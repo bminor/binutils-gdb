@@ -276,8 +276,8 @@ struct xcoff_link_hash_entry
 #define XCOFF_REF_REGULAR (01)
   /* Symbol is defined by a regular object.  */
 #define XCOFF_DEF_REGULAR (02)
-  /* Symbol is referenced by a dynamic object.  */
-#define XCOFF_REF_DYNAMIC (04)
+  /* Symbol is defined by a dynamic object.  */
+#define XCOFF_DEF_DYNAMIC (04)
   /* Symbol is used in a reloc being copied into the .loader section.  */
 #define XCOFF_LDREL (010)
   /* Symbol is the entry point.  */
@@ -416,8 +416,12 @@ struct xcoff_final_link_info
   bfd_byte *external_relocs;
 };
 
+static void xcoff_swap_ldhdr_in
+  PARAMS ((bfd *, const struct external_ldhdr *, struct internal_ldhdr *));
 static void xcoff_swap_ldhdr_out
   PARAMS ((bfd *, const struct internal_ldhdr *, struct external_ldhdr *));
+static void xcoff_swap_ldsym_in
+  PARAMS ((bfd *, const struct external_ldsym *, struct internal_ldsym *));
 static void xcoff_swap_ldsym_out
   PARAMS ((bfd *, const struct internal_ldsym *, struct external_ldsym *));
 static void xcoff_swap_ldrel_out
@@ -451,12 +455,28 @@ static boolean xcoff_reloc_link_order
 	   struct bfd_link_order *));
 static int xcoff_sort_relocs PARAMS ((const PTR, const PTR));
 
-/* Routines to swap information in the XCOFF .loader section.  We only
-   need to swap this information out, not in.  I believe that only the
-   loader needs to swap this information in.  If we ever need to write
-   an XCOFF loader, this stuff will need to be moved to another file
-   shared by the linker (which XCOFF calls the ``binder'') and the
-   loader.  */
+/* Routines to swap information in the XCOFF .loader section.  If we
+   ever need to write an XCOFF loader, this stuff will need to be
+   moved to another file shared by the linker (which XCOFF calls the
+   ``binder'') and the loader.  */
+
+/* Swap in the ldhdr structure.  */
+
+static void
+xcoff_swap_ldhdr_in (abfd, src, dst)
+     bfd *abfd;
+     const struct external_ldhdr *src;
+     struct internal_ldhdr *dst;
+{
+  dst->l_version = bfd_get_32 (abfd, src->l_version);
+  dst->l_nsyms = bfd_get_32 (abfd, src->l_nsyms);
+  dst->l_nreloc = bfd_get_32 (abfd, src->l_nreloc);
+  dst->l_istlen = bfd_get_32 (abfd, src->l_istlen);
+  dst->l_nimpid = bfd_get_32 (abfd, src->l_nimpid);
+  dst->l_impoff = bfd_get_32 (abfd, src->l_impoff);
+  dst->l_stlen = bfd_get_32 (abfd, src->l_stlen);
+  dst->l_stoff = bfd_get_32 (abfd, src->l_stoff);
+}
 
 /* Swap out the ldhdr structure.  */
 
@@ -474,6 +494,29 @@ xcoff_swap_ldhdr_out (abfd, src, dst)
   bfd_put_32 (abfd, src->l_impoff, dst->l_impoff);
   bfd_put_32 (abfd, src->l_stlen, dst->l_stlen);
   bfd_put_32 (abfd, src->l_stoff, dst->l_stoff);
+}
+
+/* Swap in the ldsym structure.  */
+
+static void
+xcoff_swap_ldsym_in (abfd, src, dst)
+     bfd *abfd;
+     const struct external_ldsym *src;
+     struct internal_ldsym *dst;
+{
+  if (bfd_get_32 (abfd, src->_l._l_l._l_zeroes) != 0)
+    memcpy (dst->_l._l_name, src->_l._l_name, SYMNMLEN);
+  else
+    {
+      dst->_l._l_l._l_zeroes = 0;
+      dst->_l._l_l._l_offset = bfd_get_32 (abfd, src->_l._l_l._l_offset);
+    }
+  dst->l_value = bfd_get_32 (abfd, src->l_value);
+  dst->l_scnum = bfd_get_16 (abfd, src->l_scnum);
+  dst->l_smtype = bfd_get_8 (abfd, src->l_smtype);
+  dst->l_smclas = bfd_get_8 (abfd, src->l_smclas);
+  dst->l_ifile = bfd_get_32 (abfd, src->l_ifile);
+  dst->l_parm = bfd_get_32 (abfd, src->l_parm);
 }
 
 /* Swap out the ldsym structure.  */
@@ -498,6 +541,8 @@ xcoff_swap_ldsym_out (abfd, src, dst)
   bfd_put_32 (abfd, src->l_ifile, dst->l_ifile);
   bfd_put_32 (abfd, src->l_parm, dst->l_parm);
 }
+
+/* As it happens, we never need to swap in the ldrel structure.  */
 
 /* Swap out the ldrel structure.  */
 
@@ -1738,7 +1783,7 @@ xcoff_link_add_symbols (abfd, info)
 				  (flagword) 0, bfd_und_section_ptr,
 				  (bfd_vma) 0, (const char *) NULL, false,
 				  true,
-				  (struct bfd_link_hash_entry **) NULL)))
+				  (struct bfd_link_hash_entry **) &hds)))
 			    goto error_return;
 			}
 		      h->descriptor = hds;
@@ -1807,9 +1852,11 @@ xcoff_link_add_dynamic_symbols (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-  bfd_size_type symesz;
-  bfd_byte *esym;
-  bfd_byte *esym_end;
+  asection *lsec;
+  bfd_byte *buf = NULL;
+  struct internal_ldhdr ldhdr;
+  const char *strings;
+  struct external_ldsym *elsym, *elsymend;
   struct xcoff_import_file *n;
   const char *bname;
   const char *mname;
@@ -1825,75 +1872,106 @@ xcoff_link_add_dynamic_symbols (abfd, info)
 	("%s: XCOFF shared object when not producing XCOFF output",
 	 bfd_get_filename (abfd));
       bfd_set_error (bfd_error_invalid_operation);
-      return false;
+      goto error_return;
     }
+
+  /* The symbols we use from a dynamic object are not the symbols in
+     the normal symbol table, but, rather, the symbols in the export
+     table.  If there is a global symbol in a dynamic object which is
+     not in the export table, the loader will not be able to find it,
+     so we don't want to find it either.  Also, on AIX 4.1.3, shr.o in
+     libc.a has symbols in the export table which are not in the
+     symbol table.  */
+
+  /* Read in the .loader section.  FIXME: We should really use the
+     o_snloader field in the a.out header, rather than grabbing the
+     section by name.  */
+  lsec = bfd_get_section_by_name (abfd, ".loader");
+  if (lsec == NULL)
+    {
+      (*_bfd_error_handler)
+	("%s: dynamic object with no .loader section",
+	 bfd_get_filename (abfd));
+      bfd_set_error (bfd_error_no_symbols);
+      goto error_return;
+    }
+
+  buf = (bfd_byte *) malloc (lsec->_raw_size);
+  if (buf == NULL && lsec->_raw_size > 0)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      goto error_return;
+    }
+
+  if (! bfd_get_section_contents (abfd, lsec, (PTR) buf, (file_ptr) 0,
+				  lsec->_raw_size))
+    goto error_return;
 
   /* Remove the sections from this object, so that they do not get
      included in the link.  */
   abfd->sections = NULL;
 
-  symesz = bfd_coff_symesz (abfd);
-  esym = (bfd_byte *) obj_coff_external_syms (abfd);
-  esym_end = esym + obj_raw_syment_count (abfd) * symesz;
-  while (esym < esym_end)
+  xcoff_swap_ldhdr_in (abfd, (struct external_ldhdr *) buf, &ldhdr);
+
+  strings = (char *) buf + ldhdr.l_stoff;
+
+  elsym = (struct external_ldsym *) (buf + LDHDRSZ);
+  elsymend = elsym + ldhdr.l_nsyms;
+  BFD_ASSERT (sizeof (struct external_ldsym) == LDSYMSZ);
+  for (; elsym < elsymend; elsym++)
     {
-      struct internal_syment sym;
+      struct internal_ldsym ldsym;
+      char nambuf[SYMNMLEN + 1];
+      const char *name;
+      struct xcoff_link_hash_entry *h;
 
-      bfd_coff_swap_sym_in (abfd, (PTR) esym, (PTR) &sym);
+      xcoff_swap_ldsym_in (abfd, elsym, &ldsym);
 
-      /* I think that every symbol mentioned in a dynamic object must
-	 be defined by that object, perhaps by importing it from
-	 another dynamic object.  All we have to do is look up each
-	 external symbol.  If we have already put it in the hash
-	 table, we simply set a flag indicating that it appears in a
-	 dynamic object.  */
+      /* We are only interested in exported symbols.  */
+      if ((ldsym.l_smtype & L_EXPORT) == 0)
+	continue;
 
-      if (sym.n_sclass == C_EXT)
+      /* All we have to do is look up the symbol in the hash table.
+	 If it's not there, we just won't import it.  Normally we
+	 could not xcoff_link_hash_lookup in an add symbols routine,
+	 since we might not be using an XCOFF hash table.  However, we
+	 verified above that we are using an XCOFF hash table.  */
+
+      if (ldsym._l._l_l._l_zeroes == 0)
+	name = strings + ldsym._l._l_l._l_offset;
+      else
 	{
-	  const char *name;
-	  char buf[SYMNMLEN + 1];
-	  struct xcoff_link_hash_entry *h;
-
-	  name = _bfd_coff_internal_syment_name (abfd, &sym, buf);
-	  if (name == NULL)
-	    return false;
-
-	  /* Normally we could not xcoff_link_hash_lookup in an add
-             symbols routine, since we might not be using an XCOFF
-             hash table.  However, we verified above that we are using
-             an XCOFF hash table.  */
-	  h = xcoff_link_hash_lookup (xcoff_hash_table (info), name,
-				      false, false, true);
-	  if (h != NULL)
-	    {
-	      h->flags |= XCOFF_REF_DYNAMIC;
-
-	      /* If the symbol is undefined, and the current BFD is
-		 not a dynamic object, change the BFD to this dynamic
-		 object, so that we can get the correct import file
-		 ID.  */
-	      if ((h->root.type == bfd_link_hash_undefined
-		   || h->root.type == bfd_link_hash_undefweak)
-		  && (h->root.u.undef.abfd == NULL
-		      || (h->root.u.undef.abfd->flags & DYNAMIC) == 0))
-		h->root.u.undef.abfd = abfd;
-
-	      if (h->smclas == XMC_UA
-		  && sym.n_numaux > 0)
-		{
-		  union internal_auxent aux;
-
-		  bfd_coff_swap_aux_in (abfd,
-					(PTR) (esym + symesz * sym.n_numaux),
-					sym.n_type, sym.n_sclass,
-					sym.n_numaux - 1, sym.n_numaux,
-					(PTR) &aux);
-		  h->smclas = aux.x_csect.x_smclas;
-		}
-	    }
+	  memcpy (nambuf, ldsym._l._l_name, SYMNMLEN);
+	  nambuf[SYMNMLEN] = '\0';
+	  name = nambuf;
 	}
 
-      esym += (sym.n_numaux + 1) * symesz;
+      h = xcoff_link_hash_lookup (xcoff_hash_table (info), name, false,
+				  false, true);
+      if (h != NULL)
+	{
+	  h->flags |= XCOFF_DEF_DYNAMIC;
+
+	  /* If the symbol is undefined, and the BFD it was found in
+	     is not a dynamic object, change the BFD to this dynamic
+	     object, so that we can get the correct import file ID.  */
+	  if ((h->root.type == bfd_link_hash_undefined
+	       || h->root.type == bfd_link_hash_undefweak)
+	      && (h->root.u.undef.abfd == NULL
+		  || (h->root.u.undef.abfd->flags & DYNAMIC) == 0))
+	    h->root.u.undef.abfd = abfd;
+
+	  if (h->smclas == XMC_UA
+	      || h->root.type == bfd_link_hash_undefined
+	      || h->root.type == bfd_link_hash_undefweak)
+	    h->smclas = ldsym.l_smclas;
+	}
+    }
+
+  if (buf != NULL)
+    {
+      free (buf);
+      buf = NULL;
     }
 
   /* Record this file in the import files.  */
@@ -1903,7 +1981,7 @@ xcoff_link_add_dynamic_symbols (abfd, info)
   if (n == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
-      return false;
+      goto error_return;
     }
   n->next = NULL;
 
@@ -1938,6 +2016,11 @@ xcoff_link_add_dynamic_symbols (abfd, info)
   xcoff_data (abfd)->import_file_id = c;
 
   return true;
+
+ error_return:
+  if (buf != NULL)
+    free (buf);
+  return false;
 }
 
 /* Routines that are called after all the input files have been
@@ -2066,12 +2149,12 @@ xcoff_mark (info, sec)
 		      || h->root.type == bfd_link_hash_defweak
 		      || h->root.type == bfd_link_hash_common
 		      || ((h->flags & XCOFF_CALLED) != 0
-			  && (h->flags & XCOFF_DEF_REGULAR) == 0
-			  && ((h->flags & XCOFF_REF_DYNAMIC) != 0
-			      || info->shared)
 			  && (h->root.type == bfd_link_hash_undefined
 			      || h->root.type == bfd_link_hash_undefweak)
-			  && h->root.root.string[0] == '.'))
+			  && h->root.root.string[0] == '.'
+			  && h->descriptor != NULL
+			  && ((h->descriptor->flags & XCOFF_DEF_DYNAMIC) != 0
+			      || info->shared)))
 		    break;
 		  /* Fall through.  */
 		case R_POS:
@@ -2735,17 +2818,17 @@ xcoff_build_ldsyms (h, p)
 	      != ldinfo->info->hash->creator)))
     h->flags |= XCOFF_MARK;
 
-  /* If this symbol is called, and it is defined in a dynamic object,
-     or if we are creating a dynamic object and it is not defined at
-     all, then we need to set up global linkage code for it.  (Unless
-     we did garbage collection and we didn't need this symbol.)  */
+  /* If this symbol is called and defined in a dynamic object, or not
+     defined at all when building a shared object, then we need to set
+     up global linkage code for it.  (Unless we did garbage collection
+     and we didn't need this symbol.)  */
   if ((h->flags & XCOFF_CALLED) != 0
-      && (h->flags & XCOFF_DEF_REGULAR) == 0
       && (h->root.type == bfd_link_hash_undefined
 	  || h->root.type == bfd_link_hash_undefweak)
-      && ((h->flags & XCOFF_REF_DYNAMIC) != 0
-	  || ldinfo->info->shared)
       && h->root.root.string[0] == '.'
+      && h->descriptor != NULL
+      && ((h->descriptor->flags & XCOFF_DEF_DYNAMIC) != 0
+	  || ldinfo->info->shared)
       && (! xcoff_hash_table (ldinfo->info)->gc
 	  || (h->flags & XCOFF_MARK) != 0))
     {
@@ -2764,9 +2847,7 @@ xcoff_build_ldsyms (h, p)
       hds = h->descriptor;
       BFD_ASSERT ((hds->root.type == bfd_link_hash_undefined
 		   || hds->root.type == bfd_link_hash_undefweak)
-		  && (hds->flags & XCOFF_DEF_REGULAR) == 0
-		  && ((hds->flags & XCOFF_REF_DYNAMIC) != 0
-		      || ldinfo->info->shared));
+		  && (hds->flags & XCOFF_DEF_REGULAR) == 0);
       hds->flags |= XCOFF_MARK;
       if (hds->toc_section == NULL)
 	{
@@ -3630,11 +3711,11 @@ xcoff_link_input_bfd (finfo, input_bfd)
 
 	  ldsym->l_smtype = smtyp;
 	  if (((h->flags & XCOFF_DEF_REGULAR) == 0
-	       && (h->flags & XCOFF_REF_DYNAMIC) != 0)
+	       && (h->flags & XCOFF_DEF_DYNAMIC) != 0)
 	      || (h->flags & XCOFF_IMPORT) != 0)
 	    ldsym->l_smtype |= L_IMPORT;
 	  if (((h->flags & XCOFF_DEF_REGULAR) != 0
-	       && (h->flags & XCOFF_REF_DYNAMIC) != 0)
+	       && (h->flags & XCOFF_DEF_DYNAMIC) != 0)
 	      || (h->flags & XCOFF_EXPORT) != 0)
 	    ldsym->l_smtype |= L_EXPORT;
 	  if ((h->flags & XCOFF_ENTRY) != 0)
@@ -4641,11 +4722,11 @@ xcoff_write_global_symbol (h, p)
 	abort ();
 
       if (((h->flags & XCOFF_DEF_REGULAR) == 0
-	   && (h->flags & XCOFF_REF_DYNAMIC) != 0)
+	   && (h->flags & XCOFF_DEF_DYNAMIC) != 0)
 	  || (h->flags & XCOFF_IMPORT) != 0)
 	ldsym->l_smtype |= L_IMPORT;
       if (((h->flags & XCOFF_DEF_REGULAR) != 0
-	   && (h->flags & XCOFF_REF_DYNAMIC) != 0)
+	   && (h->flags & XCOFF_DEF_DYNAMIC) != 0)
 	  || (h->flags & XCOFF_EXPORT) != 0)
 	ldsym->l_smtype |= L_EXPORT;
       if ((h->flags & XCOFF_ENTRY) != 0)
@@ -5192,7 +5273,7 @@ _bfd_ppc_xcoff_relocate_section (output_bfd, info, input_bfd,
 	      val = (sec->output_section->vma
 		     + sec->output_offset);
 	    }
-	  else if ((h->flags & XCOFF_REF_DYNAMIC) != 0
+	  else if ((h->flags & XCOFF_DEF_DYNAMIC) != 0
 		   || (h->flags & XCOFF_IMPORT) != 0)
 	    {
 	      /* Every symbol in a shared object is defined somewhere.  */

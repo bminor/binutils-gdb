@@ -1,5 +1,18 @@
 Wed Nov  8 11:31:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* xcofflink.c (XCOFF_DEF_DYNAMIC): Rename from XCOFF_REF_DYNAMIC.
+	Change all uses.
+	(xcoff_swap_ldhdr_in): New static function.
+	(xcoff_swap_ldsym_in): New static function.
+	(xcoff_link_add_symbols): If we just created a descriptor, pass it
+	to _bfd_generic_link_add_one_symbol, to save a hash lookup.
+	(xcoff_link_add_dynamic_symbols): Rewrite to read .loader symbols
+	rather than normal symbol table.
+	(xcoff_mark): When considering called symbols, check whether the
+	descriptor is from a dynamic object, rather than the symbol
+	itself.
+	(xcoff_build_ldsyms): Likewise.
+
 	* libbfd.c (bfd_get_file_window): Change return type to boolean.
 	Cast realloc and malloc return values.  If malloc or realloc fail,
 	set bfd_error_no_memory.
