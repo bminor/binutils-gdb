@@ -479,25 +479,26 @@ static int alpha_flag_show_after_trunc = 0;		/* -H */
 		  ? (abort (), 0)					\
 		  : (int) (op) - (int) O_literal) ])
 
-#define DEF(NAME, RELOC, NEED_SEQ) \
- { #NAME, sizeof(#NAME)-1, O_##NAME, RELOC, NEED_SEQ }
+#define DEF(NAME, RELOC, REQ, ALLOW) \
+ { #NAME, sizeof(#NAME)-1, O_##NAME, RELOC, REQ, ALLOW}
 
 static const struct alpha_reloc_op_tag {
   const char *name;				/* string to lookup */
   size_t length;				/* size of the string */
   operatorT op;					/* which operator to use */
   bfd_reloc_code_real_type reloc;		/* relocation before frob */
-  unsigned int need_seq : 1;			/* require a sequence number */
+  unsigned int require_seq : 1;			/* require a sequence number */
+  unsigned int allow_seq : 1;			/* allow a sequence number */
 } alpha_reloc_op[] = {
-  DEF(literal, BFD_RELOC_ALPHA_ELF_LITERAL, 1),
-  DEF(lituse_addr, DUMMY_RELOC_LITUSE_ADDR, 1),
-  DEF(lituse_base, DUMMY_RELOC_LITUSE_BASE, 1),
-  DEF(lituse_bytoff, DUMMY_RELOC_LITUSE_BYTOFF, 1),
-  DEF(lituse_jsr, DUMMY_RELOC_LITUSE_JSR, 1),
-  DEF(gpdisp, BFD_RELOC_ALPHA_GPDISP, 1),
-  DEF(gprelhigh, BFD_RELOC_ALPHA_GPREL_HI16, 0),
-  DEF(gprellow, BFD_RELOC_ALPHA_GPREL_LO16, 0),
-  DEF(gprel, BFD_RELOC_GPREL16, 0)
+  DEF(literal, BFD_RELOC_ALPHA_ELF_LITERAL, 0, 1),
+  DEF(lituse_addr, DUMMY_RELOC_LITUSE_ADDR, 1, 1),
+  DEF(lituse_base, DUMMY_RELOC_LITUSE_BASE, 1, 1),
+  DEF(lituse_bytoff, DUMMY_RELOC_LITUSE_BYTOFF, 1, 1),
+  DEF(lituse_jsr, DUMMY_RELOC_LITUSE_JSR, 1, 1),
+  DEF(gpdisp, BFD_RELOC_ALPHA_GPDISP, 1, 1),
+  DEF(gprelhigh, BFD_RELOC_ALPHA_GPREL_HI16, 0, 0),
+  DEF(gprellow, BFD_RELOC_ALPHA_GPREL_LO16, 0, 0),
+  DEF(gprel, BFD_RELOC_GPREL16, 0, 0)
 };
 
 #undef DEF
@@ -1874,29 +1875,32 @@ tokenize_arguments (str, tok, ntok)
           SKIP_WHITESPACE ();
 	  if (*input_line_pointer != '!')
 	    {
-	      if (r->need_seq)
+	      if (r->require_seq)
 		{
-		  as_bad (_("No !sequence-number after !%s"),
-			  input_line_pointer);
+		  as_bad (_("no sequence number after !%s"), p);
 		  goto err_report;
 		}
 
-	      tok->X_op = r->op;
 	      tok->X_add_number = 0;
-	      reloc_found_p = 1;
-	      ++tok;
-	      break;
 	    }
-
-	  input_line_pointer++;
-
-	  /* Parse !sequence_number */
-	  expression (tok);
-	  if (tok->X_op != O_constant || tok->X_add_number <= 0)
+	  else
 	    {
-	      as_bad (_("Bad sequence number: !%s!%s"),
-		      r->name, input_line_pointer);
-	      goto err_report;
+	      if (! r->allow_seq)
+		{
+		  as_bad (_("!%s does not use a sequence number"), p);
+		  goto err_report;
+		}
+
+	      input_line_pointer++;
+
+	      /* Parse !sequence_number */
+	      expression (tok);
+	      if (tok->X_op != O_constant || tok->X_add_number <= 0)
+		{
+		  as_bad (_("Bad sequence number: !%s!%s"),
+			  r->name, input_line_pointer);
+		  goto err_report;
+		}
 	    }
 
 	  tok->X_op = r->op;
