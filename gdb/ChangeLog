@@ -1,3 +1,9 @@
+Tue Sep 20 11:34:27 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* coffread.c (record_minimal_symbol, coff_read_enum_type,
+	coff_read_struct_type): Allocate on symbol_obstack, not directly
+	via malloc/savestring.
+
 Tue Sep 20 15:42:02 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* TODO: Add more items.
