@@ -433,8 +433,8 @@ get_operands (exp)
 	      /* then it was really a symbol, so change it to one */
 	      exp[numops].X_op = O_symbol;
 	      exp[numops].X_add_symbol = symbol_find_or_make ((char *)exp[numops].X_op_symbol);
-	      exp[numops].X_op_symbol = NULL;
 	    }
+	  exp[numops].X_op_symbol = (struct symbol *)-1;
 	  exp[numops].X_add_number = AT_WORD;
 	  input_line_pointer += 5;
 	}
@@ -533,7 +533,8 @@ build_insn (opcode, opers, insn)
 	  if (fixups->fc >= MAX_INSN_FIXUPS)
 	    as_fatal ("too many fixups");
 
-	  if (opers[i].X_op == O_symbol && number == AT_WORD)
+	  if (opers[i].X_op == O_symbol && number == AT_WORD && 
+	     opers[i].X_op_symbol == (struct symbol *)-1 )
 	    {
 	      number = opers[i].X_add_number = 0;
 	      fixups->fix[fixups->fc].reloc = BFD_RELOC_D10V_18;
@@ -1120,7 +1121,8 @@ find_opcode (opcode, myops)
 		  else
 		    value = S_GET_VALUE(myops[opnum].X_add_symbol);
 
-		  if (myops[opnum].X_add_number == AT_WORD)
+		  if (myops[opnum].X_add_number == AT_WORD && 
+		      myops[opnum].X_op_symbol == (struct symbol *)-1)
 		    {
 		      if (bits > 4)
 			{

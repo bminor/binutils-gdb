@@ -1,3 +1,8 @@
+Fri Oct 10 11:22:45 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* config/tc-d10v.c: Fixes to make sure the AT_WORD
+	expression is not confused with -1.
+
 Fri Oct 10 11:54:50 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/tc-d10v.c (parallel_ok): Flag SP as modified for @-sp
