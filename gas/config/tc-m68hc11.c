@@ -1,5 +1,5 @@
 /* tc-m68hc11.c -- Assembler code for the Motorola 68HC11 & 68HC12.
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Written by Stephane Carrez (stcarrez@nerim.fr)
 
    This file is part of GAS, the GNU Assembler.
@@ -375,8 +375,9 @@ md_show_usage (stream)
 {
   get_default_target ();
   fprintf (stream, _("\
-Motorola 68HC11/68HC12 options:\n\
-  -m68hc11 | -m68hc12     specify the processor [default %s]\n\
+Motorola 68HC11/68HC12/68HCS12 options:\n\
+  -m68hc11 | -m68hc12 |
+  -m68hcs12               specify the processor [default %s]\n\
   -mshort                 use 16-bit int ABI (default)\n\
   -mlong                  use 32-bit int ABI\n\
   -mshort-double          use 32-bit double ABI\n\
@@ -503,6 +504,8 @@ md_parse_option (c, arg)
 	current_architecture = cpu6811;
       else if (strcasecmp (arg, "68hc12") == 0)
 	current_architecture = cpu6812;
+      else if (strcasecmp (arg, "68hcs12") == 0)
+	current_architecture = cpu6812 | cpu6812s;
       else
 	as_bad (_("Option `%s' is not recognized."), arg);
       break;
@@ -3332,6 +3335,8 @@ md_apply_fix3 (fixP, valP, seg)
 void
 m68hc11_elf_final_processing ()
 {
+  if (current_architecture & cpu6812s)
+    elf_flags |= EF_M68HCS12_MACH;
   elf_elfheader (stdoutput)->e_flags &= ~EF_M68HC11_ABI;
   elf_elfheader (stdoutput)->e_flags |= elf_flags;
 }

@@ -362,7 +362,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset M68HC11
 
 @emph{Target M68HC11 options:}
-   [@b{-m68hc11}|@b{-m68hc12}]
+   [@b{-m68hc11}|@b{-m68hc12}|@b{-m68hcs12}]
    [@b{-mshort}|@b{-mlong}]
    [@b{-mshort-double}|@b{-mlong-double}]
    [@b{--force-long-branchs}] [@b{--short-branchs}]
@@ -801,7 +801,7 @@ Motorola 68HC11 or 68HC12 series.
 
 @table @gcctabopt
 
-@item -m68hc11 | -m68hc12
+@item -m68hc11 | -m68hc12 | -m68hcs12
 Specify what processor is the target.  The default is
 defined by the configuration option when building the assembler.
 
