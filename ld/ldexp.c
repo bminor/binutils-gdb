@@ -390,7 +390,7 @@ fold_binary (etree_type *tree,
 	    case ALIGN_K:
 	      result.value = align_n (result.value, other.value);
 	      break;
-	      
+
 	    case DATA_SEGMENT_ALIGN:
 	      if (allocation_done != lang_first_phase_enum
 		  && current_section == abs_output_section
@@ -492,7 +492,7 @@ fold_name (etree_type *tree,
   etree_value_type result;
 
   result.valid_p = FALSE;
-  
+
   switch (tree->type.node_code)
     {
     case SIZEOF_HEADERS:
@@ -669,7 +669,7 @@ exp_fold_tree (etree_type *tree,
       if (result.valid_p)
 	{
 	  if (! result.value)
-	    einfo ("%F%P: %s\n", tree->assert_s.message);
+	    einfo ("%X%P: %s\n", tree->assert_s.message);
 	  return result;
 	}
       break;

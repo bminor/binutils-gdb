@@ -1,5 +1,8 @@
 2004-10-15  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldexp.c (exp_fold_tree): Don't immediately exit ld on a
+	failing link script assert.
+
 	* ldctor.c (ldctor_add_set_entry): Fix comment typo.
 
 2004-10-14  H.J. Lu  <hongjiu.lu@intel.com>
