@@ -1822,6 +1822,17 @@ pa_ip (str)
 
 		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 6);
 
+		/* Handle zero/sign extension completer.  */
+		case 'z':
+		  flag = 1;
+		  if (!strncasecmp (s, ",z", 2))
+		    {
+		      flag = 0;
+		      s += 2;
+		    }
+
+		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 10);
+
 		/* Handle add completer.  */
 		case 'a':
 		  flag = 1;
@@ -2800,6 +2811,27 @@ pa_ip (str)
 	      opcode |= (num & 0x20) << 6;
 	      INSERT_FIELD_AND_CONTINUE (opcode, num & 0x1f, 5);
 
+	    /* Handle a 6 bit field length at 23,27:31.  */
+	    case '%':
+	      flag = 0;
+	      num = pa_get_absolute_expression (&the_insn, &s);
+	      s = expr_end;
+	      CHECK_FIELD (num, 64, 1, 0);
+	      num--;
+	      opcode |= (num & 0x20) << 3;
+	      num = 31 - (num & 0x1f);
+	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
+
+	    /* Handle a 6 bit field length at 19,27:31.  */
+	    case '|':
+	      num = pa_get_absolute_expression (&the_insn, &s);
+	      s = expr_end;
+	      CHECK_FIELD (num, 64, 1, 0);
+	      num--;
+	      opcode |= (num & 0x20) << 7;
+	      num = 31 - (num & 0x1f);
+	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
+
 	    /* Handle a 5 bit bit position at 26.  */
 	    case 'P':
 	      num = pa_get_absolute_expression (&the_insn, &s);
@@ -2807,9 +2839,16 @@ pa_ip (str)
 	      CHECK_FIELD (num, 31, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 5);
 
+	    /* Handle a 6 bit bit position at 20,22:26.  */
+	    case 'q':
+	      num = pa_get_absolute_expression (&the_insn, &s);
+	      s = expr_end;
+	      CHECK_FIELD (num, 63, 0, 0);
+	      opcode |= (num & 0x20) << 6;
+	      INSERT_FIELD_AND_CONTINUE (opcode, num & 0x1f, 5);
+
 	    /* Handle a 5 bit immediate at 10.  */
 	    case 'Q':
-
 	      num = pa_get_absolute_expression (&the_insn, &s);
 	      if (the_insn.exp.X_op != O_constant)
 		break;

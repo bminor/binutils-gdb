@@ -4,6 +4,8 @@ Sat Aug 28 01:23:11 1999  Jeffrey A Law  (law@cygnus.com)
 
 Sat Aug 28 00:26:26 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 
+	* config/tc-hppa.c (pa_ip): Add args q, %, and |.
+
 	* config/tc-hppa.c (pa_ip):  Absorb white space in instructions
 	between args.
 	Add new completers.  Fix bug in 64 bit condition handling.
