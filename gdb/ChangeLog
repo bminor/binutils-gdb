@@ -1,3 +1,22 @@
+Thu Apr  1 09:34:43 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* breakpoint.c (bpstat_print, bpstat_stop_status): Change to walk the
+	entire breakpoint chain and print only the first entry that needs to
+	be printed and needs to be stopped for. Fixes problems with printing
+	of multiple breakpoints with different conditions.
+	* breakpoint.c (print_it_done): Renamed from print_it_noop as it
+	effectively stops printing of the breakpoint chain.
+	* breakpoint.c (print_it_noop): New routine to print nothing
+	for this breakpoint entry and dont stop printing.
+	* breakpoint.c (breakpoint_re_set_one): mention the reevaluated
+	watchpoint only if it is enabled.
+	* mipsread.c (parse_procedure): Correct incorrect setjmp procedure
+	descriptor from the library to make backtraces through setjmp work.
+	* mipsread.c (fixup_sigtramp): Correct pcreg and fregoffset for
+	sigtramp.
+	* mips-tdep.c (read_next_frame_reg): Provide correct values for
+	all registers saved within sigtramp, cleanup.
+
 Wed Mar 31 12:52:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* sparc-pinsn.c: Much abridged, just calls version in libopcodes.a.
