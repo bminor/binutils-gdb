@@ -127,25 +127,11 @@ value_fpr (sim_cpu *cpu,
       /* Set QNaN value:  */
       switch (fmt)
 	{
-	case fmt_single:
-	  value = FPQNaN_SINGLE;
-	  break;
-
-	case fmt_double:
-	  value = FPQNaN_DOUBLE;
-	  break;
-
-	case fmt_word:
-	  value = FPQNaN_WORD;
-	  break;
-
-	case fmt_long:
-	  value = FPQNaN_LONG;
-	  break;
-
-	default:
-	  err = -1;
-	  break;
+	case fmt_single:  value = FPQNaN_SINGLE;  break;
+	case fmt_double:  value = FPQNaN_DOUBLE;  break;
+	case fmt_word:    value = FPQNaN_WORD;    break;
+	case fmt_long:    value = FPQNaN_LONG;    break;
+	default:          err = -1;               break;
 	}
     }
   else if (SizeFGR () == 64)
@@ -182,7 +168,7 @@ value_fpr (sim_cpu *cpu,
 	case fmt_long:
 	  if ((fpr & 1) == 0)
 	    {
-	      /* even registers only */
+	      /* Even registers numbers only.  */
 #ifdef DEBUG
 	      printf ("DBG: ValueFPR: FGR[%d] = %s, FGR[%d] = %s\n",
 		      fpr + 1, pr_uword64 ((uword64) FGR[fpr+1]),
@@ -280,7 +266,7 @@ store_fpr (sim_cpu *cpu,
 	case fmt_long:
 	  if ((fpr & 1) == 0)
 	    {
-	      /* even register number only */
+	      /* Even register numbers only.  */
 	      FGR[fpr+1] = (value >> 32);
 	      FGR[fpr] = (value & 0xFFFFFFFF);
 	      FPR_STATE[fpr + 1] = fmt;

@@ -1,3 +1,8 @@
+2002-06-07  Chris Demetriou  <cgd@broadcom.com>
+
+	* cp1.c: Clean up formatting of a few comments.
+	(value_fpr): Reformat switch statement.
+
 2002-06-06  Chris Demetriou  <cgd@broadcom.com>
             Ed Satterthwaite  <ehs@broadcom.com>
 
