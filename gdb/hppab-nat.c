@@ -63,9 +63,6 @@ kill_inferior ()
 }
 
 #ifdef ATTACH_DETACH
-/* Nonzero if we are debugging an attached process rather than
-   an inferior.  */
-extern int attach_flag;
 
 /* Start debugging the process whose number is PID.  */
 int

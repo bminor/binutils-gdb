@@ -759,7 +759,7 @@ int frame_chain_valid (chain, thisframe)
     {
       CORE_ADDR pc = get_pc_function_start (FRAME_SAVED_PC (thisframe));
 
-      if (!inside_entry_file (pc))
+      if (inside_entry_file (pc))
 	return 0;
       /* look for stw rp, -20(0,sp); copy 4,1; copy sp, 4 */
       if (read_memory_integer (pc, 4) == 0x6BC23FD9)			
@@ -802,7 +802,6 @@ gcc_p (pc)
   return 0;
 }
 
-  
 find_dummy_frame_regs (frame, frame_saved_regs)
      struct frame_info *frame;
      struct frame_saved_regs *frame_saved_regs;

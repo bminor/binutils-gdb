@@ -189,13 +189,6 @@ static int exec_trap_timer;
 
 #include "gdbcmd.h"
 
-/* Nonzero if we are debugging an attached outside process
-   rather than an inferior.  */
-
-extern int attach_flag;
-
-
-
 static struct type *vector_type ();
 static long *read_vector_register ();
 static long *read_vector_register_1 ();

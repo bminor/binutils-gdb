@@ -24,33 +24,44 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "opcode/hppa.h"
 
-char *control_reg[] = {"rctr", "cr1", "cr2", "cr3", "cr4", "cr5", "cr6", "cr7",
-		       "pidr1", "pidr2", "ccr", "sar", "pidr3", "pidr4",
-		       "iva", "eiem", "itmr", "pcsq", "pcoq", "iir", "isr",
-		       "ior", "ipsw", "eirr", "tr0", "tr1", "tr2", "tr3",
-		       "tr4", "tr5", "tr6", "tr7"
-		       };
+static char *control_reg[] =
+{  "rctr", "cr1", "cr2", "cr3", "cr4", "cr5", "cr6", "cr7",
+   "pidr1", "pidr2", "ccr", "sar", "pidr3", "pidr4",
+   "iva", "eiem", "itmr", "pcsq", "pcoq", "iir", "isr",
+   "ior", "ipsw", "eirr", "tr0", "tr1", "tr2", "tr3",
+   "tr4", "tr5", "tr6", "tr7"
+   };
 
-char *compare_cond_names[] = {"", ",=", ",<", ",<=", ",<<", ",<<=", ",sv",
-			      ",od", ",tr", ",<>", ",>=", ",>", ",>>=",
-			      ",>>", ",nsv", ",ev"
-			      };
-char *add_cond_names[] = {"", ",=", ",<", ",<=", ",nuv", ",znv", ",sv",
-			  ",od", ",tr", ",<>", ",>=", ",>", ",uv",
-			  ",vnz", ",nsv", ",ev"
-			  };
-char *logical_cond_names[] = {"", ",=", ",<", ",<=", 0, 0, 0, ",od",
-			      ",tr", ",<>", ",>=", ",>", 0, 0, 0, ",ev"};
-char *unit_cond_names[] = {"", 0, ",sbz", ",shz", ",sdc", 0, ",sbc", ",shc",
-			   ",tr", 0, ",nbz", ",nhz", ",ndc", 0, ",nbc", ",nhc"
-			   };
-char *shift_cond_names[] = {"", ",=", ",<", ",od", ",tr", ",<>", ",>=", ",ev"};
+static char *compare_cond_names[] =
+{  "", ",=", ",<", ",<=", ",<<", ",<<=", ",sv",
+   ",od", ",tr", ",<>", ",>=", ",>", ",>>=",
+   ",>>", ",nsv", ",ev"
+   };
 
-char *index_compl_names[] = {"", ",m", ",s", ",sm"};
-char *short_ldst_compl_names[] = {"", ",ma", "", ",mb"};
-char *short_bytes_compl_names[] = {"", ",b,m", ",e", ",e,m"};
-char *float_format_names[] = {",sgl", ",dbl", ",quad"};
-char *float_comp_names[] =
+static char *add_cond_names[] =
+{  "", ",=", ",<", ",<=", ",nuv", ",znv", ",sv",
+   ",od", ",tr", ",<>", ",>=", ",>", ",uv",
+   ",vnz", ",nsv", ",ev"
+   };
+
+static char *logical_cond_names[] =
+{  "", ",=", ",<", ",<=", 0, 0, 0, ",od",
+   ",tr", ",<>", ",>=", ",>", 0, 0, 0, ",ev"
+   };
+
+static char *unit_cond_names[] =
+{  "", 0, ",sbz", ",shz", ",sdc", 0, ",sbc", ",shc",
+   ",tr", 0, ",nbz", ",nhz", ",ndc", 0, ",nbc", ",nhc"
+   };
+
+static char *shift_cond_names[] =
+{"", ",=", ",<", ",od", ",tr", ",<>", ",>=", ",ev"};
+
+static char *index_compl_names[] = {"", ",m", ",s", ",sm"};
+static char *short_ldst_compl_names[] = {"", ",ma", "", ",mb"};
+static char *short_bytes_compl_names[] = {"", ",b,m", ",e", ",e,m"};
+static char *float_format_names[] = {",sgl", ",dbl", ",quad"};
+static char *float_comp_names[] =
 {",false?", ",false", ",?", ",!<=>", ",=", ",=t", ",?=", ",!<>",
  ",!?>=", ",<", ",?<", ",!>=", ",!?>", ",<=", ",?<=", ",!>",
  ",!?<=", ",>", ",?>", ",!<=", ",!?<", ",>=", ",?>=", ",!<",
@@ -65,7 +76,10 @@ char *float_comp_names[] =
 #define GET_COND(insn) (GET_FIELD ((insn), 16, 18) + \
 			(GET_FIELD ((insn), 19, 19) ? 8 : 0))
 
-void fput_reg (), fput_const ();
+static void fput_reg PARAMS ((unsigned reg, FILE *stream));
+static void fput_const PARAMS ((unsigned num, FILE *stream));
+static void fput_reg_r PARAMS ((unsigned reg, FILE *stream));
+static void fput_creg PARAMS ((unsigned reg, FILE *stream));
 
 /* Print one instruction from MEMADDR on STREAM.  */
 int
@@ -335,7 +349,7 @@ print_insn (memaddr, stream)
   
 /* Utility function to print registers */
 
-void
+static void
 fput_reg (reg, stream)
      unsigned reg;
      FILE *stream;

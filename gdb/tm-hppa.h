@@ -287,7 +287,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    address (previous FP).  */
 
 #define FRAME_CHAIN(thisframe)  \
-  (inside_entry_file ((thisframe)->pc) ? \
+  (!inside_entry_file ((thisframe)->pc) ? \
    read_memory_integer ((thisframe)->frame, 4) :\
    0)
 
@@ -419,21 +419,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 { register CORE_ADDR sp = read_register (SP_REGNUM);			\
   register int regnum;							\
   int int_buffer;							\
-  double freg_buffer;							\
+  char freg_buffer[8];							\
   /* Space for "arguments"; the RP goes in here. */			\
   sp += 48;								\
   int_buffer = read_register (RP_REGNUM) | 0x3;				\
-  write_memory (sp - 20, &int_buffer, 4);				\
+  write_memory (sp - 20, (char *)&int_buffer, 4);			\
   int_buffer = read_register (FP_REGNUM);				\
-  write_memory (sp, &int_buffer, 4);					\
+  write_memory (sp, (char *)&int_buffer, 4);				\
   write_register (FP_REGNUM, sp);					\
   sp += 4;								\
   for (regnum = 1; regnum < 31; regnum++)				\
     if (regnum != RP_REGNUM && regnum != FP_REGNUM)			\
       sp = push_word (sp, read_register (regnum));			\
   for (regnum = FP0_REGNUM; regnum < NUM_REGS; regnum++)		\
-    { read_register_bytes (REGISTER_BYTE (regnum), &freg_buffer, 8);	\
-      sp = push_bytes (sp, &freg_buffer, 8);}				\
+    { read_register_bytes (REGISTER_BYTE (regnum), freg_buffer, 8);	\
+      sp = push_bytes (sp, freg_buffer, 8);}				\
   sp = push_word (sp, read_register (IPSW_REGNUM));			\
   sp = push_word (sp, read_register (SAR_REGNUM));			\
   sp = push_word (sp, read_register (PCOQ_TAIL_REGNUM));		\
@@ -448,7 +448,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
   register int regnum;						 	\
   struct frame_saved_regs fsr;					 	\
   struct frame_info *fi;					 	\
-  double freg_buffer;						 	\
+  char freg_buffer[8];						 	\
   fi = get_frame_info (frame);					 	\
   fp = fi->frame;						 	\
   get_frame_saved_regs (fi, &fsr);				 	\
@@ -457,8 +457,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
       write_register (regnum, read_memory_integer (fsr.regs[regnum], 4)); \
   for (regnum = NUM_REGS - 1; regnum >= FP0_REGNUM ; regnum--) 	 	\
     if (fsr.regs[regnum])					 	\
-      { read_memory (fsr.regs[regnum], &freg_buffer, 8);	 	\
-        write_register_bytes (REGISTER_BYTE (regnum), &freg_buffer, 8); }\
+      { read_memory (fsr.regs[regnum], freg_buffer, 8);	 	\
+        write_register_bytes (REGISTER_BYTE (regnum), freg_buffer, 8); }\
   if (fsr.regs[IPSW_REGNUM])					 	\
     write_register (IPSW_REGNUM,				 	\
 		    read_memory_integer (fsr.regs[IPSW_REGNUM], 4)); 	\

@@ -25,18 +25,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "inferior.h"
+#include "target.h"
+#include <sys/ptrace.h>
 
-#ifndef PT_ATTACH
-#define PT_ATTACH PTRACE_ATTACH
-#endif
-#ifndef PT_DETACH
-#define PT_DETACH PTRACE_DETACH
-#endif
+static void fetch_register ();
 
 /* This function simply calls ptrace with the given arguments.  
    It exists so that all calls to ptrace are isolated in this 
    machine-dependent file. */
-#ifdef WANT_NATIVE_TARGET
 int
 call_ptrace (request, pid, addr, data)
      int request, pid;
@@ -45,28 +41,16 @@ call_ptrace (request, pid, addr, data)
 {
   return ptrace (request, pid, addr, data, 0);
 }
-#endif /* WANT_NATIVE_TARGET */
-
-#ifdef DEBUG_PTRACE
-/* For the rest of the file, use an extra level of indirection */
-/* This lets us breakpoint usefully on call_ptrace. */
-#define ptrace call_ptrace
-#endif
 
 void
 kill_inferior ()
 {
   if (inferior_pid == 0)
     return;
-  ptrace (PT_EXIT, inferior_pid, (PTRACE_ARG3_TYPE) 0, 0, 0); /* PT_EXIT = PT_KILL ? */
+  ptrace (PT_EXIT, inferior_pid, (PTRACE_ARG3_TYPE) 0, 0, 0);
   wait ((int *)0);
   target_mourn_inferior ();
 }
-
-#ifdef ATTACH_DETACH
-/* Nonzero if we are debugging an attached process rather than
-   an inferior.  */
-extern int attach_flag;
 
 /* Start debugging the process whose number is PID.  */
 int
@@ -95,7 +79,6 @@ detach (signal)
     perror_with_name ("ptrace");
   attach_flag = 0;
 }
-#endif /* ATTACH_DETACH */
 
 /* Fetch all registers, or just one, from the child process.  */
 
@@ -109,11 +92,6 @@ fetch_inferior_registers (regno)
   else
     fetch_register (regno);
 }
-
-/* Registers we shouldn't try to store.  */
-#if !defined (CANNOT_STORE_REGISTER)
-#define CANNOT_STORE_REGISTER(regno) 0
-#endif
 
 /* Store our register values back into the inferior.
    If REGNO is -1, do this for all registers.
@@ -150,8 +128,6 @@ store_inferior_registers (regno)
     {
       for (regno = 0; regno < NUM_REGS; regno++)
 	{
-	  if (CANNOT_STORE_REGISTER (regno))
-	    continue;
 	  regaddr = register_addr (regno, offset);
 	  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
 	    {
@@ -172,27 +148,7 @@ store_inferior_registers (regno)
 
 /* KERNEL_U_ADDR is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
-#if defined (KERNEL_U_ADDR_BSD)
-/* Get kernel_u_addr using BSD-style nlist().  */
-CORE_ADDR kernel_u_addr;
 
-#include <a.out.gnu.h>		/* For struct nlist */
-
-void
-_initialize_kernel_u_addr ()
-{
-  struct nlist names[2];
-
-  names[0].n_un.n_name = "_u";
-  names[1].n_un.n_name = NULL;
-  if (nlist ("/vmunix", names) == 0)
-    kernel_u_addr = names[0].n_value;
-  else
-    fatal ("Unable to get kernel u area address.");
-}
-#endif /* KERNEL_U_ADDR_BSD.  */
-
-#if defined (KERNEL_U_ADDR_HPUX)
 /* Get kernel_u_addr using HPUX-style nlist().  */
 CORE_ADDR kernel_u_addr;
 
@@ -209,11 +165,12 @@ static struct hpnlist nl[] = {{ "_u", -1, }, { (char *) 0, }};
 /* read the value of the u area from the hp-ux kernel */
 void _initialize_kernel_u_addr ()
 {
+#if 0
     struct user u;
+#endif
     nlist ("/hp-ux", &nl);
     kernel_u_addr = nl[0].n_value;
 }
-#endif /* KERNEL_U_ADDR_HPUX.  */
 
 #if !defined (offsetof)
 #define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
@@ -225,11 +182,6 @@ void _initialize_kernel_u_addr ()
   ptrace (PT_READ_U, inferior_pid, \
           (PTRACE_ARG3_TYPE) (offsetof (struct user, u_ar0)), 0, 0) \
     - KERNEL_U_ADDR
-#endif
-
-/* Registers we shouldn't try to fetch.  */
-#if !defined (CANNOT_FETCH_REGISTER)
-#define CANNOT_FETCH_REGISTER(regno) 0
 #endif
 
 /* Fetch one register.  */
@@ -245,13 +197,6 @@ fetch_register (regno)
 
   /* Offset of registers within the u area.  */
   unsigned int offset;
-
-  if (CANNOT_FETCH_REGISTER (regno))
-    {
-      bzero (buf, REGISTER_RAW_SIZE (regno));	/* Supply zeroes */
-      supply_register (regno, buf);
-      return;
-    }
 
   offset = U_REGS_OFFSET;
 
