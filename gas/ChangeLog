@@ -1,5 +1,8 @@
 Wed Nov  6 13:46:07 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-mn10300.c (mn10300_insert_operand): Shift low part
+	of a MN10300_OPERAND_SPLIT operand by operand->shift.
+
 	* config/tc-mn10300.c (mn10300_insert_operand): Handle
 	MN10300_OPERAND_SPLIT.
 
