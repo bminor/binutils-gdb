@@ -1,5 +1,7 @@
 2001-07-05  Ben Elliston  <bje@redhat.com>
 
+	* README (Supported platforms): m88k no longer suffers bitrot.
+
 	* config/tc-m88k.c (md_pseudo_table): Remove redundant "global".
 
 2001-07-04  Jim Wilson  <wilson@redhat.com>
