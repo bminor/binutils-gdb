@@ -210,4 +210,18 @@ extern void sh_elf_final_processing PARAMS ((void));
 	   && S_IS_DEFINED ((FIX)->fx_addsy)			\
 	   && ! S_IS_COMMON ((FIX)->fx_addsy))))
 
+#define md_parse_name(name, exprP, nextcharP) \
+  sh_parse_name ((name), (exprP), (nextcharP))
+int sh_parse_name PARAMS ((char const *name,
+			   expressionS *exprP,
+			   char *nextchar));
+
+#define TC_CONS_FIX_NEW(FRAG, OFF, LEN, EXP) \
+  sh_cons_fix_new ((FRAG), (OFF), (LEN), (EXP))
+void sh_cons_fix_new PARAMS ((fragS *, int, int, expressionS *));
+
+/* This is used to construct expressions out of @GOTOFF, @PLT and @GOT
+   symbols.  The relocation type is stored in X_md.  */
+#define O_PIC_reloc O_md1
+
 #endif /* OBJ_ELF */

@@ -1,3 +1,18 @@
+2002-01-24  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-sh.c (sh_elf_suffix): Removed.
+	(sh_PIC_related_p, sh_check_fixup, sh_cons_fix_new,
+	sh_end_of_match, sh_parse_name): New functions.
+	(sh_elf_cons): Simplify.
+	(parse_exp): Reject misplaced PIC operands.
+	(md_undefined_symbol): Simplify.
+	(sh_fix_adjustable): Let @GOTOFF be adjusted.
+	(md_apply_fix3): Write @PLT and @GOTOFF addends in place.
+	(tc_gen_reloc): Move fixp subsy absolute value into addnumber.
+	Complain if subsy remains at the end.
+	* config/tc-sh.h (sh_parse_name, sh_cons_fix_new): Declare.
+	(md_parse_name, TC_CONS_FIX_NEW, O_PIC_reloc): Define.
+
 2002-01-22  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-mn10300.c (xr_registers): Move `pc'...

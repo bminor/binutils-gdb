@@ -58,8 +58,6 @@ static sh_opcode_info *find_cooked_opcode PARAMS ((char **));
 static unsigned int assemble_ppi PARAMS ((char *, sh_opcode_info *));
 static void little PARAMS ((int));
 static void big PARAMS ((int));
-static bfd_reloc_code_real_type sh_elf_suffix
-  PARAMS ((char **str_p, expressionS *, expressionS *new_exp_p));
 static int parse_reg PARAMS ((char *, int *, int *));
 static symbolS *dot PARAMS ((void));
 static char *parse_exp PARAMS ((char *, sh_operand_info *));
@@ -77,6 +75,10 @@ static unsigned int build_Mytes
 
 #ifdef OBJ_ELF
 static void sh_elf_cons PARAMS ((int));
+
+inline static int sh_PIC_related_p PARAMS ((symbolS *));
+static int sh_check_fixup PARAMS ((expressionS *, bfd_reloc_code_real_type *));
+inline static char *sh_end_of_match PARAMS ((char *, char *));
 
 symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE_" */
 #endif
@@ -262,77 +264,150 @@ static struct hash_control *opcode_hash_control;	/* Opcode mnemonics */
 
 
 #ifdef OBJ_ELF
-/* Parse @got, etc. and return the desired relocation.
-   If we have additional arithmetic expression, then we fill in new_exp_p.  */
-static bfd_reloc_code_real_type
-sh_elf_suffix (str_p, exp_p, new_exp_p)
-     char **str_p;
-     expressionS *exp_p, *new_exp_p;
+/* Determinet whether the symbol needs any kind of PIC relocation.  */
+
+inline static int
+sh_PIC_related_p (sym)
+     symbolS *sym;
 {
-  struct map_bfd {
-    char *string;
-    int length;
-    bfd_reloc_code_real_type reloc;
-  };
+  expressionS *exp;
 
-  char ident[20];
-  char *str = *str_p;
-  char *str2;
-  int ch;
-  int len;
-  struct map_bfd *ptr;
+  if (! sym)
+    return 0;
 
-#define MAP(str,reloc) { str, sizeof (str)-1, reloc }
+  if (sym == GOT_symbol)
+    return 1;
 
-  static struct map_bfd mapping[] = {
-    MAP ("got",		BFD_RELOC_32_GOT_PCREL),
-    MAP ("plt",		BFD_RELOC_32_PLT_PCREL),
-    MAP ("gotoff",	BFD_RELOC_32_GOTOFF),
-    { (char *)0,	0,	BFD_RELOC_UNUSED }
-  };
+  exp = symbol_get_value_expression (sym);
 
-  if (*str++ != '@')
-    return BFD_RELOC_UNUSED;
+  return (exp->X_op == O_PIC_reloc
+	  || sh_PIC_related_p (exp->X_add_symbol)
+	  || sh_PIC_related_p (exp->X_op_symbol));
+}
 
-  for (ch = *str, str2 = ident;
-       (str2 < ident + sizeof (ident) - 1
-	&& (ISALNUM (ch) || ch == '@'));
-       ch = *++str)
-    *str2++ = TOLOWER (ch);
+/* Determine the relocation type to be used to represent the
+   expression, that may be rearranged.  */
 
-  *str2 = '\0';
-  len = str2 - ident;
+static int
+sh_check_fixup (main_exp, r_type_p)
+     expressionS *main_exp;
+     bfd_reloc_code_real_type *r_type_p;
+{
+  expressionS *exp = main_exp;
 
-  ch = ident[0];
-  for (ptr = &mapping[0]; ptr->length > 0; ptr++)
-    if (ch == ptr->string[0]
-	&& len == ptr->length
-	&& memcmp (ident, ptr->string, ptr->length) == 0)
+  /* This is here for backward-compatibility only.  GCC used to generated:
+
+	f@PLT + . - (.LPCS# + 2)
+
+     but we'd rather be able to handle this as a PIC-related reference
+     plus/minus a symbol.  However, gas' parser gives us:
+
+	O_subtract (O_add (f@PLT, .), .LPCS#+2)
+       
+     so we attempt to transform this into:
+
+        O_subtract (f@PLT, O_subtract (.LPCS#+2, .))
+
+     which we can handle simply below.  */	
+  if (exp->X_op == O_subtract)
+    {
+      if (sh_PIC_related_p (exp->X_op_symbol))
+	return 1;
+
+      exp = symbol_get_value_expression (exp->X_add_symbol);
+
+      if (exp && sh_PIC_related_p (exp->X_op_symbol))
+	return 1;
+
+      if (exp && exp->X_op == O_add
+	  && sh_PIC_related_p (exp->X_add_symbol))
+	{
+	  symbolS *sym = exp->X_add_symbol;
+
+	  exp->X_op = O_subtract;
+	  exp->X_add_symbol = main_exp->X_op_symbol;
+
+	  main_exp->X_op_symbol = main_exp->X_add_symbol;
+	  main_exp->X_add_symbol = sym;
+
+	  main_exp->X_add_number += exp->X_add_number;
+	  exp->X_add_number = 0;
+	}
+
+      exp = main_exp;
+    }
+  else if (exp->X_op == O_add && sh_PIC_related_p (exp->X_op_symbol))
+    return 1;
+
+  if (exp->X_op == O_symbol || exp->X_op == O_add || exp->X_op == O_subtract)
+    {
+      if (exp->X_add_symbol && exp->X_add_symbol == GOT_symbol)
+	{
+	  *r_type_p = BFD_RELOC_SH_GOTPC;
+	  return 0;
+	}
+      exp = symbol_get_value_expression (exp->X_add_symbol);
+      if (! exp)
+	return 0;
+    }
+
+  if (exp->X_op == O_PIC_reloc)
+    {
+      *r_type_p = exp->X_md;
+      if (exp == main_exp)
+	exp->X_op = O_symbol;
+      else
+	{
+	  main_exp->X_add_symbol = exp->X_add_symbol;
+	  main_exp->X_add_number += exp->X_add_number;
+	}
+    }
+  else
+    return (sh_PIC_related_p (exp->X_add_symbol)
+	    || sh_PIC_related_p (exp->X_op_symbol));
+
+  return 0;
+}
+
+/* Add expression EXP of SIZE bytes to offset OFF of fragment FRAG.  */
+
+void
+sh_cons_fix_new (frag, off, size, exp)
+     fragS *frag;
+     int off, size;
+     expressionS *exp;
+{
+  bfd_reloc_code_real_type r_type = BFD_RELOC_UNUSED;
+
+  if (sh_check_fixup (exp, &r_type))
+    as_bad (_("Invalid PIC expression."));
+
+  if (r_type == BFD_RELOC_UNUSED)
+    switch (size)
       {
-	/* Now check for identifier@suffix+constant */
-	if (*str == '-' || *str == '+')
-	  {
-	    char *orig_line = input_line_pointer;
+      case 1:
+	r_type = BFD_RELOC_8;
+	break;
 
-	    input_line_pointer = str;
-	    expression (new_exp_p);
-	    if (new_exp_p->X_op == O_constant)
-	      {
-		exp_p->X_add_number += new_exp_p->X_add_number;
-		str = input_line_pointer;
-	      }
-	    if (new_exp_p->X_op == O_subtract)
-	      str = input_line_pointer;
+      case 2:
+	r_type = BFD_RELOC_16;
+	break;
 
-	    if (&input_line_pointer != str_p)
-	      input_line_pointer = orig_line;
-	  }
+      case 4:
+	r_type = BFD_RELOC_32;
+	break;
 
-	*str_p = str;
-	return ptr->reloc;
+      default:
+	goto error;
       }
-
-  return BFD_RELOC_UNUSED;
+  else if (size != 4)
+    {
+    error:
+      as_bad (_("unsupported BFD relocation size %u"), size);
+      r_type = BFD_RELOC_UNUSED;
+    }
+    
+  fix_new_exp (frag, off, size, exp, 0, r_type);
 }
 
 /* The regular cons() function, that reads constants, doesn't support
@@ -343,9 +418,7 @@ static void
 sh_elf_cons (nbytes)
      register int nbytes;	/* 1=.byte, 2=.word, 4=.long */
 {
-  expressionS exp, new_exp;
-  bfd_reloc_code_real_type reloc;
-  const char *name;
+  expressionS exp;
 
   if (is_it_end_of_statement ())
     {
@@ -356,79 +429,7 @@ sh_elf_cons (nbytes)
   do
     {
       expression (&exp);
-      new_exp.X_op = O_absent;
-      new_exp.X_add_symbol = new_exp.X_op_symbol = NULL;
-      /* If the _GLOBAL_OFFSET_TABLE_ symbol hasn't been found yet,
-	 use the name of the symbol to tell whether it's the
-	 _GLOBAL_OFFSET_TABLE_.  If it has, comparing the symbols is
-	 sufficient.  */
-      if (! GOT_symbol && exp.X_add_symbol)
-	name = S_GET_NAME (exp.X_add_symbol);
-      else
-	name = NULL;
-      /* Check whether this expression involves the
-	 _GLOBAL_OFFSET_TABLE_ symbol, by itself or added to a
-	 difference of two other symbols.  */
-      if (((GOT_symbol && GOT_symbol == exp.X_add_symbol)
-	   || (! GOT_symbol && name
-	       && strcmp (name, GLOBAL_OFFSET_TABLE_NAME) == 0))
-	  && (exp.X_op == O_symbol
-	      || (exp.X_op == O_add
-		  && ((symbol_get_value_expression (exp.X_op_symbol)->X_op)
-		      == O_subtract))))
-	{
-	  reloc_howto_type *reloc_howto = bfd_reloc_type_lookup (stdoutput,
-								 BFD_RELOC_32);
-	  int size = bfd_get_reloc_size (reloc_howto);
-
-	  if (GOT_symbol == NULL)
-	    GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
-
-	  if (size > nbytes)
-	    as_bad (_("%s relocations do not fit in %d bytes\n"),
-		    reloc_howto->name, nbytes);
-	  else
-	    {
-	      register char *p = frag_more ((int) nbytes);
-	      int offset = nbytes - size;
-
-	      fix_new_exp (frag_now, p - frag_now->fr_literal + offset,
-			   size, &exp, 0, TC_RELOC_GLOBAL_OFFSET_TABLE);
-	    }
-	}
-      /* Check if this symbol involves one of the magic suffixes, such
-	 as @GOT, @GOTOFF or @PLT, and determine which relocation type
-	 to use.  */
-      else if ((exp.X_op == O_symbol || (exp.X_op == O_add && exp.X_op_symbol))
-	  && *input_line_pointer == '@'
-	  && ((reloc = sh_elf_suffix (&input_line_pointer, &exp, &new_exp))
-	      != BFD_RELOC_UNUSED))
-	{
-	  reloc_howto_type *reloc_howto = bfd_reloc_type_lookup (stdoutput,
-								 reloc);
-	  int size = bfd_get_reloc_size (reloc_howto);
-
-	  /* Force a GOT to be generated.  */
-	  if (GOT_symbol == NULL)
-	    GOT_symbol = symbol_find_or_make (GLOBAL_OFFSET_TABLE_NAME);
-
-	  if (size > nbytes)
-	    as_bad (_("%s relocations do not fit in %d bytes\n"),
-		    reloc_howto->name, nbytes);
-	  else
-	    {
-	      register char *p = frag_more ((int) nbytes);
-	      int offset = nbytes - size;
-
-	      fix_new_exp (frag_now, p - frag_now->fr_literal + offset, size,
-			   &exp, 0, reloc);
-	      if (new_exp.X_op != O_absent)
-		fix_new_exp (frag_now, p - frag_now->fr_literal + offset, size,
-			     &new_exp, 0, BFD_RELOC_32);
-	    }
-	}
-      else
-	emit_expr (&exp, (unsigned int) nbytes);
+      emit_expr (&exp, (unsigned int) nbytes);
     }
   while (*input_line_pointer++ == ',');
 
@@ -867,6 +868,12 @@ parse_exp (s, op)
   expression (&op->immediate);
   if (op->immediate.X_op == O_absent)
     as_bad (_("missing operand"));
+#ifdef OBJ_ELF
+  else if (op->immediate.X_op == O_PIC_reloc
+	   || sh_PIC_related_p (op->immediate.X_add_symbol)
+	   || sh_PIC_related_p (op->immediate.X_op_symbol))
+    as_bad (_("misplaced PIC operand"));
+#endif
   new = input_line_pointer;
   input_line_pointer = save;
   return new;
@@ -2012,26 +2019,8 @@ sh_flush_pending_output ()
 
 symbolS *
 md_undefined_symbol (name)
-     char *name;
+     char *name ATTRIBUTE_UNUSED;
 {
-#ifdef OBJ_ELF
-  /* Under ELF we need to default _GLOBAL_OFFSET_TABLE.  Otherwise we
-     have no need to default values of symbols.  */
-  if (strcmp (name, GLOBAL_OFFSET_TABLE_NAME) == 0)
-    {
-      if (!GOT_symbol)
-	{
-	  if (symbol_find (name))
-	    as_bad ("GOT already in the symbol table");
-
-	  GOT_symbol = symbol_new (name, undefined_section,
-				   (valueT)0, & zero_address_frag);
-	}
-
-      return GOT_symbol;
-    }
-#endif /* OBJ_ELF */
-
   return 0;
 }
 
@@ -2741,7 +2730,6 @@ sh_fix_adjustable (fixP)
     return 1;
 
   if (! TC_RELOC_RTSYM_LOC_FIXUP (fixP)
-      || fixP->fx_r_type == BFD_RELOC_32_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_RVA)
     return 0;
 
@@ -2980,6 +2968,8 @@ md_apply_fix3 (fixP, valP, seg)
       /* Make the jump instruction point to the address of the operand.  At
 	 runtime we merely add the offset to the actual PLT entry.  */
       * valP = 0xfffffffc;
+      val = fixP->fx_addnumber - S_GET_VALUE (fixP->fx_subsy);
+      md_number_to_chars (buf, val, 4);
       break;
 
     case BFD_RELOC_SH_GOTPC:
@@ -3009,6 +2999,7 @@ md_apply_fix3 (fixP, valP, seg)
       break;
 
     case BFD_RELOC_32_GOTOFF:
+      md_number_to_chars (buf, val, 4);
       break;
 #endif
 
@@ -3322,6 +3313,13 @@ tc_gen_reloc (section, fixp)
   *rel->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
   rel->address = fixp->fx_frag->fr_address + fixp->fx_where;
 
+  if (fixp->fx_subsy
+      && S_GET_SEGMENT (fixp->fx_subsy) == absolute_section)
+    {
+      fixp->fx_addnumber -= S_GET_VALUE (fixp->fx_subsy);
+      fixp->fx_subsy = 0;
+    }
+
   r_type = fixp->fx_r_type;
 
   if (SWITCH_TABLE (fixp))
@@ -3361,7 +3359,7 @@ tc_gen_reloc (section, fixp)
     rel->addend = 0;
 
   rel->howto = bfd_reloc_type_lookup (stdoutput, r_type);
-  if (rel->howto == NULL)
+  if (rel->howto == NULL || fixp->fx_subsy)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
 		    _("Cannot represent relocation type %s"),
@@ -3374,4 +3372,87 @@ tc_gen_reloc (section, fixp)
   return rel;
 }
 
+#ifdef OBJ_ELF
+inline static char *
+sh_end_of_match (cont, what)
+     char *cont, *what;
+{
+  int len = strlen (what);
+
+  if (strncasecmp (cont, what, strlen (what)) == 0
+      && ! is_part_of_name (cont[len]))
+    return cont + len;
+
+  return NULL;
+}  
+
+int
+sh_parse_name (name, exprP, nextcharP)
+     char const *name;
+     expressionS *exprP;
+     char *nextcharP;
+{
+  char *next = input_line_pointer;
+  char *next_end;
+  int reloc_type;
+  segT segment;
+
+  exprP->X_op_symbol = NULL;
+
+  if (strcmp (name, GLOBAL_OFFSET_TABLE_NAME) == 0)
+    {
+      if (! GOT_symbol)
+	GOT_symbol = symbol_find_or_make (name);
+
+      exprP->X_add_symbol = GOT_symbol;
+    no_suffix:
+      /* If we have an absolute symbol or a reg, then we know its
+	     value now.  */
+      segment = S_GET_SEGMENT (exprP->X_add_symbol);
+      if (segment == absolute_section)
+	{
+	  exprP->X_op = O_constant;
+	  exprP->X_add_number = S_GET_VALUE (exprP->X_add_symbol);
+	  exprP->X_add_symbol = NULL;
+	}
+      else if (segment == reg_section)
+	{
+	  exprP->X_op = O_register;
+	  exprP->X_add_number = S_GET_VALUE (exprP->X_add_symbol);
+	  exprP->X_add_symbol = NULL;
+	}
+      else
+	{
+	  exprP->X_op = O_symbol;
+	  exprP->X_add_number = 0;
+	}
+
+      return 1;
+    }
+
+  exprP->X_add_symbol = symbol_find_or_make (name);
+  
+  if (*nextcharP != '@')
+    goto no_suffix;
+  else if ((next_end = sh_end_of_match (next + 1, "GOTOFF")))
+    reloc_type = BFD_RELOC_32_GOTOFF;
+  else if ((next_end = sh_end_of_match (next + 1, "GOT")))
+    reloc_type = BFD_RELOC_32_GOT_PCREL;
+  else if ((next_end = sh_end_of_match (next + 1, "PLT")))
+    reloc_type = BFD_RELOC_32_PLT_PCREL;
+  else
+    goto no_suffix;
+
+  *input_line_pointer = *nextcharP;
+  input_line_pointer = next_end;
+  *nextcharP = *input_line_pointer;
+  *input_line_pointer = '\0';
+
+  exprP->X_op = O_PIC_reloc;
+  exprP->X_add_number = 0;
+  exprP->X_md = reloc_type;
+
+  return 1;
+}
+#endif
 #endif /* BFD_ASSEMBLER */
