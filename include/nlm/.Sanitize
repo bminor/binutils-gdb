@@ -30,6 +30,8 @@ ChangeLog
 common.h
 external.h
 internal.h
+i386-ext.h
+sparc32-ext.h
 
 Things-to-lose:
 
