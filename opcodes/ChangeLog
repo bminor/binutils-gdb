@@ -1,3 +1,10 @@
+Wed Jul 31 14:39:27 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* arm-opc.h: (arm_opcodes): Added halfword and sign-extension
+ 	memory transfer instructions. Add new format string entries %h and %s.
+	* arm-dis.c: (print_insn_arm): Provide decoding of the new
+	formats %h and %s.
+
 start-sanitize-d10v
 Fri Jul 26 11:45:04 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
