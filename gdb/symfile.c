@@ -47,6 +47,7 @@ extern char *getenv ();
 /* Functions this file defines */
 static bfd *symfile_open();
 static struct sym_fns *symfile_init();
+static void clear_symtab_users_once();
 
 /* List of all available sym_fns.  */
 
@@ -92,6 +93,14 @@ struct psymbol_allocation_list global_psymbols = {0}, static_psymbols = {0};
 struct complaint complaint_root[1] = {
   {(char *)0, 0, complaint_root},
 };
+
+/* Some actual complaints.  */
+
+struct complaint oldsyms_complaint = {
+	"Replacing old symbols for `%s'", 0, 0 };
+
+struct complaint empty_symtab_complaint = {
+	"Empty symbol table found for `%s'", 0, 0 };
 
 
 /* In the following sort, we always make sure that
@@ -721,6 +730,183 @@ clear_complaints ()
 
   for (p = complaint_root->next; p != complaint_root; p = p->next)
     p->counter = 0;
+}
+
+/* clear_symtab_users_once:
+
+   This function is run after symbol reading, or from a cleanup.
+   If an old symbol table was obsoleted, the old symbol table
+   has been blown away, but the other GDB data structures that may 
+   reference it have not yet been cleared or re-directed.  (The old
+   symtab was zapped, and the cleanup queued, in free_named_symtab()
+   below.)
+
+   This function can be queued N times as a cleanup, or called
+   directly; it will do all the work the first time, and then will be a
+   no-op until the next time it is queued.  This works by bumping a
+   counter at queueing time.  Much later when the cleanup is run, or at
+   the end of symbol processing (in case the cleanup is discarded), if
+   the queued count is greater than the "done-count", we do the work
+   and set the done-count to the queued count.  If the queued count is
+   less than or equal to the done-count, we just ignore the call.  This
+   is needed because reading a single .o file will often replace many
+   symtabs (one per .h file, for example), and we don't want to reset
+   the breakpoints N times in the user's face.
+
+   The reason we both queue a cleanup, and call it directly after symbol
+   reading, is because the cleanup protects us in case of errors, but is
+   discarded if symbol reading is successful.  */
+
+static int clear_symtab_users_queued;
+static int clear_symtab_users_done;
+
+static void
+clear_symtab_users_once ()
+{
+  /* Enforce once-per-`do_cleanups'-semantics */
+  if (clear_symtab_users_queued <= clear_symtab_users_done)
+    return;
+  clear_symtab_users_done = clear_symtab_users_queued;
+
+  printf ("Resetting debugger state after updating old symbol tables\n");
+
+  /* Someday, we should do better than this, by only blowing away
+     the things that really need to be blown.  */
+  clear_value_history ();
+  clear_displays ();
+  clear_internalvars ();
+  breakpoint_re_set ();
+  set_default_breakpoint (0, 0, 0, 0);
+  current_source_symtab = 0;
+}
+
+/* Delete the specified psymtab, and any others that reference it.  */
+
+cashier_psymtab (pst)
+     struct partial_symtab *pst;
+{
+  struct partial_symtab *ps, *pprev;
+  int i;
+
+  /* Find its previous psymtab in the chain */
+  for (ps = partial_symtab_list; ps; ps = ps->next) {
+    if (ps == pst)
+      break;
+    pprev = ps;
+  }
+
+  if (ps) {
+    /* Unhook it from the chain.  */
+    if (ps == partial_symtab_list)
+      partial_symtab_list = ps->next;
+    else
+      pprev->next = ps->next;
+
+    /* FIXME, we can't conveniently deallocate the entries in the
+       partial_symbol lists (global_psymbols/static_psymbols) that
+       this psymtab points to.  These just take up space until all
+       the psymtabs are reclaimed.  Ditto the dependencies list and
+       filename, which are all in the psymbol_obstack.  */
+
+    /* We need to cashier any psymtab that has this one as a dependency... */
+again:
+    for (ps = partial_symtab_list; ps; ps = ps->next) {
+      for (i = 0; i < ps->number_of_dependencies; i++) {
+	if (ps->dependencies[i] == pst) {
+	  cashier_psymtab (ps);
+	  goto again;		/* Must restart, chain has been munged. */
+	}
+      }
+    }
+  }
+}
+
+/* If a symtab or psymtab for filename NAME is found, free it along
+   with any dependent breakpoints, displays, etc.
+   Used when loading new versions of object modules with the "add-file"
+   command.  This is only called on the top-level symtab or psymtab's name;
+   it is not called for subsidiary files such as .h files.
+
+   Return value is 1 if we blew away the environment, 0 if not.
+
+   FIXME.  I think this is not the best way to do this.  We should
+   work on being gentler to the environment while still cleaning up
+   all stray pointers into the freed symtab.  */
+
+int
+free_named_symtabs (name)
+     char *name;
+{
+  register struct symtab *s;
+  register struct symtab *prev;
+  register struct partial_symtab *ps;
+  register struct partial_symtab *pprev;
+  struct blockvector *bv;
+  int blewit = 0;
+
+  /* Look for a psymtab with the specified name.  */
+
+again2:
+  for (ps = partial_symtab_list; ps; ps = ps->next) {
+    if (!strcmp (name, ps->filename)) {
+      cashier_psymtab (ps);	/* Blow it away...and its little dog, too.  */
+      goto again2;		/* Must restart, chain has been munged */
+    }
+  }
+
+  /* Look for a symtab with the specified name.  */
+
+  for (s = symtab_list; s; s = s->next)
+    {
+      if (!strcmp (name, s->filename))
+	break;
+      prev = s;
+    }
+
+  if (s)
+    {
+      if (s == symtab_list)
+	symtab_list = s->next;
+      else
+	prev->next = s->next;
+
+      /* For now, queue a delete for all breakpoints, displays, etc., whether
+	 or not they depend on the symtab being freed.  This should be
+	 changed so that only those data structures affected are deleted.  */
+
+      /* But don't delete anything if the symtab is empty.
+	 This test is necessary due to a bug in "dbxread.c" that
+	 causes empty symtabs to be created for N_SO symbols that
+	 contain the pathname of the object file.  (This problem
+	 has been fixed in GDB 3.9x).  */
+
+      bv = BLOCKLIST (s);
+      if (BLOCKLIST_NBLOCKS (bv) > 2
+	  || BLOCK_NSYMS (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK))
+	  || BLOCK_NSYMS (BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)))
+	{
+	  complain (&oldsyms_complaint, name);
+
+	  clear_symtab_users_queued++;
+	  make_cleanup (clear_symtab_users_once, 0);
+	  blewit = 1;
+	} else {
+	  complain (&empty_symtab_complaint, name);
+	}
+
+      free_symtab (s);
+    }
+  else
+    /* It is still possible that some breakpoints will be affected
+       even though no symtab was found, since the file might have
+       been compiled without debugging, and hence not be associated
+       with a symtab.  In order to handle this correctly, we would need
+       to keep a list of text address ranges for undebuggable files.
+       For now, we do nothing, since this is a fairly obscure case.  */
+    ;
+
+  /* FIXME, what about the misc function vector? */
+  return blewit;
 }
 
 void
