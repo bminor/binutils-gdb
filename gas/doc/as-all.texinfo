@@ -104,10 +104,11 @@ included in a translation approved by the Free Software Foundation
 instead of in the original English.
 @end titlepage
 @page
-@node Top, Overview, (dir), (dir)
 @ifinfo
+@node Top
+@top Using as
+
 This file is a user guide to the GNU assembler @code{as}.
-@end ifinfo
 @menu
 * Overview::			Overview
 * Invoking::			Command-Line Options
@@ -120,8 +121,9 @@ This file is a user guide to the GNU assembler @code{as}.
 * Copying::			GNU GENERAL PUBLIC LICENSE
 * Index::                       Index
 @end menu
+@end ifinfo
 
-@node Overview, Invoking, Top, Top
+@node Overview
 @chapter Overview
 @iftex
 This manual is a user guide to the GNU assembler @code{as}.
@@ -216,7 +218,7 @@ Standard input, or source files to assemble
 * Errors::			Error and Warning Messages
 @end menu
 
-@node Manual, GNU Assembler, Overview, Overview
+@node Manual
 @section Structure of this Manual
 
 @cindex manual, structure and purpose
@@ -264,7 +266,7 @@ computer-readable series of instructions.  Different versions of
 @c this draft makes an effort to avoid them (except in names of
 @c directives).
 
-@node GNU Assembler, Object Formats, Manual, Overview
+@node GNU Assembler
 @section as, the GNU Assembler
 
 GNU @code{as} is really a family of assemblers.  
@@ -288,7 +290,7 @@ Unlike older assemblers, @code{as} is designed to assemble a source
 program in one pass of the source file.  This has a subtle impact on the
 @kbd{.org} directive (@pxref{Org,,@code{.org}}).
 
-@node Object Formats, Command Line, GNU Assembler, Overview
+@node Object Formats
 @section Object File Formats
 
 @cindex object file format
@@ -298,7 +300,7 @@ write assembly language programs; but directives for debugging symbols
 are typically different in different file formats.  @xref{Symbol
 Attributes,,Symbol Attributes}.
 
-@node Command Line, Input Files, Object Formats, Overview
+@node Command Line
 @section Command Line
 
 @cindex command line conventions
@@ -329,7 +331,7 @@ as -o my-object-file.o mumble.s
 as -omy-object-file.o mumble.s
 @end smallexample
 
-@node Input Files, Object, Command Line, Overview
+@node Input Files
 @section Input Files
 
 @cindex input
@@ -383,7 +385,7 @@ help error messages reflect the original source file, when @code{as}
 source is itself synthesized from other files.
 @xref{App-File,,@code{.app-file}}. 
 
-@node Object, Errors, Input Files, Overview
+@node Object
 @section Output (Object) File
 
 @cindex object file
@@ -410,7 +412,7 @@ information for the debugger.
 @c link above to some info file(s) like the description of a.out.
 @c don't forget to describe GNU info as well as Unix lossage.
 
-@node Errors,  , Object, Overview
+@node Errors
 @section Error and Warning Messages
 
 @cindex error messsages
@@ -450,7 +452,7 @@ The file name and line number are derived as for warning
 messages.  The actual message text may be rather less explanatory
 because many of them aren't supposed to happen.
 
-@node Invoking, Syntax, Overview, Top
+@node Invoking
 @chapter Command-Line Options
 
 @cindex options, all versions of @code{as}
@@ -600,7 +602,7 @@ affects the warning messages: it does not change any particular of how
 @code{as} assembles your file.  Errors, which stop the assembly, are
 still reported.
 
-@node Syntax, Sections, Invoking, Top
+@node Syntax
 @chapter Syntax
 
 @cindex machine-independent syntax
@@ -619,7 +621,7 @@ assembler, except that @code{as} does not assemble Vax bit-fields.
 * Constants::			Constants
 @end menu
 
-@node Pre-processing, Whitespace, Syntax, Syntax
+@node Pre-processing
 @section Pre-Processing
 
 @cindex preprocessing
@@ -657,7 +659,7 @@ putting a line that says @code{#NO_APP} after them.  This feature is
 mainly intend to support @code{asm} statements in compilers whose output
 normally does not need to be pre-processed.
 
-@node Whitespace, Comments, Pre-processing, Syntax
+@node Whitespace
 @section Whitespace
 
 @cindex whitespace
@@ -667,7 +669,7 @@ people to read.  Unless within character constants
 (@pxref{Characters,,Character Constants}), any whitespace means the same
 as exactly one space.
 
-@node Comments, Symbol Intro, Whitespace, Syntax
+@node Comments
 @section Comments
 
 @cindex comments
@@ -721,7 +723,7 @@ the line is ignored.  (Just like a comment.)
 This feature is deprecated, and may disappear from future versions
 of @code{as}.
 
-@node Symbol Intro, Statements, Comments, Syntax
+@node Symbol Intro
 @section Symbols
 
 @cindex characters used in symbols
@@ -737,7 +739,7 @@ delimited by characters not in that set, or by the beginning of a file
 not a possible symbol delimiter).  @xref{Symbols}.
 @cindex length of symbols
 
-@node Statements, Constants, Symbol Intro, Syntax
+@node Statements
 @section Statements
 
 @cindex statements, structure of
@@ -796,7 +798,7 @@ another_label:           # This is an empty statement.
            instruction   operand_1, operand_2, @dots{}
 @end smallexample
 
-@node Constants,  , Statements, Syntax
+@node Constants
 @section Constants
 
 @cindex constants
@@ -815,7 +817,7 @@ inspection, without knowing any context.  Like this:
 * Numbers::			Number Constants
 @end menu
 
-@node Characters, Numbers, Constants, Constants
+@node Characters
 @subsection Character Constants
 
 @cindex character constants
@@ -831,7 +833,7 @@ used in arithmetic expressions.
 * Chars::			Characters
 @end menu
 
-@node Strings, Chars, Characters, Characters
+@node Strings
 @subsubsection Strings
 
 @cindex string constants
@@ -930,7 +932,7 @@ the BSD 4.2 assembler recognizes, and is a subset of what most C
 compilers recognize.  If you are in doubt, don't use an escape
 sequence.
 
-@node Chars,  , Strings, Characters
+@node Chars
 @subsubsection Characters
 
 @cindex single character constant
@@ -948,7 +950,7 @@ constant in a numeric expression is the machine's byte-wide code for
 that character.  @code{as} assumes your character code is ASCII:
 @kbd{'A} means 65, @kbd{'B} means 66, and so on. @refill
 
-@node Numbers,  , Characters, Constants
+@node Numbers
 @subsection Number Constants
 
 @cindex constants, number
@@ -965,7 +967,7 @@ are floating point numbers, described below.
 * Flonums::			Flonums
 @end menu
 
-@node Integers, Bignums, Numbers, Numbers
+@node Integers
 @subsubsection Integers
 @cindex integers
 @cindex constants, integer
@@ -994,7 +996,7 @@ Integers have the usual values.  To denote a negative integer, use
 the prefix operator @samp{-} discussed under expressions
 (@pxref{Prefix Ops,,Prefix Operators}).
 
-@node Bignums, Flonums, Integers, Numbers
+@node Bignums
 @subsubsection Bignums
 
 @cindex bignums
@@ -1004,7 +1006,7 @@ except that the number (or its negative) takes more than 32 bits to
 represent in binary.  The distinction is made because in some places
 integers are permitted while bignums are not.
 
-@node Flonums,  , Bignums, Numbers
+@node Flonums
 @subsubsection Flonums
 @cindex flonums
 @cindex floating point numbers
@@ -1064,7 +1066,7 @@ independently of any floating point hardware in the computer running
 @code{as}.
 
 
-@node Sections, Symbols, Syntax, Top
+@node Sections
 @chapter Sections and Relocation
 @cindex sections
 @cindex relocation
@@ -1077,7 +1079,7 @@ independently of any floating point hardware in the computer running
 * bss::				bss Section
 @end menu
 
-@node Secs Background, ld Sections, Sections, Sections
+@node Secs Background
 @section Background
 
 Roughly, a section is a range of addresses, with no gaps; all data
@@ -1180,7 +1182,7 @@ data and bss sections.
 Some sections are manipulated by @code{ld}; others are invented for
 use of @code{as} and have no meaning except during assembly.
 
-@node ld Sections, as Sections, Secs Background, Sections
+@node ld Sections
 @section ld Sections
 @code{ld} deals with just four kinds of sections, summarized below.
 
@@ -1277,7 +1279,7 @@ DDDD}\boxit{2cm}{\tt 00000}\ \dots\hfil}
 @end tex
 @c END TEXI2ROFF-KILL
 
-@node as Sections, Sub-Sections, ld Sections, Sections
+@node as Sections
 @section as Internal Sections
 
 @cindex internal @code{as} sections
@@ -1349,7 +1351,7 @@ statements and the like.
 @c FIXME item register
 @end table
 
-@node Sub-Sections, bss, as Sections, Sections
+@node Sub-Sections
 @section Sub-Sections
 
 @cindex numbered subsections
@@ -1418,7 +1420,7 @@ definition will capture its current value.  The location counter of the
 section that statements are being assembled into is said to be the
 @dfn{active} location counter.
 
-@node bss,  , Sub-Sections, Sections
+@node bss
 @section bss Section
 
 @cindex bss section
@@ -1434,7 +1436,7 @@ may not assemble anything directly into the bss section.  Hence there
 are no bss subsections. @xref{Comm,,@code{.comm}},
 @pxref{Lcomm,,@code{.lcomm}}.
 
-@node Symbols, Expressions, Sections, Top
+@node Symbols
 @chapter Symbols
 
 @cindex symbols
@@ -1456,7 +1458,7 @@ the same order they were declared.  This may break some debuggers.
 * Symbol Attributes::		Symbol Attributes
 @end menu
 
-@node Labels, Setting Symbols, Symbols, Symbols
+@node Labels
 @section Labels
 
 @cindex labels
@@ -1467,7 +1469,7 @@ operand.  You are warned if you use the same symbol to represent two
 different locations: the first definition overrides any other
 definitions.
 
-@node Setting Symbols, Symbol Names, Labels, Symbols
+@node Setting Symbols
 @section Giving Symbols Other Values
 
 @cindex assigning values to symbols
@@ -1477,7 +1479,7 @@ by an equals sign @samp{=}, followed by an expression
 (@pxref{Expressions}).  This is equivalent to using the @code{.set}
 directive.  @xref{Set,,@code{.set}}.
 
-@node Symbol Names, Dot, Setting Symbols, Symbols
+@node Symbol Names
 @section Symbol Names
 
 @cindex symbol names
@@ -1557,7 +1559,7 @@ through @samp{9:}.
 For instance, the first @code{1:} is named @code{L1@ctrl{A}1}, the 44th
 @code{3:} is named @code{L3@ctrl{A}44}.
 
-@node Dot, Symbol Attributes, Symbol Names, Symbols
+@node Dot
 @section The Special Dot Symbol
 
 @cindex dot (symbol)
@@ -1571,7 +1573,7 @@ Assigning a value to @code{.} is treated the same as a @code{.org}
 directive.  Thus, the expression @samp{.=.+4} is the same as saying
 @samp{.block 4}.
 
-@node Symbol Attributes,  , Dot, Symbols
+@node Symbol Attributes
 @section Symbol Attributes
 
 @cindex symbol attributes
@@ -1592,7 +1594,7 @@ would want.
 * COFF Symbols::		Symbol Attributes for COFF
 @end menu
 
-@node Symbol Value, Symbol Type, Symbol Attributes, Symbol Attributes
+@node Symbol Value
 @subsection Value
 
 @cindex value of a symbol
@@ -1614,7 +1616,7 @@ common declaration.  The value is how much common storage to reserve, in
 bytes (addresses).  The symbol refers to the first address of the
 allocated storage.
 
-@node Symbol Type, a.out Symbols, Symbol Value, Symbol Attributes
+@node Symbol Type
 @subsection Type
 
 @cindex type of a symbol
@@ -1624,7 +1626,7 @@ information, any flag settings indicating that a symbol is external, and
 (optionally), other information for linkers and debuggers.  The exact
 format depends on the object-code output format in use.
 
-@node a.out Symbols, COFF Symbols, Symbol Type, Symbol Attributes
+@node a.out Symbols
 @subsection Symbol Attributes: @code{a.out}
 
 @cindex @code{a.out} symbol attributes
@@ -1635,7 +1637,7 @@ format depends on the object-code output format in use.
 * Symbol Other::		Other
 @end menu
 
-@node Symbol Desc, Symbol Other, a.out Symbols, a.out Symbols
+@node Symbol Desc
 @subsubsection Descriptor
 
 @cindex descriptor, of @code{a.out} symbol
@@ -1644,13 +1646,13 @@ descriptor value by using a @code{.desc} statement
 (@pxref{Desc,,@code{.desc}}).  A descriptor value means nothing to
 @code{as}.
 
-@node Symbol Other,  , Symbol Desc, a.out Symbols
+@node Symbol Other
 @subsubsection Other
 
 @cindex other attribute, of @code{a.out} symbol
 This is an arbitrary 8-bit value.  It means nothing to @code{as}.
 
-@node COFF Symbols,  , a.out Symbols, Symbol Attributes
+@node COFF Symbols
 @subsection Symbol Attributes for COFF
 
 @cindex COFF symbol attributes
@@ -1673,7 +1675,7 @@ The @code{as} directives @code{.dim}, @code{.line}, @code{.scl},
 @code{.size}, and @code{.tag} can generate auxiliary symbol table
 information for COFF.
 
-@node Expressions, Pseudo Ops, Symbols, Top
+@node Expressions
 @chapter Expressions
 
 @cindex expressions
@@ -1687,7 +1689,7 @@ Whitespace may precede and/or follow an expression.
 * Integer Exprs::		Integer Expressions
 @end menu
 
-@node Empty Exprs, Integer Exprs, Expressions, Expressions
+@node Empty Exprs
 @section Empty Expressions
 
 @cindex empty expressions
@@ -1697,7 +1699,7 @@ Wherever an absolute expression is required, you may omit the
 expression and @code{as} will assume a value of (absolute) 0.  This
 is compatible with other assemblers.
 
-@node Integer Exprs,  , Empty Exprs, Expressions
+@node Integer Exprs
 @section Integer Expressions
 
 @cindex integer expressions
@@ -1712,7 +1714,7 @@ by @emph{operators}.
 * Infix Ops::			Infix Operators
 @end menu
 
-@node Arguments, Operators, Integer Exprs, Integer Exprs
+@node Arguments
 @subsection Arguments
 
 @cindex expression arguments
@@ -1744,7 +1746,7 @@ Subexpressions are a left parenthesis @samp{(} followed by an integer
 expression, followed by a right parenthesis @samp{)}; or a prefix
 operator followed by an argument.
 
-@node Operators, Prefix Ops, Arguments, Integer Exprs
+@node Operators
 @subsection Operators
 
 @cindex operators, in expressions
@@ -1755,7 +1757,7 @@ operators are followed by an argument.  Infix operators appear
 between their arguments.  Operators may be preceded and/or followed by
 whitespace.
 
-@node Prefix Ops, Infix Ops, Operators, Integer Exprs
+@node Prefix Ops
 @subsection Prefix Operator
 
 @cindex prefix operators
@@ -1780,7 +1782,7 @@ one argument, which must be absolute.
 \global\advance\leftskip by -\itemindent
 @end tex
 
-@node Infix Ops,  , Prefix Ops, Integer Exprs
+@node Infix Ops
 @subsection Infix Operators
 
 @cindex infix operators
@@ -1867,7 +1869,7 @@ one of the two arguments.
 
 Similarly, you can't subtract quantities from two different sections.
 
-@node Pseudo Ops, Machine Dependent, Expressions, Top
+@node Pseudo Ops
 @chapter Assembler Directives
 
 @cindex directives, machine independent
@@ -1914,7 +1916,6 @@ machine configuration for the GNU assembler.
 * Ln::				@code{.ln @var{line-number}}
 * List::			@code{.list}
 * Long::			@code{.long @var{expressions}}
-* Lsym::			@code{.lsym @var{symbol}, @var{expression}}
 * Nolist::			@code{.nolist}
 * Octa::			@code{.octa @var{bignums}}
 * Org::				@code{.org @var{new-lc} , @var{fill}}
@@ -1938,7 +1939,7 @@ machine configuration for the GNU assembler.
 * Deprecated::			Deprecated Directives
 @end menu
 
-@node Abort, coff-ABORT, Pseudo Ops, Pseudo Ops
+@node Abort
 @section @code{.abort}
 
 @cindex @code{abort} directive
@@ -1949,7 +1950,7 @@ assembly language source would be piped into the assembler.  If the sender
 of the source quit, it could use this directive tells @code{as} to
 quit also.  One day @code{.abort} will not be supported.
 
-@node coff-ABORT, Align, Abort, Pseudo Ops
+@node coff-ABORT
 @section @code{.ABORT}
 
 @cindex @code{ABORT} directive
@@ -1960,7 +1961,7 @@ synonym for @samp{.abort}.
 When producing @code{b.out} output, @code{as} accepts this directive,
 but ignores it.
 
-@node Align, App-File, coff-ABORT, Pseudo Ops
+@node Align
 @section @code{.align @var{abs-expr} , @var{abs-expr}}
 
 @cindex padding the location counter
@@ -1976,7 +1977,7 @@ The second expression (also absolute) gives the value to be stored in
 the padding bytes.  It (and the comma) may be omitted.  If it is
 omitted, the padding bytes are zero.
 
-@node App-File, Ascii, Align, Pseudo Ops
+@node App-File
 @section @code{.app-file @var{string}}
 
 @cindex logical file name
@@ -1991,7 +1992,7 @@ you must give the quotes--@code{""}.  This statement may go away in
 future: it is only recognized to be compatible with old @code{as}
 programs.@refill
 
-@node Ascii, Asciz, App-File, Pseudo Ops
+@node Ascii
 @section @code{.ascii "@var{string}"}@dots{}
 
 @cindex @code{ascii} directive
@@ -2000,7 +2001,7 @@ programs.@refill
 separated by commas.  It assembles each string (with no automatic
 trailing zero byte) into consecutive addresses.
 
-@node Asciz, Byte, Ascii, Pseudo Ops
+@node Asciz
 @section @code{.asciz "@var{string}"}@dots{}
 
 @cindex @code{asciz} directive
@@ -2009,7 +2010,7 @@ trailing zero byte) into consecutive addresses.
 @code{.asciz} is just like @code{.ascii}, but each string is followed by
 a zero byte.  The ``z'' in @samp{.asciz} stands for ``zero''.
 
-@node Byte, Comm, Asciz, Pseudo Ops
+@node Byte
 @section @code{.byte @var{expressions}}
 
 @cindex @code{byte} directive
@@ -2017,7 +2018,7 @@ a zero byte.  The ``z'' in @samp{.asciz} stands for ``zero''.
 @code{.byte} expects zero or more expressions, separated by commas.
 Each expression is assembled into the next byte.
 
-@node Comm, Data, Byte, Pseudo Ops
+@node Comm
 @section @code{.comm @var{symbol} , @var{length} }
 
 @cindex @code{comm} directive
@@ -2030,7 +2031,7 @@ will allocate space for each @code{.comm} symbol that is at least as
 long as the longest @code{.comm} request in any of the partial programs
 linked.  @var{length} is an absolute expression.
 
-@node Data, Def, Comm, Pseudo Ops
+@node Data
 @section @code{.data @var{subsection}}
 
 @cindex @code{data} directive
@@ -2039,7 +2040,7 @@ end of the data subsection numbered @var{subsection} (which is an
 absolute expression).  If @var{subsection} is omitted, it defaults
 to zero.
 
-@node Def, Desc, Data, Pseudo Ops
+@node Def
 @section @code{.def @var{name}}
 
 @cindex @code{def} directive
@@ -2052,7 +2053,7 @@ This directive is only observed when @code{as} is configured for COFF
 format output; when producing @code{b.out}, @samp{.def} is recognized,
 but ignored.
 
-@node Desc, Dim, Def, Pseudo Ops
+@node Desc
 @section @code{.desc @var{symbol}, @var{abs-expression}}
 
 @cindex @code{desc} directive
@@ -2066,7 +2067,7 @@ configured for COFF output; it is only for @code{a.out} or @code{b.out}
 object format.  For the sake of compatibility, @code{as} will accept
 it, but produce no output, when configured for COFF.
 
-@node Dim, Double, Desc, Pseudo Ops
+@node Dim
 @section @code{.dim}
 
 @cindex @code{dim} directive
@@ -2080,7 +2081,7 @@ information in the symbol table.  It is only permitted inside
 @code{as} is generating @code{b.out}, it accepts this directive but
 ignores it.
 
-@node Double, Eject, Dim, Pseudo Ops
+@node Double
 @section @code{.double @var{flonums}}
 
 @cindex @code{double} directive
@@ -2090,7 +2091,7 @@ assembles floating point numbers.
 The exact kind of floating point numbers emitted depends on how
 @code{as} is configured.  @xref{Machine Dependent}.
 
-@node Eject, Else, Double, Pseudo Ops
+@node Eject
 @section @code{.eject}
 
 @cindex @code{eject} directive
@@ -2099,7 +2100,7 @@ The exact kind of floating point numbers emitted depends on how
 @cindex listing control: new page
 Force a page break at this point, when generating assembly listings.
 
-@node Else, Endef, Eject, Pseudo Ops
+@node Else
 @section @code{.else}
 
 @cindex @code{else} directive
@@ -2109,7 +2110,7 @@ of code to be assembled if the condition for the preceding @code{.if}
 was false.
 
 
-@node Endef, Endif, Else, Pseudo Ops
+@node Endef
 @section @code{.endef}
 
 @cindex @code{endef} directive
@@ -2120,7 +2121,7 @@ This directive flags the end of a symbol definition begun with
 @code{as} is configured to generate @code{b.out}, it accepts this
 directive but ignores it.
 
-@node Endif, Equ, Endef, Pseudo Ops
+@node Endif
 @section @code{.endif}
 
 @cindex @code{endif} directive
@@ -2128,7 +2129,7 @@ directive but ignores it.
 it marks the end of a block of code that is only assembled
 conditionally.  @xref{If,,@code{.if}}.
 
-@node Equ, Extern, Endif, Pseudo Ops
+@node Equ
 @section @code{.equ @var{symbol}, @var{expression}}
 
 @cindex @code{equ} directive
@@ -2137,7 +2138,7 @@ conditionally.  @xref{If,,@code{.if}}.
 This directive sets the value of @var{symbol} to @var{expression}.
 It is synonymous with @samp{.set}; @pxref{Set,,@code{.set}}.
 
-@node Extern, File, Equ, Pseudo Ops
+@node Extern
 @section @code{.extern}
 
 @cindex @code{extern} directive
@@ -2145,7 +2146,7 @@ It is synonymous with @samp{.set}; @pxref{Set,,@code{.set}}.
 with other assemblers---but it is ignored.  @code{as} treats
 all undefined symbols as external.
 
-@node File, Fill, Extern, Pseudo Ops
+@node File
 @section @code{.file @var{string}}
 
 @cindex @code{file} directive
@@ -2161,7 +2162,7 @@ recognized to be compatible with old @code{as} programs.
 In some configurations of @code{as}, @code{.file} has already been
 removed to avoid conflicts with other assemblers.  @xref{Machine Dependent}.
 
-@node Fill, Float, File, Pseudo Ops
+@node Fill
 @section @code{.fill @var{repeat} , @var{size} , @var{value}}
 
 @cindex @code{fill} directive
@@ -2184,7 +2185,7 @@ If the second comma and @var{value} are absent, @var{value} is
 assumed zero.  If the first comma and following tokens are absent,
 @var{size} is assumed to be 1.
 
-@node Float, Global, Fill, Pseudo Ops
+@node Float
 @section @code{.float @var{flonums}}
 
 @cindex floating point numbers (single)
@@ -2195,7 +2196,7 @@ The exact kind of floating point numbers emitted depends on how
 @code{as} is configured.
 @xref{Machine Dependent}.
 
-@node Global, hword, Float, Pseudo Ops
+@node Global
 @section @code{.global @var{symbol}}, @code{.globl @var{symbol}}
 
 @cindex @code{global} directive
@@ -2209,7 +2210,7 @@ from another partial program it is linked with.
 Both spellings (@samp{.globl} and @samp{.global}) are accepted, for
 compatibility with other assemblers.
 
-@node hword, Ident, Global, Pseudo Ops
+@node hword
 @section @code{.hword @var{expressions}}
 
 @cindex @code{hword} directive
@@ -2222,7 +2223,7 @@ a 16 bit number for each.
 This directive is a synonym for @samp{.short}; depending on the target
 architecture, it may also be a synonym for @samp{.word}.
 
-@node Ident, If, hword, Pseudo Ops
+@node Ident
 @section @code{.ident}
 
 @cindex @code{ident} directive
@@ -2231,7 +2232,7 @@ This directive is used by some assemblers to place tags in object files.
 compatibility with such assemblers, but does not actually emit anything
 for it.
 
-@node If, Include, Ident, Pseudo Ops
+@node If
 @section @code{.if @var{absolute expression}}
 
 @cindex conditional assembly
@@ -2260,7 +2261,7 @@ has not been defined.  Both spelling variants are equivalent.
 
 @end table
 
-@node Include, Int, If, Pseudo Ops
+@node Include
 @section @code{.include "@var{file}"}
 
 @cindex @code{include} directive
@@ -2274,7 +2275,7 @@ can control the search paths used with the @samp{-I} command-line option
 (@pxref{Invoking,,Command-Line Options}).  Quotation marks are required
 around @var{file}.
 
-@node Int, Lcomm, Include, Pseudo Ops
+@node Int
 @section @code{.int @var{expressions}}
 
 @cindex @code{int} directive
@@ -2286,7 +2287,7 @@ number that will, at run
 time, be the value of that expression.  The byte order of the
 expression depends on what kind of computer will run the program.
 
-@node Lcomm, Lflags, Int, Pseudo Ops
+@node Lcomm
 @section @code{.lcomm @var{symbol} , @var{length}}
 
 @cindex @code{lcomm} directive
@@ -2299,14 +2300,14 @@ section, so at run-time the bytes will start off zeroed.  @var{Symbol}
 is not declared global (@pxref{Global,,@code{.global}}), so is normally
 not visible to @code{ld}.
 
-@node Lflags, Line, Lcomm, Pseudo Ops
+@node Lflags
 @section @code{.lflags}
 
 @cindex @code{lflags} directive (ignored)
 @code{as} accepts this directive, for compatibility with other
 assemblers, but ignores it.
 
-@node Line, Ln, Lflags, Pseudo Ops
+@node Line
 @section @code{.line @var{line-number}}
 
 @cindex @code{line} directive
@@ -2325,23 +2326,13 @@ for compatibility with existing assembler programs. @refill
 only available with the name @code{.ln}, rather than as either
 @code{.line} or @code{.ln}.  
 
-Even though this is a directive associated with the @code{a.out} or
-@code{b.out} object-code formats, @code{as} will still recognize it
-when producing COFF output, and will treat @samp{.line} as though it
-were the COFF @samp{.ln} @emph{if} it is found outside a
-@code{.def}/@code{.endef} pair.  
-
-Inside a @code{.def}, @samp{.line} is, instead, one of the directives
-used by compilers to generate auxiliary symbol information for
-debugging.
-
-@node Ln, List, Line, Pseudo Ops
+@node Ln
 @section @code{.ln @var{line-number}}
 
 @cindex @code{ln} directive
 @samp{.ln} is a synonym for @samp{.line}.
 
-@node List, Long, Ln, Pseudo Ops
+@node List
 @section @code{.list}
 
 @cindex @code{list} directive
@@ -2356,13 +2347,16 @@ By default, listings are disabled.  When you enable them (with the
 @samp{-a} command line option; @pxref{Invoking,,Command-Line Options}),
 the initial value of the listing counter is one.
 
-@node Long, Lsym, List, Pseudo Ops
+@node Long
 @section @code{.long @var{expressions}}
 
 @cindex @code{long} directive
 @code{.long} is the same as @samp{.int}, @pxref{Int,,@code{.int}}.
 
-@node Lsym, Nolist, Long, Pseudo Ops
+@ignore
+@c no one seems to know what this is for or whether this description is
+@c what it really ought to do
+@node Lsym
 @section @code{.lsym @var{symbol}, @var{expression}}
 
 @cindex @code{lsym} directive
@@ -2378,8 +2372,9 @@ the same as the expression value:
 @end smallexample
 @noindent
 The new symbol is not flagged as external.
+@end ignore
 
-@node Nolist, Octa, Lsym, Pseudo Ops
+@node Nolist
 @section @code{.nolist}
 
 @cindex @code{nolist} directive
@@ -2390,7 +2385,7 @@ internal counter (which is zero initially).   @code{.list} increments the
 counter, and @code{.nolist} decrements it.  Assembly listings are
 generated whenever the counter is greater than zero.
 
-@node Octa, Org, Nolist, Pseudo Ops
+@node Octa
 @section @code{.octa @var{bignums}}
 
 @c FIXME: double size emitted for "octa" on i960, others?  Or warn?
@@ -2403,7 +2398,7 @@ bignum, it emits a 16-byte integer.
 The term ``octa'' comes from contexts in which a ``word'' is two bytes;
 hence @emph{octa}-word for 16 bytes.
 
-@node Org, Psize, Octa, Pseudo Ops
+@node Org
 @section @code{.org @var{new-lc} , @var{fill}}
 
 @cindex @code{org} directive
@@ -2439,7 +2434,7 @@ intervening bytes are filled with @var{fill} which should be an
 absolute expression.  If the comma and @var{fill} are omitted,
 @var{fill} defaults to zero.
 
-@node Psize, Quad, Org, Pseudo Ops
+@node Psize
 @section @code{.psize @var{lines} , @var{columns}}
 
 @cindex @code{psize} directive
@@ -2459,7 +2454,7 @@ lines is exceeded (or whenever you explicitly request one, using
 If you specify @var{lines} as @code{0}, no formfeeds are generated save
 those explicitly specified with @code{.eject}.
 
-@node Quad, Sbttl, Psize, Pseudo Ops
+@node Quad
 @section @code{.quad @var{bignums}}
 
 @cindex @code{quad} directive
@@ -2474,7 +2469,7 @@ bytes of the bignum.@refill
 The term ``quad'' comes from contexts in which a ``word'' is two bytes;
 hence @emph{quad}-word for 8 bytes.
 
-@node Sbttl, Scl, Quad, Pseudo Ops
+@node Sbttl
 @section @code{.sbttl "@var{subheading}"}
 
 @cindex @code{sbttl} directive
@@ -2486,7 +2481,7 @@ title line) when generating assembly listings.
 This directive affects subsequent pages, as well as the current page if
 it appears within ten lines of the top of a page.
 
-@node Scl, Section, Sbttl, Pseudo Ops
+@node Scl
 @section @code{.scl @var{class}}
 
 @cindex @code{scl} directive
@@ -2501,7 +2496,7 @@ The @samp{.scl} directive is primarily associated with COFF output; when
 configured to generate @code{b.out} output format, @code{as} will
 accept this directive but ignore it.
 
-@node Section, Set, Scl, Pseudo Ops
+@node Section
 @section @code{.section @var{name}, @var{subsection}}
 
 @cindex @code{section} directive
@@ -2513,7 +2508,7 @@ Assemble the following code into end of subsection numbered
 @samp{.section .text} is equivalent to the @code{.text} directive;
 @samp{.section .data} is equivalent to the @code{.data} directive.
 
-@node Set, Short, Section, Pseudo Ops
+@node Set
 @section @code{.set @var{symbol}, @var{expression}}
 
 @cindex @code{set} directive
@@ -2532,12 +2527,13 @@ message if one is required.
 If you @code{.set} a global symbol, the value stored in the object
 file is the last value stored into it.
 
-@node Short, Single, Set, Pseudo Ops
+@node Short
 @section @code{.short @var{expressions}}
 
 @cindex @code{short} directive
 @code{.short} is the same as @samp{.word}.  @xref{Word,,@code{.word}}.
-@node Single, Size, Short, Pseudo Ops
+
+@node Single
 @section @code{.single @var{flonums}}
 
 @cindex @code{single} directive
@@ -2547,7 +2543,7 @@ has the same effect as @code{.float}.
 The exact kind of floating point numbers emitted depends on how
 @code{as} is configured.  @xref{Machine Dependent}.
 
-@node Size, Space, Single, Pseudo Ops
+@node Size
 @section @code{.size}
 
 @cindex @code{size} directive
@@ -2559,7 +2555,7 @@ information in the symbol table.  It is only permitted inside
 @code{as} is generating @code{b.out}, it accepts this directive but
 ignores it.
 
-@node Space, Stab, Size, Pseudo Ops
+@node Space
 @section @code{.space @var{size} , @var{fill}}
 
 @cindex @code{space} directive
@@ -2576,7 +2572,7 @@ compatibility with other AMD 29K assemblers.
 @code{.space} has the effect of @code{.block}  @xref{Machine Dependent}.
 @end quotation
 
-@node Stab, Tag, Space, Pseudo Ops
+@node Stab
 @section @code{.stabd, .stabn, .stabs}
 
 @cindex symbolic debuggers, information for
@@ -2634,7 +2630,7 @@ The name of the symbol is set to the empty string @code{""}.
 All five fields are specified.
 @end table
 
-@node Tag, Text, Stab, Pseudo Ops
+@node Tag
 @section @code{.tag @var{structname}}
 
 @cindex COFF structure debugging
@@ -2649,7 +2645,7 @@ definitions in the symbol table with instances of those structures.
 @code{as} is generating @code{b.out}, it accepts this directive but
 ignores it.
 
-@node Text, Title, Tag, Pseudo Ops
+@node Text
 @section @code{.text @var{subsection}}
 
 @cindex @code{text} directive
@@ -2658,7 +2654,7 @@ the text subsection numbered @var{subsection}, which is an absolute
 expression.  If @var{subsection} is omitted, subsection number zero
 is used.
 
-@node Title, Type, Text, Pseudo Ops
+@node Title
 @section @code{.title "@var{heading}"}
 
 @cindex @code{title} directive
@@ -2669,7 +2665,7 @@ source file name and pagenumber) when generating assembly listings.
 This directive affects subsequent pages, as well as the current page if
 it appears within ten lines of the top of a page.
 
-@node Type, Val, Title, Pseudo Ops
+@node Type
 @section @code{.type @var{int}}
 
 @cindex COFF symbol type
@@ -2682,7 +2678,7 @@ records the integer @var{int} as the type attribute of a symbol table entry.
 @code{as} is configured for @code{b.out} output, it accepts this
 directive but ignores it.
 
-@node Val, Word, Type, Pseudo Ops
+@node Val
 @section @code{.val @var{addr}}
 
 @cindex @code{val} directive
@@ -2695,7 +2691,7 @@ entry.
 @samp{.val} is used only for COFF output; when @code{as} is
 configured for @code{b.out}, it accepts this directive but ignores it.
 
-@node Word, Deprecated, Val, Pseudo Ops
+@node Word
 @section @code{.word @var{expressions}}
 
 @cindex @code{word} directive
@@ -2741,7 +2737,7 @@ minus the address of the long-jump to @code{sym4}; and so on, for as many
 entries in the original jump table as necessary.
 
 
-@node Deprecated,  , Word, Pseudo Ops
+@node Deprecated
 @section Deprecated Directives
 
 @cindex deprecated directives
@@ -2754,7 +2750,7 @@ They are included for compatibility with older assemblers.
 @item .line
 @end table
 
-@node Machine Dependent, Copying, Pseudo Ops, Top
+@node Machine Dependent
 @chapter Machine Dependent Features
 
 @cindex machine dependencies
@@ -2780,7 +2776,7 @@ subject, see the hardware manufacturer's manual.
 * i386-Dependent::		80386 Dependent Features
 @end menu
 
-@node Vax-Dependent, AMD29K-Dependent, Machine Dependent, Machine Dependent
+@node Vax-Dependent
 @section VAX Dependent Features
 
 @cindex VAX support
@@ -2794,7 +2790,7 @@ subject, see the hardware manufacturer's manual.
 * VAX-no::			Not Supported on VAX
 @end menu
 
-@node Vax-Opts, VAX-float, Vax-Dependent, Vax-Dependent
+@node Vax-Opts
 @subsection VAX Command-Line Options
 
 @cindex command-line options ignored, VAX
@@ -2865,7 +2861,7 @@ option also insertes some code following the @samp{_main}
 symbol so that the object file will be compatible with Vax-11
 "C".
 
-@node VAX-float, VAX-directives, Vax-Opts, Vax-Dependent
+@node VAX-float
 @subsection VAX Floating Point
 
 @cindex VAX floating point
@@ -2886,7 +2882,7 @@ boundary case.
 The @code{.float} directive produces @code{f} format numbers.
 The @code{.double} directive produces @code{d} format numbers.
 
-@node VAX-directives, VAX-opcodes, VAX-float, Vax-Dependent
+@node VAX-directives
 @subsection Vax Machine Directives
 
 @cindex machine directives, VAX
@@ -2919,7 +2915,7 @@ assembles Vax @code{h} format 128-bit floating point constants.
 
 @end table
 
-@node VAX-opcodes, VAX-branch, VAX-directives, Vax-Dependent
+@node VAX-opcodes
 @subsection VAX Opcodes
 
 @cindex VAX opcode mnemonics
@@ -2931,7 +2927,7 @@ follows the @code{case@dots{}} instruction should be made with
 @code{.word} statements.  This is compatible with all unix
 assemblers we know of.
 
-@node VAX-branch, VAX-operands, VAX-opcodes, Vax-Dependent
+@node VAX-branch
 @subsection VAX Branch Improvement
 
 @cindex VAX branch improvement
@@ -3043,7 +3039,7 @@ bar:
 @end table
 @end table
 
-@node VAX-operands, VAX-no, VAX-branch, Vax-Dependent
+@node VAX-operands
 @subsection VAX Operands
 
 @cindex VAX operand notation
@@ -3083,7 +3079,7 @@ separated.
 @c a syntax clash because () is used as an address mode
 @c and to encapsulate sub-expressions.
 
-@node VAX-no,  , VAX-operands, Vax-Dependent
+@node VAX-no
 @subsection Not Supported on VAX
 
 @cindex VAX bitfields not supported
@@ -3091,7 +3087,7 @@ separated.
 Vax bit fields can not be assembled with @code{as}.  Someone
 can add the required code if they really need it.
 
-@node AMD29K-Dependent, H8/300-Dependent, Vax-Dependent, Machine Dependent
+@node AMD29K-Dependent
 @section AMD 29K Dependent Features
 
 @cindex AMD 29K support
@@ -3104,21 +3100,21 @@ can add the required code if they really need it.
 * AMD29K Opcodes::		Opcodes
 @end menu
 
-@node AMD29K Options, AMD29K Syntax, AMD29K-Dependent, AMD29K-Dependent
+@node AMD29K Options
 @subsection Options
 @cindex AMD 29K options (none)
 @cindex options for AMD29K (none)
 @code{as} has no additional command-line options for the AMD
 29K family.
 
-@node AMD29K Syntax, AMD29K Floating Point, AMD29K Options, AMD29K-Dependent
+@node AMD29K Syntax
 @subsection Syntax
 @menu
 * AMD29K-Chars::		Special Characters
 * AMD29K-Regs::			Register Names
 @end menu
 
-@node AMD29K-Chars, AMD29K-Regs, AMD29K Syntax, AMD29K Syntax
+@node AMD29K-Chars
 @subsubsection Special Characters
 
 @cindex line comment character, AMD 29K
@@ -3136,7 +3132,7 @@ can add the required code if they really need it.
 The character @samp{?} is permitted in identifiers (but may not begin
 an identifier).
 
-@node AMD29K-Regs,  , AMD29K-Chars, AMD29K Syntax
+@node AMD29K-Regs
 @subsubsection Register Names
 
 @cindex AMD 29K register names
@@ -3182,14 +3178,14 @@ These unprotected special-purpose register names are also recognized:
   q      cr     exop
 @end smallexample
 
-@node AMD29K Floating Point, AMD29K Directives, AMD29K Syntax, AMD29K-Dependent
+@node AMD29K Floating Point
 @subsection Floating Point
 
 @cindex floating point, AMD 29K (@sc{ieee})
 @cindex AMD 29K floating point (@sc{ieee})
 The AMD 29K family uses @sc{ieee} floating-point numbers.
 
-@node AMD29K Directives, AMD29K Opcodes, AMD29K Floating Point, AMD29K-Dependent
+@node AMD29K Directives
 @subsection AMD 29K Machine Directives
 
 @cindex machine directives, AMD 29K
@@ -3226,9 +3222,12 @@ used for the directive called @code{.app-file} in the AMD 29K support.
 This directive is ignored; it is accepted for compatibility with other
 AMD 29K assemblers.
 
+@ignore
+@c since we're ignoring .lsym...
 @item .reg @var{symbol}, @var{expression}
 @cindex @code{reg} directive, AMD 29K
 @code{.reg} has the same effect as @code{.lsym}; @pxref{Lsym,,@code{.lsym}}.
+@end ignore
 
 @item .sect
 @cindex @code{sect} directive, AMD 29K
@@ -3245,7 +3244,7 @@ name} options, @samp{.use} is equivalent to the machine directive
 @samp{.data 200}.
 @end table
 
-@node AMD29K Opcodes,  , AMD29K Directives, AMD29K-Dependent
+@node AMD29K Opcodes
 @subsection Opcodes
 
 @cindex AMD 29K opcodes
@@ -3256,7 +3255,7 @@ additional pseudo-instructions are needed on this family.
 For information on the 29K machine instruction set, see @cite{Am29000
 User's Manual}, Advanced Micro Devices, Inc.
 
-@node H8/300-Dependent, i960-Dependent, AMD29K-Dependent, Machine Dependent
+@node H8/300-Dependent
 @section H8/300 Dependent Features
 
 @cindex H8/300 support
@@ -3268,7 +3267,7 @@ User's Manual}, Advanced Micro Devices, Inc.
 * H8/300 Opcodes::		Opcodes
 @end menu
 
-@node H8/300 Options, H8/300 Syntax, H8/300-Dependent, H8/300-Dependent
+@node H8/300 Options
 @subsection Options
 
 @cindex H8/300 options (none)
@@ -3276,7 +3275,7 @@ User's Manual}, Advanced Micro Devices, Inc.
 @code{as} has no additional command-line options for the Hitachi 
 H8/300 family.
 
-@node H8/300 Syntax, H8/300 Floating Point, H8/300 Options, H8/300-Dependent
+@node H8/300 Syntax
 @subsection Syntax
 @menu
 * H8/300-Chars::		Special Characters
@@ -3284,7 +3283,7 @@ H8/300 family.
 * H8/300-Addressing::           Addressing Modes
 @end menu
 
-@node H8/300-Chars, H8/300-Regs, H8/300 Syntax, H8/300 Syntax
+@node H8/300-Chars
 @subsubsection Special Characters
 
 @cindex line comment character, H8/300
@@ -3297,7 +3296,7 @@ H8/300 family.
 @samp{$} can be used instead of a newline to separate statements.
 Therefore @emph{you may not use @samp{$} in symbol names} on the H8/300. 
 
-@node H8/300-Regs, H8/300-Addressing, H8/300-Chars, H8/300 Syntax
+@node H8/300-Regs
 @subsubsection Register Names
 
 @cindex H8/300 registers
@@ -3317,7 +3316,7 @@ The two control registers are called @code{pc} (program counter; a
 register).   @code{r7} is used as the stack pointer, and can also be
 called @code{sp}.
 
-@node H8/300-Addressing,  , H8/300-Regs, H8/300 Syntax
+@node H8/300-Addressing
 @subsubsection Addressing Modes
 
 @cindex addressing modes, H8/300
@@ -3362,14 +3361,14 @@ Memory indirect.  You may specify the @samp{:8} for clarity, if you
 wish; but @code{as} neither requires this nor uses it.
 @end table
 
-@node H8/300 Floating Point, H8/300 Directives, H8/300 Syntax, H8/300-Dependent
+@node H8/300 Floating Point
 @subsection Floating Point
 
 @cindex floating point, H8/300 (@sc{ieee})
 @cindex H8/300 floating point (@sc{ieee})
 The H8/300 family uses @sc{ieee} floating-point numbers.
 
-@node H8/300 Directives, H8/300 Opcodes, H8/300 Floating Point, H8/300-Dependent
+@node H8/300 Directives
 @subsection H8/300 Machine Directives
 
 @cindex H8/300 machine directives (none)
@@ -3380,7 +3379,7 @@ The H8/300 family uses @sc{ieee} floating-point numbers.
 However, on this platform the @samp{.int} and @samp{.word} directives
 generate 16-bit numbers.
 
-@node H8/300 Opcodes,  , H8/300 Directives, H8/300-Dependent
+@node H8/300 Opcodes
 @subsection Opcodes
 
 @cindex H8/300 opcode summary
@@ -3505,7 +3504,7 @@ mov.w  r0,@@foo
 If you use the size suffixes, @code{as} will issue a warning if
 there's a mismatch between the suffix and the register size.
 
-@node i960-Dependent, M68K-Dependent, H8/300-Dependent, Machine Dependent
+@node i960-Dependent
 @section Intel 80960 Dependent Features
 
 @cindex i960 support
@@ -3518,7 +3517,8 @@ there's a mismatch between the suffix and the register size.
 
 @c FIXME! Add Syntax sec with discussion of bitfields here, at least so
 @c long as they're not turned on for other machines than 960.
-@node Options-i960, Floating Point-i960, i960-Dependent, i960-Dependent
+
+@node Options-i960
 
 @subsection i960 Command-line Options
 
@@ -3624,7 +3624,7 @@ emitted for them is @emph{always} adjusted when necessary (depending on
 displacement size), regardless of whether you use @samp{-norelax}.
 @end table
 
-@node Floating Point-i960, Directives-i960, Options-i960, i960-Dependent
+@node Floating Point-i960
 @subsection Floating Point
 
 @cindex floating point, i960 (@sc{ieee})
@@ -3632,7 +3632,7 @@ displacement size), regardless of whether you use @samp{-norelax}.
 @code{as} generates @sc{ieee} floating-point numbers for the directives
 @samp{.float}, @samp{.double}, @samp{.extended}, and @samp{.single}.
 
-@node Directives-i960, Opcodes for i960, Floating Point-i960, i960-Dependent
+@node Directives-i960
 @subsection i960 Machine Directives
 
 @cindex machine directives, i960
@@ -3686,7 +3686,7 @@ Both arguments are required; @var{index} must be between 0 and 31
 (inclusive).
 @end table
 
-@node Opcodes for i960,  , Directives-i960, i960-Dependent
+@node Opcodes for i960
 @subsection i960 Opcodes
 
 @cindex opcodes, i960
@@ -3705,7 +3705,7 @@ instructions with target displacements larger than 13 bits.
 * Compare-and-branch-i960::	Compare-and-Branch
 @end menu
 
-@node callj-i960, Compare-and-branch-i960, Opcodes for i960, Opcodes for i960
+@node callj-i960
 @subsubsection @code{callj}
 
 @cindex @code{callj}, i960 pseudo-opcode
@@ -3718,7 +3718,7 @@ defining the operand---then @code{as} will translate the
 @code{callj}; if not, it will simply emit the @code{callj}, leaving it
 for the linker to resolve.
 
-@node Compare-and-branch-i960,  , callj-i960, Opcodes for i960
+@node Compare-and-branch-i960
 @subsubsection Compare-and-Branch
 
 @cindex i960 compare/branch instructions
@@ -3793,8 +3793,7 @@ and the instruction pairs they may expand into:
 @end tex
 @c END TEXI2ROFF-KILL
 
-@c FIXME! node conds are only sufficient for m68k alone, all, and vintage
-@node M68K-Dependent, Sparc-Dependent, i960-Dependent, Machine Dependent
+@node M68K-Dependent
 @section M680x0 Dependent Features
 
 @cindex M680x0 support
@@ -3806,7 +3805,7 @@ and the instruction pairs they may expand into:
 * M68K-opcodes::		Opcodes
 @end menu
 
-@node M68K-Opts, M68K-Syntax, M68K-Dependent, M68K-Dependent
+@node M68K-Opts
 @subsection M680x0 Options
 
 @cindex options, M680x0
@@ -3839,7 +3838,7 @@ MC68000 or MC68010 microprocessors.  You can give @code{as} the options
 @samp{-m68020}, and @samp{-mc68020} to tell it what processor is the
 target.
 
-@node M68K-Syntax, M68K-Float, M68K-Opts, M68K-Dependent
+@node M68K-Syntax
 @subsection Syntax
 
 @cindex M680x0 syntax
@@ -3910,7 +3909,7 @@ by @samp{:b}, @samp{:w}, or @samp{:l}.
 @end ignore
 @end table
 
-@node M68K-Float, M68K-Directives, M68K-Syntax, M68K-Dependent
+@node M68K-Float
 @subsection Floating Point
 
 @cindex floating point, M680x0
@@ -3940,7 +3939,7 @@ immediate operands to floating-point instructions.  Adding a
 directive to create extended precision numbers would not be
 hard, but it has not yet seemed necessary.
 
-@node M68K-Directives, M68K-opcodes, M68K-Float, M68K-Dependent
+@node M68K-Directives
 @subsection 680x0 Machine Directives
 
 @cindex M680x0 directives
@@ -3967,7 +3966,7 @@ This directive is identical to a @code{.align 1} directive.
 This directive is identical to a @code{.space} directive.
 @end table
 
-@node M68K-opcodes,  , M68K-Directives, M68K-Dependent
+@node M68K-opcodes
 @subsection Opcodes
 
 @cindex M680x0 opcodes
@@ -3987,7 +3986,7 @@ instructions.
 * M68K-Chars::			Special Characters
 @end menu
 
-@node M68K-Branch, M68K-Chars, M68K-opcodes, M68K-opcodes
+@node M68K-Branch
 @subsubsection Branch Improvement
 
 @cindex pseudo-opcodes, M680x0
@@ -4087,7 +4086,7 @@ when it encounters @samp{fj@var{XX} foo}.
 
 @end table
 
-@node M68K-Chars,  , M68K-Branch, M68K-opcodes
+@node M68K-Chars
 @subsubsection Special Characters
 
 @cindex special characters, M680x0
@@ -4101,7 +4100,7 @@ line-comment character is @samp{|}.  If a @samp{#} appears at the
 beginning of a line, it is treated as a comment unless it looks like
 @samp{# line file}, in which case it is treated normally.
 
-@node Sparc-Dependent, i386-Dependent, M68K-Dependent, Machine Dependent
+@node Sparc-Dependent
 @section SPARC Dependent Features
 
 @cindex SPARC support
@@ -4111,7 +4110,7 @@ beginning of a line, it is treated as a comment unless it looks like
 * Sparc-Directives::		Sparc Machine Directives
 @end menu
 
-@node Sparc-Opts, Sparc-Float, Sparc-Dependent, Sparc-Dependent
+@node Sparc-Opts
 @subsection Options
 
 @cindex options for SPARC (none)
@@ -4125,14 +4124,14 @@ I don't know anything about Sparc syntax.  Someone who does
 will have to write this section.
 @end ignore
 
-@node Sparc-Float, Sparc-Directives, Sparc-Opts, Sparc-Dependent
+@node Sparc-Float
 @subsection Floating Point
 
 @cindex floating point, SPARC (@sc{ieee})
 @cindex SPARC floating point (@sc{ieee})
 The Sparc uses @sc{ieee} floating-point numbers.
 
-@node Sparc-Directives,  , Sparc-Float, Sparc-Dependent
+@node Sparc-Directives
 @subsection Sparc Machine Directives
 
 @cindex SPARC machine directives
@@ -4178,8 +4177,7 @@ On the Sparc, the .word directive produces 32 bit values,
 instead of the 16 bit values it produces on many other machines.
 @end table
 
-@c FIXME! Conditionalize for all combinations in this section
-@node i386-Dependent,  , Sparc-Dependent, Machine Dependent
+@node i386-Dependent
 @section 80386 Dependent Features
 
 @cindex i386 support
@@ -4196,14 +4194,14 @@ instead of the 16 bit values it produces on many other machines.
 * i386-Notes::			Notes
 @end menu
 
-@node i386-Options, i386-Syntax, i386-Dependent, i386-Dependent
+@node i386-Options
 @subsection Options
 
 @cindex options for i386 (none)
 @cindex i386 options (none)
 The 80386 has no machine dependent options.
 
-@node i386-Syntax, i386-Opcodes, i386-Options, i386-Dependent
+@node i386-Syntax
 @subsection AT&T Syntax versus Intel Syntax
 
 @cindex i386 syntax compatibility
@@ -4267,7 +4265,7 @@ The AT&T assembler does not provide support for multiple section
 programs.  Unix style systems expect all programs to be single sections.
 @end itemize
 
-@node i386-Opcodes, i386-Regs, i386-Syntax, i386-Dependent
+@node i386-Opcodes
 @subsection Opcode Naming
 
 @cindex i386 opcode naming
@@ -4325,7 +4323,7 @@ Far call/jump instructions are @samp{lcall} and @samp{ljmp} in
 AT&T syntax, but are @samp{call far} and @samp{jump far} in Intel
 convention.
 
-@node i386-Regs, i386-prefixes, i386-Opcodes, i386-Dependent
+@node i386-Regs
 @subsection Register Naming
 
 @cindex i386 registers
@@ -4371,7 +4369,7 @@ the 8 floating point register stack @samp{%st} or equivalently
 @samp{%st(4)}, @samp{%st(5)}, @samp{%st(6)}, and @samp{%st(7)}.
 @end itemize
 
-@node i386-prefixes, i386-Memory, i386-Regs, i386-Dependent
+@node i386-prefixes
 @subsection Opcode Prefixes
 
 @cindex i386 opcode prefixes
@@ -4425,7 +4423,7 @@ The @samp{rep}, @samp{repe}, and @samp{repne} prefixes are added
 to string instructions to make them repeat @samp{%ecx} times.
 @end itemize
 
-@node i386-Memory, i386-jumps, i386-prefixes, i386-Dependent
+@node i386-Memory
 @subsection Memory References
 
 @cindex i386 memory references
@@ -4489,7 +4487,7 @@ Any instruction that has a memory operand @emph{must} specify its size (byte,
 word, or long) with an opcode suffix (@samp{b}, @samp{w}, or @samp{l},
 respectively).
 
-@node i386-jumps, i386-Float, i386-Memory, i386-Dependent
+@node i386-jumps
 @subsection Handling of Jump Instructions
 
 @cindex jump optimization, i386
@@ -4515,7 +4513,7 @@ cx_zero: jmp foo
 cx_nonzero:
 @end smallexample
 
-@node i386-Float, i386-Notes, i386-jumps, i386-Dependent
+@node i386-Float
 @subsection Floating Point
 
 @cindex i386 floating point
@@ -4568,7 +4566,7 @@ of the @samp{fn@dots{}} instructions.  For example, @samp{fsave} and
 instructions are made equivalent to @samp{f@dots{}} instructions.  If
 @samp{fwait} is desired it must be explicitly coded.
 
-@node i386-Notes,  , i386-Float, i386-Dependent
+@node i386-Notes
 @subsection Notes
 
 @cindex i386 @code{mul}, @code{imul} instructions
@@ -4590,7 +4588,7 @@ example, can be done with @samp{imul $69, %eax} rather than @samp{imul
 $69, %eax, %eax}.
 
 
-@node Copying, Index, Machine Dependent, Top
+@node Copying
 @unnumbered GNU GENERAL PUBLIC LICENSE
 
 @cindex license
@@ -4988,7 +4986,7 @@ consider it more useful to permit linking proprietary applications with the
 library.  If this is what you want to do, use the GNU Library General
 Public License instead of this License.
 
-@node Index,  , Copying, Top
+@node Index
 @unnumbered Index
 
 @printindex cp

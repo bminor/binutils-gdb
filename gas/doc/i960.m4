@@ -1,5 +1,6 @@
 _divert__(-1)
 _define__(<_I960__>,<1>)
+_define__(<_GENERIC__>,<0>)
 _define__(<_AOUT__>,<0>)
 _define__(<_BOUT__>,<1>)
 _define__(<_COFF__>,<1>)
