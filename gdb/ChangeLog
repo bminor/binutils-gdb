@@ -1,3 +1,13 @@
+2000-07-28  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* sh-tdep.c (sh_gdbarch_init): For sh4 initialize
+ 	register_convert_to_raw, register_convert_to_virtual,
+ 	register_convertible.
+	(sh_sh4_register_convertible): New function.
+	(sh_sh4_register_convert_to_virtual): New function.
+	(sh_sh4_register_convert_to_raw): New function.
+	Include floatformat.h.
+
 Thu Jul 27 14:06:27 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 2000-06-25 Stephane Carrez <Stephane.Carrez@worldnet.fr>:

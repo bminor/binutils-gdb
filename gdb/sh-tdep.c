@@ -37,6 +37,7 @@
 #include "inferior.h"		/* for BEFORE_TEXT_END etc. */
 #include "gdb_string.h"
 #include "arch-utils.h"
+#include "floatformat.h"
 
 #undef XMALLOC
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
@@ -1530,6 +1531,71 @@ sh_default_register_virtual_type (reg_nr)
   return builtin_type_int;
 }
 
+/* On the sh4, the DRi pseudo registers are problematic if the target
+   is little endian. When the user writes one of those registers, for
+   instance with 'ser var $dr0=1', we want the double to be stored
+   like this: 
+   fr0 = 0x00 0x00 0x00 0x00 0x00 0xf0 0x3f 
+   fr1 = 0x00 0x00 0x00 0x00 0x00 0x00 0x00 
+
+   This corresponds to little endian byte order & big endian word
+   order.  However if we let gdb write the register w/o conversion, it
+   will write fr0 and fr1 this way:
+   fr0 = 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+   fr1 = 0x00 0x00 0x00 0x00 0x00 0xf0 0x3f
+   because it will consider fr0 and fr1 as a single LE stretch of memory.
+   
+   To achieve what we want we must force gdb to store things in
+   floatformat_ieee_double_littlebyte_bigword (which is defined in
+   include/floatformat.h and libiberty/floatformat.c.
+
+   In case the target is big endian, there is no problem, the
+   raw bytes will look like:
+   fr0 = 0x3f 0xf0 0x00 0x00 0x00 0x00 0x00
+   fr1 = 0x00 0x00 0x00 0x00 0x00 0x00 0x00 
+
+   The other pseudo registers (the FVs) also don't pose a problem
+   because they are stored as 4 individual FP elements. */
+
+int
+sh_sh4_register_convertible (int nr)
+{
+  if (TARGET_BYTE_ORDER == LITTLE_ENDIAN)
+    return (gdbarch_tdep (current_gdbarch)->DR0_REGNUM <= nr
+	    && nr <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM);
+  else 
+    return 0;
+}
+
+void
+sh_sh4_register_convert_to_virtual (int regnum, struct type *type,
+                                  char *from, char *to)
+{
+  if (regnum >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
+      && regnum <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM)
+    {
+      DOUBLEST val;
+      floatformat_to_doublest (&floatformat_ieee_double_littlebyte_bigword, from, &val);
+      store_floating(to, TYPE_LENGTH(type), val);
+    }
+  else
+    error("sh_register_convert_to_virtual called with non DR register number");
+}
+
+void
+sh_sh4_register_convert_to_raw (struct type *type, int regnum,
+                              char *from, char *to)
+{
+  if (regnum >= gdbarch_tdep (current_gdbarch)->DR0_REGNUM 
+      && regnum <= gdbarch_tdep (current_gdbarch)->DR14_REGNUM)
+    {
+      DOUBLEST val = extract_floating (from, TYPE_LENGTH(type));
+      floatformat_from_doublest (&floatformat_ieee_double_littlebyte_bigword, &val, to);
+    }
+  else
+    error("sh_register_convert_to_raw called with non DR register number");
+}
+
 void
 sh_fetch_pseudo_register (int reg_nr)
 {
@@ -1953,6 +2019,9 @@ sh_gdbarch_init (info, arches)
       set_gdbarch_num_pseudo_regs (gdbarch, 12);
       set_gdbarch_max_register_raw_size (gdbarch, 4 * 4);
       set_gdbarch_max_register_virtual_size (gdbarch, 4 * 4);
+      set_gdbarch_register_convert_to_raw (gdbarch, sh_sh4_register_convert_to_raw);
+      set_gdbarch_register_convert_to_virtual (gdbarch, sh_sh4_register_convert_to_virtual);
+      set_gdbarch_register_convertible (gdbarch, sh_sh4_register_convertible);
       tdep->FPUL_REGNUM = 23;
       tdep->FPSCR_REGNUM = 24;
       tdep->FP15_REGNUM = 40;
