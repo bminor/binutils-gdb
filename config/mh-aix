@@ -1,4 +1,3 @@
-INSTALL = cp
 # X11 
 #X11_HOME_DIRECTORY=/usr/lpp/X11
 X11_HOME_DIRECTORY=/usr/unsupported

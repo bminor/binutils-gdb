@@ -6,4 +6,3 @@
 CC = cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh1500
 SYSV = -DSYSV
 RANLIB = true
-INSTALL = cp
