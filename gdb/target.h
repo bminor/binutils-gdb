@@ -280,7 +280,6 @@ struct target_ops
     int (*to_remove_vfork_catchpoint) (int);
     int (*to_has_forked) (int, int *);
     int (*to_has_vforked) (int, int *);
-    int (*to_can_follow_vfork_prior_to_exec) (void);
     void (*to_post_follow_vfork) (int, int, int, int);
     int (*to_insert_exec_catchpoint) (int);
     int (*to_remove_exec_catchpoint) (int);
@@ -563,8 +562,6 @@ extern int child_has_vforked (int, int *);
 
 extern void child_acknowledge_created_inferior (int);
 
-extern int child_can_follow_vfork_prior_to_exec (void);
-
 extern void child_post_follow_vfork (int, int, int, int);
 
 extern int child_insert_exec_catchpoint (int);
@@ -758,18 +755,6 @@ extern void target_load (char *arg, int from_tty);
 
 #define target_has_vforked(pid,child_pid) \
      (*current_target.to_has_vforked) (pid,child_pid)
-
-/* Some platforms (such as pre-10.20 HP-UX) don't allow us to do
-   anything to a vforked child before it subsequently calls exec().
-   On such platforms, we say that the debugger cannot "follow" the
-   child until it has vforked.
-
-   This function should be defined to return 1 by those targets
-   which can allow the debugger to immediately follow a vforked
-   child, and 0 if they cannot.  */
-
-#define target_can_follow_vfork_prior_to_exec() \
-     (*current_target.to_can_follow_vfork_prior_to_exec) ()
 
 /* An inferior process has been created via a vfork() system call.
    The debugger has followed the parent, the child, or both.  The

@@ -3449,21 +3449,6 @@ child_has_vforked (int tid, int *childpid)
 #endif
 
 
-#if defined(CHILD_CAN_FOLLOW_VFORK_PRIOR_TO_EXEC)
-int
-child_can_follow_vfork_prior_to_exec (void)
-{
-  /* ttrace does allow this.
-
-     ??rehrauer: However, I had major-league problems trying to
-     convince wait_for_inferior to handle that case.  Perhaps when
-     it is rewritten to grok multiple processes in an explicit way...
-   */
-  return 0;
-}
-#endif
-
-
 #if defined(CHILD_INSERT_EXEC_CATCHPOINT)
 int
 child_insert_exec_catchpoint (int tid)

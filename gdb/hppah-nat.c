@@ -953,13 +953,6 @@ child_has_vforked (int pid, int *childpid)
 }
 
 int
-child_can_follow_vfork_prior_to_exec (void)
-{
-  /* ptrace doesn't allow this. */
-  return 0;
-}
-
-int
 child_insert_exec_catchpoint (int pid)
 {
   /* This request is only available on HPUX 10.0 and later.   */

@@ -492,9 +492,6 @@ cleanup_target (struct target_ops *t)
   de_fault (to_has_vforked, 
 	    (int (*) (int, int *)) 
 	    return_zero);
-  de_fault (to_can_follow_vfork_prior_to_exec, 
-	    (int (*) (void)) 
-	    return_zero);
   de_fault (to_post_follow_vfork, 
 	    (void (*) (int, int, int, int)) 
 	    target_ignore);
@@ -629,7 +626,6 @@ update_current_target (void)
       INHERIT (to_remove_vfork_catchpoint, t);
       INHERIT (to_has_forked, t);
       INHERIT (to_has_vforked, t);
-      INHERIT (to_can_follow_vfork_prior_to_exec, t);
       INHERIT (to_post_follow_vfork, t);
       INHERIT (to_insert_exec_catchpoint, t);
       INHERIT (to_remove_exec_catchpoint, t);
@@ -2154,19 +2150,6 @@ debug_to_has_vforked (int pid, int *child_pid)
   return has_vforked;
 }
 
-static int
-debug_to_can_follow_vfork_prior_to_exec (void)
-{
-  int can_immediately_follow_vfork;
-
-  can_immediately_follow_vfork = debug_target.to_can_follow_vfork_prior_to_exec ();
-
-  fprintf_unfiltered (gdb_stdlog, "target_can_follow_vfork_prior_to_exec () = %d\n",
-		      can_immediately_follow_vfork);
-
-  return can_immediately_follow_vfork;
-}
-
 static void
 debug_to_post_follow_vfork (int parent_pid, int followed_parent, int child_pid,
 			    int followed_child)
@@ -2436,7 +2419,6 @@ setup_target_debug (void)
   current_target.to_remove_vfork_catchpoint = debug_to_remove_vfork_catchpoint;
   current_target.to_has_forked = debug_to_has_forked;
   current_target.to_has_vforked = debug_to_has_vforked;
-  current_target.to_can_follow_vfork_prior_to_exec = debug_to_can_follow_vfork_prior_to_exec;
   current_target.to_post_follow_vfork = debug_to_post_follow_vfork;
   current_target.to_insert_exec_catchpoint = debug_to_insert_exec_catchpoint;
   current_target.to_remove_exec_catchpoint = debug_to_remove_exec_catchpoint;

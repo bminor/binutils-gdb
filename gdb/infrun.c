@@ -370,21 +370,6 @@ static struct
 }
 pending_follow;
 
-/* Some platforms don't allow us to do anything meaningful with a
-   vforked child until it has exec'd.  Vforked processes on such
-   platforms can only be followed after they've exec'd.
-
-   When this is set to 0, a vfork can be immediately followed,
-   and an exec can be followed merely as an exec.  When this is
-   set to 1, a vfork event has been seen, but cannot be followed
-   until the exec is seen.
-
-   (In the latter case, inferior_ptid is still the parent of the
-   vfork, and pending_follow.fork_event.child_pid is the child.  The
-   appropriate process is followed, according to the setting of
-   follow-fork-mode.) */
-static int follow_vfork_when_exec;
-
 static const char follow_fork_mode_ask[] = "ask";
 static const char follow_fork_mode_both[] = "both";
 static const char follow_fork_mode_child[] = "child";
@@ -435,13 +420,10 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
       /* Before detaching from the child, remove all breakpoints from
          it.  (This won't actually modify the breakpoint list, but will
          physically remove the breakpoints from the child.) */
-      if (!has_vforked || !follow_vfork_when_exec)
-	{
-	  detach_breakpoints (child_pid);
+      detach_breakpoints (child_pid);
 #ifdef SOLIB_REMOVE_INFERIOR_HOOK
-	  SOLIB_REMOVE_INFERIOR_HOOK (child_pid);
+      SOLIB_REMOVE_INFERIOR_HOOK (child_pid);
 #endif
-	}
 
       /* Detach from the child. */
       dont_repeat ();
@@ -458,15 +440,10 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
       followed_child = 1;
 
       /* Before detaching from the parent, detach all breakpoints from
-         the child.  But only if we're forking, or if we follow vforks
-         as soon as they happen.  (If we're following vforks only when
-         the child has exec'd, then it's very wrong to try to write
-         back the "shadow contents" of inserted breakpoints now -- they
-         belong to the child's pre-exec'd a.out.) */
-      if (!has_vforked || !follow_vfork_when_exec)
-	{
-	  detach_breakpoints (child_pid);
-	}
+         the child.  Note that this only works if we're following vforks
+	 right away; if we've exec'd then the breakpoints are already detached
+	 and the shadow contents are out of date.  */
+      detach_breakpoints (child_pid);
 
       /* Before detaching from the parent, remove all breakpoints from it. */
       remove_breakpoints ();
@@ -497,17 +474,16 @@ follow_inferior_fork (int parent_pid, int child_pid, int has_forked,
          from the breakpoint package's viewpoint, that's a switch of
          "threads".  We must update the bp's notion of which thread
          it is for, or it'll be ignored when it triggers... */
-      if (step_resume_breakpoint && (!has_vforked || !follow_vfork_when_exec))
+      /* As above, if we're following vforks at exec time then resetting the
+	 step resume breakpoint is probably wrong.  */
+      if (step_resume_breakpoint)
 	breakpoint_re_set_thread (step_resume_breakpoint);
 
       /* Reinsert all breakpoints in the child.  (The user may've set
          breakpoints after catching the fork, in which case those
          actually didn't get set in the child, but only in the parent.) */
-      if (!has_vforked || !follow_vfork_when_exec)
-	{
-	  breakpoint_re_set ();
-	  insert_breakpoints ();
-	}
+      breakpoint_re_set ();
+      insert_breakpoints ();
     }
 
   /* If we're to be following both parent and child, then fork ourselves,
@@ -604,23 +580,6 @@ follow_exec (int pid, char *execd_pathname)
 
   if (!may_follow_exec)
     return;
-
-  /* Did this exec() follow a vfork()?  If so, we must follow the
-     vfork now too.  Do it before following the exec. */
-  if (follow_vfork_when_exec &&
-      (pending_follow.kind == TARGET_WAITKIND_VFORKED))
-    {
-      pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
-      follow_vfork (PIDGET (inferior_ptid),
-		    pending_follow.fork_event.child_pid);
-      follow_vfork_when_exec = 0;
-      saved_pid = PIDGET (inferior_ptid);
-
-      /* Did we follow the parent?  If so, we're done.  If we followed
-         the child then we must also follow its exec(). */
-      if (PIDGET (inferior_ptid) == pending_follow.fork_event.parent_pid)
-	return;
-    }
 
   /* This is an exec event that we actually wish to pay attention to.
      Refresh our symbol table to the newly exec'd program, remove any
@@ -1615,13 +1574,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  target_post_startup_inferior (pid_to_ptid
 					(pending_follow.fork_event.
 					 child_pid));
-	  follow_vfork_when_exec = !target_can_follow_vfork_prior_to_exec ();
-	  if (follow_vfork_when_exec)
-	    {
-	      target_resume (ecs->ptid, 0, TARGET_SIGNAL_0);
-	      prepare_to_wait (ecs);
-	      return;
-	    }
 	}
 
       stop_pc = read_pc ();
@@ -3114,16 +3066,6 @@ stop_stepping (struct execution_control_state *ecs)
 static void
 keep_going (struct execution_control_state *ecs)
 {
-  /* ??rehrauer: ttrace on HP-UX theoretically allows one to debug a
-     vforked child between its creation and subsequent exit or call to
-     exec().  However, I had big problems in this rather creaky exec
-     engine, getting that to work.  The fundamental problem is that
-     I'm trying to debug two processes via an engine that only
-     understands a single process with possibly multiple threads.
-
-     Hence, this spot is known to have problems when
-     target_can_follow_vfork_prior_to_exec returns 1. */
-
   /* Save the pc before execution, to compare with pc after stop.  */
   prev_pc = read_pc ();		/* Might have been DECR_AFTER_BREAK */
   prev_func_start = ecs->stop_func_start;	/* Ok, since if DECR_PC_AFTER

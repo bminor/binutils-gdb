@@ -1,3 +1,27 @@
+2002-11-16  Daniel Jacobowitz  <drow@mvista.com>
+
+	* hppah-nat.c (child_can_follow_vfork_prior_to_exec): Remove.
+	* inftarg.c (child_can_follow_vfork_prior_to_exec): Remove.
+	(init_child_ops): Don't initialize to_can_follow_vfork_prior_to_exec.
+	* infttrace.c (child_can_follow_vfork_prior_to_exec): Remove.
+	* target.c (cleanup_target): Remove reference to
+	to_can_follow_vfork_prior_to_exec.
+	(update_current_target): Likewise.
+	(debug_to_can_follow_vfork_prior_to_exec): Remove.
+	(setup_target_debug): Remove reference to
+	to_can_follow_vfork_prior_to_exec.
+	* target.h (struct target_ops): Remove
+	to_can_follow_vfork_prior_to_exec.
+	(child_can_follow_vfork_prior_to_exec): Remove prototype.
+	(target_can_follow_vfork_prior_to_exec): Remove definition.
+	* config/pa/nm-hppah.h (CHILD_CAN_FOLLOW_VFORK_PRIOR_TO_EXEC): Don't
+	define.
+	* infrun.c (follow_vfork_when_exec): Remove.
+	(follow_inferior_fork): Remove references to follow_vfork_when_exec.
+	(follow_exec): Likewise.
+	(handle_inferior_event): Likewise.
+	(keep_going): Likewise.
+
 2002-11-15  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (generic_unwind_get_saved_register): Make static.

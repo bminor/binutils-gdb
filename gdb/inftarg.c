@@ -573,19 +573,6 @@ child_has_vforked (int pid, int *child_pid)
 #endif
 
 
-#if !defined(CHILD_CAN_FOLLOW_VFORK_PRIOR_TO_EXEC)
-int
-child_can_follow_vfork_prior_to_exec (void)
-{
-  /* This version of Unix doesn't support notification of vfork events.
-     However, if it did, it probably wouldn't allow vforks to be followed
-     before the following exec.
-   */
-  return 0;
-}
-#endif
-
-
 #if !defined(CHILD_POST_FOLLOW_VFORK)
 void
 child_post_follow_vfork (int parent_pid, int followed_parent, int child_pid,
@@ -789,7 +776,6 @@ init_child_ops (void)
   child_ops.to_remove_vfork_catchpoint = child_remove_vfork_catchpoint;
   child_ops.to_has_forked = child_has_forked;
   child_ops.to_has_vforked = child_has_vforked;
-  child_ops.to_can_follow_vfork_prior_to_exec = child_can_follow_vfork_prior_to_exec;
   child_ops.to_post_follow_vfork = child_post_follow_vfork;
   child_ops.to_insert_exec_catchpoint = child_insert_exec_catchpoint;
   child_ops.to_remove_exec_catchpoint = child_remove_exec_catchpoint;
