@@ -1,3 +1,7 @@
+2002-05-09  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* MAINTAINERS: Add Jason Thorpe as VAX maintainer.
+
 2002-05-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.in: Replace `*pe' with `pe' throughout.
