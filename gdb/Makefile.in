@@ -2115,6 +2115,10 @@ inf-ttrace.o: inf-ttrace.c $(defs_h) $(command_h) $(gdbcore_h) \
 interps.o: interps.c $(defs_h) $(gdbcmd_h) $(ui_out_h) $(event_loop_h) \
 	$(event_top_h) $(interps_h) $(completer_h) $(gdb_string_h) \
 	$(gdb_events_h) $(gdb_assert_h) $(top_h) $(exceptions_h)
+iq2000-tdep.o: iq2000-tdep.c $(defs_h) $(frame_h) $(frame_base_h) \
+	$(frame_unwind_h) $(dwarf2_frame_h) $(gdbtypes_h) $(value_h) \
+	$(dis_asm_h) $(gdb_string_h) $(arch_utils_h) $(regcache_h) \
+	$(osabi_h) $(gdbcore_h)
 irix5-nat.o: irix5-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(target_h) \
 	$(regcache_h) $(gdb_string_h) $(gregset_h) $(mips_tdep_h)
 jv-exp.o: jv-exp.c $(defs_h) $(gdb_string_h) $(expression_h) $(value_h) \

@@ -1,3 +1,10 @@
+2005-03-08  Corinna Vinschen  <vinschen@redhat.com>
+
+	* Makefile.in: Add dependencies for iq2000-tdep.o.
+	* configure.tgt: Add iq2000-*-* target.
+	* iq2000-tdep.c: New file.
+	* config/iq2000/iq2000.mt: New file.
+
 2005-03-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* doc/observer.texi (executable_changed): New observer.
