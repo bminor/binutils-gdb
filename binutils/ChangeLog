@@ -1,5 +1,12 @@
 Sun Dec  6 13:28:09 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* objdump.c (SFILE): Add size field.
+	(objdump_sprintf): Merge both versions into one.  Increase buffer
+	size as needed to avoid overflow.
+	(disassemble_bytes): Change buf from 1000 bytes to 50.  Change
+	initialization and use of sfile to match changes to
+	objdump_sprintf.
+
 	* strip.1: Fix typo (-V to -v).  From Issei Hirayama
 	<iss@mail.wbs.or.jp>.
 
