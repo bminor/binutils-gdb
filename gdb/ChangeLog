@@ -1,5 +1,17 @@
 2000-09-03  Mark Kettenis  <kettenis@gnu.org>
 
+	* gdb_proc_service.h: Add copyright notice.
+	Protect against multiple inclusion.
+	Add fix for broken prfpregset_t here.
+	(struct ps_prochandle): Declare here.
+	[HAVE_PROC_SERVICE_H]: Include <proc_service.h>.
+	[!HAVE_PROC_SERVICE_H]: Include "gregset.h", define prgregset_t
+	and prfpregset_t in terms of gdb_gregset_t and gdb_fpregset_t if
+	necessary.
+	* lin-thread.c: Unconditionally include "gdb_proc_service.h".
+	Remove fix for broken prfpregset_t here.
+	(struct ps_prochandle): Don't declare here.
+
 	* MAINTAINERS: Add myself as threads co-maintainer.
 
 2000-09-01  David Anderson  <davea@sgi.com>

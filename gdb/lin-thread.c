@@ -110,11 +110,7 @@
 #include <sys/procfs.h>
 #endif
 
-#if defined (HAVE_PROC_SERVICE_H)
-#include <proc_service.h>	/* defines incoming API (ps_* callbacks) */
-#else
 #include "gdb_proc_service.h"
-#endif
 
 #if defined HAVE_STDINT_H	/* Pre-5.2 systems don't have this header */
 #if defined (HAVE_THREAD_DB_H)
@@ -171,16 +167,6 @@ typedef struct ps_prochandle *gdb_ps_prochandle_t;
 typedef void *gdb_ps_read_buf_t;
 typedef const void *gdb_ps_write_buf_t;
 typedef size_t gdb_ps_size_t;
-#endif
-
-/* Unfortunately glibc 2.1.3 was released with a broken prfpregset_t
-   type.  We let configure check for this lossage, and make
-   appropriate typedefs here.  */
-
-#ifdef PRFPREGSET_T_BROKEN
-typedef elf_fpregset_t gdb_prfpregset_t;
-#else
-typedef prfpregset_t gdb_prfpregset_t;
 #endif
 
 /* 
@@ -320,10 +306,6 @@ static struct cleanup *save_inferior_pid    (void);
 static void            restore_inferior_pid (void *saved_pid);
 static char *thr_err_string   (td_err_e);
 static char *thr_state_string (td_thr_state_e);
-
-struct ps_prochandle {
-  int pid;
-};
 
 struct ps_prochandle main_prochandle;
 td_thragent_t *      main_threadagent;
