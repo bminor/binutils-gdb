@@ -503,26 +503,26 @@ find_dummy_frame_regs (frame, frame_saved_regs)
   frame_saved_regs->regs[RP_REGNUM] = fp - 20 & ~0x3;
   frame_saved_regs->regs[FP_REGNUM] = fp;
   frame_saved_regs->regs[1] = fp + 8;
-  frame_saved_regs->regs[3] = fp + 12;
 
-  for (fp += 16, i = 5; i < 32; fp += 4, i++)
-    frame_saved_regs->regs[i] = fp;
+  for (fp += 12, i = 3; i < 32; i++)
+    {
+      if (i != FP_REGNUM)
+	{
+	  frame_saved_regs->regs[i] = fp;
+	  fp += 4;
+	}
+    }
 
   fp += 4;
   for (i = FP0_REGNUM; i < NUM_REGS; i++, fp += 8)
     frame_saved_regs->regs[i] = fp;
 
   frame_saved_regs->regs[IPSW_REGNUM] = fp;
-  fp += 4;
-  frame_saved_regs->regs[SAR_REGNUM] = fp;
-  fp += 4;
-  frame_saved_regs->regs[PCOQ_HEAD_REGNUM] = fp;
-  fp +=4;
-  frame_saved_regs->regs[PCSQ_HEAD_REGNUM] = fp;
-  fp +=4;
-  frame_saved_regs->regs[PCOQ_TAIL_REGNUM] = fp;
-  fp +=4;
-  frame_saved_regs->regs[PCSQ_TAIL_REGNUM] = fp;
+  frame_saved_regs->regs[SAR_REGNUM] = fp + 4;
+  frame_saved_regs->regs[PCOQ_HEAD_REGNUM] = fp + 8;
+  frame_saved_regs->regs[PCSQ_HEAD_REGNUM] = fp + 12;
+  frame_saved_regs->regs[PCOQ_TAIL_REGNUM] = fp + 16;
+  frame_saved_regs->regs[PCSQ_TAIL_REGNUM] = fp + 20;
 }
 
 int
