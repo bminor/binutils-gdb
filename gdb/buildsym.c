@@ -1078,14 +1078,12 @@ define_symbol (valu, string, desc, type, objfile)
   register int i;
   struct type *temptype;
 
-#ifdef IBM6000_TARGET
   /* We would like to eliminate nameless symbols, but keep their types.
      E.g. stab entry ":t10=*2" should produce a type 10, which is a pointer
      to type 2, but, should not creat a symbol to address that type. Since
      the symbol will be nameless, there is no way any user can refer to it. */
 
   int nameless;
-#endif
 
   /* Ignore syms with empty names.  */
   if (string[0] == 0)
@@ -1095,11 +1093,9 @@ define_symbol (valu, string, desc, type, objfile)
   if (p == 0)
     return 0;
 
-#ifdef IBM6000_TARGET
   /* If a nameless stab entry, all we need is the type, not the symbol.
      e.g. ":t10=*2" */
   nameless = (p == string);
-#endif
 
   sym = (struct symbol *)obstack_alloc (&objfile -> symbol_obstack, sizeof (struct symbol));
 
@@ -1483,12 +1479,10 @@ define_symbol (valu, string, desc, type, objfile)
       break;
 
     case 't':
-#ifdef IBM6000_TARGET
       /* For a nameless type, we don't want a create a symbol, thus we
 	 did not use `sym'. Return without further processing. */
-
       if (nameless) return NULL;
-#endif
+
       SYMBOL_CLASS (sym) = LOC_TYPEDEF;
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
@@ -1512,6 +1506,10 @@ define_symbol (valu, string, desc, type, objfile)
       break;
 
     case 'T':
+      /* For a nameless type, we don't want a create a symbol, thus we
+	 did not use `sym'. Return without further processing. */
+      if (nameless) return NULL;
+
       SYMBOL_CLASS (sym) = LOC_TYPEDEF;
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_NAMESPACE (sym) = STRUCT_NAMESPACE;
