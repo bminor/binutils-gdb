@@ -70,7 +70,9 @@
 
 @ifinfo
 @format
-START-INFO-DIR-ENTRY As: (as).  The GNU assembler.  END-INFO-DIR-ENTRY
+START-INFO-DIR-ENTRY
+* As: (as).                     The GNU assembler.
+END-INFO-DIR-ENTRY
 @end format
 @end ifinfo
 
@@ -219,7 +221,9 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
  [ -l ] [ -m68000 | -m68010 | -m68020 | ... ]
 @end ifset
 @ifset MIPS
- [ -nocpp ] [ -EL ] [ -EB ] [ -G @var{num} ] [ -mips1 ] [ -mips2 ] [ -mips3 ]
+ [ -nocpp ] [ -EL ] [ -EB ] [ -G @var{num} ]
+ [ -mips1 ] [ -mips2 ] [ -mips3 ]
+ [ --trap ] [ --break ]
 @end ifset
  [ -- | @var{files} @dots{} ]
 @end smallexample
@@ -356,36 +360,46 @@ Warn when the assembler switches to another architecture.
 
 @ifset MIPS
 The following options are available when @value{AS} is configured for
-the MIPS R2000/R3000/R4000/R6000 processors.
+a MIPS processor.
 
 @table @code
 @item -G @var{num}
 This option sets the largest size of an object that can be referenced
-implicitly with the @code{gp} register.  It is only accepted for targets
-that use ECOFF format, such as a DECstation running Ultrix.  The default
-value is 8.
+implicitly with the @code{gp} register.  It is only accepted for targets that
+use ECOFF format, such as a DECstation running Ultrix.  The default value is 8.
 
 @cindex MIPS endianness
 @cindex endianness, MIPS
-@item -EB
 @cindex big endian output, MIPS
+@item -EB
 Generate ``big endian'' format output.
 
-@item -EL
 @cindex little endian output, MIPS
+@item -EL
 Generate ``little endian'' format output.
 
 @cindex MIPS ISA
 @item -mips1
-@item -mips2
-@item -mips3
-Generate code for a particular MIPS Instruction Set Architecture level.  -mips1
-corresponds to the @sc{r2000} and @sc{r3000} processors, -mips2 to the
-@sc{r6000} processor, and -mips3 to the @sc{r4000} processor.
+@itemx -mips2
+@itemx -mips3
+Generate code for a particular MIPS Instruction Set Architecture level.
+@samp{-mips1} corresponds to the @sc{r2000} and @sc{r3000} processors,
+@samp{-mips2} to the @sc{r6000} processor, and @samp{-mips3} to the @sc{r4000}
+processor.
 
 @item -nocpp
-This option is ignored.  It is accepted for compatibility with the native
-tools.
+@code{@value{AS}} ignores this option.  It is accepted for compatibility with
+the native tools.
+
+@item --trap
+@itemx --no-trap
+@itemx --break
+@itemx --no-break
+Control how to deal with multiplication overflow and division by zero.
+@samp{--trap} or @samp{--no-break} (which are synonyms) take a trap exception
+(and only work for Instruction Set Architecture level 2 and higher);
+@samp{--break} or @samp{--no-trap} (also synonyms, and the default) take a
+break exception.
 @end table
 @end ifset
 
@@ -772,7 +786,7 @@ assembler.)
 
 These options enable listing output from the assembler.  By itself,
 @samp{-a} requests high-level, assembly, and symbols listing.
-Other letters may be used to select specific options for the list:
+You can use other letters to select specific options for the list:
 @samp{-ah} requests a high-level language listing,
 @samp{-al} requests an output-program assembly listing, and
 @samp{-as} requests a symbol table listing.
@@ -780,7 +794,7 @@ High-level listings require that a compiler debugging option like
 @samp{-g} be used, and that assembly listings (@samp{-al}) be requested
 also.
 
-The @samp{-ad} option may be used to omit debugging directives from the
+Use the @samp{-ad} option to omit debugging directives from the
 listing.
 
 Once you have specified one of these options, you can further control
@@ -1035,12 +1049,13 @@ appropriate number of newlines.
 converts character constants into the appropriate numeric values.
 @end itemize
 
-Note that it does not do macro processing, include file handling, or
+It does not do macro processing, include file handling, or
 anything else you may get from your C compiler's preprocessor.  You can
 do include file processing with the @code{.include} directive
-(@pxref{Include,,@code{.include}}).  Other ``CPP'' style preprocessing
-can be done with the @sc{GNU} C compiler, by giving the input file a
-@samp{.S} suffix; see the compiler documentation for details.
+(@pxref{Include,,@code{.include}}).  You can use the @sc{gnu} C compiler driver
+to get other ``CPP'' style preprocessing, by giving the input file a
+@samp{.S} suffix.  @xref{Overall Options,, Options Controlling the Kind of
+Output, gcc.info, Using GNU CC}.
 
 Excess whitespace, comments, and character constants
 cannot be used in the portions of the input text that are not
@@ -1133,14 +1148,15 @@ a line, while the other always begins a comment.
 @kindex #
 @cindex lines starting with @code{#}
 @cindex logical line numbers
-To be compatible with past assemblers, a special interpretation is given to
-lines that begin with @samp{#}.  Following the @samp{#} should be an absolute
+To be compatible with past assemblers, lines that begin with @samp{#} have a
+special interpretation.  Following the @samp{#} should be an absolute
 expression (@pxref{Expressions}): the logical line number of the @emph{next}
-line.  Then a string (@xref{Strings}.) is allowed: if present it is a new
-logical file name.  The rest of the line, if any, should be whitespace.
+line.  Then a string (@pxref{Strings,, Strings}) is allowed: if present it is a
+new logical file name.  The rest of the line, if any, should be whitespace.
 
 If the first non-whitespace characters on the line are not numeric,
 the line is ignored.  (Just like a comment.)
+
 @smallexample
                           # This is an ordinary comment.
 # 42-6 "new_file_name"    # New logical file name
@@ -1410,7 +1426,7 @@ this character, because an unescaped @samp{"} would end the string.
 
 @item \ @var{anything-else}
 Any other character when escaped by @kbd{\} gives a warning, but
-assemble as if the @samp{\} was not present.  The idea is that if
+assembles as if the @samp{\} was not present.  The idea is that if
 you used an escape sequence you clearly didn't want the literal
 interpretation of the following character.  However @code{@value{AS}} has no
 other interpretation, so @code{@value{AS}} knows it is giving you the wrong
@@ -1761,11 +1777,9 @@ nature.
 (For some object formats, such as SOM for the HPPA, some expressions are
 symbol-relative instead.)
 @end ifset
-@dfn{Absolute expression} means an expression with section
-``absolute'' (@pxref{Ld Sections}).  A @dfn{pass1 expression} means
-an expression with section ``pass1'' (@pxref{As Sections,,@value{AS}
-Internal Sections}).  In this manual we use the notation @{@var{secname}
-@var{N}@} to mean ``offset @var{N} into section @var{secname}''.
+
+In this manual we use the notation @{@var{secname} @var{N}@} to mean ``offset
+@var{N} into section @var{secname}.''
 
 Apart from text, data and bss sections you need to know about the
 @dfn{absolute} section.  When @code{@value{LD}} mixes partial programs,
@@ -2394,6 +2408,13 @@ Language Reference Manual} (HP 92432-90001) under the @code{IMPORT} and
 An @dfn{expression} specifies an address or numeric value.
 Whitespace may precede and/or follow an expression.
 
+The result of an expression must be an absolute number, or else an offset into
+a particular section.  If an expression is not absolute, and there is not
+enough information when @code{@value{AS}} sees the expression to know its
+section, a second pass over the source program might be necessary to interpret
+the expression---but the second pass is currently not implemented.
+@code{@value{AS}} aborts with an error message in this situation.
+
 @menu
 * Empty Exprs::                 Empty Expressions
 * Integer Exprs::               Integer Expressions
@@ -2554,10 +2575,9 @@ Lowest Precedence
 @cindex addition, permitted arguments
 @cindex plus, permitted arguments
 @cindex arguments for addition
-@dfn{Addition}.  If either argument is absolute, the result
-has the section of the other argument.
-If either argument is pass1 or undefined, the result is pass1.
-Otherwise @code{+} is illegal.
+@dfn{Addition}.  If either argument is absolute, the result has the section of
+the other argument.  You may not add together arguments from different
+sections.
 
 @item -
 @cindex subtraction, permitted arguments
@@ -2565,19 +2585,14 @@ Otherwise @code{+} is illegal.
 @cindex arguments for subtraction
 @dfn{Subtraction}.  If the right argument is absolute, the
 result has the section of the left argument.
-If either argument is pass1 the result is pass1.
-If either argument is undefined the result is difference section.
-If both arguments are in the same section, the result is absolute---provided
-that section is one of text, data or bss.
-Otherwise subtraction is illegal.
+If both arguments are in the same section, the result is absolute.
+You may not subtract arguments from different sections.
+@c FIXME is there still something useful to say about undefined - undefined ?
 @end table
 @end enumerate
 
-The sense of the rule for addition is that it's only meaningful to add
-the @emph{offsets} in an address; you can only have a defined section in
-one of the two arguments.
-
-Similarly, you can't subtract quantities from two different sections.
+In short, it's only meaningful to add or subtract the @emph{offsets} in an
+address; you can only have a defined section in one of the two arguments.
 
 @node Pseudo Ops
 @chapter Assembler Directives
@@ -3322,7 +3337,7 @@ backwards.
 @c double negative used below "not undefined" because this is a specific
 @c reference to "undefined" (as SEG_UNKNOWN is called in this manual)
 @c section. pesch@cygnus.com 18feb91
-Because @code{@value{AS}} tries to assemble programs in one pass @var{new-lc}
+Because @code{@value{AS}} tries to assemble programs in one pass, @var{new-lc}
 may not be undefined.  If you really detest this restriction we eagerly await
 a chance to share your improved assembler.
 
@@ -3433,10 +3448,6 @@ changes @var{symbol}'s value and type to conform to
 flagged. (@xref{Symbol Attributes}.)
 
 You may @code{.set} a symbol many times in the same assembly.
-If the expression's section is unknowable during pass 1, a second
-pass over the source program is necessary.  The second pass is
-currently not implemented.  @code{@value{AS}} aborts with an error
-message if one is required.
 
 If you @code{.set} a global symbol, the value stored in the object
 file is the last value stored into it.
@@ -5524,14 +5535,13 @@ by the selected architecture cause fatal errors.
 @samp{-ACA} is equivalent to @samp{-ACA_A}; @samp{-AKC} is equivalent to
 @samp{-AMC}.  Synonyms are provided for compatibility with other tools.
 
-If none of these options is specified, @code{@value{AS}} generates code for any
-instruction or feature that is supported by @emph{some} version of the
+If you do not specify any of these options, @code{@value{AS}} generates code
+for any instruction or feature that is supported by @emph{some} version of the
 960 (even if this means mixing architectures!).  In principle,
-@code{@value{AS}} attempts to deduce the minimal sufficient processor
-type if none is specified; depending on the object code format, the
-processor type may be recorded in the object file.  If it is critical
-that the @code{@value{AS}} output match a specific architecture, specify that
-architecture explicitly.
+@code{@value{AS}} attempts to deduce the minimal sufficient processor type if
+none is specified; depending on the object code format, the processor type may
+be recorded in the object file.  If it is critical that the @code{@value{AS}}
+output match a specific architecture, specify that architecture explicitly.
 
 @item -b
 @cindex @code{-b} option, i960
@@ -5819,7 +5829,7 @@ symbols.  If you do not use the @samp{-l} option, references to undefined
 symbols are wide enough for a full @code{long} (32 bits).  (Since
 @code{@value{AS}} cannot know where these symbols end up, @code{@value{AS}} can
 only allocate space for the linker to fill in later.  Since @code{@value{AS}}
-doesn't know how far away these symbols are, it allocates as much space as it
+does not know how far away these symbols are, it allocates as much space as it
 can.)  If you use this option, the references are only one word wide (16 bits).
 This may be useful if you want the object file to be as small as possible, and
 you know that the relevant symbols are always less than 17 bits away.
@@ -7129,20 +7139,22 @@ set addr(rd),imm4       subl rrd,addr(rs)
 @sc{gnu} @code{@value{AS}} for @sc{mips} architectures supports the @sc{mips}
 @sc{r2000}, @sc{r3000}, @sc{r4000} and @sc{r6000} processors.  For information
 about the @sc{mips} instruction set, see @cite{MIPS RISC Architecture}, by Kane
-and Heindrich (Prentice-Hall).
+and Heindrich (Prentice-Hall).  For an overview of @sc{mips} assembly
+conventions, see ``Appendix D: Assembly Language Programming'' in the same
+work.
 
 @menu
-* MIPS Opts::	Assembler options
-* MIPS Object::	ECOFF object code
-* MIPS Stabs::	Directives for debugging information
-* MIPS ISA:: Directives to override the ISA level
+* MIPS Opts::   Assembler options
+* MIPS Object:: ECOFF object code
+* MIPS Stabs::  Directives for debugging information
+* MIPS ISA::    Directives to override the ISA level
 @end menu
 
 @node MIPS Opts
 @section Assembler options
 
-The @sc{mips} configurations of @sc{gnu} @code{@value{AS}} support three
-special options, and accept one other for command-line compatibility.
+The @sc{mips} configurations of @sc{gnu} @code{@value{AS}} support these
+special options:
 
 @table @code
 @cindex @code{-G} option (MIPS)
@@ -7164,12 +7176,37 @@ little-endian output at run time (unlike the other @sc{gnu} development
 tools, which must be configured for one or the other).  Use @samp{-EB}
 to select big-endian output, and @samp{-EL} for little-endian.
 
+@cindex MIPS architecture options
+@item -mips1
+@itemx -mips2
+@itemx -mips3
+Generate code for a particular MIPS Instruction Set Architecture level.
+@samp{-mips1} corresponds to the @sc{r2000} and @sc{r3000} processors,
+@samp{-mips2} to the @sc{r6000} processor, and @samp{-mips3} to the @sc{r4000}
+processor.  You can also switch instruction sets during the assembly; see
+@ref{MIPS ISA,, Directives to override the ISA level}.
+
 @cindex @code{-nocpp} ignored (MIPS)
 @item -nocpp
 This option is ignored.  It is accepted for command-line compatibility with
 other assemblers, which use it to turn off C style preprocessing.  With
 @sc{gnu} @code{@value{AS}}, there is no need for @samp{-nocpp}, because the
 @sc{gnu} assembler itself never runs the C preprocessor.
+
+@item --trap
+@itemx --no-break
+@c FIXME!  (1) reflect these options (next item too) in option summaries;
+@c         (2) stop teasing, say _which_ instructions expanded _how_.
+@code{@value{AS}} automatically macro expands certain division and
+multiplication instructions to check for overflow and division by zero.  This
+option causes @code{@value{AS}} to generate code to take a trap exception
+rather than a break exception when an error is detected.  The trap instructions
+are only supported at Instruction Set Architecture level 2 and higher.
+
+@item --break
+@itemx --no-trap
+Generate code to take a break exception rather than a trap exception when an
+error is detected.  This is the default.
 @end table
 
 @node MIPS Object
@@ -7223,17 +7260,19 @@ assembly language programmers!
 @section Directives to override the ISA level
 
 @cindex MIPS ISA override
-@sc{mips} @code{@value{AS}} supports an additional directive to change the
-@sc{mips} Instruction Set Architecture level on the fly.  This is not supported
-by traditional @sc{mips} assemblers.  The directive is @code{.set mips@var{N}}.
-@var{N} should be a number from 0 to 3.  A value from 1 to 3 will cause gas to
-start accepting instructions for the given ISA level; this affects not only
+@kindex @code{.set mips@var{n}}
+@sc{gnu} @code{@value{AS}} supports an additional directive to change the
+@sc{mips} Instruction Set Architecture level on the fly: @code{.set
+mips@var{n}}.  @var{n} should be a number from 0 to 3.  A value from 1 to 3
+makes the assembler accept instructions for the corresponding @sc{isa} level,
+from that point on in the assembly.  @code{.set mips@var{n}} affects not only
 which instructions are permitted, but also how certain macros are expanded.
-@code{.set mips0} will set the ISA level back to that set by the command line
-options, if any, or otherwise to the default for the configuration.  This
-feature may be used to permit specific r4000 instructions while assembling in
-32 bit mode.  It must be used with care.
+@code{.set mips0} restores the @sc{isa} level to its original level: either the
+level you selected with command line options, or the default for your
+configuration.  You can use this feature to permit specific @sc{r4000}
+instructions while assembling in 32 bit mode.  Use this directive with care!
 
+Traditional @sc{mips} assemblers do not support this directive.  
 @end ifset
 
 @ifset GENERIC
