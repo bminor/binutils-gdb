@@ -2834,7 +2834,7 @@ The output section name @samp{/DISCARD/} is special; @ref{Output Section
 Discarding}.
 
 @node Output Section Address
-@subsection Output Section Description
+@subsection Output Section Address
 @cindex address, section
 @cindex section address
 The @var{address} is an expression for the VMA (the virtual memory
