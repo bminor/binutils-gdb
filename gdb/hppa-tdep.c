@@ -44,22 +44,6 @@
 #include "frame-unwind.h"
 #include "frame-base.h"
 
-#ifdef USG
-#include <sys/types.h>
-#endif
-
-#include <sys/param.h>
-#include <signal.h>
-
-#include <sys/ptrace.h>
-
-#ifdef COFF_ENCAPSULATE
-#include "a.out.encap.h"
-#else
-#endif
-
-/*#include <sys/user.h>         After a.out.h  */
-#include <sys/file.h>
 #include "gdb_stat.h"
 #include "gdb_wait.h"
 
