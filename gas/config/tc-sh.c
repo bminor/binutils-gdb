@@ -3241,10 +3241,16 @@ sh_force_relocation (fix)
   if (sh_local_pcrel (fix))
     return 0;
 
+  /* Make sure some relocations get emitted.  */
   if (fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY
       || fix->fx_r_type == BFD_RELOC_SH_LOOP_START
       || fix->fx_r_type == BFD_RELOC_SH_LOOP_END
+      || fix->fx_r_type == BFD_RELOC_SH_TLS_GD_32
+      || fix->fx_r_type == BFD_RELOC_SH_TLS_LD_32
+      || fix->fx_r_type == BFD_RELOC_SH_TLS_IE_32
+      || fix->fx_r_type == BFD_RELOC_SH_TLS_LDO_32
+      || fix->fx_r_type == BFD_RELOC_SH_TLS_LE_32
       || S_FORCE_RELOC (fix->fx_addsy))
     return 1;
 
@@ -3546,11 +3552,16 @@ md_apply_fix3 (fixP, valP, seg)
 
     case BFD_RELOC_32_GOT_PCREL:
     case BFD_RELOC_SH_GOTPLT32:
+    case BFD_RELOC_SH_TLS_GD_32:
+    case BFD_RELOC_SH_TLS_LD_32:
+    case BFD_RELOC_SH_TLS_IE_32:
       * valP = 0; /* Fully resolved at runtime.  No addend.  */
       md_number_to_chars (buf, 0, 4);
       break;
 
     case BFD_RELOC_32_GOTOFF:
+    case BFD_RELOC_SH_TLS_LDO_32:
+    case BFD_RELOC_SH_TLS_LE_32:
       md_number_to_chars (buf, val, 4);
       break;
 #endif
@@ -4015,6 +4026,16 @@ sh_parse_name (name, exprP, nextcharP)
     reloc_type = BFD_RELOC_32_GOT_PCREL;
   else if ((next_end = sh_end_of_match (next + 1, "PLT")))
     reloc_type = BFD_RELOC_32_PLT_PCREL;
+  else if ((next_end = sh_end_of_match (next + 1, "TLSGD")))
+    reloc_type = BFD_RELOC_SH_TLS_GD_32;
+  else if ((next_end = sh_end_of_match (next + 1, "TLSLDM")))
+    reloc_type = BFD_RELOC_SH_TLS_LD_32;
+  else if ((next_end = sh_end_of_match (next + 1, "GOTTPOFF")))
+    reloc_type = BFD_RELOC_SH_TLS_IE_32;
+  else if ((next_end = sh_end_of_match (next + 1, "TPOFF")))
+    reloc_type = BFD_RELOC_SH_TLS_LE_32;
+  else if ((next_end = sh_end_of_match (next + 1, "DTPOFF")))
+    reloc_type = BFD_RELOC_SH_TLS_LDO_32;
   else
     goto no_suffix;
 

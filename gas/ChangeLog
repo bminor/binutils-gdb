@@ -1,3 +1,11 @@
+2002-10-11  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* config/tc-sh.c (sh_force_relocation): Make sure TLS relocs get
+	emitted.
+	(md_apply_fix3): Add TLS relocs.
+	(sh_parse_name): Support @TLSGD, @TLSLDM, @GOTTPOFF, @TPOFF and
+	@DTPOFF.
+
 2002-10-11  Michel Six  <msix@ccr.jussieu.fr>
 	    Alan Modra  <amodra@bigpond.net.au>
 
