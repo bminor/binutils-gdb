@@ -1,3 +1,13 @@
+Wed Mar 30 15:28:00 2000  Donald Lindsay  <dlindsay@cygnus.com>
+
+	* elf32-m32r.c (m32r_elf_generic_reloc): new function.  All
+	HOWTO references to bfd_elf_generic_reloc, that have
+	partial_inplace == true, now use the new function.  The function
+	is based on the recent rewrite of m32r_elf_lo16_reloc(), and
+	extends its fixes to the R_M32R_{16,24,32} relocs.
+	The new logic in m32r_elf_lo16_reloc() has been removed, and
+	it instead calls the new routine to obtain that functionality.
+
 2000-03-27  Alan Modra  <alan@linuxcare.com>
 
 	* elf32-avr.c (elf32_avr_gc_mark_hook, elf32_avr_gc_sweep_hook,

@@ -1,5 +1,5 @@
 /* M32R-specific support for 32-bit ELF.
-   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -34,6 +34,8 @@ static void m32r_elf_relocate_hi16
   PARAMS ((bfd *, int, Elf_Internal_Rela *, Elf_Internal_Rela *,
 	   bfd_byte *, bfd_vma));
 bfd_reloc_status_type m32r_elf_lo16_reloc
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+bfd_reloc_status_type m32r_elf_generic_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_reloc_status_type m32r_elf_sda16_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
@@ -105,7 +107,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 m32r_elf_generic_reloc,/* special_function */
 	 "R_M32R_16",		/* name */
 	 true,			/* partial_inplace */
 	 0xffff,		/* src_mask */
@@ -120,7 +122,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 m32r_elf_generic_reloc,/* special_function */
 	 "R_M32R_32",		/* name */
 	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
@@ -135,7 +137,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_unsigned, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 m32r_elf_generic_reloc,/* special_function */
 	 "R_M32R_24",		/* name */
 	 true,			/* partial_inplace */
 	 0xffffff,		/* src_mask */
@@ -508,10 +510,6 @@ m32r_elf_lo16_reloc (input_bfd, reloc_entry, symbol, data,
      bfd *output_bfd;
      char **error_message;
 {
-  bfd_reloc_status_type ret;
-  bfd_vma relocation;
-  unsigned long insn;
-
   /* This part is from bfd_elf_generic_reloc.
      If we're relocating, and this an external symbol, we don't want
      to change anything.  */
@@ -564,6 +562,44 @@ m32r_elf_lo16_reloc (input_bfd, reloc_entry, symbol, data,
      but we have partial_inplace == TRUE.  bfd_elf_generic_reloc will
      pass the handling back to bfd_install_relocation which will install
      a section relative addend which is wrong.  */
+  return m32r_elf_generic_reloc (input_bfd, reloc_entry, symbol, data,
+				input_section, output_bfd, error_message);
+}
+
+/* Do generic partial_inplace relocation.  
+   This is a local replacement for bfd_elf_generic_reloc. */
+
+bfd_reloc_status_type
+m32r_elf_generic_reloc (input_bfd, reloc_entry, symbol, data,
+		     input_section, output_bfd, error_message)
+     bfd *input_bfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message;
+{
+  bfd_reloc_status_type ret;
+  bfd_vma relocation;
+  bfd_byte *inplace_address;
+
+  /* This part is from bfd_elf_generic_reloc.
+     If we're relocating, and this an external symbol, we don't want
+     to change anything.  */
+  if (output_bfd != (bfd *) NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && reloc_entry->addend == 0)
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  /* Now do the the reloc in the usual way.
+     ??? It would be nice to call bfd_elf_generic_reloc here,
+     but we have partial_inplace == TRUE.  bfd_elf_generic_reloc will
+     pass the handling back to bfd_install_relocation which will install
+     a section relative addend which is wrong.  */
 
   /* Sanity check the address (offset in section).  */
   if (reloc_entry->address > input_section->_cooked_size)
@@ -588,10 +624,32 @@ m32r_elf_lo16_reloc (input_bfd, reloc_entry, symbol, data,
     }
 
   relocation += reloc_entry->addend;
+  inplace_address = data + reloc_entry->address;
 
-  insn = bfd_get_32 (input_bfd, data + reloc_entry->address);
-  insn = (insn & 0xffff0000) | (relocation & 0xffff);
-  bfd_put_32 (input_bfd, insn, data + reloc_entry->address);
+#define DOIT(x) 					\
+  x = ( (x & ~reloc_entry->howto->dst_mask) | 		\
+  (((x & reloc_entry->howto->src_mask) +  relocation) &	\
+  reloc_entry->howto->dst_mask))
+
+  switch (reloc_entry->howto->size)
+    {
+    case 1:
+      {
+	short x = bfd_get_16 (input_bfd, inplace_address);
+	DOIT (x);
+      	bfd_put_16 (input_bfd, x, inplace_address);
+      }
+      break;
+    case 2:
+      {
+	unsigned long x = bfd_get_32 (input_bfd, inplace_address);
+	DOIT (x);
+      	bfd_put_32 (input_bfd, x, inplace_address);
+      }
+      break;
+    default:
+      BFD_ASSERT (0);
+    }
 
   if (output_bfd != (bfd *) NULL)
     reloc_entry->address += input_section->output_offset;
