@@ -1,3 +1,8 @@
+2002-08-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-discard/discard.exp: xfail targets using generic linker.
+	* ld-discard/extern.d: Allow "data" to be reduced to a section sym.
+
 2002-08-15  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/libdso-4.d, ld-cris/undef1.d: New test.
