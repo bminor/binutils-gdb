@@ -256,7 +256,7 @@ struct xcoff_link_hash_entry
 	 set), this is the offset in toc_section.  */
       bfd_vma toc_offset;
       /* If the TOC entry comes from an input file, this is set to the
-         symbo lindex of the C_HIDEXT XMC_TC symbol.  */
+         symbol index of the C_HIDEXT XMC_TC or XMC_TD symbol.  */
       long toc_indx;
     } u;
 
@@ -1202,7 +1202,10 @@ xcoff_link_check_ar_symbols (abfd, info, pneeded)
 	     defines it.  We also don't bring in symbols to satisfy
 	     undefined references in shared objects.  */
 	  if (h != (struct bfd_link_hash_entry *) NULL
-	      && h->type == bfd_link_hash_undefined)
+	      && h->type == bfd_link_hash_undefined
+	      && (info->hash->creator != abfd->xvec
+		  || (((struct xcoff_link_hash_entry *) h)->flags
+		      & XCOFF_DEF_DYNAMIC) == 0))
 	    {
 	      if (! (*info->callbacks->add_archive_element) (info, abfd, name))
 		return false;
@@ -1278,8 +1281,12 @@ xcoff_link_check_dynamic_ar_symbols (abfd, info, pneeded)
       h = bfd_link_hash_lookup (info->hash, name, false, false, true);
 
       /* We are only interested in symbols that are currently
-         undefined.  */
-      if (h != NULL && h->type == bfd_link_hash_undefined)
+         undefined.  At this point we know that we are using an XCOFF
+         hash table.  */
+      if (h != NULL
+	  && h->type == bfd_link_hash_undefined
+	  && (((struct xcoff_link_hash_entry *) h)->flags
+	      & XCOFF_DEF_DYNAMIC) == 0)
 	{
 	  if (! (*info->callbacks->add_archive_element) (info, abfd, name))
 	    return false;
@@ -1402,65 +1409,71 @@ xcoff_link_add_symbols (abfd, info)
 	return false;
     }
 
-  /* We need to build a .loader section, so we do it here.  This won't
-     work if we're producing an XCOFF output file with no XCOFF input
-     files.  FIXME.  */
-  if (xcoff_hash_table (info)->loader_section == NULL)
+  if (info->hash->creator == abfd->xvec)
     {
-      asection *lsec;
+      /* We need to build a .loader section, so we do it here.  This
+	 won't work if we're producing an XCOFF output file with no
+	 XCOFF input files.  FIXME.  */
+      if (xcoff_hash_table (info)->loader_section == NULL)
+	{
+	  asection *lsec;
 
-      lsec = bfd_make_section_anyway (abfd, ".loader");
-      if (lsec == NULL)
-	goto error_return;
-      xcoff_hash_table (info)->loader_section = lsec;
-      lsec->flags |= SEC_HAS_CONTENTS | SEC_IN_MEMORY;
-    }
-  /* Likewise for the linkage section.  */
-  if (xcoff_hash_table (info)->linkage_section == NULL)
-    {
-      asection *lsec;
+	  lsec = bfd_make_section_anyway (abfd, ".loader");
+	  if (lsec == NULL)
+	    goto error_return;
+	  xcoff_hash_table (info)->loader_section = lsec;
+	  lsec->flags |= SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+	}
+      /* Likewise for the linkage section.  */
+      if (xcoff_hash_table (info)->linkage_section == NULL)
+	{
+	  asection *lsec;
 
-      lsec = bfd_make_section_anyway (abfd, ".gl");
-      if (lsec == NULL)
-	goto error_return;
-      xcoff_hash_table (info)->linkage_section = lsec;
-      lsec->flags |= SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
-      lsec->alignment_power = 2;
-    }
-  /* Likewise for the TOC section.  */
-  if (xcoff_hash_table (info)->toc_section == NULL)
-    {
-      asection *tsec;
+	  lsec = bfd_make_section_anyway (abfd, ".gl");
+	  if (lsec == NULL)
+	    goto error_return;
+	  xcoff_hash_table (info)->linkage_section = lsec;
+	  lsec->flags |= (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
+			  | SEC_IN_MEMORY);
+	  lsec->alignment_power = 2;
+	}
+      /* Likewise for the TOC section.  */
+      if (xcoff_hash_table (info)->toc_section == NULL)
+	{
+	  asection *tsec;
 
-      tsec = bfd_make_section_anyway (abfd, ".tc");
-      if (tsec == NULL)
-	goto error_return;
-      xcoff_hash_table (info)->toc_section = tsec;
-      tsec->flags |= SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
-      tsec->alignment_power = 2;
-    }
-  /* Likewise for the descriptor section.  */
-  if (xcoff_hash_table (info)->descriptor_section == NULL)
-    {
-      asection *dsec;
+	  tsec = bfd_make_section_anyway (abfd, ".tc");
+	  if (tsec == NULL)
+	    goto error_return;
+	  xcoff_hash_table (info)->toc_section = tsec;
+	  tsec->flags |= (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
+			  | SEC_IN_MEMORY);
+	  tsec->alignment_power = 2;
+	}
+      /* Likewise for the descriptor section.  */
+      if (xcoff_hash_table (info)->descriptor_section == NULL)
+	{
+	  asection *dsec;
 
-      dsec = bfd_make_section_anyway (abfd, ".ds");
-      if (dsec == NULL)
-	goto error_return;
-      xcoff_hash_table (info)->descriptor_section = dsec;
-      dsec->flags |= SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
-      dsec->alignment_power = 2;
-    }
-  /* Likewise for the .debug section.  */
-  if (xcoff_hash_table (info)->debug_section == NULL)
-    {
-      asection *dsec;
+	  dsec = bfd_make_section_anyway (abfd, ".ds");
+	  if (dsec == NULL)
+	    goto error_return;
+	  xcoff_hash_table (info)->descriptor_section = dsec;
+	  dsec->flags |= (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
+			  | SEC_IN_MEMORY);
+	  dsec->alignment_power = 2;
+	}
+      /* Likewise for the .debug section.  */
+      if (xcoff_hash_table (info)->debug_section == NULL)
+	{
+	  asection *dsec;
 
-      dsec = bfd_make_section_anyway (abfd, ".debug");
-      if (dsec == NULL)
-	goto error_return;
-      xcoff_hash_table (info)->debug_section = dsec;
-      dsec->flags |= SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+	  dsec = bfd_make_section_anyway (abfd, ".debug");
+	  if (dsec == NULL)
+	    goto error_return;
+	  xcoff_hash_table (info)->debug_section = dsec;
+	  dsec->flags |= SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+	}
     }
 
   if ((abfd->flags & DYNAMIC) != 0
@@ -2069,7 +2082,8 @@ xcoff_link_add_symbols (abfd, info)
 
       /* Check for magic symbol names.  */
       if ((smtyp == XTY_SD || smtyp == XTY_CM)
-	  && aux.x_csect.x_smclas != XMC_TC)
+	  && aux.x_csect.x_smclas != XMC_TC
+	  && aux.x_csect.x_smclas != XMC_TD)
 	{
 	  int i;
 
@@ -2130,7 +2144,14 @@ xcoff_link_add_symbols (abfd, info)
 		  && ! bfd_is_und_section (section)
 		  && ! bfd_is_com_section (section))
 		{
-		  if ((abfd->flags & DYNAMIC) != 0)
+		  /* If the existing symbol is to global linkage code,
+                     and this symbol is not global linkage code, then
+                     replace the existing symbol.  */
+		  if ((abfd->flags & DYNAMIC) != 0
+		      && ((*sym_hash)->smclas != XMC_GL
+			  || aux.x_csect.x_smclas == XMC_GL
+			  || ((*sym_hash)->root.u.def.section->owner->flags
+			      & DYNAMIC) == 0))
 		    {
 		      section = bfd_und_section_ptr;
 		      value = 0;
@@ -2207,7 +2228,7 @@ xcoff_link_add_symbols (abfd, info)
   /* Make sure that we have seen all the relocs.  */
   for (o = abfd->sections; o != first_csect; o = o->next)
     {
-      /* Reset the section size and the line numebr count, since the
+      /* Reset the section size and the line number count, since the
 	 data is now attached to the csects.  Don't reset the size of
 	 the .debug section, since we need to read it below in
 	 bfd_xcoff_size_dynamic_sections.  */
@@ -5112,12 +5133,13 @@ xcoff_link_input_bfd (finfo, input_bfd)
 	      if (r_symndx != -1)
 		{
 		  h = obj_xcoff_sym_hashes (input_bfd)[r_symndx];
-		  if  (h != NULL
-		       && (irel->r_type == R_TOC
-			   || irel->r_type == R_GL
-			   || irel->r_type == R_TCL
-			   || irel->r_type == R_TRL
-			   || irel->r_type == R_TRLA))
+		  if (h != NULL
+		      && h->smclas != XMC_TD
+		      && (irel->r_type == R_TOC
+			  || irel->r_type == R_GL
+			  || irel->r_type == R_TCL
+			  || irel->r_type == R_TRL
+			  || irel->r_type == R_TRLA))
 		    {
 		      /* This is a TOC relative reloc with a symbol
                          attached.  The symbol should be the one which
@@ -6128,21 +6150,23 @@ _bfd_ppc_xcoff_relocate_section (output_bfd, info, input_bfd,
              address instruction which may be changed to a load
              instruction.  FIXME: I don't know if this is the correct
              implementation.  */
-	  if (h != NULL && h->toc_section == NULL)
+	  if (h != NULL && h->smclas != XMC_TD)
 	    {
-	      (*_bfd_error_handler)
-		("%s: TOC reloc at 0x%x to symbol `%s' with no TOC entry",
-		 bfd_get_filename (input_bfd), rel->r_vaddr,
-		 h->root.root.string);
-	      bfd_set_error (bfd_error_bad_value);
-	      return false;
-	    }
-	  if (h != NULL)
-	    {
+	      if (h->toc_section == NULL)
+		{
+		  (*_bfd_error_handler)
+		    ("%s: TOC reloc at 0x%x to symbol `%s' with no TOC entry",
+		     bfd_get_filename (input_bfd), rel->r_vaddr,
+		     h->root.root.string);
+		  bfd_set_error (bfd_error_bad_value);
+		  return false;
+		}
+
 	      BFD_ASSERT ((h->flags & XCOFF_SET_TOC) == 0);
 	      val = (h->toc_section->output_section->vma
 		     + h->toc_section->output_offset);
 	    }
+
 	  val = ((val - xcoff_data (output_bfd)->toc)
 		 - (sym->n_value - xcoff_data (input_bfd)->toc));
 	  addend = 0;

@@ -1,3 +1,12 @@
+Thu Jul 18 15:39:10 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* xcofflink.c (xcoff_link_add_symbols): Don't check an XMC_TD
+	symbol for a magic name.
+	(xcoff_link_input_bfd): Don't change the reloc symbol for an
+	XMC_TD symbol.
+	(_bfd_ppc_xcoff_relocate_section): Don't get the TOC offset for an
+	XMC_TD symbol.
+
 Thu Jul 18 11:36:31 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-config.in: Add ELF support to mips config, create the
