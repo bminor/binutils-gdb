@@ -20,7 +20,6 @@ You should have received a copy of the GNU General Public License
 along with GDB; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-
 #include <stdio.h>
 #include "defs.h"
 #include "param.h"
@@ -28,8 +27,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "breakpoint.h"
 #include "bfd.h"
 #include "symfile.h"
-
-#ifndef NO_COFF
 
 #if defined (TDESC)
 /* Need to get C_VERSION and friends.  */
@@ -75,6 +72,11 @@ extern void free_all_psymtabs ();
 
 /* external routines from the BFD library -- undocumented interface used
    by GDB to read symbols.  Move to libcoff.h.  FIXME-SOMEDAY!  */
+extern void bfd_coff_swap_sym_in (/* symfile_bfd, &sym */);
+extern void bfd_coff_swap_aux_in (/* symfile_bfd, &aux, type, sclass */);
+extern void bfd_coff_swap_lineno_in (/* symfile_bfd, &lineno */);
+extern void bfd_coff_swap_scnhdr_in (/* bfd, scnhdr_ext, scnhdr_int */);
+
 extern void bfd_coff_swap_sym (/* symfile_bfd, &sym */);
 extern void bfd_coff_swap_aux (/* symfile_bfd, &aux, type, sclass */);
 extern void bfd_coff_swap_lineno (/* symfile_bfd, &lineno */);
@@ -812,11 +814,11 @@ read_coff_symtab (desc, nsyms)
   register struct context_stack *new;
   struct coff_symbol coff_symbol;
   register struct coff_symbol *cs = &coff_symbol;
-  static SYMENT main_sym;
-  static AUXENT main_aux;
+  static struct internal_syment main_sym;
+  static union internal_auxent main_aux;
   struct coff_symbol fcn_cs_saved;
-  static SYMENT fcn_sym_saved;
-  static AUXENT fcn_aux_saved;
+  static struct internal_syment fcn_sym_saved;
+  static union internal_auxent fcn_aux_saved;
 
   /* A .file is open.  */
   int in_source_file = 0;
@@ -1168,28 +1170,32 @@ read_file_hdr (chan, file_hdr)
 }
 #endif
 
+/* Read the next symbol, swap it, and return it in both internal_syment
+   form, and coff_symbol form.  Also return its first auxent, if any,
+   in internal_auxent form, and skip any other auxents.  */
 
 static void
 read_one_sym (cs, sym, aux)
     register struct coff_symbol *cs;
-    register SYMENT *sym;
-    register AUXENT *aux;
+    register struct internal_syment *sym;
+    register union internal_auxent *aux;
 {
-  AUXENT temp_aux;
+  struct external_syment temp_sym[1];
+  union external_auxent temp_aux[1];
   int i;
 
   cs->c_symnum = symnum;
-  fread ((char *)sym, SYMESZ, 1, nlist_stream_global);
-  bfd_coff_swap_sym (symfile_bfd, sym);
+  fread ((char *)temp_sym, SYMESZ, 1, nlist_stream_global);
+  bfd_coff_swap_sym_in (symfile_bfd, temp_sym, sym);
   cs->c_nsyms = (sym->n_numaux & 0xff) + 1;
   if (cs->c_nsyms >= 2)
     {
-    fread ((char *)aux, AUXESZ, 1, nlist_stream_global);
-    bfd_coff_swap_aux (symfile_bfd, aux, sym->n_type, sym->n_sclass);
+    fread ((char *)temp_aux, AUXESZ, 1, nlist_stream_global);
+    bfd_coff_swap_aux_in (symfile_bfd, temp_aux, sym->n_type, sym->n_sclass, aux);
     /* If more than one aux entry, read past it (only the first aux
        is important). */
     for (i = 2; i < cs->c_nsyms; i++)
-      fread ((char *)&temp_aux, AUXESZ, 1, nlist_stream_global);
+      fread ((char *)temp_aux, AUXESZ, 1, nlist_stream_global);
     }
   cs->c_name = getsymname (sym);
   cs->c_value = sym->n_value;
@@ -1225,7 +1231,7 @@ init_stringtab (chan, offset)
     return -1;
 
   val = myread (chan, (char *)lengthbuf, sizeof lengthbuf);
-  length = bfd_h_getlong (symfile_bfd, lengthbuf);
+  length = bfd_h_get_32 (symfile_bfd, lengthbuf);
 
   /* If no string table is needed, then the file may end immediately
      after the symbols.  Just return with `stringtab' set to null. */
@@ -1257,18 +1263,18 @@ free_stringtab ()
 
 static char *
 getsymname (symbol_entry)
-    SYMENT *symbol_entry;
+    struct internal_syment *symbol_entry;
 {
   static char buffer[SYMNMLEN+1];
   char *result;
 
-  if (symbol_entry->n_zeroes == 0)
+  if (symbol_entry->_n._n_n._n_zeroes == 0)
     {
-      result = stringtab + symbol_entry->n_offset;
+      result = stringtab + symbol_entry->_n._n_n._n_offset;
     }
   else
     {
-      strncpy (buffer, symbol_entry->n_name, SYMNMLEN);
+      strncpy (buffer, symbol_entry->_n._n_name, SYMNMLEN);
       buffer[SYMNMLEN] = '\0';
       result = buffer;
     }
@@ -1277,7 +1283,7 @@ getsymname (symbol_entry)
 
 static char *
 getfilename (aux_entry)
-    AUXENT *aux_entry;
+    union internal_auxent *aux_entry;
 {
   static char buffer[BUFSIZ];
   register char *temp;
@@ -1315,7 +1321,9 @@ static char *linetab = NULL;
 static long linetab_offset;
 static unsigned long linetab_size;
 
-/* Read in all the line numbers for fast lookups later.  */
+/* Read in all the line numbers for fast lookups later.  Leave them in
+   external (unswapped) format in memory; we'll swap them as we enter
+   them into GDB's data structures.  */
  
 static int
 init_lineno (chan, offset, size)
@@ -1324,7 +1332,6 @@ init_lineno (chan, offset, size)
     int size;
 {
   int val;
-  register char *p, *q;
 
   if (lseek (chan, offset, 0) < 0)
     return -1;
@@ -1334,11 +1341,6 @@ init_lineno (chan, offset, size)
   val = myread (chan, linetab, size);
   if (val != size)
     return -1;
-
-  /* Swap all entries */
-  q = linetab + size;
-  for (p = linetab; p < q; p += LINESZ)
-    bfd_coff_swap_lineno (symfile_bfd, (LINENO *)p);
 
   linetab_offset = offset;
   linetab_size = size;
@@ -1357,7 +1359,7 @@ enter_linenos (file_offset, first_line, last_line)
     register int last_line;
 {
   register char *rawptr;
-  struct lineno lptr;
+  struct internal_lineno lptr;
 
   if (file_offset < linetab_offset)
     {
@@ -1374,14 +1376,14 @@ enter_linenos (file_offset, first_line, last_line)
   /* line numbers start at one for the first line of the function */
   first_line--;
 
-  /* Bcopy since occaisionally rawptr isn't pointing at long
-     boundaries.  */  
-  for (bcopy (rawptr, &lptr, LINESZ);
-       L_LNNO32 (&lptr) && L_LNNO32 (&lptr) <= last_line;
-       rawptr += LINESZ, bcopy (rawptr, &lptr, LINESZ))
-    {
+  for (;;) {
+    bfd_coff_swap_lineno_in (symfile_bfd, (LINENO *)rawptr, &lptr);
+    rawptr += LINESZ;
+    if (L_LNNO32 (&lptr) && L_LNNO32 (&lptr) <= last_line)
       record_line (first_line + L_LNNO32 (&lptr), lptr.l_addr.l_paddr);
-    }
+    else
+      break;
+  } 
 }
 
 static int
@@ -1499,7 +1501,7 @@ patch_opaque_types ()
 static struct symbol *
 process_coff_symbol (cs, aux)
      register struct coff_symbol *cs;
-     register AUXENT *aux;
+     register union internal_auxent *aux;
 {
   register struct symbol *sym
     = (struct symbol *) obstack_alloc (symbol_obstack, sizeof (struct symbol));
@@ -1654,7 +1656,7 @@ struct type *
 decode_type (cs, c_type, aux)
      register struct coff_symbol *cs;
      unsigned int c_type;
-     register AUXENT *aux;
+     register union internal_auxent *aux;
 {
   register struct type *type = 0;
   unsigned int new_c_type;
@@ -1722,7 +1724,7 @@ struct type *
 decode_function_type (cs, c_type, aux)
      register struct coff_symbol *cs;
      unsigned int c_type;
-     register AUXENT *aux;
+     register union internal_auxent *aux;
 {
   if (aux->x_sym.x_tagndx == 0)
     cs->c_nsyms = 1;	/* auxent refers to function, not base type */
@@ -1737,7 +1739,7 @@ struct type *
 decode_base_type (cs, c_type, aux)
      register struct coff_symbol *cs;
      unsigned int c_type;
-     register AUXENT *aux;
+     register union internal_auxent *aux;
 {
   struct type *type;
 
@@ -1873,8 +1875,8 @@ read_struct_type (index, length, lastsym)
 #endif
   struct coff_symbol member_sym;
   register struct coff_symbol *ms = &member_sym;
-  SYMENT sub_sym;
-  AUXENT sub_aux;
+  struct internal_syment sub_sym;
+  union internal_auxent sub_aux;
   int done = 0;
 
   type = coff_alloc_type (index);
@@ -1957,8 +1959,8 @@ read_enum_type (index, length, lastsym)
   struct pending **symlist;
   struct coff_symbol member_sym;
   register struct coff_symbol *ms = &member_sym;
-  SYMENT sub_sym;
-  AUXENT sub_aux;
+  struct internal_syment sub_sym;
+  union internal_auxent sub_aux;
   struct pending *osyms, *syms;
   register int n;
   char *name;
@@ -2051,5 +2053,3 @@ _initialize_coffread ()
 {
   add_symtab_fns(&coff_sym_fns);
 }
-
-#endif /* NO_COFF */

@@ -1423,7 +1423,7 @@ dbx_symfile_init (sf)
   val = myread (desc, size_temp, sizeof (long));
   if (val < 0)
       perror_with_name (name);
-  info->stringtab_size = bfd_h_getlong (sym_bfd, size_temp);
+  info->stringtab_size = bfd_h_get_32 (sym_bfd, size_temp);
   
   if (info->stringtab_size >= 0 && info->stringtab_size < statbuf.st_size)
     {
@@ -1485,11 +1485,11 @@ fill_symbuf ()
 
 #define SWAP_SYMBOL(symp) \
   { \
-    (symp)->n_un.n_strx = bfd_h_getlong(symfile_bfd,			\
+    (symp)->n_un.n_strx = bfd_h_get_32(symfile_bfd,			\
 				(unsigned char *)&(symp)->n_un.n_strx);	\
-    (symp)->n_desc = bfd_h_getshort (symfile_bfd,			\
+    (symp)->n_desc = bfd_h_get_16 (symfile_bfd,			\
 				(unsigned char *)&(symp)->n_desc);  	\
-    (symp)->n_value = bfd_h_getlong (symfile_bfd,			\
+    (symp)->n_value = bfd_h_get_32 (symfile_bfd,			\
 				(unsigned char *)&(symp)->n_value); 	\
   }
 
@@ -2661,7 +2661,7 @@ dbx_psymtab_to_symtab (pst)
 	  val = myread (desc, &st_temp, sizeof st_temp);
 	  if (val < 0)
 	      perror_with_name (pst->symfile_name);
-	  stsize = bfd_h_getlong (sym_bfd, (unsigned char *)&st_temp);
+	  stsize = bfd_h_get_32 (sym_bfd, (unsigned char *)&st_temp);
 	  if (fstat (desc, &statbuf) < 0)
 	    perror_with_name (pst->symfile_name);
 	  
@@ -4535,6 +4535,7 @@ read_struct_type (pp, type)
 	{
 	  int i;
 	  struct next_fnfield *sublist = 0;
+	  struct type *look_ahead_type = NULL;
 	  int length = 0;
 	  struct next_fnfieldlist *new_mainlist =
 	    (struct next_fnfieldlist *)alloca (sizeof (struct next_fnfieldlist));
@@ -4575,12 +4576,20 @@ read_struct_type (pp, type)
 		(struct next_fnfield *)alloca (sizeof (struct next_fnfield));
 
 	      /* Check for and handle cretinous dbx symbol name continuation!  */
-	      if (**pp == '\\') *pp = next_symbol_text ();
+	      if (look_ahead_type == NULL) /* Normal case. */
+		{
+		  if (**pp == '\\') *pp = next_symbol_text ();
 
-	      new_sublist->fn_field.type = read_type (pp);
-	      if (**pp != ':')
-		/* Invalid symtab info for method.  */
-		return error_type (pp);
+		  new_sublist->fn_field.type = read_type (pp);
+		  if (**pp != ':')
+		    /* Invalid symtab info for method.  */
+		    return error_type (pp);
+	        }
+	      else
+		{ /* g++ version 1 kludge */
+		  new_sublist->fn_field.type = look_ahead_type;
+		  look_ahead_type = NULL;
+	        }
 
 	      *pp += 1;
 	      p = *pp;
@@ -4621,6 +4630,8 @@ read_struct_type (pp, type)
 		  new_sublist->fn_field.voffset =
 		      (0x7fffffff & read_number (pp, ';')) + 1;
 
+		  if (**pp == '\\') *pp = next_symbol_text ();
+
 		  if (**pp == ';' || **pp == '\0')
 		    /* Must be g++ version 1.  */
 		    new_sublist->fn_field.fcontext = 0;
@@ -4629,11 +4640,18 @@ read_struct_type (pp, type)
 		      /* Figure out from whence this virtual function came.
 			 It may belong to virtual function table of
 			 one of its baseclasses.  */
-		      new_sublist->fn_field.fcontext = read_type (pp);
-		      if (**pp != ';')
-			return error_type (pp);
+		      look_ahead_type = read_type (pp);
+		      if (**pp == ':')
+			{ /* g++ version 1 overloaded methods. */ }
 		      else
-			++*pp;
+			{
+			  new_sublist->fn_field.fcontext = look_ahead_type;
+			  if (**pp != ';')
+			    return error_type (pp);
+			  else
+			    ++*pp;
+			  look_ahead_type = NULL;
+		        }
 		    }
 		  break;
 
