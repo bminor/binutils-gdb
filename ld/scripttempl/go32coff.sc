@@ -14,7 +14,7 @@ SECTIONS
     *(.text)
     ${RELOCATING+ etext  =  .};
   }
-  .data ${RELOCATING+ ALIGN(${DATA_ALIGNMENT})} : {
+  .data ${RELOCATING+ ${DATA_ALIGNMENT}} : {
     ${RELOCATING+ *(.ctor)}
     ${RELOCATING+ *(.dtor)}
     *(.data)

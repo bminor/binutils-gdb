@@ -1,5 +1,8 @@
 Wed Jun 22 13:42:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* scripttempl/go32coff.sc: Don't put ${DATA_ALIGNMENT} inside an
+	ALIGN.
+
 	* ldlang.c (lang_size_sections): Adjust current region address
 	even for sections with an explicit address.  From
 	ralphc@pyramid.com (Ralph Campbell).
