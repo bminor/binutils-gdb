@@ -296,6 +296,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 /* dctr and dctw are used on the r5000.  */
 {"dctr",    "o(b)",	0xbc050000, 0xfc1f0000, RD_b,	I3	},
 {"dctw",    "o(b)",	0xbc090000, 0xfc1f0000, RD_b,	I3	},
+{"deret",   "",         0x4200001f, 0xffffffff,    0,	T3	},
 /* For ddiv, see the comments about div.  */
 {"ddiv",    "z,s,t",	0x0000001e, 0xfc00ffff, RD_s|RD_t|WR_HI|WR_LO,	I3	},
 {"ddiv",    "d,v,t",	3,    (int) M_DDIV_3,	INSN_MACRO	},
@@ -369,7 +370,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"dsub",    "d,v,I",	3,    (int) M_DSUB_I,	INSN_MACRO	},
 {"dsubu",   "d,v,t",	0x0000002f, 0xfc0007ff,	WR_d|RD_s|RD_t,	I3	},
 {"dsubu",   "d,v,I",	3,    (int) M_DSUBU_I,	INSN_MACRO	},
-{"eret",    "",		0x42000018, 0xffffffff,	I3	},
+{"eret",    "",		0x42000018, 0xffffffff,	0,	I3	},
 {"floor.l.d", "D,S",	0x4620000b, 0xffff003f, WR_D|RD_S|FP_D,	I3	},
 {"floor.l.s", "D,S",	0x4600000b, 0xffff003f, WR_D|RD_S|FP_S,	I3	},
 {"floor.w.d", "D,S",	0x4620000f, 0xffff003f, WR_D|RD_S|FP_D,	I2	},
@@ -561,15 +562,15 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"mulo",    "d,v,I",	0,    (int) M_MULO_I,	INSN_MACRO	},
 {"mulou",   "d,v,t",	0,    (int) M_MULOU,	INSN_MACRO	},
 {"mulou",   "d,v,I",	0,    (int) M_MULOU_I,	INSN_MACRO	},
-{"mult",    "s,t",	0x00000018, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	I1	},
-{"mult",    "d,s,t",	0x00000018, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, I1 },
+{"mult",    "s,t",	0x00000018, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	    I1},
+{"mult",    "d,s,t",	0x00000018, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, I1},
   /* start-sanitize-r5900 */
-{"mult1",   "d,s,t",	0x70000018, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d,	T5	},
+{"mult1",   "d,s,t",	0x70000018, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, T5},
   /* end-sanitize-r5900 */
-{"multu",   "s,t",	0x00000019, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	I1	},
-{"multu",   "d,s,t",	0x00000019, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, I1 },
+{"multu",   "s,t",	0x00000019, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	    I1},
+{"multu",   "d,s,t",	0x00000019, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, I1},
   /* start-sanitize-r5900 */
-{"multu1",  "d,s,t",	0x70000019, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d,	T5	},
+{"multu1",  "d,s,t",	0x70000019, 0xfc0007ff,	RD_s|RD_t|WR_HI|WR_LO|WR_d, T5},
   /* end-sanitize-r5900 */
 {"neg",     "d,w",	0x00000022, 0xffe007ff,	WR_d|RD_t,	I1	}, /* sub 0 */
 {"negu",    "d,w",	0x00000023, 0xffe007ff,	WR_d|RD_t,	I1	}, /* subu 0 */
@@ -726,7 +727,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"remu",    "z,s,t",	0x0000001b, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO,	I1 },
 {"remu",    "d,v,t",	0,    (int) M_REMU_3,	INSN_MACRO	},
 {"remu",    "d,v,I",	0,    (int) M_REMU_3I,	INSN_MACRO	},
-{"rfe",     "",		0x42000010, 0xffffffff,	0,	I1		},
+{"rfe",     "",		0x42000010, 0xffffffff,	0,	I1|T3		},
 {"rol",     "d,v,t",	0,    (int) M_ROL,	INSN_MACRO	},
 {"rol",     "d,v,I",	0,    (int) M_ROL_I,	INSN_MACRO	},
 {"ror",     "d,v,t",	0,    (int) M_ROR,	INSN_MACRO	},
@@ -749,6 +750,8 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 {"sd",	    "t,o(b)",	0xfc000000, 0xfc000000,	SM|RD_t|RD_b,	I3	},
 {"sd",      "t,o(b)",	0,    (int) M_SD_OB,	INSN_MACRO	},
 {"sd",      "t,A(b)",	0,    (int) M_SD_AB,	INSN_MACRO	},
+{"sdbbp",   "",		0x0000000e, 0xffffffff,	TRAP,           T3	},
+{"sdbbp",   "c",	0x0000000e, 0xfc00003f,	TRAP,		T3	},
 {"sdc1",    "T,o(b)",	0xf4000000, 0xfc000000, SM|RD_T|RD_b|FP_D,	I2	},
 {"sdc1",    "E,o(b)",	0xf4000000, 0xfc000000, SM|RD_T|RD_b|FP_D,	I2	},
 {"sdc1",    "T,A(b)",	2,    (int) M_SDC1_AB,	INSN_MACRO	},

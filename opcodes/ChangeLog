@@ -1,3 +1,14 @@
+Tue Oct  7 23:37:21 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* mips-opc.c: Fix formatting.
+
+Fri Oct  3 17:26:54 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i386-dis.c (OP_E): Explicitly sign extend 8 bit values, rather
+ 	than assuming that char is signed.  Explicitly sign extend 16 bit
+	values, rather than assuming that short is 16 bits.
+	(OP_sI, OP_J, OP_DIR): Likewise.
+
 start-sanitize-v850e
 Thu Oct  2 13:36:45 1997  Nick Clifton  <nickc@cygnus.com>
 
