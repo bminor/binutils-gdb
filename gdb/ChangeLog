@@ -1,5 +1,11 @@
 2002-06-09  Daniel Jacobowitz  <drow@mvista.com>
 
+	* signals/signals.c (target_signal_from_host): Fix #ifdef
+	SIGRTMIN case.
+	(do_target_signal_to_host): Likewise.
+
+2002-06-09  Daniel Jacobowitz  <drow@mvista.com>
+
 	* mips-tdep.c (mips_find_abi_section): New function.
 	(mips_gdbarch_init): Call it.
 
