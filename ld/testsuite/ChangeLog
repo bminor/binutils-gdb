@@ -1,3 +1,12 @@
+Wed Aug 19 11:59:19 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* ld-srec/srec.exp: Add arm/thumb-elf expected failures.
+
+Thu Aug 13 12:41:58 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-bootstrap/bootstrap.exp: Don't run the --static bootstrap
+	test if we don't have a static libbfd.a.
+
 Wed Aug 12 15:19:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	Based on patch from H.J. Lu <hjl@gnu.org>:
