@@ -454,6 +454,7 @@ gdbcmd_h =	gdbcmd.h $(command_h)
 defs_h =	defs.h xm.h tm.h nm.h config.status config.h
 
 inferior_h =	inferior.h $(breakpoint_h)
+tracepoint_h =	tracepoint.h
 
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
@@ -1133,10 +1134,14 @@ fork-child.o: fork-child.c $(wait_h) $(defs_h) $(gdbcore_h) \
 
 # start-sanitize-gdbtk
 gdbtk.o: gdbtk.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
-	$(bfd_h) symfile.h objfiles.h target.h gdb_string.h
+	$(bfd_h) symfile.h objfiles.h target.h gdb_string.h $(tracepoint_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
 		$(srcdir)/gdbtk.c -DGDBTK_LIBRARY=\"$(datadir)/gdbtcl\"
+
+tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
+	$(gdbtypes_h) $(expression_h) $(gdbcmd_h) $(value_h) target.h \
+	language.h gdb_string.h $(readline_headers)
 # end-sanitize-gdbtk
 
 gdbtypes.o: gdbtypes.c $(bfd_h) complaints.h $(defs_h) $(expression_h) \

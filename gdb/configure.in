@@ -361,7 +361,7 @@ if test "${enable_gdbtk}" = "yes"; then
 	   # TK_LIBS is the list of libraries that need to be linked
 	   # after Tcl/Tk.
 	   LIBS="${LIBS} ${TCL_LIBS} ${TK_LIBS}"
-	   CONFIG_OBS="${CONFIG_OBS} gdbtk.o"
+	   CONFIG_OBS="${CONFIG_OBS} gdbtk.o tracepoint.o"
 
 	   if test x$gdb_cv_os_cygwin32 = xyes; then
 	      WIN32LIBS="${WIN32LIBS} -lshell32 -lgdi32 -lcomdlg32 -ladvapi32 -luser32"

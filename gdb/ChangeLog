@@ -2,11 +2,19 @@ Thu Nov 27 09:07:18 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in ({TCL_LIBS,CONFIG_DEPS}): Don't add IDE libraries
 	if not --enable-ide.
+	(CONFIG_OBS): Add tracepoint.o to list if --enable-gdbtk.
 	* configure: Regenerate.
 
 	* gdbtk.c (gdb_get_breakpoint_info): Add missing filename
 	argument.
 	(toplevel): Move include of guitcl.h into #ifdef IDE region.
+	(gdbtk_init): Move ide_initialize_paths call into #ifdef IDE
+	section.
+
+	* Makefile.in (tracepoint_h): New macro for tracepoint.h
+	includes.
+	(tracepoint.o): Add rule to build.
+	(gdbtk.o): Update dependencies.
 
 Wed Nov 26 22:59:04 1997  Jeffrey A Law  (law@cygnus.com)
 
