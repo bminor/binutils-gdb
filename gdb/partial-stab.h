@@ -267,20 +267,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 	  /* Mark down an include file in the current psymtab */
 
-	  psymtab_include_list[includes_used++] = namestring;
-	  if (includes_used >= includes_allocated)
-	    {
-	      char **orig = psymtab_include_list;
+	  goto record_include_file;
 
-	      psymtab_include_list = (char **)
-		alloca ((includes_allocated *= 2) *
-			sizeof (char *));
-	      memcpy ((PTR)psymtab_include_list, (PTR)orig,
-		      includes_used * sizeof (char *));
-	    }
-
-#endif /* DBXREAD_ONLY */
+#else /* DBXREAD_ONLY */
 	  continue;
+#endif
 
 	case N_SOL:
 	  /* Mark down an include file in the current psymtab */
@@ -310,6 +301,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	    if (i == -1)
 	      continue;
 	  }
+
+	record_include_file:
 
 	  psymtab_include_list[includes_used++] = namestring;
 	  if (includes_used >= includes_allocated)

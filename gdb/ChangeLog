@@ -1,5 +1,8 @@
 Thu Dec 31 09:03:02 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* partial-stab.h (near N_BINCL):  Remove redundant code in N_BINCL
+	case.  Use code in N_SOL.
+
 	* paread.c:  New file that contains all HPPA/HPUX symbol reading
 	code.
 	* dbxread.c:  Remove almost all HPPA/HPUX symbol reading code.
