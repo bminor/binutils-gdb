@@ -1,3 +1,9 @@
+Tue Nov 28 17:16:48 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Default to --with-stabs for some targets for which
+	it makes sense: mips*-*-*, alpha*-*-osf*, i[345]86*-*-sysv4* and
+	i[345]86*-*-unixware*.
+
 Mon Nov 27 13:44:15 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config-ml.in: Get list of multidirs using gcc --print-multi-lib

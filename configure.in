@@ -297,6 +297,16 @@ elif [ x${with_newlib} = xyes ]; then
   skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
 fi
 
+# Default to using --with-stabs for certain targets.
+if [ x${with_stabs} = x ]; then
+  case "${target}" in
+  mips*-*-* | alpha*-*-osf* | i[345]86*-*-sysv4* | i[345]86*-*-unixware*)
+    with_stabs=yes;
+    withoptions="${withoptions} --with-stabs"
+    ;;
+  esac
+fi
+
 # Handle ${copy_dirs}
 set fnord ${copy_dirs}
 shift
