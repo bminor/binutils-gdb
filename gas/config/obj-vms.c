@@ -21,6 +21,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Modified by Eric Youngdale to write VMS debug records for program
    variables */
 #include "as.h"
+#include "config.h"
 #include "subsegs.h"
 #include "obstack.h"
 
@@ -36,7 +37,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
  *	Version string of the compiler that produced the code we are
  *	assembling.  (And this assembler, if we do not have compiler info.)
  */
-extern const char version_string[];
 char *compiler_version_string;
 
 /* Flag that determines how we map names.  This takes several values, and
@@ -489,6 +489,42 @@ const pseudo_typeS obj_pseudo_table[] =
 
 };				/* obj_pseudo_table */
 
+int
+vms_resolve_symbol_redef (sym)
+     symbolS *sym;
+{
+  /*
+   *	If the new symbol is .comm AND it has a size of zero,
+   *	we ignore it (i.e. the old symbol overrides it)
+   */
+  if ((SEGMENT_TO_SYMBOL_TYPE ((int) now_seg) == (N_UNDF | N_EXT)) &&
+      ((obstack_next_free (&frags) - frag_now->fr_literal) == 0))
+    {
+      as_warn ("compiler emitted zero-size common symbol `%s' already defined",
+	       S_GET_NAME (sym));
+      return 1;
+    }
+  /*
+   *	If the old symbol is .comm and it has a size of zero,
+   *	we override it with the new symbol value.
+   */
+  if (S_IS_EXTERNAL(sym) &&  S_IS_DEFINED(sym)
+      && (S_GET_VALUE(sym) == 0))
+    {
+      as_warn ("compiler redefined zero-size common symbol `%s'",
+	       S_GET_NAME (sym));
+      sym->sy_frag  = frag_now;
+      S_GET_OTHER(sym) = const_flag;
+      S_SET_VALUE(sym, obstack_next_free(& frags) - frag_now->fr_literal);
+      /* Keep N_EXT bit.  */
+      sym->sy_symbol.n_type |= SEGMENT_TO_SYMBOL_TYPE((int) now_seg);
+      return 1;
+    }
+
+  return 0;
+}
+
+
 void 
 obj_read_begin_hook ()
 {
@@ -804,7 +840,8 @@ VMS_Set_Data (Psect_Index, Offset, Record_Type, Force)
  *	Make a debugger reference to a struct, union or enum.
  */
 static
-VMS_Store_Struct (int Struct_Index)
+VMS_Store_Struct (Struct_Index)
+     int Struct_Index;
 {
   /*
    *	We are writing a "OBJ_S_C_DBG" record
@@ -831,7 +868,8 @@ VMS_Store_Struct (int Struct_Index)
  *	Make a debugger reference to partially define a struct, union or enum.
  */
 static
-VMS_Def_Struct (int Struct_Index)
+VMS_Def_Struct (Struct_Index)
+     int Struct_Index;
 {
   /*
    *	We are writing a "OBJ_S_C_DBG" record
@@ -854,7 +892,8 @@ VMS_Def_Struct (int Struct_Index)
 }
 
 static
-VMS_Set_Struct (int Struct_Index)
+VMS_Set_Struct (Struct_Index)
+     int Struct_Index;
 {				/* see previous functions for comments */
   Set_VMS_Object_File_Record (OBJ_S_C_DBG);
   if (Object_Record_Offset == 0)
@@ -1165,7 +1204,8 @@ VMS_TBT_Block_Begin (symbolP, Psect, Name)
  *	Write the Traceback Block End record
  */
 static
-VMS_TBT_Block_End (int Size)
+VMS_TBT_Block_End (Size)
+     int Size;
 {
   char Local[16];
 
@@ -1921,7 +1961,7 @@ generate_suffix (spnt, dbx_type)
 {
   int ilen;
   int i;
-  CONST char pvoid[6] = {5, 0xaf, 0, 1, 0, 5};
+  static CONST char pvoid[6] = {5, 0xaf, 0, 1, 0, 5};
   struct VMS_DBG_Symbol *spnt1;
   Apoint = 0;
   Lpnt = MAX_DEBUG_RECORD - 1;
@@ -3046,7 +3086,8 @@ VMS_DBG_Define_Routine (symbolP, Curr_Routine, Txt_Psect)
 #include <time.h>
 
 /* Manufacure a VMS like time on a unix based system. */
-get_VMS_time_on_unix (char *Now)
+get_VMS_time_on_unix (Now)
+     char *Now;
 {
   char *pnt;
   time_t timeb;
@@ -3172,7 +3213,7 @@ Write_VMS_MHD_Records ()
       cp = "GNU AS  V";
       while (*cp)
 	PUT_CHAR (*cp++);
-      cp = strchr (&version_string, '.');
+      cp = strchr (GAS_VERSION, '.');
       while (*cp != ' ')
 	cp--;
       cp++;
@@ -3745,8 +3786,9 @@ VMS_Psect_Spec (Name, Size, Type, vsp)
 	default:
 	  {
 	    char Error_Line[256];
-	    sprintf (Error_Line, "Globalsymbol attribute for"
-		     " symbol %s was unexpected.\n", Name);
+	    sprintf (Error_Line,
+		     "Globalsymbol attribute for symbol %s was unexpected.\n",
+		     Name);
 	    error (Error_Line);
 	    break;
 	  };
@@ -4329,62 +4371,6 @@ VMS_Fix_Indirect_Reference (Text_Psect, Offset, fragP, text_frag_root)
     }
 }
 
-
-
-/*
- *	This is a hacked _doprnt() for VAX-11 "C".  It understands that
- *	it is ONLY called by as_fatal(Format, Args) with a pointer to the
- *	"Args" argument.  From this we can make it all work right!
- */
-#if	!defined(eunice) && defined(HO_VMS)
-_doprnt (Format, a, f)
-     char *Format;
-     FILE *f;
-     char **a;
-{
-  int Nargs = ((int *) a)[-2];	/* This understands as_fatal() */
-
-  switch (Nargs)
-    {
-    default:
-      fprintf (f, "_doprnt error on \"%s\"!!", Format);
-      break;
-    case 1:
-      fprintf (f, Format);
-      break;
-    case 2:
-      fprintf (f, Format, a[0]);
-      break;
-    case 3:
-      fprintf (f, Format, a[0], a[1]);
-      break;
-    case 4:
-      fprintf (f, Format, a[0], a[1], a[2]);
-      break;
-    case 5:
-      fprintf (f, Format, a[0], a[1], a[2], a[3]);
-      break;
-    case 6:
-      fprintf (f, Format, a[0], a[1], a[2], a[3], a[4]);
-      break;
-    case 7:
-      fprintf (f, Format, a[0], a[1], a[2], a[3], a[4], a[5]);
-      break;
-    case 8:
-      fprintf (f, Format, a[0], a[1], a[2], a[3], a[4], a[5], a[6]);
-      break;
-    case 9:
-      fprintf (f, Format, a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7]);
-      break;
-    case 10:
-      fprintf (f, Format, a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8]);
-      break;
-    }
-}
-
-#endif /* eunice */
-
-
 /*
  *	If the procedure "main()" exists we have to add the instruction
  *	"jsb c$main_args" at the beginning to be compatible with VAX-11 "C".

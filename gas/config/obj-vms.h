@@ -221,12 +221,11 @@ typedef struct nlist obj_symbol_type;	/* Symbol table entry */
 
 #define obj_symbol_new_hook(s)	{;}
 
-#ifdef __STDC__
 struct fix;
-void tc_aout_fix_to_chars (char *where, struct fix *fixP, relax_addressT segment_address);
-#else
-void tc_aout_fix_to_chars ();
-#endif /* __STDC__ */
+void tc_aout_fix_to_chars PARAMS ((char *where, struct fix *fixP, relax_addressT segment_address));
+
+extern int vms_resolve_symbol_redef ();
+#define RESOLVE_SYMBOL_REDEFINITION(X)	vms_resolve_symbol_redef(X)
 
 /* The rest of this file contains definitions for constants used within the actual
    VMS object file.  We do not use a $ in the symbols (as per usual VMS
