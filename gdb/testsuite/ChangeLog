@@ -1,3 +1,9 @@
+Wed Mar  2 10:08:01 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* gdb.t21/cplusfuncs.exp (test_paddr_operator_functions): Do
+	operator[] test with gdb_test because the old code didn't seem to
+	be getting the quoting right with the new dejagnu.
+
 Thu Feb 24 18:49:37 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* gdb.t06/break.exp (test_next_with_recursion): Remove xfail for
