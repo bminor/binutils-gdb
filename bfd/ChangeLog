@@ -1,3 +1,24 @@
+Mon Nov  1 14:30:09 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* aout-target.h (MY_bfd_debug_info_start, MY_bfd_debug_info_end,
+	MY_bfd_debug_info_accumulat [sic]): Remove unused definitions.
+	(MY_bfd_get_relocated_section_contents, MY_bfd_relax_section,
+	MY_bfd_seclet_link): Define.
+	(MY_bfd_reloc_type_lookup): Rename from
+	MY_reloc_howto_type_lookup.
+	(MY_bfd_make_debug_symbol): Rename from MY_make_debug_symbol.
+	(MY(vec)): Use JUMP_TABLE rather than listing functions.
+	* hp300hpux.c (MY_get_symtab, MY_get_symtab_upper_bound,
+	MY_canonicalize_reloc, MY_write_object_contents): Don't define in
+	terms of MY, because that causes a recusive invocation of CAT when
+	expanded within JUMP_TABLE, and ANSI compilers don't expand
+	recursive macros.
+	* mipsbsd.c (MY_bfd_reloc_type_lookup): Rename from
+	MY_reloc_howto_type_lookup, and don't define in terms of MY.
+	(MY_canonicalize_reloc): Don't define in terms of MY.
+	(aout_mips_little_vec, aout_mips_big_vec): Use JUMP_TABLE rather
+	than listing functions.
+
 Mon Nov  1 09:12:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config.bfd: Use m68k-elf for m68*-*-sysv4*.
