@@ -35,8 +35,8 @@ static int print_insn_powerpc PARAMS ((bfd_vma, struct disassemble_info *,
 static int powerpc_dialect PARAMS ((struct disassemble_info *));
 
 /* Determine which set of machines to disassemble for.  PPC403/601 or
-   Motorola BookE.  For convenience, also disassemble instructions
-   supported by the AltiVec vector unit.  */
+   BookE.  For convenience, also disassemble instructions supported
+   by the AltiVec vector unit.  */
 
 int
 powerpc_dialect(info)

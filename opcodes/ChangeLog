@@ -1,3 +1,8 @@
+2002-02-19  matthew green  <mrg@redhat.com>
+
+	* ppc-opc.c (powerpc_dialect): Fix comment; BookE is not Motorola
+	specific.
+
 2002-02-18  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/tr.po: Updated translation.
