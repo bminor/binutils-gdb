@@ -769,18 +769,20 @@ void
 i386_push_dummy_frame (void)
 {
   CORE_ADDR sp = read_register (SP_REGNUM);
+  CORE_ADDR fp;
   int regnum;
   char regbuf[MAX_REGISTER_RAW_SIZE];
 
   sp = push_word (sp, read_register (PC_REGNUM));
   sp = push_word (sp, read_register (FP_REGNUM));
-  write_register (FP_REGNUM, sp);
+  fp = sp;
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     {
       read_register_gen (regnum, regbuf);
       sp = push_bytes (sp, regbuf, REGISTER_RAW_SIZE (regnum));
     }
   write_register (SP_REGNUM, sp);
+  write_register (FP_REGNUM, fp);
 }
 
 /* Insert the (relative) function address into the call sequence

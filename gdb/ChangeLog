@@ -1,3 +1,8 @@
+2001-12-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_push_dummy_frame): Don't write back the
+	modified frame pointer until the old frame pointer has been saved.
+
 2001-12-30  Andrew Cagney  <ac131313@redhat.com>
 
 	* arch-utils.c (initialize_current_architecture): Test byte_order
