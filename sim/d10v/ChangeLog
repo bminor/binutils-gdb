@@ -8,6 +8,29 @@ Tue Feb 22 18:24:56 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* Makefile.in (SIM_EXTRA_CFLAGS): Define SIM_HAVE_ENVIRONMENT.
 	* interp.c (sim_set_trace): Replace sim_trace.  Enable tracing.
 
+Tue Feb  8 17:41:12 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v_sim.h (SIG_D10V_BUS): Define.
+
+	* simops.c (address_exception): Delete function.
+	(OP_30000000, OP_6401, OP_6001, OP_6000, OP_32010000, OP_31000000,
+ 	OP_6601, OP_6201, OP_6200, OP_33010000, OP_34000000, OP_6800,
+ 	OP_6C1F, OP_6801, OP_6C01, OP_36010000, OP_35000000, OP_6A00,
+ 	OP_6E1F, OP_6A01, OP_6E01, OP_37010000): Replace call to
+ 	address_exception with code that sets SIG_D10V_BUS.
+
+	* interp.c (sim_resume): When SIGBUS or SIGSEGV, deliver a bus
+ 	error to the simulator before resuming execution.
+	(sim_trace): Check stop reason and use that to determine sim_trace
+ 	return value.
+	(sim_stop_reason): For SIG_D10V_BUS return a SIGBUS / SIGSEGV
+ 	sigrc.
+
+Tue Jan 18 16:07:42 MST 2000	Diego Novillo <dnovillo@cygnus.com>
+
+	* interp.c (sim_create_inferior): Change internal initial value for
+	DMAP2 to 0x2000.
+
 Mon Jan  3 02:06:07 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (lookup_hash): Stop the update of the PC when there was

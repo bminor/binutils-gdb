@@ -1252,7 +1252,8 @@ sim_create_inferior (sd, abfd, argv, env)
       set_imap_register (1, 0x1000);
       set_dmap_register (0, 0x2000);
       set_dmap_register (1, 0x2000);
-      set_dmap_register (2, 0x0000); /* Old DMAP, Value is not 0x2000 */
+      set_dmap_register (2, 0x2000); /* DMAP2 initial internal value is
+					0x2000 on the new board. */
       set_dmap_register (3, 0x0000);
     }
 
