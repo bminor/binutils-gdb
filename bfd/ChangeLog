@@ -1,5 +1,7 @@
 Tue Apr  9 11:44:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.host: Use ${srcdir} when looking for picfrag.
+
 	* configure.host: Switch on ${libdir}, not $(libdir).  From
 	alan@spri.levels.unisa.edu.au (Alan Modra).
 
