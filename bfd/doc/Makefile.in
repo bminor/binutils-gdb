@@ -1,3 +1,12 @@
+srcdir = .
+
+ddestdir = /usr/local
+idestdir = $(ddestdir)
+
+SHELL = /bin/sh
+
+MAKEINFO = makeinfo
+
 .SUFFIXES: .texi .o .c .h .p .ip
 VPATH=..
 .c.texi:
@@ -16,9 +25,6 @@ VPATH=..
 	./scanph -i $< $@
 
 # main GDB source directory
-srcdir = ..
-
-TEXIDIR=${srcdir}/../texinfo/fsf
 
 DOCFILES = aoutx.texi  archive.texi archures.texi \
 	bfd.texi  cache.texi coffcode.texi \
@@ -51,7 +57,17 @@ SRCPROT = archive.c archures.c bfd.c \
 
 SRCIPROT = cache.c libbfd.c reloc.c cpu-h8300.c  cpu-i960.c archures.c init.c ctor.c
 
+STAGESTUFF = $(PROTOS) *.p *.ip *.h bfd.?? $(DOCFILES)
+
 all: bfd.info
+
+install: force
+	for i in *.info* ; do \
+		echo Installing $$i... ; \
+		(cp $$i $(idestdir)/info/$$i.new \
+			&& mv -f $(idestdir)/info/$$i.new $(idestdir)/info/$$i) \
+		|| exit 1 ; \
+	done
 
 docs: protos bfd.info bfd.dvi bfd.ps
 
@@ -66,10 +82,10 @@ $(PROTOS) : $(SRCPROT)
 $(IPROTOS) : $(SRCIPROT)
 
 clean:
-	rm -f $(PROTOS) *.p *.ip *.h bfd.?? $(DOCFILES) bfd.dvi bfd.ps *~* *# bfd.??? 
+	rm -f $(STAGESTUFF) bfd.dvi bfd.ps *~* *# bfd.??? 
 
 bfd.info: $(DOCFILES) bfd.texinfo
-	makeinfo bfd.texinfo
+	- $(MAKEINFO) -o bfd.info $(srcdir)/bfd.texinfo
 
 bfd.dvi: $(DOCFILES) bfd.texinfo
 	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex bfd.texinfo
@@ -81,3 +97,38 @@ bfd.ps: bfd.dvi
 	
 quickdoc: $(DOCFILES) bfd.texinfo
 	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex bfd.texinfo
+
+stage1: force
+	- mkdir stage1
+	- mv -f $(STAGESTUFF) stage1
+
+stage2: force
+	- mkdir stage2
+	- mv -f $(STAGESTUFF) stage2
+
+stage3: force
+	- mkdir stage3
+	- mv -f $(STAGESTUFF) stage3
+
+against=stage2
+
+comparison: force
+	for i in *.o ; do cmp $$i $(against)/$$i || exit 1 ; done
+
+de-stage1: force
+	- (cd stage1 ; mv -f $(STAGESTUFF) ..)
+	- rmdir stage1
+
+de-stage2: force
+	- (cd stage2 ; mv -f $(STAGESTUFF) ..)
+	- rmdir stage2
+
+de-stage3: force
+	- (cd stage3 ; mv -f $(STAGESTUFF) ..)
+	- rmdir stage3
+
+force:
+
+Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
+	$(SHELL) ./config.status
+
