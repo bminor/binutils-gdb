@@ -1,5 +1,7 @@
 2002-08-26  Alan Modra  <amodra@bigpond.net.au>
 
+	* gas/m68k/all.exp: xfail non-ELF targets on pcrel test.
+
 	* gas/m68hc11/insns.d: Quote dots.
 	* gas/m68hc11/opers12.d: Likewise.
 
