@@ -1,3 +1,14 @@
+2004-04-14  Richard Sandiford  <rsandifo@redhat.com>
+
+	* doc/c-mips.texi (-m{no-,}fix-vr4120): Renamed from
+	-{no-}mfix-vr4122-bugs.
+	* config/tc-mips.c (mips_fix_vr4120): Renamed from mips_fix_4122_bugs.
+	(append_insn, mips_emit_delays): Update accordingly.
+	(OPTION_FIX_VR4120, OPTION_NO_FIX_VR4120): Renamed from *VR4122.
+	(md_longopts): Change -{no-,}mfix-vr4122-bugs to -m{no-,}fix-vr4120.
+	(md_parse_option): Update after above changes.
+	(md_show_usage): Add -mfix-vr4120.
+
 2004-04-13  Bob Wilson  <bob.wilson@acm.org>
 
 	* doc/as.texinfo (Sub-Sections): Conditionalize COFF-specific use

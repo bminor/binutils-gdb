@@ -1,5 +1,9 @@
 2004-04-14  Richard Sandiford  <rsandifo@redhat.com>
 
+	* gas/mips/vr4122.[sd]: Change option to -mfix-vr4120.
+
+2004-04-14  Richard Sandiford  <rsandifo@redhat.com>
+
 	* gas/elf/section2.e-mips: Allow named section symbols.
 	* gas/mips/{,el}empic.d, gas/mips/mips{,el}16-[ef].d: Likewise.
 
