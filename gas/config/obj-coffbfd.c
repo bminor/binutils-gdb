@@ -2427,7 +2427,7 @@ DEFUN (fixup_segment, (segP, this_segment_type),
       size = fixP->fx_size;
       add_symbolP = fixP->fx_addsy;
 #ifdef TC_I960
-      if (fixP->fx_callj && TC_S_IS_CALLNAME (add_symbolP))
+      if (fixP->fx_tcbit && TC_S_IS_CALLNAME (add_symbolP))
 	{
 	  /* Relocation should be done via the
 		   associated 'bal' entry point
@@ -2477,7 +2477,7 @@ DEFUN (fixup_segment, (segP, this_segment_type),
 #ifdef TC_I960
 	      /* Makes no sense to use the difference of 2 arbitrary symbols
 	         as the target of a call instruction.  */
-	      if (fixP->fx_callj)
+	      if (fixP->fx_tcbit)
 		{
 		  as_bad ("callj to difference of 2 symbols");
 		}

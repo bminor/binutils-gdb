@@ -1,3 +1,9 @@
+Wed Nov 10 16:19:13 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* write.h (fixS): Rename fx_callj field to fx_tcbit.
+	* write.c, config/obj-coff.c, config/obj-coffbfd.c,
+	config/tc-i960.c: Corresponding changes.
+
 Tue Nov  9 00:49:01 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* Makefile.in (distclean): Delete config-stamp and config.h
