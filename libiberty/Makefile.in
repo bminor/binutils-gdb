@@ -254,6 +254,7 @@ $(TARGETLIB): $(REQUIRED_OFILES) $(EXTRA_OFILES) $(LIBOBJS)
 	  $(AR) $(AR_FLAGS) $(TARGETLIB) \
 	    $(REQUIRED_OFILES) $(EXTRA_OFILES) $(LIBOBJS); \
 	  $(RANLIB) $(TARGETLIB); \
+	  cp $(TARGETLIB) ../ ; \
 	  cd ..; \
 	else true; fi; \
 	if [ x"$(NOASANFLAG)" != x ]; then \
