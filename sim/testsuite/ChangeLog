@@ -1,3 +1,8 @@
+Thu Feb 19 11:15:45 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* sim/m32r/xor3.cgs: Test xor3 instruction.
+	* sim/m32r/xor.cgs: Test xor instruction.
+
 Tue Feb 17 12:46:05 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* config/default.exp: New file.
@@ -8,7 +13,7 @@ Tue Feb 17 12:46:05 1998  Doug Evans  <devans@seba.cygnus.com>
 	(arch): Define.
 	(RUNTEST_FOR_TARGET): Delete.
 	(RUNTEST): Fix.
-	(SCHEME,SCHEMEFLAGS,CGENDIR,CGENFLAGS,CGENFILES): Define.
+	(SCHEME,SCHEMEFLAGS,CGENDIR,CGENFLAGS): Define.
 	(check): Depend on site.exp.  Run dejagnu.
 	(site.exp): New target.
 	(cgen): New target.
