@@ -1,5 +1,7 @@
 Mon Apr 25 15:31:04 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* elfcode.h (write_relocs): Undo patch of Apr 10; breaks Solaris.
+
 	* elfcode.h (bfd_section_from_shdr): Use bfd_make_section_anyway
 	to create sections.  Check return value of recursive calls.
 	(bfd_section_from_phdr): Check return value of bfd_make_section.

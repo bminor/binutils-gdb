@@ -1201,17 +1201,6 @@ write_relocs (abfd, sec, xxx)
 	    dst_rela.r_offset = ptr->address;
 
 	  sym = *ptr->sym_ptr_ptr;
-
-	  /* If SYM is a section symbol for an input section, which
-	     has been combined with other similar input sections (ld -r),
-	     then adjust the addend by the output_offset of sym->section.
-
-	     Apparently elf_symbol_from_bfd_symbol doesn't provide a 1:1
-	     mapping from bfd symbol to elf symbols in this case.  */
-	  if ((sym->flags & BSF_SECTION_SYM)
-	      && sym->section)
-	    ptr->addend += sym->section->output_offset;
-
 	  if (sym == last_sym)
 	    n = last_sym_idx;
 	  else
