@@ -25,7 +25,12 @@
 set compiler_info ""
 
 #if defined (__GNUC__)
-set compiler_info [join {gcc __GNUC__ __GNUC_MINOR__ } -]
+#if defined (__GNUC_PATCHLEVEL__)
+/* Only GCC versions >= 3.0 define the __GNUC_PATCHLEVEL__ macro.  */
+set compiler_info [join {gcc __GNUC__ __GNUC_MINOR__ __GNUC_PATCHLEVEL__} -]
+#else
+set compiler_info [join {gcc __GNUC__ __GNUC_MINOR__ "unknown"} -]
+#endif
 set gcc_compiled __GNUC__
 #else
 set gcc_compiled 0
