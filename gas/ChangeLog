@@ -1,5 +1,13 @@
 Sun Nov  7 01:02:08 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* write.c (fixup_segment): Delete {SEG,GLOBAL}_DIFF_ALLOWED code,
+	it was PA specific and is no longer needed (it's now handled 
+	within the PA backend).
+	* config/tc-hppa.h (SEG_DIFF_ALLOWED): Delete definition.
+	* config/tc-hppa.c (fix_new_hppa): If the subtract symbol for
+	a fixup is $global$ change it to NULL as $global$ is really only
+	needed long enough to determine the base type of relocation to use.
+
 	* config/tc-hppa.c (create_new_subspace): Initialize subspace_defined.
 
 	* config/tc-hppa.c (pa-ip, case 'z'): Make field selectors work
