@@ -2548,7 +2548,7 @@ gdb_realpath (const char *filename)
 #  define USE_REALPATH
 # endif
 # if defined (USE_REALPATH)
-    char *rp = realpath (filename, buf);
+    const char *rp = realpath (filename, buf);
     if (rp == NULL)
       rp = filename;
     return xstrdup (rp);
