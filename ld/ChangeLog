@@ -1,5 +1,10 @@
 2003-06-19  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_finish): Dump out
+	statistics from ppc64_elf_build_stubs.
+
+2003-06-19  Alan Modra  <amodra@bigpond.net.au>
+
 	* emultempl/ppc64elf.em (build_section_lists): Check return status
 	from ppc64_elf_next_input_section.
 

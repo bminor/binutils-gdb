@@ -387,8 +387,22 @@ gld${EMULATION_NAME}_finish ()
 
   if (stub_file != NULL && stub_file->the_bfd->sections != NULL)
     {
-      if (!ppc64_elf_build_stubs (emit_stub_syms, &link_info))
+      char *msg = NULL;
+      char *line, *endline;
+
+      if (!ppc64_elf_build_stubs (emit_stub_syms, &link_info,
+				  config.stats ? &msg : NULL))
 	einfo ("%X%P: can not build stubs: %E\n");
+
+      for (line = msg; line != NULL; line = endline)
+	{
+	  endline = strchr (line, '\n');
+	  if (endline != NULL)
+	    *endline++ = '\0';
+	  fprintf (stderr, "%s: %s\n", program_name, line);
+	}
+      if (msg != NULL)
+	free (msg);
     }
 }
 
