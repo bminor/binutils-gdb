@@ -1,3 +1,7 @@
+2001-08-29  Peter Targett  <peter.targett@arccores.com>
+
+	* MAINTAINERS: Include ARC Maintainer.
+
 2001-08-29  Ben Elliston  <bje@redhat.com>
 
 	* stabs.c (stab_demangle_template): Initialise s4.

@@ -50,6 +50,7 @@ maintainers for a given domain then responsibility falls to the first
 maintainer.  The first maintainer is free to devolve that
 responsibility among the other maintainers.
 
+  ARC		   Peter Targett <peter.targett@arccores.com>
   ARM		   Nick Clifton <nickc@redhat.com>
   AVR		   Denis Chertykov <denisc@overta.ru>
   CRIS		   Hans-Peter Nilsson <hp@axis.com>
