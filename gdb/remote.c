@@ -3989,73 +3989,6 @@ remote_xfer_memory (CORE_ADDR mem_addr, char *buffer, int mem_len,
   return res;
 }
 
-
-#if 0
-/* Enable after 4.12.  */
-
-void
-remote_search (int len, char *data, char *mask, CORE_ADDR startaddr,
-	       int increment, CORE_ADDR lorange, CORE_ADDR hirange,
-	       CORE_ADDR *addr_found, char *data_found)
-{
-  if (increment == -4 && len == 4)
-    {
-      long mask_long, data_long;
-      long data_found_long;
-      CORE_ADDR addr_we_found;
-      char *buf = alloca (rs->remote_packet_size);
-      long returned_long[2];
-      char *p;
-
-      mask_long = extract_unsigned_integer (mask, len);
-      data_long = extract_unsigned_integer (data, len);
-      sprintf (buf, "t%x:%x,%x", startaddr, data_long, mask_long);
-      putpkt (buf);
-      getpkt (buf, (rs->remote_packet_size), 0);
-      if (buf[0] == '\0')
-	{
-	  /* The stub doesn't support the 't' request.  We might want to
-	     remember this fact, but on the other hand the stub could be
-	     switched on us.  Maybe we should remember it only until
-	     the next "target remote".  */
-	  generic_search (len, data, mask, startaddr, increment, lorange,
-			  hirange, addr_found, data_found);
-	  return;
-	}
-
-      if (buf[0] == 'E')
-	/* There is no correspondance between what the remote protocol uses
-	   for errors and errno codes.  We would like a cleaner way of
-	   representing errors (big enough to include errno codes, bfd_error
-	   codes, and others).  But for now just use EIO.  */
-	memory_error (EIO, startaddr);
-      p = buf;
-      addr_we_found = 0;
-      while (*p != '\0' && *p != ',')
-	addr_we_found = (addr_we_found << 4) + fromhex (*p++);
-      if (*p == '\0')
-	error ("Protocol error: short return for search");
-
-      data_found_long = 0;
-      while (*p != '\0' && *p != ',')
-	data_found_long = (data_found_long << 4) + fromhex (*p++);
-      /* Ignore anything after this comma, for future extensions.  */
-
-      if (addr_we_found < lorange || addr_we_found >= hirange)
-	{
-	  *addr_found = 0;
-	  return;
-	}
-
-      *addr_found = addr_we_found;
-      *data_found = store_unsigned_integer (data_we_found, len);
-      return;
-    }
-  generic_search (len, data, mask, startaddr, increment, lorange,
-		  hirange, addr_found, data_found);
-}
-#endif /* 0 */
-
 static void
 remote_files_info (struct target_ops *ignore)
 {

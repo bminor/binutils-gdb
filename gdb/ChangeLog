@@ -1,3 +1,9 @@
+2003-10-15  Andrew Cagney  <cagney@redhat.com>
+
+	* remote.c (remote_search): Delete function.
+	* target.h (target_search): Delete disabled macro.
+	(struct target_ops): Delete disabled field "to_search".
+
 2003-10-14  Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-tdep.c (frv_frame_this_id): Call inside_entry_func()

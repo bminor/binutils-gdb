@@ -229,29 +229,6 @@ struct target_ops
 			   struct mem_attrib *attrib,
 			   struct target_ops *target);
 
-#if 0
-    /* Enable this after 4.12.  */
-
-    /* Search target memory.  Start at STARTADDR and take LEN bytes of
-       target memory, and them with MASK, and compare to DATA.  If they
-       match, set *ADDR_FOUND to the address we found it at, store the data
-       we found at LEN bytes starting at DATA_FOUND, and return.  If
-       not, add INCREMENT to the search address and keep trying until
-       the search address is outside of the range [LORANGE,HIRANGE).
-
-       If we don't find anything, set *ADDR_FOUND to (CORE_ADDR)0 and
-       return.  */
-
-    void (*to_search) (int len, char *data, char *mask,
-		       CORE_ADDR startaddr, int increment,
-		       CORE_ADDR lorange, CORE_ADDR hirange,
-		       CORE_ADDR * addr_found, char *data_found);
-
-#define	target_search(len, data, mask, startaddr, increment, lorange, hirange, addr_found, data_found)	\
-    (*current_target.to_search) (len, data, mask, startaddr, increment, \
-				 lorange, hirange, addr_found, data_found)
-#endif				/* 0 */
-
     void (*to_files_info) (struct target_ops *);
     int (*to_insert_breakpoint) (CORE_ADDR, char *);
     int (*to_remove_breakpoint) (CORE_ADDR, char *);
