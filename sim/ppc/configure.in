@@ -30,3 +30,104 @@ AC_CHECK_HEADERS(string.h strings.h stdlib.h time.h sys/times.h)
 
 AC_OUTPUT(Makefile,
 [case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])
+
+if test x"$enable_sim_inline" != x""; then
+  flags=""
+  case "$enable_sim_inline" in
+    no)		flags="";;
+    0)		flags="-DDEFAULT_INLINE=0";;
+    yes | 2)	flags="-DDEFAULT_INLINE=2";;
+    1)		flags="-DDEFAULT_INLINE=1";;
+    *) for x in `echo "$enable_sim_inline" | sed -e "s/,/ /g"`; do
+	 case "$x" in
+	   *_INLINE=*)	flags="$flags -D$x";;
+	   *_INLINE)	flags="$flags -D$x=2";;
+	   *=*)		x=`sed -e "s/=/_INLINE=/"`; flags="$flags -D$x";;
+	   *)		flags="$flags -D$x""_INLINE=2";;
+	 esac
+       done;;
+  esac
+  if test x"$flags" != x""; then
+    mv Makefile Makefile.tem
+    echo "Setting INLINE_CFLAGS=$flags" 1>&6
+    sed -e "s/^INLINE_CFLAGS.*=.*\$/INLINE_CFLAGS =$flags/" \
+      < Makefile.tem > Makefile
+    rm -f Makefile.tem
+  fi
+fi
+
+if test x"$enable_sim_bswap" != x"" -a x"$enable_sim_bswap" != x"no"; then
+  mv Makefile Makefile.tem
+  echo "Setting BSWAP_CFLAGS=-DWITH_BSWAP=1" 1>&6
+  sed -e "s/^BSWAP_CFLAGS.*=.*\$/BSWAP_CFLAGS = -DWITH_BSWAP=1/" \
+    < Makefile.tem > Makefile
+  rm -f Makefile.tem
+fi
+
+if test x"$enable_sim_cflags" != x"" -a x"$enable_sim_cflags" != x"no"; then
+  if test "$enable_sim_cflags" = "yes"; then
+    enable_sim_cflags="-fomit-frame-pointer -O2"
+  fi
+  mv Makefile Makefile.tem
+  echo "Setting SIM_CFLAGS=$enable_sim_cflags"
+  sed -e "s/^SIM_CFLAGS.*=.*\$/SIM_CFLAGS = $enable_sim_cflags/" \
+    < Makefile.tem > Makefile
+  rm -f Makefile.tem
+fi
+
+if test x"$enable_sim_complex" != x"" -a x"$enable_sim_complex" != x"no"; then
+  mv Makefile Makefile.tem
+  echo "Setting IGEN_OPCODE_RULES=ppc-opcode-complex" 1>&6
+  sed -e "s/^IGEN_OPCODE_RULES.*=.*\$/IGEN_OPCODE_RULES = ppc-opcode-complex/" \
+    < Makefile.tem > Makefile
+  rm -f Makefile.tem
+fi
+
+if test x"$enable_sim_switch" != x"" -a x"$enable_sim_switch" != x"no"; then
+  mv Makefile Makefile.tem
+  echo "Setting DGEN_FLAGS=-s" 1>&6
+  sed -e "s/^DGEN_FLAGS.*=.*\$/DGEN_FLAGS = -s/" < Makefile.tem > Makefile
+  rm -f Makefile.tem
+fi
+
+if test x"$enable_sim_duplicate" != x"" -a x"$enable_sim_duplicate" != x"no"; then
+  mv Makefile Makefile.tem
+  echo "Setting IGEN_DUPLICATE=-e" 1>&6
+  sed -e "s/^IGEN_DUPLICATE.*=.*\$/IGEN_DUPLICATE = -e/" < Makefile.tem > Makefile
+  rm -f Makefile.tem
+fi
+
+if test x"$enable_sim_filter" = x"no"; then
+  mv Makefile Makefile.tem
+  echo "Setting IGEN_FILTER=" 1>&6
+  sed -e "s/^IGEN_FILTER.*=.*\$/IGEN_FILTER =/" < Makefile.tem > Makefile
+  rm -f Makefile.tem
+
+else
+  if test x"$enable_sim_filter" != x"yes"; then
+    mv Makefile Makefile.tem
+    echo "Setting IGEN_FILTER= -f $enable_sim_filter" 1>&6
+    sed -e "s/^IGEN_FILTER.*=.*\$/IGEN_FILTER = -f $enable_sim_filter/" \
+      < Makefile.tem > Makefile
+    rm -f Makefile.tem
+  fi
+fi
+
+endian=""
+case x"$enable_sim_endian" in
+  xb* | xB*) endian="BIG_ENDIAN";;
+  xl* | xL*) endian="LITTLE_ENDIAN";;
+  xyes) case "$target" in
+	  *powerpc-*) endian="BIG_ENDIAN";;
+	  *powerpcle-*) endian="LITTLE_ENDIAN";;
+	  *) echo "Unknown $target" 1>&6;;
+        esac;;
+esac
+if test x"$endian" != x""; then
+  mv Makefile Makefile.tem
+  echo "Setting SIM_ENDIAN=-DWITH_TARGET_BYTE_ORDER=$endian"
+  sed -e "s/^SIM_ENDIAN.*=.*\$/SIM_ENDIAN = -DWITH_TARGET_BYTE_ORDER=$endian/" \
+    < Makefile.tem > Makefile
+  rm -f Makefile.tem
+fi
+

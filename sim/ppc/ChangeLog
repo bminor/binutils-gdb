@@ -1,3 +1,17 @@
+Tue Oct 31 15:20:04 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in: Add support for --enable-sim-inline,
+	--enable-sim-bswap, --enable-sim-cflags, --enable-sim-complex,
+	--enable-sim-switch, --enable-sim-duplicate, --enable-sim-filter,
+	and --enable-sim-endian switch to control various Makefile
+	variables.
+	* configure: Regenerate from configure.in.
+	* Makefile: Add various Make variables that the various switches
+	alter.
+
+	* std-config.h (DEFAULT_INLINE): Don't set this to 2 if using GCC
+	and optimizing by default.
+
 Fri Oct 27 19:26:27 1995  Andrew Cagney  <cagney@cagney@highland.com.au>
 
 	* bits.h (ROTL32, ROTL64): Were functions, made them macros, now
