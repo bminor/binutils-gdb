@@ -1,7 +1,11 @@
+Tue Aug 16 00:17:20 1994  Eric Youngdale  (ericy@cais.cais.com)
+
+	* scripttempl/aout.sc: Add .linux-dynamic after .data.
+
 Tue Aug 16 00:08:22 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
-	* Treat --dll-verbose as --version, for Linux compatibility.  From
-	hjl@nynexst.com (H.J. Lu).
+	* lexsup.c (parse_args) Treat --dll-verbose as --version, for
+	Linux compatibility.  From hjl@nynexst.com (H.J. Lu).
 
 Mon Aug 15 17:17:33 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
