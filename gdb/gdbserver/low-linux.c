@@ -78,6 +78,23 @@ create_inferior (char *program, char **allargs)
   return pid;
 }
 
+/* Attach to an inferior process.  */
+
+int
+myattach (int pid)
+{
+  if (ptrace (PTRACE_ATTACH, pid, 0, 0) != 0)
+    {
+      fprintf (stderr, "Cannot attach to process %d: %s (%d)\n", pid,
+	       errno < sys_nerr ? sys_errlist[errno] : "unknown error",
+	       errno);
+      fflush (stderr);
+      _exit (0177);
+    }
+
+  return 0;
+}
+
 /* Kill the inferior process.  Make us have no inferior.  */
 
 void

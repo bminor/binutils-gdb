@@ -39,6 +39,21 @@ start_inferior (char *argv[], char *statusptr)
   return mywait (statusptr);
 }
 
+static int
+attach_inferior (int pid, char *statusptr, unsigned char *sigptr)
+{
+  /* myattach should return -1 if attaching is unsupported,
+     0 if it succeeded, and call error() otherwise.  */
+  if (myattach (pid) != 0)
+    return -1;
+
+  inferior_pid = pid;
+
+  *sigptr = mywait (statusptr);
+
+  return 0;
+}
+
 extern int remote_debug;
 
 int
@@ -49,6 +64,10 @@ main (int argc, char *argv[])
   unsigned char signal;
   unsigned int len;
   CORE_ADDR mem_addr;
+  int bad_attach = 0;
+  int pid = 0;
+  int attached = 0;
+  char *arg_end;
 
   if (setjmp (toplevel))
     {
@@ -56,15 +75,44 @@ main (int argc, char *argv[])
       exit (1);
     }
 
-  if (argc < 3)
-    error ("Usage: gdbserver tty prog [args ...]");
+  if (argc >= 3 && strcmp (argv[2], "--attach") == 0)
+    {
+      if (argc == 4
+	  && argv[3] != '\0'
+	  && (pid = strtoul (argv[3], &arg_end, 10)) != 0
+	  && *arg_end == '\0')
+	{
+	  ;
+	}
+      else
+	bad_attach = 1;
+    }
+
+  if (argc < 3 || bad_attach)
+    error ("Usage:\tgdbserver tty prog [args ...]\n"
+		 "\tgdbserver tty --attach pid");
 
   initialize_low ();
 
-  /* Wait till we are at first instruction in program.  */
-  signal = start_inferior (&argv[2], &status);
+  if (pid == 0)
+    {
+      /* Wait till we are at first instruction in program.  */
+      signal = start_inferior (&argv[2], &status);
 
-  /* We are now stopped at the first instruction of the target process */
+      /* We are now stopped at the first instruction of the target process */
+    }
+  else
+    {
+      switch (attach_inferior (pid, &status, &signal))
+	{
+	case -1:
+	  error ("Attaching not supported on this target");
+	  break;
+	default:
+	  attached = 1;
+	  break;
+	}
+    }
 
   while (1)
     {
@@ -83,8 +131,18 @@ main (int argc, char *argv[])
 	      remote_debug = !remote_debug;
 	      break;
 	    case '!':
-	      extended_protocol = 1;
-	      prepare_resume_reply (own_buf, status, signal);
+	      if (attached == 0)
+		{
+		  extended_protocol = 1;
+		  prepare_resume_reply (own_buf, status, signal);
+		}
+	      else
+		{
+		  /* We can not use the extended protocol if we are
+		     attached, because we can not restart the running
+		     program.  So return unrecognized.  */
+		  own_buf[0] = '\0';
+		}
 	      break;
 	    case '?':
 	      prepare_resume_reply (own_buf, status, signal);
@@ -250,8 +308,8 @@ main (int argc, char *argv[])
 	}
       else
 	{
-	  fprintf (stderr, "Remote side has terminated connection.  GDBserver will reopen the connection.\n");
-
+	  fprintf (stderr, "Remote side has terminated connection.  "
+			   "GDBserver will reopen the connection.\n");
 	  remote_close ();
 	}
     }

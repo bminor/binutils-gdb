@@ -81,6 +81,13 @@ kill_inferior (void)
 /*************inferior_died ();****VK**************/
 }
 
+/* Attaching is not supported.  */
+int
+myattach (int pid)
+{
+  return -1;
+}
+
 /* Return nonzero if the given thread is still alive.  */
 int
 mythread_alive (int pid)

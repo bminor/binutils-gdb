@@ -72,6 +72,13 @@ create_inferior (char *program, char **allargs)
   return pid;
 }
 
+/* Attaching is not supported.  */
+int
+myattach (int pid)
+{
+  return -1;
+}
+
 /* Kill the inferior process.  Make us have no inferior.  */
 
 void
