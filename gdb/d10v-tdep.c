@@ -25,6 +25,7 @@
 #include "defs.h"
 #include "frame.h"
 #include "frame-unwind.h"
+#include "frame-base.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "gdbcmd.h"
@@ -598,7 +599,10 @@ d10v_skip_prologue (CORE_ADDR pc)
 struct d10v_unwind_cache
 {
   CORE_ADDR return_pc;
-  /* The frame's base.  Used when constructing a frame ID.  */
+  /* The previous frame's inner most stack address.  Used as this
+     frame ID's stack_addr.  */
+  CORE_ADDR prev_sp;
+  /* The frame's base, optionally used by the high-level debug info.  */
   CORE_ADDR base;
   int size;
   CORE_ADDR *saved_regs;
@@ -715,10 +719,10 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
   info->return_pc = 0;
   info->sp_offset = 0;
 
-  pc = get_pc_function_start (frame_pc_unwind (next_frame));
-
   info->uses_frame = 0;
-  while (1)
+  for (pc = get_pc_function_start (frame_pc_unwind (next_frame));
+       pc < frame_pc_unwind (next_frame);
+       pc += 4)
     {
       op = (unsigned long) read_memory_integer (pc, 4);
       if ((op & 0xC0000000) == 0xC0000000)
@@ -765,7 +769,6 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
 	      || !prologue_find_regs (info, op2, pc))
 	    break;
 	}
-      pc += 4;
     }
 
   info->size = -info->sp_offset;
@@ -799,14 +802,14 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
     }
 
   info->base = d10v_make_daddr (this_base);
-  prev_sp = d10v_make_daddr (prev_sp);
+  info->prev_sp = d10v_make_daddr (prev_sp);
 
   /* Adjust all the saved registers so that they contain addresses and
      not offsets.  */
   for (i = 0; i < NUM_REGS - 1; i++)
     if (info->saved_regs[i])
       {
-	info->saved_regs[i] = (prev_sp + info->saved_regs[i]);
+	info->saved_regs[i] = (info->prev_sp + info->saved_regs[i]);
       }
 
   if (info->saved_regs[LR_REGNUM])
@@ -825,7 +828,7 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
 
   /* The SP_REGNUM is special.  Instead of the address of the SP, the
      previous frame's SP value is saved.  */
-  info->saved_regs[SP_REGNUM] = prev_sp;
+  info->saved_regs[SP_REGNUM] = info->prev_sp;
 
   return info;
 }
@@ -1450,9 +1453,6 @@ d10v_frame_this_id (struct frame_info *next_frame,
   CORE_ADDR base;
   CORE_ADDR pc;
 
-  /* Start with a NULL frame ID.  */
-  (*this_id) = null_frame_id;
-
   /* The PC is easy.  */
   pc = frame_pc_unwind (next_frame);
 
@@ -1464,7 +1464,7 @@ d10v_frame_this_id (struct frame_info *next_frame,
   /* Hopefully the prologue analysis either correctly determined the
      frame's base (which is the SP from the previous frame), or set
      that base to "NULL".  */
-  base = info->base;
+  base = info->prev_sp;
   if (base == STACK_START || base == 0)
     return;
 
@@ -1478,8 +1478,7 @@ d10v_frame_this_id (struct frame_info *next_frame,
       && get_frame_id (next_frame).base == base)
     return;
 
-  this_id->base = base;
-  this_id->pc = pc;
+  (*this_id) = frame_id_build (base, pc);
 }
 
 static void
@@ -1553,8 +1552,7 @@ d10v_frame_prev_register (struct frame_info *next_frame,
     }
 }
 
-
-static struct frame_unwind d10v_frame_unwind = {
+static const struct frame_unwind d10v_frame_unwind = {
   d10v_frame_this_id,
   d10v_frame_prev_register
 };
@@ -1564,6 +1562,21 @@ d10v_frame_p (CORE_ADDR pc)
 {
   return &d10v_frame_unwind;
 }
+
+static CORE_ADDR
+d10v_frame_base_address (struct frame_info *next_frame, void **this_cache)
+{
+  struct d10v_unwind_cache *info
+    = d10v_frame_unwind_cache (next_frame, this_cache);
+  return info->base;
+}
+
+static const struct frame_base d10v_frame_base = {
+  &d10v_frame_unwind,
+  d10v_frame_base_address,
+  d10v_frame_base_address,
+  d10v_frame_base_address
+};
 
 /* Assuming NEXT_FRAME->prev is a dummy, return the frame ID of that
    dummy frame.  The frame ID's base needs to match the TOS value
@@ -1698,6 +1711,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_registers_info (gdbarch, d10v_print_registers_info);
 
   frame_unwind_append_predicate (gdbarch, d10v_frame_p);
+  frame_base_set_default (gdbarch, &d10v_frame_base);
 
   /* Methods for saving / extracting a dummy frame's ID.  */
   set_gdbarch_unwind_dummy_id (gdbarch, d10v_unwind_dummy_id);

@@ -1,5 +1,20 @@
 2003-04-01  Andrew Cagney  <cagney@redhat.com>
 
+	* Makefile.in (d10v-tdep.o): Update dependencies.
+	* d10v-tdep.c: Include "frame-base.h".
+	(d10v_frame_unwind): Make constant.
+	(d10v_frame_base_address): New function.
+	(d10v_frame_base): New variable.
+	(d10v_gdbarch_init): Set frame_base default.
+	(struct d10v_unwind_cache): Add the field "prev_sp".  Update
+	comment for base.
+	(d10v_frame_unwind_cache): Set and use "prev_sp".
+	(d10v_frame_this_id): Use the previous frame's inner most stack
+	address and this frame's func address for the frame ID.  Use
+	frame_id_build.  Don't analyze beyond the current instruction.
+	
+2003-04-01  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.h (get_frame_locals_address, get_frame_args_address):
 	Refer to the base address, instead of the address of the first
 	local or parameter.
