@@ -1,3 +1,8 @@
+Sun Mar 13 09:10:08 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (TAGS): Just build TAGS in each subdirectory, rather
+	than the "make ls" stuff which used to be here.
+
 Fri Mar 11 12:52:39 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* config.guess:  Recognize i[34]86-unknown-freebsd.
