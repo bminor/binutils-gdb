@@ -1,3 +1,9 @@
+Sat Dec 30 16:08:57 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config-ml.in: Add support for
+	--disable-{softfloat,m68881,m68000,m68020} on m68*-*-*.
+	Simplify setting of multidirs from --disable-foo.
+
 Fri Dec 29 07:56:11 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in (EXTRA_GCC_FLAGS): If any of the make variables
