@@ -4,8 +4,7 @@
 	* gdb.texinfo:
 	* gdbint.texinfo:
 	* libgdb.texinfo:
-	* annotate.texinfo: Fix the application of GFDL in the Copyright
-	notice.
+	* annotate.texi: Fix the application of GFDL in the Copyright notice.
 
 2001-08-15  Christopher Faylor <cgf@cygnus.com>
 
