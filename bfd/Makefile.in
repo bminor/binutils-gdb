@@ -416,7 +416,7 @@ install:
 	$(INSTALL_DATA) $(BFD_H) $(oldincludedir)/bfd.h; \
 	$(INSTALL_DATA) $(INCDIR)/ansidecl.h $(oldincludedir)/ansidecl.h; \
 	$(INSTALL_DATA) $(INCDIR)/obstack.h $(oldincludedir)/obstack.h; \
-	@$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS); \
+	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS); \
 	fi
 
 Makefile: Makefile.in configure.in $(host_makefile_frag) $(target_makefile_frag)
