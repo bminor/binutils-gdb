@@ -65,6 +65,8 @@ z8k
 
 Things-to-lose:
 
+testsuite
+
 Do-last:
 
 m32r_files="configure configure.in ChangeLog"
