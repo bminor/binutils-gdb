@@ -1,3 +1,7 @@
+2003-05-14  Theodore A. Roth  <troth@openavr.org>
+
+	* gdbint.texinfo (Breakpoint Handling): Correct a double negative.
+
 2003-05-10  H.J. Lu <hongjiu.lu@intel.com>
 
 	* Makefile.in (gdb-cfg.texi): Replace $$LN_S with $(LN_S).

@@ -288,7 +288,7 @@ A third possibility is that the target already has the ability to do
 breakpoints somehow; for instance, a ROM monitor may do its own
 software breakpoints.  So although these are not literally ``hardware
 breakpoints'', from @value{GDBN}'s point of view they work the same;
-@value{GDBN} need not do nothing more than set the breakpoint and wait
+@value{GDBN} need not do anything more than set the breakpoint and wait
 for something to happen.
 
 Since they depend on hardware resources, hardware breakpoints may be
