@@ -1,3 +1,26 @@
+Tue May 12 17:44:39 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+	Changes to support GDB running on DOS using GO32 and H8 support
+
+	* defs.h: if xm.h doesn't define FOPEN_RB, include "fopen-same.h",
+	allowing hosts with different text and binary file formats to
+	work.
+	* coffread.c (read_coff_symtab): changed calling convention and
+	operation - now it opens its own file with FOPEN_RB rather than
+	duping and fdopening the provided handle.
+	* dbxread.c, cplus-dem.c: #include mangling.
+	* exec.c: If O_BINARY isn't defined, set it to 0, call openp for
+	binary files oring in the right bit.
+	* utils.c, terminal.h, inflow.c: hackery because dos doesn't have terminals.
+	* remote-hms.c: cleanup to use the new remote serial stuff
+	* serial.h, ser-termios.c, ser-go32.c: newfiles to provide host
+	independent remote terminal I/O.
+	* remote.c: if DONT_USE_REMOTE not defined, then don't use it.
+	* source.c (openp): fix off by one problem removing / - can now
+	open a source file in the root directory with DOS.
+	* values.c (value_as_pointer): remove bogus address bits from
+	long. (unpack_long): unpack into unsigned long/short if pointer.
+
+
 Tue May 12 14:15:48 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* infrun.c (child_attach):  Don't allow gdb to attach to itself.

@@ -90,6 +90,7 @@ gdbcmd.h
 gdbcore.h
 gdbtypes.c
 gdbtypes.h
+go32-xdep.c
 gould-pinsn.c
 gould-xdep.c
 h8300-tdep.c
@@ -171,6 +172,9 @@ sparc-xdep.c
 stack.c
 standalone.c
 stuff.c
+serial.h
+ser-termios.c
+ser-go32.c
 sun3-xdep.c
 sun386-xdep.c
 symfile.c
@@ -246,7 +250,6 @@ xcoffread.c
 xcoffsolib.c
 xcoffsolib.h
 xm-3b1.h
-xm-m88k.h
 xm-altos.h
 xm-amix.h
 xm-apollo68v.h
@@ -254,6 +257,7 @@ xm-arm.h
 xm-bigmips.h
 xm-convex.h
 xm-delta88.h
+xm-go32.h
 xm-hp300bsd.h
 xm-hp300hpux.h
 xm-i386mach.h
@@ -265,6 +269,7 @@ xm-irix3.h
 xm-irix4.h
 xm-isi.h
 xm-m68k.h
+xm-m88k.h
 xm-merlin.h
 xm-mips.h
 xm-news.h

@@ -287,9 +287,9 @@ UNSIGNED_SHORT(read_memory_integer (read_register (SP_REGNUM), 2))
 
 
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
-{ bcopy ((FROM), (TO), 2); }
+{ memcpy((TO), (FROM),  2); }
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
-{ bcopy ((FROM), (TO), 4); }
+{ memcpy((TO), (FROM),  2); }
 
 #define	BEFORE_MAIN_LOOP_HOOK	\
   hms_before_main_loop();
@@ -303,3 +303,5 @@ typedef unsigned short INSN_WORD;
 #define ADDR_BITS_SET(addr) (((addr)))
 
 #define read_memory_short(x)  (read_memory_integer(x,2) & 0xffff)
+#define DONT_USE_REMOTE
+

@@ -234,75 +234,37 @@ dcache_init ()
  ***********************************************************************/
 
 static int timeout = 2;
-static char *dev_name  = "/dev/ttya";
 
-
+static CONST char *dev_name;
 
 
 /* Descriptor for I/O to remote machine.  Initialize it to -1 so that
    hms_open knows that we don't have a file open when the program
    starts.  */
-int hms_desc = -1;
-#define OPEN(x) ((x) >= 0)
 
 
-void hms_open();
+int is_open = 0;
+int check_open()
+{
+  if (!is_open)
+  {
+    error("remote device not open");
+  }
+}
 
 #define ON	1
 #define OFF	0
-static void
-rawmode(desc, turnon)
-int	desc;
-int	turnon;
-{
-  TERMINAL sg;
-
-  if (desc < 0)
-    return;
-
-  ioctl (desc, TIOCGETP, &sg);
-
-  if (turnon) {
-#ifdef HAVE_TERMIO
-  	sg.c_lflag &= ~(ICANON);
-#else
-	sg.sg_flags |= RAW;
-#endif
-  } else {
-#ifdef HAVE_TERMIO
-  	sg.c_lflag |= ICANON;
-#else
-	sg.sg_flags &= ~(RAW);
-#endif
-  }
-  ioctl (desc, TIOCSETP, &sg);
-}
-
 
 /* Read a character from the remote system, doing all the fancy
    timeout stuff.  */
 static int
 readchar ()
 {
-  char buf;
+  int ok;
+  int buf;
+  buf = serial_timedreadchar(timeout, &ok);
 
-  buf = '\0';
-#ifdef HAVE_TERMIO
-  /* termio does the timeout for us.  */
-  read (hms_desc, &buf, 1);
-#else
-  alarm (timeout);
-  if (read (hms_desc, &buf, 1) < 0)
-  {
-    if (errno == EINTR)
-     error ("Timeout reading from remote system.");
-    else
-     perror_with_name ("remote");
-  }
-  alarm (0);
-#endif
-
-  if (buf == '\0')
+  if (!ok)
    error ("Timeout reading from remote system.");
 
   if (!quiet)
@@ -314,26 +276,15 @@ readchar ()
 static int
 readchar_nofail ()
 {
-  char buf;
-
-  buf = '\0';
-#ifdef HAVE_TERMIO
-  /* termio does the timeout for us.  */
-  read (hms_desc, &buf, 1);
-#else
-  alarm (timeout);
-  if (read (hms_desc, &buf, 1) < 0)
-  {
-    return 0;
-  }
-  alarm (0);
-#endif
-
-  if (buf == '\0') 
-  {
-    return 0;
-  }
+  int ok;
+  int buf;
+  buf = serial_timedreadchar(timeout, &ok);
+  if (!ok) buf = 0;
+  if (!quiet)
+   printf("%c",buf);
+  
   return buf & 0x7f;
+
 }
 
 /* Keep discarding input from the remote system, until STRING is found. 
@@ -379,7 +330,6 @@ expect (string)
 static void
 expect_prompt ()
 {
-
   expect ("HMS>");
 }
 
@@ -435,21 +385,7 @@ get_hex_word()
   return val;
 }
 /* Called when SIGALRM signal sent due to alarm() timeout.  */
-#ifndef HAVE_TERMIO
 
-#ifndef __STDC__
-# ifndef volatile
-#  define volatile /**/
-# endif
-#endif
-volatile int n_alarms;
-
-void
-hms_timer ()
-{
-  n_alarms++;
-}
-#endif
 
 
 /* Number of SIGTRAPs we need to simulate.  That is, the next
@@ -466,12 +402,7 @@ int	from_tty;
 
 }
 
-static check_open()
-{
-  if (!OPEN(hms_desc)) {
-      hms_open("",0);
-    }  
-}
+
 
 /*
  * Download a file specified in 'args', to the hms. 
@@ -485,7 +416,8 @@ int	fromtty;
   asection *s;
   int	n;
   char	buffer[1024];
-	
+
+   
   DENTER("hms_load()");
   check_open();
 
@@ -512,9 +444,9 @@ int	fromtty;
       int i;
 
       
-#define DELTA 2048
+#define DELTA 1024
       char *buffer = xmalloc(DELTA);
-      printf_filtered("%s: %4x .. %4x  ",s->name, s->vma, s->vma + s->_raw_size);
+      printf_filtered("%s\t: 0x%4x .. 0x%4x  ",s->name, s->vma, s->vma + s->_raw_size);
       for (i = 0; i < s->_raw_size; i+= DELTA) 
       {
 	int delta = DELTA;
@@ -526,12 +458,14 @@ int	fromtty;
 	printf_filtered("*");
 	fflush(stdout);
       }
-  printf_filtered(  "\n");      
+      printf_filtered(  "\n");      
       free(buffer);
     }
     s = s->next;
   }
-
+  sprintf(buffer, "r PC=%x", abfd->start_address);
+  hms_write_cr(buffer);
+  expect_prompt();
   
   DEXIT("hms_load()");
 }
@@ -545,7 +479,7 @@ hms_create_inferior (execfile, args, env)
      char **env;
 {
   int entry_pt;
-
+  char buffer[100];    
   DENTER("hms_create_inferior()");
 
   if (args && *args)
@@ -556,61 +490,19 @@ hms_create_inferior (execfile, args, env)
 
   entry_pt = (int) bfd_get_start_address (exec_bfd);
   check_open();
-  
-  if (OPEN(hms_desc))
-  {
-char buffer[100];    
-    hms_kill(NULL,NULL);	 
-    hms_clear_breakpoints();
-    init_wait_for_inferior ();
-    /* Clear the input because what the hms sends back is different
-     * depending on whether it was running or not.
-     */
-/*sprintf(buffer,"g %x", entry_pt);
-
-    hms_write_cr(buffer);
-	*/
-hms_write_cr("");
-
-    expect_prompt();
 
 
-    insert_breakpoints ();	/* Needed to get correct instruction in cache */
-    proceed(entry_pt, -1, 0);
+  hms_kill(NULL,NULL);	 
+  hms_clear_breakpoints();
+  init_wait_for_inferior ();
+  hms_write_cr("");
+  expect_prompt();
+
+  insert_breakpoints ();	/* Needed to get correct instruction in cache */
+  proceed(entry_pt, -1, 0);
 
 
-  } 
   DEXIT("hms_create_inferior()");
-}
-
-/* Translate baud rates from integers to damn B_codes.  Unix should
-   have outgrown this crap years ago, but even POSIX wouldn't buck it.  */
-
-#ifndef B19200
-#define B19200 EXTA
-#endif
-#ifndef B38400
-#define B38400 EXTB
-#endif
-
-static struct {int rate, damn_b;} baudtab[] = {
-	{9600, B9600},
-	{19200, B19200},
-	{300, B300},
-	{1200, B1200},
-	{2400, B2400},
-	{4800, B4800},
-	{-1, -1},
-};
-
-static int damn_b (rate)
-     int rate;
-{
-  int i;
-
-  for (i = 0; baudtab[i].rate != -1; i++)
-    if (rate == baudtab[i].rate) return baudtab[i].damn_b;
-  return B19200;
 }
 
 
@@ -661,65 +553,46 @@ static int baudrate = 9600;
 static int
 is_baudrate_right()
 {
-  
-
+  int ok;
   /* Put this port into NORMAL mode, send the 'normal' character */
+
   hms_write("\001", 1);		/* Control A */
   hms_write("\r", 1);		/* Cr */
-
-  while ( readchar_nofail()) /* Skip noise we put there */
-   ;
   
-  hms_write("r");
+  while (1) 
+  {
+    serial_timedreadchar(timeout, &ok);
+    if (!ok) break;
+  }
+
+  hms_write("r",1);
+
   if (readchar_nofail() == 'r')  
    return 1;
 
   /* Not the right baudrate, or the board's not on */
   return 0;
-  
-
 }
 static void
 set_rate()
 {
-  TERMINAL sg;    
-  ioctl (hms_desc, TIOCGETP, &sg);
-#ifdef HAVE_TERMIO
-  sg.c_cc[VMIN] = 0;		/* read with timeout.  */
-  sg.c_cc[VTIME] = timeout * 10;
-  sg.c_lflag &= ~(ICANON | ECHO);
-  sg.c_cflag = (sg.c_cflag & ~CBAUD) | damn_b (baudrate);
-#else
-  sg.sg_ispeed = damn_b (baudrate);
-  sg.sg_ospeed = damn_b (baudrate);
-  sg.sg_flags |= RAW | ANYP;
-  sg.sg_flags &= ~ECHO;
-#endif
-
-  ioctl (hms_desc, TIOCSETP, &sg);
-  
+  if (!serial_setbaudrate(baudrate))
+   error("Can't set baudrate");
 }
 
 static void
 get_baudrate_right()
 {
-
-  int which_rate = 0;
-  
   while (!is_baudrate_right()) 
   {
-    which_rate++;
-
-    if (baudtab[which_rate].rate == -1)
-    {
-      which_rate = 0;
+    baudrate = serial_nextbaudrate(baudrate);
+    if (baudrate == 0) {
+      printf_filtered("Board not yet in sync\n");
+      break;
     }
-
-    
-    baudrate = baudtab[which_rate].rate;
     printf_filtered("Board not responding, trying %d baud\n",baudrate);
     QUIT;
-    set_rate();
+    serial_setbaudrate(baudrate);
   }
 }
 
@@ -738,46 +611,32 @@ hms_open (name, from_tty)
     name = "";
     
   }
-  
-  hms_close (0);
+  if (is_open)  
+   hms_close (0);
+  if (name && strlen(name))
+   dev_name = strdup(name);
+  if (!serial_open(dev_name))
+   perror_with_name ((char *)dev_name);
+  serial_raw();
+  is_open = 1;
 
-  hms_desc = open (dev_name, O_RDWR);
-  if (hms_desc < 0)
-   perror_with_name (dev_name);
-
-  set_rate();
 
   dcache_init();
 
 
   /* start_remote ();              /* Initialize gdb process mechanisms */
 
-
-#ifndef HAVE_TERMIO
-#ifndef NO_SIGINTERRUPT
-  /* Cause SIGALRM's to make reads fail with EINTR instead of resuming
-     the read.  */
-  if (siginterrupt (SIGALRM, 1) != 0)
-   perror ("hms_open: error in siginterrupt");
-#endif
-
-  /* Set up read timeout timer.  */
-  if ((void (*)) signal (SIGALRM, hms_timer) == (void (*)) -1)
-   perror ("hms_open: error in signal");
-#endif
-
   get_baudrate_right();
   
   /* Hello?  Are you there?  */
-  write (hms_desc, "\r", 1);
- 
+  serial_write("\r",1);
   expect_prompt ();
 
   /* Clear any break points */
   hms_clear_breakpoints();
 
 
-  printf_filtered("Remote debugging on an H8/300 HMS via %s.\n",dev_name);
+  printf_filtered("Connected to remote H8/300 HMS system.\n");
 
   DEXIT("hms_open()");
 }
@@ -795,21 +654,10 @@ hms_close (quitting)
   hms_clear_breakpoints();
 
   /* Put this port back into REMOTE mode */ 
-  if (OPEN(hms_desc)) {
-
-     sleep(1);		/* Let any output make it all the way back */
-     write(hms_desc, "R\r", 2);
-  }
-
-  /* Due to a bug in Unix, fclose closes not only the stdio stream,
-     but also the file descriptor.  So we don't actually close
-     hms_desc.  */
-  if (OPEN(hms_desc))
-    close (hms_desc); 
-
-  /* Do not try to close hms_desc again, later in the program.  */
-
-  hms_desc = -1;
+  sleep(1);			/* Let any output make it all the way back */
+  serial_write("R\r", 2);
+  serial_close();
+  is_open = 0;
 
   DEXIT("hms_close()");
 }
@@ -852,11 +700,9 @@ hms_detach (args,from_tty)
      int from_tty;
 {
   DENTER("hms_detach()");
-  if (OPEN(hms_desc)) { /* Send it on its way (tell it to continue)  */
+  if (is_open)
+  { 
 	hms_clear_breakpoints();
-#if 0
-  	fprintf(hms_stream,"G\r");
-#endif
   }
  
   pop_target();		/* calls hms_close to do the real work */
@@ -934,7 +780,7 @@ hms_wait (status)
     return 0;
   }
 
-  timeout = 0;			/* Don't time out -- user program is running. */
+  timeout = 99999; 	/* Don't time out -- user program is running. */
   immediate_quit = 1;		/* Helps ability to QUIT */
   while (1) 
   {
@@ -1010,11 +856,8 @@ static char *
 get_reg_name (regno)
      int regno;
 {
-static  char *rn[NUM_REGS]= REGISTER_NAMES;
-  
-
+  static  char *rn[NUM_REGS]= REGISTER_NAMES;
   return rn[regno];
-
 }
 
 /* Read the remote registers.  */
@@ -1069,7 +912,8 @@ hms_write(a,l)
 char *a;
 {
   int i;
-  write(hms_desc,a,l);
+  serial_write(a, l);
+
   if (!quiet)
    for (i = 0; i < l ; i++)
    {
@@ -1080,12 +924,13 @@ char *a;
 hms_write_cr(s)
 char *s;
 {
-hms_write( s, strlen(s));
-hms_write("\r",1);  
+  hms_write( s, strlen(s));
+  hms_write("\r",1);  
 }
 
 static void
-hms_fetch_registers ()
+hms_fetch_register (dummy)
+int dummy;
 {
 #define REGREPLY_SIZE 79
   char linebuf[REGREPLY_SIZE+1];
@@ -1132,43 +977,30 @@ hms_fetch_registers ()
   while (!gottok);
   for (i = 0; i < NUM_REGS; i++) 
   {
-    supply_register (i, reg+i);
+    char swapped[2];
+    swapped[1] = reg[i];
+    swapped[0] = (reg[i])>> 8;
+
+    supply_register (i, swapped);
   }  
 }
 
-/* Fetch register REGNO, or all registers if REGNO is -1.
- */
-static void
-hms_fetch_register (regno)
-     int regno;
-{
-
-    hms_fetch_registers ();
-
-}
-
-/* Store the remote registers from the contents of the block REGS.  */
-
-static int 
-hms_store_registers ()
-{
-  int i;
-  for (i = 0; i < NUM_REGS; i++)
-   hms_store_register(i);
-  return 0;
-  
-}
 
 /* Store register REGNO, or all if REGNO == -1.
    Return errno value.  */
-int
+static void
 hms_store_register (regno)
      int regno;
 {
 
   /* printf("hms_store_register() called.\n"); fflush(stdout); /* */
-  if (regno == -1)
-   hms_store_registers ();
+  if (regno == -1) 
+  {
+    for (regno = 0; regno < NUM_REGS; regno ++) 
+    {
+      hms_store_register(regno);
+    }
+  }
   else
   {
     char *name = get_reg_name (regno);
@@ -1179,8 +1011,10 @@ hms_store_register (regno)
   }
   
   DEXIT("hms_store_registers()");
-  return 0;
+
 }
+
+
 
 /* Get ready to modify the registers array.  On machines which store
    individual registers, this doesn't need to do anything.  On machines
@@ -1301,50 +1135,53 @@ hms_xfer_inferior_memory(memaddr, myaddr, len, write, target)
   return len;
 }
 
-#if 0
-int
-hms_xfer_inferior_memory (memaddr, myaddr, len, write)
-     CORE_ADDR memaddr;
-     char *myaddr;
-     int len;
-     int write;
-{
-  memaddr &= 0xffff;
-  if (write)
-   return hms_write_inferior_memory (memaddr, myaddr, len);
-  else
-   return hms_read_inferior_memory (memaddr, myaddr, len);
-
-}
-#endif
-
 int
 hms_write_inferior_memory (memaddr, myaddr, len)
      CORE_ADDR memaddr;
-     char *myaddr;
+     unsigned char *myaddr;
      int len;
 {
+  bfd_vma addr;
+  int done;
+  int todo ;
+  done = 0;
+  while(done < len) 
+  {
+    char buffer[20];
+    int thisgo;
+    int idx;
+    thisgo = len - done;
+    if (thisgo > 20) thisgo = 20;
 
-  bfd *abfd = bfd_openw(dev_name, "srec");
-  asection *a;
+    sprintf(buffer,"M.B %4x =", memaddr+done);
+    hms_write(buffer,10);
+    for (idx = 0; idx < thisgo; idx++) 
+    {
+      char buf[20];
+      sprintf(buf, "%2x ", myaddr[idx+done]); 
+      hms_write(buf, 3);
+    }
+    hms_write_cr("");
+    expect_prompt();
+    done += thisgo;
+  }
 
-  bfd_set_format(abfd, bfd_object);
-  a = bfd_make_section(abfd, ".text");
-  a->vma = memaddr;
-  a->_raw_size = len;
-  a->flags = SEC_LOAD | SEC_HAS_CONTENTS;
-  hms_write_cr("tl");		/* tell hms here comes the recs */  
-  bfd_set_section_contents(abfd, a, myaddr, 0, len);
-  bfd_close(abfd);
-  
-  expect_prompt();
+
 }
 
 void
 hms_files_info ()
 {
-  printf_filtered("\tAttached to %s at %d baud and running program %s\n",
-	  dev_name, baudrate, bfd_get_filename(exec_bfd));
+char *file = "nothing";
+if (exec_bfd)
+ file = bfd_get_filename(exec_bfd);
+
+if (exec_bfd)
+#ifdef __GO32__
+   printf_filtered("\tAttached to DOS asynctsr and running program %s\n",file);
+#else
+  printf_filtered("\tAttached to %s at %d baud and running program %s\n",file);
+#endif
   printf_filtered("\ton an H8/300 processor.\n");
 }
 
@@ -1431,17 +1268,9 @@ hms_read_inferior_memory(memaddr, myaddr, len)
        
     }
   } 
-  
-  
-  
   hms_write_cr(" ");
   expect_prompt();
-  
-
-  
-  
   return len;
-
 }
 
 /* This routine is run as a hook, just before the main command loop is
@@ -1457,29 +1286,6 @@ hms_before_main_loop ()
   extern jmp_buf to_top_level;
 
   push_target (&hms_ops);
-#if 0
-
-  while (current_target != &hms_ops) {
-      /* remote tty not specified yet */
-      if ( instream == stdin ){
-	  printf("\nEnter device and filename, or \"quit\" to quit:  ");
-	  fflush( stdout );
-	}
-      fgets( ttyname, sizeof(ttyname)-1, stdin );
-
-      if ( !strcmp("quit", ttyname) ){
-	  exit(1);
-	}
-
-      hms_open( ttyname, 1 );
-
-      /* Now that we have a tty open for talking to the remote machine,
-	 download the executable file if one was specified.  */
-      if ( !setjmp(to_top_level) && exec_bfd ) {
-	  target_load (bfd_get_filename (exec_bfd), 1);
-	}
-    }
-#endif
 }
 
 
@@ -1490,24 +1296,26 @@ hms_insert_breakpoint(addr, save)
 CORE_ADDR	addr;
 char		*save;	/* Throw away, let hms save instructions */
 {
-
   DENTER("hms_insert_breakpoint()"); 
   check_open();
   
-  if (num_brkpts < MAX_BREAKS) {
-      char buffer[100];
-      num_brkpts++;
-      sprintf(buffer,"b %x", addr & 0xffff);
-      hms_write_cr(buffer);
-      expect_prompt ();
-      DEXIT("hms_insert_breakpoint() success"); 
-      return(0);		/* Success */
-    } else {
-	fprintf_filtered(stderr,
-			 "Too many break points, break point not installed\n");
-  	DEXIT("hms_insert_breakpoint() failure"); 
-	return(1);		/* Failure */
-      }
+  if (num_brkpts < MAX_BREAKS) 
+  {
+    char buffer[100];
+    num_brkpts++;
+    sprintf(buffer,"b %x", addr & 0xffff);
+    hms_write_cr(buffer);
+    expect_prompt ();
+    DEXIT("hms_insert_breakpoint() success"); 
+    return(0);
+  }
+  else 
+  {
+    fprintf_filtered(stderr,
+		     "Too many break points, break point not installed\n");
+    DEXIT("hms_insert_breakpoint() failure"); 
+    return(1);
+  }
 
 
 }
@@ -1517,15 +1325,16 @@ CORE_ADDR	addr;
 char		*save;	/* Throw away, let hms save instructions */
 {
   DENTER("hms_remove_breakpoint()");
-  if (num_brkpts > 0) {
-      char buffer[100];
+  if (num_brkpts > 0) 
+  {
+    char buffer[100];
       
-      num_brkpts--;
-      sprintf(buffer,"b - %x", addr & 0xffff);
-      hms_write_cr(buffer);
-      expect_prompt();
+    num_brkpts--;
+    sprintf(buffer,"b - %x", addr & 0xffff);
+    hms_write_cr(buffer);
+    expect_prompt();
       
-    }
+  }
   DEXIT("hms_remove_breakpoint()");
   return(0);
 }
@@ -1536,12 +1345,11 @@ hms_clear_breakpoints()
 { 
 
   DENTER("hms_clear_breakpoint()");
-  if (OPEN(hms_desc)) {
-      hms_write_cr("b -");
-      expect_prompt ();
-    }
+  if (is_open) {
+    hms_write_cr("b -");
+    expect_prompt ();
+  }
   num_brkpts = 0;
-
   DEXIT("hms_clear_breakpoint()");
 }
 static void
@@ -1549,39 +1357,14 @@ hms_mourn()
 { 
   DENTER("hms_mourn()");
   hms_clear_breakpoints();
-/*  pop_target ();                /* Pop back to no-child state */
   generic_mourn_inferior ();
   DEXIT("hms_mourn()");
 }
 
-/* Display everthing we read in from the hms until we match/see the
- * specified string
- */
-static int
-display_until(str)
-char	*str;
-{
-	int	i=0,j,c;
-
-	while (c=readchar()) {
-		if (c==str[i]) {
-			i++;
-			if (i == strlen(str)) return;
-		} else {
-			if (i) {
-			    for (j=0 ; j<i ; j++) /* Put everthing we matched */
-				putchar(str[j]);
-			    i=0;
-			}
-			putchar(c);
-		}	
-	}
-
-}
 
 
 /* Put a command string, in args, out to the hms.  The hms is assumed to
-   be in raw mode, all writing/reading done through hms_desc.
+   be in raw mode, all writing/reading done through desc.
    Ouput from the hms is placed on the users terminal until the
    prompt from the hms is seen.
    FIXME: Can't handle commands that take input.  */
@@ -1597,11 +1380,9 @@ hms_com (args, fromtty)
 	
   /* Clear all input so only command relative output is displayed */
 
-
   hms_write_cr(args);
   hms_write("\030",1);
   expect_prompt();
-
 }
 
 /* Define the target subroutine names */
@@ -1633,37 +1414,37 @@ by a serial line.",
 
 hms_quiet()
 {
-  quiet = ! quiet;  
+ quiet = ! quiet;  
+   if (quiet)
+     printf_filtered("Snoop disabled\n");
+   else
+     printf_filtered("Snoop enabled\n");
+
 }
 
 hms_device(s)
 char *s;
 {
-  if (s) {
-      dev_name = get_word(&s);
-    }  
+  if (s) 
+  {
+    dev_name = get_word(&s);
+  }  
 }
+
 
 static 
 hms_speed(s)
 char *s;
 {
-check_open();
-
+  check_open();
   
   if (s) 
   {
     char buffer[100];
     int newrate = atoi(s);
     int which = 0;
-    while (baudtab[which].rate != newrate) 
-    {
-      if (baudtab[which].rate == -1) 
-      {
+    if (!serial_setbaudrate(newrate))
 	error("Can't use %d baud\n", newrate);
-      }
-      which++;
-    }
     
     printf_filtered("Checking target is in sync\n");
     
@@ -1687,12 +1468,14 @@ _initialize_remote_hms ()
  	"Send a command to the HMS monitor.");
   add_com ("snoop", class_obscure, hms_quiet,
 	   "Show what commands are going to the monitor");
+
   add_com ("device", class_obscure, hms_device,
 	   "Set the terminal line for HMS communications");
 
   add_com ("speed", class_obscure, hms_speed,
 	   "Set the terminal line speed for HMS communications");
   
+  dev_name = serial_default_name();
 }
 
 

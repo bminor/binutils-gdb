@@ -102,6 +102,7 @@ i386)
 	ncr)	gdb_host=ncr3000 ;;
 	*)
 		case "${host_os}" in
+		go32)   gdb_host=go32 ;;
 		sysv32)	gdb_host=i386v32 ;;
 		sysv4*)	gdb_host=i386v4 ;;
 		sysv*)	gdb_host=i386v ;;

@@ -30,13 +30,7 @@
 #include "demangle.h"
 
 #include <ctype.h>
-
-#ifdef USG
-#include <memory.h>
 #include <string.h>
-#else
-#include <strings.h>
-#endif
 
 #if !defined (GNU_DEMANGLING) && !defined (ARM_DEMANGLING)
 # define GNU_DEMANGLING 1

@@ -551,7 +551,7 @@ value_as_pointer (val)
 {
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
-  return value_as_long (val);
+  return ADDR_BITS_REMOVE(value_as_long (val));
 }
 
 /* Unpack raw data (copied from debugee, target byte order) at VALADDR
@@ -705,14 +705,14 @@ unpack_long (type, valaddr)
     {
       if (len == sizeof(long))
       {
-	long retval;
+	unsigned long retval;
 	bcopy (valaddr, &retval, sizeof(retval));
 	SWAP_TARGET_AND_HOST (&retval, sizeof(retval));
 	return retval;
       }
       else if (len == sizeof(short))
       {
-	short retval;
+	unsigned short retval;
 	bcopy (valaddr, &retval, len);
 	SWAP_TARGET_AND_HOST (&retval, len);
 	return retval;
