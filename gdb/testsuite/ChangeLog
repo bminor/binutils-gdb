@@ -1,3 +1,14 @@
+Fri Jan  7 12:42:45 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.t07/watchpoint.exp:  Clear xfail for calling function with
+	watchpoint enabled on mips, CALL_DUMMY_BREAKPOINT_OFFSET got defined.
+	* gdb.t20/gdbme.cc, gdb.t21/gdbme.cc:  Conversion operator functions
+	have to be typeless.
+
+Tue Jan  4 09:32:22 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* TODO: Add suggestion for copyright year test.
+
 Mon Jan  3 11:35:26 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* configure.in (*-*-lynxos*): Add stabs tests.
