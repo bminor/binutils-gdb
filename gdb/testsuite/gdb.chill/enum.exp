@@ -80,6 +80,6 @@ if ![set_lang_chill] then {
     gdb_test "print a/=\$i" { = TRUE}
 
 # This is PR 8870:
-    gdb_test "break malloc ".*"
+    gdb_test "break malloc" ".*"
     gdb_test {set var $j := m_set[b]} ".*invalid.*tuple.*"
 }

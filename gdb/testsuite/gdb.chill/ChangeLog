@@ -1,3 +1,7 @@
+Thu Aug 21 10:31:23 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* enum.exp: More quoting fixes.
+
 Tue Aug 12 21:48:08 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* tests2.exp: Fix quoting.
