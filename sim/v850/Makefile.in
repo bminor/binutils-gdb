@@ -19,28 +19,16 @@
 ## COMMON_PRE_CONFIG_FRAG
 
 SIM_OBJS = \
+	$(SIM_NEW_COMMON_OBJS) \
 	simops.o interp.o \
 	itable.o semantics.o idecode.o icache.o engine.o irun.o support.o \
-	sim-bits.o \
-	sim-config.o \
-	sim-core.o \
 	sim-engine.o \
-	sim-endian.o \
-	sim-events.o \
 	sim-hload.o \
 	sim-hrw.o \
-	sim-io.o \
-	sim-load.o \
-	sim-memopt.o \
-	sim-module.o \
-	sim-options.o \
-	sim-profile.o \
 	sim-resume.o \
 	sim-reason.o \
-	sim-stop.o \
-	sim-trace.o \
-	sim-watch.o \
-	sim-utils.o
+	sim-stop.o
+
 SIM_RUN_OBJS = nrun.o
 
 # List of extra dependencies.
@@ -48,20 +36,12 @@ SIM_RUN_OBJS = nrun.o
 SIM_EXTRA_DEPS = v850_sim.h sim-main.h simops.h itable.h
 
 # List of flags to always pass to $(CC)
-SIM_WARNINGS=@sim_warnings@
-SIM_ENDIAN=@sim_endian@
-SIM_HOSTENDIAN=@sim_hostendian@
-SIM_RESERVED_BITS=@sim_reserved_bits@
 SIM_EXTRA_CFLAGS = \
 	-DDEBUG \
-	-I$(srcdir)/../../newlib/libc/sys/sysnecv850 \
-	$(SIM_WARNINGS) \
-	$(SIM_ENDIAN) \
-	$(SIM_HOSTENDIAN) \
-	$(SIM_RESERVED_BITS)
+	-I$(srcdir)/../../newlib/libc/sys/sysnecv850
 SIM_EXTRA_CLEAN = clean-extra
 
-INCLUDE = $(sim_main_headers) $(SIM_EXTRA_DEPS)
+INCLUDE = $(sim_main_headers) $(SIM_EXTRA_DEPS) 
 
 ## COMMON_POST_CONFIG_FRAG
 
@@ -155,6 +135,6 @@ clean-extra: clean-igen
 	rm -f table.c simops.h gencode
 
 #interp.o: interp.c table.c $(INCLUDE)
-simops.o: simops.c $(INCLUDE)
+simops.o: simops.c $(INCLUDE) targ-vals.h
 #table.o: table.c
 semantics.o: $(INCLUDE)

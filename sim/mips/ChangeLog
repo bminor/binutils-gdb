@@ -1,3 +1,8 @@
+Wed Nov 25 13:41:03 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h, interp.c (sim_monitor): Change to global
+ 	function.
+
 Wed Nov 25 17:33:24 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (vr4100): Only include vr4100 instructions in

@@ -1,3 +1,35 @@
+Wed Nov 25 17:52:58 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (simops.o): Depends on targ-vals.h
+	* simops.c: Include targ-vals.h instead of
+ 	libgloss/.../syscall.h. Replace SYS_* with TARGET_SYS_*.
+start-sanitize-v850e
+	(divn, divun, OP_1C007E0, OP_18207E0, OP_1C207E0,OP_18007E0):
+ 	Replace signed long int with signed32.
+end-sanitize-v850e
+
+Fri Oct  9 18:02:25 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* interp.c: #include "itable.h".
+	(get_insn_name): New function.
+	(sim_open): Initialize CPU_INSN_NAME,CPU_MAX_INSNS.
+	* sim-main.h (MAX_INSNS,INSN_NAME): Delete.
+
+start-sanitize-v850e
+Wed Aug 26 10:43:01 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* v850.igen: Sanitize out references to PSW_US in sld.b and
+	sld.h. 
+	
+end-sanitize-v850e
+Wed May  6 19:43:27 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim-main.h (INSN_NAME): New arg `cpu'.
+
+Tue Apr 28 18:33:31 1998  Geoffrey Noer  <noer@cygnus.com>
+
+        * configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Sun Apr 26 15:31:55 1998  Tom Tromey  <tromey@creche>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
