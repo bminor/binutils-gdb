@@ -1,3 +1,8 @@
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* regcache.c (read_pc_pid): Restore inferior_ptid after reading
+	PC_REGNUM.
+
 2004-02-28  Andrew Cagney  <cagney@redhat.com>
 
 	* NEWS: Refer to GDB 6.1.
