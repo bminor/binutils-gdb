@@ -382,7 +382,9 @@ case "${host}" in
      noconfigdirs="tk tcl expect dejagnu cvs autoconf bison send-pr gprof rcs guile perl texinfo apache inet"
     ;;
   *-*-windows*)
-     noconfigdirs="tk tcl expect dejagnu cvs autoconf bison send-pr gprof rcs guile perl texinfo apache inet mmalloc"
+# This is only used to build WinGDB...
+     configdirs="bfd gdb libiberty opcodes readline sim"
+     target_configdirs=
     ;;
   ppc*-*-pe)
      noconfigdirs="patch diff make tk tcl expect dejagnu cvs autoconf texinfo bison send-pr gprof rcs guile perl apache inet"

@@ -1,3 +1,8 @@
+Sun Nov  3 19:17:07 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* configure.in (*-*-windows):  Exclude everything but those dirs
+	needed to build windows.
+
 Tue Oct 29 16:41:31 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in (all-target-winsup): Depend on all-target-librx.
