@@ -50,7 +50,6 @@ Things-to-keep:
 ChangeLog
 Makefile.am
 Makefile.in
-acconfig.h
 acinclude.m4
 aclocal.m4
 alpha-dis.c

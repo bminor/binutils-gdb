@@ -1,3 +1,14 @@
+Fri Feb  5 00:04:24 1999  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Change AC_PREREQ to 2.13.  Remove AM_CYGWIN32.
+	Change AM_EXEEXT to AC_EXEEXT and AM_PROG_INSTALL to
+	AC_PROG_INSTALL.
+	* acconfig.h: Remove.
+	* configure: Rebuild with current autoconf/automake.
+	* aclocal.m4: Likewise.
+	* config.in: Likewise.
+	* Makefile.in: Likewise.
+
 Thu Feb  4 13:48:52 1999  Ian Lance Taylor  <ian@cygnus.com>
 
 	* m68k-opc.c: Correct move (not movew) to status word on 5200.

@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.3b from Makefile.am
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
 
-# Copyright (C) 1994, 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -46,7 +46,7 @@ AUTOMAKE = @AUTOMAKE@
 AUTOHEADER = @AUTOHEADER@
 
 INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 transform = @program_transform_name@
@@ -120,126 +120,21 @@ lib_LTLIBRARIES = libopcodes.la
 BFD_H = ../bfd/bfd.h
 
 # Header files.
-HFILES = \
-	arm-opc.h \
-	h8500-opc.h \
-	sh-opc.h \
-	sysdep.h \
-	w65-opc.h \
-	z8k-opc.h
+HFILES =  	arm-opc.h 	h8500-opc.h 	sh-opc.h 	sysdep.h 	w65-opc.h 	z8k-opc.h
+
 
 # C source files that correspond to .o's.
-CFILES = \
-	a29k-dis.c \
-	alpha-dis.c \
-	alpha-opc.c \
-	arm-dis.c \
-	cgen-asm.c \
-	cgen-dis.c \
-	cgen-opc.c \
-	d10v-dis.c \
-	d10v-opc.c \
-	d30v-dis.c \
-	d30v-opc.c \
-	dis-buf.c \
-	disassemble.c \
-	h8300-dis.c \
-	h8500-dis.c \
-	hppa-dis.c \
-	i386-dis.c \
-	i960-dis.c \
-	i960c-asm.c \
-	i960c-dis.c \
-	i960c-opc.c \
-	m32r-asm.c \
-	m32r-dis.c \
-	m32r-opc.c \
-	m68k-dis.c \
-	m68k-opc.c \
-	m88k-dis.c \
-	mips-dis.c \
-	mips-opc.c \
-	mips16-opc.c \
-	m10200-dis.c \
-	m10200-opc.c \
-	m10300-dis.c \
-	m10300-opc.c \
-	ns32k-dis.c \
-	ppc-dis.c \
-	ppc-opc.c \
-	sh-dis.c \
-	sparc-dis.c \
-	sparc-opc.c \
-	tic30-dis.c \
-	vax-dis.c \
-	w65-dis.c \
-	z8k-dis.c \
-	z8kgen.c
+CFILES =  	a29k-dis.c 	alpha-dis.c 	alpha-opc.c 	arm-dis.c 	cgen-asm.c 	cgen-dis.c 	cgen-opc.c 	d10v-dis.c 	d10v-opc.c 	d30v-dis.c 	d30v-opc.c 	dis-buf.c 	disassemble.c 	h8300-dis.c 	h8500-dis.c 	hppa-dis.c 	i386-dis.c 	i960-dis.c 	i960c-asm.c 	i960c-dis.c 	i960c-opc.c 	m32r-asm.c 	m32r-dis.c 	m32r-opc.c 	m68k-dis.c 	m68k-opc.c 	m88k-dis.c 	mips-dis.c 	mips-opc.c 	mips16-opc.c 	m10200-dis.c 	m10200-opc.c 	m10300-dis.c 	m10300-opc.c 	ns32k-dis.c 	ppc-dis.c 	ppc-opc.c 	sh-dis.c 	sparc-dis.c 	sparc-opc.c 	tic30-dis.c 	vax-dis.c 	w65-dis.c 	z8k-dis.c 	z8kgen.c
 
-ALL_MACHINES = \
-	a29k-dis.lo \
-	alpha-dis.lo \
-	alpha-opc.lo \
-	arc-dis.lo \
-	arc-opc.lo \
-	arm-dis.lo \
-	cgen-asm.lo \
-	cgen-dis.lo \
-	cgen-opc.lo \
-	d10v-dis.lo \
-	d10v-opc.lo \
-	d30v-dis.lo \
-	d30v-opc.lo \
-	fr30-asm.lo \
-	fr30-dis.lo \
-	fr30-opc.lo \
-	h8300-dis.lo \
-	h8500-dis.lo \
-	hppa-dis.lo \
-	i386-dis.lo \
-	i960-dis.lo \
-	i960c-asm.lo \
-	i960c-dis.lo \
-	i960c-opc.lo \
-	m32r-asm.lo \
-	m32r-dis.lo \
-	m32r-opc.lo \
-	m68k-dis.lo \
-	m68k-opc.lo \
-	m88k-dis.lo \
-	m10200-dis.lo \
-	m10200-opc.lo \
-	m10300-dis.lo \
-	m10300-opc.lo \
-	mips-dis.lo \
-	mips-opc.lo \
-	mips16-opc.lo \
-	ppc-dis.lo \
-	ppc-opc.lo \
-	ns32k-dis.lo \
-	sh-dis.lo \
-	sparc-dis.lo \
-	sparc-opc.lo \
-	tic30-dis.lo \
-	$(start-sanitize-tic80) \
-	tic80-dis.lo \
-	tic80-opc.lo \
-	$(end-sanitize-tic80) \
-	$(start-sanitize-sky) \
-	dvp-dis.lo \
-	dvp-opc.lo \
-	$(end-sanitize-sky) \
-	v850-dis.lo \
-	v850-opc.lo \
-	vax-dis.lo \
-	w65-dis.lo \
-	z8k-dis.lo
+
+ALL_MACHINES =  	a29k-dis.lo 	alpha-dis.lo 	alpha-opc.lo 	arc-dis.lo 	arc-opc.lo 	arm-dis.lo 	cgen-asm.lo 	cgen-dis.lo 	cgen-opc.lo 	d10v-dis.lo 	d10v-opc.lo 	d30v-dis.lo 	d30v-opc.lo 	fr30-asm.lo 	fr30-dis.lo 	fr30-opc.lo 	h8300-dis.lo 	h8500-dis.lo 	hppa-dis.lo 	i386-dis.lo 	i960-dis.lo 	i960c-asm.lo 	i960c-dis.lo 	i960c-opc.lo 	m32r-asm.lo 	m32r-dis.lo 	m32r-opc.lo 	m68k-dis.lo 	m68k-opc.lo 	m88k-dis.lo 	m10200-dis.lo 	m10200-opc.lo 	m10300-dis.lo 	m10300-opc.lo 	mips-dis.lo 	mips-opc.lo 	mips16-opc.lo 	ppc-dis.lo 	ppc-opc.lo 	ns32k-dis.lo 	sh-dis.lo 	sparc-dis.lo 	sparc-opc.lo 	tic30-dis.lo 	$(start-sanitize-tic80) 	tic80-dis.lo 	tic80-opc.lo 	$(end-sanitize-tic80) 	$(start-sanitize-sky) 	dvp-dis.lo 	dvp-opc.lo 	$(end-sanitize-sky) 	v850-dis.lo 	v850-opc.lo 	vax-dis.lo 	w65-dis.lo 	z8k-dis.lo
+
 
 OFILES = @BFD_MACHINES@
 
 INCLUDES = -D_GNU_SOURCE -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFINES@ -I$(srcdir)/../intl -I../intl
 
-libopcodes_la_SOURCES =  dis-buf.c disassemble.c
+libopcodes_la_SOURCES = dis-buf.c disassemble.c
 libopcodes_la_DEPENDENCIES = $(OFILES)
 libopcodes_la_LIBADD = $(OFILES) @WIN32LIBADD@
 libopcodes_la_LDFLAGS = -release $(VERSION) @WIN32LDFLAGS@
@@ -252,11 +147,9 @@ libopcodes_la_LDFLAGS = -release $(VERSION) @WIN32LDFLAGS@
 noinst_LIBRARIES = libopcodes.a
 
 POTFILES = $(HFILES) $(CFILES)
-
-CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1
 # start-sanitize-cygnus
-CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1 \
-	stamp-m32r stamp-fr30 stamp-i960
+CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1 	stamp-m32r stamp-fr30 stamp-i960
+
 # end-sanitize-cygnus
 
 # start-sanitize-cygnus-never
@@ -270,24 +163,14 @@ CGENDIR = @cgendir@
 CGEN = @cgen@
 CGENFLAGS = -v
 
-CGENFILES = $(CGENDIR)/cos.scm $(CGENDIR)/utils.scm \
-	$(CGENDIR)/attr.scm $(CGENDIR)/enum.scm $(CGENDIR)/types.scm \
-	$(CGENDIR)/utils-cgen.scm $(CGENDIR)/cpu.scm \
-	$(CGENDIR)/mode.scm $(CGENDIR)/mach.scm \
-	$(CGENDIR)/model.scm $(CGENDIR)/hardware.scm \
-	$(CGENDIR)/ifield.scm $(CGENDIR)/iformat.scm \
-	$(CGENDIR)/operand.scm $(CGENDIR)/insn.scm $(CGENDIR)/minsn.scm \
-	$(CGENDIR)/rtl.scm $(CGENDIR)/rtx-funcs.scm \
-	$(CGENDIR)/opcodes.scm $(CGENDIR)/cgen-opc.scm \
-	cgen-opc.in cgen-asm.in cgen-dis.in
-# The CGEN_MAINT conditional is put here so it ends up in Makefile.in
-# properly sanitised.
+CGENFILES = $(CGENDIR)/cos.scm $(CGENDIR)/utils.scm 	$(CGENDIR)/attr.scm $(CGENDIR)/enum.scm $(CGENDIR)/types.scm 	$(CGENDIR)/utils-cgen.scm $(CGENDIR)/cpu.scm 	$(CGENDIR)/mode.scm $(CGENDIR)/mach.scm 	$(CGENDIR)/model.scm $(CGENDIR)/hardware.scm 	$(CGENDIR)/ifield.scm $(CGENDIR)/iformat.scm 	$(CGENDIR)/operand.scm $(CGENDIR)/insn.scm $(CGENDIR)/minsn.scm 	$(CGENDIR)/rtl.scm $(CGENDIR)/rtx-funcs.scm 	$(CGENDIR)/opcodes.scm $(CGENDIR)/cgen-opc.scm 	cgen-opc.in cgen-asm.in cgen-dis.in
+
 @CGEN_MAINT_TRUE@M32R_DEPS = stamp-m32r
+@CGEN_MAINT_FALSE@M32R_DEPS = 
 @CGEN_MAINT_TRUE@FR30_DEPS = stamp-fr30
+@CGEN_MAINT_FALSE@FR30_DEPS = 
 @CGEN_MAINT_TRUE@I960_DEPS = stamp-i960
-@CGEN_MAINT_FALSE@M32R_DEPS =
-@CGEN_MAINT_FALSE@FR30_DEPS =
-@CGEN_MAINT_FALSE@I960_DEPS =
+@CGEN_MAINT_FALSE@I960_DEPS = 
 # The end marker is written this way to pass through automake unscathed.
 ENDSAN = end-sanitize-cygnus
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -310,45 +193,52 @@ libopcodes_la_OBJECTS =  dis-buf.lo disassemble.lo
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LINK = $(LIBTOOL) --mode=link $(CC) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
-DIST_COMMON =  ChangeLog Makefile.am Makefile.in acconfig.h acinclude.m4 \
-aclocal.m4 config.in configure configure.in stamp-h.in
+CCLD = $(CC)
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+DIST_COMMON =  ./stamp-h.in ChangeLog Makefile.am Makefile.in \
+acinclude.m4 aclocal.m4 config.in configure configure.in
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = tar
-GZIP = --best
+GZIP_ENV = --best
 SOURCES = libopcodes.a.c $(libopcodes_la_SOURCES)
 OBJECTS = libopcodes.a.o $(libopcodes_la_OBJECTS)
 
-all: all-recursive-am all-am
-
+all: all-redirect
 .SUFFIXES:
 .SUFFIXES: .S .c .lo .o .s
-$(srcdir)/Makefile.in: @MAINT@Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --cygnus Makefile
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
-$(ACLOCAL_M4): @MAINT@ configure.in  acinclude.m4
+$(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ configure.in  acinclude.m4
 	cd $(srcdir) && $(ACLOCAL)
-$(srcdir)/configure: @MAINT@$(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
+$(srcdir)/configure: @MAINTAINER_MODE_TRUE@$(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
 
 config.h: stamp-h
-	@:
+	@if test ! -f $@; then \
+		rm -f stamp-h; \
+		$(MAKE) stamp-h; \
+	else :; fi
 stamp-h: $(srcdir)/config.in $(top_builddir)/config.status
 	cd $(top_builddir) \
 	  && CONFIG_FILES= CONFIG_HEADERS=config.h:config.in \
 	     $(SHELL) ./config.status
-	@echo timestamp > stamp-h
-$(srcdir)/config.in: @MAINT@$(srcdir)/stamp-h.in
-$(srcdir)/stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) acconfig.h
+	@echo timestamp > stamp-h 2> /dev/null
+$(srcdir)/config.in: @MAINTAINER_MODE_TRUE@$(srcdir)/stamp-h.in
+	@if test ! -f $@; then \
+		rm -f $(srcdir)/stamp-h.in; \
+		$(MAKE) $(srcdir)/stamp-h.in; \
+	else :; fi
+$(srcdir)/stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOHEADER)
-	@echo timestamp > $(srcdir)/stamp-h.in
+	@echo timestamp > $(srcdir)/stamp-h.in 2> /dev/null
 
 mostlyclean-hdr:
 
@@ -420,8 +310,8 @@ install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	$(mkinstalldirs) $(DESTDIR)$(libdir)
 	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo "$(LIBTOOL)  --mode=install $(INSTALL_DATA) $$p $(DESTDIR)$(libdir)/$$p"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_DATA) $$p $(DESTDIR)$(libdir)/$$p; \
+	    echo "$(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(libdir)/$$p"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(libdir)/$$p; \
 	  else :; fi; \
 	done
 
@@ -447,41 +337,65 @@ all-recursive install-data-recursive install-exec-recursive \
 installdirs-recursive install-recursive uninstall-recursive install-info-recursive \
 check-recursive installcheck-recursive info-recursive dvi-recursive:
 	@set fnord $(MAKEFLAGS); amf=$$2; \
+	dot_seen=no; \
+	target=`echo $@ | sed s/-recursive//`; \
 	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  target=`echo $@ | sed s/-recursive//`; \
 	  echo "Making $$target in $$subdir"; \
-	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$target) \
+	  if test "$$subdir" = "."; then \
+	    dot_seen=yes; \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
 	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
-	done && test -z "$$fail"
+	done; \
+	if test "$$dot_seen" = "no"; then \
+	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
+	fi; test -z "$$fail"
 
 mostlyclean-recursive clean-recursive distclean-recursive \
 maintainer-clean-recursive:
 	@set fnord $(MAKEFLAGS); amf=$$2; \
+	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
+	  test "$$subdir" = "." && dot_seen=yes; \
 	done; \
+	test "$$dot_seen" = "no" && rev=". $$rev"; \
+	target=`echo $@ | sed s/-recursive//`; \
 	for subdir in $$rev; do \
-	  target=`echo $@ | sed s/-recursive//`; \
 	  echo "Making $$target in $$subdir"; \
-	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$target) \
+	  if test "$$subdir" = "."; then \
+	    local_target="$$target-am"; \
+	  else \
+	    local_target="$$target"; \
+	  fi; \
+	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
 	   || case "$$amf" in *=*) exit 1;; *k*) fail=yes;; *) exit 1;; esac; \
 	done && test -z "$$fail"
 tags-recursive:
 	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
+	  test "$$subdir" = . || (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) tags); \
 	done
 
 tags: TAGS
 
 ID: $(HEADERS) $(SOURCES) $(LISP)
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
 	here=`pwd` && cd $(srcdir) \
-	  && mkid -f$$here/ID $(SOURCES) $(HEADERS) $(LISP)
+	  && mkid -f$$here/ID $$unique $(LISP)
 
 TAGS: tags-recursive $(HEADERS) $(SOURCES) config.in $(TAGS_DEPENDENCIES) $(LISP)
 	tags=; \
 	here=`pwd`; \
 	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  test -f $$subdir/TAGS && tags="$$tags -i $$here/$$subdir/TAGS"; \
+   if test "$$subdir" = .; then :; else \
+	    test -f $$subdir/TAGS && tags="$$tags -i $$here/$$subdir/TAGS"; \
+   fi; \
 	done; \
 	list='$(SOURCES) $(HEADERS)'; \
 	unique=`for i in $$list; do echo $$i; done | \
@@ -507,7 +421,7 @@ top_distdir = $(distdir)
 # tarfile.
 distcheck: dist
 	-rm -rf $(distdir)
-	GZIP=$(GZIP) $(TAR) zxf $(distdir).tar.gz
+	GZIP=$(GZIP_ENV) $(TAR) zxf $(distdir).tar.gz
 	mkdir $(distdir)/=build
 	mkdir $(distdir)/=inst
 	dc_install_base=`cd $(distdir)/=inst && pwd`; \
@@ -520,16 +434,18 @@ distcheck: dist
 	  && $(MAKE) $(AM_MAKEFLAGS) installcheck \
 	  && $(MAKE) $(AM_MAKEFLAGS) dist
 	-rm -rf $(distdir)
-	@echo "========================"; \
-	echo "$(distdir).tar.gz is ready for distribution"; \
-	echo "========================"
+	@banner="$(distdir).tar.gz is ready for distribution"; \
+	dashes=`echo "$$banner" | sed s/./=/g`; \
+	echo "$$dashes"; \
+	echo "$$banner"; \
+	echo "$$dashes"
 dist: distdir
 	-chmod -R a+r $(distdir)
-	GZIP=$(GZIP) $(TAR) chozf $(distdir).tar.gz $(distdir)
+	GZIP=$(GZIP_ENV) $(TAR) chozf $(distdir).tar.gz $(distdir)
 	-rm -rf $(distdir)
 dist-all: distdir
 	-chmod -R a+r $(distdir)
-	GZIP=$(GZIP) $(TAR) chozf $(distdir).tar.gz $(distdir)
+	GZIP=$(GZIP_ENV) $(TAR) chozf $(distdir).tar.gz $(distdir)
 	-rm -rf $(distdir)
 distdir: $(DISTFILES)
 	-rm -rf $(distdir)
@@ -537,47 +453,54 @@ distdir: $(DISTFILES)
 	-chmod 777 $(distdir)
 	@for file in $(DISTFILES); do \
 	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
-	  test -f $(distdir)/$$file \
-	  || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
-	  || cp -p $$d/$$file $(distdir)/$$file; \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
 	done
 	for subdir in $(SUBDIRS); do \
-	  test -d $(distdir)/$$subdir \
-	  || mkdir $(distdir)/$$subdir \
-	  || exit 1; \
-	  chmod 777 $(distdir)/$$subdir; \
-	  (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir=../$(distdir) distdir=../$(distdir)/$$subdir distdir) \
+	  if test "$$subdir" = .; then :; else \
+	    test -d $(distdir)/$$subdir \
+	    || mkdir $(distdir)/$$subdir \
 	    || exit 1; \
+	    chmod 777 $(distdir)/$$subdir; \
+	    (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir=../$(distdir) distdir=../$(distdir)/$$subdir distdir) \
+	      || exit 1; \
+	  fi; \
 	done
+info-am:
 info: info-recursive
+dvi-am:
 dvi: dvi-recursive
-check:
-	$(MAKE) $(AM_MAKEFLAGS) check-recursive
+check-am:
+check: check-recursive
+installcheck-am:
 installcheck: installcheck-recursive
+install-info-am: 
 install-info: install-info-recursive
 all-recursive-am: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
-all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) config.h
-
 install-exec-am: install-libLTLIBRARIES
+install-exec: install-exec-recursive
 
-uninstall-am: uninstall-libLTLIBRARIES
-
-install-exec: install-exec-recursive install-exec-am
-	@$(NORMAL_INSTALL)
-
+install-data-am:
 install-data: install-data-recursive
-	@$(NORMAL_INSTALL)
 
-install: install-recursive install-exec-am
-	@:
-
-uninstall: uninstall-recursive uninstall-am
-
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+install: install-recursive
+uninstall-am: uninstall-libLTLIBRARIES
+uninstall: uninstall-recursive
+all-am: Makefile $(LIBRARIES) $(LTLIBRARIES) config.h
+all-redirect: all-recursive-am
 install-strip:
-	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' INSTALL_SCRIPT='$(INSTALL_PROGRAM)' install
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs: installdirs-recursive
+installdirs-am:
 	$(mkinstalldirs)  $(DESTDIR)$(libdir)
 
 
@@ -596,31 +519,31 @@ mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstLIBRARIES \
 		mostlyclean-libLTLIBRARIES mostlyclean-tags \
 		mostlyclean-generic
 
+mostlyclean: mostlyclean-recursive
+
 clean-am:  clean-hdr clean-noinstLIBRARIES clean-compile clean-libtool \
 		clean-libLTLIBRARIES clean-tags clean-generic \
 		mostlyclean-am
 
+clean: clean-recursive
+
 distclean-am:  distclean-hdr distclean-noinstLIBRARIES distclean-compile \
 		distclean-libtool distclean-libLTLIBRARIES \
 		distclean-tags distclean-generic clean-am
+	-rm -f libtool
+
+distclean: distclean-recursive
+	-rm -f config.status
 
 maintainer-clean-am:  maintainer-clean-hdr \
 		maintainer-clean-noinstLIBRARIES \
 		maintainer-clean-compile maintainer-clean-libtool \
 		maintainer-clean-libLTLIBRARIES maintainer-clean-tags \
 		maintainer-clean-generic distclean-am
-
-mostlyclean:  mostlyclean-recursive mostlyclean-am
-
-clean:  clean-recursive clean-am
-
-distclean:  distclean-recursive distclean-am
-	-rm -f config.status
-	-rm -f libtool
-
-maintainer-clean:  maintainer-clean-recursive maintainer-clean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-recursive
 	-rm -f config.status
 
 .PHONY: mostlyclean-hdr distclean-hdr clean-hdr maintainer-clean-hdr \
@@ -637,11 +560,13 @@ uninstalldirs-recursive all-recursive check-recursive \
 installcheck-recursive info-recursive dvi-recursive \
 mostlyclean-recursive distclean-recursive clean-recursive \
 maintainer-clean-recursive tags tags-recursive mostlyclean-tags \
-distclean-tags clean-tags maintainer-clean-tags distdir info dvi \
-installcheck install-info all-recursive-am all-am install-exec-am \
-uninstall-am install-exec install-data install uninstall all \
-installdirs mostlyclean-generic distclean-generic clean-generic \
-maintainer-clean-generic clean mostlyclean distclean maintainer-clean
+distclean-tags clean-tags maintainer-clean-tags distdir info-am info \
+dvi-am dvi check check-am installcheck-am installcheck install-info-am \
+install-info all-recursive-am install-exec-am install-exec \
+install-data-am install-data install-am install uninstall-am uninstall \
+all-redirect all-am all installdirs-am installdirs mostlyclean-generic \
+distclean-generic clean-generic maintainer-clean-generic clean \
+mostlyclean distclean maintainer-clean
 
 
 disassemble.lo: disassemble.c $(INCDIR)/dis-asm.h
