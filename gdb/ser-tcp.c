@@ -129,9 +129,9 @@ net_open (struct serial *scb, const char *name)
 
       do 
 	{
-	  /* While we wait for the connect to complete 
+	  /* While we wait for the connect to complete, 
 	     poll the UI so it can update or the user can 
-	     interrupt. */
+	     interrupt.  */
 	  if (deprecated_ui_loop_hook)
 	    {
 	      if (deprecated_ui_loop_hook (0))

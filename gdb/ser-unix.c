@@ -565,11 +565,12 @@ do_hardwire_readchar (struct serial *scb, int timeout)
   if (timeout > 0)
     timeout++;
 
-  /* We have to be able to keep the GUI alive here, so we break the original
-     timeout into steps of 1 second, running the "keep the GUI alive" hook 
-     each time through the loop.
-     Also, timeout = 0 means to poll, so we just set the delta to 0, so we
-     will only go through the loop once. */
+  /* We have to be able to keep the GUI alive here, so we break the
+     original timeout into steps of 1 second, running the "keep the
+     GUI alive" hook each time through the loop.
+
+     Also, timeout = 0 means to poll, so we just set the delta to 0,
+     so we will only go through the loop once.  */
 
   delta = (timeout == 0 ? 0 : 1);
   while (1)
@@ -944,12 +945,12 @@ do_unix_readchar (struct serial *scb, int timeout)
   int status;
   int delta;
 
-  /* We have to be able to keep the GUI alive here, so we break the original
-     timeout into steps of 1 second, running the "keep the GUI alive" hook 
-     each time through the loop.
+  /* We have to be able to keep the GUI alive here, so we break the
+     original timeout into steps of 1 second, running the "keep the
+     GUI alive" hook each time through the loop.
 
-     Also, timeout = 0 means to poll, so we just set the delta to 0, so we
-     will only go through the loop once. */
+     Also, timeout = 0 means to poll, so we just set the delta to 0,
+     so we will only go through the loop once.  */
 
   delta = (timeout == 0 ? 0 : 1);
   while (1)

@@ -20,6 +20,9 @@
 
 2005-01-13  Michael Snyder  <msnyder@redhat.com>
 
+	* ser-tcp.c: Whitespace tweaks.
+	* ser-unix.c: Whitespace tweaks.
+	* serial.h: Whitespace tweaks.
 	* scm-valprint.c: Whitespace tweaks.
 	* rs6000-tdep.c: Whitespace tweaks.
 	* rs6000-nat.c: Whitespace tweaks.
