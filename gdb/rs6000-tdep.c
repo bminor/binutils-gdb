@@ -2426,6 +2426,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   bfd abfd;
   int sysv_abi;
   enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
+  asection *sect;
 
   from_xcoff_exec = info.abfd && info.abfd->format == bfd_object &&
     bfd_get_flavour (info.abfd) == bfd_target_xcoff_flavour;
@@ -2499,6 +2500,27 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   tdep->wordsize = wordsize;
   tdep->osabi = osabi;
+
+  /* For e500 executables, the apuinfo section is of help here.  Such
+     section contains the identifier and revision number of each
+     Application-specific Processing Unit that is present on the
+     chip.  The content of the section is determined by the assembler
+     which looks at each instruction and determines which unit (and
+     which version of it) can execute it. In our case we just look for
+     the existance of the section.  */
+
+  if (info.abfd)
+    {
+      sect = bfd_get_section_by_name (info.abfd, ".PPC.EMB.apuinfo");
+      if (sect)
+	{
+	  arch = info.bfd_arch_info->arch;
+	  mach = bfd_mach_ppc_e500;
+	  bfd_default_set_arch_mach (&abfd, arch, mach);
+	  info.bfd_arch_info = bfd_get_arch_info (&abfd);
+	}
+    }
+
   gdbarch = gdbarch_alloc (&info, tdep);
   power = arch == bfd_arch_rs6000;
 
