@@ -1,10 +1,15 @@
+2003-07-29  Ben Elliston  <bje@wasabisystems.com>
+
+	* MAINTAINERS: Remove self as M88k maintainer.  Future M88k
+	maintenance defaults to the blanket write privilege maintainers.
+
 2003-07-29  Michael Meissner  <gnu@the-meissners.org>
 
 	* MAINTAINERS: Updated my email address.
 
 2003-07-29  Nick Clifton  <nickc@redhat.com>
 
-	* objdump.c: Update to Iso C.
+	* objdump.c: Update to ISO C.
 
 2003-07-24  Nick Clifton  <nickc@redhat.com>
 
