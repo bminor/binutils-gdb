@@ -1,3 +1,10 @@
+2003-10-20  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	gdbarch_return_value.  Add cross references from
+	USE_STRUCT_CONVENTION, EXTRACT_RETURN_VALUE, and
+	STORE_RETURN_VALUE, and from/to EXTRACT_STRUCT_VALUE_ADDRESS.
+
 2003-10-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdbint.texinfo (Target Architecture Definition): Document

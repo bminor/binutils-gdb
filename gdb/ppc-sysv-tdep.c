@@ -305,21 +305,6 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   return sp;
 }
 
-/* Potential ways that a function can return a value of a given type.  */
-enum return_value_convention
-{
-  /* Where the return value has been squeezed into one or more
-     registers.  */
-  RETURN_VALUE_REGISTER_CONVENTION,
-  /* Commonly known as the "struct return convention".  The caller
-     passes an additional hidden first parameter to the caller.  That
-     parameter contains the address at which the value being returned
-     should be stored.  While typically, and historically, used for
-     large structs, this is convention is applied to values of many
-     different types.  */
-  RETURN_VALUE_STRUCT_CONVENTION
-};
-
 /* Handle the return-value conventions specified by the SysV 32-bit
    PowerPC ABI (including all the supplements):
 

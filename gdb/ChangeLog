@@ -1,5 +1,21 @@
 2003-10-20  Andrew Cagney  <cagney@redhat.com>
 
+	* values.c (register_value_being_returned): Update comments.  Use
+	"gdbarch_return_value" when available.
+	(using_struct_return): Ditto.
+	(set_return_value): Ditto.  Use "gdbarch_return_value" when
+	available..  Print a warning, and not an error, when an unhandled
+	return type is encountered.
+	* infcmd.c: Include "gdb_assert.h".
+	(print_return_value): When gdbarch_return_value_p, and using
+	struct return, assume that the value is not available.
+	* defs.h (return_value_convention): Define.
+	* gdbarch.sh (gdbarch_return_value): New predicate method.
+	* gdbarch.h, gdbarch.c: Re-generate
+	* ppc-sysv-tdep.c (return_value_convention): Delete definition.
+
+2003-10-20  Andrew Cagney  <cagney@redhat.com>
+
 	* symtab.c: Replace "struct sec" with "struct bfd_section".
 	* objfiles.c, linespec.c, blockframe.c, block.c: Ditto.
 

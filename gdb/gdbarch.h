@@ -1392,16 +1392,6 @@ extern void set_gdbarch_integer_to_address (struct gdbarch *gdbarch, gdbarch_int
 #define INTEGER_TO_ADDRESS(type, buf) (gdbarch_integer_to_address (current_gdbarch, type, buf))
 #endif
 
-typedef int (gdbarch_return_value_on_stack_ftype) (struct type *type);
-extern int gdbarch_return_value_on_stack (struct gdbarch *gdbarch, struct type *type);
-extern void set_gdbarch_return_value_on_stack (struct gdbarch *gdbarch, gdbarch_return_value_on_stack_ftype *return_value_on_stack);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (RETURN_VALUE_ON_STACK)
-#error "Non multi-arch definition of RETURN_VALUE_ON_STACK"
-#endif
-#if !defined (RETURN_VALUE_ON_STACK)
-#define RETURN_VALUE_ON_STACK(type) (gdbarch_return_value_on_stack (current_gdbarch, type))
-#endif
-
 #if defined (DEPRECATED_POP_FRAME)
 /* Legacy for systems yet to multi-arch DEPRECATED_POP_FRAME */
 #if !defined (DEPRECATED_POP_FRAME_P)
@@ -1454,6 +1444,34 @@ extern void set_gdbarch_deprecated_store_struct_return (struct gdbarch *gdbarch,
 #define DEPRECATED_STORE_STRUCT_RETURN(addr, sp) (gdbarch_deprecated_store_struct_return (current_gdbarch, addr, sp))
 #endif
 
+/* It has been suggested that this, well actually its predecessor,
+   should take the type/value of the function to be called and not the
+   return type.  This is left as an exercise for the reader. */
+
+extern int gdbarch_return_value_p (struct gdbarch *gdbarch);
+
+typedef enum return_value_convention (gdbarch_return_value_ftype) (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, const void *inval, void *outval);
+extern enum return_value_convention gdbarch_return_value (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, const void *inval, void *outval);
+extern void set_gdbarch_return_value (struct gdbarch *gdbarch, gdbarch_return_value_ftype *return_value);
+
+/* The deprecated methods RETURN_VALUE_ON_STACK, EXTRACT_RETURN_VALUE,
+   STORE_RETURN_VALUE and USE_STRUCT_CONVENTION have all been folded
+   into RETURN_VALUE.  For the moment do not try to fold in
+   EXTRACT_STRUCT_VALUE_ADDRESS as, dependant on the ABI, the debug
+   info, and the level of effort, it may well be possible to find the
+   address of a structure being return on the stack.  Someone else can
+   make that change. */
+
+typedef int (gdbarch_return_value_on_stack_ftype) (struct type *type);
+extern int gdbarch_return_value_on_stack (struct gdbarch *gdbarch, struct type *type);
+extern void set_gdbarch_return_value_on_stack (struct gdbarch *gdbarch, gdbarch_return_value_on_stack_ftype *return_value_on_stack);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (RETURN_VALUE_ON_STACK)
+#error "Non multi-arch definition of RETURN_VALUE_ON_STACK"
+#endif
+#if !defined (RETURN_VALUE_ON_STACK)
+#define RETURN_VALUE_ON_STACK(type) (gdbarch_return_value_on_stack (current_gdbarch, type))
+#endif
+
 typedef void (gdbarch_extract_return_value_ftype) (struct type *type, struct regcache *regcache, void *valbuf);
 extern void gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, void *valbuf);
 extern void set_gdbarch_extract_return_value (struct gdbarch *gdbarch, gdbarch_extract_return_value_ftype *extract_return_value);
@@ -1492,6 +1510,16 @@ extern void set_gdbarch_deprecated_store_return_value (struct gdbarch *gdbarch, 
 #endif
 #if !defined (DEPRECATED_STORE_RETURN_VALUE)
 #define DEPRECATED_STORE_RETURN_VALUE(type, valbuf) (gdbarch_deprecated_store_return_value (current_gdbarch, type, valbuf))
+#endif
+
+typedef int (gdbarch_use_struct_convention_ftype) (int gcc_p, struct type *value_type);
+extern int gdbarch_use_struct_convention (struct gdbarch *gdbarch, int gcc_p, struct type *value_type);
+extern void set_gdbarch_use_struct_convention (struct gdbarch *gdbarch, gdbarch_use_struct_convention_ftype *use_struct_convention);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (USE_STRUCT_CONVENTION)
+#error "Non multi-arch definition of USE_STRUCT_CONVENTION"
+#endif
+#if !defined (USE_STRUCT_CONVENTION)
+#define USE_STRUCT_CONVENTION(gcc_p, value_type) (gdbarch_use_struct_convention (current_gdbarch, gcc_p, value_type))
 #endif
 
 #if defined (EXTRACT_STRUCT_VALUE_ADDRESS)
@@ -1542,16 +1570,6 @@ extern void set_gdbarch_deprecated_extract_struct_value_address (struct gdbarch 
 #endif
 #if !defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS)
 #define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(regbuf) (gdbarch_deprecated_extract_struct_value_address (current_gdbarch, regbuf))
-#endif
-
-typedef int (gdbarch_use_struct_convention_ftype) (int gcc_p, struct type *value_type);
-extern int gdbarch_use_struct_convention (struct gdbarch *gdbarch, int gcc_p, struct type *value_type);
-extern void set_gdbarch_use_struct_convention (struct gdbarch *gdbarch, gdbarch_use_struct_convention_ftype *use_struct_convention);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (USE_STRUCT_CONVENTION)
-#error "Non multi-arch definition of USE_STRUCT_CONVENTION"
-#endif
-#if !defined (USE_STRUCT_CONVENTION)
-#define USE_STRUCT_CONVENTION(gcc_p, value_type) (gdbarch_use_struct_convention (current_gdbarch, gcc_p, value_type))
 #endif
 
 #if defined (DEPRECATED_FRAME_INIT_SAVED_REGS)

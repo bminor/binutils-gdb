@@ -3219,13 +3219,17 @@ Define this to extract a function's return value of type @var{type} from
 the raw register state @var{regbuf} and copy that, in virtual format,
 into @var{valbuf}.
  
+This method has been deprecated in favour of @code{gdbarch_return_value}
+(@pxref{gdbarch_return_value}).
+
 @item EXTRACT_STRUCT_VALUE_ADDRESS(@var{regbuf})
 @findex EXTRACT_STRUCT_VALUE_ADDRESS
+@anchor{EXTRACT_STRUCT_VALUE_ADDRESS}
 When defined, extract from the array @var{regbuf} (containing the raw
 register state) the @code{CORE_ADDR} at which a function should return
 its structure value.
 
-If not defined, @code{EXTRACT_RETURN_VALUE} is used.
+@xref{gdbarch_return_value}.
 
 @item EXTRACT_STRUCT_VALUE_ADDRESS_P()
 @findex EXTRACT_STRUCT_VALUE_ADDRESS_P
@@ -3824,6 +3828,48 @@ allocated on the stack.  @xref{unwind_dummy_id}.
 Define this to convert sdb register numbers into @value{GDBN} regnums.  If not
 defined, no conversion will be done.
 
+@item enum return_value_convention gdbarch_return_value (struct gdbarch *@var{gdbarch}, struct type *@var{valtype}, struct regcache *@var{regcache}, const void *@var{inval}, void *@var{outval})
+@findex gdbarch_return_value
+@anchor{gdbarch_return_value} Given a function with a return-value of
+type @var{rettype}, return which return-value convention that function
+would use.
+
+@value{GDBN} currently recognizes two function return-value conventions:
+@code{RETURN_VALUE_REGISTER_CONVENTION} where the return value is found
+in registers; and @code{RETURN_VALUE_STRUCT_CONVENTION} where the return
+value is found in memory and the address of that memory location is
+passed in as the function's first parameter.
+
+If the register convention is being used, and @var{inval} is
+non-@code{NULL}, also copy the return-value in @var{inval} into
+@var{regcache}.
+
+If the register convention is being used, and @var{outval} is
+non-@code{NULL}, also copy the return value from @var{regcache} into
+@var{outval} (@var{regcache} contains a copy of the registers from the
+just returned function).
+
+@xref{EXTRACT_STRUCT_VALUE_ADDRESS}, for a description of how
+return-values that use the struct convention are handled.
+
+@emph{Maintainer note: This method replaces separate predicate, extract,
+store methods.  By having only one method, the logic needed to determine
+the return-value convention need only be implemented in one place.  If
+@value{GDBN} were written in an @sc{oo} language, this method would
+instead return an object that knew how to perform the register
+return-value extract and store.}
+
+@emph{Maintainer note: This method does not take a @var{gcc_p}
+parameter, and such a parameter should not be added.  If an architecture
+that requires per-compiler or per-function information be identified,
+then the replacement of @var{rettype} with @code{struct value}
+@var{function} should be persued.}
+
+@emph{Maintainer note: The @var{regcache} parameter limits this methods
+to the inner most frame.  While replacing @var{regcache} with a
+@code{struct frame_info} @var{frame} parameter would remove that
+limitation there has yet to be a demonstrated need for such a change.}
+
 @item SKIP_PERMANENT_BREAKPOINT
 @findex SKIP_PERMANENT_BREAKPOINT
 Advance the inferior's PC past a permanent breakpoint.  @value{GDBN} normally
@@ -3881,6 +3927,9 @@ normally.  Currently only defined for the Mips.
 A C expression that writes the function return value, found in
 @var{valbuf}, into the @var{regcache}.  @var{type} is the type of the
 value that is to be returned.
+
+This method has been deprecated in favour of @code{gdbarch_return_value}
+(@pxref{gdbarch_return_value}).
 
 @item SUN_FIXED_LBRAC_BUG
 @findex SUN_FIXED_LBRAC_BUG
@@ -4016,6 +4065,9 @@ allocated for it on the stack.  @var{gcc_p} is true if the function
 being considered is known to have been compiled by GCC; this is helpful
 for systems where GCC is known to use different calling convention than
 other compilers.
+
+This method has been deprecated in favour of @code{gdbarch_return_value}
+(@pxref{gdbarch_return_value}).
 
 @item VALUE_TO_REGISTER(@var{type}, @var{regnum}, @var{from}, @var{to})
 @findex VALUE_TO_REGISTER

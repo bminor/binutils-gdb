@@ -44,6 +44,7 @@
 #include "reggroups.h"
 #include "block.h"
 #include <ctype.h>
+#include "gdb_assert.h"
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -1079,25 +1080,34 @@ print_return_value (int structure_return, struct type *value_type)
       ui_out_field_stream (uiout, "return-value", stb);
       ui_out_text (uiout, "\n");
     }
-  else
-    {
-      /* FIXME: 2003-09-27: When returning from a nested inferior
-         function call, it's possible (with no help from the
-         architecture vector) to locate and return/print a "struct
-         return" value.  This is just a more complicated case of what
-         is already being done in in the inferior function call code.
-         In fact, when inferior function calls are made async, this
-         will likely be made the norm.  */
-      /* We cannot determine the contents of the structure because
-	 it is on the stack, and we don't know where, since we did not
-	 initiate the call, as opposed to the call_function_by_hand case */
+  /* FIXME: 2003-09-27: When returning from a nested inferior function
+     call, it's possible (with no help from the architecture vector)
+     to locate and return/print a "struct return" value.  This is just
+     a more complicated case of what is already being done in in the
+     inferior function call code.  In fact, when inferior function
+     calls are made async, this will likely be made the norm.  */
 #ifdef DEPRECATED_VALUE_RETURNED_FROM_STACK
-      value = 0;
+#define DEPRECATED_VALUE_RETURNED_FROM_STACK_P 1
+#else
+#define DEPRECATED_VALUE_RETURNED_FROM_STACK_P 0
+#endif
+  else if (gdbarch_return_value_p (current_gdbarch)
+	   || DEPRECATED_VALUE_RETURNED_FROM_STACK_P)
+    /* We cannot determine the contents of the structure because it is
+       on the stack, and we don't know where, since we did not
+       initiate the call, as opposed to the call_function_by_hand
+       case.  */
+    {
+      gdb_assert (gdbarch_return_value (current_gdbarch, value_type, NULL, NULL, NULL)
+		  == RETURN_VALUE_STRUCT_CONVENTION);
       ui_out_text (uiout, "Value returned has type: ");
       ui_out_field_string (uiout, "return-type", TYPE_NAME (value_type));
       ui_out_text (uiout, ".");
       ui_out_text (uiout, " Cannot determine contents\n");
-#else
+      return;
+    }
+  else
+    {
       if (EXTRACT_STRUCT_VALUE_ADDRESS_P ())
 	{
 	  CORE_ADDR addr = EXTRACT_STRUCT_VALUE_ADDRESS (stop_registers);
@@ -1133,7 +1143,6 @@ print_return_value (int structure_return, struct type *value_type)
       value_print (value, stb->stream, 0, Val_no_prettyprint);
       ui_out_field_stream (uiout, "return-value", stb);
       ui_out_text (uiout, "\n");
-#endif
     }
 }
 
