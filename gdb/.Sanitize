@@ -215,6 +215,7 @@ remote-sim.c
 remote-st2000.c
 remote-udi.c
 remote-vx.c
+remote-z8k.c
 remote.c
 rs6000-nat.c
 rs6000-pinsn.c
@@ -306,6 +307,7 @@ tm-umax.h
 tm-vax.h
 tm-vx68.h
 tm-vx960.h
+tm-z8k.h
 typeprint.c
 typeprint.h
 ultra3-nat.c
@@ -375,6 +377,7 @@ xm-umax.h
 xm-vax.h
 xm-vaxbsd.h
 xm-vaxult.h
+z8k-tdep.c
 
 Do-last:
 
