@@ -1,3 +1,8 @@
+2004-06-11  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* coff-alpha.c (alpha_relocate_section): Set used_by_bfd directly
+	as ecoff_section_data() does not return a valid lvalue.
+
 2004-06-09  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elflink.c (elf_sort_symbol): Compare section id, not pointers.
