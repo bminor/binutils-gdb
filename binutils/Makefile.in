@@ -183,7 +183,7 @@ binutils.dvi: $(srcdir)/binutils.texi
 
 # info file for online browsing
 binutils.info: $(srcdir)/binutils.texi
-	- $(MAKEINFO) -o binutils.info $(srcdir)/binutils.texi
+	$(MAKEINFO) -o binutils.info $(srcdir)/binutils.texi
 
 #   different targets for -ms, -mm, -me
 #   (we don't use a variable because we don't trust all makes to handle
