@@ -69,7 +69,20 @@ different; see the file gdb-5.3/gdb/config/djgpp/README for details.)
 `configure' can't determine your system type, specify one as its
 argument, e.g., `./configure sun4' or `./configure decstation'.
 
-   If you get compiler errors during this stage, see the `Reporting
+   Make sure that your 'configure' line ends in 'gdb-5.3/configure':
+
+      /berman/migchain/source/gdb-5.3/configure      # RIGHT
+      /berman/migchain/source/gdb-5.3/gdb/configure  # WRONG
+
+   The gdb package contains several subdirectories, such as 'gdb',
+'bfd', and 'readline'.  If your 'configure' line ends in
+'gdb-5.3/gdb/configure', then you are configuring only the gdb
+subdirectory, not the whole gdb package.  This leads to build errors
+such as:
+
+      make: *** No rule to make target `../bfd/bfd.h', needed by `gdb.o'.  Stop.
+
+   If you get other compiler errors during this stage, see the `Reporting
 Bugs' section below; there are a few known problems.
 
    GDB requires an ISO C (ANSI C) compiler.  If you do not have an ISO

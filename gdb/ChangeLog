@@ -1,3 +1,8 @@
+2003-01-16  Michael Chastain  <mec@shout.net>
+
+	* README (Unpacking and Installation -- quick overview):
+	Warn against ".../gdb-5.3/gdb/configure".
+
 2003-01-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* dummy-frame.h (dummy_frame_id_unwind): Delete declaration.
