@@ -1,3 +1,11 @@
+2005-04-05  Sterling Augustine  <sterling@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (branch_align_power): New.
+	(xtensa_find_unaligned_branch_targets, get_aligned_diff,
+	future_alignment_required): Use branch_align_power to check section
+	alignment as well as xtensa_fetch_width when aligning branch targets.
+
 2005-04-05  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c: Warning fixes throughout.
