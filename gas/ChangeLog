@@ -1,5 +1,10 @@
 2001-03-31  Alan Modra  <alan@linuxcare.com.au>
 
+	* listing.c (listing_listing): Enable listing on EDICT_NOLIST_NEXT
+	for one line if not already enabled.
+	* cond.c (s_elseif): Correct conditional assembly listing.
+	(s_else): Likewise.
+
 	* cond.c (s_endif): Correct handling of "if .. elseif .." trees.
 	Don't abort on NULL current_cframe.
 

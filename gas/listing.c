@@ -1,5 +1,6 @@
 /* listing.c - mainting assembly listings
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+   2001
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -1007,6 +1008,8 @@ listing_listing (name)
 	  show_listing--;
 	  break;
 	case EDICT_NOLIST_NEXT:
+	  if (show_listing == 0)
+	    list_line--;
 	  break;
 	case EDICT_EJECT:
 	  break;
@@ -1029,7 +1032,8 @@ listing_listing (name)
 	    p = buffer_line (list->file, buffer, width);
 	}
 
-      if (list->edict == EDICT_LIST)
+      if (list->edict == EDICT_LIST
+	  || (list->edict == EDICT_NOLIST_NEXT && show_listing == 0))
 	{
 	  /* Enable listing for the single line that caused the enable.  */
 	  list_line++;
@@ -1090,7 +1094,7 @@ listing_listing (name)
 	    }
 	}
 
-      if (list->edict == EDICT_NOLIST_NEXT)
+      if (list->edict == EDICT_NOLIST_NEXT && show_listing == 1)
 	--show_listing;
 
       list = list->next;

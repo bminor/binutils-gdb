@@ -1,3 +1,8 @@
+2001-03-31  Alan Modra  <alan@linuxcare.com.au>
+
+	* gas/all/cond.s: Add .if .elseif tree.
+	* gas/all/cond.d: Match above.
+
 2001-03-30  H.J. Lu  <hjl@gnu.org>
 
 	* gas/i386/relax.d: Dump with -s instead of -drw.
