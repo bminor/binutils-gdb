@@ -33,7 +33,8 @@
  */
 
 /* Table of opcodes for the alpha.
-   Copyright (C) 1989 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1994, 1995 Free Software Foundation, Inc.
+   Contributed 1993 by Carnegie Mellon University.
 
 This file is part of GAS, the GNU Assembler, and GDB, the GNU disassembler.
 
