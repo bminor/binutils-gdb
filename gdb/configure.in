@@ -1,4 +1,4 @@
-configdirs="doc"
+configdirs="doc energize"
 srcname="GDB"
 srctrigger=main.c
 
