@@ -1,3 +1,10 @@
+Fri Sep 16 00:14:40 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* ch-exp.y:  Get rid of some extra non-terminals, and move
+	their rules into primitive_value.
+	* ch-lang.c (chill_op_print_tab):  Add '->'.
+	* expprint.c (print_subexp):  Recognize unary postfix operator.
+
 Wed Sep 14 18:27:42 1994  Jason Molenda  (crash@phydeaux.cygnus.com)
 
         * remote-hms.c: use remote_debug instead of hms_silent toggle.

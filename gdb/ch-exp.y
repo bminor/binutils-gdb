@@ -247,18 +247,14 @@ yyerror PARAMS ((char *));
 %token <ivar>		GDB_VARIABLE	/* Convenience variable */
 %token <voidval>	GDB_ASSIGNMENT	/* Assign value to somewhere */
 
-%type <voidval>		location
 %type <voidval>		access_name
 %type <voidval>		primitive_value
-%type <voidval>		location_contents
 %type <voidval>		value_name
 %type <voidval>		literal
 %type <voidval>		tuple
 %type <voidval>		value_string_element
 %type <voidval>		value_string_slice
-%type <voidval>		value_array_element
 %type <voidval>		value_array_slice
-%type <voidval>		value_structure_field
 %type <voidval>		expression_conversion
 %type <voidval>		value_procedure_call
 %type <voidval>		value_built_in_routine_call
@@ -290,7 +286,6 @@ yyerror PARAMS ((char *));
 %type <voidval>		left_element
 %type <voidval>		right_element
 %type <voidval>		slice_size
-%type <voidval>		array_primitive_value
 %type <voidval>		expression_list
 %type <voidval>		lower_element
 %type <voidval>		upper_element
@@ -333,15 +328,6 @@ value		:	expression
 undefined_value	:	FIXME_01
 			{
 			  $$ = 0;	/* FIXME */
-			}
-		;
-
-/* Z.200, 4.2.1 */
-
-location	:	access_name
-  		|	primitive_value POINTER
-			{
-			  write_exp_elt_opcode (UNOP_IND);
 			}
 		;
 
@@ -391,9 +377,26 @@ expression_list	:	expression
 
 /* Z.200, 5.2.1 */
 
-primitive_value	:	location_contents
+primitive_value	:
+			access_name
+		|	primitive_value '('
+				/* This is to save the value of arglist_len
+				   being accumulated for each dimension. */
+				{ start_arglist (); }
+			expression_list ')'
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (MULTI_SUBSCRIPT);
+			  write_exp_elt_longcst ((LONGEST) end_arglist ());
+			  write_exp_elt_opcode (MULTI_SUBSCRIPT);
+			}
+		|	primitive_value FIELD_NAME
+			{ write_exp_elt_opcode (STRUCTOP_STRUCT);
+			  write_exp_string ($2);
+			  write_exp_elt_opcode (STRUCTOP_STRUCT);
+			}
+  		|	primitive_value POINTER
+			{
+			  write_exp_elt_opcode (UNOP_IND);
 			}
                 |	value_name
 			{
@@ -415,15 +418,7 @@ primitive_value	:	location_contents
 			{
 			  $$ = 0;	/* FIXME */
 			}
-                |	value_array_element
-			{
-			  $$ = 0;	/* FIXME */
-			}
                 |	value_array_slice
-			{
-			  $$ = 0;	/* FIXME */
-			}
-                |	value_structure_field
 			{
 			  $$ = 0;	/* FIXME */
 			}
@@ -448,14 +443,6 @@ primitive_value	:	location_contents
 			  $$ = 0;	/* FIXME */
 			}
                 |	parenthesised_expression
-			{
-			  $$ = 0;	/* FIXME */
-			}
-		;
-
-/* Z.200, 5.2.2 */
-
-location_contents:	location
 			{
 			  $$ = 0;	/* FIXME */
 			}
@@ -568,38 +555,15 @@ value_string_slice:	string_primitive_value '(' left_element ':' right_element ')
 			}
 		;
 
-/* Z.200, 5.2.8 */
-
-value_array_element:	array_primitive_value '('
-				/* This is to save the value of arglist_len
-				   being accumulated for each dimension. */
-				{ start_arglist (); }
-			expression_list ')'
-			{
-			  write_exp_elt_opcode (MULTI_SUBSCRIPT);
-			  write_exp_elt_longcst ((LONGEST) end_arglist ());
-			  write_exp_elt_opcode (MULTI_SUBSCRIPT);
-			}
-		;
-
 /* Z.200, 5.2.9 */
 
-value_array_slice:	array_primitive_value '(' lower_element ':' upper_element ')'
+value_array_slice:	primitive_value '(' lower_element ':' upper_element ')'
 			{
 			  $$ = 0;	/* FIXME */
 			}
-		|	array_primitive_value '(' first_element UP slice_size ')'
+		|	primitive_value '(' first_element UP slice_size ')'
 			{
 			  $$ = 0;	/* FIXME */
-			}
-		;
-
-/* Z.200, 5.2.10 */
-
-value_structure_field:	primitive_value FIELD_NAME
-			{ write_exp_elt_opcode (STRUCTOP_STRUCT);
-			  write_exp_string ($2);
-			  write_exp_elt_opcode (STRUCTOP_STRUCT);
 			}
 		;
 
@@ -848,7 +812,7 @@ operand_5	:	operand_6
 
 /* Z.200, 5.3.9 */
 
-operand_6	:	POINTER location
+operand_6	:	POINTER primitive_value
 			{
 			  write_exp_elt_opcode (UNOP_ADDR);
 			}
@@ -866,7 +830,7 @@ operand_6	:	POINTER location
 /* Z.200, 6.2 */
 
 single_assignment_action :
-			location GDB_ASSIGNMENT value
+			primitive_value GDB_ASSIGNMENT value
 			{
 			  write_exp_elt_opcode (BINOP_ASSIGN);
 			}
@@ -960,15 +924,6 @@ length_argument :	expression
 			  $$ = 0;	/* FIXME */
 			}
 		;
-
-/* Z.200, 12.4.3 */
-
-array_primitive_value :	primitive_value
-			{
-			  $$ = 0;
-			}
-		;
-
 
 /* Things which still need productions... */
 
