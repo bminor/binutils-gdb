@@ -1,3 +1,24 @@
+2003-06-12  Nick Clifton  <nickc@redhat.com>
+
+	* opncls.c (calc_crc32): Rename to
+	bfd_calc_gnu_debuglink_crc32 and export.
+        (GNU_DEBUGLINK): Define and use to replace occurrences of
+	hard-coded ".gnu_debuglink" in the code.
+        (get_debug_link_info): Prevent aborts by replacing call to
+	xmalloc with a call to malloc.
+        (find_separate_debug_file): Prevent aborts by replacing calls
+	to xmalloc and xstrdup with calls to malloc and strdup.
+        (bfd_add_gnu_debuglink): New function.  Add a .gnu_debuglink
+	section to a bfd.
+	* bfd-in2.h: Regenerate.
+
+2003-06-12 Federico G. Schwindt <fgsch@lodoss.net>
+	
+	* config.bfd (i[3-7]86-*-openbsd[0-2].* | i[3-7]86-*-openbsd3.[0-3]):
+	New target (was i[3-7]86-*-openbsd* before).
+	(i[3-7]86-*-openbsd*): Change to use bfd_elf32_i386_vec.
+	(vax-*-openbsd*): New target.
+
 2003-06-11  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* elfxx-mips.c (MIPS_ELF_OPTIONS_SECTION_NAME): Use .MIPS.options
