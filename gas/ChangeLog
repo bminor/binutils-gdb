@@ -1,3 +1,11 @@
+2002-06-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/obj-elf.c (obj_elf_change_section): Set and check elf
+	linkonce flag.  Print all warnings.
+	(obj_elf_section): Parse ",comdat" for groups.
+	(elf_frob_file): Set SEC_LINK_ONCE on COMDAT groups.  Check
+	consistency of comdat flag.
+
 2002-06-02  Richard Henderson  <rth@redhat.com>
 
 	* config/tc-alpha.c (alpha_adjust_symtab_relocs): Fix thinko

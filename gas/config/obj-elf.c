@@ -77,7 +77,7 @@ static void obj_elf_weak PARAMS ((int));
 static void obj_elf_local PARAMS ((int));
 static void obj_elf_visibility PARAMS ((int));
 static void obj_elf_change_section
-  PARAMS ((const char *, int, int, int, const char *, int));
+  PARAMS ((const char *, int, int, int, const char *, int, int));
 static int obj_elf_parse_section_letters PARAMS ((char *, size_t));
 static int obj_elf_section_word PARAMS ((char *, size_t));
 static char *obj_elf_section_name PARAMS ((void));
@@ -664,12 +664,13 @@ static struct special_section const special_sections[] =
 };
 
 static void
-obj_elf_change_section (name, type, attr, entsize, group_name, push)
+obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
      const char *name;
      int type;
      int attr;
      int entsize;
      const char *group_name;
+     int linkonce;
      int push;
 {
   asection *old_sec;
@@ -758,6 +759,7 @@ obj_elf_change_section (name, type, attr, entsize, group_name, push)
       if (flags & SEC_MERGE)
 	sec->entsize = entsize;
       elf_group_name (sec) = group_name;
+      elf_linkonce_p (sec) = linkonce;
 
       /* Add a symbol for this section to the symbol table.  */
       secsym = symbol_find (name);
@@ -771,15 +773,16 @@ obj_elf_change_section (name, type, attr, entsize, group_name, push)
       /* If section attributes are specified the second time we see a
 	 particular section, then check that they are the same as we
 	 saw the first time.  */
-      if ((old_sec->flags ^ flags)
-	  & (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
-	     | SEC_EXCLUDE | SEC_SORT_ENTRIES | SEC_MERGE | SEC_STRINGS
-	     | SEC_THREAD_LOCAL))
+      if (((old_sec->flags ^ flags)
+	   & (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
+	      | SEC_EXCLUDE | SEC_SORT_ENTRIES | SEC_MERGE | SEC_STRINGS
+	      | SEC_THREAD_LOCAL))
+	  || linkonce != elf_linkonce_p (sec))
 	as_warn (_("ignoring changed section attributes for %s"), name);
-      else if ((flags & SEC_MERGE) && old_sec->entsize != (unsigned) entsize)
+      if ((flags & SEC_MERGE) && old_sec->entsize != (unsigned) entsize)
 	as_warn (_("ignoring changed section entity size for %s"), name);
-      else if ((attr & SHF_GROUP) != 0
-	       && strcmp (elf_group_name (old_sec), group_name) != 0)
+      if ((attr & SHF_GROUP) != 0
+	  && strcmp (elf_group_name (old_sec), group_name) != 0)
 	as_warn (_("ignoring new section group for %s"), name);
     }
 
@@ -947,6 +950,7 @@ obj_elf_section (push)
   char *name, *group_name, *beg;
   int type, attr, dummy;
   int entsize;
+  int linkonce;
 
 #ifndef TC_I370
   if (flag_mri)
@@ -977,6 +981,7 @@ obj_elf_section (push)
   attr = 0;
   group_name = NULL;
   entsize = 0;
+  linkonce = 0;
 
   if (*input_line_pointer == ',')
     {
@@ -1050,6 +1055,13 @@ obj_elf_section (push)
 	      group_name = obj_elf_section_name ();
 	      if (group_name == NULL)
 		attr &= ~SHF_GROUP;
+	      else if (strncmp (input_line_pointer, ",comdat", 7) == 0)
+		{
+		  input_line_pointer += 7;
+		  linkonce = 1;
+		}
+	      else if (strncmp (name, ".gnu.linkonce", 13) == 0)
+		linkonce = 1;
 	    }
 	  else if ((attr & SHF_GROUP) != 0)
 	    {
@@ -1085,7 +1097,7 @@ obj_elf_section (push)
 
   demand_empty_rest_of_line ();
 
-  obj_elf_change_section (name, type, attr, entsize, group_name, push);
+  obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push);
 }
 
 /* Change to the .data section.  */
@@ -2015,8 +2027,20 @@ elf_frob_file ()
       asection *s;
       flagword flags;
 
-      s = subseg_force_new (group_name, 0);
       flags = SEC_READONLY | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_GROUP;
+      for (s = list.head[i]; s != NULL; s = elf_next_in_group (s))
+	if (elf_linkonce_p (s) != ((flags & SEC_LINK_ONCE) != 0))
+	  {
+	    flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
+	    if (s != list.head[i])
+	      {
+		as_warn (_("assuming all members of group `%s' are COMDAT"),
+			 group_name);
+		break;
+	      }
+	  }
+
+      s = subseg_force_new (group_name, 0);
       if (s == NULL
 	  || !bfd_set_section_flags (stdoutput, s, flags)
 	  || !bfd_set_section_alignment (stdoutput, s, 2))
