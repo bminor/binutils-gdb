@@ -1,5 +1,14 @@
 2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (partial_determine_prefix)
+	(partial_determine_prefix_aux): New functions.
+	(add_partial_symbol): Call partial_determine_prefix.
+	(add_partial_structure): Remove workaround for DW_AT_specification.
+	(load_partial_die): Save DW_AT_extension.
+	(determine_prefix_aux): Reuse the return value of dwarf2_name.
+
+2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (load_partial_dies): Follow unions.  Follow
 	aggregates for all non-C languages.
 
