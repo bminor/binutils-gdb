@@ -326,6 +326,46 @@ hardwire_flush_output (scb)
 #endif  
 }
 
+static int
+hardwire_flush_input (scb)
+     serial_t scb;
+{
+#ifdef HAVE_TERMIOS
+  return tcflush (scb->fd, TCIFLUSH);
+#endif
+
+#ifdef HAVE_TERMIO
+  return ioctl (scb->fd, TCFLSH, 0);
+#endif
+
+#ifdef HAVE_SGTTY
+  /* This flushes both input and output, but we can't do better.  */
+  return ioctl (scb->fd, TIOCFLUSH, 0);
+#endif  
+}
+
+static int
+hardwire_send_break (scb)
+     serial_t scb;
+{
+  int status;
+
+#ifdef HAVE_TERMIOS
+  return tcsendbreak (scb->fd, 0);
+#endif
+
+#ifdef HAVE_TERMIO
+  return ioctl (scb->fd, TCSBRK, 0);
+#endif
+
+#ifdef HAVE_SGTTY
+  status = ioctl (scb->fd, TIOCSBRK, 0);
+  usleep (250000);
+  status = ioctl (scb->fd, TIOCCBRK, 0);
+  return status;
+#endif  
+}
+
 static void
 hardwire_raw(scb)
      serial_t scb;
@@ -607,6 +647,8 @@ static struct serial_ops hardwire_ops =
   hardwire_readchar,
   hardwire_write,
   hardwire_flush_output,
+  hardwire_flush_input,
+  hardwire_send_break,
   hardwire_raw,
   hardwire_get_tty_state,
   hardwire_set_tty_state,

@@ -267,10 +267,9 @@ go32_open (scb, name)
 }
 
 static int
-go32_flush_output (scb)
+go32_noop (scb)
      serial_t scb;
 {
-  /* No need to flush, because there is no buffering.  */
   return 0;
 }
 
@@ -378,7 +377,9 @@ static struct serial_ops go32_ops =
   go32_close,
   go32_readchar,
   go32_write,
-  go32_flush_output,
+  go32_noop, /* flush output */
+  go32_noop, /* flush input */
+  go32_noop, /* send break -- currently used only for nindy */
   go32_raw,
   go32_get_tty_state,
   go32_set_tty_state,

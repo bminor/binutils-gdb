@@ -2,7 +2,11 @@ Tue Jul 27 12:07:38 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote-udi.c: Remove old comment about download not implemented.
 
-	* serial.h, ser-{unix,go32,tcp}.c: Add flush_input.
+	* serial.h, ser-{unix,go32,tcp}.c: Add flush_input and send_break.
+	* nindy-share/*, remote-nindy.c: Extensive hacking to make it
+	conform to GDB conventions like using memcpy not bcopy, serial.h,
+	etc.  This is to make it host on Solaris, AIX, etc.
+	* Makefile.in: Reflect removed nindy-share files.
 
 	* stack.c (print_frame_info): Revise comment about `pathological'
 	case (there was a wrong FIXME about text labels; also asm() can

@@ -42,6 +42,8 @@ struct serial_ops {
   int (*readchar) PARAMS ((serial_t, int timeout));
   int (*write) PARAMS ((serial_t, const char *str, int len));
   int (*flush_output) PARAMS ((serial_t));
+  int (*flush_input) PARAMS ((serial_t));
+  int (*send_break) PARAMS ((serial_t));
   void (*go_raw) PARAMS ((serial_t));
   serial_ttystate (*get_tty_state) PARAMS ((serial_t));
   int (*set_tty_state) PARAMS ((serial_t, serial_ttystate));
@@ -72,10 +74,22 @@ serial_t serial_fdopen PARAMS ((int fd));
 
 #define SERIAL_FDOPEN(FD) serial_fdopen(FD)
 
-/* Flush pending output.  */
+/* Flush pending output.  Might also flush input (if this system can't flush
+   only output).  */
 
 #define SERIAL_FLUSH_OUTPUT(SERIAL_T) \
   ((SERIAL_T)->ops->flush_output((SERIAL_T)))
+
+/* Flush pending input.  Might also flush output (if this system can't flush
+   only input).  */
+
+#define SERIAL_FLUSH_INPUT(SERIAL_T)\
+  ((*(SERIAL_T)->ops->flush_input) ((SERIAL_T)))
+
+/* Send a break between 0.25 and 0.5 seconds long.  */
+
+#define SERIAL_SEND_BREAK(SERIAL_T) \
+  ((*(SERIAL_T)->ops->send_break) (SERIAL_T))
 
 /* Turn the port into raw mode. */
 

@@ -141,11 +141,9 @@ tcp_set_tty_state(scb, ttystate)
 }
 
 static int
-tcp_flush_output (scb)
+tcp_return_0 (scb)
      serial_t scb;
 {
-  /* This is only used by utils.c on stdout, so it doesn't need to work
-     for tcp.  */
   return 0;
 }
 
@@ -309,7 +307,9 @@ static struct serial_ops tcp_ops =
   tcp_close,
   tcp_readchar,
   tcp_write,
-  tcp_flush_output,
+  tcp_return_0, /* flush output */
+  tcp_return_0, /* flush input */
+  tcp_return_0, /* send break */
   tcp_raw,
   tcp_get_tty_state,
   tcp_set_tty_state,
