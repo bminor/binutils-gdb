@@ -222,10 +222,9 @@ unmake_mips16_addr (CORE_ADDR addr)
 static LONGEST
 read_signed_register (int regnum)
 {
-  void *buf = alloca (register_size (current_gdbarch, regnum));
-  deprecated_read_register_gen (regnum, buf);
-  return (extract_signed_integer
-	  (buf, register_size (current_gdbarch, regnum)));
+  LONGEST val;
+  regcache_cooked_read_signed (current_regcache, regnum, &val);
+  return val;
 }
 
 static LONGEST
