@@ -1958,12 +1958,14 @@ _bfd_pe_get_symbol_info (abfd, symbol, ret)
      symbol_info *ret;
 {
   coff_get_symbol_info (abfd, symbol, ret);
-
+#if 0 /* This code no longer appears to be necessary.
+	 ImageBase has already been added in by coff_swap_scnhdr_in.  */
   if (pe_data (abfd) != NULL
       && ((symbol->flags & BSF_DEBUGGING) == 0
 	  || (symbol->flags & BSF_DEBUGGING_RELOC) != 0)
       && ! bfd_is_abs_section (symbol->section))
     ret->value += pe_data (abfd)->pe_opthdr.ImageBase;
+#endif
 }
 
 /* Handle the .idata section and other things that need symbol table
