@@ -96,7 +96,6 @@ libieee.h
 liboasys.h
 newsos3.c
 oasys.c
-sparc-opc.c
 opncls.c
 reloc.c
 rs6000-core.c
@@ -116,7 +115,7 @@ trad-core.h
 Do-last:
 
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	echo Keeping v9 in aoutx.h sparc-opc.c
+	echo Keeping v9 in aoutx.h 
 else
 	echo Sanitizing v9 in aoutx.h
 	rm -f new
@@ -129,15 +128,6 @@ else
 		fi
 		mv new aoutx.h
 	done
-	echo Sanitizing v9 in sparc-opc.c
-	rm -f new
-	grep -v v9 sparc-opc.c > new
-	if [ -n "${safe}" ] ; then
-		mv sparc-opc.c .Recover
-	else
-		rm sparc-opc.c
-	fi
-	mv new sparc-opc.c
 fi
 
 echo Done in `pwd`.
