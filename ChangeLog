@@ -1,3 +1,8 @@
+Tue Dec 14 21:25:33 1993  Per Bothner  (bothner@cygnus.com)
+
+	* config.guess:  Recognize some Tektronix configurations.
+	From Kaveh R. Ghazi <ghazi@noc.rutgers.edu>.
+
 Sat Dec 11 11:18:00 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* config.sub: Match any flavor of SH.
