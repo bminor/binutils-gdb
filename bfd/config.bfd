@@ -28,6 +28,7 @@ case "${canon}" in
   hppa*-*-hiux*)	bfd_name=hppahpux ;;
   hppa*-*-osf*)		bfd_name=hppa-elf ;;
   i[34]86-*-sysv4*)	bfd_name=i386-elf ;;
+  i[34]86-*-unixware)	bfd_name=i386-elf ;;
   i[34]86-*-solaris2*)	bfd_name=i386-elf ;;
   i[34]86-*-sysv*)	bfd_name=i386-coff ;;
   i[34]86-*-isc*)	bfd_name=i386-coff ;;
@@ -82,12 +83,11 @@ case "${canon}" in
   sparc-*-solaris2*)	bfd_name=sparc-elf ;;
   sparc-*-sysv4*)	bfd_name=sparc-elf ;;
 #	start-sanitize-v9
-# Don't set target64=true for sparc64-*-aout*.  Keep it using the 32bit stuff
-# so we continue to have something that works (until the 64 bit support is
-# rock solid).
+# Don't set target64=true for sparc64-*-aout*.
   sparc64-*-aout*)	bfd_name=sparc-aout ;;
   sparc64-*-elf*)	bfd_name=sparc64-elf  ; target64=true ;;
 #	end-sanitize-v9
+  sparc-*-netware*)	bfd_name=sparc-nlm ;;
   sparc*-*-*)		bfd_name=sparc-aout ;;
   tahoe-*-*)		bfd_name=tahoe ;;
   vax-*-vms*)		bfd_name=vax-vms ;;
