@@ -427,7 +427,7 @@ static void
 procfs_create_inferior PARAMS ((char *, char *, char **));
 
 static void
-procfs_notice_signals PARAMS ((pid_t pid));
+procfs_notice_signals PARAMS ((int pid));
 
 static struct procinfo *
 find_procinfo PARAMS ((pid_t pid, int okfail));
@@ -1474,7 +1474,7 @@ GLOBAL FUNCTION
 
 SYNOPSIS
 
-	static void procfs_notice_signals (pid_t pid);
+	static void procfs_notice_signals (int pid);
 
 DESCRIPTION
 
@@ -1493,7 +1493,7 @@ DESCRIPTION
 
 static void
 procfs_notice_signals (pid)
-     pid_t pid;
+     int pid;
 {
   int signo;
   struct procinfo *pi;
@@ -3371,6 +3371,8 @@ DESCRIPTION
 	so that any grand-children start with all tracing flags set.
  */
 
+#ifdef SYS_sproc
+
 static void
 procfs_set_sproc_trap (pi)
      struct procinfo *pi;
@@ -3383,9 +3385,7 @@ procfs_set_sproc_trap (pi)
       error ("PIOCGEXIT failed");
     }
 
-#ifdef SYS_sproc
   praddset (&exitset, SYS_sproc);
-#endif
 
   if (ioctl (pi->fd, PIOCSEXIT, &exitset) < 0)
     {
@@ -3408,6 +3408,7 @@ procfs_set_sproc_trap (pi)
 #endif
 #endif
 }
+#endif	/* SYS_sproc */
 
 /* Fork an inferior process, and start debugging it with /proc.  */
 
@@ -3424,7 +3425,9 @@ procfs_create_inferior (exec_file, allargs, env)
 
   /* Setup traps on exit from sproc() */
 
-  procfs_set_sproc_trap(current_procinfo);
+#ifdef SYS_sproc
+  procfs_set_sproc_trap (current_procinfo);
+#endif
 
   proceed ((CORE_ADDR) -1, 0, 0);
 }
