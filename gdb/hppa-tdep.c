@@ -952,7 +952,7 @@ unwind_command (exp, from_tty)
 }
 
 void
-_initialize_hppah_tdep ()
+_initialize_hppa_tdep ()
 {
   add_com ("unwind", class_obscure, unwind_command, "Print unwind info\n");
   add_show_from_set
