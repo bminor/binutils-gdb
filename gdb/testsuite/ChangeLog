@@ -1,3 +1,8 @@
+Tue Nov 16 21:07:44 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t00/teststrategy.exp: If we accidently send the "maint dump-me"
+	to xgdb instead of gdb, get out of gdb.
+
 Tue Nov 16 10:21:57 1993  Rob Savoye  (rob@cygnus.com)
 
 	* lib/gdb.exp: Make GDB and GDBFLAGS global so the scoping work
