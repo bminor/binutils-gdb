@@ -1,3 +1,10 @@
+2000-08-29  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* i386-linux-nat.c (i386_linux_skip_solib_resolver, 
+	skip_hurd_resolver, find_minsym_and_objfile): Move these
+	solib functions into i386-linux-tdep.c for cross debugging.
+	* i386-linux-tdep.c: Receive the above functions.
+
 2000-08-29  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* m68hc11-tdep.c (stack_correction): New variable for stack offset
