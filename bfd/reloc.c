@@ -3367,6 +3367,21 @@ ENUM
 ENUMDOC
   This is a 32 bit reloc for the AVR that stores 23 bit value
   into 22 bits.
+ENUM
+  BFD_RELOC_AVR_LDI
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores all needed bits
+  for absolute addressing with ldi with overflow check to linktime
+ENUM
+  BFD_RELOC_AVR_6
+ENUMDOC
+  This is a 6 bit reloc for the AVR that stores offset for ldd/std
+  instructions
+ENUM
+  BFD_RELOC_AVR_6_ADIW
+ENUMDOC
+  This is a 6 bit reloc for the AVR that stores offset for adiw/sbiw
+  instructions
 
 ENUM
   BFD_RELOC_390_12

@@ -1686,10 +1686,10 @@ enum bfd_architecture
 #define bfd_mach_sh_dsp     0x2d
 #define bfd_mach_sh2a       0x2a
 #define bfd_mach_sh2a_nofpu 0x2b
-#define bfd_mach_sh2a_nofpu_or_sh4_nommu_nofpu 0x2a1
-#define bfd_mach_sh2a_nofpu_or_sh3_nommu 0x2a2
-#define bfd_mach_sh2a_or_sh4 0x2a3
-#define bfd_mach_sh2a_or_sh3e 0x2a4
+#define bfd_mach_sh2a_fake1 0x2a1
+#define bfd_mach_sh2a_fake2 0x2a2
+#define bfd_mach_sh2a_fake3 0x2a3
+#define bfd_mach_sh2a_fake4 0x2a4
 #define bfd_mach_sh2e       0x2e
 #define bfd_mach_sh3        0x30
 #define bfd_mach_sh3_nommu  0x31

@@ -1,3 +1,9 @@
+2004-12-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* reloc.c (BFD_RELOC_AVR_LDI, BFD_RELOC_AVR_6, BFD_RELOC_AVR_6_ADIW):
+	Commit missing changes from 2004-12-22.
+	* bfd-in2.h: Regenerate.
+
 2004-12-23  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* elf32-crx.c (elf32_crx_relax_section): Support 'bcop' relaxation.
