@@ -171,7 +171,8 @@ ARMul_OSInit (ARMul_State * state)
   instr = 0xe59ff000 | (ADDRSOFTVECTORS - 8);		/* Load pc from soft vector */
   
   for (i = ARMul_ResetV; i <= ARMFIQV; i += 4)
-    ARMul_WriteWord (state, i, instr);	/* Write hardware vectors.  */
+    /* Write hardware vectors.  */
+    ARMul_WriteWord (state, i, instr);
   
   SWI_vector_installed = 0;
 
@@ -658,8 +659,8 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	  return TRUE;
 
 	case 3:  /* Close.  */
-	  state->Reg[0] = close (state->Reg[1]);
-	  OSptr->ErrorNo = errno;
+	  state->Reg[0] = sim_callback->close (sim_callback, state->Reg[1]);
+	  OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
 	  return TRUE;
 
 	case 4:  /* Read.  */
@@ -671,14 +672,18 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	  return TRUE;
 
 	case 6:  /* Lseek.  */
-	  state->Reg[0] = lseek (state->Reg[1], state->Reg[2], state->Reg[3]);
-	  OSptr->ErrorNo = errno;
+	  state->Reg[0] = sim_callback->lseek (sim_callback,
+					       state->Reg[1],
+					       state->Reg[2],
+					       state->Reg[3]);
+	  OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
 	  return TRUE;
 
 	case 17: /* Utime.  */
-	  state->Reg[0] = (ARMword) time (state->Reg[1]);
-	  OSptr->ErrorNo = errno;
-	  return (TRUE);
+	  state->Reg[0] = (ARMword) sim_callback->time (sim_callback,
+							(long *) state->Reg[1]);
+	  OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
+	  return TRUE;
 
 	case 7:  /* Unlink.  */
 	case 8:  /* Getpid.  */
