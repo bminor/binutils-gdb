@@ -2660,6 +2660,8 @@ obj_coff_init_stab_section (seg)
 
   /* Make space for this first symbol. */
   p = frag_more (12);
+  /* Zero it out. */
+  memcpy (p, 0, 12);
   as_where (&file, (unsigned int *) NULL);
   stabstr_name = alloca (strlen (segment_info[seg].scnhdr.s_name) + 4);
   strcpy (stabstr_name, segment_info[seg].scnhdr.s_name);

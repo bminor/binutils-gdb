@@ -1,3 +1,9 @@
+Sat Feb  5 12:30:32 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* config/obj-coffbfd.c (obj_coff_init_stab_section): Zero the
+	initial stab symbol after allocating it.
+	* config/obj-elf.c (obj_elf_init_stab_section): Ditto.
+
 Sat Feb  5 11:53:31 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_ip): addb[tf] should only accept
