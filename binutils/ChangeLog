@@ -1,3 +1,12 @@
+Thu Mar 25 10:38:11 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* objdump.c (fprintf): Declaration of variadic function had better
+	be a prototype for ANSI C systems.
+
+Mon Mar 22 23:19:46 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: rename test-install to install-check
+
 Fri Mar 19 14:40:08 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* objdump.c (disassemble_data): Add H8500.
