@@ -1,3 +1,7 @@
+Mon Dec 14 23:28:15 1992  John Gilmore  (gnu@cygnus.com)
+
+	* tm-nindy960.h, remote-nindy.c:  Lint.
+
 Mon Dec 14 18:48:52 1992  Fred Fish  (fnf@cygnus.com)
 
 	* gdbtypes.c (create_array_type):  Complete rewrite.  Now requires

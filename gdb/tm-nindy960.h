@@ -70,6 +70,9 @@ extern char *nindy_ttyname;	/* Name of serial port to talk to nindy */
 #define	BEFORE_MAIN_LOOP_HOOK	\
   nindy_before_main_loop();
 
+extern void
+nindy_before_main_loop();		/* In remote-nindy.c */
+
 /* Address of end of stack space.
  *	This probably doesn't matter for nindy, because it's only used
  *	in manipulation of core files, which we don't support.
@@ -87,7 +90,8 @@ extern char *nindy_ttyname;	/* Name of serial port to talk to nindy */
 #define	FRAME_CHAIN_VALID(chain, thisframe) \
 	nindy_frame_chain_valid (chain, thisframe)
 
-extern int nindy_frame_chain_valid();		/* See nindy-tdep.c */
+extern int
+nindy_frame_chain_valid();		/* See nindy-tdep.c */
 
 /* Sequence of bytes for breakpoint instruction */
 

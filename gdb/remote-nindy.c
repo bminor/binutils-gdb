@@ -351,7 +351,7 @@ nindy_resume (step, siggnal)
 
 	dcache_flush();
 	if ( regs_changed ){
-		nindy_store_registers ();
+		nindy_store_registers (-1);
 		regs_changed = 0;
 	}
 	have_regs = 0;
@@ -429,9 +429,12 @@ nindy_wait( status )
 					immediate_quit--;
 				} else {
 					/* Get out of loop */
-					supply_register (IP_REGNUM, &ip_value);
-					supply_register (FP_REGNUM, &fp_value);
-					supply_register (SP_REGNUM, &sp_value);
+					supply_register (IP_REGNUM, 
+							 (char *)&ip_value);
+					supply_register (FP_REGNUM, 
+							 (char *)&fp_value);
+					supply_register (SP_REGNUM, 
+							 (char *)&sp_value);
 					break;
 				}
 			}
@@ -530,7 +533,7 @@ nindy_store_registers(regno)
   bcopy (&registers[REGISTER_BYTE (PCW_REGNUM)], nindy_regs.pcw_acw,     2*4);
   bcopy (&registers[REGISTER_BYTE (IP_REGNUM)], nindy_regs.ip,           1*4);
   bcopy (&registers[REGISTER_BYTE (TCW_REGNUM)], nindy_regs.tcw,         1*4);
-  /* Float regs.  Only works on IEEE_FLOAT hosts.  */
+  /* Float regs.  Only works on IEEE_FLOAT hosts.  FIXME!  */
   for (regnum = FP0_REGNUM; regnum < FP0_REGNUM + 4; regnum++) {
     ieee_extended_to_double (&ext_format_i960,
 			     &registers[REGISTER_BYTE (regnum)], &dub);
@@ -538,7 +541,7 @@ nindy_store_registers(regno)
     /* FIXME-someday, the arguments to unpack_double are backward.
        It expects a target double and returns a host; we pass the opposite.
        This mostly works but not quite.  */
-    dub = unpack_double (builtin_type_double, &dub, &inv);
+    dub = unpack_double (builtin_type_double, (char *)&dub, &inv);
     /* dub now in target byte order */
     bcopy ((char *)&dub, &nindy_regs.fp_as_double[8 * (regnum - FP0_REGNUM)],
 	8);
@@ -893,6 +896,7 @@ nindy_mourn_inferior ()
    of this with a RETURN.  This is useful when e.g. simply examining
    an i960 object file on the host system.  */
 
+void
 nindy_before_main_loop ()
 {
   char ttyname[100];
