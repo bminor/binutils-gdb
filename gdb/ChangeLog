@@ -1,3 +1,8 @@
+Mon Apr  8 15:35:52 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* infptrace.c (kill_inferior): Remove call to "kill"; update
+	comments.
+
 Mon Apr  8 14:05:07 1996  Geoffrey Noer  <noer@cygnus.com>
 
 	* remote-e7000.c: don't append :23 to target port if __WIN32__
