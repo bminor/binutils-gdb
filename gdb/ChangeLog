@@ -1,3 +1,10 @@
+Fri Oct  4 00:35:56 1991  John Gilmore  (gnu at cygnus.com)
+
+	* coffread.c, dbxread.c, symfile.c, symmisc.c, symtab.h:  Remove
+	vestiges of typevectors, which were for symsegs and are no longer
+	used.  (From a question by Eliot Dresselhaus
+	<dresselh@RFT30.nas.nasa.gov>).
+
 Thu Oct  3 09:33:26 1991  John Gilmore  (gnu at cygnus.com)
 
     	* dbxread.c, coffread.c:  static-ize functions that were

@@ -235,7 +235,7 @@ static unsigned int symnum;
     translated through the type_translations hash table to get
     the index into the type vector.)  */
 
-static struct typevector *type_vector;
+static struct type **type_vector;
 
 /* Number of elements allocated for type_vector currently.  */
 
@@ -629,14 +629,13 @@ dbx_lookup_type (typenums)
       while (index >= type_vector_length)
 	{
 	  type_vector_length *= 2;
-	  type_vector = (struct typevector *)
+	  type_vector = (struct type **)
 	    xrealloc (type_vector,
-		      (sizeof (struct typevector)
-		       + type_vector_length * sizeof (struct type *)));
-	  bzero (&type_vector->type[type_vector_length / 2],
+		      (type_vector_length * sizeof (struct type *)));
+	  bzero (&type_vector[type_vector_length / 2],
 		 type_vector_length * sizeof (struct type *) / 2);
 	}
-      return &type_vector->type[index];
+      return &type_vector[index];
     }
   else
     {
@@ -1026,10 +1025,9 @@ start_symtab (name, dirname, start_addr)
   new_object_header_files ();
 
   type_vector_length = 160;
-  type_vector = (struct typevector *)
-    xmalloc (sizeof (struct typevector)
-	      + type_vector_length * sizeof (struct type *));
-  bzero (type_vector->type, type_vector_length * sizeof (struct type *));
+  type_vector = (struct type **)
+    xmalloc (type_vector_length * sizeof (struct type *));
+  bzero (type_vector, type_vector_length * sizeof (struct type *));
 
   /* Initialize the list of sub source files with one entry
      for this file (the top-level source file).  */
@@ -1156,15 +1154,11 @@ end_symtab (end_addr)
       symtab->linetable = (struct linetable *)
 	xrealloc (lv, (sizeof (struct linetable)
 		       + lv->nitems * sizeof (struct linetable_entry)));
-      type_vector->length = type_vector_length;
-      symtab->typevector = type_vector;
 
       symtab->dirname = subfile->dirname;
 
       symtab->free_code = free_linetable;
       symtab->free_ptr = 0;
-      if (subfile->next == 0)
-	symtab->free_ptr = (char *) type_vector;
 
       /* There should never already be a symtab for this name, since
 	 any prev dups have been removed when the psymtab was read in.
@@ -1179,6 +1173,7 @@ end_symtab (end_addr)
       free (subfile);
     }
 
+  free ((char *) type_vector);
   type_vector = 0;
   type_vector_length = -1;
   line_vector = 0;
