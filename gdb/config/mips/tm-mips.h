@@ -77,11 +77,6 @@ extern int mips_step_skips_delay (CORE_ADDR);
 #define NUM_REGS 90
 #endif
 
-/* Given the register index, return the name of the corresponding
-   register. */
-extern const char *mips_register_name (int regnr);
-#define REGISTER_NAME(i) mips_register_name (i)
-
 /* Initializer for an array of names of registers.
    There should be NUM_REGS strings in this initializer.  */
 
@@ -223,9 +218,7 @@ extern void fixup_sigtramp (void);
 extern char *mips_read_processor_type (void);
 
 /* Functions for dealing with MIPS16 call and return stubs.  */
-#define IN_SOLIB_CALL_TRAMPOLINE(pc, name)	mips_in_call_stub (pc, name)
 #define IN_SOLIB_RETURN_TRAMPOLINE(pc, name)	mips_in_return_stub (pc, name)
-#define SKIP_TRAMPOLINE_CODE(pc)		mips_skip_stub (pc)
 #define IGNORE_HELPER_CALL(pc)			mips_ignore_helper (pc)
 extern int mips_in_call_stub (CORE_ADDR pc, char *name);
 extern int mips_in_return_stub (CORE_ADDR pc, char *name);
