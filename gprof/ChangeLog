@@ -1,3 +1,7 @@
+Fri Aug 30 12:16:11 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gmon.h: Replace #elif with #else/#endif.
+
 Thu Aug 29 17:04:10 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (i[345]86-*-*): Recognize i686 for pentium pro.
