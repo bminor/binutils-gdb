@@ -1,3 +1,9 @@
+Tue Jun  2 13:51:00 1998  Geoff Keating  <geoffk@ozemail.com.au>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): The target of an
+	R_PPC_LOCAL24PC relocation should be local; if not, print an error
+	message instead of crashing.
+
 Mon Jun  1 18:23:12 1998  Yuli Barcohen  <yuli.barcohen@telrad.co.il>
 
 	* archures.c (bfd_mach_cpu32): Define.
