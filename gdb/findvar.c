@@ -187,9 +187,27 @@ store_address (addr, len, val)
   store_unsigned_integer (addr, len, (LONGEST)val);
 }
 
+/* Swap LEN bytes at BUFFER between target and host byte-order.  */
+#define SWAP_FLOATING(buffer,len) \
+  do                                                                    \
+    {                                                                   \
+      if (TARGET_BYTE_ORDER != HOST_BYTE_ORDER)                         \
+        {                                                               \
+          char tmp;                                                     \
+          char *p = (char *)(buffer);                                   \
+          char *q = ((char *)(buffer)) + len - 1;                       \
+          for (; p < q; p++, q--)                                       \
+            {                                                           \
+              tmp = *q;                                                 \
+              *q = *p;                                                  \
+              *p = tmp;                                                 \
+            }                                                           \
+        }                                                               \
+    }                                                                   \
+  while (0)
 
-/* There are many problems with floating point cross-debugging
-   in macro SWAP_TARGET_AND_HOST().
+/* There are various problems with the extract_floating and store_floating
+   routines.
 
    1.  These routines only handle byte-swapping, not conversion of
    formats.  So if host is IEEE floating and target is VAX floating,
@@ -213,14 +231,14 @@ extract_floating (addr, len)
     {
       float retval;
       memcpy (&retval, addr, sizeof (retval));
-      SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
+      SWAP_FLOATING (&retval, sizeof (retval));
       return retval;
     }
   else if (len == sizeof (double))
     {
       double retval;
       memcpy (&retval, addr, sizeof (retval));
-      SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
+      SWAP_FLOATING (&retval, sizeof (retval));
       return retval;
     }
   else
@@ -238,12 +256,12 @@ store_floating (addr, len, val)
   if (len == sizeof (float))
     {
       float floatval = val;
-      SWAP_TARGET_AND_HOST (&floatval, sizeof (floatval));
+      SWAP_FLOATING (&floatval, sizeof (floatval));
       memcpy (addr, &floatval, sizeof (floatval));
     }
   else if (len == sizeof (double))
     {
-      SWAP_TARGET_AND_HOST (&val, sizeof (val));
+      SWAP_FLOATING (&val, sizeof (val));
       memcpy (addr, &val, sizeof (val));
     }
   else

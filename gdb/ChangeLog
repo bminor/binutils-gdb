@@ -1,3 +1,11 @@
+Tue Feb 28 22:55:47 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* hppa-tdep.c (pa_print_registers), monitor.c: Use
+	extract_unsigned_integer and friends, not SWAP_TARGET_AND_HOST.
+	* defs.h, findvar.c: Move SWAP_TARGET_AND_HOST back to findvar.c.
+	Rename it to SWAP_FLOATING to make it clear it is no longer for
+	integers.
+
 Tue Feb 28 14:38:39 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* defs.h (SWAP_TARGET_AND_HOST): check endianess at runtime not

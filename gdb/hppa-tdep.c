@@ -1652,8 +1652,8 @@ pa_print_registers (raw_regs, regnum, fpregs)
     {
       for (j = 0; j < 4; j++)
 	{
-	  val = *(int *)(raw_regs + REGISTER_BYTE (i+(j*18)));
-	  SWAP_TARGET_AND_HOST (&val, 4);
+	  val =
+	    extract_signed_integer (raw_regs + REGISTER_BYTE (i+(j*18)), 4);
 	  printf_unfiltered ("%8.8s: %8x  ", reg_names[i+(j*18)], val);
 	}
       printf_unfiltered ("\n");
