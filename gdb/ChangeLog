@@ -1,5 +1,12 @@
 2003-08-07  Andrew Cagney  <cagney@redhat.com>
 
+	* language.c (op_error): Delete function.
+	(binop_type_check): Delete function.
+	* language.h (type_op_error, range_op_error): Delete macros.
+	(op_error): Delete declaration.
+
+2003-08-07  Andrew Cagney  <cagney@redhat.com>
+
 	* interps.h (INTERP_MI2, INTERP_MI3): Define.
 
 2003-08-07  Michal Ludvig  <mludvig@suse.cz>

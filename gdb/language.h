@@ -463,12 +463,8 @@ extern void binop_type_check (struct value *, struct value *, int);
 
 /* Error messages */
 
-extern void op_error (char *fmt, enum exp_opcode, int);
-
-#define type_op_error(f,o) \
-   op_error((f),(o),type_check==type_check_on ? 1 : 0)
-#define range_op_error(f,o) \
-   op_error((f),(o),range_check==range_check_on ? 1 : 0)
+extern void op_error (const char *lhs, enum exp_opcode,
+		      const char *rhs);
 
 extern void type_error (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 
