@@ -1,8 +1,7 @@
 Tue Apr 14 18:49:31 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-bits.h (EXTEND4): Define.
-	(EXTEND4): Ditto.
-	(EXTEND15): Ditto.
+	(EXTEND4, EXTEND15, EXTEND11): Ditto.
 	
 Tue Apr 14 16:31:35 1998  John Metzler  <jmetzler@cygnus.com>
 
