@@ -3,6 +3,9 @@ Tue Jul 22 18:38:56 1997  Robert Hoehne <robert.hoehne@Mathematik.TU-Chemnitz.DE
 	* config/te-go32.h (USE_ALIGN_PTWO): Define.
 	* config/tc-i386.c (md_pseudo_table): If USE_ALIGN_PTWO is
 	defined, use s_align_ptwo for .align.
+	* configure.in (i386-*-msdosdjgpp*): New target.
+	(i386-*-go32*): Set em to go32 and targ to coffgo32.
+	* configure: Rebuild.
 
 Tue Jul 22 12:41:40 1997  Doug Evans  <dje@canuck.cygnus.com>
 

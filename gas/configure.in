@@ -174,7 +174,8 @@ changequote([,])dnl
       i386-*-coff | i386-*-sysv* | i386-*-sco* | i386-*-isc*)
 			    fmt=coff targ=i386coff ;;
       i386-*-vsta)          fmt=aout ;;
-      i386-*-go32)          fmt=coff targ=i386coff ;;
+      i386-*-msdosdjgpp* | i386-*-go32*)
+			    fmt=coff targ=coffgo32 em=go32;;
       i386-*-rtems*)        fmt=coff targ=i386coff ;;
       i386-*-gnu*)          fmt=elf ;;
       i386-*-mach*)
