@@ -1,3 +1,12 @@
+Thu May 21 18:00:09 1992  Michael Tiemann  (tiemann@rtl.cygnus.com)
+
+	* Makefile.in (tooldir): Define it.
+	(all-ld): Depend on all-flex.
+
+Sun May 10 21:45:59 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* Makefile.in (check):  Fix libg++ special case.
+
 Fri May  8 08:31:41 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* configure: do not bury `pwd` into config.status, thus do fewer
