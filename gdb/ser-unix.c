@@ -21,7 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "serial.h"
 #include <fcntl.h>
 #include <sys/types.h>
-#include <sys/time.h>
 
 #if !defined (HAVE_TERMIOS) && !defined (HAVE_TERMIO) && !defined (HAVE_SGTTY)
 #define HAVE_SGTTY
@@ -47,6 +46,10 @@ struct hardwire_ttystate
 #endif
 
 #ifdef HAVE_SGTTY
+/* Needed for the code which uses select().  We would include <sys/select.h>
+   too if it existed on all systems.  */
+#include <sys/time.h>
+
 #include <sgtty.h>
 
 struct hardwire_ttystate

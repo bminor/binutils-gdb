@@ -1,5 +1,7 @@
 Sun Jun 27 08:58:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* ser-unix.c: Move #include of <sys/time.h> to HAVE_SGTTY section.
+
 	* Makefile.in (ALLPARAM): Add config/mips/{x,n}-{news-mips,riscos}.h.
 
 Fri Jun 25 11:22:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
