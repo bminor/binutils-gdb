@@ -33,6 +33,7 @@
 #include "scm-lang.h"
 #include "demangle.h"
 #include "doublest.h"
+#include "gdb_assert.h"
 
 /* Prototypes for exported functions. */
 
@@ -971,13 +972,17 @@ value_fn_field (value_ptr *arg1p, struct fn_field *f, int j, struct type *type,
   struct minimal_symbol *msym;
 
   sym = lookup_symbol (physname, 0, VAR_NAMESPACE, 0, NULL);
-  if (!sym)
+  if (sym != NULL)
     {
-      msym = lookup_minimal_symbol (physname, NULL, NULL);
+      msym = NULL;
     }
-
-  if (!sym && !msym)
-    return NULL;
+  else
+    {
+      gdb_assert (sym == NULL);
+      msym = lookup_minimal_symbol (physname, NULL, NULL);
+      if (msym == NULL)
+	return NULL;
+    }
 
   v = allocate_value (ftype);
   if (sym)

@@ -1,3 +1,8 @@
+2001-12-11  Andrew Cagney  <ac131313@redhat.com>
+
+	* values.c: Include "gdb_assert.h".
+	(value_fn_field): Rearange to avoid -Wuninitialized warning.
+
 2001-12-10  Fred Fish  <fnf@redhat.com>
 
 	* values.c (value_fn_field): Add physname variable.  Use a minimal
