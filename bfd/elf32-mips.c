@@ -3583,8 +3583,16 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
 
   /* The generic elf_fake_sections will set up REL_HDR using the
      default kind of relocations.  But, we may actually need both
-     kinds of relocations, so we set up the second header here.  */
-  if ((sec->flags & SEC_RELOC) != 0)
+     kinds of relocations, so we set up the second header here.
+
+     This is not necessary for the O32 ABI since that only uses Elf32_Rel
+     relocations (cf. System V ABI, MIPS RISC Processor Supplement,
+     3rd Edition, p. 4-17).  It breaks the IRIX 5/6 32-bit ld, since one
+     of the resulting empty .rela.<section> sections starts with
+     sh_offset == object size, and ld doesn't allow that.  While the check
+     is arguably bogus for empty or SHT_NOBITS sections, it can easily be
+     avoided by not emitting those useless sections in the first place.  */
+  if (IRIX_COMPAT (abfd) != ict_irix5 && (sec->flags & SEC_RELOC) != 0)
     {
       struct bfd_elf_section_data *esd;
       bfd_size_type amt = sizeof (Elf_Internal_Shdr);

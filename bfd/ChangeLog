@@ -1,3 +1,10 @@
+2002-02-08  Eric Christopher  <echristo@redhat.com>
+
+	From Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
+
+	* elf32-mips.c (_bfd_mips_elf_fake_sections): Don't create .rela
+	sections for the O32 ABI.
+
 2002-02-08  Chris Demetriou  <cgd@broadcom.com>
 
 	* elf32-arm.h: Fix formatting of _("...").
