@@ -339,7 +339,7 @@ get_character_constant (struct macro_buffer *tok, char *p, char *end)
       for (;;)
         {
           if (p >= end)
-            error ("Invalid character constant.");
+            error ("Unmatched single quote.");
           else if (*p == '\'')
             {
               if (p == body_start)
