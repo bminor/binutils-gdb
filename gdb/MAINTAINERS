@@ -275,9 +275,9 @@ dcache.c		J.T. Conklin		jtc@redback.com
 UI: External (user) interfaces.
 
 command interpreter	Fernando Nasser		fnasser@cygnus.com
-gdbtk (c & tcl)		Syd Polk		spolk@cygnus.com
-			Jim Ingham		jingham@apple.com
+gdbtk (c & tcl)		Jim Ingham		jingham@apple.com
 			Fernando Nasser         fnasser@cygnus.com
+			Keith Seitz		keiths@cygnus.com
 libgui (w/foundry, sn)	Syd Polk		spolk@cygnus.com
 			Jim Ingham		jingham@apple.com
 mi (gdb/mi)		Andrew Cagney		cagney@cygnus.com

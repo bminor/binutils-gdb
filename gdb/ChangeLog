@@ -1,3 +1,7 @@
+2001-04-09  Keith Seitz  <keiths@cygnus.com>
+
+	* MAINTAINERS: Swap with Syd Polk as a gdbtk maintainer.
+
 2001-04-08  Kevin Buettner  <kevinb@redhat.com>
 
 	* fork-child.c (fork_inferior, clone_and_follow_inferior): 
