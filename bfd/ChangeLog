@@ -1,3 +1,10 @@
+Mon Sep 21 12:15:22 1998  Catherine Moore  <clm@cygnus.com>
+
+        * elf32-i386.c (elf32_i386_vtinherit_howto): New.
+        (elf32_i386_vtentry_howto): New.
+        (elf_i386_reloc_type_lookup):  Return elf32_i386_vtentry_howto
+        or elf32_i386_vtinherit_howto  on lookup.
+
 Sun Sep 20 00:48:07 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* elf32-m68k.c: Include "elf/m68k.h".  Remove definition of enum
