@@ -1,4 +1,25 @@
-Fri Apr 12 16:44:10 1996  Jeffrey A Law  (law@cygnus.com)
+Wed May 22 22:23:37 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* compile.c (sim_resume): Correctly handle divu.
+
+Tue May  7 02:13:05 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* compile.c (sim_resume): Never allow the PC to have an
+	odd value.
+
+Fri Apr 12 16:50:37 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* inst.h: Expand on comments regarding H8300H_MSIZE.  Note
+	separate memory is allocate for the 8-bit area.
+	(struct cpu_state_type): Add new "eightbit' field.
+	* compile.c (GET_MEMORY_L): Handle access into the 8-bit
+	area.
+	(GET_MEMORY_W, GET_MEMORY_B): Likewise.
+	(SET_MEMORY_L, SET_MEMORY_W, SET_MEMORY_B): Likewise.
+	(init_pointers): Initialize space for the 8-bit area.
+	(sim_write): Handle writing into the 8-bit area.
+	(sim_read): Handle reading from the 8-bit area.
+	(sim_load): Reallocate space for the 8-bit area.
 
 	* compile.c (sim_load): Re-allocate memory for the simulator
 	here.

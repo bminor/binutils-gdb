@@ -494,26 +494,34 @@ static unsigned int *lreg[18];
 #define SET_L_REG(x,y) (*(lreg[x])) = (y)
 
 #define GET_MEMORY_L(x) \
-  ((cpu.memory[x+0] << 24) | (cpu.memory[x+1] << 16) | (cpu.memory[x+2] << 8) | cpu.memory[x+3])
+  (x < memory_size \
+   ? ((cpu.memory[x+0] << 24) | (cpu.memory[x+1] << 16) \
+      | (cpu.memory[x+2] << 8) | cpu.memory[x+3]) \
+   : ((cpu.eightbit[(x+0) & 0xff] << 24) | (cpu.eightbit[(x+1) & 0xff] << 16) \
+      | (cpu.eightbit[(x+2) & 0xff] << 8) | cpu.eightbit[(x+3) & 0xff]))
 
 #define GET_MEMORY_W(x) \
-  ((cpu.memory[x+0] << 8) | (cpu.memory[x+1] << 0))
+  (x < memory_size \
+   ? ((cpu.memory[x+0] << 8) | (cpu.memory[x+1] << 0)) \
+   : ((cpu.eightbit[(x+0) & 0xff] << 8) | (cpu.eightbit[(x+1) & 0xff] << 0)))
 
 
-#define SET_MEMORY_B(x,y) \
-  (cpu.memory[(x)] = y)
-
-#define SET_MEMORY_W(x,y) \
-{register unsigned char *_p = cpu.memory+x;\
-   register int __y = y;\
-     _p[0] = (__y)>>8;\
-       _p[1] =(__y);     }
+#define GET_MEMORY_B(x) \
+  (x < memory_size ? (cpu.memory[x]) : (cpu.eightbit[x & 0xff]))
 
 #define SET_MEMORY_L(x,y)  \
-{register unsigned char *_p = cpu.memory+x;register int __y = y;\
-   _p[0] = (__y)>>24;	 _p[1] = (__y)>>16;	 _p[2] = (__y)>>8;	 _p[3] = (__y)>>0;}
+{  register unsigned char *_p; register int __y = y; \
+   _p = (x < memory_size ? cpu.memory+x : cpu.eightbit + (x & 0xff)); \
+   _p[0] = (__y)>>24; _p[1] = (__y)>>16; \
+   _p[2] = (__y)>>8; _p[3] = (__y)>>0;}
 
-#define GET_MEMORY_B(x)  (cpu.memory[x])
+#define SET_MEMORY_W(x,y) \
+{  register unsigned char *_p; register int __y = y; \
+   _p = (x < memory_size ? cpu.memory+x : cpu.eightbit + (x & 0xff)); \
+   _p[0] = (__y)>>8; _p[1] =(__y);}
+
+#define SET_MEMORY_B(x,y) \
+  (x < memory_size ? (cpu.memory[(x)] = y) : (cpu.eightbit[x & 0xff] = y))
 
 int
 fetch (arg, n)
@@ -694,6 +702,7 @@ init_pointers ()
 	memory_size = H8300_MSIZE;
       cpu.memory = (unsigned char *) calloc (sizeof (char), memory_size);
       cpu.cache_idx = (unsigned short *) calloc (sizeof (short), memory_size);
+      cpu.eightbit = (unsigned char *) calloc (sizeof (char), 256);
 
       /* `msize' must be a power of two */
       if ((memory_size & (memory_size - 1)) != 0)
@@ -879,6 +888,10 @@ sim_resume (step, siggnal)
     }
 
   pc = cpu.pc;
+
+  /* The PC should never be odd.  */
+  if (pc & 0x1)
+    abort ();
 
   GETSR ();
   oldmask = cpu.mask;
@@ -1330,8 +1343,8 @@ sim_resume (step, siggnal)
 	    ea = GET_B_REG (code->src.reg);
 	    if (ea)
 	      {
-		tmp = rd % ea;
-		rd = rd / ea;
+		tmp = (unsigned)rd % ea;
+		rd = (unsigned)rd / ea;
 	      }
 	    SET_W_REG (code->dst.reg, (rd & 0xff) | (tmp << 8));
 	    n = ea & 0x80;
@@ -1347,8 +1360,8 @@ sim_resume (step, siggnal)
 	    nz = ea & 0xffff;
 	    if (ea)
 	      {
-		tmp = rd % ea;
-		rd = rd / ea;
+		tmp = (unsigned)rd % ea;
+		rd = (unsigned)rd / ea;
 	      }
 	    SET_L_REG (code->dst.reg, (rd & 0xffff) | (tmp << 16));
 	    goto next;
@@ -1627,12 +1640,17 @@ sim_write (addr, buffer, size)
   int i;
 
   init_pointers ();
-  if (addr < 0 || addr + size > memory_size)
+  if (addr < 0)
     return 0;
   for (i = 0; i < size; i++)
     {
-      cpu.memory[addr + i] = buffer[i];
-      cpu.cache_idx[addr + i] = 0;
+      if (addr < memory_size)
+	{
+	  cpu.memory[addr + i] = buffer[i];
+	  cpu.cache_idx[addr + i] = 0;
+	}
+      else
+	cpu.eightbit[(addr + i) & 0xff] = buffer[i];
     }
   return size;
 }
@@ -1644,9 +1662,12 @@ sim_read (addr, buffer, size)
      int size;
 {
   init_pointers ();
-  if (addr < 0 || addr + size > memory_size)
+  if (addr < 0)
     return 0;
-  memcpy (buffer, cpu.memory + addr, size);
+  if (addr < memory_size)
+    memcpy (buffer, cpu.memory + addr, size);
+  else
+    memcpy (buffer, cpu.eightbit + (addr & 0xff), size);
   return size;
 }
 
@@ -1898,6 +1919,8 @@ sim_load (prog, from_tty)
     free (cpu.memory);
   if (cpu.cache_idx)
     free (cpu.cache_idx);
+  if (cpu.eightbit)
+    free (cpu.eightbit);
 
   cpu.memory = (unsigned char *) calloc (sizeof (char), memory_size);
   cpu.cache_idx = (unsigned short *) calloc (sizeof (short), memory_size);
