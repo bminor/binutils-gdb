@@ -95,6 +95,10 @@ enum
 
 extern void _initialize_d10v_tdep (void);
 
+static CORE_ADDR d10v_read_sp (void);
+
+static CORE_ADDR d10v_read_fp (void);
+
 static void d10v_eva_prepare_to_trace (void);
 
 static void d10v_eva_get_trace_data (void);
@@ -366,6 +370,8 @@ d10v_register_virtual_type (int reg_nr)
 {
   if (reg_nr == PC_REGNUM)
     return builtin_type_void_func_ptr;
+  if (reg_nr == _SP_REGNUM || reg_nr == _FP_REGNUM)
+    return builtin_type_void_data_ptr;
   else if (reg_nr >= A0_REGNUM
       && reg_nr < (A0_REGNUM + NR_A_REGS))
     return builtin_type_int64;
@@ -444,20 +450,16 @@ d10v_pointer_to_address (struct type *type, void *buf)
     return d10v_make_daddr (addr);
 }
 
+/* Don't do anything if we have an integer, this way users can type 'x
+   <addr>' w/o having gdb outsmart them.  The internal gdb conversions
+   to the correct space are taken care of in the pointer_to_address
+   function.  If we don't do this, 'x $fp' wouldn't work.  */
 static CORE_ADDR
 d10v_integer_to_address (struct type *type, void *buf)
 {
   LONGEST val;
   val = unpack_long (type, buf);
-  if (TYPE_CODE (type) == TYPE_CODE_INT
-      && TYPE_LENGTH (type) <= TYPE_LENGTH (builtin_type_void_data_ptr))
-    /* Convert small integers that would would be directly copied into
-       a pointer variable into an address pointing into data space.  */
-    return d10v_make_daddr (val & 0xffff);
-  else
-    /* The value is too large to fit in a pointer.  Assume this was
-       intentional and that the user in fact specified a raw address.  */
-    return val;
+  return val;
 }
 
 /* Store the address of the place in which to copy the structure the
@@ -848,7 +850,7 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
   fi->extra_info->size = -next_addr;
 
   if (!(fp & 0xffff))
-    fp = d10v_make_daddr (read_register (SP_REGNUM));
+    fp = d10v_read_sp ();
 
   for (i = 0; i < NUM_REGS - 1; i++)
     if (fi->saved_regs[i])
@@ -875,7 +877,7 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
       /* otherwise, it isn't being used, so we use the SP instead */
       if (uses_frame)
 	fi->saved_regs[SP_REGNUM] 
-	  = read_register (FP_REGNUM) + fi->extra_info->size;
+	  = d10v_read_fp () + fi->extra_info->size;
       else
 	{
 	  fi->saved_regs[SP_REGNUM] = fp + fi->extra_info->size;

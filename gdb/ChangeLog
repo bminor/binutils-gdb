@@ -1,5 +1,14 @@
 2002-06-06  Elena Zannoni  <ezannoni@redhat.com>
 
+        * d10v-tdep.c (d10v_read_sp, d10v_read_fp): Add prototype.
+        (d10v_register_virtual_type): Make $fp and $sp be pointer to data.
+        (d10v_integer_to_address): Rewrite.
+        (d10v_frame_init_saved_regs): When reading fp and sp registers use
+        the d10v specific functions which take care of converting to the
+        correct space.
+
+2002-06-06  Elena Zannoni  <ezannoni@redhat.com>
+
 	* config/djgpp/fnchange.lst: Add testsuite files altivec-abi.c,
 	altivec-abi.exp, altivec-regs.c, altivec-regs.exp.
 
