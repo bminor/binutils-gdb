@@ -1,3 +1,24 @@
+Mon Feb  7 20:56:27 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config.bfd (hppa*-*-osf*): Use bfd_name hppaosf for this
+	configuration.
+	(hppa*-*-*elf*): This configuration used hppa-elf now.
+
+	* som.c: This file is also used for HOST_HPPAOSF.
+
+	* targets.c (bfd_target_vector): Enable som_vec for HOST_HPPAOSF.
+
+	* hosts/hppaosf.h: New host configuration file.
+
+	* config/hppabsd.mt (SELECT_VECS): Add bfd_elf32_hppa_vec as
+	BSD handles both SOM and ELF object files.
+
+	* config/hppaosf.mh (HDEFINES): Delete.  No longer needed.
+	(RANLIB): Doesn't do anything, define it to be "echo".
+
+	* config/hppaosf.mt: New target makefile fragment for a PA running
+	OSF1.
+
 Mon Feb  7 15:02:06 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* archures.c (enum bfd_architecture): Added bfd_arch_powerpc.
