@@ -1,3 +1,10 @@
+Thu Nov  5 15:34:19 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* section.c: New section bit SEC_SHARED_LIBRARY.
+	coffcode.h (styp_to_sec_flags): if STYP_NOLOAD && (STYP_TEXT ||
+	STYP_DATA), set SEC_SHARED_LIBRARY.  This seems to be correct for
+	i386-sysv.
+
 Thu Nov  5 04:43:09 1992  John Gilmore  (gnu@cygnus.com)
 
 	* target.c (struct bfd_target):  Eliminate the SDEF and SDEF_FMT

@@ -399,9 +399,21 @@ DEFUN(styp_to_sec_flags, (styp_flags),
   }
 #endif /* STYP_NOLOAD */
 
-  if ((styp_flags & STYP_TEXT) || (styp_flags & STYP_DATA)) 
+  /* For 386 COFF, at least, an unloadable text or data section is
+     actually a shared library section.  */
+  if (styp_flags & STYP_TEXT)
   {
-    sec_flags |= SEC_LOAD | SEC_ALLOC;
+    if (sec_flags & SEC_NEVER_LOAD)
+      sec_flags |= SEC_CODE | SEC_SHARED_LIBRARY;
+    else
+      sec_flags |= SEC_CODE | SEC_LOAD | SEC_ALLOC;
+  }
+  else if (styp_flags & STYP_DATA)
+  {
+    if (sec_flags & SEC_NEVER_LOAD)
+      sec_flags |= SEC_DATA | SEC_SHARED_LIBRARY;
+    else
+      sec_flags |= SEC_DATA | SEC_LOAD | SEC_ALLOC;
   }
   else if (styp_flags & STYP_BSS) 
   {
