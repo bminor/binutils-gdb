@@ -41,8 +41,14 @@
 /* Define to `int' if <sys/types.h> doesn't define.  */
 #undef pid_t
 
+/* Define if you need to in order for stat and other things to work.  */
+#undef _POSIX_SOURCE
+
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
+
+/* Define if the `setpgrp' function takes no argument.  */
+#undef SETPGRP_VOID
 
 /* Define to `unsigned' if <sys/types.h> doesn't define.  */
 #undef size_t
@@ -228,6 +234,9 @@
 
 /* Define if you have the setpgid function.  */
 #undef HAVE_SETPGID
+
+/* Define if you have the setpgrp function.  */
+#undef HAVE_SETPGRP
 
 /* Define if you have the sigaction function.  */
 #undef HAVE_SIGACTION

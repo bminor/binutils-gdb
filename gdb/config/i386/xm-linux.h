@@ -26,8 +26,6 @@
 
 #define HOST_LONG_DOUBLE_FORMAT &floatformat_i387_ext
 
-#define NEED_POSIX_SETPGID
-
 /* Need R_OK etc, but USG isn't defined.  */
 #include <unistd.h>
 

@@ -709,21 +709,24 @@ gdb_setpgid (void)
 
   if (job_control)
     {
-#if defined (NEED_POSIX_SETPGID) || (defined (HAVE_TERMIOS) && defined (HAVE_SETPGID))
-      /* setpgid (0, 0) is supposed to work and mean the same thing as
-         this, but on Ultrix 4.2A it fails with EPERM (and
+#if defined (HAVE_TERMIOS) || defined (TIOCGPGRP)
+#ifdef HAVE_SETPGID
+      /* The call setpgid (0, 0) is supposed to work and mean the same
+         thing as this, but on Ultrix 4.2A it fails with EPERM (and
          setpgid (getpid (), getpid ()) succeeds).  */
       retval = setpgid (getpid (), getpid ());
 #else
-#if defined (TIOCGPGRP)
-#if defined(USG) && !defined(SETPGRP_ARGS)
+#ifdef HAVE_SETPGRP
+#ifdef SETPGRP_VOID 
       retval = setpgrp ();
 #else
       retval = setpgrp (getpid (), getpid ());
-#endif /* USG */
-#endif /* TIOCGPGRP.  */
-#endif /* NEED_POSIX_SETPGID */
+#endif
+#endif /* HAVE_SETPGRP */
+#endif /* HAVE_SETPGID */
+#endif /* defined (HAVE_TERMIOS) || defined (TIOCGPGRP) */
     }
+
   return retval;
 }
 

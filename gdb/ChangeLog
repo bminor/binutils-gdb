@@ -1,3 +1,20 @@
+2001-07-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in (AC_CHECK_FUNCS): Add setpggrp.
+	(AC_FUNC_SETPGRP): Add.
+	* aclocal.m4, configure, config.in: Regenerated.
+	* inflow.c (gdb_setpgid): Get rid of NEED_POSIX_SETPGID and
+	SETPGRP_ARGS.  Always use setpgid if it is available, fall back on
+	setpgrp if it isn't.  Use SETPGRP_VOID (defined by autoconf) to
+	distinguish between the two setpgrp flavours.
+	* config/xm-sysv4.h, config/arm/xm-linux.h,
+	config/i386/xm-i386aix.h, config/i386/xm-sco.h,
+	config/i386/xm-linux.h, config/i386/xm-ptx.h,
+	config/m68k/xm-linux.h, config/powerpc/xm-linux.h,
+	config/sparc/xm-linux.h, config/sparc/xm-sun4sol2.h,
+	config/ia64/xm-linux.h (NEED_POSIX_SETPGID): Remove.
+	* config/rs6000/xm-rs6000.h (SETPGRP_ARGS): Remove.
+
 2001-07-23  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* go32-nat.c (read_memory_region): Set the granularity bit of the

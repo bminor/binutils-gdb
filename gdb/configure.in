@@ -131,9 +131,10 @@ AC_HEADER_STAT
 
 AC_C_CONST
 
-AC_CHECK_FUNCS(setpgid sbrk sigaction isascii bzero bcopy btowc poll sigprocmask)
+AC_CHECK_FUNCS(setpgid setpgrp sbrk sigaction isascii bzero bcopy btowc poll sigprocmask)
 AC_FUNC_VFORK
 AC_FUNC_ALLOCA
+AC_FUNC_SETPGRP
 
 # Check if sigsetjmp is available.  Using AC_CHECK_FUNCS won't do
 # since sigsetjmp might only be defined as a macro.

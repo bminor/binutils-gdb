@@ -64,10 +64,6 @@
 
 #define	vfork	fork
 
-/* Setpgrp() takes arguments, unlike ordinary Sys V's.  */
-
-#define	SETPGRP_ARGS 1
-
 /* Signal handler for SIGWINCH `window size changed'. */
 
 #define	SIGWINCH_HANDLER  aix_resizewindow

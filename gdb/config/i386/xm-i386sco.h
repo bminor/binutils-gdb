@@ -38,6 +38,3 @@
    So we use dots instead.  This item must be coordinated with G++. */
 #undef CPLUS_MARKER
 #define CPLUS_MARKER '.'
-
-/* Use setpgid instead of setpgrp on SCO */
-#define NEED_POSIX_SETPGID

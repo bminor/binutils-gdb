@@ -35,8 +35,6 @@
 #define HAVE_TERMIOS
 #define USG
 
-#define NEED_POSIX_SETPGID
-
 #define USE_O_NOCTTY
 
 #define HOST_BYTE_ORDER LITTLE_ENDIAN

@@ -31,9 +31,6 @@
 #undef	DO_DEFERRED_STORES
 #undef	CLEAR_DEFERRED_STORES
 
-/* May be needed, may be not?  From Pace Willisson's port.  FIXME.  */
-#define NEED_POSIX_SETPGID
-
 /* solaris doesn't have siginterrupt, though it has sigaction; however,
    in this case siginterrupt would just be setting the default. */
 #define NO_SIGINTERRUPT

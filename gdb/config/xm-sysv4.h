@@ -28,10 +28,6 @@
 
 #define USG
 
-/* Use setpgid(0,0) to run inferior in a separate process group */
-
-#define NEED_POSIX_SETPGID
-
 /* We have to include these files now, so that GDB will not make
    competing definitions in defs.h.  */
 #include <limits.h>

@@ -30,8 +30,6 @@
 
 #define U_REGS_OFFSET 0
 
-#define NEED_POSIX_SETPGID
-
 /* Need R_OK etc, but USG isn't defined.  */
 #include <unistd.h>
 

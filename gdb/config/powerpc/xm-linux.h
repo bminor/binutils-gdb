@@ -27,8 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    to get the offset in the core file of the register values.  */
 #define KERNEL_U_ADDR 0x0
 
-#define NEED_POSIX_SETPGID
-
 /* Need R_OK etc, but USG isn't defined.  */
 #include <unistd.h>
 

@@ -29,6 +29,3 @@
 #define HAVE_SGTTY
 
 #include <limits.h>
-
-/* Use setpgid instead of setpgrp on AIX */
-#define NEED_POSIX_SETPGID
