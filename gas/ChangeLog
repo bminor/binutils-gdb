@@ -1,4 +1,10 @@
 start-sanitize-sky
+Tue Jan  6 13:10:20 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* config/tc-txvu.c (md_assemble): Handle no separator between
+	upper and lower insn #ifndef VERTICAL_BAR_SEPARATOR.
+	(assemble_insn): Likewise.
+
 Mon Jan  5 14:54:09 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* config/tc-txvu.c: #include dis-asm.h, opcode/txvu.h, elf/txvu.h.

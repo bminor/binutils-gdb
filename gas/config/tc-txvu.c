@@ -103,12 +103,13 @@ struct txvu_fixup
 
 #define MAX_FIXUPS 5
 
-static void assemble_insn PARAMS ((char *, int));
+static char * assemble_insn PARAMS ((char *, int));
 
 void
 md_assemble (str)
      char *str;
 {
+#ifdef VERTICAL_BAR_SEPARATOR
   char *p = strchr (str, '|');
 
   if (p == NULL)
@@ -121,12 +122,21 @@ md_assemble (str)
   assemble_insn (str, 0);
   *p = '|';
   assemble_insn (p + 1, 1);
+#else
+  str = assemble_insn (str, 0);
+  /* Don't assemble next one if we couldn't assemble the first.  */
+  if (str)
+    assemble_insn (str, 1);
+#endif
 }
 
 /* Assemble one instruction.
-   LOWER_P is non-zero if assembling in the lower insn slot.  */
+   LOWER_P is non-zero if assembling in the lower insn slot.
+   The result is a pointer to beyond the end of the scanned insn.
+   If this is the upper insn, the caller can pass back to result to us
+   parse the lower insn.  */
 
-static void
+static char *
 assemble_insn (str, lower_p)
      char *str;
      int lower_p;
@@ -368,7 +378,11 @@ assemble_insn (str, lower_p)
 	  while (isspace (*str))
 	    ++str;
 
-	  if (*str != '\0')
+	  if (*str != '\0'
+#ifndef VERTICAL_BAR_SEPARATOR
+	      && lower_p
+#endif
+	      )
 	    as_bad ("junk at end of line: `%s'", str);
 
 	  /* Write out the instruction.
@@ -403,13 +417,14 @@ assemble_insn (str, lower_p)
 	    }
 
 	  /* All done.  */
-	  return;
+	  return str;
 	}
 
       /* Try the next entry.  */
     }
 
   as_bad ("bad instruction `%s'", start);
+  return 0;
 }
 
 void 
