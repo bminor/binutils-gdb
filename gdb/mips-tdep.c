@@ -5573,6 +5573,10 @@ mips_stab_reg_to_regnum (int num)
     return num;
   else if (num >= 38 && num < 70)
     return num + FP0_REGNUM - 38;
+  else if (num == 70)
+    return HI_REGNUM;
+  else if (num == 71)
+    return LO_REGNUM;
   else
     {
       /* This will hopefully (eventually) provoke a warning.  Should
@@ -5591,6 +5595,10 @@ mips_dwarf_dwarf2_ecoff_reg_to_regnum (int num)
     return num;
   else if (num >= 32 && num < 64)
     return num + FP0_REGNUM - 32;
+  else if (num == 64)
+    return HI_REGNUM;
+  else if (num == 65)
+    return LO_REGNUM;
   else
     {
       /* This will hopefully (eventually) provoke a warning.  Should

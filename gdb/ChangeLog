@@ -1,3 +1,8 @@
+2003-04-01  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_dwarf_dwarf2_ecoff_reg_to_regnum)
+	(mips_stab_reg_to_regnum): Add mappings for HI_REGNUM and LO_REGNUM.
+
 2003-04-01  Adam Fedor  <fedor@gnu.org>
 
 	* Makefile.in (c_lang.o, jv_lang.o, language.o): Add $(demangle_h).
