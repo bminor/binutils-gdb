@@ -831,6 +831,7 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 	   be too.  */
 	|	CONST_KEYWORD typebase { $$ = $2; }
 	|	VOLATILE_KEYWORD typebase { $$ = $2; }
+	|	'.' '.' '.' { $$ = NULL; }
 	;
 
 typename:	TYPENAME

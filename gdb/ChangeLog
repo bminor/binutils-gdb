@@ -1,3 +1,7 @@
+Tue Dec 28 12:06:57 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* c-exp.y : fix grammar to parse ellipsis (...)
+
 Mon Dec 27 18:42:14 1993  Kung Hsu  (kung@cirdan.cygnus.com)
 
 	* stabsread.c (read_type): fix problem when reading static member
