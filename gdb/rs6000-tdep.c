@@ -2327,11 +2327,21 @@ static const struct variant variants[] =
   {"7400", "Motorola/IBM PowerPC 7400 (G4)", bfd_arch_powerpc,
    bfd_mach_ppc_7400, num_registers (registers_7400), registers_7400},
 
-  /* FIXME: I haven't checked the register sets of the following. */
+  /* 64-bit */
+  {"powerpc64", "PowerPC 64-bit user-level", bfd_arch_powerpc,
+   bfd_mach_ppc64, num_registers (registers_powerpc), registers_powerpc},
   {"620", "Motorola PowerPC 620", bfd_arch_powerpc,
    bfd_mach_ppc_620, num_registers (registers_powerpc), registers_powerpc},
+  {"630", "Motorola PowerPC 630", bfd_arch_powerpc,
+   bfd_mach_ppc_630, num_registers (registers_powerpc), registers_powerpc},
   {"a35", "PowerPC A35", bfd_arch_powerpc,
    bfd_mach_ppc_a35, num_registers (registers_powerpc), registers_powerpc},
+  {"rs64ii", "PowerPC rs64ii", bfd_arch_powerpc,
+   bfd_mach_ppc_rs64ii, num_registers (registers_powerpc), registers_powerpc},
+  {"rs64iii", "PowerPC rs64iii", bfd_arch_powerpc,
+   bfd_mach_ppc_rs64iii, num_registers (registers_powerpc), registers_powerpc},
+
+  /* FIXME: I haven't checked the register sets of the following. */
   {"rs1", "IBM POWER RS1", bfd_arch_rs6000,
    bfd_mach_rs6k_rs1, num_registers (registers_power), registers_power},
   {"rsc", "IBM POWER RSC", bfd_arch_rs6000,

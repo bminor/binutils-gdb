@@ -1,3 +1,9 @@
+2002-04-12  Kevin Buettner  <kevinb@redhat.com>
+
+	From Jimi X <jimix@watson.ibm.com>:
+	* rs6000-tdep.c (powerpc64, 630, rs64ii, rs64iii): Define
+	register sets for these processor variants.
+
 2002-04-11  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/linux-low.c (usr_store_inferior_registers): Support
