@@ -539,6 +539,9 @@ static
 Close_VMS_Object_File ()
 {
   short int m_one = -1;
+  /* @@ This should not be here!!  The same would presumably be needed
+     if we were writing vax-bsd a.out files on a vms system.  Put it
+     someplace else!  */
 #ifndef HO_VMS			/* For cross-assembly purposes. */
 /* Write a 0xffff into the file, which means "End of File" */
   write (VMS_Object_File_FD, &m_one, 2);
