@@ -210,7 +210,7 @@ static bfd_reloc_status_type hppa_elf_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd*, char **));
 
 static CONST reloc_howto_type * elf_hppa_reloc_type_lookup
-  PARAMS ((bfd_arch_info_type *, bfd_reloc_code_real_type));
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
 
 static symext_entryS elf32_hppa_get_sym_extn PARAMS ((bfd *, asymbol *, int));
 
@@ -269,7 +269,7 @@ static boolean elf32_hppa_backend_fake_sections
 static boolean elf32_hppa_backend_section_from_bfd_section
   PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *, int *));
 
-static boolean som_bfd_is_local_label PARAMS ((bfd *, asymbol *));
+static boolean hppa_elf_is_local_label PARAMS ((bfd *, asymbol *));
 
 /* ELF/PA relocation howto entries.  */
 
@@ -1571,8 +1571,8 @@ hppa_elf_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
    relocation for an ARCH machine.  */
 
 static CONST reloc_howto_type *
-elf_hppa_reloc_type_lookup (arch, code)
-     bfd_arch_info_type *arch;
+elf_hppa_reloc_type_lookup (abfd, code)
+     bfd *abfd;
      bfd_reloc_code_real_type code;
 {
   if ((int) code < (int) R_HPPA_UNIMPLEMENTED)
