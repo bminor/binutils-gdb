@@ -1,3 +1,8 @@
+Wed Feb 28 15:50:12 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (VERSION): Bump version to 4.15.2 to establish
+	baseline for gdb 4.16 rerelease testing.
+
 Wed Feb 28 13:32:05 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* somsolib.c (som_solib_create_inferior_hook): Before returning
