@@ -482,6 +482,7 @@ BFD64_BACKENDS = \
 	elf64-hppa.lo \
 	elf64-ia64.lo \
 	elf64-gen.lo \
+	elfn32-mips.lo \
 	elf64-mips.lo \
 	elf64-mmix.lo \
 	elf64-sh64.lo \
@@ -506,6 +507,7 @@ BFD64_BACKENDS_CFILES = \
 	elf64-alpha.c \
 	elf64-hppa.c \
 	elf64-gen.c \
+	elfn32-mips.c \
 	elf64-mips.c \
 	elf64-mmix.c \
 	elf64-ppc.c \
@@ -1508,6 +1510,12 @@ elf64-hppa.lo: elf64-hppa.c $(INCDIR)/alloca-conf.h \
 elf64-gen.lo: elf64-gen.c $(INCDIR)/filenames.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/bfdlink.h elf64-target.h
+elfn32-mips.lo: elfn32-mips.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
+  genlink.h elf-bfd.h elfxx-mips.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/elf/mips.h \
+  $(INCDIR)/elf/reloc-macros.h $(INCDIR)/coff/sym.h \
+  $(INCDIR)/coff/symconst.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/ecoff.h \
+  $(INCDIR)/coff/mips.h ecoffswap.h elf32-target.h
 elf64-mips.lo: elf64-mips.c $(INCDIR)/filenames.h $(INCDIR)/aout/ar.h \
   $(INCDIR)/bfdlink.h genlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elfxx-mips.h \

@@ -748,21 +748,23 @@ case "${targ}" in
     ;;
 #ifdef BFD64
   mips64*el-*-linux*)
-    targ_defvec=bfd_elf32_tradlittlemips_vec
-    targ_selvecs="bfd_elf32_tradbigmips_vec bfd_elf64_tradlittlemips_vec bfd_elf64_tradbigmips_vec"
+    targ_defvec=bfd_elf32_ntradlittlemips_vec
+    targ_selvecs="bfd_elf32_ntradbigmips_vec bfd_elf32_tradlittlemips_vec bfd_elf32_tradbigmips_vec bfd_elf64_tradlittlemips_vec bfd_elf64_tradbigmips_vec"
     ;;
   mips64*-*-linux*)
-    targ_defvec=bfd_elf32_tradbigmips_vec
-    targ_selvecs="bfd_elf32_tradlittlemips_vec bfd_elf64_tradbigmips_vec bfd_elf64_tradlittlemips_vec"
+    targ_defvec=bfd_elf32_ntradbigmips_vec
+    targ_selvecs="bfd_elf32_ntradlittlemips_vec bfd_elf32_tradbigmips_vec bfd_elf32_tradlittlemips_vec bfd_elf64_tradbigmips_vec bfd_elf64_tradlittlemips_vec"
     ;;
 #endif
   mips*el-*-linux*)
     targ_defvec=bfd_elf32_tradlittlemips_vec
-    targ_selvecs="bfd_elf32_tradbigmips_vec bfd_elf64_tradlittlemips_vec bfd_elf64_tradbigmips_vec ecoff_little_vec ecoff_big_vec"
+    targ_selvecs="bfd_elf32_tradbigmips_vec ecoff_little_vec ecoff_big_vec"
+    targ64_selvecs="bfd_elf64_tradlittlemips_vec bfd_elf64_tradbigmips_vec"
     ;;
   mips*-*-linux*)
     targ_defvec=bfd_elf32_tradbigmips_vec
-    targ_selvecs="bfd_elf32_tradlittlemips_vec bfd_elf64_tradbigmips_vec bfd_elf64_tradlittlemips_vec ecoff_big_vec ecoff_little_vec"
+    targ_selvecs="bfd_elf32_tradlittlemips_vec ecoff_big_vec ecoff_little_vec"
+    targ64_selvecs="bfd_elf64_tradbigmips_vec bfd_elf64_tradlittlemips_vec"
     ;;
 #ifdef BFD64
   mmix-*-*)
@@ -1180,7 +1182,7 @@ esac
 # to be used on an arbitrary ELF file for anything other than
 # relocation information.
 case "${targ_defvec} ${targ_selvecs}" in
-  *bfd_elf64*)
+  *bfd_elf64* | *bfd_elf32_n*mips*)
     targ_selvecs="${targ_selvecs} bfd_elf64_little_generic_vec bfd_elf64_big_generic_vec bfd_elf32_little_generic_vec bfd_elf32_big_generic_vec"
     ;;
   *bfd_elf32*)

@@ -1,3 +1,15 @@
+2002-07-31  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* Makefile.am: Add n32 ABI support.
+	* Makefile.in: Regenerate.
+	* config.bfd: Add n32 vectors to mips64*-*-linux* targets. Treat 64
+	bit vectors for mips*-*-linux targets as optional.
+	* configure.in: Add n32 ABI vectors.
+	* configure: Regenerate.
+	* elf32-mips.c (mips_elf32_object_p): Reject n32 ABI files.
+	* elfn32-mips.c: New file, n32 ABI support.
+	* targets.c: Add n32 ABI vectors.
+
 2002-07-30  Graeme Peterson  <gp@qnx.com>
 
 	* elfarmqnx-nabi.c: New file: Support for QNX.
