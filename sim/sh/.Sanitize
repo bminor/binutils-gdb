@@ -30,6 +30,7 @@ Makefile.in
 configure.in
 interp.c
 gencode.c
+run.1
 run.c
 sh.mt
 
