@@ -1,3 +1,8 @@
+Tue Jun 18 18:06:50 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ppc-opc.c: Fix fcmpo opcode.  From Sergei Steshenko
+	<sergei@msil.sps.mot.com>.
+
 Tue Jun 18 15:08:54 1996  Klaus Kaempf  <kkaempf@progis.de>
 
 	* makefile.vms: New file.
