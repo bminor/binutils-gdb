@@ -158,6 +158,14 @@ extern void ia64_convert_frag (fragS *);
 #define TC_FRAG_TYPE			int
 #define TC_FRAG_INIT(FRAGP)		do {(FRAGP)->tc_frag_data = 0;}while (0)
 
+/* Give an error if a frag containing code is not aligned to a 16 byte
+   boundary.  */
+#define md_frag_check(FRAGP) \
+  if ((FRAGP)->has_code							\
+      && (((FRAGP)->fr_address + (FRAGP)->insn_addr) & 15) != 0)	\
+     as_bad_where ((FRAGP)->fr_file, (FRAGP)->fr_line,			\
+		   _("instruction address is not a multiple of 16"));
+
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (15 + 16)
 
 #define WORKING_DOT_WORD	/* don't do broken word processing for now */

@@ -6129,6 +6129,7 @@ emit_one_bundle ()
   char mnemonic[16];
   fixS *fix;
   char *f;
+  int addr_mod;
 
   first = (md.curr_slot + NUM_SLOTS - md.num_slots_in_use) % NUM_SLOTS;
   know (first >= 0 & first < NUM_SLOTS);
@@ -6159,6 +6160,14 @@ emit_one_bundle ()
     insn[i] = nop[ia64_templ_desc[template].exec_unit[i]];
 
   f = frag_more (16);
+
+  /* Check to see if this bundle is at an offset that is a multiple of 16-bytes
+     from the start of the frag.  */
+  addr_mod = frag_now_fix () & 15;
+  if (frag_now->has_code && frag_now->insn_addr != addr_mod)
+    as_bad (_("instruction address is not a multiple of 16"));
+  frag_now->insn_addr = addr_mod;
+  frag_now->has_code = 1;
 
   /* now fill in slots with as many insns as possible:  */
   curr = first;
