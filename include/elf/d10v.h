@@ -20,12 +20,7 @@
 #ifndef _ELF_D10V_H
 #define _ELF_D10V_H
 
-/* Unless otherwise told we define an enum with the relocation entries.  */
-#ifndef START_RELOC_NUMBERS
-# define START_RELOC_NUMBERS(name)   enum name {
-# define RELOC_NUMBER(name, number)  name = number ,
-# define END_RELOC_NUMBERS           };
-#endif
+#include "elf/reloc-macros.h"
 
 /* Relocation types.  */
 START_RELOC_NUMBERS (elf_d10v_reloc_type)
@@ -36,6 +31,8 @@ START_RELOC_NUMBERS (elf_d10v_reloc_type)
   RELOC_NUMBER (R_D10V_18, 4)
   RELOC_NUMBER (R_D10V_18_PCREL, 5)
   RELOC_NUMBER (R_D10V_32, 6)
+  RELOC_NUMBER (R_D10V_GNU_VTINHERIT, 7)
+  RELOC_NUMBER (R_D10V_GNU_VTENTRY, 8)
 END_RELOC_NUMBERS
 
 #endif
