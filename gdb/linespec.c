@@ -39,6 +39,11 @@ extern char *operator_chars (char *, char **);
 
 /* Prototypes for local functions */
 
+static void initialize_defaults (struct symtab **default_symtab,
+				 int *default_line);
+
+static struct symtabs_and_lines decode_indirect (char **argptr);
+
 static void cplusplus_error (const char *name, const char *fmt, ...) ATTR_FORMAT (printf, 2, 3);
 
 static int total_number_of_methods (struct type *type);
@@ -533,7 +538,6 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* The symtab that SYM was found in.  */
   struct symtab *sym_symtab;
 
-  register CORE_ADDR pc;
   register struct minimal_symbol *msymbol;
   char *copy;
   struct symbol *sym_class;
@@ -552,35 +556,12 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 
   /* Defaults have defaults.  */
 
-  if (default_symtab == 0)
-    {
-      /* Use whatever we have for the default source line.  We don't use
-         get_current_or_default_symtab_and_line as it can recurse and call
-	 us back! */
-      struct symtab_and_line cursal = 
-      			get_current_source_symtab_and_line ();
-      
-      default_symtab = cursal.symtab;
-      default_line = cursal.line;
-    }
-
+  initialize_defaults (&default_symtab, &default_line);
+  
   /* See if arg is *PC */
 
   if (**argptr == '*')
-    {
-      (*argptr)++;
-      pc = parse_and_eval_address_1 (argptr);
-
-      values.sals = (struct symtab_and_line *)
-	xmalloc (sizeof (struct symtab_and_line));
-
-      values.nelts = 1;
-      values.sals[0] = find_pc_line (pc, 0);
-      values.sals[0].pc = pc;
-      values.sals[0].section = find_pc_overlay (pc);
-
-      return values;
-    }
+    return decode_indirect (argptr);
 
   /* 'has_if' is for the syntax:
    *     (gdb) break foo if (a==b)
@@ -1030,14 +1011,9 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 
       if (s == 0 && default_symtab == 0)
 	{
-          struct symtab_and_line cursal;
-
 	  /* Make sure we have at least a default source file. */
 	  set_default_source_symtab_and_line ();
-          cursal = get_current_source_symtab_and_line ();
-      
-          default_symtab = cursal.symtab;
-          default_line = cursal.line;
+	  initialize_defaults (&default_symtab, &default_line);
 	}
 
       if (**argptr == '+')
@@ -1211,6 +1187,58 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   return values;		/* for lint */
 }
 
+
+
+/* Now, still more helper functions.  */
+
+/* NOTE: carlton/2002-11-07: Some of these have non-obvious side
+   effects.  In particular, if a function is passed ARGPTR as an
+   argument, it modifies what ARGPTR points to.  (Typically, it
+   advances *ARGPTR past whatever substring it has just looked
+   at.)  */
+
+/* First, some functions to initialize stuff at the beggining of the
+   function.  */
+
+static void
+initialize_defaults (struct symtab **default_symtab, int *default_line)
+{
+  if (*default_symtab == 0)
+    {
+      /* Use whatever we have for the default source line.  We don't use
+         get_current_or_default_symtab_and_line as it can recurse and call
+	 us back! */
+      struct symtab_and_line cursal = 
+	get_current_source_symtab_and_line ();
+      
+      *default_symtab = cursal.symtab;
+      *default_line = cursal.line;
+    }
+}
+
+
+
+/* Decode arg of the form *PC.  */
+
+static struct symtabs_and_lines
+decode_indirect (char **argptr)
+{
+  struct symtabs_and_lines values;
+  CORE_ADDR pc;
+  
+  (*argptr)++;
+  pc = parse_and_eval_address_1 (argptr);
+
+  values.sals = (struct symtab_and_line *)
+    xmalloc (sizeof (struct symtab_and_line));
+
+  values.nelts = 1;
+  values.sals[0] = find_pc_line (pc, 0);
+  values.sals[0].pc = pc;
+  values.sals[0].section = find_pc_overlay (pc);
+
+  return values;
+}
 
 
 
