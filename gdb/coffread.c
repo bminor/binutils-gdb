@@ -192,8 +192,6 @@ static struct symbol *process_coff_symbol (struct coff_symbol *,
 
 static void patch_opaque_types (struct symtab *);
 
-static void patch_type (struct type *, struct type *);
-
 static void enter_linenos (long, int, int, struct objfile *);
 
 static void free_linetab (void);
@@ -216,32 +214,6 @@ static void read_one_sym (struct coff_symbol *,
 			  struct internal_syment *, union internal_auxent *);
 
 static void coff_symtab_read (long, unsigned int, struct objfile *);
-
-static void find_linenos (bfd *, sec_ptr, PTR);
-
-static void coff_symfile_init (struct objfile *);
-
-static void coff_new_init (struct objfile *);
-
-static void coff_symfile_read (struct objfile *, int);
-
-static void coff_symfile_finish (struct objfile *);
-
-static void record_minimal_symbol (char *, CORE_ADDR,
-				   enum minimal_symbol_type,
-				   struct objfile *);
-
-static void coff_end_symtab (struct objfile *);
-
-static void complete_symtab (char *, CORE_ADDR, unsigned int);
-
-static void coff_start_symtab (char *);
-
-static struct type *coff_alloc_type (int);
-
-static struct type **coff_lookup_type (int);
-
-static void coff_locate_sections (bfd *, asection *, PTR);
 
 /* We are called once per section from coff_symfile_read.  We
    need to examine each section we are passed, check to see
@@ -254,7 +226,7 @@ static void coff_locate_sections (bfd *, asection *, PTR);
    -kingdon).  */
 
 static void
-coff_locate_sections (bfd *abfd, asection *sectp, PTR csip)
+coff_locate_sections (bfd *abfd, asection *sectp, void *csip)
 {
   register struct coff_symfile_info *csi;
   const char *name;
@@ -312,10 +284,8 @@ struct find_targ_sec_arg
     asection **resultp;
   };
 
-static void find_targ_sec (bfd *, asection *, PTR);
-
 static void
-find_targ_sec (bfd *abfd, asection *sect, PTR obj)
+find_targ_sec (bfd *abfd, asection *sect, void *obj)
 {
   struct find_targ_sec_arg *args = (struct find_targ_sec_arg *) obj;
   if (sect->target_index == args->targ_index)
@@ -509,7 +479,8 @@ coff_symfile_init (struct objfile *objfile)
   objfile->sym_stab_info = (struct dbx_symfile_info *)
     xmmalloc (objfile->md, sizeof (struct dbx_symfile_info));
 
-  memset ((PTR) objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
+  memset (objfile->sym_stab_info, 0,
+	  sizeof (struct dbx_symfile_info));
 
   /* Allocate struct to keep track of the symfile */
   objfile->sym_private = xmmalloc (objfile->md,
@@ -531,7 +502,7 @@ coff_symfile_init (struct objfile *objfile)
 
 /* ARGSUSED */
 static void
-find_linenos (bfd *abfd, sec_ptr asect, PTR vpinfo)
+find_linenos (bfd *abfd, sec_ptr asect, void *vpinfo)
 {
   struct coff_symfile_info *info;
   int size, count;
@@ -625,7 +596,7 @@ coff_symfile_read (struct objfile *objfile, int mainline)
   /* Read the line number table, all at once.  */
   info->min_lineno_offset = 0;
   info->max_lineno_offset = 0;
-  bfd_map_over_sections (abfd, find_linenos, (PTR) info);
+  bfd_map_over_sections (abfd, find_linenos, (void *) info);
 
   make_cleanup (free_linetab_cleanup, 0 /*ignore*/);
   val = init_lineno (abfd, info->min_lineno_offset,
@@ -662,7 +633,7 @@ coff_symfile_read (struct objfile *objfile, int mainline)
 
   install_minimal_symbols (objfile);
 
-  bfd_map_over_sections (abfd, coff_locate_sections, (PTR) info);
+  bfd_map_over_sections (abfd, coff_locate_sections, (void *) info);
 
   if (info->stabsects)
     {

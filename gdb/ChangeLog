@@ -1,3 +1,11 @@
+2002-03-25  Alexandre Oliva  <aoliva@redhat.com>
+
+	* coffread.c: Remove redundant static declarations.  Replace
+	occurrences of `PTR' with `void *'.
+	* elfread.c, mdebugread.c, minsyms.c, mipsread.c: Likewise.
+	* top.h (quit_cover): Likewise.
+	* defs.h (catch_errors): Likewise.
+
 2002-03-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS (sh-elf): Change warning flag to -w.

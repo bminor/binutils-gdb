@@ -1152,7 +1152,7 @@ extern int catch_exceptions (struct ui_out *uiout,
    This function is superseeded by catch_exceptions().  */
 
 typedef int (catch_errors_ftype) (PTR);
-extern int catch_errors (catch_errors_ftype *, PTR, char *, return_mask);
+extern int catch_errors (catch_errors_ftype *, void *, char *, return_mask);
 
 /* Template to catch_errors() that wraps calls to command
    functions. */
