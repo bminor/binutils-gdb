@@ -564,7 +564,7 @@ direct_abs_decl: '(' abs_decl ')'
 func_mod:	'(' ')'
 			{ $$ = 0; }
 	|	'(' nonempty_typelist ')'
-			{ free ((PTR)$2); $$ = 0; }
+			{ free ($2); $$ = 0; }
 	;
 
 typebase  /* Implements (approximately): (type-qualifier)* type-specifier */

@@ -66,10 +66,10 @@
 #endif
 
 #ifdef NEED_DECLARATION_MALLOC
-extern PTR malloc ();
+extern PTR malloc ();		/* OK: PTR */
 #endif
 #ifdef NEED_DECLARATION_REALLOC
-extern PTR realloc ();
+extern PTR realloc ();		/* OK: PTR */
 #endif
 #ifdef NEED_DECLARATION_FREE
 extern void free ();
@@ -955,9 +955,6 @@ request_quit (int signo)
 
 #if !defined (USE_MMALLOC)
 
-/* NOTE: These must use PTR so that their definition matches the
-   declaration found in "mmalloc.h". */
-
 static void *
 mmalloc (void *md, size_t size)
 {
@@ -1150,19 +1147,19 @@ xmfree (void *md, void *ptr)
 /* NOTE: These are declared using PTR to ensure consistency with
    "libiberty.h".  xfree() is GDB local.  */
 
-PTR
+PTR				/* OK: PTR */
 xmalloc (size_t size)
 {
   return xmmalloc (NULL, size);
 }
 
-PTR
-xrealloc (PTR ptr, size_t size)
+PTR				/* OK: PTR */
+xrealloc (PTR ptr, size_t size)	/* OK: PTR */
 {
   return xmrealloc (NULL, ptr, size);
 }
 
-PTR
+PTR				/* OK: PTR */
 xcalloc (size_t number, size_t size)
 {
   return xmcalloc (NULL, number, size);
