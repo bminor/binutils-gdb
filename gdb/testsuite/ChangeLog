@@ -1,3 +1,7 @@
+2004-08-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/bigcore.c: Include <sys/types.h> and <sys/time.h>.
+
 2004-08-14  Eli Zaretskii  <eliz@gnu.org>
 
 	* ChangeLog: Prefix Local Variables with semi-colons and indent
@@ -68,6 +72,9 @@
 	gdb.mi/mi2-watch.exp: Update copyright years.
 
 2004-08-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* lib/gdb.exp: Recognize relative path names as well as absolute
+	ones.
 
 	* gdb.base/sigaltstack.exp: Provide proper anchoring.
 

@@ -19,9 +19,12 @@
    Please email any bugs, comments, and/or additions to this file to:
    bug-gdb@prep.ai.mit.edu  */
 
-#include <unistd.h>
-#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/time.h>
 #include <sys/resource.h>
+
+#include <stdlib.h>
+#include <unistd.h>
 
 /* Print routines:
 
