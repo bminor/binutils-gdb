@@ -1,3 +1,8 @@
+Mon Oct 25 16:45:42 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* objcopy.c (main): Give a usage message if there are too many
+	arguments.
+
 Mon Oct 25 10:37:08 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
 
 	* Makefile.in (install-info): Rewrite to take advantage of VPATH,
