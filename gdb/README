@@ -2,12 +2,16 @@
 		Updated 23 January, 2002 by Andrew Cagney
 
 This is GDB, the GNU source-level debugger.
-A summary of new features is in the file `NEWS'.
 
-See the GDB home page at http://www.gnu.org/software/gdb/ for up to
-date release information, mailing list links and archives, etc.
+A summary of new features is in the file `gdb/NEWS'.
 
-See the file PROBLEMS for late breaking news.
+The GDB home page at http://www.gnu.org/software/gdb/ for up to date
+release information, mailing list links and archives, etc.
+
+The file `gdb/PROBLEMS' contains information on problems identified
+late in the release cycle.  GDB's bug tracking data base at
+http://www.gnu.org/software/gdb/bugs/ contains a more complete list of
+bugs.
 
 
 Unpacking and Installation -- quick overview
@@ -480,22 +484,27 @@ not a complete solution.  You will need something on the other end
 that also speaks UDI.
 
 
-Reporting Bugs
-===============
+Reporting Bugs in GDB
+=====================
 
-   The correct address for reporting bugs found in gdb is
-"bug-gdb@gnu.org".  Please email all bugs, and all requests for help
-with GDB, to that address.  Please include the GDB version number
-(e.g., gdb-5.1.1), and how you configured it (e.g., "sun4" or "mach386
-host, i586-intel-synopsys target").  Since GDB now supports so many
+   There are several ways of reporting bugs in GDB.  The prefered
+method is to use the World Wide Web:
+
+      http://www.gnu.org/software/gdb/bugs/
+
+As an alternative, the bug report can be submitted, via e-mail, to the
+address "bug-gdb@gnu.org".
+
+   When submitting a bug, please include the GDB version number (e.g.,
+gdb-5.1.1), and how you configured it (e.g., "sun4" or "mach386 host,
+i586-intel-synopsys target").  Since GDB now supports so many
 different configurations, it is important that you be precise about
 this.  If at all possible, you should include the actual banner that
 GDB prints when it starts up, or failing that, the actual configure
 command that you used when configuring GDB.
 
-   For more information on how/whether to report bugs, see the GDB
-Bugs section of the GDB manual (gdb/doc/gdb.texinfo) or the
-gdb/CONTRIBUTE file.
+   For more information on how/whether to report bugs, see the
+Reporting Bugs chapter of the GDB manual (gdb/doc/gdb.texinfo).
 
 
 Graphical interface to GDB -- X Windows, MS Windows
