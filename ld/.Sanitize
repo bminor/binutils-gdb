@@ -15,10 +15,6 @@
 
 Do-first:
 
-if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	keep_these_too=""
-fi
-
 if ( echo $* | grep keep\-mpw > /dev/null ) ; then
 	keep_these_too="mpw-config.in mpw-make.in ChangeLog.mpw ${keep_these_too}"
 else
