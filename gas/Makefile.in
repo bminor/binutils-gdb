@@ -24,7 +24,8 @@
 # Variables that exist for you to override.
 # See below for how to change them for certain systems.
 
-srcdir = .
+VPATH = @srcdir@
+srcdir = @srcdir@
 srcroot = $(srcdir)/..
 
 prefix = /usr/local
@@ -66,6 +67,7 @@ BISON = bison
 MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
 RANLIB = ranlib
+CC = @CC@
 CFLAGS = -g
 
 MAKEOVERRIDES=
@@ -189,9 +191,6 @@ REAL_HEADERS = \
 	$(srcdir)/ecoff.h
 
 LINKED_HEADERS = \
-	a.out.gnu.h \
-	a.out.h \
-	host.h \
 	targ-env.h \
 	targ-cpu.h \
 	obj-format.h \
@@ -199,7 +198,7 @@ LINKED_HEADERS = \
 
 HEADERS = $(LINKED_HEADERS) $(REAL_HEADERS)
 
-#### host, target, and site specific Makefile frags come in here.
+# @target_frag@
 
 OBJS = \
 	targ-cpu.o \
@@ -262,8 +261,7 @@ ALL_CFLAGS = $(INTERNAL_CFLAGS) $(CROSS) $(CFLAGS) $(HDEFINES) $(TDEFINES)
 # How to link with both our special library facilities
 # and the system's installed libraries.
 
-LIBS = $(OPCODES_LIB) $(BFDLIB) $(LOCAL_LOADLIBES) \
-	../libiberty/libiberty.a
+LIBS = @OPCODES_LIB@ @BFDLIB@ $(LOCAL_LOADLIBES) ../libiberty/libiberty.a
 
 # Specify the directories to be searched for header files.
 # Both . and srcdir are used, in that order,
@@ -283,10 +281,12 @@ SUBDIR_INCLUDES = -I.. -I$(srcdir) -I$(srcdir)/config
 # Files to be copied away after each stage in building.
 STAGESTUFF = *.o as.new gasp.new
 
-$(OBJS): $(ALL_OBJ_DEPS)
+$(OBJS): @ALL_OBJ_DEPS@
 
 as.new: $(OBJS) $(LIBS)
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
+
+$(OBJS): config.h
 
 gasp.new: gasp.o
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o gasp.new gasp.o $(LIBS) $(LOADLIBES)
@@ -298,122 +298,126 @@ check:
 	@(here=`pwd` ; export here ; \
 	  cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) $(CHECKFLAGS) check)
 
-config.status:
-	@echo You must configure gas.  Look at the INSTALL file for details.
-	@false
+config.status: configure
+	if [ -r config.status ]; then \
+	  sh $(srcdir)/config.status --recheck ; \
+	else \
+	  echo You must configure gas.  Look at the INSTALL file for details. ; \
+	  exit 1 ; \
+	fi
+
+configure: configure.in aclocal.m4 acconfig.h
+	(cd ${srcdir} && \
+	 autoheader configure.in > conf-in.h && \
+	 ../move-if-change conf-in.h conf.in)
+	(cd ${srcdir} && autoconf )
 
 config.h: config-stamp ; @true
-config-stamp: Makefile
+config-stamp: Makefile conf
 	-rm -f config.new config-stamp
-	echo '#ifndef TARGET_CPU'			       > config.new
-	echo '#define TARGET_CPU       "$(target_cpu)"'       >> config.new
-	echo '#define TARGET_ALIAS     "$(target_alias)"'     >> config.new
-	echo '#define TARGET_CANONICAL "$(target_canonical)"' >> config.new
-	echo '#define GAS_VERSION      "$(VERSION)"'          >> config.new
-	if [ "$(defs)" != "" ]; then \
-	  for d in $(defs) ; do	\
-	    echo "#define $$d"				      >> config.new ; \
-	  done ; \
-	else true; fi
-	echo '#endif /* TARGET_CPU */'			      >> config.new
+	echo '#ifndef GAS_VERSION'			 > config.new
+	echo '#define GAS_VERSION "$(VERSION)"'		>> config.new
+	echo ''						>> config.new
+	cat conf					>> config.new
+	echo '#endif /* GAS_VERSION */'			>> config.new
 	$(srcdir)/../move-if-change config.new config.h
 	touch config-stamp
 
 # Compiling object files from source files.
 
 gasp.o : gasp.c
-app.o : app.c as.h host.h targ-env.h obj-format.h \
+app.o : app.c as.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
-as.o : as.c as.h host.h targ-env.h obj-format.h output-file.h \
+as.o : as.c as.h targ-env.h obj-format.h output-file.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h subsegs.h \
   tc.h obj.h config.h
-atof-generic.o : atof-generic.c as.h host.h targ-env.h obj-format.h \
+atof-generic.o : atof-generic.c as.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
-bignum-copy.o : bignum-copy.c as.h host.h \
+bignum-copy.o : bignum-copy.c as.h \
   targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
-cond.o : cond.c as.h host.h targ-env.h obj-format.h \
+cond.o : cond.c as.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
 
-debug.o : debug.c as.h host.h targ-env.h obj-format.h \
+debug.o : debug.c as.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
   subsegs.h 
-expr.o : expr.c as.h host.h targ-env.h obj-format.h \
+expr.o : expr.c as.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
 
 flonum-konst.o : flonum-konst.c flonum.h bignum.h 
-flonum-copy.o : flonum-copy.c as.h host.h targ-env.h obj-format.h \
+flonum-copy.o : flonum-copy.c as.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
 flonum-mult.o : flonum-mult.c flonum.h bignum.h 
-frags.o : frags.c as.h host.h targ-env.h obj-format.h \
+frags.o : frags.c as.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
   subsegs.h  
-hash.o : hash.c as.h host.h targ-env.h obj-format.h \
+hash.o : hash.c as.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h 
 hex-value.o : hex-value.c 
-input-file.o : input-file.c as.h host.h \
+input-file.o : input-file.c as.h \
    targ-env.h obj-format.h targ-cpu.h \
    struc-symbol.h write.h flonum.h bignum.h expr.h \
   frags.h hash.h read.h symbols.h tc.h obj.h input-file.h 
 input-scrub.o : input-scrub.c /usr/include/errno.h /usr/include/sys/errno.h \
-  as.h host.h targ-env.h obj-format.h \
+  as.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
   input-file.h 
-listing.o : listing.c as.h host.h targ-env.h flonum.h bignum.h \
+listing.o : listing.c as.h targ-env.h flonum.h bignum.h \
   listing.h obj-format.h targ-cpu.h struc-symbol.h write.h expr.h \
   frags.h hash.h read.h symbols.h tc.h obj.h input-file.h subsegs.h
-literal.o : literal.c subsegs.h as.h host.h targ-env.h obj-format.h \
+literal.o : literal.c subsegs.h as.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
-messages.o : messages.c as.h host.h targ-env.h obj-format.h \
+messages.o : messages.c as.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
-output-file.o : output-file.c as.h host.h targ-env.h obj-format.h \
+output-file.o : output-file.c as.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
   output-file.h 
-read.o : read.c as.h host.h targ-env.h obj-format.h \
+read.o : read.c as.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h
-subsegs.o : subsegs.c as.h host.h targ-env.h obj-format.h \
+subsegs.o : subsegs.c as.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
   subsegs.h  
-symbols.o : symbols.c as.h host.h targ-env.h obj-format.h \
+symbols.o : symbols.c as.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
    subsegs.h 
-write.o : write.c as.h host.h targ-env.h obj-format.h \
+write.o : write.c as.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
   subsegs.h  output-file.h 
-ecoff.o : ecoff.c as.h host.h targ-env.h obj-format.h \
+ecoff.o : ecoff.c as.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
   ecoff.h $(srcdir)/../include/coff/internal.h \
   $(srcdir)/../include/coff/sym.h $(srcdir)/../include/coff/ecoff.h \
   $(srcdir)/../include/coff/symconst.h $(srcdir)/../include/aout/stab_gnu.h
-stabs.o : stabs.c as.h host.h targ-env.h obj-format.h \
+stabs.o : stabs.c as.h targ-env.h obj-format.h \
   targ-cpu.h  struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h symbols.h tc.h obj.h \
   subsegs.h $(srcdir)/../include/aout/stab_gnu.h
 xmalloc.o : xmalloc.c
-atof-targ.o : atof-targ.c as.h host.h targ-env.h obj-format.h \
+atof-targ.o : atof-targ.c as.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h \
   symbols.h tc.h obj.h 
-obj-format.o : obj-format.c as.h host.h targ-env.h obj-format.h \
+obj-format.o : obj-format.c as.h targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h \
   subsegs.h symbols.h tc.h obj.h  
@@ -444,7 +448,7 @@ distclean realclean: clean-here
 	@if [ -d testsuite ] ; then \
 	  cd testsuite ; $(MAKE) $(FLAGS_TO_PASS) $@ ; \
 	else true; fi
-	-rm -f config.status Makefile host.h targ-env.h targ-cpu.h \
+	-rm -f config.status Makefile targ-env.h targ-cpu.h \
 		targ-cpu.c obj-format.h obj-format.c atof-targ.c TAGS \
 		config-stamp config.h
 

@@ -1,5 +1,39 @@
 Sat Aug 27 20:26:12 1994  Ken Raeburn  (raeburn@kr-laptop.cygnus.com)
 
+	Conversion to autoconf:
+	* acconfig.h, aclocal.m4: New files.
+	* configure.in: Rewritten (except for some target-specific code)
+	for autoconf.
+	* conf.in, configure: New files, generated from the above.
+	* Makefile.in: Changed magic sequence indicating insertion of
+	makefile fragments.
+	(VPATH, srcdir, CC, LIBS, OBJS dependencies): Use @-substitutions
+	from configure.
+	(LINKED_HEADERS): Deleted a.out.gnu.h, a.out.h, and host.h.
+	(config.status, configure): Rewrite rules.
+	(config-stamp): Depend on conf.  Skip variables that configure is
+	now substituting itself.
+	(*.o dependencies): Deleted host.h.
+	(distclean, realclean): Don't delete host.h.
+	* as.c: Don't include stdio.h, string.h, sys/types.h.  Include
+	signal.h after as.h.
+	* as.h: Include alloca-conf.h first.  Include ctype.h, string.h,
+	strings.h, stdlib.h, unistd.h, sys/types.h, fopen-bin.h,
+	fopen-same.h, as suggested by autoconf test results.
+	[BROKEN_ASSERT]: Don't include assert.h.
+	(strdup): Declare.
+	(volatile, const): Define if not __STDC__ and not already defined.
+	(malloc, realloc) [NEED_MALLOC_DECLARATION]: Declare.
+	(free) [NEED_FREE_DECLARATION]: Declare.
+	* gasp.c: Include config.h, stdlib.h (if HAVE_STDLIB_H).  Don't
+	include host.h.
+	(malloc) [NEED_MALLOC_DECLARATION]: Declare.
+	* messages.c: Include as.h first.  Include errno.h only if
+	HAVE_ERRNO_H.  If HAVE_VARARGS_H and not __STDC__, undefine
+	HAVE_STDARG_H.  Set NO_STDARG and NO_VARARGS as appropriate.
+	* doc/Makefile.in (srcdir, INSTALL, INSTALL_PROGRAM,
+	INSTALL_DATA): Use autoconf @-substitutions.
+
 	* input-file.c: Don't include assert.h here, 'cause as.h already
 	includes it.
 

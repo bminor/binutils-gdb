@@ -1,124 +1,47 @@
-# This file is configure.in
-#
-#   Copyright (C) 1987-1992,1993,1994 Free Software Foundation, Inc.
-#
-#  This file is part of GAS, the GNU Assembler.
-#
-#   GAS is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2, or (at your option)
-#   any later version.
-#
-#   GAS is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with GAS; see the file COPYING.  If not, write to
-#   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
-#
+dnl Process this file with autoconf to produce a configure script.
+dnl
+dnl And be careful when changing it!  If you must add tests with square
+dnl brackets, be sure changequote invocations surround it.
+dnl
+dnl Remember to use "dnl" in each line before the AC_INIT call...
+dnl
+dnl
+AC_INIT(as.h)
+dnl
+AC_ARG_ENABLE(bfd-assembler,
+[    bfd-assembler	use BFD back end for writing object files],
+[case "${enableval}" in
+  yes) need_bfd=yes bfd_gas=yes ;;
+  no)  ;;
+  *)   AC_MSG_ERROR(bad value ${enableval} given for bfd-assembler option) ;;
+esac])dnl
 
-# This file was written, and is maintained by K. Richard Pixley
-# <rich@cygnus.com>.
+# Generate a header file -- gets more post-processing by Makefile later.
+AC_CONFIG_HEADER(conf)
 
-# This file is a shell script that supplies the information necessary
-# to tailor a template configure script into the configure script
-# appropriate for this directory.  For more information, check any
-# existing configure script.
+dnl For recursion to work right, this must be an absolute pathname.
+AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
+AC_CANONICAL_SYSTEM
 
-srctrigger=as.c
-srcname="gas"
-need_bfd=no
-bfd_gas=no
-configdirs="doc testsuite"
-
-# per-host:
-
-gas_host=generic
-
-case "${host}" in
-  a29k-*-*)			gas_host=a29k		;;
-
-  alpha-*-osf*)			gas_host=ansi		;;
-
-  hppa*-*-hpux*)		gas_host=hpux		;;
-  hppa*-*-bsd*)			gas_host=hppabsd	;;
-  hppa*-*-osf*)			gas_host=hppaosf	;;
-  hppa*-*-hiux*)		gas_host=hpux		;;
-
-  i[345]86-ibm-aix*)		gas_host=i386aix	;;
-  i[345]86-*-isc*)		gas_host=sysv		;;
-  i[345]86-sun-sunos*)		gas_host=sun386		;;
-  i[345]86-*-mach*)		gas_host=mach3		;;
-  i[345]86-*-go32)		host_makefile_frag=config/go32.mh	
-				gas_host=go32		;;
-
-  m68k-sun-sunos*)		gas_host=sun3		;;
-  m68*-*-hpux)			gas_host=hpux		;;
-
-  mips*-dec-ultrix*)		gas_host=decstatn	;;
-  mips*-*-bsd*)			gas_host=mipsbsd	;;
-  mips*-sgi-irix*)		gas_host=irix		;;
-
-  rs6000-*-*)			gas_host=rs6000		;;
-
-  sparc-sun-sunos*)		gas_host=sun4		;;
-  sparc-sun-solaris2*)		gas_host=sysv		;;
-
-  vax-*-vms*)			gas_host=vms		;;
-  vax-*-bsd*)			gas_host=vax		;;
-  vax-*-ultrix*)		gas_host=vax		;;
-
-  *-*-sysv4* | *-*-unixware)	gas_host=sysv		;;
-
-  *-*-ansi | *-*-hpux | *-*-sysv)
-				gas_host=${host_os}	;;
-
-esac
-
-if [ ! -r ${srcdir}/config/ho-${gas_host}.h ]; then
-  echo '*** GAS does not support host' ${host} 1>&2
-  exit 1
-fi
-
-# per-target:
-
-case ${with_bfd_assembler} in
-  yes)
-    echo "*** Warning:  GAS BFD configuration option not yet fully supported" 1>&2
-    need_bfd=yes
-    bfd_gas=yes
-    ;;
-  no | "")
-    ;;
-  *)
-    echo "*** Bad value \"${with_bfd_assembler}\" for --with-bfd-assembler option" 1>&2
-    exit 1
-    ;;
-esac
-
-# assign cpu type
 emulation=generic
 
-# default is big
-endian=big
+# assign cpu type
 
 # check for architecture variants
 case ${target_cpu} in
-  # Actually we've only got support for the 1.1, so we shouldn't generalize,
-  # but this is what the support files are named...
   hppa*)	cpu_type=hppa ;;
+changequote(,)dnl
   i[45]86)	cpu_type=i386 ;;
   m680[012346]0) cpu_type=m68k ;;
   m68008)	cpu_type=m68k ;;
   m683??)       cpu_type=m68k ;;
+changequote([,])dnl
   m8*)		cpu_type=m88k ;;
   mips*el)	cpu_type=mips endian=little;;
-  mips*)	cpu_type=mips ;;
+  mips*)	cpu_type=mips endian=big ;;
   powerpc*)	cpu_type=ppc ;;
   rs6000*)	cpu_type=ppc ;;
-  sparc64)	cpu_type=sparc obj_format=elf extra_def=sparcv9 ;;
+  sparc64)	cpu_type=sparc obj_format=elf AC_DEFINE(sparcv9) ;;
   sparclite*)   cpu_type=sparc ;;
   *)		cpu_type=${target_cpu} ;;
 esac
@@ -126,12 +49,12 @@ esac
 # do we need the opcodes library?
 case ${cpu_type} in
   alpha | vax)
-    opcodes=
     ;;
   *)
-    opcodes="../opcodes/libopcodes.a"
+    OPCODES_LIB="../opcodes/libopcodes.a"
     ;;
 esac
+AC_SUBST(OPCODES_LIB)
 
 gas_target=${cpu_type}
 generic_target=${cpu_type}-${target_vendor}-${target_os}
@@ -198,11 +121,10 @@ case ${generic_target} in
   mips-*-bsd*)		bfd_gas=yes obj_format=aout gas_target=mips-lit ;;
   mips-*-ultrix*)	obj_format=ecoff gas_target=mips-lit ;;
   mips-*-ecoff*)	obj_format=ecoff 
-			if [ $endian = big ] ; then
-			  gas_target=mips-big
-			else
-			  gas_target=mips-lit
-			fi 
+			case "$endian" in
+			big) gas_target=mips-big ;;
+			*)   gas_target=mips-lit ;;
+			esac
 			;;
   mips-*-ecoff*)	obj_format=ecoff gas_target=mips-big ;;
   mips-*-irix5*)	obj_format=elf gas_target=mips-big ;;
@@ -210,13 +132,11 @@ case ${generic_target} in
   mips-*-riscos*)	obj_format=ecoff gas_target=mips-big ;;
   mips-*-sysv*)		obj_format=ecoff gas_target=mips-big ;;
   mips-*-elf*)		obj_format=elf 
-			if [ $endian = big ] ; then
-			  gas_target=mips-big
-			else
-			  gas_target=mips-lit
-			fi
+			case "$endian" in
+			big) gas_target=mips-big ;;
+			*)   gas_target=mips-lit ;;
+			esac
 			;;
-
   ppc-*-aix*)		obj_format=coff bfd_gas=yes ;;
   ppc-*-elf*)		obj_format=elf bfd_gas=yes ;;
   ppc-*-netware*)	obj_format=elf emulation=ppcnw ;;
@@ -253,7 +173,7 @@ case ${generic_target} in
   *-*-xray | *-*-hms)	obj_format=coff ;;
   *-*-sim)		obj_format=coff ;;
   *-*-elf | *-*-sysv4* | *-*-solaris*)
-	echo '*** Warning: GAS support for ELF format is incomplete' 1>&2
+			AC_MSG_WARN(GAS support for ELF format is incomplete)
 			obj_format=elf dev=yes ;;
   *-*-vxworks)		obj_format=aout ;;
   *-*-netware)		obj_format=elf ;;
@@ -267,30 +187,35 @@ case ${target_cpu} in
   *)			atof=ieee ;;
 esac
 
-if [ ! -r ${srcdir}/config/tc-${cpu_type}.c ]; then
-  echo '*** GAS does not support target CPU' ${cpu_type}		1>&2
-  exit 1
-fi
-
 case "${obj_format}" in
-  "")
-      echo "*** GAS doesn't know what format to use for target" ${target} 1>&2
-      exit 1
-      ;;
+  "") AC_MSG_ERROR(GAS does not know what format to use for target ${target}) ;;
 esac
 
-if [ ! -r ${srcdir}/config/obj-${obj_format}.c ]; then
-  echo '*** GAS does not have support for object file format' ${obj_format} 1>&2
-  exit 1
+dnl
+dnl Make sure the desired support files exist.
+dnl
+
+changequote(<<<,>>>)dnl
+
+if [ ! -r ${srcdir}/config/tc-${cpu_type}.c ]; then
+  AC_MSG_ERROR(GAS does not support target CPU ${cpu_type})
 fi
+
+if [ ! -r ${srcdir}/config/obj-${obj_format}.c ]; then
+  AC_MSG_ERROR(GAS does not have support for object file format ${obj_format})
+fi
+
+changequote([,])dnl
 
 # and target makefile frag
 
-target_makefile_frag=config/${gas_target}.mt
+target_frag=${srcdir}/config/${gas_target}.mt
+AC_SUBST_FILE(target_frag)
 
 case ${bfd_gas}-${obj_format} in
   yes-coff)	need_bfd=yes ;;
-  no-coff)	need_bfd=yes extra_def="MANY_SEGMENTS" ;;
+  no-coff)	need_bfd=yes
+		AC_DEFINE(MANY_SEGMENTS) ;;
   *-elf)	bfd_gas=yes ;;
   *-ecoff)	bfd_gas=yes ;;
   *-som)	bfd_gas=yes ;;
@@ -302,8 +227,7 @@ case ${with_bfd_assembler}-${bfd_gas} in
     # We didn't override user's choice.
     ;;
   no-yes)
-    echo '*** Use of BFD is required for ${target}; overriding config options'\
-		1>&2
+    AC_MSG_WARN(Use of BFD is required for ${target}; overriding config options.)
     ;;
   no-preferred)
     bfd_gas=no
@@ -320,44 +244,134 @@ reject_dev_configs=yes
 
 case ${reject_dev_configs}-${dev} in
   yes-yes) # Oops.
-    echo "*** GAS does not support the ${generic_target} configuration" 1>&2
-    exit 1
+    AC_MSG_ERROR(GAS does not support the ${generic_target} configuration.)
     ;;
 esac
 
-files="config/ho-${gas_host}.h config/tc-${cpu_type}.c \
-	config/tc-${cpu_type}.h config/te-${emulation}.h \
+dnl Looks like the AC_MAKE_LINKS string is taken literally and put into the
+dnl  config.status file.  So the necessary variables also have to be
+dnl  exported.
+AC_SUBST(cpu_type) AC_SUBST(obj_format) AC_SUBST(emulation) AC_SUBST(atof)
+AC_LINK_FILES(targ-cpu.c targ-cpu.h obj-format.h obj-format.c targ-env.h atof-targ.c,
+	config/tc-${cpu_type}.c	config/tc-${cpu_type}.h \
 	config/obj-${obj_format}.h config/obj-${obj_format}.c \
-	config/atof-${atof}.c"
+	config/te-${emulation}.h config/atof-${atof}.c)
 
-links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-targ.c"
-
-# post-target:
-
-case ${bfd_gas} in
-  yes)	extra_def="$extra_def BFD_ASSEMBLER" need_bfd=yes ;;
+case "${bfd_gas}" in
+  yes)	AC_DEFINE(BFD_ASSEMBLER)
+	need_bfd=yes ;;
 esac
 
-case ${need_bfd} in
-  yes)	bfdlib="BFDLIB=../bfd/libbfd.a"
-	all_obj_deps="$all_obj_deps ../bfd/bfd.h"
-	;;
-  *)	bfdlib=""
+case "${need_bfd}" in
+  yes)	BFDLIB=../bfd/libbfd.a
+	ALL_OBJ_DEPS="$ALL_OBJ_DEPS ../bfd/bfd.h"
 	;;
 esac
+AC_SUBST(BFDLIB)
+AC_SUBST(ALL_OBJ_DEPS)
 
-case "x${host}" in
-  "x${target}")	cross=""				;;
-  *)		cross="CROSS=-DCROSS_COMPILE"		;;
+case "x${host_canon}" in
+  x${target_canon})			;;
+  *)		AC_DEFINE(CROSS_COMPILE);;
 esac
 
-rm -f Makefile.tem
-echo $cross			>  Makefile.tem
-echo ALL_OBJ_DEPS=$all_obj_deps	>> Makefile.tem
-echo defs=$extra_def		>> Makefile.tem
-echo $bfdlib			>> Makefile.tem
-echo "OPCODES_LIB=$opcodes"	>> Makefile.tem
-cat Makefile			>> Makefile.tem
-mv -f Makefile.tem Makefile
+AC_DEFINE_UNQUOTED(TARGET_ALIAS,	"${target_alias}")
+AC_DEFINE_UNQUOTED(TARGET_CANONICAL,	"${target}")
+AC_DEFINE_UNQUOTED(TARGET_CPU,		"${target_cpu}")
+AC_DEFINE_UNQUOTED(TARGET_VENDOR,	"${target_vendor}")
+AC_DEFINE_UNQUOTED(TARGET_OS,		"${target_os}")
 
-# end of gas/configure.in
+case ${host} in
+  rs6000-*-*)
+	# The IBM compiler mis-compiles some expressions used in gas.
+	# This will tell gas to work around this lossage.
+	AC_DEFINE(IBM_COMPILER_SUX) ;;
+  i386-*-go32)
+	# Using fopen(..., "w") for a binary file breaks under DOS.
+	AC_DEFINE(WANT_FOPEN_BIN)   ;;
+esac
+
+AC_PROG_CC
+AC_PROG_INSTALL
+
+AC_HEADER_STDC
+AC_CHECK_HEADERS(string.h stdlib.h memory.h strings.h unistd.h stdarg.h varargs.h errno.h sys/types.h)
+
+dnl ansidecl.h will deal with const
+dnl AC_CONST
+AC_FUNC_ALLOCA
+AC_C_INLINE
+
+# Some non-ANSI preprocessors botch requoting inside strings.  That's bad
+# enough, but on some of those systems, the assert macro relies on requoting
+# working properly!
+AC_CHECKING([for working assert macro])
+AC_TRY_LINK([#include <assert.h>
+#include <stdio.h>], [
+/* check for requoting problems */
+static int a, b, c, d;
+static char *s;
+assert (!strcmp(s, "foo bar baz quux"));
+/* check for newline handling */
+assert (a == b
+        || c == d);
+], , AC_DEFINE(BROKEN_ASSERT))
+
+# On some systems, the system header files may not declare malloc, realloc,
+# and free.  There are places where gas needs these functions to have been
+# declared -- such as when taking their addresses.
+AC_CHECKING([whether malloc declaration is required])
+AC_TRY_LINK([
+#ifdef HAVE_MEMORY_H
+#include <memory.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+], [
+char *(*f) ();
+f = (char *(*)()) malloc;
+], , AC_DEFINE(NEED_MALLOC_DECLARATION))
+AC_CHECKING([free declaration required])
+AC_TRY_LINK([
+#ifdef HAVE_MEMORY_H
+#include <memory.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+], [
+int (*f) ();
+f = (int (*)()) free;
+], , AC_DEFINE(NEED_FREE_DECLARATION))
+
+# Does errno.h declare errno, or do we have to add a separate declaration
+# for it?
+AC_CHECKING([errno declaration required])
+AC_TRY_LINK([
+#ifdef HAVE_ERRNO_H
+#include <errno.h>
+#endif
+], [
+int x;
+x = errno;
+], , AC_DEFINE(NEED_ERRNO_DECLARATION))
+
+AC_CONFIG_SUBDIRS(testsuite)
+
+dnl This must come last.
+dnl Apparently symlinks are checked for in the directory containing
+dnl  the last Makefile.  Thus the order used here...
+AC_OUTPUT(doc/Makefile Makefile)

@@ -37,11 +37,38 @@
 
 /* These #defines are for parameters of entire assembler. */
 
-/* These #includes are for type definitions etc. */
+/* For some systems, this is required to be first.  */
+#include "../libiberty/alloca-conf.h"
 
+/* Now, tend to the rest of the configuration.  */
 #include "config.h"
 
+/* System include files first... */
 #include <stdio.h>
+#include <ctype.h>
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#include <strings.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+/* for size_t, pid_t */
+#include <sys/types.h>
+#endif
+
+/* Some systems do declare this, but this seems to be the universal
+   declaration, though the parameter type varies.  (It ought to use
+   `const' but many systems prototype it without.)  Include it here
+   for systems that don't declare it.  If conflicts arise, just add
+   another autoconf test...  */
+extern char *strdup (/* const char * */);
+
 #include <getopt.h>
 /* The first getopt value for machine-independent long options.
    150 isn't special; it's just an arbitrary non-ASCII char value.  */
@@ -53,14 +80,55 @@
 #ifdef DEBUG
 #undef NDEBUG
 #endif
+/* Handle lossage with assert.h.  */
+#ifndef BROKEN_ASSERT
 #include <assert.h>
+#else /* BROKEN_ASSERT */
+#ifndef NDEBUG
+#define assert(p) ((p) ? 0 : (abort(), 0))
+#else
+#define assert(p) ((p), 0)
+#endif
+#endif /* BROKEN_ASSERT */
 
+
+/* Now GNU header files... */
 #include <ansidecl.h>
 #ifdef BFD_ASSEMBLER
 #include <bfd.h>
 #endif
-#include "host.h"
-#include "flonum.h"
+
+#ifdef WANT_FOPEN_BIN
+#include "fopen-bin.h"
+#else
+#include "fopen-same.h"
+#endif
+
+/* This doesn't get taken care of by ansidecl.h.  */
+#if !defined (__STDC__) && !defined (volatile)
+#define volatile
+#endif
+
+/* This doesn't get taken care of anywhere.  */
+#if !defined (__GNUC__) && !defined (inline)
+#define inline
+#endif
+
+/* Other stuff from config.h.  */
+#ifdef NEED_MALLOC_DECLARATION
+extern PTR malloc ();
+extern PTR realloc ();
+#endif
+#ifdef NEED_FREE_DECLARATION
+extern void free ();
+#endif
+
+#ifdef BFD_ASSEMBLER
+/* This one doesn't get declared, but we're using it anyways.  This
+   should be fixed -- either it's part of the external interface or
+   it's not.  */
+extern PTR bfd_alloc_by_size_t PARAMS ((bfd *abfd, size_t sz));
+#endif
 
 /* Make Saber happier on obstack.h.  */
 #ifdef SABER
@@ -92,7 +160,11 @@
 #endif
 
 #ifndef FOPEN_WB
+#ifdef GO32
+#include "fopen-bin.h"
+#else
 #include "fopen-same.h"
+#endif
 #endif
 
 #define obstack_chunk_alloc xmalloc
@@ -111,6 +183,7 @@
    system, just delete it.  */
 extern char *strstr ();
 
+#include "flonum.h"
 
 /* These are assembler-wide concepts */
 
@@ -141,15 +214,6 @@ typedef addressT valueT;
 #endif /* not yet defined */
 #else
 #define know(p)			/* know() checks are no-op.ed */
-#endif
-
-#if defined (BROKEN_ASSERT) && !defined (NDEBUG)
-/* Used on machines where the "assert" macro is buggy.  (For example, on the
-   RS/6000, Reiser-cpp substitution is done to put the condition into a
-   string, so if the condition contains a string, parse errors result.)  If
-   the condition fails, just drop core file.  */
-#undef assert
-#define assert(p) ((p) ? 0 : (abort (), 0))
 #endif
 
 /* input_scrub.c */
@@ -224,8 +288,8 @@ extern int section_alignment[];
 extern segT reg_section, expr_section;
 /* Shouldn't these be eliminated someday?  */
 extern segT text_section, data_section, bss_section;
-#define absolute_section	(&bfd_abs_section)
-#define undefined_section	(&bfd_und_section)
+#define absolute_section	bfd_abs_section_ptr
+#define undefined_section	bfd_und_section_ptr
 #else
 #define reg_section		SEG_REGISTER
 #define expr_section		SEG_EXPR
@@ -463,10 +527,11 @@ struct symbol;
 valueT add_to_literal_pool PARAMS ((struct symbol *, valueT, segT, int));
 #endif
 
+#include "expr.h"		/* Before targ-*.h */
+
 /* this one starts the chain of target dependant headers */
 #include "targ-env.h"
 
-#include "expr.h"
 #include "struc-symbol.h"
 #include "write.h"
 #include "frags.h"

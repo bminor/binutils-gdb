@@ -35,19 +35,13 @@
 #include "ansidecl.h"
 #include "libiberty.h"
 
-#include <stdio.h>
-#include <string.h>
-
-#ifdef _POSIX_SOURCE
-#include <sys/types.h>		/* For pid_t in signal.h */
-#endif
-#include <signal.h>
-
 #define COMMON
 
 #include "as.h"
 #include "subsegs.h"
 #include "output-file.h"
+
+#include <signal.h>
 
 #ifndef SIGTY
 #ifdef __STDC__

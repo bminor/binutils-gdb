@@ -50,8 +50,16 @@ suitable for gas to consume.
 #include <stdio.h>
 #include <getopt.h>
 #include <ctype.h>
+#include "config.h"
 
-#include "host.h"
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
+#ifdef NEED_MALLOC_DECLARATION
+extern char *malloc ();
+#endif
+
 #include "libiberty.h"
 
 char *program_version = "1.2";
