@@ -52,6 +52,8 @@ static const char * parse_mem8
   PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
 static const char * parse_small_immediate
   PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
+static const char * parse_immediate16
+  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
 
 /* The machine-independent code doesn't know how to disambiguate
      mov (foo),r3
