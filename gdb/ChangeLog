@@ -1,3 +1,13 @@
+Tue Feb 20 18:54:08 1996  Fred Fish  <fnf@rtl.cygnus.com>
+
+	* valops.c (COERCE_FLOAT_TO_DOUBLE): Define default value.
+	(value_arg_coerce): Use COERCE_FLOAT_TO_DOUBLE.
+	* config/alpha/tm-alpha.h (COERCE_FLOAT_TO_DOUBLE): Define to 1.
+	* config/mips/tm-mips.h: Ditto.
+	* config/pa/tm-hppa.h: Ditto.
+	* config/rs6000/tm-rs6000.h: Ditto.
+	* config/sparc/tm-sparc.h: Ditto.
+	
 Tue Feb 20 17:32:05 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* config/{i386,ns32k}/nbsd.mh (NATDEPFILES): Remove core-aout.o.
