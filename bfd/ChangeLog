@@ -1,3 +1,7 @@
+2000-07-15  H.J. Lu  <hjl@gnu.org>
+
+	* aoutx.h (translate_to_native_sym_flags): Handle BSF_LOCAL.
+
 2000-07-12  Charles Wilson  <cwilson@ece.gatech.edu>
 
 	* libbfd.c (bfd_seek): fix 'seek beyond EOF' error when writing

@@ -1681,6 +1681,8 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
     sym_pointer->e_type[0] = ((aout_symbol_type *) cache_ptr)->type;
   else if ((cache_ptr->flags & BSF_GLOBAL) != 0)
     sym_pointer->e_type[0] |= N_EXT;
+  else if ((cache_ptr->flags & BSF_LOCAL) != 0)
+    sym_pointer->e_type[0] &= ~N_EXT;
 
   if ((cache_ptr->flags & BSF_CONSTRUCTOR) != 0)
     {
