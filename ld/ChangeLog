@@ -1,3 +1,9 @@
+2001-01-10  Kazu Hirata  <kazu@hxi.com>
+
+	* scripttempl/h8300.sc: Fix formatting.  Fix a comment typo.
+	* scripttempl/h8300h.sc: Fix formatting.
+	* scripttempl/h8300s.sc: Likewise.
+
 2000-01-07  David O'Brien  <obrien@BSDi.com>
 
 	* emultempl/elf32.em: Only perform Linux ld hints processing when
