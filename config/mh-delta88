@@ -1,15 +1,8 @@
 # Define SYSV as -DSYSV if you are using a System V operating system.
 SYSV = -DSYSV
 RANLIB = echo >/dev/null
+CC=/usr/cygnus/bin/gcc
 
-# We want a gas ..
 
 
-all: all.normal fakegas
-
-fakegas: $(unsubdir)/gas$(subdir)/as.new
-	- mkdir $(unsubdir)/gas
-	echo "/bin/as $*" > $(unsubdir)/gas$(subdir)/as.new
- 	echo "install:" > $(unsubdir)/gas$(subdir)/Makefile
-	touch $(unsubdir)/gas$(subdir)/configure.in
 
