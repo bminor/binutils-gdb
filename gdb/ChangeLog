@@ -11,7 +11,8 @@
 
 2004-06-14  Randolph Chung  <tausq@debian.org>
 
-	* MAINTAINERS (Write After Approval): Alphabetize my entry correctly.
+	* MAINTAINERS (Write After Approval): Alphabetize my entry
+	correctly.
 
 2004-06-14  Andrew Cagney  <cagney@gnu.org>
 
@@ -81,10 +82,10 @@
 
 2004-06-11  Randolph Chung  <tausq@debian.org>
 
-	* infrun.c (handle_inferior_event): Handle the case when a trampoline
-	ends up in the runtime resolver, and if the trampoline has no name.
-	Rearrange the code so that all the trampoline processing happens before
-	other step-out-of-range handling.
+	* infrun.c (handle_inferior_event): Handle the case when a
+	trampoline ends up in the runtime resolver, and if the trampoline
+	has no name.  Rearrange the code so that all the trampoline
+	processing happens before other step-out-of-range handling.
 
 2004-06-11  Martin Hunt  <hunt@redhat.com>
 
@@ -100,23 +101,23 @@
 2004-06-10  Bob Rossi  <bob@brasko.net>
 
 	* dbxread.c (read_dbx_symtab): Set pst->dirname when known.
-	* dwarf2read.c (partial_die_info) : Add dirname field.
-	(dwarf2_build_psymtabs_hard) : Set pst->dirname when known.
-	(read_partial_die) : Save away DW_AT_comp_dir.
-	* defs.h (symtab_to_filename) : Removed.
-	* source.c (find_and_open_source) : Added.
+	* dwarf2read.c (partial_die_info): Add dirname field.
+	(dwarf2_build_psymtabs_hard): Set pst->dirname when known.
+	(read_partial_die): Save away DW_AT_comp_dir.
+	* defs.h (symtab_to_filename): Removed.
+	* source.c (find_and_open_source): Added.
 	(open_source_file): Just calls find_and_open_source.
-	(symtab_to_filename) : Removed.
-	(symtab_to_fullname, psymtab_to_fullname ) : Added.
+	(symtab_to_filename): Removed.
+	(symtab_to_fullname, psymtab_to_fullname): Added.
 	* source.h (psymtab_to_fullname,symtab_to_fullname): Added.
 	* symtab.c (lookup_symtab): Call symtab_to_fullname instead of
 	symtab_to_filename.
 	* symtab.h (partial_symtab): Add dirname field.
 	* mi/mi-cmd-file.c (FILENAME,FULLNAME): Added.
-	(mi_cmd_file_list_exec_source_file): Call new function symtab_to_fullname
-	to find fullname.
+	(mi_cmd_file_list_exec_source_file): Call new function
+	symtab_to_fullname to find fullname.
 	(mi_cmd_file_list_exec_source_files): Added.
-	* mi/mi-cmds.c (mi_cmd_mi_cmds) : Add -file-list-exec-source-files.
+	* mi/mi-cmds.c (mi_cmd_mi_cmds): Add -file-list-exec-source-files.
 	* mi/mi-cmds.h (mi_cmd_file_list_exec_source_files): Added.
 
 2004-06-10  Andrew Cagney  <cagney@gnu.org>
