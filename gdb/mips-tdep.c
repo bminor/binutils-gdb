@@ -2969,6 +2969,8 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	fprintf_unfiltered (gdb_stdlog, "\n");
     }
 
+  regcache_cooked_write_signed (regcache, SP_REGNUM, sp);
+
   /* Return adjusted stack pointer.  */
   return sp;
 }
@@ -3197,6 +3199,8 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog, "\n");
     }
+
+  regcache_cooked_write_signed (regcache, SP_REGNUM, sp);
 
   /* Return adjusted stack pointer.  */
   return sp;
@@ -3504,6 +3508,8 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	fprintf_unfiltered (gdb_stdlog, "\n");
     }
 
+  regcache_cooked_write_signed (regcache, SP_REGNUM, sp);
+
   /* Return adjusted stack pointer.  */
   return sp;
 }
@@ -3809,6 +3815,8 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
       if (mips_debug)
 	fprintf_unfiltered (gdb_stdlog, "\n");
     }
+
+  regcache_cooked_write_signed (regcache, SP_REGNUM, sp);
 
   /* Return adjusted stack pointer.  */
   return sp;
@@ -5927,7 +5935,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
   set_gdbarch_deprecated_target_read_fp (gdbarch, mips_read_sp); /* Draft FRAME base.  */
   set_gdbarch_read_sp (gdbarch, mips_read_sp);
-  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 
   /* Add/remove bits from an address.  The MIPS needs be careful to
      ensure that all 32 bit addresses are sign extended to 64 bits.  */
