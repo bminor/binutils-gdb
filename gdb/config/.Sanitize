@@ -44,6 +44,7 @@ delta88.mh
 delta88.mt
 es1800.mt
 go32.mh
+h8300hms.mt
 hp300bsd.mh
 hp300bsd.mt
 hp300hpux.mh
@@ -130,5 +131,31 @@ vxworks68.mt
 vxworks960.mt
 
 Do-last:
+
+echo Stimulating away the simulator...
+
+if ( echo $* | grep keep\-sim > /dev/null ) ; then
+	echo Keeping simulator in h8300hms.mt
+else
+	for i in h8300hms.mt z8ksim.mt; do
+		if test -f $i ; then
+			echo Tickling the \"sim\" out of $i...
+			sed -e 's| remote-sim.o .*||' \
+			    -e 's| and H8 simulator||' \
+			    -e 's| Z8000 simulator| Z8000|' \
+			    -e 's| remote-z8k.o ../sim/z8k/libsim.a||' \
+				 <$i >new
+			if grep sim new ; then
+				echo '***' Not funny.  "Didn't work."
+			else
+				if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+					echo Caching $i in .Recover...
+					mv $i .Recover
+				fi
+				mv new $i
+			fi
+		fi
+	done
+fi
 
 # End of file.
