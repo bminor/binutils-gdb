@@ -545,7 +545,8 @@ elf_stab_symbol_string (string, secname)
 	if (seg == 0)
 	  {
 	    seg = bfd_make_section_old_way (stdoutput, newsecname);
-	    bfd_set_section_flags (stdoutput, seg, SEC_READONLY | SEC_ALLOC);
+	    bfd_set_section_flags (stdoutput, seg,
+				   SEC_LOAD | SEC_READONLY | SEC_ALLOC);
 	  }
 /*	free (newsecname);*/
       }
@@ -610,7 +611,7 @@ obj_elf_stab_generic (what, secname)
   asection *seg;
   subsegT subseg = now_subseg;
 
-#if 1
+#if 0
   /* This function doesn't work yet.
 
      Actually, this function is okay, but some finalizations are
@@ -629,7 +630,7 @@ obj_elf_stab_generic (what, secname)
     {
       seg = subseg_new (secname, 0);
       bfd_set_section_flags (stdoutput, seg,
-			     SEC_READONLY | SEC_ALLOC | SEC_RELOC);
+			     SEC_LOAD | SEC_READONLY | SEC_ALLOC | SEC_RELOC);
       subseg_set (saved_seg, subseg);
       seg_is_new = 1;
     }
@@ -751,7 +752,7 @@ obj_elf_stab_generic (what, secname)
   else
     {
       char *p = frag_more (4);
-      md_number_to_chars (p, 0, 0);
+      md_number_to_chars (p, 0, 4);
     }
 
   subseg_new ((char *) saved_seg->name, subseg);
@@ -908,7 +909,7 @@ obj_elf_version ()
 	  note_secp = bfd_make_section_old_way (stdoutput, ".note");
 	  bfd_set_section_flags (stdoutput,
 				 note_secp,
-				 SEC_LOAD | SEC_ALLOC | SEC_HAS_CONTENTS);
+				 SEC_LOAD | SEC_HAS_CONTENTS | SEC_READONLY);
 	}
 
       /* process the version string */
@@ -1107,18 +1108,18 @@ elf_frob_file ()
     int i;
 
     for (i = 0; i < stdoutput->symcount; i++)
-      elf_tc_symbol (stdoutput, (elf_symbol_type *) (stdoutput->outsymbols[i]),
+      elf_tc_symbol (stdoutput, (PTR) (stdoutput->outsymbols[i]),
 		     i + 1);
   }
 #endif
 
 #ifdef elf_tc_final_processing
-  elf_tc_final_processing_hook ();
+  elf_tc_final_processing ();
 #endif
 
   /* Finally, we must make any target-specific sections. */
 
 #ifdef elf_tc_make_sections
-  elf_tc_make_sections (stdoutput, NULL);
+  elf_tc_make_sections (stdoutput);
 #endif
 }

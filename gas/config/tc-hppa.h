@@ -1,6 +1,6 @@
 /* tc-hppa.h -- Header file for the PA */
 
-/* Copyright (C) 1989 Free Software Foundation, Inc.
+/* Copyright (C) 1989, 1993 Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -31,9 +31,15 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define TC_HPPA	1
 #endif
 
+#ifdef OBJ_ELF
+#include "../bfd/elf32-hppa.h"
+#endif
+
 #define TARGET_ARCH bfd_arch_hppa
 #define TARGET_FORMAT "elf32-hppa"
 
+/* Local labels have an "L$" prefix.  */
+#define LOCAL_LABEL(name) ((name)[0] == 'L' && (name)[1] == '$')
 #define ASEC_NULL (asection *)0
 
 /* We can do sym1 - sym2 as long as sym2 is $global$ */
@@ -106,6 +112,7 @@ void pa_entry (), pa_equ (), pa_exit (), pa_export ();
 void pa_export_args (), pa_import (), pa_label (), pa_leave ();
 void pa_origin (), pa_proc (), pa_procend (), pa_space ();
 void pa_spnum (), pa_subspace (), pa_version ();
+void pa_param();
 
 extern const pseudo_typeS md_pseudo_table[];
 
@@ -149,28 +156,6 @@ struct pa_89_fp_reg_struct
 int need_89_opcode ();
 int pa_89_parse_number ();
 
-
-/* pa-ctrl-func.h -- Control Structures and Functions for the PA */
-
-extern unsigned int assemble_3 ( /* unsigned int x; */ );
-
-extern void dis_assemble_3 ( /* unsigned int x, *r; */ );
-
-extern unsigned int assemble_12 ( /* unsigned int x,y; */ );
-
-extern void dis_assemble_12 ( /* unsigned int as12, *x,*y */ );
-
-extern unsigned long assemble_17 ( /* unsigned int x,y,z */ );
-
-extern void dis_assemble_17 ( /* unsigned int as17, *x,*y,*z */ );
-
-extern unsigned long assemble_21 ( /* unsigned int x; */ );
-
-extern void dis_assemble_21 ( /* unsigned int as21,*x; */ );
-
-extern void sign_unext ( /* unsigned int x,len; unsigned int *result */ );
-
-extern void low_sign_unext ( /* unsigned int x,len; unsigned int *result */ );
 
 struct call_desc
   {
@@ -237,7 +222,7 @@ struct subspace_dictionary_chain
                                                      the object file is written */
     int ssd_last_align;		/* the size of the last alignment
                                                      request for this subspace */
-    symbolS *ssd_start_sym;	/* a symbol whose value is the
+    struct symbol *ssd_start_sym; /* a symbol whose value is the
                                                      start of this subspace */
     struct subspace_dictionary_chain *ssd_next;	/* next subspace dict. entry */
   };
@@ -336,15 +321,15 @@ typedef struct space_dictionary_chain space_dict_chainS;
 
 #define STAB_FIXUP(frag,toptr,symP,stab_type)	\
 		if ( (stab_type == 's' || stab_type == 'n')	\
-		    && symP->sy_value.X_seg == undefined_section) \
+		    && symP->sy_value.X_op == O_symbol)		\
 		  {						\
 		     int i = S_GET_TYPE(symP) & N_TYPE;		\
 		     fix_new_hppa(frag,  			\
 				  toptr-frag->fr_literal, /* where */	\
 				  4,		/* size */	\
 				  symP->sy_value.X_add_symbol,	/* addr of sym for this stab */	\
-				  (asymbol *)NULL,		\
-				  0,				\
+				  (offsetT) 0,			\
+				  (expressionS *) NULL,		\
 				  i == N_UNDF || i == N_ABS,	/* 1 if internal reloc */	\
 				  R_HPPA,	/* type */	\
 				  e_fsel,	/* fixup fld = F% */	\
@@ -359,8 +344,8 @@ typedef struct space_dictionary_chain space_dict_chainS;
 				   toptr-frag->fr_literal, /* where */	\
 				   4,		/* size */	\
 				   symP,	/* addr of sym for this stab */	\
-				   (asymbol *)NULL,		\
-				   0,				\
+				   (offsetT) 0,			\
+				   (expressionS *) NULL,	\
 				   0,				\
 				   R_HPPA,	/* type */	\
 				   e_fsel,	/* fixup fld = F% */	\
@@ -422,9 +407,9 @@ extern int is_last_defined_subspace ();
 
 /* symbol support */
 
-extern symbolS *pa_get_start_symbol ();
+extern struct symbol *pa_get_start_symbol ();
 
-extern symbolS *pa_set_start_symbol ();
+extern struct symbol *pa_set_start_symbol ();
 
 /* default space and subspace dictionaries */
 
@@ -432,7 +417,8 @@ struct default_subspace_dict
   {
     char *name;
     char defined;
-    char loadable, code_only, common, dup_common, zero, sort;
+    char loadable, code_only, common, dup_common, zero;
+    unsigned char sort;
     int access, space_index, alignment, quadrant;
 #ifdef OBJ_SOM
     segT segment;
@@ -452,12 +438,13 @@ struct default_space_dict
     char loadable;
     char defined;
     char private;
-    char sort;
+    unsigned char sort;
 #ifdef OBJ_SOM
     segT segment;
 #else
     asection *segment;
-    char *alias;		/* an alias for this section (or NULL if there isn't one) */
+    /* an alias for this section (or NULL if there isn't one) */
+    char *alias;
 #endif
   };
 
@@ -472,50 +459,58 @@ extern struct default_space_dict pa_def_spaces[];
 
 typedef struct label_symbol_struct
   {
-    symbolS *lss_label;		/* the label symbol		*/
-    space_dict_chainS *lss_space;	/* the space to which it applies*/
-    struct label_symbol_struct *lss_next;	/* the next label symbol	*/
+    /* the label symbol */
+    struct symbol *lss_label;
+    /* the space to which it applies */
+    space_dict_chainS *lss_space;
+    /* the next label symbol */
+    struct label_symbol_struct *lss_next;
   } label_symbolS;
 
-extern label_symbolS *label_symbols_rootP;
-
-label_symbolS *pa_get_label ();
-int pa_label_is_defined ();
 void pa_define_label ();
-void pa_undefine_label ();
-int pa_pseudo_op_moves_pc ();
 
 /* end of label symbol support. */
 
-#define is_DP_relative(exp)  ( (exp).X_subtract_symbol		\
-                              && strcmp((exp).X_subtract_symbol->bsym->name,	\
-                                        "$global$") == 0 )
+#define is_DP_relative(exp)			\
+  ((exp).X_op == O_subtract			\
+   && strcmp((exp).X_op_symbol->bsym->name, "$global$") == 0)
 
-#define is_PC_relative(exp)  ( (exp).X_subtract_symbol		\
-                              && strcmp((exp).X_subtract_symbol->bsym->name,	\
-                                        "$PIC_pcrel$0") == 0 )
+#define is_PC_relative(exp)			\
+  ((exp).X_op == O_subtract			\
+   && strcmp((exp).X_op_symbol->bsym->name, "$PIC_pcrel$0") == 0)
 
-#define is_complex(exp) ((exp).X_seg && (exp).X_seg == diff_section)
+#define is_complex(exp)				\
+  ((exp).X_op != O_constant && (exp).X_op != O_symbol)
 
 #define tc_crawl_symbol_chain(headers) {;}	/* Not used. */
 
 #define tc_headers_hook(headers) {;}	/* Not used. */
 
-#define elf_tc_symbol		elf_hppa_tc_symbol
-#define elf_tc_make_sections	elf_hppa_tc_make_sections
+#define elf_tc_symbol		hppa_tc_symbol
+#define elf_tc_make_sections	hppa_tc_make_sections
 extern void elf_hppa_final_processing ();
 #define elf_tc_final_processing	elf_hppa_final_processing
 
 /* We need to parse field selectors in .byte, etc.  */
 
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) \
-  parse_cons_expression_hppa (exp)
+  parse_cons_expression_hppa (EXP)
 #define TC_CONS_FIX_NEW cons_fix_new_hppa
 
-extern void parse_cons_expression_hppa PARAMS ((expressionS *exp));
-extern void cons_fix_new_hppa PARAMS ((fragS *frag,
-				       int where,
-				       int size,
-				       expressionS *exp));
+/* FIXME these used to be prototypes, but both want an expressionS which
+   is not defined when this file is included.  */
+extern void parse_cons_expression_hppa ();
+extern void cons_fix_new_hppa ();
+
+/* On the PA, an equal sign often appears as a condition or nullification
+   completer in an instruction.  This can be detected by checking the
+   previous character, if the character is a comma, then the equal is
+   being used as part of an instruction.  */
+#define TC_EQUAL_IN_INSN(C, PTR)	((C) == ',')
+
+/* Similarly for an exclamation point.  It is used in FP comparison
+   instructions and as an end of line marker.  When used in an instruction
+   it will always follow a comma.  */
+#define TC_EOL_IN_INSN(PTR)	(is_end_of_line[*(PTR)] && (PTR)[-1] == ',')
 
 #endif /* _TC_HPPA_H */

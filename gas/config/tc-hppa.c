@@ -29,7 +29,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "as.h"
 #include "subsegs.h"
 
-/* #include "../bfd/libhppa.h" */
+#include "../bfd/libhppa.h"
+
+#ifdef OBJ_ELF
+#include "../bfd/elf32-hppa.h"
+#endif
+
 /*
  * Unwind table and descriptor.
  */
@@ -156,9 +161,9 @@ void md_number_to_field ();
 void md_ri_to_chars ();
 void emit_relocations ();
 static void pa_ip ();
+static void hppa_tc_make_symextn_section ();
 
-const relax_typeS md_relax_table[] =
-{0};
+const relax_typeS md_relax_table[] = {0};
 /* handle of the OPCODE hash table */
 static struct hash_control *op_hash = NULL;
 
@@ -234,6 +239,8 @@ const pseudo_typeS
   {"ORG", pa_origin, 0},
   {"origin", pa_origin, 0},
   {"ORIGIN", pa_origin, 0},
+  {"param", pa_param, 0},
+  {"PARAM", pa_param, 0},
   {"proc", pa_proc, 0},
   {"PROC", pa_proc, 0},
   {"procend", pa_procend, 0},
@@ -307,10 +314,10 @@ struct pa_it the_insn =
   0,				/* opcode */
   NULL,				/* nlistp */
   {
+    O_illegal,			/* exp.X_op */
     NULL,			/* exp.X_add_symbol */
-    NULL,			/* exp.X_subtract_symbol */
+    NULL,			/* exp.X_op_symbol */
     0,				/* exp.X_add_number */
-    NULL			/* exp.asection */
   },
   0,				/* pcrel */
   0,				/* fpof1 */
@@ -340,22 +347,25 @@ void print_insn ();
 #endif
 char *expr_end;
 
-symbolS *label_symbolP;		/* the last label symbol encountered */
+static symbolS *label_symbolP;	/* the last label symbol encountered */
 /* saved here in case a .equ is encountered */
-int label_symbol_defined;
+static int label_symbol_defined;
 
-int callinfo_found;		/* T if a .callinfo appeared within the current */
-/*  procedure definition and F otherwise        */
+/* T if a .callinfo appeared within the current procedure definition
+   and F otherwise.  */
+static int callinfo_found;
 
-int within_entry_exit;		/* T if the assembler is currently within a     */
-/* .entry/.exit pair and F otherwise            */
+/* T if the assembler is currently within a .entry/.exit pair and F
+   otherwise.  */
+static int within_entry_exit;
 
-int exit_processing_complete;	/* T is the assembler has completed exit */
-/* processing for the current procedure  */
-/* and F otherwise                       */
+/* T is the assembler has completed exit processing for the current
+   procedure and F otherwise.  */
+static int exit_processing_complete;
 
-int within_procedure;		/* T if the assembler is currently within a  */
-/* a procedure definition and F otherwise    */
+/* T if the assembler is currently within a procedure definition and
+   F otherwise.  */
+static int within_procedure;
 
 void ignore_rest_of_line ();	/* a useful function in read.c */
 
@@ -365,52 +375,42 @@ void ignore_rest_of_line ();	/* a useful function in read.c */
 #define GDB_STRINGS          GDB_STRINGS_SUBSPACE_NAME
 
 #if defined(OBJ_ELF)
-struct default_subspace_dict pa_def_subspaces[] =
+static struct default_subspace_dict pa_def_subspaces[] =
 {
-  {"$CODE$", 0, 1, 0, 0, 0, 0, 24, 0x2c, 0, 8, 0, 0, ".text", SUBSEG_CODE},
-  {"$DATA$", 0, 1, 0, 0, 0, 0, 24, 0x1f, 0, 8, 1, 1, ".data", SUBSEG_DATA},
-  {"$LIT$", 0, 1, 0, 0, 0, 0, 16, 0x2c, 0, 8, 0, 0, ".text", SUBSEG_LIT},
-  {"$BSS$", 0, 1, 0, 0, 0, 1, 80, 0x1f, 0, 8, 1, 1, ".bss", SUBSEG_BSS},
-  {"$UNWIND$", 0, 1, 0, 0, 0, 0, 64, 0x2c, 0, 4, 0, 0, ".hppa_unwind", SUBSEG_UNWIND},
-  {GDB_STRINGS, 0, 0, 0, 0, 0, 0, 254, 0x1f, 0, 4, 0, 2, ".stabstr", SUBSEG_GDB_STRINGS},
-  {GDB_SYMBOLS, 0, 0, 0, 0, 0, 0, 255, 0x1f, 0, 4, 0, 2, ".stab", SUBSEG_GDB_SYMBOLS},
-  {NULL, 0, 1, 0, 0, 0, 0, 255, 0x1f, 0, 4, 0, 0, 0}
+  {"$CODE$",    0, 1, 0, 0, 0, 0,  24, 0x2c, 0, 8, 0, 0, ".text",	 SUBSEG_CODE},
+  {"$DATA$",    0, 1, 0, 0, 0, 0,  24, 0x1f, 0, 8, 1, 1, ".data",	 SUBSEG_DATA},
+  {"$LIT$",     0, 1, 0, 0, 0, 0,  16, 0x2c, 0, 8, 0, 0, ".text",	 SUBSEG_LIT},
+  {"$BSS$",     0, 1, 0, 0, 0, 1,  80, 0x1f, 0, 8, 1, 1, ".bss",	 SUBSEG_BSS},
+  {"$UNWIND$",  0, 1, 0, 0, 0, 0,  64, 0x2c, 0, 4, 0, 0, ".hppa_unwind", SUBSEG_UNWIND},
+  {NULL,        0, 1, 0, 0, 0, 0, 255, 0x1f, 0, 4, 0, 0, 0,              0}
 };
 
-struct default_space_dict pa_def_spaces[] =
+static struct default_space_dict pa_def_spaces[] =
 {
-  {"$TEXT$", 0, 1, 0, 0, 8, ASEC_NULL, ".text"},
+  {"$TEXT$",    0, 1, 0, 0,  8, ASEC_NULL, ".text"},
   {"$PRIVATE$", 0, 1, 0, 0, 16, ASEC_NULL, ".data"},
-  {GDB_DEBUG_SPACE_NAME, 0, 0, 0, 0, 255, ASEC_NULL, ".stab"},
-  {NULL, 0, 0, 0, 0, 0, ASEC_NULL, NULL}
+  {NULL,        0, 0, 0, 0,  0, ASEC_NULL, NULL}
 };
 #else
-struct default_subspace_dict pa_def_subspaces[] =
+static struct default_subspace_dict pa_def_subspaces[] =
 {
-  {"$CODE$", 0, 1, 0, 0, 0, 0, 24, 0x2c, 0, 8, 0, SEG_TEXT, SUBSEG_CODE},
-  {"$DATA$", 0, 1, 0, 0, 0, 0, 24, 0x1f, 0, 8, 1, SEG_DATA, SUBSEG_DATA},
-  {"$LIT$", 0, 1, 0, 0, 0, 0, 16, 0x2c, 0, 8, 0, SEG_TEXT, SUBSEG_LIT},
-  {"$BSS$", 0, 1, 0, 0, 0, 1, 80, 0x1f, 0, 8, 1, SEG_DATA, SUBSEG_BSS},
-  {"$UNWIND$", 0, 1, 0, 0, 0, 0, 64, 0x2c, 0, 4, 0, SEG_TEXT, SUBSEG_UNWIND},
-  {GDB_STRINGS, 0, 0, 0, 0, 0, 0, 254, 0x1f, 0, 4, 0, SEG_GDB, SUBSEG_GDB_STRINGS
-  },
-  {GDB_SYMBOLS, 0, 0, 0, 0, 0, 0, 255, 0x1f, 0, 4, 0, SEG_GDB, SUBSEG_GDB_SYMBOLS
-  },
-  {NULL, 0, 1, 0, 0, 0, 0, 255, 0x1f, 0, 4, 0, SEG_GOOF, 0}
+  {"$CODE$",    0, 1, 0, 0, 0, 0,  24, 0x2c, 0, 8, 0, SEG_TEXT, SUBSEG_CODE},
+  {"$DATA$",    0, 1, 0, 0, 0, 0,  24, 0x1f, 0, 8, 1, SEG_DATA, SUBSEG_DATA},
+  {"$LIT$",     0, 1, 0, 0, 0, 0,  16, 0x2c, 0, 8, 0, SEG_TEXT, SUBSEG_LIT},
+  {"$BSS$",     0, 1, 0, 0, 0, 1,  80, 0x1f, 0, 8, 1, SEG_DATA, SUBSEG_BSS},
+  {"$UNWIND$",  0, 1, 0, 0, 0, 0,  64, 0x2c, 0, 4, 0, SEG_TEXT, SUBSEG_UNWIND},
+  {GDB_STRINGS, 0, 0, 0, 0, 0, 0, 254, 0x1f, 0, 4, 0, SEG_GDB,  SUBSEG_GDB_STRINGS},
+  {GDB_SYMBOLS, 0, 0, 0, 0, 0, 0, 255, 0x1f, 0, 4, 0, SEG_GDB,  SUBSEG_GDB_SYMBOLS},
+  {NULL,        0, 1, 0, 0, 0, 0, 255, 0x1f, 0, 4, 0, SEG_GOOF, 0}
 };
 
-struct default_space_dict pa_def_spaces[] =
+static struct default_space_dict pa_def_spaces[] =
 {
-  {"$TEXT$", 0, 1, 0, 0, 8, SEG_TEXT},
-  {"$PRIVATE$", 0, 1, 0, 0, 16, SEG_DATA},
+  {"$TEXT$",             0, 1, 0, 0,   8, SEG_TEXT},
+  {"$PRIVATE$",          0, 1, 0, 0,  16, SEG_DATA},
   {GDB_DEBUG_SPACE_NAME, 0, 0, 0, 0, 255, SEG_GDB},
-  {NULL, 0, 0, 0, 0, 0, SEG_GOOF}
+  {NULL,                 0, 0, 0, 0,   0, SEG_GOOF}
 };
-#endif
-
-#ifdef USG
-#define bcmp(b1,b2,n) memcmp((b1),(b2),(n))
-#define index strchr
 #endif
 
 #ifndef FALSE
@@ -432,7 +432,7 @@ struct default_space_dict pa_def_spaces[] =
 	location.
  */
 
-static const char *movers[] =
+static const char *const movers[] =
 {
 /* these entries from 'static pseudo_typeS potable[]' in pa-read.c */
   "ascii", "asciz",
@@ -460,7 +460,7 @@ static const char *movers[] =
   NULL				/* end sentinel */
 };
 
-int
+static int
 pa_pseudo_op_moves_pc (name)
      char *name;
 {
@@ -474,14 +474,12 @@ pa_pseudo_op_moves_pc (name)
   return 0;
 }
 
-/*
-	Support for keeping track of the most recent label in each
-	space.
- */
+/* Support for keeping track of the most recent label in each
+   space.  */
 
 /* XXX:  NOTE:  label_symbolS is defined in pa.h */
 
-label_symbolS *label_symbols_rootP = NULL;
+static label_symbolS *label_symbols_rootP;
 
 /*
 	PA_GET_LABEL
@@ -489,7 +487,7 @@ label_symbolS *label_symbols_rootP = NULL;
 	Returns a pointer to the label_symbolS for the current space.
  */
 
-label_symbolS *
+static label_symbolS *
 pa_get_label ()
 {
   label_symbolS *lssP;
@@ -511,7 +509,7 @@ pa_get_label ()
 	the current space.
  */
 
-int
+static int
 pa_label_is_defined ()
 {
   return (int) pa_get_label ();
@@ -557,7 +555,7 @@ pa_define_label (symbolP)
 	If there is no label_symbolS entry, then no action is taken.
  */
 
-void
+static void
 pa_undefine_label ()
 {
   label_symbolS *lssP;
@@ -583,10 +581,10 @@ pa_undefine_label ()
 /* end of label symbol support. */
 
 
-/* An HPPA-specific version of fix_new.  This is required because the HPPA	*/
-/* code needs to keep track of some extra stuff.  Each call to fix_new_hppa	*/
-/* results in the creation of an instance of an hppa_fixS.  An hppa_fixS	*/
-/* stores the extra information along with a pointer to the original fixS.	*/
+/* An HPPA-specific version of fix_new.  This is required because the HPPA
+   code needs to keep track of some extra stuff.  Each call to fix_new_hppa
+   results in the creation of an instance of an hppa_fixS.  An hppa_fixS
+   stores the extra information along with a pointer to the original fixS.  */
 
 typedef struct hppa_fix_struct
   {
@@ -600,17 +598,17 @@ typedef struct hppa_fix_struct
     struct hppa_fix_struct *fx_next;
   } hppa_fixS;
 
-hppa_fixS *hppa_fix_root = NULL;
+static hppa_fixS *hppa_fix_root;
 
 void 
-fix_new_hppa (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
+fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
 	      r_type, r_field, r_format, arg_reloc, unwind_desc)
      fragS *frag;		/* Which frag? */
      int where;			/* Where in that frag? */
      short int size;		/* 1, 2  or 4 usually. */
      symbolS *add_symbol;	/* X_add_symbol. */
-     symbolS *sub_symbol;	/* X_subtract_symbol. */
      long offset;		/* X_add_number. */
+     expressionS *exp;		/* expression (if non-null) */
      int pcrel;			/* TRUE if PC-relative relocation. */
 #ifdef BFD_ASSEMBLER
      bfd_reloc_code_real_type r_type;	/* Relocation type */
@@ -622,12 +620,14 @@ fix_new_hppa (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
      long arg_reloc;
      char *unwind_desc;
 {
-  fixS *new_fix = fix_new (frag, where, size,
-			   add_symbol, sub_symbol,
-			   offset, pcrel, r_type);
+  fixS *new_fix;
 
   hppa_fixS *hppa_fix = (hppa_fixS *) obstack_alloc (&notes, sizeof (hppa_fixS));
 
+  if (exp != NULL)
+    new_fix = fix_new_exp (frag, where, size, exp, pcrel, r_type);
+  else
+    new_fix = fix_new (frag, where, size, add_symbol, offset, pcrel, r_type);
   hppa_fix->fx_fixP = new_fix;
   hppa_fix->fx_r_field = r_field;
   hppa_fix->fx_r_format = r_format;
@@ -663,7 +663,7 @@ parse_cons_expression_hppa (exp)
      expressionS *exp;
 {
   hppa_field_selector = pa_chk_field_selector (&input_line_pointer);
-  expression (&exp);
+  expression (exp);
 }
 
 /* This fix_new is called by cons via TC_CONS_FIX_NEW.
@@ -688,10 +688,8 @@ cons_fix_new_hppa (frag, where, size, exp)
   if (hppa_field_selector != e_psel && hppa_field_selector != e_fsel)
     as_warn("Invalid field selector.  Assuming F%%.");
 
-  fix_new_hppa (frag, where, size
-		exp->X_add_symbol,
-		exp->X_subtract_symbol,
-		exp->X_add_number, 0, reloc_type,
+  fix_new_hppa (frag, where, size,
+		(symbolS *) NULL, (offsetT) 0, exp, 0, reloc_type,
 		hppa_field_selector, 32, 0, (char *) 0);
 }
 
@@ -801,9 +799,9 @@ md_assemble (str)
       fix_new_hppa (frag_now,	/* which frag */
 		    (toP - frag_now->fr_literal),	/* where */
 		    4,		/* size */
-		    the_insn.exp.X_add_symbol,
-		    the_insn.exp.X_subtract_symbol,
-		    the_insn.exp.X_add_number,
+		    (symbolS *) NULL,
+		    (offsetT) 0,
+		    &the_insn.exp,
 		    the_insn.pcrel,
 		    the_insn.reloc,
 		    the_insn.field_selector,
@@ -815,9 +813,9 @@ md_assemble (str)
       fix_new (frag_now,	/* which frag */
 	       (toP - frag_now->fr_literal),	/* where */
 	       4,		/* size */
-	       the_insn.exp.X_add_symbol,
-	       the_insn.exp.X_subtract_symbol,
-	       the_insn.exp.X_add_number,
+	       (symbolS *) NULL,
+	       (offsetT) 0,
+	       &the_insn.exp,
 	       the_insn.pcrel,
 	       the_insn.reloc,
 	       the_insn.field_selector,
@@ -980,6 +978,8 @@ pa_ip (str)
 		  continue;
 		}
 	      break;
+
+	    case 'y':		/* Same as 't'.  */
 	    case 't':		/* 5 bit register field at 31 */
 	      reg = pa_parse_number (&s);
 	      if (reg < 32 && reg >= 0)
@@ -993,7 +993,7 @@ pa_ip (str)
 		reg = pa_parse_number(&s);
 	       */
 	      getAbsoluteExpression (s);
-	      if (the_insn.exp.X_seg == &bfd_abs_section)
+	      if (the_insn.exp.X_op == O_constant)
 		{
 		  reg = the_insn.exp.X_add_number;
 		  if (reg <= 32 && reg > 0)
@@ -1129,7 +1129,7 @@ pa_ip (str)
 	      opcode |= a << 13;
 	      continue;
 	    case '<':		/* non-negated compare/subtract conditions. */
-	      cmpltr = pa_parse_nonneg_cmpsub_cmpltr (&s);
+	      cmpltr = pa_parse_nonneg_cmpsub_cmpltr (&s, 1);
 	      if (cmpltr < 0)
 		{
 		  as_bad ("Unrecognized Compare/Subtract Condition: %c", *s);
@@ -1140,11 +1140,11 @@ pa_ip (str)
 	    case '?':		/* negated or non-negated cmp/sub conditions. */
 	      /* used only by ``comb'' and ``comib'' pseudo-ops */
 	      save_s = s;
-	      cmpltr = pa_parse_nonneg_cmpsub_cmpltr (&s);
+	      cmpltr = pa_parse_nonneg_cmpsub_cmpltr (&s, 1);
 	      if (cmpltr < 0)
 		{
 		  s = save_s;
-		  cmpltr = pa_parse_neg_cmpsub_cmpltr (&s);
+		  cmpltr = pa_parse_neg_cmpsub_cmpltr (&s, 1);
 		  if (cmpltr < 0)
 		    {
 		      as_bad ("Unrecognized Compare/Subtract Condition: %c", *s);
@@ -1164,11 +1164,11 @@ pa_ip (str)
 	    case '!':		/* negated or non-negated add conditions. */
 	      /* used only by ``addb'' and ``addib'' pseudo-ops */
 	      save_s = s;
-	      cmpltr = pa_parse_nonneg_add_cmpltr (&s);
+	      cmpltr = pa_parse_nonneg_add_cmpltr (&s, 1);
 	      if (cmpltr < 0)
 		{
 		  s = save_s;
-		  cmpltr = pa_parse_neg_add_cmpltr (&s);
+		  cmpltr = pa_parse_neg_add_cmpltr (&s, 1);
 		  if (cmpltr < 0)
 		    {
 		      as_bad ("Unrecognized Compare/Subtract Condition: %c", *s);
@@ -1176,11 +1176,11 @@ pa_ip (str)
 		    }
 		  else
 		    {
-		      opcode |= 1 << 27;	/* required opcode change to make
-		    COMIBT into a COMIBF or a
-		      COMBT into a COMBF or a
-			ADDBT into a ADDBF or a
-			  ADDIBT into a ADDIBF */
+		      opcode |= 1 << 27; /* required opcode change to make
+					    COMIBT into a COMIBF or a
+					    COMBT into a COMBF or a
+					    ADDBT into a ADDBF or a
+					    ADDIBT into a ADDIBF */
 		    }
 		}
 	      opcode |= cmpltr << 13;
@@ -1191,12 +1191,12 @@ pa_ip (str)
 	      save_s = s;
 	      if (*s == ',')
 		{
-		  cmpltr = pa_parse_nonneg_cmpsub_cmpltr (&s);
+		  cmpltr = pa_parse_nonneg_cmpsub_cmpltr (&s, 0);
 		  if (cmpltr < 0)
 		    {
 		      f = 1;
 		      s = save_s;
-		      cmpltr = pa_parse_neg_cmpsub_cmpltr (&s);
+		      cmpltr = pa_parse_neg_cmpsub_cmpltr (&s, 0);
 		      if (cmpltr < 0)
 			{
 			  as_bad ("Unrecognized Compare/Subtract Condition");
@@ -1431,11 +1431,12 @@ pa_ip (str)
 	      opcode |= cmpltr << 13;
 	      opcode |= f << 12;
 	      continue;
+	    case '|':		/* shift/extract/deposit in conditional.  */
 	    case '>':		/* shift/extract/deposit conditions. */
 	      cmpltr = 0;
 	      if (*s == ',')
 		{
-		  s++;
+		  char *save_s = s++;
 		  name = s;
 		  while (*s != ',' && *s != ' ' && *s != '\t')
 		    s += 1;
@@ -1468,6 +1469,14 @@ pa_ip (str)
 		  else if (strcasecmp (name, "ev") == 0)
 		    {
 		      cmpltr = 7;
+		    }
+		  /* Handle movb,n.  Put things back the way they were.  
+		     This includes moving s back to where it started.  */
+		  else if (strcasecmp (name, "n") == 0 && *args == '|')
+		    {
+		      *s = c;
+		      s = save_s;
+		      continue;
 		    }
 		  else
 		    as_bad ("Unrecognized Shift/Extract/Deposit Condition: %s", name);
@@ -1529,7 +1538,7 @@ pa_ip (str)
 	    case 'i':		/* 11 bit immediate at 31 */
 #ifdef OBJ_SOM
 	      getExpression (s);
-	      if (the_insn.exp.X_seg == &bfd_abs_section)
+	      if (the_insn.exp.X_op == O_constant)
 		{
 		  low_sign_unext (evaluateAbsolute (the_insn.exp, the_insn.field_selector),
 				  11, &im11);
@@ -1546,7 +1555,7 @@ pa_ip (str)
 #else
 	      the_insn.field_selector = pa_chk_field_selector (&s);
 	      getExpression (s);
-	      if (the_insn.exp.X_seg == &bfd_abs_section)
+	      if (the_insn.exp.X_op == O_constant)
 		{
 		  low_sign_unext (evaluateAbsolute (the_insn.exp, the_insn.field_selector),
 				  11, &im11);
@@ -1570,7 +1579,7 @@ pa_ip (str)
 	    case 'j':		/* 14 bit immediate at 31 */
 #ifdef OBJ_SOM
 	      getExpression (s);
-	      if (the_insn.exp.X_seg == &bfd_abs_section)
+	      if (the_insn.exp.X_op == O_constant)
 		{
 		  low_sign_unext (evaluateAbsolute (the_insn.exp, field_selector),
 				  14, &im14);
@@ -1590,7 +1599,7 @@ pa_ip (str)
 #else
 	      the_insn.field_selector = pa_chk_field_selector (&s);
 	      getExpression (s);
-	      if (the_insn.exp.X_seg == &bfd_abs_section)
+	      if (the_insn.exp.X_op == O_constant)
 		{
 		  low_sign_unext (evaluateAbsolute (the_insn.exp, the_insn.field_selector),
 				  14, &im14);
@@ -1618,7 +1627,7 @@ pa_ip (str)
 	    case 'k':		/* 21 bit immediate at 31 */
 #ifdef OBJ_SOM
 	      getExpression (s);
-	      if (the_insn.exp.X_seg == &bfd_abs_section)
+	      if (the_insn.exp.X_op == O_constant)
 		{
 		  dis_assemble_21 (evaluateAbsolute (the_insn.exp, the_insn.field_selector),
 				   &im21);
@@ -1635,7 +1644,7 @@ pa_ip (str)
 #else
 	      the_insn.field_selector = pa_chk_field_selector (&s);
 	      getExpression (s);
-	      if (the_insn.exp.X_seg == &bfd_abs_section)
+	      if (the_insn.exp.X_op == O_constant)
 		{
 		  dis_assemble_21 (evaluateAbsolute (the_insn.exp, the_insn.field_selector),
 				   &im21);
@@ -1822,8 +1831,8 @@ pa_ip (str)
                                  instructions.) */
 		      if (strcasecmp (prev_str, "ldil") == 0 &&
 			  prev_insn.exp.X_add_symbol == the_insn.exp.X_add_symbol &&
-			  prev_insn.exp.X_subtract_symbol == the_insn.exp.X_subtract_symbol &&
-			  prev_insn.exp.X_seg == the_insn.exp.X_seg &&
+			  prev_insn.exp.X_op == the_insn.exp.X_op &&
+			  prev_insn.exp.X_op_symbol == the_insn.exp.X_op_symbol &&
 			  prev_insn.exp.X_add_number == the_insn.exp.X_add_number &&
 			  prev_fix != NULL)
 			prev_fix->fx_r_type = the_insn.reloc;
@@ -1848,7 +1857,7 @@ pa_ip (str)
 	      /* value is encoded in instr. as 31-p where p is   */
 	      /* the value scanned here */
 	      getExpression (s);
-	      if (the_insn.exp.X_seg == &bfd_abs_section)
+	      if (the_insn.exp.X_op == O_constant)
 		{
 		  opcode |= (((31 - the_insn.exp.X_add_number) & 0x1f) << 5);
 		}
@@ -1856,7 +1865,7 @@ pa_ip (str)
 	      continue;
 	    case 'P':		/* 5-bit bit position at 26 */
 	      getExpression (s);
-	      if (the_insn.exp.X_seg == &bfd_abs_section)
+	      if (the_insn.exp.X_op == O_constant)
 		{
 		  opcode |= (the_insn.exp.X_add_number & 0x1f) << 5;
 		}
@@ -1876,7 +1885,7 @@ pa_ip (str)
 	      continue;
 	    case 'A':		/* 13 bit immediate at 18 (to support BREAK instr.) */
 	      getAbsoluteExpression (s);
-	      if (the_insn.exp.X_seg == &bfd_abs_section)
+	      if (the_insn.exp.X_op == O_constant)
 		opcode |= (the_insn.exp.X_add_number & 0x1fff) << 13;
 	      s = expr_end;
 	      continue;
@@ -1901,7 +1910,7 @@ pa_ip (str)
 	      the_insn.field_selector = pa_chk_field_selector (&s);
 #endif
 	      getExpression (s);
-	      if (the_insn.exp.X_seg == &bfd_abs_section)
+	      if (the_insn.exp.X_op == O_constant)
 		{
 		  opcode |= ((evaluateAbsolute (the_insn.exp, the_insn.field_selector) & 0x1ffffff) << 1);
 #ifdef NEW_SOM			/* XXX what replaces this? */
@@ -2179,7 +2188,7 @@ pa_ip (str)
   the_insn.opcode = opcode;
 
 #ifdef PA_DEBUG
-  if (the_insn.exp.X_add_symbol && the_insn.exp.X_subtract_symbol)
+  if (the_insn.exp.X_add_symbol && the_insn.exp.X_op_symbol)
     print_insn_short (&the_insn);
   fprintf (stderr, "*********** END OF STATEMENT\n");
 #endif
@@ -2738,19 +2747,6 @@ md_apply_fix_1 (fixP, val)
 	  || (fixP->fx_subsy && fixP->fx_subsy->bsym->section == &bfd_und_section))
 	return;
 
-      /* Perform some processing particular to unwind */
-      /* relocations */
-
-      if (hppa_fixP->fx_call_infop
-	  && (((fixP == hppa_fixP->fx_call_infop->start_fix)
-	       && (fixP->fx_addsy ==
-		   hppa_fixP->fx_call_infop->start_symbol))
-	      || ((fixP == hppa_fixP->fx_call_infop->end_fix)
-		  && (fixP->fx_addsy ==
-		      hppa_fixP->fx_call_infop->end_symbol))
-	  ))
-	val += fixP->fx_addsy->sy_frag->fr_address;
-
       switch (fmt)
 	{
 
@@ -2759,7 +2755,6 @@ md_apply_fix_1 (fixP, val)
 	  /* need to check for overflow here */
 
 	  /* mask off 14 bits to be changed */
-	  /* *(long *)buf = *(long *)buf & 0xffffc000; */
 	  bfd_put_32 (stdoutput,
 		      bfd_get_32 (stdoutput, buf) & 0xffffc000,
 		      buf);
@@ -2771,7 +2766,6 @@ md_apply_fix_1 (fixP, val)
 	  /* need to check for overflow here */
 
 	  /* mask off 21 bits to be changed */
-	  /* *(long *)buf = *(long *)buf & 0xffe00000; */
 	  bfd_put_32 (stdoutput,
 		      bfd_get_32 (stdoutput, buf) & 0xffe00000,
 		      buf);
@@ -2783,7 +2777,6 @@ md_apply_fix_1 (fixP, val)
 	  /* need to check for overflow here */
 
 	  /* mask off 11 bits to be changed */
-	  /* *(long *)buf = *(long *)buf & 0xffff800; */
 	  bfd_put_32 (stdoutput,
 		      bfd_get_32 (stdoutput, buf) & 0xffff800,
 		      buf);
@@ -2795,34 +2788,53 @@ md_apply_fix_1 (fixP, val)
 
 	  /* mask off 11 bits to be changed */
 	  sign_unext ((new_val - 8) >> 2, 12, &result);
-	  /* *(long *)buf = *(long *)buf & 0xffffe002; */
 	  bfd_put_32 (stdoutput,
 		      bfd_get_32 (stdoutput, buf) & 0xffffe002,
 		      buf);
 
 	  dis_assemble_12 (result, &w1, &w);
 	  result = ((w1 << 2) | w);
+	  fixP->fx_addsy = NULL; /* No relocations please.  */
 	  break;
 
+#define too_far(VAL, NUM_BITS) \
+  (((int)(VAL) > (1 << (NUM_BITS)) - 1) || ((int)(VAL) < (-1 << (NUM_BITS))))
+
+#define stub_needed(CALLER, CALLEE) \
+  ((CALLEE) && (CALLER) && ((CALLEE) != (CALLER)))
+
 	case 17:		/* some of the opcodes with the 'W' operand type */
+	  if (too_far (val, 18)
+	      || stub_needed (((elf32_symbol_type *) fixP->fx_addsy->bsym)->tc_data.hppa_arg_reloc,
+			      hppa_fixP->fx_arg_reloc))
+	    /* Keep the relocation because we can't reach the target with
+	       a short call, or if an argument relocation stub is needed.  */
+	    return;
+
 	  new_val = apply_field_selector (val, 0, hppa_fixP->fx_r_field);
 	  /* need to check for overflow here */
 
 	  /* mask off 17 bits to be changed */
-	  /* *(long *)buf = *(long *)buf & 0xffe0e002; */
 	  bfd_put_32 (stdoutput,
 		      bfd_get_32 (stdoutput, buf) & 0xffe0e002,
 		      buf);
 	  sign_unext ((new_val - 8) >> 2, 17, &result);
 	  dis_assemble_17 (result, &w1, &w2, &w);
 	  result = ((w2 << 2) | (w1 << 16) | w);
+	  fixP->fx_addsy = NULL; /* No relocations please. */
 	  break;
 
 	case 32:
-	  new_val = apply_field_selector (val, 0, hppa_fixP->fx_r_field);
-	  result = new_val;	/* no transformation on result */
-	  /* *(long *)buf = 0; *//* clear out everything */
-	  bfd_put_32 (stdoutput, 0, buf);	/* clear out everything */
+	  if (hppa_fixP->fx_r_type == R_HPPA_UNWIND_ENTRY
+	      || hppa_fixP->fx_r_type == R_HPPA_UNWIND_ENTRIES)
+	    result = fixP->fx_addnumber;
+	  else
+	    {
+	      result = 0;
+	      fixP->fx_addnumber = fixP->fx_offset;
+	      bfd_put_32 (stdoutput, 0, buf); /* clear out everything */
+	      return;		/* still need the relocation */
+	    }
 	  break;
 
 	case 0:
@@ -2852,7 +2864,7 @@ md_apply_fix_1 (fixP, val)
 int
 md_apply_fix (fixP, valp)
      fixS *fixP;
-     long *valp;
+     valueT *valp;
 {
   md_apply_fix_1 (fixP, *valp);
   return 1;
@@ -3778,40 +3790,11 @@ getExpression (str)
   save_in = input_line_pointer;
   input_line_pointer = str;
   seg = expression (&the_insn.exp);
-
-  if (!(seg == &bfd_abs_section
-	|| seg == &bfd_und_section
-	|| seg == text_section
-	|| seg == data_section
-	|| seg == bss_section
-	|| seg == diff_section
-	|| seg == big_section
-	|| seg == absent_section))
+  if (!(seg == absolute_section
+	|| seg == undefined_section
+	|| SEG_NORMAL (seg)))
     {
       the_insn.error = "bad segment";
-      expr_end = input_line_pointer;
-      input_line_pointer = save_in;
-      return 1;
-    }
-  expr_end = input_line_pointer;
-  input_line_pointer = save_in;
-  return 0;
-}
-
-int
-getAbsoluteExpression (str)
-     char *str;
-{
-  char *save_in;
-  asection *seg;
-
-  save_in = input_line_pointer;
-  input_line_pointer = str;
-  seg = expression (&the_insn.exp);
-
-  if (seg != &bfd_abs_section)
-    {
-      the_insn.error = "segment should be ABSOLUTE";
       expr_end = input_line_pointer;
       input_line_pointer = save_in;
       return 1;
@@ -3831,49 +3814,12 @@ getExpression (str)
 
   save_in = input_line_pointer;
   input_line_pointer = str;
-  switch (seg = expression (&the_insn.exp))
+  seg = expression (&the_insn.exp);
+  if (!(seg == absolute_section
+	|| seg == undefined_section
+	|| SEG_NORMAL (seg)))
     {
-
-    case SEG_ABSOLUTE:
-    case SEG_TEXT:
-    case SEG_DATA:
-    case SEG_BSS:
-    case SEG_UNKNOWN:
-    case SEG_DIFFERENCE:
-    case SEG_BIG:
-    case SEG_GDB:
-    case SEG_MILLICODE:
-    case SEG_NONE:
-      break;
-
-    default:
       the_insn.error = "illegal segment";
-      expr_end = input_line_pointer;
-      input_line_pointer = save_in;
-      return 1;
-    }
-  expr_end = input_line_pointer;
-  input_line_pointer = save_in;
-  return 0;
-}
-
-int
-getAbsoluteExpression (str)
-     char *str;
-{
-  char *save_in;
-  segT seg;
-
-  save_in = input_line_pointer;
-  input_line_pointer = str;
-  switch (seg = expression (&the_insn.exp))
-    {
-
-    case SEG_ABSOLUTE:
-      break;
-
-    default:
-      the_insn.error = "segment should be ABSOLUTE";
       expr_end = input_line_pointer;
       input_line_pointer = save_in;
       return 1;
@@ -3885,6 +3831,27 @@ getAbsoluteExpression (str)
 
 #endif
 
+int
+getAbsoluteExpression (str)
+     char *str;
+{
+  char *save_in;
+
+  save_in = input_line_pointer;
+  input_line_pointer = str;
+  expression (&the_insn.exp);
+  if (the_insn.exp.X_op != O_constant)
+    {
+      the_insn.error = "segment should be ABSOLUTE";
+      expr_end = input_line_pointer;
+      input_line_pointer = save_in;
+      return 1;
+    }
+  expr_end = input_line_pointer;
+  input_line_pointer = save_in;
+  return 0;
+}
+
 int 
 evaluateAbsolute (exp, field_selector)
      expressionS exp;
@@ -3893,15 +3860,6 @@ evaluateAbsolute (exp, field_selector)
   int value;
 
   value = exp.X_add_number;
-
-  if (exp.X_add_symbol)
-    {
-      value += S_GET_VALUE (exp.X_add_symbol);
-    }
-  if (exp.X_subtract_symbol)
-    {
-      value -= S_GET_VALUE (exp.X_subtract_symbol);
-    }
 
   switch (field_selector)
     {
@@ -4040,82 +3998,20 @@ pa_parse_nullif (s)
   return nullif;
 }
 
-#if 0
 int 
-pa_parse_nonneg_cmpsub_cmpltr (s)
+pa_parse_nonneg_cmpsub_cmpltr (s, isbranch)
      char **s;
+     int isbranch;
 {
   int cmpltr;
-  char *name;
+  char *name = *s + 1;
   char c;
-
-  cmpltr = -1;
-  /** cmpltr = 0; **/
-  if (**s == ',')
-    {
-      *s += 1;
-      name = *s;
-      while (**s != ',' && **s != ' ' && **s != '\t')
-	*s += 1;
-      c = **s;
-      **s = 0x00;
-      if (strcmp (name, "=") == 0)
-	{
-	  cmpltr = 1;
-	}
-      else if (strcmp (name, "<") == 0)
-	{
-	  cmpltr = 2;
-	}
-      else if (strcmp (name, "<=") == 0)
-	{
-	  cmpltr = 3;
-	}
-      else if (strcmp (name, "<<") == 0)
-	{
-	  cmpltr = 4;
-	}
-      else if (strcmp (name, "<<=") == 0)
-	{
-	  cmpltr = 5;
-	}
-      else if (strcasecmp (name, "sv") == 0)
-	{
-	  cmpltr = 6;
-	}
-      else if (strcasecmp (name, "od") == 0)
-	{
-	  cmpltr = 7;
-	}
-      /**
-    else
-      cmpltr = -1;
-    **/
-      **s = c;
-    }
-  if (cmpltr >= 0)
-    {
-      while (**s == ' ' || **s == '\t')
-	*s = *s + 1;
-    }
-
-  return cmpltr;
-}
-
-#endif
-int 
-pa_parse_nonneg_cmpsub_cmpltr (s)
-     char **s;
-{
-  int cmpltr;
-  char *name;
-  char c;
+  char *save_s = *s;
 
   cmpltr = 0;
   if (**s == ',')
     {
       *s += 1;
-      name = *s;
       while (**s != ',' && **s != ' ' && **s != '\t')
 	*s += 1;
       c = **s;
@@ -4148,8 +4044,16 @@ pa_parse_nonneg_cmpsub_cmpltr (s)
 	{
 	  cmpltr = 7;
 	}
-      else
-	cmpltr = -1;
+      /* If we have something like addb,n then there is no condition
+	 completer.  */
+      else if (strcasecmp (name, "n") == 0 && isbranch)
+	{
+	  cmpltr = 0;
+	}
+      else 
+	{
+	  cmpltr = -1;
+	}
       **s = c;
     }
   if (cmpltr >= 0)
@@ -4158,22 +4062,27 @@ pa_parse_nonneg_cmpsub_cmpltr (s)
 	*s = *s + 1;
     }
 
+  /* Reset pointers if this was really a ,n for a branch instruction.  */
+  if (cmpltr == 0 && *name == 'n' && isbranch)
+    *s = save_s;
+
   return cmpltr;
 }
 
 int 
-pa_parse_neg_cmpsub_cmpltr (s)
+pa_parse_neg_cmpsub_cmpltr (s, isbranch)
      char **s;
+     int isbranch;
 {
   int cmpltr;
-  char *name;
+  char *name = *s + 1;
   char c;
+  char *save_s = *s;
 
-  cmpltr = -1;
+  cmpltr = 0;
   if (**s == ',')
     {
       *s += 1;
-      name = *s;
       while (**s != ',' && **s != ' ' && **s != '\t')
 	*s += 1;
       c = **s;
@@ -4210,6 +4119,16 @@ pa_parse_neg_cmpsub_cmpltr (s)
 	{
 	  cmpltr = 7;
 	}
+      /* If we have something like addb,n then there is no condition
+	 completer.  */
+      else if (strcasecmp (name, "n") == 0 && isbranch)
+	{
+	  cmpltr = 0;
+	}
+      else
+	{
+	  cmpltr = -1;
+	}
       **s = c;
     }
   if (cmpltr >= 0)
@@ -4218,22 +4137,27 @@ pa_parse_neg_cmpsub_cmpltr (s)
 	*s = *s + 1;
     }
 
+  /* Reset pointers if this was really a ,n for a branch instruction.  */
+  if (cmpltr == 0 && *name == 'n' && isbranch)
+    *s = save_s;
+
   return cmpltr;
 }
 
 int 
-pa_parse_nonneg_add_cmpltr (s)
+pa_parse_nonneg_add_cmpltr (s, isbranch)
      char **s;
+     int isbranch;
 {
   int cmpltr;
-  char *name;
+  char *name = *s + 1;
   char c;
+  char *save_s = *s;
 
-  cmpltr = -1;
+  cmpltr = 0;
   if (**s == ',')
     {
       *s += 1;
-      name = *s;
       while (**s != ',' && **s != ' ' && **s != '\t')
 	*s += 1;
       c = **s;
@@ -4266,6 +4190,16 @@ pa_parse_nonneg_add_cmpltr (s)
 	{
 	  cmpltr = 7;
 	}
+      /* If we have something like addb,n then there is no condition
+	 completer.  */
+      else if (strcasecmp (name, "n") == 0 && isbranch)
+	{
+	  cmpltr = 0;
+	}
+      else
+	{
+	  cmpltr = -1;
+	}
       **s = c;
     }
   if (cmpltr >= 0)
@@ -4274,22 +4208,27 @@ pa_parse_nonneg_add_cmpltr (s)
 	*s = *s + 1;
     }
 
+  /* Reset pointers if this was really a ,n for a branch instruction.  */
+  if (cmpltr == 0 && *name == 'n' && isbranch)
+    *s = save_s;
+
   return cmpltr;
 }
 
 int 
-pa_parse_neg_add_cmpltr (s)
+pa_parse_neg_add_cmpltr (s, isbranch)
      char **s;
+     int isbranch;
 {
   int cmpltr;
-  char *name;
+  char *name = *s + 1;
   char c;
+  char *save_s = *s;
 
-  cmpltr = -1;
+  cmpltr = 0;
   if (**s == ',')
     {
       *s += 1;
-      name = *s;
       while (**s != ',' && **s != ' ' && **s != '\t')
 	*s += 1;
       c = **s;
@@ -4326,6 +4265,16 @@ pa_parse_neg_add_cmpltr (s)
 	{
 	  cmpltr = 7;
 	}
+      /* If we have something like addb,n then there is no condition
+	 completer.  */
+      else if (strcasecmp (name, "n") == 0 && isbranch)
+	{
+	  cmpltr = 0;
+	}
+      else
+	{
+	  cmpltr = -1;
+	}
       **s = c;
     }
   if (cmpltr >= 0)
@@ -4333,6 +4282,10 @@ pa_parse_neg_add_cmpltr (s)
       while (**s == ' ' || **s == '\t')
 	*s = *s + 1;
     }
+
+  /* Reset pointers if this was really a ,n for a branch instruction.  */
+  if (cmpltr == 0 && *name == 'n' && isbranch)
+    *s = save_s;
 
   return cmpltr;
 }
@@ -4539,9 +4492,9 @@ pa_build_unwind_subspace (call_info)
     {
       seg = bfd_make_section_old_way (stdoutput, UNWIND_SECTION_NAME);
     }
-  bfd_set_section_flags (stdoutput,
-			 seg,
-			 SEC_READONLY | SEC_ALLOC | SEC_LOAD | SEC_RELOC);
+  bfd_set_section_flags (stdoutput, seg,
+			 (SEC_READONLY | SEC_HAS_CONTENTS
+			  | SEC_LOAD | SEC_RELOC));
 
   /* callinfo.frame is in bytes and unwind_desc is in 8 byte units */
   call_info->ci_unwind.descriptor.frame_size = call_info->frame / 8;
@@ -4561,8 +4514,9 @@ pa_build_unwind_subspace (call_info)
   /* relocation info. for start offset of the function */
 
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
-		call_info->start_symbol, (symbolS *) NULL,
-		0, 0, R_HPPA, e_fsel, 32, 0, (char *) 0);
+		call_info->start_symbol, (offsetT) 0,
+		(expressionS *) NULL, 0, R_HPPA_UNWIND, e_fsel, 32, 0,
+		(char *) 0);
 
   /** we need to search for the first relocation involving the start_symbol of **/
   /** this call_info descriptor **/
@@ -4589,8 +4543,9 @@ pa_build_unwind_subspace (call_info)
   /* relocation info. for end offset of the function */
 
   fix_new_hppa (frag_now, p - frag_now->fr_literal, 4,
-		call_info->end_symbol, (symbolS *) NULL,
-		0, 0, R_HPPA, e_fsel, 32, 0, (char *) 0);
+		call_info->end_symbol, (offsetT) 0,
+		(expressionS *) NULL, 0, R_HPPA_UNWIND, e_fsel, 32, 0,
+		(char *) 0);
 
   /** we need to search for the first relocation involving the start_symbol of **/
   /** this call_info descriptor **/
@@ -4686,8 +4641,9 @@ pa_build_unwind_subspace (call_info)
   /* relocation info. for start offset of the function */
 
   fix_new (frag_now, p - frag_now->fr_literal, 4,
-	   call_info->start_symbol, (symbolS *) NULL,
-	   0, 0, R_DATA_ONE_SYMBOL, e_fsel, 0, 0, (char *) 0);
+	   call_info->start_symbol, (offsetT) 0,
+	   (expressionS *) NULL, 0, R_DATA_ONE_SYMBOL, e_fsel, 0, 0,
+	   (char *) 0);
 
   /** we need to search for the first relocation involving the start_symbol of **/
   /** this call_info descriptor **/
@@ -4722,8 +4678,9 @@ pa_build_unwind_subspace (call_info)
   /* relocation info. for end offset of the function */
 
   fix_new (frag_now, p - frag_now->fr_literal, 4,
-	   call_info->start_symbol, (symbolS *) NULL,
-	   0, 0, R_DATA_ONE_SYMBOL, e_fsel, 0, 0, (char *) 0);
+	   call_info->start_symbol, (offsetT) 0,
+	   (expressionS *) NULL, 0, R_DATA_ONE_SYMBOL, e_fsel, 0, 0,
+	   (char *) 0);
 
   /** we need to search for the first relocation involving the start_symbol of **/
   /** this call_info descriptor **/
@@ -5010,7 +4967,7 @@ pa_copyright ()
 	char *company_name = name;
 	char *date_part;
 
-	date_part = (char *) index (name, ',');
+	date_part = (char *) strchr (name, ',');
 	if (date_part)
 	  {
 	    *date_part = 0x00;
@@ -5109,15 +5066,17 @@ pa_entry ()
   within_entry_exit = TRUE;
   where = frag_more (0);
 #ifdef OBJ_SOM
-  fix_new (frag_now, where - frag_now->fr_literal, 0,
-	   last_call_info->start_symbol, (symbolS *) NULL, 0, 0,
-     R_ENTRY, e_fsel, 0, 0, (char *) &last_call_info->ci_unwind.descriptor);
+  fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
+		last_call_info->start_symbol, (offsetT) 0,
+		(expressionS *) NULL, 0, R_ENTRY, e_fsel, 0, 0,
+		(char *) &last_call_info->ci_unwind.descriptor);
 #else
 #ifdef OBJ_ELF
   /* XXX: no ENTRY relocation for PA ELF.  What do we do instead? */
 #else
   fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
-		last_call_info->start_symbol, (symbolS *) NULL, 0, 0,
+		last_call_info->start_symbol, (offsetT) 0,
+		(expressionS *) NULL, 0,
 		R_HPPA_ENTRY, 0, 0, 0,
 		(char *) &last_call_info->ci_unwind.descriptor);
 #endif
@@ -5165,9 +5124,10 @@ process_exit ()
 
   where = frag_more (0);
 #ifdef OBJ_SOM
-  fix_new (frag_now, where - frag_now->fr_literal, 0,
-	   last_call_info->start_symbol, (symbolS *) NULL, 0,
-	   0, R_EXIT, e_fsel, 0, 0, (char *) NULL);
+  fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
+		last_call_info->start_symbol, (offsetT) 0,
+		(expressionS *) NULL, 0, R_EXIT, e_fsel, 0, 0,
+		(char *) NULL);
 #endif
 #ifdef OBJ_ELF
   /* XXX: no EXIT relocation for PA ELF.  All we do is create a */
@@ -5197,7 +5157,7 @@ process_exit ()
 
 	    assert (symbolP);
 
-	    symbolP->bsym->flags = last_call_info->start_symbol->bsym->flags;
+	    symbolP->bsym->flags = BSF_LOCAL;
 	    symbol_table_insert (symbolP);
 	  }
 	if (symbolP)
@@ -5211,8 +5171,9 @@ process_exit ()
   }
 #else
   fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
-		last_call_info->start_symbol, (symbolS *) NULL, 0,
-		0, R_HPPA_EXIT, 0, 0, 0, (char *) NULL);
+		last_call_info->start_symbol, (offsetT) 0,
+		(expressionS *) NULL, 0, R_HPPA_EXIT, 0, 0, 0,
+		(char *) NULL);
 #endif
   last_call_info->end_frag = frag_now;
 
@@ -5245,6 +5206,25 @@ pa_exit ()
   demand_empty_rest_of_line ();
   return;
 }
+
+#ifdef OBJ_ELF
+void
+  pa_build_symextn_section()
+{
+  segT seg;
+  asection *save_seg = now_seg;
+  subsegT subseg = (subsegT)0;
+  subsegT save_subseg = now_subseg;
+
+  seg = subseg_new(".hppa_symextn", subseg);
+  bfd_set_section_flags (stdoutput,
+			 seg,
+			 SEC_HAS_CONTENTS | SEC_READONLY | SEC_ALLOC | SEC_LOAD);
+
+  subseg_new(save_seg->name, save_subseg);
+  
+}
+#endif
 
 void 
 pa_export ()
@@ -5286,6 +5266,9 @@ pa_export ()
 	{
 	  input_line_pointer++;
 	  pa_export_args (symbolP);
+#ifdef OBJ_ELF
+	  pa_build_symextn_section();
+#endif
 	}
     }
 
@@ -5303,7 +5286,7 @@ pa_export_args (symbolP)
   register int temp;
   register unsigned int arg_reloc;
 #ifdef OBJ_ELF
-  elf_symbol_type *esymbolP = (elf_symbol_type *) (symbolP->bsym);
+  elf32_symbol_type *esymbolP = (elf32_symbol_type *) (symbolP->bsym);
 #endif
 
   if (strncasecmp (input_line_pointer, "absolute", 8) == 0)
@@ -5551,9 +5534,57 @@ pa_leave ()
 void 
 pa_origin ()
 {
-  s_org ();			/* ORG actually allows another argument (the fill value)
-                    but maybe this is OK? */
+  s_org ();			/* ORG actually allows another argument
+				   (the fill value) but maybe this is OK? */
   pa_undefine_label ();
+  return;
+}
+
+
+void 
+pa_param ()
+{
+  char *name;
+  char c;
+  char *p;
+  int temp;
+  int regno;
+  symbolS *symbolP;
+
+  name = input_line_pointer;
+  c = get_symbol_end ();
+  /* just after name is now '\0' */
+
+  if ((symbolP = symbol_find_or_make (name)) == NULL)
+    {
+      as_bad ("Cannot define static symbol: %s\n", name);
+      p = input_line_pointer;
+      *p = c;
+      input_line_pointer++;
+    }
+  else
+    {
+#ifdef OBJ_SOM
+      symbolP->pa_sy_dict.symbol_scope = SS_LOCAL;
+      /* determination of the symbol_type field will have to wait until
+	 we know the subspace index (within the object file) of the subspace
+	 containing this symbol */
+#else
+      /* S_SET_SEGMENT(symbolP,&bfd_und_section); */
+      S_CLEAR_EXTERNAL (symbolP);
+      /* symbolP->sy_frag = frag_now; */
+#endif
+
+      p = input_line_pointer;
+      *p = c;
+      if (!is_end_of_statement ())
+	{
+	  input_line_pointer++;
+	  pa_export_args (symbolP);
+	}
+    }
+
+  demand_empty_rest_of_line ();
   return;
 }
 
@@ -5897,11 +5928,15 @@ pa_space ()
 	  current_subspace = pa_subsegment_to_subspace (SEG_GDB,
 						  sd_chain->sd_last_subseg);
 #else
-	  if (now_seg != gdb_section)	/* no need to align if we are already there */
-	    pa_align_subseg (now_seg, now_subseg);
-	  subseg_new ((char *) gdb_section->name, sd_chain->sd_last_subseg);
-	  current_subspace = pa_subsegment_to_subspace (gdb_section,
-						  sd_chain->sd_last_subseg);
+	  {
+	    asection *gdb_section
+	      = bfd_make_section_old_way (stdoutput, GDB_DEBUG_SPACE_NAME);
+	    if (now_seg != gdb_section)	/* no need to align if we are already there */
+	      pa_align_subseg (now_seg, now_subseg);
+	    subseg_new ((char *) gdb_section->name, sd_chain->sd_last_subseg);
+	    current_subspace = pa_subsegment_to_subspace (gdb_section,
+							  sd_chain->sd_last_subseg);
+	  }
 #endif
 	  demand_empty_rest_of_line ();
 	  return;
@@ -6217,7 +6252,7 @@ pa_subspace ()
 /*	   fr_fix != 0.							*/
 
 void 
-elf_hppa_final_processing_hook ()
+elf_hppa_final_processing ()
 {
   extern call_infoS *call_info_root;
 
@@ -6225,10 +6260,9 @@ elf_hppa_final_processing_hook ()
 
   for (ciP = call_info_root; ciP; ciP = ciP->ci_next)
     {
-      elf_symbol_type *esym = (elf_symbol_type *) ciP->start_symbol->bsym;
+      elf32_symbol_type *esym = (elf32_symbol_type *) ciP->start_symbol->bsym;
       esym->internal_elf_sym.st_size =
-	ciP->end_symbol->bsym->value
-	- ciP->start_symbol->bsym->value + 4;
+	S_GET_VALUE (ciP->end_symbol) - S_GET_VALUE (ciP->start_symbol) + 4;
     }
 }
 
@@ -6242,9 +6276,6 @@ space_dict_chainS *space_dict_last;
 space_dict_chainS *current_space;
 subspace_dict_chainS *current_subspace;
 
-extern symbolS *start_symbol_root;
-extern symbolS *start_symbol_last;
-
 void 
 pa_spaces_begin ()
 {
@@ -6254,9 +6285,6 @@ pa_spaces_begin ()
 
   space_dict_root = NULL;
   space_dict_last = NULL;
-
-  start_symbol_root = NULL;
-  start_symbol_last = NULL;
 
   /* create default space and subspace dictionaries */
 
@@ -6850,7 +6878,11 @@ pa_stringer (append_zero)	/* Worker to do .ascii etc statements. */
 		    for (i = 0; i <= num_digit; i++)
 		      s_start[i] = num_buf[i];
 		  }
+		break;
 	      }
+	      /* This might be a "\"", skip over the escaped char.  */
+	    default:
+	      s++;
 	      break;
 	    }
 	}
@@ -6938,4 +6970,133 @@ pa_text ()
 {
   s_text ();
   pa_undefine_label ();
+}
+
+static symext_chainS *symext_rootP = NULL;
+static symext_chainS *symext_lastP = NULL;
+
+void
+hppa_tc_symbol (abfd, symbolP, sym_idx)
+     bfd * abfd;
+     elf_symbol_type * symbolP;
+     int sym_idx;
+{
+  symext_chainS *symextP;
+  unsigned int arg_reloc;
+
+  if (!(symbolP->symbol.flags & BSF_FUNCTION))
+    return;
+
+  arg_reloc = symbolP->tc_data.hppa_arg_reloc;
+
+  symextP = (symext_chainS *) bfd_alloc (abfd, sizeof (symext_chainS) * 2);
+
+  symextP[0].entry = ELF32_HPPA_SX_WORD (HPPA_SXT_SYMNDX, sym_idx);
+  symextP[0].next = &symextP[1];
+
+  symextP[1].entry = ELF32_HPPA_SX_WORD (HPPA_SXT_ARG_RELOC, arg_reloc);
+  symextP[1].next = NULL;
+
+  if (symext_rootP == NULL)
+    {
+      symext_rootP = &symextP[0];
+      symext_lastP = &symextP[1];
+    }
+  else
+    {
+      symext_lastP->next = &symextP[0];
+      symext_lastP = &symextP[1];
+    }
+}
+
+void
+hppa_tc_make_sections (abfd)
+bfd * abfd;
+{
+  symext_chainS *symextP;
+  symext_entryS *outbound_symexts;
+  int size;
+  int n;
+  extern void hppa_elf_stub_finish ();	/* forward declaration */
+  asection *symextn_sec;
+  segT save_seg = now_seg;
+  subsegT save_subseg = now_subseg;
+
+  hppa_tc_make_symextn_section();
+
+  bfd_set_section_contents(stdoutput, stdoutput->sections, "", 0, 0);	/* force some calculations */
+
+  hppa_elf_stub_finish (abfd);
+
+  if (symext_rootP == NULL)
+    return;
+
+  for (n = 0, symextP = symext_rootP; symextP; symextP = symextP->next, ++n)
+    ;
+
+  size = sizeof (symext_entryS) * n;
+
+  symextn_sec = subseg_new(SYMEXTN_SECTION_NAME, 0);
+
+  frag_wane (frag_now);
+  frag_new (0);
+
+  for (symextP = symext_rootP; symextP; symextP = symextP->next)
+    {
+      char *ptr;
+      extern int *elf_get_symtab_map();
+      Elf_Sym_Extra *symextra = elf_sym_extra (abfd);
+      int idx;
+
+      /* First, patch the symbol extension record to reflect the true */
+      /* symbol table index */
+
+      if (ELF32_HPPA_SX_TYPE(symextP->entry) == HPPA_SXT_SYMNDX)
+	{
+	  idx = ELF32_HPPA_SX_VAL(symextP->entry) - 1;
+	  symextP->entry = ELF32_HPPA_SX_WORD (HPPA_SXT_SYMNDX,
+					       symextra[idx].elf_sym_num);
+	}
+
+      ptr = frag_more(sizeof(symextP->entry));
+      md_number_to_chars(ptr,symextP->entry,sizeof(symextP->entry));
+    }
+
+  frag_now->fr_fix = obstack_next_free (&frags) - frag_now->fr_literal;
+  frag_wane (frag_now);
+
+  /* now, switch back to the original segment */
+
+  subseg_new(save_seg->name, save_subseg);
+
+  return;
+}
+
+static void
+hppa_tc_make_symextn_section()
+{
+  extern symext_chainS *elf32_hppa_get_symextn_chain();
+
+  if (symext_rootP)
+    {
+      symext_chainS *symextP;
+      int n;
+      int size;
+      segT symextn_sec;
+      segT save_seg = now_seg;
+      subsegT save_subseg = now_subseg;
+
+      for (n = 0, symextP = symext_rootP; symextP; symextP = symextP->next, ++n)
+	;
+
+      size = sizeof (symext_entryS) * n;
+
+      symextn_sec = subseg_new(SYMEXTN_SECTION_NAME, 0);
+
+      bfd_set_section_flags(stdoutput, symextn_sec, SEC_LOAD | SEC_HAS_CONTENTS | SEC_DATA);
+      bfd_set_section_size (stdoutput, symextn_sec, size);
+
+      /* now, switch back to the original segment */
+      subseg_new(save_seg->name, save_subseg);
+    }
 }
