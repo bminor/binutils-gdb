@@ -564,6 +564,7 @@ guess_is_rela (e_machine)
     case EM_ALPHA:
     case EM_MCORE:
     case EM_IA_64:
+    case EM_AVR:
       return TRUE;
 
     case EM_MMA:
@@ -1240,7 +1241,7 @@ get_machine_name (e_machine)
     case EM_SVX:      		return "Silicon Graphics SVx";
     case EM_ST19:     		return "STMicroelectronics ST19 8-bit microcontroller";
     case EM_VAX:      		return "Digital VAX";
-    case EM_AVR:                return "AVR";
+    case EM_AVR:                return "Atmel AVR 8-bit microcontroller";
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
       return buff;
