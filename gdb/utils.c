@@ -1173,17 +1173,7 @@ xasprintf (char **ret, const char *format, ...)
 void
 xvasprintf (char **ret, const char *format, va_list ap)
 {
-  int status = vasprintf (ret, format, ap);
-  /* NULL could be returned due to a memory allocation problem; a
-     badly format string; or something else. */
-  if ((*ret) == NULL)
-    internal_error (__FILE__, __LINE__,
-		    "vasprintf returned NULL buffer (errno %d)", errno);
-  /* A negative status with a non-NULL buffer shouldn't never
-     happen. But to be sure. */
-  if (status < 0)
-    internal_error (__FILE__, __LINE__,
-		    "vasprintf call failed (errno %d)", errno);
+  (*ret) = xstrvprintf (format, ap);
 }
 
 char *

@@ -1,5 +1,7 @@
 2004-07-17  Andrew Cagney  <cagney@gnu.org>
 
+	* utils.c (xvasprintf): Call xstrvprintf.
+
 	* parse.c: Update copyright.
 	(null_post_parser): Eliminate ARGSUSED.
 
