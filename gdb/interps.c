@@ -104,7 +104,6 @@ gdb_new_interpreter (char *name,
   new_interp->procs.init_proc = procs->init_proc;
   new_interp->procs.resume_proc = procs->resume_proc;
   new_interp->procs.suspend_proc = procs->suspend_proc;
-  new_interp->procs.delete_proc = procs->delete_proc;
   new_interp->procs.exec_proc = procs->exec_proc;
   new_interp->procs.prompt_proc = procs->prompt_proc;
   new_interp->inited = 0;
@@ -130,80 +129,6 @@ gdb_add_interpreter (struct gdb_interpreter *interp)
   interp_list = interp;
 
   return 1;
-}
-
-/* Looks for the interpreter INTERP in the interpreter list.  If it exists,
-   runs the delete_proc, and if this is successful, the INTERP is deleted from
-   the interpreter list and the function returns 1.  If the delete_proc fails, the
-   function returns -1 and the interpreter is NOT removed from the list.  If the
-   interp is not found, 0 is returned.
-
-   This isn't currently used by anything. */
-
-int
-gdb_delete_interpreter (struct gdb_interpreter *interp)
-{
-  struct gdb_interpreter *cur_ptr, *prev_ptr;
-
-  if (!interpreter_initialized)
-    {
-      ui_out_message (uiout, 0,
-		      "You can't delete an interp before you have added one!");
-      return -1;
-    }
-
-  if (interp_list == NULL)
-    {
-      ui_out_message (uiout, 0, "No interpreters to delete.");
-      return -1;
-    }
-
-  if (interp_list->next == NULL)
-    {
-      ui_out_message (uiout, 0, "You can't delete gdb's only intepreter.");
-      return -1;
-    }
-
-  for (cur_ptr = interp_list, prev_ptr = NULL;
-       cur_ptr != NULL; prev_ptr = cur_ptr, cur_ptr = cur_ptr->next)
-    {
-      if (cur_ptr == interp)
-	{
-	  /* Can't currently delete the console interpreter... */
-	  if (strcmp (interp->name, "console") == 0)
-	    {
-	      ui_out_message (uiout, 0,
-			      "You can't delete the console interpreter.");
-	      return -1;
-	    }
-
-	  /* If the interpreter is the current interpreter, switch
-	     back to the console interpreter */
-
-	  if (interp == current_interpreter)
-	    {
-	      gdb_set_interpreter (gdb_lookup_interpreter ("console"));
-	    }
-
-	  /* Don't delete the interpreter if its delete proc fails */
-
-	  if ((interp->procs.delete_proc != NULL)
-	      && (!interp->procs.delete_proc (interp->data)))
-	    return -1;
-
-	  if (cur_ptr == interp_list)
-	    interp_list = cur_ptr->next;
-	  else
-	    prev_ptr->next = cur_ptr->next;
-
-	  break;
-	}
-    }
-
-  if (cur_ptr == NULL)
-    return 0;
-  else
-    return 1;
 }
 
 /* This sets the current interpreter to be INTERP.  If INTERP has not

@@ -1,5 +1,17 @@
 2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
 
+	* cli/cli-interp.c (cli_interpreter_delete): Delete.
+	(_initialize_cli_interp): Remove delete_proc.
+
+	* interps.h (struct gdb_interpreter_procs): Remove delete_proc.
+	(interp_delete_ftype): Delete.
+	(gdb_delete_interpreter): Remove.
+
+	* interps.c (gdb_delete_interpreter): Remove.
+	(gdb_new_interpreter): Don't initialize delete_proc.
+
+2002-11-04  Elena Zannoni  <ezannoni@redhat.com>
+
 	* interps.c (set_interpreter_cmd): Remove.
 
 2002-11-04  Elena Zannoni  <ezannoni@redhat.com>

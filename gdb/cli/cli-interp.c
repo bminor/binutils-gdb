@@ -30,7 +30,6 @@
 static int cli_interpreter_init (void *data);
 static int cli_interpreter_resume (void *data);
 static int cli_interpreter_suspend (void *data);
-static int cli_interpreter_delete (void *data);
 static int cli_interpreter_exec (void *data, char *command_str);
 static int cli_interpreter_display_prompt (void *data, char *new_prompt);
 
@@ -68,12 +67,6 @@ static int
 cli_interpreter_suspend (void *data)
 {
   gdb_disable_readline ();
-  return 1;
-}
-
-static int
-cli_interpreter_delete (void *data)
-{
   return 1;
 }
 
@@ -135,7 +128,6 @@ _initialize_cli_interp (void)
     cli_interpreter_init,	/* init_proc */
     cli_interpreter_resume,	/* resume_proc */
     cli_interpreter_suspend,	/* suspend_proc */
-    cli_interpreter_delete,	/* delete_proc */
     cli_interpreter_exec,	/* exec_proc */
     cli_interpreter_display_prompt /* prompt_proc */
   };
