@@ -1,3 +1,7 @@
+2001-11-11  GDB Administrator  <gdbadmin@sourceware.cygnus.com>
+
+	* version.in: Bump to 5.0.93-0000-00-00-cvs.
+
 2001-11-11  Andrew Cagney  <ac131313@redhat.com>
 
 	* README (alpha-dec-osf5.1): Mention -DUSE_LDR_ROUTINES.
