@@ -1,3 +1,9 @@
+2004-07-13  Nitin Yewale <nitiny@kpitcummins.com>
+
+	* ld-h8300/h8300.exp: Addition of gcsection test case.
+	* ld-h8300/gcsection.s: New test source file.
+	* ld-h8300/gcsection.d: New test expected disassembly file.
+
 2004-07-08  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* ld-mips-elf/reloc-merge-lo16.{s,d,ld}: New test.
