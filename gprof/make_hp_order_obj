@@ -8,3 +8,4 @@ foreach func (`cat $1`)
 end
 
 gcc -c /tmp/$$.s -o $2
+rm -f /tmp/$$.s
