@@ -1,3 +1,7 @@
+Sun Mar 16 01:34:55 1997  Martin Hunt <hunt@cygnus.com>
+
+	* config.sub: Remove misplaced comment that broke Linux.
+
 Sat Mar 15 22:50:15 1997  Fred Fish  <fnf@cygnus.com>
 
 	* config.sub: Add BeOS support.
