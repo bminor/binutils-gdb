@@ -75,6 +75,7 @@ RANLIB = @RANLIB@
 WIN32LDFLAGS = @WIN32LDFLAGS@
 WIN32LIBADD = @WIN32LIBADD@
 archdefs = @archdefs@
+cgendir = @cgendir@
 
 AUTOMAKE_OPTIONS = cygnus
 
@@ -224,9 +225,8 @@ CLEANFILES = libopcodes.a stamp-lib dep.sed .dep .dep1 stamp-m32r
 # Sanitization must be split between assignments and rules because
 # automake splits them that way.
 
-SCHEME = @SCHEME@
-SCHEMEFLAGS = -s
-CGENDIR = $(srcdir)/../cgen
+CGENDIR = @cgendir@
+CGEN = @cgen@
 CGENFLAGS = -v
 
 CGENFILES = $(CGENDIR)/cos.scm $(CGENDIR)/utils.scm \
@@ -627,8 +627,8 @@ config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 
 # start-sanitize-cygnus
 cgen:
-	$(SHELL) $(srcdir)/cgen.sh opcodes $(srcdir) $(CGENDIR) $(CGENFLAGS) $(SCHEME) $(SCHEMEFLAGS) $(arch)
-	touch stamp-${arch}
+	$(SHELL) $(srcdir)/cgen.sh opcodes $(srcdir) $(CGEN) $(CGENDIR) $(CGENFLAGS) $(arch) $(prefix)
+	touch stamp-${prefix}
 
 .PHONY: cgen
 

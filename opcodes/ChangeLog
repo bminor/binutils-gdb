@@ -1,6 +1,20 @@
-Wed Jul  1 09:42:07 1998  Nick Clifton  <nickc@cygnus.com>
+Wed Jul  1 16:11:16 1998  Doug Evans  <devans@seba.cygnus.com>
 
-	* Makefile.in (CGENFILES): Replace object.scm with cos.scm.
+	* m32r-asm.c,m32r-dis.c,m32r-opc.c,m32r-opc.h: Regenerate.
+start-sanitize-cygnus
+	* Makefile.am (CGENDIR): Set via configure.
+	(CGEN): New variable.
+	(CGENFILES): object.scm renamed to cos.scm.
+	(run-cgen): Renamed from cgen.  stamp file renamed to stamp-$prefix.
+	(stamp-m32r): Pass prefix to run-cgen.
+	* Makefile.in: Regenerate.
+	* cgen-asm.in: @arch@-opc.h renamed to @prefix@-opc.h.
+	* cgen-dis.in: Ditto.
+	* cgen-opc.in: Ditto.
+	* cgen.sh: New args cgen,prefix.  Delete args scheme,schemeflags.
+	* configure.in: AC_SUBST cgen,cgendir.  No longer look for guile.
+	* configure: Regenerate.
+end-sanitize-cygnus
 
 start-sanitize-am33
 Tue Jun 30 09:59:37 1998  Jeffrey A Law  (law@cygnus.com)

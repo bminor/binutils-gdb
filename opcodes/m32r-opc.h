@@ -1,6 +1,6 @@
 /* Instruction description for m32r.
 
-This file is machine generated with CGEN.
+THIS FILE IS MACHINE GENERATED WITH CGEN.
 
 Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
 
@@ -22,8 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 */
 
-#ifndef m32r_OPC_H
-#define m32r_OPC_H
+#ifndef M32R_OPC_H
+#define M32R_OPC_H
 
 #define CGEN_ARCH m32r
 
@@ -51,6 +51,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
    e.g. In "b,a foo" the ",a" is an operand.  If mnemonics have operands
    we can't hash on everything up to the space.  */
 #define CGEN_MNEMONIC_OPERANDS
+/* Maximum number of operands any insn or macro-insn has.  */
+#define CGEN_MAX_INSN_OPERANDS 16
 
 /* Enums.  */
 
@@ -70,6 +72,32 @@ typedef enum insn_op2 {
  , OP2_12, OP2_13, OP2_14, OP2_15
 } INSN_OP2;
 
+/* Enum declaration for general registers.  */
+typedef enum h_gr {
+  H_GR_FP = 13, H_GR_LR = 14, H_GR_SP = 15, H_GR_R0 = 0
+ , H_GR_R1 = 1, H_GR_R2 = 2, H_GR_R3 = 3, H_GR_R4 = 4
+ , H_GR_R5 = 5, H_GR_R6 = 6, H_GR_R7 = 7, H_GR_R8 = 8
+ , H_GR_R9 = 9, H_GR_R10 = 10, H_GR_R11 = 11, H_GR_R12 = 12
+ , H_GR_R13 = 13, H_GR_R14 = 14, H_GR_R15 = 15
+} H_GR;
+
+/* Enum declaration for control registers.  */
+typedef enum h_cr {
+  H_CR_PSW = 0, H_CR_CBR = 1, H_CR_SPI = 2, H_CR_SPU = 3
+ , H_CR_BPC = 6, H_CR_CR0 = 0, H_CR_CR1 = 1, H_CR_CR2 = 2
+ , H_CR_CR3 = 3, H_CR_CR4 = 4, H_CR_CR5 = 5, H_CR_CR6 = 6
+ , H_CR_CR7 = 7, H_CR_CR8 = 8, H_CR_CR9 = 9, H_CR_CR10 = 10
+ , H_CR_CR11 = 11, H_CR_CR12 = 12, H_CR_CR13 = 13, H_CR_CR14 = 14
+ , H_CR_CR15 = 15
+} H_CR;
+
+/* start-sanitize-m32rx */
+/* Enum declaration for accumulators.  */
+typedef enum h_accums {
+  H_ACCUMS_A0, H_ACCUMS_A1
+} H_ACCUMS;
+
+/* end-sanitize-m32rx */
 /* Enum declaration for m32r operand types.  */
 typedef enum cgen_operand_type {
   M32R_OPERAND_PC, M32R_OPERAND_SR, M32R_OPERAND_DR, M32R_OPERAND_SRC1
@@ -87,9 +115,9 @@ typedef enum cgen_operand_type {
 /* start-sanitize-m32rx */
  , M32R_OPERAND_ACC
 /* end-sanitize-m32rx */
- , M32R_OPERAND_HI16, M32R_OPERAND_SLO16, M32R_OPERAND_ULO16, M32R_OPERAND_UIMM24
- , M32R_OPERAND_DISP8, M32R_OPERAND_DISP16, M32R_OPERAND_DISP24, M32R_OPERAND_CONDBIT
- , M32R_OPERAND_ACCUM, M32R_OPERAND_MAX
+ , M32R_OPERAND_HASH, M32R_OPERAND_HI16, M32R_OPERAND_SLO16, M32R_OPERAND_ULO16
+ , M32R_OPERAND_UIMM24, M32R_OPERAND_DISP8, M32R_OPERAND_DISP16, M32R_OPERAND_DISP24
+ , M32R_OPERAND_CONDBIT, M32R_OPERAND_ACCUM, M32R_OPERAND_MAX
 } CGEN_OPERAND_TYPE;
 
 /* Non-boolean attributes.  */
@@ -123,9 +151,9 @@ typedef enum pipe_attr {
 
 /* Enum declaration for cgen_operand attrs.  */
 typedef enum cgen_operand_attr {
-  CGEN_OPERAND_ABS_ADDR, CGEN_OPERAND_FAKE, CGEN_OPERAND_NEGATIVE, CGEN_OPERAND_PC
- , CGEN_OPERAND_PCREL_ADDR, CGEN_OPERAND_RELAX, CGEN_OPERAND_RELOC, CGEN_OPERAND_SIGN_OPT
- , CGEN_OPERAND_UNSIGNED
+  CGEN_OPERAND_ABS_ADDR, CGEN_OPERAND_FAKE, CGEN_OPERAND_HASH_PREFIX, CGEN_OPERAND_NEGATIVE
+ , CGEN_OPERAND_PC, CGEN_OPERAND_PCREL_ADDR, CGEN_OPERAND_RELAX, CGEN_OPERAND_RELOC
+ , CGEN_OPERAND_SIGN_OPT, CGEN_OPERAND_UNSIGNED
 } CGEN_OPERAND_ATTR;
 
 /* Number of non-boolean elements in cgen_operand.  */
@@ -137,54 +165,37 @@ typedef enum cgen_insn_attr {
 /* start-sanitize-m32rx */
  , CGEN_INSN_PIPE
 /* end-sanitize-m32rx */
- , CGEN_INSN_ALIAS, CGEN_INSN_COND_CTI, CGEN_INSN_FILL_SLOT, CGEN_INSN_PARALLEL
- , CGEN_INSN_RELAX, CGEN_INSN_RELAXABLE, CGEN_INSN_UNCOND_CTI
+ , CGEN_INSN_ALIAS, CGEN_INSN_COND_CTI, CGEN_INSN_FILL_SLOT, CGEN_INSN_NO_DIS
+ , CGEN_INSN_PARALLEL, CGEN_INSN_RELAX, CGEN_INSN_RELAXABLE, CGEN_INSN_SPECIAL
+ , CGEN_INSN_UNCOND_CTI
 } CGEN_INSN_ATTR;
 
 /* Number of non-boolean elements in cgen_insn.  */
 #define CGEN_INSN_NBOOL_ATTRS ((int) CGEN_INSN_ALIAS)
 
-/* Insn types are used by the simulator.  */
 /* Enum declaration for m32r instruction types.  */
 typedef enum cgen_insn_type {
-  M32R_INSN_ILLEGAL, M32R_INSN_ADD, M32R_INSN_ADD3, M32R_INSN_ADD3_A
- , M32R_INSN_AND, M32R_INSN_AND3, M32R_INSN_AND3_A, M32R_INSN_OR
- , M32R_INSN_OR3, M32R_INSN_OR3_A, M32R_INSN_XOR, M32R_INSN_XOR3
- , M32R_INSN_XOR3_A, M32R_INSN_ADDI, M32R_INSN_ADDI_A, M32R_INSN_ADDV
- , M32R_INSN_ADDV3, M32R_INSN_ADDV3_A, M32R_INSN_ADDX, M32R_INSN_BC8
- , M32R_INSN_BC8_S, M32R_INSN_BC24, M32R_INSN_BC24_L, M32R_INSN_BEQ
+  M32R_INSN_ILLEGAL, M32R_INSN_ADD, M32R_INSN_ADD3, M32R_INSN_AND
+ , M32R_INSN_AND3, M32R_INSN_OR, M32R_INSN_OR3, M32R_INSN_XOR
+ , M32R_INSN_XOR3, M32R_INSN_ADDI, M32R_INSN_ADDV, M32R_INSN_ADDV3
+ , M32R_INSN_ADDX, M32R_INSN_BC8, M32R_INSN_BC24, M32R_INSN_BEQ
  , M32R_INSN_BEQZ, M32R_INSN_BGEZ, M32R_INSN_BGTZ, M32R_INSN_BLEZ
- , M32R_INSN_BLTZ, M32R_INSN_BNEZ, M32R_INSN_BL8, M32R_INSN_BL8_S
- , M32R_INSN_BL24, M32R_INSN_BL24_L
+ , M32R_INSN_BLTZ, M32R_INSN_BNEZ, M32R_INSN_BL8, M32R_INSN_BL24
 /* start-sanitize-m32rx */
  , M32R_INSN_BCL8
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
- , M32R_INSN_BCL8_S
-/* end-sanitize-m32rx */
-/* start-sanitize-m32rx */
  , M32R_INSN_BCL24
 /* end-sanitize-m32rx */
-/* start-sanitize-m32rx */
- , M32R_INSN_BCL24_L
-/* end-sanitize-m32rx */
- , M32R_INSN_BNC8, M32R_INSN_BNC8_S, M32R_INSN_BNC24, M32R_INSN_BNC24_L
- , M32R_INSN_BNE, M32R_INSN_BRA8, M32R_INSN_BRA8_S, M32R_INSN_BRA24
- , M32R_INSN_BRA24_L
+ , M32R_INSN_BNC8, M32R_INSN_BNC24, M32R_INSN_BNE, M32R_INSN_BRA8
+ , M32R_INSN_BRA24
 /* start-sanitize-m32rx */
  , M32R_INSN_BNCL8
 /* end-sanitize-m32rx */
 /* start-sanitize-m32rx */
- , M32R_INSN_BNCL8_S
-/* end-sanitize-m32rx */
-/* start-sanitize-m32rx */
  , M32R_INSN_BNCL24
 /* end-sanitize-m32rx */
-/* start-sanitize-m32rx */
- , M32R_INSN_BNCL24_L
-/* end-sanitize-m32rx */
- , M32R_INSN_CMP, M32R_INSN_CMPI, M32R_INSN_CMPI_A, M32R_INSN_CMPU
- , M32R_INSN_CMPUI, M32R_INSN_CMPUI_A
+ , M32R_INSN_CMP, M32R_INSN_CMPI, M32R_INSN_CMPU, M32R_INSN_CMPUI
 /* start-sanitize-m32rx */
  , M32R_INSN_CMPEQ
 /* end-sanitize-m32rx */
@@ -201,15 +212,11 @@ typedef enum cgen_insn_type {
 /* start-sanitize-m32rx */
  , M32R_INSN_JNC
 /* end-sanitize-m32rx */
- , M32R_INSN_JL, M32R_INSN_JMP, M32R_INSN_LD, M32R_INSN_LD_2
- , M32R_INSN_LD_D, M32R_INSN_LD_D2, M32R_INSN_LDB, M32R_INSN_LDB_2
- , M32R_INSN_LDB_D, M32R_INSN_LDB_D2, M32R_INSN_LDH, M32R_INSN_LDH_2
- , M32R_INSN_LDH_D, M32R_INSN_LDH_D2, M32R_INSN_LDUB, M32R_INSN_LDUB_2
- , M32R_INSN_LDUB_D, M32R_INSN_LDUB_D2, M32R_INSN_LDUH, M32R_INSN_LDUH_2
- , M32R_INSN_LDUH_D, M32R_INSN_LDUH_D2, M32R_INSN_LD_PLUS, M32R_INSN_LD24
- , M32R_INSN_LD24_A, M32R_INSN_LDI8, M32R_INSN_LDI8_A, M32R_INSN_LDI8A
- , M32R_INSN_LDI8A_A, M32R_INSN_LDI16, M32R_INSN_LDI16A, M32R_INSN_LOCK
- , M32R_INSN_MACHI
+ , M32R_INSN_JL, M32R_INSN_JMP, M32R_INSN_LD, M32R_INSN_LD_D
+ , M32R_INSN_LDB, M32R_INSN_LDB_D, M32R_INSN_LDH, M32R_INSN_LDH_D
+ , M32R_INSN_LDUB, M32R_INSN_LDUB_D, M32R_INSN_LDUH, M32R_INSN_LDUH_D
+ , M32R_INSN_LD_PLUS, M32R_INSN_LD24, M32R_INSN_LDI8, M32R_INSN_LDI16
+ , M32R_INSN_LOCK, M32R_INSN_MACHI
 /* start-sanitize-m32rx */
  , M32R_INSN_MACHI_A
 /* end-sanitize-m32rx */
@@ -248,34 +255,18 @@ typedef enum cgen_insn_type {
  , M32R_INSN_MVTC, M32R_INSN_NEG, M32R_INSN_NOP, M32R_INSN_NOT
  , M32R_INSN_RAC
 /* start-sanitize-m32rx */
- , M32R_INSN_RAC_D
-/* end-sanitize-m32rx */
-/* start-sanitize-m32rx */
- , M32R_INSN_RAC_DS
-/* end-sanitize-m32rx */
-/* start-sanitize-m32rx */
  , M32R_INSN_RAC_DSI
 /* end-sanitize-m32rx */
  , M32R_INSN_RACH
 /* start-sanitize-m32rx */
- , M32R_INSN_RACH_D
-/* end-sanitize-m32rx */
-/* start-sanitize-m32rx */
- , M32R_INSN_RACH_DS
-/* end-sanitize-m32rx */
-/* start-sanitize-m32rx */
  , M32R_INSN_RACH_DSI
 /* end-sanitize-m32rx */
- , M32R_INSN_RTE, M32R_INSN_SETH, M32R_INSN_SETH_A, M32R_INSN_SLL
- , M32R_INSN_SLL3, M32R_INSN_SLL3_A, M32R_INSN_SLLI, M32R_INSN_SLLI_A
- , M32R_INSN_SRA, M32R_INSN_SRA3, M32R_INSN_SRA3_A, M32R_INSN_SRAI
- , M32R_INSN_SRAI_A, M32R_INSN_SRL, M32R_INSN_SRL3, M32R_INSN_SRL3_A
- , M32R_INSN_SRLI, M32R_INSN_SRLI_A, M32R_INSN_ST, M32R_INSN_ST_2
- , M32R_INSN_ST_D, M32R_INSN_ST_D2, M32R_INSN_STB, M32R_INSN_STB_2
- , M32R_INSN_STB_D, M32R_INSN_STB_D2, M32R_INSN_STH, M32R_INSN_STH_2
- , M32R_INSN_STH_D, M32R_INSN_STH_D2, M32R_INSN_ST_PLUS, M32R_INSN_ST_MINUS
- , M32R_INSN_SUB, M32R_INSN_SUBV, M32R_INSN_SUBX, M32R_INSN_TRAP
- , M32R_INSN_TRAP_A, M32R_INSN_UNLOCK, M32R_INSN_PUSH, M32R_INSN_POP
+ , M32R_INSN_RTE, M32R_INSN_SETH, M32R_INSN_SLL, M32R_INSN_SLL3
+ , M32R_INSN_SLLI, M32R_INSN_SRA, M32R_INSN_SRA3, M32R_INSN_SRAI
+ , M32R_INSN_SRL, M32R_INSN_SRL3, M32R_INSN_SRLI, M32R_INSN_ST
+ , M32R_INSN_ST_D, M32R_INSN_STB, M32R_INSN_STB_D, M32R_INSN_STH
+ , M32R_INSN_STH_D, M32R_INSN_ST_PLUS, M32R_INSN_ST_MINUS, M32R_INSN_SUB
+ , M32R_INSN_SUBV, M32R_INSN_SUBX, M32R_INSN_TRAP, M32R_INSN_UNLOCK
 /* start-sanitize-m32rx */
  , M32R_INSN_SATB
 /* end-sanitize-m32rx */
@@ -379,9 +370,6 @@ typedef enum hw_type {
 /* start-sanitize-m32rx */
  , HW_H_ACCUMS
 /* end-sanitize-m32rx */
-/* start-sanitize-m32rx */
- , HW_H_ABORT
-/* end-sanitize-m32rx */
  , HW_H_COND, HW_H_SM, HW_H_BSM, HW_H_IE
  , HW_H_BIE, HW_H_BCOND, HW_H_BPC, HW_H_LOCK
  , HW_MAX
@@ -416,7 +404,7 @@ extern CGEN_KEYWORD m32r_cgen_opval_h_accums;
 #define CGEN_DIS_HASH_SIZE 256
 #undef CGEN_DIS_HASH
 #define X(b) (((unsigned char *) (b))[0] & 0xf0)
-#define CGEN_DIS_HASH(buffer, insn) \
+#define CGEN_DIS_HASH(buffer, value) \
 (X (buffer) | \
  (X (buffer) == 0x40 || X (buffer) == 0xe0 || X (buffer) == 0x60 || X (buffer) == 0x50 ? 0 \
   : X (buffer) == 0x70 || X (buffer) == 0xf0 ? (((unsigned char *) (buffer))[0] & 0xf) \
@@ -426,4 +414,4 @@ extern CGEN_KEYWORD m32r_cgen_opval_h_accums;
 /* -- */
 
 
-#endif /* m32r_OPC_H */
+#endif /* M32R_OPC_H */

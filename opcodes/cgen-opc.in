@@ -1,7 +1,7 @@
 /* Generic opcode table support for targets using CGEN. -*- C -*-
    CGEN: Cpu tools GENerator
 
-This file is used to generate @arch@-opc.c.
+THIS FILE IS USED TO GENERATE @prefix@-opc.c.
 
 Copyright (C) 1998 Free Software Foundation, Inc.
 
@@ -18,8 +18,8 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+along with this program; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "sysdep.h"
 #include <stdio.h>
@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libiberty.h"
 #include "bfd.h"
 #include "symcat.h"
-#include "@arch@-opc.h"
+#include "@prefix@-opc.h"
 #include "opintl.h"
 
 /* Look up instruction INSN_VALUE and extract its fields.
