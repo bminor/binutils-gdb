@@ -15,14 +15,14 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"
 #include "aout/ar.h"
 /*#include "libaout.h"*/
 
-extern CONST struct reloc_howto_struct * NAME(aout,reloc_type_lookup) ();
+extern reloc_howto_type * NAME(aout,reloc_type_lookup) ();
 
 /* Set parameters about this a.out file that are machine-dependent.
    This routine is called from some_aout_object_p just before it returns.  */
@@ -268,6 +268,9 @@ MY(set_sizes) (abfd)
 #ifndef MY_text_includes_header
 #define MY_text_includes_header 0
 #endif
+#ifndef MY_exec_header_not_counted
+#define MY_exec_header_not_counted 0
+#endif
 #ifndef MY_add_dynamic_symbols
 #define MY_add_dynamic_symbols 0
 #endif
@@ -293,7 +296,7 @@ static CONST struct aout_backend_data MY(backend_data) = {
   MY_exec_hdr_flags,
   0,				/* text vma? */
   MY_set_sizes,
-  0,				/* exec header is counted */
+  MY_exec_header_not_counted,
   MY_add_dynamic_symbols,
   MY_add_one_symbol,
   MY_link_dynamic_object,
@@ -354,6 +357,10 @@ MY_bfd_final_link (abfd, info)
 #endif
 #ifndef	MY_slurp_extended_name_table
 #define	MY_slurp_extended_name_table	_bfd_slurp_extended_name_table
+#endif
+#ifndef MY_construct_extended_name_table
+#define MY_construct_extended_name_table \
+  _bfd_archive_bsd_construct_extended_name_table
 #endif
 #ifndef	MY_write_armap
 #define	MY_write_armap		bsd_write_armap
@@ -455,15 +462,41 @@ MY_bfd_final_link (abfd, info)
 #ifndef MY_bfd_make_debug_symbol
 #define MY_bfd_make_debug_symbol 0
 #endif
+#ifndef MY_read_minisymbols
+#define MY_read_minisymbols NAME(aout,read_minisymbols)
+#endif
+#ifndef MY_minisymbol_to_symbol
+#define MY_minisymbol_to_symbol NAME(aout,minisymbol_to_symbol)
+#endif
 #ifndef MY_bfd_link_hash_table_create
 #define MY_bfd_link_hash_table_create NAME(aout,link_hash_table_create)
 #endif
 #ifndef MY_bfd_link_add_symbols
 #define MY_bfd_link_add_symbols NAME(aout,link_add_symbols)
 #endif
+#ifndef MY_bfd_link_split_section
+#define MY_bfd_link_split_section  _bfd_generic_link_split_section
+#endif
+
 
 #ifndef MY_bfd_copy_private_bfd_data
 #define MY_bfd_copy_private_bfd_data _bfd_generic_bfd_copy_private_bfd_data
+#endif
+
+#ifndef MY_bfd_merge_private_bfd_data
+#define MY_bfd_merge_private_bfd_data _bfd_generic_bfd_merge_private_bfd_data
+#endif
+
+#ifndef MY_bfd_copy_private_symbol_data
+#define MY_bfd_copy_private_symbol_data _bfd_generic_bfd_copy_private_symbol_data
+#endif
+
+#ifndef MY_bfd_print_private_bfd_data
+#define MY_bfd_print_private_bfd_data _bfd_generic_bfd_print_private_bfd_data
+#endif
+
+#ifndef MY_bfd_set_private_flags
+#define MY_bfd_set_private_flags _bfd_generic_bfd_set_private_flags
 #endif
 
 #ifndef MY_bfd_is_local_label
@@ -524,7 +557,6 @@ const bfd_target MY(vec) =
   MY_symbol_leading_char,
   AR_PAD_CHAR,			/* ar_pad_char */
   15,				/* ar_max_namelen */
-  3,				/* minimum alignment */
 #ifdef TARGET_IS_BIG_ENDIAN_P
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,
      bfd_getb32, bfd_getb_signed_32, bfd_putb32,

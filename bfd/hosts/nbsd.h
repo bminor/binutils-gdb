@@ -1,7 +1,7 @@
 /* Architecture independant NetBSD host support */
 
-#include <machine/param.h>
 #include <machine/vmparam.h>
+#include <machine/param.h>
 #include <machine/reg.h>
 
 #define	HOST_PAGE_SIZE			NBPG

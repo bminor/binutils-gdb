@@ -1,3 +1,31 @@
+Wed Oct  4 15:36:36 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	NS32k changes from Ian Dall:
+	* aoutx.h (MY_final_link_relocate, MY_relocate_contents): New
+	macros.
+	(aout_link_input_section_std, aout_link_input_section_ext,
+	aout_link_reloc_link_order): Call them instead of _bfd_*
+	versions.
+	* aout-target.h (MY_exec_header_not_counted): New macro, defaults
+	to zero.
+	(backend_data): Use it instead of hardcoded zero.
+
+	* aout-ns32k.c (CTOR_TABLE_RELOC_HOWTO): New macro.
+	(MY_swap_std_reloc_out): Use udata.i for KEEPIT, don't call stoi.
+
+	* ns32knetbsd.c: Include bfd.h.
+	(MY_text_includes_header, MY_bfd_reloc_type_lookup): New macros.
+	(MY_bfd_reloc_type_lookup): Declare function too.
+	* pc532-mach.c (set_sizes): Don't declare.
+	(MY_text_includes_header, MY_exec_header_not_counted): Define.
+	(backend_data, MY_backend_data): Don't define.
+
+	* config.bfd: Treat ns32k-pc532-ux* like ns32k-pc532-mach*, and
+	ns32k-*-lites* like ns32k-*-netbsd*.
+
+	* hosts/nbsd.h: Swap order of sys/vmparam.h and sys/param.h, to
+	compile on lites.
+
 Wed Oct  4 14:15:52 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffcode.h (coff_write_object_contents): Restore setting

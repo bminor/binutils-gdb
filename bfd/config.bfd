@@ -337,11 +337,11 @@ case "${targ}" in
     targ_selvecs=bfd_elf32_littlemips_vec
     ;;
 
-  ns32k-pc532-mach*)
+  ns32k-pc532-mach* | ns32k-pc532-ux*)
     targ_defvec=pc532machaout_vec
     targ_underscore=yes
     ;;
-  ns32k-*-netbsd*)
+  ns32k-*-netbsd* | ns32k-*-lites*)
     targ_defvec=pc532netbsd_vec
     targ_underscore=yes
     ;;
@@ -352,6 +352,9 @@ case "${targ}" in
   powerpc-*-elf* | powerpc-*-sysv4* | powerpc-*-eabi* | powerpc-*-solaris2*)
     targ_defvec=bfd_elf32_powerpc_vec
     targ_selvecs="rs6000coff_vec bfd_elf32_powerpcle_vec"
+    ;;
+  powerpc-*-macos* | powerpc-*-mpw*)
+    targ_defvec=pmac_xcoff_vec
     ;;
   powerpc-*-netware*)
     targ_defvec=bfd_elf32_powerpc_vec
