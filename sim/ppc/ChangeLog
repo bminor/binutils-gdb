@@ -1,3 +1,163 @@
+Tue Oct 29 17:55:43 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (AC_CHECK_FUNCS): Add access.
+	* config{.in,ure}: Regenerate.
+
+	* emul_unix.c (do_unix_nop): System call that always succeeds.
+	(do_unix_access): Support access system call.
+	(solaris_descriptors): Make sigaltstack and sigaction nops.
+	({solaris,linux}_descriptors): Add support for access.
+
+Fri Oct 18 12:12:21 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ppc-instructions (Floating Select): Add support for fsel unless
+	model is 601.  Allow user to filter out instruction unless -Fs is
+	passed to igen.
+	(Store Floating-Point as Integer Word Indexed): Raise optional
+	instruction program abort.  Allow user to filter out instruction
+	unless -Fs is passed to igen.
+	(Floating Square Root{, Single}): Ditto.
+	(Floating Reciprocal Estimate Single): Ditto.
+	(Floating Reciprocal Square Root Estimate): Ditto.
+
+	* configure.in (--enable-sim-filter): If not passed, pass 32,f,s
+	to igen.
+	* configure: Regenerate.
+
+	* interrupts.h (program_interrupt_reasons): Add
+	optional_instruction_program_interrupt.
+
+	* interrupts.c (program_interrupt): Call error with more detailed
+	information on program interrupts, particularly in user mode.  Add
+	support for optional_instruction_program_interrupt.
+
+Thu Oct  3 16:15:20 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
+
+	* Makefile.in (clean): Move config.log to distclean.
+
+Thu Sep 19 14:40:40 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* debug.h: Add disklabel-package and disk-device trace options.
+	debug.h (PTRACE): Add macro to simplify tracing in packages.
+
+Thu Sep 19 14:40:40 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* device.c (device_create_instance_from): Tighten up loop
+        searching for device instances.
+	(device_instance_delete): Ditto.
+	(device_instance_delete): Only leaf instances need to be removed
+        from a devices list of active instances.
+
+Thu Sep 19 14:40:40 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* hw_disk.c: Add the cdrom as an alias.
+
+	* pk_disklabel.c (disklabel_delete): Implement, remembering to
+        delete the raw disk instance while we're at it.
+
+	* pk_disklabel.c (pk_disklabel_create_instance): Implement a
+        little bit more - still a long way to go.
+
+	* pk_disklabel.c (disklabel_write, disklabel_read): Remember the
+        new head position after a read or write.
+
+Thu Sep 19 13:05:40 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* emul_chirp.c (chirp_emul_read): Allow reads to be longer then
+        the internal buffer.
+
+Thu Sep 19 13:05:40 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* emul_chirp.c (chirp_read_t2h_args): Call memset-0 with the args
+        in the correct order.
+
+	* emul_chirp.c (chirp_emul_call_method): Correct computation for
+        the address of the first stack argument passed in from the client
+        program.
+
+Wed Sep 18 19:33:54 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* words.h: Add new types signed_cell and unsigned_cell which
+        correspond to the signed and unsigned IEEE 1275 memory locations.
+	* device.h, device.c, emul_chirp.c: Where refering to an IEEE 1275
+        memory cell, replace uses of unsigned32 with unsigned_cell.
+	* device_table.h: Ditto.
+
+	* sim-endian.h: Add new macros H2BE_cell and BE2H_cell which
+        convert cell sized values to from big endian.
+	* device.c, emul_chirp.c: Where refering to IEEE 1275 memory cells
+        use these new macros.
+
+Tue Sep 17 15:57:44 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* device.c (device_tree_add_parsed): Detect and report an
+        interrupt being attached to an invalid device. Was dumping core.
+
+Mon Sep 16 23:09:12 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* device.h, device.c (device_address_to_attach_address,
+        device_size_to_attach_size): New functions.  Convert a devices
+        unit address or unit size structure into a form suitable for
+        passing on to the attach and detach functions.
+	* device_table.h: Add extra methods to device table.
+
+	* device.h, device.c (device_find_reg_property): New function.
+        For a reg type property, return the selected address + size
+        tupple, along with a positive success status.  Add a reg_property
+        to the list of property types.
+	* (device_tree_add_parsed): Make array properties with the name
+        reg or alternate-reg of type reg_property.
+
+	* hw_memory.c (hw_memory_init_address): Rewrite to use new
+        find_reg_property method.
+	* hw_nvram.c (hw_nvram_init_address): Ditto.
+
+	* device.c (device_tree_print_device): Add code to print out a reg
+        property.
+
+	* device_table.c (generic_device_address_to_attach_address,
+        generic_device_size_to_attach_size ): New functions.  Generic
+        functions for converting between unit and attach address or size.
+
+	* device_table.c (generic_device_init_address): Rewrite to use the
+        new find_reg and address convert functions.  Look for both reg and
+        alternate-reg properties.
+
+Mon Sep 16 23:09:12 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* hw_com.c: New file.  A '550 serial device that can quickly be
+        attached to any bus.
+	* configure.in (enable-sim-hardware): Add the com device.
+	* configure: re-generate.
+
+Thu Sep 12 17:30:56 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* device.c (device_tree_verify_reg_unit_address): New
+        function. Check that the unit address as specified by the reg
+        property correctly corresponds to any unit address previously
+        specified by the devices name.
+	(device_tree_add_parsed): When adding a reg property, verify
+	that the unit-address - first value of property - correctly
+	matches any previous value specified when creating the device
+	node.
+
+Thu Sep 12 17:30:56 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* mon.c (mon_event): Remove assertion that an unsigned is >= 0.
+
+Fri Aug 16 12:05:24 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* device.c (device_full_name): Cast strdup to char *, since AIX
+	3.2.5 mistakenly declares the function to be const char *.
+	(device_create_from): Ditto.
+	(device_create_instance_from): Ditto.
+	(device_add_property): Ditto.
+
+Tue Aug 13 11:40:14 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* debug.c (trace_option): For -t all, do not set the
+	trace_dump_device_tree flag, so that the simulator is run.
+
 Tue Aug 13 11:40:14 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in (options.o): Depend on defines.h.
@@ -30,6 +190,8 @@ Wed Aug  7 14:34:20 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	* emul_unix.c (HAVE_TCGETATTR): If HAVE_TERMIOS_STRUCTURE is not
 	defined, make sure HAVE_TCGETATTR is #undef'ed
 
+Wed Aug  7 14:34:20 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
 	* std-config.h (REGPARM): Only define REGPARM attributes if using
 	GNU C.  Test for __i686__ in case GCC ever defines it.  If not on
 	a x86 platform, define REGPARM as nothing.
@@ -37,6 +199,28 @@ Wed Aug  7 14:34:20 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	* sim-endian.h (WITH_HOST_BYTE_ORDER): Test for i686 and __i686__
 	also.
 
+Wed Aug  7 20:19:55 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* ld-decode.h, ld-decode.c: Rename goto_gen to the more correct
+ 	goto_switch_gen.
+	* gen-idecode.c: Ditto.
+
+	* gen-idecode.c (print_idecode_table): Comment out check for
+ 	switch/table combination until a bug with it is fixed.
+
+	* ppc-opcode-goto: New file.  Like complex and flat but uses
+ 	goto-switch instead of padded-switch for the tables.
+
+	* gen-idecode.c (print_goto_switch_name): New function.
+	(print_goto_switch_table_leaf): New function.
+	(print_goto_switch_break): New function.
+	(print_goto_switch_table): New function. Prints a jump table
+	that can be jumped into instead of a switch statement.
+
+	* gen-idecode.c (*switch_*): As an option output a switch that is
+ 	implemented using a jump table but only if the switch is not
+ 	boolean.
+	
 Tue Aug  6 09:28:22 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (--enable-sim-{hardware,packages}): Fix typos.
@@ -45,6 +229,27 @@ Tue Aug  6 09:28:22 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	* device.c (device_instance_call_method): Fixup format message in
 	error case.  Return 0 in case of error to shut up compiler
 	warnings.
+
+Wed Aug  7 00:17:37 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* device_table.c (generic_device_unit_decode): Require a comma
+        between elements of a unit address.
+
+	* device.c (device_tree_print_device): For reg, alternate-reg and
+        ranges properties use special print functions.
+	(device_print_ranges_property): Print formatted ranges property.
+	(device_print_reg_property): Print formatted reg property.
+
+Tue Aug  6 21:35:18 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+	* device.c (device_tree_add_parsed): For reg, ranges and
+        alternate-reg properties use a special parser.
+	(device_tree_parse_reg_property): New function to parse a reg
+	property.
+	(device_tree_parse_ranges_property): New function to parse a
+	ranges property.
+	(device_encode_unit): Wrapper for encode_unit callback.
+	(device_decoce_unit): Wrapper for decode_unit callback.
 
 Wed Jul 31 00:02:30 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
 
