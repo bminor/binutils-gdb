@@ -129,6 +129,7 @@ BFD32_BACKENDS = \
 	coff-mips.o \
 	coff-rs6000.o \
 	coff-sh.o \
+	coff-sparc.o \
 	coff-u68k.o \
 	coff-we32k.o \
 	coff-z8k.o \
@@ -186,7 +187,8 @@ OPTIONAL_BACKENDS = \
 	irix-core.o \
 	lynx-core.o \
 	osf-core.o \
-	trad-core.o
+	trad-core.o \
+	cisco-core.o
 
 # These are defined by configure.in:
 # WORDSIZE=32
@@ -224,7 +226,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 ecoff.c ecofflink.c coff-m68k.c coff-u68k.c coff-apollo.c \
 	 coff-a29k.c coff-rs6000.c coff-sparc.c coffgen.c format.c \
 	 section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c \
-	 coff-m88k.c coff-mips.c coff-sh.c trad-core.c newsos3.c \
+	 coff-m88k.c coff-mips.c coff-sh.c trad-core.c cisco-core.c newsos3.c \
 	 i386aout.c i386linux.c netbsd386.c i386mach3.c i386os9k.c \
 	 bout.c aout-adobe.c coff-we32k.c \
 	 i386bsd.c cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c \
@@ -576,6 +578,7 @@ coff-mips.o : coff-mips.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
 coff-sh.o : coff-sh.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/sh.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 trad-core.o : trad-core.c libaout.h
+cisco-core.o : cisco-core.c
 newsos3.o : newsos3.c $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h libaout.h \
   aout-target.h
@@ -589,7 +592,9 @@ netbsd386.o : netbsd386.c libaout.h aout-target.h $(INCDIR)/aout/aout64.h \
 i386mach3.o : i386mach3.c $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h libaout.h \
   aout-target.h
-bout.o : bout.c $(INCDIR)/bfdlink.h $(INCDIR)/bout.h \
+i386os9k.o : i386os9k.c $(INCDIR)/bfdlink.h libaout.h \
+  $(INCDIR)/os9k.h
+bout.o : bout.c $(INCDIR)/bfdlink.h genlink.h $(INCDIR)/bout.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def libaout.h
 aout-adobe.o : aout-adobe.c $(INCDIR)/aout/adobe.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def libaout.h
@@ -613,8 +618,8 @@ coff-h8300.o : coff-h8300.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/h8300.h \
 som.o : som.c
 cpu-hppa.o : cpu-hppa.c
 cpu-we32k.o : cpu-we32k.c
-reloc16.o : reloc16.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
-  libcoff.h
+reloc16.o : reloc16.c $(INCDIR)/bfdlink.h genlink.h \
+  $(INCDIR)/coff/internal.h libcoff.h
 mipsbsd.o : mipsbsd.c libaout.h aout-target.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 cpu-sh.o : cpu-sh.c
