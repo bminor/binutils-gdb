@@ -30,6 +30,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "obstack.h"
 #include "libelf.h"
 
+/* The internal type of a symbol table extension entry.  */
+typedef unsigned long symext_entryS;
+
+/* The external type of a symbol table extension entry.  */
+#define ELF32_PARISC_SX_SIZE (4)
+#define ELF32_PARISC_SX_GET(bfd, addr) bfd_h_get_32 ((bfd), (addr))
+#define ELF32_PARISC_SX_PUT(bfd, val, addr) \
+  bfd_h_put_32 ((bfd), (val), (addr))
 
 /* HPPA symbol table extension entry types */
 enum elf32_hppa_symextn_types
@@ -58,10 +66,6 @@ enum elf32_hppa_symextn_types
 
 #define SYMEXTN_SECTION_NAME ".PARISC.symext"
 
-/* FIXME.  Are these external?  (For example used by GAS?).  If so the
-   names need to change to avoid namespace pollution, if not they should
-   be moved into elf32-hppa.c.  */
-typedef unsigned long symext_entryS;
 struct symext_chain
   {
     symext_entryS entry;
@@ -159,8 +163,6 @@ struct elf32_hppa_link_hash_table
   long global_value;
   int global_sym_defined;
 };
-
-typedef unsigned int symextn_entry;
 
 /* FIXME.  */
 #define ARGUMENTS	0
@@ -494,10 +496,10 @@ static CONST arg_reloc_type ret_mismatches[6][6] =
 /* Misc static crud for symbol extension records.  */
 static symext_chainS *symext_rootP;
 static symext_chainS *symext_lastP;
-static int symext_chain_size;
+static bfd_size_type symext_chain_size;
 
 /* FIXME: We should be able to try this static variable!  */
-static symext_entryS *symextn_contents;
+static bfd_byte *symextn_contents;
 
 
 /* For linker stub hash tables.  */
@@ -1252,7 +1254,7 @@ elf32_hppa_bfd_final_link_relocate (howto, input_bfd, output_bfd,
 
       sec = h->root.u.def.section;
       elf32_hppa_hash_table (info)->global_value = (h->root.u.def.value
-						    + sec->vma
+						    + sec->output_section->vma
 						    + sec->output_offset);
       elf32_hppa_hash_table (info)->global_sym_defined = 1;
     }
@@ -1585,7 +1587,7 @@ elf32_hppa_backend_begin_write_processing (abfd, info)
 	    continue;
 
 	  /* Yup.  This function symbol needs an entry.  */
-	  symext_chain_size += 2 * sizeof (symext_entryS);
+	  symext_chain_size += 2 * ELF32_PARISC_SX_SIZE;
 	}
     }
   else if (info->relocateable == true)
@@ -1621,9 +1623,9 @@ elf32_hppa_size_symext (gen_entry, in_args)
      struct bfd_hash_entry *gen_entry;
      PTR in_args;
 {
-  unsigned int *sizep = (unsigned int *)in_args;
+  bfd_size_type *sizep = (bfd_size_type *)in_args;
 
-  *sizep += 2 * sizeof (symext_entryS);
+  *sizep += 2 * ELF32_PARISC_SX_SIZE;
   return true;
 }
 
@@ -1701,7 +1703,7 @@ elf32_hppa_backend_final_write_processing (abfd, linker)
      boolean linker;
 {
   asection *symextn_sec;
-  unsigned int i, *symtab_map = (unsigned int *) elf_sym_extra (abfd);
+  unsigned int i;
 
   /* Now build the symbol extension section.  */
   if (symext_chain_size == 0)
@@ -1729,7 +1731,7 @@ elf32_hppa_backend_final_write_processing (abfd, linker)
 
 	  /* Add this symbol's information to the chain.  */
 	  add_entry_to_symext_chain (abfd, symbol->tc_data.hppa_arg_reloc,
-				     symtab_map[i], &symext_rootP,
+				     symbol->symbol.udata.i, &symext_rootP,
 				     &symext_lastP);
 	}
     }
@@ -1804,8 +1806,8 @@ elf_hppa_tc_make_sections (abfd, symext_root)
 
   /* Grab some memory for the contents of the symbol extension section
      itself.  */
-  symextn_contents = (symext_entryS *) bfd_zalloc (abfd,
-						   symextn_sec->_raw_size);
+  symextn_contents = (bfd_byte *) bfd_zalloc (abfd,
+					      symextn_sec->_raw_size);
   if (!symextn_contents)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -1814,7 +1816,8 @@ elf_hppa_tc_make_sections (abfd, symext_root)
 
   /* Fill in the contents of the symbol extension chain.  */
   for (i = 0, symextP = symext_root; symextP; symextP = symextP->next, ++i)
-    symextn_contents[i] = symextP->entry;
+    ELF32_PARISC_SX_PUT (abfd, (bfd_vma) symextP->entry,
+			 symextn_contents + i * ELF32_PARISC_SX_SIZE);
 
   return;
 }
@@ -1851,22 +1854,24 @@ elf32_hppa_backend_symbol_table_processing (abfd, esyms,symcnt)
       bfd_set_error (bfd_error_no_memory);
       return false;
     }
-  symextn_hdr->size = symextn_hdr->sh_size;
 
   /* Read in the symextn section.  */
   if (bfd_seek (abfd, symextn_hdr->sh_offset, SEEK_SET) == -1)
     return false;
-  if (bfd_read ((PTR) symextn_hdr->contents, 1, symextn_hdr->size, abfd)
-      != symextn_hdr->size)
+  if (bfd_read ((PTR) symextn_hdr->contents, 1, symextn_hdr->sh_size, abfd)
+      != symextn_hdr->sh_size)
     return false;
 
   /* Parse entries in the symbol extension section, updating the symtab
      entries as we go */
-  for (i = 0; i < symextn_hdr->size / sizeof(symext_entryS); i++)
+  for (i = 0; i < symextn_hdr->sh_size / ELF32_PARISC_SX_SIZE; i++)
     {
-      symext_entryS *seP = ((symext_entryS *)symextn_hdr->contents) + i;
-      unsigned int se_value = ELF32_PARISC_SX_VAL (*seP);
-      unsigned int se_type = ELF32_PARISC_SX_TYPE (*seP);
+      symext_entryS se =
+	ELF32_PARISC_SX_GET (abfd,
+			     (symextn_hdr->contents
+			      + i * ELF32_PARISC_SX_SIZE));
+      unsigned int se_value = ELF32_PARISC_SX_VAL (se);
+      unsigned int se_type = ELF32_PARISC_SX_TYPE (se);
 
       switch (se_type)
 	{
@@ -1909,7 +1914,7 @@ elf32_hppa_read_symext_info (input_bfd, symtab_hdr, args_hash_table,
      boolean do_globals;
 {
   asection *symextn_sec;
-  symextn_entry *contents;
+  bfd_byte *contents;
   unsigned int i, n_entries, current_index = 0;
 
   /* Get the symbol extension section for this BFD.  If no section exists
@@ -1926,7 +1931,7 @@ elf32_hppa_read_symext_info (input_bfd, symtab_hdr, args_hash_table,
       return true;
     }
 
-  contents = (symextn_entry *) malloc (symextn_sec->_raw_size);
+  contents = (bfd_byte *) malloc (symextn_sec->_raw_size);
   if (contents == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
@@ -1950,10 +1955,11 @@ elf32_hppa_read_symext_info (input_bfd, symtab_hdr, args_hash_table,
      sections (see above).  */
   symextn_sec->flags &= ~SEC_HAS_CONTENTS;
 
-  n_entries = symextn_sec->_raw_size / sizeof (symextn_entry);
+  n_entries = symextn_sec->_raw_size / ELF32_PARISC_SX_SIZE;
   for (i = 0; i < n_entries; i++)
     {
-      symextn_entry entry = contents[i];
+      symext_entryS entry =
+	ELF32_PARISC_SX_GET (input_bfd, contents + i * ELF32_PARISC_SX_SIZE);
       unsigned int value = ELF32_PARISC_SX_VAL (entry);
       unsigned int type = ELF32_PARISC_SX_TYPE (entry);
       struct elf32_hppa_args_hash_entry *args_hash;

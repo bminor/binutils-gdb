@@ -1,3 +1,9 @@
+Thu Nov 17 13:12:08 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* bfd/elf32-hppa.c (elf32_hppa_bfd_final_link_relocated): Use the
+	vma from the output_section containing $global$ when computing
+	global_vlaue.
+
 Thu Nov 17 14:29:13 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* archive.c (_bfd_write_archive_contents): Round up the archive
