@@ -1,3 +1,11 @@
+2001-07-04  Eric Christopher  <echristo@redhat.com>
+
+	* doc/c-mips.texi (MIPS Opts): Document 12000 as valid cpu.
+
+	* config/tc-mips.c (mips_cpu_info_table): Add rm5200, rm5231, rm5261,
+	and rm5721 as valid cpu strings.
+	(md_show_usage): Add rm5200, rm5231, rm5261, rm5721.
+
 2001-07-04  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (md_apply_fix): Prevent addend from becoming zero
@@ -14,7 +22,7 @@
         called.
 
         * doc/internals.texi; Document
-	TC_FINALIZE_SYMS_BEFORE_SIZE_SEG. 
+	TC_FINALIZE_SYMS_BEFORE_SIZE_SEG.
 
 2001-07-02  Alan Modra  <amodra@bigpond.net.au>
 

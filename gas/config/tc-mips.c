@@ -9339,6 +9339,11 @@ MIPS options:\n\
   show (stream, "4600", &column, &first);
   show (stream, "4650", &column, &first);
   show (stream, "5000", &column, &first);
+  show (stream, "5200", &column, &first);
+  show (stream, "5230", &column, &first);
+  show (stream, "5231", &column, &first);
+  show (stream, "5261", &column, &first);
+  show (stream, "5721", &column, &first);
   show (stream, "6000", &column, &first);
   show (stream, "8000", &column, &first);
   show (stream, "10000", &column, &first);
@@ -12170,10 +12175,15 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "mips64vr5000",   0,      ISA_MIPS4,      CPU_R5000, },
   { "r5000",          0,      ISA_MIPS4,      CPU_R5000, },
   { "r5200",          0,      ISA_MIPS4,      CPU_R5000, },
+  { "rm5200",         0,      ISA_MIPS4,      CPU_R5000, },
   { "r5230",          0,      ISA_MIPS4,      CPU_R5000, },
+  { "rm5230",         0,      ISA_MIPS4,      CPU_R5000, },
   { "r5231",          0,      ISA_MIPS4,      CPU_R5000, },
+  { "rm5231",         0,      ISA_MIPS4,      CPU_R5000, },
   { "r5261",          0,      ISA_MIPS4,      CPU_R5000, },
+  { "rm5261",         0,      ISA_MIPS4,      CPU_R5000, },
   { "r5721",          0,      ISA_MIPS4,      CPU_R5000, },
+  { "rm5721",         0,      ISA_MIPS4,      CPU_R5000, },
   { "r5k",            0,      ISA_MIPS4,      CPU_R5000, },
   { "r7000",          0,      ISA_MIPS4,      CPU_R5000, },
 
