@@ -1656,13 +1656,17 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
 		case bfd_link_hash_common:
 		  sym->value = h->root.u.c.size;
 		  sym->flags |= BSF_GLOBAL;
+		  if (! bfd_is_com_section (sym->section))
+		    {
+		      BFD_ASSERT (sym->section == &bfd_und_section);
+		      sym->section = &bfd_com_section;
+		    }
 		  /* We do not set the section of the symbol to
-		     c.section.  c.section is saved so that we know
-		     where to allocate the symbol if we define it.  In
-		     this case the type is still bfd_link_hash_common,
-		     so we did not define it, so we do not want to use
-		     that section.  */
-		  BFD_ASSERT (bfd_is_com_section (sym->section));
+		     h->root.u.c.section.  That value was saved so
+		     that we would know where to allocate the symbol
+		     if it was defined.  In this case the type is
+		     still bfd_link_hash_common, so we did not define
+		     it, so we do not want to use that section.  */
 		  break;
 		}
 	    }
@@ -1794,8 +1798,12 @@ _bfd_generic_link_write_global_symbol (h, data)
       break;
     case bfd_link_hash_common:
       sym->value = h->root.u.c.size;
+      if (! bfd_is_com_section (sym->section))
+	{
+	  BFD_ASSERT (sym->section == &bfd_und_section);
+	  sym->section = &bfd_com_section;
+	}
       /* Do not set the section; see _bfd_generic_link_output_symbols.  */
-      BFD_ASSERT (bfd_is_com_section (sym->section));
       break;
     case bfd_link_hash_indirect:
     case bfd_link_hash_warning:

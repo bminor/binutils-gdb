@@ -1,5 +1,9 @@
 Thu Feb  3 16:49:35 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* linker.c (_bfd_generic_link_output_symbols,
+	_bfd_generic_link_write_global_symbol): Don't require that all
+	references to a common symbol be themselves common symbols.
+
 	* aoutx.h (aout_reloc_index_to_section): Handle N_UNDF.
 
 Wed Feb  2 20:37:19 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
