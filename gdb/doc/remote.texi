@@ -170,9 +170,12 @@ different name is used to allow you to distinguish the two if you wish.
 
 If you want @value{GDBN} to be able to stop your program while it is
 running, you need to use an interrupt-driven serial driver, and arrange
-for it to execute a breakpoint instruction when it receives a control C
-character.  That is the character which @value{GDBN} uses to tell the
-remote system to stop.
+for it to stop when it receives a control C character (getting it to
+return the proper status to GDB probably requires changes to the
+standard stub; one quick and dirty way is to just execute a breakpoint
+instruction.  @value{GDBN} will return a SIGTRAP instead of a SIGINT).
+That is the character which @value{GDBN} uses to tell the remote system
+to stop.
 
 Other routines you need to supply are:
 
