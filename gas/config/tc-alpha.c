@@ -96,8 +96,9 @@ struct alpha_macro
 /* Two extra symbols we want to see in our input.  This is a blatent
    misuse of the expressionS.X_op field.  */
 
-#define O_pregister	(O_max+1)	/* O_register, but in parentheses */
-#define O_cpregister	(O_pregister+1)	/* + a leading comma */
+#define O_pregister  ((operatorT) (O_max+1)) /* O_register, in parentheses */
+#define O_cpregister ((operatorT) (O_pregister+1)) /* + a leading comma */
+#define O_alpha_max  ((operatorT) (O_cpregister+1))
 
 /* Macros for extracting the type and number of encoded register tokens */
 
@@ -708,6 +709,13 @@ void
 md_begin ()
 {
   unsigned int i;
+
+  /* Verify that X_op field is wide enough.  */
+  {
+    expressionS e;
+    e.X_op = O_alpha_max;
+    assert (e.X_op == O_alpha_max);
+  }
 
   /* Create the opcode hash table */
 

@@ -1,3 +1,8 @@
+Mon Jun  7 10:22:16 1999  Richard Henderson  <rth@cygnus.com>
+
+	* expr.h (struct expressionS): Revert last change; widen X_op.
+	* config/tc-alpha.c (md_begin): Check the field is wide enough.
+
 Mon Jun  7 11:25:16 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* Makefile.am (TARGET_CPU_CFILES): Add config/tc-fr30.c.
