@@ -17,6 +17,8 @@
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#define VERSION "0.0"
+
 #ifndef lint
 char copyright[] =
 "@(#) Copyright (c) 1983 Regents of the University of California.\n\
@@ -108,6 +110,10 @@ main(argc, argv)
 	    break;
 	case 'T': /* "Traditional" output format */
 	    bsd_style_output = 1;
+	    break;
+        case 'v':
+	    printf ("gprof version %s\n", VERSION);
+	    exit(0);
 	    break;
 	case 'z':
 	    zflag = TRUE;
