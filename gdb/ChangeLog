@@ -1,5 +1,10 @@
 2003-03-17  Andrew Cagney  <cagney@redhat.com>
 
+	* disasm.c (gdb_disassembly): Set di.mach using the architecture's
+	BFD.  Simplify setting of di.endian.
+
+2003-03-17  Andrew Cagney  <cagney@redhat.com>
+
 	* rs6000-tdep.c (ppc_floating_point_unit_p): New function.
 	* ppc-tdep.h (ppc_floating_point_unit_p): Declare.
 
