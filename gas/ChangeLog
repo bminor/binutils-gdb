@@ -1,3 +1,9 @@
+2003-10-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/obj-elf.c (obj_elf_change_section): Allow SHF_ALLOC
+	for .interp, .strtab and .symtab. Use specified section
+	attributes.
+
 2003-10-22  Andreas Schwab  <schwab@suse.de>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 	    Jim Wilson <wilson@specifixinc.com>

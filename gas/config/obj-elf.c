@@ -641,6 +641,8 @@ obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
 
   if (ssect != NULL)
     {
+      bfd_boolean override = FALSE;
+
       if (type == SHT_NULL)
 	type = ssect->type;
       else if (type != ssect->type)
@@ -669,7 +671,7 @@ obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
 	    }
 	}
 
-      if (old_sec == NULL && (attr &~ ssect->attr) != 0)
+      if (old_sec == NULL && (attr & ~ssect->attr) != 0)
 	{
 	  /* As a GNU extension, we permit a .note section to be
 	     allocatable.  If the linker sees an allocatable .note
@@ -682,13 +684,25 @@ obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
 	     something like .rodata.str.  */
 	  else if (ssect->suffix_length == -2
 		   && name[ssect->prefix_length] == '.'
-		   && (attr &~ ssect->attr &~ SHF_MERGE &~ SHF_STRINGS) == 0)
+		   && (attr
+		       & ~ssect->attr
+		       & ~SHF_MERGE
+		       & ~SHF_STRINGS) == 0)
 	    ;
+	  /* .interp, .strtab and .symtab can have SHF_ALLOC.  */
+	  else if (attr == SHF_ALLOC
+		   && (strcmp (name, ".interp") == 0
+		       || strcmp (name, ".strtab") == 0
+		       || strcmp (name, ".symtab") == 0))
+	    override = TRUE;
 	  else
-	    as_warn (_("setting incorrect section attributes for %s"),
-		     name);
+	    {
+	      as_warn (_("setting incorrect section attributes for %s"),
+		       name);
+	      override = TRUE;
+	    }
 	}
-      if (old_sec == NULL)
+      if (!override && old_sec == NULL)
 	attr |= ssect->attr;
     }
 
