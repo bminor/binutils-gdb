@@ -1,3 +1,11 @@
+2001-11-13  Jim Blandy  <jimb@redhat.com>
+
+	Patch from Peter Schauer:
+	
+	* symtab.c (find_pc_sect_line): If we can't find the function
+	containing PC, we certainly won't have line number information for
+	that location, so return zero immediately.
+
 2001-11-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/i960/tm-nindy960.h (REGISTER_CONVERTIBLE)

@@ -1570,6 +1570,14 @@ find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
 
   INIT_SAL (&val);		/* initialize to zeroes */
 
+  /* Don't even think about line numbers if we can't find a function
+     symbol for PC.  */
+  if (find_pc_function (pc) == NULL)
+    {
+      val.pc = pc;
+      return val;
+    }
+
   if (notcurrent)
     pc -= 1;
 
