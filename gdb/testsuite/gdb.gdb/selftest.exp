@@ -247,6 +247,11 @@ proc test_with_self { executable } {
 
     if { [lindex $result 0] != "" } then {
 	return -1
+    } else {
+        if { [lsearch -exact [lrange $result 1 end] "nodebug"] >= 0 } then {
+            untested "No debug information, skipping testcase."
+            return -1
+        }
     }
 
     # disassemble yourself
