@@ -1057,7 +1057,12 @@ The stab for @code{s_flap} is located just before the @code{N_LBRAC} for
 @c ............................................................
 
 @node Parameters
-@section Parameters 
+@section Parameters
+
+Parameters to a function are represented by a stab (or sometimes two,
+see below) for each parameter.  The stabs are in the order in which the
+debugger should print the parameters (i.e. the order in which the
+parameters are declared in the source file).
 
 The symbol descriptor @samp{p} is used to refer to parameters which are
 in the arglist.  Symbols have symbol type @samp{N_PSYM}.  The value of
