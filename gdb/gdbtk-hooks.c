@@ -44,11 +44,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "guitcl.h"
 #include "gdbtk.h"
 
-#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
-#else
-#include <varargs.h>
-#endif
 #include <signal.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -90,12 +86,7 @@ void   x_event PARAMS ((int));
 static int    gdbtk_query PARAMS ((const char *, va_list));
 static void   gdbtk_warning PARAMS ((const char *, va_list));
 static char*  gdbtk_readline PARAMS ((char *));
-static void
-#ifdef ANSI_PROTOTYPES
-gdbtk_readline_begin (char *format, ...);
-#else
-gdbtk_readline_begin ();
-#endif
+static void gdbtk_readline_begin (char *format, ...);
 static void gdbtk_readline_end PARAMS ((void));
 static void   gdbtk_flush PARAMS ((GDB_FILE *));
 static void gdbtk_pre_add_symbol PARAMS ((char *));
@@ -107,6 +98,7 @@ static void tracepoint_notify PARAMS ((struct tracepoint *, const char *));
 static void gdbtk_selected_frame_changed PARAMS ((int));
 static void gdbtk_context_change PARAMS ((int));
 static void gdbtk_error_begin PARAMS ((void));
+static void report_error (void);
 
 /*
  * gdbtk_fputs can't be static, because we need to call it in gdbtk.c.
@@ -204,9 +196,10 @@ int gdbtk_two_elem_cmd (cmd_name, argv1)
   Tcl_ConvertElement (argv1, command + cmd_len + 1, flags_ptr);
 
   result = Tcl_Eval (gdbtk_interp, command);
+  if (result != TCL_OK)
+    report_error ();
   free (command);
   return result;
-  
 }
 
 static void
@@ -271,7 +264,7 @@ gdbtk_fputs (ptr, stream)
 	{
 	  gdbtk_two_elem_cmd ("gdbtk_tcl_fputs", (char *) ptr);
 	  if (result_ptr->flags & GDBTK_MAKES_LIST)
-	      gdbtk_two_elem_cmd ("gdbtk_tcl_fputs", " ");
+	    gdbtk_two_elem_cmd ("gdbtk_tcl_fputs", " ");
 	}
     }
   else
@@ -294,8 +287,7 @@ gdbtk_warning (warning, args)
   char buf[200];
 
   vsprintf (buf, warning, args);
-  if (gdbtk_two_elem_cmd ("gdbtk_tcl_warning", buf) != TCL_OK)
-    report_error();
+  gdbtk_two_elem_cmd ("gdbtk_tcl_warning", buf);
 }
 
 
@@ -433,27 +425,14 @@ x_event (signo)
 
 /* VARARGS */
 static void
-#ifdef ANSI_PROTOTYPES
 gdbtk_readline_begin (char *format, ...)
-#else
-gdbtk_readline_begin (va_alist)
-     va_dcl
-#endif
 {
   va_list args;
   char buf[200];
 
-#ifdef ANSI_PROTOTYPES
   va_start (args, format);
-#else
-  char *format;
-  va_start (args);
-  format = va_arg (args, char *);
-#endif
-
   vsprintf (buf, format, args);
   gdbtk_two_elem_cmd ("gdbtk_tcl_readline_begin", buf);
-
 }
 
 static char *
@@ -483,7 +462,8 @@ gdbtk_readline (prompt)
 static void
 gdbtk_readline_end ()
 {
-  Tcl_Eval (gdbtk_interp, "gdbtk_tcl_readline_end");
+  if (Tcl_Eval (gdbtk_interp, "gdbtk_tcl_readline_end") != TCL_OK)
+    report_error ();
 }
 
 static void
@@ -565,13 +545,8 @@ breakpoint_notify(b, action)
 	   action, b->number, (long)b->address, b->line_number, filename,
 	   bpdisp[b->disposition], b->enable,  b->thread);
 
-  v = Tcl_Eval (gdbtk_interp, buf);
-
-  if (v != TCL_OK)
-    {
-      gdbtk_fputs (Tcl_GetStringResult (gdbtk_interp), gdb_stdout);
-      gdbtk_fputs ("\n", gdb_stdout);
-    }
+  if (Tcl_Eval (gdbtk_interp, buf) != TCL_OK)
+    report_error ();
 }
 
 int
@@ -581,7 +556,8 @@ gdbtk_load_hash (section, num)
 {
   char buf[128];
   sprintf (buf, "download_hash %s %ld", section, num);
-  Tcl_Eval (gdbtk_interp, buf); 
+  if (Tcl_Eval (gdbtk_interp, buf) != TCL_OK)
+    report_error ();
   return  atoi (gdbtk_interp->result);
 }
 
@@ -592,16 +568,15 @@ static void
 gdbtk_pre_add_symbol (name)
   char *name;
 {
-
   gdbtk_two_elem_cmd("gdbtk_tcl_pre_add_symbol", name);
-
 }
 
 /* This hook is called whenever we finish loading a symbol file. */
 static void
 gdbtk_post_add_symbol ()
 {
-  Tcl_Eval (gdbtk_interp, "gdbtk_tcl_post_add_symbol");
+  if (Tcl_Eval (gdbtk_interp, "gdbtk_tcl_post_add_symbol") != TCL_OK)
+    report_error ();
 }
 
 /* This hook function is called whenever we want to wait for the
@@ -697,13 +672,8 @@ tracepoint_notify(tp, action)
   sprintf (buf, "gdbtk_tcl_tracepoint %s %d 0x%lx %d {%s} %d", action, tp->number, 
 	   (long)tp->address, sal.line, filename, tp->pass_count);
 
-  v = Tcl_Eval (gdbtk_interp, buf);
-
-  if (v != TCL_OK)
-    {
-      gdbtk_fputs (gdbtk_interp->result, gdb_stdout);
-      gdbtk_fputs ("\n", gdb_stdout);
-    }
+  if (Tcl_Eval (gdbtk_interp, buf) != TCL_OK)
+    report_error ();
 }
 
 /*
@@ -729,9 +699,11 @@ gdbtk_trace_find (arg, from_tty)
   Tcl_ListObjAppendElement (gdbtk_interp, cmdObj, Tcl_NewStringObj (arg, -1));
   Tcl_ListObjAppendElement (gdbtk_interp, cmdObj, Tcl_NewIntObj(from_tty));
 #if TCL_MAJOR_VERSION == 8 && TCL_MINOR_VERSION < 1
-  Tcl_GlobalEvalObj (gdbtk_interp, cmdObj);
+  if (Tcl_GlobalEvalObj (gdbtk_interp, cmdObj) != TCL_OK)
+    report_error ();
 #else
-  Tcl_EvalObj (gdbtk_interp, cmdObj, TCL_EVAL_GLOBAL);
+  if (Tcl_EvalObj (gdbtk_interp, cmdObj, TCL_EVAL_GLOBAL) != TCL_OK)
+    report_error ();
 #endif    
 }
 
