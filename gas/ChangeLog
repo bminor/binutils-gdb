@@ -1,3 +1,8 @@
+Tue Feb 10 17:58:18 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ehopt.c (eh_frame_code_alignment): If not BFD_ASSEMBLER, use
+	seg_fix_rotP rather than fix_root from seg_info.
+
 Tue Feb 10 15:32:22 1998  Ian Carmichael  <iancarm@cygnus.com>
 
 	* expr.c: Add support for 0x1_2_3_4 bignums.
