@@ -1,3 +1,8 @@
+2000-07-31  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* config/djgpp/fnchange.lst: Add file mappings as per last weekly
+	snapshot.
+
 2000-07-29  Kevin Buettner  <kevinb@redhat.com>
 
 	* a29k-tdep.c, a68v-nat.c, abug-rom.c, alpha-nat.c,
