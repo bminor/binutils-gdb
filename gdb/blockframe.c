@@ -124,6 +124,7 @@ create_new_frame (addr, pc)
      CORE_ADDR pc;
 {
   struct frame_info *fci;	/* Same type as FRAME */
+  char *name;
 
   fci = (struct frame_info *)
     obstack_alloc (&frame_cache_obstack,
@@ -134,7 +135,8 @@ create_new_frame (addr, pc)
   fci->prev = (struct frame_info *) 0;
   fci->frame = addr;
   fci->pc = pc;
-  fci->signal_handler_caller = IN_SIGTRAMP (fci->pc, (char *)NULL);
+  find_pc_partial_function (pc, &name, (CORE_ADDR *)NULL,(CORE_ADDR *)NULL);
+  fci->signal_handler_caller = IN_SIGTRAMP (fci->pc, name);
 
 #ifdef INIT_EXTRA_FRAME_INFO
   INIT_EXTRA_FRAME_INFO (0, fci);
@@ -263,6 +265,7 @@ get_prev_frame_info (next_frame)
   FRAME_ADDR address;
   struct frame_info *prev;
   int fromleaf = 0;
+  char *name;
 
   /* If the requested entry is in the cache, return it.
      Otherwise, figure out what the address should be for the entry
@@ -382,7 +385,9 @@ get_prev_frame_info (next_frame)
      (see tm-sparc.h).  We want the pc saved in the inferior frame. */
   INIT_FRAME_PC(fromleaf, prev);
 
-  if (IN_SIGTRAMP (prev->pc, (char *)NULL))
+  find_pc_partial_function (prev->pc, &name,
+			    (CORE_ADDR *)NULL,(CORE_ADDR *)NULL);
+  if (IN_SIGTRAMP (prev->pc, name))
     prev->signal_handler_caller = 1;
 
   return prev;
@@ -578,18 +583,23 @@ clear_pc_function_cache()
   cache_pc_function_name = (char *)0;
 }
 
-/* Finds the "function" (text symbol) that is smaller than PC
-   but greatest of all of the potential text symbols.  Sets
-   *NAME and/or *ADDRESS conditionally if that pointer is non-zero.
-   Returns 0 if it couldn't find anything, 1 if it did.  On a zero
-   return, *NAME and *ADDRESS are always set to zero.  On a 1 return,
-   *NAME and *ADDRESS contain real information.  */
+/* Finds the "function" (text symbol) that is smaller than PC but
+   greatest of all of the potential text symbols.  Sets *NAME and/or
+   *ADDRESS conditionally if that pointer is non-null.  If ENDADDR is
+   non-null, then set *ENDADDR to be the end of the function
+   (exclusive), but passing ENDADDR as non-null means that the
+   function might cause symbols to be read.  This function either
+   succeeds or fails (not halfway succeeds).  If it succeeds, it sets
+   *NAME, *ADDRESS, and *ENDADDR to real information and returns 1.
+   If it fails, it sets *NAME, *ADDRESS, and *ENDADDR to zero
+   and returns 0.  */
 
 int
-find_pc_partial_function (pc, name, address)
+find_pc_partial_function (pc, name, address, endaddr)
      CORE_ADDR pc;
      char **name;
      CORE_ADDR *address;
+     CORE_ADDR *endaddr;
 {
   struct partial_symtab *pst;
   struct symbol *f;
@@ -597,54 +607,51 @@ find_pc_partial_function (pc, name, address)
   struct partial_symbol *psb;
 
   if (pc >= cache_pc_function_low && pc < cache_pc_function_high)
-    {
-	if (address)
-	    *address = cache_pc_function_low;
-	if (name)
-	    *name = cache_pc_function_name;
-	return 1;
-    }
+    goto return_cached_value;
 
+  /* If sigtramp is in the u area, it counts as a function (especially
+     important for step_1).  */
+#if defined SIGTRAMP_START
+  if (IN_SIGTRAMP (pc, (char *)NULL))
+    {
+      cache_pc_function_low = SIGTRAMP_START;
+      cache_pc_function_high = SIGTRAMP_END;
+      cache_pc_function_name = "<sigtramp>";
+
+      goto return_cached_value;
+    }
+#endif
+
+  msymbol = lookup_minimal_symbol_by_pc (pc);
   pst = find_pc_psymtab (pc);
   if (pst)
     {
+      /* Need to read the symbols to get a good value for the end address.  */
+      if (endaddr != NULL && !pst->readin)
+	PSYMTAB_TO_SYMTAB (pst);
+
       if (pst->readin)
 	{
-	  /* The information we want has already been read in.
-	     We can go to the already readin symbols and we'll get
-	     the best possible answer.  */
+	  /* Checking whether the msymbol has a larger value is for the
+	     "pathological" case mentioned in print_frame_info.  */
 	  f = find_pc_function (pc);
-	  if (!f)
+	  if (f != NULL
+	      && (msymbol == NULL
+		  || (BLOCK_START (SYMBOL_BLOCK_VALUE (f))
+		      >= SYMBOL_VALUE_ADDRESS (msymbol))))
 	    {
-	    return_error:
-	      /* No available symbol.  */
-	      if (name != 0)
-		*name = 0;
-	      if (address != 0)
-		*address = 0;
-	      return 0;
+	      cache_pc_function_low = BLOCK_START (SYMBOL_BLOCK_VALUE (f));
+	      cache_pc_function_high = BLOCK_END (SYMBOL_BLOCK_VALUE (f));
+	      cache_pc_function_name = SYMBOL_NAME (f);
+	      goto return_cached_value;
 	    }
-
-	  cache_pc_function_low = BLOCK_START (SYMBOL_BLOCK_VALUE (f));
-	  cache_pc_function_high = BLOCK_END (SYMBOL_BLOCK_VALUE (f));
-	  cache_pc_function_name = SYMBOL_NAME (f);
-	  if (name)
-	    *name = cache_pc_function_name;
-	  if (address)
-	    *address = cache_pc_function_low;
-	  return 1;
 	}
 
-      /* Get the information from a combination of the pst
-	 (static symbols), and the minimal symbol table (extern
-	 symbols).  */
-      msymbol = lookup_minimal_symbol_by_pc (pc);
+      /* Now that static symbols go in the minimal symbol table, perhaps
+	 we could just ignore the partial symbols.  But at least for now
+	 we use the partial or minimal symbol, whichever is larger.  */
       psb = find_pc_psymbol (pst, pc);
 
-      if (!psb && (msymbol == NULL))
-	{
-	  goto return_error;
-	}
       if (psb
 	  && (msymbol == NULL ||
 	      (SYMBOL_VALUE_ADDRESS (psb) >= SYMBOL_VALUE_ADDRESS (msymbol))))
@@ -654,35 +661,66 @@ find_pc_partial_function (pc, name, address)
 	    *address = SYMBOL_VALUE_ADDRESS (psb);
 	  if (name)
 	    *name = SYMBOL_NAME (psb);
+	  /* endaddr non-NULL can't happen here.  */
 	  return 1;
 	}
     }
-  else
-    /* Must be in the minimal symbol table.  */
+
+  /* Must be in the minimal symbol table.  */
+  if (msymbol == NULL)
     {
-      msymbol = lookup_minimal_symbol_by_pc (pc);
-      if (msymbol == NULL)
-	goto return_error;
+      /* No available symbol.  */
+      if (name != NULL)
+	*name = 0;
+      if (address != NULL)
+	*address = 0;
+      if (endaddr != NULL)
+	*endaddr = 0;
+      return 0;
     }
 
-  {
-    if (msymbol -> type == mst_text)
-      cache_pc_function_low = SYMBOL_VALUE_ADDRESS (msymbol);
-    else
-      /* It is a transfer table for Sun shared libraries.  */
-      cache_pc_function_low = pc - FUNCTION_START_OFFSET;
-  }
+  /* I believe the purpose of this check is to make sure that anything
+     beyond the end of the text segment does not appear as part of the
+     last function of the text segment.  It assumes that there is something
+     other than a mst_text symbol after the text segment.  It is broken in
+     various cases, so anything relying on this behavior (there might be
+     some places) should be using find_pc_section or some such instead.  */
+  if (msymbol -> type == mst_text)
+    cache_pc_function_low = SYMBOL_VALUE_ADDRESS (msymbol);
+  else
+    /* It is a transfer table for Sun shared libraries.  */
+    cache_pc_function_low = pc - FUNCTION_START_OFFSET;
   cache_pc_function_name = SYMBOL_NAME (msymbol);
-  /* FIXME:  Deal with bumping into end of minimal symbols for a given
-     objfile, and what about testing for mst_text again? */
+
   if (SYMBOL_NAME (msymbol + 1) != NULL)
+    /* This might be part of a different segment, which might be a bad
+       idea.  Perhaps we should be using the smaller of this address or the
+       endaddr from find_pc_section.  */
     cache_pc_function_high = SYMBOL_VALUE_ADDRESS (msymbol + 1);
   else
-    cache_pc_function_high = cache_pc_function_low + 1;
+    {
+      /* We got the start address from the last msymbol in the objfile.
+	 So the end address is the end of the section.  */
+      struct obj_section *sec;
+
+      sec = find_pc_section (pc);
+      if (sec == NULL)
+	{
+	  /* Don't know if this can happen but if it does, then just say
+	     that the function is 1 byte long.  */
+	  cache_pc_function_high = cache_pc_function_low + 1;
+	}
+      else
+	cache_pc_function_high = sec->endaddr;
+    }
+
+ return_cached_value:
   if (address)
     *address = cache_pc_function_low;
   if (name)
     *name = cache_pc_function_name;
+  if (endaddr)
+    *endaddr = cache_pc_function_high;
   return 1;
 }
 
@@ -713,6 +751,35 @@ block_innermost_frame (block)
 }
 
 #endif	/* 0 */
+
+#ifdef SIGCONTEXT_PC_OFFSET
+/* Get saved user PC for sigtramp from sigcontext for BSD style sigtramp.  */
+
+CORE_ADDR
+sigtramp_saved_pc (frame)
+     FRAME frame;
+{
+  CORE_ADDR sigcontext_addr;
+  char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
+  int ptrbytes = TARGET_PTR_BIT / TARGET_CHAR_BIT;
+  int sigcontext_offs = (2 * TARGET_INT_BIT) / TARGET_CHAR_BIT;
+
+  /* Get sigcontext address, it is the third parameter on the stack.  */
+  if (frame->next)
+    sigcontext_addr = read_memory_integer (FRAME_ARGS_ADDRESS (frame->next)
+					    + FRAME_ARGS_SKIP + sigcontext_offs,
+					   ptrbytes);
+  else
+    sigcontext_addr = read_memory_integer (read_register (SP_REGNUM)
+					    + sigcontext_offs,
+					   ptrbytes);
+
+  /* Don't cause a memory_error when accessing sigcontext in case the stack
+     layout has changed or the stack is corrupt.  */
+  target_read_memory (sigcontext_addr + SIGCONTEXT_PC_OFFSET, buf, ptrbytes);
+  return extract_unsigned_integer (buf, ptrbytes);
+}
+#endif /* SIGCONTEXT_PC_OFFSET */
 
 void
 _initialize_blockframe ()

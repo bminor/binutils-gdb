@@ -1,4 +1,17 @@
+Tue Aug 17 01:43:55 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* blockframe.c, frame.h (sigtramp_saved_pc):  New routine to fetch
+	the saved pc from sigcontext on the stack for BSD signal handling.
+	* config/i386/tm-i386bsd.h (SIGTRAMP_START, SIGTRAMP_END, FRAME_CHAIN,
+	FRAMELESS_FUNCTION_INVOCATION, FRAME_SAVED_PC, SIGCONTEXT_PC_OFFSET):
+	Define to make backtracing through sigtramp work.
+	* config/vax/tm-vax.h (SIGTRAMP_START, SIGTRAMP_END, TARGET_UPAGES,
+	FRAME_SAVED_PC, SIGCONTEXT_PC_OFFSET):  Ditto.
+
 Mon Aug 16 13:52:14 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* target.c (target_xfer_memory): Clear errno before calling
+	to_xfer_memory.
 
 	* stack.c (frame_info, print_frame_info): Add comment about using
 	the starting source line number on a line boundary if backtracing
