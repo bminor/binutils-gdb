@@ -1897,7 +1897,7 @@ assign_file_positions_for_segments (abfd)
   struct elf_segment_map *m;
   unsigned int alloc;
   Elf_Internal_Phdr *phdrs;
-  file_ptr off;
+  file_ptr off, voff;
   bfd_vma filehdr_vaddr, filehdr_paddr;
   bfd_vma phdrs_vaddr, phdrs_paddr;
   Elf_Internal_Phdr *p;
@@ -2068,6 +2068,7 @@ assign_file_positions_for_segments (abfd)
 	    }
 	}
 
+      voff = off;
       for (i = 0, secpp = m->sections; i < m->count; i++, secpp++)
 	{
 	  asection *sec;
@@ -2085,13 +2086,14 @@ assign_file_positions_for_segments (abfd)
                  the page size.  */
 	      if ((flags & SEC_ALLOC) != 0)
 		{
-		  adjust = (sec->vma - off) % bed->maxpagesize;
+		  adjust = (sec->vma - voff) % bed->maxpagesize;
 		  if (adjust != 0)
 		    {
 		      if (i == 0)
 			abort ();
 		      p->p_memsz += adjust;
 		      off += adjust;
+		      voff += adjust;
 		      if ((flags & SEC_LOAD) != 0)
 			p->p_filesz += adjust;
 		    }
@@ -2101,6 +2103,8 @@ assign_file_positions_for_segments (abfd)
 
 	      if ((flags & SEC_LOAD) != 0)
 		off += sec->_raw_size;
+	      if ((flags & SEC_ALLOC) != 0)
+		voff += sec->_raw_size;
 	    }
 
 	  p->p_memsz += sec->_raw_size;
