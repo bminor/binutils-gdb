@@ -1,5 +1,7 @@
 2002-05-25  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-m68k.c (elf32_m68k_print_private_bfd_data): Formatting.
+
 	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Revert last change.
 	(ppc64_elf_check_relocs): Don't set up function descriptor symbol
 	strings to point inside function code sym string.
