@@ -34,9 +34,13 @@ case "${target}" in
 			;;
   m68k-sun-sunos[34]*)	my_target=sun3
 			;;
-  sparclite-fujitsu-*)  my_target=sun4
+  sparclite*-fujitsu-*) my_target=sun4
 			;;
-  i960-wrs-vxworks*)    my_target=vxworks960
+  sparc*-*-aout)	my_target=sun4
+			;;
+  i960-wrs-vxworks*)    my_target=i960
+			;;
+  i960-intel-nindy)	my_target=i960
 			;;
   m68k-wrs-vxworks*)    my_target=vxworks68
 			;;
@@ -44,7 +48,7 @@ case "${target}" in
 			;;
   m683?2-wrs-vxworks*)  my_target=vxworks68
 			;;
-  sparc-wrs-vxworks*)   my_target=vxsparc
+  sparc*-wrs-vxworks*)  my_target=sun4
 			;;
   m68k-ericsson-ose)	my_target=ose68
 			;;
@@ -86,6 +90,8 @@ case "${target}" in
 			;;
   m68*-*-*)		echo '***' "Unknown m68k target vendor for ld:" ${target_vendor} 1>&2
 			exit 1
+			;;
+  mips-dec-ultrix*)	my_target=mips-lit
 			;;
   z8k-*sim)		my_target=z8ksim
 			;;

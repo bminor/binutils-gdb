@@ -1,0 +1,5 @@
+EMULATION_NAME=mipslit
+SCRIPT_NAME=mips
+OUTPUT_FORMAT="ecoff-littlemips"
+PAGE_SIZE=0x1000000
+ARCH=mips

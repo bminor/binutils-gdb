@@ -1,0 +1,45 @@
+# Linker script for MIPS.  This works on a DECstation running Ultrix,
+# and may work on other platforms as well.
+# Ian Lance Taylor <ian@cygnus.com>.
+cat <<EOF
+OUTPUT_FORMAT("${OUTPUT_FORMAT}")
+${LIB_SEARCH_DIRS}
+
+ENTRY(__start)
+
+SECTIONS
+{
+  .text ${RELOCATING+ 0x400000 + SIZEOF_HEADERS} : {
+    *(.init)
+    ${RELOCATING+ eprol  =  .};
+    *(.text)
+    *(.fini)
+    ${RELOCATING+ etext  =  .};
+  }
+  .rdata ${RELOCATING+ 0x10000000} : {
+    *(.rdata)
+  }
+  .data ${RELOCATING+ .} : {
+    *(.data)
+  }
+  ${RELOCATING+ _gp = . + 0x8000};
+  .lit8 ${RELOCATING+ .} : {
+    *(.lit8)
+  }
+  .lit4 ${RELOCATING+ .} : {
+    *(.lit4)
+  }
+  .sdata ${RELOCATING+ .} : {
+    *(.sdata)
+  }
+  ${RELOCATING+ edata  =  .};
+  .sbss ${RELOCATING+ .} : {
+    *(.sbss)
+  }
+  .bss ${RELOCATING+ .} : {
+    *(.bss)
+    *(COMMON)
+  }
+  ${RELOCATING+ end = .};
+}
+EOF

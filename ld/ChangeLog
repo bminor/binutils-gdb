@@ -1,3 +1,19 @@
+Fri Jan 22 14:22:44 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* mips.sc-sh: New file.  Ultrix, and hopefully other MIPS ECOFF
+	targets, linker script.
+	* mipslit.sh: New file.  Little endian MIPS emulation.
+	* config/mips-lit.mt: New file.  Use mipslit emulation.
+	* configure.in (mips-dec-ultrix*): Use target mips-lit.
+	* Makefile.in (ALL_EMULATIONS): Added em_mipslit.o.
+	(em_mipslit.c): New target.  Uses mipslit.sh.
+
+Thu Jan 14 15:30:27 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (install): Install ld as both $(tooldir)/bin/ld and
+	$(tooldir)/bin/gld, so that gcc can find it with or without
+	collect2.
+
 Mon Jan 11 18:50:07 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldwrite.c: Removed perform_relocation, copy_and_relocate, and
