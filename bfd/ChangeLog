@@ -1,3 +1,15 @@
+2002-12-04  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c (struct elf_m68k_link_hash_table): Add sym_sec
+	member.
+	(elf_m68k_link_hash_table_create): Initialize it.
+	(elf_m68k_check_relocs): Handle symbols that are forced to be
+	local due to visibility changes.
+	(elf_m68k_adjust_dynamic_symbol): Likewise.
+	(elf_m68k_size_dynamic_sections): Likewise.
+	(elf_m68k_discard_copies): Likewise.
+	(elf_m68k_relocate_section): Likewise.
+
 2002-12-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_edit_opd): Correct typo.
