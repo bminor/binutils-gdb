@@ -1,5 +1,5 @@
 /* Print instructions for Tahoe target machines, for GDB.
-   Copyright 1986, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1991, 1992 Free Software Foundation, Inc.
    Contributed by the State University of New York at Buffalo, by the
    Distributed Computer Systems Lab, Department of Computer Science, 1991.
 
@@ -28,8 +28,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Number of elements in the opcode table.  */
 #define NOPCODES (sizeof votstrs / sizeof votstrs[0])
-
-extern char *reg_names[];
 
 static unsigned char *print_insn_arg ();
 

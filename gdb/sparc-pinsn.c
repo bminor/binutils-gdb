@@ -1,7 +1,7 @@
 /* Print SPARC instructions for GDB, the GNU Debugger.
-   Copyright 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1989, 1991, 1992 Free Software Foundation, Inc.
 
-This file is part of GDB, the GNU disassembler.
+This file is part of GDB, the GNU debugger.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "string.h"
 #include "target.h"
 
-extern char *reg_names[];
 #define	freg_names	(&reg_names[4 * 8])
 
 union sparc_insn

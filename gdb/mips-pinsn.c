@@ -1,6 +1,6 @@
 /* Print mips instructions for GDB, the GNU debugger.
    Copyright 1989, 1991, 1992 Free Software Foundation, Inc.
-   Contributed by Nobuyuki Hikichi(hikichi@sra.co.jp)
+   Contributed by Nobuyuki Hikichi(hikichi@sra.co.jp).
 
 This file is part of GDB.
 
@@ -29,9 +29,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define NOPCODES (sizeof mips_opcodes / sizeof mips_opcodes[0])
 
 #define MKLONG(p)  *(unsigned long*)p
-
-extern char *reg_names[];
-
 
 /* subroutine */
 static unsigned char *

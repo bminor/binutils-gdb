@@ -1,5 +1,5 @@
 /* Print Acorn Risc Machine instructions for GDB, the GNU debugger.
-   Copyright 1986, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -23,8 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "symtab.h"
 #include "opcode/arm.h"
-
-extern char *reg_names[];
 
 static char *shift_names[] = {
     "lsl", "lsr", "asr", "ror",

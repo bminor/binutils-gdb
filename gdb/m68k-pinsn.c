@@ -44,9 +44,9 @@ print_insn_arg PARAMS ((char *, unsigned char *, unsigned char *, CORE_ADDR,
 /* Number of elements in the opcode table.  */
 #define NOPCODES (sizeof m68k_opcodes / sizeof m68k_opcodes[0])
 
-extern char *reg_names[];
-char *fpcr_names[] = { "", "fpiar", "fpsr", "fpiar/fpsr", "fpcr",
-		     "fpiar/fpcr", "fpsr/fpcr", "fpiar-fpcr"};
+const char * const fpcr_names[] = {
+  "", "fpiar", "fpsr", "fpiar/fpsr", "fpcr",
+  "fpiar/fpcr", "fpsr/fpcr", "fpiar-fpcr"};
 
 /* Define accessors for 68K's 1, 2, and 4-byte signed quantities.
    The _SHIFT values move the quantity to the high order end of an

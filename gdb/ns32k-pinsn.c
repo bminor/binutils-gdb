@@ -1,5 +1,5 @@
 /* Print National Semiconductor 32000 instructions for GDB, the GNU debugger.
-   Copyright 1986, 1988, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1988, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -27,8 +27,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Number of elements in the opcode table.  */
 #define NOPCODES (sizeof notstrs / sizeof notstrs[0])
-
-extern char *reg_names[];
 
 #define NEXT_IS_ADDR	'|'
 

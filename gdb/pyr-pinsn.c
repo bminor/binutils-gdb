@@ -1,7 +1,7 @@
 /* Print Pyramid Technology 90x instructions for GDB, the GNU Debugger.
-   Copyright 1988, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
 
-This file is part of GDB, the GNU disassembler.
+This file is part of GDB, the GNU debugger.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -51,7 +51,6 @@ CORE_ADDR pyr_saved_pc(frame)
 	    frame, 60/4, foo);
     return foo;
 }
-
 
 /* Pyramid instructions are never longer than this many bytes.  */
 #define MAXLEN 24
@@ -60,15 +59,10 @@ CORE_ADDR pyr_saved_pc(frame)
 /*const*/ static int nopcodes = (sizeof (pyr_opcodes) / sizeof( pyr_opcodes[0]));
 #define NOPCODES (nopcodes)
 
-extern char *reg_names[];
-
-/* Let's be byte-independent so we can use this as a cross-assembler.
-   (will this ever be useful?
- */
+/* Let's be byte-independent so we can use this as a cross-assembler.  */
 
 #define NEXTLONG(p)  \
   (p += 4, (((((p[-4] << 8) + p[-3]) << 8) + p[-2]) << 8) + p[-1])
-
 
 /* Print one instruction at address MEMADDR in debugged memory,
    on STREAM.  Returns length of the instruction, in bytes.  */

@@ -1,5 +1,5 @@
 /* i80960 instruction disassembler for GDB.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -20,8 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "frame.h"
 #include "inferior.h"
-
-extern char *reg_names[];
 
 static FILE *stream;		/* Output goes here */
 static void print_addr();
