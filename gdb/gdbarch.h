@@ -2263,8 +2263,7 @@ extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
    The INIT function parameter INFO shall, as far as possible, be
    pre-initialized with information obtained from INFO.ABFD or
-   previously selected architecture (if similar).  INIT shall ensure
-   that the INFO.BYTE_ORDER is non-zero.
+   previously selected architecture (if similar).
 
    The INIT function shall return any of: NULL - indicating that it
    doesn't recognize the selected architecture; an existing ``struct
@@ -2288,7 +2287,7 @@ struct gdbarch_info
   /* Use default: NULL (ZERO). */
   const struct bfd_arch_info *bfd_arch_info;
 
-  /* Use default: 0 (ZERO). */
+  /* Use default: BFD_ENDIAN_UNKNOWN (NB: is not ZERO).  */
   int byte_order;
 
   /* Use default: NULL (ZERO). */

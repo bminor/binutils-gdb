@@ -762,7 +762,7 @@ initialize_current_architecture (void)
   /* take several guesses at a byte order. */
   /* NB: can't use TARGET_BYTE_ORDER_DEFAULT as its definition is
      forced above. */
-  if (info.byte_order == 0
+  if (info.byte_order == BFD_ENDIAN_UNKNOWN
       && default_bfd_vec != NULL)
     {
       /* Extract BFD's default vector's byte order. */
@@ -778,7 +778,7 @@ initialize_current_architecture (void)
 	  break;
 	}
     }
-  if (info.byte_order == 0)
+  if (info.byte_order == BFD_ENDIAN_UNKNOWN)
     {
       /* look for ``*el-*'' in the target name. */
       const char *chp;
@@ -788,7 +788,7 @@ initialize_current_architecture (void)
 	  && strncmp (chp - 2, "el", 2) == 0)
 	info.byte_order = BFD_ENDIAN_LITTLE;
     }
-  if (info.byte_order == 0)
+  if (info.byte_order == BFD_ENDIAN_UNKNOWN)
     {
       /* Wire it to big-endian!!! */
       info.byte_order = BIG_ENDIAN;
@@ -842,6 +842,7 @@ void
 gdbarch_info_init (struct gdbarch_info *info)
 {
   memset (info, 0, sizeof (struct gdbarch_info));
+  info->byte_order = BFD_ENDIAN_UNKNOWN;
 }
 
 /* */

@@ -548,7 +548,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   log = mem_fileopen ();
   cleanups = make_cleanup_ui_file_delete (log);
   /* fundamental */
-  if (gdbarch->byte_order == 0)
+  if (gdbarch->byte_order == BFD_ENDIAN_UNKNOWN)
     fprintf_unfiltered (log, "\n\tbyte-order");
   if (gdbarch->bfd_arch_info == NULL)
     fprintf_unfiltered (log, "\n\tbfd_arch_info");
@@ -4749,17 +4749,17 @@ gdbarch_update_p (struct gdbarch_info info)
     info.bfd_arch_info = TARGET_ARCHITECTURE;
 
   /* ``(gdb) set byte-order ...'' */
-  if (info.byte_order == 0
+  if (info.byte_order == BFD_ENDIAN_UNKNOWN
       && !TARGET_BYTE_ORDER_AUTO)
     info.byte_order = TARGET_BYTE_ORDER;
   /* From the INFO struct. */
-  if (info.byte_order == 0
+  if (info.byte_order == BFD_ENDIAN_UNKNOWN
       && info.abfd != NULL)
     info.byte_order = (bfd_big_endian (info.abfd) ? BIG_ENDIAN
 		       : bfd_little_endian (info.abfd) ? BFD_ENDIAN_LITTLE
-		       : 0);
+		       : BFD_ENDIAN_UNKNOWN);
   /* From the current target. */
-  if (info.byte_order == 0)
+  if (info.byte_order == BFD_ENDIAN_UNKNOWN)
     info.byte_order = TARGET_BYTE_ORDER;
 
   /* Must have found some sort of architecture. */

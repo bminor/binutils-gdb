@@ -913,8 +913,7 @@ extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
    The INIT function parameter INFO shall, as far as possible, be
    pre-initialized with information obtained from INFO.ABFD or
-   previously selected architecture (if similar).  INIT shall ensure
-   that the INFO.BYTE_ORDER is non-zero.
+   previously selected architecture (if similar).
 
    The INIT function shall return any of: NULL - indicating that it
    doesn't recognize the selected architecture; an existing \`\`struct
@@ -938,7 +937,7 @@ struct gdbarch_info
   /* Use default: NULL (ZERO). */
   const struct bfd_arch_info *bfd_arch_info;
 
-  /* Use default: 0 (ZERO). */
+  /* Use default: BFD_ENDIAN_UNKNOWN (NB: is not ZERO).  */
   int byte_order;
 
   /* Use default: NULL (ZERO). */
@@ -1429,7 +1428,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   log = mem_fileopen ();
   cleanups = make_cleanup_ui_file_delete (log);
   /* fundamental */
-  if (gdbarch->byte_order == 0)
+  if (gdbarch->byte_order == BFD_ENDIAN_UNKNOWN)
     fprintf_unfiltered (log, "\n\tbyte-order");
   if (gdbarch->bfd_arch_info == NULL)
     fprintf_unfiltered (log, "\n\tbfd_arch_info");
@@ -2058,17 +2057,17 @@ gdbarch_update_p (struct gdbarch_info info)
     info.bfd_arch_info = TARGET_ARCHITECTURE;
 
   /* \`\`(gdb) set byte-order ...'' */
-  if (info.byte_order == 0
+  if (info.byte_order == BFD_ENDIAN_UNKNOWN
       && !TARGET_BYTE_ORDER_AUTO)
     info.byte_order = TARGET_BYTE_ORDER;
   /* From the INFO struct. */
-  if (info.byte_order == 0
+  if (info.byte_order == BFD_ENDIAN_UNKNOWN
       && info.abfd != NULL)
     info.byte_order = (bfd_big_endian (info.abfd) ? BIG_ENDIAN
 		       : bfd_little_endian (info.abfd) ? BFD_ENDIAN_LITTLE
-		       : 0);
+		       : BFD_ENDIAN_UNKNOWN);
   /* From the current target. */
-  if (info.byte_order == 0)
+  if (info.byte_order == BFD_ENDIAN_UNKNOWN)
     info.byte_order = TARGET_BYTE_ORDER;
 
   /* Must have found some sort of architecture. */
