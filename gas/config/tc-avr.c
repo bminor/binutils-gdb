@@ -838,7 +838,7 @@ md_apply_fix3 (fixP, valP, seg)
 
       if (fixP->fx_addsy && (s == seg || s == absolute_section))
 	{
-	  value = S_GET_VALUE (fixP->fx_addsy) + *valuep;
+	  value += S_GET_VALUE (fixP->fx_addsy);
 	  fixP->fx_done = 1;
 	}
     }

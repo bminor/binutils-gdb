@@ -1,3 +1,8 @@
+2001-11-20  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/tc-avr.c (md_apply_fix3): Fix typo introduced by
+	md_apply_fix3 change.
+
 2001-11-20  Ben Elliston  <bje@redhat.com>
 
 	* config/tc-m88k.c (md_apply_fix3): Match local variable `val' to
