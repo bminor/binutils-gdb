@@ -2769,7 +2769,7 @@ The first case will define @var{symbol} to the value of
 defined, and the value will be adjusted accordingly.
 
 The special symbol name @samp{.} indicates the location counter.  You
-may only use this within a @code{SECTIONS} command.
+may only use this within a @code{SECTIONS} command.  @xref{Location Counter}.
 
 The semicolon after @var{expression} is required.
 
@@ -4380,6 +4380,74 @@ move @code{.} backwards).  The @samp{.data} section will start at 0x500
 and it will have an extra 0x600 bytes worth of space after the end of
 the values from the @samp{.data} input sections and before the end of
 the @samp{.data} output section itself.
+
+@cindex dot outside sections
+Setting symbols to the value of the location counter outside of an
+output section statement can result in unexpected values if the linker
+needs to place orphan sections.  For example, given the following:
+
+@smallexample
+SECTIONS
+@{
+    start_of_text = . ;
+    .text: @{ *(.text) @}
+    end_of_text = . ;
+
+    start_of_data = . ;
+    .data: @{ *(.data) @}
+    end_of_data = . ;
+@}
+@end smallexample
+
+If the linker needs to place some input section, e.g. @code{.rodata},
+not mentioned in the script, it might choose to place that section
+between @code{.text} and @code{.data}.  You might think the linker
+should place @code{.rodata} on the blank line in the above script, but
+blank lines are of no particular significance to the linker.  As well,
+the linker doesn't associate the above symbol names with their
+sections.  Instead, it assumes that all assignments or other
+statements belong to the previous output section, except for the
+special case of an assignment to @code{.}.  I.e., the linker will
+place the orphan @code{.rodata} section as if the script was written
+as follows:
+
+@smallexample
+SECTIONS
+@{
+    start_of_text = . ;
+    .text: @{ *(.text) @}
+    end_of_text = . ;
+
+    start_of_data = . ;
+    .rodata: @{ *(.rodata) @}
+    .data: @{ *(.data) @}
+    end_of_data = . ;
+@}
+@end smallexample
+
+This may or may not be the script author's intention for the value of
+@code{start_of_data}.  One way to influence the orphan section
+placement is to assign the location counter to itself, as the linker
+assumes that an assignment to @code{.} is setting the start address of
+a following output section and thus should be grouped with that
+section.  So you could write:
+
+@smallexample
+SECTIONS
+@{
+    start_of_text = . ;
+    .text: @{ *(.text) @}
+    end_of_text = . ;
+
+    . = . ;
+    start_of_data = . ;
+    .data: @{ *(.data) @}
+    end_of_data = . ;
+@}
+@end smallexample
+
+Now, the orphan @code{.rodata} section will be placed between
+@code{end_of_text} and @code{start_of_data}.
 
 @need 2000
 @node Operators

@@ -629,7 +629,7 @@ deffilep.c ldgram.c ldlex.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES)
 OBJECTS = $(ld_new_OBJECTS)
@@ -1111,7 +1111,7 @@ distclean-generic:
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
-	-test -z "ldlexcdeffilephdeffilepcldgramhldgramc$(MAINTAINERCLEANFILES)" || rm -f ldlexc deffileph deffilepc ldgramh ldgramc $(MAINTAINERCLEANFILES)
+	-test -z "ldlex.cdeffilep.hdeffilep.cldgram.hldgram.c$(MAINTAINERCLEANFILES)" || rm -f ldlex.c deffilep.h deffilep.c ldgram.h ldgram.c $(MAINTAINERCLEANFILES)
 mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstPROGRAMS \
 		mostlyclean-compile mostlyclean-libtool \
 		mostlyclean-aminfo mostlyclean-tags mostlyclean-generic \
