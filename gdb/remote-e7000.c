@@ -631,7 +631,7 @@ e7000_start_remote (void *dummy)
   stop_pc = read_pc ();
   set_current_frame (create_new_frame (read_fp (), stop_pc));
   select_frame (get_current_frame ());
-  print_stack_frame (selected_frame, -1, 1);
+  print_stack_frame (deprecated_selected_frame, -1, 1);
 
   return 1;
 }

@@ -649,7 +649,7 @@ value_assign (struct value *toval, struct value *fromval)
 	/* Since modifying a register can trash the frame chain, we
            save the old frame and then restore the new frame
            afterwards.  */
-	get_frame_id (selected_frame, &old_frame);
+	get_frame_id (deprecated_selected_frame, &old_frame);
 
 	/* Figure out which frame this is in currently.  */
 	if (VALUE_LVAL (toval) == lval_register)
@@ -3327,7 +3327,7 @@ value_of_local (const char *name, int complain)
   int i;
   struct value * ret;
 
-  if (selected_frame == 0)
+  if (deprecated_selected_frame == 0)
     {
       if (complain)
 	error ("no frame selected");
@@ -3335,7 +3335,7 @@ value_of_local (const char *name, int complain)
 	return 0;
     }
 
-  func = get_frame_function (selected_frame);
+  func = get_frame_function (deprecated_selected_frame);
   if (!func)
     {
       if (complain)
@@ -3365,7 +3365,7 @@ value_of_local (const char *name, int complain)
 	return NULL;
     }
 
-  ret = read_var_value (sym, selected_frame);
+  ret = read_var_value (sym, deprecated_selected_frame);
   if (ret == 0 && complain)
     error ("`%s' argument unreadable", name);
   return ret;

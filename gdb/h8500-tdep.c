@@ -186,7 +186,7 @@ h8500_print_register_hook (int regno)
       unsigned char b[2];
       unsigned char l;
 
-      frame_register_read (selected_frame, regno, b);
+      frame_register_read (deprecated_selected_frame, regno, b);
       l = b[1];
       printf_unfiltered ("\t");
       printf_unfiltered ("I-%d - ", (l & 0x80) != 0);
@@ -328,7 +328,7 @@ h8500_print_registers_info (struct gdbarch *gdbarch,
 void
 h8500_do_registers_info (int regnum, int all)
 {
-  h8500_print_registers_info (current_gdbarch, gdb_stdout, selected_frame,
+  h8500_print_registers_info (current_gdbarch, gdb_stdout, deprecated_selected_frame,
 			      regnum, all);
 }
 
@@ -617,10 +617,10 @@ h8500_value_of_trapped_internalvar (struct internalvar *var)
       break;
     }
 
-  get_saved_register (regbuf, NULL, NULL, selected_frame, page_regnum, NULL);
+  get_saved_register (regbuf, NULL, NULL, deprecated_selected_frame, page_regnum, NULL);
   regval = regbuf[0] << 16;
 
-  get_saved_register (regbuf, NULL, NULL, selected_frame, regnum, NULL);
+  get_saved_register (regbuf, NULL, NULL, deprecated_selected_frame, regnum, NULL);
   regval |= regbuf[0] << 8 | regbuf[1];		/* XXX host/target byte order */
 
   xfree (var->value);		/* Free up old value */

@@ -1,5 +1,23 @@
 2002-11-29  Andrew Cagney  <ac131313@redhat.com>
 
+	* stack.c (selected_frame, select_frame): Move from here ...
+	* frame.c (selected_frame, select_frame): ... to here.  Include
+	"language.h".
+	* Makefile.in (frame.o): Update dependencies.
+	* frame.c (get_selected_frame): New function.
+	* frame.h (get_selected_frame): Declare.
+	(deprecated_selected_frame): Rename selected_frame.
+	* ada-lang.c, ada-tasks.c, breakpoint.c, corelow.c: Update.
+	* eval.c, f-valprint.c, findvar.c, frame.c, frame.h: Update.
+	* h8300-tdep.c, h8500-tdep.c, hppa-tdep.c, infcmd.c: Update.
+	* inflow.c, infrun.c, macroscope.c, mips-tdep.c: Update.
+	* mn10300-tdep.c, ocd.c, regcache.h, remote-e7000.c: Update.
+	* remote-mips.c, remote-rdp.c, sh-tdep.c, sparc-tdep.c: Update.
+	* stack.c, thread.c, tracepoint.c, valops.c, varobj.c: Update.
+	* z8k-tdep.c, cli/cli-cmds.c: Update.
+	
+2002-11-29  Andrew Cagney  <ac131313@redhat.com>
+
 	* frame.h (get_selected_block): Add comments.
 
 2002-11-28  Andrew Cagney  <ac131313@redhat.com>

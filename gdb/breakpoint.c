@@ -952,8 +952,8 @@ insert_breakpoints (void)
 
 	/* Save the current frame and level so we can restore it after
 	   evaluating the watchpoint expression on its own frame.  */
-	saved_frame = selected_frame;
-	saved_level = frame_relative_level (selected_frame);
+	saved_frame = deprecated_selected_frame;
+	saved_level = frame_relative_level (deprecated_selected_frame);
 
 	/* Determine if the watchpoint is within scope.  */
 	if (b->exp_valid_block == NULL)
@@ -1049,8 +1049,8 @@ insert_breakpoints (void)
 	  }
 
 	/* Restore the frame and level.  */
-	if ((saved_frame != selected_frame) ||
-	    (saved_level != frame_relative_level (selected_frame)))
+	if ((saved_frame != deprecated_selected_frame) ||
+	    (saved_level != frame_relative_level (deprecated_selected_frame)))
 	  select_frame (saved_frame);
 
 	if (val)
@@ -4963,9 +4963,9 @@ break_at_finish_at_depth_command_1 (char *arg, int flag, int from_tty)
 
       if (default_breakpoint_valid)
 	{
-	  if (selected_frame)
+	  if (deprecated_selected_frame)
 	    {
-	      selected_pc = selected_frame->pc;
+	      selected_pc = deprecated_selected_frame->pc;
 	      if (arg)
 		if_arg = 1;
 	    }
@@ -5041,10 +5041,10 @@ break_at_finish_command_1 (char *arg, int flag, int from_tty)
     {
       if (default_breakpoint_valid)
 	{
-	  if (selected_frame)
+	  if (deprecated_selected_frame)
 	    {
 	      addr_string = (char *) xmalloc (15);
-	      sprintf (addr_string, "*0x%s", paddr_nz (selected_frame->pc));
+	      sprintf (addr_string, "*0x%s", paddr_nz (deprecated_selected_frame->pc));
 	      if (arg)
 		if_arg = 1;
 	    }
@@ -5583,7 +5583,7 @@ until_break_command (char *arg, int from_tty)
 {
   struct symtabs_and_lines sals;
   struct symtab_and_line sal;
-  struct frame_info *prev_frame = get_prev_frame (selected_frame);
+  struct frame_info *prev_frame = get_prev_frame (deprecated_selected_frame);
   struct breakpoint *breakpoint;
   struct cleanup *old_chain;
   struct continuation_arg *arg1;
@@ -5612,7 +5612,7 @@ until_break_command (char *arg, int from_tty)
 
   resolve_sal_pc (&sal);
 
-  breakpoint = set_momentary_breakpoint (sal, selected_frame, bp_until);
+  breakpoint = set_momentary_breakpoint (sal, deprecated_selected_frame, bp_until);
 
   if (!event_loop_p || !target_can_async_p ())
     old_chain = make_cleanup_delete_breakpoint (breakpoint);
@@ -5770,10 +5770,10 @@ get_catch_sals (int this_level_only)
 
   /* Not sure whether an error message is always the correct response,
      but it's better than a core dump.  */
-  if (selected_frame == NULL)
+  if (deprecated_selected_frame == NULL)
     error ("No selected frame.");
-  block = get_frame_block (selected_frame, 0);
-  pc = selected_frame->pc;
+  block = get_frame_block (deprecated_selected_frame, 0);
+  pc = deprecated_selected_frame->pc;
 
   sals.nelts = 0;
   sals.sals = NULL;
@@ -7368,8 +7368,8 @@ is valid is not currently in scope.\n", bpt->number);
 	      return;
 	    }
 
-	  save_selected_frame = selected_frame;
-	  save_selected_frame_level = frame_relative_level (selected_frame);
+	  save_selected_frame = deprecated_selected_frame;
+	  save_selected_frame_level = frame_relative_level (deprecated_selected_frame);
 	  select_frame (fr);
 	}
 

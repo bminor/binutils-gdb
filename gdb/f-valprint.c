@@ -74,7 +74,7 @@ f77_get_dynamic_lowerbound (struct type *type, int *lower_bound)
   switch (TYPE_ARRAY_LOWER_BOUND_TYPE (type))
     {
     case BOUND_BY_VALUE_ON_STACK:
-      current_frame_addr = selected_frame->frame;
+      current_frame_addr = deprecated_selected_frame->frame;
       if (current_frame_addr > 0)
 	{
 	  *lower_bound =
@@ -98,7 +98,7 @@ f77_get_dynamic_lowerbound (struct type *type, int *lower_bound)
       break;
 
     case BOUND_BY_REF_ON_STACK:
-      current_frame_addr = selected_frame->frame;
+      current_frame_addr = deprecated_selected_frame->frame;
       if (current_frame_addr > 0)
 	{
 	  ptr_to_lower_bound =
@@ -132,7 +132,7 @@ f77_get_dynamic_upperbound (struct type *type, int *upper_bound)
   switch (TYPE_ARRAY_UPPER_BOUND_TYPE (type))
     {
     case BOUND_BY_VALUE_ON_STACK:
-      current_frame_addr = selected_frame->frame;
+      current_frame_addr = deprecated_selected_frame->frame;
       if (current_frame_addr > 0)
 	{
 	  *upper_bound =
@@ -161,7 +161,7 @@ f77_get_dynamic_upperbound (struct type *type, int *upper_bound)
       break;
 
     case BOUND_BY_REF_ON_STACK:
-      current_frame_addr = selected_frame->frame;
+      current_frame_addr = deprecated_selected_frame->frame;
       if (current_frame_addr > 0)
 	{
 	  ptr_to_upper_bound =
@@ -587,7 +587,7 @@ info_common_command (char *comname, int from_tty)
      first make sure that it is visible and if so, let 
      us display its contents */
 
-  fi = selected_frame;
+  fi = deprecated_selected_frame;
 
   if (fi == NULL)
     error ("No frame selected");
@@ -679,7 +679,7 @@ there_is_a_visible_common_named (char *comname)
   if (comname == NULL)
     error ("Cannot deal with NULL common name!");
 
-  fi = selected_frame;
+  fi = deprecated_selected_frame;
 
   if (fi == NULL)
     error ("No frame selected");

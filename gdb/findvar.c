@@ -303,7 +303,7 @@ value_of_register (int regnum, struct frame_info *frame)
   /* Builtin registers lie completly outside of the range of normal
      registers.  Catch them early so that the target never sees them.  */
   if (regnum >= NUM_REGS + NUM_PSEUDO_REGS)
-    return value_of_builtin_reg (regnum, selected_frame);
+    return value_of_builtin_reg (regnum, deprecated_selected_frame);
 
   get_saved_register (raw_buffer, &optim, &addr,
 		      frame, regnum, &lval);
@@ -418,7 +418,7 @@ symbol_read_needs_frame (struct symbol *sym)
    and a stack frame id, read the value of the variable
    and return a (pointer to a) struct value containing the value. 
    If the variable cannot be found, return a zero pointer.
-   If FRAME is NULL, use the selected_frame.  */
+   If FRAME is NULL, use the deprecated_selected_frame.  */
 
 struct value *
 read_var_value (register struct symbol *var, struct frame_info *frame)
@@ -435,7 +435,7 @@ read_var_value (register struct symbol *var, struct frame_info *frame)
   len = TYPE_LENGTH (type);
 
   if (frame == NULL)
-    frame = selected_frame;
+    frame = deprecated_selected_frame;
 
   switch (SYMBOL_CLASS (var))
     {

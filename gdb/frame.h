@@ -73,14 +73,23 @@ extern struct frame_info *get_current_frame (void);
    flush_cached_frames() and reinit_frame_cache() is that the latter
    explicitly sets the selected frame back to the current frame there
    isn't any real difference (except that one delays the selection of
-   a new frame).  There should instead be a get_selected_frame()
-   method that reinit's the frame cache on-demand.  As for
-   invalidating the cache, there should be two methods one that
-   reverts the thread's selected frame back to current frame (for when
-   the inferior resumes) and one that does not (for when the user
-   modifies the target invalidating the frame cache).  */
+   a new frame).  Code can instead simply rely on get_selected_frame()
+   to reinit's the selected frame as needed.  As for invalidating the
+   cache, there should be two methods one that reverts the thread's
+   selected frame back to current frame (for when the inferior
+   resumes) and one that does not (for when the user modifies the
+   target invalidating the frame cache).  */
 extern void flush_cached_frames (void);
 extern void reinit_frame_cache (void);
+
+/* On demand, create the selected frame and then return it.  If the
+   selected frame can not be created, this function throws an error.  */
+/* FIXME: cagney/2002-11-28: At present, when there is no selected
+   frame, this function always returns the current (inner most) frame.
+   It should instead, when a thread has previously had its frame
+   selected (but not resumed) and the frame cache invalidated, find
+   and then return that thread's previously selected frame.  */
+extern struct frame_info *get_selected_frame (void);
 
 /* Select a specific frame.  NULL, apparently implies re-select the
    inner most frame.  */
@@ -564,21 +573,21 @@ extern void return_command (char *, int);
    The relevant code needs to be audited to determine if it is
    possible (or pratical) to instead pass the applicable frame in as a
    parameter.  For instance, DEPRECATED_DO_REGISTERS_INFO() relied on
-   the selected_frame global, but its replacement,
+   the deprecated_selected_frame global, while its replacement,
    PRINT_REGISTERS_INFO(), is parameterized with the selected frame.
    The only real exceptions occure at the edge (in the CLI code) where
    user commands need to pick up the selected frame before proceeding.
 
    This is important.  GDB is trying to stamp out the hack:
 
-   saved_frame = selected_frame;
-   selected_frame = ...;
+   saved_frame = deprecated_selected_frame;
+   deprecated_selected_frame = ...;
    hack_using_global_selected_frame ();
-   selected_frame = saved_frame;
+   deprecated_selected_frame = saved_frame;
 
    Take care!  */
 
-extern struct frame_info *selected_frame;
+extern struct frame_info *deprecated_selected_frame;
 
 
 /* NOTE: cagney/2002-11-28:

@@ -1,3 +1,9 @@
+2002-11-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* tui/tui-hooks.c: Update to use deprecated_selected_frame.
+	* tui/tui.c, tui/tuiDisassem.c, tui/tuiRegs.c: Ditto.
+	* tui/tuiSource.c, tui/tuiSourceWin.c, tui/tuiWin.c: Ditto.
+
 2002-11-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* tuiStack.c (tuiShowFrameInfo): Use find_frame_sal instead of

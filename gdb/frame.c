@@ -33,6 +33,7 @@
 #include "dummy-frame.h"
 #include "gdbcore.h"
 #include "annotate.h"
+#include "language.h"
 
 /* Return a frame uniq ID that can be used to, later re-find the
    frame.  */
@@ -440,6 +441,65 @@ void
 set_current_frame (struct frame_info *frame)
 {
   current_frame = frame;
+}
+
+/* The "selected" stack frame is used by default for local and arg
+   access.  May be zero, for no selected frame.  */
+
+struct frame_info *deprecated_selected_frame;
+
+/* Return the selected frame.  Always non-null (unless there isn't an
+   inferior sufficient for creating a frame) in which case an error is
+   thrown.  */
+
+struct frame_info *
+get_selected_frame (void)
+{
+  if (deprecated_selected_frame == NULL)
+    /* Hey!  Don't trust this.  It should really be re-finding the
+       last selected frame of the currently selected thread.  This,
+       though, is better than nothing.  */
+    select_frame (get_current_frame ());
+  /* There is always a frame.  */
+  gdb_assert (deprecated_selected_frame != NULL);
+  return deprecated_selected_frame;
+}
+
+/* Select frame FI (or NULL - to invalidate the current frame).  */
+
+void
+select_frame (struct frame_info *fi)
+{
+  register struct symtab *s;
+
+  deprecated_selected_frame = fi;
+  /* NOTE: cagney/2002-05-04: FI can be NULL.  This occures when the
+     frame is being invalidated.  */
+  if (selected_frame_level_changed_hook)
+    selected_frame_level_changed_hook (frame_relative_level (fi));
+
+  /* FIXME: kseitz/2002-08-28: It would be nice to call
+     selected_frame_level_changed_event right here, but due to limitations
+     in the current interfaces, we would end up flooding UIs with events
+     because select_frame is used extensively internally.
+
+     Once we have frame-parameterized frame (and frame-related) commands,
+     the event notification can be moved here, since this function will only
+     be called when the users selected frame is being changed. */
+
+  /* Ensure that symbols for this frame are read in.  Also, determine the
+     source language of this frame, and switch to it if desired.  */
+  if (fi)
+    {
+      s = find_pc_symtab (fi->pc);
+      if (s
+	  && s->language != current_language->la_language
+	  && s->language != language_unknown
+	  && language_mode == language_mode_auto)
+	{
+	  set_language (s->language);
+	}
+    }
 }
 
 /* Return the register saved in the simplistic ``saved_regs'' cache.

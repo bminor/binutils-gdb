@@ -3941,7 +3941,7 @@ mips_read_fp_register_single (int regno, char *rare_buffer)
   int raw_size = REGISTER_RAW_SIZE (regno);
   char *raw_buffer = alloca (raw_size);
 
-  if (!frame_register_read (selected_frame, regno, raw_buffer))
+  if (!frame_register_read (deprecated_selected_frame, regno, raw_buffer))
     error ("can't read register %d (%s)", regno, REGISTER_NAME (regno));
   if (raw_size == 8)
     {
@@ -3975,7 +3975,7 @@ mips_read_fp_register_double (int regno, char *rare_buffer)
     {
       /* We have a 64-bit value for this register, and we should use
 	 all 64 bits.  */
-      if (!frame_register_read (selected_frame, regno, rare_buffer))
+      if (!frame_register_read (deprecated_selected_frame, regno, rare_buffer))
 	error ("can't read register %d (%s)", regno, REGISTER_NAME (regno));
     }
   else
@@ -4006,7 +4006,7 @@ mips_print_register (int regnum, int all)
   char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
 
   /* Get the data in raw format.  */
-  if (!frame_register_read (selected_frame, regnum, raw_buffer))
+  if (!frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
     {
       printf_filtered ("%s: [Invalid]", REGISTER_NAME (regnum));
       return;
@@ -4186,7 +4186,7 @@ do_gp_register_row (int regnum)
       if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
 	break;			/* end row: reached FP register */
       /* OK: get the data in raw format.  */
-      if (!frame_register_read (selected_frame, regnum, raw_buffer))
+      if (!frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
 	error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
       /* pad small registers */
       for (byte = 0; byte < (MIPS_REGSIZE - REGISTER_VIRTUAL_SIZE (regnum)); byte++)

@@ -3536,7 +3536,7 @@ add_symbols_from_enclosing_procs (const char *name, namespace_enum namespace,
 	-(long) TYPE_LENGTH (SYMBOL_TYPE (static_link));
     }
 
-  frame = selected_frame;
+  frame = deprecated_selected_frame;
   while (frame != NULL && ndefns == 0)
     {
       struct block *block;
@@ -5043,7 +5043,7 @@ find_printable_frame (struct frame_info *fi, int level)
 	      STREQ (sal.symtab->objfile->name, "/usr/shlib/libpthread.so"))
 	    continue;
 #endif
-	  selected_frame = fi;
+	  deprecated_selected_frame = fi;
 	  break;
 	}
     }

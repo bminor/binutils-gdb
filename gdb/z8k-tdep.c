@@ -327,8 +327,8 @@ z8k_print_register_hook (int regno)
     {
       unsigned char l[4];
 
-      frame_register_read (selected_frame, regno, l + 0);
-      frame_register_read (selected_frame, regno + 1, l + 2);
+      frame_register_read (deprecated_selected_frame, regno, l + 0);
+      frame_register_read (deprecated_selected_frame, regno + 1, l + 2);
       printf_unfiltered ("\t");
       printf_unfiltered ("0x%02x%02x%02x%02x", l[0], l[1], l[2], l[3]);
     }
@@ -337,10 +337,10 @@ z8k_print_register_hook (int regno)
     {
       unsigned char l[8];
 
-      frame_register_read (selected_frame, regno, l + 0);
-      frame_register_read (selected_frame, regno + 1, l + 2);
-      frame_register_read (selected_frame, regno + 2, l + 4);
-      frame_register_read (selected_frame, regno + 3, l + 6);
+      frame_register_read (deprecated_selected_frame, regno, l + 0);
+      frame_register_read (deprecated_selected_frame, regno + 1, l + 2);
+      frame_register_read (deprecated_selected_frame, regno + 2, l + 4);
+      frame_register_read (deprecated_selected_frame, regno + 3, l + 6);
 
       printf_unfiltered ("\t");
       printf_unfiltered ("0x%02x%02x%02x%02x%02x%02x%02x%02x",
@@ -351,7 +351,7 @@ z8k_print_register_hook (int regno)
       unsigned short rval;
       int i;
 
-      frame_register_read (selected_frame, regno, (char *) (&rval));
+      frame_register_read (deprecated_selected_frame, regno, (char *) (&rval));
 
       printf_unfiltered ("\n");
       for (i = 0; i < 10; i += 2)
@@ -469,8 +469,8 @@ z8k_print_registers_info (struct gdbarch *gdbarch,
 void
 z8k_do_registers_info (int regnum, int all)
 {
-  z8k_print_registers_info (current_gdbarch, gdb_stdout, selected_frame,
-			    regnum, all);
+  z8k_print_registers_info (current_gdbarch, gdb_stdout,
+			    deprecated_selected_frame, regnum, all);
 }
 
 void

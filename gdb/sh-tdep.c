@@ -2937,7 +2937,7 @@ sh64_show_compact_regs (void)
 static void
 sh64_show_regs (void)
 {
-  if (pc_is_isa32 (selected_frame->pc))
+  if (pc_is_isa32 (deprecated_selected_frame->pc))
     sh64_show_media_regs ();
   else
     sh64_show_compact_regs ();
@@ -3919,7 +3919,7 @@ sh_do_fp_register (int regnum)
   raw_buffer = (char *) alloca (REGISTER_RAW_SIZE (FP0_REGNUM));
 
   /* Get the data in raw format.  */
-  if (!frame_register_read (selected_frame, regnum, raw_buffer))
+  if (!frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
     error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
 
   /* Get the register as a number */ 
@@ -4001,7 +4001,7 @@ sh_do_register (int regnum)
   print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), gdb_stdout);
 
   /* Get the data in raw format.  */
-  if (!frame_register_read (selected_frame, regnum, raw_buffer))
+  if (!frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
     printf_filtered ("*value not available*\n");
       
   val_print (REGISTER_VIRTUAL_TYPE (regnum), raw_buffer, 0, 0,
@@ -4112,7 +4112,7 @@ sh_compact_do_registers_info (int regnum, int fpregs)
 void
 sh64_do_registers_info (int regnum, int fpregs)
 {
-  if (pc_is_isa32 (selected_frame->pc))
+  if (pc_is_isa32 (deprecated_selected_frame->pc))
    sh_do_registers_info (regnum, fpregs);
   else
    sh_compact_do_registers_info (regnum, fpregs); 

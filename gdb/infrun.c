@@ -3342,7 +3342,7 @@ normal_stop (void)
          bpstat_print() contains the logic deciding in detail
          what to print, based on the event(s) that just occurred. */
 
-      if (stop_print_frame && selected_frame)
+      if (stop_print_frame && deprecated_selected_frame)
 	{
 	  int bpstat_ret;
 	  int source_flag;
@@ -3386,7 +3386,7 @@ normal_stop (void)
 	     LOCATION: Print only location
 	     SRC_AND_LOC: Print location and source line */
 	  if (do_frame_printing)
-	    show_and_print_stack_frame (selected_frame, -1, source_flag);
+	    show_and_print_stack_frame (deprecated_selected_frame, -1, source_flag);
 
 	  /* Display the auto-display expressions.  */
 	  do_displays ();
@@ -3856,7 +3856,7 @@ save_inferior_status (int restore_stack_info)
 
   inf_status->registers = regcache_dup (current_regcache);
 
-  get_frame_id (selected_frame, &inf_status->selected_frame_id);
+  get_frame_id (deprecated_selected_frame, &inf_status->selected_frame_id);
   return inf_status;
 }
 

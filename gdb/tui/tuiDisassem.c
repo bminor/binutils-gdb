@@ -420,7 +420,7 @@ tuiVerticalDisassemScroll (TuiScrollDirection scrollDirection,
 
       content = (TuiWinContent) disassemWin->generic.content;
       if (cursal.symtab == (struct symtab *) NULL)
-	s = find_pc_symtab (selected_frame->pc);
+	s = find_pc_symtab (deprecated_selected_frame->pc);
       else
 	s = cursal.symtab;
 

@@ -638,7 +638,7 @@ _tuiRegisterFormat (char *buf, int bufLen, int regNum,
   stream = tui_sfileopen (bufLen);
   gdb_stdout = stream;
   cleanups = make_cleanup (tui_restore_gdbout, (void*) old_stdout);
-  gdbarch_print_registers_info (current_gdbarch, stream, selected_frame,
+  gdbarch_print_registers_info (current_gdbarch, stream, deprecated_selected_frame,
                                 regNum, 1);
 
   /* Save formatted output in the buffer.  */
@@ -679,7 +679,7 @@ _tuiSetGeneralRegsContent (int refreshValuesOnly)
 {
   return (_tuiSetRegsContent (0,
 			      NUM_GENERAL_REGS - 1,
-			      selected_frame,
+			      deprecated_selected_frame,
 			      TUI_GENERAL_REGS,
 			      refreshValuesOnly));
 
@@ -705,7 +705,7 @@ _tuiSetSpecialRegsContent (int refreshValuesOnly)
   endRegNum = FP0_REGNUM - 1;
   ret = _tuiSetRegsContent (START_SPECIAL_REGS,
 			    endRegNum,
-			    selected_frame,
+			    deprecated_selected_frame,
 			    TUI_SPECIAL_REGS,
 			    refreshValuesOnly);
 
@@ -725,7 +725,7 @@ _tuiSetGeneralAndSpecialRegsContent (int refreshValuesOnly)
 
   endRegNum = FP0_REGNUM - 1;
   ret = _tuiSetRegsContent (
-	 0, endRegNum, selected_frame, TUI_SPECIAL_REGS, refreshValuesOnly);
+	 0, endRegNum, deprecated_selected_frame, TUI_SPECIAL_REGS, refreshValuesOnly);
 
   return ret;
 }				/* _tuiSetGeneralAndSpecialRegsContent */
@@ -743,7 +743,7 @@ _tuiSetFloatRegsContent (TuiRegisterDisplayType dpyType, int refreshValuesOnly)
   startRegNum = FP0_REGNUM;
   ret = _tuiSetRegsContent (startRegNum,
 			    NUM_REGS - 1,
-			    selected_frame,
+			    deprecated_selected_frame,
 			    dpyType,
 			    refreshValuesOnly);
 

@@ -1012,7 +1012,7 @@ mn10300_print_register (const char *name, int regnum, int reg_width)
     printf_filtered ("%s: ", name);
 
   /* Get the data */
-  if (!frame_register_read (selected_frame, regnum, raw_buffer))
+  if (!frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
     {
       printf_filtered ("[invalid]");
       return;

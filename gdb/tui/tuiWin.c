@@ -1397,13 +1397,13 @@ _makeVisibleWithNewHeight (TuiWinInfoPtr winInfo)
 	  tuiUpdateSourceWindow (winInfo,
 				 cursal.symtab, lineOrAddr, TRUE);
 	}
-      else if (selected_frame != (struct frame_info *) NULL)
+      else if (deprecated_selected_frame != (struct frame_info *) NULL)
 	{
 	  TuiLineOrAddress line;
 	  struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
 
-	  s = find_pc_symtab (selected_frame->pc);
+	  s = find_pc_symtab (deprecated_selected_frame->pc);
 	  if (winInfo->generic.type == SRC_WIN)
 	    line.lineNo = cursal.line;
 	  else

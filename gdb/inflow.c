@@ -608,11 +608,11 @@ kill_command (char *arg, int from_tty)
   if (target_has_stack)
     {
       printf_filtered ("In %s,\n", target_longname);
-      if (selected_frame == NULL)
+      if (deprecated_selected_frame == NULL)
 	fputs_filtered ("No selected stack frame.\n", gdb_stdout);
       else
-	print_stack_frame (selected_frame,
-			   frame_relative_level (selected_frame), 1);
+	print_stack_frame (deprecated_selected_frame,
+			   frame_relative_level (deprecated_selected_frame), 1);
     }
 }
 

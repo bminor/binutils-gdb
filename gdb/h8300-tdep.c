@@ -904,7 +904,7 @@ h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
       int C, Z, N, V;
       unsigned char b[h8300h_reg_size];
       unsigned char l;
-      frame_register_read (selected_frame, regno, b);
+      frame_register_read (deprecated_selected_frame, regno, b);
       l = b[REGISTER_VIRTUAL_SIZE (E_CCR_REGNUM) - 1];
       fprintf_filtered (file, "\t");
       fprintf_filtered (file, "I-%d ", (l & 0x80) != 0);
@@ -945,7 +945,7 @@ h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
       /* EXR register */
       unsigned char b[h8300h_reg_size];
       unsigned char l;
-      frame_register_read (selected_frame, regno, b);
+      frame_register_read (deprecated_selected_frame, regno, b);
       l = b[REGISTER_VIRTUAL_SIZE (E_EXR_REGNUM) - 1];
       fprintf_filtered (file, "\t");
       fprintf_filtered (file, "T-%d - - - ", (l & 0x80) != 0);

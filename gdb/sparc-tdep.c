@@ -816,10 +816,10 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
       /* error ("No selected frame."); */
       if (!target_has_registers)
 	error ("The program has no registers now.");
-      if (selected_frame == NULL)
+      if (deprecated_selected_frame == NULL)
 	error ("No selected frame.");
       /* Try to use selected frame */
-      frame = get_prev_frame (selected_frame);
+      frame = get_prev_frame (deprecated_selected_frame);
       if (frame == 0)
 	error ("Cmd not meaningful in the outermost frame.");
     }
@@ -1871,8 +1871,8 @@ sparc_print_register_hook (int regno)
     {
       char value[16];
 
-      if (frame_register_read (selected_frame, regno, value)
-	  && frame_register_read (selected_frame, regno + 1, value + 4))
+      if (frame_register_read (deprecated_selected_frame, regno, value)
+	  && frame_register_read (deprecated_selected_frame, regno + 1, value + 4))
 	{
 	  printf_unfiltered ("\t");
 	  print_floating (value, builtin_type_double, gdb_stdout);
@@ -1880,8 +1880,8 @@ sparc_print_register_hook (int regno)
 #if 0				/* FIXME: gdb doesn't handle long doubles */
       if ((regno & 3) == 0)
 	{
-	  if (frame_register_read (selected_frame, regno + 2, value + 8)
-	      && frame_register_read (selected_frame, regno + 3, value + 12))
+	  if (frame_register_read (deprecated_selected_frame, regno + 2, value + 8)
+	      && frame_register_read (deprecated_selected_frame, regno + 3, value + 12))
 	    {
 	      printf_unfiltered ("\t");
 	      print_floating (value, builtin_type_long_double, gdb_stdout);
@@ -1900,8 +1900,8 @@ sparc_print_register_hook (int regno)
     {
       char value[16];
 
-      if (frame_register_read (selected_frame, regno, value)
-	  && frame_register_read (selected_frame, regno + 1, value + 8))
+      if (frame_register_read (deprecated_selected_frame, regno, value)
+	  && frame_register_read (deprecated_selected_frame, regno + 1, value + 8))
 	{
 	  printf_unfiltered ("\t");
 	  print_floating (value, builtin_type_long_double, gdb_stdout);
@@ -2150,7 +2150,7 @@ sparc_print_registers_info (struct gdbarch *gdbarch,
 void
 sparc_do_registers_info (int regnum, int all)
 {
-  sparc_print_registers_info (current_gdbarch, gdb_stdout, selected_frame,
+  sparc_print_registers_info (current_gdbarch, gdb_stdout, deprecated_selected_frame,
 			      regnum, all);
 }
 
@@ -2166,8 +2166,8 @@ sparclet_print_registers_info (struct gdbarch *gdbarch,
 void
 sparclet_do_registers_info (int regnum, int all)
 {
-  sparclet_print_registers_info (current_gdbarch, gdb_stdout, selected_frame,
-				 regnum, all);
+  sparclet_print_registers_info (current_gdbarch, gdb_stdout,
+				 deprecated_selected_frame, regnum, all);
 }
 
 

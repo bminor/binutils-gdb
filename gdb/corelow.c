@@ -364,8 +364,8 @@ core_open (char *filename, int from_tty)
       /* Now, set up the frame cache, and print the top of stack.  */
       flush_cached_frames ();
       select_frame (get_current_frame ());
-      print_stack_frame (selected_frame,
-			 frame_relative_level (selected_frame), 1);
+      print_stack_frame (deprecated_selected_frame,
+			 frame_relative_level (deprecated_selected_frame), 1);
     }
   else
     {
