@@ -1,5 +1,19 @@
 2003-10-13  Kevin Buettner  <kevinb@redhat.com>
 
+	* breakpoint.h (struct breakpoint): Add new member
+	``requested_address''.
+	* breakpoint.c (breakpoint_adjustment_warning)
+	(adjust_breakpoint_address): New static functions.
+	(print_it_typical): Issue warning if breakpoint's address is different
+	from its requested address.
+	(set_raw_breakpoint, set_longjmp_resume_breakpoint, watch_command_1)
+	(breakpoint_re_set_one):  Set breakpoint's
+	``requested_address'' field.  Set ``address'' field to the
+	result of calling adjust_breakpoint_address() on the requested
+	address.
+
+2003-10-13  Kevin Buettner  <kevinb@redhat.com>
+
  	* gdbarch.sh (ADJUST_BREAKPOINT_ADDRESS): New method.
  	* gdbarch.h, gdbarch.c: Regenerate.
 

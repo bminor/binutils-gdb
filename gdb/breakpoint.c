@@ -97,6 +97,10 @@ struct breakpoint *set_raw_breakpoint (struct symtab_and_line, enum bptype);
 
 static void check_duplicates (struct breakpoint *);
 
+static void breakpoint_adjustment_warning (CORE_ADDR, CORE_ADDR, int, int);
+
+static CORE_ADDR adjust_breakpoint_address (CORE_ADDR bpaddr);
+
 static void describe_other_breakpoints (CORE_ADDR, asection *);
 
 static void breakpoints_info (char *, int);
@@ -2023,6 +2027,10 @@ print_it_typical (bpstat bs)
     {
     case bp_breakpoint:
     case bp_hardware_breakpoint:
+      if (bs->breakpoint_at->address != bs->breakpoint_at->requested_address)
+	breakpoint_adjustment_warning (bs->breakpoint_at->requested_address,
+	                               bs->breakpoint_at->address,
+				       bs->breakpoint_at->number, 1);
       annotate_breakpoint (bs->breakpoint_at->number);
       ui_out_text (uiout, "\nBreakpoint ");
       if (ui_out_is_mi_like_p (uiout))
@@ -3840,6 +3848,54 @@ check_duplicates (struct breakpoint *bpt)
     }
 }
 
+static void
+breakpoint_adjustment_warning (CORE_ADDR from_addr, CORE_ADDR to_addr,
+                               int bnum, int have_bnum)
+{
+  char astr1[40];
+  char astr2[40];
+
+  strcpy (astr1, local_hex_string_custom ((unsigned long) from_addr, "08l"));
+  strcpy (astr2, local_hex_string_custom ((unsigned long) to_addr, "08l"));
+  if (have_bnum)
+    warning ("Breakpoint %d address previously adjusted from %s to %s.",
+             bnum, astr1, astr2);
+  else
+    warning ("Breakpoint address adjusted from %s to %s.", astr1, astr2);
+}
+
+/* Adjust a breakpoint's address to account for architectural constraints
+   on breakpoint placement.  Return the adjusted address.  Note: Very
+   few targets require this kind of adjustment.  For most targets,
+   this function is simply the identity function.  */
+
+static CORE_ADDR
+adjust_breakpoint_address (CORE_ADDR bpaddr)
+{
+  if (!gdbarch_adjust_breakpoint_address_p (current_gdbarch))
+    {
+      /* Very few targets need any kind of breakpoint adjustment.  */
+      return bpaddr;
+    }
+  else
+    {
+      CORE_ADDR adjusted_bpaddr;
+
+      /* Some targets have architectural constraints on the placement
+         of breakpoint instructions.  Obtain the adjusted address.  */
+      adjusted_bpaddr = gdbarch_adjust_breakpoint_address (current_gdbarch,
+                                                           bpaddr);
+
+      /* An adjusted breakpoint address can significantly alter
+         a user's expectations.  Print a warning if an adjustment
+	 is required.  */
+      if (adjusted_bpaddr != bpaddr)
+	breakpoint_adjustment_warning (bpaddr, adjusted_bpaddr, 0, 0);
+
+      return adjusted_bpaddr;
+    }
+}
+
 /* set_raw_breakpoint() is a low level routine for allocating and
    partially initializing a breakpoint of type BPTYPE.  The newly
    created breakpoint's address, section, source file name, and line
@@ -3862,7 +3918,8 @@ set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
 
   b = (struct breakpoint *) xmalloc (sizeof (struct breakpoint));
   memset (b, 0, sizeof (*b));
-  b->address = sal.pc;
+  b->requested_address = sal.pc;
+  b->address = adjust_breakpoint_address (b->requested_address);
   if (sal.symtab == NULL)
     b->source_file = NULL;
   else
@@ -4353,7 +4410,8 @@ set_longjmp_resume_breakpoint (CORE_ADDR pc, struct frame_id frame_id)
   ALL_BREAKPOINTS (b)
     if (b->type == bp_longjmp_resume)
     {
-      b->address = pc;
+      b->requested_address = pc;
+      b->address = adjust_breakpoint_address (b->requested_address);
       b->enable_state = bp_enabled;
       b->frame_id = frame_id;
       check_duplicates (b);
@@ -5468,7 +5526,9 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
 	  scope_breakpoint->frame_id = get_frame_id (prev_frame);
 
 	  /* Set the address at which we will stop.  */
-	  scope_breakpoint->address = get_frame_pc (prev_frame);
+	  scope_breakpoint->requested_address = get_frame_pc (prev_frame);
+	  scope_breakpoint->address =
+	    adjust_breakpoint_address (scope_breakpoint->requested_address);
 
 	  /* The scope breakpoint is related to the watchpoint.  We
 	     will need to act on them together.  */
@@ -6832,7 +6892,8 @@ breakpoint_re_set_one (void *bint)
 		  savestring (sals.sals[i].symtab->filename,
 			      strlen (sals.sals[i].symtab->filename));
 	      b->line_number = sals.sals[i].line;
-	      b->address = sals.sals[i].pc;
+	      b->requested_address = sals.sals[i].pc;
+	      b->address = adjust_breakpoint_address (b->requested_address);
 
 	      /* Used to check for duplicates here, but that can
 	         cause trouble, as it doesn't check for disabled

@@ -227,6 +227,14 @@ struct breakpoint
        simulators).  NULL is not a special value for this field.  */
     CORE_ADDR address;
 
+    /* Address at which breakpoint was requested, either by the user or
+       by GDB for internal breakpoints.  This will usually be the same
+       as ``address'' (above) except for cases in which
+       ADJUST_BREAKPOINT_ADDRESS has computed a different address at
+       which to place the breakpoint in order to comply with a
+       processor's architectual constraints.  */
+    CORE_ADDR requested_address;
+
     /* Line number of this address.  */
 
     int line_number;
