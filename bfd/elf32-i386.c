@@ -1193,8 +1193,9 @@ allocate_plt_and_got_and_discard_relocs (h, inf)
        && ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
 	   || info->symbolic))
       || (!info->shared
-	  && ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) != 0
-	      || h->dynindx == -1)))
+	  && (h->dynindx == -1
+	      || (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) != 0
+	      || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0)))
     {
       struct elf_i386_link_hash_entry *eh;
       struct elf_i386_dyn_relocs *c;
@@ -1693,10 +1694,8 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		  && h != NULL
 		  && h->dynindx != -1
 		  && (h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
-		  && ((h->root.type == bfd_link_hash_defined
-		       || h->root.type == bfd_link_hash_defweak)
-		      && (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_DEF_DYNAMIC) != 0)))
+		  && (h->elf_link_hash_flags
+		      & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	    {
 	      Elf_Internal_Rel outrel;
 	      boolean skip, relocate;

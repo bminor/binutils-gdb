@@ -1,3 +1,10 @@
+2001-06-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-i386.c (allocate_plt_and_got_and_discard_relocs): Discard
+	relocs without ELF_LINK_HASH_DEF_DYNAMIC set.
+	(elf_i386_relocate_section <R_386_32, R_386_PC32>): Remove
+	redundant bfd_link_hash_defined, bfd_link_hash_defweak test.
+
 2001-06-24  H.J. Lu  <hjl@gnu.org>
 
 	* cpu-i960.c (scan_960_mach): Don't modify const char *. Use
@@ -5,8 +12,8 @@
 
 2001-06-23  H.J. Lu  <hjl@gnu.org>
 
-	* elf32-i386.c (elf_i386_relocate_section): Check the
-	ELF_LINK_HASH_DEF_DYNAMIC to see if a symbol is not defined
+	* elf32-i386.c (elf_i386_relocate_section <R_386_32, R_386_PC32>):
+	Check ELF_LINK_HASH_DEF_DYNAMIC to see if a symbol is not defined
 	in the regular object file and treat the weak definition as
 	the normal one.
 
