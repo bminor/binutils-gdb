@@ -38,6 +38,7 @@ mt-unix
 mt-vxworks
 netware.exp
 nind-gdb.exp
+sim-gdb.exp
 udi-gdb.exp
 unix-gdb.exp
 unknown.exp
