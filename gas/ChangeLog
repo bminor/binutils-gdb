@@ -1,3 +1,11 @@
+2004-12-16  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* config/tc-sh64.c (shmedia_md_apply_fix3): Add missing
+	BFD_RELOC_SH_IMMS10BY8 relocation.
+
+	* config/tc-sh64.c (shmedia_build_Mytes): Emit an error message rather
+	than just ignoring bad code.
+
 2004-12-16  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-v850.c (handle_lo16): New function.
