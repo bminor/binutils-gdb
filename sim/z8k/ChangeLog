@@ -1,3 +1,8 @@
+2002-06-09  Andrew Cagney  <cagney@redhat.com>
+
+	* iface.c: Include "gdb/callback.h" and "gdb/remote-sim.h".
+	* support.c: Ditto.
+
 2002-06-06  Andrew Cagney  <ac131313@redhat.com>
 
 	* writecode.c (lookup_inst): Generate inverse table on-the-fly.

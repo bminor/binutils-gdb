@@ -28,8 +28,8 @@
 #include <string.h>
 #include <bfd.h>
 #include <signal.h>
-#include "callback.h"
-#include "remote-sim.h"
+#include "gdb/callback.h"
+#include "gdb/remote-sim.h"
 #include "armdefs.h"
 #include "armemu.h"
 #include "dbg_rdi.h"

@@ -43,8 +43,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "libiberty.h"
 #include "bfd.h"
-#include "callback.h"
-#include "remote-sim.h"
+#include "gdb/callback.h"
+#include "gdb/remote-sim.h"
 #include "ansidecl.h"
 #include "run-sim.h"
 

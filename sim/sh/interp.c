@@ -27,8 +27,8 @@
 
 #include "sysdep.h"
 #include "bfd.h"
-#include "callback.h"
-#include "remote-sim.h"
+#include "gdb/callback.h"
+#include "gdb/remote-sim.h"
 
 /* This file is local - if newlib changes, then so should this.  */
 #include "syscall.h"

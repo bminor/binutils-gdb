@@ -1,3 +1,8 @@
+2002-06-08  Andrew Cagney  <cagney@redhat.com>
+
+	* main.c: Include "gdb/callback.h" and "gdb/remote-sim.h".
+	* sim_calls.c: Ditto.
+
 2002-05-30  DJ Delorie  <dj@redhat.com>
 
 	* lf.c (lf_print__gnu_copyleft): Convert multiline strings to

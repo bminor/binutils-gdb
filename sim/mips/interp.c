@@ -61,8 +61,8 @@ code on the hardware.
 #include "getopt.h"
 #include "libiberty.h"
 #include "bfd.h"
-#include "callback.h"   /* GDB simulator callback interface */
-#include "remote-sim.h" /* GDB simulator interface */
+#include "gdb/callback.h"   /* GDB simulator callback interface */
+#include "gdb/remote-sim.h" /* GDB simulator interface */
 
 #include "sysdep.h"
 

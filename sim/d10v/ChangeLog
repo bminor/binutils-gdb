@@ -1,3 +1,10 @@
+2002-06-09  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (INCLUDE): Update path to callback.h.
+	* gencode.c: Do not include "callback.h".
+	* d10v_sim.h: Include "gdb/callback.h" and "gdb/remote-sim.h".
+	* interp.c: Ditto.
+
 2002-06-08  Andrew Cagney  <cagney@redhat.com>
 
 	* interp.c (sim_fetch_register): Fix name of enum used in cast.

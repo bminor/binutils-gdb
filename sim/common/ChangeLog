@@ -1,3 +1,24 @@
+2002-06-08  Andrew Cagney  <cagney@redhat.com>
+
+	* gentmap.c (gen_targ_map_c): Generate "gdb/callback.h".
+	* sim-basics.h: Include "gdb/callback.h" and "gdb/remote-sim.h".
+	* run.c: Ditto.
+	* sim-load.c: Ditto.
+	* callback.c: Ditto.
+	* syscall.c: Ditto.
+	* Make-common.in (callback_h): Define.
+	(remote_sim_h): Define.
+	(run.o): Update.
+	(callback.o): Update.
+	(syscall.o): Update.
+	(sim-load.o): 
+	(nrun.o): Update.
+	(sim-hload.o): Update.
+	(sim-io.o): Update.
+	(sim-reason.o): Update.
+	(sim-reg.o): Update.
+	(sim-resume.o): Update.
+
 2002-05-30  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* run.c: Fix formatting.

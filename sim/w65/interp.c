@@ -33,8 +33,8 @@
 #endif
 #include <sys/param.h>
 #include "bfd.h"
-#include "callback.h"
-#include "remote-sim.h"
+#include "gdb/callback.h"
+#include "gdb/remote-sim.h"
 #include "../../newlib/libc/sys/w65/sys/syscall.h"
 
 #include "interp.h"

@@ -3,7 +3,7 @@
 #include <ctype.h>
 #include <limits.h>
 #include "ansidecl.h"
-#include "callback.h"
+#include "gdb/callback.h"
 #include "opcode/d10v.h"
 #include "bfd.h"
 
@@ -21,7 +21,7 @@
 
 extern int d10v_debug;
 
-#include "remote-sim.h"
+#include "gdb/remote-sim.h"
 #include "sim-config.h"
 #include "sim-types.h"
 

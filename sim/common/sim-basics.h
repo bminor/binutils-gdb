@@ -132,8 +132,8 @@ typedef enum {
 #endif
 
 #include "ansidecl.h"
-#include "callback.h"
-#include "remote-sim.h"
+#include "gdb/callback.h"
+#include "gdb/remote-sim.h"
 
 #include "sim-config.h"
 

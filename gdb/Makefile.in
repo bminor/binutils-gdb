@@ -568,8 +568,9 @@ LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 getopt_h =	$(INCLUDE_DIR)/getopt.h
 floatformat_h =	$(INCLUDE_DIR)/floatformat.h
 bfd_h =		$(BFD_DIR)/bfd.h
+callback_h =	$(INCLUDE_DIR)/gdb/callback.h
 dis_asm_h =	$(INCLUDE_DIR)/dis-asm.h 
-remote_sim_h =	$(INCLUDE_DIR)/remote-sim.h
+remote_sim_h =	$(INCLUDE_DIR)/gdb/remote-sim.h
 demangle_h =    $(INCLUDE_DIR)/demangle.h
 obstack_h =     $(INCLUDE_DIR)/obstack.h
 sim_d10v_h =	$(INCLUDE_DIR)/gdb/sim-d10v.h
@@ -1975,7 +1976,7 @@ rdi-share/libangsd.a:	force
 	fi
 
 remote-rdp.o: remote-rdp.c $(defs_h) $(gdbcore_h) \
-	$(inferior_h) $(gdb_string_h) $(arm_tdep_h)
+	$(inferior_h) $(gdb_string_h) $(arm_tdep_h) $(callback_h)
 
 remote-bug.o: remote-bug.c $(defs_h) $(gdbcore_h) $(serial_h) \
 	$(inferior_h) $(target_h) $(terminal_h) $(remote_utils_h) \
@@ -2012,7 +2013,7 @@ remote-sds.o: remote-sds.c $(bfd_h) $(defs_h) $(gdbcmd_h) \
 	$(gdb_string_h) $(regcache_h)
 
 remote-sim.o: remote-sim.c $(defs_h) $(inferior_h) $(value_h) $(gdb_string_h) \
-	$(terminal_h) $(target_h) $(gdbcore_h) $(INCLUDE_DIR)/callback.h \
+	$(terminal_h) $(target_h) $(gdbcore_h) $(callback_h) \
 	$(remote_sim_h) $(remote_utils_h) $(command_h) $(regcache_h) \
 	$(sim_regno_h)
 

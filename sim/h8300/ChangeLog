@@ -1,3 +1,7 @@
+2002-06-08  Andrew Cagney  <cagney@redhat.com>
+
+	* compile.c: Include "gdb/callback.h" and "gdb/remote-sim.h".
+
 2002-05-19  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* compile.c: Fix formatting.

@@ -1,3 +1,12 @@
+2002-06-09  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (callback_h): Define.
+	(remote_sim_h): Update path to remote-sim.h.
+	(remote-rdp.o): Add $(callback_h).
+	(remote-sim.o): Use $(callback_h).
+	* remote-sim.c: Include "gdb/callback.h" and "gdb/remote-sim.h".
+	* remote-rdp.c: Include "gdb/callback.h".
+
 2002-06-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* osabi.h (gdb_osabi): Add GDB_OSABI_GO32 and GDB_OSABI_NETWARE.

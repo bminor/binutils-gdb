@@ -1,3 +1,7 @@
+2002-06-08  Andrew Cagney  <cagney@redhat.com>
+
+	* interp.c: Include "gdb/callback.h" and "gdb/remote-sim.h".
+
 2002-06-07  Chris Demetriou  <cgd@broadcom.com>
             Ed Satterthwaite  <ehs@broadcom.com>
 

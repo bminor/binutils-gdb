@@ -1,8 +1,8 @@
 #include <signal.h>
 #include "sysdep.h"
 #include "bfd.h"
-#include "callback.h"
-#include "remote-sim.h"
+#include "gdb/callback.h"
+#include "gdb/remote-sim.h"
 
 #include "d10v_sim.h"
 #include "gdb/sim-d10v.h"

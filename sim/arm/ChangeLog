@@ -1,3 +1,8 @@
+2002-06-09  Andrew Cagney  <cagney@redhat.com>
+
+	* wrapper.c: Include "gdb/callback.h" and "gdb/remote-sim.h".
+	* armos.c: Include "gdb/callback.h".
+
 2002-05-29  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* armcopro.c (XScale_check_memacc): Set the FSR and FAR registers

@@ -42,8 +42,8 @@
 
 #include "defs.h"
 #include "bfd.h"
-#include "callback.h"
-#include "remote-sim.h"
+#include "gdb/callback.h"
+#include "gdb/remote-sim.h"
 
 /* Define the rate at which the simulator should poll the host
    for a quit. */
