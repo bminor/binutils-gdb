@@ -2359,7 +2359,7 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
 /* Relaxing sections is MIPS specific.  */
 #define _bfd_ecoff_bfd_relax_section mips_relax_section
 
-bfd_target ecoff_little_vec =
+const bfd_target ecoff_little_vec =
 {
   "ecoff-littlemips",		/* name */
   bfd_target_ecoff_flavour,
@@ -2403,7 +2403,7 @@ bfd_target ecoff_little_vec =
   (PTR) &mips_ecoff_backend_data
 };
 
-bfd_target ecoff_big_vec =
+const bfd_target ecoff_big_vec =
 {
   "ecoff-bigmips",		/* name */
   bfd_target_ecoff_flavour,

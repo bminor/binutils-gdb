@@ -33,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Prototypes for static functions.  */
 
-static bfd_target *alpha_ecoff_object_p PARAMS ((bfd *));
+static const bfd_target *alpha_ecoff_object_p PARAMS ((bfd *));
 static boolean alpha_ecoff_bad_format_hook PARAMS ((bfd *abfd, PTR filehdr));
 static void alpha_ecoff_swap_reloc_in PARAMS ((bfd *, PTR,
 					      struct internal_reloc *));
@@ -421,15 +421,15 @@ static reloc_howto_type alpha_howto_table[] =
 
 /* Recognize an Alpha ECOFF file.  */
 
-static bfd_target *
+static const bfd_target *
 alpha_ecoff_object_p (abfd)
      bfd *abfd;
 {
-  static bfd_target *ret;
+  static const bfd_target *ret;
 
   ret = coff_object_p (abfd);
 
-  if (ret != (bfd_target *) NULL)
+  if (ret != NULL)
     {
       asection *sec;
 
@@ -1995,7 +1995,7 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
 /* Relaxing sections is generic.  */
 #define _bfd_ecoff_bfd_relax_section bfd_generic_relax_section
 
-bfd_target ecoffalpha_little_vec =
+const bfd_target ecoffalpha_little_vec =
 {
   "ecoff-littlealpha",		/* name */
   bfd_target_ecoff_flavour,

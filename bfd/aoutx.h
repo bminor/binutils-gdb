@@ -383,9 +383,9 @@ FUNCTION
 	aout_@var{size}_some_aout_object_p
 
 SYNOPSIS
-	bfd_target *aout_@var{size}_some_aout_object_p
+	const bfd_target *aout_@var{size}_some_aout_object_p
 	 (bfd *abfd,
-	  bfd_target *(*callback_to_real_object_p)());
+	  const bfd_target *(*callback_to_real_object_p)());
 
 DESCRIPTION
 	Some a.out variant thinks that the file open in @var{abfd}
@@ -395,14 +395,14 @@ DESCRIPTION
 	handle any last-minute setup.
 */
 
-bfd_target *
+const bfd_target *
 NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
      bfd *abfd;
      struct internal_exec *execp;
-     bfd_target *(*callback_to_real_object_p) PARAMS ((bfd *));
+     const bfd_target *(*callback_to_real_object_p) PARAMS ((bfd *));
 {
   struct aout_data_struct *rawptr, *oldrawptr;
-  bfd_target *result;
+  const bfd_target *result;
 
   rawptr = (struct aout_data_struct  *) bfd_zalloc (abfd, sizeof (struct aout_data_struct ));
   if (rawptr == NULL) {

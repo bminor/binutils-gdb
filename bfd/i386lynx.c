@@ -88,7 +88,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 char *lynx_core_file_failing_command ();
 int lynx_core_file_failing_signal ();
 boolean lynx_core_file_matches_executable_p ();
-bfd_target *lynx_core_file_p ();
+const bfd_target *lynx_core_file_p ();
 
 #define	MY_core_file_failing_command lynx_core_file_failing_command
 #define	MY_core_file_failing_signal lynx_core_file_failing_signal
@@ -107,7 +107,7 @@ extern reloc_howto_type aout_32_std_howto_table[];
 /* Output standard relocation information to a file in target byte order. */
 
 void
-NAME (lynx, swap_std_reloc_out) (abfd, g, natptr)
+NAME(lynx,swap_std_reloc_out) (abfd, g, natptr)
      bfd *abfd;
      arelent *g;
      struct reloc_std_external *natptr;
@@ -203,7 +203,7 @@ NAME (lynx, swap_std_reloc_out) (abfd, g, natptr)
 /* Output extended relocation information to a file in target byte order. */
 
 void
-NAME (lynx, swap_ext_reloc_out) (abfd, g, natptr)
+NAME(lynx,swap_ext_reloc_out) (abfd, g, natptr)
      bfd *abfd;
      arelent *g;
      register struct reloc_ext_external *natptr;
@@ -321,7 +321,7 @@ NAME (lynx, swap_ext_reloc_out) (abfd, g, natptr)
   }     								\
 
 void
-NAME (lynx, swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols)
+NAME(lynx,swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols)
      bfd *abfd;
      struct reloc_ext_external *bytes;
      arelent *cache_ptr;
@@ -344,7 +344,7 @@ NAME (lynx, swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols)
 }
 
 void
-NAME (lynx, swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols)
+NAME(lynx,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols)
      bfd *abfd;
      struct reloc_std_external *bytes;
      arelent *cache_ptr;
@@ -448,7 +448,7 @@ doit:
 
       for (; counter < count; counter++, rptr++, cache_ptr++)
 	{
-	  NAME (lynx, swap_ext_reloc_in) (abfd, rptr, cache_ptr, symbols);
+	  NAME(lynx,swap_ext_reloc_in) (abfd, rptr, cache_ptr, symbols);
 	}
     }
   else
@@ -459,7 +459,7 @@ doit:
 
       for (; counter < count; counter++, rptr++, cache_ptr++)
 	{
-	  NAME (lynx, swap_std_reloc_in) (abfd, rptr, cache_ptr, symbols);
+	  NAME(lynx,swap_std_reloc_in) (abfd, rptr, cache_ptr, symbols);
 	}
 
     }
@@ -475,7 +475,7 @@ doit:
 /* Write out a relocation section into an object file.  */
 
 boolean
-NAME (lynx, squirt_out_relocs) (abfd, section)
+NAME(lynx,squirt_out_relocs) (abfd, section)
      bfd *abfd;
      asection *section;
 {
@@ -505,14 +505,14 @@ NAME (lynx, squirt_out_relocs) (abfd, section)
       for (natptr = native;
 	   count != 0;
 	   --count, natptr += each_size, ++generic)
-	NAME (lynx, swap_ext_reloc_out) (abfd, *generic, (struct reloc_ext_external *) natptr);
+	NAME(lynx,swap_ext_reloc_out) (abfd, *generic, (struct reloc_ext_external *) natptr);
     }
   else
     {
       for (natptr = native;
 	   count != 0;
 	   --count, natptr += each_size, ++generic)
-	NAME (lynx, swap_std_reloc_out) (abfd, *generic, (struct reloc_std_external *) natptr);
+	NAME(lynx,swap_std_reloc_out) (abfd, *generic, (struct reloc_std_external *) natptr);
     }
 
   if (bfd_write ((PTR) native, 1, natsize, abfd) != natsize)

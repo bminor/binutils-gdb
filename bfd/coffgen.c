@@ -119,8 +119,7 @@ make_a_section_from_file (abfd, hdr, target_index)
 /* Read in a COFF object and make it into a BFD.  This is used by
    ECOFF as well.  */
 
-static
-bfd_target     *
+static const bfd_target *
 coff_real_object_p (abfd, nscns, internal_f, internal_a)
      bfd            *abfd;
      unsigned        nscns;
@@ -175,6 +174,9 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
   if (!(internal_f->f_flags & F_LSYMS))
     abfd->flags |= HAS_LOCALS;
 
+  /* FIXME: How can we set D_PAGED correctly?  */
+  if ((internal_f->f_flags & F_EXEC) != 0)
+    abfd->flags |= D_PAGED;
 
   bfd_get_symcount(abfd) = internal_f->f_nsyms;
   if (internal_f->f_nsyms)
@@ -188,13 +190,13 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
   return abfd->xvec;
  fail:
   bfd_release(abfd, tdata);
-  return (bfd_target *)NULL;
+  return (const bfd_target *)NULL;
 }
 
 /* Turn a COFF file into a BFD, but fail with bfd_error_wrong_format if it is
    not a COFF file.  This is also used by ECOFF.  */
 
-bfd_target *
+const bfd_target *
 coff_object_p (abfd)
      bfd            *abfd;
 {

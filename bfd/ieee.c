@@ -801,7 +801,7 @@ Move from our internal lists to the canon table, and insert in
 symbol index order
 */
 
-extern bfd_target ieee_vec;
+extern const bfd_target ieee_vec;
 
 long
 ieee_get_symtab (abfd, location)
@@ -1052,7 +1052,7 @@ ieee_slurp_sections (abfd)
 *  archive stuff
 */
 
-bfd_target *
+const bfd_target *
 ieee_archive_p (abfd)
      bfd *abfd;
 {
@@ -1085,7 +1085,7 @@ ieee_archive_p (abfd)
   if (this_byte (&(ieee->h)) != Module_Beginning)
     {
       abfd->tdata.ieee_ar_data = save;
-      return (bfd_target *) NULL;
+      return (const bfd_target *) NULL;
     }
 
   next_byte (&(ieee->h));
@@ -1094,7 +1094,7 @@ ieee_archive_p (abfd)
     {
       bfd_release (abfd, ieee);
       abfd->tdata.ieee_ar_data = save;
-      return (bfd_target *) NULL;
+      return (const bfd_target *) NULL;
     }
   /* Throw away the filename */
   read_id (&(ieee->h));
@@ -1104,7 +1104,7 @@ ieee_archive_p (abfd)
   if (!obstack_begin (&ob, 128))
     {
       bfd_set_error (bfd_error_no_memory);
-      return (bfd_target *) NULL;
+      return (const bfd_target *) NULL;
     }
 
   ieee->element_count = 0;
@@ -1152,7 +1152,7 @@ ieee_archive_p (abfd)
   if (!ieee->elements)
     {
       bfd_set_error (bfd_error_no_memory);
-      return (bfd_target *) NULL;
+      return (const bfd_target *) NULL;
     }
 
   /* Now scan the area again, and replace BB offsets with file */
@@ -1194,7 +1194,7 @@ ieee_mkobject (abfd)
   return abfd->tdata.ieee_data ? true : false;
 }
 
-bfd_target *
+const bfd_target *
 ieee_object_p (abfd)
      bfd *abfd;
 {
@@ -1217,7 +1217,7 @@ ieee_object_p (abfd)
 
   ieee->h.input_p = buffer;
   if (this_byte_and_next (&(ieee->h)) != Module_Beginning)
-    goto fail;
+    goto got_wrong_format;
 
   ieee->read_symbols = false;
   ieee->read_data = false;
@@ -1231,7 +1231,7 @@ ieee_object_p (abfd)
 
   processor = ieee->mb.processor = read_id (&(ieee->h));
   if (strcmp (processor, "LIBRARY") == 0)
-    goto fail;
+    goto got_wrong_format;
   ieee->mb.module_name = read_id (&(ieee->h));
   if (abfd->filename == (CONST char *) NULL)
     {
@@ -1242,7 +1242,7 @@ ieee_object_p (abfd)
   {
     bfd_arch_info_type *arch = bfd_scan_arch (processor);
     if (arch == 0)
-      goto fail;
+      goto got_wrong_format;
     abfd->arch_info = arch;
   }
 
@@ -1306,10 +1306,12 @@ ieee_object_p (abfd)
 
   ieee_slurp_sections (abfd);
   return abfd->xvec;
+got_wrong_format:
+  bfd_set_error (bfd_error_wrong_format);
 fail:
   (void) bfd_release (abfd, ieee);
   abfd->tdata.ieee_data = save;
-  return (bfd_target *) NULL;
+  return (const bfd_target *) NULL;
 }
 
 void
@@ -3369,7 +3371,7 @@ ieee_bfd_debug_info_accumulate (abfd, section)
 #define ieee_bfd_final_link _bfd_generic_final_link
 
 /*SUPPRESS 460 */
-bfd_target ieee_vec =
+const bfd_target ieee_vec =
 {
   "ieee",			/* name */
   bfd_target_ieee_flavour,

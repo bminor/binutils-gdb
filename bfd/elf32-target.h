@@ -178,7 +178,7 @@ static CONST struct elf_backend_data elf32_bed =
 };
 
 #ifdef TARGET_BIG_SYM
-bfd_target TARGET_BIG_SYM =
+const bfd_target TARGET_BIG_SYM =
 {
   /* name: identify kind of target */
   TARGET_BIG_NAME,
@@ -266,7 +266,7 @@ bfd_target TARGET_BIG_SYM =
 #endif
 
 #ifdef TARGET_LITTLE_SYM
-bfd_target TARGET_LITTLE_SYM =
+const bfd_target TARGET_LITTLE_SYM =
 {
   /* name: identify kind of target */
   TARGET_LITTLE_NAME,

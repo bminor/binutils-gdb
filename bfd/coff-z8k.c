@@ -235,7 +235,7 @@ extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
   bfd_coff_reloc16_get_relocated_section_contents
 #define coff_bfd_relax_section bfd_coff_reloc16_relax_section
 
-bfd_target z8kcoff_vec =
+const bfd_target z8kcoff_vec =
 {
   "coff-z8k",			/* name */
   bfd_target_coff_flavour,
@@ -273,6 +273,7 @@ bfd_target z8kcoff_vec =
      BFD_JUMP_TABLE_RELOCS (coff),
      BFD_JUMP_TABLE_WRITE (coff),
      BFD_JUMP_TABLE_LINK (coff),
+     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   COFF_SWAP_TABLE,
 };

@@ -91,7 +91,7 @@ static int nlm_external_reloc_compare
 #define get_word	bfd_h_get_32
 #endif
 
-bfd_target *
+const bfd_target *
 nlm_object_p (abfd)
      bfd *abfd;
 {
@@ -213,6 +213,9 @@ nlm_object_p (abfd)
   arch = nlm_architecture (abfd);
   if (arch != bfd_arch_unknown)
     bfd_default_set_arch_mach (abfd, arch, (unsigned long) 0);
+
+  abfd->flags |= EXEC_P;
+  bfd_get_start_address (abfd) = nlm_fixed_header (abfd)->codeStartOffset;
 
   return (abfd->xvec);
 

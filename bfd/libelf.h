@@ -483,8 +483,8 @@ extern boolean _bfd_elf_link_hash_table_init
 extern boolean bfd_elf32_write_object_contents PARAMS ((bfd *));
 extern boolean bfd_elf64_write_object_contents PARAMS ((bfd *));
 
-extern bfd_target *bfd_elf32_object_p PARAMS ((bfd *));
-extern bfd_target *bfd_elf32_core_file_p PARAMS ((bfd *));
+extern const bfd_target *bfd_elf32_object_p PARAMS ((bfd *));
+extern const bfd_target *bfd_elf32_core_file_p PARAMS ((bfd *));
 extern char *bfd_elf32_core_file_failing_command PARAMS ((bfd *));
 extern int bfd_elf32_core_file_failing_signal PARAMS ((bfd *));
 extern boolean bfd_elf32_core_file_matches_executable_p PARAMS ((bfd *,
@@ -540,8 +540,8 @@ extern boolean bfd_elf32_add_dynamic_entry
 extern void bfd_elf32_no_info_to_howto PARAMS ((bfd *, arelent *,
 						Elf32_Internal_Rela *));
 
-extern bfd_target *bfd_elf64_object_p PARAMS ((bfd *));
-extern bfd_target *bfd_elf64_core_file_p PARAMS ((bfd *));
+extern const bfd_target *bfd_elf64_object_p PARAMS ((bfd *));
+extern const bfd_target *bfd_elf64_core_file_p PARAMS ((bfd *));
 extern char *bfd_elf64_core_file_failing_command PARAMS ((bfd *));
 extern int bfd_elf64_core_file_failing_signal PARAMS ((bfd *));
 extern boolean bfd_elf64_core_file_matches_executable_p PARAMS ((bfd *,

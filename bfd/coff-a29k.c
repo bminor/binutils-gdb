@@ -304,7 +304,7 @@ reloc_processing (relent,reloc, symbols, abfd, section)
 
 #include "coffcode.h"
 
-bfd_target a29kcoff_big_vec =
+const bfd_target a29kcoff_big_vec =
 {
   "coff-a29k-big",		/* name */
   bfd_target_coff_flavour,

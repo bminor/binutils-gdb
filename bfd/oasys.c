@@ -1,5 +1,5 @@
 /* BFD back-end for oasys objects.
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support, <sac@cygnus.com>.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -230,7 +230,7 @@ oasys_get_symtab_upper_bound (abfd)
 /*
 */
 
-extern bfd_target oasys_vec;
+extern const bfd_target oasys_vec;
 
 long
 oasys_get_symtab (abfd, location)
@@ -256,7 +256,7 @@ oasys_get_symtab (abfd, location)
 *  archive stuff
 */
 
-static bfd_target *
+static const bfd_target *
 oasys_archive_p (abfd)
      bfd *abfd;
 {
@@ -293,7 +293,7 @@ oasys_archive_p (abfd)
       header.mod_count > 10000 ||
       header.sym_count > 100000 ||
       header.xref_count > 100000)
-    return (bfd_target *) NULL;
+    return (const bfd_target *) NULL;
 
   /*
     That all worked, let's buy the space for the header and read in
@@ -407,7 +407,7 @@ oasys_mkobject (abfd)
 }
 
 #define MAX_SECS 16
-static bfd_target *
+static const bfd_target *
 oasys_object_p (abfd)
      bfd *abfd;
 {
@@ -522,7 +522,7 @@ oasys_object_p (abfd)
 fail:
   (void) bfd_release (abfd, oasys);
   abfd->tdata.oasys_obj_data = save;
-  return (bfd_target *) NULL;
+  return (const bfd_target *) NULL;
 }
 
 
@@ -1497,7 +1497,7 @@ oasys_sizeof_headers (abfd, exec)
 #define oasys_bfd_final_link _bfd_generic_final_link
 
 /*SUPPRESS 460 */
-bfd_target oasys_vec =
+const bfd_target oasys_vec =
 {
   "oasys",			/* name */
   bfd_target_oasys_flavour,
@@ -1545,6 +1545,7 @@ bfd_target oasys_vec =
   BFD_JUMP_TABLE_RELOCS (oasys),
   BFD_JUMP_TABLE_WRITE (oasys),
   BFD_JUMP_TABLE_LINK (oasys),
+  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   (PTR) 0
 };

@@ -824,7 +824,7 @@ elf_file_p (x_ehdrp)
    any side effects in ABFD, or any data it points to (like tdata), if the
    file does not match the target vector.  */
 
-bfd_target *
+const bfd_target *
 elf_object_p (abfd)
      bfd *abfd;
 {
@@ -907,7 +907,7 @@ elf_object_p (abfd)
      BFD format expects.  */
   if (ebd->elf_machine_code != i_ehdrp->e_machine)
     {
-      bfd_target **target_ptr;
+      const bfd_target * const *target_ptr;
 
       if (ebd->elf_machine_code != EM_NONE)
 	goto got_wrong_format_error;
@@ -3694,7 +3694,7 @@ elf_corefile_note (abfd, hdr)
 
  */
 
-bfd_target *
+const bfd_target *
 elf_core_file_p (abfd)
      bfd *abfd;
 {
@@ -3783,7 +3783,7 @@ elf_core_file_p (abfd)
      BFD format expects.  */
   if (ebd->elf_machine_code != i_ehdrp->e_machine)
     {
-      bfd_target **target_ptr;
+      const bfd_target * const *target_ptr;
 
       if (ebd->elf_machine_code != EM_NONE)
 	goto wrong;

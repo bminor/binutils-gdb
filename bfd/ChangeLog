@@ -1,5 +1,10 @@
 Mon Jun 20 11:06:27 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* Many files: change all bfd_target vectors to be const.  Change
+	all uses of bfd_target * to be const bfd_target *.  Change
+	bfd_target_vector and bfd_default_vector arrays to be const
+	bfd_target * const *.
+
 	* ecoff.c, libecoff.h, ecoffswap.h, coff-alpha.c, coff-mips.c,
 	elf32-mips.c: Renamed all externally visible ECOFF routines which
 	are local to BFD to start with _bfd_ecoff instead of just ecoff.

@@ -388,7 +388,7 @@ static CONST struct aout_backend_data MY(backend_data) = {
   0				/* finish_dynamic_link */
 };
 
-bfd_target aout_mips_little_vec =
+const bfd_target aout_mips_little_vec =
 {
   "a.out-mips-little",		/* name */
   bfd_target_aout_flavour,
@@ -428,7 +428,7 @@ bfd_target aout_mips_little_vec =
   (PTR) MY_backend_data,
 };
 
-bfd_target aout_mips_big_vec =
+const bfd_target aout_mips_big_vec =
 {
   "a.out-mips-big",		/* name */
   bfd_target_aout_flavour,

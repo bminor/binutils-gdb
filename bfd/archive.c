@@ -627,7 +627,7 @@ bfd_generic_openr_next_archived_file (archive, last_file)
 }
 
 
-bfd_target *
+const bfd_target *
 bfd_generic_archive_p (abfd)
      bfd *abfd;
 {

@@ -35,9 +35,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "aout/ar.h"
 #include "libaout.h"           /* BFD a.out internal data structures */
 
-bfd_target *encap_real_callback ();
+const bfd_target *encap_real_callback ();
 
-bfd_target *
+const bfd_target *
 encap_object_p (abfd)
      bfd *abfd;
 {
@@ -79,7 +79,7 @@ encap_object_p (abfd)
 }
 
 /* Finish up the reading of a encapsulated-coff a.out file header */
-bfd_target *
+const bfd_target *
 encap_real_callback (abfd)
      bfd *abfd;
 {

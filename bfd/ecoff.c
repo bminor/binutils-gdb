@@ -3490,7 +3490,7 @@ _bfd_ecoff_write_armap (abfd, elength, map, orl_count, stridx)
 /* See whether this BFD is an archive.  If it is, read in the armap
    and the extended name table.  */
 
-bfd_target *
+const bfd_target *
 _bfd_ecoff_archive_p (abfd)
      bfd *abfd;
 {
@@ -3501,7 +3501,7 @@ _bfd_ecoff_archive_p (abfd)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
-      return (bfd_target *) NULL;
+      return (const bfd_target *) NULL;
     }
 
   /* We are setting bfd_ardata(abfd) here, but since bfd_ardata
@@ -3513,7 +3513,7 @@ _bfd_ecoff_archive_p (abfd)
   if (bfd_ardata (abfd) == (struct artdata *) NULL)
     {
       bfd_set_error (bfd_error_no_memory);
-      return (bfd_target *) NULL;
+      return (const bfd_target *) NULL;
     }
 
   bfd_ardata (abfd)->first_file_filepos = SARMAG;
@@ -3528,7 +3528,7 @@ _bfd_ecoff_archive_p (abfd)
     {
       bfd_release (abfd, bfd_ardata (abfd));
       abfd->tdata.aout_ar_data = (struct artdata *) NULL;
-      return (bfd_target *) NULL;
+      return (const bfd_target *) NULL;
     }
   
   return abfd->xvec;

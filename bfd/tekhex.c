@@ -586,7 +586,7 @@ tekhex_mkobject (abfd)
   Return true if the file looks like it's in TekHex format. Just look
   for a percent sign and some hex digits */
 
-static bfd_target *
+static const bfd_target *
 tekhex_object_p (abfd)
      bfd *abfd;
 {
@@ -600,7 +600,7 @@ tekhex_object_p (abfd)
     return NULL;
 
   if (b[0] != '%' || !ISHEX (b[1]) || !ISHEX (b[2]) || !ISHEX (b[3]))
-    return (bfd_target *) NULL;
+    return (const bfd_target *) NULL;
 
   tekhex_mkobject (abfd);
 
@@ -1015,7 +1015,7 @@ tekhex_print_symbol (ignore_abfd, filep, symbol, how)
 #define tekhex_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define tekhex_bfd_final_link _bfd_generic_final_link
 
-bfd_target tekhex_vec =
+const bfd_target tekhex_vec =
 {
   "tekhex",			/* name */
   bfd_target_tekhex_flavour,
@@ -1040,8 +1040,8 @@ bfd_target tekhex_vec =
   {
     _bfd_dummy_target,
     tekhex_object_p,		/* bfd_check_format */
-    (struct bfd_target * (*)()) bfd_nullvoidptr,
-    (struct bfd_target * (*)()) bfd_nullvoidptr,
+    _bfd_dummy_target,
+    _bfd_dummy_target,
   },
   {
     bfd_false,

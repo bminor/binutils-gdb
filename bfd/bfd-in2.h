@@ -1578,7 +1578,7 @@ struct _bfd
     CONST char *filename;                
 
      /* A pointer to the target jump table.             */
-    struct bfd_target *xvec;
+    const struct bfd_target *xvec;
 
      /* To avoid dragging too many header files into every file that
        includes `<<bfd.h>>', IOSTREAM has been declared as a "char
@@ -1938,7 +1938,7 @@ typedef struct bfd_target
   bfd_vma      (*bfd_h_getx16) PARAMS ((const bfd_byte *));
   bfd_signed_vma (*bfd_h_getx_signed_16) PARAMS ((const bfd_byte *));
   void         (*bfd_h_putx16) PARAMS ((bfd_vma, bfd_byte *));
-  struct bfd_target * (*_bfd_check_format[bfd_type_end]) PARAMS ((bfd *));
+  const struct bfd_target *(*_bfd_check_format[bfd_type_end]) PARAMS ((bfd *));
   boolean             (*_bfd_set_format[bfd_type_end]) PARAMS ((bfd *));
   boolean             (*_bfd_write_contents[bfd_type_end]) PARAMS ((bfd *));
 
@@ -2106,10 +2106,10 @@ CAT(NAME,_canonicalize_dynamic_reloc)
 
  PTR backend_data;
 } bfd_target;
-bfd_target *
+const bfd_target *
 bfd_find_target PARAMS ((CONST char *target_name, bfd *abfd));
 
-CONST char **
+const char **
 bfd_target_list PARAMS ((void));
 
 boolean 

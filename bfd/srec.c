@@ -468,7 +468,7 @@ pass_over (abfd, func, symbolfunc, section)
 
 }
 
-static bfd_target *
+static const bfd_target *
 object_p (abfd)
      bfd *abfd;
 {
@@ -491,7 +491,7 @@ object_p (abfd)
   return abfd->xvec;
 }
 
-static bfd_target *
+static const bfd_target *
 srec_object_p (abfd)
      bfd *abfd;
 {
@@ -504,7 +504,7 @@ srec_object_p (abfd)
     return NULL;
 
   if (b[0] != 'S' || !ISHEX (b[1]) || !ISHEX (b[2]) || !ISHEX (b[3]))
-    return (bfd_target *) NULL;
+    return (const bfd_target *) NULL;
 
   /* We create one section called .text for all the contents,
      and allocate enough room for the entire file.  */
@@ -513,7 +513,7 @@ srec_object_p (abfd)
 }
 
 
-static bfd_target *
+static const bfd_target *
 symbolsrec_object_p (abfd)
      bfd *abfd;
 {
@@ -526,7 +526,7 @@ symbolsrec_object_p (abfd)
     return NULL;
 
   if (b[0] != '$' || b[1] != '$')
-    return (bfd_target *) NULL;
+    return (const bfd_target *) NULL;
 
   return object_p (abfd);
 }
@@ -764,19 +764,19 @@ srec_write_symbols (abfd)
   char buffer[MAXCHUNK];
   /* Dump out the symbols of a bfd */
   int i;
-  int len = bfd_get_symcount (abfd);
+  int count = bfd_get_symcount (abfd);
 
-  if (len)
+  if (count)
     {
       size_t len;
       asymbol **table = bfd_get_outsymbols (abfd);
       sprintf (buffer, "$$ %s\r\n", abfd->filename);
 
-      len = strlen (buffer) + 1;
+      len = strlen (buffer);
       if (bfd_write (buffer, len, 1, abfd) != len)
 	return false;
 
-      for (i = 0; i < len; i++)
+      for (i = 0; i < count; i++)
 	{
 	  asymbol *s = table[i];
 #if 0
@@ -818,7 +818,7 @@ srec_write_symbols (abfd)
 	    }
 	}
       sprintf (buffer, "$$ \r\n");
-      len = strlen (buffer) + 1;
+      len = strlen (buffer);
       if (bfd_write (buffer, len, 1, abfd) != len)
 	return false;
     }
@@ -962,7 +962,7 @@ srec_print_symbol (ignore_abfd, afile, symbol, how)
 #define srec_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define srec_bfd_final_link _bfd_generic_final_link
 
-bfd_target srec_vec =
+const bfd_target srec_vec =
 {
   "srec",			/* name */
   bfd_target_srec_flavour,
@@ -987,8 +987,8 @@ bfd_target srec_vec =
   {
     _bfd_dummy_target,
     srec_object_p,		/* bfd_check_format */
-    (struct bfd_target * (*)()) bfd_nullvoidptr,
-    (struct bfd_target * (*)()) bfd_nullvoidptr,
+    _bfd_dummy_target,
+    _bfd_dummy_target,
   },
   {
     bfd_false,
@@ -1018,7 +1018,7 @@ bfd_target srec_vec =
 
 
 
-bfd_target symbolsrec_vec =
+const bfd_target symbolsrec_vec =
 {
   "symbolsrec",			/* name */
   bfd_target_srec_flavour,
@@ -1043,8 +1043,8 @@ bfd_target symbolsrec_vec =
   {
     _bfd_dummy_target,
     symbolsrec_object_p,	/* bfd_check_format */
-    (struct bfd_target * (*)()) bfd_nullvoidptr,
-    (struct bfd_target * (*)()) bfd_nullvoidptr,
+    _bfd_dummy_target,
+    _bfd_dummy_target,
   },
   {
     bfd_false,

@@ -35,7 +35,7 @@ static int aligncode PARAMS ((bfd *abfd, asection *input_section,
 static void perform_slip PARAMS ((bfd *abfd, unsigned int slip,
 				  asection *input_section, bfd_vma value));
 static boolean b_out_squirt_out_relocs PARAMS ((bfd *abfd, asection *section));
-static bfd_target *b_out_callback PARAMS ((bfd *));
+static const bfd_target *b_out_callback PARAMS ((bfd *));
 static bfd_reloc_status_type calljx_callback
   PARAMS ((bfd *, struct bfd_link_info *, arelent *, PTR src, PTR dst,
 	   asection *));
@@ -114,7 +114,7 @@ bout_swap_exec_header_out (abfd, execp, raw_bytes)
 }
 
 
-static bfd_target *
+static const bfd_target *
 b_out_object_p (abfd)
      bfd *abfd;
 {
@@ -143,7 +143,7 @@ b_out_object_p (abfd)
 /* Finish up the opening of a b.out file for reading.  Fill in all the
    fields that are not handled by common code.  */
 
-static bfd_target *
+static const bfd_target *
 b_out_callback (abfd)
      bfd *abfd;
 {
@@ -212,14 +212,9 @@ b_out_mkobject (abfd)
   abfd->tdata.bout_data = rawptr;
   exec_hdr (abfd) = &rawptr->e;
 
-  /* For simplicity's sake we just make all the sections right here. */
   obj_textsec (abfd) = (asection *)NULL;
   obj_datasec (abfd) = (asection *)NULL;
   obj_bsssec (abfd) = (asection *)NULL;
-
-  bfd_make_section (abfd, ".text");
-  bfd_make_section (abfd, ".data");
-  bfd_make_section (abfd, ".bss");
 
   return true;
 }
@@ -229,6 +224,9 @@ b_out_write_object_contents (abfd)
      bfd *abfd;
 {
   struct external_exec swapped_hdr;
+
+  if (! aout_32_make_sections (abfd))
+    return false;
 
   exec_hdr (abfd)->a_info = BMAGIC;
 
@@ -439,6 +437,7 @@ b_out_bfd_reloc_type_lookup (abfd, code)
     case BFD_RELOC_I960_CALLJ:
       return &howto_reloc_callj;
     case BFD_RELOC_32:
+    case BFD_RELOC_CTOR:
       return &howto_reloc_abs32;
     case BFD_RELOC_24_PCREL:
       return &howto_reloc_pcrel24;
@@ -867,11 +866,8 @@ b_out_set_section_contents (abfd, section, location, offset, count)
 {
 
   if (abfd->output_has_begun == false) { /* set by bfd.c handler */
-    if ((obj_textsec (abfd) == NULL) || (obj_datasec (abfd) == NULL) /*||
-        (obj_textsec (abfd)->_cooked_size == 0) || (obj_datasec (abfd)->_cooked_size == 0)*/) {
-      bfd_set_error (bfd_error_invalid_operation);
+    if (! aout_32_make_sections (abfd))
       return false;
-    }
 
     obj_textsec (abfd)->filepos = sizeof(struct internal_exec);
     obj_datasec(abfd)->filepos = obj_textsec(abfd)->filepos
@@ -1363,7 +1359,7 @@ b_out_bfd_get_relocated_section_contents (in_abfd, link_info, link_order,
 #define b_out_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define b_out_bfd_final_link _bfd_generic_final_link
 
-bfd_target b_out_vec_big_host =
+const bfd_target b_out_vec_big_host =
 {
   "b.out.big",			/* name */
   bfd_target_aout_flavour,
@@ -1405,7 +1401,7 @@ bfd_target b_out_vec_big_host =
 };
 
 
-bfd_target b_out_vec_little_host =
+const bfd_target b_out_vec_little_host =
 {
   "b.out.little",		/* name */
   bfd_target_aout_flavour,

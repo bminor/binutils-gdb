@@ -144,11 +144,11 @@ struct som_misc_symbol_info
 /* Forward declarations */
 
 static boolean som_mkobject PARAMS ((bfd *));
-static bfd_target * som_object_setup PARAMS ((bfd *,
-					      struct header *,
-					      struct som_exec_auxhdr *));
+static const bfd_target * som_object_setup PARAMS ((bfd *,
+						    struct header *,
+						    struct som_exec_auxhdr *));
 static boolean setup_sections PARAMS ((bfd *, struct header *));
-static bfd_target * som_object_p PARAMS ((bfd *));
+static const bfd_target * som_object_p PARAMS ((bfd *));
 static boolean som_write_object_contents PARAMS ((bfd *));
 static boolean som_slurp_string_table PARAMS ((bfd *));
 static unsigned int som_slurp_symbol_table PARAMS ((bfd *));
@@ -1563,7 +1563,7 @@ som_bfd_reloc_type_lookup (abfd, code)
 /* Perform some initialization for an object.  Save results of this
    initialization in the BFD.  */
 
-static bfd_target *
+static const bfd_target *
 som_object_setup (abfd, file_hdrp, aux_hdrp)
      bfd *abfd;
      struct header *file_hdrp;
@@ -1861,7 +1861,7 @@ setup_sections (abfd, file_hdr)
 
 /* Read in a SOM object and make it into a BFD.  */
 
-static bfd_target *
+static const bfd_target *
 som_object_p (abfd)
      bfd *abfd;
 {
@@ -4263,7 +4263,7 @@ som_canonicalize_reloc (abfd, section, relptr, symbols)
   return section->reloc_count;
 }
 
-extern bfd_target som_vec;
+extern const bfd_target som_vec;
 
 /* A hook to set up object file dependent section information.  */
 
@@ -5535,7 +5535,7 @@ som_bfd_free_cached_info (abfd)
 #define som_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define som_bfd_final_link _bfd_generic_final_link
 
-bfd_target som_vec =
+const bfd_target som_vec =
 {
   "som",			/* name */
   bfd_target_som_flavour,

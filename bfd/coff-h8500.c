@@ -309,7 +309,7 @@ extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
   bfd_coff_reloc16_get_relocated_section_contents
 #define coff_bfd_relax_section bfd_coff_reloc16_relax_section
 
-bfd_target h8500coff_vec =
+const bfd_target h8500coff_vec =
 {
   "coff-h8500",			/* name */
   bfd_target_coff_flavour,
@@ -347,6 +347,7 @@ bfd_target h8500coff_vec =
      BFD_JUMP_TABLE_RELOCS (coff),
      BFD_JUMP_TABLE_WRITE (coff),
      BFD_JUMP_TABLE_LINK (coff),
+     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   COFF_SWAP_TABLE,
 };

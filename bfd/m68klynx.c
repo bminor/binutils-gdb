@@ -43,7 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 char *lynx_core_file_failing_command();
 int lynx_core_file_failing_signal();
 boolean lynx_core_file_matches_executable_p();
-bfd_target *lynx_core_file_p();
+const bfd_target *lynx_core_file_p();
 
 #define	MY_core_file_failing_command lynx_core_file_failing_command
 #define	MY_core_file_failing_signal lynx_core_file_failing_signal

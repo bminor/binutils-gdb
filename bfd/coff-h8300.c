@@ -41,7 +41,7 @@ static reloc_howto_type howto_table[] =
   HOWTO (R_JMP2, 0, 0, 8, false, 0, complain_overflow_bitfield, 0, "pcrecl/16", true, 0x000000ff, 0x000000ff, false),
 
 
-  HOWTO (R_JMPL1, 0, 1, 32, false, 0, complain_overflow_bitfield, 0, "24/pcrell", true, 0x0000ffff, 0x0000ffff, false),
+  HOWTO (R_JMPL1, 0, 2, 32, false, 0, complain_overflow_bitfield, 0, "24/pcrell", true, 0x00ffffff, 0x00ffffff, false),
   HOWTO (R_JMPL_B8, 0, 0, 8, false, 0, complain_overflow_bitfield, 0, "pc8/24", true, 0x000000ff, 0x000000ff, false),
 
   HOWTO (R_MOVLB1, 0, 1, 16, false, 0, complain_overflow_bitfield, 0, "24/8", true, 0x0000ffff, 0x0000ffff, false),
@@ -342,7 +342,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 	  + dst_address 
 	    + link_order->u.indirect.section->output_section->vma;
 	int gap = (bfd_coff_reloc16_get_value (reloc, link_info, input_section)
-		   - dot) + 1;
+		   - dot) - 1;
 	if (gap > 32767 || gap < -32768)
 	  {
 	    if (! ((*link_info->callbacks->reloc_overflow)
@@ -562,7 +562,7 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 
 
 
-bfd_target h8300coff_vec =
+const bfd_target h8300coff_vec =
 {
   "coff-h8300",			/* name */
   bfd_target_coff_flavour,
@@ -599,6 +599,7 @@ bfd_target h8300coff_vec =
      BFD_JUMP_TABLE_RELOCS (coff),
      BFD_JUMP_TABLE_WRITE (coff),
      BFD_JUMP_TABLE_LINK (coff),
+     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   COFF_SWAP_TABLE,
 };
