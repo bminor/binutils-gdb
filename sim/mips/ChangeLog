@@ -1,3 +1,12 @@
+Fri Sep 19 09:33:27 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* gencode.c: Add r3900 (tx39).
+	
+start-sanitize-tx19
+	* gencode.c: Fix some configuration problems by improving 
+	the relationship between tx19 and tx39.
+end-sanitize-tx19
+
 Tue Sep 16 15:52:04 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* gencode.c (build_instruction): Don't need to subtract 4 for

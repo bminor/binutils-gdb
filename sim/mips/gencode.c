@@ -312,8 +312,8 @@ typedef enum {
  FPSQRT,
  FPCONVERT,
  FPCOMPARE,
- /* start-sanitize-r5900 */
  MADD,
+ /* start-sanitize-r5900 */
  PABS,
  PADD,
  PADSBH,
@@ -475,22 +475,21 @@ typedef struct instruction {
 /* start-sanitize-r5900 */
 #define ARCH_R5900        ((unsigned)1 << 30) /* Toshiba r5900 extension instructions */
 /* end-sanitize-r5900 */
+#define ARCH_R3900        ((unsigned)1 << 29) /* Toshiba r3900 (tx39) */
 /* start-sanitize-tx19 */
-#define ARCH_TX19         ((unsigned)1 << 27) /* Toshiba TX19 extention instruction */
+/* The r1900 (tx19) is a tx39 with a mips16 decoder.  For the purposes
+   of implementing the simulator we treat them as the same. */
 /* end-sanitize-tx19 */
 
 /* A list (or'ed) of extension insn sets that can be requested independant of the ISA# */
 #define MASK_ISA_INDEP  (0                                             \
-                         /* start-sanitize-tx19 */                     \
-                         | ARCH_TX19                                   \
-                         /* end-sanitize-tx19 */                       \
+                         | ARCH_R3900                                  \
                          /* start-sanitize-r5900 */                    \
                          | ARCH_R5900                                  \
                          /* end-sanitize-r5900 */                      \
                          | 0)
 
 #define MASK_ISA_DEP ~(MASK_ISA_INDEP | MASK_ISA)
-
 
 /* Very short names for use in the table below to keep it neet. */
 #define G1 (3 | ARCH_VR4100)
@@ -509,8 +508,18 @@ typedef struct instruction {
             /* end-sanitize-r5900 */                                    \
             | 0)
 
+#define G4 (2 | ARCH_R3900)
 
+#define G5 (0                                         \
+            | ARCH_R3900                              \
+            /* start-sanitize-r5900 */                \
+            | ARCH_R5900                              \
+            /* end-sanitize-r5900 */                  \
+            )
 
+#define G6 (3 | ARCH_R3900)
+
+#define T3 ARCH_R3900
 /* start-sanitize-r5900 */
 #define T5 ARCH_R5900       
 /* end-sanitize-r5900 */
@@ -533,21 +542,21 @@ struct instruction MIPS_DECODE[] = {
  {"ANDI",    1,"001100ssssstttttzzzzzzzzzzzzzzzz",NORMAL, AND,      (NONE)},
  {"BC1",     1,"01000101000qqqfcllllllllllllllll",COP1S,  BRANCH,   (FP)},
  {"BEQ",     1,"000100sssssgggggllllllllllllllll",NORMAL, BRANCH,   (EQ)},
- {"BEQL",    2,"010100sssssgggggllllllllllllllll",NORMAL, BRANCH,   (EQ | LIKELY)},
+ {"BEQL",   G4,"010100sssssgggggllllllllllllllll",NORMAL, BRANCH,   (EQ | LIKELY)},
  {"BGEZ",    1,"000001sssss00001llllllllllllllll",REGIMM, BRANCH,   (GT | EQ)},
  {"BGEZAL",  1,"000001sssss10001llllllllllllllll",REGIMM, BRANCH,   (GT | EQ | LINK)},
- {"BGEZALL", 2,"000001sssss10011llllllllllllllll",REGIMM, BRANCH,   (GT | EQ | LINK)},
- {"BGEZL",   2,"000001sssss00011llllllllllllllll",REGIMM, BRANCH,   (GT | EQ | LIKELY)},
+ {"BGEZALL",G4,"000001sssss10011llllllllllllllll",REGIMM, BRANCH,   (GT | EQ | LINK)},
+ {"BGEZL",  G4,"000001sssss00011llllllllllllllll",REGIMM, BRANCH,   (GT | EQ | LIKELY)},
  {"BGTZ",    1,"000111sssss00000llllllllllllllll",NORMAL, BRANCH,   (GT)},
- {"BGTZL",   2,"010111sssss00000llllllllllllllll",NORMAL, BRANCH,   (GT | LIKELY)},
+ {"BGTZL",  G4,"010111sssss00000llllllllllllllll",NORMAL, BRANCH,   (GT | LIKELY)},
  {"BLEZ",    1,"000110sssss00000llllllllllllllll",NORMAL, BRANCH,   (LT | EQ)},
- {"BLEZL",   2,"010110sssss00000llllllllllllllll",NORMAL, BRANCH,   (LT | EQ | LIKELY)},
+ {"BLEZL",  G4,"010110sssss00000llllllllllllllll",NORMAL, BRANCH,   (LT | EQ | LIKELY)},
  {"BLTZ",    1,"000001sssss00000llllllllllllllll",REGIMM, BRANCH,   (LT)},
  {"BLTZAL",  1,"000001sssss10000llllllllllllllll",REGIMM, BRANCH,   (LT | LINK)},
- {"BLTZALL", 2,"000001sssss10010llllllllllllllll",REGIMM, BRANCH,   (LT | LINK | LIKELY)},
- {"BLTZL",   2,"000001sssss00010llllllllllllllll",REGIMM, BRANCH,   (LT | LIKELY)},
+ {"BLTZALL",G4,"000001sssss10010llllllllllllllll",REGIMM, BRANCH,   (LT | LINK | LIKELY)},
+ {"BLTZL",  G4,"000001sssss00010llllllllllllllll",REGIMM, BRANCH,   (LT | LIKELY)},
  {"BNE",     1,"000101sssssgggggllllllllllllllll",NORMAL, BRANCH,   (NOT | EQ)},
- {"BNEL",    2,"010101sssssgggggllllllllllllllll",NORMAL, BRANCH,   (NOT | EQ | LIKELY)},
+ {"BNEL",   G4,"010101sssssgggggllllllllllllllll",NORMAL, BRANCH,   (NOT | EQ | LIKELY)},
  {"BREAK",   1,"000000????????????????????001101",SPECIAL,BREAK,    (NOARG)},
  {"CEIL.L",  3,"01000110mmm00000vvvvvrrrrr001010",COP1,   FPCEIL,   (FP | FIXED | DOUBLEWORD)},
  {"CEIL.W",  2,"01000110mmm00000vvvvvrrrrr001110",COP1,   FPCEIL,   (FP | FIXED | WORD)},
@@ -619,10 +628,10 @@ struct instruction MIPS_DECODE[] = {
  {"LWR",     1,"100110ssssstttttyyyyyyyyyyyyyyyy",NORMAL, LOAD,     (WORD | RIGHT)},
  {"LWU",     3,"100111ssssstttttwwwwwwwwwwwwwwww",NORMAL, LOAD,     (WORD)},
  {"LWXC1",  G3,"010011sssssggggg00000rrrrr000000",COP1X,  LOAD,     (FP | WORD | COPROC | REG)},
+ {"MADD",   G5,"011100sssssgggggddddd00000000000",MMINORM,MADD,     (NONE)},
+ {"MADDU",  G5,"011100sssssgggggddddd00000000001",MMINORM,MADD,     (UNSIGNED)},
  /* start-sanitize-r5900 */
- {"MADD",   T5,"011100sssssgggggddddd00000000000",MMINORM,MADD,     (NONE)},
  {"MADD1",  T5,"011100sssssgggggddddd00000100000",MMINORM,MADD,     (PIPE1)},
- {"MADDU",  T5,"011100sssssgggggddddd00000000001",MMINORM,MADD,     (UNSIGNED)},
  {"MADDU1", T5,"011100sssssgggggddddd00000100001",MMINORM,MADD,     (UNSIGNED | PIPE1)},
  /* end-sanitize-r5900 */
  {"MADD16", G1,"000000sssssggggg0000000000101000",SPECIAL,MADD16,   (WORD | HI | LO)},
@@ -842,7 +851,7 @@ struct instruction MIPS_DECODE[] = {
  {"SWL",     1,"101010sssssgggggyyyyyyyyyyyyyyyy",NORMAL, STORE,    (WORD | LEFT)},
  {"SWR",     1,"101110sssssgggggyyyyyyyyyyyyyyyy",NORMAL, STORE,    (WORD | RIGHT)},
  {"SWXC1",  G3,"010011sssssgggggvvvvv00000001000",COP1X,  STORE,    (FP | WORD | COPROC | REG)},
- {"SYNC",    2,"000000000000000000000aaaaa001111",SPECIAL,SYNC,     (NONE)}, /* z = 5bit stype field */
+ {"SYNC",   G4,"000000000000000000000aaaaa001111",SPECIAL,SYNC,     (NONE)}, /* z = 5bit stype field */
  {"SYSCALL", 1,"000000????????????????????001100",SPECIAL,SYSCALL,  (NOARG)},
  {"TEQ",     2,"000000sssssggggg??????????110100",SPECIAL,TRAP,     (EQ)},
  {"TEQI",    2,"000001sssss01100iiiiiiiiiiiiiiii",REGIMM, TRAP,     (EQ)},
@@ -860,7 +869,7 @@ struct instruction MIPS_DECODE[] = {
  {"TRUNC.W", 2,"01000110mmm00000vvvvvrrrrr001101",COP1,   FPTRUNC,  (FP | FIXED | WORD)},
  {"XOR",     1,"000000sssssgggggddddd00000100110",SPECIAL,XOR,      (NONE)},
  {"XORI",    1,"001110ssssstttttzzzzzzzzzzzzzzzz",NORMAL, XOR,      (NONE)},
- {"CACHE",   3,"101111sssssnnnnnyyyyyyyyyyyyyyyy",NORMAL, CACHE,    (NONE)},
+ {"CACHE",  G6,"101111sssssnnnnnyyyyyyyyyyyyyyyy",NORMAL, CACHE,    (NONE)},
  {"<INT>",   1,"111011sssssgggggyyyyyyyyyyyyyyyy",NORMAL, RSVD,     (NONE)},
 };
 
@@ -3315,7 +3324,6 @@ build_instruction (doisa, features, mips16, insn)
      printf("   }\n");
      break ;
 
-/* start-sanitize-r5900 */
     case MADD:
      {
        char* pipeline = (insn->flags & PIPE1) ? "1" : "";
@@ -3333,6 +3341,7 @@ build_instruction (doisa, features, mips16, insn)
        break;
      }
 
+/* start-sanitize-r5900 */
     case MxSA:
       {
         if (insn->flags & TO)
@@ -4115,10 +4124,11 @@ struct architectures {
 };
 
 static const struct architectures available_architectures[] = {
-  /* start-sanitize-tx19 */
-  {"1900",ARCH_TX19},   /* Toshiba TX19 */
-  /* end-sanitize-tx19  */
   {"4100",ARCH_VR4100}, /* NEC MIPS VR4100 */
+  {"3900",ARCH_R3900},   /* Toshiba R3900 (TX39) */
+  /* start-sanitize-tx19 */
+  {"1900",ARCH_R3900},   /* Toshiba R1900 (TX19) */
+  /* end-sanitize-tx19  */
   /* start-sanitize-r5900 */
   {"5900",ARCH_R5900},
   /* end-sanitize-r5900 */
