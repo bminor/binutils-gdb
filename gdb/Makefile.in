@@ -232,7 +232,7 @@ SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 HFILES=	breakpoint.h buildsym.h call-cmds.h command.h defs.h environ.h \
 	expression.h frame.h gdbcmd.h gdbcore.h gdbtypes.h \
 	ieee-float.h inferior.h minimon.h objfiles.h partial-stab.h \
-	signals.h signame.h symfile.h symtab.h solib.h \
+	signals.h signame.h symfile.h symtab.h solib.h xcoffsolib.h \
 	target.h terminal.h tm-68k.h tm-i960.h tm-sunos.h tm-sysv4.h \
 	xm-m68k.h xm-sysv4.h language.h parser-defs.h value.h
 

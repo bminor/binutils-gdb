@@ -1,5 +1,6 @@
 Tue Apr  7 08:45:46 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* Makefile.in (HFILES):  Add xcoffsolib.h.
 	* rs6k-opcode.h:  Move to ../include/opcode/rs6k.h.
 	* rs6000-pinsn.c:  #include "opcode/rs6k.h"
 
