@@ -1,3 +1,12 @@
+Thu Jul 30 21:44:25 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* d30v.h (FLAG_LKR): New flag for "left-kills-right" instructions.
+
+Tue Jul 28 10:59:07 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300.h: Add "no_match_operands" field for instructions.
+	(MN10300_MAX_OPERANDS): Define.
+
 Fri Jul 24 11:44:24 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* cgen.h (cgen_macro_insn_count): Declare.
