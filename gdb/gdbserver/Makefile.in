@@ -37,7 +37,6 @@ man8dir = $(mandir)/man8
 man9dir = $(mandir)/man9
 infodir = $(prefix)/info
 includedir = $(prefix)/include
-docdir = $(datadir)/doc
 
 SHELL = /bin/sh
 
