@@ -1696,6 +1696,7 @@ dst_symfile_offsets (objfile, addr)
      struct objfile *objfile;
      CORE_ADDR addr;
 {
+  objfile->num_sections = 1;
   return &dst_symfile_faker;
 }
 
@@ -1703,8 +1704,10 @@ dst_symfile_offsets (objfile, addr)
 
 static struct sym_fns dst_sym_fns =
 {
-  "apollo",		/* sym_name: name or name prefix of BFD target type */
-  6,			/* sym_namelen: number of significant sym_name chars */
+  /* FIXME: Can this be integrated with coffread.c?  If not, should it be
+     a separate flavour like ecoff?  */
+  (enum bfd_flavour)-2,
+
   dst_new_init,		/* sym_new_init: init anything gbl to entire symtab */
   dst_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
   dst_symfile_read,	/* sym_read: read a symbol file into symtab */
