@@ -1,5 +1,10 @@
 2002-07-31  Kevin Buettner  <kevinb@redhat.com>
 
+	* mips-tdep.c (_initialize_mips_tdep): Add "n64" to "set mips abi"
+	help message.
+
+2002-07-31  Kevin Buettner  <kevinb@redhat.com>
+
 	* mips-tdep.c (mips_push_arguments): Fetch gdbarch_tdep struct
 	and save it in a local variable.  Use variable in later test.
 

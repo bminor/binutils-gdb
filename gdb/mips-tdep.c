@@ -5126,6 +5126,7 @@ This option can be set to one of:\n\
      "  o32\n"
      "  o64\n"
      "  n32\n"
+     "  n64\n"
      "  eabi32\n"
      "  eabi64",
      &setmipscmdlist);
