@@ -1,3 +1,9 @@
+Fri Oct 16 03:02:28 1992  John Gilmore  (gnu@cygnus.com)
+
+	* config/decstation.mh, news.mh (NATDEPFILES):  Add corelow.o.
+	* config/delta88.mt, m88k.mt (TDEPFILES):  Remove coredep.o, it's
+	native dependent.
+
 Thu Oct 15 21:53:53 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	Ultra3 host/target/native split.  (untested).
