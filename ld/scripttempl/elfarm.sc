@@ -134,6 +134,8 @@ SECTIONS
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
     *(.text)
+    *(.glue_7t)
+    *(.glue_7)
     ${RELOCATING+*(.text.*)}
     *(.stub)
     /* .gnu.warning sections are handled specially by elf32.em.  */
