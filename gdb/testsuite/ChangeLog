@@ -1,3 +1,9 @@
+2004-04-27  Jerome Guitton  <guitton@gnat.com>
+
+	* i386-prologue.exp: Add testcase for jump instruction as first
+	instruction of the real code.
+	* i386-prologue.c (jump_at_beginning): New function.
+
 2004-04-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/call-sc.exp: Remove patterns to KFAIL PR gdb/1624 on
