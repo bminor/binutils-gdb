@@ -1537,7 +1537,7 @@ map_over_chirp_note(bfd *image,
     if (head.descsz == sizeof(note->desc))
       note->desc.load_base = bfd_get_32(image, (void*)&note->desc.load_base);
     else
-      note->desc.load_base = CHIRP_LOAD_BASE;
+      note->desc.load_base = (signed32)-1;
   }
 }
 
@@ -1900,6 +1900,18 @@ emul_chirp_create(device *root,
     tree_parse(node, "./psim,description \"load & map the binary");
     tree_parse(node, "./claim 1");
     tree_parse(node, "./file-name \"%s", bfd_get_filename(image));
+    tree_parse(node, "./wimg %d", 0x7);
+    tree_parse(node, "./pp %d", 0x2);
+  }
+
+  /* map in the interrupt vectors */
+
+  if (!chirp->real_mode) {
+    node = tree_parse(root, "/openprom/init/htab/pte@0x0");
+    tree_parse(node, "./psim,description \"map in interrupt vectors");
+    tree_parse(node, "./virtual-address 0x0");
+    tree_parse(node, "./real-address 0x0");
+    tree_parse(node, "./nr-bytes 0x3000");
     tree_parse(node, "./wimg %d", 0x7);
     tree_parse(node, "./pp %d", 0x2);
   }

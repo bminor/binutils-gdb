@@ -571,10 +571,12 @@ htab_map_binary(device *me,
   }
 
   /* set up virtual memory maps for each of the regions */
-  htab_map_region(me, memory, sizes.text_ra, sizes.text_base,
-		  sizes.text_bound - sizes.text_base,
-		  wimg, pp,
-		  htaborg, htabmask);
+  if (sizes.text_bound - sizes.text_base > 0) {
+    htab_map_region(me, memory, sizes.text_ra, sizes.text_base,
+		    sizes.text_bound - sizes.text_base,
+		    wimg, pp,
+		    htaborg, htabmask);
+  }
 
   htab_map_region(me, memory, sizes.data_ra, sizes.data_base,
 		  sizes.data_bound - sizes.data_base,

@@ -1,3 +1,12 @@
+2001-10-25  Andrew Cagney  <ac131313@redhat.com>
+
+	* emul_generic.c (OEA_MEMORY_SIZE): Increase to 4mb.
+	* hw_htab.c (htab_map_binary): Don't try to map the text section
+	when it is empty.
+	* emul_chirp.c (map_over_chirp_note): Default load-base to -1 not
+	CHIRP_LOAD_BASE.
+	(emul_chirp_create): Map in the interrupt table.
+
 2001-07-16  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in: Add dependencies on $(CPU_H).
