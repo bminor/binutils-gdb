@@ -1,3 +1,11 @@
+2003-05-23  Andrew Cagney  <cagney@redhat.com>
+
+	* p-valprint.c (pascal_val_print): Replace extract_address with
+	the inline equivalent extract_unsigned_integer.
+	* jv-valprint.c (java_value_print): Ditto.
+	* ada-valprint.c (ada_val_print_1): Ditto.
+	* ada-lang.h (EXTRACT_ADDRESS): Ditto.
+
 2003-05-23  Theodore A. Roth  <troth@openavr.org>
 
 	* blockframe.c (frameless_look_for_prologue): Remove unused

@@ -742,9 +742,11 @@ ada_val_print_1 (struct type *type, char *valaddr0, int embedded_offset,
       if (addressprint)
 	{
 	  fprintf_filtered (stream, "@");
+	  /* Extract an address, assume that the address is unsigned.  */
 	  print_address_numeric
-	    (extract_address (valaddr,
-			      TARGET_PTR_BIT / HOST_CHAR_BIT), 1, stream);
+	    (extract_unsigned_integer (valaddr,
+				       TARGET_PTR_BIT / HOST_CHAR_BIT),
+	     1, stream);
 	  if (deref_ref)
 	    fputs_filtered (": ", stream);
 	}

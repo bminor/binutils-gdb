@@ -141,7 +141,8 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 	  /* Print the unmangled name if desired.  */
 	  /* Print vtable entry - we only get here if we ARE using
 	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_STRUCT.) */
-	  print_address_demangle (extract_address (valaddr + embedded_offset, TYPE_LENGTH (type)),
+	  /* Extract the address, assume that it is unsigned.  */
+	  print_address_demangle (extract_unsigned_integer (valaddr + embedded_offset, TYPE_LENGTH (type)),
 				  stream, demangle);
 	  break;
 	}
@@ -272,9 +273,11 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
       if (addressprint)
 	{
 	  fprintf_filtered (stream, "@");
+	  /* Extract the address, assume that it is unsigned.  */
 	  print_address_numeric
-	    (extract_address (valaddr + embedded_offset,
-			      TARGET_PTR_BIT / HOST_CHAR_BIT), 1, stream);
+	    (extract_unsigned_integer (valaddr + embedded_offset,
+				       TARGET_PTR_BIT / HOST_CHAR_BIT),
+	     1, stream);
 	  if (deref_ref)
 	    fputs_filtered (": ", stream);
 	}
@@ -312,10 +315,11 @@ pascal_val_print (struct type *type, char *valaddr, int embedded_offset,
 	  /* Print the unmangled name if desired.  */
 	  /* Print vtable entry - we only get here if NOT using
 	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_PTR.) */
-	  print_address_demangle (extract_address (
-						    valaddr + embedded_offset + TYPE_FIELD_BITPOS (type, VTBL_FNADDR_OFFSET) / 8,
-		  TYPE_LENGTH (TYPE_FIELD_TYPE (type, VTBL_FNADDR_OFFSET))),
-				  stream, demangle);
+	  /* Extract the address, assume that it is unsigned.  */
+	  print_address_demangle
+	    (extract_unsigned_integer (valaddr + embedded_offset + TYPE_FIELD_BITPOS (type, VTBL_FNADDR_OFFSET) / 8,
+				       TYPE_LENGTH (TYPE_FIELD_TYPE (type, VTBL_FNADDR_OFFSET))),
+	     stream, demangle);
 	}
       else
 	{

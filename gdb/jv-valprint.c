@@ -110,14 +110,22 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 		{
 		  read_memory (address, buf, sizeof (buf));
 		  address += TARGET_PTR_BIT / HOST_CHAR_BIT;
-		  element = extract_address (buf, sizeof (buf));
+		  /* FIXME: cagney/2003-05-24: Bogus or what.  It
+                     pulls a host sized pointer out of the target and
+                     then extracts that as an address (while assuming
+                     that the address is unsigned)!  */
+		  element = extract_unsigned_integer (buf, sizeof (buf));
 		}
 
 	      for (reps = 1; i + reps < length; reps++)
 		{
 		  read_memory (address, buf, sizeof (buf));
 		  address += TARGET_PTR_BIT / HOST_CHAR_BIT;
-		  next_element = extract_address (buf, sizeof (buf));
+		  /* FIXME: cagney/2003-05-24: Bogus or what.  It
+                     pulls a host sized pointer out of the target and
+                     then extracts that as an address (while assuming
+                     that the address is unsigned)!  */
+		  next_element = extract_unsigned_integer (buf, sizeof (buf));
 		  if (next_element != element)
 		    break;
 		}
@@ -468,7 +476,8 @@ java_val_print (struct type *type, char *valaddr, int embedded_offset,
 	  /* Print the unmangled name if desired.  */
 	  /* Print vtable entry - we only get here if we ARE using
 	     -fvtable_thunks.  (Otherwise, look under TYPE_CODE_STRUCT.) */
-	  print_address_demangle (extract_address (valaddr, TYPE_LENGTH (type)),
+	  /* Extract an address, assume that it is unsigned.  */
+	  print_address_demangle (extract_unsigned_integer (valaddr, TYPE_LENGTH (type)),
 				  stream, demangle);
 	  break;
 	}
