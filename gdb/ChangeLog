@@ -1,5 +1,7 @@
 Thu Jan 28 19:09:02 1993  John Gilmore  (gnu@cygnus.com)
 
+	* config/go32.mh:  Remove nonexistent "native" support.
+
 	M88K fixes reported by Carl Greco, <cgreco@Creighton.Edu>:
 	* tm-m88k.h (REGISTER_CONVERT_TO_RAW):  Fix typo.
 	* m88k-tdep.c (next_insn):  Lint, cleanup.
