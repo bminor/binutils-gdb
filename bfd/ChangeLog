@@ -1,6 +1,6 @@
 Fri Apr  5 12:24:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
-	* sysdep.h: Use #ifdef,not #if.
+	* sysdep.h: Use #ifdef, not #if.
 
 Thu Apr  4 23:32:23 1996  Ian Lance Taylor  <ian@cygnus.com>
 
