@@ -544,6 +544,7 @@ saved_pc_after_call (frame)
 /* Discard from the stack the innermost frame,
    restoring all saved registers.  */
 
+void
 pop_frame ()
 {
   register struct frame_info *current_fi, *prev_fi;

@@ -1,3 +1,24 @@
+Thu Dec  3 16:30:35 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ax-gdb.c: Include target.h.
+
+Tue Dec  3 10:59:00 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ax-gdb.c (_initialize_ax_gdb), i960-tdep.c (pop_frame),
+ 	monitor.c (flush_monitor_dcache, longlongendswap), remote-array.c
+ 	(hexword2ascii), w89k-rom.c (init_w89k_cmds), z8k-tdep.c
+ 	(init_frame_pc, extract_return_value): Make return type void.
+	* monitor.c (monitor_write_even_block): Make return type explicit.
+	(monotor_read_memory_block): Delete function.
+	* monitor.h: Update.
+	* remote.c (remote_get_threadlist, remote_update_threads),
+ 	remote-array.c (array_get_packet), remote-rdi.c (Fail): Always
+ 	return a value.
+	* m32r-tdep.c (m32r_fix_call_dummy): From Michael Snyder, void
+ 	function.
+	* jv-valprint.c (java_val_print): From Stu Grossman. Return 0 by
+ 	default.
+	
 Wed Dec  2 15:11:38 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* tracepoint.c: Move default definition of 

@@ -419,7 +419,7 @@ readchar (timeout)
 
   if (c == SERIAL_TIMEOUT)
 #if 0 /* MAINTENANCE_CMDS */
-    /* I fail to see how detaching here can be useful
+    /* I fail to see how detaching here can be useful */
     if (in_monitor_wait)	/* Watchdog went off */
       {
 	target_mourn_inferior ();
@@ -794,7 +794,11 @@ monitor_supply_register (regno, valstr)
 
 /* Tell the remote machine to resume.  */
 
-int flush_monitor_dcache(void) {  dcache_flush (remote_dcache); }
+void
+flush_monitor_dcache ()
+{
+  dcache_flush (remote_dcache);
+}
 
 static void
 monitor_resume (pid, step, sig)
@@ -1360,7 +1364,8 @@ monitor_write_memory (memaddr, myaddr, len)
 }
 
 
-static monitor_write_even_block(memaddr,myaddr,len)
+static int
+monitor_write_even_block(memaddr,myaddr,len)
      CORE_ADDR memaddr ;
      char * myaddr ;
      int len ;
@@ -1418,7 +1423,8 @@ static int monitor_write_memory_bytes(memaddr,myaddr,len)
 }
 
 
-static longlongendswap(unsigned char * a)
+static void
+longlongendswap (unsigned char * a)
 {
   int i,j ;
   unsigned char x ;
@@ -1829,16 +1835,6 @@ monitor_read_memory (memaddr, myaddr, len)
     }
 
   return len;
-}
-
-/* This version supports very large reads by looping on multiline
-   dump bytes outputs. Beware of buffering limits.
-   */
-static int monotor_read_memory_block(memaddr,myaddr,len)
-     CORE_ADDR memaddr ;
-     char * myaddr ;
-     int len ;
-{
 }
 
 static int

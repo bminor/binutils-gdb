@@ -976,7 +976,7 @@ getmessage (buf, forever)
 	  if (c3 == '+')
 	    {
 	      message_pending = 1;
-	      return;
+	      return 0; /*????*/
 	    }
 	  continue;
 	}
@@ -1028,6 +1028,7 @@ getmessage (buf, forever)
   /* We have tried hard enough, and just can't receive the packet.  Give up. */
 
   printf_unfiltered ("Ignoring packet error, continuing...\n");
+  return 0;
 }
 
 static void

@@ -970,4 +970,4 @@ _initialize_remote_rdi ()
 
 /* A little dummy to make linking with the library succeed. */
 
-Fail() {}
+int Fail() { return 0; }

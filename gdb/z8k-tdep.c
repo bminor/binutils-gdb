@@ -172,6 +172,7 @@ frame_chain (thisframe)
   return 0;
 }
 
+void
 init_frame_pc ()
 {
   abort ();
@@ -299,6 +300,7 @@ saved_pc_after_call ()
 }
 
 
+void
 extract_return_value (type, regbuf, valbuf)
      struct type *type;
      char *regbuf;

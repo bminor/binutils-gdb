@@ -479,4 +479,5 @@ java_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       return c_val_print (type, valaddr, address, stream, format,
 			  deref_ref, recurse, pretty);
     }
+  return 0;
 }

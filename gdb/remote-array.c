@@ -90,7 +90,7 @@ static int from_hex();
 static int array_send_packet();
 static int array_get_packet();
 static unsigned long ascii2hexword();
-static char *hexword2ascii();
+static void hexword2ascii();
 
 extern char *version;
 
@@ -1365,6 +1365,7 @@ array_get_packet (packet)
       }
     }
   }
+  return 0; /* exceeded retries */
 }
 
 /*
@@ -1398,7 +1399,7 @@ ascii2hexword (mem)
  * ascii2hexword -- convert a hex value to an ascii number represented by 8
  *	digits.
  */
-static char*
+static void
 hexword2ascii (mem, num)
      unsigned char *mem;
      unsigned long num;

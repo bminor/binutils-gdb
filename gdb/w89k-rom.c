@@ -244,7 +244,8 @@ static struct target_ops w89k_ops;
 static char *w89k_inits[] = {"\n", NULL};
 
 static struct monitor_ops w89k_cmds ;
-static init_w89k_cmds(void)
+static void
+init_w89k_cmds(void)
 {
   w89k_cmds.flags =   MO_GETMEM_NEEDS_RANGE|MO_FILL_USES_ADDR; /* flags */
   w89k_cmds.init =   w89k_inits;		/* Init strings */
