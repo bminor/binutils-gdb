@@ -125,7 +125,6 @@ alloc_cfi_info (void)
 static int
 cfi_parse_arg (long *param, int resolvereg)
 {
-  char *name, c, *p;
   long value;
   int retval = -1;
   int nchars;
@@ -138,8 +137,11 @@ cfi_parse_arg (long *param, int resolvereg)
       input_line_pointer += nchars;
       retval = 1;
     }
+#ifdef tc_regname_to_dw2regnum
   else if (resolvereg && (is_name_beginner (*input_line_pointer)))
     {
+      char *name, c, *p;
+
       name = input_line_pointer;
       c = get_symbol_end ();
       p = input_line_pointer;
@@ -149,6 +151,7 @@ cfi_parse_arg (long *param, int resolvereg)
 
       *p = c;
     }
+#endif
   else
     as_bad (resolvereg ?
 	    _("can't convert argument to a register number") :
@@ -539,6 +542,7 @@ dot_cfi_endproc (void)
   unsigned long  buf_size, cie_size, fde_size, last_cie_offset;
   unsigned long	fde_initloc_offset, fde_len_offset;
   void *saved_seg, *cfi_seg;
+  expressionS exp;
 
   if (! cfi_info)
     {
@@ -653,7 +657,6 @@ dot_cfi_endproc (void)
 
   /* Set relocation for initial address.  */
   buf_size = current_config.addr_length;
-  expressionS exp;
   memset (&exp, 0, sizeof (exp));
   exp.X_op = O_symbol;
   exp.X_add_symbol = symbol_find (cfi_info->labelname);
