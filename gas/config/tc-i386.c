@@ -1476,7 +1476,7 @@ md_assemble (line)
 	    {
 	      /* In case it is "hi" register, give up.  */
 	      if (i.op[x].regs->reg_num > 3)
-		as_bad (_("can't encode register '%%%s' in an instruction requiring REX prefix.\n"),
+		as_bad (_("can't encode register '%%%s' in an instruction requiring REX prefix."),
 			i.op[x].regs->reg_name);
 
 	      /* Otherwise it is equivalent to the extended register.
@@ -5350,7 +5350,7 @@ tc_gen_reloc (section, fixp)
 
    Initial production is 'expr'.
 
-    addOp		+ | -
+    addOp		+ | - | & | \| | << | >>
 
     alpha		[a-zA-Z]
 
@@ -5387,6 +5387,7 @@ tc_gen_reloc (section, fixp)
 			| id
 			| $
 			| register
+			| ~
 
  => expr		SHORT e05
 			| e05
@@ -5455,6 +5456,7 @@ tc_gen_reloc (section, fixp)
 		| $
 		| register
 		| id
+		| ~
 		| constant  */
 
 /* Parsing structure for the intel syntax parser. Used to implement the
@@ -5496,6 +5498,7 @@ static struct intel_token cur_token, prev_token;
 #define T_OFFSET	9
 #define T_PTR		10
 #define T_ID		11
+#define T_SHIFTOP	12
 
 /* Prototypes for intel parser functions.  */
 static int intel_match_token	PARAMS ((int code));
@@ -5615,7 +5618,9 @@ static int
 intel_e05_1 ()
 {
   /* e05'  addOp e06 e05'  */
-  if (cur_token.code == '+' || cur_token.code == '-')
+  if (cur_token.code == '+' || cur_token.code == '-'
+      || cur_token.code == '&' || cur_token.code == '|'
+      || cur_token.code == T_SHIFTOP)
     {
       strcat (intel_parser.disp, cur_token.str);
       intel_match_token (cur_token.code);
@@ -5717,7 +5722,7 @@ intel_e09_1 ()
 
       else
 	{
-	  as_bad (_("Unknown operand modifier `%s'\n"), prev_token.str);
+	  as_bad (_("Unknown operand modifier `%s'"), prev_token.str);
 	  return 0;
 	}
 
@@ -5801,6 +5806,7 @@ intel_e10_1 ()
 	| .
 	| register
 	| id
+	| ~
 	| constant  */
 static int
 intel_e11 ()
@@ -5819,6 +5825,15 @@ intel_e11 ()
       else
 	return 0;
     }
+
+  /* e11 ~ expr */
+  else if (cur_token.code == '~')
+   {
+     strcat (intel_parser.disp, "~");
+     intel_match_token ('~');
+
+     return (intel_e11 ());
+   }
 
   /* e11  [ expr ] */
   else if (cur_token.code == '[')
@@ -5965,7 +5980,7 @@ intel_e11 ()
 	{
 	  if (i.base_reg && i.index_reg)
 	    {
-	      as_bad (_("Too many register references in memory operand.\n"));
+	      as_bad (_("Too many register references in memory operand."));
 	      return 0;
 	    }
 
@@ -6034,7 +6049,7 @@ intel_e11 ()
 	  intel_match_token (cur_token.code);
 	  if (cur_token.code != T_CONST)
 	    {
-	      as_bad (_("Syntax error. Expecting a constant. Got `%s'.\n"),
+	      as_bad (_("Syntax error. Expecting a constant. Got `%s'."),
 		      cur_token.str);
 	      return 0;
 	    }
@@ -6121,7 +6136,7 @@ intel_match_token (code)
     }
   else
     {
-      as_bad (_("Unexpected token `%s'\n"), cur_token.str);
+      as_bad (_("Unexpected token `%s'"), cur_token.str);
       return 0;
     }
 }
@@ -6182,7 +6197,16 @@ intel_get_token ()
 	new_token.code = T_ID;
     }
 
-  else if (strchr ("+-/*:[]()", *intel_parser.op_string))
+  else if (strchr ("<>", *intel_parser.op_string)
+	   && *intel_parser.op_string == *(intel_parser.op_string + 1))
+    {
+      new_token.code = T_SHIFTOP;
+      new_token.str[0] = *intel_parser.op_string;
+      new_token.str[1] = *intel_parser.op_string;
+      new_token.str[2] = '\0';
+    }
+
+  else if (strchr ("+-/*&|:[]()~", *intel_parser.op_string))
     {
       new_token.code = *intel_parser.op_string;
       new_token.str[0] = *intel_parser.op_string;
@@ -6265,7 +6289,7 @@ intel_get_token ()
     }
 
   else
-    as_bad (_("Unrecognized token `%s'\n"), intel_parser.op_string);
+    as_bad (_("Unrecognized token `%s'"), intel_parser.op_string);
 
   intel_parser.op_string += strlen (new_token.str);
   cur_token = new_token;

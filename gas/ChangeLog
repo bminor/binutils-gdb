@@ -1,3 +1,18 @@
+2004-07-13  Thomas Nystrom  <thn@saeab.se>
+
+	* config/tc-i386.c (T_SHIFTOP): New constant.
+	(intel_e05_1): Handle '&', '|' and T_SHIFTOP.
+	(intel_el1): Handle '~'.
+	(intel_get_token): Handle '<>', '&', '|' and '~'.
+
+2004-07-13  Nick Clifton <nickc@redhat.com>
+
+	(md_assemble): Remove spurious newline from end of as_bad error
+	message.
+	(intel_e05_1): Likewise.
+	(intel_e11): Likewise.
+	(intel_match_token): Likewise.
+
 2004-07-11  Andreas Schwab  <schwab@suse.de>
 
 	* config/tc-m68k.c: Convert to C90.  Remove redundant

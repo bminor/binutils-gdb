@@ -12,6 +12,8 @@
 * Support for ColdFire EMAC instructions added and Motorola syntax for MAC/EMAC
   instrucitons.
 
+Changes in 2.15:
+
 * The MIPS -membedded-pic option (Embedded-PIC code generation) is
   deprecated and will be removed in a future release.
 

@@ -620,4 +620,11 @@ Disassembly of section .text:
  a6a:	ff 20 [ 	]*jmp    \*\(%eax\)
  a6c:	ff 25 d2 09 00 00 [ 	]*jmp    \*0x9d2
  a72:	e9 5b ff ff ff [ 	]*jmp    9d2 <bar>
+ a77:	b8 12 00 00 00 [ 	]*mov    \$0x12,%eax
+ a7c:	25 ff ff fb ff [ 	]*and    \$0xfffbffff,%eax
+ a81:	25 ff ff fb ff [ 	]*and    \$0xfffbffff,%eax
+ a86:	b0 11 [ 	]*mov    \$0x11,%al
+ a88:	b0 11 [ 	]*mov    \$0x11,%al
+ a8a:	b3 47 [ 	]*mov    \$0x47,%bl
+ a8c:	b3 47 [ 	]*mov    \$0x47,%bl
 [ 	]*...
