@@ -215,7 +215,7 @@ static reloc_howto_type * elf_hppa_reloc_type_lookup
 static boolean elf32_hppa_set_section_contents
   PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
 
-static void elf_info_to_howto
+static void elf32_hppa_info_to_howto
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
 
 static boolean elf32_hppa_backend_symbol_table_processing
@@ -296,7 +296,9 @@ static boolean elf32_hppa_link_output_symbol_hook
 static reloc_howto_type elf_hppa_howto_table[ELF_HOWTO_TABLE_SIZE] =
 {
   {R_PARISC_NONE, 0, 0, 0, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_PARISC_NONE"},
-  {R_PARISC_DIR32, 0, 0, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_PARISC_DIR32"},
+  /* The values in DIR32 are to placate the check in
+     _bfd_stab_section_find_nearest_line.  */
+  {R_PARISC_DIR32, 0, 2, 32, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_PARISC_DIR32", false, 0, 0xffffffff, false},
   {R_PARISC_DIR21L, 0, 0, 21, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_PARISC_DIR21L"},
   {R_PARISC_DIR17R, 0, 0, 17, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_PARISC_DIR17R"},
   {R_PARISC_DIR17F, 0, 0, 17, false, 0, complain_overflow_bitfield, hppa_elf_reloc, "R_PARISC_DIR17F"},
@@ -939,12 +941,13 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
    relocation with modifications based on format and field.  */
 
 elf32_hppa_reloc_type **
-hppa_elf_gen_reloc_type (abfd, base_type, format, field, ignore)
+hppa_elf_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
      bfd *abfd;
      elf32_hppa_reloc_type base_type;
      int format;
      int field;
      int ignore;
+     asymbol *sym;
 {
   elf32_hppa_reloc_type *finaltype;
   elf32_hppa_reloc_type **final_types;
@@ -1169,7 +1172,7 @@ elf32_hppa_set_section_contents (abfd, section, location, offset, count)
 /* Translate from an elf into field into a howto relocation pointer.  */
 
 static void
-elf_info_to_howto (abfd, cache_ptr, dst)
+elf32_hppa_info_to_howto (abfd, cache_ptr, dst)
      bfd *abfd;
      arelent *cache_ptr;
      Elf32_Internal_Rela *dst;
@@ -1865,7 +1868,7 @@ elf32_hppa_backend_symbol_table_processing (abfd, esyms,symcnt)
     {
       symext_entryS se =
 	ELF32_PARISC_SX_GET (abfd,
-			     (symextn_hdr->contents
+			     ((unsigned char *)symextn_hdr->contents
 			      + i * ELF32_PARISC_SX_SIZE));
       unsigned int se_value = ELF32_PARISC_SX_VAL (se);
       unsigned int se_type = ELF32_PARISC_SX_TYPE (se);
@@ -2960,6 +2963,7 @@ error_return:
 
 /* Symbol extension stuff.  */
 #define bfd_elf32_set_section_contents		elf32_hppa_set_section_contents
+#define elf_info_to_howto			elf32_hppa_info_to_howto
 #define elf_backend_symbol_table_processing \
   elf32_hppa_backend_symbol_table_processing
 #define elf_backend_begin_write_processing \

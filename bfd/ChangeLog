@@ -1,3 +1,9 @@
+Fri Sep 13 15:50:57 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-hppa.c (elf_hppa_howto_table): Fill in some fields for
+	R_PARISC_DIR32, so that _bfd_stab_section_find_nearest_line passes
+	its sanity check.
+
 start-sanitize-m32r
 Thu Sep 12 11:45:57 1996  Doug Evans  <dje@seba.cygnus.com>
 
