@@ -1,3 +1,8 @@
+2004-06-07  Randolph Chung  <tausq@debian.org>
+
+	* gdb.base/shlib-call.exp: Allow breakpoint to be added after inferior
+	has started.
+
 2004-06-04  Roland McGrath  <roland@redhat.com>
 
 	Fix PR gdb/1647.
