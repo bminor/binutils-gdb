@@ -897,11 +897,7 @@ md_begin ()
 	mips_cpu = 4320;
 
       /* end-sanitize-vr4320 */
-      else if (strcmp (cpu, "mips64vr4100") == 0
-	       /* start-sanitize-vr4111 */
-	       || strcmp (cpu, "mips64vr4111") == 0
-               /* end-sanitize-vr4111 */
-	       )
+      else if (strcmp (cpu, "mips64vr4100") == 0)
         mips_cpu = 4100;
 
       else if (strcmp (cpu, "r4010") == 0)

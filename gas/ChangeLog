@@ -703,13 +703,6 @@ Thu Jan 15 13:46:48 1998  Richard Henderson  <rth@cygnus.com>
 	account when attempting to match a register name.
 	* tc-h8500.c (parse_reg): Likewise.
 
-start-sanitize-vr4111
-Thu Jan 15 09:33:11 1998  Gavin Koch  <gavin@cygnus.com>
-
-	* config/tc-mips.c (md_begin): Create the vr4111 as a copy of
-	the vr4100.
-
-end-sanitize-vr4111
 Wed Jan 14 17:52:33 1998  Nick Clifton  <nickc@cygnus.com>
 
 start-sanitize-m32rx
