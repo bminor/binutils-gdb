@@ -47,6 +47,9 @@ static boolean sparc64_elf_size_dynamic_sections
 static boolean sparc64_elf_adjust_dynindx
   PARAMS((struct elf_link_hash_entry *, PTR));
 
+static boolean sparc64_elf_merge_private_bfd_data
+  PARAMS ((bfd *, bfd *));
+
 static boolean sparc64_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
@@ -2287,6 +2290,80 @@ sparc64_elf_finish_dynamic_sections (output_bfd, info)
 
   return true;
 }
+
+/* Functions for dealing with the e_flags field. */
+
+/* Merge backend specific data from an object file to the output
+   object file when linking.  */
+
+static boolean
+sparc64_elf_merge_private_bfd_data (ibfd, obfd)
+     bfd *ibfd;
+     bfd *obfd;
+{
+  boolean error;
+  flagword new_flags, old_flags;
+  int new_mm, old_mm;
+
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  new_flags = elf_elfheader (ibfd)->e_flags;
+  old_flags = elf_elfheader (obfd)->e_flags;
+
+  if (!elf_flags_init (obfd))   /* First call, no flags set */
+    {
+      elf_flags_init (obfd) = true;
+      elf_elfheader (obfd)->e_flags = new_flags;
+    }
+                      
+  else if (new_flags == old_flags)      /* Compatible flags are ok */
+    ;
+                            
+  else                                  /* Incompatible flags */
+    {
+      error = false;
+  
+      old_flags |= (new_flags & (EF_SPARC_SUN_US1|EF_SPARC_HAL_R1));
+      new_flags |= (old_flags & (EF_SPARC_SUN_US1|EF_SPARC_HAL_R1));
+      if ((old_flags & (EF_SPARC_SUN_US1|EF_SPARC_HAL_R1)) ==
+           (EF_SPARC_SUN_US1|EF_SPARC_HAL_R1))
+        {
+          error = true;
+          (*_bfd_error_handler)
+            ("%s: linking UltraSPARC specific with HAL specific code",
+             bfd_get_filename (ibfd));
+        }
+        
+      /* Choose the most restrictive memory ordering */
+      old_mm = (old_flags & EF_SPARCV9_MM);
+      new_mm = (new_flags & EF_SPARCV9_MM);
+      old_flags &= ~EF_SPARCV9_MM;
+      new_flags &= ~EF_SPARCV9_MM;
+      if (new_mm < old_mm) old_mm = new_mm;
+      old_flags |= old_mm;
+      new_flags |= old_mm;
+
+      /* Warn about any other mismatches */
+      if (new_flags != old_flags)
+        {
+          error = true;
+          (*_bfd_error_handler)
+            ("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)",
+             bfd_get_filename (ibfd), (long)new_flags, (long)old_flags);
+        }
+
+      elf_elfheader (obfd)->e_flags = old_flags;
+
+      if (error)
+        {
+          bfd_set_error (bfd_error_bad_value);
+          return false;
+        }
+    }
+  return true;
+}
 
 
 /* Set the right machine number for a SPARC64 ELF file.  */
@@ -2295,7 +2372,11 @@ static boolean
 sparc64_elf_object_p (abfd)
      bfd *abfd;
 {
-  return bfd_default_set_arch_mach (abfd, bfd_arch_sparc, bfd_mach_sparc_v9);
+  unsigned long mach = bfd_mach_sparc_v9;
+  
+  if (elf_elfheader (abfd)->e_flags & EF_SPARC_SUN_US1)
+    mach = bfd_mach_sparc_v9a;
+  return bfd_default_set_arch_mach (abfd, bfd_arch_sparc, mach);
 }
 
 #define TARGET_BIG_SYM	bfd_elf64_sparc_vec
@@ -2323,6 +2404,9 @@ sparc64_elf_object_p (abfd)
   sparc64_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections \
   sparc64_elf_finish_dynamic_sections
+
+#define bfd_elf64_bfd_merge_private_bfd_data \
+  sparc64_elf_merge_private_bfd_data
 
 #define elf_backend_object_p \
   sparc64_elf_object_p

@@ -1,3 +1,10 @@
+Fri Oct 24 11:15:58 1997  Jakub Jelinek  <jj@sunsite.mff.cuni.cz>
+
+	* elf64-sparc.c (sparc64_elf_merge_private_bfd_data):
+	New function. Avoid mixing US1 and HAL R1 code.
+	Set resulting memory ordering to the strongest one used.
+	(sparc64_elf_object_p): Set bfd_mach correctly.
+
 Thu Oct 23 14:09:33 1997  Richard Henderson  <rth@cygnus.com>
 
 	* elf64-sparc.c (sparc64_elf_howto_table): Add UA64 & UA16.
