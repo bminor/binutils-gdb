@@ -117,6 +117,15 @@ else
 	lose_these_too="${lose_these_too} ${ide_files}"
 fi
 
+flexlm_files="flexlm"
+
+if (echo $* | grep keep\-cygnus > /dev/null); then
+	keep_these_too="${keep_these_too} ${flexlm_files}"
+	test -n "$verbose" && echo Keeping ${flexlm_files}
+else
+	lose_these_too="${lose_these_too} ${flexlm_files}"
+fi
+
 # CGEN files:
 # It is not yet clear if the cgen package will be shipped with the
 # simulators.
@@ -646,7 +655,7 @@ else
 	done
 fi
 
-kcygnus_files="configure"
+kcygnus_files="ChangeLog configure configure.in Makefile.in"
 if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
 	for i in $kcygnus_files ; do
 		if test ! -d $i && (grep sanitize-cygnus $i > /dev/null) ; then
