@@ -463,7 +463,7 @@ hist_print ()
 {
   Sym **time_sorted_syms, *top_dog, *sym;
   unsigned int index;
-  int log_scale;
+  unsigned log_scale;
   double top_time, time;
   bfd_vma addr;
 
@@ -528,11 +528,12 @@ hist_print ()
 	{
 	  top_time /= hz;
 
-	  while (SItab[log_scale].scale * top_time < 1000.0
-		 && ((size_t) log_scale
-		     < sizeof (SItab) / sizeof (SItab[0]) - 1))
+	  for (log_scale = 0; log_scale < ARRAY_SIZE (SItab); log_scale ++)
 	    {
-	      ++log_scale;
+	      double scaled_value = SItab[log_scale].scale * top_time;
+
+	      if (scaled_value >= 1.0 && scaled_value < 1000.0) 
+		break;
 	    }
 	}
     }
