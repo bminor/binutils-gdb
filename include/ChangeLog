@@ -1,3 +1,7 @@
+Thu Oct 15 04:35:51 1992  John Gilmore  (gnu@cygnus.com)
+
+	* bfd.h:  Update after comment changes.
+
 Thu Oct  8 09:03:02 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* bfd.h (bfd_get_symbol_leading_char): new macro for getting in xvec
