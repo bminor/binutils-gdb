@@ -1,5 +1,8 @@
 2001-11-09  Jim Blandy  <jimb@redhat.com>
 
+	* s390-nat.c: (s390_push_arguments): Write a back chain pointer
+	into the dummy frame, to help us get backtraces.
+
 	* values.c (value_as_address): If VAL is a function or method,
 	just return its address; don't let COERCE_ARRAY convert its
 	address to a pointer, and then have unpack_long convert it back to

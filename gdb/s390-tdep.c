@@ -1263,7 +1263,16 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		}
 	    }
 	}
-      if (!second_pass)
+      if (second_pass)
+        {
+          /* Write the back chain pointer into the first word of the
+             stack frame.  This will help us get backtraces from
+             within functions called from GDB.  */
+          write_memory_unsigned_integer (sp, 
+                                         (TARGET_PTR_BIT / TARGET_CHAR_BIT),
+                                         read_fp ());
+        }
+      else
 	{
 	  outgoing_args_space = outgoing_args_ptr;
 	  /* Align to 16 bytes because because I like alignment & 
