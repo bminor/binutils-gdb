@@ -179,6 +179,7 @@ extern void mips_enable_auto_align (void);
 extern enum dwarf2_format mips_dwarf2_format (void);
 #define DWARF2_FORMAT() mips_dwarf2_format ()
 
+extern int mips_dwarf2_addr_size (void);
 #define DWARF2_ADDR_SIZE(bfd) mips_dwarf2_addr_size ()
 
 #endif /* TC_MIPS */
