@@ -894,7 +894,7 @@ elf32_thumb_to_arm_stub (info, name, input_bfd, output_bfd, input_section,
     + my_offset
     - (input_section->output_offset
        + offset + addend)
-    - 4;
+    - 8;
 
   tmp = bfd_get_32 (input_bfd, hit_data
 		    - input_section->vma);
