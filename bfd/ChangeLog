@@ -1,3 +1,8 @@
+Tue Mar  5 12:02:23 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* sunos.c (sunos_scan_ext_relocs): If not making a shared library,
+	don't fiddle with a symbol which is not defined anywhere.
+
 Mon Mar  4 12:49:16 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (xcoff_mark): Treat undefined imported symbols as
