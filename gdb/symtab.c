@@ -382,7 +382,7 @@ find_pc_psymbol (psymtab, pc)
      struct partial_symtab *psymtab;
      CORE_ADDR pc;
 {
-  struct partial_symbol *best, *p;
+  struct partial_symbol *best = NULL, *p;
   CORE_ADDR best_pc;
   
   if (!psymtab)
@@ -430,7 +430,7 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
      struct symtab **symtab;
 {
   register struct symbol *sym;
-  register struct symtab *s;
+  register struct symtab *s = NULL;
   register struct partial_symtab *ps;
   struct blockvector *bv;
   register struct objfile *objfile;
@@ -991,15 +991,7 @@ find_pc_symtab (pc)
    code in the middle of a subroutine.  To properly find the end of a line's PC
    range, we must search all symtabs associated with this compilation unit, and
    find the one whose first PC is closer than that of the next line in this
-   symtab.
-
-   FIXME:  We used to complain here about zero length or negative length line
-   tables, but there are two problems with this: (1) some symtabs may not have
-   any line numbers due to gcc -g1 compilation, and (2) this function is called
-   during single stepping, when we don't own the terminal and thus can't
-   produce any output.  One solution might be to implement a mechanism whereby
-   complaints can be queued until we regain control of the terminal.  -fnf
- */
+   symtab.  */
 
 /* If it's worth the effort, we could be using a binary search.  */
 
@@ -1065,8 +1057,12 @@ find_pc_line (pc, notcurrent)
       if (!l)
         continue;
       len = l->nitems;
-      if (len <= 0)		  /* See FIXME above. */
+      if (len <= 0)
 	{
+	  /* I think len can be zero if the symtab lacks line numbers
+	     (e.g. gcc -g1).  (Either that or the LINETABLE is NULL;
+	     I'm not sure which, and maybe it depends on the symbol
+	     reader).  */
 	  continue;
 	}
 
@@ -2775,7 +2771,7 @@ make_symbol_completion_list (text, word)
   {
     char *p;
     char quote_found;
-    char *quote_pos;
+    char *quote_pos = NULL;
 
     /* First see if this is a quoted string.  */
     quote_found = '\0';
