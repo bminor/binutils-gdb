@@ -2091,6 +2091,115 @@ sh_elf_swap_insns (abfd, sec, relocs, contents, addr)
 
 /* First entry in an absolute procedure linkage table look like this.  */
 
+#if 1
+/* Note - this code has been "optimised" not to use r2.  r2 is used by
+   GCC to return the address of large strutcures, so it should not be
+   corrupted here.  This does mean however, that this PLT does not conform
+   to the SH PIC ABI.  That spec says that r0 contains the type of the PLT
+   and r2 contains the GOT id.  This version stores the GOT id in r0 and
+   ignores the type.  Loaders can easily detect this difference however,
+   since the type will always be 0 or 8, and the GOT ids will always be
+   greater than or equal to 12.  */
+static const bfd_byte elf_sh_plt0_entry_be[PLT_ENTRY_SIZE] =
+{
+  0xd0, 0x05,	/* mov.l 2f,r0 */
+  0x60, 0x02,	/* mov.l @r0,r0 */
+  0x2f, 0x06,	/* mov.l r0,@-r15 */
+  0xd0, 0x03,	/* mov.l 1f,r0 */
+  0x60, 0x02,	/* mov.l @r0,r0 */
+  0x40, 0x2b,	/* jmp @r0 */
+  0x60, 0xf6,	/*  mov.l @r15+,r0 */
+  0x00, 0x09,	/* nop */
+  0x00, 0x09,	/* nop */
+  0x00, 0x09,	/* nop */
+  0, 0, 0, 0,	/* 1: replaced with address of .got.plt + 8.  */
+  0, 0, 0, 0,	/* 2: replaced with address of .got.plt + 4.  */
+};
+
+static const bfd_byte elf_sh_plt0_entry_le[PLT_ENTRY_SIZE] =
+{
+  0x05, 0xd0,	/* mov.l 2f,r0 */
+  0x02, 0x60,	/* mov.l @r0,r0 */
+  0x06, 0x2f,	/* mov.l r0,@-r15 */
+  0x03, 0xd0,	/* mov.l 1f,r0 */
+  0x02, 0x60,	/* mov.l @r0,r0 */
+  0x2b, 0x40,	/* jmp @r0 */
+  0xf6, 0x60,	/*  mov.l @r15+,r0 */
+  0x09, 0x00,	/* nop */
+  0x09, 0x00,	/* nop */
+  0x09, 0x00,	/* nop */
+  0, 0, 0, 0,	/* 1: replaced with address of .got.plt + 8.  */
+  0, 0, 0, 0,	/* 2: replaced with address of .got.plt + 4.  */
+};
+
+/* Sebsequent entries in an absolute procedure linkage table look like
+   this.  */
+
+static const bfd_byte elf_sh_plt_entry_be[PLT_ENTRY_SIZE] =
+{
+  0xd0, 0x04,	/* mov.l 1f,r0 */
+  0x60, 0x02,	/* mov.l @r0,r0 */
+  0xd1, 0x02,	/* mov.l 0f,r1 */
+  0x40, 0x2b,   /* jmp @r0 */
+  0x60, 0x13,	/*  mov r1,r0 */
+  0xd1, 0x03,	/* mov.l 2f,r1 */
+  0x40, 0x2b,	/* jmp @r0 */
+  0x00, 0x09,	/* nop */
+  0, 0, 0, 0,	/* 0: replaced with address of .PLT0.  */
+  0, 0, 0, 0,	/* 1: replaced with address of this symbol in .got.  */
+  0, 0, 0, 0,	/* 2: replaced with offset into relocation table.  */
+};
+
+static const bfd_byte elf_sh_plt_entry_le[PLT_ENTRY_SIZE] =
+{
+  0x04, 0xd0,	/* mov.l 1f,r0 */
+  0x02, 0x60,	/* mov.l @r0,r0 */
+  0x02, 0xd1,	/* mov.l 0f,r1 */
+  0x2b, 0x40,   /* jmp @r0 */
+  0x13, 0x60,	/*  mov r1,r0 */
+  0x03, 0xd1,	/* mov.l 2f,r1 */
+  0x2b, 0x40,	/* jmp @r0 */
+  0x09, 0x00,	/*  nop */
+  0, 0, 0, 0,	/* 0: replaced with address of .PLT0.  */
+  0, 0, 0, 0,	/* 1: replaced with address of this symbol in .got.  */
+  0, 0, 0, 0,	/* 2: replaced with offset into relocation table.  */
+};
+
+/* Entries in a PIC procedure linkage table look like this.  */
+
+static const bfd_byte elf_sh_pic_plt_entry_be[PLT_ENTRY_SIZE] =
+{
+  0xd0, 0x04,	/* mov.l 1f,r0 */
+  0x00, 0xce,	/* mov.l @(r0,r12),r0 */
+  0x40, 0x2b,	/* jmp @r0 */
+  0x00, 0x09,	/*  nop */
+  0x50, 0xc2,	/* mov.l @(8,r12),r0 */
+  0xd1, 0x03,	/* mov.l 2f,r1 */
+  0x40, 0x2b,	/* jmp @r0 */
+  0x50, 0xc1,	/*  mov.l @(4,r12),r0 */
+  0x00, 0x09,	/* nop */
+  0x00, 0x09,	/* nop */
+  0, 0, 0, 0,	/* 1: replaced with address of this symbol in .got.  */
+  0, 0, 0, 0    /* 2: replaced with offset into relocation table.  */
+};
+
+static const bfd_byte elf_sh_pic_plt_entry_le[PLT_ENTRY_SIZE] =
+{
+  0x04, 0xd0,	/* mov.l 1f,r0 */
+  0xce, 0x00,	/* mov.l @(r0,r12),r0 */
+  0x2b, 0x40,	/* jmp @r0 */
+  0x09, 0x00,	/*  nop */
+  0xc2, 0x50,	/* mov.l @(8,r12),r0 */
+  0x03, 0xd1,	/* mov.l 2f,r1 */
+  0x2b, 0x40,	/* jmp @r0 */
+  0xc1, 0x50,	/*  mov.l @(4,r12),r0 */
+  0x09, 0x00,	/*  nop */
+  0x09, 0x00,	/* nop */
+  0, 0, 0, 0,	/* 1: replaced with address of this symbol in .got.  */
+  0, 0, 0, 0    /* 2: replaced with offset into relocation table.  */
+};
+
+#else /* These are the old style PLT entries.  */
 static const bfd_byte elf_sh_plt0_entry_be[PLT_ENTRY_SIZE] =
 {
   0xd0, 0x04,	/* mov.l 1f,r0 */
@@ -2189,6 +2298,7 @@ static const bfd_byte elf_sh_pic_plt_entry_le[PLT_ENTRY_SIZE] =
   0, 0, 0, 0,	/* 1: replaced with address of this symbol in .got.  */
   0, 0, 0, 0    /* 2: replaced with offset into relocation table.  */
 };
+#endif /* old style PLT entries.  */
 
 static const bfd_byte *elf_sh_plt0_entry;
 static const bfd_byte *elf_sh_plt_entry;

@@ -1,3 +1,10 @@
+2001-05-23  kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (elf_sh_plt0_entry_be, elf_sh_plt0_entry,
+	elf_sh_plt_entry_be, elf_sh_plt_entry, elf_sh_pic_plt_entry_be,
+	elf_sh_pic_plt_entry): New PLT code, that does not use r2, since
+	that is used by GCC.
+
 2001-05-23  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elf-bfd.h (NUM_SHDR_ENTRIES): New macro: compute the number
