@@ -507,9 +507,6 @@ function_frame_info (pc, frameless, offset, saved_gpr, saved_fpr)
   *offset = 0;
   *saved_gpr = *saved_fpr = -1;
 
-  if (!inferior_pid)
-    return;
-
   op  = read_memory_integer (pc, 4);
   if (op == 0x7c0802a6) {		/* mflr r0 */
     pc += 4;

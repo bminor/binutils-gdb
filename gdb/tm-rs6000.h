@@ -148,9 +148,12 @@ extern int aix_loadInfoTextIndex;
    some instructions.  */
 
 extern char registers[];
+extern char register_valid [];
 
 #define	SAVED_PC_AFTER_CALL(frame)	\
-	(*(int*)&registers[REGISTER_BYTE (LR_REGNUM)])
+	(register_valid [LR_REGNUM] ? 	\
+	  (*(int*)&registers[REGISTER_BYTE (LR_REGNUM)]) :	\
+	  read_register (LR_REGNUM))
 
 /*#define SAVED_PC_AFTER_CALL(frame)	saved_pc_after_call(frame) */
 
@@ -451,9 +454,48 @@ extern unsigned int rs6000_struct_return_address;
    This includes special registers such as pc and fp saved in special
    ways in the stack frame.  sp is even more special:
    the address we return for it IS the sp for the next frame.  */
+/* In the following implementation for RS6000, we did *not* save sp. I am
+   not sure if it will be needed. The following macro takes care of gpr's
+   and fpr's only. */
 
-#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs)		\
-	printf ("FIXMEmgo! FRAME_FIND_SAVED_REGS() not implemented!\n")
+#define FRAME_FIND_SAVED_REGS(FRAME_INFO, FRAME_SAVED_REGS)		\
+{									\
+  int frameless, offset, saved_gpr, saved_fpr, ii, frame_addr, func_start;	\
+										\
+  /* find the start of the function and collect info about its frame. */	\
+										\
+  func_start = get_pc_function_start ((FRAME_INFO)->pc) + FUNCTION_START_OFFSET;\
+  function_frame_info (func_start, &frameless, &offset, &saved_gpr, &saved_fpr);\
+  bzero (&(FRAME_SAVED_REGS), sizeof (FRAME_SAVED_REGS));			\
+										\
+  /* if there were any saved registers, figure out parent's stack pointer. */	\
+  frame_addr = 0;								\
+  if (saved_fpr >= 0 || saved_gpr >= 0) {					\
+    if ((FRAME_INFO)->prev && (FRAME_INFO)->prev->frame)			\
+      frame_addr = (FRAME_INFO)->prev->frame;					\
+    else									\
+      frame_addr = read_memory_integer ((FRAME_INFO)->frame, 4);		\
+  }										\
+										\
+  /* if != -1, saved_fpr is the smallest number of saved_fpr. All fpr's		\
+     from saved_fpr to fp31 are saved right underneath caller stack pointer,	\
+     starting from fp31 first. */						\
+										\
+  if (saved_fpr >= 0) {								\
+    for (ii=31; ii >= saved_fpr; --ii) 						\
+      (FRAME_SAVED_REGS).regs [FP0_REGNUM + ii] = frame_addr - ((32 - ii) * 8);	\
+    frame_addr -= (32 - saved_fpr) * 8;						\
+  }										\
+										\
+  /* if != -1, saved_gpr is the smallest number of saved_gpr. All gpr's		\
+     from saved_gpr to gpr31 are saved right under saved fprs, starting		\
+     from r31 first. */								\
+										\
+  if (saved_gpr >= 0)								\
+    for (ii=31; ii >= saved_gpr; --ii)						\
+      (FRAME_SAVED_REGS).regs [ii] = frame_addr - ((32 - ii) * 4);		\
+}
+
 
 /* Things needed for making the inferior call functions.  */
 

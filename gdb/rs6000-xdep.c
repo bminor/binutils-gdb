@@ -60,30 +60,58 @@ static int special_regs[] = {
 /* Nonzero if we just simulated a single step break. */
 extern int one_stepped;
 
+extern char register_valid[];
+
 
 void
 fetch_inferior_registers (regno)
-     int regno;
+  int regno;
 {
   int ii;
   extern char registers[];
 
-  /* read 32 general purpose registers. */
+  if (regno < 0) {			/* for all registers */
 
-  for (ii=0; ii < 32; ++ii)
-    *(int*)&registers[REGISTER_BYTE (ii)] = 
+    /* read 32 general purpose registers. */
+
+    for (ii=0; ii < 32; ++ii)
+      *(int*)&registers[REGISTER_BYTE (ii)] = 
 	ptrace (PT_READ_GPR, inferior_pid, ii, 0, 0);
 
-  /* read general purpose floating point registers. */
+    /* read general purpose floating point registers. */
 
-  for (ii=0; ii < 32; ++ii)
-    ptrace (PT_READ_FPR, inferior_pid, 
+    for (ii=0; ii < 32; ++ii)
+      ptrace (PT_READ_FPR, inferior_pid, 
 	(int*)&registers [REGISTER_BYTE (FP0_REGNUM+ii)], FPR0+ii, 0);
 
-  /* read special registers. */
-  for (ii=0; ii <= LAST_SP_REGNUM-FIRST_SP_REGNUM; ++ii)
-    *(int*)&registers[REGISTER_BYTE (FIRST_SP_REGNUM+ii)] = 
+    /* read special registers. */
+    for (ii=0; ii <= LAST_SP_REGNUM-FIRST_SP_REGNUM; ++ii)
+      *(int*)&registers[REGISTER_BYTE (FIRST_SP_REGNUM+ii)] = 
 	ptrace (PT_READ_GPR, inferior_pid, special_regs[ii], 0, 0);
+
+    registers_fetched ();
+    return;
+  }
+
+  /* else an individual register is addressed. */
+
+  else if (regno < FP0_REGNUM) {		/* a GPR */
+    *(int*)&registers[REGISTER_BYTE (regno)] =
+	ptrace (PT_READ_GPR, inferior_pid, regno, 0, 0);
+  }
+  else if (regno <= FPLAST_REGNUM) {		/* a FPR */
+    ptrace (PT_READ_FPR, inferior_pid,
+	(int*)&registers [REGISTER_BYTE (regno)], (regno-FP0_REGNUM+FPR0), 0);
+  }
+  else if (regno <= LAST_SP_REGNUM) {		/* a special register */
+    *(int*)&registers[REGISTER_BYTE (regno)] =
+	ptrace (PT_READ_GPR, inferior_pid,
+		special_regs[regno-FIRST_SP_REGNUM], 0, 0);
+  }
+  else
+    fprintf (stderr, "gdb error: register no %d not implemented.\n", regno);
+
+  register_valid [regno] = 1;
 }
 
 /* Store our register values back into the inferior.

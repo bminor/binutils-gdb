@@ -1427,11 +1427,14 @@ function_entry_point:
 	/* Between a function symbol and `.bf', there always will be a function
 	   stab. We save function type when processing that stab. */
 
-	if (fcn_type_saved == NULL)
-	  fatal ("Unknown function type");
-
-	SYMBOL_TYPE (new->name) = fcn_type_saved;
-	fcn_type_saved = NULL;
+	if (fcn_type_saved == NULL) {
+	  printf ("Unknown function type: symbol 0x%x\n", cs->c_symnum);
+	  SYMBOL_TYPE (new->name) = lookup_function_type (builtin_type_int);
+	}
+	else {
+	  SYMBOL_TYPE (new->name) = fcn_type_saved;
+	  fcn_type_saved = NULL;
+	}
       }
       else if (strcmp (cs->c_name, ".ef") == 0) {
 
@@ -1599,16 +1602,36 @@ process_xcoff_symbol (cs, objfile)
 
     case C_DECL:      			/* a type decleration?? */
 	qq =  (char*) strchr (name, ':');
+	/* skip if there is no ':' or a nameless construct */
 	if (!qq)			/* skip if there is no ':' */
 	  return NULL;
 
 	struct_and_type_combined = (qq[1] == 'T' && qq[2] == 't');
 	pp = qq + (struct_and_type_combined ? 3 : 2);
+
+
+	/* To handle GNU C++ typename abbreviation, we need to be able to fill
+	   in a type's name as soon as space for that type is allocated. */
+
+	if (struct_and_type_combined && name != qq) {
+
+	   int typenums[2];
+	   struct type *tmp_type;
+	   char *tmp_pp = pp;
+
+	   read_type_number (&tmp_pp, typenums);
+	   tmp_type = dbx_alloc_type (typenums);
+
+	   if (tmp_type && !TYPE_NAME (tmp_type))
+	     TYPE_NAME (tmp_type) = SYMBOL_NAME (sym) =
+				obsavestring (name, qq-name);
+	}
 	ttype = SYMBOL_TYPE (sym) = read_type (&pp, objfile);
 
 	/* read_type() will return null if type (or tag) definition was
 	   unnnecessarily duplicated. Also, if the symbol doesn't have a name,
 	   there is no need to keep it in symbol table. */
+	/* The above argument no longer valid. read_type() never returns NULL. */
 
 	if (!ttype || name == qq)
 	  return NULL;
@@ -1623,11 +1646,12 @@ process_xcoff_symbol (cs, objfile)
 	}
 
 	SYMBOL_CLASS (sym) = LOC_TYPEDEF;
-	SYMBOL_NAME (sym) = obsavestring (name, qq-name, &objfile->symbol_obstack);
+	if (!SYMBOL_NAME (sym))
+	  SYMBOL_NAME (sym) =
+	    obsavestring (name, qq-name, &objfile->symbol_obstack);
 
 	if (struct_and_type_combined)
-	  TYPE_NAME (ttype) = SYMBOL_NAME (sym);
-	  
+	  ;
 	else if  (SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE)
 	    TYPE_NAME (ttype) = concat (
 		TYPE_CODE (ttype) == TYPE_CODE_UNION ? "union " :

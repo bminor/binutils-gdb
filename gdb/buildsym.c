@@ -48,7 +48,7 @@ patch_block_stabs PARAMS ((struct pending *, struct pending_stabs *,
 static void
 read_huge_number PARAMS ((char **, int, long *, int *));
 
-static struct type *
+struct type *
 dbx_alloc_type PARAMS ((int [2], struct objfile *));
 
 static int
@@ -243,7 +243,7 @@ dbx_lookup_type (typenums)
    TYPENUMS may be (-1, -1) to return a new type object that is not
    put into the type vector, and so may not be referred to by number. */
 
-static struct type *
+struct type *
 dbx_alloc_type (typenums, objfile)
      int typenums[2];
      struct objfile *objfile;
@@ -676,7 +676,6 @@ start_symtab (name, dirname, start_addr)
   file_symbols = 0;
   global_symbols = 0;
   global_stabs = 0;		/* AIX COFF */
-  file_stabs = 0;		/* AIX COFF */
   within_function = 0;
 
   /* Context stack is initially empty.  Allocate first one with room for
@@ -817,13 +816,6 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile)
      file_symbols is still good).  */
   cleanup_undefined_types ();
 
-  /* Hooks for xcoffread.c */
-  if (file_stabs) {
-    patch_block_stabs (file_symbols, file_stabs, objfile);
-    free (file_stabs);
-    file_stabs = 0;
-  }
-
   if (global_stabs) {
     patch_block_stabs (global_symbols, global_stabs, objfile);
     free (global_stabs);
@@ -887,6 +879,15 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile)
 	symtab->dirname = subfile->dirname;
 	symtab->free_code = free_linetable;
 	symtab->free_ptr = 0;
+
+#if 0 /* defined(IBM6000) */
+	/* In case we need to duplicate symbol tables (to represent include
+	   files), and in case our system needs relocation, we want to
+	   relocate the main symbol table node only (for the main file,
+	   not for the include files). */
+
+	symtab->nonreloc = TRUE;
+#endif
       }
       if (subfile->line_vector)
 	free (subfile->line_vector);
@@ -894,6 +895,13 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile)
       nextsub = subfile->next;
       free (subfile);
     }
+
+#if 0 /* defined(IBM6000) */
+  /* all include symbol tables are non-relocatable, except the main source
+     file's. */
+  if (symtab_list)
+    symtab_list->nonreloc = FALSE;
+#endif
 
   if (type_vector)
     free ((char *) type_vector);
@@ -1941,14 +1949,16 @@ read_type (pp, objfile)
 
     case 's':
       type = dbx_alloc_type (typenums, objfile);
-      TYPE_NAME (type) = type_synonym_name;
+      if (!TYPE_NAME (type))
+        TYPE_NAME (type) = type_synonym_name;
       type_synonym_name = 0;
       type = read_struct_type (pp, type, objfile);
       break;
 
     case 'u':
       type = dbx_alloc_type (typenums, objfile);
-      TYPE_NAME (type) = type_synonym_name;
+      if (!TYPE_NAME (type))
+	TYPE_NAME (type) = type_synonym_name;
       type_synonym_name = 0;
       type = read_struct_type (pp, type, objfile);
       TYPE_CODE (type) = TYPE_CODE_UNION;
