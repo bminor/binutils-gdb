@@ -1,3 +1,11 @@
+Thu Apr 17 03:28:03 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* psim.c (psim_options): Ignore -E option (sets endianness).
+	* sim_calls.c: #include bfd.h.
+	(entry_point): New static local.
+	(sim_load): Return SIM_RC.  New arg abfd.  Set start address from bfd.
+	(sim_create_inferior): Return SIM_RC.  Delete arg start_address.
+
 Tue Apr 15 14:57:18 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (INSTALL): Set to @INSTALL@.

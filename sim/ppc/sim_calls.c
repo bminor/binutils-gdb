@@ -41,6 +41,7 @@
 #endif
 
 #include "defs.h"
+#include "bfd.h"
 #include "callback.h"
 #include "remote-sim.h"
 
@@ -51,32 +52,35 @@ static psim *simulator;
 static device *root_device;
 static const char *register_names[] = REGISTER_NAMES;
 
-void
-sim_open (char *args)
+/* For communication between sim_load and sim_create_inferior.
+   This can be made to go away, please do.  */
+static unsigned_word entry_point;
+
+SIM_DESC
+sim_open (SIM_OPEN_KIND kind, char **argv)
 {
   /* Note: The simulation is not created by sim_open() because
      complete information is not yet available */
   /* trace the call */
-  TRACE(trace_gdb, ("sim_open(args=%s) called\n", args ? args : "(null)"));
+  TRACE(trace_gdb, ("sim_open called\n"));
 
   if (root_device != NULL)
     sim_io_printf_filtered("Warning - re-open of simulator leaks memory\n");
   root_device = psim_tree();
   simulator = NULL;
 
-  if (args) {
-    char **argv = buildargv(args);
-    psim_options(root_device, argv);
-    freeargv(argv);
-  }
+  psim_options(root_device, argv + 1);
 
   if (ppc_trace[trace_opts])
     print_options ();
+
+  /* fudge our descriptor for now */
+  return (SIM_DESC) 1;
 }
 
 
 void
-sim_close (int quitting)
+sim_close (SIM_DESC sd, int quitting)
 {
   TRACE(trace_gdb, ("sim_close(quitting=%d) called\n", quitting));
   if (ppc_trace[trace_print_info] && simulator != NULL)
@@ -84,8 +88,8 @@ sim_close (int quitting)
 }
 
 
-int
-sim_load (char *prog, int from_tty)
+SIM_RC
+sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
 {
   char **argv;
   TRACE(trace_gdb, ("sim_load(prog=%s, from_tty=%d) called\n",
@@ -106,13 +110,32 @@ sim_load (char *prog, int from_tty)
   /* release the arguments */
   freeargv(argv);
 
-  /* `I did it my way' */
-  return 0;
+  /* get the start address */
+  if (abfd != NULL)
+    entry_point = bfd_get_start_address (abfd);
+  else
+    {
+      abfd = bfd_openr (argv[0], 0);
+      if (abfd == NULL)
+	error ("psim: can't open \"%s\": %s\n", 
+	       argv[0], bfd_errmsg (bfd_get_error ()));
+      if (!bfd_check_format (abfd, bfd_object)) 
+	{
+	  const char *errmsg = bfd_errmsg (bfd_get_error ());
+	  bfd_close (abfd);
+	  error ("psim: \"%s\" is not an object file: %s\n",
+		 argv[0], errmsg);
+	}
+      entry_point = bfd_get_start_address (abfd);
+      bfd_close (abfd);
+    }
+
+  return SIM_RC_OK;
 }
 
 
 void
-sim_kill (void)
+sim_kill (SIM_DESC sd)
 {
   TRACE(trace_gdb, ("sim_kill(void) called\n"));
   /* do nothing, nothing to do */
@@ -120,7 +143,7 @@ sim_kill (void)
 
 
 int
-sim_read (SIM_ADDR mem, unsigned char *buf, int length)
+sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 {
   int result = psim_read_memory(simulator, MAX_NR_PROCESSORS,
 				buf, mem, length);
@@ -131,7 +154,7 @@ sim_read (SIM_ADDR mem, unsigned char *buf, int length)
 
 
 int
-sim_write (SIM_ADDR mem, unsigned char *buf, int length)
+sim_write (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 {
   int result = psim_write_memory(simulator, MAX_NR_PROCESSORS,
 				 buf, mem, length,
@@ -143,7 +166,7 @@ sim_write (SIM_ADDR mem, unsigned char *buf, int length)
 
 
 void
-sim_fetch_register (int regno, unsigned char *buf)
+sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf)
 {
   if (simulator == NULL) {
     return;
@@ -157,7 +180,7 @@ sim_fetch_register (int regno, unsigned char *buf)
 
 
 void
-sim_store_register (int regno, unsigned char *buf)
+sim_store_register (SIM_DESC sd, int regno, unsigned char *buf)
 {
   if (simulator == NULL)
     return;
@@ -170,33 +193,32 @@ sim_store_register (int regno, unsigned char *buf)
 
 
 void
-sim_info (int verbose)
+sim_info (SIM_DESC sd, int verbose)
 {
   TRACE(trace_gdb, ("sim_info(verbose=%d) called\n", verbose));
   psim_print_info (simulator, verbose);
 }
 
 
-void
-sim_create_inferior (SIM_ADDR start_address, char **argv, char **envp)
+SIM_RC
+sim_create_inferior (SIM_DESC sd, char **argv, char **envp)
 {
-  unsigned_word entry_point = start_address;
-
   TRACE(trace_gdb, ("sim_create_inferior(start_address=0x%x, ...)\n",
-		    start_address));
+		    entry_point));
 
   psim_init(simulator);
   psim_stack(simulator, argv, envp);
 
   psim_write_register(simulator, -1 /* all start at same PC */,
 		      &entry_point, "pc", cooked_transfer);
+  return SIM_RC_OK;
 }
 
 
 static volatile int sim_should_run;
 
 void
-sim_stop_reason (enum sim_stop *reason, int *sigrc)
+sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
 {
   psim_status status = psim_get_status(simulator);
 
@@ -244,14 +266,14 @@ sim_stop_reason (enum sim_stop *reason, int *sigrc)
 
 
 /* Run (or resume) the program.  */
-static void
-sim_ctrl_c()
+static RETSIGTYPE
+sim_ctrl_c(int sig)
 {
   sim_should_run = 0;
 }
 
 void
-sim_resume (int step, int siggnal)
+sim_resume (SIM_DESC sd, int step, int siggnal)
 {
   TRACE(trace_gdb, ("sim_resume(step=%d, siggnal=%d)\n",
 		    step, siggnal));
@@ -265,7 +287,7 @@ sim_resume (int step, int siggnal)
     }
   else
     {
-      void (*prev) ();
+      RETSIGTYPE (*prev) ();
 
       prev = signal(SIGINT, sim_ctrl_c);
       sim_should_run = 1;
@@ -275,7 +297,7 @@ sim_resume (int step, int siggnal)
 }
 
 void
-sim_do_command (char *cmd)
+sim_do_command (SIM_DESC sd, char *cmd)
 {
   TRACE(trace_gdb, ("sim_do_commands(cmd=%s) called\n",
 		    cmd ? cmd : "(null)"));
@@ -384,7 +406,7 @@ sim_io_flush_stdoutput(void)
 }
 
 void
-sim_set_callbacks (host_callback *callback)
+sim_set_callbacks (SIM_DESC sd, host_callback *callback)
 {
   callbacks = callback;
   TRACE(trace_gdb, ("sim_set_callbacks called\n"));

@@ -147,8 +147,16 @@ psim_usage(int verbose)
   printf_filtered("The following are valid <psim-option>s:\n");
   printf_filtered("\n");
 
-  printf_filtered("\t-i              Print instruction counting statistics\n");
-  if (verbose) { printf_filtered("\n"); }
+  printf_filtered("\t-c <count>      Limit the simulation to <count> iterations\n");
+  if (verbose) { 
+  printf_filtered("\n");
+  }
+
+  printf_filtered("\t-i or -i2       Print instruction counting statistics\n");
+  if (verbose) { 
+  printf_filtered("\t                Specify -i2 for a more detailed display\n");
+  printf_filtered("\n");
+  }
 
   printf_filtered("\t-I              Print execution unit statistics\n");
   if (verbose) { printf_filtered("\n"); }
@@ -221,8 +229,12 @@ psim_options(device *root,
 	psim_usage(0);
 	error ("");
 	break;
+      case 'c':
+	param = find_arg("Missing <count> option for -c (max-iterations)\n", &argp, argv);
+	tree_parse(root, "/openprom/options/max-iterations %s", param);
+	break;
       case 'e':
-	param = find_arg("Missing <emul> option for -e\n", &argp, argv);
+	param = find_arg("Missing <emul> option for -e (os-emul)\n", &argp, argv);
 	tree_parse(root, "/openprom/options/os-emul %s", param);
 	break;
       case 'f':
@@ -237,7 +249,13 @@ psim_options(device *root,
 	psim_usage(2);
 	break;
       case 'i':
-	tree_parse(root, "/openprom/trace/print-info 1");
+	if (isdigit(p[1])) {
+	  tree_parse(root, "/openprom/trace/print-info %c", p[1]);
+	  p++;
+	}
+	else {
+	  tree_parse(root, "/openprom/trace/print-info 1");
+	}
 	break;
       case 'I':
 	tree_parse(root, "/openprom/trace/print-info 2");
@@ -245,11 +263,11 @@ psim_options(device *root,
 		   MODEL_ISSUE_PROCESS);
 	break;
       case 'm':
-	param = find_arg("Missing <model> option for -m\n", &argp, argv);
+	param = find_arg("Missing <model> option for -m (model)\n", &argp, argv);
 	tree_parse(root, "/openprom/options/model \"%s", param);
 	break;
       case 'n':
-	param = find_arg("Missing <nr-smp> option for -n\n", &argp, argv);
+	param = find_arg("Missing <nr-smp> option for -n (smp)\n", &argp, argv);
 	tree_parse(root, "/openprom/options/smp %s", param);
 	break;
       case 'o':
@@ -257,16 +275,20 @@ psim_options(device *root,
 	current = tree_parse(current, "%s", param);
 	break;
       case 'r':
-	param = find_arg("Missing <ram-size> option for -r\n", &argp, argv);
+	param = find_arg("Missing <ram-size> option for -r (oea-memory-size)\n", &argp, argv);
 	tree_parse(root, "/openprom/options/oea-memory-size %s",
 			       param);
 	break;
       case 't':
-	param = find_arg("Missing <trace> option for -t\n", &argp, argv);
+	param = find_arg("Missing <trace> option for -t (trace/*)\n", &argp, argv);
 	if (param[0] == '!')
 	  tree_parse(root, "/openprom/trace/%s 0", param+1);
 	else
 	  tree_parse(root, "/openprom/trace/%s 1", param);
+	break;
+      case 'E':
+	/* endian spec, ignored for now */
+	++p;
 	break;
       }
       p += 1;
@@ -466,6 +488,8 @@ INLINE_PSIM\
 psim_restart(psim *system,
 	     int current_cpu)
 {
+  ASSERT(current_cpu >= 0 && current_cpu < system->nr_cpus);
+  ASSERT(system->path_to_restart != NULL);
   system->last_cpu = current_cpu;
   longjmp(*(jmp_buf*)(system->path_to_restart), current_cpu + 1);
 }
@@ -478,13 +502,21 @@ psim_halt(psim *system,
 	  stop_reason reason,
 	  int signal)
 {
-  ASSERT(current_cpu >= 0 && current_cpu < system->nr_cpus);
+  ASSERT(current_cpu >= 0 && current_cpu <= system->nr_cpus);
+  ASSERT(system->path_to_halt != NULL);
   system->last_cpu = current_cpu;
-  system->halt_status.cpu_nr = current_cpu;
   system->halt_status.reason = reason;
   system->halt_status.signal = signal;
-  system->halt_status.program_counter =
-    cpu_get_program_counter(system->processors[current_cpu]);
+  if (current_cpu == system->nr_cpus) {
+    system->halt_status.cpu_nr = 0;
+    system->halt_status.program_counter =
+      cpu_get_program_counter(system->processors[0]);
+  }
+  else {
+    system->halt_status.cpu_nr = current_cpu;
+    system->halt_status.program_counter =
+      cpu_get_program_counter(system->processors[current_cpu]);
+  }
   longjmp(*(jmp_buf*)(system->path_to_halt), current_cpu + 1);
 }
 
@@ -540,6 +572,18 @@ psim_event_queue(psim *system)
 
 
 
+STATIC_INLINE_PSIM\
+(void)
+psim_max_iterations_exceeded(void *data)
+{
+  psim *system = data;
+  psim_halt(system,
+	    system->nr_cpus, /* halted during an event */
+	    was_signalled,
+	    -1);
+}
+
+
 INLINE_PSIM\
 (void)
 psim_init(psim *system)
@@ -551,6 +595,17 @@ psim_init(psim *system)
 
   /* trash any pending events */
   event_queue_init(system->events);
+
+  /* if needed, schedule a halt event.  FIXME - In the future this
+     will be replaced by a more generic change to psim_command().  A
+     new command `schedule NNN halt' being added. */
+  if (tree_find_property(system->devices, "/openprom/options/max-iterations")) {
+    event_queue_schedule(system->events,
+			 tree_find_integer_property(system->devices,
+						    "/openprom/options/max-iterations") - 2,
+			 psim_max_iterations_exceeded,
+			 system);
+  }
 
   /* scrub all the cpus */
   for (cpu_nr = 0; cpu_nr < system->nr_cpus; cpu_nr++)
@@ -569,8 +624,8 @@ psim_init(psim *system)
     cpu_page_tlb_invalidate_all(processor);
   }
 
-  /* force loop to start with first cpu (after processing events) */
-  system->last_cpu = system->nr_cpus - 1;
+  /* force loop to start with first cpu */
+  system->last_cpu = -1;
 }
 
 INLINE_PSIM\
@@ -644,10 +699,15 @@ psim_read_register(psim *system,
   cpu *processor;
 
   /* find our processor */
-  if (which_cpu == MAX_NR_PROCESSORS)
-    which_cpu = system->last_cpu;
-  if (which_cpu < 0 || which_cpu >= system->nr_cpus)
-    error("psim_read_register() - invalid processor %d\n", which_cpu);
+  if (which_cpu == MAX_NR_PROCESSORS) {
+    if (system->last_cpu == system->nr_cpus
+	|| system->last_cpu == -1)
+      which_cpu = 0;
+    else
+      which_cpu = system->last_cpu;
+  }
+  ASSERT(which_cpu >= 0 && which_cpu < system->nr_cpus);
+
   processor = system->processors[which_cpu];
 
   /* find the register description */
@@ -751,17 +811,20 @@ psim_write_register(psim *system,
   char cooked_buf[sizeof(unsigned_8)];
 
   /* find our processor */
-  if (which_cpu == MAX_NR_PROCESSORS)
-    which_cpu = system->last_cpu;
+  if (which_cpu == MAX_NR_PROCESSORS) {
+    if (system->last_cpu == system->nr_cpus
+	|| system->last_cpu == -1)
+      which_cpu = 0;
+    else
+      which_cpu = system->last_cpu;
+  }
   if (which_cpu == -1) {
     int i;
     for (i = 0; i < system->nr_cpus; i++)
       psim_write_register(system, i, buf, reg, mode);
     return;
   }
-  else if (which_cpu < 0 || which_cpu >= system->nr_cpus) {
-    error("psim_read_register() - invalid processor %d\n", which_cpu);
-  }
+  ASSERT(which_cpu >= 0 && which_cpu < system->nr_cpus);
 
   processor = system->processors[which_cpu];
 
@@ -844,10 +907,13 @@ psim_read_memory(psim *system,
 		 unsigned nr_bytes)
 {
   cpu *processor;
-  if (which_cpu == MAX_NR_PROCESSORS)
-    which_cpu = system->last_cpu;
-  if (which_cpu < 0 || which_cpu >= system->nr_cpus)
-    error("psim_read_memory() invalid cpu\n");
+  if (which_cpu == MAX_NR_PROCESSORS) {
+    if (system->last_cpu == system->nr_cpus
+	|| system->last_cpu == -1)
+      which_cpu = 0;
+    else
+      which_cpu = system->last_cpu;
+  }
   processor = system->processors[which_cpu];
   return vm_data_map_read_buffer(cpu_data_map(processor),
 				 buffer, vaddr, nr_bytes,
@@ -865,10 +931,14 @@ psim_write_memory(psim *system,
 		  int violate_read_only_section)
 {
   cpu *processor;
-  if (which_cpu == MAX_NR_PROCESSORS)
-    which_cpu = system->last_cpu;
-  if (which_cpu < 0 || which_cpu >= system->nr_cpus)
-    error("psim_read_memory() invalid cpu\n");
+  if (which_cpu == MAX_NR_PROCESSORS) {
+    if (system->last_cpu == system->nr_cpus
+	|| system->last_cpu == -1)
+      which_cpu = 0;
+    else
+      which_cpu = system->last_cpu;
+  }
+  ASSERT(which_cpu >= 0 && which_cpu < system->nr_cpus);
   processor = system->processors[which_cpu];
   return vm_data_map_write_buffer(cpu_data_map(processor),
 				  buffer, vaddr, nr_bytes, 1/*violate-read-only*/,
