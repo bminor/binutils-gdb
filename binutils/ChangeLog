@@ -1,3 +1,8 @@
+2005-02-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (display_debug_ranges): Print out offset for end of
+	list.
+
 2005-02-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* dlltool.c: Warning fixes.
