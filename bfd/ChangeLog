@@ -1,3 +1,9 @@
+2004-06-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Don't set COREFILE to trad-core.lo for FreeBSD
+	4.10 and beyond.
+	* configure: Regenerate.
+
 2004-06-07  Daniel Jacobowitz  <dan@debian.org>
 
 	From:  Albert Chin-A-Young  <china@thewrittenword.com>

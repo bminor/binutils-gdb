@@ -5310,7 +5310,7 @@ if test "${target}" = "${host}"; then
   i[3-7]86-*-bsdi)
 	COREFILE=
 	;;
-  i[3-7]86-*-bsd* | i[3-7]86-*-freebsd[123] | i[3-7]86-*-freebsd[123]\.* | i[3-7]86-*-freebsd4\.[01234]* | i[3-7]86-*-freebsd*aout*)
+  i[3-7]86-*-bsd* | i[3-7]86-*-freebsd[123] | i[3-7]86-*-freebsd[123]\.* | i[3-7]86-*-freebsd4\.[01234] | i[3-7]86-*-freebsd4\.[01234]\.* | i[3-7]86-*-freebsd*aout*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/i386bsd.h"'
 	;;
