@@ -567,7 +567,8 @@ nlm_swap_auxiliary_headers_in (abfd)
 	     is what we want to happen.  The sections from the
 	     original file, which may be subsets of the NLM section,
 	     can only be found using bfd_map_over_sections.  */
-	  contents = (bfd_byte *) malloc (len);
+
+	  contents = (bfd_byte *) bfd_alloc (abfd, len);
 	  if (contents == (bfd_byte *) NULL)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
@@ -577,10 +578,7 @@ nlm_swap_auxiliary_headers_in (abfd)
 	  if (bfd_seek (abfd, nlm_cygnus_section_header (abfd)->offset,
 			SEEK_SET) != 0
 	      || bfd_read (contents, len, 1, abfd) != len)
-	    {
-	      free (contents);
-	      return false;
-	    }
+	    return false;
 	  p = contents;
 	  pend = p + len;
 	  while (p < pend)
@@ -609,10 +607,7 @@ nlm_swap_auxiliary_headers_in (abfd)
 
 	      newsec = bfd_make_section_anyway (abfd, name);
 	      if (newsec == (asection *) NULL)
-		{
-		  free (contents);
-		  return false;
-		}
+		return false;
 	      newsec->_raw_size = size;
 	      if (filepos != 0)
 		{
@@ -621,7 +616,6 @@ nlm_swap_auxiliary_headers_in (abfd)
 		}
 	    }
 
-	  free (contents);
 	  if (bfd_seek (abfd, pos, SEEK_SET) != 0)
 	    return false;
 	}
