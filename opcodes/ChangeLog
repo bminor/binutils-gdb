@@ -1,3 +1,26 @@
+Mon Apr 27 10:33:56 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen-asm.c (cgen_current_opcode_table): Renamed from ..._data.
+	(asm_hash_table_entries): New variable.
+	(cgen_asm_init): Free asm_hash_table_entries.
+	(hash_insn_array,hash_insn_list): New functions.
+	(build_asm_hash_table): Use them.  Hash macro insns as well.
+	(cgen_asm_lookup_insn): Update.
+	* cgen_dis.c (cgen_current_opcode_table): Renamed from ..._data.
+	(dis_hash_table_entries): New variable.
+	(cgen_dis_init): Free dis_hash_table_entries.
+	(hash_insn_array,hash_insn_list): New functions.
+	(build_dis_hash_table): Use them.  Hash macro insns as well.
+	(cgen_dis_lookup_insn): Update.
+	* cgen-opc.c (cgen_current_opcode_table): Renamed from ..._data.
+	(cgen_set_cpu,cgen_hw_lookup,cgen_insn_count): Update.
+	(cgen_macro_insn_count): New function.
+	* cgen-opc.in (@arch@_cgen_lookup_insn): New arg alias_p.
+	All callers updated.  Sanity check result of extract fn.
+	(@arch@_cgen_get_insn_operands): Change result type to void.
+	Delete args insn_value, length.  New arg fields.  All callers updated.
+	(@arch@_cgen_lookup_get_insn_operands): New function.
+
 Fri Apr 24 16:07:57 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386-dis.c (OP_DSSI): Print segment override.

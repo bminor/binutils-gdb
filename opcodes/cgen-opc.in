@@ -30,10 +30,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "@arch@-opc.h"
 
 /* Look up instruction INSN_VALUE and extract its fields.
-   If non-null INSN is the insn table entry.
+   INSN, if non-null, is the insn table entry.
    Otherwise INSN_VALUE is examined to compute it.
    LENGTH is the bit length of INSN_VALUE if known, otherwise 0.
+   0 is only valid if `insn == NULL && ! defined (CGEN_INT_INSN)'.
+   If INSN != NULL, LENGTH must be valid.
    ALIAS_P is non-zero if alias insns are to be included in the search.
+
    The result a pointer to the insn table entry, or NULL if the instruction
    wasn't recognized.  */
 
@@ -43,6 +46,7 @@ const CGEN_INSN *
      cgen_insn_t insn_value;
      int length;
      CGEN_FIELDS *fields;
+     int alias_p;
 {
   char buf[16];
 
@@ -91,9 +95,15 @@ const CGEN_INSN *
 		 extract handler.  */
 	      if ((insn_value & CGEN_INSN_MASK (insn)) == CGEN_INSN_VALUE (insn))
 		{
-		  length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, fields);
-		  if (length > 0)
-		    return insn;
+		  int elength = (*CGEN_EXTRACT_FN (insn)) (insn, NULL,
+							   insn_value, fields);
+		  if (elength > 0)
+		    {
+		      /* sanity check */
+		      if (length != 0 && length != elength)
+			abort ();
+		      return insn;
+		    }
 		}
 	    }
 
@@ -106,42 +116,33 @@ const CGEN_INSN *
       if (! alias_p
 	  && CGEN_INSN_ATTR (insn, CGEN_INSN_ALIAS))
 	abort ();
+      /* Sanity check: length must be correct.  */
+      if (length != CGEN_INSN_BITSIZE (insn))
+	abort ();
 
       length = (*CGEN_EXTRACT_FN (insn)) (insn, NULL, insn_value, fields);
-      if (length > 0)
-	return insn;
+      /* Sanity check: must succeed.
+	 Could relax this later if it ever proves useful.  */
+      if (length == 0)
+	abort ();
+      return insn;
     }
 
   return NULL;
 }
 
-/* Fill in the operand instances used by insn INSN_VALUE.
-   If non-null INS is the insn table entry.
-   Otherwise INSN_VALUE is examined to compute it.
-   LENGTH is the number of bits in INSN_VALUE if known, otherwise 0.
+/* Fill in the operand instances used by INSN whose operands are FIELDS.
    INDICES is a pointer to a buffer of MAX_OPERAND_INSTANCES ints to be filled
-   in.
-   The result a pointer to the insn table entry, or NULL if the instruction
-   wasn't recognized.  */
+   in.  */
 
-const CGEN_INSN *
-@arch@_cgen_get_insn_operands (insn, insn_value, length, indices)
-     const CGEN_INSN *insn;
-     cgen_insn_t insn_value;
-     int length;
+void
+@arch@_cgen_get_insn_operands (insn, fields, indices)
+     const CGEN_INSN * insn;
+     const CGEN_FIELDS * fields;
      int *indices;
 {
-  CGEN_FIELDS fields;
   const CGEN_OPERAND_INSTANCE *opinst;
   int i;
-
-  /* FIXME: ALIAS insns are in transition from being record in the insn table
-     to being recorded separately as macros.  They don't have semantic code
-     so they can't be used here.  Thus we currently always ignore the INSN
-     argument.  */
-  insn = @arch@_cgen_lookup_insn (NULL, insn_value, length, &fields, 0);
-  if (! insn)
-    return NULL;
 
   for (i = 0, opinst = CGEN_INSN_OPERANDS (insn);
        opinst != NULL
@@ -152,8 +153,34 @@ const CGEN_INSN *
       if (op == NULL)
 	indices[i] = CGEN_OPERAND_INSTANCE_INDEX (opinst);
       else
-	indices[i] = @arch@_cgen_get_operand (CGEN_OPERAND_INDEX (op), &fields);
+	indices[i] = @arch@_cgen_get_operand (CGEN_OPERAND_INDEX (op), fields);
     }
+}
 
+/* Cover function to @arch@_cgen_get_insn_operands when either INSN or FIELDS
+   isn't known.
+   The INSN, INSN_VALUE, and LENGTH arguments are passed to
+   @arch@_cgen_lookup_insn unchanged.
+
+   The result is the insn table entry or NULL if the instruction wasn't
+   recognized.  */
+
+const CGEN_INSN *
+@arch@_cgen_lookup_get_insn_operands (insn, insn_value, length, indices)
+     const CGEN_INSN *insn;
+     cgen_insn_t insn_value;
+     int length;
+     int *indices;
+{
+  CGEN_FIELDS fields;
+
+  /* Pass non-zero for ALIAS_P only if INSN != NULL.
+     If INSN == NULL, we want a real insn.  */
+  insn = @arch@_cgen_lookup_insn (insn, insn_value, length, &fields,
+				  insn != NULL);
+  if (! insn)
+    return NULL;
+
+  @arch@_cgen_get_insn_operands (insn, &fields, indices);
   return insn;
 }

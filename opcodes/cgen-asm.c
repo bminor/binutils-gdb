@@ -1,34 +1,30 @@
 /* CGEN generic assembler support code.
 
-Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
 
-This file is part of the GNU Binutils and GDB, the GNU debugger.
+   This file is part of the GNU Binutils and GDB, the GNU debugger.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include "config.h"
+#include "sysdep.h"
 #include <stdio.h>
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
+#include <ctype.h>
 #include "ansidecl.h"
 #include "libiberty.h"
 #include "bfd.h"
+#include "symcat.h"
 #include "opcode/cgen.h"
 
 /* Operand parsing callback.  */
@@ -38,10 +34,11 @@ const char * (*cgen_parse_operand_fn)
 
 /* This is not published as part of the public interface so we don't
    declare this in cgen.h.  */
-extern CGEN_OPCODE_DATA *cgen_current_opcode_data;
+extern CGEN_OPCODE_TABLE *cgen_current_opcode_table;
 
 /* Assembler instruction hash table.  */
 static CGEN_INSN_LIST **asm_hash_table;
+static CGEN_INSN_LIST *asm_hash_table_entries;
 
 /* Called once at startup and whenever machine/endian change.  */
 
@@ -51,7 +48,9 @@ cgen_asm_init ()
   if (asm_hash_table)
     {
       free (asm_hash_table);
+      free (asm_hash_table_entries);
       asm_hash_table = NULL;
+      asm_hash_table_entries = NULL;
     }
 }
 
@@ -65,61 +64,131 @@ cgen_init_parse_operand ()
 				   NULL, NULL);
 }
 
+/* Subroutine of build_asm_hash_table to add INSNS to the hash table.
+
+   COUNT is the number of elements in INSNS.
+   ENTSIZE is sizeof (CGEN_INSN) for the target.
+   This is a bit tricky as the size of the attribute member of CGEN_INSN
+   is variable among architectures.  This code could be moved to
+   cgen-asm.in, but I prefer to keep it here for now.
+   OTABLE is the opcode table.
+   HTABLE points to the hash table.
+   HENTBUF is a pointer to sufficiently large buffer of hash entries.
+   The result is a pointer to the next entry to use.
+
+   The table is scanned backwards as additions are made to the front of the
+   list and we want earlier ones to be prefered.  */
+
+static CGEN_INSN_LIST *
+hash_insn_array (insns, count, entsize, otable, htable, hentbuf)
+     const CGEN_INSN * insns;
+     int count;
+     int entsize;
+     const CGEN_OPCODE_TABLE * otable;
+     CGEN_INSN_LIST ** htable;
+     CGEN_INSN_LIST * hentbuf;
+{
+  const CGEN_INSN * insn;
+
+  for (insn = (CGEN_INSN *) ((char *) insns + entsize * (count - 1));
+       insn >= insns;
+       insn = (CGEN_INSN *) ((char *) insn - entsize), ++ hentbuf)
+    {
+      unsigned int hash;
+
+      if (! (*otable->asm_hash_p) (insn))
+	continue;
+      hash = (*otable->asm_hash) (CGEN_INSN_MNEMONIC (insn));
+      hentbuf->next = htable[hash];
+      hentbuf->insn = insn;
+      htable[hash] = hentbuf;
+    }
+
+  return hentbuf;
+}
+
+/* Subroutine of build_asm_hash_table to add INSNS to the hash table.
+   This function is identical to hash_insn_array except the insns are
+   in a list.  */
+
+static CGEN_INSN_LIST *
+hash_insn_list (insns, otable, htable, hentbuf)
+     const CGEN_INSN_LIST * insns;
+     const CGEN_OPCODE_TABLE * otable;
+     CGEN_INSN_LIST ** htable;
+     CGEN_INSN_LIST * hentbuf;
+{
+  const CGEN_INSN_LIST * ilist;
+
+  for (ilist = insns; ilist != NULL; ilist = ilist->next, ++ hentbuf)
+    {
+      unsigned int hash;
+
+      if (! (*otable->asm_hash_p) (ilist->insn))
+	continue;
+      hash = (*otable->asm_hash) (CGEN_INSN_MNEMONIC (ilist->insn));
+      hentbuf->next = htable[hash];
+      hentbuf->insn = ilist->insn;
+      asm_hash_table[hash] = hentbuf;
+    }
+
+  return hentbuf;
+}
+
 /* Build the assembler instruction hash table.  */
 
 static void
 build_asm_hash_table ()
 {
-  int i;
-  unsigned int hash;
-  int count = cgen_insn_count ();
-  CGEN_OPCODE_DATA *data = cgen_current_opcode_data;
-  CGEN_INSN_TABLE *insn_table = data->insn_table;
-  unsigned int hash_size = insn_table->asm_hash_table_size;
-  const CGEN_INSN *insn;
-  CGEN_INSN_LIST *insn_lists,*new_insns;
+  int count = cgen_insn_count () + cgen_macro_insn_count ();
+  CGEN_OPCODE_TABLE *opcode_table = cgen_current_opcode_table;
+  CGEN_INSN_TABLE *insn_table = opcode_table->insn_table;
+  CGEN_INSN_TABLE *macro_insn_table = opcode_table->macro_insn_table;
+  unsigned int hash_size = opcode_table->asm_hash_table_size;
+  CGEN_INSN_LIST *hash_entry_buf;
 
   /* The space allocated for the hash table consists of two parts:
      the hash table and the hash lists.  */
 
   asm_hash_table = (CGEN_INSN_LIST **)
-    xmalloc (hash_size * sizeof (CGEN_INSN_LIST *)
-	     + count * sizeof (CGEN_INSN_LIST));
-  memset (asm_hash_table, 0,
-	  hash_size * sizeof (CGEN_INSN_LIST *)
-	  + count * sizeof (CGEN_INSN_LIST));
-  insn_lists = (CGEN_INSN_LIST *) (asm_hash_table + hash_size);
+    xmalloc (hash_size * sizeof (CGEN_INSN_LIST *));
+  memset (asm_hash_table, 0, hash_size * sizeof (CGEN_INSN_LIST *));
+  asm_hash_table_entries = hash_entry_buf = (CGEN_INSN_LIST *)
+    xmalloc (count * sizeof (CGEN_INSN_LIST));
 
   /* Add compiled in insns.
-     The table is scanned backwards as later additions are inserted in
-     front of earlier ones and we want earlier ones to be prefered.
-     We stop at the first one as it is a reserved entry.  */
+     Don't include the first one as it is a reserved entry.  */
+  /* ??? It was the end of all hash chains, and also the special
+     "illegal insn" marker.  May be able to do it differently now.  */
 
-  for (insn = insn_table->init_entries + insn_table->num_init_entries - 1;
-       insn > insn_table->init_entries;
-       --insn, ++insn_lists)
-    {
-      hash = (*insn_table->asm_hash) (insn->syntax.mnemonic);
-      insn_lists->next = asm_hash_table[hash];
-      insn_lists->insn = insn;
-      asm_hash_table[hash] = insn_lists;
-    }
+  hash_entry_buf = hash_insn_array ((CGEN_INSN *) ((char *) insn_table->init_entries
+						   + insn_table->entry_size),
+				    insn_table->num_init_entries - 1,
+				    insn_table->entry_size,
+				    opcode_table, asm_hash_table, hash_entry_buf);
+
+  /* Add compiled in macro-insns.  */
+
+  hash_entry_buf = hash_insn_array (macro_insn_table->init_entries,
+				    macro_insn_table->num_init_entries,
+				    macro_insn_table->entry_size,
+				    opcode_table, asm_hash_table, hash_entry_buf);
 
   /* Add runtime added insns.
-     ??? Currently later added insns will be prefered over earlier ones.
-     Not sure this is a bug or not.  */
-  for (new_insns = insn_table->new_entries;
-       new_insns != NULL;
-       new_insns = new_insns->next, ++insn_lists)
-    {
-      hash = (*insn_table->asm_hash) (new_insns->insn->syntax.mnemonic);
-      insn_lists->next = asm_hash_table[hash];
-      insn_lists->insn = new_insns->insn;
-      asm_hash_table[hash] = insn_lists;
-    }
+     Later added insns will be prefered over earlier ones.  */
+
+  hash_entry_buf = hash_insn_list (insn_table->new_entries, opcode_table,
+				   asm_hash_table, hash_entry_buf);
+
+  /* Add runtime added macro-insns.  */
+
+  hash_insn_list (macro_insn_table->new_entries,
+		  opcode_table, asm_hash_table, hash_entry_buf);
 }
 
-/* Return the first entry in the hash list for INSN.  */
+/* Return the first entry in the hash list for INSN.
+   ??? Of course it would be better to pass in a pointer to the
+   opcode data structure, rather than reference a global.  Later.  */
 
 CGEN_INSN_LIST *
 cgen_asm_lookup_insn (insn)
@@ -130,7 +199,7 @@ cgen_asm_lookup_insn (insn)
   if (asm_hash_table == NULL)
     build_asm_hash_table ();
 
-  hash = (*cgen_current_opcode_data->insn_table->asm_hash) (insn);
+  hash = (*cgen_current_opcode_table->asm_hash) (insn);
   return asm_hash_table[hash];
 }
 
@@ -145,35 +214,40 @@ cgen_asm_lookup_insn (insn)
 const char *
 cgen_parse_keyword (strp, keyword_table, valuep)
      const char **strp;
-     struct cgen_keyword *keyword_table;
+     CGEN_KEYWORD *keyword_table;
      long *valuep;
 {
-  const struct cgen_keyword_entry *ke;
+  const CGEN_KEYWORD_ENTRY *ke;
   char buf[256];
-  const char *p;
+  const char *p,*start;
 
-  p = *strp;
+  p = start = *strp;
 
-  /* Allow any first character.  */
+  /* Allow any first character.
+     Note that this allows recognizing ",a" for the annul flag in sparc
+     even though "," is subsequently not a valid keyword char.  */
   if (*p)
     ++p;
 
   /* Now allow letters, digits, and _.  */
-  while (isalnum (*p) || *p == '_')
+  while (((p - start) < (int) sizeof (buf))
+	 && (isalnum ((unsigned char) *p) || *p == '_'))
     ++p;
 
-  if (p - *strp > 255)
+  if (p - start >= (int) sizeof (buf))
     return "unrecognized keyword/register name";
 
-  memcpy (buf, *strp, p - *strp);
-  buf[p - *strp] = 0;
+  memcpy (buf, start, p - start);
+  buf[p - start] = 0;
 
   ke = cgen_keyword_lookup_name (keyword_table, buf);
 
   if (ke != NULL)
     {
       *valuep = ke->value;
-      *strp = p;
+      /* Don't advance pointer if we recognized the null keyword.  */
+      if (ke->name[0] != 0)
+	*strp = p;
       return NULL;
     }
 
@@ -183,13 +257,12 @@ cgen_parse_keyword (strp, keyword_table, valuep)
 /* Signed integer parser.  */
 
 const char *
-cgen_parse_signed_integer (strp, opindex, min, max, valuep)
+cgen_parse_signed_integer (strp, opindex, valuep)
      const char **strp;
      int opindex;
-     long min, max;
      long *valuep;
 {
-  long value;
+  bfd_vma value;
   enum cgen_parse_operand_result result;
   const char *errmsg;
 
@@ -198,24 +271,19 @@ cgen_parse_signed_integer (strp, opindex, min, max, valuep)
 				     &result, &value);
   /* FIXME: Examine `result'.  */
   if (!errmsg)
-    {
-      if (value < min || value > max)
-	return "integer operand out of range";
-      *valuep = value;
-    }
+    *valuep = value;
   return errmsg;
 }
 
 /* Unsigned integer parser.  */
 
 const char *
-cgen_parse_unsigned_integer (strp, opindex, min, max, valuep)
+cgen_parse_unsigned_integer (strp, opindex, valuep)
      const char **strp;
      int opindex;
-     unsigned long min, max;
      unsigned long *valuep;
 {
-  unsigned long value;
+  bfd_vma value;
   enum cgen_parse_operand_result result;
   const char *errmsg;
 
@@ -224,33 +292,32 @@ cgen_parse_unsigned_integer (strp, opindex, min, max, valuep)
 				     &result, &value);
   /* FIXME: Examine `result'.  */
   if (!errmsg)
-    {
-      if (value < min || value > max)
-	return "integer operand out of range";
-      *valuep = value;
-    }
+    *valuep = value;
   return errmsg;
 }
 
 /* Address parser.  */
 
 const char *
-cgen_parse_address (strp, opindex, opinfo, valuep)
+cgen_parse_address (strp, opindex, opinfo, resultp, valuep)
      const char **strp;
      int opindex;
      int opinfo;
+     enum cgen_parse_operand_result *resultp;
      long *valuep;
 {
-  long value;
-  enum cgen_parse_operand_result result;
+  bfd_vma value;
+  enum cgen_parse_operand_result result_type;
   const char *errmsg;
 
   errmsg = (*cgen_parse_operand_fn) (CGEN_PARSE_OPERAND_ADDRESS, strp,
 				     opindex, opinfo,
-				     &result, &value);
+				     &result_type, &value);
   /* FIXME: Examine `result'.  */
   if (!errmsg)
     {
+      if (resultp != NULL)
+	*resultp = result_type;
       *valuep = value;
     }
   return errmsg;
