@@ -716,6 +716,9 @@ case "${target}" in
     ;;
   mn10300-*-*)
     noconfigdirs="$noconfigdirs"
+    if [ x${is_cross_compiler} != xno ] ; then
+	   target_configdirs="${target_configdirs} target-libstub target-cygmon"
+    fi
     ;;
   powerpc-*-aix*)
     # copied from rs6000-*-* entry
