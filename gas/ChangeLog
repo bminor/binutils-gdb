@@ -1,3 +1,10 @@
+1999-05-05  Catherine Moore  <clm@cygnus.com>
+ 
+        * tc-m68k.c: Include elf/m68k.h.
+        (m68k_elf_final_processing): New routine.
+        * tc-m68k.h (elf_tc_final_processing m68k_elf_final_processing):
+        Define.
+ 
 Mon May  3 10:26:03 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (md_apply_fix): Handle 22 bit fmt insn like a

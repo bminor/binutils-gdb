@@ -27,6 +27,10 @@
 #include "opcode/m68k.h"
 #include "m68k-parse.h"
 
+#if defined (OBJ_ELF)
+#include "elf/m68k.h"
+#endif
+
 /* This string holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful.  The macro
    tc_comment_chars points to this.  We use this, rather than the
@@ -7005,5 +7009,12 @@ tc_coff_sizemachdep (frag)
 
 #endif
 #endif
-
+#ifdef OBJ_ELF
+void m68k_elf_final_processing()
+{
+   /* Set file-specific flags if this is a cpu32 processor */
+   if (cpu_of_arch (current_architecture) & cpu32)
+     elf_elfheader (stdoutput)->e_flags |= EF_CPU32;
+}
+#endif
 /* end of tc-m68k.c */
