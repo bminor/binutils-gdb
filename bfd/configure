@@ -7861,8 +7861,10 @@ fi
 
 
 
-        if test "$CATOBJEXT" = "NONE"; then
-	  	  	  nls_cv_use_gnu_gettext=yes
+        if test "$CATOBJEXT" = "NONE" && test -d $srcdir/../intl; then
+	  # Neither gettext nor catgets in included in the C library.
+	  # Fall back on GNU gettext library (assuming it is present).
+	  nls_cv_use_gnu_gettext=yes
         fi
       fi
 
