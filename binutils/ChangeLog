@@ -1,5 +1,10 @@
 2001-02-11  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
+	* unwind-ia64.c: Don't use ANSI C preprocessor stringisation and string
+	literal concatenation.
+
+2001-02-11  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
 	* readelf.c (struct unw_aux_info): Remove const from the info member.
 	(process_unwind): Don't type-cast the third argument to the
 	GET_DATA_ALLOC macro.
