@@ -45,9 +45,7 @@ a29k-*-vxworks*)        gdb_target=vx29k ;;
 alpha-*-osf*)		gdb_target=alpha-osf1 ;;
 alpha-*-linux*)		gdb_target=alpha-linux ;;
 
-# start-sanitize-arc
 arc-*-*)		gdb_target=arc ;;
-# end-sanitize-arc
 
 arm-*-*)		gdb_target=arm ;;
 
