@@ -505,9 +505,9 @@ display_rel_file (abfd, archive_bfd)
      bfd *abfd;
      bfd *archive_bfd;
 {
-  unsigned int storage;
+  long storage;
   asymbol **syms;
-  unsigned int symcount = 0;
+  long symcount = 0;
 
   if (!(bfd_get_file_flags (abfd) & HAS_SYMS))
     {
@@ -515,7 +515,9 @@ display_rel_file (abfd, archive_bfd)
       return;
     }
 
-  storage = get_symtab_upper_bound (abfd);
+  storage = bfd_get_symtab_upper_bound (abfd);
+  if (storage < 0)
+    bfd_fatal (bfd_get_filename (abfd));
   if (storage == 0)
     {
     nosymz:
@@ -527,6 +529,8 @@ display_rel_file (abfd, archive_bfd)
   syms = (asymbol **) xmalloc (storage);
 
   symcount = bfd_canonicalize_symtab (abfd, syms);
+  if (symcount < 0)
+    bfd_fatal (bfd_get_filename (abfd));
   if (symcount == 0)
     {
       free (syms);

@@ -116,23 +116,23 @@ static const char *select_output_format PARAMS ((enum bfd_architecture,
 static void setup_sections PARAMS ((bfd *, asection *, PTR));
 static void copy_sections PARAMS ((bfd *, asection *, PTR));
 static void mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
-				   bfd_size_type *, char *,
+				   long *, char *,
 				   bfd_size_type));
 static void i386_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
-					bfd_size_type *, char *,
+					long *, char *,
 					bfd_size_type));
 static void alpha_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
-					 bfd_size_type *, char *,
+					 long *, char *,
 					 bfd_size_type));
 /* start-sanitize-powerpc-netware */
-static void powerpc_build_stubs PARAMS ((bfd *, asymbol ***, unsigned int *));
+static void powerpc_build_stubs PARAMS ((bfd *, asymbol ***, long *));
 static void powerpc_resolve_stubs PARAMS ((bfd *, bfd *));
 static void powerpc_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
-					   bfd_size_type *, char *,
+					   long *, char *,
 					   bfd_size_type));
 /* end-sanitize-powerpc-netware */
 static void default_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
-					   bfd_size_type *, char *,
+					   long *, char *,
 					   bfd_size_type));
 static char *link_inputs PARAMS ((struct string_list *, char *));
 static const char *choose_temp_base_try PARAMS ((const char *,
@@ -161,12 +161,13 @@ main (argc, argv)
   bfd *inbfd;
   bfd *outbfd;
   asymbol **newsyms, **outsyms;
-  unsigned int symcount, newsymalloc, newsymcount;
+  long symcount, newsymalloc, newsymcount;
+  long symsize;
   asection *text_sec, *bss_sec, *data_sec;
   bfd_vma vma;
   bfd_size_type align;
   asymbol *endsym;
-  unsigned int i;
+  long i;
   char inlead, outlead;
   boolean gotstart, gotexit, gotcheck;
   struct stat st;
@@ -357,8 +358,13 @@ main (argc, argv)
   if (! bfd_set_file_flags (outbfd, bfd_get_file_flags (inbfd)))
     bfd_fatal (bfd_get_filename (outbfd));
 
-  symbols = (asymbol **) xmalloc (get_symtab_upper_bound (inbfd));
+  symsize = bfd_get_symtab_upper_bound (inbfd);
+  if (symsize < 0)
+    bfd_fatal (input_file);
+  symbols = (asymbol **) xmalloc (symsize);
   symcount = bfd_canonicalize_symtab (inbfd, symbols);
+  if (symcount < 0)
+    bfd_fatal (input_file);
 
   /* Make sure we have a .bss section.  */
   bss_sec = bfd_get_section_by_name (outbfd, NLM_UNINITIALIZED_DATA_NAME);
@@ -1193,7 +1199,7 @@ copy_sections (inbfd, insec, data_ptr)
   asection *outsec;
   bfd_size_type size;
   PTR contents;
-  bfd_size_type reloc_size;
+  long reloc_size;
 
   /* FIXME: We don't want to copy the .reginfo section of an ECOFF
      file.  However, I don't have a good way to describe this section.
@@ -1224,13 +1230,17 @@ copy_sections (inbfd, insec, data_ptr)
     }
 
   reloc_size = bfd_get_reloc_upper_bound (inbfd, insec);
+  if (reloc_size < 0)
+    bfd_fatal (bfd_get_filename (inbfd));
   if (reloc_size != 0)
     {
       arelent **relocs;
-      bfd_size_type reloc_count;
+      long reloc_count;
 
       relocs = (arelent **) xmalloc (reloc_size);
       reloc_count = bfd_canonicalize_reloc (inbfd, insec, relocs, symbols);
+      if (reloc_count < 0)
+	bfd_fatal (bfd_get_filename (inbfd));
       mangle_relocs (outbfd, insec, &relocs, &reloc_count, (char *) contents,
 		     size);
 
@@ -1272,7 +1282,7 @@ mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
      bfd *outbfd;
      asection *insec;
      arelent ***relocs_ptr;
-     bfd_size_type *reloc_count_ptr;
+     long *reloc_count_ptr;
      char *contents;
      bfd_size_type contents_size;
 {
@@ -1309,15 +1319,15 @@ default_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
      bfd *outbfd;
      asection *insec;
      arelent ***relocs_ptr;
-     bfd_size_type *reloc_count_ptr;
+     long *reloc_count_ptr;
      char *contents;
      bfd_size_type contents_size;
 {
   if (insec->output_offset != 0)
     {
-      bfd_size_type reloc_count;
+      long reloc_count;
       register arelent **relocs;
-      register bfd_size_type i;
+      register long i;
 
       reloc_count = *reloc_count_ptr;
       relocs = *relocs_ptr;
@@ -1353,11 +1363,11 @@ i386_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
      bfd *outbfd;
      asection *insec;
      arelent ***relocs_ptr;
-     bfd_size_type *reloc_count_ptr;
+     long *reloc_count_ptr;
      char *contents;
      bfd_size_type contents_size;
 {
-  bfd_size_type reloc_count, i;
+  long reloc_count, i;
   arelent **relocs;
 
   reloc_count = *reloc_count_ptr;
@@ -1508,11 +1518,11 @@ alpha_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
      bfd *outbfd;
      asection *insec;
      register arelent ***relocs_ptr;
-     bfd_size_type *reloc_count_ptr;
+     long *reloc_count_ptr;
      char *contents;
      bfd_size_type contents_size;
 {
-  bfd_size_type old_reloc_count;
+  long old_reloc_count;
   arelent **old_relocs;
   register arelent **relocs;
 
@@ -1652,14 +1662,14 @@ static void
 powerpc_build_stubs (inbfd, symbols_ptr, symcount_ptr)
      bfd *inbfd;
      asymbol ***symbols_ptr;
-     unsigned int *symcount_ptr;
+     long *symcount_ptr;
 {
   asection *stub_sec;
   asection *got_sec;
   unsigned int got_base;
-  unsigned int i;
-  unsigned int symcount;
-  unsigned int stubcount;
+  long i;
+  long symcount;
+  long stubcount;
 
   /* Make a section to hold stubs.  We don't set SEC_HAS_CONTENTS for
      the section to prevent copy_sections from reading from it.  */
@@ -1722,7 +1732,9 @@ powerpc_build_stubs (inbfd, symbols_ptr, symcount_ptr)
       /* Define the `.' symbol to be in the stub section.  */
       sym->section = stub_sec;
       sym->value = stubcount * POWERPC_STUB_SIZE;
-      sym->flags = BSF_LOCAL;
+      /* We set the BSF_DYNAMIC flag here so that we can check it when
+	 we are mangling relocs.  FIXME: This is a hack.  */
+      sym->flags = BSF_LOCAL | BSF_DYNAMIC;
 
       /* Add this stub to the linked list.  */
       item = (struct powerpc_stub *) xmalloc (sizeof (struct powerpc_stub));
@@ -1835,14 +1847,14 @@ powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
      bfd *outbfd;
      asection *insec;
      register arelent ***relocs_ptr;
-     bfd_size_type *reloc_count_ptr;
+     long *reloc_count_ptr;
      char *contents;
      bfd_size_type contents_size;
 {
   const reloc_howto_type *toc_howto;
-  bfd_size_type reloc_count;
+  long reloc_count;
   register arelent **relocs;
-  register bfd_size_type i;
+  register long i;
 
   toc_howto = bfd_reloc_type_lookup (insec->owner, BFD_RELOC_PPC_TOC16);
   if (toc_howto == (reloc_howto_type *) NULL)
@@ -1893,13 +1905,14 @@ powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 			& rel->howto->dst_mask));
 	      bfd_put_32 (outbfd, val, (bfd_byte *) contents + rel->address);
 
-	      /* If this reloc is against a symbol whose name begins
-		 with a `.', and the next instruction is
+	      /* If this reloc is against an stubbed symbol and the
+		 next instruction is
 		     cror 31,31,31
 		 then we replace the next instruction with
 		     lwz  r2,20(r1)
-		 This reloads the TOC pointer after a call.  */
+		 This reloads the TOC pointer after a stub call.  */
 	      if (bfd_asymbol_name (sym)[0] == '.'
+		  && (sym->flags & BSF_DYNAMIC) != 0
 		  && (bfd_get_32 (outbfd,
 				  (bfd_byte *) contents + rel->address + 4)
 		      == 0x4ffffb82)) /* cror 31,31,31 */

@@ -178,10 +178,10 @@ static unsigned int
 filter_symbols (abfd, osyms, isyms, symcount)
      bfd *abfd;
      asymbol **osyms, **isyms;
-     unsigned long symcount;
+     long symcount;
 {
   register asymbol **from = isyms, **to = osyms;
-  unsigned int src_count = 0, dst_count = 0;
+  long src_count = 0, dst_count = 0;
 
   for (; src_count < symcount; src_count++)
     {
@@ -229,7 +229,7 @@ copy_object (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
 {
-  unsigned int symcount;
+  long symcount;
 
   if (!bfd_set_format (obfd, bfd_get_format (ibfd)))
     {
@@ -272,7 +272,8 @@ copy_object (ibfd, obfd)
   if (!bfd_copy_private_bfd_data (ibfd, obfd))
     {
       fprintf (stderr, "%s: %s: error copying private BFD data: %s\n",
-	       program_name, bfd_errmsg (bfd_get_error ()));
+	       program_name, bfd_get_filename (obfd),
+	       bfd_errmsg (bfd_get_error ()));
       status = 1;
       return;
     }
@@ -290,8 +291,20 @@ copy_object (ibfd, obfd)
     }
   else
     {
-      osympp = isympp = (asymbol **) xmalloc (get_symtab_upper_bound (ibfd));
+      long symsize;
+
+      symsize = bfd_get_symtab_upper_bound (ibfd);
+      if (symsize < 0)
+	{
+	  nonfatal (bfd_get_filename (ibfd));
+	}
+
+      osympp = isympp = (asymbol **) xmalloc (symsize);
       symcount = bfd_canonicalize_symtab (ibfd, isympp);
+      if (symcount < 0)
+	{
+	  nonfatal (bfd_get_filename (ibfd));
+	}
 
       if (strip_symbols == strip_debug || discard_locals != locals_undef)
 	{
@@ -560,7 +573,7 @@ copy_section (ibfd, isection, obfd)
      bfd *obfd;
 {
   arelent **relpp;
-  int relcount;
+  long relcount;
   sec_ptr osection;
   bfd_size_type size;
 
@@ -578,16 +591,29 @@ copy_section (ibfd, isection, obfd)
   if (size == 0 || osection == 0)
     return;
 
-  if (strip_symbols == strip_all
-      || bfd_get_reloc_upper_bound (ibfd, isection) == 0)
-    {
-      bfd_set_reloc (obfd, osection, (arelent **) NULL, 0);
-    }
+  if (strip_symbols == strip_all)
+    bfd_set_reloc (obfd, osection, (arelent **) NULL, 0);
   else
     {
-      relpp = (arelent **) xmalloc (bfd_get_reloc_upper_bound (ibfd, isection));
-      relcount = bfd_canonicalize_reloc (ibfd, isection, relpp, isympp);
-      bfd_set_reloc (obfd, osection, relpp, relcount);
+      long relsize;
+
+      relsize = bfd_get_reloc_upper_bound (ibfd, isection);
+      if (relsize < 0)
+	{
+	  nonfatal (bfd_get_filename (ibfd));
+	}
+      if (relsize == 0)
+	bfd_set_reloc (obfd, osection, (arelent **) NULL, 0);
+      else
+	{
+	  relpp = (arelent **) xmalloc (relsize);
+	  relcount = bfd_canonicalize_reloc (ibfd, isection, relpp, isympp);
+	  if (relcount < 0)
+	    {
+	      nonfatal (bfd_get_filename (ibfd));
+	    }
+	  bfd_set_reloc (obfd, osection, relpp, relcount);
+	}
     }
 
   isection->_cooked_size = isection->_raw_size;
@@ -626,15 +652,22 @@ mark_symbols_used_in_relocations (ibfd, isection, symbols)
      sec_ptr isection;
      asymbol **symbols;
 {
+  long relsize;
   arelent **relpp;
-  unsigned int relcount, i;
+  long relcount, i;
 
   /* Ignore an input section with no corresponding output section.  */
   if (isection->output_section == NULL)
     return;
 
-  relpp = (arelent **) xmalloc (bfd_get_reloc_upper_bound (ibfd, isection));
+  relsize = bfd_get_reloc_upper_bound (ibfd, isection);
+  if (relsize < 0)
+    bfd_fatal (bfd_get_filename (ibfd));
+
+  relpp = (arelent **) xmalloc (relsize);
   relcount = bfd_canonicalize_reloc (ibfd, isection, relpp, symbols);
+  if (relcount < 0)
+    bfd_fatal (bfd_get_filename (ibfd));
 
   /* Examine each symbol used in a relocation.  If it's not one of the
      special bfd section symbols, then mark it with BSF_KEEP.  */

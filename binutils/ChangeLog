@@ -1,3 +1,49 @@
+Wed Mar 30 15:52:40 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Update for recent BFD changes to symbol and reloc reading.  Rename
+	all uses of get_symtab_upper_bound to bfd_get_symtab_upper_bound.
+	Also:
+	* coffgrok.c (symcount): Change to long.
+	(do_sections_p1): Check for error return from
+	bfd_get_reloc_upper_bound.  Change relcount to long, and check for
+	error from bfd_canonicalize_reloc.
+	(coff_grok): Change storage to long.  Check for error from
+	bfd_get_symtab_upper_bound and bfd_canonicalize_symtab.
+	* nlmconv.c (main): Change symcount, newsymalloc, newsymcount, and
+	i to long.  Check for error from bfd_get_symtab_upper_bound and
+	bfd_canonicalize_symtab.
+	(copy_sections): Change reloc_size and reloc_count to long.  Check
+	for error from bfd_get_reloc_upper_bound and
+	bfd_canonicalize_reloc.
+	(mangle_relocs, i386_mangle_relocs, alpha_mangle_relocs): Change
+	reloc_count_ptr argument to long *.  Make corresponding changes to
+	variables loaded from *reloc_count_ptr.
+	* nm.c (display_rel_file): Change storage and symcount to long.
+	Check for errors from bfd_get_symtab_upper_bound and
+	bfd_canonicalize_symtab.
+	* objcopy.c (filter_symbols): Change symcount, src_count and
+	dst_count to long.
+	(copy_object): Change symcount to long.  Pass another argument to
+	fprintf.  Check for errors from bfd_get_symtab_upper_bound and
+	bfd_canonicalize_symtab.
+	(copy_section): Change relcount to long.  Check for errors from
+	bfd_get_reloc_upper_bound and bfd_canonicalize_reloc.
+	(mark_symbols_used_in_relocations): Change relcount and i to long.
+	Check for errors form bfd_get_reloc_upper_bound and
+	bfd_canonicalize_reloc.
+	* objdump.c (storage): Remove global variable.
+	(symcount): Changed to long.
+	(slurp_symtab): New local variable storage.  Check for errors from
+	bfd_get_symtab_upper_bound and bfd_canonicalize_symtab.
+	(remove_useless_symbols): Change return value and count to long.
+	(objdump_print_address): Change min, max, thisplace and i to long.
+	(disassemble_data): Change i to long.
+	(dump_symbols): Change count to long.
+	(dump_relocs): Change relcount to long.  Check for errors from
+	bfd_ret_reloc_upper_bound and bfd_canonicalize_reloc.
+	(display_info_table): Add casts when passing LONGEST_ARCH for
+	printf %* argument.
+
 Tue Mar 29 14:59:04 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* nm.c (display_archive): Close each archive element after it has

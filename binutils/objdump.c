@@ -64,11 +64,8 @@ char *machine = (char *) NULL;
 /* The symbol table.  */
 asymbol **syms;
 
-/* Number of bytes allocated for `syms'.  */
-unsigned int storage;
-
 /* Number of symbols in `syms'.  */
-unsigned int symcount = 0;
+long symcount = 0;
 
 /* Forward declarations.  */
 
@@ -179,6 +176,7 @@ slurp_symtab (abfd)
      bfd *abfd;
 {
   asymbol **sy = (asymbol **) NULL;
+  long storage;
 
   if (!(bfd_get_file_flags (abfd) & HAS_SYMS))
     {
@@ -186,13 +184,18 @@ slurp_symtab (abfd)
       return NULL;
     }
 
-  storage = get_symtab_upper_bound (abfd);
+  storage = bfd_get_symtab_upper_bound (abfd);
+  if (storage < 0)
+    bfd_fatal (bfd_get_filename (abfd));
+
   if (storage)
     {
       sy = (asymbol **) xmalloc (storage);
     }
   symcount = bfd_canonicalize_symtab (abfd, sy);
-  if (symcount <= 0)
+  if (symcount < 0)
+    bfd_fatal (bfd_get_filename (abfd));
+  if (symcount == 0)
     {
       fprintf (stderr, "%s: %s: Invalid symbol table\n",
 	       program_name, bfd_get_filename (abfd));
@@ -205,10 +208,10 @@ slurp_symtab (abfd)
    COUNT is the number of elements in SYMBOLS.
    Return the number of useful symbols. */
 
-int
+long
 remove_useless_symbols (symbols, count)
      asymbol **symbols;
-     int count;
+     long count;
 {
   register asymbol **in_ptr = symbols, **out_ptr = symbols;
 
@@ -267,9 +270,9 @@ objdump_print_address (vma, info)
      constantly churned by code doing heavy memory accesses.  */
 
   /* Indices in `syms'.  */
-  unsigned int min = 0;
-  unsigned int max = symcount;
-  unsigned int thisplace;
+  long min = 0;
+  long max = symcount;
+  long thisplace;
 
   bfd_signed_vma vardiff;
 
@@ -308,7 +311,7 @@ objdump_print_address (vma, info)
     /* If this symbol isn't global, search for one with the same value
        that is.  */
     bfd_vma val = syms[thisplace]->value;
-    int i;
+    long i;
     if (syms[thisplace]->flags & (BSF_LOCAL|BSF_DEBUGGING))
       for (i = thisplace - 1; i >= 0; i--)
 	{
@@ -344,7 +347,7 @@ objdump_print_address (vma, info)
        no way to tell what's desired without looking at the relocation
        table.  */
     struct objdump_disasm_info *aux;
-    int i;
+    long i;
 
     aux = (struct objdump_disasm_info *) info->application_data;
     if ((aux->abfd->flags & HAS_RELOC)
@@ -413,7 +416,7 @@ void
 disassemble_data (abfd)
      bfd *abfd;
 {
-  bfd_size_type i;
+  long i;
   unsigned int (*print) () = 0; /* Old style */
   disassembler_ftype disassemble = 0; /* New style */
   struct disassemble_info disasm_info;
@@ -1065,8 +1068,7 @@ static void
 dump_symbols (abfd)
      bfd *abfd;
 {
-
-  unsigned int count;
+  long count;
   asymbol **current = syms;
 
   printf ("SYMBOL TABLE:\n");
@@ -1097,11 +1099,13 @@ dump_relocs (abfd)
      bfd *abfd;
 {
   arelent **relpp;
-  unsigned int relcount;
+  long relcount;
   asection *a;
 
   for (a = abfd->sections; a != (asection *) NULL; a = a->next)
     {
+      long relsize;
+
       if (a == &bfd_abs_section)
 	continue;
       if (a == &bfd_und_section)
@@ -1119,7 +1123,11 @@ dump_relocs (abfd)
 
       printf ("RELOCATION RECORDS FOR [%s]:", a->name);
 
-      if (bfd_get_reloc_upper_bound (abfd, a) == 0)
+      relsize = bfd_get_reloc_upper_bound (abfd, a);
+      if (relsize < 0)
+	bfd_fatal (bfd_get_filename (abfd));
+
+      if (relsize == 0)
 	{
 	  printf (" (none)\n\n");
 	}
@@ -1127,10 +1135,12 @@ dump_relocs (abfd)
 	{
 	  arelent **p;
 
-	  relpp = (arelent **) xmalloc (bfd_get_reloc_upper_bound (abfd, a));
+	  relpp = (arelent **) xmalloc (relsize);
 	  /* Note that this must be done *before* we sort the syms table. */
 	  relcount = bfd_canonicalize_reloc (abfd, a, relpp, syms);
-	  if (relcount == 0)
+	  if (relcount < 0)
+	    bfd_fatal (bfd_get_filename (abfd));
+	  else if (relcount == 0)
 	    {
 	      printf (" (none)\n\n");
 	    }
@@ -1253,7 +1263,7 @@ display_info_table (first, last)
   extern bfd_target *bfd_target_vector[];
 
   /* Print heading of target names.  */
-  printf ("\n%*s", LONGEST_ARCH, " ");
+  printf ("\n%*s", (int) LONGEST_ARCH, " ");
   for (t = first; t++ < last && bfd_target_vector[t];)
     printf ("%s ", bfd_target_vector[t]->name);
   putchar ('\n');
@@ -1261,7 +1271,8 @@ display_info_table (first, last)
   for (a = (int) bfd_arch_obscure + 1; a < (int) bfd_arch_last; a++)
     if (strcmp (bfd_printable_arch_mach (a, 0), "UNKNOWN!") != 0)
       {
-	printf ("%*s ", LONGEST_ARCH - 1, bfd_printable_arch_mach (a, 0));
+	printf ("%*s ", (int) LONGEST_ARCH - 1,
+		bfd_printable_arch_mach (a, 0));
 	for (t = first; t++ < last && bfd_target_vector[t];)
 	  {
 	    bfd_target *p = bfd_target_vector[t];
