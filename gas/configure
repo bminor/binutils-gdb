@@ -55,11 +55,13 @@ hostsubdir=
 Makefile=Makefile
 Makefile_in=Makefile.in
 norecurse=
+recursing=
 removing=
 srcdir=
 srctrigger=
 target=
 targets=
+commontargets=
 targetsubdir=
 template=
 verbose=
@@ -69,6 +71,7 @@ do
 	case ${arg} in
 	-ansi | +a*)
 		ansi=true
+		clib=clib
 		;;
 	-destdir=* | +destdir=* | +destdi=* | +destd=* | +dest=* | +des=* | +de=* | +d=*)
 		destdir=`echo ${arg} | sed 's/[+-]d[a-z]*=//'`
@@ -90,6 +93,9 @@ do
 	-norecurse | +no*)
 		norecurse=true
 		;;
+	-recursing)
+		recursing=true
+		;;
 	-rm | +r*)
 		removing=${arg}
 		;;
@@ -110,7 +116,7 @@ do
 	-template=* | +template=* | +templat=* | +templa=* | +templ=* | +temp=* | +tem=* | +te=*)
 		template=`echo ${arg} | sed 's/[+-]template=//'`
 		;;
-	-verbose | +v*)
+	-v | -verbose | +v*)
 		verbose=${arg}
 		;;
 	-* | +*)
@@ -132,7 +138,6 @@ done
 
 if [ -n "${verbose}" ] ; then
 	echo `pwd`/configure $*
-	echo targets=\"${targets}\"
 fi
 
 # process host and target only if not rebuilding configure itself or removing.
@@ -141,7 +146,7 @@ if [ -z "${template}" -a -z "${removing}" -a -z "${fatal}" ] ; then
 	if [ -z "${hosts}" ] ; then
 		(echo ;
 		echo "configure: No HOST specified." ;
-		echo) 2>&1
+		echo) 1>&2
 		fatal=true
 	fi
 fi
@@ -188,7 +193,7 @@ targetdependent=true
 # are we rebuilding config itself?
 if [ -n "${template}" ] ; then
 	if [ ! -r ${template} ] ; then
-		echo "Can't find template ${template}."
+		echo '***' "Can't find template ${template}." 1>&2
 		exit 1
 	fi
 
@@ -209,12 +214,12 @@ if [ -n "${template}" ] ; then
 
 	if [ -r configure.in ] ; then
 		if [ -z "`grep '^# per\-host:' configure.in`" ] ; then
-			echo `pwd`/configure.in has no "per-host:" line.
+			echo '***' `pwd`/configure.in has no "per-host:" line. 1>&2
 			exit 1
 		fi
 
 		if [ -z "`grep '^# per\-target:' configure.in`" ] ; then
-			echo `pwd`/configure.in has no "per-target:" line.
+			echo '***' `pwd`/configure.in has no "per-target:" line. 1>&2
 			exit 1
 		fi
 
@@ -247,7 +252,21 @@ if [ -n "${template}" ] ; then
 	rm template.new
 #	mv configure configure.old
 	mv configure.new configure
-	echo Rebuilt configure in `pwd`
+
+	if [ -n "${verbose}" ] ; then
+		echo Rebuilt configure in `pwd`
+	fi
+
+	# Now update config.sub from the template directory.
+	if echo "$template" | grep -s 'configure$' ; then
+		cp `echo "$template" | sed s/configure$/config.sub/` ./config.sub.new
+	#	mv config.sub config.sub.old
+		mv config.sub.new config.sub
+
+		if [ -n "${verbose}" ] ; then
+			echo Rebuilt config.sub in `pwd`
+		fi
+	fi
 
 	if [ -z "${norecurse}" ] ; then
 		# If template is relative path, make it absolute for recursing.
@@ -273,10 +292,12 @@ if [ -n "${template}" ] ; then
 						(cd $i ;
 							./configure +template=${template} ${verbose})
 					else
-						echo No configure script in `pwd`/$i
+						echo Warning: No configure script in `pwd`/$i
 					fi
 				else
-					echo Warning: directory $i is missing.
+					if [ -n "${verbose}" ] ; then
+					  echo Warning: directory $i is missing.
+					fi
 				fi
 			done
 		done
@@ -287,7 +308,7 @@ fi
 
 # some sanity checks on configure.in
 if [ -z "${srctrigger}" ] ; then
-	echo srctrigger not set in configure.in. `pwd` not configured.
+	echo Warning: srctrigger not set in configure.in. `pwd` not configured.
 	exit 1
 fi
 
@@ -298,19 +319,51 @@ for host in ${hosts} ; do
 		defaulttargets=true
 	fi
 
+	result=`/bin/sh ./config.sub ${host}`
+	host_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
+	host_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
+	host_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
+	host=${host_cpu}-${host_vendor}-${host_os}
 	host_makefile_frag=config/hmake-${host}
 
 #### configure.in per-host parts come in here.
 
-## end of per-host part.
+gas_host=generic
 
+case "${host_cpu}" in
+a29k | rs6000 | vax)  gas_host=${host_cpu} ;;	
+mips)
+	case "${host_os}" in
+	ultrix) gas_host=decstation ;;
+	esac
+	;;
+*)
+	case "${host_os}" in
+	ansi | ultrix | hpux | sysv*)	gas_host=${host_os} ;;
+	*)
+		case "${host_vendor}" in
+		sun)
+			case "${host_cpu}" in
+			m68k)	gas_host=sun3 ;;
+			i386)	gas_host=sun386 ;;
+			sparc)	gas_host=sun4 ;;
+			esac
+			;;
+		esac
+		;;
+	esac
+	;;
+esac
+
+## end of per-host part.
 
 	for target in ${targets} ; do
 
-		if [ -n "${verbose}" ] ; then
-			echo "	target=\"${target}\""
-		fi
-
+		result=`/bin/sh ./config.sub ${target}`
+		target_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
+		target_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
+		target_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
+		target=${target_cpu}-${target_vendor}-${target_os}
 		target_makefile_frag=config/tmake-${target}
 
 #### configure.in per-target parts come in here.
@@ -318,49 +371,26 @@ for host in ${hosts} ; do
 # assign cpu type
 emulation=generic
 
-case ${target} in
-sun4* | sparc*)
-	cpu_type=sparc
-	;;
-sun3*)
-	cpu_type=m68k
-	;;
-i386*)
-	cpu_type=i386
-	;;
-i960*)
-	cpu_type=i960
-	emulation=ic960
-	;;
-a29k*)
-	cpu_type=a29k
-	;;
-m68k*)
-	cpu_type=m68k
-	;;
-*)
-	cpu_type=generic
-	;;
-esac
+cpu_type=${target_cpu}
 
 # assign object format
-case ${target} in
-*-coff)
+case ${target_os} in
+-sysv* | -coff*)
 	obj_format=coff
 	;;
-*-bout)
+-bout*)
 	obj_format=bout
+	;;
+-bsd* | -sunos* | *)
+	obj_format=aout
 	;;
 generic)
 	obj_format=generic
 	;;
-*)
-	obj_format=aout
-	;;
 esac
 
 # assign floating point type
-case ${target} in
+case ${target_cpu} in
 vax)
 	atof=vax
 	;;
@@ -369,7 +399,7 @@ vax)
 	;;
 esac
 
-files="config/ho-${host}.h config/tc-${cpu_type}.c \
+files="config/ho-${gas_host}.h config/tc-${cpu_type}.c \
 	config/tc-${cpu_type}.h config/te-${emulation}.h \
 	config/obj-${obj_format}.h config/obj-${obj_format}.c \
 	config/atof-${atof}.c"
@@ -386,7 +416,7 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 				if [ -d "${hostsubdir}" ] ; then
 					rm -rf ${hostsubdir}/${targetsubdir}
 
-					if [ -z "`(ls ${hostsubdir}) 2>&1 | grep Target-`" ] ; then
+					if [ -z "`(ls ${hostsubdir}) 2>&1 | grep Target- | grep -v Target-independent`" ] ; then
 						rm -rf ${hostsubdir}
 					fi
 				else
@@ -399,21 +429,32 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 			if [ -n "${subdirs}" ] ; then
 				# check for existing status before allowing forced subdirs.
 				if [ -f ${Makefile} ] ; then
-					echo "${Makefile} already exists in source directory.  `pwd` not configured."
+					echo '***' "${Makefile} already exists in source directory.  `pwd` not configured." 1>&2
 					exit 1
 				fi
 
 				if [ ! -d ${hostsubdir} ] ; then mkdir ${hostsubdir} ; fi
 				cd ${hostsubdir}
 
-				if [ ! -d ${targetsubdir} ] ; then mkdir ${targetsubdir} ; fi
+				if [ ! -d ${targetsubdir} ] ; then
+					if [ -z "${commontargets}" ] ; then
+						mkdir ${targetsubdir}
+					else
+						if [ ! -d Target-independent ] ; then
+							mkdir Target-independent
+						fi
+
+						${symbolic_link} Target-independent ${targetsubdir}
+					fi # if target independent
+				fi # if no target dir yet
+
 				cd ${targetsubdir}
 
 				srcdir=../..
 			else
 				# if not subdir builds, then make sure none exist.
 				if [ -n "`(ls .) 2>&1 | grep Host-`" ] ; then
-					echo "Configured subdirs exist.  `pwd` not configured."
+					echo '***' "Configured subdirs exist.  `pwd` not configured." 1>&2
 					exit 1
 				fi
 			fi
@@ -429,12 +470,12 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 
 			if [ -n "${srctrigger}" -a ! -r ${srcdir}/${srctrigger} ] ; then
 				if [ -z "${srcdirdefaulted}" ] ; then
-					echo "${progname}: Can't find ${srcname} sources in `pwd`/${srcdir}" 1>&2
+					echo '***' "${progname}: Can't find ${srcname} sources in `pwd`/${srcdir}" 1>&2
 				else
-					echo "${progname}: Can't find ${srcname} sources in `pwd`/. or `pwd`/.." 1>&2
+					echo '***' "${progname}: Can't find ${srcname} sources in `pwd`/. or `pwd`/.." 1>&2
 				fi
 
-				echo \(At least ${srctrigger} is missing.\) 1>&2
+				echo '***' \(At least ${srctrigger} is missing.\) 1>&2
 				exit 1
 			fi
 
@@ -448,8 +489,8 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 				set ${links}; link=$1; shift; links=$*
 
 				if [ ! -r ${srcdir}/${file} ] ; then
-					echo "${progname}: cannot create a link \"${link}\"," 1>&2
-					echo "since the file \"${file}\" does not exist." 1>&2
+					echo '***' "${progname}: cannot create a link \"${link}\"," 1>&2
+					echo '***' "since the file \"${file}\" does not exist." 1>&2
 					exit 1
 				fi
 
@@ -459,10 +500,13 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 				${symbolic_link} ${srcdir}/${file} ${link} 2>/dev/null || ${hard_link} ${srcdir}/${file} ${link}
 
 				if [ ! -r ${link} ] ; then
-					echo "${progname}: unable to link \"${link}\" to \"${srcdir}/${file}\"." 1>&2
+					echo '***' "${progname}: unable to link \"${link}\" to \"${srcdir}/${file}\"." 1>&2
 					exit 1
 				fi
-				echo "Linked \"${link}\" to \"${srcdir}/${file}\"."
+
+				if [ -n "${verbose}" ] ; then
+					echo "Linked \"${link}\" to \"${srcdir}/${file}\"."
+				fi
 			done
 
 			# Create a .gdbinit file which runs the one in srcdir
@@ -555,7 +599,9 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 				andusing=${using}
 			fi
 
-			echo "Created \"${Makefile}\"" in `pwd`${andusing}.
+			if [ -n "${verbose}" -o -z "${recursing}" ] ; then
+				echo "Created \"${Makefile}\"" in `pwd`${andusing}.
+			fi
 
 #### configure.in post-target parts come in here.
 
@@ -599,7 +645,10 @@ if [ -n "${norecurse}" -o -z "${configdirs}" ] ; then exit 0 ; fi
 
 # configdirs is not null
 for configdir in ${configdirs} ; do
-	echo Configuring ${configdir}...
+	if [ -n "${verbose}" ] ; then
+		echo Configuring ${configdir}...
+	fi
+
 	specifics=
 	commons=
 
@@ -617,18 +666,23 @@ for configdir in ${configdirs} ; do
 		if [ -n "${commons}" ] ; then
 			if [ -d ${configdir} ] ; then
 				(cd ${configdir} ;
-					./configure ${commons} ${verbose} ${subdirs} ${removing} +destdir=${destdir}) \
+					./configure -recursing ${commons} ${verbose} ${subdirs} ${removing} +destdir=${destdir}) \
 					| sed 's/^/	/'
 			else
-				echo Warning: directory \"${configdir}\" is missing.
+				if [ -n "${verbose}" ] ; then
+				  echo Warning: directory \"${configdir}\" is missing.
+				fi
 			fi
 		fi # if any common hosts
 
 		if [ -n "${specifics}" ] ; then
 			for host in ${specifics} ; do
-				echo Configuring target specific directory ${configdir}.${host}...
+				if [ -n "${verbose}" ] ; then
+					echo Configuring target specific directory ${configdir}.${host}...
+				fi
+
 				(cd ${configdir}.${host} ;
-					./configure ${host} ${verbose} ${subdirs} ${removing} +destdir=${destdir}) \
+					./configure -recursing ${host} ${verbose} ${subdirs} ${removing} +destdir=${destdir}) \
 					| sed 's/^/	/'
 			done # for host in specifics
 		fi # if there are any specifics
@@ -653,19 +707,24 @@ for configdir in ${configdirs} ; do
 		if [ -n "${commons}" ] ; then
 			if [ -d ${configdir} ] ; then
 				(cd ${configdir} ;
-					./configure ${hosts} ${verbose} ${subdirs} ${removing} \
+					./configure -recursing ${hosts} ${verbose} ${subdirs} ${removing} \
 						${commons} +destdir=${destdir}) \
 					| sed 's/^/	/'
 			else
-				echo Warning: directory \"${configdir}\" is missing.
+				if [ -n "${verbose}" ] ; then
+				  echo Warning: directory \"${configdir}\" is missing.
+				fi
 			fi
 		fi # if any commons
 
 		if [ -n "${specifics}" ] ; then
 			for target in ${specifics} ; do
-				echo Configuring target specific directory ${configdir}.${target}...
+				if [ -n "${verbose}" ] ; then
+					echo Configuring target specific directory ${configdir}.${target}...
+				fi
+
 				(cd ${configdir}.${target} ;
-					./configure ${hosts} ${verbose} ${subdirs} ${removing} \
+					./configure -recursing ${hosts} ${verbose} ${subdirs} ${removing} \
 						"+target=${target}" +destdir=${destdir}) \
 					| sed 's/^/	/'
 			done
@@ -677,10 +736,17 @@ exit 0
 
 #
 # $Log$
-# Revision 1.20  1991/08/14 00:29:31  rich
-# Deal with emulations more gracefully.
+# Revision 1.21  1991/08/22 03:21:56  rich
+# Three part names, etc.
 #
-# Revision 1.19  1991/08/08  01:12:07  rich
+# Revision 1.29  1991/08/20  04:56:51  rich
+# revisiting error messages
+#
+# Revision 1.28  1991/08/16  19:22:17  rich
+# This is the commontargets change and should be considered
+# experimental.
+#
+# Revision 1.27  1991/08/08  01:14:13  rich
 # allow +f to stand in for +subdirs
 #
 # Revision 1.26  1991/08/07  19:21:32  rich
