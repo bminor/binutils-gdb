@@ -1,3 +1,7 @@
+1999-08-17  H.J. Lu  <hjl@gnu.org>
+
+	* ld-cdtest/cdtest-foo.cc (Foo::init_foo): Use "%ld" for sizeof.
+
 1999-08-09  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* ld-elfvers/vers.exp: Run tests on sparc*-*-linux*.
