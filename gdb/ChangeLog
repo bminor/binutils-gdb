@@ -1,3 +1,20 @@
+Fri Feb  3 11:19:20 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* core.c (dis_asm_read_memory), defs.h, gdbtk.c (gdb_disassemble),
+	top.c :  Get rid of dis_asm_read_memory_hook.  We can now call the
+	disassemblers directly and have no need for this hook anymore.
+	* defs.h, printcmd.c:  Make print_insn be static.
+
+	* ser-go32.c (dos_comisr):  Make this 8 bit clean.
+	* (dos_open dos_close):  Allow multiple opens to the same device.
+	Use a ref count to prevent unwanted deallocations.
+	* sparcl-tdep.c:  Put #ifdefs around all socket stuff to make GO32
+	happy.
+	* (sparclite_ops):  Switch to download_stratum.
+	* target.h (enum strata):  Move download_stratum before
+	process_stratum so that executable targets get pushed on top of
+	download targets.
+
 Thu Feb  2 19:02:45 1995  Rob Savoye  <rob@darkstar.cygnus.com>
 
 	* array-rom.c: Remove the non GDB remote protocol config stuff.

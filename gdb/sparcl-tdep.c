@@ -24,24 +24,30 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "serial.h"
 #include <sys/types.h>
 #include <sys/time.h>
+#include <unistd.h>
+#ifndef __GO32__
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <unistd.h>
+#endif
 
 extern struct target_ops sparclite_ops;	/* Forward decl */
 extern struct target_ops remote_ops;
 
 static char *remote_target_name = NULL;
 static serial_t remote_desc = NULL;
-static int udp_fd = -1;
 static int serial_flag;
+#ifndef __GO32__
+static int udp_fd = -1;
+#endif
 
 static serial_t open_tty PARAMS ((char *name));
 static int send_resp PARAMS ((serial_t desc, char c));
 static void close_tty PARAMS ((int ignore));
+#ifndef __GO32__
 static int recv_udp_buf PARAMS ((int fd, unsigned char *buf, int len, int timeout));
 static int send_udp_buf PARAMS ((int fd, unsigned char *buf, int len));
+#endif
 static void sparclite_open PARAMS ((char *name, int from_tty));
 static void sparclite_close PARAMS ((int quitting));
 static void download PARAMS ((char *target_name, char *args, int from_tty,
@@ -54,12 +60,14 @@ static void sparclite_serial_start PARAMS ((bfd_vma entry));
 static void sparclite_serial_write PARAMS ((bfd *from_bfd, asection *from_sec,
 					    file_ptr from_addr,
 					    bfd_vma to_addr, int len));
+#ifndef __GO32__
 static unsigned short calc_checksum PARAMS ((unsigned char *buffer,
 					     int count));
 static void sparclite_udp_start PARAMS ((bfd_vma entry));
 static void sparclite_udp_write PARAMS ((bfd *from_bfd, asection *from_sec,
 					 file_ptr from_addr, bfd_vma to_addr,
 					 int len));
+#endif
 static void sparclite_download PARAMS ((char *filename, int from_tty));
 
 #define DDA2_SUP_ASI		0xb000000
@@ -316,6 +324,7 @@ close_tty (ignore)
   remote_desc = NULL;
 }
 
+#ifndef __GO32__
 static int
 recv_udp_buf (fd, buf, len, timeout)
      int fd, len;
@@ -368,6 +377,7 @@ send_udp_buf (fd, buf, len)
 
   error ("Short count in send: tried %d, sent %d\n", len, cc);
 }
+#endif /* __GO32__ */
 
 static void
 sparclite_open (name, from_tty)
@@ -439,6 +449,7 @@ or: target sparclite udp host");
     }
   else
     {
+#ifndef __GO32__
       struct hostent *he;
       struct sockaddr_in sockaddr;
       unsigned char buffer[100];
@@ -472,6 +483,9 @@ or: target sparclite udp host");
 
       if (cc < 3)
 	error ("SPARClite appears to be ill.");
+#else
+      error ("UDP downloading is not supported for DOS hosts.");
+#endif /* __GO32__ */
     }
 
   printf_unfiltered ("[SPARClite appears to be alive]\n");
@@ -489,9 +503,11 @@ sparclite_close (quitting)
 {
   if (serial_flag)
     close_tty (0);
+#ifndef __GO32__
   else
     if (udp_fd != -1)
       close (udp_fd);
+#endif
 }
 
 #define LOAD_ADDRESS 0x40000000
@@ -668,6 +684,8 @@ sparclite_serial_write (from_bfd, from_sec, from_addr, to_addr, len)
     error ("Bad checksum from load command (0x%x)", i);
 }
 
+#ifndef __GO32__
+
 static unsigned short
 calc_checksum (buffer, count)
      unsigned char *buffer;
@@ -780,14 +798,20 @@ sparclite_udp_write (from_bfd, from_sec, from_addr, to_addr, len)
     }
 }
 
+#endif /* __GO32__ */
+
 static void
 sparclite_download (filename, from_tty)
      char *filename;
      int from_tty;
 {
   if (!serial_flag)
+#ifndef __GO32__
     download (remote_target_name, filename, from_tty, sparclite_udp_write,
 	      sparclite_udp_start);
+#else
+    abort ();			/* sparclite_open should prevent this! */
+#endif
   else
     download (remote_target_name, filename, from_tty, sparclite_serial_write,
 	      sparclite_serial_start);
@@ -827,7 +851,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",  /* to_doc */
   0,				/* to_can_run */
   0,				/* to_notice_signals */
   0,				/* to_stop */
-  process_stratum,		/* to_stratum */
+  download_stratum,		/* to_stratum */
   0,				/* to_next */
   0,				/* to_has_all_memory */
   0,				/* to_has_memory */

@@ -419,12 +419,6 @@ int (*target_wait_hook) PARAMS ((int pid, struct target_waitstatus *status));
 void (*call_command_hook) PARAMS ((struct cmd_list_element *c, char *cmd,
 				   int from_tty));
 
-/* An alternate way to read memory for disassembly.  This is used to provide a
-   switch that allows disassembly to come from an exec file rather than a
-   remote target.  This is a speed hack.  */
-
-int (*dis_asm_read_memory_hook) PARAMS ((bfd_vma memaddr, bfd_byte *myaddr,
-					 int len, disassemble_info *info));
 /* Takes control from error ().  Typically used to prevent longjmps out of the
    middle of the GUI.  Usually used in conjunction with a catch routine.  */
 

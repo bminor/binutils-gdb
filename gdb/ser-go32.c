@@ -196,6 +196,7 @@ static struct dos_ttystate
 {
   int		base;
   int		irq;
+  int		refcnt;
   struct intrupt *intrupt;
   int		fifo;
   int		baudrate;
@@ -311,7 +312,7 @@ dos_comisr (irq)
 		    port->oflo++;
 		}
 
-	      if (dos_putc (c & 0x7f, port) < 0)
+	      if (dos_putc (c, port) < 0)
 		{
 		  COUNT (CNT_ORUN);
 		}
@@ -474,11 +475,11 @@ dos_open (scb, name)
 
   fd = name[3] - '1';
   port = &ports[fd];
-  if (port->intrupt)
+  if (port->refcnt++ > 0)
     {
-      /* already open (EBUSY not defined!) */
-      errno = EACCES;
-      return -1;
+      /* Device already opened another user.  Just point at it. */
+      scb->fd = fd;
+      return 0;
     }
 
   /* force access to ID reg */
@@ -559,6 +560,10 @@ dos_close (scb)
       return;
 
     port = &ports[scb->fd];
+
+    if (port->refcnt-- > 1)
+      return;
+
     if (!(intrupt = port->intrupt))
       return;
 

@@ -667,8 +667,6 @@ call_wrapper (clientData, interp, argc, argv)
 
       finish_saving_output ();	/* Restore stdout to normal */
 
-      dis_asm_read_memory_hook = 0; /* Restore disassembly hook */
-
       gdb_flush (gdb_stderr);	/* Flush error output */
 
       gdb_flush (gdb_stdout);	/* Sometimes error output comes here as well */
@@ -783,6 +781,16 @@ gdb_disassemble (clientData, interp, argc, argv)
 {
   CORE_ADDR pc, low, high;
   int mixed_source_and_assembly;
+  static disassemble_info di = {
+    (fprintf_ftype) fprintf_filtered, /* fprintf_func */
+    gdb_stdout,			/* stream */
+    NULL,			/* application_data */
+    0,				/* flags */
+    NULL,			/* private_data */
+    NULL,			/* read_memory_func */
+    dis_asm_memory_error,	/* memory_error_func */
+    dis_asm_print_address	/* print_address_func */
+    };
 
   if (argc != 3 && argc != 4)
     {
@@ -836,7 +844,9 @@ gdb_disassemble (clientData, interp, argc, argv)
       disassemble_from_exec = 1; /* It's remote, read the exec file */
 
   if (disassemble_from_exec)
-    dis_asm_read_memory_hook = gdbtk_dis_asm_read_memory;
+    di.read_memory_func = gdbtk_dis_asm_read_memory;
+  else
+    di.read_memory_func = dis_asm_read_memory;
 
   /* If just doing straight assembly, all we need to do is disassemble
      everything between low and high.  If doing mixed source/assembly, we've
@@ -940,7 +950,7 @@ gdb_disassemble (clientData, interp, argc, argv)
 	      fputs_unfiltered ("    ", gdb_stdout);
 	      print_address (pc, gdb_stdout);
 	      fputs_unfiltered (":\t    ", gdb_stdout);
-	      pc += print_insn (pc, gdb_stdout);
+	      pc += tm_print_insn (pc, &di);
 	      fputs_unfiltered ("\n", gdb_stdout);
 	    }
 	}
@@ -954,12 +964,10 @@ assembly_only:
 	  fputs_unfiltered ("    ", gdb_stdout);
 	  print_address (pc, gdb_stdout);
 	  fputs_unfiltered (":\t    ", gdb_stdout);
-	  pc += print_insn (pc, gdb_stdout);
+	  pc += tm_print_insn (pc, &di);
 	  fputs_unfiltered ("\n", gdb_stdout);
 	}
     }
-
-  dis_asm_read_memory_hook = 0;
 
   gdb_flush (gdb_stdout);
 

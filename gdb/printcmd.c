@@ -1,6 +1,6 @@
 /* Print values for GNU debugger GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1993, 1994
-             Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1993, 1994, 1995
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -111,77 +111,60 @@ static struct display *display_chain;
 
 static int display_number;
 
-/* Prototypes for local functions */
+/* Pointer to the target-dependent disassembly function.  */
 
-static void
-delete_display PARAMS ((int));
+int (*tm_print_insn) PARAMS ((bfd_vma, disassemble_info *));
 
-static void
-enable_display PARAMS ((char *, int));
+/* Prototypes for local functions.  */
 
-static void
-disable_display_command PARAMS ((char *, int));
+static void delete_display PARAMS ((int));
 
-static void
-disassemble_command PARAMS ((char *, int));
+static void enable_display PARAMS ((char *, int));
 
-static void
-printf_command PARAMS ((char *, int));
+static void disable_display_command PARAMS ((char *, int));
 
-static void
-print_frame_nameless_args PARAMS ((struct frame_info *, long, int, int,
-				   GDB_FILE *));
+static void disassemble_command PARAMS ((char *, int));
 
-static void
-display_info PARAMS ((char *, int));
+static void printf_command PARAMS ((char *, int));
 
-static void
-do_one_display PARAMS ((struct display *));
+static void print_frame_nameless_args PARAMS ((struct frame_info *, long,
+					       int, int, GDB_FILE *));
 
-static void
-undisplay_command PARAMS ((char *, int));
+static void display_info PARAMS ((char *, int));
 
-static void
-free_display PARAMS ((struct display *));
+static void do_one_display PARAMS ((struct display *));
 
-static void
-display_command PARAMS ((char *, int));
+static void undisplay_command PARAMS ((char *, int));
 
-static void
-x_command PARAMS ((char *, int));
+static void free_display PARAMS ((struct display *));
 
-static void
-address_info PARAMS ((char *, int));
+static void display_command PARAMS ((char *, int));
 
-static void
-set_command PARAMS ((char *, int));
+static void x_command PARAMS ((char *, int));
 
-static void
-output_command PARAMS ((char *, int));
+static void address_info PARAMS ((char *, int));
 
-static void
-call_command PARAMS ((char *, int));
+static void set_command PARAMS ((char *, int));
 
-static void
-inspect_command PARAMS ((char *, int));
+static void output_command PARAMS ((char *, int));
 
-static void
-print_command PARAMS ((char *, int));
+static void call_command PARAMS ((char *, int));
 
-static void
-print_command_1 PARAMS ((char *, int, int));
+static void inspect_command PARAMS ((char *, int));
 
-static void
-validate_format PARAMS ((struct format_data, char *));
+static void print_command PARAMS ((char *, int));
 
-static void
-do_examine PARAMS ((struct format_data, CORE_ADDR));
+static void print_command_1 PARAMS ((char *, int, int));
 
-static void
-print_formatted PARAMS ((value_ptr, int, int));
+static void validate_format PARAMS ((struct format_data, char *));
 
-static struct format_data
-decode_format PARAMS ((char **, int, int));
+static void do_examine PARAMS ((struct format_data, CORE_ADDR));
+
+static void print_formatted PARAMS ((value_ptr, int, int));
+
+static struct format_data decode_format PARAMS ((char **, int, int));
+
+static int print_insn PARAMS ((CORE_ADDR, GDB_FILE *));
 
 
 /* Decode a format specification.  *STRING_PTR should point to it.
@@ -246,22 +229,15 @@ decode_format (string_ptr, oformat, osize)
       case 'a':
       case 's':
 	/* Pick the appropriate size for an address.  */
-#if TARGET_PTR_BIT == 64
-	val.size = osize ? 'g' : osize;
-	break;
-#else /* Not 64 */
-#if TARGET_PTR_BIT == 32
-	val.size = osize ? 'w' : osize;
-	break;
-#else /* Not 32 */
-#if TARGET_PTR_BIT == 16
-	val.size = osize ? 'h' : osize;
-	break;
-#else /* Not 16 */
-	#error Bad value for TARGET_PTR_BIT
-#endif /* Not 16 */
-#endif /* Not 32 */
-#endif /* Not 64 */
+	if (TARGET_PTR_BIT == 64)
+	  val.size = osize ? 'g' : osize;
+	else if (TARGET_PTR_BIT == 32)
+	  val.size = osize ? 'w' : osize;
+	else if (TARGET_PTR_BIT == 16)
+	  val.size = osize ? 'h' : osize;
+	else
+	  /* Bad value for TARGET_PTR_BIT */
+	  abort ();
 	break;
       case 'f':
 	/* Floating point has to be word or giantword.  */
@@ -305,7 +281,7 @@ print_formatted (val, format, size)
     {
     case 's':
       next_address = VALUE_ADDRESS (val)
-	+ value_print (value_addr (val), gdb_stdout, format, Val_pretty_default);
+	+ val_print_string (VALUE_ADDRESS (val), 0, gdb_stdout);
       break;
 
     case 'i':
@@ -1500,10 +1476,11 @@ disable_display_command (args, from_tty)
 void
 print_variable_value (var, frame, stream)
      struct symbol *var;
-     FRAME frame;
+     struct frame_info *frame;
      GDB_FILE *stream;
 {
   value_ptr val = read_var_value (var, frame);
+
   value_print (val, stream, 0, Val_pretty_default);
 }
 
@@ -1656,7 +1633,7 @@ print_frame_args (func, fi, num, stream)
 	 we do not know.  We pass 2 as "recurse" to val_print because our
 	 standard indentation here is 4 spaces, and val_print indents
 	 2 for each recurse.  */
-      val = read_var_value (sym, FRAME_INFO_ID (fi));
+      val = read_var_value (sym, fi);
 
       annotate_arg_value (val == NULL ? NULL : VALUE_TYPE (val));
 
@@ -1692,6 +1669,7 @@ print_frame_args (func, fi, num, stream)
    of the first nameless arg, and NUM is the number of nameless args to
    print.  FIRST is nonzero if this is the first argument (not just
    the first nameless arg).  */
+
 static void
 print_frame_nameless_args (fi, start, num, first, stream)
      struct frame_info *fi;
@@ -2074,6 +2052,33 @@ disassemble_command (arg, from_tty)
   gdb_flush (gdb_stdout);
 }
 
+/* Print the instruction at address MEMADDR in debugged memory,
+   on STREAM.  Returns length of the instruction, in bytes.  */
+
+static int
+print_insn (memaddr, stream)
+     CORE_ADDR memaddr;
+     GDB_FILE *stream;
+{
+  disassemble_info info;
+
+#define GDB_INIT_DISASSEMBLE_INFO(INFO, STREAM) \
+  (INFO).fprintf_func = (fprintf_ftype)fprintf_filtered, \
+  (INFO).stream = (STREAM), \
+  (INFO).read_memory_func = dis_asm_read_memory, \
+  (INFO).memory_error_func = dis_asm_memory_error, \
+  (INFO).print_address_func = dis_asm_print_address, \
+  (INFO).insn_info_valid = 0
+
+  GDB_INIT_DISASSEMBLE_INFO(info, stream);
+
+  /* If there's no disassembler, something is very wrong.  */
+  if (tm_print_insn == NULL)
+    abort ();
+
+  return (*tm_print_insn) (memaddr, &info);
+}
+
 
 void
 _initialize_printcmd ()
@@ -2084,17 +2089,17 @@ _initialize_printcmd ()
 	   "Describe where variable VAR is stored.");
 
   add_com ("x", class_vars, x_command,
-	   "Examine memory: x/FMT ADDRESS.\n\
+	   concat ("Examine memory: x/FMT ADDRESS.\n\
 ADDRESS is an expression for the memory address to examine.\n\
 FMT is a repeat count followed by a format letter and a size letter.\n\
 Format letters are o(octal), x(hex), d(decimal), u(unsigned decimal),\n\
-  t(binary), f(float), a(address), i(instruction), c(char) and s(string).\n\
-Size letters are b(byte), h(halfword), w(word), g(giant, 8 bytes).\n\
+  t(binary), f(float), a(address), i(instruction), c(char) and s(string).\n",
+"Size letters are b(byte), h(halfword), w(word), g(giant, 8 bytes).\n\
 The specified number of objects of the specified size are printed\n\
 according to the format.\n\n\
 Defaults for format and size letters are those previously used.\n\
 Default count is 1.  Default address is following last thing printed\n\
-with this command or \"print\".");
+with this command or \"print\".", NULL));
 
   add_com ("disassemble", class_vars, disassemble_command,
 	   "Disassemble a specified section of memory.\n\
@@ -2125,7 +2130,8 @@ Do \"info display\" to see current list of code numbers.",
 as in the \"x\" command, and then EXP is used to get the address to examine\n\
 and examining is done as in the \"x\" command.\n\n\
 With no argument, display all currently requested auto-display expressions.\n\
-Use \"undisplay\" to cancel display requests previously made.");
+Use \"undisplay\" to cancel display requests previously made."
+);
 
   add_cmd ("display", class_vars, enable_display, 
 	   "Enable some expressions to be displayed when program stops.\n\
@@ -2148,19 +2154,20 @@ Do \"info display\" to see current list of code numbers.", &deletelist);
   add_com ("printf", class_vars, printf_command,
 	"printf \"printf format string\", arg1, arg2, arg3, ..., argn\n\
 This is useful for formatted output in user-defined commands.");
+
   add_com ("output", class_vars, output_command,
 	   "Like \"print\" but don't put in value history and don't print newline.\n\
 This is useful in user-defined commands.");
 
   add_prefix_cmd ("set", class_vars, set_command,
-"Evaluate expression EXP and assign result to variable VAR, using assignment\n\
+concat ("Evaluate expression EXP and assign result to variable VAR, using assignment\n\
 syntax appropriate for the current language (VAR = EXP or VAR := EXP for\n\
 example).  VAR may be a debugger \"convenience\" variable (names starting\n\
 with $), a register (a few standard names starting with $), or an actual\n\
-variable in the program being debugged.  EXP is any valid expression.\n\
-Use \"set variable\" for variables with names identical to set subcommands.\n\
+variable in the program being debugged.  EXP is any valid expression.\n",
+"Use \"set variable\" for variables with names identical to set subcommands.\n\
 \nWith a subcommand, this command modifies parts of the gdb environment.\n\
-You can see these environment settings with the \"show\" command.",
+You can see these environment settings with the \"show\" command.", NULL),
                   &setlist, "set ", 1, &cmdlist);
 
   /* "call" is the same as "set", but handy for dbx users to call fns. */
@@ -2186,8 +2193,8 @@ stack frame, plus all those whose scope is global or an entire file.\n\
 \n\
 $NUM gets previous value number NUM.  $ and $$ are the last two values.\n\
 $$NUM refers to NUM'th value back from the last one.\n\
-Names starting with $ refer to registers (with the values they would have\n\
-if the program were to return to the stack frame now selected, restoring\n\
+Names starting with $ refer to registers (with the values they would have\n",
+"if the program were to return to the stack frame now selected, restoring\n\
 all registers saved by frames farther in) or else to debugger\n\
 \"convenience\" variables (any such name not a known register).\n\
 Use assignment expressions to give values to convenience variables.\n",
@@ -2220,8 +2227,8 @@ environment, the value is printed in its own window.");
 		   &setprintlist),
       &showprintlist);
 
-  examine_b_type = init_type (TYPE_CODE_INT, 1, 0, NULL, NULL);
-  examine_h_type = init_type (TYPE_CODE_INT, 2, 0, NULL, NULL);
-  examine_w_type = init_type (TYPE_CODE_INT, 4, 0, NULL, NULL);
-  examine_g_type = init_type (TYPE_CODE_INT, 8, 0, NULL, NULL);
+  examine_b_type = init_type (TYPE_CODE_INT, 1, 0, "examine_b_type", NULL);
+  examine_h_type = init_type (TYPE_CODE_INT, 2, 0, "examine_h_type", NULL);
+  examine_w_type = init_type (TYPE_CODE_INT, 4, 0, "examine_w_type", NULL);
+  examine_g_type = init_type (TYPE_CODE_INT, 8, 0, "examine_g_type", NULL);
 }
