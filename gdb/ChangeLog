@@ -1,3 +1,68 @@
+Thu Apr 18 18:08:30 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* symfile.c (clear_symtab_users_once, cashier_psymtab,
+	free_named_symtabs):  Move these routines from symmisc.c.
+	(free_symtab):  Make non-static.
+	* symmisc.c (same):  same.
+	* symtab.c (free_symtab):  Declare as exported void fn now.
+	* dbxread.c (end_symtab, end_psymtab):  Change comments.
+	(initialize_dbxread):  Call dbx_new_init() in case the first
+	command is add-symbols.
+	* target.c (dummy_target):  Permit add_syms_addr_command.
+
+Sat Apr 13 14:46:07 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	Permit symbols to be superseded when new symbol files have
+	been read in, particularly for VxWorks.
+
+	* dbxread.c (read_dbx_symtab): Allow N_SOL to cleanly take us back
+	to the main file, as well as to include files.  Also, put global
+	functions into the global psymtab, to make "i fun" work.
+	(end_psymtab):  Free named symtabs and psymtabs for a file, once a
+	new psymtab for it has been read.
+	* coffread.c (end_psymtab):  Free named symtabs and psymtabs for
+	a file, once a new symtab has been read for it.
+	* mipsread.c:  FIXME.  We need to do the same for MIPS, but it
+	looks harder to determine the top-level block before it's been
+	queued to the psymtab list.	
+
+	* symfile.c (symbol_file_add):  Use filtered printing and wrap it.
+	If we have wiped out any old symbol tables, clean up at end of
+	symbol reading.
+	(symbol_file_command):  Don't reference symfile_fns if it's zero.
+
+	* symtab.h (GLOBAL_BLOCK, STATIC_BLOCK, FIRST_LOCAL_BLOCK):  New
+	defines for the blocks of a blockvector that contain global and
+	file-static symbols and the first of the smaller scope contours. 
+	* symtab.c (lookup_symbol, find_pc_symtab, find_pc_line,
+	decode_line_1, make_symbol_completion_list):  Use the above.
+	* coffread.c (end_symtab, patch_opaque_types):  Ditto.
+	* dbxread.c (end_symtab):  Ditto.
+	* expread.y (block):  Ditto.
+	* mipsread.c (throughout):  Ditto.
+	* symmisc.c (free_named_symtabs):  Ditto.
+
+	* symtab.c (list_symbols):  Process the first symbol of the
+	static psymbols list.
+	(types_info):  Restore this function from its untimely #if 0.
+	It's not perfect, but it is better than nothing.
+	(_initialize_symtab):  Restore "info types".
+
+Thu Apr 11 05:23:19 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* m68k-stub.c:  Remote stub for 680x0's, created from
+	rem-m68k.shar (which is removed).
+	* nindy-share/{Makefile,Onindy.c,blout.h,env.h,nindy.c,ttyflush.c}:
+	Remove RCS log stuff now that we use CVS and it blows our diffs.
+
+Wed Apr 10 14:18:06 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* symmisc.c (free_named_symtab):  Make it work, in its current
+	kludgy fashion.  Change result to indicate if we blew away bkpts.
+	* dbxread.c (end_symtab):  Accumulate result from
+	free_named_symtab and print warning if we blew user's state.
+	* symfile.h:  free_named_symtab now returns an int.
+
 Mon Apr  8 23:57:43 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* dbxread.c (dbx_symfile_read):  Initialize psymbol list if this
