@@ -1238,9 +1238,11 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 
   for (; stab < (indexentry+1)->stab; stab += STABSIZE)
     {
-      boolean done;
+      boolean done, saw_line, saw_func;
       bfd_vma val;
 
+      saw_line = false;
+      saw_func = false;
       done = false;
 
       switch (stab[TYPEOFF])
@@ -1261,7 +1263,11 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 	  /* A line number.  The value is relative to the start of the
              current function.  */
 	  val = indexentry->val + bfd_get_32 (abfd, stab + VALOFF);
-	  if (val <= offset)
+	  /* If this line starts before our desired offset, or if it's
+	     the first line we've been able to find, use it.  The
+	     !saw_line check works around a bug in GCC 2.95.3, which emits
+	     the first N_SLINE late.  */
+	  if (!saw_line || val <= offset)
 	    {
 	      *pline = bfd_get_16 (abfd, stab + DESCOFF);
 
@@ -1274,11 +1280,14 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 	    }
 	  if (val > offset)
 	    done = true;
+	  saw_line = true;
 	  break;
 
 	case N_FUN:
 	case N_SO:
-	  done = true;
+	  if (saw_func || saw_line)
+	    done = true;
+	  saw_func = true;
 	  break;
 	}
 

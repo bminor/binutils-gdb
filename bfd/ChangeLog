@@ -1,3 +1,16 @@
+2002-03-20  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2.c (struct funcinfo): Move up.
+	(lookup_address_in_function_table): New argument function_ptr.
+	Set it.
+	(lookup_address_in_line_table): New argument function.  If function
+	is non-NULL, use it to handle ``addr'' before the first line note of
+	the function.
+	(comp_unit_find_nearest_line): Update and swap calls to
+	lookup_address_in_function_table and lookup_address_in_line_table.
+	* syms.c (_bfd_stab_section_find_nearest_line): Use the first
+	N_SLINE encountered if we see an N_FUN before any N_SLINE.
+
 2002-03-20  Tom Rix  <trix@redhat.com>
 
 	* coff-rs6000.c (_bfd_xcoff_stat_arch_elt): Renamed from 
