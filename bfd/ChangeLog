@@ -1,3 +1,26 @@
+Sat Feb 27 00:44:24 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* aoutf1.c (sunos4_reloc_type_lookup): Unused; deleted.
+	(MY_set_sizes): Use sunos4_set_sizes.
+
+	* elf32.c: Renamed from elf.c.  Several CPU-specific functions
+	deleted, as well as elf-big and elf-little targets.
+	* libelf.h: New file.
+	* elf32-sparc.c, elf32-i386.c, elf32-i860.c, elf32-m68k.c: New
+	files, new targets.
+	* Makefile.in, config/*-elf.mt, targets.c: Adjusted.
+
+	* i386linux.c (TARGETNAME): Use hyphens instead of parentheses.
+
+	* coffcode.h (coff_compute_section_file_positions): Don't need
+	variable "old_sofar" if compiling for i960.
+
+	* reloc.c (bfd_default_reloc_type_lookup): First argument is now a
+	bfd pointer.
+	* libbfd.h: Updated.
+
+	* ieee.c (exten, envi): "static" belongs first in declaration.
+
 Fri Feb 26 17:37:34 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* srec.c: add support for symbolsrec, srecords with symbols in
