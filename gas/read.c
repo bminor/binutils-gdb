@@ -15,8 +15,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GAS; see the file COPYING.  If not, write to
-the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+along with GAS; see the file COPYING.  If not, write to the Free
+Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+02111-1307, USA. */
 
 #if 0
 #define MASK_CHAR (0xFF)	/* If your chars aren't 8 bits, you will
@@ -526,13 +527,15 @@ read_a_source_file (name)
 		    {
 		      char *line_start = input_line_pointer;
 		      char c;
+		      int mri_line_macro;
 
 		      HANDLE_CONDITIONAL_ASSEMBLY ();
 
 		      c = get_symbol_end ();
 
-		      /* In MRI mode, the EQU pseudoop must be
-			 handled specially.  */
+		      /* In MRI mode, the EQU and MACRO pseudoops must
+			 be handled specially.  */
+		      mri_line_macro = 0;
 		      if (flag_m68k_mri)
 			{
 			  char *rest = input_line_pointer + 1;
@@ -549,9 +552,23 @@ read_a_source_file (name)
 			      equals (line_start);
 			      continue;
 			    }
+			  if (strncasecmp (rest, "MACRO", 5) == 0
+			      && (rest[5] == ' '
+				  || rest[5] == '\t'
+				  || is_end_of_line[(unsigned char) rest[5]]))
+			    mri_line_macro = 1;
 			}
 
-		      line_label = colon (line_start);
+		      /* In MRI mode, we need to handle the MACRO
+                         pseudo-op specially: we don't want to put the
+                         symbol in the symbol table.  */
+		      if (! mri_line_macro)
+			line_label = colon (line_start);
+		      else
+			line_label = symbol_create (line_start,
+						    absolute_section,
+						    (valueT) 0,
+						    &zero_address_frag);
 
 		      *input_line_pointer = c;
 		      if (c == ':')

@@ -1,3 +1,8 @@
+Thu Jan  9 09:08:43 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* read.c (read_a_source_file): When defining a macro in MRI mode,
+	don't add the symbol to the symbol table.
+
 Tue Jan  7 11:21:42 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.c (tc_gen_reloc): Handle sym1-sym2 fixups
