@@ -114,6 +114,8 @@ tc-tahoe.c
 tc-tahoe.h
 tc-vax.c
 tc-vax.h
+tc-w65.c
+tc-w65.h
 tc-z8k.c
 tc-z8k.h
 te-386bsd.h
@@ -137,6 +139,7 @@ te-sun3.h
 te-sysv32.h
 vax-inst.h
 vms-conf.h
+w65.mt
 z8k.mt
 
 Things-to-lose:
