@@ -1,4 +1,14 @@
 2001-09-24  Charles Wilson  <cwilson@ece.gatech.edu>
+
+	* ld.texinfo(enable-auto-import): Clarify the explanation.
+
+2001-09-24  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* pe-dll.c (pe_create_import_fixup): Revert previous patch.
+	* emultemp/pe.em (pe_data_import_dll): Move definition outside of
+	DLL_SUPPORT controlled code.
+
+2001-09-24  Charles Wilson  <cwilson@ece.gatech.edu>
  
 	* emultempl/pe.em(pe_data_import_dll): Make static.
 	(pe_get_data_import_dll_name): New accessor function.

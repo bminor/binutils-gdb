@@ -1738,8 +1738,14 @@ This message occurs when some (sub)expression accesses an address
 ultimately given by the sum of two constants (Win32 import tables only 
 allow one).  Instances where this may occur include accesses to member 
 fields of struct variables imported from a DLL, as well as using a 
-constant index into an array variable imported from a DLL.  There are
-several ways to address this difficulty.
+constant index into an array variable imported from a DLL.  Any 
+multiword variable (arrays, structs, long long, etc) may trigger
+this error condition.  However, regardless of the exact data type
+of the offending exported variable, ld will always detect it, issue
+the warning, and exit.
+
+There are several ways to address this difficulty, regardless of the
+data type of the exported variable:
 
 One solution is to force one of the 'constants' to be a variable -- 
 that is, unknown and un-optimizable at compile time.  For arrays, 
@@ -1760,7 +1766,8 @@ extern_array[1] -->
    @{ volatile int t=1; extern_array[t] @}
 @end example
 
-For structs, the only option is to make the struct itself variable:
+For structs (and most other multiword data types) the only option 
+is to make the struct itself (or the long long, or the ...) variable:
 
 @example
 extern struct s extern_struct;
