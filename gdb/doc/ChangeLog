@@ -1,3 +1,11 @@
+2003-02-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Set Breaks): Add cross reference to "set remote
+	hardware-breakpoint-limit".
+	(Set Watchpoints): Add cross reference to "set remote
+	hardware-watchpoint-limit".
+	(Remote configuration options): New section.
+
 2003-02-04  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete

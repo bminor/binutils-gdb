@@ -2514,6 +2514,8 @@ example, on the DSU, only two data breakpoints can be set at a time, and
 @value{GDBN} will reject this command if more than two are used.  Delete
 or disable unused hardware breakpoints before setting new ones
 (@pxref{Disabling, ,Disabling}).  @xref{Conditions, ,Break conditions}.
+@xref{set remote hardware-breakpoint-limit}.
+
 
 @kindex thbreak
 @item thbreak @var{args}
@@ -2749,6 +2751,8 @@ software watchpoints as usual.  However, @value{GDBN} may not notice
 when a non-current thread's activity changes the expression.  (Hardware
 watchpoints, in contrast, watch an expression in all threads.)
 @end quotation
+
+@xref{set remote hardware-watchpoint-limit}.
 
 @node Set Catchpoints
 @subsection Setting catchpoints
@@ -10352,6 +10356,7 @@ is supported other than to try it.
 @menu
 * Server::	                Using the gdbserver program
 * NetWare::                     Using the gdbserve.nlm program
+* Remote configuration::        Remote configuration
 * remote stub::                 Implementing a remote stub
 @end menu
 
@@ -10522,6 +10527,23 @@ argument is a device name (usually a serial device, like
 
 @noindent
 communications with the server via serial line @file{/dev/ttyb}.
+@end table
+
+@node Remote configuration
+@section Remote configuration
+
+The following configuration options are available when debugging remote
+programs:
+
+@table @code
+@kindex set remote hardware-watchpoint-limit
+@kindex set remote hardware-breakpoint-limit
+@anchor{set remote hardware-watchpoint-limit}
+@anchor{set remote hardware-breakpoint-limit}
+@item set remote hardware-watchpoint-limit @var{limit}
+@itemx set remote hardware-breakpoint-limit @var{limit}
+Restrict @value{GDBN} to using @var{limit} remote hardware breakpoint or
+watchpoints.  A limit of -1, the default, is treated as unlimited.
 @end table
 
 @node remote stub

@@ -1,3 +1,12 @@
+2003-02-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* remote.c (_initialize_remote): Add commands "set/show remote
+	hardware-watchpoint-limit" and "set/show remote
+	hardware-breakpoint-limit".
+	(remote_hw_watchpoint_limit): Initialize to -1.
+	(remote_hw_breakpoint_limit): Ditto.
+	(remote_check_watch_resources): Treat a limit of -1 as unlimited.
+
 2003-02-19  Raoul Gough  <RaoulGough@yahoo.co.uk>
 
 	* coff-pe-read.c: New file - support reading of minimal symbols from a
