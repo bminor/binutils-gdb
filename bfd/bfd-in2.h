@@ -708,6 +708,16 @@ extern boolean bfd_arm_process_before_allocation
 extern boolean bfd_arm_get_bfd_for_interworking
   PARAMS ((bfd *, struct bfd_link_info *));
 
+/* ELF ARM Interworking support.  Called from linker.  */
+  extern boolean bfd_elf32_arm_allocate_interworking_sections
+    PARAMS ((struct bfd_link_info *));
+ 
+  extern boolean bfd_elf32_arm_process_before_allocation
+    PARAMS ((bfd *, struct bfd_link_info *));
+ 
+  extern boolean bfd_elf32_arm_get_bfd_for_interworking
+    PARAMS ((bfd *, struct bfd_link_info *));
+
 /* And more from the source.  */
 void 
 bfd_init PARAMS ((void));
@@ -1246,7 +1256,7 @@ enum bfd_architecture
 #define bfd_mach_mips4900              4900
   /* end-sanitize-tx49 */
 #define bfd_mach_mips5000              5000
-  /* start-sanitize-cygnus */ /* CYGNUS LOCAL vr5400/raeburn */
+  /* start-sanitize-cygnus */
 #define bfd_mach_mips5400              5400
   /* end-sanitize-cygnus */
   /* start-sanitize-r5900 */
@@ -1294,6 +1304,9 @@ enum bfd_architecture
 #define bfd_mach_sh3e       0x3e
 #define bfd_mach_sh4        0x40
   bfd_arch_alpha,      /* Dec Alpha */
+#define bfd_mach_alpha_ev4  0x10
+#define bfd_mach_alpha_ev5  0x20
+#define bfd_mach_alpha_ev6  0x30
   bfd_arch_arm,        /* Advanced Risc Machines ARM */
 #define bfd_mach_arm_2         1
 #define bfd_mach_arm_2a                2
