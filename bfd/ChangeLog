@@ -1,3 +1,25 @@
+2001-02-09  David Mosberger  <davidm@hpl.hp.com>
+
+	* elfxx-ia64.c (is_unwind_section_name): New function.  Returns
+	true if section name is an unwind table section name.
+	(elfNN_ia64_additional_program_headers): Count each unwind section
+	separately.
+	(elfNN_ia64_modify_segment_map): Install one unwind program header
+	for each unwind separate section.  Note: normally the linker
+	script merges the unwind sections that go into a single segment,
+	so this still generates at most one unwind program header per
+	segment.
+
+	* elfxx-ia64.c (elfNN_ia64_section_from_shdr): Accept any section
+	name for SHT_IA_64_UNWIND, not just .IA_64.unwind.
+	(elfNN_ia64_fake_sections): Mark sections with names that start
+	with .IA_64.unwind but not with .IA_64.unwind_info as an IA-64
+	unwind section.
+
+	* elfxx-ia64.c (elfNN_ia64_final_write_processing): New function.
+	Use it to make sh_info in unwind section point to the text section
+	it applies to.
+
 2001-02-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* Makefile.am: Add linux target for S/390.
@@ -66,7 +88,7 @@
 	* libbfd-in.h (bfd_target_vector): Change extern array to pointer.
 	* libbfd.h (bfd_target_vector): Likewise.
 	* targets.c (bfd_target_vector): Rename to _bfd_target_vector and
-        make static; create pointer reference named bfd_target_vector.
+	make static; create pointer reference named bfd_target_vector.
 	(_bfd_target_vector_entries): Calculate this based on the array
 	typed _bfd_target_vector.
 

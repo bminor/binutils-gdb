@@ -1,5 +1,5 @@
 /* IA-64 support for 64-bit ELF
-   Copyright 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -157,10 +157,14 @@ static void elfNN_ia64_info_to_howto
 static boolean elfNN_ia64_relax_section
   PARAMS((bfd *abfd, asection *sec, struct bfd_link_info *link_info,
 	  boolean *again));
+static boolean is_unwind_section_name
+  PARAMS ((const char *));
 static boolean elfNN_ia64_section_from_shdr
   PARAMS ((bfd *, ElfNN_Internal_Shdr *, char *));
 static boolean elfNN_ia64_fake_sections
   PARAMS ((bfd *abfd, ElfNN_Internal_Shdr *hdr, asection *sec));
+static void elfNN_ia64_final_write_processing
+  PARAMS ((bfd *abfd, boolean linker));
 static boolean elfNN_ia64_add_symbol_hook
   PARAMS ((bfd *abfd, struct bfd_link_info *info, const Elf_Internal_Sym *sym,
 	   const char **namep, flagword *flagsp, asection **secp,
@@ -900,6 +904,20 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
   return false;
 }
 
+/* Return true if NAME is an unwind table section name.  */
+
+static inline boolean
+is_unwind_section_name (name)
+	const char *name;
+{
+  size_t len1, len2;
+
+  len1 = sizeof (ELF_STRING_ia64_unwind) - 1;
+  len2 = sizeof (ELF_STRING_ia64_unwind_info) - 1;
+  return (strncmp (name, ELF_STRING_ia64_unwind, len1) == 0
+	  && strncmp (name, ELF_STRING_ia64_unwind_info, len2) != 0);
+}
+
 /* Handle an IA-64 specific section when reading an object file.  This
    is called when elfcode.h finds a section with an unknown type.  */
 
@@ -919,8 +937,6 @@ elfNN_ia64_section_from_shdr (abfd, hdr, name)
   switch (hdr->sh_type)
     {
     case SHT_IA_64_UNWIND:
-      if (strcmp (name, ELF_STRING_ia64_unwind) != 0)
-	return false;
       break;
 
     case SHT_IA_64_EXT:
@@ -968,8 +984,13 @@ elfNN_ia64_fake_sections (abfd, hdr, sec)
 
   name = bfd_get_section_name (abfd, sec);
 
-  if (strcmp (name, ELF_STRING_ia64_unwind) == 0)
-    hdr->sh_type = SHT_IA_64_UNWIND;
+  if (is_unwind_section_name (name))
+    {
+      /* We don't have the sections numbered at this point, so sh_info
+	 is set later, in elfNN_ia64_final_write_processing.  */
+      hdr->sh_type = SHT_IA_64_UNWIND;
+      hdr->sh_flags |= SHF_LINK_ORDER;
+    }
   else if (strcmp (name, ELF_STRING_ia64_archext) == 0)
     hdr->sh_type = SHT_IA_64_EXT;
   else if (strcmp (name, ".reloc") == 0)
@@ -997,6 +1018,58 @@ elfNN_ia64_fake_sections (abfd, hdr, sec)
     hdr->sh_flags |= SHF_IA_64_SHORT;
 
   return true;
+}
+
+/* The final processing done just before writing out an IA-64 ELF
+   object file.  */
+
+static void
+elfNN_ia64_final_write_processing (abfd, linker)
+     bfd *abfd;
+     boolean linker ATTRIBUTE_UNUSED;
+{
+  Elf_Internal_Shdr *hdr;
+  const char *sname;
+  asection *text_sect, *s;
+  size_t len;
+
+  for (s = abfd->sections; s; s = s->next)
+    {
+      hdr = &elf_section_data (s)->this_hdr;
+      switch (hdr->sh_type)
+	{
+	case SHT_IA_64_UNWIND:
+	  /* See comments in gas/config/tc-ia64.c:dot_endp on why we
+	     have to do this.  */
+	  sname = bfd_get_section_name (abfd, s);
+	  len = sizeof (ELF_STRING_ia64_unwind) - 1;
+	  if (sname && strncmp (sname, ELF_STRING_ia64_unwind, len) == 0)
+	    {
+	      sname += len;
+
+	      if (sname[0] == '\0')
+		/* .IA_64.unwind -> .text */
+		text_sect = bfd_get_section_by_name (abfd, ".text");
+	      else
+		/* .IA_64.unwindFOO -> FOO */
+		text_sect = bfd_get_section_by_name (abfd, sname);
+	    }
+	  else
+	    /* last resort: fall back on .text */
+	    text_sect = bfd_get_section_by_name (abfd, ".text");
+
+	  if (text_sect)
+	    {
+	      /* The IA-64 processor-specific ABI requires setting
+		 sh_link to the unwind section, whereas HP-UX requires
+		 sh_info to do so.  For maximum compatibility, we'll
+		 set both for now... */
+	      hdr->sh_link = elf_section_data (text_sect)->this_idx;
+	      hdr->sh_info = elf_section_data (text_sect)->this_idx;
+	    }
+	  break;
+	}
+    }
 }
 
 /* Hook called by the linker routine which adds symbols from an object
@@ -1052,10 +1125,10 @@ elfNN_ia64_additional_program_headers (abfd)
   if (s && (s->flags & SEC_LOAD))
     ++ret;
 
-  /* See if we need a PT_IA_64_UNWIND segment.  */
-  s = bfd_get_section_by_name (abfd, ELF_STRING_ia64_unwind);
-  if (s && (s->flags & SEC_LOAD))
-    ++ret;
+  /* Count how many PT_IA_64_UNWIND segments we need.  */
+  for (s = abfd->sections; s; s = s->next)
+    if (is_unwind_section_name(s->name) && (s->flags & SEC_LOAD))
+      ++ret;
 
   return ret;
 }
@@ -1065,6 +1138,7 @@ elfNN_ia64_modify_segment_map (abfd)
      bfd *abfd;
 {
   struct elf_segment_map *m, **pm;
+  Elf_Internal_Shdr *hdr;
   asection *s;
 
   /* If we need a PT_IA_64_ARCHEXT segment, it must come before
@@ -1097,29 +1171,36 @@ elfNN_ia64_modify_segment_map (abfd)
 	}
     }
 
-  /* Install the PT_IA_64_UNWIND segment, if needed.  */
-  s = bfd_get_section_by_name (abfd, ELF_STRING_ia64_unwind);
-  if (s && (s->flags & SEC_LOAD))
+  /* Install PT_IA_64_UNWIND segments, if needed.  */
+  for (s = abfd->sections; s; s = s->next)
     {
-      for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
-	if (m->p_type == PT_IA_64_UNWIND)
-	  break;
-      if (m == NULL)
+      hdr = &elf_section_data (s)->this_hdr;
+      if (hdr->sh_type != SHT_IA_64_UNWIND)
+	continue;
+
+      if (s && (s->flags & SEC_LOAD))
 	{
-	  m = (struct elf_segment_map *) bfd_zalloc (abfd, sizeof *m);
+	  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+	    if (m->p_type == PT_IA_64_UNWIND && m->sections[0] == s)
+	      break;
+
 	  if (m == NULL)
-	    return false;
+	    {
+	      m = (struct elf_segment_map *) bfd_zalloc (abfd, sizeof *m);
+	      if (m == NULL)
+		return false;
 
-	  m->p_type = PT_IA_64_UNWIND;
-	  m->count = 1;
-	  m->sections[0] = s;
-	  m->next = NULL;
+	      m->p_type = PT_IA_64_UNWIND;
+	      m->count = 1;
+	      m->sections[0] = s;
+	      m->next = NULL;
 
-	  /* We want to put it last.  */
-	  pm = &elf_tdata (abfd)->segment_map;
-	  while (*pm != NULL)
-	    pm = &(*pm)->next;
-	  *pm = m;
+	      /* We want to put it last.  */
+	      pm = &elf_tdata (abfd)->segment_map;
+	      while (*pm != NULL)
+		pm = &(*pm)->next;
+	      *pm = m;
+	    }
 	}
     }
 
@@ -4069,6 +4150,8 @@ elfNN_ia64_print_private_bfd_data (abfd, ptr)
 	elfNN_ia64_section_flags
 #define elf_backend_fake_sections \
 	elfNN_ia64_fake_sections
+#define elf_backend_final_write_processing \
+	elfNN_ia64_final_write_processing
 #define elf_backend_add_symbol_hook \
 	elfNN_ia64_add_symbol_hook
 #define elf_backend_additional_program_headers \
