@@ -1,3 +1,9 @@
+2003-08-21  Nick Clifton  <nickc@redhat.com>
+
+	* frv.cpu (mbtoh): Replace input parameter to u-media-dual-expand
+	and u-media-dual-btoh with output parameter.
+	(cmbtoh): Add profiling hack.
+
 2003-08-19  Michael Snyder  <msnyder@redhat.com>
 
 	* frv.cpu: Fix typo, Frintkeven -> FRintkeven

@@ -7962,9 +7962,9 @@
 	       (set FRintkeven (c-raw-call SI "frv_ref_SI" FRintkeven))
 	       (mbtoh-semantics 1))
      ((fr400 (unit u-media-dual-expand
-		   (in FRinti FRintieven)))
+		   (out FRintk FRintkeven)))
       (fr500 (unit u-media-dual-btoh
-		   (in FRinti FRintieven))))
+		   (out FRintk FRintkeven))))
 )
 
 (dni cmbtoh
@@ -7972,7 +7972,11 @@
      ((UNIT FM01) (FR500-MAJOR M-2) (FR400-MAJOR M-2) CONDITIONAL)
      "cmbtoh$pack $FRintj,$FRintkeven,$CCi,$cond"
      (+ pack FRintkeven OP_77 (FRi-null) CCi cond OPE4_0 FRintj)
-     (mbtoh-semantics (eq CCi (or cond 2)))
+     (sequence ()
+	       ; hack to get these referenced for profiling
+	       (set FRintj (c-raw-call SI "frv_ref_SI" FRintj))
+	       (set FRintkeven (c-raw-call SI "frv_ref_SI" FRintkeven))
+	       (mbtoh-semantics (eq CCi (or cond 2))))
      ((fr400 (unit u-media-dual-expand
 		   (out FRintk FRintkeven)))
       (fr500 (unit u-media-dual-btoh
