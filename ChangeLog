@@ -1,5 +1,8 @@
 Thu Dec  2 14:35:54 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* configure.in: Don't build ld for Irix 5.  Don't build gas,
+	libg++ or libio for any Alpha target.
+
 	* configure.in (mips*-sgi-irix5*): New target; use mh-irix5.
 	* config/mh-irix5. New file for Irix 5.
 

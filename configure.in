@@ -177,6 +177,9 @@ case "${target}" in
   alpha-dec-osf1*)
     noconfigdirs="$noconfigdirs gas emacs fileutils grep libg++ libio"
     ;;	
+  alpha*-*-*)
+    noconfigdirs="$noconfigdirs gas libg++ libio"
+    ;;    
   h8300*-*-* | \
   h8500-*-*)
     noconfigdirs="$noconfigdirs libg++ libio"
@@ -235,7 +238,11 @@ case "${target}" in
   m68k-apollo-*)
     noconfigdirs="$noconfigdirs ld binutils gprof"
     ;;
-  mips-*-*)
+  mips*-*-irix5*)
+    # The GNU linker does not support shared libraries.
+    noconfigdirs="$noconfigdirs ld gprof"
+    ;;
+  mips*-*-*)
     noconfigdirs="$noconfigdirs gprof"
     ;;
   sh-*-*)
