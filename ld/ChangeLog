@@ -1,3 +1,12 @@
+Wed Aug 26 17:28:51 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* ldlang.c (lang_process): don't pass null pointers when
+	abs_output_section is what is required.
+	* ldwrite.c (ldwrite): use malloc to allocate the largest space
+	used, and pass that down.
+	* relax.c,relax.h (write_relaxnorel): use the passed malloc area rather
+	than alloca. 
+	
 Mon Aug 24 14:42:06 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure.in, config/ose68.mt: renamed OSE to ose.

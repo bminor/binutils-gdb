@@ -1,4 +1,4 @@
-void  EXFUN(write_relaxnorel,( bfd *output_bfd));
+void  EXFUN(write_relaxnorel,( bfd *output_bfd, PTR data));
 boolean EXFUN(relax_section,( lang_statement_union_type **this_ptr));
 
 

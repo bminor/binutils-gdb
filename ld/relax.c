@@ -27,8 +27,9 @@ DEFUN(build_it,(statement),
       lang_statement_union_type *statement)
 {
   switch (statement->header.type) {
-    {
 #if 0
+    {
+
       bfd_byte play_area[SHORT_SIZE];
       unsigned int i;
       bfd_putshort(output_bfd, statement->fill_statement.fill, play_area);
@@ -55,10 +56,11 @@ DEFUN(build_it,(statement),
 				   1);
 
 	}
-#endif
+
       abort();
     }
     break;
+#endif
   case lang_data_statement_enum:
 #if 0
     {
@@ -147,8 +149,9 @@ DEFUN(build_it,(statement),
 
 
 void 
-DEFUN(write_relaxnorel,(output_bfd),
-      bfd *output_bfd)
+DEFUN(write_relaxnorel,(output_bfd, data),
+      bfd *output_bfd AND
+      PTR data)
 {
 /* Tie up all the statements to generate an output bfd structure which
    bfd can mull over */
@@ -156,7 +159,7 @@ DEFUN(write_relaxnorel,(output_bfd),
 
   lang_for_each_statement(build_it);
 
-  seclet_dump(output_bfd);
+  seclet_dump(output_bfd, data);
 
 }
 
