@@ -1,3 +1,9 @@
+Thu Sep 11 10:27:39 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen-semantics.c (print_semantic_body): Trace the instruction
+ 	after it has been validated.
+	(print_semantic_body): Count the instruction using sim-profile.
+	
 Wed Sep 10 13:35:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gen-itable.c (gen_itable_h): Collect summary info on instruction
