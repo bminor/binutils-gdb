@@ -1,3 +1,18 @@
+Tue Jun 18 15:08:54 1996  Klaus Kaempf  <kkaempf@progis.de>
+
+	* makefile.vms: New file.
+
+	* alpha-dis.c (print_insn_alpha): Print lda ra,lit(rz) as mov.
+
+Mon Jun 10 18:50:38 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* h8300-dis.c (bfd_h8_disassemble): Always print ABS8MEM with :8,
+	regardless of plen.
+
+Tue Jun  4 09:15:53 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* i386-dis.c (OP_OFF): Call append_prefix.
+
 Thu May 23 15:18:23 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* ppc-opc.c (instruction encoding macros): Add explicit casts to
