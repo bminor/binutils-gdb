@@ -90,37 +90,6 @@ struct fde_array
   int array_size;
 };
 
-struct context_reg
-{
-  union
-  {
-    unsigned int reg;
-    long offset;
-    CORE_ADDR addr;
-  }
-  loc;
-  enum
-  {
-    REG_CTX_UNSAVED,
-    REG_CTX_SAVED_OFFSET,
-    REG_CTX_SAVED_REG,
-    REG_CTX_SAVED_ADDR,
-    REG_CTX_VALUE,
-  }
-  how;
-};
-
-/* This is the register and unwind state for a particular frame.  */
-struct context
-{
-  struct context_reg *reg;
-
-  CORE_ADDR cfa;
-  CORE_ADDR ra;
-  void *lsda;
-  int args_size;
-};
-
 struct frame_state_reg
 {
   union
@@ -208,11 +177,8 @@ static struct fde_unit *fde_unit_alloc (void);
 static struct cie_unit *cie_unit_alloc (void);
 static void fde_chunks_need_space ();
 
-static struct context *context_alloc ();
-static struct frame_state *frame_state_alloc ();
 static void unwind_tmp_obstack_init ();
 static void unwind_tmp_obstack_free ();
-static void context_cpy (struct context *dst, struct context *src);
 
 static unsigned int read_1u (bfd * abfd, char **p);
 static int read_1s (bfd * abfd, char **p);
@@ -286,7 +252,7 @@ fde_chunks_need_space (void)
 }
 
 /* Alocate a new `struct context' on temporary obstack.  */
-static struct context *
+struct context *
 context_alloc (void)
 {
   struct context *context;
@@ -303,7 +269,7 @@ context_alloc (void)
 }
 
 /* Alocate a new `struct frame_state' on temporary obstack.  */
-static struct frame_state *
+struct frame_state *
 frame_state_alloc (void)
 {
   struct frame_state *fs;
@@ -332,7 +298,7 @@ unwind_tmp_obstack_free (void)
   unwind_tmp_obstack_init ();
 }
 
-static void
+void
 context_cpy (struct context *dst, struct context *src)
 {
   int regs_size = sizeof (struct context_reg) * NUM_REGS;

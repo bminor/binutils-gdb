@@ -1,3 +1,27 @@
+2002-10-24  Michal Ludvig  <mludvig@suse.cz>
+
+	* dwarf2cfi.c (struct context)
+	(struct context_reg): Moved to dwarf2cfi.h
+	(context_alloc, frame_state_alloc, context_cpy):
+	Made extern instead of static, removed prototypes.
+	* dwarf2cfi.h (struct context)
+	(struct context_reg): New, moved from dwarf2cfi.c
+	(context_alloc, frame_state_alloc, context_cpy):
+	New prototypes.
+	* x86-64-linux-tdep.c (x86_64_linux_sigtramp_saved_pc):
+	Changed from static to extern.
+	(LINUX_SIGINFO_SIZE, LINUX_SIGCONTEXT_PC_OFFSET)
+	(LINUX_SIGCONTEXT_FP_OFFSET)
+	(LINUX_UCONTEXT_SIGCONTEXT_OFFSET): Adjusted.
+	(x86_64_linux_in_sigtramp, x86_64_linux_frame_chain)
+	(x86_64_init_frame_pc, x86_64_init_extra_frame_info): New.
+	* x86-64-tdep.c (x86_64_gdbarch_init): Several
+	set_gdbarch_*() calls now use x86-64 specific functions 
+	instead of DWARF2 CFI ones.
+	* x86-64-tdep.h (x86_64_linux_in_sigtramp)
+	(x86_64_linux_frame_chain, x86_64_init_frame_pc)
+	(x86_64_init_extra_frame_info): New prototypes.
+	
 2002-10-23  David Carlton  <carlton@math.stanford.edu>
 
 	* linespec.c: #include "parser-defs.h".
