@@ -857,20 +857,22 @@ struct reg_entry
 #define REG_LR  14
 #define REG_SP  13
 
-/* These are the standard names;  Users can add aliases with .req */
+/* These are the standard names.  Users can add aliases with .req */
 static CONST struct reg_entry reg_table[] =
 {
-  /* Processor Register Numbers */
+  /* Processor Register Numbers.  */
   {"r0", 0},    {"r1", 1},      {"r2", 2},      {"r3", 3},
   {"r4", 4},    {"r5", 5},      {"r6", 6},      {"r7", 7},
   {"r8", 8},    {"r9", 9},      {"r10", 10},    {"r11", 11},
   {"r12", 12},  {"r13", REG_SP},{"r14", REG_LR},{"r15", REG_PC},
-  /* APCS conventions */
+  /* APCS conventions.  */
   {"a1", 0},	{"a2", 1},    {"a3", 2},     {"a4", 3},
   {"v1", 4},	{"v2", 5},    {"v3", 6},     {"v4", 7},     {"v5", 8},
   {"v6", 9},	{"sb", 9},    {"v7", 10},    {"sl", 10},
   {"fp", 11},	{"ip", 12},   {"sp", REG_SP},{"lr", REG_LR},{"pc", REG_PC},
-  /* FP Registers */
+  /* ATPCS additions to APCS conventions.  */
+  {"wr", 7},    {"v8", 11},
+  /* FP Registers.  */
   {"f0", 16},   {"f1", 17},   {"f2", 18},   {"f3", 19},
   {"f4", 20},   {"f5", 21},   {"f6", 22},   {"f7", 23},
   {"c0", 32},   {"c1", 33},   {"c2", 34},   {"c3", 35},
@@ -881,6 +883,13 @@ static CONST struct reg_entry reg_table[] =
   {"cr4", 36},  {"cr5", 37},  {"cr6", 38},  {"cr7", 39},
   {"cr8", 40},  {"cr9", 41},  {"cr10", 42}, {"cr11", 43},
   {"cr12", 44}, {"cr13", 45}, {"cr14", 46}, {"cr15", 47},
+  /* ATPCS additions to float register names.  */
+  {"s0",16},	{"s1",17},	{"s2",18},	{"s3",19},
+  {"s4",20},	{"s5",21},	{"s6",22},	{"s7",23},
+  {"d0",16},	{"d1",17},	{"d2",18},	{"d3",19},
+  {"d4",20},	{"d5",21},	{"d6",22},	{"d7",23},
+  /* FIXME: At some point we need to add VFP register names.  */
+  /* Array terminator.  */
   {NULL, 0}
 };
 

@@ -1,5 +1,9 @@
-2000-01-31  Geoff Keating  <geoffk@cygnus.com>
+2000-01-31  Nick Clifton  <nickc@cygnus.com>
+	* config/tc-arm.c (reg_table): Add support for ATPCS register
+	naming conventions.
 
+2000-01-31  Geoff Keating  <geoffk@cygnus.com>
+	
 	* config/obj-coff.h (OBJ_COPY_SYMBOL_ATTRIBUTES): Don't define if
 	already defined.
 	* config/tc-ppc.h [OBJ_XCOFF] (OBJ_COPY_SYMBOL_ATTRIBUTES): 
