@@ -4129,7 +4129,7 @@ _bfd_ecoff_bfd_final_link (abfd, info)
 
       if (bfd_get_flavour (input_bfd) == bfd_target_ecoff_flavour)
 	{
-	  /* Abitrarily set the symbolic header vstamp to the vstamp
+	  /* Arbitrarily set the symbolic header vstamp to the vstamp
 	     of the first object file in the link.  */
 	  if (symhdr->vstamp == 0)
 	    symhdr->vstamp

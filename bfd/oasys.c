@@ -324,7 +324,7 @@ oasys_archive_p (abfd)
 
   /*
     There isn't a magic number in an Oasys archive, so the best we
-    can do to verify reasnableness is to make sure that the values in
+    can do to verify reasonableness is to make sure that the values in
     the header are too weird
     */
 

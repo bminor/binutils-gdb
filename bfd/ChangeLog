@@ -3138,7 +3138,7 @@
 
 2003-05-04  H.J. Lu <hjl@gnu.org>
 
-	* elflink.h (elf_merge_symbol): Correctly handle weak definiton.
+	* elflink.h (elf_merge_symbol): Correctly handle weak definition.
 
 2003-05-04  H.J. Lu <hjl@gnu.org>
 
@@ -8442,7 +8442,7 @@
 	* config.bfd: Added DLX configuraton.
 	* Makefile.am: Added DLX configuraton.
 	* configure.in: Added DLX configuraton.
-	* archures.c: Add DLX architecure.
+	* archures.c: Add DLX architecture.
 	* reloc.c: Add DLX relocs.
 	* targets.c: Added DLX target vector.
 	* configure: Regenerate.

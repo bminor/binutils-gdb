@@ -1932,7 +1932,7 @@ struct reloc_howto_struct
 
   /* If this field is non null, then the supplied function is
      called rather than the normal function.  This allows really
-     strange relocation methods to be accomodated (e.g., i960 callj
+     strange relocation methods to be accommodated (e.g., i960 callj
      instructions).  */
   bfd_reloc_status_type (*special_function)
     (bfd *, arelent *, struct bfd_symbol *, void *, asection *,
@@ -2551,7 +2551,7 @@ in the instruction.  */
 /* IBM 370/390 relocations  */
   BFD_RELOC_I370_D12,
 
-/* The type of reloc used to build a contructor table - at the moment
+/* The type of reloc used to build a constructor table - at the moment
 probably a 32 bit wide absolute relocation, but the target can choose.
 It generally does map to one of the other relocation types.  */
   BFD_RELOC_CTOR,
@@ -2848,11 +2848,11 @@ data area pointer.  */
   BFD_RELOC_V850_TDA_4_4_OFFSET,
 
 /* This is a 16 bit offset from the short data area pointer, with the
-bits placed non-contigously in the instruction.  */
+bits placed non-contiguously in the instruction.  */
   BFD_RELOC_V850_SDA_16_16_SPLIT_OFFSET,
 
 /* This is a 16 bit offset from the zero data area pointer, with the
-bits placed non-contigously in the instruction.  */
+bits placed non-contiguously in the instruction.  */
   BFD_RELOC_V850_ZDA_16_16_SPLIT_OFFSET,
 
 /* This is a 6 bit offset from the call table base pointer.  */
@@ -3209,7 +3209,7 @@ that are not used, so that the code for those functions need not be
 included in the output.
 
 VTABLE_INHERIT is a zero-space relocation used to describe to the
-linker the inheritence tree of a C++ virtual function table.  The
+linker the inheritance tree of a C++ virtual function table.  The
 relocation's symbol should be the parent class' vtable, and the
 relocation should be located at the child vtable.
 
@@ -3318,7 +3318,7 @@ This is the 3 bit of a value.  */
 /* Motorola 68HC11 reloc.
 This reloc marks the beginning of a jump/call instruction.
 It is used for linker relaxation to correctly identify beginning
-of instruction and change some branchs to use PC-relative
+of instruction and change some branches to use PC-relative
 addressing mode.  */
   BFD_RELOC_M68HC11_RL_JUMP,
 
@@ -3530,7 +3530,7 @@ typedef struct bfd_symbol
      <<BSF_LOCAL>>, <<BSF_FORT_COMM>>,  <<BSF_UNDEFINED>> or
      <<BSF_GLOBAL>>.  */
 
-  /* The symbol is a debugging record. The value has an arbitary
+  /* The symbol is a debugging record. The value has an arbitrary
      meaning, unless BSF_DEBUGGING_RELOC is also set.  */
 #define BSF_DEBUGGING  0x08
 

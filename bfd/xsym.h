@@ -133,7 +133,7 @@ typedef struct bfd_sym_resources_table_entry bfd_sym_resources_table_entry;
    (Note that having a single module copied into two resources is not
    possible).  Modules map back to their resource via an index into the
    resource table and an offset into the resource.  Modules also point
-   to their source files, both the definition module and implemention
+   to their source files, both the definition module and implementation
    module.  Because modules can be textually nested within other
    modules, a link to the parent (containing) module is required.  This
    module can textually contain other modules.  A link to the contiguous

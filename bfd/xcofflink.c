@@ -1248,7 +1248,7 @@ xcoff_link_add_symbols (abfd, info)
 		}
 	      linoff = (auxlin.x_sym.x_fcnary.x_fcn.x_lnnoptr
 			- enclosing->line_filepos);
-	      /* explict cast to bfd_signed_vma for compiler */
+	      /* explicit cast to bfd_signed_vma for compiler */
 	      if (linoff < (bfd_signed_vma) (enclosing->lineno_count * linesz))
 		{
 		  struct internal_lineno lin;
@@ -2898,7 +2898,7 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
       xcoff_mark_symbol (info, hsym);
       hsym->flags |= (XCOFF_DEF_REGULAR | XCOFF_RTINIT);
 
-      /* __rtinit initalized */
+      /* __rtinit initialized */
       amt = sizeof (struct internal_ldsym);
       ldsym = (struct internal_ldsym *) bfd_malloc (amt);
 

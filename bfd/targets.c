@@ -30,7 +30,7 @@ SECTION
 	Targets
 
 DESCRIPTION
-	Each port of BFD to a different machine requries the creation
+	Each port of BFD to a different machine requires the creation
 	of a target back end. All the back end provides to the root
 	part of BFD is a structure containing pointers to functions
 	which perform certain low level operations on files. BFD

@@ -645,7 +645,7 @@ _bfd_XXi_swap_aouthdr_out (abfd, in, out)
 
   if (extra->DataDirectory[1].VirtualAddress == 0)
     /* Until other .idata fixes are made (pending patch), the entry for
-       .idata is needed for backwards compatability.  FIXME.  */
+       .idata is needed for backwards compatibility.  FIXME.  */
     add_data_entry (abfd, extra, 1, ".idata", ib);
     
   /* For some reason, the virtual size (which is what's set by
@@ -969,7 +969,7 @@ _bfd_XXi_swap_scnhdr_out (abfd, in, out)
       && strcmp (scnhdr_int->s_name, ".text") == 0)
     {
       /* By inference from looking at MS output, the 32 bit field
-	 which is the combintion of the number_of_relocs and
+	 which is the combination of the number_of_relocs and
 	 number_of_linenos is used for the line number count in
 	 executables.  A 16-bit field won't do for cc1.  The MS
 	 document says that the number of relocs is zero for

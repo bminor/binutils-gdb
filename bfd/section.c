@@ -1065,7 +1065,7 @@ DESCRIPTION
 
 |	func (abfd, the_section, obj);
 
-	This is the prefered method for iterating over sections; an
+	This is the preferred method for iterating over sections; an
 	alternative would be to use a loop:
 
 |	   section *p;
