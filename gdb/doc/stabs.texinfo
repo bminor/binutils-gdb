@@ -1033,13 +1033,38 @@ Some compilers use the pair of symbols approach described above
 (sometimes) when the argument type is @code{float} and it is passed as a
 @code{double} and converted to @code{float} by the prologue (in the
 latter case the type of the @samp{@var{arg}:p} symbol is @code{double}
-and the type of the @samp{@var{arg}:} symbol is @code{float}).  GCC, at
-least on the 960, uses a single @samp{p} symbol descriptor for an
-argument which is stored as a local variable but uses @code{N_LSYM}
-instead of @code{N_PSYM}.  In this case, the value of the symbol
-is an offset relative to the local variables for that function, not
-relative to the arguments; on some machines those are the same thing,
-but not on all.
+and the type of the @samp{@var{arg}:} symbol is @code{float}).  
+
+GCC, at least on the 960, has another solution to the same problem.  It
+uses a single @samp{p} symbol descriptor for an argument which is stored
+as a local variable but uses @code{N_LSYM} instead of @code{N_PSYM}.  In
+this case, the value of the symbol is an offset relative to the local
+variables for that function, not relative to the arguments; on some
+machines those are the same thing, but not on all.
+
+@c This is mostly just background info; the part that logically belongs
+@c here is the last sentence.  
+On the VAX or on other machines in which the calling convention includes
+the number of words of arguments actually passed, the debugger (GDB at
+least) uses the parameter symbols to keep track of whether it needs to
+print nameless arguments in addition to the formal parameters which it
+has printed because each one has a stab.  For example, in 
+
+@example
+extern int fprintf (FILE *stream, char *format, @dots{});
+@dots{}
+fprintf (stdout, "%d\n", x);
+@end example
+
+there are stabs for @code{stream} and @code{format}.  On most machines,
+the debugger can only print those two arguments (because it has no way
+of knowing that additional arguments were passed), but on the VAX or
+other machines with a calling convention which indicates the number of
+words of arguments, the debugger can print all three arguments.  To do
+so, the parameter symbol (symbol descriptor @samp{p}) (not necessarily
+@samp{r} or symbol descriptor omitted symbols) needs to contain the
+actual type as passed (for example, @code{double} not @code{float} if it
+is passed as a double and converted to a float).
 
 @node Reference Parameters
 @subsection Passing Parameters by Reference
