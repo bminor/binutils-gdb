@@ -36,7 +36,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldgram.h"
 #include "ldsym.h"
 #include "ldlang.h"
-#include "ld-emul.h"
+#include "ldemul.h"
 #include "ldlex.h"
 #include "ldfile.h"
 

@@ -32,7 +32,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldmisc.h"
 #include "ldlang.h"
 #include "ldexp.h"
-#include "ld-emul.h"
+#include "ldemul.h"
 #include "ldlex.h"
 
 /* FORWARDS */
