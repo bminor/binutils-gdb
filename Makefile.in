@@ -1013,18 +1013,21 @@ $(INSTALL_MODULES): install-dirs
 .PHONY: $(CONFIGURE_TARGET_MODULES)
 $(CONFIGURE_TARGET_MODULES):
 	@dir=`echo $@ | sed -e 's/configure-target-//'`; \
-	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/$${dir}/tmpmulti.out; \
-	if [ -f $(TARGET_SUBDIR)/$${dir}/multilib.out ]; then \
-	  if cmp $(TARGET_SUBDIR)/$${dir}/multilib.out $(TARGET_SUBDIR)/$${dir}/tmpmulti.out > /dev/null; then \
-	    rm -f $(TARGET_SUBDIR)/$${dir}/tmpmulti.out; \
+	if [ -d $(TARGET_SUBDIR)/$${dir} ]; then \
+	  $(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/$${dir}/tmpmulti.out; \
+	  if [ -f $(TARGET_SUBDIR)/$${dir}/multilib.out ]; then \
+	    if cmp $(TARGET_SUBDIR)/$${dir}/multilib.out $(TARGET_SUBDIR)/$${dir}/tmpmulti.out > /dev/null; then \
+	      rm -f $(TARGET_SUBDIR)/$${dir}/tmpmulti.out; \
+	    else \
+	      echo "Multilibs changed for $${dir}, reconfiguring"; \
+	      rm -f $(TARGET_SUBDIR)/$${dir}/multilib.out $(TARGET_SUBDIR)/$${dir}/Makefile; \
+	      mv $(TARGET_SUBDIR)/$${dir}/tmpmulti.out $(TARGET_SUBDIR)/$${dir}/multilib.out; \
+	    fi; \
 	  else \
-	    echo "Multilibs changed for $${dir}, reconfiguring"; \
-	    rm -f $(TARGET_SUBDIR)/$${dir}/multilib.out $(TARGET_SUBDIR)/$${dir}/Makefile; \
 	    mv $(TARGET_SUBDIR)/$${dir}/tmpmulti.out $(TARGET_SUBDIR)/$${dir}/multilib.out; \
 	  fi; \
-	else \
-	  mv $(TARGET_SUBDIR)/$${dir}/tmpmulti.out $(TARGET_SUBDIR)/$${dir}/multilib.out; \
-	fi; \
+	fi; exit 0	# break command into two pieces
+	@dir=`echo $@ | sed -e 's/configure-target-//'`; \
 	if [ -f $(TARGET_SUBDIR)/$${dir}/Makefile ] ; then \
 	  true; \
 	elif echo " $(TARGET_CONFIGDIRS) " | grep " $${dir} " >/dev/null 2>&1; then \
