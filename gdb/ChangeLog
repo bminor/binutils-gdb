@@ -1,3 +1,13 @@
+Tue Dec 24 10:27:37 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* remote-e7000.c (want_h8300h, want_nopc_h8300h): Renamed
+	from want and want_nopc.
+	(want_h8300s, want_nopc_h8300s): New variables for H8/S register
+	lists.
+	(e7000_fetch_registers): Use H8/300H or H8/S register list string
+	as needed.
+	(e7000_wait): Likewise.
+
 Mon Dec 23 02:25:58 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mips-tdep.c (mips_find_saved_regs):  If a frame has been
