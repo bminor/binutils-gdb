@@ -1,3 +1,8 @@
+Mon Jun 20 16:43:03 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* Makefile.in (MANPAGES): Remove $(DEMANGLER_PROG).
+	(install): Install it explicitly, from build dir, not srcdir.
+
 Mon Jun 20 16:29:54 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* objdump.c: Don't include elf/internal.h.

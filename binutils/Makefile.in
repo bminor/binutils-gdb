@@ -104,7 +104,7 @@ NLMCONV_PROG=nlmconv
 
 SRCONV_PROG=srconv sysdump coffdump 
 
-MANPAGES= ar nm objdump ranlib size strings strip $(DEMANGLER_PROG) objcopy nlmconv
+MANPAGES= ar nm objdump ranlib size strings strip objcopy nlmconv
 
 PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) $(BUILD_NLMCONV) $(BUILD_SRCONV) $(SYSINFO_PROG) 
 STAGESTUFF = $(PROGS) *.o
@@ -485,6 +485,7 @@ install: all $(DEMANGLER_PROG).1
 	for i in $(MANPAGES) ; do \
 	  $(INSTALL_XFORM1) $(srcdir)/$$i.1 $(man1dir)/$$i.1 ; \
 	done
+	$(INSTALL_XFORM1) $(DEMANGLER_PROG).1 $(man1dir)/$(DEMANGLER_PROG).1
 	-if [ -d $(tooldir) ]; then \
 	  if [ -d $(tooldir)/bin ]; then true; else mkdir $(tooldir)/bin; fi; \
 	  for i in $(TOOL_PROGS) ; do \
