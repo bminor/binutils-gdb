@@ -1,3 +1,8 @@
+Sat Oct  8 20:59:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* blockframe.c (reinit_frame_cache): Reinstate select_frame call
+	if inferior_pid is nonzero.
+
 Sat Oct  8 04:27:21 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	Speed up GDB startup time by not demangling partial symbols.
