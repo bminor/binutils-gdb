@@ -354,14 +354,14 @@ if test "${enable_gdbtk}" = "yes"; then
 	      TCL_LIBS='$(LIBIDE) $(IDE) $(ITCL) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
 	      CONFIG_DEPS='$(LIBIDE) $(IDE_DEPS) $(ITCL_DEPS) $(TIX_DEPS) $(TK_DEPS) $(TCL_DEPS)'
 	   else
-	      TCL_LIBS='$(ITCL) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
-	      CONFIG_DEPS='$(ITCL_DEPS) $(TIX_DEPS) $(TK_DEPS) $(TCL_DEPS)'
+	      TCL_LIBS='$(LIBIDE) $(ITCL) $(TIX) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
+	      CONFIG_DEPS='$(LIBIDE) $(ITCL_DEPS) $(TIX_DEPS) $(TK_DEPS) $(TCL_DEPS)'
 	   fi
 	   # Yes, the ordering seems wrong here.  But it isn't.
 	   # TK_LIBS is the list of libraries that need to be linked
 	   # after Tcl/Tk.
 	   LIBS="${LIBS} ${TCL_LIBS} ${TK_LIBS}"
-	   CONFIG_OBS="${CONFIG_OBS} gdbtk.o tracepoint.o"
+	   CONFIG_OBS="${CONFIG_OBS} gdbtk.o"
 
 	   if test x$gdb_cv_os_cygwin32 = xyes; then
 	      WIN32LIBS="${WIN32LIBS} -lshell32 -lgdi32 -lcomdlg32 -ladvapi32 -luser32"

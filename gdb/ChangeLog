@@ -1,3 +1,19 @@
+Mon Dec  1 10:19:44 1997  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* gdbtk.c: move include of "guitcl.h" back out of IDE ifdef
+	(gdbtk_init): move ide_initialize_paths out of IDE ifdef
+
+	* configure.in (TCL_LIBS, CONFIG_DEPS): add IDE libraries for all
+	builds
+	(CONFIG_OBS): remove tracepoint.o, which should always be included
+
+	* configure: regenerate
+
+	* Makefile.in (install-only): ALWAYS install the new gdbtk
+	(REMOTE_OBS): add tracepoint.o
+	
+	* ChangeLog: tidy up 11/26 entry
+	
 Thu Nov 27 09:07:18 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in ({TCL_LIBS,CONFIG_DEPS}): Don't add IDE libraries
@@ -33,7 +49,7 @@ Wed Nov 26 11:33:09 1997  Keith Seitz  <keiths@onions.cygnus.com>
 	* tracepoint.c (set_raw_tracepoint): make sure there's a trailing slash on
 	the directory name
 
-	* Merge (lots) with foundry-971118-build
+	* Merge (lots) with foundry's 11/18/97 build
 	
 	* Makefile.in (install-only): install the new gdbtk, not the old
 

@@ -38,10 +38,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <tk.h>
 #include <itcl.h> 
 #include <tix.h> 
+#include "guitcl.h"
 
 #ifdef IDE
 /* start-sanitize-ide */
-#include "guitcl.h"
 #include "event.h"
 #include "idetcl.h"
 #include "ilutk.h"
@@ -1759,10 +1759,10 @@ gdbtk_init ( argv0 )
   make_final_cleanup (gdbtk_cleanup, NULL);
 
   /* Initialize the Paths variable.  */
-#ifdef IDE
   if (ide_initialize_paths (interp, "gdbtcl") != TCL_OK)
     error ("ide_initialize_paths failed: %s", interp->result);
 
+#ifdef IDE
   /* start-sanitize-ide */
   /* Find the directory where we expect to find idemanager.  We ignore
      errors since it doesn't really matter if this fails.  */
