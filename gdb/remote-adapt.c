@@ -50,7 +50,7 @@ extern struct target_ops adapt_ops;		/* Forward declaration */
 
 /* Forward function declarations */
 static void adapt_fetch_registers ();
-static int  adapt_store_registers ();
+static void adapt_store_registers ();
 static void adapt_close ();
 static int  adapt_clear_breakpoints();
 
@@ -970,7 +970,7 @@ adapt_fetch_registers ()
   {
     int val = -1;
     supply_register (FPE_REGNUM, &val);
-    supply_register (INT_REGNUM, &val);
+    supply_register (INTE_REGNUM, &val);
     supply_register (FPS_REGNUM, &val);
     supply_register (EXO_REGNUM, &val);
   }
@@ -1006,7 +1006,7 @@ adapt_fetch_register (regno)
 
 /* Store the remote registers from the contents of the block REGS.  */
 
-static int 
+static void
 adapt_store_registers ()
 {
   int i, j;
@@ -1063,7 +1063,7 @@ adapt_store_registers ()
 
 /* Store register REGNO, or all if REGNO == -1.
    Return errno value.  */
-int
+void
 adapt_store_register (regno)
      int regno;
 {
@@ -1085,7 +1085,6 @@ adapt_store_register (regno)
       expect_prompt ();
     }
   DEXIT("adapt_store_registers()");
-  return 0;
 }
 
 /* Get ready to modify the registers array.  On machines which store

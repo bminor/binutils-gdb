@@ -718,7 +718,7 @@ eb_fetch_registers ()
   {
     int val = -1;
     supply_register (FPE_REGNUM, &val);
-    supply_register (INT_REGNUM, &val);
+    supply_register (INTE_REGNUM, &val);
     supply_register (FPS_REGNUM, &val);
     supply_register (EXO_REGNUM, &val);
   }
@@ -790,7 +790,7 @@ eb_store_registers ()
 
 /* Store register REGNO, or all if REGNO == 0.
    Return errno value.  */
-int
+void
 eb_store_register (regno)
      int regno;
 {
@@ -810,7 +810,6 @@ eb_store_register (regno)
 	registers_changed ();
       expect_prompt ();
     }
-  return 0;
 }
 
 /* Get ready to modify the registers array.  On machines which store

@@ -61,7 +61,7 @@ extern int stop_soon_quietly;           /* for wait_for_inferior */
 static void mm_resume();
 static void mm_fetch_registers ();
 static int fetch_register ();
-static int mm_store_registers ();
+static void mm_store_registers ();
 static int store_register ();
 static int regnum_to_srnum();
 static void  mm_close ();
@@ -793,7 +793,7 @@ int	regno;
   {
     int val = -1;
     supply_register (FPE_REGNUM, &val);
-    supply_register (INT_REGNUM, &val);
+    supply_register (INTE_REGNUM, &val);
     supply_register (FPS_REGNUM, &val);
     supply_register (EXO_REGNUM, &val);
   }
@@ -808,14 +808,16 @@ int	regno;
  * Result is 0 for success, -1 for failure.
  */
 
-static int 
+static void
 mm_store_registers (regno)
 int regno;
 {
   int result;
   
-  if (regno >= 0)
-	return(store_register(regno));
+  if (regno >= 0) {
+    store_register(regno);
+    return;
+  }
 
   DENTER("mm_store_registers()");
   result = 0;
@@ -929,7 +931,7 @@ int regno;
  
   registers_changed ();
   DEXIT("mm_store_registers()");
-  return result;
+  /* FIXME return result;  it is ignored by caller.  */
 }
 
 /*************************************************** REMOTE_PREPARE_TO_STORE */
@@ -1506,7 +1508,7 @@ int	regno;
 		case FC_REGNUM:  return(134); 
 		case CR_REGNUM:  return(135); 
 		case FPE_REGNUM: return(160); 
-		case INT_REGNUM: return(161); 
+		case INTE_REGNUM: return(161); 
 		case FPS_REGNUM: return(162); 
 		case EXO_REGNUM:return(164); 
 		default:

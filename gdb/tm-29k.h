@@ -151,6 +151,16 @@ CORE_ADDR skip_prologue ();
   "alu", "ipc", "ipa", "ipb" }
 
 /*
+ * Converts an sdb register number to an internal gdb register number.
+ * Currently under epi, gr96->0...gr127->31...lr0->32...lr127->159, or...
+ * 		  	gr64->0...gr95->31, lr0->32...lr127->159.
+ */
+#define SDB_REG_TO_REGNUM(value) \
+  (((value) >= 96 && (value) <= 127) ? ((value) - 96) : \
+   ((value) >= 128 && (value) <=  255) ? ((value) - 128 + LR0_REGNUM) : \
+   (value))
+
+/*
  * Provide the processor register numbers of some registers that are
  * expected/written in instructions that might change under different
  * register sets.  Namely, gcc can compile (-mkernel-registers) so that
