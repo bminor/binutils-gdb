@@ -204,6 +204,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	# the load address is not zero (which is the default).
 	setup_xfail "*-*-sunos4*"
 	setup_xfail "*-*-linux*libc1"
+	setup_xfail "powerpc-*-linux*"
 	shared_test shnp "shared (non PIC, load offset)" \
 		mainnp.o sh1np.o sh2np.o shared \
 		"-T $srcdir/$subdir/elf-offset.ld"

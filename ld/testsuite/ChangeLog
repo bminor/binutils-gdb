@@ -1,3 +1,9 @@
+2000-10-19  H.J. Lu  (hjl@gnu.org)
+
+	* ld-elfvsb/elfvsb.exp (visibility_run): Set expected failures
+	for Linux/PPC.
+	* ld-shared/shared.exp: Likewise.
+
 2000-10-09  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-selective/selective.exp: Rearrange to be table-driven.

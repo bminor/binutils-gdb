@@ -232,6 +232,10 @@ proc visibility_run {visibility} {
 	    } else {
 		setup_xfail "*-*-sunos4*"
 	    }
+	    if { [ string match $visibility "hidden_weak" ]
+		 || [ string match $visibility "protected_weak" ] } {
+		setup_xfail "powerpc-*-linux*"
+	    }
 	    visibility_test $visibility vnp "visibility ($visibility) (non PIC)" mainnp.o sh1np.o sh2np.o elfvsb
 
 	    # Test ELF shared library relocations with a non-zero load
@@ -246,6 +250,14 @@ proc visibility_run {visibility} {
 	    } else {
 		setup_xfail "*-*-sunos4*"
 		setup_xfail "*-*-linux*libc1"
+	    }
+	    if { [ string match $visibility "hidden_normal" ]
+		 || [ string match $visibility "hidden_weak" ]
+		 || [ string match $visibility "protected" ]
+		 || [ string match $visibility "protected_undef_def" ]
+		 || [ string match $visibility "protected_weak" ]
+		 || [ string match $visibility "normal" ] } {
+		setup_xfail "powerpc-*-linux*"
 	    }
 	    visibility_test $visibility vnp "visibility ($visibility) (non PIC, load offset)" \
 		mainnp.o sh1np.o sh2np.o elfvsb \
@@ -293,6 +305,10 @@ proc visibility_run {visibility} {
 		    }
 		} else {
 		    setup_xfail "*-*-sunos4*"
+		}
+		if { [ string match $visibility "hidden_weak" ]
+		     || [ string match $visibility "protected_weak" ] } {
+		    setup_xfail "powerpc-*-linux*"
 		}
 		visibility_test $visibility vmpnp "visibility ($visibility) (PIC main, non PIC so)" mainp.o sh1np.o sh2np.o elfvsb
 	    }
