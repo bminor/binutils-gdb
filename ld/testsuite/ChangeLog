@@ -1,5 +1,12 @@
 Mon May  4 17:12:06 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ld-shared/main.c (shlib_overriddencall2): New function.
+	(main): Call shlib_shlibcall2.
+	* ld-shared/sh1.c (shlib_shlibcall2): New function.
+	(shlib_overriddencall2): New function.
+	* ld-shared/shared.dat: Add output line for new test.
+	* ld-shared/sun4.dat: Likewise.
+
 	* ld-srec/sr3.cc (__get_eh_context): New function.
 
 Tue Apr  7 12:50:17 1998  Manfred Hollstein  <manfred@s-direktnet.de>
