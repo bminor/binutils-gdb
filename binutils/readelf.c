@@ -6495,7 +6495,7 @@ typedef struct Frame_Chunk
   unsigned long pc_begin;
   unsigned long pc_range;
   int cfa_reg;
-  int cfa_offset
+  int cfa_offset;
   int ra;
 }
 Frame_Chunk;
