@@ -108,7 +108,8 @@ do
 		exec_prefixoption="-exec_prefix=${exec_prefix}"
 		next_exec_prefix=
 	elif [ -n "${next_site}" ] ; then site=${arg} ; next_site=
-	elif [ -n "${next_srcdir}" ] ; then srcdir=${arg} ; next_srcdir=
+	# remove any possible trailing slash from srcdir.  See note below.
+	elif [ -n "${next_srcdir}" ] ; then srcdir=`echo ${arg} | sed -e 's:/$::'` ; next_srcdir=
 	elif [ -n "${next_program_prefix}" ] ; then
 		program_prefix=${arg}
 		program_prefixoption="-program_prefix=${program_prefix}"
@@ -185,8 +186,12 @@ do
 		-site | --site | --sit)
 			next_site=yes
 			;;
+		# remove trailing slashes.  Otherwise, when the file name gets
+		# bolted into an object file as debug info, it has two slashes in
+		# it.  Ordinarily this is ok, but emacs takes double slash to
+		# mean "forget the first part".
 		-srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=*)
-			srcdir=`echo ${arg} | sed 's/^[-a-z]*=//'`
+			srcdir=`echo ${arg} | sed 's/^[-a-z]*=//' | sed -e 's:/$::'`
 			;;
 		-srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
 			next_srcdir=yes
