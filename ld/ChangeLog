@@ -1,5 +1,14 @@
 2003-10-18  Hans-Peter Nilsson  <hp@bitrange.com>
 
+	* emultempl/mmix-elfnmmo.em (mmix_before_allocation): Force linker
+	relaxation always; don't exclude relocatable linking.  Adjust for
+	_bfd_mmix_prepare_linker_allocated_gregs renamed to
+	_bfd_mmix_before_linker_allocation.
+	(mmix_after_allocation): Adjust for
+	_bfd_mmix_finalize_linker_allocated_gregs renamed to
+	_bfd_mmix_after_linker_allocation.
+	* scripttempl/mmo.sc: Use ADDR (.text), not . - SIZEOF (.text).
+
 	* ldlang.c (lang_size_sections): Last, set _cooked_size for output
 	sections.
 

@@ -38,11 +38,11 @@ mmix_before_allocation (void)
      maintenance burden to keep them in sync.  (Of course we lose the
      maintenance burden of checking that it still does what we need.)  */
 
-  /* Force -relax on if not doing a relocatable link.  */
-  if (! link_info.relocatable)
-    command_line.relax = TRUE;
+  /* Force -relax on (regardless of whether we're doing a relocatable
+     link).  */
+  command_line.relax = TRUE;
 
-  if (!_bfd_mmix_prepare_linker_allocated_gregs (output_bfd, &link_info))
+  if (!_bfd_mmix_before_linker_allocation (output_bfd, &link_info))
     einfo ("%X%P: Internal problems setting up section %s",
 	   MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME);
 }
@@ -109,7 +109,7 @@ mmix_after_allocation (void)
   if (sec != NULL)
     bfd_set_section_vma (abfd, sec, 0);
 
-  if (!_bfd_mmix_finalize_linker_allocated_gregs (output_bfd, &link_info))
+  if (!_bfd_mmix_after_linker_allocation (output_bfd, &link_info))
     {
       /* This is a fatal error; make einfo call not return.  */
       einfo ("%F%P: Can't finalize linker-allocated global registers\n");
