@@ -1,3 +1,7 @@
+2003-02-07  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb_mbuild.sh: Delete extra shift after parsing '-f'.
+
 2003-02-07  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdbtypes.h (struct main_type): Move ``length'' field from here...
