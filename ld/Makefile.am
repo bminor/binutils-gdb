@@ -261,6 +261,8 @@ ALL_EMULATIONS = \
 	esh.o \
 	eshelf32.o \
 	eshlelf32.o \
+	eshelf32_linux.o \
+	eshlelf32_linux.o \
 	eshelf32_nbsd.o \
 	eshlelf32_nbsd.o \
 	eshelf.o \
@@ -986,6 +988,12 @@ eshelf32.c: $(srcdir)/emulparams/shelf32.sh \
   $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shelf32 "$(tdir_shelf32)"
+eshelf32_linux.c: $(srcdir)/emulparams/shelf32_linux.sh \
+  $(srcdir)/emulparams/shelf32.sh \
+  $(BFDDIR)/libbfd.h $(INCDIR)/libiberty.h \
+  $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shelf32_linux "$(tdir_shelf32_linux)"
 eshelf32_nbsd.c: $(srcdir)/emulparams/shelf32_nbsd.sh \
   $(srcdir)/emulparams/shelf32.sh \
   $(BFDDIR)/libbfd.h $(INCDIR)/libiberty.h \
@@ -1030,6 +1038,12 @@ eshlelf32.c: $(srcdir)/emulparams/shlelf32.sh \
   $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shlelf32 "$(tdir_shlelf32)"
+eshlelf32_linux.c: $(srcdir)/emulparams/shlelf32_linux.sh \
+  $(srcdir)/emulparams/shelf32_linux.sh $(srcdir)/emulparams/shelf32.sh \
+  $(BFDDIR)/libbfd.h $(INCDIR)/libiberty.h \
+  $(srcdir)/emultempl/sh64elf.em $(INCDIR)/elf/sh.h $(BFDDIR)/elf-bfd.h \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shlelf32_linux "$(tdir_shlelf32_linux)"
 eshlelf32_nbsd.c: $(srcdir)/emulparams/shlelf32_nbsd.sh \
   $(srcdir)/emulparams/shelf32_nbsd.sh $(srcdir)/emulparams/shelf32.sh \
   $(BFDDIR)/libbfd.h $(INCDIR)/libiberty.h \

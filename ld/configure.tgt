@@ -269,6 +269,13 @@ sh-*-linux*)
 			targ_extra_emuls=shelf_linux
 			targ_extra_libpath=shelf_linux
 			;;
+sh64eb-*-linux*)	targ_emul=shelf32_linux
+			targ_extra_emuls="shlelf32_linux"
+			;;
+sh64-*-linux*)		targ_emul=shlelf32_linux
+			targ_extra_emuls="shelf32_linux"
+			targ_extra_libpath=shelf32_linux
+			;;
 sh*eb-*-linux*)
 			targ_emul=shelf_linux
 			;;

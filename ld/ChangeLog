@@ -1,3 +1,13 @@
+2002-10-09  Richard Shann <richard.shann@superh.com>
+	    Stephen Clarke <stephen.clarke@superh.com>
+
+	* Makefile.am: Add eshelf32_linux.o and
+	eshlelf32_linux.o, new emulations for sh64 Linux.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add sh64eb-*-linux* and sh64-*-linux* emulations.
+	* emulparams/shelf32_linux.sh: New file.
+	* emulparams/shlelf32_linux.sh: New file.
+	
 2002-10-08  H.J. Lu <hjl@gnu.org>
 
 	* ldlang.c (lang_file_exist): Removed.
