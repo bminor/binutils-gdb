@@ -1,29 +1,23 @@
-/* disassemble sparc instructions for objdump
-   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+/* Print SPARC instructions.
+   Copyright 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
 
-
-This file is part of the binutils.
-
-The binutils are free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-The binutils are distributed in the hope that they will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with the binutils; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include "bfd.h"
-#include "sysdep.h"
-#include <stdio.h>
 #include "opcode/sparc.h"
-#include "objdump.h"
-extern int print_address();
+#include "dis-asm.h"
+#include <string.h>
 
 static  char *reg_names[] =
  { "g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7",	
@@ -38,34 +32,37 @@ static  char *reg_names[] =
 
 #define	freg_names	(&reg_names[4 * 8])
 
+/* FIXME--need to deal with byte order (probably using masking and
+   shifting rather than bitfields is easiest).  */
+
 union sparc_insn
   {
     unsigned long int code;
     struct
       {
-	unsigned int _OP:2;
-#define	op	ldst._OP
-	unsigned int _RD:5;
-#define	rd	ldst._RD
+	unsigned int anop:2;
+#define	op	ldst.anop
+	unsigned int anrd:5;
+#define	rd	ldst.anrd
 	unsigned int op3:6;
-	unsigned int _RS1:5;
-#define	rs1	ldst._RS1
+	unsigned int anrs1:5;
+#define	rs1	ldst.anrs1
 	unsigned int i:1;
-	unsigned int _ASI:8;
-#define	asi	ldst._ASI
-	unsigned int _RS2:5;
-#define	rs2	ldst._RS2
+	unsigned int anasi:8;
+#define	asi	ldst.anasi
+	unsigned int anrs2:5;
+#define	rs2	ldst.anrs2
 #define	shcnt	rs2
       } ldst;
     struct
       {
-	unsigned int _OP:2, _RD:5, op3:6, _RS1:5, i:1;
+	unsigned int anop:2, anrd:5, op3:6, anrs1:5, i:1;
 	unsigned int IMM13:13;
 #define	imm13	IMM13.IMM13
       } IMM13;
     struct
       {
-	unsigned int _OP:2;
+	unsigned int anop:2;
 	unsigned int a:1;
 	unsigned int cond:4;
 	unsigned int op2:3;
@@ -94,9 +91,9 @@ union sparc_insn
 #define	imm22	disp22
     struct
       {
-	unsigned int _OP:2;
-	unsigned int _DISP30:30;
-#define	disp30	call._DISP30
+	unsigned int anop:2;
+	unsigned int adisp30:30;
+#define	disp30	call.adisp30
       } call;
   };
 
@@ -111,23 +108,28 @@ is_delayed_branch (insn)
     {
       const struct sparc_opcode *opcode = &sparc_opcodes[i];
       if ((opcode->match & insn.code) == opcode->match
-	  && (opcode->lose & insn.code) == 0
-	  && (opcode->flags&F_DELAYED))
-	return 1;
+	  && (opcode->lose & insn.code) == 0)
+	return (opcode->flags & F_DELAYED);
     }
   return 0;
 }
 
 static int opcodes_sorted = 0;
+extern void qsort ();
 
-/* Print one instruction from MEMADDR on STREAM.  */
+/* Print one instruction from MEMADDR on STREAM.
+
+   We suffix the instruction with a comment that gives the absolute
+   address involved, as well as its symbolic form, if the instruction
+   is preceded by a findable `sethi' and it either adds an immediate
+   displacement to that register, or it is an `add' or `or' instruction
+   on that register.  */
 int
-print_insn_sparc (memaddr, buffer,  stream)
+print_insn_sparc (memaddr, info)
      bfd_vma memaddr;
-    bfd_byte  *buffer;
-     FILE *stream;
-     
+     disassemble_info *info;
 {
+  FILE *stream = info->stream;
   union sparc_insn insn;
 
   register unsigned int i;
@@ -140,7 +142,15 @@ print_insn_sparc (memaddr, buffer,  stream)
       opcodes_sorted = 1;
     }
 
-memcpy(&insn,buffer, sizeof (insn));
+  {
+    int status =
+      (*info->read_memory_func) (memaddr, (char *) &insn, sizeof (insn), info);
+    if (status != 0)
+      {
+	(*info->memory_error_func) (status, memaddr, info);
+	return -1;
+      }
+  }
 
   for (i = 0; i < NUMOPCODES; ++i)
     {
@@ -156,48 +166,44 @@ memcpy(&insn,buffer, sizeof (insn));
 	     field of the opcode table.  */
 	  int found_plus = 0;
 	  
-	  /* Do we have an 'or' instruction where rs1 is the same
+	  /* Do we have an `add' or `or' instruction where rs1 is the same
 	     as rsd, and which has the i bit set?  */
-	  if (opcode->match == 0x80102000
+	  if ((opcode->match == 0x80102000 || opcode->match == 0x80002000)
+	  /*			  (or)				 (add)  */
 	      && insn.rs1 == insn.rd)
 	    imm_added_to_rs1 = 1;
 
-	  if (strchr (opcode->args, 'S') != 0)
-	    /* Reject the special case for `set'.
-	       The real `sethi' will match.  */
-	    continue;
 	  if (insn.rs1 != insn.rd
 	      && strchr (opcode->args, 'r') != 0)
 	      /* Can't do simple format if source and dest are different.  */
 	      continue;
 
-	  fputs (opcode->name, stream);
+	  (*info->fprintf_func) (stream, opcode->name);
 
 	  {
 	    register const char *s;
 
 	    if (opcode->args[0] != ',')
-	      fputs (" ", stream);
+	      (*info->fprintf_func) (stream, " ");
 	    for (s = opcode->args; *s != '\0'; ++s)
 	      {
 		while (*s == ',')
 		  {
-		    fputs (",", stream);
+		    (*info->fprintf_func) (stream, ",");
 		    ++s;
-
 		    switch (*s) {
 		    case 'a':
-		      fputs ("a", stream);
+		      (*info->fprintf_func) (stream, "a");
 		      ++s;
 		      continue;
 #ifndef NO_V9
 		    case 'N':
-		      fputs("pn", stream);
+		      (*info->fprintf_func) (stream, "pn");
 		      ++s;
 		      continue;
 
 		    case 'T':
-		      fputs("pt", stream);
+		      (*info->fprintf_func) (stream, "pt");
 		      ++s;
 		      continue;
 #endif				/* NO_V9 */
@@ -207,7 +213,7 @@ memcpy(&insn,buffer, sizeof (insn));
 		    }		/* switch on arg */
 		  }		/* while there are comma started args */
 
-		fputs (" ", stream);
+		(*info->fprintf_func) (stream, " ");
 			
 		switch (*s)
 		  {
@@ -216,14 +222,14 @@ memcpy(&insn,buffer, sizeof (insn));
 
 		    /* note fall-through */
 		  default:
-		    fprintf (stream, "%c", *s);
+		    (*info->fprintf_func) (stream, "%c", *s);
 		    break;
 
 		  case '#':
-		    fputs ("0", stream);
+		    (*info->fprintf_func) (stream, "0");
 		    break;
 
-#define	reg(n)	fprintf (stream, "%%%s", reg_names[n])
+#define	reg(n)	(*info->fprintf_func) (stream, "%%%s", reg_names[n])
 		  case '1':
 		  case 'r':
 		    reg (insn.rs1);
@@ -238,7 +244,7 @@ memcpy(&insn,buffer, sizeof (insn));
 		    break;
 #undef	reg
 
-#define	freg(n)	fprintf (stream, "%%%s", freg_names[n])
+#define	freg(n)	(*info->fprintf_func) (stream, "%%%s", freg_names[n])
 		  case 'e':
 		  case 'v':	/* double/even */
 		  case 'V':	/* quad/multiple of 4 */
@@ -258,7 +264,7 @@ memcpy(&insn,buffer, sizeof (insn));
 		    break;
 #undef	freg
 
-#define	creg(n)	fprintf (stream, "%%c%u", (unsigned int) (n))
+#define	creg(n)	(*info->fprintf_func) (stream, "%%c%u", (unsigned int) (n))
 		  case 'b':
 		    creg (insn.rs1);
 		    break;
@@ -273,8 +279,8 @@ memcpy(&insn,buffer, sizeof (insn));
 #undef	creg
 
 		  case 'h':
-		    fprintf (stream, "%%hi(%#x)",
-			     (unsigned int) insn.imm22 << 10);
+		    (*info->fprintf_func) (stream, "%%hi(%#x)",
+					   (int) insn.imm22 << 10);
 		    break;
 
 		  case 'i':
@@ -285,7 +291,7 @@ memcpy(&insn,buffer, sizeof (insn));
 
 		      /* Check to see whether we have a 1+i, and take
 			 note of that fact.
-			 
+
 			 Note: because of the way we sort the table,
 			 we will be matching 1+i rather than i+1,
 			 so it is OK to assume that i is after +,
@@ -294,9 +300,9 @@ memcpy(&insn,buffer, sizeof (insn));
 			imm_added_to_rs1 = 1;
 		      
 		      if (imm <= 9)
-			fprintf (stream, "%d", imm);
+			(*info->fprintf_func) (stream, "%d", imm);
 		      else
-			fprintf (stream, "%#x", (unsigned) imm);
+			(*info->fprintf_func) (stream, "%#x", imm);
 		    }
 		    break;
 
@@ -324,9 +330,9 @@ memcpy(&insn,buffer, sizeof (insn));
 			imm_added_to_rs1 = 1;
 		      
 		      if (imm <= 9)
-			fprintf (stream, "%d", imm);
+			(info->fprintf_func) (stream, "%d", imm);
 		      else
-			fprintf (stream, "%#x", (unsigned) imm);
+			(info->fprintf_func) (stream, "%#x", (unsigned) imm);
 		    }
 		    break;
 
@@ -389,8 +395,9 @@ memcpy(&insn,buffer, sizeof (insn));
 		    if ((insn.code >> 22) == 0)
 		      /* Special case for `unimp'.  Don't try to turn
 			 it's operand into a function offset.  */
-		      fprintf (stream, "%#x",
-			       (unsigned) (((int) insn.disp22 << 10) >> 10));
+		      (*info->fprintf_func)
+			(stream, "%#x",
+			 (int) (((int) insn.disp22 << 10) >> 10));
 		    else
 		      /* We cannot trust the compiler to sign-extend
 			 when extracting the bitfield, hence the shifts.  */
@@ -401,39 +408,39 @@ memcpy(&insn,buffer, sizeof (insn));
 		    break;
 
 		  case 'A':
-		    fprintf (stream, "(%d)", (int) insn.asi);
+		    (*info->fprintf_func) (stream, "(%d)", (int) insn.asi);
 		    break;
 
 		  case 'C':
-		    fputs ("%csr", stream);
+		    (*info->fprintf_func) (stream, "%csr");
 		    break;
 
 		  case 'F':
-		    fputs ("%fsr", stream);
+		    (*info->fprintf_func) (stream, "%fsr");
 		    break;
 
 		  case 'p':
-		    fputs ("%psr", stream);
+		    (*info->fprintf_func) (stream, "%psr");
 		    break;
 
 		  case 'q':
-		    fputs ("%fq", stream);
+		    (*info->fprintf_func) (stream, "%fq");
 		    break;
 
 		  case 'Q':
-		    fputs ("%cq", stream);
+		    (*info->fprintf_func) (stream, "%cq");
 		    break;
 
 		  case 't':
-		    fputs ("%tbr", stream);
+		    (*info->fprintf_func) (stream, "%tbr");
 		    break;
 
 		  case 'w':
-		    fputs ("%wim", stream);
+		    (*info->fprintf_func) (stream, "%wim");
 		    break;
 
 		  case 'y':
-		    fputs ("%y", stream);
+		    (*info->fprintf_func) (stream, "%y");
 		    break;
 		  }
 	      }
@@ -448,9 +455,12 @@ memcpy(&insn,buffer, sizeof (insn));
 	  if (imm_added_to_rs1)
 	    {
 	      union sparc_insn prev_insn;
-	      int errcode = 0;
+	      int errcode;
 
-	      memcpy(&prev_insn, buffer -4,  sizeof (prev_insn));
+	      errcode =
+		(*info->read_memory_func)
+		  (memaddr - 4,
+		   (char *)&prev_insn, sizeof (prev_insn));
 
 	      if (errcode == 0)
 		{
@@ -464,8 +474,8 @@ memcpy(&insn,buffer, sizeof (insn));
 		     */
 
 		  if (is_delayed_branch (prev_insn))
-		    memcpy(&prev_insn, buffer - 8, sizeof(prev_insn));
-
+		    errcode = (*info->read_memory_func)
+		      (memaddr - 8, (char *)&prev_insn, sizeof (prev_insn));
 		}
 
 	      /* If there was a problem reading memory, then assume
@@ -476,7 +486,7 @@ memcpy(&insn,buffer, sizeof (insn));
 		  if ((prev_insn.code & 0xc1c00000) == 0x01000000
 		      && prev_insn.rd == insn.rs1)
 		    {
-		      fprintf (stream, "\t! ");
+		      (*info->fprintf_func) (stream, "\t! ");
 		      /* We cannot trust the compiler to sign-extend
 			 when extracting the bitfield, hence the shifts.  */
 		      print_address (((int) prev_insn.imm22 << 10)
@@ -489,10 +499,9 @@ memcpy(&insn,buffer, sizeof (insn));
 	}
     }
 
-  fprintf (stream, "%#8x", insn.code);
+  (*info->fprintf_func) (stream, "%#8x", insn.code);
   return sizeof (insn);
 }
-
 
 /* Compare opcodes A and B.  */
 
@@ -548,6 +557,27 @@ compare_opcodes (a, b)
 
   /* They are functionally equal.  So as long as the opcode table is
      valid, we can put whichever one first we want, on aesthetic grounds.  */
+
+  /* Our first aesthetic ground is that aliases defer to real insns.  */
+  {
+    int alias_diff = (op0->flags & F_ALIAS) - (op1->flags & F_ALIAS);
+    if (alias_diff != 0)
+      /* Put the one that isn't an alias first.  */
+      return alias_diff;
+  }
+
+  /* Except for aliases, two "identical" instructions had
+     better have the same opcode.  This is a sanity check on the table.  */
+  i = strcmp (op0->name, op1->name);
+  if (i)
+      if (op0->flags & F_ALIAS) /* If they're both aliases, be arbitrary. */
+	  return i;
+      else
+	  fprintf (stderr,
+		   "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n",
+		   op0->name, op1->name);
+
+  /* Fewer arguments are preferred.  */
   {
     int length_diff = strlen (op0->args) - strlen (op1->args);
     if (length_diff != 0)
