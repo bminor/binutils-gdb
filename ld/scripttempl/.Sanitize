@@ -15,14 +15,6 @@
 
 Do-first:
 
-h8s_files="h8300s.sc"
-
-if ( echo $* | grep keep\-h8s > /dev/null ) ; then
-	keep_these_too="${h8s_files} ${keep_these_too}"
-else
-	lose_these_too="${h8s_files} ${lose_these_too}"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -46,6 +38,7 @@ elfppc.sc
 go32coff.sc
 h8300.sc
 h8300h.sc
+h8300s.sc
 h8500.sc
 h8500b.sc
 h8500c.sc

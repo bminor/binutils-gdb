@@ -84,10 +84,7 @@ a29k-*-*)		targ_emul=a29k ;;
 arm-*-aout | armel-*-aout) targ_emul=armaoutl ;;
 armeb-*-aout)		targ_emul=armaoutb ;;
 arm-*-coff)		targ_emul=armcoff ;;
-h8300-*-hms)		targ_emul=h8300; targ_extra_emuls="h8300h"
-#start-sanitize-h8s
-			targ_extra_emuls="h8300h h8300s"
-#end-sanitize-h8s
+h8300-*-hms)		targ_emul=h8300; targ_extra_emuls="h8300h h8300s"
 			;;
 h8500-*-hms)		targ_emul=h8500
 			targ_extra_emuls="h8500s h8500b h8500m h8500c"

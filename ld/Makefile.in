@@ -221,9 +221,7 @@ ALL_EMULATIONS = \
 	ego32.o \
 	eh8300.o \
 	eh8300h.o \
-	$(start-sanitize-h8s) \
 	eh8300s.o \
-	$(end-sanitize-h8s) \
 	eh8500.o \
 	eh8500b.o \
 	eh8500c.o \
@@ -430,11 +428,9 @@ eh8300.c: $(srcdir)/emulparams/h8300.sh \
 eh8300h.c: $(srcdir)/emulparams/h8300h.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8300h.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} h8300h "$(tdir_h8300h)"
-# start-sanitize-h8s
 eh8300s.c: $(srcdir)/emulparams/h8300s.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8300s.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} h8300s "$(tdir_h8300s)"
-# end-sanitize-h8s
 eh8500.c: $(srcdir)/emulparams/h8500.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/h8500.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} h8500 "$(tdir_h8500)"

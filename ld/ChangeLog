@@ -134,7 +134,6 @@ Wed Jun 19 11:40:14 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* configure.host (m88*-*-dgux*): Quote HOSTING_CRT0.  From
 	<randall.hron@medaphis.com>.
 
-start-sanitize-h8s
 Tue Jun 18 15:53:09 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* scripttempl/h8300s.sc: New file for H8/S.
@@ -143,7 +142,6 @@ Tue Jun 18 15:53:09 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
 	(e_h8300s.c): Add dependencies.
 	* configure.tgt: Add H8/S to targ_extra_emuls.
 
-end-sanitize-h8s
 Tue Jun 18 17:55:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.tgt (i[345]86*-*-isc*): New target.  From
