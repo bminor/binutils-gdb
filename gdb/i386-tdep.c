@@ -499,12 +499,14 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 	    xorl %ebx, %ebx
 	    xorl %ecx, %ecx
 	    xorl %edx, %edx
+	    xorl %eax, %eax
 
 	 and the equivalent
 
 	    subl %ebx, %ebx
 	    subl %ecx, %ecx
 	    subl %edx, %edx
+	    subl %eax, %eax
 
 	 Make sure we only skip these instructions if we later see the
 	 `movl %esp, %ebp' that actually sets up the frame.  */
@@ -516,6 +518,7 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 	    case 0xdb:	/* %ebx */
 	    case 0xc9:	/* %ecx */
 	    case 0xd2:	/* %edx */
+	    case 0xc0:	/* %eax */
 	      skip += 2;
 	      break;
 	    default:
