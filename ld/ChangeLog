@@ -1,3 +1,26 @@
+Mon Jul 26 14:00:02 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* ldgram.y (OPTION_Qy, OPTION_Y, OPTION_dn, OPTION_YP): New
+	terminals, for Solaris.
+	(dirlist_ptr): New static variable.
+	(command_line_option): Accept new options.
+
+	* ldlex.l: Accept command-line options "-Qy", "-dn", "-Y", and
+	"-YP,...".
+
+	* config/sun4sol2.mt: Pass emulation name without ".sh".
+
+Fri Jul 23 13:51:09 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* scripttempl/elf.sc: Add support for .init, .fini, .ctors,
+	.dtors, .data1, .rodata1 sections, instead of combining them into
+	other sections.  For `-r', set all section start addresses to
+	zero.
+
+	* emulparams/elf32-sparc.sh (TEXT_START_ADDR,
+	NONPAGED_TEXT_START_ADDR): Value should be 0x10100.
+	(MAXPAGESIZE): Renamed from PAGE_SIZE.
+
 Wed Jul 21 14:28:42 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* genscripts.sh: If this is the default emulation, set
