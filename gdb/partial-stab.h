@@ -401,7 +401,7 @@ switch (CUR_SYMBOL_TYPE)
 	   function relative stabs, or the address of the function's
 	   end for old style stabs.  */
 	valu = CUR_SYMBOL_VALUE + last_function_start;
-	if (pst->texthigh == 0 || valu > pst->texthigh)
+	if (pst && pst->texthigh == 0 || valu > pst->texthigh)
 	  pst->texthigh = valu;
 	break;
       }
@@ -647,7 +647,7 @@ switch (CUR_SYMBOL_TYPE)
 	   use the address of this function as the low bound for
 	   the partial symbol table.  */
 	if (textlow_not_set
-	    || (CUR_SYMBOL_VALUE < pst->textlow
+	    || (pst && CUR_SYMBOL_VALUE < pst->textlow
 		&& CUR_SYMBOL_VALUE
 		!= ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile))))
 	  {

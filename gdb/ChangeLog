@@ -1,3 +1,8 @@
+2000-08-10  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	From Greg McGary <greg@mcgary.org>:
+	* partial-stab.h: Don't crash if pst is null. 
+
 2000-08-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-nat.h (i387_supply_fsave, i387_fill_fsave): Make extern.
