@@ -1,5 +1,5 @@
 /* Generic stabs parsing for gas.
-   Copyright (C) 1989, 90, 91, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1989, 90, 91, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -17,7 +17,7 @@ the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with GAS; see the file COPYING.  If not, write to the Free
 Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-02111-1307, USA. */
+02111-1307, USA.  */
 
 #include "as.h"
 #include "obstack.h"
@@ -25,7 +25,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "ecoff.h"
 
 /* We need this, despite the apparent object format dependency, since
-   it defines stab types, which all object formats can use now. */
+   it defines stab types, which all object formats can use now.  */
 
 #include "aout/stab_gnu.h"
 
@@ -112,7 +112,7 @@ get_stab_string_offset (string, stabstr_secname)
     }
 
   if (length > 0)
-    {				/* Ordinary case. */
+    {				/* Ordinary case.  */
       p = frag_more (length + 1);
       strcpy (p, string);
 
@@ -171,9 +171,9 @@ aout_process_stab (what, string, type, other, desc)
 #endif
 
 /* This can handle different kinds of stabs (s,n,d) and different
-   kinds of stab sections. */
+   kinds of stab sections.  */
 
-static void 
+static void
 s_stab_generic (what, stab_secname, stabstr_secname)
      int what;
      char *stab_secname;
@@ -383,7 +383,7 @@ s_stab_generic (what, stab_secname, stabstr_secname)
   demand_empty_rest_of_line ();
 }
 
-/* Regular stab directive. */
+/* Regular stab directive.  */
 
 void
 s_stab (what)
@@ -392,7 +392,7 @@ s_stab (what)
   s_stab_generic (what, STAB_SECTION_NAME, STAB_STRING_SECTION_NAME);
 }
 
-/* "Extended stabs", used in Solaris only now. */
+/* "Extended stabs", used in Solaris only now.  */
 
 void
 s_xstab (what)
@@ -438,7 +438,7 @@ s_xstab (what)
 
 /* Frob invented at RMS' request. Set the n_desc of a symbol.  */
 
-void 
+void
 s_desc (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
@@ -524,13 +524,13 @@ generate_asm_file (type, file)
           int len = (bslash ? (bslash - tmp + 1) : strlen (tmp));
           /* double all backslashes, since demand_copy_C_string (used by
              s_stab to extract the part in quotes) will try to replace them as
-             escape sequences.  backslash may appear in a filespec. */
+             escape sequences.  backslash may appear in a filespec.  */
           strncpy (bufp, tmp, len);
           tmp += len;
           bufp += len;
           if (bslash != NULL)
             *bufp++ = '\\';
-        } 
+        }
       sprintf (bufp, "\",%d,0,0,%s\n", type, sym);
       input_line_pointer = buf;
       s_stab ('s');

@@ -17,7 +17,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with GAS; see the file COPYING.  If not, write to the Free
 Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-02111-1307, USA. */
+02111-1307, USA.  */
 
 #if 0
 /* If your chars aren't 8 bits, you will change this a bit.
@@ -627,7 +627,7 @@ read_a_source_file (name)
 	  /* We are at the begining of a line, or similar place.
 	     We expect a well-formed assembler statement.
 	     A "symbol-name:" is a statement.
-	    
+
 	     Depending on what compiler is used, the order of these tests
 	     may vary to catch most common case 1st.
 	     Each test is independent of all other tests at the (top) level.
@@ -699,10 +699,10 @@ read_a_source_file (name)
 		      /* In MRI mode, \tsym: set 0 is permitted.  */
 		      if (*rest == ':')
 			++rest;
-		      
+
 		      if (*rest == ' ' || *rest == '\t')
 			++rest;
-		      
+
 		      if ((strncasecmp (rest, "EQU", 3) == 0
 			   || strncasecmp (rest, "SET", 3) == 0)
 			  && (rest[3] == ' ' || rest[3] == '\t'))
@@ -760,7 +760,7 @@ read_a_source_file (name)
 		      || (!flag_m68k_mri && *s == '.'))
 		    {
 		      /* PSEUDO - OP.
-		        
+
 		         WARNING: c has next char, which may be end-of-line.
 		         We lookup the pseudo-op table with s+1 because we
 		         already know that the pseudo-op begins with a '.'.  */
@@ -791,7 +791,7 @@ read_a_source_file (name)
 			{
 			  do_align (1, (char *) NULL, 0, 0);
 			  mri_pending_align = 0;
-			  
+
 			  if (line_label != NULL)
 			    {
 			      symbol_set_frag (line_label, frag_now);
@@ -1045,7 +1045,7 @@ read_a_source_file (name)
 	      buffer = new_buf;
 	      input_line_pointer = new_buf;
 	      buffer_limit = new_tmp;
-	      
+
 	      continue;
 	    }
 
@@ -1129,7 +1129,7 @@ mri_comment_field (stopcp)
 #endif
   *stopcp = *s;
   *s = '\0';
-  
+
   return s;
 }
 
@@ -1244,7 +1244,7 @@ s_align (arg, bytes_p)
 	    ;
 	  if (align != 1)
 	    as_bad (_("Alignment not a power of 2"));
-	  
+
 	  align = i;
 	}
     }
@@ -1360,7 +1360,7 @@ s_comm (ignore)
   p = input_line_pointer;
   *p = c;
   SKIP_WHITESPACE ();
-  
+
   if (*input_line_pointer != ',')
     {
       as_bad (_("Expected comma after symbol-name: rest of line ignored."));
@@ -1369,9 +1369,9 @@ s_comm (ignore)
 	mri_comment_end (stop, stopc);
       return;
     }
-  
+
   input_line_pointer++;		/* skip ',' */
-  
+
   if ((temp = get_absolute_expression ()) < 0)
     {
       as_warn (_(".COMMon length (%ld.) <0! Ignored."), (long) temp);
@@ -1380,11 +1380,11 @@ s_comm (ignore)
 	mri_comment_end (stop, stopc);
       return;
     }
-  
+
   *p = 0;
   symbolP = symbol_find_or_make (name);
   *p = c;
-  
+
   if (S_IS_DEFINED (symbolP) && !S_IS_COMMON (symbolP))
     {
       as_bad (_("Ignoring attempt to re-define symbol `%s'."),
@@ -1394,7 +1394,7 @@ s_comm (ignore)
 	mri_comment_end (stop, stopc);
       return;
     }
-  
+
   if (S_GET_VALUE (symbolP))
     {
       if (S_GET_VALUE (symbolP) != (valueT) temp)
@@ -1459,7 +1459,7 @@ s_mri_common (small)
 	  ++input_line_pointer;
 	}
       while (isdigit ((unsigned char) *input_line_pointer));
-      
+
       c = *input_line_pointer;
       *input_line_pointer = '\0';
 
@@ -1757,9 +1757,9 @@ s_fill (ignore)
 	  p = frag_var (rs_space, (int) size, (int) size,
 			(relax_substateT) 0, rep_sym, (offsetT) 0, (char *) 0);
 	}
-      
+
       memset (p, 0, (unsigned int) size);
-      
+
       /* The magic number BSD_FILL_SIZE_CROCK_4 is from BSD 4.2 VAX
          flavoured AS.  The following bizzare behaviour is to be
          compatible with above.  I guess they tried to take up to 8
@@ -2003,25 +2003,25 @@ s_lcomm_internal (needs_align, bytes_p)
     {
       align = 0;
       SKIP_WHITESPACE ();
-      
+
       if (*input_line_pointer != ',')
 	{
 	  as_bad (_("Expected comma after size"));
 	  ignore_rest_of_line ();
 	  return;
 	}
-      
+
       input_line_pointer++;
       SKIP_WHITESPACE ();
-      
+
       if (*input_line_pointer == '\n')
 	{
 	  as_bad (_("Missing alignment"));
 	  return;
 	}
-      
+
       align = get_absolute_expression ();
-      
+
       if (bytes_p)
 	{
 	  /* Convert to a power of 2.  */
@@ -2036,7 +2036,7 @@ s_lcomm_internal (needs_align, bytes_p)
 	      align = i;
 	    }
 	}
-      
+
       if (align > max_alignment)
 	{
 	  align = max_alignment;
@@ -2047,7 +2047,7 @@ s_lcomm_internal (needs_align, bytes_p)
 	  align = 0;
 	  as_warn (_("Alignment negative. 0 assumed."));
 	}
-      
+
       record_alignment (bss_seg, align);
     }
   else
@@ -2086,7 +2086,7 @@ s_lcomm_internal (needs_align, bytes_p)
 
       if (align)
 	frag_align (align, 0, 0);
-      
+
       /* Detach from old frag.	*/
       if (S_GET_SEGMENT (symbolP) == bss_seg)
 	symbol_get_frag (symbolP)->fr_symbol = NULL;
@@ -2151,7 +2151,7 @@ s_lsym (ignore)
   p = input_line_pointer;
   *p = c;
   SKIP_WHITESPACE ();
-  
+
   if (*input_line_pointer != ',')
     {
       *p = 0;
@@ -2160,10 +2160,10 @@ s_lsym (ignore)
       ignore_rest_of_line ();
       return;
     }
-  
+
   input_line_pointer++;
   expression (&exp);
-  
+
   if (exp.X_op != O_constant
       && exp.X_op != O_register)
     {
@@ -2171,7 +2171,7 @@ s_lsym (ignore)
       ignore_rest_of_line ();
       return;
     }
-  
+
   *p = 0;
   symbolP = symbol_find_or_make (name);
 
@@ -2197,7 +2197,7 @@ s_lsym (ignore)
     {
       as_bad (_("Symbol %s already defined"), name);
     }
-  
+
   *p = c;
   demand_empty_rest_of_line ();
 }
@@ -2235,7 +2235,7 @@ get_line_sb (line)
 #endif
 
   inquote = '\0';
-  
+
   while (!is_end_of_line[(unsigned char) *input_line_pointer]
 	 || (inquote != '\0' && *input_line_pointer != '\n'))
     {
@@ -2248,10 +2248,10 @@ get_line_sb (line)
 	  else if (*input_line_pointer == quote2)
 	    inquote = quote2;
 	}
-      
+
       sb_add_char (line, *input_line_pointer++);
     }
-  
+
   while (input_line_pointer < buffer_limit
 	 && is_end_of_line[(unsigned char) *input_line_pointer])
     {
@@ -2259,7 +2259,7 @@ get_line_sb (line)
 	bump_line_counters ();
       ++input_line_pointer;
     }
-  
+
   return 1;
 }
 
@@ -2472,7 +2472,7 @@ s_mri_sect (type)
 	  ++input_line_pointer;
 	}
       while (isdigit ((unsigned char) *input_line_pointer));
-      
+
       c = *input_line_pointer;
       *input_line_pointer = '\0';
     }
@@ -2945,13 +2945,13 @@ s_space (mult)
 	      as_bad (_("space allocation too complex in absolute section"));
 	      subseg_set (text_section, 0);
 	    }
-	  
+
 	  if (mri_common_symbol != NULL)
 	    {
 	      as_bad (_("space allocation too complex in common section"));
 	      mri_common_symbol = NULL;
 	    }
-	  
+
 	  if (!need_pass_2)
 	    p = frag_var (rs_space, 1, 1, (relax_substateT) 0,
 			  make_expr_symbol (&exp), (offsetT) 0, (char *) 0);
@@ -3114,12 +3114,12 @@ ignore_rest_of_line ()
       else
 	as_bad (_("Rest of line ignored. First ignored character valued 0x%x."),
 		*input_line_pointer);
-      
+
       while (input_line_pointer < buffer_limit
 	     && !is_end_of_line[(unsigned char) *input_line_pointer])
 	input_line_pointer++;
     }
-  
+
   input_line_pointer++;
 
   /* Return pointing just after end-of-line.  */
@@ -3134,14 +3134,14 @@ discard_rest_of_line ()
     input_line_pointer++;
 
   input_line_pointer++;
-  
+
   /* Return pointing just after end-of-line.  */
   know (is_end_of_line[(unsigned char) input_line_pointer[-1]]);
 }
 
 /* In:	Pointer to a symbol.
   	Input_line_pointer->expression.
-  
+
    Out:	Input_line_pointer->just after any whitespace after expression.
   	Tried to set symbol to value of expression.
   	Will change symbols type, value, and frag;  */
@@ -3244,13 +3244,13 @@ pseudo_set (symbolP)
 }
 
 /*  			cons()
-  
+
    CONStruct more frag of .bytes, or .words etc.
    Should need_pass_2 be 1 then emit no frag(s).
    This understands EXPRESSIONS.
-  
+
    Bug (?)
-  
+
    This has a split personality. We use expression() to read the
    value. We can detect if the value won't fit in a byte or word.
    But we can't detect if expression() discarded significant digits
@@ -3898,11 +3898,11 @@ parse_mri_cons (exp, nbytes)
 	  result <<= 8;
 	  scan++;
 	}
-      
+
       /* Create correct expression.  */
       exp->X_op = O_constant;
       exp->X_add_number = result;
-      
+
       /* Fake it so that we can read the next char too.  */
       if (input_line_pointer[0] != '\'' ||
 	  (input_line_pointer[0] == '\'' && input_line_pointer[1] == '\''))
@@ -4050,12 +4050,12 @@ hex_float (float_type, bytes)
 }
 
 /*  			float_cons()
-  
+
    CONStruct some more frag chars of .floats .ffloats etc.
    Makes 0 or more new frags.
    If need_pass_2 == 1, no frags are emitted.
    This understands only floating literals, not expressions. Sorry.
-  
+
    A floating constant is defined by atof_generic(), except it is preceded
    by 0d 0f 0g or 0h. After observing the STRANGE way my BSD AS does its
    reading, I decided to be incompatible. This always tries to give you
@@ -4063,7 +4063,7 @@ hex_float (float_type, bytes)
    truncatation, restored noisy bits instead of trailing 0s AND gave you
    a choice of 2 flavours of noise according to which of 2 floating-point
    scanners you directed AS to use.
-  
+
    In:	input_line_pointer->whitespace before, or '0' of flonum.  */
 
 void
@@ -4137,7 +4137,7 @@ float_cons (float_type)
 
 	      ++input_line_pointer;
 	      expression (&count_exp);
-	      
+
 	      if (count_exp.X_op != O_constant
 		  || count_exp.X_add_number <= 0)
 		as_warn (_("unresolvable or nonpositive repeat count; using 1"));
@@ -4627,7 +4627,7 @@ next_char_of_string ()
 	      {
 		number = number * 8 + c - '0';
 	      }
-	    
+
 	    c = number & 0xff;
 	  }
 	  --input_line_pointer;
@@ -4771,7 +4771,7 @@ demand_copy_C_string (len_pointer)
 	    }
 	}
     }
-  
+
   return s;
 }
 
@@ -4813,9 +4813,9 @@ demand_copy_string (lenP)
 }
 
 /* In:	Input_line_pointer->next character.
-  
+
    Do:	Skip input_line_pointer over all whitespace.
-  
+
    Out:	1 if input_line_pointer->end-of-line.  */
 
 int
@@ -4906,16 +4906,16 @@ s_include (arg)
 	  ++input_line_pointer;
 	  ++i;
 	}
-      
+
       obstack_1grow (&notes, '\0');
       filename = obstack_finish (&notes);
       while (!is_end_of_line[(unsigned char) *input_line_pointer])
 	++input_line_pointer;
     }
-  
+
   demand_empty_rest_of_line ();
   path = xmalloc ((unsigned long) i + include_dir_maxlen + 5 /* slop */ );
-  
+
   for (i = 0; i < include_dir_count; i++)
     {
       strcpy (path, include_dirs[i]);
@@ -4927,7 +4927,7 @@ s_include (arg)
 	  goto gotit;
 	}
     }
-  
+
   free (path);
   path = filename;
 gotit:

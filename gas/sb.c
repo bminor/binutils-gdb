@@ -1,5 +1,5 @@
 /* sb.c - string buffer manipulation routines
-   Copyright (C) 1994, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995, 2000 Free Software Foundation, Inc.
 
    Written by Steve and Judy Chamberlain of Cygnus Support,
       sac@cygnus.com
@@ -19,7 +19,7 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA. */
+   02111-1307, USA.  */
 
 #include "config.h"
 #include <stdio.h>
@@ -62,7 +62,7 @@ int string_count[sb_max_power_two];
 
 static sb_list_vector free_list;
 
-/* initializes an sb. */
+/* initializes an sb.  */
 
 void
 sb_build (ptr, size)
@@ -97,7 +97,6 @@ sb_build (ptr, size)
   ptr->item = e;
 }
 
-
 void
 sb_new (ptr)
      sb *ptr;
@@ -129,7 +128,7 @@ sb_add_sb (ptr, s)
 }
 
 /* make sure that the sb at ptr has room for another len characters,
-   and grow it if it doesn't. */
+   and grow it if it doesn't.  */
 
 static void
 sb_check (ptr, len)
@@ -158,7 +157,7 @@ sb_reset (ptr)
   ptr->len = 0;
 }
 
-/* add character c to the end of the sb at ptr. */
+/* add character c to the end of the sb at ptr.  */
 
 void
 sb_add_char (ptr, c)
@@ -169,7 +168,7 @@ sb_add_char (ptr, c)
   ptr->ptr[ptr->len++] = c;
 }
 
-/* add null terminated string s to the end of sb at ptr. */
+/* add null terminated string s to the end of sb at ptr.  */
 
 void
 sb_add_string (ptr, s)
@@ -216,7 +215,7 @@ sb_print (outfile, ptr)
     }
 }
 
-void 
+void
 sb_print_at (outfile, idx, ptr)
      FILE *outfile;
      int idx;
@@ -228,7 +227,7 @@ sb_print_at (outfile, idx, ptr)
 }
 
 /* put a null at the end of the sb at in and return the start of the
-   string, so that it can be used as an arg to printf %s. */
+   string, so that it can be used as an arg to printf %s.  */
 
 char *
 sb_name (in)
@@ -267,7 +266,7 @@ sb_skip_white (idx, ptr)
 
 /* start at the index idx into the sb at ptr. skips whitespace,
    a comma and any following whitespace. returnes the index of the
-   next character. */
+   next character.  */
 
 int
 sb_skip_comma (idx, ptr)

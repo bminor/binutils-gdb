@@ -1,8 +1,18 @@
 2000-09-11  Kazu Hirata  <kazu@hxi.com>
 
-	* config/tc-i370.c: Fix formatting.
+	* bignum-copy.c: Fix formatting.
+	* config/tc-i370.c: Likewise.
 	* config/tc-i960.c: Likewise.
 	* config/tc-m68k.c: Likewise.
+	* ehopt.c: Likewise.
+	* flonum-copy.c: Likewise.
+	* flonum-konst.c: Likewise.
+	* flonum-mult.c: Likewise.
+	* literal.c: Likewise.
+	* read.c: Likewise.
+	* sb.c: Likewise.
+	* stabs.c: Likewise.
+	* subsegs.c: Likewise.
 
 2000-09-09  Philip Blundell  <philb@gnu.org>
 

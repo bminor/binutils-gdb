@@ -1,5 +1,6 @@
 /* flonum_mult.c - multiply two flonums
-   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1990, 1991, 1992, 2000
+   Free Software Foundation, Inc.
 
    This file is part of Gas, the GNU Assembler.
 
@@ -160,7 +161,7 @@ flonum_multip (a, b, product)
 	}
     }
   /* [P]-> position # size_of_sum + 1.
-     This is where 'carry' should go. */
+     This is where 'carry' should go.  */
 #ifdef TRACE
   printf ("final carry =%04x\n", carry);
 #endif

@@ -1,5 +1,5 @@
 /* flonum_const.c - Useful Flonum constants
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 1996
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -23,7 +23,7 @@
 #include "flonum.h"
 /* JF:  I added the last entry to this table, and I'm not
    sure if its right or not.  Could go either way.  I wish
-   I really understood this stuff. */
+   I really understood this stuff.  */
 
 const int table_size_of_flonum_powers_of_ten = 13;
 

@@ -1,5 +1,5 @@
 /* flonum_copy.c - copy a flonum
-   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1990, 1991, 1992, 2000 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -59,7 +59,7 @@ flonum_copy (in, out)
 	}
       else
 	{
-	  int shorten;		/* 1-origin. Number of littlenums we drop. */
+	  int shorten;		/* 1-origin. Number of littlenums we drop.  */
 
 	  shorten = in_length - out_length;
 	  /* Assume out_length >= 0 ! */
