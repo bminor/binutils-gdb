@@ -1,3 +1,14 @@
+start-sanitize-d10v
+Tue Oct 29 12:33:05 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* emulparams/d10velf.sh: Changes needed for D10V-EVA board. 
+	Set TEXT_START_ADDR to 0x1000000. Set READONLY_START_ADDR to 
+	0x2000000.
+	
+	* scripttempl/elfd10v.sc:  Fix calculation of .text.  Change
+	.stack to start at 0x2007ffe.
+
+end-sanitize-d10v	
 Mon Oct 28 15:37:00 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.tgt (sparclet*-*-aout*): Delete, use sparc*-*-aout*.
