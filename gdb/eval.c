@@ -1,5 +1,5 @@
 /* Evaluate expressions for GDB.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -42,6 +42,19 @@ static value_ptr evaluate_subexp_for_sizeof PARAMS ((struct expression *,
 
 static value_ptr evaluate_subexp_for_address PARAMS ((struct expression *,
 						      int *, enum noside));
+
+static value_ptr evaluate_subexp PARAMS ((struct type *, struct expression *,
+					  int *, enum noside));
+
+static char *get_label PARAMS ((struct expression *, int *));
+
+static value_ptr
+evaluate_struct_tuple PARAMS ((value_ptr, struct expression *, int *,
+			       enum noside, int));
+
+static LONGEST
+init_array_element PARAMS ((value_ptr, value_ptr, struct expression *,
+			    int *, enum noside, LONGEST, LONGEST));
 
 #ifdef __GNUC__
 inline
@@ -321,6 +334,7 @@ init_array_element (array, element, exp, pos, noside, low_bound, high_bound)
      register struct expression *exp;
      register int *pos;
      enum noside noside;
+     LONGEST low_bound, high_bound;
 {
   LONGEST index;
   int element_size = TYPE_LENGTH (VALUE_TYPE (element));
@@ -510,6 +524,9 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	      low_bound = 0;
 	      high_bound = (TYPE_LENGTH (type) / element_size) - 1;
 	    }
+	  if (nargs > (high_bound - low_bound + 1))
+	    /* to avoid memory corruption */
+	    error ("Too many array elements");
 	  index = low_bound;
 	  memset (VALUE_CONTENTS_RAW (array), 0, TYPE_LENGTH (expect_type));
 	  for (tem = nargs;  --nargs >= 0;  )
@@ -1032,7 +1049,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (binop_user_defined_p (op, arg1, arg2))
-	return value_x_binop (arg1, arg2, op, OP_NULL);
+	return value_x_binop (arg1, arg2, op, OP_NULL, noside);
       else
 	return value_concat (arg1, arg2);
 
@@ -1042,7 +1059,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
 	return arg1;
       if (binop_user_defined_p (op, arg1, arg2))
-	return value_x_binop (arg1, arg2, op, OP_NULL);
+	return value_x_binop (arg1, arg2, op, OP_NULL, noside);
       else
 	return value_assign (arg1, arg2);
 
@@ -1054,7 +1071,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	return arg1;
       op = exp->elts[pc + 1].opcode;
       if (binop_user_defined_p (op, arg1, arg2))
-	return value_x_binop (arg1, arg2, BINOP_ASSIGN_MODIFY, op);
+	return value_x_binop (arg1, arg2, BINOP_ASSIGN_MODIFY, op, noside);
       else if (op == BINOP_ADD)
 	arg2 = value_add (arg1, arg2);
       else if (op == BINOP_SUB)
@@ -1069,7 +1086,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (binop_user_defined_p (op, arg1, arg2))
-	return value_x_binop (arg1, arg2, op, OP_NULL);
+	return value_x_binop (arg1, arg2, op, OP_NULL, noside);
       else
 	return value_add (arg1, arg2);
 
@@ -1079,7 +1096,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (binop_user_defined_p (op, arg1, arg2))
-	return value_x_binop (arg1, arg2, op, OP_NULL);
+	return value_x_binop (arg1, arg2, op, OP_NULL, noside);
       else
 	return value_sub (arg1, arg2);
 
@@ -1097,7 +1114,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (binop_user_defined_p (op, arg1, arg2))
-	return value_x_binop (arg1, arg2, op, OP_NULL);
+	return value_x_binop (arg1, arg2, op, OP_NULL, noside);
       else
 	if (noside == EVAL_AVOID_SIDE_EFFECTS
 	    && (op == BINOP_DIV || op == BINOP_REM || op == BINOP_MOD))
@@ -1117,24 +1134,31 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	{
-	  /* If the user attempts to subscript something that has no target
-	     type (like a plain int variable for example), then report this
-	     as an error. */
-
-	  type = TYPE_TARGET_TYPE (check_typedef (VALUE_TYPE (arg1)));
-	  if (type)
-	    return value_zero (type, VALUE_LVAL (arg1));
-	  else
-	    error ("cannot subscript something of type `%s'",
-		   TYPE_NAME (VALUE_TYPE (arg1)));
-	}
-			   
       if (binop_user_defined_p (op, arg1, arg2))
-	return value_x_binop (arg1, arg2, op, OP_NULL);
+	return value_x_binop (arg1, arg2, op, OP_NULL, noside);
       else
-	return value_subscript (arg1, arg2);
+        {
+	  /* If the user attempts to subscript something that is not an
+	     array or pointer type (like a plain int variable for example),
+	     then report this as an error. */
+
+	  COERCE_REF (arg1);
+	  type = check_typedef (VALUE_TYPE (arg1));
+	  if (TYPE_CODE (type) != TYPE_CODE_ARRAY
+	      && TYPE_CODE (type) != TYPE_CODE_PTR)
+	    {
+	      if (TYPE_NAME (type))
+		error ("cannot subscript something of type `%s'",
+		       TYPE_NAME (type));
+	      else
+		error ("cannot subscript requested type");
+	    }
+
+	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	    return value_zero (TYPE_TARGET_TYPE (type), VALUE_LVAL (arg1));
+	  else
+	    return value_subscript (arg1, arg2);
+        }
 
     case BINOP_IN:
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
@@ -1185,7 +1209,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	  
 	  if (binop_user_defined_p (op, arg1, arg2))
 	    {
-	      arg1 = value_x_binop (arg1, arg2, op, OP_NULL);
+	      arg1 = value_x_binop (arg1, arg2, op, OP_NULL, noside);
 	    }
 	  else
 	    {
@@ -1289,7 +1313,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       if (binop_user_defined_p (op, arg1, arg2)) 
 	{
 	  arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-	  return value_x_binop (arg1, arg2, op, OP_NULL);
+	  return value_x_binop (arg1, arg2, op, OP_NULL, noside);
 	}
       else
 	{
@@ -1315,7 +1339,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       if (binop_user_defined_p (op, arg1, arg2)) 
 	{
 	  arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-	  return value_x_binop (arg1, arg2, op, OP_NULL);
+	  return value_x_binop (arg1, arg2, op, OP_NULL, noside);
 	}
       else
 	{
@@ -1333,7 +1357,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	goto nosideret;
       if (binop_user_defined_p (op, arg1, arg2))
 	{
-	  return value_x_binop (arg1, arg2, op, OP_NULL);
+	  return value_x_binop (arg1, arg2, op, OP_NULL, noside);
 	}
       else
 	{
@@ -1348,7 +1372,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	goto nosideret;
       if (binop_user_defined_p (op, arg1, arg2))
 	{
-	  return value_x_binop (arg1, arg2, op, OP_NULL);
+	  return value_x_binop (arg1, arg2, op, OP_NULL, noside);
 	}
       else
 	{
@@ -1363,7 +1387,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	goto nosideret;
       if (binop_user_defined_p (op, arg1, arg2))
 	{
-	  return value_x_binop (arg1, arg2, op, OP_NULL);
+	  return value_x_binop (arg1, arg2, op, OP_NULL, noside);
 	}
       else
 	{
@@ -1378,7 +1402,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	goto nosideret;
       if (binop_user_defined_p (op, arg1, arg2))
 	{
-	  return value_x_binop (arg1, arg2, op, OP_NULL);
+	  return value_x_binop (arg1, arg2, op, OP_NULL, noside);
 	}
       else
 	{
@@ -1393,7 +1417,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	goto nosideret;
       if (binop_user_defined_p (op, arg1, arg2))
 	{
-	  return value_x_binop (arg1, arg2, op, OP_NULL);
+	  return value_x_binop (arg1, arg2, op, OP_NULL, noside);
 	}
       else
 	{
@@ -1408,7 +1432,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	goto nosideret;
       if (binop_user_defined_p (op, arg1, arg2))
 	{
-	  return value_x_binop (arg1, arg2, op, OP_NULL);
+	  return value_x_binop (arg1, arg2, op, OP_NULL, noside);
 	}
       else 
 	{
@@ -1440,7 +1464,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (unop_user_defined_p (op, arg1))
-	return value_x_unop (arg1, op);
+	return value_x_unop (arg1, op, noside);
       else
 	return value_neg (arg1);
 
@@ -1452,7 +1476,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (unop_user_defined_p (UNOP_COMPLEMENT, arg1))
-	return value_x_unop (arg1, UNOP_COMPLEMENT);
+	return value_x_unop (arg1, UNOP_COMPLEMENT, noside);
       else
 	return value_complement (arg1);
 
@@ -1461,7 +1485,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (unop_user_defined_p (op, arg1))
-	return value_x_unop (arg1, op);
+	return value_x_unop (arg1, op, noside);
       else
 	return value_from_longest (builtin_type_int,
 				   (LONGEST) value_logical_not (arg1));
@@ -1544,7 +1568,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	return arg1;
       else if (unop_user_defined_p (op, arg1))
 	{
-	  return value_x_unop (arg1, op);
+	  return value_x_unop (arg1, op, noside);
 	}
       else
 	{
@@ -1559,7 +1583,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	return arg1;
       else if (unop_user_defined_p (op, arg1))
 	{
-	  return value_x_unop (arg1, op);
+	  return value_x_unop (arg1, op, noside);
 	}
       else
 	{
@@ -1574,7 +1598,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	return arg1;
       else if (unop_user_defined_p (op, arg1))
 	{
-	  return value_x_unop (arg1, op);
+	  return value_x_unop (arg1, op, noside);
 	}
       else
 	{
@@ -1590,7 +1614,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	return arg1;
       else if (unop_user_defined_p (op, arg1))
 	{
-	  return value_x_unop (arg1, op);
+	  return value_x_unop (arg1, op, noside);
 	}
       else
 	{

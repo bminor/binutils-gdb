@@ -1,5 +1,6 @@
 /* Definitions for values of C expressions, for GDB.
-   Copyright 1986, 1987, 1989, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1992, 1993, 1994, 1995, 1996
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -15,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #if !defined (VALUE_H)
 #define VALUE_H 1
@@ -88,10 +89,6 @@ struct value
       char *myaddr;
     } substring_addr;
 
-    /* If an lval is forced to repeat, a new value is created with
-       these fields set.  The new value is not an lval.  */
-    short repeated;
-    short repetitions;
     /* Register number if the value is from a register.  Is not kept
        if you take a field of a structure that is stored in a
        register.  Shouldn't it be?  */
@@ -142,18 +139,18 @@ extern int value_fetch_lazy PARAMS ((value_ptr val));
 #define VALUE_BITSIZE(val) (val)->bitsize
 #define VALUE_BITPOS(val) (val)->bitpos
 #define VALUE_NEXT(val) (val)->next
-#define VALUE_REPEATED(val) (val)->repeated
-#define VALUE_REPETITIONS(val) (val)->repetitions
 #define VALUE_REGNO(val) (val)->regno
 #define VALUE_OPTIMIZED_OUT(val) ((val)->optimized_out)
 
 /* Convert a REF to the object referenced. */
 
 #define COERCE_REF(arg)    \
-{ if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_REF)			\
-    arg = value_at_lazy (TYPE_TARGET_TYPE (VALUE_TYPE (arg)),		\
-			 unpack_long (VALUE_TYPE (arg),			\
-				      VALUE_CONTENTS (arg)));}
+do { CHECK_TYPEDEF (VALUE_TYPE (arg));                                  \
+     if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_REF)			\
+     arg = value_at_lazy (TYPE_TARGET_TYPE (VALUE_TYPE (arg)),		\
+			  unpack_long (VALUE_TYPE (arg),		\
+				       VALUE_CONTENTS (arg)));          \
+} while (0)
 
 /* If ARG is an array, convert it to a pointer.
    If ARG is an enum, convert it to an integer.
@@ -162,24 +159,24 @@ extern int value_fetch_lazy PARAMS ((value_ptr val));
    References are dereferenced.  */
 
 #define COERCE_ARRAY(arg)    \
-{ COERCE_REF(arg);							\
+do { COERCE_REF(arg);							\
   if (current_language->c_style_arrays					\
-      && (VALUE_REPEATED (arg)						\
-	  || TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY))		\
+      && TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ARRAY)		\
     arg = value_coerce_array (arg);					\
   if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_FUNC)                   \
     arg = value_coerce_function (arg);                                  \
-  if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ENUM)			\
-    arg = value_cast (builtin_type_unsigned_int, arg);			\
-}
+} while (0)
 
-#define COERCE_VARYING_ARRAY(arg)	\
-{ if (chill_varying_type (VALUE_TYPE (arg))) arg = varying_to_slice (arg); }
+#define COERCE_NUMBER(arg)  \
+  do { COERCE_ARRAY(arg);  COERCE_ENUM(arg); } while (0)
+
+#define COERCE_VARYING_ARRAY(arg, real_arg_type)	\
+{ if (chill_varying_type (real_arg_type))  \
+    arg = varying_to_slice (arg), real_arg_type = VALUE_TYPE (arg); }
 
 /* If ARG is an enum, convert it to an integer.  */
 
-#define COERCE_ENUM(arg)    \
-{ COERCE_REF (arg); \
+#define COERCE_ENUM(arg)   { \
   if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_ENUM)			\
     arg = value_cast (builtin_type_unsigned_int, arg);			\
 }
@@ -215,14 +212,14 @@ print_address_demangle PARAMS ((CORE_ADDR, GDB_FILE *, int));
 
 extern LONGEST value_as_long PARAMS ((value_ptr val));
 
-extern double value_as_double PARAMS ((value_ptr val));
+extern DOUBLEST value_as_double PARAMS ((value_ptr val));
 
 extern CORE_ADDR value_as_pointer PARAMS ((value_ptr val));
 
 extern LONGEST unpack_long PARAMS ((struct type *type, char *valaddr));
 
-extern double unpack_double PARAMS ((struct type *type, char *valaddr,
-				     int *invp));
+extern DOUBLEST unpack_double PARAMS ((struct type *type, char *valaddr,
+				       int *invp));
 
 extern CORE_ADDR unpack_pointer PARAMS ((struct type *type, char *valaddr));
 
@@ -231,7 +228,7 @@ extern LONGEST unpack_field_as_long PARAMS ((struct type *type, char *valaddr,
 
 extern value_ptr value_from_longest PARAMS ((struct type *type, LONGEST num));
 
-extern value_ptr value_from_double PARAMS ((struct type *type, double num));
+extern value_ptr value_from_double PARAMS ((struct type *type, DOUBLEST num));
 
 extern value_ptr value_at PARAMS ((struct type *type, CORE_ADDR addr));
 
@@ -334,6 +331,9 @@ extern value_ptr evaluate_expression PARAMS ((struct expression *exp));
 
 extern value_ptr evaluate_type PARAMS ((struct expression *exp));
 
+extern value_ptr evaluate_subexp_with_coercion PARAMS ((struct expression *,
+							int *, enum noside));
+
 extern value_ptr parse_and_eval PARAMS ((char *exp));
 
 extern value_ptr parse_to_comma_and_eval PARAMS ((char **expp));
@@ -369,9 +369,11 @@ extern value_ptr value_of_this PARAMS ((int complain));
 
 extern value_ptr value_x_binop PARAMS ((value_ptr arg1, value_ptr arg2,
 					enum exp_opcode op,
-					enum exp_opcode otherop));
+					enum exp_opcode otherop,
+					enum noside noside));
 
-extern value_ptr value_x_unop PARAMS ((value_ptr arg1, enum exp_opcode op));
+extern value_ptr value_x_unop PARAMS ((value_ptr arg1, enum exp_opcode op,
+				       enum noside noside));
 
 extern value_ptr value_fn_field PARAMS ((value_ptr *arg1p, struct fn_field *f,
 					 int j,
@@ -479,7 +481,7 @@ clear_internalvars PARAMS ((void));
 
 extern value_ptr value_copy PARAMS ((value_ptr));
 
-extern int baseclass_offset PARAMS ((struct type *, int, value_ptr, int));
+extern int baseclass_offset PARAMS ((struct type *, int, char *, CORE_ADDR));
 
 /* From valops.c */
 
@@ -490,5 +492,9 @@ extern value_ptr value_slice PARAMS ((value_ptr, int, int));
 extern value_ptr call_function_by_hand PARAMS ((value_ptr, int, value_ptr *));
 
 extern value_ptr value_literal_complex PARAMS ((value_ptr, value_ptr, struct type*));
+
+extern value_ptr find_function_in_inferior PARAMS ((char *));
+
+extern value_ptr value_allocate_space_in_inferior PARAMS ((int));
 
 #endif	/* !defined (VALUE_H) */

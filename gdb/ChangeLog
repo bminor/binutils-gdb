@@ -1,3 +1,24 @@
+Wed Sep  4 06:49:35 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* ch-exp.c (parse_tuple_element): Allow (*): for array tuples
+	if we have a type.
+
+	* eval.c (evaluate_subexp_standard): In case of OP_ARRAY:
+	check number of args against bounds of array to avoid
+	memory corruption.
+
+	* value.h (COERCE_REF): Do a CHECK_TYPEDEF in case we get
+	a TYPE_CODE_TYPEDEF.
+
+Fri Aug 30 15:07:14 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* remote-mips.c: Provide support for CAIRO target board.
+	(cairo_open, cairo_ops): Added.
+	(mips_monitor_type): MON_CAIRO Added.
+	(mips_enter_debug, mips_exit_debug, mips_initialize,
+ 	mips_fetch_registers, common_breakpoint, mips_load,
+ 	_initialize_remote_mips): Updated.
+
 Thu Aug 29 17:00:18 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* nlm/configure.in (i[345]86-*-*): Recognize i686 for pentium pro.

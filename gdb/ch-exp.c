@@ -161,8 +161,8 @@ static void parse_operand5 PARAMS ((void));
 static void parse_operand6 PARAMS ((void));
 static void parse_primval PARAMS ((void));
 static void parse_tuple PARAMS ((struct type *));
-static void parse_opt_element_list PARAMS ((void));
-static void parse_tuple_element PARAMS ((void));
+static void parse_opt_element_list PARAMS ((struct type *));
+static void parse_tuple_element PARAMS ((struct type *));
 static void parse_named_record_element PARAMS ((void));
 static void parse_call PARAMS ((void));
 static struct type *parse_mode_or_normal_call PARAMS ((void));
@@ -549,10 +549,11 @@ parse_named_record_element ()
   write_exp_elt_opcode (OP_LABELED);
 }
 
-/* Returns one or nore TREE_LIST nodes, in reverse order. */
+/* Returns one or more TREE_LIST nodes, in reverse order. */
 
 static void
-parse_tuple_element ()
+parse_tuple_element (type)
+     struct type *type;
 {
   if (PEEK_TOKEN () == FIELD_NAME)
     {
@@ -566,7 +567,32 @@ parse_tuple_element ()
       if (check_token ('*'))
 	{
 	  expect (')', "missing ')' after '*' case label list");
-	  error ("(*) not implemented in case label list");
+	  if (type)
+	    {
+	      if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+		{
+		  /* do this as a range from low to high */
+		  struct type *range_type = TYPE_FIELD_TYPE (type, 0);
+		  LONGEST low_bound, high_bound;
+		  if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
+		    error ("cannot determine bounds for (*)");
+		  /* lower bound */
+		  write_exp_elt_opcode (OP_LONG);
+		  write_exp_elt_type (range_type);
+		  write_exp_elt_longcst (low_bound);
+		  write_exp_elt_opcode (OP_LONG);
+		  /* upper bound */
+		  write_exp_elt_opcode (OP_LONG);
+		  write_exp_elt_type (range_type);
+		  write_exp_elt_longcst (high_bound);
+		  write_exp_elt_opcode (OP_LONG);
+		  write_exp_elt_opcode (BINOP_RANGE);
+		}
+	      else
+		error ("(*) in invalid context");
+	    }
+	  else
+	    error ("(*) only possible with modename in front of tuple (mode[..])");
 	}
       else
 	{
@@ -592,14 +618,15 @@ parse_tuple_element ()
 /* Matches:  a COMMA-separated list of tuple elements.
    Returns a list (of TREE_LIST nodes). */
 static void
-parse_opt_element_list ()
+parse_opt_element_list (type)
+     struct type *type;
 {
   arglist_len = 0;
   if (PEEK_TOKEN () == ']')
     return;
   for (;;)
     {
-      parse_tuple_element ();
+      parse_tuple_element (type);
       arglist_len++;
       if (PEEK_TOKEN () == ']')
 	break;
@@ -615,17 +642,21 @@ static void
 parse_tuple (mode)
      struct type *mode;
 {
+  struct type *type;
+  if (mode)
+    type = check_typedef (mode);
+  else
+    type = 0;
   require ('[');
   start_arglist ();
-  parse_opt_element_list ();
+  parse_opt_element_list (type);
   expect (']', "missing ']' after tuple");
   write_exp_elt_opcode (OP_ARRAY);
   write_exp_elt_longcst ((LONGEST) 0);
   write_exp_elt_longcst ((LONGEST) end_arglist () - 1);
   write_exp_elt_opcode (OP_ARRAY);
-  if (mode)
+  if (type)
     {
-      struct type *type = check_typedef (mode);
       if (TYPE_CODE (type) != TYPE_CODE_ARRAY
 	  && TYPE_CODE (type) != TYPE_CODE_STRUCT
 	  && TYPE_CODE (type) != TYPE_CODE_SET)
