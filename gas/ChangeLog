@@ -1,3 +1,7 @@
+2000-08-16  Jason Eckhardt  <jle@cygnus.com>
+
+        * config/tc-i860.c (md_operand): Silly typo fixed.
+
 2000-08-16  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (struct asm_shift): Delete.

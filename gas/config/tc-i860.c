@@ -1125,7 +1125,7 @@ md_operand (exp)
 {
   char *s;
 
-  for (s = input_line_pointer; s; s++)
+  for (s = input_line_pointer; *s; s++)
     {
       if (s[0] == '+' && s[1] == '+')
 	{
