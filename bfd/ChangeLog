@@ -2,6 +2,7 @@
 
 	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Return -1 on errors
 	rather than 0.
+	(ppc64_elf_check_relocs): Remove unnecessary SEC_ALLOC check.
 
 2005-03-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
