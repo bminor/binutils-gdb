@@ -1,3 +1,13 @@
+Mon Nov 24 18:56:07 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* sim-io.c (sim_io_syscalls): New function to provide system call
+	emulation.  Provide exit, open, close, read, write, lseek, and
+	unlink.
+	(sim_io_getstring): New function to return a string from a
+	simulated memory location.
+
+	* sim-io.h (sim_io_syscalls): Add declaration.
+
 Mon Nov 24 12:09:59 1997  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim-core.c (sim_core_signal): Fix spelling error in message.
