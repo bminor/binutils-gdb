@@ -1,3 +1,10 @@
+2003-02-04  Andrew Cagney  <ac131313@redhat.com>
+
+	From Keith Seitz <keiths@redhat.com>:
+	* gdb.texinfo (Interpreters): New chapter.  Refer the command-line
+	option "-i"/"--interpreter" to this chapter.  Include index
+	entries.
+
 2003-02-04  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.texinfo (C@t{++}): Recommend DWARF 2, then stabs+.

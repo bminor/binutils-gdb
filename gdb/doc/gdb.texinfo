@@ -146,6 +146,7 @@ Copyright (C) 1988-2003 Free Software Foundation, Inc.
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
 * TUI::                         @value{GDBN} Text User Interface
+* Interpreters::		Command Interpreters
 * Emacs::                       Using @value{GDBN} under @sc{gnu} Emacs
 * Annotations::                 @value{GDBN}'s annotation interface.
 * GDB/MI::                      @value{GDBN}'s Machine Interface.
@@ -1124,6 +1125,7 @@ Do not use this option if you run @value{GDBN} from Emacs
 Use the interpreter @var{interp} for interface with the controlling
 program or device.  This option is meant to be set by programs which
 communicate with @value{GDBN} using it as a back end.
+@xref{Interpreters, , Command Interpreters}.
 
 @samp{--interpreter=mi} (or @samp{--interpreter=mi2}) causes
 @value{GDBN} to use the current @dfn{@sc{gdb/mi} interface}
@@ -13212,6 +13214,69 @@ The only backslash-escape sequences that you can use in the format
 string are the simple ones that consist of backslash followed by a
 letter.
 @end table
+
+@node Interpreters
+@chapter Command Interpreters
+@cindex command interpreters
+
+@value{GDBN} supports multiple command interpreters, and some command
+infrastructure to allow users or user interface writers to switch
+between interpreters or run commands in other interpreters.
+
+@value{GDBN} currently supports two command interpreters, the console
+interpreter (sometimes called the command-line interpreter or @sc{cli})
+and the machine interface interpreter (or @sc{gdb/mi}).  This manual
+describes both of these interfaces in great detail.
+
+By default, @value{GDBN} will start with the console interpreter.
+However, the user may choose to start @value{GDBN} with another
+interpreter by specifying the @option{-i} or @option{--interpreter}
+startup options.  Defined interpreters include:
+
+@table @code
+@item console
+@cindex console interpreter
+The traditional console or command-line interpreter.  This is the most often
+used interpreter with @value{GDBN}. With no interpreter specified at runtime,
+@value{GDBN} will use this interpreter.
+
+@item mi
+@cindex mi interpreter
+The newest @sc{gdb/mi} interface (currently @code{mi2}).  Used primarily
+by programs wishing to use @value{GDBN} as a backend for a debugger GUI
+or an IDE.  For more information, see @ref{GDB/MI, ,The @sc{gdb/mi}
+Interface}.
+
+@item mi2
+@cindex mi2 interpreter
+The current @sc{gdb/mi} interface.
+
+@item mi1
+@cindex mi1 interpreter
+The @sc{gdb/mi} interface included in @value{GDBN} 5.1, 5.2, and 5.3.
+
+@end table
+
+@cindex invoke another interpreter
+The interpreter being used by @value{GDBN} may not be dynamically
+switched at runtime.  Although possible, this could lead to a very
+precarious situation.  Consider an IDE using @sc{gdb/mi}.  If a user
+enters the command "interpreter-set console" in a console view,
+@value{GDBN} would switch to using the console interpreter, rendering
+the IDE inoperable!
+
+@kindex interpreter-exec
+Although you may only choose a single interpreter at startup, you may execute
+commands in any interpreter from the current interpreter using the appropriate
+command.  If you are running the console interpreter, simply use the
+@code{interpreter-exec} command:
+
+@smallexample
+interpreter-exec mi "-data-list-register-names"
+@end smallexample
+
+@sc{gdb/mi} has a similar command, although it is only available in versions of
+@value{GDBN} which support @sc{gdb/mi} version 2 (or greater).
 
 @node TUI
 @chapter @value{GDBN} Text User Interface
