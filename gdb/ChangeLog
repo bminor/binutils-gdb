@@ -1,3 +1,11 @@
+2003-06-13  Mark Kettenis  <kettenis@gnu.org>
+
+	From Kelley Cook  <kelleycook@wideopenwest.com>:
+	* configure.host: Accept i[34567]86 variants.
+	* configure.tgt: Likewise.
+	* nlm/configure.in: Likewise.
+	* nlm/configure: Regenerated.
+
 2003-06-13  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-tdep.c (solib-svr4.h): Dont' include it.
