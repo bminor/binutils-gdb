@@ -126,6 +126,18 @@ Fri Mar 27 16:06:02 1998  Ian Lance Taylor  <ian@cygnus.com>
 	int *.  Update uses.  Change j to long.
 	* bfd-in2.h, libcoff.h: Rebuild.
 
+Fri Mar 27 10:10:46 1998  Catherine Moore <clm@cygnus.com>
+         * elf32-v850.c Remove definition of USE_REL.
+         (v850_elf_info_to_howto_rela): New function.
+         (v850_elf_perform_relocation):  Renamed from 
+         v850_elf_store_addend_in_insn.  Removed replace argument.
+         (v850_elf_reloc): store the relocation in the addend field
+         instead of the insn.  
+         (v850_elf_final_link_relocate):  Now calls
+         v850_elf_perform_relocation.
+         (v850_elf_relocate_section):  Remove code to generate REL
+         relocations.
+ 
 Thu Mar 26 13:32:17 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffcode.h (coff_new_section_hook): Set the type and storage
