@@ -1,3 +1,31 @@
+Fri Jun 18 14:34:18 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* tc-hppa.c: General cleanups of ELF support.  No more spaces
+	and subspaces for ELF.
+	(GDB_DEBUG_SPACE_NAME): Delete definition for ELF.
+	(GDB_STRINGS_SUBSPACE_NAME): Likewise.
+	(GDB_SYMBOLS_SUBSPACE_NAME): Likewise
+	(UNWIND_SECTION_NAME): Likewise.
+	(space/subspace related structures): Conditionalize definitions
+	on OBJ_SOM.
+	(space/subspace directives and support routines): Conditionalize
+	definitions and references/uses on OBJ_SOM.
+	(label_symbol_struct): For ELF, track the symbol's segment.  For
+	SOM track its space.
+	(pa_define_label, pa_undefine_label, pa_get_label): Corresponding
+	changes.
+	(USE_ALIASES): Kill for both SOM & ELF.
+	(pa_def_subspaces, pa_def_spaces): Corresponding changes.
+	(pa_space, pa_subspace): Corresponding changes.
+	(pa_spaces_begin): Corresponding chagnes.
+	(md_begin): Do not muck around with space/subspace stuff for
+	OBJ_ELF.
+	(md_apply_fix): Temporarily disable argument relocation stuff
+	for OBJ_ELF.
+	(tc_gen_reloc): Temporarily disable relocation generation for
+	OBJ_ELF
+	(pa_build_unwind_subspace): Similarly.
+
 1999-06-16  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (thumb_set): New pseudo op.
