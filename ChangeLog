@@ -1,3 +1,40 @@
+Tue Mar 28 14:47:34 1995  Jason Molenda (crash@phydeaux.cygnus.com)
+
+	build-all.mk,config/mh-solaris:  revert these two changes:
+
+	Tue Mar 30 10:03:09 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+		* build-all.mk: Use CC=cc -Xs on Solaris.
+
+	Mon Mar 29 19:59:26 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+		* config/mh-solaris: SunPRO C needs -Xs to be able to get a
+		working xmakefile for Emacs.
+
+Tue Mar 21 10:43:32 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* glob/*: Removed.  Schauer's 24 Feb 1994 readline change made us
+	stop using it.
+	* Makefile.in: Nuke all references to glob subdirectory.
+
+Thu Mar 16 13:35:30 1995  Jason Merrill  <jason@phydeaux.cygnus.com>
+
+	* configure.in: Fix --enable-shared logic in per-host.
+
+Mon Mar 13 12:33:15 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in (*-hp-hpux[78]*): Use mh-hpux8.
+
+Mon Mar  6 10:21:58 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in (noconfigdirs): Don't build gas on AIX, for
+	powerpc*-*-aix* as well as for rs6000*-*-aix*.
+
+Wed Mar  1 12:51:53 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Fix --cache-file to work if the file argument is a
+	relative path.
+
 Tue Feb 28 17:36:07 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: If the --cache-file is used, pass it down to

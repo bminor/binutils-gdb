@@ -161,7 +161,7 @@ TARGETS = $(NATIVE) \
 # do for themselves from sources) hasn't developed bit-rot.
 # The OSE68000 and OSE68k targets are for Ericsson only.
 
-CC = cc -Xs
+CC = cc
 GCC = gcc -O2 -pipe
 all: all-cygnus
 endif
