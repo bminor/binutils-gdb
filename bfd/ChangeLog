@@ -1,3 +1,7 @@
+Wed Jun 23 11:34:21 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* hosts/riscos.h: New file.
+
 Tue Jun 22 14:35:20 1993  Ken Raeburn  (raeburn@poseidon.cygnus.com)
 
 	* elfcode.h (bfd_section_from_shdr, case SHT_PROGBITS): Even if
