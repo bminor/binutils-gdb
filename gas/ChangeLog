@@ -5,6 +5,9 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* config/obj-coff.c (obj_coff_loc): New static function.
+	(obj_pseudo_table): Add "loc".
+
 	* config/obj-coff.c (add_lineno): Check that the line number is
 	positive.
 

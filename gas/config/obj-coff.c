@@ -42,6 +42,9 @@ static void obj_coff_scl PARAMS ((int));
 static void obj_coff_tag PARAMS ((int));
 static void obj_coff_val PARAMS ((int));
 static void obj_coff_type PARAMS ((int));
+#ifdef BFD_ASSEMBLER
+static void obj_coff_loc PARAMS((int));
+#endif
 
 /* This is used to hold the symbol built by a sequence of pseudo-ops
    from .def and .endef.  */
@@ -498,6 +501,55 @@ obj_coff_ln (appline)
 #endif
 
   demand_empty_rest_of_line ();
+}
+
+/* .loc is essentially the same as .ln; parse it for assembler
+   compatibility.  */
+
+static void
+obj_coff_loc (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  int lineno;
+
+  /* FIXME: Why do we need this check?  We need it for ECOFF, but why
+     do we need it for COFF?  */
+  if (now_seg != text_section)
+    {
+      as_warn (_(".loc outside of .text"));
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  if (def_symbol_in_progress != NULL)
+    {
+      as_warn (_(".loc pseudo-op inside .def/.endef: ignored."));
+      demand_empty_rest_of_line ();
+      return;
+    }
+
+  /* Skip the file number.  */
+  SKIP_WHITESPACE ();
+  get_absolute_expression ();
+  SKIP_WHITESPACE ();
+
+  lineno = get_absolute_expression ();
+
+#ifndef NO_LISTING
+  {
+    extern int listing;
+
+    if (listing)
+      {
+        lineno += coff_line_base - 1;
+	listing_source_line (lineno);
+      }
+  }
+#endif
+
+  demand_empty_rest_of_line ();
+
+  add_lineno (frag_now, frag_now_fix (), lineno);
 }
 
 /*
@@ -4419,6 +4471,9 @@ const pseudo_typeS obj_pseudo_table[] =
   {"endef", obj_coff_endef, 0},
   {"line", obj_coff_line, 0},
   {"ln", obj_coff_ln, 0},
+#ifdef BFD_ASSEMBLER
+  {"loc", obj_coff_loc, 0},
+#endif
   {"appline", obj_coff_ln, 1},
   {"scl", obj_coff_scl, 0},
   {"size", obj_coff_size, 0},
