@@ -4218,7 +4218,7 @@ stab_demangle_qualified (minfo, pp, ptype)
 
 	      if (context == DEBUG_TYPE_NULL)
 		{
-	  /* We have to fall back on finding the type by name.
+		  /* We have to fall back on finding the type by name.
                      If there are more types to come, then this must
                      be a class.  Otherwise, it could be anything.  */
 
