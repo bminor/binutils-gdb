@@ -302,8 +302,8 @@ typedef struct {
 } object_headers;
 
 /* unused hooks. */
-#define OBJ_EMIT_LINENO(a, b, c)	;
-#define obj_pre_write_hook(a)		;
+#define OBJ_EMIT_LINENO(a, b, c)	{;}
+#define obj_pre_write_hook(a)		{;}
 
 #ifdef __STDC__
 struct fix;
