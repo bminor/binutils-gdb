@@ -1,3 +1,8 @@
+Fri Aug  9 09:12:11 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tm-hppa.h (EXTRACT_RETURN_VALUE): Fix thinko in
+	last change.
+
 Thu Aug  8 10:12:36 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* symfile.c (symfile_bfd_open):  Change ifdef from __WIN32__ to
