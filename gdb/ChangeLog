@@ -1,3 +1,9 @@
+2004-03-15  Andrew Cagney  <cagney@redhat.com>
+
+	* infrun.c (handle_step_into_function, step_over_function): Only
+	update and use STEP_FRAME_ID when the system is using legacy
+	frames.  Update comments.
+
 2004-03-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64-linux-tdep.h: Remove file.
