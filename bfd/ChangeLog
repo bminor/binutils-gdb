@@ -1,3 +1,25 @@
+Mon Jan 27 19:44:08 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	New entry point in the transfer vector - bfd_relax_section.
+
+	* aout-target.h: add to vector, call generic_relax
+	* bfd-in.h: add to vector
+	* bfd.c: add #define for vector
+	* bout.c: add to vector, call generic_relax
+	* coffcode.h: add to vector, also now has coff specific relax code
+	for the relaxable H8/300 relocs. Also clean up abs section cruft.
+	* elf.c: call generic_relax
+	* ieee.c: call new vector, clean up some bugs due to the creation
+	of bfd_abs_section
+	* libbfd.h: add bfd_generic_relax_section EXFUN
+	* oasys.c: call generic_relax
+	* reloc.c: implement generic_relax
+	* seclet.c: moved much of this into coffcode.h
+	* srec.c: call generic_relax
+	* targets.c: define new transfer vector
+
+	
+
 Fri Jan 24 14:40:17 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* everything: now modified to use smaller reloc type. Self hosts

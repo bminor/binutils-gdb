@@ -18,6 +18,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+/* 
+Most of this hacked by  Steve Chamberlain,
+			sac@cygnus.com 
+*/
 /*
 
 SECTION
@@ -256,7 +260,10 @@ CODE_FRAGMENT
 
 */
 
-/* Most of this hacked by Steve Chamberlain, steve@cygnus.com */
+#include "seclet.h"
+extern bfd_error_vector_type bfd_error_vector;
+
+
 
 
 #define PUTWORD bfd_h_put_32
@@ -882,11 +889,17 @@ DEFUN(coff_new_section_hook,(abfd_ignore, section),
   return true;
 }
 
+static asection bfd_debug_section = 
+{ "*DEBUG*" };
+
+
+
 static void
 DEFUN(make_abs_section,(abfd),
       bfd *abfd)
 {
-  abort();
+    
+
   
 }
 
@@ -965,7 +978,7 @@ DEFUN(coff_mkobject,(abfd),
     return false;
   }
   coff_data(abfd)->relocbase = 0;
-  make_abs_section(abfd);
+/*  make_abs_section(abfd);*/
   return true;
 }
 
@@ -1379,10 +1392,13 @@ DEFUN(coff_mangle_symbols,(bfd_ptr),
 	    if (a->fix_tag) {
 	      a->u.auxent.x_sym.x_tagndx.l =
 		a->u.auxent.x_sym.x_tagndx.p->offset;
+	      a->fix_tag = 0;
 	    }
 	    if (a->fix_end) {
 	      a->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l =
 		a->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p->offset;
+	      a->fix_end = 0;
+	      
 	    }
 
 	  }
@@ -1456,20 +1472,37 @@ unsigned int written)
   int             class =  native->u.syment.n_sclass;
   SYMENT buf;
   unsigned int j;
-  native->u.syment.n_scnum = symbol->section->output_section->target_index;
+  if (symbol->section == &bfd_abs_section) 
+  {
+    native->u.syment.n_scnum = N_ABS;
+  }
+  else if (symbol->section == &bfd_debug_section) 
+  {
+    native->u.syment.n_scnum = N_DEBUG;
+  }
+  else if (symbol->section == &bfd_und_section)   
+  {
+    native->u.syment.n_scnum = N_UNDEF;
+  }
+  else 
+  {
+    native->u.syment.n_scnum =
+     symbol->section->output_section->target_index;
+  }
+  
   
   coff_fix_symbol_name(abfd, symbol, native);
 
   coff_swap_sym_out(abfd, &native->u.syment, &buf);
   bfd_write((PTR)& buf, 1, SYMESZ, abfd);
   for (j = 0; j != native->u.syment.n_numaux;  j++)
-      {
-	AUXENT buf1;
-	bzero((PTR)&buf, AUXESZ);
-	coff_swap_aux_out(abfd,
-			 &( (native + j + 1)->u.auxent), type, class, &buf1);
-	bfd_write((PTR) (&buf1), 1, AUXESZ, abfd);
-      }
+  {
+    AUXENT buf1;
+    bzero((PTR)&buf, AUXESZ);
+    coff_swap_aux_out(abfd,
+		      &( (native + j + 1)->u.auxent), type, class, &buf1);
+    bfd_write((PTR) (&buf1), 1, AUXESZ, abfd);
+  }
   /*
     Reuse somewhere in the symbol to keep the index
     */
@@ -1496,7 +1529,8 @@ DEFUN(coff_write_alien_symbol,(abfd, symbol, written),
 #ifdef I960
   native->u.syment.n_flags =  0;
 #endif
-  if (symbol->section == &bfd_und_section) {
+  if (symbol->section == &bfd_und_section) 
+  {
       native->u.syment.n_scnum =  N_UNDEF;
       native->u.syment.n_value =  symbol->value;
     }
@@ -2033,7 +2067,7 @@ DEFUN(coff_compute_section_file_positions,(abfd),
       old_sofar= sofar;
       sofar = BFD_ALIGN(sofar, 1 << current->alignment_power);
       if (previous != (asection *)NULL) {
-	  previous->_cooked_size += sofar - old_sofar;
+	  previous->_raw_size += sofar - old_sofar;
 	}
     }
 
@@ -2046,7 +2080,7 @@ DEFUN(coff_compute_section_file_positions,(abfd),
       current->filepos = sofar;
 
       /* make sure that this section is of the right size too */
-      old_sofar =  sofar += current->_cooked_size;
+      old_sofar =  sofar += current->_raw_size;
       sofar = BFD_ALIGN(sofar, 1 << current->alignment_power);
       current->_raw_size += sofar - old_sofar ;
 
@@ -2091,14 +2125,12 @@ DEFUN(coff_write_object_contents,(abfd),
   for (current = abfd->sections; current != (asection *)NULL; 
        current = current->next) 
   {
-    if (current->name[0] != '*') 
-    {
       current->target_index = count;
-      count++;
-    }
   }
   
     
+
+
 
   if(abfd->output_has_begun == false) {
       coff_compute_section_file_positions(abfd);
@@ -2195,12 +2227,12 @@ DEFUN(coff_write_object_contents,(abfd),
 	strncpy(&(section.s_name[0]), current->name, 8);
 	section.s_vaddr = current->vma + pad;
 	section.s_paddr = current->vma + pad;
-	section.s_size = current->_cooked_size - pad;
+	section.s_size = current->_raw_size - pad;
 	/*
 	  If this section has no size or is unloadable then the scnptr
 	  will be 0 too
 	  */
-	if (current->_cooked_size - pad == 0 ||
+	if (current->_raw_size - pad == 0 ||
 	    (current->flags & SEC_LOAD) == 0) {
 	    section.s_scnptr = 0;
 	  }
@@ -2359,15 +2391,15 @@ DEFUN(coff_write_object_contents,(abfd),
     }
 #endif				/* NO_COFF_SYMBOLS */
   if (text_sec) {
-      internal_a.tsize = bfd_get_section_size_after_reloc(text_sec);
+      internal_a.tsize = bfd_get_section_size_before_reloc(text_sec);
       internal_a.text_start = internal_a.tsize ? text_sec->vma : 0;
     }
   if (data_sec) {
-      internal_a.dsize = bfd_get_section_size_after_reloc(data_sec);
+      internal_a.dsize = bfd_get_section_size_before_reloc(data_sec);
       internal_a.data_start = internal_a.dsize ? data_sec->vma      : 0;
     }
   if (bss_sec) {
-      internal_a.bsize = bfd_get_section_size_after_reloc(bss_sec);
+      internal_a.bsize = bfd_get_section_size_before_reloc(bss_sec);
     }
 
   internal_a.entry = bfd_get_start_address(abfd);
@@ -2411,14 +2443,15 @@ combined_entry_type *auxent)
 
   /* Otherwise patch up */
   if (ISFCN(type) || ISTAG(class) || class == C_BLOCK) {
-    auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p = table_base +
-      auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l;
-    auxent->fix_end = 1;
-  }
+      auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.p = table_base +
+       auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l;
+      auxent->fix_end = 1;
+    }
   if (auxent->u.auxent.x_sym.x_tagndx.l != 0) {
-    auxent->u.auxent.x_sym.x_tagndx.p = table_base +  auxent->u.auxent.x_sym.x_tagndx.l;
-    auxent->fix_tag = 1;
-  }
+      auxent->u.auxent.x_sym.x_tagndx.p =
+       table_base +  auxent->u.auxent.x_sym.x_tagndx.l;
+      auxent->fix_tag = 1;
+    }
 }
 
 #endif /* NO_COFF_SYMBOLS */
@@ -2753,6 +2786,20 @@ DEFUN(section_from_bfd_index,(abfd, index),
       int             index)
 {
   struct sec *answer = abfd->sections;
+
+  if (index == N_ABS) 
+  {
+    return &bfd_abs_section;
+  }
+  if (index == N_UNDEF)
+  {
+    return &bfd_und_section;
+  }
+  if(index == N_DEBUG)
+  {
+    return &bfd_debug_section;
+    
+  }
   
   while (answer) {
       if (answer->target_index == index)
@@ -3033,7 +3080,7 @@ DEFUN(coff_slurp_symbol_table,(abfd),
 	break;
       }
 
-      BFD_ASSERT(dst->symbol.flags != 0);
+/*      BFD_ASSERT(dst->symbol.flags != 0);*/
 
       dst->native = src;
 
@@ -3446,6 +3493,384 @@ DEFUN(coff_sizeof_headers,(abfd, reloc),
     return size;
 }
 
+static bfd_vma 
+DEFUN(get_value,(reloc, seclet),
+      arelent  *reloc AND
+      bfd_seclet_type *seclet)
+{
+  bfd_vma value;
+  asymbol *symbol = *(reloc->sym_ptr_ptr);
+  /* A symbol holds a pointer to a section, and an offset from the
+     base of the section.  To relocate, we find where the section will
+     live in the output and add that in */
+
+  if (symbol->section == &bfd_und_section)
+  {
+    /* Ouch, this is an undefined symbol.. */
+    bfd_error_vector.undefined_symbol(reloc, seclet);
+    value = symbol->value;
+  }
+  else 
+  {
+    value = symbol->value +
+     symbol->section->output_offset +
+      symbol->section->output_section->vma;
+  }
+  
+  
+  /* Add the value contained in the relocation */
+  value += (short)((reloc->addend) & 0xffff);
+  
+  return value;
+}
+
+static void
+DEFUN(perform_slip,(s, slip, input_section, value),
+      asymbol **s AND
+      unsigned int slip AND
+      asection *input_section AND
+      bfd_vma value)
+{
+  
+  /* Find all symbols past this point, and make them know
+     what's happened */
+  while (*s) 
+  {
+    asymbol *p = *s;
+    if (p->section == input_section) 
+    {
+      /* This was pointing into this section, so mangle it */
+      if (p->value > value)
+      {
+	p->value -=2;
+      }
+    }
+    s++;
+	
+  }    
+}
+static int 
+DEFUN(movb1,(input_section, symbols, r, shrink),
+      asection *input_section AND
+      asymbol **symbols AND
+      arelent *r AND
+      unsigned int shrink) 
+{
+  bfd_vma value = get_value(r,0);
+	
+  if (value >= 0xff00)
+  { 
+
+    /* Change the reloc type from 16bit, possible 8 to 8bit
+       possible 16 */
+    r->howto = r->howto + 1;	  
+    /* The place to relc moves back by one */
+    r->address -=1;
+	  
+    /* This will be two bytes smaller in the long run */
+    shrink +=2 ;
+    perform_slip(symbols, 2, input_section, r->address - shrink +1);
+
+	  
+  }      
+  return shrink;      
+}
+
+static int 
+DEFUN(jmp1,(input_section, symbols, r, shrink),
+      asection *input_section AND
+      asymbol **symbols AND
+      arelent *r AND
+      unsigned int shrink) 
+{
+
+  
+  bfd_vma value = get_value(r, 0);
+	
+  bfd_vma dot = input_section->output_section->vma +
+   input_section->output_offset + r->address;	
+  bfd_vma gap;
+  
+  /* See if the address we're looking at within 127 bytes of where
+     we are, if so then we can use a small branch rather than the
+     jump we were going to */
+
+  gap = value - (dot - shrink);
+  
+
+  if (-120 < (long)gap && (long)gap < 120 )
+  { 
+
+    /* Change the reloc type from 16bit, possible 8 to 8bit
+       possible 16 */
+    r->howto = r->howto + 1;	  
+    /* The place to relc moves back by one */
+    r->address -=1;
+	  
+    /* This will be two bytes smaller in the long run */
+    shrink +=2 ;
+    perform_slip(symbols, 2, input_section, r->address-shrink +1);
+
+	  
+  }      
+  return shrink;      
+}
+
+extern boolean 
+DEFUN(bfd_coff_relax_section,(abfd, i, symbols, seclet),
+      bfd *abfd AND
+      asection *i AND
+      asymbol **symbols AND
+      bfd_seclet_type *seclet)
+{
+  
+  /* Get enough memory to hold the stuff */
+  bfd *input_bfd = i->owner;
+  asection *input_section = i;
+  int shrink = 0 ;
+  int new = 0;
+  
+  bfd_size_type reloc_size = bfd_get_reloc_upper_bound(input_bfd,
+						       input_section);
+  arelent **reloc_vector = (arelent **)bfd_xmalloc(reloc_size);
+
+  /* Get the relocs and think about them */
+  if (bfd_canonicalize_reloc(input_bfd, 
+			     input_section,
+			     reloc_vector,
+			     symbols))
+  {
+    arelent **parent;
+    for (parent = reloc_vector; *parent; parent++) 
+    {
+      arelent *r = *parent;
+      switch (r->howto->type) {
+	case R_MOVB2:
+	case R_JMP2:
+	  
+	  shrink+=2;
+	  break;
+	  
+	case R_MOVB1:
+	  shrink = movb1(input_section, symbols, r, shrink);
+	  new = 1;
+	  
+	  break;
+	case R_JMP1:
+	  shrink = jmp1(input_section, symbols, r, shrink);
+	  new = 1;
+	  
+	  break;
+	}
+    }
+
+  }
+  input_section->_cooked_size -= shrink;  
+  free((char *)reloc_vector);
+  return new;
+}
+
+static bfd_byte *
+DEFUN(bfd_coff_get_relocated_section_contents,(in_abfd, seclet),
+      bfd *in_abfd AND
+      bfd_seclet_type *seclet)
+
+{
+  asymbol **symbols = 0;
+  extern bfd *output_bfd;
+
+  /* Get enough memory to hold the stuff */
+  bfd *input_bfd = seclet->u.indirect.section->owner;
+  asection *input_section = seclet->u.indirect.section;
+
+  char *data = malloc(input_section->_raw_size);
+  char *dst = data;
+  char *prev_dst = data;
+
+  unsigned int gap = 0;
+
+  bfd_size_type reloc_size = bfd_get_reloc_upper_bound(input_bfd,
+						       input_section);
+  arelent **reloc_vector = (arelent **)bfd_xmalloc(reloc_size);
+  
+  /* read in the section */
+  bfd_get_section_contents(input_bfd,
+			   input_section,
+			   data,
+			   0,
+			   input_section->_raw_size);
+  
+  
+  if (bfd_canonicalize_reloc(input_bfd, 
+			     input_section,
+			     reloc_vector,
+			     seclet->u.indirect.symbols) )
+  {
+    arelent **parent = reloc_vector;
+    arelent *reloc ;
+    
+
+
+    unsigned int dst_address = 0;
+    unsigned int src_address = 0;
+    unsigned int run;
+    unsigned int idx;
+    
+    /* Find how long a run we can do */
+    while (dst_address < seclet->size) 
+    {
+      
+      reloc = *parent;
+      if (reloc) 
+      {
+	/* Note that the relaxing didn't tie up the addresses in the
+	   relocation, so we use the original address to work out the
+	   run of non-relocated data */
+	run = reloc->address - src_address;
+	parent++;
+	
+      }
+      else 
+      {
+	run = seclet->size - dst_address;
+      }
+      /* Copy the bytes */
+      for (idx = 0; idx < run; idx++)
+      {
+	data[dst_address++] = data[src_address++];
+      }
+    
+      /* Now do the relocation */
+    
+      if (reloc) 
+      {
+	switch (reloc->howto->type) 
+	{
+	case R_JMP2:
+	  /* Speciial relaxed type */
+	{
+	  bfd_vma dot = seclet->offset + dst_address + seclet->u.indirect.section->output_section->vma;	  
+	  int   gap = get_value(reloc,seclet)-dot-1;
+	  if ((gap & ~0xff  ) != 0 &&((gap & 0xff00)!= 0xff00)) abort();
+
+	  bfd_put_8(in_abfd,gap,   data+dst_address);
+
+	  switch (data[dst_address-1]) 
+	  {
+	    
+	  case 0x5e:
+	    /* jsr -> bsr */
+	    bfd_put_8(in_abfd, 0x55, data+dst_address-1);
+	    break;
+	  case 0x5a:	 
+	    /* jmp ->bra */
+	    bfd_put_8(in_abfd, 0x40, data+dst_address-1);
+	    break;
+	  
+	  default:
+	    abort();
+	  
+	  }
+	
+	
+
+	     
+	  dst_address++;
+	  src_address+=3;
+  
+	  break;
+	}
+
+	     
+	case R_MOVB2:
+	  /* Special relaxed type, there will be a gap between where we
+	     get stuff from and where we put stuff to now 
+	     
+	     for a mov.b @aa:16 -> mov.b @aa:8
+	     opcode 0x6a 0x0y offset
+	     ->     0x2y off
+	     */
+	  if (data[dst_address-1] != 0x6a)
+	   abort();
+	  switch (data[dst_address] & 0xf0) 
+	  {
+	  case 0x00:
+	    /* Src is memory */
+	    data[dst_address-1] = (data[src_address] & 0xf) | 0x20;
+	    break;
+	  case 0x80:
+	    /* Src is reg */
+	    data[dst_address-1] = (data[src_address] & 0xf) | 0x30;
+	    break;
+	  default:
+	    abort();
+	  }
+	
+	  /* the offset must fit ! after all, what was all the relaxing
+	     about ? */
+
+	  bfd_put_8(in_abfd, get_value(reloc, seclet), data + dst_address);
+
+	  /* Note the magic - src goes up by two bytes, but dst by only
+	     one */
+	  dst_address+=1;
+	  src_address+=3;
+	
+	  break;
+	  /* PCrel 8 bits */
+	case R_PCRBYTE:	  
+	{
+	  bfd_vma dot = seclet->offset + dst_address + seclet->u.indirect.section->output_section->vma;	  
+	  int   gap = get_value(reloc,seclet)-dot;
+	  if (gap > 127 || gap < -128) 
+	  {
+	    bfd_error_vector.reloc_value_truncated(reloc, seclet);
+	  }
+	  
+	  bfd_put_8(in_abfd,gap,   data+dst_address);
+	  dst_address++;
+	  src_address++;
+  
+	  break;
+	}
+
+	case R_RELBYTE:
+	{
+	  unsigned  int gap =get_value(reloc,seclet);
+	  if (gap > 256)
+	  {
+	    bfd_error_vector.reloc_value_truncated(reloc, seclet);
+	  }
+	  
+	  bfd_put_8(in_abfd, gap, data+dst_address);
+	  dst_address+=1;
+	  src_address+=1;
+
+
+	}
+	  break; 
+	case R_JMP1:
+	  /* A relword which would have like to have been a pcrel */
+	case R_MOVB1:	
+	  /* A relword which would like to have been modified but
+	     didn't make it */
+	case R_RELWORD:
+	  bfd_put_16(in_abfd, get_value(reloc,seclet), data+dst_address);
+	  dst_address+=2;
+	  src_address+=2;
+	  break;
+	
+	default:
+	  abort();
+	}
+      }    
+    }
+  }
+  free((char *)reloc_vector);
+  return data;
+  
+}
+
 
 #define coff_core_file_failing_command	_bfd_dummy_core_file_failing_command
 #define coff_core_file_failing_signal	_bfd_dummy_core_file_failing_signal
@@ -3461,5 +3886,6 @@ DEFUN(coff_sizeof_headers,(abfd, reloc),
 #define coff_bfd_debug_info_start		bfd_void
 #define coff_bfd_debug_info_end		bfd_void
 #define coff_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
-#define coff_bfd_get_relocated_section_contents \
- bfd_generic_get_relocated_section_contents
+#define coff_bfd_get_relocated_section_contents  bfd_generic_get_relocated_section_contents
+#define coff_bfd_relax_section bfd_generic_relax_section
+

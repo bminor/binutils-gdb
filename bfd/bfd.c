@@ -573,6 +573,10 @@ DESCRIPTION
 .
 .#define bfd_get_relocated_section_contents(abfd, seclet) \
 .	BFD_SEND (abfd, _bfd_get_relocated_section_contents, (abfd, seclet))
+.
+.#define bfd_relax_section(abfd, section, symbols) \
+.       BFD_SEND (abfd, _bfd_relax_section, (abfd, section, symbols))
+
 */
 
 
