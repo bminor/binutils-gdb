@@ -1,3 +1,13 @@
+Tue Apr  5 15:48:03 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (mips_ip): For case 'o', when generating
+	embedded PIC code, accept the difference between two local symbols
+	as being constant.
+	(mips_force_relocation): Only force a reloc to be generated for a
+	PC relative fixup.
+	(md_apply_fix): For BFD_RELOC_32 and BFD_RELOC_LO16, put the fixup
+	value into the file if the fixup will not generate a reloc.
+
 Tue Apr  5 11:14:14 1994  Ken Raeburn  (raeburn@rtl.cygnus.com)
 
 	* config/tc-sparc.c (s_reserve): If section passed isn't bss,

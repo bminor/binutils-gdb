@@ -4534,14 +4534,25 @@ mips_ip (str, ip)
 
 	    case 'o':		/* 16 bit offset */
 	      c = my_getSmallExpression (&offset_expr, s);
-	      /*
-	       * If this value won't fit into a 16 bit offset, then
-	       * go find a macro that will generate the 32 bit offset
-	       * code pattern.
-	       */
-	      if (offset_expr.X_op != O_constant
-		  || offset_expr.X_add_number >= 0x8000
-		  || offset_expr.X_add_number < -0x8000)
+
+	      /* If this value won't fit into a 16 bit offset, then go
+		 find a macro that will generate the 32 bit offset
+		 code pattern.  As a special hack, we accept the
+		 difference of two local symbols as a constant.  This
+		 is required to suppose embedded PIC switches, which
+		 use an instruction which looks like
+		     lw $4,$L12-$LS12($4)
+		 The problem with handling this in a more general
+		 fashion is that the macro function doesn't expect to
+		 see anything which can be handled in a single
+		 constant instruction.  */
+	      if ((offset_expr.X_op != O_constant
+		   || offset_expr.X_add_number >= 0x8000
+		   || offset_expr.X_add_number < -0x8000)
+		  && (mips_pic != EMBEDDED_PIC
+		      || offset_expr.X_op != O_subtract
+		      || ! S_IS_LOCAL (offset_expr.X_add_symbol)
+		      || ! S_IS_LOCAL (offset_expr.X_op_symbol)))
 		break;
 
 	      offset_reloc = BFD_RELOC_LO16;
@@ -5060,7 +5071,7 @@ int
 mips_force_relocation (fixp)
      fixS *fixp;
 {
-  return mips_pic == EMBEDDED_PIC;
+  return fixp->fx_pcrel && mips_pic == EMBEDDED_PIC;
 }
 
 /* Apply a fixup to the object file.  */
@@ -5083,17 +5094,39 @@ md_apply_fix (fixP, valueP)
 
   switch (fixP->fx_r_type)
     {
-    case BFD_RELOC_32:
     case BFD_RELOC_MIPS_JMP:
     case BFD_RELOC_HI16:
     case BFD_RELOC_HI16_S:
-    case BFD_RELOC_LO16:
     case BFD_RELOC_MIPS_GPREL:
     case BFD_RELOC_MIPS_LITERAL:
     case BFD_RELOC_MIPS_CALL16:
     case BFD_RELOC_MIPS_GOT16:
     case BFD_RELOC_MIPS_GPREL32:
       /* Nothing needed to do. The value comes from the reloc entry */
+      break;
+
+    case BFD_RELOC_32:
+      /* If we are deleting this reloc entry, we must fill in the
+	 value now.  This can happen if we have a .word which is not
+	 resolved when it appears but is later defined.  */
+      if (fixP->fx_done)
+	md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
+			    value, 4);
+      break;
+
+    case BFD_RELOC_LO16:
+      /* When handling an embedded PIC switch statement, we can wind
+	 up deleting a LO16 reloc.  See the 'o' case in mips_ip.  */
+      if (fixP->fx_done)
+	{
+	  if (value < -0x8000 || value > 0x7fff)
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  "relocation overflow");
+	  buf = fixP->fx_frag->fr_literal + fixP->fx_where;
+	  if (byte_order == BIG_ENDIAN)
+	    buf += 2;
+	  md_number_to_chars (buf, value, 2);
+	}
       break;
 
     case BFD_RELOC_16_PCREL_S2:
