@@ -17,7 +17,7 @@
 #define REG1(X) (((X) & 0xc) >> 2)
 #define REG0_8(X) (((X) & 0x300) >> 8)
 #define REG1_8(X) (((X) & 0xc00) >> 10)
-#define REG0_16(X) (((X) & 0x30000) >> 8)
+#define REG0_16(X) (((X) & 0x30000) >> 16)
 #define REG1_16(X) (((X) & 0xc0000) >> 18)
 
 /* mov imm8, dn */
