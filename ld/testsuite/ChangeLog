@@ -1,3 +1,7 @@
+2004-10-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-scripts/sort.exp: Run for ELF targets only.
+
 2004-10-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-scripts/overlay-size.d: Update for changed orphan section
