@@ -11,7 +11,7 @@ proc dotest {} {
 	    -re " 00008000 +.single" { pass $testname; set x 1 }
 	    -re " ........ +.single" { fail $testname; set x 1 }
 	    -re "\[^\n\]*\n" { }
-	    timeout { error "timeout\n"; break }
+	    timeout { perror "timeout\n"; break }
 	    eof { break }
 	}
     }
