@@ -1,4 +1,15 @@
+Tue Jul 11 12:29:02 1995  Rick Sladkey  <jrs@world.std.com>
+
+	* ldmisc.c (vfinfo): Don't print the line number if it isn't
+	meaningful.
+
 Mon Jul 10 13:38:28 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.h (ld_config_type): Add field warn_constructors.
+	* ldmain.c (add_to_set): Warn if config.warn_constructors.
+	(constructor_callback): Likewise.
+	* lexsup.c (parse_args): Handle -warn-constructors.
+	* ld.texinfo, ld.1: Document -warn-constructors.
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_check_needed): Don't
 	get confused by directory names if we searched for the file.
