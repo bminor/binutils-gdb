@@ -453,6 +453,7 @@ os_shutdown (p)
 	  /* At the initial call of os_init, we got -1, 0, 0, 0, ...  */
 	  if (next < 0)
 	    {
+	      p->fd_buddy[i] = -1;
 	      do_close = 0;
 	      break;
 	    }

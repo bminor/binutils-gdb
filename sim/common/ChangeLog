@@ -1,3 +1,8 @@
+2004-06-27  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* callback.c (os_shutdown): Fix bug in last change: actually
+	mark file descriptors as available on startup.
+
 2004-06-25  J"orn Rennecke <joern.rennecke@superh.com>
 
 	[ include/gdb: * callback.h (host_callback_struct): Replace
