@@ -1,7 +1,16 @@
+Fri Sep  9 11:51:49 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	Convert m68k COFF to use new COFF backend linker.
+	* coff-m68k.c (coff_relocate_section): Define.
+	* cf-m68klynx.c (coff_rtype_to_howto): Define.
+	(coff_m68k_lynx_rtype_to_howto): New static function.
+	* configure.in (m68kcoff_vec): Build cofflink.o.
+	(m68kcoffun_vec, m68klynx_coff_vec): Likewise.
+
 Thu Sep  8 16:20:38 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
-	* coff-h8300.c (h8300_reloc16_extra_cases, case RELBYTE):  Flag overflows
-	correctly.
+	* coff-h8300.c (h8300_reloc16_extra_cases, case RELBYTE): Flag
+	overflows correctly.
 
 Wed Sep  7 19:01:42 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 

@@ -1,5 +1,5 @@
 /* BFD back-end for Motorola M68K COFF LynxOS files.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -35,13 +35,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 
-static bfd_reloc_status_type _bfd_m68klynx_special_fn PARAMS ((bfd *abfd,
-						      arelent *reloc_entry,
-						      asymbol *symbol,
-						      PTR data,
-						      asection *input_section,
-						      bfd *output_bfd,
-						      char **error_message));
+#ifdef ANSI_PROTOTYPES
+struct internal_reloc;
+struct coff_link_hash_entry;
+struct internal_syment;
+#endif
+
+static bfd_reloc_status_type _bfd_m68klynx_special_fn
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static const struct reloc_howto_struct *coff_m68k_lynx_rtype_to_howto
+  PARAMS ((bfd *, asection *, struct internal_reloc *,
+	   struct coff_link_hash_entry *, struct internal_syment *,
+	   bfd_vma *));
 
 /* For some reason when using m68k COFF the value stored in the .text
    section for a reference to a common symbol is the value itself plus
@@ -54,8 +59,8 @@ static bfd_reloc_status_type _bfd_m68klynx_special_fn PARAMS ((bfd *abfd,
    reloc type to make any required adjustments.  */
 
 static bfd_reloc_status_type
-_bfd_m68klynx_special_fn (abfd, reloc_entry, symbol, data, input_section, output_bfd,
-			  error_message)
+_bfd_m68klynx_special_fn (abfd, reloc_entry, symbol, data, input_section,
+			  output_bfd, error_message)
      bfd *abfd;
      arelent *reloc_entry;
      asymbol *symbol;
@@ -170,5 +175,51 @@ _bfd_m68klynx_special_fn (abfd, reloc_entry, symbol, data, input_section, output
       cache_ptr->addend += asect->vma;				\
   }
 
+#define coff_rtype_to_howto coff_m68k_lynx_rtype_to_howto
 
 #include "coff-m68k.c"
+
+/* coff-m68k.c uses the special COFF backend linker.  We need to
+   adjust common symbols.  FIXME: We may able to get rid of
+   CALC_ADDEND and _bfd_m68klynx_special_fn.  However, they may still
+   be used by gas.
+
+   We can't define this function until after we have included
+   coff-m68k.c, because it uses RTYPE2HOWTO.  */
+
+/*ARGSUSED*/
+static const struct reloc_howto_struct *
+coff_m68k_lynx_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
+     bfd *abfd;
+     asection *sec;
+     struct internal_reloc *rel;
+     struct coff_link_hash_entry *h;
+     struct internal_syment *sym;
+     bfd_vma *addendp;
+{
+  arelent relent;
+  const struct reloc_howto_struct *howto;
+
+  RTYPE2HOWTO (&relent, rel);
+
+  howto = relent.howto;
+
+  if (sym->n_scnum == 0 && sym->n_value != 0)
+    {
+      /* This is a common symbol.  The section contents include the
+	 size (sym->n_value) as an addend.  The relocate_section
+	 function will be adding in the final value of the symbol.  We
+	 need to subtract out the current size in order to get the
+	 correct result.  */
+      BFD_ASSERT (h != NULL);
+      *addendp -= sym->n_value;
+    }
+
+  /* If the output symbol is common (in which case this must be a
+     relocateable link), we need to add in the final size of the
+     common symbol.  */
+  if (h != NULL && h->root.type == bfd_link_hash_common)
+    *addendp += h->root.u.c.size;
+
+  return howto;
+}
