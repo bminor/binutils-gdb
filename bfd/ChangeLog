@@ -1,5 +1,8 @@
 2001-09-25  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-hppa.c: Rename all occurrences of "hplink" to "htab"
+	throughout file.
+
 	* elf32-hppa.c: (LONG_BRANCH_PIC_IN_SHLIB): Delete.  Remove all
 	code handling this option.
 	(LONG_BRANCH_VIA_PLT): Likewise.
@@ -155,7 +158,7 @@
 	Consolidate error messages, and split long messages to two lines.
 
 2001-09-20  John Reiser  <jreiser@BitWagon.com>
-	
+
 	* elf32-i386.c (elf_i386_relocate_section): Coordinate info->symbolic
 	and info->allow_shlib_undefined.
 	* elf32-cris.c: Likewise.
