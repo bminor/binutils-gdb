@@ -44,14 +44,17 @@ symbolic_link='ln -s'
 progname=$0
 
 # clear some things potentially inherited from environment.
+
+Makefile=Makefile
+Makefile_in=Makefile.in
 ansi=
 arguments=$*
+commontargets=
+configdirs=
 defaulttargets=
 destdir=
 fatal=
 hostsubdir=
-Makefile=Makefile
-Makefile_in=Makefile.in
 norecursion=
 recurring=
 removing=
@@ -59,8 +62,6 @@ srcdir=
 srctrigger=
 target=
 targets=
-commontargets=
-configdirs=
 targetsubdir=
 verbose=
 
@@ -109,7 +110,8 @@ do
 #	-srcdir=* | +srcdir=* | +srcdi=* | +srcd=* | +src=* | +sr=* | +s=*)
 #		srcdir=`echo ${arg} | sed 's/[+-]s[a-z]*=//'`
 #		;;
-	-subdirs | +f* | +su*)
+
+	-subdirs | +su*)
 		subdirs=${arg}
 		;;
 	-target=* | +target=* | +targe=* | +targ=* | +tar=* | +ta=*)
@@ -526,7 +528,11 @@ exit 0
 #
 #
 # $Log$
-# Revision 1.44  1991/10/02 06:02:35  rich
+# Revision 1.45  1991/10/02 06:15:13  rich
+# Removed +f option.  Used to stand for +forcesubdirs which is now
+# called +subdirs.
+#
+# Revision 1.44  1991/10/02  06:02:35  rich
 # Added rcs log line.
 #
 #
