@@ -1,3 +1,27 @@
+Sun May 19 05:36:59 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* coffread.c:  Undo minor damage done by Rich Pixley.  Use
+	different internal and external representations of COFF
+	data structures.  Use new BFD routines for swapping them in and
+	out.
+	* symfile.c (free_named_symtabs):  Avoid freeing file names that
+	are null or empty.  Old i960 tools seem to produce files that
+	claim to have empty names, causing each successive file read
+	to blow away the previous one.
+	* sparc-xdep.c (deferred_stores):  Repair minor damage by Rich.
+	Move deferred_stores to top of file, but don't separate its
+	#define's from its variable.  Add commentary.
+	* Makefile.dist:  Fix Rich damage; undo "configure" changes in
+	favor of keeping the (working) config.gdb.  Move readline
+	library up a notch.
+
+Fri May 17 12:49:56 1991  Per Bothner  (via gnu at cygint.cygnus.com)
+
+	* dbxread.c (read_struct_type):  Try to handle g++ version 1 MI
+	debug info.
+	* infptrace.c (fetch_registers):  no result, since now void.
+	* tconfig/news:  target depends on m68k-tdep too.
+
 Fri May 17 14:40:14 1991  Roland H. Pesch  (pesch at fowanton.cygnus.com)
 
 	* Makefile.dist: added readline/inc-*.texinfo to dependencies for
