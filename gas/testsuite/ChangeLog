@@ -1,3 +1,11 @@
+2004-07-20  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* gas/mips/mips32.s: Adjust for the unified "break" syntax.  Add
+	another "break" case.  Update the comment accordingly.
+	* gas/mips/set-arch.s: Likewise.
+	* gas/mips/mips32.d: Adjust for the new output.
+	* gas/mips/set-arch.d: Likewise.
+
 2004-07-15  Nitin Yewale <nitiny@kpitcummins.com>
 
 	* gas/h8300/h8300.exp (do_h8300hn_addressgen): Addition of

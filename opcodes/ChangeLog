@@ -1,3 +1,8 @@
+2004-07-20  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* mips-opc.c (mips_builtin_opcodes): Remove the MIPS32
+	ISA-specific "break" encoding.
+
 2004-07-13  Elvis Chiang  <elvisfb@gmail.com>
 
 	* arm-opc.h: Fix typo in comment.
