@@ -324,7 +324,7 @@ dwarf2_directive_file (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
   offsetT num;
-  const char *filename;
+  char *filename;
   int filename_len;
 
   /* Continue to accept a bare string and pass it off.  */
@@ -347,7 +347,7 @@ dwarf2_directive_file (dummy)
 
   if (num < files_in_use && files[num].filename != 0)
     {
-      as_bad (_("File number %d already allocated"), num);
+      as_bad (_("File number %ld already allocated"), (long) num);
       return;
     }
 

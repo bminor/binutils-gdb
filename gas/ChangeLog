@@ -1,5 +1,24 @@
 2001-03-30  Alan Modra  <alan@linuxcare.com.au>
 
+	* frags.h (struct frag): Add last_fr_address.  Reorder fields for
+	better packing.
+	* symbols.c (resolve_symbol_value): Don't fix expression values
+	until relaxation is complete.
+	(resolve_local_symbol): Pass `finalize_syms' to resolve_symbol_value.
+	(S_GET_VALUE): Likewise, and return unresolved expression value.
+	* write.c (finalize_syms): New.
+	(relax_and_size_seg): Split into..
+	(relax_seg): New function, returns 1 if anything changed..
+	(size_seg): And the remainder of relax_and_size_seg.
+	(fixup_segment): Arrange for final resolution of sym values.
+	(adjust_reloc_syms): Likewise.
+	(write_object_file): Likewise, and repeatedly call relax_seg until
+	nothing more changes.
+	(relax_segment): Return 1 if anything changed.  Use correct types
+	for rs_org `target' and `after'.
+	* write.h (finalize_syms): Declare.
+	(relax_segment): Update prototype.
+
 	* config/tc-sh.c (md_estimate_size_before_relax): Add extra
 	do-nothing cases to switch to avoid abort on a second relaxation
 	pass, and tidy code a little.

@@ -61,6 +61,11 @@ extern CONST int md_short_jump_size;
 extern CONST int md_long_jump_size;
 #endif
 
+/* Used to control final evaluation of expressions that are more
+   complex than symbol + constant.  1 means set final value for simple
+   expressions, 2 means set final value for more complex expressions.  */
+int finalize_syms = 1;
+
 int symbol_table_frozen;
 void print_fixup PARAMS ((fixS *));
 
@@ -122,7 +127,6 @@ static fragS *chain_frchains_together_1 PARAMS ((segT, struct frchain *));
 #ifdef BFD_ASSEMBLER
 static void chain_frchains_together PARAMS ((bfd *, segT, PTR));
 static void cvt_frag_to_fill PARAMS ((segT, fragS *));
-static void relax_and_size_seg PARAMS ((bfd *, asection *, PTR));
 static void adjust_reloc_syms PARAMS ((bfd *, asection *, PTR));
 static void write_relocs PARAMS ((bfd *, asection *, PTR));
 static void write_contents PARAMS ((bfd *, asection *, PTR));
@@ -597,8 +601,26 @@ cvt_frag_to_fill (headersP, sec, fragP)
 #endif /* defined (BFD_ASSEMBLER) || !defined (BFD)  */
 
 #ifdef BFD_ASSEMBLER
+static void relax_seg PARAMS ((bfd *, asection *, PTR));
 static void
-relax_and_size_seg (abfd, sec, xxx)
+relax_seg (abfd, sec, xxx)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *sec;
+     PTR xxx;
+{
+  segment_info_type *seginfo = seg_info (sec);
+
+  if (seginfo && seginfo->frchainP
+      && relax_segment (seginfo->frchainP->frch_root, sec))
+    {
+      int *result = (int *) xxx;
+      *result = 1;
+    }
+}
+
+static void size_seg PARAMS ((bfd *, asection *, PTR));
+static void
+size_seg (abfd, sec, xxx)
      bfd *abfd;
      asection *sec;
      PTR xxx ATTRIBUTE_UNUSED;
@@ -611,12 +633,9 @@ relax_and_size_seg (abfd, sec, xxx)
 
   subseg_change (sec, 0);
 
-  flags = bfd_get_section_flags (abfd, sec);
-
   seginfo = seg_info (sec);
   if (seginfo && seginfo->frchainP)
     {
-      relax_segment (seginfo->frchainP->frch_root, sec);
       for (fragp = seginfo->frchainP->frch_root; fragp; fragp = fragp->fr_next)
 	cvt_frag_to_fill (sec, fragp);
       for (fragp = seginfo->frchainP->frch_root;
@@ -628,6 +647,8 @@ relax_and_size_seg (abfd, sec, xxx)
     }
   else
     size = 0;
+
+  flags = bfd_get_section_flags (abfd, sec);
 
   if (size > 0 && ! seginfo->bss)
     flags |= SEC_HAS_CONTENTS;
@@ -739,10 +760,10 @@ adjust_reloc_syms (abfd, sec, xxx)
 	   symbols, though, since they are not in the regular symbol
 	   table.  */
 	if (sym != NULL)
-	  resolve_symbol_value (sym, 1);
+	  resolve_symbol_value (sym, finalize_syms);
 
 	if (fixp->fx_subsy != NULL)
-	  resolve_symbol_value (fixp->fx_subsy, 1);
+	  resolve_symbol_value (fixp->fx_subsy, finalize_syms);
 
 	/* If this symbol is equated to an undefined symbol, convert
            the fixup to being against that symbol.  */
@@ -1519,10 +1540,22 @@ write_object_file ()
 #endif
 
 #ifdef BFD_ASSEMBLER
-  bfd_map_over_sections (stdoutput, relax_and_size_seg, (char *) 0);
+  while (1)
+    {
+      int changed;
+
+      changed = 0;
+      bfd_map_over_sections (stdoutput, relax_seg, &changed);
+      if (!changed)
+	break;
+    }
+  bfd_map_over_sections (stdoutput, size_seg, (char *) 0);
 #else
   relax_and_size_all_segments ();
 #endif /* BFD_ASSEMBLER  */
+
+  /* Relaxation has completed.  Freeze all syms.  */
+  finalize_syms = 2;
 
 #if defined (BFD_ASSEMBLER) && defined (OBJ_COFF) && defined (TE_GO32)
   /* Now that the segments have their final sizes, run through the
@@ -1842,7 +1875,7 @@ write_object_file ()
       symbolS *symp;
 
       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
-	resolve_symbol_value (symp, 1);
+	resolve_symbol_value (symp, finalize_syms);
     }
   resolve_local_symbol_values ();
 
@@ -1890,7 +1923,7 @@ write_object_file ()
 	  /* Do it again, because adjust_reloc_syms might introduce
 	     more symbols.  They'll probably only be section symbols,
 	     but they'll still need to have the values computed.  */
-	  resolve_symbol_value (symp, 1);
+	  resolve_symbol_value (symp, finalize_syms);
 
 	  /* Skip symbols which were equated to undefined or common
              symbols.  */
@@ -2141,13 +2174,15 @@ relax_align (address, alignment)
    these frag addresses may not be the same as final object-file
    addresses.  */
 
-void
+int
 relax_segment (segment_frag_root, segment)
      struct frag *segment_frag_root;
      segT segment;
 {
   register struct frag *fragP;
   register relax_addressT address;
+  int ret;
+
 #if !defined (MANY_SEGMENTS) && !defined (BFD_ASSEMBLER)
   know (segment == SEG_DATA || segment == SEG_TEXT || segment == SEG_BSS);
 #endif
@@ -2229,14 +2264,15 @@ relax_segment (segment_frag_root, segment)
     long stretch;	/* May be any size, 0 or negative.  */
     /* Cumulative number of addresses we have relaxed this pass.
        We may have relaxed more than one address.  */
-    long stretched;	/* Have we stretched on this pass?  */
+    int stretched;	/* Have we stretched on this pass?  */
     /* This is 'cuz stretch may be zero, when, in fact some piece of code
        grew, and another shrank.  If a branch instruction doesn't fit anymore,
        we could be scrod.  */
 
     do
       {
-	stretch = stretched = 0;
+	stretch = 0;
+	stretched = 0;
 
 	for (fragP = segment_frag_root; fragP; fragP = fragP->fr_next)
 	  {
@@ -2345,8 +2381,8 @@ relax_segment (segment_frag_root, segment)
 
 	      case rs_org:
 		{
-		  long target = offset;
-		  long after;
+		  addressT target = offset;
+		  addressT after;
 
 		  if (symbolP)
 		    {
@@ -2447,17 +2483,21 @@ relax_segment (segment_frag_root, segment)
 	    if (growth)
 	      {
 		stretch += growth;
-		stretched++;
+		stretched = 1;
 	      }
 	  }			/* For each frag in the segment.  */
       }
     while (stretched);		/* Until nothing further to relax.  */
   }				/* do_relax  */
 
-  /* We now have valid fr_address'es for each frag.  */
-
-  /* All fr_address's are correct, relative to their own segment.
-     We have made all the fixS we will ever make.  */
+  ret = 0;
+  for (fragP = segment_frag_root; fragP; fragP = fragP->fr_next)
+    if (fragP->last_fr_address != fragP->fr_address)
+      {
+	fragP->last_fr_address = fragP->fr_address;
+	ret = 1;
+      }
+  return ret;
 }
 
 #if defined (BFD_ASSEMBLER) || (!defined (BFD) && !defined (OBJ_VMS))
@@ -2544,7 +2584,7 @@ fixup_segment (fixP, this_segment_type)
 
       if (sub_symbolP)
 	{
-	  resolve_symbol_value (sub_symbolP, 1);
+	  resolve_symbol_value (sub_symbolP, finalize_syms);
 	  if (add_symbolP == NULL || add_symbol_segment == absolute_section)
 	    {
 	      if (add_symbolP != NULL)

@@ -866,6 +866,10 @@ resolve_symbol_value (symp, finalize)
 
   resolved = 0;
   final_seg = S_GET_SEGMENT (symp);
+  /* Expressions aren't really symbols, so don't finalize their values
+     until relaxation is complete.  */
+  if (final_seg == expr_section && finalize != 2)
+    finalize = 0;
 
   if (symp->sy_resolving)
     {
@@ -1182,7 +1186,7 @@ resolve_local_symbol (key, value)
      PTR value;
 {
   if (value != NULL)
-    resolve_symbol_value (value, 1);
+    resolve_symbol_value (value, finalize_syms);
 }
 
 #endif
@@ -1574,7 +1578,11 @@ S_GET_VALUE (s)
 #endif
 
   if (!s->sy_resolved && s->sy_value.X_op != O_constant)
-    resolve_symbol_value (s, 1);
+    {
+      valueT val = resolve_symbol_value (s, finalize_syms);
+      if (finalize_syms != 2 && S_GET_SEGMENT (s) == expr_section)
+	return val;
+    }
   if (s->sy_value.X_op != O_constant)
     {
       static symbolS *recur;
