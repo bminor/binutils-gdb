@@ -28,6 +28,14 @@
 #include "gdb_wait.h"
 #include "command.h"
 
+/* We need pstat functionality so that we can get the exec file
+   for a process we attach to.
+
+   According to HP, we should use the 64bit interfaces, so we
+   define _PSTAT64 to achieve this.  */
+#define _PSTAT64
+#include <sys/pstat.h>
+
 /* Some hackery to work around a use of the #define name NO_FLAGS
  * in both gdb and HPUX (bfd.h and /usr/include/machine/vmparam.h).
  */
@@ -5059,79 +5067,43 @@ udot_info (void)
 }
 #endif /* !defined (CHILD_XFER_MEMORY).  */
 
+
 /* TTrace version of "target_pid_to_exec_file"
  */
 char *
 child_pid_to_exec_file (int tid)
 {
-  static char exec_file_buffer[1024];
   int tt_status;
-  CORE_ADDR top_of_stack;
-  char four_chars[4];
-  int name_index;
-  int i;
-  int done;
-  ptid_t saved_inferior_ptid;
+  static char exec_file_buffer[1024];
+  pid_t pid;
+  static struct pst_status buf;
 
-  /* As of 10.x HP-UX, there's an explicit request to get the
-   *pathname.
-   */
+  /* On various versions of hpux11, this may fail due to a supposed
+     kernel bug.  We have alternate methods to get this information
+     (ie pstat).  */
   tt_status = call_ttrace (TT_PROC_GET_PATHNAME,
 			   tid,
-			   (TTRACE_ARG_TYPE) exec_file_buffer,
-			   (TTRACE_ARG_TYPE) sizeof (exec_file_buffer) - 1,
-			   TT_NIL);
+			   (uint64_t) exec_file_buffer,
+			   sizeof (exec_file_buffer) - 1,
+			   0);
   if (tt_status >= 0)
     return exec_file_buffer;
 
-  /* ??rehrauer: The above request may or may not be broken.  It
-     doesn't seem to work when I use it.  But, it may be designed
-     to only work immediately after an exec event occurs.  (I'm
-     waiting for COSL to explain.)
-
-     In any case, if it fails, try a really, truly amazingly gross
-     hack that DDE uses, of pawing through the process' data
-     segment to find the pathname.
-   */
-  top_of_stack = (TARGET_PTR_BIT == 64 ? 0x800003ffff7f0000 : 0x7b03a000);
-  name_index = 0;
-  done = 0;
-
-  /* On the chance that pid != inferior_ptid, set inferior_ptid
-     to pid, so that (grrrr!) implicit uses of inferior_ptid get
-     the right id.
-   */
-  saved_inferior_ptid = inferior_ptid;
-  inferior_ptid = pid_to_ptid (tid);
-
-  /* Try to grab a null-terminated string. */
-  while (!done)
+  /* Try to get process information via pstat and extract the filename
+     from the pst_cmd field within the pst_status structure.  */
+  if (pstat_getproc (&buf, sizeof (struct pst_status), 0, tid) != -1)
     {
-      if (target_read_memory (top_of_stack, four_chars, 4) != 0)
-	{
-	  inferior_ptid = saved_inferior_ptid;
-	  return NULL;
-	}
-      for (i = 0; i < 4; i++)
-	{
-	  exec_file_buffer[name_index++] = four_chars[i];
-	  done = (four_chars[i] == '\0');
-	  if (done)
-	    break;
-	}
-      top_of_stack += 4;
+      char *p = buf.pst_cmd;
+
+      while (*p && *p != ' ')
+	p++;
+      *p = 0;
+
+      return (buf.pst_cmd);
     }
 
-  if (exec_file_buffer[0] == '\0')
-    {
-      inferior_ptid = saved_inferior_ptid;
-      return NULL;
-    }
-
-  inferior_ptid = saved_inferior_ptid;
-  return exec_file_buffer;
+  return (NULL);
 }
-
 
 void
 pre_fork_inferior (void)

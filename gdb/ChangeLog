@@ -1,5 +1,12 @@
 2002-01-20  Andrew Cagney  <ac131313@redhat.com>
 
+	From Jeff Law <law@redhat.com>:
+	* infttrace.c: Include <sys/pstat.h>.
+	(child_pid_to_exec_file): Revamp.  Use pstat call to get the
+	exec file if the ttrace equivalent fails.
+
+2002-01-20  Andrew Cagney  <ac131313@redhat.com>
+
 	* rdi-share/devsw.c (openLogFile): Delete unused ``struct tm lt''.
 	(closeLogFile): Ditto.
 
