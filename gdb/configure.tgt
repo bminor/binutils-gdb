@@ -167,7 +167,8 @@ m68*-*-linux*)		gdb_target=linux
 		configdirs="${configdirs} gdbserver" ;;
 m68*-*-lynxos*)		gdb_target=m68klynx
 		configdirs="${configdirs} gdbserver" ;;
-m68*-*-netbsd*)		gdb_target=nbsd ;;
+m68*-*-netbsd*)		gdb_target=nbsd
+		configdirs="${configdirs} gdbserver" ;;
 m68*-*-os68k*)		gdb_target=os68k ;;
 m68*-*-sunos3*)		gdb_target=sun3os3 ;;
 m68*-*-sunos4*)		gdb_target=sun3os4 ;;
@@ -222,7 +223,8 @@ mn10300-*-*)		gdb_target=mn10300 ;;
 none-*-*)		gdb_target=none ;;
 
 ns32k-*-mach3*)		gdb_target=ns32km3 ;;
-ns32k-*-netbsd*)	gdb_target=nbsd ;;
+ns32k-*-netbsd*)	gdb_target=nbsd
+		configdirs="${configdirs} gdbserver" ;;
 ns32k-utek-sysv*)	gdb_target=merlin ;;
 ns32k-utek-*)		gdb_target=umax ;;
 

@@ -36,15 +36,8 @@
 #include <fcntl.h>
 
 /***************Begin MY defs*********************/
-int quit_flag = 0;
 static char my_registers[REGISTER_BYTES];
 char *registers = my_registers;
-
-/* Index within `registers' of the first byte of the space for
-   register N.  */
-
-
-char buf2[MAX_REGISTER_RAW_SIZE];
 /***************End MY defs*********************/
 
 #include <sys/ptrace.h>
@@ -52,15 +45,12 @@ char buf2[MAX_REGISTER_RAW_SIZE];
 
 extern int sys_nerr;
 extern char **sys_errlist;
-extern char **environ;
 extern int errno;
 extern int inferior_pid;
-void quit (), perror_with_name ();
-int query ();
+void perror_with_name ();
 
 /* Start an inferior process and returns its pid.
-   ALLARGS is a vector of program-name and args.
-   ENV is the environment vector to pass.  */
+   ALLARGS is a vector of program-name and args. */
 
 int
 create_inferior (char *program, char **allargs)

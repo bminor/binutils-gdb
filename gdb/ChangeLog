@@ -1,3 +1,28 @@
+2000-12-07  J.T. Conklin  <jtc@redback.com>
+
+	* gdbserver/low-hppabsd.c (buf2, environ, quit, quit_flag):
+ 	Removed unused variables and declarations.
+	* gdbserver/low-linux.c (buf2, environ, query, quit, quit_flag):
+	Likewise.
+	* gdbserver/low-nbsd.c (buf2, environ, quit, quit_flag):
+	Likewise.
+	* gdbserver/low-sparc.c (buf2, environ, query, quit, quit_flag):
+	Likewise.
+	* gdbserver/low-sun.c (buf2, environ, query, quit, quit_flag):
+	Likewise.
+
+	* gdbserver/low-hppabsd.c, gdbserver/low-linux.c,
+ 	gdbserver/low-nbsd.c, gdbserver/low-sparc.c, gdbserver/low-sun3.c
+ 	(create_inferior): Update comment.
+
+	* gdbserver/low-nbsd.c (initialize_arch, fetch_inferior_registers,
+	store_inferior_registers): Provide implementations for the m68k 
+	and ns32k.
+	* config/m68k/nbsd.mt (GDBSERVER_DEPFILES): Add low-nbsd.o
+	* config/ns32k/nbsd.mt (GDBSERVER_DEPFILES): Likewise.
+	* configure.tgt (m68*-*-netbsd*, ns32k-*-netbsd*): Add gdbserver
+ 	to configdirs.
+
 2000-12-07  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* config/sh/tm-sh.h (struct gdbarch_tdep): Rename fields
