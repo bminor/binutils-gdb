@@ -1,3 +1,14 @@
+Thu Mar 30 13:26:19 2000  Philippe De Muyter  <phdm@macqel.be>
+
+	* gdb.base/call-ar-st.c (init_small_structs, main): Use floating-point
+ 	values that can be represented exactly.
+	* gdb.base/call-ar-st.exp (print print_small_structs): Fixed to match
+	above change, and to not check against the directory part of the source
+	file name.
+	(step into print_long_arg_list): Likewise.
+	(print print_small_structs from print_long_arg_list): Likewise.
+	(print print_long_arg_list): Likewise.
+
 2000-03-27  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdb.base/printcmds.c: Terminate char array ctable2 with 0.
