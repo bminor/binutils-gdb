@@ -41,10 +41,7 @@
 #include <unistd.h>
 #include <sys/utsname.h>
 #include <io.h>
-/* breakpoint.h defines `disable' which is an enum member.  */
-#define disable interrup_disable
 #include <dos.h>
-#undef disable
 #include <dpmi.h>
 #include <go32.h>
 #include <sys/farptr.h>

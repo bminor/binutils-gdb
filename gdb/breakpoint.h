@@ -133,21 +133,21 @@ enum bptype
 
 /* States of enablement of breakpoint. */
 
-enum enable
+enum enable_state
   {
-    disabled,		/* The eventpoint is inactive, and cannot trigger. */
-    enabled,		/* The eventpoint is active, and can trigger. */
-    shlib_disabled,	/* The eventpoint's address is in an unloaded solib.
+    bp_disabled,	/* The eventpoint is inactive, and cannot trigger. */
+    bp_enabled,		/* The eventpoint is active, and can trigger. */
+    bp_shlib_disabled,	/* The eventpoint's address is in an unloaded solib.
 			   The eventpoint will be automatically enabled 
 			   and reset when that solib is loaded. */
-    call_disabled,	/* The eventpoint has been disabled while a call 
+    bp_call_disabled,	/* The eventpoint has been disabled while a call 
 			   into the inferior is "in flight", because some 
 			   eventpoints interfere with the implementation of 
 			   a call on some targets.  The eventpoint will be 
 			   automatically enabled and reset when the call 
 			   "lands" (either completes, or stops at another 
 			   eventpoint). */
-    permanent		/* There is a breakpoint instruction hard-wired into
+    bp_permanent	/* There is a breakpoint instruction hard-wired into
 			   the target's code.  Don't try to write another
 			   breakpoint instruction on top of it, or restore
 			   its value.  Step over it using the architecture's
@@ -159,10 +159,10 @@ enum enable
 
 enum bpdisp
   {
-    del,			/* Delete it */
-    del_at_next_stop,		/* Delete at next stop, whether hit or not */
-    disable,			/* Disable it */
-    donttouch			/* Leave it alone */
+    disp_del,			/* Delete it */
+    disp_del_at_next_stop,	/* Delete at next stop, whether hit or not */
+    disp_disable,		/* Disable it */
+    disp_donttouch		/* Leave it alone */
   };
 
 enum target_hw_bp_type
@@ -187,7 +187,7 @@ struct breakpoint
     /* Type of breakpoint. */
     enum bptype type;
     /* Zero means disabled; remember the info but don't break here.  */
-    enum enable enable;
+    enum enable_state enable_state;
     /* What to do with this breakpoint after we hit it. */
     enum bpdisp disposition;
     /* Number assigned to distinguish breakpoints.  */

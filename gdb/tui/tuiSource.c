@@ -172,7 +172,7 @@ tuiSetSourceContent (struct symtab *s, int lineNo, int noerror)
 		      element->whichElement.source.hasBreak =
 			(bp != (struct breakpoint *) NULL &&
 			 (!element->whichElement.source.isExecPoint ||
-			  (bp->disposition != del || bp->hit_count <= 0)));
+			  (bp->disposition != disp_del || bp->hit_count <= 0)));
 		      if (c != EOF)
 			{
 			  i = strlen (srcLine) - 1;
