@@ -1,3 +1,8 @@
+2002-02-20  Andreas Schwab  <schwab@suse.de>
+
+	* emulparams/elf64_ia64.sh (OTHER_READONLY_SECTIONS): Don't fold
+	.IA64_unwind* in a relocatable link.
+
 2002-02-19  David O'Brien  <obrien@FreeBSD.org>
 
 	* Makefile.am: Add new files earmelf_fbsd, eelf32ppc_fbsd,
