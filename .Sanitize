@@ -29,7 +29,7 @@ Things-to-keep:
 
 Makefile.in
 README
-README.configure
+DOC.configure
 bison
 bfd
 binutils
