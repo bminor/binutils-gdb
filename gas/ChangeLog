@@ -1,3 +1,9 @@
+Sat Feb 13 14:10:10 1999  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-alpha.c (cpu_types): Enable EV6 PALcode with -m21264.
+	(emit_insn): Look for pc-relative and no-overflow specifiers on
+	internal relocation types.
+
 1999-02-13  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* doc/c-mips.texi (MIPS Opts): Updated list of -mNNNN and

@@ -1,5 +1,5 @@
 /* tc-alpha.c - Processor-specific code for the DEC Alpha AXP CPU.
-   Copyright (C) 1989, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1989, 93-98, 1999 Free Software Foundation, Inc.
    Contributed by Carnegie Mellon University, 1993.
    Written by Alessandro Forin, based on earlier gas-1.38 target CPU files.
    Modified by Ken Raeburn for gas-2.x and ECOFF support.
@@ -451,14 +451,11 @@ static const struct cpu_type
   { "21066", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
   { "21068", AXP_OPCODE_BASE|AXP_OPCODE_EV4 },
   { "21164", AXP_OPCODE_BASE|AXP_OPCODE_EV5 },
-  /* Do we have CIX extension here? */
   { "21164a", AXP_OPCODE_BASE|AXP_OPCODE_EV5|AXP_OPCODE_BWX },
-  /* Still same PALcodes? */
   { "21164pc", (AXP_OPCODE_BASE|AXP_OPCODE_EV5|AXP_OPCODE_BWX
 		|AXP_OPCODE_MAX) },
-  /* All new PALcodes?  Extras? */
-  { "21264", (AXP_OPCODE_BASE|AXP_OPCODE_BWX
-	      |AXP_OPCODE_CIX|AXP_OPCODE_MAX) },
+  { "21264", (AXP_OPCODE_BASE|AXP_OPCODE_EV6|AXP_OPCODE_BWX
+	      |AXP_OPCODE_MAX|AXP_OPCODE_CIX) },
 
   { "ev4", AXP_OPCODE_BASE },
   { "ev45", AXP_OPCODE_BASE },
@@ -466,7 +463,7 @@ static const struct cpu_type
   { "ev5", AXP_OPCODE_BASE },
   { "ev56", AXP_OPCODE_BASE|AXP_OPCODE_BWX },
   { "pca56", AXP_OPCODE_BASE|AXP_OPCODE_BWX|AXP_OPCODE_MAX },
-  { "ev6", AXP_OPCODE_BASE|AXP_OPCODE_BWX|AXP_OPCODE_CIX|AXP_OPCODE_MAX },
+  { "ev6", AXP_OPCODE_BASE|AXP_OPCODE_BWX|AXP_OPCODE_MAX|AXP_OPCODE_CIX },
 
   { "all", AXP_OPCODE_BASE },
   { 0 }
@@ -1003,9 +1000,10 @@ md_show_usage (stream)
 Alpha options:\n\
 -32addr			treat addresses as 32-bit values\n\
 -F			lack floating point instructions support\n\
--m21064 | -m21066 | -m21164 | -m21164a\n\
--mev4 | -mev45 | -mev5 | -mev56 | -mall\n\
-			specify variant of Alpha architecture\n"),
+-mev4 | -mev45 | -mev5 | -mev56 | -mpca56 | -mev6 | -mall\n\
+			specify variant of Alpha architecture\n
+-m21064 | -m21066 | -m21164 | -m21164a | -m21164pc | -m21264\n\
+			these variants include PALcode opcodes\n"),
 	stream);
 #ifdef OBJ_EVAX
   fputs (_("\
@@ -1435,7 +1433,8 @@ tc_gen_reloc (sec, fixp)
        * at assembly time.  bfd_perform_reloc doesn't know about this sort
        * of thing, and as a result we need to fake it out here.
        */
-      if (S_IS_EXTERN (fixp->fx_addsy) && !S_IS_COMMON(fixp->fx_addsy))
+      if ((S_IS_EXTERN (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy))
+	  && !S_IS_COMMON(fixp->fx_addsy))
 	reloc->addend -= fixp->fx_addsy->bsym->value;
 #endif
     }
@@ -1921,13 +1920,18 @@ emit_insn (insn)
   /* Apply the fixups in order */
   for (i = 0; i < insn->nfixups; ++i)
     {
+      const struct alpha_operand *operand;
       struct alpha_fixup *fixup = &insn->fixups[i];
       int size, pcrel;
       fixS *fixP;
 
       /* Some fixups are only used internally and so have no howto */
       if ((int)fixup->reloc < 0)
-	size = 4, pcrel = 0;
+	{
+	  operand = &alpha_operands[-(int)fixup->reloc];
+	  size = 4;
+	  pcrel = ((operand->flags & AXP_OPERAND_RELATIVE) != 0);
+	}
 #ifdef OBJ_ELF
       /* These relocation types are only used internally. */
       else if (fixup->reloc == BFD_RELOC_ALPHA_GPDISP_HI16
@@ -1963,7 +1967,13 @@ emit_insn (insn)
 	case BFD_RELOC_GPREL32:
 	  fixP->fx_no_overflow = 1;
 	  break;
+
 	default:
+	  if ((int)fixup->reloc < 0)
+	    {
+	      if (operand->flags & AXP_OPERAND_NOOVERFLOW)
+		fixP->fx_no_overflow = 1;
+	    }
 	  break;
 	}
     }
@@ -2110,7 +2120,8 @@ FIXME
   addend = tok[1];
 
 #ifdef OBJ_ECOFF
-  assert (addend.X_op == O_constant);
+  if (addend.X_op != O_constant)
+    as_bad (_("can not resolve expression"));
   addend.X_op = O_symbol;
   addend.X_add_symbol = alpha_gp_symbol;
 #endif
@@ -3613,7 +3624,7 @@ s_alpha_mask (fp)
         ecoff_directive_mask (0);
     }
   else
-    ignore_rest_of_line ();
+    discard_rest_of_line ();
 }
 
 static void
@@ -3623,7 +3634,7 @@ s_alpha_frame (dummy)
   if (ECOFF_DEBUGGING)
     ecoff_directive_frame (0);
   else
-    ignore_rest_of_line ();
+    discard_rest_of_line ();
 }
 
 static void
