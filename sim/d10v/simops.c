@@ -21,6 +21,7 @@ enum op_types {
   OP_CR_OUTPUT,
   OP_CR_REVERSE,
   OP_FLAG,
+  OP_FLAG_OUTPUT,
   OP_CONSTANT16,
   OP_CONSTANT3,
   OP_CONSTANT4,
@@ -171,6 +172,7 @@ trace_input (name, in1, in2, in3)
 	  break;
 
 	case OP_FLAG:
+	case OP_FLAG_OUTPUT:
 	  if (OP[i] == 0)
 	    sprintf (p, "%sf0", comma);
 
@@ -178,7 +180,7 @@ trace_input (name, in1, in2, in3)
 	    sprintf (p, "%sf1", comma);
 
 	  else
-	    sprintf (p, "%scarry", comma);
+	    sprintf (p, "%sc", comma);
 
 	  p += strlen (p);
 	  comma = ",";
@@ -211,6 +213,7 @@ trace_input (name, in1, in2, in3)
 	    case OP_DREG_OUTPUT:
 	    case OP_CR_OUTPUT:
 	    case OP_ACCUM_OUTPUT:
+	    case OP_FLAG_OUTPUT:
 	      (*d10v_callback->printf_filtered) (d10v_callback, "%*s", SIZE_VALUES, "---");
 	      break;
 
@@ -339,6 +342,7 @@ trace_output (result)
 	  break;
 
 	case OP_FLAG:
+	case OP_FLAG_OUTPUT:
 	  (*d10v_callback->printf_filtered) (d10v_callback, " :: %*s F0=%d F1=%d C=%d\n", SIZE_VALUES, "",
 					     State.F0 != 0, State.F1 != 0, State.C != 0);
 	  break;
@@ -835,7 +839,7 @@ OP_4E09 ()
 {
   uint8 *src, *dst;
   
-  trace_input ("cpfg", OP_FLAG, OP_VOID, OP_VOID);
+  trace_input ("cpfg", OP_FLAG_OUTPUT, OP_FLAG, OP_VOID);
   if (OP[0] == 0)
     dst = &State.F0;
   else

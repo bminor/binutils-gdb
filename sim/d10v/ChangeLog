@@ -4,6 +4,9 @@ Mon Sep  9 13:27:26 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	(OP_3{0,2,4}00): Properly parenthesize test expression.  Add error
 	if shift count is too high.
 	(OP_4E{00,02,04,20,22,40,42}): Make tests agree with book.
+	(OP_4E09): Make cpfg properly trace the input flags.
+	(op_types): Add OP_FLAG_OUTPUT.
+	(trace_{input,output}): Support OP_FLAG_OUTPUT.
 
 Fri Sep  6 17:56:17 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
