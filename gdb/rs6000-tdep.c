@@ -2402,88 +2402,7 @@ find_variant_by_arch (enum bfd_architecture arch, unsigned long mach)
 
   return NULL;
 }
-
-
-
 
-static void
-process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
-{
-  int *os_ident_ptr = obj;
-  const char *name;
-  unsigned int sectsize;
-
-  name = bfd_get_section_name (abfd, sect);
-  sectsize = bfd_section_size (abfd, sect);
-  if (strcmp (name, ".note.ABI-tag") == 0 && sectsize > 0)
-    {
-      unsigned int name_length, data_length, note_type;
-      char *note = alloca (sectsize);
-
-      bfd_get_section_contents (abfd, sect, note,
-                                (file_ptr) 0, (bfd_size_type) sectsize);
-
-      name_length = bfd_h_get_32 (abfd, note);
-      data_length = bfd_h_get_32 (abfd, note + 4);
-      note_type   = bfd_h_get_32 (abfd, note + 8);
-
-      if (name_length == 4 && data_length == 16 && note_type == 1
-          && strcmp (note + 12, "GNU") == 0)
-	{
-	  int os_number = bfd_h_get_32 (abfd, note + 16);
-
-	  /* The case numbers are from abi-tags in glibc */
-	  switch (os_number)
-	    {
-	    case 0 :
-	      *os_ident_ptr = ELFOSABI_LINUX;
-	      break;
-	    case 1 :
-	      *os_ident_ptr = ELFOSABI_HURD;
-	      break;
-	    case 2 :
-	      *os_ident_ptr = ELFOSABI_SOLARIS;
-	      break;
-	    default :
-	      internal_error (__FILE__, __LINE__,
-			      "process_note_abi_sections: unknown OS number %d",
-			      os_number);
-	      break;
-	    }
-	}
-    }
-}
-
-/* Return one of the ELFOSABI_ constants for BFDs representing ELF
-   executables.  If it's not an ELF executable or if the OS/ABI couldn't
-   be determined, simply return -1. */
-
-static int
-get_elfosabi (bfd *abfd)
-{
-  int elfosabi = -1;
-
-  if (abfd != NULL && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-    {
-      elfosabi = elf_elfheader (abfd)->e_ident[EI_OSABI];
-
-      /* When elfosabi is 0 (ELFOSABI_NONE), this is supposed to indicate
-         that we're on a SYSV system.  However, GNU/Linux uses a note section
-	 to record OS/ABI info, but leaves e_ident[EI_OSABI] zero.  So we
-	 have to check the note sections too. */
-      if (elfosabi == 0)
-	{
-	  bfd_map_over_sections (abfd,
-	                         process_note_abi_tag_sections,
-				 &elfosabi);
-	}
-    }
-
-  return elfosabi;
-}
-
-
-
 /* Initialize the current architecture based on INFO.  If possible, re-use an
    architecture from ARCHES, which is a list of architectures already created
    during this debugging session.
@@ -2502,7 +2421,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum bfd_architecture arch;
   unsigned long mach;
   bfd abfd;
-  int osabi, sysv_abi;
+  int sysv_abi;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
   gdbarch_print_insn_ftype *print_insn;
 
   from_xcoff_exec = info.abfd && info.abfd->format == bfd_object &&
@@ -2513,7 +2433,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   sysv_abi = info.abfd && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour;
 
-  osabi = get_elfosabi (info.abfd);
+  if (info.abfd)
+    osabi = gdbarch_lookup_osabi (info.abfd);
 
   /* Check word size.  If INFO is from a binary file, infer it from
      that, else choose a likely default. */
@@ -2726,57 +2647,23 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Not sure on this. FIXMEmgo */
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
-  /* Until November 2001, gcc was not complying to the SYSV ABI for
-     returning structures less than or equal to 8 bytes in size. It was
-     returning everything in memory. When this was corrected, it wasn't
-     fixed for native platforms. */
   if (sysv_abi)
-    {
-      if (osabi == ELFOSABI_LINUX
-          || osabi == ELFOSABI_NETBSD
-          || osabi == ELFOSABI_FREEBSD)
-	set_gdbarch_use_struct_convention (gdbarch,
-					   ppc_sysv_abi_broken_use_struct_convention);
-      else
-	set_gdbarch_use_struct_convention (gdbarch,
-					   ppc_sysv_abi_use_struct_convention);
-    }
+    set_gdbarch_use_struct_convention (gdbarch,
+    				       ppc_sysv_abi_use_struct_convention);
   else
-    {
-      set_gdbarch_use_struct_convention (gdbarch,
-					 generic_use_struct_convention);
-    }
+    set_gdbarch_use_struct_convention (gdbarch,
+				       generic_use_struct_convention);
 
   set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
-  /* Note: kevinb/2002-04-12: See note above regarding *_push_arguments().
-     The same remarks hold for the methods below.  */
-  if (osabi == ELFOSABI_LINUX && wordsize == 4)
-    {
-      set_gdbarch_frameless_function_invocation (gdbarch,
-	ppc_linux_frameless_function_invocation);
-      set_gdbarch_frame_chain (gdbarch, ppc_linux_frame_chain);
-      set_gdbarch_frame_saved_pc (gdbarch, ppc_linux_frame_saved_pc);
 
-      set_gdbarch_frame_init_saved_regs (gdbarch,
-	                                 ppc_linux_frame_init_saved_regs);
-      set_gdbarch_init_extra_frame_info (gdbarch,
-	                                 ppc_linux_init_extra_frame_info);
+  set_gdbarch_frameless_function_invocation (gdbarch,
+                                         rs6000_frameless_function_invocation);
+  set_gdbarch_frame_chain (gdbarch, rs6000_frame_chain);
+  set_gdbarch_frame_saved_pc (gdbarch, rs6000_frame_saved_pc);
 
-      set_gdbarch_memory_remove_breakpoint (gdbarch,
-	                                    ppc_linux_memory_remove_breakpoint);
-      set_solib_svr4_fetch_link_map_offsets 
-	(gdbarch, ppc_linux_svr4_fetch_link_map_offsets);
-    }
-  else
-    {
-      set_gdbarch_frameless_function_invocation (gdbarch,
-	rs6000_frameless_function_invocation);
-      set_gdbarch_frame_chain (gdbarch, rs6000_frame_chain);
-      set_gdbarch_frame_saved_pc (gdbarch, rs6000_frame_saved_pc);
+  set_gdbarch_frame_init_saved_regs (gdbarch, rs6000_frame_init_saved_regs);
+  set_gdbarch_init_extra_frame_info (gdbarch, rs6000_init_extra_frame_info);
 
-      set_gdbarch_frame_init_saved_regs (gdbarch, rs6000_frame_init_saved_regs);
-      set_gdbarch_init_extra_frame_info (gdbarch, rs6000_init_extra_frame_info);
-    }
   if (!sysv_abi)
     {
       /* Handle RS/6000 function pointers (which are really function
@@ -2792,7 +2679,22 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      now that the C compiler delays popping them.  */
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
 
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch, osabi);
+
   return gdbarch;
+}
+
+static void
+rs6000_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (tdep == NULL)
+    return;
+
+  fprintf_unfiltered (file, "rs6000_dump_tdep: OS ABI = %s\n",
+		      gdbarch_osabi_name (tdep->osabi));
 }
 
 static struct cmd_list_element *info_powerpc_cmdlist = NULL;
@@ -2808,8 +2710,8 @@ rs6000_info_powerpc_command (char *args, int from_tty)
 void
 _initialize_rs6000_tdep (void)
 {
-  register_gdbarch_init (bfd_arch_rs6000, rs6000_gdbarch_init);
-  register_gdbarch_init (bfd_arch_powerpc, rs6000_gdbarch_init);
+  gdbarch_register (bfd_arch_rs6000, rs6000_gdbarch_init, rs6000_dump_tdep);
+  gdbarch_register (bfd_arch_powerpc, rs6000_gdbarch_init, rs6000_dump_tdep);
 
   /* Add root prefix command for "info powerpc" commands */
   add_prefix_cmd ("powerpc", class_info, rs6000_info_powerpc_command,
@@ -2819,5 +2721,4 @@ _initialize_rs6000_tdep (void)
   add_cmd ("altivec", class_info, rs6000_altivec_registers_info,
 	   "Display the contents of the AltiVec registers.",
 	   &info_powerpc_cmdlist);
-
 }

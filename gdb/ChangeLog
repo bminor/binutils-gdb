@@ -1,3 +1,36 @@
+2002-05-20  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (ppc_tdep_h): Define.
+	(ppc-linux-nat.o)
+	(ppc-linux-tdep.o)
+	(rs6000-tdep.o): Use $(ppc_tdep_h).
+	(ppc-sysv-tdep.o)
+	(ppcnbsd-nat.o)
+	(ppcnbsd-tdep.o): New dependency lists.
+	* ppc-tdep.h: Use generic OS ABI framework.
+	* ppc-linux-tdep.c (_initialize_ppc_linux_tdep,
+	ppc_linux_init_abi): New functions.
+	(ppc_sysv_abi_broken_use_struct_convention)
+	(ppc_sysv_abi_use_struct_convention)
+	(ppc_sysv_abi_push_arguments): Move to...
+	* ppc-sysv-tdep.c: ...here.
+	* ppcnbsd-nat.c: Don't include gdbcore.h and regcache.h.
+	* rs6000-tdep.c (process_note_abi_tag_sections)
+	(get_elfosabi): Remove.
+	(rs6000_gdbarch_init): Use generic OS ABI framework.
+	(rs6000_dump_tdep): New function.
+	(_initialize_rs6000_tdep): Use gdbarch_register.
+	* config/powerpc/linux.mt (TDEPFILES): Add ppc-sysv-tdep.o.
+	* config/powerpc/nbsd.mh (NATDEPFILES): Remove solib-legacy.o.
+	* config/powerpc/aix.mt (TDEPFILES): Use ppc-sysv-tdep.o instead
+	of ppc-linux-tdep.o.
+	* config/powerpc/nbsd.mt (TDEPFILES): Likewise.
+	* config/powerpc/ppc-eabi.mt (TDEPFILES): Likewise.
+	* config/powerpc/ppc-sim.mt (TDEPFILES): Likewise.
+	* config/powerpc/ppcle-eabi.mt (TDEPFILES): Likewise.
+	* config/powerpc/ppcle-sim.mt (TDEPFILES): Likewise.
+	* config/powerpc/vxworks.mt (TDEPFILES): Likewise.
+
 2002-05-29  Jim Blandy  <jimb@redhat.com>
 
 	* macroscope.c (default_macro_scope): Put `void' in empty argument

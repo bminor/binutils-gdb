@@ -25,8 +25,6 @@
 
 #include "defs.h"
 #include "inferior.h"
-#include "gdbcore.h"
-#include "regcache.h"
 
 #include "ppc-tdep.h"
 #include "ppcnbsd-tdep.h"

@@ -646,6 +646,7 @@ memattr_h =     memattr.h
 monitor_h =	monitor.h
 objfiles_h =	objfiles.h
 parser_defs_h =	parser-defs.h $(doublest_h)
+ppc_tdep_h =	ppc-tdep.h osabi.h
 regcache_h =	regcache.h
 remote_h =	remote.h
 remote_utils_h =  remote-utils.h $(target_h)
@@ -1226,7 +1227,8 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	nindy-share/ttyflush.c nindy-tdep.c \
 	ns32k-tdep.c solib-osf.c \
 	somread.c somsolib.c $(HPREAD_SOURCE) \
-	ppc-linux-nat.c ppc-linux-tdep.c \
+	ppc-sysv-tdep.o ppc-linux-nat.c ppc-linux-tdep.c \
+	ppcnbsd-nat.o ppcnbsd-tdep.o \
 	procfs.c \
 	remote-adapt.c remote-array.c remote-bug.c remote-e7000.c remote-eb.c \
 	remote-es.c remote-hms.c remote-mips.c \
@@ -1901,10 +1903,20 @@ ppc-bdm.o: ppc-bdm.c $(defs_h) $(gdbcore_h) $(gdb_string_h) $(frame_h) \
 	$(objfiles_h) $(gdb_stabs_h) $(serial_h) ocd.h $(regcache_h)
 
 ppc-linux-nat.o: ppc-linux-nat.c $(defs_h) $(gdbcore_h) $(frame_h) \
-	$(inferior_h) $(target_h) $(regcache_h) ppc-tdep.h
+	$(inferior_h) $(target_h) $(regcache_h) $(ppc_tdep_h)
 
 ppc-linux-tdep.o: ppc-linux-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
-	$(target_h) ppc-tdep.h $(regcache_h) $(value_h)
+	$(target_h) $(ppc_tdep_h) $(regcache_h) $(value_h)
+
+ppc-sysv-tdep.o: ppc-sysv-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
+	$(value_h) $(regcache_h) $(ppc_tdep_h)
+
+ppcnbsd-nat.o: ppcnbsd-nat.c $(defs_h) $(inferior_h) $(ppc_tdep_h) \
+	ppcnbsd-tdep.h
+
+ppcnbsd-tdep.o: ppcnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
+	$(target_h) $(breakpoint_h) $(value_h) $(ppc_tdep_t) ppcnbsd-tdep.h \
+	nbsd-tdep.h
 
 ppcbug-rom.o: ppcbug-rom.c $(monitor_h) $(bfd_h) $(gdb_wait_h) $(defs_h) \
 	$(gdbcmd_h) $(inferior_h) $(target_h) $(serial_h) $(terminal_h) \
@@ -2041,7 +2053,7 @@ rs6000-nat.o: rs6000-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(target_h) \
 	$(gdb_stabs_h) $(regcache_h) $(arch_utils_h)
 
 rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
-	$(target_h) ppc-tdep.h $(regcache_h) $(value_h) $(parser_defs_h)
+	$(target_h) $(ppc_tdep_h) $(regcache_h) $(value_h) $(parser_defs_h)
 
 s390-tdep.o: s390-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) $(inferior_h) \
 	$(symtab_h) $(target_h) $(gdbcore_h) $(gdbcmd_h) $(symfile_h) \
