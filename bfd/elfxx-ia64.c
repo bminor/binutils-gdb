@@ -1834,26 +1834,22 @@ get_local_sym_hash (ia64_info, abfd, rel, create)
      const Elf_Internal_Rela *rel;
      bfd_boolean create;
 {
-  char *addr_name;
-  size_t len;
   struct elfNN_ia64_local_hash_entry *ret;
+  asection *sec = abfd->sections;
+  char addr_name [34];
+
+  BFD_ASSERT ((sizeof (sec->id)*2 + 1 + sizeof (unsigned long)*2 + 1) <= 34);
+  BFD_ASSERT (sec);
 
   /* Construct a string for use in the elfNN_ia64_local_hash_table.
      name describes what was once anonymous memory.  */
 
-  len = sizeof (void*)*2 + 1 + sizeof (bfd_vma)*4 + 1 + 1;
-  len += 10;	/* %p slop */
-
-  addr_name = bfd_malloc (len);
-  if (addr_name == NULL)
-    return 0;
-  sprintf (addr_name, "%p:%lx",
-	   (void *) abfd, (unsigned long) ELFNN_R_SYM (rel->r_info));
+  sprintf (addr_name, "%x:%lx",
+	   sec->id, (unsigned long) ELFNN_R_SYM (rel->r_info));
 
   /* Collect the canonical entry data for this address.  */
   ret = elfNN_ia64_local_hash_lookup (&ia64_info->loc_hash_table,
 				      addr_name, create, create);
-  free (addr_name);
   return ret;
 }
 

@@ -1,3 +1,8 @@
+2002-12-04  H.J. Lu <hjl@gnu.org>
+
+	* elfxx-ia64.c (get_local_sym_hash): Use section ID instead of
+	BFD address when constructing local name.
+
 2002-12-04  Andreas Schwab  <schwab@suse.de>
 
 	* elf32-m68k.c (struct elf_m68k_link_hash_table): Add sym_sec
