@@ -5,6 +5,10 @@ Wed Mar  8 02:54:05 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	work around gcc bugs.
 	(print_insn_m68k): Call opcode instead of referencing m68k_opcodes
 	directly.
+	(BREAK_UP_BIG_DECL): Make secondary array static and const.
+	(reg_names): Now const.
+	(print_insn_arg): Arrays cacheFieldName and names now const.
+	(print_indexed): Array scales now const.
 
 start-sanitize-arc
 Tue Mar  7 21:14:14 1995  Doug Evans  <dje@chestnut.cygnus.com>
