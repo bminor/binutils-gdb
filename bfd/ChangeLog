@@ -1,3 +1,13 @@
+Wed May 22 07:26:38 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+
+	* libbfd.c: Changed #ifdef __GNUC__ to #ifdef HOST_64_BIT, Added
+	DEFUNS 
+
+
+Tue May 21 08:58:58 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+	(bothner)
+	* opncls.c: Changed obstack_chunk_alloc use xmalloc
+
 Mon May 20 17:12:17 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* everything: Removed sysdep.h from bfd.h and put back into files
