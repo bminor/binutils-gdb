@@ -1651,92 +1651,111 @@ pa_ip (str)
 	      dis_assemble_3 (num, &num);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 13);
 
-	    /* Handle a completer for an indexing load or store.  */
+	    /* Handle all completers.  */
 	    case 'c':
-	      {
-		int uu = 0;
-		int m = 0;
-		int i = 0;
-		while (*s == ',' && i < 2)
+	      switch (*++args)
+		{
+
+		/* Handle a completer for an indexing load or store.  */
+		case 'x':
 		  {
-		    s++;
-		    if (strncasecmp (s, "sm", 2) == 0)
+		    int uu = 0;
+		    int m = 0;
+		    int i = 0;
+		    while (*s == ',' && i < 2)
 		      {
-			uu = 1;
-			m = 1;
+			s++;
+			if (strncasecmp (s, "sm", 2) == 0)
+			  {
+			    uu = 1;
+			    m = 1;
+			    s++;
+			    i++;
+			  }
+			else if (strncasecmp (s, "m", 1) == 0)
+			  m = 1;
+			else if (strncasecmp (s, "s", 1) == 0)
+			  uu = 1;
+			else
+			  as_bad (_("Invalid Indexed Load Completer."));
 			s++;
 			i++;
 		      }
-		    else if (strncasecmp (s, "m", 1) == 0)
-		      m = 1;
-		    else if (strncasecmp (s, "s", 1) == 0)
-		      uu = 1;
-		    else
-		      as_bad (_("Invalid Indexed Load Completer."));
-		    s++;
-		    i++;
-		  }
-		if (i > 2)
-		  as_bad (_("Invalid Indexed Load Completer Syntax."));
-		opcode |= m << 5;
-		INSERT_FIELD_AND_CONTINUE (opcode, uu, 13);
-	      }
-
-	    /* Handle a short load/store completer.  */
-	    case 'C':
-	      {
-		int a = 0;
-		int m = 0;
-		if (*s == ',')
-		  {
-		    s++;
-		    if (strncasecmp (s, "ma", 2) == 0)
-		      {
-			a = 0;
-			m = 1;
-		      }
-		    else if (strncasecmp (s, "mb", 2) == 0)
-		      {
-			a = 1;
-			m = 1;
-		      }
-		    else
-		      as_bad (_("Invalid Short Load/Store Completer."));
-		    s += 2;
+		    if (i > 2)
+		      as_bad (_("Invalid Indexed Load Completer Syntax."));
+		    opcode |= m << 5;
+		    INSERT_FIELD_AND_CONTINUE (opcode, uu, 13);
 		  }
 
-		if (*args == 'C')
+		/* Handle a short load/store completer.  */
+		case 'm':
 		  {
+		    int a = 0;
+		    int m = 0;
+		    if (*s == ',')
+		      {
+			s++;
+			if (strncasecmp (s, "ma", 2) == 0)
+			  {
+			    a = 0;
+			    m = 1;
+			  }
+			else if (strncasecmp (s, "mb", 2) == 0)
+			  {
+			    a = 1;
+			    m = 1;
+			  }
+			else
+			  as_bad (_("Invalid Short Load/Store Completer."));
+			s += 2;
+		      }
+
 		    opcode |= m << 5;
 		    INSERT_FIELD_AND_CONTINUE (opcode, a, 13);
 		  }
-	      }
 
-	    /* Handle a stbys completer.  */
-	    case 'Y':
-	      {
-		int a = 0;
-		int m = 0;
-		int i = 0;
-		while (*s == ',' && i < 2)
+		/* Handle a stbys completer.  */
+		case 's':
 		  {
-		    s++;
-		    if (strncasecmp (s, "m", 1) == 0)
-		      m = 1;
-		    else if (strncasecmp (s, "b", 1) == 0)
-		      a = 0;
-		    else if (strncasecmp (s, "e", 1) == 0)
-		      a = 1;
-		    else
+		    int a = 0;
+		    int m = 0;
+		    int i = 0;
+		    while (*s == ',' && i < 2)
+		      {
+			s++;
+			if (strncasecmp (s, "m", 1) == 0)
+			  m = 1;
+			else if (strncasecmp (s, "b", 1) == 0)
+			  a = 0;
+			else if (strncasecmp (s, "e", 1) == 0)
+			  a = 1;
+			else
+			  as_bad (_("Invalid Store Bytes Short Completer"));
+			s++;
+			i++;
+		      }
+		    if (i > 2)
 		      as_bad (_("Invalid Store Bytes Short Completer"));
-		    s++;
-		    i++;
+		    opcode |= m << 5;
+		    INSERT_FIELD_AND_CONTINUE (opcode, a, 13);
 		  }
-		if (i > 2)
-		  as_bad (_("Invalid Store Bytes Short Completer"));
-		opcode |= m << 5;
-		INSERT_FIELD_AND_CONTINUE (opcode, a, 13);
-	      }
+
+		/* Handle a system control completer.  */
+		case 'Z':
+		  if (*s == ',' && (*(s + 1) == 'm' || *(s + 1) == 'M'))
+		    {
+		      flag = 1;
+		      s += 2;
+		    }
+		  else
+		    flag = 0;
+
+		  INSERT_FIELD_AND_CONTINUE (opcode, flag, 5);
+
+		default:
+		  abort ();
+		}
+	      break;
 
 	    /* Handle all conditions.  */
 	    case '?':
@@ -2265,18 +2284,6 @@ pa_ip (str)
 		  }
 		break;
 	      }
-
-	    /* Handle a system control completer.  */
-	    case 'Z':
-	      if (*s == ',' && (*(s + 1) == 'm' || *(s + 1) == 'M'))
-		{
-		  flag = 1;
-		  s += 2;
-		}
-	      else
-		flag = 0;
-
-	      INSERT_FIELD_AND_CONTINUE (opcode, flag, 5);
 
 	    /* Handle a nullification completer for branch instructions.  */
 	    case 'n':
