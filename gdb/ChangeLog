@@ -1,3 +1,19 @@
+Thu Nov 30 01:24:37 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (struct upk_mips16): Delete fields ``inst'' and
+ 	``fmt''.  Make ``offset'' a CORE_ADDR.
+	(print_unpack): Delete.
+	(extended_offset): Construct and return a CORE_ADDR.
+	(fetch_mips_16): Return an int.  Don't assume short is 16 bits.
+	(unpack_mips16): Rewrite.  Add ``extension'' parameter instead of
+ 	incorrectly guessing if the instruction had an extension.
+	(map16): Delete array.
+	(mips16_op): Delete macro.
+	(extended_mips16_next_pc): Rewrite of old mips16_next_pc function.
+  	When an extended instruction do a recursive call.
+	(mips16_next_pc): Call extended_mips16_next_pc.
+	(mips_next_pc): Cleanup.
+	
 Sat Dec  2 10:40:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* ser-e7kpc.c (e7000pc_setstopbits): New function.
