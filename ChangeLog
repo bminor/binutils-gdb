@@ -1,4 +1,8 @@
-	Mon Feb 12 15:33:59 1996  Christian Bauernfeind <chrisbfd@theorie3.physik.uni-erlangen.de>
+Mon Feb 12 15:28:49 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* config.sub, configure.in: Recognize sparclet cpu.
+
+Mon Feb 12 15:33:59 1996  Christian Bauernfeind <chrisbfd@theorie3.physik.uni-erlangen.de>
 
 	* config.guess:  Support m68k-cbm-sysv4.
 
