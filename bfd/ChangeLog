@@ -1,5 +1,7 @@
 Tue Sep 12 12:14:33 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* dep-in.sed: Remove config.h from generated dependencies.
+
 	* sunos.c (sunos_slurp_dynamic_symtab): New static function,
 	broken out of sunos_canonicalize_dynamic_symtab.
 	(sunos_canonicalize_dynamic_symtab): Call new function
