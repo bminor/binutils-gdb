@@ -1312,7 +1312,7 @@ sim_monitor(sd,reason)
            having to allocate and manage a temporary string buffer. */
         if (AddressTranslation(A0,isDATA,isLOAD,&paddr,&cca,isHOST,isREAL)) {
           char *s = (char *)((int)paddr);
-          ut_reg *ap = &A1; /* 1st argument */
+          signed_word *ap = &A1; /* 1st argument */
           /* TODO: Include check that we only use three arguments (A1, A2 and A3) */
           for (; *s;) {
             if (*s == '%') {

@@ -1,3 +1,13 @@
+Mon Oct 20 13:31:20 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (SIGNEXTEND): Force type of result to unsigned_word.
+
+	* interp.c (sim_monitor): Make register pointers of type
+ 	unsigned_word*.
+
+	* sim-main.h: Make registers of type unsigned_word not
+ 	signed_word.
+
 Thu Oct 16 10:31:39 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 start-sanitize-r5900
