@@ -1186,41 +1186,6 @@ build_regcache (void)
 }
 
 void
-regcache_save (struct regcache *regcache)
-{
-  int i;
-  gdb_assert (current_regcache != NULL && regcache != NULL);
-  gdb_assert (current_regcache->descr->gdbarch == regcache->descr->gdbarch);
-  regcache_cpy (regcache, current_regcache);
-}
-
-void
-regcache_save_no_passthrough (struct regcache *regcache)
-{
-  gdb_assert (current_regcache != NULL && regcache != NULL);
-  gdb_assert (current_regcache->descr->gdbarch == regcache->descr->gdbarch);
-  regcache_cpy_no_passthrough (regcache, current_regcache);
-}
-
-void
-regcache_restore (struct regcache *regcache)
-{
-  int i;
-  gdb_assert (current_regcache != NULL && regcache != NULL);
-  gdb_assert (current_regcache->descr->gdbarch == regcache->descr->gdbarch);
-  regcache_cpy (current_regcache, regcache);
-}
-
-void
-regcache_restore_no_passthrough (struct regcache *regcache)
-{
-  char *regcache_registers;
-  gdb_assert (current_regcache != NULL && regcache != NULL);
-  gdb_assert (current_regcache->descr->gdbarch == regcache->descr->gdbarch);
-  regcache_cpy_no_passthrough (current_regcache, regcache);
-}
-
-void
 _initialize_regcache (void)
 {
   regcache_descr_handle = register_gdbarch_data (init_regcache_descr,

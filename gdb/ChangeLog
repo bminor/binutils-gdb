@@ -1,3 +1,15 @@
+2002-06-22  Andrew Cagney  <ac131313@redhat.com>
+
+	* regcache.h: Update comments describing the regcache_cpy family
+	of functions.
+	(regcache_save, regcache_restore): Delete declaration.
+	(regcache_save_no_passthrough): Delete declaration.
+	(regcache_restore_no_passthrough): Delete declaration.
+	* regcache.c (regcache_save): Delete function.
+	(regcache_save_no_passthrough): Delete function.
+	(regcache_restore): Delete function.
+	(regcache_restore_no_passthrough): Delete function.
+
 2002-06-21  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/m68k/tm-m68k.h: Fix typo.
