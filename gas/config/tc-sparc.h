@@ -129,8 +129,7 @@ extern int elf32_sparc_force_relocation PARAMS ((struct fix *));
        || ((FIX)->fx_subsy != NULL					\
 	   && (S_GET_SEGMENT ((FIX)->fx_subsy)				\
 	       == S_GET_SEGMENT ((FIX)->fx_addsy)))			\
-       || strchr (S_GET_NAME ((FIX)->fx_addsy), '\001') != NULL		\
-       || strchr (S_GET_NAME ((FIX)->fx_addsy), '\002') != NULL))
+       || S_IS_LOCAL ((FIX)->fx_addsy)))
 #endif
 
 #ifdef OBJ_AOUT

@@ -247,8 +247,7 @@ extern const char *ppc_comment_chars;
        || ((FIX)->fx_subsy != NULL					\
 	   && (S_GET_SEGMENT ((FIX)->fx_subsy)				\
 	       == S_GET_SEGMENT ((FIX)->fx_addsy)))			\
-       || strchr (S_GET_NAME ((FIX)->fx_addsy), '\001') != NULL		\
-       || strchr (S_GET_NAME ((FIX)->fx_addsy), '\002') != NULL))
+       || S_IS_LOCAL ((FIX)->fx_addsy)))
 
 /* We must never ever try to resolve references to externally visible
    symbols in the assembler, because the .o file might go into a shared

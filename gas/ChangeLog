@@ -1,3 +1,9 @@
+1999-07-10  Ian Lance Taylor  <ian@zembu.com>
+
+	* config/tc-ppc.h (tc_fix_adjustable) [OBJ_ELF]: Call S_IS_LOCAL
+	rather than checking for \001 and \002 in symbol name.
+	* config/tc-sparc.h (tc_fix_adjustable) [OBJ_ELF]: Likewise.
+
 Thu Jul  8 12:32:23 1999  John David Anglin <dave@hiauly1.hia.nrc.ca>
 
 	* configure.in (hppa*-linux-gnu*): New target.
