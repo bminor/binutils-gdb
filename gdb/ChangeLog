@@ -1,5 +1,9 @@
 2003-08-04  Andrew Cagney  <cagney@redhat.com>
 
+	* solib-svr4.c (_initialize_svr4_solib): Update
+	register_gdbarch_data call.
+	* mips-linux-tdep.c (_initialize_mips_linux_tdep): Ditto.
+
 	* gdbarch.sh (gdbarch_data_free_ftype): Delete declaration.
 	(register_gdbarch_data): Delete "free" parameter.  Update
 	comments.

@@ -1472,7 +1472,7 @@ void
 _initialize_svr4_solib (void)
 {
   fetch_link_map_offsets_gdbarch_data =
-    register_gdbarch_data (init_fetch_link_map_offsets, 0);
+    register_gdbarch_data (init_fetch_link_map_offsets);
 
   svr4_so_ops.relocate_section_addresses = svr4_relocate_section_addresses;
   svr4_so_ops.free_so = svr4_free_so;
