@@ -154,8 +154,6 @@ static int find_dot_all (const char *);
 		   return CHARLIT;
 		}
 
-\"{OPER}\"/{WHITE}*"(" { return processId (yytext, yyleng); }
-
 <INITIAL>\"	{
 		   tempbuf_len = 0;
 		   BEGIN IN_STRING;
@@ -926,5 +924,5 @@ yywrap(void)
 typedef void (*dummy_function) ();
 dummy_function ada_flex_use[] = 
 { 
-  (dummy_function) yyrealloc, (dummy_function) yyunput
+  (dummy_function) yyunput
 };

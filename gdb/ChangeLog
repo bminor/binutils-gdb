@@ -1,3 +1,9 @@
+2004-10-09  Paul Hilfinger  <hilfingr@nile.gnat.com>
+
+	* ada-lex.l: Remove useless rule whose right-context clause
+	causes unreferenced static function warning for yyrealloc.
+	(ada_flex_use): Remove the artificial reference to yyrealloc.
+
 2004-10-08  Andrew Cagney  <cagney@gnu.org>
 
 	* target.h (struct target_ops): Rename to_xfer_memory to
