@@ -209,13 +209,28 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
   int fprs_saved[S390_NUM_FPRS];
   int regidx, instrlen;
   int save_link_regidx, subtract_sp_regidx;
-  int const_pool_state, save_link_state, got_state;
+  int const_pool_state, save_link_state;
   int frame_pointer_found, varargs_state;
   int loop_cnt, gdb_gpr_store, gdb_fpr_store;
   int frame_pointer_regidx = 0xf;
   int offset, expected_offset;
   int err = 0;
   disassemble_info info;
+
+  /* What we've seen so far regarding r12 --- the GOT (Global Offset
+     Table) pointer.  We expect to see `l %r12, N(%r13)', which loads
+     r12 with the offset from the constant pool to the GOT, and then
+     an `ar %r12, %r13', which adds the constant pool address,
+     yielding the GOT's address.  Here's what got_state means:
+     0 -- seen nothing
+     1 -- seen `l %r12, N(%r13)', but no `ar'
+     2 -- seen load and add, so GOT pointer is totally initialized
+     When got_state is 1, then got_load_addr is the address of the
+     load instruction, and got_load_len is the length of that
+     instruction.  */
+  int got_state;
+  CORE_ADDR got_load_addr, got_load_len;
+
   const_pool_state = save_link_state = got_state = varargs_state = 0;
   frame_pointer_found = 0;
   memset (gprs_saved, 0, sizeof (gprs_saved));
@@ -539,7 +554,9 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
 	      && (instr[2] == (CONST_POOL_REGIDX << 4))
 	      && ((instr[1] >> 4) == GOT_REGIDX))
 	    {
-	      got_state == 1;
+	      got_state = 1;
+              got_load_addr = test_pc;
+              got_load_len = instrlen;
 	      valid_prologue = 1;
 	      continue;
 	    }
@@ -556,8 +573,20 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
   while (valid_prologue && good_prologue);
   if (good_prologue)
     {
-      good_prologue = (((got_state == 0) || (got_state == 2)) &&
-		       ((const_pool_state == 0) || (const_pool_state == 2)) &&
+      /* If this function doesn't reference the global offset table,
+         then the compiler may use r12 for other things.  If the last
+         instruction we saw was a load of r12 from the constant pool,
+         with no subsequent add to make the address PC-relative, then
+         the load was probably a genuine body instruction; don't treat
+         it as part of the prologue.  */
+      if (got_state == 1
+          && got_load_addr + got_load_len == test_pc)
+        {
+          test_pc = got_load_addr;
+          instrlen = got_load_len;
+        }
+        
+      good_prologue = (((const_pool_state == 0) || (const_pool_state == 2)) &&
 		       ((save_link_state == 0) || (save_link_state == 4)) &&
 		       ((varargs_state == 0) || (varargs_state == 2)));
     }

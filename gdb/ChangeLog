@@ -1,5 +1,10 @@
 2001-11-08  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c (s390_get_frame_info): If the prologue loads r12
+ 	from the constant pool, but doesn't add in the constant pool's
+ 	address to it, then this function probably isn't using r12 as a
+	GOT pointer, and that load probably wasn't part of the prologue.
+
 	* s390-tdep.c (s390_gdbarch_init): Use the default
  	prepare_to_proceed function established by config/nm-linux.h;
  	don't try to set it to linuxthreads_prepare_to_proceed.
