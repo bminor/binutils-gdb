@@ -27,7 +27,9 @@
 /bfd/s/"{s}"bfd\.h/"{o}"bfd.h/g
 /config/s/"{s}"config\.h/"{o}"config.h/g
 /elf32-target/s/"{s}"elf32-target\.h/"{o}"elf32-target.h/g
+/elf32-target/s/^elf32-target\.h/"{o}"elf32-target.h/
 /elf64-target/s/"{s}"elf64-target\.h/"{o}"elf64-target.h/g
+/elf64-target/s/^elf64-target\.h/"{o}"elf64-target.h/
 
 /"{s}"{INCDIR}/s/"{s}"{INCDIR}/"{INCDIR}"/g
 

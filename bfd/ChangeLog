@@ -1,13 +1,19 @@
+Thu Jul 18 11:36:31 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in: Add ELF support to mips config, create the
+	elf32-target.h file in the object dir.
+	* mpw-make.sed: Edit elfXX-target.h refs at beginnings of lines.
+
 Wed Jul 17 18:02:32 1996  Kim Knuttila  <krk@cygnus.com>
 
 	* coff-ppc.c: Redid debug scheme - numerous fprintf's gone.
 	Also removed most abort calls, in favor of using bfd reporting.
 
 start-sanitize-d10v
-	Wed Jul 17 14:51:52 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+Wed Jul 17 14:51:52 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
-	* Makefile.in (ALL_MACHINES): Add cpu-d10v.o
-	(BFD32_BACKENDS) Add elf32-d10v.o
+	* Makefile.in (ALL_MACHINES): Add cpu-d10v.o.
+	(BFD32_BACKENDS) Add elf32-d10v.o.
 	* archures.c: Add bfd_d10v_arch.
 	* bfd-in2.h: Add bfd_d10v_arch.
 	* config.bfd (d10v-*-*): New target.
@@ -17,8 +23,8 @@ start-sanitize-d10v
 	* elf.c (prep_headers): Added case bfd_arch_d10v.
 	* elf32-d10v.c: New file.
 	* libbfd.h: Rebuild.
-	* reloc.c (BFD_RELOC_D10V_10_PCREL_R, BFD_RELOC_D10V_10_PCREL_L, BFD_RELOC_D10V_18,
-	  BFD_RELOC_D10V_18_PCREL): Define.
+	* reloc.c (BFD_RELOC_D10V_10_PCREL_R, BFD_RELOC_D10V_10_PCREL_L,
+ 	BFD_RELOC_D10V_18, BFD_RELOC_D10V_18_PCREL): Define.
 	* targets.c (bfd_elf32_d10v_vec): New vector.
 end-sanitize-d10v
 	
