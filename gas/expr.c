@@ -869,7 +869,7 @@ operand (expressionP)
 
 	case 'x':
 	case 'X':
-	  if (flag_m68k_mri || NUMBERS_WITH_SUFFIX)
+	  if (flag_m68k_mri)
 	    goto default_case;
 	  input_line_pointer++;
 	  integer_constant (16, expressionP);
