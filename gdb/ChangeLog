@@ -1,3 +1,19 @@
+2004-03-22  Andrew Cagney  <cagney@redhat.com>
+
+	* s390-tdep.c (struct s390_stub_unwind_cache): Rename
+	s390_pltstub_unwind_cache.
+	(s390_stub_frame_unwind_cache): Rename
+	s390_pltstub_frame_unwind_cache.
+	(s390_stub_frame_this_id): Rename s390_pltstub_frame_this_id.
+	(s390_stub_frame_prev_register): Rename
+	s390_pltstub_frame_prev_register.
+	(s390_stub_frame_unwind): Rename s390_pltstub_frame_unwind.
+	(s390_stub_frame_sniffer): Rename s390_stub_frame_sniffer.
+
+	From Ulrich Weigand:
+	* s390-tdep.c (s390_pltstub_frame_sniffer): Handle invalid function
+	pointer calls like PLT calls.
+
 2004-03-22  Daniel Jacobowitz  <drow@mvista.com>
 
 	* mips-tdep.c (non_heuristic_proc_desc): Search using the specified
