@@ -3,6 +3,6 @@ TERMCAP = -lcurses
 XDEPFILES= 
 XM_FILE= xm-hppah.h
 NAT_FILE= nm-hppah.h
-NATDEPFILES= exec.o coredep.o corelow.o
+NATDEPFILES= hppah-nat.o exec.o coredep.o corelow.o
 REGEX=regex.o
 REGEX1=regex.o
