@@ -1,5 +1,8 @@
 Tue Feb  2 00:19:08 1993  John Gilmore  (gnu@cygnus.com)
 
+	* blockframe.c (inside_entry_file, inside_main_func,
+	inside_entry_func):  PC of zero is always "bottom of stack".
+
 	* printcmd.c (print_frame_args, print_frame_nameless_args):
 	Let print_frame_nameless_args decide whether there are any,
 	laying groundwork for possibly later printing 29K args for
