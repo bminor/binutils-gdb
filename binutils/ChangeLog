@@ -1,3 +1,33 @@
+Mon Aug 22 16:02:18 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* ar.c: Include libiberty.h.
+	(inarch): Remove variable.
+	(map_over_members): Make static.  Add arch argument, and use it
+	instead of inarch.  Change all callers.
+	(main): Treat --version as -v.  Accept -t argument.  Accept any
+	number of archive arguments.  Catch and use open_inarch return
+	value, rather than using inarch.
+	(open_inarch): Return newly opened BFD, rather than using inarch.
+	(do_quick_append): Make archive_filename const.
+	(write_archive): Add iarch argument, and use it instead of inarch.
+	Change all callers.
+	(delete_members, move_members, replace_members): Likewise.
+	(ranlib_only): Don't exit on success.  Catch and use open_inarch
+	return value.
+	(ranlib_touch): New function.
+	* arsup.h (map_over_members): Don't declare.
+	(ar_end, ar_extract): Declare.
+	(open_inarch): Change return value in declaration to bfd *.
+	* arsup.c (map_over_list): Make static. Always pass two arguments
+	to function.  Add arch argument, and use it instead of inarch.
+	Change all callers.
+	(ar_directory_doer): Make static.  Add ignored second argument.
+	Change all callers.
+	(ar_directory): Use open_inarch return value rather than inarch.
+	(ar_addlib_doer): Make static.
+	(ar_addlib): Use open_inarch return value rather than inarch.
+	(ar_extract): Remove unused local variable abfd.
+
 Thu Aug 11 14:55:57 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	Add support for removing named sections to objcopy and strip.
