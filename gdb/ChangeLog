@@ -1,3 +1,8 @@
+Thu Nov 10 23:17:45 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* symfile.c (syms_from_objfile): Only call find_lowest_section if
+	no ".text" section exists.
+
 Thu Nov 10 15:16:21 1994  Rob Savoye  <rob@rtl.cygnus.com>
 
 	* rom68k-rom.c: New file. Replaces the old remote-mon.c and uses
