@@ -169,7 +169,7 @@ parse_args (argc, argv)
 	    char *end;
 	    g_switch_value = strtoul (optarg, &end, 0);
 	    if (*end)
-	      einfo ("%P%F: invalid number `%s'", optarg);
+	      einfo ("%P%F: invalid number `%s'\n", optarg);
 	  }
 	  break;
 	case 'g':
