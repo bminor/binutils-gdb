@@ -1,3 +1,7 @@
+Thu Jan 30 11:57:33 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mips/mips16.d: Update for disassembler changes.
+
 Thu Jan 23 03:15:06 1997  Angela Marie Thomas (angela@cygnus.com)
 
 	* gas/mips/mips.exp: set ilocks for all 4100/4300
