@@ -35,7 +35,7 @@ else
 	lose_these_too="${tic80_files} ${lose_these_too}"
 fi
 
-sky_files="tc-txvu.c tc-txvu.h"
+sky_files="tc-dvp.c tc-dvp.h"
 
 if ( echo $* | grep keep\-sky > /dev/null ) ; then
 	keep_these_too="${sky_files} ${keep_these_too}"

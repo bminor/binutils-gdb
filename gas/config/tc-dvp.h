@@ -1,5 +1,5 @@
-/* tc-txvu.h -- Header file for tc-txvu.c.
-   Copyright (C) 1997 Free Software Foundation, Inc.
+/* tc-dvp.h -- Header file for tc-dvp.c.
+   Copyright (C) 1997, 1998 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -18,19 +18,19 @@
    the Free Software Foundation, 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA. */
 
-#define TC_TXVU
+#define TC_DVP
 
 #ifndef BFD_ASSEMBLER
 /* leading space so will compile with cc */
- #error TXVU support requires BFD_ASSEMBLER
+ #error DVP support requires BFD_ASSEMBLER
 #endif
 
-#define LISTING_HEADER "TXVU GAS "
+#define LISTING_HEADER "DVP GAS "
 
 /* The target BFD architecture.  */
-#define TARGET_ARCH bfd_arch_txvu
+#define TARGET_ARCH bfd_arch_mips
 
-#define TARGET_FORMAT "elf32-txvu"
+#define TARGET_FORMAT "elf32-littlemips"
 
 #define TARGET_BYTES_BIG_ENDIAN 0
 
@@ -45,7 +45,7 @@
 /* We don't need to handle .word strangely.  */
 #define WORKING_DOT_WORD
 
-#define md_convert_frag(b,s,f)		{as_fatal ("txvu convert_frag\n");}
+#define md_convert_frag(b,s,f)		{as_fatal ("dvp convert_frag\n");}
 #define md_estimate_size_before_relax(f,s) \
 			(as_fatal("estimate_size_before_relax called"),1)
 
