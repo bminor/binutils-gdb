@@ -1,4 +1,11 @@
+Thu Nov 16 00:21:44 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* config/obj-coff.c (write_object_file): Change use of md_do_align
+	to pass a pointer rather than a fill value, to match other uses.
+
 Wed Nov 15 03:52:00 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* config/tc-ns32k.h (TC_FIX_TYPE): Add missing semicolon.
 
 	* as.c (main): Move md_end call to just after call to
 	perform_an_assembly_pass.  Delete cpu-specific code here.
