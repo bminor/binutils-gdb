@@ -26,11 +26,12 @@ Dump of debug contents of section \.debug_line:
   Opcode 8 has 0 args
   Opcode 9 has 1 args
 
- The Directory Table is empty\.
+ The Directory Table:
+  .*/gas/testsuite/gas/cris
 
  The File Name Table:
   Entry	Dir	Time	Size	Name
-  1	0	0	0	.*/addi\.s
+  1	1	0	0	addi\.s
 
  Line Number Statements:
   Extended opcode 2: set Address to 0x0

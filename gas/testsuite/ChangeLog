@@ -1,3 +1,7 @@
+2003-02-04  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/cris/rd-dw2-1.d: Adjust for dwarf2 directory table change.
+
 2003-02-02  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/elf-rel8.[sd], gas/mips/elf-rel9.[sd],
