@@ -1042,6 +1042,10 @@ enum bfd_architecture
   /* end-sanitize-rce */
   /* start-sanitize-arc */
   bfd_arch_arc,        /* Argonaut RISC Core */
+#define bfd_mach_arc_base 0
+#define bfd_mach_arc_host 1
+#define bfd_mach_arc_graphics 2
+#define bfd_mach_arc_audio 3
   /* end-sanitize-arc */
   bfd_arch_last
   };
