@@ -1,3 +1,7 @@
+Fri Oct 14 14:35:38 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
+
+	* ldint.texinfo: Move misplaced `@end iftex'.
+
 Fri Oct 14 12:02:18 1994  Eric Youngdale  (eric@aib.com)
 
 	* scripttempl/elf.sc: Add .rel.ctors, .rela.ctors, .rel.dtors, and
