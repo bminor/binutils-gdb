@@ -1,3 +1,14 @@
+Tue Oct 29 17:05:43 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mips/*.d: Update for disassembler changes.
+
+start-sanitize-v850
+Wed Oct 16 22:39:50 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/v850/reloc.s: New tests.
+	* gas/v850/basic.exp: Run them.
+
+end-sanitize-v850
 Mon Oct 14 13:52:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mips: Add symbols to several testsuites, since the ELF
