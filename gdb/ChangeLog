@@ -1,3 +1,8 @@
+Mon Jun 12 12:17:20 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c: Include "symcat.h".
+ 	(mips_dump_tdep): Print all known but not yet multi-arched values.
+
 2000-06-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-i386.h: Add forward declaration of `struct value'.

@@ -41,7 +41,7 @@
 #include "opcode/mips.h"
 #include "elf/mips.h"
 #include "elf-bfd.h"
-
+#include "symcat.h"
 
 /* The sizes of floating point registers.  */
 
@@ -4151,9 +4151,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: MIPS_LAST_FP_ARG_REGNUM = %d\n",
 		      MIPS_LAST_FP_ARG_REGNUM);
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: MIPS_LAST_ARG_REGNUM = %d\n",
-		      MIPS_LAST_ARG_REGNUM);
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS_FPU_TYPE = %d (%s)\n",
 		      MIPS_FPU_TYPE,
 		      (MIPS_FPU_TYPE == MIPS_FPU_NONE ? "none"
@@ -4163,9 +4160,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS_DEFAULT_SAVED_REGSIZE = %d\n",
 		      MIPS_DEFAULT_SAVED_REGSIZE);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: MIPS_SAVED_REGSIZE = %d\n",
-		      MIPS_SAVED_REGSIZE);
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: FP_REGISTER_DOUBLE = %d\n",
 		      FP_REGISTER_DOUBLE);
@@ -4181,6 +4175,333 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS_REGSIZE = %d\n",
 		      MIPS_REGSIZE);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: A0_REGNUM = %d\n",
+		      A0_REGNUM);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: ADDR_BITS_REMOVE # %s\n",
+		      XSTRING (ADDR_BITS_REMOVE(ADDR)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: ATTACH_DETACH # %s\n",
+		      XSTRING (ATTACH_DETACH));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: BADVADDR_REGNUM = %d\n",
+		      BADVADDR_REGNUM);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: BIG_BREAKPOINT = delete?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: CAUSE_REGNUM = %d\n",
+		      CAUSE_REGNUM);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: CPLUS_MARKER = %c\n",
+		      CPLUS_MARKER);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: DEFAULT_MIPS_TYPE = %s\n",
+		      DEFAULT_MIPS_TYPE);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: DO_REGISTERS_INFO # %s\n",
+		      XSTRING (DO_REGISTERS_INFO));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: DWARF_REG_TO_REGNUM # %s\n",
+		      XSTRING (DWARF_REG_TO_REGNUM (REGNUM)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: ECOFF_REG_TO_REGNUM # %s\n",
+		      XSTRING (ECOFF_REG_TO_REGNUM (REGNUM)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: ELF_MAKE_MSYMBOL_SPECIAL # %s\n",
+		      XSTRING (ELF_MAKE_MSYMBOL_SPECIAL (SYM, MSYM)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: FCRCS_REGNUM = %d\n",
+		      FCRCS_REGNUM);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: FCRIR_REGNUM = %d\n",
+		      FCRIR_REGNUM);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: FIRST_EMBED_REGNUM = %d\n",
+		      FIRST_EMBED_REGNUM);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: FPA0_REGNUM = %d\n",
+		      FPA0_REGNUM);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: GDB_TARGET_IS_MIPS64 = %d\n",
+		      GDB_TARGET_IS_MIPS64);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: GDB_TARGET_MASK_DISAS_PC # %s\n",
+		      XSTRING (GDB_TARGET_MASK_DISAS_PC (PC)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: GDB_TARGET_UNMASK_DISAS_PC # %s\n",
+		      XSTRING (GDB_TARGET_UNMASK_DISAS_PC (PC)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: GEN_REG_SAVE_MASK = %d\n",
+		      GEN_REG_SAVE_MASK);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: HAVE_NONSTEPPABLE_WATCHPOINT # %s\n",
+		      XSTRING (HAVE_NONSTEPPABLE_WATCHPOINT));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep:  HI_REGNUM = %d\n",
+		      HI_REGNUM);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: IDT_BIG_BREAKPOINT = delete?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: IDT_LITTLE_BREAKPOINT = delete?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: IGNORE_HELPER_CALL # %s\n",
+		      XSTRING (IGNORE_HELPER_CALL (PC)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: INIT_FRAME_PC # %s\n",
+		      XSTRING (INIT_FRAME_PC (FROMLEAF, PREV)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: INIT_FRAME_PC_FIRST # %s\n",
+		      XSTRING (INIT_FRAME_PC_FIRST (FROMLEAF, PREV)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: IN_SIGTRAMP # %s\n",
+		      XSTRING (IN_SIGTRAMP (PC, NAME)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: IN_SOLIB_CALL_TRAMPOLINE # %s\n",
+		      XSTRING (IN_SOLIB_CALL_TRAMPOLINE (PC, NAME)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: IN_SOLIB_RETURN_TRAMPOLINE # %s\n",
+		      XSTRING (IN_SOLIB_RETURN_TRAMPOLINE (PC, NAME)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: IS_MIPS16_ADDR = FIXME!\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: LAST_EMBED_REGNUM = %d\n",
+		      LAST_EMBED_REGNUM);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: LITTLE_BREAKPOINT = delete?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: LO_REGNUM = %d\n",
+		      LO_REGNUM);
+#ifdef MACHINE_CPROC_FP_OFFSET
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: MACHINE_CPROC_FP_OFFSET = %d\n",
+		      MACHINE_CPROC_FP_OFFSET);
+#endif
+#ifdef MACHINE_CPROC_PC_OFFSET
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: MACHINE_CPROC_PC_OFFSET = %d\n",
+		      MACHINE_CPROC_PC_OFFSET);
+#endif
+#ifdef MACHINE_CPROC_SP_OFFSET
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: MACHINE_CPROC_SP_OFFSET = %d\n",
+		      MACHINE_CPROC_SP_OFFSET);
+#endif
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: MAKE_MIPS16_ADDR = FIXME!\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: MIPS16_BIG_BREAKPOINT = delete?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: MIPS16_INSTLEN = %d\n",
+		      MIPS16_INSTLEN);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: MIPS16_LITTLE_BREAKPOINT = delete?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: MIPS_DEFAULT_ABI = FIXME!\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: MIPS_EFI_SYMBOL_NAME = multi-arch!!\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: MIPS_INSTLEN = %d\n",
+		      MIPS_INSTLEN);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: MIPS_LAST_ARG_REGNUM = %d\n",
+		      MIPS_LAST_ARG_REGNUM);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: MIPS_NUMREGS = %d\n",
+		      MIPS_NUMREGS);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: MIPS_REGISTER_NAMES = delete?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: MIPS_SAVED_REGSIZE = %d\n",
+		      MIPS_SAVED_REGSIZE);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: MSYMBOL_IS_SPECIAL = function?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: MSYMBOL_SIZE # %s\n",
+		      XSTRING (MSYMBOL_SIZE (MSYM)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: OP_LDFPR = used?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: OP_LDGPR = used?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PMON_BIG_BREAKPOINT = delete?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PMON_LITTLE_BREAKPOINT = delete?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PRID_REGNUM = %d\n",
+		      PRID_REGNUM);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PRINT_EXTRA_FRAME_INFO # %s\n",
+		      XSTRING (PRINT_EXTRA_FRAME_INFO (FRAME)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PROC_DESC_IS_DUMMY = function?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PROC_FRAME_ADJUST = function?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PROC_FRAME_OFFSET = function?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PROC_FRAME_REG = function?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PROC_FREG_MASK = function?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PROC_FREG_OFFSET = function?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PROC_HIGH_ADDR = function?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PROC_LOW_ADDR = function?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PROC_PC_REG = function?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PROC_REG_MASK = function?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PROC_REG_OFFSET = function?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PROC_SYMBOL = function?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PS_REGNUM = %d\n",
+		      PS_REGNUM);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: PUSH_FP_REGNUM = %d\n",
+		      PUSH_FP_REGNUM);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: RA_REGNUM = %d\n",
+		      RA_REGNUM);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: REGISTER_CONVERT_FROM_TYPE # %s\n",
+		      XSTRING (REGISTER_CONVERT_FROM_TYPE (REGNUM, VALTYPE, RAW_BUFFER)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: REGISTER_CONVERT_TO_TYPE # %s\n",
+		      XSTRING (REGISTER_CONVERT_TO_TYPE (REGNUM, VALTYPE, RAW_BUFFER)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: REGISTER_NAMES = delete?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: ROUND_DOWN = function?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: ROUND_UP = function?\n");
+#ifdef SAVED_BYTES
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: SAVED_BYTES = %d\n",
+		      SAVED_BYTES);
+#endif
+#ifdef SAVED_FP
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: SAVED_FP = %d\n",
+		      SAVED_FP);
+#endif
+#ifdef SAVED_PC
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: SAVED_PC = %d\n",
+		      SAVED_PC);
+#endif
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: SETUP_ARBITRARY_FRAME # %s\n",
+		      XSTRING (SETUP_ARBITRARY_FRAME (NUMARGS, ARGS)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: SET_PROC_DESC_IS_DUMMY = function?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: SIGFRAME_BASE = %d\n",
+		      SIGFRAME_BASE);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: SIGFRAME_FPREGSAVE_OFF = %d\n",
+		      SIGFRAME_FPREGSAVE_OFF);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: SIGFRAME_PC_OFF = %d\n",
+		      SIGFRAME_PC_OFF);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: SIGFRAME_REGSAVE_OFF = %d\n",
+		      SIGFRAME_REGSAVE_OFF);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: SIGFRAME_REG_SIZE = %d\n",
+		      SIGFRAME_REG_SIZE);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: SKIP_TRAMPOLINE_CODE # %s\n",
+		      XSTRING (SKIP_TRAMPOLINE_CODE (PC)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: SOFTWARE_SINGLE_STEP # %s\n",
+		      XSTRING (SOFTWARE_SINGLE_STEP (SIG, BP_P)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: SOFTWARE_SINGLE_STEP_P = %d\n",
+		      SOFTWARE_SINGLE_STEP_P);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: SOFTWARE_SINGLE_STEP_P = %d\n",
+		      SOFTWARE_SINGLE_STEP_P);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: STAB_REG_TO_REGNUM # %s\n",
+		      XSTRING (STAB_REG_TO_REGNUM (REGNUM)));
+#ifdef STACK_END_ADDR
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: STACK_END_ADDR = %d\n",
+		      STACK_END_ADDR);
+#endif
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: STEP_SKIPS_DELAY # %s\n",
+		      XSTRING (STEP_SKIPS_DELAY (PC)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: STEP_SKIPS_DELAY_P = %d\n",
+		      STEP_SKIPS_DELAY_P);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: STOPPED_BY_WATCHPOINT # %s\n",
+		      XSTRING (STOPPED_BY_WATCHPOINT (WS)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: T9_REGNUM = %d\n",
+		      T9_REGNUM);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: TABULAR_REGISTER_OUTPUT = used?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: TARGET_CAN_USE_HARDWARE_WATCHPOINT # %s\n",
+		      XSTRING (TARGET_CAN_USE_HARDWARE_WATCHPOINT (TYPE,CNT,OTHERTYPE)));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: TARGET_HAS_HARDWARE_WATCHPOINTS # %s\n",
+		      XSTRING (TARGET_HAS_HARDWARE_WATCHPOINTS));
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: TARGET_MIPS = used?\n");
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: TM_PRINT_INSN_MACH # %s\n",
+		      XSTRING (TM_PRINT_INSN_MACH));
+#ifdef TRACE_CLEAR
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: TRACE_CLEAR # %s\n",
+		      XSTRING (TRACE_CLEAR (THREAD, STATE)));
+#endif
+#ifdef TRACE_FLAVOR
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: TRACE_FLAVOR = %d\n",
+		      TRACE_FLAVOR);
+#endif
+#ifdef TRACE_FLAVOR_SIZE
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: TRACE_FLAVOR_SIZE = %d\n",
+		      TRACE_FLAVOR_SIZE);
+#endif
+#ifdef TRACE_SET
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: TRACE_SET # %s\n",
+		      XSTRING (TRACE_SET (X,STATE)));
+#endif
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: UNMAKE_MIPS16_ADDR = function?\n");
+#ifdef UNUSED_REGNUM
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: UNUSED_REGNUM = %d\n",
+		      UNUSED_REGNUM);
+#endif
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: V0_REGNUM = %d\n",
+		      V0_REGNUM);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: VM_MIN_ADDRESS = %ld\n",
+		      (long) VM_MIN_ADDRESS);
+#ifdef VX_NUM_REGS
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: VX_NUM_REGS = %d (used?)\n",
+		      VX_NUM_REGS);
+#endif
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: ZERO_REGNUM = %d\n",
+		      ZERO_REGNUM);
+  fprintf_unfiltered (file,
+		      "mips_dump_tdep: _PROC_MAGIC_ = %d\n",
+		      _PROC_MAGIC_);
 }
 
 void
