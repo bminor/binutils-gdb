@@ -3,6 +3,14 @@
 	* configure.in: Set version to 2.10.
 	* configure: Regenerate.
 
+2000-05-02  H.J. Lu  <hjl@gnu.org>
+
+	* readelf.c (get_osabi_name): Handle ELFOSABI_NONE instead of
+	ELFOSABI_SYSV. Also handle ELFOSABI_NETBSD, ELFOSABI_HURD,
+	ELFOSABI_SOLARIS, ELFOSABI_MONTEREY, ELFOSABI_IRIX,
+	ELFOSABI_FREEBSD, ELFOSABI_TRU64, ELFOSABI_MODESTO
+	and ELFOSABI_OPENBSD.
+
 2000-04-14  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* arlex.l: Add directives to increase lex buffer size.

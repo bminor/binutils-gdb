@@ -46,6 +46,11 @@ Sat Jul  3 10:35:19 CDT 1999 Joel Sherrill <joel@OARcorp.com>
 	the .bss section.
 	* bfd/coff-stgo32.c (COFF_SECTION_ALIGNMENT_ENTRIES): Likewise.
 
+2000-05-02  H.J. Lu  <hjl@gnu.org>
+
+	* elf.c (prep_headers): Use ELFOSABI_NONE instead of
+	ELFOSABI_SYSV.
+
 2000-04-29  Andreas Jaeger  <aj@suse.de>
 
 	* libbfd-in.h: Correctly check GCC version.
