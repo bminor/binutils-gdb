@@ -1,3 +1,7 @@
+2000-08-24  David Edelsohn  <dje@watson.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes): Add rfid, mtsrd, mtsrdin, mtmsrd.
+
 2000-08-24  Kazu Hirata  <kazu@hxi.com>
 
 	* z8k-dis.c: Fix formatting.

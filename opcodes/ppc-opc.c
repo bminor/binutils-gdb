@@ -2033,6 +2033,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "bcr",     XLLK(19,16,0), XLBB_MASK,	PWRCOM,		{ BO, BI } },
 { "bcrl",    XLLK(19,16,1), XLBB_MASK,	PWRCOM,		{ BO, BI } },
 
+{ "rfid",    XL(19,18),	0xffffffff,	PPC64,		{ 0 } },
+
 { "crnot",   XL(19,33), XL_MASK,	PPCCOM,		{ BT, BA, BBA } },
 { "crnor",   XL(19,33),	XL_MASK,	COM,		{ BT, BA, BB } },
 
@@ -2366,6 +2368,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "mulhw",   XO(31,75,0,0), XO_MASK,	PPC,		{ RT, RA, RB } },
 { "mulhw.",  XO(31,75,0,1), XO_MASK,	PPC,		{ RT, RA, RB } },
 
+{ "mtsrd",   X(31,82),	XRB_MASK|(1<<20), PPC64,	{ SR, RS } },
+
 { "mfmsr",   X(31,83),	XRARB_MASK,	COM,		{ RT } },
 
 { "ldarx",   X(31,84),	X_MASK,		PPC64,		{ RT, RA, RB } },
@@ -2383,6 +2387,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "mul.",    XO(31,107,0,1), XO_MASK,	M601,		{ RT, RA, RB } },
 { "mulo",    XO(31,107,1,0), XO_MASK,	M601,		{ RT, RA, RB } },
 { "mulo.",   XO(31,107,1,1), XO_MASK,	M601,		{ RT, RA, RB } },
+
+{ "mtsrdin", X(31,114),	XRA_MASK,	PPC64,		{ RS, RB } },
 
 { "clf",     X(31,118), XRB_MASK,	POWER,		{ RT, RA } },
 
@@ -2432,6 +2438,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "sle.",    XRC(31,153,1), X_MASK,	M601,		{ RA, RS, RB } },
 
 { "wrteei",  X(31,163),	XE_MASK,	PPC403,		{ E } },
+
+{ "mtmsrd",  X(31,178),	XRARB_MASK,	PPC64,		{ RS } },
 
 { "stdux",   X(31,181),	X_MASK,		PPC64,		{ RS, RAS, RB } },
 
