@@ -221,10 +221,6 @@ udi_open (name, from_tty)
   UDIUInt32 TIPId, TargetId, DFEId, DFE, TIP, DFEIPCId, TIPIPCId;
 
   target_preopen(from_tty);
-  /* target_preopen calls target_kill to clean up the previous target.  But
-     udi_kill leaves it on the stack.  So we pop it here (the call to udi_close
-     is harmless now that udi_session_id is -1).  */
-  unpush_target (&udi_ops);
 
   entry.Offset = 0;
 
