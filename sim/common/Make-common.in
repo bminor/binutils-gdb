@@ -71,6 +71,22 @@ SIM_DEBUG = @sim_debug@
 SIM_TRACE = @sim_trace@
 SIM_PROFILE = @sim_profile@
 
+SIM_ASSERT = @sim_assert@
+SIM_ALIGNMENT = @sim_alignment@
+SIM_ENDIAN = @sim_endian@
+SIM_FLOAT = @sim_float@
+SIM_HARDWARE = @sim_hardware@
+SIM_HOSTENDIAN = @sim_hostendian@
+SIM_INLINE = @sim_inline@
+SIM_PACKAGES = @sim_packages@
+SIM_REGPARM = @sim_regparm@
+SIM_RESERVED_BITS = @sim_reserved_bits@
+SIM_SMP = @sim_smp@
+SIM_STDCALL = @sim_stdcall@
+SIM_WARNINGS = @sim_warnings@
+SIM_XOR_ENDIAN = @sim_xor_endian@
+
+
 HDEFINES = @HDEFINES@
 TDEFINES =
 
@@ -108,8 +124,28 @@ SIM_EXTRA_CLEAN =
 
 ## COMMON_POST_CONFIG_FRAG
 
-CONFIG_CFLAGS = @DEFS@ $(SIM_CFLAGS) $(SIM_DEBUG) $(SIM_TRACE) $(SIM_PROFILE) \
-  $(SIM_BSWAP) $(SIM_EXTRA_CFLAGS) $(HDEFINES) $(TDEFINES)
+CONFIG_CFLAGS = @DEFS@ \
+	$(SIM_CFLAGS) \
+	$(SIM_DEBUG) \
+	$(SIM_TRACE) \
+	$(SIM_PROFILE) \
+	$(SIM_BSWAP) \
+	$(SIM_ASSERT) \
+	$(SIM_ALIGNMENT) \
+	$(SIM_ENDIAN) \
+	$(SIM_FLOAT) \
+	$(SIM_HARDWARE) \
+	$(SIM_HOSTENDIAN) \
+	$(SIM_INLINE) \
+	$(SIM_PACKAGES) \
+	$(SIM_REGPARM) \
+	$(SIM_RESERVED_BITS) \
+	$(SIM_SMP) \
+	$(SIM_STDCALL) \
+	$(SIM_WARNINGS) \
+	$(SIM_XOR_ENDIAN) \
+	$(SIM_EXTRA_CFLAGS) \
+	$(HDEFINES) $(TDEFINES)
 CSEARCH = -I. -I$(srcdir) -I../common -I$(srcdir)/../common \
   -I../../include -I$(srcroot)/include \
   -I../../bfd -I$(srcroot)/bfd \
@@ -248,6 +284,10 @@ sim-fpu.o: $(srcdir)/../common/sim-fpu.c $(sim-fpu_h) \
 sim-hload.o: $(srcdir)/../common/sim-hload.c $(sim-assert_h) \
 	$(SIM_EXTRA_DEPS)
 	$(CC) -c $(srcdir)/../common/sim-hload.c $(ALL_CFLAGS)
+
+sim-hrw.o: $(srcdir)/../common/sim-hrw.c $(sim-assert_h) \
+	$(SIM_EXTRA_DEPS)
+	$(CC) -c $(srcdir)/../common/sim-hrw.c $(ALL_CFLAGS)
 
 sim-inline.c: $(srcdir)/../common/sim-inline.c
 	rm -f $@ tmp-$@

@@ -44,19 +44,8 @@ SIM_EXTRA_LIBS = -lm
 SIM_GEN=tmp-igen
 
 # List of flags to always pass to $(CC).
-SIM_WARNINGS=@sim_warnings@
-SIM_ENDIAN=@sim_endian@
-SIM_HOSTENDIAN=@sim_hostendian@
-SIM_INLINE=@sim_inline@
-SIM_RESERVED_BITS=@sim_reserved_bits@
-SIM_ALIGNMENT=@sim_alignment@
 
 SIM_EXTRA_CFLAGS = \
-	$(SIM_WARNINGS) \
-	$(SIM_ENDIAN) \
-	$(SIM_HOSTENDIAN) \
-	$(SIM_INLINE) \
-	$(SIM_RESERVED_BITS) \
 	-DWITH_TARGET_WORD_MSB=31
 
 # List of main object files for `run'.

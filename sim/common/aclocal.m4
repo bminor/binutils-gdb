@@ -258,8 +258,8 @@ else
     sim_alignment=
   fi
 fi])dnl
-AC_SUBST(sim_alignment)
 ])dnl
+AC_SUBST(sim_alignment)
 
 
 dnl Conditionally compile in assertion statements.
@@ -275,8 +275,8 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_assert" != x""; then
   echo "Setting assert flags = $sim_assert" 6>&1
 fi],[sim_assert=""])dnl
-AC_SUBST(sim_assert)
 ])
+AC_SUBST(sim_assert)
 
 
 dnl --enable-sim-endian={yes,no,big,little} is for simulators
@@ -285,9 +285,8 @@ dnl arg[1] is hardwired target endianness.
 dnl arg[2] is default target endianness.
 AC_DEFUN(SIM_AC_OPTION_ENDIAN,
 [
-wire_endian="ifelse([$1],,ifelse([$2],,,[$2]),[$1])"
-default_endian="ifelse([$2],,ifelse([$1],,,[$1]),[$2])"
-default_sim_endian="ifelse([$1],,ifelse([$2],,,-DWITH_DEFAULT_TARGET_BYTE_ORDER=[$2]),-DWITH_TARGET_BYTE_ORDER=[$1])"
+wire_endian="[$1]"
+default_endian="[$2]"
 AC_ARG_ENABLE(sim-endian,
 [  --enable-sim-endian=endian		Specify target byte endian orientation.],
 [case "${enableval}" in
@@ -296,22 +295,39 @@ AC_ARG_ENABLE(sim-endian,
   yes)	 if test x"$wire_endian" != x; then
 	   sim_endian="-DWITH_TARGET_BYTE_ORDER=${wire_endian}"
 	 else
-	   echo "No hard-wired endian for target $target" 1>&6
-	   sim_endian="-DWITH_TARGET_BYTE_ORDER=0"
+           if test x"$default_endian" != x; then
+	     sim_endian="-DWITH_TARGET_BYTE_ORDER=${default_endian}"
+	   else
+	     echo "No hard-wired endian for target $target" 1>&6
+	     sim_endian="-DWITH_TARGET_BYTE_ORDER=0"
+	   fi
 	 fi;;
   no)	 if test x"$default_endian" != x; then
 	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${default_endian}"
 	 else
-	   echo "No default endian for target $target" 1>&6
-	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=0"
+	   if test x"$wire_endian" != x; then
+	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${wire_endian}"
+	   else
+	     echo "No default endian for target $target" 1>&6
+	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=0"
+	   fi
 	 fi;;
   *)	 AC_MSG_ERROR("Unknown value $enableval for --enable-sim-endian"); sim_endian="";;
 esac
 if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
   echo "Setting endian flags = $sim_endian" 6>&1
-fi],[sim_endian="${default_sim_endian}"])dnl
-AC_SUBST(sim_endian)
+fi],
+[if test x"$default_endian" != x; then
+  sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${default_endian}"
+else
+  if test x"$wire_endian" != x; then
+    sim_endian="-DWITH_TARGET_BYTE_ORDER=${wire_endian}"
+  else
+    sim_endian=
+  fi
+fi])dnl
 ])
+AC_SUBST(sim_endian)
 
 
 dnl --enable-sim-hostendian is for users of the simulator when
@@ -340,8 +356,8 @@ if test "x$cross_compiling" = "xno"; then
 else
   sim_hostendian="-DWITH_HOST_BYTE_ORDER=0"
 fi])dnl
-AC_SUBST(sim_hostendian)
 ])
+AC_SUBST(sim_hostendian)
 
 
 AC_DEFUN(SIM_AC_OPTION_FLOAT,
@@ -357,8 +373,8 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_float" != x""; then
   echo "Setting float flags = $sim_float" 6>&1
 fi],[sim_float="-DWITH_FLOATING_POINT=${default_sim_floating_point}"])dnl
-AC_SUBST(sim_float)
 ])
+AC_SUBST(sim_float)
 
 
 dnl The argument is the default cache size if none is specified.
@@ -377,8 +393,8 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_scache" != x""; then
   echo "Setting scache size = $sim_scache" 6>&1
 fi],[sim_scache="-DWITH_SCACHE=${default_sim_scache}"])
-AC_SUBST(sim_scache)
 ])
+AC_SUBST(sim_scache)
 
 
 dnl The argument is the default model if none is specified.
@@ -394,8 +410,8 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_default_model" != x""; then
   echo "Setting default model = $sim_default_model" 6>&1
 fi],[sim_default_model="-DWITH_DEFAULT_MODEL='\"${default_sim_default_model}\"'"])
-AC_SUBST(sim_default_model)
 ])
+AC_SUBST(sim_default_model)
 
 
 AC_DEFUN(SIM_AC_OPTION_HARDWARE,
@@ -420,8 +436,8 @@ sim_hw_obj=`echo $sim_hw_src | sed -e 's/\.c/.o/g'`
 if test x"$silent" != x"yes"; then
   echo "Setting hardware to $sim_hw_src, $sim_hw_obj"
 fi])dnl
-AC_SUBST(sim_hardware)
 ])
+AC_SUBST(sim_hardware)
 
 
 dnl --enable-sim-inline is for users that wish to ramp up the simulator's
@@ -462,8 +478,8 @@ fi],[if test x"$GCC" != "x" -a x"${default_sim_inline}" != "x" ; then
 else
   sim_inline=""
 fi])dnl
-AC_SUBST(sim_inline)
 ])
+AC_SUBST(sim_inline)
 
 
 AC_DEFUN(SIM_AC_OPTION_PACKAGES,
@@ -488,8 +504,8 @@ sim_pk_obj=`echo $sim_pk_src | sed -e 's/\.c/.o/g'`
 if test x"$silent" != x"yes"; then
   echo "Setting packages to $sim_pk_src, $sim_pk_obj"
 fi])dnl
-AC_SUBST(sim_packages)
 ])
+AC_SUBST(sim_packages)
 
 
 AC_DEFUN(SIM_AC_OPTION_REGPARM,
@@ -505,8 +521,8 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_regparm" != x""; then
   echo "Setting regparm flags = $sim_regparm" 6>&1
 fi],[sim_regparm=""])dnl
-AC_SUBST(sim_regparm)
 ])
+AC_SUBST(sim_regparm)
 
 
 AC_DEFUN(SIM_AC_OPTION_RESERVED_BITS,
@@ -522,8 +538,8 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_reserved_bits" != x""; then
   echo "Setting reserved flags = $sim_reserved_bits" 6>&1
 fi],[sim_reserved_bits="-DWITH_RESERVED_BITS=${default_sim_reserved_bits}"])dnl
-AC_SUBST(sim_reserved_bits)
 ])
+AC_SUBST(sim_reserved_bits)
 
 
 AC_DEFUN(SIM_AC_OPTION_SMP,
@@ -542,8 +558,8 @@ fi],[sim_smp="-DWITH_SMP=${default_sim_smp}" ; sim_igen_smp="-N ${default_sim_sm
 if test x"$silent" != x"yes"; then
   echo "Setting smp flags = $sim_smp" 6>&1
 fi])dnl
-AC_SUBST(sim_smp)
 ])
+AC_SUBST(sim_smp)
 
 
 AC_DEFUN(SIM_AC_OPTION_STDCALL,
@@ -559,8 +575,8 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_stdcall" != x""; then
   echo "Setting function call flags = $sim_stdcall" 6>&1
 fi],[sim_stdcall=""])dnl
-AC_SUBST(sim_stdcall)
 ])
+AC_SUBST(sim_stdcall)
 
 
 AC_DEFUN(SIM_AC_OPTION_XOR_ENDIAN,
@@ -576,8 +592,8 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_xor_endian" != x""; then
   echo "Setting xor-endian flag = $sim_xor_endian" 6>&1
 fi],[sim_xor_endian="-DWITH_XOR_ENDIAN=${default_sim_xor_endian}"])dnl
-AC_SUBST(sim_xor_endian)
 ])
+AC_SUBST(sim_xor_endian)
 
 
 dnl --enable-sim-warnings is for developers of the simulator.
@@ -594,8 +610,8 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_warnings" != x""; then
   echo "Setting warning flags = $sim_warnings" 6>&1
 fi],[sim_warnings=""])dnl
-AC_SUBST(sim_warnings)
 ])
+AC_SUBST(sim_warnings)
 
 
 dnl Generate the Makefile in a target specific directory.

@@ -1,5 +1,71 @@
 #! /bin/sh
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Guess values for system-dependent variables and create Makefiles.
 # Generated automatically using autoconf version 2.12 
 # Copyright (C) 1992, 93, 94, 95, 96 Free Software Foundation, Inc.
@@ -542,7 +608,7 @@ fi
 
 
 echo $ac_n "checking how to run the C preprocessor""... $ac_c" 1>&6
-echo "configure:546: checking how to run the C preprocessor" >&5
+echo "configure:612: checking how to run the C preprocessor" >&5
 # On Suns, sometimes $CPP names a directory.
 if test -n "$CPP" && test -d "$CPP"; then
   CPP=
@@ -557,13 +623,13 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 561 "configure"
+#line 627 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:567: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:633: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -574,13 +640,13 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 578 "configure"
+#line 644 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:584: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:650: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -653,7 +719,7 @@ else { echo "configure: error: can not run $ac_config_sub" 1>&2; exit 1; }
 fi
 
 echo $ac_n "checking host system type""... $ac_c" 1>&6
-echo "configure:657: checking host system type" >&5
+echo "configure:723: checking host system type" >&5
 
 host_alias=$host
 case "$host_alias" in
@@ -674,7 +740,7 @@ host_os=`echo $host | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 echo "$ac_t""$host" 1>&6
 
 echo $ac_n "checking target system type""... $ac_c" 1>&6
-echo "configure:678: checking target system type" >&5
+echo "configure:744: checking target system type" >&5
 
 target_alias=$target
 case "$target_alias" in
@@ -692,7 +758,7 @@ target_os=`echo $target | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 echo "$ac_t""$target" 1>&6
 
 echo $ac_n "checking build system type""... $ac_c" 1>&6
-echo "configure:696: checking build system type" >&5
+echo "configure:762: checking build system type" >&5
 
 build_alias=$build
 case "$build_alias" in
@@ -736,7 +802,7 @@ test "$program_transform_name" = "" && program_transform_name="s,x,x,"
 # Extract the first word of "gcc", so it can be a program name with args.
 set dummy gcc; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:740: checking for $ac_word" >&5
+echo "configure:806: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -765,7 +831,7 @@ if test -z "$CC"; then
   # Extract the first word of "cc", so it can be a program name with args.
 set dummy cc; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:769: checking for $ac_word" >&5
+echo "configure:835: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_CC'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -813,7 +879,7 @@ fi
 fi
 
 echo $ac_n "checking whether the C compiler ($CC $CFLAGS $LDFLAGS) works""... $ac_c" 1>&6
-echo "configure:817: checking whether the C compiler ($CC $CFLAGS $LDFLAGS) works" >&5
+echo "configure:883: checking whether the C compiler ($CC $CFLAGS $LDFLAGS) works" >&5
 
 ac_ext=c
 # CFLAGS is not in ac_cpp because -g, -O, etc. are not valid cpp options.
@@ -823,11 +889,11 @@ ac_link='${CC-cc} -o conftest $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS 
 cross_compiling=$ac_cv_prog_cc_cross
 
 cat > conftest.$ac_ext <<EOF
-#line 827 "configure"
+#line 893 "configure"
 #include "confdefs.h"
 main(){return(0);}
 EOF
-if { (eval echo configure:831: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:897: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   ac_cv_prog_cc_works=yes
   # If we can't run a trivial program, we are probably using a cross compiler.
   if (./conftest; exit) 2>/dev/null; then
@@ -847,12 +913,12 @@ if test $ac_cv_prog_cc_works = no; then
   { echo "configure: error: installation or configuration problem: C compiler cannot create executables." 1>&2; exit 1; }
 fi
 echo $ac_n "checking whether the C compiler ($CC $CFLAGS $LDFLAGS) is a cross-compiler""... $ac_c" 1>&6
-echo "configure:851: checking whether the C compiler ($CC $CFLAGS $LDFLAGS) is a cross-compiler" >&5
+echo "configure:917: checking whether the C compiler ($CC $CFLAGS $LDFLAGS) is a cross-compiler" >&5
 echo "$ac_t""$ac_cv_prog_cc_cross" 1>&6
 cross_compiling=$ac_cv_prog_cc_cross
 
 echo $ac_n "checking whether we are using GNU C""... $ac_c" 1>&6
-echo "configure:856: checking whether we are using GNU C" >&5
+echo "configure:922: checking whether we are using GNU C" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_gcc'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -861,7 +927,7 @@ else
   yes;
 #endif
 EOF
-if { ac_try='${CC-cc} -E conftest.c'; { (eval echo configure:865: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
+if { ac_try='${CC-cc} -E conftest.c'; { (eval echo configure:931: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
   ac_cv_prog_gcc=yes
 else
   ac_cv_prog_gcc=no
@@ -876,7 +942,7 @@ if test $ac_cv_prog_gcc = yes; then
   ac_save_CFLAGS="$CFLAGS"
   CFLAGS=
   echo $ac_n "checking whether ${CC-cc} accepts -g""... $ac_c" 1>&6
-echo "configure:880: checking whether ${CC-cc} accepts -g" >&5
+echo "configure:946: checking whether ${CC-cc} accepts -g" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_cc_g'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -914,7 +980,7 @@ fi
 # SVR4 /usr/ucb/install, which tries to use the nonexistent group "staff"
 # ./install, which can be erroneously created by make from ./install.sh.
 echo $ac_n "checking for a BSD compatible install""... $ac_c" 1>&6
-echo "configure:918: checking for a BSD compatible install" >&5
+echo "configure:984: checking for a BSD compatible install" >&5
 if test -z "$INSTALL"; then
 if eval "test \"`echo '$''{'ac_cv_path_install'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -979,7 +1045,7 @@ AR=${AR-ar}
 # Extract the first word of "ranlib", so it can be a program name with args.
 set dummy ranlib; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:983: checking for $ac_word" >&5
+echo "configure:1049: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_RANLIB'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1013,17 +1079,17 @@ for ac_hdr in stdlib.h string.h strings.h unistd.h time.h sys/time.h sys/resourc
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1017: checking for $ac_hdr" >&5
+echo "configure:1083: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1022 "configure"
+#line 1088 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1027: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1093: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1052,12 +1118,12 @@ done
 for ac_func in getrusage time
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:1056: checking for $ac_func" >&5
+echo "configure:1122: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1061 "configure"
+#line 1127 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1080,7 +1146,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:1084: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:1150: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -1235,12 +1301,12 @@ fi
 
 
 echo $ac_n "checking return type of signal handlers""... $ac_c" 1>&6
-echo "configure:1239: checking return type of signal handlers" >&5
+echo "configure:1305: checking return type of signal handlers" >&5
 if eval "test \"`echo '$''{'ac_cv_type_signal'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1244 "configure"
+#line 1310 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <signal.h>
@@ -1257,7 +1323,7 @@ int main() {
 int i;
 ; return 0; }
 EOF
-if { (eval echo configure:1261: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1327: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_type_signal=void
 else
@@ -1302,8 +1368,7 @@ sim_link_links="${sim_link_links} cpu-sim.h cpu-opc.h"
 
 
 wire_endian="BIG_ENDIAN"
-default_endian="BIG_ENDIAN"
-default_sim_endian="-DWITH_TARGET_BYTE_ORDER=BIG_ENDIAN"
+default_endian=""
 # Check whether --enable-sim-endian or --disable-sim-endian was given.
 if test "${enable_sim_endian+set}" = set; then
   enableval="$enable_sim_endian"
@@ -1313,14 +1378,22 @@ if test "${enable_sim_endian+set}" = set; then
   yes)	 if test x"$wire_endian" != x; then
 	   sim_endian="-DWITH_TARGET_BYTE_ORDER=${wire_endian}"
 	 else
-	   echo "No hard-wired endian for target $target" 1>&6
-	   sim_endian="-DWITH_TARGET_BYTE_ORDER=0"
+           if test x"$default_endian" != x; then
+	     sim_endian="-DWITH_TARGET_BYTE_ORDER=${default_endian}"
+	   else
+	     echo "No hard-wired endian for target $target" 1>&6
+	     sim_endian="-DWITH_TARGET_BYTE_ORDER=0"
+	   fi
 	 fi;;
   no)	 if test x"$default_endian" != x; then
 	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${default_endian}"
 	 else
-	   echo "No default endian for target $target" 1>&6
-	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=0"
+	   if test x"$wire_endian" != x; then
+	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${wire_endian}"
+	   else
+	     echo "No default endian for target $target" 1>&6
+	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=0"
+	   fi
 	 fi;;
   *)	 { echo "configure: error: "Unknown value $enableval for --enable-sim-endian"" 1>&2; exit 1; }; sim_endian="";;
 esac
@@ -1328,9 +1401,16 @@ if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
   echo "Setting endian flags = $sim_endian" 6>&1
 fi
 else
-  sim_endian="${default_sim_endian}"
+  if test x"$default_endian" != x; then
+  sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=${default_endian}"
+else
+  if test x"$wire_endian" != x; then
+    sim_endian="-DWITH_TARGET_BYTE_ORDER=${wire_endian}"
+  else
+    sim_endian=
+  fi
 fi
-
+fi
 
 wire_alignment="NONSTRICT_ALIGNMENT"
 default_alignment=""
@@ -1380,7 +1460,6 @@ fi
 fi
 
 
-
 # Check whether --enable-sim-hostendian or --disable-sim-hostendian was given.
 if test "${enable_sim_hostendian+set}" = set; then
   enableval="$enable_sim_hostendian"
@@ -1397,14 +1476,14 @@ else
   
 if test "x$cross_compiling" = "xno"; then
   echo $ac_n "checking whether byte ordering is bigendian""... $ac_c" 1>&6
-echo "configure:1401: checking whether byte ordering is bigendian" >&5
+echo "configure:1480: checking whether byte ordering is bigendian" >&5
 if eval "test \"`echo '$''{'ac_cv_c_bigendian'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   ac_cv_c_bigendian=unknown
 # See if sys/param.h defines the BYTE_ORDER macro.
 cat > conftest.$ac_ext <<EOF
-#line 1408 "configure"
+#line 1487 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/param.h>
@@ -1415,11 +1494,11 @@ int main() {
 #endif
 ; return 0; }
 EOF
-if { (eval echo configure:1419: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1498: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   # It does; now see whether it defined to BIG_ENDIAN or not.
 cat > conftest.$ac_ext <<EOF
-#line 1423 "configure"
+#line 1502 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <sys/param.h>
@@ -1430,7 +1509,7 @@ int main() {
 #endif
 ; return 0; }
 EOF
-if { (eval echo configure:1434: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1513: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_c_bigendian=yes
 else
@@ -1450,7 +1529,7 @@ if test "$cross_compiling" = yes; then
     { echo "configure: error: can not run test program while cross compiling" 1>&2; exit 1; }
 else
   cat > conftest.$ac_ext <<EOF
-#line 1454 "configure"
+#line 1533 "configure"
 #include "confdefs.h"
 main () {
   /* Are we little or big endian?  From Harbison&Steele.  */
@@ -1463,7 +1542,7 @@ main () {
   exit (u.c[sizeof (long) - 1] == 1);
 }
 EOF
-if { (eval echo configure:1467: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:1546: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest && (./conftest; exit) 2>/dev/null
 then
   ac_cv_c_bigendian=no
 else
@@ -1497,7 +1576,6 @@ fi
 fi
 
 
-
 default_sim_scache="1024"
 # Check whether --enable-sim-scache or --disable-sim-scache was given.
 if test "${enable_sim_scache+set}" = set; then
@@ -1518,7 +1596,6 @@ fi
 
 
 
-
 default_sim_default_model="m32r/d"
 # Check whether --enable-sim-default-model or --disable-sim-default-model was given.
 if test "${enable_sim_default_model+set}" = set; then
@@ -1533,7 +1610,6 @@ fi
 else
   sim_default_model="-DWITH_DEFAULT_MODEL='\"${default_sim_default_model}\"'"
 fi
-
 
 
 
@@ -1649,6 +1725,22 @@ sed 's/%@/@@/; s/@%/@@/; s/%g\$/@g/; /@g\$/s/[\\\\&%]/\\\\&/g;
  s/@@/%@/; s/@@/@%/; s/@g\$/%g/' > conftest.subs <<\\CEOF
 $ac_vpsub
 $extrasub
+s%@sim_alignment@%$sim_alignment%g
+s%@sim_assert@%$sim_assert%g
+s%@sim_endian@%$sim_endian%g
+s%@sim_hostendian@%$sim_hostendian%g
+s%@sim_float@%$sim_float%g
+s%@sim_scache@%$sim_scache%g
+s%@sim_default_model@%$sim_default_model%g
+s%@sim_hardware@%$sim_hardware%g
+s%@sim_inline@%$sim_inline%g
+s%@sim_packages@%$sim_packages%g
+s%@sim_regparm@%$sim_regparm%g
+s%@sim_reserved_bits@%$sim_reserved_bits%g
+s%@sim_smp@%$sim_smp%g
+s%@sim_stdcall@%$sim_stdcall%g
+s%@sim_xor_endian@%$sim_xor_endian%g
+s%@sim_warnings@%$sim_warnings%g
 s%@CFLAGS@%$CFLAGS%g
 s%@CPPFLAGS@%$CPPFLAGS%g
 s%@CXXFLAGS@%$CXXFLAGS%g
@@ -1699,11 +1791,6 @@ s%@sim_debug@%$sim_debug%g
 s%@sim_stdio@%$sim_stdio%g
 s%@sim_trace@%$sim_trace%g
 s%@sim_profile@%$sim_profile%g
-s%@sim_endian@%$sim_endian%g
-s%@sim_alignment@%$sim_alignment%g
-s%@sim_hostendian@%$sim_hostendian%g
-s%@sim_scache@%$sim_scache%g
-s%@sim_default_model@%$sim_default_model%g
 
 CEOF
 EOF

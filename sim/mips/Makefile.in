@@ -25,18 +25,12 @@ SIM_OBJS = interp.o \
 	sim-watch.o
 
 # List of flags to always pass to $(CC).
-SIM_WARNINGS=@sim_warnings@
-SIM_ENDIAN=@sim_endian@
-SIM_HOSTENDIAN=@sim_hostendian@
-SIM_INLINE=@sim_inline@
+SIM_SUBTARGET=@SIM_SUBTARGET@
 
 # FIXME: Hack to find syscall.h?  Better support for syscall.h
 # is in progress.
 SIM_EXTRA_CFLAGS = \
-	$(SIM_WARNINGS) \
-	$(SIM_ENDIAN) \
-	$(SIM_HOSTENDIAN) \
-	$(SIM_INLINE) \
+	$(SIM_SUBTARGET) \
 	-I$(srcdir)/../../newlib/libc/sys/idt
 
 SIM_EXTRA_CLEAN = clean-extra
