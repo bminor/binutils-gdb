@@ -1,3 +1,8 @@
+Tue Nov 25 10:55:36 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-arm.c (coff_arm_bfd_merge_private_bfd_data): Do not
+	complain if inout and output formats differ.
+
 Tue Nov 25 11:26:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (BFD32_BACKENDS): Remove tekhex.lo.
