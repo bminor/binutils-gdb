@@ -60,6 +60,7 @@ rs6000-*-aix*)		configdirs="${configdirs} ${stabsdirs}" ;;
 *-*-linux*)		configdirs="${configdirs} ${stabsdirs}" ;;
 *-*-lynxos*)		configdirs="${configdirs} ${stabsdirs}" ;;
 *-sun-*)		configdirs="${configdirs} ${stabsdirs}" ;;
+hppa*-*-*)		configdirs="${configdirs} ${stabsdirs}" ;;
 
 *)			if [ x${with_stabs} = xyes ]; then
 			  configdirs="${configdirs} ${stabsdirs}"

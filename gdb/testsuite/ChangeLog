@@ -1,3 +1,8 @@
+Sat Jan 29 23:31:26 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* configure.in (hppa*-*-*): Also configure and build stabs-only
+	tests.
+
 Thu Jan 27 08:21:16 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gdb.t10/hppa.mt: A makefile fragment for the PA.
