@@ -1407,9 +1407,9 @@ username_completion_function (text, state)
      char *text;
      int state;
 {
-#if defined (__GO32__) || defined (__WIN32__) || defined (__OPENNT)
+#if defined (__WIN32__) || defined (__OPENNT)
   return (char *)NULL;
-#else /* !__GO32__ */
+#else /* !__WIN32__ && !__OPENNT */
   static char *username = (char *)NULL;
   static struct passwd *entry;
   static int namelen, first_char, first_char_loc;
@@ -1499,6 +1499,14 @@ filename_completion_function (text, state)
 	  strcpy (filename, ++temp);
 	  *temp = '\0';
 	}
+#if defined (__WIN32__) || defined (__OPENNT) || defined (__MSDOS__)
+      /* Handle the drive-relative names "d:foo/bar".  */
+      else if (dirname[1] == ':')
+	{
+	  strcpy (filename, dirname + 2);
+	  dirname[2] = '\0';
+	}
+#endif
       else
 	{
 	  dirname[0] = '.';
