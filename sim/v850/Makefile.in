@@ -108,11 +108,13 @@ clean-igen:
 ../igen/igen:
 	cd ../igen && $(MAKE)
 
+IGEN_TRACE= # -G trace-rule-selection -G trace-rule-rejection -G trace-entries
 IGEN_INSN=$(srcdir)/v850.igen
 IGEN_DC=$(srcdir)/v850-dc
 tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen
 	cd ../igen && $(MAKE)
 	../igen/igen \
+		$(IGEN_TRACE) \
 		-G gen-direct-access \
 		-i $(IGEN_INSN) \
 		-o $(IGEN_DC) \

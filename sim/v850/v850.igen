@@ -1214,11 +1214,22 @@ rrrrr,110101,RRRRR + iiiiiiiiiiiiiiii:VI:::xori
 
 
 // end-sanitize-v850e
-// Special - breakpoint
-// 1111111111111111:Z:::breakpoint
-// {
-//   COMPAT_2 (OP_FFFF ());
-// }
+// Special - breakpoint - illegal
+// Hopefully, in the future, this instruction will go away
+1111111111111111 + 1111111111111111:Z:::breakpoint
+*v850
+{
+  sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIGTRAP);
+}
+
+// start-sanitize-v850e
+// First field could be any nonzero value.
+11111,000010,00000:I:::break
+{
+  sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIGTRAP);
+}
+
+// end-sanitize-v850e
 
 
 // start-sanitize-v850eq

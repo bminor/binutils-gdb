@@ -30,3 +30,10 @@
 # start-sanitize-v850eq
   switch,combine        :   4 :   0 :    :    :    :    0 : III,IV,XIV  : v850eq
 # end-sanitize-v850eq
+# start-sanitize-v850e
+
+
+# for opcode 66
+
+  switch,combine        :   4 :   0 :    :    :    :    0 : I           :
+# end-sanitize-v850e
