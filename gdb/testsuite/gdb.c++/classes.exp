@@ -835,7 +835,7 @@ proc do_tests {} {
 
     gdb_breakpoint enums2
     if [ gdb_continue enums2 ]==0 then {
-	send_gdb "finish\n"
+	gdb_test "finish" "" ""
 	test_enums
     }
 
