@@ -392,7 +392,7 @@ else
 	done
 fi
 
-r16_files="configure.in"
+r16_files="configure.in configure"
 
 if ( echo $* | grep keep\-r16 > /dev/null ) ; then
 	for i in $r16_files ; do
@@ -421,7 +421,7 @@ else
 	done
 fi
 
-arc_files="configure.in ChangeLog"
+arc_files="configure.in configure ChangeLog"
 
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do

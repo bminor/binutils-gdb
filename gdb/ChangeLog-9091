@@ -2538,7 +2538,7 @@ Fri Aug 23 14:07:09 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	* doc/rdl-apps.texi: renamed from rdl-apps.texinfo
 
-	* Makefile.in, doc/Makefile, doc/.Sanitize, doc/gdb.texinfo:
+	* Makefile.in, doc/Makefile, doc/gdb.texinfo:
 	reflect above name change
 
 	* WHATS.NEW: correct pointer to refcard.
@@ -2763,7 +2763,6 @@ Tue Aug  6 17:16:15 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	* doc/Makefile: GDB documentation now has its own Makefile
 	  doc/refcard.tex: renamed from "gdbrc.tex"
-	  doc/.Sanitize: add Makefile; recognize renamed refcard.tex
 	  doc/gdbint.texinfo: add markup in "Cleanups" chapter
 
 

@@ -3049,8 +3049,6 @@ Fri Jun 10 14:52:56 1994  Kung Hsu  (kung@mexican.cygnus.com)
 	unique.
 	* sparcl-stub.c: ditto.
 
-	* .Sanitize: add sparclite-stub.c sparclite-tdep.c to keep.
-
 	* sparclite/Makefile.in: fix INCLUDE_CFLAGS to have {srcdir}/../config.
 
 Fri Jun 10 10:38:15 1994  Jeff Law  (law@snake.cs.utah.edu)
