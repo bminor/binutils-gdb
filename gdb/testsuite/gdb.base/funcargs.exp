@@ -189,8 +189,7 @@ proc float_and_integral_args {} {
 
     # Print each arg as a double check to see if we can print
     gdb_test "print c" ".* = 97 'a'" "print c after run to call2a"
-    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
-    gdb_test "print fl" ".* = 4" "print f1 after run to call2a"
+    gdb_test "print f1" ".* = 4" "print f1 after run to call2a"
     gdb_test "print s" ".* = 1" "print s after run to call2a"
     gdb_test "print d1" ".* = 5" "print d1 after run to call2a"
     gdb_test "print i" ".* = 2" "print i after run to call2a"
@@ -1058,20 +1057,19 @@ proc localvars_after_alloca { } {
     global prompt
     global hex
     global decimal
+    global gcc_compiled
 
     if { ! [ runto localvars_after_alloca ] } then { return 0 }
 
     # Print each arg as a double check to see if we can print
     # them here as well as with backtrace.
 
-    setup_xfail "rs6000-*-*"
-    gdb_test "print c after runto localvars_after_alloca" " = 97 'a'"
-    setup_xfail "rs6000-*-*"
-    gdb_test "print s after runto localvars_after_alloca" " = 1"
-    setup_xfail "rs6000-*-*"
-    gdb_test "print i after runto localvars_after_alloca" " = 2"
-    setup_xfail "rs6000-*-*"
-    gdb_test "print l after runto localvars_after_alloca" " = 3"
+    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    gdb_test "print c" " = 97 'a'" "print c after runto localvars_after_alloca"
+    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    gdb_test "print s" " = 1" "print s after runto localvars_after_alloca"
+    gdb_test "print i" " = 2" "print i after runto localvars_after_alloca"
+    gdb_test "print l" " = 3" "print l after runto localvars_after_alloca"
 
     send "next\n"
     expect {
