@@ -1,3 +1,8 @@
+2002-06-29  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* config/tc-m68hc11.h (ELF_TC_SPECIAL_SECTIONS): New sections
+	.softregs and .eeprom.
+
 2002-06-28  David O'Brien  <obrien@FreeBSD.org>
 
 	* NEWS: Note the next release is 2.13.
