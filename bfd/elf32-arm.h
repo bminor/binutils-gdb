@@ -1148,26 +1148,24 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	    }
 
 	  skip = false;
+	  relocate = false;
 
 	  outrel.r_offset =
 	    _bfd_elf_section_offset (output_bfd, info, input_section,
 				     rel->r_offset);
 	  if (outrel.r_offset == (bfd_vma) -1)
 	    skip = true;
+	  else if (outrel.r_offset == (bfd_vma) -2)
+	    skip = true, relocate = true;
 	  outrel.r_offset += (input_section->output_section->vma
 			      + input_section->output_offset);
 
 	  if (skip)
-	    {
-	      memset (&outrel, 0, sizeof outrel);
-	      relocate = false;
-	    }
+	    memset (&outrel, 0, sizeof outrel);
 	  else if (r_type == R_ARM_PC24)
 	    {
 	      BFD_ASSERT (h != NULL && h->dynindx != -1);
-	      if ((input_section->flags & SEC_ALLOC) != 0)
-		relocate = false;
-	      else
+	      if ((input_section->flags & SEC_ALLOC) == 0)
 		relocate = true;
 	      outrel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_PC24);
 	    }
@@ -1184,9 +1182,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	      else
 		{
 		  BFD_ASSERT (h->dynindx != -1);
-		  if ((input_section->flags & SEC_ALLOC) != 0)
-		    relocate = false;
-		  else
+		  if ((input_section->flags & SEC_ALLOC) == 0)
 		    relocate = true;
 		  outrel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_ABS32);
 		}

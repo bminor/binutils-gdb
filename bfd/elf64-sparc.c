@@ -2161,7 +2161,7 @@ do_dynreloc:
 	    case R_SPARC_UA16:
 	      {
 		Elf_Internal_Rela outrel;
-		boolean skip;
+		boolean skip, relocate;
 
 		if (sreloc == NULL)
 		  {
@@ -2184,12 +2184,15 @@ do_dynreloc:
 		  }
 
 		skip = false;
+		relocate = false;
 
 		outrel.r_offset =
 		  _bfd_elf_section_offset (output_bfd, info, input_section,
 					   rel->r_offset);
 		if (outrel.r_offset == (bfd_vma) -1)
 		  skip = true;
+		else if (outrel.r_offset == (bfd_vma) -2)
+		  skip = true, relocate = true;
 
 		outrel.r_offset += (input_section->output_section->vma
 				    + input_section->output_offset);
@@ -2301,7 +2304,8 @@ do_dynreloc:
 
 		/* This reloc will be computed at runtime, so there's no
 		   need to do anything now.  */
-		continue;
+		if (! relocate)
+		  continue;
 	      }
 	    break;
 	    }

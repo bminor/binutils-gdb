@@ -3671,7 +3671,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	    outrel.r_offset =
 	      _bfd_elf_section_offset (output_bfd, info, input_section,
 				       rel->r_offset);
-	    if (outrel.r_offset != (bfd_vma) -1)
+	    if ((outrel.r_offset | 1) != (bfd_vma) -1)
 	      outrel.r_offset += (input_section->output_section->vma
 				  + input_section->output_offset);
 	    else

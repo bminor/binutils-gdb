@@ -1891,20 +1891,20 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 		 time.  */
 
               skip = false;
+              relocate = false;
 
 	      outrel.r_offset =
 		_bfd_elf_section_offset (output_bfd, info, input_section,
 					 rel->r_offset);
 	      if (outrel.r_offset == (bfd_vma) -1)
 		skip = true;
+	      else if (outrel.r_offset == (bfd_vma) -2)
+		skip = true, relocate = true;
               outrel.r_offset += (input_section->output_section->vma
                                   + input_section->output_offset);
 
               if (skip)
-                {
-                  memset (&outrel, 0, sizeof outrel);
-                  relocate = false;
-                }
+		memset (&outrel, 0, sizeof outrel);
               else if (h != NULL
 		       && h->dynindx != -1
 		       && (r_type == R_390_PC16
@@ -1915,7 +1915,6 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 			   || (h->elf_link_hash_flags
 			       & ELF_LINK_HASH_DEF_REGULAR) == 0))
                 {
-		  relocate = false;
                   outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
 		  outrel.r_addend = rel->r_addend;
                 }

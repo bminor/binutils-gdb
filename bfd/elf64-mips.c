@@ -3396,6 +3396,9 @@ mips_elf64_create_dynamic_relocation (output_bfd, info, rel, h, sec,
   outrel[0].r_offset = _bfd_elf_section_offset (output_bfd, info,
 						input_section,
 						rel[0].r_offset);
+  /* FIXME: For -2 runtime relocation needs to be skipped, but
+     properly resolved statically and installed.  */
+  BFD_ASSERT (outrel[0].r_offset != (bfd_vma) -2);
 
   /* We begin by assuming that the offset for the dynamic relocation
      is the same as for the original relocation.  We'll adjust this

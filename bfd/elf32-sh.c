@@ -4419,24 +4419,23 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		}
 
 	      skip = false;
+	      relocate = false;
 
 	      outrel.r_offset =
 		_bfd_elf_section_offset (output_bfd, info, input_section,
 					 rel->r_offset);
 	      if (outrel.r_offset == (bfd_vma) -1)
 		skip = true;
+	      else if (outrel.r_offset == (bfd_vma) -2)
+		skip = true, relocate = true;
 	      outrel.r_offset += (input_section->output_section->vma
 				  + input_section->output_offset);
 
 	      if (skip)
-		{
-		  memset (&outrel, 0, sizeof outrel);
-		  relocate = false;
-		}
+		memset (&outrel, 0, sizeof outrel);
 	      else if (r_type == R_SH_REL32)
 		{
 		  BFD_ASSERT (h != NULL && h->dynindx != -1);
-		  relocate = false;
 		  outrel.r_info = ELF32_R_INFO (h->dynindx, R_SH_REL32);
 		  outrel.r_addend
 		    = bfd_get_32 (input_bfd, contents + rel->r_offset);
@@ -4459,7 +4458,6 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  else
 		    {
 		      BFD_ASSERT (h->dynindx != -1);
-		      relocate = false;
 		      outrel.r_info = ELF32_R_INFO (h->dynindx, R_SH_DIR32);
 		      outrel.r_addend
 			= relocation + bfd_get_32 (input_bfd,
