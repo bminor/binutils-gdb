@@ -1,3 +1,13 @@
+2004-08-08  Nathan J. Williams  <nathanw@wasabisystems.com>
+
+	* ppcnbsd-nat.c: Include <machine/frame.h>, <machine/pcb.h>,
+	"gdbcore.h", "regcache.h", and "bsd-kvm.h".
+	(ppcnbsd_supply_pcb): New function.
+	(_initialize_ppcnbsd_nat): New prototype and function.
+	* config/powerpc/nbsd.mh (NATDEPFILES): Add bsd-kvm.o.
+	(LOADLIBES): New variable.
+	* Makefile.in (ppcnbsd-nat.o): Update dependencies.
+
 2004-08-08  Andrew Cagney  <cagney@gnu.org>
 
 	* gdbtypes.c (builtin_type_arm_ext, builtin_type_ieee_single)

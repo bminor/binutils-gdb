@@ -1,5 +1,5 @@
 /* Native-dependent code for PowerPC's running NetBSD, for GDB.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2004 Free Software Foundation, Inc.
    Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -22,10 +22,15 @@
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <machine/reg.h>
+#include <machine/frame.h>
+#include <machine/pcb.h>
 
 #include "defs.h"
 #include "inferior.h"
 #include "gdb_assert.h"
+#include "gdbcore.h"
+#include "regcache.h"
+#include "bsd-kvm.h"
 
 #include "ppc-tdep.h"
 #include "ppcnbsd-tdep.h"
@@ -133,4 +138,45 @@ store_inferior_registers (int regno)
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't set FP registers");
     }
+}
+
+static int
+ppcnbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
+{
+  struct switchframe sf;
+  struct callframe cf;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  int i;
+
+  /* The stack pointer shouldn't be zero.  */
+  if (pcb->pcb_sp == 0)
+    return 0;
+
+  read_memory (pcb->pcb_sp, (char *) &sf, sizeof sf);
+  regcache_raw_supply (regcache, tdep->ppc_cr_regnum, &sf.cr);
+  regcache_raw_supply (regcache, tdep->ppc_gp0_regnum + 2, &sf.fixreg2);
+  for (i = 0 ; i < 19 ; i++)
+    regcache_raw_supply (regcache, tdep->ppc_gp0_regnum + 13 + i,
+			 &sf.fixreg[i]);
+
+  read_memory(sf.sp, (char *)&cf, sizeof(cf));
+  regcache_raw_supply (regcache, tdep->ppc_gp0_regnum + 30, &cf.r30);
+  regcache_raw_supply (regcache, tdep->ppc_gp0_regnum + 31, &cf.r31);
+  regcache_raw_supply (regcache, tdep->ppc_gp0_regnum + 1, &cf.sp);
+
+  read_memory(cf.sp, (char *)&cf, sizeof(cf));
+  regcache_raw_supply (regcache, tdep->ppc_lr_regnum, &cf.lr);
+  regcache_raw_supply (regcache, PC_REGNUM, &cf.lr);
+
+  return 1;
+}
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_ppcnbsd_nat (void);
+
+void
+_initialize_ppcnbsd_nat (void)
+{
+  /* Support debugging kernel virtual memory images.  */
+  bsd_kvm_add_target (ppcnbsd_supply_pcb);
 }
