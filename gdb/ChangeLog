@@ -1,3 +1,26 @@
+2002-11-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-nat.c (ORIG_EAX): Define to -1 if not already
+	defined.
+	(regmap): Extend to cover all registers.
+	(PT_READ_U, PT_WRITE_U, PTRACE_XFER_TYPE,
+	OLD_CANNOT_FETCH_REGISTERS, OLD_CANNOT_STORE_REGISTERS): Remove
+	definitions.
+	(fetch_register, sore_register): Simplify.
+	(old_fetch_inferior_registers, old_store_inferior_registers):
+	Remove functions.
+	(cannot_fetch_register, cannot_store_register): Change
+	implementation to use regmap array to decide which registers
+	cannot be fetched/stored.  This removes $orig_eax from the
+	registers that cannot be fetched/stored.
+	(fetch_inferior_registers): Call fetch_register directly instead
+	of calling old_fetch_inferior_registers.
+	(store_inferior_registers): Call store_register directly instead
+	of calling old_store_inferior_registers.
+	(i386_linux_dr_get): Replace PT_READ_U with PTRACE_PEEKUSER.
+	(i386_linux_dr_set): Replace PT_WRITE_U with PTRACE_POKEUSER.
+	* config/i386/nm-linux.h (U_REGS_OFFSET): Remove definition.
+
 2002-11-09  Klee Dienes  <kdienes@apple.com>
 
         * i387-tdep.c (i387_supply_register): When called with NULL as a

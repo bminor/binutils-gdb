@@ -39,9 +39,6 @@ extern int kernel_u_size (void);
    the core file of the register values.  */
 #define KERNEL_U_ADDR 0
 
-/* Offset of the registers within the user area.  */
-#define U_REGS_OFFSET 0
-
 extern CORE_ADDR register_u_addr (CORE_ADDR blockend, int regnum);
 #define REGISTER_U_ADDR(addr, blockend, regnum) \
   (addr) = register_u_addr (blockend, regnum)
