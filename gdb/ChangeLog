@@ -1,5 +1,17 @@
 Fri Jul 26 13:20:02 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
+	* doc/gdb.texinfo:
+	(1) Applied some fixes due to comments from Larry Breed (easier ones
+	through chapsec 5.2)
+	(2) Eliminated use of @footnote---had my doubts about it anyways, and
+	it's broken in latest texinfo
+	(3) Introduced *some* use of [] for optional arguments, where
+	explanation is not simpler by listing cmd w arg and cmd w/out arg
+	separately.  Still not using @deffn.
+	(4) Dropped in GPL-2.  NOTE: one of GPL-2 or texinfo is broken; a
+	couple of headings are too long.  Need patches to texinfo or revision
+	to GPL-2.
+
 	* Partial update to README (which still needs work for this
 	release!): (1) use of configure corrected for new script, 
                    (2) "make gdb.dvi" and "make gdb.info" mentioned.
