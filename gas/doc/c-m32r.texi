@@ -1,4 +1,4 @@
-@c Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000
+@c Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2003
 @c Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
@@ -15,6 +15,7 @@
 @cindex M32R support
 @menu
 * M32R-Opts::                   M32R Options
+* M32R-Directives::             M32R Directives
 * M32R-Warnings::               M32R Warnings
 @end menu
 
@@ -76,6 +77,87 @@ option.
 
 @end table
 
+@node M32R-Directives
+@section M32R Directives
+@cindex directives, M32R
+@cindex M32R directives
+
+The Renease M32R version of @code{@value{AS}} has a few architecture
+specific directives:
+
+@table @code
+@cindex @code{.low} directive, M32R
+@item .low @var{expression}
+The @code{.low} directive computes the value of its expression and
+places the lower 16-bits of the result into the immediate-field of the
+instruction.  For example:
+
+@smallexample
+   or3   r0, r0, #low(0x12345678) ; compute r0 = r0 | 0x5678 
+   add3, r0, r0, #low(fred)   ; compute r0 = r0 + low 16-bits of address of fred
+@end smallexample
+
+@item .high @var{expression}
+@cindex @code{.high} directive, M32R
+The @code{.high} directive computes the value of its expression and
+places the upper 16-bits of the result into the immediate-field of the
+instruction.  For example:
+
+@smallexample
+   seth  r0, #high(0x12345678) ; compute r0 = 0x12340000 
+   seth, r0, #high(fred)       ; compute r0 = upper 16-bits of address of fred
+@end smallexample
+
+@item .shigh @var{expression}
+@cindex @code{.shigh} directive, M32R
+The @code{.shigh} directive is very similar to the @code{.high}
+directive.  It also computes the value of its expression and places
+the upper 16-bits of the result into the immediate-field of the 
+instruction.  The difference is that @code{.shigh} also checks to see
+if the lower 16-bits could be interpreted as a signed number, and if
+so it assumes that a borrow will occur from the upper-16 bits.  To
+compensate for this the @code{.shigh} directive pre-biases the upper
+16 bit value by adding one to it.  For example:
+
+For example:
+
+@smallexample
+   seth  r0, #shigh(0x12345678) ; compute r0 = 0x12340000
+   seth  r0, #shigh(0x00008000) ; compute r0 = 0x00010000
+@end smallexample
+
+In the second example the lower 16-bits are 0x8000.  If these are
+treated as a signed value and sign extended to 32-bits then the value
+becomes 0xffff8000.  If this value is then added to 0x00010000 then
+the result is 0x00008000.
+
+This behaviour is to allow for the different semantics of the
+@code{or3} and @code{add3} instructions.  The @code{or3} instruction
+treats its 16-bit immediate argument as unsigned whereas the
+@code{add3} treats its 16-bit immediate as a signed value.  So for
+example:
+
+@smallexample
+   seth  r0, #shigh(0x00008000) 
+   add3  r0, r0, #low(0x00008000) 
+@end smallexample
+
+Produces the correct result in r0, whereas:
+
+@smallexample
+   seth  r0, #shigh(0x00008000) 
+   or3   r0, r0, #low(0x00008000) 
+@end smallexample
+
+Stores 0xffff8000 into r0.
+
+Note - the @code{shigh} directive does not know where in the assembly
+source code the lower 16-bits of the value are going set, so it cannot
+check to make sure that an @code{or3} instruction is being used rather
+than an @code{add3} instruction.  It is up to the programmer to make
+sure that correct directives are used.
+@end table
+
 @node M32R-Warnings
 @section M32R Warnings
 
@@ -113,7 +195,7 @@ instructions.
 
 @item unknown instruction @samp{...}
 This message is produced when the assembler encounters an instruction
-which it doe snot recognise.
+which it does not recognise.
 
 @item only the NOP instruction can be issued in parallel on the m32r
 This message is produced when the assembler encounters a parallel

@@ -1,3 +1,8 @@
+2003-07-07  Nick Clifton  <nickc@redhat.com>
+
+	* doc/c-m32r.texi (M32R-Directives): New node.  Document the
+	.high, .shigh and .low directives.
+
 2003-07-07  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-h8300.c (h8300sxnmode): Add prototype.
