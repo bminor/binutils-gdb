@@ -41,7 +41,7 @@ info:
 install-info:
 
 install: all
-	$(INSTALL_PROGRAM) $(PROG) $(DESTDIR)$(bindir)
+	$(INSTALL_PROGRAM) $(PROG) $(bindir)
 	$(INSTALL_DATA) $(srcdir)/gprof.1 $(man1dir)/gprof.1
 
 $(PROG):	$(OBJS)

@@ -1,7 +1,6 @@
 Wed Aug 12 15:14:14 1992  Mark Eichin  (eichin@cygnus.com)
 
-	* Makefile.in: change ${MACHINE} to $(MACHINE), add $(DESTDIR) to
-	bin install rule. 
+	* Makefile.in: change ${MACHINE} to $(MACHINE).
 
 Sun Jul 19 17:34:01 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
