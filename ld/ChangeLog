@@ -1,3 +1,11 @@
+Fri Sep  1 08:35:16 1995  James G. Smith  <jsmith@beauty.cygnus.com>
+
+	* configure.in: Added mips*vr4300-idt-elf* and
+        mips*vr4300el-idt-elf* targets.
+	* Makefile.in: Added eelf32vr4300* targets.
+	* emulparams/{elf32vr4300.sh, elf32vr4300el.sh}: Added.
+	* config/{mips-vr4300.mt, mips-vr4300el.mt}: Added.
+
 Fri Sep  1 10:51:45 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* scripttempl/a29k.sc: Fix to be reasonable.  From Brendan Kehoe

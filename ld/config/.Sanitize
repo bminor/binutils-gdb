@@ -99,6 +99,8 @@ m88k-bcs.mt
 mips-big.mt
 mips-idt.mt
 mips-lit.mt
+mips-vr4300.mt
+mips-vr4300el.mt
 mipsb-elf32.mt
 mipsbsd.mh
 mipsbsd.mt
