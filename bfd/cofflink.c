@@ -27,134 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/internal.h"
 #include "libcoff.h"
 
-#define STRING_SIZE_SIZE (4)
-
-/* We use a hash table to merge identical enum, struct, and union
-   definitions in the linker.  */
-
-/* Information we keep for a single element (an enum value, a
-   structure or union field) in the debug merge hash table.  */
-
-struct coff_debug_merge_element
-{
-  /* Next element.  */
-  struct coff_debug_merge_element *next;
-
-  /* Name.  */
-  const char *name;
-
-  /* Type.  */
-  unsigned int type;
-
-  /* Symbol index for complex type.  */
-  long tagndx;
-};
-
-/* A linked list of debug merge entries for a given name.  */
-
-struct coff_debug_merge_type
-{
-  /* Next type with the same name.  */
-  struct coff_debug_merge_type *next;
-
-  /* Class of type.  */
-  int class;
-
-  /* Symbol index where this type is defined.  */
-  long indx;
-
-  /* List of elements.  */
-  struct coff_debug_merge_element *elements;
-};
-
-/* Information we store in the debug merge hash table.  */
-
-struct coff_debug_merge_hash_entry
-{
-  struct bfd_hash_entry root;
-
-  /* A list of types with this name.  */
-  struct coff_debug_merge_type *types;
-};
-
-/* The debug merge hash table.  */
-
-struct coff_debug_merge_hash_table
-{
-  struct bfd_hash_table root;
-};
-
-/* Initialize a COFF debug merge hash table.  */
-
-#define coff_debug_merge_hash_table_init(table) \
-  (bfd_hash_table_init (&(table)->root, coff_debug_merge_hash_newfunc))
-
-/* Free a COFF debug merge hash table.  */
-
-#define coff_debug_merge_hash_table_free(table) \
-  (bfd_hash_table_free (&(table)->root))
-
-/* Look up an entry in a COFF debug merge hash table.  */
-
-#define coff_debug_merge_hash_lookup(table, string, create, copy) \
-  ((struct coff_debug_merge_hash_entry *) \
-   bfd_hash_lookup (&(table)->root, (string), (create), (copy)))
-
-/* Information we keep for each section in the output file when doing
-   a relocateable link.  */
-
-struct coff_link_section_info
-{
-  /* The relocs to be output.  */
-  struct internal_reloc *relocs;
-  /* For each reloc against a global symbol whose index was not known
-     when the reloc was handled, the global hash table entry.  */
-  struct coff_link_hash_entry **rel_hashes;
-};
-
-/* Information that we pass around while doing the final link step.  */
-
-struct coff_final_link_info
-{
-  /* General link information.  */
-  struct bfd_link_info *info;
-  /* Output BFD.  */
-  bfd *output_bfd;
-  /* Used to indicate failure in traversal routine.  */
-  boolean failed;
-  /* Hash table for long symbol names.  */
-  struct bfd_strtab_hash *strtab;
-  /* When doing a relocateable link, an array of information kept for
-     each output section, indexed by the target_index field.  */
-  struct coff_link_section_info *section_info;
-  /* Symbol index of last C_FILE symbol (-1 if none).  */
-  long last_file_index;
-  /* Contents of last C_FILE symbol.  */
-  struct internal_syment last_file;
-  /* Hash table used to merge debug information.  */
-  struct coff_debug_merge_hash_table debug_merge;
-  /* Buffer large enough to hold swapped symbols of any input file.  */
-  struct internal_syment *internal_syms;
-  /* Buffer large enough to hold sections of symbols of any input file.  */
-  asection **sec_ptrs;
-  /* Buffer large enough to hold output indices of symbols of any
-     input file.  */
-  long *sym_indices;
-  /* Buffer large enough to hold output symbols for any input file.  */
-  bfd_byte *outsyms;
-  /* Buffer large enough to hold external line numbers for any input
-     section.  */
-  bfd_byte *linenos;
-  /* Buffer large enough to hold any input section.  */
-  bfd_byte *contents;
-  /* Buffer large enough to hold external relocs of any input section.  */
-  bfd_byte *external_relocs;
-  /* Buffer large enough to hold swapped relocs of any input section.  */
-  struct internal_reloc *internal_relocs;
-};
-
-static struct bfd_hash_entry *coff_debug_merge_hash_newfunc
-  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 static boolean coff_link_add_object_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean coff_link_check_archive_element
@@ -162,13 +34,6 @@ static boolean coff_link_check_archive_element
 static boolean coff_link_check_ar_symbols
   PARAMS ((bfd *, struct bfd_link_info *, boolean *));
 static boolean coff_link_add_symbols PARAMS ((bfd *, struct bfd_link_info *));
-static boolean coff_link_input_bfd
-  PARAMS ((struct coff_final_link_info *, bfd *));
-static boolean coff_write_global_sym
-  PARAMS ((struct coff_link_hash_entry *, PTR));
-static boolean coff_reloc_link_order
-  PARAMS ((bfd *, struct coff_final_link_info *, asection *,
-	   struct bfd_link_order *));
 
 /* Create an entry in a COFF linker hash table.  */
 
@@ -242,7 +107,7 @@ _bfd_coff_link_hash_table_create (abfd)
 
 /* Create an entry in a COFF debug merge hash table.  */
 
-static struct bfd_hash_entry *
+struct bfd_hash_entry *
 coff_debug_merge_hash_newfunc (entry, table, string)
      struct bfd_hash_entry *entry;
      struct bfd_hash_table *table;
@@ -562,11 +427,11 @@ _bfd_coff_final_link (abfd, info)
   boolean debug_merge_allocated;
   asection *o;
   struct bfd_link_order *p;
-  size_t max_contents_size;
   size_t max_sym_count;
   size_t max_lineno_count;
   size_t max_reloc_count;
   size_t max_output_reloc_count;
+  size_t max_contents_size;
   file_ptr rel_filepos;
   unsigned int relsz;
   file_ptr line_filepos;
@@ -613,12 +478,14 @@ _bfd_coff_final_link (abfd, info)
   max_contents_size = 0;
   max_lineno_count = 0;
   max_reloc_count = 0;
+
   for (o = abfd->sections; o != NULL; o = o->next)
     {
       o->reloc_count = 0;
       o->lineno_count = 0;
       for (p = o->link_order_head; p != NULL; p = p->next)
 	{
+
 	  if (p->type == bfd_indirect_link_order)
 	    {
 	      asection *sec;
@@ -662,14 +529,12 @@ _bfd_coff_final_link (abfd, info)
 
       /* We use section_count + 1, rather than section_count, because
          the target_index fields are 1 based.  */
-      finfo.section_info = ((struct coff_link_section_info *)
-			    malloc ((abfd->section_count + 1)
-				    * sizeof (struct coff_link_section_info)));
+      finfo.section_info =
+	((struct coff_link_section_info *)
+	 bfd_malloc ((abfd->section_count + 1)
+		     * sizeof (struct coff_link_section_info)));
       if (finfo.section_info == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
       for (i = 0; i <= abfd->section_count; i++)
 	{
 	  finfo.section_info[i].relocs = NULL;
@@ -710,17 +575,14 @@ _bfd_coff_final_link (abfd, info)
 	  BFD_ASSERT (info->relocateable);
 	  finfo.section_info[o->target_index].relocs =
 	    ((struct internal_reloc *)
-	     malloc (o->reloc_count * sizeof (struct internal_reloc)));
+	     bfd_malloc (o->reloc_count * sizeof (struct internal_reloc)));
 	  finfo.section_info[o->target_index].rel_hashes =
 	    ((struct coff_link_hash_entry **)
-	     malloc (o->reloc_count
+	     bfd_malloc (o->reloc_count
 		     * sizeof (struct coff_link_hash_entry *)));
 	  if (finfo.section_info[o->target_index].relocs == NULL
 	      || finfo.section_info[o->target_index].rel_hashes == NULL)
-	    {
-	      bfd_set_error (bfd_error_no_memory);
-	      goto error_return;
-	    }
+	    goto error_return;
 
 	  if (o->reloc_count > max_output_reloc_count)
 	    max_output_reloc_count = o->reloc_count;
@@ -750,20 +612,21 @@ _bfd_coff_final_link (abfd, info)
 
   /* Allocate some buffers used while linking.  */
   finfo.internal_syms = ((struct internal_syment *)
-			 malloc (max_sym_count
-				 * sizeof (struct internal_syment)));
-  finfo.sec_ptrs = (asection **) malloc (max_sym_count * sizeof (asection *));
-  finfo.sym_indices = (long *) malloc (max_sym_count * sizeof (long));
+			 bfd_malloc (max_sym_count
+				     * sizeof (struct internal_syment)));
+  finfo.sec_ptrs = (asection **) bfd_malloc (max_sym_count
+					     * sizeof (asection *));
+  finfo.sym_indices = (long *) bfd_malloc (max_sym_count * sizeof (long));
   finfo.outsyms = ((bfd_byte *)
-		   malloc ((size_t) ((max_sym_count + 1) * symesz)));
-  finfo.linenos = (bfd_byte *) malloc (max_lineno_count
+		   bfd_malloc ((size_t) ((max_sym_count + 1) * symesz)));
+  finfo.linenos = (bfd_byte *) bfd_malloc (max_lineno_count
 				       * bfd_coff_linesz (abfd));
-  finfo.contents = (bfd_byte *) malloc (max_contents_size);
-  finfo.external_relocs = (bfd_byte *) malloc (max_reloc_count * relsz);
+  finfo.contents = (bfd_byte *) bfd_malloc (max_contents_size);
+  finfo.external_relocs = (bfd_byte *) bfd_malloc (max_reloc_count * relsz);
   if (! info->relocateable)
     finfo.internal_relocs = ((struct internal_reloc *)
-			     malloc (max_reloc_count
-				     * sizeof (struct internal_reloc)));
+			     bfd_malloc (max_reloc_count
+					 * sizeof (struct internal_reloc)));
   if ((finfo.internal_syms == NULL && max_sym_count > 0)
       || (finfo.sec_ptrs == NULL && max_sym_count > 0)
       || (finfo.sym_indices == NULL && max_sym_count > 0)
@@ -774,10 +637,7 @@ _bfd_coff_final_link (abfd, info)
       || (! info->relocateable
 	  && finfo.internal_relocs == NULL
 	  && max_reloc_count > 0))
-    {
-      bfd_set_error (bfd_error_no_memory);
-      goto error_return;
-    }
+    goto error_return;
 
   /* We now know the position of everything in the file, except that
      we don't know the size of the symbol table and therefore we don't
@@ -899,12 +759,10 @@ _bfd_coff_final_link (abfd, info)
       /* Now that we have written out all the global symbols, we know
 	 the symbol indices to use for relocs against them, and we can
 	 finally write out the relocs.  */
-      external_relocs = (bfd_byte *) malloc (max_output_reloc_count * relsz);
+      external_relocs = ((bfd_byte *)
+			 bfd_malloc (max_output_reloc_count * relsz));
       if (external_relocs == NULL)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  goto error_return;
-	}
+	goto error_return;
 
       for (o = abfd->sections; o != NULL; o = o->next)
 	{
@@ -1083,12 +941,9 @@ process_embedded_commands (output_bfd, info,  abfd)
   if (!sec) 
     return 1;
   
-  copy = malloc ((size_t) sec->_raw_size);
+  copy = bfd_malloc ((size_t) sec->_raw_size);
   if (!copy) 
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return 0;
-    }
+    return 0;
   if (! bfd_get_section_contents(abfd, sec, copy, 0, sec->_raw_size)) 
     {
       free (copy);
@@ -1160,7 +1015,7 @@ process_embedded_commands (output_bfd, info,  abfd)
 /* Link an input file into the linker output file.  This function
    handles all the sections and relocations of the input file at once.  */
 
-static boolean
+boolean
 coff_link_input_bfd (finfo, input_bfd)
      struct coff_final_link_info *finfo;
      bfd *input_bfd;
@@ -2045,7 +1900,7 @@ coff_link_input_bfd (finfo, input_bfd)
 
 /* Write out a global symbol.  Called via coff_link_hash_traverse.  */
 
-static boolean
+boolean
 coff_write_global_sym (h, data)
      struct coff_link_hash_entry *h;
      PTR data;
@@ -2176,7 +2031,7 @@ coff_write_global_sym (h, data)
 
 /* Handle a link order which is supposed to generate a reloc.  */
 
-static boolean
+boolean
 coff_reloc_link_order (output_bfd, finfo, output_section, link_order)
      bfd *output_bfd;
      struct coff_final_link_info *finfo;

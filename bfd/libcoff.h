@@ -299,7 +299,133 @@ extern void bfd_perform_slip PARAMS ((bfd *abfd, unsigned int slip,
 				      asection *input_section,
 				      bfd_vma val));
 
-/* Functions in cofflink.c.  */
+/* Functions and types in cofflink.c.  */
+
+#define STRING_SIZE_SIZE (4)
+#define POWERPC_LE_PE
+/* We use a hash table to merge identical enum, struct, and union
+   definitions in the linker.  */
+
+/* Information we keep for a single element (an enum value, a
+   structure or union field) in the debug merge hash table.  */
+
+struct coff_debug_merge_element
+{
+  /* Next element.  */
+  struct coff_debug_merge_element *next;
+
+  /* Name.  */
+  const char *name;
+
+  /* Type.  */
+  unsigned int type;
+
+  /* Symbol index for complex type.  */
+  long tagndx;
+};
+
+/* A linked list of debug merge entries for a given name.  */
+
+struct coff_debug_merge_type
+{
+  /* Next type with the same name.  */
+  struct coff_debug_merge_type *next;
+
+  /* Class of type.  */
+  int class;
+
+  /* Symbol index where this type is defined.  */
+  long indx;
+
+  /* List of elements.  */
+  struct coff_debug_merge_element *elements;
+};
+
+/* Information we store in the debug merge hash table.  */
+
+struct coff_debug_merge_hash_entry
+{
+  struct bfd_hash_entry root;
+
+  /* A list of types with this name.  */
+  struct coff_debug_merge_type *types;
+};
+
+/* The debug merge hash table.  */
+
+struct coff_debug_merge_hash_table
+{
+  struct bfd_hash_table root;
+};
+
+/* Initialize a COFF debug merge hash table.  */
+
+#define coff_debug_merge_hash_table_init(table) \
+  (bfd_hash_table_init (&(table)->root, coff_debug_merge_hash_newfunc))
+
+/* Free a COFF debug merge hash table.  */
+
+#define coff_debug_merge_hash_table_free(table) \
+  (bfd_hash_table_free (&(table)->root))
+
+/* Look up an entry in a COFF debug merge hash table.  */
+
+#define coff_debug_merge_hash_lookup(table, string, create, copy) \
+  ((struct coff_debug_merge_hash_entry *) \
+   bfd_hash_lookup (&(table)->root, (string), (create), (copy)))
+
+/* Information we keep for each section in the output file when doing
+   a relocateable link.  */
+
+struct coff_link_section_info
+{
+  /* The relocs to be output.  */
+  struct internal_reloc *relocs;
+  /* For each reloc against a global symbol whose index was not known
+     when the reloc was handled, the global hash table entry.  */
+  struct coff_link_hash_entry **rel_hashes;
+};
+
+/* Information that we pass around while doing the final link step.  */
+
+struct coff_final_link_info
+{
+  /* General link information.  */
+  struct bfd_link_info *info;
+  /* Output BFD.  */
+  bfd *output_bfd;
+  /* Used to indicate failure in traversal routine.  */
+  boolean failed;
+  /* Hash table for long symbol names.  */
+  struct bfd_strtab_hash *strtab;
+  /* When doing a relocateable link, an array of information kept for
+     each output section, indexed by the target_index field.  */
+  struct coff_link_section_info *section_info;
+  /* Symbol index of last C_FILE symbol (-1 if none).  */
+  long last_file_index;
+  /* Contents of last C_FILE symbol.  */
+  struct internal_syment last_file;
+  /* Hash table used to merge debug information.  */
+  struct coff_debug_merge_hash_table debug_merge;
+  /* Buffer large enough to hold swapped symbols of any input file.  */
+  struct internal_syment *internal_syms;
+  /* Buffer large enough to hold sections of symbols of any input file.  */
+  asection **sec_ptrs;
+  /* Buffer large enough to hold output indices of symbols of any
+     input file.  */
+  long *sym_indices;
+  /* Buffer large enough to hold output symbols for any input file.  */
+  bfd_byte *outsyms;
+  /* Buffer large enough to hold external line numbers for any input
+     section.  */
+  bfd_byte *linenos;
+  /* Buffer large enough to hold any input section.  */
+  bfd_byte *contents;
+  /* Buffer large enough to hold external relocs of any input section.  */
+  bfd_byte *external_relocs;
+  /* Buffer large enough to hold swapped relocs of any input section.  */
+  struct internal_reloc *internal_relocs;
+};
 
 extern struct bfd_hash_entry *_bfd_coff_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
@@ -322,6 +448,17 @@ extern struct internal_reloc *_bfd_coff_read_internal_relocs
 extern boolean _bfd_coff_generic_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   struct internal_reloc *, struct internal_syment *, asection **));
+
+extern struct bfd_hash_entry *coff_debug_merge_hash_newfunc
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+extern boolean coff_write_global_sym
+  PARAMS ((struct coff_link_hash_entry *, PTR));
+extern boolean coff_link_input_bfd
+  PARAMS ((struct coff_final_link_info *, bfd *));
+extern boolean coff_reloc_link_order
+  PARAMS ((bfd *, struct coff_final_link_info *, asection *,
+	   struct bfd_link_order *));
+
 
 #define coff_get_section_contents_in_window \
   _bfd_generic_get_section_contents_in_window

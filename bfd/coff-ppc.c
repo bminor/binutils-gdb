@@ -1,5 +1,5 @@
 /* BFD back-end for PowerPC Microsoft Portable Executable files.
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 
    Original version pieced together by Kim Knuttila (krk@cygnus.com)
 
@@ -34,6 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
+
 #include "libbfd.h"
 #include "obstack.h"
 
@@ -1234,9 +1235,10 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
   
 #ifdef DEBUG_RELOC
   fprintf(stderr, 
-	  "pe_ppc_relocate_section (%s) for %s \n", 
+	  "pe_ppc_relocate_section (%s) for %s in bfd %s\n", 
 	  TARGET_LITTLE_NAME,
-	  input_section->name);
+	  input_section->name,
+	  input_bfd->filename);
   
 #endif  
 
@@ -1337,6 +1339,8 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  else
 	    {
+fprintf(stderr,
+	"missing %s\n",h->root.root.root.string);
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.root.string, input_bfd, input_section,
 		      rel->r_vaddr - input_section->vma)))
@@ -1370,8 +1374,9 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 #ifdef TOC_DEBUG
 
 		fprintf(stderr,
-			"BFD of toc owner %p, section addr of %s %p\n",
-			 bfd_of_toc_owner, TOC_SECTION_NAME, toc_section);
+			"BFD of toc owner %p (%s), section addr of %s %p\n",
+			 bfd_of_toc_owner, bfd_of_toc_owner->filename, 
+			TOC_SECTION_NAME, toc_section);
 #endif
 
 		if ( toc_section == NULL ) 
@@ -1443,8 +1448,12 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		our_toc_offset = h->toc_offset;
 
 		if ((r_flags & IMAGE_REL_PPC_TOCDEFN) 
-		    == IMAGE_REL_PPC_TOCDEFN 
+		    == IMAGE_REL_PPC_TOCDEFN )
+#if 0
+		  /* This is wrong. If tocdefn is on, we must unconditionally
+		     assume the following path */
 		    && IS_UNALLOCATED(our_toc_offset))
+#endif
 		  {
 		    /* This is unbelievable cheese. Some knowledgable asm 
 		       hacker has decided to use r2 as a base for loading 
@@ -1460,9 +1469,20 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		       dll linkage, takes advantage of that and considers 
 		       the IAT to be part of the toc, thus saving a load.
 		    */
+#ifdef DEBUG_RELOC
+		    fprintf(stderr,
+			    "TOCDEFN is on, (%s) (%p) our_toc_offset = %x\n", 
+			    name, h, our_toc_offset);
+#endif
+
 		    our_toc_offset = val - 
 		      (toc_section->output_section->vma + 
 		       toc_section->output_offset);
+
+#ifdef DEBUG_RELOC
+		    fprintf(stderr,
+			    "               our_toc_offset set to %x\n", our_toc_offset);
+#endif
 
 		    /* The size must still fit in a 16bit displacment */
 		    if (our_toc_offset >= 65535)
@@ -1632,6 +1652,38 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 	    struct coff_link_hash_entry *myh = 0;
 	    const char *name = 0;
 	    DUMP_RELOC2(howto->name, rel);
+
+	    if (strncmp(".idata$2",input_section->name,8) == 0 && first_thunk_address == 0)
+	      {
+		/* set magic values */
+		int idata5offset;
+		struct coff_link_hash_entry *myh = 0;
+		myh = coff_link_hash_lookup (coff_hash_table (info),
+					     "__idata5_magic__",
+					     false, false, true);
+		first_thunk_address = myh->root.u.def.value + 
+		  sec->output_section->vma + 
+		    sec->output_offset - 
+		      pe_data(output_bfd)->pe_opthdr.ImageBase;
+		
+		idata5offset = myh->root.u.def.value;
+		myh = coff_link_hash_lookup (coff_hash_table (info),
+					     "__idata6_magic__",
+					     false, false, true);
+		
+		thunk_size = myh->root.u.def.value - idata5offset;
+		myh = coff_link_hash_lookup (coff_hash_table (info),
+					     "__idata4_magic__",
+					     false, false, true);
+		import_table_size = myh->root.u.def.value;
+#ifdef DEBUG_RELOC
+		fprintf(stderr,
+			"first computation triggered fta %x, ts %d(%x), its %d(%x)\n",
+			first_thunk_address, thunk_size, thunk_size, import_table_size,
+			import_table_size);
+#endif
+	      }
+
 	    if (h == 0)
 	      { /* it is a file local symbol */
 		sym = syms + symndx;
@@ -1686,6 +1738,13 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 						     "__idata4_magic__",
 						     false, false, true);
 			import_table_size = myh->root.u.def.value;
+#ifdef DEBUG_RELOC
+
+			fprintf(stderr,
+				"second computation triggered fta %x, ts %d(%x), its %d(%x)\n",
+				first_thunk_address, thunk_size, thunk_size, import_table_size,
+				import_table_size);
+#endif
 		      }
 		  }
 	      }
@@ -1789,18 +1848,38 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		   (info, name, howto->name, 
 		    (bfd_vma) 0, input_bfd,
 		    input_section, rel->r_vaddr - input_section->vma)))
-	      return false;
+	      {
+#ifdef DEBUG_RELOC
+		fprintf(stderr, 
+			"pe_ppc_relocate_section (%s) for %s in bfd %s RETURNING TRUE\n", 
+			TARGET_LITTLE_NAME,
+			input_section->name,
+			input_bfd->filename);
+  
+#endif  
+		return false;
+	      }
 	  }
 	}
 
     }     
 
+#ifdef DEBUG_RELOC
+  fprintf(stderr, 
+	  "pe_ppc_relocate_section (%s) for %s in bfd %s RETURNING TRUE\n", 
+	  TARGET_LITTLE_NAME,
+	  input_section->name,
+	  input_bfd->filename);
+  
+#endif  
+
   return true;
 }
 
+
 #ifdef COFF_IMAGE_WITH_PE
 
-long int global_toc_size = 0;
+long int global_toc_size = 4;
 
 bfd* bfd_of_toc_owner = 0;
 
@@ -1845,7 +1924,12 @@ dump_toc(vfile)
 	  if (t->offset <= global_toc_size + thunk_size)
 	    cat = "IAT reference ";
 	  else
-	    cat = "Out of bounds!";
+	    {
+	      fprintf(file,
+		      "**** global_toc_size %d(%x), thunk_size %d(%x)\n",
+		      global_toc_size, global_toc_size, thunk_size, thunk_size);
+	      cat = "Out of bounds!";
+	    }
 	}
 
       fprintf(file,
@@ -2467,6 +2551,7 @@ ppc_coff_swap_sym_in_hook ();
 #define coff_bfd_reloc_type_lookup   ppc_coff_reloc_type_lookup
 #define coff_rtype_to_howto          coff_ppc_rtype_to_howto
 #define coff_relocate_section        coff_ppc_relocate_section
+#define coff_bfd_final_link          ppc_bfd_coff_final_link 
 
 #ifndef COFF_IMAGE_WITH_PE
 #define coff_swap_sym_in_hook        ppc_coff_swap_sym_in_hook
@@ -2506,10 +2591,8 @@ ppc_coff_swap_sym_in_hook (abfd, ext1, in1)
   SYMENT *ext = (SYMENT *)ext1;
   struct internal_syment      *in = (struct internal_syment *)in1;
 
-#if 0
   if (bfd_of_toc_owner != 0) /* we already have a toc, so go home */
     return;
-#endif
 
   if (strcmp(in->_n._n_name, ".toc") == 0)
     {
@@ -2550,6 +2633,528 @@ ppc_coff_swap_sym_in_hook (abfd, ext1, in1)
 }
 #endif
 
+boolean
+ppc_bfd_coff_final_link ();
+
+#ifndef COFF_IMAGE_WITH_PE
+
+static boolean
+ppc_do_last(abfd)
+     bfd *abfd;
+{
+  if (abfd == bfd_of_toc_owner)
+    return true;
+  else
+    return false;
+}
+
+static bfd *
+ppc_get_last()
+{
+  return bfd_of_toc_owner;
+}
+
+/* this piece of machinery exists only to guarantee that the bfd that holds
+   the toc section is written last. 
+
+   This does depend on bfd_make_section attaching a new section to the
+   end of the section list for the bfd. 
+
+   This is otherwise intended to be functionally the same as 
+   cofflink.c:_bfd_coff_final_link(). It is specifically different only 
+   where the POWERPC_LE_PE macro modifies the code. It is left in as a 
+   precise form of comment. krk@cygnus.com
+*/
+#define POWERPC_LE_PE
+
+
+/* Do the final link step.  */
+
+boolean
+ppc_bfd_coff_final_link (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  bfd_size_type symesz;
+  struct coff_final_link_info finfo;
+  boolean debug_merge_allocated;
+  asection *o;
+  struct bfd_link_order *p;
+  size_t max_sym_count;
+  size_t max_lineno_count;
+  size_t max_reloc_count;
+  size_t max_output_reloc_count;
+  size_t max_contents_size;
+  file_ptr rel_filepos;
+  unsigned int relsz;
+  file_ptr line_filepos;
+  unsigned int linesz;
+  bfd *sub;
+  bfd_byte *external_relocs = NULL;
+  char strbuf[STRING_SIZE_SIZE];
+
+  symesz = bfd_coff_symesz (abfd);
+
+  finfo.info = info;
+  finfo.output_bfd = abfd;
+  finfo.strtab = NULL;
+  finfo.section_info = NULL;
+  finfo.last_file_index = -1;
+  finfo.internal_syms = NULL;
+  finfo.sec_ptrs = NULL;
+  finfo.sym_indices = NULL;
+  finfo.outsyms = NULL;
+  finfo.linenos = NULL;
+  finfo.contents = NULL;
+  finfo.external_relocs = NULL;
+  finfo.internal_relocs = NULL;
+  debug_merge_allocated = false;
+
+  coff_data (abfd)->link_info = info;
+
+  finfo.strtab = _bfd_stringtab_init ();
+  if (finfo.strtab == NULL)
+    goto error_return;
+
+  if (! coff_debug_merge_hash_table_init (&finfo.debug_merge))
+    goto error_return;
+  debug_merge_allocated = true;
+
+  /* Compute the file positions for all the sections.  */
+  if (! abfd->output_has_begun)
+    bfd_coff_compute_section_file_positions (abfd);
+
+  /* Count the line numbers and relocation entries required for the
+     output file.  Set the file positions for the relocs.  */
+  rel_filepos = obj_relocbase (abfd);
+  relsz = bfd_coff_relsz (abfd);
+  max_contents_size = 0;
+  max_lineno_count = 0;
+  max_reloc_count = 0;
+
+  for (o = abfd->sections; o != NULL; o = o->next)
+    {
+      o->reloc_count = 0;
+      o->lineno_count = 0;
+      for (p = o->link_order_head; p != NULL; p = p->next)
+	{
+
+	  if (p->type == bfd_indirect_link_order)
+	    {
+	      asection *sec;
+
+	      sec = p->u.indirect.section;
+
+	      if (info->strip == strip_none
+		  || info->strip == strip_some)
+		o->lineno_count += sec->lineno_count;
+
+	      if (info->relocateable)
+		o->reloc_count += sec->reloc_count;
+
+	      if (sec->_raw_size > max_contents_size)
+		max_contents_size = sec->_raw_size;
+	      if (sec->lineno_count > max_lineno_count)
+		max_lineno_count = sec->lineno_count;
+	      if (sec->reloc_count > max_reloc_count)
+		max_reloc_count = sec->reloc_count;
+	    }
+	  else if (info->relocateable
+		   && (p->type == bfd_section_reloc_link_order
+		       || p->type == bfd_symbol_reloc_link_order))
+	    ++o->reloc_count;
+	}
+      if (o->reloc_count == 0)
+	o->rel_filepos = 0;
+      else
+	{
+	  o->flags |= SEC_RELOC;
+	  o->rel_filepos = rel_filepos;
+	  rel_filepos += o->reloc_count * relsz;
+	}
+    }
+
+  /* If doing a relocateable link, allocate space for the pointers we
+     need to keep.  */
+  if (info->relocateable)
+    {
+      unsigned int i;
+
+      /* We use section_count + 1, rather than section_count, because
+         the target_index fields are 1 based.  */
+      finfo.section_info =
+	((struct coff_link_section_info *)
+	 bfd_malloc ((abfd->section_count + 1)
+		     * sizeof (struct coff_link_section_info)));
+      if (finfo.section_info == NULL)
+	goto error_return;
+      for (i = 0; i <= abfd->section_count; i++)
+	{
+	  finfo.section_info[i].relocs = NULL;
+	  finfo.section_info[i].rel_hashes = NULL;
+	}
+    }
+
+  /* We now know the size of the relocs, so we can determine the file
+     positions of the line numbers.  */
+  line_filepos = rel_filepos;
+  linesz = bfd_coff_linesz (abfd);
+  max_output_reloc_count = 0;
+  for (o = abfd->sections; o != NULL; o = o->next)
+    {
+      if (o->lineno_count == 0)
+	o->line_filepos = 0;
+      else
+	{
+	  o->line_filepos = line_filepos;
+	  line_filepos += o->lineno_count * linesz;
+	}
+
+      if (o->reloc_count != 0)
+	{
+	  /* We don't know the indices of global symbols until we have
+             written out all the local symbols.  For each section in
+             the output file, we keep an array of pointers to hash
+             table entries.  Each entry in the array corresponds to a
+             reloc.  When we find a reloc against a global symbol, we
+             set the corresponding entry in this array so that we can
+             fix up the symbol index after we have written out all the
+             local symbols.
+
+	     Because of this problem, we also keep the relocs in
+	     memory until the end of the link.  This wastes memory,
+	     but only when doing a relocateable link, which is not the
+	     common case.  */
+	  BFD_ASSERT (info->relocateable);
+	  finfo.section_info[o->target_index].relocs =
+	    ((struct internal_reloc *)
+	     bfd_malloc (o->reloc_count * sizeof (struct internal_reloc)));
+	  finfo.section_info[o->target_index].rel_hashes =
+	    ((struct coff_link_hash_entry **)
+	     bfd_malloc (o->reloc_count
+		     * sizeof (struct coff_link_hash_entry *)));
+	  if (finfo.section_info[o->target_index].relocs == NULL
+	      || finfo.section_info[o->target_index].rel_hashes == NULL)
+	    goto error_return;
+
+	  if (o->reloc_count > max_output_reloc_count)
+	    max_output_reloc_count = o->reloc_count;
+	}
+
+      /* Reset the reloc and lineno counts, so that we can use them to
+	 count the number of entries we have output so far.  */
+      o->reloc_count = 0;
+      o->lineno_count = 0;
+    }
+
+  obj_sym_filepos (abfd) = line_filepos;
+
+  /* Figure out the largest number of symbols in an input BFD.  Take
+     the opportunity to clear the output_has_begun fields of all the
+     input BFD's.  */
+  max_sym_count = 0;
+  for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+    {
+      size_t sz;
+
+      sub->output_has_begun = false;
+      sz = obj_raw_syment_count (sub);
+      if (sz > max_sym_count)
+	max_sym_count = sz;
+    }
+
+  /* Allocate some buffers used while linking.  */
+  finfo.internal_syms = ((struct internal_syment *)
+			 bfd_malloc (max_sym_count
+				     * sizeof (struct internal_syment)));
+  finfo.sec_ptrs = (asection **) bfd_malloc (max_sym_count
+					     * sizeof (asection *));
+  finfo.sym_indices = (long *) bfd_malloc (max_sym_count * sizeof (long));
+  finfo.outsyms = ((bfd_byte *)
+		   bfd_malloc ((size_t) ((max_sym_count + 1) * symesz)));
+  finfo.linenos = (bfd_byte *) bfd_malloc (max_lineno_count
+				       * bfd_coff_linesz (abfd));
+  finfo.contents = (bfd_byte *) bfd_malloc (max_contents_size);
+  finfo.external_relocs = (bfd_byte *) bfd_malloc (max_reloc_count * relsz);
+  if (! info->relocateable)
+    finfo.internal_relocs = ((struct internal_reloc *)
+			     bfd_malloc (max_reloc_count
+					 * sizeof (struct internal_reloc)));
+  if ((finfo.internal_syms == NULL && max_sym_count > 0)
+      || (finfo.sec_ptrs == NULL && max_sym_count > 0)
+      || (finfo.sym_indices == NULL && max_sym_count > 0)
+      || finfo.outsyms == NULL
+      || (finfo.linenos == NULL && max_lineno_count > 0)
+      || (finfo.contents == NULL && max_contents_size > 0)
+      || (finfo.external_relocs == NULL && max_reloc_count > 0)
+      || (! info->relocateable
+	  && finfo.internal_relocs == NULL
+	  && max_reloc_count > 0))
+    goto error_return;
+
+  /* We now know the position of everything in the file, except that
+     we don't know the size of the symbol table and therefore we don't
+     know where the string table starts.  We just build the string
+     table in memory as we go along.  We process all the relocations
+     for a single input file at once.  */
+  obj_raw_syment_count (abfd) = 0;
+
+  if (coff_backend_info (abfd)->_bfd_coff_start_final_link)
+    {
+      if (! bfd_coff_start_final_link (abfd, info))
+	goto error_return;
+    }
+
+  for (o = abfd->sections; o != NULL; o = o->next)
+    {
+      for (p = o->link_order_head; p != NULL; p = p->next)
+	{
+	  if (p->type == bfd_indirect_link_order
+	      && (bfd_get_flavour (p->u.indirect.section->owner)
+		  == bfd_target_coff_flavour))
+	    {
+	      sub = p->u.indirect.section->owner;
+#ifdef POWERPC_LE_PE
+	      if (! sub->output_has_begun && !ppc_do_last(sub))
+#else
+	      if (! sub->output_has_begun)
+#endif
+		{
+		  if (! coff_link_input_bfd (&finfo, sub))
+		    goto error_return;
+		  sub->output_has_begun = true;
+		}
+	    }
+	  else if (p->type == bfd_section_reloc_link_order
+		   || p->type == bfd_symbol_reloc_link_order)
+	    {
+	      if (! coff_reloc_link_order (abfd, &finfo, o, p))
+		goto error_return;
+	    }
+	  else
+	    {
+	      if (! _bfd_default_link_order (abfd, info, o, p))
+		goto error_return;
+	    }
+	}
+    }
+
+#ifdef POWERPC_LE_PE
+  {
+    extern bfd* ppc_get_last();
+    bfd* last_one = ppc_get_last();
+    if (last_one)
+      {
+	if (! coff_link_input_bfd (&finfo, last_one))
+	  goto error_return;
+      }
+    last_one->output_has_begun = true;
+  }
+#endif
+
+  /* Free up the buffers used by coff_link_input_bfd.  */
+
+  coff_debug_merge_hash_table_free (&finfo.debug_merge);
+  debug_merge_allocated = false;
+
+  if (finfo.internal_syms != NULL)
+    {
+      free (finfo.internal_syms);
+      finfo.internal_syms = NULL;
+    }
+  if (finfo.sec_ptrs != NULL)
+    {
+      free (finfo.sec_ptrs);
+      finfo.sec_ptrs = NULL;
+    }
+  if (finfo.sym_indices != NULL)
+    {
+      free (finfo.sym_indices);
+      finfo.sym_indices = NULL;
+    }
+  if (finfo.linenos != NULL)
+    {
+      free (finfo.linenos);
+      finfo.linenos = NULL;
+    }
+  if (finfo.contents != NULL)
+    {
+      free (finfo.contents);
+      finfo.contents = NULL;
+    }
+  if (finfo.external_relocs != NULL)
+    {
+      free (finfo.external_relocs);
+      finfo.external_relocs = NULL;
+    }
+  if (finfo.internal_relocs != NULL)
+    {
+      free (finfo.internal_relocs);
+      finfo.internal_relocs = NULL;
+    }
+
+  /* The value of the last C_FILE symbol is supposed to be the symbol
+     index of the first external symbol.  Write it out again if
+     necessary.  */
+  if (finfo.last_file_index != -1
+      && (unsigned int) finfo.last_file.n_value != obj_raw_syment_count (abfd))
+    {
+      finfo.last_file.n_value = obj_raw_syment_count (abfd);
+      bfd_coff_swap_sym_out (abfd, (PTR) &finfo.last_file,
+			     (PTR) finfo.outsyms);
+      if (bfd_seek (abfd,
+		    (obj_sym_filepos (abfd)
+		     + finfo.last_file_index * symesz),
+		    SEEK_SET) != 0
+	  || bfd_write (finfo.outsyms, symesz, 1, abfd) != symesz)
+	return false;
+    }
+
+  /* Write out the global symbols.  */
+  finfo.failed = false;
+  coff_link_hash_traverse (coff_hash_table (info), coff_write_global_sym,
+			   (PTR) &finfo);
+  if (finfo.failed)
+    goto error_return;
+
+  /* The outsyms buffer is used by coff_write_global_sym.  */
+  if (finfo.outsyms != NULL)
+    {
+      free (finfo.outsyms);
+      finfo.outsyms = NULL;
+    }
+
+  if (info->relocateable)
+    {
+      /* Now that we have written out all the global symbols, we know
+	 the symbol indices to use for relocs against them, and we can
+	 finally write out the relocs.  */
+      external_relocs = ((bfd_byte *)
+			 bfd_malloc (max_output_reloc_count * relsz));
+      if (external_relocs == NULL)
+	goto error_return;
+
+      for (o = abfd->sections; o != NULL; o = o->next)
+	{
+	  struct internal_reloc *irel;
+	  struct internal_reloc *irelend;
+	  struct coff_link_hash_entry **rel_hash;
+	  bfd_byte *erel;
+
+	  if (o->reloc_count == 0)
+	    continue;
+
+	  irel = finfo.section_info[o->target_index].relocs;
+	  irelend = irel + o->reloc_count;
+	  rel_hash = finfo.section_info[o->target_index].rel_hashes;
+	  erel = external_relocs;
+	  for (; irel < irelend; irel++, rel_hash++, erel += relsz)
+	    {
+	      if (*rel_hash != NULL)
+		{
+		  BFD_ASSERT ((*rel_hash)->indx >= 0);
+		  irel->r_symndx = (*rel_hash)->indx;
+		}
+	      bfd_coff_swap_reloc_out (abfd, (PTR) irel, (PTR) erel);
+	    }
+
+	  if (bfd_seek (abfd, o->rel_filepos, SEEK_SET) != 0
+	      || bfd_write ((PTR) external_relocs, relsz, o->reloc_count,
+			    abfd) != relsz * o->reloc_count)
+	    goto error_return;
+	}
+
+      free (external_relocs);
+      external_relocs = NULL;
+    }
+
+  /* Free up the section information.  */
+  if (finfo.section_info != NULL)
+    {
+      unsigned int i;
+
+      for (i = 0; i < abfd->section_count; i++)
+	{
+	  if (finfo.section_info[i].relocs != NULL)
+	    free (finfo.section_info[i].relocs);
+	  if (finfo.section_info[i].rel_hashes != NULL)
+	    free (finfo.section_info[i].rel_hashes);
+	}
+      free (finfo.section_info);
+      finfo.section_info = NULL;
+    }
+
+  /* Write out the string table.  */
+  if (obj_raw_syment_count (abfd) != 0)
+    {
+      if (bfd_seek (abfd,
+		    (obj_sym_filepos (abfd)
+		     + obj_raw_syment_count (abfd) * symesz),
+		    SEEK_SET) != 0)
+	return false;
+
+#if STRING_SIZE_SIZE == 4
+      bfd_h_put_32 (abfd,
+		    _bfd_stringtab_size (finfo.strtab) + STRING_SIZE_SIZE,
+		    (bfd_byte *) strbuf);
+#else
+ #error Change bfd_h_put_32
+#endif
+
+      if (bfd_write (strbuf, 1, STRING_SIZE_SIZE, abfd) != STRING_SIZE_SIZE)
+	return false;
+
+      if (! _bfd_stringtab_emit (abfd, finfo.strtab))
+	return false;
+    }
+
+  _bfd_stringtab_free (finfo.strtab);
+
+  /* Setting bfd_get_symcount to 0 will cause write_object_contents to
+     not try to write out the symbols.  */
+  bfd_get_symcount (abfd) = 0;
+
+  return true;
+
+ error_return:
+  if (debug_merge_allocated)
+    coff_debug_merge_hash_table_free (&finfo.debug_merge);
+  if (finfo.strtab != NULL)
+    _bfd_stringtab_free (finfo.strtab);
+  if (finfo.section_info != NULL)
+    {
+      unsigned int i;
+
+      for (i = 0; i < abfd->section_count; i++)
+	{
+	  if (finfo.section_info[i].relocs != NULL)
+	    free (finfo.section_info[i].relocs);
+	  if (finfo.section_info[i].rel_hashes != NULL)
+	    free (finfo.section_info[i].rel_hashes);
+	}
+      free (finfo.section_info);
+    }
+  if (finfo.internal_syms != NULL)
+    free (finfo.internal_syms);
+  if (finfo.sec_ptrs != NULL)
+    free (finfo.sec_ptrs);
+  if (finfo.sym_indices != NULL)
+    free (finfo.sym_indices);
+  if (finfo.outsyms != NULL)
+    free (finfo.outsyms);
+  if (finfo.linenos != NULL)
+    free (finfo.linenos);
+  if (finfo.contents != NULL)
+    free (finfo.contents);
+  if (finfo.external_relocs != NULL)
+    free (finfo.external_relocs);
+  if (finfo.internal_relocs != NULL)
+    free (finfo.internal_relocs);
+  if (external_relocs != NULL)
+    free (external_relocs);
+  return false;
+}
+#endif
 
 
 /* The transfer vectors that lead the outside world to all of the above. */
@@ -2560,8 +3165,8 @@ TARGET_LITTLE_SYM =
 {
   TARGET_LITTLE_NAME,		/* name or coff-arm-little */
   bfd_target_coff_flavour,
-  false,			/* data byte order is little */
-  false,			/* header byte order is little */
+  BFD_ENDIAN_LITTLE,		/* data byte order is little */
+  BFD_ENDIAN_LITTLE,		/* header byte order is little */
 
   (HAS_RELOC | EXEC_P |		/* FIXME: object flags */
    HAS_LINENO | HAS_DEBUG |
@@ -2607,8 +3212,8 @@ TARGET_BIG_SYM =
 {
   TARGET_BIG_NAME,
   bfd_target_coff_flavour,	
-  true,				/* data byte order is big */
-  true,				/* header byte order is big */
+  BFD_ENDIAN_BIG,		/* data byte order is big */
+  BFD_ENDIAN_BIG,		/* header byte order is big */
 
   (HAS_RELOC | EXEC_P |		/* FIXME: object flags */
    HAS_LINENO | HAS_DEBUG |

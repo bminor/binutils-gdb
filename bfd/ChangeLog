@@ -1,3 +1,22 @@
+Mon Jan 29 11:34:36 1996  Kim Knuttila  <krk@cygnus.com>
+
+	* cofflink.c: removed the POWERPC_LE_PE hack, promoted some types
+	and made a few static functions externs.
+
+	* coff-ppc.c (ppc_bfd_coff_final_link): new function, replaces the
+	POWERPC_LE_PE hack in cofflink.
+
+	* libcoff-in.h: promoted the following from cofflink.c to allow
+	_bfd_coff_final_link to be overridden -  STRING_SIZE_SIZE,
+	coff_debug_merge_element, struct coff_debug_merge_type, 
+	coff_debug_merge_hash_entry, coff_debug_merge_hash_table,
+	coff_debug_merge_hash_table_init,  coff_debug_merge_hash_table_free,
+	coff_debug_merge_hash_lookup, coff_link_section_info, 
+	coff_final_link_info, coff_debug_merge_hash_newfunc,
+	coff_write_global_sym, coff_link_input_bfd, coff_reloc_link_order.
+
+	* libcoff.h: re-gen'd
+
 Fri Jan 26 18:33:35 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* syms.c: Include "bfdlink.h".
