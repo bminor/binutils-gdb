@@ -1,5 +1,7 @@
 Thu Mar  6 13:55:32 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-mn10200.c (md_relax_table): Fix typos.
+
 	* config/tc-mn10300.c (md_assemble): Don't use any MN10300 specific
 	relocs anymore.  Tweak fx_offset for pc-relative relocs.
 
