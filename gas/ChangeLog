@@ -1,3 +1,9 @@
+Tue Apr  1 16:08:21 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in: Remove unnecessary itbl-parse.h, ibtl-parse.c, and
+	itbl-lex.c dependencies.  Remove rules for itbl-lex.o,
+	itbl-parse.o, and itbl-ops.o; just use the normal .c.o rule.
+
 start-sanitize-tic80
 Tue Apr  1 11:25:56 1997  Michael Meissner  <meissner@cygnus.com>
 
