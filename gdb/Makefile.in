@@ -1495,7 +1495,7 @@ frv-tdep.o: frv-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \
 	$(arch_utils_h) $(regcache_h)
 
 regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(gdbarch_h) \
-	$(gdbcmd_h) $(regcache_h) $(gdb_assert_h) $(gdb_string_h)
+	$(gdbcmd_h) $(regcache_h) $(gdb_assert_h) $(gdb_string_h) $(gdbcmd_h)
 
 fork-child.o: fork-child.c $(gdb_wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(terminal_h) $(gdbthread_h) $(gdb_string_h)

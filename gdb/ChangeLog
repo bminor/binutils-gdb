@@ -1,3 +1,18 @@
+2002-08-09  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.c: Include "gdbcmd.h"
+	(_initialize_regcache): Add commands "maintenance print
+	registers", "maintenance print raw-registers" and "maintenance
+	print cooked-registers".
+	(enum regcache_dump_what): Define.
+	(dump_endian_bytes): New function.
+	(regcache_dump): New function.
+	(regcache_print): New function.
+	(maintenance_print_registers): New function.
+	(maintenance_print_raw_registers): New function.
+	(maintenance_print_cooked_registers): New function.
+	* Makefile.in (regcache.o): Update dependencies.
+
 2002-08-09  Michael Snyder  <msnyder@redhat.com>
 
 	* mips-tdep.c (ROUND_DOWN, ROUND_UP): Move to global scope.

@@ -28,6 +28,7 @@
 #include "regcache.h"
 #include "gdb_assert.h"
 #include "gdb_string.h"
+#include "gdbcmd.h"		/* For maintenanceprintlist.  */
 
 /*
  * DATA STRUCTURE
@@ -1185,6 +1186,237 @@ build_regcache (void)
   register_valid = deprecated_grub_regcache_for_register_valid (current_regcache);
 }
 
+static void
+dump_endian_bytes (struct ui_file *file, enum bfd_endian endian,
+		   const unsigned char *buf, long len)
+{
+  int i;
+  switch (endian)
+    {
+    case BFD_ENDIAN_BIG:
+      for (i = 0; i < len; i++)
+	fprintf_unfiltered (file, "%02x", buf[i]);
+      break;
+    case BFD_ENDIAN_LITTLE:
+      for (i = len - 1; i >= 0; i--)
+	fprintf_unfiltered (file, "%02x", buf[i]);
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "Bad switch");
+    }
+}
+
+enum regcache_dump_what
+{
+  regcache_dump_none, regcache_dump_raw, regcache_dump_cooked
+};
+
+static void
+regcache_dump (struct regcache *regcache, struct ui_file *file,
+	       enum regcache_dump_what what_to_dump)
+{
+  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
+  int regnum;
+  int footnote_nr = 0;
+  int footnote_register_size = 0;
+  int footnote_register_offset = 0;
+  int footnote_register_type_name_null = 0;
+  long register_offset = 0;
+  unsigned char *buf = alloca (regcache->descr->max_register_size);
+
+#if 0
+  fprintf_unfiltered (file, "legacy_p %d\n", regcache->descr->legacy_p);
+  fprintf_unfiltered (file, "nr_raw_registers %d\n",
+		      regcache->descr->nr_raw_registers);
+  fprintf_unfiltered (file, "nr_cooked_registers %d\n",
+		      regcache->descr->nr_cooked_registers);
+  fprintf_unfiltered (file, "sizeof_raw_registers %ld\n",
+		      regcache->descr->sizeof_raw_registers);
+  fprintf_unfiltered (file, "sizeof_raw_register_valid_p %ld\n",
+		      regcache->descr->sizeof_raw_register_valid_p);
+  fprintf_unfiltered (file, "max_register_size %ld\n",
+		      regcache->descr->max_register_size);
+  fprintf_unfiltered (file, "NUM_REGS %d\n", NUM_REGS);
+  fprintf_unfiltered (file, "NUM_PSEUDO_REGS %d\n", NUM_PSEUDO_REGS);
+#endif
+
+  gdb_assert (regcache->descr->nr_cooked_registers
+	      == (NUM_REGS + NUM_PSEUDO_REGS));
+
+  for (regnum = -1; regnum < regcache->descr->nr_cooked_registers; regnum++)
+    {
+      /* Name.  */
+      if (regnum < 0)
+	fprintf_unfiltered (file, " %-10s", "Name");
+      else
+	{
+	  const char *p = REGISTER_NAME (regnum);
+	  if (p == NULL)
+	    p = "";
+	  else if (p[0] == '\0')
+	    p = "''";
+	  fprintf_unfiltered (file, " %-10s", p);
+	}
+
+      /* Number.  */
+      if (regnum < 0)
+	fprintf_unfiltered (file, " %4s", "Nr");
+      else
+	fprintf_unfiltered (file, " %4d", regnum);
+
+      /* Relative number.  */
+      if (regnum < 0)
+	fprintf_unfiltered (file, " %4s", "Rel");
+      else if (regnum < NUM_REGS)
+	fprintf_unfiltered (file, " %4d", regnum);
+      else
+	fprintf_unfiltered (file, " %4d", (regnum - NUM_REGS));
+
+      /* Offset.  */
+      if (regnum < 0)
+	fprintf_unfiltered (file, " %6s  ", "Offset");
+      else
+	{
+	  fprintf_unfiltered (file, " %6ld",
+			      regcache->descr->register_offset[regnum]);
+	  if (register_offset != regcache->descr->register_offset[regnum])
+	    {
+	      if (!footnote_register_offset)
+		footnote_register_offset = ++footnote_nr;
+	      fprintf_unfiltered (file, "*%d", footnote_register_offset);
+	    }
+	  else
+	    fprintf_unfiltered (file, "  ");
+	  register_offset = (regcache->descr->register_offset[regnum]
+			     + regcache->descr->sizeof_register[regnum]);
+	}
+
+      /* Size.  */
+      if (regnum < 0)
+	fprintf_unfiltered (file, " %5s ", "Size");
+      else
+	{
+	  fprintf_unfiltered (file, " %5ld",
+			      regcache->descr->sizeof_register[regnum]);
+	  if ((regcache->descr->sizeof_register[regnum]
+	       != REGISTER_RAW_SIZE (regnum))
+	      || (regcache->descr->sizeof_register[regnum]
+		  != REGISTER_VIRTUAL_SIZE (regnum))
+	      || (regcache->descr->sizeof_register[regnum]
+		  != TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (regnum)))
+	      )
+	    {
+	      if (!footnote_register_size)
+		footnote_register_size = ++footnote_nr;
+	      fprintf_unfiltered (file, "*%d", footnote_register_size);
+	    }
+	  else
+	    fprintf_unfiltered (file, " ");
+	}
+
+      /* Type.  */
+      if (regnum < 0)
+	fprintf_unfiltered (file, " %-20s", "Type");
+      else
+	{
+	  static const char blt[] = "builtin_type";
+	  const char *t = TYPE_NAME (REGISTER_VIRTUAL_TYPE (regnum));
+	  if (t == NULL)
+	    {
+	      char *n;
+	      if (!footnote_register_type_name_null)
+		footnote_register_type_name_null = ++footnote_nr;
+	      xasprintf (&n, "*%d", footnote_register_type_name_null);
+	      make_cleanup (xfree, n);
+	      t = n;
+	    }
+	  /* Chop a leading builtin_type.  */
+	  if (strncmp (t, blt, strlen (blt)) == 0)
+	    t += strlen (blt);
+	  fprintf_unfiltered (file, " %-20s", t);
+	}
+
+      /* Value, raw.  */
+      if (what_to_dump == regcache_dump_raw)
+	{
+	  if (regnum < 0)
+	    fprintf_unfiltered (file, "Raw value");
+	  else if (regnum >= regcache->descr->nr_raw_registers)
+	    fprintf_unfiltered (file, "<cooked>");
+	  else if (!regcache_valid_p (regcache, regnum))
+	    fprintf_unfiltered (file, "<invalid>");
+	  else
+	    {
+	      regcache_raw_read (regcache, regnum, buf);
+	      fprintf_unfiltered (file, "0x");
+	      dump_endian_bytes (file, TARGET_BYTE_ORDER, buf,
+				 REGISTER_RAW_SIZE (regnum));
+	    }
+	}
+
+      /* Value, cooked.  */
+      if (what_to_dump == regcache_dump_cooked)
+	{
+	  if (regnum < 0)
+	    fprintf_unfiltered (file, "Cooked value");
+	  else
+	    {
+	      regcache_cooked_read (regcache, regnum, buf);
+	      fprintf_unfiltered (file, "0x");
+	      dump_endian_bytes (file, TARGET_BYTE_ORDER, buf,
+				 REGISTER_VIRTUAL_SIZE (regnum));
+	    }
+	}
+
+      fprintf_unfiltered (file, "\n");
+    }
+
+  if (footnote_register_size)
+    fprintf_unfiltered (file, "*%d: Inconsistent register sizes.\n",
+			footnote_register_size);
+  if (footnote_register_offset)
+    fprintf_unfiltered (file, "*%d: Inconsistent register offsets.\n",
+			footnote_register_offset);
+  if (footnote_register_type_name_null)
+    fprintf_unfiltered (file, 
+			"*%d: Register type's name NULL.\n",
+			footnote_register_type_name_null);
+  do_cleanups (cleanups);
+}
+
+static void
+regcache_print (char *args, enum regcache_dump_what what_to_dump)
+{
+  if (args == NULL)
+    regcache_dump (current_regcache, gdb_stdout, what_to_dump);
+  else
+    {
+      struct ui_file *file = gdb_fopen (args, "w");
+      if (file == NULL)
+	perror_with_name ("maintenance print architecture");
+      regcache_dump (current_regcache, file, what_to_dump);    
+      ui_file_delete (file);
+    }
+}
+
+static void
+maintenance_print_registers (char *args, int from_tty)
+{
+  regcache_print (args, regcache_dump_none);
+}
+
+static void
+maintenance_print_raw_registers (char *args, int from_tty)
+{
+  regcache_print (args, regcache_dump_raw);
+}
+
+static void
+maintenance_print_cooked_registers (char *args, int from_tty)
+{
+  regcache_print (args, regcache_dump_cooked);
+}
+
 void
 _initialize_regcache (void)
 {
@@ -1201,4 +1433,21 @@ _initialize_regcache (void)
    /* Initialize the thread/process associated with the current set of
       registers.  For now, -1 is special, and means `no current process'.  */
   registers_ptid = pid_to_ptid (-1);
+
+  add_cmd ("registers", class_maintenance,
+	   maintenance_print_registers,
+	   "Print the internal register configuration.\
+Takes an optional file parameter.",
+	   &maintenanceprintlist);
+  add_cmd ("raw-registers", class_maintenance,
+	   maintenance_print_raw_registers,
+	   "Print the internal register configuration including raw values.\
+Takes an optional file parameter.",
+	   &maintenanceprintlist);
+  add_cmd ("cooked-registers", class_maintenance,
+	   maintenance_print_cooked_registers,
+	   "Print the internal register configuration including cooked values.\
+Takes an optional file parameter.",
+	   &maintenanceprintlist);
+
 }
