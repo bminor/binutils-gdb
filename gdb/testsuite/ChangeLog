@@ -1,3 +1,8 @@
+2003-02-27  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/restore.c (main): Return zero, so exit code 
+	will be consistant.
+
 2003-02-26  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/templates.exp (do_tests): KFAIL the "print Foo<volatile
@@ -153,6 +158,8 @@
 
 2003-01-29  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.base/maint.exp: Allow for leading underscore in symbol.
+	* gdb.base/display.exp: Allow for leading underscore in symbol.
 	* gdb.base/args.exp: Skip if target does not support args passing.
 
 2003-01-22  Daniel Jacobowitz  <drow@mvista.com>
