@@ -304,9 +304,9 @@ gdbsim_fetch_register (int regno)
       {
 	/* For moment treat a `does not exist' register the same way
            as an ``unavailable'' register.  */
-	char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+	char buf[MAX_REGISTER_SIZE];
 	int nr_bytes;
-	memset (buf, 0, MAX_REGISTER_RAW_SIZE);
+	memset (buf, 0, MAX_REGISTER_SIZE);
 	supply_register (regno, buf);
 	set_register_cached (regno, -1);
 	break;
@@ -314,10 +314,10 @@ gdbsim_fetch_register (int regno)
     default:
       {
 	static int warn_user = 1;
-	char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+	char buf[MAX_REGISTER_SIZE];
 	int nr_bytes;
 	gdb_assert (regno >= 0 && regno < NUM_REGS);
-	memset (buf, 0, MAX_REGISTER_RAW_SIZE);
+	memset (buf, 0, MAX_REGISTER_SIZE);
 	nr_bytes = sim_fetch_register (gdbsim_desc,
 				       REGISTER_SIM_REGNO (regno),
 				       buf, REGISTER_RAW_SIZE (regno));

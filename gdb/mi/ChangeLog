@@ -1,5 +1,10 @@
 2003-05-08  Andrew Cagney  <cagney@redhat.com>
 
+	* mi-main.c (register_changed_p): Use MAX_REGISTER_SIZE instead of
+	MAX_REGISTER_RAW_SIZE.
+
+2003-05-08  Andrew Cagney  <cagney@redhat.com>
+
 	* mi-main.c (get_register): Use MAX_REGISTER_SIZE.
 
 2003-05-05  Andrew Cagney  <cagney@redhat.com>

@@ -480,7 +480,7 @@ value_assign (struct value *toval, struct value *fromval)
 {
   register struct type *type;
   struct value *val;
-  char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
   int use_buffer = 0;
   struct frame_id old_frame;
 
@@ -634,8 +634,7 @@ value_assign (struct value *toval, struct value *fromval)
 	  amount_to_copy = byte_offset + TYPE_LENGTH (type);
 
 	/* And a bounce buffer.  Be slightly over generous.  */
-	buffer = (char *) alloca (amount_to_copy
-				  + MAX_REGISTER_RAW_SIZE);
+	buffer = (char *) alloca (amount_to_copy + MAX_REGISTER_SIZE);
 
 	/* Copy it in.  */
 	for (regno = reg_offset, amount_copied = 0;
@@ -963,7 +962,7 @@ CORE_ADDR
 push_word (CORE_ADDR sp, ULONGEST word)
 {
   register int len = DEPRECATED_REGISTER_SIZE;
-  char *buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char buffer[MAX_REGISTER_SIZE]);
 
   store_unsigned_integer (buffer, len, word);
   if (INNER_THAN (1, 2))

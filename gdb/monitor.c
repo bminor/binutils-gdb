@@ -1181,9 +1181,9 @@ monitor_fetch_register (int regno)
   char *regbuf;
   int i;
 
-  regbuf  = alloca (MAX_REGISTER_RAW_SIZE * 2 + 1);
-  zerobuf = alloca (MAX_REGISTER_RAW_SIZE);
-  memset (zerobuf, 0, MAX_REGISTER_RAW_SIZE);
+  regbuf  = alloca (MAX_REGISTER_SIZE * 2 + 1);
+  zerobuf = alloca (MAX_REGISTER_SIZE);
+  memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   if (current_monitor->regname != NULL)
     name = current_monitor->regname (regno);

@@ -1739,7 +1739,7 @@ frame_initial_stack_address (struct frame_info *fi)
   /* There is an alloca register, use its value, in the current frame,
      as the initial stack pointer.  */
   {
-    char *tmpbuf = alloca (MAX_REGISTER_RAW_SIZE);
+    char tmpbuf[MAX_REGISTER_SIZE];
     if (frame_register_read (fi, fdata.alloca_reg, tmpbuf))
       {
 	get_frame_extra_info (fi)->initial_sp
@@ -1921,7 +1921,7 @@ e500_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   int base_regnum;
   int offset = 0;
-  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char temp_buffer[MAX_REGISTER_SIZE];
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   if (reg_nr >= tdep->ppc_gp0_regnum 
@@ -1944,7 +1944,7 @@ e500_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   int base_regnum;
   int offset = 0;
-  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char temp_buffer[MAX_REGISTER_SIZE];
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   if (reg_nr >= tdep->ppc_gp0_regnum 

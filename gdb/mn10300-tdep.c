@@ -1010,7 +1010,7 @@ mn10300_dwarf2_reg_to_regnum (int dwarf2)
 static void
 mn10300_print_register (const char *name, int regnum, int reg_width)
 {
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
 
   if (reg_width)
     printf_filtered ("%*s: ", reg_width, name);

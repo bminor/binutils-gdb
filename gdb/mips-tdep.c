@@ -245,7 +245,7 @@ mips_xfer_register (struct regcache *regcache, int reg_num, int length,
 		    enum bfd_endian endian, bfd_byte *in, const bfd_byte *out,
 		    int buf_offset)
 {
-  bfd_byte *reg = alloca (MAX_REGISTER_RAW_SIZE);
+  bfd_byte reg[MAX_REGISTER_SIZE];
   int reg_offset = 0;
   /* Need to transfer the left or right part of the register, based on
      the targets byte order.  */
@@ -1642,7 +1642,7 @@ read_next_frame_reg (struct frame_info *fi, int regno)
   CORE_ADDR addr;
   int realnum;
   enum lval_type lval;
-  void *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
 
   if (fi == NULL)
     {
@@ -2751,7 +2751,7 @@ mips_eabi_push_arguments (int nargs,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       char *val;
-      char *valbuf = alloca (MAX_REGISTER_RAW_SIZE);
+      char valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -3002,7 +3002,7 @@ mips_n32n64_push_arguments (int nargs,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       char *val;
-      char *valbuf = alloca (MAX_REGISTER_RAW_SIZE);
+      char valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -3225,7 +3225,7 @@ mips_o32_push_arguments (int nargs,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       char *val;
-      char *valbuf = alloca (MAX_REGISTER_RAW_SIZE);
+      char valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -3524,7 +3524,7 @@ mips_o64_push_arguments (int nargs,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       char *val;
-      char *valbuf = alloca (MAX_REGISTER_RAW_SIZE);
+      char valbuf[MAX_REGISTER_SIZE];
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
       int len = TYPE_LENGTH (arg_type);
@@ -4044,7 +4044,7 @@ mips_print_fp_register (int regnum)
 static void
 mips_print_register (int regnum, int all)
 {
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
   int offset;
 
   if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
@@ -4100,7 +4100,7 @@ static int
 do_gp_register_row (int regnum)
 {
   /* do values for GP (int) regs */
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
   int ncols = (MIPS_REGSIZE == 8 ? 4 : 8);	/* display cols per row */
   int col, byte;
   int start_regnum = regnum;
@@ -4603,7 +4603,7 @@ mips_o64_extract_return_value (struct type *valtype,
 static void
 mips_eabi_store_return_value (struct type *valtype, char *valbuf)
 {
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
   struct return_value_word lo;
   struct return_value_word hi;
   return_value_location (valtype, &hi, &lo);
@@ -4625,7 +4625,7 @@ mips_eabi_store_return_value (struct type *valtype, char *valbuf)
 static void
 mips_o64_store_return_value (struct type *valtype, char *valbuf)
 {
-  char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char raw_buffer[MAX_REGISTER_SIZE];
   struct return_value_word lo;
   struct return_value_word hi;
   return_value_location (valtype, &hi, &lo);
@@ -4707,7 +4707,7 @@ mips_o32_xfer_return_value (struct type *type,
       /* A struct that contains one or two floats.  Each value is part
          in the least significant part of their floating point
          register..  */
-      bfd_byte *reg = alloca (MAX_REGISTER_RAW_SIZE);
+      bfd_byte reg[MAX_REGISTER_SIZE];
       int regnum;
       int field;
       for (field = 0, regnum = FP0_REGNUM;
@@ -4819,7 +4819,7 @@ mips_n32n64_xfer_return_value (struct type *type,
       /* A struct that contains one or two floats.  Each value is part
          in the least significant part of their floating point
          register..  */
-      bfd_byte *reg = alloca (MAX_REGISTER_RAW_SIZE);
+      bfd_byte reg[MAX_REGISTER_SIZE];
       int regnum;
       int field;
       for (field = 0, regnum = FP0_REGNUM;

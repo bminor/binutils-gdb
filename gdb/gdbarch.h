@@ -802,9 +802,9 @@ extern void set_gdbarch_register_raw_size (struct gdbarch *gdbarch, gdbarch_regi
 #endif
 #endif
 
-/* The methods DEPRECATED_MAX_REGISTER_RAW_SIZE, MAX_REGISTER_RAW_SIZE,
-   DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE, and MAX_REGISTER_VIRTUAL_SIZE
-   are all being replaced by MAX_REGISTER_SIZE (a constant). */
+/* The methods DEPRECATED_MAX_REGISTER_RAW_SIZE and
+   DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE are all being replaced by
+   MAX_REGISTER_SIZE (a constant). */
 
 #if defined (DEPRECATED_MAX_REGISTER_RAW_SIZE)
 /* Legacy for systems yet to multi-arch DEPRECATED_MAX_REGISTER_RAW_SIZE */
@@ -862,9 +862,9 @@ extern void set_gdbarch_register_virtual_size (struct gdbarch *gdbarch, gdbarch_
 #endif
 #endif
 
-/* The methods DEPRECATED_MAX_REGISTER_RAW_SIZE, MAX_REGISTER_RAW_SIZE,
-   DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE, and MAX_REGISTER_VIRTUAL_SIZE
-   are all being replaced by MAX_REGISTER_SIZE (a constant). */
+/* The methods DEPRECATED_MAX_REGISTER_RAW_SIZE and
+   DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE are all being replaced by
+   MAX_REGISTER_SIZE (a constant). */
 
 #if defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE)
 /* Legacy for systems yet to multi-arch DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE */

@@ -1259,7 +1259,7 @@ ia64_get_saved_register (char *raw_buffer,
     }
   else if (IA64_PR0_REGNUM <= regnum && regnum <= IA64_PR63_REGNUM)
     {
-      char *pr_raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+      char pr_raw_buffer[MAX_REGISTER_SIZE];
       int  pr_optim;
       enum lval_type pr_lval;
       CORE_ADDR pr_addr;
@@ -1282,7 +1282,7 @@ ia64_get_saved_register (char *raw_buffer,
     }
   else if (IA64_NAT0_REGNUM <= regnum && regnum <= IA64_NAT31_REGNUM)
     {
-      char *unat_raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
+      char unat_raw_buffer[MAX_REGISTER_SIZE];
       int  unat_optim;
       enum lval_type unat_lval;
       CORE_ADDR unat_addr;

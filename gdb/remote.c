@@ -2948,7 +2948,7 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 	case 'T':		/* Status with PC, SP, FP, ... */
 	  {
 	    int i;
-	    char* regs = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+	    char regs[MAX_REGISTER_SIZE];
 
 	    /* Expedited reply, containing Signal, {regno, reg} repeat */
 	    /*  format is:  'Tssn...:r...;n...:r...;n...:r...;#cc', where
@@ -3199,7 +3199,7 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 	case 'T':		/* Status with PC, SP, FP, ... */
 	  {
 	    int i;
-	    char* regs = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+	    char regs[MAX_REGISTER_SIZE];
 
 	    /* Expedited reply, containing Signal, {regno, reg} repeat */
 	    /*  format is:  'Tssn...:r...;n...:r...;n...:r...;#cc', where
@@ -3546,7 +3546,7 @@ store_register_using_P (int regnum)
   struct packet_reg *reg = packet_reg_from_regnum (rs, regnum);
   /* Try storing a single register.  */
   char *buf = alloca (rs->remote_packet_size);
-  char *regp = alloca (MAX_REGISTER_RAW_SIZE);
+  char regp[MAX_REGISTER_SIZE];
   char *p;
   int i;
 

@@ -1640,7 +1640,7 @@ debug_print_register (const char * func, int regno)
   if (regno >= 0)
     {
       int i;
-      unsigned char *buf = alloca (MAX_REGISTER_RAW_SIZE);
+      unsigned char buf[MAX_REGISTER_SIZE];
       deprecated_read_register_gen (regno, buf);
       fprintf_unfiltered (gdb_stdlog, " = ");
       for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)

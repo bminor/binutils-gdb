@@ -483,16 +483,16 @@ F::REGISTER_BYTE:int:register_byte:int reg_nr:reg_nr::generic_register_byte:gene
 # The methods REGISTER_VIRTUAL_TYPE, REGISTER_VIRTUAL_SIZE and
 # REGISTER_RAW_SIZE are all being replaced by REGISTER_TYPE.
 f:2:REGISTER_RAW_SIZE:int:register_raw_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
-# The methods DEPRECATED_MAX_REGISTER_RAW_SIZE, MAX_REGISTER_RAW_SIZE,
-# DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE, and MAX_REGISTER_VIRTUAL_SIZE
-# are all being replaced by MAX_REGISTER_SIZE (a constant).
+# The methods DEPRECATED_MAX_REGISTER_RAW_SIZE and
+# DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE are all being replaced by
+# MAX_REGISTER_SIZE (a constant).
 V:2:DEPRECATED_MAX_REGISTER_RAW_SIZE:int:deprecated_max_register_raw_size
 # The methods REGISTER_VIRTUAL_TYPE, REGISTER_VIRTUAL_SIZE and
 # REGISTER_RAW_SIZE are all being replaced by REGISTER_TYPE.
 f:2:REGISTER_VIRTUAL_SIZE:int:register_virtual_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
-# The methods DEPRECATED_MAX_REGISTER_RAW_SIZE, MAX_REGISTER_RAW_SIZE,
-# DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE, and MAX_REGISTER_VIRTUAL_SIZE
-# are all being replaced by MAX_REGISTER_SIZE (a constant).
+# The methods DEPRECATED_MAX_REGISTER_RAW_SIZE and
+# DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE are all being replaced by
+# MAX_REGISTER_SIZE (a constant).
 V:2:DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE:int:deprecated_max_register_virtual_size
 # The methods REGISTER_VIRTUAL_TYPE, REGISTER_VIRTUAL_SIZE and
 # REGISTER_RAW_SIZE are all being replaced by REGISTER_TYPE.

@@ -1097,7 +1097,7 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   if (i386_mmx_regnum_p (regnum))
     {
-      char *mmx_buf = alloca (MAX_REGISTER_RAW_SIZE);
+      char mmx_buf[MAX_REGISTER_SIZE];
       int fpnum = i386_mmx_regnum_to_fp_regnum (regcache, regnum);
 
       /* Extract (always little endian).  */
@@ -1114,7 +1114,7 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   if (i386_mmx_regnum_p (regnum))
     {
-      char *mmx_buf = alloca (MAX_REGISTER_RAW_SIZE);
+      char mmx_buf[MAX_REGISTER_SIZE];
       int fpnum = i386_mmx_regnum_to_fp_regnum (regcache, regnum);
 
       /* Read ...  */

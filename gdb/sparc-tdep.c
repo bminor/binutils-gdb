@@ -317,9 +317,7 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
      deprecated_read_fp() to create_new_frame.  */
   if (get_next_frame (fi))
     {
-      char *buf;
-
-      buf = alloca (MAX_REGISTER_RAW_SIZE);
+      char buf[MAX_REGISTER_SIZE];
 
       /* Compute ->frame as if not flat.  If it is flat, we'll change
          it later.  */
@@ -368,9 +366,7 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	      && X_OP3 (insn) == 4
 	      && X_RS1 (insn) == 14)
 	    {
-	      char *buf;
-	      
-	      buf = alloca (MAX_REGISTER_RAW_SIZE);
+	      char buf[MAX_REGISTER_SIZE];
 
 	      /* We definitely have a flat frame now.  */
 	      get_frame_extra_info (fi)->flat = 1;
@@ -474,10 +470,9 @@ sparc_extract_struct_value_address (char *regbuf)
 CORE_ADDR
 sparc_frame_saved_pc (struct frame_info *frame)
 {
-  char *buf;
+  char buf[MAX_REGISTER_SIZE];
   CORE_ADDR addr;
 
-  buf = alloca (MAX_REGISTER_RAW_SIZE);
   if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     {
       /* This is the signal trampoline frame.
@@ -2311,9 +2306,7 @@ void
 sparc_store_return_value (struct type *type, char *valbuf)
 {
   int regno;
-  char *buffer;
-
-  buffer = alloca (MAX_REGISTER_RAW_SIZE);
+  char buffer[MAX_REGISTER_SIZE];
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT && SPARC_HAS_FPU)
     /* Floating-point values are returned in the register pair */

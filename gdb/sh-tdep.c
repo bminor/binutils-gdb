@@ -3481,7 +3481,7 @@ sh_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			 int reg_nr, void *buffer)
 {
   int base_regnum, portion;
-  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char temp_buffer[MAX_REGISTER_SIZE];
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   if (reg_nr >= tdep->DR0_REGNUM 
@@ -3520,7 +3520,7 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   int base_regnum;
   int portion;
   int offset = 0;
-  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char temp_buffer[MAX_REGISTER_SIZE];
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   if (reg_nr >= tdep->DR0_REGNUM 
@@ -3684,7 +3684,7 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			  int reg_nr, const void *buffer)
 {
   int base_regnum, portion;
-  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char temp_buffer[MAX_REGISTER_SIZE];
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   if (reg_nr >= tdep->DR0_REGNUM
@@ -3721,7 +3721,7 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   int base_regnum, portion;
   int offset;
-  char *temp_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+  char temp_buffer[MAX_REGISTER_SIZE];
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (reg_nr >= tdep->DR0_REGNUM

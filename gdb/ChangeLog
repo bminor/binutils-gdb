@@ -1,5 +1,21 @@
 2003-05-08  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh: Delete references to MAX_REGISTER_RAW_SIZE.
+	* gdbarch.h: Re-generate.
+	* defs.h (MAX_REGISTER_RAW_SIZE): Delete macro.
+	(legacy_max_register_raw_size): Delete declaration.
+	* regcache.c (legacy_max_register_raw_size): Delete function.
+	* valops.c: Replace MAX_REGISTER_RAW_SIZE with MAX_REGISTER_SIZE.
+	* target.c, stack.c, sparc-tdep.c, sh-tdep.c: Ditto.
+	* rs6000-tdep.c, rs6000-nat.c, remote.c, remote-sim.c: Ditto.
+	* remote-rdp.c, remote-array.c, regcache.c: Ditto.
+	* ppc-linux-nat.c, monitor.c, mn10300-tdep.c: Ditto.
+	* mips-tdep.c, mips-linux-tdep.c, m68klinux-nat.c: Ditto.
+	* infptrace.c, ia64-tdep.c, i386-tdep.c, frame.c: Ditto.
+	* findvar.c, dwarf2cfi.c: Ditto.
+
+2003-05-08  Andrew Cagney  <cagney@redhat.com>
+
 	* mips-tdep.c (read_signed_register): New function, moved to here
 	from "regcache.c".
 	(read_signed_register_pid): Ditto.

@@ -297,15 +297,6 @@ max_register_size (struct gdbarch *gdbarch)
 }
 
 int
-legacy_max_register_raw_size (void)
-{
-  if (DEPRECATED_MAX_REGISTER_RAW_SIZE_P ())
-    return DEPRECATED_MAX_REGISTER_RAW_SIZE;
-  else
-    return max_register_size (current_gdbarch);
-}
-
-int
 register_size (struct gdbarch *gdbarch, int regnum)
 {
   struct regcache_descr *descr = regcache_descr (gdbarch);
@@ -676,7 +667,7 @@ deprecated_read_register_bytes (int in_start, char *in_buf, int in_len)
 {
   int in_end = in_start + in_len;
   int regnum;
-  char *reg_buf = alloca (MAX_REGISTER_RAW_SIZE);
+  char reg_buf[MAX_REGISTER_SIZE];
 
   /* See if we are trying to read bytes from out-of-date registers.  If so,
      update just those registers.  */
@@ -1066,7 +1057,7 @@ deprecated_write_register_bytes (int myregstart, char *myaddr, int inlen)
       /* The register partially overlaps the range being written.  */
       else
 	{
-	  char *regbuf = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+	  char regbuf[MAX_REGISTER_SIZE];
 	  /* What's the overlap between this register's bytes and
              those the caller wants to write?  */
 	  int overlapstart = max (regstart, myregstart);

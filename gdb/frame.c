@@ -618,7 +618,7 @@ void
 frame_unwind_signed_register (struct frame_info *frame, int regnum,
 			      LONGEST *val)
 {
-  void *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  char buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
   (*val) = extract_signed_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
 }
@@ -627,7 +627,7 @@ void
 frame_unwind_unsigned_register (struct frame_info *frame, int regnum,
 				ULONGEST *val)
 {
-  void *buf = alloca (MAX_REGISTER_RAW_SIZE);
+  char buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
   (*val) = extract_unsigned_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
 }

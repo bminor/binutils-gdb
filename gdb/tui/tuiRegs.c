@@ -489,7 +489,7 @@ tuiCheckRegisterValues (struct frame_info *frame)
       else
 	{
 	  int i, j;
-	  char rawBuf[MAX_REGISTER_RAW_SIZE];
+	  char rawBuf[MAX_REGISTER_SIZE];
 
 	  for (i = 0;
 	       (i < dataWin->detail.dataDisplayInfo.regsContentCount); i++)
@@ -766,7 +766,7 @@ _tuiRegValueHasChanged (TuiDataElementPtr dataElement,
   if (dataElement->itemNo != UNDEFINED_ITEM &&
       _tuiRegisterName (dataElement->itemNo) != (char *) NULL)
     {
-      char rawBuf[MAX_REGISTER_RAW_SIZE];
+      char rawBuf[MAX_REGISTER_SIZE];
       int i;
 
       if (_tuiGetRegisterRawValue (
@@ -830,7 +830,7 @@ _tuiSetRegisterElement (int regNum, struct frame_info *frame,
 	  dataElement->highlight = FALSE;
 	}
       if (dataElement->value == (Opaque) NULL)
-	dataElement->value = (Opaque) xmalloc (MAX_REGISTER_RAW_SIZE);
+	dataElement->value = (Opaque) xmalloc (MAX_REGISTER_SIZE);
       if (dataElement->value != (Opaque) NULL)
 	_tuiGetRegisterRawValue (regNum, dataElement->value, frame);
     }

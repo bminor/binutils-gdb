@@ -1091,22 +1091,6 @@ extern void *alloca ();
 
 enum { MAX_REGISTER_SIZE = 16 };
 
-/* FIXME: cagney/2003-03-01: Hack to prop up old targets while they
-   migrate to the overhauled register cache.
-
-   The problem is that some architectures specify different sized raw
-   and cooked (nee virtual) register sizes.  They shouldn't.  Instead,
-   all architectures should just implement a gdbarch_register_type().
-   That can be used to compute all needed register attributes.  While
-   waiting for the conversion, provide compatibility macros that keep
-   old code working.  */
-
-#ifdef MAX_REGISTER_RAW_SIZE
-#error MAX_REGISTER_RAW_SIZE defined
-#endif
-extern int legacy_max_register_raw_size (void);
-#define MAX_REGISTER_RAW_SIZE legacy_max_register_raw_size ()
-
 /* Static target-system-dependent parameters for GDB. */
 
 /* Number of bits in a char or unsigned char for the target machine.
