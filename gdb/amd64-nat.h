@@ -22,6 +22,8 @@
 #ifndef AMD64_NAT_H
 #define AMD64_NAT_H 1
 
+struct regcache;
+
 /* General-purpose register set description for native 32-bit code.  */
 extern int *amd64_native_gregset32_reg_offset;
 extern int amd64_native_gregset32_num_regs;

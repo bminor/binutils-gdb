@@ -1,5 +1,7 @@
 2003-08-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64-nat.h (struct regcache): Add opaque declaration.
+
 	* i386-linux-tdep.h (I386_LINUX_NUM_REGS): New define.
 	* x86-64-linux-nat.c: Include "i386-linux-tdep.h" and "amd64.h".
 	Change "register array" to "register cache" in comments.
