@@ -1,3 +1,8 @@
+2000-03-28  Christopher Faylor  <cgf@cygnus.com>
+
+        * partial-stab.h: Add one more check against corrupted or irregular
+        stabs entry.
+
 Tue Mar 28 12:23:37 2000  Philippe De Muyter  <phdm@macqel.be>
 
 	* gnu-regex.c (regerror): Function renamed from `__regerror'.
