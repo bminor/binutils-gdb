@@ -18,7 +18,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	BYTES_IN_WORD	4
-#define	ARCH	32
 
 /* ZMAGIC files never have the header in the text.  */
 #define	N_HEADER_IN_TEXT(x)	0

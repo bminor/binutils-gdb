@@ -1,3 +1,11 @@
+Tue Jul 12 11:41:22 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* aout-encap.c (ARCH): Don't define.  Obsolete.
+	* aout0.c, aoutx.h, gen-aout.c, hp300bsd.c, hp300hpux.c: Likewise.
+	* i386aout.c, i386bsd.c, i386dynix.c, i386linux.c: Likewise.
+	* i386lynx.c, m68klynx.c, mipsbsd.c, netbsd386.c: Likewise.
+	* newsos3.c, sparclynx.c, sunos.c: Likewise.
+
 Mon Jul 11 20:08:23 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* section.c (STD_SECTION): Make the sixth argument boolean, not

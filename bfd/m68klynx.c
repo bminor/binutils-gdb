@@ -18,7 +18,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define BYTES_IN_WORD 4
-#define ARCH 32
 #define N_SHARED_LIB(x) 0
 
 #define TEXT_START_ADDR 0

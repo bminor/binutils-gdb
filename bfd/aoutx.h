@@ -65,7 +65,6 @@ DESCRIPTION
 
 	from @file{sunos.c}:
 
-|	#define ARCH 32
 |	#define TARGET_NAME "a.out-sunos-big"
 |	#define VECNAME    sunos_big_vec
 |	#include "aoutf1.h"
