@@ -33,7 +33,7 @@ mh-svr4
 mh-sysv
 mt-a29k
 mt-ebmon29k
-
+mh-rs6000
 Do-last:
 
 echo Done in `pwd`.
@@ -41,7 +41,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.5  1991/11/05 20:58:27  sac
+# Revision 1.6  1991/11/05 21:16:30  sac
+# Added mh-rs6000
+#
+# Revision 1.5  1991/11/05  20:58:27  sac
 # renamed to make:
 # mh-delta88
 # mh-dgux
