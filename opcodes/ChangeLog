@@ -1,3 +1,9 @@
+Tue Jun 23 10:59:26 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* m10300-opc.c: Support one operand "asr", "lsr" and "asl"
+	instructions.  Support (sp) addressing mode by expanding it into
+	(0,sp).
+
 start-sanitize-am33
 Mon Jun 22 13:36:27 1998  Jeffrey A Law  (law@cygnus.com)
 
