@@ -20,7 +20,7 @@ extern int  EXFUN(abort,(void));
 extern int  EXFUN(free,(PTR));
 extern void EXFUN(bcopy,(char*,char*,int));
 extern void EXFUN(exit,(int));
-extern int  EXFUN(strtol());
+extern int  EXFUN(strtol,(char *, char **, int));
 extern void EXFUN(bzero,(char *, int));
 #define NO_STDARG 1
 extern int  EXFUN(abort,(void));
