@@ -1,3 +1,9 @@
+2003-04-17  Michael Snyder  <msnyder@redhat.com>
+	    Karen Bennet  <bennet@redhat.com>
+
+	Committed by Elena Zannoni  <ezannoni@redhat.com>
+	* gdb_gcore.sh: New script to create a core dump of a process.
+	
 2003-04-17  Elena Zannoni  <ezannoni@redhat.com>
 
 	* values.c (value_being_returned): Don't fetch the return
