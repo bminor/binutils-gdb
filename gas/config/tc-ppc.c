@@ -766,6 +766,11 @@ md_parse_option (c, arg)
 	  ppc_cpu = PPC_OPCODE_PPC;
 	  ppc_size = PPC_OPCODE_64;
 	}
+      else if (strcmp (arg, "ppc64bridge") == 0)
+	{
+	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_64_BRIDGE;
+	  ppc_size = PPC_OPCODE_64;
+	}
       /* -mcom means assemble for the common intersection between Power
 	 and PowerPC.  At present, we just allow the union, rather
 	 than the intersection.  */
@@ -872,6 +877,7 @@ PowerPC options:\n\
 -mppc, -mppc32, -m403, -m603, -m604\n\
 			generate code for Motorola PowerPC 603/604\n\
 -mppc64, -m620		generate code for Motorola PowerPC 620\n\
+-mppc64bridge		generate code for PowerPC 64, including bridge insns\n\
 -mcom			generate code Power/PowerPC common instructions\n\
 -many			generate code for any architecture (PWR/PWRX/PPC)\n\
 -mregnames		Allow symbolic names for registers\n\
@@ -972,7 +978,8 @@ md_begin ()
 
       if ((op->flags & ppc_cpu) != 0
 	  && ((op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64)) == 0
-	      || (op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64)) == ppc_size))
+	      || (op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64)) == ppc_size
+	      || (ppc_cpu & PPC_OPCODE_64_BRIDGE) != 0))
 	{
 	  const char *retval;
 
@@ -1056,8 +1063,7 @@ ppc_insert_operand (insn, operand, val, file, line)
 
       if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
 	{
-	  if ((operand->flags & PPC_OPERAND_SIGNOPT) != 0
-	      && ppc_size == PPC_OPCODE_32)
+	  if ((operand->flags & PPC_OPERAND_SIGNOPT) != 0)
 	    max = (1 << operand->bits) - 1;
 	  else
 	    max = (1 << (operand->bits - 1)) - 1;

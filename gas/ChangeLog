@@ -1,3 +1,9 @@
+Sat May  8 23:28:50 1999  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-ppc.c (md_parse_option): Recognize -mppc64bridge.
+	(md_begin): Allow ppc32 insns in ppc64bridge mode.
+	(ppc_insert_operand): Accept SIGNOPT in ppc64 mode.
+
 Thu May  6 23:13:39 1999  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-i386.c (i386_immediate): Skip whitespace before
