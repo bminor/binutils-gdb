@@ -595,7 +595,8 @@ value_coerce_array (arg1)
     error ("Attempt to take address of value not located in memory.");
 
   /* Get type of elements.  */
-  if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_ARRAY)
+  if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_ARRAY
+      || TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_STRING)
     type = TYPE_TARGET_TYPE (VALUE_TYPE (arg1));
   else
     /* A phony array made by value_repeat.
@@ -1747,7 +1748,19 @@ value_struct_elt_for_reference (domain, offset, curtype, name, intype)
 
   for (i = TYPE_NFN_FIELDS (t) - 1; i >= 0; --i)
     {
-      if (STREQ (TYPE_FN_FIELDLIST_NAME (t, i), name))
+      char *t_field_name = TYPE_FN_FIELDLIST_NAME (t, i);
+      char dem_opname[64];
+
+      if (strncmp(t_field_name, "__", 2)==0 ||
+	strncmp(t_field_name, "op", 2)==0 ||
+	strncmp(t_field_name, "type", 4)==0 )
+	{
+	  if (cplus_demangle_opname(t_field_name, dem_opname, DMGL_ANSI))
+	    t_field_name = dem_opname;
+	  else if (cplus_demangle_opname(t_field_name, dem_opname, 0))
+	    t_field_name = dem_opname; 
+	}
+      if (t_field_name && STREQ (t_field_name, name))
 	{
 	  int j = TYPE_FN_FIELDLIST_LENGTH (t, i);
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, i);
