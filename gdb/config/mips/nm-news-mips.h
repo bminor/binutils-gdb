@@ -19,6 +19,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+#ifndef NM_NEWS_MIPS_H
+#define NM_NEWS_MIPS_H 1
+
 /* Needed for RISC NEWS core files.  */
 #include <machine/machparam.h>
 #include <sys/types.h>
@@ -32,3 +35,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define	ONE_PROCESS_WRITETEXT
 
 #include "mips/nm-mips.h"
+
+/* Apparently not in <sys/types.h> */
+typedef int pid_t;
+
+#endif	/* NM_NEWS_MIPS_H */

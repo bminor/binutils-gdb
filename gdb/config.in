@@ -41,6 +41,9 @@
 /* Define if you have the getpagesize function.  */
 #undef HAVE_GETPAGESIZE
 
+/* Define if you have the setpgid function.  */
+#undef HAVE_SETPGID
+
 /* Define if you have the valloc function.  */
 #undef HAVE_VALLOC
 

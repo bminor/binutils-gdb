@@ -1,5 +1,5 @@
 /* Parameters for execution on a Sony/NEWS, for GDB, the GNU debugger.
-   Copyright 1987, 1989, 1992 Free Software Foundation, Inc.
+   Copyright 1987, 1989, 1992, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -17,4 +17,10 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* This file intentionally empty. */
+#ifndef NM_HEWS_H
+#define NM_NEWS_H 1
+
+/* Supply missing typedef needed in inftarg.c */
+typedef int pid_t;
+
+#endif	/* NM_NEWS_H */

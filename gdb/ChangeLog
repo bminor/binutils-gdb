@@ -1,3 +1,24 @@
+Thu Apr  4 20:16:55 1996  Fred Fish  <fnf@cygnus.com>
+
+	* configure.in: Check for setpgid function.
+	* config.in: Regenerate with autoheader.
+	* configure: Regenerate with autoconf.
+	* inflow.c (_initialize_inflow): Only try to use _SC_JOB_CONTROL
+	if it is actually defined.
+	(gdb_setpgid): Use HAVE_SETPGID.
+	* ch-exp.c: Change include of <string.h> to "gdb_string.h".
+	* c-exp.y: Ditto.
+	* f-exp.y: Ditto.
+	* m2-exp.y: Ditto.
+	* c-exp.y: Include <ctype.h>.
+	* serial.c: Ditto.
+	* config/m68k/nm-news.h: Add typedef for pid_t which is
+	apparently missing from <sys/types.h>.  Enclose entire
+	file in NM_NEWS_H ifndef and define when included.
+	* config/mips/nm-news-mips.h: Ditto.
+	* config/m68k/tm-m68k.h (REGISTER_CONVERT_TO_VIRTUAL,
+	REGISTER_CONVERT_TO_RAW): Change name of temporary variable.
+
 Thu Apr  4 19:04:18 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* arm-xdep.c: Move native-specific code to here from arm-tdep.c.
