@@ -91,7 +91,17 @@ ns32k)
 	esac
 	;;
 
-arm | vax | m88k | merlin | none | np1 | pn | pyramid | tahoe)	gdb_host=${host_cpu} ;;
+rtpc)
+	gdb_host=rtbsd
+	;;
+
+a29k)
+	gdb_host=ultra3
+	;;
+
+arm | vax | m88k | merlin | none | np1 | pn | pyramid | tahoe)
+	gdb_host=${host_cpu}
+	;;
 
 ### unhandled hosts
 #altosgas
@@ -152,11 +162,17 @@ m68030)
 	esac
 	;;
 
-none | tahoe | vax | np1 | pn | np1 | pn | pyramid | merlin | m88k)
+none | arm | tahoe | vax | np1 | pn | np1 | pn | pyramid | merlin | m88k)
 	gdb_target=${target_cpu} ;;
-a29k)	gdb_target=am29k ;;
-arm)	gdb_target=${target_cpu} ;;
 
+a29k)
+	case "${target_os}" in
+	none)	gdb_target=a29k ;;
+	sym1)	gdb_target=ultra3 ;;
+	kern)	gdb_target=a29k-kern ;;
+	esac
+	;;
+	
 mips)
 	case "${target_vendor}" in
 	sony)	gdb_target=bigmips ;;
