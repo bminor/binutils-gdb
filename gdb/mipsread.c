@@ -77,8 +77,6 @@ typedef struct mips_extra_func_info {
 
 #ifdef USG
 #include <sys/types.h>
-#define L_SET 0
-#define L_INCR 1
 #endif
 
 #include <sys/param.h>
@@ -350,6 +348,7 @@ static void
 mipscoff_new_init (ignore)
      struct objfile *ignore;
 {
+  sigtramp_address = 0;
   stabsread_new_init ();
   buildsym_new_init ();
 }
@@ -675,33 +674,6 @@ free_pending (f_idx)
 
 #endif
 
-static char *
-prepend_tag_kind (tag_name, type_code)
-     char *tag_name;
-     enum type_code type_code;
-{
-  char *prefix;
-  char *result;
-  switch (type_code)
-    {
-    case TYPE_CODE_ENUM:
-      prefix = "enum ";
-      break;
-    case TYPE_CODE_STRUCT:
-      prefix = "struct ";
-      break;
-    case TYPE_CODE_UNION:
-      prefix = "union ";
-      break;
-    default:
-      prefix = "";
-    }
-
-  result = (char *) obstack_alloc (&current_objfile->symbol_obstack,
-				   strlen (prefix) + strlen (tag_name) + 1);
-  sprintf (result, "%s%s", prefix, tag_name);
-  return result;
-}
 
 
 /* Parsing Routines proper. */
@@ -757,7 +729,17 @@ parse_symbol (sh, ax, ext_sh, bigend)
       class = LOC_STATIC;
       b = top_stack->cur_block;
       s = new_symbol (name);
-      SYMBOL_VALUE_ADDRESS (s) = (CORE_ADDR) sh->value;
+      if (sh->sc == scCommon)
+	{
+	  /* It is a FORTRAN common block.  At least for SGI Fortran the
+	     address is not in the symbol; we need to fix it later in
+	     scan_file_globals.  */
+	  int bucket = hashname (SYMBOL_NAME (s));
+	  SYMBOL_VALUE_CHAIN (s) = global_sym_chain[bucket];
+	  global_sym_chain[bucket] = s;
+	}
+      else
+	SYMBOL_VALUE_ADDRESS (s) = (CORE_ADDR) sh->value;
       goto data;
 
     case stLocal:		/* local variable, goes into current block */
@@ -797,14 +779,27 @@ parse_symbol (sh, ax, ext_sh, bigend)
       s = new_symbol (name);
 
       SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
-      if (sh->sc == scRegister)
+      switch (sh->sc)
 	{
-	  SYMBOL_CLASS (s) = LOC_REGPARM;
+	case scRegister:
+	  /* Pass by value in register.  */
+	  SYMBOL_CLASS(s) = LOC_REGPARM;
 	  if (sh->value > 31)
-	    sh->value += FP0_REGNUM - 32;
+	    sh->value += FP0_REGNUM-32;
+	  break;
+	case scVar:
+	  /* Pass by reference on stack.  */
+	  SYMBOL_CLASS(s) = LOC_REF_ARG;
+	  break;
+	case scVarRegister:
+	  /* Pass by reference in register.  */
+	  SYMBOL_CLASS(s) = LOC_REGPARM_ADDR;
+	  break;
+	default:
+	  /* Pass by value on stack.  */
+	  SYMBOL_CLASS(s) = LOC_ARG;
+	  break;
 	}
-      else
-	SYMBOL_CLASS (s) = LOC_ARG;
       SYMBOL_VALUE (s) = sh->value;
       SYMBOL_TYPE (s) = parse_type (ax + sh->index, 0, bigend);
       add_symbol (s, top_stack->cur_block);
@@ -903,7 +898,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	goto structured_common;
 
     case stBlock:		/* Either a lexical block, or some type */
-	if (sh->sc != scInfo)
+	if (sh->sc != scInfo && sh->sc != scCommon)
 	  goto case_stBlock_code;	/* Lexical block */
 
 	type_code = TYPE_CODE_UNDEF;	/* We have a type.  */
@@ -1021,8 +1016,10 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	if (pend != (struct mips_pending *) NULL)
 	  t = pend->t;
 	else
-	  t = new_type (prepend_tag_kind (name, type_code));
+	  t = new_type (NULL);
 
+	TYPE_TAG_NAME (t) = obconcat (&current_objfile->symbol_obstack,
+				      "", "", name);
 	TYPE_CODE (t) = type_code;
 	TYPE_LENGTH (t) = sh->value;
 	TYPE_NFIELDS (t) = nfields;
@@ -1091,7 +1088,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
       break;
 
     case stEnd:		/* end (of anything) */
-      if (sh->sc == scInfo)
+      if (sh->sc == scInfo || sh->sc == scCommon)
 	{
 	  /* Finished with type */
 	  top_stack->cur_type = 0;
@@ -1259,7 +1256,6 @@ parse_type (ax, bs, bigend)
   if (map_bt[t->bt])
     {
       tp = *map_bt[t->bt];
-      fmt = "%s";
     }
   else
     {
@@ -1269,27 +1265,21 @@ parse_type (ax, bs, bigend)
 	{
 	case btAdr:
 	  tp = lookup_pointer_type (builtin_type_void);
-	  fmt = "%s";
 	  break;
 	case btStruct:
 	  type_code = TYPE_CODE_STRUCT;
-	  fmt = "struct %s";
 	  break;
 	case btUnion:
 	  type_code = TYPE_CODE_UNION;
-	  fmt = "union %s";
 	  break;
 	case btEnum:
 	  type_code = TYPE_CODE_ENUM;
-	  fmt = "enum %s";
 	  break;
 	case btRange:
 	  type_code = TYPE_CODE_RANGE;
-	  fmt = "%s";
 	  break;
 	case btSet:
 	  type_code = TYPE_CODE_SET;
-	  fmt = "set %s";
 	  break;
 	case btTypedef:
 	default:
@@ -1323,24 +1313,49 @@ parse_type (ax, bs, bigend)
   /* All these types really point to some (common) MIPS type
      definition, and only the type-qualifiers fully identify
      them.  We'll make the same effort at sharing. */
-  if (t->bt == btIndirect ||
-      t->bt == btStruct ||
+  if (t->bt == btStruct ||
       t->bt == btUnion ||
       t->bt == btEnum ||
-      t->bt == btTypedef ||
-      t->bt == btRange ||
+
+      /* btSet (I think) implies that the name is a tag name, not a typedef
+	 name.  This apparently is a MIPS extension for C sets.  */
       t->bt == btSet)
     {
-      char name[256], *pn;
+      char *name;
 
       /* Try to cross reference this type */
-      ax += cross_ref (ax, &tp, type_code, &pn, bigend);
+      ax += cross_ref (ax, &tp, type_code, &name, bigend);
       /* reading .o file ? */
       if (tp == (struct type *) NULL)
 	tp = init_type (type_code, 0, 0, (char *) NULL,
 			(struct objfile *) NULL);
-      /* SOMEONE OUGHT TO FIX DBXREAD TO DROP "STRUCT" */
-      sprintf (name, fmt, pn);
+
+      /* Usually, TYPE_CODE(tp) is already type_code.  The main
+	 exception is if we guessed wrong re struct/union/enum. */
+      if (TYPE_CODE (tp) != type_code)
+	{
+	  complain (&bad_tag_guess_complaint, name);
+	  TYPE_CODE (tp) = type_code;
+	}
+      if (TYPE_TAG_NAME (tp) == NULL || !STREQ (TYPE_TAG_NAME (tp), name))
+	TYPE_TAG_NAME (tp) = obsavestring (name, strlen (name),
+					   &current_objfile->type_obstack);
+    }
+
+  /* All these types really point to some (common) MIPS type
+     definition, and only the type-qualifiers fully identify
+     them.  We'll make the same effort at sharing. */
+  if (t->bt == btIndirect ||
+      t->bt == btRange)
+    {
+      char *name;
+
+      /* Try to cross reference this type */
+      ax += cross_ref (ax, &tp, type_code, &name, bigend);
+      /* reading .o file ? */
+      if (tp == (struct type *) NULL)
+	tp = init_type (type_code, 0, 0, (char *) NULL,
+			(struct objfile *) NULL);
 
       /* Usually, TYPE_CODE(tp) is already type_code.  The main
 	 exception is if we guessed wrong re struct/union/enum. */
@@ -2103,7 +2118,7 @@ parse_partial_symbols (objfile, section_offsets)
 		case stStruct:
 		case stEnum:
 		case stBlock:	/* { }, str, un, enum*/
-		  if (sh.sc == scInfo)
+		  if (sh.sc == scInfo || sh.sc == scCommon)
 		    {
 		      ADD_PSYMBOL_TO_LIST (name, strlen (name),
 					   STRUCT_NAMESPACE, LOC_TYPEDEF,
