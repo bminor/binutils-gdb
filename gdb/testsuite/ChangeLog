@@ -1,3 +1,7 @@
+Wed Jan  6 13:50:57 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/default.exp: Reflect wording change in remote.c.
+
 Tue Jan  5 19:14:51 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* gdb.base/help.exp: Update to reflect current text.
