@@ -461,9 +461,14 @@ uninstall: force
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 init.c: munch $(OBS) $(TSOBS)
-	$(srcdir)/munch $(MUNCH_DEFINE) $(OBS) $(TSOBS) > init.c
+	$(srcdir)/munch $(MUNCH_DEFINE) $(OBS) $(TSOBS) > init.c-new
+	mv init.c-new init.c
 
+.PRECIOUS: init.c
+
+# Removing the old gdb first works better if it is running, at least on SunOS.
 gdb: $(OBS) $(TSOBS) $(ADD_DEPS) $(CDEPS) init.o
+	rm -f gdb
 	$(CC-LD) $(GLOBAL_CFLAGS) $(LDFLAGS) -o gdb \
 	  init.o $(OBS) $(TSOBS) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
 

@@ -1,5 +1,8 @@
 Tue Jul  6 11:51:18 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* Makefile.in: Remove gdb before creating a new one.
+	Update init.c atomically.
+
 	* Makefile.in (ALLPARAM): Add config/{alpha/xm-alpha.h,pa/xm-pa.h}.
 	(ALLCONFIG): Add config/alpha/alpha-osf1.mh.
 
