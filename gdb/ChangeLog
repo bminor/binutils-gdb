@@ -1,3 +1,18 @@
+2001-07-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* lin-lwp.c (count_events_callback): Fix formatting.  Turn check
+	commented with "paranoia" into gdb_assert.
+	(select_event_lwp_callback): Likewise.
+	(cancel_breakpoints_callback): Bail out early if LP is the event
+	LWP.  Add comment about backup up breakpoints.  Fix formatting and
+	debug message.
+	(select_event_lwp): Make solely repsonsible for switching event
+	LWP.  Fix formatting and remove bogus "ERROR" debug message.
+	Don't backup breakpoints from here.
+	(lin_lwp_wait): Don't touch LP->status, let select_event_lwp
+	handle that.  Only call select_event_lwp if we're not waiting for
+	a specific LWP, i.e. when PID == -1.  Backup breakpoints from here.
+
 2001-07-06  Michael Snyder  <msnyder@redhat.com>
 
 	* procfs.c (procfs_resume): Silence noisy warning.

@@ -722,24 +722,24 @@ running_callback (struct lwp_info *lp, void *data)
   return (lp->stopped == 0);
 }
 
-/* Count the LWP's that have had events. */
+/* Count the LWP's that have had events.  */
 
 static int
 count_events_callback (struct lwp_info *lp, void *data)
 {
   int *count = data;
 
-  /* Count only threads that have a SIGTRAP pending. */
-  if (lp->status != 0 &&
-      WIFSTOPPED (lp->status) && 
-      WSTOPSIG (lp->status) == SIGTRAP &&
-      count != NULL)	/* paranoia */
+  gdb_assert (count != NULL);
+
+  /* Count only LWPs that have a SIGTRAP event pending.  */
+  if (lp->status != 0
+      && WIFSTOPPED (lp->status) && WSTOPSIG (lp->status) == SIGTRAP)
     (*count)++;
 
   return 0;
 }
 
-/* Select the LWP (if any) that is currently being single-stepped. */
+/* Select the LWP (if any) that is currently being single-stepped.  */
 
 static int
 select_singlestep_lwp_callback (struct lwp_info *lp, void *data)
@@ -750,18 +750,18 @@ select_singlestep_lwp_callback (struct lwp_info *lp, void *data)
     return 0;
 }
 
-/* Select the Nth LWP that has had a SIGTRAP event. */
+/* Select the Nth LWP that has had a SIGTRAP event.  */
 
 static int
 select_event_lwp_callback (struct lwp_info *lp, void *data)
 {
   int *selector = data;
 
-  /* Select only threads that have a SIGTRAP event pending. */
-  if (lp->status != 0 &&
-      WIFSTOPPED (lp->status) &&
-      WSTOPSIG (lp->status) == SIGTRAP &&
-      selector != NULL)	/* paranoia */
+  gdb_assert (selector != NULL);
+
+  /* Select only LWPs that have a SIGTRAP event pending. */
+  if (lp->status != 0
+      && WIFSTOPPED (lp->status) && WSTOPSIG (lp->status) == SIGTRAP)
     if ((*selector)-- == 0)
       return 1;
 
@@ -773,32 +773,43 @@ cancel_breakpoints_callback (struct lwp_info *lp, void *data)
 {
   struct lwp_info *event_lp = data;
 
-  if (lp != event_lp &&
-      lp->status != 0 &&
-      WIFSTOPPED (lp->status) &&
-      WSTOPSIG (lp->status) == SIGTRAP &&
-      breakpoint_inserted_here_p (read_pc_pid (lp->ptid) - 
-				  DECR_PC_AFTER_BREAK))
+  /* Leave the LWP that has been elected to receive a SIGTRAP alone.  */
+  if (lp == event_lp)
+    return 0;
+
+  /* If a LWP other than the LWP that we're reporting an event for has
+     hit a GDB breakpoint (as opposed to some random trap signal),
+     then just arrange for it to hit it again later.  We don't keep
+     the SIGTRAP status and don't forward the SIGTRAP signal to the
+     LWP.  We will handle the current event, eventually we will resume
+     all LWPs, and this one will get its breakpoint trap again.
+
+     If we do not do this, then we run the risk that the user will
+     delete or disable the breakpoint, but the LWP will have already
+     tripped on it.  */
+
+  if (lp->status != 0
+      && WIFSTOPPED (lp->status) &&  WSTOPSIG (lp->status) == SIGTRAP
+      && breakpoint_inserted_here_p (read_pc_pid (lp->ptid) - 
+				     DECR_PC_AFTER_BREAK))
     {
       if (debug_lin_lwp)
-	{
-	  fprintf_unfiltered (gdb_stdlog, 
-			      "Push back BP for %ld\n",
-			      GET_LWP (lp->ptid));
-	}
-      /* For each lp except the event lp, if there was a trap,
-	 set the PC to before the trap. */
+	fprintf_unfiltered (gdb_stdlog,
+			    "Push back breakpoint for LWP %ld\n",
+			    GET_LWP (lp->ptid));
+
+      /* Back up the PC if necessary.  */
       if (DECR_PC_AFTER_BREAK)
-	{
-	  write_pc_pid (read_pc_pid (lp->ptid) - DECR_PC_AFTER_BREAK, 
-			lp->ptid);
-	}
+	write_pc_pid (read_pc_pid (lp->ptid) - DECR_PC_AFTER_BREAK, lp->ptid);
+
+      /* Throw away the SIGTRAP.  */
       lp->status = 0;
     }
+
   return 0;
 }
 
-/* Select one LWP out of those that have events to be the event thread. */
+/* Select one LWP out of those that have events pending.  */
 
 static void
 select_event_lwp (struct lwp_info **orig_lp, int *status)
@@ -807,54 +818,48 @@ select_event_lwp (struct lwp_info **orig_lp, int *status)
   int random_selector;
   struct lwp_info *event_lp;
 
-  /* Give preference to any LWP that is being single-stepped. */
+  /* Record the wait status for the origional LWP.  */
+  (*orig_lp)->status = *status;
+
+  /* Give preference to any LWP that is being single-stepped.  */
   event_lp = iterate_over_lwps (select_singlestep_lwp_callback, NULL);
   if (event_lp != NULL)
     {
       if (debug_lin_lwp)
-	fprintf_unfiltered (gdb_stdlog, 
-			    "Select singlestep lwp %ld\n", 
+	fprintf_unfiltered (gdb_stdlog,
+			    "Select single-step LWP %ld\n",
 			    GET_LWP (event_lp->ptid));
     }
   else
     {
       /* No single-stepping LWP.  Select one at random, out of those
-	 which have had SIGTRAP events. */
+	 which have had SIGTRAP events.  */
 
-      /* First see how many SIGTRAP events we have. */
-      iterate_over_lwps (count_events_callback, (void *) &num_events);
+      /* First see how many SIGTRAP events we have.  */
+      iterate_over_lwps (count_events_callback, &num_events);
 
-      /* OK, now randomly pick the Nth LWP of those that have had SIGTRAP. */
-      random_selector = (int) 
+      /* Now randomly pick a LWP out of those that have had a SIGTRAP.  */
+      random_selector = (int)
 	((num_events * (double) rand ()) / (RAND_MAX + 1.0));
 
-      if (debug_lin_lwp)
-	{
-	  if (num_events > 1)
-	    fprintf_unfiltered (gdb_stdlog, 
-				"Found %d SIGTRAP events, selecting #%d\n", 
-				num_events, random_selector);
-	  else if (num_events <= 0)
-	    fprintf_unfiltered (gdb_stdlog, 
-				"ERROR select_event_lwp %d events!\n", 
-				num_events);
-	}
+      if (debug_lin_lwp && num_events > 1)
+	fprintf_unfiltered (gdb_stdlog, 
+			    "Found %d SIGTRAP events, selecting #%d\n", 
+			    num_events, random_selector);
 
-      event_lp =  iterate_over_lwps (select_event_lwp_callback, 
-				     (void *) &random_selector);
+      event_lp = iterate_over_lwps (select_event_lwp_callback,
+				    &random_selector);
     }
 
   if (event_lp != NULL)
     {
-      /* "event_lp" is now the selected event thread.
-	 If any other threads have had SIGTRAP events, these events
-	 must now be cancelled, so that the respective thread will
-	 trip the breakpoint again once it is resumed.  */
-      iterate_over_lwps (cancel_breakpoints_callback, (void *) event_lp);
+      /* Switch the event LWP.  */
       *orig_lp = event_lp;
       *status  = event_lp->status;
-      event_lp->status = 0;
     }
+
+  /* Flush the wait status for the event LWP.  */
+  (*orig_lp)->status = 0;
 }
 
 /* Return non-zero if LP has been resumed.  */
@@ -1097,12 +1102,6 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   /* This LWP is stopped now.  */
   lp->stopped = 1;
 
-  if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP)
-    {
-      /* Save SIGTRAP event for select_event_lwp. */
-      lp->status = status;
-    }
-
   if (debug_lin_lwp)
     fprintf_unfiltered (gdb_stdlog, 
 			"LLW: Candidate event %d in %ld\n",
@@ -1115,11 +1114,16 @@ lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
      longer running.  */
   iterate_over_lwps (stop_wait_callback, NULL);
 
-  /* MVS Now choose an event thread from among those that
-     have had events.  Giving equal priority to all threads
-     that have had events helps prevent starvation. */
+  /* If we're not waiting for a specific LWP, choose an event LWP from
+     among those that have had events.  Giving equal priority to all
+     LWPs that have had events helps prevent starvation.  */
+  if (pid == -1)
+    select_event_lwp (&lp, &status);
 
-  select_event_lwp (&lp, &status);
+  /* Now that we've selected our final event LWP, cancel any
+     breakpoints in other LWPs that have hit a GDB breakpoint.  See
+     the comment in cancel_breakpoints_callback to find out why.  */
+  iterate_over_lwps (cancel_breakpoints_callback, lp);
 
   /* If we're not running in "threaded" mode, we'll report the bare
      process id.  */
