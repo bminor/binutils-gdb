@@ -44,6 +44,7 @@
 #include "objc-lang.h"	/* For objc language constructs.  */
 
 #include "value.h"
+#include "block.h"
 #include "parser-defs.h"
 #include "language.h"
 #include "c-lang.h"

@@ -47,6 +47,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdb_string.h"
 #include "expression.h"
 #include "value.h"
+#include "block.h"
 #include "parser-defs.h"
 #include "language.h"
 #include "f-lang.h"

@@ -45,6 +45,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "expression.h"
 #include "language.h"
 #include "value.h"
+#include "block.h"
 #include "parser-defs.h"
 #include "m2-lang.h"
 #include "bfd.h" /* Required by objfiles.h.  */

@@ -1,3 +1,7 @@
+2002-10-18  David Carlton  <carlton@math.stanford.edu>
+
+	* mi-cmd-stack.c: #include "block.h"
+
 2002-10-03  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdbmi.texinfo: Fix examples that show frames to remove

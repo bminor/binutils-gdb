@@ -30,6 +30,7 @@
 #include "bfd.h"
 #include "gdb_obstack.h"
 #include "symtab.h"
+#include "block.h"
 #include "symfile.h"		/* Needed for "struct complaint", obsavestring */
 #include "objfiles.h"
 #include "gdbtypes.h"
@@ -159,6 +160,7 @@ add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
      namespaces.  */
   
    if (SYMBOL_LANGUAGE (symbol) == language_cplus
+       && !processing_has_namespace_info
        && SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL)
      scan_for_anonymous_namespaces (symbol);
 }
@@ -888,6 +890,7 @@ start_symtab (char *name, char *dirname, CORE_ADDR start_addr)
   global_symbols = NULL;
   within_function = 0;
   have_line_numbers = 0;
+  processing_has_namespace_info = 0;
   using_list = NULL;
 
   /* Context stack is initially empty.  Allocate first one with room
@@ -1184,10 +1187,6 @@ copy_usings_to_obstack (struct using_direct_node *usings,
       return new_node;
     }
 }
-
-/* Search the block for global symbols indicating the presence of
-   anonymous namespaces; add using declarations for them, if
-   found.  */
 
 /* Push a context block.  Args are an identifying nesting level
    (checkable when you pop it), and the starting PC address of this

@@ -42,6 +42,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <ctype.h>
 #include "expression.h"
 #include "value.h"
+#include "block.h"
 #include "parser-defs.h"
 #include "language.h"
 #include "ada-lang.h"

@@ -93,6 +93,12 @@ EXTERN unsigned char processing_acc_compilation;
 
 EXTERN unsigned char processing_hp_compilation;
 
+/* When set, the file that we're processing seems to have debugging
+   info for C++ namespaces, so buildsym.c shouldn't try to guess
+   namespace info itself.  */
+
+EXTERN unsigned char processing_has_namespace_info;
+
 /* Count symbols as they are processed, for error messages.  */
 
 EXTERN unsigned int symnum;

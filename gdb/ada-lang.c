@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "demangle.h"
 #include "defs.h"
 #include "symtab.h"
+#include "block.h"
 #include "gdbtypes.h"
 #include "gdbcmd.h"
 #include "expression.h"

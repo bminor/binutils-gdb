@@ -24,6 +24,7 @@
 #include "defs.h"
 #include <ctype.h>
 #include "symtab.h"
+#include "block.h"
 #include "frame.h"
 #include "breakpoint.h"
 #include "gdbtypes.h"

@@ -24,6 +24,7 @@
 #include <signal.h>
 #include "gdb_string.h"
 #include "symtab.h"
+#include "block.h"
 #include "gdbtypes.h"
 #include "frame.h"
 #include "inferior.h"

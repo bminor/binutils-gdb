@@ -23,6 +23,7 @@
 #include "defs.h"
 #include "bfd.h"
 #include "symtab.h"
+#include "block.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "buildsym.h"

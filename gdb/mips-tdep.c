@@ -28,6 +28,7 @@
 #include "frame.h"
 #include "inferior.h"
 #include "symtab.h"
+#include "block.h"
 #include "value.h"
 #include "gdbcmd.h"
 #include "language.h"

@@ -26,6 +26,7 @@
 #include "gdb_string.h"
 #include "value.h"
 #include "symtab.h"
+#include "block.h"
 #include "gdbtypes.h"
 #include "expression.h"
 #include "language.h"

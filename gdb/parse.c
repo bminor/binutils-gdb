@@ -48,6 +48,7 @@
 				   with "gdbarch.h" when appropriate.  */
 #include "doublest.h"
 #include "gdb_assert.h"
+#include "block.h"
 
 
 /* Symbols which architectures can redefine.  */
@@ -1107,7 +1108,7 @@ parse_exp_1 (char **stringptr, struct block *block, int comma)
   if (block)
     {
       expression_context_block = block;
-      expression_context_pc = block->startaddr;
+      expression_context_pc = BLOCK_START (block);
     }
   else
     expression_context_block = get_selected_block (&expression_context_pc);

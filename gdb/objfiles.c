@@ -28,6 +28,7 @@
 #include "defs.h"
 #include "bfd.h"		/* Binary File Description */
 #include "symtab.h"
+#include "block.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"

@@ -23,6 +23,7 @@
 
 #include "defs.h"
 #include "symtab.h"
+#include "block.h"
 #include "gdbtypes.h"
 #include "bfd.h"
 #include "symfile.h"

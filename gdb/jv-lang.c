@@ -20,6 +20,7 @@
 
 #include "defs.h"
 #include "symtab.h"
+#include "block.h"
 #include "gdbtypes.h"
 #include "expression.h"
 #include "parser-defs.h"

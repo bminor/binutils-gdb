@@ -20,6 +20,7 @@
 
 #include "defs.h"
 #include "symtab.h"
+#include "block.h"
 #include "symfile.h"
 #include "gdbtypes.h"
 #include "value.h"

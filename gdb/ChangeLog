@@ -1,3 +1,73 @@
+2002-10-18  David Carlton  <carlton@math.stanford.edu>
+
+	* Makefile.in (block_h): New variable.
+	Updated dependencies to reflect it.
+	* parse.c (parse_exp_1): Use BLOCK_START.
+	#include "block.h"
+	* p-exp.tab.c: Regenerated.
+	* m2-exp.tab.c: Ditto.
+	* jv-exp.tab.c: Ditto.
+	* f-exp.tab.c: Ditto.
+	* c-exp.tab.c: Ditto.
+	* ada-exp.tab.c: Ditto.
+	* ada-lang.c: #include "block.h"
+	* p-exp.y: Ditto.
+	* objc-exp.y: Ditto.
+	* m2-exp.y: Ditto.
+	* jv-exp.y: Ditto.
+	* f-exp.y: Ditto.
+	* c-exp.y: Ditto.
+	* ada-exp.y: Ditto.
+	* values.c: Ditto.
+	* valops.c: Ditto.
+	* tracepoint.c: Ditto.
+	* symtab.c: Ditto.
+	* symmisc.c: Ditto.
+	* symfile.c: Ditto.
+	* stack.c: Ditto.
+	* printcmd.c: Ditto.
+	* objfiles.c: Ditto.
+	* objc-lang.c: Ditto.
+	* nlmread.c: Ditto.
+	* mips-tdep.c: Ditto.
+	* mdebugread.c: Ditto.
+	* linespec.c: Ditto.
+	* jv-lang.c: Ditto.
+	* infcmd.c: Ditto.
+	* f-valprint.c: Ditto.
+	* findvar.c: Ditto.
+	* expprint.c: Ditto.
+	* coffread.c: Ditto.
+	* buildsym.c: Ditto.
+	* breakpoint.c: Ditto.
+	* blockframe.c: Ditto.
+	* ax-gdb.c: Ditto.
+	* alpha-tdep.c: Ditto.
+	* block.h: New file.
+	* symtab.h: Moved struct block, struct blockvector, and related
+	macros and function declarations to block.h.
+	* dwarf2read.c (process_die): Set processing_has_namespace_info if
+	we run into DW_TAG_namespace, DW_TAG_imported_declaration, or
+	DW_TAG_imported_module.
+	New variable current_namespace.
+	(psymtab_to_symtab_1): Set current_namespace to "".
+	(dwarf2_name): New function.
+	(dwarf2_add_member_fn): Get name via dwarf2_name.
+	(read_typedef): Ditto.
+	(read_file_scope): Ditto.
+	(dwarf2_add_field): Ditto.
+	(read_structure_scope): Ditto.
+	(read_enumeration): Ditto.
+	(dwarf2_extension): New function.
+	(read_namespace): Set current_namespace correctly; also, if we're
+	entering an anonymous namespace, add an appropriate using
+	directive.
+	* buildsym.c (start_symtab): Reset processing_has_namespace_info
+	to 0.
+	(add_symbol_to_list): Only scan for anonymous namespaces if
+	!processing_has_namespace_info.
+	* buildsym.h: Add new flag processing_has_namespace_info.
+
 2002-10-16  David Carlton  <carlton@math.stanford.edu>
 
 	* dwarf2read.c (dwarf_tag_name): Add DWARF 3 names.

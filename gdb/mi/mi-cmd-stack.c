@@ -26,6 +26,7 @@
 #include "mi-cmds.h"
 #include "ui-out.h"
 #include "symtab.h"
+#include "block.h"
 #include "dictionary.h"
 
 /* FIXME: these should go in some .h file but stack.c doesn't have a

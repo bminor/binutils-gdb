@@ -22,6 +22,7 @@
 
 #include "defs.h"
 #include "symtab.h"
+#include "block.h"
 #include "gdbtypes.h"
 #include "frame.h"
 #include "value.h"
