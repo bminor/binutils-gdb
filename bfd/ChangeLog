@@ -1,5 +1,10 @@
 2001-10-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-mips.c (_bfd_mips_elf_copy_indirect_symbol): Bail out after
+	copying flags if this is a weakdef.
+
+2001-10-04  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf-bfd.h (struct elf_link_hash_entry): Reorganise for better
 	packing.
 
