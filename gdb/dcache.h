@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define DCACHE_H
 
 typedef int (*memxferfunc) PARAMS((CORE_ADDR memaddr,
-			     unsigned char *myaddr,
+			     char *myaddr,
 			     int len));
 
 typedef struct dcache_struct DCACHE;

@@ -1,3 +1,12 @@
+Sun Jun 25 15:30:43 1995  Stan Shebs  <shebs@cygnus.com>
+
+	* remote.c (remote_read_bytes, remote_write_bytes): Second arg
+	should be char *, not unsigned char *.
+	* dcache.h (memxferfunc): Ditto.
+	* monitor.c (monitor_write_memory, monitor_read_memory_single):
+	Ditto.
+	(monitor_make_srec): Let compiler figure size of hextab.
+
 Sat Jun 24 19:27:37 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* lynx-nat.c (child_wait): Don't restart new threads and loop
