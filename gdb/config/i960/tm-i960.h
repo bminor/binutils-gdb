@@ -156,39 +156,15 @@ extern CORE_ADDR saved_pc_after_call ();
 
 #define MAX_REGISTER_VIRTUAL_SIZE 8
 
-/* Nonzero if register N requires conversion from raw format to virtual
-   format.  */
-
-#define REGISTER_CONVERTIBLE(N) ((N) >= FP0_REGNUM)
-
 #include "floatformat.h"
 
 #define TARGET_LONG_DOUBLE_FORMAT &floatformat_i960_ext
 
-/* Convert data from raw format for register REGNUM in buffer FROM
-   to virtual format with type TYPE in buffer TO.  */
-
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO)	\
-{ \
-  DOUBLEST val; \
-  floatformat_to_doublest (&floatformat_i960_ext, (FROM), &val); \
-  store_floating ((TO), TYPE_LENGTH (TYPE), val); \
-}
-
-/* Convert data from virtual format with type TYPE in buffer FROM
-   to raw format for register REGNUM in buffer TO.  */
-
-#define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO)	\
-{ \
-  DOUBLEST val = extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
-  floatformat_from_doublest (&floatformat_i960_ext, &val, (TO)); \
-}
-
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
-#define REGISTER_VIRTUAL_TYPE(N) ((N) < FP0_REGNUM ? \
-					builtin_type_int : builtin_type_double)
+struct type *i960_register_type (int regnum);
+#define REGISTER_VIRTUAL_TYPE(N) i960_register_type (N)
 
 /* Macros for understanding function return values... */
 

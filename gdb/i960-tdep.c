@@ -34,6 +34,16 @@
 static CORE_ADDR next_insn (CORE_ADDR memaddr,
 			    unsigned int *pword1, unsigned int *pword2);
 
+struct type *
+i960_register_type (int regnum)
+{
+  if (regnum < FP0_REGNUM)
+    return builtin_type_int32;
+  else
+    return builtin_type_i960_ext;
+}
+
+
 /* Does the specified function use the "struct returning" convention
    or the "value returning" convention?  The "value returning" convention
    almost invariably returns the entire value in registers.  The
