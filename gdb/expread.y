@@ -573,6 +573,24 @@ variable:	typebase COLONCOLON name
 			  write_exp_string ($3);
 			  write_exp_elt_opcode (OP_SCOPE);
 			}
+	|	typebase COLONCOLON '~' name
+			{
+			  struct type *type = $1;
+			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
+			      && TYPE_CODE (type) != TYPE_CODE_UNION)
+			    error ("`%s' is not defined as an aggregate type.",
+				   TYPE_NAME (type));
+
+			  if (strcmp (type_name_no_tag (type), $4.ptr))
+			    error ("invalid destructor `%s::~%s'",
+				   type_name_no_tag (type), $4.ptr);
+
+			  write_exp_elt_opcode (OP_SCOPE);
+			  write_exp_elt_type (type);
+			  write_exp_string ($4);
+			  write_exp_elt_opcode (OP_SCOPE);
+			  write_exp_elt_opcode (UNOP_LOGNOT);
+			}
 	|	COLONCOLON name
 			{
 			  char *name = copy_name ($2);
@@ -733,6 +751,10 @@ abs_decl:	'*'
 			{ push_type (tp_pointer); $$ = 0; }
 	|	'*' abs_decl
 			{ push_type (tp_pointer); $$ = $2; }
+	|	'&'
+			{ push_type (tp_reference); $$ = 0; }
+	|	'&' abs_decl
+			{ push_type (tp_reference); $$ = $2; }
 	|	direct_abs_decl
 	;
 
@@ -792,6 +814,14 @@ typebase
 			{ $$ = builtin_type_long; }
 	|	UNSIGNED LONG INT_KEYWORD
 			{ $$ = builtin_type_unsigned_long; }
+	|	LONG LONG
+			{ $$ = builtin_type_long_long; }
+	|	LONG LONG INT_KEYWORD
+			{ $$ = builtin_type_long_long; }
+	|	UNSIGNED LONG LONG
+			{ $$ = builtin_type_unsigned_long_long; }
+	|	UNSIGNED LONG LONG INT_KEYWORD
+			{ $$ = builtin_type_unsigned_long_long; }
 	|	SHORT INT_KEYWORD
 			{ $$ = builtin_type_short; }
 	|	UNSIGNED SHORT INT_KEYWORD
@@ -1152,13 +1182,13 @@ struct token
   enum exp_opcode opcode;
 };
 
-static struct token tokentab3[] =
+const static struct token tokentab3[] =
   {
     {">>=", ASSIGN_MODIFY, BINOP_RSH},
     {"<<=", ASSIGN_MODIFY, BINOP_LSH}
   };
 
-static struct token tokentab2[] =
+const static struct token tokentab2[] =
   {
     {"+=", ASSIGN_MODIFY, BINOP_ADD},
     {"-=", ASSIGN_MODIFY, BINOP_SUB},
