@@ -1047,7 +1047,8 @@ advance_command (char *arg, int from_tty)
 }
 
 
-/* Print the result of a function at the end of a 'finish' command. */
+/* Print the result of a function at the end of a 'finish' command.  */
+
 static void
 print_return_value (int structure_return, struct type *value_type)
 {
@@ -1059,7 +1060,8 @@ print_return_value (int structure_return, struct type *value_type)
       value = register_value_being_returned (value_type, stop_registers);
       stb = ui_out_stream_new (uiout);
       ui_out_text (uiout, "Value returned is ");
-      ui_out_field_fmt (uiout, "gdb-result-var", "$%d", record_latest_value (value));
+      ui_out_field_fmt (uiout, "gdb-result-var", "$%d",
+			record_latest_value (value));
       ui_out_text (uiout, " = ");
       value_print (value, stb->stream, 0, Val_no_prettyprint);
       ui_out_field_stream (uiout, "return-value", stb);
@@ -1077,7 +1079,8 @@ print_return_value (int structure_return, struct type *value_type)
        initiate the call, as opposed to the call_function_by_hand
        case.  */
     {
-      gdb_assert (gdbarch_return_value (current_gdbarch, value_type, NULL, NULL, NULL)
+      gdb_assert (gdbarch_return_value (current_gdbarch, value_type,
+					NULL, NULL, NULL)
 		  == RETURN_VALUE_STRUCT_CONVENTION);
       ui_out_text (uiout, "Value returned has type: ");
       ui_out_field_string (uiout, "return-type", TYPE_NAME (value_type));
@@ -1109,7 +1112,8 @@ print_return_value (int structure_return, struct type *value_type)
 	}
       stb = ui_out_stream_new (uiout);
       ui_out_text (uiout, "Value returned is ");
-      ui_out_field_fmt (uiout, "gdb-result-var", "$%d", record_latest_value (value));
+      ui_out_field_fmt (uiout, "gdb-result-var", "$%d",
+			record_latest_value (value));
       ui_out_text (uiout, " = ");
       value_print (value, stb->stream, 0, Val_no_prettyprint);
       ui_out_field_stream (uiout, "return-value", stb);
@@ -1118,14 +1122,15 @@ print_return_value (int structure_return, struct type *value_type)
 }
 
 /* Stuff that needs to be done by the finish command after the target
-   has stopped.  In asynchronous mode, we wait for the target to stop in
-   the call to poll or select in the event loop, so it is impossible to
-   do all the stuff as part of the finish_command function itself. The
-   only chance we have to complete this command is in
-   fetch_inferior_event, which is called by the event loop as soon as it
-   detects that the target has stopped. This function is called via the
-   cmd_continuation pointer. */
-void
+   has stopped.  In asynchronous mode, we wait for the target to stop
+   in the call to poll or select in the event loop, so it is
+   impossible to do all the stuff as part of the finish_command
+   function itself.  The only chance we have to complete this command
+   is in fetch_inferior_event, which is called by the event loop as
+   soon as it detects that the target has stopped. This function is
+   called via the cmd_continuation pointer.  */
+
+static void
 finish_command_continuation (struct continuation_arg *arg)
 {
   struct symbol *function;
@@ -1133,15 +1138,15 @@ finish_command_continuation (struct continuation_arg *arg)
   struct cleanup *cleanups;
 
   breakpoint = (struct breakpoint *) arg->data.pointer;
-  function   = (struct symbol *)     arg->next->data.pointer;
-  cleanups   = (struct cleanup *)    arg->next->next->data.pointer;
+  function = (struct symbol *) arg->next->data.pointer;
+  cleanups = (struct cleanup *) arg->next->next->data.pointer;
 
   if (bpstat_find_breakpoint (stop_bpstat, breakpoint) != NULL
-      && function != 0)
+      && function != NULL)
     {
       struct type *value_type;
-      CORE_ADDR funcaddr;
       int struct_return;
+      int gcc_compiled;
 
       value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
       if (!value_type)
@@ -1154,18 +1159,18 @@ finish_command_continuation (struct continuation_arg *arg)
 	  return;
 	}
 
-      funcaddr = BLOCK_START (SYMBOL_BLOCK_VALUE (function));
-
-      struct_return = using_struct_return (check_typedef (value_type),
-					   BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function)));
+      CHECK_TYPEDEF (value_type);
+      gcc_compiled = BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function));
+      struct_return = using_struct_return (value_type, gcc_compiled);
 
       print_return_value (struct_return, value_type); 
     }
+
   do_exec_cleanups (cleanups);
 }
 
-/* "finish": Set a temporary breakpoint at the place
-   the selected frame will return to, then continue.  */
+/* "finish": Set a temporary breakpoint at the place the selected
+   frame will return to, then continue.  */
 
 static void
 finish_command (char *arg, int from_tty)
@@ -1179,20 +1184,20 @@ finish_command (char *arg, int from_tty)
 
   int async_exec = 0;
 
-  /* Find out whether we must run in the background. */
+  /* Find out whether we must run in the background.  */
   if (arg != NULL)
     async_exec = strip_bg_char (&arg);
 
   /* If we must run in the background, but the target can't do it,
-     error out. */
+     error out.  */
   if (event_loop_p && async_exec && !target_can_async_p ())
     error ("Asynchronous execution not supported on this target.");
 
   /* If we are not asked to run in the bg, then prepare to run in the
-     foreground, synchronously. */
+     foreground, synchronously.  */
   if (event_loop_p && !async_exec && target_can_async_p ())
     {
-      /* Simulate synchronous execution */
+      /* Simulate synchronous execution.  */
       async_disable_stdin ();
     }
 
@@ -1223,8 +1228,8 @@ finish_command (char *arg, int from_tty)
 
   function = find_pc_function (get_frame_pc (deprecated_selected_frame));
 
-  /* Print info on the selected frame, including level number
-     but not source.  */
+  /* Print info on the selected frame, including level number but not
+     source.  */
   if (from_tty)
     {
       printf_filtered ("Run till exit from ");
@@ -1235,7 +1240,7 @@ finish_command (char *arg, int from_tty)
   /* If running asynchronously and the target support asynchronous
      execution, set things up for the rest of the finish command to be
      completed later on, when gdb has detected that the target has
-     stopped, in fetch_inferior_event. */
+     stopped, in fetch_inferior_event.  */
   if (event_loop_p && target_can_async_p ())
     {
       arg1 =
@@ -1253,44 +1258,43 @@ finish_command (char *arg, int from_tty)
       add_continuation (finish_command_continuation, arg1);
     }
 
-  proceed_to_finish = 1;	/* We want stop_registers, please... */
+  proceed_to_finish = 1;	/* We want stop_registers, please...  */
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 
   /* Do this only if not running asynchronously or if the target
-     cannot do async execution. Otherwise, complete this command when
-     the target actually stops, in fetch_inferior_event. */
+     cannot do async execution.  Otherwise, complete this command when
+     the target actually stops, in fetch_inferior_event.  */
   if (!event_loop_p || !target_can_async_p ())
     {
-
-      /* Did we stop at our breakpoint? */
+      /* Did we stop at our breakpoint?  */
       if (bpstat_find_breakpoint (stop_bpstat, breakpoint) != NULL
-	  && function != 0)
+	  && function != NULL)
 	{
 	  struct type *value_type;
-	  CORE_ADDR funcaddr;
 	  int struct_return;
+	  int gcc_compiled;
 
 	  value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
 	  if (!value_type)
 	    internal_error (__FILE__, __LINE__,
 			    "finish_command: function has no target type");
 
-	  /* FIXME: Shouldn't we do the cleanups before returning? */
+	  /* FIXME: Shouldn't we do the cleanups before returning?  */
 	  if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
 	    return;
 
-	  funcaddr = BLOCK_START (SYMBOL_BLOCK_VALUE (function));
-
-	  struct_return =
-	    using_struct_return (check_typedef (value_type),
-			BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function)));
+	  CHECK_TYPEDEF (value_type);
+	  gcc_compiled = BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function));
+	  struct_return = using_struct_return (value_type, gcc_compiled);
 
 	  print_return_value (struct_return, value_type); 
 	}
+
       do_cleanups (old_chain);
     }
 }
 
+
 static void
 program_info (char *args, int from_tty)
 {

@@ -1,5 +1,9 @@
 2004-01-25  Mark Kettenis  <kettenis@gnu.org>
 
+	* infcmd.c (print_return_value): Wrap long lines.
+	(finish_command_continuation, finish_command): Remove unused
+	variable `funcaddr'.  Fix some coding-standards problems.
+
 	* sparc-tdep.c (sparc_regset_from_core_section): Check whether
 	SECT_SIZE is large enough, not wheter it's exactly the right size.
 	(sparc32_gdbarch_init): Initialize TDEP->sizeof_gregset and
