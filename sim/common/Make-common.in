@@ -374,7 +374,7 @@ sim-bits.o: $(srccom)/sim-bits.c $(sim-bits_h) $(sim-n-bits_h) \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-bits.c $(ALL_CFLAGS)
 
-sim-config.o: $(srccom)/sim-config.c $(sim-config_h) \
+sim-config.o: $(srccom)/sim-config.c $(sim-config_h) sim-main.h \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-config.c $(ALL_CFLAGS)
 
@@ -391,7 +391,7 @@ sim-endian.o: $(srccom)/sim-endian.c $(sim-endian_h) $(sim-n-endian_h)
 sim-engine.o: $(srccom)/sim-engine.c $(sim_main_headers) $(sim-engine_h)
 	$(CC) -c $(srccom)/sim-engine.c $(ALL_CFLAGS)
 
-sim-events.o: $(srccom)/sim-events.c $(sim-events_h) \
+sim-events.o: $(srccom)/sim-events.c $(sim-events_h) sim-main.h \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-events.c $(ALL_CFLAGS)
 

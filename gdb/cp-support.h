@@ -1,7 +1,8 @@
 /* Helper routines for C++ support in GDB.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
+   Namespace support contributed by David Carlton.
 
    This file is part of GDB.
 
@@ -20,6 +21,61 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#ifndef CP_SUPPORT_H
+#define CP_SUPPORT_H
+
+/* Opaque declarations.  */
+
+struct obstack;
+struct block;
+struct symbol;
+
+/* This struct is designed to store data from using directives.  It
+   says that names from namespace INNER should be visible within
+   namespace OUTER.  OUTER should always be a strict initial substring
+   of INNER.  These form a linked list; NEXT is the next element of
+   the list.  */
+
+struct using_direct
+{
+  char *inner;
+  char *outer;
+  struct using_direct *next;
+};
+
+
+/* Functions from cp-support.c.  */
+
 extern char *class_name_from_physname (const char *physname);
 
 extern char *method_name_from_physname (const char *physname);
+
+extern unsigned int cp_find_first_component (const char *name);
+
+extern unsigned int cp_entire_prefix_len (const char *name);
+
+
+/* Functions/variables from cp-namespace.c.  */
+
+extern unsigned char processing_has_namespace_info;
+
+extern const char *processing_current_namespace;
+
+extern int cp_is_anonymous (const char *namespace);
+
+extern void cp_add_using_directive (const char *name,
+				    unsigned int outer_length,
+				    unsigned int inner_length);
+
+extern void cp_initialize_namespace ();
+
+extern void cp_finalize_namespace (struct block *static_block,
+				   struct obstack *obstack);
+
+extern void cp_set_block_scope (const struct symbol *symbol,
+				struct block *block,
+				struct obstack *obstack);
+
+extern void cp_scan_for_anonymous_namespaces (const struct symbol *symbol);
+
+#endif /* CP_SUPPORT_H */

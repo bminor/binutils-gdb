@@ -1,0 +1,200 @@
+2003-04-11  Michael Snyder  <msnyder@redhat.com>
+
+	* mac.s: New file.  Test multiply-accumulator insns.
+	* allinsn.exp: Add mac tests.
+
+2003-04-10  Michael Snyder  <msnyder@redhat.com>
+
+	* brabc.s: New file.  Test for bra/bc and bra/bs.
+	* allinsn.exp: Add bra/bc test.
+	* testsuite.inc: New macro memcmp.
+	* bfld.s: Un-comment insns, assembler works now.
+
+	* bfld.s: Add tests for bfst insn.
+	* bfld.s: New file.  Test for bfld insn.
+	* allinsn.exp: Add bfld test.
+
+2003-04-09  Michael Snyder  <msnyder@redhat.com>
+
+	* movmd.s: New file.  Test for movmd insn.
+	* allinsn.exp: Add movmd test.
+	* movsd.s: Un-comment movsd instructions (assembler works now).
+	* movsd.s: New file.  Test for movsd insn.
+	* allinsn.exp: Add movsd test.
+	* add.b.s: Add tests for ABS8 mode.
+
+2003-04-08  Michael Snyder  <msnyder@redhat.com>
+
+	* bset.s: New file, test bset and bclr.
+	* allinsn.exp: Add bset test.
+	* and.b.s: Add test for andc ccr.
+	* or.b.s:  Add test for orc  ccr.
+	* xor.b.s: Add test for xorc ccr.
+
+2003-04-07  Michael Snyder  <msnyder@redhat.com>
+
+	* testutils.inc (_write_and_exit): Rewrite for new syscall lib.
+	(pass, fail): Use new syscall abi.
+
+2003-04-04  Michael Snyder  <msnyder@redhat.com>
+
+	* rotl.s: Add INDEXB, INDEXW, INDEXL tests.
+	* rotl.s, rotr.s, rotxl.s, rotxr.s: New files.
+	* allinsn.exp: Add rot insn tests.
+
+2003-04-03  Michael Snyder  <msnyder@redhat.com>
+
+	* shift.s: Remove.  Replace with
+	* shal.s, shar.s, shll.s, shlr.s: New files.
+	* allinsn.exp: Invoke new test files.
+	* ext.w.s, ext.l.s: New files, tests for exts and extu.
+
+2003-04-02  Michael Snyder  <msnyder@redhat.com>
+
+	* bra.s: New file, test for branch insns.
+	* allinsn.exp: Add bra.s.
+	* adds.s: Add ccr flags checking.
+
+2003-04-01  Michael Snyder  <msnyder@redhat.com>
+
+	* shift.s: Add lots of tests.
+	* mov.b.s: Add word and long tests.
+	* neg.s: New file, test neg instructions.
+	* allinsn.exp: Add neg test.
+
+2003-03-31  Michael Snyder  <msnyder@redhat.com>
+
+	* addx.s: Add word and long tests.
+
+2003-03-28  Michael Snyder  <msnyder@redhat.com>
+
+	* mov.w.s: Add a bunch more tests for new addressing modes.
+	* add.l.s: Comment fixes.
+	* not.s: Add tests for word and long operations.
+	* not.s: Fill out remaining tests for byte operation.
+	* add.l.s: Fix up .if directives for h8h, h8s.
+	* mov.l.s: Simplify results checking.
+	* add.l.s: Add several dozen new tests for new addressing modes.
+
+2003-03-25  Michael Snyder  <msnyder@redhat.com>
+
+	* mov.l.s: A sampling of tests for esoteric addressing modes.
+	* mov.l.s: Finish tests for immediate and register direct modes.
+	* mov.l.s: Simplify, add more tests.
+	* mov.l.s: Add more new tests.
+
+2003-03-13  Michael Snyder  <msnyder@redhat.com>
+
+	* not.s: New test.
+	* allinsn.exp: Add not.s test.
+	* add.b.s, add.w.s, addx.s and.b.s, cmp.b.s, or.b.s, sub.b.s, xor.b.s:
+	Un-comment assembler instructions: assembler should handle 'em all.
+
+2003-03-04  Michael Snyder  <msnyder@redhat.com>
+
+	* add.b.s: Add DISP16, DISP32, ABS16, ABS32.
+	* sub.b.s: Add POSTINC, POSTDEC, RDIND.
+	* or.b.s, xor.b.s: Add RDPOSTINC, RDPREINC, RDPREDEC.
+
+2003-03-03  Michael Snyder  <msnyder@redhat.com>
+
+	* add.b.s, addx.s, and.b.s, cmp.b.s: Add RDPOSTINC, 
+	RDPREINC, RDPREDEC.
+	* add.b.s, addx.s, and.b.s, cmp.b.s, or.b.s, xor.b.s: Add RDPOSTDEC.
+
+2003-02-28  Michael Snyder  <msnyder@redhat.com>
+
+	* add.b.s, and.b.s, cmp.b.s, or.b.s, sub.b.s, xor.b.s:
+	Add tests for RDIND.  Also add RDPOSTDEC to cmp.b.s.
+	* allinsn.exp: All tests run for all machine flavors.
+
+2003-02-27  Michael Snyder  <msnyder@redhat.com>
+
+	* add.l.s, adds.s, addx.s, and.l.s, cmp.l.s, cmp.w.s, jmp.s, 
+	or.l.s, or.w.s, sub.l.s, sub.w.s, xor.l.s, xor.w.s): 
+	Substitute actual assembler instructions for data words!
+	* addx.s: Add tests for RDIND and RDPOSTDEC.
+	* shifts.s: New file.
+	* allinsn.exp: Add shifts.s.
+	* testutils.inc: Add assembler directive ".h8300sx".
+	* add.w.s, add.l.s, ...: Add linker directive "-m h8300sxelf".
+
+2003-02-25  Michael Snyder  <msnyder@redhat.com>
+
+	* adds.s, addw.s: New files.
+	* testutils.inc (set_ccr, set_carry_flag, test_carry_clear,
+	test_carry_set, test_ovf_clear, test_ovf_set, test_zero_clear,
+	test_zero_set, test_neg_clear, test_neg_set): New macros.
+
+2003-02-24  Michael Snyder  <msnyder@redhat.com>
+
+	* stc.c: Extend tests to all h8300s opcodes.
+	* ldc.s: New file.
+
+	* stc.s: New file.
+	* allinsn.exp: Add stc test.
+	* and.l.s: 'and.l imm:16 clears upper half of dest. reg.
+	* testutils.inc: Add kludge for h8sx.
+	(set_gr_a5a5, set_grs_a5a5, test_gr_a5a5, test_grs_a5a5,
+	set_ccr_zero): New macros.
+
+2003-02-18  Michael Snyder  <msnyder@redhat.com>
+
+	* daa.s: New file.
+	* das.s: New file.
+	* dec.s: New file.
+	* inc.s: New file.
+	* or.b.s: New file.
+	* or.w.s: New file.
+	* or.l.s: New file.
+	* xor.b.s: New file.
+	* xor.w.s: New file.
+	* xor.l.s: New file.
+	* and.l.s: Fix expected result.
+	* allinsn.exp: Add new tests.
+
+2003-02-12  Michael Snyder  <msnyder@redhat.com>
+
+	* and.b.s: New file.
+	* and.w.s: New file.
+	* and.l.s: New file.
+	* cmp.b.s: New file.
+	* cmp.w.s: New file.
+	* cmp.l.s: New file.
+	* jmp.s: New file.
+	* add.w.s: Add test for 3-bit immediate operand.
+	* add.l.s: Add test for 3-bit and 16-bit immediate operands.
+	* mov.b.s (dst_addr16, dst_addr32): Delete.	
+	* nop.s: Simplify using testutils.inc macros.
+	* sub.w.s: Add test for 3-bit immediate operand.
+	* sub.l.s: Add test for 3-bit and 16-bit immediate operands.
+
+2003-02-07  Michael Snyder  <msnyder@redhat.com>
+
+	* mov.b.s: Add tests for more addressing modes.
+	(src_addr16, src_addr32, dst_addr16, dst_addr32): Delete.
+	* mov.b.s: Add prospective tests for h8sx modes.
+	* mov.w.s: New file (test for 'mov.w').
+	* mov.l.s: New file (test for 'mov.l').
+	* sub.b.s: New file (test for 'sub.b').
+	* sub.w.s: New file (test for 'sub.w').
+	* sub.l.s: New file (test for 'sub.l').
+	* allinsn.exp: Turn new tests on.
+
+2003-02-06  Michael Snyder  <msnyder@redhat.com>
+
+	* allinsn.exp: New file.
+	* testutils.inc: New file.
+	* nop.s: New file (test for 'nop' insn).
+	* add.b.s: New file (test for 'add.b').
+	* add.w.s: New file (test for 'add.w').
+	* add.l.s: New file (test for 'add.l').
+	* mov.b.s: New file (test for 'mov.b');
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog"
+End:

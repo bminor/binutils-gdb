@@ -1,5 +1,6 @@
 /* Target-dependent code for HPUX running on PA-RISC, for GDB.
-   Copyright 2002 Free Software Foundation, Inc.
+
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -67,14 +68,14 @@ hppa_hpux_pc_in_sigtramp (CORE_ADDR pc, char *name)
 void
 hppa_hpux_frame_saved_pc_in_sigtramp (struct frame_info *fi, CORE_ADDR *tmp)
 {
-  *tmp = read_memory_integer (fi->frame + (43 * 4), 4);
+  *tmp = read_memory_integer (get_frame_base (fi) + (43 * 4), 4);
 }
 
 void
 hppa_hpux_frame_base_before_sigtramp (struct frame_info *fi,
                                       CORE_ADDR *tmp)
 {
-  *tmp = read_memory_integer (fi->frame + (40 * 4), 4);
+  *tmp = read_memory_integer (get_frame_base (fi) + (40 * 4), 4);
 }
 
 void
@@ -82,7 +83,7 @@ hppa_hpux_frame_find_saved_regs_in_sigtramp (struct frame_info *fi,
 					     CORE_ADDR *fsr)
 {
   int i;
-  const CORE_ADDR tmp = (fi)->frame + (10 * 4);
+  const CORE_ADDR tmp = get_frame_base (fi) + (10 * 4);
 
   for (i = 0; i < NUM_REGS; i++)
     {

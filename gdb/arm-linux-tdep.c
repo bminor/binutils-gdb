@@ -181,10 +181,10 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       if (TYPE_CODE_FLT == typecode && REGISTER_SIZE == len)
 	{
 	  DOUBLEST dblval;
-	  dblval = extract_floating (val, len);
+	  dblval = deprecated_extract_floating (val, len);
 	  len = TARGET_DOUBLE_BIT / TARGET_CHAR_BIT;
 	  val = alloca (len);
-	  store_floating (val, len, dblval);
+	  deprecated_store_floating (val, len, dblval);
 	}
 
       /* If the argument is a pointer to a function, and it is a Thumb
@@ -406,7 +406,7 @@ skip_hurd_resolver (CORE_ADDR pc)
 	= lookup_minimal_symbol ("fixup", NULL, objfile);
 
       if (fixup && SYMBOL_VALUE_ADDRESS (fixup) == pc)
-	return (SAVED_PC_AFTER_CALL (get_current_frame ()));
+	return (DEPRECATED_SAVED_PC_AFTER_CALL (get_current_frame ()));
     }
 
   return 0;

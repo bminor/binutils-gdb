@@ -488,17 +488,6 @@ d10v_extract_struct_value_address (struct regcache *regcache)
   return (addr | DMEM_START);
 }
 
-/* Immediately after a function call, return the saved pc.  We can't
-   use frame->return_pc beause that is determined by reading R13 off
-   the stack and that may not be written yet. */
-
-static CORE_ADDR
-d10v_saved_pc_after_call (struct frame_info *frame)
-{
-  return ((read_register (LR_REGNUM) << 2)
-	  | IMEM_START);
-}
-
 static int
 check_prologue (unsigned short op)
 {
@@ -721,7 +710,7 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
 
   info->uses_frame = 0;
   for (pc = frame_func_unwind (next_frame);
-       pc < frame_pc_unwind (next_frame);
+       pc > 0 && pc < frame_pc_unwind (next_frame);
        pc += 4)
     {
       op = (unsigned long) read_memory_integer (pc, 4);
@@ -1451,14 +1440,15 @@ d10v_frame_this_id (struct frame_info *next_frame,
   struct d10v_unwind_cache *info
     = d10v_frame_unwind_cache (next_frame, this_prologue_cache);
   CORE_ADDR base;
-  CORE_ADDR pc;
+  CORE_ADDR func;
+  struct frame_id id;
 
-  /* The PC is easy.  */
-  pc = frame_pc_unwind (next_frame);
+  /* The FUNC is easy.  */
+  func = frame_func_unwind (next_frame);
 
   /* This is meant to halt the backtrace at "_start".  Make sure we
      don't halt it at a generic dummy frame. */
-  if (pc == IMEM_START || pc <= IMEM_START || inside_entry_file (pc))
+  if (func <= IMEM_START || inside_entry_file (func))
     return;
 
   /* Hopefully the prologue analysis either correctly determined the
@@ -1468,17 +1458,18 @@ d10v_frame_this_id (struct frame_info *next_frame,
   if (base == STACK_START || base == 0)
     return;
 
+  id = frame_id_build (base, func);
+
   /* Check that we're not going round in circles with the same frame
      ID (but avoid applying the test to sentinel frames which do go
      round in circles).  Can't use frame_id_eq() as that doesn't yet
      compare the frame's PC value.  */
   if (frame_relative_level (next_frame) >= 0
       && get_frame_type (next_frame) != DUMMY_FRAME
-      && get_frame_pc (next_frame) == pc
-      && get_frame_base (next_frame) == base)
+      && frame_id_eq (get_frame_id (next_frame), id))
     return;
 
-  (*this_id) = frame_id_build (base, pc);
+  (*this_id) = id;
 }
 
 static void
@@ -1700,7 +1691,6 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);
 
-  set_gdbarch_saved_pc_after_call (gdbarch, d10v_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_stack_align (gdbarch, d10v_stack_align);
 

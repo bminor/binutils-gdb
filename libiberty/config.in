@@ -105,6 +105,9 @@
 /* Define if you have the memmove function.  */
 #undef HAVE_MEMMOVE
 
+/* Define if you have the mempcpy function.  */
+#undef HAVE_MEMPCPY
+
 /* Define if you have the memset function.  */
 #undef HAVE_MEMSET
 
@@ -146,6 +149,15 @@
 
 /* Define if you have the sigsetmask function.  */
 #undef HAVE_SIGSETMASK
+
+/* Define if you have the snprintf function.  */
+#undef HAVE_SNPRINTF
+
+/* Define if you have the stpcpy function.  */
+#undef HAVE_STPCPY
+
+/* Define if you have the stpncpy function.  */
+#undef HAVE_STPNCPY
 
 /* Define if you have the strcasecmp function.  */
 #undef HAVE_STRCASECMP
@@ -206,6 +218,9 @@
 
 /* Define if you have the vprintf function.  */
 #undef HAVE_VPRINTF
+
+/* Define if you have the vsnprintf function.  */
+#undef HAVE_VSNPRINTF
 
 /* Define if you have the vsprintf function.  */
 #undef HAVE_VSPRINTF

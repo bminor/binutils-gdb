@@ -22,6 +22,12 @@
 #ifndef GDBARCH_UTILS_H
 #define GDBARCH_UTILS_H
 
+struct gdbarch;
+struct frame_info;
+struct minimal_symbol;
+struct type;
+struct gdbarch_info;
+
 /* gdbarch trace variable */
 extern int gdbarch_debug;
 

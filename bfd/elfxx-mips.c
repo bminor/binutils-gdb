@@ -408,6 +408,7 @@ static asection * mips_elf_rel_dyn_section PARAMS ((bfd *, bfd_boolean));
 static asection * mips_elf_got_section PARAMS ((bfd *, bfd_boolean));
 static struct mips_got_info *mips_elf_got_info
   PARAMS ((bfd *, asection **));
+static long mips_elf_get_global_gotsym_index PARAMS ((bfd *abfd));
 static bfd_vma mips_elf_local_got_index
   PARAMS ((bfd *, bfd *, struct bfd_link_info *, bfd_vma));
 static bfd_vma mips_elf_global_got_index
@@ -1705,6 +1706,29 @@ mips_elf_got_info (abfd, sgotp)
     *sgotp = (sgot->flags & SEC_EXCLUDE) == 0 ? sgot : NULL;
 
   return g;
+}
+
+/* Obtain the lowest dynamic index of a symbol that was assigned a
+   global GOT entry.  */
+static long
+mips_elf_get_global_gotsym_index (abfd)
+     bfd *abfd;
+{
+  asection *sgot;
+  struct mips_got_info *g;
+
+  if (abfd == NULL)
+    return 0;
+  
+  sgot = mips_elf_got_section (abfd, TRUE);
+  if (sgot == NULL || mips_elf_section_data (sgot) == NULL)
+    return 0;
+  
+  g = mips_elf_section_data (sgot)->u.got_info;
+  if (g == NULL || g->global_gotsym == NULL)
+    return 0;
+    
+  return g->global_gotsym->dynindx;
 }
 
 /* Returns the GOT offset at which the indicated address can be found.
@@ -3196,6 +3220,18 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
      and we're going to need it, get it now.  */
   switch (r_type)
     {
+    case R_MIPS_GOT_PAGE:
+    case R_MIPS_GOT_OFST:
+      /* If this symbol got a global GOT entry, we have to decay
+	 GOT_PAGE/GOT_OFST to GOT_DISP/addend.  */
+      local_p = local_p || ! h
+	|| (h->root.dynindx
+	    < mips_elf_get_global_gotsym_index (elf_hash_table (info)
+						->dynobj));
+      if (local_p || r_type == R_MIPS_GOT_OFST)
+	break;
+      /* Fall through.  */
+
     case R_MIPS_CALL16:
     case R_MIPS_GOT16:
     case R_MIPS_GOT_DISP:
@@ -3206,7 +3242,11 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       /* Find the index into the GOT where this value is located.  */
       if (!local_p)
 	{
-	  BFD_ASSERT (addend == 0);
+	  /* GOT_PAGE may take a non-zero addend, that is ignored in a
+	     GOT_PAGE relocation that decays to GOT_DISP because the
+	     symbol turns out to be global.  The addend is then added
+	     as GOT_OFST.  */
+	  BFD_ASSERT (addend == 0 || r_type == R_MIPS_GOT_PAGE);
 	  g = mips_elf_global_got_index (elf_hash_table (info)->dynobj,
 					 input_bfd,
 					 (struct elf_link_hash_entry *) h);
@@ -3220,7 +3260,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
 		 We must initialize this entry in the GOT.  */
 	      bfd *tmpbfd = elf_hash_table (info)->dynobj;
 	      asection *sgot = mips_elf_got_section (tmpbfd, FALSE);
-	      MIPS_ELF_PUT_WORD (tmpbfd, symbol + addend, sgot->contents + g);
+	      MIPS_ELF_PUT_WORD (tmpbfd, symbol, sgot->contents + g);
 	    }
 	}
       else if (r_type == R_MIPS_GOT16 || r_type == R_MIPS_CALL16)
@@ -3439,6 +3479,7 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       /* Fall through.  */
 
     case R_MIPS_GOT_DISP:
+    got_disp:
       value = g;
       overflowed_p = mips_elf_overflow_p (value, 16);
       break;
@@ -3470,6 +3511,11 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       break;
 
     case R_MIPS_GOT_PAGE:
+      /* GOT_PAGE relocations that reference non-local symbols decay
+	 to GOT_DISP.  The corresponding GOT_OFST relocation decays to
+	 0.  */
+      if (! local_p)
+	goto got_disp;
       value = mips_elf_got_page (abfd, input_bfd, info, symbol + addend, NULL);
       if (value == MINUS_ONE)
 	return bfd_reloc_outofrange;
@@ -3479,7 +3525,10 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       break;
 
     case R_MIPS_GOT_OFST:
-      mips_elf_got_page (abfd, input_bfd, info, symbol + addend, &value);
+      if (local_p)
+	mips_elf_got_page (abfd, input_bfd, info, symbol + addend, &value);
+      else
+	value = addend;
       overflowed_p = mips_elf_overflow_p (value, 16);
       break;
 
@@ -5311,6 +5360,44 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 	      h->type = STT_FUNC;
 	    }
 	  break;
+
+	case R_MIPS_GOT_PAGE:
+	  /* If this is a global, overridable symbol, GOT_PAGE will
+	     decay to GOT_DISP, so we'll need a GOT entry for it.  */
+	  if (h == NULL)
+	    break;
+	  else
+	    {
+	      struct mips_elf_link_hash_entry *hmips =
+		(struct mips_elf_link_hash_entry *) h;
+	      
+	      while (hmips->root.root.type == bfd_link_hash_indirect
+		     || hmips->root.root.type == bfd_link_hash_warning)
+		hmips = (struct mips_elf_link_hash_entry *)
+		  hmips->root.root.u.i.link;
+	  
+	      if ((hmips->root.root.type == bfd_link_hash_defined
+		   || hmips->root.root.type == bfd_link_hash_defweak)
+		  && hmips->root.root.u.def.section
+		  && ! (info->shared && ! info->symbolic
+			&& ! (hmips->root.elf_link_hash_flags
+			      & ELF_LINK_FORCED_LOCAL))
+		  /* If we've encountered any other relocation
+		     referencing the symbol, we'll have marked it as
+		     dynamic, and, even though we might be able to get
+		     rid of the GOT entry should we know for sure all
+		     previous relocations were GOT_PAGE ones, at this
+		     point we can't tell, so just keep using the
+		     symbol as dynamic.  This is very important in the
+		     multi-got case, since we don't decide whether to
+		     decay GOT_PAGE to GOT_DISP on a per-GOT basis: if
+		     the symbol is dynamic, we'll need a GOT entry for
+		     every GOT in which the symbol is referenced with
+		     a GOT_PAGE relocation.  */
+		  && hmips->root.dynindx == -1)
+		break;
+	    }
+	  /* Fall through.  */
 
 	case R_MIPS_GOT16:
 	case R_MIPS_GOT_HI16:

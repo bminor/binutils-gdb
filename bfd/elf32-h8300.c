@@ -1,5 +1,5 @@
-/* Generic support for 32-bit ELF
-   Copyright 1993, 1995, 1998, 1999, 2001, 2002
+/* BFD back-end for Renesas H8/300 ELF binaries.
+   Copyright 1993, 1995, 1998, 1999, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.

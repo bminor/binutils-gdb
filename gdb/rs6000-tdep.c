@@ -1646,7 +1646,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
       CORE_ADDR gpr_addr = frame_addr + fdatap->gpr_offset;
       for (i = fdatap->saved_gpr; i < 32; i++)
 	{
-	  get_frame_saved_regs (fi)[i] = gpr_addr;
+	  get_frame_saved_regs (fi)[tdep->ppc_gp0_regnum + i] = gpr_addr;
 	  gpr_addr += wordsize;
 	}
     }
@@ -1892,8 +1892,8 @@ rs6000_register_convert_to_virtual (int n, struct type *type,
 {
   if (TYPE_LENGTH (type) != REGISTER_RAW_SIZE (n))
     {
-      double val = extract_floating (from, REGISTER_RAW_SIZE (n));
-      store_floating (to, TYPE_LENGTH (type), val);
+      double val = deprecated_extract_floating (from, REGISTER_RAW_SIZE (n));
+      deprecated_store_floating (to, TYPE_LENGTH (type), val);
     }
   else
     memcpy (to, from, REGISTER_RAW_SIZE (n));
@@ -1908,8 +1908,8 @@ rs6000_register_convert_to_raw (struct type *type, int n,
 {
   if (TYPE_LENGTH (type) != REGISTER_RAW_SIZE (n))
     {
-      double val = extract_floating (from, TYPE_LENGTH (type));
-      store_floating (to, REGISTER_RAW_SIZE (n), val);
+      double val = deprecated_extract_floating (from, TYPE_LENGTH (type));
+      deprecated_store_floating (to, REGISTER_RAW_SIZE (n), val);
     }
   else
     memcpy (to, from, REGISTER_RAW_SIZE (n));
@@ -2895,7 +2895,10 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_long_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
-  set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
+  if (sysv_abi)
+    set_gdbarch_long_double_bit (gdbarch, 16 * TARGET_CHAR_BIT);
+  else
+    set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_char_signed (gdbarch, 0);
 
   set_gdbarch_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
@@ -2957,7 +2960,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
   set_gdbarch_frame_args_address (gdbarch, rs6000_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, rs6000_frame_args_address);
-  set_gdbarch_saved_pc_after_call (gdbarch, rs6000_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, rs6000_saved_pc_after_call);
 
   /* We can't tell how many args there are
      now that the C compiler delays popping them.  */

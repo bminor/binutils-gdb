@@ -994,7 +994,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_function_start_offset (gdbarch, 0);
 
   set_gdbarch_skip_prologue (gdbarch, m68k_skip_prologue);
-  set_gdbarch_saved_pc_after_call (gdbarch, m68k_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, m68k_saved_pc_after_call);
   set_gdbarch_breakpoint_from_pc (gdbarch, m68k_local_breakpoint_from_pc);
 
   /* Stack grows down. */

@@ -26,6 +26,7 @@
 #define GDBTYPES_H 1
 
 /* Forward declarations for prototypes.  */
+struct field;
 struct block;
 
 /* Codes for `fundamental types'.  This is a monstrosity based on the

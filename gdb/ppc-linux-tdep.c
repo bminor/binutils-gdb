@@ -347,14 +347,17 @@ ppc_linux_frame_saved_pc (struct frame_info *fi)
   if ((get_frame_type (fi) == SIGTRAMP_FRAME))
     {
       CORE_ADDR regs_addr =
-	read_memory_integer (fi->frame + PPC_LINUX_REGS_PTR_OFFSET, 4);
+	read_memory_integer (get_frame_base (fi)
+			     + PPC_LINUX_REGS_PTR_OFFSET, 4);
       /* return the NIP in the regs array */
       return read_memory_integer (regs_addr + 4 * PPC_LINUX_PT_NIP, 4);
     }
-  else if (fi->next && (get_frame_type (fi->next) == SIGTRAMP_FRAME))
+  else if (get_next_frame (fi)
+	   && (get_frame_type (get_next_frame (fi)) == SIGTRAMP_FRAME))
     {
       CORE_ADDR regs_addr =
-	read_memory_integer (fi->next->frame + PPC_LINUX_REGS_PTR_OFFSET, 4);
+	read_memory_integer (get_frame_base (get_next_frame (fi))
+			     + PPC_LINUX_REGS_PTR_OFFSET, 4);
       /* return LNK in the regs array */
       return read_memory_integer (regs_addr + 4 * PPC_LINUX_PT_LNK, 4);
     }
@@ -367,12 +370,12 @@ ppc_linux_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   rs6000_init_extra_frame_info (fromleaf, fi);
 
-  if (fi->next != 0)
+  if (get_next_frame (fi) != 0)
     {
       /* We're called from get_prev_frame_info; check to see if
          this is a signal frame by looking to see if the pc points
          at trampoline code */
-      if (ppc_linux_at_sigtramp_return_path (fi->pc))
+      if (ppc_linux_at_sigtramp_return_path (get_frame_pc (fi)))
 	deprecated_set_frame_type (fi, SIGTRAMP_FRAME);
       else
 	/* FIXME: cagney/2002-11-10: Is this double bogus?  What
@@ -386,7 +389,7 @@ ppc_linux_frameless_function_invocation (struct frame_info *fi)
 {
   /* We'll find the wrong thing if we let 
      rs6000_frameless_function_invocation () search for a signal trampoline */
-  if (ppc_linux_at_sigtramp_return_path (fi->pc))
+  if (ppc_linux_at_sigtramp_return_path (get_frame_pc (fi)))
     return 0;
   else
     return rs6000_frameless_function_invocation (fi);
@@ -399,31 +402,32 @@ ppc_linux_frame_init_saved_regs (struct frame_info *fi)
     {
       CORE_ADDR regs_addr;
       int i;
-      if (fi->saved_regs)
+      if (get_frame_saved_regs (fi))
 	return;
 
       frame_saved_regs_zalloc (fi);
 
       regs_addr =
-	read_memory_integer (fi->frame + PPC_LINUX_REGS_PTR_OFFSET, 4);
-      fi->saved_regs[PC_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_NIP;
-      fi->saved_regs[gdbarch_tdep (current_gdbarch)->ppc_ps_regnum] =
+	read_memory_integer (get_frame_base (fi)
+			     + PPC_LINUX_REGS_PTR_OFFSET, 4);
+      get_frame_saved_regs (fi)[PC_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_NIP;
+      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_ps_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_MSR;
-      fi->saved_regs[gdbarch_tdep (current_gdbarch)->ppc_cr_regnum] =
+      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_cr_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_CCR;
-      fi->saved_regs[gdbarch_tdep (current_gdbarch)->ppc_lr_regnum] =
+      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_lr_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_LNK;
-      fi->saved_regs[gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum] =
+      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_CTR;
-      fi->saved_regs[gdbarch_tdep (current_gdbarch)->ppc_xer_regnum] =
+      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_xer_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_XER;
-      fi->saved_regs[gdbarch_tdep (current_gdbarch)->ppc_mq_regnum] =
+      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_mq_regnum] =
 	regs_addr + 4 * PPC_LINUX_PT_MQ;
       for (i = 0; i < 32; i++)
-	fi->saved_regs[gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + i] =
+	get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + i] =
 	  regs_addr + 4 * PPC_LINUX_PT_R0 + 4 * i;
       for (i = 0; i < 32; i++)
-	fi->saved_regs[FP0_REGNUM + i] = regs_addr + 4 * PPC_LINUX_PT_FPR0 + 8 * i;
+	get_frame_saved_regs (fi)[FP0_REGNUM + i] = regs_addr + 4 * PPC_LINUX_PT_FPR0 + 8 * i;
     }
   else
     rs6000_frame_init_saved_regs (fi);
@@ -434,7 +438,7 @@ ppc_linux_frame_chain (struct frame_info *thisframe)
 {
   /* Kernel properly constructs the frame chain for the handler */
   if ((get_frame_type (thisframe) == SIGTRAMP_FRAME))
-    return read_memory_integer ((thisframe)->frame, 4);
+    return read_memory_integer (get_frame_base (thisframe), 4);
   else
     return rs6000_frame_chain (thisframe);
 }

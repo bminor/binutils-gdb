@@ -43,6 +43,7 @@
 
 static struct link_map_offsets *svr4_fetch_link_map_offsets (void);
 static struct link_map_offsets *legacy_fetch_link_map_offsets (void);
+static int svr4_have_link_map_offsets (void);
 
 /* fetch_link_map_offsets_gdbarch_data is a handle used to obtain the
    architecture specific link map offsets fetching function.  */
@@ -542,9 +543,10 @@ locate_base (void)
   /* Check to see if we have a currently valid address, and if so, avoid
      doing all this work again and just return the cached address.  If
      we have no cached address, try to locate it in the dynamic info
-     section for ELF executables.  */
+     section for ELF executables.  There's no point in doing any of this
+     though if we don't have some link map offsets to work with.  */
 
-  if (debug_base == 0)
+  if (debug_base == 0 && svr4_have_link_map_offsets ())
     {
       if (exec_bfd != NULL
 	  && bfd_get_flavour (exec_bfd) == bfd_target_elf_flavour)
@@ -1273,6 +1275,13 @@ svr4_solib_create_inferior_hook (void)
   /* Relocate the main executable if necessary.  */
   svr4_relocate_main_executable ();
 
+  if (!svr4_have_link_map_offsets ())
+    {
+      warning ("no shared library support for this OS / ABI");
+      return;
+
+    }
+
   if (!enable_break ())
     {
       warning ("shared library handler failed to enable breakpoint");
@@ -1290,7 +1299,7 @@ svr4_solib_create_inferior_hook (void)
      out what we need to know about them. */
 
   clear_proceed_status ();
-  stop_soon_quietly = 1;
+  stop_soon = STOP_QUIETLY;
   stop_signal = TARGET_SIGNAL_0;
   do
     {
@@ -1298,7 +1307,7 @@ svr4_solib_create_inferior_hook (void)
       wait_for_inferior ();
     }
   while (stop_signal != TARGET_SIGNAL_TRAP);
-  stop_soon_quietly = 0;
+  stop_soon = NO_STOP_QUIETLY;
 #endif /* defined(_SCO_DS) */
 }
 
@@ -1390,6 +1399,20 @@ svr4_fetch_link_map_offsets (void)
     }
   else
     return (flmo ());
+}
+
+/* Return 1 if a link map offset fetcher has been defined, 0 otherwise.  */
+static int
+svr4_have_link_map_offsets (void)
+{
+  struct link_map_offsets *(*flmo)(void) =
+    gdbarch_data (current_gdbarch, fetch_link_map_offsets_gdbarch_data);
+  if (flmo == NULL
+      || (flmo == legacy_fetch_link_map_offsets 
+          && legacy_svr4_fetch_link_map_offsets_hook == NULL))
+    return 0;
+  else
+    return 1;
 }
 
 /* set_solib_svr4_fetch_link_map_offsets() is intended to be called by

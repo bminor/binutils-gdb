@@ -93,14 +93,15 @@ dump_insns (struct ui_out *uiout, disassemble_info * di,
 
   /* parts of the symbolic representation of the address */
   int unmapped;
-  char *filename = NULL;
-  char *name = NULL;
   int offset;
   int line;
   struct cleanup *ui_out_chain;
 
   for (pc = low; pc < high;)
     {
+      char *filename = NULL;
+      char *name = NULL;
+
       QUIT;
       if (how_many >= 0)
 	{
@@ -358,7 +359,8 @@ gdb_disassembly (struct ui_out *uiout,
       if (strcmp (target_shortname, "child") == 0
 	  || strcmp (target_shortname, "procfs") == 0
 	  || strcmp (target_shortname, "vxprocess") == 0
-	  || strstr (target_shortname, "-threads") != NULL)
+          || strcmp (target_shortname, "core") == 0
+	  || strstr (target_shortname, "-thread") != NULL)
 	gdb_disassemble_from_exec = 0;	/* It's a child process, read inferior mem */
       else
 	gdb_disassemble_from_exec = 1;	/* It's remote, read the exec file */

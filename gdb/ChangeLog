@@ -1,3 +1,655 @@
+2003-04-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_num_register_names): New variable.
+	(i386_num_mmx_regs): Renamed from mmx_num_regs.
+	(MM0_REGNUM): Remove redundant parentheses in define.
+	(i386_mmx_regnum_p): Use i386_mmx_regnum instead of mmx_num_regs.
+	(i386_fp_regnum_p, i386_fpc_regnum_p, i386_sse_regnum_p,
+	i386_mxcsr_regnum_p): Remove redundant parentheses.
+	(i386_register_name): Use i386_num_register_names.
+	
+	* i386-tdep.c (i386_extract_return_value,
+	i386_store_return_value): Correct check for availability of
+	floating-point registers.
+
+	* i386-tdep.c (i386_frame_num_args): Remove function.
+	(i386_gdbarch_init): Set frame_num_args to frame_num_args_unknown.
+
+	* i386-tdep.c (i386_mmx_regnum_to_fp_regnum): Renamed from
+	mmx_regnum_to_fp_regnum.  Adjust all callers.
+
+	* i386-tdep.c (i386_get_longjmp_target): Use
+	TYPE_LENGTH(builtin_type_void_func_ptr) instead of TARGET_PTR_BIT
+	and TARGET_CHAR_BIT.  Use extract_typed_address instead of
+	extract_address.
+
+2003-04-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* core-regset.c: Update comments to reflect reality.  Re-order
+	includes.
+	(fetch_core_registers): Use switch instead of if.  Remove
+	redundant prototype.
+
+2003-04-18  Jim Blandy  <jimb@redhat.com>
+
+	* s390-tdep.c (s390_frame_align): New function.
+        (s390_gdbarch_init): Register it with the gdbarch object.
+
+2003-04-17  Richard Henderson  <rth@redhat.com>
+
+	* remote.c (minitelnet): Don't redeclare escape_count, echo_check.
+
+2003-04-17  Michael Snyder  <msnyder@redhat.com>
+	    Karen Bennet  <bennet@redhat.com>
+
+	Committed by Elena Zannoni  <ezannoni@redhat.com>
+	* gdb_gcore.sh: New script to create a core dump of a process.
+	
+2003-04-17  Elena Zannoni  <ezannoni@redhat.com>
+
+	* values.c (value_being_returned): Don't fetch the return
+        value if the return type is void.
+
+2003-04-17  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* thread-db.c: Reindented.
+ 
+2003-04-17  Jeff Johnston  <jjohnstn@redhat.com>
+ 
+ 	* gdb_indent.sh: Recognize td_thrhandle_t, td_event_msg_t, 
+ 	td_thr_events_t, td_notify_t, td_thr_iter_f, and td_thrinfo_t
+	as types.
+
+2003-04-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* rs6000-tdep.c (rs6000_gdbarch_init): For the SysV ABI, set
+	the size of ``long double'' to 16, instead of 8.
+
+2003-04-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-nat.c: Add some whitespace to make things more
+	readable.
+	(fetch_register, store_register, fetch_inferior_registers,
+	store_inferior_registers): Get rid of assignment in if-statement.
+	(store_register): Fix typo in error message.
+
+2003-04-16  Andrew Cagney  <cagney@redhat.com>
+
+	* utils.c (xmmalloc): Always allocate something, matches
+	libiberty/xmalloc's semantics.
+	(xmrealloc, xmcalloc): Ditto.
+
+2003-04-16  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (get_prev_frame): Do not initialize "unwind" or "type",
+	update comments.
+	(get_frame_type): Initialize unwind and type when needed.
+	(get_frame_id, frame_register_unwind): Ditto.
+
+2003-04-16  Andrew Cagney  <cagney@redhat.com>
+
+	* NEWS: Mention that sparclet-*-* and sparclite-*-* have been made
+	obsolete.
+	* sparc-tdep.c: Obsolete SPARCLET and SPARCLITE code.
+	* sparcl-stub.c: Obsolete file.
+	* config/sparc/tm-sparclet.h: Obsolete file.
+	* sparclet-stub.c: Obsolete file.
+	* sparclet-rom.c: Obsolete file.
+	* sparcl-tdep.c: Obsolete file.
+	* config/sparc/tm-sparclite.h: Obsolete file.
+	* config/sparc/sparclite.mt: Obsolete file.
+	* config/sparc/sparclet.mt: Obsolete file.
+	* configure.tgt: Make sparclet-*-*, sparclite-*-*, and
+	sparc86x-*-* obsolete.
+
+2003-04-15  David Carlton  <carlton@math.stanford.edu>
+
+	* Makefile.in (SFILES): Add cp-namespace.c.
+	(COMMON_OBS): Add cp-namespace.o.
+	(block.o): Depend on gdb_obstack_h and cp_support_h.
+	(buildsym.o): Depend on cp_support_h.
+	(cp-namespace.o): New.
+	(cp-support.o): Depend on gdb_string_h, demangle_h, gdb_assert_h,
+	gdb_obstack_h, symtab_h, symfile_h, and gdbcmd_h.
+	(dwarf2read.o): Depend on cp_support_h.
+	* jv-lang.c (get_java_class_symtab): Set BLOCK_NAMESPACE.
+	* dwarf2read.c (process_die): Set processing_has_namespace_info,
+	processing_current_namespace.
+	(read_namespace): Update processing_current_namespace; check for
+	anonymous namespaces.
+	(dwarf2_name): New function.
+	(dwarf2_extension): Ditto.
+	* cp-support.h: Update copyright, contributors.
+	Add inclusion guards.
+	Add opaque declaration for structs obstack, block, symbol.
+	(struct using_direct): New struct.
+	Add declarations for cp_find_first_component,
+	cp_entire_prefix_len, processing_has_namespace_info,
+	processing_current_namespace, cp_is_anonymous,
+	cp_add_using_directive, cp_initialize_namespace,
+	cp_finalize_namespace, cp_set_block_scope,
+	cp_scan_for_anonymous_namespaces.
+	* cp-namespace.c: New file.
+	* cp-support.c: Update copyright.
+	Include ctype.h, gdb_assert.h, gdbcmd.h.
+	New variable maint_cplus_cmd_list.
+	(cp_find_first_component): New function.
+	(cp_entire_prefix_len, maint_cplus_command)
+	(first_component_command, _initialize_cp_support): Ditto.
+	* buildsym.c: Include cp-support.h.
+	New variable using_list.
+	(add_symbol_to_list): Check for anonymous namespaces.
+	(finish_block): Set block's scope.
+	(start_symtab): Initialize C++ namespace support.
+	(end_symtab): Finalize C++ namespace support.
+	* block.h: Add opaque declarations for structs
+	block_namespace_info, using_direct, and obstack.
+	Add declarations for block_set_scope and block_set_using.
+	(struct block): Add 'language_specific' member.
+	(BLOCK_NAMESPACE): New macro.
+	* block.c: Include gdb_obstack.h and cp-support.h.
+	(struct block_namespace_info): New struct.
+	(block_set_scope): New function.
+	(block_set_using, block_initialize_namespace): Ditto.
+
+2003-04-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* solib-svr4.c (svr4_have_link_map_offsets): New function.
+	(locate_base): Return early if there aren't any link map offsets.
+	(svr4_solib_create_inferior_hook): Warn if shared library support
+	is unavailable.
+
+2003-04-14  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (symbol_set_names): Add prefix when storing Java names
+	in hash table.  Fix for PR java/1039.
+
+2003-04-14  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (symbol_set_names): Rename 'name' arg to
+	'linkage_name', and 'tmpname' variable to 'linkage_name_copy'.
+	* symtab.h: Change 'name' argument in declaration of
+	symbol_set_names to 'linkage_name'.
+	(SYMBOL_SET_NAMES): Change 'name' argument to 'linkage_name'.
+
+2003-04-14  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (mips_read_sp): Do not apply ADDR_BITS_REMOVE,
+	return the fully sign-extended register value.
+	(get_frame_pointer): Ditto.
+	(mips_pop_frame): Initialize "proc_desc" after checking for a
+	dummy frame.
+
+2003-04-14  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (mips_push_dummy_frame): Delete function.
+	(MASK, PUSH_FP_REGNUM, GEN_REG_SAVE_MASK): Delete macros.
+	(FLOAT_REG_SAVE_MASK, FLOAT_SINGLE_REG_SAVE_MASK): Delete macro.
+	(mips_push_register): Delete function.
+	(mips_dump_tdep): Delete references to GEN_REG_SAVE_MASK and
+	PUSH_FP_REGNUM.
+
+2003-04-14  Jim Blandy  <jimb@redhat.com>
+
+	* symmisc.c: #include "gdb_regex.h".
+	(maintenance_list_symtabs, maintenance_list_psymtabs): New
+	functions.
+	* maint.c (maintenance_list_command): New function.
+	(_initialize_maint_cmds): Register the above as commands.
+	* symtab.h (maintenance_list_symtabs,
+	maintenance_list_psymtabs): New declarations.
+	* cli/cli-cmds.c (maintenancelistlist): New variable.
+	(init_cmd_lists): Initialize it.
+	* cli/cli-cmds.h (maintenancelistlist): New declaration.
+	* gdbcmd.h (maintenancelistlist): New declaration.
+	* Makefile.in (symmisc.o): Update dependencies.
+
+2003-04-14  Elena Zannoni  <ezannoni@redhat.com>
+
+	* s390-nat.c: Include asm/types.h for addr_t.
+
+2003-04-14  Corinna Vinschen  <vinschen@redhat.com>
+
+	* cp-valprint.c (cp_print_class_method): Call unpack_pointer() with
+	actually incoming type.
+
+2003-04-13  Andrew Cagney  <cagney@redhat.com>
+
+	* ppc-linux-tdep.c: Use get_frame_base, get_frame_pc,
+	get_next_frame and get_frame_saved_regs.
+
+2003-04-13  Andrew Cagney  <cagney@redhat.com>
+
+	* reggroups.c (default_register_reggroup_p): Use NUM_REGS instead
+	of gdbarch_num_regs.
+
+2003-04-13  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h: Mention what replaced what in "struct frame_info".
+	* hppa-hpux-tdep.c: Use get_frame_base, get_frame_pc and
+	deprecated_update_frame_base_hack and
+	deprecated_update_frame_pc_hack.
+	* hppa-tdep.c: Ditto.
+
+2003-04-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2expr.h (struct dwarf_expr_context): Remove extra arguments
+	to read_reg and update its comment.  Remove regnum member.
+	* dwarf2expr.c (execute_stack_op): Remove memaddr and expr_lval.
+	Don't call read_reg when setting in_reg.  Call read_reg to get
+	the frame base if it's in a register.  Return the register number
+	on the stack instead of in the context.  Remove extra arguments
+	to read_reg.
+	* dwarf2loc.c (dwarf_expr_read_reg): Remove extra arguments.
+	(dwarf2_evaluate_loc_desc): Call value_from_register.  Expect
+	the register number on the expression stack.
+	(needs_frame_read_reg): Remove extra arguments.
+
+2003-04-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2expr.c (dwarf2_read_address): Renamed from read_address;
+	made non-static.
+	(execute_stack_op): All callers updated.
+	* dwarf2expr.h: Add prototype for dwarf2_read_address.
+	* dwarf2loc.c (find_location_expression): New function.
+	(dwarf_expr_frame_base): Call it.
+	(dwarf2_evaluate_loc_desc): Handle 0-length location expressions.
+	(dwarf2_tracepoint_var_ref): New function, broken out from
+	locexpr_tracepoint_var_ref.
+	(locexpr_tracepoint_var_ref): Call dwarf2_tracepoint_var_ref.
+	Make static.
+	(loclist_read_variable, loclist_read_needs_frame): New functions.
+	(loclist_describe_location, loclist_tracepoint_var_ref): New
+	functions.
+	(dwarf2_loclist_funcs): New struct location_funcs.
+	* dwarf2loc.h (struct dwarf2_loclist_baton): New type.
+	(struct dwarf2_locexpr_baton): Add comments.
+	(dwarf2_loclist_funcs): New extern.
+	* dwarf2read.c (struct comp_unit_head): Remove DIE member, add
+	base_address and base_known.
+	(dwarf_loc_buffer): New variable.
+	(struct dwarf2_pinfo): Add dwarf_loc_buffer and dwarf_loc_size.
+	(DWARF_LOC_BUFFER, DWARF_LOC_SIZE): New macros.
+	(dwarf2_has_info): Initialize dwarf_loc_offset.
+	(dwarf2_build_psymtabs): Read in .debug_loc.
+	(dwarf2_build_psymtabs_hard): Use DWARF_LOC_BUFFER and
+	DWARF_LOC_SIZE.
+	(psymtab_to_symtab_1): Likewise.  Move base address calculation
+	here, from...
+	(dwarf2_get_pc_bounds): ... here.  Use the base address from
+	cu_header.
+	(dwarf2_symbol_mark_computed): Handle location lists.
+
+2003-04-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* minsyms.c (install_minimal_symbols): Only switch to gnu-v3 mode
+	if the linkage name demangled successfully.
+
+2003-04-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* x86-64-tdep.c (att_flavour, intel_flavour, valid_flavours,
+	disassmbly_flavour): Removed.
+
+	* x86-64-tdep.c (gdb_print_insn_x86_64): Removed.
+
+2003-04-13  Mark Kettenis  <kettenis@gnu.org>
+
+	* x86-64-tdep.c (x86_64_breakpoint_from_pc): Removed.
+
+2003-04-12  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h (struct frame_info): Move definition from here ...
+	* frame.c (struct frame_info): ... to here.
+
+2003-04-12  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbthread.h (save_infrun_state): Delete parameter
+	"prev_func_start".
+	(struct thread_info): Delete field "prev_func_start".
+	(load_infrun_state): Ditto.
+	* thread.c (load_infrun_state, save_infrun_state): Update.
+	* infrun.c (prev_func_start): Delete variable.
+	(context_switch, init_wait_for_inferior): Update.
+	(stop_stepping, keep_going): Update.
+
+2003-04-12  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh: Add missing opaque declarations.
+	* gdbarch.h: Regnerate.
+	* symtab.h: Add missing opaque declarations.
+	* value.h, target.h, symfile.h, stabsread.h: Ditto.
+	* x86-64-tdep.h, xmodem.h, monitor.h, typeprint.h: Ditto.
+	* srec.h, solib-svr4.h, source.h, inferior.h: Ditto.
+	* ser-unix.h, serial.h, remote-utils.h, gdbcore.h: Ditto.
+	* ppc-tdep.h, ocd.h, mips-tdep.h, gdbtypes.h: Ditto.
+	* buildsym.h, builtin-regs.h, linespec.h, language.h: Ditto.
+	* i387-tdep.h, gdbthread.h, event-top.h, gdb.h: Ditto.
+	* dwarf2cfi.h, doublest.h, disasm.h, cp-abi.h: Ditto.
+	* cli-out.h, c-lang.h, ax-gdb.h, arch-utils.h: Ditto.
+	* ada-lang.h, config/nm-lynx.h, config/nm-linux.h: Ditto.
+	* config/sparc/tm-sp64.h, config/rs6000/tm-rs6000.h: Ditto.
+	* config/pa/tm-hppah.h, config/m68k/tm-delta68.h: Ditto.
+	* cli/cli-setshow.h, cli/cli-script.h: Ditto.
+
+2003-04-11  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (get_frame_id): Return this frame's "id".
+	(legacy_get_prev_frame): Set prev's frame ID code_addr to the
+	function start.
+	(legacy_saved_regs_this_id): Replace function body with
+	internal-error.
+	(deprecated_frame_xmalloc): Mark the frame ID as valid, use
+	FRAME_OBSTACK_ZALLOC.
+	(create_new_frame): Mark the frame ID as valid.
+
+2003-04-11  Alexandre Oliva  <aoliva@redhat.com>
+
+	* Makefile.in (libbfd_h): Added missing setting.
+	* mips-tdep.c (mips_gdbarch_init): Set disassembler_options
+	according to the selected ABI.
+
+2003-04-11  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb_indent.sh: Recognize pid_t and sigset_t as types.
+
+2003-04-11  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_SAVED_PC_AFTER_CALL): Deprecate
+	SAVED_PC_AFTER_CALL.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* x86-64-tdep.c (x86_64_init_abi): Update.
+	* vax-tdep.c (vax_gdbarch_init): Update.
+	* v850-tdep.c (v850_gdbarch_init): Update.
+	* sparc-tdep.c (sparc_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* mcore-tdep.c (mcore_gdbarch_init): Update.
+	* m68k-tdep.c (m68k_gdbarch_init): Update.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	(ia64_saved_pc_after_call): Update declaration.
+	* i386ly-tdep.c (i386lynx_init_abi): Update.
+	* i386-tdep.c (i386_gdbarch_init): Update.
+	* hppa-tdep.c (hppa_gdbarch_init): Update.
+	* h8300-tdep.c (h8300_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* avr-tdep.c (avr_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* alpha-tdep.c (alpha_gdbarch_init): Update.
+	* ns32knbsd-nat.c (frame_num_args): Update.
+	* ns32k-tdep.c (umax_frame_num_args): Update.
+	* mips-tdep.c (mips_init_frame_pc_first): Update.
+	* infrun.c (step_over_function): Update.
+	* i386-linux-tdep.c (skip_hurd_resolver): Update.
+	* i386-interix-tdep.c (i386_interix_back_one_frame): Update.
+	* config/sparc/tm-sparc.h (DEPRECATED_SAVED_PC_AFTER_CALL): Update.
+	(DEPRECATED_INIT_FRAME_PC_FIRST): Update.
+	* config/rs6000/tm-rs6000.h (DEPRECATED_INIT_FRAME_PC_FIRST): Update.
+	* config/pa/tm-hppa.h (DEPRECATED_SAVED_PC_AFTER_CALL): Update.
+	* arm-linux-tdep.c (skip_hurd_resolver): Update.
+	* arch-utils.c (init_frame_pc_default): Update.
+	* alpha-tdep.c (alpha_init_frame_pc_first): Update.
+	* x86-64-tdep.h (x86_64_linux_saved_pc_after_call): Update
+	declaration.
+	
+2003-04-11  Andrew Cagney  <cagney@redhat.com>
+
+	* i387-tdep.c: Update copyright.
+	(i387_to_double): Delete function.
+	(double_to_i387): Delete function.
+
+2003-04-10  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v-tdep.c (d10v_frame_this_id): Set the code addr to the
+	frame's function's address.  Simplify.
+	(d10v_frame_unwind_cache): Check that the frame's function is
+	non-zero.
+
+2003-04-10  Jim Blandy  <jimb@redhat.com>
+
+	* s390-tdep.c (s390_gdbarch_init): Put back accidentally deleted
+	call to set_gdbarch_deprecated_push_arguments.
+
+2003-04-10  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (fprint_frame_id): New function.
+	(fprint_frame_type, fprint_frame): New function.
+	(frame_pc_unwind, frame_func_unwind): Add/update trace code.
+	(create_sentinel_frame, get_frame_id): Ditto.
+	(frame_id_p, frame_id_eq): Ditto.
+	(frame_id_inner, create_new_frame): Ditto.
+	(legacy_get_prev_frame, get_prev_frame): Ditto.
+	(deprecated_update_frame_pc_hack): Ditto.
+	(frame_register_unwind): Ditto.
+	(deprecated_update_frame_base_hack): Ditto.
+
+2003-04-10  Corinna Vinschen  <vinschen@redhat.com>
+
+	* i386-cygwin-tdep.c (i386_cygwin_frame_chain): New function.
+	(i386_cygwin_init_abi): Set i386_cygwin_frame_chain as new
+	frame_chain function.
+	* Makefile.in: Add dependencies due to above change.
+
+2003-04-10  Corinna Vinschen  <vinschen@redhat.com>
+
+	* blockframe.c (legacy_frame_chain_valid): Move call to
+	DEPRECATED_FRAME_CHAIN_VALID before calls to inside_entry_func and
+	inside_entry_file.
+
+2003-04-09  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h (struct frame_id): Replace "pc" and "base" with
+	"stack_addr" and "code_addr".  Update comments.
+	(frame_id_build): Update parameter names and comment.
+	(struct frame_info): Replace "id_p" and "id" with "this_id".
+	* dummy-frame.c (dummy_frame_this_id): Update.
+	* breakpoint.c (print_one_breakpoint): Update.
+	* frame.c (get_frame_id): Update.
+	(get_frame_base, frame_id_build): Update.
+	(create_sentinel_frame, legacy_get_prev_frame): Update.
+	(deprecated_update_frame_base_hack): Update.
+	(frame_id_p, frame_id_eq): Rework, return 0 when an invalid ID.
+	(frame_id_inner): Ditto.
+
+2003-04-09  Andrew Cagney  <cagney@redhat.com>
+
+	* defs.h (gdb_print_host_address): Make "addr" parameter a
+	pointer constant.
+	* utils.c (gdb_print_host_address): Update.
+
+2003-04-09  Kevin Buettner  <kevinb@redhat.com>
+
+	* rs6000-tdep.c (frame_get_saved_regs): Don't assume that the
+	register number for R0 is 0.
+
+2003-04-09  J. Brobecker  <brobecker@gnat.com>
+
+	* frame.h (struct gdbarch): Add opaque structure definition
+	to avoid a compilation warning on LynxOS 4.0.
+
+2003-04-09  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h (struct frame_info): Delete field "pc".  Replace
+	"pc_unwind_cache" and "pc_unwind_cache_p" with "prev_pc"
+	structure.
+	* frame.c (frame_pc_unwind): Update.
+	(create_sentinel_frame): Do not set "pc".
+	(get_prev_frame): Do not set "pc".  Use frame_pc_unwind.
+	(get_frame_pc): Call frame_pc_unwind.
+	(deprecated_update_frame_pc_hack): Update.
+	(create_new_frame): Use "pc" not "->pc".
+
+2003-04-09  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (get_frame_id): Eliminate code updating "frame".
+	(legacy_get_prev_frame): Ditto.
+	(get_frame_base): Return id.base directly.
+	(deprecated_update_frame_base_hack): Update "id.base".
+	* frame.h (struct frame_info): Delete field "frame".
+
+2003-04-09  Andrew Cagney  <cagney@redhat.com>
+
+	* NEWS: Mention that the "Sequent family" is obsolete.
+	* configure.tgt: Obsolete i[3456]86-sequent-bsd*,
+	i[3456]86-sequent-sysv4*, and i[3456]86-sequent-sysv*.
+	* configure.host: Obsolete i[3456]86-sequent-bsd*,
+	i[3456]86-sequent-sysv4*, and i[3456]86-sequent-sysv*.
+	* config/i386/tm-ptx4.h: Obsolete file.
+	* config/i386/tm-ptx.h: Obsolete file.
+	* symm-tdep.c: Obsolete file.
+	* config/i386/symmetry.mt: Obsolete file.
+	* config/i386/tm-symmetry.h: Obsolete file.
+	* symm-nat.c: Obsolete file.
+	* config/i386/nm-symmetry.h: Obsolete file.
+	* config/i386/xm-symmetry.h: Obsolete file.
+	* config/i386/symmetry.mh: Obsolete file.
+	* config/i386/nm-ptx4.h: Obsolete file.
+	* config/i386/ptx4.mh: Obsolete file.
+	* config/i386/ptx.mt: Obsolete file.
+	* config/i386/ptx.mh: Obsolete file.
+	* config/i386/xm-ptx4.h: Obsolete file.
+	* config/i386/xm-ptx.h: Obsolete file.
+
+2003-04-09  Andrew Cagney  <cagney@redhat.com>
+
+	Obsolete mips*-*-mach3*.
+	* NEWS: Mention that mips*-*-mach3* is obsolete.
+	* m3-nat.c: Obsolete file.
+	* config/nm-m3.h: Obsolete file.
+	* config/mips/tm-mipsm3.h: Obsolete file.
+	* config/mips/mipsm3.mt: Obsolete file.
+	* config/mips/mipsm3.mh: Obsolete file.
+	* config/mips/xm-mipsm3.h: Obsolete file.
+	* mipsm3-nat.c: Obsolete file.
+	* configure.host: Obsolete mips-dec-mach3*.
+	* configure.tgt: Obsolete mips*-*-mach3*.
+
+2003-04-09  Andrew Cagney  <cagney@redhat.com>
+
+	* doublest.h: Update copyright.
+	(deprecated_store_floating, deprecated_extract_floating): Rename
+	store_floating and extract_floating.  Update comments.
+	* doublest.c: Update copyright.
+	(extract_floating_by_length): Replace extract_floating.
+	(store_floating_by_length): Replace store_floating.
+	(deprecated_extract_floating): New function.
+	(deprecated_store_floating): New function.
+	(extract_typed_floating): Call extract_floating_by_length.
+	(store_typed_floating): Call store_floating_by_length.
+	* x86-64-tdep.c (x86_64_store_return_value): Update.
+	* sh-tdep.c (sh3e_sh4_extract_return_value): Update.
+	(sh64_extract_return_value): Update.
+	(sh_sh4_register_convert_to_virtual): Update.
+	(sh_sh64_register_convert_to_virtual): Update.
+	(sh_sh4_register_convert_to_raw): Update.
+	(sh_sh64_register_convert_to_raw): Update.
+	* rs6000-tdep.c (rs6000_register_convert_to_virtual): Update.
+	(rs6000_register_convert_to_raw): Update.
+	* ia64-tdep.c (ia64_register_convert_to_virtual): Update.
+	(ia64_register_convert_to_raw): Update.
+	* config/i386/tm-symmetry.h (REGISTER_CONVERT_TO_RAW): Update.
+	(REGISTER_CONVERT_TO_VIRTUAL): Update.
+	* arm-linux-tdep.c (arm_linux_push_arguments): Update.
+	* alpha-tdep.c (alpha_register_convert_to_virtual): Update.
+	(alpha_register_convert_to_raw): Update.
+
+2003-04-08  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (SAVED_PC_AFTER_CALL): Add a predicate.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* d10v-tdep.c (d10v_saved_pc_after_call): Delete function.
+	(d10v_gdbarch_init): Do not set saved_pc_after_call.
+	* infrun.c (step_over_function): Call SAVED_PC_AFTER_CALL_P
+	conditionally, use frame_pc_unwind as an alternative.  Add
+	comments.
+	* arch-utils.c (init_frame_pc_default): Only call
+	SAVED_PC_AFTER_CALL when available.
+
+2003-04-08  Elena Zannoni  <ezannoni@redhat.com>
+
+        * infrun.c (stop_soon): Rename from stop_soon_quietly.
+	(struct inferior_status): Rename stop_soon_quietly field to stop_soon.
+	(clear_proceed_status): Rename stop_soon_quietly to stop_soon.
+	(start_remote): Ditto.
+	(handle_inferior_event): Ditto.
+	(save_inferior_status): Ditto.
+	(restore_inferior_status): Ditto.
+	* infcmd.c (attach_command): Ditto.
+	* fork-child.c (startup_inferior): Ditto.
+        * inferior.h (stop_soon): Rename from stop_soon_quietly.
+	* alpha-tdep.c (heuristic_proc_start): Ditto.
+	* mips-tdep.c (heuristic_proc_start): Ditto.
+	* solib-svr4.c (svr4_solib_create_inferior_hook): Ditto.
+	* solib-sunos.c (sunos_solib_create_inferior_hook): Ditto.
+	* solib-osf.c (osf_solib_create_inferior_hook): Ditto.
+	* solib-irix.c (irix_solib_create_inferior_hook): Ditto.
+	* remote-vx.c (vx_create_inferior): Ditto.
+
+2003-04-08  Elena Zannoni  <ezannoni@redhat.com>
+
+	* infrun.c (stop_soon_quietly): Make it an enum, to better
+	override the default behavior of handle_inferior_event.
+	(clear_proceed_status): Update uses of stop_soon_quietly to
+	reflect that it is now an enum.
+	(start_remote): Ditto.
+	(handle_inferior_event): Change logic a bit if stop_soon_quietly
+	is set to handle the new GNU/Linux kernel behavior for
+	attach/sigstop.  Update uses of stop_soon_quietly.
+	* inferior.h (enum stop_kind): New enum.
+	* infcmd.c (attach_command): Use STOP_QUIETLY_NO_SIGSTOP.
+	Reset normal handle_inferior_event behavior, afterwards.
+	* fork-child.c (startup_inferior): Update.
+	* alpha-tdep.c (heuristic_proc_start): Update.
+	* solib-svr4.c (svr4_solib_create_inferior_hook): Update.
+	* solib-sunos.c (sunos_solib_create_inferior_hook): Update.
+	* solib-osf.c (osf_solib_create_inferior_hook): Update.
+	* solib-irix.c (irix_solib_create_inferior_hook): Update.
+	* remote-vx.c (vx_create_inferior): Update.
+	* mips-tdep.c (heuristic_proc_start): Update.
+
+2003-04-07  Elena Zannoni  <ezannoni@redhat.com>
+
+	* disasm.c (dump_insns):  Move variables inside loop, or they will
+        be freed more than once, causing wild memory corruptions.
+	(gdb_disassembly): Look for the substring "-thread",
+        instead of "-threads" in the target name, to make sure to find
+        the 'multi-thread' target.  Also, make sure we do the right thing 
+        with the "core" target.
+
+2003-04-07  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_print_fp_register): New function, created from
+	do_fp_register_row().  Registers are now (also) printed as hex.
+	Only one register is printed per row.
+	(mips_print_register, do_fp_register_row): Print floating point
+	registers with mips_print_fp_register().
+
+2003-04-06  Andrew Cagney  <cagney@redhat.com>
+
+	* valprint.h (inspect_it): Add extern declaration.
+	* objc-lang.c (value_nsstring): Avoid assignment inside of "if".
+	(selectors_info, classes_info): Ditto.
+	(find_objc_msgcall): Fix indentation.
+	(objc_printstr): Delete extern declarations.
+
+	* arm-tdep.c (arm_frameless_function_invocation): Fix typo.
+
+2003-04-06  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h (legacy_frame_chain_valid): Rename frame_chain_valid.
+	Update comment.
+	* frame.c (legacy_saved_regs_this_id): Update.
+	(legacy_get_prev_frame): Update.
+	* xstormy16-tdep.c: Update comment.
+	* sparc-tdep.c (sparc_frame_chain): Update comment.
+	* blockframe.c (legacy_frame_chain_valid): Update.
+
 2003-04-06  Andrew Cagney  <cagney@redhat.com>
 
 	* valprint.c (val_print_type_code_int): Delete #ifdef

@@ -104,8 +104,8 @@ extern int hppa_in_solib_return_trampoline (CORE_ADDR, char *);
 #endif
 
 #if !GDB_MULTI_ARCH
-#undef	SAVED_PC_AFTER_CALL
-#define SAVED_PC_AFTER_CALL(frame) hppa_saved_pc_after_call (frame)
+#undef	DEPRECATED_SAVED_PC_AFTER_CALL
+#define DEPRECATED_SAVED_PC_AFTER_CALL(frame) hppa_saved_pc_after_call (frame)
 extern CORE_ADDR hppa_saved_pc_after_call (struct frame_info *);
 #endif
 

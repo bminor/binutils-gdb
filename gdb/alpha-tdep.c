@@ -65,7 +65,6 @@ static gdbarch_frame_args_address_ftype alpha_frame_args_address;
 static gdbarch_frame_locals_address_ftype alpha_frame_locals_address;
 
 static gdbarch_skip_prologue_ftype alpha_skip_prologue;
-static gdbarch_saved_pc_after_call_ftype alpha_saved_pc_after_call;
 
 static gdbarch_fix_call_dummy_ftype alpha_fix_call_dummy;
 
@@ -453,8 +452,10 @@ alpha_frame_init_saved_regs (struct frame_info *fi)
 static CORE_ADDR
 alpha_init_frame_pc_first (int fromleaf, struct frame_info *prev)
 {
-  return (fromleaf ? SAVED_PC_AFTER_CALL (get_next_frame (prev)) 
-	  : get_next_frame (prev) ? DEPRECATED_FRAME_SAVED_PC (get_next_frame (prev))
+  return (fromleaf
+	  ? DEPRECATED_SAVED_PC_AFTER_CALL (get_next_frame (prev)) 
+	  : get_next_frame (prev)
+	  ? DEPRECATED_FRAME_SAVED_PC (get_next_frame (prev))
 	  : read_pc ());
 }
 
@@ -554,10 +555,10 @@ heuristic_proc_start (CORE_ADDR pc)
     if (start_pc < fence)
       {
 	/* It's not clear to me why we reach this point when
-	   stop_soon_quietly, but with this test, at least we
+	   stop_soon, but with this test, at least we
 	   don't print out warnings for every child forked (eg, on
 	   decstation).  22apr93 rich@cygnus.com.  */
-	if (!stop_soon_quietly)
+	if (stop_soon == NO_STOP_QUIETLY)
 	  {
 	    static int blurb_printed = 0;
 
@@ -1458,8 +1459,8 @@ alpha_register_convert_to_virtual (int regnum, struct type *valtype,
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
     {
-      double d = extract_floating (raw_buffer, REGISTER_RAW_SIZE (regnum));
-      store_floating (virtual_buffer, TYPE_LENGTH (valtype), d);
+      double d = deprecated_extract_floating (raw_buffer, REGISTER_RAW_SIZE (regnum));
+      deprecated_store_floating (virtual_buffer, TYPE_LENGTH (valtype), d);
     }
   else if (TYPE_CODE (valtype) == TYPE_CODE_INT && TYPE_LENGTH (valtype) <= 4)
     {
@@ -1484,8 +1485,8 @@ alpha_register_convert_to_raw (struct type *valtype, int regnum,
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
     {
-      double d = extract_floating (virtual_buffer, TYPE_LENGTH (valtype));
-      store_floating (raw_buffer, REGISTER_RAW_SIZE (regnum), d);
+      double d = deprecated_extract_floating (virtual_buffer, TYPE_LENGTH (valtype));
+      deprecated_store_floating (raw_buffer, REGISTER_RAW_SIZE (regnum), d);
     }
   else if (TYPE_CODE (valtype) == TYPE_CODE_INT && TYPE_LENGTH (valtype) <= 4)
     {
@@ -1834,7 +1835,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch,
                                     generic_frameless_function_invocation_not);
 
-  set_gdbarch_saved_pc_after_call (gdbarch, alpha_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, alpha_saved_pc_after_call);
 
   set_gdbarch_deprecated_frame_chain (gdbarch, alpha_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, alpha_frame_saved_pc);

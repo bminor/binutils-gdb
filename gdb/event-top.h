@@ -24,6 +24,8 @@
 #ifndef EVENT_TOP_H
 #define EVENT_TOP_H
 
+struct cmd_list_element;
+
 /* Stack for prompts.  Each prompt is composed as a prefix, a prompt
    and a suffix.  The prompt to be displayed at any given time is the
    one on top of the stack.  A stack is necessary because of cases in

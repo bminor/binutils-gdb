@@ -1629,7 +1629,7 @@ enum bfd_architecture
   bfd_arch_m88k,      /* Motorola 88xxx */
   bfd_arch_m98k,      /* Motorola 98xxx */
   bfd_arch_pyramid,   /* Pyramid Technology */
-  bfd_arch_h8300,     /* Hitachi H8/300 */
+  bfd_arch_h8300,     /* Renesas H8/300 (formerly Hitachi H8/300) */
 #define bfd_mach_h8300   1
 #define bfd_mach_h8300h  2
 #define bfd_mach_h8300s  3
@@ -1674,8 +1674,8 @@ enum bfd_architecture
   bfd_arch_z8k,       /* Zilog Z8000 */
 #define bfd_mach_z8001         1
 #define bfd_mach_z8002         2
-  bfd_arch_h8500,     /* Hitachi H8/500 */
-  bfd_arch_sh,        /* Hitachi SH */
+  bfd_arch_h8500,     /* Renesas H8/500 (formerly Hitachi H8/500) */
+  bfd_arch_sh,        /* Renesas SH (formerly Hitachi SH) */
 #define bfd_mach_sh            1
 #define bfd_mach_sh2        0x20
 #define bfd_mach_sh_dsp     0x2d
@@ -2598,7 +2598,7 @@ field in the instruction.  */
   BFD_RELOC_ARM_GOTOFF,
   BFD_RELOC_ARM_GOTPC,
 
-/* Hitachi SH relocs.  Not all of these appear in object files.  */
+/* Renesas SH relocs.  Not all of these appear in object files.  */
   BFD_RELOC_SH_PCDISP8BY2,
   BFD_RELOC_SH_PCDISP12BY2,
   BFD_RELOC_SH_IMM4,

@@ -26,6 +26,9 @@
 
 struct symbol;
 struct symtab;
+struct block_namespace_info;
+struct using_direct;
+struct obstack;
 
 /* All of the name-scope contours of the program
    are represented by `struct block' objects.
@@ -74,6 +77,22 @@ struct block
 
   struct block *superblock;
 
+  /* Used for language-specific info.  */
+
+  union
+  {
+    struct
+    {
+      /* Contains information about namespace-related info relevant to
+	 this block: using directives and the current namespace
+	 scope.  */
+      
+      struct block_namespace_info *namespace;
+    }
+    cplus_specific;
+  }
+  language_specific;
+
   /* Version of GCC used to compile the function corresponding
      to this block, or 0 if not compiled with GCC.  When possible,
      GCC should be compatible with the native compiler, or if that
@@ -120,6 +139,7 @@ struct block
 #define BLOCK_FUNCTION(bl)	(bl)->function
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
 #define BLOCK_GCC_COMPILED(bl)	(bl)->gcc_compile_flag
+#define BLOCK_NAMESPACE(bl)   (bl)->language_specific.cplus_specific.namespace
 #define BLOCK_HASHTABLE(bl)	(bl)->hashtable
 
 /* For blocks without a hashtable (BLOCK_HASHTABLE (bl) == 0) only.  */
@@ -179,5 +199,12 @@ extern struct blockvector *blockvector_for_pc_sect (CORE_ADDR, asection *,
 extern struct block *block_for_pc (CORE_ADDR);
 
 extern struct block *block_for_pc_sect (CORE_ADDR, asection *);
+
+extern void block_set_scope (struct block *block, const char *scope,
+			     struct obstack *obstack);
+
+extern void block_set_using (struct block *block,
+			     struct using_direct *using,
+			     struct obstack *obstack);
 
 #endif /* BLOCK_H */

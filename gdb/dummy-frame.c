@@ -397,7 +397,8 @@ dummy_frame_this_id (struct frame_info *next_frame,
       (*this_id) = null_frame_id;
       return;
     }
-  (*this_prologue_cache) = find_dummy_frame ((*this_id).pc, (*this_id).base);
+  (*this_prologue_cache) = find_dummy_frame ((*this_id).code_addr,
+					     (*this_id).stack_addr);
 }
 
 static struct frame_unwind dummy_frame_unwind =

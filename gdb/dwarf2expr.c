@@ -170,13 +170,13 @@ read_sleb128 (unsigned char *buf, unsigned char *buf_end, LONGEST * r)
    BUF_END.  The address is returned, and *BYTES_READ is set to the
    number of bytes read from BUF.  */
 
-static CORE_ADDR
-read_address (unsigned char *buf, unsigned char *buf_end, int *bytes_read)
+CORE_ADDR
+dwarf2_read_address (unsigned char *buf, unsigned char *buf_end, int *bytes_read)
 {
   CORE_ADDR result;
 
   if (buf_end - buf < TARGET_ADDR_BIT / TARGET_CHAR_BIT)
-    error ("read_address: Corrupted DWARF expression.");
+    error ("dwarf2_read_address: Corrupted DWARF expression.");
 
   *bytes_read = TARGET_ADDR_BIT / TARGET_CHAR_BIT;
   result = extract_address (buf, TARGET_ADDR_BIT / TARGET_CHAR_BIT);
@@ -231,11 +231,10 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
   while (op_ptr < op_end)
     {
       enum dwarf_location_atom op = *op_ptr++;
-      CORE_ADDR result, memaddr;
+      CORE_ADDR result;
       ULONGEST uoffset, reg;
       LONGEST offset;
       int bytes_read;
-      enum lval_type expr_lval;
 
       ctx->in_reg = 0;
 
@@ -277,7 +276,7 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	  break;
 
 	case DW_OP_addr:
-	  result = read_address (op_ptr, op_end, &bytes_read);
+	  result = dwarf2_read_address (op_ptr, op_end, &bytes_read);
 	  op_ptr += bytes_read;
 	  break;
 
@@ -361,19 +360,8 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	    error ("DWARF-2 expression error: DW_OP_reg operations must be "
 		   "used alone.");
 
-	  /* FIXME drow/2003-02-21: This call to read_reg could be pushed
-	     into the evaluator's caller by changing the semantics for in_reg.
-	     Then we wouldn't need to return an lval_type and a memaddr.  */
-	  result = (ctx->read_reg) (ctx->baton, op - DW_OP_reg0, &expr_lval,
-				    &memaddr);
-
-	  if (expr_lval == lval_register)
-	    {
-	      ctx->regnum = op - DW_OP_reg0;
-	      ctx->in_reg = 1;
-	    }
-	  else
-	    result = memaddr;
+	  result = op - DW_OP_reg0;
+	  ctx->in_reg = 1;
 
 	  break;
 
@@ -383,16 +371,8 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	    error ("DWARF-2 expression error: DW_OP_reg operations must be "
 		   "used alone.");
 
-	  result = (ctx->read_reg) (ctx->baton, reg, &expr_lval, &memaddr);
-
-	  if (expr_lval == lval_register)
-	    {
-	      ctx->regnum = reg;
-	      ctx->in_reg = 1;
-	    }
-	  else
-	    result = memaddr;
-
+	  result = reg;
+	  ctx->in_reg = 1;
 	  break;
 
 	case DW_OP_breg0:
@@ -429,8 +409,7 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	case DW_OP_breg31:
 	  {
 	    op_ptr = read_sleb128 (op_ptr, op_end, &offset);
-	    result = (ctx->read_reg) (ctx->baton, op - DW_OP_breg0,
-				      &expr_lval, &memaddr);
+	    result = (ctx->read_reg) (ctx->baton, op - DW_OP_breg0);
 	    result += offset;
 	  }
 	  break;
@@ -438,7 +417,7 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	  {
 	    op_ptr = read_uleb128 (op_ptr, op_end, &reg);
 	    op_ptr = read_sleb128 (op_ptr, op_end, &offset);
-	    result = (ctx->read_reg) (ctx->baton, reg, &expr_lval, &memaddr);
+	    result = (ctx->read_reg) (ctx->baton, reg);
 	    result += offset;
 	  }
 	  break;
@@ -460,16 +439,19 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 	    (ctx->get_frame_base) (ctx->baton, &datastart, &datalen);
 	    dwarf_expr_eval (ctx, datastart, datalen);
 	    result = dwarf_expr_fetch (ctx, 0);
-	    if (! ctx->in_reg)
+	    if (ctx->in_reg)
+	      result = (ctx->read_reg) (ctx->baton, result);
+	    else
 	      {
 		char *buf = alloca (TARGET_ADDR_BIT / TARGET_CHAR_BIT);
 		int bytes_read;
 
 		(ctx->read_mem) (ctx->baton, buf, result,
 				 TARGET_ADDR_BIT / TARGET_CHAR_BIT);
-		result = read_address (buf,
-				       buf + TARGET_ADDR_BIT / TARGET_CHAR_BIT,
-				       &bytes_read);
+		result = dwarf2_read_address (buf,
+					      buf + (TARGET_ADDR_BIT
+						     / TARGET_CHAR_BIT),
+					      &bytes_read);
 	      }
 	    result = result + offset;
 	    ctx->stack_len = before_stack_len;
@@ -528,9 +510,10 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 
 		(ctx->read_mem) (ctx->baton, buf, result,
 				 TARGET_ADDR_BIT / TARGET_CHAR_BIT);
-		result = read_address (buf,
-				       buf + TARGET_ADDR_BIT / TARGET_CHAR_BIT,
-				       &bytes_read);
+		result = dwarf2_read_address (buf,
+					      buf + (TARGET_ADDR_BIT
+						     / TARGET_CHAR_BIT),
+					      &bytes_read);
 	      }
 	      break;
 
@@ -540,9 +523,10 @@ execute_stack_op (struct dwarf_expr_context *ctx, unsigned char *op_ptr,
 		int bytes_read;
 
 		(ctx->read_mem) (ctx->baton, buf, result, *op_ptr++);
-		result = read_address (buf,
-				       buf + TARGET_ADDR_BIT / TARGET_CHAR_BIT,
-				       &bytes_read);
+		result = dwarf2_read_address (buf,
+					      buf + (TARGET_ADDR_BIT
+						     / TARGET_CHAR_BIT),
+					      &bytes_read);
 	      }
 	      break;
 

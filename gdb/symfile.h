@@ -26,7 +26,7 @@
 /* This file requires that you first include "bfd.h".  */
 
 /* Opaque declarations.  */
-
+struct objfile;
 struct obstack;
 struct block;
 

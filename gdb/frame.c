@@ -40,6 +40,97 @@
 #include "command.h"
 #include "gdbcmd.h"
 
+/* We keep a cache of stack frames, each of which is a "struct
+   frame_info".  The innermost one gets allocated (in
+   wait_for_inferior) each time the inferior stops; current_frame
+   points to it.  Additional frames get allocated (in get_prev_frame)
+   as needed, and are chained through the next and prev fields.  Any
+   time that the frame cache becomes invalid (most notably when we
+   execute something, but also if we change how we interpret the
+   frames (e.g. "set heuristic-fence-post" in mips-tdep.c, or anything
+   which reads new symbols)), we should call reinit_frame_cache.  */
+
+struct frame_info
+{
+  /* Level of this frame.  The inner-most (youngest) frame is at level
+     0.  As you move towards the outer-most (oldest) frame, the level
+     increases.  This is a cached value.  It could just as easily be
+     computed by counting back from the selected frame to the inner
+     most frame.  */
+  /* NOTE: cagney/2002-04-05: Perhaphs a level of ``-1'' should be
+     reserved to indicate a bogus frame - one that has been created
+     just to keep GDB happy (GDB always needs a frame).  For the
+     moment leave this as speculation.  */
+  int level;
+
+  /* The frame's type.  */
+  /* FIXME: cagney/2003-04-02: Should instead be returning
+     ->unwind->type.  Unfortunatly, legacy code is still explicitly
+     setting the type using the method deprecated_set_frame_type.
+     Eliminate that method and this field can be eliminated.  */
+  enum frame_type type;
+
+  /* For each register, address of where it was saved on entry to the
+     frame, or zero if it was not saved on entry to this frame.  This
+     includes special registers such as pc and fp saved in special
+     ways in the stack frame.  The SP_REGNUM is even more special, the
+     address here is the sp for the previous frame, not the address
+     where the sp was saved.  */
+  /* Allocated by frame_saved_regs_zalloc () which is called /
+     initialized by DEPRECATED_FRAME_INIT_SAVED_REGS(). */
+  CORE_ADDR *saved_regs;	/*NUM_REGS + NUM_PSEUDO_REGS*/
+
+  /* Anything extra for this structure that may have been defined in
+     the machine dependent files. */
+  /* Allocated by frame_extra_info_zalloc () which is called /
+     initialized by DEPRECATED_INIT_EXTRA_FRAME_INFO */
+  struct frame_extra_info *extra_info;
+
+  /* If dwarf2 unwind frame informations is used, this structure holds
+     all related unwind data.  */
+  struct context *context;
+
+  /* The frame's low-level unwinder and corresponding cache.  The
+     low-level unwinder is responsible for unwinding register values
+     for the previous frame.  The low-level unwind methods are
+     selected based on the presence, or otherwize, of register unwind
+     information such as CFI.  */
+  void *prologue_cache;
+  const struct frame_unwind *unwind;
+
+  /* Cached copy of the previous frame's resume address.  */
+  struct {
+    int p;
+    CORE_ADDR value;
+  } prev_pc;
+  
+  /* Cached copy of the previous frame's function address.  */
+  struct
+  {
+    CORE_ADDR addr;
+    int p;
+  } prev_func;
+  
+  /* This frame's ID.  */
+  struct
+  {
+    int p;
+    struct frame_id value;
+  } this_id;
+  
+  /* The frame's high-level base methods, and corresponding cache.
+     The high level base methods are selected based on the frame's
+     debug info.  */
+  const struct frame_base *base;
+  void *base_cache;
+
+  /* Pointers to the next (down, inner, younger) and previous (up,
+     outer, older) frame_info's in the frame cache.  */
+  struct frame_info *next; /* down, inner, younger */
+  int prev_p;
+  struct frame_info *prev; /* up, outer, older */
+};
+
 /* Flag to control debugging.  */
 
 static int frame_debug;
@@ -47,6 +138,77 @@ static int frame_debug;
 /* Flag to indicate whether backtraces should stop at main.  */
 
 static int backtrace_below_main;
+
+static void
+fprint_frame_id (struct ui_file *file, struct frame_id id)
+{
+  fprintf_unfiltered (file, "{stack=0x%s,code=0x%s}",
+		      paddr_nz (id.stack_addr),
+		      paddr_nz (id.code_addr));
+}
+
+static void
+fprint_frame_type (struct ui_file *file, enum frame_type type)
+{
+  switch (type)
+    {
+    case UNKNOWN_FRAME:
+      fprintf_unfiltered (file, "UNKNOWN_FRAME");
+      return;
+    case NORMAL_FRAME:
+      fprintf_unfiltered (file, "NORMAL_FRAME");
+      return;
+    case DUMMY_FRAME:
+      fprintf_unfiltered (file, "DUMMY_FRAME");
+      return;
+    case SIGTRAMP_FRAME:
+      fprintf_unfiltered (file, "SIGTRAMP_FRAME");
+      return;
+    default:
+      fprintf_unfiltered (file, "<unknown type>");
+      return;
+    };
+}
+
+static void
+fprint_frame (struct ui_file *file, struct frame_info *fi)
+{
+  if (fi == NULL)
+    {
+      fprintf_unfiltered (file, "<NULL frame>");
+      return;
+    }
+  fprintf_unfiltered (file, "{");
+  fprintf_unfiltered (file, "level=%d", fi->level);
+  fprintf_unfiltered (file, ",");
+  fprintf_unfiltered (file, "type=");
+  fprint_frame_type (file, fi->type);
+  fprintf_unfiltered (file, ",");
+  fprintf_unfiltered (file, "unwind=");
+  if (fi->unwind != NULL)
+    gdb_print_host_address (fi->unwind, file);
+  else
+    fprintf_unfiltered (file, "<unknown>");
+  fprintf_unfiltered (file, ",");
+  fprintf_unfiltered (file, "pc=");
+  if (fi->next != NULL && fi->next->prev_pc.p)
+    fprintf_unfiltered (file, "0x%s", paddr_nz (fi->next->prev_pc.value));
+  else
+    fprintf_unfiltered (file, "<unknown>");
+  fprintf_unfiltered (file, ",");
+  fprintf_unfiltered (file, "id=");
+  if (fi->this_id.p)
+    fprint_frame_id (file, fi->this_id.value);
+  else
+    fprintf_unfiltered (file, "<unknown>");
+  fprintf_unfiltered (file, ",");
+  fprintf_unfiltered (file, "func=");
+  if (fi->next != NULL && fi->next->prev_func.p)
+    fprintf_unfiltered (file, "0x%s", paddr_nz (fi->next->prev_func.addr));
+  else
+    fprintf_unfiltered (file, "<unknown>");
+  fprintf_unfiltered (file, "}");
+}
 
 /* Return a frame uniq ID that can be used to, later, re-find the
    frame.  */
@@ -58,56 +220,118 @@ get_frame_id (struct frame_info *fi)
     {
       return null_frame_id;
     }
-  if (!fi->id_p)
+  if (!fi->this_id.p)
     {
       gdb_assert (!legacy_frame_p (current_gdbarch));
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog, "{ get_frame_id (fi=%d) ",
+			    fi->level);
+      /* Find the unwinder.  */
+      if (fi->unwind == NULL)
+	{
+	  fi->unwind = frame_unwind_find_by_pc (current_gdbarch,
+						get_frame_pc (fi));
+	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
+	     type in the frame, the unwinder's type should be returned
+	     directly.  Unfortunatly, legacy code, called by
+	     legacy_get_prev_frame, explicitly set the frames type
+	     using the method deprecated_set_frame_type().  */
+	  gdb_assert (fi->unwind->type != UNKNOWN_FRAME);
+	  fi->type = fi->unwind->type;
+	}
       /* Find THIS frame's ID.  */
-      fi->unwind->this_id (fi->next, &fi->prologue_cache, &fi->id);
-      fi->id_p = 1;
-      /* FIXME: cagney/2002-12-18: Instead of this hack, should only
-	 store the frame ID in PREV_FRAME.  */
-      fi->frame = fi->id.base;
+      fi->unwind->this_id (fi->next, &fi->prologue_cache, &fi->this_id.value);
+      fi->this_id.p = 1;
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame_id (gdb_stdlog, fi->this_id.value);
+	  fprintf_unfiltered (gdb_stdlog, " }\n");
+	}
     }
-  return frame_id_build (fi->frame, get_frame_pc (fi));
+  return fi->this_id.value;
 }
 
 const struct frame_id null_frame_id; /* All zeros.  */
 
 struct frame_id
-frame_id_build (CORE_ADDR base, CORE_ADDR func_or_pc)
+frame_id_build (CORE_ADDR stack_addr, CORE_ADDR code_addr)
 {
   struct frame_id id;
-  id.base = base;
-  id.pc = func_or_pc;
+  id.stack_addr = stack_addr;
+  id.code_addr = code_addr;
   return id;
 }
 
 int
 frame_id_p (struct frame_id l)
 {
-  /* The .func can be NULL but the .base cannot.  */
-  return (l.base != 0);
+  int p;
+  /* The .code can be NULL but the .stack cannot.  */
+  p = (l.stack_addr != 0);
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "{ frame_id_p (l=");
+      fprint_frame_id (gdb_stdlog, l);
+      fprintf_unfiltered (gdb_stdlog, ") -> %d }\n", p);
+    }
+  return p;
 }
 
 int
 frame_id_eq (struct frame_id l, struct frame_id r)
 {
-  /* If .base is different, the frames are different.  */
-  if (l.base != r.base)
-    return 0;
-  /* Add a test to check that the frame ID's are for the same function
-     here.  */
-  return 1;
+  int eq;
+  if (l.stack_addr == 0 || r.stack_addr == 0)
+    /* Like a NaN, if either ID is invalid, the result is false.  */
+    eq = 0;
+  else if (l.stack_addr != r.stack_addr)
+    /* If .stack addresses are different, the frames are different.  */
+    eq = 0;
+  else if (l.code_addr == 0 || r.code_addr == 0)
+    /* A zero code addr is a wild card, always succeed.  */
+    eq = 1;
+  else if (l.code_addr == r.code_addr)
+    /* The .stack and .code are identical, the ID's are identical.  */
+    eq = 1;
+  else
+    /* FIXME: cagney/2003-04-06: This should be zero.  Can't yet do
+       this because most frame ID's are not being initialized
+       correctly.  */
+    eq = 1;
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "{ frame_id_eq (l=");
+      fprint_frame_id (gdb_stdlog, l);
+      fprintf_unfiltered (gdb_stdlog, ",r=");
+      fprint_frame_id (gdb_stdlog, r);
+      fprintf_unfiltered (gdb_stdlog, ") -> %d }\n", eq);
+    }
+  return eq;
 }
 
 int
 frame_id_inner (struct frame_id l, struct frame_id r)
 {
-  /* Only return non-zero when strictly inner than.  Note that, per
-     comment in "frame.h", there is some fuzz here.  Frameless
-     functions are not strictly inner than (same .base but different
-     .func).  */
-  return INNER_THAN (l.base, r.base);
+  int inner;
+  if (l.stack_addr == 0 || r.stack_addr == 0)
+    /* Like NaN, any operation involving an invalid ID always fails.  */
+    inner = 0;
+  else
+    /* Only return non-zero when strictly inner than.  Note that, per
+       comment in "frame.h", there is some fuzz here.  Frameless
+       functions are not strictly inner than (same .stack but
+       different .code).  */
+    inner = INNER_THAN (l.stack_addr, r.stack_addr);
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "{ frame_id_inner (l=");
+      fprint_frame_id (gdb_stdlog, l);
+      fprintf_unfiltered (gdb_stdlog, ",r=");
+      fprint_frame_id (gdb_stdlog, r);
+      fprintf_unfiltered (gdb_stdlog, ") -> %d }\n", inner);
+    }
+  return inner;
 }
 
 struct frame_info *
@@ -142,7 +366,7 @@ frame_find_by_id (struct frame_id id)
 CORE_ADDR
 frame_pc_unwind (struct frame_info *this_frame)
 {
-  if (!this_frame->pc_unwind_cache_p)
+  if (!this_frame->prev_pc.p)
     {
       CORE_ADDR pc;
       if (gdbarch_unwind_pc_p (current_gdbarch))
@@ -184,10 +408,15 @@ frame_pc_unwind (struct frame_info *this_frame)
 	}
       else
 	internal_error (__FILE__, __LINE__, "No gdbarch_unwind_pc method");
-      this_frame->pc_unwind_cache = pc;
-      this_frame->pc_unwind_cache_p = 1;
+      this_frame->prev_pc.value = pc;
+      this_frame->prev_pc.p = 1;
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "{ frame_pc_unwind (this_frame=%d) -> 0x%s }\n",
+			    this_frame->level,
+			    paddr_nz (this_frame->prev_pc.value));
     }
-  return this_frame->pc_unwind_cache;
+  return this_frame->prev_pc.value;
 }
 
 CORE_ADDR
@@ -197,6 +426,10 @@ frame_func_unwind (struct frame_info *fi)
     {
       fi->prev_func.p = 1;
       fi->prev_func.addr = get_pc_function_start (frame_pc_unwind (fi));
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "{ frame_func_unwind (fi=%d) -> 0x%s }\n",
+			    fi->level, paddr_nz (fi->prev_func.addr));
     }
   return fi->prev_func.addr;
 }
@@ -262,6 +495,13 @@ frame_register_unwind (struct frame_info *frame, int regnum,
 {
   struct frame_unwind_cache *cache;
 
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "{ frame_register_unwind (frame=%d,regnum=\"%s\",...) ",
+			  frame->level, frame_map_regnum_to_name (regnum));
+    }
+
   /* Require all but BUFFERP to be valid.  A NULL BUFFERP indicates
      that the value proper does not need to be fetched.  */
   gdb_assert (optimizedp != NULL);
@@ -276,12 +516,46 @@ frame_register_unwind (struct frame_info *frame, int regnum,
      detected the problem before calling here.  */
   gdb_assert (frame != NULL);
 
+  /* Find the unwinder.  */
+  if (frame->unwind == NULL)
+    {
+      frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
+					       get_frame_pc (frame));
+      /* FIXME: cagney/2003-04-02: Rather than storing the frame's
+	 type in the frame, the unwinder's type should be returned
+	 directly.  Unfortunatly, legacy code, called by
+	 legacy_get_prev_frame, explicitly set the frames type using
+	 the method deprecated_set_frame_type().  */
+      gdb_assert (frame->unwind->type != UNKNOWN_FRAME);
+      frame->type = frame->unwind->type;
+    }
+
   /* Ask this frame to unwind its register.  See comment in
      "frame-unwind.h" for why NEXT frame and this unwind cace are
      passed in.  */
   frame->unwind->prev_register (frame->next, &frame->prologue_cache, regnum,
 				optimizedp, lvalp, addrp, realnump, bufferp);
 
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "->");
+      fprintf_unfiltered (gdb_stdlog, " *optimizedp=%d", (*optimizedp));
+      fprintf_unfiltered (gdb_stdlog, " *lvalp=%d", (int) (*lvalp));
+      fprintf_unfiltered (gdb_stdlog, " *addrp=0x%s", paddr_nz ((*addrp)));
+      fprintf_unfiltered (gdb_stdlog, " *bufferp=");
+      if (bufferp == NULL)
+	fprintf_unfiltered (gdb_stdlog, "<NULL>");
+      else
+	{
+	  int i;
+	  const char *buf = bufferp;
+	  fprintf_unfiltered (gdb_stdlog, "[");
+	  for (i = 0; i < register_size (current_gdbarch, regnum); i++)
+	    fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
+	  fprintf_unfiltered (gdb_stdlog, "]");
+	}
+      fprintf_unfiltered (gdb_stdlog, " }\n");
+    }
 }
 
 void
@@ -521,18 +795,16 @@ create_sentinel_frame (struct regcache *regcache)
   /* Link this frame back to itself.  The frame is self referential
      (the unwound PC is the same as the pc), so make it so.  */
   frame->next = frame;
-  /* Always unwind the PC as part of creating this frame.  This
-     ensures that the frame's PC points at something valid.  */
-  /* FIXME: cagney/2003-01-10: Problem here.  Unwinding a sentinel
-     frame's PC may require information such as the frame's thread's
-     stop reason.  Is it possible to get to that?  */
-  /* FIXME: cagney/2003-04-04: Once ->pc is eliminated, this
-     assignment can go away.  */
-  frame->pc = frame_pc_unwind (frame);
   /* Make the sentinel frame's ID valid, but invalid.  That way all
      comparisons with it should fail.  */
-  frame->id_p = 1;
-  frame->id = null_frame_id;
+  frame->this_id.p = 1;
+  frame->this_id.value = null_frame_id;
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "{ create_sentinel_frame (...) -> ");
+      fprint_frame (gdb_stdlog, frame);
+      fprintf_unfiltered (gdb_stdlog, " }\n");
+    }
   return frame;
 }
 
@@ -767,70 +1039,9 @@ legacy_saved_regs_this_id (struct frame_info *next_frame,
 			   void **this_prologue_cache,
 			   struct frame_id *id)
 {
-  int fromleaf;
-  CORE_ADDR base;
-  CORE_ADDR pc;
-
-  if (frame_relative_level (next_frame) < 0)
-    {
-      /* FIXME: cagney/2003-03-14: We've got the extra special case of
-	 unwinding a sentinel frame, the PC of which is pointing at a
-	 stack dummy.  Fake up the dummy frame's ID using the same
-	 sequence as is found a traditional unwinder.  */
-      (*id) = frame_id_build (read_fp (), read_pc ());
-      return;
-    }
-
-  /* Start out by assuming it's NULL.  */
-  (*id) = null_frame_id;
-
-  if (frame_relative_level (next_frame) <= 0)
-    /* FIXME: 2002-11-09: Frameless functions can occure anywhere in
-       the frame chain, not just the inner most frame!  The generic,
-       per-architecture, frame code should handle this and the below
-       should simply be removed.  */
-    fromleaf = FRAMELESS_FUNCTION_INVOCATION (next_frame);
-  else
-    fromleaf = 0;
-
-  if (fromleaf)
-    /* A frameless inner-most frame.  The `FP' (which isn't an
-       architecture frame-pointer register!) of the caller is the same
-       as the callee.  */
-    /* FIXME: 2002-11-09: There isn't any reason to special case this
-       edge condition.  Instead the per-architecture code should hande
-       it locally.  */
-    base = get_frame_base (next_frame);
-  else
-    {
-      /* Two macros defined in tm.h specify the machine-dependent
-         actions to be performed here.
-
-         First, get the frame's chain-pointer.
-
-         If that is zero, the frame is the outermost frame or a leaf
-         called by the outermost frame.  This means that if start
-         calls main without a frame, we'll return 0 (which is fine
-         anyway).
-
-         Nope; there's a problem.  This also returns when the current
-         routine is a leaf of main.  This is unacceptable.  We move
-         this to after the ffi test; I'd rather have backtraces from
-         start go curfluy than have an abort called from main not show
-         main.  */
-      gdb_assert (DEPRECATED_FRAME_CHAIN_P ());
-      base = DEPRECATED_FRAME_CHAIN (next_frame);
-
-      if (!frame_chain_valid (base, next_frame))
-	return;
-    }
-  if (base == 0)
-    return;
-
-  /* FIXME: cagney/2002-06-08: This should probably return the frame's
-     function and not the PC (a.k.a. resume address).  */
-  pc = frame_pc_unwind (next_frame);
-  (*id) = frame_id_build (base, pc);
+  /* legacy_get_prev_frame() always sets ->this_id.p, hence this is
+     never needed.  */
+  internal_error (__FILE__, __LINE__, "legacy_saved_regs_this_id() called");
 }
 	
 const struct frame_unwind legacy_saved_regs_unwinder = {
@@ -974,23 +1185,38 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 {
   struct frame_info *fi;
 
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "{ create_new_frame (addr=0x%s, pc=0x%s) ",
+			  paddr_nz (addr), paddr_nz (pc));
+    }
+
   fi = frame_obstack_zalloc (sizeof (struct frame_info));
 
   fi->next = create_sentinel_frame (current_regcache);
 
   /* Select/initialize both the unwind function and the frame's type
      based on the PC.  */
-  fi->unwind = frame_unwind_find_by_pc (current_gdbarch, fi->pc);
+  fi->unwind = frame_unwind_find_by_pc (current_gdbarch, pc);
   if (fi->unwind->type != UNKNOWN_FRAME)
     fi->type = fi->unwind->type;
   else
     fi->type = frame_type_from_pc (pc);
 
+  fi->this_id.p = 1;
   deprecated_update_frame_base_hack (fi, addr);
   deprecated_update_frame_pc_hack (fi, pc);
 
   if (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ())
     DEPRECATED_INIT_EXTRA_FRAME_INFO (0, fi);
+
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "-> ");
+      fprint_frame (gdb_stdlog, fi);
+      fprintf_unfiltered (gdb_stdlog, " }\n");
+    }
 
   return fi;
 }
@@ -1020,6 +1246,8 @@ flush_cached_frames (void)
   current_frame = NULL;		/* Invalidate cache */
   select_frame (NULL);
   annotate_frames_invalid ();
+  if (frame_debug)
+    fprintf_unfiltered (gdb_stdlog, "{ flush_cached_frames () }\n");
 }
 
 /* Flush the frame cache, and start a new one if necessary.  */
@@ -1045,6 +1273,9 @@ legacy_get_prev_frame (struct frame_info *this_frame)
   CORE_ADDR address = 0;
   struct frame_info *prev;
   int fromleaf;
+
+  /* Don't frame_debug print legacy_get_prev_frame() here, just
+     confuses the output.  */
 
   /* Allocate the new frame.
 
@@ -1080,7 +1311,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
   prev->type = UNKNOWN_FRAME;
 
   /* A legacy frame's ID is always computed here.  Mark it as valid.  */
-  prev->id_p = 1;
+  prev->this_id.p = 1;
 
   /* Handle sentinel frame unwind as a special case.  */
   if (this_frame->level < 0)
@@ -1109,16 +1340,21 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	  /* The allocated PREV_FRAME will be reclaimed when the frame
 	     obstack is next purged.  */
 	  if (frame_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"Outermost frame - unwound PC zero\n");
+	    {
+	      fprintf_unfiltered (gdb_stdlog, "-> ");
+	      fprint_frame (gdb_stdlog, NULL);
+	      fprintf_unfiltered (gdb_stdlog,
+				  " // unwound legacy PC zero }\n");
+	    }
 	  return NULL;
 	}
 
       /* Set the unwind functions based on that identified PC.  Ditto
          for the "type" but strongly prefer the unwinder's frame type.  */
-      prev->unwind = frame_unwind_find_by_pc (current_gdbarch, prev->pc);
+      prev->unwind = frame_unwind_find_by_pc (current_gdbarch,
+					      get_frame_pc (prev));
       if (prev->unwind->type == UNKNOWN_FRAME)
-	prev->type = frame_type_from_pc (prev->pc);
+	prev->type = frame_type_from_pc (get_frame_pc (prev));
       else
 	prev->type = prev->unwind->type;
 
@@ -1142,7 +1378,8 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	     dummy ID from the next frame.  Note that this method uses
 	     frame_register_unwind to obtain the register values
 	     needed to determine the dummy frame's ID.  */
-	  prev->id = gdbarch_unwind_dummy_id (current_gdbarch, this_frame);
+	  prev->this_id.value = gdbarch_unwind_dummy_id (current_gdbarch,
+							 this_frame);
 	}
       else
 	{
@@ -1151,15 +1388,19 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	     using the same sequence as is found a traditional
 	     unwinder.  Once all architectures supply the
 	     unwind_dummy_id method, this code can go away.  */
-	  prev->id = frame_id_build (read_fp (), read_pc ());
+	  prev->this_id.value = frame_id_build (read_fp (), read_pc ());
 	}
 
       /* Check that the unwound ID is valid.  */
-      if (!frame_id_p (prev->id))
+      if (!frame_id_p (prev->this_id.value))
 	{
 	  if (frame_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"Outermost legacy sentinel frame - unwound frame ID invalid\n");
+	    {
+	      fprintf_unfiltered (gdb_stdlog, "-> ");
+	      fprint_frame (gdb_stdlog, NULL);
+	      fprintf_unfiltered (gdb_stdlog,
+				  " // unwound legacy ID invalid }\n");
+	    }
 	  return NULL;
 	}
 
@@ -1171,12 +1412,6 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	 sentinel frame's frame ID to a `sentinel'.  Leave it until
 	 after the switch to storing the frame ID, instead of the
 	 frame base, in the frame object.  */
-
-      /* FIXME: cagney/2002-12-18: Instead of this hack, should only
-	 store the frame ID in PREV_FRAME.  */
-      /* FIXME: cagney/2003-04-04: Once ->frame is eliminated, this
-         assignment can go.  */
-      prev->frame = prev->id.base;
 
       /* Link it in.  */
       this_frame->prev = prev;
@@ -1192,6 +1427,17 @@ legacy_get_prev_frame (struct frame_info *this_frame)
       if (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ())
 	{
 	  DEPRECATED_INIT_EXTRA_FRAME_INFO (0, prev);
+	}
+
+      if (prev->type == NORMAL_FRAME)
+	prev->this_id.value.code_addr
+	  = get_pc_function_start (prev->this_id.value.code_addr);
+
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, prev);
+	  fprintf_unfiltered (gdb_stdlog, " } // legacy innermost frame\n");
 	}
       return prev;
     }
@@ -1246,11 +1492,29 @@ legacy_get_prev_frame (struct frame_info *this_frame)
       gdb_assert (DEPRECATED_FRAME_CHAIN_P ());
       address = DEPRECATED_FRAME_CHAIN (this_frame);
 
-      if (!frame_chain_valid (address, this_frame))
-	return 0;
+      if (!legacy_frame_chain_valid (address, this_frame))
+	{
+	  if (frame_debug)
+	    {
+	      fprintf_unfiltered (gdb_stdlog, "-> ");
+	      fprint_frame (gdb_stdlog, NULL);
+	      fprintf_unfiltered (gdb_stdlog,
+				  " // legacy frame chain invalid }\n");
+	    }
+	  return NULL;
+	}
     }
   if (address == 0)
-    return 0;
+    {
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog,
+			      " // legacy frame chain NULL }\n");
+	}
+      return NULL;
+    }
 
   /* Link in the already allocated prev frame.  */
   this_frame->prev = prev;
@@ -1355,6 +1619,13 @@ legacy_get_prev_frame (struct frame_info *this_frame)
     {
       this_frame->prev = NULL;
       obstack_free (&frame_cache_obstack, prev);
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog,
+			      " // legacy this.id == prev.id }\n");
+	}
       return NULL;
     }
 
@@ -1370,6 +1641,15 @@ legacy_get_prev_frame (struct frame_info *this_frame)
   if (prev->unwind->type != UNKNOWN_FRAME)
     {
       prev->type = prev->unwind->type;
+      if (prev->type == NORMAL_FRAME)
+	prev->this_id.value.code_addr
+	  = get_pc_function_start (prev->this_id.value.code_addr);
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, prev);
+	  fprintf_unfiltered (gdb_stdlog, " } // legacy with unwound type\n");
+	}
       return prev;
     }
 
@@ -1406,6 +1686,17 @@ legacy_get_prev_frame (struct frame_info *this_frame)
          go away.  */
     }
 
+  if (prev->type == NORMAL_FRAME)
+    prev->this_id.value.code_addr
+      = get_pc_function_start (prev->this_id.value.code_addr);
+
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "-> ");
+      fprint_frame (gdb_stdlog, prev);
+      fprintf_unfiltered (gdb_stdlog, " } // legacy with confused type\n");
+    }
+
   return prev;
 }
 
@@ -1417,6 +1708,16 @@ struct frame_info *
 get_prev_frame (struct frame_info *this_frame)
 {
   struct frame_info *prev_frame;
+
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "{ get_prev_frame (this_frame=");
+      if (this_frame != NULL)
+	fprintf_unfiltered (gdb_stdlog, "%d", this_frame->level);
+      else
+	fprintf_unfiltered (gdb_stdlog, "<NULL>");
+      fprintf_unfiltered (gdb_stdlog, ") ");
+    }
 
   /* Return the inner-most frame, when the caller passes in NULL.  */
   /* NOTE: cagney/2002-11-09: Not sure how this would happen.  The
@@ -1467,14 +1768,21 @@ get_prev_frame (struct frame_info *this_frame)
        allow unwinds past main(), that just happens.  */
     {
       if (frame_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Outermost frame - inside main func.\n");
+	fprintf_unfiltered (gdb_stdlog, "-> NULL // inside main func }\n");
       return NULL;
     }
 
   /* Only try to do the unwind once.  */
   if (this_frame->prev_p)
-    return this_frame->prev;
+    {
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, this_frame->prev);
+	  fprintf_unfiltered (gdb_stdlog, " // cached \n");
+	}
+      return this_frame->prev;
+    }
   this_frame->prev_p = 1;
 
 #if 0
@@ -1502,8 +1810,11 @@ get_prev_frame (struct frame_info *this_frame)
       && inside_entry_file (get_frame_pc (this_frame)))
     {
       if (frame_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Outermost frame - inside entry file\n");
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog, " // inside entry file }\n");
+	}
       return NULL;
     }
 #endif
@@ -1520,8 +1831,11 @@ get_prev_frame (struct frame_info *this_frame)
       && inside_entry_func (get_frame_pc (this_frame)))
     {
       if (frame_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Outermost frame - inside entry func\n");
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog, "// inside entry func }\n");
+	}
       return NULL;
     }
 
@@ -1530,9 +1844,6 @@ get_prev_frame (struct frame_info *this_frame)
   if (legacy_frame_p (current_gdbarch))
     {
       prev_frame = legacy_get_prev_frame (this_frame);
-      if (frame_debug && prev_frame == NULL)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Outermost frame - legacy_get_prev_frame NULL.\n");
       return prev_frame;
     }
 
@@ -1542,8 +1853,11 @@ get_prev_frame (struct frame_info *this_frame)
   if (this_frame->level >= 0 && !frame_id_p (get_frame_id (this_frame)))
     {
       if (frame_debug)
- 	fprintf_filtered (gdb_stdlog,
- 			  "Outermost frame - this ID is NULL\n");
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog, " // this ID is NULL }\n");
+	}
       return NULL;
     }
 
@@ -1599,35 +1913,25 @@ get_prev_frame (struct frame_info *this_frame)
      because (well ignoring the PPC) a dummy frame can be located
      using THIS_FRAME's frame ID.  */
 
-  /* FIXME: cagney/2003-04-04: Once ->pc is eliminated, this
-     assignment can go away.  */
-  prev_frame->pc = frame_pc_unwind (this_frame);
-  if (prev_frame->pc == 0)
+  if (frame_pc_unwind (this_frame) == 0)
     {
       /* The allocated PREV_FRAME will be reclaimed when the frame
 	 obstack is next purged.  */
       if (frame_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Outermost frame - unwound PC zero\n");
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog, " // unwound PC zero }\n");
+	}
       return NULL;
     }
 
-  /* Set the unwind functions based on that identified PC.  */
-  prev_frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
-						prev_frame->pc);
+  /* Don't yet compute ->unwind (and hence ->type).  It is computed
+     on-demand in get_frame_type, frame_register_unwind, and
+     get_frame_id.  */
 
-  /* FIXME: cagney/2003-04-02: Rather than storing the frame's type in
-     the frame, the unwinder's type should be returned directly.
-     Unfortunatly, legacy code, called by legacy_get_prev_frame,
-     explicitly set the frames type using the method
-     deprecated_set_frame_type().  */
-  gdb_assert (prev_frame->unwind->type != UNKNOWN_FRAME);
-  prev_frame->type = prev_frame->unwind->type;
-
-  /* Can the frame's type and unwinder be computed on demand?  That
-     would make a frame's creation really really lite!  */
-
-  /* The prev's frame's ID is computed by demand in get_frame_id().  */
+  /* Don't yet compute the frame's ID.  It is computed on-demand by
+     get_frame_id().  */
 
   /* The unwound frame ID is validate at the start of this function,
      as part of the logic to decide if that frame should be further
@@ -1645,13 +1949,21 @@ get_prev_frame (struct frame_info *this_frame)
   this_frame->prev = prev_frame;
   prev_frame->next = this_frame;
 
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "-> ");
+      fprint_frame (gdb_stdlog, prev_frame);
+      fprintf_unfiltered (gdb_stdlog, " }\n");
+    }
+
   return prev_frame;
 }
 
 CORE_ADDR
 get_frame_pc (struct frame_info *frame)
 {
-  return frame->pc;
+  gdb_assert (frame->next != NULL);
+  return frame_pc_unwind (frame->next);
 }
 
 static int
@@ -1682,13 +1994,7 @@ find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
 CORE_ADDR
 get_frame_base (struct frame_info *fi)
 {
-  if (!fi->id_p)
-    {
-      /* HACK: Force the ID code to (indirectly) initialize the
-         ->frame pointer.  */
-      get_frame_id (fi);
-    }
-  return fi->frame;
+  return get_frame_id (fi).stack_addr;
 }
 
 /* High-level offsets into the frame.  Used by the debug info.  */
@@ -1763,6 +2069,20 @@ get_frame_type (struct frame_info *frame)
   if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES
       && deprecated_frame_in_dummy (frame))
     return DUMMY_FRAME;
+  if (frame->unwind == NULL)
+    {
+      /* Initialize the frame's unwinder because it is that which
+         provides the frame's type.  */
+      frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
+					       get_frame_pc (frame));
+      /* FIXME: cagney/2003-04-02: Rather than storing the frame's
+	 type in the frame, the unwinder's type should be returned
+	 directly.  Unfortunatly, legacy code, called by
+	 legacy_get_prev_frame, explicitly set the frames type using
+	 the method deprecated_set_frame_type().  */
+      gdb_assert (frame->unwind->type != UNKNOWN_FRAME);
+      frame->type = frame->unwind->type;
+    }
   if (frame->type == UNKNOWN_FRAME)
     return NORMAL_FRAME;
   else
@@ -1792,8 +2112,10 @@ frame_extra_info_zalloc (struct frame_info *fi, long size)
 void
 deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
 {
-  /* See comment in "frame.h".  */
-  frame->pc = pc;
+  if (frame_debug)
+    fprintf_unfiltered (gdb_stdlog,
+			"{ deprecated_update_frame_pc_hack (frame=%d,pc=0x%s) }\n",
+			frame->level, paddr_nz (pc));
   /* NOTE: cagney/2003-03-11: Some architectures (e.g., Arm) are
      maintaining a locally allocated frame object.  Since such frame's
      are not in the frame chain, it isn't possible to assume that the
@@ -1803,16 +2125,20 @@ deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
       /* While we're at it, update this frame's cached PC value, found
 	 in the next frame.  Oh for the day when "struct frame_info"
 	 is opaque and this hack on hack can just go away.  */
-      frame->next->pc_unwind_cache = pc;
-      frame->next->pc_unwind_cache_p = 1;
+      frame->next->prev_pc.value = pc;
+      frame->next->prev_pc.p = 1;
     }
 }
 
 void
 deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
 {
+  if (frame_debug)
+    fprintf_unfiltered (gdb_stdlog,
+			"{ deprecated_update_frame_base_hack (frame=%d,base=0x%s) }\n",
+			frame->level, paddr_nz (base));
   /* See comment in "frame.h".  */
-  frame->frame = base;
+  frame->this_id.value.stack_addr = base;
 }
 
 void
@@ -1859,8 +2185,8 @@ deprecated_set_frame_context (struct frame_info *fi,
 struct frame_info *
 deprecated_frame_xmalloc (void)
 {
-  struct frame_info *frame = XMALLOC (struct frame_info);
-  memset (frame, 0, sizeof (struct frame_info));
+  struct frame_info *frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
+  frame->this_id.p = 1;
   return frame;
 }
 

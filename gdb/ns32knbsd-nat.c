@@ -295,7 +295,9 @@ frame_num_args (struct frame_info *fi)
   enter_addr = ns32k_get_enter_addr (fi->pc);
   if (enter_addr = 0)
     return (-1);
-  argp = enter_addr == 1 ? SAVED_PC_AFTER_CALL (fi) : DEPRECATED_FRAME_SAVED_PC (fi);
+  argp = (enter_addr == 1
+	  ? DEPRECATED_SAVED_PC_AFTER_CALL (fi)
+	  : DEPRECATED_FRAME_SAVED_PC (fi));
   for (i = 0; i < 16; i++)
     {
       /*

@@ -186,7 +186,7 @@ proc test_startup {} {
     set main_id $expect_out(1,string)
 
     # Check that we can continue and create the first thread.
-    gdb_test "break thread1" "Breakpoint .* file .*$srcdir.*"
+    gdb_test "break thread1" "Breakpoint .* file .*$srcfile.*"
     gdb_test "continue" \
 	    "Continuing.*Breakpoint .*, thread1 \\(arg=0xfeedface\\).*at.*$srcfile.*" \
 	    "Continue to creation of first thread"
@@ -199,7 +199,7 @@ proc test_startup {} {
 
     # Check that we can continue and create the second thread,
     # ignoring the first thread for the moment.
-    gdb_test "break thread2" "Breakpoint .* file .*$srcdir.*"
+    gdb_test "break thread2" "Breakpoint .* file .*$srcfile.*"
     gdb_test "continue" \
 	    "Continuing.*Breakpoint .*, thread2 \\(arg=0xdeadbeef\\).*at.*$srcfile.*" \
 	    "Continue to creation of second thread"

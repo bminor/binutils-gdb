@@ -23,6 +23,10 @@
 #if !defined (VALUE_H)
 #define VALUE_H 1
 
+struct ui_file;
+struct expression;
+struct symbol;
+struct type;
 struct regcache;
 struct block;
 

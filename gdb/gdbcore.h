@@ -24,6 +24,8 @@
 #if !defined (GDBCORE_H)
 #define GDBCORE_H 1
 
+struct type;
+
 #include "bfd.h"
 
 /* Return the name of the executable file as a string.

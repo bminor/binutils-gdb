@@ -2138,6 +2138,57 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 	  }
 	  goto next;
 
+	case O (O_DAA, SB):
+	  /* Decimal Adjust Addition.  This is for BCD arithmetic.  */
+	  res = GET_B_REG (code->src.reg);
+	  if (!c && (0 <= (res >>  4) && (res >>  4) <= 9) 
+	      && !h && (0 <= (res & 0xf) && (res & 0xf) <= 9))
+	    res = res;		/* Value added == 0.  */
+	  else if (!c && (0  <= (res >>  4) && (res >>  4) <=  8) 
+		   && !h && (10 <= (res & 0xf) && (res & 0xf) <= 15))
+	    res = res + 0x6;		/* Value added == 6.  */
+	  else if (!c && (0 <= (res >>  4) && (res >>  4) <= 9) 
+		   && h && (0 <= (res & 0xf) && (res & 0xf) <= 3))
+	    res = res + 0x6;		/* Value added == 6.  */
+	  else if (!c && (10 <= (res >>  4) && (res >>  4) <= 15) 
+		   && !h && (0  <= (res & 0xf) && (res & 0xf) <=  9))
+	    res = res + 0x60;		/* Value added == 60.  */
+	  else if (!c && (9  <= (res >>  4) && (res >>  4) <= 15) 
+		   && !h && (10 <= (res & 0xf) && (res & 0xf) <= 15))
+	    res = res + 0x66;		/* Value added == 66.  */
+	  else if (!c && (10 <= (res >>  4) && (res >>  4) <= 15) 
+		   && h && (0  <= (res & 0xf) && (res & 0xf) <=  3))
+	    res = res + 0x66;		/* Value added == 66.  */
+	  else if (c && (1 <= (res >>  4) && (res >>  4) <= 2) 
+		   && !h && (0 <= (res & 0xf) && (res & 0xf) <= 9))
+	    res = res + 0x160;		/* Value added == 60, plus 'carry'.  */
+	  else if (c && (1  <= (res >>  4) && (res >>  4) <=  2) 
+		   && !h && (10 <= (res & 0xf) && (res & 0xf) <= 15))
+	    res = res + 0x166;		/* Value added == 66, plus 'carry'.  */
+	  else if (c && (1 <= (res >>  4) && (res >>  4) <= 3) 
+		   && h && (0 <= (res & 0xf) && (res & 0xf) <= 3))
+	    res = res + 0x166;		/* Value added == 66, plus 'carry'.  */
+
+	  goto alu8;
+
+	case O (O_DAS, SB):
+	  /* Decimal Adjust Subtraction.  This is for BCD arithmetic.  */
+	  res = GET_B_REG (code->src.reg); /* FIXME fetch, fetch2... */
+	  if (!c && (0 <= (res >>  4) && (res >>  4) <= 9) 
+	      && !h && (0 <= (res & 0xf) && (res & 0xf) <= 9))
+	    res = res;		/* Value added == 0.  */
+	  else if (!c && (0 <= (res >>  4) && (res >>  4) <=  8) 
+		   && h && (6 <= (res & 0xf) && (res & 0xf) <= 15))
+	    res = res + 0xfa;		/* Value added == 0xfa.  */
+	  else if (c && (7 <= (res >>  4) && (res >>  4) <= 15) 
+		   && !h && (0 <= (res & 0xf) && (res & 0xf) <=  9))
+	    res = res + 0xa0;		/* Value added == 0xa0.  */
+	  else if (c && (6 <= (res >>  4) && (res >>  4) <= 15) 
+		   && h && (6 <= (res & 0xf) && (res & 0xf) <= 15))
+	    res = res + 0x9a;		/* Value added == 0x9a.  */
+
+	  goto alu8;
+
 	default:
 	illegal:
 	  cpu.state = SIM_STATE_STOPPED;

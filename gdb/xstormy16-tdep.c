@@ -748,9 +748,8 @@ xstormy16_frame_init_saved_regs (struct frame_info *fi)
 
 /* Function: xstormy16_frame_saved_pc
    Returns the return address for the selected frame. 
-   Called by frame_info, frame_chain_valid, and sometimes by
-   get_prev_frame.
-*/
+   Called by frame_info, legacy_frame_chain_valid, and sometimes by
+   get_prev_frame.  */
 
 static CORE_ADDR
 xstormy16_frame_saved_pc (struct frame_info *fi)
@@ -1057,7 +1056,7 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				     xstormy16_frame_init_saved_regs);
   set_gdbarch_deprecated_frame_chain (gdbarch, xstormy16_frame_chain);
   set_gdbarch_deprecated_get_saved_register (gdbarch, xstormy16_get_saved_register);
-  set_gdbarch_saved_pc_after_call (gdbarch, xstormy16_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, xstormy16_saved_pc_after_call);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, xstormy16_frame_saved_pc);
   set_gdbarch_skip_prologue (gdbarch, xstormy16_skip_prologue);
   set_gdbarch_deprecated_frame_chain_valid (gdbarch, xstormy16_frame_chain_valid);

@@ -53,7 +53,7 @@ i386lynx_saved_pc_after_call (struct frame_info *frame)
 static void
 i386lynx_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  set_gdbarch_saved_pc_after_call (gdbarch, i386lynx_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, i386lynx_saved_pc_after_call);
 }
 
 

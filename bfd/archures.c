@@ -163,7 +163,7 @@ DESCRIPTION
 .  bfd_arch_m88k,      {* Motorola 88xxx *}
 .  bfd_arch_m98k,      {* Motorola 98xxx *}
 .  bfd_arch_pyramid,   {* Pyramid Technology *}
-.  bfd_arch_h8300,     {* Hitachi H8/300 *}
+.  bfd_arch_h8300,     {* Renesas H8/300 (formerly Hitachi H8/300) *}
 .#define bfd_mach_h8300   1
 .#define bfd_mach_h8300h  2
 .#define bfd_mach_h8300s  3
@@ -208,8 +208,8 @@ DESCRIPTION
 .  bfd_arch_z8k,       {* Zilog Z8000 *}
 .#define bfd_mach_z8001		1
 .#define bfd_mach_z8002		2
-.  bfd_arch_h8500,     {* Hitachi H8/500 *}
-.  bfd_arch_sh,        {* Hitachi SH *}
+.  bfd_arch_h8500,     {* Renesas H8/500 (formerly Hitachi H8/500) *}
+.  bfd_arch_sh,        {* Renesas SH (formerly Hitachi SH) *}
 .#define bfd_mach_sh            1
 .#define bfd_mach_sh2        0x20
 .#define bfd_mach_sh_dsp     0x2d

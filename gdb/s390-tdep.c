@@ -1664,6 +1664,15 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 }
 
 
+static CORE_ADDR
+s390_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  /* Both the 32- and 64-bit ABI's say that the stack pointer should
+     always be aligned on an eight-byte boundary.  */
+  return (addr & -8);
+}
+
+
 static int
 s390_use_struct_convention (int gcc_p, struct type *value_type)
 {
@@ -1843,7 +1852,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* DEPRECATED_FRAME_CHAIN takes a frame's nominal address and
      produces the frame's chain-pointer. */
   set_gdbarch_deprecated_frame_chain (gdbarch, s390_frame_chain);
-  set_gdbarch_saved_pc_after_call (gdbarch, s390_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, s390_saved_pc_after_call);
   set_gdbarch_register_byte (gdbarch, s390_register_byte);
   set_gdbarch_pc_regnum (gdbarch, S390_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, S390_SP_REGNUM);
@@ -1862,8 +1871,11 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Parameters for inferior function calls.  */
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
+  set_gdbarch_frame_align (gdbarch, s390_frame_align);
   set_gdbarch_deprecated_push_arguments (gdbarch, s390_push_arguments);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+  set_gdbarch_deprecated_push_return_address (gdbarch,
+                                              s390_push_return_address);
   set_gdbarch_sizeof_call_dummy_words (gdbarch,
                                        sizeof (s390_call_dummy_words));
   set_gdbarch_call_dummy_words (gdbarch, s390_call_dummy_words);

@@ -24,16 +24,41 @@
 /* This header is private to the DWARF-2 reader.  It is shared between
    dwarf2read.c and dwarf2loc.c.  */
 
-/* The symbol location baton type used by the DWARF-2 reader (i.e.
-   SYMBOL_LOCATION_BATON for a LOC_COMPUTED symbol).  */
+/* The symbol location baton types used by the DWARF-2 reader (i.e.
+   SYMBOL_LOCATION_BATON for a LOC_COMPUTED symbol).  "struct
+   dwarf2_locexpr_baton" is for a symbol with a single location
+   expression; "struct dwarf2_loclist_baton" is for a symbol with a
+   location list.  */
 
 struct dwarf2_locexpr_baton
 {
+  /* Pointer to the start of the location expression.  */
   unsigned char *data;
+
+  /* Length of the location expression.  */
   unsigned short size;
+
+  /* The objfile containing the symbol whose location we're computing.  */
+  struct objfile *objfile;
+};
+
+struct dwarf2_loclist_baton
+{
+  /* The initial base address for the location list, based on the compilation
+     unit.  */
+  CORE_ADDR base_address;
+
+  /* Pointer to the start of the location list.  */
+  unsigned char *data;
+
+  /* Length of the location list.  */
+  unsigned short size;
+
+  /* The objfile containing the symbol whose location we're computing.  */
   struct objfile *objfile;
 };
 
 extern struct location_funcs dwarf2_locexpr_funcs;
+extern struct location_funcs dwarf2_loclist_funcs;
 
 #endif

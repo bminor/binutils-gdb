@@ -1,3 +1,88 @@
+2003-04-16  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* configure.in (funcs, AC_CHECK_FUNCS): Add snprintf and
+	vsnprintf.
+	* snprintf.c, vsnprintf.c: New files.
+	* Makefile.in (CFILES): Add snprintf.c and vsnprintf.c.
+	(CONFIGURED_OFILES): Add snprintf.o and vsnprintf.o.
+	Regenerate dependencies.
+
+	* functions.texi, configure, config.in: Regenerated.
+
+2003-04-15  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* mempcpy.c, stpcpy.c, stpncpy.c: New files.
+	* configure.in (funcs, AC_CHECK_FUNCS): Add mempcpy, stpcpy
+	and stpncpy.
+	* Makefile.in (CFILES): Add mempcpy.c, stpcpy.c and stpncpy.c.
+	(CONFIGURED_OFILES): Add mempcpy.o, stpcpy.o and stpncpy.o.
+	Regenerate dependencies.
+
+	* functions.texi, configure, config.in: Regenerated.
+
+2003-04-15  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* argv.c: Fix comments.
+	* calloc.c: Don't unnecessarily include "libiberty.h".
+	(bzero): Add prototype.
+	* floatformat.c: Include "ansidecl.h", rely on ANSI_PROTOTYPES.
+	* getcwd.c (getcwd): Use standard definition to avoid conflicts
+	with system headers.
+	* hashtab.c (htab_traverse): Delete unused variables.
+	* rename.c: Include "ansidecl.h".
+	(rename): Use standard definition to avoid conflicts with system
+	headers.
+	* strsignal.c: Rely on ANSI_PROTOTYPES.
+	* strstr.c: Check GNUC >= 2, not GNUC == 2.
+	* vfprintf.c: Include "ansidecl.h", rely on ANSI_PROTOTYPES.
+	* vprintf.c: Include "ansidecl.h" earlier, rely on
+	ANSI_PROTOTYPES.
+	* vsprintf.c: Include "ansidecl.h" earlier, rely on
+	ANSI_PROTOTYPES and possibly include <stdarg.h>.
+	
+	* Makefile.in: Regenerate dependencies.
+
+2003-04-15  DJ Delorie  <dj@redhat.com>
+
+	* maint-tool (deps): Scan for headers in $srcdir also.
+
+2003-04-15  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	PR target/10338
+	PR bootstrap/10198
+	PR bootstrap/10140
+	* getopt.c (exchange, _getopt_initialize): Use mempcpy not
+	__mempcpy.
+	* regex.c (regerror): Likewise.
+
+2003-04-14  Roger Sayle  <roger@eyesopen.com>
+
+	* argv.c: Use ANSI_PROTOTYPES instead of __STDC__.
+	* memchr.c: Likewise.
+	* strcasecmp.c: Likewise.
+	* strncasecmp.c: Likewise.
+	* strncmp.c: Likewise.
+	* xatexit.c: Likewise.
+	* xmalloc.c: Likewise.
+
+	* copysign.c: Use traditional function declaration instead of DEFUN.
+	* sigsetmask.c: Likewise.
+
+	* memcmp.c: Both of the above, ANSI_PROTOTYPES and DEFUN.
+	* memset.c: Likewise.
+
+	* memcpy.c: ANSI_PROTOTYPES, DEFUN and prototype bcopy.
+	* memmove.c: Likewise.
+
+2003-04-14  Roger Sayle  <roger@eyesopen.com>
+
+	* strdup.c (strdup): Tweak implementation to use memcpy.
+
+2003-04-14  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+	* configure.in (HAVE_UINTPTR_T): Always define.
+	* configure: Regenerated.
+
 2003-03-23  Alexandre Oliva  <aoliva@redhat.com>
 
 	* Makefile.in (MULTIOSDIR): New macro.  Use $(CC) $(LIBCFLAGS)
@@ -12,12 +97,6 @@
 2003-12-03  Jan Hubicka  <jh@suse.cz>
 
 	* hashtab.c (htab_expand): Fix warning.
-
-	* hashtab.c (htab_expand): Compute the size of hashtable based
-	on the number of elements actually used.
-	(htab_traverse):  Call htab_expand when table is too empty.
-
-2003-12-03  Jan Hubicka  <jh@suse.cz>
 
 	* hashtab.c (htab_expand): Compute the size of hashtable based
 	on the number of elements actually used.
@@ -58,7 +137,7 @@
 2003-02-22  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
 	    Richard Earnshaw  <rearnsha@arm.com>
 	    Geoffrey Keating  <geoffk@apple.com>
-
+	
 	* configure.in: Check for sys/sysctl.h and sysctl.
 	* physmem.c: Add support for *bsd and darwin.
 	* Makefile.in: Generate depedency for physmem.o.
@@ -77,10 +156,17 @@
 
 2003-02-21  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
 
+	* configure.in: Check for sys/sysmp.h and sysmp.
+	* physmem.c: Pull upstream copy, add support for irix6.
+
+	* config.in, configure: Regenerated.
+
+2003-02-21  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
 	* physmem.c (physmem_total, physmem_available): De-ANSI-fy.
 	* configure.in (AC_CHECK_FUNCS): Add pstat_getstatic and
 	pstat_getdynamic.
-
+	
 2003-02-20  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
 
 	* Makefile.in (CFILES): Add physmem.c.

@@ -1,7 +1,7 @@
 2003-04-06  Nick Clifton  <nickc@redhat.com>
 
-	* simops.c (OP_40): Delete.  Move code to:
-	* v850-igen.c (): Here. Sign extend the first operand.
+	* simops.c (OP_40): Delete.  Move code to...
+	* v850-igen.c (): ...Here. Sign extend the first operand.
 	* simops.h (OP_40): Remove prototype.
 
 2003-02-27  Andrew Cagney  <cagney@redhat.com>

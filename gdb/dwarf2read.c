@@ -43,6 +43,7 @@
 #include "bcache.h"
 #include "dwarf2expr.h"
 #include "dwarf2loc.h"
+#include "cp-support.h"
 
 #include <fcntl.h>
 #include "gdb_string.h"
@@ -220,9 +221,13 @@ struct comp_unit_head
 
     struct abbrev_info *dwarf2_abbrevs[ABBREV_HASH_SIZE];
 
-    /* Pointer to the DIE associated with the compilation unit.  */
+    /* Base address of this compilation unit.  */
 
-    struct die_info *die;
+    CORE_ADDR base_address;
+
+    /* Non-zero if base_address has been set.  */
+
+    int base_known;
   };
 
 /* The line number information for a compilation unit (found in the
@@ -395,6 +400,7 @@ static char *dwarf_line_buffer;
 static char *dwarf_str_buffer;
 static char *dwarf_macinfo_buffer;
 static char *dwarf_ranges_buffer;
+static char *dwarf_loc_buffer;
 
 /* A zeroed version of a partial die for initialization purposes.  */
 static struct partial_die_info zeroed_partial_die;
@@ -511,6 +517,13 @@ struct dwarf2_pinfo
 
     unsigned int dwarf_ranges_size;
 
+    /* Pointer to start of dwarf locations buffer for the objfile.  */
+
+    char *dwarf_loc_buffer;
+
+    /* Size of dwarf locations buffer for the objfile.  */
+
+    unsigned int dwarf_loc_size;
   };
 
 #define PST_PRIVATE(p) ((struct dwarf2_pinfo *)(p)->read_symtab_private)
@@ -526,6 +539,8 @@ struct dwarf2_pinfo
 #define DWARF_MACINFO_SIZE(p)   (PST_PRIVATE(p)->dwarf_macinfo_size)
 #define DWARF_RANGES_BUFFER(p)  (PST_PRIVATE(p)->dwarf_ranges_buffer)
 #define DWARF_RANGES_SIZE(p)    (PST_PRIVATE(p)->dwarf_ranges_size)
+#define DWARF_LOC_BUFFER(p)     (PST_PRIVATE(p)->dwarf_loc_buffer)
+#define DWARF_LOC_SIZE(p)       (PST_PRIVATE(p)->dwarf_loc_size)
 
 /* Maintain an array of referenced fundamental types for the current
    compilation unit being read.  For DWARF version 1, we have to construct
@@ -853,6 +868,10 @@ static void process_die (struct die_info *, struct objfile *,
 
 static char *dwarf2_linkage_name (struct die_info *);
 
+static char *dwarf2_name (struct die_info *die);
+
+static struct die_info *dwarf2_extension (struct die_info *die);
+
 static char *dwarf_tag_name (unsigned int);
 
 static char *dwarf_attr_name (unsigned int);
@@ -926,6 +945,7 @@ dwarf2_has_info (bfd *abfd)
   dwarf_frame_offset = 0;
   dwarf_eh_frame_offset = 0;
   dwarf_ranges_offset = 0;
+  dwarf_loc_offset = 0;
   
   bfd_map_over_sections (abfd, dwarf2_locate_sections, NULL);
   if (dwarf_info_offset && dwarf_abbrev_offset)
@@ -1061,6 +1081,14 @@ dwarf2_build_psymtabs (struct objfile *objfile, int mainline)
 					       dwarf_ranges_section);
   else
     dwarf_ranges_buffer = NULL;
+
+  if (dwarf_loc_offset)
+    dwarf_loc_buffer = dwarf2_read_section (objfile,
+					    dwarf_loc_offset,
+					    dwarf_loc_size,
+					    dwarf_loc_section);
+  else
+    dwarf_loc_buffer = NULL;
 
   if (mainline
       || (objfile->global_psymbols.size == 0
@@ -1283,6 +1311,8 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       DWARF_MACINFO_SIZE (pst) = dwarf_macinfo_size;
       DWARF_RANGES_BUFFER (pst) = dwarf_ranges_buffer;
       DWARF_RANGES_SIZE (pst) = dwarf_ranges_size;
+      DWARF_LOC_BUFFER (pst) = dwarf_loc_buffer;
+      DWARF_LOC_SIZE (pst) = dwarf_loc_size;
       baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
       /* Store the function that reads in the rest of the symbol table */
@@ -1607,6 +1637,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   char *info_ptr;
   struct symtab *symtab;
   struct cleanup *back_to;
+  struct attribute *attr;
 
   /* Set local variables from the partial symbol table info.  */
   offset = DWARF_INFO_OFFSET (pst);
@@ -1621,6 +1652,8 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   dwarf_macinfo_size = DWARF_MACINFO_SIZE (pst);
   dwarf_ranges_buffer = DWARF_RANGES_BUFFER (pst);
   dwarf_ranges_size = DWARF_RANGES_SIZE (pst);
+  dwarf_loc_buffer = DWARF_LOC_BUFFER (pst);
+  dwarf_loc_size = DWARF_LOC_SIZE (pst);
   baseaddr = ANOFFSET (pst->section_offsets, SECT_OFF_TEXT (objfile));
   cu_header_offset = offset;
   info_ptr = dwarf_info_buffer + offset;
@@ -1642,8 +1675,32 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
 
   make_cleanup_free_die_list (dies);
 
+  /* Find the base address of the compilation unit for range lists and
+     location lists.  It will normally be specified by DW_AT_low_pc.
+     In DWARF-3 draft 4, the base address could be overridden by
+     DW_AT_entry_pc.  It's been removed, but GCC still uses this for
+     compilation units with discontinuous ranges.  */
+
+  cu_header.base_known = 0;
+  cu_header.base_address = 0;
+
+  attr = dwarf_attr (dies, DW_AT_entry_pc);
+  if (attr)
+    {
+      cu_header.base_address = DW_ADDR (attr);
+      cu_header.base_known = 1;
+    }
+  else
+    {
+      attr = dwarf_attr (dies, DW_AT_low_pc);
+      if (attr)
+	{
+	  cu_header.base_address = DW_ADDR (attr);
+	  cu_header.base_known = 1;
+	}
+    }
+
   /* Do line number decoding in read_file_scope () */
-  cu_header.die = dies;
   process_die (dies, objfile, &cu_header);
 
   if (!dwarf2_get_pc_bounds (dies, &lowpc, &highpc, objfile, &cu_header))
@@ -1753,6 +1810,11 @@ process_die (struct die_info *die, struct objfile *objfile,
     case DW_TAG_common_inclusion:
       break;
     case DW_TAG_namespace:
+      if (!processing_has_namespace_info)
+	{
+	  processing_has_namespace_info = 1;
+	  processing_current_namespace = "";
+	}
       read_namespace (die, objfile, cu_header);
       break;
     case DW_TAG_imported_declaration:
@@ -1763,6 +1825,11 @@ process_die (struct die_info *die, struct objfile *objfile,
 	 shouldn't in the C++ case, but conceivably could in the
 	 Fortran case, so we'll have to replace this gdb_assert if
 	 Fortran compilers start generating that info.  */
+      if (!processing_has_namespace_info)
+	{
+	  processing_has_namespace_info = 1;
+	  processing_current_namespace = "";
+	}
       gdb_assert (!die->has_children);
       break;
     default:
@@ -2122,39 +2189,17 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
 	     .debug_renges section.  */
 	  unsigned int offset = DW_UNSND (attr);
 	  /* Base address selection entry.  */
-	  CORE_ADDR base = 0;
-	  int found_base = 0;
+	  CORE_ADDR base;
+	  int found_base;
 	  int dummy;
 	  unsigned int i;
 	  char *buffer;
 	  CORE_ADDR marker;
 	  int low_set;
  
-	  /* The applicable base address is determined by (1) the closest
-	     preceding base address selection entry in the range list or
-	     (2) the DW_AT_low_pc of the compilation unit.  */
-
-	  /* ??? Was in dwarf3 draft4, and has since been removed.
-	     GCC still uses it though.  */
-	  attr = dwarf_attr (cu_header->die, DW_AT_entry_pc);
-	  if (attr)
-	    {
-	      base = DW_ADDR (attr);
-	      found_base = 1;
-	    }
-
-	  if (!found_base)
-	    {
-	      attr = dwarf_attr (cu_header->die, DW_AT_low_pc);
-	      if (attr)
-		{
-		  base = DW_ADDR (attr);
-		  found_base = 1;
-		}
-	    }
-
+	  found_base = cu_header->base_known;
+	  base = cu_header->base_address;
 	  buffer = dwarf_ranges_buffer + offset;
-
 
 	  /* Read in the largest possible address.  */
 	  marker = read_address (obfd, buffer, cu_header, &dummy);
@@ -3157,13 +3202,59 @@ read_common_block (struct die_info *die, struct objfile *objfile,
 
 /* Read a C++ namespace.  */
 
-/* FIXME: carlton/2002-10-16: For now, we don't actually do anything
-   useful with the namespace data: we just process its children.  */
-
 static void
 read_namespace (struct die_info *die, struct objfile *objfile,
 		const struct comp_unit_head *cu_header)
 {
+  const char *previous_namespace = processing_current_namespace;
+  const char *name = NULL;
+  int is_anonymous;
+  struct die_info *current_die;
+
+  /* Loop through the extensions until we find a name.  */
+
+  for (current_die = die;
+       current_die != NULL;
+       current_die = dwarf2_extension (die))
+    {
+      name = dwarf2_name (current_die);
+      if (name != NULL)
+	break;
+    }
+
+  /* Is it an anonymous namespace?  */
+
+  is_anonymous = (name == NULL);
+  if (is_anonymous)
+    name = "(anonymous namespace)";
+
+  /* Now build the name of the current namespace.  */
+
+  if (previous_namespace[0] == '\0')
+    {
+      processing_current_namespace = name;
+    }
+  else
+    {
+      /* We need temp_name around because processing_current_namespace
+	 is a const char *.  */
+      char *temp_name = alloca (strlen (previous_namespace)
+				+ 2 + strlen(name) + 1);
+      strcpy (temp_name, previous_namespace);
+      strcat (temp_name, "::");
+      strcat (temp_name, name);
+
+      processing_current_namespace = temp_name;
+    }
+
+  /* If it's an anonymous namespace that we're seeing for the first
+     time, add a using directive.  */
+
+  if (is_anonymous && dwarf_attr (die, DW_AT_extension) == NULL)
+    cp_add_using_directive (processing_current_namespace,
+			    strlen (previous_namespace),
+			    strlen (processing_current_namespace));
+
   if (die->has_children)
     {
       struct die_info *child_die = die->next;
@@ -3174,6 +3265,8 @@ read_namespace (struct die_info *die, struct objfile *objfile,
 	  child_die = sibling_die (child_die);
 	}
     }
+
+  processing_current_namespace = previous_namespace;
 }
 
 /* Extract all information from a DW_TAG_pointer_type DIE and add to
@@ -5640,6 +5733,43 @@ dwarf2_linkage_name (struct die_info *die)
   return NULL;
 }
 
+/* Get name of a die, return NULL if not found.  */
+
+static char *
+dwarf2_name (struct die_info *die)
+{
+  struct attribute *attr;
+
+  attr = dwarf_attr (die, DW_AT_name);
+  if (attr && DW_STRING (attr))
+    return DW_STRING (attr);
+  return NULL;
+}
+
+/* Return the die that this die in an extension of, or NULL if there
+   is none.  */
+
+static struct die_info *
+dwarf2_extension (struct die_info *die)
+{
+  struct attribute *attr;
+  struct die_info *extension_die;
+  unsigned int ref;
+
+  attr = dwarf_attr (die, DW_AT_extension);
+  if (attr == NULL)
+    return NULL;
+
+  ref = dwarf2_get_ref_die_offset (attr);
+  extension_die = follow_die_ref (ref);
+  if (!extension_die)
+    {
+      error ("Dwarf Error: Cannot find referent at offset %d.", ref);
+    }
+
+  return extension_die;
+}
+
 /* Convert a DIE tag into its string name.  */
 
 static char *
@@ -7328,26 +7458,53 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 			     const struct comp_unit_head *cu_header,
 			     struct objfile *objfile)
 {
-  struct dwarf2_locexpr_baton *baton;
-
-  /* When support for location lists is added, this will go away.  */
-  if (!attr_form_is_block (attr))
+  if (attr->form == DW_FORM_data4 || attr->form == DW_FORM_data8)
     {
-      dwarf2_complex_location_expr_complaint ();
-      return;
+      struct dwarf2_loclist_baton *baton;
+
+      baton = obstack_alloc (&objfile->symbol_obstack,
+			     sizeof (struct dwarf2_loclist_baton));
+      baton->objfile = objfile;
+
+      /* We don't know how long the location list is, but make sure we
+	 don't run off the edge of the section.  */
+      baton->size = dwarf_loc_size - DW_UNSND (attr);
+      baton->data = dwarf_loc_buffer + DW_UNSND (attr);
+      baton->base_address = cu_header->base_address;
+      if (cu_header->base_known == 0)
+	complaint (&symfile_complaints,
+		   "Location list used without specifying the CU base address.");
+
+      SYMBOL_LOCATION_FUNCS (sym) = &dwarf2_loclist_funcs;
+      SYMBOL_LOCATION_BATON (sym) = baton;
     }
+  else
+    {
+      struct dwarf2_locexpr_baton *baton;
 
-  baton = obstack_alloc (&objfile->symbol_obstack,
-			 sizeof (struct dwarf2_locexpr_baton));
-  baton->objfile = objfile;
+      baton = obstack_alloc (&objfile->symbol_obstack,
+			     sizeof (struct dwarf2_locexpr_baton));
+      baton->objfile = objfile;
 
-  /* Note that we're just copying the block's data pointer here, not
-     the actual data.  We're still pointing into the dwarf_info_buffer
-     for SYM's objfile; right now we never release that buffer, but
-     when we do clean up properly this may need to change.  */
-  baton->size = DW_BLOCK (attr)->size;
-  baton->data = DW_BLOCK (attr)->data;
-
-  SYMBOL_LOCATION_FUNCS (sym) = &dwarf2_locexpr_funcs;
-  SYMBOL_LOCATION_BATON (sym) = baton;
+      if (attr_form_is_block (attr))
+	{
+	  /* Note that we're just copying the block's data pointer
+	     here, not the actual data.  We're still pointing into the
+	     dwarf_info_buffer for SYM's objfile; right now we never
+	     release that buffer, but when we do clean up properly
+	     this may need to change.  */
+	  baton->size = DW_BLOCK (attr)->size;
+	  baton->data = DW_BLOCK (attr)->data;
+	}
+      else
+	{
+	  dwarf2_invalid_attrib_class_complaint ("location description",
+						 SYMBOL_NATURAL_NAME (sym));
+	  baton->size = 0;
+	  baton->data = NULL;
+	}
+      
+      SYMBOL_LOCATION_FUNCS (sym) = &dwarf2_locexpr_funcs;
+      SYMBOL_LOCATION_BATON (sym) = baton;
+    }
 }

@@ -5745,9 +5745,6 @@ minitelnet (void)
   int status;
   int quit_count = 0;
 
-  extern int escape_count;	/* global shared by readsocket */
-  extern int echo_check;	/* ditto */
-
   escape_count = 0;
   echo_check = -1;
 

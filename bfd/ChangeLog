@@ -1,3 +1,100 @@
+2003-04-18  Nick Clifton  <nickc@redhat.com>
+
+	* format.c (bfd_check_format_matches): Only check associated
+	vector if the matching_vector has been created.
+
+2003-04-15  Alexandre Oliva  <aoliva@redhat.com>
+
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Fix typo in
+	2003-04-09's change.
+
+2003-04-15  Brian Ford  <ford@vss.fsi.com>
+
+	* peicode.h (coff_swap_scnhdr_in): If a section holds
+	uninitialized data and is from an object file or from an
+	executable image that has not initialized the s_size field, or if
+	the physical size is padded, use the virtual size (stored in
+	s_paddr) instead.
+
+2003-04-15  H.J. Lu <hjl@gnu.org>
+
+	* elflink.h (elf_link_add_object_symbols): Properly report
+	filename for alignment reduction.
+
+2003-04-15  Rohit Kumar Srivastava <rohits@kpitcummins.com>
+
+	* archures.c: Replace occurrances of 'Hitachi' with 'Renesas'.
+	* reloc.c: Likewise.
+	* coff-h8300.c: Likewise.
+	* coff-h8500.c: Likewise.
+	* coff-sh.c: Likewise.
+	* cpu-h8300.c: Likewise.
+	* cpu-sh.c: Likewise.
+	* elf32-h8300.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* elf32-sh64-com.c: Likewise.
+	* elf32-sh64.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* bfd-in2.h: Regenerate.
+
+2003-04-14  H.J. Lu <hjl@gnu.org>
+
+	* elflink.h (elf_link_add_object_symbols): Maintain maximum
+	alignment for common symbols. Warn reducing alignment for
+	common symbols. Report old filename when symbol size changes.
+
+2003-04-12  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Adjust two other
+	occurrences of the same test changed in the previous patch.
+	Optimize.
+
+2003-04-11  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (mips_elf_get_global_gotsym_index): New.
+	(mips_elf_calculate_relocation): Decay GOT_PAGE/GOT_OFST to
+	GOT_DISP/addend only if the symbol got a global GOT entry.
+
+2003-04-10  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Decay
+	GOT_PAGE/GOT_OFST referencing overridable symbol to
+	GOT_DISP/addend.
+	(_bfd_mips_elf_check_relocs): Handle GOT_PAGE referencing
+	global symbol as GOT_DISP.
+
+2003-04-10  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (elf_xtensa_relocate_section): Don't continue to the
+	next relocation on an undefined symbol.
+
+2003-04-09  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_relocate_section) <R_ALPHA_GPREL32>:
+	Ignore relocations against r_symndx == 0.
+
+2003-04-09  H.J. Lu <hjl@gnu.org>
+
+	* elf64-alpha.c (elf64_alpha_relocate_section): Don't return
+	FALSE for undefined symbols.
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Likewise.
+
+2003-04-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Try DWARF3-standard
+	and IRIX-specific shift-to-64-bit 4-byte lengths before following
+	addr_size.
+
+2003-04-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-mips.c (bfd_elf32_bfd_reloc_type_lookup): Detect (ctor)
+	pointer size from ABI, not arch_bits_per_address.
+
+2003-04-07  Kevin Buettner  <kevinb@redhat.com>
+
+	* elfn32-mips.c (elf32_mips_grok_prstatus): Adjust core file related
+	constants for n32 ABI.
+
 2003-04-06  Andrew Cagney  <cagney@redhat.com>
 
 	* simple.c (bfd_simple_get_relocated_section_contents): Disable

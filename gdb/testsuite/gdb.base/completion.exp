@@ -669,7 +669,14 @@ cd ${srcdir}
 set fullsrcdir [pwd]
 cd ${mydir}
 
-gdb_test "cd ${fullsrcdir}" "Working directory ${fullsrcdir}.*" "cd to \${srcdir}"
+# If the directory name contains a '+' we must escape it, adding a backslash.
+# If not, the test below will fail because it will interpret the '+' as a 
+# regexp operator. We use string_to_regexp for this purpose.
+
+gdb_test "cd ${fullsrcdir}" \
+         "Working directory [string_to_regexp ${fullsrcdir}].*" \
+         "cd to \${srcdir}"
+
 send_gdb "file ./gdb.base/compl\t"
 sleep 1
 gdb_expect  {
@@ -694,10 +701,10 @@ gdb_expect  {
         timeout         { fail "(timeout) complete 'file ./gdb.base/compl'" }
         }
 
-send_gdb "info func mark\t"
+send_gdb "info func marke\t"
 sleep 1
 gdb_expect  {
-        -re "^info func mark.*er$"\
+        -re "^info func marke.*r$"\
             {
 	      send_gdb "\t\t"
               sleep 3
@@ -706,17 +713,17 @@ gdb_expect  {
                       { send_gdb "\n"
                         gdb_expect {
                                 -re "All functions matching regular expression \"marker\":.*File.*break.c:\r\nint marker1\\((void|)\\);\r\nint marker2\\(int\\).*marker3\\(char.*char.*\\).*marker4\\(long int\\);.*$gdb_prompt $"\
-                                                  { pass "complete 'info func mar'"}
-                                -re ".*$gdb_prompt $" { fail "complete 'info func mar'"}
-                                timeout           {fail "(timeout) complete 'info func mar'"}
+                                                  { pass "complete 'info func marke'"}
+                                -re ".*$gdb_prompt $" { fail "complete 'info func marke'"}
+                                timeout           {fail "(timeout) complete 'info func marke'"}
                                }
                       }
-                      -re ".*$gdb_prompt $" { fail "complete 'info func mar'"}
-                      timeout           {fail "(timeout) complete 'info func mar'"}
+                      -re ".*$gdb_prompt $" { fail "complete 'info func marke'"}
+                      timeout           {fail "(timeout) complete 'info func marke'"}
                      }
             }
-        -re ".*$gdb_prompt $"       { fail "complete 'info func mar'" }
-        timeout         { fail "(timeout) complete 'info func mar'" }
+        -re ".*$gdb_prompt $"       { fail "complete 'info func marke'" }
+        timeout         { fail "(timeout) complete 'info func marke'" }
         }
 
 

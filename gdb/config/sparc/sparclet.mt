@@ -1,3 +1,3 @@
-# Target: SPARC embedded Sparclet monitor
-TDEPFILES= sparc-tdep.o monitor.o sparclet-rom.o dsrec.o
-TM_FILE= tm-sparclet.h
+# OBSOLETE # Target: SPARC embedded Sparclet monitor
+# OBSOLETE TDEPFILES= sparc-tdep.o monitor.o sparclet-rom.o dsrec.o
+# OBSOLETE TM_FILE= tm-sparclet.h

@@ -46,6 +46,7 @@
 
 /* Names of the registers.  The first 10 registers match the register
    numbering scheme used by GCC for stabs and DWARF.  */
+
 static char *i386_register_names[] =
 {
   "eax",   "ecx",    "edx",   "ebx",
@@ -61,6 +62,9 @@ static char *i386_register_names[] =
   "mxcsr"
 };
 
+static const int i386_num_register_names =
+  (sizeof (i386_register_names) / sizeof (*i386_register_names));
+
 /* MMX registers.  */
 
 static char *i386_mmx_names[] =
@@ -68,14 +72,17 @@ static char *i386_mmx_names[] =
   "mm0", "mm1", "mm2", "mm3",
   "mm4", "mm5", "mm6", "mm7"
 };
-static const int mmx_num_regs = (sizeof (i386_mmx_names)
-				 / sizeof (i386_mmx_names[0]));
-#define MM0_REGNUM (NUM_REGS)
+
+static const int i386_num_mmx_regs =
+  (sizeof (i386_mmx_names) / sizeof (i386_mmx_names[0]));
+
+#define MM0_REGNUM NUM_REGS
 
 static int
-i386_mmx_regnum_p (int reg)
+i386_mmx_regnum_p (int regnum)
 {
-  return (reg >= MM0_REGNUM && reg < MM0_REGNUM + mmx_num_regs);
+  return (regnum >= MM0_REGNUM
+	  && regnum < MM0_REGNUM + i386_num_mmx_regs);
 }
 
 /* FP register?  */
@@ -84,14 +91,14 @@ int
 i386_fp_regnum_p (int regnum)
 {
   return (regnum < NUM_REGS
-	  && (FP0_REGNUM && FP0_REGNUM <= (regnum) && (regnum) < FPC_REGNUM));
+	  && (FP0_REGNUM && FP0_REGNUM <= regnum && regnum < FPC_REGNUM));
 }
 
 int
 i386_fpc_regnum_p (int regnum)
 {
   return (regnum < NUM_REGS
-	  && (FPC_REGNUM <= (regnum) && (regnum) < XMM0_REGNUM));
+	  && (FPC_REGNUM <= regnum && regnum < XMM0_REGNUM));
 }
 
 /* SSE register?  */
@@ -100,14 +107,14 @@ int
 i386_sse_regnum_p (int regnum)
 {
   return (regnum < NUM_REGS
-	  && (XMM0_REGNUM <= (regnum) && (regnum) < MXCSR_REGNUM));
+	  && (XMM0_REGNUM <= regnum && regnum < MXCSR_REGNUM));
 }
 
 int
 i386_mxcsr_regnum_p (int regnum)
 {
   return (regnum < NUM_REGS
-	  && (regnum == MXCSR_REGNUM));
+	  && regnum == MXCSR_REGNUM);
 }
 
 /* Return the name of register REG.  */
@@ -115,14 +122,13 @@ i386_mxcsr_regnum_p (int regnum)
 const char *
 i386_register_name (int reg)
 {
-  if (reg < 0)
-    return NULL;
+  if (reg >= 0 && reg < i386_num_register_names)
+    return i386_register_names[reg];
+
   if (i386_mmx_regnum_p (reg))
     return i386_mmx_names[reg - MM0_REGNUM];
-  if (reg >= sizeof (i386_register_names) / sizeof (*i386_register_names))
-    return NULL;
 
-  return i386_register_names[reg];
+  return NULL;
 }
 
 /* Convert stabs register number REG to the appropriate register
@@ -600,80 +606,6 @@ i386_saved_pc_after_call (struct frame_info *frame)
   return read_memory_unsigned_integer (read_register (SP_REGNUM), 4);
 }
 
-/* Return number of args passed to a frame.
-   Can return -1, meaning no way to tell.  */
-
-static int
-i386_frame_num_args (struct frame_info *fi)
-{
-#if 1
-  return -1;
-#else
-  /* This loses because not only might the compiler not be popping the
-     args right after the function call, it might be popping args from
-     both this call and a previous one, and we would say there are
-     more args than there really are.  */
-
-  int retpc;
-  unsigned char op;
-  struct frame_info *pfi;
-
-  /* On the i386, the instruction following the call could be:
-     popl %ecx        -  one arg
-     addl $imm, %esp  -  imm/4 args; imm may be 8 or 32 bits
-     anything else    -  zero args.  */
-
-  int frameless;
-
-  frameless = FRAMELESS_FUNCTION_INVOCATION (fi);
-  if (frameless)
-    /* In the absence of a frame pointer, GDB doesn't get correct
-       values for nameless arguments.  Return -1, so it doesn't print
-       any nameless arguments.  */
-    return -1;
-
-  pfi = get_prev_frame (fi);
-  if (pfi == 0)
-    {
-      /* NOTE: This can happen if we are looking at the frame for
-         main, because DEPRECATED_FRAME_CHAIN_VALID won't let us go
-         into start.  If we have debugging symbols, that's not really
-         a big deal; it just means it will only show as many arguments
-         to main as are declared.  */
-      return -1;
-    }
-  else
-    {
-      retpc = pfi->pc;
-      op = read_memory_integer (retpc, 1);
-      if (op == 0x59)		/* pop %ecx */
-	return 1;
-      else if (op == 0x83)
-	{
-	  op = read_memory_integer (retpc + 1, 1);
-	  if (op == 0xc4)
-	    /* addl $<signed imm 8 bits>, %esp */
-	    return (read_memory_integer (retpc + 2, 1) & 0xff) / 4;
-	  else
-	    return 0;
-	}
-      else if (op == 0x81)	/* `add' with 32 bit immediate.  */
-	{
-	  op = read_memory_integer (retpc + 1, 1);
-	  if (op == 0xc4)
-	    /* addl $<imm 32>, %esp */
-	    return read_memory_integer (retpc + 2, 4) / 4;
-	  else
-	    return 0;
-	}
-      else
-	{
-	  return 0;
-	}
-    }
-#endif
-}
-
 /* Parse the first few instructions the function to see what registers
    were stored.
    
@@ -901,7 +833,7 @@ i386_get_longjmp_target (CORE_ADDR *pc)
   char buf[8];
   CORE_ADDR sp, jb_addr;
   int jb_pc_offset = gdbarch_tdep (current_gdbarch)->jb_pc_offset;
-  int len = TARGET_PTR_BIT / TARGET_CHAR_BIT;
+  int len = TYPE_LENGTH (builtin_type_void_func_ptr);
 
   /* If JB_PC_OFFSET is -1, we have no way to find out where the
      longjmp will land.  */
@@ -912,11 +844,11 @@ i386_get_longjmp_target (CORE_ADDR *pc)
   if (target_read_memory (sp + len, buf, len))
     return 0;
 
-  jb_addr = extract_address (buf, len);
+  jb_addr = extract_typed_address (buf, builtin_type_void_func_ptr);
   if (target_read_memory (jb_addr + jb_pc_offset, buf, len))
     return 0;
 
-  *pc = extract_address (buf, len);
+  *pc = extract_typed_address (buf, builtin_type_void_func_ptr);
   return 1;
 }
 
@@ -966,7 +898,7 @@ i386_extract_return_value (struct type *type, struct regcache *regcache,
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      if (FP0_REGNUM == 0)
+      if (FP0_REGNUM < 0)
 	{
 	  warning ("Cannot find floating-point return value.");
 	  memset (valbuf, 0, len);
@@ -1024,7 +956,7 @@ i386_store_return_value (struct type *type, struct regcache *regcache,
       ULONGEST fstat;
       char buf[FPU_REG_RAW_SIZE];
 
-      if (FP0_REGNUM == 0)
+      if (FP0_REGNUM < 0)
 	{
 	  warning ("Cannot set floating-point return value.");
 	  return;
@@ -1141,19 +1073,21 @@ i386_register_type (struct gdbarch *gdbarch, int regnum)
 }
 
 /* Map a cooked register onto a raw register or memory.  For the i386,
-   the MMX registers need to be mapped onto floating point registers.  */
+   the MMX registers need to be mapped onto floating-point registers.  */
 
 static int
-mmx_regnum_to_fp_regnum (struct regcache *regcache, int regnum)
+i386_mmx_regnum_to_fp_regnum (struct regcache *regcache, int regnum)
 {
   int mmxi;
   ULONGEST fstat;
   int tos;
   int fpi;
+
   mmxi = regnum - MM0_REGNUM;
   regcache_raw_read_unsigned (regcache, FSTAT_REGNUM, &fstat);
   tos = (fstat >> 11) & 0x7;
   fpi = (mmxi + tos) % 8;
+
   return (FP0_REGNUM + fpi);
 }
 
@@ -1164,9 +1098,10 @@ i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   if (i386_mmx_regnum_p (regnum))
     {
       char *mmx_buf = alloca (MAX_REGISTER_RAW_SIZE);
-      int fpnum = mmx_regnum_to_fp_regnum (regcache, regnum);
-      regcache_raw_read (regcache, fpnum, mmx_buf);
+      int fpnum = i386_mmx_regnum_to_fp_regnum (regcache, regnum);
+
       /* Extract (always little endian).  */
+      regcache_raw_read (regcache, fpnum, mmx_buf);
       memcpy (buf, mmx_buf, REGISTER_RAW_SIZE (regnum));
     }
   else
@@ -1180,7 +1115,8 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   if (i386_mmx_regnum_p (regnum))
     {
       char *mmx_buf = alloca (MAX_REGISTER_RAW_SIZE);
-      int fpnum = mmx_regnum_to_fp_regnum (regcache, regnum);
+      int fpnum = i386_mmx_regnum_to_fp_regnum (regcache, regnum);
+
       /* Read ...  */
       regcache_raw_read (regcache, fpnum, mmx_buf);
       /* ... Modify ... (always little endian).  */
@@ -1601,8 +1537,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                            i386_frameless_function_invocation);
   set_gdbarch_deprecated_frame_chain (gdbarch, i386_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, i386_frame_saved_pc);
-  set_gdbarch_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
-  set_gdbarch_frame_num_args (gdbarch, i386_frame_num_args);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, i386_saved_pc_after_call);
+  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
 
   /* Wire in the MMX registers.  */

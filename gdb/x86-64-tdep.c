@@ -240,17 +240,6 @@ x86_64_dwarf2_reg_to_regnum (int dw_reg)
   return x86_64_dwarf2gdb_regno_map[dw_reg];
 }
 
-/* This is the variable that is set with "set disassembly-flavour", and
-   its legitimate values.  */
-static const char att_flavour[] = "att";
-static const char intel_flavour[] = "intel";
-static const char *valid_flavours[] = {
-  att_flavour,
-  intel_flavour,
-  NULL
-};
-static const char *disassembly_flavour = att_flavour;
-
 /* Push the return address (pointing to the call dummy) onto the stack
    and return the new value for the stack pointer.  */
 
@@ -781,7 +770,7 @@ x86_64_store_return_value (struct type *type, struct regcache *regcache,
 	     floating point format used by the FPU.  This is probably
 	     not exactly how it would happen on the target itself, but
 	     it is the best we can do.  */
-	  val = extract_floating (valbuf, TYPE_LENGTH (type));
+	  val = deprecated_extract_floating (valbuf, TYPE_LENGTH (type));
 	  floatformat_from_doublest (&floatformat_i387_ext, &val, buf);
 	  regcache_cooked_write_part (regcache, FP0_REGNUM,
 			  	      0, FPU_REG_RAW_SIZE, buf);
@@ -825,23 +814,6 @@ x86_64_register_number (const char *name)
     if (strcmp (name, x86_64_register_info_table[reg_nr].name) == 0)
       return reg_nr;
   return -1;
-}
-
-
-
-/* We have two flavours of disassembly.  The machinery on this page
-   deals with switching between those.  */
-
-static int
-gdb_print_insn_x86_64 (bfd_vma memaddr, disassemble_info * info)
-{
-  if (disassembly_flavour == att_flavour)
-    return print_insn_i386_att (memaddr, info);
-  else if (disassembly_flavour == intel_flavour)
-    return print_insn_i386_intel (memaddr, info);
-  /* Never reached -- disassembly_flavour is always either att_flavour
-     or intel_flavour.  */
-  internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
 
 
@@ -921,15 +893,6 @@ x86_64_skip_prologue (CORE_ADDR pc)
       }
 
   return pc;
-}
-
-/* Sequence of bytes for breakpoint instruction.  */
-static const unsigned char *
-x86_64_breakpoint_from_pc (CORE_ADDR *pc, int *lenptr)
-{
-  static unsigned char breakpoint[] = { 0xcc };
-  *lenptr = 1;
-  return breakpoint;
 }
 
 static void
@@ -1036,7 +999,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* FIXME: kettenis/20021026: These two are GNU/Linux-specific and
      should be moved elsewhere.  */
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, x86_64_linux_frame_saved_pc);
-  set_gdbarch_saved_pc_after_call (gdbarch, x86_64_linux_saved_pc_after_call);
+  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, x86_64_linux_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   /* FIXME: kettenis/20021026: This one is GNU/Linux-specific too.  */
   set_gdbarch_pc_in_sigtramp (gdbarch, x86_64_linux_in_sigtramp);
