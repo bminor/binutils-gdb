@@ -1,3 +1,7 @@
+2005-01-10  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/fileio.c: Include unistd.h as required for lseek(2).
+
 2005-01-07  Andrew Cagney  <cagney@gnu.org>
 
 	* configure.ac: Rename configure.in, require autoconf 2.59.

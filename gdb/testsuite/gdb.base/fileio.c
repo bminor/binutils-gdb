@@ -8,6 +8,7 @@
 #include <sys/time.h>
 #include <errno.h>
 #include <sys/wait.h>
+#include <unistd.h>
 /* TESTS :
  * - open(const char *pathname, int flags, mode_t mode);
 1) Attempt to create file that already exists - EEXIST
@@ -55,7 +56,6 @@ Not applicable.
 
 system (const char * string);
 1) Invalid string/command. -  returns 127.  */
-
 static const char *strerrno (int err);
 
 #define FILENAME    "foo.fileio.test"
