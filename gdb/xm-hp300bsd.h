@@ -115,3 +115,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 { asm ("subil #8,sp@(28)");     \
   asm ("movem sp@,#0xffff"); \
   asm ("rte"); }
+
+extern char *strdup PARAMS ((const char *));

@@ -1,3 +1,9 @@
+Tue Jul 14 00:12:30 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* xm-hp300bsd.h:  Add decl for strdup().
+	* mips-tdep.c (heuristic_proc_desc):  Fill in proc start addr in
+	PDR.  Cleanup a few things, fix compilation warnings.
+
 Mon Jul 13 19:06:54 1992  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (DEMANGLING_STYLE):  New define to set default
