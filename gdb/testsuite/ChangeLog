@@ -1,3 +1,36 @@
+2003-06-12  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.base/float.exp: Add ia64 support.
+
+2003-06-12  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/fileio.exp: Run only on remote targets.
+
+2003-06-10  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/fileio.c: New file, testing File-I/O.
+	* gdb.base/fileio.exp: Ditto.
+
+2003-06-09  Raoul Gough  <RaoulGough@yahoo.co.uk>
+
+	* gdb.base/shreloc.exp: New file, check symbol values obtained from
+	shared objects after relocation at load time (gdb PR/1132).
+	* gdb.base/shreloc.c, gdb.base/shreloc1.c, gdb.base/shreloc2.c:
+        as above, part of the shared object relocation test.
+
+2003-06-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/readline.exp: Add tests for operate-and-get-next with a
+	fully filled history list.
+	* gdb.base/gdb_history: New file.
+
+	* gdb.base/signals.exp: XFAIL "continue to func1" on
+	i*86-*-freebsd*.
+
+	* gdb.base/attach.exp: When trying to attach to a nonexistent
+	process, make it possible to specify the PID based on the target,
+	and do so for *-*-freebsd*.
+
 2003-06-02  Richard Henderson  <rth@redhat.com>
 
 	* gdb.base/float.exp: Add expected regexp for alpha-*-*.

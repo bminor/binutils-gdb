@@ -24,8 +24,4 @@
 
 #define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
 
-/* XXXJRT not yet under gdbarch control */
-#define FRAME_ARGS_ADDRESS_CORRECT(fi) vax_frame_args_address_correct ((fi))
-extern CORE_ADDR vax_frame_args_address_correct (struct frame_info *);
-
 #endif /* TM_VAX_H */

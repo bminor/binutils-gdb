@@ -405,6 +405,8 @@ extern void reinitialize_more_filter (void);
 
 /* Normal results */
 extern struct ui_file *gdb_stdout;
+/* Input stream */
+extern struct ui_file *gdb_stdin;
 /* Serious error notifications */
 extern struct ui_file *gdb_stderr;
 /* Log/debug/trace messages that should bypass normal stdout/stderr
@@ -417,6 +419,8 @@ extern struct ui_file *gdb_stdlog;
    very near future that restriction shall be removed - either call
    shall be unfiltered. (cagney 1999-07-02). */
 extern struct ui_file *gdb_stdtarg;
+extern struct ui_file *gdb_stdtargerr;
+extern struct ui_file *gdb_stdtargin;
 
 #if defined(TUI)
 #include "tui.h"
@@ -880,6 +884,9 @@ extern NORETURN void verror (const char *fmt, va_list ap) ATTR_NORETURN;
 extern NORETURN void error (const char *fmt, ...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 
 extern NORETURN void error_stream (struct ui_file *) ATTR_NORETURN;
+
+/* Initialize the error buffer.  */
+extern void error_init (void);
 
 /* Returns a freshly allocate buffer containing the last error
    message.  */

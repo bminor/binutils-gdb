@@ -196,6 +196,8 @@ ppcbug_open1 (char *args, int from_tty)
   monitor_open (args, &ppcbug_cmds1, from_tty);
 }
 
+extern initialize_file_ftype _initialize_ppcbug_rom; /* -Wmissing-prototypes */
+
 void
 _initialize_ppcbug_rom (void)
 {

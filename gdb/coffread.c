@@ -45,6 +45,7 @@
 #include "target.h"
 #include "gdb_assert.h"
 #include "block.h"
+#include "dictionary.h"
 
 #include "coff-pe-read.h"
 
@@ -604,15 +605,6 @@ coff_symfile_read (struct objfile *objfile, int mainline)
      process it and define symbols accordingly.  */
 
   coff_symtab_read ((long) symtab_offset, num_symbols, objfile);
-
-  /* Sort symbols alphabetically within each block.  */
-
-  {
-    struct symtab *s;
-
-    for (s = objfile->symtabs; s != NULL; s = s->next)
-      sort_symtab_syms (s);
-  }
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile.  */
@@ -1423,12 +1415,12 @@ static void
 patch_opaque_types (struct symtab *s)
 {
   register struct block *b;
-  register int i;
+  struct dict_iterator iter;
   register struct symbol *real_sym;
 
   /* Go through the per-file symbols only */
   b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
-  ALL_BLOCK_SYMBOLS (b, i, real_sym)
+  ALL_BLOCK_SYMBOLS (b, iter, real_sym)
     {
       /* Find completed typedefs to use to fix opaque ones.
          Remove syms from the chain when their types are stored,

@@ -58,6 +58,7 @@ extern unsigned int cp_find_first_component (const char *name);
 
 extern unsigned int cp_entire_prefix_len (const char *name);
 
+extern struct symbol **make_symbol_overload_list (struct symbol *);
 
 /* Functions/variables from cp-namespace.c.  */
 
@@ -71,7 +72,7 @@ extern void cp_add_using_directive (const char *name,
 				    unsigned int outer_length,
 				    unsigned int inner_length);
 
-extern void cp_initialize_namespace ();
+extern void cp_initialize_namespace (void);
 
 extern void cp_finalize_namespace (struct block *static_block,
 				   struct obstack *obstack);

@@ -38,6 +38,7 @@
 #include "completer.h"
 #include "gdb-events.h"
 #include "block.h"
+#include "dictionary.h"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -1289,13 +1290,14 @@ add_local_symbols (struct collection_list *collect, CORE_ADDR pc,
 {
   struct symbol *sym;
   struct block *block;
-  int i, count = 0;
+  struct dict_iterator iter;
+  int count = 0;
 
   block = block_for_pc (pc);
   while (block != 0)
     {
       QUIT;			/* allow user to bail out with ^C */
-      ALL_BLOCK_SYMBOLS (block, i, sym)
+      ALL_BLOCK_SYMBOLS (block, iter, sym)
 	{
 	  switch (SYMBOL_CLASS (sym))
 	    {
@@ -2333,7 +2335,8 @@ scope_info (char *args, int from_tty)
   struct minimal_symbol *msym;
   struct block *block;
   char **canonical, *symname, *save_args = args;
-  int i, j, count = 0;
+  struct dict_iterator iter;
+  int j, count = 0;
 
   if (args == 0 || *args == 0)
     error ("requires an argument (function, line or *addr) to define a scope");
@@ -2349,7 +2352,7 @@ scope_info (char *args, int from_tty)
   while (block != 0)
     {
       QUIT;			/* allow user to bail out with ^C */
-      ALL_BLOCK_SYMBOLS (block, i, sym)
+      ALL_BLOCK_SYMBOLS (block, iter, sym)
 	{
 	  QUIT;			/* allow user to bail out with ^C */
 	  if (count == 0)

@@ -40,6 +40,9 @@
 #include "annotate.h"
 #include "ui-out.h"
 #include "block.h"
+#include "stack.h"
+#include "gdb_assert.h"
+#include "dictionary.h"
 
 /* Prototypes for exported functions. */
 
@@ -70,8 +73,6 @@ static void up_silently_command (char *, int);
 void frame_command (char *, int);
 
 static void current_frame_command (char *, int);
-
-static void select_frame_command (char *, int);
 
 static void print_frame_arg_vars (struct frame_info *, struct ui_file *);
 
@@ -168,6 +169,225 @@ struct print_args_args
 
 static int print_args_stub (void *);
 
+/* Print nameless args on STREAM.
+   FI is the frameinfo for this frame, START is the offset
+   of the first nameless arg, and NUM is the number of nameless args to
+   print.  FIRST is nonzero if this is the first argument (not just
+   the first nameless arg).  */
+
+static void
+print_frame_nameless_args (struct frame_info *fi, long start, int num,
+			   int first, struct ui_file *stream)
+{
+  int i;
+  CORE_ADDR argsaddr;
+  long arg_value;
+
+  for (i = 0; i < num; i++)
+    {
+      QUIT;
+      argsaddr = get_frame_args_address (fi);
+      if (!argsaddr)
+	return;
+      arg_value = read_memory_integer (argsaddr + start, sizeof (int));
+      if (!first)
+	fprintf_filtered (stream, ", ");
+      fprintf_filtered (stream, "%ld", arg_value);
+      first = 0;
+      start += sizeof (int);
+    }
+}
+
+/* Print the arguments of a stack frame, given the function FUNC
+   running in that frame (as a symbol), the info on the frame,
+   and the number of args according to the stack frame (or -1 if unknown).  */
+
+/* References here and elsewhere to "number of args according to the
+   stack frame" appear in all cases to refer to "number of ints of args
+   according to the stack frame".  At least for VAX, i386, isi.  */
+
+static void
+print_frame_args (struct symbol *func, struct frame_info *fi, int num,
+		  struct ui_file *stream)
+{
+  struct block *b = NULL;
+  int first = 1;
+  struct dict_iterator iter;
+  register struct symbol *sym;
+  struct value *val;
+  /* Offset of next stack argument beyond the one we have seen that is
+     at the highest offset.
+     -1 if we haven't come to a stack argument yet.  */
+  long highest_offset = -1;
+  int arg_size;
+  /* Number of ints of arguments that we have printed so far.  */
+  int args_printed = 0;
+  struct cleanup *old_chain, *list_chain;
+  struct ui_stream *stb;
+
+  stb = ui_out_stream_new (uiout);
+  old_chain = make_cleanup_ui_out_stream_delete (stb);
+
+  if (func)
+    {
+      b = SYMBOL_BLOCK_VALUE (func);
+
+      ALL_BLOCK_SYMBOLS (b, iter, sym)
+        {
+	  QUIT;
+
+	  /* Keep track of the highest stack argument offset seen, and
+	     skip over any kinds of symbols we don't care about.  */
+
+	  switch (SYMBOL_CLASS (sym))
+	    {
+	    case LOC_ARG:
+	    case LOC_REF_ARG:
+	      {
+		long current_offset = SYMBOL_VALUE (sym);
+		arg_size = TYPE_LENGTH (SYMBOL_TYPE (sym));
+
+		/* Compute address of next argument by adding the size of
+		   this argument and rounding to an int boundary.  */
+		current_offset =
+		  ((current_offset + arg_size + sizeof (int) - 1)
+		   & ~(sizeof (int) - 1));
+
+		/* If this is the highest offset seen yet, set highest_offset.  */
+		if (highest_offset == -1
+		    || (current_offset > highest_offset))
+		  highest_offset = current_offset;
+
+		/* Add the number of ints we're about to print to args_printed.  */
+		args_printed += (arg_size + sizeof (int) - 1) / sizeof (int);
+	      }
+
+	      /* We care about types of symbols, but don't need to keep track of
+		 stack offsets in them.  */
+	    case LOC_REGPARM:
+	    case LOC_REGPARM_ADDR:
+	    case LOC_LOCAL_ARG:
+	    case LOC_BASEREG_ARG:
+	    case LOC_COMPUTED_ARG:
+	      break;
+
+	    /* Other types of symbols we just skip over.  */
+	    default:
+	      continue;
+	    }
+
+	  /* We have to look up the symbol because arguments can have
+	     two entries (one a parameter, one a local) and the one we
+	     want is the local, which lookup_symbol will find for us.
+	     This includes gcc1 (not gcc2) on the sparc when passing a
+	     small structure and gcc2 when the argument type is float
+	     and it is passed as a double and converted to float by
+	     the prologue (in the latter case the type of the LOC_ARG
+	     symbol is double and the type of the LOC_LOCAL symbol is
+	     float).  */
+	  /* But if the parameter name is null, don't try it.
+	     Null parameter names occur on the RS/6000, for traceback tables.
+	     FIXME, should we even print them?  */
+
+	  if (*DEPRECATED_SYMBOL_NAME (sym))
+	    {
+	      struct symbol *nsym;
+	      nsym = lookup_symbol
+		(DEPRECATED_SYMBOL_NAME (sym),
+		 b, VAR_DOMAIN, (int *) NULL, (struct symtab **) NULL);
+	      if (SYMBOL_CLASS (nsym) == LOC_REGISTER)
+		{
+		  /* There is a LOC_ARG/LOC_REGISTER pair.  This means that
+		     it was passed on the stack and loaded into a register,
+		     or passed in a register and stored in a stack slot.
+		     GDB 3.x used the LOC_ARG; GDB 4.0-4.11 used the LOC_REGISTER.
+
+		     Reasons for using the LOC_ARG:
+		     (1) because find_saved_registers may be slow for remote
+		     debugging,
+		     (2) because registers are often re-used and stack slots
+		     rarely (never?) are.  Therefore using the stack slot is
+		     much less likely to print garbage.
+
+		     Reasons why we might want to use the LOC_REGISTER:
+		     (1) So that the backtrace prints the same value as
+		     "print foo".  I see no compelling reason why this needs
+		     to be the case; having the backtrace print the value which
+		     was passed in, and "print foo" print the value as modified
+		     within the called function, makes perfect sense to me.
+
+		     Additional note:  It might be nice if "info args" displayed
+		     both values.
+		     One more note:  There is a case with sparc structure passing
+		     where we need to use the LOC_REGISTER, but this is dealt with
+		     by creating a single LOC_REGPARM in symbol reading.  */
+
+		  /* Leave sym (the LOC_ARG) alone.  */
+		  ;
+		}
+	      else
+		sym = nsym;
+	    }
+
+	  /* Print the current arg.  */
+	  if (!first)
+	    ui_out_text (uiout, ", ");
+	  ui_out_wrap_hint (uiout, "    ");
+
+	  annotate_arg_begin ();
+
+	  list_chain = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+	  fprintf_symbol_filtered (stb->stream, SYMBOL_PRINT_NAME (sym),
+				   SYMBOL_LANGUAGE (sym), DMGL_PARAMS | DMGL_ANSI);
+	  ui_out_field_stream (uiout, "name", stb);
+	  annotate_arg_name_end ();
+	  ui_out_text (uiout, "=");
+
+	  /* Avoid value_print because it will deref ref parameters.  We just
+	     want to print their addresses.  Print ??? for args whose address
+	     we do not know.  We pass 2 as "recurse" to val_print because our
+	     standard indentation here is 4 spaces, and val_print indents
+	     2 for each recurse.  */
+	  val = read_var_value (sym, fi);
+
+	  annotate_arg_value (val == NULL ? NULL : VALUE_TYPE (val));
+
+	  if (val)
+	    {
+	      val_print (VALUE_TYPE (val), VALUE_CONTENTS (val), 0,
+			 VALUE_ADDRESS (val),
+			 stb->stream, 0, 0, 2, Val_no_prettyprint);
+	      ui_out_field_stream (uiout, "value", stb);
+	    }
+	  else
+	    ui_out_text (uiout, "???");
+
+	  /* Invoke ui_out_tuple_end.  */
+	  do_cleanups (list_chain);
+
+	  annotate_arg_end ();
+
+	  first = 0;
+	}
+    }
+
+  /* Don't print nameless args in situations where we don't know
+     enough about the stack to find them.  */
+  if (num != -1)
+    {
+      long start;
+
+      if (highest_offset == -1)
+	start = FRAME_ARGS_SKIP;
+      else
+	start = highest_offset;
+
+      print_frame_nameless_args (fi, start, num - args_printed,
+				 first, stream);
+    }
+  do_cleanups (old_chain);
+}
+
 /* Pass the args the way catch_errors wants them.  */
 
 static int
@@ -176,7 +396,13 @@ print_args_stub (void *args)
   int numargs;
   struct print_args_args *p = (struct print_args_args *) args;
 
-  numargs = FRAME_NUM_ARGS (p->fi);
+  if (FRAME_NUM_ARGS_P ())
+    {
+      numargs = FRAME_NUM_ARGS (p->fi);
+      gdb_assert (numargs >= 0);
+    }
+  else
+    numargs = -1;
   print_frame_args (p->func, p->fi, numargs, p->stream);
   return 0;
 }
@@ -760,15 +986,22 @@ frame_info (char *addr_exp, int from_tty)
 	print_address_numeric (arg_list, 1, gdb_stdout);
 	printf_filtered (",");
 
-	numargs = FRAME_NUM_ARGS (fi);
-	if (numargs < 0)
-	  puts_filtered (" args: ");
-	else if (numargs == 0)
-	  puts_filtered (" no args.");
-	else if (numargs == 1)
-	  puts_filtered (" 1 arg: ");
+	if (!FRAME_NUM_ARGS_P ())
+	  {
+	    numargs = -1;
+	    puts_filtered (" args: ");
+	  }
 	else
-	  printf_filtered (" %d args: ", numargs);
+	  {
+	    numargs = FRAME_NUM_ARGS (fi);
+	    gdb_assert (numargs >= 0);
+	    if (numargs == 0)
+	      puts_filtered (" no args.");
+	    else if (numargs == 1)
+	      puts_filtered (" 1 arg: ");
+	    else
+	      printf_filtered (" %d args: ", numargs);
+	  }
 	print_frame_args (func, fi, numargs, gdb_stdout);
 	puts_filtered ("\n");
       }
@@ -1076,14 +1309,15 @@ backtrace_full_command (char *arg, int from_tty)
    Return 1 if any variables were printed; 0 otherwise.  */
 
 static int
-print_block_frame_locals (struct block *b, register struct frame_info *fi,
-			  int num_tabs, register struct ui_file *stream)
+print_block_frame_locals (struct block *b, struct frame_info *fi,
+			  int num_tabs, struct ui_file *stream)
 {
-  register int i, j;
-  register struct symbol *sym;
-  register int values_printed = 0;
+  struct dict_iterator iter;
+  int j;
+  struct symbol *sym;
+  int values_printed = 0;
 
-  ALL_BLOCK_SYMBOLS (b, i, sym)
+  ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       switch (SYMBOL_CLASS (sym))
 	{
@@ -1115,11 +1349,11 @@ static int
 print_block_frame_labels (struct block *b, int *have_default,
 			  register struct ui_file *stream)
 {
-  register int i;
+  struct dict_iterator iter;
   register struct symbol *sym;
   register int values_printed = 0;
 
-  ALL_BLOCK_SYMBOLS (b, i, sym)
+  ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       if (STREQ (DEPRECATED_SYMBOL_NAME (sym), "default"))
 	{
@@ -1297,7 +1531,7 @@ print_frame_arg_vars (register struct frame_info *fi,
 {
   struct symbol *func = get_frame_function (fi);
   register struct block *b;
-  register int i;
+  struct dict_iterator iter;
   register struct symbol *sym, *sym2;
   register int values_printed = 0;
 
@@ -1308,7 +1542,7 @@ print_frame_arg_vars (register struct frame_info *fi,
     }
 
   b = SYMBOL_BLOCK_VALUE (func);
-  ALL_BLOCK_SYMBOLS (b, i, sym)
+  ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       switch (SYMBOL_CLASS (sym))
 	{
@@ -1460,14 +1694,7 @@ find_relative_frame (register struct frame_info *frame,
    and select it.  See parse_frame_specification for more info on proper
    frame expressions. */
 
-/* ARGSUSED */
 void
-select_frame_command_wrapper (char *level_exp, int from_tty)
-{
-  select_frame_command (level_exp, from_tty);
-}
-
-static void
 select_frame_command (char *level_exp, int from_tty)
 {
   struct frame_info *frame;

@@ -34,10 +34,6 @@
 #include "vax-tdep.h"
 
 static gdbarch_register_name_ftype vax_register_name;
-static gdbarch_register_byte_ftype vax_register_byte;
-static gdbarch_register_raw_size_ftype vax_register_raw_size;
-static gdbarch_register_virtual_size_ftype vax_register_virtual_size;
-static gdbarch_register_virtual_type_ftype vax_register_virtual_type;
 
 static gdbarch_skip_prologue_ftype vax_skip_prologue;
 static gdbarch_frame_num_args_ftype vax_frame_num_args;
@@ -162,40 +158,24 @@ vax_frame_saved_pc (struct frame_info *frame)
   return (read_memory_integer (get_frame_base (frame) + 16, 4));
 }
 
-CORE_ADDR
-vax_frame_args_address_correct (struct frame_info *frame)
-{
-  /* Cannot find the AP register value directly from the FP value.  Must
-     find it saved in the frame called by this one, or in the AP register
-     for the innermost frame.  However, there is no way to tell the
-     difference between the innermost frame and a frame for which we
-     just don't know the frame that it called (e.g. "info frame 0x7ffec789").
-     For the sake of argument, suppose that the stack is somewhat trashed
-     (which is one reason that "info frame" exists).  So, return 0 (indicating
-     we don't know the address of the arglist) if we don't know what frame
-     this frame calls.  */
-  if (get_next_frame (frame))
-    return (read_memory_integer (get_frame_base (get_next_frame (frame)) + 8, 4));
-
-  return (0);
-}
-
 static CORE_ADDR
 vax_frame_args_address (struct frame_info *frame)
 {
-  /* In most of GDB, getting the args address is too important to
-     just say "I don't know".  This is sometimes wrong for functions
-     that aren't on top of the stack, but c'est la vie.  */
+  /* In most of GDB, getting the args address is too important to just
+     say "I don't know".  This is sometimes wrong for functions that
+     aren't on top of the stack, but c'est la vie.  */
   if (get_next_frame (frame))
     return (read_memory_integer (get_frame_base (get_next_frame (frame)) + 8, 4));
-
-  return (read_register (VAX_AP_REGNUM));
-}
-
-static CORE_ADDR
-vax_frame_locals_address (struct frame_info *frame)
-{
-  return (get_frame_base (frame));
+  /* Cannot find the AP register value directly from the FP value.
+     Must find it saved in the frame called by this one, or in the AP
+     register for the innermost frame.  However, there is no way to
+     tell the difference between the innermost frame and a frame for
+     which we just don't know the frame that it called (e.g. "info
+     frame 0x7ffec789").  For the sake of argument, suppose that the
+     stack is somewhat trashed (which is one reason that "info frame"
+     exists).  So, return 0 (indicating we don't know the address of
+     the arglist) if we don't know what frame this frame calls.  */
+  return 0;
 }
 
 static int
@@ -381,13 +361,13 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, vax_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, VAX_REGISTER_SIZE);
   set_gdbarch_deprecated_register_bytes (gdbarch, VAX_REGISTER_BYTES);
-  set_gdbarch_register_byte (gdbarch, vax_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, vax_register_raw_size);
+  set_gdbarch_deprecated_register_byte (gdbarch, vax_register_byte);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, vax_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, VAX_MAX_REGISTER_RAW_SIZE);
-  set_gdbarch_register_virtual_size (gdbarch, vax_register_virtual_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, vax_register_virtual_size);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch,
                                          VAX_MAX_REGISTER_VIRTUAL_SIZE);
-  set_gdbarch_register_virtual_type (gdbarch, vax_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, vax_register_virtual_type);
 
   /* Frame and stack info */
   set_gdbarch_skip_prologue (gdbarch, vax_skip_prologue);
@@ -401,7 +381,6 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, vax_frame_saved_pc);
 
   set_gdbarch_frame_args_address (gdbarch, vax_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, vax_frame_locals_address);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, vax_frame_init_saved_regs);
 
@@ -435,7 +414,7 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
   /* Should be using push_dummy_call.  */
-  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
@@ -444,6 +423,8 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   return (gdbarch);
 }
+
+extern initialize_file_ftype _initialize_vax_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_vax_tdep (void)

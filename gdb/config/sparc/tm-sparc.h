@@ -448,10 +448,6 @@ extern CORE_ADDR sparc_frame_saved_pc (struct frame_info *);
 /* Set VAL to the number of args passed to frame described by FI.
    Can set VAL to -1, meaning no way to tell.  */
 
-/* We can't tell how many args there are
-   now that the C compiler delays popping them.  */
-#define FRAME_NUM_ARGS(FI) (-1)
-
 /* Return number of bytes at start of arglist that are not really args.  */
 
 #define FRAME_ARGS_SKIP 68

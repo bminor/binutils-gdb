@@ -73,6 +73,13 @@ legacy_store_return_value (struct type *type, struct regcache *regcache,
 
 
 int
+always_use_struct_convention (int gcc_p, struct type *value_type)
+{
+  return 1;
+}
+
+
+int
 legacy_register_sim_regno (int regnum)
 {
   /* Only makes sense to supply raw registers.  */
@@ -232,14 +239,7 @@ default_double_format (struct gdbarch *gdbarch)
 /* Misc helper functions for targets. */
 
 int
-frame_num_args_unknown (struct frame_info *fi)
-{
-  return -1;
-}
-
-
-int
-generic_register_convertible_not (int num)
+deprecated_register_convertible_not (int num)
 {
   return 0;
 }
@@ -442,21 +442,21 @@ legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)
 int
 legacy_convert_register_p (int regnum)
 {
-  return REGISTER_CONVERTIBLE (regnum);
+  return DEPRECATED_REGISTER_CONVERTIBLE (regnum);
 }
 
 void
 legacy_register_to_value (int regnum, struct type *type,
 			  char *from, char *to)
 {
-  REGISTER_CONVERT_TO_VIRTUAL (regnum, type, from, to);
+  DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (regnum, type, from, to);
 }
 
 void
 legacy_value_to_register (struct type *type, int regnum,
 			  char *from, char *to)
 {
-  REGISTER_CONVERT_TO_RAW (type, regnum, from, to);
+  DEPRECATED_REGISTER_CONVERT_TO_RAW (type, regnum, from, to);
 }
 
 
@@ -882,7 +882,7 @@ gdbarch_info_init (struct gdbarch_info *info)
 
 /* */
 
-extern initialize_file_ftype _initialize_gdbarch_utils;
+extern initialize_file_ftype _initialize_gdbarch_utils; /* -Wmissing-prototypes */
 
 void
 _initialize_gdbarch_utils (void)

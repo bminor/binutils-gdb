@@ -311,7 +311,7 @@ avr_address_to_pointer (struct type *type, void *buf, CORE_ADDR addr)
       || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD)
     {
       store_unsigned_integer (buf, TYPE_LENGTH (type),
-			      avr_convert_iaddr_to_raw (addr));
+			      avr_convert_iaddr_to_raw (addr >> 1));
     }
   else
     {
@@ -338,7 +338,7 @@ avr_pointer_to_address (struct type *type, const void *buf)
   if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
       || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD
       || TYPE_CODE_SPACE (TYPE_TARGET_TYPE (type)))
-    return avr_make_iaddr (addr);
+    return avr_make_iaddr (addr << 1);
   else
     return avr_make_saddr (addr);
 }
@@ -409,15 +409,6 @@ avr_remote_translate_xfer_address (struct gdbarch *gdbarch,
 
   *targ_addr = memaddr;
   *targ_len = nr_bytes;
-}
-
-/* Function pointers obtained from the target are half of what gdb expects so
-   multiply by 2. */
-
-static CORE_ADDR
-avr_convert_from_func_ptr_addr (CORE_ADDR addr)
-{
-  return addr * 2;
 }
 
 /* avr_scan_prologue is also used as the
@@ -1095,7 +1086,7 @@ avr_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    it as a NOP. Thus, it should be ok. Since the avr is currently a remote
    only target, this shouldn't be a problem (I hope). TRoth/2003-05-14  */
 
-const unsigned char *
+static const unsigned char *
 avr_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
 {
     static unsigned char avr_break_insn [] = { 0x98, 0x95 };
@@ -1172,12 +1163,12 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, avr_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, 1);
   set_gdbarch_deprecated_register_bytes (gdbarch, AVR_NUM_REG_BYTES);
-  set_gdbarch_register_byte (gdbarch, avr_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, avr_register_raw_size);
+  set_gdbarch_deprecated_register_byte (gdbarch, avr_register_byte);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, avr_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
-  set_gdbarch_register_virtual_size (gdbarch, avr_register_virtual_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, avr_register_virtual_size);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4);
-  set_gdbarch_register_virtual_type (gdbarch, avr_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, avr_register_virtual_type);
 
   set_gdbarch_print_insn (gdbarch, print_insn_avr);
 
@@ -1213,10 +1204,6 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_address (gdbarch, avr_frame_address);
   set_gdbarch_frame_locals_address (gdbarch, avr_frame_address);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, avr_saved_pc_after_call);
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
-
-  set_gdbarch_convert_from_func_ptr_addr (gdbarch,
-					  avr_convert_from_func_ptr_addr);
 
   return gdbarch;
 }
@@ -1310,6 +1297,8 @@ avr_io_reg_read_command (char *args, int from_tty)
 	}
     }
 }
+
+extern initialize_file_ftype _initialize_avr_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_avr_tdep (void)

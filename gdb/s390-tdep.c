@@ -45,7 +45,7 @@
 
 /* Number of bytes of storage in the actual machine representation
    for register N.  */
-int
+static int
 s390_register_raw_size (int reg_nr)
 {
   if (S390_FP0_REGNUM <= reg_nr
@@ -55,21 +55,21 @@ s390_register_raw_size (int reg_nr)
     return 4;
 }
 
-int
+static int
 s390x_register_raw_size (int reg_nr)
 {
   return (reg_nr == S390_FPC_REGNUM)
     || (reg_nr >= S390_FIRST_ACR && reg_nr <= S390_LAST_ACR) ? 4 : 8;
 }
 
-int
+static int
 s390_cannot_fetch_register (int regno)
 {
   return (regno >= S390_FIRST_CR && regno < (S390_FIRST_CR + 9)) ||
     (regno >= (S390_FIRST_CR + 12) && regno <= S390_LAST_CR);
 }
 
-int
+static int
 s390_register_byte (int reg_nr)
 {
   if (reg_nr <= S390_GP_LAST_REGNUM)
@@ -119,7 +119,7 @@ struct frame_extra_info
 
 static CORE_ADDR s390_frame_saved_pc_nofix (struct frame_info *fi);
 
-int
+static int
 s390_readinstruction (bfd_byte instr[], CORE_ADDR at,
 		      struct disassemble_info *info)
 {
@@ -150,7 +150,7 @@ s390_memset_extra_info (struct frame_extra_info *fextra_info)
 
 
 
-const char *
+static const char *
 s390_register_name (int reg_nr)
 {
   static char *register_names[] = {
@@ -175,7 +175,7 @@ s390_register_name (int reg_nr)
 
 
 
-int
+static int
 s390_stab_reg_to_regnum (int regno)
 {
   return regno >= 64 ? S390_PSWM_REGNUM - 64 :
@@ -210,7 +210,7 @@ is_arg_reg (int regidx)
 
  */
 
-int
+static int
 s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
 		     struct frame_info *fi, int init_extra_info)
 {
@@ -675,7 +675,7 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
 }
 
 
-int
+static int
 s390_check_function_end (CORE_ADDR pc)
 {
   bfd_byte instr[S390_MAX_INSTR_SIZE];
@@ -767,7 +767,7 @@ s390_sniff_pc_function_start (CORE_ADDR pc, struct frame_info *fi)
 
 
 
-CORE_ADDR
+static CORE_ADDR
 s390_function_start (struct frame_info *fi)
 {
   CORE_ADDR function_start = 0;
@@ -782,7 +782,7 @@ s390_function_start (struct frame_info *fi)
 
 
 
-int
+static int
 s390_frameless_function_invocation (struct frame_info *fi)
 {
   struct frame_extra_info fextra_info, *fextra_info_ptr;
@@ -881,7 +881,7 @@ s390_is_sigreturn (CORE_ADDR pc, struct frame_info *sighandler_fi,
   for the moment.
   For some reason the blockframe.c calls us with fi->next->fromleaf
   so this seems of little use to us. */
-CORE_ADDR
+static CORE_ADDR
 s390_init_frame_pc_first (int next_fromleaf, struct frame_info *fi)
 {
   CORE_ADDR sigcaller_pc;
@@ -901,7 +901,7 @@ s390_init_frame_pc_first (int next_fromleaf, struct frame_info *fi)
   return pc;
 }
 
-void
+static void
 s390_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
@@ -916,7 +916,7 @@ s390_init_extra_frame_info (int fromleaf, struct frame_info *fi)
    &FEXTRA_INFOP contains struct frame_extra_info; TDATAP can be NULL,
    in which case the framedata are read.  */
 
-void
+static void
 s390_frame_init_saved_regs (struct frame_info *fi)
 {
 
@@ -939,15 +939,6 @@ s390_frame_init_saved_regs (struct frame_info *fi)
     }
 }
 
-
-
-CORE_ADDR
-s390_frame_args_address (struct frame_info *fi)
-{
-
-  /* Apparently gdb already knows gdb_args_offset itself */
-  return get_frame_base (fi);
-}
 
 
 static CORE_ADDR
@@ -979,7 +970,7 @@ s390_frame_saved_pc_nofix (struct frame_info *fi)
   return 0;
 }
 
-CORE_ADDR
+static CORE_ADDR
 s390_frame_saved_pc (struct frame_info *fi)
 {
   CORE_ADDR saved_pc = 0, sig_pc;
@@ -1008,7 +999,7 @@ s390_frame_saved_pc (struct frame_info *fi)
 /* We want backtraces out of signal handlers so we don't set
    (get_frame_type (thisframe) == SIGTRAMP_FRAME) to 1 */
 
-CORE_ADDR
+static CORE_ADDR
 s390_frame_chain (struct frame_info *thisframe)
 {
   CORE_ADDR prev_fp = 0;
@@ -1088,7 +1079,7 @@ s390_frame_chain (struct frame_info *thisframe)
 
 /* a given return value in `regbuf' with a type `valtype', extract and copy its
    value into `valbuf' */
-void
+static void
 s390_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 {
   /* floats and doubles are returned in fpr0. fpr's have a size of 8 bytes.
@@ -1146,7 +1137,7 @@ s390_promote_integer_argument (struct type *valtype, char *valbuf,
   return (value);
 }
 
-void
+static void
 s390_store_return_value (struct type *valtype, char *valbuf)
 {
   int arglen;
@@ -1194,7 +1185,7 @@ gdb_print_insn_s390 (bfd_vma memaddr, disassemble_info * info)
 
 
 /* Not the most efficent code in the world */
-int
+static int
 s390_fp_regnum (void)
 {
   int regno = S390_SP_REGNUM;
@@ -1209,7 +1200,7 @@ s390_fp_regnum (void)
   return regno;
 }
 
-CORE_ADDR
+static CORE_ADDR
 s390_read_fp (void)
 {
   return read_register (s390_fp_regnum ());
@@ -1251,7 +1242,7 @@ s390_pop_frame_regular (struct frame_info *frame)
    machine state that was in effect before the frame was created. 
    Used in the contexts of the "return" command, and of 
    target function calls from the debugger.  */
-void
+static void
 s390_pop_frame (void)
 {
   /* This function checks for and handles generic dummy frames, and
@@ -1501,7 +1492,7 @@ alignment_of (struct type *type)
 
    Our caller has taken care of any type promotions needed to satisfy
    prototypes or the old K&R argument-passing rules.  */
-CORE_ADDR
+static CORE_ADDR
 s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
@@ -1685,7 +1676,7 @@ s390_use_struct_convention (int gcc_p, struct type *value_type)
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
-struct type *
+static struct type *
 s390_register_virtual_type (int regno)
 {
   if (S390_FP0_REGNUM <= regno && regno < S390_FP0_REGNUM + S390_NUM_FPRS)
@@ -1695,7 +1686,7 @@ s390_register_virtual_type (int regno)
 }
 
 
-struct type *
+static struct type *
 s390x_register_virtual_type (int regno)
 {
   return (regno == S390_FPC_REGNUM) ||
@@ -1705,7 +1696,7 @@ s390x_register_virtual_type (int regno)
 
 
 
-void
+static void
 s390_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   write_register (S390_GP0_REGNUM + 2, addr);
@@ -1713,7 +1704,7 @@ s390_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 
 
 
-const static unsigned char *
+static const unsigned char *
 s390_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
   static unsigned char breakpoint[] = { 0x0, 0x1 };
@@ -1724,7 +1715,7 @@ s390_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 
 /* Advance PC across any function entry prologue instructions to reach some
    "real" code.  */
-CORE_ADDR
+static CORE_ADDR
 s390_skip_prologue (CORE_ADDR pc)
 {
   struct frame_extra_info fextra_info;
@@ -1737,7 +1728,7 @@ s390_skip_prologue (CORE_ADDR pc)
    Can't go through the frames for this because on some machines
    the new frame is not set up until the new function executes
    some instructions.  */
-CORE_ADDR
+static CORE_ADDR
 s390_saved_pc_after_call (struct frame_info *frame)
 {
   return ADDR_BITS_REMOVE (read_register (S390_RETADDR_REGNUM));
@@ -1775,7 +1766,7 @@ s390_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flags)
     return NULL;
 }
 
-int
+static int
 s390_address_class_name_to_type_flags (struct gdbarch *gdbarch, const char *name,
 				       int *type_flags_ptr)
 {
@@ -1788,7 +1779,7 @@ s390_address_class_name_to_type_flags (struct gdbarch *gdbarch, const char *name
     return 0;
 }
 
-struct gdbarch *
+static struct gdbarch *
 s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   static LONGEST s390_call_dummy_words[] = { 0 };
@@ -1816,12 +1807,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_char_signed (gdbarch, 0);
 
   set_gdbarch_frame_args_skip (gdbarch, 0);
-  set_gdbarch_frame_args_address (gdbarch, s390_frame_args_address);
   set_gdbarch_deprecated_frame_chain (gdbarch, s390_frame_chain);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, s390_frame_init_saved_regs);
-  set_gdbarch_frame_locals_address (gdbarch, s390_frame_args_address);
-  /* We can't do this */
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_deprecated_store_struct_return (gdbarch, s390_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch, s390_extract_return_value);
   set_gdbarch_deprecated_store_return_value (gdbarch, s390_store_return_value);
@@ -1853,7 +1840,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      produces the frame's chain-pointer. */
   set_gdbarch_deprecated_frame_chain (gdbarch, s390_frame_chain);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, s390_saved_pc_after_call);
-  set_gdbarch_register_byte (gdbarch, s390_register_byte);
+  set_gdbarch_deprecated_register_byte (gdbarch, s390_register_byte);
   set_gdbarch_pc_regnum (gdbarch, S390_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, S390_SP_REGNUM);
   set_gdbarch_deprecated_fp_regnum (gdbarch, S390_FP_REGNUM);
@@ -1883,19 +1870,18 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
     case bfd_mach_s390_31:
       set_gdbarch_deprecated_register_size (gdbarch, 4);
-      set_gdbarch_register_raw_size (gdbarch, s390_register_raw_size);
-      set_gdbarch_register_virtual_size (gdbarch, s390_register_raw_size);
-      set_gdbarch_register_virtual_type (gdbarch, s390_register_virtual_type);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, s390_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, s390_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_type (gdbarch, s390_register_virtual_type);
 
       set_gdbarch_addr_bits_remove (gdbarch, s390_addr_bits_remove);
       set_gdbarch_deprecated_register_bytes (gdbarch, S390_REGISTER_BYTES);
       break;
     case bfd_mach_s390_64:
       set_gdbarch_deprecated_register_size (gdbarch, 8);
-      set_gdbarch_register_raw_size (gdbarch, s390x_register_raw_size);
-      set_gdbarch_register_virtual_size (gdbarch, s390x_register_raw_size);
-      set_gdbarch_register_virtual_type (gdbarch,
-					 s390x_register_virtual_type);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, s390x_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, s390x_register_raw_size);
+      set_gdbarch_deprecated_register_virtual_type (gdbarch, s390x_register_virtual_type);
 
       set_gdbarch_long_bit (gdbarch, 64);
       set_gdbarch_long_long_bit (gdbarch, 64);
@@ -1911,12 +1897,14 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   /* Should be using push_dummy_call.  */
-  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
   return gdbarch;
 }
 
 
+
+extern initialize_file_ftype _initialize_s390_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_s390_tdep (void)

@@ -579,13 +579,6 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
     }
 }
 
-static int
-alpha_use_struct_convention (int gcc_p, struct type *type)
-{
-  /* Structures are returned by ref in extra arg0.  */
-  return 1;
-}
-
 
 static const unsigned char *
 alpha_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
@@ -1516,9 +1509,9 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fp0_regnum (gdbarch, ALPHA_FP0_REGNUM);
 
   set_gdbarch_register_name (gdbarch, alpha_register_name);
-  set_gdbarch_register_byte (gdbarch, alpha_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, alpha_register_raw_size);
-  set_gdbarch_register_virtual_size (gdbarch, alpha_register_virtual_size);
+  set_gdbarch_deprecated_register_byte (gdbarch, alpha_register_byte);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, alpha_register_raw_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, alpha_register_virtual_size);
   set_gdbarch_register_type (gdbarch, alpha_register_type);
 
   set_gdbarch_cannot_fetch_register (gdbarch, alpha_cannot_fetch_register);
@@ -1537,11 +1530,10 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, print_insn_alpha);
 
   /* Call info.  */
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frameless_function_invocation (gdbarch,
                                     generic_frameless_function_invocation_not);
 
-  set_gdbarch_use_struct_convention (gdbarch, alpha_use_struct_convention);
+  set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
   set_gdbarch_extract_return_value (gdbarch, alpha_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, alpha_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch,
@@ -1552,7 +1544,6 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Methods for saving / extracting a dummy frame's ID.  */
   set_gdbarch_unwind_dummy_id (gdbarch, alpha_unwind_dummy_id);
-  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
 
   /* Return the unwound PC value.  */
   set_gdbarch_unwind_pc (gdbarch, alpha_unwind_pc);
@@ -1590,6 +1581,8 @@ alpha_dwarf2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   frame_base_append_predicate (gdbarch, dwarf2_frame_base_p);
   set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
 }
+
+extern initialize_file_ftype _initialize_alpha_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_alpha_tdep (void)

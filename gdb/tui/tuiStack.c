@@ -233,7 +233,7 @@ tui_get_function_from_frame (struct frame_info *fi)
   struct ui_file *stream = tui_sfileopen (256);
   char *p;
 
-  print_address_symbolic (fi->pc, stream, demangle, "");
+  print_address_symbolic (get_frame_pc (fi), stream, demangle, "");
   p = tui_file_get_strbuf (stream);
 
   /* Use simple heuristics to isolate the function name.  The symbol can
@@ -356,7 +356,7 @@ tuiShowFrameInfo (struct frame_info *fi)
       tui_set_locator_info (sal.symtab == 0 ? "??" : sal.symtab->filename,
                             tui_get_function_from_frame (fi),
                             sal.line,
-                            fi->pc);
+                            get_frame_pc (fi));
       tuiShowLocatorContent ();
       startLine = 0;
       for (i = 0; i < (sourceWindows ())->count; i++)
@@ -374,10 +374,11 @@ tuiShowFrameInfo (struct frame_info *fi)
 	    }
 	  else
 	    {
-	      if (find_pc_partial_function (fi->pc, (char **) NULL, &low, (CORE_ADDR) NULL) == 0)
+	      if (find_pc_partial_function (get_frame_pc (fi), (char **) NULL,
+					    &low, (CORE_ADDR) NULL) == 0)
 		error ("No function contains program counter for selected frame.\n");
 	      else
-		low = tuiGetLowDisassemblyAddress (low, fi->pc);
+		low = tuiGetLowDisassemblyAddress (low, get_frame_pc (fi));
 	    }
 
 	  if (winInfo == srcWin)

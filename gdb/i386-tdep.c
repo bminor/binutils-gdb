@@ -751,6 +751,7 @@ i386_frame_this_id (struct frame_info *next_frame, void **this_cache,
   if (cache->base == 0)
     return;
 
+  /* See the end of i386_push_dummy_call.  */
   (*this_id) = frame_id_build (cache->base + 8, cache->pc);
 }
 
@@ -902,6 +903,7 @@ i386_sigtramp_frame_this_id (struct frame_info *next_frame, void **this_cache,
   struct i386_frame_cache *cache =
     i386_sigtramp_frame_cache (next_frame, this_cache);
 
+  /* See the end of i386_push_dummy_call.  */
   (*this_id) = frame_id_build (cache->base + 8, frame_pc_unwind (next_frame));
 }
 
@@ -960,12 +962,6 @@ static const struct frame_base i386_frame_base =
   i386_frame_base_address
 };
 
-static void
-i386_save_dummy_frame_tos (CORE_ADDR sp)
-{
-  generic_save_dummy_frame_tos (sp + 8);
-}
-
 static struct frame_id
 i386_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
@@ -975,6 +971,7 @@ i386_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
   frame_unwind_register (next_frame, I386_EBP_REGNUM, buf);
   fp = extract_unsigned_integer (buf, 4);
 
+  /* See the end of i386_push_dummy_call.  */
   return frame_id_build (fp + 8, frame_pc_unwind (next_frame));
 }
 
@@ -1058,7 +1055,16 @@ i386_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   /* ...and fake a frame pointer.  */
   regcache_cooked_write (regcache, I386_EBP_REGNUM, buf);
 
-  return sp;
+  /* MarkK wrote: This "+ 8" is all over the place:
+     (i386_frame_this_id, i386_sigtramp_frame_this_id,
+     i386_unwind_dummy_id).  It's there, since all frame unwinders for
+     a given target have to agree (within a certain margin) on the
+     defenition of the stack address of a frame.  Otherwise
+     frame_id_inner() won't work correctly.  Since DWARF2/GCC uses the
+     stack address *before* the function call as a frame's CFA.  On
+     the i386, when %ebp is used as a frame pointer, the offset
+     between the contents %ebp and the CFA as defined by GCC.  */
+  return sp + 8;
 }
 
 /* These registers are used for returning integers (and on some
@@ -1359,7 +1365,7 @@ i386_register_convert_to_virtual (int regnum, struct type *type,
 
 static void
 i386_register_convert_to_raw (struct type *type, int regnum,
-			      char *from, char *to)
+			      const char *from, char *to)
 {
   gdb_assert (i386_fp_regnum_p (regnum));
 
@@ -1686,10 +1692,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Call dummy code.  */
   set_gdbarch_push_dummy_call (gdbarch, i386_push_dummy_call);
 
-  set_gdbarch_register_convertible (gdbarch, i386_register_convertible);
-  set_gdbarch_register_convert_to_virtual (gdbarch,
-					   i386_register_convert_to_virtual);
-  set_gdbarch_register_convert_to_raw (gdbarch, i386_register_convert_to_raw);
+  set_gdbarch_deprecated_register_convertible (gdbarch, i386_register_convertible);
+  set_gdbarch_deprecated_register_convert_to_virtual (gdbarch, i386_register_convert_to_virtual);
+  set_gdbarch_deprecated_register_convert_to_raw (gdbarch, i386_register_convert_to_raw);
 
   set_gdbarch_extract_return_value (gdbarch, i386_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, i386_store_return_value);
@@ -1707,7 +1712,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_function_start_offset (gdbarch, 0);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_pc_in_sigtramp);
 
   /* Wire in the MMX registers.  */
@@ -1718,7 +1722,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, i386_print_insn);
 
   set_gdbarch_unwind_dummy_id (gdbarch, i386_unwind_dummy_id);
-  set_gdbarch_save_dummy_frame_tos (gdbarch, i386_save_dummy_frame_tos);
 
   set_gdbarch_unwind_pc (gdbarch, i386_unwind_pc);
 

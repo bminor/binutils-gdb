@@ -30,15 +30,10 @@ extern void _initialize_frv_tdep (void);
 static gdbarch_init_ftype frv_gdbarch_init;
 
 static gdbarch_register_name_ftype frv_register_name;
-static gdbarch_register_raw_size_ftype frv_register_raw_size;
-static gdbarch_register_virtual_size_ftype frv_register_virtual_size;
-static gdbarch_register_virtual_type_ftype frv_register_virtual_type;
-static gdbarch_register_byte_ftype frv_register_byte;
 static gdbarch_breakpoint_from_pc_ftype frv_breakpoint_from_pc;
 static gdbarch_skip_prologue_ftype frv_skip_prologue;
 static gdbarch_deprecated_extract_return_value_ftype frv_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype frv_extract_struct_value_address;
-static gdbarch_use_struct_convention_ftype frv_use_struct_convention;
 static gdbarch_frameless_function_invocation_ftype frv_frameless_function_invocation;
 static gdbarch_init_extra_frame_info_ftype stupid_useless_init_extra_frame_info;
 static gdbarch_push_arguments_ftype frv_push_arguments;
@@ -738,18 +733,6 @@ frv_frame_init_saved_regs (struct frame_info *frame)
   }
 }
 
-/* Should we use EXTRACT_STRUCT_VALUE_ADDRESS instead of
-   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc
-   and TYPE is the type (which is known to be struct, union or array).
-
-   The frv returns all structs in memory.  */
-
-static int
-frv_use_struct_convention (int gcc_p, struct type *type)
-{
-  return 1;
-}
-
 static void
 frv_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
@@ -1059,17 +1042,16 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, frv_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, 4);
   set_gdbarch_deprecated_register_bytes (gdbarch, frv_num_regs * 4);
-  set_gdbarch_register_byte (gdbarch, frv_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, frv_register_raw_size);
+  set_gdbarch_deprecated_register_byte (gdbarch, frv_register_byte);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, frv_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
-  set_gdbarch_register_virtual_size (gdbarch, frv_register_virtual_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, frv_register_virtual_size);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4);
-  set_gdbarch_register_virtual_type (gdbarch, frv_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, frv_register_virtual_type);
 
   set_gdbarch_skip_prologue (gdbarch, frv_skip_prologue);
   set_gdbarch_breakpoint_from_pc (gdbarch, frv_breakpoint_from_pc);
 
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frv_frameless_function_invocation);
 
@@ -1080,7 +1062,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, frv_frame_init_saved_regs);
 
-  set_gdbarch_use_struct_convention (gdbarch, frv_use_struct_convention);
+  set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
   set_gdbarch_deprecated_extract_return_value (gdbarch, frv_extract_return_value);
 
   set_gdbarch_deprecated_store_struct_return (gdbarch, frv_store_struct_return);
@@ -1099,10 +1081,8 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Settings that should be unnecessary.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-  set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
-  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
 

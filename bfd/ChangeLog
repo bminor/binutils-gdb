@@ -1,3 +1,164 @@
+2003-06-13  Robert Millan  <zeratul2@wanadoo.es>
+
+	* config.bfd: Add i386-netbsd-gnu target.
+
+2003-06-12  Nick Clifton  <nickc@redhat.com>
+
+	* opncls.c (calc_crc32): Rename to
+	bfd_calc_gnu_debuglink_crc32 and export.
+        (GNU_DEBUGLINK): Define and use to replace occurrences of
+	hard-coded ".gnu_debuglink" in the code.
+        (get_debug_link_info): Prevent aborts by replacing call to
+	xmalloc with a call to malloc.
+        (find_separate_debug_file): Prevent aborts by replacing calls
+	to xmalloc and xstrdup with calls to malloc and strdup.
+        (bfd_add_gnu_debuglink): New function.  Add a .gnu_debuglink
+	section to a bfd.
+	* bfd-in2.h: Regenerate.
+
+2003-06-12 Federico G. Schwindt <fgsch@lodoss.net>
+	
+	* config.bfd (i[3-7]86-*-openbsd[0-2].* | i[3-7]86-*-openbsd3.[0-3]):
+	New target (was i[3-7]86-*-openbsd* before).
+	(i[3-7]86-*-openbsd*): Change to use bfd_elf32_i386_vec.
+	(vax-*-openbsd*): New target.
+
+2003-06-11  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elfxx-mips.c (MIPS_ELF_OPTIONS_SECTION_NAME): Use .MIPS.options
+	for n32, too.
+	(MIPS_ELF_STUB_SECTION_NAME): Use .MIPS.stubs for n32, too.
+	(mips_elf_rel_dyn_section): Use appropriate section alignment.
+	(mips_elf_create_got_section): Likewise.
+	(_bfd_mips_elf_create_dynamic_sections): Likewise.
+
+2003-06-11  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elf32-mips.c (mips_elf_generic_reloc): New Function.
+	(elf_mips_howto_table_rel): Use it.
+	(gprel32_with_gp): Move prototype.
+	(mips_elf_hi16_reloc): Check for ! BSF_LOCAL instead of zero addend.
+	Use mips_elf_generic_reloc.
+	(mips_elf_got16_reloc): Check for ! BSF_LOCAL instead of zero addend.
+	Code cleanup.
+	(_bfd_mips_elf32_gprel16_reloc): Check for ! BSF_LOCAL instead of
+	zero addend.
+	(mips_elf_gprel32_reloc): Likewise. Use the same GP assignment logic
+	as in the other *_gprel*_reloc functions.
+	(gprel32_with_gp): Handle partial_inplace properly.
+	(mips32_64bit_reloc): Use mips_elf_generic_reloc.
+	(mips16_gprel_reloc): Check for ! BSF_LOCAL instead of zero addend.
+	Do addend handling directly instead of calling
+	_bfd_mips_elf_gprel16_with_gp. Handle partial_inplace properly.
+	* elf64-mips.c (mips_elf64_hi16_reloc): Check for ! BSF_LOCAL instead
+	of zero addend. Handle partial_inplace properly.
+	(mips_elf64_got16_reloc): Check for ! BSF_LOCAL instead of zero
+	addend.
+	(mips_elf64_gprel16_reloc): Likewise.
+	(mips_elf64_literal_reloc): Likewise.
+	(mips_elf64_gprel32_reloc): Likewise. Use the same GP assignment
+	logic as in the other *_gprel*_reloc functions. Handle
+	partial_inplace properly.
+	(mips_elf64_shift6_reloc): Check for ! BSF_LOCAL instead of zero
+	addend. Handle partial_inplace properly.
+	(mips16_gprel_reloc): Likewise. Do addend handling directly instead
+	of calling _bfd_mips_elf_gprel16_with_gp.
+	* elfn32-mips.c (mips_elf_got16_reloc): Check for BSF_LOCAL.
+	(mips_elf_gprel32_reloc): Check for ! BSF_LOCAL instead
+	of zero addend.
+	(mips_elf_shift6_reloc): Handle partial_inplace properly.
+	(mips16_gprel_reloc): Likewise. Do addend handling directly instead
+	of calling _bfd_mips_elf_gprel16_with_gp.
+	* elfxx-mips.c (_bfd_mips_elf_gprel16_with_gp): Handle
+	partial_inplace properly. Fix wrong addend handling. Fix overflow
+	check.
+	(_bfd_mips_elf_sign_extend): Renamed from mips_elf_sign_extend and
+	exported.
+	(mips_elf_calculate_relocation): Use _bfd_mips_elf_sign_extend.
+	(_bfd_mips_elf_relocate_section): Likewise.
+	(mips_elf_create_dynamic_relocation): Update sec_info_type access.
+	* elfxx-mips.h (_bfd_mips_relax_section): Fix prototype declaration.
+	(_bfd_mips_elf_sign_extend): New prototype.
+
+2003-06-11 Federico G. Schwindt <fgsch@lodoss.net>
+	
+	* config.bfd (sparc-*-openbsd[0-2].* | sparc-*-openbsd3.[0-1]):
+	New target (was sparc-*-openbsd* before).
+	(sparc-*-openbsd*): Change to use bfd_elf32_sparc_vec.
+	
+	* configure.in (vax-*-openbsd*): Set COREFILE to netbsd-core.lo.
+	* configure: Regenerate.
+
+2003-06-11  H.J. Lu <hongjiu.lu@intel.com>
+
+	* po/Make-in (DESTDIR): New.
+	(install-data-yes): Support $(DESTDIR).
+	(uninstall): Likewise.
+
+2003-06-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (config.status): Depend on version.h.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
+2003-06-10  Alan Modra  <amodra@bigpond.net.au>
+	    Gary Hade <garyhade@us.ibm.com>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section <*_DS>): Special case lq.
+
+2003-06-10  Richard Sandiford  <rsandifo@redhat.com>
+
+	* archures.c (bfd_mach_h8300sxn): New architecture.
+	* bfd-in2.h: Regenerate.
+	* cpu-h8300.c (h8300_scan): Check for 'sxn'.
+	(h8300sxn_info_struct): New.
+	(h8300sx_info_struct): Link to it.
+	* elf32-h8300.c (elf32_h8_mach): Add h8300sxn case.
+	(elf32_h8_final_write_processing): Likewise.
+
+2003-06-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c: Move TARGET_LITTLE_SYM and other macros used by
+	elfxx-target.h so that we can use elf_backend_got_header_size.
+	(ELF_MACHINE_ALT1, ELF_MACHINE_ALT2): Delete.
+	(GLINK_CALL_STUB_SIZE): Modify.  Define new glink call stub and
+	associated macros.
+	(ppc64_elf_howto_raw <GOT_TPREL16_DS, GOT_TPREL16_LO_DS>): Correct
+	dst_mask.
+	(enum ppc_stub_type): Add ppc_stub_long_branch_r2off and
+	ppc_stub_plt_branch_r2off.
+	(struct ppc_stub_hash_entry): Reorganize.
+	(struct ppc_link_hash_table): Add no_multi_toc, multi_toc_needed,
+	toc_curr, toc_off and emit_stub_syms.
+	(ppc64_elf_link_hash_table_create): Init them.
+	(ppc_stub_name): Correct string size.
+	(ppc64_elf_check_relocs): Set has_gp_reloc on GOT and TOC relocs.
+	(ppc64_elf_size_dynamic_sections): Set no_multi_toc if GOT entries
+	used.
+	(ppc_type_of_stub): Tweak root.type test.
+	(build_plt_stub): Remove glink code.  Adjust for insn macro changes.
+	(ppc_size_one_stub): Handle ppc_stub_long_branch_r2off and
+	ppc_stub_plt_branch_r2off.
+	(ppc_build_one_stub): Likewise.  Fix var shadowing.  Correct addis,addi
+	range test.  Use toc_off to calculte r2 values.  Handle emit_stub_syms.
+	(ppc64_elf_setup_section_lists): Remove htab creator flavour test.
+	Initialize elf_gp and toc_curr.
+	(ppc64_elf_next_toc_section, ppc64_elf_reinit_toc): New functions.
+	(ppc64_elf_next_input_section): Set toc_off.
+	(group_sections): Ensure groups have the same TOC.
+	(ppc64_elf_size_stubs): Check whether we need a TOC adjusting stub.
+	(ppc64_elf_build_stubs): Add emit_stub_syms param, and stash in htab.
+	Build new glink stub.
+	(ppc64_elf_relocate_section): Handle multiple TOCs.  Fix comments.
+	(ppc64_elf_finish_dynamic_sections): Adjust DT_PPC64_GLINK.
+	* elf64-ppc.h (ppc64_elf_build_stubs): Update prototype.
+	(ppc64_elf_next_toc_section, ppc64_elf_reinit_toc): Declare.
+	* section.c (struct sec): Rename flag12 to has_gp_reloc.
+	(STD_SECTION): Update.
+	* ecoff.c (bfd_debug_section): Update comment.
+	* bfd-in2.h: Regenerate.
+
 2003-06-05  Daniel Jacobowitz  <drow@mvista.com>
 
 	* elfcode.h (elf_slurp_reloc_table_from_section): Don't dereference
@@ -64,12 +225,12 @@
 
 	* elf32-v850.c (v850_elf_howto_t): Rename R_V850_32to
 	R_V850_ABS32.  Add entry for R_V850_REL32.
-        (v850_elf_reloc_map): Likewise.
-        (v850_elf_check_relocs): Likewise.
-        (v850_elf_perform_relocation): Likewise.
-        (v850_elf_final_link_relocate): Likewise.  Include computation
+	(v850_elf_reloc_map): Likewise.
+	(v850_elf_check_relocs): Likewise.
+	(v850_elf_perform_relocation): Likewise.
+	(v850_elf_final_link_relocate): Likewise.  Include computation
 	to make R_V850_REl32 pc-relative.
-          
+
 2003-06-03  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf32-sh.c (sh_elf_size_dynamic_sections): Create .interp section
@@ -323,8 +484,8 @@
 	(allocate_dynrelocs):  For undef weak syms with non-default
 	visibility, a) don't allocate plt entries, b) don't allocate
 	.got relocs, c) discard dyn rel space
-        (sh_elf_relocate_section): d) don't generate .got relocs, e)
-        don't generate dynamic relocs.
+	(sh_elf_relocate_section): d) don't generate .got relocs, e)
+	don't generate dynamic relocs.
 	(sh_elf_copy_indirect_symbol): Don't copy ELF_LINK_NON_GOT_REF
 	for weakdefs when symbol already adjusted.
 

@@ -30,10 +30,6 @@
 
 #include "config/tm-linux.h"
 
-/* Use target-specific function to define link map offsets.  */
-extern struct link_map_offsets *arm_linux_svr4_fetch_link_map_offsets (void);
-#define SVR4_FETCH_LINK_MAP_OFFSETS() arm_linux_svr4_fetch_link_map_offsets ()
-
 /* Offset to saved PC in sigcontext structure, from <asm/sigcontext.h> */
 #define SIGCONTEXT_PC_OFFSET	(sizeof(unsigned long) * 18)
 

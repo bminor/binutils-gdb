@@ -307,7 +307,7 @@ xstormy16_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    (which may or may not be the same as before).
 */
 
-CORE_ADDR
+static CORE_ADDR
 xstormy16_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   unsigned char buf[xstormy16_pc_size];
@@ -995,7 +995,7 @@ xstormy16_stack_align (CORE_ADDR addr)
   return addr;
 }
 
-void
+static void
 xstormy16_save_dummy_frame_tos (CORE_ADDR sp)
 {
   generic_save_dummy_frame_tos (sp - xstormy16_pc_size);
@@ -1039,12 +1039,12 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, xstormy16_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, xstormy16_reg_size);
   set_gdbarch_deprecated_register_bytes (gdbarch, E_ALL_REGS_SIZE);
-  set_gdbarch_register_byte (gdbarch, xstormy16_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, xstormy16_register_raw_size);
+  set_gdbarch_deprecated_register_byte (gdbarch, xstormy16_register_byte);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, xstormy16_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, xstormy16_pc_size);
-  set_gdbarch_register_virtual_size (gdbarch, xstormy16_register_raw_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, xstormy16_register_raw_size);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4);
-  set_gdbarch_register_virtual_type (gdbarch, xstormy16_reg_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, xstormy16_reg_virtual_type);
 
   /*
    * Frame Info
@@ -1075,8 +1075,6 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_function_start_offset (gdbarch, 0);
   /* This value is almost never non-zero... */
   set_gdbarch_frame_args_skip (gdbarch, 0);
-  /* OK to default this value to 'unknown'. */
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
 
   /*
    * Call Dummies
@@ -1114,7 +1112,7 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					xstormy16_in_solib_call_trampoline);
 
   /* Should be using push_dummy_call.  */
-  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
   return gdbarch;
 }
@@ -1122,6 +1120,8 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 /* Function: _initialize_xstormy16_tdep
    Initializer function for the Sanyo Xstormy16a module.
    Called by gdb at start-up. */
+
+extern initialize_file_ftype _initialize_xstormy16_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_xstormy16_tdep (void)

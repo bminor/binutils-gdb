@@ -698,7 +698,7 @@ bfd_h8_disassemble (addr, info, mach)
 			outfn (stream, "er%d", regno[1]);
 		      else
 			{
-			  outfn (stream, "(er%d-er%d)", regno[1] - regno[0],
+			  outfn (stream, "er%d-er%d", regno[1] - regno[0],
 				 regno[1]);
 			}
 		      return qi->length;

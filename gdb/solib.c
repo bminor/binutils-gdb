@@ -382,7 +382,7 @@ symbol_add_stub (void *arg)
    the section table.  But we only use this for core files and
    processes we've just attached to, so that's okay.  */
 
-void
+static void
 update_solib_list (int from_tty, struct target_ops *target)
 {
   struct so_list *inferior = TARGET_SO_CURRENT_SOS ();
@@ -856,6 +856,8 @@ reload_shared_libraries (char *ignored, int from_tty)
   no_shared_libraries (NULL, from_tty);
   solib_add (NULL, from_tty, NULL, auto_solib_add);
 }
+
+extern initialize_file_ftype _initialize_solib; /* -Wmissing-prototypes */
 
 void
 _initialize_solib (void)

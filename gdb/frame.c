@@ -674,12 +674,12 @@ frame_read_signed_register (struct frame_info *frame, int regnum,
 }
 
 void
-generic_unwind_get_saved_register (char *raw_buffer,
-				   int *optimizedp,
-				   CORE_ADDR *addrp,
-				   struct frame_info *frame,
-				   int regnum,
-				   enum lval_type *lvalp)
+deprecated_unwind_get_saved_register (char *raw_buffer,
+				      int *optimizedp,
+				      CORE_ADDR *addrp,
+				      struct frame_info *frame,
+				      int regnum,
+				      enum lval_type *lvalp)
 {
   int optimizedx;
   CORE_ADDR addrx;
@@ -778,7 +778,7 @@ frame_map_regnum_to_name (int regnum)
 
 /* Create a sentinel frame.  */
 
-struct frame_info *
+static struct frame_info *
 create_sentinel_frame (struct regcache *regcache)
 {
   struct frame_info *frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
@@ -1944,11 +1944,11 @@ get_prev_frame (struct frame_info *this_frame)
      Doing this makes it possible for the user to examine a frame that
      has an invalid frame ID.
 
-     The very old VAX frame_args_address_correct() method noted: [...]
-     For the sake of argument, suppose that the stack is somewhat
-     trashed (which is one reason that "info frame" exists).  So,
-     return 0 (indicating we don't know the address of the arglist) if
-     we don't know what frame this frame calls.  */
+     Some very old VAX code noted: [...]  For the sake of argument,
+     suppose that the stack is somewhat trashed (which is one reason
+     that "info frame" exists).  So, return 0 (indicating we don't
+     know the address of the arglist) if we don't know what frame this
+     frame calls.  */
 
   /* Link it in.  */
   this_frame->prev = prev_frame;
@@ -2250,6 +2250,37 @@ get_frame_arch (struct frame_info *this_frame)
   return current_gdbarch;
 }
 
+/* Stack pointer methods.  */
+
+CORE_ADDR
+get_frame_sp (struct frame_info *this_frame)
+{
+  return frame_sp_unwind (this_frame->next);
+}
+
+CORE_ADDR
+frame_sp_unwind (struct frame_info *next_frame)
+{
+  /* Normality, an architecture that provides a way of obtaining any
+     frame inner-most address.  */
+  if (gdbarch_unwind_sp_p (current_gdbarch))
+    return gdbarch_unwind_sp (current_gdbarch, next_frame);
+  /* Things are looking grim.  If it's the inner-most frame and there
+     is a TARGET_READ_SP then that can be used.  */
+  if (next_frame->level < 0 && TARGET_READ_SP_P ())
+    return TARGET_READ_SP ();
+  /* Now things are really are grim.  Hope that the value returned by
+     the SP_REGNUM register is meaningful.  */
+  if (SP_REGNUM >= 0)
+    {
+      ULONGEST sp;
+      frame_unwind_unsigned_register (next_frame, SP_REGNUM, &sp);
+      return sp;
+    }
+  internal_error (__FILE__, __LINE__, "Missing unwind SP method");
+}
+
+
 int
 legacy_frame_p (struct gdbarch *current_gdbarch)
 {
@@ -2257,9 +2288,10 @@ legacy_frame_p (struct gdbarch *current_gdbarch)
 	  || DEPRECATED_INIT_FRAME_PC_FIRST_P ()
 	  || DEPRECATED_INIT_EXTRA_FRAME_INFO_P ()
 	  || DEPRECATED_FRAME_CHAIN_P ()
-	  || !gdbarch_unwind_dummy_id_p (current_gdbarch)
-	  || !SAVE_DUMMY_FRAME_TOS_P ());
+	  || !gdbarch_unwind_dummy_id_p (current_gdbarch));
 }
+
+extern initialize_file_ftype _initialize_frame; /* -Wmissing-prototypes */
 
 void
 _initialize_frame (void)

@@ -1775,7 +1775,6 @@ yylex ()
 	CORE_ADDR Class = lookup_objc_class(tmp);
 	if (Class)
 	  {
-	    extern struct symbol *lookup_struct_typedef();
 	    yylval.class.class = Class;
 	    if ((sym = lookup_struct_typedef (tmp, 
 					      expression_context_block, 

@@ -231,8 +231,3 @@ mi_parse (char *cmd)
   parse->op = MI_COMMAND;
   return parse;
 }
-
-void
-_initialize_mi_parse (void)
-{
-}

@@ -33,7 +33,6 @@
 #include "doublest.h"
 #include "value.h"
 #include "arch-utils.h"
-#include "solib-svr4.h"
 #include "osabi.h"
 
 #include "arm-tdep.h"
@@ -304,28 +303,6 @@ arm_frameless_function_invocation (struct frame_info *fi)
 
   frameless = (after_prologue < func_start + 12);
   return frameless;
-}
-
-/* The address of the arguments in the frame.  */
-static CORE_ADDR
-arm_frame_args_address (struct frame_info *fi)
-{
-  return get_frame_base (fi);
-}
-
-/* The address of the local variables in the frame.  */
-static CORE_ADDR
-arm_frame_locals_address (struct frame_info *fi)
-{
-  return get_frame_base (fi);
-}
-
-/* The number of arguments being passed in the frame.  */
-static int
-arm_frame_num_args (struct frame_info *fi)
-{
-  /* We have no way of knowing.  */
-  return -1;
 }
 
 /* A typical Thumb prologue looks like this:
@@ -2690,49 +2667,6 @@ arm_othernames (char *names, int n)
   set_disassembly_style ();
 }
 
-/* Fetch, and possibly build, an appropriate link_map_offsets structure
-   for ARM linux targets using the struct offsets defined in <link.h>.
-   Note, however, that link.h is not actually referred to in this file.
-   Instead, the relevant structs offsets were obtained from examining
-   link.h.  (We can't refer to link.h from this file because the host
-   system won't necessarily have it, or if it does, the structs which
-   it defines will refer to the host system, not the target).  */
-
-struct link_map_offsets *
-arm_linux_svr4_fetch_link_map_offsets (void)
-{
-  static struct link_map_offsets lmo;
-  static struct link_map_offsets *lmp = 0;
-
-  if (lmp == 0)
-    {
-      lmp = &lmo;
-
-      lmo.r_debug_size = 8;	/* Actual size is 20, but this is all we
-                                   need.  */
-
-      lmo.r_map_offset = 4;
-      lmo.r_map_size   = 4;
-
-      lmo.link_map_size = 20;	/* Actual size is 552, but this is all we
-                                   need.  */
-
-      lmo.l_addr_offset = 0;
-      lmo.l_addr_size   = 4;
-
-      lmo.l_name_offset = 4;
-      lmo.l_name_size   = 4;
-
-      lmo.l_next_offset = 12;
-      lmo.l_next_size   = 4;
-
-      lmo.l_prev_offset = 16;
-      lmo.l_prev_size   = 4;
-    }
-
-    return lmp;
-}
-
 /* Test whether the coff symbol specific value corresponds to a Thumb
    function.  */
 
@@ -2944,9 +2878,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation
     (gdbarch, arm_frameless_function_invocation);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, arm_frame_saved_pc);
-  set_gdbarch_frame_args_address (gdbarch, arm_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, arm_frame_locals_address);
-  set_gdbarch_frame_num_args (gdbarch, arm_frame_num_args);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, arm_frame_init_saved_regs);
   set_gdbarch_deprecated_pop_frame (gdbarch, arm_pop_frame);
@@ -2976,17 +2907,17 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_fp_regnum (gdbarch, ARM_FP_REGNUM);	/* ??? */
   set_gdbarch_sp_regnum (gdbarch, ARM_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, ARM_PC_REGNUM);
-  set_gdbarch_register_byte (gdbarch, arm_register_byte);
+  set_gdbarch_deprecated_register_byte (gdbarch, arm_register_byte);
   set_gdbarch_deprecated_register_bytes (gdbarch,
 					 (NUM_GREGS * INT_REGISTER_RAW_SIZE
 					  + NUM_FREGS * FP_REGISTER_RAW_SIZE
 					  + NUM_SREGS * STATUS_REGISTER_SIZE));
   set_gdbarch_num_regs (gdbarch, NUM_GREGS + NUM_FREGS + NUM_SREGS);
-  set_gdbarch_register_raw_size (gdbarch, arm_register_raw_size);
-  set_gdbarch_register_virtual_size (gdbarch, arm_register_virtual_size);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, arm_register_raw_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, arm_register_virtual_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, FP_REGISTER_RAW_SIZE);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, FP_REGISTER_VIRTUAL_SIZE);
-  set_gdbarch_register_virtual_type (gdbarch, arm_register_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, arm_register_type);
 
   /* Internal <-> external register number maps.  */
   set_gdbarch_register_sim_regno (gdbarch, arm_register_sim_regno);
@@ -3078,6 +3009,8 @@ arm_init_abi_apcs (struct gdbarch_info info,
 {
   /* Place-holder.  */
 }
+
+extern initialize_file_ftype _initialize_arm_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_arm_tdep (void)

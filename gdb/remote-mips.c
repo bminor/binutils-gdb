@@ -536,7 +536,7 @@ fputs_readable (const char *string, struct ui_file *file)
    timed out.  TIMEOUT specifies timeout value in seconds.
  */
 
-int
+static int
 mips_expect_timeout (const char *string, int timeout)
 {
   const char *p = string;
@@ -592,7 +592,7 @@ mips_expect_timeout (const char *string, int timeout)
    mips_expect_timeout if a different timeout value is needed.
  */
 
-int
+static int
 mips_expect (const char *string)
 {
   return mips_expect_timeout (string, remote_timeout);
@@ -600,7 +600,7 @@ mips_expect (const char *string)
 
 /* Read the required number of characters into the given buffer (which
    is assumed to be large enough). The only failure is a timeout. */
-int
+static int
 mips_getstring (char *string, int n)
 {
   char *p = string;
@@ -1721,7 +1721,7 @@ mips_resume (ptid_t ptid, int step, enum target_signal siggnal)
 
 /* Return the signal corresponding to SIG, where SIG is the number which
    the MIPS protocol uses for the signal.  */
-enum target_signal
+static enum target_signal
 mips_signal_from_protocol (int sig)
 {
   /* We allow a few more signals than the IDT board actually returns, on
@@ -2437,7 +2437,7 @@ calculate_mask (CORE_ADDR addr, int len)
 /* Insert a hardware breakpoint.  This works only on LSI targets, which
    implement ordinary breakpoints using hardware facilities.  */
 
-int
+static int
 remote_mips_insert_hw_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   if (strcmp (target_shortname, "lsi") == 0)
@@ -2450,7 +2450,7 @@ remote_mips_insert_hw_breakpoint (CORE_ADDR addr, char *contents_cache)
 /* Remove a hardware breakpoint.  This works only on LSI targets, which
    implement ordinary breakpoints using hardware facilities.  */
 
-int
+static int
 remote_mips_remove_hw_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   if (strcmp (target_shortname, "lsi") == 0)
@@ -3477,6 +3477,8 @@ pmon_command (char *args, int from_tty)
   printf_filtered ("Received packet: %s\n", buf);
 }
 
+extern initialize_file_ftype _initialize_remote_mips; /* -Wmissing-prototypes */
+
 void
 _initialize_remote_mips (void)
 {

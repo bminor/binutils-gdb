@@ -41,6 +41,7 @@
 #include "regcache.h"
 #include "gdb.h"
 #include "frame.h"
+#include "mi-main.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -535,9 +536,9 @@ get_register (int regnum, int format)
 
   /* Convert raw data to virtual format if necessary.  */
 
-  if (REGISTER_CONVERTIBLE (regnum))
+  if (DEPRECATED_REGISTER_CONVERTIBLE (regnum))
     {
-      REGISTER_CONVERT_TO_VIRTUAL (regnum,
+      DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (regnum,
 				   register_type (current_gdbarch, regnum),
 				   raw_buffer, virtual_buffer);
     }

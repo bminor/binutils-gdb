@@ -743,9 +743,6 @@ struct section_offsets
   (sizeof (struct section_offsets) \
    + sizeof (((struct section_offsets *) 0)->offsets) * ((n)-1))
 
-/* The maximum possible size of a section_offsets table.  */
-#define SIZEOF_SECTION_OFFSETS (SIZEOF_N_SECTION_OFFSETS (SECT_OFF_MAX))
-
 /* Each source file or header is represented by a struct symtab. 
    These objects are chained through the `next' field.  */
 
@@ -804,10 +801,10 @@ struct symtab
   }
   free_code;
 
-  /* Pointer to one block of storage to be freed, if nonzero.  */
-  /* This is IN ADDITION to the action indicated by free_code.  */
+  /* A function to call to free space, if necessary.  This is IN
+     ADDITION to the action indicated by free_code.  */
 
-  char *free_ptr;
+  void (*free_func)(struct symtab *symtab);
 
   /* Total number of lines found in source file.  */
 
@@ -1026,6 +1023,13 @@ extern struct symbol *lookup_symbol_aux_block (const char *name,
 					       const struct block *block,
 					       const domain_enum domain,
 					       struct symtab **symtab);
+
+/* Lookup a partial symbol.  */
+
+extern struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
+						     const char *,
+						     const char *, int,
+						     domain_enum);
 
 /* lookup a symbol by name, within a specified block */
 
@@ -1288,8 +1292,6 @@ extern void select_source_symtab (struct symtab *);
 extern char **make_symbol_completion_list (char *, char *);
 
 extern char **make_file_symbol_completion_list (char *, char *, char *);
-
-extern struct symbol **make_symbol_overload_list (struct symbol *);
 
 extern char **make_source_files_completion_list (char *, char *);
 

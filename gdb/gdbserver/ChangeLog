@@ -1,3 +1,8 @@
+2003-06-13  Mark Kettenis  <kettenis@gnu.org>
+
+	From Kelley Cook  <kelleycook@wideopenwest.com>:
+	* configure.srv: Accept i[34567]86 variants.
+
 2003-06-05  Daniel Jacobowitz  <drow@mvista.com>
 
 	* linux-low.c (linux_wait_for_event): Correct comment typos.

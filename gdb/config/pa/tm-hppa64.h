@@ -292,11 +292,6 @@ extern CORE_ADDR hppa_frame_locals_address (struct frame_info *fi);
 #endif
 
 #if !GDB_MULTI_ARCH
-extern int hppa_frame_num_args (struct frame_info *frame);
-#define FRAME_NUM_ARGS(fi) hppa_frame_num_args (fi)
-#endif
-
-#if !GDB_MULTI_ARCH
 #define FRAME_ARGS_SKIP 0
 #endif
 

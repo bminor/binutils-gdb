@@ -905,8 +905,14 @@ bfd_make_writable PARAMS ((bfd *abfd));
 bfd_boolean
 bfd_make_readable PARAMS ((bfd *abfd));
 
+unsigned long
+bfd_calc_gnu_debuglink_crc32 PARAMS ((unsigned long crc, const unsigned char *buf, bfd_size_type len));
+
 char *
 bfd_follow_gnu_debuglink PARAMS ((bfd *abfd, const char *dir));
+
+bfd_boolean
+bfd_add_gnu_debuglink PARAMS ((bfd * abfd, const char * filename));
 
 /* Extracted from libbfd.c.  */
 
@@ -1308,8 +1314,10 @@ typedef struct sec
   /* Nonzero if this section needs the relax finalize pass.  */
   unsigned int need_finalize_relax:1;
 
+  /* Nonzero if this section has a gp reloc.  */
+  unsigned int has_gp_reloc:1;
+
   /* Usused bits.  */
-  unsigned int flag12:1;
   unsigned int flag13:1;
   unsigned int flag14:1;
   unsigned int flag15:1;
@@ -1652,6 +1660,7 @@ enum bfd_architecture
 #define bfd_mach_h8300hn  4
 #define bfd_mach_h8300sn  5
 #define bfd_mach_h8300sx  6
+#define bfd_mach_h8300sxn 7
   bfd_arch_pdp11,     /* DEC PDP-11 */
   bfd_arch_powerpc,   /* PowerPC */
 #define bfd_mach_ppc           32

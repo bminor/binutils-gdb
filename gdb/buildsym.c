@@ -45,6 +45,7 @@
 #include "demangle.h"		/* Needed by SYMBOL_INIT_DEMANGLED_NAME.  */
 #include "block.h"
 #include "cp-support.h"
+#include "dictionary.h"
 
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */
 #define	EXTERN
@@ -229,62 +230,22 @@ finish_block (struct symbol *symbol, struct pending **listhead,
   register struct block *block;
   register struct pending_block *pblock;
   struct pending_block *opblock;
-  register int i;
-  register int j;
 
-  /* Count the length of the list of symbols.  */
-
-  for (next = *listhead, i = 0;
-       next;
-       i += next->nsyms, next = next->next)
-    {
-      /* EMPTY */ ;
-    }
-
-  /* Copy the symbols into the block.  */
+  /* Initialize the block's dictionary.  */
 
   if (symbol)
     {
       block = (struct block *) 
-	obstack_alloc (&objfile->symbol_obstack,
-		       (sizeof (struct block) + 
-			((i - 1) * sizeof (struct symbol *))));
-      BLOCK_NSYMS (block) = i;
-      for (next = *listhead; next; next = next->next)
-	for (j = next->nsyms - 1; j >= 0; j--)
-	  {
-	    BLOCK_SYM (block, --i) = next->symbol[j];
-	  }
+	obstack_alloc (&objfile->symbol_obstack, sizeof (struct block));
+      BLOCK_DICT (block) = dict_create_linear (&objfile->symbol_obstack,
+					       *listhead);
     }
   else
     {
-      int htab_size = BLOCK_HASHTABLE_SIZE (i);
-
       block = (struct block *) 
-	obstack_alloc (&objfile->symbol_obstack,
-		       (sizeof (struct block) + 
-			((htab_size - 1) * sizeof (struct symbol *))));
-      for (j = 0; j < htab_size; j++)
-	{
-	  BLOCK_BUCKET (block, j) = 0;
-	}
-      BLOCK_BUCKETS (block) = htab_size;
-      for (next = *listhead; next; next = next->next)
-	{
-	  for (j = next->nsyms - 1; j >= 0; j--)
-	    {
-	      struct symbol *sym;
-	      unsigned int hash_index;
-	      const char *name = SYMBOL_DEMANGLED_NAME (next->symbol[j]);
-	      if (name == NULL)
-		name = DEPRECATED_SYMBOL_NAME (next->symbol[j]);
-	      hash_index = msymbol_hash_iw (name);
-	      hash_index = hash_index % BLOCK_BUCKETS (block);
-	      sym = BLOCK_BUCKET (block, hash_index);
-	      BLOCK_BUCKET (block, hash_index) = next->symbol[j];
-	      next->symbol[j]->hash_next = sym;
-	    }
-	}
+	obstack_alloc (&objfile->symbol_obstack, sizeof (struct block));
+      BLOCK_DICT (block) = dict_create_hashed (&objfile->symbol_obstack,
+					       *listhead);
     }
 
   BLOCK_START (block) = start;
@@ -300,9 +261,9 @@ finish_block (struct symbol *symbol, struct pending **listhead,
   if (symbol)
     {
       struct type *ftype = SYMBOL_TYPE (symbol);
+      struct dict_iterator iter;
       SYMBOL_BLOCK_VALUE (symbol) = block;
       BLOCK_FUNCTION (block) = symbol;
-      BLOCK_HASHTABLE (block) = 0;
 
       if (TYPE_NFIELDS (ftype) <= 0)
 	{
@@ -311,7 +272,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	     parameter symbols. */
 	  int nparams = 0, iparams;
 	  struct symbol *sym;
-	  ALL_BLOCK_SYMBOLS (block, i, sym)
+	  ALL_BLOCK_SYMBOLS (block, iter, sym)
 	    {
 	      switch (SYMBOL_CLASS (sym))
 		{
@@ -348,9 +309,12 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	      TYPE_FIELDS (ftype) = (struct field *)
 		TYPE_ALLOC (ftype, nparams * sizeof (struct field));
 
-	      for (i = iparams = 0; iparams < nparams; i++)
+	      iparams = 0;
+	      ALL_BLOCK_SYMBOLS (block, iter, sym)
 		{
-		  sym = BLOCK_SYM (block, i);
+		  if (iparams == nparams)
+		    break;
+
 		  switch (SYMBOL_CLASS (sym))
 		    {
 		    case LOC_ARG:
@@ -394,7 +358,6 @@ finish_block (struct symbol *symbol, struct pending **listhead,
   else
     {
       BLOCK_FUNCTION (block) = NULL;
-      BLOCK_HASHTABLE (block) = 1;
     }
 
   /* Now "free" the links of the list, and empty the list.  */
@@ -475,6 +438,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 
   record_pending_block (objfile, block, opblock);
 }
+
 
 /* Record BLOCK on the list of all blocks in the file.  Put it after
    OPBLOCK, or at the beginning if opblock is NULL.  This puts the
@@ -1031,7 +995,7 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
 	      symtab->dirname = NULL;
 	    }
 	  symtab->free_code = free_linetable;
-	  symtab->free_ptr = NULL;
+	  symtab->free_func = NULL;
 
 	  /* Use whatever language we have been using for this
 	     subfile, not the one that was deduced in allocate_symtab

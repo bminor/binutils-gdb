@@ -29,10 +29,14 @@ bfd_vma ppc64_elf_toc
   PARAMS ((bfd *));
 int ppc64_elf_setup_section_lists
   PARAMS ((bfd *, struct bfd_link_info *));
+void ppc64_elf_next_toc_section
+  PARAMS ((struct bfd_link_info *, asection *));
+void ppc64_elf_reinit_toc
+  PARAMS ((bfd *, struct bfd_link_info *));
 void ppc64_elf_next_input_section
   PARAMS ((struct bfd_link_info *, asection *));
 bfd_boolean ppc64_elf_size_stubs
   PARAMS ((bfd *, bfd *, struct bfd_link_info *, bfd_signed_vma,
 	   asection *(*) (const char *, asection *), void (*) (void)));
 bfd_boolean ppc64_elf_build_stubs
-  PARAMS ((struct bfd_link_info *));
+  PARAMS ((bfd_boolean, struct bfd_link_info *));

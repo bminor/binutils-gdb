@@ -434,7 +434,7 @@ address_space_int_to_name (int space_flag)
 /* Create a new type with instance flags NEW_FLAGS, based on TYPE.
    If STORAGE is non-NULL, create the new type instance there.  */
 
-struct type *
+static struct type *
 make_qualified_type (struct type *type, int new_flags,
 		     struct type *storage)
 {
@@ -1668,7 +1668,7 @@ check_typedef (struct type *type)
 /* Parse a type expression in the string [P..P+LENGTH).  If an error occurs,
    silently return builtin_type_void. */
 
-struct type *
+static struct type *
 safe_parse_type (char *p, int length)
 {
   struct ui_file *saved_gdb_stderr;

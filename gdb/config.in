@@ -441,6 +441,9 @@
    Solaris 2.[78] when using GCC.  */
 #undef _MSE_INT_H
 
+/* Define to 1 if we found this declaration otherwise define to 0. */
+#undef HAVE_DECL_GETOPT
+
 /* Define if sigsetjmp is available.  */
 #undef HAVE_SIGSETJMP
 

@@ -283,9 +283,29 @@ extern void set_gdbarch_char_signed (struct gdbarch *gdbarch, int char_signed);
 #define TARGET_CHAR_SIGNED (gdbarch_char_signed (current_gdbarch))
 #endif
 
+#if defined (TARGET_READ_PC)
+/* Legacy for systems yet to multi-arch TARGET_READ_PC */
+#if !defined (TARGET_READ_PC_P)
+#define TARGET_READ_PC_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_READ_PC_P)
+#define TARGET_READ_PC_P() (0)
+#endif
+
+extern int gdbarch_read_pc_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (TARGET_READ_PC_P)
+#error "Non multi-arch definition of TARGET_READ_PC"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_READ_PC_P)
+#define TARGET_READ_PC_P() (gdbarch_read_pc_p (current_gdbarch))
+#endif
+
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (TARGET_READ_PC)
-#define TARGET_READ_PC(ptid) (generic_target_read_pc (ptid))
+#define TARGET_READ_PC(ptid) (internal_error (__FILE__, __LINE__, "TARGET_READ_PC"), 0)
 #endif
 
 typedef CORE_ADDR (gdbarch_read_pc_ftype) (ptid_t ptid);
@@ -351,9 +371,31 @@ extern void set_gdbarch_deprecated_target_read_fp (struct gdbarch *gdbarch, gdba
 #define DEPRECATED_TARGET_READ_FP() (gdbarch_deprecated_target_read_fp (current_gdbarch))
 #endif
 
+/* UNWIND_SP is a direct replacement for TARGET_READ_SP. */
+
+#if defined (TARGET_READ_SP)
+/* Legacy for systems yet to multi-arch TARGET_READ_SP */
+#if !defined (TARGET_READ_SP_P)
+#define TARGET_READ_SP_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_READ_SP_P)
+#define TARGET_READ_SP_P() (0)
+#endif
+
+extern int gdbarch_read_sp_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (TARGET_READ_SP_P)
+#error "Non multi-arch definition of TARGET_READ_SP"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_READ_SP_P)
+#define TARGET_READ_SP_P() (gdbarch_read_sp_p (current_gdbarch))
+#endif
+
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (TARGET_READ_SP)
-#define TARGET_READ_SP() (generic_target_read_sp ())
+#define TARGET_READ_SP() (internal_error (__FILE__, __LINE__, "TARGET_READ_SP"), 0)
 #endif
 
 typedef CORE_ADDR (gdbarch_read_sp_ftype) (void);
@@ -464,7 +506,8 @@ extern void set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch, int num_pseudo
 
 /* GDB's standard (or well known) register numbers.  These can map onto
    a real register or a pseudo (computed) register or not be defined at
-   all (-1). */
+   all (-1).
+   SP_REGNUM will hopefully be replaced by UNWIND_SP. */
 
 /* Default (value) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (SP_REGNUM)
@@ -653,6 +696,8 @@ extern void set_gdbarch_register_name (struct gdbarch *gdbarch, gdbarch_register
 #define REGISTER_NAME(regnr) (gdbarch_register_name (current_gdbarch, regnr))
 #endif
 
+/* See the dummy frame code. */
+
 extern int gdbarch_deprecated_register_size (struct gdbarch *gdbarch);
 extern void set_gdbarch_deprecated_register_size (struct gdbarch *gdbarch, int deprecated_register_size);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_SIZE)
@@ -661,6 +706,54 @@ extern void set_gdbarch_deprecated_register_size (struct gdbarch *gdbarch, int d
 #if !defined (DEPRECATED_REGISTER_SIZE)
 #define DEPRECATED_REGISTER_SIZE (gdbarch_deprecated_register_size (current_gdbarch))
 #endif
+
+/* REGISTER_TYPE is a direct replacement for REGISTER_VIRTUAL_TYPE. */
+
+extern int gdbarch_register_type_p (struct gdbarch *gdbarch);
+
+typedef struct type * (gdbarch_register_type_ftype) (struct gdbarch *gdbarch, int reg_nr);
+extern struct type * gdbarch_register_type (struct gdbarch *gdbarch, int reg_nr);
+extern void set_gdbarch_register_type (struct gdbarch *gdbarch, gdbarch_register_type_ftype *register_type);
+
+/* REGISTER_TYPE is a direct replacement for REGISTER_VIRTUAL_TYPE. */
+
+#if defined (REGISTER_VIRTUAL_TYPE)
+/* Legacy for systems yet to multi-arch REGISTER_VIRTUAL_TYPE */
+#if !defined (REGISTER_VIRTUAL_TYPE_P)
+#define REGISTER_VIRTUAL_TYPE_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_TYPE_P)
+#define REGISTER_VIRTUAL_TYPE_P() (0)
+#endif
+
+extern int gdbarch_deprecated_register_virtual_type_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_TYPE_P)
+#error "Non multi-arch definition of REGISTER_VIRTUAL_TYPE"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_VIRTUAL_TYPE_P)
+#define REGISTER_VIRTUAL_TYPE_P() (gdbarch_deprecated_register_virtual_type_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_TYPE)
+#define REGISTER_VIRTUAL_TYPE(reg_nr) (internal_error (__FILE__, __LINE__, "REGISTER_VIRTUAL_TYPE"), 0)
+#endif
+
+typedef struct type * (gdbarch_deprecated_register_virtual_type_ftype) (int reg_nr);
+extern struct type * gdbarch_deprecated_register_virtual_type (struct gdbarch *gdbarch, int reg_nr);
+extern void set_gdbarch_deprecated_register_virtual_type (struct gdbarch *gdbarch, gdbarch_deprecated_register_virtual_type_ftype *deprecated_register_virtual_type);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_TYPE)
+#error "Non multi-arch definition of REGISTER_VIRTUAL_TYPE"
+#endif
+#if !defined (REGISTER_VIRTUAL_TYPE)
+#define REGISTER_VIRTUAL_TYPE(reg_nr) (gdbarch_deprecated_register_virtual_type (current_gdbarch, reg_nr))
+#endif
+
+/* DEPRECATED_REGISTER_BYTES can be deleted.  The value is computed
+   from REGISTER_TYPE. */
 
 extern int gdbarch_deprecated_register_bytes (struct gdbarch *gdbarch);
 extern void set_gdbarch_deprecated_register_bytes (struct gdbarch *gdbarch, int deprecated_register_bytes);
@@ -671,11 +764,12 @@ extern void set_gdbarch_deprecated_register_bytes (struct gdbarch *gdbarch, int 
 #define DEPRECATED_REGISTER_BYTES (gdbarch_deprecated_register_bytes (current_gdbarch))
 #endif
 
-/* NOTE: cagney/2002-05-02: This function with predicate has a valid
-   (callable) initial value.  As a consequence, even when the predicate
-   is false, the corresponding function works.  This simplifies the
-   migration process - old code, calling REGISTER_BYTE, doesn't need to
-   be modified. */
+/* DEPRECATED_REGISTER_BYTE can be deleted.  The value is computed from
+   REGISTER_TYPE.  NOTE: cagney/2002-05-02: This function with
+   predicate has a valid (callable) initial value.  As a consequence,
+   even when the predicate is false, the corresponding function works.
+   This simplifies the migration process - old code, calling
+   DEPRECATED_REGISTER_BYTE, doesn't need to be modified. */
 
 #if defined (REGISTER_BYTE)
 /* Legacy for systems yet to multi-arch REGISTER_BYTE */
@@ -689,12 +783,12 @@ extern void set_gdbarch_deprecated_register_bytes (struct gdbarch *gdbarch, int 
 #define REGISTER_BYTE_P() (0)
 #endif
 
-extern int gdbarch_register_byte_p (struct gdbarch *gdbarch);
+extern int gdbarch_deprecated_register_byte_p (struct gdbarch *gdbarch);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_BYTE_P)
 #error "Non multi-arch definition of REGISTER_BYTE"
 #endif
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_BYTE_P)
-#define REGISTER_BYTE_P() (gdbarch_register_byte_p (current_gdbarch))
+#define REGISTER_BYTE_P() (gdbarch_deprecated_register_byte_p (current_gdbarch))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
@@ -702,37 +796,54 @@ extern int gdbarch_register_byte_p (struct gdbarch *gdbarch);
 #define REGISTER_BYTE(reg_nr) (generic_register_byte (reg_nr))
 #endif
 
-typedef int (gdbarch_register_byte_ftype) (int reg_nr);
-extern int gdbarch_register_byte (struct gdbarch *gdbarch, int reg_nr);
-extern void set_gdbarch_register_byte (struct gdbarch *gdbarch, gdbarch_register_byte_ftype *register_byte);
+typedef int (gdbarch_deprecated_register_byte_ftype) (int reg_nr);
+extern int gdbarch_deprecated_register_byte (struct gdbarch *gdbarch, int reg_nr);
+extern void set_gdbarch_deprecated_register_byte (struct gdbarch *gdbarch, gdbarch_deprecated_register_byte_ftype *deprecated_register_byte);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_BYTE)
 #error "Non multi-arch definition of REGISTER_BYTE"
 #endif
 #if !defined (REGISTER_BYTE)
-#define REGISTER_BYTE(reg_nr) (gdbarch_register_byte (current_gdbarch, reg_nr))
+#define REGISTER_BYTE(reg_nr) (gdbarch_deprecated_register_byte (current_gdbarch, reg_nr))
 #endif
 
-/* The methods REGISTER_VIRTUAL_TYPE, REGISTER_VIRTUAL_SIZE and
-   REGISTER_RAW_SIZE are all being replaced by REGISTER_TYPE. */
+/* DEPRECATED_REGISTER_RAW_SIZE can be deleted.  The value is computed
+   from REGISTER_TYPE. */
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_RAW_SIZE)
 #define REGISTER_RAW_SIZE(reg_nr) (generic_register_size (reg_nr))
 #endif
 
-typedef int (gdbarch_register_raw_size_ftype) (int reg_nr);
-extern int gdbarch_register_raw_size (struct gdbarch *gdbarch, int reg_nr);
-extern void set_gdbarch_register_raw_size (struct gdbarch *gdbarch, gdbarch_register_raw_size_ftype *register_raw_size);
+typedef int (gdbarch_deprecated_register_raw_size_ftype) (int reg_nr);
+extern int gdbarch_deprecated_register_raw_size (struct gdbarch *gdbarch, int reg_nr);
+extern void set_gdbarch_deprecated_register_raw_size (struct gdbarch *gdbarch, gdbarch_deprecated_register_raw_size_ftype *deprecated_register_raw_size);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_RAW_SIZE)
 #error "Non multi-arch definition of REGISTER_RAW_SIZE"
 #endif
 #if !defined (REGISTER_RAW_SIZE)
-#define REGISTER_RAW_SIZE(reg_nr) (gdbarch_register_raw_size (current_gdbarch, reg_nr))
+#define REGISTER_RAW_SIZE(reg_nr) (gdbarch_deprecated_register_raw_size (current_gdbarch, reg_nr))
 #endif
 
-/* The methods DEPRECATED_MAX_REGISTER_RAW_SIZE and
-   DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE are all being replaced by
-   MAX_REGISTER_SIZE (a constant). */
+/* DEPRECATED_REGISTER_VIRTUAL_SIZE can be deleted.  The value is
+   computed from REGISTER_TYPE. */
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_SIZE)
+#define REGISTER_VIRTUAL_SIZE(reg_nr) (generic_register_size (reg_nr))
+#endif
+
+typedef int (gdbarch_deprecated_register_virtual_size_ftype) (int reg_nr);
+extern int gdbarch_deprecated_register_virtual_size (struct gdbarch *gdbarch, int reg_nr);
+extern void set_gdbarch_deprecated_register_virtual_size (struct gdbarch *gdbarch, gdbarch_deprecated_register_virtual_size_ftype *deprecated_register_virtual_size);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_SIZE)
+#error "Non multi-arch definition of REGISTER_VIRTUAL_SIZE"
+#endif
+#if !defined (REGISTER_VIRTUAL_SIZE)
+#define REGISTER_VIRTUAL_SIZE(reg_nr) (gdbarch_deprecated_register_virtual_size (current_gdbarch, reg_nr))
+#endif
+
+/* DEPRECATED_MAX_REGISTER_RAW_SIZE can be deleted.  It has been
+   replaced by the constant MAX_REGISTER_SIZE. */
 
 #if defined (DEPRECATED_MAX_REGISTER_RAW_SIZE)
 /* Legacy for systems yet to multi-arch DEPRECATED_MAX_REGISTER_RAW_SIZE */
@@ -768,27 +879,8 @@ extern void set_gdbarch_deprecated_max_register_raw_size (struct gdbarch *gdbarc
 #define DEPRECATED_MAX_REGISTER_RAW_SIZE (gdbarch_deprecated_max_register_raw_size (current_gdbarch))
 #endif
 
-/* The methods REGISTER_VIRTUAL_TYPE, REGISTER_VIRTUAL_SIZE and
-   REGISTER_RAW_SIZE are all being replaced by REGISTER_TYPE. */
-
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_SIZE)
-#define REGISTER_VIRTUAL_SIZE(reg_nr) (generic_register_size (reg_nr))
-#endif
-
-typedef int (gdbarch_register_virtual_size_ftype) (int reg_nr);
-extern int gdbarch_register_virtual_size (struct gdbarch *gdbarch, int reg_nr);
-extern void set_gdbarch_register_virtual_size (struct gdbarch *gdbarch, gdbarch_register_virtual_size_ftype *register_virtual_size);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_SIZE)
-#error "Non multi-arch definition of REGISTER_VIRTUAL_SIZE"
-#endif
-#if !defined (REGISTER_VIRTUAL_SIZE)
-#define REGISTER_VIRTUAL_SIZE(reg_nr) (gdbarch_register_virtual_size (current_gdbarch, reg_nr))
-#endif
-
-/* The methods DEPRECATED_MAX_REGISTER_RAW_SIZE and
-   DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE are all being replaced by
-   MAX_REGISTER_SIZE (a constant). */
+/* DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE can be deleted.  It has been
+   replaced by the constant MAX_REGISTER_SIZE. */
 
 #if defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE)
 /* Legacy for systems yet to multi-arch DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE */
@@ -823,50 +915,6 @@ extern void set_gdbarch_deprecated_max_register_virtual_size (struct gdbarch *gd
 #if !defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE)
 #define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE (gdbarch_deprecated_max_register_virtual_size (current_gdbarch))
 #endif
-
-/* The methods REGISTER_VIRTUAL_TYPE, REGISTER_VIRTUAL_SIZE and
-   REGISTER_RAW_SIZE are all being replaced by REGISTER_TYPE. */
-
-#if defined (REGISTER_VIRTUAL_TYPE)
-/* Legacy for systems yet to multi-arch REGISTER_VIRTUAL_TYPE */
-#if !defined (REGISTER_VIRTUAL_TYPE_P)
-#define REGISTER_VIRTUAL_TYPE_P() (1)
-#endif
-#endif
-
-/* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_TYPE_P)
-#define REGISTER_VIRTUAL_TYPE_P() (0)
-#endif
-
-extern int gdbarch_register_virtual_type_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_TYPE_P)
-#error "Non multi-arch definition of REGISTER_VIRTUAL_TYPE"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_VIRTUAL_TYPE_P)
-#define REGISTER_VIRTUAL_TYPE_P() (gdbarch_register_virtual_type_p (current_gdbarch))
-#endif
-
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_TYPE)
-#define REGISTER_VIRTUAL_TYPE(reg_nr) (internal_error (__FILE__, __LINE__, "REGISTER_VIRTUAL_TYPE"), 0)
-#endif
-
-typedef struct type * (gdbarch_register_virtual_type_ftype) (int reg_nr);
-extern struct type * gdbarch_register_virtual_type (struct gdbarch *gdbarch, int reg_nr);
-extern void set_gdbarch_register_virtual_type (struct gdbarch *gdbarch, gdbarch_register_virtual_type_ftype *register_virtual_type);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_TYPE)
-#error "Non multi-arch definition of REGISTER_VIRTUAL_TYPE"
-#endif
-#if !defined (REGISTER_VIRTUAL_TYPE)
-#define REGISTER_VIRTUAL_TYPE(reg_nr) (gdbarch_register_virtual_type (current_gdbarch, reg_nr))
-#endif
-
-extern int gdbarch_register_type_p (struct gdbarch *gdbarch);
-
-typedef struct type * (gdbarch_register_type_ftype) (struct gdbarch *gdbarch, int reg_nr);
-extern struct type * gdbarch_register_type (struct gdbarch *gdbarch, int reg_nr);
-extern void set_gdbarch_register_type (struct gdbarch *gdbarch, gdbarch_register_type_ftype *register_type);
 
 #if defined (DEPRECATED_DO_REGISTERS_INFO)
 /* Legacy for systems yet to multi-arch DEPRECATED_DO_REGISTERS_INFO */
@@ -1404,49 +1452,58 @@ extern void set_gdbarch_deprecated_get_saved_register (struct gdbarch *gdbarch, 
 #define DEPRECATED_GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) (gdbarch_deprecated_get_saved_register (current_gdbarch, raw_buffer, optimized, addrp, frame, regnum, lval))
 #endif
 
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (REGISTER_CONVERTIBLE)
-#define REGISTER_CONVERTIBLE(nr) (generic_register_convertible_not (nr))
-#endif
-
-typedef int (gdbarch_register_convertible_ftype) (int nr);
-extern int gdbarch_register_convertible (struct gdbarch *gdbarch, int nr);
-extern void set_gdbarch_register_convertible (struct gdbarch *gdbarch, gdbarch_register_convertible_ftype *register_convertible);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_CONVERTIBLE)
-#error "Non multi-arch definition of REGISTER_CONVERTIBLE"
-#endif
-#if !defined (REGISTER_CONVERTIBLE)
-#define REGISTER_CONVERTIBLE(nr) (gdbarch_register_convertible (current_gdbarch, nr))
-#endif
+/* For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
+   For raw <-> cooked register conversions, replaced by pseudo registers. */
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (REGISTER_CONVERT_TO_VIRTUAL)
-#define REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to) (internal_error (__FILE__, __LINE__, "REGISTER_CONVERT_TO_VIRTUAL"), 0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_REGISTER_CONVERTIBLE)
+#define DEPRECATED_REGISTER_CONVERTIBLE(nr) (deprecated_register_convertible_not (nr))
 #endif
 
-typedef void (gdbarch_register_convert_to_virtual_ftype) (int regnum, struct type *type, char *from, char *to);
-extern void gdbarch_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum, struct type *type, char *from, char *to);
-extern void set_gdbarch_register_convert_to_virtual (struct gdbarch *gdbarch, gdbarch_register_convert_to_virtual_ftype *register_convert_to_virtual);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_CONVERT_TO_VIRTUAL)
-#error "Non multi-arch definition of REGISTER_CONVERT_TO_VIRTUAL"
+typedef int (gdbarch_deprecated_register_convertible_ftype) (int nr);
+extern int gdbarch_deprecated_register_convertible (struct gdbarch *gdbarch, int nr);
+extern void set_gdbarch_deprecated_register_convertible (struct gdbarch *gdbarch, gdbarch_deprecated_register_convertible_ftype *deprecated_register_convertible);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_CONVERTIBLE)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_CONVERTIBLE"
 #endif
-#if !defined (REGISTER_CONVERT_TO_VIRTUAL)
-#define REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to) (gdbarch_register_convert_to_virtual (current_gdbarch, regnum, type, from, to))
+#if !defined (DEPRECATED_REGISTER_CONVERTIBLE)
+#define DEPRECATED_REGISTER_CONVERTIBLE(nr) (gdbarch_deprecated_register_convertible (current_gdbarch, nr))
 #endif
+
+/* For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
+   For raw <-> cooked register conversions, replaced by pseudo registers. */
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (REGISTER_CONVERT_TO_RAW)
-#define REGISTER_CONVERT_TO_RAW(type, regnum, from, to) (internal_error (__FILE__, __LINE__, "REGISTER_CONVERT_TO_RAW"), 0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL)
+#define DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to) (internal_error (__FILE__, __LINE__, "DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL"), 0)
 #endif
 
-typedef void (gdbarch_register_convert_to_raw_ftype) (struct type *type, int regnum, char *from, char *to);
-extern void gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type, int regnum, char *from, char *to);
-extern void set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, gdbarch_register_convert_to_raw_ftype *register_convert_to_raw);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_CONVERT_TO_RAW)
-#error "Non multi-arch definition of REGISTER_CONVERT_TO_RAW"
+typedef void (gdbarch_deprecated_register_convert_to_virtual_ftype) (int regnum, struct type *type, char *from, char *to);
+extern void gdbarch_deprecated_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum, struct type *type, char *from, char *to);
+extern void set_gdbarch_deprecated_register_convert_to_virtual (struct gdbarch *gdbarch, gdbarch_deprecated_register_convert_to_virtual_ftype *deprecated_register_convert_to_virtual);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL"
 #endif
-#if !defined (REGISTER_CONVERT_TO_RAW)
-#define REGISTER_CONVERT_TO_RAW(type, regnum, from, to) (gdbarch_register_convert_to_raw (current_gdbarch, type, regnum, from, to))
+#if !defined (DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL)
+#define DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to) (gdbarch_deprecated_register_convert_to_virtual (current_gdbarch, regnum, type, from, to))
+#endif
+
+/* For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
+   For raw <-> cooked register conversions, replaced by pseudo registers. */
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_REGISTER_CONVERT_TO_RAW)
+#define DEPRECATED_REGISTER_CONVERT_TO_RAW(type, regnum, from, to) (internal_error (__FILE__, __LINE__, "DEPRECATED_REGISTER_CONVERT_TO_RAW"), 0)
+#endif
+
+typedef void (gdbarch_deprecated_register_convert_to_raw_ftype) (struct type *type, int regnum, const char *from, char *to);
+extern void gdbarch_deprecated_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type, int regnum, const char *from, char *to);
+extern void set_gdbarch_deprecated_register_convert_to_raw (struct gdbarch *gdbarch, gdbarch_deprecated_register_convert_to_raw_ftype *deprecated_register_convert_to_raw);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_CONVERT_TO_RAW)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_CONVERT_TO_RAW"
+#endif
+#if !defined (DEPRECATED_REGISTER_CONVERT_TO_RAW)
+#define DEPRECATED_REGISTER_CONVERT_TO_RAW(type, regnum, from, to) (gdbarch_deprecated_register_convert_to_raw (current_gdbarch, type, regnum, from, to))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
@@ -2217,6 +2274,12 @@ typedef CORE_ADDR (gdbarch_unwind_pc_ftype) (struct gdbarch *gdbarch, struct fra
 extern CORE_ADDR gdbarch_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame);
 extern void set_gdbarch_unwind_pc (struct gdbarch *gdbarch, gdbarch_unwind_pc_ftype *unwind_pc);
 
+extern int gdbarch_unwind_sp_p (struct gdbarch *gdbarch);
+
+typedef CORE_ADDR (gdbarch_unwind_sp_ftype) (struct gdbarch *gdbarch, struct frame_info *next_frame);
+extern CORE_ADDR gdbarch_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame);
+extern void set_gdbarch_unwind_sp (struct gdbarch *gdbarch, gdbarch_unwind_sp_ftype *unwind_sp);
+
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (FRAME_ARGS_ADDRESS)
 #define FRAME_ARGS_ADDRESS(fi) (get_frame_base (fi))
@@ -2280,6 +2343,31 @@ extern void set_gdbarch_deprecated_saved_pc_after_call (struct gdbarch *gdbarch,
 #endif
 #if !defined (DEPRECATED_SAVED_PC_AFTER_CALL)
 #define DEPRECATED_SAVED_PC_AFTER_CALL(frame) (gdbarch_deprecated_saved_pc_after_call (current_gdbarch, frame))
+#endif
+
+#if defined (FRAME_NUM_ARGS)
+/* Legacy for systems yet to multi-arch FRAME_NUM_ARGS */
+#if !defined (FRAME_NUM_ARGS_P)
+#define FRAME_NUM_ARGS_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_NUM_ARGS_P)
+#define FRAME_NUM_ARGS_P() (0)
+#endif
+
+extern int gdbarch_frame_num_args_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_NUM_ARGS_P)
+#error "Non multi-arch definition of FRAME_NUM_ARGS"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_NUM_ARGS_P)
+#define FRAME_NUM_ARGS_P() (gdbarch_frame_num_args_p (current_gdbarch))
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (FRAME_NUM_ARGS)
+#define FRAME_NUM_ARGS(frame) (internal_error (__FILE__, __LINE__, "FRAME_NUM_ARGS"), 0)
 #endif
 
 typedef int (gdbarch_frame_num_args_ftype) (struct frame_info *frame);

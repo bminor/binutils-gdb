@@ -59,6 +59,8 @@ if { [istarget "alpha*-*-*"] } then {
     gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
 } elseif { [istarget "i?86-*-*"] || [istarget "x86_64-*-*"] } then {
     gdb_test "info float" "R7:.*Status Word:.*Opcode:.*" "info float"
+} elseif [istarget "ia64-*-*"] then {
+    gdb_test "info float" "f0.*f1.*f127.*" "info float"
 } else {
     gdb_test "info float" "No floating.point info available for this processor." "info float"
 }

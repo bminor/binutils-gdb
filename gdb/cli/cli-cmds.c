@@ -48,18 +48,6 @@
 #define GDBINIT_FILENAME        ".gdbinit"
 #endif
 
-/* From gdb/top.c */
-
-extern void dont_repeat (void);
-
-extern void set_verbose (char *, int, struct cmd_list_element *);
-
-extern void show_history (char *, int);
-
-extern void set_history (char *, int);
-
-extern void show_commands (char *, int);
-
 /* Prototypes for local command functions */
 
 static void complete_command (char *, int);

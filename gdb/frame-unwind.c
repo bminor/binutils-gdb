@@ -98,6 +98,8 @@ frame_unwind_find_by_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
   return legacy_saved_regs_unwind;
 }
 
+extern initialize_file_ftype _initialize_frame_unwind; /* -Wmissing-prototypes */
+
 void
 _initialize_frame_unwind (void)
 {

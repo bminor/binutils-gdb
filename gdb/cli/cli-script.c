@@ -34,12 +34,6 @@
 #include "cli/cli-decode.h"
 #include "cli/cli-script.h"
 
-/* From gdb/top.c */
-
-extern void dont_repeat (void);
-
-extern void do_restore_instream_cleanup (void *stream);
-
 /* Prototypes for local functions */
 
 static struct cleanup *
@@ -216,7 +210,7 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 
 /* Handle pre-post hooks.  */
 
-void
+static void
 clear_hook_in_cleanup (void *data)
 {
   struct cmd_list_element *c = data;
@@ -248,7 +242,7 @@ execute_cmd_post_hook (struct cmd_list_element *c)
 }
 
 /* Execute the command in CMD.  */
-void
+static void
 do_restore_user_call_depth (void * call_depth)
 {	
   int * depth = call_depth;

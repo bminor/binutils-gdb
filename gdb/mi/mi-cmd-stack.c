@@ -27,11 +27,8 @@
 #include "ui-out.h"
 #include "symtab.h"
 #include "block.h"
-
-/* FIXME: these should go in some .h file but stack.c doesn't have a
-   corresponding .h file. These wrappers will be obsolete anyway, once
-   we pull the plug on the sanitization. */
-extern void select_frame_command_wrapper (char *, int);
+#include "stack.h"
+#include "dictionary.h"
 
 static void list_args_or_locals (int locals, int values, struct frame_info *fi);
 
@@ -217,7 +214,8 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 {
   struct block *block;
   struct symbol *sym;
-  int i, nsyms;
+  struct dict_iterator iter;
+  int nsyms;
   struct cleanup *cleanup_list;
   static struct ui_stream *stb = NULL;
 
@@ -229,7 +227,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 
   while (block != 0)
     {
-      ALL_BLOCK_SYMBOLS (block, i, sym)
+      ALL_BLOCK_SYMBOLS (block, iter, sym)
 	{
           int print_me = 0;
 
@@ -311,8 +309,8 @@ mi_cmd_stack_select_frame (char *command, char **argv, int argc)
 
   /* with no args, don't change frame */
   if (argc == 0)
-    select_frame_command_wrapper (0, 1 /* not used */ );
+    select_frame_command (0, 1 /* not used */ );
   else
-    select_frame_command_wrapper (argv[0], 1 /* not used */ );
+    select_frame_command (argv[0], 1 /* not used */ );
   return MI_CMD_DONE;
 }

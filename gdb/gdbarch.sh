@@ -426,12 +426,13 @@ v:2:TARGET_BFD_VMA_BIT:int:bfd_vma_bit::::8 * sizeof (void*):TARGET_ARCHITECTURE
 # One if \`char' acts like \`signed char', zero if \`unsigned char'.
 v:2:TARGET_CHAR_SIGNED:int:char_signed::::1:-1:1::::
 #
-f:2:TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid::0:generic_target_read_pc::0
+F:2:TARGET_READ_PC:CORE_ADDR:read_pc:ptid_t ptid:ptid
 f:2:TARGET_WRITE_PC:void:write_pc:CORE_ADDR val, ptid_t ptid:val, ptid::0:generic_target_write_pc::0
 # This is simply not needed.  See value_of_builtin_frame_fp_reg and
 # call_function_by_hand.
 F::DEPRECATED_TARGET_READ_FP:CORE_ADDR:deprecated_target_read_fp:void
-f:2:TARGET_READ_SP:CORE_ADDR:read_sp:void:::0:generic_target_read_sp::0
+# UNWIND_SP is a direct replacement for TARGET_READ_SP.
+F:2:TARGET_READ_SP:CORE_ADDR:read_sp:void
 # The dummy call frame SP should be set by push_dummy_call.
 F:2:DEPRECATED_DUMMY_WRITE_SP:void:deprecated_dummy_write_sp:CORE_ADDR val:val
 # Function for getting target's idea of a frame pointer.  FIXME: GDB's
@@ -452,6 +453,7 @@ v:2:NUM_PSEUDO_REGS:int:num_pseudo_regs::::0:0::0:::
 # GDB's standard (or well known) register numbers.  These can map onto
 # a real register or a pseudo (computed) register or not be defined at
 # all (-1).
+# SP_REGNUM will hopefully be replaced by UNWIND_SP.
 v:2:SP_REGNUM:int:sp_regnum::::-1:-1::0
 # This is simply not needed.  See value_of_builtin_frame_fp_reg and
 # call_function_by_hand.
@@ -472,33 +474,36 @@ f:2:DWARF_REG_TO_REGNUM:int:dwarf_reg_to_regnum:int dwarf_regnr:dwarf_regnr:::no
 f:2:SDB_REG_TO_REGNUM:int:sdb_reg_to_regnum:int sdb_regnr:sdb_regnr:::no_op_reg_to_regnum::0
 f:2:DWARF2_REG_TO_REGNUM:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr:::no_op_reg_to_regnum::0
 f:2:REGISTER_NAME:const char *:register_name:int regnr:regnr:::legacy_register_name::0
+# See the dummy frame code.
 v::DEPRECATED_REGISTER_SIZE:int:deprecated_register_size
-v::DEPRECATED_REGISTER_BYTES:int:deprecated_register_bytes
-# NOTE: cagney/2002-05-02: This function with predicate has a valid
-# (callable) initial value.  As a consequence, even when the predicate
-# is false, the corresponding function works.  This simplifies the
-# migration process - old code, calling REGISTER_BYTE, doesn't need to
-# be modified.
-F::REGISTER_BYTE:int:register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte
-# The methods REGISTER_VIRTUAL_TYPE, REGISTER_VIRTUAL_SIZE and
-# REGISTER_RAW_SIZE are all being replaced by REGISTER_TYPE.
-f:2:REGISTER_RAW_SIZE:int:register_raw_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
-# The methods DEPRECATED_MAX_REGISTER_RAW_SIZE and
-# DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE are all being replaced by
-# MAX_REGISTER_SIZE (a constant).
-V:2:DEPRECATED_MAX_REGISTER_RAW_SIZE:int:deprecated_max_register_raw_size
-# The methods REGISTER_VIRTUAL_TYPE, REGISTER_VIRTUAL_SIZE and
-# REGISTER_RAW_SIZE are all being replaced by REGISTER_TYPE.
-f:2:REGISTER_VIRTUAL_SIZE:int:register_virtual_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
-# The methods DEPRECATED_MAX_REGISTER_RAW_SIZE and
-# DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE are all being replaced by
-# MAX_REGISTER_SIZE (a constant).
-V:2:DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE:int:deprecated_max_register_virtual_size
-# The methods REGISTER_VIRTUAL_TYPE, REGISTER_VIRTUAL_SIZE and
-# REGISTER_RAW_SIZE are all being replaced by REGISTER_TYPE.
-F:2:REGISTER_VIRTUAL_TYPE:struct type *:register_virtual_type:int reg_nr:reg_nr::0:0
+
+# REGISTER_TYPE is a direct replacement for REGISTER_VIRTUAL_TYPE.
 M:2:REGISTER_TYPE:struct type *:register_type:int reg_nr:reg_nr::0:
-#
+# REGISTER_TYPE is a direct replacement for REGISTER_VIRTUAL_TYPE.
+F:2:REGISTER_VIRTUAL_TYPE:struct type *:deprecated_register_virtual_type:int reg_nr:reg_nr::0:0
+# DEPRECATED_REGISTER_BYTES can be deleted.  The value is computed
+# from REGISTER_TYPE.
+v::DEPRECATED_REGISTER_BYTES:int:deprecated_register_bytes
+# DEPRECATED_REGISTER_BYTE can be deleted.  The value is computed from
+# REGISTER_TYPE.  NOTE: cagney/2002-05-02: This function with
+# predicate has a valid (callable) initial value.  As a consequence,
+# even when the predicate is false, the corresponding function works.
+# This simplifies the migration process - old code, calling
+# DEPRECATED_REGISTER_BYTE, doesn't need to be modified.
+F::REGISTER_BYTE:int:deprecated_register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte
+# DEPRECATED_REGISTER_RAW_SIZE can be deleted.  The value is computed
+# from REGISTER_TYPE.
+f:2:REGISTER_RAW_SIZE:int:deprecated_register_raw_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
+# DEPRECATED_REGISTER_VIRTUAL_SIZE can be deleted.  The value is
+# computed from REGISTER_TYPE.
+f:2:REGISTER_VIRTUAL_SIZE:int:deprecated_register_virtual_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
+# DEPRECATED_MAX_REGISTER_RAW_SIZE can be deleted.  It has been
+# replaced by the constant MAX_REGISTER_SIZE.
+V:2:DEPRECATED_MAX_REGISTER_RAW_SIZE:int:deprecated_max_register_raw_size
+# DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE can be deleted.  It has been
+# replaced by the constant MAX_REGISTER_SIZE.
+V:2:DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE:int:deprecated_max_register_virtual_size
+
 F:2:DEPRECATED_DO_REGISTERS_INFO:void:deprecated_do_registers_info:int reg_nr, int fpregs:reg_nr, fpregs
 m:2:PRINT_REGISTERS_INFO:void:print_registers_info:struct ui_file *file, struct frame_info *frame, int regnum, int all:file, frame, regnum, all:::default_print_registers_info::0
 M:2:PRINT_FLOAT_INFO:void:print_float_info:struct ui_file *file, struct frame_info *frame, const char *args:file, frame, args
@@ -553,9 +558,15 @@ v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion:::::::
 v::BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type:::::::
 F:2:DEPRECATED_GET_SAVED_REGISTER:void:deprecated_get_saved_register:char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval:raw_buffer, optimized, addrp, frame, regnum, lval
 #
-f:2:REGISTER_CONVERTIBLE:int:register_convertible:int nr:nr:::generic_register_convertible_not::0
-f:2:REGISTER_CONVERT_TO_VIRTUAL:void:register_convert_to_virtual:int regnum, struct type *type, char *from, char *to:regnum, type, from, to:::0::0
-f:2:REGISTER_CONVERT_TO_RAW:void:register_convert_to_raw:struct type *type, int regnum, char *from, char *to:type, regnum, from, to:::0::0
+# For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
+# For raw <-> cooked register conversions, replaced by pseudo registers.
+f:2:DEPRECATED_REGISTER_CONVERTIBLE:int:deprecated_register_convertible:int nr:nr:::deprecated_register_convertible_not::0
+# For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
+# For raw <-> cooked register conversions, replaced by pseudo registers.
+f:2:DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL:void:deprecated_register_convert_to_virtual:int regnum, struct type *type, char *from, char *to:regnum, type, from, to:::0::0
+# For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
+# For raw <-> cooked register conversions, replaced by pseudo registers.
+f:2:DEPRECATED_REGISTER_CONVERT_TO_RAW:void:deprecated_register_convert_to_raw:struct type *type, int regnum, const char *from, char *to:type, regnum, from, to:::0::0
 #
 f:1:CONVERT_REGISTER_P:int:convert_register_p:int regnum:regnum::0:legacy_convert_register_p::0
 f:1:REGISTER_TO_VALUE:void:register_to_value:int regnum, struct type *type, char *from, char *to:regnum, type, from, to::0:legacy_register_to_value::0
@@ -609,10 +620,11 @@ F:2:DEPRECATED_FRAME_CHAIN_VALID:int:deprecated_frame_chain_valid:CORE_ADDR chai
 # interfaces they have very different underlying implementations.
 F:2:DEPRECATED_FRAME_SAVED_PC:CORE_ADDR:deprecated_frame_saved_pc:struct frame_info *fi:fi::0:0
 M::UNWIND_PC:CORE_ADDR:unwind_pc:struct frame_info *next_frame:next_frame:
+M::UNWIND_SP:CORE_ADDR:unwind_sp:struct frame_info *next_frame:next_frame:
 f:2:FRAME_ARGS_ADDRESS:CORE_ADDR:frame_args_address:struct frame_info *fi:fi::0:get_frame_base::0
 f:2:FRAME_LOCALS_ADDRESS:CORE_ADDR:frame_locals_address:struct frame_info *fi:fi::0:get_frame_base::0
 F::DEPRECATED_SAVED_PC_AFTER_CALL:CORE_ADDR:deprecated_saved_pc_after_call:struct frame_info *frame:frame
-f:2:FRAME_NUM_ARGS:int:frame_num_args:struct frame_info *frame:frame::0:0
+F:2:FRAME_NUM_ARGS:int:frame_num_args:struct frame_info *frame:frame
 #
 F:2:STACK_ALIGN:CORE_ADDR:stack_align:CORE_ADDR sp:sp::0:0
 M:::CORE_ADDR:frame_align:CORE_ADDR address:address
@@ -1401,7 +1413,7 @@ function_list | while do_read
 do
     if class_is_info_p
     then
-	printf "  ${staticdefault},\n"
+	printf "  ${staticdefault},  /* ${function} */\n"
     fi
 done
 cat <<EOF
@@ -1415,7 +1427,7 @@ function_list | while do_read
 do
     if class_is_function_p || class_is_variable_p
     then
-	printf "  ${staticdefault},\n"
+	printf "  ${staticdefault},  /* ${function} */\n"
     fi
 done
 cat <<EOF

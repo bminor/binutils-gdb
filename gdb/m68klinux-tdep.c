@@ -149,9 +149,9 @@ m68k_linux_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-       REGISTER_CONVERT_TO_VIRTUAL (FP0_REGNUM, type,
-				    regbuf + REGISTER_BYTE (FP0_REGNUM),
-				    valbuf);
+      DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (FP0_REGNUM, type,
+					      regbuf + REGISTER_BYTE (FP0_REGNUM),
+					      valbuf);
     }
   else if (TYPE_CODE (type) == TYPE_CODE_PTR)
     memcpy (valbuf, regbuf + REGISTER_BYTE (M68K_A0_REGNUM),
@@ -171,7 +171,7 @@ m68k_linux_store_return_value (struct type *type, char *valbuf)
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       char raw_buffer[REGISTER_RAW_SIZE (FP0_REGNUM)];
-      REGISTER_CONVERT_TO_RAW (type, FP0_REGNUM, valbuf, raw_buffer);
+      DEPRECATED_REGISTER_CONVERT_TO_RAW (type, FP0_REGNUM, valbuf, raw_buffer);
       deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM),
 				       raw_buffer, TYPE_LENGTH (type));
     }

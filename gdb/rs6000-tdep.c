@@ -231,7 +231,7 @@ rs6000_saved_pc_after_call (struct frame_info *fi)
 }
 
 /* Get the ith function argument for the current function.  */
-CORE_ADDR
+static CORE_ADDR
 rs6000_fetch_pointer_argument (struct frame_info *frame, int argi, 
 			       struct type *type)
 {
@@ -1944,7 +1944,7 @@ rs6000_register_convert_to_virtual (int n, struct type *type,
 
 static void
 rs6000_register_convert_to_raw (struct type *type, int n,
-				char *from, char *to)
+				const char *from, char *to)
 {
   if (TYPE_LENGTH (type) != REGISTER_RAW_SIZE (n))
     {
@@ -2164,7 +2164,7 @@ rs6000_create_inferior (int pid)
 /* Return real function address if ADDR (a function pointer) is in the data
    space and is therefore a special function pointer.  */
 
-CORE_ADDR
+static CORE_ADDR
 rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
 {
   struct obj_section *s;
@@ -2910,22 +2910,20 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     set_gdbarch_print_insn (gdbarch, gdb_print_insn_powerpc);
 
-  set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-  set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
-  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
   set_gdbarch_num_regs (gdbarch, v->nregs);
   set_gdbarch_num_pseudo_regs (gdbarch, v->npregs);
   set_gdbarch_register_name (gdbarch, rs6000_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, wordsize);
   set_gdbarch_deprecated_register_bytes (gdbarch, off);
-  set_gdbarch_register_byte (gdbarch, rs6000_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, rs6000_register_raw_size);
+  set_gdbarch_deprecated_register_byte (gdbarch, rs6000_register_byte);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, rs6000_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 16);
-  set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, generic_register_size);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 16);
-  set_gdbarch_register_virtual_type (gdbarch, rs6000_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, rs6000_register_virtual_type);
 
   set_gdbarch_ptr_bit (gdbarch, wordsize * TARGET_CHAR_BIT);
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
@@ -2946,9 +2944,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_return_address (gdbarch, ppc_push_return_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
-  set_gdbarch_register_convertible (gdbarch, rs6000_register_convertible);
-  set_gdbarch_register_convert_to_virtual (gdbarch, rs6000_register_convert_to_virtual);
-  set_gdbarch_register_convert_to_raw (gdbarch, rs6000_register_convert_to_raw);
+  set_gdbarch_deprecated_register_convertible (gdbarch, rs6000_register_convertible);
+  set_gdbarch_deprecated_register_convert_to_virtual (gdbarch, rs6000_register_convert_to_virtual);
+  set_gdbarch_deprecated_register_convert_to_raw (gdbarch, rs6000_register_convert_to_raw);
   set_gdbarch_stab_reg_to_regnum (gdbarch, rs6000_stab_reg_to_regnum);
   /* Note: kevinb/2002-04-12: I'm not convinced that rs6000_push_arguments()
      is correct for the SysV ABI when the wordsize is 8, but I'm also
@@ -3004,10 +3002,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Helpers for function argument information.  */
   set_gdbarch_fetch_pointer_argument (gdbarch, rs6000_fetch_pointer_argument);
 
-  /* We can't tell how many args there are
-     now that the C compiler delays popping them.  */
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
-
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
@@ -3034,6 +3028,8 @@ rs6000_info_powerpc_command (char *args, int from_tty)
 }
 
 /* Initialization code.  */
+
+extern initialize_file_ftype _initialize_rs6000_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_rs6000_tdep (void)

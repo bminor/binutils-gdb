@@ -81,6 +81,17 @@ static char *solib_break_names[] =
   "_dl_debug_state",
   "rtld_db_dlactivity",
   "_rtld_debug_state",
+
+  /* On the 64-bit PowerPC, the linker symbol with the same name as
+     the C function points to a function descriptor, not to the entry
+     point.  The linker symbol whose name is the C function name
+     prefixed with a '.' points to the function's entry point.  So
+     when we look through this table, we ignore symbols that point
+     into the data section (thus skipping the descriptor's symbol),
+     and eventually try this one, giving us the real entry point
+     address.  */
+  "._dl_debug_state",
+
   NULL
 };
 
@@ -1454,6 +1465,8 @@ init_fetch_link_map_offsets (struct gdbarch *gdbarch)
 }
 
 static struct target_so_ops svr4_so_ops;
+
+extern initialize_file_ftype _initialize_svr4_solib; /* -Wmissing-prototypes */
 
 void
 _initialize_svr4_solib (void)

@@ -621,7 +621,7 @@ mips_register_convert_to_virtual (int n, struct type *virtual_type,
 
 static void
 mips_register_convert_to_raw (struct type *virtual_type, int n,
-			      char *virt_buf, char *raw_buf)
+			      const char *virt_buf, char *raw_buf)
 {
   memset (raw_buf, 0, REGISTER_RAW_SIZE (n));
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
@@ -766,12 +766,6 @@ static int
 mips_n32n64_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_LENGTH (type) > 2 * MIPS_SAVED_REGSIZE);
-}
-
-static int
-mips_o32_use_struct_convention (int gcc_p, struct type *type)
-{
-  return 1;	/* Structures are returned by ref in extra arg0.  */
 }
 
 /* Should call_function pass struct by reference? 
@@ -5453,8 +5447,8 @@ mips_get_saved_register (char *raw_buffer,
     lvalp = &lvalx;
   if (optimizedp == NULL)
     optimizedp = &optimizedx;
-  generic_unwind_get_saved_register (raw_buffer, optimizedp, addrp, frame,
-                                     regnum, lvalp);
+  deprecated_unwind_get_saved_register (raw_buffer, optimizedp, addrp, frame,
+					regnum, lvalp);
   /* FIXME: cagney/2002-09-13: This is just so bad.  The MIPS should
      have a pseudo register range that correspons to the ABI's, rather
      than the ISA's, view of registers.  These registers would then
@@ -5747,7 +5741,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_float_bit (gdbarch, 32);
   set_gdbarch_double_bit (gdbarch, 64);
   set_gdbarch_long_double_bit (gdbarch, 64);
-  set_gdbarch_register_raw_size (gdbarch, mips_register_raw_size);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, mips_register_raw_size);
   tdep->found_abi = found_abi;
   tdep->mips_abi = mips_abi;
 
@@ -5778,7 +5772,7 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_reg_struct_has_addr (gdbarch, 
 				       mips_o32_reg_struct_has_addr);
       set_gdbarch_use_struct_convention (gdbarch, 
-					 mips_o32_use_struct_convention);
+					 always_use_struct_convention);
       break;
     case MIPS_ABI_O64:
       set_gdbarch_push_dummy_call (gdbarch, mips_o64_push_dummy_call);
@@ -5796,8 +5790,7 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_reg_struct_has_addr (gdbarch, 
 				       mips_o32_reg_struct_has_addr);
-      set_gdbarch_use_struct_convention (gdbarch, 
-					 mips_o32_use_struct_convention);
+      set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
       break;
     case MIPS_ABI_EABI32:
       set_gdbarch_push_dummy_call (gdbarch, mips_eabi_push_dummy_call);
@@ -5961,17 +5954,14 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_pop_frame (gdbarch, mips_pop_frame);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
-  set_gdbarch_register_convertible (gdbarch, mips_register_convertible);
-  set_gdbarch_register_convert_to_virtual (gdbarch, 
-					   mips_register_convert_to_virtual);
-  set_gdbarch_register_convert_to_raw (gdbarch, 
-				       mips_register_convert_to_raw);
+  set_gdbarch_deprecated_register_convertible (gdbarch, mips_register_convertible);
+  set_gdbarch_deprecated_register_convert_to_virtual (gdbarch, mips_register_convert_to_virtual);
+  set_gdbarch_deprecated_register_convert_to_raw (gdbarch, mips_register_convert_to_raw);
 
   set_gdbarch_deprecated_frame_chain (gdbarch, mips_frame_chain);
   set_gdbarch_frameless_function_invocation (gdbarch, 
 					     generic_frameless_function_invocation_not);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, mips_frame_saved_pc);
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 
   set_gdbarch_deprecated_get_saved_register (gdbarch, mips_get_saved_register);
@@ -5991,7 +5981,7 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   /* There are MIPS targets which do not yet use this since they still
      define REGISTER_VIRTUAL_TYPE.  */
-  set_gdbarch_register_virtual_type (gdbarch, mips_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, mips_register_virtual_type);
 
   set_gdbarch_print_registers_info (gdbarch, mips_print_registers_info);
   set_gdbarch_pc_in_sigtramp (gdbarch, mips_pc_in_sigtramp);
@@ -6401,6 +6391,8 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: _PROC_MAGIC_ = %d\n",
 		      _PROC_MAGIC_);
 }
+
+extern initialize_file_ftype _initialize_mips_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_mips_tdep (void)

@@ -1054,12 +1054,11 @@ monitor_wait_cleanup (void *old_timeout)
 
 
 
-void
+static void
 monitor_wait_filter (char *buf,
 		     int bufmax,
 		     int *ext_resp_len,
-		     struct target_waitstatus *status
-)
+		     struct target_waitstatus *status)
 {
   int resp_len;
   do
@@ -2334,6 +2333,8 @@ init_monitor_ops (struct target_ops *ops)
 }
 
 /* Define additional commands that are usually only used by monitors.  */
+
+extern initialize_file_ftype _initialize_remote_monitors; /* -Wmissing-prototypes */
 
 void
 _initialize_remote_monitors (void)

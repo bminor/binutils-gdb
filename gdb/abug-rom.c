@@ -164,6 +164,8 @@ abug_open (char *args, int from_tty)
   monitor_open (args, &abug_cmds, from_tty);
 }
 
+extern initialize_file_ftype _initialize_abug_rom; /* -Wmissing-prototypes */
+
 void
 _initialize_abug_rom (void)
 {

@@ -1163,6 +1163,7 @@ target_char_to_host (int target_char, int *host_char)
 
 /* The charset.c module initialization function.  */
 
+extern initialize_file_ftype _initialize_charset; /* -Wmissing-prototype */
 
 void
 _initialize_charset (void)

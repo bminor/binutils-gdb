@@ -76,7 +76,7 @@ struct dwarf_expr_context
   int in_reg;
 };
 
-struct dwarf_expr_context *new_dwarf_expr_context ();
+struct dwarf_expr_context *new_dwarf_expr_context (void);
 void free_dwarf_expr_context (struct dwarf_expr_context *ctx);
 
 void dwarf_expr_push (struct dwarf_expr_context *ctx, CORE_ADDR value);

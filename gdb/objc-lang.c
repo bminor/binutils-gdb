@@ -775,7 +775,8 @@ end_msglist(void)
  * Used for qsorting lists of objc methods (either by class or selector).
  */
 
-int specialcmp(char *a, char *b)
+static int
+specialcmp (char *a, char *b)
 {
   while (*a && *a != ' ' && *a != ']' && *b && *b != ' ' && *b != ']')
     {
@@ -1518,7 +1519,7 @@ char *find_imps (struct symtab *symtab, struct block *block,
   return method + (tmp - buf);
 }
 
-void 
+static void 
 print_object_command (char *args, int from_tty)
 {
   struct value *object, *function, *description;
@@ -1606,7 +1607,7 @@ static struct objc_methcall methcalls[] = {
  * case the functions have moved for some reason.  
  */
 
-void 
+static void 
 find_objc_msgsend (void)
 {
   unsigned int i;
@@ -1653,7 +1654,7 @@ struct objc_submethod_helper_data {
   CORE_ADDR *new_pc;
 };
 
-int 
+static int 
 find_objc_msgcall_submethod_helper (void * arg)
 {
   struct objc_submethod_helper_data *s = 
@@ -1665,7 +1666,7 @@ find_objc_msgcall_submethod_helper (void * arg)
     return 0;
 }
 
-int 
+static int 
 find_objc_msgcall_submethod (int (*f) (CORE_ADDR, CORE_ADDR *),
 			     CORE_ADDR pc, 
 			     CORE_ADDR *new_pc)
@@ -1709,6 +1710,8 @@ find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc)
   return 0;
 }
 
+extern initialize_file_ftype _initialize_objc_language; /* -Wmissing-prototypes */
+
 void
 _initialize_objc_language (void)
 {
@@ -1721,41 +1724,6 @@ _initialize_objc_language (void)
 	   "Ask an Objective-C object to print itself.");
   add_com_alias ("po", "print-object", class_vars, 1);
 }
-
-#if 1
-/* Disable these functions until we put them in the gdbarch vector.  */
-static unsigned long FETCH_ARGUMENT (int i)
-{
-  internal_error (__FILE__, __LINE__, "FETCH_ARGUMENT not implemented");
-  return 0;
-}
-#else
-#if defined (__powerpc__) || defined (__ppc__)
-static unsigned long FETCH_ARGUMENT (int i)
-{
-  return read_register (3 + i);
-}
-#elif defined (__i386__)
-static unsigned long FETCH_ARGUMENT (int i)
-{
-  CORE_ADDR stack = read_register (SP_REGNUM);
-  return read_memory_unsigned_integer (stack + (4 * (i + 1)), 4);
-}
-#elif defined (__sparc__)
-static unsigned long FETCH_ARGUMENT (int i)
-{
-  return read_register (O0_REGNUM + i);
-}
-#elif defined (__hppa__) || defined (__hppa)
-static unsigned long FETCH_ARGUMENT (int i)
-{
-  return read_register (R0_REGNUM + 26 - i);
-}
-#else
-#error unknown architecture
-#endif
-
-#endif
 
 static void 
 read_objc_method (CORE_ADDR addr, struct objc_method *method)
@@ -1807,7 +1775,7 @@ read_objc_class (CORE_ADDR addr, struct objc_class *class)
   class->protocols = read_memory_unsigned_integer (addr + 36, 4);
 }
 
-CORE_ADDR
+static CORE_ADDR
 find_implementation_from_class (CORE_ADDR class, CORE_ADDR sel)
 {
   CORE_ADDR subclass = class;
@@ -1857,7 +1825,7 @@ find_implementation_from_class (CORE_ADDR class, CORE_ADDR sel)
   return 0;
 }
 
-CORE_ADDR
+static CORE_ADDR
 find_implementation (CORE_ADDR object, CORE_ADDR sel)
 {
   struct objc_object ostr;
@@ -1871,6 +1839,9 @@ find_implementation (CORE_ADDR object, CORE_ADDR sel)
   return find_implementation_from_class (ostr.isa, sel);
 }
 
+#define OBJC_FETCH_POINTER_ARGUMENT(argi) \
+  FETCH_POINTER_ARGUMENT (get_current_frame (), argi, builtin_type_void_func_ptr)
+
 static int
 resolve_msgsend (CORE_ADDR pc, CORE_ADDR *new_pc)
 {
@@ -1878,8 +1849,8 @@ resolve_msgsend (CORE_ADDR pc, CORE_ADDR *new_pc)
   CORE_ADDR sel;
   CORE_ADDR res;
 
-  object = FETCH_ARGUMENT (0);
-  sel = FETCH_ARGUMENT (1);
+  object = OBJC_FETCH_POINTER_ARGUMENT (0);
+  sel = OBJC_FETCH_POINTER_ARGUMENT (1);
 
   res = find_implementation (object, sel);
   if (new_pc != 0)
@@ -1896,8 +1867,8 @@ resolve_msgsend_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
   CORE_ADDR sel;
   CORE_ADDR res;
 
-  object = FETCH_ARGUMENT (1);
-  sel = FETCH_ARGUMENT (2);
+  object = OBJC_FETCH_POINTER_ARGUMENT (1);
+  sel = OBJC_FETCH_POINTER_ARGUMENT (2);
 
   res = find_implementation (object, sel);
   if (new_pc != 0)
@@ -1916,8 +1887,8 @@ resolve_msgsend_super (CORE_ADDR pc, CORE_ADDR *new_pc)
   CORE_ADDR sel;
   CORE_ADDR res;
 
-  super = FETCH_ARGUMENT (0);
-  sel = FETCH_ARGUMENT (1);
+  super = OBJC_FETCH_POINTER_ARGUMENT (0);
+  sel = OBJC_FETCH_POINTER_ARGUMENT (1);
 
   read_objc_super (super, &sstr);
   if (sstr.class == 0)
@@ -1940,8 +1911,8 @@ resolve_msgsend_super_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
   CORE_ADDR sel;
   CORE_ADDR res;
 
-  super = FETCH_ARGUMENT (1);
-  sel = FETCH_ARGUMENT (2);
+  super = OBJC_FETCH_POINTER_ARGUMENT (1);
+  sel = OBJC_FETCH_POINTER_ARGUMENT (2);
 
   read_objc_super (super, &sstr);
   if (sstr.class == 0)

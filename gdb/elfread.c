@@ -177,7 +177,6 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
   asymbol **symbol_table;
   long number_of_symbols;
   long i;
-  int index;
   struct cleanup *back_to;
   CORE_ADDR symaddr;
   CORE_ADDR offset;
@@ -372,34 +371,40 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 		    }
 		  else if (sym->flags & BSF_LOCAL)
 		    {
-		      /* Named Local variable in a Data section.  Check its
-		         name for stabs-in-elf.  The STREQ macro checks the
-		         first character inline, so we only actually do a
-		         strcmp function call on names that start with 'B'
-		         or 'D' */
-		      index = SECT_OFF_MAX;
-		      if (STREQ ("Bbss.bss", sym->name))
-			{
-			  index = SECT_OFF_BSS (objfile);
-			}
-		      else if (STREQ ("Ddata.data", sym->name))
-			{
-			  index = SECT_OFF_DATA (objfile);
-			}
-		      else if (STREQ ("Drodata.rodata", sym->name))
-			{
-			  index = SECT_OFF_RODATA (objfile);
-			}
-		      if (index != SECT_OFF_MAX)
+		      /* Named Local variable in a Data section.
+		         Check its name for stabs-in-elf.  The STREQ
+		         macro checks the first character inline, so
+		         we only actually do a strcmp function call on
+		         names that start with 'B' or 'D'.  */
+		      int special_local_sect;
+		      if (strcmp ("Bbss.bss", sym->name) == 0)
+			special_local_sect = SECT_OFF_BSS (objfile);
+		      else if (strcmp ("Ddata.data", sym->name) == 0)
+			special_local_sect = SECT_OFF_DATA (objfile);
+		      else if (strcmp ("Drodata.rodata", sym->name) == 0)
+			special_local_sect = SECT_OFF_RODATA (objfile);
+		      else
+			special_local_sect = -1;
+		      if (special_local_sect >= 0)
 			{
 			  /* Found a special local symbol.  Allocate a
 			     sectinfo, if needed, and fill it in.  */
 			  if (sectinfo == NULL)
 			    {
+			      int max_index;
+			      size_t size;
+
+			      max_index 
+				= max (SECT_OFF_BSS (objfile),
+				       max (SECT_OFF_DATA (objfile),
+					    SECT_OFF_RODATA (objfile)));
+			      size = (sizeof (struct stab_section_info) 
+				      + (sizeof (CORE_ADDR)
+					 * (max_index - 1)));
 			      sectinfo = (struct stab_section_info *)
-				xmmalloc (objfile->md, sizeof (*sectinfo));
-			      memset (sectinfo, 0,
-				      sizeof (*sectinfo));
+				xmmalloc (objfile->md, size);
+			      memset (sectinfo, 0, size);
+			      sectinfo->num_sections = max_index;
 			      if (filesym == NULL)
 				{
 				  complaint (&symfile_complaints,
@@ -412,36 +417,23 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 				    (char *) filesym->name;
 				}
 			    }
-			  if (index != -1)
-			    { 
-			      if (sectinfo->sections[index] != 0)
-				{
-				  complaint (&symfile_complaints,
-					     "duplicated elf/stab section information for %s",
-					     sectinfo->filename);
-				}
-			    }
-			  else
-			    internal_error (__FILE__, __LINE__,
-					    "Section index uninitialized.");
-			  /* Bfd symbols are section relative. */
+			  if (sectinfo->sections[special_local_sect] != 0)
+			    complaint (&symfile_complaints,
+				       "duplicated elf/stab section information for %s",
+				       sectinfo->filename);
+			  /* BFD symbols are section relative.  */
 			  symaddr = sym->value + sym->section->vma;
-			  /* Relocate non-absolute symbols by the section offset. */
+			  /* Relocate non-absolute symbols by the
+                             section offset.  */
 			  if (sym->section != &bfd_abs_section)
-			    {
-			      symaddr += offset;
-			    }
-			  if (index != -1)
-			    sectinfo->sections[index] = symaddr;
-			  else
-			    internal_error (__FILE__, __LINE__,
-					    "Section index uninitialized.");
+			    symaddr += offset;
+			  sectinfo->sections[special_local_sect] = symaddr;
 			  /* The special local symbols don't go in the
-			     minimal symbol table, so ignore this one. */
+			     minimal symbol table, so ignore this one.  */
 			  continue;
 			}
 		      /* Not a special stabs-in-elf symbol, do regular
-		         symbol processing. */
+		         symbol processing.  */
 		      if (sym->section->flags & SEC_LOAD)
 			{
 			  ms_type = mst_file_data;
@@ -740,8 +732,9 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
       /* Found it!  Allocate a new psymtab struct, and fill it in.  */
       maybe->found++;
       pst->section_offsets = (struct section_offsets *)
-	obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
-      for (i = 0; i < SECT_OFF_MAX; i++)
+	obstack_alloc (&objfile->psymbol_obstack, 
+		       SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
+      for (i = 0; i < maybe->num_sections; i++)
 	(pst->section_offsets)->offsets[i] = maybe->sections[i];
       return;
     }

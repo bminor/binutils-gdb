@@ -430,9 +430,10 @@ som_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
   int i;
   CORE_ADDR text_addr;
 
-  objfile->num_sections = SECT_OFF_MAX;
+  objfile->num_sections = bfd_count_sections (objfile->obfd);
   objfile->section_offsets = (struct section_offsets *)
-    obstack_alloc (&objfile->psymbol_obstack, SIZEOF_SECTION_OFFSETS);
+    obstack_alloc (&objfile->psymbol_obstack, 
+		   SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
 
   /* FIXME: ezannoni 2000-04-20 The section names in SOM are not
      .text, .data, etc, but $TEXT$, $DATA$,... We should initialize
@@ -457,7 +458,7 @@ som_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
 	  break;
       text_addr = addrs->other[i].addr;
 
-      for (i = 0; i < SECT_OFF_MAX; i++)
+      for (i = 0; i < objfile->num_sections; i++)
 	(objfile->section_offsets)->offsets[i] = text_addr;
     }
 }

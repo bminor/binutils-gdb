@@ -4875,26 +4875,6 @@ hppa_cannot_store_register (int regnum)
 }
 
 CORE_ADDR
-hppa_frame_args_address (struct frame_info *fi)
-{
-  return get_frame_base (fi);
-}
-
-CORE_ADDR
-hppa_frame_locals_address (struct frame_info *fi)
-{
-  return get_frame_base (fi);
-}
-
-int
-hppa_frame_num_args (struct frame_info *frame)
-{
-  /* We can't tell how many args there are now that the C compiler delays
-     popping them.  */
-  return -1;
-}
-
-CORE_ADDR
 hppa_smash_text_address (CORE_ADDR addr)
 {
   /* The low two bits of the PC on the PA contain the privilege level.
@@ -4959,13 +4939,13 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fp0_regnum (gdbarch, 64);
   set_gdbarch_pc_regnum (gdbarch, PCOQ_HEAD_REGNUM);
   set_gdbarch_npc_regnum (gdbarch, PCOQ_TAIL_REGNUM);
-  set_gdbarch_register_raw_size (gdbarch, hppa_register_raw_size);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, hppa_register_raw_size);
   set_gdbarch_deprecated_register_bytes (gdbarch, hppa_num_regs * 4);
-  set_gdbarch_register_byte (gdbarch, hppa_register_byte);
-  set_gdbarch_register_virtual_size (gdbarch, hppa_register_raw_size);
+  set_gdbarch_deprecated_register_byte (gdbarch, hppa_register_byte);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, hppa_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 8);
-  set_gdbarch_register_virtual_type (gdbarch, hppa_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, hppa_register_virtual_type);
   set_gdbarch_deprecated_store_struct_return (gdbarch, hppa_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch,
                                                hppa_extract_return_value);
@@ -4980,9 +4960,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation
     (gdbarch, hppa_frameless_function_invocation);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, hppa_frame_saved_pc);
-  set_gdbarch_frame_args_address (gdbarch, hppa_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, hppa_frame_locals_address);
-  set_gdbarch_frame_num_args (gdbarch, hppa_frame_num_args);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, hppa_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, hppa_pop_frame);

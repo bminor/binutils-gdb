@@ -158,8 +158,8 @@ parse_number (char *, int, int, YYSTYPE *);
 
 static struct type *current_type;
 
-static void push_current_type ();
-static void pop_current_type ();
+static void push_current_type (void);
+static void pop_current_type (void);
 static int search_field;
 %}
 
@@ -992,7 +992,8 @@ struct type_push
 
 static struct type_push *tp_top = NULL;
 
-static void push_current_type ()
+static void
+push_current_type (void)
 {
   struct type_push *tpnew;
   tpnew = (struct type_push *) malloc (sizeof (struct type_push));
@@ -1002,7 +1003,8 @@ static void push_current_type ()
   tp_top = tpnew; 
 }
 
-static void pop_current_type ()
+static void
+pop_current_type (void)
 {
   struct type_push *tp = tp_top;
   if (tp)

@@ -25,7 +25,7 @@
 #include "regcache.h"
 
 /* Wonder if this is correct?  Should be using push_dummy_call().  */
-#define DEPRECATED_DUMMY_WRITE_SP(SP) generic_target_write_sp (SP)
+#define DEPRECATED_DUMMY_WRITE_SP(SP) deprecated_write_sp (SP)
 
 #ifndef GDB_MULTI_ARCH
 #define GDB_MULTI_ARCH 1

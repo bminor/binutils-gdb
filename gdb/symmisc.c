@@ -34,6 +34,7 @@
 #include "bcache.h"
 #include "block.h"
 #include "gdb_regex.h"
+#include "dictionary.h"
 
 #include "gdb_string.h"
 #include <readline/readline.h>
@@ -87,22 +88,22 @@ static void free_symtab_block (struct objfile *, struct block *);
 
 /* Free a struct block <- B and all the symbols defined in that block.  */
 
+/* FIXME: carlton/2003-04-28: I don't believe this is currently ever
+   used.  */
+
 static void
 free_symtab_block (struct objfile *objfile, struct block *b)
 {
-  register int i, n;
-  struct symbol *sym, *next_sym;
+  struct dict_iterator iter;
+  struct symbol *sym;
 
-  n = BLOCK_BUCKETS (b);
-  for (i = 0; i < n; i++)
+  ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      for (sym = BLOCK_BUCKET (b, i); sym; sym = next_sym)
-	{
-	  next_sym = sym->hash_next;
-	  xmfree (objfile->md, DEPRECATED_SYMBOL_NAME (sym));
-	  xmfree (objfile->md, sym);
-	}
+      xmfree (objfile->md, DEPRECATED_SYMBOL_NAME (sym));
+      xmfree (objfile->md, sym);
     }
+
+  dict_free (BLOCK_DICT (b));
   xmfree (objfile->md, b);
 }
 
@@ -141,7 +142,7 @@ free_symtab (register struct symtab *s)
       /* Also free the linetable.  */
 
     case free_linetable:
-      /* Everything will be freed either by our `free_ptr'
+      /* Everything will be freed either by our `free_func'
          or by some other symtab, except for our linetable.
          Free that now.  */
       if (LINETABLE (s))
@@ -150,8 +151,8 @@ free_symtab (register struct symtab *s)
     }
 
   /* If there is a single block of memory to free, free it.  */
-  if (s->free_ptr != NULL)
-    xmfree (s->objfile->md, s->free_ptr);
+  if (s->free_func != NULL)
+    s->free_func (s);
 
   /* Free source-related stuff */
   if (s->line_charpos != NULL)
@@ -444,12 +445,13 @@ static void
 dump_symtab (struct objfile *objfile, struct symtab *symtab,
 	     struct ui_file *outfile)
 {
-  register int i, j;
+  int i;
+  struct dict_iterator iter;
   int len, blen;
-  register struct linetable *l;
+  struct linetable *l;
   struct blockvector *bv;
   struct symbol *sym;
-  register struct block *b;
+  struct block *b;
   int depth;
 
   fprintf_filtered (outfile, "\nSymtab for file %s\n", symtab->filename);
@@ -496,11 +498,8 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
 	  /* drow/2002-07-10: We could save the total symbols count
 	     even if we're using a hashtable, but nothing else but this message
 	     wants it.  */
-	  blen = BLOCK_BUCKETS (b);
-	  if (BLOCK_HASHTABLE (b))
-	    fprintf_filtered (outfile, ", %d buckets in ", blen);
-	  else
-	    fprintf_filtered (outfile, ", %d syms in ", blen);
+	  fprintf_filtered (outfile, ", %d syms/buckets in ",
+			    dict_size (BLOCK_DICT (b)));
 	  print_address_numeric (BLOCK_START (b), 1, outfile);
 	  fprintf_filtered (outfile, "..");
 	  print_address_numeric (BLOCK_END (b), 1, outfile);
@@ -518,7 +517,7 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
 	  fprintf_filtered (outfile, "\n");
 	  /* Now print each symbol in this block (in no particular order, if
 	     we're using a hashtable).  */
-	  ALL_BLOCK_SYMBOLS (b, j, sym)
+	  ALL_BLOCK_SYMBOLS (b, iter, sym)
 	    {
 	      struct print_symbol_args s;
 	      s.symbol = sym;

@@ -44,7 +44,7 @@ sentinel_frame_cache (struct regcache *regcache)
 
 /* Here the register value is taken direct from the register cache.  */
 
-void
+static void
 sentinel_frame_prev_register (struct frame_info *next_frame,
 			      void **this_prologue_cache,
 			      int regnum, int *optimized,
@@ -70,7 +70,7 @@ sentinel_frame_prev_register (struct frame_info *next_frame,
     }
 }
 
-void
+static void
 sentinel_frame_this_id (struct frame_info *next_frame,
 			void **this_prologue_cache,
 			struct frame_id *this_id)
