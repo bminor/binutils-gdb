@@ -6601,7 +6601,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	 for the next.  */
       if (rel + 1 < relend 
 	  && rel->r_offset == rel[1].r_offset
-	  && r_type != R_MIPS_NONE)
+	  && ELF32_R_TYPE (rel[1].r_info) != R_MIPS_NONE)
 	use_saved_addend_p = true;
       else
 	use_saved_addend_p = false;
