@@ -240,69 +240,96 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	}
 
 	case N_BINCL:
+	  {
 #ifdef DBXREAD_ONLY
-	  /* Add this bincl to the bincl_list for future EXCLs.  No
-	     need to save the string; it'll be around until
-	     read_dbx_symtab function returns */
+	    enum language tmp_language;
+	    /* Add this bincl to the bincl_list for future EXCLs.  No
+	       need to save the string; it'll be around until
+	       read_dbx_symtab function returns */
 
-	  SET_NAMESTRING();
+	    SET_NAMESTRING();
 
-	  add_bincl_to_list (pst, namestring, CUR_SYMBOL_VALUE);
+	    tmp_language = deduce_language_from_filename (namestring);
 
-	  /* Mark down an include file in the current psymtab */
+	    /* Only change the psymtab's language if we've learned
+	       something useful (eg. tmp_language is not language_unknown).
+	       In addition, to match what start_subfile does, never change
+	       from C++ to C.  */
+	    if (tmp_language != language_unknown
+		&& (tmp_language != language_c
+		    || psymtab_language != language_cplus))
+	      psymtab_language = tmp_language;
 
-	  goto record_include_file;
+	    add_bincl_to_list (pst, namestring, CUR_SYMBOL_VALUE);
+
+	    /* Mark down an include file in the current psymtab */
+
+	    goto record_include_file;
 
 #else /* DBXREAD_ONLY */
-	  continue;
-#endif
-
-	case N_SOL:
-	  /* Mark down an include file in the current psymtab */
-
-	  SET_NAMESTRING();
-
-	  /* In C++, one may expect the same filename to come round many
-	     times, when code is coming alternately from the main file
-	     and from inline functions in other files. So I check to see
-	     if this is a file we've seen before -- either the main
-	     source file, or a previously included file.
-
-	     This seems to be a lot of time to be spending on N_SOL, but
-	     things like "break c-exp.y:435" need to work (I
-	     suppose the psymtab_include_list could be hashed or put
-	     in a binary tree, if profiling shows this is a major hog).  */
-	  if (pst && STREQ (namestring, pst->filename))
 	    continue;
-	  {
-	    register int i;
-	    for (i = 0; i < includes_used; i++)
-	      if (STREQ (namestring, psymtab_include_list[i]))
-		{
-		  i = -1; 
-		  break;
-		}
-	    if (i == -1)
-	      continue;
+#endif
 	  }
 
-#ifdef DBXREAD_ONLY
-	record_include_file:
-#endif
-
-	  psymtab_include_list[includes_used++] = namestring;
-	  if (includes_used >= includes_allocated)
+	case N_SOL:
+	  {
+	    enum language tmp_language;
+	    /* Mark down an include file in the current psymtab */
+	    
+	    SET_NAMESTRING();
+  
+	    tmp_language = deduce_language_from_filename (namestring);
+  
+	    /* Only change the psymtab's language if we've learned
+	       something useful (eg. tmp_language is not language_unknown).
+	       In addition, to match what start_subfile does, never change
+	       from C++ to C.  */
+	    if (tmp_language != language_unknown
+		&& (tmp_language != language_c
+		    || psymtab_language != language_cplus))
+	      psymtab_language = tmp_language;
+	    
+	    /* In C++, one may expect the same filename to come round many
+	       times, when code is coming alternately from the main file
+	       and from inline functions in other files. So I check to see
+	       if this is a file we've seen before -- either the main
+	       source file, or a previously included file.
+	       
+	       This seems to be a lot of time to be spending on N_SOL, but
+	       things like "break c-exp.y:435" need to work (I
+	       suppose the psymtab_include_list could be hashed or put
+	       in a binary tree, if profiling shows this is a major hog).  */
+	    if (pst && STREQ (namestring, pst->filename))
+	      continue;
 	    {
-	      char **orig = psymtab_include_list;
-
-	      psymtab_include_list = (char **)
-		alloca ((includes_allocated *= 2) *
-			sizeof (char *));
-	      memcpy ((PTR)psymtab_include_list, (PTR)orig,
-		      includes_used * sizeof (char *));
+	      register int i;
+	      for (i = 0; i < includes_used; i++)
+		if (STREQ (namestring, psymtab_include_list[i]))
+		  {
+		    i = -1; 
+		    break;
+		  }
+	      if (i == -1)
+		continue;
 	    }
-	  continue;
-
+	    
+#ifdef DBXREAD_ONLY
+	  record_include_file:
+#endif
+	    
+	    psymtab_include_list[includes_used++] = namestring;
+	    if (includes_used >= includes_allocated)
+	      {
+		char **orig = psymtab_include_list;
+		
+		psymtab_include_list = (char **)
+		  alloca ((includes_allocated *= 2) *
+			  sizeof (char *));
+		memcpy ((PTR)psymtab_include_list, (PTR)orig,
+			includes_used * sizeof (char *));
+	      }
+	    continue;
+	  }
 	case N_LSYM:		/* Typedef or automatic variable. */
 	case N_STSYM:		/* Data seg var -- static  */
 	case N_LCSYM:		/* BSS      "  */
@@ -375,6 +402,20 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 					   objfile);
 		      p += 1;
 		    }
+		  /* The semantics of C++ state that "struct foo { ... }"
+		     also defines a typedef for "foo".  Unfortuantely, cfront
+		     never makes the typedef when translating from C++ to C.
+		     We make the typedef here so that "ptype foo" works as
+		     expected for cfront translated code.  */
+		  else if (psymtab_language == language_cplus)
+		   {
+		      /* Also a typedef with the same name.  */
+		      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
+					   VAR_NAMESPACE, LOC_TYPEDEF,
+					   objfile->static_psymbols,
+					   CUR_SYMBOL_VALUE, psymtab_language,
+					   objfile);
+		   }
 		}
 	      goto check_enum;
 	    case 't':

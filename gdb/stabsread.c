@@ -1035,6 +1035,17 @@ define_symbol (valu, string, desc, type, objfile)
 					    strlen (SYMBOL_NAME (sym)),
 					    &objfile -> symbol_obstack);
 	}
+      /* The semantics of C++ state that "struct foo { ... }" also defines 
+	 a typedef for "foo".  Unfortunately, cfront never makes the typedef
+	 when translating C++ into C.  We make the typedef here so that
+	 "ptype foo" works as expected for cfront translated code.  */
+      else if (current_subfile->language == language_cplus)
+	{
+	  synonym = 1;
+	  type_synonym_name = obsavestring (SYMBOL_NAME (sym),
+					    strlen (SYMBOL_NAME (sym)),
+					    &objfile -> symbol_obstack);
+	}
 
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
 

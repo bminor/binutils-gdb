@@ -883,22 +883,32 @@ address_info (exp, from_tty)
     {
       if (is_a_field_of_this)
 	{
-	  printf_unfiltered ("Symbol \"%s\" is a field of the local class variable `this'\n", exp);
+	  printf_unfiltered ("Symbol \"");
+	  fprintf_symbol_filtered (gdb_stdout, exp,
+				   current_language->la_language, DMGL_ANSI);
+	  printf_unfiltered ("\" is a field of the local class variable `this'\n");
 	  return;
 	}
 
       msymbol = lookup_minimal_symbol (exp, (struct objfile *) NULL);
 
       if (msymbol != NULL)
-	printf_unfiltered ("Symbol \"%s\" is at %s in a file compiled without debugging.\n",
-		exp,
-		local_hex_string((unsigned long) SYMBOL_VALUE_ADDRESS (msymbol)));
+	{
+	  printf_unfiltered ("Symbol \"");
+	  fprintf_symbol_filtered (gdb_stdout, exp,
+				   current_language->la_language, DMGL_ANSI);
+	  printf_unfiltered ("\" is at %s in a file compiled without debugging.\n",
+	      local_hex_string((unsigned long) SYMBOL_VALUE_ADDRESS (msymbol)));
+	}
       else
 	error ("No symbol \"%s\" in current context.", exp);
       return;
     }
 
-  printf_unfiltered ("Symbol \"%s\" is ", SYMBOL_NAME (sym));
+  printf_unfiltered ("Symbol \"");
+  fprintf_symbol_filtered (gdb_stdout, SYMBOL_NAME (sym),
+			   current_language->la_language, DMGL_ANSI);
+  printf_unfiltered ("\" is ", SYMBOL_NAME (sym));
   val = SYMBOL_VALUE (sym);
   basereg = SYMBOL_BASEREG (sym);
 

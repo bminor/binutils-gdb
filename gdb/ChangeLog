@@ -1,3 +1,17 @@
+Thu Nov 11 15:22:20 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* printcmd.c (address_info): Use fprintf_symbol_filtered
+	to print the symbol name.
+
+	* stabsread.c (define_symbol): Handle cfront lossage for 
+	struct/union/enums and typedefs.
+
+	* partial-stab.h (case N_BINCL): Update psymtab_language
+	as appropriate when changing subfiles.
+	(case N_SOL): Update psymtab_language as appropriate when
+	changing subfiles.  Add typedef for structs, unions, and enums
+	when processing C++ files.
+
 Thu Nov 11 13:18:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* README: Remove information on languages and just cite the (newly
