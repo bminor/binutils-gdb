@@ -295,13 +295,13 @@ CODE_FRAGMENT
 .          called rather than the normal function. This allows really
 .          strange relocation methods to be accomodated (eg, i960 callj
 .          instructions). *}
-.  bfd_reloc_status_type EXFUN ((*special_function), 
-.					    (bfd *abfd,
+.  bfd_reloc_status_type (*special_function) 
+.				    PARAMS ((bfd *abfd,
 .					     arelent *reloc_entry,
 .                                            struct symbol_cache_entry *symbol,
 .                                            PTR data,
 .                                            asection *input_section, 
-.                                            bfd *output_bfd     ));
+.                                            bfd *output_bfd));
 .
 .       {* The textual name of the relocation type. *}
 .  char *name;

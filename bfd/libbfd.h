@@ -189,14 +189,30 @@ extern bfd *bfd_last_cache;
 
 /* And more follows */
 
-void EXFUN(bfd_check_init, (void));
-PTR  EXFUN(bfd_xmalloc, ( bfd_size_type size));
-void EXFUN(bfd_write_bigendian_4byte_int, (bfd *abfd,  int i));
-bfd_vma EXFUN(bfd_log2, (bfd_vma x));
-void EXFUN(bfd_check_init, (void));
-PTR  EXFUN(bfd_xmalloc, ( bfd_size_type size));
-void EXFUN(bfd_write_bigendian_4byte_int, (bfd *abfd,  int i));
-bfd_vma EXFUN(bfd_log2, (bfd_vma x));
+void 
+bfd_check_init PARAMS ((void));
+
+PTR  
+bfd_xmalloc PARAMS (( bfd_size_type size));
+
+void 
+bfd_write_bigendian_4byte_int PARAMS ((bfd *abfd,  int i));
+
+bfd_vma 
+bfd_log2 PARAMS ((bfd_vma x));
+
+void 
+bfd_check_init PARAMS ((void));
+
+PTR  
+bfd_xmalloc PARAMS (( bfd_size_type size));
+
+void 
+bfd_write_bigendian_4byte_int PARAMS ((bfd *abfd,  int i));
+
+bfd_vma 
+bfd_log2 PARAMS ((bfd_vma x));
+
 #define BFD_CACHE_MAX_OPEN 10
 extern bfd *bfd_last_cache;
 
@@ -204,34 +220,62 @@ extern bfd *bfd_last_cache;
     ((x)==bfd_last_cache? \
       (FILE*)(bfd_last_cache->iostream): \
        bfd_cache_lookup_worker(x))
-void  EXFUN(bfd_cache_init , (bfd *));
-boolean EXFUN(bfd_cache_close , (bfd *));
-FILE* EXFUN(bfd_open_file, (bfd *));
-FILE *EXFUN(bfd_cache_lookup_worker, (bfd *));
-void EXFUN(bfd_constructor_entry, (bfd *abfd, 
+void  
+bfd_cache_init  PARAMS ((bfd *));
+
+boolean 
+bfd_cache_close  PARAMS ((bfd *));
+
+FILE* 
+bfd_open_file PARAMS ((bfd *));
+
+FILE *
+bfd_cache_lookup_worker PARAMS ((bfd *));
+
+void 
+bfd_constructor_entry PARAMS ((bfd *abfd, 
     asymbol **symbol_ptr_ptr,
     CONST char*type));
-CONST struct reloc_howto_struct *EXFUN(bfd_default_reloc_type_lookup
-    , (CONST struct bfd_arch_info *,
+
+CONST struct reloc_howto_struct *
+bfd_default_reloc_type_lookup
+ PARAMS ((CONST struct bfd_arch_info *,
     bfd_reloc_code_real_type  code));
-boolean EXFUN(bfd_generic_relax_section
-    , (bfd *abfd,
+
+boolean 
+bfd_generic_relax_section
+ PARAMS ((bfd *abfd,
     asection *section,
     asymbol **symbols));
+
 bfd_byte *
-EXFUN(bfd_generic_get_relocated_section_contents, (bfd *abfd,
+
+bfd_generic_get_relocated_section_contents PARAMS ((bfd *abfd,
     struct bfd_seclet_struct  *seclet,
     bfd_byte *data)
     
     );
+
 extern bfd_arch_info_type bfd_default_arch_struct;
-boolean EXFUN(bfd_default_set_arch_mach, (bfd *abfd,
+boolean 
+bfd_default_set_arch_mach PARAMS ((bfd *abfd,
     enum bfd_architecture arch,
     unsigned long mach));
-void  EXFUN(bfd_arch_init, (void));
-void EXFUN(bfd_arch_linkin, (bfd_arch_info_type *));
-CONST bfd_arch_info_type *EXFUN(bfd_default_compatible
-    , (CONST bfd_arch_info_type *a,
+
+void  
+bfd_arch_init PARAMS ((void));
+
+void 
+bfd_arch_linkin PARAMS ((bfd_arch_info_type *));
+
+CONST bfd_arch_info_type *
+bfd_default_compatible
+ PARAMS ((CONST bfd_arch_info_type *a,
     CONST bfd_arch_info_type *b));
-boolean EXFUN(bfd_default_scan, (CONST struct bfd_arch_info *, CONST char *));
-struct elf_internal_shdr *EXFUN(bfd_elf_find_section , (bfd *abfd, char *name));
+
+boolean 
+bfd_default_scan PARAMS ((CONST struct bfd_arch_info *, CONST char *));
+
+struct elf_internal_shdr *
+bfd_elf_find_section  PARAMS ((bfd *abfd, char *name));
+

@@ -36,7 +36,8 @@ SECTION
 @* section prototypes::
 @end menu
 
-@node Section Input, Section Output, Sections, Sections
+INODE
+Section Input, Section Output, Sections, Sections
 SUBSECTION
 	Section Input
 
@@ -65,7 +66,8 @@ SUBSECTION
 	the data area has to be parsed to get out the data and
 	relocations.
 
-@node Section Output, typedef asection, Section Input, Sections
+INODE
+Section Output, typedef asection, Section Input, Sections
 
 SUBSECTION
 	Section Output
@@ -75,8 +77,12 @@ SUBSECTION
 	the same way as input sections, data is written to the
 	sections using <<bfd_set_section_contents>>.  
 
-	The linker uses the fields <<output_section>> and
-	<<output_offset>> to create an output file.
+	Any program that creates or combines sections (e.g., the assembler
+	and linker) must use the fields <<output_section>> and
+	<<output_offset>> to indicate the file sections to which each
+	section must be written.  (If the section is being created from
+	scratch, <<output_section>> should probably point to the section
+	itself, and <<output_offset>> should probably be zero.)
 
 	The data to be written comes from input sections attached to
 	the output sections.  The output section structure can be
@@ -85,7 +91,7 @@ SUBSECTION
 	input section determines the offset into the output section of
 	the data to be written.
 
-	Eg to create a section "O", starting at 0x100, 0x123 long,
+	E.g., to create a section "O", starting at 0x100, 0x123 long,
 	containing two subsections, "A" at offset 0x0 (ie at vma
 	0x100) and "B" at offset 0x20 (ie at vma 0x120) the structures
 	would look like:
@@ -128,8 +134,10 @@ SUBSECTION
 #include "libbfd.h"
 
 
-/*doc*
-@node typedef asection, section prototypes, Section Output, Sections
+/*
+DOCDD
+INODE
+typedef asection, section prototypes, Section Output, Sections
 SUBSECTION
 	typedef asection
 
@@ -235,6 +243,7 @@ CODE_FRAGMENT
 .
 .       
 .   bfd_vma vma;
+.   boolean user_set_vma;
 .
 .        {* The size of the section in bytes, as it will be output.
 .           contains a value even if the section has no contents (eg, the
@@ -356,18 +365,30 @@ CODE_FRAGMENT
 .     ((section->reloc_done) ? (section)->_cooked_size: (abort(),1))
 */
 
+/* These symbols are global, not specific to any BFD.  Therefore, anything
+   that tries to change them is broken, and should be repaired.  */
+static CONST asymbol global_syms[] = {
+  /* bfd, name, value, attr, section [, udata] */
+  { 0, BFD_COM_SECTION_NAME, 0, BSF_SECTION_SYM, &bfd_com_section },
+  { 0, BFD_UND_SECTION_NAME, 0, BSF_SECTION_SYM, &bfd_und_section },
+  { 0, BFD_ABS_SECTION_NAME, 0, BSF_SECTION_SYM, &bfd_abs_section },
+};
 
+#define STD_SECTION(SEC,SYM,NAME, IDX)	\
+  asymbol *SYM = (asymbol *) &global_syms[IDX]; \
+  asection SEC = { NAME, 0, 0, 0, 0, (boolean) 0, 0, 0, 0, &SEC,\
+		    0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, (boolean) 0, \
+		     (asymbol *) &global_syms[IDX], &SYM, }
 
-asection bfd_com_section = {  BFD_COM_SECTION_NAME ,0 };
-asection bfd_und_section = {  BFD_UND_SECTION_NAME ,0 };
-asection bfd_abs_section = {  BFD_ABS_SECTION_NAME ,0 };
-
-struct symbol_cache_entry *bfd_abs_symbol;
-struct symbol_cache_entry *bfd_com_symbol;
-struct symbol_cache_entry *bfd_und_symbol;
+STD_SECTION (bfd_com_section, bfd_com_symbol, BFD_COM_SECTION_NAME, 0);
+STD_SECTION (bfd_und_section, bfd_und_symbol, BFD_UND_SECTION_NAME, 1);
+STD_SECTION (bfd_abs_section, bfd_abs_symbol, BFD_ABS_SECTION_NAME, 2);
+#undef STD_SECTION
 
 /*
-@node section prototypes,  , typedef asection, Sections
+DOCDD
+INODE
+section prototypes,  , typedef asection, Sections
 SUBSECTION
 	section prototypes
 
@@ -420,9 +441,9 @@ DESCRIPTION
 	before is was rewritten...
 
 	Possible errors are:
-	o invalid_operation
+	o invalid_operation -
 	If output has already started for this BFD.
-	o no_memory
+	o no_memory -
 	If obstack alloc fails.
 
 */
@@ -513,10 +534,9 @@ DEFUN(bfd_make_section,(abfd, name),
   newsect->line_filepos =0;
   newsect->owner = abfd;
 
-/* Create a symbol whos only job is to point to this section. This is
-   usfull for things like relocs which are relative to the base of a
-   section
- */
+  /* Create a symbol whos only job is to point to this section. This is
+     useful for things like relocs which are relative to the base of a
+     section.  */
   newsect->symbol = bfd_make_empty_symbol(abfd);
   newsect->symbol->name = name;
   newsect->symbol->value = 0;
@@ -548,7 +568,7 @@ DESCRIPTION
 	supplied to the value. Returns true on success, false on
 	error. Possible error returns are:
 
-	o invalid operation
+	o invalid operation -
 	The section cannot have one or more of the attributes
 	requested. For example, a .bss section in <<a.out>> may not
 	have the <<SEC_HAS_CONTENTS>> field set.
@@ -561,10 +581,17 @@ DEFUN(bfd_set_section_flags,(abfd, section, flags),
      sec_ptr section AND
      flagword flags)
 {
+#if 0
+  /* If you try to copy a text section from an input file (where it
+     has the SEC_CODE flag set) to an output file, this loses big if
+     the bfd_applicable_section_flags (abfd) doesn't have the SEC_CODE
+     set - which it doesn't, at least not for a.out.  FIXME */
+
   if ((flags & bfd_applicable_section_flags (abfd)) != flags) {
     bfd_error = invalid_operation;
     return false;
   }
+#endif
 
   section->flags = flags;
   return true;
@@ -576,7 +603,11 @@ FUNCTION
 	bfd_map_over_sections
 
 SYNOPSIS
-	void bfd_map_over_sections(bfd *abfd, void (*func)(), PTR obj);
+	void bfd_map_over_sections(bfd *abfd,
+				   void (*func)(bfd *abfd,
+						asection *sect,
+						PTR obj),
+				   PTR obj);
 
 DESCRIPTION
 	Calls the provided function @var{func} for each section
@@ -599,7 +630,7 @@ DESCRIPTION
 void
 DEFUN(bfd_map_over_sections,(abfd, operation, user_storage),
       bfd *abfd AND
-      void (*operation)() AND
+      void (*operation) PARAMS ((bfd *abfd, asection *sect, PTR obj)) AND
       PTR user_storage)
 {
   asection *sect;
@@ -625,7 +656,7 @@ DESCRIPTION
 	ok, then <<true>> is returned, else <<false>>. 
 
 	Possible error returns:
-	o invalid_operation
+	o invalid_operation -
 	Writing has started to the BFD, so setting the size is invalid
 
 */
@@ -673,7 +704,7 @@ DESCRIPTION
 
 	Normally <<true>> is returned, else <<false>>. Possible error
 	returns are:
-	o no_contents
+	o no_contents -
 	The output section does not have the <<SEC_HAS_CONTENTS>>
 	attribute, so nothing can be written to it.
 	o and some more too
@@ -684,6 +715,11 @@ DESCRIPTION
 
 */
 
+#define bfd_get_section_size_now(abfd,sec) \
+(sec->reloc_done \
+ ? bfd_get_section_size_after_reloc (sec) \
+ : bfd_get_section_size_before_reloc (sec))
+
 boolean
 DEFUN(bfd_set_section_contents,(abfd, section, location, offset, count),
       bfd *abfd AND
@@ -692,11 +728,25 @@ DEFUN(bfd_set_section_contents,(abfd, section, location, offset, count),
       file_ptr offset AND
       bfd_size_type count)
 {
+  bfd_size_type sz;
+
   if (!(bfd_get_section_flags(abfd, section) & SEC_HAS_CONTENTS)) 
       {
         bfd_error = no_contents;
         return(false);
-      } 
+      }
+
+  if (offset < 0 || count < 0)
+    {
+    bad_val:
+      bfd_error = bad_value;
+      return false;
+    }
+  sz = bfd_get_section_size_now (abfd, section);
+  if (offset > sz
+      || count > sz
+      || offset + count > sz)
+    goto bad_val;
 
   if (BFD_SEND (abfd, _bfd_set_section_contents,
                 (abfd, section, location, offset, count))) 
@@ -739,51 +789,30 @@ DEFUN(bfd_get_section_contents,(abfd, section, location, offset, count),
       file_ptr offset AND
       bfd_size_type count)
 {
+  bfd_size_type sz;
+
   if (section->flags & SEC_CONSTRUCTOR) 
-      {
-        memset(location, 0, (unsigned)count);
-        return true;
-      }
-  else 
-      {
-        return  (BFD_SEND (abfd, _bfd_get_section_contents,
-                           (abfd, section, location, offset, count)));
-      }
-}
+    {
+      memset(location, 0, (unsigned)count);
+      return true;
+    }
 
+  if (offset < 0 || count < 0)
+    {
+    bad_val:
+      bfd_error = bad_value;
+      return false;
+    }
+  sz = bfd_get_section_size_now (abfd, section);
+  if (offset > sz
+      || count > sz
+      || offset + count > sz)
+    goto bad_val;
 
-/* Initialize the internal data structures */
-DEFUN_VOID(bfd_section_init)
-{
+  if (count == 0)
+    /* Don't bother.  */
+    return true;
 
-  bfd_com_symbol = (asymbol *)zalloc(sizeof(asymbol));
-  bfd_com_symbol->name = BFD_COM_SECTION_NAME;
-  bfd_com_symbol->flags = BSF_SECTION_SYM;
-  bfd_com_symbol->section = &bfd_com_section;
-  bfd_com_section.symbol = bfd_com_symbol;
-  bfd_com_section.symbol_ptr_ptr = &bfd_com_symbol;
-  bfd_com_section.output_section = &bfd_com_section;
-  
-
-
-  bfd_und_symbol = (asymbol *)zalloc(sizeof(asymbol));
-  bfd_und_symbol->name = BFD_UND_SECTION_NAME;
-  bfd_und_symbol->flags = BSF_SECTION_SYM;
-  bfd_und_symbol->section = &bfd_und_section;
-  bfd_und_section.symbol = bfd_und_symbol;
-  bfd_und_section.symbol_ptr_ptr = &bfd_und_symbol;
-  bfd_und_section.output_section = &bfd_und_section;  
-
-  bfd_abs_symbol = (asymbol *)zalloc(sizeof(asymbol));
-  bfd_abs_symbol->name = BFD_ABS_SECTION_NAME;
-  bfd_abs_symbol->flags = BSF_SECTION_SYM;
-  bfd_abs_symbol->section = &bfd_abs_section;
-  bfd_abs_section.symbol = bfd_abs_symbol;
-  bfd_abs_section.symbol_ptr_ptr = &bfd_abs_symbol;
-  bfd_abs_section.output_section = &bfd_abs_section;  
-
-  
-  
-
-
+  return BFD_SEND (abfd, _bfd_get_section_contents,
+		   (abfd, section, location, offset, count));
 }

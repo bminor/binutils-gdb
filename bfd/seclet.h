@@ -50,5 +50,7 @@ struct bfd_seclet_struct
 
 typedef struct bfd_seclet_struct bfd_seclet_type;
 
-bfd_seclet_type *EXFUN(bfd_new_seclet,(bfd*,asection*));
+bfd_seclet_type *
+bfd_new_seclet PARAMS ((bfd*, asection*));
+
 #endif

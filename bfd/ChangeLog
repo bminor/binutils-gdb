@@ -1,3 +1,18 @@
+Thu Nov  5 02:59:09 1992  John Gilmore  (gnu@cygnus.com)
+
+	Cleanup:  Replace all uses of EXFUN in the BFD sources, with PARAMS.
+
+	* archures.c, reloc.c, section.c, tekhex.c:  Use PARAMS in
+	declaring pointers to functions.
+	* cache.c, elf.c:  Move static function decls to top, use PARAMS.
+	* seclet.h:  Declare external function with PARAMS.
+
+	* doc/chew.c (exfunstuff):  Eliminate.
+	(paramstuff):  Replace exfunstuff with function to generate PARAMS.
+	* doc/proto.str:  Use paramstuff rather than exfunstuff.
+
+	* libbfd.h:  Update, based on changes in source code and chew.
+
 Wed Nov  4 22:47:29 1992  John Gilmore  (gnu@cygnus.com)
 
 	* libieee.h:  Add FIXME about removing limit on number of sections.
