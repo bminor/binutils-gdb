@@ -123,6 +123,8 @@ proc test_demangling_exact {test result} {
 #
 
 proc test_gnu_style_demangling {} {
+    global gdb_prompt
+
     test_demangling "gnu: Abort__FP6EditoriPCc" \
 	"Abort\[(\]+Editor \[*\]+, int, (const char|char const) \[*\]+\[)\]+"
     test_demangling_exact "gnu: AddAlignment__9ivTSolverUiP12ivInteractorP7ivTGlue" "ivTSolver::AddAlignment(unsigned int, ivInteractor *, ivTGlue *)"
@@ -531,7 +533,22 @@ proc test_gnu_style_demangling {} {
     test_demangling_exact "gnu: foo__I_4000000000000000000000000000000000000000000000000000000000000000000000000" "Can't demangle \"foo__I_4000000000000000000000000000000000000000000000000000000000000000000000000\""
 
     ## 1999-04-19: "Fix from Dale Hawkins".  Shouldn't segfault.
-    test_demangling_exact "gnu: __thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator" "Can't demangle \"__thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator\""
+    # Accept even a dubious demangling; the string is ambiguous.
+    send_gdb "maintenance demangle __thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator\n"
+    gdb_expect {
+	-re "virtual function thunk \\(delta:-64\\) for CosNaming::_proxy_NamingContext::_0RL__list\\(unsigned long, _CORBA_Unbounded_Sequence<CosNaming::Binding> \\*\\&, CosNaming::BindingIterator \\*\\&\\)\r\n$gdb_prompt $" {
+		pass "gnu: __thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator"
+	}
+	-re ".*Can't demangle \"__thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator\"\r\n$gdb_prompt $" {
+		pass "gnu: __thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator"
+	}
+	-re ".*$gdb_prompt $" {
+		fail "gnu: __thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator"
+	}
+	timeout {
+		fail "gnu: __thunk_64__0RL__list__Q29CosNaming20_proxy_NamingContextUlRPt25_CORBA_Unbounded_Sequence1ZQ29CosNaming7BindingRPQ29CosNaming15BindingIterator (timeout)"
+	}
+    }
 }
 
 #

@@ -1,5 +1,10 @@
 2002-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdb.c++/demangle.exp: Accept slightly dubious v2 demangler result
+	for slightly dubious v2 mangled string.
+
+2002-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdb.base/completion.exp: Expand ${srcdir} to an absolute path.
 
 2002-01-10  Jason Merrill  <jason@redhat.com>
