@@ -1418,41 +1418,49 @@ read_type (pp, objfile)
     case '9':
     case '(':
 
-      (*pp)--;
-      if (read_type_number (pp, xtypenums) != 0)
-	return error_type (pp);
+      {
+	char *pp_saved;
 
-      if (typenums[0] == xtypenums[0] && typenums[1] == xtypenums[1])
-	/* It's being defined as itself.  That means it is "void".  */
-	type = init_type (TYPE_CODE_VOID, 0, 0, NULL, objfile);
-      else
-	{
-	  struct type *xtype = *dbx_lookup_type (xtypenums);
+	(*pp)--;
+	pp_saved = *pp;
 
-	  /* This can happen if we had '-' followed by a garbage character,
-	     for example.  */
-	  if (xtype == NULL)
-	    return error_type (pp);
+	/* Peek ahead at the number to detect void.  */
+	if (read_type_number (pp, xtypenums) != 0)
+	  return error_type (pp);
 
-	  /* The type is being defined to another type.  So we copy the type.
-	     This loses if we copy a C++ class and so we lose track of how
-	     the names are mangled (but g++ doesn't output stabs like this
-	     now anyway).  */
+	if (typenums[0] == xtypenums[0] && typenums[1] == xtypenums[1])
+	  /* It's being defined as itself.  That means it is "void".  */
+	  type = init_type (TYPE_CODE_VOID, 0, 0, NULL, objfile);
+	else
+	  {
+	    struct type *xtype;
 
-	  type = alloc_type (objfile);
-	  memcpy (type, xtype, sizeof (struct type));
+	    /* Go back to the number and have read_type get it.  This means
+	       that we can deal with something like t(1,2)=(3,4)=... which
+	       the Lucid compiler uses.  */
+	    *pp = pp_saved;
+	    xtype = read_type (pp, objfile);
 
-	  /* The idea behind clearing the names is that the only purpose
-	     for defining a type to another type is so that the name of
-	     one can be different.  So we probably don't need to worry much
-	     about the case where the compiler doesn't give a name to the
-	     new type.  */
-	  TYPE_NAME (type) = NULL;
-	  TYPE_TAG_NAME (type) = NULL;
-	}
-      if (typenums[0] != -1)
-	*dbx_lookup_type (typenums) = type;
-      break;
+	    /* The type is being defined to another type.  So we copy the type.
+	       This loses if we copy a C++ class and so we lose track of how
+	       the names are mangled (but g++ doesn't output stabs like this
+	       now anyway).  */
+
+	    type = alloc_type (objfile);
+	    memcpy (type, xtype, sizeof (struct type));
+
+	    /* The idea behind clearing the names is that the only purpose
+	       for defining a type to another type is so that the name of
+	       one can be different.  So we probably don't need to worry much
+	       about the case where the compiler doesn't give a name to the
+	       new type.  */
+	    TYPE_NAME (type) = NULL;
+	    TYPE_TAG_NAME (type) = NULL;
+	  }
+	if (typenums[0] != -1)
+	  *dbx_lookup_type (typenums) = type;
+	break;
+      }
 
     /* In the following types, we must be sure to overwrite any existing
        type that the typenums refer to, rather than allocating a new one

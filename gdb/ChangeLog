@@ -1,5 +1,8 @@
 Mon Jan  3 11:57:29 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* stabsread.c (read_type): Allow defining several type numbers
+	at once (e.g. "(1,2)=(3,4)="...).
+
 	* stabsread.c (read_enum_type): Use TARGET_INT_BIT not sizeof (int).
 
 	* breakpoint.c (frame_in_dummy): Check PC as well as frame.
