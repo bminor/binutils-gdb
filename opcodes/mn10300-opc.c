@@ -240,7 +240,7 @@ const struct mn10300_opcode mn10300_opcodes[] = {
 { "mov",	0xfc300000,	0xfff00000,	FMT_D4, {AM1, MEM2(IMM32,AN0)}},
 { "mov",	0x4300,		0xf300,		FMT_S1, {AM1, MEM2(IMM8, SP)}},
 { "mov",	0xfa900000,	0xfff30000,	FMT_D2, {AM1, MEM2(IMM16, SP)}},
-{ "mov",	0xfc900000,	0xfc930000,	FMT_D4, {AM1, MEM2(IMM32, SP)}},
+{ "mov",	0xfc900000,	0xfff30000,	FMT_D4, {AM1, MEM2(IMM32, SP)}},
 { "mov",	0xf3c0,		0xffc0,		FMT_D0, {AM2, MEM2(DI, AN0)}},
 { "mov",	0xfa800000,	0xfff30000,	FMT_D2, {AM1, MEM(IMM16_MEM)}},
 { "mov",	0xfc800000,	0xfff30000,	FMT_D4, {AM1, MEM(IMM32_MEM)}},
