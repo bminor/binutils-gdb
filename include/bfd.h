@@ -223,7 +223,8 @@ typedef enum bfd_print_symbol
 { 
   bfd_print_symbol_name,
   bfd_print_symbol_more,
-  bfd_print_symbol_all
+  bfd_print_symbol_all,
+  bfd_print_symbol_nm, /* Pretty format suitable for nm program. */
 } bfd_print_symbol_type;
     
 
@@ -1611,6 +1612,24 @@ problems later on.
 */
 #define bfd_make_empty_symbol(abfd) \
      BFD_SEND (abfd, _bfd_make_empty_symbol, (abfd))
+
+/*
+ bfd_decode_symclass
+Return a lower-case character corresponding to the symbol class of symbol.
+*/
+
+ PROTO(int, bfd_decode_symclass, (asymbol *symbol));
+
+/*
+
+ bfd_stab_name
+Returns a string for the stab with the given code, or NULL if not found.
+*/
+
+ PROTO(char *, bfd_stab_name, (int code));
+
+/*
+*/
 
 /*:bfd.c*/
 /* @section @code{typedef bfd}
