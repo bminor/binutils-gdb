@@ -1,6 +1,10 @@
+Wed May  5 08:35:04 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* configure (tooldir): Fix for i386-aix again.
+
 Mon May  3 19:00:27 1993  Per Bothner  (bothner@cygnus.com)
 
-	* configure.in, Makefile.in:  Change definition of $(tooldir)
+	* configure, Makefile.in:  Change definition of $(tooldir)
 	to match the FSF.
 
 Fri Apr 30 15:55:21 1993  Fred Fish  (fnf@cygnus.com)
