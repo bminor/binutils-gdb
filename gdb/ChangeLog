@@ -1,3 +1,55 @@
+Sun Mar  1 13:13:39 1992  Fred Fish  (fnf@cygnus.com)
+
+	* xm-sysv4.h:  Provide definitions/prototypes for host environment
+	functions for which no definitions or prototypes are provided in
+	any currently included gdb or host environment header files.
+	For SVR4, this currently includes malloc and realloc, which cannot
+	be portably prototyped in any gdb include file.
+
+Sat Feb 29 14:43:02 1992  Per Bothner  (bothner@cygnus.com)
+
+	* buildsym.h:  Remove obsolete variable file_stabs.
+
+	* Makefile.in:  Move place where configure merges in host-
+	and target-dependent fragments later, so the latter
+	can override (say) GNU_MALLOC.
+	* config/mh-rs6000:  Use system malloc.  Otherwise, I
+	ended up with *two* incompatible versions of malloc
+	(functions in libc would call the malloc in libc).
+	I assume this is a shared library problem.
+
+	* remote.c:  Fix (presumed) typo.
+	* objfiles.c:  Use xmalloc/xrealloc instead of
+	malloc/realloc (since the latter are no longer declared).
+
+	Changes from metin@ibmpa.awdpa.ibm.com (Metin G. Ozisik)
+	[Mail dated Thu, 6 Feb 1992 10:22:02 -0800]
+	* rs6000-xdep.c: Improvements to fetch_inferior_registers() to
+	handle individual registers.
+	* tm-rs6000.h: Fix SAVED_PC_AFTER_CALL macro to handle pc value
+	correctly in case it wasn't cached yet. (A problem showed up
+	after fetching individual registers.)
+	* buildsym.c: Disable type_synonym_name's type name overwriting
+	in cases it is unnecesary. rs6000 portation doesn't use
+	type_synonym_name, and it used to nullify type names
+	* xcoffread.c: to handle g++'s typename abbreviation, fill in a
+	type's name as soon as space for that type is allocated.
+	* xcoffread.c: ignore a section's lineno information if it is
+	not `.text'. (In rs6000 bfd portation integration, skipping over
+	`.pad' sections are ignored since it was in machine independent
+	part of the code. Thus, a problem of fake sections with invalid
+	lineno information arised.)
+
+	Changes from metin@ibmpa.awdpa.ibm.com (Metin G. Ozisik)
+	[Mail dated Thu, 6 Feb 1992 13:26:22 -0800]
+	* rs6000-tdep.c: make function_frame_info() work whether or not
+	reading from a core file.
+	* tm-rs6000.h: Implementation of FRAME_FIND_SAVED_REGS macro.
+
+	* infrun.c. main.c, printcmd.c. symtab.c:
+	More changes from IBM for rs6000.
+
+
 Thu Feb 27 22:57:19 1992  Per Bothner  (bothner@cygnus.com)
 
 	* rs6k-opcode.h, tm-rs6000.h, xm-rs6000.h, rs6000-tdep.c,
