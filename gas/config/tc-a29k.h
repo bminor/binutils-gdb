@@ -21,6 +21,8 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 
 #define TARGET_BYTES_BIG_ENDIAN	1
 
+#define LEX_DOLLAR 1
+
 #define tc_headers_hook(a)		;	/* not used */
 #define tc_headers_hook(a)		;	/* not used */
 #define tc_crawl_symbol_chain(a)	;	/* not used */

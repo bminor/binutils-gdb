@@ -1148,6 +1148,77 @@ md_operand (expressionP)
       else
 	expressionP->X_op = O_constant;
     }
+  else if (input_line_pointer[0] == '$')
+    {
+      char *s;
+      char type;
+      int fieldnum, fieldlimit;
+      LITTLENUM_TYPE floatbuf[8];
+
+      /* $float(), $doubleN(), or $extendN() convert floating values
+	 to integers.  */
+
+      s = input_line_pointer;
+
+      ++s;
+
+      fieldnum = 0;
+      if (strncmp (s, "double", sizeof "double" - 1) == 0)
+	{
+	  s += sizeof "double" - 1;
+	  type = 'd';
+	  fieldlimit = 2;
+	}
+      else if (strncmp (s, "float", sizeof "float" - 1) == 0)
+	{
+	  s += sizeof "float" - 1;
+	  type = 'f';
+	  fieldlimit = 1;
+	}
+      else if (strncmp (s, "extend", sizeof "extend" - 1) == 0)
+	{
+	  s += sizeof "extend" - 1;
+	  type = 'x';
+	  fieldlimit = 4;
+	}
+      else 
+	{
+	  /* FIXME: We should handle a29k local labels here.  */
+	  return;
+	}
+
+      if (isdigit (*s))
+	{
+	  fieldnum = *s - '0';
+	  ++s;
+	}
+      if (fieldnum >= fieldlimit)
+	return;
+
+      SKIP_WHITESPACE ();
+      if (*s != '(')
+	return;
+      ++s;
+      SKIP_WHITESPACE ();
+
+      s = atof_ieee (s, type, floatbuf);
+      if (s == NULL)
+	return;
+      s = s;
+
+      SKIP_WHITESPACE ();
+      if (*s != ')')
+	return;
+      ++s;
+      SKIP_WHITESPACE ();
+
+      input_line_pointer = s;
+      expressionP->X_op = O_constant; 
+      expressionP->X_unsigned = 1;
+      expressionP->X_add_number = ((floatbuf[fieldnum * 2]
+				    << LITTLENUM_NUMBER_OF_BITS)
+				   + floatbuf[fieldnum * 2 + 1]);
+    }
 }
 
 /* Round up a section size to the appropriate boundary.  */

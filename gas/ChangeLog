@@ -1,3 +1,12 @@
+Wed Nov  8 19:59:36 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-a29k.c (md_operand): Handle $float, $double, and
+	$extend.  Based on code from Eric Freudenthal
+	<freudenthal@nyu.edu>.
+	* config/tc-a29k.h (LEX_DOLLAR): Define.
+	* read.c (LEX_DOLLAR): Define if not defined.
+	(lex_type): Use LEX_DOLLAR.
+
 Wed Nov  8 16:38:14 1995  Eric Freudenthal <freudenthal@nyu.edu>
 
 	* configure.in (a29k-nyu-sym1): New target, just like other a29k
