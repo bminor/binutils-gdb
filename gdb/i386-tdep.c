@@ -833,8 +833,7 @@ i386_do_pop_frame (struct frame_info *frame)
       if (addr)
 	{
 	  read_memory (addr, regbuf, REGISTER_RAW_SIZE (regnum));
-	  write_register_bytes (REGISTER_BYTE (regnum), regbuf,
-				REGISTER_RAW_SIZE (regnum));
+	  write_register_gen (regnum, regbuf);
 	}
     }
   write_register (FP_REGNUM, read_memory_integer (fp, 4));
@@ -1003,8 +1002,7 @@ i386_store_return_value (struct type *type, char *valbuf)
 	 not exactly how it would happen on the target itself, but
 	 it is the best we can do.  */
       convert_typed_floating (valbuf, type, buf, builtin_type_i387_ext);
-      write_register_bytes (REGISTER_BYTE (FP0_REGNUM), buf,
-			    FPU_REG_RAW_SIZE);
+      write_register_gen (FP0_REGNUM, buf);
 
       /* Set the top of the floating-point register stack to 7.  The
          actual value doesn't really matter, but 7 is what a normal

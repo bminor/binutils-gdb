@@ -1,5 +1,8 @@
 2002-08-18  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_do_pop_frame, i386_store_return_value): Call
+	write_register_gen instead of write_register_bytes.
+
 	* NEWS: Mention that the i[3456]-*mach3*, i[3456]-*-mach* and
 	i[3456]-*-osf1mk* configurations have been made obsolete.
 	* configure.host: Make i[3456]86-*-mach3*, i[3456]86-*mach* and
