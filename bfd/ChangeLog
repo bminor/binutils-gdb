@@ -1,3 +1,8 @@
+Tue Oct 15 12:40:41 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* hosts/i386bsd.h: If NBPG is not defined, define it as
+	PAGE_SIZE, for recent versions of FreeBSD.
+
 Mon Oct 14 12:37:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.host: Use `long long' as the 64 bit type on a Solaris
