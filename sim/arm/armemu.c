@@ -3871,10 +3871,9 @@ MultiplyAdd64 (ARMul_State * state, ARMword instr, int msigned, int scc)
 
   if (scc)
     {
-      if ((RdHi == 0) && (RdLo == 0))
-	ARMul_NegZero (state, RdHi);	/* zero value */
-      else
-	ARMul_NegZero (state, scc);	/* non-zero value */
+      /* Ensure that both RdHi and RdLo are used to compute Z, but
+	 don't let RdLo's sign bit make it to N.  */
+      ARMul_NegZero (state, RdHi | (RdLo >> 16) | (RdLo & 0xFFFF));
     }
 
   return scount + 1;		/* extra cycle for addition */
