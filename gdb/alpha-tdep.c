@@ -96,7 +96,7 @@ alpha_register_virtual_type (int regno)
 
   /* Don't need to worry about little vs big endian until 
      some jerk tries to port to alpha-unicosmk.  */
-  if (regno >= FP0_REGNUM && regno < FP0_REGNUM + 31)
+  if (regno >= ALPHA_FP0_REGNUM && regno < ALPHA_FP0_REGNUM + 31)
     return builtin_type_ieee_double_little;
 
   return builtin_type_int64;
@@ -747,9 +747,9 @@ alpha_sigtramp_register_address (CORE_ADDR sigcontext_addr, unsigned int regno)
 { 
   if (regno < 32)
     return sigcontext_addr + SIGFRAME_REGSAVE_OFF + regno * 8;
-  if (regno >= FP0_REGNUM && regno < FP0_REGNUM + 32)
+  if (regno >= ALPHA_FP0_REGNUM && regno < ALPHA_FP0_REGNUM + 32)
     return sigcontext_addr + SIGFRAME_FPREGSAVE_OFF + regno * 8;
-  if (regno == PC_REGNUM)
+  if (regno == ALPHA_PC_REGNUM)
     return sigcontext_addr + SIGFRAME_PC_OFF; 
 
   return 0;
