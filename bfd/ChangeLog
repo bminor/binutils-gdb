@@ -1,5 +1,9 @@
 Sat Feb 24 11:38:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* archive.c (bfd_generic_archive_p): If the first file in the
+	archive can not be recognized as an object, don't assume that this
+	is the wrong format.
+
 	* elf.c (bfd_elf_set_dt_needed_name): Don't do anything if the
 	format is not bfd_object.
 	(bfd_elf_get_dt_soname): Likewise.
