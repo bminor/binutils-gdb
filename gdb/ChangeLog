@@ -1,3 +1,7 @@
+2003-04-25  Adam Fedor  <fedor@gnu.org>
+
+	* Makefile.in (COMMON_OBS): Add objc-lang.o
+
 2003-04-25  Andrew Cagney  <cagney@redhat.com>
 
 	* d10v-tdep.c (print_insn): Delete function.
