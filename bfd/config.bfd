@@ -214,7 +214,7 @@ case "${targ}" in
     targ_defvec=i386coff_vec
     targ_selvecs=bfd_elf32_i386_vec
     ;;
-  i[3456]86-*-sysv4* | i[3456]86-*-unixware | i[3456]86-*-solaris2* | \
+  i[3456]86-*-sysv4* | i[3456]86-*-unixware* | i[3456]86-*-solaris2* | \
   i[3456]86-*-elf | i[3456]86-*-sco3.2v5* | \
   i[3456]86-*-dgux* | i[3456]86-*-sysv5*)
     targ_defvec=bfd_elf32_i386_vec
