@@ -228,7 +228,16 @@ main (argc, argv)
       if (isfile)
 	ldfile_open_command_file (s);
       else
-	lex_redirect (s);
+	{
+	  if (trace_file_tries)
+	    {
+	      info_msg ("using internal linker script:\n");
+	      info_msg ("==================================================\n");
+	      info_msg (s);
+	      info_msg ("\n==================================================\n");
+	    }
+	  lex_redirect (s);
+	}
       parser_input = input_script;
       yyparse ();
     }
@@ -285,7 +294,7 @@ main (argc, argv)
 	}
     }
 
-  if (link_info.relocateable)
+  if (link_info.relocateable || link_info.shared)
     output_bfd->flags &= ~EXEC_P;
   else
     output_bfd->flags |= EXEC_P;

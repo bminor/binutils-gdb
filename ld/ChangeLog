@@ -1,5 +1,7 @@
 Fri Mar 10 14:43:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldmain.c (main): Don't set EXEC_P if link_info.shared is set.
+
 	* ldlex.l: Return -lFILENAME as the token LNAME.
 	* ldgram.y: Add token LNAME.
 	(input_list): Treat LNAME like NAME, but pass it to
