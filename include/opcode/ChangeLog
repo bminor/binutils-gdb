@@ -1,4 +1,8 @@
 start-sanitize-d30v
+Fri Feb 21 16:34:18 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* d30v.h (FLAG_X): Remove unused flag.
+
 Tue Feb 18 17:37:20 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* d30v.h: New file.
