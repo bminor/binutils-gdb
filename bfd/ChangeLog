@@ -1,6 +1,6 @@
 2004-11-02  Hans-Peter Nilsson  <hp@axis.com>
 
-	* elflink.c (_bfd_elf_create_got_section): Hide _GLOBAL_OFFSET_SYMBOL.
+	* elflink.c (_bfd_elf_create_got_section): Hide _GLOBAL_OFFSET_TABLE_.
 
 2004-10-28  H.J. Lu  <hongjiu.lu@intel.com>
 
