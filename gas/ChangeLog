@@ -1,3 +1,42 @@
+Sat Mar 28 22:28:02 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	Fix some gcc -Wall warnings:
+	* atof-generic.c (atof_generic): Add casts to avoid warnings.
+	* ehopt.c (eh_frame_code_alignment): Likewise.
+	* expr.c (integer_constant, operand): Likewise.
+	* frags.c (frag_align): Likewise.
+	* gasp.c (level_0, change_base, doinstr): Likewise.
+	* hash.c (hash_ask): Likewise.
+	* listing.c (listing_page, calc_hex, print_lines): Likewise.
+	(debugging_pseudo): Likewise.
+	* macro.c (define_macro, check_macro): Likewise.
+	* read.c (read_a_source_file, s_align, s_float_space): Likewise.
+	(ignore_rest_of_line, float_cons): Likewise.
+	* symbols.c (decode_local_label_name): Likewise.
+	* write.c (record_alignment, cvs_frag_to_fill): Likewise.
+	(fixup_segment, number_to_chars_bigendian): Likewise.
+	(number_to_chars_littleendian): Likewise.
+	* config/atof-ieee.c (gen_to_words): Likewise.
+	* config/tc-sparc.c (md_begin, md_assemble): Likewise.
+	(sparc_ip, parse_keyword_arg, s_common): Likewise.
+	* read.c (output_big_sleb128): Initialize locals to avoid
+	warnings.
+	(output_big_uleb128, equals): Likewise.
+	* atof-generic.c (atof_generic): Change number_of_digits_* locals
+	to unsigned int.  Change zeros to unsigned int.
+	* cond.c (s_if): Add return to default case.
+	* frags.c (frag_now_fix): Change return type to addressT.
+	* frags.h (frag_now_fix): Update declaration.
+	* listing.c (file_info_struct): Change linenum to unsigned int.
+	(struct list_info_struct): Change hll_line to unsigned int.
+	(print_source): Update format string.
+	* read.c (emit_expr): Change scan to unsigned int, and don't
+	bother to initialize it.
+	* symbols.c (dollar_label_count): Change to unsigned long.
+	* write.c (adjust_reloc_syms): Remove unused label reduce_fixup.
+	* config/tc-sparc.c (sparc_memory_model): Only define if OBJ_ELF.
+	* config/tc-sparc.c (tc_gen_reloc): Add return to default case.
+
 Fri Mar 27 12:46:47 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-m68k.c (m68k_ip): Check legal addressing modes for

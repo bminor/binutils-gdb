@@ -1,5 +1,5 @@
 /* expr.c -operands, expressions-
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 1997, 1998
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -302,7 +302,9 @@ integer_constant (radix, expressionP)
       /* In MRI mode, the number may have a suffix indicating the
          radix.  For that matter, it might actually be a floating
          point constant.  */
-      for (suffix = input_line_pointer; isalnum (*suffix); suffix++)
+      for (suffix = input_line_pointer;
+	   isalnum ((unsigned char) *suffix);
+	   suffix++)
 	{
 	  if (*suffix == 'e' || *suffix == 'E')
 	    flt = 1;
@@ -316,7 +318,7 @@ integer_constant (radix, expressionP)
       else
 	{
 	  c = *--suffix;
-	  if (islower (c))
+	  if (islower ((unsigned char) c))
 	    c = toupper (c);
 	  if (c == 'B')
 	    radix = 2;
@@ -818,7 +820,8 @@ operand (expressionP)
 	    {
 	      input_line_pointer++;
 	      floating_constant (expressionP);
-	      expressionP->X_add_number = -(isupper (c) ? tolower (c) : c);
+	      expressionP->X_add_number =
+		- (isupper ((unsigned char) c) ? tolower (c) : c);
 	    }
 	  else
 	    {
@@ -933,7 +936,8 @@ operand (expressionP)
 	case 'G':
 	  input_line_pointer++;
 	  floating_constant (expressionP);
-	  expressionP->X_add_number = -(isupper (c) ? tolower (c) : c);
+	  expressionP->X_add_number =
+	    - (isupper ((unsigned char) c) ? tolower (c) : c);
 	  break;
 
 	case '$':

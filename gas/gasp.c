@@ -607,7 +607,7 @@ level_0 (idx, string, lhs)
 
   lhs->value = 0;
 
-  if (isdigit (string->ptr[idx]))
+  if (isdigit ((unsigned char) string->ptr[idx]))
     {
       idx = sb_strtol (idx, string, 10, &lhs->value);
     }
@@ -1165,7 +1165,7 @@ change_base (idx, in, out)
 	      idx++;
 	    }
 	}
-      else if (isdigit (in->ptr[idx]))
+      else if (isdigit ((unsigned char) in->ptr[idx]))
 	{
 	  int value;
 	  /* all numbers must start with a digit, let's chew it and
@@ -1717,7 +1717,7 @@ doinstr (idx, in, out)
   idx = sb_skip_comma (idx, in);
   idx = get_and_process (idx, in, &search);
   idx = sb_skip_comma (idx, in);
-  if (isdigit (in->ptr[idx]))
+  if (isdigit ((unsigned char) in->ptr[idx]))
     {
       idx = exp_get_abs (".instr needs absolute expresson.\n", idx, in, &start);
     }
