@@ -266,6 +266,9 @@ tui_enable (void)
      tuiShowFrameInfo (selected_frame);
 
   refresh ();
+
+  /* Update gdb's knowledge of its terminal.  */
+  target_terminal_save_ours ();
   tui_update_gdb_sizes ();
 }
 
@@ -288,6 +291,9 @@ tui_disable (void)
   /* gdb terminal has changed, update gdb internal copy of it
      so that terminal management with the inferior works.  */
   tui_setup_io (0);
+
+  /* Update gdb's knowledge of its terminal.  */
+  target_terminal_save_ours ();
 
   tui_version = 0;
   tui_active = 0;
