@@ -1,5 +1,19 @@
 2004-04-09  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips.igen (check_fmt): Remove.
+	(ABS.fmt, ADD.fmt, C.cond.fmta, C.cond.fmtb, CEIL.L.fmt, CEIL.W)
+	(CVT.D.fmt, CVT.L.fmt, CVT.S.fmt, CVT.W.fmt, DIV.fmt, FLOOR.L.fmt)
+	(FLOOR.W.fmt, MADD.fmt, MOV.fmt, MOVtf.fmt, MOVN.fmt, MOVZ.fmt)
+	(MSUB.fmt, MUL.fmt, NEG.fmt, NMADD.fmt, NMSUB.fmt, RECIP.fmt)
+	(ROUND.L.fmt, ROUND.W.fmt, RSQRT.fmt, SQRT.fmt, SUB.fmt)
+	(TRUNC.L.fmt, TRUNC.W): Explicitly specify allowed FPU formats.
+	(check_fmt_p, CEIL.L.fmt, CEIL.W, DIV.fmt, FLOOR.L.fmt)
+	(FLOOR.W.fmt, RECIP.fmt, ROUND.L.fmt, ROUND.W.fmt, RSQRT.fmt)
+	(SQRT.fmt, TRUNC.L.fmt, TRUNC.W): Remove all uses of check_fmt.
+	(C.cnd.fmta): Remove incorrect call to check_fmt_p.
+
+2004-04-09  Chris Demetriou  <cgd@broadcom.com>
+
 	* sb1.igen (check_sbx): New function.
 	(PABSDIFF.fmt, PABSDIFC.fmt, PAVG.fmt): Use check_sbx.
 
