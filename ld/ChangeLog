@@ -1,3 +1,8 @@
+1999-04-13  Philip Blundell  <philb@gnu.org>
+
+	* emultempl/armelf.em: Add definitions related to shared objects
+	(copied from elf32.em).
+
 Wed May 19 12:44:26 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* Makefile.am (ALL_EMULATIONS): Remove earmlinux.o and
