@@ -1,3 +1,9 @@
+2004-01-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (IGNORE_SECTION): Don't ignore SEC_ALLOC && !SEC_LOAD
+	sections.  Do ignore SEC_NEVER_LOAD sections.
+	(lang_size_sections_1): Remove test made redundant with the above.
+
 2004-01-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc64elf.em (ppc_before_allocation): Clear cached

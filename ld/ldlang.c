@@ -2762,8 +2762,8 @@ size_input_section (lang_statement_union_type **this_ptr,
 }
 
 #define IGNORE_SECTION(bfd, s) \
-  (((bfd_get_section_flags (bfd, s) & (SEC_ALLOC | SEC_LOAD))	\
-    != (SEC_ALLOC | SEC_LOAD))					\
+  (((bfd_get_section_flags (bfd, s) & (SEC_ALLOC | SEC_NEVER_LOAD))	\
+    != SEC_ALLOC)							\
    || bfd_section_size (bfd, s) == 0)
 
 /* Check to see if any allocated sections overlap with other allocated
@@ -2930,8 +2930,6 @@ lang_size_sections_1
 		       region, and some non default memory regions were
 		       defined, issue an error message.  */
 		    if (!IGNORE_SECTION (output_bfd, os->bfd_section)
-			&& (bfd_get_section_flags (output_bfd, os->bfd_section)
-			    & SEC_NEVER_LOAD) == 0
 			&& ! link_info.relocatable
 			&& check_regions
 			&& strcmp (os->region->name, DEFAULT_MEMORY_REGION) == 0
