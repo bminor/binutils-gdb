@@ -1,3 +1,8 @@
+Thu Jan  6 00:13:10 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* scripttempl/alpha.sc: Don't create .lit4 or .sdata sections,
+	since the Alpha doesn't use them.
+
 Wed Jan  5 17:42:16 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldemul.h (ld_emulation_xfer_struct): Comment the members.
