@@ -1,3 +1,15 @@
+Fri Oct  3 09:52:26 1997  Mark Alexander  <marka@cygnus.com>
+
+	* config/mips/tm-mips.h (MAKE_MSYMBOL_SPECIAL): Force MIPS16
+	addresses to be odd.
+	(MIPS_FPU_SINGLE_REGSIZE, MIPS_FPU_DOUBLE_REGSIZE): Define.
+	* mips-tdep.c (mips_extract_return_value): Doubles aren't
+	returned in FP0 if FP registers are single-precision only.
+start-sanitize-r5900
+	* config/mips/tm-r5900.h (MIPS_LAST_FP_ARG_REGNUM): Redefine
+	to disable use of FP registers for function arguments.
+end-sanitize-r5900
+
 Mon Sep 29 23:03:03 1997  Mark Alexander  <marka@cygnus.com>
 
 	* mips-tdep.c (set_reg_offset): New function.

@@ -163,6 +163,11 @@ int mips_about_to_return PARAMS ((CORE_ADDR pc));
 #define MIPS_REGSIZE 4
 #endif
 
+/* The sizes of floating point registers.  */
+
+#define MIPS_FPU_SINGLE_REGSIZE 4
+#define MIPS_FPU_DOUBLE_REGSIZE 8
+
 /* Number of machine registers */
 
 #ifndef NUM_REGS
@@ -567,7 +572,11 @@ typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
 #define SYMBOL_IS_SPECIAL(sym) \
   (((elf_symbol_type *) sym) -> internal_elf_sym.st_other == STO_MIPS16)
 #define MAKE_MSYMBOL_SPECIAL(msym) \
-  MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym)) | 0x80000000)
+ { \
+  MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym)) | 0x80000000); \
+  SYMBOL_VALUE_ADDRESS (msym) |= 1; \
+ }
+   
 #define MSYMBOL_IS_SPECIAL(msym) \
   (((long) MSYMBOL_INFO (msym) & 0x80000000) != 0)
 #define MSYMBOL_SIZE(msym) \
