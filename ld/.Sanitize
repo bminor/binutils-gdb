@@ -27,6 +27,7 @@ echo Sanitizing `pwd`...
 
 Things-to-keep:
 
+ChangeLog
 Makefile.in
 config
 config.h
@@ -83,7 +84,13 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.13  1991/09/27 20:19:25  bothner
+# Revision 1.14  1991/10/05 04:55:04  gnu
+# * Makefile.in:  Avoid using $< in non-suffix rules (breaks on Sun Make).
+# * ldfile.c, ldlang.c, ldmain.c, ldwrite.c:  Cope with renames of a
+# few BFD types & enums.
+# * ChangeLog:  Create.
+#
+# Revision 1.13  1991/09/27  20:19:25  bothner
 # Update for deleted (and some added) files.
 #
 # Revision 1.12  1991/09/24  02:30:20  rich
