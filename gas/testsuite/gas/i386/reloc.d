@@ -5,7 +5,7 @@
 
 Disassembly of section .text:
 
-00000000 <foo>:
+0+000 <foo>:
    0:	b3 00 [ 	]*mov    \$0x0,%bl	1: (R_386_)?8	.text
    2:	68 00 00 00 00 [ 	]*push   \$0x0	3: (R_386_)?32	.text
    7:	05 00 00 00 00 [ 	]*add    \$0x0,%eax	8: (R_386_)?32	.text

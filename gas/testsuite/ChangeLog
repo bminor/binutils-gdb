@@ -1,3 +1,8 @@
+1999-07-27  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* gas/i386/reloc.d: Fix so that test passes when enable-targets
+	includes 64-bit bfd target.
+
 1999-06-13  Ian Lance Taylor  <ian@zembu.com>
 
 	* gas/i386/katmai.d: Tweak for recent disassembler changes.
