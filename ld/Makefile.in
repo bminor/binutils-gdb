@@ -160,7 +160,7 @@ SED_REMOVE_CONSTRUCTORS= -e /CONSTRUCTORS/d
 BFDLIB=$(unsubdir)/../bfd$(subdir)/libbfd.a
 LIBIBERTY=$(unsubdir)/../libiberty$(subdir)/libiberty.a
 
-OFILES= ldgram.o ldlex.o ldlang.o ldctor.o ldmain.o ldindr.o \
+OFILES= ldgram.o ldlex.o lexsup.o ldlang.o ldctor.o ldmain.o ldindr.o \
 	ldwarn.o ldwrite.o ldexp.o ldlnk960.o ld__gld68k.o ld__i386aout.o \
 	ld__m88k.o ld__glda29k.o ld__news.o h8300hds.o ld__ebmon29k.o \
 	ld__gld.o ldgld960.o ldemul.o ldver.o ldmisc.o ldsym.o \
@@ -173,7 +173,7 @@ HEADERS=config.h ldmain.h ldmain.h ldwarn.h ldmisc.h ldindr.h \
 
 MANSOURCES=ld.tex
 
-LDCSOURCES=ldlang.c ldctor.c ldindr.c ldmain.c ldwrite.c ldwarn.c ldlnk960.c \
+LDCSOURCES=ldlang.c lexsup.c ldctor.c ldindr.c ldmain.c ldwrite.c ldwarn.c ldlnk960.c \
 	ld__gld.c ld__gld68k.c ld__m88k.c ld__ebmon29k.c \
 	ldgld960.c ldemul.c ldver.c ldmisc.c ldexp.c ldsym.c ldfile.c \
 	ldvanilla.c relax.c  lderror.c
@@ -200,7 +200,13 @@ ldgram.h ldgram.c: ldgram.y
 	mv -f y.tab.h ldgram.h
 
 ldlex.c: ldlex.l
-	lex -t $(VPATH)/ldlex.l >ldlex.c 
+	/lib/cpp -E -P $(INCLUDES)  $(HDEFINES) $(TDEFINES) $(CDEFINES) $(VPATH)/ldlex.l >ldlex.p
+	lex -t ldlex.p >ldlex.q
+	sed -e "s/define input/define old_input/" \
+            -e "s/define unput/define old_unput/" \
+	    -e "s/input/lex_input/" \
+            -e "s/unput/lex_unput/" <ldlex.q >ldlex.c
+
 
 # These all start with ld__ so 'make clean' can find them.
 

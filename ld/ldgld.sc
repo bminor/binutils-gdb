@@ -21,7 +21,7 @@ SECTIONS
   .bss   SIZEOF(.data) + ADDR(.data) :	
     { 					
       *(.bss)	 			
-	[COMMON] 				
+	*(COMMON) 				
 	  _end = .;				
       __end = .;				
     } 					

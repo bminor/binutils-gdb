@@ -1,3 +1,16 @@
+Wed Jan 29 08:35:39 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* config/mh-sparc.h: now uses libgcc.a
+	* ldmain.c: quit using exit
+	* *sc: use *(COMMON) rather than [COMMON]
+	* ldlex.l, lexsup.c: much thinking moved from .l and put into .c,
+	to allow preprocessing of .l file.
+	* Makefile.in: New ldlex.l mangling
+	* ldexp.c (fold_binary): perform expressions with % and / in
+	integer.
+	* ldfile.c (open_a): open archives on VMS in a special way
+
+
 Tue Jan 28 10:18:16 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* ldgram.y: map -M behave in the same way as -Map (sets file name

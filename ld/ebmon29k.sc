@@ -19,7 +19,7 @@ SECTIONS {
 	.bss  . :
 		{ 
 
-		[COMMON] 	
+		*(COMMON) 	
 		*(.bss);
 		_end = .;
 		 } 

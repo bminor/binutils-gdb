@@ -15,7 +15,7 @@ _edata = .;
   { 
    _bss_start = . ;
    *(.bss)  
-   [COMMON] 
+   *(COMMON)
     } 
 _end = . ; 
 } 

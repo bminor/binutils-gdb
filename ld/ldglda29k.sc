@@ -29,7 +29,7 @@ SECTIONS
   .bss   SIZEOF(.data) + ADDR(.data) :	
   { 					
    *(.bss)	 			
-   [COMMON] 				
+   *(COMMON) 				
      __end = ALIGN(0x8);				
   } 
   .mstack  : { } > mstack
