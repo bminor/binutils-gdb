@@ -34,7 +34,7 @@
 
    TODO: purge signed_keyword_not_used.  */
 
-set compiler_info ""
+set compiler_info "unknown"
 
 #if defined (__GNUC__)
 #if defined (__GNUC_PATCHLEVEL__)
@@ -43,23 +43,14 @@ set compiler_info [join {gcc __GNUC__ __GNUC_MINOR__ __GNUC_PATCHLEVEL__} -]
 #else
 set compiler_info [join {gcc __GNUC__ __GNUC_MINOR__ "unknown"} -]
 #endif
-set gcc_compiled __GNUC__
-#else
-set gcc_compiled 0
 #endif
 
 #if defined (__HP_cc)
 set compiler_info [join {hpcc __HP_cc} -]
-set hp_cc_compiler __HP_cc
-#else
-set hp_cc_compiler 0
 #endif
 
 #if defined (__HP_aCC)
 set compiler_info [join {hpacc __HP_aCC} -]
-set hp_aCC_compiler __HP_aCC
-#else
-set hp_aCC_compiler 0
 #endif
 
 /* gdb.base/whatis.exp still uses this */

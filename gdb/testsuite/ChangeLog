@@ -1,3 +1,12 @@
+2004-06-14  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* lib/compiler.c: Remove gcc_compiled, hp_cc_compiler,
+	hp_aCC_compiler.
+	* lib/compiler.cc: Likewise.
+	* lib/gdb.exp (get_compiler_info): Eval lines only if they are
+	'set' commands.  Log diagnostics for other lines.  Set
+	gcc_compiled, hp_cc_compiler, and hp_aCC_compiler.
+
 2004-06-13  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/try_catch.cc: Add copyright notice.

@@ -1190,10 +1190,12 @@ proc get_compiler_info {binfile args} {
 
     # These come from compiler.c or compiler.cc
     global compiler_info
+    global signed_keyword_not_used
+
+    # Legacy global data symbols.
     global gcc_compiled
     global hp_cc_compiler
     global hp_aCC_compiler
-    global signed_keyword_not_used
 
     # Choose which file to preprocess.
     set ifile "${srcdir}/lib/compiler.c"
@@ -1207,15 +1209,43 @@ proc get_compiler_info {binfile args} {
     set cppout [ gdb_compile "${ifile}" "" preprocess [list "$args" quiet] ]
     log_file -a "$outdir/$tool.log" 
 
-    # Source the output.
+    # Eval the output.
+    set unknown 0
     foreach cppline [ split "$cppout" "\n" ] {
-	if { ! [ regexp "^#" "$cppline" ] } {
-	    if { ! [ regexp "^\[\n\r\t \]*$" "$cppline" ] } {
-		verbose "get_compiler_info: $cppline" 2
-		eval "$cppline"
-	    }
+	if { [ regexp "^#" "$cppline" ] } {
+	    # line marker
+	} elseif { [ regexp "^\[\n\r\t \]*$" "$cppline" ] } {
+	    # blank line
+	} elseif { [ regexp "^\[\n\r\t \]*set\[\n\r\t \]" "$cppline" ] } {
+	    # eval this line
+	    verbose "get_compiler_info: $cppline" 2
+	    eval "$cppline"
+	} else {
+	    # unknown line
+	    verbose -log "get_compiler_info: $cppline"
+	    set unknown 1
 	}
     }
+
+    # Reset to unknown compiler if any diagnostics happened.
+    if { $unknown } {
+	set compiler_info "unknown"
+	set signed_keyword_not_used 0
+    }
+
+    # Set the legacy symbols.
+    set gcc_compiled     0
+    set hp_cc_compiler   0
+    set hp_aCC_compiler  0
+    if { [regexp "^gcc-1-" "$compiler_info" ] } { set gcc_compiled 1 }
+    if { [regexp "^gcc-2-" "$compiler_info" ] } { set gcc_compiled 2 }
+    if { [regexp "^gcc-3-" "$compiler_info" ] } { set gcc_compiled 3 }
+    if { [regexp "^gcc-4-" "$compiler_info" ] } { set gcc_compiled 4 }
+    if { [regexp "^gcc-5-" "$compiler_info" ] } { set gcc_compiled 5 }
+    if { [regexp "^hpcc-"  "$compiler_info" ] } { set hp_cc_compiler 1 }
+    if { [regexp "^hpacc-" "$compiler_info" ] } { set hp_aCC_compiler 1 }
+
+    # Log what happened.
     verbose -log "get_compiler_info: $compiler_info"
 
     # Most compilers will evaluate comparisons and other boolean
