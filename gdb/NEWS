@@ -3,23 +3,19 @@
 
 *** Changes since GDB 5.0:
 
-* "info symbol" works on platforms which use COFF, ECOFF, XCOFF, and NLM.
-
-* The MI enabled.
-
-The new machine oriented interface (MI) introduced in GDB 5.0 has been
-revised and enabled.
-
 * New native configurations
 
 Alpha FreeBSD					alpha*-*-freebsd*
 x86 FreeBSD 3.x and 4.x				i[3456]86*-freebsd[34]*
 MIPS Linux					mips*-*-linux*
+MIPS SGI Irix 6.x				mips*-sgi-irix6*
+ia64 AIX					ia64-*-aix*
 
 * New targets
 
 Motorola 68HC11 and 68HC12			m68hc11-elf
 CRIS						cris-axis
+UltraSparc running Linux			sparc64-*-linux*
 
 * OBSOLETE configurations and files
 
@@ -55,11 +51,136 @@ ARM RISCix					arm-*-* (as host)
 Tahoe						tahoe-*-*
 ser-ocd.c					*-*-*
 
+* GDB has been converted to ANS/ISO C.
+
+GDB's source code has been converted to ANS/ISO C.  In particular, the
+sources are fully protoized, and rely on standard headers being
+present.
+
 * Other news:
 
-* All MIPS configurations are multi-arched.
+* "info symbol" works on platforms which use COFF, ECOFF, XCOFF, and NLM.
+
+* The MI enabled by default.
+
+The new machine oriented interface (MI) introduced in GDB 5.0 has been
+revised and enabled by default.  Packages which use GDB as a debugging
+engine behind a UI or another front end are encouraged to switch to
+using the GDB/MI interface, instead of the old annotations interface
+which is now deprecated.
+
+* Support for debugging Pascal programs.
+
+GDB now includes support for debugging Pascal programs.  The following
+main features are supported:
+
+    - Pascal-specific data types such as sets;
+
+    - automatic recognition of Pascal sources based on file-name
+      extension;
+
+    - Pascal-style display of data types, variables, and functions;
+
+    - a Pascal expression parser.
+
+However, some important features are not yet supported.
+
+    - Pascal string operations are not supported at all;
+
+    - there are some problems with boolean types;
+
+    - Pascal type hexadecimal constants are not supported
+      because they conflict with the internal variables format;
+
+    - support for Pascal objects and classes is not full yet;
+
+    - unlike Pascal, GDB is case-sensitive for symbol names.
+
+* Changes in completion.
+
+Commands such as `shell', `run' and `set args', which pass arguments
+to inferior programs, now complete on file names, similar to what
+users expect at the shell prompt.
+
+Commands which accept locations, such as `disassemble', `print',
+`breakpoint', `until', etc. now complete on filenames as well as
+program symbols.  Thus, if you type "break foob TAB", and the source
+files linked into the programs include `foobar.c', that file name will
+be one of the candidates for completion.  However, file names are not
+considered for completion after you typed a colon that delimits a file
+name from a name of a function in that file, as in "break foo.c:bar".
+
+`set demangle-style' completes on available demangling styles.
+
+* New platform-independent commands:
+
+It is now possible to define a post-hook for a command as well as a
+hook that runs before the command.  For more details, see the
+documentation of `hookpost' in the GDB manual.
+
+* Changes in GNU/Linux native debugging.
+
+Attach/detach is supported for multi-threaded programs.
+
+Support for SSE registers was added.
+
+* Changes in MIPS configurations.
 
 Multi-arch support is enabled for all MIPS configurations.
+
+GDB can now be built as native debugger on SGI Irix 6.x systems for
+debugging n32 executables.  (Debugging 64-bit executables is not yet
+supported.)
+
+* Unified support for hardware watchpoints in all x86 configurations.
+
+Most (if not all) native x86 configurations support hardware-assisted
+breakpoints and watchpoints in a unified manner.  This support
+implements debug register sharing between watchpoints, which allows to
+put a virtually infinite number of watchpoints on the same address,
+and also supports watching regions up to 16 bytes with several debug
+registers.
+
+The new maintenance command `maintenance show-debug-regs' toggles
+debugging print-outs in functions that insert, remove, and test
+watchpoints and hardware breakpoints.
+
+* Changes in the DJGPP native configuration.
+
+New command ``info dos sysinfo'' displays assorted information about
+the CPU, OS, memory, and DPMI server.
+
+New commands ``info dos gdt'', ``info dos ldt'', and ``info dos idt''
+display information about segment descriptors stored in GDT, LDT, and
+IDT.
+
+New commands ``info dos pde'' and ``info dos pte'' display entries
+from Page Directory and Page Tables (for now works with CWSDPMI only).
+New command ``info dos address-pte'' displays the Page Table entry for
+a given linear address.
+
+GDB can now pass command lines longer than 126 characters to the
+program being debugged (requires an update to the libdbg.a library
+which is part of the DJGPP development kit).
+
+DWARF2 debug info is now supported.
+
+* Changes in documentation.
+
+All GDB documentation was converted to GFDL, the GNU Free
+Documentation License.
+
+Tracepoints-related commands are now fully documented in the GDB
+manual.
+
+TUI, the Text-mode User Interface, is now documented in the manual.
+
+Tracepoints-related commands are now fully documented in the GDB
+manual.
+
+The "GDB Internals" manual now has an index.  It also includes
+documentation of `ui_out' functions, GDB coding standards, x86
+hardware watchpoints, and memory region attributes.
 
 * GDB's version number moved to ``version.in''
 
