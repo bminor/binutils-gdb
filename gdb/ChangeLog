@@ -1,3 +1,8 @@
+2001-07-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* Makefile.in (ALLDEPFILES): Add i386bsd-nat.c and i386bsd-tdep.c
+	(i386bsd-tdep.o, i386bsd-nat.o): New targets.
+
 2001-07-13  Elena Zannoni  <ezannoni@redhat.com>
 
 	* remote-e7000.c (fetch_regs_from_dump): If register set is null,
