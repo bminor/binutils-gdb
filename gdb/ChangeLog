@@ -1,5 +1,10 @@
 Tue Oct 12 08:59:15 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* stabsread.c (read_type): Treat a negative type number at the start
+	of a type as a type reference, not as a definition of a type with
+	"50=" omitted.  This makes things work on the RS/6000 again (the
+	14 Sep 1993 change broke it).
+
 	* inflow.c: Use 0 (standard input) not scb->fd.
 	(terminal_ours_1): If printing warning, don't claim it happened in
 	terminal_inferior.

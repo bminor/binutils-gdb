@@ -1219,7 +1219,8 @@ read_type (pp, objfile)
      for instance in a two-dimensional array declared with type
      "ar1;1;10;ar1;1;10;4".  */
   if ((**pp >= '0' && **pp <= '9')
-      || **pp == '(')
+      || **pp == '('
+      || **pp == '-')
     {
       if (read_type_number (pp, typenums) != 0)
 	return error_type (pp);
