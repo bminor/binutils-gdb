@@ -42,10 +42,10 @@ typedef int * va_list;
 #define va_end(ARGS)
 #endif
 
-static void identify PARAMS ((char *));
-static void as_show_where PARAMS ((void));
-static void as_warn_internal PARAMS ((char *, unsigned int, char *));
-static void as_bad_internal PARAMS ((char *, unsigned int, char *));
+static void identify (char *);
+static void as_show_where (void);
+static void as_warn_internal (char *, unsigned int, char *);
+static void as_bad_internal (char *, unsigned int, char *);
 
 /* Despite the rest of the comments in this file, (FIXME-SOON),
  * here is the current scheme for error messages etc:
@@ -85,8 +85,7 @@ static void as_bad_internal PARAMS ((char *, unsigned int, char *));
  */
 
 static void
-identify (file)
-     char *file;
+identify (char *file)
 {
   static int identified;
   if (identified)
@@ -108,7 +107,7 @@ identify (file)
 static int warning_count;
 
 int
-had_warnings ()
+had_warnings (void)
 {
   return (warning_count);
 }
@@ -119,7 +118,7 @@ had_warnings ()
 static int error_count;
 
 int
-had_errors ()
+had_errors (void)
 {
   return (error_count);
 }
@@ -127,7 +126,7 @@ had_errors ()
 /* Print the current location to stderr.  */
 
 static void
-as_show_where ()
+as_show_where (void)
 {
   char *file;
   unsigned int line;
@@ -141,9 +140,8 @@ as_show_where ()
 /* Like perror(3), but with more info.  */
 
 void
-as_perror (gripe, filename)
-     const char *gripe;		/* Unpunctuated error theme.  */
-     const char *filename;
+as_perror (const char *gripe,		/* Unpunctuated error theme.  */
+	   const char *filename)
 {
   const char *errtxt;
 
@@ -198,10 +196,7 @@ as_tsktsk (format, va_alist)
 /* The common portion of as_warn and as_warn_where.  */
 
 static void
-as_warn_internal (file, line, buffer)
-     char *file;
-     unsigned int line;
-     char *buffer;
+as_warn_internal (char *file, unsigned int line, char *buffer)
 {
   ++warning_count;
 
@@ -302,10 +297,7 @@ as_warn_where (file, line, format, va_alist)
 /* The common portion of as_bad and as_bad_where.  */
 
 static void
-as_bad_internal (file, line, buffer)
-     char *file;
-     unsigned int line;
-     char *buffer;
+as_bad_internal (char *file, unsigned int line, char *buffer)
 {
   ++error_count;
 
@@ -442,9 +434,7 @@ as_fatal (format, va_alist)
    Arguments: Filename, line number, optional function name.  */
 
 void
-as_assert (file, line, fn)
-     const char *file, *fn;
-     int line;
+as_assert (const char *file, int line, const char *fn)
 {
   as_show_where ();
   fprintf (stderr, _("Internal error!\n"));
@@ -461,9 +451,7 @@ as_assert (file, line, fn)
    and exit without producing a core file.  */
 
 void
-as_abort (file, line, fn)
-     const char *file, *fn;
-     int line;
+as_abort (const char *file, int line, const char *fn)
 {
   as_show_where ();
   if (fn)
@@ -479,9 +467,7 @@ as_abort (file, line, fn)
 /* Support routines.  */
 
 void
-fprint_value (file, val)
-     FILE *file;
-     valueT val;
+fprint_value (FILE *file, valueT val)
 {
   if (sizeof (val) <= sizeof (long))
     {
@@ -499,9 +485,7 @@ fprint_value (file, val)
 }
 
 void
-sprint_value (buf, val)
-     char *buf;
-     valueT val;
+sprint_value (char *buf, valueT val)
 {
   if (sizeof (val) <= sizeof (long))
     {

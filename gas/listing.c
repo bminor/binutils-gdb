@@ -204,27 +204,22 @@ static FILE *list_file;
 static char *data_buffer;
 
 /* Prototypes.  */
-static void listing_message PARAMS ((const char *name, const char *message));
-static file_info_type *file_info PARAMS ((const char *file_name));
-static void new_frag PARAMS ((void));
-static char *buffer_line PARAMS ((file_info_type *file,
-				  char *line, unsigned int size));
-static void listing_page PARAMS ((list_info_type *list));
-static unsigned int calc_hex PARAMS ((list_info_type *list));
-static void print_lines PARAMS ((list_info_type *, unsigned int,
-				 char *, unsigned int));
-static void list_symbol_table PARAMS ((void));
-static void print_source PARAMS ((file_info_type *current_file,
-				  list_info_type *list,
-				  char *buffer,
-				  unsigned int width));
-static int debugging_pseudo PARAMS ((list_info_type *, const char *));
-static void listing_listing PARAMS ((char *name));
+static void listing_message (const char *name, const char *message);
+static file_info_type *file_info (const char *file_name);
+static void new_frag (void);
+static char *buffer_line (file_info_type *file, char *line, unsigned int size);
+static void listing_page (list_info_type *list);
+static unsigned int calc_hex (list_info_type *list);
+static void print_lines (list_info_type *, unsigned int,
+			 char *, unsigned int);
+static void list_symbol_table (void);
+static void print_source (file_info_type *current_file, list_info_type *list,
+			  char *buffer, unsigned int width);
+static int debugging_pseudo (list_info_type *, const char *);
+static void listing_listing (char *name);
 
 static void
-listing_message (name, message)
-     const char *name;
-     const char *message;
+listing_message (const char *name, const char *message)
 {
   if (listing_tail != (list_info_type *) NULL)
     {
@@ -237,22 +232,19 @@ listing_message (name, message)
 }
 
 void
-listing_warning (message)
-     const char *message;
+listing_warning (const char *message)
 {
   listing_message (_("Warning:"), message);
 }
 
 void
-listing_error (message)
-     const char *message;
+listing_error (const char *message)
 {
   listing_message (_("Error:"), message);
 }
 
 static file_info_type *
-file_info (file_name)
-     const char *file_name;
+file_info (const char *file_name)
 {
   /* Find an entry with this file name.  */
   file_info_type *p = file_info_head;
@@ -278,7 +270,7 @@ file_info (file_name)
 }
 
 static void
-new_frag ()
+new_frag (void)
 {
 
   frag_wane (frag_now);
@@ -287,8 +279,7 @@ new_frag ()
 }
 
 void
-listing_newline (ps)
-     char *ps;
+listing_newline (char *ps)
 {
   char *file;
   unsigned int line;
@@ -432,7 +423,7 @@ listing_newline (ps)
    with the new instruction.  */
 
 void
-listing_prev_line ()
+listing_prev_line (void)
 {
   list_info_type *l;
   fragS *f;
@@ -459,10 +450,7 @@ listing_prev_line ()
    file to make.  */
 
 static char *
-buffer_line (file, line, size)
-     file_info_type *file;
-     char *line;
-     unsigned int size;
+buffer_line (file_info_type *file, char *line, unsigned int size)
 {
   unsigned int count = 0;
   int c;
@@ -533,8 +521,7 @@ static char *subtitle;		/* Current subtitle */
 static unsigned int on_page;	/* Number of lines printed on current page */
 
 static void
-listing_page (list)
-     list_info_type *list;
+listing_page (list_info_type *list)
 {
   /* Grope around, see if we can see a title or subtitle edict coming up
      soon.  (we look down 10 lines of the page and see if it's there)  */
@@ -577,8 +564,7 @@ listing_page (list)
 }
 
 static unsigned int
-calc_hex (list)
-     list_info_type *list;
+calc_hex (list_info_type *list)
 {
   int data_buffer_size;
   list_info_type *first = list;
@@ -653,11 +639,8 @@ calc_hex (list)
 }
 
 static void
-print_lines (list, lineno, string, address)
-     list_info_type *list;
-     unsigned int lineno;
-     char *string;
-     unsigned int address;
+print_lines (list_info_type *list, unsigned int lineno,
+	     char *string, unsigned int address)
 {
   unsigned int idx;
   unsigned int nchars;
@@ -761,7 +744,7 @@ print_lines (list, lineno, string, address)
 }
 
 static void
-list_symbol_table ()
+list_symbol_table (void)
 {
   extern symbolS *symbol_rootP;
   int got_some = 0;
@@ -869,11 +852,8 @@ list_symbol_table ()
 }
 
 static void
-print_source (current_file, list, buffer, width)
-     file_info_type *current_file;
-     list_info_type *list;
-     char *buffer;
-     unsigned int width;
+print_source (file_info_type *current_file, list_info_type *list,
+	      char *buffer, unsigned int width)
 {
   if (!current_file->at_end)
     {
@@ -893,9 +873,7 @@ print_source (current_file, list, buffer, width)
    records inserted by the compiler, see if the line is suspicious.  */
 
 static int
-debugging_pseudo (list, line)
-     list_info_type *list;
-     const char *line;
+debugging_pseudo (list_info_type *list, const char *line)
 {
   static int in_debug;
   int was_debug;
@@ -965,8 +943,7 @@ debugging_pseudo (list, line)
 }
 
 static void
-listing_listing (name)
-     char *name ATTRIBUTE_UNUSED;
+listing_listing (char *name ATTRIBUTE_UNUSED)
 {
   list_info_type *list = head;
   file_info_type *current_hll_file = (file_info_type *) NULL;
@@ -1107,8 +1084,7 @@ listing_listing (name)
 }
 
 void
-listing_print (name)
-     char *name;
+listing_print (char *name)
 {
   int using_stdout;
 
@@ -1161,23 +1137,20 @@ listing_print (name)
 }
 
 void
-listing_file (name)
-     const char *name;
+listing_file (const char *name)
 {
   fn = name;
 }
 
 void
-listing_eject (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+listing_eject (int ignore ATTRIBUTE_UNUSED)
 {
   if (listing)
     listing_tail->edict = EDICT_EJECT;
 }
 
 void
-listing_flags (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+listing_flags (int ignore ATTRIBUTE_UNUSED)
 {
   while ((*input_line_pointer++) && (*input_line_pointer != '\n'))
     input_line_pointer++;
@@ -1190,8 +1163,7 @@ listing_flags (ignore)
    the current line should be listed, but the next line should not.  */
 
 void
-listing_list (on)
-     int on;
+listing_list (int on)
 {
   if (listing)
     {
@@ -1220,8 +1192,7 @@ listing_list (on)
 }
 
 void
-listing_psize (width_only)
-     int width_only;
+listing_psize (int width_only)
 {
   if (! width_only)
     {
@@ -1248,15 +1219,13 @@ listing_psize (width_only)
 }
 
 void
-listing_nopage (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+listing_nopage (int ignore ATTRIBUTE_UNUSED)
 {
   paper_height = 0;
 }
 
 void
-listing_title (depth)
-     int depth;
+listing_title (int depth)
 {
   int quoted;
   char *start;
@@ -1308,8 +1277,7 @@ listing_title (depth)
 }
 
 void
-listing_source_line (line)
-     unsigned int line;
+listing_source_line (unsigned int line)
 {
   if (listing)
     {
@@ -1320,8 +1288,7 @@ listing_source_line (line)
 }
 
 void
-listing_source_file (file)
-     const char *file;
+listing_source_file (const char *file)
 {
   if (listing)
     listing_tail->hll_file = file_info (file);
@@ -1332,71 +1299,61 @@ listing_source_file (file)
 /* Dummy functions for when compiled without listing enabled.  */
 
 void
-listing_flags (ignore)
-     int ignore;
+listing_flags (int ignore)
 {
   s_ignore (0);
 }
 
 void
-listing_list (on)
-     int on;
+listing_list (int on)
 {
   s_ignore (0);
 }
 
 void
-listing_eject (ignore)
-     int ignore;
+listing_eject (int ignore)
 {
   s_ignore (0);
 }
 
 void
-listing_psize (ignore)
-     int ignore;
+listing_psize (int ignore)
 {
   s_ignore (0);
 }
 
 void
-listing_nopage (ignore)
-     int ignore;
+listing_nopage (int ignore)
 {
   s_ignore (0);
 }
 
 void
-listing_title (depth)
-     int depth;
+listing_title (int depth)
 {
   s_ignore (0);
 }
 
 void
-listing_file (name)
-     const char *name;
+listing_file (const char *name)
 {
 
 }
 
 void
-listing_newline (name)
-     char *name;
+listing_newline (char *name)
 {
 
 }
 
 void
-listing_source_line (n)
-     unsigned int n;
+listing_source_line (unsigned int n)
 {
 
 }
 
 void
-listing_source_file (n)
-     const char *n;
+listing_source_file (const char *n)
 {
 
 }
