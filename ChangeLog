@@ -1,3 +1,8 @@
+Wed Jun  2 16:14:10 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	Change from Utah for HPPA support:
+	* config.guess: Recognize hppa1.x-hp-bsd.
+
 Wed Jun  2 11:53:33 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* config.guess:  Add support for Motorola Delta 68k, up to r3v7.
