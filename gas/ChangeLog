@@ -1,3 +1,11 @@
+Mon Jul 19 14:30:00 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* expr.c (clean_up_expression): Don't cancel the subtraction of
+	undefined symbols.
+
+	* read.c (s_data), config/obj-coffbfd.c (obj_coff_data): If -R,
+	switch to text section rather than data section.
+
 Mon Jul 19 12:35:39 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/tc-m68k.c (m68k_ip, case AINDX): Add 6 to operand

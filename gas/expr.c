@@ -681,6 +681,7 @@ clean_up_expression (expressionP)
 	      && expressionP->X_add_symbol
 	      && (expressionP->X_subtract_symbol->sy_frag
 		  == expressionP->X_add_symbol->sy_frag)
+	      && SEG_NORMAL (S_GET_SEGMENT (expressionP->X_add_symbol))
 	      && (S_GET_VALUE (expressionP->X_subtract_symbol)
 		  == S_GET_VALUE (expressionP->X_add_symbol))))
 	{

@@ -832,13 +832,22 @@ s_comm ()
 void
 s_data ()
 {
+  segT section;
   register int temp;
 
   temp = get_absolute_expression ();
+  if (flagseen['R'])
+    {
+      section = text_section;
+      temp += 1000;
+    }
+  else
+    section = data_section;
+
 #ifdef BFD_ASSEMBLER
-  subseg_set (data_section, (subsegT) temp);
+  subseg_set (section, (subsegT) temp);
 #else
-  subseg_new (data_section, (subsegT) temp);
+  subseg_new (section, (subsegT) temp);
 #endif
 
 #ifdef OBJ_VMS

@@ -2047,7 +2047,10 @@ obj_coff_text ()
 static void
 obj_coff_data ()
 {
-  change_to_section (".data", 5, get_absolute_expression ());
+  if (flagseen['R'])
+    change_to_section (".text", 5, get_absolute_expression () + 1000);
+  else
+    change_to_section (".data", 5, get_absolute_expression ());
 }
 
 static void
