@@ -1,7 +1,9 @@
 Fri Apr  2 08:23:14 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* xcoffread.c (xcoff_symfile_offsets): Use 0 not addr for offsets.
+
 	* rs6000-tdep.c (frameless_function_invocation): Don't even think
-	about framlessness except on the innermost frame.
+	about framelessness except on the innermost frame.
 
 	* xcoffexec.c: Call fatal() not abort().
 

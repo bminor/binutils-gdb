@@ -2335,8 +2335,16 @@ xcoff_symfile_offsets (objfile, addr)
        sizeof (struct section_offsets)
        + sizeof (section_offsets->offsets) * (objfile->num_sections));
 
+  /* syms_from_objfile kindly subtracts from addr the bfd_section_vma
+     of the .text section.  This strikes me as wrong--whether the
+     offset to be applied to symbol reading is relative to the start
+     address of the section depends on the symbol format.  In any
+     event, this whole "addr" concept is pretty broken (it doesn't
+     handle any section but .text sensibly), so just ignore the addr
+     parameter and use 0.  That matches the fact that xcoff_symfile_read
+     ignores the section_offsets).  */
   for (i = 0; i < objfile->num_sections; i++)
-    ANOFFSET (section_offsets, i) = addr;
+    ANOFFSET (section_offsets, i) = 0;
   
   return section_offsets;
 }
