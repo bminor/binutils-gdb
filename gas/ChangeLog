@@ -1,3 +1,8 @@
+2001-06-24  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-alpha.c (tc_gen_reloc): Handle relocs against SEC_MERGE
+	section symbols the same way as externs.
+
 2001-06-24  Ben Elliston  <bje@redhat.com>
 
 	* config/tc-m88k.c (md_number_to_imm): Remove; unused since 1993.
