@@ -1,3 +1,10 @@
+2001-07-24  Kazu Hirata  <kazu@hxi.com>
+
+	* alpha-dis.c: Fix formatting.
+	* cris-dis.c: Likewise.
+	* m10300-dis.c: Likewise.
+	* tic54x-dis.c: Likewise.
+
 2001-07-23  Kazu Hirata  <kazu@hxi.com>
 
 	* m68k-dis.c: Fix formatting.

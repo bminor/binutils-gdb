@@ -1,5 +1,5 @@
 /* Disassembler code for CRIS.
-   Copyright 2000 Free Software Foundation, Inc.
+   Copyright 2000, 2001 Free Software Foundation, Inc.
    Contributed by Axis Communications AB, Lund, Sweden.
    Written by Hans-Peter Nilsson.
 
@@ -124,7 +124,7 @@ number_of_bits (val)
 {
   int bits;
 
-  for (bits = 0; val != 0; val &= val-1)
+  for (bits = 0; val != 0; val &= val - 1)
     bits++;
 
   return bits;
@@ -372,7 +372,7 @@ cris_constraint (cs, insn, prefix_insn)
   int prefix_ok = 0;
 
   const char *s;
-  for (s  = cs; *s; s++)
+  for (s = cs; *s; s++)
     switch (*s)
       {
       case '!':

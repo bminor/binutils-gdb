@@ -51,7 +51,7 @@ static int sprint_condition (disassemble_info *,char *,unsigned short);
 static int sprint_cc2 (disassemble_info *,char *,unsigned short);
 
 int
-print_insn_tic54x(memaddr, info)
+print_insn_tic54x (memaddr, info)
   bfd_vma memaddr;
   disassemble_info *info;
 {
@@ -63,11 +63,11 @@ print_insn_tic54x(memaddr, info)
   status = (*info->read_memory_func) (memaddr, opbuf, 2, info);
   if (status != 0)
   {
-    (*info->memory_error_func)(status, memaddr, info);
+    (*info->memory_error_func) (status, memaddr, info);
     return -1;
   }
 
-  opcode = bfd_getl16(opbuf);
+  opcode = bfd_getl16 (opbuf);
   if (!get_instruction (info, memaddr, opcode, &insn))
       return -1;
 
@@ -85,25 +85,25 @@ print_insn_tic54x(memaddr, info)
   else
   {
     if (!print_instruction (info, memaddr, opcode, 
-                            (char *)insn.tm->name, 
+                            (char *) insn.tm->name, 
                             insn.tm->operand_types,
                             size, (insn.tm->flags & FL_EXT)))
       return -1;
   }
 
-  return size*2;
+  return size * 2;
 }
 
 static int
-has_lkaddr(opcode, tm)
+has_lkaddr (opcode, tm)
   unsigned short opcode;
   template *tm;
 {
-  return IS_LKADDR(opcode) && 
-    (OPTYPE(tm->operand_types[0]) == OP_Smem ||
-     OPTYPE(tm->operand_types[1]) == OP_Smem ||
-     OPTYPE(tm->operand_types[2]) == OP_Smem ||
-     OPTYPE(tm->operand_types[1]) == OP_Sind);
+  return (IS_LKADDR (opcode)
+	  && (OPTYPE (tm->operand_types[0]) == OP_Smem
+	      || OPTYPE (tm->operand_types[1]) == OP_Smem
+	      || OPTYPE (tm->operand_types[2]) == OP_Smem
+	      || OPTYPE (tm->operand_types[1]) == OP_Sind));
 }
 
 /* always returns 1 (whether an insn template was found) since we provide an
@@ -119,7 +119,7 @@ get_instruction (info, addr, opcode, insn)
   partemplate * ptm;
 
   insn->parallel = 0;
-  for (tm = (template *)tic54x_optab; tm->name; tm++)
+  for (tm = (template *) tic54x_optab; tm->name; tm++)
   {
     if (tm->opcode == (opcode & tm->mask))
     {
@@ -129,11 +129,11 @@ get_instruction (info, addr, opcode, insn)
           /* if lk addressing is used, the second half of the opcode gets
              pushed one word later */
           bfd_byte opbuf[2];
-          bfd_vma addr2 = addr + 1 + has_lkaddr(opcode, tm);
-          int status = (*info->read_memory_func)(addr2, opbuf, 2, info);
+          bfd_vma addr2 = addr + 1 + has_lkaddr (opcode, tm);
+          int status = (*info->read_memory_func) (addr2, opbuf, 2, info);
           if (status == 0)
             {
-              unsigned short opcode2 = bfd_getl16(opbuf);
+              unsigned short opcode2 = bfd_getl16 (opbuf);
               if (tm->opcode2 == (opcode2 & tm->mask2))
                 {
                   insn->tm = tm;
@@ -148,7 +148,7 @@ get_instruction (info, addr, opcode, insn)
         }
     }
   }
-  for (ptm = (partemplate *)tic54x_paroptab; ptm->name; ptm++)
+  for (ptm = (partemplate *) tic54x_paroptab; ptm->name; ptm++)
   {
     if (ptm->opcode == (opcode & ptm->mask))
     {
@@ -158,7 +158,7 @@ get_instruction (info, addr, opcode, insn)
     }
   }
 
-  insn->tm = (template *)&tic54x_unknown_opcode;
+  insn->tm = (template *) &tic54x_unknown_opcode;
   return 1;
 }
 
@@ -176,7 +176,7 @@ get_insn_size (opcode, insn)
     }
   else
     {
-      size = insn->tm->words + has_lkaddr(opcode, insn->tm);
+      size = insn->tm->words + has_lkaddr (opcode, insn->tm);
     }
 
   return size;
@@ -206,52 +206,52 @@ print_instruction (info, memaddr, opcode, tm_name, tm_operands, size, ext)
 
   if (size > 1)
     {
-      int status = (*info->read_memory_func) (memaddr+1, buf, 2, info);
+      int status = (*info->read_memory_func) (memaddr + 1, buf, 2, info);
       if (status != 0)
         return 0;
-      lkaddr = opcode2 = bfd_getl16(buf);
+      lkaddr = opcode2 = bfd_getl16 (buf);
       if (size > 2)
         {
-          status = (*info->read_memory_func) (memaddr+2, buf, 2, info);
+          status = (*info->read_memory_func) (memaddr + 2, buf, 2, info);
           if (status != 0)
             return 0;
-          opcode2 = bfd_getl16(buf);
+          opcode2 = bfd_getl16 (buf);
         }
     }
 
-  for (i=0;i < MAX_OPERANDS && OPTYPE(tm_operands[i]) != OP_None;i++)
+  for (i = 0; i < MAX_OPERANDS && OPTYPE (tm_operands[i]) != OP_None; i++)
     {
       char *next_comma = ",";
       int optional = (tm_operands[i] & OPT) != 0;
 
-      switch (OPTYPE(tm_operands[i]))
+      switch (OPTYPE (tm_operands[i]))
         {
         case OP_Xmem:
-          sprint_dual_address (info, operand[i], XMEM(opcode));
+          sprint_dual_address (info, operand[i], XMEM (opcode));
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_Ymem:
-          sprint_dual_address (info, operand[i], YMEM(opcode));
+          sprint_dual_address (info, operand[i], YMEM (opcode));
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_Smem:
         case OP_Sind:
         case OP_Lmem:
           info->fprintf_func (info->stream, "%s", comma);
-          if (INDIRECT(opcode))
+          if (INDIRECT (opcode))
             {
-              if (MOD(opcode) >= 12)
+              if (MOD (opcode) >= 12)
                 {
                   bfd_vma addr = lkaddr;
-                  int arf = ARF(opcode);
-                  int mod = MOD(opcode);
+                  int arf = ARF (opcode);
+                  int mod = MOD (opcode);
                   if (mod == 15)
                       info->fprintf_func (info->stream, "*(");
                   else
                       info->fprintf_func (info->stream, "*%sar%d(", 
                                           (mod == 13 || mod == 14 ? "+" : ""),
                                           arf);
-                  (*(info->print_address_func))((bfd_vma)addr, info);
+                  (*(info->print_address_func)) ((bfd_vma) addr, info);
                   info->fprintf_func (info->stream, ")%s", 
                                       mod == 14 ? "%" : "");
                 }
@@ -271,49 +271,49 @@ print_instruction (info, memaddr, opcode, tm_name, tm_operands, size, ext)
           break;
         case OP_dmad:
           info->fprintf_func (info->stream, "%s", comma);
-          (*(info->print_address_func))((bfd_vma)opcode2, info);
+          (*(info->print_address_func)) ((bfd_vma) opcode2, info);
           break;
         case OP_xpmad:
           /* upper 7 bits of address are in the opcode */
-          opcode2 += ((unsigned long)opcode & 0x7F) << 16;
+          opcode2 += ((unsigned long) opcode & 0x7F) << 16;
           /* fall through */
         case OP_pmad:
           info->fprintf_func (info->stream, "%s", comma);
-          (*(info->print_address_func))((bfd_vma)opcode2, info);
+          (*(info->print_address_func)) ((bfd_vma) opcode2, info);
           break;
         case OP_MMRX:
-          sprint_mmr (info, operand[i], MMRX(opcode));
+          sprint_mmr (info, operand[i], MMRX (opcode));
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_MMRY:
-          sprint_mmr (info, operand[i], MMRY(opcode));
+          sprint_mmr (info, operand[i], MMRY (opcode));
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_MMR:
-          sprint_mmr (info, operand[i], MMR(opcode));
+          sprint_mmr (info, operand[i], MMR (opcode));
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_PA:
-          sprintf (operand[i], "pa%d", (unsigned)opcode2);
+          sprintf (operand[i], "pa%d", (unsigned) opcode2);
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_SRC:
-          src = SRC(ext ? opcode2 : opcode) ? OP_B : OP_A;
+          src = SRC (ext ? opcode2 : opcode) ? OP_B : OP_A;
           sprintf (operand[i], (src == OP_B) ? "b" : "a");
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_SRC1:
-          src = SRC1(ext ? opcode2 : opcode) ? OP_B : OP_A;
+          src = SRC1 (ext ? opcode2 : opcode) ? OP_B : OP_A;
           sprintf (operand[i], (src == OP_B) ? "b" : "a");
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_RND:
-          dst = DST(opcode) ? OP_B : OP_A;
+          dst = DST (opcode) ? OP_B : OP_A;
           sprintf (operand[i], (dst == OP_B) ? "a" : "b");
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_DST:
-          dst = DST(ext ? opcode2 : opcode) ? OP_B : OP_A;
+          dst = DST (ext ? opcode2 : opcode) ? OP_B : OP_A;
           if (!optional || dst != src)
             {
               sprintf (operand[i], (dst == OP_B) ? "b" : "a");
@@ -331,31 +331,31 @@ print_instruction (info, memaddr, opcode, tm_name, tm_operands, size, ext)
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_ARX:
-          sprintf (operand[i],"ar%d", (int)ARX(opcode));
+          sprintf (operand[i], "ar%d", (int) ARX (opcode));
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_SHIFT:
-          shift = SHIFT(ext ? opcode2 : opcode);
+          shift = SHIFT (ext ? opcode2 : opcode);
           if (!optional || shift != 0)
             {
-              sprintf (operand[i],"%d", shift);
+              sprintf (operand[i], "%d", shift);
               info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
             }
           else
             next_comma = comma;
           break;
         case OP_SHFT:
-          shift = SHFT(opcode);
+          shift = SHFT (opcode);
           if (!optional || shift != 0)
             {
-              sprintf (operand[i],"%d", (unsigned)shift);
+              sprintf (operand[i], "%d", (unsigned) shift);
               info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
             }
           else
             next_comma = comma;
           break;
         case OP_lk:
-          sprintf (operand[i],"#%d", (int)(short)opcode2);
+          sprintf (operand[i], "#%d", (int) (short) opcode2);
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_T:
@@ -367,7 +367,7 @@ print_instruction (info, memaddr, opcode, tm_name, tm_operands, size, ext)
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_k8:
-          sprintf (operand[i], "%d", (int)((signed char)(opcode & 0xFF)));
+          sprintf (operand[i], "%d", (int) ((signed char) (opcode & 0xFF)));
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_16:
@@ -379,7 +379,7 @@ print_instruction (info, memaddr, opcode, tm_name, tm_operands, size, ext)
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_BITC:
-          sprintf (operand[i], "%d", (int)(opcode & 0xF));
+          sprintf (operand[i], "%d", (int) (opcode & 0xF));
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_CC:
@@ -395,32 +395,32 @@ print_instruction (info, memaddr, opcode, tm_name, tm_operands, size, ext)
         case OP_CC3:
         {
           const char *code[] = { "eq", "lt", "gt", "neq" };
-          sprintf (operand[i], code[CC3(opcode)]);
+          sprintf (operand[i], code[CC3 (opcode)]);
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         }
         case OP_123:
           {
-            int code = (opcode>>8) & 0x3;
+            int code = (opcode >> 8) & 0x3;
             sprintf (operand[i], "%d", (code == 0) ? 1 : (code == 2) ? 2 : 3);
             info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
             break;
           }
         case OP_k5:
           sprintf (operand[i], "#%d", 
-                   (int)(((signed char)opcode & 0x1F) << 3)>>3);
+                   (int) (((signed char) opcode & 0x1F) << 3) >> 3);
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_k8u:
-          sprintf (operand[i], "#%d", (unsigned)(opcode & 0xFF));
+          sprintf (operand[i], "#%d", (unsigned) (opcode & 0xFF));
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_k3:
-          sprintf (operand[i], "#%d", (int)(opcode & 0x7));
+          sprintf (operand[i], "#%d", (int) (opcode & 0x7));
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_lku:
-          sprintf (operand[i], "#%d", (unsigned)opcode2);
+          sprintf (operand[i], "#%d", (unsigned) opcode2);
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_N:
@@ -440,12 +440,12 @@ print_instruction (info, memaddr, opcode, tm_name, tm_operands, size, ext)
             "intm", "hm", "xf", "cpl", "braf"
           };
           sprintf (operand[i], "%s", 
-                   n ? status1[SBIT(opcode)] : status0[SBIT(opcode)]);
+                   n ? status1[SBIT (opcode)] : status0[SBIT (opcode)]);
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         }
         case OP_12:
-          sprintf (operand[i], "%d", (int)((opcode >> 9)&1) + 1);
+          sprintf (operand[i], "%d", (int) ((opcode >> 9) & 1) + 1);
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_TRN:
@@ -458,7 +458,7 @@ print_instruction (info, memaddr, opcode, tm_name, tm_operands, size, ext)
           break;
         case OP_k9:
           /* FIXME-- this is DP, print the original address? */
-          sprintf (operand[i], "#%d", (int)(opcode & 0x1FF));
+          sprintf (operand[i], "#%d", (int) (opcode & 0x1FF));
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_ARP:
@@ -466,7 +466,7 @@ print_instruction (info, memaddr, opcode, tm_name, tm_operands, size, ext)
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         case OP_031:
-          sprintf (operand[i], "%d", (int)(opcode & 0x1F));
+          sprintf (operand[i], "%d", (int) (opcode & 0x1F));
           info->fprintf_func (info->stream, "%s%s", comma, operand[i]);
           break;
         default:
@@ -506,7 +506,7 @@ sprint_dual_address (info, buf, code)
     "*ar%d+",
     "*ar%d+0%%",
   };
-  return sprintf (buf, formats[XMOD(code)], XARX(code));
+  return sprintf (buf, formats[XMOD (code)], XARX (code));
 }
 
 static int
@@ -529,7 +529,7 @@ sprint_indirect_address (info, buf, opcode)
     "*ar%d+%%",
     "*ar%d+0%%",
   };
-  return sprintf (buf, formats[MOD(opcode)], ARF(opcode));
+  return sprintf (buf, formats[MOD (opcode)], ARF (opcode));
 }
 
 static int
@@ -539,7 +539,7 @@ sprint_direct_address (info, buf, opcode)
   unsigned short opcode;
 {
   /* FIXME -- look up relocation if available */
-  return sprintf (buf, "0x??%02x", (int)(opcode & 0x7F));
+  return sprintf (buf, "0x??%02x", (int) (opcode & 0x7F));
 }
 
 static int
@@ -548,12 +548,12 @@ sprint_mmr (info, buf, mmr)
   char buf[];
   int mmr;
 {
-  symbol *reg = (symbol *)mmregs;
+  symbol *reg = (symbol *) mmregs;
   while (reg->name != NULL)
     {
       if (mmr == reg->value)
         {
-          sprintf (buf, "%s", (reg+1)->name);
+          sprintf (buf, "%s", (reg + 1)->name);
           return 1;
         }
       ++reg;
@@ -589,10 +589,10 @@ sprint_condition (info, buf, opcode)
     {
       char acc = (opcode & 0x8) ? 'b' : 'a';
       if (opcode & 0x7)
-          buf += sprintf (buf, "%c%s%s", acc, cmp[(opcode&0x7)],
-                          (opcode&0x20) ? ", " : "");
+          buf += sprintf (buf, "%c%s%s", acc, cmp[(opcode & 0x7)],
+                          (opcode & 0x20) ? ", " : "");
       if (opcode & 0x20)
-          buf += sprintf (buf, "%c%s", acc, (opcode&0x10) ? "ov" : "nov");
+          buf += sprintf (buf, "%c%s", acc, (opcode & 0x10) ? "ov" : "nov");
     }
   else if (opcode & 0x3F)
     {
