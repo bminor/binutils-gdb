@@ -1976,6 +1976,7 @@ assign_file_positions_except_relocs (abfd)
 	}
 
       if (exec_p
+	  && (abfd->flags & D_PAGED) != 0
 	  && get_elf_backend_data (abfd)->maxpagesize > 1
 	  && i_shdrp->sh_type == SHT_PROGBITS
 	  && (i_shdrp->sh_flags & SHF_ALLOC)

@@ -1,3 +1,9 @@
+Mon Apr 11 14:41:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elfcode.h (assign_file_positions_except_relocs): Don't require
+	the file alignment to correspond to the page size when linking
+	with -N.
+
 Sun Apr 10 01:02:24 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* elfcode.h (write_relocs): For rela relocations, adjust the
