@@ -28,6 +28,7 @@ echo Sanitizing `pwd`...
 Things-to-keep:
 
 ChangeLog
+Makefile.dos
 Makefile.in
 README
 TODO
@@ -38,8 +39,8 @@ ar.c
 binutils.texi
 bucomm.c
 bucomm.h
+configure.bat
 configure.in
-configdos.bat
 copy.c
 cplus-dem.c
 filemode.c
@@ -48,7 +49,6 @@ i960-pinsn.c
 is-ranlib.c
 is-strip.c
 m68k-pinsn.c
-makefile.dos
 maybe-ranlib.c
 maybe-strip.c
 nm.1
