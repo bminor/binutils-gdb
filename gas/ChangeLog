@@ -1,3 +1,8 @@
+Mon Jun 16 12:45:56 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (OBJS): Put @extra_objects@ on the same line as
+	macro.o.
+
 Thu Jun 12 12:16:20 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* write.c (write_object_file): In non BFD_ASSEMBLER code, as we

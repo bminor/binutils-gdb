@@ -421,8 +421,9 @@ OBJS = \
 	ecoff.o \
 	stabs.o \
 	sb.o \
-	macro.o \
-	@extra_objects@
+	macro.o @extra_objects@
+# @extra_objects@ is on the same line as macro.o because some non-GNU
+# makes can't handle an empty line in a variable definition.
 
 GASPOBJS = \
 	gasp.o \
