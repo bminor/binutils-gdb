@@ -123,8 +123,9 @@ add_free_pendings (struct pending *list)
 }
       
 /* Add a symbol to one of the lists of symbols.  While we're at it, if
-   we're in the C++ case, check to see if it references an anonymous
-   namespace; if so, add an appropriate using directive.  */
+   we're in the C++ case and don't have full namespace debugging info,
+   check to see if it references an anonymous namespace; if so, add an
+   appropriate using directive.  */
 
 void
 add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
@@ -253,7 +254,6 @@ add_using_directive (const char *name, unsigned int outer_length,
   using_list = cp_add_using_xmalloc (name, outer_length, inner_length,
 				     using_list);
 }
-
 
 /* At end of reading syms, or in case of quit, really free as many
    `struct pending's as we can easily find. */

@@ -2295,7 +2295,7 @@ x86-64-linux-tdep.o: x86-64-linux-tdep.c $(defs_h) $(inferior_h) \
 	$(gdbcore_h) $(regcache_h) $(x86_64_tdep_h) $(dwarf2cfi_h)
 x86-64-tdep.o: x86-64-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(gdbcmd_h) $(arch_utils_h) $(regcache_h) $(symfile_h) $(objfiles_h) \
-	$(x86_64_tdep_h) $(dwarf2cfi_h) $(gdb_assert_h)
+	$(x86_64_tdep_h) $(dwarf2cfi_h) $(gdb_assert_h) $(block_h)
 xcoffread.o: xcoffread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(gdb_stat_h) \
 	$(coff_internal_h) $(libcoff_h) $(coff_xcoff_h) $(libxcoff_h) \
 	$(coff_rs6000_h) $(symtab_h) $(gdbtypes_h) $(symfile_h) \

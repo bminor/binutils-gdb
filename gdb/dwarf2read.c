@@ -893,7 +893,7 @@ static char *dwarf2_linkage_name (struct die_info *);
 
 static char *dwarf2_name (struct die_info *);
 
-static struct die_info * dwarf2_extension (struct die_info *die);
+static struct die_info *dwarf2_extension (struct die_info *die);
 
 static char *dwarf_tag_name (unsigned int);
 

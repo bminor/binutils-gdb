@@ -32,6 +32,7 @@
 #include "x86-64-tdep.h"
 #include "dwarf2cfi.h"
 #include "gdb_assert.h"
+#include "block.h"
 
 /* Register numbers of various important registers.  */
 #define RAX_REGNUM 0
@@ -889,7 +890,7 @@ x86_64_skip_prologue (CORE_ADDR pc)
   if (!v_function || !v_function->ginfo.value.block || !v_sal.symtab)
     return pc;
 
-  endaddr = v_function->ginfo.value.block->endaddr;
+  endaddr = BLOCK_END (SYMBOL_BLOCK_VALUE (v_function));
 
   for (i = 0; i < v_sal.symtab->linetable->nitems; i++)
     if (v_sal.symtab->linetable->item[i].pc >= pc

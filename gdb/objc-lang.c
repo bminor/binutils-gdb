@@ -1321,8 +1321,8 @@ find_methods (struct symtab *symtab, char type,
 	continue;
 
       if (symtab)
-	if ((SYMBOL_VALUE_ADDRESS (msymbol) <  block->startaddr) ||
-	    (SYMBOL_VALUE_ADDRESS (msymbol) >= block->endaddr))
+	if ((SYMBOL_VALUE_ADDRESS (msymbol) <  BLOCK_START (block)) ||
+	    (SYMBOL_VALUE_ADDRESS (msymbol) >= BLOCK_END (block)))
 	  /* Not in the specified symtab.  */
 	  continue;
 

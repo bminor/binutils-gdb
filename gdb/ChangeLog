@@ -1,3 +1,11 @@
+2002-10-21  David Carlton  <carlton@math.stanford.edu>
+
+	* buildsym.c (add_symbol_to_list): Expand comment.
+	* objc-lang.c (find_methods): Use BLOCK_START, BLOCK_END.
+	* Makefile.in (x86-64-tdep.o): Depend on block_h.
+	* x86-64-tdep.c (x86_64_skip_prologue): Use BLOCK_END and
+	SYMBOL_BLOCK_VALUE.
+
 2002-10-18  David Carlton  <carlton@math.stanford.edu>
 
 	* Makefile.in (block_h): New variable.
