@@ -1,3 +1,9 @@
+2000-09-13  Nick Clifton  <nickc@redhat.com>
+
+	* ldmain.c (multiple_definition): Disable relaxation if
+	multiple symbol definitions are encountered - otherwise the
+	linker could abort with an assertion failure.
+
 2000-09-10  Nick Clifton  <nickc@redhat.com>
 
 	* mri.c: Fix formatting.

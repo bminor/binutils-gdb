@@ -863,6 +863,13 @@ multiple_definition (info, name, obfd, osec, oval, nbfd, nsec, nval)
 	 nbfd, nsec, nval, name);
   if (obfd != (bfd *) NULL)
     einfo (_("%D: first defined here\n"), obfd, osec, oval);
+
+  if (command_line.relax)
+    {
+      einfo (_("%P: Disabling relaxation: it will not work with multiple definitions\n"));
+      command_line.relax = 0;
+    }
+  
   return true;
 }
 
