@@ -1,3 +1,15 @@
+Mon Oct  5 09:25:32 1998  Catherine Moore  <clm@cygnsu.com>
+
+        * symbols.c (S_IS_FUNCTION):  New.
+        * config/tc-v850.h (obj_fix_adjustable):  Define.
+        (TC_FORCE_RELOCATION):  Define.
+        (v850_force_relocation):  Declare.
+        * config/tc-v850.c (tc_gen_reloc):  Use offset instead
+        of fx_addnumber for VTABLE reloc addends.
+        (md_apply_fix3):  Handle VTABLE relocs.
+        (v850_fix_adjustable):  New.
+        (v850_force_relocation):  New.
+
 Mon Oct  5 00:48:52 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* tc-hppa.c (fp_operand_format): Add some additional formats.
