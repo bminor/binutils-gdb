@@ -18,10 +18,7 @@ SYMBOL TABLE:
 0+ g     F \.text	0+ Main
 0+ g       \.text	0+ _start
 0+fe g       \*REG\*	0+ areg
-2000000000000000 g     O \*ABS\*	0+ __bss_start
-2000000000000000 g     O \*ABS\*	0+ _edata
-2000000000000000 g     O \*ABS\*	0+ _end
-0+ g     O \.text	0+ _start\.
+#...
 
 Contents of section \.text:
  0+ e3fd0001 8f03fe10 8e0307fe 8f05fe04  .*

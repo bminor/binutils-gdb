@@ -53,10 +53,7 @@ Symbol table '\.symtab' contains 17 entries:
     10: 0+fe     0 NOTYPE  LOCAL  DEFAULT  PRC lsym
     11: 0+fc     0 NOTYPE  GLOBAL DEFAULT  PRC ext1
     12: 0+4     0 NOTYPE  GLOBAL DEFAULT    1 _start
-    13: 2000000000000000     0 OBJECT  GLOBAL DEFAULT  ABS __bss_start
-    14: 2000000000000000     0 OBJECT  GLOBAL DEFAULT  ABS _edata
-    15: 2000000000000000     0 OBJECT  GLOBAL DEFAULT  ABS _end
-    16: 0+4     0 OBJECT  GLOBAL DEFAULT    1 _start\.
+#...
 
 Hex dump of section '\.text':
   0x0+ fd030201 e3fd0001                   .*

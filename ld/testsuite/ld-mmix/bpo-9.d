@@ -21,10 +21,7 @@ SYMBOL TABLE:
 0+ l       \.init	0+ _start
 0+14 g       \.text	0+ x
 0+10 g       \.text	0+ x2
-2000000000000000 g     O \*ABS\*	0+ __bss_start
-2000000000000000 g     O \*ABS\*	0+ _edata
-2000000000000000 g     O \*ABS\*	0+ _end
-0+10 g     O \.text	0+ _start\.
+#...
 
 Contents of section \.init:
  0000 00000000 0000003d 00000000 0000003a  .*
