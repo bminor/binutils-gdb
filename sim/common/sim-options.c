@@ -264,7 +264,7 @@ standard_option_handler (sd, opt, arg, is_command)
 
     case OPTION_TARGET:
       {
-	STATE_TARGET (sd) = strdup (arg);
+	STATE_TARGET (sd) = xstrdup (arg);
 	break;
       }
 
