@@ -4750,6 +4750,14 @@ md_apply_fix (fixP, valueP)
   value = *valueP;
   fixP->fx_addnumber = value;	/* Remember value for tc_gen_reloc */
 
+  /* bfd_perform_relocation is going to add in the symbol value.  If
+     this is an external symbol, it will have a non-zero value, but we
+     do not want to add in.  Therefore, we subtract it out of
+     fx_addnumber.  FIXME: relocations in gas are very confusing.  */
+  if (fixP->fx_addsy != (symbolS *) NULL
+      && fixP->fx_addsy->ecoff_undefined)
+    fixP->fx_addnumber -= S_GET_VALUE (fixP->fx_addsy);
+
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_32:
