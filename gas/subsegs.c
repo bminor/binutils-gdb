@@ -35,8 +35,7 @@ frchainS*	frchain_root,
 #else
 frchainS*	frchain_root,
     *	frchain_now,	/* Commented in "subsegs.h". */
-    *	data0_frchainP,
-    *	bss0_frchainP;
+    *	data0_frchainP;
 
 #endif
 char * const /* in: segT   out: char* */
@@ -109,8 +108,6 @@ void
 #else
 	subseg_new (SEG_DATA, 0);	/* .data 0 */
 	data0_frchainP = frchain_now;
-	subseg_new (SEG_BSS, 0);
-	bss0_frchainP = frchain_now;
 #endif
 	
 }
@@ -136,12 +133,7 @@ register int	subseg;
 	seg_fix_rootP = & segment_info[seg].fix_root;
 	seg_fix_tailP = & segment_info[seg].fix_tail;
 #else
-	if (seg == SEG_BSS)
-	    {
-	      	    seg_fix_rootP = & bss_fix_root;
-		    seg_fix_tailP = & bss_fix_tail;
-	    }
-	else if (seg == SEG_DATA)
+	if (seg == SEG_DATA)
 	    {
 		    seg_fix_rootP = & data_fix_root;
 		    seg_fix_tailP = & data_fix_tail;
@@ -173,13 +165,25 @@ register int	subseg;
 
 void
     subseg_new (seg, subseg)	/* begin assembly for a new sub-segment */
-register segT	seg;	/* SEG_DATA or SEG_TEXT or SEG_BSS */
+register segT	seg; /* SEG_DATA or SEG_TEXT */
 register subsegT	subseg;
 {
 	long tmp;		/* JF for obstack alignment hacking */
 #ifndef MANY_SEGMENTS
-	know( seg == SEG_DATA || seg == SEG_TEXT || seg == SEG_BSS);
+	know(seg == SEG_DATA || seg == SEG_TEXT);
 #endif
+#ifdef OBJ_AOUT
+/* If -R specifed, always put stuff into the data section */
+	if (flagseen['R']) 
+	{
+	  if (seg == SEG_DATA) 
+	  {
+	    subseg += 1000;
+	    seg = SEG_TEXT;
+	  }
+	}
+#endif
+
 	if (seg != now_seg || subseg != now_subseg)
 	    {				/* we just changed sub-segments */
 		    register	frchainS *	frcP;	/* crawl frchain chain */

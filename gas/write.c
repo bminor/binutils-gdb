@@ -215,6 +215,7 @@ void write_object_file()
 	 * data frags into the text segment. Do this before relaxing so
 	 * we know to take advantage of -R and make shorter addresses.
 	 */
+#ifndef OBJ_AOUT
 	if (flagseen[ 'R' ]) {
 		fixS *tmp;
 		
@@ -230,7 +231,7 @@ void write_object_file()
 		    text_fix_root=data_fix_root;
 		data_fix_root=NULL;
 	}
-	
+#endif	
 	relax_segment(text_frag_root, SEG_TEXT);
 	relax_segment(data_frag_root, SEG_DATA);
 	/*

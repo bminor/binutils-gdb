@@ -1,3 +1,18 @@
+Thu Jun  4 11:59:13 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* expr.c(expr): allow SEG_REGISTER in expressions.
+	* read.c(pseudo_set): register expressions can be the source of a
+	set.
+	* subsegs.c (subseg_new): Now -R forces all changes to SEG_DATA to
+	goto SEG_TEXT (if a.out)
+	* write.c (write_object_file): If a.out don't use the old way for
+	-R.
+	* config/obj-a.out (s_sect): complain if the user tries to use a
+	subsegment with a value which might interfere with out -R hackery.
+	* config/tc-m68k.c (m68k_reg_parse): lookup names in symbol table
+	rather than use ugly if tree. (init_regtable): insert register
+	names into symbol table.
+
 Tue Jun  2 16:47:09 1992  Steve Chamberlain (sac@cygnus.com)
 
 	* write.c (write_object_file): keep the fix_tail clean, which

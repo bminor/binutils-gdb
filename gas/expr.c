@@ -39,10 +39,6 @@ static void clean_up_expression();	/* Internal. */
 extern const char EXP_CHARS[];	/* JF hide MD floating pt stuff all the same place */
 extern const char FLT_CHARS[];
 
-#ifdef LOCAL_LABELS_DOLLAR
-extern int local_label_defined[];
-#endif
-
 /*
  * Build any floating-point literal here.
  * Also build any bignum literal here.
@@ -101,22 +97,20 @@ expressionS *expressionP;
 integer_constant(radix, expressionP)
 int radix;
 expressionS *expressionP;
-
-
 {
   register char *	digit_2; /*->2nd digit of number. */  
   char c;
-
+  
   register valueT	number;	/* offset or (absolute) value */
   register short int digit; /* value of next digit in current radix */
   register short int maxdig = 0; /* highest permitted digit value. */
   register int too_many_digits = 0; /* if we see >= this number of */
   register char *name; /* points to name of symbol */
   register symbolS *	symbolP; /* points to symbol */
-
+  
   int small; /* true if fits in 32 bits. */
   extern  char hex_value[]; /* in hex_value.c */
-
+  
   /* may be bignum, or may fit in 32 bits. */
   /*
    * most numbers fit into 32 bits, and we want this case to be fast.
@@ -133,189 +127,199 @@ expressionS *expressionP;
    * if it fits into 32 bits as an unsigned number, we let it be a 32-bit
    * number. the cavalier approach is for speed in ordinary cases.
    */
-
+  
   switch (radix) 
-  {
-    
-  case 2:
-    maxdig = 2;
-    too_many_digits = 33;
-    break;
-  case 8:
-     maxdig = radix = 8;
-    too_many_digits = 11;
-    break;
-  case 16:
-    
-
-    maxdig = radix = 16;
-    too_many_digits = 9;
-    break;
-  case 10:
-    maxdig = radix = 10;
-    too_many_digits = 11;
-  }
+    {
+      
+    case 2:
+      maxdig = 2;
+      too_many_digits = 33;
+      break;
+    case 8:
+      maxdig = radix = 8;
+      too_many_digits = 11;
+      break;
+    case 16:
+      
+      
+      maxdig = radix = 16;
+      too_many_digits = 9;
+      break;
+    case 10:
+      maxdig = radix = 10;
+      too_many_digits = 11;
+    }
   c = *input_line_pointer;
   input_line_pointer++;
   digit_2 = input_line_pointer;
   for (number=0;  (digit=hex_value[c])<maxdig;  c = * input_line_pointer ++)
-  {
-    number = number * radix + digit;
-  }
+    {
+      number = number * radix + digit;
+    }
   /* c contains character after number. */
   /* input_line_pointer->char after c. */
   small = input_line_pointer - digit_2 < too_many_digits;
   if (! small)
-  {
-    /*
-     * we saw a lot of digits. manufacture a bignum the hard way.
-     */
-    LITTLENUM_TYPE *	leader;	/*->high order littlenum of the bignum. */
-    LITTLENUM_TYPE *	pointer; /*->littlenum we are frobbing now. */
-    long carry;
-
-    leader = generic_bignum;
-    generic_bignum [0] = 0;
-    generic_bignum [1] = 0;
-    /* we could just use digit_2, but lets be mnemonic. */
-    input_line_pointer = -- digit_2; /*->1st digit. */
-    c = *input_line_pointer ++;
-    for (;   (carry = hex_value [c]) < maxdig;   c = * input_line_pointer ++)
     {
-      for (pointer = generic_bignum;
-	   pointer <= leader;
-	   pointer ++)
-      {
-	long work;
-
-	work = carry + radix * * pointer;
-	* pointer = work & LITTLENUM_MASK;
-	carry = work >> LITTLENUM_NUMBER_OF_BITS;
-      }
-      if (carry)
-      {
-	if (leader < generic_bignum + SIZE_OF_LARGE_NUMBER - 1)
-	{ /* room to grow a longer bignum. */
-	  * ++ leader = carry;
+      /*
+       * we saw a lot of digits. manufacture a bignum the hard way.
+       */
+      LITTLENUM_TYPE *	leader;	/*->high order littlenum of the bignum. */
+      LITTLENUM_TYPE *	pointer; /*->littlenum we are frobbing now. */
+      long carry;
+      
+      leader = generic_bignum;
+      generic_bignum [0] = 0;
+      generic_bignum [1] = 0;
+      /* we could just use digit_2, but lets be mnemonic. */
+      input_line_pointer = --digit_2; /*->1st digit. */
+      c = *input_line_pointer++;
+      for (; (carry = hex_value[c]) < maxdig;   c = *input_line_pointer++)
+	{
+	  for (pointer = generic_bignum;
+	       pointer <= leader;
+	       pointer++)
+	    {
+	      long work;
+	      
+	      work = carry + radix * * pointer;
+	      *pointer = work & LITTLENUM_MASK;
+	      carry = work >> LITTLENUM_NUMBER_OF_BITS;
+	    }
+	  if (carry)
+	    {
+	      if (leader < generic_bignum + SIZE_OF_LARGE_NUMBER - 1)
+		{ /* room to grow a longer bignum. */
+		  *++leader = carry;
+		}
+	    }
 	}
-      }
+      /* again, c is char after number, */
+      /* input_line_pointer->after c. */
+      know(sizeof (int) * 8 == 32);
+      know(LITTLENUM_NUMBER_OF_BITS == 16);
+      /* hence the constant "2" in the next line. */
+      if (leader < generic_bignum + 2)
+	{ /* will fit into 32 bits. */
+	  number =
+	    ((generic_bignum [1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
+	      | (generic_bignum [0] & LITTLENUM_MASK);
+	  small = 1;
+	}
+      else
+	{
+	  number = leader - generic_bignum + 1; /* number of littlenums in the bignum. */
+	}
     }
-    /* again, c is char after number, */
-    /* input_line_pointer->after c. */
-    know(sizeof (int) * 8 == 32);
-    know(LITTLENUM_NUMBER_OF_BITS == 16);
-    /* hence the constant "2" in the next line. */
-    if (leader < generic_bignum + 2)
-    { /* will fit into 32 bits. */
-      number =
-       ((generic_bignum [1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
-	| (generic_bignum [0] & LITTLENUM_MASK);
-      small = 1;
-    }
-    else
-    {
-      number = leader - generic_bignum + 1; /* number of littlenums in the bignum. */
-    }
-  }
-  if (small)
-  {
+  if (small) {
     /*
      * here with number, in correct radix. c is the next char.
      * note that unlike un*x, we allow "011f" "0x9f" to
      * both mean the same as the (conventional) "9f". this is simply easier
      * than checking for strict canonical form. syntax sux!
      */
-    if (number<10)
-    {
-      if (0
+    
+    switch (c) {
+      
 #ifdef LOCAL_LABELS_FB
-	  || c=='b'
-#endif
-#ifdef LOCAL_LABELS_DOLLAR
-	  || (c=='$' && local_label_defined[number])
-#endif
-	  )
-      {
-	/*
-	 * backward ref to local label.
-	 * because it is backward, expect it to be defined.
-	 */
-	/*
-	 * construct a local label.
-	 */
-	name = local_label_name ((int)number, 0);
-	if (((symbolP = symbol_find(name)) != NULL) /* seen before */
-	    && (S_IS_DEFINED(symbolP))) /* symbol is defined: ok */
-	{ /* expected path: symbol defined. */
-	  /* local labels are never absolute. don't waste time checking absoluteness. */
-	  know(SEG_NORMAL(S_GET_SEGMENT(symbolP)));
-
-	  expressionP->X_add_symbol = symbolP;
-	  expressionP->X_add_number = 0;
-	  expressionP->X_seg = S_GET_SEGMENT(symbolP);
-	}
-	else
-	{ /* either not seen or not defined. */
-	  as_bad("backw. ref to unknown label \"%d:\", 0 assumed.",
-		 number);
-	  expressionP->X_add_number = 0;
-	  expressionP->X_seg        = SEG_ABSOLUTE;
-	}
+    case 'b': {
+      /*
+       * backward ref to local label.
+       * because it is backward, expect it to be defined.
+       */
+      /*
+       * construct a local label.
+       */
+      name = fb_label_name((int) number, 0);
+      
+      /* seen before, or symbol is defined: ok */
+      symbolP = symbol_find(name);
+      if ((symbolP != NULL) && (S_IS_DEFINED(symbolP))) {
+	
+	/* local labels are never absolute. don't waste time checking absoluteness. */
+	know(SEG_NORMAL(S_GET_SEGMENT(symbolP)));
+	
+	expressionP->X_add_symbol = symbolP;
+	expressionP->X_seg = S_GET_SEGMENT(symbolP);
+	
+      } else { /* either not seen or not defined. */
+	as_bad("backw. ref to unknown label \"%d:\", 0 assumed.", number);
+	expressionP->X_seg = SEG_ABSOLUTE;
       }
-      else
-      {
-	if (0
-#ifdef LOCAL_LABELS_FB
-	    || c == 'f'
-#endif
-#ifdef LOCAL_LABELS_DOLLAR
-	    || (c=='$' && !local_label_defined[number])
-#endif
-	    )
-	{
-	  /*
-	   * forward reference. expect symbol to be undefined or
-	   * unknown. undefined: seen it before. unknown: never seen
-	   * it in this pass.
-	   * construct a local label name, then an undefined symbol.
-	   * don't create a xseg frag for it: caller may do that.
-	   * just return it as never seen before.
-	   */
-	  name = local_label_name((int)number, 1);
-	  symbolP = symbol_find_or_make(name);
-	  /* we have no need to check symbol properties. */
+      
+      expressionP->X_add_number = 0;
+      break;
+    } /* case 'b' */
+      
+    case 'f': {
+      /*
+       * forward reference. expect symbol to be undefined or
+       * unknown. undefined: seen it before. unknown: never seen
+       * it before.
+       * construct a local label name, then an undefined symbol.
+       * don't create a xseg frag for it: caller may do that.
+       * just return it as never seen before.
+       */
+      name = fb_label_name((int) number, 1);
+      symbolP = symbol_find_or_make(name);
+      /* we have no need to check symbol properties. */
 #ifndef many_segments
-	  /* since "know" puts its arg into a "string", we
-	     can't have newlines in the argument.  */
-	  know(S_GET_SEGMENT(symbolP) == SEG_UNKNOWN || S_GET_SEGMENT(symbolP) == SEG_TEXT || S_GET_SEGMENT(symbolP) == SEG_DATA);
+      /* since "know" puts its arg into a "string", we
+	 can't have newlines in the argument.  */
+      know(S_GET_SEGMENT(symbolP) == SEG_UNKNOWN || S_GET_SEGMENT(symbolP) == SEG_TEXT || S_GET_SEGMENT(symbolP) == SEG_DATA);
 #endif
-	  expressionP->X_add_symbol      = symbolP;
-	  expressionP->X_seg             = SEG_UNKNOWN;
-	  expressionP->X_subtract_symbol = NULL;
-	  expressionP->X_add_number      = 0;
-	}
-	else
-	{ /* really a number, not a local label. */
-	  expressionP->X_add_number = number;
-	  expressionP->X_seg        = SEG_ABSOLUTE;
-	  input_line_pointer --; /* restore following character. */
-	} /* if (c=='f') */
-      } /* if (c=='b') */
-    }
-    else
-    { /* really a number. */
+      expressionP->X_add_symbol = symbolP;
+      expressionP->X_seg = SEG_UNKNOWN;
+      expressionP->X_subtract_symbol = NULL;
+      expressionP->X_add_number = 0;
+      
+      break;
+    } /* case 'f' */
+      
+#endif /* LOCAL_LABELS_FB */
+      
+#ifdef LOCAL_LABELS_DOLLAR
+      
+    case '$': {
+      
+      /* if the dollar label is *currently* defined, then this is just another
+	 reference to it.  If it is not *currently* defined, then this is a
+	 fresh instantiation of that number, so create it.  */
+      
+      if (dollar_label_defined(number)) {
+	name = dollar_label_name(number, 0);
+	symbolP = symbol_find(name);
+	know(symbolP != NULL);
+      } else {
+	name = dollar_label_name(number, 1);
+	symbolP = symbol_find_or_make(name);
+      }
+      
+      expressionP->X_add_symbol = symbolP;
+      expressionP->X_add_number = 0;
+      expressionP->X_seg = S_GET_SEGMENT(symbolP);
+
+      break;
+    } /* case '$' */
+      
+#endif /* LOCAL_LABELS_DOLLAR */
+      
+    default: {
       expressionP->X_add_number = number;
-      expressionP->X_seg        = SEG_ABSOLUTE;
-      input_line_pointer --; /* restore following character. */
-    } /* if (number<10) */
-  }
-  else
-  {
+      expressionP->X_seg = SEG_ABSOLUTE;
+      input_line_pointer--; /* restore following character. */
+      break;
+    } /* really just a number */
+      
+    } /* switch on char following the number */
+    
+    
+  } else { /* not a small number */
     expressionP->X_add_number = number;
     expressionP->X_seg = SEG_BIG;
     input_line_pointer --; /*->char following number. */
   } /* if (small) */
-} 
+} /* integer_constant() */
 
 
 /*
@@ -390,10 +394,21 @@ operand (expressionP)
     {
 
     default:
-      /* The string was only zero */
-      expressionP->X_add_symbol = 0;
-      expressionP->X_add_number = 0;
-      expressionP->X_seg = SEG_ABSOLUTE;
+      if (c && strchr(FLT_CHARS,c)) 
+      {
+	input_line_pointer++;  
+	floating_constant(expressionP);
+      }
+      else 
+      {
+	
+      
+	/* The string was only zero */
+	expressionP->X_add_symbol = 0;
+	expressionP->X_add_number = 0;
+	expressionP->X_seg = SEG_ABSOLUTE;
+      }
+      
       break;
       
     case 'x':
@@ -435,7 +450,7 @@ operand (expressionP)
     case 'd':
     case 'D':
     case 'F':
-      
+    case 'r':
     case 'e':
     case 'E':
     case 'g':
@@ -459,7 +474,7 @@ operand (expressionP)
     }
     /* here with input_line_pointer->char after "(...)" */
   }
-    return;
+    return expressionP->X_seg;
 
 
   case '\'':
@@ -545,10 +560,10 @@ operand (expressionP)
     }
   case ',':    
   case '\n':
-	/* can't imagine any other kind of operand */
-	expressionP->X_seg = SEG_ABSENT;
-	input_line_pointer --;
-	md_operand (expressionP);
+    /* can't imagine any other kind of operand */
+    expressionP->X_seg = SEG_ABSENT;
+    input_line_pointer --;
+    md_operand (expressionP);
     break;    
     /* Fall through */
   default:
@@ -558,7 +573,7 @@ operand (expressionP)
        * Identifier begins here.
        * This is kludged for speed, so code is repeated.
        */
-isname:
+    isname:
       name =  -- input_line_pointer;
       c = get_symbol_end();
       symbolP = symbol_find_or_make(name);
@@ -931,7 +946,9 @@ register expressionS *resultP; /* Deliver result here. */
 	      segT	seg1;
 	      segT	seg2;
 #ifndef MANY_SEGMENTS
-	      know(resultP->X_seg == SEG_DATA || resultP->X_seg == SEG_TEXT || resultP->X_seg == SEG_BSS || resultP->X_seg == SEG_UNKNOWN || resultP->X_seg == SEG_DIFFERENCE || resultP->X_seg == SEG_ABSOLUTE || resultP->X_seg == SEG_PASS1);
+	      know(resultP->X_seg == SEG_DATA || resultP->X_seg == SEG_TEXT || resultP->X_seg == SEG_BSS || resultP->X_seg ==
+		   SEG_UNKNOWN || resultP->X_seg == SEG_DIFFERENCE || resultP->X_seg == SEG_ABSOLUTE || resultP->X_seg == SEG_PASS1
+		   || resultP->X_seg == SEG_REGISTER);
 	      know(right.X_seg == SEG_DATA || right.X_seg == SEG_TEXT || right.X_seg == SEG_BSS || right.X_seg == SEG_UNKNOWN || right.X_seg == SEG_DIFFERENCE || right.X_seg == SEG_ABSOLUTE || right.X_seg == SEG_PASS1);
 #endif
 	      clean_up_expression (& right);
