@@ -1,7 +1,15 @@
+Tue May 23 17:00:32 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-sparc.c (tc_gen_reloc): Handle BFD_RELOC_SPARC_WDISP16
+	and BFD_RELOC_SPARC_WDISP19.
+
 Tue May 23 19:18:33 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* as.c (parse_args) [! USE_EMULATIONS]: Always print an error
 	message.
+
+	* doc/internals.texi: Document obj_app_file and
+	TARGET_BYTES_BIG_ENDIAN.
 
 Mon May 22 20:03:23 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
