@@ -48,9 +48,9 @@ SHELL = /bin/sh
 
 INSTALL = `cd $(srcdir)/..;pwd`/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
-INSTALL_DATA = $(INSTALL) 
+INSTALL_DATA = $(INSTALL) -m 644
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
-INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1
+INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1 -m 644
 
 AR = ar
 AR_FLAGS = rc
@@ -63,7 +63,7 @@ RANLIB = ranlib
 BISONFLAGS = -d
 TEXI2ROFF=texi2roff
 MAKEOVERRIDES=
-CC_FOR_BUILD = $(CC)
+CC_FOR_BUILD = @CC_FOR_BUILD@
 NM_FOR_TARGET = nm
 NM = $(NM_FOR_TARGET)
 SYMLINK = ln -s
@@ -393,26 +393,26 @@ $(NLMCONV_PROG): nlmconv.o nlmheader.o $(ADDL_LIBS) $(BFD)
 # changing "../include" to "$(INCDIR)"
 
 bucomm.o: bucomm.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h $(BFDDIR)/hosts/std-host.h \
+  $(INCDIR)/obstack.h \
   $(INCDIR)/fopen-same.h bucomm.h config.h
 filemode.o: filemode.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h $(BFDDIR)/hosts/std-host.h \
+  $(INCDIR)/obstack.h \
   $(INCDIR)/fopen-same.h 
 size.o: size.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h $(BFDDIR)/hosts/std-host.h \
+  $(INCDIR)/obstack.h \
   $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h config.h
 objdump.o: objdump.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h $(BFDDIR)/hosts/std-host.h \
+  $(INCDIR)/obstack.h \
   $(INCDIR)/fopen-same.h $(INCDIR)/getopt.h \
   $(INCDIR)/dis-asm.h $(INCDIR)/aout/aout64.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/aout/stab.def config.h
 nm.o: nm.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h $(BFDDIR)/hosts/std-host.h \
+  $(INCDIR)/obstack.h \
   $(INCDIR)/fopen-same.h bucomm.h config.h $(INCDIR)/getopt.h \
   $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
   $(INCDIR)/aout/ranlib.h $(INCDIR)/demangle.h
 ar.o: ar.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h $(BFDDIR)/hosts/std-host.h \
+  $(INCDIR)/obstack.h \
   $(INCDIR)/fopen-same.h bucomm.h config.h $(INCDIR)/aout/ar.h \
   $(BFDDIR)/libbfd.h arsup.h
 arparse.o: arparse.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
@@ -424,16 +424,16 @@ arsup.o: arsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
 strings.o: strings.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h bucomm.h config.h
 objcopy.o: objcopy.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/obstack.h $(BFDDIR)/hosts/std-host.h \
+  $(INCDIR)/obstack.h \
   $(INCDIR)/fopen-same.h bucomm.h config.h
 is-strip.o: is-strip.c 
 is-ranlib.o: is-ranlib.c 
 not-strip.o: not-strip.c 
 nlmheader.o: nlmheader.c ../bfd/bfd.h \
-  $(BFDDIR)/hosts/std-host.h $(INCDIR)/fopen-same.h bucomm.h config.h \
+  $(INCDIR)/fopen-same.h bucomm.h config.h \
   $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h nlmconv.h
 nlmconv.o: nlmconv.c ../bfd/bfd.h $(INCDIR)/libiberty.h \
-  $(BFDDIR)/hosts/std-host.h $(INCDIR)/fopen-same.h bucomm.h config.h \
+  $(INCDIR)/fopen-same.h bucomm.h config.h \
   $(BFDDIR)/libnlm.h $(INCDIR)/nlm/common.h \
   $(INCDIR)/nlm/internal.h $(INCDIR)/nlm/external.h nlmconv.h \
   $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
@@ -547,14 +547,14 @@ binutils.me: $(srcdir)/binutils.texi
 ###
 
 mostlyclean:
-	-rm -f *.o *~ \#* core binutils.?? binutils.??? y.output
+	-rm -f *.o *~ \#* core binutils.?? binutils.??? y.output config.log
 	-rm -rf tmpdir
 clean: mostlyclean
 	-rm -f $(PROGS) underscore.c sysroff sysroff.c sysroff.h sysinfo
 distclean:
 	-rm -f Makefile config.status *.o *~ \#* core y.* \
 		binutils.?? binutils.??s binutils.aux binutils.log binutils.toc
-	-rm -f $(PROGS) underscore.c
+	-rm -f $(PROGS) underscore.c config.cache
 realclean: clean distclean
 	-rm -f $(DISTSTUFF) *.info TAGS
 

@@ -1,3 +1,17 @@
+Wed Sep  6 15:02:55 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (*.o): Remove incorrect dependencies on
+	$(BFDDIR)/hosts/std-host.h.
+
+	* Makefile.in (INSTALL_DATA): Add -m 644.
+	(INSTALL_XFORM1): Likewise.
+	(CC_FOR_BUILD): Set to @CC_FOR_BUILD@ rather than $(CC).
+	(mostlyclean): Remove config.log.
+	(distclean): Remove config.cache.
+
+	* configure.in: Call BFD_CC_FOR_BUILD and BFD_BINARY_FOPEN.
+	* configure: Rebuild.
+
 Tue Sep  5 20:22:42 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Rewrite to use autoconf.
