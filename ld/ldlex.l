@@ -51,12 +51,13 @@ YY_BUFFER_STATE include_stack[MAX_INCLUDE_DEPTH];
 unsigned int include_stack_ptr = 0;
 
 
-/* FOUR STATES 
+/* STATES 
 	COMMAND	 	on command line
 	COMMENT		in a C comment
 	EXPRESSION	definiatelyt in an expression
 	SCRIPT		definately in a script
 	SOMEWHERE	either EXPRESSION or SCRIPT
+        MRI             in an MRI script
 */
 #define RTOKEN(x)  {  yylval.token = x; return x; }
 %}
@@ -73,6 +74,7 @@ WHITE		[ \t\n]+
 %x EXPRESSION
 %x COMMENT
 %x BOTH
+%x MRI
 %%
   
 <COMMAND>"-defsym" 		{ return OPTION_defsym; }
@@ -153,7 +155,33 @@ WHITE		[ \t\n]+
 		                	yylval.name = buystring(yytext+2);
 				 	return OPTION_Aarch;
 			       	}
-<BOTH,EXPRESSION>"0x"?([0-9A-Fa-f])+(M|K|m|k)? {
+
+<MRI,EXPRESSION>"$"([0-9A-Fa-f])+ {
+  				yylval.integer = strtol(yytext+1, 0,16);	
+				return INT;
+			}
+
+<MRI,EXPRESSION>([0-9A-Fa-f])+(H|X|B|O|D)
+				 {
+				   int base ;
+				   switch (yytext[yyleng-1]) {
+				    case 'X': 
+				    case 'H':
+				     base = 16;
+				     break;
+				    case 'O':
+				     base = 8;
+				     break;
+				    case 'B':
+				     base = 2;
+				     break;
+				    default:
+				     base = 10;
+				   }
+				   yylval.integer = strtol(yytext+1, 0, base);	
+				   return INT;
+				 }
+<MRI,BOTH,EXPRESSION>"$"?"0x"?([0-9A-Fa-f])+(M|K|m|k)? {
 				  yylval.integer = strtol(yytext,0,hex_mode);
 				  if (yytext[yyleng-1]=='M'
 					|| yytext[yyleng-1] == 'm') {
@@ -184,7 +212,7 @@ WHITE		[ \t\n]+
 <BOTH,SCRIPT,EXPRESSION>"|="	{ RTOKEN(OREQ);}
 <BOTH,SCRIPT,EXPRESSION>"&&"	{ RTOKEN(ANDAND);}
 <BOTH,SCRIPT,EXPRESSION>">"		{ RTOKEN('>');}
-<BOTH,SCRIPT,EXPRESSION>","		{ RTOKEN(',');}
+<MRI,BOTH,SCRIPT,EXPRESSION>","		{ RTOKEN(',');}
 <BOTH,SCRIPT,EXPRESSION>"&"		{ RTOKEN('&');}
 <BOTH,SCRIPT,EXPRESSION>"|"		{ RTOKEN('|');}
 <BOTH,SCRIPT,EXPRESSION>"~"		{ RTOKEN('~');}
@@ -197,7 +225,7 @@ WHITE		[ \t\n]+
 <BOTH,SCRIPT,EXPRESSION>"%"		{ RTOKEN('%');}
 <BOTH,SCRIPT,EXPRESSION>"<"		{ RTOKEN('<');}
 <BOTH,SCRIPT,EXPRESSION>">"		{ RTOKEN('>');}
-<BOTH,SCRIPT,EXPRESSION>"="          { RTOKEN('=');}
+<MRI,BOTH,SCRIPT,EXPRESSION>"="          { RTOKEN('=');}
 <BOTH,SCRIPT,EXPRESSION>"}"			{ RTOKEN('}') ; }
 <BOTH,SCRIPT,EXPRESSION>"{"			{ RTOKEN('{'); }
 <BOTH,SCRIPT,EXPRESSION>")"			{ RTOKEN(')');}
@@ -250,7 +278,15 @@ WHITE		[ \t\n]+
 <BOTH,SCRIPT>"l"			{ RTOKEN( LENGTH);}
 <BOTH,SCRIPT>"len"			{ RTOKEN( LENGTH);}
 
-<BOTH,EXPRESSION>{FILENAMECHAR1}{FILENAMECHAR}*	{
+<MRI>^"*".*			{ /* Mri comment line */ }
+<MRI>\n		                { ++ lineno;  }
+<MRI>"CHIP"                     { RTOKEN(CHIP); }
+<MRI>"LOAD"                     { RTOKEN(LOAD); }
+<MRI>"LIST".*\n                 { RTOKEN(LIST); /* LIST and ignore to end of line */ }
+<MRI>"SECT"			{ RTOKEN(SECT); }
+<MRI>"ABSOLUTE"			{ RTOKEN(ABSOLUTE); }
+
+<MRI,BOTH,EXPRESSION>{FILENAMECHAR1}{FILENAMECHAR}*	{
 				 yylval.name = buystring(yytext); 
 				  return NAME;
 				}
@@ -266,7 +302,7 @@ WHITE		[ \t\n]+
 					return NAME;
 				}
 <BOTH,SCRIPT,EXPRESSION>"\n"		{ lineno++;}
-<COMMAND,BOTH,SCRIPT,EXPRESSION>[ \t]
+<MRI,COMMAND,BOTH,SCRIPT,EXPRESSION>[ \t]
 
 "/*"				{ old = INITIAL; BEGIN(COMMENT); }
 <COMMAND>"/*"			{ old = COMMAND; BEGIN(COMMENT); }
@@ -278,6 +314,7 @@ WHITE		[ \t\n]+
 <COMMENT>"*"+[^*/\\n]*
 <COMMENT>\\n             	{ ++lineno;}
 <COMMENT>"*"+"/" 		{ BEGIN(old); }
+
 
 <<EOF>> {
     include_stack_ptr--;
@@ -389,6 +426,13 @@ BEGIN(SCRIPT);
 }
 
 
+void
+DEFUN_VOID(ldlex_mri_script)
+{
+  *(state_stack_p)++ = yy_start;
+  BEGIN(MRI);
+}
+	   
 void
 DEFUN_VOID(ldlex_expression)
 {

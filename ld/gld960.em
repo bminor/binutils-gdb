@@ -113,11 +113,20 @@ static char *script =
 #include "gld960.x"
 ;
 
+  
+static char *script_reloc =
+#include "gld960.xr"
+ ;
+
 
 static char *
 gld960_get_script()
 {
-return script;
+   extern ld_config_type config;
+   if (config.relocateable_output)
+     return script_reloc;
+   return script;
+
 }
 
 struct ld_emulation_xfer_struct ld_gld960_emulation = 
