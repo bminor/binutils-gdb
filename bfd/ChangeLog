@@ -1,3 +1,8 @@
+Mon Jun  9 12:34:21 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* elflink.h (elf_link_add_object_symbols): Ignore relocations of
+	sections that will be discarded.
+
 1997-06-06 22:58  Ulrich Drepper  <drepper@cygnus.com>
 
 	* elflink.h (elf_link_find_version_dependencies): When searching

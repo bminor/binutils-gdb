@@ -1586,7 +1586,8 @@ elf_link_add_object_symbols (abfd, info)
 	  if ((o->flags & SEC_RELOC) == 0
 	      || o->reloc_count == 0
 	      || ((info->strip == strip_all || info->strip == strip_debugger)
-		  && (o->flags & SEC_DEBUGGING) != 0))
+		  && (o->flags & SEC_DEBUGGING) != 0)
+	      || bfd_is_abs_section (o->output_section))
 	    continue;
 
 	  internal_relocs = (NAME(_bfd_elf,link_read_relocs)
