@@ -61,7 +61,7 @@ elf_generic_info_to_howto_rel (abfd, bfd_reloc, elf_reloc)
 static boolean 
 elf64_generic_link_add_symbols (abfd, info)
      bfd *abfd;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     struct bfd_link_info *info;
 {
   asection *o;
 
