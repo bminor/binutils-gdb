@@ -1,3 +1,8 @@
+2002-09-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-avr.c (md_apply_fix3): Reinstate code handling pcrel
+	fixups to current or absolute section.
+
 2002-09-26  Jim Wilson  <wilson@redhat.com>
 
 	* config/tc-v850.c (v850_offset): Use frag_var instead of frag_now_fix

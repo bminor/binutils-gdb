@@ -838,6 +838,17 @@ md_apply_fix3 (fixP, valP, seg)
   if (fixP->fx_addsy == (symbolS *) NULL)
     fixP->fx_done = 1;
 
+  else if (fixP->fx_pcrel)
+    {
+      segT s = S_GET_SEGMENT (fixP->fx_addsy);
+
+      if (s == seg || s == absolute_section)
+	{
+	  value += S_GET_VALUE (fixP->fx_addsy);
+	  fixP->fx_done = 1;
+	}
+    }
+
   /* We don't actually support subtracting a symbol.  */
   if (fixP->fx_subsy != (symbolS *) NULL)
     as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
