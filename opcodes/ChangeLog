@@ -1,3 +1,7 @@
+Tue Sep  5 18:28:10 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc-dis.c: Remove all references to NO_V9.
+
 Tue Sep  5 20:03:26 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aclocal.m4: Just include ../bfd/aclocal.m4.
