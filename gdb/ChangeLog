@@ -1,5 +1,11 @@
 2005-03-11  Jim Blandy  <jimb@redhat.com>
 
+	Avoid warnings due to the use of -Wuninitialized without -O.
+	* configure.ac (build_warnings): Include -Wuninitialized only if
+	CFLAGS is unset at configure time, or CFLAGS is set and includes
+	some -O option other than -O0.
+	* configure: Regenerated.
+
 	* mips-tdep.c (show_mips_abi): Change calling conventions to match
 	those expected by add_setshow_enum_cmd.  Use 'file' argument as
 	appropriate.
