@@ -1,5 +1,9 @@
 Mon Jul  8 16:18:03 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-ppc.c (ppc_elf_howto_raw): For R_PPC_ADDR16_HA, use
+	ppc_elf_addr16_ha_reloc.
+	(ppc_elf_addr16_ha_reloc): New static function.
+
 	* coff-mips.c (struct mips_hi): Define.
 	(mips_refhi_list): New static variable.
  	(mips_refhi_addr, mips_refhi_addend): Remove.
