@@ -1,3 +1,14 @@
+2003-09-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbarch.sh (DEPRECATED_REG_STRUCT_HAS_ADDR): Add comment.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	(stabs_argument_has_addr): New architecture method.
+	* arch-utils.h (default_stabs_argument_has_addr): New prototype.
+	* arch-utils.c: Include "buildsym.h".
+	(default_stabs_argument_has_addr): New function.
+	* stabsread.c (define_symbol): Use stabs_argument_has_addr
+	instead of DEPRECATED_REG_STRUCT_HAS_ADDR.
+
 2003-09-17  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_NPC_REGNUM): Deprecate NPC_REGNUM.

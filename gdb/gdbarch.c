@@ -238,6 +238,7 @@ struct gdbarch
   gdbarch_deprecated_stack_align_ftype *deprecated_stack_align;
   gdbarch_frame_align_ftype *frame_align;
   gdbarch_deprecated_reg_struct_has_addr_ftype *deprecated_reg_struct_has_addr;
+  gdbarch_stabs_argument_has_addr_ftype *stabs_argument_has_addr;
   int frame_red_zone_size;
   int parm_boundary;
   const struct floatformat * float_format;
@@ -406,6 +407,7 @@ struct gdbarch startup_gdbarch =
   0,  /* deprecated_stack_align */
   0,  /* frame_align */
   0,  /* deprecated_reg_struct_has_addr */
+  default_stabs_argument_has_addr,  /* stabs_argument_has_addr */
   0,  /* frame_red_zone_size */
   0,  /* parm_boundary */
   0,  /* float_format */
@@ -540,6 +542,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
   current_gdbarch->deprecated_frame_args_address = get_frame_base;
   current_gdbarch->deprecated_frame_locals_address = get_frame_base;
+  current_gdbarch->stabs_argument_has_addr = default_stabs_argument_has_addr;
   current_gdbarch->convert_from_func_ptr_addr = core_addr_identity;
   current_gdbarch->addr_bits_remove = core_addr_identity;
   current_gdbarch->smash_text_address = core_addr_identity;
@@ -730,6 +733,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of deprecated_stack_align, has predicate */
   /* Skip verify of frame_align, has predicate */
   /* Skip verify of deprecated_reg_struct_has_addr, has predicate */
+  /* Skip verify of stabs_argument_has_addr, invalid_p == 0 */
   if (gdbarch->float_format == 0)
     gdbarch->float_format = default_float_format (gdbarch);
   if (gdbarch->double_format == 0)
@@ -797,6 +801,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: register_reggroup_p = 0x%08lx\n",
                       (long) current_gdbarch->register_reggroup_p);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: stabs_argument_has_addr = 0x%08lx\n",
+                      (long) current_gdbarch->stabs_argument_has_addr);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_pseudo_register_read_p() = %d\n",
                       gdbarch_pseudo_register_read_p (current_gdbarch));
@@ -4928,6 +4935,23 @@ set_gdbarch_deprecated_reg_struct_has_addr (struct gdbarch *gdbarch,
                                             gdbarch_deprecated_reg_struct_has_addr_ftype deprecated_reg_struct_has_addr)
 {
   gdbarch->deprecated_reg_struct_has_addr = deprecated_reg_struct_has_addr;
+}
+
+int
+gdbarch_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->stabs_argument_has_addr != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_stabs_argument_has_addr called\n");
+  return gdbarch->stabs_argument_has_addr (gdbarch, type);
+}
+
+void
+set_gdbarch_stabs_argument_has_addr (struct gdbarch *gdbarch,
+                                     gdbarch_stabs_argument_has_addr_ftype stabs_argument_has_addr)
+{
+  gdbarch->stabs_argument_has_addr = stabs_argument_has_addr;
 }
 
 int
