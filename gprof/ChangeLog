@@ -1,3 +1,8 @@
+Tue Aug 22 10:00:45 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* Makefile.in (install): Remove "brokensed" hack, unnecessary now
+	that we're using autoconf.
+
 Wed Jul 19 18:46:13 1995  Fred Fish  <fnf@cygnus.com>
 
 	* core.c (get_src_info): Cast arg 7 of bfd_find_nearest_line
