@@ -1,3 +1,12 @@
+Tue Nov  7 15:45:17 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Default ${build} correctly.  Avoid picking up extra
+	spaces when reading CC and CXX from Makefile.  When doing a
+	Canadian Cross, use plausible default values for numerous
+	variables.
+	* configure.in: When doing a Canadian Cross, don't try to
+	configure tools whose configure script can't handle it.
+
 Mon Nov  6 19:32:17 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 
 	* cfg-ml-com.in (sh-*-*): Add m2 and ml/m2 to multidirs.

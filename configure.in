@@ -507,6 +507,12 @@ case "${target}" in
      ;;    
 esac
 
+# If we are building a Canadian Cross, discard tools that can not be built
+# using a cross compiler.  FIXME: These tools should be fixed.
+if [ "${build}" != "${host}" ]; then
+  noconfigdirs="$noconfigdirs expect dejagnu make texinfo diff"
+fi
+
 # Remove the entries in $skipdirs and $noconfigdirs from $configdirs and
 # $target_configdirs.
 # If we have the source for $noconfigdirs entries, add them to $notsupp.

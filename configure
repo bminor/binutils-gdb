@@ -550,7 +550,7 @@ case "${build_alias}" in
 	    build_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
 	    build_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 	    build_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
-	    build=${host_cpu}-${host_vendor}-${host_os}
+	    build=${build_cpu}-${build_vendor}-${build_os}
 	    build_alias=${host_alias}
 	fi
 	;;
@@ -649,7 +649,7 @@ if [ -z "${CC}" -a -r Makefile ]; then
 /\\$/ N
 /\\$/ b loop
 s/\\\n//g
-/^CC[ 	]*=/ s/CC[ 	]*=\(.*\)/\1/p' < Makefile > Makefile.cc
+/^CC[ 	]*=/ s/CC[ 	]*=[ 	]*\(.*\)/\1/p' < Makefile > Makefile.cc
   CC=`tail -1 Makefile.cc`
   rm -f Makefile.cc
 fi
@@ -659,26 +659,114 @@ if [ -z "${CXX}" -a -r Makefile ]; then
 /\\$/ N
 /\\$/ b loop
 s/\\\n//g
-/^CXX[ 	]*=/ s/CXX[ 	]*=\(.*\)/\1/p' < Makefile > Makefile.cc
+/^CXX[ 	]*=/ s/CXX[ 	]*=[ 	]*\(.*\)/\1/p' < Makefile > Makefile.cc
   CXX=`tail -1 Makefile.cc`
   rm -f Makefile.cc
 fi
 
-# If CC is still not set, try to get gcc.
-if [ -z "${CC}" ]; then
-  IFS="${IFS= 	}"; save_ifs="$IFS"; IFS="${IFS}:"
-  for dir in $PATH; do
-    test -z "$dir" && dir=.
-    if test -f $dir/gcc; then
-      CC="gcc"
-      break
+if [ "${build}" != "${host}" ]; then
+  # If we are doing a Canadian Cross, in which the host and build systems
+  # are not the same, we set reasonable default values for the tools.
+
+  tools="AR AR_FOR_TARGET AS AS_FOR_TARGET BISON CC_FOR_BUILD"
+  tools="${tools} CC_FOR_TARGET CXX_FOR_TARGET HOST_PREFIX"
+  tools="${tools} HOST_PREFIX_1 LEX MAKEINFO NM NM_FOR_TARGET"
+  tools="${tools} RANLIB RANLIB_FOR_TARGET"
+
+  for var in ${tools}; do
+    if [ -z "`eval 'echo $'"${var}"`" -a -r Makefile ]; then
+      sed -n -e ':loop
+/\\$/ N
+/\\$/ b loop
+s/\\\n//g
+/^'"${var}"'[ 	]*=/ s/'"${var}"'[ 	]*=[ 	]*\(.*\)/\1/p' \
+	< Makefile > Makefile.v
+      t=`tail -1 Makefile.v`
+      if [ -n "${t}" ]; then
+	eval "${var}='${t}'"
+      fi
+      rm -f Makefile.v
     fi
   done
-  IFS="$save_ifs"
-  CC=${CC-cc}
-fi
 
-CXX=${CXX-"g++ -O"}
+  AR=${AR-${host_alias}-ar}
+  AR_FOR_TARGET=${AR_FOR_TARGET-${target_alias}-ar}
+  AS=${AS-${host_alias}-as}
+  AS_FOR_TARGET=${AS_FOR_TARGET-${target_alias}-as}
+  CC=${CC-${host_alias}-gcc}
+  CXX=${CXX-${host_alias}-gcc}
+  CC_FOR_BUILD=${CC_FOR_BUILD-gcc}
+  CC_FOR_TARGET=${CC_FOR_TARGET-${target_alias}-gcc}
+  CXX_FOR_TARGET=${CXX_FOR_TARGET-${target_alias}-gcc}
+  HOST_PREFIX=${build_alias}-
+  HOST_PREFIX_1=${build_alias}-
+  MAKEINFO=${MAKEINFO-makeinfo}
+  NM=${NM-${host_alias}-nm}
+  NM_FOR_TARGET=${NM_FOR_TARGET-${target_alias}-nm}
+  RANLIB=${RANLIB-${host_alias}-ranlib}
+  RANLIB_FOR_TARGET=${RANLIB_FOR_TARGET-${target_alias}-ranlib}
+
+  if [ -z "${BISON}" ]; then
+    IFS="${IFS= 	}"; save_ifs="$IFS"; IFS="${IFS}:"
+    for dir in $PATH; do
+      test -z "$dir" && dir=.
+      if test -f $dir/byacc; then
+	BISON=byacc
+	break
+      fi
+      if test -f $dir/bison; then
+	BISON=bison
+	break
+      fi
+      if test -f $dir/yacc; then
+	BISON=yacc
+	break
+      fi
+    done
+    IFS="$save_ifs"
+    BISON=${BISON-bison}
+  fi
+
+  if [ -z "${LEX}" ]; then
+    IFS="${IFS= 	}"; save_ifs="$IFS"; IFS="${IFS}:"
+    for dir in $PATH; do
+      test -z "$dir" && dir=.
+      if test -f $dir/flex; then
+	LEX=flex
+	break
+      fi
+      if test -f $dir/lex; then
+	LEX=lex
+	break
+      fi
+    done
+    IFS="$save_ifs"
+    LEX=${LEX-flex}
+  fi
+
+  # Export variables which autoconf might try to set.
+  export AS
+  export AR
+  export CC_FOR_BUILD
+  export NM
+  export RANLIB
+else
+  # If CC is still not set, try to get gcc.
+  if [ -z "${CC}" ]; then
+    IFS="${IFS= 	}"; save_ifs="$IFS"; IFS="${IFS}:"
+    for dir in $PATH; do
+      test -z "$dir" && dir=.
+      if test -f $dir/gcc; then
+	CC="gcc"
+	break
+      fi
+    done
+    IFS="$save_ifs"
+    CC=${CC-cc}
+  fi
+
+  CXX=${CXX-"g++ -O"}
+fi
 
 export CC
 export CXX
@@ -954,6 +1042,23 @@ EOF
                     -e "s:^program_transform_name[ 	]*=.*$:program_transform_name = ${program_transform_name}:" \
                     -e "s:^tooldir[ 	]*=.*$:tooldir = ${tooldir}:" \
                     ${subdir}/Makefile.tem >> ${Makefile}
+
+	    # If this is a Canadian Cross, preset the values of many more
+	    # tools.
+	    if [ "${build}" != "${host}" ]; then
+		for var in ${tools}; do
+		    val=`eval 'echo $'"${var}"`
+		    sed -e "/^${var}[ 	]*=/{
+			   :loop1
+			   /\\\\$/ N
+			   /\\\\$/ b loop1
+			   s/\\\\\\n//g
+			   s%^${var}[ 	]*=.*$%${var} = ${val}%
+			   }" ${Makefile} > ${Makefile}.tem
+		    mv -f ${Makefile}.tem ${Makefile}
+		done
+	    fi
+
             # final copy now in ${Makefile}
 
         else
