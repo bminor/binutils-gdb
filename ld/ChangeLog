@@ -1,3 +1,8 @@
+Tue Jun 14 23:10:07 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldctor.c (ldctor_add_entry): Add entries to a set in the order
+	they are encountered.
+
 Tue Jun 14 18:05:09 1994  Eric Youngdale  (ericy@cais.cais.com)
 
 	* emulparams/i386linux.sh (TEXT_START_ADDR): Define as 0x1000.
