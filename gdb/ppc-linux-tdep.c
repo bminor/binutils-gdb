@@ -941,6 +941,52 @@ ppc64_call_dummy_address (void)
 }
 
 
+/* Return the unrelocated code address at which execution begins for
+   ABFD, under the 64-bit PowerPC Linux ABI.
+
+   On that system, the ELF header's e_entry field (which is what
+   bfd_get_start_address gives you) is not the address of the actual
+   machine instruction you need to jump to, as it is on almost every
+   other target.  Instead, it's the address of a function descriptor
+   for the start function.  A function descriptor is a structure
+   containing three addresses: the entry point, the TOC pointer for
+   the function, and an environment pointer for the function.  The
+   first field is what we want to return.
+
+   So all we do is find the section containing the start address, read
+   the address-sized word there out of the BFD, and return that.  */
+static CORE_ADDR
+ppc64_linux_bfd_entry_point (struct gdbarch *gdbarch, bfd *abfd)
+{
+  CORE_ADDR start_address = bfd_get_start_address (abfd);
+  CORE_ADDR addr_size = (bfd_arch_bits_per_address (abfd)
+                         / bfd_arch_bits_per_byte (abfd));
+  unsigned char *entry_pt_buf = alloca (addr_size);
+  asection *sec;
+
+  /* Find a data section containing an address word at the start
+     address.  */
+  for (sec = abfd->sections; sec; sec = sec->next)
+    if (bfd_get_section_vma (sec) <= start_address
+        && ((start_address + addr_size)
+            <= (bfd_get_section_vma (sec) + bfd_section_size (sec))))
+      break;
+  if (! sec)
+    return 0;
+
+  /* Seek to the start address, and read the address word there.  */
+  if (bfd_seek (abfd, 
+                sec->filepos + (start_address - bfd_get_section_vma (sec)),
+                SEEK_SET)
+      || bfd_bread (entry_pt_buf, addr_size, abfd) != addr_size)
+    return 0;
+      
+  /* That's the actual code entry point.  */
+  return (CORE_ADDR) bfd_get (bfd_arch_bits_per_address (abfd),
+                              abfd, entry_pt_buf);
+}
+
+
 enum {
   ELF_NGREG = 48,
   ELF_NFPREG = 33,
@@ -1072,6 +1118,8 @@ ppc_linux_init_abi (struct gdbarch_info info,
       set_gdbarch_in_solib_call_trampoline
         (gdbarch, ppc64_in_solib_call_trampoline);
       set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);
+      
+      set_gdbarch_bfd_entry_point (gdbarch, ppc64_linux_bfd_entry_point);
     }
 }
 
