@@ -1,3 +1,20 @@
+Mon Nov 11 10:27:55 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.c++/inherit.exp (test_ptype_si): Fix tagless struct ptype
+ 	tests and anonymous union print/ptype tests.
+	* gdb.base/list.exp (test_forward-search): Increase timeout by
+	5 minutes for the "search extremely long line" case.
+	* lib/gdb.exp (gdb_test): Document that the third arg to gdb_test is
+	completely optional and that the pass/fail messages use the command as
+	the message if that third arg is a null string.
+	(gdb_test_exact):  Arrange that a null string pattern means match a
+	null string output rather than any output, which might include random
+ 	errors.
+	* gdb.base/mips_pro.exp: Add "mips*-sgi-irix4*" xfail for
+	backtrace test.
+	* gdb.c++/demangle.exp: Add a "*-*-*" xfail for test that was
+	always failing and failure is now exposed by gdb.exp changes.
+
 Sat Nov  9 11:13:24 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.c++/inherit.exp (test_ptype_vi): Log some passes that
