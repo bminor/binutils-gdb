@@ -3359,17 +3359,53 @@ ENUM
   BFD_RELOC_M68HC11_HI8
 ENUMDOC
   Motorola 68HC11 reloc.
-  This is the 8 bits high part of an absolute address.
+  This is the 8 bit high part of an absolute address.
 ENUM
   BFD_RELOC_M68HC11_LO8
 ENUMDOC
   Motorola 68HC11 reloc.
-  This is the 8 bits low part of an absolute address.
+  This is the 8 bit low part of an absolute address.
 ENUM
   BFD_RELOC_M68HC11_3B
 ENUMDOC
   Motorola 68HC11 reloc.
-  This is the 3 bits of a value.
+  This is the 3 bit of a value.
+ENUM
+  BFD_RELOC_M68HC11_RL_JUMP
+ENUMDOC
+  Motorola 68HC11 reloc.
+  This reloc marks the beginning of a jump/call instruction.
+  It is used for linker relaxation to correctly identify beginning
+  of instruction and change some branchs to use PC-relative
+  addressing mode.
+ENUM
+  BFD_RELOC_M68HC11_RL_GROUP
+ENUMDOC
+  Motorola 68HC11 reloc.
+  This reloc marks a group of several instructions that gcc generates
+  and for which the linker relaxation pass can modify and/or remove
+  some of them.
+ENUM
+  BFD_RELOC_M68HC11_LO16
+ENUMDOC
+  Motorola 68HC11 reloc.
+  This is the 16-bit lower part of an address.  It is used for 'call'
+  instruction to specify the symbol address without any special
+  transformation (due to memory bank window).
+ENUM
+  BFD_RELOC_M68HC11_PAGE
+ENUMDOC
+  Motorola 68HC11 reloc.
+  This is a 8-bit reloc that specifies the page number of an address.
+  It is used by 'call' instruction to specify the page number of
+  the symbol.
+ENUM
+  BFD_RELOC_M68HC11_24
+ENUMDOC
+  Motorola 68HC11 reloc.
+  This is a 24-bit reloc that represents the address with a 16-bit
+  value and a 8-bit page number.  The symbol address is transformed
+  to follow the 16K memory bank of 68HC12 (seen as mapped in the window).
 
 ENUM
   BFD_RELOC_CRIS_BDISP8

@@ -1,3 +1,10 @@
+2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* reloc.c (BFD_RELOC_M68HC11_RL_JUMP, BFD_RELOC_M68HC11_RL_GROUP,
+	BFD_RELOC_M68HC11_LO16, BFD_RELOC_M68HC11_PAGE,
+	BFD_RELOC_M68HC11_24): New relocs for 68HC11/68HC12.
+	* bfd-in2.h: Regenerate.
+
 2002-08-12  H.J. Lu <hjl@gnu.org>
 
 	* elflink.h (elf_add_default_symbol): Preserve section across
