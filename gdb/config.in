@@ -444,6 +444,9 @@
 /* Define to 1 if the regex included in libiberty should be used. */
 #undef USE_INCLUDED_REGEX
 
+/* Define if <stdint.h> provides the uintptr_t type. */
+#undef HAVE_UINTPTR_T
+
 /* Define if malloc is not declared in system header files. */
 #undef NEED_DECLARATION_MALLOC
 

@@ -1,3 +1,8 @@
+2003-02-26  Michael Chastain  <mec@shout.net>
+
+	* configure.in: New variable HAVE_UINTPTR_T.
+	* configure, config.in: Regenerated.
+
 2003-02-26  Daniel Jacobowitz  <drow@mvista.com>
 
 	Fix PR build/1097.
