@@ -1,3 +1,8 @@
+2004-06-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (elf_section_ignore_discarded_relocs): Don't test
+	sec_info_type, test section name instead.
+
 2004-06-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 240
