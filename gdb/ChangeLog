@@ -1,8 +1,17 @@
+Fri Apr  9 10:20:55 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* solib.c (struct so_list): Add bfd field.
+	(solib_map_sections): Leave bfd open and scratch_pathname allocated.
+	Put the bfd in bfd field of the so_list.
+	(clear_solib): Free bfd name and close_bfd on the bfd.
+
 Fri Apr  9 00:45:41 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* valarith.c (value_subscript):  Add COERCE_REF.
+	**** start-sanitize-chill ****
 	* ch-exp.y (operand_5):  We can generalize the 2nd operand
 	of a string repetition ot 'literal' without ambiguity.
+	**** end-sanitize-chill ****
 
 Thu Apr  8 10:15:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
@@ -528,7 +537,9 @@ Thu Mar 18 14:26:57 1993  Per Bothner  (bothner@rtl.cygnus.com)
 	prologue (some callers _do_ care).
 	* mips-pinsn.c (print_insn), z8k-tdep.c (print_insn):  Convert to
 	new interface of ../opcodes/*-dis.c. 
+	**** start-sanitize-chill ****
 	* ch-exp.y:  Add #include <ctype.h>.
+	**** end-sanitize-chill ****
 
 Thu Mar 18 11:57:49 1993  Jim Kingdon  (kingdon@cygnus.com)
 
