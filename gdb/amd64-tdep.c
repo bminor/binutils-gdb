@@ -790,13 +790,12 @@ amd64_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   if (cache->frameless_p)
     {
-      /* We didn't find a valid frame, which means that CACHE->base
-	 currently holds the frame pointer for our calling frame.  If
-	 we're at the start of a function, or somewhere half-way its
-	 prologue, the function's frame probably hasn't been fully
-	 setup yet.  Try to reconstruct the base address for the stack
-	 frame by looking at the stack pointer.  For truly "frameless"
-	 functions this might work too.  */
+      /* We didn't find a valid frame.  If we're at the start of a
+	 function, or somewhere half-way its prologue, the function's
+	 frame probably hasn't been fully setup yet.  Try to
+	 reconstruct the base address for the stack frame by looking
+	 at the stack pointer.  For truly "frameless" functions this
+	 might work too.  */
 
       frame_unwind_register (next_frame, AMD64_RSP_REGNUM, buf);
       cache->base = extract_unsigned_integer (buf, 8) + cache->sp_offset;

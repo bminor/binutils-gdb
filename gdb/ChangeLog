@@ -1,3 +1,7 @@
+2004-02-28  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64-tdep.c (amd64_frame_cache): Fix comment.
+
 2004-02-28  Andrew Cagney  <cagney@redhat.com>
 
 	* utils.c: Use "", instead of <>, to include readline.
