@@ -6315,7 +6315,7 @@ _bfd_elfcore_make_pseudosection (bfd *abfd,
     return FALSE;
   memcpy (threaded_name, buf, len);
 
-  sect = bfd_make_section (abfd, threaded_name);
+  sect = bfd_make_section_anyway (abfd, threaded_name);
   if (sect == NULL)
     return FALSE;
   sect->_raw_size = size;
@@ -6599,7 +6599,7 @@ elfcore_grok_lwpstatus (bfd *abfd, Elf_Internal_Note *note)
     return FALSE;
   memcpy (name, buf, len);
 
-  sect = bfd_make_section (abfd, name);
+  sect = bfd_make_section_anyway (abfd, name);
   if (sect == NULL)
     return FALSE;
 
@@ -6629,7 +6629,7 @@ elfcore_grok_lwpstatus (bfd *abfd, Elf_Internal_Note *note)
     return FALSE;
   memcpy (name, buf, len);
 
-  sect = bfd_make_section (abfd, name);
+  sect = bfd_make_section_anyway (abfd, name);
   if (sect == NULL)
     return FALSE;
 
@@ -6685,7 +6685,7 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 
       memcpy (name, buf, len);
 
-      sect = bfd_make_section (abfd, name);
+      sect = bfd_make_section_anyway (abfd, name);
       if (sect == NULL)
 	return FALSE;
 
@@ -6712,7 +6712,7 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 
       memcpy (name, buf, len);
 
-      sect = bfd_make_section (abfd, name);
+      sect = bfd_make_section_anyway (abfd, name);
 
       if (sect == NULL)
 	return FALSE;
@@ -6789,7 +6789,7 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
 
     case NT_AUXV:
       {
-	asection *sect = bfd_make_section (abfd, ".auxv");
+	asection *sect = bfd_make_section_anyway (abfd, ".auxv");
 
 	if (sect == NULL)
 	  return FALSE;
@@ -6941,7 +6941,7 @@ elfcore_grok_nto_status (bfd *abfd, Elf_Internal_Note *note, pid_t *tid)
     return FALSE;
   strcpy (name, buf);
 
-  sect = bfd_make_section (abfd, name);
+  sect = bfd_make_section_anyway (abfd, name);
   if (sect == NULL)
     return FALSE;
 
@@ -6968,7 +6968,7 @@ elfcore_grok_nto_gregs (bfd *abfd, Elf_Internal_Note *note, pid_t tid)
     return FALSE;
   strcpy (name, buf);
 
-  sect = bfd_make_section (abfd, name);
+  sect = bfd_make_section_anyway (abfd, name);
   if (sect == NULL)
     return FALSE;
 

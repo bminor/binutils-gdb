@@ -1,3 +1,13 @@
+2003-10-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (_bfd_elfcore_make_pseudosection): Allow multiple
+	sections with the same name.
+	(elfcore_grok_lwpstatus): Likewise.
+	(elfcore_grok_win32pstatus): Likewise.
+	(elfcore_grok_note): Likewise.
+	(elfcore_grok_nto_status): Likewise.
+	(elfcore_grok_nto_gregs): Likewise.
+
 2003-10-27  Daniel Jacobowitz  <drow@mvista.com>
 
 	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Never skip dynamic
@@ -66,7 +76,7 @@
 	* ieee.c (ieee_write_processor): Likewise.
 
 2003-10-21  Peter Barada  <pbarada@mail.wm.sps.mot.com>
-            Bernardo Innocenti  <bernie@develer.com>
+	    Bernardo Innocenti  <bernie@develer.com>
 
 	* archures.c: Add MCF528x (MCFv4) support.
 	* bfd/cpu-m68k.c (arch_info_struct): Likewise.
@@ -80,7 +90,7 @@
 	* elf.c, coffgen.c, bfd.c, bfd-in.h, aoutf1.h: Ditto.
 	* aout-tic30.c, aout-target.h:
 	* bfd-in2.h, libcoff.h, libbfd.h: Regenerate.
-	
+
 2003-10-18  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	Support linker relaxation of new R_MMIX_PUSHJ_STUBBABLE relocs.
@@ -118,7 +128,7 @@
 	output section has been discarded.
 
 2003-10-17  Shrinivas Atre  <shrinivasa@KPITCummins.com>
-	
+
 	* coff-h8300.c (funcvec_hash_newfunc): Handle normal mode.
 	(h8300_reloc16_extra_cases): Likewise.
 	(h8300_bfd_link_add_symbols): Likewise.
@@ -228,8 +238,8 @@
 	elf_backend_merge_symbol_attribute.
 	* elflink.h (elf_link_add_object_symbols): Adjust call to
 	elf_backend_merge_symbol_attribute if the backend defined it.
-        * elfxx-target.h (elf_backend_merge_symbol_attribute): New macro.
-        (elfNN_bed): Add that to the initializer.
+	* elfxx-target.h (elf_backend_merge_symbol_attribute): New macro.
+	(elfNN_bed): Add that to the initializer.
 
 2003-10-14  Bob Wilson  <bob.wilson@acm.org>
 
@@ -417,12 +427,12 @@
 	* elf32-xtensa.c (elf_xtensa_relocate_section): Fix typo that clobbered
 	dynamic relocation offsets.
 
-2003-09-23  Alan Modra  <alan@modra.org>
+2003-09-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* simple.c (bfd_simple_get_relocated_section_contents): Free the
 	hash table using _bfd_generic_link_hash_table_free.
 
-2003-09-23  Alan Modra  <alan@modra.org>
+2003-09-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-bfd.h (struct bfd_elf_special_section): Remove "suffix".  Change
 	type of prefix_length and suffix_length to int.  Rename "attributes"
