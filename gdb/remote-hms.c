@@ -622,14 +622,13 @@ static void
 hms_close (quitting)
      int quitting;
 {
-
   /* Clear any break points */
   hms_clear_breakpoints ();
-
-  /* Put this port back into REMOTE mode */
   sleep (1);			/* Let any output make it all the way back */
-  serial_write ("R\r", 2);
-  serial_close ();
+  if (is_open) {
+    serial_write ("R\r", 2);
+    serial_close ();
+  }
   is_open = 0;
 }
 

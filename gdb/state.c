@@ -198,7 +198,6 @@ static struct formnode *
 alloc_formnode ()
 {
   struct formnode *fnp;
-
   fnp = (struct formnode *) xmalloc (sizeof (struct formnode));
   (void) memset (fnp, 0, sizeof (struct formnode));
   fnp -> sibling = formtree;
@@ -461,7 +460,7 @@ load_state_command (arg_string, from_tty)
   filename = tilde_expand (*argv);
   make_cleanup (free, filename);
 
-  if ((fp = fopen (filename, "r")) == NULL)
+  if ((fp = fopen (filename, FOPEN_RB)) == NULL)
     {
       perror_with_name (filename);
     }
@@ -517,7 +516,7 @@ dump_state_command (arg_string, from_tty)
 
   /* Now attempt to create a fresh state file. */
 
-  if ((asfd = sfd_fopen (filename, "w")) == NULL)
+  if ((asfd = sfd_fopen (filename, FOPEN_WB)) == NULL)
     {
       perror_with_name (filename);
     }

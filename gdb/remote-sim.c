@@ -45,7 +45,7 @@ sim_write_inferior_memory (memaddr, myaddr, len)
   return  sim_write(memaddr, myaddr, len);
 }
 
-static int
+static void
 store_register(regno)
 int regno;
 {
@@ -58,7 +58,6 @@ int regno;
   {
     sim_store_register(regno, read_register(regno));
   }
-  return 0;
 }
 
 
@@ -142,7 +141,7 @@ sim_create_inferior (execfile, args, env)
 
 
 
-static int
+static void
 sim_open (name, from_tty)
      char *name;
      int from_tty;
@@ -151,7 +150,6 @@ sim_open (name, from_tty)
   {
     name = "";
   }
-
   push_target (&sim_ops);
   target_fetch_registers(-1);
   printf_filtered("Connected to the simulator.\n");
@@ -159,7 +157,7 @@ sim_open (name, from_tty)
 
 /* Close out all files and local state before this target loses control. */
 
-static int
+static void
 sim_close (quitting)
      int quitting;
 {
@@ -168,7 +166,7 @@ sim_close (quitting)
 /* Terminate the open connection to the remote debugger.
    Use this when you want to detach and do something else
    with your gdb.  */
-int
+void
 sim_detach (args,from_tty)
      char *args;
      int from_tty;
@@ -176,7 +174,7 @@ sim_detach (args,from_tty)
   pop_target();			/* calls sim_close to do the real work */
   if (from_tty)
    printf_filtered ("Ending remote %s debugging\n", target_shortname);
-  return 0;
+
 }
  
 /* Tell the remote machine to resume.  */
@@ -245,15 +243,14 @@ sim_before_main_loop ()
 }
 
 
-static int rem_resume(a,b)
+static void rem_resume(a,b)
 {
   sim_resume(a,b);
-  return 0;
 }
 
+void
 pstore()
 {
-  return 1;
 }
 /* Define the target subroutine names */
 
