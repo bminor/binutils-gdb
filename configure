@@ -286,10 +286,10 @@ for host in ${hosts} ; do
 	host_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 	host_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
 	host=${host_cpu}-${host_vendor}-${host_os}
-	host_makefile_frag=config/hmake-${host}
+	host_makefile_frag=config/mh-${host}
 	if [ ! -f ${host_makefile_frag} ]
 	then
-		host_makefile_frag=config/hmake-${host_alias}
+		host_makefile_frag=config/mh-${host_alias}
 	fi
 
 	. ${tmpfile}.hst
@@ -302,10 +302,10 @@ for host in ${hosts} ; do
 		target_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 		target_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
 		target=${target_cpu}-${target_vendor}-${target_os}
-		target_makefile_frag=config/tmake-${target}
+		target_makefile_frag=config/mt-${target}
 		if [ ! -f ${target_makefile_frag} ]
 		then
-			target_makefile_frag=config/tmake-${target_alias}
+			target_makefile_frag=config/mt-${target_alias}
 		fi
 
 		. ${tmpfile}.tgt
@@ -481,21 +481,36 @@ for host in ${hosts} ; do
 			cat ${srcdir}/${Makefile_in} >> ${Makefile}
 
 			# Conditionalize the makefile for this host.
-			(echo "host_makefile_frag = ${srcdir}/${host_makefile_frag}" ; 
-				sed -e "/^####/  r ${srcdir}/${host_makefile_frag}" ${Makefile}) > Makefile.tem
+			if [ -f ${srcdir}/${host_makefile_frag} ] ; then
+				(echo "host_makefile_frag = ${srcdir}/${host_makefile_frag}" ;
+					sed -e "/^####/  r ${srcdir}/${host_makefile_frag}" ${Makefile}) > Makefile.tem
+			else
+				(echo "host_makefile_frag =" ;
+					cat ${Makefile}) > Makefile.tem
+			fi
 			mv Makefile.tem ${Makefile}
 
 			# Conditionalize the makefile for this target.
-			(echo "target_makefile_frag = ${srcdir}/${target_makefile_frag}" ; 
-				sed -e "/^####/  r ${srcdir}/${target_makefile_frag}" ${Makefile}) > Makefile.tem
+			if [ -f ${srcdir}/${target_makefile_frag} ] ; then
+				(echo "target_makefile_frag = ${srcdir}/${target_makefile_frag}" ; 
+					sed -e "/^####/  r ${srcdir}/${target_makefile_frag}" ${Makefile}) > Makefile.tem
+			else
+				(echo "target_makefile_frag =" ; 
+					cat ${Makefile}) > Makefile.tem
+			fi
 			mv Makefile.tem ${Makefile}
 
 			# Conditionalize the makefile for this site.
 			if [ -n "${site}" ] ; then
-				site_makefile_frag=config/smake-${site}
+				site_makefile_frag=config/ms-${site}
 
-				(echo "site_makefile_frag = ${srcdir}/${site_makefile_frag}" ; 
-					sed -e "/^####/  r ${srcdir}/${site_makefile_frag}" ${Makefile}) > Makefile.tem
+				if [ -f ${srcdir}/${site_makefile_frag} ] ; then
+					(echo "site_makefile_frag = ${srcdir}/${site_makefile_frag}" ; 
+						sed -e "/^####/  r ${srcdir}/${site_makefile_frag}" ${Makefile}) > Makefile.tem
+				else
+					(echo "site_makefile_frag =" ; 
+						cat ${Makefile}) > Makefile.tem
+				fi
 				mv Makefile.tem ${Makefile}
 			fi
 
@@ -631,7 +646,13 @@ exit 0
 #
 #
 # $Log$
-# Revision 1.61  1991/10/24 00:23:59  hgs
+# Revision 1.63  1991/10/25 02:07:18  steve
+# More name changing
+#
+# Revision 1.62  1991/10/24  11:59:03  rich
+# add null definitions for makefile_frag_foo
+#
+# Revision 1.61  1991/10/24  00:23:59  hgs
 # Allow for using tmake-sun4
 #
 # Revision 1.60  1991/10/23  21:48:28  rich
