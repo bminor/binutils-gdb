@@ -1,3 +1,14 @@
+2003-07-16  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c (avr_skip_prologue): Return PC unchanged if no prologue
+	found.
+	(avr_frame_unwind_cache): Don't unwind FP for main.
+	Update a comment.
+	Save the computed prev_sp.
+	(avr_saved_regs_unwinder): Remove function.
+	(avr_frame_prev_register): Use PC unwind logic from 
+	avr_saved_regs_unwinder, otherwise use trad_frame_prev_register.
+
 2003-07-15  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (get_frame_id): Use frame_unwind_find_by_frame.
