@@ -447,12 +447,12 @@ DEFUN (gmon_out_read, (filename), const char *filename)
     {
       printf (_("File `%s' (version %d) contains:\n"),
 	      filename, gmon_file_version);
-      printf (_("\t%d histogram record%s\n"),
-	      nhist, nhist == 1 ? "" : "s");
-      printf (_("\t%d call-graph record%s\n"),
-	      narcs, narcs == 1 ? "" : "s");
-      printf (_("\t%d basic-block count record%s\n"),
-	      nbbs, nbbs == 1 ? "" : "s");
+      printf (ngettext ("\t%d histogram record\n",
+			"\t%d histogram records\n", nhist), nhist);
+      printf (ngettext ("\t%d call-graph record\n",
+			"\t%d call-graph records\n", narcs), narcs);
+      printf (ngettext ("\t%d basic-block count record\n",
+			"\t%d basic-block count records\n", nbbs), nbbs);
       first_output = FALSE;
     }
 }

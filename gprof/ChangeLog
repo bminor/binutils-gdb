@@ -1,3 +1,10 @@
+2002-01-02  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* cg_print.c (print_header): Fix spelling typo.
+
+	* gmon_io.c (gmon_out_read): Fix formatting of text messages to
+	allow easier translation into other languages.
+
 2001-12-21  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* configure.in (ALL_LINGUAS): Add sv.
