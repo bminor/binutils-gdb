@@ -1,5 +1,6 @@
-/* Parameters for execution on a Sun, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
+/* Target machine parameters for an embedded m68k, for GDB, the GNU debugger.
+   This is for object file formats that don't have underlines on symbols.
+   Copyright 1986, 1987, 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -19,19 +20,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define HAVE_68881
 
-/* Let native-versus-cross support code know we are targeting sun3,
-   and modify registers to include sun3 fpustate register.  */
-
-#define GDB_TARGET_IS_SUN3 1
-
-/* Address of the end of stack space.  We get this from the system
-   include files. */
-
-#include <sys/types.h>
-#include <machine/vmparam.h>
-#define STACK_END_ADDR USRSTACK
-
 #include "tm-68k.h"
+
+/* Longjmp info comes from the Sun-3 machine description.  Might as well
+   guess... */
 
 /* Offsets (in target ints) into jmp_buf.  Not defined by Sun, but at least
    documented in a comment in <machine/setjmp.h>! */
@@ -62,7 +54,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
 
-#undef SAVED_PC_AFTER_CALL
+/* Where is the PC after a call?  */
 
 #ifdef __STDC__
 struct frame_info;
@@ -70,5 +62,6 @@ struct frame_info;
 
 extern CORE_ADDR sun3_saved_pc_after_call PARAMS ((struct frame_info *));
 
+#undef SAVED_PC_AFTER_CALL
 #define SAVED_PC_AFTER_CALL(frame) \
   sun3_saved_pc_after_call(frame)

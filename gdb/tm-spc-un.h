@@ -1,6 +1,6 @@
-/* Target machine sub-description for SunOS version 4.
-   This is included by other tm-*.h files to specify SunOS-specific stuff.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+/* Target machine definitions for GDB for an embedded SPARC, that
+   uses a file format where symbols have a leading underscore.
+   Copyright (C) 1989, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,9 +18,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include "tm-spc-noun.h"
+
 /* The C compiler puts an underscore at the front
    of external names before giving them to the linker.  */
 
 #define NAMES_HAVE_UNDERSCORE
-
-#include "solib.h"	/* Support for shared libraries. */

@@ -1,3 +1,25 @@
+Wed Sep  2 00:10:43 1992  John Gilmore  (gnu@cygnus.com)
+
+	* configure.in (*-*-sunos*):  Use trailing * to match all
+	sub-variants of SunOS, e.g. sunos4* to match sunos4.1.1.
+	(sparc-*-sunos3):  Remove host & target.  Sunos3 never shipped
+	in production on Sun-4.
+	({a29k,i[34]86,i960}-*-elf):  Add targets, equivalent to coff.
+	(m68k-*-{aout,coff,elf}):  Add targets, w/new config and tm files.
+	(sparc-*-{aout,coff,elf}):  Add targets, w/new config and tm files.
+
+	* config/m68k-un.mt, config/m68k-noun.mt, config/sparc-un.mt,
+	config/sparc-noun.mt:  New target configs for embedded.
+	* config/sun4os3.{mh,mt}:  Remove, never existed in production.
+
+	* tm-68k-un.h, tm-68k-noun.h, tm-spc-un.h, tm-spc-noun.h:  New
+	target definitions for embedded with and without underlines on
+	identifiers.  FIXME -- this ought to be known by BFD instead.
+
+	* tm-sparc.h, tm-sun2.h, tm-sun3.h:  Delete NAMES_HAVE_UNDERSCORE:
+	not a parameter of the CPU, but of the development environment.
+	* tm-es1800.h, tm-sunos.h, tm-vx68.h:  Add NAMES_HAVE_UNDERSCORE.
+
 Tue Sep  1 17:31:45 1992  John Gilmore  (gnu@cygnus.com)
 
 	* breakpoint.c (breakpoint_re_set):  Avoid setting source symtab

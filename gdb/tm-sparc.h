@@ -1,4 +1,5 @@
-/* Parameters for SPARC target machines, for GDB, the GNU debugger.
+/* Target machine sub-parameters for SPARC, for GDB, the GNU debugger.
+   This is included by other tm-*.h files to define SPARC cpu-related info.
    Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
    Contributed by Michael Tiemann (tiemann@mcc.com)
 
@@ -22,11 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Floating point is IEEE compatible.  */
 #define IEEE_FLOAT
-
-/* Define this if the C compiler puts an underscore at the front
-   of external names before giving them to the linker.  */
-
-#define NAMES_HAVE_UNDERSCORE
 
 /* When passing a structure to a function, Sun cc passes the address
    in a register, not the structure itself.  It (under SunOS4) creates

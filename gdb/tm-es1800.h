@@ -2,7 +2,7 @@
    The code was originally written by Johan Holmberg TT/SJ Ericsson Telecom
    AB and later modified by Johan Henriksson TT/SJ. It was adapted to GDB 4.0
    by Jan Norden TX/DK.
-   Copyright (C) 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -26,6 +26,11 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Kludge... */
 #include "tm-sun3.h"
+
+/* Define this if the C compiler puts an underscore at the front
+   of external names before giving them to the linker.  */
+
+#define NAMES_HAVE_UNDERSCORE
 
 #undef SAVED_PC_AFTER_CALL
 
