@@ -1,3 +1,9 @@
+2003-09-23  Alan Modra  <alan@modra.org>
+
+	* ld-discard/exit.s: Correct .text.exit attributes.
+	* ld-discard/extern.s: Likewise.
+	* ld-discard/static.s: Likewise.
+
 2003-09-21  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* ld-mips-elf/relax-jalr-n32.d: Fix little endian test failure.
