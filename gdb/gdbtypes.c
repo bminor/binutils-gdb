@@ -52,7 +52,7 @@ alloc_type (objfile)
       type  = (struct type *) obstack_alloc (&objfile -> type_obstack,
 					     sizeof (struct type));
     }
-  memset ((char *)type, 0, sizeof (struct type));
+  memset ((char *) type, 0, sizeof (struct type));
 
   /* Initialize the fields that might not be zero. */
 
@@ -97,7 +97,7 @@ make_pointer_type (type, typeptr)
     {
       ntype = *typeptr;
       objfile = TYPE_OBJFILE (ntype);
-      memset ((char *)ntype, 0, sizeof (struct type));
+      memset ((char *) ntype, 0, sizeof (struct type));
       TYPE_OBJFILE (ntype) = objfile;
     }
 
@@ -162,7 +162,7 @@ make_reference_type (type, typeptr)
     {
       ntype = *typeptr;
       objfile = TYPE_OBJFILE (ntype);
-      memset ((char *)ntype, 0, sizeof (struct type));
+      memset ((char *) ntype, 0, sizeof (struct type));
       TYPE_OBJFILE (ntype) = objfile;
     }
 
@@ -224,7 +224,7 @@ make_function_type (type, typeptr)
     {
       ntype = *typeptr;
       objfile = TYPE_OBJFILE (ntype);
-      memset ((char *)ntype, 0, sizeof (struct type));
+      memset ((char *) ntype, 0, sizeof (struct type));
       TYPE_OBJFILE (ntype) = objfile;
     }
 
@@ -314,8 +314,7 @@ create_array_type (element_type, number)
   TYPE_LENGTH (result_type) = number * TYPE_LENGTH (element_type);
   TYPE_NFIELDS (result_type) = 1;
   TYPE_FIELDS (result_type) = (struct field *)
-    obstack_alloc (&TYPE_OBJFILE (result_type) -> type_obstack,
-		   sizeof (struct field));
+    TYPE_ALLOC (result_type, sizeof (struct field));
 
   {
     /* Create range type.  */
@@ -328,8 +327,7 @@ create_array_type (element_type, number)
 
     TYPE_NFIELDS (range_type) = 2;
     TYPE_FIELDS (range_type) = (struct field *)
-      obstack_alloc (&TYPE_OBJFILE (range_type) -> type_obstack,
-		     2 * sizeof (struct field));
+      TYPE_ALLOC (range_type, 2 * sizeof (struct field));
     TYPE_FIELD_BITPOS (range_type, 0) = 0; /* FIXME */
     TYPE_FIELD_BITPOS (range_type, 1) = number-1; /* FIXME */
     TYPE_FIELD_TYPE (range_type, 0) = builtin_type_int; /* FIXME */
@@ -362,7 +360,7 @@ smash_to_member_type (type, domain, to_type)
 
   objfile = TYPE_OBJFILE (type);
 
-  memset ((char *)type, 0, sizeof (struct type));
+  memset ((char *) type, 0, sizeof (struct type));
   TYPE_OBJFILE (type) = objfile;
   TYPE_TARGET_TYPE (type) = to_type;
   TYPE_DOMAIN_TYPE (type) = domain;
@@ -388,7 +386,7 @@ smash_to_method_type (type, domain, to_type, args)
 
   objfile = TYPE_OBJFILE (type);
 
-  memset ((char *)type, 0, sizeof (struct type));
+  memset ((char *) type, 0, sizeof (struct type));
   TYPE_OBJFILE (type) = objfile;
   TYPE_TARGET_TYPE (type) = to_type;
   TYPE_DOMAIN_TYPE (type) = domain;
@@ -797,8 +795,7 @@ check_stub_method (type, i, j)
      NULL [...] or void [end of arglist].  */
 
   argtypes = (struct type **)
-    obstack_alloc (&TYPE_OBJFILE (type) -> type_obstack,
-		   (argcount+2) * sizeof (struct type *));
+    TYPE_ALLOC (type, (argcount + 2) * sizeof (struct type *));
   p = argtypetext;
   argtypes[0] = lookup_pointer_type (type);
   argcount = 1;
@@ -860,8 +857,7 @@ allocate_cplus_struct_type (type)
   if (!HAVE_CPLUS_STRUCT (type))
     {
       TYPE_CPLUS_SPECIFIC (type) = (struct cplus_struct_type *)
-	obstack_alloc (&current_objfile -> type_obstack,
-		       sizeof (struct cplus_struct_type));
+	TYPE_ALLOC (type, sizeof (struct cplus_struct_type));
       *(TYPE_CPLUS_SPECIFIC(type)) = cplus_struct_default;
     }
 }
@@ -951,7 +947,7 @@ lookup_fundamental_type (objfile, typeid)
 	  nbytes = FT_NUM_MEMBERS * sizeof (struct type *);
 	  objfile -> fundamental_types = (struct type **)
 	    obstack_alloc (&objfile -> type_obstack, nbytes);
-	  memset ((char *)objfile -> fundamental_types, 0, nbytes);
+	  memset ((char *) objfile -> fundamental_types, 0, nbytes);
 	}
       typep = objfile -> fundamental_types + typeid;
       if ((type = *typep) == NULL)

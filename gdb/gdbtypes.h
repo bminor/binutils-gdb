@@ -507,6 +507,20 @@ extern struct type *builtin_type_m2_bool;
    TYPE_UNSIGNED(t) ? UMIN_OF_SIZE(TYPE_LENGTH(t)) \
     : MIN_OF_SIZE(TYPE_LENGTH(t))
 
+/* Allocate space for storing data associated with a particular type.
+   We ensure that the space is allocated using the same mechanism that
+   was used to allocate the space for the type structure itself.  I.E.
+   if the type is on an objfile's type_obstack, then the space for data
+   associated with that type will also be allocated on the type_obstack.
+   If the type is not associated with any particular objfile (such as
+   builtin types), then the data space will be allocated with xmalloc,
+   the same as for the type structure. */
+
+#define TYPE_ALLOC(t,size)  \
+   TYPE_OBJFILE (t) != NULL  \
+    ? obstack_alloc (&TYPE_OBJFILE (t) -> type_obstack, size) \
+    : xmalloc (size)
+
 extern struct type *
 alloc_type PARAMS ((struct objfile *));
 

@@ -935,8 +935,7 @@ struct_type (dip, thisdie, enddie, objfile)
     {
       TYPE_NFIELDS (type) = nfields;
       TYPE_FIELDS (type) = (struct field *)
-	obstack_alloc (&objfile -> type_obstack,
-		       sizeof (struct field) * nfields);
+	TYPE_ALLOC (type, sizeof (struct field) * nfields);
       /* Copy the saved-up fields into the field vector.  */
       for (n = nfields; list; list = list -> next)
 	{

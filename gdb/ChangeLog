@@ -1,3 +1,25 @@
+Sun Aug 23 17:10:07 1992  Fred Fish  (fnf@cygnus.com)
+
+	* coffread.c (decode_type):  Call alloc_type to alloc new
+	types.
+	* stabsread.c (read_array_type, read_range_type, define_symbol):
+	Call alloc_type to alloc new types.
+	* stabsread.c (define_symbol):  Move dbl_valu symbol field data
+	from type_obstack to symbol_obstack.
+	* stabsread.c (define_symbol):  Move typedef_sym from type_obstack
+	to symbol_obstack.
+	* gdbtypes.h (TYPE_ALLOC):  New macro to allocate space for data
+	associated with a type, using the same mechanism as was used to
+	allocate space for the type structure itself.
+	* coffread.c (patch_type, coff_read_struct_type,
+	coff_read_enum_type):  Use TYPE_ALLOC.
+	* dwarfread.c (struct_type):  Use TYPE_ALLOC.
+	* gdbtypes.c (create_array_type, check_stub_method, 
+	allocate_cplus_struct_type):  Use TYPE_ALLOC.
+	* mipsread.c (parse_symbol, parse_type):  Use TYPE_ALLOC.
+	* stabsread.c (read_struct_type, read_array_type, read_enum_type,
+	read_range_type):  Use TYPE_ALLOC.
+
 Sun Aug 23 11:04:08 1992  Fred Fish  (fnf@cygnus.com)
 
 	* breakpoint.c (breakpoint_re_set):  Select a default source
