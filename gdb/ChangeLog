@@ -1,3 +1,8 @@
+Wed Jun 22 14:40:52 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* symtab.c (decode_line_1): fix a bug in dealing with '<>'
+	embedded in template name.
+
 Tue Jun 21 14:06:46 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* config/i386/nm-linux.h: change calling convention of 
