@@ -1,3 +1,23 @@
+Thu Jan 14 15:48:12 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* nindy-share/nindy.c:  Add comments to #endif's to clarify
+	grouping.
+
+	* hppa-pinsn.c (print_insn):  Use read_memory_integer, instead of
+	read_memory to get byte order right.
+	* hppah-tdep.c (find_unwind_info):  Don't read in unwind info
+	anymore.  This is done in paread.c now.  We expect unwind info
+	to hang off of objfiles, and search all of the objfiles when until
+	we find a match.
+	* (skip_trampoline_code):  Cast arg to target_read_memory.
+	* objfiles.h (struct objfile):  Add new field obj_private to hold
+	per object file private data (unwind info in this case).
+	* paread.c (read_unwind_info):  New routine to read unwind info
+	for the objfile.  This data is hung off of obj_private.
+	* tm-hppa.h:  Define struct obj_unwind_info, to hold pointers to
+	the unwind info for this objfile.  Also define OBJ_UNWIND_INFO to
+	make this easier to access.
+
 Wed Jan 13 20:49:59 1993  Fred Fish  (fnf@cygnus.com)
 
 	* c-valprint.c (cp_print_class_member):  Add extern decl.
