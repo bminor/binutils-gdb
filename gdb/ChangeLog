@@ -1,3 +1,8 @@
+2002-05-16  Daniel Jacobowitz  <drow@mvista.com>
+
+	Fix PR gdb/546
+	* ser-tcp.c: Don't include <netinet/udp.h>.
+
 2002-05-16  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* MAINTAINERS: Update my email address.
