@@ -1,5 +1,8 @@
 Mon Jun  3 11:48:29 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* inftarg.c (child_thread_alive): Protect declaration with
+	#ifndef CHILD_THREAD_ALIVE.
+
 	* source.c (find_source_lines): Check the time on the symtab's bfd if
 	it exists, else check the time on the exec_bfd.
 
