@@ -1,3 +1,7 @@
+2001-10-06  Mark Kettenis  <kettenis@beast.freebsd.org>
+
+	* config/alpha/tm-fbsd.h (FRAME_CHAIN_VALID): Define.
+
 2001-10-04  Tom Tromey  <tromey@redhat.com>
 
 	* main.c (enable_external_editor): Don't declare.

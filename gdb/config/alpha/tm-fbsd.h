@@ -29,6 +29,13 @@
 #define USE_STRUCT_CONVENTION(gcc_p, type) \
   alphafbsd_use_struct_convention (gcc_p, type)
 
+/* FreeBSD doesn't mark the outermost frame.  While some FreeBSD/Alpha
+   releases include (a minimal amount of) debugging info in its
+   startup code (crt1.o), the safest thing is to consider the user
+   code entry point as the outermost frame.  */
+#define FRAME_CHAIN_VALID(chain, thisframe) \
+  func_frame_chain_valid(chain, thisframe)
+
 /* Number of traps that happen between exec'ing the shell to run an
    inferior, and when we finally get to the inferior code.  The
    default is right for FreeBSD.  */
