@@ -28,6 +28,7 @@
 
 #include "hw-properties.h"
 #include "hw-events.h"
+#include "hw-alloc.h"
 /* #include "hw-instances.h" */
 /* #include "hw-handles.h" */
 #include "hw-ports.h"
@@ -131,6 +132,14 @@ int do_hw_poll_read
  int sim_io_fd,
  void *buf,
  unsigned size_of_buf);
+
+
+/* ALLOC */
+
+extern void create_hw_alloc_data
+(struct hw *hw);
+extern void delete_hw_alloc_data
+(struct hw *hw);
 
 
 /* PORTS */

@@ -142,6 +142,7 @@ SIM_EXTRA_CLEAN =
 # Those files are specified in LIB_OBJS below.
 
 SIM_COMMON_HW_OBJS = \
+	hw-alloc.o \
 	hw-device.o \
 	hw-events.o \
 	hw-ports.o \
@@ -314,6 +315,7 @@ sim-options_h = $(srccom)/sim-options.h
 sim-break_h = $(srccom)/sim-break.h
 sim-signal_h = $(srccom)/sim-signal.h
 
+hw-alloc_h = $(srccom)/hw-alloc.h
 hw-base_h = $(srccom)/hw-base.h
 hw-device_h = $(srccom)/hw-device.h
 hw-events_h = $(srccom)/hw-events.h
@@ -324,6 +326,7 @@ hw-properties_h = $(srccom)/hw-properties.h
 hw-tree_h = $(srccom)/hw-tree.h
 
 hw_base_headers = \
+	$(hw-alloc_h) \
 	$(hw-base_h) \
 	$(hw-device_h) \
 	$(hw-events_h) \
@@ -471,6 +474,10 @@ hw-config.h: Makefile.in $(srccom)/Make-common.in config.status Makefile
 	echo "  NULL," >> tmp-hw.h
 	echo "};" >> tmp-hw.h
 	mv tmp-hw.h hw-config.h
+
+hw-alloc.o: $(srccom)/hw-alloc.c $(sim_main_headers) \
+	  $(hw-alloc_h)
+	$(CC) -c $(srccom)/hw-alloc.c $(ALL_CFLAGS)
 
 hw-base.o: $(srccom)/hw-base.c $(sim_main_headers) \
 	  $(hw_base_headers) hw-config.h

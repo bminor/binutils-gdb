@@ -20,9 +20,7 @@
 
 
 #include "sim-main.h"
-
-#include "hw-device.h"
-#include "hw-properties.h"
+#include "hw-base.h"
 
 #if HAVE_STDLIB_H
 #include <stdlib.h>
@@ -54,74 +52,6 @@ hw_ioctl (struct hw *me,
   return status;
 }
       
-/* Mechanism for associating allocated memory regions to a device.
-   When a device is deleted any remaining memory regions are also
-   reclaimed.
-
-   FIXME: Perhaphs this can be generalized, perhaphs it should not
-   be. */
-
-struct hw_alloc_data {
-  void *alloc;
-  int zalloc_p;
-  struct hw_alloc_data *next;
-};
-
-void *
-hw_zalloc (struct hw *me, unsigned long size)
-{
-  struct hw_alloc_data *memory = ZALLOC (struct hw_alloc_data);
-  memory->alloc = zalloc (size);
-  memory->zalloc_p = 1;
-  memory->next = me->alloc_of_hw;
-  me->alloc_of_hw = memory;
-  return memory->alloc;
-}
-
-void *
-hw_malloc (struct hw *me, unsigned long size)
-{
-  struct hw_alloc_data *memory = ZALLOC (struct hw_alloc_data);
-  memory->alloc = zalloc (size);
-  memory->zalloc_p = 0;
-  memory->next = me->alloc_of_hw;
-  me->alloc_of_hw = memory;
-  return memory->alloc;
-}
-
-void
-hw_free (struct hw *me,
-	 void *alloc)
-{
-  struct hw_alloc_data **memory;
-  for (memory = &me->alloc_of_hw;
-       *memory != NULL;
-       memory = &(*memory)->next)
-    {
-      if ((*memory)->alloc == alloc)
-	{
-	  struct hw_alloc_data *die = (*memory);
-	  (*memory) = die->next;
-	  if (die->zalloc_p)
-	    zfree (die->alloc);
-	  else
-	    free (die->alloc);
-	  zfree (die);
-	  return;
-	}
-    }
-  hw_abort (me, "free of memory not belonging to a device");
-}
-
-void
-hw_free_all (struct hw *me)
-{
-  while (me->alloc_of_hw != NULL)
-    {
-      hw_free (me, me->alloc_of_hw->alloc);
-    }
-}
-
 char *
 hw_strdup (struct hw *me, const char *str)
 {

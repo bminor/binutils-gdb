@@ -417,6 +417,7 @@ hw_create (struct sim_state *sd,
   }
 
   /* Attach dummy ports */
+  create_hw_alloc_data (hw);
   create_hw_port_data (hw);
   create_hw_event_data (hw);
   
@@ -500,7 +501,7 @@ hw_delete (struct hw *me)
     }
 
   /* blow away all memory belonging to the device */
-  hw_free_all (me);
+  delete_hw_alloc_data (me);
 
   /* finally */
   zfree (me->base_of_hw);

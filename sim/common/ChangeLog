@@ -1,10 +1,25 @@
-Mon May 25 17:14:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+Mon May 25 17:40:46 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
-	* dv-pal.c: Update.
+	* hw-device.c, hw-properties.c: Include hw-base.h
+
+	* hw-alloc.h, hw-alloc.c: New files. Move alloc code to here.
+	* hw-device.c: From here.
+	* hw-base.h: Include "hw-events.h".
+
+	* hw-base.h (create_hw_alloc_data, delete_hw_alloc_data): Declare.
+	* hw-base.c (hw_create, hw_delete): Call.
+	* hw-alloc.c (create_hw_alloc_data, delete_hw_alloc_data): Define.
+
+	* Make-common.in (SIM_NEW_COMMON_OBJS): Add hw-alloc.o.
+	(hw-alloc.o): New target.
+	
+Mon May 25 17:14:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-events.h, hw-events.c: New files.  Move event code to here.
   	* sim-hw.c: From here.
 	* hw-base.h: Include "hw-events.h".
+	* Make-common.in (SIM_NEW_COMMON_OBJS): Add hw-events.o.
+	(hw-events.o): New target.
 
 	* hw-device.h (struct hw): Add struct hw_event_data events_of_hw.
 	* hw-events.h (struct hw_event): Replace typedef hw_event.
@@ -13,8 +28,7 @@ Mon May 25 17:14:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	* hw-base.c (hw_create, hw_delete): Call.
 	* hw-events.c (create_hw_event_data, delete_hw_event_data): Define.
 
-	* Make-common.in (SIM_NEW_COMMON_OBJS): Add hw-events.o.
-	(hw-events.o): New target.
+	* dv-pal.c: Update.
 
 Mon May 25 16:55:16 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 

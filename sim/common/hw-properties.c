@@ -19,9 +19,7 @@
     */
 
 #include "sim-main.h"
-
-#include "hw-device.h"
-#include "hw-properties.h"
+#include "hw-base.h"
 
 #include "sim-assert.h"
 
@@ -347,9 +345,10 @@ hw_find_array_property (struct hw *me,
 {
   const struct hw_property *node;
   node = hw_find_property (me, property);
-  if (node == NULL
-      || node->type != array_property)
-    hw_abort(me, "property %s not found or of wrong type", property);
+  if (node == NULL)
+    hw_abort (me, "property \"%s\" not found", property);
+  if (node->type != array_property)
+    hw_abort (me, "property \"%s\" of wrong type (array)", property);
   return node;
 }
 
@@ -374,8 +373,10 @@ hw_find_boolean_property (struct hw *me,
   const struct hw_property *node;
   unsigned_cell boolean;
   node = hw_find_property (me, property);
-  if (node == NULL || node->type != boolean_property)
-    hw_abort (me, "property %s not found or of wrong type", property);
+  if (node == NULL)
+    hw_abort (me, "property \"%s\" not found", property);
+  if (node->type != boolean_property)
+    hw_abort (me, "property \"%s\" of wrong type (boolean)", property);
   ASSERT (sizeof (boolean) == node->sizeof_array);
   memcpy (&boolean, node->array, sizeof (boolean));
   return boolean;
@@ -407,10 +408,11 @@ hw_find_ihandle_runtime_property (struct hw *me,
   TRACE (trace_devices,
 	 ("hw_find_ihandle_runtime_property(me=0x%lx, property=%s)\n",
 	  (long)me, property));
-  if (entry == NULL
-      || entry->property->type != ihandle_property
+  if (entry == NULL)
+    hw_abort (me, "property \"%s\" not found", property);
+  if (entry->property->type != ihandle_property
       || entry->property->disposition != permenant_object)
-    hw_abort (me, "property %s not found or of wrong type", property);
+    hw_abort (me, "property \"%s\" of wrong type", property);
   ASSERT (entry->init_array != NULL);
   /* the full path */
   ihandle->full_path = entry->init_array;
@@ -443,10 +445,12 @@ hw_find_ihandle_property (struct hw *me,
   hw_instance *instance;
 
   node = hw_find_property (me, property);
-  if (node == NULL || node->type != ihandle_property)
-    hw_abort(me, "property %s not found or of wrong type", property);
+  if (node == NULL)
+    hw_abort (me, "property \"%s\" not found", property);
+  if (node->type != ihandle_property)
+    hw_abort(me, "property \"%s\" of wrong type (ihandle)", property);
   if (node->array == NULL)
-    hw_abort(me, "runtime property %s not yet initialized", property);
+    hw_abort(me, "runtime property \"%s\" not yet initialized", property);
 
   ASSERT (sizeof(ihandle) == node->sizeof_array);
   memcpy (&ihandle, node->array, sizeof(ihandle));
@@ -479,8 +483,10 @@ hw_find_integer_property (struct hw *me,
 	 ("hw_find_integer(me=0x%lx, property=%s)\n",
 	  (long)me, property));
   node = hw_find_property (me, property);
-  if (node == NULL || node->type != integer_property)
-    hw_abort (me, "property %s not found or of wrong type", property);
+  if (node == NULL)
+    hw_abort (me, "property \"%s\" not found", property);
+  if (node->type != integer_property)
+    hw_abort (me, "property \"%s\" of wrong type (integer)", property);
   ASSERT (sizeof(integer) == node->sizeof_array);
   memcpy (&integer, node->array, sizeof (integer));
   return BE2H_cell (integer);
@@ -501,12 +507,13 @@ hw_find_integer_array_property (struct hw *me,
   
   /* check things sane */
   node = hw_find_property (me, property);
-  if (node == NULL
-      || (node->type != integer_property
-	  && node->type != array_property))
-    hw_abort (me, "property %s not found or of wrong type", property);
+  if (node == NULL)
+    hw_abort (me, "property \"%s\" not found", property);
+  if (node->type != integer_property
+      && node->type != array_property)
+    hw_abort (me, "property \"%s\" of wrong type (integer or array)", property);
   if ((node->sizeof_array % sizeof_integer) != 0)
-    hw_abort (me, "property %s contains an incomplete number of cells", property);
+    hw_abort (me, "property \"%s\" contains an incomplete number of cells", property);
   if (node->sizeof_array <= sizeof_integer * index)
     return 0;
   
@@ -612,12 +619,14 @@ hw_find_range_array_property (struct hw *me,
   
   /* locate the property */
   node = hw_find_property (me, property);
-  if (node == NULL || node->type != range_array_property)
-    hw_abort (me, "property %s not found or of wrong type", property);
+  if (node == NULL)
+    hw_abort (me, "property \"%s\" not found", property);
+  if (node->type != range_array_property)
+    hw_abort (me, "property \"%s\" of wrong type (range array)", property);
   
   /* aligned ? */
   if ((node->sizeof_array % sizeof_entry) != 0)
-    hw_abort (me, "property %s contains an incomplete number of entries",
+    hw_abort (me, "property \"%s\" contains an incomplete number of entries",
 	      property);
   
   /* within bounds? */
@@ -700,12 +709,14 @@ hw_find_reg_array_property (struct hw *me,
   
   /* locate the property */
   node = hw_find_property (me, property);
-  if (node == NULL || node->type != reg_array_property)
-    hw_abort (me, "property %s not found or of wrong type", property);
+  if (node == NULL)
+    hw_abort (me, "property \"%s\" not found", property);
+  if (node->type != reg_array_property)
+    hw_abort (me, "property \"%s\" of wrong type (reg array)", property);
   
   /* aligned ? */
   if ((node->sizeof_array % sizeof_entry) != 0)
-    hw_abort (me, "property %s contains an incomplete number of entries",
+    hw_abort (me, "property \"%s\" contains an incomplete number of entries",
 	      property);
   
   /* within bounds? */
@@ -745,8 +756,10 @@ hw_find_string_property (struct hw *me,
   const struct hw_property *node;
   const char *string;
   node = hw_find_property (me, property);
-  if (node == NULL || node->type != string_property)
-    hw_abort (me, "property %s not found or of wrong type", property);
+  if (node == NULL)
+    hw_abort (me, "property \"%s\" not found", property);
+  if (node->type != string_property)
+    hw_abort (me, "property \"%s\" of wrong type (string)", property);
   string = node->array;
   ASSERT (strlen(string) + 1 == node->sizeof_array);
   return string;
@@ -763,7 +776,7 @@ hw_add_string_array_property (struct hw *me,
   char *array;
   char *chp;
   if (nr_strings == 0)
-    hw_abort (me, "property %s must be non-null", property);
+    hw_abort (me, "property \"%s\" must be non-null", property);
   /* total up the size of the needed array */
   for (sizeof_array = 0, string_nr = 0;
        string_nr < nr_strings;
@@ -798,11 +811,11 @@ hw_find_string_array_property (struct hw *me,
   const struct hw_property *node;
   node = hw_find_property (me, property);
   if (node == NULL)
-    hw_abort (me, "property %s not found", property);
+    hw_abort (me, "property \"%s\" not found", property);
   switch (node->type)
     {
     default:
-      hw_abort (me, "property %s of wrong type", property);
+      hw_abort (me, "property \"%s\" of wrong type", property);
       break;
     case string_property:
       if (index == 0)
@@ -815,7 +828,7 @@ hw_find_string_array_property (struct hw *me,
     case array_property:
       if (node->sizeof_array == 0
 	  || ((char*)node->array)[node->sizeof_array - 1] != '\0')
-	hw_abort (me, "property %s invalid for string array", property);
+	hw_abort (me, "property \"%s\" invalid for string array", property);
       /* FALL THROUGH */
     case string_array_property:
       ASSERT (node->sizeof_array > 0);
