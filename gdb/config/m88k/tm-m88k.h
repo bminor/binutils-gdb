@@ -384,6 +384,12 @@ extern CORE_ADDR frame_locals_address ();
    previous frames.
 */
 
+struct frame_saved_regs;
+struct frame_info;
+
+void frame_find_saved_regs PARAMS((struct frame_info *fi,
+				   struct frame_saved_regs *fsr));
+
 #define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
         frame_find_saved_regs (frame_info, &frame_saved_regs)
 

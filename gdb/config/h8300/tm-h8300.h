@@ -94,8 +94,12 @@ extern CORE_ADDR h8300_skip_prologue ();
 
 #define REGISTER_TYPE  unsigned short
 
-/*#  define NUM_REGS 20 /* 20 for fake HW support */
+#if 0
+#  define NUM_REGS 20 /* 20 for fake HW support */
+#else
 #define NUM_REGS 13  
+#endif
+
 #define REGISTER_BYTES (NUM_REGS * 4)
 
 /* Index within `registers' of the first byte of the space for
