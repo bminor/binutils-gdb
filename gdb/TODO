@@ -237,14 +237,6 @@ suffer bit rot.
 
 --
 
-Updated readline
-
-Readline 4.? is out.  A merge wouldn't hurt.  Patches are in:
-
-http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00436.html
-
---
-
 Deprecate "fg".  Apparently ``fg'' is actually continue.
 
 http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00417.html

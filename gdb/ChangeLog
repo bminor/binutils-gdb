@@ -1,3 +1,7 @@
+2000-07-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        * TODO: Remove readline 4.1 import item.
+
 2000-07-09  Nick Duffek  <nsd@redhat.com>
 
 	* gdbtypes.c (is_ancestor): Infer type equivalence from name
