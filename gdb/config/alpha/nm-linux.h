@@ -1,5 +1,6 @@
 /* Native definitions for alpha running Linux.
-   Copyright 1993, 1994, 1996, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1996, 1998, 2000, 2001
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -51,16 +52,6 @@ extern int get_longjmp_target (CORE_ADDR *);
 /* Linux has shared libraries.  */
 
 #define GDB_TARGET_HAS_SHARED_LIBS
-
-/* Support for shared libraries.  */
-
-#ifdef __ELF__
-#define TARGET_ELF64
-#endif
-
-/* This is a lie.  It's actually in stdio.h. */
-
-#define PSIGNAL_IN_SIGNAL_H
 
 /* Given a pointer to either a gregset_t or fpregset_t, return a
    pointer to the first register.  */
