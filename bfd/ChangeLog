@@ -1,3 +1,7 @@
+2005-01-21  Ben Elliston  <bje@au.ibm.com>
+
+	* aout-encap.c: Remove unused file.
+
 2005-01-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 679
