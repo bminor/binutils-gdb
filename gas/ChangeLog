@@ -1,5 +1,9 @@
 Sat Aug 26 17:24:20 1995  Ian Lance Taylor  (ian@cygnus.com)
 
+	* config/te-delta.h: Include obj-format.h.
+	* config/te-sco386.h: Likewise.
+	* config/te-sysv32.h: Likewise.
+
 	* app.c (scrub_file): Remove.
 	(scrub_from_file, scrub_to_file): Remove.
 	(scrub_string, scrub_last_string): Remove.

@@ -3,4 +3,6 @@
 
 #define TE_DELTA
 
+#include "obj-format.h"
+
 /* end of te-delta.h */
