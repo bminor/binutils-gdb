@@ -3887,6 +3887,7 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
   else
     {
       long indx;
+      bfd_boolean defined_p;
 
       /* We must now calculate the dynamic symbol table index to use
 	 in the relocation.  */
@@ -3899,6 +3900,15 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
 	     become local.  */
 	  if (indx == -1)
 	    indx = 0;
+	  if (SGI_COMPAT (output_bfd))
+	    defined_p = ((h->root.elf_link_hash_flags
+			  & ELF_LINK_HASH_DEF_REGULAR) != 0);
+	  else
+	    /* ??? glibc's ld.so just adds the final GOT entry to the
+	       relocation field.  It therefore treats relocs against
+	       defined symbols in the same way as relocs against
+	       undefined symbols.  */
+	    defined_p = FALSE;
 	}
       else
 	{
@@ -3928,13 +3938,14 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
 	     useful, after all.  This should be a bit more efficient
 	     as well.  */
 	  indx = 0;
+	  defined_p = TRUE;
 	}
 
       /* If the relocation was previously an absolute relocation and
 	 this symbol will not be referred to by the relocation, we must
 	 adjust it by the value we give it in the dynamic symbol table.
 	 Otherwise leave the job up to the dynamic linker.  */
-      if (!indx && r_type != R_MIPS_REL32)
+      if (defined_p && r_type != R_MIPS_REL32)
 	*addendp += symbol;
 
       /* The relocation is always an REL32 relocation because we don't

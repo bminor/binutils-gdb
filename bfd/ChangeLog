@@ -1,5 +1,11 @@
 2003-07-09  Richard Sandiford  <rsandifo@redhat.com>
 
+	* bfd/elfxx-mips.c (mips_elf_create_dynamic_relocation): In SGI-
+	compatible objects, add the values of defined external symbols
+	to the addend.
+
+2003-07-09  Richard Sandiford  <rsandifo@redhat.com>
+
 	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_symbol): Always
 	initialize a GOT entry to the symbol's st_value.
 
