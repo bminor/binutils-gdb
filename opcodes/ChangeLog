@@ -1,3 +1,14 @@
+Thu Mar 20 19:03:30 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
+
+	* m68k-opc.c (m68k_opcode_aliases): Added blo and blo{s,b,w,l}.
+
+start-sanitize-coldfire
+Wed Mar 19 06:53:58 1997  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* m68k-opc.c (m68k_opcodes): Provide coldfire division module
+ 	instructions.
+	
+end-sanitize-coldfire
 Tue Mar 18 14:17:03 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10200-opc.c: Change "trap" to "syscall".
