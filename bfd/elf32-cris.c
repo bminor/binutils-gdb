@@ -33,6 +33,12 @@ static reloc_howto_type * cris_reloc_type_lookup
 static void cris_info_to_howto_rela
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
 
+static boolean cris_elf_grok_prstatus
+  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
+
+static boolean cris_elf_grok_psinfo
+  PARAMS ((bfd *abfd, Elf_Internal_Note *note));
+
 static boolean cris_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
@@ -459,6 +465,72 @@ cris_info_to_howto_rela (abfd, cache_ptr, dst)
   r_type = ELF32_R_TYPE (dst->r_info);
   BFD_ASSERT (r_type < (unsigned int) R_CRIS_max);
   cache_ptr->howto = & cris_elf_howto_table [r_type];
+}
+
+/* Support for core dump NOTE sections.  */
+
+static boolean
+cris_elf_grok_prstatus (abfd, note)
+     bfd *abfd;
+     Elf_Internal_Note *note;
+{
+  int offset;
+  size_t raw_size;
+
+  switch (note->descsz)
+    {
+      default:
+	return false;
+
+      case 166:		/* Linux/CRIS */
+	/* pr_cursig */
+	elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
+
+	/* pr_pid */
+	elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 22);
+
+	/* pr_reg */
+	offset = 70;
+	raw_size = 92;
+
+	break;
+    }
+
+  /* Make a ".reg/999" section.  */
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg",
+					  raw_size, note->descpos + offset);
+}
+
+static boolean
+cris_elf_grok_psinfo (abfd, note)
+     bfd *abfd;
+     Elf_Internal_Note *note;
+{
+  switch (note->descsz)
+    {
+      default:
+	return false;
+
+      case 124:		/* Linux/CRIS elf_prpsinfo */
+	elf_tdata (abfd)->core_program
+	 = _bfd_elfcore_strndup (abfd, note->descdata + 28, 16);
+	elf_tdata (abfd)->core_command
+	 = _bfd_elfcore_strndup (abfd, note->descdata + 44, 80);
+    }
+
+  /* Note that for some reason, a spurious space is tacked
+     onto the end of the args in some (at least one anyway)
+     implementations, so strip it off if it exists.  */
+
+  {
+    char *command = elf_tdata (abfd)->core_command;
+    int n = strlen (command);
+
+    if (0 < n && command[n - 1] == ' ')
+      command[n - 1] = '\0';
+  }
+
+  return true;
 }
 
 /* The name of the dynamic interpreter.  This is put in the .interp
@@ -2997,6 +3069,8 @@ elf_cris_reloc_type_class (rela)
 #define elf_backend_gc_mark_hook		cris_elf_gc_mark_hook
 #define elf_backend_gc_sweep_hook		cris_elf_gc_sweep_hook
 #define elf_backend_check_relocs                cris_elf_check_relocs
+#define elf_backend_grok_prstatus		cris_elf_grok_prstatus
+#define elf_backend_grok_psinfo			cris_elf_grok_psinfo
 
 #define elf_backend_can_gc_sections		1
 #define elf_backend_can_refcount		1

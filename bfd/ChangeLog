@@ -1,3 +1,10 @@
+2001-11-02  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_elf_grok_prstatus): New function.
+	(cris_elf_grok_prstatus): New function.
+	(elf_backend_grok_prstatus): Define.
+	(elf_backend_grok_psinfo): Define.
+
 2001-11-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_relocate_section): Correct branch
