@@ -15,11 +15,11 @@ TREE	= devo
 
 NATIVE  = native
 
-DATE	= 921208
+DATE	= 921213
 
 TAG	= latest-$(DATE)
 
-INSTALLDIR = /cirdan/justice/devo-test/$(TAG)
+INSTALLDIR = /cirdan/taxes/devo-test/$(TAG)
 
 GCC = gcc -O -g
 CFLAGS = -O
@@ -73,10 +73,10 @@ all: all-native
 endif
 
 ifeq ($(canonhost),hppa1.1-hp-hpux)
-TARGETS	= $(NATIVE) m68k-aout m68k-vxworks i960-vxworks 
+TARGETS	= m68k-coff m68k-aout m68k-vxworks i960-vxworks a29k-amd-udi
 CC = cc 
 CFLAGS =
-all: all-cygnus
+all: all-native
 endif
 
 FLAGS_TO_PASS := \
