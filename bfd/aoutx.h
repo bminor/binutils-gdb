@@ -449,7 +449,7 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
   execp = abfd->tdata.aout_data->a.hdr;
 
   /* Set the file flags */
-  abfd->flags = NO_FLAGS;
+  abfd->flags = BFD_NO_FLAGS;
   if (execp->a_drsize || execp->a_trsize)
     abfd->flags |= HAS_RELOC;
   /* Setting of EXEC_P has been deferred to the bottom of this function */
@@ -747,12 +747,6 @@ NAME(aout,machine_type) (arch, machine, unknown)
   case bfd_arch_vax:
     *unknown = false;
     break;
-
-    /* start-sanitize-rce */
-  case bfd_arch_rce:
-    arch_flags = M_RCE;
-    break;
-    /* end-sanitize-rce */
 
   default:
     arch_flags = M_UNKNOWN;
@@ -1589,8 +1583,9 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
       /* This case occurs, e.g., for the *DEBUG* section of a COFF
 	 file.  */
       (*_bfd_error_handler)
-	("%s: can not represent section `%s' in a.out object file format",
-	 bfd_get_filename (abfd), bfd_get_section_name (abfd, sec));
+	("%s: can not represent section for symbol `%s' in a.out object file format",
+	 bfd_get_filename (abfd), 
+	 cache_ptr->name != NULL ? cache_ptr->name : "*unknown*");
       bfd_set_error (bfd_error_nonrepresentable_section);
       return false;
     }
@@ -2677,7 +2672,49 @@ NAME(aout,find_nearest_line)
       aout_symbol_type  *q = (aout_symbol_type *)(*p);
     next:
       switch (q->type){
+      case N_TEXT:
+	/* If this looks like a file name symbol, and it comes after
+           the line number we have found so far, but before the
+           offset, then we have probably not found the right line
+           number.  */
+	if (q->symbol.value <= offset
+	    && ((q->symbol.value > low_line_vma
+		 && (line_file_name != NULL
+		     || *line_ptr != 0))
+		|| (q->symbol.value > low_func_vma
+		    && func != NULL)))
+	  {
+	    const char *symname;
+
+	    symname = q->symbol.name;
+	    if (strcmp (symname + strlen (symname) - 2, ".o") == 0)
+	      {
+		if (q->symbol.value > low_line_vma)
+		  {
+		    *line_ptr = 0;
+		    line_file_name = NULL;
+		  }
+		if (q->symbol.value > low_func_vma)
+		  func = NULL;
+	      }
+	  }
+	break;
+
       case N_SO:
+	/* If this symbol is less than the offset, but greater than
+           the line number we have found so far, then we have not
+           found the right line number.  */
+	if (q->symbol.value <= offset)
+	  {
+	    if (q->symbol.value > low_line_vma)
+	      {
+		*line_ptr = 0;
+		line_file_name = NULL;
+	      }
+	    if (q->symbol.value > low_func_vma)
+	      func = NULL;
+	  }
+
 	main_file_name = current_file_name = q->symbol.name;
 	/* Look ahead to next symbol to check if that too is an N_SO. */
 	p++;
@@ -4225,7 +4262,8 @@ aout_link_write_symbols (finfo, input_bfd)
 		case discard_none:
 		  break;
 		case discard_l:
-		  if (*name == *finfo->info->lprefix
+		  if ((type & N_STAB) == 0
+		      && *name == *finfo->info->lprefix
 		      && (finfo->info->lprefix_len == 1
 			  || strncmp (name, finfo->info->lprefix,
 				      finfo->info->lprefix_len) == 0))
@@ -5048,12 +5086,20 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 	{
 	  /* We are generating a relocateable output file, and must
 	     modify the reloc accordingly.  */
-	  if (r_extern)
+	  if (r_extern
+	      || r_type == RELOC_BASE10
+	      || r_type == RELOC_BASE13
+	      || r_type == RELOC_BASE22)
 	    {
 	      /* If we know the symbol this relocation is against,
 		 convert it into a relocation against a section.  This
 		 is what the native linker does.  */
-	      h = sym_hashes[r_index];
+	      if (r_type == RELOC_BASE10
+		  || r_type == RELOC_BASE13
+		  || r_type == RELOC_BASE22)
+		h = NULL;
+	      else
+		h = sym_hashes[r_index];
 	      if (h != (struct aout_link_hash_entry *) NULL
 		  && (h->root.type == bfd_link_hash_defined
 		      || h->root.type == bfd_link_hash_defweak))
@@ -5169,8 +5215,12 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 	    }
 
 	  /* As described above, we must always adjust a PC relative
-	     reloc by the change in VMA of the source.  */
-	  if (howto_table_ext[r_type].pc_relative)
+	     reloc by the change in VMA of the source.  However, if
+	     pcrel_offset is set, then the addend does not include the
+	     location within the section, in which case we don't need
+	     to adjust anything.  */
+	  if (howto_table_ext[r_type].pc_relative
+	      && ! howto_table_ext[r_type].pcrel_offset)
 	    relocation -= (input_section->output_section->vma
 			   + input_section->output_offset
 			   - input_section->vma);

@@ -1,3 +1,8 @@
+Fri Jan 31 14:07:27 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aoutx.h (aout_link_write_symbols): Don't apply discard_l to
+	debugging symbols.
+
 Wed Jan 29 00:00:49 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-mn10200.c (reloc_type): Add 16bit pc-relative reloc.
