@@ -1,5 +1,5 @@
 # Test Framework Driver for GDB driving a builtin simulator
-#   Copyright 1994 Free Software Foundation, Inc.
+#   Copyright 1994, 1997, 1998 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
 load_lib gdb.exp
 
@@ -27,23 +27,31 @@ if [istarget "sh*-*-*"] then {
     set target_sim_options "18"
 }
 
+# The ERC32 simulator requires the argument -sparclite in order
+# to emulate sparclite-specific instructions.
+
+if [istarget "sparclite*-*-*"] then {
+    set target_sim_options "-sparclite"
+}
+if [istarget "sparc86x*-*-*"] then {
+    set target_sim_options "-sparclite"
+}
+
 #
 # gdb_target_sim
 # Set gdb to target the simulator
 #
 proc gdb_target_sim { } {
-    global prompt
+    global gdb_prompt
     global verbose
     global exit_status
     global target_sim_options
-    global gdb_spawn_id
 
-    set spawn_id $gdb_spawn_id
     send_gdb "target sim $target_sim_options\n"
     set timeout 60
     verbose "Timeout is now $timeout seconds" 2
-    expect {
-	-re "Connected to the simulator.*$prompt $"	{
+    gdb_expect {
+	-re "Connected to the simulator.*$gdb_prompt $"	{
 	    verbose "Set target to sim"
 	}
 	timeout { 
@@ -65,10 +73,7 @@ proc gdb_load { arg } {
     global loadpath
     global loadfile
     global GDB
-    global prompt
-    global gdb_spawn_id
-
-    set spawn_id $gdb_spawn_id
+    global gdb_prompt
 
     if [gdb_file_cmd $arg] then { return -1 }
 
@@ -77,8 +82,8 @@ proc gdb_load { arg } {
     send_gdb "load\n"
     set timeout 2400
     verbose "Timeout is now $timeout seconds" 2
-    expect {
-	-re ".*$prompt $" {
+    gdb_expect {
+	-re ".*$gdb_prompt $" {
 	    if $verbose>1 then {
 		send_user "Loaded $arg into $GDB\n"
 	    }
@@ -86,7 +91,7 @@ proc gdb_load { arg } {
 	    verbose "Timeout is now $timeout seconds" 2
 	    return 1
 	}
-	-re "$prompt $"     {
+	-re "$gdb_prompt $"     {
 	    if $verbose>1 then {
 		perror "GDB couldn't load."
 	    }

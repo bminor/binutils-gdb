@@ -1,3 +1,8 @@
+Sat May 16 23:22:09 1998  Mark Alexander  <marka@cygnus.com>
+
+	* config/sim.exp: Use 'target sim -sparclite' when running
+	SPARClite programs.
+
 Sat May 16 18:48:08 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gdb.base/structs2.exp: New file.
