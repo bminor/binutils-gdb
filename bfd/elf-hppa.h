@@ -854,20 +854,61 @@ elf_hppa_final_link (abfd, info)
     {
       struct elf_link_hash_entry *gp;
       bfd_vma gp_val;
+      struct elf64_hppa_link_hash_table *hppa_info;
 
-      /* The linker script defines a value for __gp, we just need to
-	 install that value into magic place for the BFD.  */
+      hppa_info = elf64_hppa_hash_table (info);
+
+      /* The linker script defines a value for __gp iff it was referenced
+	 by one of the objects being linked.  First try to find the symbol
+	 in the hash table.  If that fails, just compute the value __gp
+	 should have had.  */
       gp = elf_link_hash_lookup (elf_hash_table (info), "__gp", false,
 				 false, false);
 
-      /* Adjust the value of __gp as we may want to slide it into the
-	 .plt section so that the stubs can access PLT entries without
-	 using an addil sequence.  */
-      gp->root.u.def.value += elf64_hppa_hash_table (info)->gp_offset;
+      if (gp)
+	{
 
-      gp_val = (gp->root.u.def.section->output_section->vma
-		+ gp->root.u.def.section->output_offset
-		+ gp->root.u.def.value);
+	  /* Adjust the value of __gp as we may want to slide it into the
+	     .plt section so that the stubs can access PLT entries without
+	     using an addil sequence.  */
+	  gp->root.u.def.value += elf64_hppa_hash_table (info)->gp_offset;
+
+	  gp_val = (gp->root.u.def.section->output_section->vma
+		    + gp->root.u.def.section->output_offset
+		    + gp->root.u.def.value);
+	}
+      else
+	{
+	  asection *sec;
+  
+
+	  /* First look for a .plt section.  If found, then __gp is the
+	     address of the .plt + gp_offset.
+
+	     If no .plt is found, then look for .dlt, .opd and .data (in
+	     that order) and set __gp to the base address of whichever section
+	    is found first.  */
+
+	  sec = hppa_info->plt_sec;
+	  if (sec)
+	    gp_val = (sec->output_offset
+		      + sec->output_section->vma
+		      + hppa_info->gp_offset);
+	  else
+	    {
+	      sec = hppa_info->dlt_sec;
+	      if (!sec)
+		sec = hppa_info->opd_sec;
+	      if (!sec)
+		sec = bfd_get_section_by_name (abfd, ".data");
+	      if (!sec)
+		return false;
+
+	      gp_val = sec->output_offset + sec->output_section->vma;
+	    }
+	}
+
+      /* Install whatever value we found/computed for __gp.  */
       _bfd_set_gp_value (abfd, gp_val);
     }
 
