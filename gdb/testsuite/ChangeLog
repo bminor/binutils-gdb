@@ -1,3 +1,22 @@
+Thu Feb 12 13:49:30 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/d10vovly.c (D10VTranslate): Map IMAP0 to low 128k of
+ 	on-chip insn memory and IMAP1 to upper 128k.
+	(D10VCopy): Handle memory regions crossing 16k boundaries.
+	(D10VCopy): Transfer data in 32 bit chunks.
+
+Tue Feb 10 17:23:22 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/overlays.c (main): Exit normally when result is
+ 	correct.
+
+	* gdb.base/d10v.ld: Update LMAs to reflect current d10v address
+ 	map.  Include space for printf in .text segment.
+
+	* gdb.base/d10vovly.c (D10VTranslate): New function, handle
+ 	updated d10v memory VMA/LMA map.
+	(D10VCopy): Call D10VTranslate.
+	
 Fri Feb  6 14:13:12 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/m32rovly.c: Force variable _novlys into .data section.
