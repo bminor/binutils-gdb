@@ -1,3 +1,8 @@
+2002-05-19  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* cpu-mips.c (mips_compatible): Don't try to check machine
+	compatibility.
+
 2002-05-18  Tom Rix  <trix@redhat.com>
 
 	* coff64-rs6000.c (_bfd_xcoff64_swap_aux_out):  Fix C_FILE auxent.
