@@ -426,18 +426,12 @@ other GNU tools recursively; but these are the only options that affect
 GDB or its supporting libraries.
 
 
-Languages other than C
-=======================
+Host/target specific installation notes
+=======================================
 
-See the GDB manual (gdb/doc/gdb.texinfo) for information on this.
+solaris??-64-???
 
-
-Kernel debugging
-=================
-
-   Remote debugging over serial lines works fine, but the kernel
-debugging code in here has not been tested in years.  Van Jacobson has
-better kernel debugging, but the UC lawyers won't let FSF have it.
+Something goes here on how to set up a 64 bit build.
 
 
 Remote debugging
@@ -507,68 +501,6 @@ command that you used when configuring GDB.
    For more information on how/whether to report bugs, see the GDB
 Bugs section of the GDB manual (gdb/doc/gdb.texinfo) or the
 gdb/CONTRIBUTE file.
-
-Known bugs:
-
-  * Under Ultrix 4.2 (DECstation-3100) or Alphas under OSF/1, we have
-    seen problems with backtraces after interrupting the inferior out
-    of a read().  The problem is caused by ptrace() returning an
-    incorrect value for the frame pointer register (register 15 or
-    30).  As far as we can tell, this is a kernel problem.  Any help
-    with this would be greatly appreciated.
-
-  * Under Ultrix 4.4 (DECstation-3100), setting the TERMCAP environment
-    variable to a string without a trailing ':' can cause GDB to dump
-    core upon startup.  Although the core file makes it look as though
-    GDB code failed, the crash actually occurs within a call to the
-    termcap library function tgetent().  The problem can be solved by
-    using the GNU Termcap library.
-
-    Alphas running OSF/1 (versions 1.0 through 2.1) have the same buggy
-    termcap code, but GDB behaves strangely rather than crashing.
-
-  * On DECstations there are warnings about shift counts out of range in
-    various BFD modules.  None of them is a cause for alarm, they are actually
-    a result of bugs in the DECstation compiler.
-
-  * Notes for the DEC Alpha using OSF/1:
-    The debugging output of native cc has two known problems; we view these
-    as compiler bugs.
-    The linker miscompacts symbol tables, which causes gdb to confuse the
-    type of variables or results in `struct <illegal>' type outputs.
-    dbx has the same problems with those executables.  A workaround is to
-    specify -Wl,-b when linking, but that will increase the executable size
-    considerably.
-    If a structure has incomplete type in one file (e.g., "struct foo *"
-    without a definition for "struct foo"), gdb will be unable to find the
-    structure definition from another file.
-    It has been reported that the Ultrix 4.3A compiler on decstations has the
-    same problems.
-
-  * Notes for Solaris 2.x, using the SPARCworks cc compiler:
-    You have to compile your program with the -xs option of the SPARCworks
-    compiler to be able to debug your program with gdb.
-    Under Solaris 2.3 you also need patch 101409-03 (Jumbo linker patch).
-    Under Solaris 2.2, if you have patch 101052 installed, make sure
-    that it is at least at revision 101052-06.
-
-  * Under Irix 5 for SGIs, you must have installed the `compiler_dev.hdr'
-    subsystem that is on the IDO CD, otherwise you will get complaints
-    that certain files such as `/usr/include/syms.h' cannot be found.
-
-  * Under Irix 6 you must build with GCC.  The vendor compiler reports
-    as errors certain assignments that GCC considers to be warnings.
-  
-   GDB can produce warnings about symbols that it does not understand.
-By default, these warnings are disabled.  You can enable them by
-executing `set complaint 10' (which you can put in your ~/.gdbinit if
-you like).  I recommend doing this if you are working on a compiler,
-assembler, linker, or GDB, since it will point out problems that you
-may be able to fix.  Warnings produced during symbol reading indicate
-some mismatch between the object file and GDB's symbol reading code.
-In many cases, it's a mismatch between the specs for the object file
-format, and what the compiler actually outputs or the debugger
-actually understands.
 
 
 Graphical interface to GDB -- X Windows, MS Windows

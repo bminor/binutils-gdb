@@ -1,3 +1,10 @@
+2001-07-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* README (Known bugs): Delete section.
+	(Kernel debugging): Delete section.
+	(Languages other than C): Delete section.
+	(Host/target specific installation notes) New section.
+
 2001-07-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-i386.h (STAB_REG_TO_REGNUM, SDB_REG_TO_REGNUM,
