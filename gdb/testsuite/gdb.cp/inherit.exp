@@ -1012,6 +1012,10 @@ proc test_print_mvi_classes { } {
 	    # gcc HEAD 2004-01-21 -gstabs+
 	    pass "$name (FIXME v3 vtbl ptr)"
 	}
+	-re "$vhn = \{<vD> = \{<vB> = \{<vA> = \{va = 0, vx = 0\}, $re_vbptr_3_vB = $hex, vb = 0, vx = 0\}, <vC> = \{$re_vbptr_3_vC = $hex <VTT for vD>, vc = 0, vx = 0\}, $re_vbptr_3_vD = $hex, vd = 0, vx = 0\}, $re_vbptr_3_vE = $hex, ve = 27, vx = 28\}$nl$gdb_prompt $" {
+	    # gcc 3.2.7-rh -gstabs+
+	    pass "$name (FIXME v3 vtbl ptr)"
+	}
     }
 }
 

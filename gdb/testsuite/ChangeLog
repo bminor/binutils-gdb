@@ -1,3 +1,7 @@
+2004-02-03  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.cp/inherit.exp: Accept output with gcc 3.2-7-rh.
+
 2004-02-02  Fred Fish  <fnf@redhat.com>
 
 	* gdb.base/bang.exp: Use gdb_run_cmd so this tests works with
