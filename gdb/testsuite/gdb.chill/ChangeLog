@@ -1,3 +1,7 @@
+Tue Jan 23 16:57:13 1996  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* enum.ch, enum.exp:  New test case (covers PRs 8869 and 8870).
+
 Thu Jan 11 17:34:01 1996  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* Makefile.in (PROGS):  Removed.
