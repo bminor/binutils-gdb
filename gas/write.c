@@ -24,6 +24,10 @@
 #include "obstack.h"
 #include "output-file.h"
 
+/* This looks like a good idea.  Let's try turning it on always, for now.  */
+#undef  BFD_FAST_SECTION_FILL
+#define BFD_FAST_SECTION_FILL
+
 /* The NOP_OPCODE is for the alignment fill value.  Fill it with a nop
    instruction so that the disassembler does not choke on it.  */
 #ifndef NOP_OPCODE
@@ -453,7 +457,7 @@ relax_and_size_seg (abfd, sec, xxx)
 
   flags = bfd_get_section_flags (abfd, sec);
 
-  seginfo = (segment_info_type *) bfd_get_section_userdata (abfd, sec);
+  seginfo = seg_info (sec);
   if (seginfo && seginfo->frchainP)
     {
       relax_segment (seginfo->frchainP->frch_root, sec);
@@ -848,6 +852,11 @@ write_contents (abfd, sec, xxx)
       count = f->fr_offset;
       assert (count >= 0);
       if (fill_size && count)
+#ifdef BFD_FAST_SECTION_FILL
+	{
+	  char buf[256];
+	  if (fill_size > sizeof(buf)) {
+	    /* Do it the old way. Can this ever happen? */
 	while (count--)
 	  {
 	    x = bfd_set_section_contents (stdoutput, sec,
@@ -861,6 +870,46 @@ write_contents (abfd, sec, xxx)
 	      }
 	    offset += fill_size;
 	  }
+    }
+	  else {
+	    /* Build a buffer full of fill objects and output it as
+	     * often as necessary. This saves on the overhead of potentially
+	     * lots of bfd_set_section_contents calls.
+	     */
+	    int n_per_buf, bytes, i;
+	    if (fill_size == 1)
+	      {
+		n_per_buf = sizeof (buf);
+		memset (buf, *fill_literal, n_per_buf);
+	      }
+	    else
+	      {
+		char *bufp;
+		n_per_buf = sizeof(buf)/fill_size;
+		for (i = n_per_buf, bufp = buf; i; i--, bufp += fill_size)
+		  memcpy(bufp, fill_literal, fill_size);
+	      }
+	    for (; count > 0; count -= n_per_buf)
+	      {
+		n_per_buf = n_per_buf > count ? count : n_per_buf;
+		x = bfd_set_section_contents (stdoutput, sec,
+					      buf, (file_ptr) offset,
+					      (bfd_size_type) n_per_buf * fill_size);
+		assert (x == true);
+		offset += n_per_buf * fill_size;
+	      }
+	  }
+	}
+#else
+	while (count--)
+	  {
+	    x = bfd_set_section_contents (stdoutput, sec,
+					  fill_literal, (file_ptr) offset,
+					  (bfd_size_type) fill_size);
+	    assert (x == true);
+	    offset += fill_size;
+	  }
+#endif
     }
 }
 #endif
@@ -1213,9 +1262,15 @@ write_object_file ()
 	  exp.X_op_symbol = lie->sub;
 	  exp.X_add_number = lie->addnum;
 #ifdef BFD_ASSEMBLER
+#ifdef TC_CONS_FIX_NEW
+	  TC_CONS_FIX_NEW (lie->frag,
+		       lie->word_goes_here - lie->frag->fr_literal,
+		       2, &exp);
+#else
 	  fix_new_exp (lie->frag,
 		       lie->word_goes_here - lie->frag->fr_literal,
 		       2, &exp, 0, BFD_RELOC_NONE);
+#endif
 #else
 #if defined(TC_SPARC) || defined(TC_A29K) || defined(NEED_FX_R_TYPE)
 	  fix_new_exp (lie->frag,
@@ -1271,6 +1326,9 @@ write_object_file ()
 	    /* Patch the jump table */
 	    /* This is the offset from ??? to table_ptr+0 */
 	    to_addr = table_addr - S_GET_VALUE (lie->sub);
+#ifdef BFD_ASSEMBLER
+	    to_addr -= lie->sub->sy_frag->fr_address;
+#endif
 	    md_number_to_chars (lie->word_goes_here, to_addr, 2);
 	    for (untruth = lie->next_broken_word; untruth && untruth->dispfrag == fragP; untruth = untruth->next_broken_word)
 	      {
@@ -1282,6 +1340,9 @@ write_object_file ()
 	    /* this is a long jump from table_ptr+0 to the final target */
 	    from_addr = table_addr;
 	    to_addr = S_GET_VALUE (lie->add) + lie->addnum;
+#ifdef BFD_ASSEMBLER
+	    to_addr += lie->add->sy_frag->fr_address;
+#endif
 	    md_create_long_jump (table_ptr, from_addr, to_addr, lie->dispfrag, lie->add);
 	    table_ptr += md_long_jump_size;
 	    table_addr += md_long_jump_size;
@@ -1432,7 +1493,7 @@ write_object_file ()
 	     Put them in the common section now.  */
 	  if (S_IS_DEFINED (symp) == 0
 	      && S_GET_VALUE (symp) != 0)
-	    S_SET_SEGMENT (symp, &bfd_com_section);
+	    S_SET_SEGMENT (symp, bfd_com_section_ptr);
 #if 0
 	  printf ("symbol `%s'\n\t@%x: value=%d flags=%x seg=%s\n",
 		  S_GET_NAME (symp), symp,
@@ -1804,16 +1865,14 @@ relax_segment (segment_frag_root, segment)
 		    }
 
 		  aim = target - address - fragP->fr_fix;
-		  /* The displacement is affected by the instruction size
-		     for the 32k architecture. I think we ought to be able
-		     to add fragP->fr_pcrel_adjust in all cases (it should be
-		     zero if not used), but just in case it breaks something
-		     else we'll put this inside #ifdef NS32K ... #endif  */
-#ifndef TC_NS32K
-		  if (fragP->fr_pcrel_adjust)
-		    abort ();
+#ifdef TC_PCREL_ADJUST
+		  /* Currently only the ns32k family needs this */
+		  aim += TC_PCREL_ADJUST(fragP);
+#else
+		  /* This machine doesn't want to use pcrel_adjust.
+		     In that case, pcrel_adjust should be zero.  */
+		  assert (fragP->fr_pcrel_adjust == 0);
 #endif
-		  aim += fragP->fr_pcrel_adjust;
 
 		  if (aim < 0)
 		    {
@@ -1879,6 +1938,10 @@ relax_segment (segment_frag_root, segment)
 }				/* relax_segment() */
 
 #if defined (BFD_ASSEMBLER) || !defined (BFD)
+
+#ifndef TC_RELOC_RTSYM_LOC_FIXUP
+#define TC_RELOC_RTSYM_LOC_FIXUP(X) (1)
+#endif
 
 /* fixup_segment()
 
@@ -2034,7 +2097,8 @@ fixup_segment (fixP, this_segment_type)
 
       if (add_symbolP)
 	{
-	  if (add_symbol_segment == this_segment_type && pcrel)
+	  if (add_symbol_segment == this_segment_type && pcrel
+	      && TC_RELOC_RTSYM_LOC_FIXUP (fixP->fx_r_type))
 	    {
 	      /*
 	       * This fixup was made when the symbol's segment was
