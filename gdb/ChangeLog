@@ -1,3 +1,8 @@
+2004-11-20  Eli Zaretskii  <eliz@gnu.org>
+
+	* config/djgpp/fnchange.lst: Resolve file-name clash between
+	hppa-hpux-tdep.c and the new hppa-hpux-nat.c.
+
 2004-11-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppa-hpux-nat.c: New file.
