@@ -51,8 +51,6 @@ static int prev_line_number;
 
 static int line_vector_length;
 
-struct pending_block *pending_blocks;
-
 static struct blockvector *
 make_blockvector PARAMS ((struct objfile *));
 

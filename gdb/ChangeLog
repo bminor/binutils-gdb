@@ -1,3 +1,8 @@
+Wed Apr 20 08:37:16 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* dstread.c, coffread.c: Don't define pending_blocks; buildsym.c
+	takes care of it.
+
 Tue Apr 19 09:46:05 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (internalize_unwind_info): Delete unused indexp
