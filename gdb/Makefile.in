@@ -309,7 +309,7 @@ clean-info: force
 	$(MAKE) subdir_do DO=clean-info "DODIRS=$(SUBDIRS)"
 
 gdb.z:gdb.1
-	nroff -man gdb.1 | col -b > gdb.t 
+	nroff -man $(srcdir)/gdb.1 | col -b > gdb.t 
 	pack gdb.t ; rm -f gdb.t
 	mv gdb.t.z gdb.z
 	
