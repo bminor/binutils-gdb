@@ -46,10 +46,8 @@
 
 #define WORKING_DOT_WORD
 
-/* FIXME.  The lack of a place to put things which are both target cpu
-   and target format dependent makes hacks like this necessary.  */
 #ifdef OBJ_ELF
-#ifdef BFD64
+#if BFD_ARCH_SIZE == 64
 #include "bfd/elf64-hppa.h"
 #define TARGET_FORMAT "elf64-hppa"
 #else

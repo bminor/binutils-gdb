@@ -224,11 +224,9 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-#if 0 /* HPPA ELF does not work currently.  */
   hppa*-*-*elf* | hppa*-*-linux-gnu* | hppa*-*-lites* | hppa*-*-sysv4* | hppa*-*-rtems*)
     targ_defvec=bfd_elf32_hppa_vec
     ;;
-#endif
 #if 0
 #ifdef BFD64 
   # Do not enable this until we've settled the configury issues
@@ -242,18 +240,14 @@ case "${targ}" in
 #if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD) || defined (HOST_HPPAOSF) || defined (HOST_HPPAMPEIX)
   hppa*-*-bsd*)
     targ_defvec=som_vec
-#if 0 /* HPPA ELF does not work currently.  */
     targ_selvecs=bfd_elf32_hppa_vec
-#endif
     ;;
   hppa*-*-hpux* | hppa*-*-hiux* | hppa*-*-mpeix*)
     targ_defvec=som_vec
     ;;
   hppa*-*-osf*)
     targ_defvec=som_vec
-#if 0 /* HPPA ELF does not work currently.  */
     targ_selvecs=bfd_elf32_hppa_vec
-#endif
     ;;
 #endif /* defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD) || defined (HOST_HPPAOSF) */
 

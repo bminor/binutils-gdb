@@ -32,7 +32,7 @@
 #define OUTPUT_FLAVOR bfd_target_elf_flavour
 #endif
 
-#include <bfd.h>
+#include "bfd.h"
 
 #define BYTES_IN_WORD 4		/* for now */
 #include "bfd/elf-bfd.h"

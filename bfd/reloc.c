@@ -25,7 +25,7 @@ SECTION
 
 	BFD maintains relocations in much the same way it maintains
 	symbols: they are left alone until required, then read in
-	en-mass and translated into an internal form.  A common
+	en-masse and translated into an internal form.  A common
 	routine <<bfd_perform_relocation>> acts upon the
 	canonical form to do the fixup.
 

@@ -26,7 +26,7 @@
 
 #define OBJ_SOM 1
 
-#include <bfd.h>
+#include "bfd.h"
 #include "bfd/som.h"
 #include "targ-cpu.h"
 

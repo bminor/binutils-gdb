@@ -351,8 +351,10 @@ changequote([,])dnl
 fi
 AC_SUBST(COREFILE)
 AC_SUBST(COREFLAG)
-AC_DEFINE_UNQUOTED(TRAD_HEADER, $TRAD_HEADER,
-  [Name of host specific header file to include in trad-core.c.])
+if test -n "$TRAD_HEADER"; then
+  AC_DEFINE_UNQUOTED(TRAD_HEADER, $TRAD_HEADER,
+    [Name of host specific header file to include in trad-core.c.])
+fi
 
 # Horrible hacks to build DLLs on Windows.
 WIN32LDFLAGS=

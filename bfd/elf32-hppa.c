@@ -311,17 +311,17 @@ hppa_elf_relocate_insn (abfd, input_sect, insn, address, sym_value,
     case BL:
     case BE:
     case BLE:
-      /* XXX computing constant_value is not needed??? */
+      /* XXX r_addend ignored ???.  */
       constant_value = assemble_17 ((insn & 0x001f0000) >> 16,
 				    (insn & 0x00001ffc) >> 2,
 				    insn & 1);
 
-      constant_value = (constant_value << 15) >> 15;
+      constant_value = (constant_value << (BFD_ARCH_SIZE-17))
+				       >> (BFD_ARCH_SIZE-17);
       if (pcrel)
 	{
-	  sym_value -=
-	    address + input_sect->output_offset
-	    + input_sect->output_section->vma;
+	  sym_value -= (address + input_sect->output_offset
+			+ input_sect->output_section->vma);
 	  sym_value = hppa_field_adjust (sym_value, -8, r_field);
 	}
       else

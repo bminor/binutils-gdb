@@ -1731,8 +1731,8 @@ for this_target in $target $canon_targets ; do
 
       fr30-*-*)		    fmt=elf bfd_gas=yes ;;
 
+      hppa-*-linux-gnu*)    fmt=elf em=linux ;;
       hppa-*-*elf*)         fmt=elf em=hppa ;;
-      hppa-*-linux-gnu*)    fmt=elf em=hppa ;;
       hppa-*-lites*)        fmt=elf em=hppa ;;
       hppa-*-osf*)          fmt=som em=hppa ;;
       hppa-*-rtems*)        fmt=elf em=hppa ;;

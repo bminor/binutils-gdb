@@ -20,7 +20,7 @@
 
 #define BFD 1
 
-#include <bfd.h>
+#include "bfd.h"
 
 typedef struct
 {

@@ -74,11 +74,13 @@ frag_grow (nchars)
       frag_new (0);
       oldc = frchain_now->frch_obstack.chunk_size;
       frchain_now->frch_obstack.chunk_size = 2 * nchars + SIZEOF_STRUCT_FRAG;
-      while ((n = obstack_room (&frchain_now->frch_obstack)) < nchars)
-	{
-	  frag_wane (frag_now);
-	  frag_new (0);
-	}
+      if (frchain_now->frch_obstack.chunk_size > 0)
+	while ((n = obstack_room (&frchain_now->frch_obstack)) < nchars
+	       && (unsigned long) frchain_now->frch_obstack.chunk_size > nchars)
+	  {
+	    frag_wane (frag_now);
+	    frag_new (0);
+	  }
       frchain_now->frch_obstack.chunk_size = oldc;
     }
   if (obstack_room (&frchain_now->frch_obstack) < nchars)

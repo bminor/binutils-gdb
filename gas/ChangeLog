@@ -1,3 +1,48 @@
+2000-05-02  Alan Modra  <alan@linuxcare.com.au>
+
+	* configure.in: Set em=linux for hppa-*-linux.
+	* configure: Regenerate.
+	* doc/Makefile.in: Regenerate with correct automake.
+
+	* frags.c (frag_grow): Sanity check chunk_size.
+
+	* config/obj-elf.h: #include "bfd.h" not <bfd.h>
+	* config/obj-som.h: Likewise.
+	* config/obj-ieee.h: Likewise.
+
+	* config/tc-hppa.h: Test BFD_ARCH_SIZE, not BFD64.
+
+	* config/tc-hppa.c (log2): Only compile when OBJ_SOM.
+	(md_pseudo_table): Fully initialise OBJ_ELF cases.
+	(fix_new_hppa): Add ATTRIBUTE_UNUSED to args as appropriate.
+	(pa_ip): low_sign_unext now returns via function value.  Use
+	re_assemble_* instead of dis_assemble_* and
+	INSERT_FIELD_AND_CONTINUE combination.  Don't call sign_unext
+	unnecessarily.
+	(md_convert_frag): Add ATTRIBUTE_UNUSED to args as appropriate.
+	(md_section_align, md_parse_option, md_show_usage,
+	md_undefined_symbol, pa_align, pa_block, pa_brtab, pa_try,
+	pa_callinfo, pa_code, pa_comm, pa_end, pa_enter, pa_entry,
+	pa_exit, pa_export, pa_import, pa_label, pa_leave, pa_level,
+	pa_origin, pa_param, pa_proc, pa_procend, pa_space, pa_spnum,
+	pa_version, pa_compiler, pa_copyright, pa_data, pa_fill, pa_lsym,
+	pa_text): Likewise.
+	(md_apply_fix): Change type of new_val to offsetT.  Delete w1, w2,
+	w, resulti.  Add insn, val.  Move bfd_get_32 and bfd_put_32
+	outside of switch.  Correct mask and shifting errors in case 10
+	and case -11.  In case 21, compare against signed range to suit
+	hppa_field_adjust changes.  In case 12, use re_assemble_12.  In
+	case 17 and case 22, use offsetT variable to properly check range.
+	Use re_assemble_* here too.
+	(evaluate_absolute): Change type of value to offsetT.  Call
+	hppa_field_adjust to do the work for us.
+	(pa_parse_cmpb_64_cmpltr): Delete save_s.
+	(pa_parse_cmpib_64_cmpltr): Ditto.
+	(pa_build_unwind_subspace): Delete unused var subseg.  Change type
+	of i to unsigned int.
+	(pa_type_args): Conditionally declare symbol if OBJ_SOM.
+	(pa_end_of_source): Return type is void.
+
 Mon May  1 08:54:23 2000  Catherine Moore  <clm@cygnus.com>
 
 	* macro.c (macro_expand_body): Don't prepend macro number with zeroes.

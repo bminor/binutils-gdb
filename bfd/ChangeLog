@@ -1,3 +1,81 @@
+2000-05-02  Alan Modra  <alan@linuxcare.com.au>
+
+	* config.bfd: Re-enable elf32-hppa.  It now compiles, even if it
+	doesn't work very well.
+
+	* elf-hppa.h (elf_hppa_internal_shdr): Define.
+	(elf_hppa_fake_sections): hdr is elf_hppa_internal_shdr.
+	Set hdr->s_type to 1 if ARCH_SIZE == 32.
+	(_bfd_elf_hppa_gen_reloc_type): Add prototype.
+	(elf_hppa_info_to_howto): Likewise.
+	(elf_hppa_info_to_howto_rel): Likewise.
+	(elf_hppa_reloc_type_lookup): Likewise.
+	(elf_hppa_is_local_label_name): Likewise.
+	(elf_hppa_fake_sections): Likewise.
+	(elf_hppa_final_write_processing): Likewise.
+	(elf_hppa_howto_table): Fully initialise all entries.
+	(_bfd_elf_hppa_gen_reloc_type): Add ATTRIBUTE_UNUSED to args.
+	(elf_hppa_info_to_howto): Likewise.
+	(elf_hppa_info_to_howto_rel): Likewise.
+	(elf_hppa_reloc_type_lookup): Likewise.
+	(elf_hppa_final_write_processing, elf_hppa_add_symbol_hook,
+	elf_hppa_unmark_useless_dynamic_symbols,
+	elf_hppa_remark_useless_dynamic_symbols,
+	elf_hppa_record_segment_addrs, elf_hppa_final_link,
+	elf_hppa_relocate_section, elf_hppa_final_link_relocate,
+	elf_hppa_relocate_insn): Compile only if ARCH_SIZE == 64 until
+	elf32-hppa.c mess is cleaned up.
+	(elf_hppa_final_link_relocate): Make insn and r_type unsigned
+	int.  Delete r_field.  In case R_PARISC_PCREL21L, don't set
+	r_field then call hppa_field_adjust inline func with variable
+	r_field arg, instead call hppa_field_adjust with fixed arg.
+	In case R_PARISC_PCREL22F, don't set r_field.
+	(elf_hppa_relocate_insn): Change args and return type to unsigned
+	int.  Call re_assemble_* funcs to do the work.
+
+	* elf32-hppa.c (hppa_elf_relocate_insn): Don't assume 32 bit when
+	sign extending.
+
+	* libhppa.h (HPPA_R_CONSTANT): Don't assume 32 bit when sign
+	extending.
+	(sign_extend): Mask first before sign extending.
+	(low_sign_extend): Rewrite without condition expression.
+	(ones, dis_assemble_3, dis_assemble_12, dis_assemble_16,
+	dis_assemble_17, dis_assemble_21, dis_assemble_22): Delete.
+	(assemble_3, assemble_6, assemble_12, assemble_16, assemble_16a,
+	assemble_17, assemble_21, sign_unext, low_sign_unext): Return
+	result as function return value rather than through pointer arg.
+	Accept unsigned int args, and return unsigned int.
+	(re_assemble_3): New.  Combines function of dis_assemble_3 with
+	re-assembly of opcode and immediate.
+	(re_assemble_12): Likewise.
+	(re_assemble_16): Likewise.
+	(re_assemble_17): Likewise.
+	(re_assemble_21): Likewise.
+	(re_assemble_22): Likewise.
+	(hppa_field_adjust): Rewrite and document, paying attention to
+	size of types and signed/unsigned issues.
+	(get_opcode): Shift before masking.
+	(FDLW): Rename to FLDW.
+	(bfd_hppa_insn2fmt): Change arg to unsigned int.  Delete fmt.
+	(hppa_rebuild_insn): Change args and return value to unsigned
+	int.  Make use of re_assemble_*.  Correct case 11.
+	
+	* dep-in.sed: Handle ../opcodes/.
+	* Makefile.am (SOURCE_HFILES): Add elf-hppa.h, elf32-hppa.h,
+	elf64-hppa.h, hppa_stubs.h, xcoff.h.
+	(BFD32_BACKENDS_CFILES): Restore elf32-hppa.c.
+	Remove elf64-hppa.lo, cpu-ia64.lo, elf64-ia64.lo, elfarm-oabi.lo,
+	elfarm-nabi.lo dependencies outside of auto-dependency area.
+	Regenerate dependencies.
+	* Makefile.in: Regenerate.
+
+	* configure.in (TRAD_HEADER): Test non-null before
+	AC_DEFINE_UNQUOTED.
+	* configure: Regenerate.
+
+	* reloc.c: Fix mis-spelling in comment.
+
 2000-05-01  Alan Modra  <alan@linuxcare.com.au>
 
 	* coff-sh.c (bfd_coff_small_swap_table): Fix Fri Apr 28 change.

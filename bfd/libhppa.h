@@ -35,53 +35,6 @@
 #endif /* GNU C? */
 #endif /* INLINE */
 
-#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
-/* Declare the functions with the unused attribute to avoid warnings.  */
-static INLINE unsigned int assemble_3 (unsigned int)
-     __attribute__ ((__unused__));
-static INLINE void dis_assemble_3 (unsigned int, unsigned int *)
-     __attribute__ ((__unused__));
-static INLINE unsigned int assemble_12 (unsigned int, unsigned int)
-     __attribute__ ((__unused__));
-static INLINE void dis_assemble_12 (unsigned int, unsigned int *,
-				    unsigned int *)
-     __attribute__ ((__unused__));
-static INLINE void dis_assemble_16 (unsigned int, unsigned int *, int)
-     __attribute__ ((__unused__));
-static INLINE unsigned long assemble_17 (unsigned int, unsigned int,
-					 unsigned int)
-     __attribute__ ((__unused__));
-static INLINE void dis_assemble_17 (unsigned int, unsigned int *,
-				    unsigned int *, unsigned int *)
-     __attribute__ ((__unused__));
-static INLINE void dis_assemble_22 (unsigned int, unsigned int *,
-				    unsigned int *, unsigned int *,
-				    unsigned int *)
-     __attribute__ ((__unused__));
-static INLINE unsigned long assemble_21 (unsigned int)
-     __attribute ((__unused__));
-static INLINE void dis_assemble_21 (unsigned int, unsigned int *)
-     __attribute__ ((__unused__));
-static INLINE unsigned long sign_extend (unsigned int, unsigned int)
-     __attribute__ ((__unused__));
-static INLINE unsigned int ones (int) __attribute ((__unused__));
-static INLINE void sign_unext (unsigned int, unsigned int, unsigned int *)
-     __attribute__ ((__unused__));
-static INLINE unsigned long low_sign_extend (unsigned int, unsigned int)
-     __attribute__ ((__unused__));
-static INLINE void low_sign_unext (unsigned int, unsigned int, unsigned int *)
-     __attribute__ ((__unused__));
-static INLINE unsigned long hppa_field_adjust (unsigned long, unsigned long,
-					       unsigned short)
-     __attribute__ ((__unused__));
-static INLINE int bfd_hppa_insn2fmt (unsigned long)
-     __attribute__ ((__unused__));
-static INLINE  unsigned long hppa_rebuild_insn (bfd *, unsigned long,
-						unsigned long, unsigned long)
-     __attribute__ ((__unused__));
-#endif /* gcc 2.7 or higher */
-
-
 /* The PA instruction set variants.  */
 enum pa_arch {pa10 = 10, pa11 = 11, pa20 = 20, pa20w = 25};
 
@@ -199,10 +152,13 @@ enum hppa_reloc_expr_type_alt
 
    The high order 10 bits contain parameter relocation information,
    the low order 22 bits contain the constant offset.  */
-   
-#define HPPA_R_ARG_RELOC(a)	(((a) >> 22) & 0x3FF)
-#define HPPA_R_CONSTANT(a)	((((int)(a)) << 10) >> 10)
-#define HPPA_R_ADDEND(r,c)	(((r) << 22) + ((c) & 0x3FFFFF))
+
+#define HPPA_R_ARG_RELOC(a)	\
+  (((a) >> 22) & 0x3ff)
+#define HPPA_R_CONSTANT(a)	\
+  ((((int)(a)) << (BFD_ARCH_SIZE-22)) >> (BFD_ARCH_SIZE-22))
+#define HPPA_R_ADDEND(r, c)	\
+  (((r) << 22) + ((c) & 0x3fffff))
 #define HPPA_WIDE	       (0) /* PSW W-bit, need to check! FIXME */
 
 /* These macros get bit fields using HP's numbering (MSB = 0),
@@ -212,32 +168,96 @@ enum hppa_reloc_expr_type_alt
 #ifndef GET_FIELD
 #define GET_FIELD(X, FROM, TO) \
   ((X) >> (31 - (TO)) & ((1 << ((TO) - (FROM) + 1)) - 1))
-#endif  
+#endif
 #define GET_BIT(X, WHICH) \
   GET_FIELD (X, WHICH, WHICH)
 
 #define MASK(SIZE) \
   (~((-1) << SIZE))
-  
+
 #define CATENATE(X, XSIZE, Y, YSIZE) \
   (((X & MASK (XSIZE)) << YSIZE) | (Y & MASK (YSIZE)))
 
 #define ELEVEN(X) \
   CATENATE (GET_BIT (X, 10), 1, GET_FIELD (X, 0, 9), 10)
-  
+
 /* Some functions to manipulate PA instructions.  */
 
-/* NOTE: these use the HP convention that f{1} is the _left_ most
+/* NOTE: these use the HP convention that f{0} is the _left_ most
  *       bit (MSB) of f; they sometimes have to impose an assumption
  *       about the size of a field; and as far as I can tell, most
  *       aren't used.
  */
 
-static INLINE unsigned long
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
+/* Declare the functions with the unused attribute to avoid warnings.  */
+static INLINE unsigned int sign_extend (unsigned int, unsigned int)
+     __attribute__ ((__unused__));
+static INLINE unsigned int low_sign_extend (unsigned int, unsigned int)
+     __attribute__ ((__unused__));
+static INLINE unsigned int assemble_3 (unsigned int)
+     __attribute__ ((__unused__));
+static INLINE unsigned int assemble_6 (unsigned int, unsigned int)
+     __attribute__ ((__unused__));
+static INLINE unsigned int assemble_12 (unsigned int, unsigned int)
+     __attribute__ ((__unused__));
+static INLINE unsigned int assemble_16 (unsigned int, unsigned int)
+     __attribute__ ((__unused__));
+static INLINE unsigned int assemble_16a (unsigned int, unsigned int,
+					 unsigned int)
+     __attribute__ ((__unused__));
+static INLINE unsigned int assemble_17 (unsigned int, unsigned int,
+					unsigned int)
+     __attribute__ ((__unused__));
+static INLINE unsigned int assemble_21 (unsigned int)
+     __attribute ((__unused__));
+
+static INLINE unsigned int sign_unext (unsigned int, unsigned int)
+     __attribute__ ((__unused__));
+static INLINE unsigned int low_sign_unext (unsigned int, unsigned int)
+     __attribute__ ((__unused__));
+static INLINE unsigned int re_assemble_3 (unsigned int, unsigned int)
+     __attribute__ ((__unused__));
+static INLINE unsigned int re_assemble_12 (unsigned int, unsigned int)
+     __attribute__ ((__unused__));
+static INLINE unsigned int re_assemble_16 (unsigned int, unsigned int, int)
+     __attribute__ ((__unused__));
+static INLINE unsigned int re_assemble_17 (unsigned int, unsigned int)
+     __attribute__ ((__unused__));
+static INLINE unsigned int re_assemble_22 (unsigned int, unsigned int)
+     __attribute__ ((__unused__));
+static INLINE unsigned int re_assemble_21 (unsigned int, unsigned int)
+     __attribute__ ((__unused__));
+static INLINE bfd_signed_vma hppa_field_adjust (bfd_signed_vma, bfd_signed_vma,
+						enum hppa_reloc_field_selector_type_alt)
+     __attribute__ ((__unused__));
+static INLINE int bfd_hppa_insn2fmt (unsigned int)
+     __attribute__ ((__unused__));
+static INLINE  unsigned int hppa_rebuild_insn (bfd *, unsigned int,
+					       unsigned int, unsigned int)
+     __attribute__ ((__unused__));
+#endif /* gcc 2.7 or higher */
+
+
+/* The *sign_extend and assemble_* functions are used to assemble
+   various bitfields taken from an instruction and return the
+   resulting immediate value.  They correspond to functions by the
+   same name in HP's PA-RISC 2.0 Architecture Reference Manual.  */
+
+static INLINE unsigned int
 sign_extend (x, len)
      unsigned int x, len;
 {
-  return (int)(x >> (len - 1) ? (-1 << len) | x : x);
+  unsigned int signbit = (1 << (len - 1));
+  unsigned int mask = (signbit << 1) - 1;
+  return ((x & mask) ^ signbit) - signbit;
+}
+
+static INLINE unsigned int
+low_sign_extend (x, len)
+     unsigned int x, len;
+{
+  return (x >> 1) - ((x & 1) << (len - 1));
 }
 
 static INLINE unsigned int
@@ -247,19 +267,11 @@ assemble_3 (x)
   return CATENATE (GET_BIT (x, 2), 1, GET_FIELD (x, 0, 1), 2);
 }
 
-static INLINE void
-dis_assemble_3 (x, r)
-     unsigned int x;
-     unsigned int *r;
-{
-  *r = (((x & 4) >> 2) | ((x & 3) << 1)) & 7;
-}
-
 static INLINE unsigned int
 assemble_6 (x, y)
      unsigned int x, y;
 {
-  return (((x & 0x1) << 5) + (32 - (y & 0x1f)));
+  return (((x & 1) << 5) + (32 - (y & 0x1f)));
 }
 
 static INLINE unsigned int
@@ -270,40 +282,7 @@ assemble_12 (x, y)
  		   GET_FIELD (x, 0, 9), 9);
 }
 
-static INLINE void
-dis_assemble_12 (as12, x, y)
-     unsigned int as12;
-     unsigned int *x, *y;
-{
-  *y = (as12 & 0x800) >> 11;
-  *x = ((as12 & 0x3ff) << 1) | ((as12 & 0x400) >> 10);
-}
-
-static INLINE void
-dis_assemble_16 (as16, x, wide)
-     unsigned int as16;
-     unsigned int *x;
-     int wide;
-{
-  unsigned int t1, t2;
-
-  if (wide)
-    {
-      /* Unusual 16-bit encoding.  */
-      t1 = (as16 << 1) & 0xffff;
-      t2 = (as16 & 0x8000);
-      *x = t1 ^ t2 ^ (t2 >> 1) | (t2 >> 15);
-    }
-  else
-    {
-      /* Standard 14-bit encoding.  */
-      t1 = (as16 << 1) & 0x3fff;
-      t2 = (as16 & 0x2000);
-      *x = t1 | (t2 >> 13);
-    }
-}
-
-static INLINE unsigned long
+static INLINE unsigned int
 assemble_16 (x, y)
      unsigned int x, y;
 {
@@ -322,8 +301,7 @@ assemble_16 (x, y)
   return sign_extend (temp, 16);
 }
 
-
-static INLINE unsigned long
+static INLINE unsigned int
 assemble_16a (x, y, z)
      unsigned int x, y, z;
 {
@@ -333,223 +311,252 @@ assemble_16a (x, y, z)
   if (HPPA_WIDE)
     temp = CATENATE (CATENATE (z, 1, (z ^ GET_BIT (x, 0)), 1), 2,
 		     CATENATE ((z ^ GET_BIT (x, 1)), 1, y, 11), 12);
-  else 
-      temp = CATENATE (CATENATE (z, 1, z, 1), 2, CATENATE (z, 1, y, 11), 12);
+  else
+    temp = CATENATE (CATENATE (z, 1, z, 1), 2, CATENATE (z, 1, y, 11), 12);
 
   return sign_extend ((temp << 2), 16);
 }
 
-static INLINE unsigned long
+static INLINE unsigned int
 assemble_17 (x, y, z)
      unsigned int x, y, z;
 {
-  unsigned long temp;
+  unsigned int temp;
 
   temp = CATENATE (CATENATE (z, 1, x, 5), 6,
 		   CATENATE (GET_BIT (y, 10), 1, GET_FIELD (y, 0, 9), 10), 11);
-  
+
   return temp;
 }
 
-static INLINE void
-dis_assemble_17 (as17, x, y, z)
-     unsigned int as17;
-     unsigned int *x, *y, *z;
-{
-
-  *z = (as17 & 0x10000) >> 16;
-  *x = (as17 & 0x0f800) >> 11;
-  *y = (((as17 & 0x00400) >> 10) | ((as17 & 0x3ff) << 1)) & 0x7ff;
-}
-
-static INLINE void
-dis_assemble_22 (as22, a, b, c, d)
-     unsigned int as22;
-     unsigned int *a, *b, *c, *d;
-{
-
-  *d = (as22 & 0x200000) >> 21;
-  *a = (as22 & 0x1f0000) >> 16;
-  *b = (as22 & 0x0f800) >> 11;
-  *c = (((as22 & 0x00400) >> 10) | ((as22 & 0x3ff) << 1)) & 0x7ff;
-}
-
-static INLINE unsigned long
+static INLINE unsigned int
 assemble_21 (x)
      unsigned int x;
 {
-  unsigned long temp;
+  unsigned int temp;
 
-  temp = ((x & 1) << 20) |
-    ((x & 0xffe) << 8) |
-    ((x & 0xc000) >> 7) |
-    ((x & 0x1f0000) >> 14) |
-    ((x & 0x003000) >> 12);
-  return temp & 0x1fffff;
+  temp = ((  (x & 0x000001) << 20)
+	  | ((x & 0x000ffe) << 8)
+	  | ((x & 0x003000) >> 12)
+	  | ((x & 0x00c000) >> 7)
+	  | ((x & 0x1f0000) >> 14));
+  return temp;
 }
 
-static INLINE unsigned long
+static INLINE unsigned int
 assemble_22 (a,b,c,d)
      unsigned int a,b,c,d;
 {
-  unsigned long temp;
-  
+  unsigned int temp;
+
   temp = CATENATE (CATENATE (d, 1, a, 5), 6,
 		   CATENATE (b, 5, ELEVEN (c), 11), 16);
 
   return sign_extend (temp, 22);
 }
 
-static INLINE void
-dis_assemble_21 (as21, x)
-     unsigned int as21, *x;
+
+/* The re_assemble_* functions splice together an opcode and an
+   immediate value.  pa-risc uses all sorts of weird bitfields in the
+   instruction to hold the value.  */
+
+static INLINE unsigned int
+sign_unext (x, len)
+     unsigned int x, len;
 {
-  unsigned long temp;
+  unsigned int len_ones;
 
+  len_ones = ((unsigned int) 1 << len) - 1;
 
-  temp = (as21 & 0x100000) >> 20;
-  temp |= (as21 & 0x0ffe00) >> 8;
-  temp |= (as21 & 0x000180) << 7;
-  temp |= (as21 & 0x00007c) << 14;
-  temp |= (as21 & 0x000003) << 12;
-  *x = temp;
+  return x & len_ones;
 }
 
 static INLINE unsigned int
-ones (n)
-     int n;
-{
-  unsigned int len_ones;
-  int i;
-
-  i = 0;
-  len_ones = 0;
-  while (i < n)
-    {
-      len_ones = (len_ones << 1) | 1;
-      i++;
-    }
-
-  return len_ones;
-}
-
-static INLINE void
-sign_unext (x, len, result)
+low_sign_unext (x, len)
      unsigned int x, len;
-     unsigned int *result;
-{
-  unsigned int len_ones;
-
-  len_ones = ones (len);
-
-  *result = x & len_ones;
-}
-
-static INLINE unsigned long
-low_sign_extend (x, len)
-     unsigned int x, len;
-{
-  return (int)((x & 0x1 ? (-1 << (len - 1)) : 0) | x >> 1);
-}
-
-static INLINE void
-low_sign_unext (x, len, result)
-     unsigned int x, len;
-     unsigned int *result;
 {
   unsigned int temp;
   unsigned int sign;
-  unsigned int rest;
-  unsigned int one_bit_at_len;
-  unsigned int len_ones;
 
-  len_ones = ones (len);
-  one_bit_at_len = 1 << (len - 1);
+  sign = (x >> (len-1)) & 1;
 
-  sign_unext (x, len, &temp);
-  sign = temp & one_bit_at_len;
-  sign >>= (len - 1);
+  temp = sign_unext (x, len-1);
 
-  rest = temp & (len_ones ^ one_bit_at_len);
-  rest <<= 1;
-
-  *result = rest | sign;
+  return (temp << 1) | sign;
 }
 
-/* Handle field selectors for PA instructions.  */
-
-static INLINE unsigned long
-hppa_field_adjust (value, constant_value, r_field)
-     unsigned long value;
-     unsigned long constant_value;
-     unsigned short r_field;
+static INLINE unsigned int
+re_assemble_3 (insn, as3)
+     unsigned int insn;
+     unsigned int as3;
 {
+  return ((insn & ~ (7 << 13))
+	  | ((as3 & 4) << (13-2))
+	  | ((as3 & 3) << (13+1)));
+}
+
+static INLINE unsigned int
+re_assemble_12 (insn, as12)
+     unsigned int insn;
+     unsigned int as12;
+{
+  return ((insn & ~ 0x1ffd)
+	  | ((as12 & 0x800) >> 11)
+	  | ((as12 & 0x400) >> (10 - 2))
+	  | ((as12 & 0x3ff) << (1 + 2)));
+}
+
+static INLINE unsigned int
+re_assemble_16 (insn, as16, wide)
+     unsigned int insn;
+     unsigned int as16;
+     int wide;
+{
+  unsigned int s, t;
+
+  if (wide)
+    {
+      /* Unusual 16-bit encoding.  */
+      t = (as16 << 1) & 0xffff;
+      s = (as16 & 0x8000);
+      return (insn & ~ 0xffff) | (t ^ s ^ (s >> 1)) | (s >> 15);
+    }
+  else
+    {
+      /* Standard 14-bit encoding.  */
+      t = (as16 << 1) & 0x3fff;
+      s = (as16 & 0x2000);
+      return (insn & ~ 0xffff) | t | (s >> 13);
+    }
+}
+
+static INLINE unsigned int
+re_assemble_17 (insn, as17)
+     unsigned int insn;
+     unsigned int as17;
+{
+  return ((insn & ~ 0x1f1ffd)
+	  | ((as17 & 0x10000) >> 16)
+	  | ((as17 & 0x0f800) << (16 - 11))
+	  | ((as17 & 0x00400) >> (10 - 2))
+	  | ((as17 & 0x003ff) << (1 + 2)));
+}
+
+static INLINE unsigned int
+re_assemble_21 (insn, as21)
+     unsigned int insn;
+     unsigned int as21;
+{
+  return ((insn & ~ 0x1fffff)
+	  | ((as21 & 0x100000) >> 20)
+	  | ((as21 & 0x0ffe00) >> 8)
+	  | ((as21 & 0x000180) << 7)
+	  | ((as21 & 0x00007c) << 14)
+	  | ((as21 & 0x000003) << 12));
+}
+
+static INLINE unsigned int
+re_assemble_22 (insn, as22)
+     unsigned int insn;
+     unsigned int as22;
+{
+  return ((insn & ~ 0x3ff1ffd)
+	  | ((as22 & 0x200000) >> 21)
+	  | ((as22 & 0x1f0000) << (21 - 16))
+	  | ((as22 & 0x00f800) << (16 - 11))
+	  | ((as22 & 0x000400) >> (10 - 2))
+	  | ((as22 & 0x0003ff) << (1 + 2)));
+}
+
+
+/* Handle field selectors for PA instructions.
+   The L and R (and LS, RS etc.) selectors are used in pairs to form a
+   full 32 bit address.  eg.
+
+   LDIL	L'start,%r1		; put left part into r1
+   LDW	R'start(%r1),%r2	; add r1 and right part to form address
+
+   This function returns sign extended values in all cases.
+*/
+
+static INLINE bfd_signed_vma
+hppa_field_adjust (sym_val, addend, r_field)
+     bfd_signed_vma sym_val;
+     bfd_signed_vma addend;
+     enum hppa_reloc_field_selector_type_alt r_field;
+{
+  bfd_signed_vma value;
+
+  value = sym_val + addend;
   switch (r_field)
     {
-    case e_fsel:		/* F  : no change		      */
-    case e_nsel:		/* N  : no change		       */
-      value += constant_value;
+    case e_fsel:
+    case e_nsel:
+      /* F: No change.  */
       break;
 
-    case e_lssel:		/* LS : if (bit 21) then add 0x800
-				   arithmetic shift right 11 bits */
-      value += constant_value;
-      if (value & 0x00000400)
-	value += 0x800;
-      value = (value & 0xfffff800) >> 11;
+    case e_lsel:
+    case e_nlsel:
+      /* L:  Select top 21 bits.  */
+      value = value >> 11;
       break;
 
-    case e_rssel:		/* RS : Sign extend from bit 21	*/
-      value += constant_value;
-      if (value & 0x00000400)
-	value |= 0xfffff800;
-      else
-	value &= 0x7ff;
-      break;
-
-    case e_lsel:		/* L  : Arithmetic shift right 11 bits */
-    case e_nlsel:		/* NL  : Arithmetic shift right 11 bits */
-      value += constant_value;
-      value = (value & 0xfffff800) >> 11;
-      break;
-
-    case e_rsel:		/* R  : Set bits 0-20 to zero	  */
-      value += constant_value;
+    case e_rsel:
+      /* R:  Select bottom 11 bits.  */
       value = value & 0x7ff;
       break;
 
-    case e_ldsel:		/* LD : Add 0x800, arithmetic shift
-				   right 11 bits		  */
-      value += constant_value;
-      value += 0x800;
-      value = (value & 0xfffff800) >> 11;
+    case e_lssel:
+      /* LS:  Round to nearest multiple of 2048 then select top 21 bits.  */
+      value = value + 0x400;
+      value = value >> 11;
       break;
 
-    case e_rdsel:		/* RD : Set bits 0-20 to one	   */
-      value += constant_value;
-      value |= 0xfffff800;
+    case e_rssel:
+      /* RS:  Select bottom 11 bits for LS.
+	 We need to return a value such that 2048 * LS'x + RS'x == x.
+	 ie. RS'x = x - ((x + 0x400) & -0x800)
+	 this is just a sign extension from bit 21.  */
+      value = ((value & 0x7ff) ^ 0x400) - 0x400;
       break;
 
-    case e_lrsel:		/* LR : L with "rounded" constant      */
-    case e_nlrsel:		/* NLR : NL with "rounded" constant      */
-      value = value + ((constant_value + 0x1000) & 0xffffe000);
-      value = (value & 0xfffff800) >> 11;
+    case e_ldsel:
+      /* LD:  Round to next multiple of 2048 then select top 21 bits.
+	 Yes, if we are already on a multiple of 2048, we go up to the
+	 next one.  RD in this case will be -2048.  */
+      value = value + 0x800;
+      value = value >> 11;
       break;
 
-    case e_rrsel:		/* RR : R with "rounded" constant      */
-      value = value + ((constant_value + 0x1000) & 0xffffe000);
-      value = (value & 0x7ff) + constant_value - ((constant_value + 0x1000) & 0xffffe000);
+    case e_rdsel:
+      /* RD:  Set bits 0-20 to one.  */
+      value = value | -0x800;
+      break;
+
+    case e_lrsel:
+    case e_nlrsel:
+      /* LR:  L with rounding of the addend to nearest 8k.  */
+      value = sym_val + ((addend + 0x1000) & -0x2000);
+      value = value >> 11;
+      break;
+
+    case e_rrsel:
+      /* RR:  R with rounding of the addend to nearest 8k.
+	 We need to return a value such that 2048 * LR'x + RR'x == x
+	 ie. RR'x = s+a - (s + (((a + 0x1000) & -0x2000) & -0x800))
+	 .	  = s+a - ((s & -0x800) + ((a + 0x1000) & -0x2000))
+	 .	  = (s & 0x7ff) + a - ((a + 0x1000) & -0x2000)  */
+      value = (sym_val & 0x7ff) + (((addend & 0x1fff) ^ 0x1000) - 0x1000);
       break;
 
     default:
       abort ();
     }
   return value;
-
 }
 
 /* PA-RISC OPCODES */
-#define get_opcode(insn)	((insn) & 0xfc000000) >> 26
+#define get_opcode(insn)	(((insn) >> 26) & 0x3f)
 
 /* FIXME: this list is incomplete.  It should also be an enumerated
    type rather than #defines.  */
@@ -597,9 +604,9 @@ hppa_field_adjust (value, constant_value, r_field)
 #define STD	0x1c
 #define LDWL	0x17
 #define STWL	0x1f
-#define FDLW    0x16
+#define FLDW    0x16
 #define FSTW    0x1e
-  
+
 /* Given a machine instruction, return its format.
 
    FIXME:  opcodes which do not map to a known format
@@ -607,18 +614,17 @@ hppa_field_adjust (value, constant_value, r_field)
 
 static INLINE int
 bfd_hppa_insn2fmt (insn)
-     unsigned long insn;
+     unsigned int insn;
 {
-  int fmt = -1;
   unsigned char op = get_opcode (insn);
-  
+
   switch (op)
     {
     case ADDI:
     case ADDIT:
     case SUBI:
-      fmt = 11;
-      break;
+      return 11;
+
     case MOVB:
     case MOVIB:
     case COMBT:
@@ -634,8 +640,8 @@ bfd_hppa_insn2fmt (insn)
     case CMPBDT:
     case CMPBDF:
     case CMPIBD:
-      fmt = 12;
-      break;
+      return 12;
+
     case LDO:
     case LDB:
     case LDH:
@@ -645,106 +651,57 @@ bfd_hppa_insn2fmt (insn)
     case STH:
     case STW:
     case STWM:
-      fmt = 14;
-      break;
+      return 14;
+
     case LDWL:
     case STWL:
-    case FDLW:
+    case FLDW:
     case FSTW:
       /* This is a hack.  Unfortunately, format 11 is already taken
 	 and we're using integers rather than an enum, so it's hard
-	 to describe the 10a format.  */
-      fmt = -11;
-      break;
+	 to describe the 11a format.  */
+      return -11;
+
     case LDD:
     case STD:
-      fmt = 10;
-      break;
+      return 10;
+
     case BL:
     case BE:
     case BLE:
-      if ((insn & 0x00008000) == 0x00008000)
+      if ((insn & 0x00008000) != 0)
 	return 22;
-      fmt = 17;
-      break;
+      return 17;
+
     case LDIL:
     case ADDIL:
-      fmt = 21;
-      break;
+      return 21;
+
     default:
-      fmt = 32;
       break;
     }
-  return fmt;
+  return 32;
 }
 
 
 /* Insert VALUE into INSN using R_FORMAT to determine exactly what
    bits to change.  */
-   
-static INLINE unsigned long
+
+static INLINE unsigned int
 hppa_rebuild_insn (abfd, insn, value, r_format)
      bfd *abfd ATTRIBUTE_UNUSED;
-     unsigned long insn;
-     unsigned long value;
-     unsigned long r_format;
+     unsigned int insn;
+     unsigned int value;
+     unsigned int r_format;
 {
-  unsigned long const_part;
-  unsigned long rebuilt_part;
-
   switch (r_format)
     {
-    case 11:
-      {
-	unsigned w1, w;
-
-	const_part = insn & 0xffffe002;
-	dis_assemble_12 (value, &w1, &w);
-	rebuilt_part = (w1 << 2) | w;
-	return const_part | rebuilt_part;
-      }
-
-    case 12:
-      {
-	unsigned w1, w;
-
-	const_part = insn & 0xffffe002;
-	dis_assemble_12 (value, &w1, &w);
-	rebuilt_part = (w1 << 2) | w;
-	return const_part | rebuilt_part;
-      }
-
-    case 14:
-      {
-	unsigned int ext;
-	
-	const_part = insn & 0xffffc000;
-	low_sign_unext (value, 14, &ext);
-	return const_part | ext;
-      }
-
-    case 17:
-      {
-	unsigned w1, w2, w;
-
-	const_part = insn & 0xffe0e002;
-	dis_assemble_17 (value, &w1, &w2, &w);
-	rebuilt_part = (w2 << 2) | (w1 << 16) | w;
-	return const_part | rebuilt_part;
-      }
-
-    case 21:
-      {
-	unsigned int w;
-
-	const_part = insn & 0xffe00000;
-	dis_assemble_21 (value, &w);
-	return const_part | w;
-      }
-
-    case 32:
-      const_part = 0;
-      return value;
+    case 11: return (insn & ~ 0x7ff) | low_sign_unext (value, 11);
+    case 12: return re_assemble_12 (insn, value);
+    case 14: return (insn & ~ 0x3fff) | low_sign_unext (value, 14);
+    case 17: return re_assemble_17 (insn, value);
+    case 21: return re_assemble_21 (insn, value);
+    case 32: return value;
 
     default:
       abort ();
