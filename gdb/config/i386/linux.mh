@@ -4,9 +4,9 @@ XM_FILE= xm-i386.h
 XDEPFILES=
 
 NAT_FILE= nm-linux.h
-NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o \
+NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o linux-proc.o \
 	core-aout.o i386-nat.o i386-linux-nat.o i387-nat.o \
-	proc-service.o thread-db.o lin-lwp.o
+	proc-service.o thread-db.o lin-lwp.o linux-proc.o 
 
 # The dynamically loaded libthread_db needs access to symbols in the
 # gdb executable.

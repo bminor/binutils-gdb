@@ -67,3 +67,8 @@ extern void lin_thread_get_thread_signals (sigset_t *mask);
 
 #define GDB_GREGSET_T  elf_gregset_t
 #define GDB_FPREGSET_T elf_fpregset_t
+
+/* Override child_pid_to_exec_file in 'inftarg.c'.  */
+#define CHILD_PID_TO_EXEC_FILE
+
+

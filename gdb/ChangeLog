@@ -1,3 +1,20 @@
+2002-01-07  Michael Snyder  <msnyder@redhat.com>
+
+	* linux-proc.c: New file.  Implement child_pid_to_exec_file, 
+	so that attaching to a pid will automatically read the process's 
+	symbol file and shlibs.
+	* Makefile.in: Add rule for linux-proc.o.
+	* config/nm-linux.h: Define CHILD_PID_TO_EXEC_FILE.
+	* config/alpha/alpha-linux.mh: Add linux-proc.o to NATDEPFILES.
+	* config/arm/linux.mh: Ditto.
+	* config/i386/linux.mh: Ditto.
+	* config/i386/x86-64linux.mh: Ditto.
+	* config/ia64/linux.mh: Ditto.
+	* config/m68k/linux.mh: Ditto.
+	* config/mips/linux.mh: Ditto.
+	* config/powerpc/linux.mh: Ditto.
+	* config/sparc/linux.mh: Ditto.
+
 2002-01-06  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* win32-nat.c: Add i386-tdep.h dependency.

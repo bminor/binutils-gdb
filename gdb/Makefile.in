@@ -1848,6 +1848,8 @@ proc-why.o: proc-why.c $(defs_h) proc-utils.h
 sol-thread.o: sol-thread.c $(defs_h) $(gdbthread_h) $(target_h) $(inferior_h) \
 	$(gdbcmd_h) $(regcache_h)
 
+linux-proc.o: linux-proc.c $(defs_h)
+
 linux-thread.o: linux-thread.c $(breakpoint_h) $(gdbcmd_h) gdb_wait.h \
 	$(gdbthread_h) $(gdbcore_h) $(inferior_h) $(target_h) $(defs_h)
 

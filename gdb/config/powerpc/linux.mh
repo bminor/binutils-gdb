@@ -5,7 +5,7 @@ XDEPFILES=
 XM_CLIBS=
 
 NAT_FILE= nm-linux.h
-NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o \
+NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o linux-proc.o \
 core-regset.o ppc-linux-nat.o proc-service.o thread-db.o lin-lwp.o
 
 LOADLIBES = -ldl -rdynamic
