@@ -189,10 +189,10 @@ maintenance_info_command (char *arg, int from_tty)
 /* Mini tokenizing lexer for 'maint info sections' command.  */
 
 static int
-match_substring (char *string, char *substr)
+match_substring (const char *string, const char *substr)
 {
   int substr_len = strlen(substr);
-  char *tok;
+  const char *tok;
 
   while ((tok = strstr (string, substr)) != NULL)
     {

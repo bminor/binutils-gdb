@@ -1,5 +1,10 @@
 2001-12-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* maint.c (match_substring): Make parameters `string' and `substr'
+	const.  Make local variable `tok' const.
+
+2001-12-27  Mark Kettenis  <kettenis@gnu.org>
+
 	* config/i386/tm-i386.h (FP7_REGNUM, FIRST_FPU_CTRL_REGNUM,
 	FCTRL_REGNUM, FPC_REGNUM, FSTAT_REGNUM, FTAG_REGNUM, FCS_REGNUM,
 	FCOFF_REGNUM, FDS_REGNUM, FDOFF_REGNUM, FOP_REGNUM,
