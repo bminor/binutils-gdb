@@ -1,3 +1,8 @@
+Tue Jul  1 15:23:07 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* ecoff.c (page_type): Renamed from page_t to avoid conflict
+	with hpux10 header files.
+
 Mon Jun 30 12:27:28 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Jason Merrill <jason@cygnus.com>:

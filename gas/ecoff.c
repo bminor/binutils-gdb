@@ -977,11 +977,7 @@ static const efdr_t init_file =
     langC,		/* lang:	language for this file */
     1,			/* fMerge:	whether this file can be merged */
     0,			/* fReadin:	true if read in (not just created) */
-#ifdef TARGET_BYTES_BIG_ENDIAN
-    1,			/* fBigendian:	if 1, compiled on big endian machine */
-#else
-    0,			/* fBigendian:	if 1, compiled on big endian machine */
-#endif
+    TARGET_BYTES_BIG_ENDIAN,  /* fBigendian:	if 1, compiled on big endian machine */
     GLEVEL_2,		/* glevel:	level this file was compiled with */
     0,			/* reserved:	reserved for future use */
     0,			/* cbLineOffset: byte offset from header for this file ln's */
@@ -1050,13 +1046,13 @@ typedef union page {
   forward_t	forward	[ PAGE_SIZE / sizeof (forward_t)     ];
   thead_t	thead	[ PAGE_SIZE / sizeof (thead_t)	     ];
   lineno_list_t	lineno	[ PAGE_SIZE / sizeof (lineno_list_t) ];
-} page_t;
+} page_type;
 
 
 /* Structure holding allocation information for small sized structures.  */
 typedef struct alloc_info {
   char		*alloc_name;	/* name of this allocation type (must be first) */
-  page_t	*cur_page;	/* current page being allocated from */
+  page_type	*cur_page;	/* current page being allocated from */
   small_free_t	 free_list;	/* current free list if any */
   int		 unallocated;	/* number of elements unallocated on page */
   int		 total_alloc;	/* total number of allocations */
@@ -1473,8 +1469,8 @@ static unsigned long ecoff_build_fdr
   PARAMS ((const struct ecoff_debug_swap *backend, char **buf, char **bufend,
 	   unsigned long offset));
 static void ecoff_setup_ext PARAMS ((void));
-static page_t *allocate_cluster PARAMS ((unsigned long npages));
-static page_t *allocate_page PARAMS ((void));
+static page_type *allocate_cluster PARAMS ((unsigned long npages));
+static page_type *allocate_page PARAMS ((void));
 static scope_t *allocate_scope PARAMS ((void));
 static void free_scope PARAMS ((scope_t *ptr));
 static vlinks_t *allocate_vlinks PARAMS ((void));
@@ -1530,7 +1526,7 @@ add_varray_page (vp)
 
 #ifdef MALLOC_CHECK
   if (vp->object_size > 1)
-    new_links->datum = (page_t *) xcalloc (1, vp->object_size);
+    new_links->datum = (page_type *) xcalloc (1, vp->object_size);
   else
 #endif
     new_links->datum = allocate_page ();
@@ -4845,11 +4841,11 @@ ecoff_build_debug (hdr, bufp, backend)
 
 #ifndef MALLOC_CHECK
 
-static page_t *
+static page_type *
 allocate_cluster (npages)
      unsigned long npages;
 {
-  register page_t *value = (page_t *) xmalloc (npages * PAGE_USIZE);
+  register page_type *value = (page_type *) xmalloc (npages * PAGE_USIZE);
 
 #ifdef ECOFF_DEBUG
   if (debug > 3)
@@ -4862,14 +4858,14 @@ allocate_cluster (npages)
 }
 
 
-static page_t *cluster_ptr = NULL;
+static page_type *cluster_ptr = NULL;
 static unsigned long pages_left = 0;
 
 #endif /* MALLOC_CHECK */
 
 /* Allocate one page (which is initialized to 0).  */
 
-static page_t *
+static page_type *
 allocate_page ()
 {
 #ifndef MALLOC_CHECK
@@ -4885,7 +4881,7 @@ allocate_page ()
 
 #else	/* MALLOC_CHECK */
 
-  page_t *ptr;
+  page_type *ptr;
 
   ptr = xmalloc (PAGE_USIZE);
   memset (ptr, 0, PAGE_USIZE);
@@ -4910,7 +4906,7 @@ allocate_scope ()
   else
     {
       register int unallocated	= alloc_counts[(int)alloc_type_scope].unallocated;
-      register page_t *cur_page	= alloc_counts[(int)alloc_type_scope].cur_page;
+      register page_type *cur_page	= alloc_counts[(int)alloc_type_scope].cur_page;
 
       if (unallocated == 0)
 	{
@@ -4961,7 +4957,7 @@ allocate_vlinks ()
 #ifndef MALLOC_CHECK
 
   register int unallocated = alloc_counts[(int)alloc_type_vlinks].unallocated;
-  register page_t *cur_page = alloc_counts[(int)alloc_type_vlinks].cur_page;
+  register page_type *cur_page = alloc_counts[(int)alloc_type_vlinks].cur_page;
 
   if (unallocated == 0)
     {
@@ -4995,7 +4991,7 @@ allocate_shash ()
 #ifndef MALLOC_CHECK
 
   register int unallocated = alloc_counts[(int)alloc_type_shash].unallocated;
-  register page_t *cur_page = alloc_counts[(int)alloc_type_shash].cur_page;
+  register page_type *cur_page = alloc_counts[(int)alloc_type_shash].cur_page;
 
   if (unallocated == 0)
     {
@@ -5029,7 +5025,7 @@ allocate_thash ()
 #ifndef MALLOC_CHECK
 
   register int unallocated = alloc_counts[(int)alloc_type_thash].unallocated;
-  register page_t *cur_page = alloc_counts[(int)alloc_type_thash].cur_page;
+  register page_type *cur_page = alloc_counts[(int)alloc_type_thash].cur_page;
 
   if (unallocated == 0)
     {
@@ -5068,7 +5064,7 @@ allocate_tag ()
   else
     {
       register int unallocated = alloc_counts[(int)alloc_type_tag].unallocated;
-      register page_t *cur_page = alloc_counts[(int)alloc_type_tag].cur_page;
+      register page_type *cur_page = alloc_counts[(int)alloc_type_tag].cur_page;
 
       if (unallocated == 0)
 	{
@@ -5119,7 +5115,7 @@ allocate_forward ()
 #ifndef MALLOC_CHECK
 
   register int unallocated = alloc_counts[(int)alloc_type_forward].unallocated;
-  register page_t *cur_page = alloc_counts[(int)alloc_type_forward].cur_page;
+  register page_type *cur_page = alloc_counts[(int)alloc_type_forward].cur_page;
 
   if (unallocated == 0)
     {
@@ -5158,7 +5154,7 @@ allocate_thead ()
   else
     {
       register int unallocated = alloc_counts[(int)alloc_type_thead].unallocated;
-      register page_t *cur_page = alloc_counts[(int)alloc_type_thead].cur_page;
+      register page_type *cur_page = alloc_counts[(int)alloc_type_thead].cur_page;
 
       if (unallocated == 0)
 	{
@@ -5207,7 +5203,7 @@ allocate_lineno_list ()
 #ifndef MALLOC_CHECK
 
   register int unallocated = alloc_counts[(int)alloc_type_lineno].unallocated;
-  register page_t *cur_page = alloc_counts[(int)alloc_type_lineno].cur_page;
+  register page_type *cur_page = alloc_counts[(int)alloc_type_lineno].cur_page;
 
   if (unallocated == 0)
     {
