@@ -1,5 +1,8 @@
 Tue Aug 16 15:24:03 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* symtab.c (decode_line_1): If funfirstline and we get a
+	non-LOC_BLOCK symbol (e.g. variable or type), then error().
+
 	* Makefile.in (TARFILES, NONSRC, SFILES_STAND, SFILES_KGDB):
 	Remove; unused.
 	(TAGFILES_NO_SRCDIR): Remove ALLPARAM.
