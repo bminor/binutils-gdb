@@ -1,3 +1,8 @@
+2000-08-30  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ld-undefined/undefined.exp (hppa*64*-*-*, mn10300-*-elf,
+	sh-*-*): With dwarf-2, `undefined function' can't pass.
+
 2000-08-03  H.J. Lu  (hjl@gnu.org)
 
 	* ld-bootstrap/bootstrap.exp: Add strip.

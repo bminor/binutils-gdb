@@ -1,7 +1,7 @@
 # Test that the linker reports undefined symbol errors correctly.
 # By Ian Lance Taylor, Cygnus Support
 #
-#   Copyright (C) 1995, 1996, 1997 Free Software Foundation
+#   Copyright (C) 1995, 1996, 1997, 2000 Free Software Foundation
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -68,6 +68,12 @@ checkund $mu $testund
 
 # Just doesn't work for PA ELF.  No clue why.
 setup_xfail "hppa*-*-*elf*"
+
+# With dwarf-2, we can't get the function in which the reference
+# occurs; see below.
+setup_xfail "hppa*64*-*-*"
+setup_xfail "mn10300-*-elf"
+setup_xfail "sh-*-*"
 
 set mf "tmpdir/undefined.o: In function `function':"
 checkund $mf $testfn
