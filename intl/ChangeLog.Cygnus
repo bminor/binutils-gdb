@@ -1,0 +1,30 @@
+Tue May 26 18:29:09 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (distclean): Remove config.log.
+
+Sun May 10 22:35:54 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * po/Makefile.in (install-info): New target.
+
+Sun Apr 19 19:20:00 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* aclocal.m4, configure: Rebuilt.
+	* configure.in: Call AC_LINK_FILES so that <libintl.h> will
+	always exist.
+
+Fri Mar 27 16:37:25 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* aclocal.m4, configure: Rebuilt with new cygettext.m4.
+
+Wed Mar 25 15:00:14 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* configure.in: Build config.h from config.in.
+	* config.h.in: Removed.
+	* config.in: New file.
+
+	* config.h.in: New file.
+
+	* configure.in, configure, acconfig.h, aclocal.m4: New files.
+	* Makefile.in (OBJECTS): Depend on config.h, not ../config.h.
+	(Makefile): Rebuild Makefile here, not in `..'.
+
