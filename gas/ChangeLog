@@ -1,3 +1,10 @@
+Tue May  7 00:49:58 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-h8300.c (do_a_fix_imm): Rename last argument to
+	"relaxmode".  Output relocs which identify various relaxing
+	possibilities for mov.[bwl] instructions.
+	(build_bytes): Pass in a relaxing mode to do_a_fix_imm.
+
 Mon May  6 15:26:28 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config/tc-arm.h (TC_HANDLES_FX_DONE): Define.
