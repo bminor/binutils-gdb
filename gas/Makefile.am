@@ -9,8 +9,8 @@ SUBDIRS = doc po
 
 tooldir = $(exec_prefix)/$(target_alias)
 
-YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
-LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ;  else echo flex ; fi`
+YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo @YACC@ ; fi`
+LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo @LEX@ ; fi`
 
 WARN_CFLAGS = @WARN_CFLAGS@
 AM_CFLAGS = $(WARN_CFLAGS)

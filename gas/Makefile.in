@@ -113,8 +113,8 @@ SUBDIRS = doc po
 
 tooldir = $(exec_prefix)/$(target_alias)
 
-YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo bison -y ; fi`
-LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ;  else echo flex ; fi`
+YACC = `if [ -f ../bison/bison ] ; then echo ../bison/bison -y -L../bison/bison ; else echo @YACC@ ; fi`
+LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo @LEX@ ; fi`
 
 WARN_CFLAGS = @WARN_CFLAGS@
 AM_CFLAGS = $(WARN_CFLAGS)
@@ -145,6 +145,7 @@ CPU_TYPES = \
 	alpha \
 	arc \
 	arm \
+	avr \
 	d10v \
 	d30v \
 	fr30 \
@@ -309,6 +310,7 @@ TARGET_CPU_CFILES = \
 	config/tc-alpha.c \
 	config/tc-arc.c \
 	config/tc-arm.c \
+	config/tc-avr.c \
 	config/tc-d10v.c \
 	config/tc-d30v.c \
 	config/tc-fr30.c \
@@ -345,6 +347,7 @@ TARGET_CPU_HFILES = \
 	config/tc-alpha.h \
 	config/tc-arc.h \
 	config/tc-arm.h \
+	config/tc-avr.h \
 	config/tc-d10v.h \
 	config/tc-d30v.h \
 	config/tc-fr30.h \
