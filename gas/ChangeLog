@@ -1,5 +1,9 @@
 2003-11-10  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-ia64.c (ia64_handle_align): Remove bogus be_nop.
+
+2003-11-10  Alan Modra  <amodra@bigpond.net.au>
+
 	* README: Update bug report address.  Move bug reporting info to
 	binutils/README.
 
@@ -113,7 +117,7 @@
 	(md_begin): Remove F_SOFT_FLOAT if enabling MAVERICK FP.
 
 2003-10-21  Peter Barada  <pbarada@mail.wm.sps.mot.com>
-            Bernardo Innocenti  <bernie@develer.com>
+	    Bernardo Innocenti  <bernie@develer.com>
 
 	* config/tc-m68k.c: Add MCF528x (MCFv4) support.
 	* config/m68k-parse.h: Likewise.

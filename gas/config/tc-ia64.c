@@ -10744,9 +10744,6 @@ ia64_handle_align (fragp)
      fragS *fragp;
 {
   /* Use mfi bundle of nops with no stop bits.  */
-  static const unsigned char be_nop[]
-    = { 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00,
-	0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x0c};
   static const unsigned char le_nop[]
     = { 0x0c, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
 	0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00};
@@ -10771,7 +10768,8 @@ ia64_handle_align (fragp)
       fragp->fr_fix += fix;
     }
 
-  memcpy (p, (target_big_endian ? be_nop : le_nop), 16);
+  /* Instruction bundles are always little-endian.  */
+  memcpy (p, le_nop, 16);
   fragp->fr_var = 16;
 }
 
