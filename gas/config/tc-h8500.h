@@ -46,7 +46,10 @@ extern void tc_reloc_mangle
 #define RELOC_32 1234
 
 #define TC_START_LABEL(ch, ptr)  (ch == ':' && start_label(ptr))
+int start_label PARAMS ((char *));
+
 #define TC_COFF_SIZEMACHDEP(frag) tc_coff_sizemachdep(frag)
+int tc_coff_sizemachdep PARAMS ((struct frag *));
 
 #define md_operand(x)
 

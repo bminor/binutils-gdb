@@ -1,5 +1,32 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-h8500.c (cons): Delete declaration.
+	(md_begin <opcode>): Constify.
+	(displacement_size, immediate_size, absolute_size): Remove.
+	(build_relaxable_instruction <operand>): Add ATTRIBUTE_UNUSED.
+	(tc_crawl_symbol_chain <headers>): Likewise.
+	(md_undefined_symbol <name>): Likewise.
+	(tc_headers_hook <headers>): Likewise.
+	(md_parse_option <c,arg>): Likewise.
+	(md_show_usage <stream>): Likewise.
+	(md_convert_frag <headers, seg>): Likewise.
+	(tc_coff_symbol_emit_hook <ignore>): Likewise.
+	(md_atof): Remove declaration of atof_ieee.
+	(tc_aout_fix_to_chars): Remove unused function.
+	(parse_reg): Prototype.
+	(parse_exp): Prototype.
+	(skip_colonthing): Prototype.  Use &&, not & in logical expressions.
+	(parse_reglist): Prototype.
+	(get_operand): Prototype.
+	(get_operands): Prototype.
+	(get_specific): Prototype.  Make "this_index" signed.
+	(check): Prototype, make static.
+	(insert): Prototype
+	(build_relaxable_instruction): Prototype, make static.
+	(build_bytes): Prototype.
+	(wordify_scb): Prototype.
+	* config/tc-h8500.h (start_label): Declare.
+	(tc_coff_sizemachdep): Declare.
 	* config/tc-i370.c (i370_ebcdic <unused>): Add ATTRIBUTE_UNUSED.
 	(i370_rmode <unused>): Likewise.
 	(i370_csect <unused>): Likewise.
