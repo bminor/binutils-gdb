@@ -1,6 +1,8 @@
 2003-08-14  Alan Modra  <amodra@bigpond.net.au>
 
+	* dep-in.sed: Remove libintl.h.
 	* Makefile.am (POTFILES.in): Unset LC_COLLATE.
+	Run "make dep-am".
 	* Makefile.in: Regenerate.
 
 2003-08-11  Ian Lance Taylor  <ian@airs.com>
