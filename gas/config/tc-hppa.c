@@ -2357,7 +2357,6 @@ pa_ip (str)
 			  }
 			else if (*s == '*')
 			  break;
-			name = s;
 
 			name = s;
 			while (*s != ',' && *s != ' ' && *s != '\t')
@@ -2419,7 +2418,7 @@ pa_ip (str)
 			    flag = 1;
 			  }
 			/* ",*" is a valid condition.  */
-			else if (*args == 'a')
+			else if (*args == 'a' || *name)
 			  as_bad (_("Invalid Add Condition: %s"), name);
 			*s = c;
 		      }
@@ -2525,7 +2524,6 @@ pa_ip (str)
 			  }
 			else if (*s == '*')
 			  break;
-			name = s;
 
 			name = s;
 			while (*s != ',' && *s != ' ' && *s != '\t')
@@ -2587,7 +2585,7 @@ pa_ip (str)
 			    flag = 1;
 			  }
 			/* ",*" is a valid condition.  */
-			else if (*args != 'S')
+			else if (*args != 'S' || *name)
 			  as_bad (_("Invalid Compare/Subtract Condition: %s"),
 				  name);
 			*s = c;
@@ -2710,7 +2708,7 @@ pa_ip (str)
 			    flag = 1;
 			  }
 			/* ",*" is a valid condition.  */
-			else if (*args != 'L')
+			else if (*args != 'L' || *name)
 			  as_bad (_("Invalid Logical Instruction Condition."));
 			*s = c;
 		      }
@@ -2765,7 +2763,7 @@ pa_ip (str)
 			    continue;
 			  }
 			/* ",*" is a valid condition.  */
-			else if (*args != 'X')
+			else if (*args != 'X' || *name)
 			  as_bad (_("Invalid Shift/Extract/Deposit Condition."));
 			*s = c;
 		      }
@@ -2877,7 +2875,7 @@ pa_ip (str)
 			    s += 3;
 			  }
 			/* ",*" is a valid condition.  */
-			else if (*args != 'U')
+			else if (*args != 'U' || (*s != ' ' && *s != '\t'))
 			  as_bad (_("Invalid Unit Instruction Condition."));
 		      }
 		    opcode |= cmpltr << 13;

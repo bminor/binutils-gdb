@@ -1,3 +1,7 @@
+2003-09-27  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* config/tc-hppa.c (pa_ip): Check for invalid 64-bit conditions.
+
 2003-09-26  Matt Thomas  <matt@3am-software.com>
 
 	* config/tc-vax.c (md_shortopts): Fix a typo.  Remove 'K'.
