@@ -1,3 +1,8 @@
+Wed Aug 23 15:18:20 1995  Ian Lance Taylor  (ian@cygnus.com)
+
+	* sb.c (sb_build): Undefine abort before calling it, since gasp
+	does not provide as_abort.
+
 Wed Aug 23 10:40:41 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (set_target_endian): New static to say whether
