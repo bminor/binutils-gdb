@@ -1,3 +1,9 @@
+001-03-31  David O'Brien  <obrien@FreeBSD.org>
+
+	* ld-selective/selective.exp: Use -O with gcc rather than -O2.
+	This optimization level is buggy on some platforms, and this test
+	is not intended to test compiler optimizations.
+
 2001-03-18  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* ld-selective/selective.exp: Don't run test for 68hc11 and 68hc12
