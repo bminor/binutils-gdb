@@ -31,7 +31,9 @@ Makefile.in
 chardefs.h
 config
 configure.in
+doc
 emacs_keymap.c
+examples
 funmap.c
 history.c
 history.h
