@@ -1616,10 +1616,11 @@ operator ()
 /* Parse an expression.  */
 
 segT
-expr (rank, resultP)
-     operator_rankT rank;	/* Larger # is higher rank. */
+expr (rankarg, resultP)
+     int rankarg;	/* Larger # is higher rank. */
      expressionS *resultP;	/* Deliver result here. */
 {
+  operator_rankT rank = (operator_rankT) rankarg;
   segT retval;
   expressionS right;
   operatorT op_left;

@@ -32,8 +32,20 @@
 
 static void obj_coff_bss PARAMS ((int));
 const char *s_get_name PARAMS ((symbolS * s));
-static symbolS *def_symbol_in_progress;
+static void obj_coff_ln PARAMS ((int));
+static void obj_coff_def PARAMS ((int));
+static void obj_coff_endef PARAMS ((int));
+static void obj_coff_dim PARAMS ((int));
+static void obj_coff_line PARAMS ((int));
+static void obj_coff_size PARAMS ((int));
+static void obj_coff_scl PARAMS ((int));
+static void obj_coff_tag PARAMS ((int));
+static void obj_coff_val PARAMS ((int));
+static void obj_coff_type PARAMS ((int));
 
+/* This is used to hold the symbol built by a sequence of pseudo-ops
+   from .def and .endef.  */
+static symbolS *def_symbol_in_progress;
 
 /* stack stuff */
 typedef struct
@@ -334,6 +346,8 @@ c_dot_file_symbol (filename)
 {
   symbolS *symbolP;
 
+  /* BFD converts filename to a .file symbol with an aux entry.  It
+     also handles chaining.  */
   symbolP = symbol_new (filename, bfd_abs_section_ptr, 0, &zero_address_frag);
 
   S_SET_STORAGE_CLASS (symbolP, C_FILE);
@@ -928,8 +942,15 @@ obj_coff_val (ignore)
 	     resolved, then copy the segment id from the forward
 	     symbol.  */
 	  SF_SET_GET_SEGMENT (def_symbol_in_progress);
+
+	  /* FIXME: gcc can generate address expressions here in
+	     unusual cases (search for "obscure" in sdbout.c).  We
+	     just ignore the offset here, thus generating incorrect
+	     debugging information.  We ignore the rest of the line
+	     just below.  */
 	}
-      /* Otherwise, it is the name of a non debug symbol and its value will be calculated later. */
+      /* Otherwise, it is the name of a non debug symbol and its value
+         will be calculated later. */
       *input_line_pointer = name_end;
     }
   else
@@ -1037,8 +1058,7 @@ coff_frob_symbol (symp, punt)
 	      coff_last_function = symp;
 	      if (S_GET_NUMBER_AUXILIARY (symp) < 1)
 		S_SET_NUMBER_AUXILIARY (symp, 1);
-	      auxp =
-		&coffsymbol (symbol_get_bfdsym (symp))->native[1].u.auxent;
+	      auxp = SYM_AUXENT (symp);
 	      memset (auxp->x_sym.x_fcnary.x_ary.x_dimen, 0,
 		      sizeof (auxp->x_sym.x_fcnary.x_ary.x_dimen));
 	    }
@@ -2609,12 +2629,11 @@ obj_coff_val (ignore)
 	     symbol.  */
 	  SF_SET_GET_SEGMENT (def_symbol_in_progress);
 
-	  /* FIXME: gcc can generate address expressions
-	     here in unusual cases (search for "obscure"
-	     in sdbout.c).  We just ignore the offset
-	     here, thus generating incorrect debugging
-	     information.  We ignore the rest of the
-	     line just below.  */
+	  /* FIXME: gcc can generate address expressions here in
+	     unusual cases (search for "obscure" in sdbout.c).  We
+	     just ignore the offset here, thus generating incorrect
+	     debugging information.  We ignore the rest of the line
+	     just below.  */
 	}
       /* Otherwise, it is the name of a non debug symbol and
 	 its value will be calculated later. */
@@ -4429,6 +4448,9 @@ const pseudo_typeS obj_pseudo_table[] =
 };				/* obj_pseudo_table */
 
 #ifdef BFD_ASSEMBLER
+
+static void coff_pop_insert PARAMS ((void));
+static int coff_sec_sym_ok_for_reloc PARAMS ((asection *));
 
 /* Support for a COFF emulation.  */
 

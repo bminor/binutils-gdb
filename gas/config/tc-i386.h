@@ -445,9 +445,6 @@ void i386_validate_fix PARAMS ((struct fix *));
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
 
-
-extern int flag_16bit_code;
-
 #define md_do_align(n, fill, len, max, around)				\
 if ((n) && !need_pass_2							\
     && (!(fill) || ((char)*(fill) == (char)0x90 && (len) == 1))		\

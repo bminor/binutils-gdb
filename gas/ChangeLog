@@ -10,6 +10,10 @@
 	int.
 	(md_atof): Return NULL rather than 0.
 	* config/tc-i386.c (md_atof): Change type to int.
+	* expr.c (expr): Change first parameter to int.
+	* config/obj-coff.c: Add declarations for static functions.
+	(coff_frob_symbol): Use SYM_AUXENT.
+	* config/tc-i386.h (flag_16bit_code): Don't declare.
 
 	* config/obj-coff.c (obj_coff_section): Default to setting
 	SEC_LOAD.  Don't set SEC_DATA for 'w' modifier.
