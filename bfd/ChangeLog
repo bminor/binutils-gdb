@@ -1,3 +1,8 @@
+Fri Oct 11 22:45:14 1991  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in:  Avoid Sun Make VPATH bugs.
+	* targets.c:  Declare trad_core vectors extern.
+
 Fri Oct 11 13:03:02 1991  Per Bothner  (bothner at cygnus.com)
 
 	* coffcode.h: Moved ALIGN macro to libbfd.h. Removed i960_align.
