@@ -225,7 +225,8 @@ sysdump_SOURCES = sysdump.c $(BULIBS)
 
 nlmconv_SOURCES = nlmconv.c nlmheader.y $(BULIBS)
 
-windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l
+windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l \
+	$(BULIBS)
 windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@
 
 CLEANFILES = dep.sed .dep .dep1
@@ -261,7 +262,7 @@ filemode.o
 dlltool_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 dlltool_LDFLAGS = 
 windres_OBJECTS =  windres.o resrc.o rescoff.o resbin.o rcparse.o \
-rclex.o
+rclex.o bucomm.o version.o filemode.o
 windres_DEPENDENCIES =  ../bfd/libbfd.la ../libiberty/libiberty.a
 windres_LDFLAGS = 
 size_OBJECTS =  size.o bucomm.o version.o filemode.o

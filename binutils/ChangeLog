@@ -1,3 +1,10 @@
+Mon Aug  4 11:47:31 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* deflex.l, defparse.y: Use VERSIONK rather than VERSION.
+	* rclex.l, rcparse.y: Likewise.
+	* Makefile.am (windres_SOURCES): Add $(BULIBS).
+	* Makefile.in: Rebuild.
+
 Fri Aug  1 13:08:39 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* acinclude.m4: Include bfd/acinclude.m4, not bfd/acmacros.m4.

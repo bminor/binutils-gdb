@@ -238,7 +238,8 @@ nlmconv.o: nlmconv.c $(INCDIR)/coff/sym.h $(INCDIR)/coff/ecoff.h
 
 nlmconv_SOURCES = nlmconv.c nlmheader.y $(BULIBS)
 
-windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l
+windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.l \
+	$(BULIBS)
 windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@
 
 # Targets to rebuild dependencies in this Makefile.

@@ -99,7 +99,7 @@ static char *get_string PARAMS ((int));
 "ICON"			{ return ICON; }
 "LANGUAGE"		{ return LANGUAGE; }
 "CHARACTERISTICS"	{ return CHARACTERISTICS; }
-"VERSION"		{ return VERSION; }
+"VERSION"		{ return VERSIONK; }
 "MENU"			{ return MENU; }
 "MENUEX"		{ return MENUEX; }
 "MENUITEM"		{ return MENUITEM; }
