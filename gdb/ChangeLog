@@ -1,3 +1,8 @@
+2000-06-12  Fernando Nasser  <fnasser@cygnus.com>
+
+	* valops.c (value_assign): Adjust the length to take into
+	consideration that we are not starting from the beginning.
+
 2000-06-12  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* symfile.c (add_symbol_file_command): Properly reformat "else if"

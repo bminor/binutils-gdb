@@ -660,7 +660,8 @@ value_assign (toval, fromval)
       if (VALUE_BITSIZE (toval))
 	{
 	  char buffer[sizeof (LONGEST)];
-	  int len = REGISTER_RAW_SIZE (VALUE_REGNO (toval));
+	  int len = 
+		REGISTER_RAW_SIZE (VALUE_REGNO (toval)) - VALUE_OFFSET (toval);
 
 	  if (len > (int) sizeof (LONGEST))
 	    error ("Can't handle bitfields in registers larger than %d bits.",
