@@ -1,6 +1,9 @@
 \input texinfo
 @setfilename gdb.info
 @synindex ky cp
+@c CHANGELOG CONSULTED BETWEEN:
+@c Tue Feb 26 01:47:07 1991  Cygnus John Gilmore  (cygnus at yuba)
+@c Sat Dec 22 02:51:40 1990  John Gilmore  (gnu at cygint)
 @ifinfo
 This file documents the GNU debugger GDB.
 
@@ -466,6 +469,17 @@ or @samp{vi} may wish to read it. @xref{Command Line Editing}.
 These commands display the state of the GDB history parameters.
 @samp{show history} by itself displays all four states.
 
+@kindex show
+@kindex info set
+@item show
+@itemx info set
+This chapter introduced a number of internal GDB variables that you
+can control with the @samp{set} command, and display with the
+@samp{show} command.   A number of others are introduced throughout the
+manual.  To display all the settable parameters and their current
+values, you can use @samp{show} with no arguments; you may also use
+@samp{info set}.  Both commands produce the same display.
+
 @end table
 
 @table @code
@@ -609,9 +623,9 @@ message to be printed if you want to see how frequent the problems are.
 
 @table @code
 @kindex set complaints
-@item set complaints @var{howmany}
-Permits GDB to output @var{howmany} complaints about each type of unusual
-symbols before becoming silent about the problem.  Set @var{howmany} to
+@item set complaints @var{limit}
+Permits GDB to output @var{limit} complaints about each type of unusual
+symbols before becoming silent about the problem.  Set @var{limit} to
 zero to suppress all complaints; set it to a large number to prevent
 complaints from being suppressed.
 
@@ -808,9 +822,9 @@ encounter such a problem and feel like debugging it, you can debug gdb
 with itself, breakpoint on "complain", then go "up" to
 read_dbx_symtab() and examine *bufp to see the symbol.
 
-@item stub type has NULL name
-
-FIXME, Mike Tiemann needs to write about what this means.
+@c @item stub type has NULL name
+@c 
+@c FIXME, Mike Tiemann needs to write about what this means.
 
 @item const/volatile indicator missing, got 'X'
 
@@ -842,33 +856,38 @@ debug a core file instead, you must kill the subprocess in which the
 program is running.  To do this, use the @samp{kill} command
 (@pxref{Kill Process}).
 
-@item add-file @var{filename} @var{address}
-@itemx load @var{filename} @var{address}
-@kindex add-file
+@item load @var{filename} @var{address}
 @kindex load
-@cindex dynamic linking
-The @samp{add-file} command reads additional symbol table information
-from the file @var{filename}.  You would use this command when that file
-has been dynamically loaded into the program that is running.
-@var{address} should be the memory address at which the file has been
-loaded; GDB cannot figure this out for itself.
+This command will dynamically link @var{filename} on the current target,
+performing any necessary downloads, then add @var{filename}'s symbol
+table in the same way as the @samp{add-syms} command.
 
-When debugging with some targets (@pxref{Targets}), this command will
-also cause the file to be dynamically loaded into the target system.
-@comment FIXME: "some" is obnoxious.  Currently this is only VxWorks.
-@comment       ---pesch 18dec1990
+@item add-syms @var{filename} @var{address}
+@kindex add-syms
+@cindex dynamic linking
+The @samp{add-syms} command reads additional symbol table information
+from the file @var{filename}.  You would use this command when that file
+has been dynamically loaded (by some other means) into the program that
+is running.  @var{address} should be the memory address at which the
+file has been loaded; GDB cannot figure this out for itself.
 
 The symbol table of the file @var{filename} is added to the symbol table
 originally read with the @samp{symbol-file} command.  You can use the
-@samp{add-file} command any number of times; the new symbol data thus
+@samp{add-syms} command any number of times; the new symbol data thus
 read keeps adding to the old.  The @samp{symbol-file} command forgets
 all the symbol data GDB has read.
 
 @item info files
+@itemx info target
 @kindex info files
-Print the names of the executable and core dump files currently in
-use by GDB, and the files from which symbols were loaded, as well as the
-stack of current targets (@pxref{Targets}).
+@kindex info target
+@samp{info files} and @samp{info target} are synonymous; both print the
+current targets (@pxref{Targets}), including the names of the
+executable and core dump files currently in use by GDB, and the files
+from which symbols were loaded.
+
+Beware: the similar command @samp{info targets} lists all possible
+targets rather than current ones.
 
 @end table
 
@@ -955,6 +974,9 @@ option or use shorter file names.  Alternatively, use a version of GNU
 @chapter Specifying a Debugging Target 
 @cindex debugging target
 @kindex target
+A @dfn{target} is an interface between the debugger and a particular 
+kind of file or process.  
+
 Often, you will be able to run GDB in the same host environment as the
 program you are debugging; in that case, the debugging target is
 specified as a side effect of the @samp{file} or @samp{core} commands.
@@ -962,6 +984,35 @@ When you need more flexibility---for example, running GDB on a
 physically separate host, controlling standalone systems over a
 serial port, or realtime systems over a TCP/IP connection---you can use
 the @samp{target} command.
+
+@node Active Targets,,,
+@section Active Targets
+@cindex stacking targets
+@cindex active targets
+@cindex multiple targets
+
+Targets are managed in three @dfn{strata} that correspond to different
+classes of target: processes, core files, and executable files.  This
+allows you to (for example) start a process and inspect its activity
+without abandoning your work on a core file.
+
+More than one target can potentially respond to a request.  In
+particular, when you access memory GDB will walk down the three strata of
+targets until it finds a target that can handle that particular address.
+
+Strata are always examined in a fixed order: first a process if there is
+one, then a core file if there is one, and finally an executable file if
+there is one of those.
+
+When you specify a new target in a given stratum, it replaces any target
+previously in that stratum.
+
+To get rid of a target without replacing it, use the @samp{detach}
+command.  The related command @samp{attach} provides you
+with an alternative way of choosing a new target. @xref{Attach}.
+
+@node Target Commands,,,
+@section Commands for Managing Targets
 
 @table @code
 @item target @var{type} @var{parameters}
@@ -978,24 +1029,17 @@ with, process numbers, and baud rates.  Executing
    target @var{type}
 @end example
 
-@noindent{}(without any parameters) will issue a message about what
+@noindent
+(without any parameters) will issue a message about what
 parameters are required for that target type.
 
-@end table
-
-Targets are managed as a stack, so that you may (for example) specify
-a core file as a target without abandoning a running program; when
-you're done with the core file, you can return to the previous target
-using @samp{detach}.  The related command @samp{attach} provides you
-with an alternative way of stacking a new target. @xref{Attach}.
-
-@table @code
 @item info targets
-Displays the names of all targets available.
+@kindex info targets
+Displays the names of all targets available.  Beware: the similar
+command @samp{info target} displays targets currently in use rather than
+all available ones.  @samp{info files} gives the same information as
+@samp{info target} (@pxref{File Commands}).
 @end table
-
-To display the targets currently stacked, use the @samp{info files}
-command (@pxref{File Commands}).
 
 @node Running, Stopping, Targets, Top
 @chapter Running Your Program Under GDB
@@ -1207,7 +1251,7 @@ for GDB still comes from your terminal.
 @item attach @var{process--id}
 @itemx attach @var{device}
 This command attaches to another target, of the same type as your last
-@samp{target} command (@samp{info files} will show your target stack).
+@samp{target} command (@samp{info files} will show your active targets).
 The command may take as argument a process ID or a device file.
 
 You specify a process ID to debug an already-running process that was
@@ -2242,12 +2286,23 @@ source file and line number of execution in that frame, and the text of
 that source line.  For example:
 
 @example
-#3  main (argc=3, argv=??, env=??) at main.c, line 67
+#3  main (argc=3, argv=??, env=??) at main.c:67
 67        read_input_file (argv[i]);
 @end example
 
 After such a printout, the @samp{list} command with no arguments will print
 ten lines centered on the point of execution in the frame.  @xref{List}.
+
+@table @code
+@item up-silently @var{n}
+@itemx down-silently @var{n}
+@kindex down-silently
+@kindex up-silently
+These two commants are variants of @samp{up} and @samp{down},
+respectively; they differ in that they do their work silently, without
+causing display of the new frame.  They are intended primarily for use
+in GDB command scripts, where the output might be unncecssary and
+distracting. 
 
 @node Frame Info,  , Selection, Stack
 @section Information on a Frame
@@ -3137,7 +3192,11 @@ because they refer to automatic variables not currently available.
 
 @cindex value history
 Values printed by the @samp{print} command are saved in GDB's @dfn{value
-history} so that you can refer to them in other expressions.
+history} so that you can refer to them in other expressions.  Values are
+kept until the symbol table is re-read or discarded (for example with
+the @samp{file} or @samp{symbol-file} commands).  When the symbol table
+changes, the value history is discarded, since the values may contain
+pointers back to the types defined in the symbol table.
 
 @cindex @code{$}
 @cindex @code{$$}
@@ -4310,28 +4369,28 @@ is all that's required to install GDB on a Sun 3 running SunOS 4.
 @table @code
 @kindex config.gdb
 @item config.gdb @var{machine}
-@itemx config.gdb +srcdir=@var{dir} @var{machine}
+@itemx config.gdb -srcdir=@var{dir} @var{machine}
 This is the most usual way of configuring GDB; to debug programs running
 on the same machine as GDB itself.  If you wish to build the GDB binaries
 in a completely different directory from the sources, specify a path to
-the source directory using the @samp{+srcdir} option.
+the source directory using the @samp{-srcdir} option.
 
-@item config.gdb +host
+@item config.gdb -host
 @cindex host environments
 Display a list of supported host environments for GDB.
 
 @item config.gdb @var{host} @var{target}
-@itemx config.gdb +srcdir=@var{dir} @var{host} @var{target}
+@itemx config.gdb -srcdir=@var{dir} @var{host} @var{target}
 @cindex cross-debugging
 GDB can also be used as a cross-debugger, running on a machine of one
 type while debugging a program running on a machine of another type.
 You configure it this way by specifying first the @var{host}, then the
 @var{target} environment on the @code{config.gdb} argument list; the
 @var{host} is where GDB runs, and the @var{target} is where your program
-runs. @xref{Remote}.  Again, you can use @samp{+srcdir} to specify a
+runs. @xref{Remote}.  Again, you can use @samp{-srcdir} to specify a
 path to the GDB source.
 
-@item config.gdb +target
+@item config.gdb -target
 @cindex target environments
 Display a list of supported target environments for GDB.
 @end table
