@@ -1096,13 +1096,13 @@ const struct alpha_opcode alpha_opcodes[] = {
   { "excb",		MFC(0x18,0x0400), BASE, ARG_NONE },
   { "mb",		MFC(0x18,0x4000), BASE, ARG_NONE },
   { "wmb",		MFC(0x18,0x4400), BASE, ARG_NONE },
-  { "fetch",		MFC(0x18,0x8000), BASE, { PRB } },
-  { "fetch_m",		MFC(0x18,0xA000), BASE, { PRB } },
+  { "fetch",		MFC(0x18,0x8000), BASE, { ZA, PRB } },
+  { "fetch_m",		MFC(0x18,0xA000), BASE, { ZA, PRB } },
   { "rpcc",		MFC(0x18,0xC000), BASE, { RA } },
   { "rc",		MFC(0x18,0xE000), BASE, { RA } },
-  { "ecb",		MFC(0x18,0xE800), BASE, { PRB } },	/* ev56 una */
+  { "ecb",		MFC(0x18,0xE800), BASE, { ZA, PRB } },	/* ev56 una */
   { "rs",		MFC(0x18,0xF000), BASE, { RA } },
-  { "wh64",		MFC(0x18,0xF800), BASE, { PRB } },	/* ev56 una */
+  { "wh64",		MFC(0x18,0xF800), BASE, { ZA, PRB } },	/* ev56 una */
 
   { "hw_mfpr",		OPR(0x19,0x00), EV4, { RA, RBA, EV4EXTHWINDEX } },
   { "hw_mfpr",		OP(0x19), OP_MASK, EV5, { RA, RBA, EV5HWINDEX } },

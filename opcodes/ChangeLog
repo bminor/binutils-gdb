@@ -1,3 +1,7 @@
+Mon Aug 30 18:56:14 1999  Richard Henderson  <rth@cygnus.com>
+
+	* alpha-opc.c (fetch, fetch_m, ecb, wh64): RA must be R31.
+
 1999-08-04  Doug Evans  <devans@casey.cygnus.com>
 
 	* fr30-asm.c,fr30-desc.h,fr30-dis.c,fr30-ibld.c,fr30-opc.c: Rebuild.
