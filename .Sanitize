@@ -664,6 +664,34 @@ else
 	done
 fi
 
+java_files="ChangeLog"
+if ( echo $* | grep keep\-java > /dev/null ) ; then
+	for i in $java_files ; do
+		if test ! -d $i && (grep sanitize-java $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping java stuff in $i
+			fi
+		fi
+	done
+else
+	for i in * ; do
+		if test ! -d $i && (grep sanitize-java $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"java\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-java/,/end-\sanitize\-java/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
 kcygnus_files="ChangeLog configure configure.in Makefile.in"
 if ( echo $* | grep keep\-cygnus > /dev/null ) ; then
 	for i in $kcygnus_files ; do
