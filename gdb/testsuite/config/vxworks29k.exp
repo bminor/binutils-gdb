@@ -1,4 +1,4 @@
-#   Copyright (C) 1997 Free Software Foundation, Inc.
+#   Copyright (C) 1995, 1997 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,10 +15,13 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
 # Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
+# DejaGnu@cygnus.com
 
-load_lib ../config/monitor.exp
+# This file was written by Brendan Kehoe (brendan@cygnus.com).
 
-# Hppro monitor is very slow...
-set timeout 540
-verbose "Timeout is now $timeout seconds" 2
+# We need this file here because the targetname for the 29k board
+# is `vxworks29k', not `vxworks'.  That way other tools (e.g., gcc)
+# can differentiate between the stuff run on that board and others.
+
+verbose "Loading ${srcdir}/config/vx-gdb.exp"
+source ${srcdir}/config/vx-gdb.exp

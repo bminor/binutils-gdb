@@ -1,4 +1,4 @@
-#   Copyright (C) 1988, 1990, 1991, 1992, 1995 Free Software Foundation, Inc.
+#   Copyright (C) 1988, 1990, 1991, 1992, 1995, 1997 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
 # Please email any bugs, comments, and/or additions to this file to:
 # DejaGnu@cygnus.com
@@ -24,7 +24,6 @@
 #
 load_lib remote.exp
 load_lib gdb.exp
-load_lib vxworks.exp
 
 set shell_prompt "->"
 set gdb_prompt "\\(vxgdb\\)"
@@ -63,10 +62,13 @@ proc gdb_start { } {
     global reboot
 
     # get a connection to the board
-    set shell_id [remote_open target]
-    if { $shell_id < 0 } then {
-	perror "Couldn't connect to target."
-	return -1
+    for { set x 0; } { $x < 3 } { incr x } {
+	set shell_id [remote_open target]
+	if { $shell_id > 0 } {
+	    break;
+	} else {
+	    remote_reboot target;
+	}
     }
     verbose "Spawn id for remote shell is $shell_id"
 
@@ -107,17 +109,17 @@ proc spawn_vxgdb { } {
 
     # set the default arguments to "main", so that "run" with no
     # arguments will work correctly.
-    send "set args main\n"
-    expect -re ".*$gdb_prompt $" {}
+    send_gdb "set args main\n"
+    gdb_expect -re ".*$gdb_prompt $" {}
 
     verbose "Setting up target, Please wait..."
     # set targets hostname
-    send "target vxworks [target_info netport]\n"
+    send_gdb "target vxworks [target_info hostname]\n"
     set timeout 60
     verbose "Timeout is now $timeout seconds" 2
-    expect {
+    gdb_expect {
 	-re "Done\..*$gdb_prompt $"	{
-	    verbose "Set target to [target_info netport]" 1
+	    verbose "Set target to [target_info hostname]" 1
 	}
 	-re "net_connect: RPC: Program not registered.*$" {
 	    perror "Couldn't set GDB to target [target_info netport]."

@@ -1,3 +1,22 @@
+#   Copyright (C) 1997 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
 if [target_info exists gdb,nosignals] {
     verbose "Skipping signals.exp because of nosignals."
     continue
@@ -25,7 +44,7 @@ if [get_compiler_info ${binfile}] {
 }
 
 proc signal_tests_1 {} {
-    global prompt
+    global gdb_prompt
     if [runto_main] then {
 	gdb_test "next" "signal \\(SIGUSR1.*" \
 		"next over signal (SIGALRM, handler)"
@@ -50,9 +69,9 @@ proc signal_tests_1 {} {
 	# object file format or utils.  (sigh)
 	setup_xfail "i*86-pc-linuxaout-gnu" "i*86-pc-linuxoldld-gnu"
 	send_gdb "next\n"
-	expect {
-	    -re "alarm .*$prompt $" { pass "next to 2nd alarm (1)" }
-	    -re "Program received signal SIGTRAP.*first.*$prompt $" {
+	gdb_expect {
+	    -re "alarm .*$gdb_prompt $" { pass "next to 2nd alarm (1)" }
+	    -re "Program received signal SIGTRAP.*first.*$gdb_prompt $" {
 
 		# This can happen on machines that have a trace flag
 		# in their PS register.
@@ -82,7 +101,7 @@ proc signal_tests_1 {} {
 		fail "next to 2nd alarm (1) (probably kernel bug)"
 		gdb_test "next" "alarm.*" "next to 2nd alarm (1)"
 	    }
-	    -re "Program exited with code.*$prompt $" {
+	    -re "Program exited with code.*$gdb_prompt $" {
 
 		# This is apparently a bug in the UnixWare kernel (but
 		# has not been investigated beyond the
@@ -115,7 +134,7 @@ proc signal_tests_1 {} {
 		fail "'next' behaved as 'continue (known SVR4 bug)'"
 		return 0
 	    }
-	    -re ".*$prompt $" { fail "next to 2nd alarm (1)" }
+	    -re ".*$gdb_prompt $" { fail "next to 2nd alarm (1)" }
 	    timeout { fail "next to 2nd alarm (1); (timeout)" }
 	    eof { fail "next to 2nd alarm (1); (eof)" }
 	}
@@ -129,18 +148,18 @@ proc signal_tests_1 {} {
 	set bash_bug 0
 	send_gdb "next\n"
 	setup_xfail "i*86-pc-linux-gnu"
-	expect {
-	    -re "Breakpoint.*handler.*$prompt $" {
+	gdb_expect {
+	    -re "Breakpoint.*handler.*$gdb_prompt $" {
 		pass "next to handler in signals_tests_1"
 	    }
-	    -re "Program received signal SIGEMT.*$prompt $" {
+	    -re "Program received signal SIGEMT.*$gdb_prompt $" {
 		# Bash versions before 1.13.5 cause this behaviour
 		# by blocking SIGTRAP.
 		fail "next to handler in signals_tests_1 (known problem with bash versions before 1.13.5)"
 		set bash_bug 1
 		gdb_test "signal 0" "Breakpoint.*handler.*"
 	    }
-	    -re ".*$prompt $" { fail "next to handler in signals_tests_1" }
+	    -re ".*$gdb_prompt $" { fail "next to handler in signals_tests_1" }
 	    timeout { fail "next to handler in signals_tests_1 (timeout)" }
 	    eof { fail "next to handler in signals_tests_1 (eof)" }
 	}
@@ -161,9 +180,9 @@ proc signal_tests_1 {} {
 	setup_xfail "i*86-*-bsd*"
 	setup_xfail "i*86-pc-linux-gnu"
 	send_gdb "continue\n"
-	expect {
-	    -re "Breakpoint.*func1.*$prompt $" { pass "continue to func1" }
-	    -re "Program received signal SIGTRAP.*second.*$prompt $" {
+	gdb_expect {
+	    -re "Breakpoint.*func1.*$gdb_prompt $" { pass "continue to func1" }
+	    -re "Program received signal SIGTRAP.*second.*$gdb_prompt $" {
 
 		# See explanation for `next to 2nd alarm (1)' fail above.
 		# We did step into the signal handler, hit a breakpoint
@@ -175,7 +194,7 @@ proc signal_tests_1 {} {
 		gdb_test "continue" "Breakpoint.*func1.*" \
 		    "extra continue to func1"
 	    }
-	    -re "Program received signal SIGTRAP.*func1 ..;.*$prompt $" {
+	    -re "Program received signal SIGTRAP.*func1 ..;.*$gdb_prompt $" {
 
 		# On the vax under Ultrix the set trace flag in the restored
 		# context is causing the SIGTRAP, but after stepping one
@@ -185,21 +204,21 @@ proc signal_tests_1 {} {
 		gdb_test "continue" "Breakpoint.*func1.*" \
 		    "extra continue to func1"
 	    }
-	    -re ".*$prompt $" { fail "continue to func1" }
+	    -re ".*$gdb_prompt $" { fail "continue to func1" }
 	    default { fail "continue to func1" }
 	}
 
 	setup_xfail "*-*-irix*"
 	send_gdb "signal SIGUSR1\n"
-	expect {
-	    -re "Breakpoint.*handler.*$prompt $" { pass "signal SIGUSR1" }
-	    -re "Program received signal SIGUSR1.*$prompt $" {
+	gdb_expect {
+	    -re "Breakpoint.*handler.*$gdb_prompt $" { pass "signal SIGUSR1" }
+	    -re "Program received signal SIGUSR1.*$gdb_prompt $" {
 		# This is what irix4 and irix5 do.
 		# It would appear to be a kernel bug.
 		fail "signal SIGUSR1"
 		gdb_test "continue" "Breakpoint.*handler.*" "pass it SIGUSR1"
 	    }
-	    -re ".*$prompt $" { fail "signal SIGUSR1" }
+	    -re ".*$gdb_prompt $" { fail "signal SIGUSR1" }
 	    default { fail "signal SIGUSR1" }
 	}
 
@@ -216,14 +235,14 @@ proc signal_tests_1 {} {
 
 	setup_xfail "*-*-*"
 	send_gdb "continue\n"
-	expect {
-	    -re "Breakpoint.*func2.*$prompt $" { pass "continue to func2" }
-	    -re "Breakpoint.*func1.*$prompt $" {
+	gdb_expect {
+	    -re "Breakpoint.*func2.*$gdb_prompt $" { pass "continue to func2" }
+	    -re "Breakpoint.*func1.*$gdb_prompt $" {
 	    	fail "continue to func2"
 		gdb_test "continue" "Breakpoint.*func2.*" \
 		    "extra continue to func2"
 	    }
-	    -re ".*$prompt $" { fail "continue to func2" }
+	    -re ".*$gdb_prompt $" { fail "continue to func2" }
 	    default { fail "continue to func2" }
 	}
 
@@ -319,9 +338,9 @@ signal_tests_1
 # Force a resync, so we're looking at the right prompt.  On SCO we
 # were getting out of sync (I don't understand why).
 send_gdb "p 1+1\n"
-expect {
-    -re "= 2.*$prompt $" {}
-    -re ".*$prompt $" { perror "sync trouble in signals.exp" }
+gdb_expect {
+    -re "= 2.*$gdb_prompt $" {}
+    -re ".*$gdb_prompt $" { perror "sync trouble in signals.exp" }
     default { perror "sync trouble in signals.exp" }
 }
 
