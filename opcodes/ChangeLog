@@ -1,4 +1,39 @@
+start-sanitize-r5900
+Fri Oct 23 12:06:00 EDT 1998  Frank Ch. Eigler <fche@cygnus.com>
+
+	* mips-opc.c (vrget, vclipw, vrnext): Correct COP2 opcodes
+	and masks. 
+
+end-sanitize-r5900
+Mon Oct 19 13:03:19 1998  Doug Evans  <devans@seba.cygnus.com>
+
+start-sanitize-cygnus
+	* cgen-asm.in (insert_1): New function.
+	(insert_normal): Progress on handling ! CGEN_INT_INSN_P.
+	(insert_insn_normal): Update handling of CGEN_INT_INSN_P.
+	(@arch@_cgen_assemble_insn): Update type of `buf' arg.
+	* cgen-dis.in (extract_1): New function.
+	(extract_normal): buf_ctrl renamed to ex_info, update type.
+	Progress on handling of CGEN_INT_INSN_P.
+	(extract_insn_normal): buf_ctrl renamed to ex_info, update type.
+	Update handling of CGEN_INT_INSN_P.  Handle errors from
+	@arch@_cgen_extract_operand.
+	(print_insn): Renamed from print_int_insn.  Handle ! CGEN_INT_INSN_P.
+	(default_print_insn): Renamed from print_insn.
+	Handle ! CGEN_INT_INSN_P.
+	(print_insn_@arch@): Handle error returns from print_insn.
+	* cgen-opc.in (cgen_get_insn_value, cgen_put_insn_value): New fns.
+	(@arch@_cgen_lookup_insn): Update handling of CGEN_INT_INSN_P.
+	(@arch@_cgen_lookup_get_insn_operands): Ditto.
+end-sanitize-cygnus
+	* m32r-opc.c,m32r-opc.h,m32r-asm.c,m32r-dis.c: Regenerate.
+
 start-sanitize-am33
+Wed Oct 14 12:12:25 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* m10300-opc.c: Allow autoincrement stores using the same register
+	for source and destination operands.
+
 Mon Oct 12 10:43:51 1998  Jeffrey A Law  (law@cygnus.com)
 
         * m10300-opc.c: DSP instrutions which only write to one general
