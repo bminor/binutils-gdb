@@ -1,3 +1,8 @@
+2001-08-02  Daniel Jacobowitz  <drow@mvista.com>
+
+	* core-regset.c (fetch_core_registers):  Remove HAVE_GREGSET_T
+	and HAVE_FPREGSET_T checks.  Use gdb_gregset_t and gdb_fpregset_t.
+
 2001-08-02  Keith Seitz  <keiths@redhat.com>
 
         * defs.h (SLASH_STRING): If not defined, set
