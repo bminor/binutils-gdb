@@ -59,8 +59,13 @@ te_file=generic
 install_tooldir=install-exec-tooldir
 
 canon_targets=""
+all_targets=no
 if test -n "$enable_targets" ; then
   for t in `echo $enable_targets | sed 's/,/ /g'`; do
+    if test $t = "all"; then
+      all_targets=yes
+      continue
+    fi
     result=`$ac_config_sub $t 2>/dev/null`
     if test -n "$result" ; then
       canon_targets="$canon_targets $result"
@@ -518,6 +523,25 @@ changequote([,])dnl
     emulations="$emulations $emulation"
 
 done
+
+# Turn on all targets if possible
+if test ${all_targets} = "yes"; then
+  case ${target_cpu_type} in
+  i386)
+    case ${obj_format} in
+    aout)
+      emulations="$emulations i386coff i386elf"
+      ;;
+    coff)
+      emulations="$emulations i386aout i386elf"
+    ;;
+    elf)
+      emulations="$emulations i386aout i386coff"
+      ;;
+    esac
+  ;;
+  esac
+fi
 
 # Assign floating point type.  Most processors with FP support
 # IEEE FP.  On those that don't support FP at all, usually IEEE
