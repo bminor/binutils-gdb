@@ -21,10 +21,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef CGEN_H
 #define CGEN_H
 
-/* Prepend the cpu name, defined in cpu-opc.h, and _cgen_ to symbol S.
+/* Prepend the arch name, defined in <arch>-opc.h, and _cgen_ to symbol S.
    The lack of spaces in the arg list is important for non-stdc systems.
-   This file is included by <cpu>-opc.h.
-   It can be included independently of cpu-opc.h, in which case the cpu
+   This file is included by <arch>-opc.h.
+   It can be included independently of <arch>-opc.h, in which case the arch
    dependent portions will be declared as "unknown_cgen_foo".  */
 
 #ifndef CGEN_SYM
@@ -60,14 +60,20 @@ typedef char * cgen_insn_t;
 #define CGEN_INLINE
 #endif
 
-/* Perhaps we should just use bfd.h, but it's not clear
-   one would want to require that yet.  */
 enum cgen_endian
 {
   CGEN_ENDIAN_UNKNOWN,
   CGEN_ENDIAN_LITTLE,
   CGEN_ENDIAN_BIG
 };
+
+/* Version information.  */
+extern const int cgen_version_major;
+extern const int cgen_version_minor;
+extern const int cgen_version_fixlevel;
+
+/* Forward decl.  */
+typedef struct cgen_insn CGEN_INSN;
 
 /* Attributes.
    Attributes are used to describe various random things.  */
@@ -115,7 +121,7 @@ typedef struct
   int value;
 } CGEN_ATTR_ENTRY;
 
-/* For each domain (fld,operand,insn), list of attributes.  */
+/* For each domain (ifld,operand,insn), list of attributes.  */
 
 typedef struct
 {
@@ -150,10 +156,11 @@ typedef struct cgen_fields CGEN_FIELDS;
 #define CGEN_FIELDS_BITSIZE(fields) ((fields)->length)
 
 /* Associated with each insn or expression is a set of "handlers" for
-   performing operations like parsing, printing, etc.  */
+   performing operations like parsing, printing, etc.  These require a bfd_vma
+   value to be passed around but we don't want all applications to need bfd.h.
+   So this stuff is only provided if bfd.h has been included.  */
 
-/* Forward decl.  */
-typedef struct cgen_insn CGEN_INSN;
+#ifdef BFD_VERSION
 
 /* Parse handler.
    The first argument is a pointer to a struct describing the insn being
@@ -177,13 +184,8 @@ typedef const char * (cgen_parse_fn) PARAMS ((const struct cgen_insn *,
    The third argument is a pointer to a cgen_fields struct.
    The fourth argument is the pc value of the insn.
    The fifth argument is the length of the insn, in bytes.  */
-/* Don't require bfd.h unnecessarily.  */
-#ifdef BFD_VERSION
 typedef void (cgen_print_fn) PARAMS ((PTR, const struct cgen_insn *,
 				      CGEN_FIELDS *, bfd_vma, int));
-#else
-typedef void (cgen_print_fn) ();
-#endif
 
 /* Insert handler.
    The first argument is a pointer to a struct describing the insn being
@@ -191,9 +193,11 @@ typedef void (cgen_print_fn) ();
    The second argument is a pointer to a cgen_fields struct
    from which the values are fetched.
    The third argument is a pointer to a buffer in which to place the insn.
+   The fourth argument is the pc value of the insn.
    The result is an error message or NULL if success.  */
 typedef const char * (cgen_insert_fn) PARAMS ((const struct cgen_insn *,
-					       CGEN_FIELDS *, cgen_insn_t *));
+					       CGEN_FIELDS *, cgen_insn_t *,
+					       bfd_vma));
 
 /* Extract handler.
    The first argument is a pointer to a struct describing the insn being
@@ -203,10 +207,11 @@ typedef const char * (cgen_insert_fn) PARAMS ((const struct cgen_insn *,
    The third argument is the first CGEN_BASE_INSN_SIZE bytes.
    The fourth argument is a pointer to a cgen_fields struct
    in which the results are placed.
+   The fifth argument is the pc value of the insn.
    The result is the length of the insn or zero if not recognized.  */
 typedef int (cgen_extract_fn) PARAMS ((const struct cgen_insn *,
 				       void *, cgen_insn_t,
-				       CGEN_FIELDS *));
+				       CGEN_FIELDS *, bfd_vma));
 
 /* The `parse' and `insert' fields are indices into these tables.
    The elements are pointer to specialized handler functions.
@@ -221,6 +226,14 @@ extern cgen_extract_fn * CGEN_SYM (extract_handlers) [];
 #define CGEN_EXTRACT_FN(x) (CGEN_SYM (extract_handlers)[(x)->base.extract])
 extern cgen_print_fn * CGEN_SYM (print_handlers) [];
 #define CGEN_PRINT_FN(x) (CGEN_SYM (print_handlers)[(x)->base.print])
+
+/* Default insn parser, printer.  */
+extern cgen_parse_fn CGEN_SYM (parse_insn);
+extern cgen_insert_fn CGEN_SYM (insert_insn);
+extern cgen_extract_fn CGEN_SYM (extract_insn);
+extern cgen_print_fn CGEN_SYM (print_insn);
+
+#endif /* BFD_VERSION */
 
 /* Base class of parser/printer.
    (Don't read too much into the use of the phrase "base class".
@@ -248,6 +261,7 @@ struct cgen_base
    Not that one would necessarily want to do that but rather that it helps
    keep a clean interface.  The interface will obviously be slanted towards
    GAS, but at least it's a start.
+   ??? Note that one possible use of the assembler besides GAS is GDB.
 
    Parsing is controlled by the assembler which calls
    CGEN_SYM (assemble_insn).  If it can parse and build the entire insn
@@ -272,8 +286,7 @@ enum cgen_parse_operand_type
   CGEN_PARSE_OPERAND_ADDRESS
 };
 
-/* Values for indicating what was parsed.
-   ??? Not too useful at present but in time.  */
+/* Values for indicating what was parsed.  */
 enum cgen_parse_operand_result
 {
   CGEN_PARSE_OPERAND_RESULT_NUMBER,
@@ -282,8 +295,7 @@ enum cgen_parse_operand_result
   CGEN_PARSE_OPERAND_RESULT_ERROR
 };
 
-/* Don't require bfd.h unnecessarily.  */
-#ifdef BFD_VERSION
+#ifdef BFD_VERSION /* Don't require bfd.h unnecessarily.  */
 extern const char * (*cgen_parse_operand_fn)
      PARAMS ((enum cgen_parse_operand_type, const char **, int, int,
 	      enum cgen_parse_operand_result *, bfd_vma *));
@@ -292,40 +304,15 @@ extern const char * (*cgen_parse_operand_fn)
 /* Called before trying to match a table entry with the insn.  */
 extern void cgen_init_parse_operand PARAMS ((void));
 
-/* Called from <cpu>-asm.c to initialize operand parsing.  */
-
-/* These are GAS specific.  They're not here as part of the interface,
-   but rather that we need to put them somewhere.  */
-
-/* Call this from md_assemble to initialize the assembler callback.  */
-extern void cgen_asm_init_parse PARAMS ((void));
-
-/* Don't require bfd.h unnecessarily.  */
-#ifdef BFD_VERSION
 /* The result is an error message or NULL for success.
    The parsed value is stored in the bfd_vma *.  */
+#ifdef BFD_VERSION /* Don't require bfd.h unnecessarily.  */
 extern const char * cgen_parse_operand
      PARAMS ((enum cgen_parse_operand_type,
 	      const char **, int, int,
 	      enum cgen_parse_operand_result *,
 	      bfd_vma *));
 #endif
-
-extern void cgen_save_fixups PARAMS ((void));
-extern void cgen_restore_fixups PARAMS ((void));
-extern void cgen_swap_fixups PARAMS ((void));
-     
-/* Add a register to the assembler's hash table.
-   This makes lets GAS parse registers for us.
-   ??? This isn't currently used, but it could be in the future.  */
-extern void cgen_asm_record_register PARAMS ((char *, int));
-
-/* After CGEN_SYM (assemble_insn) is done, this is called to
-   output the insn and record any fixups.  The address of the
-   assembled instruction is returned in case it is needed by
-   the caller.  */
-extern char * cgen_asm_finish_insn PARAMS ((const struct cgen_insn *,
-					    cgen_insn_t *, unsigned int, int));
 
 /* Operand values (keywords, integers, symbols, etc.)  */
 
@@ -349,7 +336,8 @@ typedef struct cgen_hw_entry
   PTR asm_data;
 } CGEN_HW_ENTRY;
 
-extern const CGEN_HW_ENTRY * cgen_hw_lookup PARAMS ((const char *));
+extern const CGEN_HW_ENTRY * cgen_hw_lookup_by_name PARAMS ((const char *));
+extern const CGEN_HW_ENTRY * cgen_hw_lookup_by_num PARAMS ((int));
 
 /* This struct is used to describe things like register names, etc.  */
 
@@ -926,23 +914,25 @@ extern const CGEN_INSN *
 CGEN_SYM (lookup_get_insn_operands) PARAMS ((const CGEN_INSN *, cgen_insn_t,
 					     int, int *));
 
-CGEN_INLINE void
-CGEN_SYM (put_operand) PARAMS ((int, const long *,
-				CGEN_FIELDS *));
-CGEN_INLINE long
-CGEN_SYM (get_operand) PARAMS ((int, const CGEN_FIELDS *));
+/* Get/set fields in the CGEN_FIELDS struct.  */
+int
+CGEN_SYM (get_int_operand) PARAMS ((int, const CGEN_FIELDS *));
+void
+CGEN_SYM (set_int_operand) PARAMS ((int, CGEN_FIELDS *, int));
+#ifdef BFD_VERSION /* Don't require bfd.h unnecessarily.  */
+bfd_vma
+CGEN_SYM (get_vma_operand) PARAMS ((int, const CGEN_FIELDS *));
+void
+CGEN_SYM (set_vma_operand) PARAMS ((int, CGEN_FIELDS *, bfd_vma));
+#endif
 
 extern const char *
 CGEN_SYM (parse_operand) PARAMS ((int, const char **, CGEN_FIELDS *));
 
+#ifdef BFD_VERSION /* Don't require bfd.h unnecessarily.  */
 extern const char *
-CGEN_SYM (insert_operand) PARAMS ((int, CGEN_FIELDS *, char *));
-
-/* Default insn parser, printer.  */
-extern cgen_parse_fn CGEN_SYM (parse_insn);
-extern cgen_insert_fn CGEN_SYM (insert_insn);
-extern cgen_extract_fn CGEN_SYM (extract_insn);
-extern cgen_print_fn CGEN_SYM (print_insn);
+CGEN_SYM (insert_operand) PARAMS ((int, CGEN_FIELDS *, char *, bfd_vma));
+#endif
 
 /* Read in a cpu description file.  */
 extern const char * cgen_read_cpu_file PARAMS ((const char *));
