@@ -1,3 +1,8 @@
+2000-09-07  Catherine Moore  <clm@redhat.com>
+ 
+        * d30v-opc.c (d30v_format_tab): Use format Ra for
+        modinc and moddec.
+
 2000-09-06  Alexandre Oliva  <aoliva@redhat.com>
 
 	* configure: Rebuilt with new libtool.m4.

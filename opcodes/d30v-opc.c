@@ -460,8 +460,8 @@ const struct d30v_format d30v_format_table[] =
   { SHORT_AA, 2, { Aa, Rb, IMM6 } },		/* Aa,Rb,imm6 */
   { SHORT_RA, 0, { Ra, Ab, Rc } },		/* Ra,Ab,Rc */
   { SHORT_RA, 2, { Ra, Ab, IMM6U2 } },		/* Ra,Ab,imm6u */
-  { SHORT_MODINC, 1, { Rb, IMM5 } },		/* Rb,imm5 (modinc) */
-  { SHORT_MODDEC, 3, { Rb, IMM5 } },		/* Rb,imm5 (moddec) */
+  { SHORT_MODINC, 1, { Ra, IMM5 } },		/* Ra,imm5 (modinc) */
+  { SHORT_MODDEC, 3, { Ra, IMM5 } },		/* Ra,imm5 (moddec) */
   { SHORT_C1, 0, { Ra, Cb, Fake } },		/* Ra,Cb (mvfsys) */
   { SHORT_C2, 0, { Ca, Rb, Fake } },		/* Ca,Rb (mvtsys) */
   { SHORT_UF, 0, { Fa, Fb } },			/* Fa,Fb  (notfg) */
