@@ -3952,7 +3952,6 @@ i386_scale (scale)
 
   switch (val)
     {
-    case 0:
     case 1:
       i.log2_scale_factor = 0;
       break;
