@@ -178,6 +178,30 @@ vax_frame_num_args (struct frame_info *fi)
   return (0xff & read_memory_integer (FRAME_ARGS_ADDRESS (fi), 1));
 }
 
+void
+vax_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
+{
+  write_register (1, addr);
+}
+
+void
+vax_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
+{
+  memcpy (valbuf, regbuf + REGISTER_BYTE (0), TYPE_LENGTH (valtype));
+}
+
+void
+vax_store_return_value (struct type *valtype, char *valbuf)
+{
+  write_register_bytes (0, valbuf, TYPE_LENGTH (valtype));
+}
+
+CORE_ADDR
+vax_extract_struct_value_address (char *regbuf)
+{
+  return (extract_address (regbuf + REGISTER_BYTE (0), REGISTER_RAW_SIZE (0)));
+}
+
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */
 

@@ -122,30 +122,20 @@ extern int vax_register_virtual_size (int);
 #define REGISTER_VIRTUAL_TYPE(N) vax_register_virtual_type ((N))
 extern struct type *vax_register_virtual_type (int);
 
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function. */
-
-#define STORE_STRUCT_RETURN(ADDR, SP) \
-  { write_register (1, (ADDR)); }
-
-/* Extract from an array REGBUF containing the (raw) register state
-   a function return value of type TYPE, and copy that, in virtual format,
-   into VALBUF.  */
+#define STORE_STRUCT_RETURN(ADDR, SP) vax_store_struct_return ((ADDR), (SP))
+extern void vax_store_struct_return (CORE_ADDR, CORE_ADDR);
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  memcpy (VALBUF, REGBUF, TYPE_LENGTH (TYPE))
-
-/* Write into appropriate registers a function return value
-   of type TYPE, given in virtual format.  */
+  vax_extract_return_value ((TYPE), (REGBUF), (VALBUF))
+extern void vax_extract_return_value (struct type *, char *, char *);
 
 #define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE))
+  vax_store_return_value ((TYPE), (VALBUF))
+extern void vax_store_return_value (struct type *, char *);
 
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value,
-   as a CORE_ADDR (or an expression that can be used as one).  */
-
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF))
+#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+  vax_extract_struct_value_address ((REGBUF))
+extern CORE_ADDR vax_extract_struct_value_address (char *);
 
 
 /* Describe the pointer in each stack frame to the previous stack frame

@@ -1,5 +1,17 @@
 2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* vax-tdep.c (vax_store_struct_return): New function.
+	(vax_extract_return_value): Ditto.
+	(vax_store_return_value): Ditto.
+	(vax_extract_struct_value_address): Ditto.
+	* config/vax/tm-vax.h (STORE_STRUCT_RETURN): Use
+	vax_store_struct_return.
+	(EXTRACT_RETURN_VALUE): Use vax_extract_return_value.
+	(STORE_RETURN_VALUE): Use vax_store_return_value.
+	(EXTRACT_STRUCT_VALUE_ADDRESS): Use vax_extract_struct_value_address.
+
+2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* vax-tdep.c (vax_frame_saved_pc): New function.
 	(vax_frame_args_address_correct): Ditto.
 	(vax_frame_args_address): Ditto.
