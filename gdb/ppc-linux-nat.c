@@ -209,7 +209,6 @@ fetch_register (int tid, int regno)
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr = ppc_register_u_addr (regno);
-  char mess[128];              /* For messages */
   int i;
   unsigned int offset;         /* Offset of registers within the u area. */
   char buf[MAX_REGISTER_SIZE];
@@ -253,9 +252,10 @@ fetch_register (int tid, int regno)
       regaddr += sizeof (PTRACE_XFER_TYPE);
       if (errno != 0)
 	{
-	  sprintf (mess, "reading register %s (#%d)", 
+          char message[128];
+	  sprintf (message, "reading register %s (#%d)", 
 		   REGISTER_NAME (regno), regno);
-	  perror_with_name (mess);
+	  perror_with_name (message);
 	}
     }
 
@@ -406,7 +406,6 @@ store_register (int tid, int regno)
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr = ppc_register_u_addr (regno);
-  char mess[128];              /* For messages */
   int i;
   unsigned int offset;         /* Offset of registers within the u area.  */
   char buf[MAX_REGISTER_SIZE];
@@ -457,9 +456,10 @@ store_register (int tid, int regno)
 
       if (errno != 0)
 	{
-	  sprintf (mess, "writing register %s (#%d)", 
+          char message[128];
+	  sprintf (message, "writing register %s (#%d)", 
 		   REGISTER_NAME (regno), regno);
-	  perror_with_name (mess);
+	  perror_with_name (message);
 	}
     }
 }

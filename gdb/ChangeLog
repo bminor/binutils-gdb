@@ -1,3 +1,8 @@
+2004-06-02  Jim Blandy  <jimb@redhat.com>
+
+	* ppc-linux-nat.c (store_register, fetch_register): Rename 'mess'
+	to 'message', and make it local to the lone block that uses it.
+
 2004-06-02  Paul N. Hilfinger  <hilfinger@gnat.com>
 
 	* ada-exp.y: Synchronize with current ACT sources.
