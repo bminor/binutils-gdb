@@ -3576,7 +3576,7 @@ common_block_end (objfile)
     for (j = common_block_i; j < common_block->nsyms; j++)
       add_symbol_to_list (common_block->symbol[j], &new);
 
-  SYMBOL_NAMESPACE (sym) = (enum namespace)((long) new);
+  SYMBOL_TYPE (sym) = (struct type *) new;
 
   /* Should we be putting local_symbols back to what it was?
      Does it matter?  */
@@ -3596,7 +3596,7 @@ fix_common_block (sym, valu)
     struct symbol *sym;
     int valu;
 {
-  struct pending *next = (struct pending *) SYMBOL_NAMESPACE (sym);
+  struct pending *next = (struct pending *) SYMBOL_TYPE (sym);
   for ( ; next; next = next->next)
     {
       register int j;

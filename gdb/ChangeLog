@@ -1,3 +1,9 @@
+Wed Mar  9 15:23:19 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.c (common_block_end, fix_common_block): Stash the
+	struct pending * in the SYMBOL_TYPE, not the SYMBOL_NAMESPACE, so
+	as to not assume that a pointer fits in an enum.
+
 Wed Mar  9 18:56:36 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* os9kread.c (fill_sym): check compiler verion number for pre-
@@ -12,7 +18,7 @@ Wed Mar  9 18:56:36 1994  Kung Hsu  (kung@mexican.cygnus.com)
 	* remote-os9k.c: fix bug in 'set remotebaud' function.
 	* remote-os9k.c (rombug_link): minimize checking so to improve
 	speed.
-	* symfile.c (symfile_command): check if failed to link, also make
+	* symfile.c (symbol_file_command): check if failed to link, also make
 	the command be able to accept more than one filenames.
 	* target.c (target_link): check if failed to link with rombug.
 	* config/i386/tm-i386os9k.h : add #define DECR_PC_AFTER_BREAK 0.

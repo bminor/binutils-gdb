@@ -40,7 +40,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    have the correct data for that slot yet.
 
    The use of the LOC_BLOCK code in this chain is nonstandard--
-   it refers to a FORTRAN common block rather than the usual meaning.  */
+   it refers to a FORTRAN common block rather than the usual meaning, and
+   the such LOC_BLOCK symbols use their fields in nonstandard ways.  */
 
 EXTERN struct symbol *global_sym_chain[HASHSIZE];
 
