@@ -2424,9 +2424,12 @@ Here are the functions that make up the OS ABI framework:
 Return the name of the OS ABI corresponding to @var{osabi}.
 @end deftypefun
 
-@deftypefun void gdbarch_register_osabi (enum bfd_architecture @var{arch}, enum gdb_osabi @var{osabi}, void (*@var{init_osabi})(struct gdbarch_info @var{info}, struct gdbarch *@var{gdbarch}))
+@deftypefun void gdbarch_register_osabi (enum bfd_architecture @var{arch}, unsigned long @var{machine}, enum gdb_osabi @var{osabi}, void (*@var{init_osabi})(struct gdbarch_info @var{info}, struct gdbarch *@var{gdbarch}))
 Register the OS ABI handler specified by @var{init_osabi} for the
-architecture/OS ABI pair specified by @var{arch} and @var{osabi}.
+architecture, machine type and OS ABI specified by @var{arch},
+@var{machine} and @var{osabi}.  In most cases, a value of zero for the
+machine type, which implies the architecture's default machine type,
+will suffice.
 @end deftypefun
 
 @deftypefun void gdbarch_register_osabi_sniffer (enum bfd_architecture @var{arch}, enum bfd_flavour @var{flavour}, enum gdb_osabi (*@var{sniffer})(bfd *@var{abfd}))
