@@ -122,9 +122,6 @@ RUNTEST = `if [ -f $${srcroot}/dejagnu/runtest ] ; \
 	else echo runtest ; fi`
 
 
-# libraries that may need to be augmented on a system-by-system basis
-X11_LIB = -lX11
-
 # compilers to use to create programs which must be run in the build
 # environment.
 CC_FOR_BUILD = $(CC)
@@ -204,6 +201,17 @@ AS_FOR_TARGET = ` \
     fi; \
   fi`
 
+LD_FOR_TARGET = ` \
+  if [ -f $$r/ld/ld.new ] ; then \
+    echo $$r/ld/ld.new ; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(LD); \
+    else \
+       t='$(program_transform_name)'; echo ld | sed -e 's/x/x/' $$t ; \
+    fi; \
+  fi`
+
 DLLTOOL_FOR_TARGET = ` \
   if [ -f $$r/binutils/dlltool ] ; then \
     echo $$r/binutils/dlltool ; \
@@ -279,6 +287,7 @@ BASE_FLAGS_TO_PASS = \
 	"INSTALL_XFORM=$(INSTALL_XFORM)" \
 	"LDFLAGS=$(LDFLAGS)" \
 	"LEX=$(LEX)" \
+	"LD_FOR_TARGET=$(LD_FOR_TARGET)" \
 	"LIBCFLAGS=$(LIBCFLAGS)" \
 	"LIBCFLAGS_FOR_TARGET=$(LIBCFLAGS_FOR_TARGET)" \
 	"LIBCXXFLAGS=$(LIBCXXFLAGS)" \
@@ -313,10 +322,15 @@ FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_HOST_FLAGS)
 
 # Flags that are concerned with the location of the X11 include files
 # and library files
+#
+# NOTE: until the top-level is getting the values via autoconf, it only
+# causes problems to have this top-level Makefile overriding the autoconf-set
+# values in child directories.  Only variables that don't conflict with
+# autoconf'ed ones should be passed by X11_FLAGS_TO_PASS for now.
+#
 X11_FLAGS_TO_PASS = \
-	"X11_INCLUDE_FLAGS=$(X11_INCLUDE_FLAGS)" \
-	"X11_LIB_FLAGS=$(X11_LIB_FLAGS)" \
-	"X11_LIB=$(X11_LIB)"
+	'X11_EXTRA_CFLAGS=$(X11_EXTRA_CFLAGS)' \
+	'X11_EXTRA_LIBS=$(X11_EXTRA_LIBS)'
 
 # Flags to pass down to makes which are built with the target environment.
 # The double $ decreases the length of the command line; the variables
@@ -330,6 +344,7 @@ EXTRA_TARGET_FLAGS = \
 	'CXX=$$(CXX_FOR_TARGET)' \
 	'CXXFLAGS=$$(CXXFLAGS_FOR_TARGET)' \
 	'DLLTOOL=$$(DLLTOOL_FOR_TARGET)' \
+	'LD=$$(LD_FOR_TARGET)' \
 	'LIBCFLAGS=$$(LIBCFLAGS_FOR_TARGET)' \
 	'LIBCXXFLAGS=$$(LIBCXXFLAGS_FOR_TARGET)' \
 	'NM=$$(NM_FOR_TARGET)' \
@@ -830,6 +845,7 @@ $(CONFIGURE_TARGET_MODULES):
 	    CFLAGS="$(CFLAGS_FOR_TARGET)"; export CFLAGS; \
 	    CXX="$(CXX_FOR_TARGET)"; export CXX; \
 	    CXXFLAGS="$(CXXFLAGS_FOR_TARGET)"; export CXXFLAGS; \
+	    LD="$(LD_FOR_TARGET)"; export LD; \
 	    NM="$(NM_FOR_TARGET)"; export NM; \
 	    RANLIB="$(RANLIB_FOR_TARGET)"; export RANLIB; \
 	    cd $${dir}; \

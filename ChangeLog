@@ -1,3 +1,10 @@
+Tue Oct 24 18:19:09 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* Makefile.in (X11_LIB): Removed.
+	(X11_FLAGS_TO_PASS): pass only X11_EXTRA_CFLAGS and X11_EXTRA_LIBS.
+
+	* configure.in (host_makefile_frag): mh-aix & mh-sun removed.
+
 Sun Oct 22 13:04:42 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* cfg-ml-com.in (powerpc*): Shorten some of the multilib directory
