@@ -72,6 +72,9 @@ struct fifo_quadword* pke_fifo_fit(struct pke_fifo*);
 struct fifo_quadword* pke_fifo_access(struct pke_fifo*, unsigned_4 qwnum);
 void pke_fifo_old(struct pke_fifo*, unsigned_4 qwnum);
 
+/* Default --log-file names  */
+const char *pke0_default_trace = "vif0.s";
+const char *pke1_default_trace = "vif1.s";
 
 
 /* Static data */
@@ -665,9 +668,18 @@ pke_issue(SIM_DESC sd, struct pke_device* me)
     }
 
   /* open trace file if necessary */
-  if(me->trace_file == NULL &&
-     me->trace_file_name != NULL)
+  if((me->flags & PKE_FLAG_TRACE_ON) && 
+     (me->trace_file == NULL))
     {
+      /* use default names  */
+      if(me->trace_file_name == NULL)
+        {
+          if(me->pke_number == 0)
+            me->trace_file_name = (char *) pke0_default_trace;
+          else
+            me->trace_file_name = (char *) pke1_default_trace;
+        }
+
       sky_open_file(& (me->trace_file),
 		    me->trace_file_name,
 		    (char *) NULL, _IOFBF );
