@@ -19,6 +19,7 @@ The initial version of this document was written by Ian Lance Taylor
 * BFD guidelines::		BFD programming guidelines
 * BFD generated files::		BFD generated files
 * BFD multiple compilations::	Files compiled multiple times in BFD
+* BFD relocation handling::	BFD relocation handling
 * Index::			Index
 @end menu
 
@@ -96,7 +97,8 @@ used for Windows (specifically, Win32) executables.  It is very similar
 to PE, but includes some additional header information.
 
 @item relocations
-Information used by the linker to adjust section contents.
+Information used by the linker to adjust section contents.  Also called
+relocs.
 
 @item section
 Object files and executable are composed of sections.  Sections have
@@ -140,6 +142,9 @@ emulate it.
 Here are some general BFD programming guidelines:
 
 @itemize @bullet
+@item
+Follow the GNU coding standards.
+
 @item
 Avoid global variables.  We ideally want BFD to be fully reentrant, so
 that it can be used in multiple threads.  All uses of global or static
@@ -390,6 +395,216 @@ PE target.  This defines PE specific versions of the COFF swapping
 routines, and also defines some macros which control @file{coffcode.h}
 itself.
 @end table
+
+@node BFD relocation handling
+@section BFD relocation handling
+@cindex bfd relocation handling
+@cindex relocations in bfd
+
+The handling of relocations is one of the more confusing aspects of BFD.
+Relocation handling has been implemented in various different ways, all
+somewhat incompatible, none perfect.
+
+@menu
+BFD relocation concepts::	BFD relocation concepts
+BFD relocation functions::	BFD relocation functions
+BFD relocation future::		BFD relocation future
+@end menu
+
+@node BFD relocation concepts
+@subsection BFD relocation concepts
+
+A relocation is an action which the linker must take when linking.  It
+describes a change to the contents of a section.  The change is normally
+based on the final value of one or more symbols.  Relocations are
+created by the assembler when it creates an object file.
+
+Most relocations are simple.  A typical simple relocation is to set 32
+bits at a given offset in a section to the value of a symbol.  This type
+of relocation would be generated for code like @code{int *p = &i;} where
+@samp{p} and @samp{i} are global variables.  A relocation for the symbol
+@samp{i} would be generated such that the linker would initialize the
+area of memory which holds the value of @samp{p} to the value of the
+symbol @samp{i}.
+
+Slightly more complex relocations may include an addend, which is a
+constant to add to the symbol value before using it.  In some cases a
+relocation will require adding the symbol value to the existing contents
+of the section in the object file.  In others the relocation will simply
+replace the contents of the section with the symbol value.  Some
+relocations are PC relative, so that the value to be stored in the
+section is the difference between the value of a symbol and the final
+address of the section contents.
+
+In general, relocations can be arbitrarily complex.  For
+example,relocations used in dynamic linking systems often require the
+linker to allocate space in a different section and use the offset
+within that section as the value to store.  In the IEEE object file
+format, relocations may involve arbitrary expressions.
+
+When doing a relocateable link, the linker may or may not have to do
+anything with a relocation, depending upon the definition of the
+relocation.  Simple relocations generally do not require any special
+action.
+
+@node BFD relocation functions
+@subsection BFD relocation functions
+
+In BFD, each section has an array of @samp{arelent} structures.  Each
+structure has a pointer to a symbol, an address within the section, an
+addend, and a pointer to a @samp{reloc_howto_struct} structure.  The
+howto structure has a bunch of fields describing the reloc, including a
+type field.  The type field is specific to the object file format
+backend; none of the generic code in BFD examines it.
+
+Originally, the function @samp{bfd_perform_relocation} was supposed to
+handle all relocations.  In theory, many relocations would be simple
+enough to be described by the fields in the howto structure.  For those
+that weren't, the howto structure included a @samp{special_function}
+field to use as an escape.
+
+While this seems plausible, a look at @samp{bfd_perform_relocation}
+shows that it failed.  The function has odd special cases.  Some of the
+fields in the howto structure, such as @samp{pcrel_offset}, were not
+adequately documented.
+
+The linker uses @samp{bfd_perform_relocation} to do all relocations when
+the input and output file have different formats (e.g., when generating
+S-records).  The generic linker code, which is used by all targets which
+do not define their own special purpose linker, uses
+@samp{bfd_get_relocated_section_contents}, which for most targets turns
+into a call to @samp{bfd_generic_get_relocated_section_contents}, which
+calls @samp{bfd_perform_relocation}.  So @samp{bfd_perform_relocation}
+is still widely used, which makes it difficult to change, since it is
+difficult to test all possible cases.
+
+The assembler used @samp{bfd_perform_relocation} for a while.  This
+turned out to be the wrong thing to do, since
+@samp{bfd_perform_relocation} was written to handle relocations on an
+existing object file, while the assembler needed to create relocations
+in a new object file.  The assembler was changed to use the new function
+@samp{bfd_install_relocation} instead, and @samp{bfd_install_relocation}
+was created as a copy of @samp{bfd_perform_relocation}.
+
+Unfortunately, the work did not progress any farther, so
+@samp{bfd_install_relocation} remains a simple copy of
+@samp{bfd_perform_relocation}, with all the odd special cases and
+confusing code.  This again is difficult to change, because again any
+change can affect any assembler target, and so is difficult to test.
+
+The new linker, when using the same object file format for all input
+files and the output file, does not convert relocations into
+@samp{arelent} structures, so it can not use
+@samp{bfd_perform_relocation} at all.  Instead, users of the new linker
+are expected to write a @samp{relocate_section} function which will
+handle relocations in a target specific fashion.
+
+There are two helper functions for target specific relocation:
+@samp{_bfd_final_link_relocate} and @samp{_bfd_relocate_contents}.
+These functions use a howto structure, but they @emph{do not} use the
+@samp{special_function} field.  Since the functions are normally called
+from target specific code, the @samp{special_function} field adds
+little; any relocations which require special handling can be handled
+without calling those functions.
+
+So, if you want to add a new target, or add a new relocation to an
+existing target, you need to do the following:
+@itemize @bullet
+@item
+Make sure you clearly understand what the contents of the section should
+look like after assembly, after a relocateable link, and after a final
+link.  Make sure you clearly understand the operations the linker must
+perform during a relocateable link and during a final link.
+
+@item
+Write a howto structure for the relocation.  The howto structure is
+flexible enough to represent any relocation which should be handled by
+setting a contiguous bitfield in the destination to the value of a
+symbol, possibly with an addend, possibly adding the symbol value to the
+value already present in the destination.
+
+@item
+Change the assembler to generate your relocation.  The assembler will
+call @samp{bfd_install_relocation}, so your howto structure has to be
+able to handle that.  You may need to set the @samp{special_function}
+field to handle assembly correctly.  Be careful to ensure that any code
+you write to handle the assembler will also work correctly when doing a
+relocateable link.  For example, see @samp{bfd_elf_generic_reloc}.
+
+@item
+Test the assembler.  Consider the cases of relocation against an
+undefined symbol, a common symbol, a symbol defined in the object file
+in the same section, and a symbol defined in the object file in a
+different section.  These cases may not all be applicable for your
+reloc.
+
+@item
+If your target uses the new linker, which is recommended, add any
+required handling to the target specific relocation function.  In simple
+cases this will just involve a call to @samp{_bfd_final_link_relocate}
+or @samp{_bfd_relocate_contents}, depending upon the definition of the
+relocation and whether the link is relocateable or not.
+
+@item
+Test the linker.  Test the case of a final link.  If the relocation can
+overflow, use a linker script to force an overflow and make sure the
+error is reported correctly.  Test a relocateable link, whether the
+symbol is defined or undefined in the relocateable output.  For both the
+final and relocateable link, test the case when the symbol is a common
+symbol, when the symbol looked like a common symbol but became a defined
+symbol, when the symbol is defined in a different object file, and when
+the symbol is defined in the same object file.
+
+@item
+In order for linking to another object file format, such as S-records,
+to work correctly, @samp{bfd_perform_relocation} has to do the right
+thing for the relocation.  You may need to set the
+@samp{special_function} field to handle this correctly.  Test this by
+doing a link in which the output object file format is S-records.
+
+@item
+Using the linker to generate relocateable output in a different object
+file format is impossible in the general case, so you generally don't
+have to worry about that.  Linking input files of different object file
+formats together is quite unusual, but if you're really dedicated you
+may want to consider testing this case, both when the output object file
+format is the same as your format, and when it is different.
+@end itemize
+
+@node BFD relocation future
+@subsection BFD relocation future
+
+Clearly the current BFD relocation support is in bad shape.  A
+wholescale rewrite would be very difficult, because it would require
+thorough testing of every BFD target.  So some sort of incremental
+change is required.
+
+My vague thoughts on this would involve defining a new, clearly defined,
+howto structure.  Some mechanism would be used to determine which type
+of howto structure was being used by a particular format.
+
+The new howto structure would clearly define the relocation behaviour in
+the case of an assembly, a relocateable link, and a final link.  At
+least one special function would be defined as an escape, and it might
+make sense to define more.
+
+One or more generic functions similar to @samp{bfd_perform_relocation}
+would be written to handle the new howto structure.
+
+This should make it possible to write a generic version of the relocate
+section functions used by the new linker.  The target specific code
+would provide some mechanism (a function pointer or an initial
+conversion) to convert target specific relocations into howto
+structures.
+
+Ideally it would be possible to use this generic relocate section
+function for the generic linker as well.  That is, it would replace the
+@samp{bfd_generic_get_relocated_section_contents} function which is
+currently normally used.
+
+For the special case of ELF dynamic linking, more consideration needs to
+be given to writing ELF specific but ELF target generic code to handle
+special relocation types such as GOT and PLT.
 
 @node Index
 @unnumberedsec Index
