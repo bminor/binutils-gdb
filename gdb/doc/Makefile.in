@@ -370,20 +370,6 @@ gdb.mm: $(SFILES_LOCAL) links2roff rluser.texinfo inc-hist.texinfo gdbmi.texinfo
 gdb_toc.html: ${SFILES_DOC}
 	$(MAKEHTML) $(MAKEHTMLFLAGS) -I ${READLINE_DIR} -I ${GDBMI_DIR} -I $(srcdir) $(srcdir)/gdb.texinfo
 
-# GDB GUI MANUAL: TeX dvi file
-gdbgui.dvi : gdbgui.texinfo ${SFILES_DOC}
-	$(SET_TEXINPUTS) $(TEX) gdbgui.texinfo
-	$(TEXINDEX) gdbgui.??
-	$(SET_TEXINPUTS) $(TEX) gdbgui.texinfo
-	rm -f gdbgui.aux gdbgui.cp* gdbgui.fn* gdbgui.ky* \
-		gdbgui.log gdbgui.pg* gdbgui.toc gdbgui.tp* gdbgui.vr*
-
-# GDB GUI MANUAL: info file
-gdb-gui: gdbgui.info
-
-gdbgui.info: gdbgui.texinfo ${SFILES_DOC}
-	$(MAKEINFO) -o gdbgui.info $(srcdir)/gdbgui.texinfo
-
 # GDB INTERNALS MANUAL: TeX dvi file
 gdbint.dvi : gdbint.texinfo
 	$(SET_TEXINPUTS) $(TEX) gdbint.texinfo
