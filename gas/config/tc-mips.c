@@ -8374,14 +8374,14 @@ mips_ip (str, ip)
 		      if (imm_expr.X_op == O_constant)
 			imm_expr.X_add_number =
 			  (imm_expr.X_add_number >> 16) & 0xffff;
-#ifdef OBJ_ELF
-		      else if (c == S_EX_HIGHEST)
-			  *imm_reloc = BFD_RELOC_MIPS_HIGHEST;
 		      else if (c == S_EX_HI)
 			{
 			  *imm_reloc = BFD_RELOC_HI16_S;
 			  imm_unmatched_hi = true;
 			}
+#ifdef OBJ_ELF
+		      else if (c == S_EX_HIGHEST)
+			  *imm_reloc = BFD_RELOC_MIPS_HIGHEST;
 		      else if (c == S_EX_GP_REL)
 			{
 			  /* This occurs in NewABI only.  */

@@ -1,3 +1,7 @@
+2001-11-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (mips_ip): Re-allow %hi() op for non-ELF assembler.
+
 2001-11-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* frags.c (frag_grow): Revert last change.
