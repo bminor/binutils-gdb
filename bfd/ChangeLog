@@ -1,3 +1,7 @@
+2005-02-23  Ben Elliston  <bje@au.ibm.com>
+
+	* opncls.c (bfd_zalloc): Document this function.
+
 2005-02-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* coffcode.h (sec_to_styp_flags): Replaced SEC_CLINK with

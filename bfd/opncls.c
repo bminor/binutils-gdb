@@ -820,7 +820,6 @@ DESCRIPTION
 	<<abfd>> and return a pointer to it.
 */
 
-
 void *
 bfd_alloc (bfd *abfd, bfd_size_type size)
 {
@@ -837,6 +836,18 @@ bfd_alloc (bfd *abfd, bfd_size_type size)
     bfd_set_error (bfd_error_no_memory);
   return ret;
 }
+
+/*
+INTERNAL_FUNCTION
+	bfd_zalloc
+
+SYNOPSIS
+	void *bfd_zalloc (bfd *abfd, bfd_size_type wanted);
+
+DESCRIPTION
+	Allocate a block of @var{wanted} bytes of zeroed memory
+	attached to <<abfd>> and return a pointer to it.
+*/
 
 void *
 bfd_zalloc (bfd *abfd, bfd_size_type size)
