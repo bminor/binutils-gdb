@@ -24,12 +24,17 @@
 #error "N must be #defined"
 #endif
 
+#include "sim-xcat.h"
+
 /* NOTE: See end of file for #undef */
 #define unsignedN XCONCAT2(unsigned,N)
 #define signedN XCONCAT2(signed,N)
 #define MASKEDn XCONCAT2(MASKED,N)
 #define MASKn XCONCAT2(MASK,N)
 #define LSMASKEDn XCONCAT2(LSMASKED,N)
+#define LSMASKn XCONCAT2(LSMASK,N)
+#define MSMASKEDn XCONCAT2(MSMASKED,N)
+#define MSMASKn XCONCAT2(MSMASK,N)
 #define EXTRACTEDn XCONCAT2(EXTRACTED,N)
 #define INSERTEDn XCONCAT2(INSERTED,N)
 #define ROTn XCONCAT2(ROT,N)
@@ -40,56 +45,65 @@
 
 INLINE_SIM_BITS\
 (unsignedN)
-MASKEDn(unsignedN word,
-	unsigned start,
-	unsigned stop)
+MASKEDn (unsignedN word,
+	 unsigned start,
+	 unsigned stop)
 {
-  return (word & MASKn(start, stop));
+  return (word & MASKn (start, stop));
 }
 
 
 INLINE_SIM_BITS\
 (unsignedN)
-LSMASKEDn(unsignedN word,
-	  unsigned nr_bits)
+LSMASKEDn (unsignedN word,
+	   unsigned nr_bits)
 {
-  return (word & MASKn(N - nr_bits, N - 1));
+  return (word & LSMASKn (nr_bits));
 }
 
 
 INLINE_SIM_BITS\
 (unsignedN)
-EXTRACTEDn(unsignedN val,
+MSMASKEDn (unsignedN word,
+	   unsigned nr_bits)
+{
+  return (word & MSMASKn (nr_bits));
+}
+
+
+INLINE_SIM_BITS\
+(unsignedN)
+EXTRACTEDn (unsignedN val,
+	    unsigned start,
+	    unsigned stop)
+{
+  val <<= _MSB_SHIFT (N, start);
+  val >>= (_MSB_SHIFT (N, start) + _LSB_SHIFT (N, stop));
+  return val;
+}
+
+
+INLINE_SIM_BITS\
+(unsignedN)
+INSERTEDn (unsignedN val,
 	   unsigned start,
 	   unsigned stop)
 {
-  return LSMASKEDn((((unsignedN)(val)) >> (N - stop - 1)),
-		   stop - start + 1);
+  val &= LSMASKn (_MAKE_WIDTH (start, stop));
+  val <<= _LSB_SHIFT (N, stop);
+  return val;
 }
 
 
 INLINE_SIM_BITS\
 (unsignedN)
-INSERTEDn(unsignedN val,
-	  unsigned start,
-	  unsigned stop)
+ROTn (unsignedN val,
+      int shift)
 {
-  return (((unsignedN)(val)
-	   << _MAKE_SHIFT(N, stop))
-	  & MASKn(start, stop));
-}
-
-
-INLINE_SIM_BITS\
-(unsignedN)
-ROTn(unsignedN val,
-     int shift)
-{
-  unsignedN result;
   if (shift > 0)
-    return ROTRn(val, shift);
+    return ROTRn (val, shift);
   else if (shift < 0)
-    return ROTLn(val, -shift);
+    return ROTLn (val, -shift);
   else
     return val;
 }
@@ -97,11 +111,11 @@ ROTn(unsignedN val,
 
 INLINE_SIM_BITS\
 (unsignedN)
-ROTLn(unsignedN val,
-      unsigned shift)
+ROTLn (unsignedN val,
+       unsigned shift)
 {
   unsignedN result;
-  ASSERT(shift <= N);
+  ASSERT (shift <= N);
   result = (((val) << (shift)) | ((val) >> ((N)-(shift))));
   return result;
 }
@@ -109,11 +123,11 @@ ROTLn(unsignedN val,
 
 INLINE_SIM_BITS\
 (unsignedN)
-ROTRn(unsignedN val,
-      unsigned shift)
+ROTRn (unsignedN val,
+       unsigned shift)
 {
   unsignedN result;
-  ASSERT(shift <= N);
+  ASSERT (shift <= N);
   result = (((val) >> (shift)) | ((val) << ((N)-(shift))));
   return result;
 }
@@ -121,13 +135,15 @@ ROTRn(unsignedN val,
 
 INLINE_SIM_BITS\
 (unsignedN)
-SEXTn(signedN val,
-	     unsigned sign_bit)
+SEXTn (signedN val,
+       unsigned sign_bit)
 {
   /* make the sign-bit most significant and then smear it back into
      position */
-  ASSERT(sign_bit < N);
-  return (val << sign_bit) >> sign_bit;
+  ASSERT (sign_bit < N);
+  val <<= _MSB_SHIFT (N, sign_bit);
+  val >>= _MSB_SHIFT (N, sign_bit);
+  return val;
 }
 
 
@@ -139,6 +155,9 @@ SEXTn(signedN val,
 #undef INSERTEDn
 #undef EXTRACTEDn
 #undef LSMASKEDn
+#undef LSMASKn
+#undef MSMASKEDn
+#undef MSMASKn
 #undef MASKn
 #undef MASKEDn
 #undef signedN

@@ -37,6 +37,8 @@ configure.in
 
 Things-to-lose:
 
+common
+
 Do-last:
 
 d30v_files="configure configure.in ChangeLog Makefile.in"

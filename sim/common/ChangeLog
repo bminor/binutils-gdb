@@ -1,3 +1,33 @@
+Tue Apr 15 15:08:12 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-assert.h (SIM_ASSERT, ASSERT): Allow these macros to
+	be overriden.
+
+Wed Apr  9 16:06:44 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* sim-basics.h: Only bring in config.h and tconfig.h if
+ 	HAVE_CONFIG_H.
+
+Mon Apr  7 11:39:45 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* sim-config.h (WITH_TARGET_WORD_MSB): New Macro. Define the bit
+ 	numbering convention of the target.
+	* sim-config.c (print_sim_config): Print WITH_TARGET_WORD_BITSIZE
+ 	and WITH_TARGET_WORD_MSB.
+	(sim_config): When possible, check for consistency with bitsize
+ 	and msb.
+
+	* sim-bits.h: Allow MSB to be other than zero.
+	* sim-bits.c: Ditto.
+	* sim-n-bits.h: Ditto.
+	
+	* sim-bits.h (MSMASK*): New macros - converce to LSMASK*.
+	* sim-n-bits.h (MSMASKEDn): Ditto.
+
+Mon Apr 14 16:29:21 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (INSTALL): Change install.sh to install-sh.
+
 Mon Apr  7 10:46:38 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sim-base.h (sim_state_base): Move `magic' to end of struct.

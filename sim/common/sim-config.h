@@ -22,6 +22,189 @@
 #ifndef _PSIM_CONFIG_H_
 #define _PSIM_CONFIG_H_
 
+/* Host dependant:
+
+   The CPP below defines information about the compilation host.  In
+   particular it defines the macro's:
+
+   	WITH_HOST_BYTE_ORDER	The byte order of the host. Could
+				be any of LITTLE_ENDIAN, BIG_ENDIAN
+				or 0 (unknown).  Those macro's also
+				need to be defined.
+
+ */
+
+
+/* NetBSD:
+
+   NetBSD is easy, everything you could ever want is in a header file
+   (well almost :-) */
+
+#if defined(__NetBSD__)
+# include <machine/endian.h>
+# if (WITH_HOST_BYTE_ORDER == 0)
+#  undef WITH_HOST_BYTE_ORDER
+#  define WITH_HOST_BYTE_ORDER BYTE_ORDER
+# endif
+# if (BYTE_ORDER != WITH_HOST_BYTE_ORDER)
+#  error "host endian incorrectly configured, check config.h"
+# endif
+#endif
+
+/* Linux is similarly easy.  */
+
+#if defined(__linux__)
+# include <endian.h>
+# include <asm/byteorder.h>
+# if defined(__LITTLE_ENDIAN) && !defined(LITTLE_ENDIAN)
+#  define LITTLE_ENDIAN __LITTLE_ENDIAN
+# endif
+# if defined(__BIG_ENDIAN) && !defined(BIG_ENDIAN)
+#  define BIG_ENDIAN __BIG_ENDIAN
+# endif
+# if defined(__BYTE_ORDER) && !defined(BYTE_ORDER)
+#  define BYTE_ORDER __BYTE_ORDER
+# endif
+# if (WITH_HOST_BYTE_ORDER == 0)
+#  undef WITH_HOST_BYTE_ORDER
+#  define WITH_HOST_BYTE_ORDER BYTE_ORDER
+# endif
+# if (BYTE_ORDER != WITH_HOST_BYTE_ORDER)
+#  error "host endian incorrectly configured, check config.h"
+# endif
+#endif
+
+/* INSERT HERE - hosts that have available LITTLE_ENDIAN and
+   BIG_ENDIAN macro's */
+
+
+/* Some hosts don't define LITTLE_ENDIAN or BIG_ENDIAN, help them out */
+
+#ifndef LITTLE_ENDIAN
+#define LITTLE_ENDIAN 1234
+#endif
+#ifndef BIG_ENDIAN
+#define BIG_ENDIAN 4321
+#endif
+
+
+/* SunOS on SPARC:
+
+   Big endian last time I looked */
+
+#if defined(sparc) || defined(__sparc__)
+# if (WITH_HOST_BYTE_ORDER == 0)
+#  undef WITH_HOST_BYTE_ORDER
+#  define WITH_HOST_BYTE_ORDER BIG_ENDIAN
+# endif
+# if (WITH_HOST_BYTE_ORDER != BIG_ENDIAN)
+#  error "sun was big endian last time I looked ..."
+# endif
+#endif
+
+
+/* Random x86
+
+   Little endian last time I looked */
+
+#if defined(i386) || defined(i486) || defined(i586) || defined (i686) || defined(__i386__) || defined(__i486__) || defined(__i586__) || defined (__i686__)
+# if (WITH_HOST_BYTE_ORDER == 0)
+#  undef WITH_HOST_BYTE_ORDER
+#  define WITH_HOST_BYTE_ORDER LITTLE_ENDIAN
+# endif
+# if (WITH_HOST_BYTE_ORDER != LITTLE_ENDIAN)
+#  error "x86 was little endian last time I looked ..."
+# endif
+#endif
+
+#if (defined (__i486__) || defined (__i586__) || defined (__i686__)) && defined(__GNUC__) && WITH_BSWAP
+#undef  htonl
+#undef  ntohl
+#define htonl(IN) __extension__ ({ int _out; __asm__ ("bswap %0" : "=r" (_out) : "0" (IN)); _out; })
+#define ntohl(IN) __extension__ ({ int _out; __asm__ ("bswap %0" : "=r" (_out) : "0" (IN)); _out; })
+#endif
+
+/* Power or PowerPC running AIX  */
+#if defined(_POWER) && defined(_AIX)
+# if (WITH_HOST_BYTE_ORDER == 0)
+#  undef WITH_HOST_BYTE_ORDER
+#  define WITH_HOST_BYTE_ORDER BIG_ENDIAN
+# endif
+# if (WITH_HOST_BYTE_ORDER != BIG_ENDIAN)
+#  error "Power/PowerPC AIX was big endian last time I looked ..."
+# endif
+#endif
+
+/* Solaris running PowerPC */
+#if defined(__PPC) && defined(__sun__)
+# if (WITH_HOST_BYTE_ORDER == 0)
+#  undef WITH_HOST_BYTE_ORDER
+#  define WITH_HOST_BYTE_ORDER LITTLE_ENDIAN
+# endif
+# if (WITH_HOST_BYTE_ORDER != LITTLE_ENDIAN)
+#  error "Solaris on PowerPCs was little endian last time I looked ..."
+# endif
+#endif
+
+/* HP/PA */
+#if defined(__hppa__)
+# if (WITH_HOST_BYTE_ORDER == 0)
+#  undef WITH_HOST_BYTE_ORDER
+#  define WITH_HOST_BYTE_ORDER BIG_ENDIAN
+# endif
+# if (WITH_HOST_BYTE_ORDER != BIG_ENDIAN)
+#  error "HP/PA was big endian last time I looked ..."
+# endif
+#endif
+
+/* Big endian MIPS */
+#if defined(__MIPSEB__)
+# if (WITH_HOST_BYTE_ORDER == 0)
+#  undef WITH_HOST_BYTE_ORDER
+#  define WITH_HOST_BYTE_ORDER BIG_ENDIAN
+# endif
+# if (WITH_HOST_BYTE_ORDER != BIG_ENDIAN)
+#  error "MIPSEB was big endian last time I looked ..."
+# endif
+#endif
+
+/* Little endian MIPS */
+#if defined(__MIPSEL__)
+# if (WITH_HOST_BYTE_ORDER == 0)
+#  undef WITH_HOST_BYTE_ORDER
+#  define WITH_HOST_BYTE_ORDER LITTLE_ENDIAN
+# endif
+# if (WITH_HOST_BYTE_ORDER != LITTLE_ENDIAN)
+#  error "MIPSEL was little endian last time I looked ..."
+# endif
+#endif
+
+/* Windows NT */
+#if defined(__WIN32__)
+# if (WITH_HOST_BYTE_ORDER == 0)
+#  undef WITH_HOST_BYTE_ORDER
+#  define WITH_HOST_BYTE_ORDER LITTLE_ENDIAN
+# endif
+# if (WITH_HOST_BYTE_ORDER != LITTLE_ENDIAN)
+#  error "Windows NT was little endian last time I looked ..."
+# endif
+#endif
+
+/* Alpha running DEC unix */
+#if defined(__osf__) && defined(__alpha__)
+# if (WITH_HOST_BYTE_ORDER == 0)
+#  undef WITH_HOST_BYTE_ORDER
+#  define WITH_HOST_BYTE_ORDER LITTLE_ENDIAN
+# endif
+# if (WITH_HOST_BYTE_ORDER != LITTLE_ENDIAN)
+#  error "AXP running DEC unix was little endian last time I looked ..."
+# endif
+#endif
+
+
+/* INSERT HERE - additional hosts that do not have LITTLE_ENDIAN and
+   BIG_ENDIAN definitions available.  */
+
 
 /* endianness of the host/target:
 
@@ -106,6 +289,20 @@ extern int current_target_byte_order;
 
 #ifndef WITH_HOST_WORD_BITSIZE
 #define WITH_HOST_WORD_BITSIZE		32 /* 64bit ready? */
+#endif
+
+
+
+/* Most significant bit of target:
+
+   Set this according to your target's bit numbering convention.  For
+   the PowerPC it is zero, for many other targets it is 31 or 63.
+
+   For targets that can both have either 32 or 64 bit words and number
+   MSB as 31, 63.  Define this to be (WITH_TARGET_WORD_BITSIZE - 1) */
+
+#ifndef WITH_TARGET_WORD_MSB
+#define WITH_TARGET_WORD_MSB            0
 #endif
 
 
