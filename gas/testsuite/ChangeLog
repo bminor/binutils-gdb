@@ -1,3 +1,10 @@
+start-sanitize-v850
+Fri Aug 30 00:37:55 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/v850/hilo.s: New testfile.
+	* gas/v850/basic.exp: Run hilo tests.
+
+end-sanitize-v850
 Thu Aug 29 11:32:23 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* gas/arm/arm7t.d: Explicitly force little-endian assembly.

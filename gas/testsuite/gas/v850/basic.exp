@@ -261,7 +261,7 @@ proc do_mem {} {
 	    -re "^ +\[0-9\]+ 0000 05370500\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0004 25370400\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0008 25370500\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 000c\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 000c 4033\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 000e\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0010\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0012 462F0500\[^\n\]*\n"	{ set x [expr $x+1] }
@@ -353,6 +353,34 @@ proc do_move {} {
     if [expr $x==4] then { pass $testname } else { fail $testname }
 }
 
+proc do_hilo {} {
+    set testname "hilo.s: hilo tests"
+    set x 0
+
+    gas_start "hilo.s" "-al"
+
+    # Instead of having a variable for each match string just increment the
+    # total number of matches seen.  That's simpler when testing large numbers
+    # of instructions (as these tests to).
+    while 1 {
+	expect {
+	    -re "^ +\[0-9\]+ 0000 200EEFBE\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0004 410EAEDE\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0008 410EADDE\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "\[^\n\]*\n"				{ }
+	    timeout				{ perror "timeout\n"; break }
+	    eof					{ break }
+	}
+    }
+
+    # This was intended to do any cleanup necessary.  It kinda looks like it
+    # isn't needed, but just in case, please keep it in for now.
+    gas_finish
+
+    # Did we find what we were looking for?  If not, flunk it.
+    if [expr $x==3] then { pass $testname } else { fail $testname }
+}
+
 if [istarget v850*-*-*] then {
     # Test the basic instruction parser.
     do_arith
@@ -364,4 +392,7 @@ if [istarget v850*-*-*] then {
     do_mem
     do_misc
     do_move
+
+    # Make sure we handle lo() hi() and hi0() correctly.
+    do_hilo
 }
