@@ -1163,7 +1163,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	rs6000-nat.c rs6000-tdep.c \
 	ser-go32.c ser-pipe.c ser-ocd.c ser-tcp.c \
 	sh-tdep.c solib.c sparc-nat.c \
-	sparc-tdep.c sparcl-tdep.c sun3-nat.c sun386-nat.c \
+	sparc-tdep.c sparcl-tdep.c sun3-nat.c \
 	symm-tdep.c symm-nat.c \
 	vax-tdep.c \
 	vx-share/xdr_ld.c vx-share/xdr_ptrace.c vx-share/xdr_rdb.c \
@@ -1938,7 +1938,7 @@ ax-gdb.o: ax-gdb.c $(defs_h) $(symtab_h) symfile.h $(gdbtypes_h) \
 
 sun3-nat.o: sun3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 
-sun386-nat.o: sun386-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h)
+# OBSOLETE sun386-nat.o: sun386-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h)
 
 symfile.o: symfile.c $(breakpoint_h) complaints.h $(defs_h) \
 	$(expression_h) gdb-stabs.h $(gdbcmd_h) $(gdbcore_h) \

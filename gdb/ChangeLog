@@ -1,3 +1,19 @@
+2001-04-09  Andrew Cagney  <ac131313@redhat.com>
+
+	Obsolete i[3456]86-*-sunos* (aka Sun386) host and target.
+	* config/i386/sun386.mh: Obsolete.
+	* config/i386/sun386.mt: Obsolete.
+	* config/i386/xm-sun386.h: Obsolete.
+	* config/i386/tm-sun386.h: Obsolete.
+	* config/i386/nm-sun386.h: Obsolete.
+	* Makefile.in (ALLDEPFILES): Delete sun386-nat.c.
+	(sun386-nat.o): Target is obsolete.
+	* sun386-nat.c: Obsolete.
+	* configure.tgt (i[3456]86-*-sunos*): Obsolete.
+	* configure.host (i[3456]86-*-sunos*): Obsolete.
+	* NEWS: Update.
+	* TODO: Update.
+
 2001-04-10  J.T. Conklin  <jtc@redback.com>
 
 	* maint.c: Fix typo in comment.

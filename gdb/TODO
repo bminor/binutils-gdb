@@ -200,7 +200,7 @@ Steps:
 		  powerpcle-*-cygwin*	powerpc	 cygwin	  cygwin     yes
 		  powerpc-*-netware*	powerpc  -	  ppc-nw     yes
 		  w65-*-*		w65	 -	  w65        yes
-		  i[3456]86-*-sunos*	i386	 sun386	  sun386
+		  i[3456]86-*-sunos*	i386	 sun386	  sun386     yes
 
 		(DONE)
 

@@ -1,3 +1,3 @@
-# Target: Sun 386i target configuration file.
-TDEPFILES= i386-tdep.o solib.o solib-svr4.o solib-legacy.o
-TM_FILE= tm-sun386.h
+# OBSOLETE # Target: Sun 386i target configuration file.
+# OBSOLETE TDEPFILES= i386-tdep.o solib.o solib-svr4.o solib-legacy.o
+# OBSOLETE TM_FILE= tm-sun386.h

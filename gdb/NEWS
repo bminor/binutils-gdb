@@ -24,6 +24,7 @@ Ultracomputer (29K) running Sym1		a29k-nyu-sym1 a29k-*-kern*
 PowerPC Solaris					powerpcle-*-solaris*
 PowerPC Windows NT				powerpcle-*-cygwin32
 PowerPC Netware					powerpc-*-netware*
+SunOS 4.0.Xi on i386				i[3456]86-*-sunos*
 
 stuff.c (Program to stuff files into a specially prepared space in kdb)
 kdb-start.c (Main loop for the standalone kernel debugger)
