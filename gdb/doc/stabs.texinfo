@@ -463,11 +463,10 @@ the start of this one.  To specify the main source file again, use an
 @findex N_EXCL
 The @code{N_BINCL} approach works as follows.  An @code{N_BINCL} symbol
 specifies the start of an include file.  In an object file, only the
-string is significant; the Sun linker puts data into some of the
-other fields.  The end of the include file is marked by an
-@code{N_EINCL} symbol (which has no string field).  In an object
-file, there is no significant data in the @code{N_EINCL} symbol; the Sun
-linker puts data into some of the fields.  @code{N_BINCL} and
+string is significant; the Sun linker puts data into some of the other
+fields.  The end of the include file is marked by an @code{N_EINCL}
+symbol (which has no string field).  In an object file, there is no
+significant data in the @code{N_EINCL} symbol.  @code{N_BINCL} and
 @code{N_EINCL} can be nested.
 
 If the linker detects that two source files have identical stabs between
@@ -476,7 +475,14 @@ for a header file), then it only puts out the stabs once.  Each
 additional occurance is replaced by an @code{N_EXCL} symbol.  I believe
 the Sun (SunOS4, not sure about Solaris) linker is the only one which
 supports this feature.
-@c What do the fields of N_EXCL contain? -djm
+
+The SunOS4 linker sets the value of a @code{N_BINCL} symbol to the total
+of all the characters in the stabs strings included in the header file,
+omitting the file number.  The value of an @code{N_EXCL} symbol is the
+same as the value of the @code{N_BINCL} symbol it replaces.  I do not
+know if this information is used by anything.  The @code{N_EINCL} value,
+and the values of the other and description fields for all three, appear
+to always be zero.
 
 @findex C_BINCL
 @findex C_EINCL
