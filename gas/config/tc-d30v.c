@@ -1,5 +1,5 @@
 /* tc-d30v.c -- Assembler code for the Mitsubishi D30V
-   Copyright (C) 1997, 1998, 1999 Free Software Foundation.
+   Copyright (C) 1997, 1998, 1999, 2000 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1146,10 +1146,10 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
   flags_used1 = op1->op->flags_used;
   flags_used2 = op2->op->flags_used;
 
-  /* ST2W/ST4HB combined with ADDppp/SUBppp is illegal.  */
-  if (((flags_set1 & (FLAG_MEM | FLAG_2WORD)) == (FLAG_MEM | FLAG_2WORD)
+  /* Check for illegal combinations with ADDppp/SUBppp.  */
+  if (((flags_set1 & FLAG_NOT_WITH_ADDSUBppp) != 0
        && (flags_used2 & FLAG_ADDSUBppp) != 0)
-      || ((flags_set2 & (FLAG_MEM | FLAG_2WORD)) == (FLAG_MEM | FLAG_2WORD)
+      || ((flags_set2 & FLAG_NOT_WITH_ADDSUBppp) != 0
 	  && (flags_used1 & FLAG_ADDSUBppp) != 0))
     return 0;
 

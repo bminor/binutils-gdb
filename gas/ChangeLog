@@ -1,3 +1,9 @@
+2000-02-19  Michael Meissner  <meissner@redhat.com>
+
+	* config/tc-d30v.c (parallel_ok): Use FLAG_NOT_WITH_ADDSUBppp to
+	determine if an instruction can be used in parallel with an ADDppp
+	or SUBppp instruction.
+
 2000-02-22  Andrew Haley  <aph@cygnus.com>
 
 	* doc/c-mips.texi (MIPS Opts): Document -mgp32 and -mgp64.
