@@ -63,22 +63,38 @@ static void restore_current_thread (int);
 static void switch_to_thread (int pid);
 static void prune_threads (void);
 
+static void
+free_thread (struct thread_info *tp)
+{
+  /* NOTE: this will take care of any left-over step_resume breakpoints,
+     but not any user-specified thread-specific breakpoints. */
+  if (tp->step_resume_breakpoint)
+    delete_breakpoint (tp->step_resume_breakpoint);
+
+  /* FIXME: do I ever need to call the back-end to give it a
+     chance at this private data before deleting the thread?  */
+  if (tp->private)
+    free (tp->private);
+
+  free (tp);
+}
+
 void
 init_thread_list ()
 {
   struct thread_info *tp, *tpnext;
 
+  highest_thread_num = 0;
   if (!thread_list)
     return;
 
   for (tp = thread_list; tp; tp = tpnext)
     {
       tpnext = tp->next;
-      free (tp);
+      free_thread (tp);
     }
 
   thread_list = NULL;
-  highest_thread_num = 0;
 }
 
 /* add_thread now returns a pointer to the new thread_info, 
@@ -134,19 +150,7 @@ delete_thread (pid)
   else
     thread_list = tp->next;
 
-  /* NOTE: this will take care of any left-over step_resume breakpoints,
-     but not any user-specified thread-specific breakpoints. */
-  if (tp->step_resume_breakpoint)
-    delete_breakpoint (tp->step_resume_breakpoint);
-
-  /* FIXME: do I ever need to call the back-end to give it a
-     chance at this private data before deleting the thread?  */
-  if (tp->private)
-    free (tp->private);
-
-  free (tp);
-
-  return;
+  free_thread (tp);
 }
 
 static struct thread_info *
@@ -519,6 +523,28 @@ restore_current_thread (pid)
     }
 }
 
+struct current_thread_cleanup
+{
+  int inferior_pid;
+};
+
+static void
+do_restore_current_thread_cleanup (void *arg)
+{
+  struct current_thread_cleanup *old = arg;
+  restore_current_thread (old->inferior_pid);
+  free (old);
+}
+
+static struct cleanup *
+make_cleanup_restore_current_thread (int inferior_pid)
+{
+  struct current_thread_cleanup *old
+    = xmalloc (sizeof (struct current_thread_cleanup));
+  old->inferior_pid = inferior_pid;
+  return make_cleanup (do_restore_current_thread_cleanup, old);
+}
+
 /* Apply a GDB command to a list of threads.  List syntax is a whitespace
    seperated list of numbers, or ranges, or the keyword `all'.  Ranges consist
    of two numbers seperated by a hyphen.  Examples:
@@ -539,8 +565,11 @@ thread_apply_all_command (cmd, from_tty)
   if (cmd == NULL || *cmd == '\000')
     error ("Please specify a command following the thread ID list");
 
-  old_chain = make_cleanup ((make_cleanup_func) restore_current_thread,
-			    (void *) inferior_pid);
+  old_chain = make_cleanup_restore_current_thread (inferior_pid);
+
+  /* It is safe to update the thread list now, before
+     traversing it for "thread apply all".  MVS */
+  target_find_new_threads ();
 
   for (tp = thread_list; tp; tp = tp->next)
     if (thread_alive (tp))
@@ -556,6 +585,8 @@ thread_apply_all_command (cmd, from_tty)
 #endif
 	execute_command (cmd, from_tty);
       }
+
+  do_cleanups (old_chain);
 }
 
 static void
@@ -575,8 +606,7 @@ thread_apply_command (tidlist, from_tty)
   if (*cmd == '\000')
     error ("Please specify a command following the thread ID list");
 
-  old_chain = make_cleanup ((make_cleanup_func) restore_current_thread,
-			    (void *) inferior_pid);
+  old_chain = make_cleanup_restore_current_thread (inferior_pid);
 
   while (tidlist < cmd)
     {
@@ -627,6 +657,8 @@ thread_apply_command (tidlist, from_tty)
 	    }
 	}
     }
+
+  do_cleanups (old_chain);
 }
 
 /* Switch to the specified thread.  Will dispatch off to thread_apply_command

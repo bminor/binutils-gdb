@@ -299,7 +299,7 @@ INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 # Profiling options need to go here to work.
 # I think it's perfectly reasonable for a user to set -pg in CFLAGS
 # and have it work; that's why CFLAGS is here.
-INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) $(LDFLAGS) $(CONFIG_LDFLAGS) @HLDFLAGS@
+INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) $(MH_LDFLAGS) $(LDFLAGS) $(CONFIG_LDFLAGS) @HLDFLAGS@
 HLDENV = @HLDENV@
 
 # If your system is missing alloca(), or, more likely, it's there but
@@ -480,7 +480,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	demangle.c dwarfread.c dwarf2read.c elfread.c environ.c eval.c \
 	event-loop.c event-top.c \
 	expprint.c f-exp.y f-lang.c f-typeprint.c f-valprint.c \
-	findvar.c gdbarch.c arch-utils.c gdbtypes.c \
+	findvar.c regcache.c gdbarch.c arch-utils.c gdbtypes.c \
 	inf-loop.c infcmd.c inflow.c infrun.c language.c \
 	kod.c kod-cisco.c \
 	ui-out.c cli-out.c \
@@ -614,10 +614,10 @@ TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 	$(POSSLIBS)
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
-COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
+COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	symtab.o symfile.o symmisc.o infcmd.o infrun.o command.o \
-	expprint.o environ.o \
+	expprint.o environ.o stack.o thread.o \
 	event-loop.o event-top.o inf-loop.o \
 	gdbarch.o arch-utils.o gdbtypes.o copying.o $(DEPFILES) \
 	mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
@@ -1275,6 +1275,8 @@ expprint.o: expprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
 	gdb_string.h
 
+regcache.o: regcache.c $(defs_h) $(inferior_h) target.h 
+
 fork-child.o: fork-child.c gdb_wait.h $(defs_h) $(gdbcore_h) \
 	$(inferior_h) target.h terminal.h gdbthread.h gdb_string.h
 
@@ -1363,6 +1365,10 @@ v850ice.o: v850ice.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/v850ice.c
 
+v850-tdep.o: v850-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(obstack_h) \
+	$(target_h) $(value_h) $(bfd_h) $(gdb_string_h) $(gdbcore_h) \
+	$(symfile_h) $(arch_utils_h)
+
 tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
 	$(gdbtypes_h) $(expression_h) $(gdbcmd_h) $(value_h) target.h \
 	language.h gdb_string.h $(readline_headers) $(remote_h)
@@ -1401,7 +1407,7 @@ i386gnu-nat.o: gnu-nat.h
 
 i386-tdep.o: i386-tdep.c $(defs_h) gdb_string.h $(frame_h)	\
 	$(inferior_h) $(gdbcore_h) target.h $(floatformat_h)	\
-	$(symtab_h) $(gdbcmd_h) $(command_h)
+	$(symtab_h) $(gdbcmd_h) $(command_h) $(arch_utils_h)
 
 i386aix-nat.o: i386aix-nat.c $(defs_h) $(frame_h) $(inferior_h) \
 	language.h $(gdbcore_h) $(floatformat_h) target.h
@@ -1790,10 +1796,10 @@ serial.o: serial.c $(defs_h) serial.h gdb_string.h
 
 sh-tdep.o: sh-tdep.c $(bfd_h) $(dis-asm_h) \
 	$(srcdir)/../opcodes/sh-opc.h $(defs_h) $(expression_h) $(frame_h) \
-	$(gdbcmd_h) $(gdbtypes_h) $(symtab_h) $(value_h)
+	$(gdbcmd_h) $(gdbtypes_h) $(symtab_h) $(value_h) $(arch_utils_h)
 
 sh3-rom.o: sh3-rom.c monitor.h $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
-	$(inferior_h) target.h serial.h terminal.h
+	$(inferior_h) target.h serial.h terminal.h $(arch_utils_h)
 
 mon960-rom.o: mon960-rom.c monitor.h $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) target.h serial.h terminal.h

@@ -487,34 +487,9 @@ nindy_store_registers (regno)
   immediate_quit--;
 }
 
-/* Read a word from remote address ADDR and return it.
- * This goes through the data cache.
- */
-int
-nindy_fetch_word (addr)
-     CORE_ADDR addr;
-{
-  return dcache_fetch (nindy_dcache, addr);
-}
-
-/* Write a word WORD into remote address ADDR.
-   This goes through the data cache.  */
-
-void
-nindy_store_word (addr, word)
-     CORE_ADDR addr;
-     int word;
-{
-  dcache_poke (nindy_dcache, addr, word);
-}
-
 /* Copy LEN bytes to or from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.   Copy to inferior if
-   WRITE is nonzero.  Returns the length copied.
-
-   This is stolen almost directly from infptrace.c's child_xfer_memory,
-   which also deals with a word-oriented memory interface.  Sometime,
-   FIXME, rewrite this to not use the word-oriented routines.  */
+   SHOULD_WRITE is nonzero.  Returns the length copied. */
 
 int
 nindy_xfer_inferior_memory (memaddr, myaddr, len, should_write, target)
@@ -524,61 +499,10 @@ nindy_xfer_inferior_memory (memaddr, myaddr, len, should_write, target)
      int should_write;
      struct target_ops *target;	/* ignored */
 {
-  register int i;
-  /* Round starting address down to longword boundary.  */
-  register CORE_ADDR addr = memaddr & -sizeof (int);
-  /* Round ending address up; get number of longwords that makes.  */
-  register int count
-  = (((memaddr + len) - addr) + sizeof (int) - 1) / sizeof (int);
-  /* Allocate buffer of that many longwords.  */
-  register int *buffer = (int *) alloca (count * sizeof (int));
-
-  if (should_write)
-    {
-      /* Fill start and end extra bytes of buffer with existing memory data.  */
-
-      if (addr != memaddr || len < (int) sizeof (int))
-	{
-	  /* Need part of initial word -- fetch it.  */
-	  buffer[0] = nindy_fetch_word (addr);
-	}
-
-      if (count > 1)		/* FIXME, avoid if even boundary */
-	{
-	  buffer[count - 1]
-	    = nindy_fetch_word (addr + (count - 1) * sizeof (int));
-	}
-
-      /* Copy data to be written over corresponding part of buffer */
-
-      memcpy ((char *) buffer + (memaddr & (sizeof (int) - 1)), myaddr, len);
-
-      /* Write the entire buffer.  */
-
-      for (i = 0; i < count; i++, addr += sizeof (int))
-	{
-	  errno = 0;
-	  nindy_store_word (addr, buffer[i]);
-	  if (errno)
-	    return 0;
-	}
-    }
-  else
-    {
-      /* Read all the longwords */
-      for (i = 0; i < count; i++, addr += sizeof (int))
-	{
-	  errno = 0;
-	  buffer[i] = nindy_fetch_word (addr);
-	  if (errno)
-	    return 0;
-	  QUIT;
-	}
-
-      /* Copy appropriate bytes out of the buffer.  */
-      memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (int) - 1)), len);
-    }
-  return len;
+  if (len <= 0)
+    return 0;
+  return dcache_xfer_memory (nindy_dcache, memaddr, myaddr, 
+			     len, should_write);
 }
 
 static void

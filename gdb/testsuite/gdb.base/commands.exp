@@ -391,11 +391,11 @@ proc deprecated_command_test {} {
     gdb_test "p 5" "Warning: command 'print' \\(p\\) is deprecated.*Use 'new_print'.*" "both alias and command are deprecated"
     gdb_test "p 5" ".\[0-9\]* = 5.*" "Deprecated warning goes away"
 
-    gdb_test "maintenance deprecate set endian big \"seb\" " "" "deprecate long comamnd"
-    gdb_test "set endian big" "Warning: command 'set endian big' is deprecated.*Use 'seb'.*" "long command deprecated"
+    gdb_test "maintenance deprecate set remote memory-read-packet-size \"srm\" " "" "deprecate long comamnd"
+    gdb_test "set remote memory-read-packet-size" "Warning: command 'set remote memory-read-packet-size' is deprecated.*Use 'srm'.*" "long command deprecated"
 
-    gdb_test "maintenance deprecate set endian big" "" "deprecate long comamnd"
-    gdb_test "set endian big" "Warning: command 'set endian big' is deprecated.*No alternative known.*" "long command deprecated with no alternative."
+    gdb_test "maintenance deprecate set remote memory-read-packet-size" "" "deprecate long comamnd"
+    gdb_test "set remote memory-read-packet-size" "Warning: command 'set remote memory-read-packet-size' is deprecated.*No alternative known.*" "long command deprecated with no alternative."
 
     gdb_test "maintenance deprecate" "\"maintenance deprecate\".*" "deprecate with no arguments"
 }

@@ -1,5 +1,5 @@
 /* Remote debugging interface for Hitachi E7000 ICE, for GDB
-   Copyright 1993, 1994, 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
    Contributed by Cygnus Support. 
 
    Written by Steve Chamberlain for Cygnus Support.
@@ -60,6 +60,31 @@
 #define ENQ  0x05
 #define ACK  0x06
 #define CTRLZ 0x1a
+
+/* This file is used by 2 different targets, sh-elf and h8300. The
+   h8300 is not multiarched and doesn't use the registers defined in
+   tm-sh.h. To avoid using a macro GDB_TARGET_IS_SH, we do runtime check
+   of the target, which requires that these namse below are always
+   defined also in the h8300 case. */
+
+#if !defined (PR_REGNUM)
+#define PR_REGNUM 	-1
+#endif
+#if !defined (GBR_REGNUM)
+#define GBR_REGNUM 	-1
+#endif
+#if !defined (VBR_REGNUM)
+#define VBR_REGNUM 	-1
+#endif
+#if !defined (MACH_REGNUM)
+#define MACH_REGNUM 	-1
+#endif
+#if !defined (MACL_REGNUM)
+#define MACL_REGNUM 	-1
+#endif
+#if !defined (SR_REGNUM)
+#define SR_REGNUM 	-1
+#endif
 
 extern void notice_quit (void);
 
@@ -732,8 +757,6 @@ e7000_resume (pid, step, sig)
    BREAK POINT
  */
 
-#ifdef GDB_TARGET_IS_H8300
-
 char *want_h8300h = "PC=%p CCR=%c\n\
  ER0 - ER3  %0 %1 %2 %3\n\
  ER4 - ER7  %4 %5 %6 %7\n";
@@ -751,17 +774,13 @@ char *want_nopc_h8300s = "%p CCR=%c EXR=%9\n\
  ER0 - ER3  %0 %1 %2 %3\n\
  ER4 - ER7  %4 %5 %6 %7";
 
-#endif
-
-#ifdef GDB_TARGET_IS_SH
-
-char *want = "PC=%16 SR=%22\n\
+char *want_sh = "PC=%16 SR=%22\n\
 PR=%17 GBR=%18 VBR=%19\n\
 MACH=%20 MACL=%21\n\
 R0-7  %0 %1 %2 %3 %4 %5 %6 %7\n\
 R8-15 %8 %9 %10 %11 %12 %13 %14 %15\n";
 
-char *want_nopc = "%16 SR=%22\n\
+char *want_nopc_sh = "%16 SR=%22\n\
  PR=%17 GBR=%18 VBR=%19\n\
  MACH=%20 MACL=%21\n\
  R0-7  %0 %1 %2 %3 %4 %5 %6 %7\n\
@@ -777,7 +796,7 @@ R4_BANK0-R7_BANK0 %29 %30 %31 %32\n\
 R0_BANK1-R3_BANK1 %33 %34 %35 %36\n\
 R4_BANK1-R7_BANK1 %37 %38 %39 %40";
 
-char *want_sh3_nopc = "%16 SR=%22\n\
+char *want_nopc_sh3 = "%16 SR=%22\n\
  PR=%17 GBR=%18 VBR=%19\n\
  MACH=%20 MACL=%21 SSR=%22 SPC=%23\n\
  R0-7  %0 %1 %2 %3 %4 %5 %6 %7\n\
@@ -786,8 +805,6 @@ char *want_sh3_nopc = "%16 SR=%22\n\
  R4_BANK0-R7_BANK0 %29 %30 %31 %32\n\
  R0_BANK1-R3_BANK1 %33 %34 %35 %36\n\
  R4_BANK1-R7_BANK1 %37 %38 %39 %40";
-
-#endif
 
 static int
 gch ()
@@ -920,22 +937,27 @@ e7000_fetch_registers ()
 
   puts_e7000debug ("R\r");
 
-#ifdef GDB_TARGET_IS_SH
-  wanted = want;
   if (TARGET_ARCHITECTURE->arch == bfd_arch_sh)
-    switch (TARGET_ARCHITECTURE->mach)
-      {
-      case bfd_mach_sh3:
-      case bfd_mach_sh3e:
-      case bfd_mach_sh4:
-	wanted = want_sh3;
-      }
-#else
-  if (h8300smode)
-    wanted = want_h8300s;
-  else
-    wanted = want_h8300h;
+    {
+      wanted = want_sh;
+      switch (TARGET_ARCHITECTURE->mach)
+	{
+	case bfd_mach_sh3:
+	case bfd_mach_sh3e:
+	case bfd_mach_sh4:
+	  wanted = want_sh3;
+	}
+    }
+#ifdef GDB_TARGET_IS_H8300
+  if (TARGET_ARCHITECTURE->arch == bfd_arch_h8300)
+    {
+      if (h8300smode)
+	wanted = want_h8300s;
+      else
+	wanted = want_h8300h;
+    }
 #endif
+
   fetch_regs_from_dump (gch, wanted);
 
   /* And supply the extra ones the simulator uses */
@@ -984,69 +1006,76 @@ e7000_store_register (regno)
       return;
     }
 
-#ifdef GDB_TARGET_IS_H8300
-  if (regno <= 7)
+  if (TARGET_ARCHITECTURE->arch == bfd_arch_h8300)
     {
-      sprintf (buf, ".ER%d %x\r", regno, read_register (regno));
-      puts_e7000debug (buf);
-    }
-  else if (regno == PC_REGNUM)
-    {
-      sprintf (buf, ".PC %x\r", read_register (regno));
-      puts_e7000debug (buf);
-    }
-  else if (regno == CCR_REGNUM)
-    {
-      sprintf (buf, ".CCR %x\r", read_register (regno));
-      puts_e7000debug (buf);
-    }
-#endif /* GDB_TARGET_IS_H8300 */
-
-#ifdef  GDB_TARGET_IS_SH
-  switch (regno)
-    {
-    default:
-      sprintf (buf, ".R%d %x\r", regno, read_register (regno));
-      puts_e7000debug (buf);
-      break;
-
-    case PC_REGNUM:
-      sprintf (buf, ".PC %x\r", read_register (regno));
-      puts_e7000debug (buf);
-      break;
-
-    case SR_REGNUM:
-      sprintf (buf, ".SR %x\r", read_register (regno));
-      puts_e7000debug (buf);
-      break;
-
-    case PR_REGNUM:
-      sprintf (buf, ".PR %x\r", read_register (regno));
-      puts_e7000debug (buf);
-      break;
-
-    case GBR_REGNUM:
-      sprintf (buf, ".GBR %x\r", read_register (regno));
-      puts_e7000debug (buf);
-      break;
-
-    case VBR_REGNUM:
-      sprintf (buf, ".VBR %x\r", read_register (regno));
-      puts_e7000debug (buf);
-      break;
-
-    case MACH_REGNUM:
-      sprintf (buf, ".MACH %x\r", read_register (regno));
-      puts_e7000debug (buf);
-      break;
-
-    case MACL_REGNUM:
-      sprintf (buf, ".MACL %x\r", read_register (regno));
-      puts_e7000debug (buf);
-      break;
+      if (regno <= 7)
+	{
+	  sprintf (buf, ".ER%d %lx\r", regno, read_register (regno));
+	  puts_e7000debug (buf);
+	}
+      else if (regno == PC_REGNUM)
+	{
+	  sprintf (buf, ".PC %lx\r", read_register (regno));
+	  puts_e7000debug (buf);
+	}
+#ifdef CCR_REGNUM
+      else if (regno == CCR_REGNUM)
+	{
+	  sprintf (buf, ".CCR %lx\r", read_register (regno));
+	  puts_e7000debug (buf);
+	}
+#endif
     }
 
-#endif /* GDB_TARGET_IS_SH */
+  else if (TARGET_ARCHITECTURE->arch == bfd_arch_sh)
+    {
+      if (regno == PC_REGNUM)
+	{
+	  sprintf (buf, ".PC %lx\r", read_register (regno));
+	  puts_e7000debug (buf);
+	}
+
+      else if (regno == SR_REGNUM)
+	{
+	  sprintf (buf, ".SR %lx\r", read_register (regno));
+	  puts_e7000debug (buf);
+	}
+
+      else if (regno ==  PR_REGNUM)
+	{
+	  sprintf (buf, ".PR %lx\r", read_register (regno));
+	  puts_e7000debug (buf);
+	}
+
+      else if (regno == GBR_REGNUM)
+	{
+	  sprintf (buf, ".GBR %lx\r", read_register (regno));
+	  puts_e7000debug (buf);
+	}
+
+      else if (regno == VBR_REGNUM)
+	{
+	  sprintf (buf, ".VBR %lx\r", read_register (regno));
+	  puts_e7000debug (buf);
+	}
+
+      else if (regno == MACH_REGNUM)
+	{
+	  sprintf (buf, ".MACH %lx\r", read_register (regno));
+	  puts_e7000debug (buf);
+	}
+
+      else if (regno == MACL_REGNUM)
+	{
+	  sprintf (buf, ".MACL %lx\r", read_register (regno));
+	  puts_e7000debug (buf);
+	}
+      else
+	{
+	  sprintf (buf, ".R%d %lx\r", regno, read_register (regno));
+	  puts_e7000debug (buf);
+	}
+    }
 
   expect_prompt ();
 }
@@ -1098,7 +1127,7 @@ write_small (memaddr, myaddr, len)
       if (((memaddr + i) & 3) == 0 && (i + 3 < len))
 	{
 	  /* Can be done with a long word */
-	  sprintf (buf, "m %x %x%02x%02x%02x;l\r",
+	  sprintf (buf, "m %lx %x%02x%02x%02x;l\r",
 		   memaddr + i,
 		   myaddr[i], myaddr[i + 1], myaddr[i + 2], myaddr[i + 3]);
 	  puts_e7000debug (buf);
@@ -1106,7 +1135,7 @@ write_small (memaddr, myaddr, len)
 	}
       else
 	{
-	  sprintf (buf, "m %x %x\r", memaddr + i, myaddr[i]);
+	  sprintf (buf, "m %lx %x\r", memaddr + i, myaddr[i]);
 	  puts_e7000debug (buf);
 	}
     }
@@ -1268,7 +1297,7 @@ e7000_read_inferior_memory (memaddr, myaddr, len)
       return 0;
     }
 
-  sprintf (buf, "m %x;l\r", memaddr);
+  sprintf (buf, "m %lx;l\r", memaddr);
   puts_e7000debug (buf);
 
   for (count = 0; count < len; count += 4)
@@ -1349,7 +1378,7 @@ e7000_read_inferior_memory_large (memaddr, myaddr, len)
       return 0;
     }
 
-  sprintf (buf, "d %x %x\r", memaddr, memaddr + len - 1);
+  sprintf (buf, "d %lx %lx\r", memaddr, memaddr + len - 1);
   puts_e7000debug (buf);
 
   count = 0;
@@ -1603,7 +1632,7 @@ e7000_load (args, from_tty)
 	  section_size = bfd_get_section_size_before_reloc (section);
 
 	  if (!quiet)
-	    printf_filtered ("[Loading section %s at 0x%x (%d bytes)]\n",
+	    printf_filtered ("[Loading section %s at 0x%x (%ud bytes)]\n",
 			     bfd_get_section_name (pbfd, section),
 			     section_address,
 			     section_size);
@@ -1736,12 +1765,12 @@ e7000_insert_breakpoint (addr, shadow)
 #ifdef HARD_BREAKPOINTS
 	if (BC_BREAKPOINTS)
 	  {
-	    sprintf (buf, "BC%d A=%x\r", i + 1, addr);
+	    sprintf (buf, "BC%d A=%lx\r", i + 1, addr);
 	    puts_e7000debug (buf);
 	  }
 	else
 	  {
-	    sprintf (buf, "B %x\r", addr);
+	    sprintf (buf, "B %lx\r", addr);
 	    puts_e7000debug (buf);
 	  }
 #else
@@ -1782,12 +1811,12 @@ e7000_remove_breakpoint (addr, shadow)
 	  }
 	else
 	  {
-	    sprintf (buf, "B - %x\r", addr);
+	    sprintf (buf, "B - %lx\r", addr);
 	    puts_e7000debug (buf);
 	  }
 	expect_prompt ();
 #else
-	sprintf (buf, "B - %x\r", addr);
+	sprintf (buf, "B - %lx\r", addr);
 	puts_e7000debug (buf);
 	expect_prompt ();
 
@@ -1800,7 +1829,7 @@ e7000_remove_breakpoint (addr, shadow)
 	return 0;
       }
 
-  warning ("Can't find breakpoint associated with 0x%x\n", addr);
+  warning ("Can't find breakpoint associated with 0x%lx\n", addr);
   return 1;
 }
 
@@ -2008,7 +2037,7 @@ sub2_from_pc ()
 			REGISTER_RAW_SIZE (PC_REGNUM),
 			read_register (PC_REGNUM) - 2);
   supply_register (PC_REGNUM, buf);
-  sprintf (buf2, ".PC %x\r", read_register (PC_REGNUM));
+  sprintf (buf2, ".PC %lx\r", read_register (PC_REGNUM));
   puts_e7000debug (buf2);
 }
 
@@ -2078,21 +2107,25 @@ e7000_wait (pid, status)
   /* Skip till the PC= */
   expect ("=");
 
-#ifdef GDB_TARGET_IS_SH
-  wanted_nopc = want_nopc;
   if (TARGET_ARCHITECTURE->arch == bfd_arch_sh)
-    switch (TARGET_ARCHITECTURE->mach)
-      {
-      case bfd_mach_sh3:
-      case bfd_mach_sh3e:
-      case bfd_mach_sh4:
-	wanted_nopc = want_sh3_nopc;
-      }
-#else
-  if (h8300smode)
-    wanted_nopc = want_nopc_h8300s;
-  else
-    wanted_nopc = want_nopc_h8300h;
+    {
+      wanted_nopc = want_nopc_sh;
+      switch (TARGET_ARCHITECTURE->mach)
+	{
+	case bfd_mach_sh3:
+	case bfd_mach_sh3e:
+	case bfd_mach_sh4:
+	  wanted_nopc = want_nopc_sh3;
+	}
+    }
+#ifdef GDB_TARGET_IS_H8300
+  if (TARGET_ARCHITECTURE->arch == bfd_arch_h8300)
+    {
+      if (h8300smode)
+	wanted_nopc = want_nopc_h8300s;
+      else
+	wanted_nopc = want_nopc_h8300h;
+    }
 #endif
   fetch_regs_from_dump (gch, wanted_nopc);
 

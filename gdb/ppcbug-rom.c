@@ -104,7 +104,7 @@ ppcbug_supply_register (regname, regnamelen, val, vallen)
  * registers either. So, typing "info reg sp" becomes an "A7".
  */
 
-static char *ppcbug_regnames[NUM_REGS] =
+static char *ppcbug_regnames[] =
 {
   "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
   "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",

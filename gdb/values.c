@@ -594,7 +594,36 @@ value_as_pointer (val)
      for pointers to char, in which the low bits *are* significant.  */
   return ADDR_BITS_REMOVE (value_as_long (val));
 #else
-  return value_as_long (val);
+  COERCE_ARRAY (val);
+  /* In converting VAL to an address (CORE_ADDR), any small integers
+     are first cast to a generic pointer.  The function unpack_long
+     will then correctly convert that pointer into a canonical address
+     (using POINTER_TO_ADDRESS).
+
+     Without the cast, the MIPS gets: 0xa0000000 -> (unsigned int)
+     0xa0000000 -> (LONGEST) 0x00000000a0000000
+
+     With the cast, the MIPS gets: 0xa0000000 -> (unsigned int)
+     0xa0000000 -> (void*) 0xa0000000 -> (LONGEST) 0xffffffffa0000000.
+
+     If the user specifies an integer that is larger than the target
+     pointer type, it is assumed that it was intentional and the value
+     is converted directly into an ADDRESS.  This ensures that no
+     information is discarded.
+
+     NOTE: The cast operation may eventualy be converted into a TARGET
+     method (see POINTER_TO_ADDRESS() and ADDRESS_TO_POINTER()) so
+     that the TARGET ISA/ABI can apply an arbitrary conversion.
+
+     NOTE: In pure harvard architectures function and data pointers
+     can be different and may require different integer to pointer
+     conversions. */
+  if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_INT
+      && TYPE_LENGTH (VALUE_TYPE (val)) <= TYPE_LENGTH (builtin_type_ptr))
+    {
+      val = value_cast (builtin_type_ptr, val);
+    }
+  return unpack_long (VALUE_TYPE (val), VALUE_CONTENTS (val));
 #endif
 }
 
@@ -841,6 +870,7 @@ value_primitive_field (arg1, offset, fieldno, arg_type)
   if (VALUE_LVAL (arg1) == lval_internalvar)
     VALUE_LVAL (v) = lval_internalvar_component;
   VALUE_ADDRESS (v) = VALUE_ADDRESS (arg1);
+  VALUE_REGNO (v) = VALUE_REGNO (arg1);
 /*  VALUE_OFFSET (v) = VALUE_OFFSET (arg1) + offset
    + TYPE_FIELD_BITPOS (arg_type, fieldno) / 8; */
   return v;

@@ -96,10 +96,10 @@ struct monitor_ops
     char *dump_registers;	/* Command to dump all regs at once */
     char *register_pattern;	/* Pattern that picks out register from reg dump */
     void (*supply_register) (char *name, int namelen, char *val, int vallen);
-    void (*load_routine) PARAMS ((serial_t desc, char *file,
-				  int hashmark));	/* Download routine */
-    int (*dumpregs) PARAMS ((void));	/* routine to dump all registers */
-    int (*continue_hook) PARAMS ((void));	/* Emit the continue command */
+    void (*load_routine) (serial_t desc, char *file,
+			  int hashmark);	/* Download routine */
+    int (*dumpregs) (void);	/* routine to dump all registers */
+    int (*continue_hook) (void);	/* Emit the continue command */
     int (*wait_filter) (char *buf,	/* Maybe contains registers */
 			int bufmax,
 			int *response_length,

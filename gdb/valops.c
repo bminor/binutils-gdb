@@ -273,7 +273,8 @@ value_cast (type, arg2)
 	      /* With HP aCC, pointers to data members have a bias */
 	    case TYPE_CODE_MEMBER:
 	      retvalp = value_from_longest (type, value_as_long (arg2));
-	      ptr = (unsigned int *) VALUE_CONTENTS (retvalp);	/* force evaluation */
+	      /* force evaluation */
+	      ptr = (unsigned int *) VALUE_CONTENTS (retvalp);
 	      *ptr &= ~0x20000000;	/* zap 29th bit to remove bias */
 	      return retvalp;
 
@@ -286,7 +287,22 @@ value_cast (type, arg2)
 	    }
 	}
       longest = value_as_long (arg2);
-      return value_from_longest (type, convert_to_boolean ? (LONGEST) (longest ? 1 : 0) : longest);
+      return value_from_longest (type, convert_to_boolean ?
+				 (LONGEST) (longest ? 1 : 0) : longest);
+    }
+  else if (code1 == TYPE_CODE_PTR && (code2 == TYPE_CODE_INT  ||
+                                    code2 == TYPE_CODE_ENUM ||
+                                    code2 == TYPE_CODE_RANGE))
+    {
+      int ptr_bit = HOST_CHAR_BIT * TYPE_LENGTH (type);
+      LONGEST longest = value_as_long (arg2);
+      if (ptr_bit < sizeof (LONGEST) * HOST_CHAR_BIT)
+	{
+	  if (longest >= ((LONGEST) 1 << ptr_bit)
+	      || longest <= -((LONGEST) 1 << ptr_bit))
+	    warning ("value truncated");
+	}
+      return value_from_longest (type, longest);
     }
   else if (TYPE_LENGTH (type) == TYPE_LENGTH (type2))
     {
@@ -545,7 +561,7 @@ value_fetch_lazy (val)
     }
   else if (length)
     read_memory (addr, VALUE_CONTENTS_ALL_RAW (val), length);
-  
+
   VALUE_LAZY (val) = 0;
   return 0;
 }
@@ -660,7 +676,8 @@ value_assign (toval, fromval)
       if (VALUE_BITSIZE (toval))
 	{
 	  char buffer[sizeof (LONGEST)];
-	  int len = REGISTER_RAW_SIZE (VALUE_REGNO (toval));
+	  int len =
+		REGISTER_RAW_SIZE (VALUE_REGNO (toval)) - VALUE_OFFSET (toval);
 
 	  if (len > (int) sizeof (LONGEST))
 	    error ("Can't handle bitfields in registers larger than %d bits.",
@@ -2012,12 +2029,22 @@ typecmp (staticp, t1, t2)
 	  continue;
 	}
 
-      while (TYPE_CODE (tt1) == TYPE_CODE_PTR
-	     && (TYPE_CODE (tt2) == TYPE_CODE_ARRAY
-		 || TYPE_CODE (tt2) == TYPE_CODE_PTR))
+      /* djb - 20000715 - Until the new type structure is in the
+	 place, and we can attempt things like implicit conversions,
+	 we need to do this so you can take something like a map<const
+	 char *>, and properly access map["hello"], because the
+	 argument to [] will be a reference to a pointer to a char,
+	 and the argument will be a pointer to a char. */
+      while ( TYPE_CODE(tt1) == TYPE_CODE_REF ||
+	      TYPE_CODE (tt1) == TYPE_CODE_PTR)
 	{
-	  tt1 = check_typedef (TYPE_TARGET_TYPE (tt1));
-	  tt2 = check_typedef (TYPE_TARGET_TYPE (tt2));
+	  tt1 = check_typedef( TYPE_TARGET_TYPE(tt1) );
+	}
+      while ( TYPE_CODE(tt2) == TYPE_CODE_ARRAY ||
+	      TYPE_CODE(tt2) == TYPE_CODE_PTR ||
+	      TYPE_CODE(tt2) == TYPE_CODE_REF)
+	{
+	  tt2 = check_typedef( TYPE_TARGET_TYPE(tt2) );
 	}
       if (TYPE_CODE (tt1) == TYPE_CODE (tt2))
 	continue;
@@ -2327,7 +2354,7 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
 		    *static_memfuncp = 1;
 		  v = value_fn_field (arg1p, f, j, type, offset);
 		  if (v != NULL)
-		    return v;
+		    return v;       
 		}
 	      j--;
 	    }
@@ -2509,10 +2536,10 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
     }
   else
     v = search_struct_method (name, argp, args, 0, static_memfuncp, t);
-
+  
   if (v == (value_ptr) - 1)
     {
-      error ("Argument list of %s mismatch with component in the structure.", name);
+      error ("One of the arguments you tried to pass to %s could not be converted to what the function wants.", name);
     }
   else if (v == 0)
     {
@@ -2855,16 +2882,16 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
 	    break;
 	  }
       free (parm_types);
-if (overload_debug)
-{
-      if (method)
-	fprintf_filtered (gdb_stderr,"Overloaded method instance %s, # of parms %d\n", fns_ptr[ix].physname, nparms);
-      else
-	fprintf_filtered (gdb_stderr,"Overloaded function instance %s # of parms %d\n", SYMBOL_DEMANGLED_NAME (oload_syms[ix]), nparms);
-      for (jj = 0; jj < nargs; jj++)
-	fprintf_filtered (gdb_stderr,"...Badness @ %d : %d\n", jj, bv->rank[jj]);
-      fprintf_filtered (gdb_stderr,"Overload resolution champion is %d, ambiguous? %d\n", oload_champ, oload_ambiguous);
-}
+      if (overload_debug)
+	{
+	  if (method)
+	    fprintf_filtered (gdb_stderr,"Overloaded method instance %s, # of parms %d\n", fns_ptr[ix].physname, nparms);
+	  else
+	    fprintf_filtered (gdb_stderr,"Overloaded function instance %s # of parms %d\n", SYMBOL_DEMANGLED_NAME (oload_syms[ix]), nparms);
+	  for (jj = 0; jj < nargs; jj++)
+	    fprintf_filtered (gdb_stderr,"...Badness @ %d : %d\n", jj, bv->rank[jj]);
+	  fprintf_filtered (gdb_stderr,"Overload resolution champion is %d, ambiguous? %d\n", oload_champ, oload_ambiguous);
+	}
     }				/* end loop over all candidates */
   /* NOTE: dan/2000-03-10: Seems to be a better idea to just pick one
      if they have the exact same goodness. This is because there is no
@@ -2887,15 +2914,11 @@ if (overload_debug)
   /* Check how bad the best match is */
   for (ix = 1; ix <= nargs; ix++)
     {
-      switch (oload_champ_bv->rank[ix])
-	{
-	case 10:
-	  oload_non_standard = 1;	/* non-standard type conversions needed */
-	  break;
-	case 100:
-	  oload_incompatible = 1;	/* truly mismatched types */
-	  break;
-	}
+      if (oload_champ_bv->rank[ix] >= 100)
+	oload_incompatible = 1;	/* truly mismatched types */
+
+      else if (oload_champ_bv->rank[ix] >= 10)
+	oload_non_standard = 1;	/* non-standard type conversions needed */
     }
   if (oload_incompatible)
     {
@@ -3311,7 +3334,7 @@ value_rtti_type (v, full, top, using_enc)
     /*
       Right now this is G++ RTTI. Plan on this changing in the
       future as i get around to setting the vtables properly for G++
-      compiled stuff. Also, i'll be using the type info functions, 
+      compiled stuff. Also, i'll be using the type info functions,
       which are always right. Deal with it until then.
     */
     {
@@ -3340,7 +3363,7 @@ value_rtti_type (v, full, top, using_enc)
 	    *using_enc=1;
 	}
       /*
-	We can't use value_ind here, because it would want to use RTTI, and 
+	We can't use value_ind here, because it would want to use RTTI, and
 	we'd waste a bunch of time figuring out we already know the type.
         Besides, we don't care about the type, just the actual pointer
       */

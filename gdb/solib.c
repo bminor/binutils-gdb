@@ -714,7 +714,7 @@ elf_locate_base ()
      For mips elf we look for DT_MIPS_RLD_MAP, mips elf apparently has
      no DT_DEBUG entries.  */
 
-  arch_size = bfd_elf_get_arch_size (exec_bfd);
+  arch_size = bfd_get_arch_size (exec_bfd);
   if (arch_size == -1)	/* failure */
     return 0;
 
@@ -1491,7 +1491,7 @@ info_sharedlibrary_command (ignore, from_tty)
       return;
     }
 
-  arch_size = bfd_elf_get_arch_size (exec_bfd);
+  arch_size = bfd_get_arch_size (exec_bfd);
   /* Default to 32-bit in case of failure (non-elf). */
   if (arch_size == 32 || arch_size == -1)
     {

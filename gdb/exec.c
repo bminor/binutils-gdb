@@ -206,7 +206,7 @@ exec_file_attach (args, from_tty)
       scratch_chan = openp (getenv ("PATH"), 1, filename,
 		   write_files ? O_RDWR | O_BINARY : O_RDONLY | O_BINARY, 0,
 			    &scratch_pathname);
-#if defined(__GO32__) || defined(_WIN32)
+#if defined(__GO32__) || defined(_WIN32) || defined(__CYGWIN__)
       if (scratch_chan < 0)
 	{
 	  char *exename = alloca (strlen (filename) + 5);

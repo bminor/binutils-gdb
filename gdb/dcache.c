@@ -378,22 +378,6 @@ dcache_writeback (dcache)
 }
 
 
-/* Using the data cache DCACHE return the contents of the word at
-   address ADDR in the remote machine.  */
-int
-dcache_fetch (dcache, addr)
-     DCACHE *dcache;
-     CORE_ADDR addr;
-{
-  int res;
-
-  if (dcache_xfer_memory (dcache, addr, (char *) &res, sizeof res, 0) != sizeof res)
-    memory_error (EIO, addr);
-
-  return res;
-}
-
-
 /* Write the byte at PTR into ADDR in the data cache.
    Return zero on write error.
  */
@@ -418,23 +402,6 @@ dcache_poke_byte (dcache, addr, ptr)
   db->anydirty = 1;
   return 1;
 }
-
-/* Write the word at ADDR both in the data cache and in the remote machine.  
-   Return zero on write error.
- */
-
-int
-dcache_poke (dcache, addr, data)
-     DCACHE *dcache;
-     CORE_ADDR addr;
-     int data;
-{
-  if (dcache_xfer_memory (dcache, addr, (char *) &data, sizeof data, 1) != sizeof data)
-    return 0;
-
-  return dcache_writeback (dcache);
-}
-
 
 /* Initialize the data cache.  */
 DCACHE *

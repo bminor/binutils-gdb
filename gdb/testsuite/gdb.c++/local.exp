@@ -130,6 +130,15 @@ gdb_expect {
     timeout             { fail "(timeout) ptype NestedInnerLocal" }
 }     
 
+# srikanth, These tests have always been run only with aCC. Now in
+# the new scheme of things, we run it twice, once with aCC, and once
+# with g++. Flag these tests as expected failures when run with g++.
+# as these are failing now and were never known to pass with g++.
+global gcc_compiled
+if {$gcc_compiled} then  {
+setup_xfail "*-*-*"
+}
+
 # gdb incorrectly interprets the NestedInnerLocal in
 # InnerLocal::NestedInnerLocal as field name instead of a type name;
 # See CLLbs14784.

@@ -52,7 +52,8 @@ extern void write_inferior_status_register (struct inferior_status
 
 /* This macro gives the number of registers actually in use by the
    inferior.  This may be less than the total number of registers,
-   perhaps depending on the actual CPU in use or program being run.  */
+   perhaps depending on the actual CPU in use or program being run.  
+   FIXME: This could be replaced by the new MULTI_ARCH capability.  */
 
 #ifndef ARCH_NUM_REGS
 #define ARCH_NUM_REGS NUM_REGS

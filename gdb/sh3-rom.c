@@ -1,5 +1,5 @@
 /* Remote target glue for the Hitachi SH-3 ROM monitor.
-   Copyright 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,6 +24,7 @@
 #include "monitor.h"
 #include "serial.h"
 #include "srec.h"
+#include "arch-utils.h"
 
 static serial_t parallel;
 static int parallel_in_use;
@@ -75,9 +76,9 @@ sh3_supply_register (regname, regnamelen, val, vallen)
 	  break;
 	case 'S':
 	  if (regname[1] == 'S' && regname[2] == 'R')
-	    regno = SSR_REGNUM;
+	    regno = gdbarch_tdep (current_gdbarch)->SSR_REGNUM;
 	  else if (regname[1] == 'P' && regname[2] == 'C')
-	    regno = SPC_REGNUM;
+	    regno = gdbarch_tdep (current_gdbarch)->SPC_REGNUM;
 	  break;
 	}
     }
@@ -152,7 +153,7 @@ sh3_load (desc, file, hashmark)
    than does GDB, and don't necessarily support all the registers
    either. So, typing "info reg sp" becomes a "r30".  */
 
-static char *sh3_regnames[NUM_REGS] =
+static char *sh3_regnames[] =
 {
   "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7",
   "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15",
@@ -167,7 +168,7 @@ static char *sh3_regnames[NUM_REGS] =
   "R4_BANK1", "R5_BANK1", "R6_BANK1", "R7_BANK1"
 };
 
-static char *sh3e_regnames[NUM_REGS] =
+static char *sh3e_regnames[] =
 {
   "R0", "R1", "R2", "R3", "R4", "R5", "R6", "R7",
   "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15",

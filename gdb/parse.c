@@ -43,6 +43,9 @@
 #include "parser-defs.h"
 #include "gdbcmd.h"
 #include "symfile.h"		/* for overlay functions */
+#include "inferior.h"		/* for NUM_PSEUDO_REGS.  NOTE: replace 
+				   with "gdbarch.h" when appropriate.  */
+
 
 /* Symbols which architectures can redefine.  */
 
@@ -131,7 +134,15 @@ target_map_name_to_register (str, len)
 	return i;
       }
 
-  /* Try standard aliases */
+  /* Try pseudo-registers, if any. */
+  for (i = NUM_REGS; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
+    if (REGISTER_NAME (i) && len == strlen (REGISTER_NAME (i))
+	&& STREQN (str, REGISTER_NAME (i), len))
+      {
+	return i;
+      }
+
+  /* Try standard aliases. */
   for (i = 0; i < num_std_regs; i++)
     if (std_regs[i].name && len == strlen (std_regs[i].name)
 	&& STREQN (str, std_regs[i].name, len))

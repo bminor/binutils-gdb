@@ -618,27 +618,6 @@ gr_prepare_to_store ()
   /* Do nothing, since we assume we can store individual regs */
 }
 
-/* Read a word from remote address ADDR and return it.
- * This goes through the data cache.
- */
-int
-gr_fetch_word (addr)
-     CORE_ADDR addr;
-{
-  return dcache_fetch (gr_get_dcache (), addr);
-}
-
-/* Write a word WORD into remote address ADDR.
-   This goes through the data cache.  */
-
-void
-gr_store_word (addr, word)
-     CORE_ADDR addr;
-     int word;
-{
-  dcache_poke (gr_get_dcache (), addr, word);
-}
-
 void
 _initialize_sr_support ()
 {

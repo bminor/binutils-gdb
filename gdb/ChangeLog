@@ -1,13 +1,1059 @@
+2000-07-28  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* sh-tdep.c (sh_gdbarch_init): For sh4 initialize
+ 	register_convert_to_raw, register_convert_to_virtual,
+ 	register_convertible.
+	(sh_sh4_register_convertible): New function.
+	(sh_sh4_register_convert_to_virtual): New function.
+	(sh_sh4_register_convert_to_raw): New function.
+	Include floatformat.h.
+
+Thu Jul 27 14:06:27 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 2000-06-25 Stephane Carrez <Stephane.Carrez@worldnet.fr>:
+	* configure.tgt: Recognize the 68hc11.
+	* m68hc11-tdep.c: New file for 68hc11 target.
+	* config/m68hc11/m68hc11.mt: New file for 68hc11 port.
+	
+	* configure.tgt: When 68hc11, set gdb_multi_arch.
+
+Wed Jul 26 17:22:53 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (GDB_MULTI_ARCH): Define from configure.tgt
+ 	or makefile fragment.
+	* acconfig.h (GDB_MULTI_ARCH): Add.
+	* config.in, configure: Regenerate.
+	
+	* gdbarch.sh (GDB_MULTI_ARCH): Delete definition, moved to
+ 	configure.in and defs.h.  Use GDB_MULTI_ARCH_TM,
+ 	GDB_MULTI_ARCH_PARTIAL and GDB_MULTI_ARCH_PURE in tests.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+	* defs.h (GDB_MULTI_ARCH_PARTIAL, GDB_MULTI_ARCH_TM, ,
+ 	GDB_MULTI_ARCH_PURE): Define.  Only include "tm.h" when the target
+ 	is less than pure multi-arch.
+
+2000-07-26  Jimmy Guo       <guo@cup.hp.com>
+
+	* config/convex/tm-convex.h: Remove stray control characters.
+	* config/m68k/tm-altos.h: Ditto.
+	* config/tahoe/tm-tahoe.h: Ditto.
+
+2000-07-26  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* sh-tdep.c (sh_sh4_register_name, sh_sh4_register_byte,
+ 	sh_sh4_register_raw_size, sh_sh4_register_virtual_type,
+ 	sh_fetch_pseudo_register, sh_store_pseudo_register,
+ 	sh_do_pseudo_register, sh_gdbarch_init): Fix names for pseudoregs,
+ 	they should be numbered as drx fvy where x and y are multiples of
+ 	2 and 4 respectively.
+	
+	* config/sh/tm-sh.h: Fix names of pseudo regs.
+
+2000-07-24  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* config/sh/tm-sh.h (struct gdbarch_tdep): Add sh4 specific
+ 	pseudo registers.
+	(DO_REGISTERS_INFO): Define.
+
+	* sh-tdep.c (sh_sh4_register_name): New function.
+	(sh_generic_show_regs, sh3_show_regs, sh3e_show_regs,
+ 	sh3_dsp_show_regs, sh4_show_regs, sh_dsp_show_regs): Update
+ 	signature.
+	(sh_show_regs_command): New function. Actual function called by
+ 	the 'regs' command.
+	(sh_register_byte): Rename to...
+	(sh_default_register_byte): ...New function.
+	(sh_sh4_register_byte): New function.
+	(sh_register_raw_size): Rename to...
+	(sh_default_register_raw_size): ...New function.
+	(sh_sh4_register_raw_size): New function.
+	(sh_sh4_register_virtual_type): New function.
+	(sh_sh4_build_float_register_type): New function.
+	(sh_fetch_pseudo_register, sh_store_pseudo_register): New
+ 	functions.
+	(fv_reg_base_num, dr_reg_base_num): New functions.
+	(do_fv_register_info, do_dr_register_info, sh_do_pseudo_register,
+ 	sh_do_fp_register, sh_do_register, sh_print_register,
+ 	sh_do_registers_info): New functions.
+	(sh_gdbarch_init): Initialize sh4 pseudo registers to -1. Update
+ 	architecture specific parts.
+	(_initialize_sh_tdep): Use sh_show_regs_command for 'regs' command.
+
+2000-07-24  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2read.c (read_structure_scope): Correct overzealous
+	addition of cu_header argument.
+
+Mon Jul 24 07:47:46 2000  Anthony Green  <green@redhat.com>
+
+	* TODO: Update.  Two of my java patches are in. 
+
+2000-07-24  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+         * gdbarch.sh: Add FETCH_PSEUDO_REGISTER and STORE_PSEUDO_REGISTER
+         to the gdbarch structure.
+         * gdbarch.c: Regenerate.
+         * gdbarch.h: Regenerate.
+         * inferior.h (FETCH_PSEUDO_REGISTER, STORE_PSEUDO_REGISTER):
+         Delete macros.
+         * regcache.c (write_register, read_register, write_register_bytes,
+         write_register_gen, read_register_bytes, read_register_gen):
+         Rename ARCH_FECTH_PSEUDO_REGISTERS to FETCH_PSEUDO_REGISTERS and
+         ARCH_STORE_PSEUDO_REGISTER to STORE_PSEUDO_REGISTER.
+
+2000-07-24  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdbarch.sh: Add NUM_PSEUDO_REGS to the gdbarch structure.
+	* gdbarch.c: Regenerate. 
+	* gdbarch.h: Regenerate.
+	* inferior.h (NUM_PSEUDO_REGS): Delete macro.
+
+Sun Jul 23 21:40:55 2000  Anthony Green  <green@redhat.com>
+
+	* language.c: Include jv-lang.h.
+	(lang_bool_type): Add case for java booleans.
+
+Mon Jul 24 11:23:14 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dwarf2read.c (address_size): Delete file wide global.
+	(struct comp_unit_head): Add signed_addr_p;
+	(read_comp_unit_head): New function.
+	(psymtab_to_symtab_1, dwarf2_build_psymtabs_hard): Use
+ 	read_comp_unit_head to parse the debug_info header.
+	(read_address): Add parameters cu_header and bytes_read.  When
+ 	specified, sign extend the address.
+	
+	* dwarf2read.c (add_partial_symbol, decode_locdesc,
+ 	die_containing_type, die_type, dwarf_decode_lines,
+ 	dwarf2_add_field, dwarf2_add_member_fn,
+ 	dwarf2_build_psymtabs_hard, dwarf2_const_value, new_symbol,
+ 	process_die, psymtab_to_symtab_1, read_array_type,
+ 	read_enumeration, read_attribute, read_common_block,
+ 	read_comp_unit, read_file_scope, read_full_die, read_func_scope,
+ 	read_lexical_block_scope, read_partial_die, scan_partial_symbols,
+ 	read_structure_scope, read_subroutine_type, read_tag_const_type,
+ 	read_tag_pointer_type, read_tag_ptr_to_member_type,
+ 	read_tag_reference_type, read_type_die, read_typedef,
+ 	tag_type_to_type): Pass cu_header parameter.
+
+2000-07-21  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        * regcache.c (read_register, read_register_bytes): Fix typos.
+
+2000-07-21  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* thread.c (thread_apply_all_command): Update thread list first.
+	* printcmd.c (printf_command): Guard against 0-length string.
+	* config/i386/tm-i386.h: treat PC and FP as unsigned.
+	(SAVED_PC_AFTER_CALL): Use read_memory_unsigned_integer.
+	(FRAME_SAVED_PC): Ditto.
+	(FRAME_CHAIN): Ditto.
+
+2000-07-20  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* valarith.c (value_sub): Call check_typedef.
+
+2000-07-19  Nicholas Duffek  <nsd@redhat.com>
+
+	* thread.c (free_thread): New function.
+	(init_thread_list): Always zero highest_thread_num.  Call
+	free_thread() instead of free().
+	(delete_thread): Move thread cleanup code to free_thread().
+
+2000-07-19  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        Multiarch the sh target.
+	* sh-tdep.c:
+	(sh_generic_reg_names, sh_reg_names,sh3_reg_names, sh3e_reg_names,
+ 	sh_dsp_reg_names, sh3_dsp_reg_names, sh_processor_type_table):
+ 	Remove.
+	(XMALLOC): Define.
+	(struct frame_extra_info): Define.
+	(sh_register_raw_size, sh_register_virtual_size,
+ 	sh_register_virtual_type, sh_register_byte, sh_breakpoint_from_pc,
+ 	sh_frame_saved_pc, sh_skip_prologue,
+ 	sh_nofp_frame_init_saved_regs, sh_fp_frame_init_saved_regs,
+ 	sh_extract_struct_value_address, sh_use_struct_convention,
+ 	sh_store_struct_return, sh_push_arguments, sh_push_return_address,
+ 	sh_saved_pc_after_call, sh_generic_register_name,
+ 	sh_sh_register_name, sh_sh3_register_name, sh_sh3e_register_name,
+ 	sh_sh_dsp_register_name, sh_sh3_dsp_register_name,
+ 	sh_frame_args_address, sh_frame_locals_address,
+ 	sh_coerce_float_to_double, sh_default_store_return_value,
+ 	sh3e_sh4_store_return_value, sh_generic_show_regs,
+ 	sh3_show_regs,sh3e_show_regs, sh3_dsp_show_regs, sh4_show_regs,
+ 	sh_dsp_show_regs, sh_register_byte, sh_register_raw_size,
+ 	sh_register_virtual_size, sh_sh3e_register_virtual_type,
+ 	sh_default_register_virtual_type, sh_gdbarch_init): New functions.
+	(sh_target_architecture_hook, sh_frame_find_saved_regs,
+ 	sh_show_regs): Delete functions.
+	(sh_frame_chain, sh_find_callers_reg, sh_init_extra_frame_info,
+ 	sh_pop_frame, sh_extract_return_value): Update
+
+	* config/sh/tm-sh.h (GDB_MULTI_ARCH): Define to 1.
+	(struct gdbarch_tdep): Define.
+	Remove all unnecessary defines. 	
+
+	* remote-e7000.c ({PR,GBR,SR,MACL,VBR,MACH}_REGNUM): Define to -1,
+ 	for h8300 case.
+	(want_sh,want_nopc_sh,want_nopc_sh3): Make nomenclature
+ 	consistent.
+	(e7000_fetch_registers): Remove ifdef GDB_TARGET_IS_SH, use
+ 	runtime check instead.
+	(e7000_wait): Ditto.
+
+	* sh3-rom.c (sh3_supply_register): Use gdbarch_tdep to get the SSR
+ 	and SPC register numbers.
+	(sh3_regnames, sh3e_regnames): Don't specify a size.
+
+	* config/h8300/tm-h8300.h: Add comment.
+
+Wed Jul 19 12:50:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* solib.c (elf_locate_base, info_sharedlibrary_command): Rename
+ 	bfd_elf_get_arch_size to bfd_get_arch_size.
+
+Tue Jul 18 17:13:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Richard Henderson <rth@cygnus.com>:
+	* dwarf2read.c (dwarf2_empty_hash_tables): Renamed from
+	dwarf2_empty_die_ref_table; zero dwarf2_cached_types as well.
+	Update all callers.
+
+2000-07-17  Daniel Berlin  <dberlin@redhat.com>
+
+	* valops.c (value_struct_elt): Change error message
+
+2000-07-17  matthew green  <mrg@redhat.com>
+
+	* config/sparc/nm-nbsd.h (GDB_GREGSET_T, GDB_FPREGSET_T): Define.
+
+Mon Jul 17 13:08:10 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* values.c (value_as_pointer): When VAL is an integer, explictly
+ 	cast to a pointer before converting to a CORE_ADDR.
+	* gdbtypes.c (build_gdbtypes): For builtin_type_ptr, construct a
+ 	real void pointer instead of an integer.
+
+2000-07-15  Daniel Berlin  <dberlin@redhat.com>
+
+	* valops.c (typecmp):  Seperate loop into two, add support for
+	references. This way, we can  say a reference to a pointer to a
+	char is	compatible with a pointer to a char. Before, this would
+	not be true.
+
+2000-07-14  Nicholas Duffek  <nsd@redhat.com>
+
+	* ppcbug-rom.c (ppcbug_regnames[]): Make array size implicit.
+	* rs6000-tdep.c (DEFAULT_LR_SAVE): Move to config/*/tm-*.h.
+	(rs6000_gdbarch_init): Use generic_pc_in_call_dummy instead of
+	rs6000_pc_in_call_dummy.
+	* config/rs6000/tm-rs6000.h (DEFAULT_LR_SAVE): Move here from
+	rs6000-tdep.c.
+	* config/powerpc/tm-ppc-eabi.h: Remove various definitions
+	handled by multi-arched rs6000-tdep.c.
+
+2000-07-14  Nick Clifton  <nickc@cygnus.com>
+
+	* config/mcore/tm-mcore.h (SKIP_PROLOGUE): Fix defintion to avoid
+	assignment.
+
+2000-07-13  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* parse.c: Include inferior.h.
+
+2000-07-12  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* regcache.c (registers_changed, registers_fetched): Use 
+	ARCH_NUM_REGS directly, eliminating an unnecessary variable.
+
+	This change adds pseudo-register capability to GDB.
+	Pseudo-registers are handled like registers, but they
+	don't come from or live on the target.  They may be 
+	aliases for an existing register, or they may be computed.
+	* inferior.h (NUM_PSEUDO_REGISTERS): Define default of zero.
+	(ARCH_FETCH_PSEUDO_REGISTERS): Define default of no-op.
+	(ARCH_STORE_PSEUDO_REGISTERS): Define default of no-op.
+	# regcache.c (registers_changed): Mark pseudo-registers 
+	invalid, as well as real registers.
+	(registers_fetched): Do not mark pseudo-registers as fetched
+	at the same time as other (real) registers.
+	(read_register_bytes): Fetch pseudo-registers (if any) from
+	the target architecture module instead of from the target.
+	(read_register_gen): Ditto.
+	(read_register): Ditto.
+	(write_register_bytes): Store pseudo-registers (if any) to
+	the target architecture module instead of to the target.
+	(write_register_gen): Ditto.
+	(write_register): Ditto.
+	(build_regcache): Allocate enough register_valid space for
+	pseudo-registers as well as normal (real) ones.
+	* parse.c (target_map_name_to_register): Include pseudo-regs.
+	
+Tue Jul 11 19:45:42 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+ 	* valops.c (value_cast): Allow cast from INT, ENUM or RANGE to
+ 	POINTER.
+
+2000-07-11  Scott Bambrough <scottb@netwinder.org>
+
+	* command.c (do_setshow_command): Fix typo in var_auto_boolean
+	case.
+
+Tue Jul 11 20:38:36 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c: General cleanup.  Delete all #if 0 code.  Convert
+ 	all old style K&R function definitions to ISO-C.
+	(struct gdbarch_tdep): Add mips_abi_string.
+	(mips_gdbarch_init): Initialize.
+ 	(mips_dump_tdep): Print mips_abi_string and other values.
+	(mips_push_arguments): Add more detailed tracing.
+
+Tue Jul 11 20:16:09 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (mips32_next_pc, mips16_next_pc,
+ 	read_next_frame_reg, mips_push_dummy_frame, mips_skip_stub,
+ 	mips_saved_pc_after_call): Use read_signed_register when
+ 	extracting register value.  Ensures all addresses are sign
+ 	extended.
+	(mips_read_pc): New function.  Return sign extended address.
+	(mips_gdbarch_init): Set gdbarch_read_pc.
+
+Tue Jul 11 19:06:29 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-mips.c (mips_request): Change all arguments to ULONGEST.
+	(mips_exit_debug, mips_resume, mips_initialize, mips_wait,
+ 	mips_fetch_registers, mips_store_registers, mips_fetch_word):
+ 	Update.
+	(mips_xfer_memory): When mask_address_p, mask MEMADDR down to just
+ 	32 bits.
+	(_initialize_remote_mips): Add ``set mask-address'' command.
+
+	* mips-tdep.c (_initialize_mips_tdep): Replace "set mask-address"
+ 	with "set mips mask-address".  Implement using
+ 	add_set_auto_boolean_cmd.
+	(struct gdbarch_tdep): Add default_mask_address_p.
+	(mips_mask_address_p, show_mask_address): New functions.
+	(mips_addr_bits_remove): Use mips_mask_address_p() to determine if
+ 	masking is needed.
+	(mips_gdbarch_init): Set default_mask_address_p to zero.
+	(mips_dump_tdep): Print value of mask_address_p.
+
+Tue Jul 11 18:32:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* printcmd.c (print_scalar_formatted): Move masking of 'a' address
+ 	from here.
+	(print_address_numeric): To here.
+	* TODO: Update.
+
+Tue Jul 11 17:50:31 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* symtab.c: Use paddr_nz() to print addresses.
+
+Tue Jul 11 12:52:31 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* value.h (read_register, read_signed_register): Change return
+ 	type to ULONGEST.
+	(read_signed_register, read_signed_register_pid): Declare.
+
+	* regcache.c (read_register, read_register_pid): Update.
+	(read_signed_register_pid, read_signed_register): New functions.
+	
+Mon Jul 10 18:06:18 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (mips_push_arguments): Always align struct_addr on a
+ 	16 byte boundary. Align allocated argument space using
+ 	MIPS_STACK_ARGSIZE.  Reserve space on stack for the struct return
+ 	and floating-point registers.  Use fp_register_arg_p to determine
+ 	if float_argreg should be aligned.
+
+2000-07-10  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* config/sh/tm-sh.h (STORE_RETURN_VALUE): Redefine as
+ 	sh_store_return_value().
+	* sh-tdep.c (sh_store_return_value): New function. Store the
+ 	value returned by a function into the appropriate register.
+
+2000-07-10  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        * sh-tdep.c (sh_skip_prologue): Before looking at the actual
+ 	instructions, try to see if the symbol table can be of help, by
+ 	calling after_prologue(). If this doesn't work, call
+ 	skip_prologue_hard_way().
+	(skip_prologue_hard_way): Renamed from sh_skip_prologue. Add some
+ 	more instruction pattern matching for pushing of arguments, and
+ 	manipulation of r14.
+	(after_prologue): New function. Use symbol table info to determine
+ 	the end of the prologue, if possible.
+
+2000-07-07  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* findvar.c (_initialize_findvar, build_findvar, write_fp, read_fp,
+	generic_target_write_fp, generic_target_read_fp, write_sp, read_sp,
+	generic_target_write_sp, generic_target_read_sp, write_pc, read_pc,
+	generic_target_write_pc, generic_target_read_pc, write_pc_pid, 
+	read_pc_pid, supply_register, write_register_pid, write_register,
+	read_register_pid, read_register, write_register_bytes, 
+	read_register_bytes, write_register_gen, read_register_gen, 
+	registers_fetched, registers_changed, find_saved_register, 
+	read_relative_register_raw_bytes, default_get_saved_register, 
+	read_relative_register_raw_bytes_for_frame, get_saved_register):
+	Move from this file into new file regcache.c.
+	(register_valid, registers_pid, registers): Ditto.
+	* regcache.c: New file to hold the register cache.
+	(register_cached): New function to read register_valid array.
+	* value.h (register_cached): Declare.
+	* defs.h (default_get_saved_register): Delete decl of static function.
+	* Makefile.in: Add regcache module.
+	
+Mon Jul 10 15:02:35 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 2000-07-05 Pierre Muller <muller@ics.u-strasbg.fr>:
+	* p-typeprint.c (pascal_type_print_method_args): Add braces around
+ 	isdigit after while keyword.
+
+2000-07-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        * TODO: Remove readline 4.1 import item.
+
+2000-07-09  Nick Duffek  <nsd@redhat.com>
+
+	* gdbtypes.c (is_ancestor): Infer type equivalence from name
+	equivalence.
+	(rank_one_type): Use strcmp instead of == to compare type names.
+	Don't swap parm with arg when checking TYPE_CODE_REF types.
+	* valops.c (find_overload_match): Fix indentation.  Compare
+	parameter rankings to 0..9, 10..99, and 100+ instead of 0, 10,
+	and 100.
+
+2000-07-07  David Edelsohn  <edelsohn@gnu.org>
+
+	* xcoffread.c (read_symbol_nvalue): Return CORE_ADDR.
+	* rs6000-tdep.c (rs6000_pop_frame): Make addr CORE_ADDR type.
+
+Fri Jul  7 18:29:51 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/mips/tm-mips.h (IEEE_FLOAT, SKIP_PROLOGUE,
+ 	SAVED_PC_AFTER_CALL, DECR_PC_AFTER_BREAK, BREAKPOINT_FROM_PC,
+ 	INNER_THAN): Macros.
+
+	* mips-tdep.c (mips_in_lenient_prologue): Delete function.
+	(mips32_skip_prologue, mips16_skip_prologue, mips_skip_prologue):
+ 	Remove ``lenient'' argument.
+	(mips_saved_pc_after_call): New function.
+ 	(mips_gdbarch_init): Initialize gdbarch members inner_than,
+ 	breakpoint_from_pc, decr_pc_after_break, ieee_float,
+ 	skip_prologue, saved_pc_after_call.
+
+2000-07-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-linux.h: Add longjmp support.
+	(JB_ELEMENT_SIZE, JB_PC): New defines.
+	(GET_LONGJMP_TARGET): Define.
+	(get_longjmp_target): Add prototype.
+
+	* breakpoint.c (bpstat_what): Keep returning
+	BPSTAT_WHAT_SET_LONGJMP_RESUME when hitting multiple longjmp()
+	breakpoints instead of signalling an error by returning
+	BPSTAT_WHAT_STOP_NOISY.
+
+2000-07-06  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* mips-tdep.c: Replace '16' with bfd_mach_mips16 where appropriate.
+
+2000-07-06  Christopher Faylor  <cgf@cygnus.com>
+
+	* infcmd.c (attach_command): Move "stop_soon_quietly" setting
+	inside ATTACH_NO_WAIT conditional since we are not about to
+	stop soon if we're not calling wait_for_inferior.
+
+Wed Jul  5 21:06:39 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/i386/fbsd.mh (NATDEPFILES): Keep NATDEPFILES to a single
+ 	line.  configure.in assumes this.
+
+Wed Jul  5 20:48:22 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (SER_HARDWIRE): When go32 or DJGPP, set to
+ 	ser-go32.c.
+	* configure: Re-generate.
+	
+Wed Jul  5 20:28:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* top.h (command_loop_marker), top.c (command_loop_marker):
+ 	Delete.
+	* event-top.c (command_handler), top.c (simplified_command_loop,
+ 	command_loop): Use null_cleanup instead of command_loop_marker.
+
+Wed Jul  5 20:09:41 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* event-loop.c: Include either <poll.h> or <sys/poll.h>.
+
+	* configure.in (targ_archs): Check for <poll.h> and <sys/poll.h>.
+	* configure, config.in: Re-generate.
+	
+Wed Jul  5 18:10:44 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From 2000-06-12 Bill Nottingham <notting@redhat.com>:
+	* Makefile.in: add $(infodir) to FLAGS_TO_PASS
+	
+Wed Jul  5 18:03:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* TODO: Updates.
+
+2000-07-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* TODO: Update.
+
+2000-07-03  Chris Faylor  <cfg@cygnus.com>
+
+        Committed by Elena Zannoni <ezannoni@cygnus.com>
+	* sh-tdep.c (sh_skip_prologue): Change prologue matching for modern
+	compilers.
+	(sh_frame_find_saved_regs): Ditto.
+	(sh_find_callers_reg): Stop if pc is zero.
+
+Sat Jul  1 17:47:08 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ser-unix.c (do_unix_readchar): Revert Tue Mar 28 18:19:50 2000
+ 	Andrew Cagney <cagney@b1.cygnus.com>.  Locks up when no data is
+ 	pending.
+
+Sat Jul  1 15:40:14 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (SER_HARDWIRE): Restore code to set it by configure.
+
+2000-06-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* copying.awk: Eliminate use of PARAMS from this file.
+
+Fri Jun 23 20:47:03 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (mips_push_arguments): Use the variable stack_used_p
+ 	to determine if any arguments were written to the stack.  Do not
+ 	rely on NUMARG>=8.
+
+Mon Jun 19 11:29:35 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* command.h (add_set_auto_boolean_cmd): Add declaration.
+	(enum var_types): Add var_auto_boolean.
+
+	* command.c (add_set_auto_boolean_cmd): New function.
+	(do_setshow_command): Recognize auto_boolean.
+	(parse_binary_operation): Recognize enable and disable.
+	(parse_auto_binary_operation): Parse auto binary variables.
+
+	* TODO: Update
+
+Fri Jun 23 16:20:21 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (fp_register_arg_p): New function.
+	(mips_push_arguments): Use.  Do not pass floating point arguments
+ 	on in an integer register.
+
+2000-06-21  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* symfile.c (init_filename_language_table): add ".pas", ".p" and ".pp"
+	as pascal source file extensions.
+
+2000-06-19  J.T. Conklin  <jtc@redback.com>
+
+	* remote-nindy.c (nindy_fetch_word, nindy_store_word): Removed
+	(nindy_xfer_inferior_memory): Use dcache_xfer_memory() instead of
+ 	breaking transfer into chunks and using nindy_fetch_word() and
+	nindy_store_word().
+
+	* remote-bug.c (bug_xfer_memory): Use dcache_xfer_memory() instead
+ 	of breaking transfer into chunks and using gr_fetch_word() and
+ 	gr_store_word().
+
+	* remote.c (remote_fetch_word, remote_store_word): Removed.
+
+	* remote-utils.h (gr_fetch_word, gr_store_word): Removed.
+	* remote-utils.c (gr_fetch_word, gr_store_word): Removed.
+
+	* dcache.h (dcache_fetch, dcache_poke, dcache_poke_block): Removed.
+	* dcache.c (dcache_fetch, dcache_poke): Removed.
+
+2000-06-16  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* defs.h: define language_pascal in language enumeration.
+	* language.h: define _LANG_pascal macro.
+	* language.c: add language_pascal support in all language dependant
+   functions.
+
+Sun Jun 18 01:01:09 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (mips_debug): New variable.
+ 	(_initialize_mips_tdep): Add command "set debug mips".
+	(mips_push_arguments): Add code to dump the argument list as it is
+ 	created.
+
+Sun Jun 18 00:27:15 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (mips_push_arguments): For MIPS_EABI, squeeze a
+ 	strut containing a floating-point into an FP register.
+
+Sat Jun 17 16:00:56 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-mips.c: Include <ctype.h>
+ 	(mips_receive_header): Write printable characters to gdb_stdtarg
+ 	instead of gdb_stdlog.  Only count non-printables as invalid.
+	(mips_syn_garbage): Reduce to 10.
+
+Sat Jun 17 15:39:28 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (mips_gdbarch_init): When the object file header
+ 	specifies EABI64, select EABI64 and not EABI32.
+
+2000-06-16  Nicholas Duffek  <nsd@redhat.com>
+
+	* rs6000-tdep.c: Changes throughout for multi-arch 64-bit
+	support.  Incorporate most of tm-rs6000.h.
+	(find_toc_address_hook): Rename to rs6000_find_toc_address_hook.
+	(rs6000_set_host_arch_hook): Declare.
+	(read_memory_addr): Define.
+	(pop_frame): Rename to rs6000_pop_frame.
+	(rs6000_pop_frame, rs6000_fix_call_dummy, rs6000_push_arguments,
+	rs6000_frame_saved_pc, rs6000_frame_chain): Remove non-generic
+	dummy frame handling.
+	(branch_dest, rs6000_pop_frame, rs6000_skip_trampoline_code,
+	rs6000_frame_saved_pc, frame_get_saved_regs,
+	frame_initial_stack_address, rs6000_frame_chain,
+	rs6000_convert_from_func_ptr_addr): Call read_memory_addr instead
+	of read_memory_integer.
+	(branch_dest, rs6000_pop_frame, rs6000_push_arguments,
+	rs6000_skip_trampoline_code, rs6000_frame_saved_pc,
+	frame_get_saved_regs, frame_initial_stack_address,
+	rs6000_frame_chain): Replace 4 with TDEP->wordsize.
+	(skip_prologue): Recognize some 64-bit stack adjustments.
+	(push_dummy_frame, pop_dummy_frame, set_processor,
+	show_processor): Delete.
+	(frame_get_saved_regs): Manipulate saved register addresses using
+	CORE_ADDR instead of int.
+	(rs6000_create_inferior): New function.
+	(register_names_*[]): Change to struct reg registers_*[].
+	(variants[]): Assimilate into multi-arch approach.
+	(register_names_*[], variants[]): Refer to pre-PowerPC
+	architectures as POWER instead of RS6000.
+	* rs6000-nat.c: Ubiquitous changes for 64-bit support.
+	(vmap_secs, xcoff_relocate_symtab): Cast addresses
+	to unsigned long to avoid sign-extension errors.
+	(set_host_arch): New function.
+	(xcoff_relocate_symtab): Try disabling usleep(36000) workaround.
+	(rs6000_core_fns): Use new bfd_target_xcoff_flavour.
+	(_initialize_core_rs6000): Initialize rs6000_set_host_arch_hook.
+	* symfile.c (find_sym_fns): Remove special xcoff kludge.
+	* xcoffread.c (secnum_to_bfd_section): Initialize args.objfile.
+	(process_linenos): Query line struct size from coff
+	backend instead of using compile-time constant.
+	(enter_line_range): Likewise.
+	(read_xcoff_symtab): Pass "XCOFF64" instead of "XCOFF" to
+	record_debugformat() if appropriate.
+	(process_xcoff_symbol): Access symbol addresses using
+	SYMBOL_VALUE_ADDRESS instead of SYMBOL_VALUE.
+	(read_symbol_lineno): Retrieve XCOFF64 symbol names from strtbl.
+	(scan_xcoff_symtab): Likewise.  Query syment struct size from
+	coff backend instead of using compile-time constant.
+	(xcoff_sym_fns): Set flavour to bfd_target_xcoff_flavour.
+	* Makefile.in (INTERNAL_LDFLAGS): Add $(MH_LDFLAGS) to list of flags
+	that this Makefile variable get set to.  (From Kevin Buettner.)
+	* config/powerpc/aix.mh (MH_LDFLAGS): Add linker flags so that
+	the TOC doesn't overflow.  (From Kevin Buettner.)
+	* config/powerpc/tm-ppc-aix.h: Move config decisions to
+	multi-arched rs6000-tdep.c.
+	* config/rs6000/tm-rs6000.h: Likewise.
+	(GDB_MULTI_ARCH): Define.
+	(skip_trampoline_code): Rename to rs6000_skip_trampoline_code.
+	(is_magic_function_pointer): Replace with
+	rs6000_convert_from_func_ptr_addr.
+	(TARGET_CREATE_INFERIOR_HOOK): Define.
+	(find_toc_address_hook): Rename to rs6000_find_toc_address_hook.
+	(rs6000_set_host_arch_hook): Declare.
+	* config/rs6000/nm-rs6000.h (CHILD_XFER_MEMORY): Define.
+
+2000-06-15  Kevin Buettner  <kevinb@redhat.com>
+
+	* v850ice.c: Eliminate use of PARAMS from this file.
+
+2000-06-15  Michael Snyder  <msnyder@cygnus.com>
+
+	* valops.c (value_cast): Break up long lines.
+	* utils.c: Fix comment typo.
+
+2000-06-14  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2read.c (dump_die): Use the proper printf format for
+ 	printing DW_UNSND values; they're longs now.
+
+	* dwarf2read.c (dump_die): We can read DW_FORM_data8 now, on
+	at least some platforms, so print it out too.
+
+2000-06-14  James E. Wilson  <wilson@bletchleypark.cygnus.com>
+
+	* dwarf2read.c (struct attribute): Change unsnd and snd field types
+	to long.
+	(read_8_bytes): Change return type to long.
+	(read_unsigned_leb128): Change return type to long.  Change type of
+	local result to long.  Cast argument of left shift to long.
+	(read_signed_leb128): Likewise.
+
+2000-06-14  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Add support for Pascal language. Part 1: new files.
+	* p-exp.y, p-lang.c, p-lang.h, p-typeprint.c, p-valprint.c: New files.
+
+2000-06-13  Kevin Buettner  <kevinb@redhat.com>
+
+	* ser-ocd.c, symtab.c: Eliminate use of PARAMS from these files.
+
+Tue Jun 13 09:21:23 2000  Jeffrey A Law  (law@cygnus.com)
+
+	* configure.host (hppa*64*): Renamed from hppa2.0w per
+	gcc/binutils changes.
+	* configure.tgt: Similarly.
+
+2000-06-12  Bill Nottingham <notting@redhat.com>
+
+	Patch applied by Kevin Buettner <kevinb@redhat.com>:
+
+	* ia64-linux-nat.c, gdbserver/low-linux.c (u_offsets):  PT_CR_IFS
+	is deprecated.  Use PT_CFM instead.
+
+2000-06-12  Michael Snyder  <msnyder@cygnus.com>
+
+	* breakpoint.c (breakpoint_thread_match): Fix comment.
+
+2000-06-12  Fernando Nasser  <fnasser@cygnus.com>
+
+	* valops.c (value_assign): Adjust the length to take into
+	consideration that we are not starting from the beginning.
+
+2000-06-12  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* symfile.c (add_symbol_file_command): Properly reformat "else if"
+ 	code.
+	* coffread.c (coff_symtab_read): Ditto.
+	
+Mon Jun 12 15:24:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (SER_HARDWIRE): Set using autoconf.
+	* configure.in (SER_HARDWIRE): Define, add ser-tcp.o.
+	* configure: Re-generate.
+
+	* config/i386/go32.mh (SER_HARDWIRE): Delete.  Handled by
+ 	configure.in.
+	* config/sparc/sun4sol2.mh, config/sparc/sun4os4.mh,
+ 	config/sparc/sparclynx.mh, config/sparc/nbsdelf.mh,
+ 	config/sparc/nbsd.mh, config/sparc/linux.mh,
+ 	config/rs6000/rs6000lynx.mh, config/powerpc/solaris.mh,
+ 	config/powerpc/nbsd.mh, config/powerpc/linux.mh,
+ 	config/powerpc/cygwin.mh, config/pa/hpux11w.mh,
+ 	config/pa/hpux11.mh, config/pa/hpux1020.mh, config/pa/hppaosf.mh,
+ 	config/pa/hppahpux.mh, config/pa/hppabsd.mh, config/ns32k/nbsd.mh,
+ 	config/mips/irix5.mh, config/mips/irix4.mh, config/m68k/nbsd.mh,
+ 	config/m68k/m68klynx.mh, config/m68k/linux.mh,
+ 	config/i386/nbsdelf.mh, config/i386/nbsd.mh, config/i386/linux.mh,
+ 	config/i386/i386sco5.mh, config/i386/i386lynx.mh,
+ 	config/i386/i386dgux.mh, config/i386/fbsd.mh,
+ 	config/i386/cygwin.mh, config/arm/linux.mh, config/alpha/fbsd.mh,
+ 	config/alpha/alpha-osf3.mh, config/alpha/alpha-linux.mh: Remove
+ 	ser-tcp.o from XDEPFILES.
+	* config/ia64/linux.mh: Ditto.
+
+	* TODO: Update.
+
+Mon Jun 12 14:26:02 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (GDB_TARGET_IS_MIPS64): Define.
+	(struct gdbarch_tdep): Add gdb_target_is_mips64.
+	(mips_addr_bits_remove): Update.
+	(mips_gdbarch_init): Initialize.
+
+	* config/mips/tm-mips64.h (GDB_TARGET_IS_MIPS64,
+ 	GDB_TARGET_IS_MIPS64): Delete.
+
+Mon Jun 12 12:17:20 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c: Include "symcat.h".
+ 	(mips_dump_tdep): Print all known but not yet multi-arched values.
+
+2000-06-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-i386.h: Add forward declaration of `struct value'.
+	(FIX_CALL_DUMMY): Redefined to call i386_fix_call_dummy.
+	(i386_fix_call_dummy): Add prototype.
+	* i386-tdep.c (i386_fix_call_dummy): New function based on the
+	code from the old FIX_CALL_DUMMY macro.
+
+2000-06-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* procfs.c, remote.c: Eliminate use of PARAMS from these files.
+
+Mon Jun 12 10:21:24 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh (gdbarch_dump): When non multi-arch skip macros that
+ 	return void.
+
+Sun Jun 11 12:06:21 2000  Christopher Faylor <cgf@cygnus.com>
+
+	* exec.c (exec_file_attach): Add .exe extension when __CYGWIN__.
+
+Sat Jun 10 22:31:46 2000  Christopher Faylor <cgf@cygnus.com>
+
+	* win32-nat.c (safe_symbol_file_add_args): Store old gdb_stderr and
+	gdb_stdout here.
+	(safe_symbol_file_add_stub): Redirect gdb_stdout as well as stderr.
+	(safe_symbol_file_add_cleanup): Restore gdb_stdout.
+	(info_dll_command): Use the pager for displaying DLLs since there are
+	often quite a few.
+
+Sun Jun 11 11:34:05 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Sat Jun 10 17:54:04 2000 Hans-Peter Nilsson <hp@axis.com>:
+	* configure.in (targ_archs): Clear out secondary components.
+	* configure: Regenerate.
+
+Fri Jun  9 15:06:37 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh (struct gdbarch): Add member dump_tdep.
+	(struct gdbarch_registration): Ditto.
+	(gdbarch_dump): Add ui_file and gdbarch arguments.  Add support
+ 	for external dump functions.  Dump the macro value.  Call target
+ 	dump routine.
+	(gdbarch_register): New function.
+	(gdbarch_registrary): Replace gdbarch_init_registrary.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* arch-utils.c (set_arch): Update.
+	
+	* mips-tdep.c (mips_dump_tdep): New function. Move dump code here.
+	(mips_gdbarch_init): From here.
+
+	* maint.c (maintenance_print_architecture): New function.
+	(_initialize_maint_cmds): Add command ``maintenance print
+ 	architecture''.
+
+2000-06-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* command.h, monitor.h: Eliminate use of PARAMS from these
+	files.
+
+2000-06-08  Fernando Nasser  <fnasser@cygnus.com>
+
+	* config/i386/tm-embed.h: New file.  Specific for embedded targets
+	like i386-elf, i386-coff and i386-aout.
+	* config/i386/embed.mt (): Specify tm-embed.h instead of the System V
+	header file.
+
+2000-06-08  Fernando Nasser  <fnasser@cygnus.com>
+
+	* MAINTAINERS: Add myself to gdbtk list.
+
+2000-06-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* config/ia64/nm-linux.h (U_REGS_OFFSET): Define.
+
+2000-06-08  Fernando Nasser  <fnasser@cygnus.com>
+
+	* configure.in: Replace misplaced CONFIG_ADD by the correct
+	CONFIG_CLEAN.
+	* configure, config.in: Regenerate.
+
+2000-06-08  Fernando Nasser  <fnasser@cygnus.com>
+
+	* values.c (value_primitive_field): Copy VALUE_REGNO as well.
+	With typed registers we may have the location information in this field,
+	in addition to VALUE_ADDRESS (which was already being copied).
+
+Thu Jun  8 15:26:44 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/mips/tm-mips.h (GDB_MULTI_ARCH): Define as 1.
+	(CALL_DUMMY, TARGET_BYTE_ORDER_SELECTABLE_P,
+ 	COERCE_FLOAT_TO_DOUBLE): Delete.
+	* config/mips/tm-vr5000el.h, config/mips/tm-vr5000.h,
+ 	config/mips/tm-vr4xxxel.h, config/mips/tm-vr4xxx.h,
+ 	config/mips/tm-vr4100.h, config/mips/tm-tx39l.h
+ 	config/mips/tm-tx39.h, config/mips/tm-irix5.h: Delete
+ 	GDB_MULTI_ARCH.
+
+	* config/mips/tm-mips64.h (TARGET_LONG_BIT, TARGET_LONG_LONG_BIT,
+ 	TARGET_PTR_BIT): Delete definitions.
+	* config/mips/tm-vr5000el.h, config/mips/tm-vr5000.h,
+ 	config/mips/tm-tx39l.h, config/mips/tm-vr4100.h,
+ 	config/mips/tm-tx39.h: Delete definition of MIPS_EABI.
+	* mips-tdep.c (mips_gdbarch_init): Use the ISA to determine the
+ 	ABI.  If all else fails, assume O32.
+
+	* TODO, NEWS: Update.  Mention MIPS is multi-arch.
+
+Thu Jun  8 14:23:12 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/mips/tm-vr4xxxel.h, config/mips/tm-vr4xxx.h,
+ 	config/mips/tm-vr4100.h, config/mips/tm-tx39l.h,
+ 	config/mips/tm-tx39.h: Delete definition of
+ 	MIPS_DEFAULT_FPU_TYPE. Enable multi-arch.
+	* mips-tdep.c: (mips_gdbarch_init): The bfd_mach_mips3900 has no
+ 	FPU.  bfd_mach_mips4650 FPU is single precision.
+
+	* config/mips/tm-mips.h (MIPS_FPU_SINGLE_REGSIZE): 
+	(MIPS_FPU_DOUBLE_REGSIZE): Move from here.
+	* mips-tdep.c: To here.  Change to an enum.
+
+Wed Jun  7 18:27:51 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (DEFAULT_BFD_ARCH, DEFAULT_BFD_VEC): Use config.bfd
+ 	to determine the default architecture / target.
+	* acconfig (DEFAULT_BFD_ARCH, DEFAULT_BFD_VEC): Add.
+	* configure, config.in: Regenerate.
+	
+	* arch-utils.c (set_endian): Better separate multi-arch and non-
+ 	multi-arch cases.
+	(set_endian_from_file): Call internal_error when multi-arch.
+	(initialize_current_architecture): Rewrite logic selecting a byte
+ 	order.  Use DEFAULT_BFD_ARCH DEFAULT_BFD_VEC.
+	(version.h): Include.
+
+	* config/mips/tm-mips.h, config/mips/tm-bigmips64.h,
+ 	config/mips/tm-bigmips.h: Delete definition of
+ 	TARGET_BYTE_ORDER_DEFAULT.
+
+Thu Jun  8 11:41:41 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* infrun.c (follow_inferior_fork): Bad merge from below.  Compare
+ 	strings using follow_fork_mode_ask and not "ask".
+
+Wed Jun  7 15:13:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* command.h (add_set_enum_cmd): Make ``enumlist'' and ``var''
+ 	constant char pointers.
+	(complete_on_enum): Change ``enumlist'' to a constant char
+ 	pointer.
+	(struct cmd_list_element): Ditto for member ``enums''.
+	* command.c (complete_on_enum, add_set_enum_cmd,
+ 	do_setshow_command): Update.
+
+	* infrun.c (follow_fork_mode_ask, follow_fork_mode_parent,
+ 	follow_fork_mode_both, follow_fork_mode_child): New.  Use to
+ 	construct the follow_fork_mode_kind_names.
+	(set_follow_fork_mode_command): Delete function.
+	(_initialize_infrun): Update.
+	(follow_inferior_fork): Do not strdup follow_fork_mode_string.
+  	Use follow_fork_mode_* variables directly instead.  Call
+ 	internal_error instead of error when unimplemented "ask" mode.
+
+	* infrun.c (scheduler_enums, scheduler_mode, schedlock_off,
+ 	schedlock_on, schedlock_step): Update.
+	* serial.c (serial_logbase, logbase_hex, logbase_octal,
+ 	logbase_ascii, logbase_enums): Update.
+	* remote.c (packet_support_enums, packet_support_auto,
+ 	packet_enable, packet_disable, struct packet_config): Update.
+	* arch-utils.c (initialize_current_architecture,
+ 	set_architecture_string): Update.
+	(endian_big, endian_little, endian_auto, endian_enum,
+ 	set_endian_string): Update.
+	* i386-tdep.c (valid_flavors, att_flavor, intel_flavor,
+ 	disassembly_flavor): Update.
+	* mips-tdep.c (size_enums, size_64, size_32, size_auto,
+ 	mips_stack_argsize_string, mips_saved_regsize_string): Update.
+	* arm-tdep.c (disassembly_flavor, valid_flavors): Update.
+	(_initialize_arm_tdep): Ditto.
+
+	* TODO: Update.
+
+Mon Jun  5 18:44:14 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* thread.c (make_cleanup_restore_current_thread,
+ 	do_restore_current_thread_cleanup): New functions.
+	(thread_apply_all_command, thread_apply_command): Use. Call
+ 	do_cleanups when finished.
+
+	* defs.h (make_cleanup_func): Delete typedef.
+	* TODO: Update.
+
+Wed Jun  7 11:34:54 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* arch-utils.c (target_byte_order, target_byte_order_auto,
+ 	show_endian, set_endian, set_endian_big, set_endian_little,
+ 	set_endian_auto, set_endian_from_file, enum set_arch,
+ 	target_architecture_auto, set_architecture_string,
+ 	target_architecture_hook, target_architecture, arch_ok, set_arch,
+ 	set_architecture_from_arch_mach, set_architecture_from_file,
+ 	show_architecture, set_architecture, info_architecture,
+ 	set_gdbarch_from_file, initialize_current_architecture): Copy from
+ 	gdbarch.c.  Rewrite ``set architecture'' and ``set endian''
+ 	commands to use enums.
+	(_initialize_gdbarch_utils): Fix name.
+	* arch-utils.h (set_architecture_from_arch_mach,
+ 	target_architecture_hook): Copy from gdbarch.h.
+	* gdbarch.sh: Update.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+	* TODO: Update.
+
+	* v850-tdep.c, sh3-rom.c, sh-tdep.c, i386-tdep.c: Include
+ 	"arch-utils.h".
+	* Makefile.in (v850-tdep.o): Specify dependencies.
+	(i386-tdep.o, sh3-rom.o, sh-tdep.o): Add arch-utils.h to
+ 	dependency list.
+
+2000-06-06  Michael Snyder  <msnyder@cygnus.com>
+
+	* configure.in: Enable autoconf to find curses.h on Solaris 2.8.
+	* configure: Regenerate.
+
+Tue Jun  6 21:14:47 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* command.c (do_setshow_command): Accept an enum option immediatly
+ 	when it is an exact match.
+
+Tue Jun  6 16:46:37 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/mips/tm-vr5000el.h, config/mips/tm-vr5000.h,
+ 	config/mips/tm-vr4xxxel.h, config/mips/tm-vr4xxx.h,
+ 	config/mips/tm-vr4300el.h, config/mips/tm-vr4100.h,
+ 	config/mips/tm-vr4300.h, config/mips/tm-tx39l.h,
+ 	config/mips/tm-tx39.h, config/mips/tm-embedl64.h,
+ 	config/mips/tm-embedl.h, config/mips/tm-embed64.h,
+ 	config/mips/tm-embed.h: Delete TARGET_BYTE_ORDER_SELECTABLE_P.
+
+	* tm-mips.h (TARGET_BYTE_ORDER_SELECTABLE_P): Define as 1.
+	
+Tue Jun  6 16:21:14 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh (generic_register_convertible_not,
+ 	frame_num_args_unknown): Move from here.
+	* arch-utils.c (generic_register_convertible_not,
+ 	frame_num_args_unknown): To here.
+	* arch-utils.h (frame_num_args_unknown): Add declaration.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+Tue Jun  6 15:07:08 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-mips.c (mips_open): Select the default monitor prompt
+ 	based on the target ISA.
+
+	* config/mips/tm-vr4100.h (TARGET_MONITOR_PROMPT),
+ 	config/mips/tm-vr4300el.h (TARGET_MONITOR_PROMPT),
+ 	config/mips/tm-vr4300.h (TARGET_MONITOR_PROMPT),
+ 	config/mips/tm-vr4xxx.h (TARGET_MONITOR_PROMPT),
+ 	config/mips/tm-vr4xxxel.h (TARGET_MONITOR_PROMPT),
+ 	config/mips/tm-vr5000el.h (TARGET_MONITOR_PROMPT),
+ 	config/mips/tm-vr5000.h (TARGET_MONITOR_PROMPT),
+	config/mips/tm-mips.h (TARGET_MONITOR_PROMPT): Delete macro.
+
 2000-06-05  Daniel Berlin  <dan@cgsoftware.com>
 
 	* c-exp.y (yylex): template handling fixes.
 
 2000-06-03  Daniel Berlin  <dan@cgsoftware.com>
 
-	* symtab.h (VTBL_PREFIX_P): Add newer g++ vtbl prefix to prefix list.
+	* symtab.h (VTBL_PREFIX_P): Add newer g++ vtbl prefix to prefix
+	list.
 
-	* symtab.c (lookup_partial_symbol): Change to stop forcing linear searches
-	on C++ when we fail the binary search, by doing the binary search right.
+	* symtab.c (lookup_partial_symbol): Change to stop forcing linear
+	searches on C++ when we fail the binary search, by doing the
+	binary search right.
 
 2000-05-30  Daniel Berlin  <dan@cgsoftware.com>
 
@@ -167,7 +1213,7 @@ Tue May 30 13:31:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/alpha/nm-fbsd.h (CANNOT_STEP_BREAKPOINT): Define.
 
-2000-06-01  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-06-01  Michael Snyder  <msnyder@cygnus.com>
 
 	* sol-thread.c (rw_common): Circumstances (eg. a bug in Sun's 
 	thread_db library) may cause this function to be called with an
@@ -177,6 +1223,11 @@ Tue May 30 13:31:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Thu Jun  1 20:05:26 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: More suggestions added.
+
+2000-06-01  Klee Dienes  <kdienes@apple.com>
+
+	* MAINTAINERS: Add Klee Dienes and Jim Ingham as maintainers for
+	Mac OS X and Objective C components (to be contributed).
 
 2000-05-31  J.T. Conklin  <jtc@redback.com>
 
@@ -352,7 +1403,7 @@ Mon May 29 15:41:10 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	xcoffsolib.c, xmodem.h, z8k-tdep.c: Remove PARAMS from function
 	declarations.
 
-2000-05-26  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-05-26  Michael Snyder  <msnyder@cygnus.com>
 
 	* gregset.h: New file.  Typedefs for gdb_gregset_t and 
 	gdb_fpregset_t, prototypes for supply_gregset and friends.
@@ -473,7 +1524,7 @@ Thu May 25 11:02:24 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* config/i386/fbsd.mh (NATDEPFILES): Remove i386b-nat.o.  Add
 	core-regset.o i387-nat.o i386bsd-nat.o.
 
-2000-05-24  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-05-24  Michael Snyder  <msnyder@cygnus.com>
 
 	* findvar.c (value_from_register): Factor code, simplify logic.
 
@@ -532,7 +1583,7 @@ Tue May 23 17:44:18 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Update.
 
-2000-05-17  Michael Snyder  <msnyder@seadog.cygnus.com>
+2000-05-17  Michael Snyder  <msnyder@cygnus.com>
 
 	* config/sparc/tm-sun4sol2.h: Turn on multi-arch.
 	* sparc-tdep.c (gdb_print_insn_sparc): Remove temp. multi-arch hack.
@@ -804,7 +1855,7 @@ Mon May 15 11:23:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	value.
 	* mdebugread.c (START_PSYMTAB): Add paren to avoid x=x=x.
 
-2000-05-12  Michael Snyder  <msnyder@.cygnus.com>
+2000-05-12  Michael Snyder  <msnyder@cygnus.com>
 
 	* config/i386/tm-i386sol2.h (COERCE_FLOAT_TO_DOUBLE): Define.
 	
@@ -881,7 +1932,7 @@ Thu May 11 13:24:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
         * elfread.c (record_minimal_symbol_and_info): Use the section 
 	where the symbol lives to get the index, instead of guessing.
 
-2000-05-10  Michael Snyder  <msnyder@.cygnus.com>
+2000-05-10  Michael Snyder  <msnyder@cygnus.com>
 
 	Make Sparc a Multi-Arch target.  Discard PARAMS macro (require ANSI).
 	* sparc-tdep.c: include arch-utils.h.
@@ -955,7 +2006,7 @@ Thu May 11 13:24:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	avoid using deprecated REGISTER_NAMES macro.
 	* Makefile.in: Let sparc-tdep.c depend on arch-utils.h.
 
-2000-05-08  Michael Snyder  <msnyder@.cygnus.com>
+2000-05-08  Michael Snyder  <msnyder@cygnus.com>
 
 	* gdbarch.sh: Add FP0_REGNUM to list of multi-arched register numbers.
 	* gdbarch.c, gdbarch.h: Regenerate.
@@ -1014,7 +2065,7 @@ Mon May  8 00:49:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* proc-utils.h (PROCFS_NOTE, PROC_PRETTYFPRINT_STATUS): Always
  	define.
 
-2000-05-05  Michael Snyder  <msnyder@.cygnus.com>
+2000-05-05  Michael Snyder  <msnyder@cygnus.com>
 
 	* procfs.c: Cleanup of procfs tracing.  Move defines and 
 	prototypes to proc-utils.h
@@ -1034,7 +2085,7 @@ Mon May  8 00:49:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
         used must be the index of the section where 'sym' resides,
         not .text.
 
-2000-05-05  Michael Snyder  <msnyder@.cygnus.com>
+2000-05-05  Michael Snyder  <msnyder@cygnus.com>
 
 	* procfs.c (many functions): change int cmd; to long cmd;
 	Solaris /proc API calls this parameter a long, and requires it
@@ -1089,7 +2140,7 @@ Thu May  4 20:54:00 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	(MIPS_NUM_ARG_REGS), config/mips/tm-mips.h (MIPS_NUM_FP_ARG_REGS):
  	Delete unused macros.
 
-2000-05-03  Michael Snyder  <msnyder@.cygnus.com>
+2000-05-03  Michael Snyder  <msnyder@cygnus.com>
 
 	* solib.c (elf_locate_base, info_sharedlibrary_command):
 	Look at the bfd to determine if it is elf32 or elf64, rather
@@ -1624,8 +2675,7 @@ Mon Apr 17 11:26:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	config/h8300/tm-h8300.h, config/i386/tm-i386.h,
  	config/i960/tm-i960.h, config/m88k/tm-m88k.h,
  	config/mips/tm-mips.h, config/pa/tm-hppa.h,
- 	config/sparc/tm-sparc.h, config/delta/tm-delta.h,
- 	config/frv/tm-frv.h (IEEE_FLOAT): For all ports that #define
+ 	config/sparc/tm-sparc.h (IEEE_FLOAT): For all ports that #define
 	IEEE_FLOAT, make sure they give it the value (1).
 
 	Provide the hooks needed to support architectures on which

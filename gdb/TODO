@@ -35,11 +35,9 @@ x86 targets.
 x86 linux GDB and SIGALRM (???)
 http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00803.html
 
-I know there are problems with single stepping through signal
-handlers.  These problems were present in 4.18.  They were just masked
-because 4.18 failed to recognize signal handlers.  Fixing it is not
-easy, and will require changes to handle_inferior_event(), that I
-prefer not to make before the 5.0 release.
+This problem has been fixed, but a regression test still needs to be
+added to the testsuite:
+http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00309.html
 
 Mark
 
@@ -101,19 +99,30 @@ Eliminate all uses of PARAMS in GDB's source code.
 
 --
 
-Elimination of make_cleanup_func. (Andrew Cagney)
-
-make_cleanup_func elimination
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00791.html
-http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00814.html
-
---
-
 Fix copyright notices.
 
 Turns out that ``1998-2000'' isn't considered valid :-(
 
 http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00467.html
+
+--
+
+Find something better than DEFAULT_BFD_ARCH, DEFAULT_BFD_VEC to
+determine the default isa/byte-order.
+
+--
+
+Rely on BFD_BIG_ENDIAN and BFD_LITTLE_ENDIAN instead of host dependant
+BIG_ENDIAN and LITTLE_ENDIAN.
+
+--
+
+printcmd.c (print_address_numeric):
+
+NOTE: This assumes that the significant address information is kept in
+the least significant bits of ADDR - the upper bits were either zero
+or sign extended.  Should ADDRESS_TO_POINTER() or some
+ADDRESS_TO_PRINTABLE() be used to do the conversion?
 
 --
 
@@ -143,6 +152,9 @@ file at a time.
 Elimination of ``(catch_errors_ftype *) func''.
 
 Like make_cleanup_func it isn't portable.
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00791.html
+http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00814.html
+
 
 --
 
@@ -234,14 +246,6 @@ suffer bit rot.
 
 --
 
-Updated readline
-
-Readline 4.? is out.  A merge wouldn't hurt.  Patches are in:
-
-http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00436.html
-
---
-
 Deprecate "fg".  Apparently ``fg'' is actually continue.
 
 http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00417.html
@@ -274,18 +278,6 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00466.html
 
 --
 
-Always build ser-tcp.c.
-
-The patch as submitted was just going to add ser-tcp.c to the Alpha's
-makefile.  A better patch is to instead add ser-tcp.c to SER_HARDWARE
-and make it a standard part of all debuggers.
-
-If problems occure then configure.in can sort them out.
-
-http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00544.html
-
---
-
 Follow through `make check' with --enable-shared.
 
 When the srcware tree is configured with --enable-shared, the `expect'
@@ -297,6 +289,53 @@ http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00845.html
 
 --
 
+The ``maintenance deprecate set endian big'' command doesn't notice
+that it is deprecating ``set endian'' and not ``set endian big'' (big
+is implemented using an enum).  Is anyone going to notice this?
+
+--
+
+When tab expanding something like ``set arch<tab>'' ignore the
+deprecated ``set archdebug'' and expand to ``set architecture''.
+
+--
+
+Eliminate ``arm_register_names[j] = (char *) regnames[j]'' and the
+like from arm-tdep.c.
+
+--
+
+Fix uses of ->function.cfunc = set_function().
+
+The command.c code calls sfunc() when a set command.  Rather than
+change it suggest fixing the callback function so that it is more
+useful.  See:
+
+http://sourceware.cygnus.com/ml/gdb-patches/2000-06/msg00062.html
+
+See also ``Fix implementation of  ``target xxx''.'' below.
+
+--
+
+IRIX 3.x support is probably broken.
+
+--
+
+Delete sim/SIM_HAVE_BREAKPOINTS and gdb/SIM_HAS_BREAKPOINTS.
+http://sourceware.cygnus.com/ml/gdb-patches/2000-07/msg00042.html
+
+Apart from the d30v, are there any sim/common simulators that make use
+of this?
+
+A brief summary of what happended is that sim/common/sim-break.c was
+created as a good idea.  It turned out a better idea was to use
+SIM_SIGBREAK and have GDB pass back sim_resume (..., SIGBREAK).
+
+--
+
+parse.c:build_parse() has a buffer overrun.
+
+--
 
 			New Features and Fixes
 			======================
@@ -333,6 +372,9 @@ This requires internationalization.
 Convert GDB build process to AUTOMAKE.
 
 See also sub-directory configure below.
+
+The current convention is (kind of) to use $(<header>_h) in all
+dependency lists.  It isn't done in a consistent way.
 
 --
 
@@ -422,6 +464,16 @@ Which is very different from ``(gdb) ! ls''.  Implementing the latter
 is trivial.
 
 http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00034.html
+
+--
+
+Change the (char *list[]) to (const char (*)[]) so that dynamic lists can
+be passed.
+
+--
+
+When tab expanding something like ``set arch<tab>'' ignore the
+deprecated ``set archdebug'' and expand to ``set architecture''.
 
 --
 
@@ -518,7 +570,8 @@ http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00496.html
 Java (Anthony Green, David Taylor)
 
 Anthony Green has a number of Java patches that did not make it into
-the 5.0 release.
+the 5.0 release.  The first two are in cvs now, but the third needs
+some fixing up before it can go in.
 
 Patch: java tests
 http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00512.html
@@ -654,6 +707,12 @@ conversions.
 
 Consequence of recent symtab clarification.  No marks for figuring out
 who maintains the MIPS.
+
+--
+
+GDB truncates 64 bit enums.
+
+http://sourceware.cygnus.com/ml/gdb-patches/2000-06/msg00290.html
 
 --
 
@@ -884,14 +943,6 @@ symtab file.
 
 --
 
-Fix ``set architecture <tab>''
-
-This command should expand to a list of all supported architectures.
-At present ``info architecture'' needs to be used.  That is simply
-wrong.  It involves the use of add_set_enum_cmd().
-
---
-
 Fix target_signal_from_host() etc.
 
 The name is wrong for starters.  ``target_signal'' should probably be
@@ -931,6 +982,12 @@ Select the initial multi-arch ISA / ABI based on --target or similar.
 At present the default is based on what ever is first in the BFD
 archures table.  It should be determined based on the ``--target=...''
 name.
+
+--
+
+Make MIPS pure multi-arch.
+
+It is only at the multi-arch enabled stage.
 
 --
 
@@ -1088,6 +1145,36 @@ output / error-messages when things go wrong.
 
 --
 
+do_setshow_command contains a 1024 byte buffer.
+
+The function assumes that there will never be any more than 1024 bytes
+of enum.  It should use mem_file.
+
+--
+
+Should struct cmd_list_element . completer take the command as an
+argument?
+
+--
+
+Should the bulk of top.c:line_completion_function() be moved to
+command.[hc]?  complete_on_cmdlist() and complete_on_enums() could
+then be made private.
+
+--
+
+top.c (execute_command): Should a command being valid when the target
+is running be made an attribute (predicate) to the command rather than
+an explicit set of tests.
+
+--
+
+top.c (execute_command): Should the bulk of this function be moved
+into command.[hc] so that top.c doesn't grub around in the command
+internals?
+
+--
+
 		Architectural Change: Async
 		===========================
 
@@ -1131,6 +1218,9 @@ CLI code so that it passes to the callback function (attatched to a
 command) useful information such as the actual command and a context
 for that command.  Other changes such as making ``struct command''
 opaque may also help.
+
+See also:
+http://sourceware.cygnus.com/ml/gdb-patches/2000-06/msg00062.html
 
 --
 

@@ -8,7 +8,7 @@ XM_FILE= xm-i386sco.h
 # runtime, but all come with the development system, so we always
 # have socket(), gethostbyname(), and friends.
 #
-XDEPFILES= ser-tcp.o
+XDEPFILES=
 XM_CLIBS= -lPW -lsocket
 
 NAT_FILE= nm-i386sco5.h

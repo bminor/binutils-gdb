@@ -982,22 +982,20 @@ coff_symtab_read (symtab_offset, nsyms, objfile)
 		      SMASH_TEXT_ADDRESS (tmpaddr);
 #endif
 		  }
+		else if (sec == SECT_OFF_DATA (objfile))
+		  {
+		    ms_type =
+		      cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXT ?
+		      mst_data : mst_file_data;
+		  }
+		else if (sec == SECT_OFF_BSS (objfile))
+		  {
+		    ms_type =
+		      cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXT ?
+		      mst_data : mst_file_data;
+		  }
 		else
-		  if  (sec == SECT_OFF_DATA (objfile))
-		    {
-		    ms_type =
-		      cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXT ?
-		      mst_data : mst_file_data;
-		    }
-		  else
-		    if (sec == SECT_OFF_BSS (objfile))
-		      {
-		    ms_type =
-		      cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXT ?
-		      mst_data : mst_file_data;
-		      }
-		    else
-		      ms_type = mst_unknown;
+		  ms_type = mst_unknown;
 	      }
 
 	    if (cs->c_name[0] != '@' /* Skip tdesc symbols */ )

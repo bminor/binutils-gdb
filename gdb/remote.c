@@ -526,17 +526,17 @@ enum packet_detect
 
 struct packet_config
   {
-    char *state;
+    const char *state;
     char *name;
     char *title;
     enum packet_detect detect;
     enum packet_support support;
   };
 
-static char packet_support_auto[] = "auto";
-static char packet_enable[] = "enable";
-static char packet_disable[] = "disable";
-static char *packet_support_enums[] =
+static const char packet_support_auto[] = "auto";
+static const char packet_enable[] = "enable";
+static const char packet_disable[] = "disable";
+static const char *packet_support_enums[] =
 {
   packet_support_auto,
   packet_enable,
@@ -3209,42 +3209,7 @@ remote_store_registers (regno)
 
   remote_send (buf, PBUFSIZ);
 }
-
-/* Use of the data cache *used* to be disabled because it loses for looking
-   at and changing hardware I/O ports and the like.  Accepting `volatile'
-   would perhaps be one way to fix it.  Another idea would be to use the
-   executable file for the text segment (for all SEC_CODE sections?
-   For all SEC_READONLY sections?).  This has problems if you want to
-   actually see what the memory contains (e.g. self-modifying code,
-   clobbered memory, user downloaded the wrong thing).  
-
-   Because it speeds so much up, it's now enabled, if you're playing
-   with registers you turn it of (set remotecache 0).  */
-
-/* Read a word from remote address ADDR and return it.
-   This goes through the data cache.  */
-
-#if 0				/* unused? */
-static int
-remote_fetch_word (addr)
-     CORE_ADDR addr;
-{
-  return dcache_fetch (remote_dcache, addr);
-}
-
-/* Write a word WORD into remote address ADDR.
-   This goes through the data cache.  */
-
-static void
-remote_store_word (addr, word)
-     CORE_ADDR addr;
-     int word;
-{
-  dcache_poke (remote_dcache, addr, word);
-}
-#endif /* 0 (unused?) */
 
-
 
 /* Return the number of hex digits in num.  */
 
@@ -5162,8 +5127,7 @@ remote_cisco_close (int quitting)
 }
 
 static void
-  remote_cisco_mourn
-PARAMS ((void))
+remote_cisco_mourn (void)
 {
   remote_mourn_1 (&remote_cisco_ops);
 }

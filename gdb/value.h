@@ -461,15 +461,23 @@ extern void read_register_gen (int regno, char *myaddr);
 
 extern void write_register_gen (int regno, char *myaddr);
 
-extern CORE_ADDR read_register (int regno);
+/* Rename to read_unsigned_register()? */
+extern ULONGEST read_register (int regno);
 
-extern CORE_ADDR read_register_pid (int regno, int pid);
+extern LONGEST read_signed_register (int regno);
+
+/* Rename to read_unsigned_register_pid()? */
+extern ULONGEST read_register_pid (int regno, int pid);
+
+extern LONGEST read_signed_register_pid (int regno, int pid);
 
 extern void write_register (int regno, LONGEST val);
 
 extern void write_register_pid (int regno, CORE_ADDR val, int pid);
 
 extern void supply_register (int regno, char *val);
+
+extern int register_cached (int regno);
 
 extern void get_saved_register (char *raw_buffer, int *optimized,
 				CORE_ADDR * addrp,

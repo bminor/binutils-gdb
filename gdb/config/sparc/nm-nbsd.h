@@ -53,4 +53,7 @@
 #define PTRACE_SETREGS	 PT_SETREGS
 #define PTRACE_SETFPREGS PT_SETFPREGS
 
+#define GDB_GREGSET_T	struct reg
+#define GDB_FPREGSET_T	struct fpreg
+
 #endif /* NM_NBSD_H */

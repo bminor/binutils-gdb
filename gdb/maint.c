@@ -283,6 +283,21 @@ maintenance_print_statistics (args, from_tty)
   print_symbol_bcache_statistics ();
 }
 
+void
+maintenance_print_architecture (char *args, int from_tty)
+{
+  if (args == NULL)
+    gdbarch_dump (current_gdbarch, gdb_stdout);
+  else
+    {
+      struct ui_file *file = gdb_fopen (args, "w");
+      if (file == NULL)
+	perror_with_name ("maintenance print architecture");
+      gdbarch_dump (current_gdbarch, file);    
+      ui_file_delete (file);
+    }
+}
+
 /* The "maintenance print" command is defined as a prefix, with
    allow_unknown 0.  Therefore, its own definition is called only for
    "maintenance print" with no args.  */
@@ -567,6 +582,11 @@ If a SOURCE file is specified, dump only that file's partial symbols.",
 
   add_cmd ("statistics", class_maintenance, maintenance_print_statistics,
 	   "Print statistics about internal gdb state.",
+	   &maintenanceprintlist);
+
+  add_cmd ("architecture", class_maintenance, maintenance_print_architecture,
+	   "Print the internal architecture configuration.\
+Takes an optional file parameter.",
 	   &maintenanceprintlist);
 
   add_cmd ("check-symtabs", class_maintenance, maintenance_check_symtabs,

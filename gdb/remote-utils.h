@@ -117,7 +117,6 @@ extern struct gr_settings *gr_settings;
 
 #define gr_expect_prompt()	sr_expect(gr_get_prompt())
 
-int gr_fetch_word (CORE_ADDR addr);
 int gr_multi_scan (char *list[], int passthrough);
 int sr_get_hex_digit (int ignore_space);
 int sr_pollchar (void);
@@ -132,7 +131,6 @@ void gr_generic_checkin (void);
 void gr_kill (void);
 void gr_mourn (void);
 void gr_prepare_to_store (void);
-void gr_store_word (CORE_ADDR addr, int word);
 void sr_expect (char *string);
 void sr_get_hex_byte (char *byt);
 void sr_scan_args (char *proto, char *args);

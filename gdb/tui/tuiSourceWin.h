@@ -6,10 +6,10 @@
 
 
 extern void tuiDisplayMainFunction (void);
-extern void tuiUpdateSourceWindow PARAMS
-  ((TuiWinInfoPtr, struct symtab *, Opaque, int));
-extern void tuiUpdateSourceWindowAsIs PARAMS
-  ((TuiWinInfoPtr, struct symtab *, Opaque, int));
+extern void tuiUpdateSourceWindow (TuiWinInfoPtr, struct symtab *, Opaque,
+				   int);
+extern void tuiUpdateSourceWindowAsIs (TuiWinInfoPtr, struct symtab *, Opaque,
+				       int);
 extern void tuiUpdateSourceWindowsWithAddr (Opaque);
 extern void tui_vUpdateSourceWindowsWithAddr (va_list);
 extern void tuiUpdateSourceWindowsWithLine (struct symtab *, int);

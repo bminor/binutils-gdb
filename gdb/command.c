@@ -315,8 +315,8 @@ add_set_cmd (char *name,
 struct cmd_list_element *
 add_set_enum_cmd (char *name,
 		  enum command_class class,
-		  char *enumlist[],
-		  char **var,
+		  const char *enumlist[],
+		  const char **var,
 		  char *doc,
 		  struct cmd_list_element **list)
 {
@@ -324,6 +324,25 @@ add_set_enum_cmd (char *name,
   = add_set_cmd (name, class, var_enum, var, doc, list);
   c->enums = enumlist;
 
+  return c;
+}
+
+/* Add element named NAME to command list LIST (the list for set
+   or some sublist thereof).
+   CLASS is as in add_cmd.
+   VAR is address of the variable which will contain the value.
+   DOC is the documentation string.  */
+struct cmd_list_element *
+add_set_auto_boolean_cmd (char *name,
+			  enum command_class class,
+			  enum cmd_auto_boolean *var,
+			  char *doc,
+			  struct cmd_list_element **list)
+{
+  static const char *auto_boolean_enums[] = { "on", "off", "auto", NULL };
+  struct cmd_list_element *c;
+  c = add_set_cmd (name, class, var_auto_boolean, var, doc, list);
+  c->enums = auto_boolean_enums;
   return c;
 }
 
@@ -1470,17 +1489,16 @@ complete_on_cmdlist (list, text, word)
    "oobar"; if WORD is "baz/foo", return "baz/foobar".  */
 
 char **
-complete_on_enum (enumlist, text, word)
-     char **enumlist;
-     char *text;
-     char *word;
+complete_on_enum (const char *enumlist[],
+		  char *text,
+		  char *word)
 {
   char **matchlist;
   int sizeof_matchlist;
   int matches;
   int textlen = strlen (text);
   int i;
-  char *name;
+  const char *name;
 
   sizeof_matchlist = 10;
   matchlist = (char **) xmalloc (sizeof_matchlist * sizeof (char *));
@@ -1531,6 +1549,32 @@ complete_on_enum (enumlist, text, word)
   return matchlist;
 }
 
+static enum cmd_auto_boolean
+parse_auto_binary_operation (const char *arg)
+{
+  if (arg != NULL && *arg != '\0')
+    {
+      int length = strlen (arg);
+      while (isspace (arg[length - 1]) && length > 0)
+	length--;
+      if (strncmp (arg, "on", length) == 0
+	  || strncmp (arg, "1", length) == 0
+	  || strncmp (arg, "yes", length) == 0
+	  || strncmp (arg, "enable", length) == 0)
+	return CMD_AUTO_BOOLEAN_TRUE;
+      else if (strncmp (arg, "off", length) == 0
+	       || strncmp (arg, "0", length) == 0
+	       || strncmp (arg, "no", length) == 0
+	       || strncmp (arg, "disable", length) == 0)
+	return CMD_AUTO_BOOLEAN_FALSE;
+      else if (strncmp (arg, "auto", length) == 0
+	       || (strncmp (arg, "-1", length) == 0 && length > 1))
+	return CMD_AUTO_BOOLEAN_AUTO;
+    }
+  error ("\"on\", \"off\" or \"auto\" expected.");
+  return CMD_AUTO_BOOLEAN_AUTO; /* pacify GCC */
+}
+
 static int
 parse_binary_operation (arg)
      char *arg;
@@ -1545,13 +1589,15 @@ parse_binary_operation (arg)
   while (arg[length - 1] == ' ' || arg[length - 1] == '\t')
     length--;
 
-  if (!strncmp (arg, "on", length)
-      || !strncmp (arg, "1", length)
-      || !strncmp (arg, "yes", length))
+  if (strncmp (arg, "on", length) == 0
+      || strncmp (arg, "1", length) == 0
+      || strncmp (arg, "yes", length) == 0
+      || strncmp (arg, "enable", length) == 0)
     return 1;
-  else if (!strncmp (arg, "off", length)
-	   || !strncmp (arg, "0", length)
-	   || !strncmp (arg, "no", length))
+  else if (strncmp (arg, "off", length) == 0
+	   || strncmp (arg, "0", length) == 0
+	   || strncmp (arg, "no", length) == 0
+	   || strncmp (arg, "disable", length) == 0)
     return 0;
   else
     {
@@ -1636,6 +1682,9 @@ do_setshow_command (arg, from_tty, c)
 	case var_boolean:
 	  *(int *) c->var = parse_binary_operation (arg);
 	  break;
+	case var_auto_boolean:
+	  *(enum cmd_auto_boolean *) c->var = parse_auto_binary_operation (arg);
+	  break;
 	case var_uinteger:
 	  if (arg == NULL)
 	    error_no_arg ("integer to set it to.");
@@ -1667,7 +1716,7 @@ do_setshow_command (arg, from_tty, c)
 	    int i;
 	    int len;
 	    int nmatches;
-	    char *match = NULL;
+	    const char *match = NULL;
 	    char *p;
 
 	    /* if no argument was supplied, print an informative error message */
@@ -1696,8 +1745,17 @@ do_setshow_command (arg, from_tty, c)
 	    for (i = 0; c->enums[i]; i++)
 	      if (strncmp (arg, c->enums[i], len) == 0)
 		{
-		  match = c->enums[i];
-		  nmatches++;
+		  if (c->enums[i][len] == '\0')
+		    {
+		      match = c->enums[i];
+		      nmatches = 1;
+		      break; /* exact match. */
+		    }
+		  else
+		    {
+		      match = c->enums[i];
+		      nmatches++;
+		    }
 		}
 
 	    if (nmatches <= 0)
@@ -1706,7 +1764,7 @@ do_setshow_command (arg, from_tty, c)
 	    if (nmatches > 1)
 	      error ("Ambiguous item \"%s\".", arg);
 
-	    *(char **) c->var = match;
+	    *(const char **) c->var = match;
 	  }
 	  break;
 	default:
@@ -1751,6 +1809,23 @@ do_setshow_command (arg, from_tty, c)
 	  break;
 	case var_boolean:
 	  fputs_filtered (*(int *) c->var ? "on" : "off", stb->stream);
+	  break;
+	case var_auto_boolean:
+	  switch (*(enum cmd_auto_boolean*) c->var)
+	    {
+	    case CMD_AUTO_BOOLEAN_TRUE:
+	      fputs_filtered ("on", stb->stream);
+	      break;
+	    case CMD_AUTO_BOOLEAN_FALSE:
+	      fputs_filtered ("off", stb->stream);
+	      break;
+	    case CMD_AUTO_BOOLEAN_AUTO:
+	      fputs_filtered ("auto", stb->stream);
+	      break;
+	    default:
+	      internal_error ("do_setshow_command: invalid var_auto_boolean");
+	      break;
+	    }
 	  break;
 	case var_uinteger:
 	  if (*(unsigned int *) c->var == UINT_MAX)
@@ -1804,6 +1879,23 @@ do_setshow_command (arg, from_tty, c)
 	  break;
 	case var_boolean:
 	  fputs_filtered (*(int *) c->var ? "on" : "off", gdb_stdout);
+	  break;
+	case var_auto_boolean:
+	  switch (*(enum cmd_auto_boolean*) c->var)
+	    {
+	    case CMD_AUTO_BOOLEAN_TRUE:
+	      fputs_filtered ("on", gdb_stdout);
+	      break;
+	    case CMD_AUTO_BOOLEAN_FALSE:
+	      fputs_filtered ("off", gdb_stdout);
+	      break;
+	    case CMD_AUTO_BOOLEAN_AUTO:
+	      fputs_filtered ("auto", gdb_stdout);
+	      break;
+	    default:
+	      internal_error ("do_setshow_command: invalid var_auto_boolean");
+	      break;
+	    }
 	  break;
 	case var_uinteger:
 	  if (*(unsigned int *) c->var == UINT_MAX)

@@ -47,12 +47,28 @@ typedef enum cmd_types
   }
 cmd_types;
 
+/* Reasonable values for an AUTO_BOOLEAN variable. */
+enum cmd_auto_boolean
+{
+  CMD_AUTO_BOOLEAN_TRUE,
+  CMD_AUTO_BOOLEAN_FALSE,
+  CMD_AUTO_BOOLEAN_AUTO
+};
+
 /* Types of "set" or "show" command.  */
 typedef enum var_types
   {
     /* "on" or "off".  *VAR is an integer which is nonzero for on,
        zero for off.  */
     var_boolean,
+
+    /* "on" / "true" / "enable" or "off" / "false" / "disable" or
+       "auto.  *VAR is an ``enum cmd_auto_boolean''.  NOTE: In general
+       a custom show command will need to be implemented - one that
+       for "auto" prints both the "auto" and the current auto-selected
+       value. */
+    var_auto_boolean,
+
     /* Unsigned Integer.  *VAR is an unsigned int.  The user can type 0
        to mean "unlimited", which is stored in *VAR as UINT_MAX.  */
     var_uinteger,
@@ -115,7 +131,7 @@ struct cmd_list_element
 	void (*sfunc) (char *args, int from_tty, struct cmd_list_element * c);
       }
     function;
-#define NO_FUNCTION ((void (*) PARAMS((char *args, int from_tty))) 0)
+#define NO_FUNCTION ((void (*) (char *args, int from_tty)) 0)
 
     /* Documentation of this command (or help topic).
        First line is brief documentation; remaining lines form, with it,
@@ -199,7 +215,7 @@ struct cmd_list_element
     var_types var_type;
 
     /* Pointer to NULL terminated list of enumerated values (like argv).  */
-    char **enums;
+    const char **enums;
 
     /* Pointer to command strings of user-defined commands */
     struct command_line *user_commands;
@@ -274,7 +290,7 @@ extern struct cmd_list_element *add_info_alias (char *, char *, int);
 
 extern char **complete_on_cmdlist (struct cmd_list_element *, char *, char *);
 
-extern char **complete_on_enum (char **enumlist, char *, char *);
+extern char **complete_on_enum (const char *enumlist[], char *, char *);
 
 extern void delete_cmd (char *, struct cmd_list_element **);
 
@@ -294,10 +310,16 @@ extern struct cmd_list_element *add_set_cmd (char *name, enum
 
 extern struct cmd_list_element *add_set_enum_cmd (char *name,
 						  enum command_class class,
-						  char *enumlist[],
-						  char **var,
+						  const char *enumlist[],
+						  const char **var,
 						  char *doc,
 						  struct cmd_list_element **list);
+
+extern struct cmd_list_element *add_set_auto_boolean_cmd (char *name,
+							  enum command_class class,
+							  enum cmd_auto_boolean *var,
+							  char *doc,
+							  struct cmd_list_element **list);
 
 extern struct cmd_list_element *add_show_from_set (struct cmd_list_element *,
 						   struct cmd_list_element

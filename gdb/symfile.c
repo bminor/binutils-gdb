@@ -1143,11 +1143,6 @@ find_sym_fns (objfile)
   enum bfd_flavour our_flavour = bfd_get_flavour (objfile->obfd);
   char *our_target = bfd_get_target (objfile->obfd);
 
-  /* Special kludge for RS/6000 and PowerMac.  See xcoffread.c.  */
-  if (STREQ (our_target, "aixcoff-rs6000") ||
-      STREQ (our_target, "xcoff-powermac"))
-    our_flavour = (enum bfd_flavour) -1;
-
   /* Special kludge for apollo.  See dstread.c.  */
   if (STREQN (our_target, "apollo", 6))
     our_flavour = (enum bfd_flavour) -2;
@@ -1930,6 +1925,9 @@ init_filename_language_table ()
       add_filename_language (".F", language_fortran);
       add_filename_language (".s", language_asm);
       add_filename_language (".S", language_asm);
+      add_filename_language (".pas", language_pascal);
+      add_filename_language (".p", language_pascal);
+      add_filename_language (".pp", language_pascal);
     }
 }
 

@@ -1,7 +1,7 @@
 # Host: Motorola m68k running Linux
 
 XM_FILE= xm-linux.h
-XDEPFILES= ser-tcp.o
+XDEPFILES=
 
 NAT_FILE= nm-linux.h
 NATDEPFILES= infptrace.o solib.o inftarg.o fork-child.o \

@@ -58,7 +58,7 @@
 @unnumberedsec Function and Purpose
 
 @cindex @sc{gdb/mi}, its purpose
-@sc{gdb/mi} is a line based machine oriented text interface to GDB.  It is
+@sc{gdb/mi} is a line based machine oriented text interface to @value{GDBN}.  It is
 specifically intended to support the development of systems which use
 the debugger as just one small component of a larger system.
 
@@ -151,7 +151,7 @@ Elena Zannoni.
 
 @item @var{cli-command} @expansion{}
 @code{[ @var{token} ] @var{cli-command} @var{nl}}, where
-@var{cli-command} is any existing GDB CLI command.
+@var{cli-command} is any existing @value{GDBN} CLI command.
 
 @item @var{mi-command} @expansion{}
 @code{[ @var{token} ] "-" @var{operation} ( " " @var{option} )*
@@ -333,7 +333,7 @@ All the target output is prefixed by @samp{@@}.
 
 @item
 @cindex log output in @sc{gdb/mi}
-@var{log-stream-output} is output text coming from GDB's internals, for
+@var{log-stream-output} is output text coming from @value{GDBN}'s internals, for
 instance messages that should be displayed as part of an error log.  All
 the log output is prefixed by @samp{&}.
 @end itemize
@@ -405,9 +405,9 @@ Here's what happens if you pass a non-existent command:
 
 @cindex compatibility, @sc{gdb/mi} and CLI
 @cindex @sc{gdb/mi}, compatibility with CLI
-To help users familiar with GDB's existing CLI interface, @sc{gdb/mi}
+To help users familiar with @value{GDBN}'s existing CLI interface, @sc{gdb/mi}
 accepts existing CLI commands.  As specified by the syntax, such
-commands can be directly entered into the @sc{gdb/mi} interface and GDB will
+commands can be directly entered into the @sc{gdb/mi} interface and @value{GDBN} will
 respond.
 
 This mechanism is provided as an aid to developers of @sc{gdb/mi}
@@ -447,7 +447,7 @@ The asynchronous operation was successfully started.  The target is
 running.
 
 @item "^error" "," @var{c-string}
-@cindex ^error
+@findex ^error
 The operation failed.  The @code{@var{c-string}} contains the corresponding
 error message.
 @end table
@@ -457,13 +457,13 @@ error message.
 
 @cindex @sc{gdb/mi}, stream records
 @cindex stream records in @sc{gdb/mi}
-GDB internally maintains a number of output streams: the console, the
+@value{GDBN} internally maintains a number of output streams: the console, the
 target, and the log.  The output intended for each of these streams is
 funneled through the @sc{gdb/mi} interface using @dfn{stream records}.
 
 Each stream record begins with a unique @dfn{prefix character} which
 identifies its stream (@pxref{GDB/MI Output Syntax, , @sc{gdb/mi} Output
-Syntax}). In addition to the prefix, each stream record contains a
+Syntax}).  In addition to the prefix, each stream record contains a
 @code{@var{string-output}}.  This is either raw text (with an implicit new
 line) or a quoted C string (which does not contain an implicit newline).
 
@@ -477,7 +477,7 @@ The target output stream contains any textual output from the running
 target.
 
 @item "&" @var{string-output}
-The LOG stream contains debugging messages being produced by GDB's
+The log stream contains debugging messages being produced by @value{GDBN}'s
 internals.
 @end table
 
@@ -512,7 +512,7 @@ not yet implemented.
 
 @subheading Motivation
 
-The motivation for this collection of commands
+The motivation for this collection of commands.
 
 @subheading Introduction
 
@@ -525,12 +525,12 @@ For each command in the block, the following is described:
 @subsubheading Synopsis
 
 @example
- -command @var{args}...
+ -command @var{args}@dots{}
 @end example
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB CLI command.
+The corresponding @value{GDBN} CLI command.
 
 @subsubheading Result
 
@@ -564,27 +564,27 @@ hit @var{count} times.  To see how this is reflected in the output of
 the @samp{-break-list} command, see the description of the
 @samp{-break-list} command below.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{ignore}.
+The corresponding @value{GDBN} command is @samp{ignore}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -break-insert main
 ^done,bkpt=@{number="1",addr="0x000100d0",file="hello.c",line="5"@}
-(gdb)
+(@value{GDBP})
 -break-after 1 3
 ~
 ^done
-(gdb)
+(@value{GDBP})
 -break-list
 ^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
 bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x000100d0",func="main",file="hello.c",line="5",times="0",
 ignore="3"@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @ignore
@@ -596,7 +596,7 @@ ignore="3"@}@}
 @end ignore
 
 
-@subheading -break-condition
+@subheading The -break-condition Command
 @findex -break-condition
 
 @subsubheading Synopsis
@@ -610,23 +610,23 @@ Breakpoint @var{number} will stop the program only if the condition in
 @samp{-break-list} output (see the description of the @samp{-break-list}
 command below).
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{condition}.
+The corresponding @value{GDBN} command is @samp{condition}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -break-condition 1 1
 ^done
-(gdb)
+(@value{GDBP})
 -break-list
 ^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
 bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x000100d0",func="main",file="hello.c",line="5",cond="1",
 times="0",ignore="3"@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @subheading The @code{-break-delete} Command
@@ -639,22 +639,22 @@ times="0",ignore="3"@}@}
 @end example
 
 Delete the breakpoint(s) whose number(s) are specified in the argument
-list. This is obviously reflected in the breakpoint list.
+list.  This is obviously reflected in the breakpoint list.
 
-@subsubheading GDB command
+@subsubheading @value{GDBN} command
 
-The corresponding GDB command is @samp{delete}.
+The corresponding @value{GDBN} command is @samp{delete}.
 
 @subsubheading Example
 
 @example
-(gdb)
+(@value{GDBP})
 -break-delete 1
 ^done
-(gdb)
+(@value{GDBP})
 -break-list
 ^done,BreakpointTable=@{@}
-(gdb)
+(@value{GDBP})
 @end example
 
 @subheading The @code{-break-disable} Command
@@ -669,22 +669,22 @@ The corresponding GDB command is @samp{delete}.
 Disable the named @var{breakpoint}(s).  The field @samp{enabled} in the
 break list is now set to @samp{n} for the named @var{breakpoint}(s).
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{disable}.
+The corresponding @value{GDBN} command is @samp{disable}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -break-disable 2
 ^done
-(gdb)
+(@value{GDBP})
 -break-list
 ^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
 bkpt=@{number="2",type="breakpoint",disp="keep",enabled="n",
 addr="0x000100d0",func="main",file="hello.c",line="5",times="0"@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @subheading The @code{-break-enable} Command
@@ -698,22 +698,22 @@ addr="0x000100d0",func="main",file="hello.c",line="5",times="0"@}@}
 
 Enable (previously disabled) @var{breakpoint}(s).
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{enable}.
+The corresponding @value{GDBN} command is @samp{enable}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -break-enable 2
 ^done
-(gdb)
+(@value{GDBP})
 -break-list
 ^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
 bkpt=@{number="2",type="breakpoint",disp="keep",enabled="y",
 addr="0x000100d0",func="main",file="hello.c",line="5",times="0"@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @subheading The @code{-break-info} Command
@@ -728,9 +728,9 @@ addr="0x000100d0",func="main",file="hello.c",line="5",times="0"@}@}
 @c REDUNDANT???
 Get information about a single breakpoint.
 
-@subsubheading GDB command
+@subsubheading @value{GDBN} command
 
-The corresponding GDB command is @samp{info break @var{breakpoint}}.
+The corresponding @value{GDBN} command is @samp{info break @var{breakpoint}}.
 
 @subsubheading Example
 N.A.
@@ -786,7 +786,7 @@ The result is in the form:
 @end example
 
 @noindent
-where @var{number} is the GDB number for this breakpoint, @var{funcname}
+where @var{number} is the @value{GDBN} number for this breakpoint, @var{funcname}
 is the name of the function where the breakpoint was inserted,
 @var{filename} is the name of the source file which contains this
 function, and @var{lineno} is the source line number within that file.
@@ -794,32 +794,32 @@ function, and @var{lineno} is the source line number within that file.
 Note: this format is open to change.
 @c An out-of-band breakpoint instead of part of the result?
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB commands are @samp{break}, @samp{tbreak},
+The corresponding @value{GDBN} commands are @samp{break}, @samp{tbreak},
 @samp{hbreak}, @samp{thbreak}, and @samp{rbreak}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -break-insert main
 ^done,bkpt=@{number="1",addr="0x0001072c",file="recursive2.c",line="4"@}
-(gdb)
+(@value{GDBP})
 -break-insert -t foo
 ^done,bkpt=@{number="2",addr="0x00010774",file="recursive2.c",line="11"@}
-(gdb)
+(@value{GDBP})
 -break-list
 ^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
 bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x0001072c", func="main",file="recursive2.c",line="4",times="0"@},
 bkpt=@{number="2",type="breakpoint",disp="del",enabled="y",
 addr="0x00010774",func="foo",file="recursive2.c",line="11",times="0"@}@}
-(gdb)
+(@value{GDBP})
 -break-insert -r foo.*
 ~int foo(int, int);
 ^done,bkpt=@{number="3",addr="0x00010774",file="recursive2.c",line="11"@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @subheading The @code{-break-list} Command
@@ -848,37 +848,37 @@ memory location at which the breakpoint is set
 @item What
 logical location of the breakpoint, expressed by function name, file
 name, line number
-@item times
+@item Times
 number of times the breakpoint has been hit
 @end table
 
 If there are no breakpoints or watchpoints, the BreakpointTable field is
 an empty list.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{info break}.
+The corresponding @value{GDBN} command is @samp{info break}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -break-list
 ^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
 bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x000100d0",func="main",file="hello.c",line="5",times="0"@},
 bkpt=@{number="2",type="breakpoint",disp="keep",enabled="y",
 addr="0x00010114",func="foo",file="hello.c",line="13",times="0"@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 Here's an example of the result when there are no breakpoints:
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -break-list
 ^done,BreakpointTable=@{@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @subheading The @code{-break-watch} Command
@@ -902,9 +902,9 @@ i.e. it will trigger when the memory location is accessed for writing.
 Note that @samp{-break-list} will report a single list of watchpoints and
 breakpoints inserted.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB commands are @samp{watch}, @samp{awatch}, and
+The corresponding @value{GDBN} commands are @samp{watch}, @samp{awatch}, and
 @samp{rwatch}.
 
 @subsubheading Example
@@ -912,41 +912,41 @@ The corresponding GDB commands are @samp{watch}, @samp{awatch}, and
 Setting a watchpoint on a variable in the @code{main} function:
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -break-watch x
 ^done,wpt=@{number="2",exp="x"@}
-(gdb)
+(@value{GDBP})
 -exec-continue
 ^running
 ^done,reason="watchpoint-trigger",wpt=@{number="2",exp="x"@},
 value=@{old="-268439212",new="55"@},
 frame=@{func="main",args=@{@},file="recursive2.c",line="5"@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
-Setting a watchpoint on a variable local to a function.  GDB will stop
+Setting a watchpoint on a variable local to a function.  @value{GDBN} will stop
 the program execution twice: first for the variable changing value, then
 for the watchpoint going out of scope.
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -break-watch C
 ^done,wpt=@{number="5",exp="C"@}
-(gdb)
+(@value{GDBP})
 -exec-continue
 ^running
 ^done,reason="watchpoint-trigger",
 wpt=@{number="5",exp="C"@},value=@{old="-276895068",new="3"@},
 frame=@{func="callee4",args=@{@},
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="13"@}
-(gdb)
+(@value{GDBP})
 -exec-continue
 ^running
 ^done,reason="watchpoint-scope",wpnum="5",
 frame=@{func="callee3",args=@{@{name="strarg",
 value="0x11940 \"A string argument.\""@}@},
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="18"@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 Listing breakpoints and watchpoints, at different points in the program
@@ -954,10 +954,10 @@ execution.  Note that once the watchpoint goes out of scope, it is
 deleted.
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -break-watch C
 ^done,wpt=@{number="2",exp="C"@}
-(gdb)
+(@value{GDBP})
 -break-list
 ^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
 bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
@@ -965,14 +965,14 @@ addr="0x00010734",func="callee4",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8",times="1"@},
 bkpt=@{number="2",type="watchpoint",disp="keep",
 enabled="y",addr="",what="C",times="0"@}@}
-(gdb)
+(@value{GDBP})
 -exec-continue
 ^running
 ^done,reason="watchpoint-trigger",wpt=@{number="2",exp="C"@},
 value=@{old="-276895068",new="3"@},
 frame=@{func="callee4",args=@{@},
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="13"@}
-(gdb)
+(@value{GDBP})
 -break-list
 ^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
 bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
@@ -980,20 +980,20 @@ addr="0x00010734",func="callee4",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8",times="1"@},
 bkpt=@{number="2",type="watchpoint",disp="keep",
 enabled="y",addr="",what="C",times="-5"@}@}
-(gdb)
+(@value{GDBP})
 -exec-continue
 ^running
 ^done,reason="watchpoint-scope",wpnum="2",
 frame=@{func="callee3",args=@{@{name="strarg",
 value="0x11940 \"A string argument.\""@}@},
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="18"@}
-(gdb)
+(@value{GDBP})
 -break-list
 ^done,BreakpointTable=@{hdr=@{"Num","Type","Disp","Enb","Address","What"@},
 bkpt=@{number="1",type="breakpoint",disp="keep",enabled="y",
 addr="0x00010734",func="callee4",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8",times="1"@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1048,7 +1048,7 @@ displayed; if @var{lines} is higher than the number of lines between
 are displayed.
 @item @var{mode}
 is either 0 (meaning only disassembly) or 1 (meaning mixed source and
-disassembly)
+disassembly).
 @end table
 
 @subsubheading Result
@@ -1065,7 +1065,7 @@ The output for each instruction is composed of two fields:
 Note that whatever included in the instruction field, is not manipulated
 directely by flathead, i.e. it is not possible to adjust its format.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
 There's no direct mapping from this command to the CLI.
 
@@ -1074,7 +1074,7 @@ There's no direct mapping from this command to the CLI.
 Disassemble from the current value of @code{$pc} to @code{$pc + 20}:
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -data-disassemble -s $pc -e "$pc + 20" -- 0
 ^done,
 asm_insns=@{
@@ -1088,7 +1088,7 @@ inst="or  %o2, 0x140, %o1\t! 0x11940 <_lib_version+8>"@},
 inst="sethi  %hi(0x11800), %o2"@},
 @{address="0x000107d0",func-name="main",offset="20",
 inst="or  %o2, 0x168, %o4\t! 0x11968 <_lib_version+48>"@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 Disassemble the whole @code{main} function.  Line 32 is part of
@@ -1103,16 +1103,16 @@ inst="save  %sp, -112, %sp"@},
 inst="mov   2, %o0"@},
 @{address="0x000107c4",func-name="main",offset="8",
 inst="sethi %hi(0x11800), %o2"@},
-[...]
+[@dots{}]
 @{address="0x0001081c",func-name="main",offset="96",inst="ret "@},
 @{address="0x00010820",func-name="main",offset="100",inst="restore "@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 Disassemble 3 instructions from the start of @code{main}:
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -data-disassemble -f basics.c -l 32 -n 3 -- 0
 ^done,asm_insns=@{
 @{address="0x000107bc",func-name="main",offset="0",
@@ -1121,13 +1121,13 @@ inst="save  %sp, -112, %sp"@},
 inst="mov  2, %o0"@},
 @{address="0x000107c4",func-name="main",offset="8",
 inst="sethi  %hi(0x11800), %o2"@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 Disassemble 3 instructions from the start of @code{main} in mixed mode:
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -data-disassemble -f basics.c -l 32 -n 3 -- 1
 ^done,asm_insns=@{
 src_and_asm_line=@{line="31",
@@ -1143,7 +1143,7 @@ file="/kwikemart/marge/ezannoni/flathead-dev/devo/gdb/ \
 inst="mov  2, %o0"@},
 @{address="0x000107c4",func-name="main",offset="8",
 inst="sethi  %hi(0x11800), %o2"@}@}@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -1160,32 +1160,32 @@ Evaluate @var{expr} as an expression.  The expression could contain an
 inferior function call.  The function call will execute synchronously.
 If the expression contains spaces, it must be enclosed in double quotes.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB commands are @samp{print}, @samp{output}, and
+The corresponding @value{GDBN} commands are @samp{print}, @samp{output}, and
 @samp{call}.  In @code{gdbtk} only, there's a corresponding
 @samp{gdb_eval} command.
 
 @subsubheading Example
 
 In the following example, the numbers that precede the commands are the
-@dfn{tokens} described in @ref{GDB/MI Command Syntax, , @sc{gdb/mi}
+@dfn{tokens} described in @ref{GDB/MI Command Syntax, ,@sc{gdb/mi}
 Command Syntax}.  Notice how @sc{gdb/mi} returns the same tokens in its
 output.
 
 @smallexample
 211-data-evaluate-expression A
 211^done,value="1"
-(gdb)
+(@value{GDBP})
 311-data-evaluate-expression &A
 311^done,value="0xefffeb7c"
-(gdb)
+(@value{GDBP})
 411-data-evaluate-expression A+3
 411^done,value="4"
-(gdb)
+(@value{GDBP})
 511-data-evaluate-expression "A + 3"
 511^done,value="4"
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -1200,29 +1200,29 @@ output.
 
 Display a list of the registers that have changed.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-GDB doesn't have a direct analog for this command; @code{gdbtk} has the
-corresponding command @samp{gdb_changed_register_list}.
+@value{GDBN} doesn't have a direct analog for this command; @code{gdbtk}
+has the corresponding command @samp{gdb_changed_register_list}.
 
 @subsubheading Example
 
 On a PPC MBX board:
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -exec-continue
 ^running
 
-(gdb)
+(@value{GDBP})
 *stopped,reason="breakpoint-hit",bkptno="1",frame=@{func="main",
 args=@{@},file="try.c",line="5"@}
-(gdb)
+(@value{GDBP})
 -data-list-changed-registers
 ^done,changed-registers=@{"0","1","2","4","5","6","7","8","9",
 "10","11","13","14","15","16","17","18","19","20","21","22","23",
 "24","25","26","27","28","30","31","64","65","66","67","69"@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -1240,9 +1240,9 @@ are given, it shows a list of the names of all the registers.  If
 integer numbers are given as arguments, it will print a list of the
 names of the registers corresponding to the arguments.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-GDB does not have a command which corresponds to
+@value{GDBN} does not have a command which corresponds to
 @samp{-data-list-register-names}.  In @code{gdbtk} there is a
 corresponding command @samp{gdb_regnames}.
 
@@ -1250,7 +1250,7 @@ corresponding command @samp{gdb_regnames}.
 
 For the PPC MBX board:
 @smallexample
-(gdb)
+(@value{GDBP})
 -data-list-register-names
 ^done,register-names=@{"r0","r1","r2","r3","r4","r5","r6","r7",
 "r8","r9","r10","r11","r12","r13","r14","r15","r16","r17","r18",
@@ -1259,10 +1259,10 @@ For the PPC MBX board:
 "f10","f11","f12","f13","f14","f15","f16","f17","f18","f19","f20",
 "f21","f22","f23","f24","f25","f26","f27","f28","f29","f30","f31",
 "pc","ps","cr","lr","ctr","xer"@}
-(gdb)
+(@value{GDBP})
 -data-list-register-names 1 2 3
 ^done,register-names=@{"r1","r2","r3"@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @subheading The @code{-data-list-register-values} Command
@@ -1296,10 +1296,10 @@ Raw
 Natural
 @end table
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB commands are @samp{info reg}, @samp{info all-reg},
-and (in @code{gdbtk}) @samp{gdb_fetch_registers}.
+The corresponding @value{GDBN} commands are @samp{info reg}, @samp{info
+all-reg}, and (in @code{gdbtk}) @samp{gdb_fetch_registers}.
 
 @subsubheading Example
 
@@ -1307,11 +1307,11 @@ For a PPC MBX board (note: line breaks are for readability only, they
 don't appear in the actual output):
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -data-list-register-values r 64 65
 ^done,register-values=@{@{number="64",value="0xfe00a300"@},
 @{number="65",value="0x00029002"@}@}
-(gdb)
+(@value{GDBP})
 -data-list-register-values x
 ^done,register-values=@{@{number="0",value="0xfe0043c8"@},
 @{number="1",value="0x3fff88"@},@{number="2",value="0xfffffffe"@},
@@ -1349,7 +1349,7 @@ don't appear in the actual output):
 @{number="65",value="0x29002"@},@{number="66",value="0x202f04b5"@},
 @{number="67",value="0xfe0043b0"@},@{number="68",value="0xfe00b3e4"@},
 @{number="69",value="0x20002b03"@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -1375,8 +1375,8 @@ quoted using the C convention.
 
 @item @var{word-format}
 The format to be used to print the memory words.  The notation is the
-same as for GDB's @code{print} command (@pxref{Output Formats, , Output
-formats}).
+same as for @value{GDBN}'s @code{print} command (@pxref{Output Formats,
+,Output formats}).
 
 @item @var{word-size}
 The size of each memory word in bytes.
@@ -1410,19 +1410,19 @@ The address of the next/previous page or row is available in
 @samp{next-row} and @samp{prev-row}, @samp{next-page} and
 @samp{prev-page}.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{x}.  @code{gdbtk} has
-@samp{gdb_get_mem} memory read.
+The corresponding @value{GDBN} command is @samp{x}.  @code{gdbtk} has
+@samp{gdb_get_mem} memory read command.
 
 @subsubheading Example
 
 Read six bytes of memory starting at @code{bytes+6} but then offset by
-@code{-6} bytes.  Format as three rows of two columns. One byte per
+@code{-6} bytes.  Format as three rows of two columns.  One byte per
 word.  Display each word in hex.
 
 @smallexample
-(gdb)
+(@value{GDBP})
 9-data-read-memory -o -6 -- bytes+6 x 1 3 2
 9^done,addr="0x00001390",nr-bytes="6",total-bytes="6",
 next-row="0x00001396",prev-row="0x0000138e",next-page="0x00001396",
@@ -1430,20 +1430,20 @@ prev-page="0x0000138a",memory=@{
 @{addr="0x00001390",data=@{"0x00","0x01"@}@},
 @{addr="0x00001392",data=@{"0x02","0x03"@}@},
 @{addr="0x00001394",data=@{"0x04","0x05"@}@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 Read two bytes of memory starting at address @code{shorts + 64} and
 display as a single word formatted in decimal.
 
 @smallexample
-(gdb)
+(@value{GDBP})
 5-data-read-memory shorts+64 d 2 1 1
 5^done,addr="0x00001510",nr-bytes="2",total-bytes="2",
 next-row="0x00001512",prev-row="0x0000150e",
 next-page="0x00001512",prev-page="0x0000150e",memory=@{
 @{addr="0x00001510",data=@{"128"@}@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 Read thirty two bytes of memory starting at @code{bytes+16} and format
@@ -1451,7 +1451,7 @@ as eight rows of four columns.  Include a string encoding with @code{x}
 used as the non-printable character.
 
 @smallexample
-(gdb)
+(@value{GDBP})
 4-data-read-memory bytes+16 x 1 8 4 x
 4^done,addr="0x000013a0",nr-bytes="32",total-bytes="32",
 next-row="0x000013c0",prev-row="0x0000139c",
@@ -1464,7 +1464,7 @@ next-page="0x000013c0",prev-page="0x00001380",memory=@{
 @{addr="0x000013b4",data=@{"0x24","0x25","0x26","0x27"@},ascii="$%&'"@},
 @{addr="0x000013b8",data=@{"0x28","0x29","0x2a","0x2b"@},ascii="()*+"@},
 @{addr="0x000013bc",data=@{"0x2c","0x2d","0x2e","0x2f"@},ascii=",-./"@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @subheading The @code{-display-delete} Command
@@ -1478,9 +1478,9 @@ next-page="0x000013c0",prev-page="0x00001380",memory=@{
 
 Delete the display @var{number}.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{delete display}.
+The corresponding @value{GDBN} command is @samp{delete display}.
 
 @subsubheading Example
 N.A.
@@ -1497,9 +1497,9 @@ N.A.
 
 Disable display @var{number}.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{disable display}.
+The corresponding @value{GDBN} command is @samp{disable display}.
 
 @subsubheading Example
 N.A.
@@ -1516,9 +1516,9 @@ N.A.
 
 Enable display @var{number}.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{enable display}.
+The corresponding @value{GDBN} command is @samp{enable display}.
 
 @subsubheading Example
 N.A.
@@ -1535,9 +1535,9 @@ N.A.
 
 Display @var{expression} every time the program stops.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{display}.
+The corresponding @value{GDBN} command is @samp{display}.
 
 @subsubheading Example
 N.A.
@@ -1554,9 +1554,9 @@ N.A.
 
 List the displays.  Do not show the current values.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{info display}.
+The corresponding @value{GDBN} command is @samp{info display}.
 
 @subsubheading Example
 N.A.
@@ -1571,19 +1571,19 @@ N.A.
  -environment-cd @var{pathdir}
 @end example
 
-Set GDB's working directory.
+Set @value{GDBN}'s working directory.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{cd}.
+The corresponding @value{GDBN} command is @samp{cd}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -environment-cd /kwikemart/marge/ezannoni/flathead-dev/devo/gdb
 ^done
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -1598,17 +1598,17 @@ The corresponding GDB command is @samp{cd}.
 
 Add directory @var{pathdir} to beginning of search path for source files.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{dir}.
+The corresponding @value{GDBN} command is @samp{dir}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -environment-directory /kwikemart/marge/ezannoni/flathead-dev/devo/gdb
 ^done
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -1623,17 +1623,17 @@ The corresponding GDB command is @samp{dir}.
 
 Add directories to beginning of search path for object files.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{path}.
+The corresponding @value{GDBN} command is @samp{path}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -environment-path /kwikemart/marge/ezannoni/flathead-dev/ppc-eabi/gdb
 ^done
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -1648,18 +1648,18 @@ The corresponding GDB command is @samp{path}.
 
 Show the current working directory.
 
-@subsubheading GDB command
+@subsubheading @value{GDBN} command
 
-The corresponding GDB command is @samp{pwd}.
+The corresponding @value{GDBN} command is @samp{pwd}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -environment-pwd
 ~Working directory /kwikemart/marge/ezannoni/flathead-dev/devo/gdb.
 ^done
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1669,7 +1669,7 @@ The corresponding GDB command is @samp{pwd}.
 @subsubheading Program termination
 
 As a result of execution, the inferior program can run to completion, if
-it doesn't encouter any breakpoints.  In this case the ouput will
+it doesn't encounter any breakpoints.  In this case the output will
 include an exit code, if the program has exited exceptionally.
 
 @subsubheading Examples:
@@ -1678,33 +1678,33 @@ include an exit code, if the program has exited exceptionally.
 Program exited normally:
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -exec-run
 ^running
-(gdb)
+(@value{GDBP})
 x = 55
 *stopped,reason="exited-normally"
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @noindent
 Program exited exceptionally:
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -exec-run
 ^running
-(gdb)
+(@value{GDBP})
 x = 55
 *stopped,reason="exited",exit-code="01"
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 Another way the program can terminate is if it receives a signal such as
 @code{SIGINT}.  In this case, @sc{gdb/mi} displays this:
 
 @smallexample
-(gdb)
+(@value{GDBP})
 *stopped,reason="exited-signalled",signal-name="SIGINT",
 signal-meaning="Interrupt"
 @end smallexample
@@ -1721,9 +1721,9 @@ signal-meaning="Interrupt"
 
 Kill the inferior running program.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{kill}.
+The corresponding @value{GDBN} command is @samp{kill}.
 
 @subsubheading Example
 N.A.
@@ -1741,9 +1741,9 @@ N.A.
 Set the inferior program arguments, to be used in the next
 @samp{-exec-run}.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{set args}.
+The corresponding @value{GDBN} command is @samp{set args}.
 
 @subsubheading Example
 
@@ -1763,20 +1763,20 @@ Don't have one around.
 Asynchronous command.  Resumes the execution of the inferior program
 until a breakpoint is encountered, or until the inferior exits.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB corresponding is @samp{continue}.
+The corresponding @value{GDBN} corresponding is @samp{continue}.
 
 @subsubheading Example
 
 @smallexample
 -exec-continue
 ^running
-(gdb)
+(@value{GDBP})
 @@Hello world
 *stopped,reason="breakpoint-hit",bkptno="2",frame=@{func="foo",args=@{@},
 file="hello.c",line="13"@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -1793,9 +1793,9 @@ Asynchronous command.  Resumes the execution of the inferior program
 until the current function is exited.  Displays the results returned by
 the function.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{finish}.
+The corresponding @value{GDBN} command is @samp{finish}.
 
 @subsubheading Example
 
@@ -1804,25 +1804,26 @@ Function returning @code{void}.
 @smallexample
 -exec-finish
 ^running
-(gdb)
+(@value{GDBP})
 @@hello from foo
 *stopped,reason="function-finished",frame=@{func="main",args=@{@},
 file="hello.c",line="7"@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
-Function returning other than @code{void}.  The name of the internal GDB
-variable storing the result is printed, together with the value itself.
+Function returning other than @code{void}.  The name of the internal
+@value{GDBN} variable storing the result is printed, together with the
+value itself.
 
 @smallexample
 -exec-finish
 ^running
-(gdb)
+(@value{GDBP})
 *stopped,reason="function-finished",frame=@{addr="0x000107b0",func="foo",
 args=@{@{name="a",value="1"@},@{name="b",value="9"@}@},
 file="recursive2.c",line="14"@},
 gdb-result-var="$1",return-value="0"
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -1835,35 +1836,35 @@ gdb-result-var="$1",return-value="0"
  -exec-interrupt
 @end example
 
-Asynchronous command. Interrupts the background execution of the target.
+Asynchronous command.  Interrupts the background execution of the target.
 Note how the token associated with the stop message is the one for the
 execution command that has been interrupted.  The token for the interrupt
-itself only appears in the '^done' output.  If the user is trying to
+itself only appears in the @samp{^done} output.  If the user is trying to
 interrupt a non-running program, an error message will be printed.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{interrupt}.
+The corresponding @value{GDBN} command is @samp{interrupt}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 111-exec-continue
 111^running
 
-(gdb)
+(@value{GDBP})
 222-exec-interrupt
 222^done
-(gdb)
+(@value{GDBP})
 111*stopped,signal-name="SIGINT",signal-meaning="Interrupt",
 frame=@{addr="0x00010140",func="foo",args=@{@},file="try.c",line="13"@}
-(gdb)
+(@value{GDBP})
 
-(gdb)
+(@value{GDBP})
 -exec-interrupt
 ^error,msg="mi_cmd_exec_interrupt: Inferior not executing."
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -1879,18 +1880,18 @@ frame=@{addr="0x00010140",func="foo",args=@{@},file="try.c",line="13"@}
 Asynchronous command.  Resumes execution of the inferior program, stopping
 when the beginning of the next source line is reached.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{next}.
+The corresponding @value{GDBN} command is @samp{next}.
 
 @subsubheading Example
 
 @smallexample
 -exec-next
 ^running
-(gdb)
+(@value{GDBP})
 *stopped,reason="end-stepping-range",line="8",file="hello.c"
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -1908,21 +1909,21 @@ instruction is a function call continues until the function returns.  If
 the program stops at an instruction in the middle of a source line, the
 address will be printed as well.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{nexti}.
+The corresponding @value{GDBN} command is @samp{nexti}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -exec-next-instruction
 ^running
 
-(gdb)
+(@value{GDBP})
 *stopped,reason="end-stepping-range",
 addr="0x000100d4",line="5",file="hello.c"
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -1938,34 +1939,34 @@ addr="0x000100d4",line="5",file="hello.c"
 Makes current function return immediately.  Doesn't execute the inferior.
 Displays the new current frame.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{return}.
+The corresponding @value{GDBN} command is @samp{return}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 200-break-insert callee4
 200^done,bkpt=@{number="1",addr="0x00010734",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8"@}
-(gdb)
+(@value{GDBP})
 000-exec-run
 000^running
-(gdb)
+(@value{GDBP})
 000*stopped,reason="breakpoint-hit",bkptno="1",
 frame=@{func="callee4",args=@{@},
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8"@}
-(gdb)
+(@value{GDBP})
 205-break-delete
 205^done
-(gdb)
+(@value{GDBP})
 111-exec-return
 111^done,frame=@{level="0 ",func="callee3",
 args=@{@{name="strarg",
 value="0x11940 \"A string argument.\""@}@},
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="18"@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -1982,23 +1983,23 @@ Asynchronous command.  Starts execution of the inferior from the
 beginning.  The inferior executes until either a breakpoint is
 encountered or the program exits.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{run}.
+The corresponding @value{GDBN} command is @samp{run}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -break-insert main
 ^done,bkpt=@{number="1",addr="0x0001072c",file="recursive2.c",line="4"@}
-(gdb)
+(@value{GDBP})
 -exec-run
 ^running
-(gdb)
+(@value{GDBP})
 *stopped,reason="breakpoint-hit",bkptno="1",
 frame=@{func="main",args=@{@},file="recursive2.c",line="4"@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -2013,9 +2014,9 @@ frame=@{func="main",args=@{@},file="recursive2.c",line="4"@}
 
 Print the arguments of the program.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{show args}.
+The corresponding @value{GDBN} command is @samp{show args}.
 
 @subsubheading Example
 N.A.
@@ -2036,9 +2037,9 @@ when the beginning of the next source line is reached, if the next
 source line is not a function call.  If it is, stop at the first
 instruction of the called function.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{step}.
+The corresponding @value{GDBN} command is @samp{step}.
 
 @subsubheading Example
 
@@ -2047,11 +2048,11 @@ Stepping into a function:
 @smallexample
 -exec-step
 ^running
-(gdb)
+(@value{GDBP})
 *stopped,reason="end-stepping-range",
 frame=@{func="foo",args=@{@{name="a",value="10"@},
 @{name="b",value="0"@}@},file="recursive2.c",line="11"@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 Regular stepping:
@@ -2059,9 +2060,9 @@ Regular stepping:
 @smallexample
 -exec-step
 ^running
-(gdb)
+(@value{GDBP})
 *stopped,reason="end-stepping-range",line="14",file="recursive2.c"
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -2075,33 +2076,33 @@ Regular stepping:
 @end example
 
 Asynchronous command.  Resumes the inferior which executes one machine
-instruction.  The output, once GDB has stopped, will vary depending on
+instruction.  The output, once @value{GDBN} has stopped, will vary depending on
 whether we have stopped in the middle of a source line or not.  In the
 former case, the address at which the program stopped will be printed as
 well.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{stepi}.
+The corresponding @value{GDBN} command is @samp{stepi}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -exec-step-instruction
 ^running
 
-(gdb)
+(@value{GDBP})
 *stopped,reason="end-stepping-range",
 frame=@{func="foo",args=@{@},file="try.c",line="10"@}
-(gdb)
+(@value{GDBP})
 -exec-step-instruction
 ^running
 
-(gdb)
+(@value{GDBP})
 *stopped,reason="end-stepping-range",
 frame=@{addr="0x000100f4",func="foo",args=@{@},file="try.c",line="10"@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -2119,21 +2120,21 @@ specified in the argument is reached.  If there is no argument, the inferior
 executes until a source line greater than the current one is reached.
 The reason for stopping in this case will be ``location-reached''.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{until}.
+The corresponding @value{GDBN} command is @samp{until}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -exec-until recursive2.c:6
 ^running
-(gdb)
+(@value{GDBP})
 x = 55
 *stopped,reason="location-reached",frame=@{func="main",args=@{@},
 file="recursive2.c",line="6"@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @ignore
@@ -2154,21 +2155,21 @@ Is this going away????
 Specify the executable file to be debugged.  This file is the one from
 which the symbol table is also read.  If no file is specified, the
 command clears the executable and symbol information.  If breakpoints
-are set when using this command with no arguments, gdb will produce
+are set when using this command with no arguments, @value{GDBN} will produce
 error messages.  Otherwise, no output is produced, except a completion
 notification.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{file}.
+The corresponding @value{GDBN} command is @samp{file}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -file-exec-and-symbols /kwikemart/marge/ezannoni/TRUNK/mbx/hello.mbx
 ^done
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -2183,21 +2184,21 @@ The corresponding GDB command is @samp{file}.
 
 Specify the executable file to be debugged.  Unlike
 @samp{-file-exec-and-symbols}, the symbol table is @emph{not} read
-from this file.  If used without argument, GDB clears the information
+from this file.  If used without argument, @value{GDBN} clears the information
 about the executable file.  No output is produced, except a completion
 notification.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{exec-file}.
+The corresponding @value{GDBN} command is @samp{exec-file}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -file-exec-file /kwikemart/marge/ezannoni/TRUNK/mbx/hello.mbx
 ^done
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -2212,9 +2213,9 @@ The corresponding GDB command is @samp{exec-file}.
 
 List the sections of the current executable file.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The GDB command @samp{info file} shows, among the rest, the same
+The @value{GDBN} command @samp{info file} shows, among the rest, the same
 information as this command.  @code{gdbtk} has a corresponding command
 @samp{gdb_load_info}.
 
@@ -2233,9 +2234,9 @@ N.A.
 
 List the source files for the current executable.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-There's no GDB command which directly corresponds to this one.
+There's no @value{GDBN} command which directly corresponds to this one.
 @code{gdbtk} has an analogous command @samp{gdb_listfiles}.
 
 @subsubheading Example
@@ -2253,9 +2254,9 @@ N.A.
 
 List the shared libraries in the program.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{info shared}.
+The corresponding @value{GDBN} command is @samp{info shared}.
 
 @subsubheading Example
 N.A.
@@ -2272,9 +2273,9 @@ N.A.
 
 List symbol files.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{info file} (part of it).
+The corresponding @value{GDBN} command is @samp{info file} (part of it).
 
 @subsubheading Example
 N.A.
@@ -2290,25 +2291,25 @@ N.A.
 @end example
 
 Read symbol table info from the specified @var{file} argument.  When
-used without arguments, clears GDB's symbol table info.  No output is
+used without arguments, clears @value{GDBN}'s symbol table info.  No output is
 produced, except for a completion notification.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{symbol-file}.
+The corresponding @value{GDBN} command is @samp{symbol-file}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -file-symbol-file /kwikemart/marge/ezannoni/TRUNK/mbx/hello.mbx
 ^done
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Miscellaneous Commands
-@section Miscellaneous GDB commands in @sc{gdb/mi}
+@section Miscellaneous @value{GDBN} commands in @sc{gdb/mi}
 
 @c @subheading -gdb-complete
 
@@ -2321,16 +2322,16 @@ The corresponding GDB command is @samp{symbol-file}.
  -gdb-exit
 @end example
 
-Exit GDB immediately.
+Exit @value{GDBN} immediately.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
 Approximately corresponds to @samp{quit}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -gdb-exit
 @end smallexample
 
@@ -2343,20 +2344,20 @@ Approximately corresponds to @samp{quit}.
  -gdb-set
 @end example
 
-Set an internal GDB variable.
+Set an internal @value{GDBN} variable.
 @c IS THIS A DOLLAR VARIABLE? OR SOMETHING LIKE ANNOTATE ?????
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{set}.
+The corresponding @value{GDBN} command is @samp{set}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -gdb-set $foo=3
 ^done
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -2369,19 +2370,19 @@ The corresponding GDB command is @samp{set}.
  -gdb-show
 @end example
 
-Show the current value of a GDB variable.
+Show the current value of a @value{GDBN} variable.
 
-@subsubheading GDB command
+@subsubheading @value{GDBN} command
 
-The corresponding GDB command is @samp{show}.
+The corresponding @value{GDBN} command is @samp{show}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -gdb-show annotate
 ^done,value="0"
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @c @subheading -gdb-source
@@ -2396,11 +2397,11 @@ The corresponding GDB command is @samp{show}.
  -gdb-version
 @end example
 
-Show version information for GDB.  Used mostly in testing.
+Show version information for @value{GDBN}.  Used mostly in testing.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-There's no equivalent GDB command.  GDB by default shows this
+There's no equivalent @value{GDBN} command.  @value{GDBN} by default shows this
 information when you start an interactive session.
 
 @subsubheading Example
@@ -2408,7 +2409,7 @@ information when you start an interactive session.
 @c This example modifies the actual output from GDB to avoid overfull
 @c box in TeX.
 @smallexample
-(gdb)
+(@value{GDBP})
 -gdb-version
 ~GNU gdb 5.2.1
 ~Copyright 2000 Free Software Foundation, Inc.
@@ -2421,7 +2422,7 @@ information when you start an interactive session.
 ~This GDB was configured as 
  "--host=sparc-sun-solaris2.5.1 --target=ppc-eabi".
 ^done
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @ignore
@@ -2489,9 +2490,9 @@ Signal handling commands are not implemented.
 
 Get info on the current frame.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{info frame} or @samp{frame}
+The corresponding @value{GDBN} command is @samp{info frame} or @samp{frame}
 (without arguments).
 
 @subsubheading Example
@@ -2509,31 +2510,31 @@ N.A.
 Return the depth of the stack.  If the integer argument @var{max-depth}
 is specified, do not count beyond @var{max-depth} frames.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-There's no equivalent GDB command.
+There's no equivalent @value{GDBN} command.
 
 @subsubheading Example
 
 For a stack with frame levels 0 through 11:
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -stack-info-depth
 ^done,depth="12"
-(gdb)
+(@value{GDBP})
 -stack-info-depth 4
 ^done,depth="4"
-(gdb)
+(@value{GDBP})
 -stack-info-depth 12
 ^done,depth="12"
-(gdb)
+(@value{GDBP})
 -stack-info-depth 11
 ^done,depth="11"
-(gdb)
+(@value{GDBP})
 -stack-info-depth 13
 ^done,depth="12"
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @subheading The @code{-stack-list-arguments} Command
@@ -2555,16 +2556,16 @@ The @var{show-values} argument must have a value of 0 or 1.  A value of
 0 means that only the names of the arguments are listed, a value of 1
 means that both names and values of the arguments are printed.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-GDB does not have an equivalent command.  @code{gdbtk} has a
+@value{GDBN} does not have an equivalent command.  @code{gdbtk} has a
 @samp{gdb_get_args} command which partially overlaps with the
 functionality of @samp{-stack-list-arguments}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -stack-list-frames
 ^done,
 stack=@{
@@ -2578,7 +2579,7 @@ frame=@{level="3 ",addr="0x000107b4",func="callee1",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="27"@},
 frame=@{level="4 ",addr="0x000107e0",func="main",
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="32"@}@}
-(gdb)
+(@value{GDBP})
 -stack-list-arguments 0
 ^done,
 stack-args=@{
@@ -2587,7 +2588,7 @@ frame=@{level="1",args=@{name="strarg"@}@},
 frame=@{level="2",args=@{name="intarg",name="strarg"@}@},
 frame=@{level="3",args=@{name="intarg",name="strarg",name="fltarg"@}@},
 frame=@{level="4",args=@{@}@}@}
-(gdb)
+(@value{GDBP})
 -stack-list-arguments 1
 ^done,
 stack-args=@{
@@ -2602,15 +2603,15 @@ frame=@{level="2",args=@{
 @{name="strarg",value="0x11940 \"A string argument.\""@},
 @{name="fltarg",value="3.5"@}@}@},
 frame=@{level="4",args=@{@}@}@}
-(gdb)
+(@value{GDBP})
 -stack-list-arguments 0 2 2
 ^done,stack-args=@{frame=@{level="2",args=@{name="intarg",name="strarg"@}@}@}
-(gdb)
+(@value{GDBP})
 -stack-list-arguments 1 2 2
 ^done,stack-args=@{frame=@{level="2",
 args=@{@{name="intarg",value="2"@},
 @{name="strarg",value="0x11940 \"A string argument.\""@}@}@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @c @subheading -stack-list-exception-handlers
@@ -2646,16 +2647,16 @@ whole stack.  If given two integer arguments, it shows the frames whose
 levels are between the two arguments (inclusive).  If the two arguments
 are equal, it shows the single frame at the corresponding level.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB commands are @samp{backtrace} and @samp{where}.
+The corresponding @value{GDBN} commands are @samp{backtrace} and @samp{where}.
 
 @subsubheading Example
 
 Full stack backtrace:
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -stack-list-frames
 ^done,stack=
 @{frame=@{level="0 ",addr="0x0001076c",func="foo",
@@ -2682,13 +2683,13 @@ frame=@{level="10",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
 frame=@{level="11",addr="0x00010738",func="main",
   file="recursive2.c",line="4"@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
-Show frames between low_frame and high_frame:
+Show frames between @var{low_frame} and @var{high_frame}:
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -stack-list-frames 3 5
 ^done,stack=
 @{frame=@{level="3 ",addr="0x000107a4",func="foo",
@@ -2697,18 +2698,18 @@ frame=@{level="4 ",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@},
 frame=@{level="5 ",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 Show a single frame:
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -stack-list-frames 3 3
 ^done,stack=
 @{frame=@{level="3 ",addr="0x000107a4",func="foo",
   file="recursive2.c",line="14"@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -2725,21 +2726,21 @@ Display the local variable names for the current frame.  With an
 argument of 0 prints only the names of the variables, with argument of 1
 prints also their values.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-@samp{info locals} in GDB, @samp{gdb_get_locals} in @code{gdbtk}.
+@samp{info locals} in @value{GDBN}, @samp{gdb_get_locals} in @code{gdbtk}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -stack-list-locals 0
 ^done,locals=@{name="A",name="B",name="C"@}
-(gdb)
+(@value{GDBP})
 -stack-list-locals 1
 ^done,locals=@{@{name="A",value="1"@},@{name="B",value="2"@},
   @{name="C",value="3"@}@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -2755,18 +2756,18 @@ prints also their values.
 Change the current frame.  Select a different frame @var{framenum} on
 the stack.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB commands are @samp{frame}, @samp{up}, @samp{down},
-@samp{select-frame}, @samp{up-silent}, and @samp{down-silent}.
+The corresponding @value{GDBN} commands are @samp{frame}, @samp{up},
+@samp{down}, @samp{select-frame}, @samp{up-silent}, and @samp{down-silent}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -stack-select-frame 2
 ^done
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2785,9 +2786,9 @@ The corresponding GDB commands are @samp{frame}, @samp{up}, @samp{down},
 
 Describe where @var{symbol} is stored.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{info address}.
+The corresponding @value{GDBN} command is @samp{info address}.
 
 @subsubheading Example
 N.A.
@@ -2804,10 +2805,10 @@ N.A.
 
 Show the file for the symbol.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-There's no equivalent GDB command.  @code{gdbtk} has
-@samp{gdb_filnd_file}.
+There's no equivalent @value{GDBN} command.  @code{gdbtk} has
+@samp{gdb_find_file}.
 
 @subsubheading Example
 N.A.
@@ -2824,7 +2825,7 @@ N.A.
 
 Show which function the symbol lives in.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
 @samp{gdb_get_function} in @code{gdbtk}.
 
@@ -2843,10 +2844,10 @@ N.A.
 
 Show the core addresses of the code for a source line.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB comamnd is @samp{info line}.  @code{gdbtk} has the
-@samp{gdb_get_line} @samp{gdb_get_file} commands.
+The corresponding @value{GDBN} comamnd is @samp{info line}.
+@code{gdbtk} has the @samp{gdb_get_line} and @samp{gdb_get_file} commands.
 
 @subsubheading Example
 N.A.
@@ -2863,9 +2864,9 @@ N.A.
 
 Describe what symbol is at location @var{addr}.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{info symbol}.
+The corresponding @value{GDBN} command is @samp{info symbol}.
 
 @subsubheading Example
 N.A.
@@ -2882,10 +2883,10 @@ N.A.
 
 List the functions in the executable.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-@samp{info functions} in GDB, @samp{gdb_listfunc} @samp{gdb_search} in
-@code{gdbtk}.
+@samp{info functions} in @value{GDBN}, @samp{gdb_listfunc} and
+@samp{gdb_search} in @code{gdbtk}.
 
 @subsubheading Example
 N.A.
@@ -2902,9 +2903,9 @@ N.A.
 
 List all the type names.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding commands are @samp{info types} in GDB,
+The corresponding commands are @samp{info types} in @value{GDBN},
 @samp{gdb_search} in @code{gdbtk}.
 
 @subsubheading Example
@@ -2922,9 +2923,9 @@ N.A.
 
 List all the global and static variable names.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-@samp{info variables} in GDB, @samp{gdb_search} in @code{gdbtk}.
+@samp{info variables} in @value{GDBN}, @samp{gdb_search} in @code{gdbtk}.
 
 @subsubheading Example
 N.A.
@@ -2939,7 +2940,7 @@ N.A.
  -symbol-locate
 @end example
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
 @samp{gdb_loc} in @code{gdbtk}.
 
@@ -2958,9 +2959,9 @@ N.A.
 
 Show type of @var{variable}.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{ptype}, @code{gdbtk} has
+The corresponding @value{GDBN} command is @samp{ptype}, @code{gdbtk} has
 @samp{gdb_obj_variable}.
 
 @subsubheading Example
@@ -2981,11 +2982,11 @@ N.A.
  -target-attach @var{pid} | @var{file}
 @end example
 
-Attach to a process @var{pid} or a file @var{file} outside of GDB.
+Attach to a process @var{pid} or a file @var{file} outside of @value{GDBN}.
 
-@subsubheading GDB command
+@subsubheading @value{GDBN} command
 
-The corresponding GDB command is @samp{attach}.
+The corresponding @value{GDBN} command is @samp{attach}.
 
 @subsubheading Example
 N.A.
@@ -3003,9 +3004,9 @@ N.A.
 Compare data of section @var{section} on target to the exec file.
 Without the argument, all sections are compared.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The GDB equivalent is @samp{compare-sections}.
+The @value{GDBN} equivalent is @samp{compare-sections}.
 
 @subsubheading Example
 N.A.
@@ -3022,17 +3023,17 @@ N.A.
 
 Disconnect from the remote target.  There's no output.
 
-@subsubheading GDB command
+@subsubheading @value{GDBN} command
 
-The corresponding GDB command is @samp{detach}.
+The corresponding @value{GDBN} command is @samp{detach}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -target-detach
 ^done
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -3078,11 +3079,11 @@ The size of the overall executable to download.
 @end table
 
 @noindent
-At the end,  a summary is printed.
+At the end, a summary is printed.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{load}.
+The corresponding @value{GDBN} command is @samp{load}.
 
 @subsubheading Example
 
@@ -3090,7 +3091,7 @@ Note: each status message appears on a single line.  Here the messages
 have been broken down so that they can fit onto a page.
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -target-download
 +download,@{section=".text",section-size="6668",total-size="9880"@}
 +download,@{section=".text",section-sent="512",section-size="6668",
@@ -3136,7 +3137,7 @@ total-sent="9284",total-size="9880"@}
 total-sent="9796",total-size="9880"@}
 ^done,address="0x10004",load-size="9880",transfer-rate="6586",
 write-rate="429"
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -3152,9 +3153,9 @@ write-rate="429"
 Provide information on the state of the target (whether it is running or
 not, for instance).
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-There's no equivalent GDB command.
+There's no equivalent @value{GDBN} command.
 
 @subsubheading Example
 N.A.
@@ -3171,9 +3172,9 @@ N.A.
 
 List the possible targets to connect to.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{help target}.
+The corresponding @value{GDBN} command is @samp{help target}.
 
 @subsubheading Example
 N.A.
@@ -3190,7 +3191,7 @@ N.A.
 
 Describe the current target.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
 The corresponding information is printed by @samp{info file} (among
 other things).
@@ -3210,7 +3211,7 @@ N.A.
 
 @c ????
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
 No equivalent.
 
@@ -3224,10 +3225,10 @@ N.A.
 @subsubheading Synopsis
 
 @example
- -target-select @var{type} @var{parameters ...}
+ -target-select @var{type} @var{parameters @dots{}}
 @end example
 
-Connect GDB to the remote target.  This command takes two args:
+Connect @value{GDBN} to the remote target.  This command takes two args:
 
 @table @samp
 @item @var{type}
@@ -3245,17 +3246,17 @@ which the target program is, in the following form:
   args=@{@var{arg list}@}
 @end smallexample
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{target}.
+The corresponding @value{GDBN} command is @samp{target}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -target-select async /dev/ttya
 ^connected,addr="0xfe00a300",func="??",args=@{@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -3272,7 +3273,7 @@ The corresponding GDB command is @samp{target}.
  -thread-info
 @end example
 
-@subsubheading GDB command
+@subsubheading @value{GDBN} command
 
 No equivalent.
 
@@ -3289,9 +3290,9 @@ N.A.
  -thread-list-all-threads
 @end example
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The equivalent GDB command is @samp{info threads}.
+The equivalent @value{GDBN} command is @samp{info threads}.
 
 @subsubheading Example
 N.A.
@@ -3306,10 +3307,10 @@ N.A.
  -thread-list-ids
 @end example
 
-Produces a list of the currently known gdb thread ids.  At the end of the
-list it also prints the total number of such threads.
+Produces a list of the currently known @value{GDBN} thread ids.  At the
+end of the list it also prints the total number of such threads.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
 Part of @samp{info threads} supplies the same information.
 
@@ -3318,21 +3319,21 @@ Part of @samp{info threads} supplies the same information.
 No threads present, besides the main process.
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -thread-list-ids
 ^done,thread-ids=@{@},number-of-threads="0"
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
 Several threads.
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -thread-list-ids
 ^done,thread-ids=@{thread-id="3",thread-id="2",thread-id="1"@},
 number-of-threads="3"
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 
@@ -3348,31 +3349,31 @@ number-of-threads="3"
 Make @var{threadnum} the current thread.  It prints the number of the new
 current thread, and the topmost frame for that thread.
 
-@subsubheading GDB Command
+@subsubheading @value{GDBN} Command
 
-The corresponding GDB command is @samp{thread}.
+The corresponding @value{GDBN} command is @samp{thread}.
 
 @subsubheading Example
 
 @smallexample
-(gdb)
+(@value{GDBP})
 -exec-next
 ^running
-(gdb)
+(@value{GDBP})
 *stopped,reason="end-stepping-range",thread-id="2",line="187",
 file="../../../devo/gdb/testsuite/gdb.threads/linux-dp.c"
-(gdb)
+(@value{GDBP})
 -thread-list-ids
 ^done,
 thread-ids=@{thread-id="3",thread-id="2",thread-id="1"@},
 number-of-threads="3"
-(gdb)
+(@value{GDBP})
 -thread-select 3
 ^done,new-thread-id="3",
 frame=@{level="0 ",func="vprintf",
 args=@{@{name="format",value="0x8048e9c \"%*s%c %d %c\\n\""@},
 @{name="arg",value="0x2"@}@},file="vprintf.c",line="31"@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -3435,7 +3436,7 @@ now).
 @end enumerate
 
 The original interface was designed to be used by Tcl code, so it was
-slightly changed so it could be used through flathead.  This document
+slightly changed so it could be used through flathead.  This section
 describes the flathead operations that will be available and gives some
 hints about their use.
 
@@ -3551,7 +3552,7 @@ begin with a @samp{*}), or one of the following:
 
 This operation returns the name, number of children and the type of the
 object created.  Type is returned as a string as the ones generated by
-the GDB CLI:
+the @value{GDBN} CLI:
 
 @example
  name="@var{name}",numchild="N",type="@var{type}"
@@ -3652,7 +3653,8 @@ Returns a list of the children of the specified variable object:
 @end example
 
 Returns the type of the specified variable @var{name}.  The type is
-returned as a string in the same format as it is output by the GDB CLI:
+returned as a string in the same format as it is output by the
+@value{GDBN} CLI:
 
 @example
  type=@var{typename}
@@ -3766,7 +3768,7 @@ addresses this problem.
 The output from @sc{gdb/mi} consists of zero or more out-of-band records
 optionally followed by a single result record, the result record being
 for the most recent command input.  The sequence is terminated by
-``(gdb)''.
+``(@value{GDBP})''.
 
 Asynchronous @sc{gdb/mi} output is similar.
 
@@ -3775,7 +3777,7 @@ by the input commands @code{@var{token}}.
 
 @table @code
 @item @var{output} @expansion{}
-@{ @var{out-of-band-record} @} @code{[} @var{result-record} @code{]} "(gdb)" @var{nl}
+@{ @var{out-of-band-record} @} @code{[} @var{result-record} @code{]} "(@value{GDBP})" @var{nl}
 
 @item @var{result-record} @expansion{}
 @code{[} @var{token} @code{]} "^" @var{result-class} @{ "," @var{result} @} @var{nl}
@@ -3889,9 +3891,9 @@ output is prefixed by the prefix ``~''.
 All the target output is prefixed by the prefix ``@@''.
 
 @item
-@var{log-stream-output} is output text coming from GDB's internals, for
-instance messages that should be displayed as part of an error log.  All
-the log output is prefixed by the prefix ``&''.
+@var{log-stream-output} is output text coming from @value{GDBN}'s
+internals, for instance messages that should be displayed as part of an
+error log.  All the log output is prefixed by the prefix ``&''.
 
 @end itemize
 

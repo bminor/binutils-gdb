@@ -73,11 +73,6 @@ static char *line_completion_function (char *, int, char *, int);
 
 static char *readline_line_completion_function (char *, int);
 
-/* NOTE 1999-04-29: this function will be static again, after we make the
-   event loop be the default command loop for gdb, and we merge
-   event-top.c into this file, top.c */
-/* static */ void command_loop_marker (void *);
-
 static void while_command (char *, int);
 
 static void if_command (char *, int);
@@ -1581,15 +1576,6 @@ extern void serial_log_command (const char *);
     }
 }
 
-/* ARGSUSED */
-/* NOTE 1999-04-29: This function will be static again, once we modify
-   gdb to use the event loop as the default command loop and we merge
-   event-top.c into this file, top.c */
-/* static */ void
-command_loop_marker (void *foo)
-{
-}
-
 /* Read commands from `instream' and execute them
    until end of file or error reading instream.  */
 
@@ -1617,7 +1603,7 @@ command_loop ()
       quit_flag = 0;
       if (instream == stdin && stdin_is_tty)
 	reinitialize_more_filter ();
-      old_chain = make_cleanup (command_loop_marker, 0);
+      old_chain = make_cleanup (null_cleanup, 0);
 
 #if defined(TUI)
       /* A bit of paranoia: I want to make sure the "insert_mode" global
@@ -1698,7 +1684,7 @@ simplified_command_loop (read_input_func, execute_command_func)
       quit_flag = 0;
       if (instream == stdin && stdin_is_tty)
 	reinitialize_more_filter ();
-      old_chain = make_cleanup (command_loop_marker, 0);
+      old_chain = make_cleanup (null_cleanup, 0);
 
       /* Get a command-line. */
       command = (*read_input_func) (instream == stdin ?

@@ -16,6 +16,7 @@ AC_CANONICAL_SYSTEM
 configdirs="gdb.asm \
             gdb.base \
             gdb.c++ \
+            gdb.java \
             gdb.disasm \
             gdb.chill \
             gdb.mi \

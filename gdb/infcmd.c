@@ -1721,11 +1721,11 @@ attach_command (args, from_tty)
      wait_for_inferior as soon as the target reports a stop.  */
   init_wait_for_inferior ();
   clear_proceed_status ();
-  stop_soon_quietly = 1;
 
   /* No traps are generated when attaching to inferior under Mach 3
      or GNU hurd.  */
 #ifndef ATTACH_NO_WAIT
+  stop_soon_quietly = 1;
   wait_for_inferior ();
 #endif
 
