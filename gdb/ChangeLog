@@ -4,7 +4,8 @@ Mon Apr 22 00:02:43 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 	solib.c (solib_add): Don't malloc name passed to symbol_file_add.
 
 	* exec.c (build_section_table): If *start isn't NULL, free it.
-	stack.c (parse_frame_specification): Error if NULL selected_frame.
+	
+	* stack.c (parse_frame_specification): Error if NULL selected_frame.
 	infcmd.c (finish_command): Error if NULL selected_frame.
 	inflow.c (kill_command): Deal with NULL selected_frame.
 	stack.c (record_selected_frame): Set *FRAMEP to NULL if there
