@@ -20,6 +20,8 @@ Thu Mar 20 13:42:01 1997  H.J. Lu  <hjl@lucon.org>
 
 Thu Mar 20 12:48:45 1997  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
+	* config/m68k-parse.y (motorola_operand): Allow (zdireg,EXPR).
+
 	* config/te-delta.h (COFF_COMMON_ADDEND): Define.
 	* config/obj-coff.c (fixup_segment): Check COFF_COMMON_ADDEND when
 	storing the value of a common symbol.
