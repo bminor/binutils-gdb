@@ -1,3 +1,7 @@
+Thu Apr 27 20:29:34 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (RUNTEST): Fix reference of `srcdir'.
+
 Wed Apr 26 19:01:08 1995  Steve Chamberlain  <sac@slash.cygnus.com>
  
  	* remote-hms.c: Rewrite to use new monitor conventions.

@@ -133,6 +133,19 @@ TK = -L$(TK_DIR) -ltk
 TK_SRC = $(srcdir)/$(TK_DIR)
 TK_CFLAGS = -I$(TK_SRC)
 
+# A "-I" switch that can be used when compiling to make all of the
+# X11 include files accessible (the configure script will try to
+# set this value, and will cause it to be an empty string if the
+# include files are accessible via /usr/include).
+X11_INCLUDES =
+X11_CFLAGS = $(X11_INCLUDES)
+
+# Linker switch(es) to use to link with the X11 library archive (the
+# configure script will try to set this value automatically, but you
+# can override it).
+X11_LIB_SWITCHES =
+X11_LIBS = -lX11
+
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
 # -I$(srcdir) for gdb internal headers and possibly for regex.h also.
@@ -194,14 +207,14 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(BFD) $(READLINE) $(OPCODES) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 4.13.2
+VERSION = 4.14.1
 DIST=gdb
 
 LINT=/usr/5bin/lint
 LINTFLAGS= $(BFD_CFLAGS)
 
-RUNTEST = `if [ -f $${srcdir}/../dejagnu/runtest ] ; then \
-		echo $${srcdir}/../dejagnu/runtest ; else echo runtest; \
+RUNTEST = `if [ -f ${srcdir}/../dejagnu/runtest ] ; then \
+		echo ${srcdir}/../dejagnu/runtest ; else echo runtest; \
 	   fi`
 
 RUNTESTFLAGS=
@@ -1117,8 +1130,8 @@ fork-child.o: fork-child.c $(wait_h) $(defs_h) $(gdbcore_h) \
 # start-sanitize-gdbtk
 gdbtk.o: gdbtk.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(bfd_h) symfile.h objfiles.h target.h
-	$(CC) -c $(INTERNAL_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(srcdir)/gdbtk.c \
-		 -DGDBTK_FILENAME=\"$(libdir)/gdbtk.tcl\"
+	$(CC) -c $(INTERNAL_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
+		$(srcdir)/gdbtk.c -DGDBTK_FILENAME=\"$(libdir)/gdbtk.tcl\"
 # end-sanitize-gdbtk
 
 gdbtypes.o: gdbtypes.c $(bfd_h) complaints.h $(defs_h) $(expression_h) \
