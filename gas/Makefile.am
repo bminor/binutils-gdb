@@ -196,7 +196,7 @@ GAS_CFILES = \
 	symbols.c \
 	write.c
 
-CFILES = $(GAS_CFILES) gasp.c itbl-ops.c
+CFILES = $(GAS_CFILES) itbl-ops.c
 
 HFILES = \
 	as.h \
@@ -447,8 +447,8 @@ po/POTFILES.in: @MAINT@ Makefile
 	for file in $(POTFILES); do echo $$file; done | sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
-# Note: GASP is now deprecated and will be removed at some point in the future.
-# Anything that GASP could do can now be done by GAS.
+# Note: GASP is now deprecated and has been removed.  It is still
+# available in the CVS archive or older binutils releases if it is needed.
 noinst_PROGRAMS = as-new
 noinst_SCRIPTS = $(GDBINIT)
 EXTRA_SCRIPTS = .gdbinit
@@ -511,10 +511,6 @@ $(OBJS): $(INCDIR)/bin-bugs.h $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
 	$(OBJ_FORMAT_H) $(TARG_CPU_H) $(TARG_ENV_H) \
 	as.h asintl.h bignum.h bit_fix.h config.h emul.h expr.h flonum.h \
 	frags.h hash.h listing.h obj.h read.h symbols.h tc.h write.h
-
-gasp_new_SOURCES = gasp.c macro.c sb.c hash.c
-gasp_new_LDADD = ../libiberty/libiberty.a $(INTLLIBS)
-gasp_new_DEPENDENCIES = ../libiberty/libiberty.a $(INTLDEPS)
 
 EXPECT = `if [ -f $${rootme}/../expect/expect ] ; then \
           echo $${rootme}/../expect/expect ; \
@@ -648,7 +644,7 @@ itbl-parse.c itbl-parse.h: $(srcdir)/itbl-parse.y
 
 # stand-alone itbl assembler & disassembler
 
-EXTRA_PROGRAMS = gasp-new itbl-test
+EXTRA_PROGRAMS = itbl-test
 itbl_test_SOURCES = itbl-parse.y itbl-lex.l
 itbl_test_LDADD = itbl-tops.o itbl-test.o $(GASLIBS) @LEXLIB@
 
@@ -2369,8 +2365,6 @@ symbols.o: symbols.c $(INCDIR)/symcat.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/obstack.h subsegs.h struc-symbol.h
 write.o: write.c $(INCDIR)/symcat.h subsegs.h $(INCDIR)/obstack.h \
   output-file.h dwarf2dbg.h
-gasp.o: gasp.c $(INCDIR)/getopt.h $(INCDIR)/safe-ctype.h \
-  sb.h macro.h $(INCDIR)/xregex.h $(INCDIR)/xregex2.h
 itbl-ops.o: itbl-ops.c itbl-ops.h $(INCDIR)/symcat.h
 e-crisaout.o: $(srcdir)/config/e-crisaout.c $(INCDIR)/symcat.h \
   emul-target.h

@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -312,7 +312,7 @@ GAS_CFILES = \
 	write.c
 
 
-CFILES = $(GAS_CFILES) gasp.c itbl-ops.c
+CFILES = $(GAS_CFILES) itbl-ops.c
 
 HFILES = \
 	as.h \
@@ -570,8 +570,8 @@ POTFILES = $(MULTI_CFILES) $(TARGET_ENV_HFILES) $(OBJ_FORMAT_HFILES) \
 	$(HFILES) $(CFILES) $(GAS_CFILES)
 
 
-# Note: GASP is now deprecated and will be removed at some point in the future.
-# Anything that GASP could do can now be done by GAS.
+# Note: GASP is now deprecated and has been removed.  It is still
+# available in the CVS archive or older binutils releases if it is needed.
 noinst_PROGRAMS = as-new
 noinst_SCRIPTS = $(GDBINIT)
 EXTRA_SCRIPTS = .gdbinit
@@ -621,10 +621,6 @@ as_new_DEPENDENCIES = $(TARG_CPU_O) $(OBJ_FORMAT_O) $(ATOF_TARG_O) \
 	$(extra_objects) $(GASLIBS) $(INTLDEPS)
 
 
-gasp_new_SOURCES = gasp.c macro.c sb.c hash.c
-gasp_new_LDADD = ../libiberty/libiberty.a $(INTLLIBS)
-gasp_new_DEPENDENCIES = ../libiberty/libiberty.a $(INTLDEPS)
-
 EXPECT = `if [ -f $${rootme}/../expect/expect ] ; then \
           echo $${rootme}/../expect/expect ; \
           else echo expect ; fi`
@@ -642,7 +638,7 @@ EXTRA_as_new_SOURCES = config/m68k-parse.y
 
 # stand-alone itbl assembler & disassembler
 
-EXTRA_PROGRAMS = gasp-new itbl-test
+EXTRA_PROGRAMS = itbl-test
 itbl_test_SOURCES = itbl-parse.y itbl-lex.l
 itbl_test_LDADD = itbl-tops.o itbl-test.o $(GASLIBS) @LEXLIB@
 
@@ -2380,9 +2376,6 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I.
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-gasp_new_OBJECTS =  gasp.$(OBJEXT) macro.$(OBJEXT) sb.$(OBJEXT) \
-hash.$(OBJEXT)
-gasp_new_LDFLAGS = 
 itbl_test_OBJECTS =  itbl-parse.$(OBJEXT) itbl-lex.$(OBJEXT)
 itbl_test_DEPENDENCIES =  itbl-tops.o itbl-test.o \
 ../libiberty/libiberty.a
@@ -2414,10 +2407,10 @@ configure configure.in gdbinit.in itbl-lex.c itbl-parse.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
-SOURCES = $(gasp_new_SOURCES) $(itbl_test_SOURCES) $(as_new_SOURCES) $(EXTRA_as_new_SOURCES)
-OBJECTS = $(gasp_new_OBJECTS) $(itbl_test_OBJECTS) $(as_new_OBJECTS)
+SOURCES = $(itbl_test_SOURCES) $(as_new_SOURCES) $(EXTRA_as_new_SOURCES)
+OBJECTS = $(itbl_test_OBJECTS) $(as_new_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -2520,10 +2513,6 @@ distclean-libtool:
 
 maintainer-clean-libtool:
 
-gasp-new$(EXEEXT): $(gasp_new_OBJECTS) $(gasp_new_DEPENDENCIES)
-	@rm -f gasp-new$(EXEEXT)
-	$(LINK) $(gasp_new_LDFLAGS) $(gasp_new_OBJECTS) $(gasp_new_LDADD) $(LIBS)
-
 itbl-test$(EXEEXT): $(itbl_test_OBJECTS) $(itbl_test_DEPENDENCIES)
 	@rm -f itbl-test$(EXEEXT)
 	$(LINK) $(itbl_test_LDFLAGS) $(itbl_test_OBJECTS) $(itbl_test_LDADD) $(LIBS)
@@ -2575,7 +2564,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" = "." && dot_seen=yes; \
+	  test "$$subdir" != "." || dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \
@@ -3274,8 +3263,6 @@ symbols.o: symbols.c $(INCDIR)/symcat.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/obstack.h subsegs.h struc-symbol.h
 write.o: write.c $(INCDIR)/symcat.h subsegs.h $(INCDIR)/obstack.h \
   output-file.h dwarf2dbg.h
-gasp.o: gasp.c $(INCDIR)/getopt.h $(INCDIR)/safe-ctype.h \
-  sb.h macro.h $(INCDIR)/xregex.h $(INCDIR)/xregex2.h
 itbl-ops.o: itbl-ops.c itbl-ops.h $(INCDIR)/symcat.h
 e-crisaout.o: $(srcdir)/config/e-crisaout.c $(INCDIR)/symcat.h \
   emul-target.h

@@ -862,7 +862,7 @@ read_a_source_file (name)
 			  const char *err;
 			  macro_entry *macro;
 
-			  if (check_macro (s, &out, '\0', &err, &macro))
+			  if (check_macro (s, &out, &err, &macro))
 			    {
 			      if (err != NULL)
 				as_bad ("%s", err);
@@ -1855,7 +1855,7 @@ s_irp (irpc)
 
   sb_new (&out);
 
-  err = expand_irp (irpc, 0, &s, &out, get_line_sb, '\0');
+  err = expand_irp (irpc, 0, &s, &out, get_line_sb);
   if (err != NULL)
     as_bad_where (file, line, "%s", err);
 
@@ -2296,8 +2296,7 @@ get_line_sb (line)
   return 1;
 }
 
-/* Define a macro.  This is an interface to macro.c, which is shared
-   between gas and gasp.  */
+/* Define a macro.  This is an interface to macro.c.  */
 
 void
 s_macro (ignore)

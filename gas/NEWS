@@ -1,5 +1,7 @@
 -*- text -*-
 
+* GASP has now been removed.
+
 * Support for Texas Instruments TMS320C4x and TMS320C3x series of
   DSP's contributed by Michael Hayes and Svein E. Seldal.
   

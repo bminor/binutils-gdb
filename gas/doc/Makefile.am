@@ -15,8 +15,6 @@ POD2MAN = pod2man --center="GNU Development Tools" \
 
 man_MANS = as.1
 
-# The gasp.texi file is now deprecated, as GASP has been deprecated.
-# It will disappear in a future release.
 info_TEXINFOS = as.texinfo 
 
 asconfig.texi: $(CONFIG).texi
@@ -71,7 +69,7 @@ install: install-info
 
 # This one isn't ready for prime time yet.  Not even a little bit.
 
-noinst_TEXINFOS = internals.texi gasp.texi
+noinst_TEXINFOS = internals.texi
 
 DISTCLEANFILES = asconfig.texi
 

@@ -1,4 +1,4 @@
-/* macro.c - macro support for gas and gasp
+/* macro.c - macro support for gas
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
@@ -63,7 +63,7 @@ extern void *alloca ();
 #include "asintl.h"
 
 /* The routines in this file handle macro definition and expansion.
-   They are called by both gasp and gas.  */
+   They are called by gas.  */
 
 /* Internal functions.  */
 
@@ -75,8 +75,8 @@ static int get_apost_token PARAMS ((int, sb *, sb *, int));
 static int sub_actual
   PARAMS ((int, sb *, sb *, struct hash_control *, int, sb *, int));
 static const char *macro_expand_body
-  PARAMS ((sb *, sb *, formal_entry *, struct hash_control *, int, int));
-static const char *macro_expand PARAMS ((int, sb *, macro_entry *, sb *, int));
+  PARAMS ((sb *, sb *, formal_entry *, struct hash_control *, int));
+static const char *macro_expand PARAMS ((int, sb *, macro_entry *, sb *));
 
 #define ISWHITE(x) ((x) == ' ' || (x) == '\t')
 
@@ -99,7 +99,7 @@ static struct hash_control *macro_hash;
 
 int macro_defined;
 
-/* Whether we are in GASP alternate mode.  */
+/* Whether we are in alternate syntax mode.  */
 
 static int macro_alternate;
 
@@ -653,12 +653,11 @@ sub_actual (start, in, t, formal_hash, kind, out, copyifnotthere)
 /* Expand the body of a macro.  */
 
 static const char *
-macro_expand_body (in, out, formals, formal_hash, comment_char, locals)
+macro_expand_body (in, out, formals, formal_hash, locals)
      sb *in;
      sb *out;
      formal_entry *formals;
      struct hash_control *formal_hash;
-     int comment_char;
      int locals;
 {
   sb t;
@@ -689,14 +688,7 @@ macro_expand_body (in, out, formals, formal_hash, comment_char, locals)
       else if (in->ptr[src] == '\\')
 	{
 	  src++;
-	  if (in->ptr[src] == comment_char && comment_char != '\0')
-	    {
-	      /* This is a comment, just drop the rest of the line.  */
-	      while (src < in->len
-		     && in->ptr[src] != '\n')
-		src++;
-	    }
-	  else if (in->ptr[src] == '(')
+	  if (in->ptr[src] == '(')
 	    {
 	      /* Sub in till the next ')' literally.  */
 	      src++;
@@ -779,7 +771,7 @@ macro_expand_body (in, out, formals, formal_hash, comment_char, locals)
 	      formal_entry *f;
 
 	      src = sb_skip_white (src + 5, in);
-	      while (in->ptr[src] != '\n' && in->ptr[src] != comment_char)
+	      while (in->ptr[src] != '\n')
 		{
 		  static int loccnt;
 		  char buf[20];
@@ -805,17 +797,6 @@ macro_expand_body (in, out, formals, formal_hash, comment_char, locals)
 		  src = sb_skip_comma (src, in);
 		}
 	    }
-	}
-      else if (comment_char != '\0'
-	       && in->ptr[src] == comment_char
-	       && src + 1 < in->len
-	       && in->ptr[src + 1] == comment_char
-	       && !inquote)
-	{
-	  /* Two comment chars in a row cause the rest of the line to
-             be dropped.  */
-	  while (src < in->len && in->ptr[src] != '\n')
-	    src++;
 	}
       else if (in->ptr[src] == '"'
 	       || (macro_mri && in->ptr[src] == '\''))
@@ -899,12 +880,11 @@ macro_expand_body (in, out, formals, formal_hash, comment_char, locals)
    body.  */
 
 static const char *
-macro_expand (idx, in, m, out, comment_char)
+macro_expand (idx, in, m, out)
      int idx;
      sb *in;
      macro_entry *m;
      sb *out;
-     int comment_char;
 {
   sb t;
   formal_entry *ptr;
@@ -954,7 +934,7 @@ macro_expand (idx, in, m, out, comment_char)
 
   /* Peel off the actuals and store them away in the hash tables' actuals.  */
   idx = sb_skip_white (idx, in);
-  while (idx < in->len && in->ptr[idx] != comment_char)
+  while (idx < in->len)
     {
       int scan;
 
@@ -1056,8 +1036,7 @@ macro_expand (idx, in, m, out, comment_char)
       sb_add_string (&ptr->actual, buffer);
     }
 
-  err = macro_expand_body (&m->sub, out, m->formals, m->formal_hash,
-			   comment_char, 1);
+  err = macro_expand_body (&m->sub, out, m->formals, m->formal_hash, 1);
   if (err != NULL)
     return err;
 
@@ -1090,14 +1069,12 @@ macro_expand (idx, in, m, out, comment_char)
 }
 
 /* Check for a macro.  If one is found, put the expansion into
-   *EXPAND.  COMMENT_CHAR is the comment character--this is used by
-   gasp.  Return 1 if a macro is found, 0 otherwise.  */
+   *EXPAND.  Return 1 if a macro is found, 0 otherwise.  */
 
 int
-check_macro (line, expand, comment_char, error, info)
+check_macro (line, expand, error, info)
      const char *line;
      sb *expand;
-     int comment_char;
      const char **error;
      macro_entry **info;
 {
@@ -1135,7 +1112,7 @@ check_macro (line, expand, comment_char, error, info)
     sb_add_char (&line_sb, *s++);
 
   sb_new (expand);
-  *error = macro_expand (0, &line_sb, macro, expand, comment_char);
+  *error = macro_expand (0, &line_sb, macro, expand);
 
   sb_kill (&line_sb);
 
@@ -1160,13 +1137,12 @@ delete_macro (name)
    success, or an error message otherwise.  */
 
 const char *
-expand_irp (irpc, idx, in, out, get_line, comment_char)
+expand_irp (irpc, idx, in, out, get_line)
      int irpc;
      int idx;
      sb *in;
      sb *out;
      int (*get_line) PARAMS ((sb *));
-     int comment_char;
 {
   const char *mn;
   sb sub;
@@ -1204,10 +1180,10 @@ expand_irp (irpc, idx, in, out, get_line, comment_char)
   sb_reset (out);
 
   idx = sb_skip_comma (idx, in);
-  if (idx >= in->len || in->ptr[idx] == comment_char)
+  if (idx >= in->len)
     {
       /* Expand once with a null string.  */
-      err = macro_expand_body (&sub, out, &f, h, comment_char, 0);
+      err = macro_expand_body (&sub, out, &f, h, 0);
       if (err != NULL)
 	return err;
     }
@@ -1215,7 +1191,7 @@ expand_irp (irpc, idx, in, out, get_line, comment_char)
     {
       if (irpc && in->ptr[idx] == '"')
 	++idx;
-      while (idx < in->len && in->ptr[idx] != comment_char)
+      while (idx < in->len)
 	{
 	  if (!irpc)
 	    idx = get_any_string (idx, in, &f.actual, 1, 0);
@@ -1226,7 +1202,7 @@ expand_irp (irpc, idx, in, out, get_line, comment_char)
 		  int nxt;
 
 		  nxt = sb_skip_white (idx + 1, in);
-		  if (nxt >= in->len || in->ptr[nxt] == comment_char)
+		  if (nxt >= in->len)
 		    {
 		      idx = nxt;
 		      break;
@@ -1236,7 +1212,7 @@ expand_irp (irpc, idx, in, out, get_line, comment_char)
 	      sb_add_char (&f.actual, in->ptr[idx]);
 	      ++idx;
 	    }
-	  err = macro_expand_body (&sub, out, &f, h, comment_char, 0);
+	  err = macro_expand_body (&sub, out, &f, h, 0);
 	  if (err != NULL)
 	    return err;
 	  if (!irpc)

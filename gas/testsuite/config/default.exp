@@ -5,11 +5,6 @@ if ![info exists AS] then {
     set AS [findfile $base_dir/../as-new "../as-new" [transform as]]
 }
 
-global GASP
-if ![info exists GASP] then {
-    set GASP [findfile $base_dir/../gasp-new "../gasp-new" [transform gasp]]
-}
-
 global ASFLAGS
 if ![info exists ASFLAGS] then {
     set ASFLAGS ""
