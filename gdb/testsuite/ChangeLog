@@ -1,5 +1,12 @@
 2002-04-18  Kevin Buettner  <kevinb@redhat.com>
 
+	* gdb.base/shlib-call.exp (additional_flags): AIX doesn't need
+	``-fpic'' when compiling files comprising a shared library, but
+	it does need additional linker flags in order to find shared
+	libraries at run time.
+
+2002-04-18  Kevin Buettner  <kevinb@redhat.com>
+
 	* gdb.base/cvexpr.c (use): New function.
 	(main): Invoke use() on all global variables to prevent
 	some linkers from deleting these otherwise unused symbols.
