@@ -1,3 +1,9 @@
+2002-06-18  Don Howard  <dhoward@redhat.com>
+ 
+        * valops.c (value_ind): Use value_at_lazy() when dereferencing
+        type int expressions.  Thanks to Jim Blandy <jimb@redhat.com> for
+        suggesting this solution.
+
 2002-06-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/romp/xm-rtbsd.h: Delete file.

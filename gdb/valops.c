@@ -961,9 +961,9 @@ value_ind (struct value *arg1)
      to do.  "long long" variables are rare enough that
      BUILTIN_TYPE_LONGEST would seem to be a mistake.  */
   if (TYPE_CODE (base_type) == TYPE_CODE_INT)
-    return value_at (builtin_type_int,
-		     (CORE_ADDR) value_as_long (arg1),
-		     VALUE_BFD_SECTION (arg1));
+    return value_at_lazy (builtin_type_int,
+			  (CORE_ADDR) value_as_long (arg1),
+			  VALUE_BFD_SECTION (arg1));
   else if (TYPE_CODE (base_type) == TYPE_CODE_PTR)
     {
       struct type *enc_type;
