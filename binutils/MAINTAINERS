@@ -54,6 +54,7 @@ SPARC		Jakub Jelinek <jakub@redhat.com>
 DWARF2		Jason Merrill <jason@redhat.com>
 x86_64		Jan Hubicka <jh@suse.cz>
 x86_64		Andreas Jaeger <aj@suse.de>
+z8k		Christian Groessler <cpg@aladdin.de>
 
                --------- CGEN Maintainers -------------
 

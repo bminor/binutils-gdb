@@ -1,3 +1,7 @@
+2001-07-15  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* MAINTAINERS: Add Christian Groessler as maintainer for z8k port.
+
 2001-07-11  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* MAINTAINERS: Add notes about branch checkins.
