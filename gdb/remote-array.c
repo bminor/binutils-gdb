@@ -703,7 +703,7 @@ array_resume (pid, step, sig)
   if (step) {
     printf_monitor ("s\n");
   } else {
-    printf_monitor ("go");
+    printf_monitor ("go\n");
   }
 }
 
