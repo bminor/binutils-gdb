@@ -1202,50 +1202,6 @@ value_from_double (struct type *type, DOUBLEST num)
   return val;
 }
 
-/* Deal with the return-value of a function that has "just returned".
-
-   Extract the return-value (as a "struct value") that a function,
-   using register convention, has just returned to its caller.  Assume
-   that the type of the function is VALTYPE, and that the "just
-   returned" register state is found in RETBUF.
-
-   The function has "just returned" because GDB halts a returning
-   function by setting a breakpoint at the return address (in the
-   caller), and not the return instruction (in the callee).
-
-   Because, in the case of a return from an inferior function call,
-   GDB needs to restore the inferiors registers, RETBUF is normally a
-   copy of the inferior's registers.  */
-
-struct value *
-register_value_being_returned (struct type *valtype, struct regcache *retbuf)
-{
-  struct value *val = allocate_value (valtype);
-
-  /* If the function returns void, don't bother fetching the return
-     value.  See also "using_struct_return".  */
-  if (TYPE_CODE (valtype) == TYPE_CODE_VOID)
-    return val;
-
-  if (!gdbarch_return_value_p (current_gdbarch))
-    {
-      /* NOTE: cagney/2003-10-20: Unlike "gdbarch_return_value", the
-         EXTRACT_RETURN_VALUE and USE_STRUCT_CONVENTION methods do not
-         handle the edge case of a function returning a small
-         structure / union in registers.  */
-      CHECK_TYPEDEF (valtype);
-      EXTRACT_RETURN_VALUE (valtype, retbuf, VALUE_CONTENTS_RAW (val));
-      return val;
-    }
-
-  /* This function only handles "register convention".  */
-  gdb_assert (gdbarch_return_value (current_gdbarch, valtype,
-				    NULL, NULL, NULL)
-	      == RETURN_VALUE_REGISTER_CONVENTION);
-  gdbarch_return_value (current_gdbarch, valtype, retbuf,
-			VALUE_CONTENTS_RAW (val) /*read*/, NULL /*write*/);
-  return val;
-}
 
 /* Should we use DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS instead of
    EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc and TYPE
@@ -1287,7 +1243,7 @@ using_struct_return (struct type *value_type, int gcc_p)
 
   if (code == TYPE_CODE_VOID)
     /* A void return value is never in memory.  See also corresponding
-       code in "register_value_being_returned".  */
+       code in "print_return_value".  */
     return 0;
 
   if (!gdbarch_return_value_p (current_gdbarch))

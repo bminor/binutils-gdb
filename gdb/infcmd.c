@@ -1072,41 +1072,6 @@ advance_command (char *arg, int from_tty)
   until_break_command (arg, from_tty, 1);
 }
 
-
-static struct value *
-legacy_return_value (int struct_return, struct type *value_type)
-{
-  struct value *value;
-
-  if (!struct_return)
-    {
-      /* The return value can be found in the inferior's registers.  */
-      return register_value_being_returned (value_type, stop_registers);
-    }
-
-  if (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
-    {
-      CORE_ADDR addr;
-
-      addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (stop_registers);
-      if (!addr)
-	error ("Function return value unknown.");
-      return value_at (value_type, addr, NULL);
-    }
-
-  /* It is "struct return" yet the value is being extracted,
-     presumably from registers, using EXTRACT_RETURN_VALUE.  This
-     doesn't make sense.  Unfortunately, the legacy interfaces allowed
-     this behavior.  Sigh!  */
-  value = allocate_value (value_type);
-  CHECK_TYPEDEF (value_type);
-  /* If the function returns void, don't bother fetching the return
-     value.  */
-  EXTRACT_RETURN_VALUE (value_type, stop_registers,
-			VALUE_CONTENTS_RAW (value));
-  return value;
-}
-
 /* Print the result of a function at the end of a 'finish' command.  */
 
 static void
@@ -1115,7 +1080,9 @@ print_return_value (int struct_return, struct type *value_type)
   struct gdbarch *gdbarch = current_gdbarch;
   struct cleanup *old_chain;
   struct ui_stream *stb;
-  struct value *value = NULL;
+  struct value *value;
+
+  gdb_assert (TYPE_CODE (value_type) != TYPE_CODE_VOID);
 
   /* FIXME: 2003-09-27: When returning from a nested inferior function
      call, it's possible (with no help from the architecture vector)
@@ -1135,13 +1102,26 @@ print_return_value (int struct_return, struct type *value_type)
 	  gdbarch_return_value (current_gdbarch, value_type, stop_registers,
 				VALUE_CONTENTS_RAW (value), NULL);
 	  break;
-
 	case RETURN_VALUE_STRUCT_CONVENTION:
+	  value = NULL;
 	  break;
+	default:
+	  internal_error (__FILE__, __LINE__, "bad switch");
 	}
     }
+  else if (!struct_return && DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
+    {
+      CORE_ADDR addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (stop_registers);
+      if (!addr)
+	error ("Function return value unknown.");
+      value = value_at (value_type, addr, NULL);
+    }
   else
-    value = legacy_return_value (struct_return, value_type);
+    {
+      value = allocate_value (value_type);
+      EXTRACT_RETURN_VALUE (value_type, stop_registers,
+			    VALUE_CONTENTS_RAW (value));
+    }
 
   if (value)
     {

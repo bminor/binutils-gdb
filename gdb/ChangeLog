@@ -1,3 +1,14 @@
+2004-06-12  Andrew Cagney  <cagney@gnu.org>
+
+	* values.c (register_value_being_returned): Delete function.
+	* infcmd.c (legacy_return_value): Delete function.
+	* infcall.c (call_function_by_hand): Inline
+	"register_value_being_returned", simplify.
+	* values.c (using_struct_return): Update comment, refer to
+	print_return_value instead of register_value_being_returned.
+	* infcmd.c (print_return_value): Inline calls to
+	register_value_being_returned and legacy_return_value.  Simplify.
+
 2004-06-11  Randolph Chung  <tausq@debian.org>
 
 	* somread.c (som_symtab_read): Exclude gcc local symbols.

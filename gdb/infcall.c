@@ -922,9 +922,14 @@ the function call).", name);
      leave the RETBUF alone.  */
   do_cleanups (inf_status_cleanup);
 
-  /* Figure out the value returned by the function.  */
-  if (struct_return)
-    {
+  /* Figure out the value returned by the function, return that.  */
+  {
+    struct value *retval;
+    if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
+      /* If the function returns void, don't bother fetching the
+	 return value.  */
+      retval = allocate_value (value_type);
+    else if (struct_return)
       /* NOTE: cagney/2003-09-27: This assumes that PUSH_DUMMY_CALL
 	 has correctly stored STRUCT_ADDR in the target.  In the past
 	 that hasn't been the case, the old MIPS PUSH_ARGUMENTS
@@ -933,18 +938,30 @@ the function call).", name);
 	 you're seeing problems with values being returned using the
 	 "struct return convention", check that PUSH_DUMMY_CALL isn't
 	 playing tricks.  */
-      struct value *retval = value_at (value_type, struct_addr, NULL);
-      do_cleanups (retbuf_cleanup);
-      return retval;
-    }
-  else
-    {
-      /* The non-register case was handled above.  */
-      struct value *retval = register_value_being_returned (value_type,
-							    retbuf);
-      do_cleanups (retbuf_cleanup);
-      return retval;
-    }
+      retval = value_at (value_type, struct_addr, NULL);
+    else if (gdbarch_return_value_p (current_gdbarch))
+      {
+	/* This code only handles "register convention".  */
+	retval = allocate_value (value_type);
+	gdb_assert (gdbarch_return_value (current_gdbarch, value_type,
+					  NULL, NULL, NULL)
+		    == RETURN_VALUE_REGISTER_CONVENTION);
+	gdbarch_return_value (current_gdbarch, value_type, retbuf,
+			      VALUE_CONTENTS_RAW (retval) /*read*/,
+			      NULL /*write*/);
+      }
+    else
+      {
+	/* NOTE: cagney/2003-10-20: Unlike "gdbarch_return_value", the
+	   EXTRACT_RETURN_VALUE and USE_STRUCT_CONVENTION methods do
+	   not handle the edge case of a function returning a small
+	   structure / union in registers.  */
+	retval = allocate_value (value_type);
+	EXTRACT_RETURN_VALUE (value_type, retbuf, VALUE_CONTENTS_RAW (retval));
+      }
+    do_cleanups (retbuf_cleanup);
+    return retval;
+  }
 }
 
 void _initialize_infcall (void);
