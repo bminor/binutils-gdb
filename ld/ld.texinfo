@@ -966,6 +966,7 @@ demangle by default unless the environment variable @samp{COLLECT_NO_DEMANGLE}
 is set.  These options may be used to override the default.
 
 @cindex dynamic linker, from command line
+@kindex -I@var{file}
 @kindex --dynamic-linker @var{file}
 @item --dynamic-linker @var{file}
 Set the name of the dynamic linker.  This is only meaningful when

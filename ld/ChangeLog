@@ -1,3 +1,23 @@
+2001-05-22  Alexandre Oliva  <aoliva@redhat.com>
+
+	* emulparams/elf_i386_ldso.sh: New, copied from elf_i386.sh.
+	(ELF_INTERPRETER_NAME): Define it.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): Use
+	it.
+	* configure.tgt (targ_emul, targ_extra_emuls)
+	[i[3456]86-*-solaris2*, i[3456]86-*-solaris*]: Use elf_i386_ldso
+	as primary, elf_i386 as extra.
+	* Makefile.am (ALL_EMULATIONS): Added eelf_i386_ldso.o.
+	(eelf_i386_ldso.c): New rule.
+	* Makefile.in: Rebuilt.
+
+2001-05-22  Nick Clifton  <nickc@redhat.com>
+
+	* lexsup.c (ld_options):  Allow -I to be an alias for
+	--dynamic-linker.  This is for Solaris compatability.
+	* ld.texinfo: Document that -I can be used.
+	* ld.1: Regenerate.
+
 2001-05-16  Alan Modra  <amodra@one.net.au>
 
 	* ldlang.c (wild_doit): Use linker_has_input to reliably determine

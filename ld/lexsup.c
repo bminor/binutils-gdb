@@ -201,6 +201,8 @@ static const struct ld_option ld_options[] =
       TWO_DASHES },
   { {"soname", required_argument, NULL, OPTION_SONAME},
       'h', N_("FILENAME"), N_("Set internal name of shared library"), ONE_DASH },
+  { {"dynamic-linker", required_argument, NULL, OPTION_DYNAMIC_LINKER},
+      'I', N_("PROGRAM"), N_("Set the dynamic linker to use"), TWO_DASHES },
   { {"library", required_argument, NULL, 'l'},
       'l', N_("LIBNAME"), N_("Search for library LIBNAME"), TWO_DASHES },
   { {"library-path", required_argument, NULL, 'L'},
@@ -290,8 +292,6 @@ static const struct ld_option ld_options[] =
       '\0', N_("SYMBOL=EXPRESSION"), N_("Define a symbol"), TWO_DASHES },
   { {"demangle", optional_argument, NULL, OPTION_DEMANGLE},
       '\0', N_("[=STYLE]"), N_("Demangle symbol names [using STYLE]"), TWO_DASHES },
-  { {"dynamic-linker", required_argument, NULL, OPTION_DYNAMIC_LINKER},
-      '\0', N_("PROGRAM"), N_("Set the dynamic linker to use"), TWO_DASHES },
   { {"embedded-relocs", no_argument, NULL, OPTION_EMBEDDED_RELOCS},
       '\0', NULL, N_("Generate embedded relocs"), TWO_DASHES},
   { {"fini", required_argument, NULL, OPTION_FINI},
@@ -651,6 +651,7 @@ parse_args (argc, argv)
 	      cplus_demangle_set_style (style);
 	    }
 	  break;
+	case 'I':		/* Used on Solaris.  */
 	case OPTION_DYNAMIC_LINKER:
 	  command_line.interpreter = optarg;
 	  break;

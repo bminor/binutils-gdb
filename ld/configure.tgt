@@ -144,9 +144,13 @@ x86_64-*-linux-gnu*)	targ_emul=elf_x86_64
 			tdir_i386linux=${targ_alias}aout
 			;;
 i[3456]86-*-sysv[45]*)	targ_emul=elf_i386 ;;
-i[3456]86-*-solaris2*)	targ_emul=elf_i386 ;;
+i[3456]86-*-solaris2*)  targ_emul=elf_i386_ldso
+                        targ_extra_emuls="elf_i386"
+                        ;;
 i[3456]86-*-unixware)	targ_emul=elf_i386 ;;
-i[3456]86-*-solaris*)	targ_emul=elf_i386 ;;
+i[3456]86-*-solaris*)   targ_emul=elf_i386_ldso
+                        targ_extra_emuls="elf_i386"
+                        ;;
 i[3456]86-*-netbsd*)	targ_emul=i386nbsd ;;
 i[3456]86-*-netware)	targ_emul=i386nw ;;
 i[3456]86-*-elf*)	targ_emul=elf_i386 ;;

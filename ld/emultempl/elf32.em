@@ -817,6 +817,14 @@ gld${EMULATION_NAME}_before_allocation ()
 	  &link_info, &sinterp, lang_elf_version_info)))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 
+${ELF_INTERPRETER_NAME+"
+  if (sinterp != NULL)
+    {
+      sinterp->contents = ${ELF_INTERPRETER_NAME};
+      sinterp->_raw_size = strlen (sinterp->contents) + 1;
+    }
+
+"}
   /* Let the user override the dynamic linker we are using.  */
   if (command_line.interpreter != NULL
       && sinterp != NULL)

@@ -162,6 +162,7 @@ ALL_EMULATIONS = \
 	eelf_i386.o \
 	eelf_i386_be.o \
 	eelf_i386_chaos.o \
+	eelf_i386_ldso.o \
 	eelf_s390.o \
 	egld960.o \
 	egld960coff.o \
@@ -537,6 +538,9 @@ eelf_i386_be.c: $(srcdir)/emulparams/elf_i386_be.sh \
 eelf_i386_chaos.c: $(srcdir)/emulparams/elf_i386_chaos.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386_chaos "$(tdir_elf_i386_chaos)"
+eelf_i386_ldso.c: $(srcdir)/emulparams/elf_i386_ldso.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf_i386_ldso "$(tdir_elf_i386_ldso)"
 eelf_s390.c: $(srcdir)/emulparams/elf_s390.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_s390 "$(tdir_elf_s390)"
