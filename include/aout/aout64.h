@@ -36,6 +36,7 @@ struct external_exec
 #define OMAGIC 0407		/* ...object file or impure executable.  */
 #define NMAGIC 0410		/* Code indicating pure executable.  */
 #define ZMAGIC 0413		/* Code indicating demand-paged executable.  */
+#define BMAGIC 0415		/* Used by a b.out object.  */
 
 /* This indicates a demand-paged executable with the header in the text.
    It is used by 386BSD (and variants) and Linux, at least.  */
