@@ -1,3 +1,7 @@
+2004-08-31  Eric Botcazou  <ebotcazou@libertysurf.fr>
+
+	* elf.c (special_sections): Add .gnu.linkonce.b modelled on .bss.
+
 2004-08-30  Nathanael Nerode  <neroden@gcc.gnu.org>
 
 	* acinclude.m4: Require AC_CANONICAL_TARGET, not AC_CANONICAL_SYSTEM.
