@@ -1,3 +1,12 @@
+2001-06-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.disasm/Makefile.in (clean mostlyclean): Add h8300s to list
+	of files to delete.
+
+	From 2000-06-15 Kazu Hirata <kazu@hxi.com>:
+	* gdb.disasm/h8300s.exp: New file.
+	gdb.disasm/h8300s.s: Likewise.
+
 2001-06-27  Andrew Cagney  <ac131313@redhat.com>
 
 	* lib/mi-support.exp (mi_delete_breakpoints): Accept mi1 format

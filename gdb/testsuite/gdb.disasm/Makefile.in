@@ -9,12 +9,10 @@ all:
 	@echo "Nothing to be done for all..."	
 
 clean mostlyclean:
-	-rm -f *.o *.diff *~ *.bad core sh3 hppa mn10200 mn10300
+	-rm -f *.o *.diff *~ *.bad core h8300s hppa mn10200 mn10300 sh3
 
 distclean maintainer-clean realclean: clean
 	-rm -f Makefile config.status config.log
 
 Makefile: $(srcdir)/Makefile.in $(srcdir)/configure.in
 	$(SHELL) ./config.status --recheck
-
-
