@@ -1,5 +1,10 @@
 2004-11-08  Andrew Cagney  <cagney@gnu.org>
 
+	GDB 6.3 released.
+	* version.in: Bump to version 6.3.
+
+2004-11-08  Andrew Cagney  <cagney@gnu.org>
+
 	* README: Refer to 6.3, not 6.2, update directory listing droppng
 	references to intl/ and mmalloc/.
 	* PROBLEMS: Refer to 6.3 not 6.2.
