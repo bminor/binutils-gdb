@@ -37,18 +37,6 @@ rename(from, to)
 #include <string.h>
 #define index(s,c)		strchr(s,c)
 #define rindex(s,c)		strrchr(s,c)
-
-#ifdef SEEK_SET
-#	ifndef L_SET
-#		define L_SET SEEK_SET
-#	endif
-# endif
-
-#ifdef SEEK_CUR
-#	ifndef L_INCR
-#		define L_INCR SEEK_CUR
-#	endif
-# endif
  */
 
 /* EXACT TYPES */

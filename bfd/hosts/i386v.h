@@ -16,10 +16,6 @@
 #define SEEK_CUR 1
 #endif
 
-#ifndef L_SET
-# define L_SET SEEK_SET
-#endif
-
 #define	POSIX_UTIME
 
 /* Some things that need to be defined in order to make code written for
@@ -33,22 +29,6 @@
 #include <string.h>
 #define index(s,c)		strchr(s,c)
 #define rindex(s,c)		strrchr(s,c)
-
-/*
- * Might not need these. Leave them out for now.
- *
-#ifdef SEEK_SET
-#	ifndef L_SET
-#		define L_SET SEEK_SET
-#	endif
-# endif
-
-#ifdef SEEK_CUR
-#	ifndef L_INCR
-#		define L_INCR SEEK_CUR
-#	endif
-# endif
- */
 
 #ifndef DONTDECLARE_MALLOC
 extern PTR  EXFUN(malloc,(unsigned));

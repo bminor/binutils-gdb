@@ -17,10 +17,6 @@
 #define	MAXPATHLEN	1024
 #endif	/* MAXPATHLEN */
 
-#ifndef L_SET
-#	define L_SET 0
-#endif
-
 #ifndef DONTDECLARE_MALLOC
 extern PTR  EXFUN(malloc,(unsigned));
 extern PTR  EXFUN(realloc, (PTR, unsigned));

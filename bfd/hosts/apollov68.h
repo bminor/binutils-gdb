@@ -28,22 +28,6 @@
 
 #include <string.h>
 
-/*
- * Might not need these. Leave them out for now.
- *
-#ifdef SEEK_SET
-#	ifndef L_SET
-#		define L_SET SEEK_SET
-#	endif
-# endif
-
-#ifdef SEEK_CUR
-#	ifndef L_INCR
-#		define L_INCR SEEK_CUR
-#	endif
-# endif
- */
-
 #ifndef DONTDECLARE_MALLOC
 extern PTR  EXFUN(malloc,(unsigned));
 extern PTR  EXFUN(realloc, (PTR, unsigned));
