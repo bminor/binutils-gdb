@@ -125,7 +125,8 @@ fetch_register (int regnum)
   if (FETCH_PSEUDO_REGISTER_P ()
       && pseudo_register (regnum))
     FETCH_PSEUDO_REGISTER (regnum);
-  target_fetch_registers (regnum);
+  else
+    target_fetch_registers (regnum);
 }
 
 /* Write register REGNUM cached value to the target.  */
@@ -140,7 +141,8 @@ store_register (int regnum)
   if (STORE_PSEUDO_REGISTER_P ()
       && pseudo_register (regnum))
     STORE_PSEUDO_REGISTER (regnum);
-  target_store_registers (regnum);
+  else
+    target_store_registers (regnum);
 }
 
 /* Low level examining and depositing of registers.

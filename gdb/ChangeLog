@@ -1,3 +1,10 @@
+2002-02-05  Michael Snyder  <msnyder@redhat.com>
+
+	* regcache.c (fetch_register): Call target_fetch_register
+	only if we don't call FETCH_PSEUDO_REGISTER.
+	(store_register): Call target_store_register only if we
+	don't call STORE_PSEUDO_REGISTER.
+
 2002-02-05  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdbarch.sh: Add definitions for COFF_MAKEMSYMBOL_SPECIAL and
