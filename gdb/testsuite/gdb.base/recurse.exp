@@ -43,7 +43,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $objdir/$subdir/$binfile
 
 # For now we only run this on PAs running BSD.
-if {[file exists $objdir/$subdir/$binfile] && [istarget "hppa*-*-bsd*"]} then {
+if {[istarget "sparc*-*-sunos4*"] || [istarget "hppa*-*-bsd*"]} then {
 
     # Preserve the old timeout, and set a new one that should be
     # sufficient to avoid timing out during this test.
@@ -94,6 +94,7 @@ if {[file exists $objdir/$subdir/$binfile] && [istarget "hppa*-*-bsd*"]} then {
 
 	# Continue until second set of b (second instance).
 	send "cont\n"
+	setup_xfail "sparc*-*-sunos4*"
 	expect {
 	    -re "Continuing.*\[Ww\]atchpoint.*: b.*Old value = 5.*New value = 120.*return.*$prompt $" { pass "watchpoint hit, second time (second instance)" }
 	    -re ".*$prompt $" {
