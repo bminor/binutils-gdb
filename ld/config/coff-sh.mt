@@ -1,1 +1,2 @@
+EMUL=shl
 EMUL=sh

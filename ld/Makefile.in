@@ -193,6 +193,7 @@ ALL_CFLAGS = $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(CFLAGS)
 BFDLIB = ../bfd/libbfd.a
 LIBIBERTY = ../libiberty/libiberty.a
 
+
 ALL_EMULATIONS = ea29k.o ealpha.o ecoff_sparc.o eebmon29k.o \
 	eelf32_sparc.o eelf32bmip.o eelf32lmip.o eelf32ppc.o \
 	eelf64_sparc.o eelf_i386.o egld960.o ego32.o eh8300.o \
@@ -202,7 +203,7 @@ ALL_EMULATIONS = ea29k.o ealpha.o ecoff_sparc.o eebmon29k.o \
 	ei386nbsd.o ei386nw.o elnk960.o em68kaout.o em68kcoff.o \
 	em68klynx.o em68knbsd.o em88kbcs.o emipsbig.o emipsbsd.o \
 	emipsidt.o emipsidtl.o emipslit.o enews.o ens32knbsd.o eppcnw.o \
-	eriscix.o esa29200.o esh.o esparclynx.o esparcnbsd.o \
+	eriscix.o esa29200.o eshl.o esh.o esparclynx.o esparcnbsd.o \
 	est2000.o esun3.o esun4.o evanilla.o evax.o evsta.o \
 	ez8ksim.o
 
@@ -347,6 +348,9 @@ eh8500s.c: $(srcdir)/emulparams/h8500s.sh \
 esh.c: $(srcdir)/emulparams/sh.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sh.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sh
+eshl.c: $(srcdir)/emulparams/shl.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sh.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shl
 est2000.c: $(srcdir)/emulparams/st2000.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/st2000.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} st2000
@@ -444,16 +448,16 @@ eppcnw.c:	$(srcdir)/emulparams/ppcnw.sh \
 	${GENSCRIPTS} ppcnw
 
 ei386nbsd.c:	$(srcdir)/emulparams/i386nbsd.sh \
-  $(srcdir)/emultmpl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386nbsd
 em68knbsd.c:	$(srcdir)/emulparams/m68knbsd.sh \
-  $(srcdir)/emultmpl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68knbsd
 ens32knbsd.c:	$(srcdir)/emulparams/ns32knbsd.sh \
-  $(srcdir)/emultmpl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} ns32knbsd
 esparcnbsd.c:	$(srcdir)/emulparams/sparcnbsd.sh \
-  $(srcdir)/emultmpl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sparcnbsd
 
 $(LD_PROG): $(OFILES) $(BFDLIB) $(LIBIBERTY)
