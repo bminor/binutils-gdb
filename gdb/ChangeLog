@@ -1,3 +1,34 @@
+Mon Aug 31 13:47:45 1992  Fred Fish  (fnf@cygnus.com)
+
+	* dwarfread.c (cu_language):  New local variable to record
+	language for current compilation unit being processed.
+	* dwarfread.c (set_cu_language):  New local function to decode
+	and record language for current compilation unit being processed.
+	* dwarfread.c (synthesize_typedef):  Add local function to
+	synthesize a typedef for C++ classes, structs, unions, and
+	enumerations.
+	* dwarfread.c (read_structure_scope):  Synthesize typedefs
+	for C++ classes, structs and unions.
+	* dwarfread.c (read_enumeration):  Synthesize typedefs for
+	C++ enumerations.
+	* dwarfread.c (read_file_scope):   Call set_cu_language to
+	record language for current compilation unit.  After symtab
+	is built, save this recorded language.
+	* dwarfread.c (process_dies, add_partial_symbol, struct_type,
+	scan_partial_symbols, new_symbol):  Recognize TAG_class_type.
+	* dwarfread.c (add_partial_symbol):  Synthesize partial symbol
+	typedefs for C++ classes, structs, unions, and enumerations.
+	* dwarfread.c (scan_compilation_units):  Call set_cu_language
+	to record language for current compilation unit.	
+	* dwarfread.c (scan_partial_symbols):  Call add_enum_psymbol here
+	for TAG_enumeration_types, rather than in add_partial_symbol.
+	* dwarfread.c (add_partial_symbol):  Combine TAG_enumeration_type
+	case with class, struct, and union type cases, now that they are
+	the same.  Remove tests for non-NULL name attributes, now done
+	by callers.
+	* gdbtypes.h (TYPE_CODE_CLASS):  Add type for C++ classes, but
+	treat as alias for TYPE_CODE_STRUCT for now.
+
 Sun Aug 30 21:18:51 1992  Fred Fish  (fnf@cygnus.com)
 
 	* {i386-tdep.c, m68k-tdep.c, mips-tdep.c, sparc-tdep.c}

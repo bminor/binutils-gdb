@@ -83,6 +83,12 @@ enum type_code
   TYPE_CODE_BOOL		/* Builtin Modula-2 BOOLEAN */
 };
 
+/* For now allow source to use TYPE_CODE_CLASS for C++ classes, as an
+   alias for TYPE_CODE_STRUCT.  Eventually these should probably be
+   officially distinct types within gdb. */
+
+#define TYPE_CODE_CLASS TYPE_CODE_STRUCT
+
 /* Some bits for the type's flags word. */
 
 /* Explicitly unsigned integer type */

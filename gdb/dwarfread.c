@@ -300,6 +300,15 @@ struct pending **list_in_scope = &file_symbols;
 static struct type **utypes;	/* Pointer to array of user type pointers */
 static int numutypes;		/* Max number of user type pointers */
 
+/* Record the language for the compilation unit which is currently being
+   processed.  We know it once we have seen the TAG_compile_unit DIE,
+   and we need it while processing the DIE's for that compilation unit.
+   It is eventually saved in the symtab structure, but we don't finalize
+   the symtab struct until we have processed all the DIE's for the
+   compilation unit. */
+
+static enum language cu_language;
+
 /* Forward declarations of static functions so we don't have to worry
    about ordering within this file.  */
 
@@ -417,12 +426,68 @@ alloc_utype PARAMS ((DIE_REF, struct type *));
 static struct symbol *
 new_symbol PARAMS ((struct dieinfo *, struct objfile *));
 
+static void
+synthesize_typedef PARAMS ((struct dieinfo *, struct objfile *,
+			    struct type *));
+
 static int
 locval PARAMS ((char *));
 
 static void
 record_minimal_symbol PARAMS ((char *, CORE_ADDR, enum minimal_symbol_type,
 			       struct objfile *));
+
+static void
+set_cu_language PARAMS ((struct dieinfo *));
+
+/*
+
+LOCAL FUNCTION
+
+	set_cu_language -- set local copy of language for compilation unit
+
+SYNOPSIS
+
+	void
+	set_cu_language (struct dieinfo *dip)
+
+DESCRIPTION
+
+	Decode the language attribute for a compilation unit DIE and
+	remember what the language was.  We use this at various times
+	when processing DIE's for a given compilation unit.
+
+RETURNS
+
+	No return value.
+
+ */
+
+static void
+set_cu_language (dip)
+     struct dieinfo *dip;
+{
+  switch (dip -> at_language)
+    {
+      case LANG_C89:
+      case LANG_C:
+        cu_language = language_c;
+	break;
+      case LANG_C_PLUS_PLUS:
+	cu_language = language_cplus;
+	break;
+      case LANG_ADA83:
+      case LANG_COBOL74:
+      case LANG_COBOL85:
+      case LANG_FORTRAN77:
+      case LANG_FORTRAN90:
+      case LANG_PASCAL83:
+      case LANG_MODULA2:
+      default:
+	cu_language = language_unknown;
+	break;
+    }
+}
 
 /*
 
@@ -818,6 +883,10 @@ struct_type (dip, thisdie, enddie, objfile)
   INIT_CPLUS_SPECIFIC(type);
   switch (dip -> die_tag)
     {
+      case TAG_class_type:
+        TYPE_CODE (type) = TYPE_CODE_CLASS;
+	tpart1 = "class";
+	break;
       case TAG_structure_type:
         TYPE_CODE (type) = TYPE_CODE_STRUCT;
 	tpart1 = "struct";
@@ -830,7 +899,7 @@ struct_type (dip, thisdie, enddie, objfile)
 	/* Should never happen */
 	TYPE_CODE (type) = TYPE_CODE_UNDEF;
 	tpart1 = "???";
-	SQUAWK (("missing structure or union tag"));
+	SQUAWK (("missing class, structure, or union tag"));
 	break;
     }
   /* Some compilers try to be helpful by inventing "fake" names for
@@ -992,9 +1061,14 @@ read_structure_scope (dip, thisdie, enddie, objfile)
   type = struct_type (dip, thisdie, enddie, objfile);
   if (!(TYPE_FLAGS (type) & TYPE_FLAG_STUB))
     {
-      if ((sym = new_symbol (dip, objfile)) != NULL)
+      sym = new_symbol (dip, objfile);
+      if (sym != NULL)
 	{
 	  SYMBOL_TYPE (sym) = type;
+	  if (cu_language == language_cplus)
+	    {
+	      synthesize_typedef (dip, objfile, type);
+	    }
 	}
     }
 }
@@ -1371,9 +1445,14 @@ read_enumeration (dip, thisdie, enddie, objfile)
   struct symbol *sym;
   
   type = enum_type (dip, objfile);
-  if ((sym = new_symbol (dip, objfile)) != NULL)
+  sym = new_symbol (dip, objfile);
+  if (sym != NULL)
     {
       SYMBOL_TYPE (sym) = type;
+      if (cu_language == language_cplus)
+	{
+	  synthesize_typedef (dip, objfile, type);
+	}
     }
 }
 
@@ -1649,6 +1728,7 @@ read_file_scope (dip, thisdie, enddie, objfile)
       objfile -> ei.entry_file_lowpc = dip -> at_low_pc;
       objfile -> ei.entry_file_highpc = dip -> at_high_pc;
     }
+  set_cu_language (dip);
   if (dip -> at_producer != NULL)
     {
       handle_producer (dip -> at_producer);
@@ -1663,19 +1743,7 @@ read_file_scope (dip, thisdie, enddie, objfile)
   symtab = end_symtab (dip -> at_high_pc, 0, 0, objfile);
   if (symtab != NULL)
     {
-      /* FIXME:  The following may need to be expanded for other languages */
-      switch (dip -> at_language)
-	{
-	  case LANG_C89:
-	  case LANG_C:
-	    symtab -> language = language_c;
-	    break;
-	  case LANG_C_PLUS_PLUS:
-	    symtab -> language = language_cplus;
-	    break;
-	  default:
-	    ;
-	}
+      symtab -> language = cu_language;
     }      
   do_cleanups (back_to);
   utypes = NULL;
@@ -1745,6 +1813,7 @@ process_dies (thisdie, enddie, objfile)
 	    case TAG_lexical_block:
 	      read_lexical_block_scope (&di, thisdie, nextdie, objfile);
 	      break;
+	    case TAG_class_type:
 	    case TAG_structure_type:
 	    case TAG_union_type:
 	      read_structure_scope (&di, thisdie, nextdie, objfile);
@@ -2311,6 +2380,9 @@ DESCRIPTION
 	add to a partial symbol table, finish filling in the die info
 	and then add a partial symbol table entry for it.
 
+NOTES
+
+	The caller must ensure that the DIE has a valid name attribute.
 */
 
 static void
@@ -2354,22 +2426,22 @@ add_partial_symbol (dip, objfile)
 			   objfile -> static_psymbols,
 			   0);
       break;
+    case TAG_class_type:
     case TAG_structure_type:
     case TAG_union_type:
+    case TAG_enumeration_type:
       ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
 			   STRUCT_NAMESPACE, LOC_TYPEDEF,
 			   objfile -> static_psymbols,
 			   0);
-      break;
-    case TAG_enumeration_type:
-      if (dip -> at_name)
+      if (cu_language == language_cplus)
 	{
+	  /* For C++, these implicitly act as typedefs as well. */
 	  ADD_PSYMBOL_TO_LIST (dip -> at_name, strlen (dip -> at_name),
-			       STRUCT_NAMESPACE, LOC_TYPEDEF,
+			       VAR_NAMESPACE, LOC_TYPEDEF,
 			       objfile -> static_psymbols,
 			       0);
 	}
-      add_enum_psymbol (dip, objfile);
       break;
     }
 }
@@ -2495,6 +2567,7 @@ scan_partial_symbols (thisdie, enddie, objfile)
 		}
 	      break;
 	    case TAG_typedef:
+	    case TAG_class_type:
 	    case TAG_structure_type:
 	    case TAG_union_type:
 	      completedieinfo (&di, objfile);
@@ -2505,7 +2578,11 @@ scan_partial_symbols (thisdie, enddie, objfile)
 	      break;
 	    case TAG_enumeration_type:
 	      completedieinfo (&di, objfile);
-	      add_partial_symbol (&di, objfile);
+	      if (di.at_name)
+		{
+		  add_partial_symbol (&di, objfile);
+		}
+	      add_enum_psymbol (&di, objfile);
 	      break;
 	    }
 	}
@@ -2586,6 +2663,7 @@ scan_compilation_units (filename, thisdie, enddie, dbfoff, lnoffset, objfile)
       else
 	{
 	  completedieinfo (&di, objfile);
+	  set_cu_language (&di);
 	  if (di.at_sibling != 0)
 	    {
 	      nextdie = dbbase + di.at_sibling - dbroff;
@@ -2600,8 +2678,8 @@ scan_compilation_units (filename, thisdie, enddie, dbfoff, lnoffset, objfile)
 
 	  /* First allocate a new partial symbol table structure */
 
-	  pst = start_psymtab_common (objfile, base_section_offsets, di.at_name,
-				      di.at_low_pc,
+	  pst = start_psymtab_common (objfile, base_section_offsets,
+				      di.at_name, di.at_low_pc,
 				      objfile -> global_psymbols.next,
 				      objfile -> static_psymbols.next);
 
@@ -2663,7 +2741,8 @@ new_symbol (dip, objfile)
       sym = (struct symbol *) obstack_alloc (&objfile -> symbol_obstack,
 					     sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
-      SYMBOL_NAME (sym) = create_name (dip -> at_name, &objfile->symbol_obstack);
+      SYMBOL_NAME (sym) = create_name (dip -> at_name,
+				       &objfile->symbol_obstack);
       /* default assumptions */
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       SYMBOL_CLASS (sym) = LOC_STATIC;
@@ -2736,6 +2815,7 @@ new_symbol (dip, objfile)
 	  /* From varargs functions; gdb doesn't seem to have any interest in
 	     this information, so just ignore it for now. (FIXME?) */
 	  break;
+	case TAG_class_type:
 	case TAG_structure_type:
 	case TAG_union_type:
 	case TAG_enumeration_type:
@@ -2756,6 +2836,50 @@ new_symbol (dip, objfile)
 	}
     }
   return (sym);
+}
+
+/*
+
+LOCAL FUNCTION
+
+	synthesize_typedef -- make a symbol table entry for a "fake" typedef
+
+SYNOPSIS
+
+	static void synthesize_typedef (struct dieinfo *dip,
+					struct objfile *objfile,
+					struct type *type);
+
+DESCRIPTION
+
+	Given a pointer to a DWARF information entry, synthesize a typedef
+	for the name in the DIE, using the specified type.
+
+	This is used for C++ class, structs, unions, and enumerations to
+	set up the tag name as a type.
+
+ */
+
+static void
+synthesize_typedef (dip, objfile, type)
+     struct dieinfo *dip;
+     struct objfile *objfile;
+     struct type *type;
+{
+  struct symbol *sym = NULL;
+  
+  if (dip -> at_name != NULL)
+    {
+      sym = (struct symbol *)
+	obstack_alloc (&objfile -> symbol_obstack, sizeof (struct symbol));
+      memset (sym, 0, sizeof (struct symbol));
+      SYMBOL_NAME (sym) = create_name (dip -> at_name,
+				       &objfile->symbol_obstack);
+      SYMBOL_TYPE (sym) = type;
+      SYMBOL_CLASS (sym) = LOC_TYPEDEF;
+      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      add_symbol_to_list (sym, list_in_scope);
+    }
 }
 
 /*
