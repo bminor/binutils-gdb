@@ -54,8 +54,3 @@ extern int unlink();
 
 
 #include "fopen-same.h"
-
-/* From ANSI C <stddef.h>, which we can't depend upon the existence of */
-#ifndef	offsetof
-#define	offsetof(type,memb)	((size_t)&(((type *)0)->memb))
-#endif

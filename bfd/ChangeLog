@@ -1,3 +1,8 @@
+Mon Sep 27 18:00:41 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* archive.c: Define offsetof here.
+	* hosts/*.h: Don't define it here.
+
 Mon Sep 27 19:09:27 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elfcode.h (bfd_section_from_shdr): Set filepos for SHT_STRTAB
