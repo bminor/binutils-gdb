@@ -171,7 +171,7 @@ ALL_EMULATIONS = em_lnk960.o em_sun3.o em_i386aout.o em_go32.o em_vsta.o \
 	em_vanilla.o em_i386coff.o em_z8ksim.o em_mipslit.o em_i386bsd.o \
 	em_mipsbig.o em_mipsbsd.o em_mipsidt.o em_vax.o em_h8500.o \
 	em_h8500b.o em_h8500s.o em_h8500c.o em_h8500m.o \
-	em_hppaosf.o em_mipsidtl.o em_sh.o em_elf_i386.o em_alpha.o \
+	em_hppaelf.o em_mipsidtl.o em_sh.o em_elf_i386.o em_alpha.o \
 	em_i386lynx.o em_m68klynx.o em_sparclynx.o em_coff_sparc.o \
 	em_delta68.o \
 	$(OTHER_EMULATIONS)
@@ -269,9 +269,9 @@ em_hp300bsd.c: $(srcdir)/emulparams/hp300bsd.sh \
 em_hp3hpux.c: $(srcdir)/emulparams/hp3hpux.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} hp3hpux
-em_hppaosf.c: $(srcdir)/emulparams/hppaosf.sh \
-  $(srcdir)/emultempl/hppaosf.em $(srcdir)/scripttempl/hppaosf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} hppaosf
+em_hppaelf.c: $(srcdir)/emulparams/hppaelf.sh \
+  $(srcdir)/emultempl/hppaelf.em $(srcdir)/scripttempl/hppaelf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} hppaelf
 em_i386aout.c: $(srcdir)/emulparams/i386aout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} i386aout
@@ -667,8 +667,8 @@ install:
 	  ln $(bindir)/$$n $(tooldir)/bin/ld \
 	   || $(INSTALL_PROGRAM) ld.new $(tooldir)/bin/ld
 
-install-info: 
-	for i in ld.info* ; do \
+install-info: ld.info
+	for i in $<* ; do \
 		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
 
