@@ -620,13 +620,30 @@ print_insn_arg (char *d, register char *p, CORE_ADDR addr,
 static struct gdbarch *
 vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
+  struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
-  /* Right now there is only one VAX architecture variant.  */
-  if (arches != NULL)
-    return (arches->gdbarch);
+  /* Try to determine the ABI of the object we are loading.  */
 
-  gdbarch = gdbarch_alloc (&info, NULL);
+  if (info.abfd != NULL)
+    osabi = gdbarch_lookup_osabi (info.abfd);
+
+  /* Find a candidate among extant architectures.  */
+  for (arches = gdbarch_list_lookup_by_info (arches, &info);
+       arches != NULL;
+       arches = gdbarch_list_lookup_by_info (arches->next, &info))
+    {
+      /* Make sure the ABI selection matches.  */
+      tdep = gdbarch_tdep (arches->gdbarch);
+      if (tdep && tdep->osabi == osabi)
+	return arches->gdbarch;
+    }
+
+  tdep = xmalloc (sizeof (struct gdbarch_tdep));
+  gdbarch = gdbarch_alloc (&info, tdep);
+
+  tdep->osabi = osabi;
 
   /* Register info */
   set_gdbarch_num_regs (gdbarch, VAX_NUM_REGS);
@@ -696,13 +713,28 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Misc info */
   set_gdbarch_function_start_offset (gdbarch, 2);
 
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch, osabi);
+
   return (gdbarch);
+}
+
+static void
+vax_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (tdep == NULL)
+    return;
+
+  fprintf_unfiltered (file, "vax_dump_tdep: OS ABI = %s\n",
+		      gdbarch_osabi_name (tdep->osabi));
 }
 
 void
 _initialize_vax_tdep (void)
 {
-  gdbarch_register (bfd_arch_vax, vax_gdbarch_init, NULL);
+  gdbarch_register (bfd_arch_vax, vax_gdbarch_init, vax_dump_tdep);
 
   tm_print_insn = vax_print_insn;
 }

@@ -665,6 +665,7 @@ ui_out_h =      ui-out.h
 valprint_h =	valprint.h
 value_h =	value.h $(symtab_h) $(gdbtypes_h) $(expression_h) $(doublest_h)
 varobj_h =      varobj.h $(symtab_h) $(gdbtypes_h)
+vax_tdep_h =	vax-tdep.h osabi.h
 version_h = 	version.h
 wrapper_h =	wrapper.h
 xcoffsolib_h =	xcoffsolib.h
@@ -2236,7 +2237,7 @@ values.o: values.c $(defs_h) $(expression_h) $(frame_h) $(gdbcmd_h) \
 	$(gdb_string_h) scm-lang.h $(doublest_h)
 
 vax-tdep.o: vax-tdep.c $(OP_INCLUDE)/vax.h $(defs_h) $(symtab_h) \
-	$(arch_utils_h) $(inferior_h) vax-tdep.h
+	$(arch_utils_h) $(inferior_h) $(vax_tdep_h)
 
 x86-64-linux-tdep.o : x86-64-linux-tdep.c $(defs_h) $(inferior_h) \
 	$(gdbcore_h) $(regcache_h) x86-64-tdep.h i386-tdep.h $(dwarf2cfi_h)

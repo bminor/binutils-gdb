@@ -1,3 +1,13 @@
+2002-06-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (vax_tdep_h): Define.  
+	(vax-tdep.o): Use $(vax_tdep_h).
+	* vax-tdep.c (vax_gdbarch_init): Use generic OS ABI framework.
+	(vax_dump_tdep): New function. 
+	(_initialize_vax_tdep): Register vax_dump_tdep.
+	* vax-tdep.h: Include osabi.h.     
+	(struct gdbarch_tdep): New. 
+
 2002-06-26  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.h (deprecated_generic_find_dummy_frame): Rename
