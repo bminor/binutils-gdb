@@ -7,7 +7,7 @@
 # numbering a bit, to hold kernel regs, and adds support for looking at
 # the upage.
 
+TDEPFILES= a29k-tdep.o remote-mm.o remote-adapt.o
 TM_FILE= tm-ultra3.h
-TDEPFILES= a29k-pinsn.o a29k-tdep.o remote-mm.o remote-adapt.o
 
 MT_CFLAGS = -DKERNEL_DEBUGGING -DNO_HIF_SUPPORT

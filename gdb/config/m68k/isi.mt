@@ -1,3 +1,3 @@
 # Target: ISI Optimum V (3.05) under 4.3bsd.
-TDEPFILES= m68k-pinsn.o
+TDEPFILES=
 TM_FILE= tm-isi.h

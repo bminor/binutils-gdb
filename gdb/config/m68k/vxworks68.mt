@@ -1,3 +1,3 @@
-# Target: VxWorks running on a 68000
-TDEPFILES= m68k-pinsn.o m68k-tdep.o remote-vx.o xdr_ld.o xdr_ptrace.o xdr_rdb.o
+# Target: Motorola m68k running VxWorks
+TDEPFILES= m68k-tdep.o remote-vx.o xdr_ld.o xdr_ptrace.o xdr_rdb.o
 TM_FILE= tm-vx68.h

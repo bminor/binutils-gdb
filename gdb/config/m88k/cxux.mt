@@ -1,4 +1,3 @@
 # Target: Motorola 88k running Harris CX/UX
-
+TDEPFILES= m88k-tdep.o remote-bug.o
 TM_FILE= tm-cxux.h
-TDEPFILES= m88k-tdep.o m88k-pinsn.o remote-bug.o

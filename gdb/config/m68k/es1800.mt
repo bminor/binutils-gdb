@@ -5,5 +5,5 @@
 # configurations.  However, before that happens remote-es.c has to be
 # fixed to compile on a DOS host.
 
-TDEPFILES= m68k-pinsn.o m68k-tdep.o remote-es.o 
+TDEPFILES= m68k-tdep.o remote-es.o 
 TM_FILE= tm-es1800.h
