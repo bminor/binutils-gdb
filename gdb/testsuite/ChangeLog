@@ -1,5 +1,9 @@
 Tue Mar 14 07:39:19 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.base/funcargs.exp: Replace \[(\]+ with \\(.  The latter is
+	clearer and does not spuriously match multiple ('s.  Likewise for
+	) and *.
+
 	* gdb.base/nodebug.exp: Test ability to call a function and pass
 	it a string (even with no debugging info).
 

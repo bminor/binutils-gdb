@@ -56,7 +56,7 @@ proc integral_args {} {
     setup_xfail "a29k-*-udi"
     gdb_run_cmd
     expect {
-	-re ".* call0a \[(\]+c=97 'a', s=1, i=2, l=3\[)\]+ .*$prompt $" {
+	-re ".* call0a \\(c=97 'a', s=1, i=2, l=3\\) .*$prompt $" {
 	    pass "run to call0a"
 	}
 	-re "$prompt $"  { fail "run to call0a" ; return }
@@ -71,22 +71,22 @@ proc integral_args {} {
     gdb_test "print l" ".* = 3"
 
     # Continue; should stop at call0b and print actual arguments.
-    if [gdb_test "cont" ".* call0b \[(\]+s=1, i=2, l=3, c=97 'a'\[)\]+ " "continue to call0b"] {
+    if [gdb_test "cont" ".* call0b \\(s=1, i=2, l=3, c=97 'a'\\) " "continue to call0b"] {
 	return 
     }
 
     # Continue; should stop at call0c and print actual arguments.
-    if [gdb_test "cont" ".* call0c \[(\]+i=2, l=3, c=97 'a', s=1\[)\]+ " "continue to call0c"] {
+    if [gdb_test "cont" ".* call0c \\(i=2, l=3, c=97 'a', s=1\\) " "continue to call0c"] {
 	return
     }
 
     # Continue; should stop at call0d and print actual arguments.
-    if [gdb_test "cont" ".* call0d \[(\]+l=3, c=97 'a', s=1, i=2\[)\]+ " "continue to call0d";] {
+    if [gdb_test "cont" ".* call0d \\(l=3, c=97 'a', s=1, i=2\\) " "continue to call0d";] {
 	return
     }
 
     # Continue; should stop at call0e and print actual arguments.
-    if [gdb_test "cont" ".* call0e \[(\]+c1=97 'a', l=3, c2=97 'a', i=2, c3=97 'a', s=1, c4=97 'a', c5=97 'a'\[)\]+ " "continue to call0e" ] {
+    if [gdb_test "cont" ".* call0e \\(c1=97 'a', l=3, c2=97 'a', i=2, c3=97 'a', s=1, c4=97 'a', c5=97 'a'\\) " "continue to call0e" ] {
 	return
     }
 }
@@ -113,7 +113,7 @@ proc unsigned_integral_args {} {
     setup_xfail "a29k-*-udi"
     gdb_run_cmd
     expect {
-	-re ".* call1a \[(\]+uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*$prompt $" {
+	-re ".* call1a \\(uc=98 'b', us=6, ui=7, ul=8\\) .*$prompt $" {
 	    pass "run to call1a"
 	}
 	-re "$prompt $" { fail "run to call1a" ; return }
@@ -128,22 +128,22 @@ proc unsigned_integral_args {} {
     gdb_test "print ul" ".* = 8"
     
     # Continue; should stop at call1b and print actual arguments.
-    if [gdb_test "cont" ".* call1b \[(\]+us=6, ui=7, ul=8, uc=98 'b'\[)\]+ " "continue to call1b"] {
+    if [gdb_test "cont" ".* call1b \\(us=6, ui=7, ul=8, uc=98 'b'\\) " "continue to call1b"] {
 	return 
     }
 
     # Continue; should stop at call1c and print actual arguments.
-    if [gdb_test "cont" ".* call1c \[(\]+ui=7, ul=8, uc=98 'b', us=6\[)\]+ " "continue to call1c"] {
+    if [gdb_test "cont" ".* call1c \\(ui=7, ul=8, uc=98 'b', us=6\\) " "continue to call1c"] {
 	return 
     }
 
     # Continue; should stop at call1d and print actual arguments.
-    if [gdb_test "cont" ".* call1d \[(\]+ul=8, uc=98 'b', us=6, ui=7\[)\]+ " "continue to call1d"] {
+    if [gdb_test "cont" ".* call1d \\(ul=8, uc=98 'b', us=6, ui=7\\) " "continue to call1d"] {
 	return
     }
 
     # Continue; should stop at call1e and print actual arguments.
-    if [gdb_test "cont" ".* call1e \[(\]+uc1=98 'b', ul=8, uc2=98 'b', ui=7, uc3=98 'b', us=6, uc4=98 'b', uc5=98 'b'\[)\]+ " "continue to call1e"] {
+    if [gdb_test "cont" ".* call1e \\(uc1=98 'b', ul=8, uc2=98 'b', ui=7, uc3=98 'b', us=6, uc4=98 'b', uc5=98 'b'\\) " "continue to call1e"] {
 	return
     }
 }
@@ -176,7 +176,7 @@ proc float_and_integral_args {} {
     setup_xfail "a29k-*-udi"
     gdb_run_cmd
     expect {
-	-re ".* call2a \[(\]+c=97 'a', f1=4, s=1, d1=5, i=2, f2=4, l=3, d2=5\[)\]+ .*$prompt $" { pass "run to call2a" }
+	-re ".* call2a \\(c=97 'a', f1=4, s=1, d1=5, i=2, f2=4, l=3, d2=5\\) .*$prompt $" { pass "run to call2a" }
 	-re "$prompt $" { fail "run to call2a" ; return }
 	timeout { fail "(timeout) run to call2a" ; return }
     }
@@ -192,42 +192,42 @@ proc float_and_integral_args {} {
     gdb_test "print d2" ".* = 5"
 
     # Continue; should stop at call2b and print actual arguments.
-    if [gdb_test "cont" ".* call2b \[(\]+f1=4, s=1, d1=5, i=2, f2=4, l=3, d2=5, c=97 'a'\[)\]+ " "continue to call2b"] {
+    if [gdb_test "cont" ".* call2b \\(f1=4, s=1, d1=5, i=2, f2=4, l=3, d2=5, c=97 'a'\\) " "continue to call2b"] {
 	return
     }
 
     # Continue; should stop at call2c and print actual arguments.
-    if [gdb_test "cont" ".* call2c \[(\]+s=1, d1=5, i=2, f2=4, l=3, d2=5, c=97 'a', f1=4\[)\]+ " "continue to call2c"] {
+    if [gdb_test "cont" ".* call2c \\(s=1, d1=5, i=2, f2=4, l=3, d2=5, c=97 'a', f1=4\\) " "continue to call2c"] {
 	return
     }
 
     # Continue; should stop at call2d and print actual arguments.
-    if [gdb_test "cont" ".* call2d \[(\]+d1=5, i=2, f2=4, l=3, d2=5, c=97 'a', f1=4, s=1\[)\]+ " "continue to call2d"] {
+    if [gdb_test "cont" ".* call2d \\(d1=5, i=2, f2=4, l=3, d2=5, c=97 'a', f1=4, s=1\\) " "continue to call2d"] {
 	return
     }
 
     # Continue; should stop at call2e and print actual arguments.
-    if [gdb_test "cont" ".* call2e \[(\]+i=2, f2=4, l=3, d2=5, c=97 'a', f1=4, s=1, d1=5\[)\]+ " "continue to call2e"] {
+    if [gdb_test "cont" ".* call2e \\(i=2, f2=4, l=3, d2=5, c=97 'a', f1=4, s=1, d1=5\\) " "continue to call2e"] {
 	return
     }
 
     # Continue; should stop at call2f and print actual arguments.
-    if [gdb_test "cont" ".* call2f \[(\]+f2=4, l=3, d2=5, c=97 'a', f1=4, s=1, d1=5, i=2\[)\]+ " "continue to call2f"] {
+    if [gdb_test "cont" ".* call2f \\(f2=4, l=3, d2=5, c=97 'a', f1=4, s=1, d1=5, i=2\\) " "continue to call2f"] {
 	return
     }
 
     # Continue; should stop at call2g and print actual arguments.
-    if [gdb_test "cont" ".* call2g \[(\]+l=3, d2=5, c=97 'a', f1=4, s=1, d1=5, i=2, f2=4\[)\]+ " "continue to call2g"] {
+    if [gdb_test "cont" ".* call2g \\(l=3, d2=5, c=97 'a', f1=4, s=1, d1=5, i=2, f2=4\\) " "continue to call2g"] {
 	return
     }
 
     # Continue; should stop at call2h and print actual arguments.
-    if [gdb_test "cont" ".* call2h \[(\]+d2=5, c=97 'a', f1=4, s=1, d1=5, i=2, f2=4, l=3\[)\]+ " "continue to call2h"] {
+    if [gdb_test "cont" ".* call2h \\(d2=5, c=97 'a', f1=4, s=1, d1=5, i=2, f2=4, l=3\\) " "continue to call2h"] {
 	return
     }
 
     # Continue; should stop at call2i and print actual arguments.
-    if [gdb_test "cont" ".* call2i \[(\]+c1=97 'a', f1=4, c2=97 'a', c3=97 'a', d1=5, c4=97 'a', c5=97 'a', c6=97 'a', f2=4, s=1, c7=97 'a', d2=5\[)\]+ " "continue to call2i"] {
+    if [gdb_test "cont" ".* call2i \\(c1=97 'a', f1=4, c2=97 'a', c3=97 'a', d1=5, c4=97 'a', c5=97 'a', c6=97 'a', f2=4, s=1, c7=97 'a', d2=5\\) " "continue to call2i"] {
 	return
     }
 }
@@ -255,7 +255,7 @@ proc pointer_args {} {
     setup_xfail "a29k-*-udi"
     gdb_run_cmd
     expect {
-	-re ".* call3a \[(\]+cp=$hex \"a\", sp=$hex, ip=$hex, lp=$hex\[)\]+ .*$prompt $" { pass "run to call3a" }
+	-re ".* call3a \\(cp=$hex \"a\", sp=$hex, ip=$hex, lp=$hex\\) .*$prompt $" { pass "run to call3a" }
 	-re "$prompt $" { fail "run to call3a" ; return }
 	timeout { fail "(timeout) run to call3a" ; return }
     }
@@ -267,7 +267,7 @@ proc pointer_args {} {
 
     # Continue; should stop at call3b and print actual arguments.
     # Try dereferencing the arguments.
-    if [gdb_test "cont" ".* call3b \[(\]+ucp=$hex \"b\", usp=$hex, uip=$hex, ulp=$hex\[)\]+ " "continue to call3b"] {
+    if [gdb_test "cont" ".* call3b \\(ucp=$hex \"b\", usp=$hex, uip=$hex, ulp=$hex\\) " "continue to call3b"] {
 	return
     }
 
@@ -278,7 +278,7 @@ proc pointer_args {} {
 
     # Continue; should stop at call3c and print actual arguments.
     # Try dereferencing the arguments.
-    if [gdb_test "cont" ".* call3c \[(\]+fp=$hex, dp=$hex\[)\]+ " "continue to call3c"] {
+    if [gdb_test "cont" ".* call3c \\(fp=$hex, dp=$hex\\) " "continue to call3c"] {
 	return
     }
 
@@ -310,7 +310,7 @@ proc structs_by_reference {} {
     setup_xfail "a29k-*-udi"
     gdb_run_cmd
     expect {
-	-re ".* call4a \[(\]+stp=$hex\[)\]+ .*$prompt $" {
+	-re ".* call4a \\(stp=$hex\\) .*$prompt $" {
 	    pass "run to call4a"
 	}
 	-re "$prompt $" { fail "run to call4a" ; return }
@@ -322,7 +322,7 @@ proc structs_by_reference {} {
     # Continue; should stop at call4b and print actual arguments.
     # Try dereferencing the arguments.
 
-    gdb_test "cont" ".* call4b \[(\]+unp=$hex\[)\]+ " "continue to call4b"
+    gdb_test "cont" ".* call4b \\(unp=$hex\\) " "continue to call4b"
 
     gdb_test "print *unp" ".* = \{u1 = 1, u2 = 1\}"
 
@@ -351,7 +351,7 @@ proc structs_by_value {} {
     setup_xfail "a29k-*-udi"
     gdb_run_cmd
     expect {
-	-re ".* call5a \[(\]+st=\{s1 = 101, s2 = 102\}\[)\]+ .*$prompt $" {
+	-re ".* call5a \\(st=\{s1 = 101, s2 = 102\}\\) .*$prompt $" {
 	    pass "run to call5a"
 	}
 	-re "$prompt $" { fail "run to call5a" ; return }
@@ -362,7 +362,7 @@ proc structs_by_value {} {
 
     # Continue; should stop at call5b and print actual arguments.
     # Try dereferencing the arguments.
-    gdb_test "cont" ".* call5b \[(\]+un=\{u1 = 2, u2 = 2\}\[)\]+ " \
+    gdb_test "cont" ".* call5b \\(un=\{u1 = 2, u2 = 2\}\\) " \
 	"continue to call5b"
 
     gdb_test "print un" ".* = \{u1 = 2, u2 = 2\}"
@@ -408,8 +408,8 @@ proc discard_and_shuffle {} {
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call6a \\(c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call6a" }
 	-re "$prompt $" { fail "backtrace from call6a" ; return }
 	timeout { fail "(timeout) backtrace from call6a" ; return }
@@ -428,9 +428,9 @@ $prompt $" { pass "backtrace from call6a" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call6b \\(s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6a \\(c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call6b" }
 	-re "$prompt $" { fail "backtrace from call6b" ; return }
 	timeout { fail "(timeout) backtrace from call6b" ; return }
@@ -449,10 +449,10 @@ $prompt $" { pass "backtrace from call6b" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call6c \[(\]+i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call6c \\(i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6b \\(s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6a \\(c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call6c" }
 	-re "$prompt $" { fail "backtrace from call6c" ; return }
 	timeout { fail "(timeout) backtrace from call6c" ; return }
@@ -471,11 +471,11 @@ $prompt $" { pass "backtrace from call6c" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call6d \[(\]+l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6c \[(\]+i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call6d \\(l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6c \\(i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6b \\(s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6a \\(c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call6d" }
 	-re "$prompt $" { fail "backtrace from call6d" ; return }
 	timeout { fail "(timeout) backtrace from call6d" ; return }
@@ -494,12 +494,12 @@ $prompt $" { pass "backtrace from call6d" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call6e \[(\]+f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6d \[(\]+l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6c \[(\]+i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call6e \\(f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6d \\(l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6c \\(i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6b \\(s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6a \\(c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call6e" }
 	-re "$prompt $" { fail "backtrace from call6e" ; return }
 	timeout { fail "(timeout) backtrace from call6e" ; return }
@@ -518,13 +518,13 @@ $prompt $" { pass "backtrace from call6e" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call6f \[(\]+d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6e \[(\]+f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6d \[(\]+l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6c \[(\]+i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call6f \\(d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6e \\(f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6d \\(l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6c \\(i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6b \\(s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6a \\(c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call6f" }
 	-re "$prompt $" { fail "backtrace from call6f" ; return }
 	timeout { fail "(timeout) backtrace from call6f" ; return }
@@ -543,14 +543,14 @@ $prompt $" { pass "backtrace from call6f" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call6g \[(\]+uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6f \[(\]+d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6e \[(\]+f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6d \[(\]+l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6c \[(\]+i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call6g \\(uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6f \\(d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6e \\(f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6d \\(l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6c \\(i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6b \\(s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6a \\(c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call6g" }
 	-re "$prompt $" { fail "backtrace from call6g" ; return }
 	timeout { fail "(timeout) backtrace from call6g" ; return }
@@ -569,15 +569,15 @@ $prompt $" { pass "backtrace from call6g" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call6h \[(\]+us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6g \[(\]+uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6f \[(\]+d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6e \[(\]+f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6d \[(\]+l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6c \[(\]+i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call6h \\(us=6, ui=7, ul=8\\) .*\r
+.* call6g \\(uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6f \\(d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6e \\(f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6d \\(l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6c \\(i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6b \\(s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6a \\(c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call6h" }
 	-re "$prompt $" { fail "backtrace from call6h" ; return }
 	timeout { fail "(timeout) backtrace from call6h" ; return }
@@ -596,16 +596,16 @@ $prompt $" { pass "backtrace from call6h" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call6i \[(\]+ui=7, ul=8\[)\]+ .*\r
-.* call6h \[(\]+us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6g \[(\]+uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6f \[(\]+d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6e \[(\]+f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6d \[(\]+l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6c \[(\]+i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call6i \\(ui=7, ul=8\\) .*\r
+.* call6h \\(us=6, ui=7, ul=8\\) .*\r
+.* call6g \\(uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6f \\(d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6e \\(f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6d \\(l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6c \\(i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6b \\(s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6a \\(c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call6i" }
 	-re "$prompt $" { fail "backtrace from call6i" ; return }
 	timeout { fail "(timeout) backtrace from call6i" ; return }
@@ -624,17 +624,17 @@ $prompt $" { pass "backtrace from call6i" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call6j \[(\]+ul=8\[)\]+ .*\r
-.* call6i \[(\]+ui=7, ul=8\[)\]+ .*\r
-.* call6h \[(\]+us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6g \[(\]+uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6f \[(\]+d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6e \[(\]+f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6d \[(\]+l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6c \[(\]+i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call6j \\(ul=8\\) .*\r
+.* call6i \\(ui=7, ul=8\\) .*\r
+.* call6h \\(us=6, ui=7, ul=8\\) .*\r
+.* call6g \\(uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6f \\(d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6e \\(f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6d \\(l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6c \\(i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6b \\(s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6a \\(c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call6j" }
 	-re "$prompt $" { fail "backtrace from call6j" ; return }
 	timeout { fail "(timeout) backtrace from call6j" ; return }
@@ -657,18 +657,18 @@ $prompt $" { pass "backtrace from call6j" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call6k \[(\]+\[)\]+ .*\r
-.* call6j \[(\]+ul=8\[)\]+ .*\r
-.* call6i \[(\]+ui=7, ul=8\[)\]+ .*\r
-.* call6h \[(\]+us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6g \[(\]+uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6f \[(\]+d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6e \[(\]+f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6d \[(\]+l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6c \[(\]+i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6b \[(\]+s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* call6a \[(\]+c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call6k \\(\\) .*\r
+.* call6j \\(ul=8\\) .*\r
+.* call6i \\(ui=7, ul=8\\) .*\r
+.* call6h \\(us=6, ui=7, ul=8\\) .*\r
+.* call6g \\(uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6f \\(d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6e \\(f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6d \\(l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6c \\(i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6b \\(s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* call6a \\(c=97 'a', s=1, i=2, l=3, f=4, d=5, uc=98 'b', us=6, ui=7, ul=8\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call6k" }
 	-re "$prompt $" { fail "backtrace from call6k" ; return }
 	timeout { fail "(timeout) backtrace from call6k" ; return }
@@ -718,8 +718,8 @@ proc shuffle_round_robin {} {
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call7a \\(c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call7a" }
 	-re "$prompt $" { fail "backtrace from call7a" ; return }
 	timeout { fail "(timeout) backtrace from call7a" ; return }
@@ -738,9 +738,9 @@ $prompt $" { pass "backtrace from call7a" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
-.* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call7b \\(i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\\) .*\r
+.* call7a \\(c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call7b" }
 	-re "$prompt $" { fail "backtrace from call7b" ; return }
 	timeout { fail "(timeout) backtrace from call7b" ; return }
@@ -759,10 +759,10 @@ $prompt $" { pass "backtrace from call7b" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call7c \[(\]+s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\[)\]+ .*\r
-.* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
-.* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call7c \\(s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\\) .*\r
+.* call7b \\(i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\\) .*\r
+.* call7a \\(c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call7c" }
 	-re "$prompt $" { fail "backtrace from call7c" ; return }
 	timeout { fail "(timeout) backtrace from call7c" ; return }
@@ -781,11 +781,11 @@ $prompt $" { pass "backtrace from call7c" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call7d \[(\]+l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1\[)\]+ .*\r
-.* call7c \[(\]+s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\[)\]+ .*\r
-.* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
-.* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call7d \\(l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1\\) .*\r
+.* call7c \\(s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\\) .*\r
+.* call7b \\(i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\\) .*\r
+.* call7a \\(c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call7d" }
 	-re "$prompt $" { fail "backtrace from call7d" ; return }
 	timeout { fail "(timeout) backtrace from call7d" ; return }
@@ -804,12 +804,12 @@ $prompt $" { pass "backtrace from call7d" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call7e \[(\]+f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3\[)\]+ .*\r
-.* call7d \[(\]+l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1\[)\]+ .*\r
-.* call7c \[(\]+s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\[)\]+ .*\r
-.* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
-.* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call7e \\(f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3\\) .*\r
+.* call7d \\(l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1\\) .*\r
+.* call7c \\(s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\\) .*\r
+.* call7b \\(i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\\) .*\r
+.* call7a \\(c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call7e" }
 	-re "$prompt $" { fail "backtrace from call7e" ; return }
 	timeout { fail "(timeout) backtrace from call7e" ; return }
@@ -828,13 +828,13 @@ $prompt $" { pass "backtrace from call7e" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call7f \[(\]+uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4\[)\]+ .*\r
-.* call7e \[(\]+f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3\[)\]+ .*\r
-.* call7d \[(\]+l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1\[)\]+ .*\r
-.* call7c \[(\]+s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\[)\]+ .*\r
-.* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
-.* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call7f \\(uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4\\) .*\r
+.* call7e \\(f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3\\) .*\r
+.* call7d \\(l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1\\) .*\r
+.* call7c \\(s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\\) .*\r
+.* call7b \\(i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\\) .*\r
+.* call7a \\(c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call7f" }
 	-re "$prompt $" { fail "backtrace from call7f" ; return }
 	timeout { fail "(timeout) backtrace from call7f" ; return }
@@ -853,14 +853,14 @@ $prompt $" { pass "backtrace from call7f" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call7g \[(\]+d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b'\[)\]+ .*\r
-.* call7f \[(\]+uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4\[)\]+ .*\r
-.* call7e \[(\]+f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3\[)\]+ .*\r
-.* call7d \[(\]+l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1\[)\]+ .*\r
-.* call7c \[(\]+s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\[)\]+ .*\r
-.* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
-.* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call7g \\(d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b'\\) .*\r
+.* call7f \\(uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4\\) .*\r
+.* call7e \\(f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3\\) .*\r
+.* call7d \\(l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1\\) .*\r
+.* call7c \\(s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\\) .*\r
+.* call7b \\(i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\\) .*\r
+.* call7a \\(c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call7g" }
 	-re "$prompt $" { fail "backtrace from call7g" ; return }
 	timeout { fail "(timeout) backtrace from call7g" ; return }
@@ -879,15 +879,15 @@ $prompt $" { pass "backtrace from call7g" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call7h \[(\]+us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5\[)\]+ .*\r
-.* call7g \[(\]+d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b'\[)\]+ .*\r
-.* call7f \[(\]+uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4\[)\]+ .*\r
-.* call7e \[(\]+f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3\[)\]+ .*\r
-.* call7d \[(\]+l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1\[)\]+ .*\r
-.* call7c \[(\]+s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\[)\]+ .*\r
-.* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
-.* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call7h \\(us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5\\) .*\r
+.* call7g \\(d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b'\\) .*\r
+.* call7f \\(uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4\\) .*\r
+.* call7e \\(f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3\\) .*\r
+.* call7d \\(l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1\\) .*\r
+.* call7c \\(s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\\) .*\r
+.* call7b \\(i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\\) .*\r
+.* call7a \\(c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call7h" }
 	-re "$prompt $" { fail "backtrace from call7h" ; return }
 	timeout { fail "(timeout) backtrace from call7h" ; return }
@@ -906,16 +906,16 @@ $prompt $" { pass "backtrace from call7h" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call7i \[(\]+ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6\[)\]+ .*\r
-.* call7h \[(\]+us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5\[)\]+ .*\r
-.* call7g \[(\]+d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b'\[)\]+ .*\r
-.* call7f \[(\]+uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4\[)\]+ .*\r
-.* call7e \[(\]+f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3\[)\]+ .*\r
-.* call7d \[(\]+l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1\[)\]+ .*\r
-.* call7c \[(\]+s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\[)\]+ .*\r
-.* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
-.* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call7i \\(ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6\\) .*\r
+.* call7h \\(us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5\\) .*\r
+.* call7g \\(d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b'\\) .*\r
+.* call7f \\(uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4\\) .*\r
+.* call7e \\(f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3\\) .*\r
+.* call7d \\(l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1\\) .*\r
+.* call7c \\(s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\\) .*\r
+.* call7b \\(i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\\) .*\r
+.* call7a \\(c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call7i" }
 	-re "$prompt $" { fail "backtrace from call7i" ; return }
 	timeout { fail "(timeout) backtrace from call7i" ; return }
@@ -934,17 +934,17 @@ $prompt $" { pass "backtrace from call7i" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call7j \[(\]+ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8\[)\]+ .*\r
-.* call7i \[(\]+ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6\[)\]+ .*\r
-.* call7h \[(\]+us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5\[)\]+ .*\r
-.* call7g \[(\]+d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b'\[)\]+ .*\r
-.* call7f \[(\]+uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4\[)\]+ .*\r
-.* call7e \[(\]+f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3\[)\]+ .*\r
-.* call7d \[(\]+l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1\[)\]+ .*\r
-.* call7c \[(\]+s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\[)\]+ .*\r
-.* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
-.* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call7j \\(ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8\\) .*\r
+.* call7i \\(ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6\\) .*\r
+.* call7h \\(us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5\\) .*\r
+.* call7g \\(d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b'\\) .*\r
+.* call7f \\(uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4\\) .*\r
+.* call7e \\(f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3\\) .*\r
+.* call7d \\(l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1\\) .*\r
+.* call7c \\(s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\\) .*\r
+.* call7b \\(i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\\) .*\r
+.* call7a \\(c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call7j" }
 	-re "$prompt $" { fail "backtrace from call7j" ; return }
 	timeout { fail "(timeout) backtrace from call7j" ; return }
@@ -963,18 +963,18 @@ $prompt $" { pass "backtrace from call7j" }
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* call7k \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
-.* call7j \[(\]+ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8\[)\]+ .*\r
-.* call7i \[(\]+ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6\[)\]+ .*\r
-.* call7h \[(\]+us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5\[)\]+ .*\r
-.* call7g \[(\]+d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b'\[)\]+ .*\r
-.* call7f \[(\]+uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4\[)\]+ .*\r
-.* call7e \[(\]+f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3\[)\]+ .*\r
-.* call7d \[(\]+l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1\[)\]+ .*\r
-.* call7c \[(\]+s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\[)\]+ .*\r
-.* call7b \[(\]+i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\[)\]+ .*\r
-.* call7a \[(\]+c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* call7k \\(c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\\) .*\r
+.* call7j \\(ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8\\) .*\r
+.* call7i \\(ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6\\) .*\r
+.* call7h \\(us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5\\) .*\r
+.* call7g \\(d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b'\\) .*\r
+.* call7f \\(uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3, f=4\\) .*\r
+.* call7e \\(f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1, l=3\\) .*\r
+.* call7d \\(l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2, s=1\\) .*\r
+.* call7c \\(s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a', i=2\\) .*\r
+.* call7b \\(i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\\) .*\r
+.* call7a \\(c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "backtrace from call7k" }
 	-re "$prompt $" { fail "backtrace from call7k" ; return }
 	timeout { fail "(timeout) backtrace from call7k" ; return }
@@ -1010,14 +1010,14 @@ proc recursive_structs_by_value {} {
     send "backtrace 100\n"
     expect {
 	-re "backtrace 100\r
-.* hitbottom \[(\]+\[)\]+ .*\r
-.* recurse \[(\]+a=\{s = 0, i = 0, l = 0\}, depth=0\[)\]+ .*\r
-.* recurse \[(\]+a=\{s = 1, i = 1, l = 1\}, depth=1\[)\]+ .*\r
-.* recurse \[(\]+a=\{s = 2, i = 2, l = 2\}, depth=2\[)\]+ .*\r
-.* recurse \[(\]+a=\{s = 3, i = 3, l = 3\}, depth=3\[)\]+ .*\r
-.* recurse \[(\]+a=\{s = 4, i = 4, l = 4\}, depth=4\[)\]+ .*\r
-.* test_struct_args \[(\]+\[)\]+ .*\r
-.* main \[(\]+.*\[)\]+ .*\r
+.* hitbottom \\(\\) .*\r
+.* recurse \\(a=\{s = 0, i = 0, l = 0\}, depth=0\\) .*\r
+.* recurse \\(a=\{s = 1, i = 1, l = 1\}, depth=1\\) .*\r
+.* recurse \\(a=\{s = 2, i = 2, l = 2\}, depth=2\\) .*\r
+.* recurse \\(a=\{s = 3, i = 3, l = 3\}, depth=3\\) .*\r
+.* recurse \\(a=\{s = 4, i = 4, l = 4\}, depth=4\\) .*\r
+.* test_struct_args \\(\\) .*\r
+.* main \\(.*\\) .*\r
 $prompt $" { pass "recursive passing of structs by value" }
 	-re "$prompt $" { fail "recursive passing of structs by value" ; return }
 	timeout { fail "(timeout) recursive passing of structs by value" ; return }
@@ -1071,7 +1071,7 @@ proc localvars_after_alloca { } {
     gdb_test "print i" " = 2" "print i in localvars_after_alloca"
     gdb_test "print l" " = 3" "print l in localvars_after_alloca"
 
-    gdb_test "backtrace 8" "#0.*localvars_after_alloca \[(\]+c=97 'a', s=1, i=2, l=3\[)\]+.*#1.*main" "backtrace after alloca"
+    gdb_test "backtrace 8" "#0.*localvars_after_alloca \\(c=97 'a', s=1, i=2, l=3\\).*#1.*main" "backtrace after alloca"
 }
 
 proc call_after_alloca { } {
@@ -1122,7 +1122,9 @@ proc localvars_in_indirect_call { } {
     gdb_test "print i" " = 2" "print i in localvars_in_indirect_call"
     gdb_test "print l" " = 3" "print l in localvars_in_indirect_call"
 
-    gdb_test "backtrace 8" "#0.*call0a \[(\]+c=97 'a', s=1, i=2, l=3\[)\]+.*#1.*main" "backtrace in indirectly called function"
+    gdb_test "backtrace 8" \
+	"#0.*call0a \\(c=97 'a', s=1, i=2, l=3\\).*#1.*main" \
+	"backtrace in indirectly called function"
 
     # 
     # "finish" brings us back to main.  We then will try to step through
@@ -1135,11 +1137,11 @@ proc localvars_in_indirect_call { } {
 
     send "finish\n"
     expect {
-	-re "\[(\]+\[*\]+pointer_to_call0a\[)\]+ \[(\]+c, s, i, l\[)\]+;.*First.*$prompt $" {
+	-re "\\(\\*pointer_to_call0a\\) \\(c, s, i, l\\);.*First.*$prompt $" {
 	    send "step\n"
 	    exp_continue
 	}
-	-re "\[(\]+\[*\]+pointer_to_call0a\[)\]+ \[(\]+c, s, i, l\[)\]+;.*Second.*$prompt $" {
+	-re "\\(\\*pointer_to_call0a\\) \\(c, s, i, l\\);.*Second.*$prompt $" {
 	    pass "finish from indirectly called function"
 	}
 	-re ".*$prompt $" {
@@ -1149,7 +1151,7 @@ proc localvars_in_indirect_call { } {
 	default { fail "finish from indirectly called function" ; return }
     }
 
-    gdb_test "step" "call0a \[(\]+c=97 'a', s=1, i=2, l=3\[)\]+" \
+    gdb_test "step" "call0a \\(c=97 'a', s=1, i=2, l=3\\)" \
 	"stepping into indirectly called function"
 }
 
@@ -1184,11 +1186,12 @@ proc test_stepping_over_trampolines { } {
     }
 
     # Try to step into the target function.
-    gdb_test "step" "call_with_trampolines \[(\]+d1=5\[)\]+" \
+    gdb_test "step" "call_with_trampolines \\(d1=5\\)" \
 	"stepping into function called with trampolines"
 
     # Make we can backtrace and the argument looks correct.  */
-    gdb_test "backtrace 8" "#0.*call_with_trampolines \[(\]+d1=5\[)\]+.*1.*main" "backtrace through call with trampolines"
+    gdb_test "backtrace 8" "#0.*call_with_trampolines \\(d1=5\\).*1.*main" \
+	"backtrace through call with trampolines"
 
     # Make sure we can get back to main.
     # Stepping back to main might stop again after the return statement
