@@ -1,5 +1,10 @@
 2002-04-07  Andrew Cagney  <ac131313@redhat.com>
 
+	* MAINTAINERS (Misc): List Daniel Jacobowitz as the GDBSERVER
+	maintainer.
+
+2002-04-07  Andrew Cagney  <ac131313@redhat.com>
+
 	* README (Reporting Bugs in GDB): Document the bug web page as the
 	prefered way of submitting bugs.
 	Fix PR gdb/402.
