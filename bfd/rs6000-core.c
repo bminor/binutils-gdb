@@ -42,7 +42,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 
-#ifdef	COREFILES_PLEASE
+#ifdef HOST_AIX
 
 /* AOUTHDR is defined by the above.  We need another defn of it, from the
    system include files.  Punt the old one and get us a new name for the
@@ -371,4 +371,4 @@ rs6000coff_get_section_contents (abfd, section, location, offset, count)
       			(abfd, section, location, offset, count);
 }
 
-#endif /* COREFILES_PLEASE */
+#endif /* HOST_AIX */

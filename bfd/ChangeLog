@@ -1,3 +1,13 @@
+Mon Feb 14 17:02:28 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* coff-rs6000.c:  Add Lynx core file support, use HOST_AIX, where
+	appropriate.
+	* rs6000-core.c:  Use HOST_AIX instead of COREFILES_PLEASE.
+	* config/rs6000.mh:  Remove defs of ARCHIVES_PLEASE and
+	COREFILES_PLEASE.
+	* config/rs6000lynx.mh:  Turn on Lynx core file support.
+	* hosts/rs6000.h:  #define HOST_AIX.
+
 Sun Feb 13 14:30:00 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.h (som_symbol_data): Safely access backend private data
