@@ -479,7 +479,7 @@ f:2:REGISTER_RAW_SIZE:int:register_raw_size:int reg_nr:reg_nr::generic_register_
 # MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
 # REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
 # by REGISTER_TYPE.
-v:2:MAX_REGISTER_RAW_SIZE:int:max_register_raw_size::::0:-1
+V:2:DEPRECATED_MAX_REGISTER_RAW_SIZE:int:deprecated_max_register_raw_size
 # The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
 # MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
 # REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
@@ -489,7 +489,7 @@ f:2:REGISTER_VIRTUAL_SIZE:int:register_virtual_size:int reg_nr:reg_nr::generic_r
 # MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
 # REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
 # by REGISTER_TYPE.
-v:2:MAX_REGISTER_VIRTUAL_SIZE:int:max_register_virtual_size::::0:-1
+V:2:DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE:int:deprecated_max_register_virtual_size
 # The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
 # MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
 # REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE have all being replaced

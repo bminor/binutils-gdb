@@ -1021,8 +1021,8 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_register_raw_size (gdbarch, m68k_register_raw_size);
   set_gdbarch_register_virtual_size (gdbarch, m68k_register_virtual_size);
-  set_gdbarch_max_register_raw_size (gdbarch, 12);
-  set_gdbarch_max_register_virtual_size (gdbarch, 12);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 12);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 12);
   set_gdbarch_register_virtual_type (gdbarch, m68k_register_virtual_type);
   set_gdbarch_register_name (gdbarch, m68k_register_name);
   set_gdbarch_register_size (gdbarch, 4);

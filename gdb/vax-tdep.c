@@ -635,9 +635,9 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_bytes (gdbarch, VAX_REGISTER_BYTES);
   set_gdbarch_register_byte (gdbarch, vax_register_byte);
   set_gdbarch_register_raw_size (gdbarch, vax_register_raw_size);
-  set_gdbarch_max_register_raw_size (gdbarch, VAX_MAX_REGISTER_RAW_SIZE);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, VAX_MAX_REGISTER_RAW_SIZE);
   set_gdbarch_register_virtual_size (gdbarch, vax_register_virtual_size);
-  set_gdbarch_max_register_virtual_size (gdbarch,
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch,
                                          VAX_MAX_REGISTER_VIRTUAL_SIZE);
   set_gdbarch_register_virtual_type (gdbarch, vax_register_virtual_type);
 

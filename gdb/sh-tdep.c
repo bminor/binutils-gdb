@@ -4359,8 +4359,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_fp0_regnum (gdbarch, -1);
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
-  set_gdbarch_max_register_raw_size (gdbarch, 4);
-  set_gdbarch_max_register_virtual_size (gdbarch, 4);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4);
   set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_num_regs (gdbarch, SH_DEFAULT_NUM_REGS);
@@ -4513,8 +4513,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_virtual_size (gdbarch, sh_sh4_register_raw_size);
       set_gdbarch_register_byte (gdbarch, sh_sh4_register_byte);
       set_gdbarch_num_pseudo_regs (gdbarch, 12);
-      set_gdbarch_max_register_raw_size (gdbarch, 4 * 4);
-      set_gdbarch_max_register_virtual_size (gdbarch, 4 * 4);
+      set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4 * 4);
+      set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4 * 4);
       set_gdbarch_pseudo_register_read (gdbarch, sh_pseudo_register_read);
       set_gdbarch_pseudo_register_write (gdbarch, sh_pseudo_register_write);
       tdep->FPUL_REGNUM = 23;
@@ -4601,12 +4601,12 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_virtual_size (gdbarch, sh_sh64_register_raw_size);
       set_gdbarch_register_byte (gdbarch, sh_sh64_register_byte);
       /* This seems awfully wrong!*/
-      /*set_gdbarch_max_register_raw_size (gdbarch, 8);*/
+      /*set_gdbarch_deprecated_max_register_raw_size (gdbarch, 8);*/
       /* should include the size of the pseudo regs. */
-      set_gdbarch_max_register_raw_size (gdbarch, 4 * 4);
+      set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4 * 4);
       /* Or should that go in the virtual_size? */
-      /*set_gdbarch_max_register_virtual_size (gdbarch, 8);*/
-      set_gdbarch_max_register_virtual_size (gdbarch, 4 * 4);
+      /*set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 8);*/
+      set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4 * 4);
       set_gdbarch_pseudo_register_read (gdbarch, sh64_pseudo_register_read);
       set_gdbarch_pseudo_register_write (gdbarch, sh64_pseudo_register_write);
 

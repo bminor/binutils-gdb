@@ -1,3 +1,50 @@
+2003-03-03  Andrew Cagney  <cagney@redhat.com>
+
+	Make MAX_REGISTER_RAW_SIZE and MAX_REGISTER_VIRTUAL_SIZE optional.
+	* gdbarch.sh (DEPRECATED_MAX_REGISTER_RAW_SIZE): Variable with
+	predicate.  Replace MAX_REGISTER_RAW_SIZE.
+	(DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE): Ditto for
+	MAX_REGISTER_VIRTUAL_SIZE.
+	* regcache.c (legacy_max_register_raw_size): New function.
+	(legacy_max_register_virtual_size): New function.
+	* defs.h (MAX_REGISTER_VIRTUAL_SIZE): Define.
+	(MAX_REGISTER_RAW_SIZE): Define.
+	(legacy_max_register_raw_size): Declare.
+	(legacy_max_register_virtual_size): Declare.
+	* config/sparc/tm-sparc.h (DEPRECATED_MAX_REGISTER_RAW_SIZE)
+	(DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE): Update.
+	* config/sparc/tm-sp64.h (DEPRECATED_MAX_REGISTER_RAW_SIZE)
+	(DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE): Ditto.
+	* config/pa/tm-hppa.h (DEPRECATED_MAX_REGISTER_RAW_SIZE)
+	(DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE): Ditto.
+	* config/pa/tm-hppa64.h (DEPRECATED_MAX_REGISTER_RAW_SIZE): Ditto.
+	* config/ia64/tm-ia64.h (DEPRECATED_MAX_REGISTER_RAW_SIZE): Ditto.
+	* config/i386/tm-ptx.h (DEPRECATED_MAX_REGISTER_RAW_SIZE): Ditto.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* vax-tdep.c (vax_gdbarch_init): Update.
+	* v850-tdep.c (v850_gdbarch_init): Update.
+	* sparc-tdep.c (sparc_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* mcore-tdep.c (mcore_gdbarch_init): Update.
+	* m68k-tdep.c (m68k_gdbarch_init): Update.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	* i386-tdep.c (i386_gdbarch_init): Update.
+	* hppa-tdep.c (hppa_gdbarch_init): Update.
+	* h8300-tdep.c (h8300_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* avr-tdep.c (avr_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* alpha-tdep.c (alpha_gdbarch_init): Update.
+	* d10v-tdep.c (d10v_gdbarch_init): Do not set
+	max_register_raw_size or max_register_virtual_size.
+
 2003-03-03  David Carlton  <carlton@math.stanford.edu>
 
 	* symtab.h (DEPRECATED_SYMBOL_MATCHES_NAME): Rename from

@@ -293,6 +293,24 @@ max_register_size (struct gdbarch *gdbarch)
 }
 
 int
+legacy_max_register_raw_size (void)
+{
+  if (DEPRECATED_MAX_REGISTER_RAW_SIZE_P ())
+    return DEPRECATED_MAX_REGISTER_RAW_SIZE;
+  else
+    return max_register_size (current_gdbarch);
+}
+
+int
+legacy_max_register_virtual_size (void)
+{
+  if (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P ())
+    return DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE;
+  else
+    return max_register_size (current_gdbarch);
+}
+
+int
 register_size (struct gdbarch *gdbarch, int regnum)
 {
   struct regcache_descr *descr = regcache_descr (gdbarch);

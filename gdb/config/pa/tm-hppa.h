@@ -302,13 +302,13 @@ extern int hppa_register_byte (int reg_nr);
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
 #if !GDB_MULTI_ARCH
-#define MAX_REGISTER_RAW_SIZE 4
+#define DEPRECATED_MAX_REGISTER_RAW_SIZE 4
 #endif
 
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 
 #if !GDB_MULTI_ARCH
-#define MAX_REGISTER_VIRTUAL_SIZE 8
+#define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE 8
 #endif
 
 #if !GDB_MULTI_ARCH

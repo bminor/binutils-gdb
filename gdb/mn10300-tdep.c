@@ -1146,10 +1146,10 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_register_size (gdbarch, 4);
   set_gdbarch_register_bytes (gdbarch, 
                               num_regs * gdbarch_register_size (gdbarch));
-  set_gdbarch_max_register_raw_size (gdbarch, 4);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
   set_gdbarch_register_raw_size (gdbarch, mn10300_register_raw_size);
   set_gdbarch_register_byte (gdbarch, mn10300_register_byte);
-  set_gdbarch_max_register_virtual_size (gdbarch, 4);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4);
   set_gdbarch_register_virtual_size (gdbarch, mn10300_register_virtual_size);
   set_gdbarch_register_virtual_type (gdbarch, mn10300_register_virtual_type);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, mn10300_dwarf2_reg_to_regnum);

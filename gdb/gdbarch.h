@@ -748,14 +748,39 @@ extern void set_gdbarch_register_raw_size (struct gdbarch *gdbarch, gdbarch_regi
    REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
    by REGISTER_TYPE. */
 
-extern int gdbarch_max_register_raw_size (struct gdbarch *gdbarch);
-extern void set_gdbarch_max_register_raw_size (struct gdbarch *gdbarch, int max_register_raw_size);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (MAX_REGISTER_RAW_SIZE)
-#error "Non multi-arch definition of MAX_REGISTER_RAW_SIZE"
+#if defined (DEPRECATED_MAX_REGISTER_RAW_SIZE)
+/* Legacy for systems yet to multi-arch DEPRECATED_MAX_REGISTER_RAW_SIZE */
+#if !defined (DEPRECATED_MAX_REGISTER_RAW_SIZE_P)
+#define DEPRECATED_MAX_REGISTER_RAW_SIZE_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_MAX_REGISTER_RAW_SIZE_P)
+#define DEPRECATED_MAX_REGISTER_RAW_SIZE_P() (0)
+#endif
+
+extern int gdbarch_deprecated_max_register_raw_size_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_MAX_REGISTER_RAW_SIZE_P)
+#error "Non multi-arch definition of DEPRECATED_MAX_REGISTER_RAW_SIZE"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_MAX_REGISTER_RAW_SIZE_P)
+#define DEPRECATED_MAX_REGISTER_RAW_SIZE_P() (gdbarch_deprecated_max_register_raw_size_p (current_gdbarch))
+#endif
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_MAX_REGISTER_RAW_SIZE)
+#define DEPRECATED_MAX_REGISTER_RAW_SIZE (0)
+#endif
+
+extern int gdbarch_deprecated_max_register_raw_size (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_max_register_raw_size (struct gdbarch *gdbarch, int deprecated_max_register_raw_size);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_MAX_REGISTER_RAW_SIZE)
+#error "Non multi-arch definition of DEPRECATED_MAX_REGISTER_RAW_SIZE"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (MAX_REGISTER_RAW_SIZE)
-#define MAX_REGISTER_RAW_SIZE (gdbarch_max_register_raw_size (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_MAX_REGISTER_RAW_SIZE)
+#define DEPRECATED_MAX_REGISTER_RAW_SIZE (gdbarch_deprecated_max_register_raw_size (current_gdbarch))
 #endif
 #endif
 
@@ -786,14 +811,39 @@ extern void set_gdbarch_register_virtual_size (struct gdbarch *gdbarch, gdbarch_
    REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
    by REGISTER_TYPE. */
 
-extern int gdbarch_max_register_virtual_size (struct gdbarch *gdbarch);
-extern void set_gdbarch_max_register_virtual_size (struct gdbarch *gdbarch, int max_register_virtual_size);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (MAX_REGISTER_VIRTUAL_SIZE)
-#error "Non multi-arch definition of MAX_REGISTER_VIRTUAL_SIZE"
+#if defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE)
+/* Legacy for systems yet to multi-arch DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE */
+#if !defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P)
+#define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P)
+#define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P() (0)
+#endif
+
+extern int gdbarch_deprecated_max_register_virtual_size_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P)
+#error "Non multi-arch definition of DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P)
+#define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE_P() (gdbarch_deprecated_max_register_virtual_size_p (current_gdbarch))
+#endif
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE)
+#define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE (0)
+#endif
+
+extern int gdbarch_deprecated_max_register_virtual_size (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_max_register_virtual_size (struct gdbarch *gdbarch, int deprecated_max_register_virtual_size);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE)
+#error "Non multi-arch definition of DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (MAX_REGISTER_VIRTUAL_SIZE)
-#define MAX_REGISTER_VIRTUAL_SIZE (gdbarch_max_register_virtual_size (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE)
+#define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE (gdbarch_deprecated_max_register_virtual_size (current_gdbarch))
 #endif
 #endif
 

@@ -227,11 +227,11 @@ extern int sparc_intreg_size (void);
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
-#define MAX_REGISTER_RAW_SIZE 8
+#define DEPRECATED_MAX_REGISTER_RAW_SIZE 8
 
 /* Largest value REGISTER_VIRTUAL_SIZE can have.  */
 
-#define MAX_REGISTER_VIRTUAL_SIZE 8
+#define DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE 8
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */

@@ -2950,8 +2950,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, NUM_GREGS + NUM_FREGS + NUM_SREGS);
   set_gdbarch_register_raw_size (gdbarch, arm_register_raw_size);
   set_gdbarch_register_virtual_size (gdbarch, arm_register_virtual_size);
-  set_gdbarch_max_register_raw_size (gdbarch, FP_REGISTER_RAW_SIZE);
-  set_gdbarch_max_register_virtual_size (gdbarch, FP_REGISTER_VIRTUAL_SIZE);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, FP_REGISTER_RAW_SIZE);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, FP_REGISTER_VIRTUAL_SIZE);
   set_gdbarch_register_virtual_type (gdbarch, arm_register_type);
 
   /* Internal <-> external register number maps.  */

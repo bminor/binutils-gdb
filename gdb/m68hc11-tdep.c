@@ -1360,8 +1360,8 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
 
   /* Set register info.  */
   set_gdbarch_fp0_regnum (gdbarch, -1);
-  set_gdbarch_max_register_raw_size (gdbarch, 2);
-  set_gdbarch_max_register_virtual_size (gdbarch, 2);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 2);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 2);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, m68hc11_frame_init_saved_regs);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 

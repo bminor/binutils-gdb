@@ -1066,9 +1066,9 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_bytes (gdbarch, frv_num_regs * 4);
   set_gdbarch_register_byte (gdbarch, frv_register_byte);
   set_gdbarch_register_raw_size (gdbarch, frv_register_raw_size);
-  set_gdbarch_max_register_raw_size (gdbarch, 4);
+  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
   set_gdbarch_register_virtual_size (gdbarch, frv_register_virtual_size);
-  set_gdbarch_max_register_virtual_size (gdbarch, 4);
+  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4);
   set_gdbarch_register_virtual_type (gdbarch, frv_register_virtual_type);
 
   set_gdbarch_skip_prologue (gdbarch, frv_skip_prologue);
