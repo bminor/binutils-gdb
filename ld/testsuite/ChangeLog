@@ -1,3 +1,20 @@
+2003-04-23  H.J. Lu <hjl@gnu.org>
+
+	* ld-elfvers/vers.exp (objdump_dynsymstuff): Support empty
+	files.
+	(objdump_versionstuff): Likewise.
+	Add tests vers25a, vers25b1 and vers25b2 for versioned
+	definition vs. normal definition in different files.
+
+	* ld-elfvers/vers25a.c: New file.
+	* ld-elfvers/vers25a.dsym: Likewise.
+	* ld-elfvers/vers25a.map: Likewise.
+	* ld-elfvers/vers25a.ver: Likewise.
+
+	* ld-elfvers/vers25b.c: New empty file.
+	* ld-elfvers/vers25b.dsym: Likewise.
+	* ld-elfvers/vers25b.ver: Likewise.
+
 2003-04-22  H.J. Lu <hjl@gnu.org>
 
 	* ld-elfcomm/elfcomm.exp: Support 64bit targets.
