@@ -801,7 +801,7 @@ else
 fi
 done
 
-for ac_hdr in fcntl.h sys/file.h sys/procfs.h
+for ac_hdr in fcntl.h sys/file.h
 do
 ac_safe=`echo "$ac_hdr" | tr './\055' '___'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
@@ -1170,6 +1170,42 @@ EOF
   rs6000-core.o)	COREFLAG="$COREFLAG -DAIX_CORE" ;;
   trad-core.o)		COREFLAG="$COREFLAG -DTRAD_CORE" ;;
   esac
+
+  # The ELF code uses the native <sys/procfs.h> to handle core files.
+  # Define HAVE_SYS_PROCFS_H if the file exists and defines
+  # prstatus_t.
+  echo $ac_n "checking for sys/procfs.h""... $ac_c" 1>&6
+  if eval "test \"`echo '$''{'bfd_cv_header_sys_procfs_h'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 1183 "configure"
+#include "confdefs.h"
+#include <sys/procfs.h>
+int main() { return 0; }
+int t() {
+prstatus_t t;
+; return 0; }
+EOF
+if eval $ac_compile; then
+  rm -rf conftest*
+  bfd_cv_header_sys_procfs_h=yes
+else
+  rm -rf conftest*
+  bfd_cv_header_sys_procfs_h=no
+fi
+rm -f conftest*
+
+fi
+
+  echo "$ac_t""$bfd_cv_header_sys_procfs_h" 1>&6
+  if test $bfd_cv_header_sys_procfs_h = yes; then
+    cat >> confdefs.h <<\EOF
+#define HAVE_SYS_PROCFS_H 1
+EOF
+
+  fi
+
 fi
 
 

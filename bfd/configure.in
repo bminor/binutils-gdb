@@ -53,7 +53,7 @@ AC_SUBST(HOST_64BIT_LONG)
 BFD_CC_FOR_BUILD
 
 AC_CHECK_HEADERS(stddef.h string.h strings.h stdlib.h time.h unistd.h)
-AC_CHECK_HEADERS(fcntl.h sys/file.h sys/procfs.h)
+AC_CHECK_HEADERS(fcntl.h sys/file.h)
 AC_CHECK_FUNCS(fcntl)
 
 BFD_BINARY_FOPEN
@@ -237,6 +237,20 @@ changequote([,])dnl
   rs6000-core.o)	COREFLAG="$COREFLAG -DAIX_CORE" ;;
   trad-core.o)		COREFLAG="$COREFLAG -DTRAD_CORE" ;;
   esac
+
+  # The ELF code uses the native <sys/procfs.h> to handle core files.
+  # Define HAVE_SYS_PROCFS_H if the file exists and defines
+  # prstatus_t.
+  AC_MSG_CHECKING([for sys/procfs.h])
+  AC_CACHE_VAL(bfd_cv_header_sys_procfs_h,
+  [AC_TRY_COMPILE([#include <sys/procfs.h>],
+  [prstatus_t t;],
+  bfd_cv_header_sys_procfs_h=yes, bfd_cv_header_sys_procfs_h=no)])
+  AC_MSG_RESULT($bfd_cv_header_sys_procfs_h)
+  if test $bfd_cv_header_sys_procfs_h = yes; then
+    AC_DEFINE(HAVE_SYS_PROCFS_H)
+  fi
+
 fi
 AC_SUBST(COREFILE)
 AC_SUBST(COREFLAG)
