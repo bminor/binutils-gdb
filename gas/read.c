@@ -1377,7 +1377,6 @@ s_comm_internal (int param,
   if (*input_line_pointer == ',')
     input_line_pointer++;
 
-  *p = 0;
   temp = get_absolute_expr (&exp);
   size = temp;
 #ifdef BFD_ASSEMBLER
@@ -1386,18 +1385,17 @@ s_comm_internal (int param,
   if (exp.X_op == O_absent)
     {
       as_bad (_("missing size expression"));
-      *p = c;
       ignore_rest_of_line ();
       goto out;
     }
   else if (temp != size || !exp.X_unsigned)
     {
       as_warn (_("size (%ld) out of range, ignored"), (long) temp);
-      *p = c;
       ignore_rest_of_line ();
       goto out;
     }
 
+  *p = 0;
   symbolP = symbol_find_or_make (name);
   if (S_IS_DEFINED (symbolP) && !S_IS_COMMON (symbolP))
     {

@@ -1,3 +1,9 @@
+2004-12-29  Alan Modra  <amodra@bigpond.net.au>
+
+	PR gas/619
+	* read.c (s_comm_internal): Don't zero end of name until size
+	expression has been parsed.
+
 2004-12-25  Marek Michalkiewicz  <marekm@amelek.gda.pl>
 
 	* config/tc-avr.c (mcu_types): Move attiny{13,2313} from avr4 to avr2.
