@@ -44,18 +44,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define CGEN_INT_INSN_P 1
 
-/* FIXME: Need to compute CGEN_MAX_SYNTAX_BYTES.  */
+/* Maximum number of syntax bytes in an instruction.  */
+#define CGEN_ACTUAL_MAX_SYNTAX_BYTES 15
 
 /* CGEN_MNEMONIC_OPERANDS is defined if mnemonics have operands.
    e.g. In "b,a foo" the ",a" is an operand.  If mnemonics have operands
    we can't hash on everything up to the space.  */
 #define CGEN_MNEMONIC_OPERANDS
 
-/* Maximum number of operands any insn or macro-insn has.  */
-#define CGEN_MAX_INSN_OPERANDS 16
-
 /* Maximum number of fields in an instruction.  */
-#define CGEN_MAX_IFMT_OPERANDS 7
+#define CGEN_ACTUAL_MAX_IFMT_OPERANDS 7
 
 /* Enums.  */
 

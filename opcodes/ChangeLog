@@ -1,3 +1,9 @@
+2000-05-16  Frank Ch. Eigler  <fche@redhat.com>
+
+	* fr30-desc.h: Partially regenerated to account for changed
+	CGEN_MAX_* -> CGEN_ACTUAL_MAX_* macros.
+	* m32r-desc.h: Ditto.
+
 2000-05-15  Nick Clifton  <nickc@cygnus.com>
 
 	* arm-opc.h: Use upper case for flasg in MSR and MRS
