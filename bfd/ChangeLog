@@ -1,3 +1,8 @@
+2002-07-31  Ian Dall  <ian@sibyl.beware.dropbear.id.au>
+
+	* aoutx.h (aout_link_check_ar_symbols): Whether to include an
+	archive object is target dependant.
+
 2002-07-31  Adam Nemet  <anemet@lnxw.com>
 
 	* elf32-arm.h (ARM_PLT_ENTRY_SIZE): Rename PLT_ENTRY_SIZE.

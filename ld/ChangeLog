@@ -1,3 +1,12 @@
+2002-07-31  Ian Dall  <ian@sibyl.beware.dropbear.id.au>
+
+	* emultempl/netbsd.em (LDEMUL_BEFORE_PARSE): New file to custom set
+	link_info.common_skip_ar_aymbols.
+	* emulparams/ns32knbsd.sh (EXTRA_EM_FILE): Refer to extra file.
+
+	* ldmain.c (main): Initialize new field
+	link_info.common_skip_ar_aymbols.
+
 2002-07-31  Adam Nemet  <anemet@lnxw.com>
 
 	* emulparams/armelf.sh (OTHER_PLT_SECTIONS): New variable.  Set it

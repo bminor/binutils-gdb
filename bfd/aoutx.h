@@ -4,21 +4,21 @@
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
 SECTION
@@ -193,7 +193,7 @@ DESCRIPTION
 
 reloc_howto_type howto_table_ext[] =
 {
-  /* type           rs   size bsz  pcrel bitpos ovrf                  sf name          part_inpl readmask setmask pcdone */
+  /* type           rs   size bsz  pcrel bitpos ovrf                  sf name          part_inpl readmask setmask pcdone.  */
   HOWTO(RELOC_8,      0,  0,  	8,  false, 0, complain_overflow_bitfield,0,"8",        false, 0,0x000000ff, false),
   HOWTO(RELOC_16,     0,  1, 	16, false, 0, complain_overflow_bitfield,0,"16",       false, 0,0x0000ffff, false),
   HOWTO(RELOC_32,     0,  2, 	32, false, 0, complain_overflow_bitfield,0,"32",       false, 0,0xffffffff, false),
@@ -227,7 +227,7 @@ reloc_howto_type howto_table_ext[] =
 /* Convert standard reloc records to "arelent" format (incl byte swap).  */
 
 reloc_howto_type howto_table_std[] = {
-  /* type              rs size bsz  pcrel bitpos ovrf                     sf name     part_inpl readmask  setmask    pcdone */
+  /* type              rs size bsz  pcrel bitpos ovrf                     sf name     part_inpl readmask  setmask    pcdone.  */
 HOWTO ( 0,	       0,  0,  	8,  false, 0, complain_overflow_bitfield,0,"8",		true, 0x000000ff,0x000000ff, false),
 HOWTO ( 1,	       0,  1, 	16, false, 0, complain_overflow_bitfield,0,"16",	true, 0x0000ffff,0x0000ffff, false),
 HOWTO ( 2,	       0,  2, 	32, false, 0, complain_overflow_bitfield,0,"32",	true, 0xffffffff,0xffffffff, false),
@@ -281,6 +281,7 @@ NAME(aout,reloc_type_lookup) (abfd,code)
 #define EXT(i, j)	case i: return &howto_table_ext[j]
 #define STD(i, j)	case i: return &howto_table_std[j]
   int ext = obj_reloc_entry_size (abfd) == RELOC_EXT_SIZE;
+
   if (code == BFD_RELOC_CTOR)
     switch (bfd_get_arch_info (abfd)->bits_per_address)
       {
@@ -291,6 +292,7 @@ NAME(aout,reloc_type_lookup) (abfd,code)
 	code = BFD_RELOC_64;
 	break;
       }
+
   if (ext)
     switch (code)
       {
@@ -313,7 +315,7 @@ NAME(aout,reloc_type_lookup) (abfd,code)
       default: return (reloc_howto_type *) NULL;
       }
   else
-    /* std relocs */
+    /* std relocs.  */
     switch (code)
       {
 	STD (BFD_RELOC_16, 1);
@@ -474,14 +476,15 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
     *abfd->tdata.aout_data = *oldrawptr;
 
   abfd->tdata.aout_data->a.hdr = &rawptr->e;
-  *(abfd->tdata.aout_data->a.hdr) = *execp;	/* Copy in the internal_exec struct */
+  /* Copy in the internal_exec struct.  */
+  *(abfd->tdata.aout_data->a.hdr) = *execp;
   execp = abfd->tdata.aout_data->a.hdr;
 
-  /* Set the file flags */
+  /* Set the file flags.  */
   abfd->flags = BFD_NO_FLAGS;
   if (execp->a_drsize || execp->a_trsize)
     abfd->flags |= HAS_RELOC;
-  /* Setting of EXEC_P has been deferred to the bottom of this function */
+  /* Setting of EXEC_P has been deferred to the bottom of this function.  */
   if (execp->a_syms)
     abfd->flags |= HAS_LINENO | HAS_DEBUG | HAS_SYMS | HAS_LOCALS;
   if (N_DYNAMIC (*execp))
@@ -563,18 +566,18 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
 
   obj_textsec (abfd)->size = N_TXTSIZE (*execp);
   obj_textsec (abfd)->raw_size = N_TXTSIZE (*execp);
-  /* data and bss are already filled in since they're so standard */
+  /* Data and bss are already filled in since they're so standard.  */
 
-  /* The virtual memory addresses of the sections */
+  /* The virtual memory addresses of the sections.  */
   obj_textsec (abfd)->vma = N_TXTADDR (*execp);
   obj_datasec (abfd)->vma = N_DATADDR (*execp);
   obj_bsssec  (abfd)->vma = N_BSSADDR (*execp);
 
-  /* The file offsets of the sections */
+  /* The file offsets of the sections.  */
   obj_textsec (abfd)->filepos = N_TXTOFF (*execp);
   obj_datasec (abfd)->filepos = N_DATOFF (*execp);
 
-  /* The file offsets of the relocation info */
+  /* The file offsets of the relocation info.  */
   obj_textsec (abfd)->rel_filepos = N_TRELOFF (*execp);
   obj_datasec (abfd)->rel_filepos = N_DRELOFF (*execp);
 
@@ -865,7 +868,7 @@ NAME(aout,set_arch_mach) (abfd, arch, machine)
 	return false;
     }
 
-  /* Determine the size of a relocation entry */
+  /* Determine the size of a relocation entry.  */
   switch (arch)
     {
     case bfd_arch_sparc:
@@ -903,7 +906,7 @@ adjust_o_magic (abfd, execp)
   /* Data.  */
   if (!obj_datasec (abfd)->user_set_vma)
     {
-#if 0	    /* ?? Does alignment in the file image really matter? */
+#if 0	    /* ?? Does alignment in the file image really matter?  */
       pad = align_power (vma, obj_datasec (abfd)->alignment_power) - vma;
 #endif
       obj_textsec (abfd)->_raw_size += pad;
@@ -1220,35 +1223,34 @@ NAME(aout,new_section_hook) (abfd, newsect)
      bfd *abfd;
      asection *newsect;
 {
-  /* align to double at least */
+  /* Align to double at least.  */
   newsect->alignment_power = bfd_get_arch_info (abfd)->section_align_power;
 
   if (bfd_get_format (abfd) == bfd_object)
-  {
-    if (obj_textsec (abfd) == NULL && !strcmp (newsect->name, ".text"))
-      {
-	obj_textsec (abfd)= newsect;
-	newsect->target_index = N_TEXT;
-	return true;
-      }
+    {
+      if (obj_textsec (abfd) == NULL && !strcmp (newsect->name, ".text"))
+	{
+	  obj_textsec (abfd)= newsect;
+	  newsect->target_index = N_TEXT;
+	  return true;
+	}
 
-    if (obj_datasec (abfd) == NULL && !strcmp (newsect->name, ".data"))
-      {
-	obj_datasec (abfd) = newsect;
-	newsect->target_index = N_DATA;
-	return true;
-      }
+      if (obj_datasec (abfd) == NULL && !strcmp (newsect->name, ".data"))
+	{
+	  obj_datasec (abfd) = newsect;
+	  newsect->target_index = N_DATA;
+	  return true;
+	}
 
-    if (obj_bsssec (abfd) == NULL && !strcmp (newsect->name, ".bss"))
-      {
-	obj_bsssec (abfd) = newsect;
-	newsect->target_index = N_BSS;
-	return true;
-      }
+      if (obj_bsssec (abfd) == NULL && !strcmp (newsect->name, ".bss"))
+	{
+	  obj_bsssec (abfd) = newsect;
+	  newsect->target_index = N_BSS;
+	  return true;
+	}
+    }
 
-  }
-
-  /* We allow more than three sections internally */
+  /* We allow more than three sections internally.  */
   return true;
 }
 
@@ -1401,7 +1403,6 @@ translate_from_native_sym_flags (abfd, cache_ptr)
       asection *sec;
 
       /* This is a debugging symbol.  */
-
       cache_ptr->symbol.flags = BSF_DEBUGGING;
 
       /* Work out the symbol section.  */
@@ -1702,7 +1703,7 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
       return false;
     }
 
-  /* Turn the symbol from section relative to absolute again */
+  /* Turn the symbol from section relative to absolute again.  */
   value += sec->vma + off;
 
   if ((cache_ptr->flags & BSF_WARNING) != 0)
@@ -1718,6 +1719,7 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
   if ((cache_ptr->flags & BSF_CONSTRUCTOR) != 0)
     {
       int type = ((aout_symbol_type *) cache_ptr)->type;
+
       switch (type)
 	{
 	case N_ABS:	type = N_SETA; break;
@@ -1826,7 +1828,7 @@ NAME(aout,slurp_symbol_table) (abfd)
   aout_symbol_type *cached;
   bfd_size_type cached_size;
 
-  /* If there's no work to be done, don't do any */
+  /* If there's no work to be done, don't do any.  */
   if (obj_aout_symbols (abfd) != (aout_symbol_type *) NULL)
     return true;
 
@@ -2023,7 +2025,7 @@ NAME(aout,get_symtab) (abfd, location)
     return bfd_get_symcount (abfd);
 }
 
-/* Standard reloc stuff */
+/* Standard reloc stuff.  */
 /* Output standard relocation information to a file in target byte order.  */
 
 extern void  NAME(aout,swap_std_reloc_out)
@@ -2045,8 +2047,8 @@ NAME(aout,swap_std_reloc_out) (abfd, g, natptr)
 
   PUT_WORD (abfd, g->address, natptr->r_address);
 
-  r_length = g->howto->size ;	/* Size as a power of two */
-  r_pcrel  = (int) g->howto->pc_relative; /* Relative to PC? */
+  r_length = g->howto->size ;	/* Size as a power of two.  */
+  r_pcrel  = (int) g->howto->pc_relative; /* Relative to PC?  */
   /* XXX This relies on relocs coming from a.out files.  */
   r_baserel = (g->howto->type & 8) != 0;
   r_jmptable = (g->howto->type & 16) != 0;
@@ -2057,43 +2059,41 @@ NAME(aout,swap_std_reloc_out) (abfd, g, natptr)
   r_addend = g->addend + (*(g->sym_ptr_ptr))->section->output_section->vma;
 #endif
 
-  /* name was clobbered by aout_write_syms to be symbol index */
+  /* Name was clobbered by aout_write_syms to be symbol index.  */
 
   /* If this relocation is relative to a symbol then set the
      r_index to the symbols index, and the r_extern bit.
 
      Absolute symbols can come in in two ways, either as an offset
      from the abs section, or as a symbol which has an abs value.
-     check for that here
-     */
+     check for that here.  */
 
   if (bfd_is_com_section (output_section)
       || bfd_is_abs_section (output_section)
       || bfd_is_und_section (output_section))
     {
       if (bfd_abs_section_ptr->symbol == sym)
-      {
-	/* Whoops, looked like an abs symbol, but is really an offset
-	   from the abs section */
-	r_index = N_ABS;
-	r_extern = 0;
-       }
+	{
+	  /* Whoops, looked like an abs symbol, but is
+	     really an offset from the abs section.  */
+	  r_index = N_ABS;
+	  r_extern = 0;
+	}
       else
-      {
-	/* Fill in symbol */
-	r_extern = 1;
-	r_index = (*(g->sym_ptr_ptr))->KEEPIT;
-
-      }
+	{
+	  /* Fill in symbol.  */
+	  r_extern = 1;
+	  r_index = (*(g->sym_ptr_ptr))->KEEPIT;
+	}
     }
   else
     {
-      /* Just an ordinary section */
+      /* Just an ordinary section.  */
       r_extern = 0;
       r_index  = output_section->target_index;
     }
 
-  /* now the fun stuff */
+  /* Now the fun stuff.  */
   if (bfd_header_big_endian (abfd))
     {
       natptr->r_index[0] = r_index >> 16;
@@ -2120,7 +2120,7 @@ NAME(aout,swap_std_reloc_out) (abfd, g, natptr)
     }
 }
 
-/* Extended stuff */
+/* Extended stuff.  */
 /* Output extended relocation information to a file in target byte order.  */
 
 extern void NAME(aout,swap_ext_reloc_out)
@@ -2153,7 +2153,6 @@ NAME(aout,swap_ext_reloc_out) (abfd, g, natptr)
      Absolute symbols can come in in two ways, either as an offset
      from the abs section, or as a symbol which has an abs value.
      check for that here.  */
-
   if (bfd_is_abs_section (bfd_get_section (sym)))
     {
       r_extern = 0;
@@ -2170,12 +2169,12 @@ NAME(aout,swap_ext_reloc_out) (abfd, g, natptr)
     }
   else
     {
-      /* Just an ordinary section */
+      /* Just an ordinary section.  */
       r_extern = 0;
       r_index = output_section->target_index;
     }
 
-  /* now the fun stuff */
+  /* Now the fun stuff.  */
   if (bfd_header_big_endian (abfd))
     {
       natptr->r_index[0] = r_index >> 16;
@@ -2256,7 +2255,7 @@ NAME(aout,swap_ext_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
 
   cache_ptr->address = (GET_SWORD (abfd, bytes->r_address));
 
-  /* now the fun stuff */
+  /* Now the fun stuff.  */
   if (bfd_header_big_endian (abfd))
     {
       r_index = ((bytes->r_index[0] << 16)
@@ -2315,7 +2314,7 @@ NAME(aout,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols, symcount)
 
   cache_ptr->address = H_GET_32 (abfd, bytes->r_address);
 
-  /* now the fun stuff */
+  /* Now the fun stuff.  */
   if (bfd_header_big_endian (abfd))
     {
       r_index = ((bytes->r_index[0] << 16)
@@ -2505,7 +2504,8 @@ NAME(aout,squirt_out_relocs) (abfd, section)
   return true;
 }
 
-/* This is stupid.  This function should be a boolean predicate */
+/* This is stupid.  This function should be a boolean predicate.  */
+
 long
 NAME(aout,canonicalize_reloc) (abfd, section, relptr, symbols)
      bfd *abfd;
@@ -2558,10 +2558,9 @@ NAME(aout,get_reloc_upper_bound) (abfd, asect)
       bfd_set_error (bfd_error_invalid_operation);
       return -1;
     }
+
   if (asect->flags & SEC_CONSTRUCTOR)
-    {
-      return (sizeof (arelent *) * (asect->reloc_count+1));
-    }
+    return (sizeof (arelent *) * (asect->reloc_count+1));
 
   if (asect == obj_datasec (abfd))
     return (sizeof (arelent *)
@@ -2739,11 +2738,9 @@ NAME(aout,minisymbol_to_symbol) (abfd, dynamic, minisym, sym)
   return sym;
 }
 
-/*
- provided a BFD, a section and an offset into the section, calculate
- and return the name of the source file and the line nearest to the
- wanted location.
-*/
+/* Provided a BFD, a section and an offset into the section, calculate
+   and return the name of the source file and the line nearest to the
+   wanted location.  */
 
 boolean
 NAME(aout,find_nearest_line)
@@ -2756,7 +2753,7 @@ NAME(aout,find_nearest_line)
      const char **functionname_ptr;
      unsigned int *line_ptr;
 {
-  /* Run down the file looking for the filename, function and linenumber */
+  /* Run down the file looking for the filename, function and linenumber.  */
   asymbol **p;
   const char *directory_name = NULL;
   const char *main_file_name = NULL;
@@ -2772,6 +2769,7 @@ NAME(aout,find_nearest_line)
   *filename_ptr = abfd->filename;
   *functionname_ptr = 0;
   *line_ptr = 0;
+
   if (symbols != (asymbol **)NULL)
     {
       for (p = symbols; *p; p++)
@@ -2859,12 +2857,13 @@ NAME(aout,find_nearest_line)
 	      break;
 	    case N_FUN:
 	      {
-		/* We'll keep this if it is nearer than the one we have already */
+		/* We'll keep this if it is nearer than the one we have already.  */
 		if (q->symbol.value >= low_func_vma &&
-		    q->symbol.value <= offset) {
-		  low_func_vma = q->symbol.value;
-		  func = (asymbol *)q;
-		}
+		    q->symbol.value <= offset)
+		  {
+		    low_func_vma = q->symbol.value;
+		    func = (asymbol *)q;
+		  }
 		else if (q->symbol.value > offset)
 		  goto done;
 	      }
@@ -2886,6 +2885,7 @@ NAME(aout,find_nearest_line)
     filelen = 0;
   else
     filelen = strlen (directory_name) + strlen (main_file_name);
+
   if (func == NULL)
     funclen = 0;
   else
@@ -2893,6 +2893,7 @@ NAME(aout,find_nearest_line)
 
   if (adata (abfd).line_buf != NULL)
     free (adata (abfd).line_buf);
+
   if (filelen + funclen == 0)
     adata (abfd).line_buf = buf = NULL;
   else
@@ -2930,7 +2931,7 @@ NAME(aout,find_nearest_line)
 	  buf[0] = bfd_get_symbol_leading_char (abfd);
 	  strcpy (buf + 1, function);
 	}
-      /* Have to remove : stuff */
+      /* Have to remove : stuff.  */
       colon = strchr (buf, ':');
       if (colon != NULL)
 	*colon = '\0';
@@ -3224,19 +3225,43 @@ aout_link_check_ar_symbols (abfd, info, pneeded)
 	{
 	  /* This object file defines this symbol.  We must link it
 	     in.  This is true regardless of whether the current
-	     definition of the symbol is undefined or common.  If the
-	     current definition is common, we have a case in which we
-	     have already seen an object file including
+	     definition of the symbol is undefined or common.
+
+             If the current definition is common, we have a case in
+	     which we have already seen an object file including:
 	         int a;
-	     and this object file from the archive includes
+	     and this object file from the archive includes:
 	         int a = 5;
-	     In such a case we must include this object file.
+	     In such a case, whether to include this object is target
+             dependant for backward compatability.
 
 	     FIXME: The SunOS 4.1.3 linker will pull in the archive
 	     element if the symbol is defined in the .data section,
 	     but not if it is defined in the .text section.  That
-	     seems a bit crazy to me, and I haven't implemented it.
-	     However, it might be correct.  */
+	     seems a bit crazy to me, and it has not been implemented
+	     yet.  However, it might be correct.  */
+	  if (h->type == bfd_link_hash_common)
+	    {
+	      int skip = 0;
+
+	      switch (info->common_skip_ar_aymbols)
+		{
+		case bfd_link_common_skip_text:
+		  skip = (type == (N_TEXT | N_EXT));
+		  break;
+		case bfd_link_common_skip_data:
+		  skip = (type == (N_DATA | N_EXT));
+		  break;
+		default:
+		case bfd_link_common_skip_all:
+		  skip = 1;
+		  break;
+		}
+
+	      if (skip)
+		continue;
+	    }
+
 	  if (! (*info->callbacks->add_archive_element) (info, abfd, name))
 	    return false;
 	  *pneeded = true;
