@@ -178,7 +178,7 @@ show_line PARAMS ((bfd *, asection *, bfd_vma));
 
 static void
 disassemble_bytes PARAMS ((struct disassemble_info *, disassembler_ftype,
-			   boolean, bfd_byte *, unsigned long, unsigned long,
+			   boolean, bfd_byte *, bfd_vma, bfd_vma,
 			   arelent ***, arelent **));
 
 static void
@@ -1152,8 +1152,8 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
      disassembler_ftype disassemble_fn;
      boolean insns;
      bfd_byte *data;
-     unsigned long start;
-     unsigned long stop;
+     bfd_vma start;
+     bfd_vma stop;
      arelent ***relppp;
      arelent **relppend;
 {
@@ -1162,7 +1162,7 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
   int bytes_per_line;
   boolean done_dot;
   int skip_addr_chars;
-  unsigned long i;
+  bfd_vma i;
 
   aux = (struct objdump_disasm_info *) info->application_data;
   section = aux->sec;
@@ -1199,7 +1199,7 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
   i = start;
   while (i < stop)
     {
-      unsigned long z;
+      bfd_vma z;
       int bytes;
       boolean need_nl = false;
 
