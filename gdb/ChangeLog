@@ -1,3 +1,48 @@
+Fri Sep  4 00:34:30 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	A bunch of changes mostly to improve debugging of C++ programs.
+	Specifically, the calling of inferiors methods is improved.
+
+	* value.h:  New macros METHOD_PTR_IS_VIRTUAL,
+	METHOD_PTR_FROM_VOFFSET, METHOD_PTR_TO_VOFFSET to partially
+	hide the implementation details of pointer-to-method objects.
+	How to tell if the pointer points to a virtual method is
+	still very dependent on the particular compiler, but this
+	should make it easier to find the places to change.
+	* eval.c (evaluate_subexp [case OP_FUNCALL]), valprint.c
+	(val_print [case TYPE_CODE_PTR]):  Use the new METHOD_PTR_*
+	macros, instead of a hard-wired-in code that incorrectly
+	assumed a no-longerused representation of pointer-to-method
+	values.  And otherwise fix the relevant bit-rotted code.
+
+	* valprint.c (type_print_base [case TYPE_CODE_STRUCT]):
+	If there are both fields and methods, put a space between.
+
+	* stabsread.c (read_struct_type):  Fix bug in handling of
+	GNU C++ anonymous type (indicated by CPLUS_MARKER followed
+	by '_').  (It used to prematurely exit the loop reading in
+	the fields, so it would think it should start reading
+	methods while still in the fields.  This could crash gdb
+	given a gcc that can emit nested type information.)
+
+	* valops.c (search_struct_method):  Pass 'this' value by
+	reference instead of by value.  This provides a more
+	consistent interface through a recursive search where the
+	"bottom" functions may need to adjust offsets (due to multiple
+	inheritance).
+	* valops.c, value.h, values.c:  Pass extra parameters to
+	value_fn_field and value_virtual_fn_field so we can
+	correctly adjust offset for multiple inheritance.
+	* eval.c (evaluate_subexp [case OP_FUNCALL]):  Simplify
+	virtual function calls by using value_virtual_fn_field().
+	* values.c: New function baseclass_offset, derived from
+	baseclass_addr (which perhaps can be made obsolete?).
+	It returns an offset rather than an address.  This is a
+	cleaner interface since it doesn't mess around allocating
+	new values.
+	* valops.c (search_struct_method):  Use baseclass_offset
+	rather than baseclass_addr.
+
 Mon Oct  5 16:02:04 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in:  Re-install 29K/UDI stuff.

@@ -1430,8 +1430,10 @@ read_struct_type (pp, type, objfile)
       p = *pp;
       if (*p == CPLUS_MARKER)
 	{
+	  if (*p == '_')    /* GNU C++ anonymous type.  */
+	    ;
 	  /* Special GNU C++ name.  */
-	  if (*++p == 'v')
+	  else if (*++p == 'v')
 	    {
 	      const char *prefix;
 	      char *name = 0;
@@ -1470,15 +1472,12 @@ read_struct_type (pp, type, objfile)
 	      list->field.bitsize = 0;
 	      list->visibility = 0;	/* private */
 	      non_public_fields++;
+
+	      nfields++;
+	      continue;
 	    }
-	  /* GNU C++ anonymous type.  */
-	  else if (*p == '_')
-	    break;
 	  else
 	    complain (&invalid_cpp_abbrev_complaint, *pp);
-
-	  nfields++;
-	  continue;
 	}
 
       while (*p != ':') p++;
