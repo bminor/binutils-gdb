@@ -1,5 +1,8 @@
 Wed Jun 19 11:31:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* doc/as.texinfo: Document that any number of hex digits can
+	follow \x.
+
 	* as.c (struct defsym_list): Define.
 	(defsyms): New static variable.
 	(parse_args): Just put --defsym arguments on defsyms list, rather
