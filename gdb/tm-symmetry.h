@@ -1,6 +1,6 @@
 /* Definitions to make GDB run on a Sequent Symmetry under dynix 3.0,
    with Weitek 1167 and i387 support.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -30,10 +30,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    of external names before giving them to the linker.  */
 
 #define NAMES_HAVE_UNDERSCORE
-
-/* Debugger information will be in DBX format.  */
-
-#define READ_DBX_FORMAT
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */

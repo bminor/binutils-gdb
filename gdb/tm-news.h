@@ -1,5 +1,5 @@
 /* Parameters for execution on a Sony/NEWS, for GDB, the GNU debugger.
-   Copyright (C) 1987, 1989 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -33,9 +33,6 @@ Here is an m-news.h file for gdb.  It supports the 68881 registers.
    of external names before giving them to the linker.  */
 
 #define NAMES_HAVE_UNDERSCORE
-
-/* Symbols on this machine are in DBX format. */
-#define READ_DBX_FORMAT
 
 /* Use to compute STACK_END_ADDR.  */
 #define TARGET_UPAGES 2

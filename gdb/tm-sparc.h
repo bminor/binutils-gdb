@@ -1,6 +1,7 @@
 /* Parameters for target machine of Sun 4, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
    Contributed by Michael Tiemann (tiemann@mcc.com)
+
 This file is part of GDB.
 
 This program is free software; you can redistribute it and/or modify
@@ -26,10 +27,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    of external names before giving them to the linker.  */
 
 #define NAMES_HAVE_UNDERSCORE
-
-/* Debugger information will be in DBX format.  */
-
-#define READ_DBX_FORMAT
 
 /* When passing a structure to a function, Sun cc passes the address
    in a register, not the structure itself.  It (under SunOS4) creates

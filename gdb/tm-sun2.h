@@ -1,5 +1,5 @@
 /* Parameters for execution on a Sun, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989, 199 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -21,10 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    of external names before giving them to the linker.  */
 
 #define NAMES_HAVE_UNDERSCORE
-
-/* Debugger information will be in DBX format.  */
-
-#define READ_DBX_FORMAT
 
 /* Address of the end of stack space.  We get this from the system
    include files. */

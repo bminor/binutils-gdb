@@ -1,5 +1,5 @@
 /* Definitions to make GDB run on an Altos 3068 using COFF encapsulation.
-   Copyright (C) 1989 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -21,8 +21,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "m-altos.h"
 
-#undef COFF_FORMAT
-#undef COFF_NO_LONG_FILE_NAMES
 #define NAMES_HAVE_UNDERSCORE
-
-#define READ_DBX_FORMAT

@@ -35,10 +35,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define NAMES_HAVE_UNDERSCORE
 
-/* Debugger information will be in DBX format.  */
-
-#define READ_DBX_FORMAT
-
 #define TARGET_NBPG 4096
 #define TARGET_UPAGES 3
 

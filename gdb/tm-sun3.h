@@ -19,18 +19,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define HAVE_68881
 
-/* TARGET_SUN3 might be a more logical name, but that's used by
-   ../include/target.h (included by ../include/a.out.gnu.h).  */
+/* Let native-versus-cross support code know we are targeting sun3,
+   and modify registers to include sun3 fpustate register.  */
+
 #define GDB_TARGET_IS_SUN3 1
 
 /* Define this if the C compiler puts an underscore at the front
    of external names before giving them to the linker.  */
 
 #define NAMES_HAVE_UNDERSCORE
-
-/* Debugger information will be in DBX format.  */
-
-#define READ_DBX_FORMAT
 
 /* Address of the end of stack space.  We get this from the system
    include files. */
@@ -40,8 +37,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define STACK_END_ADDR USRSTACK
 
 #include "tm-68k.h"
-  SWAP_TARGET_AND_HOST (temp, 4);                       \
-  bcopy ((char *)&temp, (char *)(dummyname) + 20, 4);   \
-  temp = fun;                                           \
-  SWAP_TARGET_AND_HOST (temp, 4);                       \
-  bcopy ((char *)&temp, (char *)(dummyname) + 14, 4); }

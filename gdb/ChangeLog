@@ -1,3 +1,11 @@
+Thu Nov  7 04:51:19 1991  John Gilmore  (gnu at cygnus.com)
+
+	* tm-*.h:  Remove READ_DBX_FORMAT, COFF_FORMAT, and
+	READ_MIPS_FORMAT, which have been unused since BFD.  Still
+	remaining is COFF_NO_LONG_FILE_NAMES.
+	* tm-sun3.h, tm-altos.h:  Remove detritus accidentally left from
+	function calling code moved to m68k-tdep.c.
+
 Wed Nov  6 17:21:59 1991  John Gilmore  (gnu at cygnus.com)
 
 	* coffread.c:  Eliminate c_nsyms in favor of c_naux.

@@ -1,4 +1,5 @@
-/* Copyright (C) 1990 Free Software Foundation, Inc.
+/* Target machine description for SGI Iris under Irix, for GDB.
+   Copyright 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -25,14 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    of external names before giving them to the linker.  */
 
 /*#define NAMES_HAVE_UNDERSCORE*/
-
-/* Debugger information will be in mips' format */
-
-#define READ_MIPS_FORMAT
-
-/* File format is coff, but with additions */
-
-#define COFF_FORMAT
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */

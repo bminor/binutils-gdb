@@ -1,5 +1,5 @@
 /* Parameters for execution on a Sun 386i, for GDB, the GNU debugger.
-   Copyright (C) 1986, 1987 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -37,10 +37,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* sun386 ptrace seems unable to change the frame pointer */
 #define PTRACE_FP_BUG
-
-/* Debugger information will be in DBX format.  */
-
-#define READ_DBX_FORMAT
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */

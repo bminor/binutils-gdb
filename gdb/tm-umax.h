@@ -1,5 +1,5 @@
 /* Definitions to make GDB run on an encore under umax 4.2
-   Copyright (C) 1987, 1989 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -23,10 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    of external names before giving them to the linker.  */
 
 #define NAMES_HAVE_UNDERSCORE
-
-/* Exec files and symbol tables are in COFF format */
-
-#define COFF_FORMAT
 
 /* Need to get function ends by adding this to epilogue address from .bf
    record, not using x_fsize field.  */

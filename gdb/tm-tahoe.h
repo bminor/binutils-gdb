@@ -30,10 +30,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define NAMES_HAVE_UNDERSCORE
 
-/* Debugger information will be in DBX format.  */
-
-#define READ_DBX_FORMAT
-
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
 

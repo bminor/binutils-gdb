@@ -1,5 +1,5 @@
 /* Macro defintions for i386.
-   Copyright (C) 1986, 1987, 1989 Free Software Foundation, Inc.
+   Copyright (C) 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -31,17 +31,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define COFF_NO_LONG_FILE_NAMES
 
 /* turn this on when rest of gdb is ready */
-/* #define IEEE_FLOAT */
+#define IEEE_FLOAT
 
 /* Define this if the C compiler puts an underscore at the front
    of external names before giving them to the linker.  */
 
 /* #define NAMES_HAVE_UNDERSCORE */
-
-/* Specify debugger information format.  */
-
-/* #define READ_DBX_FORMAT */
-#define COFF_FORMAT
 
 /* number of traps that happen between exec'ing the shell 
  * to run an inferior, and when we finally get to 
