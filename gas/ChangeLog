@@ -1,3 +1,12 @@
+Wed Jan 25 16:23:13 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* tc-sh.c (little): Add argument IGNORE to avoid compiler warnings.
+	(md_pseudo_table): Add space for consistent formatting.
+	(COND8_RANGE, COND12_RANGE): Delete unused macros.
+	(COND8_F, COND8_M, COND12_F, COND12_M, UNCOND12_F, UNCOND12_M):
+	Correct minimum and maximum branch offsets.  Add comments explaining
+	why these numbers are correct.
+
 Wed Jan 25 15:32:09 1995  David Edelsohn  <edelsohn@mhpcc.edu>
 
 	* config/tc-ppc.c (md_parse_option): Accept mpwr2 as a synonym for
