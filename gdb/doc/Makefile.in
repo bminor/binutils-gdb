@@ -83,7 +83,7 @@ CONFIG=all
 all install:
 
 info: gdb.info gdbint.info
-#all: gdb.info gdb.dvi refcard.dvi gdb-internals gdbint.dvi
+all-doc: gdb.info gdb.dvi refcard.dvi gdb-internals gdbint.dvi
 clean-info:
 	-rm -f *.info*
 

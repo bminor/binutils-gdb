@@ -8,6 +8,8 @@ _define__(<_ALL_ARCH__>,<0>)           (Meant as most inclusive; file turning
 					"_GENERIC__")
 _define__(<_GENERIC__>,<1>)            (may not be quite all configs; 
 					meant for "most vanilla" manual)
+_define__(<_FSF__>,<1>)                 set to zero to include things
+                                        FSF won't take which Cygnus may want.
 _define__(<_INTERNALS__>,<0>)
 
 _define__(<_AOUT__>,<1>)		Object formats.  Note we turn on one.
