@@ -1,3 +1,28 @@
+1999-05-28  Torbjorn Granlund  <tege@matematik.su.se>
+
+	* config/tc-m68k.c (m68k_ip): Check for disallowed index register
+	width for Coldfire.
+	(arch_coldfire_p): New #define.
+	(m68k_ip, m68k_init_after_args): Use arch_coldfire_p.
+
+1999-05-28  Linus Nordberg  <linus.nordberg@canit.se>
+
+	* config/tc-m68k.c (install_operand): Add places `n', `o'.
+
+	* config/tc-m68k.c (m68k_ip): Add formats `E', `G', `H'.
+	(install_operand): Add place `N'.
+	(init_table): Add registers ACC, MACSR, MASK.
+
+	* config/m68k-parse.h (m68k_register): Add ACC, MACSR, MASK.
+
+	* config/tc-m68k.c: Change mcf5200 --> mcf.
+	(archs): Add mcf5206e, mcf5307.
+	(m68k_ip): Add format `u'.
+	(install_operand): Add place `m', `M', `h'.
+	(init_table): Add upper/lower registers.
+
+	* config/m68k-parse.h (m68k_register): Add upper/lower registers.
+
 1999-05-28  Martin Dorey  <mdorey@madge.com>
 
 	* config/tc-i960.c: Several minor changes to add ELF and

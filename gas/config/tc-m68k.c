@@ -1,5 +1,5 @@
 /* tc-m68k.c -- Assemble for the m68k family
-   Copyright (C) 1987, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1987, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -193,7 +193,7 @@ static const enum m68k_register m68060_control_regs[] = {
   USP, VBR, URP, SRP, PCR,
   0
 };
-static const enum m68k_register mcf5200_control_regs[] = {
+static const enum m68k_register mcf_control_regs[] = {
   CACR, TC, ITT0, ITT1, DTT0, DTT1, VBR, ROMBAR, 
   RAMBAR0, RAMBAR1, MBAR,
   0
@@ -251,9 +251,10 @@ struct m68k_it
   reloc[5];			/* Five is enough??? */
 };
 
-#define cpu_of_arch(x)		((x) & (m68000up|mcf5200))
+#define cpu_of_arch(x)		((x) & (m68000up|mcf))
 #define float_of_arch(x)	((x) & mfloat)
 #define mmu_of_arch(x)		((x) & mmmu)
+#define arch_coldfire_p(x)	(((x) & mcf) != 0)
 
 /* Macros for determining if cpu supports a specific addressing mode */
 #define HAVE_LONG_BRANCH(x)	((x) & (m68020|m68030|m68040|m68060|cpu32))
@@ -395,6 +396,8 @@ static const struct m68k_cpu archs[] = {
   { m68881, "68881", 0 },
   { m68851, "68851", 0 },
   { mcf5200, "5200", 0 },
+  { mcf5206e, "5206e", 0 },
+  { mcf5307, "5307", 0},
   /* Aliases (effectively, so far as gas is concerned) for the above
      cpus.  */
   { m68020, "68k", 1 },
@@ -422,6 +425,9 @@ static const struct m68k_cpu archs[] = {
   { cpu32,  "68349", 1 },
   { cpu32,  "68360", 1 },
   { m68881, "68882", 1 },
+  { mcf5200, "5202", 1 },
+  { mcf5200, "5204", 1 },
+  { mcf5200, "5206", 1 },
 };
 
 static const int n_archs = sizeof (archs) / sizeof (archs[0]);
@@ -1475,8 +1481,23 @@ m68k_ip (instring)
 		    losing++;
 		  break;
 
+		case 'E':
+		  if (opP->reg != ACC)
+		    losing++;
+		  break;
+
 		case 'F':
 		  if (opP->mode != FPREG)
+		    losing++;
+		  break;
+
+		case 'G':
+		  if (opP->reg != MACSR)
+		    losing++;
+		  break;
+
+		case 'H':
+		  if (opP->reg != MASK)
 		    losing++;
 		  break;
 
@@ -1741,6 +1762,19 @@ m68k_ip (instring)
 		    ++losing;
 		  break;
 
+		case 'u':
+		  if (opP->reg < DATA0L || opP->reg > ADDR7U)
+		    losing++;
+		  /* FIXME: kludge instead of fixing parser:
+                     upper/lower registers are *not* CONTROL
+                     registers, but ordinary ones. */
+		  if ((opP->reg >= DATA0L && opP->reg <= DATA7L)
+		      || (opP->reg >= DATA0U && opP->reg <= DATA7U))
+		    opP->mode = DREG;
+		  else
+		    opP->mode = AREG;
+		  break;
+
 		default:
 		  abort ();
 		}		/* switch on type of operand */
@@ -1998,11 +2032,11 @@ m68k_ip (instring)
 		      && ((opP->disp.size == SIZE_UNSPEC
 			   && flag_short_refs == 0
 			   && cpu_of_arch (current_architecture) >= m68020
-			   && cpu_of_arch (current_architecture) != mcf5200)
+			   && ! arch_coldfire_p (current_architecture))
 			  || opP->disp.size == SIZE_LONG)))
 		{
 		  if (cpu_of_arch (current_architecture) < m68020
-		      || cpu_of_arch (current_architecture) == mcf5200)
+		      || arch_coldfire_p (current_architecture))
 		    opP->error =
 		      _("displacement too large for this architecture; needs 68020 or higher");
 		  if (opP->reg == PC)
@@ -2111,11 +2145,15 @@ m68k_ip (instring)
 		  if ((opP->index.scale != 1 
 		       && cpu_of_arch (current_architecture) < m68020)
 		      || (opP->index.scale == 8 
-			  && current_architecture == mcf5200))
+			  && arch_coldfire_p (current_architecture)))
 		    {
 		      opP->error =
 			_("scale factor invalid on this architecture; needs cpu32 or 68020 or higher");
 		    }
+
+		  if (arch_coldfire_p (current_architecture)
+		      && opP->index.size == SIZE_WORD)
+		    opP->error = _("invalid index size for coldfire");
 
 		  switch (opP->index.scale)
 		    {
@@ -2148,7 +2186,7 @@ m68k_ip (instring)
 		    {
 		      if (siz1 == SIZE_BYTE
 			  || cpu_of_arch (current_architecture) < m68020
-			  || cpu_of_arch (current_architecture) == mcf5200
+			  || arch_coldfire_p (current_architecture)
 			  || (siz1 == SIZE_UNSPEC
 			      && ! isvar (&opP->disp)
 			      && issbyte (baseo)))
@@ -2215,7 +2253,7 @@ m68k_ip (instring)
 	      /* It isn't simple.  */
 
 	      if (cpu_of_arch (current_architecture) < m68020
-		  || cpu_of_arch (current_architecture) == mcf5200)
+		  || arch_coldfire_p (current_architecture))
 		opP->error =
 		  _("invalid operand mode for this architecture; needs 68020 or higher");
 
@@ -2574,8 +2612,15 @@ m68k_ip (instring)
 	  install_operand (s[1], opP->reg - DATA);
 	  break;
 
+	case 'E':		/* Ignore it */
+	  break;
+
 	case 'F':
 	  install_operand (s[1], opP->reg - FP0);
+	  break;
+
+	case 'G':		/* Ignore it */
+	case 'H':
 	  break;
 
 	case 'I':
@@ -2905,6 +2950,11 @@ m68k_ip (instring)
 	  addword (tmpreg >> 16);
 	  addword (tmpreg & 0xFFFF);
 	  break;
+	case 'u':
+	  install_operand (s[1], opP->reg - DATA0L);
+	  opP->reg -= (DATA0L);
+	  opP->reg &= 0x0F;	/* remove upper/lower bit */
+	  break;
 	default:
 	  abort ();
 	}
@@ -3043,6 +3093,30 @@ install_operand (mode, val)
     case 'L':
       the_ins.opcode[1] = (val >> 16);
       the_ins.opcode[2] = val & 0xffff;
+      break;
+    case 'm':
+      the_ins.opcode[0] |= ((val & 0x8) << (6 - 3));
+      the_ins.opcode[0] |= ((val & 0x7) << 9);
+      the_ins.opcode[1] |= ((val & 0x10) << (7 - 4));
+      break;
+    case 'n':
+      the_ins.opcode[0] |= ((val & 0x8) << (6 - 3));
+      the_ins.opcode[0] |= ((val & 0x7) << 9);
+      break;
+    case 'o':
+      the_ins.opcode[1] |= val << 12;
+      the_ins.opcode[1] |= ((val & 0x10) << (7 - 4));
+      break;
+    case 'M':
+      the_ins.opcode[0] |= (val & 0xF);
+      the_ins.opcode[1] |= ((val & 0x10) << (6 - 4));
+      break;
+    case 'N':
+      the_ins.opcode[1] |= (val & 0xF);
+      the_ins.opcode[1] |= ((val & 0x10) << (6 - 4));
+      break;
+    case 'h':
+      the_ins.opcode[1] |= ((val != 1) << 10);
       break;
     case 'c':
     default:
@@ -3245,6 +3319,10 @@ static const struct init_entry init_table[] =
   { "ccr", CCR },
   { "cc", CCR },
 
+  { "acc", ACC },
+  { "macsr", MACSR },
+  { "mask", MASK },
+
   /* control registers */
   { "sfc", SFC },		/* Source Function Code */
   { "sfcr", SFC },
@@ -3348,6 +3426,43 @@ static const struct init_entry init_table[] =
   { "za5", ZADDR5 },
   { "za6", ZADDR6 },
   { "za7", ZADDR7 },
+
+  /* Upper and lower data and address registers, used by macw and msacw. */
+  { "d0l", DATA0L },
+  { "d1l", DATA1L },
+  { "d2l", DATA2L },
+  { "d3l", DATA3L },
+  { "d4l", DATA4L },
+  { "d5l", DATA5L },
+  { "d6l", DATA6L },
+  { "d7l", DATA7L },
+
+  { "a0l", ADDR0L },
+  { "a1l", ADDR1L },
+  { "a2l", ADDR2L },
+  { "a3l", ADDR3L },
+  { "a4l", ADDR4L },
+  { "a5l", ADDR5L },
+  { "a6l", ADDR6L },
+  { "a7l", ADDR7L },
+
+  { "d0u", DATA0U },
+  { "d1u", DATA1U },
+  { "d2u", DATA2U },
+  { "d3u", DATA3U },
+  { "d4u", DATA4U },
+  { "d5u", DATA5U },
+  { "d6u", DATA6U },
+  { "d7u", DATA7U },
+
+  { "a0u", ADDR0U },
+  { "a1u", ADDR1U },
+  { "a2u", ADDR2U },
+  { "a3u", ADDR3U },
+  { "a4u", ADDR4U },
+  { "a5u", ADDR5U },
+  { "a6u", ADDR6U },
+  { "a7u", ADDR7U },
 
   { 0, 0 }
 };
@@ -3783,7 +3898,9 @@ select_control_regs ()
       control_regs = cpu32_control_regs;
       break;
     case mcf5200:
-      control_regs = mcf5200_control_regs;
+    case mcf5206e:
+    case mcf5307:
+      control_regs = mcf_control_regs;
       break;
     default:
       abort ();
@@ -3857,7 +3974,7 @@ m68k_init_after_args ()
   select_control_regs ();
 
   if (cpu_of_arch (current_architecture) < m68020
-      || cpu_of_arch (current_architecture) == mcf5200)
+      || arch_coldfire_p (current_architecture))
     md_relax_table[TAB (PCINDEX, BYTE)].rlx_more = 0;
 }
 
