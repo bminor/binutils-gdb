@@ -3291,7 +3291,7 @@ NAME(aout,final_link) (abfd, info, callback)
       drsize = 0;
       for (sub = info->input_bfds; sub != (bfd *) NULL; sub = sub->link_next)
 	{
-	  if (bfd_get_flavour (abfd) == bfd_target_aout_flavour)
+	  if (bfd_get_flavour (sub) == bfd_target_aout_flavour)
 	    {
 	      trsize += exec_hdr (sub)->a_trsize;
 	      drsize += exec_hdr (sub)->a_drsize;

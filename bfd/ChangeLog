@@ -1,5 +1,11 @@
 Mon Jun 20 11:06:27 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* aoutx.h (NAME(aout,final_link)): Check flavour of sub, not abfd,
+	when computing reloc sizes.  From Eric Youngdale
+	<ericy@cais.cais.com>.
+	* elfcode.h (elf_bfd_final_link): Don't try to compute maximum
+	reloc count or size for a non-ELF file.
+
 	* mipsbsd.c (MY_final_link_callback): Define to avoid warning.
 
 	* hp300hpux.c (MY_final_link_callback): Define to avoid warning.

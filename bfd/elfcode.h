@@ -5115,17 +5115,17 @@ elf_bfd_final_link (abfd, info)
 
 		  if (sym_count > max_sym_count)
 		    max_sym_count = sym_count;
-		}
 
-	      if ((sec->flags & SEC_RELOC) != 0)
-		{
-		  size_t ext_size;
+		  if ((sec->flags & SEC_RELOC) != 0)
+		    {
+		      size_t ext_size;
 
-		  ext_size = elf_section_data (sec)->rel_hdr.sh_size;
-		  if (ext_size > max_external_reloc_size)
-		    max_external_reloc_size = ext_size;
-		  if (sec->reloc_count > max_internal_reloc_count)
-		    max_internal_reloc_count = sec->reloc_count;
+		      ext_size = elf_section_data (sec)->rel_hdr.sh_size;
+		      if (ext_size > max_external_reloc_size)
+			max_external_reloc_size = ext_size;
+		      if (sec->reloc_count > max_internal_reloc_count)
+			max_internal_reloc_count = sec->reloc_count;
+		    }
 		}
 	    }
 	}
