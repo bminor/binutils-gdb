@@ -214,7 +214,13 @@ attr:
 	;
 
 opt_name: ID		{ $$ = $1; }
-	|		{ $$ = 0; }
+	| ID '.' ID	
+	  { 
+	    char * name = xmalloc (strlen ($1) + 1 + strlen ($3) + 1);
+	    sprintf (name, "%s.%s", $1, $3);
+	    $$ = name;
+	  }
+	|		{ $$ = ""; }
 	;
 
 opt_ordinal: 

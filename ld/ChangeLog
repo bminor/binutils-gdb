@@ -1,3 +1,9 @@
+2000-01-04  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* pe-dll.c (pe_dll_generate_implib): Use the correct name for output 
+	dll.
+        * deffilep.y (opt_name): Allow "." in name.
+
 1999-12-02  Nick Clifton  <nickc@cygnus.com>
 
 	* Makefile.am: Fix arm-epoc-pe dependencies.

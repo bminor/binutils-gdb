@@ -1455,14 +1455,7 @@ pe_dll_generate_implib (def, impfilename)
   bfd *outarch;
   bfd *head = 0;
 
-  dll_filename = def->name;
-  if (dll_filename == 0)
-    {
-      dll_filename = dll_name;
-      for (i=0; impfilename[i]; i++)
-	if (impfilename[i] == '/' || impfilename[i] == '\\')
-	  dll_filename = impfilename+1;
-    }
+  dll_filename = (def->name) ? def->name : dll_name;
   dll_symname = xstrdup (dll_filename);
   for (i=0; dll_symname[i]; i++)
     if (!isalnum ((unsigned char) dll_symname[i]))
