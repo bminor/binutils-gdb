@@ -6,7 +6,7 @@ _dnl__ $Id$
 @c %**start of header 
 @setfilename _GDBP__.info
 _if__(_GENERIC__)
-@settitle _GDB__, The GNU Debugger 
+@settitle _GDBN__, The GNU Debugger 
 _fi__(_GENERIC__)
 _if__(!_GENERIC__)
 @settitle _GDB__, The GNU Debugger (_HOST__)
