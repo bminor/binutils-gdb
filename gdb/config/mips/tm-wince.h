@@ -1,4 +1,5 @@
 /* Definitions to make GDB run on a Windows CE system.
+
    Copyright 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -18,8 +19,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef TM_MIPS_H
-#define TM_MIPS_H 1
+#ifndef TM_WINCE_H
+#define TM_WINCE_H 1
 
 #include "mips/tm-mips.h"
 
@@ -31,4 +32,4 @@ void wince_software_single_step (unsigned int, int);
 #undef TARGET_BYTE_ORDER_SELECTABLE
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
 
-#endif /* TM_MIPS_H */
+#endif /* TM_WINCE_H */
