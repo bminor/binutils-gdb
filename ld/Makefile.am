@@ -159,6 +159,8 @@ ALL_EMULATIONS = \
 	eelf32ppc.o \
 	eelf32ppclinux.o \
 	eelf32ppcsim.o \
+	eelf64ppc.o \
+	eelf64lppc.o \
 	eelf_i386.o \
 	eelf_i386_be.o \
 	eelf_i386_chaos.o \
@@ -501,6 +503,12 @@ eelf32ppcsim.c: $(srcdir)/emulparams/elf32ppcsim.sh \
 eelf32ppclinux.c: $(srcdir)/emulparams/elf32ppclinux.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32ppclinux "$(tdir_elf32ppclinux)"
+eelf64ppc.c: $(srcdir)/emulparams/elf64ppc.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64ppc "$(tdir_elf64ppc)"
+eelf64lppc.c: $(srcdir)/emulparams/elf64lppc.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64lppc "$(tdir_elf64lppc)"
 eelf32i370.c: $(srcdir)/emulparams/elf32i370.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elfi370.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32i370 "$(tdir_elf32i370)"

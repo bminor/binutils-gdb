@@ -1,3 +1,15 @@
+2001-08-27  Linus Nordberg  <linus@swox.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (ALL_EMULATIONS): Add eelf64ppc.o and eelf64lppc.o.
+	(eelf64ppc.c, eelf64lppc.c): Add make targets.
+	Run "make dep-am"
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add powerpc64 support.  Move pdp11, pjl, pj
+	entries to correct alphabetical position.
+	* emulparams/elf64ppc.sh: New.
+	* emulparams/elf64lppc.sh: New.
+
 2001-08-27  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* ldmain.c (main): Declare BSIZE as static.
