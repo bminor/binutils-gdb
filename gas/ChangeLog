@@ -1,3 +1,8 @@
+2001-06-12  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* doc/as.texinfo (Infix Ops): Document that comparison and
+	combiner operators can be used as infix operators.
+
 2001-06-12  Peter Jakubek <pjak@snafu.de>
 
 	* gas/config/tc-m68k.c (parse_mri_control_operand): Fix handling
