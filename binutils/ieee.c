@@ -3307,12 +3307,15 @@ ieee_enum_type (p, tag, names, vals)
      use type N.  */
 
   simple = true;
-  for (i = 0; names[i] != NULL; i++)
+  if (names != NULL)
     {
-      if (vals[i] != i)
+      for (i = 0; names[i] != NULL; i++)
 	{
-	  simple = false;
-	  break;
+	  if (vals[i] != i)
+	    {
+	      simple = false;
+	      break;
+	    }
 	}
     }
 
@@ -3327,14 +3330,17 @@ ieee_enum_type (p, tag, names, vals)
       if (! ieee_write_number (info, 4))
 	return false;
     }
-  for (i = 0; names[i] != NULL; i++)
+  if (names != NULL)
     {
-      if (! ieee_write_id (info, names[i]))
-	return false;
-      if (! simple)
+      for (i = 0; names[i] != NULL; i++)
 	{
-	  if (! ieee_write_number (info, vals[i]))
+	  if (! ieee_write_id (info, names[i]))
 	    return false;
+	  if (! simple)
+	    {
+	      if (! ieee_write_number (info, vals[i]))
+		return false;
+	    }
 	}
     }
 
