@@ -9,11 +9,6 @@ srcname="GDB Test Suite"
 # Directories to use in all configurations.
 configdirs="gdb.base gdb.c++ gdb.chill gdb.disasm"
 
-# Directories to use for a configuration which uses stabs.  C++ tests
-# are also here because I don't believe they work well for any other
-# debugging format.
-stabsdirs="gdb.stabs"
-
 # Directories to use for a configuration which supports signals.
 # This usually excludes cross targets.
 signaldirs="gdb.signals"
@@ -54,12 +49,6 @@ case "${target}" in
 				  configdirs="${configdirs} ${stabsdirs}"
 				fi
 				;;
-esac
-
-# add signal tests for appropriate targets
-case "${target}" in
-	sh*-hms)	;;
-	*)		configdirs="${configdirs} ${signaldirs}" ;;
 esac
 
 # link in the lib directory if needed

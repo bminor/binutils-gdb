@@ -1,8 +1,28 @@
+Wed Jul 12 10:20:08 1995  Fred Fish  (fnf@rtl.cygnus.com)
+
+	* Revert all signal changes from Jul 6.
+	* gdb.base/{sigall.c signals.c}:  Define away signal() and alarm()
+	for sh-hms targets, allowing these tests to link, with no other
+	changes.  Testing is suppressed by setting "nosignals" in site.exp.
+
+Thu Jul  6 20:58:30 1995  Fred Fish  (fnf@cygnus.com)
+
+	* configure.in (signaldirs): Define and add to configdirs for all
+	targets except some specific ones that are known to not support signals.
+	Also clean up formatting.
+	* gdb.base/Makefile.in (EXECUTABLES):  Remove sigall and signals.
+	(signals, sigall):  Remove rules to build.
+	* gdb.base/{sigall.c, sigall.exp, signals.c, signals.exp}:
+	Moved to new gdb.signals directory.
+	* gdb.signals: New test directory.
+	* gdb.signals/{Makefile.in, configure.in, sigall.c, sigall.exp,
+	signals.c signals.exp}:  New or moved files.
+
 Sun Jun 25 12:55:18 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gdb.base/interrupt.exp: Don't choke if $nointerrupts doesn't exist.
 
-Wed Jun 21 16:35:55 1995  Fred Fish  <fnf@lisa.cygnus.com>
+Wed Jun 21 16:35:55 1995  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/return.exp:  Xfail `return double' test failure
 	on at least Solaris 2.3 and handle future/past versions on
