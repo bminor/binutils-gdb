@@ -1,4 +1,11 @@
 start-sanitize-am33
+Fri Jun 26 11:17:46 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mn10300/am33.s: Add .am33 pseudo-op to force am33 mode.
+	* gas/mn10300/{am33_2.s, am33_3.s, am33_4.s, am33_5.s}: Likewise.
+	* gas/mn10300/{am33_6.s, am33_7.s, am33_8.s}: Likewise.
+	* gas/mn10300/basic.exp: Corresponding changes.
+
 Wed Jun 24 10:10:52 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/basic.exp (do_am33_3): Fix typo.

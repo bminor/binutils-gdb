@@ -1,4 +1,5 @@
 	.text
+	.am33
 	cmp_add 4,r1,r2,r3
 	cmp_add 4,r1,2,r3
 	cmp_sub 4,r1,r2,r3

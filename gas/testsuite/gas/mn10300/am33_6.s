@@ -1,4 +1,5 @@
 	.text
+	.am33
 	add_add r4,r1,r2,r3
 	add_add r4,r1,2,r3
 	add_sub r4,r1,r2,r3
