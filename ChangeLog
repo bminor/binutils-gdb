@@ -1,8 +1,6 @@
 Wed Nov 18 20:13:29 1998  Christopher Faylor <cgf@cygnus.com>
 
 	* configure.in: Add libtermcap to list of cygwin dependencies.
-	* config/cygwin.mh: Add extra libtermcap target information.
-	Make gdb depend on libtermcap for future readline depencency.
 
 Tue Nov 17 16:57:51 1998  Geoffrey Noer  <noer@cygnus.com>
 
