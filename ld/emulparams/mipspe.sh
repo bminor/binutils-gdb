@@ -1,0 +1,6 @@
+ARCH=mips
+SCRIPT_NAME=pe
+OUTPUT_FORMAT="pei-mips"
+OUTPUT_ARCH="mips"
+RELOCATEABLE_OUTPUT_FORMAT="ecoff-littlemips"
+TEMPLATE_NAME=pe

@@ -65,8 +65,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #if defined(TARGET_IS_i386pe)
 #define DLL_SUPPORT
 #endif
+#if defined(TARGET_IS_shpe) || defined(TARGET_IS_mipspe) || defined(TARGET_IS_armpe)
+#define DLL_SUPPORT
+#endif
 
+#if defined(TARGET_IS_i386pe) || ! defined(DLL_SUPPORT)
 #define	PE_DEF_SUBSYSTEM		3
+#else
+#undef NT_EXE_IMAGE_BASE
+#undef PE_DEF_SECTION_ALIGNMENT
+#undef PE_DEF_FILE_ALIGNMENT
+#define NT_EXE_IMAGE_BASE		0x00010000
+#ifdef TARGET_IS_armpe
+#define PE_DEF_SECTION_ALIGNMENT	0x00001000
+#define	PE_DEF_SUBSYSTEM		9
+#else
+#define PE_DEF_SECTION_ALIGNMENT	0x00000400
+#define	PE_DEF_SUBSYSTEM		2
+#endif
+#define PE_DEF_FILE_ALIGNMENT		0x00000200
+#endif
 
 #ifdef TARGET_IS_arm_epoc_pe
 #define bfd_arm_pe_allocate_interworking_sections \
@@ -109,6 +127,14 @@ gld_${EMULATION_NAME}_before_parse()
   ldfile_output_architecture = bfd_arch_${ARCH};
 #ifdef DLL_SUPPORT
   config.has_shared = 1;
+
+#if (PE_DEF_SUBSYSTEM == 9) || (PE_DEF_SUBSYSTEM == 2)
+#if defined TARGET_IS_mipspe || defined TARGET_IS_armpe
+  lang_add_entry ("WinMainCRTStartup", 1);
+#else
+  lang_add_entry ("_WinMainCRTStartup", 1);
+#endif
+#endif
 #endif
 }
 
@@ -207,7 +233,11 @@ static definfo init[] =
   D(MinorOperatingSystemVersion,"__minor_os_version__", 0),
   D(MajorImageVersion,"__major_image_version__", 1),
   D(MinorImageVersion,"__minor_image_version__", 0),
+#ifdef TARGET_IS_armpe
+  D(MajorSubsystemVersion,"__major_subsystem_version__", 2),
+#else
   D(MajorSubsystemVersion,"__major_subsystem_version__", 4),
+#endif
   D(MinorSubsystemVersion,"__minor_subsystem_version__", 0),
   D(Subsystem,"__subsystem__", ${SUBSYSTEM}),
   D(SizeOfStackReserve,"__size_of_stack_reserve__", 0x2000000),
@@ -288,13 +318,18 @@ set_pe_subsystem ()
   v[] =
     {
       { "native", 1, "NtProcessStartup" },
+#if defined TARGET_IS_mipspe || defined TARGET_IS_armpe
       { "windows", 2, "WinMainCRTStartup" },
+#else
+      { "windows", 2, "WinMainCRTStartup" },
+#endif
       { "console", 3, "mainCRTStartup" },
 #if 0
       /* The Microsoft linker does not recognize this.  */
       { "os2", 5, "" },
 #endif
       { "posix", 7, "__PosixProcessStartup"},
+      { "wince", 9, "_WinMainCRTStartup" },
       { 0, 0, 0 }
     };
 
@@ -692,6 +727,13 @@ gld_${EMULATION_NAME}_after_open ()
   pe_process_import_defs(output_bfd, &link_info);
   if (link_info.shared)
     pe_dll_build_sections (output_bfd, &link_info);
+
+#ifndef TARGET_IS_i386pe
+#ifndef TARGET_IS_armpe
+  else
+    pe_exe_build_sections (output_bfd, &link_info);
+#endif
+#endif
 #endif
 
 #if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_epoc_pe)
@@ -931,6 +973,15 @@ gld_${EMULATION_NAME}_recognized_file(entry)
 #ifdef TARGET_IS_i386pe
   pe_dll_id_target ("pei-i386");
 #endif
+#ifdef TARGET_IS_shpe
+  pe_dll_id_target ("pei-shl");
+#endif
+#ifdef TARGET_IS_mipspe
+  pe_dll_id_target ("pei-mips");
+#endif
+#ifdef TARGET_IS_armpe
+  pe_dll_id_target ("pei-arm-little");
+#endif
   if (bfd_get_format (entry->the_bfd) == bfd_object)
     {
       const char *ext = entry->filename + strlen (entry->filename) - 4;
@@ -992,6 +1043,13 @@ gld_${EMULATION_NAME}_finish ()
       if (pe_implib_filename)
 	pe_dll_generate_implib (pe_def_file, pe_implib_filename);
     }
+#if defined(TARGET_IS_shpe) || defined(TARGET_IS_mipspe)
+  else
+    {
+      pe_exe_fill_sections (output_bfd, &link_info);
+    }
+#endif
+  
   if (pe_out_def_filename)
     pe_dll_generate_def_file (pe_out_def_filename);
 #endif
@@ -1236,6 +1294,14 @@ gld${EMULATION_NAME}_place_section (s)
   else if (strcmp (os->name, ".bss") == 0)
     hold_bss = os;
 }
+
+static int
+gld_${EMULATION_NAME}_find_potential_libraries (name, entry)
+     char * name;
+     lang_input_statement_type * entry;
+{
+  return ldfile_open_file_search (name, entry, "", ".lib");
+}
 
 static char *
 gld_${EMULATION_NAME}_get_script(isfile)
@@ -1288,6 +1354,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld_${EMULATION_NAME}_parse_args,
   gld_${EMULATION_NAME}_unrecognized_file,
   gld_${EMULATION_NAME}_list_options,
-  gld_${EMULATION_NAME}_recognized_file
+  gld_${EMULATION_NAME}_recognized_file,
+  gld_${EMULATION_NAME}_find_potential_libraries
 };
 EOF

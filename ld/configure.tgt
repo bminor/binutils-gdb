@@ -16,6 +16,8 @@ targ_extra_ofiles=
 case "${targ}" in
 arm-epoc-pe)		targ_emul=arm_epoc_pe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
+arm-*-wince)		targ_emul=armpe ;
+			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 arm-*-pe)		targ_emul=armpe ;
 			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 arc-*-elf*)		targ_emul=arcelf ;;
@@ -157,6 +159,8 @@ sh-*-elf* | sh-*-rtemself*)
 			targ_emul=shelf
 			targ_extra_emuls="shlelf sh shl"
 			;;
+sh-*-pe)		targ_emul=shpe ;
+			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 sh-*-*|sh-*-rtems*)	targ_emul=sh; targ_extra_emuls=shl ;;
 m68k-sony-*)		targ_emul=news ;;
 m68k-hp-bsd*)		targ_emul=hp300bsd ;;
@@ -185,6 +189,8 @@ hppa*-*-linux-gnu*)	targ_emul=hppaelf ;;
 hppa*-*-lites*)		targ_emul=hppaelf ;;
 hppa*-*-rtems*)		targ_emul=hppaelf ;;
 vax-dec-ultrix* | vax-dec-bsd*) targ_emul=vax ;;
+mips*-*-pe)		targ_emul=mipspe ;
+			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
 mips*-dec-ultrix*)	targ_emul=mipslit ;;
 mips*-dec-osf*)		targ_emul=mipslit ;;
 mips*-sgi-irix5*)	targ_emul=elf32bsmip ;;

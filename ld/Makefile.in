@@ -285,6 +285,7 @@ ALL_EMULATIONS = \
 	emipsidtl.o \
 	emipslit.o \
 	emipslnews.o \
+	emipspe.o \
 	enews.o \
 	epjelf.o \
 	epjlelf.o \
@@ -299,6 +300,7 @@ ALL_EMULATIONS = \
 	eshelf.o \
 	eshlelf.o \
 	eshl.o \
+	eshpe.o \
 	esparcaout.o \
 	esparclinux.o \
 	esparclynx.o \
@@ -1249,6 +1251,9 @@ emipslit.c:  $(srcdir)/emulparams/mipslit.sh \
 emipslnews.c:  $(srcdir)/emulparams/mipslnews.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mipslnews
+emipspe.c: $(srcdir)/emulparams/mipspe.sh \
+  $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} mipspe "$(tdir_mips)"
 emn10300.c: $(srcdir)/emulparams/mn10300.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mn10300 "$(tdir_mn10300)"
@@ -1297,6 +1302,9 @@ eshlelf.c: $(srcdir)/emulparams/shlelf.sh \
 eshl.c: $(srcdir)/emulparams/shl.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sh.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} shl "$(tdir_shl)"
+eshpe.c: $(srcdir)/emulparams/shpe.sh \
+  $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} shpe "$(tdir_shl)"
 esparcaout.c: $(srcdir)/emulparams/sparcaout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} sparcaout "$(tdir_sparcaout)"

@@ -1,4 +1,4 @@
-/* Copyright (C) 1991, 92, 93, 94, 95, 98, 1999 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 92, 93, 94, 95, 98, 99, 2000 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -74,9 +74,6 @@ typedef struct search_arch
 static search_arch_type *search_arch_head;
 static search_arch_type **search_arch_tail_ptr = &search_arch_head;
  
-static boolean ldfile_open_file_search
-  PARAMS ((const char *arch, lang_input_statement_type *,
-	   const char *lib, const char *suffix));
 static FILE *try_open PARAMS ((const char *name, const char *exten));
 
 void
@@ -150,7 +147,7 @@ ldfile_try_open_bfd (attempt, entry)
 /* Search for and open the file specified by ENTRY.  If it is an
    archive, use ARCH, LIB and SUFFIX to modify the file name.  */
 
-static boolean
+boolean
 ldfile_open_file_search (arch, entry, lib, suffix)
      const char *arch;
      lang_input_statement_type *entry;
@@ -247,6 +244,8 @@ ldfile_open_file (entry)
 	  if (ldfile_open_file_search (arch->name, entry, ":lib", ".a"))
 	    return;
 #endif
+	  if (ldemul_find_potential_libraries (arch->name, entry))
+	    return;
 	}
       einfo (_("%F%P: cannot find %s\n"), entry->local_sym_name);
     }

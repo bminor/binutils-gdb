@@ -297,3 +297,14 @@ ldemul_list_emulation_options (f)
   if (! options_found)
     fprintf (f, _("  no emulation specific options.\n"));
 }
+
+int
+ldemul_find_potential_libraries (name, entry)
+     char * name;
+     lang_input_statement_type * entry;
+{
+  if (ld_emulation->find_potential_libraries)
+    return ld_emulation->find_potential_libraries (name, entry);
+
+  return 0;
+}

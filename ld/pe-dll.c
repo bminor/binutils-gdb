@@ -86,6 +86,9 @@ typedef struct {
 } pe_details_type;
 
 #define PE_ARCH_i386	1
+#define PE_ARCH_sh	2
+#define PE_ARCH_mips	3
+#define PE_ARCH_arm	4
 
 static pe_details_type pe_detail_list[] = {
   {
@@ -95,6 +98,30 @@ static pe_details_type pe_detail_list[] = {
     PE_ARCH_i386,
     bfd_arch_i386,
     1
+  },
+  {
+    "pei-shl",
+    "pe-shl",
+    16 /* R_SH_IMAGEBASE */,
+    PE_ARCH_sh,
+    bfd_arch_sh,
+    1
+  },
+  {
+    "pei-mips",
+    "pe-mips",
+    34 /* MIPS_R_RVA */,
+    PE_ARCH_mips,
+    bfd_arch_mips,
+    0
+  },
+  {
+    "pei-arm-little",
+    "pe-arm-little",
+    11 /* ARM_RVA32 */,
+    PE_ARCH_arm,
+    bfd_arch_arm,
+    0
   },
   { NULL, NULL, 0, 0, 0, 0 }
 };
@@ -403,7 +430,7 @@ process_def_file (abfd, info)
 	    exported_symbol_sections[i] = blhe->u.def.section;
 	  else
 	    exported_symbol_sections[i] = blhe->u.c.p->section;
-
+	  
 	  if (pe_def_file->exports[i].ordinal != -1)
 	    {
 	      if (max_ordinal < pe_def_file->exports[i].ordinal)
@@ -776,11 +803,30 @@ generate_reloc (abfd, info)
 			     + sym->section->output_offset
 			     + sym->section->output_section->vma);
 		  reloc_data[total_relocs].vma = sec_vma + relocs[i]->address;
-		  switch (relocs[i]->howto->bitsize*1000
-			  + relocs[i]->howto->rightshift)
+		  
+#define BITS_AND_SHIFT(bits, shift) (bits * 1000 | shift)
+				    
+		  switch BITS_AND_SHIFT (relocs[i]->howto->bitsize,
+					 relocs[i]->howto->rightshift)
 		    {
-		    case 32000:
+		    case BITS_AND_SHIFT (32, 0):
 		      reloc_data[total_relocs].type = 3;
+		      total_relocs++;
+		      break;
+		    case BITS_AND_SHIFT (16, 0):
+		      reloc_data[total_relocs].type = 2;
+		      total_relocs++;
+		      break;
+		    case BITS_AND_SHIFT (16, 16):
+		      reloc_data[total_relocs].type = 4;
+		      /* FIXME: we can't know the symbol's right value yet,
+			 but we probably can safely assume that CE will relocate
+			 us in 64k blocks, so leaving it zero is safe.  */
+		      reloc_data[total_relocs].extra = 0;
+		      total_relocs++;
+		      break;
+		    case BITS_AND_SHIFT (26, 2):
+		      reloc_data[total_relocs].type = 5;
 		      total_relocs++;
 		      break;
 		    default:
@@ -807,13 +853,18 @@ generate_reloc (abfd, info)
   for (i = 0; i < total_relocs; i++)
     {
       unsigned long this_page = (reloc_data[i].vma >> 12);
+      
       if (this_page != sec_page)
 	{
 	  reloc_sz = (reloc_sz + 3) & ~3;	/* 4-byte align */
 	  reloc_sz += 8;
 	  sec_page = this_page;
 	}
+      
       reloc_sz += 2;
+      
+      if (reloc_data[i].type == 4)
+	reloc_sz += 2;
     }
   reloc_sz = (reloc_sz + 3) & ~3;	/* 4-byte align */
 
@@ -1319,6 +1370,31 @@ static unsigned char jmp_ix86_bytes[] = {
   0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90
 };
 
+/*
+ *_function:
+ *	mov.l	ip+8,r0
+ *	mov.l	@r0,r0
+ *	jmp	@r0
+ *	nop
+ *	.dw	__imp_function
+ */
+
+static unsigned char jmp_sh_bytes[] = {
+  0x01, 0xd0, 0x02, 0x60, 0x2b, 0x40, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+/*
+ *_function:
+ *	lui	$t0,<high:__imp_function>
+ *	lw	$t0,<low:__imp_function>
+ *	jr	$t0
+ *	nop
+ */
+
+static unsigned char jmp_mips_bytes[] = {
+  0x00, 0x00, 0x08, 0x3c,  0x00, 0x00, 0x08, 0x8d,
+  0x08, 0x00, 0x00, 0x01,  0x00, 0x00, 0x00, 0x00
+};
 
 static bfd *
 make_one (exp, parent)
@@ -1338,6 +1414,14 @@ make_one (exp, parent)
     case PE_ARCH_i386:
       jmp_bytes = jmp_ix86_bytes;
       jmp_byte_count = sizeof (jmp_ix86_bytes);
+      break;
+    case PE_ARCH_sh:
+      jmp_bytes = jmp_sh_bytes;
+      jmp_byte_count = sizeof (jmp_sh_bytes);
+      break;
+    case PE_ARCH_mips:
+      jmp_bytes = jmp_mips_bytes;
+      jmp_byte_count = sizeof (jmp_mips_bytes);
       break;
     }
 
@@ -1375,6 +1459,14 @@ make_one (exp, parent)
     {
     case PE_ARCH_i386:
       quick_reloc (abfd, 2, BFD_RELOC_32, 2);
+      break;
+    case PE_ARCH_sh:
+      quick_reloc (abfd, 8, BFD_RELOC_32, 2);
+      break;
+    case PE_ARCH_mips:
+      quick_reloc (abfd, 0, BFD_RELOC_HI16_S, 2);
+      quick_reloc (abfd, 0, BFD_RELOC_LO16, 0); /* MIPS_R_PAIR */
+      quick_reloc (abfd, 4, BFD_RELOC_LO16, 2);
       break;
     }
   save_relocs (tx);

@@ -1,0 +1,4 @@
+ARCH=sh
+SCRIPT_NAME=pe
+OUTPUT_FORMAT="pei-shl"
+TEMPLATE_NAME=pe

@@ -87,6 +87,11 @@ SECTIONS
     *(.eh_frame)
   }
 
+  .pdata ${RELOCATING+BLOCK(__section_alignment__)} :
+  {
+    *(.pdata)
+  }
+
   .bss ${RELOCATING+BLOCK(__section_alignment__)} :
   {
     ${RELOCATING+__bss_start__ = . ;}

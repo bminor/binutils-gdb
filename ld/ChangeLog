@@ -1,3 +1,29 @@
+2000-02-24  Nick Clifton  <nickc@cygnus.com>
+
+	* Makefile.am: Add rules to build emipspe.o and earmpe.o.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add targets for arm-wince, sh-pe and mips-pe.
+
+	* ldemul.h (ld_emulation_xfer_struct): Add new field:
+	find_potential_libraries.
+	* ldemul.c (ldemul_find_potential_libraries): New function.
+
+	* ldfile.c (ldfile_open_file_search): Allow function to be
+	exported. 
+	(ldfile_open_file): Call ldemul_find_potential_libraries.
+	* ldfile.h: Add prototype for ldfile_open_file_search.
+
+	* pe-dll.c: Add support for ARM, MIPS and SH targets.
+
+	* emulparams/mipspe.sh: New file.  Parameters for mips-pe target.
+	* emulparams/shpe.sh: New file.  Parameters for sh-pe target.
+
+	* emultempl/pe.em: Add support for ARM, MIPS and SH DLLs.
+	(gld_X_find_potential_libraries): New function.  Search for
+	libraries called "*.lib".
+
+	* scriptempl/pe.sc: Add .pdata section.
+
 2000-02-23  Richard Henderson  <rth@cygnus.com>
 
 	* scripttempl/elfd10v.sc: Remove dynamic linking hooks.
