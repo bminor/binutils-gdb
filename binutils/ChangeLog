@@ -1,5 +1,9 @@
 Wed Jun 21 17:32:45 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* Makefile.in (DISTSTUFF): Don't include info here.
+	(diststuff): Include it here.
+	(realclean): Remove *.info.
+
 	* objdump.c (compare_relocs): If relocation entries have the same
 	address, keep them in file order.
 
