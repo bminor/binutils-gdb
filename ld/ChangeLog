@@ -1,3 +1,9 @@
+start-sanitize-vr4320
+Tue Mar  3 11:16:35 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* configure.tgt (mips*vr4320el-*-elf*,mips*vr4320-*-elf*): Added.
+
+end-sanitize-vr4320
 Mon Mar  2 19:24:08 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* ldlang.c (lang_size_sections): If the default memory region is
