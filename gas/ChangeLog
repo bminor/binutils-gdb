@@ -1,5 +1,8 @@
 Mon Jul 13 13:55:42 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* write.c (subsegs_finish): Don't align the segments if there were
+	any errors.
+
 	* config/obj-coff.c (c_symbol_merge): Correct number of bytes when
 	copying aux information.
 
