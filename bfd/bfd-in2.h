@@ -6,9 +6,10 @@
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* Main header file for the bfd library -- portable access to object files.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
+   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -75,7 +76,10 @@ extern "C" {
 #endif
 
 /* Forward declaration.  */
-typedef struct _bfd bfd;
+typedef struct bfd bfd;
+/* For backward compatibility.  Keep code that was using "struct
+   _bfd" working.  */
+#define _bfd bfd
 
 /* Boolean type used in bfd.  Too many systems define their own
    versions of "boolean" for us to safely typedef a "boolean" of
@@ -3605,7 +3609,7 @@ bfd_copy_private_symbol_data PARAMS ((bfd *ibfd, asymbol *isym, bfd *obfd, asymb
                (ibfd, isymbol, obfd, osymbol))
 
 /* Extracted from bfd.c.  */
-struct _bfd
+struct bfd
 {
   /* A unique identifier of the BFD  */
   unsigned int id;

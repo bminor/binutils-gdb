@@ -1,3 +1,11 @@
+2003-02-27  Andrew Cagney  <cagney@redhat.com>
+
+	* bfd.c (struct bfd): Rename "struct _bfd".
+	* bfd-in.h: Update copyright.
+	(struct bfd): Rename "struct _bfd".
+	(_bfd): Define for backward compatibility.
+	* bfd-in2.h: Regenerate.
+
 2003-02-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h (elf_bfd_final_link): Apportion reloc counts to rel_hdr

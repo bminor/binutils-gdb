@@ -34,7 +34,7 @@ SECTION
 
 CODE_FRAGMENT
 .
-.struct _bfd
+.struct bfd
 .{
 .  {* A unique identifier of the BFD  *}
 .  unsigned int id;
