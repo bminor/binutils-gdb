@@ -1,5 +1,11 @@
 2004-06-21  Alexandre Oliva  <aoliva@redhat.com>
 
+	2003-05-15  Richard Sandiford  <rsandifo@redhat.com>
+	* cpu-h8300.c (compatible): Allow h8300s and h8300sx code to be
+	linked together. Mark the result as h8300sx code.
+
+2004-06-21  Alexandre Oliva  <aoliva@redhat.com>
+
 	* elf-bfd.h (struct elf_backend_data): Added
 	elf_backend_omit_section_dynsym.
 	(_bfd_elf_link_omit_section_dynsym): Declare.
