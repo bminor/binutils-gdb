@@ -102,8 +102,8 @@
 
 2001-02-20  Kazu Hirata  <kazu@hxi.com>
 
-	* tc-pdp11.c: Fix formatting.
-	* tc-pdp11.h: Likewise.
+	* config/tc-pdp11.c: Fix formatting.
+	* config/tc-pdp11.h: Likewise.
 
 2001-02-20  Bo Thorsen  <bo@suse.de>
 
@@ -187,7 +187,7 @@
 
 Mon Feb 12 17:45:50 CET 2001  Jan Hubicka  <jh@suse.cz>
 
-	* tc-i386.c (i386_displacement): Fix handling of
+	* config/tc-i386.c (i386_displacement): Fix handling of
 	BFD_RELOC_X86_64_GOTPCREL.
 	(i386_validate_fix): Likewise.
 
@@ -433,9 +433,9 @@ Mon Feb 12 17:45:50 CET 2001  Jan Hubicka  <jh@suse.cz>
 
 Sun Jan 14 00:36:42 MET 2001  Jan Hubicka  <jh@suse.cz>
 
-	* tc-i386.h (TARGET_MACH): New macro.
+	* config/tc-i386.h (TARGET_MACH): New macro.
 	(i386_mach): Declare.
-	* tc-i386.c (i386_mach): New function.
+	* config/tc-i386.c (i386_mach): New function.
 
 2001-01-13  Philip Blundell  <philb@gnu.org>
 
@@ -555,7 +555,7 @@ Sat Jan 13 01:47:35 MET 2001  Jan Hubicka <jh@suse.cz>
 Sat Jan  6 13:33:10 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* configure.in: Define DEFAULT_ARCH for i386.
-	* tc-i386.c (md_assemble): Return after the error message;
+	* config/tc-i386.c (md_assemble): Return after the error message;
 	move testing for 64bit operands to proper place.
 
 2001-01-06  Jan Hubicka <jh@suse.cz>, Andreas Jaeger  <aj@suse.de>
@@ -567,21 +567,21 @@ Sat Jan  6 13:33:10 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 Fri Jan  5 13:26:42 MET 2001  Jan Hubicka  <jh@suse.cz>
 
-	* tc-i386.c (md_assemble): Handle third byte of the opcode as prefix.
+	* config/tc-i386.c (md_assemble): Handle third byte of the opcode as prefix.
 
 Thu Jan  4 22:25:26 MET 2001  Jan Hubicka  <jh@suse.cz>
 
-	* tc-i386.c (cpu_arch): Add Pentium4 and modify sledgehammer entry.
+	* config/tc-i386.c (cpu_arch): Add Pentium4 and modify sledgehammer entry.
 	* NEWS: Add note about Pentium4 support.
 
 Wed Jan  3 17:26:32 MET 2001  Jan Hubicka  <jh@suse.cz>
 
-	* tc-i387.c (pi, pte, pt): Update.
+	* config/tc-i387.c (pi, pte, pt): Update.
 	(type_names): Add new types.
 
 Wed Jan  3 16:26:52 MET 2001  Jan Hubicka  <jh@suse.cz>
 
-	* tc-i386.h (CpuK6, CpuAthlon, CpuSledgehammer, CpuMMX, Cpu3dnow,
+	* config/tc-i386.h (CpuK6, CpuAthlon, CpuSledgehammer, CpuMMX, Cpu3dnow,
 	CpuUnknown): Renumber
 	(CpuP4, CpuSSE2): New.
 	(CpuUnknownFlags): Add CpuP4 and CpuSSE2
@@ -694,7 +694,7 @@ Sat Dec 30 19:02:48 MET 2000  Jan Hubicka  <jh@suse.cz>
 
 Wed Dec 20 14:21:22 MET 2000  Jan Hubicka  <jh@suse.cz>
 
-	* tc-i386.h (i386_target_format): Define even for ELFs.
+	* config/tc-i386.h (i386_target_format): Define even for ELFs.
 	(QWORD_MNEM_SUFFIX): New macro.
 	(CpuK6,CpuAthlon,CpuSledgehammer, Cpu64, CpuNo64, CpuUnknownFlags):
 	New macros
@@ -714,7 +714,7 @@ Wed Dec 20 14:21:22 MET 2000  Jan Hubicka  <jh@suse.cz>
 	(AnyMem): Add Disp32S.
 	(RegRex, RegRex64): New macros.
 	(rex_byte): New type.
-	* tc-i386.c (set_16bit_code_flag): Kill.
+	* config/tc-i386.c (set_16bit_code_flag): Kill.
 	(fits_in_unsigned_long, fits_in_signed_long): New functions.
 	(reloc): New parameter "signed"; support x86_64.
 	(set_code_flag): New.
@@ -822,12 +822,12 @@ Wed Dec 20 14:21:22 MET 2000  Jan Hubicka  <jh@suse.cz>
 
 Mon Dec 11 14:35:42 MET 2000  Jan hubicka  <jh@suse.cz>
 
-	* tc-i386.c (md_assemble): Refuse 's' and 'l' suffixes in the intel
+	* config/tc-i386.c (md_assemble): Refuse 's' and 'l' suffixes in the intel
 	mode; convert 'd' suffix to 's' or 'l'; remove all DWORD_MNEM_SUFFIX
 	references.
 	(intel_e09_1): Convert QWORD to 'l' suffix for FP operations; refuse
 	otherwise.
-	* tc-i386.h (DWORD_MNEM_SUFFIX): Kill.
+	* config/tc-i386.h (DWORD_MNEM_SUFFIX): Kill.
 	(No_dSuf): Kill.
 
 	* i386.h (*_Suf): Remove No_dSuf.
@@ -943,7 +943,7 @@ Mon Dec 11 14:35:42 MET 2000  Jan hubicka  <jh@suse.cz>
 	4Kp entries with a single mips32-4k entry.  Note that you can
 	use ".set mips32".
 
-	* tc-mips.c (ISA_HAS_64BIT_REGS): Add checks for ISA_MIPS5 and
+	* config/tc-mips.c (ISA_HAS_64BIT_REGS): Add checks for ISA_MIPS5 and
 	ISA_MIPS64.
 	(md_longopts, OPTION_MIPS5, OPTION_MIPS64): Add options for
 	-mips5 and -mips64.
@@ -986,7 +986,7 @@ Mon Dec 11 14:35:42 MET 2000  Jan hubicka  <jh@suse.cz>
 
 2000-11-30  Diego Novillo  <dnovillo@redhat.com>
 
-	* tc-i386.c (md_assemble): Swap i.disp_relocs when using intel
+	* config/tc-i386.c (md_assemble): Swap i.disp_relocs when using intel
 	syntax.
 
 2000-11-29  Richard Henderson  <rth@redhat.com>
@@ -1267,7 +1267,7 @@ Mon Dec 11 14:35:42 MET 2000  Jan hubicka  <jh@suse.cz>
 
 2000-11-15  Bernd Schmidt  <bernds@redhat.com>
 
-	* tc-ia64.c (struct md): New entries LAST_GROUPS, GROUP_IDX.
+	* config/tc-ia64.c (struct md): New entries LAST_GROUPS, GROUP_IDX.
 	(errata_nops_necessary_p): New function.
 	(emit_one_bundle): Call it.  Update the GROUP_IDX field in struct
 	md.
@@ -1468,7 +1468,7 @@ Mon Dec 11 14:35:42 MET 2000  Jan hubicka  <jh@suse.cz>
 
 2000-10-31  Bernd Schmidt  <bernds@redhat.co.uk>
 
-	* tc-ia64.c (extra_goodness): Only prefer F in slot 1 and B in slot 2.
+	* config/tc-ia64.c (extra_goodness): Only prefer F in slot 1 and B in slot 2.
 
 2000-10-30  Kazu Hirata  <kazu@hxi.com>
 
@@ -1527,12 +1527,12 @@ Mon Dec 11 14:35:42 MET 2000  Jan hubicka  <jh@suse.cz>
 
 2000-10-25  Diego Novillo  <dnovillo@cygnus.com>
 
-	* tc-i386.c: Fix prototype declarations for functions taking no
+	* config/tc-i386.c: Fix prototype declarations for functions taking no
 	arguments.
 
 2000-10-24  Diego Novillo  <dnovillo@cygnus.com>
 
-	* tc-i386.c (i386_operand_modifier): Remove.
+	* config/tc-i386.c (i386_operand_modifier): Remove.
 	(build_displacement_string): Remove.
 	(i386_parse_seg): Remove.
 	(i386_intel_memory_operand): Remove.
@@ -2100,7 +2100,7 @@ Mon Dec 11 14:35:42 MET 2000  Jan hubicka  <jh@suse.cz>
 
 2000-08-25  J. David Anglin  <dave@hiauly1.hia.nrc.ca>
 
-	* tc-vax.c (md_convert_frag): Correctly calculate the pc relative
+	* config/tc-vax.c (md_convert_frag): Correctly calculate the pc relative
 	offset of the target destination for jmp instructions.
 	(md_assemble): Change mode to VAX_ABSOLUTE_MODE as per comments.
 
@@ -2115,8 +2115,8 @@ Thu Aug 24 20:41:05 2000  Denis Chertykov  <denisc@overta.ru>
 
 2000-08-23  Alexandre Oliva  <aoliva@redhat.com>
 
-	* config/tc-i386.h <OBJ_MAYBE_ELF, OBJ_MAYBE_COFF>
-	(TC_FIX_ADJUSTABLE): Define.
+	* config/tc-i386.h (OBJ_MAYBE_ELF, OBJ_MAYBE_COFF,
+	TC_FIX_ADJUSTABLE): Define.
 
 2000-08-23  Jim Wilson  <wilson@cygnus.com>
 
@@ -2315,8 +2315,8 @@ Mon Aug 14 11:49:12 2000  Jeffrey A Law  (law@cygnus.com)
 
 Wed Aug  9 16:28:21 EDT 2000	Diego Novillo <dnovillo@cygnus.com>
 
-	* tc-i386.c (md_assemble): Skip suffix check if the opcode modifier
-	has the IgnoreSize bit set.
+	* config/tc-i386.c (md_assemble): Skip suffix check if the opcode
+	modifier has the IgnoreSize bit set.
 
 2000-08-09  Alan Modra  <alan@linuxcare.com.au>
 
@@ -3654,7 +3654,7 @@ Tue Apr 25 11:02:02 2000  Jeffrey A Law  (law@cygnus.com)
 
 2000-04-24  Mark Klein <mklein@dis.com>
 
-	* obj-som.c: Terminate obj_pseudo_table.
+	* config/obj-som.c: Terminate obj_pseudo_table.
 
 Mon Apr 24 15:21:11 2000  Clinton Popetz  <cpopetz@cygnus.com>
 
