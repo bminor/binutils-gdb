@@ -153,5 +153,9 @@ SECTIONS
   .debug_macinfo  0 : { *(.debug_macinfo) }
 
   PROVIDE (__stack = ${STACK}) ;
+  PROVIDE (__data_start_rom = _etext) ;
+  PROVIDE (__data_end_rom   = _etext + SIZEOF (.data)) ;
+  PROVIDE (__noinit_start_rom = _etext + SIZEOF (.data)) ;
+  PROVIDE (__noinit_end_rom = _etext + SIZEOF (.data) + SIZEOF (.noinit)) ;
 }
 EOF
