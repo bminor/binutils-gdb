@@ -1,5 +1,9 @@
 Wed Feb  2 12:30:13 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* coff-mips.c (mips_ecoff_backend_data), coff-alpha.c
+	(alpha_ecoff_backend_data): Change casts of aux_in and aux_out
+	fields to match yesterday's changes.
+
 	* coffcode.h (coff_write_relocs): If SELECT_RELOC is defined, pass
 	in the internal_reloc itself, not the type.
 	* coff-apollo.c, coff-h8300.c, coff-h8500.c, coff-i386.c,
