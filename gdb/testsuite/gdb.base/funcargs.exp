@@ -1,4 +1,4 @@
-# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2002
+# Copyright 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2002, 2003
 # Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -177,7 +177,6 @@ proc float_and_integral_args {} {
 
     # Run; should stop at call2a and print actual arguments.
 
-    setup_xfail "i960-*-*" 1813
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" "mips-sgi-irix5*" }
     # The debug info. for "f" is not correct. It's a known bug.
     if {$hp_cc_compiler} {setup_xfail hppa2.0w-*-*}
@@ -680,9 +679,6 @@ $gdb_prompt $" {
 
     # Continue; should stop at call6k and print actual arguments.
     # Print backtrace.
-    # This fails on i960-*-vxworks because gdb gets confused by
-    # breakpoints on adjacent instructions.
-    setup_xfail "i960-*-vxworks" 1786
     gdb_continue call6k
 
     if {$hp_cc_compiler} {setup_xfail hppa2.0w-*-*}
@@ -742,7 +738,6 @@ proc shuffle_round_robin {} {
 	 timeout { fail "(timeout) run to call7a" ; gdb_suppress_tests; }
     }
 
-    setup_xfail "i960-*-*" 1813
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" "mips-sgi-irix5*" }
     # The debug info. for "f" is not correct. It's a known bug.
     if {$hp_cc_compiler} {setup_xfail hppa2.0w-*-*}

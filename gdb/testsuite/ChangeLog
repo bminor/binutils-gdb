@@ -1,3 +1,10 @@
+2003-02-13  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/exprs.exp: Remove i960 remnants.
+	* gdb.base/funcargs.exp: Likewise.
+	* gdb.base/list.exp: Likewise.
+	* gdb.base/ptype.exp: Likewise.
+
 2003-02-14  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/virtfunc.exp (test_virtual_calls): Change 'print
