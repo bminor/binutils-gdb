@@ -116,45 +116,13 @@ extern int register_offset_hack (struct gdbarch *gdbarch, int regnum);
 
 /* The type of a register.  This function is slightly more efficient
    then its gdbarch vector counterpart since it returns a precomputed
-   value stored in a table.
-
-   NOTE: cagney/2002-08-17: The original macro was called
-   DEPRECATED_REGISTER_VIRTUAL_TYPE.  This was because the register
-   could have different raw and cooked (nee virtual) representations.
-   The CONVERTABLE methods being used to convert between the two
-   representations.  Current code does not do this.  Instead, the
-   first [0..NUM_REGS) registers are 1:1 raw:cooked, and the type
-   exactly describes the register's representation.  Consequently, the
-   ``virtual'' has been dropped.
-
-   FIXME: cagney/2002-08-17: A number of architectures, including the
-   MIPS, are currently broken in this regard.  */
+   value stored in a table.  */
 
 extern struct type *register_type (struct gdbarch *gdbarch, int regnum);
 
 
 /* Return the size of register REGNUM.  All registers should have only
-   one size.
-
-   FIXME: cagney/2003-02-28:
-
-   Unfortunately, thanks to some legacy architectures, this doesn't
-   hold.  A register's cooked (nee virtual) and raw size can differ
-   (see MIPS).  Such architectures should be using different register
-   numbers for the different sized views of identical registers.
-
-   Anyway, the up-shot is that, until that mess is fixed, core code
-   can end up being very confused - should the RAW or VIRTUAL size be
-   used?  As a rule of thumb, use DEPRECATED_REGISTER_VIRTUAL_SIZE in
-   cooked code, but with the comment:
-
-   OK: REGISTER_VIRTUAL_SIZE
-
-   or just
-
-   OK
-
-   appended to the end of the line.  */
+   one size.  */
    
 extern int register_size (struct gdbarch *gdbarch, int regnum);
 

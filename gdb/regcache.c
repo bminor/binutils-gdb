@@ -144,20 +144,6 @@ init_regcache_descr (struct gdbarch *gdbarch)
      buffer.  Ulgh!  */
   descr->sizeof_raw_registers = descr->sizeof_cooked_registers;
 
-  /* Sanity check.  Confirm that there is agreement between the
-     regcache and the target's redundant DEPRECATED_REGISTER_BYTE (new
-     targets should not even be defining it).  */
-  for (i = 0; i < descr->nr_cooked_registers; i++)
-    {
-      if (DEPRECATED_REGISTER_BYTE_P ())
-	gdb_assert (descr->register_offset[i] == DEPRECATED_REGISTER_BYTE (i));
-#if 0
-      gdb_assert (descr->sizeof_register[i] == DEPRECATED_REGISTER_RAW_SIZE (i));
-      gdb_assert (descr->sizeof_register[i] == DEPRECATED_REGISTER_VIRTUAL_SIZE (i));
-#endif
-    }
-  /* gdb_assert (descr->sizeof_raw_registers == DEPRECATED_REGISTER_BYTES (i));  */
-
   return descr;
 }
 
@@ -1311,25 +1297,8 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
       if (regnum < 0)
 	fprintf_unfiltered (file, " %5s ", "Size");
       else
-	{
-	  fprintf_unfiltered (file, " %5ld",
-			      regcache->descr->sizeof_register[regnum]);
-	  if ((regcache->descr->sizeof_register[regnum]
-	       != DEPRECATED_REGISTER_RAW_SIZE (regnum))
-	      || (regcache->descr->sizeof_register[regnum]
-		  != DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum))
-	      || (regcache->descr->sizeof_register[regnum]
-		  != TYPE_LENGTH (register_type (regcache->descr->gdbarch,
-						 regnum)))
-	      )
-	    {
-	      if (!footnote_register_size)
-		footnote_register_size = ++footnote_nr;
-	      fprintf_unfiltered (file, "*%d", footnote_register_size);
-	    }
-	  else
-	    fprintf_unfiltered (file, " ");
-	}
+	fprintf_unfiltered (file, " %5ld",
+			    regcache->descr->sizeof_register[regnum]);
 
       /* Type.  */
       {
@@ -1373,7 +1342,7 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	      regcache_raw_read (regcache, regnum, buf);
 	      fprintf_unfiltered (file, "0x");
 	      dump_endian_bytes (file, TARGET_BYTE_ORDER, buf,
-				 DEPRECATED_REGISTER_RAW_SIZE (regnum));
+				 regcache->descr->sizeof_register[regnum]);
 	    }
 	}
 
@@ -1387,7 +1356,7 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	      regcache_cooked_read (regcache, regnum, buf);
 	      fprintf_unfiltered (file, "0x");
 	      dump_endian_bytes (file, TARGET_BYTE_ORDER, buf,
-				 DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
+				 regcache->descr->sizeof_register[regnum]);
 	    }
 	}
 

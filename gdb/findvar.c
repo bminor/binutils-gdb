@@ -282,18 +282,8 @@ value_of_register (int regnum, struct frame_info *frame)
 
   reg_val = allocate_value (register_type (current_gdbarch, regnum));
 
-  /* Convert raw data to virtual format if necessary.  */
-
-  if (DEPRECATED_REGISTER_RAW_SIZE (regnum) == DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum))
-    memcpy (VALUE_CONTENTS_RAW (reg_val), raw_buffer,
-	    DEPRECATED_REGISTER_RAW_SIZE (regnum));
-  else
-    internal_error (__FILE__, __LINE__,
-		    "Register \"%s\" (%d) has conflicting raw (%d) and virtual (%d) size",
-		    REGISTER_NAME (regnum),
-		    regnum,
-		    DEPRECATED_REGISTER_RAW_SIZE (regnum),
-		    DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
+  memcpy (VALUE_CONTENTS_RAW (reg_val), raw_buffer,
+	  register_size (current_gdbarch, regnum));
   VALUE_LVAL (reg_val) = lval;
   VALUE_ADDRESS (reg_val) = addr;
   VALUE_REGNO (reg_val) = regnum;

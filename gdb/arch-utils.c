@@ -289,13 +289,7 @@ int
 generic_register_size (int regnum)
 {
   gdb_assert (regnum >= 0 && regnum < NUM_REGS + NUM_PSEUDO_REGS);
-  if (gdbarch_register_type_p (current_gdbarch))
-    return TYPE_LENGTH (gdbarch_register_type (current_gdbarch, regnum));
-  else
-    /* FIXME: cagney/2003-03-01: Once all architectures implement
-       gdbarch_register_type(), this entire function can go away.  It
-       is made obsolete by register_size().  */
-    return TYPE_LENGTH (DEPRECATED_REGISTER_VIRTUAL_TYPE (regnum)); /* OK */
+  return TYPE_LENGTH (gdbarch_register_type (current_gdbarch, regnum));
 }
 
 /* Assume all registers are adjacent.  */

@@ -1,5 +1,17 @@
 2004-08-02  Andrew Cagney  <cagney@gnu.org>
 
+	* regcache.h: Delete DEPRECATED_REGISTER_VIRTUAL_SIZE and
+	DEPRECATED_REGISTER_RAW_SIZE from comments.
+	* regcache.c (init_regcache_descr, regcache_dump): Do not check or
+	use DEPRECATED_REGISTER_VIRTUAL_SIZE and
+	DEPRECATED_REGISTER_RAW_SIZE.
+	* findvar.c (value_of_register): Simplify by assuming that the
+	registers raw and virtual sizes are identical.
+	* regcache.h: Delete DEPRECATED_REGISTER_VIRTUAL_TYPE in
+	comment.
+	* arch-utils.c (generic_register_size): Simplify by assuming
+	register_type.
+
 	* regcache.c (legacy_read_register_gen, real_register) 
 	(legacy_write_register_gen): Delete, not used.
 
