@@ -1,3 +1,9 @@
+Tue Oct 24 18:30:18 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* config/pa/hppahpux.mh: Remove hardcoding of X locations.
+	* Makefile.in: Use X11_CFLAGS, X11_LDFLAGS and X11_LIBS.
+	* configure.in: Link X statically on Solaris, SunOS and HPUX.
+
 Tue Oct 24 12:26:14 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* monitor.c (monitor_expect_regexp):  Same as monitor_expect, but
