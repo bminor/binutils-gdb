@@ -480,6 +480,17 @@ _bfd_elf_hppa_gen_reloc_type (abfd, base_type, format, field, ignore, sym)
 	    }
 	  break;
 
+	case 22:
+	  switch (field)
+	    {
+	    case e_fsel:
+	      final_type = R_PARISC_PCREL22F;
+	      break;
+	    default:
+	      return NULL;
+	    }
+	  break;
+
 	case 21:
 	  switch (field)
 	    {
