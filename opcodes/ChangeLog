@@ -1,5 +1,16 @@
 2005-02-22  Alan Modra  <amodra@bigpond.net.au>
 
+	* arc-ext.c: Warning fixes.
+	* arc-ext.h: Likewise.
+	* cgen-opc.c: Likewise.
+	* ia64-gen.c: Likewise.
+	* maxq-dis.c: Likewise.
+	* ns32k-dis.c: Likewise.
+	* w65-dis.c: Likewise.
+	* ia64-asmtab.c: Regenerate.
+
+2005-02-22  Alan Modra  <amodra@bigpond.net.au>
+
 	* fr30-desc.c: Regenerate.
 	* fr30-desc.h: Regenerate.
 	* fr30-opc.c: Regenerate.

@@ -1,5 +1,6 @@
 /* ia64-gen.c -- Generate a shrunk set of opcode tables
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2004, 2005
+   Free Software Foundation, Inc.
    Written by Bob Manson, Cygnus Solutions, <manson@cygnus.com>
 
    This file is part of GDB, GAS, and the GNU binutils.
@@ -1570,7 +1571,7 @@ print_dependency_table ()
   for (i=0;i < dlistlen;i++)
     {
       int len = 2;
-      printf ("static const short dep%d[] = {\n  ", i);
+      printf ("static const unsigned short dep%d[] = {\n  ", i);
       for (j=0;j < dlists[i]->len; j++)
         {
           len += printf ("%d, ", dlists[i]->deps[j]);
@@ -1913,7 +1914,7 @@ gen_dis_table (ent)
   if ((needed_bytes + insn_list_len) > tot_insn_list_len)
     {
       tot_insn_list_len += 256;
-      insn_list = (char *) xrealloc (insn_list, tot_insn_list_len);
+      insn_list = (unsigned char *) xrealloc (insn_list, tot_insn_list_len);
     }
   our_offset = insn_list_len;
   insn_list_len += needed_bytes;
@@ -2064,7 +2065,7 @@ gen_dis_table (ent)
 	  /* Store the address of the entry being branched to.  */
 	  while (currbits >= 0)
 	    {
-	      char *byte = insn_list + our_offset + bitsused / 8;
+	      unsigned char *byte = insn_list + our_offset + bitsused / 8;
 
 	      if (idest & (1 << currbits))
 		*byte |= (1 << (7 - (bitsused % 8)));

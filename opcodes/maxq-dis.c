@@ -1,6 +1,6 @@
 /* Instruction printing code for the MAXQ
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    Written by Vineet Sharma(vineets@noida.hcltech.com) Inderpreet
    S.(inderpreetb@noida.hcltech.com)
@@ -145,9 +145,9 @@ unsigned char const SIM_ALU_DECODE_POP_OP_GROUP = 10;
 unsigned char const SIM_ALU_DECODE_CMP_SRC_OP_GROUP = 11;
 
 /* GLOBAL */
-unsigned char unres_reg_name[20];
+char unres_reg_name[20];
 
-static unsigned char *
+static char *
 get_reg_name (unsigned char reg_code, type1 arg_pos)
 {
   unsigned char module;
