@@ -1,3 +1,11 @@
+2003-10-11  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* config/tc-sh.c: Convert to ISO C90.  Remove unnecessary
+        prototypes and casts.
+	* config/tc-sh.h: Likewise.
+	* config/tc-sh64.c: Likewise.
+	* config/tc-sh64.h: Likewise.
+
 2003-10-08  Dave Brolley  <brolley@redhat.com>
 
 	* config/tc-frv.c (fr550_check_insn_acc_range): New function.

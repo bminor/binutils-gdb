@@ -48,44 +48,17 @@ const char comment_chars[] = "!";
 const char line_separator_chars[] = ";";
 const char line_comment_chars[] = "!#";
 
-static void s_uses PARAMS ((int));
-
-static void sh_count_relocs PARAMS ((bfd *, segT, PTR));
-static void sh_frob_section PARAMS ((bfd *, segT, PTR));
-
-static void s_uacons PARAMS ((int));
-static sh_opcode_info *find_cooked_opcode PARAMS ((char **));
-static unsigned int assemble_ppi PARAMS ((char *, sh_opcode_info *));
-static void little PARAMS ((int));
-static void big PARAMS ((int));
-static int parse_reg PARAMS ((char *, int *, int *));
-static char *parse_exp PARAMS ((char *, sh_operand_info *));
-static char *parse_at PARAMS ((char *, sh_operand_info *));
-static void get_operand PARAMS ((char **, sh_operand_info *));
-static char *get_operands
-  PARAMS ((sh_opcode_info *, char *, sh_operand_info *));
-static sh_opcode_info *get_specific
-  PARAMS ((sh_opcode_info *, sh_operand_info *));
-static void insert PARAMS ((char *, int, int, sh_operand_info *));
-static void build_relax PARAMS ((sh_opcode_info *, sh_operand_info *));
-static char *insert_loop_bounds PARAMS ((char *, sh_operand_info *));
-static unsigned int build_Mytes
-  PARAMS ((sh_opcode_info *, sh_operand_info *));
-static bfd_boolean sh_local_pcrel PARAMS ((fixS *fix));
+static void s_uses (int);
+static void s_uacons (int);
 
 #ifdef OBJ_ELF
-static void sh_elf_cons PARAMS ((int));
-
-inline static int sh_PIC_related_p PARAMS ((symbolS *));
-static int sh_check_fixup PARAMS ((expressionS *, bfd_reloc_code_real_type *));
-inline static char *sh_end_of_match PARAMS ((char *, char *));
+static void sh_elf_cons (int);
 
 symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE_" */
 #endif
 
 static void
-big (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+big (int ignore ATTRIBUTE_UNUSED)
 {
   if (! target_big_endian)
     as_bad (_("directive .big encountered when option -big required"));
@@ -95,8 +68,7 @@ big (ignore)
 }
 
 static void
-little (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+little (int ignore ATTRIBUTE_UNUSED)
 {
   if (target_big_endian)
     as_bad (_("directive .little encountered when option -little required"));
@@ -510,8 +482,7 @@ static struct hash_control *opcode_hash_control;	/* Opcode mnemonics */
 /* Determinet whether the symbol needs any kind of PIC relocation.  */
 
 inline static int
-sh_PIC_related_p (sym)
-     symbolS *sym;
+sh_PIC_related_p (symbolS *sym)
 {
   expressionS *exp;
 
@@ -537,9 +508,7 @@ sh_PIC_related_p (sym)
    expression, that may be rearranged.  */
 
 static int
-sh_check_fixup (main_exp, r_type_p)
-     expressionS *main_exp;
-     bfd_reloc_code_real_type *r_type_p;
+sh_check_fixup (expressionS *main_exp, bfd_reloc_code_real_type *r_type_p)
 {
   expressionS *exp = main_exp;
 
@@ -765,10 +734,7 @@ sh_check_fixup (main_exp, r_type_p)
 /* Add expression EXP of SIZE bytes to offset OFF of fragment FRAG.  */
 
 void
-sh_cons_fix_new (frag, off, size, exp)
-     fragS *frag;
-     int off, size;
-     expressionS *exp;
+sh_cons_fix_new (fragS *frag, int off, int size, expressionS *exp)
 {
   bfd_reloc_code_real_type r_type = BFD_RELOC_UNUSED;
 
@@ -813,9 +779,9 @@ sh_cons_fix_new (frag, off, size, exp)
    suffixes such as @GOT, @GOTOFF and @PLT, that generate
    machine-specific relocation types.  So we must define it here.  */
 /* Clobbers input_line_pointer, checks end-of-line.  */
+/* NBYTES 1=.byte, 2=.word, 4=.long */
 static void
-sh_elf_cons (nbytes)
-     register int nbytes;	/* 1=.byte, 2=.word, 4=.long */
+sh_elf_cons (register int nbytes)
 {
   expressionS exp;
 
@@ -857,7 +823,7 @@ sh_elf_cons (nbytes)
    set up all the tables, etc that the MD part of the assembler needs.  */
 
 void
-md_begin ()
+md_begin (void)
 {
   const sh_opcode_info *opcode;
   char *prev_name = "";
@@ -897,10 +863,7 @@ static int reg_b;
 /* Try to parse a reg name.  Return the number of chars consumed.  */
 
 static int
-parse_reg (src, mode, reg)
-     char *src;
-     int *mode;
-     int *reg;
+parse_reg (char *src, int *mode, int *reg)
 {
   char l0 = TOLOWER (src[0]);
   char l1 = l0 ? TOLOWER (src[1]) : 0;
@@ -1250,9 +1213,7 @@ parse_reg (src, mode, reg)
 }
 
 static char *
-parse_exp (s, op)
-     char *s;
-     sh_operand_info *op;
+parse_exp (char *s, sh_operand_info *op)
 {
   char *save;
   char *new;
@@ -1293,9 +1254,7 @@ parse_exp (s, op)
  */
 
 static char *
-parse_at (src, op)
-     char *src;
-     sh_operand_info *op;
+parse_at (char *src, sh_operand_info *op)
 {
   int len;
   int mode;
@@ -1455,9 +1414,7 @@ parse_at (src, op)
 }
 
 static void
-get_operand (ptr, op)
-     char **ptr;
-     sh_operand_info *op;
+get_operand (char **ptr, sh_operand_info *op)
 {
   char *src = *ptr;
   int mode = -1;
@@ -1493,10 +1450,7 @@ get_operand (ptr, op)
 }
 
 static char *
-get_operands (info, args, operand)
-     sh_opcode_info *info;
-     char *args;
-     sh_operand_info *operand;
+get_operands (sh_opcode_info *info, char *args, sh_operand_info *operand)
 {
   char *ptr = args;
   if (info->arg[0])
@@ -1554,9 +1508,7 @@ get_operands (info, args, operand)
    provided.  */
 
 static sh_opcode_info *
-get_specific (opcode, operands)
-     sh_opcode_info *opcode;
-     sh_operand_info *operands;
+get_specific (sh_opcode_info *opcode, sh_operand_info *operands)
 {
   sh_opcode_info *this_try = opcode;
   char *name = opcode->name;
@@ -1840,11 +1792,7 @@ get_specific (opcode, operands)
 }
 
 static void
-insert (where, how, pcrel, op)
-     char *where;
-     int how;
-     int pcrel;
-     sh_operand_info *op;
+insert (char *where, int how, int pcrel, sh_operand_info *op)
 {
   fix_new_exp (frag_now,
 	       where - frag_now->fr_literal,
@@ -1855,9 +1803,7 @@ insert (where, how, pcrel, op)
 }
 
 static void
-build_relax (opcode, op)
-     sh_opcode_info *opcode;
-     sh_operand_info *op;
+build_relax (sh_opcode_info *opcode, sh_operand_info *op)
 {
   int high_byte = target_big_endian ? 0 : 1;
   char *p;
@@ -1891,9 +1837,7 @@ build_relax (opcode, op)
 /* Insert ldrs & ldre with fancy relocations that relaxation can recognize.  */
 
 static char *
-insert_loop_bounds (output, operand)
-     char *output;
-     sh_operand_info *operand;
+insert_loop_bounds (char *output, sh_operand_info *operand)
 {
   char *name;
   symbolS *end_sym;
@@ -1941,9 +1885,7 @@ insert_loop_bounds (output, operand)
 /* Now we know what sort of opcodes it is, let's build the bytes.  */
 
 static unsigned int
-build_Mytes (opcode, operand)
-     sh_opcode_info *opcode;
-     sh_operand_info *operand;
+build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
 {
   int index;
   char nbuf[4];
@@ -2054,8 +1996,7 @@ build_Mytes (opcode, operand)
    *STR_P to the first character after the last one read.  */
 
 static sh_opcode_info *
-find_cooked_opcode (str_p)
-     char **str_p;
+find_cooked_opcode (char **str_p)
 {
   char *str = *str_p;
   unsigned char *op_start;
@@ -2102,9 +2043,7 @@ find_cooked_opcode (str_p)
 #define DDT_BASE 0xf000 /* Base value for double data transfer insns */
 
 static unsigned int
-assemble_ppi (op_end, opcode)
-     char *op_end;
-     sh_opcode_info *opcode;
+assemble_ppi (char *op_end, sh_opcode_info *opcode)
 {
   int movx = 0;
   int movy = 0;
@@ -2327,8 +2266,7 @@ assemble_ppi (op_end, opcode)
    the frags/bytes it assembles to.  */
 
 void
-md_assemble (str)
-     char *str;
+md_assemble (char *str)
 {
   unsigned char *op_end;
   sh_operand_info operand[3];
@@ -2436,7 +2374,7 @@ md_assemble (str)
    emits a BFD_RELOC_SH_LABEL reloc if necessary.  */
 
 void
-sh_frob_label ()
+sh_frob_label (void)
 {
   static fragS *last_label_frag;
   static int last_label_offset;
@@ -2461,7 +2399,7 @@ sh_frob_label ()
    data.  It emits a BFD_RELOC_SH_DATA reloc if necessary.  */
 
 void
-sh_flush_pending_output ()
+sh_flush_pending_output (void)
 {
   if (sh_relax
       && seg_info (now_seg)->tc_segment_info_data.in_code)
@@ -2473,8 +2411,7 @@ sh_flush_pending_output ()
 }
 
 symbolS *
-md_undefined_symbol (name)
-     char *name ATTRIBUTE_UNUSED;
+md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
   return 0;
 }
@@ -2483,15 +2420,13 @@ md_undefined_symbol (name)
 #ifndef BFD_ASSEMBLER
 
 void
-tc_crawl_symbol_chain (headers)
-     object_headers *headers ATTRIBUTE_UNUSED;
+tc_crawl_symbol_chain (object_headers *headers ATTRIBUTE_UNUSED)
 {
   printf (_("call to tc_crawl_symbol_chain \n"));
 }
 
 void
-tc_headers_hook (headers)
-     object_headers *headers ATTRIBUTE_UNUSED;
+tc_headers_hook (object_headers *headers ATTRIBUTE_UNUSED)
 {
   printf (_("call to tc_headers_hook \n"));
 }
@@ -2509,10 +2444,7 @@ tc_headers_hook (headers)
    returned, or NULL on OK.  */
 
 char *
-md_atof (type, litP, sizeP)
-     int type;
-     char *litP;
-     int *sizeP;
+md_atof (int type, char *litP, int *sizeP)
 {
   int prec;
   LITTLENUM_TYPE words[4];
@@ -2566,8 +2498,7 @@ md_atof (type, litP, sizeP)
    special reloc for the linker.  */
 
 static void
-s_uses (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_uses (int ignore ATTRIBUTE_UNUSED)
 {
   expressionS ex;
 
@@ -2622,9 +2553,7 @@ struct option md_longopts[] =
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (c, arg)
-     int c;
-     char *arg ATTRIBUTE_UNUSED;
+md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 {
   switch (c)
     {
@@ -2718,8 +2647,7 @@ md_parse_option (c, arg)
 }
 
 void
-md_show_usage (stream)
-     FILE *stream;
+md_show_usage (FILE *stream)
 {
   fprintf (stream, _("\
 SH options:\n\
@@ -2762,10 +2690,7 @@ struct sh_count_relocs
    bfd_map_over_sections.  */
 
 static void
-sh_count_relocs (abfd, sec, data)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     segT sec;
-     PTR data;
+sh_count_relocs (bfd *abfd ATTRIBUTE_UNUSED, segT sec, void *data)
 {
   struct sh_count_relocs *info = (struct sh_count_relocs *) data;
   segment_info_type *seginfo;
@@ -2791,10 +2716,8 @@ sh_count_relocs (abfd, sec, data)
    BFD_ASSEMBLER, this is called via bfd_map_over_sections.  */
 
 static void
-sh_frob_section (abfd, sec, ignore)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     segT sec;
-     PTR ignore ATTRIBUTE_UNUSED;
+sh_frob_section (bfd *abfd ATTRIBUTE_UNUSED, segT sec,
+		 void *ignore ATTRIBUTE_UNUSED)
 {
   segment_info_type *seginfo;
   fixS *fix;
@@ -2877,13 +2800,13 @@ sh_frob_section (abfd, sec, ignore)
       info.sym = sym;
       info.count = 0;
 #ifdef BFD_ASSEMBLER
-      bfd_map_over_sections (stdoutput, sh_count_relocs, (PTR) &info);
+      bfd_map_over_sections (stdoutput, sh_count_relocs, &info);
 #else
       {
 	int iscan;
 
 	for (iscan = SEG_E0; iscan < SEG_UNKNOWN; iscan++)
-	  sh_count_relocs ((bfd *) NULL, iscan, (PTR) &info);
+	  sh_count_relocs ((bfd *) NULL, iscan, &info);
       }
 #endif
 
@@ -2911,7 +2834,7 @@ sh_frob_section (abfd, sec, ignore)
    the stored function address entirely.  */
 
 void
-sh_frob_file ()
+sh_frob_file (void)
 {
 #ifdef HAVE_SH64
   shmedia_frob_file_before_adjust ();
@@ -2921,13 +2844,13 @@ sh_frob_file ()
     return;
 
 #ifdef BFD_ASSEMBLER
-  bfd_map_over_sections (stdoutput, sh_frob_section, (PTR) NULL);
+  bfd_map_over_sections (stdoutput, sh_frob_section, NULL);
 #else
   {
     int iseg;
 
     for (iseg = SEG_E0; iseg < SEG_UNKNOWN; iseg++)
-      sh_frob_section ((bfd *) NULL, iseg, (PTR) NULL);
+      sh_frob_section ((bfd *) NULL, iseg, NULL);
   }
 #endif
 }
@@ -2936,14 +2859,12 @@ sh_frob_file ()
    create relocs so that md_apply_fix3 will fill in the correct values.  */
 
 void
-md_convert_frag (headers, seg, fragP)
 #ifdef BFD_ASSEMBLER
-     bfd *headers ATTRIBUTE_UNUSED;
+md_convert_frag (bfd *headers ATTRIBUTE_UNUSED, segT seg, fragS *fragP)
 #else
-     object_headers *headers ATTRIBUTE_UNUSED;
+md_convert_frag (object_headers *headers ATTRIBUTE_UNUSED, segT seg,
+		 fragS *fragP)
 #endif
-     segT seg;
-     fragS *fragP;
 {
   int donerelax = 0;
 
@@ -3086,9 +3007,7 @@ md_convert_frag (headers, seg, fragP)
 }
 
 valueT
-md_section_align (seg, size)
-     segT seg ATTRIBUTE_UNUSED;
-     valueT size;
+md_section_align (segT seg ATTRIBUTE_UNUSED, valueT size)
 {
 #ifdef BFD_ASSEMBLER
 #ifdef OBJ_ELF
@@ -3113,8 +3032,7 @@ static int sh_no_align_cons = 0;
    to be aligned.  */
 
 static void
-s_uacons (bytes)
-     int bytes;
+s_uacons (int bytes)
 {
   /* Tell sh_cons_align not to align this value.  */
   sh_no_align_cons = 1;
@@ -3128,8 +3046,7 @@ s_uacons (bytes)
    enable this warning?  */
 
 void
-sh_cons_align (nbytes)
-     int nbytes;
+sh_cons_align (int nbytes)
 {
   int nalign;
   char *p;
@@ -3169,8 +3086,7 @@ sh_cons_align (nbytes)
    also where we check for misaligned data.  */
 
 void
-sh_handle_align (frag)
-     fragS *frag;
+sh_handle_align (fragS *frag)
 {
   int bytes = frag->fr_next->fr_address - frag->fr_address - frag->fr_fix;
 
@@ -3218,8 +3134,7 @@ sh_handle_align (frag)
 /* See whether the relocation should be resolved locally.  */
 
 static bfd_boolean
-sh_local_pcrel (fix)
-     fixS *fix;
+sh_local_pcrel (fixS *fix)
 {
   return (! sh_relax
 	  && (fix->fx_r_type == BFD_RELOC_SH_PCDISP8BY2
@@ -3236,8 +3151,7 @@ sh_local_pcrel (fix)
    relaxing.  */
 
 int
-sh_force_relocation (fix)
-     fixS *fix;
+sh_force_relocation (fixS *fix)
 {
   /* These relocations can't make it into a DSO, so no use forcing
      them for global symbols.  */
@@ -3272,8 +3186,7 @@ sh_force_relocation (fix)
 
 #ifdef OBJ_ELF
 bfd_boolean
-sh_fix_adjustable (fixP)
-   fixS *fixP;
+sh_fix_adjustable (fixS *fixP)
 {
   if (fixP->fx_r_type == BFD_RELOC_32_PLT_PCREL
       || fixP->fx_r_type == BFD_RELOC_32_GOT_PCREL
@@ -3290,7 +3203,7 @@ sh_fix_adjustable (fixP)
 }
 
 void
-sh_elf_final_processing ()
+sh_elf_final_processing (void)
 {
   int val;
 
@@ -3330,10 +3243,7 @@ sh_elf_final_processing ()
 /* Apply a fixup to the object file.  */
 
 void
-md_apply_fix3 (fixP, valP, seg)
-     fixS * fixP;
-     valueT * valP;
-     segT seg ATTRIBUTE_UNUSED;
+md_apply_fix3 (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   int lowbyte = target_big_endian ? 1 : 0;
@@ -3606,9 +3516,7 @@ md_apply_fix3 (fixP, valP, seg)
    by which a fragment must grow to reach it's destination.  */
 
 int
-md_estimate_size_before_relax (fragP, segment_type)
-     register fragS *fragP;
-     register segT segment_type;
+md_estimate_size_before_relax (fragS *fragP, segT segment_type)
 {
   int what;
 
@@ -3684,10 +3592,7 @@ md_estimate_size_before_relax (fragP, segment_type)
 /* Put number into target byte order.  */
 
 void
-md_number_to_chars (ptr, use, nbytes)
-     char *ptr;
-     valueT use;
-     int nbytes;
+md_number_to_chars (char *ptr, valueT use, int nbytes)
 {
 #ifdef HAVE_SH64
   /* We might need to set the contents type to data.  */
@@ -3704,16 +3609,13 @@ md_number_to_chars (ptr, use, nbytes)
    eg for the sh-hms target.  */
 
 long
-md_pcrel_from (fixP)
-     fixS *fixP;
+md_pcrel_from (fixS *fixP)
 {
   return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address + 2;
 }
 
 long
-md_pcrel_from_section (fixP, sec)
-     fixS *fixP;
-     segT sec;
+md_pcrel_from_section (fixS *fixP, segT sec)
 {
   if (! sh_local_pcrel (fixP)
       && fixP->fx_addsy != (symbolS *) NULL
@@ -3733,8 +3635,7 @@ md_pcrel_from_section (fixP, sec)
 #ifdef OBJ_COFF
 
 int
-tc_coff_sizemachdep (frag)
-     fragS *frag;
+tc_coff_sizemachdep (fragS *frag)
 {
   return md_relax_table[frag->fr_subtype].rlx_length;
 }
@@ -3783,11 +3684,8 @@ static const struct reloc_map coff_reloc_map[] =
    but does some minor tweaking.  */
 
 void
-sh_coff_reloc_mangle (seg, fix, intr, paddr)
-     segment_info_type *seg;
-     fixS *fix;
-     struct internal_reloc *intr;
-     unsigned int paddr;
+sh_coff_reloc_mangle (segment_info_type *seg, fixS *fix,
+		      struct internal_reloc *intr, unsigned int paddr)
 {
   symbolS *symbol_ptr = fix->fx_addsy;
   symbolS *dot;
@@ -3898,9 +3796,7 @@ sh_coff_reloc_mangle (seg, fix, intr, paddr)
 /* Create a reloc.  */
 
 arelent *
-tc_gen_reloc (section, fixp)
-     asection *section ATTRIBUTE_UNUSED;
-     fixS *fixp;
+tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 {
   arelent *rel;
   bfd_reloc_code_real_type r_type;
@@ -3973,8 +3869,7 @@ tc_gen_reloc (section, fixp)
 
 #ifdef OBJ_ELF
 inline static char *
-sh_end_of_match (cont, what)
-     char *cont, *what;
+sh_end_of_match (char *cont, char *what)
 {
   int len = strlen (what);
 
@@ -3986,10 +3881,7 @@ sh_end_of_match (cont, what)
 }
 
 int
-sh_parse_name (name, exprP, nextcharP)
-     char const *name;
-     expressionS *exprP;
-     char *nextcharP;
+sh_parse_name (char const *name, expressionS *exprP, char *nextcharP)
 {
   char *next = input_line_pointer;
   char *next_end;
