@@ -1,3 +1,13 @@
+Tue Nov  8 13:12:54 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* objcopy.c (copy_archive): Keep a list of the names of the
+        temporary files we created.  Close each input BFD after we open
+        its successor.
+
+Mon Nov  7 15:48:39 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (VERSION): Bump to 2.5.3.
+
 Thu Nov  3 19:04:34 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in (install-info): Install info files from whatever
