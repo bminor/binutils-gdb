@@ -1,3 +1,12 @@
+Mon Oct 25 09:59:37 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* aoutx.h (reloc_type_lookup): Handle BFD_RELOC_SPARC_WDISP22.
+
+Fri Oct 22 20:35:54 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* config.bfd: handle mips*-* instead of mips-*, use mips*el
+	  instead of mips-*-*l
+
 Fri Oct 22 14:03:33 1993  Mark Eichin  (eichin@cygnus.com)
 
 	* m68k-lynx.mt, i386-lynx.mt (TDEFINES): set
