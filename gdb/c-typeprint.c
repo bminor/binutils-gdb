@@ -514,7 +514,7 @@ c_type_print_base (type, stream, show, level)
 	     possible that we should have a better way of distinguising
 	     tag names from typedef'd names.  (e.g. a new tagname field in
 	     the struct type).  */
-	  if (strncmp (name, "struct ", 7) == 0)
+	  if (name != NULL && strncmp (name, "struct ", 7) == 0)
 	    {
 	      fputs_filtered (name + 7, stream);
 	      fputs_filtered (" ", stream);
@@ -544,7 +544,7 @@ c_type_print_base (type, stream, show, level)
 	     possible that we should have a better way of distinguising
 	     tag names from typedef'd names.  (e.g. a new tagname field in
 	     the struct type).  */
-	  if (strncmp (name, "union ", 6) == 0)
+	  if (name != NULL && strncmp (name, "union ", 6) == 0)
 	    {
 	      fputs_filtered (name + 6, stream);
 	      fputs_filtered (" ", stream);
