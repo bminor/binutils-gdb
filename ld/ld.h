@@ -1,6 +1,5 @@
-/* ld.h -
-
-   Copyright (C) 1991, 1993, 1994, 1995 Free Software Foundation, Inc.
+/* ld.h -- general linker header file
+   Copyright (C) 1991, 93, 94, 95, 1996 Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
@@ -15,8 +14,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GLD; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with GLD; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 #ifndef LD_H
 #define LD_H
