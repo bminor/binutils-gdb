@@ -1,6 +1,6 @@
-Tue Oct  4 19:35:53 1994  Brendan Kehoe  (brendan@phydeaux.cygnus.com)
+Thu Oct  6 18:00:54 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
-	* Makefile.in (all-prms): Depend on all-librx.
+	* config.guess:  Update from FSF.
 
 Tue Oct  4 12:05:42 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
