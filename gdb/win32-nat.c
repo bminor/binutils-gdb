@@ -123,7 +123,8 @@ static DEBUG_EVENT current_event;	/* The current debug event from
 					   WaitForDebugEvent */
 static HANDLE current_process_handle;	/* Currently executing process */
 static thread_info *current_thread;	/* Info on currently selected thread */
-static DWORD main_thread_id;	/* Thread ID of the main thread */
+static DWORD main_thread_id;		/* Thread ID of the main thread */
+static pid_t cygwin_pid;		/* pid of cygwin process */
 
 /* Counts of things. */
 static int exception_count = 0;
@@ -138,9 +139,6 @@ static int debug_events = 0;		/* show events from kernel */
 static int debug_memory = 0;		/* show target memory accesses */
 static int debug_exceptions = 0;	/* show target exceptions */
 static int useshell = 0;		/* use shell for subprocesses */
-
-/* Path to shell */
-static char shell[MAX_PATH + 1];
 
 /* This vector maps GDB's idea of a register's number into an address
    in the win32 exception context vector.
@@ -1461,6 +1459,8 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
   char *args;
   char real_path[MAXPATHLEN];
   char *toexec;
+  char shell[MAX_PATH + 1]; /* Path to shell */
+  const char *sh;
 
   if (!exec_file)
     error ("No executable specified, use `target exec'.\n");
@@ -1468,7 +1468,7 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
   memset (&si, 0, sizeof (si));
   si.cb = sizeof (si);
 
-  if (!useshell || !shell[0])
+  if (!useshell)
     {
       flags = DEBUG_ONLY_THIS_PROCESS;
       cygwin_conv_to_win32_path (exec_file, real_path);
@@ -1476,8 +1476,13 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
     }
   else
     {
-      char *newallargs = alloca (sizeof (" -c 'exec  '") + strlen (exec_file)
-				 + strlen (allargs) + 2);
+      char *newallargs;
+      sh = getenv ("SHELL");
+      if (!sh)
+	sh = "/bin/sh";
+      cygwin_conv_to_win32_path (sh, shell);
+      newallargs = alloca (sizeof (" -c 'exec  '") + strlen (exec_file)
+			   + strlen (allargs) + 2);
       sprintf (newallargs, " -c 'exec %s %s'", exec_file, allargs);
       allargs = newallargs;
       toexec = shell;
@@ -1497,7 +1502,7 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
 
   /* Prepare the environment vars for CreateProcess.  */
   {
-    /* This code use to assume all env vars were file names and would
+    /* This code used to assume all env vars were file names and would
        translate them all to win32 style.  That obviously doesn't work in the
        general case.  The current rule is that we only translate PATH.
        We need to handle PATH because we're about to call CreateProcess and
@@ -1813,27 +1818,12 @@ void
 _initialize_inftarg (void)
 {
   struct cmd_list_element *c;
-  const char *sh;
 
   init_child_ops ();
 
   c = add_com ("dll-symbols", class_files, dll_symbol_command,
 	       "Load dll library symbols from FILE.");
   c->completer = filename_completer;
-
-  sh = getenv ("SHELL");
-  if (!sh)
-    sh = "/bin/sh";
-  if (access (sh, X_OK) != 0)
-    {
-      shell[0] = '\0';
-      useshell = 0;
-    }
-  else
-    {
-      cygwin_conv_to_win32_path (sh, shell);
-      useshell = 1;
-    }
 
   add_com_alias ("sharedlibrary", "dll-symbols", class_alias, 1);
 

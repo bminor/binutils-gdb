@@ -1,3 +1,12 @@
+2002-04-08  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	from 2002-03-22  Christopher Faylor  <cgf@redhat.com> patch 
+	in main branch.
+	* win32-nat.c (child_create_inferior): Check for proper shell to use 
+	here, in case the user changes it on the fly.
+	(_initialize_inftarg): Remove shell path considerations.
+
+
 2002-04-07  Andrew Cagney  <ac131313@redhat.com>
 
 	I believe Jeff Law denies responsability for this one:
