@@ -313,22 +313,23 @@ _bfd_vms_get_record (abfd)
 
   switch (PRIV(file_format))
     {
-      case FF_UNKNOWN:
-      case FF_FOREIGN:
-	test_len = 6;			/* probe 6 bytes */
-	test_start = 2;			/* where the record starts */
+    case FF_UNKNOWN:
+    case FF_FOREIGN:
+      test_len = 6;			/* probe 6 bytes */
+      test_start = 2;			/* where the record starts */
       break;
-
-      case FF_NATIVE:
-	test_len = 4;
-	test_start = 0;
+      
+    case FF_NATIVE:
+      test_len = 4;
+      test_start = 0;
       break;
-
-      case FF_VAX:
-	test_len = 0;
-	test_start = 0;
+      
+    default:
+    case FF_VAX:
+      test_len = 0;
+      test_start = 0;
       break;
-  }
+    }
 
   /* skip odd alignment byte  */
 
