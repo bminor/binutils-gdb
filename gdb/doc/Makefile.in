@@ -202,7 +202,7 @@ gdb.dvi : gdb-${CONFIG}.texi rluser.texinfo inc-hist.texi
 # cope with all the markup.  In the meantime, we distribute the info
 # files 
 gdb.info: gdb-${CONFIG}.texi
-	$(MAKEINFO) -o ./gdb.info $(srcdir)/gdb-${CONFIG}.texi
+	$(MAKEINFO) -o ./gdb.info gdb-${CONFIG}.texi
 
 # GDB MANUAL: roff translations
 # Try to use a recent texi2roff.  v2 was put on prep in jan91.

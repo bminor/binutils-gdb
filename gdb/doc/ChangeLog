@@ -1,3 +1,7 @@
+Tue Mar 24 23:28:38 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: remove $(srcdir) from gdb.info rule.
+
 Sat Mar  7 18:44:50 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* Makefile.in: commented out gdb-all.texinfo rule.  This is
