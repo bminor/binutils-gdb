@@ -48,8 +48,6 @@ unsigned long sim_elapsed_time_since (SIM_ELAPSED_TIME start);
 SIM_RC sim_analyze_program (SIM_DESC sd, char *prog_name,
 			    struct _bfd *prog_bfd);
 
-char **sim_copy_argv (char **argv);
-
 /* Load program PROG into the simulator.
    If PROG_BFD is non-NULL, the file has already been opened.
    If VERBOSE_P is non-zero statistics are printed of each loaded section

@@ -220,21 +220,36 @@ sim_core_map_attach(SIM_DESC sd,
   /* check insertion point correct */
   SIM_ASSERT (next_mapping == NULL || next_mapping->level >= (int) attach);
   if (next_mapping != NULL && next_mapping->level == (int) attach
-      && next_mapping->base < (addr + (nr_bytes - 1))) {
+      && next_mapping->base < (addr + (nr_bytes - 1)))
+    {
 #if (WITH_DEVICES)
-    device_error(client, "map overlap when attaching %d:0x%lx (%ld)",
-		 space, (long)addr, (long)nr_bytes);
+      device_error (client, "memory map %d:0x%lx..0x%lx (%ld bytes) overlaps %d:0x%lx..0x%lx (%ld bytes)",
+		    space,
+		    (long) addr,
+		    (long) nr_bytes,
+		    (long) (addr + (nr_bytes - 1)),
+		    next_mapping->space,
+		    (long) next_mapping->base,
+		    (long) next_mapping->bound,
+		    (long) next_mapping->nr_bytes);
 #else
-    sim_io_error (sd, "map overlap when attaching %d:0x%lx (%ld)",
-		 space, (long)addr, (long)nr_bytes);
+      sim_io_error (sd, "memory map %d:0x%lx..0x%lx (%ld bytes) overlaps %d:0x%lx..0x%lx (%ld bytes)",
+		    space,
+		    (long) addr,
+		    (long) nr_bytes,
+		    (long) (addr + (nr_bytes - 1)),
+		    next_mapping->space,
+		    (long) next_mapping->base,
+		    (long) next_mapping->bound,
+		    (long) next_mapping->nr_bytes);
 #endif
   }
 
   /* create/insert the new mapping */
   *last_mapping = new_sim_core_mapping(sd,
-				   attach,
-				   space, addr, nr_bytes,
-				   client, buffer, free_buffer);
+				       attach,
+				       space, addr, nr_bytes,
+				       client, buffer, free_buffer);
   (*last_mapping)->next = next_mapping;
 }
 
