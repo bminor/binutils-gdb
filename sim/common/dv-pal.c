@@ -368,7 +368,7 @@ static void
 hw_pal_finish (struct hw *hw)
 {
   /* create the descriptor */
-  hw_pal_device *hw_pal = ZALLOC (hw_pal_device);
+  hw_pal_device *hw_pal = HW_ZALLOC (hw, hw_pal_device);
   hw_pal->output.status = 1;
   hw_pal->output.buffer = '\0';
   hw_pal->input.status = 0;

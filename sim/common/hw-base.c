@@ -24,10 +24,6 @@
 
 
 /* LATER: #include "hwconfig.h" */
-struct hw_base_data {
-  int finished_p;
-  const struct hw_device_descriptor *descriptor;
-};
 extern const struct hw_device_descriptor dv_core_descriptor[];
 extern const struct hw_device_descriptor dv_pal_descriptor[];
 const struct hw_device_descriptor *hw_descriptors[] = {
@@ -50,6 +46,11 @@ const struct hw_device_descriptor *hw_descriptors[] = {
 
 #include <ctype.h>
 
+struct hw_base_data {
+  int finished_p;
+  const struct hw_device_descriptor *descriptor;
+  hw_delete_callback *to_delete;
+};
 
 static int
 generic_hw_unit_decode (struct hw *bus,
@@ -287,6 +288,14 @@ panic_hw_port_event (struct hw *me,
   hw_abort (me, "no port method");
 }
 
+static void
+ignore_hw_delete (struct hw *me)
+{
+  /* NOP */
+}
+
+
+
 
 static const char *
 full_name_of_hw (struct hw *leaf,
@@ -345,6 +354,7 @@ hw_create (SIM_DESC sd,
 	   const char *unit,
 	   const char *args)
 {
+ /* NOTE: HW must be allocated using ZALLOC, others use HW_ZALLOC */
   struct hw *hw = ZALLOC (struct hw);
 
   /* our identity */
@@ -391,6 +401,10 @@ hw_create (SIM_DESC sd,
   else
     hw->path_of_hw = "/";
 
+  /* create our base type */
+  hw->base_of_hw = HW_ZALLOC (hw, struct hw_base_data);
+  hw->base_of_hw->finished_p = 0;
+
   /* our callbacks */
   set_hw_io_read_buffer (hw, panic_hw_io_read_buffer);
   set_hw_io_write_buffer (hw, panic_hw_io_write_buffer);
@@ -402,6 +416,7 @@ hw_create (SIM_DESC sd,
   set_hw_unit_size_to_attach_size (hw, generic_hw_unit_size_to_attach_size);
   set_hw_attach_address (hw, passthrough_hw_attach_address);
   set_hw_detach_address (hw, passthrough_hw_detach_address);
+  set_hw_delete (hw, ignore_hw_delete);
 
   /* locate a descriptor */
   {
@@ -417,13 +432,11 @@ hw_create (SIM_DESC sd,
 	  {
 	    if (strcmp (family, entry->family) == 0)
 	      {
-		hw->base_of_hw = ZALLOC (struct hw_base_data);
 		hw->base_of_hw->descriptor = entry;
-		hw->base_of_hw->finished_p = 0;
 	      }
 	  }
       }
-    if (hw->base_of_hw == NULL)
+    if (hw->base_of_hw->descriptor == NULL)
       {
 	hw_abort (parent, "Unknown device `%s'", family);
       }
@@ -464,4 +477,45 @@ hw_finish (struct hw *me)
   /* Allow the real device to override any methods */
   me->base_of_hw->descriptor->to_finish (me);
   me->base_of_hw->finished_p = 1;
+}
+
+
+void
+hw_delete (struct hw *me)
+{
+  /* give the object a chance to tidy up */
+  me->base_of_hw->to_delete (me);
+
+  /* now unlink us from the tree */
+  if (hw_parent (me))
+    {
+      struct hw **sibling = &hw_parent (me)->child_of_hw;
+      while (*sibling != NULL)
+	{
+	  if (*sibling == me)
+	    {
+	      *sibling = me->sibling_of_hw;
+	      me->sibling_of_hw = NULL;
+	      me->parent_of_hw = NULL;
+	      break;
+	    }
+	}
+    }
+
+  /* some sanity checks */
+  if (hw_child (me) != NULL)
+    {
+      hw_abort (me, "attempt to delete device with children");
+    }
+  if (hw_sibling (me) != NULL)
+    {
+      hw_abort (me, "attempt to delete device with siblings");
+    }
+
+  /* blow away all memory belonging to the device */
+  hw_free_all (me);
+
+  /* finally */
+  zfree (me->base_of_hw);
+  zfree (me);
 }

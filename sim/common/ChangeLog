@@ -1,3 +1,32 @@
+Sun Mar 22 15:23:35 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* hw-device.h (HW_ZALLOC, HW_MALLOC): New macros.
+	(hw_alloc_data): Delcare.
+	(struct hw): Add member alloc_of_hw.
+	
+	* hw-device.c (hw_zalloc, hw_malloc, hw_free, hw_free_all): New
+ 	functions. Assocate memory with a device.
+	(stdlib.h): Include.
+	
+	* hw-base.h (set_hw_delete): Define.
+	(hw_delete_callback): Declare.
+	(hw_delete): Declare.
+
+	* hw-base.c (hw_delete): Implement function.
+	(struct hw_base_data): Add member to_delete.
+	(ignore_hw_delete): New function, does nothing.
+	(hw_create): Set the hw_delete method.
+	(hw_create): Allocate the base type using HW_ZALLOC before setting
+ 	any methods.
+
+	* hw-properties.c: Replace zalloc/zfree with hw_zalloc/hw_free.
+	
+	* hw-ports.c: Replace zalloc/zfree with hw_zalloc/hw_free.
+	(attach_hw_port_edge): Add struct hw argument
+
+	* dv-pal.c (hw_pal_finish): Replace zalloc/zfree with
+ 	hw_zalloc/hw_free.
+
 Sun Mar 22 15:09:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* hw-device.h (hw_attach_address_callback,

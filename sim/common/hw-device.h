@@ -350,6 +350,25 @@ typedef int (hw_unit_size_to_attach_size_callback)
 
 
 
+/* Memory allocator / de-allocator.
+
+   All memory allocated using the below will be automatically
+   reclaimed when the device is deleted.
+
+   A device implementation can either use these functions when
+   allocating memory or use malloc/zalloc/free an co-ordinate its own
+   garbage collection. */
+
+#define HW_ZALLOC(me,type) (type*) hw_zalloc (me, sizeof (type))
+#define HW_MALLOC(me,type) (type*) hw_malloc (me, sizeof (type))
+
+extern void *hw_zalloc (struct hw *me, unsigned long size);
+extern void *hw_malloc (struct hw *me, unsigned long size);
+extern void hw_free (struct hw *me, void *);
+extern void hw_free_all (struct hw *me);
+
+
+
 /* Utilities:
 
    */
@@ -435,6 +454,7 @@ void volatile NORETURN hw_abort
 struct hw_property_data;
 struct hw_port_data;
 struct hw_base_data;
+struct hw_alloc_data;
 
 /* Finally the hardware device - keep your grubby little mits off of
    these internals! :-) */
@@ -489,6 +509,7 @@ struct hw {
   struct hw_property_data *properties_of_hw;
   struct hw_port_data *ports_of_hw;
   struct hw_base_data *base_of_hw;
+  struct hw_alloc_data *alloc_of_hw;
 
 };
 
