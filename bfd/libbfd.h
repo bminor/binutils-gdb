@@ -1,0 +1,160 @@
+/* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+
+This file is part of BFD, the Binary File Diddler.
+
+BFD is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
+
+BFD is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with BFD; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/* $Id$ */
+
+/*** libbfd.h -- Declarations used by bfd library implementation.
+   This include file is not for users of the library */
+
+
+
+
+
+/* If you want to read and write large blocks, you might want to do it
+   in quanta of this amount */
+#define DEFAULT_BUFFERSIZE 8192
+
+/* tdata for an archive.  For an input archive cache
+   needs to be free()'d.  For an output archive, symdefs do.
+*/
+
+struct artdata {
+  file_ptr first_file_filepos;
+  /* Speed up searching the armap */
+  struct ar_cache *cache;
+  bfd *archive_head;            /* Only interesting in output routines */
+  carsym *symdefs;		/* the symdef entries */
+  symindex symdef_count;             /* how many there are */
+  char *extended_names;		/* clever intel extension */
+};
+
+#define bfd_ardata(bfd) ((struct artdata *) ((bfd)->tdata))
+#define bfd_set_ardata(bfd, v) ((bfd)->tdata = (void *) (v))
+
+/* Goes in bfd's arelt_data slot */
+struct areltdata {
+  char * arch_header;			     /* it's actually a string */
+  unsigned int parsed_size;     /* octets of filesize not including ar_hdr */
+  char *filename;			     /* null-terminated */
+};
+
+#define arelt_size(bfd) (((struct areltdata *)((bfd)->arelt_data))->parsed_size)
+
+/* FIXME -- a lot of my code allocates a large block and subdivides it.
+   This can't always work, because of alignment restrictions.  We should change
+   it before it becomes a problem -- Gumby */
+
+PROTO (char *, zalloc, (size_t size));
+PROTO (char *, realloc, (char * ptr, size_t size));
+PROTO (bfd_target *, bfd_find_target, (char *target_name));
+PROTO (size_t, bfd_read, (void *ptr, size_t size, size_t nitems, bfd *abfd));
+PROTO (size_t, bfd_write, (void *ptr, size_t size, size_t nitems, bfd *abfd));
+
+
+
+PROTO (FILE *, bfd_cache_lookup, (bfd *));
+PROTO (void, bfd_cache_close, (bfd *));
+PROTO (int, bfd_seek,(bfd*, file_ptr, int direction));
+PROTO (long, bfd_tell, (bfd *abfd));
+PROTO (bfd *, _bfd_create_empty_archive_element_shell, (bfd *obfd));
+PROTO (bfd *, look_for_bfd_in_cache, (bfd *arch_bfd, file_ptr index));
+PROTO (boolean, _bfd_generic_mkarchive, (bfd *abfd));
+PROTO (struct areltdata *, snarf_ar_hdr, (bfd *abfd));
+PROTO (bfd_target *, bfd_generic_archive_p, (bfd *abfd));
+PROTO (boolean, bfd_slurp_bsd_armap, (bfd *abfd));
+PROTO (boolean, bfd_slurp_coff_armap, (bfd *abfd));
+PROTO (boolean, _bfd_slurp_extended_name_table, (bfd *abfd));
+PROTO (boolean, _bfd_write_archive_contents, (bfd *abfd));
+PROTO (bfd *, new_bfd, ());
+
+#define DEFAULT_STRING_SPACE_SIZE 0x2000
+PROTO (boolean, bfd_add_to_string_table, (char **table, char *new_string,
+					  unsigned int *table_length,
+					  char **free_ptr));
+     
+PROTO (long, _do_getblong, (unsigned char *addr));
+PROTO (long, _do_getllong, (unsigned char *addr));
+PROTO (short, _do_getbshort, (unsigned char *addr));
+PROTO (short, _do_getlshort, (unsigned char *addr));
+PROTO (void, _do_putblong, (unsigned long data, unsigned char *addr));
+PROTO (void, _do_putllong, (unsigned long data, unsigned char *addr));
+PROTO (void, _do_putbshort, (int data, unsigned char *addr));
+PROTO (void, _do_putlshort, (int data, unsigned char *addr));
+
+PROTO (boolean, bfd_false, (bfd *ignore));
+PROTO (boolean, bfd_true, (bfd *ignore));
+PROTO (void *, bfd_nullvoidptr, (bfd *ignore));
+PROTO (int, bfd_0, (bfd *ignore));
+PROTO (unsigned int, bfd_0u, (bfd *ignore));
+PROTO (void, bfd_void, (bfd *ignore));
+
+
+PROTO (bfd *,new_bfd_contained_in,(bfd *));
+PROTO (boolean, _bfd_dummy_new_section_hook, (bfd *ignore, asection *newsect));
+PROTO (char *, _bfd_dummy_core_file_failing_command, (bfd *abfd));
+PROTO (int, _bfd_dummy_core_file_failing_signal, (bfd *abfd));
+PROTO (boolean, _bfd_dummy_core_file_matches_executable_p, (bfd *core_bfd,
+							    bfd *exec_bfd));
+PROTO (bfd_target *, _bfd_dummy_target, (bfd *abfd));
+
+PROTO (void, bfd_dont_truncate_arname, (bfd *abfd, char *filename, char *hdr));
+PROTO (void, bfd_bsd_truncate_arname, (bfd *abfd, char *filename, char *hdr));
+PROTO (void, bfd_gnu_truncate_arname, (bfd *abfd, char *filename, char *hdr));
+
+PROTO (boolean, bsd_write_armap, (bfd *arch, unsigned int elength,
+				  struct orl *map, int orl_count, int stridx));
+
+PROTO (boolean, coff_write_armap, (bfd *arch, unsigned int elength,
+				   struct orl *map, int orl_count, int stridx));
+
+PROTO ( bfd *,bfd_generic_openr_next_archived_file, (bfd *archive, bfd *last_file));
+
+PROTO(int, bfd_generic_stat_arch_elt, (bfd *, struct stat *));
+/* Macros to tell if bfds are read or write enabled.
+
+   Note that bfds open for read may be scribbled into if the fd passed
+   to bfd_fdopenr is actually open both for read and write
+   simultaneously.  However an output bfd will never be open for
+   read.  Therefore sometimes you want to check bfd_read_p or
+   !bfd_read_p, and only sometimes bfd_write_p.
+*/
+
+#define bfd_read_p(abfd) ((abfd)->direction == read_direction || (abfd)->direction == both_direction)
+#define bfd_write_p(abfd) ((abfd)->direction == write_direction || (abfd)->direction == both_direction)
+
+PROTO (void, bfd_assert,(char*,int));
+#define BFD_ASSERT(x) \
+{ if (!(x)) bfd_assert(__FILE__,__LINE__); }
+
+#define BFD_FAIL() \
+{ bfd_assert(__FILE__,__LINE__); }
+
+PROTO (FILE *, bfd_cache_lookup_worker, (bfd *));
+
+extern bfd *bfd_last_cache;
+#define bfd_cache_lookup(x) \
+     (x==bfd_last_cache?(FILE*)(bfd_last_cache->iostream):bfd_cache_lookup_worker(x))
+    
+/* Now Steve, what's the story here? */
+#ifdef lint
+#define itos(x) "l"
+#define stoi(x) 1
+#else
+#define itos(x) ((char*)(x))
+#define stoi(x) ((int)(x))
+#endif

@@ -1,0 +1,314 @@
+Tue Mar  5 01:47:57 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* coff-code.h (bfd_coff_swap_sym, bfd_coff_swap_aux,
+	bfd_coff_swap_lineno):  Export the routines that byte-swap COFF
+	symbol tables if necessary when reading them in, so gdb can use
+	them.  Add "bfd_coff_" to the names so they won't conflict with
+	names in calling programs.  FIXME-soon:  if coff-code.h is
+	included in two BFD modules, this will cause duplicate
+	definitions; the routines should be exported to a separate,
+	common, module (probably along with a mess of other ones).
+
+Sat Mar  2 12:11:26 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	Improve modtime support.
+
+	* bfd.h:  Add boolean mtime_set, and declare bfd_get_mtime.
+	Remove #define for bfd_get_mtime.  Remove gratuitous comment.
+	* bfd.c (bfd_get_mtime):  New fn, caches mtime, gets if not cached.
+	BUG:  archive members still do not get correct mod times.
+
+	Improve floating point support for core files.
+
+	* sunos.c (struct core):  Change void *fpa_dummy to double fp_stuff.
+	(sunos4_core_file_p):  Create a second registers section in the
+	core file, called ".reg2", for the float registers.
+
+Thu Feb 14 15:49:06 1991  Gumby Vinayak Wallace  (gumby at cygint.cygnus.com)
+
+	* many changes to improve archive handling; found a logic flaw in
+	  bfd_check_format which only just happened to work by cooncidence.
+
+Thu Feb 14 07:53:16 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+
+	* bfd.c (bfd_perform_relocation): fixed to use output_offsets
+	correctly.
+	
+	* bfd.h: changed type of udata in asymbol to void *, like it
+	should be. Added bfd_reloc_dangerous enum member.
+
+	* coff-code.h: Fixed it so that internally generated symbols get
+	their values relocated correctly in all cases. Removed calls to
+	xmalloc.
+
+	* icoff.c: Not understanding the destination symbol of a reloc is
+	not a failure any more, just 'dangerous'. This allows linking of
+	b.out and coff images.
+
+	* sunos.c: Cleaned up the way that ZMAGIC section sizes are
+	calculated.
+
+
+Tue Feb 12 13:25:46 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+
+	* sunos.c (translate_to_native_sym_flags): fixed
+	sym_pointer->n_value so that symbols on the way out get their
+	section relative values calculated correctly.
+
+	* coff-code.h (mangle_symbols): fixed problem where tags were not
+	being relocated for structs, enums, unions. Also various lints.
+
+Mon Feb 11 19:52:26 1991  Gumby Vinayak Wallace  (gumby at cygint.cygnus.com)
+
+	* archive.c (get_elt_at_filepos): system_call_error returned
+	  incorrectly.
+
+Sun Feb 10 23:18:40 1991  Gumby Vinayak Wallace  (gumby at cygint.cygnus.com)
+
+	* Resolve the use of no_error and system_call_error.
+	  The bfd library itself now will never set bfd_error to
+	  no_error.
+
+	  The code still needs to be combed to make sure all the error
+	  codes are correct.  I suspect they are not always set correctly.
+
+	* The names of all the messages have _ prepended because the sun
+	  bundled compiler can't distinguish from a macro which takes an
+	  argument and the same identifier in a non-macro context.
+
+	* The reason for the above being that entry points which used to
+	  be trampoline functions are now just macros which expand to a
+	  direct call through the bfd's xfer vector.
+
+	* (../include/intel-coff.h) F_AR32WR: fix this constant.  Why
+	  must gas have its own version of everything (the gas version
+	  had the correct value)
+
+Tue Feb  5 11:46:53 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+
+	* b.out.c: Added patches supplied by chrisb@mipon2.intel.com to
+	properly support i960 architecture and output correct reloc stuff.
+
+	* bfd.h: added prototype for bfd_printable_arch_mach, added
+	BFD_FAIL
+
+	* coff-code.h: Applied patches from chrisb to support i960
+	architecture, zero relocs and swap them correcly and conditionally
+	compiled the timestamp.
+
+	* sunos.c: Made the default section alignment 2^3 so that doubles
+	are done properly. Fixed the same reloc bug that was in b.out.c
+
+	* sysdep.h: Now compiles on a Posix box
+
+Wed Jan 30 21:36:26 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* icoff.c:  Fix comment on big-endian version.
+	* coff-code.h:  Make HAS_RELOC really work (it's backwards from
+	F_RELFLG).  Set F_AR32WR in output files if little endian
+	architecture.
+
+Tue Jan 29 20:56:10 PST 1991 steve@cygnus.com
+	
+	* archures.c fixed =/== typo
+	
+	* sunos.c added architecture stuff for output. Fixed
+	bug where files where vma(data) != size(text) 
+	were processed wrong.
+
+	* coff-code.h added a lint cast
+
+	* (../include/a.out.sun4.h) fixed it so zmagic
+	worked
+
+Mon Jan 28 19:15:29 PST 1991 steve@cygnus.com
+
+	* archive.c removed loads of includes, and fixed bug where string
+	table didn't have a null at the end.
+
+	* bfd.c fixed includes, added symbols argument to 
+	canonicalize_reloc entry point.
+
+	* libbfd.c fixed includes and added some lint patches.
+	
+	* targets.c added both sorts of intel coff.
+
+	* b.out.c fixed included, changed was the canonical
+	relocs were done.
+
+	* icoff.c added support for callj and big and little
+	enidian tables.
+
+	* opncls.c added chmod+xing for files with EXEC_P set.
+
+	* sunos.c fixed includes. Changed default section
+	alignement to words. Fixed relocation stuff to work with
+	new scheme
+
+	* bfd.h various new types added, prototype for new
+	reloc calls, changed bfd->iostream to a void *
+	to including files don't need stdio.h.
+
+	* libcoff.h added conversion table to tie relocs to
+	canonical symbols
+		
+	* sysdep.h created
+
+	* coff-code.h fixed includes. Added code to support
+	big and little endian formats. Various lints. Better
+	processing of symbols. Changed reloc stuff to new
+	order
+
+	* libbfd.h fixed includes
+
+
+Mon Jan 21 11:53:51 PST 1991 steve@cygnus.com
+	
+	* bfd.h	changed name of alignment entry in sec_struct to
+	alignment_power, because of conflicting uses within bfd.
+	Now it should be obvious that it's a 2**n alignment
+	specifier. Removed start_pad, end_alignment, block, minsize,
+	output_file_alignment, subsection_alignment and original_vma fields.
+	Added align_power() macro. Fixed bfd_section_alignment
+	acessor macros. Added bfd_symbol_same_target macro.
+
+	* b.out.c (b_out_write_object_contents) fixed to use
+	new alignment member. Fixed (callj_callback) to use section
+	relative symbols properly.
+
+	* sunos.c (sunos4_object_p) fixed to use new alignment_power.
+	Fixed (translate_from_native_sym_flags) to correctly make	
+	symbols section relative.
+
+	* bfd.c (bfd_errmsg) fixed various enum cast problems. 
+	(bfd_make_section) took out initialization of obsolete members.
+	(bfd_print_symbol_vandf) added
+
+	* opncls.c (bfd_create) created.
+
+	* coff-code.h (coff_new_section_hook) took away refs
+	to obsolete members. (make_a_section_from_file) added
+	conversion between alignment types. (coff_symbol_from)
+	added. (coff_count_linenumbers) only counts linenumbers
+	if symbol is of coff-type. (coff_mangle_symbols) only
+	heavily mangles symbols if symbol is coff-type.
+	(coff_write_symbols) various lints. (coff_write_object_contents)
+	various lints and modification for alignment conversion.
+	(coff_slurp_relocs) fixed for use with new asection shape.
+
+Sat Jan 19 16:10:42 PST 1991 steve@cygnus.com
+
+	* archive.c lots of lint
+
+	* b.out.c added callj relocation support, upgrated reloc howto.
+	Fixed so that asymbol and reloc records are output 
+	correctly.
+
+	* bfd.c lots of lint, support for new bfd entry point
+	bfd_print_symbol.
+
+	* bfd.h changed definition of asymbol to contain pointer to
+	owning bfd, removed target dependencies.
+
+	* cache.c took out print statements, put in BFD_ASSERT calls.
+
+	* coff-code.h various lints, corrected linenumber output
+	functionality. Added support for new style asymbols and
+	bfd_print_symbol. Fixed so that asymbol and
+	reloc records are handled correctly. Added timestamp.
+
+	* icoff.c Added support for new howto shape.
+	
+	* liba.out.h Added support for new asymbol shape
+
+	* libbfd.c various lints
+
+	* libbfd.h various lints
+
+	* libcoff.h added support for new asymbol shape.
+
+	* sunos.c  various lints. Added support for new asymbol shape
+	and bfd_print_symbol.
+
+Wed Jan 16 21:38:09 PST 1991 steve@cygnus.com
+
+	* b.out.c removed prototype of sunos4_ennativate_symtab, lots of
+	pointer lint. Added support for callj relocation. Fixed bug where
+	the last 32 bytes of the text section were overwritten by data. Fixed bug
+	where archives of b.out didn't work due bfd_slurp_extended_name_table
+	returning false.
+
+	* sunos.c added support for n_other field. Braced the howto table so
+	that it won't be affected by any lengthing of the howto struct typedef.
+	Various lints
+
+	* bfd.h added support for n_other field, added special_function 	
+	reloc type, modified bfd_perform_relocation prototype. Added bfd_h_get_x
+	macros.
+
+	* bfd.c upgraded bfd_perform_relocation, various lints.
+
+Wed Jan 16 01:55:53 1991  John Gilmore  (gnu at rtl)
+
+	* ChangeLog:  Started ChangeLog for BFD.
+	* ToDo:  Create file for suggestions.
+
+	* Makefile:  Support easy loading into Saber C.
+	Add dependencies for icoff.o and bcs88kcoff.o.
+	Rename coff.c to coff-code.h.  Change callers.
+
+	* bfd.c (bfd_check_format):  Allow the check_format routines
+	to return the desired target vector, rather than just a Boolean.
+	bfd.h (bfd_check_format):  Change function pointer return type.
+	archive.c (bfd_generic_archive_p):  change callee.
+	b.out.c (b_out_little_object_p, b_out_big_object_p,
+	b_out_real_object_p):  change callee.
+	libbfd.c (_bfd_dummy_target):  Dummy routine replacing bfd_false
+	in check_format transfer vectors that need a filler.
+	libbfd.h (bfd_generic_archive_p, _bfd_dummy_target):  Fix decls.
+	bcs88kcoff.c:  change callee.
+	coff-code.h (coff_real_object_p, coff_big_object_p):  change callee.
+	icoff.c:  change callee.
+	sunos.c (sunos4_object_p, sunos4_core_file_p):  change callee.
+
+	* libbfd.c (zalloc):  It should actually zero the storage!
+	This was commented out for some reason.
+
+	* libbfd.h:  Add malloc, xmalloc, memcpy, and fatal decls.
+	This is so callers can avoid <stdlib.h> which doesn't exist
+	on older systems.
+
+	* bfd.c (map_over_sections):  Add debugging code, since I
+	noticed the section count for sunos core files was bad, but only
+	GDB had detected the problem.
+	(bfd_set_section_lineno_size, bfd_set_section_linenos,
+	bfd_get_section_linenos):  Remove obsolete functions.
+	(bfd_apply_relocations):  Use longs, not ints, for the math.
+
+	* bfd.h:  Declare enum boolean and struct bfd_target as well
+	as typedefs for them.  Remove obsolete
+	bfd_get_section_lineno_size.
+
+	* cache.c:  Make the "fdopen" support work.  Keep better track
+	of how many files are open.  Centralize the opening of files
+	and be sure bfd_open[rw] actually try to open the file.  Evade
+	linked list initialization problems.
+
+	* b.out.c, coff-code.h, opncls.c, sunos.c:  lint.
+
+	* coff-code.h (coff_slurp_symbol_table):  Null-terminate symtab names.
+
+	* cplus-dem.c:  Delete file, since it is not part of BFD.
+
+	* opncls.c (bfd_openr):  Eliminate misplaced #if 0 code.
+	(bfd_openr, bfd_openw):  Actually open the file, give error now.
+	
+	* sunos.c (sunos4_core_file_p):  Set section count.
+	(sunos4_set_section_linenos, stab_names, fprint_name):  Eliminiate
+	obsolete definitions.
+	(_write_symbol_table):  Initialize <idx> counter.
+	(foop):  Eliminate debugging code.
+
+
+
+
