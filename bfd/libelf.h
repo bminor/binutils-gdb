@@ -122,10 +122,6 @@ struct bfd_elf_section_data {
   Elf_Internal_Shdr this_hdr;
   Elf_Internal_Shdr rel_hdr;
   int this_idx, rel_idx;
-#if 0
-  Elf_Internal_Shdr str_hdr;
-  int str_idx;
-#endif
 };
 #define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)
 #define shdr_name(abfd,shdr)	(elf_shstrtab (abfd)->tab + (shdr)->sh_name)
