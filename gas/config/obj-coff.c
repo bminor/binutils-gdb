@@ -1909,6 +1909,9 @@ coff_header_append (abfd, h)
   unsigned int i;
   char buffer[1000];
   char buffero[1000];
+#ifdef COFF_LONG_SECTION_NAMES
+  unsigned long string_size = 4;
+#endif
 
   bfd_seek (abfd, 0, 0);
 
@@ -1931,10 +1934,6 @@ coff_header_append (abfd, h)
 
   for (i = SEG_E0; i < SEG_LAST; i++)
     {
-#ifdef COFF_LONG_SECTION_NAMES
-      unsigned long string_size = 4;
-#endif
-
       if (segment_info[i].scnhdr.s_name[0])
 	{
 	  unsigned int size;
@@ -1979,8 +1978,12 @@ symbol_to_chars (abfd, where, symbolP)
     }
   /* At the same time, relocate all symbols to their output value */
 
+#ifndef TE_PE
   val = (segment_info[S_GET_SEGMENT (symbolP)].scnhdr.s_paddr
 	 + S_GET_VALUE (symbolP));
+#else
+  val = S_GET_VALUE (symbolP);
+#endif
 
   S_SET_VALUE (symbolP, val);
 
@@ -3145,10 +3148,8 @@ write_object_file ()
 #define SUB_SEGMENT_ALIGN(SEG) 1
 #endif
 #ifdef md_do_align
-      {
-	static char nop = NOP_OPCODE;
-	md_do_align (SUB_SEGMENT_ALIGN (now_seg), &nop, 1, 0, alignment_done);
-      }
+      md_do_align (SUB_SEGMENT_ALIGN (now_seg), (char *) NULL, 0, 0,
+		   alignment_done);
 #endif
       frag_align (SUB_SEGMENT_ALIGN (now_seg), NOP_OPCODE, 0);
 #ifdef md_do_align
@@ -3625,6 +3626,11 @@ c_section_symbol (name, idx)
 
   SF_SET_STATICS (symbolP);
 
+#ifdef TE_DELTA
+  /* manfred@s-direktnet.de: section symbols *must* have the LOCAL bit cleared,
+     which is set by the new definition of LOCAL_LABEL in tc-m68k.h.  */
+  SF_CLEAR_LOCAL (symbolP);
+#endif
 #ifdef TE_PE
   /* If the .linkonce pseudo-op was used for this section, we must
      store the information in the auxiliary entry for the section
@@ -3770,7 +3776,7 @@ obj_coff_lcomm (ignore)
 	  subseg_set (SEG_E2, 1);
 	  symbolP->sy_frag = frag_now;
 	  p = frag_var(rs_org, 1, 1, (relax_substateT)0, symbolP,
-		       temp, (char *)0);
+		       (offsetT) temp, (char *) 0);
 	  *p = 0;
 	  subseg_set (current_seg, current_subseg); /* restore current seg */
 	  S_SET_SEGMENT(symbolP, SEG_E2);
@@ -4046,11 +4052,21 @@ fixup_segment (segP, this_segment_type)
 
 	      add_number += S_GET_VALUE (add_symbolP);
 	      add_number -= md_pcrel_from (fixP);
-#if defined (TC_I386) || defined (TE_LYNX)
-	      /* On the 386 we must adjust by the segment vaddr as
-		 well.  Ian Taylor.  */
-	      add_number -= segP->scnhdr.s_vaddr;
-#endif
+
+	      /* We used to do
+		   add_number -= segP->scnhdr.s_vaddr;
+		 if defined (TC_I386) || defined (TE_LYNX).  I now
+		 think that was an error propagated from the case when
+		 we are going to emit the relocation.  If we are not
+		 going to emit the relocation, then we just want to
+		 set add_number to the difference between the symbols.
+		 This is a case that would only arise when there is a
+		 PC relative reference from a section other than .text
+		 to a symbol defined in the same section, and the
+		 reference is not relaxed.  Since jump instructions on
+		 the i386 are relaxed, this could only arise with a
+		 call instruction.  */
+
 	      pcrel = 0;	/* Lie. Don't want further pcrel processing. */
 	      if (!TC_FORCE_RELOCATION (fixP))
 		{
