@@ -6,6 +6,8 @@
 	(read_func_scope): Use cu->language, not cu_language.  Pass 'cu'
 	argument to 'die_specification'.
 
+	* dwarf2read.c (read_func_scope): Re-indent comment.
+
 2004-01-27  Paul N. Hilfinger  <hilfinger@gnat.com>
 	
 	* breakpoint.c (breakpoint_re_set_one): Set b->cond, b->val, and

@@ -2173,27 +2173,27 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
     {
       struct die_info *spec_die = die_specification (die, cu);
 
-	  /* NOTE: carlton/2004-01-23: We have to be careful in the
-	     presence of DW_AT_specification.  For example, with GCC
-	     3.4, given the code
+      /* NOTE: carlton/2004-01-23: We have to be careful in the
+         presence of DW_AT_specification.  For example, with GCC 3.4,
+         given the code
 
-               namespace N {
-	         void foo() {
-		   // Definition of N::foo.
-	         }
-	       }
+           namespace N {
+             void foo() {
+               // Definition of N::foo.
+             }
+           }
 
-	     then we'll have a tree of DIEs like this:
+         then we'll have a tree of DIEs like this:
 
-	     1: DW_TAG_compile_unit
-               2: DW_TAG_namespace        // N
-                 3: DW_TAG_subprogram     // declaration of N::foo
-               4: DW_TAG_subprogram       // definition of N::foo
-                    DW_AT_specification   // refers to die #3
+         1: DW_TAG_compile_unit
+           2: DW_TAG_namespace        // N
+             3: DW_TAG_subprogram     // declaration of N::foo
+           4: DW_TAG_subprogram       // definition of N::foo
+                DW_AT_specification   // refers to die #3
 
-             Thus, when processing die #4, we have to pretend that
-             we're in the context of its DW_AT_specification, namely
-             the contex of die #3.  */
+         Thus, when processing die #4, we have to pretend that we're
+         in the context of its DW_AT_specification, namely the contex
+         of die #3.  */
 	
       if (spec_die != NULL)
 	{
