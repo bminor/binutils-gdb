@@ -218,11 +218,11 @@ m68hc11_which_soft_register (CORE_ADDR addr)
 /* Fetch a pseudo register.  The 68hc11 soft registers are treated like
    pseudo registers.  They are located in memory.  Translate the register
    fetch into a memory read.  */
-void
-m68hc11_fetch_pseudo_register (int regno)
+static void
+m68hc11_pseudo_register_read (struct gdbarch *gdbarch,
+			      struct regcache *regcache,
+			      int regno, void *buf)
 {
-  char buf[MAX_REGISTER_RAW_SIZE];
-
   m68hc11_initialize_register_info ();
   
   /* Fetch a soft register: translate into a memory read.  */
@@ -234,23 +234,24 @@ m68hc11_fetch_pseudo_register (int regno)
     {
       memset (buf, 0, 2);
     }
-  supply_register (regno, buf);
 }
 
 /* Store a pseudo register.  Translate the register store
    into a memory write.  */
 static void
-m68hc11_store_pseudo_register (int regno)
+m68hc11_pseudo_register_write (struct gdbarch *gdbarch,
+			       struct regcache *regcache,
+			       int regno, const void *buf)
 {
   m68hc11_initialize_register_info ();
 
   /* Store a soft register: translate into a memory write.  */
   if (soft_regs[regno].name)
     {
-      char buf[MAX_REGISTER_RAW_SIZE];
-
-      read_register_gen (regno, buf);
-      target_write_memory (soft_regs[regno].addr, buf, 2);
+      const int regsize = 2;
+      char *tmp = alloca (regsize);
+      memcpy (tmp, buf, regsize);
+      target_write_memory (soft_regs[regno].addr, tmp, regsize);
     }
 }
 
@@ -1098,8 +1099,8 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_register_size (gdbarch, 2);
   set_gdbarch_register_bytes (gdbarch, M68HC11_ALL_REGS * 2);
   set_gdbarch_register_virtual_type (gdbarch, m68hc11_register_virtual_type);
-  set_gdbarch_fetch_pseudo_register (gdbarch, m68hc11_fetch_pseudo_register);
-  set_gdbarch_store_pseudo_register (gdbarch, m68hc11_store_pseudo_register);
+  set_gdbarch_pseudo_register_read (gdbarch, m68hc11_pseudo_register_read);
+  set_gdbarch_pseudo_register_write (gdbarch, m68hc11_pseudo_register_write);
 
   set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_call_dummy_length (gdbarch, 0);
