@@ -1,5 +1,6 @@
 /* Remote utility routines for the remote server for GDB.
-   Copyright 1986, 1989, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1986, 1989, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+   2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -183,6 +184,7 @@ fromhex (int a)
     return a - 'a' + 10;
   else
     error ("Reply contains invalid hex digit");
+  return 0;
 }
 
 /* Convert number NIB to a hex digit.  */
@@ -204,10 +206,12 @@ putpkt (char *buf)
 {
   int i;
   unsigned char csum = 0;
-  char buf2[PBUFSIZ];
+  char *buf2;
   char buf3[1];
   int cnt = strlen (buf);
   char *p;
+
+  buf2 = malloc (PBUFSIZ);
 
   /* Copy the packet into buffer BUF2, encapsulating it
      and giving it a checksum.  */
@@ -250,11 +254,13 @@ putpkt (char *buf)
 	  else
 	    perror ("putpkt(read)");
 
+	  free (buf2);
 	  return -1;
 	}
     }
   while (buf3[0] != '+');
 
+  free (buf2);
   return 1;			/* Success! */
 }
 
@@ -264,7 +270,7 @@ putpkt (char *buf)
    will cause us to send a SIGINT to the child.  */
 
 static void
-input_interrupt (void)
+input_interrupt (int unused)
 {
   fd_set readset;
   struct timeval immediate = { 0, 0 };
@@ -440,7 +446,7 @@ convert_ascii_to_int (char *from, char *to, int n)
 static char *
 outreg (int regno, char *buf)
 {
-  int regsize = REGISTER_RAW_SIZE (regno);
+  int regsize = register_size (regno);
 
   if ((regno >> 12) != 0)
     *buf++ = tohex ((regno >> 12) & 0xf);
@@ -449,7 +455,7 @@ outreg (int regno, char *buf)
   *buf++ = tohex ((regno >> 4) & 0xf);
   *buf++ = tohex (regno & 0xf);
   *buf++ = ':';
-  convert_int_to_ascii (&registers[REGISTER_BYTE (regno)], buf, regsize);
+  convert_int_to_ascii (register_data (regno), buf, regsize);
   buf += 2 * regsize;
   *buf++ = ';';
 
@@ -474,30 +480,15 @@ prepare_resume_reply (char *buf, char status, unsigned char signo)
 
   if (status == 'T')
     {
-#ifdef GDBSERVER_RESUME_REGS
-      static int gdbserver_resume_regs[] = GDBSERVER_RESUME_REGS ;
-      int i;
-      for (i = 0; 
-           i < sizeof (gdbserver_resume_regs) 
-	        / sizeof (gdbserver_resume_regs[0]);
-	   i++)
+      const char **regp = gdbserver_expedite_regs;
+      while (*regp)
 	{
-	  int regnum = gdbserver_resume_regs[i];
-	  buf = outreg (regnum, buf);
+	  buf = outreg (find_regno (*regp), buf);
+	  regp ++;
 	}
-#else /* !defined(GDBSERVER_RESUME_REGS) */
-      buf = outreg (PC_REGNUM, buf);
-      buf = outreg (FP_REGNUM, buf);
-      buf = outreg (SP_REGNUM, buf);
-      if (NPC_REGNUM >= 0)
-	buf = outreg (NPC_REGNUM, buf);
-#ifdef O7_REGNUM
-      buf = outreg (O7_REGNUM, buf);
-#endif
-#endif /* GDBSERVER_RESUME_REGS */
 
       /* If the debugger hasn't used any thread features, don't burden it with
-         threads.  If we didn't check this, GDB 4.13 and older would choke.  */
+	 threads.  If we didn't check this, GDB 4.13 and older would choke.  */
       if (cont_thread != 0)
 	{
 	  if (old_thread_from_wait != thread_from_wait)

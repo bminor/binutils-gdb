@@ -59,7 +59,7 @@ extern int remote_debug;
 int
 main (int argc, char *argv[])
 {
-  char ch, status, own_buf[PBUFSIZ], mem_buf[2000];
+  char ch, status, *own_buf, mem_buf[2000];
   int i = 0;
   unsigned char signal;
   unsigned int len;
@@ -93,6 +93,8 @@ main (int argc, char *argv[])
 		 "\tgdbserver tty --attach pid");
 
   initialize_low ();
+
+  own_buf = malloc (PBUFSIZ);
 
   if (pid == 0)
     {
@@ -167,10 +169,10 @@ main (int argc, char *argv[])
 		}
 	      break;
 	    case 'g':
-	      convert_int_to_ascii (registers, own_buf, REGISTER_BYTES);
+	      registers_to_string (own_buf);
 	      break;
 	    case 'G':
-	      convert_ascii_to_int (&own_buf[1], registers, REGISTER_BYTES);
+	      registers_from_string (&own_buf[1]);
 	      store_inferior_registers (-1);
 	      write_ok (own_buf);
 	      break;

@@ -1,4 +1,4 @@
-/* Register protocol definition structures for the GNU Debugger
+/* Register support routines for the remote server for GDB.
    Copyright 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -18,29 +18,32 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef REGDEF_H
-#define REGDEF_H
+#ifndef REGCACHE_H
+#define REGCACHE_H
 
-struct reg
-{
-  /* The name of this register - NULL for pad entries.  */
-  const char *name;
+/* Convert all registers to a string in the currently specified remote
+   format.  */
 
-  /* At the moment, both of the following bit counts must be divisible
-     by eight (to match the representation as two hex digits) and divisible
-     by the size of a byte (to match the layout of each register in
-     memory).  */
+void registers_to_string (char *buf);
 
-  /* The offset (in bits) of the value of this register in the buffer.  */
-  int offset;
+/* Convert a string to register values and fill our register cache.  */
 
-  /* The size (in bits) of the value of this register, as transmitted.  */
-  int size;
-};
+void registers_from_string (char *buf);
 
-/* Set the current remote protocol and register cache according to the array
-   ``regs'', with ``n'' elements.  */
+/* Return the size in bytes of a string-encoded register packet.  */
 
-void set_register_cache (struct reg *regs, int n);
+int registers_length (void);
 
-#endif /* REGDEF_H */
+/* Return a pointer to the description of register ``n''.  */
+
+struct reg *find_register_by_number (int n);
+
+char *register_data (int n);
+
+int register_size (int n);
+
+int find_regno (const char *name);
+
+extern const char **gdbserver_expedite_regs;
+
+#endif /* REGCACHE_H */

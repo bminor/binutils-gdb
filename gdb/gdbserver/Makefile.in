@@ -1,6 +1,5 @@
-#Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-#1999, 2000
-#Free Software Foundation, Inc.
+# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
+# 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -97,8 +96,8 @@ READLINE_DEP = $$(READLINE_DIR)
 # -I${srcdir} possibly for regex.h also.
 # -I${srcdir}/config for more generic config files.
 # -I$(srcdir)/../regformats for regdef.h
-INCLUDE_CFLAGS = -I. -I.. -I${srcdir} -I${srcdir}/.. -I${srcdir}/../config \
-	-I$(INCLUDE_DIR) -I$(srcdir)/../regformats
+INCLUDE_CFLAGS = -I. -I.. -I${srcdir} -I${srcdir}/.. \
+	-I$(srcdir)/../regformats
 
 # M{H,T}_CFLAGS, if defined, has host- and target-dependent CFLAGS
 # from the config/ directory.
@@ -139,7 +138,7 @@ DEPFILES = $(GDBSERVER_DEPFILES)
 SOURCES = $(SFILES) $(ALLDEPFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS} 
 
-OBS = utils.o $(GDBSERVER_DEPFILES) server.o remote-utils.o
+OBS = utils.o $(GDBSERVER_DEPFILES) server.o remote-utils.o regcache.o
 
 # Prevent Sun make from putting in the machine type.  Setting
 # TARGET_ARCH to nothing works for SunOS 3, 4.0, but not for 4.1.
@@ -201,6 +200,8 @@ tags: TAGS
 clean:
 	rm -f *.o ${ADD_FILES} *~
 	rm -f gdbserver gdbreplay core make.log
+	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m68k.c reg-mips.c
+	rm -f reg-ppc.c reg-sh.c
 
 distclean: clean
 	rm -f nm.h tm.h xm.h config.status
@@ -239,19 +240,31 @@ MAKEOVERRIDES=
 ## with no dependencies and no actions.
 unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 
-server.o : ${srcdir}/server.c ${srcdir}/server.h
-remote-utils.o : ${srcdir}/remote-utils.c ${srcdir}/server.h
-low-linux.o : ${srcdir}/low-linux.c ${srcdir}/server.h
-low-lynx.o : ${srcdir}/low-lynx.c ${srcdir}/server.h
-low-nbsd.o : ${srcdir}/low-nbsd.c ${srcdir}/server.h
-low-sim.o : ${srcdir}/low-sim.c ${srcdir}/server.h
-low-sparc.o : $(srcdir)/low-sparc.c $(srcdir)/server.h
-low-sun3.o : $(srcdir)/low-sun3.c $(srcdir)/server.h
-low-hppabsd.o : $(srcdir)/low-hppabsd.c $(srcdir)/server.h
-utils.o : ${srcdir}/utils.c ${srcdir}/server.h
-
-regdef_h = $(srcdir)/../regformats/regdef.h
 regdat_sh = $(srcdir)/../regformats/regdat.sh
+regdef_h = $(srcdir)/../regformats/regdef.h
+regcache_h = $(srcdir)/regcache.h
+server_h = $(srcdir)/server.h $(regcache_h)
+
+server.o: server.c $(server_h)
+remote-utils.o: remote-utils.c $(server_h)
+utils.o: utils.c $(server_h)
+regcache.o: regcache.c $(server_h) $(regdef_h)
+
+linux-low.o: linux-low.c $(server_h)
+linux-low-arm.o: linux-low-arm.c $(server_h)
+linux-low-i386.o: linux-low-i386.c $(server_h)
+linux-low-ia64.o: linux-low-ia64.c $(server_h)
+linux-low-mips.o: linux-low-mips.c $(server_h)
+linux-low-ppc.o: linux-low-ppc.c $(server_h)
+linux-low-sh.o: linux-low-sh.c $(server_h)
+
+# OBSOLETE TARGETS
+# OBSOLETE # low-lynx.o : ${srcdir}/low-lynx.c ${srcdir}/server.h
+# OBSOLETE # low-nbsd.o : ${srcdir}/low-nbsd.c ${srcdir}/server.h
+# OBSOLETE # low-sim.o : ${srcdir}/low-sim.c ${srcdir}/server.h
+# OBSOLETE # low-sparc.o : $(srcdir)/low-sparc.c $(srcdir)/server.h
+# OBSOLETE # low-sun3.o : $(srcdir)/low-sun3.c $(srcdir)/server.h
+# OBSOLETE # low-hppabsd.o : $(srcdir)/low-hppabsd.c $(srcdir)/server.h
 
 reg-arm.o : reg-arm.c $(regdef_h)
 reg-arm.c : $(srcdir)/../regformats/reg-arm.dat $(regdat_sh)

@@ -1,5 +1,5 @@
 /* General utility routines for the remote server for GDB.
-   Copyright 1986, 1989, 1993, 1995, 1996, 1997, 1999, 2000
+   Copyright 1986, 1989, 1993, 1995, 1996, 1997, 1999, 2000, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -75,7 +75,7 @@ error (const char *string,...)
 
 /* VARARGS */
 NORETURN void
-fatal (char *string,...)
+fatal (const char *string,...)
 {
   va_list args;
   va_start (args, string);
@@ -84,4 +84,16 @@ fatal (char *string,...)
   fprintf (stderr, "\n");
   va_end (args);
   exit (1);
+}
+
+/* VARARGS */
+void
+warning (const char *string,...)
+{
+  va_list args;
+  va_start (args, string);
+  fprintf (stderr, "gdb: ");
+  vfprintf (stderr, string, args);
+  fprintf (stderr, "\n");
+  va_end (args);
 }

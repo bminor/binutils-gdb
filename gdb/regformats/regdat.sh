@@ -123,6 +123,7 @@ EOF
 exec > new-$2
 copyright $1
 echo '#include "regdef.h"'
+echo '#include "regcache.h"'
 echo
 offset=0
 i=0
@@ -151,6 +152,17 @@ done
 echo "};"
 echo
 echo "const char *expedite_regs_${name}[] = { \"`echo ${expedite} | sed 's/,/", "/g'`\", 0 };"
+echo
+
+cat <<EOF
+void
+init_registers ()
+{
+    set_register_cache (regs_${name},
+			sizeof (regs_${name}) / sizeof (regs_${name}[0]));
+    gdbserver_expedite_regs = expedite_regs_${name};
+}
+EOF
 
 # close things off
 exec 1>&2

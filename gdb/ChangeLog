@@ -1,5 +1,51 @@
 2002-02-14  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbserver/Makefile.in: Add regformats directory to INCLUDE_CFLAGS,
+	and remove unused $(INCLUDE_DIR).
+	Add regcache.c to OBS.
+	Add generated register protocol files to clean target.
+	Update dependencies for new objects, obsolete old target code.
+
+	* gdbserver/linux-low.c: Remove all platform-specific code to
+	new files.  Remove various dead code.  Update to use regcache
+	functionality.
+	* gdbserver/remote-utils.c (fromhex): Add return statement
+	to quiet warning.
+	(putpkt): Dynamically allocate buf2 because PBUFSIZ is no longer
+	constant.
+	(input_interrupt): Add integer parameter to match prototype
+	of a signal handler.
+	(outreg): Use register_data ().
+	(prepare_resume_reply): Use gdbserver_expedite_regs.
+	* gdbserver/server.c (main): Dynamically allocate own_buf because
+	PBUFSIZ is no longer constant.  Use registers_to_string () and
+	registers_from_string ().
+	* gdbserver/server.h: No longer include "defs.h".  Add prototypes
+	for error (), fatal (), and warning ().  Update definition of
+	PBUFSIZ to use regcache functionality.  Add include guard.
+	* gdbserver/utils.c (fatal): Add missing ``const''.
+	(warning): New function.
+
+	* regformats/regdat.sh: Include "regcache.h" in generated files.
+	Provide init_registers () function.
+	* regformats/regdef.h: Add prototype for set_register_cache ().
+	Add include guard.
+
+	* gdbserver/linux-arm-low.c: New file.
+	* gdbserver/linux-i386-low.c: New file.
+	* gdbserver/linux-ia64-low.c: New file.
+	* gdbserver/linux-m68k-low.c: New file.
+	* gdbserver/linux-mips-low.c: New file.
+	* gdbserver/linux-ppc-low.c: New file.
+	* gdbserver/linux-sh-low.c: New file.
+
+	* gdbserver/regcache.c: New file.
+	* gdbserver/regcache.h: New file.
+
+	* gdbserver/low-linux.c: Removed obsolete file.
+
+2002-02-14  Daniel Jacobowitz  <drow@mvista.com>
+
 	* config/arm/linux.mt: Update GDBSERVER_DEPFILES.
 	* config/i386/linux.mt: Likewise.
 	* config/ia64/linux.mt: Likewise.

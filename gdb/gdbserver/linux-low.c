@@ -31,22 +31,15 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <string.h>
-
-/***************Begin MY defs*********************/
-static char my_registers[REGISTER_BYTES];
-char *registers = my_registers;
-/***************End MY defs*********************/
-
-#ifdef HAVE_SYS_REG_H
-#include <sys/reg.h>
-#endif
+#include <stdlib.h>
+#include <unistd.h>
 
 #define PTRACE_ARG3_TYPE long
 #define PTRACE_XFER_TYPE int
 
 extern int errno;
-
-static void initialize_arch (void);
+extern int num_regs;
+extern int regmap[];
 
 /* Start an inferior process and returns its pid.
    ALLARGS is a vector of program-name and args. */
@@ -156,428 +149,19 @@ myresume (int step, int signal)
     perror_with_name ("ptrace");
 }
 
-
-#if !defined (offsetof)
-#define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
-#endif
-
-/* U_REGS_OFFSET is the offset of the registers within the u area.  */
-#if !defined (U_REGS_OFFSET)
-#define U_REGS_OFFSET \
-  ptrace (PT_READ_U, inferior_pid, \
-          (PTRACE_ARG3_TYPE) (offsetof (struct user, u_ar0)), 0) \
-    - KERNEL_U_ADDR
-#endif
-
-#ifdef I386_GNULINUX_TARGET
-/* This module only supports access to the general purpose registers.
-   Adjust the relevant constants accordingly.
-
-   FIXME: kettenis/2001-03-28: We should really use PTRACE_GETREGS to
-   get at the registers.  Better yet, we should try to share code with
-   i386-linux-nat.c.  */
-#undef NUM_FREGS
-#define NUM_FREGS 0
-#undef NUM_REGS
-#define NUM_REGS NUM_GREGS
-
-/* This stuff comes from i386-tdep.c.  */
-
-/* i386_register_byte[i] is the offset into the register file of the
-   start of register number i.  We initialize this from
-   i386_register_raw_size.  */
-int i386_register_byte[MAX_NUM_REGS];
-
-/* i386_register_raw_size[i] is the number of bytes of storage in
-   GDB's register array occupied by register i.  */
-int i386_register_raw_size[MAX_NUM_REGS] = {
-   4,  4,  4,  4,
-   4,  4,  4,  4,
-   4,  4,  4,  4,
-   4,  4,  4,  4,
-  10, 10, 10, 10,
-  10, 10, 10, 10,
-   4,  4,  4,  4,
-   4,  4,  4,  4,
-  16, 16, 16, 16,
-  16, 16, 16, 16,
-   4
-};
-
-static void
-initialize_arch (void)
-{
-  /* Initialize the table saying where each register starts in the
-     register file.  */
-  {
-    int i, offset;
-
-    offset = 0;
-    for (i = 0; i < MAX_NUM_REGS; i++)
-      {
-	i386_register_byte[i] = offset;
-	offset += i386_register_raw_size[i];
-      }
-  }
-}
-
-/* This stuff comes from i386-linux-nat.c.  */
-
-/* Mapping between the general-purpose registers in `struct user'
-   format and GDB's register array layout.  */
-static int regmap[] = 
-{
-  EAX, ECX, EDX, EBX,
-  UESP, EBP, ESI, EDI,
-  EIP, EFL, CS, SS,
-  DS, ES, FS, GS
-};
-
-/* Return the address of register REGNUM.  BLOCKEND is the value of
-   u.u_ar0, which should point to the registers.  */
-
-CORE_ADDR
-register_u_addr (CORE_ADDR blockend, int regnum)
-{
-  return (blockend + 4 * regmap[regnum]);
-}
-#elif defined(TARGET_M68K)
-static void
-initialize_arch (void)
-{
-  return;
-}
-
-/* This table must line up with REGISTER_NAMES in tm-m68k.h */
-static int regmap[] =
-{
-#ifdef PT_D0
-  PT_D0, PT_D1, PT_D2, PT_D3, PT_D4, PT_D5, PT_D6, PT_D7,
-  PT_A0, PT_A1, PT_A2, PT_A3, PT_A4, PT_A5, PT_A6, PT_USP,
-  PT_SR, PT_PC,
-#else
-  14, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15,
-  17, 18,
-#endif
-#ifdef PT_FP0
-  PT_FP0, PT_FP1, PT_FP2, PT_FP3, PT_FP4, PT_FP5, PT_FP6, PT_FP7,
-  PT_FPCR, PT_FPSR, PT_FPIAR
-#else
-  21, 24, 27, 30, 33, 36, 39, 42, 45, 46, 47
-#endif
-};
-
-/* BLOCKEND is the value of u.u_ar0, and points to the place where GS
-   is stored.  */
+#define REGISTER_RAW_SIZE(regno) register_size((regno))
 
 int
-m68k_linux_register_u_addr (int blockend, int regnum)
-{
-  return (blockend + 4 * regmap[regnum]);
-}
-#elif defined(IA64_GNULINUX_TARGET)
-#undef NUM_FREGS
-#define NUM_FREGS 0
-
-#include <asm/ptrace_offsets.h>
-
-static int u_offsets[] =
-  {
-    /* general registers */
-    -1,		/* gr0 not available; i.e, it's always zero */
-    PT_R1,
-    PT_R2,
-    PT_R3,
-    PT_R4,
-    PT_R5,
-    PT_R6,
-    PT_R7,
-    PT_R8,
-    PT_R9,
-    PT_R10,
-    PT_R11,
-    PT_R12,
-    PT_R13,
-    PT_R14,
-    PT_R15,
-    PT_R16,
-    PT_R17,
-    PT_R18,
-    PT_R19,
-    PT_R20,
-    PT_R21,
-    PT_R22,
-    PT_R23,
-    PT_R24,
-    PT_R25,
-    PT_R26,
-    PT_R27,
-    PT_R28,
-    PT_R29,
-    PT_R30,
-    PT_R31,
-    /* gr32 through gr127 not directly available via the ptrace interface */
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    /* Floating point registers */
-    -1, -1,	/* f0 and f1 not available (f0 is +0.0 and f1 is +1.0) */
-    PT_F2,
-    PT_F3,
-    PT_F4,
-    PT_F5,
-    PT_F6,
-    PT_F7,
-    PT_F8,
-    PT_F9,
-    PT_F10,
-    PT_F11,
-    PT_F12,
-    PT_F13,
-    PT_F14,
-    PT_F15,
-    PT_F16,
-    PT_F17,
-    PT_F18,
-    PT_F19,
-    PT_F20,
-    PT_F21,
-    PT_F22,
-    PT_F23,
-    PT_F24,
-    PT_F25,
-    PT_F26,
-    PT_F27,
-    PT_F28,
-    PT_F29,
-    PT_F30,
-    PT_F31,
-    PT_F32,
-    PT_F33,
-    PT_F34,
-    PT_F35,
-    PT_F36,
-    PT_F37,
-    PT_F38,
-    PT_F39,
-    PT_F40,
-    PT_F41,
-    PT_F42,
-    PT_F43,
-    PT_F44,
-    PT_F45,
-    PT_F46,
-    PT_F47,
-    PT_F48,
-    PT_F49,
-    PT_F50,
-    PT_F51,
-    PT_F52,
-    PT_F53,
-    PT_F54,
-    PT_F55,
-    PT_F56,
-    PT_F57,
-    PT_F58,
-    PT_F59,
-    PT_F60,
-    PT_F61,
-    PT_F62,
-    PT_F63,
-    PT_F64,
-    PT_F65,
-    PT_F66,
-    PT_F67,
-    PT_F68,
-    PT_F69,
-    PT_F70,
-    PT_F71,
-    PT_F72,
-    PT_F73,
-    PT_F74,
-    PT_F75,
-    PT_F76,
-    PT_F77,
-    PT_F78,
-    PT_F79,
-    PT_F80,
-    PT_F81,
-    PT_F82,
-    PT_F83,
-    PT_F84,
-    PT_F85,
-    PT_F86,
-    PT_F87,
-    PT_F88,
-    PT_F89,
-    PT_F90,
-    PT_F91,
-    PT_F92,
-    PT_F93,
-    PT_F94,
-    PT_F95,
-    PT_F96,
-    PT_F97,
-    PT_F98,
-    PT_F99,
-    PT_F100,
-    PT_F101,
-    PT_F102,
-    PT_F103,
-    PT_F104,
-    PT_F105,
-    PT_F106,
-    PT_F107,
-    PT_F108,
-    PT_F109,
-    PT_F110,
-    PT_F111,
-    PT_F112,
-    PT_F113,
-    PT_F114,
-    PT_F115,
-    PT_F116,
-    PT_F117,
-    PT_F118,
-    PT_F119,
-    PT_F120,
-    PT_F121,
-    PT_F122,
-    PT_F123,
-    PT_F124,
-    PT_F125,
-    PT_F126,
-    PT_F127,
-    /* predicate registers - we don't fetch these individually */
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    /* branch registers */
-    PT_B0,
-    PT_B1,
-    PT_B2,
-    PT_B3,
-    PT_B4,
-    PT_B5,
-    PT_B6,
-    PT_B7,
-    /* virtual frame pointer and virtual return address pointer */
-    -1, -1,
-    /* other registers */
-    PT_PR,
-    PT_CR_IIP,	/* ip */
-    PT_CR_IPSR, /* psr */
-    PT_CFM,	/* cfm */
-    /* kernel registers not visible via ptrace interface (?) */
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    /* hole */
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    PT_AR_RSC,
-    PT_AR_BSP,
-    PT_AR_BSPSTORE,
-    PT_AR_RNAT,
-    -1,
-    -1,		/* Not available: FCR, IA32 floating control register */
-    -1, -1,
-    -1,		/* Not available: EFLAG */
-    -1,		/* Not available: CSD */
-    -1,		/* Not available: SSD */
-    -1,		/* Not available: CFLG */
-    -1,		/* Not available: FSR */
-    -1,		/* Not available: FIR */
-    -1,		/* Not available: FDR */
-    -1,
-    PT_AR_CCV,
-    -1, -1, -1,
-    PT_AR_UNAT,
-    -1, -1, -1,
-    PT_AR_FPSR,
-    -1, -1, -1,
-    -1,		/* Not available: ITC */
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    PT_AR_PFS,
-    PT_AR_LC,
-    -1,		/* Not available: EC, the Epilog Count register */
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1,
-    /* nat bits - not fetched directly; instead we obtain these bits from
-       either rnat or unat or from memory. */
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, -1, -1, -1, -1,
-  };
-
-int
-ia64_register_u_addr (int blockend, int regnum)
+register_addr (int regnum)
 {
   int addr;
 
-  if (regnum < 0 || regnum >= NUM_REGS)
+  if (regnum < 0 || regnum >= num_regs)
     error ("Invalid register number %d.", regnum);
 
-  addr = u_offsets[regnum];
+  addr = regmap[regnum];
   if (addr == -1)
     addr = 0;
-
-  return addr;
-}
-
-static void
-initialize_arch (void)
-{
-  return;
-}
-
-#elif defined(ARM_GNULINUX_TARGET)
-int arm_register_u_addr(blockend, regnum)
-     int blockend;
-     int regnum;
-{
-  return blockend + REGISTER_BYTE(regnum);  
-}
-
-static void
-initialize_arch ()
-{
-}
-#endif
-
-CORE_ADDR
-register_addr (int regno, CORE_ADDR blockend)
-{
-  CORE_ADDR addr;
-
-  if (regno < 0 || regno >= NUM_REGS)
-    error ("Invalid register number %d.", regno);
-
-  REGISTER_U_ADDR (addr, blockend, regno);
 
   return addr;
 }
@@ -590,16 +174,18 @@ fetch_register (int regno)
   CORE_ADDR regaddr;
   register int i;
 
-  /* Offset of registers within the u area.  */
-  unsigned int offset;
+  if (regno >= num_regs)
+    return;
+  if (cannot_fetch_register (regno))
+    return;
 
-  offset = U_REGS_OFFSET;
-
-  regaddr = register_addr (regno, offset);
+  regaddr = register_addr (regno);
+  if (regaddr == -1)
+    return;
   for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
-      *(PTRACE_XFER_TYPE *) &registers[REGISTER_BYTE (regno) + i] =
+      *(PTRACE_XFER_TYPE *) (register_data (regno) + i) =
 	ptrace (PTRACE_PEEKUSER, inferior_pid, (PTRACE_ARG3_TYPE) regaddr, 0);
       regaddr += sizeof (PTRACE_XFER_TYPE);
       if (errno != 0)
@@ -622,7 +208,7 @@ void
 fetch_inferior_registers (int regno)
 {
   if (regno == -1 || regno == 0)
-    for (regno = 0; regno < NUM_REGS - NUM_FREGS; regno++)
+    for (regno = 0; regno < num_regs; regno++)
       fetch_register (regno);
   else
     fetch_register (regno);
@@ -637,61 +223,42 @@ store_inferior_registers (int regno)
 {
   CORE_ADDR regaddr;
   int i;
-  unsigned int offset = U_REGS_OFFSET;
 
   if (regno >= 0)
     {
-#if 0
-      if (CANNOT_STORE_REGISTER (regno))
+      if (regno >= num_regs)
 	return;
-#endif
-      regaddr = register_addr (regno, offset);
+
+      if (cannot_store_register (regno))
+	return;
+
+      regaddr = register_addr (regno);
+      if (regaddr == -1)
+	return;
       errno = 0;
-#if 0
-      if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
+      for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
 	{
-	  scratch = *(int *) &registers[REGISTER_BYTE (regno)] | 0x3;
-	  ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-		  scratch, 0);
+	  errno = 0;
+	  ptrace (PTRACE_POKEUSER, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+		  *(int *) (register_data (regno) + i));
 	  if (errno != 0)
 	    {
-	      /* Error, even if attached.  Failing to write these two
-	         registers is pretty serious.  */
-	      sprintf (buf, "writing register number %d", regno);
-	      perror_with_name (buf);
+	      /* Warning, not error, in case we are attached; sometimes the
+		 kernel doesn't let us at the registers.  */
+	      char *err = strerror (errno);
+	      char *msg = alloca (strlen (err) + 128);
+	      sprintf (msg, "writing register %d: %s",
+		       regno, err);
+	      error (msg);
+	      return;
 	    }
+	  regaddr += sizeof (int);
 	}
-      else
-#endif
-	for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
-	  {
-	    errno = 0;
-	    ptrace (PTRACE_POKEUSER, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-		    *(int *) &registers[REGISTER_BYTE (regno) + i]);
-	    if (errno != 0)
-	      {
-		/* Warning, not error, in case we are attached; sometimes the
-		   kernel doesn't let us at the registers.  */
-		char *err = strerror (errno);
-		char *msg = alloca (strlen (err) + 128);
-		sprintf (msg, "writing register %d: %s",
-			 regno, err);
-		error (msg);
-		return;
-	      }
-	    regaddr += sizeof (int);
-	  }
     }
   else
-    for (regno = 0; regno < NUM_REGS - NUM_FREGS; regno++)
+    for (regno = 0; regno < num_regs; regno++)
       store_inferior_registers (regno);
 }
-
-/* NOTE! I tried using PTRACE_READDATA, etc., to read and write memory
-   in the NEW_SUN_PTRACE case.
-   It ought to be straightforward.  But it appears that writing did
-   not write the data that I specified.  I cannot understand where
-   it got the data that it actually did write.  */
 
 /* Copy LEN bytes from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.  */
@@ -772,5 +339,5 @@ write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len)
 void
 initialize_low (void)
 {
-  initialize_arch ();
+  init_registers ();
 }
