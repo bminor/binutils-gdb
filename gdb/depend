@@ -1,9 +1,9 @@
 udip2soc.o : ${srcdir}/29k-share/udi/udip2soc.c ${srcdir}/29k-share/udi/udiproc.h \
-  ${srcdir}/29k-share/udi/udiphcfg.h ${srcdir}/29k-share/udi/udiphsun.h ${srcdir}/29k-share/udi/udiptcfg.h \
+  ${srcdir}/29k-share/udi/udiphcfg.h ${srcdir}/29k-share/udi/udiphunix.h ${srcdir}/29k-share/udi/udiptcfg.h \
   ${srcdir}/29k-share/udi/udipt29k.h ${srcdir}/29k-share/udi/udisoc.h 
 	${CC} -c ${INTERNAL_CFLAGS}  ${srcdir}/29k-share/udi/udip2soc.c
 udr.o : ${srcdir}/29k-share/udi/udr.c ${srcdir}/29k-share/udi/udiproc.h ${srcdir}/29k-share/udi/udiphcfg.h \
-  ${srcdir}/29k-share/udi/udiphsun.h ${srcdir}/29k-share/udi/udiptcfg.h ${srcdir}/29k-share/udi/udipt29k.h \
+  ${srcdir}/29k-share/udi/udiphunix.h ${srcdir}/29k-share/udi/udiptcfg.h ${srcdir}/29k-share/udi/udipt29k.h \
   ${srcdir}/29k-share/udi/udisoc.h 
 	${CC} -c ${INTERNAL_CFLAGS}  ${srcdir}/29k-share/udi/udr.c
 a29k-pinsn.o : ${srcdir}/a29k-pinsn.c ${srcdir}/defs.h $(INCLUDE_DIR)/ansidecl.h \
@@ -617,6 +617,14 @@ remote-st2000.o : ${srcdir}/remote-st2000.c ${srcdir}/defs.h $(INCLUDE_DIR)/ansi
   ${srcdir}/gdbcore.h $(INCLUDE_DIR)/bfd.h $(INCLUDE_DIR)/obstack.h \
   ${srcdir}/target.h $(INCLUDE_DIR)/wait.h ${srcdir}/serial.h 
 	${CC} -c ${INTERNAL_CFLAGS}  ${srcdir}/remote-st2000.c
+<<<<<<< depend
+remote-udi.o : ${srcdir}/remote-udi.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h \
+  ${srcdir}/../include/fopen-same.h tm.h config.status ${srcdir}/inferior.h ${srcdir}/symtab.h ${srcdir}/../include/obstack.h \
+  ${srcdir}/breakpoint.h ${srcdir}/frame.h ${srcdir}/value.h ${srcdir}/gdbtypes.h ${srcdir}/expression.h ${srcdir}/../include/wait.h \
+  ${srcdir}/terminal.h ${srcdir}/target.h ${srcdir}/../include/bfd.h ${srcdir}/29k-share/udi/udiproc.h ${srcdir}/29k-share/udi/udiphcfg.h \
+  ${srcdir}/29k-share/udi/udiphunix.h ${srcdir}/29k-share/udi/udiptcfg.h ${srcdir}/29k-share/udi/udipt29k.h \
+  ${srcdir}/gdbcmd.h ${srcdir}/command.h 
+=======
 remote-udi.o : ${srcdir}/remote-udi.c ${srcdir}/defs.h $(INCLUDE_DIR)/ansidecl.h \
   xm.h config.status ${srcdir}/config/sparc/xm-sparc.h nm.h config.status $(INCLUDE_DIR)/fopen-same.h \
   tm.h config.status ${srcdir}/config/sparc/tm-sparc.h ${srcdir}/config/tm-sunos.h ${srcdir}/solib.h \
@@ -626,6 +634,7 @@ remote-udi.o : ${srcdir}/remote-udi.c ${srcdir}/defs.h $(INCLUDE_DIR)/ansidecl.h
   ${srcdir}/29k-share/udi/udiproc.h ${srcdir}/29k-share/udi/udiphcfg.h ${srcdir}/29k-share/udi/udiphsun.h \
   ${srcdir}/29k-share/udi/udiptcfg.h ${srcdir}/29k-share/udi/udipt29k.h ${srcdir}/gdbcmd.h \
   ${srcdir}/command.h 
+>>>>>>> 1.51
 	${CC} -c ${INTERNAL_CFLAGS}  ${srcdir}/remote-udi.c
 remote-vx.o : ${srcdir}/remote-vx.c ${srcdir}/defs.h $(INCLUDE_DIR)/ansidecl.h \
   xm.h config.status ${srcdir}/config/sparc/xm-sparc.h nm.h config.status $(INCLUDE_DIR)/fopen-same.h \
