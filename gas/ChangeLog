@@ -13,6 +13,8 @@
 	* config/tc-tahoe.c: Likewise.
 	* config/tc-vax.c: Likewise.
 
+	* config/tc-arc.c: Fix formatting.
+
 2001-01-14  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-hppa.c (pa_build_unwind_subspace): Use SEGREL32 for
