@@ -1,3 +1,27 @@
+Sun Apr 16 14:00:55 1995  Stu Grossman  (grossman@andros.cygnus.com)
+
+	* monitor.c:  Move all xmodem stuff into xmodem.[ch].  Remove
+	unnecessary remoteloadprotocol and remoteloadtype support.
+	* (expect expect_prompt):  Change names to monitor_expect and
+	monitor_expect_prompt.  Make them global.
+	* (printf_monitor):  Change name to monitor_printf.  Make global.
+	* (monitor_read_memory):  Flush command echo to avoid parsing
+	ambiguity with CPU32Bug monitor.
+	* (monitor_load):  Remove remoteloadprotocol and remoteloadtype
+	support.  Call target_ops->load_routine, default to
+	monitor_load_srec.
+	* (monitor_load_srec):  Remove everything but S-record support.
+	* monitor.h (monitor_ops):  Add load_routine to provide monitor
+	specific download capability.
+	* remote-est.c:  Clean up copyrights and comments.
+	* w89k-rom.c:  Use new xmodem support.
+	* xmodem.c xmodem.h:  New files to support xmodem downloads.
+	* rom68k-rom.c remote-est.c:  Fix copyrights, add load_routine
+	entry to monitor_ops.
+	* cpu32bug-rom.c:  New file to support Moto BCC debuggers.
+	* config/m68k/est.mt (TDEPFILES):  Add cpu32bug.o.
+	* config/pa/hppapro.mt (TDEPFILES):  Add xmodem.o.
+
 Sat Apr 15 18:00:15 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* rem-multi.shar: Removed; superceded by gdbserver.
