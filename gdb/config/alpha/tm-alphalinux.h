@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Are we currently handling a signal ?  */
 
-extern long alpha_linux_sigtramp_offset PARAMS ((CORE_ADDR);
+extern long alpha_linux_sigtramp_offset PARAMS ((CORE_ADDR));
 #undef IN_SIGTRAMP
 #define IN_SIGTRAMP(pc, name)	(alpha_linux_sigtramp_offset (pc) >= 0)
 
