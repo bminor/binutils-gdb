@@ -1,3 +1,7 @@
+Tue Oct 10 11:13:01 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (BISONFLAGS): Remove macro.
+
 Wed Sep 20 13:35:43 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (maintainer-clean): New synonym for realclean.
