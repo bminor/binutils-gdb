@@ -54,12 +54,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/rs6000.h"	/* FIXME, raw file-format guts of xcoff */
 
 
-/* Define this if you want gdb use the old xcoff symbol processing. This
-   way it won't use common `define_symbol()' function and Sun dbx stab
-   string grammar. And likely it won't be able to do G++ debugging. */
-
-/* #define	NO_DEFINE_SYMBOL 1 */
-
 /* Define this if you want gdb to ignore typdef stabs. This was needed for
    one of Transarc, to reduce the size of the symbol table. Types won't be
    recognized, but tag names will be. */
@@ -1384,25 +1378,7 @@ function_entry_point:
 
 
     case C_FUN:
-
-#ifdef NO_DEFINE_SYMBOL
-      /* For a function stab, just save its type in `fcn_type_saved', and leave
-	 it for the `.bf' processing. */
-      {
-	char *pp = (char*) index (cs->c_name, ':');
-
-	if (!pp || ( *(pp+1) != 'F' && *(pp+1) != 'f'))
-	  fatal ("Unrecognized stab");
-	pp += 2;
-
-	if (fcn_type_saved)
-	  fatal ("Unprocessed function type");
-
-	fcn_type_saved = lookup_function_type (read_type (&pp, objfile));
-      }
-#else
       fcn_stab_saved = *cs;
-#endif
       break;
     
 
@@ -1472,26 +1448,10 @@ function_entry_point:
 
 	new = push_context (0, fcn_start_addr);
 
-#ifdef NO_DEFINE_SYMBOL
-	new->name = process_xcoff_symbol (&fcn_cs_saved, objfile);
-
-	/* Between a function symbol and `.bf', there always will be a function
-	   stab. We save function type when processing that stab. */
-
-	if (fcn_type_saved == NULL) {
-	  printf ("Unknown function type: symbol 0x%x\n", cs->c_symnum);
-	  SYMBOL_TYPE (new->name) = lookup_function_type (builtin_type_int);
-	}
-	else {
-	  SYMBOL_TYPE (new->name) = fcn_type_saved;
-	  fcn_type_saved = NULL;
-	}
-#else
 	new->name = define_symbol 
 		(fcn_cs_saved.c_value, fcn_stab_saved.c_name, 0, 0, objfile);
 	if (new->name != NULL)
 	  SYMBOL_SECTION (new->name) = cs->c_secnum;
-#endif
       }
       else if (STREQ (cs->c_name, ".ef")) {
 
@@ -1679,7 +1639,7 @@ process_xcoff_symbol (cs, objfile)
 
     case C_DECL:      			/* a type decleration?? */
 
-#if defined(NO_TYPEDEFS) || defined(NO_DEFINE_SYMBOL)
+#if defined(NO_TYPEDEFS)
 	qq =  (char*) strchr (name, ':');
 	if (!qq)			/* skip if there is no ':' */
 	  return NULL;
@@ -1716,7 +1676,6 @@ process_xcoff_symbol (cs, objfile)
 	if (nameless)
 	  return;
 
-#ifdef NO_TYPEDEFS
 	/* Transarc wants to eliminate type definitions from the symbol table.
 	   Limited debugging capabilities, but faster symbol table processing
 	   and less memory usage. Note that tag definitions (starting with
@@ -1731,8 +1690,6 @@ process_xcoff_symbol (cs, objfile)
 
 	  return;
 	}
-
-#endif /* !NO_TYPEDEFS */
 
 	/* read_type() will return null if type (or tag) definition was
 	   unnnecessarily duplicated. Also, if the symbol doesn't have a name,
@@ -1786,7 +1743,7 @@ process_xcoff_symbol (cs, objfile)
 	}
 	break;
 
-#else /* !NO_DEFINE_SYMBOL */
+#else /* !NO_TYPEDEFS */
       sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
       if (sym != NULL)
 	SYMBOL_SECTION (sym) = cs->c_secnum;
@@ -1800,45 +1757,20 @@ process_xcoff_symbol (cs, objfile)
     case C_PSYM:
     case C_RPSYM:
 
-#ifdef NO_DEFINE_SYMBOL
-	if (*name == ':' || (pp = (char *) strchr (name, ':')) == NULL)
-	  return NULL;
-	SYMBOL_NAME (sym) = obsavestring (name, pp-name, &objfile -> symbol_obstack);
-	SYMBOL_CLASS (sym) = (cs->c_sclass == C_PSYM) ? LOC_ARG : LOC_REGPARM;
-	pp += 2;
-	SYMBOL_TYPE (sym) = read_type (&pp, objfile);
-	SYMBOL_DUP (sym, sym2);
-	add_symbol_to_list (sym2, &local_symbols);
-	break;
-#else
       sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
       if (sym != NULL)
 	{
-	  SYMBOL_CLASS (sym) =
-	    (cs->c_sclass == C_PSYM) ? LOC_ARG : LOC_REGPARM;
 	  SYMBOL_SECTION (sym) = cs->c_secnum;
 	}
       return sym;
-#endif
 
     case C_STSYM:
 
-#ifdef NO_DEFINE_SYMBOL
-	if (*name == ':' || (pp = (char *) strchr (name, ':')) == NULL)
-	  return NULL;
-	SYMBOL_NAME (sym) = obsavestring (name, pp-name, &objfile -> symbol_obstack);
-	SYMBOL_CLASS (sym) = LOC_STATIC;
-	SYMBOL_VALUE (sym) += static_block_base;
-	pp += 2;
-	SYMBOL_TYPE (sym) = read_type (&pp, objfile);
-	SYMBOL_DUP (sym, sym2);
-	add_symbol_to_list 
-	   (sym2, within_function ? &local_symbols : &file_symbols);
-	break;
-#else
 	/* If we are going to use Sun dbx's define_symbol(), we need to
 	   massage our stab string a little. Change 'V' type to 'S' to be
 	   comparible with Sun. */
+        /* FIXME: I believe this is to avoid a Sun-specific hack somewhere.
+	   Needs more investigation.  */
 
 	if (*name == ':' || (pp = (char *) index (name, ':')) == NULL)
 	  return NULL;
@@ -1852,7 +1784,6 @@ process_xcoff_symbol (cs, objfile)
 	    SYMBOL_SECTION (sym) = static_block_section;
 	  }
 	return sym;
-#endif
 
     case C_LSYM:
 	if (*name == ':' || (pp = (char *) strchr (name, ':')) == NULL)
@@ -1902,27 +1833,6 @@ process_xcoff_symbol (cs, objfile)
 
     case C_RSYM:
 	pp = (char*) strchr (name, ':');
-#ifdef NO_DEFINE_SYMBOL
-	SYMBOL_CLASS (sym) = LOC_REGISTER;
-	SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (cs->c_value);
-	if (pp) {
-	  SYMBOL_NAME (sym) = obsavestring (name, pp-name, &objfile -> symbol_obstack);
-	  pp += 2;
-	  if (*pp)
-	    SYMBOL_TYPE (sym) = read_type (&pp, objfile);
-	}
-	else
-	  /* else this is not a stab entry, suppose the type is either
-	     `int' or `float', depending on the register class. */
-
-	  SYMBOL_TYPE (sym) = (SYMBOL_VALUE (sym) < 32)
-	      ? lookup_fundamental_type (objfile, FT_INTEGER)
-		  : lookup_fundamental_type (objfile, FT_FLOAT);
-
-	SYMBOL_DUP (sym, sym2);
-	add_symbol_to_list (sym2, &local_symbols);
-	break;
-#else
 	if (pp) {
 	  sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
 	  if (sym != NULL)
@@ -1933,7 +1843,6 @@ process_xcoff_symbol (cs, objfile)
 	  complain (&rsym_complaint, name);
 	  return NULL;
 	}
-#endif
 
     default	:
       complain (&storclass_complaint, cs->c_sclass);

@@ -1,3 +1,11 @@
+Sun Apr 18 10:39:35 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* xcoffread.c: Nuke NO_DEFINE_SYMBOL code.  There is no going back.
+
+	* stabsread.c (define_symbol): 'R' is synonym for 'P', not 'r'.
+	xcoffread.c (process_xcoff_symbol, case C_RPSYM):
+	Don't muck with SYMBOL_CLASS.
+
 Fri Apr 16 17:38:33 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* munch:  Don't use head command.  It doesn't exist everywhere.

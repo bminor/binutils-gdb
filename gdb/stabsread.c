@@ -833,6 +833,7 @@ define_symbol (valu, string, desc, type, objfile)
 
 #endif /* no BELIEVE_PCC_PROMOTION_TYPE.  */
 
+    case 'R':
     case 'P':
       /* acc seems to use P to delare the prototypes of functions that
          are referenced by this file.  gdb is not prepared to deal
@@ -852,7 +853,6 @@ define_symbol (valu, string, desc, type, objfile)
       add_symbol_to_list (sym, &local_symbols);
       break;
 
-    case 'R':
     case 'r':
       /* Register variable (either global or local).  */
       SYMBOL_CLASS (sym) = LOC_REGISTER;
