@@ -1,3 +1,8 @@
+Mon Jan 17 22:00:15 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* infrun.c (_initialize_infrun): Add TARGET_SIGNAL_POLL to list of
+	signals for which stop and print are cleared by default.
+
 Mon Jan 17 20:00:51 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/pa/tm-hppa.h (unwind_table_entry): Use one of the

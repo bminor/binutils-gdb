@@ -74,13 +74,6 @@ hook_stop_stub PARAMS ((char *));
 #define	SKIP_TRAMPOLINE_CODE(pc)	0
 #endif
 
-/* On Irix 5, some function calls automatically skip the first few
-   instructions, so we need a more complicated test to see if we are
-   the start of a function.  */
-#ifndef AT_FUNCTION_START
-#define AT_FUNCTION_START(pc,func_name,func_addr)	0
-#endif
-
 /* For SVR4 shared libraries, each call goes through a small piece of
    trampoline code in the ".init" section.  IN_SOLIB_TRAMPOLINE evaluates
    to nonzero if we are current stopped in one of these. */
@@ -989,15 +982,6 @@ switch_thread:
 
 	      /* If we do a call, we will be at the start of a function...  */
 	      || stop_pc == stop_func_start
-#if 0
-	      /* Should be taken care of by the stop_pc < prologue_pc check
-		 below.  Also, on irix5 where this checks for stop_pc
-		 equal to stop_func_start plus 12, it would seem to be
-		 wrong for a function with a 4 byte prologue, and an 8 byte
-		 call; a "return" could end up at stop_func_start+12.  */
-
-	      || AT_FUNCTION_START (stop_pc, stop_func_name, stop_func_start)
-#endif
 
 	      /* ...except on the Alpha with -O (and also Irix 5 and
 		 perhaps others), in which we might call the address
@@ -1878,6 +1862,8 @@ of the program stops.", &cmdlist);
   signal_print[TARGET_SIGNAL_CHLD] = 0;
   signal_stop[TARGET_SIGNAL_IO] = 0;
   signal_print[TARGET_SIGNAL_IO] = 0;
+  signal_stop[TARGET_SIGNAL_POLL] = 0;
+  signal_print[TARGET_SIGNAL_POLL] = 0;
   signal_stop[TARGET_SIGNAL_URG] = 0;
   signal_print[TARGET_SIGNAL_URG] = 0;
 }
