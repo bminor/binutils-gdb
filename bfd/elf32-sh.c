@@ -3114,7 +3114,9 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
-	  else if (info->shared && !info->symbolic && !info->no_undefined)
+	  else if (info->shared
+	       && (!info->symbolic || info->allow_shlib_undefined)
+	       && !info->no_undefined)
 	    relocation = 0;
 	  else
 	    {

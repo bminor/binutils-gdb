@@ -746,7 +746,8 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 	 have yet been processed.  Do something with what we know, as
 	 this may help reduce memory usage and processing time later.  */
       maybe_dynamic = false;
-      if (h && ((info->shared && ! info->symbolic)
+      if (h && ((info->shared
+		    && (!info->symbolic || info->allow_shlib_undefined) )
 		|| ! (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
 		|| h->root.type == bfd_link_hash_defweak))
 	maybe_dynamic = true;
@@ -973,7 +974,7 @@ elf64_hppa_dynamic_symbol_p (h, info)
   if (h->root.root.string[0] == '$' && h->root.root.string[1] == '$')
     return false;
 
-  if ((info->shared && !info->symbolic)
+  if ((info->shared && (!info->symbolic || info->allow_shlib_undefined))
       || ((h->elf_link_hash_flags
 	   & (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR))
 	  == (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR)))

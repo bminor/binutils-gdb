@@ -3679,7 +3679,7 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 		   && ELF_ST_VISIBILITY (h->elf.other) == STV_DEFAULT
 		   && h->elf.type != STT_PARISC_MILLI)
 	    {
-	      if (info->symbolic)
+	      if (info->symbolic && !info->allow_shlib_undefined)
 		if (!((*info->callbacks->undefined_symbol)
 		      (info, h->elf.root.root.string, input_bfd,
 		       input_section, rel->r_offset, false)))

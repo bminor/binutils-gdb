@@ -1429,7 +1429,7 @@ elfNN_ia64_dynamic_symbol_p (h, info)
       || h->root.type == bfd_link_hash_defweak)
     return true;
 
-  if ((info->shared && !info->symbolic)
+  if ((info->shared && (!info->symbolic || info->allow_shlib_undefined))
       || ((h->elf_link_hash_flags
 	   & (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR))
 	  == (ELF_LINK_HASH_DEF_DYNAMIC | ELF_LINK_HASH_REF_REGULAR)))
@@ -2020,7 +2020,8 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	 have yet been processed.  Do something with what we know, as
 	 this may help reduce memory usage and processing time later.  */
       maybe_dynamic = false;
-      if (h && ((info->shared && ! info->symbolic)
+      if (h && ((info->shared
+		      && (!info->symbolic || info->allow_shlib_undefined))
 		|| ! (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
 		|| h->root.type == bfd_link_hash_defweak
 		|| elfNN_ia64_aix_vec (abfd->xvec)))
@@ -3509,7 +3510,8 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    undef_weak_ref = true;
-	  else if (info->shared && !info->symbolic
+	  else if (info->shared
+		   && (!info->symbolic || info->allow_shlib_undefined)
 		   && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    ;

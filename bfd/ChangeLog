@@ -1,3 +1,23 @@
+2001-09-20  John Reiser  <jreiser@BitWagon.com>
+	
+	* elf32-i386.c (elf_i386_relocate_section): coordinate info->symbolic
+	  and info->allow_shlib_undefined.
+	* elf32-cris.c: likewise
+	* elf32-hppa.c: likewise
+	* elf32-m68k.c: likewise
+	* elf32-mips.c: likewise
+	* elf32-ppc.c: likewise
+	* elf32-s390.c: likewise
+	* elf32-sh.c: likewise
+	* elf32-sparc.c: likewise
+	* elf64-alpha.c: likewise
+	* elf64-hppa.c: likewise
+	* elf64-ppc.c: likewise
+	* elf64-s390.c: likewise
+	* elf64-sparc.c: likewise
+	* elf64-x86-64.c: likewise
+	* elfxx-ia64.c: likewise
+
 2001-09-18  Bruno Haible  <haible@clisp.cons.org>
 
 	* aoutx.h: Include "safe-ctype.h" instead of <ctype.h>.
