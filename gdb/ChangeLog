@@ -1,5 +1,12 @@
 2003-08-04  Andrew Cagney  <cagney@redhat.com>
 
+	* remote.c (free_remote_state): Delete function.
+	(_initialize_remote): Update register_gdbarch_data.
+	(init_remote_state): Use GDBARCH_OBSTACK_XALLOC and
+	GDBARCH_OBSTACK_CALLOC instead of xmalloc / xcalloc.
+
+2003-08-04  Andrew Cagney  <cagney@redhat.com>
+
 	* reggroups.c (struct reggroup_el): Define.
 	(struct reggroups): Delete field "nr_group".  Replace array
 	"group" with a "first" to "last" linked list.

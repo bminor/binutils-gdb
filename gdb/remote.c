@@ -256,7 +256,7 @@ static void *
 init_remote_state (struct gdbarch *gdbarch)
 {
   int regnum;
-  struct remote_state *rs = xmalloc (sizeof (struct remote_state));
+  struct remote_state *rs = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct remote_state);
 
   if (DEPRECATED_REGISTER_BYTES != 0)
     rs->sizeof_g_packet = DEPRECATED_REGISTER_BYTES;
@@ -264,7 +264,8 @@ init_remote_state (struct gdbarch *gdbarch)
     rs->sizeof_g_packet = 0;
 
   /* Assume a 1:1 regnum<->pnum table.  */
-  rs->regs = xcalloc (NUM_REGS + NUM_PSEUDO_REGS, sizeof (struct packet_reg));
+  rs->regs = GDBARCH_OBSTACK_CALLOC (gdbarch, NUM_REGS + NUM_PSEUDO_REGS,
+				     struct packet_reg);
   for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
     {
       struct packet_reg *r = &rs->regs[regnum];
@@ -301,14 +302,6 @@ init_remote_state (struct gdbarch *gdbarch)
   rs->actual_register_packet_size = 0;
 
   return rs;
-}
-
-static void
-free_remote_state (struct gdbarch *gdbarch, void *pointer)
-{
-  struct remote_state *data = pointer;
-  xfree (data->regs);
-  xfree (data);
 }
 
 static struct packet_reg *
@@ -6063,8 +6056,7 @@ _initialize_remote (void)
   struct cmd_list_element *tmpcmd;
 
   /* architecture specific data */
-  remote_gdbarch_data_handle = register_gdbarch_data (init_remote_state,
-						      free_remote_state);
+  remote_gdbarch_data_handle = register_gdbarch_data (init_remote_state, NULL);
 
   /* Old tacky stuff.  NOTE: This comes after the remote protocol so
      that the remote protocol has been initialized.  */
