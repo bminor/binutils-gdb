@@ -1,3 +1,7 @@
+Thu Oct 19 17:41:46 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlex.l: Treat PROVIDE as a keyword in expression state.
+
 Wed Oct 18 17:34:06 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* scripttempl/pe.sc (.bss): Move to be after .text
