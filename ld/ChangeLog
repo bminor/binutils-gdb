@@ -1,3 +1,8 @@
+2005-03-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* scripttempl/elf.sc: When CREATE_SHLIB, put .sdata2 and .sbss2
+	input sections into .sdata and .sbss output respectively.
+
 2005-03-16  David Heine  <dlheine@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
 
