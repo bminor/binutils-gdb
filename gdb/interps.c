@@ -178,7 +178,7 @@ interp_set (struct interp *interp)
       interp->inited = 1;
     }
 
-  /* Clear out any installed interpreter hooks/event handlers. */
+  /* Clear out any installed interpreter hooks/event handlers.  */
   clear_interpreter_hooks ();
 
   if (interp->procs->resume_proc != NULL
@@ -315,9 +315,8 @@ interp_exec (struct interp *interp, const char *command_str)
   return exception_none;
 }
 
-/* A convenience routine that nulls out all the
-   common command hooks.  Use it when removing your interpreter in its 
-   suspend proc. */
+/* A convenience routine that nulls out all the common command hooks.
+   Use it when removing your interpreter in its suspend proc.  */
 void
 clear_interpreter_hooks (void)
 {
@@ -345,10 +344,10 @@ clear_interpreter_hooks (void)
   clear_gdb_event_hooks ();
 }
 
-/* This is a lazy init routine, called the first time
-   the interpreter module is used.  I put it here just in case, but I haven't
-   thought of a use for it yet.  I will probably bag it soon, since I don't
-   think it will be necessary. */
+/* This is a lazy init routine, called the first time the interpreter
+   module is used.  I put it here just in case, but I haven't thought
+   of a use for it yet.  I will probably bag it soon, since I don't
+   think it will be necessary.  */
 static void
 initialize_interps (void)
 {
