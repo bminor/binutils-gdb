@@ -1,3 +1,9 @@
+2004-08-04  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/store.exp: Update copyright.
+	(check_set, up_set, check_struct, up_struct): Add a prefix to test
+	names, do not import gdb_prompt.
+
 2004-08-01  Andrew Cagney  <cagney@gnu.org>
 
 	Fix PR testsuite/1729.
