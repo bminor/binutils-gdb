@@ -1,8 +1,8 @@
 Sat May  1 02:47:20 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
-	* config/mips/tm-mips.h (STABS_REG_TO_REGNUM): Match it with the gcc
+	* config/mips/tm-mips.h (STAB_REG_TO_REGNUM): Match it with the gcc
 	definition.
-	* config/mips/tm-irix3.h (STABS_REG_TO_REGNUM): Add.
+	* config/mips/tm-irix3.h (STAB_REG_TO_REGNUM): Add.
 	* irix4-nat.c (fill_fpregset): Fix bug with indexing into fpregsetp.
 
 Fri Apr 30 17:45:32 1993  Stu Grossman  (grossman@cygnus.com)
