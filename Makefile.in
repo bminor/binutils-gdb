@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Wed Nov 6 20:56:58 PST 1991, by rich@rtl.cygnus.com
+# Last Mod Thu Nov 7 03:37:41 PST 1991, by rich@sendai
 #
 # $Id$
 
@@ -141,32 +141,41 @@ clean:
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 	$(MAKE) subdir_do DO=clean "DODIRS=$(SUBDIRS) $(OTHERS)"
 
-install: install-dirs $(INSTALL_FIXED_INCLUDES) $(INSTALL_HEADERS)
+install: install-no-fixincludes $(INSTALL_FIXED_INCLUDES)
+
+install-no-fixincludes: install-dirs $(INSTALL_HEADERS)
 	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS) $(OTHERS)"
 
 # The "else true" stuff is for Ultrix; the shell returns the exit code
 # of the "if" command, if no commands are run in the "then" or "else" part,
 # causing Make to quit.
+
+MAKEDIRS= \
+	$(ddestdir) \
+	$(ddestdir)/bin \
+	$(ddestdir)/include \
+	$(ddestdir)/lib \
+	$(ddestdir)/lib/emacs \
+	$(idestdir) \
+	$(idestdir)/bin \
+	$(idestdir)/lib \
+	$(idestdir)/include \
+	$(idestdir)/doc \
+	$(idestdir)/man \
+	$(idestdir)/man/man1 \
+	$(idestdir)/man/man2 \
+	$(idestdir)/man/man3 \
+	$(idestdir)/man/man4 \
+	$(idestdir)/man/man5 \
+	$(idestdir)/man/man6 \
+	$(idestdir)/man/man7 \
+	$(idestdir)/man/man8
+
+
 install-dirs: force
-	- mkdir $(ddestdir)
-	- mkdir $(ddestdir)/bin
-	- mkdir $(ddestdir)/include
-	- mkdir $(ddestdir)/lib
-	- mkdir $(ddestdir)/lib/emacs
-	- mkdir $(idestdir)
-	- mkdir $(idestdir)/bin
-	- mkdir $(idestdir)/lib
-	- mkdir $(idestdir)/include
-	- mkdir $(idestdir)/doc
-	- mkdir $(idestdir)/man
-	- mkdir $(idestdir)/man/man1
-	- mkdir $(idestdir)/man/man2
-	- mkdir $(idestdir)/man/man3
-	- mkdir $(idestdir)/man/man4
-	- mkdir $(idestdir)/man/man5
-	- mkdir $(idestdir)/man/man6
-	- mkdir $(idestdir)/man/man7
-	- mkdir $(idestdir)/man/man8
+	for i in $(MAKEDIRS) ; do \
+		if [ -d $$i ] ; then true ; else mkdir $$i ; fi ; \
+	done
 
 install-headers:
 	if [ -d $(unsubdir)/gcc$(subdir) ] ; then \
