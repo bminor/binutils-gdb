@@ -1382,7 +1382,7 @@ option is given.  Note that the symbols @code{DllMain@@12},
 exported.
 
 @kindex --exclude-symbols
-@item --exclude-symbols @var{symbol,symbol,...}
+@item --exclude-symbols @var{symbol},@var{symbol},...
 Specifies a list of symbols which should not be automatically
 exported.  The symbol names may be delimited by commas or colons.
 
