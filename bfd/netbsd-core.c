@@ -169,12 +169,33 @@ netbsd_core_file_p (abfd)
  /* Set architecture from machine ID.  */
  switch (CORE_GETMID (core))
    {
+   case M_ALPHA_NETBSD:
+     bfd_default_set_arch_mach (abfd, bfd_arch_alpha, 0);
+     break;
+
+   case M_ARM6_NETBSD:
+     bfd_default_set_arch_mach (abfd, bfd_arch_arm, bfd_mach_arm_3);
+     break;
+
    case M_X86_64_NETBSD:
      bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_x86_64);
      break;
 
    case M_386_NETBSD:
      bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_i386_i386);
+     break;
+
+   case M_68K_NETBSD:
+   case M_68K4K_NETBSD:
+     bfd_default_set_arch_mach (abfd, bfd_arch_m68k, 0);
+     break;
+
+   case M_88K_OPENBSD:
+     bfd_default_set_arch_mach (abfd, bfd_arch_m88k, 0);
+     break;
+
+   case M_HPPA_OPENBSD:
+     bfd_default_set_arch_mach (abfd, bfd_arch_hppa, bfd_mach_hppa11);
      break;
 
    case M_POWERPC_NETBSD:

@@ -1,3 +1,9 @@
+2004-05-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* libaout.h (machine_type): Add M_88K_OPENBSD and M_HPPA_OPENBSD.
+	* netbsd-core.c (netbsd_core_file_p): Set architecture for alpha,
+	arm, m68k, m88k and hppa core files.
+
 2004-05-21  Nick Clifton  <nickc@redhat.com>
 
 	* bfdio.c (bfd_bread): Do not use iovec if it is NULL.
