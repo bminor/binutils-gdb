@@ -932,6 +932,8 @@ static CORE_ADDR
 read_encoded_value (struct comp_unit *unit, unsigned char encoding,
 		    char *buf, unsigned int *bytes_read_ptr)
 {
+  int ptr_len = size_of_encoded_value (DW_EH_PE_absptr);
+  ptrdiff_t offset;
   CORE_ADDR base;
 
   /* GCC currently doesn't generate DW_EH_PE_indirect encodings for
@@ -939,6 +941,8 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
   if (encoding & DW_EH_PE_indirect)
     internal_error (__FILE__, __LINE__, 
 		    "Unsupported encoding: DW_EH_PE_indirect");
+
+  *bytes_read_ptr = 0;
 
   switch (encoding & 0x70)
     {
@@ -952,32 +956,41 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
     case DW_EH_PE_datarel:
       base = unit->dbase;
       break;
+    case DW_EH_PE_aligned:
+      base = 0;
+      offset = buf - unit->dwarf_frame_buffer;
+      if ((offset % ptr_len) != 0)
+	{
+	  *bytes_read_ptr = ptr_len - (offset % ptr_len);
+	  buf += *bytes_read_ptr;
+	}
+      break;
     default:
       internal_error (__FILE__, __LINE__, "Invalid or unsupported encoding");
     }
 
   if ((encoding & 0x0f) == 0x00)
-    encoding |= encoding_for_size (TYPE_LENGTH(builtin_type_void_data_ptr));
+    encoding |= encoding_for_size (ptr_len);
 
   switch (encoding & 0x0f)
     {
     case DW_EH_PE_udata2:
-      *bytes_read_ptr = 2;
+      *bytes_read_ptr += 2;
       return (base + bfd_get_16 (unit->abfd, (bfd_byte *) buf));
     case DW_EH_PE_udata4:
-      *bytes_read_ptr = 4;
+      *bytes_read_ptr += 4;
       return (base + bfd_get_32 (unit->abfd, (bfd_byte *) buf));
     case DW_EH_PE_udata8:
-      *bytes_read_ptr = 8;
+      *bytes_read_ptr += 8;
       return (base + bfd_get_64 (unit->abfd, (bfd_byte *) buf));
     case DW_EH_PE_sdata2:
-      *bytes_read_ptr = 2;
+      *bytes_read_ptr += 2;
       return (base + bfd_get_signed_16 (unit->abfd, (bfd_byte *) buf));
     case DW_EH_PE_sdata4:
-      *bytes_read_ptr = 4;
+      *bytes_read_ptr += 4;
       return (base + bfd_get_signed_32 (unit->abfd, (bfd_byte *) buf));
     case DW_EH_PE_sdata8:
-      *bytes_read_ptr = 8;
+      *bytes_read_ptr += 8;
       return (base + bfd_get_signed_64 (unit->abfd, (bfd_byte *) buf));
     default:
       internal_error (__FILE__, __LINE__, "Invalid or unsupported encoding");

@@ -1,3 +1,8 @@
+2003-09-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (read_encoded_value): Add support for
+	DW_EH_PE_aligned encoding.
+
 2003-09-08  Daniel Jacobowitz  <drow@mvista.com>
 
 	* infrun.c (normal_stop): Don't print a message if the inferior
