@@ -1,3 +1,9 @@
+2002-09-27  Jim Wilson  <wilson@redhat.com>
+
+	* simops.c (OP_E6077E0): And op1 with 7 after reading register, not
+	before.
+	(BIT_CHANGE_OP): Likewise.
+
 2002-09-26  Jim Wilson  <wilson@redhat.com>
 
 	* simops (OP_10007E0): Don't subtract 4 from PC.
