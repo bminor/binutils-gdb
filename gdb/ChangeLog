@@ -1,3 +1,12 @@
+2004-02-22  Andrew Cagney  <cagney@redhat.com>
+
+	* config/pa/tm-hppa.h (CALL_DUMMY_LOCATION): Delete macro.
+	(DEPRECATED_PC_IN_CALL_DUMMY): Delete macro.
+	(DEPRECATED_USE_GENERIC_DUMMY_FRAMES): Delete macro.
+	* hppa-tdep.c (hppa_gdbarch_init): Clear deprecated
+	use_generic_dummy_frames, set deprecated pc_in_call_dummy, set
+	call_dummy_location to ON_STACK.
+
 2004-02-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* x86-64-linux-tdep.c: Tweak comment.

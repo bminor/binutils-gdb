@@ -5606,6 +5606,9 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_deprecated_push_dummy_frame (gdbarch, hppa_push_dummy_frame);
       /* set_gdbarch_deprecated_fix_call_dummy (gdbarch, hppa_fix_call_dummy); */
       set_gdbarch_deprecated_push_arguments (gdbarch, hppa_push_arguments);
+      set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
+      set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
+      set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
     }
       
   /* Struct return methods.  */
