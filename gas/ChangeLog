@@ -1,5 +1,11 @@
 2001-04-04  Hans-Peter Nilsson  <hp@axis.com>
 
+	* config/tc-cris.c (md_estimate_size_before_relax) <case
+	ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_UNDF)>: Don't emit
+	32-bit branch, just set fragP->fr_subtype.  Set fragP->fr_var.
+	<all cases>: Always set fragP->fr_var using md_cris_relax_table.
+	Add cases to cover all relax states.
+
 	* write.c (write_object_file): Reset broken word state before
 	calling relax_seg.
 

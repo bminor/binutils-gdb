@@ -357,33 +357,14 @@ md_estimate_size_before_relax (fragP, segment_type)
     {
     case ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_UNDF):
       if (S_GET_SEGMENT (fragP->fr_symbol) == segment_type)
-	{
-	  /* The symbol lies in the same segment - a relaxable case.  */
-	  fragP->fr_subtype
-	    = ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_BYTE);
-	}
+	/* The symbol lies in the same segment - a relaxable case.  */
+	fragP->fr_subtype
+	  = ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_BYTE);
       else
-	{
-	  /* Unknown or not the same segment, so not relaxable.  */
-	  char *writep;
-
-	  /* A small branch-always (2 bytes) to the "real" branch
-	     instruction, plus a delay-slot nop (2 bytes), plus a
-	     jump (2 plus 4 bytes).  See gen_cond_branch_32.  */
-	  fragP->fr_fix += 2 + 2 + 2 + 4;
-	  writep = fragP->fr_literal + old_fr_fix;
-	  gen_cond_branch_32 (fragP->fr_opcode, writep, fragP,
-			      fragP->fr_symbol, (symbolS *) NULL,
-			      fragP->fr_offset);
-	  frag_wane (fragP);
-	}
-      break;
-
-    case ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_BYTE):
-    case ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_WORD):
-      /* We *might* give a better initial guess if we peek at offsets
-	 now, but the caller will relax correctly and without this, so
-	 don't bother.  */
+	/* Unknown or not the same segment, so not relaxable.  */
+	fragP->fr_subtype
+	  = ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_DWORD);
+      fragP->fr_var = md_cris_relax_table[fragP->fr_subtype].rlx_length;
       break;
 
     case ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_UNDF):
@@ -402,7 +383,7 @@ md_estimate_size_before_relax (fragP, segment_type)
 	  /* Go for dword if not absolute or same segment.  */
 	  fragP->fr_subtype
 	    = ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_DWORD);
-	  fragP->fr_var += 4;
+	  fragP->fr_var = md_cris_relax_table[fragP->fr_subtype].rlx_length;
 	}
       else
 	{
@@ -445,9 +426,15 @@ md_estimate_size_before_relax (fragP, segment_type)
 	}
       break;
 
+    case ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_BYTE):
+    case ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_WORD):
+    case ENCODE_RELAX (STATE_CONDITIONAL_BRANCH, STATE_DWORD):
+    case ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_BYTE):
+    case ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_WORD):
     case ENCODE_RELAX (STATE_BASE_PLUS_DISP_PREFIX, STATE_DWORD):
       /* When relaxing a section for the second time, we don't need to
-	 do anything.  */
+	 do anything except making sure that fr_var is set right.  */
+      fragP->fr_var = md_cris_relax_table[fragP->fr_subtype].rlx_length;
       break;
 
     default:
