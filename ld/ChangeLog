@@ -1,3 +1,16 @@
+2001-06-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (record_bfd_errors): Remove.
+
+	Merge from mainline.
+	2001-05-31  H.J. Lu  <hjl@gnu.org>
+	* ldlang.c (open_input_bfds): Don't change the bfd error
+	handler whilst loading symbols.
+
+	2001-05-02  Nick Clifton  <nickc@redhat.com>
+	* emultempl/aix.em: Replace buystring with xstrdup.
+	* emultempl/beos.em: Replace buystring with xstrdup.
+
 2001-06-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* Many files: Update copyright notices.
