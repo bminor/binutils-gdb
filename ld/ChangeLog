@@ -1,4 +1,10 @@
-Wed Aug 29 13:37:20 2001  J"orn Rennecke <amylaar@redhat.com>
+2001-08-29  Jeff Law <law@redhat.com>
+
+	* emulparams/h8300helf.sh: Resync with h8300elf.sh.  Update
+	ARCH specification.
+	* emulparams/h8300self.sh: Similarly.
+
+Wed Aug 28 13:37:20 2001  J"orn Rennecke <amylaar@redhat.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add eh8300elf.o, eh8300elf.o and
 	eh8300self.o .
