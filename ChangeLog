@@ -6,6 +6,7 @@ Tue Apr 15 12:21:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* mkinstalldirs: New file, copied from automake.
 	* Makefile.in (installdirs): Rename from install-dirs.  Use
 	mkinstalldirs.  Change all users.
+	(DEVO_SUPPORT): Add mkinstalldirs.
 
 Mon Apr 14 11:21:38 1997  Ian Lance Taylor  <ian@cygnus.com>
 
