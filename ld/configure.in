@@ -51,7 +51,6 @@ case "${targ}" in
   sparc*-*-lynxos*)	ld_target=sparc-lynx ;;
   sparc*-*-solaris2*)	ld_target=sun4sol2 ;;
   sparc*-wrs-vxworks*)  ld_target=sun4 ;;
-  sparc*-*-netware)	ld_target=sun4sol2 ;;
   i960-wrs-vxworks5.0*) ld_target=i960 ;;
   i960-wrs-vxworks5*)   ld_target=i960coff ;;
   i960-wrs-vxworks*)    ld_target=i960 ;;
@@ -69,11 +68,12 @@ case "${targ}" in
   i[345]86-*-coff)	ld_target=i386-coff ;;
   i[345]86-*-bsd)	ld_target=i386-bsd ;;
   i[345]86-*-bsd386)	ld_target=i386-bsd ;;
+  i[345]86-*-bsdi*)	ld_target=i386-bsd ;;
   i[345]86-*-aout)	ld_target=i386-aout ;;
-  i[345]86-*-linux)	ld_target=i386-linux ;;
+  i[345]86-*-linux*)	ld_target=i386-linux ;;
   i[345]86-*-sysv4*)	ld_target=i386-elf ;;
   i[345]86-*-unixware)	ld_target=i386-elf ;;
-  i[345]86-*-netware)	ld_target=i386-elf ;;
+  i[345]86-*-netware)	ld_target=i386-nw ;;
   i[345]86-*-elf*)	ld_target=i386-elf ;;
   i[345]86-*-sysv*)	ld_target=i386-coff ;;
   i[345]86-*-mach*)	ld_target=i386-mach ;;
@@ -91,7 +91,7 @@ case "${targ}" in
   m68k-hp-bsd*)		ld_target=hp300bsd ;;
   m68*-*-aout)		ld_target=m68k ;;
   m68*-*-coff)		ld_target=m68k-coff ;;
-  m68*-*-hpux)		ld_target=hp300hpux ;;
+  m68*-*-hpux*)		ld_target=hp300hpux ;;
   m68*-*-lynxos*)	ld_target=m68k-lynx ;;
   m68*-*-*)
     echo '***' "Unknown m68k target vendor for ld:" ${target_vendor} 1>&2
@@ -104,7 +104,7 @@ case "${targ}" in
   mips*el-idt-ecoff*)	ld_target=mipsl-idt ;;
   mips*-idt-ecoff*)	ld_target=mips-idt ;;
   mips*-dec-bsd*)	ld_target=mipsbsd ;;
-  mips*el-elf*)		ld_target=mipsl-elf32 ;;
+  mips*el-*-elf*)	ld_target=mipsl-elf32 ;;
   mips*-*-elf*)		ld_target=mipsb-elf32 ;;
   alpha-*-osf*)		ld_target=alpha ;;
   alpha-*-netware*)	ld_target=alpha ;;
@@ -112,10 +112,10 @@ case "${targ}" in
   ns32k-pc532-mach)	ld_target=pc532mach ;;
   ns32k-pc532-netbsd*)  ld_target=netbsd532 ;;
   powerpc-*-elf*)	ld_target=ppc-elf32 ;;
-  powerpc-*-netware*)	ld_target=ppc-elf32 ;;
+  powerpc-*-netware*)	ld_target=ppc-nw ;;
   *-*-aout)		ld_target=${target_cpu}-${target_vendor} ;;
   *-*-coff)		ld_target=${target_cpu}-${target_vendor} ;;
-  *-*-netware)		ld_target=${target_cpu}-elf ;;
+  *-*-netware)		ld_target=${target_cpu}-nw ;;
 
   all)			ld_target=all ;;
 esac
