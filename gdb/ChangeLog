@@ -1,3 +1,7 @@
+Mon Oct 21 14:01:38 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* top.c: Add new commands "set annotate" and "show annotate".
+	
 Sun Oct 20 04:38:39 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* corelow.c (core_close):  Clear inferior_pid only if there is

@@ -3636,4 +3636,11 @@ is displayed.", &setlist),
 This value is used to set the time limit for gdb to wait for a response\n\
 from he target.", &setlist),
 		     &showlist);
+
+  c = add_set_cmd ("annotate", class_obscure, var_zinteger, 
+		   (char *)&annotation_level, "Set annotation_level.\n\
+0 == normal;     1 == fullname (for use when running under emacs)\n\
+2 == output annotated suitably for use by programs that control GDB.",
+		 &setlist);
+  c = add_show_from_set (c, &showlist);
 }
