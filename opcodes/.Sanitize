@@ -173,7 +173,7 @@ if ( echo $* | grep keep\-am33 > /dev/null ) ; then
 		fi
 	done
 else
-	for i in $am33-files ; do
+	for i in $am33_files ; do
 		if test ! -d $i && (grep sanitize-am33 $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
 				echo Removing traces of \"am33\" from $i...
