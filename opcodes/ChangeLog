@@ -1,3 +1,10 @@
+2002-02-10  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* configure.in <bfd_sh_arc>: For sh-* and shl-*, enable sh64
+	support only for sh-*-*elf*, shl-*-*elf*, sh-*-linux* and
+	shl-*-linux*.
+	* configure: Regenerate.
+
 2002-02-10  Daniel Jacobowitz  <drow@mvista.com>
 
 	* cgen-dis.c: Add prototypes for count_decodable_bits
