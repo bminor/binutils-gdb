@@ -1,6 +1,11 @@
 Thu Jul 27 20:37:47 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	From 2000-06-25 Stephane Carrez <Stephane.Carrez@worldnet.fr>:
+	* sim-hw.c: Use <errno.h> instead of <sys/errno.h>
+	(OPTION_HW_LIST): New option --hw-list to list the devices.
+	(hw_option_handler): List the device tree with 'sim_hw_print'.
+
+	From 2000-06-25 Stephane Carrez <Stephane.Carrez@worldnet.fr>:
 	* sim-bits.h (_MSB_16, _LSB_16): Define for 16-bit targets.
 	(MASK, LSBIT, MSBIT): Likewise and use _MSB_16 and _LSB_16.
 	(EXTENDED): Define for 16-bit word size.
