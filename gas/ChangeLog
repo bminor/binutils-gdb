@@ -1,3 +1,11 @@
+Wed Dec 28 15:01:01 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* subsegs.h: Include obstack.h.
+
+Tue Dec 27 18:16:04 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* as.h (struct frag): Enable align* components now.
+
 Tue Dec 20 14:56:31 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* frags.c (frag_init): Call obstack_begin on `frags'.

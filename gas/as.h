@@ -403,12 +403,10 @@ struct frag
   relax_stateT fr_type;
   relax_substateT fr_subtype;
 
-#if 0 /* not yet */
   /* Track the alignment and offset of the current frag.  With this,
      sometimes we can avoid creating new frags for .align directives.  */
   unsigned short align_mask;
   unsigned short align_offset;
-#endif
 
   /* These are needed only on the NS32K machines.  But since we don't
      include targ-cpu.h until after this structure has been defined,
