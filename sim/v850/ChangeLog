@@ -2,6 +2,9 @@ Wed Aug 20 13:56:35 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* simops.c (OP_107E0, OP_107F0, OP_307E0, OP_307F0): Use correct
 	interpretation of SR bit in list18 structure.
+start-sanitize-v850eq
+	(divn, divun): New functions to perform N step divide functions.
+end-sanitize-v850eq
 
 start-sanitize-v850eq
 Mon Aug 18 10:59:02 1997  Nick Clifton  <nickc@cygnus.com>

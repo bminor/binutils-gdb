@@ -504,7 +504,6 @@ condition_met (unsigned code)
   return 1;
 }
 
-/* start-sanitize-v850e */
 static unsigned long
 Add32 (unsigned long a1, unsigned long a2, int * carry)
 {
@@ -576,7 +575,6 @@ Multiply64 (boolean sign, unsigned long op0)
 
   return;
 }
-/* end-sanitize-v850e */
 
 
 /* sld.b */
@@ -2427,6 +2425,19 @@ OP_E607E0 (void)
   return 4;
 }
 
+/* mulu reg1, reg2, reg3 */
+int
+OP_22207E0 (void)
+{
+  trace_input ("mulu", OP_REG_REG_REG, 0);
+
+  Multiply64 (false, State.regs[ OP[0] ]);
+
+  trace_output (OP_REG_REG_REG);
+
+  return 4;
+}
+
 /* start-sanitize-v850e */
 
 #define BIT_CHANGE_OP( name, binop )		\
@@ -2485,32 +2496,196 @@ OP_20007E0 (void)
 /* end-sanitize-v850e */
 
 /* start-sanitize-v850eq */
+/* This function is courtesy of Sugimoto at NEC, via Seow Tan (Soew_Tan@el.nec.com) */
+static void
+divun
+(
+  unsigned int       N,
+  unsigned long int  als,
+  unsigned long int  sfi,
+  unsigned long int *  quotient_ptr,
+  unsigned long int *  remainder_ptr,
+  boolean *          overflow_ptr
+)
+{
+  unsigned long   ald = sfi >> N - 1;
+  unsigned long   alo = als;
+  unsigned int    Q   = 1;
+  unsigned int    C;
+  unsigned int    S   = 0;
+  unsigned int    i;
+  unsigned int    R1  = 1;
+  unsigned int    OV;
+  unsigned int    DBZ = (als == 0) ? 1 : 0;
+  unsigned long   alt = Q ? ~als : als;
+
+  /* 1st Loop */
+  alo = ald + alt + Q;
+  C   = (alt >> 31) & (ald >> 31) | ((alt >> 31) ^ (ald >> 31)) & (~alo >> 31);
+  C   = C ^ Q;
+  Q   = ~(C ^ S) & 1;
+  R1  = (alo == 0) ? 0 : (R1 & Q);
+  if ((S ^ (alo>>31)) && !C)
+    {
+      DBZ = 1;
+    }
+  S   = alo >> 31;
+  sfi = (sfi << (32-N+1)) | Q;
+  ald = (alo << 1) | (sfi >> 31);
+
+  /* 2nd - N-1th Loop */
+  for (i = 2; i < N; i++)
+    {
+      alt = Q ? ~als : als;
+      alo = ald + alt + Q;
+      C   = (alt >> 31) & (ald >> 31) | ((alt >> 31) ^ (ald >> 31)) & (~alo >> 31);
+      C   = C ^ Q;
+      Q   = ~(C ^ S) & 1;
+      R1  = (alo == 0) ? 0 : (R1 & Q);
+      if ((S ^ (alo>>31)) && !C && !DBZ)
+	{
+	  DBZ = 1;
+	}
+      S   = alo >> 31;
+      sfi = (sfi << 1) | Q;
+      ald = (alo << 1) | (sfi >> 31);
+    }
+  
+  /* Nth Loop */
+  alt = Q ? ~als : als;
+  alo = ald + alt + Q;
+  C   = (alt >> 31) & (ald >> 31) | ((alt >> 31) ^ (ald >> 31)) & (~alo >> 31);
+  C   = C ^ Q;
+  Q   = ~(C ^ S) & 1;
+  R1  = (alo == 0) ? 0 : (R1 & Q);
+  if ((S ^ (alo>>31)) && !C)
+    {
+      DBZ = 1;
+    }
+  
+  * quotient_ptr  = (sfi << 1) | Q;
+  * remainder_ptr = Q ? alo : (alo + als);
+  * overflow_ptr  = DBZ | R1;
+}
+
+/* This function is courtesy of Sugimoto at NEC, via Seow Tan (Soew_Tan@el.nec.com) */
+static void
+divn
+(
+  unsigned int       N,
+  unsigned long int  als,
+  unsigned long int  sfi,
+  signed long int *  quotient_ptr,
+  signed long int *  remainder_ptr,
+  boolean *          overflow_ptr
+)
+{
+  unsigned long	  ald = (signed long) sfi >> (N - 1);
+  unsigned long   alo = als;
+  unsigned int    SS  = als >> 31;
+  unsigned int	  SD  = sfi >> 31;
+  unsigned int    R1  = 1;
+  unsigned int    OV;
+  unsigned int    DBZ = als == 0 ? 1 : 0;
+  unsigned int    Q   = ~(SS ^ SD) & 1;
+  unsigned int    C;
+  unsigned int    S;
+  unsigned int    i;
+  unsigned long   alt = Q ? ~als : als;
+
+
+  /* 1st Loop */
+  
+  alo = ald + alt + Q;
+  C   = (alt >> 31) & (ald >> 31) | ((alt >> 31) ^ (ald >> 31)) & (~alo >> 31);
+  Q   = C ^ SS;
+  R1  = (alo == 0) ? 0 : (R1 & (Q ^ (SS ^ SD)));
+  S   = alo >> 31;
+  sfi = (sfi << (32-N+1)) | Q;
+  ald = (alo << 1) | (sfi >> 31);
+  if ((alo >> 31) ^ (ald >> 31))
+    {
+      DBZ = 1;
+    }
+
+  /* 2nd - N-1th Loop */
+  
+  for (i = 2; i < N; i++)
+    {
+      alt = Q ? ~als : als;
+      alo = ald + alt + Q;
+      C   = (alt >> 31) & (ald >> 31) | ((alt >> 31) ^ (ald >> 31)) & (~alo >> 31);
+      Q   = C ^ SS;
+      R1  = (alo == 0) ? 0 : (R1 & (Q ^ (SS ^ SD)));
+      S   = alo >> 31;
+      sfi = (sfi << 1) | Q;
+      ald = (alo << 1) | (sfi >> 31);
+      if ((alo >> 31) ^ (ald >> 31))
+	{
+	  DBZ = 1;
+	}
+    }
+
+  /* Nth Loop */
+  alt = Q ? ~als : als;
+  alo = ald + alt + Q;
+  C   = (alt >> 31) & (ald >> 31) | ((alt >> 31) ^ (ald >> 31)) & (~alo >> 31);
+  Q   = C ^ SS;
+  R1  = (alo == 0) ? 0 : (R1 & (Q ^ (SS ^ SD)));
+  sfi = (sfi << (32-N+1));
+  ald = alo;
+
+  /* End */
+  if (alo != 0)
+    {
+      alt = Q ? ~als : als;
+      alo = ald + alt + Q;
+    }
+  R1  = R1 & ((~alo >> 31) ^ SD);
+  if ((alo != 0) && ((Q ^ (SS ^ SD)) ^ R1)) alo = ald;
+  if (N != 32)
+    ald = sfi = (long) ((sfi >> 1) | (SS ^ SD) << 31) >> (32-N-1) | Q;
+  else
+    ald = sfi = sfi | Q;
+  
+  OV = DBZ | ((alo == 0) ? 0 : R1);
+  
+  * remainder_ptr = alo;
+
+  /* Adj */
+  if ((alo != 0) && ((SS ^ SD) ^ R1) || (alo == 0) && (SS ^ R1))
+    alo = ald + 1;
+  else
+    alo = ald;
+  
+  OV  = (DBZ | R1) ? OV : ((alo >> 31) & (~ald >> 31));
+
+  * quotient_ptr  = alo;
+  * overflow_ptr  = OV;
+}
+
 /* sdivun imm5, reg1, reg2, reg3 */
 int
 OP_1C207E0 (void)
 {
-  unsigned long long int quotient;
-  unsigned long long int remainder;
-  unsigned long long int divisor;
-  unsigned long long int dividend;
-  boolean                overflow = false;
-  unsigned int           imm5;
+  unsigned long int  quotient;
+  unsigned long int  remainder;
+  unsigned long int  divide_by;
+  unsigned long int  divide_this;
+  boolean            overflow = false;
+  unsigned int       imm5;
       
   trace_input ("sdivun", OP_IMM_REG_REG_REG, 0);
 
   imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
 
-  divisor  = State.regs[ OP[0] ] << imm5;
-  dividend = State.regs[ OP[1] ];
+  divide_by   = State.regs[ OP[0] ];
+  divide_this = State.regs[ OP[1] ] << imm5;
 
-  State.regs[ OP[1]       ] = quotient  = dividend / divisor;
-  State.regs[ OP[2] >> 11 ] = remainder = dividend % divisor;
+  divun (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
   
-  if (divisor == 0)
-    {
-      overflow = true;
-      quotient = dividend;
-    }
+  State.regs[ OP[1]       ] = quotient;
+  State.regs[ OP[2] >> 11 ] = remainder;
   
   /* Set condition codes.  */
   PSW &= ~(PSW_Z | PSW_S | PSW_OV);
@@ -2527,28 +2702,24 @@ OP_1C207E0 (void)
 int
 OP_1C007E0 (void)
 {
-  signed long long int quotient;
-  signed long long int remainder;
-  signed long long int divisor;
-  signed long long int dividend;
-  boolean              overflow = false;
-  unsigned int         imm5;
+  signed long int  quotient;
+  signed long int  remainder;
+  signed long int  divide_by;
+  signed long int  divide_this;
+  boolean          overflow = false;
+  unsigned int     imm5;
       
   trace_input ("sdivn", OP_IMM_REG_REG_REG, 0);
 
   imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
 
-  divisor  = State.regs[ OP[0] ] << imm5;
-  dividend = State.regs[ OP[1] ];
+  divide_by   = State.regs[ OP[0] ];
+  divide_this = State.regs[ OP[1] ] << imm5;
 
-  State.regs[ OP[1]       ] = quotient  = dividend / divisor;
-  State.regs[ OP[2] >> 11 ] = remainder = dividend % divisor;
+  divn (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
   
-  if (divisor == 0)
-    {
-      overflow = true;
-      quotient = dividend;
-    }
+  State.regs[ OP[1]       ] = quotient;
+  State.regs[ OP[2] >> 11 ] = remainder;
   
   /* Set condition codes.  */
   PSW &= ~(PSW_Z | PSW_S | PSW_OV);
@@ -2566,28 +2737,24 @@ OP_1C007E0 (void)
 int
 OP_18207E0 (void)
 {
-  unsigned long long int quotient;
-  unsigned long long int remainder;
-  unsigned long long int divisor;
-  unsigned long long int dividend;
-  boolean                overflow = false;
-  unsigned int           imm5;
+  unsigned long int  quotient;
+  unsigned long int  remainder;
+  unsigned long int  divide_by;
+  unsigned long int  divide_this;
+  boolean            overflow = false;
+  unsigned int       imm5;
       
   trace_input ("sdivhun", OP_IMM_REG_REG_REG, 0);
 
   imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
 
-  divisor  = State.regs[ OP[0] ] << imm5;
-  dividend = State.regs[ OP[1] ] & 0xffff;
+  divide_by   = State.regs[ OP[0] ] & 0xffff;
+  divide_this = State.regs[ OP[1] ] << imm5;
 
-  State.regs[ OP[1]       ] = quotient  = dividend / divisor;
-  State.regs[ OP[2] >> 11 ] = remainder = dividend % divisor;
+  divun (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
   
-  if (divisor == 0)
-    {
-      overflow = true;
-      quotient = dividend;
-    }
+  State.regs[ OP[1]       ] = quotient;
+  State.regs[ OP[2] >> 11 ] = remainder;
   
   /* Set condition codes.  */
   PSW &= ~(PSW_Z | PSW_S | PSW_OV);
@@ -2604,28 +2771,24 @@ OP_18207E0 (void)
 int
 OP_18007E0 (void)
 {
-  signed long long int quotient;
-  signed long long int remainder;
-  signed long long int divisor;
-  signed long long int dividend;
-  boolean              overflow = false;
-  unsigned int         imm5;
+  signed long int  quotient;
+  signed long int  remainder;
+  signed long int  divide_by;
+  signed long int  divide_this;
+  boolean          overflow = false;
+  unsigned int     imm5;
       
   trace_input ("sdivhn", OP_IMM_REG_REG_REG, 0);
 
   imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
 
-  divisor  = State.regs[ OP[0] ] << imm5;
-  dividend = SEXT16 (State.regs[ OP[1] ]);
+  divide_by   = SEXT16 (State.regs[ OP[0] ]);
+  divide_this = State.regs[ OP[1] ] << imm5;
 
-  State.regs[ OP[1]       ] = quotient  = dividend / divisor;
-  State.regs[ OP[2] >> 11 ] = remainder = dividend % divisor;
+  divn (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
   
-  if (divisor == 0)
-    {
-      overflow = true;
-      quotient = dividend;
-    }
+  State.regs[ OP[1]       ] = quotient;
+  State.regs[ OP[2] >> 11 ] = remainder;
   
   /* Set condition codes.  */
   PSW &= ~(PSW_Z | PSW_S | PSW_OV);
@@ -2642,14 +2805,13 @@ OP_18007E0 (void)
 
 /* start-sanitize-v850e */
 /* divu  reg1, reg2, reg3 */
-/* divun imm5, reg1, reg2, reg3 */
 int
 OP_2C207E0 (void)
 {
   unsigned long int quotient;
   unsigned long int remainder;
-  unsigned long int divisor;
-  unsigned long int dividend;
+  unsigned long int divide_by;
+  unsigned long int divide_this;
   boolean           overflow = false;
   
   if ((OP[3] & 0x3c0000) == 0)
@@ -2658,17 +2820,17 @@ OP_2C207E0 (void)
 
       /* Compute the result.  */
 
-      divisor  = State.regs[ OP[0] ];
-      dividend = State.regs[ OP[1] ];
+      divide_by   = State.regs[ OP[0] ];
+      divide_this = State.regs[ OP[1] ];
 
-      if (divisor == 0)
+      if (divide_by == 0)
 	{
 	  overflow = true;
-	  divisor  = 1;
+	  divide_by  = 1;
 	}
 	    
-      State.regs[ OP[1]       ] = quotient  = dividend / divisor;
-      State.regs[ OP[2] >> 11 ] = remainder = dividend % divisor;
+      State.regs[ OP[1]       ] = quotient  = divide_this / divide_by;
+      State.regs[ OP[2] >> 11 ] = remainder = divide_this % divide_by;
 
       /* Set condition codes.  */
       PSW &= ~(PSW_Z | PSW_S | PSW_OV);
@@ -2679,6 +2841,7 @@ OP_2C207E0 (void)
       trace_output (OP_REG_REG_REG);
     }
 /* start-sanitize-v850eq */
+/* divun imm5, reg1, reg2, reg3 */
   else
     {
       unsigned int imm5;
@@ -2687,19 +2850,13 @@ OP_2C207E0 (void)
 
       imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
 
-      divisor  = State.regs[ OP[0] ];
-      dividend = State.regs[ OP[1] ];
+      divide_by   = State.regs[ OP[0] ];
+      divide_this = State.regs[ OP[1] ];
 
-      State.regs[ OP[1]       ] = quotient  = dividend / divisor;
-      State.regs[ OP[2] >> 11 ] = remainder = dividend % divisor;
+      divun (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
       
-      if ((divisor == 0)
-	  || (quotient > (1 << imm5))
-	  || (quotient < (((imm5 & 1) ? 1 : -1) << imm5)))
-	{
-	  overflow = true;
-	  quotient = dividend;
-	}
+      State.regs[ OP[1]       ] = quotient;
+      State.regs[ OP[2] >> 11 ] = remainder;
       
       /* Set condition codes.  */
       PSW &= ~(PSW_Z | PSW_S | PSW_OV);
@@ -2715,14 +2872,13 @@ OP_2C207E0 (void)
 }
 
 /* div  reg1, reg2, reg3 */
-/* divn imm5, reg1, reg2, reg3 */
 int
 OP_2C007E0 (void)
 {
   signed long int quotient;
   signed long int remainder;
-  signed long int divisor;
-  signed long int dividend;
+  signed long int divide_by;
+  signed long int divide_this;
   boolean         overflow = false;
   
   if ((OP[3] & 0x3c0000) == 0)
@@ -2731,17 +2887,17 @@ OP_2C007E0 (void)
 
       /* Compute the result.  */
 
-      divisor  = State.regs[ OP[0] ];
-      dividend = State.regs[ OP[1] ];
+      divide_by   = State.regs[ OP[0] ];
+      divide_this = State.regs[ OP[1] ];
 
-      if (divisor == 0 || (divisor == -1 && dividend == (1 << 31)))
+      if (divide_by == 0 || (divide_by == -1 && divide_this == (1 << 31)))
 	{
-	  overflow = true;
-	  divisor  = 1;
+	  overflow  = true;
+	  divide_by = 1;
 	}
 	    
-      State.regs[ OP[1]       ] = quotient  = dividend / divisor;
-      State.regs[ OP[2] >> 11 ] = remainder = dividend % divisor;
+      State.regs[ OP[1]       ] = quotient  = divide_this / divide_by;
+      State.regs[ OP[2] >> 11 ] = remainder = divide_this % divide_by;
 
       /* Set condition codes.  */
       PSW &= ~(PSW_Z | PSW_S | PSW_OV);
@@ -2753,6 +2909,7 @@ OP_2C007E0 (void)
       trace_output (OP_REG_REG_REG);
     }
 /* start-sanitize-v850eq */
+/* divn imm5, reg1, reg2, reg3 */
   else
     {
       unsigned int imm5;
@@ -2761,20 +2918,13 @@ OP_2C007E0 (void)
 
       imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
 
-      divisor  = State.regs[ OP[0] ];
-      dividend = State.regs[ OP[1] ];
+      divide_by   = State.regs[ OP[0] ];
+      divide_this = State.regs[ OP[1] ];
 
-      State.regs[ OP[1]       ] = quotient  = dividend / divisor;
-      State.regs[ OP[2] >> 11 ] = remainder = dividend % divisor;
+      divn (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
       
-      if ((divisor == 0)
-	  || (quotient > (1 << imm5))
-	  || (divisor == -1 && dividend == (1 << 31))
-	  || (quotient < (((imm5 & 1) ? 1 : -1) << imm5)))
-	{
-	  overflow = true;
-	  quotient = dividend;
-	}
+      State.regs[ OP[1]       ] = quotient;
+      State.regs[ OP[2] >> 11 ] = remainder;
       
       /* Set condition codes.  */
       PSW &= ~(PSW_Z | PSW_S | PSW_OV);
@@ -2791,14 +2941,13 @@ OP_2C007E0 (void)
 }
 
 /* divhu  reg1, reg2, reg3 */
-/* divhun imm5, reg1, reg2, reg3 */
 int
 OP_28207E0 (void)
 {
   unsigned long int quotient;
   unsigned long int remainder;
-  unsigned long int divisor;
-  unsigned long int dividend;
+  unsigned long int divide_by;
+  unsigned long int divide_this;
   boolean           overflow = false;
   
   if ((OP[3] & 0x3c0000) == 0)
@@ -2807,17 +2956,17 @@ OP_28207E0 (void)
 
       /* Compute the result.  */
 
-      divisor  = State.regs[ OP[0] ];
-      dividend = State.regs[ OP[1] ] & 0xffff;
+      divide_by   = State.regs[ OP[0] ] & 0xffff;
+      divide_this = State.regs[ OP[1] ];
 
-      if (divisor == 0)
+      if (divide_by == 0)
 	{
 	  overflow = true;
-	  divisor  = 1;
+	  divide_by  = 1;
 	}
 	    
-      State.regs[ OP[1]       ] = quotient  = dividend / divisor;
-      State.regs[ OP[2] >> 11 ] = remainder = dividend % divisor;
+      State.regs[ OP[1]       ] = quotient  = divide_this / divide_by;
+      State.regs[ OP[2] >> 11 ] = remainder = divide_this % divide_by;
 
       /* Set condition codes.  */
       PSW &= ~(PSW_Z | PSW_S | PSW_OV);
@@ -2828,6 +2977,7 @@ OP_28207E0 (void)
       trace_output (OP_REG_REG_REG);
     }
 /* start-sanitize-v850eq */
+/* divhun imm5, reg1, reg2, reg3 */
   else
     {
       unsigned int imm5;
@@ -2836,19 +2986,13 @@ OP_28207E0 (void)
 
       imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
 
-      divisor  = State.regs[ OP[0] ];
-      dividend = State.regs[ OP[1] ] & 0xffff;
+      divide_by   = State.regs[ OP[0] ] & 0xffff;
+      divide_this = State.regs[ OP[1] ];
 
-      State.regs[ OP[1]       ] = quotient  = dividend / divisor;
-      State.regs[ OP[2] >> 11 ] = remainder = dividend % divisor;
+      divun (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
       
-      if ((divisor == 0)
-	  || (quotient > (1 << imm5))
-	  || (quotient < (((imm5 & 1) ? 1 : -1) << imm5)))
-	{
-	  overflow = true;
-	  quotient = dividend;
-	}
+      State.regs[ OP[1]       ] = quotient;
+      State.regs[ OP[2] >> 11 ] = remainder;
       
       /* Set condition codes.  */
       PSW &= ~(PSW_Z | PSW_S | PSW_OV);
@@ -2864,14 +3008,13 @@ OP_28207E0 (void)
 }
 
 /* divh  reg1, reg2, reg3 */
-/* divhn imm5, reg1, reg2, reg3 */
 int
 OP_28007E0 (void)
 {
   signed long int quotient;
   signed long int remainder;
-  signed long int divisor;
-  signed long int dividend;
+  signed long int divide_by;
+  signed long int divide_this;
   boolean         overflow = false;
   
   if ((OP[3] & 0x3c0000) == 0)
@@ -2880,17 +3023,17 @@ OP_28007E0 (void)
 
       /* Compute the result.  */
 
-      divisor  = State.regs[ OP[0] ];
-      dividend = SEXT16 (State.regs[ OP[1] ]);
+      divide_by  = State.regs[ OP[0] ];
+      divide_this = SEXT16 (State.regs[ OP[1] ]);
 
-      if (divisor == 0 || (divisor == -1 && dividend == (1 << 31)))
+      if (divide_by == 0 || (divide_by == -1 && divide_this == (1 << 31)))
 	{
 	  overflow = true;
-	  divisor  = 1;
+	  divide_by  = 1;
 	}
 	    
-      State.regs[ OP[1]       ] = quotient  = dividend / divisor;
-      State.regs[ OP[2] >> 11 ] = remainder = dividend % divisor;
+      State.regs[ OP[1]       ] = quotient  = divide_this / divide_by;
+      State.regs[ OP[2] >> 11 ] = remainder = divide_this % divide_by;
 
       /* Set condition codes.  */
       PSW &= ~(PSW_Z | PSW_S | PSW_OV);
@@ -2902,6 +3045,7 @@ OP_28007E0 (void)
       trace_output (OP_REG_REG_REG);
     }
 /* start-sanitize-v850eq */
+/* divhn imm5, reg1, reg2, reg3 */
   else
     {
       unsigned int imm5;
@@ -2910,20 +3054,13 @@ OP_28007E0 (void)
 
       imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
 
-      divisor  = State.regs[ OP[0] ];
-      dividend = SEXT16 (State.regs[ OP[1] ]);
+      divide_by   = SEXT16 (State.regs[ OP[0] ]);
+      divide_this = State.regs[ OP[1] ];
 
-      State.regs[ OP[1]       ] = quotient  = dividend / divisor;
-      State.regs[ OP[2] >> 11 ] = remainder = dividend % divisor;
+      divn (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
       
-      if ((divisor == 0)
-	  || (quotient > (1 << imm5))
-	  || (divisor == -1 && dividend == (1 << 31))
-	  || (quotient < (((imm5 & 1) ? 1 : -1) << imm5)))
-	{
-	  overflow = true;
-	  quotient = dividend;
-	}
+      State.regs[ OP[1]       ] = quotient;
+      State.regs[ OP[2] >> 11 ] = remainder;
       
       /* Set condition codes.  */
       PSW &= ~(PSW_Z | PSW_S | PSW_OV);
@@ -2951,23 +3088,6 @@ OP_24207E0 (void)
 
   return 4;
 }
-
-/* end-sanitize-v850e */
-
-/* mulu reg1, reg2, reg3 */
-int
-OP_22207E0 (void)
-{
-  trace_input ("mulu", OP_REG_REG_REG, 0);
-
-  Multiply64 (false, State.regs[ OP[0] ]);
-
-  trace_output (OP_REG_REG_REG);
-
-  return 4;
-}
-
-/* start-sanitize-v850e */
 
 /* mul imm9, reg2, reg3 */
 int
@@ -3290,6 +3410,59 @@ OP_30780 (void)
   return 4;
 }
 
+/* sld.hu */
+int
+OP_70 (void)
+{
+  unsigned long result;
+  
+  result  = load_mem (State.regs[30] + ((OP[3] & 0xf) << 1), 2);
+
+/* start-sanitize-v850eq */
+#ifdef ARCH_v850eq
+  trace_input ("sld.h", OP_LOAD16, 2);
+  
+  State.regs[ OP[1] ] = SEXT16 (result);
+#else
+/* end-sanitize-v850eq */
+  trace_input ("sld.hu", OP_LOAD16, 2);
+  
+  State.regs[ OP[1] ] = result;
+/* start-sanitize-v850eq */
+#endif
+/* end-sanitize-v850eq */
+  
+  trace_output (OP_LOAD16);
+  
+  return 2;
+}
+
+/* cmov reg1, reg2, reg3 */
+int
+OP_32007E0 (void)
+{
+  trace_input ("cmov", OP_REG_REG_REG, 0);
+
+  State.regs[ OP[2] >> 11 ] = condition_met (OP[0]) ? State.regs[ OP[0] ] : State.regs[ OP[1] ];
+  
+  trace_output (OP_REG_REG_REG);
+
+  return 4;
+}
+
+/* mul reg1, reg2, reg3 */
+int
+OP_22007E0 (void)
+{
+  trace_input ("mul", OP_REG_REG_REG, 0);
+
+  Multiply64 (true, State.regs[ OP[0] ]);
+
+  trace_output (OP_REG_REG_REG);
+
+  return 4;
+}
+
 /* end-sanitize-v850e */
 /* start-sanitize-v850eq */
 
@@ -3409,59 +3582,3 @@ OP_307E0 (void)
 }
 
 /* end-sanitize-v850eq */
-/* start-sanitize-v850e */
-
-/* sld.hu */
-int
-OP_70 (void)
-{
-  unsigned long result;
-  
-  result  = load_mem (State.regs[30] + ((OP[3] & 0xf) << 1), 2);
-
-/* start-sanitize-v850eq */
-#ifdef ARCH_v850eq
-  trace_input ("sld.h", OP_LOAD16, 2);
-  
-  State.regs[ OP[1] ] = SEXT16 (result);
-#else
-/* end-sanitize-v850eq */
-  trace_input ("sld.hu", OP_LOAD16, 2);
-  
-  State.regs[ OP[1] ] = result;
-/* start-sanitize-v850eq */
-#endif
-/* end-sanitize-v850eq */
-  
-  trace_output (OP_LOAD16);
-  
-  return 2;
-}
-
-/* cmov reg1, reg2, reg3 */
-int
-OP_32007E0 (void)
-{
-  trace_input ("cmov", OP_REG_REG_REG, 0);
-
-  State.regs[ OP[2] >> 11 ] = condition_met (OP[0]) ? State.regs[ OP[0] ] : State.regs[ OP[1] ];
-  
-  trace_output (OP_REG_REG_REG);
-
-  return 4;
-}
-
-/* mul reg1, reg2, reg3 */
-int
-OP_22007E0 (void)
-{
-  trace_input ("mul", OP_REG_REG_REG, 0);
-
-  Multiply64 (true, State.regs[ OP[0] ]);
-
-  trace_output (OP_REG_REG_REG);
-
-  return 4;
-}
-
-/* end-sanitize-v850e */
