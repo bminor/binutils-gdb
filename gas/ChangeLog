@@ -1,3 +1,16 @@
+2003-05-11  Jason Eckhardt  <jle@rice.edu>
+
+	* config/tc-i860.c (MAX_FIXUPS): Define.
+	(struct i860_fi fi[]): New struct.
+	(struct i860_it the_insn): Add above as member and move fields
+	exp, reloc, pcrel and fup into i860_fi.
+	(md_assemble): Replace all instances of exp, reloc, pcrel
+	and fup with fi[].exp, fi[].reloc, fi[].pcrel, fi[].fup.
+	Add a loop to possibly emit multiple fix-ups for each insn.
+	(i860_process_insn): Likewise.
+	(i860_get_expression): Likewise.
+	(md_apply_fix3): Use a bitwise check for OP_IMM_U5, not equality.
+
 2003-05-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* config/tc-s390.c (s390_target_format): Always call init_default_arch.

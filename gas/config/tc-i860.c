@@ -61,16 +61,24 @@ static const char reg_prefix = '%';
 static const char reg_prefix = 0;
 #endif
 
+#define MAX_FIXUPS 2
+
 struct i860_it
 {
   char *error;
   unsigned long opcode;
-  expressionS exp;
   enum expand_type expand;
-  bfd_reloc_code_real_type reloc;
-  int pcrel;
-  valueT fup;
+  struct i860_fi
+  {
+    expressionS exp;
+    bfd_reloc_code_real_type reloc;
+    int pcrel;
+    valueT fup;
+  } fi[MAX_FIXUPS];
 } the_insn;
+
+/* The current fixup count.  */
+static int fc;
 
 static char *expr_end;
 
@@ -214,6 +222,7 @@ md_assemble (str)
   struct i860_it pseudo[3];
 
   assert (str);
+  fc = 0;
 
   /* Assemble the instruction.  */
   i860_process_insn (str);
@@ -221,12 +230,13 @@ md_assemble (str)
   /* Check for expandable flag to produce pseudo-instructions.  This
      is an undesirable feature that should be avoided.  */
   if (the_insn.expand != 0
-      && ! (the_insn.fup & (OP_SEL_HA | OP_SEL_H | OP_SEL_L | OP_SEL_GOT
+      && ! (the_insn.fi[0].fup & (OP_SEL_HA | OP_SEL_H | OP_SEL_L | OP_SEL_GOT
 			    | OP_SEL_GOTOFF | OP_SEL_PLT)))
     {
       for (i = 0; i < 3; i++)
 	pseudo[i] = the_insn;
 
+      fc = 1;
       switch (the_insn.expand)
 	{
 
@@ -235,103 +245,105 @@ md_assemble (str)
 	  break;
 
 	case E_MOV:
-	  if (the_insn.exp.X_add_symbol == NULL
-	      && the_insn.exp.X_op_symbol == NULL
-	      && (the_insn.exp.X_add_number < (1 << 15)
-		  && the_insn.exp.X_add_number >= -(1 << 15)))
+	  if (the_insn.fi[0].exp.X_add_symbol == NULL
+	      && the_insn.fi[0].exp.X_op_symbol == NULL
+	      && (the_insn.fi[0].exp.X_add_number < (1 << 15)
+		  && the_insn.fi[0].exp.X_add_number >= -(1 << 15)))
 	    break;
 
 	  /* Emit "or l%const,r0,ireg_dest".  */
 	  pseudo[0].opcode = (the_insn.opcode & 0x001f0000) | 0xe4000000;
-	  pseudo[0].fup = (OP_IMM_S16 | OP_SEL_L);
+	  pseudo[0].fi[0].fup = (OP_IMM_S16 | OP_SEL_L);
 
 	  /* Emit "orh h%const,ireg_dest,ireg_dest".  */
 	  pseudo[1].opcode = (the_insn.opcode & 0x03ffffff) | 0xec000000
 			      | ((the_insn.opcode & 0x001f0000) << 5);
-	  pseudo[1].fup = (OP_IMM_S16 | OP_SEL_H);
+	  pseudo[1].fi[0].fup = (OP_IMM_S16 | OP_SEL_H);
 
 	  num_opcodes = 2;
 	  break;
 
 	case E_ADDR:
-	  if (the_insn.exp.X_add_symbol == NULL
-	      && the_insn.exp.X_op_symbol == NULL
-	      && (the_insn.exp.X_add_number < (1 << 15)
-		  && the_insn.exp.X_add_number >= -(1 << 15)))
+	  if (the_insn.fi[0].exp.X_add_symbol == NULL
+	      && the_insn.fi[0].exp.X_op_symbol == NULL
+	      && (the_insn.fi[0].exp.X_add_number < (1 << 15)
+		  && the_insn.fi[0].exp.X_add_number >= -(1 << 15)))
 	    break;
 
 	  /* Emit "orh ha%addr_expr,r0,r31".  */
 	  pseudo[0].opcode = 0xec000000 | (atmp << 16);
-	  pseudo[0].fup = (OP_IMM_S16 | OP_SEL_HA);
+	  pseudo[0].fi[0].fup = (OP_IMM_S16 | OP_SEL_HA);
 
 	  /* Emit "l%addr_expr(r31),ireg_dest".  We pick up the fixup
 	     information from the original instruction.   */
 	  pseudo[1].opcode = (the_insn.opcode & ~0x03e00000) | (atmp << 21);
-	  pseudo[1].fup = the_insn.fup | OP_SEL_L;
+	  pseudo[1].fi[0].fup = the_insn.fi[0].fup | OP_SEL_L;
 
 	  num_opcodes = 2;
 	  break;
 
 	case E_U32:
-	  if (the_insn.exp.X_add_symbol == NULL
-	      && the_insn.exp.X_op_symbol == NULL
-	      && (the_insn.exp.X_add_number < (1 << 16)
-		  && the_insn.exp.X_add_number >= 0))
+	  if (the_insn.fi[0].exp.X_add_symbol == NULL
+	      && the_insn.fi[0].exp.X_op_symbol == NULL
+	      && (the_insn.fi[0].exp.X_add_number < (1 << 16)
+		  && the_insn.fi[0].exp.X_add_number >= 0))
 	    break;
 
 	  /* Emit "$(opcode)h h%const,ireg_src2,r31".  */
 	  pseudo[0].opcode = (the_insn.opcode & 0xf3e0ffff) | 0x0c000000
 			      | (atmp << 16);
-	  pseudo[0].fup = (OP_IMM_S16 | OP_SEL_H);
+	  pseudo[0].fi[0].fup = (OP_IMM_S16 | OP_SEL_H);
 
 	  /* Emit "$(opcode) l%const,r31,ireg_dest".  */
 	  pseudo[1].opcode = (the_insn.opcode & 0xf01f0000) | 0x04000000
 			      | (atmp << 21);
-	  pseudo[1].fup = (OP_IMM_S16 | OP_SEL_L);
+	  pseudo[1].fi[0].fup = (OP_IMM_S16 | OP_SEL_L);
 
 	  num_opcodes = 2;
 	  break;
 
 	case E_AND:
-	  if (the_insn.exp.X_add_symbol == NULL
-	      && the_insn.exp.X_op_symbol == NULL
-	      && (the_insn.exp.X_add_number < (1 << 16)
-		  && the_insn.exp.X_add_number >= 0))
+	  if (the_insn.fi[0].exp.X_add_symbol == NULL
+	      && the_insn.fi[0].exp.X_op_symbol == NULL
+	      && (the_insn.fi[0].exp.X_add_number < (1 << 16)
+		  && the_insn.fi[0].exp.X_add_number >= 0))
 	    break;
 
 	  /* Emit "andnot h%const,ireg_src2,r31".  */
 	  pseudo[0].opcode = (the_insn.opcode & 0x03e0ffff) | 0xd4000000
 			      | (atmp << 16);
-	  pseudo[0].fup = (OP_IMM_S16 | OP_SEL_H);
-	  pseudo[0].exp.X_add_number = -1 - the_insn.exp.X_add_number;
+	  pseudo[0].fi[0].fup = (OP_IMM_S16 | OP_SEL_H);
+	  pseudo[0].fi[0].exp.X_add_number =
+            -1 - the_insn.fi[0].exp.X_add_number;
 
 	  /* Emit "andnot l%const,r31,ireg_dest".  */
 	  pseudo[1].opcode = (the_insn.opcode & 0x001f0000) | 0xd4000000
 			      | (atmp << 21);
-	  pseudo[1].fup = (OP_IMM_S16 | OP_SEL_L);
-	  pseudo[1].exp.X_add_number = -1 - the_insn.exp.X_add_number;
+	  pseudo[1].fi[0].fup = (OP_IMM_S16 | OP_SEL_L);
+	  pseudo[1].fi[0].exp.X_add_number =
+            -1 - the_insn.fi[0].exp.X_add_number;
 
 	  num_opcodes = 2;
 	  break;
 
 	case E_S32:
-	  if (the_insn.exp.X_add_symbol == NULL
-	      && the_insn.exp.X_op_symbol == NULL
-	      && (the_insn.exp.X_add_number < (1 << 15)
-		  && the_insn.exp.X_add_number >= -(1 << 15)))
+	  if (the_insn.fi[0].exp.X_add_symbol == NULL
+	      && the_insn.fi[0].exp.X_op_symbol == NULL
+	      && (the_insn.fi[0].exp.X_add_number < (1 << 15)
+		  && the_insn.fi[0].exp.X_add_number >= -(1 << 15)))
 	    break;
 
 	  /* Emit "orh h%const,r0,r31".  */
 	  pseudo[0].opcode = 0xec000000 | (atmp << 16);
-	  pseudo[0].fup = (OP_IMM_S16 | OP_SEL_H);
+	  pseudo[0].fi[0].fup = (OP_IMM_S16 | OP_SEL_H);
 
 	  /* Emit "or l%const,r31,r31".  */
 	  pseudo[1].opcode = 0xe4000000 | (atmp << 21) | (atmp << 16);
-	  pseudo[1].fup = (OP_IMM_S16 | OP_SEL_L);
+	  pseudo[1].fi[0].fup = (OP_IMM_S16 | OP_SEL_L);
 
 	  /* Emit "r31,ireg_src2,ireg_dest".  */
 	  pseudo[2].opcode = (the_insn.opcode & ~0x0400ffff) | (atmp << 11);
-	  pseudo[2].fup = OP_IMM_S16;
+	  pseudo[2].fi[0].fup = OP_IMM_S16;
 
 	  num_opcodes = 3;
 	  break;
@@ -358,29 +370,36 @@ md_assemble (str)
   i = 0;
   do
     {
+      int tmp;
+
       /* Output the opcode.  Note that the i860 always reads instructions
 	 as little-endian data.  */
       destp = frag_more (4);
       number_to_chars_littleendian (destp, the_insn.opcode, 4);
 
       /* Check for expanded opcode after branch or in dual mode.  */
-      last_expand = the_insn.pcrel;
+      last_expand = the_insn.fi[0].pcrel;
 
-      /* Output the symbol-dependent stuff.  */
-      if (the_insn.fup != OP_NONE)
-	{
-	  fixS *fix;
-	  fix = fix_new_exp (frag_now,
-			     destp - frag_now->fr_literal,
-			     4,
-			     &the_insn.exp,
-			     the_insn.pcrel,
-			     the_insn.reloc);
+      /* Output the symbol-dependent stuff.  Only btne and bte will ever
+         loop more than once here, since only they (possibly) have more
+         than one fixup.  */
+      for (tmp = 0; tmp < fc; tmp++)
+        {
+          if (the_insn.fi[tmp].fup != OP_NONE)
+	    {
+	      fixS *fix;
+	      fix = fix_new_exp (frag_now,
+			         destp - frag_now->fr_literal,
+			         4,
+			         &the_insn.fi[tmp].exp,
+			         the_insn.fi[tmp].pcrel,
+			         the_insn.fi[tmp].reloc);
 
-	  /* Despite the odd name, this is a scratch field.  We use
-	     it to encode operand type information.  */
-	  fix->fx_addnumber = the_insn.fup;
-	}
+	     /* Despite the odd name, this is a scratch field.  We use
+	        it to encode operand type information.  */
+	     fix->fx_addnumber = the_insn.fi[tmp].fup;
+	   }
+        }
       the_insn = pseudo[++i];
     }
   while (--num_opcodes > 0);
@@ -455,15 +474,22 @@ i860_process_insn (str)
   args_start = s;
   for (;;)
     {
+      int t;
       opcode = insn->match;
       memset (&the_insn, '\0', sizeof (the_insn));
-      the_insn.reloc = BFD_RELOC_NONE;
-      the_insn.pcrel = 0;
-      the_insn.fup = OP_NONE;
+      for (t = 0; t < MAX_FIXUPS; t++)
+        {
+          the_insn.fi[t].reloc = BFD_RELOC_NONE;
+          the_insn.fi[t].pcrel = 0;
+          the_insn.fi[t].fup = OP_NONE;
+        }
 
       /* Build the opcode, checking as we go that the operands match.  */
       for (args = insn->args; ; ++args)
 	{
+          if (fc > MAX_FIXUPS)
+            abort ();
+
 	  switch (*args)
 	    {
 
@@ -667,74 +693,75 @@ i860_process_insn (str)
 	      if (! i860_get_expression (s))
 		{
 		  s = expr_end;
-		  the_insn.fup |= OP_IMM_U5;
+		  the_insn.fi[fc].fup |= OP_IMM_U5;
+		  fc++;
 		  continue;
 		}
 	      break;
 
 	    /* 26-bit immediate, relative branch (lbroff).  */
 	    case 'l':
-	      the_insn.pcrel = 1;
-	      the_insn.fup |= OP_IMM_BR26;
+	      the_insn.fi[fc].pcrel = 1;
+	      the_insn.fi[fc].fup |= OP_IMM_BR26;
 	      goto immediate;
 
 	    /* 16-bit split immediate, relative branch (sbroff).  */
 	    case 'r':
-	      the_insn.pcrel = 1;
-	      the_insn.fup |= OP_IMM_BR16;
+	      the_insn.fi[fc].pcrel = 1;
+	      the_insn.fi[fc].fup |= OP_IMM_BR16;
 	      goto immediate;
 
 	    /* 16-bit split immediate.  */
 	    case 's':
-	      the_insn.fup |= OP_IMM_SPLIT16;
+	      the_insn.fi[fc].fup |= OP_IMM_SPLIT16;
 	      goto immediate;
 
 	    /* 16-bit split immediate, byte aligned (st.b).  */
 	    case 'S':
-	      the_insn.fup |= OP_IMM_SPLIT16;
+	      the_insn.fi[fc].fup |= OP_IMM_SPLIT16;
 	      goto immediate;
 
 	    /* 16-bit split immediate, half-word aligned (st.s).  */
 	    case 'T':
-	      the_insn.fup |= (OP_IMM_SPLIT16 | OP_ENCODE1 | OP_ALIGN2);
+	      the_insn.fi[fc].fup |= (OP_IMM_SPLIT16 | OP_ENCODE1 | OP_ALIGN2);
 	      goto immediate;
 
 	    /* 16-bit split immediate, word aligned (st.l).  */
 	    case 'U':
-	      the_insn.fup |= (OP_IMM_SPLIT16 | OP_ENCODE1 | OP_ALIGN4);
+	      the_insn.fi[fc].fup |= (OP_IMM_SPLIT16 | OP_ENCODE1 | OP_ALIGN4);
 	      goto immediate;
 
 	    /* 16-bit immediate.  */
 	    case 'i':
-	      the_insn.fup |= OP_IMM_S16;
+	      the_insn.fi[fc].fup |= OP_IMM_S16;
 	      goto immediate;
 
 	    /* 16-bit immediate, byte aligned (ld.b).  */
 	    case 'I':
-	      the_insn.fup |= OP_IMM_S16;
+	      the_insn.fi[fc].fup |= OP_IMM_S16;
 	      goto immediate;
 
 	    /* 16-bit immediate, half-word aligned (ld.s).  */
 	    case 'J':
-	      the_insn.fup |= (OP_IMM_S16 | OP_ENCODE1 | OP_ALIGN2);
+	      the_insn.fi[fc].fup |= (OP_IMM_S16 | OP_ENCODE1 | OP_ALIGN2);
 	      goto immediate;
 
 	    /* 16-bit immediate, word aligned (ld.l, {p}fld.l, fst.l).  */
 	    case 'K':
 	      if (insn->name[0] == 'l')
-		the_insn.fup |= (OP_IMM_S16 | OP_ENCODE1 | OP_ALIGN4);
+		the_insn.fi[fc].fup |= (OP_IMM_S16 | OP_ENCODE1 | OP_ALIGN4);
 	      else
-		the_insn.fup |= (OP_IMM_S16 | OP_ENCODE2 | OP_ALIGN4);
+		the_insn.fi[fc].fup |= (OP_IMM_S16 | OP_ENCODE2 | OP_ALIGN4);
 	      goto immediate;
 
 	    /* 16-bit immediate, double-word aligned ({p}fld.d, fst.d).  */
 	    case 'L':
-	      the_insn.fup |= (OP_IMM_S16 | OP_ENCODE3 | OP_ALIGN8);
+	      the_insn.fi[fc].fup |= (OP_IMM_S16 | OP_ENCODE3 | OP_ALIGN8);
 	      goto immediate;
 
 	    /* 16-bit immediate, quad-word aligned (fld.q, fst.q).  */
 	    case 'M':
-	      the_insn.fup |= (OP_IMM_S16 | OP_ENCODE3 | OP_ALIGN16);
+	      the_insn.fi[fc].fup |= (OP_IMM_S16 | OP_ENCODE3 | OP_ALIGN16);
 
 	      /*FALLTHROUGH*/
 
@@ -757,60 +784,61 @@ i860_process_insn (str)
 
 	      if (strncmp (s, "@ha", 3) == 0)
 		{
-		  the_insn.fup |= OP_SEL_HA;
+		  the_insn.fi[fc].fup |= OP_SEL_HA;
 		  s += 3;
 		}
 	      else if (strncmp (s, "@h", 2) == 0)
 		{
-		  the_insn.fup |= OP_SEL_H;
+		  the_insn.fi[fc].fup |= OP_SEL_H;
 		  s += 2;
 		}
 	      else if (strncmp (s, "@l", 2) == 0)
 		{
-		  the_insn.fup |= OP_SEL_L;
+		  the_insn.fi[fc].fup |= OP_SEL_L;
 		  s += 2;
 		}
 	      else if (strncmp (s, "@gotoff", 7) == 0
 		       || strncmp (s, "@GOTOFF", 7) == 0)
 		{
 		  as_bad (_("Assembler does not yet support PIC"));
-		  the_insn.fup |= OP_SEL_GOTOFF;
+		  the_insn.fi[fc].fup |= OP_SEL_GOTOFF;
 		  s += 7;
 		}
 	      else if (strncmp (s, "@got", 4) == 0
 		       || strncmp (s, "@GOT", 4) == 0)
 		{
 		  as_bad (_("Assembler does not yet support PIC"));
-		  the_insn.fup |= OP_SEL_GOT;
+		  the_insn.fi[fc].fup |= OP_SEL_GOT;
 		  s += 4;
 		}
 	      else if (strncmp (s, "@plt", 4) == 0
 		       || strncmp (s, "@PLT", 4) == 0)
 		{
 		  as_bad (_("Assembler does not yet support PIC"));
-		  the_insn.fup |= OP_SEL_PLT;
+		  the_insn.fi[fc].fup |= OP_SEL_PLT;
 		  s += 4;
 		}
 
 	      the_insn.expand = insn->expand;
-
+              fc++;
+              
 	      continue;
 #else /* ! SYNTAX_SVR4 */
 	      if (*s == ' ')
 		s++;
 	      if (strncmp (s, "ha%", 3) == 0)
 		{
-		  the_insn.fup |= OP_SEL_HA;
+		  the_insn.fi[fc].fup |= OP_SEL_HA;
 		  s += 3;
 		}
 	      else if (strncmp (s, "h%", 2) == 0)
 		{
-		  the_insn.fup |= OP_SEL_H;
+		  the_insn.fi[fc].fup |= OP_SEL_H;
 		  s += 2;
 		}
 	      else if (strncmp (s, "l%", 2) == 0)
 		{
-		  the_insn.fup |= OP_SEL_L;
+		  the_insn.fi[fc].fup |= OP_SEL_L;
 		  s += 2;
 		}
 	      the_insn.expand = insn->expand;
@@ -824,6 +852,7 @@ i860_process_insn (str)
 	      else
 		goto error;
 
+              fc++;
 	      continue;
 #endif /* SYNTAX_SVR4 */
 	      break;
@@ -865,7 +894,7 @@ i860_get_expression (str)
 
   save_in = input_line_pointer;
   input_line_pointer = str;
-  seg = expression (&the_insn.exp);
+  seg = expression (&the_insn.fi[fc].exp);
   if (seg != absolute_section
       && seg != undefined_section
       && ! SEG_NORMAL (seg))
@@ -1229,7 +1258,7 @@ md_apply_fix3 (fix, valP, seg)
 
   /* Determine the necessary relocations as well as inserting an
      immediate into the instruction.   */
-  if (fup == OP_IMM_U5)
+  if (fup & OP_IMM_U5)
     {
       if (val & ~0x1f)
 	as_bad_where (fix->fx_file, fix->fx_line,
