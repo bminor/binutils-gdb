@@ -1268,7 +1268,7 @@ undefined_symbol (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 		  bfd *abfd,
 		  asection *section,
 		  bfd_vma address,
-		  bfd_boolean fatal ATTRIBUTE_UNUSED)
+		  bfd_boolean error)
 {
   static char *error_name;
   static unsigned int error_count;
@@ -1311,27 +1311,47 @@ undefined_symbol (struct bfd_link_info *info ATTRIBUTE_UNUSED,
     {
       if (error_count < MAX_ERRORS_IN_A_ROW)
 	{
-	  einfo (_("%C: undefined reference to `%T'\n"),
-		 abfd, section, address, name);
-	  if (fatal)
-	    einfo ("%X");
+	  if (error)
+	    einfo (_("%X%C: undefined reference to `%T'\n"),
+		   abfd, section, address, name);
+	  else
+	    einfo (_("%C: warning: undefined reference to `%T'\n"),
+		   abfd, section, address, name);
 	}
       else if (error_count == MAX_ERRORS_IN_A_ROW)
-	einfo (_("%D: more undefined references to `%T' follow\n"),
-	       abfd, section, address, name);
+	{
+	  if (error)
+	    einfo (_("%X%D: more undefined references to `%T' follow\n"),
+		   abfd, section, address, name);
+	  else
+	    einfo (_("%D: warning: more undefined references to `%T' follow\n"),
+		   abfd, section, address, name);
+	}
+      else if (error)
+	einfo ("%X");
     }
   else
     {
       if (error_count < MAX_ERRORS_IN_A_ROW)
 	{
-	  einfo (_("%B: undefined reference to `%T'\n"),
-		 abfd, name);
-	  if (fatal)
-	    einfo ("%X");
+	  if (error)
+	    einfo (_("%X%B: undefined reference to `%T'\n"),
+		   abfd, name);
+	  else
+	    einfo (_("%B: warning: undefined reference to `%T'\n"),
+		   abfd, name);
 	}
       else if (error_count == MAX_ERRORS_IN_A_ROW)
-	einfo (_("%B: more undefined references to `%T' follow\n"),
-	       abfd, name);
+	{
+	  if (error)
+	    einfo (_("%X%B: more undefined references to `%T' follow\n"),
+		   abfd, name);
+	  else
+	    einfo (_("%B: warning: more undefined references to `%T' follow\n"),
+		   abfd, name);
+	}
+      else if (error)
+	einfo ("%X");
     }
 
   return TRUE;

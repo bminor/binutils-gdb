@@ -1,3 +1,9 @@
+2003-08-12  Ian Lance Taylor  <ian@airs.com>
+
+	* ldmain.c (undefined_symbol): Change parameter name from `fatal'
+	to `error'.  If only a warning, put warning in the reported
+	string.  Consistently set failure flag when not a warning.
+
 2003-08-08 Dmitry Diky <diwil@mail.ru>
 
 	* Makefile.am: Add xW42 and xE42 parts. Sort MPU list according to
