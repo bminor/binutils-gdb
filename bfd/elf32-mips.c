@@ -776,7 +776,7 @@ mips_elf_hi16_reloc (abfd,
       if (ret != bfd_reloc_ok)
 	return ret;
 
-      relocation = elf_gp (output_bfd) - reloc_entry->address;
+      relocation = _bfd_get_gp_value (output_bfd) - reloc_entry->address;
     }
   else
     {
@@ -878,7 +878,7 @@ mips_elf_lo16_reloc (abfd,
       if (ret != bfd_reloc_ok)
 	return ret;
 
-      relocation = elf_gp (output_bfd) - reloc_entry->address;
+      relocation = _bfd_get_gp_value (output_bfd) - reloc_entry->address;
       relocation += symbol->section->output_section->vma;
       relocation += symbol->section->output_offset;
       relocation += reloc_entry->addend;
@@ -967,15 +967,15 @@ mips_elf_final_gp (output_bfd, symbol, relocateable, error_message)
   if (output_bfd->xvec->flavour != bfd_target_elf_flavour)
     abort ();
 
-  if (elf_gp (output_bfd) == 0
+  if (_bfd_get_gp_value (output_bfd) == 0
       && (! relocateable
 	  || (symbol->flags & BSF_SECTION_SYM) != 0))
     {
       if (relocateable)
 	{
 	  /* Make up a value.  */
-	  elf_gp (output_bfd) =
-	    symbol->section->output_section->vma + 0x4000;
+	  _bfd_set_gp_value (output_bfd,
+			     symbol->section->output_section->vma + 0x4000);
 	}
       else
 	{
@@ -997,7 +997,7 @@ mips_elf_final_gp (output_bfd, symbol, relocateable, error_message)
 		  name = bfd_asymbol_name (*sym);
 		  if (*name == '_' && strcmp (name, "_gp") == 0)
 		    {
-		      elf_gp (output_bfd) = bfd_asymbol_value (*sym);
+		      _bfd_set_gp_value (output_bfd, bfd_asymbol_value (*sym));
 		      break;
 		    }
 		}
@@ -1006,7 +1006,7 @@ mips_elf_final_gp (output_bfd, symbol, relocateable, error_message)
 	  if (i >= count)
 	    {
 	      /* Only get the error once.  */
-	      elf_gp (output_bfd) = 4;
+	      _bfd_set_gp_value (output_bfd, 4);
 	      *error_message =
 		(char *) "GP relative relocation when _gp not defined";
 	      return bfd_reloc_dangerous;
@@ -1071,7 +1071,8 @@ mips_elf_gprel16_reloc (abfd,
     return ret;
 
   return gprel16_with_gp (abfd, symbol, reloc_entry, input_section,
-			  relocateable, data, elf_gp (output_bfd));
+			  relocateable, data,
+			  _bfd_get_gp_value (output_bfd));
 }
 
 static bfd_reloc_status_type
@@ -1180,7 +1181,8 @@ mips_elf_gprel32_reloc (abfd,
     }
 
   return gprel32_with_gp (abfd, symbol, reloc_entry, input_section,
-			  relocateable, data, elf_gp (output_bfd));
+			  relocateable, data,
+			  _bfd_get_gp_value (output_bfd));
 }
 
 static bfd_reloc_status_type
@@ -3801,6 +3803,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       reloc_howto_type *howto;
       unsigned long r_symndx;
       bfd_vma addend;
+      bfd_vma gp;
       struct elf_link_hash_entry *h;
       asection *sec;
       Elf_Internal_Sym *sym;
@@ -3835,6 +3838,8 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
       r_symndx = ELF32_R_SYM (rel->r_info);
 
+      gp = _bfd_get_gp_value (output_bfd);
+
       /* Mix in the change in GP address for a GP relative reloc.  */
       if (r_type != R_MIPS_GPREL16
 	  && r_type != R_MIPS_LITERAL
@@ -3842,7 +3847,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	addend = 0;
       else
 	{
-	  if (elf_gp (output_bfd) == 0)
+	  if (gp == 0)
 	    {
 	      if (! ((*info->callbacks->reloc_dangerous)
 		     (info,
@@ -3851,7 +3856,8 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		      rel->r_offset)))
 		return false;
 	      /* Only give the error once per link.  */
-	      elf_gp (output_bfd) = 4;
+	      gp = 4;
+	      _bfd_set_gp_value (output_bfd, gp);
 	    }
 
 	  if (r_symndx < extsymoff
@@ -3864,7 +3870,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		 must change this to be the difference between the
 		 final definition (which will end up in RELOCATION)
 		 and the GP value of OUTPUT_BFD (which is in GP).  */
-	      addend = elf_gp (input_bfd) - elf_gp (output_bfd);
+	      addend = elf_gp (input_bfd) - gp;
 	    }
 	  else if (! info->relocateable)
 	    {
@@ -3874,7 +3880,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		 hold the difference between the final definition of
 		 the symbol (which will end up in RELOCATION) and the
 		 GP value of OUTPUT_BFD (which is in GP).  */
-	      addend = - elf_gp (output_bfd);
+	      addend = - gp;
 	    }
 	  else
 	    {
@@ -3965,7 +3971,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	      if (strcmp (h->root.root.string, "_gp_disp") == 0)
 		{
-		  if (elf_gp (output_bfd) == 0)
+		  if (gp == 0)
 		    {
 		      if (! ((*info->callbacks->reloc_dangerous)
 			     (info,
@@ -3974,19 +3980,20 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			      rel->r_offset)))
 			return false;
 		      /* Only give the error once per link.  */
-		      elf_gp (output_bfd) = 4;
+		      gp = 4;
+		      _bfd_set_gp_value (output_bfd, gp);
 		      relocation = 0;
 		    }
 		  else
 		    {
 		      sec = input_section;
 		      if (sec->output_section != NULL)
-			relocation = (elf_gp (output_bfd)
+			relocation = (gp
 				      - (rel->r_offset
 					 + sec->output_section->vma
 					 + sec->output_offset));
 		      else
-			relocation = elf_gp (output_bfd) - rel->r_offset;
+			relocation = gp - rel->r_offset;
 		      if (r_type == R_MIPS_LO16)
 			relocation += 4;
 		    }
@@ -4076,7 +4083,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      bfd_put_32 (output_bfd, relocation + addend,
 			  sgot->contents + offset);
 	      offset = (sgot->output_section->vma + sgot->output_offset
-			+ offset - elf_gp (output_bfd));
+			+ offset - gp);
 	      mips_elf_relocate_global_got (input_bfd, rel, contents,
 					    offset);
 	      r = bfd_reloc_ok;
@@ -4101,7 +4108,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      bfd_put_32 (output_bfd, relocation + addend,
 			  sgot->contents + offset);
 	      offset = (sgot->output_section->vma + sgot->output_offset
-			+ offset - elf_gp (output_bfd));
+			+ offset - gp);
 	      mips_elf_relocate_hi16 (input_bfd, rel, rel + 1, contents,
 				      offset);
 	      r = bfd_reloc_ok;
@@ -4251,7 +4258,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		case R_MIPS_LITERAL:
 		case R_MIPS_GPREL32:
 		  mips_elf_set_cr_type (cptrel, CRT_MIPS_GPHI_LO);
-		  cptrel.konst = elf_gp (output_bfd) - cptrel.vaddr;
+		  cptrel.konst = gp - cptrel.vaddr;
 		  mips_elf_set_cr_dist2to (cptrel, 4);
 		  cr = scpt->contents + sizeof (Elf32_External_compact_rel);
 		  bfd_elf32_swap_crinfo_out (output_bfd, &cptrel,
@@ -5231,7 +5238,7 @@ mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	{
 	  sym->st_shndx = SHN_ABS;
 	  sym->st_info = ELF_ST_INFO (STB_GLOBAL, STT_SECTION);
-	  sym->st_value = elf_gp (output_bfd);
+	  sym->st_value = _bfd_get_gp_value (output_bfd);
 	}
       else if (strcmp (name, mips_elf_dynsym_rtproc_names[0]) == 0
 	       || strcmp (name, mips_elf_dynsym_rtproc_names[1]) == 0)

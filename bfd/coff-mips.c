@@ -1,5 +1,5 @@
 /* BFD back-end for MIPS Extended-Coff files.
-   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
 
@@ -538,7 +538,7 @@ mips_adjust_reloc_in (abfd, intern, rptr)
   if (! intern->r_extern
       && (intern->r_type == MIPS_R_GPREL
 	  || intern->r_type == MIPS_R_LITERAL))
-    rptr->addend += ecoff_data (abfd)->gp;
+    rptr->addend += _bfd_get_gp_value (abfd);
 
   /* If the type is MIPS_R_IGNORE, make sure this is a reference to
      the absolute section so that the reloc is ignored.  */
@@ -794,15 +794,15 @@ mips_gprel_reloc (abfd,
      BFD.  If we can't find it, we're stuck.  We cache it in the ECOFF
      target data.  We don't need to adjust the symbol value for an
      external symbol if we are producing relocateable output.  */
-  if (ecoff_data (output_bfd)->gp == 0
+  if (_bfd_get_gp_value (output_bfd) == 0
       && (relocateable == false
 	  || (symbol->flags & BSF_SECTION_SYM) != 0))
     {
       if (relocateable != false)
 	{
 	  /* Make up a value.  */
-	  ecoff_data (output_bfd)->gp =
-	    symbol->section->output_section->vma + 0x4000;
+	  _bfd_set_gp_value (output_bfd,
+			     symbol->section->output_section->vma + 0x4000);
 	}
       else
 	{
@@ -824,7 +824,8 @@ mips_gprel_reloc (abfd,
 		  name = bfd_asymbol_name (*sym);
 		  if (*name == '_' && strcmp (name, "_gp") == 0)
 		    {
-		      ecoff_data (output_bfd)->gp = bfd_asymbol_value (*sym);
+		      _bfd_set_gp_value (output_bfd,
+					 bfd_asymbol_value (*sym));
 		      break;
 		    }
 		}
@@ -833,7 +834,7 @@ mips_gprel_reloc (abfd,
 	  if (i >= count)
 	    {
 	      /* Only get the error once.  */
-	      ecoff_data (output_bfd)->gp = 4;
+	      _bfd_set_gp_value (output_bfd, 4);
 	      *error_message =
 		(char *) "GP relative relocation when _gp not defined";
 	      return bfd_reloc_dangerous;
@@ -864,7 +865,7 @@ mips_gprel_reloc (abfd,
      an external symbol.  */
   if (relocateable == false
       || (symbol->flags & BSF_SECTION_SYM) != 0)
-    val += relocation - ecoff_data (output_bfd)->gp;
+    val += relocation - _bfd_get_gp_value (output_bfd);
 
   insn = (insn &~ 0xffff) | (val & 0xffff);
   bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc_entry->address);
@@ -1237,7 +1238,7 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 
   sym_hashes = ecoff_data (input_bfd)->sym_hashes;
 
-  gp = ecoff_data (output_bfd)->gp;
+  gp = _bfd_get_gp_value (output_bfd);
   if (gp == 0)
     gp_undefined = true;
   else
@@ -1356,7 +1357,8 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 		      int_rel.r_vaddr - input_section->vma)))
 		return false;
 	      /* Only give the error once per link.  */
-	      ecoff_data (output_bfd)->gp = gp = 4;
+	      gp = 4;
+	      _bfd_set_gp_value (output_bfd, gp);
 	      gp_undefined = false;
 	    }
 	  if (! int_rel.r_extern)
@@ -2421,7 +2423,7 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
     mips_ecoff_bad_format_hook, _bfd_ecoff_set_arch_mach_hook,
     _bfd_ecoff_mkobject_hook, _bfd_ecoff_styp_to_sec_flags,
     _bfd_ecoff_set_alignment_hook, _bfd_ecoff_slurp_symbol_table,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
   },
   /* Supported architecture.  */
   bfd_arch_mips,

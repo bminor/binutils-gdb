@@ -1,5 +1,5 @@
 /* BFD back-end for ALPHA Extended-Coff files.
-   Copyright 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
    Modified from coff-mips.c by Steve Chamberlain <sac@cygnus.com> and
    Ian Lance Taylor <ian@cygnus.com>.
 
@@ -785,7 +785,7 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 
   /* Get the GP value for the output BFD.  */
   gp_undefined = false;
-  if (ecoff_data (abfd)->gp == 0)
+  if (_bfd_get_gp_value (abfd) == 0)
     {
       if (relocateable != false)
 	{
@@ -804,7 +804,7 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 		      || strcmp (sec->name, ".lita") == 0))
 		lo = sec->vma;
 	    }
-	  ecoff_data (abfd)->gp = lo + 0x8000;
+	  _bfd_set_gp_value (abfd, lo + 0x8000);
 	}
       else
 	{
@@ -816,12 +816,13 @@ alpha_ecoff_get_relocated_section_contents (abfd, link_info, link_order,
 	      || h->type != bfd_link_hash_defined)
 	    gp_undefined = true;
 	  else
-	    ecoff_data (abfd)->gp = (h->u.def.value
-				     + h->u.def.section->output_section->vma
-				     + h->u.def.section->output_offset);
+	    _bfd_set_gp_value (abfd,
+			       (h->u.def.value
+				+ h->u.def.section->output_section->vma
+				+ h->u.def.section->output_offset));
 	}
     }
-  gp = ecoff_data (abfd)->gp;
+  gp = _bfd_get_gp_value (abfd);
 
   for (; *reloc_vector != (arelent *) NULL; reloc_vector++)
     {
@@ -1430,7 +1431,7 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
      output, the .lita section is limited to 64KB. . */
 
   lita_sec = symndx_to_section[RELOC_SECTION_LITA];
-  gp = ecoff_data (output_bfd)->gp;
+  gp = _bfd_get_gp_value (output_bfd);
   if (! info->relocateable && lita_sec != NULL)
     {
       struct ecoff_section_tdata *lita_sec_data;
@@ -1489,7 +1490,7 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	  lita_sec_data->gp = gp;
 	}
 
-      ecoff_data (output_bfd)->gp = gp;
+      _bfd_set_gp_value (output_bfd, gp);
     }
 
   gp_undefined = (gp == 0);
@@ -1979,7 +1980,8 @@ alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		  input_bfd, input_section, r_vaddr - input_section->vma)))
 	    return false;
 	  /* Only give the error once per link.  */
-	  ecoff_data (output_bfd)->gp = gp = 4;
+	  gp = 4;
+	  _bfd_set_gp_value (output_bfd, gp);
 	  gp_undefined = false;
 	}
     }
@@ -2257,7 +2259,7 @@ static const struct ecoff_backend_data alpha_ecoff_backend_data =
     alpha_ecoff_bad_format_hook, _bfd_ecoff_set_arch_mach_hook,
     alpha_ecoff_mkobject_hook, _bfd_ecoff_styp_to_sec_flags,
     _bfd_ecoff_set_alignment_hook, _bfd_ecoff_slurp_symbol_table,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
   },
   /* Supported architecture.  */
   bfd_arch_alpha,

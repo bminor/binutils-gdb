@@ -1,5 +1,25 @@
 Fri Feb 16 12:46:18 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* bfd.c (_bfd_get_gp_value): New function.
+	(_bfd_set_gp_value): New function.
+	* libbfd-in.h (_bfd_get_gp_value): Declare.
+	(_bfd_set_gp_value): Declare.
+	* libbfd.h: Rebuild.
+	* coff-alpha.c (alpha_ecoff_get_relocated_section_contents): Use
+	_bfd_get_gp_value and _bfd_set_gp_value rather than referring
+	directly to the fields in the tdata information.
+	(alpha_relocate_section): Likewise.
+	* coff-mips.c (mips_adjust_reloc_in): Likewise.
+	(mips_gprel_reloc): Likewise.
+	(mips_relocate_section): Likewise.
+	* elf32-mips.c (mips_elf_hi16_reloc): Likewise.
+	(mips_elf_lo16_reloc): Likewise.
+	(mips_elf_final_gp): Likewise.
+	(mips_elf_gprel16_reloc): Likewise.
+	(mips_elf_gprel32_reloc): Likewise.
+	(mips_elf_relocate_section): Likewise.
+	(mips_elf_finish_dynamic_symbol): Likewise.
+
 	* bout.c (b_out_set_arch_mach): Recognize bfd_mach_i960_jx.
 
 Thu Feb 15 11:29:13 1996  Ian Lance Taylor  <ian@cygnus.com>
