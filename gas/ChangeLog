@@ -1,3 +1,10 @@
+2000-01-10  Philip Blundell  <philb@gnu.org>
+
+	* doc/c-arm.texi (ARM Options): Fix typo.
+ 	(ARM-Chars): Correct description of `#'.  Mention  that `;' is a 
+	line separator for Linux.
+	* doc/as.texinfo (Comments): Mention the ARM.
+
 2000-01-10  Philip Blundell  <pb@futuretv.com>
 
 	* configure.in (arm*-*-conix*): New target.

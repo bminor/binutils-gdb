@@ -1555,6 +1555,9 @@ is considered a comment and is ignored.  The line comment character is
 @ifset ARC
 @samp{;} on the ARC;
 @end ifset
+@ifset ARM
+@samp{@@} on the ARM;
+@end ifset
 @ifset H8/300
 @samp{;} for the H8/300 family;
 @end ifset

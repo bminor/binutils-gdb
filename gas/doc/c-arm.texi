@@ -66,7 +66,7 @@ Calling Standard.
 @item -mapcs-float
 This indicates the the floating point variant of the APCS should be
 used.  In this variant floating point arguments are passed in FP
-registers ratehr than integer registers.
+registers rather than integer registers.
 @item -mapcs-reentrant
 This indicates that the reentrant variant of the APCS should be used.
 This variant supports position independent code.
@@ -102,8 +102,19 @@ the final release of the ARM-ELF specifications.
 
 @cindex line comment character, ARM
 @cindex ARM line comment character
-The presence of a @samp{#} and @samp{@@} on a line indicates the start of
-a comment that extends to the end of the current line.
+The presence of a @samp{@@} on a line indicates the start of a comment
+that extends to the end of the current line.  If a @samp{#} appears as
+the first character of a line, the whole line is treated as a comment.
+
+@cindex line separator, ARM
+@cindex statement separator, ARM
+@cindex ARM line separator
+On ARM systems running the GNU/Linux operating system, @samp{;} can be
+used instead of a newline to separate statements.
+
+@cindex immediate character, ARM
+@cindex ARM immediate character
+Either @samp{#} or @samp{$} can be used to indicate immediate operands.
 
 @cindex identifiers, ARM
 @cindex ARM identifiers
