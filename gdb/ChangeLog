@@ -1,3 +1,9 @@
+1999-01-11  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* scm-tags.h: Update FSF's address on copyright notice.
+	* ser-e7kpc.c: Same.
+	* gnu-nat.h: Same.
+
 Mon Jan 11 13:45:57 1999  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
 	* dwarf2read.c (dump_die):  Change stderr gdb_stderr.
