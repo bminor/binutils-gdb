@@ -1,4 +1,4 @@
-# This file is configure.inj
+# This file is configure.in
 #
 #   Copyright (C) 1987-1992 Free Software Foundation, Inc.
 #   
@@ -40,6 +40,11 @@ mips)
 	ultrix) gas_host=decstation ;;
 	esac
 	;;
+i386)
+	case "${host_os}" in
+	aix*)	gas_host=i386aix ;;
+	esac
+	;;
 *)
 	case "${host_os}" in
 	ansi | ultrix | hpux | sysv*)	gas_host=${host_os} ;;
@@ -67,6 +72,14 @@ cpu_type=${target_cpu}
 
 # assign object format
 case ${target_os} in
+aix*)
+	case "${target_cpu}" in
+	i386)	obj_format=coff
+		target_cpu=i386aix
+		;;
+	esac
+	;;
+
 bout*) obj_format=bout ;;
 nindy*) obj_format=bout ;;
 bsd* | sunos*) obj_format=aout ;;

@@ -1,3 +1,18 @@
+Fri Feb 21 01:08:48 1992  Minh Tran-Le (TRANLE@INTELLICORP.COM)
+
+	* symbols.c (local_label_name): symbols now start with ^A.
+
+	* read.c, subsegs.c, write.c obj-coff.c: added handling of
+	  `.bss` pseudo op for unitialized data. The new gcc (1.37.9x)
+	  generate these sections.  .align: will use NOP_OPCODE or 0
+	  for padding. This is just for being nice to the
+	  disassembler.
+
+	* expr.c (operand): changed to generate local label "\001L0"
+	  starting with a ^A so that it is recognized as a local label.
+
+	* as.c (perform_an_assembly_pass): zero bss_fix_root, too.
+
 Fri Feb 21 01:08:48 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in, configure.in, doc: use the doc.  Build it, install

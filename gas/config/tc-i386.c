@@ -239,6 +239,7 @@ void dummy ()
 }
 
 const pseudo_typeS md_pseudo_table[] = {
+	{ "align",	s_align_bytes,	0 },
 	{ "ffloat",	float_cons,	'f' },
 	{ "dfloat",	float_cons,	'd' },
 	{ "tfloat",	float_cons,	'x' },
@@ -1308,17 +1309,17 @@ char *operand_string;
 		if ((r->reg_type & (SReg2|SReg3)) && op_string[3] == ':') {
 			switch (r->reg_num) {
 			case 0:
-				i.seg = &es; break;
+				i.seg = (seg_entry *) &es; break;
 			case 1:
-				i.seg = &cs; break;
+				i.seg = (seg_entry *) &cs; break;
 			case 2:
-				i.seg = &ss; break;
+				i.seg = (seg_entry *) &ss; break;
 			case 3:
-				i.seg = &ds; break;
+				i.seg = (seg_entry *) &ds; break;
 			case 4:
-				i.seg = &fs; break;
+				i.seg = (seg_entry *) &fs; break;
 			case 5:
-				i.seg = &gs; break;
+				i.seg = (seg_entry *) &gs; break;
 			}
 			op_string += 4;		/* skip % <x> s : */
 			operand_string = op_string; /* Pretend given string starts here. */
@@ -1572,6 +1573,13 @@ char *operand_string;
 			as_bad("register size mismatch in (base,index,scale) expression");
 			return 0;
 		}
+		/*
+		 * special case for (%dx) while doing input/output op
+		 */
+		if ((i.base_reg &&
+		     (i.base_reg->reg_type == (Reg16|InOutPortReg)) &&
+		     (i.index_reg == 0)))
+		  return 1;
 		if ((i.base_reg && (i.base_reg->reg_type & Reg32) == 0) ||
 		    (i.index_reg && (i.index_reg->reg_type & Reg32) == 0)) {
 			as_bad("base/index register must be 32 bit register");
@@ -1718,7 +1726,7 @@ register fragS *	fragP;
 	break;
 }
 	/* now put displacement after opcode */
-	md_number_to_chars (where_to_put_displacement,
+	md_number_to_chars ((char *) where_to_put_displacement,
 			    displacement_from_opcode_start - extension,
 			    SIZE_FROM_RELAX_STATE (fragP->fr_subtype));
 	fragP -> fr_fix += extension;

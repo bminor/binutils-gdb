@@ -56,6 +56,7 @@ AR_FLAGS = qv
 BISON = bison
 MAKEINFO = makeinfo
 RANLIB = ranlib
+MINUS_G = -g
 
 # Lists of files for various purposes.
 
@@ -175,7 +176,7 @@ clean-info:
 # Now figure out from those variables how to compile and link.
 
 # This is the variable actually used when we compile.
-ALL_CFLAGS = -g $(INTERNAL_CFLAGS) $(CFLAGS) $(HDEFINES) $(TDEFINES)
+ALL_CFLAGS = $(MINUS_G) $(INTERNAL_CFLAGS) $(CFLAGS) $(HDEFINES) $(TDEFINES)
 
 # How to link with both our special library facilities
 # and the system's installed libraries.

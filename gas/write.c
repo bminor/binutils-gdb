@@ -34,12 +34,22 @@
 #include "obstack.h"
 #include "output-file.h"
 
+/* The NOP_OPCODE is for the alignment fill value.
+ * fill it a nop instruction so that the disassembler does not choke
+ * on it
+ */
+#ifndef NOP_OPCODE
+#define NOP_OPCODE 0x00
+#endif
+
 #ifndef MANY_SEGMENTS
 static struct frag *text_frag_root;
 static struct frag *data_frag_root;
+static struct frag *bss_frag_root;
 
 static struct frag *text_last_frag;	/* Last frag in segment. */
 static struct frag *data_last_frag;	/* Last frag in segment. */
+static struct frag *bss_last_frag;	/* Last frag in segment. */
 #endif
 
 static object_headers headers;
@@ -79,7 +89,7 @@ void relax_segment();
 fixS *fix_new(frag, where, size, add_symbol, sub_symbol, offset, pcrel, r_type)
 fragS *frag;		/* Which frag? */
 int where;		/* Where in that frag? */
-short int size;		/* 1, 2  or 4 usually. */
+short int size;		/* 1, 2, or 4 usually. */
 symbolS *add_symbol;	/* X_add_symbol. */
 symbolS *sub_symbol;	/* X_subtract_symbol. */
 long offset;		/* X_add_number. */
@@ -174,7 +184,7 @@ void write_object_file()
 #define	SUB_SEGMENT_ALIGN ((frchainP->frch_seg != SEG_DATA) ? 2 : 0)
 #endif	/* VMS */
 		subseg_new (frchainP->frch_seg, frchainP->frch_subseg);
-		frag_align (SUB_SEGMENT_ALIGN, 0);
+		frag_align (SUB_SEGMENT_ALIGN, NOP_OPCODE);
 		/* frag_align will have left a new frag. */
 		/* Use this last frag for an empty ".fill". */
 		/*
@@ -197,17 +207,23 @@ void write_object_file()
 	for (frchainP = frchain_root; frchainP; frchainP = next_frchainP) {
 		know( frchainP->frch_root );
 		* prev_fragPP = frchainP->frch_root;
-		prev_fragPP = & frchainP->frch_last->fr_next;
-		
-		if (((next_frchainP = frchainP->frch_next) == NULL)
-		    || next_frchainP == data0_frchainP) {
-			prev_fragPP = & data_frag_root;
-			if (next_frchainP) {
-				text_last_frag = frchainP->frch_last;
-			} else {
-				data_last_frag = frchainP->frch_last;
-			}
-		}
+		prev_fragPP   = & frchainP->frch_last->fr_next;
+		next_frchainP = frchainP->frch_next;
+
+		if (next_frchainP == NULL)
+		  {
+		    bss_last_frag  = frchainP->frch_last;
+		  }
+		else if (next_frchainP == data0_frchainP)
+		  {
+		    text_last_frag = frchainP->frch_last;
+		    prev_fragPP    = & data_frag_root;
+		  }
+		else if (next_frchainP == bss0_frchainP)
+		  {
+		    data_last_frag = frchainP->frch_last;
+		    prev_fragPP    = & bss_frag_root;
+		  }
 	} /* walk the frag chain */
 	
 	/*
@@ -232,6 +248,7 @@ void write_object_file()
 	
 	relax_segment(text_frag_root, SEG_TEXT);
 	relax_segment(data_frag_root, SEG_DATA);
+	relax_segment(bss_frag_root,  SEG_BSS);
 	/*
 	 * Now the addresses of frags are correct within the segment.
 	 */
@@ -267,10 +284,21 @@ void write_object_file()
 		data_siz = 0;
 	}
 	
-	bss_address_frag.fr_address = H_GET_TEXT_SIZE(&headers) + 
-	    H_GET_DATA_SIZE(&headers);
+	bss_address_frag.fr_address = (H_GET_TEXT_SIZE(&headers) + 
+				       H_GET_DATA_SIZE(&headers));
 	
-	H_SET_BSS_SIZE(&headers,local_bss_counter);
+	H_SET_BSS_SIZE(&headers, bss_last_frag->fr_address);
+
+	/*
+	 * now fixup all bss frags addresses
+	 */
+	if (bss_frag_root)
+	  {
+	    relax_addressT	slide;
+	    slide = bss_address_frag.fr_address;
+	    for (fragP = bss_frag_root; fragP; fragP = fragP->fr_next)
+	      fragP->fr_address += slide;
+	  }
 	
 	/*
 	 *
@@ -592,14 +620,14 @@ void write_object_file()
 
 void relax_segment(segment_frag_root, segment)
 struct frag *	segment_frag_root;
-segT		segment; /* SEG_DATA or SEG_TEXT */
+segT		segment; /* SEG_DATA or SEG_TEXT or SEG_BSS */
 {
 	register struct frag *	fragP;
 	register relax_addressT	address;
 	/* register relax_addressT	old_address; JF unused */
 	/* register relax_addressT	new_address; JF unused */
 #ifndef MANY_SEGMENTS	
-	know( segment == SEG_DATA || segment == SEG_TEXT );
+	know(segment == SEG_DATA || segment == SEG_TEXT || segment == SEG_BSS);
 #endif
 	/* In case md_estimate_size_before_relax() wants to make fixSs. */
 	subseg_change(segment, 0);
@@ -740,7 +768,10 @@ segT		segment; /* SEG_DATA or SEG_TEXT */
 					if (symbolP) {
 #ifdef MANY_SEGMENTS
 #else
-						know((S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE) || (S_GET_SEGMENT(symbolP) == SEG_DATA) || (S_GET_SEGMENT(symbolP) == SEG_TEXT));
+						know((S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE)
+						     || (S_GET_SEGMENT(symbolP) == SEG_DATA)
+						     || (S_GET_SEGMENT(symbolP) == SEG_TEXT)
+						     || (S_GET_SEGMENT(symbolP) == SEG_BSS));
 						know(symbolP->sy_frag);
 						know(!(S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE) || (symbolP->sy_frag == &zero_address_frag));
 #endif
@@ -1051,14 +1082,19 @@ segT		this_segment_type; /* N_TYPE bits for segment. */
 						continue;
 					} /* COBR */
 #endif /* TC_I960 */
-					/* FIXME-SOON: I think this is trash, but I'm not sure.  xoxorich. */
-#ifdef comment
+
 #ifdef OBJ_COFF
+					/* This really needed to be
+					   like this for COFF output.
+					   - mtranle@paris
+
+					   But I'm not sure it's right
+					   for i960 or a29k coff.
+					   xoxorich.  */
+
 					if (S_IS_COMMON(add_symbolP))
 					    add_number += S_GET_VALUE(add_symbolP);
 #endif /* OBJ_COFF */
-#endif /* comment */
-					
 					++seg_reloc_count;
 					
 					break;

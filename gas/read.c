@@ -39,6 +39,9 @@
 
 char *input_line_pointer;	/*->next char of source file to parse. */
 
+#ifndef NOP_OPCODE
+# define NOP_OPCODE 0x00
+#endif
 
 #if BITS_PER_CHAR != 8
 The following table is indexed by [ (char) ] and will break if
@@ -180,6 +183,7 @@ static const pseudo_typeS
 	{ "asciz",	stringer,	1	},
 	/* block */
 	{ "byte",	cons,		1	},
+	{ "bss",	s_bss,		0	},
 	{ "comm",	s_comm,		0	},
 	{ "data",	s_data,		0	},
 	/* dim */
@@ -626,7 +630,7 @@ int arg;
 		input_line_pointer ++;
 		temp_fill = get_absolute_expression ();
 	} else {
-		temp_fill = 0;
+		temp_fill = NOP_OPCODE;
 	}
 	/* Only make a frag if we HAVE to. . . */
 	if (temp && ! need_pass_2)
@@ -652,7 +656,7 @@ void s_align_ptwo() {
 		input_line_pointer ++;
 		temp_fill = get_absolute_expression ();
 	} else
-	    temp_fill = 0;
+	    temp_fill = NOP_OPCODE;
 	/* Only make a frag if we HAVE to. . . */
 	if (temp && ! need_pass_2)
 	    frag_align (temp, (int)temp_fill);
@@ -661,6 +665,17 @@ void s_align_ptwo() {
 	
 	demand_empty_rest_of_line();
 } /* s_align_ptwo() */
+
+
+void s_bss()
+{
+  register int temp;
+
+  temp = get_absolute_expression ();
+  subseg_new (SEG_BSS, (subsegT)temp);
+  demand_empty_rest_of_line();
+}
+  
 
 void s_comm() {
 	register char *name;
@@ -1796,12 +1811,7 @@ void stringer(append_zero )		/* Worker to do .ascii etc statements. */
 /* Checks end-of-line. */
 register int append_zero;	/* 0: don't append '\0', else 1 */
 {
-	/* register char *	p; JF unused */
-	/* register int length; JF unused */	/* Length of string we read, excluding */
-	/* trailing '\0' implied by closing quote. */
-	/* register char *	where; JF unused */
-	/* register fragS *	fragP; JF unused */
-	register unsigned int c;
+	unsigned int c;
 	
 	/*
 	 * The following awkward logic is to parse ZERO or more strings,
@@ -1811,16 +1821,14 @@ register int append_zero;	/* 0: don't append '\0', else 1 */
 	 * a 1st, expression. We keep demanding expressions for each
 	 * ','.
 	 */
-	if (is_it_end_of_statement())
-	    {
-		    c = 0; /* Skip loop. */
-		    ++ input_line_pointer; /* Compensate for end of loop. */
-	    }
-	else
-	    {
-		    c = ','; /* Do loop. */
-	    }
-	while (c == ',' || c == '<' || c == '"' ) {
+	if (is_it_end_of_statement()) {
+		c = 0; /* Skip loop. */
+		++ input_line_pointer; /* Compensate for end of loop. */
+	} else {
+		c = ','; /* Do loop. */
+	}
+	
+	while (c == ',' || c == '<' || c == '"') {
 		SKIP_WHITESPACE();
 		switch (*input_line_pointer) {
 		case  '\"':

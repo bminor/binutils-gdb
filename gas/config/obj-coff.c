@@ -166,6 +166,16 @@ SCNHDR text_section_header;
 #endif
 /* Relocation. */
 
+static int reloc_compare(p1, p2)
+#ifdef BFD_HEADERS
+struct internal_reloc *p1, *p2;
+#else
+RELOC *p1, *p2;
+#endif
+{
+	return (int)(p1->r_vaddr - p2->r_vaddr);
+}
+
 /*
  *		emit_relocations()
  *
@@ -178,43 +188,66 @@ fixS *fixP; /* Fixup chain for this segment. */
 relax_addressT segment_address_in_file;
 {
 #ifdef BFD_HEADERS
-	struct internal_reloc ri;
+	struct internal_reloc *ri_table;
 #else
-	RELOC ri;
+	RELOC *ri_table;
 #endif
 	symbolS *symbolP;
+	int i, count;
+	fixS *p;
 	
-	bzero((char *)&ri,sizeof(ri));
-	for (;  fixP;  fixP = fixP->fx_next) {
+	for (count = 0, p = fixP; p ; p = p->fx_next)
+	    if (p->fx_addsy) count++;
+	if (!count)
+	    return;
+  	
+#ifdef BFD_HEADERS
+	ri_table = (struct internal_reloc *) calloc(sizeof(*ri_table),count);
+#else
+	ri_table = (RELOC *) calloc(sizeof(*ri_table),count);
+#endif
+	if (!ri_table)
+	    as_fatal ("obj_emit_relocations: Could not malloc relocation table");
+	
+#ifdef TC_I960
+	callj_table = (char *)malloc (sizeof(char)*count);
+	if (!callj_table)
+	    as_fatal ("obj_emit_relocations: Could not malloc callj table");
+#endif
+	
+	for (i = 0;  fixP;  fixP = fixP->fx_next) {
 		if (symbolP = fixP->fx_addsy) {
 #if defined(TC_M68K)
-			ri.r_type = (fixP->fx_pcrel ?
-				     (fixP->fx_size == 1 ? R_PCRBYTE :
-				      fixP->fx_size == 2 ? R_PCRWORD :
-				      R_PCRLONG):
-				     (fixP->fx_size == 1 ? R_RELBYTE :
-				      fixP->fx_size == 2 ? R_RELWORD :
-				      R_RELLONG));
+			ri_table[i].r_type = (fixP->fx_pcrel ?
+					      (fixP->fx_size == 1 ? R_PCRBYTE :
+					       fixP->fx_size == 2 ? R_PCRWORD :
+					       R_PCRLONG):
+					      (fixP->fx_size == 1 ? R_RELBYTE :
+					       fixP->fx_size == 2 ? R_RELWORD :
+					       R_RELLONG));
 #elif defined(TC_I386)
-			/* FIXME-SOON R_OFF8 & R_DIR16 are a vague guess, completly untested. */
-			ri.r_type = (fixP->fx_pcrel ?
-				     (fixP->fx_size == 1 ? R_PCRBYTE :
-				      fixP->fx_size == 2 ? R_PCRWORD :
-				      R_PCRLONG):
-				     (fixP->fx_size == 1 ? R_OFF8 :
-				      fixP->fx_size == 2 ? R_DIR16 :
-				      R_DIR32));
+			/* FIXME-SOON R_OFF8 & R_DIR16 are a vague guess, completly
+			   untested. */
+			ri_table[i].r_type = (fixP->fx_pcrel ?
+					      (fixP->fx_size == 1 ? R_PCRBYTE :
+					       fixP->fx_size == 2 ? R_PCRWORD :
+					       R_PCRLONG):
+					      (fixP->fx_size == 1 ? R_OFF8 :
+					       fixP->fx_size == 2 ? R_DIR16 :
+					       R_DIR32));
 #elif defined(TC_I960)
-			ri.r_type = (fixP->fx_pcrel
-				     ? R_IPRMED
-				     : R_RELLONG);
+			ri_table[i].r_type = (fixP->fx_pcrel
+					      ? R_IPRMED
+					      : R_RELLONG);
+			callj_table[i] =  fixP->fx_callj ? 1 : 0;
 #elif defined(TC_A29K)
-			ri.r_type = tc_coff_fix2rtype(fixP);
+			ri_table[i].r_type = tc_coff_fix2rtype(fixP);
 			
 #else
-			you lose
+#error		  you lose
 #endif /* TC_M68K || TC_I386 */
-			    ri.r_vaddr = fixP->fx_frag->fr_address + fixP->fx_where;
+			ri_table[i].r_vaddr = (fixP->fx_frag->fr_address
+					       + fixP->fx_where);
 			/* If symbol associated to relocation entry is a bss symbol
 			   or undefined symbol just remember the index of the symbol.
 			   Otherwise store the index of the symbol describing the
@@ -225,61 +258,77 @@ relax_addressT segment_address_in_file;
 			   number because they won't be emitted in the final object.
 			   In the case where they are in the BSS section, this leads
 			   to an incorrect r_symndx.
-			   Under bsd the loader do not care if the symbol reference is
-			   incorrect. But the SYS V ld complains about this. To avoid
-			   this we associate the symbol to the associated section,
-			   *even* if it is the BSS section. */
+			   Under bsd the loader do not care if the symbol reference
+			   is incorrect. But the SYS V ld complains about this. To
+			   avoid this we associate the symbol to the associated
+			   section, *even* if it is the BSS section. */
 			/* If someone can tell me why the other symbols of the bss
 			   section are not associated with the .bss section entry,
 			   I'd be gratefull. I guess that it has to do with the special
 			   nature of the .bss section. Or maybe this is because the
 			   bss symbols are declared in the common section and can
 			   be resized later. Can it break code some where ? */
-			ri.r_symndx = (S_GET_SEGMENT(symbolP) == SEG_TEXT
-				       ? dot_text_symbol->sy_number
-				       : (S_GET_SEGMENT(symbolP) == SEG_DATA
-					  ? dot_data_symbol->sy_number
-					  : ((SF_GET_LOCAL(symbolP)
-					      ? dot_bss_symbol->sy_number
-					      : symbolP->sy_number)))); /* bss or undefined */
+			ri_table[i].r_symndx = (S_GET_SEGMENT(symbolP) == SEG_TEXT
+						? dot_text_symbol->sy_number
+						: (S_GET_SEGMENT(symbolP) == SEG_DATA
+						   ? dot_data_symbol->sy_number
+						   : ((SF_GET_LOCAL(symbolP)
+						       ? dot_bss_symbol->sy_number
+						       : symbolP->sy_number)))); /* bss or undefined */
 			
 			/* md_ri_to_chars((char *) &ri, ri); */  /* Last step : write md f */
 			
-			
-#ifdef BFD_HEADERS
-			*where += bfd_coff_swap_reloc_out(stdoutput, &ri, *where);
-#if defined(TC_A29K)
-			/* The 29k has a special kludge for the high 16 bit reloc.
-			   Two relocations are emmited, R_IHIHALF, and R_IHCONST. The second one 
-			   doesn't contain a symbol, but uses the value for offset */
-			if (ri.r_type == R_IHIHALF) {
-				/* now emit the second bit */
-				ri.r_type = R_IHCONST;	
-				ri.r_symndx = fixP->fx_addnumber;
-				*where += bfd_coff_swap_reloc_out(stdoutput, &ri, *where);
-			}
-			
-#endif
-			
-#else
-			append(where, (char *) &ri, sizeof(ri));
-#endif
-			
-#ifdef TC_I960
-			if (fixP->fx_callj) {
-				ri.r_type = R_OPTCALL;
-#ifdef BFD_HEADERS
-				*where += bfd_coff_swap_reloc_out(stdoutput, &ri, *where);
-#else
-				append(where, (char *) &ri, sizeof(ri));
-#endif
-				
-				
-			} /* if it's a callj, do it again for the opcode */
-#endif /* TC_I960 */
-			
+			i++;
 		} /* if there's a symbol */
 	} /* for each fixP */
+	
+	/*
+	 * AIX ld prefer to have the reloc table with r_vaddr sorted.
+	 * But sorting it should not hurt any other ld.
+	 */
+	qsort (ri_table, count, sizeof(*ri_table), reloc_compare);
+	
+	for (i = 0; i < count; i++)
+	    {
+#ifdef BFD_HEADERS
+		    *where += bfd_coff_swap_reloc_out(stdoutput, &ri_table[i], *where);
+# ifdef TC_A29K
+		    /* The 29k has a special kludge for the high 16 bit reloc.
+		       Two relocations are emmited, R_IHIHALF, and R_IHCONST.
+		       The second one doesn't contain a symbol, but uses the
+		       value for offset */
+		    if (ri_table[i].r_type == R_IHIHALF)
+			{
+				/* now emit the second bit */
+				ri_table[i].r_type = R_IHCONST;	
+				ri_table[i].r_symndx = fixP->fx_addnumber;
+				*where += bfd_coff_swap_reloc_out(stdoutput, &ri_table[i],
+								  *where);
+			}
+# endif /* TC_A29K */
+		    
+#else /* not BFD_HEADERS */
+		    append(where, (char *) &ri_table[i], RELSZ);
+#endif /* not BFD_HEADERS */
+		    
+#ifdef TC_I960
+		    if (callj_table[i])
+			{
+				ri_table[i].r_type = R_OPTCALL;
+# ifdef BFD_HEADERS
+				*where += bfd_coff_swap_reloc_out(stdoutput, &ri_table[i],
+								  *where);
+# else
+				append(where, (char *) &ri_table[i], (unsigned long)RELSZ);
+# endif /* BFD_HEADERS */
+			} /* if it's a callj, do it again for the opcode */
+#endif /* TC_I960 */
+	    }
+	
+	free (ri_table);
+#ifdef TC_I960
+	free (callj_table);
+#endif
 	
 	return;
 } /* obj_emit_relocations() */
@@ -351,9 +400,9 @@ object_headers *headers;
 	
 #else /* CROSS_COMPILE */
 	
-	append(where, (char *) &headers->filehdr, sizeof(headers->filehdr));
+	append(where, (char *) &headers->filehdr, FILHSZ);
 #ifndef OBJ_COFF_OMIT_OPTIONAL_HEADER
-	append(where, (char *) &headers->aouthdr, sizeof(headers->aouthdr));
+	append(where, (char *) &headers->aouthdr, AOUTHDRSZ);
 #endif /* OBJ_COFF_OMIT_OPTIONAL_HEADER */
 	
 #endif /* CROSS_COMPILE */
@@ -409,7 +458,7 @@ symbolS *symbolP;
 	md_number_to_chars(*where, syment->n_numaux, sizeof(syment->n_numaux));
 	*where += sizeof(syment->n_numaux);
 #else /* CROSS_COMPILE */
-	append(where, (char *) syment, sizeof(*syment));
+	append(where, (char *) syment, SYMESZ);
 #endif /* CROSS_COMPILE */
 	
 	/* Should do the following : if (.file entry) MD(..)... else if (static entry) MD(..) */
@@ -458,7 +507,7 @@ symbolS *symbolP;
 		}
 #endif /* 0 */
 #else /* CROSS_COMPILE */
-		append(where, (char *) &symbolP->sy_symbol.ost_auxent[i], sizeof(symbolP->sy_symbol.ost_auxent[i]));
+		append(where, (char *) &symbolP->sy_symbol.ost_auxent[i], AUXESZ);
 #endif /* CROSS_COMPILE */
 		
 	}; /* for each aux in use */
@@ -516,7 +565,7 @@ SCNHDR *header;
 	
 #else /* CROSS_COMPILE */
 	
-	append(where, (char *) header, sizeof(*header));
+	append(where, (char *) header, SCNHSZ);
 	
 #endif /* CROSS_COMPILE */
 	
@@ -544,7 +593,7 @@ symbolS *symbol_rootP;
 			S_SET_OFFSET(symbolP, symbolP->sy_name_offset);
 			S_SET_ZEROES(symbolP, 0);
 		} else {
-			bzero(symbolP->sy_symbol.ost_entry.n_name, SYMNMLEN);
+			memset(symbolP->sy_symbol.ost_entry.n_name, '\0', SYMNMLEN);
 			strncpy(symbolP->sy_symbol.ost_entry.n_name, temp, SYMNMLEN);
 		}
 		obj_symbol_to_chars(where, symbolP);
@@ -797,7 +846,7 @@ symbolS *symbolP;
 	/* Additional information */
 	symbolP->sy_symbol.ost_flags = 0;
 	/* Auxiliary entries */
-	bzero((char*)&symbolP->sy_symbol.ost_auxent[0], AUXESZ);
+	memset((char*) &symbolP->sy_symbol.ost_auxent[0], '\0', AUXESZ);
 	
 #ifdef STRIP_UNDERSCORE
 	/* Remove leading underscore at the beginning of the symbol.
@@ -933,7 +982,7 @@ int what;
 	SKIP_WHITESPACES();
 	
 	def_symbol_in_progress = (symbolS *) obstack_alloc(&notes, sizeof(*def_symbol_in_progress));
-	bzero(def_symbol_in_progress, sizeof(*def_symbol_in_progress));
+	memset(def_symbol_in_progress, '\0', sizeof(*def_symbol_in_progress));
 	
 	symbol_name = input_line_pointer;
 	name_end = get_symbol_end();
@@ -1349,7 +1398,8 @@ object_headers *headers;
 					      + S_GET_VALUE(symbolP->sy_forward)
 					      + symbolP->sy_forward->sy_frag->fr_address));
 			
-			if (SF_GET_GET_SEGMENT(symbolP)) {
+			if (SF_GET_GET_SEGMENT(symbolP) &&
+			    S_GET_SEGMENT(symbolP) == SEG_UNKNOWN) {
 				S_SET_SEGMENT(symbolP, S_GET_SEGMENT(symbolP->sy_forward));
 			} /* forward segment also */
 			
@@ -1385,6 +1435,9 @@ object_headers *headers;
 			     H_GET_TEXT_SIZE(headers),
 			     0/*text_relocation_number */,
 			     0/*text_lineno_number */);
+	symbol_remove(dot_text_symbol, &symbol_rootP, &symbol_lastP);
+	symbol_append(dot_text_symbol, previous_file_symbol,
+		      &symbol_rootP, &symbol_lastP);
 	
 	dot_data_symbol = (symbolS*)
 	    c_section_symbol(".data",
@@ -1392,6 +1445,9 @@ object_headers *headers;
 			     H_GET_DATA_SIZE(headers),
 			     0/*data_relocation_number */,
 			     0); /* There are no data lineno entries */
+	symbol_remove(dot_data_symbol, &symbol_rootP, &symbol_lastP);
+	symbol_append(dot_data_symbol, dot_text_symbol,
+		      &symbol_rootP, &symbol_lastP);
 	
 	dot_bss_symbol = (symbolS*)
 	    c_section_symbol(".bss",
@@ -1399,6 +1455,9 @@ object_headers *headers;
 			     H_GET_BSS_SIZE(headers),
 			     0, /* No relocation for a bss section. */
 			     0); /* There are no bss lineno entries */
+	symbol_remove(dot_bss_symbol, &symbol_rootP, &symbol_lastP);
+	symbol_append(dot_bss_symbol, dot_data_symbol,
+		      &symbol_rootP, &symbol_lastP);
 	
 #if defined(DEBUG)
 	verify_symbol_chain(symbol_rootP, symbol_lastP);
@@ -1495,8 +1554,8 @@ object_headers *headers;
 					} /* make it at least 1 */
 					
 					/* Clobber possible stale .dim information. */
-					bzero(symbolP->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_ary.x_dimen,
-					      sizeof(symbolP->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_ary.x_dimen));
+					memset(symbolP->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_ary.x_dimen,
+					       '\0', sizeof(symbolP->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_ary.x_dimen));
 				}
 				/* The C_FCN doesn't need any additional information.
 				   I don't even know if this is needed for sdb. But the
@@ -1544,8 +1603,8 @@ object_headers *headers;
 			/* next pointer remains valid */
 			symbol_remove(symbolP, &symbol_rootP, &symbol_lastP);
 			
-		} else if (!S_IS_DEFINED(symbolP) && !S_IS_DEBUG(symbolP) && !SF_GET_STATICS(symbolP)) {
-			/* S_GET_STORAGE_CLASS(symbolP) == C_EXT && !SF_GET_FUNCTION(symbolP)) { */
+		} else if (/*!S_IS_DEFINED(symbolP) && !S_IS_DEBUG(symbolP) && !SF_GET_STATICS(symbolP) */
+			   S_GET_STORAGE_CLASS(symbolP) == C_EXT && !SF_GET_FUNCTION(symbolP)) {
 			/* if external, Remove from the list */
 			symbolS *hold = symbol_previous(symbolP);
 			
@@ -1733,10 +1792,18 @@ object_headers *headers;
 #endif
 	/* symbol table size allready set */
 	H_SET_SIZEOF_OPTIONAL_HEADER(headers, OBJ_COFF_AOUTHDRSZ);
+	
+	/* do not added the F_RELFLG for the standard COFF.
+	 * The AIX linker complain on file with relocation info striped flag.
+	 */
+#ifdef KEEP_RELOC_INFO
+	H_SET_FLAGS(headers, (text_lineno_number == 0 ? F_LNNO : 0)
+		    | BYTE_ORDERING);
+#else
 	H_SET_FLAGS(headers, (text_lineno_number == 0 ? F_LNNO : 0)
 		    | ((text_relocation_number + data_relocation_number) ? 0 : F_RELFLG)
 		    | BYTE_ORDERING);
-	
+#endif	
 	/* aouthdr */
 	/* magic number allready set */
 	H_SET_VERSION_STAMP(headers, 0);

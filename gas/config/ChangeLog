@@ -1,3 +1,34 @@
+Fri Feb 21 02:17:22 1992  Minh Tran-Le (TRANLE@INTELLICORP.COM)
+
+	* tc-i386.c: tc-i386.c: added handling of the following opcodes:
+	  i/o opcodes - inb, inw, outb and outw.  string manipulation with
+	  att syntax - scmp, slod, smov, ssca, ssto.
+
+Fri Feb 21 01:53:50 1992  Minh Tran-Le (TRANLE@INTELLICORP.COM)
+
+	* obj-coff.c: (for aix386) Moved the symbols .text, .data and .bss
+	  to just after .file .
+
+	  In obj_crawl_symbol_chain() where it tries to put the external
+	  symbols apart, with the condition:
+	    (!S_IS_DEFINED(symbolP) &&
+	     !S_IS_DEBUG(symbolP) &&
+	     !SF_GET_STATICS(symbolP))
+	  it was moving too many symbols out. So I switch it back to the
+	  condition:
+	    (S_GET_STORAGE_CLASS(symbolP) == C_EXT && !SF_GET_FUNCTION(symbolP))
+
+	  In obj_emit_relocations() added the conditional on KEEP_RELOC_INFO
+	  so that we don't use the F_RELFLG which make the linker complain
+	  that somebody has stripped the relocation info.
+
+	  Also, the AIX ld program require that the relocation table
+	  is sorted by r_vaddr like the standard ATT assembler does.
+
+	  [he also changed the sizeof(struct ...)'s into the coff
+	  style FOOSZ macros.  I'm not sure this is right, but I can't
+	  remember why.  xoxorich.]
+
 Tue Feb 18 02:11:10 1992  K. Richard Pixley  (rich at cygnus.com)
 
 	* tc-m88k.[hc]: pulled in from hack's unfinished work.  These
