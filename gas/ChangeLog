@@ -1,3 +1,8 @@
+Wed Nov 19 23:46:18 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* symbols.c (resolve_symbol_value): Add missing breaks in case on
+	symbol value operator.
+
 start-sanitize-vr5400
 Wed Nov 19 02:24:07 1997  Ken Raeburn  <raeburn@cygnus.com>
 
