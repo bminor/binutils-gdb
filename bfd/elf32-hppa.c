@@ -1,5 +1,5 @@
 /* BFD back-end for HP PA-RISC ELF files.
-   Copyright (C) 1990, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
 
    Written by
 
@@ -209,7 +209,7 @@ static unsigned long hppa_elf_relocate_insn
 static bfd_reloc_status_type hppa_elf_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd*, char **));
 
-static CONST reloc_howto_type * elf_hppa_reloc_type_lookup
+static reloc_howto_type * elf_hppa_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 
 static boolean elf32_hppa_set_section_contents
@@ -241,7 +241,7 @@ static boolean elf32_hppa_add_symbol_hook
 	   const char **, flagword *, asection **, bfd_vma *));
 
 static bfd_reloc_status_type elf32_hppa_bfd_final_link_relocate
-  PARAMS ((const reloc_howto_type *, bfd *, bfd *, asection *,
+  PARAMS ((reloc_howto_type *, bfd *, bfd *, asection *,
 	   bfd_byte *, bfd_vma, bfd_vma, bfd_vma, struct bfd_link_info *,
 	   asection *, const char *, int));
 
@@ -784,7 +784,7 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
   for (; rel < relend; rel++)
     {
       int r_type;
-      const reloc_howto_type *howto;
+      reloc_howto_type *howto;
       long r_symndx;
       struct elf_link_hash_entry *h;
       Elf_Internal_Sym *sym;
@@ -841,14 +841,15 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  indx = r_symndx - symtab_hdr->sh_info;
 	  h = elf_sym_hashes (input_bfd)[indx];
-	  if (h->root.type == bfd_link_hash_defined)
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
 	    {
 	      sym_sec = h->root.u.def.section;
 	      relocation = (h->root.u.def.value
 			    + sym_sec->output_offset
 			    + sym_sec->output_section->vma);
 	    }
-	  else if (h->root.type == bfd_link_hash_weak)
+	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
 	  else
 	    {
@@ -890,6 +891,16 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  switch (r)
 	    {
+	    /* This can happen for DP relative relocs if $global$ is
+	       undefined.  This is a panic situation so we don't try
+	       to continue.  */
+	    case bfd_reloc_undefined:
+	    case bfd_reloc_notsupported:
+	      if (!((*info->callbacks->undefined_symbol)
+		    (info, "$global$", input_bfd,
+		     input_section, rel->r_offset)))
+		return false;
+	      return false;
 	    case bfd_reloc_dangerous:
 	      {
 		/* We use this return value to indicate that we performed
@@ -1215,7 +1226,7 @@ static bfd_reloc_status_type
 elf32_hppa_bfd_final_link_relocate (howto, input_bfd, output_bfd,
 				    input_section, contents, offset, value,
 				    addend, info, sym_sec, sym_name, is_local)
-     const reloc_howto_type *howto;
+     reloc_howto_type *howto;
      bfd *input_bfd;
      bfd *output_bfd;
      asection *input_section;
@@ -1251,6 +1262,11 @@ elf32_hppa_bfd_final_link_relocate (howto, input_bfd, output_bfd,
       /* If there isn't a $global$, then we're in deep trouble.  */
       if (h == NULL)
 	return bfd_reloc_notsupported;
+
+      /* If $global$ isn't a defined symbol, then we're still in deep
+	 trouble.  */
+      if (h->root.type != bfd_link_hash_defined)
+	return bfd_reloc_undefined;
 
       sec = h->root.u.def.section;
       elf32_hppa_hash_table (info)->global_value = (h->root.u.def.value
@@ -1525,7 +1541,7 @@ do_basic_type_1:
 /* Return the address of the howto table entry to perform the CODE
    relocation for an ARCH machine.  */
 
-static CONST reloc_howto_type *
+static reloc_howto_type *
 elf_hppa_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
@@ -2815,7 +2831,8 @@ elf32_hppa_size_stubs (stub_bfd, output_bfd, link_info)
 
 		  index = r_index - symtab_hdr->sh_info;
 		  hash = elf_sym_hashes (input_bfd)[index];
-		  if (hash->root.type == bfd_link_hash_defined)
+		  if (hash->root.type == bfd_link_hash_defined
+		      || hash->root.type == bfd_link_hash_defweak)
 		    {
 		      sym_sec = hash->root.u.def.section;
 		      sym_name = hash->root.root.string;

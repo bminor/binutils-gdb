@@ -1,3 +1,9 @@
+Fri Jun 16 00:07:25 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* elf32-hppa.c (elf32_hppa_bfd_link_link_relocate): Use the right
+	type field (there are two!) when checking to see if $global$ is
+	defined.
+
 Thu Jun 15 14:03:47 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* bfd-in.h, bfd-in2.h (bfd_boolean): Rename bfd_true, bfd_false
