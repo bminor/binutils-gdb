@@ -410,7 +410,7 @@ copy_usage (FILE *stream, int exit_status)
   -G --keep-global-symbol <name>   Localize all symbols except <name>\n\
   -W --weaken-symbol <name>        Force symbol <name> to be marked as a weak\n\
      --weaken                      Force all global symbols to be marked as weak\n\
-  -w --wildcard                    Permit wildcard in symbol comparasion\n\
+  -w --wildcard                    Permit wildcard in symbol comparison\n\
   -x --discard-all                 Remove all non-global symbols\n\
   -X --discard-locals              Remove any compiler-generated symbols\n\
   -i --interleave <number>         Only copy one out of every <number> bytes\n\
@@ -485,7 +485,7 @@ strip_usage (FILE *stream, int exit_status)
      --only-keep-debug             Strip everything but the debug information\n\
   -N --strip-symbol=<name>         Do not copy symbol <name>\n\
   -K --keep-symbol=<name>          Only copy symbol <name>\n\
-  -w --wildcard                    Permit wildcard in symbol comparasion\n\
+  -w --wildcard                    Permit wildcard in symbol comparison\n\
   -x --discard-all                 Remove all non-global symbols\n\
   -X --discard-locals              Remove any compiler-generated symbols\n\
   -v --verbose                     List all object files modified\n\
