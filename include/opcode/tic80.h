@@ -200,6 +200,15 @@ extern const struct tic80_operand tic80_operands[];
 
 #define TIC80_OPERAND_BASEREL	(1 << 11)
 
+/* This operand is an "endmask" field for a shift instruction.
+   It is treated special in that it can have values of 0-32,
+   where 0 and 32 result in the same instruction.  The assembler
+   must be able to accept both endmask values.  This disassembler
+   has no way of knowing from the instruction which value was 
+   given at assembly time, so it just uses '0'. */
+
+#define TIC80_OPERAND_ENDMASK	(1 << 12)
+
 /* This operand is one of the 32 general purpose registers.
    The disassembler prints these with a leading 'r'. */
 
