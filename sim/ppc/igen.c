@@ -1543,7 +1543,8 @@ lf_print_semantic_function_header(lf *file,
 				  int is_inline_function)
 {
   lf_printf(file, "\n");
-  lf_printf(file, "STATIC_SEMANTICS unsigned_word ");
+  lf_print_function_type(file, "unsigned_word", "EXTERN_SEMANTICS",
+			 " ");
   lf_print_function_name(file,
 			 basename,
 			 expanded_bits,
@@ -1599,8 +1600,9 @@ semantics_h_function(insn_table *entry,
   }
   else {
     lf_printf(file, "\n");
-    lf_printf(file, "INLINE_SEMANTICS %s %s\n(%s);\n",
-	      function->fields[function_type],
+    lf_print_function_type(file, function->fields[function_type],
+			   "INLINE_SEMANTICS", " ");
+    lf_printf(file, "%s\n(%s);\n",
 	      function->fields[function_name],
 	      function->fields[function_param]);
   }
@@ -1615,15 +1617,6 @@ gen_semantics_h(insn_table *table, lf *file)
   lf_printf(file, "\n");
   lf_printf(file, "#ifndef _SEMANTICS_H_\n");
   lf_printf(file, "#define _SEMANTICS_H_\n");
-  lf_printf(file, "\n");
-  lf_printf(file, "#ifndef INLINE_SEMANTICS\n");
-  lf_printf(file, "#define INLINE_SEMANTICS\n");
-  lf_printf(file, "#endif\n");
-  lf_printf(file, "\n");
-  lf_printf(file, "#ifndef STATIC_SEMANTICS\n");
-  lf_printf(file, "#define STATIC_SEMANTICS\n");
-  lf_printf(file, "#endif\n");
-  lf_printf(file, "\n");
   lf_printf(file, "\n");
 
   /* output a declaration for all functions */
@@ -1721,10 +1714,6 @@ gen_icache_h(icache_tree *tree,
   lf_printf(file, "\n");
   lf_printf(file, "#ifndef _ICACHE_H_\n");
   lf_printf(file, "#define _ICACHE_H_\n");
-  lf_printf(file, "\n");
-  lf_printf(file, "#ifndef INLINE_ICACHE\n");
-  lf_printf(file, "#define INLINE_ICACHE\n");
-  lf_printf(file, "#endif\n");
   lf_printf(file, "\n");
 
   lf_printf(file, "#define WITH_IDECODE_CACHE_SIZE %d\n",
@@ -2292,8 +2281,9 @@ semantics_c_function(insn_table *table,
   }
   else {
     lf_printf(file, "\n");
-    lf_printf(file, "INLINE_SEMANTICS %s\n%s(%s)\n",
-	      function->fields[function_type],
+    lf_print_function_type(file, function->fields[function_type],
+			   "INLINE_SEMANTICS", "\n");
+    lf_printf(file, "%s(%s)\n",
 	      function->fields[function_name],
 	      function->fields[function_param]);
   }
@@ -2315,10 +2305,6 @@ gen_semantics_c(insn_table *table, lf *file)
   lf_printf(file, "\n");
   lf_printf(file, "#ifndef _SEMANTICS_C_\n");
   lf_printf(file, "#define _SEMANTICS_C_\n");
-  lf_printf(file, "\n");
-  lf_printf(file, "#ifndef STATIC_INLINE_SEMANTICS\n");
-  lf_printf(file, "#define STATIC_INLINE_SEMANTICS STATIC_INLINE\n");
-  lf_printf(file, "#endif\n");
   lf_printf(file, "\n");
   lf_printf(file, "#include \"cpu.h\"\n");
   lf_printf(file, "#include \"idecode.h\"\n");
@@ -2359,10 +2345,6 @@ gen_idecode_h(insn_table *table, lf *file)
   lf_printf(file, "#ifndef _IDECODE_H_\n");
   lf_printf(file, "#define _IDECODE_H_\n");
   lf_printf(file, "\n");
-  lf_printf(file, "#ifndef INLINE_IDECODE\n");
-  lf_printf(file, "#define INLINE_IDECODE\n");
-  lf_printf(file, "#endif\n");
-  lf_printf(file, "\n");
   lf_printf(file, "#include \"idecode_expression.h\"\n");
   lf_printf(file, "#include \"idecode_fields.h\"\n");
   lf_printf(file, "#include \"idecode_branch.h\"\n");
@@ -2372,12 +2354,14 @@ gen_idecode_h(insn_table *table, lf *file)
   lf_printf(file, "typedef unsigned_word idecode_semantic\n(%s);\n",
 	    (idecode_cache ? cache_semantic_formal : semantic_formal));
   lf_printf(file, "\n");
-  if (idecode_cache)
-    lf_printf(file, "INLINE_IDECODE idecode_semantic *idecode\n(%s);\n",
-	      cache_idecode_formal);
-  else
-    lf_printf(file, "INLINE_IDECODE unsigned_word idecode_issue\n(%s);\n",
-	      semantic_formal);
+  if (idecode_cache) {
+    lf_print_function_type(file, "idecode_semantic *", "INLINE_IDECODE", " ");
+    lf_printf(file, "idecode\n(%s);\n", cache_idecode_formal);
+  }
+  else {
+    lf_print_function_type(file, "unsigned_word", "INLINE_IDECODE", " ");
+    lf_printf(file, "idecode_issue\n(%s);\n", semantic_formal);
+  }
   lf_printf(file, "\n");
   lf_printf(file, "#endif /* _IDECODE_H_ */\n");
 }
@@ -2566,10 +2550,13 @@ idecode_switch_end(insn_table *table,
   ASSERT(table->opcode_rule->use_switch);
   ASSERT(table->opcode);
 
+  lf_printf(file, "default:\n");
   if (table->opcode_rule->use_switch == 1
       && !table->opcode->is_boolean) {
-    lf_printf(file, "default:\n");
     lf_print_idecode_switch_illegal(file);
+  }
+  else {
+    lf_printf(file, "  error(\"igen internal error - bad switch generated\n\");\n");
   }
   lf_printf(file, "}\n");
 }
@@ -2680,7 +2667,7 @@ lf_print_c_cracker_function(lf *file,
 {
   /* if needed, generate code to enter this routine into a cache */
   lf_printf(file, "\n");
-  lf_printf(file, "STATIC_IDECODE idecode_semantic *\n");
+  lf_printf(file, "static idecode_semantic *\n");
   lf_print_function_name(file,
 			 instruction->file_entry->fields[insn_name],
 			 expanded_bits,
@@ -2733,7 +2720,8 @@ idecode_c_internal_function(insn_table *table,
   ASSERT(idecode_cache != 0);
   if (it_is("internal", function->fields[insn_flags])) {
     lf_printf(file, "\n");
-    lf_printf(file, "STATIC_INLINE_IDECODE idecode_semantic *\n");
+    lf_print_function_type(file, "idecode_semantic *", "STATIC_INLINE_IDECODE",
+			   "\n");
     lf_print_function_name(file,
 			   function->fields[insn_name],
 			   NULL,
@@ -2770,14 +2758,6 @@ gen_idecode_c(insn_table *table, lf *file)
   lf_printf(file, "\n");
   lf_printf(file, "#ifndef _IDECODE_C_\n");
   lf_printf(file, "#define _IDECODE_C_\n");
-  lf_printf(file, "\n");
-  lf_printf(file, "#ifndef STATIC_INLINE_IDECODE\n");
-  lf_printf(file, "#define STATIC_INLINE_IDECODE STATIC_INLINE\n");
-  lf_printf(file, "#endif\n");
-  lf_printf(file, "\n");
-  lf_printf(file, "#ifndef STATIC_IDECODE\n");
-  lf_printf(file, "#define STATIC_IDECODE\n");
-  lf_printf(file, "#endif\n");
   lf_printf(file, "\n");
   lf_printf(file, "#include \"cpu.h\"\n");
   lf_printf(file, "#include \"idecode.h\"\n");
@@ -2848,12 +2828,14 @@ gen_idecode_c(insn_table *table, lf *file)
 
   /* output the main idecode routine */
   lf_printf(file, "\n");
-  if (idecode_cache)
-    lf_printf(file, "INLINE_IDECODE idecode_semantic *\nidecode\n(%s)\n",
-	      cache_idecode_formal);
-  else
-    lf_printf(file, "INLINE_IDECODE unsigned_word\nidecode_issue\n(%s)\n",
-	      semantic_formal);
+  if (idecode_cache) {
+    lf_print_function_type(file, "idecode_semantic *", "INLINE_IDECODE", "\n");
+    lf_printf(file, "idecode\n(%s)\n", cache_idecode_formal);
+  }
+  else {
+    lf_print_function_type(file, "unsigned_word", "INLINE_IDECODE", "\n");
+    lf_printf(file, "idecode_issue\n(%s)\n", semantic_formal);
+  }
   lf_printf(file, "{\n");
   lf_indent(file, +2);
   if (table->opcode_rule->use_switch)
@@ -2892,11 +2874,6 @@ gen_itable_h(insn_table *table, lf *file)
   lf_printf(file, "\n");
   lf_printf(file, "#ifndef _ITABLE_H_\n");
   lf_printf(file, "#define _ITABLE_H_\n");
-  lf_printf(file, "\n");
-  lf_printf(file, "#ifndef INLINE_ITABLE\n");
-  lf_printf(file, "#define INLINE_ITABLE\n");
-  lf_printf(file, "#endif\n");
-  lf_printf(file, "\n");
   lf_printf(file, "\n");
 
   /* output an enumerated type for each instruction */
@@ -2958,10 +2935,6 @@ gen_itable_c(insn_table *table, lf *file)
   lf_printf(file, "#ifndef _ITABLE_C_\n");
   lf_printf(file, "#define _ITABLE_C_\n");
   lf_printf(file, "\n");
-  lf_printf(file, "#ifndef STATIC_INLINE_ITABLE\n");
-  lf_printf(file, "#define STATIC_INLINE_ITABLE STATIC_INLINE\n");
-  lf_printf(file, "#endif\n");
-  lf_printf(file, "\n");
   lf_printf(file, "#include \"itable.h\"\n");
   lf_printf(file, "\n");
 
@@ -3002,14 +2975,11 @@ model_c_or_h_function(insn_table *entry,
       || function->fields[function_type][0] == '\0') {
     error("Model function type not specified for %s", function->fields[function_name]);
   }
-  else {
-    lf_printf(file, "\n");
-    lf_printf(file, "%s %s %s\n(%s);\n",
-	      prefix,
-	      function->fields[function_type],
-	      function->fields[function_name],
-	      function->fields[function_param]);
-  }
+  lf_printf(file, "\n");
+  lf_print_function_type(file, function->fields[function_type], prefix, " ");
+  lf_printf(file, "%s\n(%s);\n",
+	    function->fields[function_name],
+	    function->fields[function_param]);
   lf_printf(file, "\n");
 }
 
@@ -3036,22 +3006,6 @@ gen_model_h(insn_table *table, lf *file)
     model_c_or_h_data(table, file, macro->file_entry);
   }
 
-  lf_printf(file, "#ifndef INLINE_MODEL\n");
-  lf_printf(file, "#define INLINE_MODEL\n");
-  lf_printf(file, "#endif\n");
-  lf_printf(file, "#ifndef STATIC_INLINE_MODEL\n");
-  lf_printf(file, "#define STATIC_INLINE_MODEL STATIC_INLINE\n");
-  lf_printf(file, "#endif\n");
-  lf_printf(file, "\n");
-  lf_printf(file, "#ifndef STATIC_MODEL\n");
-  lf_printf(file, "#define STATIC_MODEL\n");
-  lf_printf(file, "#endif\n");
-  lf_printf(file, "\n");
-  lf_printf(file, "#ifndef EXTERN_MODEL\n");
-  lf_printf(file, "#define EXTERN_MODEL extern\n");
-  lf_printf(file, "#endif\n");
-  lf_printf(file, "\n");
-
   lf_printf(file, "typedef enum _model_enum {\n");
   lf_printf(file, "  MODEL_NONE,\n");
   for (model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
@@ -3069,9 +3023,9 @@ gen_model_h(insn_table *table, lf *file)
   lf_printf(file, "\n");
 
   lf_printf(file, "extern model_enum current_model;\n");
-  lf_printf(file, "EXTERN_MODEL const char *model_name[ (int)nr_models ];\n");
-  lf_printf(file, "EXTERN_MODEL const char *const *const model_func_unit_name[ (int)nr_models ];\n");
-  lf_printf(file, "EXTERN_MODEL const model_time *const model_time_mapping[ (int)nr_models ];\n");
+  lf_printf(file, "extern const char *model_name[ (int)nr_models ];\n");
+  lf_printf(file, "extern const char *const *const model_func_unit_name[ (int)nr_models ];\n");
+  lf_printf(file, "extern const model_time *const model_time_mapping[ (int)nr_models ];\n");
   lf_printf(file, "\n");
 
   for(insn_ptr = model_functions; insn_ptr; insn_ptr = insn_ptr->next) {
@@ -3090,37 +3044,43 @@ gen_model_h(insn_table *table, lf *file)
   }
 
   if (!model_create_p) {
-    lf_printf(file, "INLINE_MODEL model_data *model_create\n");
+    lf_print_function_type(file, "model_data *", "INLINE_MODEL", " ");
+    lf_printf(file, "model_create\n");
     lf_printf(file, "(cpu *processor);\n");
     lf_printf(file, "\n");
   }
 
   if (!model_init_p) {
-    lf_printf(file, "INLINE_MODEL void model_init\n");
+    lf_print_function_type(file, "void", "INLINE_MODEL", " ");
+    lf_printf(file, "model_init\n");
     lf_printf(file, "(model_data *model_ptr);\n");
     lf_printf(file, "\n");
   }
 
   if (!model_halt_p) {
-    lf_printf(file, "INLINE_MODEL void model_halt\n");
+    lf_print_function_type(file, "void", "INLINE_MODEL", " ");
+    lf_printf(file, "model_halt\n");
     lf_printf(file, "(model_data *model_ptr);\n");
     lf_printf(file, "\n");
   }
 
   if (!model_mon_info_p) {
-    lf_printf(file, "INLINE_MODEL model_print *model_mon_info\n");
+    lf_print_function_type(file, "model_print *", "INLINE_MODEL", " ");
+    lf_printf(file, "model_mon_info\n");
     lf_printf(file, "(model_data *model_ptr);\n");
     lf_printf(file, "\n");
   }
 
   if (!model_mon_info_free_p) {
-    lf_printf(file, "INLINE_MODEL void model_mon_info_free\n");
+    lf_print_function_type(file, "void", "INLINE_MODEL", " ");
+    lf_printf(file, "model_mon_info_free\n");
     lf_printf(file, "(model_data *model_ptr,\n");
     lf_printf(file, " model_print *info_ptr);\n");
     lf_printf(file, "\n");
   }
 
-  lf_printf(file, "INLINE_MODEL void model_set\n");
+  lf_print_function_type(file, "void", "INLINE_MODEL", " ");
+  lf_printf(file, "model_set\n");
   lf_printf(file, "(const char *name);\n");
   lf_printf(file, "\n");
   lf_printf(file, "#endif /* _MODEL_H_ */\n");
@@ -3174,9 +3134,8 @@ model_c_function(insn_table *table,
   }
   else {
     lf_printf(file, "\n");
-    lf_printf(file, "%s %s\n%s(%s)\n",
-	      prefix,
-	      function->fields[function_type],
+    lf_print_function_type(file, function->fields[function_type], prefix, "\n");
+    lf_printf(file, "%s(%s)\n",
 	      function->fields[function_name],
 	      function->fields[function_param]);
   }
@@ -3222,7 +3181,7 @@ gen_model_c(insn_table *table, lf *file)
   }
 
   for(insn_ptr = model_static; insn_ptr; insn_ptr = insn_ptr->next) {
-    model_c_or_h_function(table, file, insn_ptr->file_entry, "STATIC_MODEL");
+    model_c_or_h_function(table, file, insn_ptr->file_entry, "/*h*/STATIC");
   }
 
   for(insn_ptr = model_internal; insn_ptr; insn_ptr = insn_ptr->next) {
@@ -3230,7 +3189,7 @@ gen_model_c(insn_table *table, lf *file)
   }
 
   for(insn_ptr = model_static; insn_ptr; insn_ptr = insn_ptr->next) {
-    model_c_function(table, file, insn_ptr->file_entry, "STATIC_MODEL");
+    model_c_function(table, file, insn_ptr->file_entry, "/*c*/STATIC");
   }
 
   for(insn_ptr = model_internal; insn_ptr; insn_ptr = insn_ptr->next) {
@@ -3253,7 +3212,8 @@ gen_model_c(insn_table *table, lf *file)
   }
 
   if (!model_create_p) {
-    lf_printf(file, "INLINE_MODEL model_data *model_create(cpu *processor)\n");
+    lf_print_function_type(file, "model_data *", "INLINE_MODEL", "\n");
+    lf_printf(file, "model_create(cpu *processor)\n");
     lf_printf(file, "{\n");
     lf_printf(file, "  return (model_data *)0;\n");
     lf_printf(file, "}\n");
@@ -3261,21 +3221,24 @@ gen_model_c(insn_table *table, lf *file)
   }
 
   if (!model_init_p) {
-    lf_printf(file, "INLINE_MODEL void model_init(model_data *model_ptr)\n");
+    lf_print_function_type(file, "void", "INLINE_MODEL", "\n");
+    lf_printf(file, "model_init(model_data *model_ptr)\n");
     lf_printf(file, "{\n");
     lf_printf(file, "}\n");
     lf_printf(file, "\n");
   }
 
   if (!model_halt_p) {
-    lf_printf(file, "INLINE_MODEL void model_halt(model_data *model_ptr)\n");
+    lf_print_function_type(file, "void", "INLINE_MODEL", "\n");
+    lf_printf(file, "model_halt(model_data *model_ptr)\n");
     lf_printf(file, "{\n");
     lf_printf(file, "}\n");
     lf_printf(file, "\n");
   }
 
   if (!model_mon_info_p) {
-    lf_printf(file, "INLINE_MODEL model_print *model_mon_info(model_data *model_ptr)\n");
+    lf_print_function_type(file, "model_print *", "INLINE_MODEL", "\n");
+    lf_printf(file, "model_mon_info(model_data *model_ptr)\n");
     lf_printf(file, "{\n");
     lf_printf(file, "  return (model_print *)0;\n");
     lf_printf(file, "}\n");
@@ -3283,8 +3246,9 @@ gen_model_c(insn_table *table, lf *file)
   }
 
   if (!model_mon_info_free_p) {
-    lf_printf(file, "INLINE_MODEL void model_mon_info_free(model_data *model_ptr,\n");
-    lf_printf(file, "                                      model_print *info_ptr)\n");
+    lf_print_function_type(file, "void", "INLINE_MODEL", "\n");
+    lf_printf(file, "model_mon_info_free(model_data *model_ptr,\n");
+    lf_printf(file, "                    model_print *info_ptr)\n");
     lf_printf(file, "{\n");
     lf_printf(file, "}\n");
     lf_printf(file, "\n");
@@ -3306,25 +3270,29 @@ gen_model_c(insn_table *table, lf *file)
     lf_printf(file, "\f\n");
   }
 
-  lf_printf(file, "STATIC_MODEL const model_time *const model_time_mapping[ (int)nr_models ] = {\n");
+  lf_printf(file, "#ifndef _INLINE_C_\n");
+  lf_printf(file, "const model_time *const model_time_mapping[ (int)nr_models ] = {\n");
   lf_printf(file, "  (const model_time *const)0,\n");
   for(model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
     lf_printf(file, "  model_time_%s,\n", model_ptr->name);
   }
   lf_printf(file, "};\n");
+  lf_printf(file, "#endif\n");
   lf_printf(file, "\n");
 
   lf_printf(file, "\f\n");
   lf_printf(file, "/* map model enumeration into printable string */\n");
-  lf_printf(file, "STATIC_MODEL const char *model_name[ (int)nr_models ] = {\n");
+  lf_printf(file, "#ifndef _INLINE_C_\n");
+  lf_printf(file, "const char *model_name[ (int)nr_models ] = {\n");
   lf_printf(file, "  \"NONE\",\n");
   for (model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
     lf_printf(file, "  \"%s\",\n", model_ptr->printable_name);
   }
   lf_printf(file, "};\n");
+  lf_printf(file, "#endif\n");
   lf_printf(file, "\n");
 
-  lf_printf(file, "INLINE_MODEL void\n");
+  lf_print_function_type(file, "void", "INLINE_MODEL", "\n");
   lf_printf(file, "model_set(const char *name)\n");
   lf_printf(file, "{\n");
   if (models) {

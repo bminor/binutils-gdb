@@ -1,3 +1,22 @@
+Thu Mar 21 00:06:09 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
+
+        * main.c (error): Be careful to not try to print out statistics
+        when the simulation was never created.
+
+Thu Mar  7 19:53:49 1996  Michael Meissner  <meissner@cygnus.com>
+
+	* emul_netbsd.c: Only include sys/mount.h if HAVE_SYS_MOUNT_H is
+	defined.
+	* configure.in: Test for sys/mount.h.
+	* configure,config.in: Regenerate.
+
+Mon Feb 26 21:11:20 1996  Andrew Cagney - aka Noid  <cagney@highland.com.au>
+
+        * igen.c (idecode_switch_end): Output a default entry when the
+        switch statement is perfect.  Firstly stops GCC complaining about
+        an incomplete switch and secondly it will be eliminated by a good
+        compiler any way.
+
 Thu Feb 22 22:48:57 1996  Andrew Cagney  <cagney@highland.com.au>
 
 	* README, RUN, INSTALL: Update to reflect announcement
