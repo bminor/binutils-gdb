@@ -12,7 +12,7 @@ END-INFO-DIR-ENTRY
 @ifinfo
 This file documents the internals of the GNU debugger GDB.
 
-Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+Copyright 1990-1999 Free Software Foundation, Inc.
 Contributed by Cygnus Solutions.  Written by John Gilmore.
 Second Edition by Stan Shebs.
 
@@ -55,7 +55,7 @@ regarded as a program in the language TeX).
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1990, 91, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+Copyright @copyright{} 1990-1999 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -1562,9 +1562,15 @@ where @var{valbuf} is the address of the value to be stored.
 The default value of the `symbol-reloading' variable.  (Never defined in
 current sources.)
 
-@item TARGET_BYTE_ORDER
-The ordering of bytes in the target.  This must be defined to be either
-@code{BIG_ENDIAN} or @code{LITTLE_ENDIAN}.
+@item TARGET_BYTE_ORDER_DEFAULT
+The ordering of bytes in the target.  This must be either
+@code{BIG_ENDIAN} or @code{LITTLE_ENDIAN}.  This macro replaces
+@var{TARGET_BYTE_ORDER} which is deprecated.
+
+@item TARGET_BYTE_ORDER_SELECTABLE_P
+Non-zero if the target has both @code{BIG_ENDIAN} and
+@code{LITTLE_ENDIAN} variants.  This macro replaces
+@var{TARGET_BYTE_ORDER_SELECTABLE} which is deprecated.
 
 @item TARGET_CHAR_BIT
 Number of bits in a char; defaults to 8.
@@ -2185,22 +2191,96 @@ finish by printing a newline, to flush the wrap buffer, before switching
 to unfiltered (``@code{printf}'') output.  Symbol reading routines that
 print warnings are a good example.
 
-@section Coding Style
+@section GDB Coding Standards
 
 GDB follows the GNU coding standards, as described in
 @file{etc/standards.texi}.  This file is also available for anonymous
-FTP from GNU archive sites.  There are some additional considerations
-for GDB maintainers that reflect the unique environment and style of GDB
-maintenance.  If you follow these guidelines, GDB will be more
-consistent and easier to maintain.
+FTP from GNU archive sites.  GDB takes a strict interpretation of the
+standard; in general, when the GNU standard recommends a practice but
+does not require it, GDB requires it.
 
-GDB's policy on the use of prototypes is that prototypes are used to
-@emph{declare} functions but never to @emph{define} them.  Simple macros
-are used in the declarations, so that a non-ANSI compiler can compile
-GDB without trouble.  The simple macro calls are used like this:
+GDB follows an additional set of coding standards specific to GDB,
+as described in the following sections.
+
+You can configure with @samp{--enable-build-warnings} to get GCC to
+check on a number of these rules.  GDB sources ought not to engender any
+complaints, unless they are caused by bogus host systems.  (The exact
+set of enabled warnings is currently @samp{-Wall -Wpointer-arith
+-Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations}.
+
+@subsection Formatting
+
+The standard GNU recommendations for formatting must be followed
+strictly.
+
+Note that while in a definition, the function's name must be in column
+zero, in a function declaration, the name must be on the same line as
+the return type.
+
+In addition, there must be a space between a function or macro name and
+the opening parenthesis of its argument list (except for macro
+definitions, as required by C).  There must not be a space after an open
+paren/bracket or before a close paren/bracket.
+
+While additional whitespace is generally helpful for reading, do not use
+more than one blank line to separate blocks, and avoid adding whitespace
+after the end of a program line (as of 1/99, some 600 lines had whitespace
+after the semicolon).  Excess whitespace causes difficulties for diff and
+patch.
+
+@subsection Comments
+
+The standard GNU requirements on comments must be followed strictly.
+
+Block comments must appear in the following form, with no `/*'- or
+'*/'-only lines, and no leading `*':
 
 @example @code
-extern int memory_remove_breakpoint PARAMS ((CORE_ADDR, char *));
+/* Wait for control to return from inferior to debugger.  If inferior
+   gets a signal, we may decide to start it up again instead of
+   returning.  That is why there is a loop in this function.  When
+   this function actually returns it means the inferior should be left
+   stopped and GDB should read more commands.  */
+@end example
+
+(Note that this format is encouraged by Emacs; tabbing for a multi-line
+comment works correctly, and M-Q fills the block consistently.)
+
+Put a blank line between the block comments preceding function or
+variable definitions, and the definition itself.
+
+In general, put function-body comments on lines by themselves, rather
+than trying to fit them into the 20 characters left at the end of a
+line, since either the comment or the code will inevitably get longer
+than will fit, and then somebody will have to move it anyhow.
+
+@subsection C Usage
+
+Code must not depend on the sizes of C data types, the format of the
+host's floating point numbers, the alignment of anything, or the order
+of evaluation of expressions.
+
+Use functions freely.  There are only a handful of compute-bound areas
+in GDB that might be affected by the overhead of a function call, mainly
+in symbol reading.  Most of GDB's performance is limited by the target
+interface (whether serial line or system call).
+
+However, use functions with moderation.  A thousand one-line functions
+are just as hard to understand as one thousand-line function.
+
+@subsection Function Prototypes
+
+Prototypes must be used to @emph{declare} functions but never to
+@emph{define} them.  Prototypes for GDB functions must include both the
+argument type and name, with the name matching that used in the actual
+function definition.
+
+For the sake of compatibility with pre-ANSI compilers, define prototypes
+with the @code{PARAMS} macro:
+
+@example @code
+extern int memory_remove_breakpoint PARAMS ((CORE_ADDR addr,
+                                             char *contents_cache));
 @end example
 
 Note the double parentheses around the parameter types.  This allows an
@@ -2209,22 +2289,21 @@ C preprocessor.  When the function has no parameters, it should be
 described like:
 
 @example @code
-void noprocess PARAMS ((void));
+extern void noprocess PARAMS ((void));
 @end example
 
 The @code{PARAMS} macro expands to its argument in ANSI C, or to a
 simple @code{()} in traditional C.
 
 All external functions should have a @code{PARAMS} declaration in a
-header file that callers include.  All static functions should have such
-a declaration near the top of their source file.
+header file that callers include, except for @code{_initialize_*}
+functions, which must be external so that @file{init.c} construction
+works, but shouldn't be visible to random source files.
 
-We don't have a gcc option that will properly check that these rules
-have been followed, but it's GDB policy, and we periodically check it
-using the tools available (plus manual labor), and clean up any
-remnants.
+All static functions must be declared in a block near the top of the
+source file.
 
-@section Clean Design
+@subsection Clean Design
 
 In addition to getting the syntax right, there's the little question of
 semantics.  Some things are done in certain ways in GDB because long
@@ -2326,11 +2405,6 @@ these have all been consolidated into @file{infptrace.c}.
 any system-independent file would (hooks, #if defined, etc.), and
 machines which are radically different don't need to use infptrace.c at
 all.
-
-@emph{Do} write code that doesn't depend on the sizes of C data types,
-the format of the host's floating point numbers, the alignment of anything,
-or the order of evaluation of expressions.  In short, follow good 
-programming practices for writing portable C code.
 
 
 @node Porting GDB
