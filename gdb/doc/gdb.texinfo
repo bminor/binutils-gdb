@@ -1661,6 +1661,7 @@ Some things do not work as well with @samp{-g -O} as with just
 @samp{-g}, particularly on machines with instruction scheduling.  If in
 doubt, recompile with @samp{-g} alone, and if this fixes the problem,
 please report it to us as a bug (including a test case!).
+@xref{Variables}, for more information about debugging optimized code.
 
 Older versions of the @sc{gnu} C compiler permitted a variant option
 @w{@samp{-gg}} for debugging information.  @value{GDBN} no longer supports this
@@ -4464,25 +4465,26 @@ following command-line syntax:
 @smallexample
 ex +@var{number} file
 @end smallexample
-The optional numeric value +@var{number} designates the active line in
-the file.}.  By default, it is @value{EDITOR}, but you can change this
+The optional numeric value +@var{number} specifies the number of the line in
+the file where to start editing.}.
+By default, it is @file{@value{EDITOR}}, but you can change this
 by setting the environment variable @code{EDITOR} before using
 @value{GDBN}.  For example, to configure @value{GDBN} to use the
 @code{vi} editor, you could use these commands with the @code{sh} shell:
 @smallexample
 EDITOR=/usr/bin/vi
 export EDITOR
-gdb ...
+gdb @dots{}
 @end smallexample
 or in the @code{csh} shell,
 @smallexample
 setenv EDITOR /usr/bin/vi
-gdb ...
+gdb @dots{}
 @end smallexample
 
 @node Search
 @section Searching source files
-@cindex searching
+@cindex searching source files
 @kindex reverse-search
 
 There are two commands for searching through the current source file for a
@@ -4591,6 +4593,7 @@ directories in one command.
 
 @node Machine Code
 @section Source and machine code
+@cindex source line and its code address
 
 You can use the command @code{info line} to map source lines to program
 addresses (and vice versa), and the command @code{disassemble} to display
@@ -4620,6 +4623,7 @@ Line 895 of "builtin.c" starts at pc 0x634c and ends at 0x6350.
 @end smallexample
 
 @noindent
+@cindex code address and its source line
 We can also inquire (using @code{*@var{addr}} as the form for
 @var{linespec}) what source line covers a particular address:
 @smallexample
@@ -4628,6 +4632,7 @@ Line 926 of "builtin.c" starts at pc 0x63e4 and ends at 0x6404.
 @end smallexample
 
 @cindex @code{$_} and @code{info line}
+@cindex @code{x} command, default address
 @kindex x@r{(examine), and} info line
 After @code{info line}, the default address for the @code{x} command
 is changed to the starting address of the line, so that @samp{x/i} is
@@ -4673,10 +4678,6 @@ mnemonics or other syntax.
 
 @table @code
 @kindex set disassembly-flavor
-@cindex assembly instructions
-@cindex instructions, assembly
-@cindex machine instructions
-@cindex listing machine instructions
 @cindex Intel disassembly flavor
 @cindex AT&T disassembly flavor
 @item set disassembly-flavor @var{instruction-set}
@@ -4717,6 +4718,7 @@ formats}.
 
 @item print
 @itemx print /@var{f}
+@cindex reprint the last value
 If you omit @var{expr}, @value{GDBN} displays the last value again (from the
 @dfn{value history}; @pxref{Value History, ,Value history}).  This allows you to
 conveniently inspect the same value in an alternative format.
@@ -4763,6 +4765,7 @@ casts, and string constants.  It also includes preprocessor macros, if
 you compiled your program to include this information; see
 @ref{Compilation}.
 
+@cindex arrays in expressions
 @value{GDBN} supports array constants in expressions input by
 the user.  The syntax is @{@var{element}, @var{element}@dots{}@}.  For example,
 you can use the command @code{print @{1, 2, 3@}} to build up an array in
@@ -4776,6 +4779,7 @@ languages.
 In this section, we discuss operators that you can use in @value{GDBN}
 expressions regardless of your programming language.
 
+@cindex casts, in expressions
 Casts are supported in all languages, not just in C, because it is so
 useful to cast a number into a pointer in order to examine a structure
 at that address in memory.
@@ -4854,7 +4858,7 @@ in this file.  But it is possible to have more than one such variable or
 function with the same name (in different source files).  If that
 happens, referring to that name has unpredictable effects.  If you wish,
 you can specify a static variable in a particular function or file,
-using the colon-colon notation:
+using the colon-colon (@code{::}) notation:
 
 @cindex colon-colon, context for variables/functions
 @iftex
@@ -4885,6 +4889,8 @@ scope resolution operator in @value{GDBN} expressions.
 
 @cindex wrong values
 @cindex variable values, wrong
+@cindex function entry/exit, wrong values of variables
+@cindex optimized code, wrong values of variables
 @quotation
 @emph{Warning:} Occasionally, a local variable may appear to have the
 wrong value at certain points in a function---just after entry to a new
@@ -4917,18 +4923,20 @@ No symbol "foo" in current context.
 
 To solve such problems, either recompile without optimizations, or use a
 different debug info format, if the compiler supports several such
-formats.  For example, @value{NGCC}, the @sc{gnu} C/C@t{++} compiler
+formats.  For example, @value{NGCC}, the @sc{gnu} C/C@t{++} compiler,
 usually supports the @option{-gstabs+} option.  @option{-gstabs+}
 produces debug info in a format that is superior to formats such as
 COFF.  You may be able to use DWARF 2 (@option{-gdwarf-2}), which is also
 an effective form for debug info.  @xref{Debugging Options,,Options
 for Debugging Your Program or @sc{gnu} CC, gcc.info, Using @sc{gnu} CC}.
-
+@xref{C, , Debugging C++}, for more info about debug info formats
+that are best suited to C@t{++} programs.
 
 @node Arrays
 @section Artificial arrays
 
 @cindex artificial array
+@cindex arrays
 @kindex @@@r{, referencing memory as an array}
 It is often useful to print out several successive objects of the
 same type in memory; a section of an array, or an array of
@@ -5261,6 +5269,7 @@ It also includes expressions which would not be displayed right now
 because they refer to automatic variables not currently available.
 @end table
 
+@cindex display disabled out of scope
 If a display expression refers to local variables, then it does not make
 sense outside the lexical context for which it was set up.  Such an
 expression is disabled when execution enters a context where one of its
