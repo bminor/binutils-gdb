@@ -71,14 +71,20 @@ SECTIONS
     *(.reloc)
     ;
   }
+
+  .drectve BLOCK (0x1000) :
+	{
+	   ${RELOCATING+ *(.drectve); }
+	}
   .junk BLOCK(0x1000) :
   { 					
     *(.debug\$S)
     *(.debug\$T)
     *(.debug\$F)
-    *(.drectve)
     ;
   }
+
+
   .bss BLOCK(0x1000)  :
 	{
 	*(.bss)
