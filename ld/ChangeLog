@@ -1,3 +1,7 @@
+2002-07-01  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* emulparams/vax.sh (OUTPUT_FORMAT): Use a.out-vax-bsd format.
+
 2002-07-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.h (entry_sym): Make it a struct bfd_sym_chain.
