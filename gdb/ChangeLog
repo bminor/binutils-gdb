@@ -1,3 +1,10 @@
+Fri Oct 15 21:29:40 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* findvar.c (value_from_register): When preparing to cast a value
+	from REGISTER_VIRTUAL_TYPE to type, copy the REGISTER_VIRTUAL_SIZE;
+	the old code didn't copy the whole thing.
+	* valops.c (value_assign): Add comment.
+
 Fri Oct 15 12:57:30 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mipsread.c (upgrade_type):  Replace bitsize sanity checks and
