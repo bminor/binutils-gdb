@@ -2319,14 +2319,23 @@ proc create_command_window {} {
 	gdb_cmd {set height 0}
 	gdb_cmd {set width 0}
 
+	bind .cmd.text <Control-c> gdb_stop
+
         # Tk uses the Motifism that Delete means delete forward.  I
 	# hate this, and I'm not gonna take it any more.
         set bsBinding [bind Text <BackSpace>]
         bind .cmd.text <Delete> "delete_char %W ; $bsBinding; break"
-	bind .cmd.text <BackSpace> {delete_char %W}
-	bind .cmd.text <Control-c> gdb_stop
-	bind .cmd.text <Control-u> {delete_line %W ; break}
+	bind .cmd.text <BackSpace> {
+	  if {([%W get -state] == "disabled")} { break }
+	  delete_char %W
+	}
+	bind .cmd.text <Control-u> {
+	  if {([%W cget -state] == "disabled")} { break }
+	  delete_line %W
+	  break
+	}
 	bind .cmd.text <Any-Key> {
+	  if {([%W cget -state] == "disabled")} { break }
 	  set saw_tab 0
 	  %W insert end %A
 	  %W see end
@@ -2334,6 +2343,7 @@ proc create_command_window {} {
 	  break
 	}
 	bind .cmd.text <Key-Return> {
+	  if {([%W cget -state] == "disabled")} { break }
 	  set saw_tab 0
 	  %W insert end \n
 	  interactive_cmd $command_line
@@ -2356,6 +2366,7 @@ proc create_command_window {} {
         bind .cmd.text <B2-Motion> break
         bind .cmd.text <ButtonRelease-2> break
 	bind .cmd.text <Key-Tab> {
+	  if {([%W cget -state] == "disabled")} { break }
 	  set choices [gdb_cmd "complete $command_line"]
 	  set choices [string trimright $choices \n]
 	  set choices [split $choices \n]
