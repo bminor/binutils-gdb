@@ -45,6 +45,7 @@ ho-go32.h
 ho-hpux.h
 ho-i386.h
 ho-i386aix.h
+ho-mipsbsd.h
 ho-rs6000.h
 ho-sun3.h
 ho-sun386.h
@@ -58,9 +59,7 @@ m68k.mt
 m68kcoff.mt
 m88k-opcode.h
 m88k.patches
-mh-i386
-mh-i386aix
-mips.mt
+mips-opocode.h
 obj-aout.c
 obj-aout.h
 obj-bfd-sunos.c
@@ -71,13 +70,14 @@ obj-coff.c
 obj-coff.h
 obj-coffbfd.c
 obj-coffbfd.h
+obj-elf.c
+obj-elf.h
 obj-generic.c
 obj-generic.h
 obj-ieee.c
 obj-ieee.h
 obj-vms.c
 obj-vms.h
-rs6000.mt
 sparc.mt
 tc-a29k.c
 tc-a29k.h
@@ -142,7 +142,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.32  1993/02/04 20:47:35  sac
+# Revision 1.33  1993/02/08 19:24:09  raeburn
+# update for files added and deleted
+#
+# Revision 1.32  1993/02/04  20:47:35  sac
 # 	* config/{h8500.mt, tc-h8500.c, tc-h8500.h, obj-coffbfd.c,
 # 	obj-coffbfd.h}: support for the H8/500
 #
