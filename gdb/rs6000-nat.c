@@ -502,9 +502,10 @@ vmap_ldinfo (ldi)
 	  fatal ("cannot find BFD's iostream for %s", vp->name);
 
 	/* See if we are referring to the same file. */
+	/* An error here is innocuous, most likely meaning that
+	   the file descriptor has become worthless. */
 	if (fstat (fileno(io), &vi) < 0)
-	  fatal ("cannot fstat(fd=%d) the BFD for %s (errno=%d)",
-		 fileno(io), vp->name, errno);
+	  continue;
 
 	if (ii.st_dev != vi.st_dev || ii.st_ino != vi.st_ino)
 	  continue;
@@ -717,10 +718,11 @@ xcoff_relocate_core ()
       vp->dstart = (CORE_ADDR) ldip->ldinfo_dataorg;
       vp->dend = vp->dstart + ldip->ldinfo_datasize;
 
-      if (vp->tadj != 0) {
-	vp->tstart += vp->tadj;
-	vp->tend += vp->tadj;
-      }
+      if (vp->tadj != 0)
+	{
+	  vp->tstart += vp->tadj;
+	  vp->tend += vp->tadj;
+	}
 
       /* Unless this is the exec file,
 	 add our sections to the section table for the core target.  */
