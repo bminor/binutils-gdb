@@ -1583,7 +1583,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 void
 alpha_dwarf2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  frame_unwind_append_predicate (gdbarch, dwarf2_frame_p);
+  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
   frame_base_append_predicate (gdbarch, dwarf2_frame_base_p);
   set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
 }

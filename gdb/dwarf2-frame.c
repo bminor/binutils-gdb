@@ -491,15 +491,12 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
      done for "normal" frames and not for resume-type frames (signal
      handlers, sentinel frames, dummy frames).
 
-     We don't do what GCC's does here (yet).  It's not clear how
-     reliable the method is.  There's also a problem with finding the
-     right FDE; see the comment in dwarf_frame_p.  If dwarf_frame_p
-     selected this frame unwinder because it found the FDE for the
-     next function, using the adjusted return address might not yield
-     a FDE at all.  The problem isn't specific to DWARF CFI; other
-     unwinders loose in similar ways.  Therefore it's probably
-     acceptable to leave things slightly broken for now.  */
-  fs->pc = frame_pc_unwind (next_frame);
+     frame_unwind_address_in_block does just this.
+
+     It's not clear how reliable the method is though - there is the
+     potential for the register state pre-call being different to that
+     on return.  */
+  fs->pc = frame_unwind_address_in_block (next_frame);
 
   /* Find the correct FDE.  */
   fde = dwarf2_frame_find_fde (&fs->pc);
@@ -708,16 +705,13 @@ static const struct frame_unwind dwarf2_frame_unwind =
 };
 
 const struct frame_unwind *
-dwarf2_frame_p (CORE_ADDR pc)
+dwarf2_frame_sniffer (struct frame_info *next_frame)
 {
-  /* The way GDB works, this function can be called with PC just after
-     the last instruction of the function we're supposed to return the
-     unwind methods for.  In that case we won't find the correct FDE;
-     instead we find the FDE for the next function, or we won't find
-     an FDE at all.  There is a possible solution (see the comment in
-     dwarf2_frame_cache), GDB doesn't pass us enough information to
-     implement it.  */
-  if (dwarf2_frame_find_fde (&pc))
+  /* Grab an address that is guarenteed to reside somewhere within the
+     function.  frame_pc_unwind(), for a no-return next function, can
+     end up returning something past the end of this function's body.  */
+  CORE_ADDR block_addr = frame_unwind_address_in_block (next_frame);
+  if (dwarf2_frame_find_fde (&block_addr))
     return &dwarf2_frame_unwind;
 
   return NULL;

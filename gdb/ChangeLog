@@ -1,3 +1,12 @@
+2003-07-21  Andrew Cagney  <cagney@redhat.com>
+
+	* dwarf2-frame.h (dwarf2_frame_sniffer): Replace "dwarf2_frame_p".
+	* dwarf2-frame.c (dwarf2_frame_sniffer): Replace "dwarf2_frame_p".
+	(dwarf2_frame_cache): Use frame_unwind_address_in_block, instead
+	of frame_pc_unwind.
+	* i386-tdep.c (i386_gdbarch_init): Update.
+	* alpha-tdep.c (alpha_dwarf2_init_abi): Update.
+
 2003-07-20  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* m68hc11-tdep.c (m68hc11_pseudo_register_read): Use 

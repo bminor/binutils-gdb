@@ -1811,7 +1811,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fetch_pointer_argument (gdbarch, i386_fetch_pointer_argument);
 
   /* Hook in the DWARF CFI frame unwinder.  */
-  frame_unwind_append_predicate (gdbarch, dwarf2_frame_p);
+  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
   set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
 
   frame_base_set_default (gdbarch, &i386_frame_base);
