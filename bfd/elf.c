@@ -1201,6 +1201,15 @@ bfd_section_from_shdr (abfd, shindex)
 	asection *target_sect;
 	Elf_Internal_Shdr *hdr2;
 
+	/* Check for a bogus link to avoid crashing.  */
+	if (hdr->sh_link >= ehdr->e_shnum)
+	  {
+	    ((*_bfd_error_handler)
+	     (_("%s: invalid link %lu for reloc section %s (index %u)"),
+	      bfd_get_filename (abfd), hdr->sh_link, name, shindex));
+	    return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
+	  }
+
 	/* For some incomprehensible reason Oracle distributes
 	   libraries for Solaris in which some of the objects have
 	   bogus sh_link fields.  It would be nice if we could just

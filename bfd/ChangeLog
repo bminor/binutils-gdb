@@ -1,3 +1,8 @@
+1999-06-23  Ian Lance Taylor  <ian@zembu.com>
+
+	* elf.c (bfd_section_from_shdr): Avoid crashing on a bogus sh_link
+	field.
+
 1999-06-22  Ian Lance Taylor  <ian@zembu.com>
 
 	From Franz Sirl <Franz.Sirl-kernel@lauterbach.com>:
