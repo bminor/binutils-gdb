@@ -1,3 +1,15 @@
+2002-06-24  Keith Seitz  <keiths@redhat.com>
+
+	* mi-cmds.h (mi_execute_command): Add "extern".
+	(mi_error_last_message): New function.
+	* mi-main.c (mi_error_last_message): New function.
+	* mi-interp.c (mi_event_handlers): New static global.
+	(mi_interpreter_init): Don't install mi event handlers here.
+	(mi_interpreter_resume): Install mi event handlers here.
+	(mi_interpreter_exec): Don't actually switch interpreters.
+	Update error messages.
+	exec_proc will return <0 if an error occurs.
+
 2002-06-19  Keith Seitz  <keiths@redhat.com>
 
 	* mi-cmd-break.c (breakpoint_notify): Only query the breakpoint

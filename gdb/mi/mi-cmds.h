@@ -125,5 +125,6 @@ extern int mi_debug_p;
 extern struct ui_file *raw_stdout;
 
 extern char *mi_error_message;
-void mi_execute_command (char *cmd, int from_tty);
+extern void mi_error_last_message (void);
+extern void mi_execute_command (char *cmd, int from_tty);
 #endif

@@ -69,6 +69,17 @@ static void mi1_command_loop (void);
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
+static struct gdb_events mi_event_handlers =
+  {
+    mi_create_breakpoint,
+    mi_delete_breakpoint,
+    mi_modify_breakpoint,
+    mi_create_tracepoint,
+    mi_delete_tracepoint,
+    mi_modify_tracepoint,
+    mi_architecture_changed
+  };
+
 static int
 mi_interpreter_init (void *data)
 {
@@ -91,16 +102,6 @@ mi_interpreter_init (void *data)
   mi_stdlog = mi_stderr;
   mi_stdtarg = mi_console_file_new (raw_stdout, "@", '"');
   mi_event_channel = mi_console_file_new (raw_stdout, "=", 0);
-
-  /* Add global event handlers */
-  handlers.breakpoint_create = mi_create_breakpoint;
-  handlers.breakpoint_modify = mi_modify_breakpoint;
-  handlers.breakpoint_delete = mi_delete_breakpoint;
-  handlers.tracepoint_create = mi_create_tracepoint;
-  handlers.tracepoint_modify = mi_modify_tracepoint;
-  handlers.tracepoint_delete = mi_delete_tracepoint;
-  handlers.architecture_changed = mi_architecture_changed;
-  set_gdb_event_hooks (&handlers);
 
   return 1;
 }
@@ -140,6 +141,7 @@ mi_interpreter_resume (void *data)
   /* Replace all the hooks that we know about.  There really needs to be a better way
      of doing this... */
   clear_interpreter_hooks ();
+  set_gdb_event_hooks (&mi_event_handlers);
 
   show_load_progress = mi_load_progress;
 
@@ -203,26 +205,24 @@ mi_interpreter_exec_continuation (struct continuation_arg *arg)
 enum mi_cmd_result
 mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 {
-  struct gdb_interpreter *old_interp, *interp_to_use;
+  struct gdb_interpreter *interp_to_use;
   enum mi_cmd_result result = MI_CMD_DONE;
-  int i, old_quiet;
+  int i;
   struct gdb_interpreter_procs *procs;
 
   if (argc < 2)
     {
       xasprintf (&mi_error_message,
-		 "Wrong # or arguments, should be \"%s interp cmd <cmd ...>\".",
-		 command);
+		 "mi_cmd_interpreter_exec: Usage: -interpreter-exec interp command");
       return MI_CMD_ERROR;
     }
-
-  old_interp = gdb_current_interpreter ();
 
   interp_to_use = gdb_lookup_interpreter (argv[0]);
   if (interp_to_use == NULL)
     {
       xasprintf (&mi_error_message,
-		 "Could not find interpreter \"%s\".", argv[0]);
+		 "mi_cmd_interpreter_exec: could not find interpreter \"%s\"",
+		 argv[0]);
       return MI_CMD_ERROR;
     }
 
@@ -230,16 +230,8 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
   if (!procs->exec_proc)
     {
       xasprintf (&mi_error_message,
-		 "Interpreter \"%s\" does not support command execution.",
+		 "mi_cmd_interpreter_exec: interpreter \"%s\" does not support command execution",
 		 argv[0]);
-      return MI_CMD_ERROR;
-    }
-  old_quiet = gdb_interpreter_set_quiet (interp_to_use, 1);
-
-  if (!gdb_set_interpreter (interp_to_use))
-    {
-      xasprintf (&mi_error_message,
-		 "Could not switch to interpreter \"%s\".", argv[0]);
       return MI_CMD_ERROR;
     }
 
@@ -271,12 +263,9 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
          since that is what the cli expects - before running the command,
          and then set it back to 0 when we are done. */
       sync_execution = 1;
-      if (!procs->exec_proc (gdb_interpreter_get_data (interp_to_use), argv[i]))
+      if (procs->exec_proc (gdb_interpreter_get_data (interp_to_use), argv[i]) < 0)
 	{
-	  xasprintf (&mi_error_message,
-		     "mi_interpreter_execute: error in command: \"%s\".",
-		     argv[i]);
-
+	  mi_error_last_message ();
 	  result = MI_CMD_ERROR;
 	  break;
 	}
@@ -285,11 +274,7 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
       sync_execution = 0;
     }
 
-  /* Now do the switch... */
-
-  gdb_set_interpreter (old_interp);
   mi_remove_notify_hooks ();
-  gdb_interpreter_set_quiet (interp_to_use, old_quiet);
 
   /* Okay, now let's see if the command set the inferior going...
      Tricky point - have to do this AFTER resetting the interpreter, since

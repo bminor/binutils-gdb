@@ -104,6 +104,15 @@ void mi_load_progress (const char *section_name,
 extern void interrupt_target_command_wrapper (char *, int);
 extern void return_command_wrapper (char *, int);
 
+/* A helper function which will set mi_error_message to error_last_message. */
+void
+mi_error_last_message (void)
+{
+  char *s = error_last_message ();
+  xasprintf (&mi_error_message, s);
+  xfree (s);
+}
+
 /* Command implementations. FIXME: Is this libgdb? No.  This is the MI
    layer that calls libgdb.  Any operation used in the below should be
    formalized. */
