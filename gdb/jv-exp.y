@@ -18,14 +18,14 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* Parse a C expression from text in a string,
+/* Parse a Java expression from text in a string,
    and return the result as a  struct expression  pointer.
    That structure contains arithmetic operations in reverse polish,
    with constants represented by operations that are followed by special data.
    See expression.h for the details of the format.
    What is important here is that it can be built up sequentially
    during the process of parsing; the lower levels of the tree always
-   come first in the result.
+   come first in the result.  Well, almost always; see ArrayAccess.
 
    Note that malloc's and realloc's in this file are transformed to
    xmalloc and xrealloc respectively by the same sed command in the
@@ -111,6 +111,9 @@ yyerror PARAMS ((char *));
 static struct type * java_type_from_name PARAMS ((struct stoken));
 static void push_expression_name PARAMS ((struct stoken));
 static void push_fieldnames PARAMS ((struct stoken));
+
+static struct expression *copy_exp PARAMS ((struct expression *, int));
+static void insert_exp PARAMS ((int, struct expression *));
 
 %}
 
@@ -442,8 +445,22 @@ MethodInvocation:
 
 ArrayAccess:
 	Name '[' Expression ']'
-		/* FIXME - This is nasty - need to shuffle expr stack. */
-		{ error ("`Name[Expr]' not implemented yet - try `(Name)[Expr]'"); }
+                {
+                  /* Emit code for the Name now, then exchange it in the
+		     expout array with the Expression's code.  We could
+		     introduce a OP_SWAP code or a reversed version of
+		     BINOP_SUBSCRIPT, but that makes the rest of GDB pay
+		     for our parsing kludges.  */
+		  struct expression *name_expr;
+
+		  push_expression_name ($1);
+		  name_expr = copy_exp (expout, expout_ptr);
+		  expout_ptr -= name_expr->nelts;
+		  insert_exp (expout_ptr-length_of_subexp (expout, expout_ptr),
+			      name_expr);
+		  free (name_expr);
+		  write_exp_elt_opcode (BINOP_SUBSCRIPT);
+		}
 |	VARIABLE '[' Expression ']'
 		{ write_exp_elt_opcode (BINOP_SUBSCRIPT); }
 |	PrimaryNoNewArray '[' Expression ']'
@@ -1377,4 +1394,54 @@ push_expression_name (name)
 	error ("No symbol \"%s\" in current context.", tmp);
     }
 
+}
+
+
+/* The following two routines, copy_exp and insert_exp, aren't specific to
+   Java, so they could go in parse.c, but their only purpose is to support
+   the parsing kludges we use in this file, so maybe it's best to isolate
+   them here.  */
+
+/* Copy the expression whose last element is at index ENDPOS - 1 in EXPR
+   into a freshly malloc'ed struct expression.  Its language_defn is set
+   to null.  */
+static struct expression *
+copy_exp (struct expression *expr, int endpos)
+{
+  int len = length_of_subexp (expr, endpos);
+  struct expression *new
+    = (struct expression *) malloc (sizeof (*new) + EXP_ELEM_TO_BYTES (len));
+  new->nelts = len;
+  memcpy (new->elts, expr->elts + endpos - len, EXP_ELEM_TO_BYTES (len));
+  new->language_defn = 0;
+
+  return new;
+}
+
+/* Insert the expression NEW into the current expression (expout) at POS.  */
+static void
+insert_exp (int pos,
+	    struct expression *new)
+{
+  int newlen = new->nelts;
+
+  /* Grow expout if necessary.  In this function's only use at present,
+     this should never be necessary.  */
+  if (expout_ptr + newlen > expout_size)
+    {
+      expout_size = max (expout_size * 2, expout_ptr + newlen + 10);
+      expout = (struct expression *)
+	realloc ((char *) expout, (sizeof (struct expression)
+				    + EXP_ELEM_TO_BYTES (expout_size)));
+    }
+
+  {
+    int i;
+
+    for (i = expout_ptr - 1; i >= pos; i--)
+      expout->elts[i + newlen] = expout->elts[i];
+  }
+  
+  memcpy (expout->elts + pos, new->elts, EXP_ELEM_TO_BYTES (newlen));
+  expout_ptr += newlen;
 }
