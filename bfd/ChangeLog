@@ -1,3 +1,9 @@
+Tue Dec 23 17:01:10 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* peicode.h (coff_swap_scnhdr_out): Set .reloc section to be
+	shared.  Set stab* sections to be shared and read.  Set .rsrc
+	section to be read and shared.
+
 start-sanitize-sky
 Mon Dec 22 15:14:28 1997  Doug Evans  <devans@canuck.cygnus.com>
 
