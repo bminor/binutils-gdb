@@ -61,7 +61,7 @@ install_tooldir=install-exec-tooldir
 canon_targets=""
 if test -n "$enable_targets" ; then
   for t in `echo $enable_targets | sed 's/,/ /g'`; do
-    result=`${CONFIG_SHELL-/bin/sh} $ac_config_sub $t 2>/dev/null`
+    result=`$ac_config_sub $t 2>/dev/null`
     if test -n "$result" ; then
       canon_targets="$canon_targets $result"
 #    else

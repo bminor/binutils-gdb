@@ -1,3 +1,10 @@
+1999-09-14  Michael Meissner  <meissner@cygnus.com>
+
+	* configure.in (Canonicalization of target names): Remove adding
+	${CONFIG_SHELL} in front of $ac_config_sub, since autoconfig 2.14
+	generates $ac_config_sub with a ${CONFIG_SHELL} already.
+	* configure: Regenerate.
+
 1999-09-14  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-m32r.c (ELF_MAXPAGESIZE): Change to 0x1 (at request of
