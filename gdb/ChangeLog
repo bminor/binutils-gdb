@@ -1,3 +1,29 @@
+2004-02-10  Andrew Cagney  <cagney@redhat.com>
+
+	* defs.h: Do not include "tui.h".
+	* gdb_curses.h: New file.
+	* tui/tui-hooks.h: New file.
+	* tui/tui.h (tui_update_all_exec_infos): Delete declaration.
+	(tui_install_hooks, tui_remove_hooks): Delete declarations.
+	(tui_initialize_io): Delete declaration.
+	(tui_initialize_readline: Delete redundant declaration.
+	(struct tui_point): Delete definition.
+	* tui/tui-data.h (struct tui_point): Define.
+	* cli/cli-decode.c [TUI]: Include "tui/tui.h".
+	* utils.c: Include "tui/tui.h".
+	* tui/tui-data.h: Include "tui/tui.h" and "gdb_curses.h".
+	* printcmd.c [TUI]: Include "tui/tui.h".
+	* cli/cli-cmds.c [TUI]: Include "tui/tui.h".
+	* tui/tui-command.c: Include "gdb_curses.h".
+	* tui/tui.c, tui/tui-winsource.c, tui/tui-wingeneral.c: Ditto.
+	* tui/tui-windata.c, tui/tui-win.c, tui/tui-stack.c: Ditto.
+	* tui/tui-source.c, tui/tui-regs.c, tui/tui-layout.c: Ditto.
+	* tui/tui-io.c, tui/tui-disasm.c, tui/tui-data.c: : Ditto.
+	* tui/tui-hooks.c: Include "tui-hooks.h" and "gdb_curses.h".
+	* Makefile.in: Update all dependencies.
+	(tui_hooks_h, gdb_curses_h): Define.
+	(SUBDIR_TUI_CFLAGS): Remove -I${srcdir}/tui.
+
 2004-02-10  Elena Zannoni  <ezannoni@redhat.com>
 
 	* objfiles.h (struct objfile): Remove unused fields auxf1 and

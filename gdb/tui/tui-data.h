@@ -25,11 +25,14 @@
 #ifndef TUI_DATA_H
 #define TUI_DATA_H
 
-#if defined (HAVE_NCURSES_H)
-#include <ncurses.h>
-#elif defined (HAVE_CURSES_H)
-#include <curses.h>
-#endif
+#include "tui/tui.h"	/* For enum tui_win_type.  */
+#include "gdb_curses.h"	/* For WINDOW.  */
+
+/* This is a point definition.  */
+struct tui_point
+{
+  int x, y;
+};
 
 /* Generic window information */
 struct tui_gen_win_info

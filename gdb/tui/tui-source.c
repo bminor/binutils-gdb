@@ -36,13 +36,7 @@
 #include "tui/tui-winsource.h"
 #include "tui/tui-source.h"
 
-#ifdef HAVE_NCURSES_H       
-#include <ncurses.h>
-#else
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#endif
+#include "gdb_curses.h"
 
 /* Function to display source in the source window.  */
 enum tui_status

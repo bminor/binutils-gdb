@@ -40,6 +40,7 @@
 #include <fcntl.h>
 
 #include "tui/tui.h"
+#include "tui/tui-hooks.h"
 #include "tui/tui-data.h"
 #include "tui/tui-layout.h"
 #include "tui/tui-io.h"
@@ -49,13 +50,7 @@
 #include "tui/tui-windata.h"
 #include "tui/tui-winsource.h"
 
-#ifdef HAVE_NCURSES_H
-#include <ncurses.h>
-#else
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#endif
+#include "gdb_curses.h"
 
 int tui_target_has_run = 0;
 

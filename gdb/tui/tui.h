@@ -54,12 +54,6 @@ enum tui_win_type
   UNDEFINED_WIN		/* LAST */
 };
 
-/* This is a point definition.  */
-struct tui_point
-{
-  int x, y;
-};
-
 /* GENERAL TUI FUNCTIONS */
 /* tui.c */
 extern CORE_ADDR tui_get_low_disassembly_address (CORE_ADDR, CORE_ADDR);
@@ -94,14 +88,7 @@ extern enum tui_key_mode tui_current_key_mode;
 /* Change the TUI key mode by installing the appropriate readline keymap.  */
 extern void tui_set_key_mode (enum tui_key_mode mode);
 
-extern void tui_initialize_io (void);
-
-extern void tui_initialize_readline (void);
-
 extern int tui_active;
-
-extern void tui_install_hooks (void);
-extern void tui_remove_hooks (void);
 
 extern void tui_show_source (const char *file, int line);
 
@@ -110,8 +97,4 @@ extern struct ui_out *tui_out_new (struct ui_file *stream);
 /* tui-layout.c */
 extern enum tui_status tui_set_layout_for_display_command (const char *name);
 
-/* tui-winsource.c */
-extern void tui_update_all_exec_infos (void);
-
 #endif
-

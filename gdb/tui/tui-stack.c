@@ -39,13 +39,7 @@
 #include "tui/tui-winsource.h"
 #include "tui/tui-file.h"
 
-#ifdef HAVE_NCURSES_H       
-#include <ncurses.h>
-#else
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#endif
+#include "gdb_curses.h"
 
 /* Get a printable name for the function at the address.
    The symbol name is demangled if demangling is turned on.

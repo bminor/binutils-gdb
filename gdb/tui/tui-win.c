@@ -46,13 +46,7 @@
 #include "tui/tui-winsource.h"
 #include "tui/tui-windata.h"
 
-#ifdef HAVE_NCURSES_H       
-#include <ncurses.h>
-#else
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#endif
+#include "gdb_curses.h"
 
 #include "gdb_string.h"
 #include <ctype.h>

@@ -217,7 +217,7 @@ SUBDIR_TUI_SRCS = \
 SUBDIR_TUI_DEPS =
 SUBDIR_TUI_LDFLAGS=
 SUBDIR_TUI_CFLAGS= \
-	-DTUI=1 -I${srcdir}/tui
+	-DTUI=1
 
 
 # Opcodes currently live in one of two places.  Either they are in the
@@ -645,8 +645,8 @@ cp_abi_h = cp-abi.h
 cp_support_h = cp-support.h $(symtab_h)
 dcache_h = dcache.h
 defs_h = defs.h $(config_h) $(ansidecl_h) $(gdb_locale_h) $(gdb_signals_h) \
-	$(libiberty_h) $(progress_h) $(bfd_h) $(tui_h) $(ui_file_h) $(xm_h) \
-	$(nm_h) $(tm_h) $(fopen_same_h) $(gdbarch_h)
+	$(libiberty_h) $(progress_h) $(bfd_h) $(ui_file_h) $(xm_h) $(nm_h) \
+	$(tm_h) $(fopen_same_h) $(gdbarch_h)
 dictionary_h = dictionary.h
 disasm_h = disasm.h
 doublest_h = doublest.h $(floatformat_h)
@@ -667,6 +667,7 @@ gdbarch_h = gdbarch.h
 gdb_assert_h = gdb_assert.h
 gdbcmd_h = gdbcmd.h $(command_h) $(ui_out_h)
 gdbcore_h = gdbcore.h $(bfd_h)
+gdb_curses_h = gdb_curses.h
 gdb_dirent_h = gdb_dirent.h
 gdb_events_h = gdb-events.h
 gdb_h = gdb.h
@@ -802,10 +803,11 @@ mi_parse_h = $(srcdir)/mi/mi-parse.h
 #
 
 tui_command_h = $(srcdir)/tui/tui-command.h
-tui_data_h = $(srcdir)/tui/tui-data.h
+tui_data_h = $(srcdir)/tui/tui-data.h $(tui_h) $(gdb_curses_h)
 tui_disasm_h = $(srcdir)/tui/tui-disasm.h $(tui_h) $(tui_data_h)
 tui_file_h = $(srcdir)/tui/tui-file.h
 tui_h = $(srcdir)/tui/tui.h
+tui_hooks_h = $(srcdir)/tui/tui-hooks.h
 tui_io_h = $(srcdir)/tui/tui-io.h
 tui_layout_h = $(srcdir)/tui/tui-layout.h $(tui_h) $(tui_data_h)
 tui_regs_h = $(srcdir)/tui/tui-regs.h $(tui_data_h)
@@ -2082,12 +2084,11 @@ mipsread.o: mipsread.c $(defs_h) $(gdb_string_h) $(bfd_h) $(symtab_h) \
 	$(libecoff_h) $(elf_common_h) $(elf_mips_h)
 mips-tdep.o: mips-tdep.c $(defs_h) $(gdb_string_h) $(gdb_assert_h) \
 	$(frame_h) $(inferior_h) $(symtab_h) $(value_h) $(gdbcmd_h) \
-	$(language_h) $(gdbcore_h) $(symfile_h) $(objfiles_h) \
-	$(gdbtypes_h) $(target_h) $(arch_utils_h) $(regcache_h) \
-	$(osabi_h) $(mips_tdep_h) $(block_h) $(reggroups_h) \
-	$(opcode_mips_h) $(elf_mips_h) $(elf_bfd_h) $(symcat_h) \
-	$(sim_regno_h) $(dis_asm_h) $(frame_unwind_h) $(frame_base_h) \
-	$(trad_frame_h)
+	$(language_h) $(gdbcore_h) $(symfile_h) $(objfiles_h) $(gdbtypes_h) \
+	$(target_h) $(arch_utils_h) $(regcache_h) $(osabi_h) $(mips_tdep_h) \
+	$(block_h) $(reggroups_h) $(opcode_mips_h) $(elf_mips_h) \
+	$(elf_bfd_h) $(symcat_h) $(sim_regno_h) $(dis_asm_h) \
+	$(frame_unwind_h) $(frame_base_h) $(trad_frame_h)
 mipsv4-nat.o: mipsv4-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(target_h) \
 	$(regcache_h) $(gregset_h)
 mn10300-tdep.o: mn10300-tdep.c $(defs_h) $(frame_h) $(inferior_h) \
@@ -2165,7 +2166,7 @@ printcmd.o: printcmd.c $(defs_h) $(gdb_string_h) $(frame_h) $(symtab_h) \
 	$(gdbtypes_h) $(value_h) $(language_h) $(expression_h) $(gdbcore_h) \
 	$(gdbcmd_h) $(target_h) $(breakpoint_h) $(demangle_h) $(valprint_h) \
 	$(annotate_h) $(symfile_h) $(objfiles_h) $(completer_h) $(ui_out_h) \
-	$(gdb_assert_h) $(block_h) $(disasm_h)
+	$(gdb_assert_h) $(block_h) $(disasm_h) $(tui_h)
 proc-api.o: proc-api.c $(defs_h) $(gdbcmd_h) $(completer_h) $(gdb_wait_h) \
 	$(proc_utils_h)
 proc-events.o: proc-events.c $(defs_h)
@@ -2460,7 +2461,7 @@ ui-out.o: ui-out.c $(defs_h) $(gdb_string_h) $(expression_h) $(language_h) \
 user-regs.o: user-regs.c $(defs_h) $(user_regs_h) $(gdbtypes_h) \
 	$(gdb_string_h) $(gdb_assert_h) $(frame_h)
 utils.o: utils.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(event_top_h) \
-	$(gdbcmd_h) $(serial_h) $(bfd_h) $(target_h) $(demangle_h) \
+	$(tui_h) $(gdbcmd_h) $(serial_h) $(bfd_h) $(target_h) $(demangle_h) \
 	$(expression_h) $(language_h) $(charset_h) $(annotate_h) \
 	$(filenames_h) $(inferior_h)
 uw-thread.o: uw-thread.c $(defs_h) $(gdbthread_h) $(target_h) $(inferior_h) \
@@ -2536,11 +2537,11 @@ cli-cmds.o: $(srcdir)/cli/cli-cmds.c $(defs_h) $(completer_h) $(target_h) \
 	$(linespec_h) $(expression_h) $(frame_h) $(value_h) $(language_h) \
 	$(filenames_h) $(objfiles_h) $(source_h) $(disasm_h) $(ui_out_h) \
 	$(top_h) $(cli_decode_h) $(cli_script_h) $(cli_setshow_h) \
-	$(cli_cmds_h)
+	$(cli_cmds_h) $(tui_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-cmds.c
 cli-decode.o: $(srcdir)/cli/cli-decode.c $(defs_h) $(symtab_h) \
 	$(gdb_regex_h) $(gdb_string_h) $(ui_out_h) $(cli_cmds_h) \
-	$(cli_decode_h) $(gdb_assert_h)
+	$(cli_decode_h) $(tui_h) $(gdb_assert_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-decode.c
 cli-dump.o: $(srcdir)/cli/cli-dump.c $(defs_h) $(gdb_string_h) \
 	$(cli_decode_h) $(cli_cmds_h) $(value_h) $(completer_h) \
@@ -2801,22 +2802,22 @@ signals.o: $(srcdir)/signals/signals.c $(server_h) $(defs_h) $(target_h) \
 # Need to explicitly specify the compile rule as make will do nothing
 # or try to compile the object file into the sub-directory.
 
-tui.o: $(srcdir)/tui/tui.c $(defs_h) $(gdbcmd_h) $(tui_h) $(tui_data_h) \
-	$(tui_layout_h) $(tui_io_h) $(tui_regs_h) $(tui_stack_h) \
-	$(tui_win_h) $(tui_winsource_h) $(tui_windata_h) $(readline_h) \
-	$(target_h) $(frame_h) $(breakpoint_h) $(inferior_h) $(symtab_h) \
-	$(source_h)
+tui.o: $(srcdir)/tui/tui.c $(defs_h) $(gdbcmd_h) $(tui_h) $(tui_hooks_h) \
+	$(tui_data_h) $(tui_layout_h) $(tui_io_h) $(tui_regs_h) \
+	$(tui_stack_h) $(tui_win_h) $(tui_winsource_h) $(tui_windata_h) \
+	$(readline_h) $(target_h) $(frame_h) $(breakpoint_h) $(inferior_h) \
+	$(symtab_h) $(source_h) $(gdb_curses_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui.c
 tui-command.o: $(srcdir)/tui/tui-command.c $(defs_h) $(tui_h) $(tui_data_h) \
-	$(tui_win_h) $(tui_io_h)
+	$(tui_win_h) $(tui_io_h) $(gdb_curses_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-command.c
 tui-data.o: $(srcdir)/tui/tui-data.c $(defs_h) $(symtab_h) $(tui_h) \
-	$(tui_data_h) $(tui_wingeneral_h) $(gdb_string_h)
+	$(tui_data_h) $(tui_wingeneral_h) $(gdb_string_h) $(gdb_curses_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-data.c
 tui-disasm.o: $(srcdir)/tui/tui-disasm.c $(defs_h) $(symtab_h) \
 	$(breakpoint_h) $(frame_h) $(value_h) $(source_h) $(disasm_h) \
 	$(gdb_string_h) $(tui_h) $(tui_data_h) $(tui_win_h) $(tui_layout_h) \
-	$(tui_winsource_h) $(tui_stack_h) $(tui_file_h)
+	$(tui_winsource_h) $(tui_stack_h) $(tui_file_h) $(gdb_curses_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-disasm.c
 tui-file.o: $(srcdir)/tui/tui-file.c $(defs_h) $(ui_file_h) $(tui_file_h) \
 	$(tui_io_h) $(tui_h) $(gdb_string_h)
@@ -2825,8 +2826,9 @@ tui-hooks.o: $(srcdir)/tui/tui-hooks.c $(defs_h) $(symtab_h) $(inferior_h) \
 	$(command_h) $(bfd_h) $(symfile_h) $(objfiles_h) $(target_h) \
 	$(gdbcore_h) $(event_loop_h) $(event_top_h) $(frame_h) \
 	$(breakpoint_h) $(gdb_events_h) $(ui_out_h) $(top_h) $(tui_h) \
-	$(tui_data_h) $(tui_layout_h) $(tui_io_h) $(tui_regs_h) $(tui_win_h) \
-	$(tui_stack_h) $(tui_windata_h) $(tui_winsource_h)
+	$(tui_hooks_h) $(tui_data_h) $(tui_layout_h) $(tui_io_h) \
+	$(tui_regs_h) $(tui_win_h) $(tui_stack_h) $(tui_windata_h) \
+	$(tui_winsource_h) $(gdb_curses_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-hooks.c
 tui-interp.o: $(srcdir)/tui/tui-interp.c $(defs_h) $(interps_h) $(top_h) \
 	$(event_top_h) $(event_loop_h) $(ui_out_h) $(cli_out_h) \
@@ -2835,12 +2837,13 @@ tui-interp.o: $(srcdir)/tui/tui-interp.c $(defs_h) $(interps_h) $(top_h) \
 tui-io.o: $(srcdir)/tui/tui-io.c $(defs_h) $(terminal_h) $(target_h) \
 	$(event_loop_h) $(event_top_h) $(command_h) $(top_h) $(readline_h) \
 	$(tui_h) $(tui_data_h) $(tui_io_h) $(tui_command_h) $(tui_win_h) \
-	$(tui_wingeneral_h) $(tui_file_h) $(ui_out_h) $(cli_out_h)
+	$(tui_wingeneral_h) $(tui_file_h) $(ui_out_h) $(cli_out_h) \
+	$(gdb_curses_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-io.c
 tui-layout.o: $(srcdir)/tui/tui-layout.c $(defs_h) $(command_h) $(symtab_h) \
 	$(frame_h) $(source_h) $(tui_h) $(tui_data_h) $(tui_windata_h) \
 	$(tui_wingeneral_h) $(tui_stack_h) $(tui_regs_h) $(tui_win_h) \
-	$(tui_winsource_h) $(tui_disasm_h)
+	$(tui_winsource_h) $(tui_disasm_h) $(gdb_curses_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-layout.c
 tui-out.o: $(srcdir)/tui/tui-out.c $(defs_h) $(ui_out_h) $(tui_h) \
 	$(gdb_string_h) $(gdb_assert_h)
@@ -2848,33 +2851,35 @@ tui-out.o: $(srcdir)/tui/tui-out.c $(defs_h) $(ui_out_h) $(tui_h) \
 tui-regs.o: $(srcdir)/tui/tui-regs.c $(defs_h) $(tui_h) $(tui_data_h) \
 	$(symtab_h) $(gdbtypes_h) $(gdbcmd_h) $(frame_h) $(regcache_h) \
 	$(inferior_h) $(target_h) $(gdb_string_h) $(tui_layout_h) \
-	$(tui_win_h) $(tui_windata_h) $(tui_wingeneral_h) $(tui_file_h)
+	$(tui_win_h) $(tui_windata_h) $(tui_wingeneral_h) $(tui_file_h) \
+	$(gdb_curses_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-regs.c
 tui-source.o: $(srcdir)/tui/tui-source.c $(defs_h) $(symtab_h) $(frame_h) \
 	$(breakpoint_h) $(source_h) $(symtab_h) $(tui_h) $(tui_data_h) \
-	$(tui_stack_h) $(tui_winsource_h) $(tui_source_h)
+	$(tui_stack_h) $(tui_winsource_h) $(tui_source_h) $(gdb_curses_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-source.c
 tui-stack.o: $(srcdir)/tui/tui-stack.c $(defs_h) $(symtab_h) $(breakpoint_h) \
 	$(frame_h) $(command_h) $(inferior_h) $(target_h) $(top_h) \
 	$(gdb_string_h) $(tui_h) $(tui_data_h) $(tui_stack_h) \
-	$(tui_wingeneral_h) $(tui_source_h) $(tui_winsource_h) $(tui_file_h)
+	$(tui_wingeneral_h) $(tui_source_h) $(tui_winsource_h) $(tui_file_h) \
+	$(gdb_curses_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-stack.c
 tui-win.o: $(srcdir)/tui/tui-win.c $(defs_h) $(command_h) $(symtab_h) \
 	$(breakpoint_h) $(frame_h) $(cli_cmds_h) $(top_h) $(source_h) \
 	$(tui_h) $(tui_data_h) $(tui_wingeneral_h) $(tui_stack_h) \
 	$(tui_regs_h) $(tui_disasm_h) $(tui_source_h) $(tui_winsource_h) \
-	$(tui_windata_h) $(gdb_string_h)
+	$(tui_windata_h) $(gdb_curses_h) $(gdb_string_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-win.c
 tui-windata.o: $(srcdir)/tui/tui-windata.c $(defs_h) $(tui_h) $(tui_data_h) \
-	$(tui_wingeneral_h) $(tui_regs_h)
+	$(tui_wingeneral_h) $(tui_regs_h) $(gdb_curses_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-windata.c
 tui-wingeneral.o: $(srcdir)/tui/tui-wingeneral.c $(defs_h) $(tui_h) \
-	$(tui_data_h) $(tui_wingeneral_h) $(tui_win_h)
+	$(tui_data_h) $(tui_wingeneral_h) $(tui_win_h) $(gdb_curses_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-wingeneral.c
 tui-winsource.o: $(srcdir)/tui/tui-winsource.c $(defs_h) $(symtab_h) \
 	$(frame_h) $(breakpoint_h) $(value_h) $(source_h) $(tui_h) \
 	$(tui_data_h) $(tui_stack_h) $(tui_win_h) $(tui_wingeneral_h) \
-	$(tui_winsource_h) $(tui_source_h) $(tui_disasm_h)
+	$(tui_winsource_h) $(tui_source_h) $(tui_disasm_h) $(gdb_curses_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-winsource.c
 
 #

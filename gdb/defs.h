@@ -457,10 +457,6 @@ extern struct ui_file *gdb_stdtarg;
 extern struct ui_file *gdb_stdtargerr;
 extern struct ui_file *gdb_stdtargin;
 
-#if defined(TUI)
-#include "tui.h"
-#endif
-
 #include "ui-file.h"
 
 /* More generic printf like operations.  Filtered versions may return

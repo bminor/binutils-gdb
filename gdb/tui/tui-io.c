@@ -43,13 +43,7 @@
 #include <signal.h>
 #include <stdio.h>
 
-#ifdef HAVE_NCURSES_H       
-#include <ncurses.h>
-#else
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#endif
+#include "gdb_curses.h"
 
 int
 key_is_start_sequence (int ch)

@@ -38,6 +38,7 @@
 #include "defs.h"
 #include "gdbcmd.h"
 #include "tui/tui.h"
+#include "tui/tui-hooks.h"
 #include "tui/tui-data.h"
 #include "tui/tui-layout.h"
 #include "tui/tui-io.h"
@@ -54,13 +55,7 @@
 #include "symtab.h"
 #include "source.h"
 
-#ifdef HAVE_NCURSES_H       
-#include <ncurses.h>
-#else
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#endif
+#include "gdb_curses.h"
 
 /* Tells whether the TUI is active or not.  */
 int tui_active = 0;

@@ -46,6 +46,10 @@
 #include "cli/cli-setshow.h"
 #include "cli/cli-cmds.h"
 
+#ifdef TUI
+#include "tui/tui.h"		/* For tui_active et.al.   */
+#endif
+
 #ifndef GDBINIT_FILENAME
 #define GDBINIT_FILENAME        ".gdbinit"
 #endif

@@ -44,6 +44,10 @@
 #include "block.h"
 #include "disasm.h"
 
+#ifdef TUI
+#include "tui/tui.h"		/* For tui_active et.al.   */
+#endif
+
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
 extern int addressprint;	/* Whether to print hex addresses in HLL " */
 

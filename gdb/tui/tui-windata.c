@@ -28,13 +28,7 @@
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-regs.h"
 
-#ifdef HAVE_NCURSES_H       
-#include <ncurses.h>
-#else
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#endif
+#include "gdb_curses.h"
 
 
 /*****************************************
