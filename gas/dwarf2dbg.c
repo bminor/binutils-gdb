@@ -1,5 +1,5 @@
 /* dwarf2dbg.c - DWARF2 debug support
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -42,6 +42,7 @@
 #endif
 
 #include "dwarf2dbg.h"
+#include <filenames.h>
 
 #ifndef DWARF2_FORMAT
 # define DWARF2_FORMAT() dwarf2_format_32bit
@@ -132,7 +133,7 @@ struct line_seg {
 static struct line_seg *all_segs;
 
 struct file_entry {
-  char *filename;
+  const char *filename;
   unsigned int dir;
 };
 
@@ -140,6 +141,11 @@ struct file_entry {
 static struct file_entry *files;
 static unsigned int files_in_use;
 static unsigned int files_allocated;
+
+/* Table of directories used by .debug_line.  */
+static char **dirs;
+static unsigned int dirs_in_use;
+static unsigned int dirs_allocated;
 
 /* TRUE when we've seen a .loc directive recently.  Used to avoid
    doing work when there's nothing to do.  */
@@ -155,7 +161,7 @@ static char const fake_label_name[] = ".L0\001";
 static unsigned int sizeof_address;
 
 static struct line_subseg *get_line_subseg PARAMS ((segT, subsegT));
-static unsigned int get_filenum PARAMS ((const char *));
+static unsigned int get_filenum PARAMS ((const char *, unsigned int));
 static struct frag *first_frag_for_seg PARAMS ((segT));
 static struct frag *last_frag_for_seg PARAMS ((segT));
 static void out_byte PARAMS ((int));
@@ -277,7 +283,7 @@ dwarf2_where (line)
     {
       char *filename;
       as_where (&filename, &line->line);
-      line->filenum = get_filenum (filename);
+      line->filenum = get_filenum (filename, 0);
       line->column = 0;
       line->flags = DWARF2_FLAG_BEGIN_STMT;
     }
@@ -318,22 +324,83 @@ dwarf2_emit_insn (size)
   dwarf2_gen_line_info (frag_now_fix () - size, &loc);
 }
 
-/* Get a .debug_line file number for FILENAME.  */
+/* Get a .debug_line file number for FILENAME.  If NUM is nonzero,
+   allocate it on that file table slot, otherwise return the first
+   empty one.  */
 
 static unsigned int
-get_filenum (filename)
+get_filenum (filename, num)
      const char *filename;
+     unsigned int num;
 {
-  static unsigned int last_used;
-  unsigned int i;
+  static unsigned int last_used, last_used_dir_len;
+  const char *file;
+  size_t dir_len;
+  unsigned int i, dir;
 
-  if (last_used)
-    if (strcmp (filename, files[last_used].filename) == 0)
-      return last_used;
+  if (num == 0 && last_used)
+    {
+      if (! files[last_used].dir
+	  && strcmp (filename, files[last_used].filename) == 0)
+	return last_used;
+      if (files[last_used].dir
+	  && strncmp (filename, dirs[files[last_used].dir],
+		      last_used_dir_len) == 0
+	  && IS_DIR_SEPARATOR (filename [last_used_dir_len])
+	  && strcmp (filename + last_used_dir_len + 1,
+		     files[last_used].filename) == 0)
+	return last_used;
+    }
 
-  for (i = 1; i < files_in_use; ++i)
-    if (strcmp (filename, files[i].filename) == 0)
-      return i;
+  file = lbasename (filename);
+  /* Don't make empty string from / or A: from A:/ .  */
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+  if (file <= filename + 3)
+    file = filename;
+#else
+  if (file == filename + 1)
+    file = filename;
+#endif
+  dir_len = file - filename;
+
+  dir = 0;
+  if (dir_len)
+    {
+      --dir_len;
+      for (dir = 1; dir < dirs_in_use; ++dir)
+	if (memcmp (filename, dirs[dir], dir_len) == 0
+	    && dirs[dir][dir_len] == '\0')
+	  break;
+
+      if (dir >= dirs_in_use)
+	{
+	  if (dir >= dirs_allocated)
+	    {
+	      dirs_allocated = dir + 32;
+	      dirs = (char **)
+		     xrealloc (dirs, (dir + 32) * sizeof (const char *));
+	    }
+
+	  dirs[dir] = xmalloc (dir_len + 1);
+	  memcpy (dirs[dir], filename, dir_len);
+	  dirs[dir][dir_len] = '\0';
+	  dirs_in_use = dir + 1;
+	}
+    }
+
+  if (num == 0)
+    {
+      for (i = 1; i < files_in_use; ++i)
+	if (files[i].dir == dir
+	    && strcmp (file, files[i].filename) == 0)
+	  {
+	    last_used = i;
+	    last_used_dir_len = dir_len;
+	    return i;
+	  }
+    }
+  else
+    i = num;
 
   if (i >= files_allocated)
     {
@@ -346,10 +413,11 @@ get_filenum (filename)
       memset (files + old, 0, (i + 32 - old) * sizeof (struct file_entry));
     }
 
-  files[i].filename = xstrdup (filename);
-  files[i].dir = 0;
+  files[i].filename = num ? file : xstrdup (file);
+  files[i].dir = dir;
   files_in_use = i + 1;
   last_used = i;
+  last_used_dir_len = dir_len;
 
   return i;
 }
@@ -392,21 +460,7 @@ dwarf2_directive_file (dummy)
       return NULL;
     }
 
-  if (num >= (int) files_allocated)
-    {
-      unsigned int old = files_allocated;
-
-      files_allocated = num + 16;
-      files = (struct file_entry *)
-	xrealloc (files, (num + 16) * sizeof (struct file_entry));
-
-      /* Zero the new memory.  */
-      memset (files + old, 0, (num + 16 - old) * sizeof (struct file_entry));
-    }
-
-  files[num].filename = filename;
-  files[num].dir = 0;
-  files_in_use = num + 1;
+  get_filenum (filename, num);
 
   return filename;
 }
@@ -445,7 +499,20 @@ dwarf2_directive_loc (dummy)
 #ifndef NO_LISTING
   if (listing)
     {
-      listing_source_file (files[filenum].filename);
+      if (files[filenum].dir)
+	{
+	  size_t dir_len = strlen (dirs[files[filenum].dir]);
+	  size_t file_len = strlen (files[filenum].filename);
+	  char *cp = (char *) alloca (dir_len + 1 + file_len + 1);
+
+	  memcpy (cp, dirs[files[filenum].dir], dir_len);
+	  cp[dir_len] = '/';
+	  memcpy (cp + dir_len + 1, files[filenum].filename, file_len);
+	  cp[dir_len + file_len + 1] = '\0';
+	  listing_source_file (cp);
+	}
+      else
+	listing_source_file (files[filenum].filename);
       listing_source_line (line);
     }
 #endif
@@ -988,7 +1055,14 @@ out_file_list ()
   char *cp;
   unsigned int i;
 
-  /* Terminate directory list.  */
+  /* Emit directory list.  */
+  for (i = 1; i < dirs_in_use; ++i)
+    {
+      size = strlen (dirs[i]) + 1;
+      cp = frag_more (size);
+      memcpy (cp, dirs[i], size);
+    }
+  /* Terminate it.  */
   out_byte ('\0');
 
   for (i = 1; i < files_in_use; ++i)
@@ -1305,6 +1379,13 @@ out_debug_info (info_seg, abbrev_seg, line_seg)
      entry was emitted, so this should always be defined.  */
   if (!files || files_in_use < 1)
     abort ();
+  if (files[1].dir)
+    {
+      len = strlen (dirs[files[1].dir]);
+      p = frag_more (len + 1);
+      memcpy (p, dirs[files[1].dir], len);
+      p[len] = '/';
+    }
   len = strlen (files[1].filename) + 1;
   p = frag_more (len);
   memcpy (p, files[1].filename, len);

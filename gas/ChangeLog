@@ -1,3 +1,17 @@
+2003-01-28  Jakub Jelinek  <jakub@redhat.com>
+
+	* dwarf2dbg.c: Include filenames.h.
+	(struct file_entry): Make filename const char *.
+	(dirs, dirs_in_use, dirs_allocated): New variables.
+	(get_filenum): Add NUM argument.  Build directory table.
+	(dwarf2_where): Adjust caller.
+	(dwarf2_directive_file): Use get_filenum to allocate
+	slot in file and directory tables.
+	(dwarf2_directive_loc): Recreate full filename from
+	directory and filename part if needed for listing.
+	(out_file_list): Output directory table.
+	Output main source file dirname before its filename.
+
 2003-01-28    Dmitry Diky <diwil@mail.ru>
 	
 	* config/tc-msp430.c: Replace occurences of 'tolower' with
