@@ -1,3 +1,8 @@
+Wed May  4 18:15:51 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* remote.c (get_offsets):  Handle case where stub doesn't support
+	qOffsets message.
+
 Wed May  4 15:30:39 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	Add partial support for g++ code compiled with -fvtable-thunks.
