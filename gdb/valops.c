@@ -2858,16 +2858,16 @@ find_overload_match (arg_types, nargs, name, method, lax, obj, fsym, valp, symp,
 	    break;
 	  }
       free (parm_types);
-if (overload_debug)
-{
-      if (method)
-	fprintf_filtered (gdb_stderr,"Overloaded method instance %s, # of parms %d\n", fns_ptr[ix].physname, nparms);
-      else
-	fprintf_filtered (gdb_stderr,"Overloaded function instance %s # of parms %d\n", SYMBOL_DEMANGLED_NAME (oload_syms[ix]), nparms);
-      for (jj = 0; jj < nargs; jj++)
-	fprintf_filtered (gdb_stderr,"...Badness @ %d : %d\n", jj, bv->rank[jj]);
-      fprintf_filtered (gdb_stderr,"Overload resolution champion is %d, ambiguous? %d\n", oload_champ, oload_ambiguous);
-}
+      if (overload_debug)
+	{
+	  if (method)
+	    fprintf_filtered (gdb_stderr,"Overloaded method instance %s, # of parms %d\n", fns_ptr[ix].physname, nparms);
+	  else
+	    fprintf_filtered (gdb_stderr,"Overloaded function instance %s # of parms %d\n", SYMBOL_DEMANGLED_NAME (oload_syms[ix]), nparms);
+	  for (jj = 0; jj < nargs; jj++)
+	    fprintf_filtered (gdb_stderr,"...Badness @ %d : %d\n", jj, bv->rank[jj]);
+	  fprintf_filtered (gdb_stderr,"Overload resolution champion is %d, ambiguous? %d\n", oload_champ, oload_ambiguous);
+	}
     }				/* end loop over all candidates */
   /* NOTE: dan/2000-03-10: Seems to be a better idea to just pick one
      if they have the exact same goodness. This is because there is no
@@ -2890,15 +2890,11 @@ if (overload_debug)
   /* Check how bad the best match is */
   for (ix = 1; ix <= nargs; ix++)
     {
-      switch (oload_champ_bv->rank[ix])
-	{
-	case 10:
-	  oload_non_standard = 1;	/* non-standard type conversions needed */
-	  break;
-	case 100:
-	  oload_incompatible = 1;	/* truly mismatched types */
-	  break;
-	}
+      if (oload_champ_bv->rank[ix] >= 100)
+	oload_incompatible = 1;	/* truly mismatched types */
+
+      else if (oload_champ_bv->rank[ix] >= 10)
+	oload_non_standard = 1;	/* non-standard type conversions needed */
     }
   if (oload_incompatible)
     {

@@ -1736,6 +1736,9 @@ is_ancestor (base, dclass)
 
   if (base == dclass)
     return 1;
+  if (TYPE_NAME (base) && TYPE_NAME (dclass) &&
+      !strcmp (TYPE_NAME (base), TYPE_NAME (dclass)))
+    return 1;
 
   for (i = 0; i < TYPE_N_BASECLASSES (dclass); i++)
     if (is_ancestor (base, TYPE_BASECLASS (dclass, i)))
@@ -2206,7 +2209,8 @@ rank_one_type (parm, arg)
      really are the same.
   */
 
-  if (TYPE_NAME (parm) == TYPE_NAME (arg))
+  if (TYPE_NAME (parm) && TYPE_NAME (arg) &&
+      !strcmp (TYPE_NAME (parm), TYPE_NAME (arg)))
       return 0;
 
   /* Check if identical after resolving typedefs */
@@ -2216,10 +2220,10 @@ rank_one_type (parm, arg)
   /* See through references, since we can almost make non-references
      references. */
   if (TYPE_CODE (arg) == TYPE_CODE_REF)
-    return (rank_one_type (TYPE_TARGET_TYPE (arg), parm)
+    return (rank_one_type (parm, TYPE_TARGET_TYPE (arg))
 	    + REFERENCE_CONVERSION_BADNESS);
   if (TYPE_CODE (parm) == TYPE_CODE_REF)
-    return (rank_one_type (arg, TYPE_TARGET_TYPE (parm))
+    return (rank_one_type (TYPE_TARGET_TYPE (parm), arg)
 	    + REFERENCE_CONVERSION_BADNESS);
   if (overload_debug)
   /* Debugging only. */
