@@ -1,3 +1,12 @@
+Wed Sep  9 17:36:53 1992  John Gilmore  (gnu@cygnus.com)
+
+	* i386-stub.c, sparc-stub.c (getpacket):  Actually check checksums.
+	* m68k-stub.c:  Remove a few extraneous ANSI-isms.
+	* remote-nindy.c (nindy_prepare_to_store):  Only fetch regs if 
+	they aren't already there.
+	* remote-vx.c (vx_prepare_to_store):  Ditto.
+	* xcoffread.c:  Surround forward struct defns with #ifdef __STDC__.
+
 Wed Sep  9 16:50:22 1992  John Gilmore  (gnu@cygnus.com)
 
 	Removed a large number of changes inserted by Per Bothner

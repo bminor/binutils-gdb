@@ -182,7 +182,9 @@ xcoff_symfile_init PARAMS ((struct objfile *));
 static void
 xcoff_new_init PARAMS ((struct objfile *));
 
+#ifdef __STDC__
 struct section_offset;
+#endif
 
 static void
 xcoff_symfile_read PARAMS ((struct objfile *, struct section_offset *, int));

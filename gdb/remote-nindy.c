@@ -502,7 +502,8 @@ nindy_fetch_registers(regno)
 static void
 nindy_prepare_to_store()
 {
-  nindy_fetch_registers(-1);
+  /* Fetch all regs if they aren't already here.  */
+  read_register_bytes (0, NULL, REGISTER_BYTES);
 }
 
 static void

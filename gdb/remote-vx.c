@@ -474,7 +474,8 @@ vx_read_register (regno)
 static void
 vx_prepare_to_store ()
 {
-  vx_read_register (-1);
+  /* Fetch all registers, if any of them are not yet fetched.  */
+  read_register_bytes (0, NULL, REGISTER_BYTES);
 }
 
 
