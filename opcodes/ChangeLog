@@ -1,3 +1,10 @@
+2003-09-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (powerpc_opcodes): Combine identical PPC403/BOOKE entries.
+	Move duplicate mnemonic entries together.  Use RS instead of RT on
+	all mt*.
+	* ppc-dis.c: Convert to ISO C.
+
 2003-08-29  Dave Brolley  <brolley@redhat.com>
 
 	* Makefile.am (stamp-frv): Copy frv.cpu and frv.opc from

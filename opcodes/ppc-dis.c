@@ -30,18 +30,14 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
    in both big and little endian mode and also for the POWER (RS/6000)
    chip.  */
 
-static int print_insn_powerpc PARAMS ((bfd_vma, struct disassemble_info *,
-				       int bigendian, int dialect));
-
-static int powerpc_dialect PARAMS ((struct disassemble_info *));
+static int print_insn_powerpc (bfd_vma, struct disassemble_info *, int, int);
 
 /* Determine which set of machines to disassemble for.  PPC403/601 or
    BookE.  For convenience, also disassemble instructions supported
    by the AltiVec vector unit.  */
 
 int
-powerpc_dialect(info)
-     struct disassemble_info *info;
+powerpc_dialect (struct disassemble_info *info)
 {
   int dialect = PPC_OPCODE_PPC | PPC_OPCODE_ALTIVEC;
 
@@ -97,9 +93,7 @@ powerpc_dialect(info)
 /* Print a big endian PowerPC instruction.  */
 
 int
-print_insn_big_powerpc (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
+print_insn_big_powerpc (bfd_vma memaddr, struct disassemble_info *info)
 {
   return print_insn_powerpc (memaddr, info, 1, powerpc_dialect(info));
 }
@@ -107,9 +101,7 @@ print_insn_big_powerpc (memaddr, info)
 /* Print a little endian PowerPC instruction.  */
 
 int
-print_insn_little_powerpc (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
+print_insn_little_powerpc (bfd_vma memaddr, struct disassemble_info *info)
 {
   return print_insn_powerpc (memaddr, info, 0, powerpc_dialect(info));
 }
@@ -117,9 +109,7 @@ print_insn_little_powerpc (memaddr, info)
 /* Print a POWER (RS/6000) instruction.  */
 
 int
-print_insn_rs6000 (memaddr, info)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
+print_insn_rs6000 (bfd_vma memaddr, struct disassemble_info *info)
 {
   return print_insn_powerpc (memaddr, info, 1, PPC_OPCODE_POWER);
 }
@@ -127,11 +117,10 @@ print_insn_rs6000 (memaddr, info)
 /* Print a PowerPC or POWER instruction.  */
 
 static int
-print_insn_powerpc (memaddr, info, bigendian, dialect)
-     bfd_vma memaddr;
-     struct disassemble_info *info;
-     int bigendian;
-     int dialect;
+print_insn_powerpc (bfd_vma memaddr,
+		    struct disassemble_info *info,
+		    int bigendian,
+		    int dialect)
 {
   bfd_byte buffer[4];
   int status;
@@ -295,7 +284,7 @@ print_insn_powerpc (memaddr, info, bigendian, dialect)
 }
 
 void
-print_ppc_disassembler_options (FILE * stream)
+print_ppc_disassembler_options (FILE *stream)
 {
   fprintf (stream, "\n\
 The following PPC specific disassembler options are supported for use with\n\
