@@ -5,7 +5,10 @@ Thu Sep 18 14:11:56 1997  Nick Clifton  <nickc@cygnus.com>
 
 Thu Sep 18 11:24:01 1997  Doug Evans  <dje@canuck.cygnus.com>
 
-	* config/tc-sparc.c (parse_keyword_arg): Allow numbers in reg names.
+	* config/tc-sparc.c: Reorganize file.
+	(parse_keyword_arg): Allow numbers in reg names.
+	(SPECIAL_CASE_NONE): New macro.
+	(md_assemble): Use it.
 
 Wed Sep 17 16:54:20 1997  Nick Clifton  <nickc@cygnus.com>
 

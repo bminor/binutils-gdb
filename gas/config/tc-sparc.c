@@ -35,6 +35,7 @@ static bfd_vma BSR PARAMS ((bfd_vma, int));
 static int cmp_reg_entry PARAMS ((const PTR, const PTR));
 static int parse_keyword_arg PARAMS ((int (*) (const char *), char **, int *));
 static int parse_const_expr_arg PARAMS ((char **, int *));
+static int get_expression PARAMS ((char *str));
 
 /* Current architecture.  We don't bump up unless necessary.  */
 static enum sparc_opcode_arch_val current_architecture = SPARC_OPCODE_ARCH_V6;
@@ -162,540 +163,222 @@ struct sparc_it the_insn, set_insn;
 
 static void output_insn
   PARAMS ((const struct sparc_opcode *, struct sparc_it *));
-
-/* Return non-zero if VAL is in the range -(MAX+1) to MAX.  */
-
-static INLINE int
-in_signed_range (val, max)
-     bfd_signed_vma val, max;
-{
-  if (max <= 0)
-    abort ();
-  if (val > max)
-    return 0;
-  if (val < ~max)
-    return 0;
-  return 1;
-}
-
-/* Return non-zero if VAL is in the range -(MAX/2+1) to MAX.
-   (e.g. -15 to +31).  */
-
-static INLINE int
-in_bitfield_range (val, max)
-     bfd_signed_vma val, max;
-{
-  if (max <= 0)
-    abort ();
-  if (val > max)
-    return 0;
-  if (val < ~(max >> 1))
-    return 0;
-  return 1;
-}
-
-static int
-sparc_ffs (mask)
-     unsigned int mask;
-{
-  int i;
-
-  if (mask == 0)
-    return -1;
-
-  for (i = 0; (mask & 1) == 0; ++i)
-    mask >>= 1;
-  return i;
-}
-
-/* Implement big shift right.  */
-static bfd_vma
-BSR (val, amount)
-     bfd_vma val;
-     int amount;
-{
-  if (sizeof (bfd_vma) <= 4 && amount >= 32)
-    as_fatal ("Support for 64-bit arithmetic not compiled in.");
-  return val >> amount;
-}
-
-#if 0
-static void print_insn PARAMS ((struct sparc_it *insn));
-#endif
-static int getExpression PARAMS ((char *str));
-
-static char *expr_end;
-static int special_case;
-
+
 /*
- * Instructions that require wierd handling because they're longer than
- * 4 bytes.
- */
-#define	SPECIAL_CASE_SET	1
-#define SPECIAL_CASE_SETSW	2
-#define SPECIAL_CASE_SETX	3
-/* FIXME: sparc-opc.c doesn't have necessary "S" trigger to enable this.  */
-#define	SPECIAL_CASE_FDIV	4
-
-/* Bit masks of various insns.  */
-#define NOP_INSN 0x01000000
-#define OR_INSN 0x80100000
-#define FMOVS_INSN 0x81A00020
-#define SETHI_INSN 0x01000000
-#define SLLX_INSN 0x81281000
-#define SRA_INSN 0x81380000
-
-/* The last instruction to be assembled.  */
-static const struct sparc_opcode *last_insn;
-/* The assembled opcode of `last_insn'.  */
-static unsigned long last_opcode;
-
-/*
- * sort of like s_lcomm
+ * md_parse_option
+ *	Invocation line includes a switch not recognized by the base assembler.
+ *	See if it's a processor-specific option.  These are:
  *
+ *	-bump
+ *		Warn on architecture bumps.  See also -A.
+ *
+ *	-Av6, -Av7, -Av8, -Asparclite, -Asparclet
+ *		Standard 32 bit architectures.
+ *	-Av8plus, -Av8plusa
+ *		Sparc64 in a 32 bit world.
+ *	-Av9, -Av9a
+ *		Sparc64 in a 64 bit world.
+ *	-xarch=v8plus, -xarch=v8plusa
+ *		Same as -Av8plus{,a}, for compatibility with Sun's assembler.
+ *
+ *		Select the architecture and possibly the file format.
+ *		Instructions or features not supported by the selected
+ *		architecture cause fatal errors.
+ *
+ *		The default is to start at v6, and bump the architecture up
+ *		whenever an instruction is seen at a higher level.  If 32 bit
+ *		environments, v9 is not bumped up to, the user must pass -Av9.
+ *
+ *		-xarch=v8plus{,a} is for compatibility with the Sun assembler.
+ *
+ *		If -bump is specified, a warning is printing when bumping to
+ *		higher levels.
+ *
+ *		If an architecture is specified, all instructions must match
+ *		that architecture.  Any higher level instructions are flagged
+ *		as errors.  Note that in the 32 bit environment specifying
+ *		-Av9 does not automatically create a v9 object file, a v9
+ *		insn must be seen.
+ *
+ *		If both an architecture and -bump are specified, the
+ *		architecture starts at the specified level, but bumps are
+ *		warnings.  Note that we can't set `current_architecture' to
+ *		the requested level in this case: in the 32 bit environment,
+ *		we still must avoid creating v9 object files unless v9 insns
+ *		are seen.
+ *
+ * Note:
+ *		Bumping between incompatible architectures is always an
+ *		error.  For example, from sparclite to v9.
  */
-#ifndef OBJ_ELF
-static int max_alignment = 15;
-#endif
 
-static void
-s_reserve (ignore)
-     int ignore;
-{
-  char *name;
-  char *p;
-  char c;
-  int align;
-  int size;
-  int temp;
-  symbolS *symbolP;
-
-  name = input_line_pointer;
-  c = get_symbol_end ();
-  p = input_line_pointer;
-  *p = c;
-  SKIP_WHITESPACE ();
-
-  if (*input_line_pointer != ',')
-    {
-      as_bad ("Expected comma after name");
-      ignore_rest_of_line ();
-      return;
-    }
-
-  ++input_line_pointer;
-
-  if ((size = get_absolute_expression ()) < 0)
-    {
-      as_bad ("BSS length (%d.) <0! Ignored.", size);
-      ignore_rest_of_line ();
-      return;
-    }				/* bad length */
-
-  *p = 0;
-  symbolP = symbol_find_or_make (name);
-  *p = c;
-
-  if (strncmp (input_line_pointer, ",\"bss\"", 6) != 0
-      && strncmp (input_line_pointer, ",\".bss\"", 7) != 0)
-    {
-      as_bad ("bad .reserve segment -- expected BSS segment");
-      return;
-    }
-
-  if (input_line_pointer[2] == '.')
-    input_line_pointer += 7;
-  else
-    input_line_pointer += 6;
-  SKIP_WHITESPACE ();
-
-  if (*input_line_pointer == ',')
-    {
-      ++input_line_pointer;
-
-      SKIP_WHITESPACE ();
-      if (*input_line_pointer == '\n')
-	{
-	  as_bad ("Missing alignment");
-	  return;
-	}
-
-      align = get_absolute_expression ();
-#ifndef OBJ_ELF
-      if (align > max_alignment)
-	{
-	  align = max_alignment;
-	  as_warn ("Alignment too large: %d. assumed.", align);
-	}
-#endif
-      if (align < 0)
-	{
-	  align = 0;
-	  as_warn ("Alignment negative. 0 assumed.");
-	}
-
-      record_alignment (bss_section, align);
-
-      /* convert to a power of 2 alignment */
-      for (temp = 0; (align & 1) == 0; align >>= 1, ++temp);;
-
-      if (align != 1)
-	{
-	  as_bad ("Alignment not a power of 2");
-	  ignore_rest_of_line ();
-	  return;
-	}			/* not a power of two */
-
-      align = temp;
-    }				/* if has optional alignment */
-  else
-    align = 0;
-
-  if (!S_IS_DEFINED (symbolP)
+#ifdef OBJ_ELF
+CONST char *md_shortopts = "A:K:VQ:sq";
+#else
 #ifdef OBJ_AOUT
-      && S_GET_OTHER (symbolP) == 0
-      && S_GET_DESC (symbolP) == 0
+CONST char *md_shortopts = "A:k";
+#else
+CONST char *md_shortopts = "A:";
 #endif
-      )
-    {
-      if (! need_pass_2)
-	{
-	  char *pfrag;
-	  segT current_seg = now_seg;
-	  subsegT current_subseg = now_subseg;
+#endif
+struct option md_longopts[] = {
+#define OPTION_BUMP (OPTION_MD_BASE)
+  {"bump", no_argument, NULL, OPTION_BUMP},
+#define OPTION_SPARC (OPTION_MD_BASE + 1)
+  {"sparc", no_argument, NULL, OPTION_SPARC},
+#define OPTION_XARCH (OPTION_MD_BASE + 2)
+  {"xarch", required_argument, NULL, OPTION_XARCH},
+#ifdef SPARC_BIENDIAN
+#define OPTION_LITTLE_ENDIAN (OPTION_MD_BASE + 3)
+  {"EL", no_argument, NULL, OPTION_LITTLE_ENDIAN},
+#define OPTION_BIG_ENDIAN (OPTION_MD_BASE + 4)
+  {"EB", no_argument, NULL, OPTION_BIG_ENDIAN},
+#endif
+#define OPTION_ENFORCE_ALIGNED_DATA (OPTION_MD_BASE + 5)
+  {"enforce-aligned-data", no_argument, NULL, OPTION_ENFORCE_ALIGNED_DATA},
+  {NULL, no_argument, NULL, 0}
+};
+size_t md_longopts_size = sizeof(md_longopts);
 
-	  subseg_set (bss_section, 1); /* switch to bss */
-
-	  if (align)
-	    frag_align (align, 0, 0); /* do alignment */
-
-	  /* detach from old frag */
-	  if (S_GET_SEGMENT(symbolP) == bss_section)
-	    symbolP->sy_frag->fr_symbol = NULL;
-
-	  symbolP->sy_frag = frag_now;
-	  pfrag = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
-			    (offsetT) size, (char *)0);
-	  *pfrag = 0;
-
-	  S_SET_SEGMENT (symbolP, bss_section);
-
-	  subseg_set (current_seg, current_subseg);
-	}
-    }
-  else
-    {
-      as_warn("Ignoring attempt to re-define symbol %s",
-	      S_GET_NAME (symbolP));
-    }				/* if not redefining */
-
-  demand_empty_rest_of_line ();
-}
-
-static void
-s_common (ignore)
-     int ignore;
+int
+md_parse_option (c, arg)
+     int c;
+     char *arg;
 {
-  char *name;
-  char c;
-  char *p;
-  int temp, size;
-  symbolS *symbolP;
+  switch (c)
+    {
+    case OPTION_BUMP:
+      warn_on_bump = 1;
+      warn_after_architecture = SPARC_OPCODE_ARCH_V6;
+      break;
 
-  name = input_line_pointer;
-  c = get_symbol_end ();
-  /* just after name is now '\0' */
-  p = input_line_pointer;
-  *p = c;
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer != ',')
-    {
-      as_bad ("Expected comma after symbol-name");
-      ignore_rest_of_line ();
-      return;
-    }
-  input_line_pointer++;		/* skip ',' */
-  if ((temp = get_absolute_expression ()) < 0)
-    {
-      as_bad (".COMMon length (%d.) <0! Ignored.", temp);
-      ignore_rest_of_line ();
-      return;
-    }
-  size = temp;
-  *p = 0;
-  symbolP = symbol_find_or_make (name);
-  *p = c;
-  if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
-    {
-      as_bad ("Ignoring attempt to re-define symbol");
-      ignore_rest_of_line ();
-      return;
-    }
-  if (S_GET_VALUE (symbolP) != 0)
-    {
-      if (S_GET_VALUE (symbolP) != size)
-	{
-	  as_warn ("Length of .comm \"%s\" is already %ld. Not changed to %d.",
-		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
-	}
-    }
-  else
-    {
-#ifndef OBJ_ELF
-      S_SET_VALUE (symbolP, (valueT) size);
-      S_SET_EXTERNAL (symbolP);
-#endif
-    }
-  know (symbolP->sy_frag == &zero_address_frag);
-  if (*input_line_pointer != ',')
-    {
-      as_bad ("Expected comma after common length");
-      ignore_rest_of_line ();
-      return;
-    }
-  input_line_pointer++;
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer != '"')
-    {
-      temp = get_absolute_expression ();
-#ifndef OBJ_ELF
-      if (temp > max_alignment)
-	{
-	  temp = max_alignment;
-	  as_warn ("Common alignment too large: %d. assumed", temp);
-	}
-#endif
-      if (temp < 0)
-	{
-	  temp = 0;
-	  as_warn ("Common alignment negative; 0 assumed");
-	}
-#ifdef OBJ_ELF
-      if (symbolP->local)
-	{
-	  segT old_sec;
-	  int old_subsec;
-	  char *p;
-	  int align;
-
-	  old_sec = now_seg;
-	  old_subsec = now_subseg;
-	  align = temp;
-	  record_alignment (bss_section, align);
-	  subseg_set (bss_section, 0);
-	  if (align)
-	    frag_align (align, 0, 0);
-	  if (S_GET_SEGMENT (symbolP) == bss_section)
-	    symbolP->sy_frag->fr_symbol = 0;
-	  symbolP->sy_frag = frag_now;
-	  p = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
-			(offsetT) size, (char *) 0);
-	  *p = 0;
-	  S_SET_SEGMENT (symbolP, bss_section);
-	  S_CLEAR_EXTERNAL (symbolP);
-	  subseg_set (old_sec, old_subsec);
-	}
+    case OPTION_XARCH:
+      /* This is for compatibility with Sun's assembler.
+         We could add v8plus and v8plusa to sparc_opcode_archs,
+	 but that table is used to describe architectures whereas here we
+	 want the argument to describe *both* the architecture and the file
+	 format.  */
+      if (strcmp (arg, "v8plus") == 0)
+	arg = "v9";
+      else if (strcmp (arg, "v8plusa") == 0)
+	arg = "v9a";
       else
-#endif
 	{
-	allocate_common:
-	  S_SET_VALUE (symbolP, (valueT) size);
+	  as_bad ("invalid architecture -xarch=%s", arg);
+	  return 0;
+	}
+
+      /* fall through */
+
+    case 'A':
+      {
+	enum sparc_opcode_arch_val new_arch = sparc_opcode_lookup_arch (arg);
+
+	if (new_arch == SPARC_OPCODE_ARCH_BAD)
+	  {
+	    as_bad ("invalid architecture -A%s", arg);
+	    return 0;
+	  }
+
+	max_architecture = new_arch;
+	architecture_requested = 1;
+      }
+      break;
+
+    case OPTION_SPARC:
+      /* Ignore -sparc, used by SunOS make default .s.o rule.  */
+      break;
+
+    case OPTION_ENFORCE_ALIGNED_DATA:
+      enforce_aligned_data = 1;
+      break;
+
+#ifdef SPARC_BIENDIAN
+    case OPTION_LITTLE_ENDIAN:
+      target_big_endian = 0;
+      break;
+    case OPTION_BIG_ENDIAN:
+      target_big_endian = 1;
+      break;
+#endif
+
+#ifdef OBJ_AOUT
+    case 'k':
+      sparc_pic_code = 1;
+      break;
+#endif
+
 #ifdef OBJ_ELF
-	  S_SET_ALIGN (symbolP, temp);
-#endif
-	  S_SET_EXTERNAL (symbolP);
-	  S_SET_SEGMENT (symbolP, bfd_com_section_ptr);
-	}
-    }
-  else
-    {
-      input_line_pointer++;
-      /* @@ Some use the dot, some don't.  Can we get some consistency??  */
-      if (*input_line_pointer == '.')
-	input_line_pointer++;
-      /* @@ Some say data, some say bss.  */
-      if (strncmp (input_line_pointer, "bss\"", 4)
-	  && strncmp (input_line_pointer, "data\"", 5))
-	{
-	  while (*--input_line_pointer != '"')
-	    ;
-	  input_line_pointer--;
-	  goto bad_common_segment;
-	}
-      while (*input_line_pointer++ != '"')
-	;
-      goto allocate_common;
-    }
+    case 'V':
+      print_version_id ();
+      break;
 
-#ifdef BFD_ASSEMBLER
-  symbolP->bsym->flags |= BSF_OBJECT;
+    case 'Q':
+      /* Qy - do emit .comment
+	 Qn - do not emit .comment */
+      break;
+
+    case 's':
+      /* use .stab instead of .stab.excl */
+      break;
+
+    case 'q':
+      /* quick -- native assembler does fewer checks */
+      break;
+
+    case 'K':
+      if (strcmp (arg, "PIC") != 0)
+	as_warn ("Unrecognized option following -K");
+      else
+	sparc_pic_code = 1;
+      break;
 #endif
 
-  demand_empty_rest_of_line ();
-  return;
-
-  {
-  bad_common_segment:
-    p = input_line_pointer;
-    while (*p && *p != '\n')
-      p++;
-    c = *p;
-    *p = '\0';
-    as_bad ("bad .common segment %s", input_line_pointer + 1);
-    *p = c;
-    input_line_pointer = p;
-    ignore_rest_of_line ();
-    return;
-  }
-}
-
-/* Handle the .empty pseudo-op.  This supresses the warnings about
-   invalid delay slot usage.  */
-
-static void
-s_empty (ignore)
-     int ignore;
-{
-  /* The easy way to implement is to just forget about the last
-     instruction.  */
-  last_insn = NULL;
-}
-
-static void
-s_seg (ignore)
-     int ignore;
-{
-
-  if (strncmp (input_line_pointer, "\"text\"", 6) == 0)
-    {
-      input_line_pointer += 6;
-      s_text (0);
-      return;
+    default:
+      return 0;
     }
-  if (strncmp (input_line_pointer, "\"data\"", 6) == 0)
-    {
-      input_line_pointer += 6;
-      s_data (0);
-      return;
-    }
-  if (strncmp (input_line_pointer, "\"data1\"", 7) == 0)
-    {
-      input_line_pointer += 7;
-      s_data1 ();
-      return;
-    }
-  if (strncmp (input_line_pointer, "\"bss\"", 5) == 0)
-    {
-      input_line_pointer += 5;
-      /* We only support 2 segments -- text and data -- for now, so
-	 things in the "bss segment" will have to go into data for now.
-	 You can still allocate SEG_BSS stuff with .lcomm or .reserve. */
-      subseg_set (data_section, 255);	/* FIXME-SOMEDAY */
-      return;
-    }
-  as_bad ("Unknown segment type");
-  demand_empty_rest_of_line ();
+
+  return 1;
 }
-
-static void
-s_data1 ()
-{
-  subseg_set (data_section, 1);
-  demand_empty_rest_of_line ();
-}
-
-static void
-s_proc (ignore)
-     int ignore;
-{
-  while (!is_end_of_line[(unsigned char) *input_line_pointer])
-    {
-      ++input_line_pointer;
-    }
-  ++input_line_pointer;
-}
-
-/* This static variable is set by s_uacons to tell sparc_cons_align
-   that the expession does not need to be aligned.  */
-
-static int sparc_no_align_cons = 0;
-
-/* This handles the unaligned space allocation pseudo-ops, such as
-   .uaword.  .uaword is just like .word, but the value does not need
-   to be aligned.  */
-
-static void
-s_uacons (bytes)
-     int bytes;
-{
-  /* Tell sparc_cons_align not to align this value.  */
-  sparc_no_align_cons = 1;
-  cons (bytes);
-}
-
-/* If the --enforce-aligned-data option is used, we require .word,
-   et. al., to be aligned correctly.  We do it by setting up an
-   rs_align_code frag, and checking in HANDLE_ALIGN to make sure that
-   no unexpected alignment was introduced.
-
-   The SunOS and Solaris native assemblers enforce aligned data by
-   default.  We don't want to do that, because gcc can deliberately
-   generate misaligned data if the packed attribute is used.  Instead,
-   we permit misaligned data by default, and permit the user to set an
-   option to check for it.  */
 
 void
-sparc_cons_align (nbytes)
-     int nbytes;
+md_show_usage (stream)
+     FILE *stream;
 {
-  int nalign;
-  char *p;
+  const struct sparc_opcode_arch *arch;
 
-  /* Only do this if we are enforcing aligned data.  */
-  if (! enforce_aligned_data)
-    return;
-
-  if (sparc_no_align_cons)
+  fprintf(stream, "SPARC options:\n");
+  for (arch = &sparc_opcode_archs[0]; arch->name; arch++)
     {
-      /* This is an unaligned pseudo-op.  */
-      sparc_no_align_cons = 0;
-      return;
+      if (arch != &sparc_opcode_archs[0])
+	fprintf (stream, " | ");
+      fprintf (stream, "-A%s", arch->name);
     }
-
-  nalign = 0;
-  while ((nbytes & 1) == 0)
-    {
-      ++nalign;
-      nbytes >>= 1;
-    }
-
-  if (nalign == 0)
-    return;
-
-  if (now_seg == absolute_section)
-    {
-      if ((abs_section_offset & ((1 << nalign) - 1)) != 0)
-	as_bad ("misaligned data");
-      return;
-    }
-
-  p = frag_var (rs_align_code, 1, 1, (relax_substateT) 0,
-		(symbolS *) NULL, (offsetT) nalign, (char *) NULL);
-
-  record_alignment (now_seg, nalign);
+  fprintf (stream, "\n-xarch=v8plus | -xarch=v8plusa\n");
+  fprintf (stream, "\
+			specify variant of SPARC architecture\n\
+-bump			warn when assembler switches architectures\n\
+-sparc			ignored\n\
+--enforce-aligned-data	force .long, etc., to be aligned correctly\n");
+#ifdef OBJ_AOUT
+  fprintf (stream, "\
+-k			generate PIC\n");
+#endif
+#ifdef OBJ_ELF
+  fprintf (stream, "\
+-KPIC			generate PIC\n\
+-V			print assembler version number\n\
+-q			ignored\n\
+-Qy, -Qn		ignored\n\
+-s			ignored\n");
+#endif
+#ifdef SPARC_BIENDIAN
+  fprintf (stream, "\
+-EL			generate code for a little endian machine\n\
+-EB			generate code for a big endian machine\n");
+#endif
 }
-
-/* This is where we do the unexpected alignment check.  */
-
-void
-sparc_handle_align (fragp)
-     fragS *fragp;
-{
-  if (fragp->fr_type == rs_align_code
-      && fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix != 0)
-    as_bad_where (fragp->fr_file, fragp->fr_line, "misaligned data");
-}
-
+
 /* sparc64 priviledged registers */
 
 struct priv_reg_entry
@@ -736,7 +419,7 @@ cmp_reg_entry (parg, qarg)
 
   return strcmp (q->name, p->name);
 }
-
+
 /* This function is called once, at assembler startup time.  It should
    set up all the tables, etc. that the MD part of the assembler will need. */
 
@@ -839,36 +522,93 @@ sparc_md_end ()
     }
 #endif
 }
+
+/* Return non-zero if VAL is in the range -(MAX+1) to MAX.  */
 
-/* Utility to output one insn.  */
-
-static void
-output_insn (insn, the_insn)
-     const struct sparc_opcode *insn;
-     struct sparc_it *the_insn;
+static INLINE int
+in_signed_range (val, max)
+     bfd_signed_vma val, max;
 {
-  char *toP = frag_more (4);
-
-  /* put out the opcode */
-  if (INSN_BIG_ENDIAN)
-    number_to_chars_bigendian (toP, (valueT) the_insn->opcode, 4);
-  else
-    number_to_chars_littleendian (toP, (valueT) the_insn->opcode, 4);
-
-  /* put out the symbol-dependent stuff */
-  if (the_insn->reloc != BFD_RELOC_NONE)
-    {
-      fix_new_exp (frag_now,	/* which frag */
-		   (toP - frag_now->fr_literal),	/* where */
-		   4,		/* size */
-		   &the_insn->exp,
-		   the_insn->pcrel,
-		   the_insn->reloc);
-    }
-
-  last_insn = insn;
-  last_opcode = the_insn->opcode;
+  if (max <= 0)
+    abort ();
+  if (val > max)
+    return 0;
+  if (val < ~max)
+    return 0;
+  return 1;
 }
+
+/* Return non-zero if VAL is in the range -(MAX/2+1) to MAX.
+   (e.g. -15 to +31).  */
+
+static INLINE int
+in_bitfield_range (val, max)
+     bfd_signed_vma val, max;
+{
+  if (max <= 0)
+    abort ();
+  if (val > max)
+    return 0;
+  if (val < ~(max >> 1))
+    return 0;
+  return 1;
+}
+
+static int
+sparc_ffs (mask)
+     unsigned int mask;
+{
+  int i;
+
+  if (mask == 0)
+    return -1;
+
+  for (i = 0; (mask & 1) == 0; ++i)
+    mask >>= 1;
+  return i;
+}
+
+/* Implement big shift right.  */
+static bfd_vma
+BSR (val, amount)
+     bfd_vma val;
+     int amount;
+{
+  if (sizeof (bfd_vma) <= 4 && amount >= 32)
+    as_fatal ("Support for 64-bit arithmetic not compiled in.");
+  return val >> amount;
+}
+
+/* For communication between sparc_ip and get_expression.  */
+static char *expr_end;
+
+/* For communication between md_assemble and sparc_ip.  */
+static int special_case;
+
+/* Values for `special_case'.
+   Instructions that require wierd handling because they're longer than
+   4 bytes.  */
+#define SPECIAL_CASE_NONE	0
+#define	SPECIAL_CASE_SET	1
+#define SPECIAL_CASE_SETSW	2
+#define SPECIAL_CASE_SETX	3
+/* FIXME: sparc-opc.c doesn't have necessary "S" trigger to enable this.  */
+#define	SPECIAL_CASE_FDIV	4
+
+/* Bit masks of various insns.  */
+#define NOP_INSN 0x01000000
+#define OR_INSN 0x80100000
+#define FMOVS_INSN 0x81A00020
+#define SETHI_INSN 0x01000000
+#define SLLX_INSN 0x81281000
+#define SRA_INSN 0x81380000
+
+/* The last instruction to be assembled.  */
+static const struct sparc_opcode *last_insn;
+/* The assembled opcode of `last_insn'.  */
+static unsigned long last_opcode;
+
+/* Main entry point to assemble one instruction.  */
 
 void
 md_assemble (str)
@@ -877,7 +617,7 @@ md_assemble (str)
   const struct sparc_opcode *insn;
 
   know (str);
-  special_case = 0;
+  special_case = SPECIAL_CASE_NONE;
   sparc_ip (str, &insn);
 
   /* We warn about attempts to put a floating point branch in a delay slot,
@@ -911,7 +651,7 @@ md_assemble (str)
 
   switch (special_case)
     {
-    case 0:
+    case SPECIAL_CASE_NONE:
       /* normal insn */
       output_insn (insn, &the_insn);
       break;
@@ -1128,66 +868,7 @@ md_assemble (str)
     }
 }
 
-/* Parse an argument that can be expressed as a keyword.
-   (eg: #StoreStore or %ccfr).
-   The result is a boolean indicating success.
-   If successful, INPUT_POINTER is updated.  */
-
-static int
-parse_keyword_arg (lookup_fn, input_pointerP, valueP)
-     int (*lookup_fn) PARAMS ((const char *));
-     char **input_pointerP;
-     int *valueP;
-{
-  int value;
-  char c, *p, *q;
-
-  p = *input_pointerP;
-  for (q = p + (*p == '#' || *p == '%'); isalnum (*q) || *q == '_'; ++q)
-    continue;
-  c = *q;
-  *q = 0;
-  value = (*lookup_fn) (p);
-  *q = c;
-  if (value == -1)
-    return 0;
-  *valueP = value;
-  *input_pointerP = q;
-  return 1;
-}
-
-/* Parse an argument that is a constant expression.
-   The result is a boolean indicating success.  */
-
-static int
-parse_const_expr_arg (input_pointerP, valueP)
-     char **input_pointerP;
-     int *valueP;
-{
-  char *save = input_line_pointer;
-  expressionS exp;
-
-  input_line_pointer = *input_pointerP;
-  /* The next expression may be something other than a constant
-     (say if we're not processing the right variant of the insn).
-     Don't call expression unless we're sure it will succeed as it will
-     signal an error (which we want to defer until later).  */
-  /* FIXME: It might be better to define md_operand and have it recognize
-     things like %asi, etc. but continuing that route through to the end
-     is a lot of work.  */
-  if (*input_line_pointer == '%')
-    {
-      input_line_pointer = save;
-      return 0;
-    }
-  expression (&exp);
-  *input_pointerP = input_line_pointer;
-  input_line_pointer = save;
-  if (exp.X_op != O_constant)
-    return 0;
-  *valueP = exp.X_add_number;
-  return 1;
-}
+/* Subroutine of md_assemble to do the actual parsing.  */
 
 static void
 sparc_ip (str, pinsn)
@@ -1916,7 +1597,7 @@ sparc_ip (str, pinsn)
 		  else
 		    break;
 		}
-	      /* Note that if the getExpression() fails, we will still
+	      /* Note that if the get_expression() fails, we will still
 		 have created U entries in the symbol table for the
 		 'symbols' in the input string.  Try not to create U
 		 symbols for registers, etc.  */
@@ -1936,7 +1617,7 @@ sparc_ip (str, pinsn)
 		      {
 			s1 -= 3;
 			*s1 = '\0';
-			(void) getExpression (s);
+			(void) get_expression (s);
 			*s1 = '+';
 			s = s1;
 			continue;
@@ -1945,14 +1626,14 @@ sparc_ip (str, pinsn)
 		      {
 			s1 -= 4;
 			*s1 = '\0';
-			(void) getExpression (s);
+			(void) get_expression (s);
 			*s1 = '+';
 			s = s1;
 			continue;
 		      }
 		  }
 	      }
-	      (void) getExpression (s);
+	      (void) get_expression (s);
 	      s = expr_end;
 
 	      if (the_insn.exp.X_op == O_constant
@@ -2281,8 +1962,71 @@ sparc_ip (str, pinsn)
   the_insn.opcode = opcode;
 }
 
+/* Parse an argument that can be expressed as a keyword.
+   (eg: #StoreStore or %ccfr).
+   The result is a boolean indicating success.
+   If successful, INPUT_POINTER is updated.  */
+
 static int
-getExpression (str)
+parse_keyword_arg (lookup_fn, input_pointerP, valueP)
+     int (*lookup_fn) PARAMS ((const char *));
+     char **input_pointerP;
+     int *valueP;
+{
+  int value;
+  char c, *p, *q;
+
+  p = *input_pointerP;
+  for (q = p + (*p == '#' || *p == '%'); isalnum (*q) || *q == '_'; ++q)
+    continue;
+  c = *q;
+  *q = 0;
+  value = (*lookup_fn) (p);
+  *q = c;
+  if (value == -1)
+    return 0;
+  *valueP = value;
+  *input_pointerP = q;
+  return 1;
+}
+
+/* Parse an argument that is a constant expression.
+   The result is a boolean indicating success.  */
+
+static int
+parse_const_expr_arg (input_pointerP, valueP)
+     char **input_pointerP;
+     int *valueP;
+{
+  char *save = input_line_pointer;
+  expressionS exp;
+
+  input_line_pointer = *input_pointerP;
+  /* The next expression may be something other than a constant
+     (say if we're not processing the right variant of the insn).
+     Don't call expression unless we're sure it will succeed as it will
+     signal an error (which we want to defer until later).  */
+  /* FIXME: It might be better to define md_operand and have it recognize
+     things like %asi, etc. but continuing that route through to the end
+     is a lot of work.  */
+  if (*input_line_pointer == '%')
+    {
+      input_line_pointer = save;
+      return 0;
+    }
+  expression (&exp);
+  *input_pointerP = input_line_pointer;
+  input_line_pointer = save;
+  if (exp.X_op != O_constant)
+    return 0;
+  *valueP = exp.X_add_number;
+  return 1;
+}
+
+/* Subroutine of sparc_ip to parse an expression.  */
+
+static int
+get_expression (str)
      char *str;
 {
   char *save_in;
@@ -2305,9 +2049,38 @@ getExpression (str)
   expr_end = input_line_pointer;
   input_line_pointer = save_in;
   return 0;
-}				/* getExpression() */
+}
 
+/* Subroutine of md_assemble to output one insn.  */
 
+static void
+output_insn (insn, the_insn)
+     const struct sparc_opcode *insn;
+     struct sparc_it *the_insn;
+{
+  char *toP = frag_more (4);
+
+  /* put out the opcode */
+  if (INSN_BIG_ENDIAN)
+    number_to_chars_bigendian (toP, (valueT) the_insn->opcode, 4);
+  else
+    number_to_chars_littleendian (toP, (valueT) the_insn->opcode, 4);
+
+  /* put out the symbol-dependent stuff */
+  if (the_insn->reloc != BFD_RELOC_NONE)
+    {
+      fix_new_exp (frag_now,	/* which frag */
+		   (toP - frag_now->fr_literal),	/* where */
+		   4,		/* size */
+		   &the_insn->exp,
+		   the_insn->pcrel,
+		   the_insn->reloc);
+    }
+
+  last_insn = insn;
+  last_opcode = the_insn->opcode;
+}
+
 /*
   This is identical to the md_atof in m68k.c.  I think this is right,
   but I'm not sure.
@@ -2400,7 +2173,7 @@ md_number_to_chars (buf, val, n)
   else
     number_to_chars_littleendian (buf, val, n);
 }
-
+
 /* Apply a fixS to the frags, now that we know the value it ought to
    hold. */
 
@@ -2751,272 +2524,6 @@ tc_gen_reloc (section, fixp)
 
   return reloc;
 }
-
-
-#if 0
-/* for debugging only */
-static void
-print_insn (insn)
-     struct sparc_it *insn;
-{
-  const char *const Reloc[] = {
-    "RELOC_8",
-    "RELOC_16",
-    "RELOC_32",
-    "RELOC_DISP8",
-    "RELOC_DISP16",
-    "RELOC_DISP32",
-    "RELOC_WDISP30",
-    "RELOC_WDISP22",
-    "RELOC_HI22",
-    "RELOC_22",
-    "RELOC_13",
-    "RELOC_LO10",
-    "RELOC_SFA_BASE",
-    "RELOC_SFA_OFF13",
-    "RELOC_BASE10",
-    "RELOC_BASE13",
-    "RELOC_BASE22",
-    "RELOC_PC10",
-    "RELOC_PC22",
-    "RELOC_JMP_TBL",
-    "RELOC_SEGOFF16",
-    "RELOC_GLOB_DAT",
-    "RELOC_JMP_SLOT",
-    "RELOC_RELATIVE",
-    "NO_RELOC"
-  };
-
-  if (insn->error)
-    fprintf (stderr, "ERROR: %s\n");
-  fprintf (stderr, "opcode=0x%08x\n", insn->opcode);
-  fprintf (stderr, "reloc = %s\n", Reloc[insn->reloc]);
-  fprintf (stderr, "exp = {\n");
-  fprintf (stderr, "\t\tX_add_symbol = %s\n",
-	   ((insn->exp.X_add_symbol != NULL)
-	    ? ((S_GET_NAME (insn->exp.X_add_symbol) != NULL)
-	       ? S_GET_NAME (insn->exp.X_add_symbol)
-	       : "???")
-	    : "0"));
-  fprintf (stderr, "\t\tX_sub_symbol = %s\n",
-	   ((insn->exp.X_op_symbol != NULL)
-	    ? (S_GET_NAME (insn->exp.X_op_symbol)
-	       ? S_GET_NAME (insn->exp.X_op_symbol)
-	       : "???")
-	    : "0"));
-  fprintf (stderr, "\t\tX_add_number = %d\n",
-	   insn->exp.X_add_number);
-  fprintf (stderr, "}\n");
-}
-#endif
-
-/*
- * md_parse_option
- *	Invocation line includes a switch not recognized by the base assembler.
- *	See if it's a processor-specific option.  These are:
- *
- *	-bump
- *		Warn on architecture bumps.  See also -A.
- *
- *	-Av6, -Av7, -Av8, -Av9, -Av9a, -Asparclite
- *	-xarch=v8plus, -xarch=v8plusa
- *		Select the architecture.  Instructions or features not
- *		supported by the selected architecture cause fatal errors.
- *
- *		The default is to start at v6, and bump the architecture up
- *		whenever an instruction is seen at a higher level.  If 32 bit
- *		environments, v9 is not bumped up to, the user must pass -Av9.
- *
- *		-xarch=v8plus{,a} is for compatibility with the Sun assembler.
- *
- *		If -bump is specified, a warning is printing when bumping to
- *		higher levels.
- *
- *		If an architecture is specified, all instructions must match
- *		that architecture.  Any higher level instructions are flagged
- *		as errors.  Note that in the 32 bit environment specifying
- *		-Av9 does not automatically create a v9 object file, a v9
- *		insn must be seen.
- *
- *		If both an architecture and -bump are specified, the
- *		architecture starts at the specified level, but bumps are
- *		warnings.  Note that we can't set `current_architecture' to
- *		the requested level in this case: in the 32 bit environment,
- *		we still must avoid creating v9 object files unless v9 insns
- *		are seen.
- *
- * Note:
- *		Bumping between incompatible architectures is always an
- *		error.  For example, from sparclite to v9.
- */
-
-#ifdef OBJ_ELF
-CONST char *md_shortopts = "A:K:VQ:sq";
-#else
-#ifdef OBJ_AOUT
-CONST char *md_shortopts = "A:k";
-#else
-CONST char *md_shortopts = "A:";
-#endif
-#endif
-struct option md_longopts[] = {
-#define OPTION_BUMP (OPTION_MD_BASE)
-  {"bump", no_argument, NULL, OPTION_BUMP},
-#define OPTION_SPARC (OPTION_MD_BASE + 1)
-  {"sparc", no_argument, NULL, OPTION_SPARC},
-#define OPTION_XARCH (OPTION_MD_BASE + 2)
-  {"xarch", required_argument, NULL, OPTION_XARCH},
-#ifdef SPARC_BIENDIAN
-#define OPTION_LITTLE_ENDIAN (OPTION_MD_BASE + 3)
-  {"EL", no_argument, NULL, OPTION_LITTLE_ENDIAN},
-#define OPTION_BIG_ENDIAN (OPTION_MD_BASE + 4)
-  {"EB", no_argument, NULL, OPTION_BIG_ENDIAN},
-#endif
-#define OPTION_ENFORCE_ALIGNED_DATA (OPTION_MD_BASE + 5)
-  {"enforce-aligned-data", no_argument, NULL, OPTION_ENFORCE_ALIGNED_DATA},
-  {NULL, no_argument, NULL, 0}
-};
-size_t md_longopts_size = sizeof(md_longopts);
-
-int
-md_parse_option (c, arg)
-     int c;
-     char *arg;
-{
-  switch (c)
-    {
-    case OPTION_BUMP:
-      warn_on_bump = 1;
-      warn_after_architecture = SPARC_OPCODE_ARCH_V6;
-      break;
-
-    case OPTION_XARCH:
-      /* ??? We could add v8plus and v8plusa to sparc_opcode_archs.
-	 But we might want v8plus to mean something different than v9
-	 someday, and we'd recognize more -xarch options than Sun's
-	 assembler does (which may lead to a conflict someday).  */
-      if (strcmp (arg, "v8plus") == 0)
-	arg = "v9";
-      else if (strcmp (arg, "v8plusa") == 0)
-	arg = "v9a";
-      else
-	{
-	  as_bad ("invalid architecture -xarch=%s", arg);
-	  return 0;
-	}
-
-      /* fall through */
-
-    case 'A':
-      {
-	enum sparc_opcode_arch_val new_arch = sparc_opcode_lookup_arch (arg);
-
-	if (new_arch == SPARC_OPCODE_ARCH_BAD)
-	  {
-	    as_bad ("invalid architecture -A%s", arg);
-	    return 0;
-	  }
-	else
-	  {
-	    max_architecture = new_arch;
-	    architecture_requested = 1;
-	  }
-      }
-      break;
-
-    case OPTION_SPARC:
-      /* Ignore -sparc, used by SunOS make default .s.o rule.  */
-      break;
-
-    case OPTION_ENFORCE_ALIGNED_DATA:
-      enforce_aligned_data = 1;
-      break;
-
-#ifdef SPARC_BIENDIAN
-    case OPTION_LITTLE_ENDIAN:
-      target_big_endian = 0;
-      break;
-    case OPTION_BIG_ENDIAN:
-      target_big_endian = 1;
-      break;
-#endif
-
-#ifdef OBJ_AOUT
-    case 'k':
-      sparc_pic_code = 1;
-      break;
-#endif
-
-#ifdef OBJ_ELF
-    case 'V':
-      print_version_id ();
-      break;
-
-    case 'Q':
-      /* Qy - do emit .comment
-	 Qn - do not emit .comment */
-      break;
-
-    case 's':
-      /* use .stab instead of .stab.excl */
-      break;
-
-    case 'q':
-      /* quick -- native assembler does fewer checks */
-      break;
-
-    case 'K':
-      if (strcmp (arg, "PIC") != 0)
-	as_warn ("Unrecognized option following -K");
-      else
-	sparc_pic_code = 1;
-      break;
-#endif
-
-    default:
-      return 0;
-    }
-
-  return 1;
-}
-
-void
-md_show_usage (stream)
-     FILE *stream;
-{
-  const struct sparc_opcode_arch *arch;
-
-  fprintf(stream, "SPARC options:\n");
-  for (arch = &sparc_opcode_archs[0]; arch->name; arch++)
-    {
-      if (arch != &sparc_opcode_archs[0])
-	fprintf (stream, " | ");
-      fprintf (stream, "-A%s", arch->name);
-    }
-  fprintf (stream, "\n-xarch=v8plus | -xarch=v8plusa\n");
-  fprintf (stream, "\
-			specify variant of SPARC architecture\n\
--bump			warn when assembler switches architectures\n\
--sparc			ignored\n\
---enforce-aligned-data	force .long, etc., to be aligned correctly\n");
-#ifdef OBJ_AOUT
-  fprintf (stream, "\
--k			generate PIC\n");
-#endif
-#ifdef OBJ_ELF
-  fprintf (stream, "\
--KPIC			generate PIC\n\
--V			print assembler version number\n\
--q			ignored\n\
--Qy, -Qn		ignored\n\
--s			ignored\n");
-#endif
-#ifdef SPARC_BIENDIAN
-  fprintf (stream, "\
--EL			generate code for a little endian machine\n\
--EB			generate code for a big endian machine\n");
-#endif
-}
 
 /* We have no need to default values of symbols. */
 
@@ -3066,5 +2573,450 @@ md_pcrel_from (fixP)
     ret += fixP->fx_size;
   return ret;
 }
+
+/*
+ * sort of like s_lcomm
+ */
 
-/* end of tc-sparc.c */
+#ifndef OBJ_ELF
+static int max_alignment = 15;
+#endif
+
+static void
+s_reserve (ignore)
+     int ignore;
+{
+  char *name;
+  char *p;
+  char c;
+  int align;
+  int size;
+  int temp;
+  symbolS *symbolP;
+
+  name = input_line_pointer;
+  c = get_symbol_end ();
+  p = input_line_pointer;
+  *p = c;
+  SKIP_WHITESPACE ();
+
+  if (*input_line_pointer != ',')
+    {
+      as_bad ("Expected comma after name");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  ++input_line_pointer;
+
+  if ((size = get_absolute_expression ()) < 0)
+    {
+      as_bad ("BSS length (%d.) <0! Ignored.", size);
+      ignore_rest_of_line ();
+      return;
+    }				/* bad length */
+
+  *p = 0;
+  symbolP = symbol_find_or_make (name);
+  *p = c;
+
+  if (strncmp (input_line_pointer, ",\"bss\"", 6) != 0
+      && strncmp (input_line_pointer, ",\".bss\"", 7) != 0)
+    {
+      as_bad ("bad .reserve segment -- expected BSS segment");
+      return;
+    }
+
+  if (input_line_pointer[2] == '.')
+    input_line_pointer += 7;
+  else
+    input_line_pointer += 6;
+  SKIP_WHITESPACE ();
+
+  if (*input_line_pointer == ',')
+    {
+      ++input_line_pointer;
+
+      SKIP_WHITESPACE ();
+      if (*input_line_pointer == '\n')
+	{
+	  as_bad ("Missing alignment");
+	  return;
+	}
+
+      align = get_absolute_expression ();
+#ifndef OBJ_ELF
+      if (align > max_alignment)
+	{
+	  align = max_alignment;
+	  as_warn ("Alignment too large: %d. assumed.", align);
+	}
+#endif
+      if (align < 0)
+	{
+	  align = 0;
+	  as_warn ("Alignment negative. 0 assumed.");
+	}
+
+      record_alignment (bss_section, align);
+
+      /* convert to a power of 2 alignment */
+      for (temp = 0; (align & 1) == 0; align >>= 1, ++temp);;
+
+      if (align != 1)
+	{
+	  as_bad ("Alignment not a power of 2");
+	  ignore_rest_of_line ();
+	  return;
+	}			/* not a power of two */
+
+      align = temp;
+    }				/* if has optional alignment */
+  else
+    align = 0;
+
+  if (!S_IS_DEFINED (symbolP)
+#ifdef OBJ_AOUT
+      && S_GET_OTHER (symbolP) == 0
+      && S_GET_DESC (symbolP) == 0
+#endif
+      )
+    {
+      if (! need_pass_2)
+	{
+	  char *pfrag;
+	  segT current_seg = now_seg;
+	  subsegT current_subseg = now_subseg;
+
+	  subseg_set (bss_section, 1); /* switch to bss */
+
+	  if (align)
+	    frag_align (align, 0, 0); /* do alignment */
+
+	  /* detach from old frag */
+	  if (S_GET_SEGMENT(symbolP) == bss_section)
+	    symbolP->sy_frag->fr_symbol = NULL;
+
+	  symbolP->sy_frag = frag_now;
+	  pfrag = frag_var (rs_org, 1, 1, (relax_substateT)0, symbolP,
+			    (offsetT) size, (char *)0);
+	  *pfrag = 0;
+
+	  S_SET_SEGMENT (symbolP, bss_section);
+
+	  subseg_set (current_seg, current_subseg);
+	}
+    }
+  else
+    {
+      as_warn("Ignoring attempt to re-define symbol %s",
+	      S_GET_NAME (symbolP));
+    }				/* if not redefining */
+
+  demand_empty_rest_of_line ();
+}
+
+static void
+s_common (ignore)
+     int ignore;
+{
+  char *name;
+  char c;
+  char *p;
+  int temp, size;
+  symbolS *symbolP;
+
+  name = input_line_pointer;
+  c = get_symbol_end ();
+  /* just after name is now '\0' */
+  p = input_line_pointer;
+  *p = c;
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+      as_bad ("Expected comma after symbol-name");
+      ignore_rest_of_line ();
+      return;
+    }
+  input_line_pointer++;		/* skip ',' */
+  if ((temp = get_absolute_expression ()) < 0)
+    {
+      as_bad (".COMMon length (%d.) <0! Ignored.", temp);
+      ignore_rest_of_line ();
+      return;
+    }
+  size = temp;
+  *p = 0;
+  symbolP = symbol_find_or_make (name);
+  *p = c;
+  if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
+    {
+      as_bad ("Ignoring attempt to re-define symbol");
+      ignore_rest_of_line ();
+      return;
+    }
+  if (S_GET_VALUE (symbolP) != 0)
+    {
+      if (S_GET_VALUE (symbolP) != size)
+	{
+	  as_warn ("Length of .comm \"%s\" is already %ld. Not changed to %d.",
+		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
+	}
+    }
+  else
+    {
+#ifndef OBJ_ELF
+      S_SET_VALUE (symbolP, (valueT) size);
+      S_SET_EXTERNAL (symbolP);
+#endif
+    }
+  know (symbolP->sy_frag == &zero_address_frag);
+  if (*input_line_pointer != ',')
+    {
+      as_bad ("Expected comma after common length");
+      ignore_rest_of_line ();
+      return;
+    }
+  input_line_pointer++;
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != '"')
+    {
+      temp = get_absolute_expression ();
+#ifndef OBJ_ELF
+      if (temp > max_alignment)
+	{
+	  temp = max_alignment;
+	  as_warn ("Common alignment too large: %d. assumed", temp);
+	}
+#endif
+      if (temp < 0)
+	{
+	  temp = 0;
+	  as_warn ("Common alignment negative; 0 assumed");
+	}
+#ifdef OBJ_ELF
+      if (symbolP->local)
+	{
+	  segT old_sec;
+	  int old_subsec;
+	  char *p;
+	  int align;
+
+	  old_sec = now_seg;
+	  old_subsec = now_subseg;
+	  align = temp;
+	  record_alignment (bss_section, align);
+	  subseg_set (bss_section, 0);
+	  if (align)
+	    frag_align (align, 0, 0);
+	  if (S_GET_SEGMENT (symbolP) == bss_section)
+	    symbolP->sy_frag->fr_symbol = 0;
+	  symbolP->sy_frag = frag_now;
+	  p = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP,
+			(offsetT) size, (char *) 0);
+	  *p = 0;
+	  S_SET_SEGMENT (symbolP, bss_section);
+	  S_CLEAR_EXTERNAL (symbolP);
+	  subseg_set (old_sec, old_subsec);
+	}
+      else
+#endif
+	{
+	allocate_common:
+	  S_SET_VALUE (symbolP, (valueT) size);
+#ifdef OBJ_ELF
+	  S_SET_ALIGN (symbolP, temp);
+#endif
+	  S_SET_EXTERNAL (symbolP);
+	  S_SET_SEGMENT (symbolP, bfd_com_section_ptr);
+	}
+    }
+  else
+    {
+      input_line_pointer++;
+      /* @@ Some use the dot, some don't.  Can we get some consistency??  */
+      if (*input_line_pointer == '.')
+	input_line_pointer++;
+      /* @@ Some say data, some say bss.  */
+      if (strncmp (input_line_pointer, "bss\"", 4)
+	  && strncmp (input_line_pointer, "data\"", 5))
+	{
+	  while (*--input_line_pointer != '"')
+	    ;
+	  input_line_pointer--;
+	  goto bad_common_segment;
+	}
+      while (*input_line_pointer++ != '"')
+	;
+      goto allocate_common;
+    }
+
+#ifdef BFD_ASSEMBLER
+  symbolP->bsym->flags |= BSF_OBJECT;
+#endif
+
+  demand_empty_rest_of_line ();
+  return;
+
+  {
+  bad_common_segment:
+    p = input_line_pointer;
+    while (*p && *p != '\n')
+      p++;
+    c = *p;
+    *p = '\0';
+    as_bad ("bad .common segment %s", input_line_pointer + 1);
+    *p = c;
+    input_line_pointer = p;
+    ignore_rest_of_line ();
+    return;
+  }
+}
+
+/* Handle the .empty pseudo-op.  This supresses the warnings about
+   invalid delay slot usage.  */
+
+static void
+s_empty (ignore)
+     int ignore;
+{
+  /* The easy way to implement is to just forget about the last
+     instruction.  */
+  last_insn = NULL;
+}
+
+static void
+s_seg (ignore)
+     int ignore;
+{
+
+  if (strncmp (input_line_pointer, "\"text\"", 6) == 0)
+    {
+      input_line_pointer += 6;
+      s_text (0);
+      return;
+    }
+  if (strncmp (input_line_pointer, "\"data\"", 6) == 0)
+    {
+      input_line_pointer += 6;
+      s_data (0);
+      return;
+    }
+  if (strncmp (input_line_pointer, "\"data1\"", 7) == 0)
+    {
+      input_line_pointer += 7;
+      s_data1 ();
+      return;
+    }
+  if (strncmp (input_line_pointer, "\"bss\"", 5) == 0)
+    {
+      input_line_pointer += 5;
+      /* We only support 2 segments -- text and data -- for now, so
+	 things in the "bss segment" will have to go into data for now.
+	 You can still allocate SEG_BSS stuff with .lcomm or .reserve. */
+      subseg_set (data_section, 255);	/* FIXME-SOMEDAY */
+      return;
+    }
+  as_bad ("Unknown segment type");
+  demand_empty_rest_of_line ();
+}
+
+static void
+s_data1 ()
+{
+  subseg_set (data_section, 1);
+  demand_empty_rest_of_line ();
+}
+
+static void
+s_proc (ignore)
+     int ignore;
+{
+  while (!is_end_of_line[(unsigned char) *input_line_pointer])
+    {
+      ++input_line_pointer;
+    }
+  ++input_line_pointer;
+}
+
+/* This static variable is set by s_uacons to tell sparc_cons_align
+   that the expession does not need to be aligned.  */
+
+static int sparc_no_align_cons = 0;
+
+/* This handles the unaligned space allocation pseudo-ops, such as
+   .uaword.  .uaword is just like .word, but the value does not need
+   to be aligned.  */
+
+static void
+s_uacons (bytes)
+     int bytes;
+{
+  /* Tell sparc_cons_align not to align this value.  */
+  sparc_no_align_cons = 1;
+  cons (bytes);
+}
+
+/* If the --enforce-aligned-data option is used, we require .word,
+   et. al., to be aligned correctly.  We do it by setting up an
+   rs_align_code frag, and checking in HANDLE_ALIGN to make sure that
+   no unexpected alignment was introduced.
+
+   The SunOS and Solaris native assemblers enforce aligned data by
+   default.  We don't want to do that, because gcc can deliberately
+   generate misaligned data if the packed attribute is used.  Instead,
+   we permit misaligned data by default, and permit the user to set an
+   option to check for it.  */
+
+void
+sparc_cons_align (nbytes)
+     int nbytes;
+{
+  int nalign;
+  char *p;
+
+  /* Only do this if we are enforcing aligned data.  */
+  if (! enforce_aligned_data)
+    return;
+
+  if (sparc_no_align_cons)
+    {
+      /* This is an unaligned pseudo-op.  */
+      sparc_no_align_cons = 0;
+      return;
+    }
+
+  nalign = 0;
+  while ((nbytes & 1) == 0)
+    {
+      ++nalign;
+      nbytes >>= 1;
+    }
+
+  if (nalign == 0)
+    return;
+
+  if (now_seg == absolute_section)
+    {
+      if ((abs_section_offset & ((1 << nalign) - 1)) != 0)
+	as_bad ("misaligned data");
+      return;
+    }
+
+  p = frag_var (rs_align_code, 1, 1, (relax_substateT) 0,
+		(symbolS *) NULL, (offsetT) nalign, (char *) NULL);
+
+  record_alignment (now_seg, nalign);
+}
+
+/* This is where we do the unexpected alignment check.
+   This is called from HANDLE_ALIGN in tc-sparc.h.  */
+
+void
+sparc_handle_align (fragp)
+     fragS *fragp;
+{
+  if (fragp->fr_type == rs_align_code
+      && fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix != 0)
+    as_bad_where (fragp->fr_file, fragp->fr_line, "misaligned data");
+}
