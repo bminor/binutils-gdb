@@ -984,8 +984,7 @@ find_source_lines (struct symtab *s, int desc)
   long mtime = 0;
   int size;
 
-  line_charpos = (int *) xmmalloc (s->objfile->md,
-				   lines_allocated * sizeof (int));
+  line_charpos = (int *) xmalloc (lines_allocated * sizeof (int));
   if (fstat (desc, &st) < 0)
     perror_with_name (s->filename);
 

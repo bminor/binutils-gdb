@@ -2708,15 +2708,15 @@ init_psymbol_list (struct objfile *objfile, int total_symbols)
     {
       objfile->global_psymbols.next =
 	objfile->global_psymbols.list = (struct partial_symbol **)
-	xmmalloc (objfile->md, (objfile->global_psymbols.size
-				* sizeof (struct partial_symbol *)));
+	xmalloc ((objfile->global_psymbols.size
+		  * sizeof (struct partial_symbol *)));
     }
   if (objfile->static_psymbols.size > 0)
     {
       objfile->static_psymbols.next =
 	objfile->static_psymbols.list = (struct partial_symbol **)
-	xmmalloc (objfile->md, (objfile->static_psymbols.size
-				* sizeof (struct partial_symbol *)));
+	xmalloc ((objfile->static_psymbols.size
+		  * sizeof (struct partial_symbol *)));
     }
 }
 

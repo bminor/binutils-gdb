@@ -1232,7 +1232,7 @@ extend_psymbol_list (struct psymbol_allocation_list *listp,
     {
       new_size = 255;
       listp->list = (struct partial_symbol **)
-	xmmalloc (objfile->md, new_size * sizeof (struct partial_symbol *));
+	xmalloc (new_size * sizeof (struct partial_symbol *));
     }
   else
     {

@@ -377,7 +377,7 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 				      + (sizeof (CORE_ADDR)
 					 * max_index));
 			      sectinfo = (struct stab_section_info *)
-				xmmalloc (objfile->md, size);
+				xmalloc (size);
 			      memset (sectinfo, 0, size);
 			      sectinfo->num_sections = max_index;
 			      if (filesym == NULL)
@@ -499,7 +499,7 @@ elf_symfile_read (struct objfile *objfile, int mainline)
 
   /* Allocate struct to keep track of the symfile */
   objfile->sym_stab_info = (struct dbx_symfile_info *)
-    xmmalloc (objfile->md, sizeof (struct dbx_symfile_info));
+    xmalloc (sizeof (struct dbx_symfile_info));
   memset ((char *) objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
   make_cleanup (free_elfinfo, (void *) objfile);
 

@@ -437,14 +437,13 @@ coff_symfile_init (struct objfile *objfile)
 {
   /* Allocate struct to keep track of stab reading. */
   objfile->sym_stab_info = (struct dbx_symfile_info *)
-    xmmalloc (objfile->md, sizeof (struct dbx_symfile_info));
+    xmalloc (sizeof (struct dbx_symfile_info));
 
   memset (objfile->sym_stab_info, 0,
 	  sizeof (struct dbx_symfile_info));
 
   /* Allocate struct to keep track of the symfile */
-  objfile->sym_private = xmmalloc (objfile->md,
-				   sizeof (struct coff_symfile_info));
+  objfile->sym_private = xmalloc (sizeof (struct coff_symfile_info));
 
   memset (objfile->sym_private, 0, sizeof (struct coff_symfile_info));
 

@@ -625,7 +625,7 @@ dbx_symfile_init (struct objfile *objfile)
 
   /* Allocate struct to keep track of the symfile */
   objfile->sym_stab_info = (struct dbx_symfile_info *)
-    xmmalloc (objfile->md, sizeof (struct dbx_symfile_info));
+    xmalloc (sizeof (struct dbx_symfile_info));
   memset (objfile->sym_stab_info, 0, sizeof (struct dbx_symfile_info));
 
   DBX_TEXT_SECTION (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
@@ -892,7 +892,7 @@ init_bincl_list (int number, struct objfile *objfile)
 {
   bincls_allocated = number;
   next_bincl = bincl_list = (struct header_file_location *)
-    xmmalloc (objfile->md, bincls_allocated * sizeof (struct header_file_location));
+    xmalloc (bincls_allocated * sizeof (struct header_file_location));
 }
 
 /* Add a bincl to the list.  */

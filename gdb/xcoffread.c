@@ -1838,8 +1838,7 @@ static void
 xcoff_symfile_init (struct objfile *objfile)
 {
   /* Allocate struct to keep track of the symfile */
-  objfile->sym_private = xmmalloc (objfile->md,
-				   sizeof (struct coff_symfile_info));
+  objfile->sym_private = xmalloc (sizeof (struct coff_symfile_info));
 
   /* XCOFF objects may be reordered, so set OBJF_REORDERED.  If we
      find this causes a significant slowdown in gdb then we could

@@ -1668,7 +1668,7 @@ hpread_symfile_init (struct objfile *objfile)
 
   /* Allocate struct to keep track of the symfile */
   objfile->sym_private =
-    xmmalloc (objfile->md, sizeof (struct hpread_symfile_info));
+    xmalloc (sizeof (struct hpread_symfile_info));
   memset (objfile->sym_private, 0, sizeof (struct hpread_symfile_info));
 
   /* We haven't read in any types yet.  */
@@ -3024,7 +3024,7 @@ hpread_lookup_type (dnttpointer hp_type, struct objfile *objfile)
 	    {
 	      DNTT_TYPE_VECTOR_LENGTH (objfile) = LNTT_SYMCOUNT (objfile) + GNTT_SYMCOUNT (objfile);
 	      DNTT_TYPE_VECTOR (objfile) = (struct type **)
-		xmmalloc (objfile->md, DNTT_TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *));
+		xmalloc (DNTT_TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *));
 	      memset (&DNTT_TYPE_VECTOR (objfile)[old_len], 0,
 		      (DNTT_TYPE_VECTOR_LENGTH (objfile) - old_len) *
 		      sizeof (struct type *));

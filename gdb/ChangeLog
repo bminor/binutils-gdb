@@ -1,3 +1,19 @@
+2004-08-10  Andrew Cagney  <cagney@gnu.org>
+
+	* utils.c (xmmalloc): Delete.
+	(xmalloc): Inline xmmalloc and mmalloc calls.
+	(msavestring): Use xmalloc.
+	* defs.h (xmmalloc): Delete declaration.
+	* xcoffread.c (xcoff_symfile_init): Use xmalloc instead of
+	xmmalloc.
+	* symmisc.c (extend_psymbol_list): Ditto.
+	* symfile.c (init_psymbol_list): Ditto.
+	* source.c (find_source_lines): Ditto.
+	* hpread.c (hpread_symfile_init, hpread_lookup_type): Ditto.
+	* elfread.c (elf_symtab_read): Ditto.
+	* dbxread.c (dbx_symfile_init, init_bincl_list): Ditto.
+	* coffread.c (coff_symfile_init): Ditto.
+
 2004-08-10  David Carlton  <carlton@bactrian.org>
 
 	* MAINTAINERS: Remove David Carlton from c++ testsuite

@@ -1037,33 +1037,6 @@ nomem (long size)
     }
 }
 
-/* The xmmalloc() family of memory management routines.
-
-   These are are like the mmalloc() family except that they implement
-   consistent semantics and guard against typical memory management
-   problems: if a malloc fails, an internal error is thrown; if
-   free(NULL) is called, it is ignored; if *alloc(0) is called, NULL
-   is returned.
-
-   All these routines are implemented using the mmalloc() family. */
-
-void *
-xmmalloc (void *md, size_t size)
-{
-  void *val;
-
-  /* See libiberty/xmalloc.c.  This function need's to match that's
-     semantics.  It never returns NULL.  */
-  if (size == 0)
-    size = 1;
-
-  val = mmalloc (md, size);
-  if (val == NULL)
-    nomem (size);
-
-  return (val);
-}
-
 void *
 xmrealloc (void *md, void *ptr, size_t size)
 {
@@ -1115,9 +1088,7 @@ xmfree (void *md, void *ptr)
 
    These are like the ISO-C malloc() family except that they implement
    consistent semantics and guard against typical memory management
-   problems.  See xmmalloc() above for further information.
-
-   All these routines are wrappers to the xmmalloc() family. */
+   problems.  */
 
 /* NOTE: These are declared using PTR to ensure consistency with
    "libiberty.h".  xfree() is GDB local.  */
@@ -1125,7 +1096,18 @@ xmfree (void *md, void *ptr)
 PTR				/* OK: PTR */
 xmalloc (size_t size)
 {
-  return xmmalloc (NULL, size);
+  void *val;
+
+  /* See libiberty/xmalloc.c.  This function need's to match that's
+     semantics.  It never returns NULL.  */
+  if (size == 0)
+    size = 1;
+
+  val = malloc (size);		/* OK: malloc */
+  if (val == NULL)
+    nomem (size);
+
+  return (val);
 }
 
 PTR				/* OK: PTR */
@@ -1230,7 +1212,7 @@ savestring (const char *ptr, size_t size)
 char *
 msavestring (void *md, const char *ptr, size_t size)
 {
-  char *p = (char *) xmmalloc (md, size + 1);
+  char *p = (char *) xmalloc (size + 1);
   memcpy (p, ptr, size);
   p[size] = 0;
   return p;
