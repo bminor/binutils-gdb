@@ -1,3 +1,7 @@
+2002-12-16  Christopher Faylor  <cgf@redhat.com>
+
+	* config/cygwin.cache: Prime mbstate_t.
+
 2002-12-06  Elena Zannoni  <ezannoni@redhat.com>
 
         Import of readline 4.3:
