@@ -351,3 +351,27 @@
 .*:507: Warning: This is the location of the conflicting usage
 .*:513: Warning: Use of 'mov' .* WAW dependency 'RR#' \(impliedf\), specific resource number is 7
 .*:512: Warning: This is the location of the conflicting usage
+.*:537: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 7
+.*:536: Warning: This is the location of the conflicting usage
+.*:537: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 6
+.*:536: Warning: This is the location of the conflicting usage
+.*:537: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 7
+.*:536: Warning: This is the location of the conflicting usage
+.*:537: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 6
+.*:536: Warning: This is the location of the conflicting usage
+.*:540: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 7
+.*:539: Warning: This is the location of the conflicting usage
+.*:540: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 7
+.*:539: Warning: This is the location of the conflicting usage
+.*:540: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR63' \(impliedf\)
+.*:539: Warning: This is the location of the conflicting usage
+.*:540: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR63' \(impliedf\)
+.*:539: Warning: This is the location of the conflicting usage
+.*:543: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 6
+.*:542: Warning: This is the location of the conflicting usage
+.*:543: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR%.*' \(impliedf\), specific resource number is 6
+.*:542: Warning: This is the location of the conflicting usage
+.*:543: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR63' \(impliedf\)
+.*:542: Warning: This is the location of the conflicting usage
+.*:543: Warning: Use of 'cmp.eq.and.orcm' .* WAW .* 'PR63' \(impliedf\)
+.*:542: Warning: This is the location of the conflicting usage

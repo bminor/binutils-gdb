@@ -513,4 +513,33 @@
 	mov	rr[r2] = r3
 	;;
 // RSE
+	
+// PR, additional cases (or.andcm and and.orcm interaction)
+	cmp.eq.or.andcm	p6, p7 = 1, r32
+	cmp.eq.or.andcm p6, p7 = 5, r36	// no DV here
+	;;
+	cmp.eq.and.orcm	p6, p7 = 1, r32
+	cmp.eq.and.orcm p6, p7 = 5, r36	// no DV here
+	;;
+	cmp.eq.or.andcm	p63, p7 = 1, r32
+	cmp.eq.or.andcm p63, p7 = 5, r36 // no DV here
+	;;
+	cmp.eq.or.andcm	p6, p63 = 1, r32
+	cmp.eq.or.andcm p6, p63 = 5, r36 // no DV here
+	;;
+	cmp.eq.and.orcm	p63, p7 = 1, r32
+	cmp.eq.and.orcm p63, p7 = 5, r36 // no DV here
+	;;
+	cmp.eq.and.orcm	p6, p63 = 1, r32
+	cmp.eq.and.orcm p6, p63 = 5, r36 // no DV here
+	;;
+	cmp.eq.or.andcm	p6, p7 = 1, r32
+	cmp.eq.and.orcm p6, p7 = 5, r36	
+	;;
+	cmp.eq.or.andcm	p63, p7 = 1, r32
+	cmp.eq.and.orcm p63, p7 = 5, r36	
+	;;
+	cmp.eq.or.andcm	p6, p63 = 1, r32
+	cmp.eq.and.orcm p6, p63 = 5, r36	
+	;;
 L:	

@@ -1,3 +1,11 @@
+2000-09-14  Timothy Wall  <twall@cygnus.com>
+
+	* config/tc-ia64.c (specify_resource): For PR%/PR63, note types of
+	parallel comparisons for later use.
+	(struct rsrc): Add parallel comparison type.
+	(resources_match): Skip special cases of PR usage (non-conflicting
+	parallel compares).
+	
 2000-09-13  Kazu Hirata  <kazu@hxi.com>
 
 	* config/obj-ecoff.c: Fix formatting.

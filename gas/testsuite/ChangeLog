@@ -1,3 +1,8 @@
+2000-09-14  Timothy Wall  <twall@cygnus.com>
+
+	* gas/ia64/dv-waw-err.[sl]: Additional tests for parallel
+	comparisons which should and should not produce DVs.
+
 2000-09-05  Alan Modra  <alan@linuxcare.com.au>
 
 	* gas/vtable/vtable.exp: Re-enable for hppa-elf.
