@@ -1,3 +1,12 @@
+Thu Mar 30 14:32:26 1995  H.J. Lu (hjl@nynexst.com)
+
+	* config.bfd: Change linux to default to elf.  Using
+	i[345]86-*-linuxaout will build a library which defaults to a.out.
+	* config/i386-laout.mt: Rename from old config/i386-linux.mt.
+	* config/i386-linux.mt: Rename from old config/i386-lelf.mt.
+	Comment out EXTRALIBS.
+	* config/i386-lelf.mt: Remove.
+
 Wed Mar 29 12:01:30 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-i960.c (coff_i960_relocate): Cache the section symbol in
