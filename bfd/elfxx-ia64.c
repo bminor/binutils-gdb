@@ -943,6 +943,19 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	{
 	  bfd_signed_vma offset;
 
+	  /* We can't put a trampoline in a .init/.fini section. Issue
+	     an error.  */
+	  if (strcmp (sec->output_section->name, ".init") == 0
+	      || strcmp (sec->output_section->name, ".fini") == 0)
+	    {
+	      (*_bfd_error_handler)
+		(_("%s: Can't relax br at 0x%lx in section `%s'. Please use brl or indirect branch."),
+		 bfd_archive_filename (sec->owner),
+		 (unsigned long) roff, sec->name);
+	      bfd_set_error (bfd_error_bad_value);
+	      goto error_return;
+	    }
+
 	  reladdr = (sec->output_section->vma
 		     + sec->output_offset
 		     + roff) & (bfd_vma) -4;

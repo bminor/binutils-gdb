@@ -1,3 +1,9 @@
+2004-06-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 240
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Don't relax branch
+	in .init/.fini sections.
+
 2004-06-29  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (elf_xtensa_relocate_section): Use
