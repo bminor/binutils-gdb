@@ -1,13 +1,17 @@
+Mon Jan 29 18:44:57 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config/m88k/xm-cxux.h (BP_HIT_COUNT): Remove, never used.
+
 Mon Jan 29 00:10:35 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 
-	* ch-valprint.c (calculate_array_length): New function to determine
-	the length of an array type (see comment).
+	* ch-valprint.c (calculate_array_length): New function to
+ 	determine the length of an array type.
 	(chill_val_print (case TYPE_CODE_ARRAY)): If the length of an
 	array type is zero, call calculate_array_length.
 
-	* gdbtypes.c (get_discrete_bounds (case TYPE_CODE_ENUM)): They values
-	may not be sorted. Scan all entries and set the real lower and
-	upper bound.
+	* gdbtypes.c (get_discrete_bounds (case TYPE_CODE_ENUM)): The
+ 	values may not be sorted. Scan all entries and set the real lower
+ 	and upper bound.
 
 Sun Jan 28 15:50:42 1996  Fred Fish  <fnf@cygnus.com>
 
@@ -36,7 +40,8 @@ Sat Jan 27 10:34:05 1996  Fred Fish  <fnf@cygnus.com>
 	(SVR4_SHARED_LIBS): Define.
 	* i386v4-nat.c: Only compile if HAVE_SYS_PROCFS_H is defined.
 	(supply_gregset, fill_gregset): Compile if HAVE_GREGSET_T defined.
-	(supply_fpregset, fill_fpregset): Compile if HAVE_FPREGSET_T defined.
+	(supply_fpregset, fill_fpregset): Compile if HAVE_FPREGSET_T
+ 	defined.
 
 Fri Jan 26 13:48:14 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
