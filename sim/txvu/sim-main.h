@@ -376,6 +376,7 @@ struct _sim_cpu {
 #define REGISTERS       ((STATE_CPU (sd,0))->registers)
 
 #define GPR     (&REGISTERS[0])
+#define GPR_SET(N,VAL) (REGISTERS[(N)] = (VAL))
 #define FGRIDX  (38)
 #define FGR     (&REGISTERS[FGRIDX])
 #define LO      (REGISTERS[33])
@@ -431,8 +432,6 @@ struct _sim_cpu {
 #define PENDING_SLOT_REG ((STATE_CPU (sd, 0))->pending_slot_reg)
 #define PENDING_SLOT_VALUE ((STATE_CPU (sd, 0))->pending_slot_value)
 
-#if 0
-
   /* The following are not used for MIPS IV onwards: */
 #define PENDING_FILL(r,v) {\
 /* printf("DBG: FILL BEFORE pending_in = %d, pending_out = %d, pending_total = %d\n",PENDING_IN,PENDING_OUT,PENDING_TOTAL); */\
@@ -448,7 +447,6 @@ struct _sim_cpu {
                              PENDING_IN = 0;\
 /*printf("DBG: FILL AFTER  pending_in = %d, pending_out = %d, pending_total = %d\n",PENDING_IN,PENDING_OUT,PENDING_TOTAL);*/\
                           }
-#endif
 
 
   /* LLBIT = Load-Linked bit. A bit of "virtual" state used by atomic
