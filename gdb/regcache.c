@@ -24,6 +24,7 @@
 #include "inferior.h"
 #include "target.h"
 #include "gdbarch.h"
+#include "gdbcmd.h"
 
 /*
  * DATA STRUCTURE
@@ -867,6 +868,17 @@ write_fp (CORE_ADDR val)
   TARGET_WRITE_FP (val);
 }
 
+/* ARGSUSED */
+static void
+reg_flush_command (char *command, int from_tty)
+{
+  /* Force-flush the register cache.  */
+  registers_changed ();
+  if (from_tty)
+    printf_filtered ("Register cache flushed.\n");
+}
+
+
 static void
 build_regcache (void)
 {
@@ -889,4 +901,7 @@ _initialize_regcache (void)
   register_gdbarch_swap (&registers, sizeof (registers), NULL);
   register_gdbarch_swap (&register_valid, sizeof (register_valid), NULL);
   register_gdbarch_swap (NULL, 0, build_regcache);
+
+  add_com ("flushregs", class_maintenance, reg_flush_command,
+	   "Force gdb to flush its register cache (maintainer command)");
 }

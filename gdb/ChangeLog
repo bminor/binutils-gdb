@@ -1,3 +1,8 @@
+2000-09-01  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* regcache.c (reg_flush_command): New function.  Maintainer-mode
+	command, flushes GDB's register cache, for testing purposes.
+
 2000-08-31  J.T. Conklin  <jtc@redback.com>
 
 	* dcache.c (dcache_info): Output a cache line's state vector so it
