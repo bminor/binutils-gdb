@@ -1,3 +1,7 @@
+Mon Jul 26 13:17:36 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.c (rs6000_builtin_type): Make `logical' be TYPE_CODE_BOOL.
+
 Sun Jul 25 23:41:48 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* breakpoint.{c,h} (struct breakpoint): Replace symtab field with

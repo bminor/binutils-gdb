@@ -1686,7 +1686,7 @@ rs6000_builtin_type (typenum)
 			   "logical*4", NULL);
       break;
     case 24:
-      rettype = init_type (TYPE_CODE_INT, 4, TYPE_FLAG_UNSIGNED,
+      rettype = init_type (TYPE_CODE_BOOL, 4, TYPE_FLAG_UNSIGNED,
 			   "logical", NULL);
       break;
     case 25:
