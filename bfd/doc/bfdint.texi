@@ -1611,7 +1611,7 @@ called @file{@var{cpu}.h}.  This file should define any target specific
 information which may be needed outside of the BFD code.  In particular
 it should use the @samp{START_RELOC_NUMBERS}, @samp{RELOC_NUMBER},
 @samp{FAKE_RELOC}, @samp{EMPTY_RELOC} and @samp{END_RELOC_NUMBERS}
-macros to create a table mapping the number used to indentify a
+macros to create a table mapping the number used to identify a
 relocation to a name describing that relocation.
 
 While not a BFD component, you probably also want to make the binutils
@@ -1788,7 +1788,7 @@ The implementation within BFD of a particular object file format.  The
 set of functions which appear in a particular target vector.
 
 @item BFD
-The BFD library itself.  Also, each object file, archive, or exectable
+The BFD library itself.  Also, each object file, archive, or executable
 opened by the BFD library has the type @samp{bfd *}, and is sometimes
 referred to as a bfd.
 
