@@ -379,10 +379,11 @@ psymtab_to_symtab (pst)
 /* Process a symbol file, as either the main file or as a dynamically
    loaded file.
 
-   NAME is the file name (which will be tilde-expanded and made absolute
-   herein).  FROM_TTY says how verbose to be.  MAINLINE specifies whether
-   this is the main symbol file, or whether it's an extra symbol file
-   such as dynamically loaded code.  If !mainline, ADDR is the address
+   NAME is the file name (which will be tilde-expanded and made
+   absolute herein) (but we don't free or modify NAME itself).
+   FROM_TTY says how verbose to be.  MAINLINE specifies whether this
+   is the main symbol file, or whether it's an extra symbol file such
+   as dynamically loaded code.  If !mainline, ADDR is the address
    where the text segment was loaded.  */
 
 void

@@ -27,6 +27,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "gdbcore.h"
 #include "command.h"
+#include "target.h"
 
 /*
 **	local data declarations
@@ -94,13 +95,18 @@ int i;
 	 ** Advance to next local abbreviated load_map structure
 	 */
 	 if (!(inferior_lm = so_list_ptr->inferior_lm.lm_next)) {
-	     /* 
-	     ** See if any were added
-	     */
-	     read_memory((CORE_ADDR)so_list_ptr->inferior_lm_add,
-			 &so_list_ptr->inferior_lm,
-			 sizeof(struct link_map));
-	     inferior_lm = so_list_ptr->inferior_lm.lm_next;
+	     /* See if any were added, but be quiet if we can't read
+		from the target any more.  */
+	     int status;
+
+	     status = target_read_memory (
+			(CORE_ADDR)so_list_ptr->inferior_lm_add,
+			&so_list_ptr->inferior_lm,
+			sizeof(struct link_map));
+	     if (status == 0)
+	       inferior_lm = so_list_ptr->inferior_lm.lm_next;
+	     else
+	       inferior_lm = 0;
 	 }
 	 so_list_next = so_list_ptr->next;
      }
@@ -168,11 +174,7 @@ int from_tty;
 	    if (so->symbols_loaded) {
 		printf("Symbols already loaded for %s\n", so->inferior_so_name);
 	    } else {
-		/* File Name String Freed by processing */
-		sz = strlen(so->inferior_so_name) + 1;
-		val = (char *) xmalloc(sz);
-		bcopy(so->inferior_so_name, val, sz);
-		symbol_file_add (val, from_tty,
+		symbol_file_add (so->inferior_so_name, from_tty,
 				 (unsigned int)so->inferior_lm.lm_addr, 0);
 		so->symbols_loaded = 1;
 	    }
