@@ -1,3 +1,11 @@
+Thu Jun  9 14:59:58 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* remote-os9k.c (rombuf_command): fix a bug accepting rombug
+	output.
+	* stabsread.c (read_struct_fields): os9k nested structure does not
+	have terminating ';', instead it just get to ',' and bit position
+	and length.
+
 Wed Jun  8 23:20:45 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* nlmread.c (nlm_symtab_read):  Clean up a bit.
