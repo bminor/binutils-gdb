@@ -43,6 +43,8 @@ static enum sparc_architecture current_architecture = v6;
 static int architecture_requested;
 static int warn_on_bump;
 
+extern int target_big_endian;
+
 const relax_typeS md_relax_table[1];
 
 /* handle of the OPCODE hash table */
@@ -50,7 +52,7 @@ static struct hash_control *op_hash = NULL;
 
 static void s_seg (), s_proc (), s_data1 (), s_reserve (), s_common ();
 extern void s_globl (), s_long (), s_short (), s_space (), cons ();
-extern void s_align_bytes (), s_ignore ();
+extern void s_align_bytes (), s_ignore (), s_local();
 /* start-sanitize-v9 */
 #ifndef NO_V9
 static void s_xword ();
@@ -78,6 +80,9 @@ const pseudo_typeS md_pseudo_table[] =
   {"common", s_common, 0},
   {"global", s_globl, 0},
   {"half", cons, 2},
+#ifdef OBJ_ELF
+  {"local", s_local, 0},
+#endif
   {"optim", s_ignore, 0},
   {"proc", s_proc, 0},
   {"reserve", s_reserve, 0},
@@ -294,14 +299,45 @@ s_reserve ()
 #endif
 }
 
+#ifdef OBJ_ELF
+/* Currently used only by Solaris 2.  */
+void 
+s_local ()
+{
+  char *name;
+  int c;
+  symbolS *symbolP;
+
+  do
+    {
+      name = input_line_pointer;
+      c = get_symbol_end ();
+      symbolP = symbol_find_or_make (name);
+      *input_line_pointer = c;
+      SKIP_WHITESPACE ();
+      S_CLEAR_EXTERNAL (symbolP);
+      symbolP->local = 1;
+      if (c == ',')
+	{
+	  input_line_pointer++;
+	  SKIP_WHITESPACE ();
+	  if (*input_line_pointer == '\n')
+	    c = '\n';
+	}
+    }
+  while (c == ',');
+  demand_empty_rest_of_line ();
+}
+#endif
+
 static void
 s_common ()
 {
-  register char *name;
-  register char c;
-  register char *p;
-  register int temp;
-  register symbolS *symbolP;
+  char *name;
+  char c;
+  char *p;
+  int temp, size;
+  symbolS *symbolP;
 
   name = input_line_pointer;
   c = get_symbol_end ();
@@ -322,6 +358,7 @@ s_common ()
       ignore_rest_of_line ();
       return;
     }
+  size = temp;
   *p = 0;
   symbolP = symbol_find_or_make (name);
   *p = c;
@@ -333,27 +370,24 @@ s_common ()
     }
   if (S_GET_VALUE (symbolP) != 0)
     {
-      if (S_GET_VALUE (symbolP) != temp)
+      if (S_GET_VALUE (symbolP) != size)
 	{
 	  as_warn ("Length of .comm \"%s\" is already %d. Not changed to %d.",
-		   S_GET_NAME (symbolP), S_GET_VALUE (symbolP), temp);
+		   S_GET_NAME (symbolP), S_GET_VALUE (symbolP), size);
 	}
     }
   else
     {
-      S_SET_VALUE (symbolP, temp);
+#ifndef OBJ_ELF
+      S_SET_VALUE (symbolP, size);
       S_SET_EXTERNAL (symbolP);
-#ifdef OBJ_ELF
-      /* But not for a.out ... find some sensible way to characterize
-	 this.  */
-      S_SET_SEGMENT (symbolP, now_seg);
 #endif
     }
   know (symbolP->sy_frag == &zero_address_frag);
 #ifdef OBJ_ELF
   if (*input_line_pointer != ',')
     {
-      as_bad ("Expected command (and alignment) after common length");
+      as_bad ("Expected comma and alignment after common length");
       ignore_rest_of_line ();
       return;
     }
@@ -369,7 +403,34 @@ s_common ()
       temp = 0;
       as_warn ("Common alignment negative; 0 assumed");
     }
-  record_alignment (S_GET_SEGMENT (symbolP), temp);
+  if (symbolP->local)
+    {
+      segT old_sec = now_seg;
+      int old_subsec = now_subseg;
+      char *p;
+      int align = temp;
+
+      record_alignment (bss_section, align);
+      subseg_set (bss_section, 0);
+      if (align)
+	frag_align (align, 0);
+      if (S_GET_SEGMENT (symbolP) == bss_section)
+	symbolP->sy_frag->fr_symbol = 0;
+      symbolP->sy_frag = frag_now;
+      p = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
+		    (char *) 0);
+      *p = 0;
+      S_SET_SEGMENT (symbolP, bss_section);
+      S_CLEAR_EXTERNAL (symbolP);
+      subseg_set (old_sec, old_subsec);
+    }
+  else
+    {
+      S_SET_VALUE (symbolP, size);
+      S_SET_EXTERNAL (symbolP);
+      /* should be common, but this is how gas does it for now */
+      S_SET_SEGMENT (symbolP, &bfd_und_section);
+    }
 #else
   if (strncmp (input_line_pointer, ",\"bss\"", 6) != 0
       && strncmp (input_line_pointer, ",\"data\"", 7) != 0)
@@ -482,6 +543,26 @@ struct priv_reg_entry priv_reg_table[] =
   {"", -1},			/* end marker */
 };
 
+struct membar_masks
+{
+  char *name;
+  int len;
+  int mask;
+};
+
+#define MEMBAR_MASKS_SIZE 7
+
+struct membar_masks membar_masks[MEMBAR_MASKS_SIZE] =
+{
+  {"Sync", 4, 0x40},
+  {"MemIssue", 8, 0x20},
+  {"Lookaside", 9, 0x10},
+  {"StoreStore", 10, 0x08},
+  {"LoadStore", 9, 0x04},
+  {"StoreLoad", 9, 0x02},
+  {"LoadLoad", 8, 0x01},
+};
+
 static int
 cmp_reg_entry (p, q)
      struct priv_reg_entry *p, *q;
@@ -547,6 +628,8 @@ md_begin ()
 	 sizeof (priv_reg_table[0]), cmp_reg_entry);
 #endif
   /* end-sanitize-v9 */
+
+  target_big_endian = 1;
 }				/* md_begin() */
 
 void
@@ -709,36 +792,50 @@ sparc_ip (str)
 #ifndef NO_V9
 	    case 'K':
 	      {
-		/* Load is 0; Store is 1.
-		   We compute the mask based on the values
-		   we find in S.  OK is set set
-		   if we see something we don't like.  */
-		int ok = 1;
 		int mask = 0;
-		while (ok == 1)
+		int i;
+
+		/* Parse a series of masks.  */
+		if (*s == '#')
 		  {
-		    int lo = 0, hi = 0;
-		    if (*s == '#')
+		    while (*s == '#')
 		      {
-			s += 1;
-			if (!(lo = (s[0] == 'S')))
-			  ok = (s[0] == 'L');
-			if (!(hi = (s[1] == 'S')))
-			  ok = (s[1] == 'L');
-			mask |= (1 << ((hi << 1) | lo));
-			s += 2;
+			++s;
+			for (i = 0; i < MEMBAR_MASKS_SIZE; i++)
+			  if (!strncmp (s, membar_masks[i].name,
+					membar_masks[i].len))
+			    break;
+			if (i < MEMBAR_MASKS_SIZE)
+			  {
+			    mask |= membar_masks[i].mask;
+			    s += membar_masks[i].len;
+			  }
+			else
+			  {
+			    error_message = ": invalid membar mask name";
+			    goto error;
+			  }
+			if (*s == '|')
+			  ++s;
 		      }
-		    else
-		      {
-			/* Parse a number, somehow.  */
-			ok = 0;
-		      }
-		    if (s[2] != '|')
-		      break;
 		  }
-		if (!ok)
+		else if (isdigit (*s))
 		  {
-		    error_message = "unrecognizable mmask";
+		    while (isdigit (*s))
+		      {
+			mask = mask * 10 + *s - '0';
+			++s;
+		      }
+
+		    if (mask < 0 || mask > 127)
+		      {
+			error_message = ": invalid membar mask number";
+			goto error;
+		      }
+		  }
+		else
+		  {
+		    error_message = ": unrecognizable membar mask";
 		    goto error;
 		  }
 		opcode |= SIMM13 (mask);
@@ -746,35 +843,51 @@ sparc_ip (str)
 	      }
 
 	    case '*':
-	      /* Parse a prefetch function.  */
-	      if (*s == '#')
-		{
-		  int prefetch_fcn = 0;
+	      {
+		int prefetch_fcn = 0;
 
-		  s += 1;
-		  if (!strncmp (s, "n_reads", 7))
-		    prefetch_fcn = 0, s += 7;
-		  else if (!strncmp (s, "one_read", 8))
-		    prefetch_fcn = 1, s += 8;
-		  else if (!strncmp (s, "n_writes", 8))
-		    prefetch_fcn = 2, s += 8;
-		  else if (!strncmp (s, "one_write", 9))
-		    prefetch_fcn = 3, s += 9;
-		  else if (!strncmp (s, "page", 4))
-		    prefetch_fcn = 4, s += 4;
-		  else
-		    {
-		      error_message = "unrecognizable prefetch fucntion";
-		      goto error;
-		    }
-		}
-	      else
-		{
-		  /* Parse a number, somehow.  */
-		  error_message = "unrecognizable prefetch fucntion";
-		  goto error;
-		}
-	      continue;
+		/* Parse a prefetch function.  */
+		if (*s == '#')
+		  {
+		    s += 1;
+		    if (!strncmp (s, "n_reads", 7))
+		      prefetch_fcn = 0, s += 7;
+		    else if (!strncmp (s, "one_read", 8))
+		      prefetch_fcn = 1, s += 8;
+		    else if (!strncmp (s, "n_writes", 8))
+		      prefetch_fcn = 2, s += 8;
+		    else if (!strncmp (s, "one_write", 9))
+		      prefetch_fcn = 3, s += 9;
+		    else if (!strncmp (s, "page", 4))
+		      prefetch_fcn = 4, s += 4;
+		    else
+		      {
+			error_message = ": invalid prefetch function name";
+			goto error;
+		      }
+		  }
+		else if (isdigit (*s))
+		  {
+		    while (isdigit (*s))
+		      {
+			prefetch_fcn = prefetch_fcn * 10 + *s - '0';
+			++s;
+		      }
+
+		    if (prefetch_fcn < 0 || prefetch_fcn > 31)
+		      {
+			error_message = ": invalid prefetch function number";
+			goto error;
+		      }
+		  }
+		else
+		  {
+		    error_message = ": unrecognizable prefetch function";
+		    goto error;
+		  }
+		opcode |= RD (prefetch_fcn);
+		continue;
+	      }
 
 	    case '!':
 	    case '?':
@@ -796,7 +909,7 @@ sparc_ip (str)
 		    }
 		  if (p->name[0] != s[0])
 		    {
-		      error_message = "unrecognizable privileged register";
+		      error_message = ": unrecognizable privileged register";
 		      goto error;
 		    }
 		  if (*args == '?')
@@ -808,7 +921,7 @@ sparc_ip (str)
 		}
 	      else
 		{
-		  error_message = "unrecognizable privileged register";
+		  error_message = ": unrecognizable privileged register";
 		  goto error;
 		}
 #endif
@@ -1491,6 +1604,9 @@ sparc_ip (str)
 
 	    case 'A':
 	      {
+/* start-sanitize-v9 */
+#ifdef NO_V9
+/* end-sanitize-v9 */
 		char *push = input_line_pointer;
 		expressionS e;
 
@@ -1505,6 +1621,55 @@ sparc_ip (str)
 		  }		/* if absolute */
 
 		break;
+/* start-sanitize-v9 */
+#else
+		int asi = 0;
+
+		/* Parse an asi.  */
+		if (*s == '#')
+		  {
+		    s += 1;
+		    if (!strncmp (s, "ASI_AIUP", 8))
+		      asi = 0x10, s += 8;
+		    else if (!strncmp (s, "ASI_AIUS", 8))
+		      asi = 0x11, s += 8;
+		    else if (!strncmp (s, "ASI_PNF", 7))
+		      asi = 0x82, s += 7;
+		    else if (!strncmp (s, "ASI_SNF", 7))
+		      asi = 0x83, s += 7;
+		    else if (!strncmp (s, "ASI_P", 5))
+		      asi = 0x80, s += 5;
+		    else if (!strncmp (s, "ASI_S", 5))
+		      asi = 0x81, s += 5;
+		    else
+		      {
+			error_message = ": invalid asi name";
+			goto error;
+		      }
+		  }
+		else if (isdigit (*s))
+		  {
+		    char *push = input_line_pointer;
+		    input_line_pointer = s;
+		    asi = get_absolute_expression ();
+		    s = input_line_pointer;
+		    input_line_pointer = push;
+		    
+		    if (asi < 0 || asi > 255)
+		      {
+			error_message = ": invalid asi number";
+			goto error;
+		      }
+		  }
+		else
+		  {
+		    error_message = ": unrecognizable asi";
+		    goto error;
+		  }
+		opcode |= ASI (asi);
+		continue;
+#endif
+/* end-sanitize-v9 */
 	      }			/* alternate space */
 
 	    case 'p':
@@ -1748,8 +1913,8 @@ md_atof (type, litP, sizeP)
       md_number_to_chars (litP, (long) (*wordP++), sizeof (LITTLENUM_TYPE));
       litP += sizeof (LITTLENUM_TYPE);
     }
-  return "";			/* Someone should teach Dean about null pointers */
-}				/* md_atof() */
+  return 0;
+}
 
 /*
  * Write out big-endian.
@@ -2012,21 +2177,19 @@ tc_gen_reloc (section, fixp)
   if (fixp->fx_pcrel == 0)
     reloc->addend = fixp->fx_addnumber;
   else
-#ifdef OBJ_ELF
-    reloc->addend = 0;
-#else
-    reloc->addend = - reloc->address;
-#endif
+    switch (OUTPUT_FLAVOR)
+      {
+      case bfd_target_elf_flavour:
+	reloc->addend = 0;
+	break;
+      case bfd_target_aout_flavour:
+	reloc->addend = - reloc->address;
+	break;
+      default:
+	/* What's a good default here?  Is there any??  */
+	abort ();
+      }
 
-#if 0
-  printf ("addr %04x addend=%08x fx_pcrel=%d fx_addnumber=%08x\n",
-	  reloc->address, reloc->addend, fixp->fx_pcrel, fixp->fx_addnumber);
-  if (fixp->fx_addsy->sy_frag)
-    printf ("\tsy_frag->fr_address=%08x sym=`%s'\n",
-	    fixp->fx_addsy->sy_frag->fr_address,
-	    fixp->fx_addsy->bsym->name);
-
-#endif
   switch (fixp->fx_r_type)
     {
     case BFD_RELOC_32:
@@ -2034,6 +2197,7 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_LO10:
     case BFD_RELOC_32_PCREL_S2:
     case BFD_RELOC_SPARC_BASE13:
+    case BFD_RELOC_SPARC_WDISP22:
       code = fixp->fx_r_type;
       break;
     default:
@@ -2265,6 +2429,22 @@ md_parse_option (argP, cntP, vecP)
 	  architecture_requested = 1;
 	}
     }
+#ifdef OBJ_ELF
+  else if (**argP == 'V')
+    {
+      extern void print_version_id ();
+      print_version_id ();
+    }
+  else if (**argP == 'Q')
+    {
+      /* Qy - do emit .comment
+	 Qn - do not emit .comment */
+    }
+  else if (**argP == 's')
+    {
+      /* use .stab instead of .stab.excl */
+    }
+#endif
   else
     {
       /* Unknown option */
