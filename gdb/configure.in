@@ -746,11 +746,10 @@ then
 	case $w in
 	-Werr*) WERROR_CFLAGS=-Werror ;;
 	*) # Check that GCC accepts it
-	    if $CC $w 2>&1 | grep 'unrecognized option' > /dev/null; then
-		:
-	    else
-		WARN_CFLAGS="${WARN_CFLAGS} $w"
-	    fi
+	    saved_CFLAGS="$CFLAGS"
+	    CFLAGS="$CFLAGS $w"
+	    AC_TRY_COMPILE([],[],WARN_CFLAGS="${WARN_CFLAGS} $w",)
+	    CFLAGS="$saved_CFLAGS"
 	esac
     done
     AC_MSG_RESULT(${WARN_CFLAGS}${WERROR_CFLAGS})
