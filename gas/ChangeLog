@@ -1,3 +1,8 @@
+Tue Jan  5 21:58:03 1999  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-mips.c (mips_frob_file): Disable "Unmatched %hi reloc"
+	warning.
+
 1998-12-29  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* config/tc-mips.c (append_insn): For mips16, insert a nop between
