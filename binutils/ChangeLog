@@ -1,3 +1,65 @@
+Mon Jan  8 18:02:29 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ieee.c: Add global function write_ieee_debugging_info and a
+	bunch of static functions and structs used to write out IEEE
+	debugging information.
+	* budbg.h (write_ieee_debugging_info): Declare.
+
+	* ieee.c (struct ieee_type): Add pslot field.
+	(enum builtin_types): Define.
+	(ieee_builtin_type): For a pointer, return a pointer to the named
+	type.  Use enum values rather than numbers.
+	(ieee_alloc_type): New static function.
+	(ieee_read_type_index): Use ieee_alloc_type.
+	(parse_ieee_bb): Likewise.
+	(parse_ieee_ty): Likewise.  Use ieee_builtin_type for array range,
+	rather than making a new integer type.  Store the new type in the
+	slot, if there is one.
+	(parse_ieee_atn): Treat ATN10 as defining a register variable.
+	(ieee_regno_to_genreg): Rename from ieee_regno_to_gen.  Change all
+	callers.
+	(ieee_genreg_to_regno): New static function.
+
+	* stabs.c (parse_stab_type): Add new typename parameter.  Change
+	all callers.
+	(parse_stab_range_type): Add new typename parameter.  Change all
+	callers.
+
+	* debug.h (struct debug_write_fns): Add tag parameter to
+	enum_type, start_struct_type, and start_class_type.
+	* debug.c (debug_write_type): Pass any tag name to
+	start_struct_type, debug_write_class_type, and enum_type.  If
+	DEBUG_KIND_TAGGED, pass the name in the recursive call.
+	(debug_write_class_type): Accept a new tag parameter, and pass it
+	to start_class_type.
+	* prdbg.c (pop_type): Don't remove '+' character.
+	(pr_enum_type): Accept and use tag parameter.
+	(pr_start_struct_type): Likewise.
+	(pr_start_class_type): Likewise.
+	(pr_class_baseclass): Adjust algorithm used to find where to put
+	the baseclass name.
+	(pr_tag): Don't bother to insert the tag name.
+
+	* objcopy.c: Include budbg.h.
+	(convert_debugging): New static variable.
+	(OPTION_DEBUGGING): Define.
+	(copy_options): Add "debugging".
+	(copy_usage): Mention --debugging.
+	(is_strip_section): Skip debugging sections if convert_debugging.
+	(setup_section, copy_section): Likewise.
+	(filter_symbols): Skip debugging symbols if convert_debugging.
+	(copy_object): If convert_debugging, read and write debugging
+	information.
+	(write_debugging_info): New static function.
+	(copy_main): Handle --debugging.
+	* Makefile.in (DEBUG_OBJS): New variable.
+	($(OBJCOPY_PROG)): Depend upon and link against $(DEBUG_OBJS).
+	($(STRIP_PROG)): Likewise.
+	(OBJDUMP_OBJS): Remove variable.
+	($(OBJDUMP_PROG)): Use objdump.o $(DEBUG_OBJS) rather than
+	$(OBJDUMP_OBJS).
+	* binutils.texi, objcopy.1: Document --debugging.
+
 Thu Jan  4 16:31:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c: New file with code to read IEEE debugging information.
