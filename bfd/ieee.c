@@ -825,6 +825,28 @@ ieee_slurp_external_symbols (abfd)
 			      &extra,
 			      &symbol->symbol.section);
 
+	    /* Fully linked IEEE-695 files tend to give every symbol
+               an absolute value.  Try to convert that back into a
+               section relative value.  FIXME: This won't always to
+               the right thing.  */
+	    if (bfd_is_abs_section (symbol->symbol.section)
+		&& (abfd->flags & HAS_RELOC) == 0)
+	      {
+		bfd_vma val;
+		asection *s;
+
+		val = symbol->symbol.value;
+		for (s = abfd->sections; s != NULL; s = s->next)
+		  {
+		    if (val >= s->vma && val < s->vma + s->_raw_size)
+		      {
+			symbol->symbol.section = s;
+			symbol->symbol.value -= s->vma;
+			break;
+		      }
+		  }
+	      }
+
 	    symbol->symbol.flags = BSF_GLOBAL | BSF_EXPORT;
 
 	  }
