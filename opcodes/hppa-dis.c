@@ -384,6 +384,16 @@ print_insn_hppa (memaddr, info)
 		      else
 			fput_fp_reg (GET_FIELD (insn, 6, 10), info);
 		      break;
+
+		    /* 'fA' will not generate a space before the regsiter
+			name.  Normally that is fine.  Except that it
+			causes problems with xmpyu which has no FP format
+			completer.  */
+		    case 'X':
+		      fputs_filtered (" ", info);
+
+		    /* FALLTHRU */
+
 		    case 'A':
 		      if (GET_FIELD (insn, 24, 24))
 			fput_fp_reg_r (GET_FIELD (insn, 6, 10), info);

@@ -1,5 +1,7 @@
 Sat Sep 18 11:36:12 1999  Jeffrey A Law  (law@cygnus.com)
 
+	* hppa-dis.c: (print_insn_hppa): Handle 'fX'.
+
 	* hppa-dis.c: (print_insn_hppa): Add missing break after
 	FP register case.
 
