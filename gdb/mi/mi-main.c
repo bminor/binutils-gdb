@@ -323,7 +323,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 
   numregs = NUM_REGS;
 
-  ui_out_tuple_begin (uiout, "changed-registers");
+  ui_out_list_begin (uiout, "changed-registers");
 
   if (argc == 0)		/* No args, just do all the regs */
     {
@@ -372,7 +372,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 	  return MI_CMD_ERROR;
 	}
     }
-  ui_out_tuple_end (uiout);
+  ui_out_list_end (uiout);
   return MI_CMD_DONE;
 }
 
