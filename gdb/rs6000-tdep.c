@@ -1388,10 +1388,13 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
       && fdatap->cr_offset == 0
       && fdatap->vr_offset == 0)
     frame_addr = 0;
-  else if (fi->prev && fi->prev->frame)
-    frame_addr = fi->prev->frame;
   else
-    frame_addr = read_memory_addr (fi->frame, wordsize);
+    /* NOTE: cagney/2002-04-14: The ->frame points to the inner-most
+       address of the current frame.  Things might be easier if the
+       ->frame pointed to the outer-most address of the frame.  In the
+       mean time, the address of the prev frame is used as the base
+       address of this frame.  */
+    frame_addr = FRAME_CHAIN (fi);
 
   /* if != -1, fdatap->saved_fpr is the smallest number of saved_fpr.
      All fpr's from saved_fpr to fp31 are saved.  */

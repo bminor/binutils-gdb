@@ -160,10 +160,6 @@ read_memory_pointer (CORE_ADDR x)
 CORE_ADDR
 z8k_frame_chain (struct frame_info *thisframe)
 {
-  if (thisframe->prev == 0)
-    {
-      /* This is the top of the stack, let's get the sp for real */
-    }
   if (!inside_entry_file (thisframe->pc))
     {
       return read_memory_pointer (thisframe->frame);

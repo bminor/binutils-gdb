@@ -1009,9 +1009,7 @@ s390_frame_chain (struct frame_info *thisframe)
 {
   CORE_ADDR prev_fp = 0;
 
-  if (thisframe->prev && thisframe->prev->frame)
-    prev_fp = thisframe->prev->frame;
-  else if (generic_find_dummy_frame (thisframe->pc, thisframe->frame))
+  if (generic_find_dummy_frame (thisframe->pc, thisframe->frame))
     return generic_read_register_dummy (thisframe->pc, thisframe->frame,
                                         S390_SP_REGNUM);
   else

@@ -1,3 +1,12 @@
+2002-04-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* sparc-tdep.c (sparc_get_saved_register): Use get_prev_frame
+	instead of ->prev.
+	* z8k-tdep.c (z8k_frame_chain): Do not use ->prev.
+	* s390-tdep.c (s390_frame_chain): Do not use ->prev.
+	* rs6000-tdep.c (frame_get_saved_regs): Use rs6000_frame_chain()
+	instead of ->prev.
+
 2002-04-19  Elena Zannoni  <ezannoni@redhat.com>
 
         Fix PR gdb/471.
