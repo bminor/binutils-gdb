@@ -60,21 +60,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libelf.h"
 
 #define Elf_External_Ehdr	NAME(Elf,External_Ehdr)
-#define Elf_Internal_Ehdr	NAME(Elf,Internal_Ehdr)
 #define Elf_External_Sym	NAME(Elf,External_Sym)
-#define Elf_Internal_Sym	NAME(Elf,Internal_Sym)
 #define Elf_External_Shdr	NAME(Elf,External_Shdr)
-#define Elf_Internal_Shdr	NAME(Elf,Internal_Shdr)
 #define Elf_External_Phdr	NAME(Elf,External_Phdr)
-#define Elf_Internal_Phdr	NAME(Elf,Internal_Phdr)
 #define Elf_External_Rel	NAME(Elf,External_Rel)
 #define Elf_External_Rela	NAME(Elf,External_Rela)
-#define Elf_Internal_Rel	NAME(Elf,Internal_Rel)
-#define Elf_Internal_Rela	NAME(Elf,Internal_Rela)
 
 #define elf_symbol_type		NAME(elf,symbol_type)
-#define elf_internal_shdr	NAME(elf,internal_shdr)
-#define elf_backend_data	NAME(elf,backend_data)
 
 #define elf_core_file_failing_command	NAME(bfd_elf,core_file_failing_command)
 #define elf_core_file_failing_signal	NAME(bfd_elf,core_file_failing_signal)
@@ -133,7 +125,7 @@ static char * elf_get_str_section PARAMS ((bfd *, unsigned int));
 static int elf_symbol_from_bfd_symbol PARAMS ((bfd *,
 					       struct symbol_cache_entry **));
 
-static boolean elf_map_symbols PARAMS ((bfd *));
+static void elf_map_symbols PARAMS ((bfd *));
 
 /* Some private data is stashed away for future use using the tdata pointer
    in the bfd structure.  */
@@ -168,6 +160,16 @@ struct elf_obj_tdata
 #define obj_raw_syms(bfd)	(elf_tdata(bfd) -> raw_syms)
 #define obj_internal_syms(bfd)	(elf_tdata(bfd) -> internal_syms)
 
+
+#if ARCH_SIZE == 64
+#define put_word	bfd_h_put_64
+#define get_word	bfd_h_get_64
+#endif
+#if ARCH_SIZE == 32
+#define put_word	bfd_h_put_32
+#define get_word	bfd_h_get_32
+#endif
+
 /* Translate an ELF symbol in external format into an ELF symbol in internal
    format. */
 
@@ -178,8 +180,8 @@ DEFUN (elf_swap_symbol_in, (abfd, src, dst),
        Elf_Internal_Sym * dst)
 {
   dst->st_name = bfd_h_get_32 (abfd, (bfd_byte *) src->st_name);
-  dst->st_value = bfd_h_get_32 (abfd, (bfd_byte *) src->st_value);
-  dst->st_size = bfd_h_get_32 (abfd, (bfd_byte *) src->st_size);
+  dst->st_value = get_word (abfd, (bfd_byte *) src->st_value);
+  dst->st_size = get_word (abfd, (bfd_byte *) src->st_size);
   dst->st_info = bfd_h_get_8 (abfd, (bfd_byte *) src->st_info);
   dst->st_other = bfd_h_get_8 (abfd, (bfd_byte *) src->st_other);
   dst->st_shndx = bfd_h_get_16 (abfd, (bfd_byte *) src->st_shndx);
@@ -195,8 +197,8 @@ DEFUN (elf_swap_symbol_out, (abfd, src, dst),
        Elf_External_Sym * dst)
 {
   bfd_h_put_32 (abfd, src->st_name, dst->st_name);
-  bfd_h_put_32 (abfd, src->st_value, dst->st_value);
-  bfd_h_put_32 (abfd, src->st_size, dst->st_size);
+  put_word (abfd, src->st_value, dst->st_value);
+  put_word (abfd, src->st_size, dst->st_size);
   bfd_h_put_8 (abfd, src->st_info, dst->st_info);
   bfd_h_put_8 (abfd, src->st_other, dst->st_other);
   bfd_h_put_16 (abfd, src->st_shndx, dst->st_shndx);
@@ -216,9 +218,9 @@ DEFUN (elf_swap_ehdr_in, (abfd, src, dst),
   dst->e_type = bfd_h_get_16 (abfd, (bfd_byte *) src->e_type);
   dst->e_machine = bfd_h_get_16 (abfd, (bfd_byte *) src->e_machine);
   dst->e_version = bfd_h_get_32 (abfd, (bfd_byte *) src->e_version);
-  dst->e_entry = bfd_h_get_32 (abfd, (bfd_byte *) src->e_entry);
-  dst->e_phoff = bfd_h_get_32 (abfd, (bfd_byte *) src->e_phoff);
-  dst->e_shoff = bfd_h_get_32 (abfd, (bfd_byte *) src->e_shoff);
+  dst->e_entry = get_word (abfd, (bfd_byte *) src->e_entry);
+  dst->e_phoff = get_word (abfd, (bfd_byte *) src->e_phoff);
+  dst->e_shoff = get_word (abfd, (bfd_byte *) src->e_shoff);
   dst->e_flags = bfd_h_get_32 (abfd, (bfd_byte *) src->e_flags);
   dst->e_ehsize = bfd_h_get_16 (abfd, (bfd_byte *) src->e_ehsize);
   dst->e_phentsize = bfd_h_get_16 (abfd, (bfd_byte *) src->e_phentsize);
@@ -242,9 +244,9 @@ DEFUN (elf_swap_ehdr_out, (abfd, src, dst),
   bfd_h_put_16 (abfd, src->e_type, dst->e_type);
   bfd_h_put_16 (abfd, src->e_machine, dst->e_machine);
   bfd_h_put_32 (abfd, src->e_version, dst->e_version);
-  bfd_h_put_32 (abfd, src->e_entry, dst->e_entry);
-  bfd_h_put_32 (abfd, src->e_phoff, dst->e_phoff);
-  bfd_h_put_32 (abfd, src->e_shoff, dst->e_shoff);
+  put_word (abfd, src->e_entry, dst->e_entry);
+  put_word (abfd, src->e_phoff, dst->e_phoff);
+  put_word (abfd, src->e_shoff, dst->e_shoff);
   bfd_h_put_32 (abfd, src->e_flags, dst->e_flags);
   bfd_h_put_16 (abfd, src->e_ehsize, dst->e_ehsize);
   bfd_h_put_16 (abfd, src->e_phentsize, dst->e_phentsize);
@@ -266,14 +268,14 @@ DEFUN (elf_swap_shdr_in, (abfd, src, dst),
 {
   dst->sh_name = bfd_h_get_32 (abfd, (bfd_byte *) src->sh_name);
   dst->sh_type = bfd_h_get_32 (abfd, (bfd_byte *) src->sh_type);
-  dst->sh_flags = bfd_h_get_32 (abfd, (bfd_byte *) src->sh_flags);
-  dst->sh_addr = bfd_h_get_32 (abfd, (bfd_byte *) src->sh_addr);
-  dst->sh_offset = bfd_h_get_32 (abfd, (bfd_byte *) src->sh_offset);
-  dst->sh_size = bfd_h_get_32 (abfd, (bfd_byte *) src->sh_size);
+  dst->sh_flags = get_word (abfd, (bfd_byte *) src->sh_flags);
+  dst->sh_addr = get_word (abfd, (bfd_byte *) src->sh_addr);
+  dst->sh_offset = get_word (abfd, (bfd_byte *) src->sh_offset);
+  dst->sh_size = get_word (abfd, (bfd_byte *) src->sh_size);
   dst->sh_link = bfd_h_get_32 (abfd, (bfd_byte *) src->sh_link);
   dst->sh_info = bfd_h_get_32 (abfd, (bfd_byte *) src->sh_info);
-  dst->sh_addralign = bfd_h_get_32 (abfd, (bfd_byte *) src->sh_addralign);
-  dst->sh_entsize = bfd_h_get_32 (abfd, (bfd_byte *) src->sh_entsize);
+  dst->sh_addralign = get_word (abfd, (bfd_byte *) src->sh_addralign);
+  dst->sh_entsize = get_word (abfd, (bfd_byte *) src->sh_entsize);
   /* we haven't done any processing on it yet, so... */
   dst->rawdata = (void *) 0;
 }
@@ -290,14 +292,14 @@ DEFUN (elf_swap_shdr_out, (abfd, src, dst),
   /* note that all elements of dst are *arrays of unsigned char* already... */
   bfd_h_put_32 (abfd, src->sh_name, dst->sh_name);
   bfd_h_put_32 (abfd, src->sh_type, dst->sh_type);
-  bfd_h_put_32 (abfd, src->sh_flags, dst->sh_flags);
-  bfd_h_put_32 (abfd, src->sh_addr, dst->sh_addr);
-  bfd_h_put_32 (abfd, src->sh_offset, dst->sh_offset);
-  bfd_h_put_32 (abfd, src->sh_size, dst->sh_size);
+  put_word (abfd, src->sh_flags, dst->sh_flags);
+  put_word (abfd, src->sh_addr, dst->sh_addr);
+  put_word (abfd, src->sh_offset, dst->sh_offset);
+  put_word (abfd, src->sh_size, dst->sh_size);
   bfd_h_put_32 (abfd, src->sh_link, dst->sh_link);
   bfd_h_put_32 (abfd, src->sh_info, dst->sh_info);
-  bfd_h_put_32 (abfd, src->sh_addralign, dst->sh_addralign);
-  bfd_h_put_32 (abfd, src->sh_entsize, dst->sh_entsize);
+  put_word (abfd, src->sh_addralign, dst->sh_addralign);
+  put_word (abfd, src->sh_entsize, dst->sh_entsize);
 }
 
 
@@ -311,13 +313,13 @@ DEFUN (elf_swap_phdr_in, (abfd, src, dst),
        Elf_Internal_Phdr * dst)
 {
   dst->p_type = bfd_h_get_32 (abfd, (bfd_byte *) src->p_type);
-  dst->p_offset = bfd_h_get_32 (abfd, (bfd_byte *) src->p_offset);
-  dst->p_vaddr = bfd_h_get_32 (abfd, (bfd_byte *) src->p_vaddr);
-  dst->p_paddr = bfd_h_get_32 (abfd, (bfd_byte *) src->p_paddr);
-  dst->p_filesz = bfd_h_get_32 (abfd, (bfd_byte *) src->p_filesz);
-  dst->p_memsz = bfd_h_get_32 (abfd, (bfd_byte *) src->p_memsz);
   dst->p_flags = bfd_h_get_32 (abfd, (bfd_byte *) src->p_flags);
-  dst->p_align = bfd_h_get_32 (abfd, (bfd_byte *) src->p_align);
+  dst->p_offset = get_word (abfd, (bfd_byte *) src->p_offset);
+  dst->p_vaddr = get_word (abfd, (bfd_byte *) src->p_vaddr);
+  dst->p_paddr = get_word (abfd, (bfd_byte *) src->p_paddr);
+  dst->p_filesz = get_word (abfd, (bfd_byte *) src->p_filesz);
+  dst->p_memsz = get_word (abfd, (bfd_byte *) src->p_memsz);
+  dst->p_align = get_word (abfd, (bfd_byte *) src->p_align);
 }
 
 /* ... */
@@ -388,7 +390,7 @@ INTERNAL_FUNCTION
 	bfd_elf_find_section
 
 SYNOPSIS
-	struct elf32_internal_shdr *bfd_elf32_find_section (bfd *abfd, char *name);
+	struct elf_internal_shdr *bfd_elf32_find_section (bfd *abfd, char *name);
 
 DESCRIPTION
 	Helper functions for GDB to locate the string tables.
@@ -738,6 +740,7 @@ DEFUN (bfd_add_2_to_strtab, (abfd, ss, str, str2),
 
 /* Create a new ELF section from a bfd section. */
 
+#if 0 /* not used */
 static boolean
 DEFUN (bfd_shdr_from_section, (abfd, hdr, shstrtab, indx),
        bfd * abfd AND
@@ -792,6 +795,7 @@ DEFUN (bfd_shdr_from_section, (abfd, hdr, shstrtab, indx),
 
   return true;
 }
+#endif
 
 /* Create a new bfd section from an ELF program header.
 
@@ -1575,6 +1579,7 @@ DEFUN (elf_mkobject, (abfd), bfd * abfd)
 
 */
 
+#if 0 /* not used */
 static int
 elf_idx_of_sym (abfd, sym)
      bfd *abfd;
@@ -1593,6 +1598,7 @@ elf_idx_of_sym (abfd, sym)
     }
   return STN_UNDEF;
 }
+#endif
 
 static void
 DEFUN (elf_make_sections, (abfd, asect, obj),
@@ -1744,7 +1750,9 @@ fix_up_strtabs (abfd, asect, obj)
       strcat (strtab, "str");
 
       s = bfd_get_section_by_name (abfd, strtab);
+#if 0
       fprintf (stderr, "`%s' -> 0x%x\n", strtab, s);
+#endif
       if (s)
 	{
 	  Elf_Internal_Shdr *s2 = thunk->i_shdrp;
@@ -1757,15 +1765,19 @@ fix_up_strtabs (abfd, asect, obj)
 	}
       else
 	{
-	  asection *s2 = abfd->sections;
 	  stridx = 0;
-	  fprintf (stderr, " not in:");
-	  while (s2)
-	    {
-	      fprintf (stderr, " %s", s2->name);
-	      s2 = s2->next;
-	    }
-	  fprintf (stderr, "\n");
+#if 0
+	  {
+	    asection *s2 = abfd->sections;
+	    fprintf (stderr, " not in:");
+	    while (s2)
+	      {
+		fprintf (stderr, " %s", s2->name);
+		s2 = s2->next;
+	      }
+	    fprintf (stderr, "\n");
+	  }
+#endif
 	}
       this_hdr->sh_link = stridx;
       /* @@ Assuming 32 bits!  */
@@ -1889,11 +1901,11 @@ xxxDESCRIPTION
         name of a BFD section.
 */
 
-struct elf32_internal_shdr *
+struct elfNAME (internal_shdr) *
 DEFUN (bfd_elf_locate_sh, (abfd, strtab, shdrp, name),
        bfd * abfd AND
        struct strtab *strtab AND
-       struct elf32_internal_shdr *shdrp AND
+       struct elfNAME (internal_shdr) *shdrp AND
        CONST char *name)
 {
   Elf_Internal_Shdr *gotit = NULL;
@@ -1935,12 +1947,11 @@ sym_is_global (sym)
   return 0;
 }
 
-static boolean
+static void
 DEFUN (elf_map_symbols, (abfd), bfd * abfd)
 {
   int symcount = bfd_get_symcount (abfd);
   asymbol **syms = bfd_get_outsymbols (abfd);
-  flagword flags;
   int num_locals = 0;
   int num_globals = 0;
   int num_locals2 = 0;
@@ -2681,7 +2692,6 @@ DEFUN (elf_symbol_from_bfd_symbol, (abfd, asym_ptr_ptr),
 {
   struct symbol_cache_entry *asym_ptr = *asym_ptr_ptr;
   CONST char *name = asym_ptr->name;
-  flagword flags = asym_ptr->flags;
   int idx;
   int symcount = bfd_get_symcount (abfd);
   asymbol **syms = bfd_get_outsymbols (abfd);
@@ -2697,71 +2707,76 @@ DEFUN (elf_symbol_from_bfd_symbol, (abfd, asym_ptr_ptr),
   idx = elf_symtab_map (abfd)[idx];
 
 #ifdef DEBUG
-  fprintf (stderr, "elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags =",
-	   (long) asym_ptr, asym_ptr->name, idx);
+  {
+    flagword flags = asym_ptr->flags;
 
-  if (flags == BSF_NO_FLAGS)
-    fprintf (stderr, " none");
+    fprintf (stderr,
+	     "elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags =",
+	     (long) asym_ptr, asym_ptr->name, idx);
 
-  if (flags & BSF_LOCAL)
-    fprintf (stderr, " local");
+    if (flags == BSF_NO_FLAGS)
+      fprintf (stderr, " none");
 
-  if (flags & BSF_GLOBAL)
-    fprintf (stderr, " global");
+    if (flags & BSF_LOCAL)
+      fprintf (stderr, " local");
 
-  if (flags & BSF_IMPORT)
-    fprintf (stderr, " import");
+    if (flags & BSF_GLOBAL)
+      fprintf (stderr, " global");
 
-  if (flags & BSF_EXPORT)
-    fprintf (stderr, " export");
+    if (flags & BSF_IMPORT)
+      fprintf (stderr, " import");
 
-  if (flags & BSF_UNDEFINED_OBS)
-    fprintf (stderr, " undefined_obs");
+    if (flags & BSF_EXPORT)
+      fprintf (stderr, " export");
 
-  if (flags & BSF_FORT_COMM_OBS)
-    fprintf (stderr, " fort_comm_obs");
+    if (flags & BSF_UNDEFINED_OBS)
+      fprintf (stderr, " undefined_obs");
 
-  if (flags & BSF_DEBUGGING)
-    fprintf (stderr, " debugging");
+    if (flags & BSF_FORT_COMM_OBS)
+      fprintf (stderr, " fort_comm_obs");
 
-  if (flags & BSF_KEEP)
-    fprintf (stderr, " keep");
+    if (flags & BSF_DEBUGGING)
+      fprintf (stderr, " debugging");
 
-  if (flags & BSF_KEEP_G)
-    fprintf (stderr, " keep_g");
+    if (flags & BSF_KEEP)
+      fprintf (stderr, " keep");
 
-  if (flags & BSF_WEAK)
-    fprintf (stderr, " weak");
+    if (flags & BSF_KEEP_G)
+      fprintf (stderr, " keep_g");
 
-  if (flags & BSF_CTOR)
-    fprintf (stderr, " ctor");
+    if (flags & BSF_WEAK)
+      fprintf (stderr, " weak");
 
-  if (flags & BSF_SECTION_SYM)
-    fprintf (stderr, " section_sym");
+    if (flags & BSF_CTOR)
+      fprintf (stderr, " ctor");
 
-  if (flags & BSF_OLD_COMMON)
-    fprintf (stderr, " old_common");
+    if (flags & BSF_SECTION_SYM)
+      fprintf (stderr, " section_sym");
 
-  if (flags & BSF_NOT_AT_END)
-    fprintf (stderr, " not_at_end");
+    if (flags & BSF_OLD_COMMON)
+      fprintf (stderr, " old_common");
 
-  if (flags & BSF_CONSTRUCTOR)
-    fprintf (stderr, " constructor");
+    if (flags & BSF_NOT_AT_END)
+      fprintf (stderr, " not_at_end");
 
-  if (flags & BSF_WARNING)
-    fprintf (stderr, " warning");
+    if (flags & BSF_CONSTRUCTOR)
+      fprintf (stderr, " constructor");
 
-  if (flags & BSF_INDIRECT)
-    fprintf (stderr, " indirect");
+    if (flags & BSF_WARNING)
+      fprintf (stderr, " warning");
 
-  if (flags & BSF_FILE)
-    fprintf (stderr, " file");
+    if (flags & BSF_INDIRECT)
+      fprintf (stderr, " indirect");
 
-  if (flags & BSF_FUNCTION)
-    fprintf (stderr, " function");
+    if (flags & BSF_FILE)
+      fprintf (stderr, " file");
 
-  putc ('\n', stderr);
-  fflush (stderr);
+    if (flags & BSF_FUNCTION)
+      fprintf (stderr, " function");
+
+    putc ('\n', stderr);
+    fflush (stderr);
+  }
 #endif
 
   return idx;
@@ -3264,9 +3279,9 @@ DEFUN (elf_print_symbol, (ignore_abfd, filep, symbol, how),
       fprintf (file, "%s", symbol->name);
       break;
     case bfd_print_symbol_more:
-      fprintf (file, "elf %lx %lx",
-	       symbol->value,
-	       (long) symbol->flags);
+      fprintf (file, "elf ");
+      fprintf_vma (file, symbol->value);
+      fprintf (file, " %lx", (long) symbol->flags);
       break;
     case bfd_print_symbol_all:
       {
