@@ -1,5 +1,10 @@
 2003-01-02  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.in: Remove --with-cpu option.
+	subscripts.  Remove evil changequotes here.
+	* acconfig.h (TARGET_CPU_DEFAULT): Remove.
+	* config.in, configure: Regenerated.
+	
 	* acconfig.h (DEFAULT_BFD_ARCH, DEFAULT_BFD_VEC): Remove.
 	* configure.in: Cleanup section that sources GDB and BFD configure
 	subscripts.  Remove evil changequotes here.

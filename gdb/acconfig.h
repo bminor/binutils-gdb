@@ -131,10 +131,6 @@
    size_t, and assorted other type changes. */
 #undef PROC_SERVICE_IS_OLD
 
-/* If you want to specify a default CPU variant, define this to be its
-   name, as a C string.  */
-#undef TARGET_CPU_DEFAULT
-
 /* Define if the simulator is being linked in.  */
 #undef WITH_SIM
 
