@@ -1,3 +1,8 @@
+1999-09-17  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* ld-shared/shared.exp: xfail linux*libc1 shared (non PIC, load
+	offset) test.
+
 1999-09-12  Ian Lance Taylor  <ian@zembu.com>
 
 	* ld-scripts/script.exp: Add --image-base 0 for PE targets.

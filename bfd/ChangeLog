@@ -1,3 +1,9 @@
+1999-09-17  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* coff-i386.c (coff_i386_reloc_type_lookup): Support BFD_RELOC_16,
+	BFD_RELOC_16_PCREL, BFD_RELOC_8, BFD_RELOC_8_PCREL relocs.
+	(reloc_howto_type howto_table): Tidy comments and whitespace.
+
 1999-09-17  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-arm.h (bfd_elf32_arm_get_bfd_for_interworking): Undo
