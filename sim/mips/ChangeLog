@@ -1,3 +1,15 @@
+1998-12-12  Gavin Romig-Koch  <gavin@cygnus.com>
+
+start-sanitize-vr4xxx
+	* configure.in (mips64vr4xxx): Enable TARGET_ENABLE_FR.
+	Set mips_fpu, and mips_fpu_bitsize.
+	Set sim_gen, and sim_igen_machine.
+	* configure: Rebuild.
+
+end-sanitize-vr4xxx
+	* mips.igen (BC1): Renamed to BC1a and BC1b to avoid conflicts.
+	* sim-main.h (SizeFGR): Handle TARGET_ENABLE_FR.
+	
 1998-12-11  Gavin Romig-Koch  <gavin@cygnus.com>
 
     * mips/interp.c (DEBUG): Cleanups.

@@ -18,6 +18,9 @@ SIM_AC_OPTION_WARNINGS
 # in question.
 #
 case "${target}" in
+# start-sanitize-vr4xxx
+  mips64vr4xxx-*-*)	SIM_SUBTARGET="-DTARGET_ENABLE_FR=1" ;;
+# end-sanitize-vr4xxx
 # start-sanitize-tx19
   mips*tx19*)        SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
 # end-sanitize-tx19
@@ -85,6 +88,9 @@ case "${target}" in
   mips*tx39*)		mips_fpu=HARD_FLOATING_POINT
 			mips_fpu_bitsize=32
 			;;
+# start-sanitize-vr4xxx
+  mips64vr4xxx-*-*)	mips_fpu=HARD_FLOATING_POINT ; mips_fpu_bitsize=64 ;;
+# end-sanitize-vr4xxx
 # start-sanitize-r5900
   mips64r59*-*-*)       mips_fpu=HARD_FLOATING_POINT ; mips_fpu_bitsize=32 ;;
 # end-sanitize-r5900
@@ -161,6 +167,11 @@ case "${target}" in
 			sim_igen_machine="-M vr5000,vr5400 -G gen-multi-sim=vr5000"
 			;;
 # end-sanitize-cygnus
+# start-sanitize-vr4xxx
+  mips64vr4xxx-*-*)	sim_gen=IGEN
+			sim_igen_machine="-M mipsIV,vr4100 -G gen-multi-sim=mipsIV"
+                        ;;
+# end-sanitize-vr4xxx
   mips64vr41*)		sim_gen=M16
 			sim_igen_machine="-M vr4100"
 			sim_m16_machine="-M vr4100"
