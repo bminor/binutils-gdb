@@ -12,8 +12,9 @@ _if__(!_GENERIC__)
 @settitle Debugging with _GDBN__ (_HOST__)
 _fi__(!_GENERIC__)
 @setchapternewpage odd
+@input smpklug.texi
 @smallbook
-@c @cropmarks
+@cropmarks
 @c %**end of header
 
 @finalout
