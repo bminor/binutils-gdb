@@ -181,7 +181,7 @@ print_insn_arg (d, buffer, p, addr, stream)
   register int val;
   register int place = d[1];
   int regno;
-  register char *regname;
+  register const char *regname;
   register unsigned char *p1;
   double flval;
   int flt_p;
