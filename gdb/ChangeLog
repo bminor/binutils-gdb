@@ -1,5 +1,10 @@
 2002-02-11  Richard Earnshaw  <rearnsha@arm.com>
 
+	* arm-linux-nat.c: Really include arm-tdep.h.
+	* config/arm/tm-linux.h (struct type, struct value): Declare.
+
+2002-02-11  Richard Earnshaw  <rearnsha@arm.com>
+
 	* arm-tdep.h: New file.
 	* arm-tdep.c: Include arm-tdep.h.
 	(arm_addr_bits_remove, arm_smash_text_address, arm_saved_pc_after_call)

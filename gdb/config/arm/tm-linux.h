@@ -51,6 +51,8 @@ extern LONGEST arm_linux_call_dummy_words[];
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
+struct type;
+struct value;
 extern void arm_linux_extract_return_value (struct type *, char[], char *);
 #undef EXTRACT_RETURN_VALUE
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \

@@ -24,6 +24,8 @@
 #include "gdb_string.h"
 #include "regcache.h"
 
+#include "arm-tdep.h"
+
 #include <sys/user.h>
 #include <sys/ptrace.h>
 #include <sys/utsname.h>
