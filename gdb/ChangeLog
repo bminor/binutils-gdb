@@ -1,3 +1,10 @@
+2002-02-07  Klee Dienes  <klee@apple.com>
+
+	* fork-inferior.c (fork_inferior): Add '!' to the list of
+	characters that need to be quoted when building a string for the
+	shell.  Quote '!' specifically with a backslash, since CSH chokes
+	when trying to evaluate "str!str".
+	
 2002-02-06  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* rdi-share/host.h: Only provide a typedef for bool if it is not

@@ -183,6 +183,7 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 	  switch (*p)
 	    {
 	    case '\'':
+	    case '!':
 	    case '"':
 	    case '(':
 	    case ')':
@@ -214,6 +215,8 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 	    {
 	      if (*p == '\'')
 		strcat (shell_command, "'\\''");
+	      else if (*p == '!')
+		strcat (shell_command, "\\!");
 	      else
 		strncat (shell_command, p, 1);
 	    }
