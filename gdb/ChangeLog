@@ -1,3 +1,10 @@
+2002-11-13  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	Import from mainline:
+
+	* p-exp.y (name_not_typename): Use copy_name to
+	set current_type variable for fields of THIS.
+
 2002-11-12  Andrew Cagney  <ac131313@redhat.com>
 
 	* utils.c (gdb_realpath): Rewrite.  Try, in order: realpath() with
