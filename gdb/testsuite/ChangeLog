@@ -1,3 +1,10 @@
+Wed Apr 13 15:05:00 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gdb.t07/{recurse.exp, recurse.c}: New tests for watchpoints
+	on local variables in recursive functions.
+
+	* gdb.t07/Makefile.in: Build the new test.
+
 Tue Apr 12 20:45:25 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gdb.t17/gdbme.c (t_func_values): Do not compare function pointers
