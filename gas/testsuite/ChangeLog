@@ -28,6 +28,10 @@
         * gas/mips/mips16-f.d: Likewise.
         * gas/mips/mips16-f.s: Likewise.
 
+        * gas/mips/mips32.d: Expect disassembly of madd and maddu
+        to use their correct names.  Add tests for break and sdbbp.
+        * gas/mips/mips32.s: Likewise.
+
 2000-12-01  Chris Demetriou  <cgd@sibyte.com>
 
         * gas/mips/mips16.d: Expect mips16 nops to be used for padding

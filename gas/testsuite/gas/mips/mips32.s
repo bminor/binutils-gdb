@@ -10,8 +10,8 @@ text_label:
 
       clo     $1, $2
       clz     $3, $4
-      madd    $5, $6                  # disassembles as mad ...
-      maddu   $7, $8                  # disassembles as madu ...
+      madd    $5, $6
+      maddu   $7, $8
       msub    $9, $10
       msubu   $11, $12
       mul     $13, $14, $15
@@ -58,6 +58,14 @@ text_label:
       wait    0                       # disassembles without code
       wait    0x56789
 
-      # padding to a cache line boundary so it's more likely to
-      # pass everywhere
-      nop
+      # Instructions in previous ISAs or CPUs which are now slightly
+      # different.
+      break
+      break   0                       # disassembles without code
+      break   0x12345
+      sdbbp
+      sdbbp   0                       # disassembles without code
+      sdbbp   0x56789
+
+# Force at least 8 (non-delay-slot) zero bytes, to make 'objdump' print ...
+      .space  8

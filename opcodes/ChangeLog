@@ -1,3 +1,11 @@
+2000-12-03  Ed Satterthwaite  ehs@sibyte.com  and
+            Chris Demetriou   cgd@sibyte.com
+
+        * mips-opc.c (mips_builtin_opcodes): Finish additions
+        for MIPS32 support, and clean up existing entries for
+        aesthetics, consistency with the MIPS32 ISA, and
+        with consistency the rest of the table.
+
 2000-12-01  Nick Clifton  <nickc@redhat.com>
 
 	* mips16-opc.c (mips16_opcodes): Add initialiser for membership
