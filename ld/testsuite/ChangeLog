@@ -1,3 +1,10 @@
+2004-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 233
+	* ld-discard/extern.d: Updated.
+	* ld-discard/start.d: Likewise.
+	* ld-discard/static.d: Likewise.
+
 2004-06-29  J"orn Rennecke <joern.rennecke@superh.com>
 
 	Actually add these files:

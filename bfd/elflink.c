@@ -6581,8 +6581,7 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 			    {
 			      BFD_ASSERT (r_symndx != 0);
 			      /* Try to preserve debug information.  */
-			      if ((o->flags & SEC_DEBUGGING) != 0
-				  && sec->kept_section != NULL
+			      if (sec->kept_section != NULL
 				  && sec->size == sec->kept_section->size)
 				h->root.u.def.section
 				  = sec->kept_section;
@@ -6590,13 +6589,20 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 				memset (rel, 0, sizeof (*rel));
 			    }
 			  else
-			    finfo->info->callbacks->error_handler
-			      (LD_DEFINITION_IN_DISCARDED_SECTION,
-			       _("%T: discarded in section `%s' from %s\n"),
-			       h->root.root.string,
-			       h->root.root.string,
-			       h->root.u.def.section->name,
-			       bfd_archive_filename (h->root.u.def.section->owner));
+			    {
+			      char *r_name
+				= xstrdup (bfd_archive_filename (o->owner));
+			      finfo->info->callbacks->error_handler
+				(LD_DEFINITION_IN_DISCARDED_SECTION,
+				 _("`%T' referenced in section `%s' from %s: discarded in section `%s' from %s\n"),
+				 h->root.root.string,
+				 h->root.root.string,
+				 o->name, r_name,
+				 h->root.u.def.section->name,
+				 bfd_archive_filename (h->root.u.def.section->owner));
+			      if (r_name)
+				free (r_name);
+			    }
 			}
 		    }
 		  else
@@ -6605,13 +6611,11 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 
 		      if (sec != NULL && elf_discarded_section (sec))
 			{
-			  if ((o->flags & SEC_DEBUGGING) != 0
-			      || (sec->flags & SEC_LINK_ONCE) != 0)
+			  if ((o->flags & SEC_DEBUGGING) != 0)
 			    {
 			      BFD_ASSERT (r_symndx != 0);
 			      /* Try to preserve debug information.  */
-			      if ((o->flags & SEC_DEBUGGING) != 0
-				  && sec->kept_section != NULL
+			      if (sec->kept_section != NULL
 				  && sec->size == sec->kept_section->size)
 				finfo->sections[r_symndx]
 				  = sec->kept_section;
@@ -6633,8 +6637,8 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 				buf = (char *) "local symbol";
 			      finfo->info->callbacks->error_handler
 				(LD_DEFINITION_IN_DISCARDED_SECTION,
-				 _("%T: discarded in section `%s' from %s\n"),
-				 buf, buf, sec->name,
+				 _("`%T' referenced in section `%s': discarded in section `%s' from %s\n"),
+				 buf, buf, o->name, sec->name,
 				 bfd_archive_filename (input_bfd));
 			      if (ok != -1)
 				free (buf);

@@ -1,3 +1,10 @@
+2004-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 233
+	* elflink.c (elf_link_input_bfd): Issue an error for non-debug
+	local references to discarded sections and report their
+	locations.
+
 2004-06-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (elf_section_ignore_discarded_relocs): Don't test
