@@ -1208,18 +1208,28 @@ long val;
  /* start-sanitize-v9 */
 #ifndef NO_V9
 	case RELOC_11:
-		if (val & 0x7ff) {
-			as_bad("relocation overflow");
+#if 0
+		/* ??? Bogus overflow test.  This is a signed value, so
+		   the upper bits can be set if the sign bit is set.  */
+		if (val & ~0x7ff) {
+			as_bad("relocation overflow.");
 		} /* on overflow */
+#endif
 
 		buf[2] = (val >> 8) & 0x7;
 		buf[3] = val & 0xff;
 		break;
 
 	case RELOC_WDISP2_14:
+#if 0
+		/* ??? Bogus overflow test.  This is a signed value, so
+		   the upper bits can be set if the sign bit is set.  */
+		/* ??? This tests the wrong 16 bits also, should test
+		   ~0x3fffc0.  */
 		if (val & ~0xffff) {
 			as_bad("relocation overflow.");
 		} /* on overflow */
+#endif
 
 		val = (val >>= 2) + 1;
 		buf[1] |= ((val >> 14) & 0x3) << 3;
@@ -1228,9 +1238,15 @@ long val;
 		break;
 
 	case RELOC_WDISP19:
+#if 0
+		/* ??? Bogus overflow test.  This is a signed value, so
+		   the upper bits can be set if the sign bit is set.  */
+		/* ??? This tests the wrong 19 bits also, should test
+		   ~0x1ffffc0.  */
 		if (val & ~0x7ffff) {
 			as_bad("relocation overflow.");
 		} /* on overflow */
+#endif
 
 		val = (val >>= 2) + 1;
 		buf[1] |= (val >> 16) & 0x7;
