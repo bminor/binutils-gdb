@@ -33,6 +33,7 @@ mh-dgux
 mh-hpux
 mh-irix4
 mh-linux
+mh-lynxos
 mh-ncr3000
 mh-riscos
 mh-sco
@@ -41,6 +42,7 @@ mh-sun
 mh-sun3
 mh-sysv
 mh-sysv4
+mh-unixware
 mh-vaxult2
 
 Things-to-lose:
