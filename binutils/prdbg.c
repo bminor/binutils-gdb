@@ -992,8 +992,6 @@ pr_fix_visibility (info, visibility)
   if (info->stack->visibility == visibility)
     return true;
 
-  assert (info->stack->visibility != DEBUG_VISIBILITY_IGNORE);
-
   switch (visibility)
     {
     case DEBUG_VISIBILITY_PUBLIC:
