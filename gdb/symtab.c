@@ -3995,8 +3995,8 @@ make_symbol_overload_list (struct symbol *fsym)
   sym_return_val = (struct symbol **) xmalloc ((sym_return_val_size + 1) * sizeof (struct symbol *));
   sym_return_val[0] = NULL;
 
-  /* Look through the partial symtabs for all symbols which begin
-     by matching OLOAD_NAME.  Make sure we read that symbol table in. */
+  /* Read in all partial symtabs containing a partial symbol named
+     OLOAD_NAME.  */
 
   ALL_PSYMTABS (objfile, ps)
   {
@@ -4007,26 +4007,9 @@ make_symbol_overload_list (struct symbol *fsym)
     if (ps->readin)
       continue;
 
-    for (psym = objfile->global_psymbols.list + ps->globals_offset;
-	 psym < (objfile->global_psymbols.list + ps->globals_offset
-		 + ps->n_global_syms);
-	 psym++)
-      {
-	/* If interrupted, then quit. */
-	QUIT;
-        /* This will cause the symbol table to be read if it has not yet been */
-        s = PSYMTAB_TO_SYMTAB (ps);
-      }
-
-    for (psym = objfile->static_psymbols.list + ps->statics_offset;
-	 psym < (objfile->static_psymbols.list + ps->statics_offset
-		 + ps->n_static_syms);
-	 psym++)
-      {
-	QUIT;
-        /* This will cause the symbol table to be read if it has not yet been */
-        s = PSYMTAB_TO_SYMTAB (ps);
-      }
+    if ((lookup_partial_symbol (ps, oload_name, 1, VAR_NAMESPACE) != NULL)
+	|| (lookup_partial_symbol (ps, oload_name, 0, VAR_NAMESPACE) != NULL))
+      PSYMTAB_TO_SYMTAB (ps);
   }
 
   /* Search upwards from currently selected frame (so that we can

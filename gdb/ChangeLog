@@ -1,5 +1,10 @@
 2003-02-24  David Carlton  <carlton@math.stanford.edu>
 
+	* symtab.c (make_symbol_overload_list): Only read in partial
+	symtabs containing a matching partial symbol.
+
+2003-02-24  David Carlton  <carlton@math.stanford.edu>
+
 	* symtab.c (lookup_partial_symbol): Use strcmp_iw_ordered to
 	do the comparison, not strcmp.
 	* symfile.c (compare_psymbols): Ditto.
