@@ -72,7 +72,7 @@ BFD_H = bfd.h
 # Some of these files should be in BFD*_BACKENDS below, but some programs
 # won't link without them.  So, in order for some of the minimal-bfd
 # hacks to work, they're also included here for now.
-#	gdb: ecoff.o
+#	gdb: ecoff.o elf.o
 #	objdump: elf.o
 #
 # Also, Jim Kingdon notes:
@@ -97,13 +97,13 @@ BFD32_BACKENDS = \
 	nlm.o \
 	nlm32.o nlm32-gen.o nlm32-i386.o \
 	aout32.o sunos.o newsos3.o mipsbsd.o aout-adobe.o \
-	i386aout.o i386bsd.o i386linux.o i386lynx.o \
+	i386aout.o i386bsd.o i386linux.o i386lynx.o i386mach3.o \
 	hp300bsd.o hp300hpux.o bout.o \
 	coff-i960.o coff-a29k.o coff-m68k.o coff-u68k.o \
 	coff-i386.o coff-m88k.o \
 	coff-rs6000.o coff-h8300.o coff-h8500.o coff-z8k.o coff-we32k.o \
 	coff-mips.o coff-sh.o \
-	hppa.o oasys.o ieee.o srec.o \
+	hppa.o oasys.o ieee.o reloc16.o \
 	stab-syms.o
 
 BFD64_BACKENDS = \
@@ -149,7 +149,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 coff-a29k.c coff-rs6000.c coffgen.c format.c \
 	 section.c core.c syms.c stab-syms.c reloc.c init.c ctor.c \
 	 seclet.c coff-m88k.c coff-mips.c coff-sh.c trad-core.c newsos3.c \
-	 i386aout.c i386linux.c bout.c aout-adobe.c coff-we32k.c \
+	 i386aout.c i386linux.c i386mach3.c bout.c aout-adobe.c coff-we32k.c \
 	 i386bsd.c cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c \
 	 cpu-m88k.c cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c \
 	 cpu-rs6000.c coff-h8300.c hppa.c cpu-hppa.c cpu-we32k.c reloc16.c \
@@ -484,6 +484,9 @@ i386lynx.o : i386lynx.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
   $(INCDIR)/aout/ar.h libaout.h 
 i386aout.o : i386aout.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
+  $(INCDIR)/aout/ar.h libaout.h 
+i386mach3.o : i386mach3.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
   $(INCDIR)/aout/ar.h libaout.h 
 i386linux.o : i386linux.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \

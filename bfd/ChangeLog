@@ -1,3 +1,11 @@
+Tue Aug 17 18:12:32 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* hosts/i386{mach3,osf1mk}.h: New files, for Mach hosting.
+	* hosts/i386mach.h: removed, replaced by i386osf1mk.h.
+	* config/i386mach3.mt, i386mach3.c: New files, for Mach a.out format.
+	* Makefile.in, configure.host, config.bfd: Corresponding changes.
+	* hosts/decstation.h: Include <sys/param.h> not <machine/param.h>.
+
 Tue Aug 17 15:19:41 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* coffgen.c (coff_section_symbol): If section's output_section is
