@@ -48,7 +48,7 @@
  */
 
 #define BEFORE_STRING ("\n")
-#define AFTER_STRING ("\0")	/* bcopy of 0 chars might choke. */
+#define AFTER_STRING ("\0")	/* memcpy of 0 chars might choke. */
 #define BEFORE_SIZE (1)
 #define AFTER_SIZE  (1)
 
@@ -130,7 +130,7 @@ char *saved_position;
 	saved->logical_input_file	= logical_input_file;
 	saved->physical_input_line	= physical_input_line;
 	saved->logical_input_line	= logical_input_line;
-	bcopy(saved->save_source, save_source, sizeof(save_source));
+	memcpy(saved->save_source, save_source, sizeof(save_source));
 	saved->next_saved_file		= next_saved_file;
 	saved->input_file_save		= input_file_push();
 	
@@ -161,7 +161,7 @@ char *arg;
 	partial_where		= saved->partial_where;
 	partial_size		= saved->partial_size;
 	next_saved_file		= saved->next_saved_file;
-	bcopy (save_source,	  saved->save_source, sizeof (save_source));
+	memcpy(save_source, saved->save_source, sizeof (save_source));
 	
 	free(arg);
 	return saved_position;
@@ -179,7 +179,7 @@ void
 	buffer_length = input_file_buffer_size ();
 	
 	buffer_start = xmalloc((long)(BEFORE_SIZE + buffer_length + buffer_length + AFTER_SIZE));
-	bcopy (BEFORE_STRING, buffer_start, (int)BEFORE_SIZE);
+	memcpy(buffer_start, BEFORE_STRING, (int) BEFORE_SIZE);
 	
 	/* Line number things. */
 	logical_input_line = 0;
@@ -256,7 +256,7 @@ char **bufp;
 		}
 		
 		if(partial_size)
-		    bcopy(save_source, partial_where,(int)AFTER_SIZE);
+		    memcpy(partial_where, save_source, (int) AFTER_SIZE);
 		do_scrub(partial_where,partial_size,buffer_start+BEFORE_SIZE,limit-(buffer_start+BEFORE_SIZE),&out_string,&out_length);
 		limit=out_string + out_length;
 		for(p=limit;*--p!='\n';)
@@ -267,8 +267,8 @@ char **bufp;
 		
 		partial_where = p;
 		partial_size = limit-p;
-		bcopy(partial_where, save_source,(int)AFTER_SIZE);
-		bcopy(AFTER_STRING, partial_where, (int)AFTER_SIZE);
+		memcpy(save_source, partial_where, (int) AFTER_SIZE);
+		memcpy(partial_where, AFTER_STRING, (int) AFTER_SIZE);
 		
 		save_buffer = *bufp;
 		*bufp = out_string;
@@ -278,45 +278,36 @@ char **bufp;
 	
 	/* We're not preprocessing.  Do the right thing */
 #endif
-	if (partial_size)
-	    {
-		    bcopy (partial_where, buffer_start + BEFORE_SIZE, (int)partial_size);
-		    bcopy (save_source, buffer_start + BEFORE_SIZE, (int)AFTER_SIZE);
-	    }
+	if (partial_size) {
+		memcpy(buffer_start + BEFORE_SIZE, partial_where, (int) partial_size);
+		memcpy(buffer_start + BEFORE_SIZE, save_source, (int) AFTER_SIZE);
+	}
 	limit = input_file_give_next_buffer (buffer_start + BEFORE_SIZE + partial_size);
-	if (limit)
-	    {
-		    register char *	p;	/* Find last newline. */
-		    
-		    for (p = limit;   * -- p != '\n';)
-			{
-			}
-		    ++ p;
-		    if (p <= buffer_start + BEFORE_SIZE)
-			{
-				as_fatal("Source line too long. Please change file %s then rebuild assembler.", __FILE__);
-			}
-		    partial_where = p;
-		    partial_size = limit - p;
-		    bcopy (partial_where, save_source,  (int)AFTER_SIZE);
-		    bcopy (AFTER_STRING, partial_where, (int)AFTER_SIZE);
-	    }
-	else
-	    {
-		    partial_where = 0;
-		    if (partial_size > 0)
-			{
-				as_warn("Partial line at end of file ignored");
-			}
-		    /* If we should pop to another file at EOF, do it. */
-		    if (next_saved_file)
-			{
-				*bufp = input_scrub_pop (next_saved_file);	/* Pop state */
-				/* partial_where is now correct to return, since we popped it. */
-			}
-	    }
-	return (partial_where);
-}
+	if (limit) {
+		register char *	p;	/* Find last newline. */
+		
+		for (p = limit; *--p != '\n';) ;;
+		++p;
+		if (p <= buffer_start + BEFORE_SIZE) {
+			as_fatal("Source line too long. Please change file %s then rebuild assembler.", __FILE__);
+		}
+		partial_where = p;
+		partial_size = limit - p;
+		memcpy(save_source, partial_where, (int) AFTER_SIZE);
+		memcpy(partial_where, AFTER_STRING, (int) AFTER_SIZE);
+	} else {
+		partial_where = 0;
+		if (partial_size > 0) {
+			as_warn("Partial line at end of file ignored");
+		}
+		/* If we should pop to another file at EOF, do it. */
+		if (next_saved_file) {
+			*bufp = input_scrub_pop (next_saved_file);	/* Pop state */
+			/* partial_where is now correct to return, since we popped it. */
+		}
+	}
+	return(partial_where);
+} /* input_scrub_next_buffer() */
 
 /*
  * The remaining part of this file deals with line numbers, error

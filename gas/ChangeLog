@@ -1,3 +1,9 @@
+Mon Aug 17 15:09:56 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* input-scrub.c (input_scrub_pop, input_scrub_push): memcpy was
+	being used with args swapped, causing occasional lossage when
+	refilling buffers after an include file.
+
 Mon Aug 17 13:18:51 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* messages.c (as_tsktsk): Use correct ANSI form for stdarg
