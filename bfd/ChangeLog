@@ -1,3 +1,13 @@
+start-sanitize-d30v
+Wed Dec 10 14:06:48 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* elf32-d30v.c (d30v_info_to_howto_rela): New function to support
+	RELA relocations.
+	(USE_REL): Don't define any more, switch to using RELA
+	relocations.
+	(elf_info_to_howto): Define as d30v_info_to_howto_rela.
+
+end-sanitize-d30v
 Tue Dec  9 11:37:53 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* archures.c (bfd_mach_mips*): Define.
