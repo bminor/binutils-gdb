@@ -1,3 +1,7 @@
+2004-04-16  Jason Molenda  (jmolenda@apple.com)
+
+	* frame.c: Minor typeo corrections in comments.
+
 2004-04-16  Joel Brobecker  <brobecker@gnat.com>
 
 	* observer.c (observer_test_first_notification_function): Update
