@@ -1,3 +1,13 @@
+2003-03-10  David Carlton  <carlton@math.stanford.edu>
+
+	* minsyms.c (add_minsym_to_hash_table): Replace
+	DEPRECATED_SYMBOL_NAME by SYMBOL_LINKAGE_NAME.
+	(compare_minimal_symbols, compact_minimal_symbols)
+	(install_minimal_symbols, find_solib_trampoline_target): Ditto.
+	(lookup_minimal_symbol_text): Use strcmp on linkage names instead
+	of DEPRECATED_SYMBOL_MATCHES_NAME.
+	(lookup_minimal_symbol_solib_trampoline): Ditto.
+
 2003-03-10  Andrew Cagney  <cagney@redhat.com>
 
 	* regcache.h (regcache_cooked_read_ftype): Define.
