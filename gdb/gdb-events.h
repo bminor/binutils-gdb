@@ -83,7 +83,7 @@ extern void tracepoint_modify_event (int number);
 extern void architecture_changed_event (void);
 
 /* Install custom gdb-events hooks. */
-extern struct gdb_events *set_gdb_event_hooks (struct gdb_events *vector);
+extern struct gdb_events *deprecated_set_gdb_event_hooks (struct gdb_events *vector);
 
 /* Deliver any pending events. */
 extern void gdb_events_deliver (struct gdb_events *vector);

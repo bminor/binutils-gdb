@@ -116,7 +116,7 @@ architecture_changed_event (void)
 }
 
 struct gdb_events *
-set_gdb_event_hooks (struct gdb_events *vector)
+deprecated_set_gdb_event_hooks (struct gdb_events *vector)
 {
   struct gdb_events *old_events = current_event_hooks;
   if (vector == NULL)
@@ -129,7 +129,7 @@ set_gdb_event_hooks (struct gdb_events *vector)
 void
 clear_gdb_event_hooks (void)
 {
-  set_gdb_event_hooks (&null_event_hooks);
+  deprecated_set_gdb_event_hooks (&null_event_hooks);
 }
 
 enum gdb_event

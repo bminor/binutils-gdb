@@ -290,7 +290,7 @@ tui_install_hooks (void)
   deprecated_query_hook = tui_query_hook;
 
   /* Install the event hooks.  */
-  tui_old_event_hooks = set_gdb_event_hooks (&tui_event_hooks);
+  tui_old_event_hooks = deprecated_set_gdb_event_hooks (&tui_event_hooks);
 
   deprecated_registers_changed_hook = tui_registers_changed_hook;
   deprecated_register_changed_hook = tui_register_changed_hook;
@@ -310,7 +310,7 @@ tui_remove_hooks (void)
   deprecated_detach_hook = 0;
 
   /* Restore the previous event hooks.  */
-  set_gdb_event_hooks (tui_old_event_hooks);
+  deprecated_set_gdb_event_hooks (tui_old_event_hooks);
 }
 
 void _initialize_tui_hooks (void);

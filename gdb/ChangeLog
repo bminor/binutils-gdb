@@ -1,3 +1,11 @@
+2004-06-26  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb-events.sh (deprecated_set_gdb_event_hooks): Deprecated.
+	* gdb-events.h, gdb-events.c: Re-generate.
+	* tui/tui-hooks.c (tui_install_hooks): Update.
+	(tui_remove_hooks): Update.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert): Update.
+
 2004-06-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64fbsd-nat.c: Don't include <sys/procfs.h> and "gregset.h".

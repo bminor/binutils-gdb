@@ -177,7 +177,7 @@ done
 cat <<EOF
 
 /* Install custom gdb-events hooks. */
-extern struct gdb_events *set_gdb_event_hooks (struct gdb_events *vector);
+extern struct gdb_events *deprecated_set_gdb_event_hooks (struct gdb_events *vector);
 
 /* Deliver any pending events. */
 extern void gdb_events_deliver (struct gdb_events *vector);
@@ -265,7 +265,7 @@ done
 echo ""
 cat <<EOF
 struct gdb_events *
-set_gdb_event_hooks (struct gdb_events *vector)
+deprecated_set_gdb_event_hooks (struct gdb_events *vector)
 {
   struct gdb_events *old_events = current_event_hooks;
   if (vector == NULL)
@@ -292,7 +292,7 @@ cat <<EOF
 void
 clear_gdb_event_hooks (void)
 {
-  set_gdb_event_hooks (&null_event_hooks);
+  deprecated_set_gdb_event_hooks (&null_event_hooks);
 }
 EOF
 
