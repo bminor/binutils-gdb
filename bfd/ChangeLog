@@ -7,6 +7,8 @@ Sun Jan 30 15:14:36 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	compiling.  Derive BYTES_IN_WORD and ARCH values from sizeof
 	results.
 	* Makefile.in (aout-params.h): Pass gen-aout a dummy target name.
+	(check, installcheck): Identify directory in "no testsuites"
+	message.
 
 Sun Jan 30 13:25:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 

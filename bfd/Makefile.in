@@ -250,10 +250,10 @@ MAKEOVERRIDES=
 
 .PHONY: check installcheck
 check:
-	@echo No testsuites exist. Nothing to check.
+	@echo No testsuites exist for the BFD library. Nothing to check.
 
 installcheck:
-	@echo No testsuites exist. Nothing to check.
+	@echo No testsuites exist for the BFD library. Nothing to check.
 
 info dvi : force
 	@$(MAKE) subdir_do DO=$@ "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
