@@ -1,3 +1,24 @@
+2004-02-09  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (mips-tdep.o): Update dependencies.
+	* mips-tdep.c: Include "frame-unwind.h", "frame-base.h" and
+	"trad-frame.h".
+	(mips_unwind_pc): Return the pseudo PC register.
+	(mips_unwind_dummy_id): New function.
+	(mips16_fetch_instruction): New function.
+	(mips32_fetch_instruction): New function.
+	(struct mips_frame_cache): Define.
+	(mips_mdebug_frame_cache): New function.
+	(mips_mdebug_frame_this_id): New function.
+	(mips_mdebug_frame_prev_register): New function.
+	(mips_mdebug_frame_unwind): Define.
+	(mips_mdebug_frame_sniffer): New function.
+	(mips_mdebug_frame_base_address): New function.
+	(mips_mdebug_frame_base): Define.
+	(mips_mdebug_frame_base_sniffer): New function.
+	(mips_gdbarch_init): Append unwind and base sniffers.  Set
+	unwind_dummy_id.
+
 2004-02-08  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c: Print both the register number and name.
