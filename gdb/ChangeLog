@@ -1,3 +1,7 @@
+2000-05-23  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* config/sparc/nm-linux.h: Include config/nm-linux.h.
+
 2000-05-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-tdep.c (print_i387_value): Cast &value to (char *) in

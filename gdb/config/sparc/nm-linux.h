@@ -1,5 +1,5 @@
 /* Macro definitions for running gdb on a Sparc running Linux.
-   Copyright (C) 1989, 1992, 1996, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1992, 1996, 1998, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,6 +19,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include <nm-sysv4.h>
+#include "nm-linux.h"
 #include "solib.h"
 
 #define FETCH_INFERIOR_REGISTERS
