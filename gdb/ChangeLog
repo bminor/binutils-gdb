@@ -1,5 +1,15 @@
 2004-08-05  Andrew Cagney  <cagney@gnu.org>
 
+	* config/vax/xm-vax.h: Delete file.
+	* Makefile.in (xm-vaxult.h, xm-vaxbsd.h): Delete.
+	* config/vax/xm-vaxult2.h: Delete file.
+	* config/djgpp/fnchange.lst: Do not fix xm-vaxult2.h.
+	* config/vax/vaxult2.mh (XM_FILE): Delete.
+	* config/vax/xm-vaxult.h: Delete file.
+	* config/vax/vaxult.mh (XM_FILE): Delete.
+	* config/vax/xm-vaxbsd.h: Delete file.
+	* config/vax/vaxbsd.mh (XM_FILE): Delete.
+
 	* gdbarch.sh (deprecated_frame_saved_pc): Delete.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* regcache.c (deprecated_read_fp, deprecated_write_sp): Delete.

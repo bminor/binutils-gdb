@@ -7,7 +7,6 @@
 #msg If this occurs, use gcc
 #msg  (but see comments in Makefile.dist about compiling with gcc).
 
-XM_FILE= xm-vaxbsd.h
 NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o core-aout.o
 
 NAT_FILE= nm-vax.h
