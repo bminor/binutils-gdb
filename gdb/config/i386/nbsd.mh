@@ -6,7 +6,7 @@
 # continuation character (backslash) to extend a commented line.  As a
 # consequence, BSD make considers subsequent tab-indented lines to be
 # "unassociated shell commands".
-NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o i386bsd-nat.o i386nbsd-nat.o solib.o solib-sunos.o
+NATDEPFILES= fork-child.o infptrace.o inftarg.o corelow.o i386bsd-nat.o solib.o solib-sunos.o
 
 XM_FILE= xm-nbsd.h
 NAT_FILE= nm-nbsd.h

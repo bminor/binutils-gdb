@@ -1,5 +1,23 @@
 2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* i386nbsd-nat.c: Delete file.  Move fetch_core_registers and
+	fetch_elfcore_registers to...
+	* i386nbsd-tdep.c: ...here.
+	(i386nbsd_use_struct_convention): Rename to...
+	(i386nbsd_aout_use_struct_convention): ...this.
+	(i386nbsd_supply_reg): New function.
+	(i386nbsd_fill_reg): New function.
+	(fetch_core_registers): Use i386nbsd_supply_reg.
+	(fetch_elfcore_registers): Likewise.
+	(_initialize_i386nbsd_tdep): New function.
+	* config/i386/nbsd.mh (NATDEPFILES): Remove i386nbsd-nat.o.
+	* config/i386/nbsdelf.mh (NATDEPFILES): Likewise.
+	* config/i386/nbsdelf.mt (TDEPFILES): Add i386nbsd-tdep.o.
+	* config/i386/tm-nbsd.h (i386nbsd_use_struct_convention): Rename to...
+	(i386nbsd_aout_use_struct_convention): ...this.
+
+2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* shnbsd-nat.c (fetch_inferior_registers): Use shnbsd_supply_reg.
 	(store_inferior_registers): Use shnbsd_fill_reg.
 	* shnbsd-tdep.c (sh_nbsd_supply_registers, 
