@@ -100,6 +100,8 @@ static void set_endian_big PARAMS ((char *, int));
 
 static void set_endian_little PARAMS ((char *, int));
 
+static void set_endian_auto PARAMS ((char *, int));
+
 static void show_endian PARAMS ((char *, int));
 
 #endif
@@ -2654,13 +2656,15 @@ echo_command (text, from_tty)
 
 int target_byte_order = TARGET_BYTE_ORDER_DEFAULT;
 
+static int target_byte_order_auto = 1;
+
 /* Called if the user enters ``set endian'' without an argument.  */
 static void
 set_endian (args, from_tty)
      char *args;
      int from_tty;
 {
-  printf_unfiltered ("\"set endian\" must be followed by \"big\" or \"little\".\n");
+  printf_unfiltered ("\"set endian\" must be followed by \"auto\", \"big\" or \"little\".\n");
   show_endian (args, from_tty);
 }
 
@@ -2671,6 +2675,7 @@ set_endian_big (args, from_tty)
      int from_tty;
 {
   target_byte_order = BIG_ENDIAN;
+  target_byte_order_auto = 0;
 }
 
 /* Called by ``set endian little''.  */
@@ -2680,6 +2685,16 @@ set_endian_little (args, from_tty)
      int from_tty;
 {
   target_byte_order = LITTLE_ENDIAN;
+  target_byte_order_auto = 0;
+}
+
+/* Called by ``set endian auto''.  */
+static void
+set_endian_auto (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  target_byte_order_auto = 1;
 }
 
 /* Called by ``show endian''.  */
@@ -2688,11 +2703,45 @@ show_endian (args, from_tty)
      char *args;
      int from_tty;
 {
-  printf_unfiltered ("The target is assumed to be %s endian.\n",
-		     TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
+  const char *msg =
+    (target_byte_order_auto
+     ? "The target endianness is set automatically (currently %s endian)\n"
+     : "The target is assumed to be %s endian\n");
+  printf_unfiltered (msg, TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
 }
 
 #endif /* defined (TARGET_BYTE_ORDER_SELECTABLE) */
+
+/* Set the endianness from a BFD.  */
+void
+set_endian_from_file (abfd)
+     bfd *abfd;
+{
+#ifdef TARGET_BYTE_ORDER_SELECTABLE
+  int want;
+
+  if (abfd->xvec->byteorder_big_p)
+    want = BIG_ENDIAN;
+  else
+    want = LITTLE_ENDIAN;
+  if (target_byte_order_auto)
+    target_byte_order = want;
+  else if (target_byte_order != want)
+    warning ("%s endian file does not match %s endian target.",
+	     want == BIG_ENDIAN ? "big" : "little",
+	     TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
+
+#else /* ! defined (TARGET_BYTE_ORDER_SELECTABLE) */
+
+  if (abfd->xvec->byteorder_big_p
+      ? TARGET_BYTE_ORDER != BIG_ENDIAN
+      : TARGET_BYTE_ORDER == BIG_ENDIAN)
+    warning ("%s endian file does not match %s endian target.",
+	     want == BIG_ENDIAN ? "big" : "little",
+	     TARGET_BYTE_ORDER == BIG_ENDIAN ? "big" : "little");
+
+#endif /* ! defined (TARGET_BYTE_ORDER_SELECTABLE) */
+}
 
 /* Functions to manipulate command line editing control variables.  */
 
@@ -2925,6 +2974,8 @@ init_main ()
 	   "Set target as being big endian.", &endianlist);
   add_cmd ("little", class_support, set_endian_little,
 	   "Set target as being little endian.", &endianlist);
+  add_cmd ("auto", class_support, set_endian_auto,
+	   "Select target endianness automatically.", &endianlist);
   add_cmd ("endian", class_support, show_endian,
 	   "Show endianness of target.", &showlist);
 
