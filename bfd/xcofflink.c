@@ -3499,7 +3499,10 @@ xcoff_link_input_bfd (finfo, input_bfd)
       if (! skip
 	  && isym.n_sclass == C_EXT
 	  && smtyp == XTY_CM
-	  && (*sym_hash)->root.type != bfd_link_hash_common)
+	  && ((*sym_hash)->root.type != bfd_link_hash_common
+	      || (*sym_hash)->root.u.c.p->section != *csectpp)
+	  && ((*sym_hash)->root.type != bfd_link_hash_defined
+	      || (*sym_hash)->root.u.def.section != *csectpp))
 	skip = true;
 
       /* Skip local symbols if we are discarding them.  */
