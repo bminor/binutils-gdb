@@ -18,6 +18,6 @@ register_devices(SIM_DESC sd)
   dma_attach(sd);
   pke0_attach(sd);
   vu0_attach(sd);
-  vu1_attach(sd);
+  vu1_init(sd);
   pke1_attach(sd);
 }

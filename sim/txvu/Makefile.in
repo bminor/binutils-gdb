@@ -37,6 +37,7 @@ SIM_OBJS = \
 	dma.o \
 	vu0.o \
 	vu1.o \
+	libvpe.o \
 	pke.o \
 	sim-hload.o \
 	sim-engine.o \
@@ -58,6 +59,8 @@ SIM_EXTRA_CFLAGS = \
 	$(SIM_SUBTARGET) \
 	-I$(srcdir)/../../newlib/libc/sys/idt \
 	$(SIM_@sim_gen@_CFLAGS)
+
+SIM_EXTRA_CCFLAGS = $(SIM_EXTRA_CFLAGS)
 
 SIM_EXTRA_CLEAN = clean-igen clean-m16 clean-extra
 

@@ -1,15 +1,19 @@
+Tue Jan 27 18:24:01 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* Very, very early support for vu1 based on sce code.
+
 Thu Jan 22 15:44:46 1998  Ian Carmichael  <iancarm@cygnus.com>
 
-	* Incorporate GPR_SET from mips/sim-main.h
+	* Incorporate GPR_SET from mips/sim-main.h.
 
 Fri Jan 16 14:25:54 1998  Ian Carmichael  <iancarm@cygnus.com>
 
-	* Devices now get decode() call
+	* Devices now get decode() call.
 
 Fri Jan 16 14:25:54 1998  Ian Carmichael  <iancarm@cygnus.com>
 
-	* Initial Device Support
+	* Initial Device Support.
 
 Thu Jan 15 10:25:54 1998  Ian Carmichael  <iancarm@cygnus.com>
 
-	* ChangeLog created
+	* ChangeLog created.
