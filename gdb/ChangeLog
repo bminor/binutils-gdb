@@ -1,3 +1,7 @@
+Mon Mar 20 10:09:59 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppab-nat.c (store_inferior_registers): Sync with HPUX version.
+
 Mon Mar 20 07:34:48 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* hppah-nat.c (store_inferior_registers):  Move check for

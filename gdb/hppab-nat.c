@@ -105,41 +105,55 @@ store_inferior_registers (regno)
      int regno;
 {
   register unsigned int regaddr;
+  char buf[80];
   extern char registers[];
   register int i;
-
   unsigned int offset = U_REGS_OFFSET;
+  int scratch;
 
   if (regno >= 0)
     {
+      if (CANNOT_STORE_REGISTER (regno))
+	return;
       regaddr = register_addr (regno, offset);
-      for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
-	{
-	  errno = 0;
-	  ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-		  *(int *) &registers[REGISTER_BYTE (regno) + i]);
-	  if (errno != 0)
-	    {
-	      char *err = safe_strerror (errno);
-	      char *msg = alloca (strlen (err) + 128);
-	      sprintf (msg, "writing register %s: %s", reg_names[regno], err);
-	      warning (msg);
-	    }
-	  regaddr += sizeof(int);
-	}
+      errno = 0;
+      if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
+        {
+          scratch = *(int *) &registers[REGISTER_BYTE (regno)] | 0x3;
+          ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+                  scratch);
+          if (errno != 0)
+            {
+	      /* Error, even if attached.  Failing to write these two
+		 registers is pretty serious.  */
+              sprintf (buf, "writing register number %d", regno);
+              perror_with_name (buf);
+            }
+        }
+      else
+	for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof(int))
+	  {
+	    errno = 0;
+	    ptrace (PT_WUREGS, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+		    *(int *) &registers[REGISTER_BYTE (regno) + i]);
+	    if (errno != 0)
+	      {
+		/* Warning, not error, in case we are attached; sometimes the
+		   kernel doesn't let us at the registers.  */
+		char *err = safe_strerror (errno);
+		char *msg = alloca (strlen (err) + 128);
+		sprintf (msg, "writing register %s: %s",
+			 reg_names[regno], err);
+		warning (msg);
+		return;
+	      }
+	    regaddr += sizeof(int);
+	  }
     }
   else
-    {
-      for (regno = 0; regno < NUM_REGS; regno++)
-	{
-	  if (CANNOT_STORE_REGISTER (regno))
-	    continue;
-	  store_inferior_registers (regno);
-	}
-    }
-  return;
+    for (regno = 0; regno < NUM_REGS; regno++)
+      store_inferior_registers (regno);
 }
-
 
 /* PT_PROT is specific to the PA BSD kernel and isn't documented
    anywhere (except here).  
