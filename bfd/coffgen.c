@@ -361,7 +361,11 @@ coff_count_linenumbers (abfd)
 	{
 	  coff_symbol_type *q = coffsymbol (q_maybe);
 
-	  if (q->lineno != NULL)
+	  /* The AIX 4.1 compiler can sometimes generate line numbers
+             attached to debugging symbols.  We try to simply ignore
+             those here.  */
+	  if (q->lineno != NULL
+	      && q->symbol.section->owner != NULL)
 	    {
 	      /* This symbol has line numbers.  Increment the owning
 	         section's linenumber count.  */
@@ -894,7 +898,7 @@ coff_write_native_symbol (abfd, symbol, written, string_size_p,
   /* If this symbol has an associated line number, we must store the
      symbol index in the line number field.  We also tag the auxent to
      point to the right place in the lineno table.  */
-  if (lineno && !symbol->done_lineno)
+  if (lineno && !symbol->done_lineno && symbol->symbol.section->owner != NULL)
     {
       unsigned int count = 0;
       lineno[count].u.offset = *written;
