@@ -1,3 +1,7 @@
+Thu Jul 23 17:01:17 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* tracepoint.c (collect_symbol): handle LOC_ARG case.
+
 Thu Jul 23 15:07:40 1998  Dawn Perchik  <dawn@cygnus.com>
 
 	* sparc-tdep.c (sparc_init_extra_frame_info): Recognize when we're

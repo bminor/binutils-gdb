@@ -1207,19 +1207,30 @@ collect_symbol (collect, sym)
       printf_filtered ("LOC_REG[parm] %s: ", SYMBOL_NAME (sym));
     add_register (collect, reg);
     break;
-  case LOC_ARG:
   case LOC_REF_ARG:
-    printf_filtered ("Sorry, don't know how to do LOC_ARGs yet.\n");
+    printf_filtered ("Sorry, don't know how to do LOC_REF_ARG yet.\n");
     printf_filtered ("       (will not collect %s)\n", 
 		     SYMBOL_NAME (sym));
+    break;
+  case LOC_ARG:
+    offset = SYMBOL_VALUE (sym);
+    reg = FP_REGNUM;
+    if (info_verbose)
+      {
+	printf_filtered ("LOC_LOCAL %s: Collect %d bytes at offset",
+			 SYMBOL_NAME (sym), len);
+	printf_filtered (" %d from frame ptr reg %d\n", offset, reg);
+      }
+    add_memrange (collect, reg, offset, len);
     break;
   case LOC_REGPARM_ADDR:
     reg = SYMBOL_VALUE (sym);
     offset = 0;
     if (info_verbose)
       {
-	printf_filtered ("LOC_REGPARM_ADDR %s: Collect %d bytes at offset %d from reg %d\n", 
-			 SYMBOL_NAME (sym), len, offset, reg);
+	printf_filtered ("LOC_REGPARM_ADDR %s: Collect %d bytes at offset",
+			 SYMBOL_NAME (sym), len);
+	printf_filtered (" %d from reg %d\n", offset, reg);
       }
     add_memrange (collect, reg, offset, len);
     break;
@@ -1229,8 +1240,9 @@ collect_symbol (collect, sym)
     reg = FP_REGNUM;
     if (info_verbose)
       {
-	printf_filtered ("LOC_LOCAL %s: Collect %d bytes at offset %d from frame ptr reg %d\n", 
-			 SYMBOL_NAME (sym), len, offset, reg);
+	printf_filtered ("LOC_LOCAL %s: Collect %d bytes at offset",
+			 SYMBOL_NAME (sym), len);
+	printf_filtered (" %d from frame ptr reg %d\n", offset, reg);
       }
     add_memrange (collect, reg, offset, len);
     break;
