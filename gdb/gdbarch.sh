@@ -1462,7 +1462,7 @@ cat <<EOF
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
     internal_error (__FILE__, __LINE__,
-                    "verify_gdbarch: the following are invalid ...%s",
+                    _("verify_gdbarch: the following are invalid ...%s"),
                     buf);
   do_cleanups (cleanups);
 }
@@ -1957,7 +1957,7 @@ gdbarch_printable_names (void)
       ap = bfd_lookup_arch (rego->bfd_architecture, 0);
       if (ap == NULL)
         internal_error (__FILE__, __LINE__,
-                        "gdbarch_architecture_names: multi-arch unknown");
+                        _("gdbarch_architecture_names: multi-arch unknown"));
       do
         {
           append_name (&arches, &nr_arches, ap->printable_name);
@@ -1982,7 +1982,7 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
   if (bfd_arch_info == NULL)
     {
       internal_error (__FILE__, __LINE__,
-                      "gdbarch: Attempt to register unknown architecture (%d)",
+                      _("gdbarch: Attempt to register unknown architecture (%d)"),
                       bfd_architecture);
     }
   /* Check that we haven't seen this architecture before */
@@ -1992,7 +1992,7 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
     {
       if (bfd_architecture == (*curr)->bfd_architecture)
 	internal_error (__FILE__, __LINE__,
-                        "gdbarch: Duplicate registraration of architecture (%s)",
+                        _("gdbarch: Duplicate registraration of architecture (%s)"),
 	                bfd_arch_info->printable_name);
     }
   /* log it */
@@ -2216,14 +2216,13 @@ _initialize_gdbarch (void)
 {
   struct cmd_list_element *c;
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("arch",
-	          class_maintenance,
-		  var_zinteger,
-		  (char *)&gdbarch_debug,
-		  "Set architecture debugging.\\n\\
-When non-zero, architecture debugging is enabled.", &setdebuglist),
-     &showdebuglist);
+  add_setshow_zinteger_cmd ("arch", class_maintenance, &gdbarch_debug, _("\\
+Set architecture debugging."), _("\\
+Show architecture debugging."), _("\\
+When non-zero, architecture debugging is enabled."),
+                            NULL,
+                            NULL, /* FIXME: i18n: */
+                            &setdebuglist, &showdebuglist);
 }
 EOF
 

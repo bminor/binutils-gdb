@@ -2559,7 +2559,12 @@ _initialize_varobj (void)
   varobj_table = xmalloc (sizeof_table);
   memset (varobj_table, 0, sizeof_table);
 
-  deprecated_add_show_from_set (add_set_cmd ("debugvarobj", class_maintenance, var_zinteger, (char *) &varobjdebug, "Set varobj debugging.\n\
-When non-zero, varobj debugging is enabled.", &setlist),
-		     &showlist);
+  add_setshow_zinteger_cmd ("debugvarobj", class_maintenance,
+			    &varobjdebug, _("\
+Set varobj debugging."), _("\
+Show varobj debugging."), _("\
+When non-zero, varobj debugging is enabled."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 }

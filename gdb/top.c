@@ -1425,13 +1425,14 @@ Show whether to confirm potentially dangerous operations."), NULL,
 			   NULL, /* FIXME: i18n: */
 			   &setlist, &showlist);
 
-  c = add_set_cmd ("annotate", class_obscure, var_zinteger,
-		   (char *) &annotation_level, "Set annotation_level.\n\
+  add_setshow_zinteger_cmd ("annotate", class_obscure, &annotation_level, _("\
+Set annotation_level."), _("\
+Show annotation_level."), _("\
 0 == normal;     1 == fullname (for use when running under emacs)\n\
-2 == output annotated suitably for use by programs that control GDB.",
-		   &setlist);
-  deprecated_add_show_from_set (c, &showlist);
-  set_cmd_sfunc (c, set_async_annotation_level);
+2 == output annotated suitably for use by programs that control GDB."),
+			    set_async_annotation_level,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 
   add_setshow_boolean_cmd ("exec-done-display", class_support,
 			   &exec_done_display_p, _("\

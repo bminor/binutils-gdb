@@ -1587,9 +1587,11 @@ Zero is unlimited."),
 			    &show_backtrace_cmdlist);
 
   /* Debug this files internals. */
-  deprecated_add_show_from_set
-    (add_set_cmd ("frame", class_maintenance, var_zinteger,
-		  &frame_debug, "Set frame debugging.\n\
-When non-zero, frame specific internal debugging is enabled.", &setdebuglist),
-     &showdebuglist);
+  add_setshow_zinteger_cmd ("frame", class_maintenance, &frame_debug,  _("\
+Set frame debugging."), _("\
+Show frame debugging."), _("\
+When non-zero, frame specific internal debugging is enabled."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setdebuglist, &showdebuglist);
 }

@@ -3370,31 +3370,34 @@ of the TFTP temporary file, if it differs from the filename seen by the board.";
   add_target (&ddb_ops);
   add_target (&lsi_ops);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("timeout", no_class, var_zinteger,
-		  (char *) &mips_receive_wait,
-		  "Set timeout in seconds for remote MIPS serial I/O.",
-		  &setlist),
-     &showlist);
+  add_setshow_zinteger_cmd ("timeout", no_class, &mips_receive_wait, _("\
+Set timeout in seconds for remote MIPS serial I/O."), _("\
+Show timeout in seconds for remote MIPS serial I/O."), NULL,
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("retransmit-timeout", no_class, var_zinteger,
-		  (char *) &mips_retransmit_wait, "\
-Set retransmit timeout in seconds for remote MIPS serial I/O.\n\
+  add_setshow_zinteger_cmd ("retransmit-timeout", no_class,
+			    &mips_retransmit_wait, _("\
+Set retransmit timeout in seconds for remote MIPS serial I/O."), _("\
+Show retransmit timeout in seconds for remote MIPS serial I/O."), _("\
 This is the number of seconds to wait for an acknowledgement to a packet\n\
-before resending the packet.", &setlist),
-     &showlist);
+before resending the packet."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("syn-garbage-limit", no_class, var_zinteger,
-		  (char *) &mips_syn_garbage, "\
-Set the maximum number of characters to ignore when scanning for a SYN.\n\
+  add_setshow_zinteger_cmd ("syn-garbage-limit", no_class,
+			    &mips_syn_garbage,  _("\
+Set the maximum number of characters to ignore when scanning for a SYN."), _("\
+Show the maximum number of characters to ignore when scanning for a SYN."), _("\
 This is the maximum number of characters GDB will ignore when trying to\n\
 synchronize with the remote system.  A value of -1 means that there is no\n\
 limit. (Note that these characters are printed out even though they are\n\
-ignored.)",
-		  &setlist),
-     &showlist);
+ignored.)"),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 
   deprecated_add_show_from_set
     (add_set_cmd ("monitor-prompt", class_obscure, var_string,
@@ -3403,14 +3406,14 @@ ignored.)",
 		  &setlist),
      &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("monitor-warnings", class_obscure, var_zinteger,
-		  (char *) &monitor_warnings,
-		  "Set printing of monitor warnings.\n"
-		  "When enabled, monitor warnings about hardware breakpoints "
-		  "will be displayed.",
-		  &setlist),
-     &showlist);
+  add_setshow_zinteger_cmd ("monitor-warnings", class_obscure,
+			    &monitor_warnings, _("\
+Set printing of monitor warnings."), _("\
+Show printing of monitor warnings."), _("\
+When enabled, monitor warnings about hardware breakpoints will be displayed."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 
   add_com ("pmon <command>", class_obscure, pmon_command,
 	   _("Send a packet to PMON (must be in debug mode)."));

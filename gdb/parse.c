@@ -1312,11 +1312,12 @@ _initialize_parse (void)
   DEPRECATED_REGISTER_GDBARCH_SWAP (msym_unknown_symbol_type);
   deprecated_register_gdbarch_swap (NULL, 0, build_parse);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("expression", class_maintenance, var_zinteger,
-		  (char *) &expressiondebug,
-		  "Set expression debugging.\n\
-When non-zero, the internal representation of expressions will be printed.",
-		  &setdebuglist),
-     &showdebuglist);
+  add_setshow_zinteger_cmd ("expression", class_maintenance,
+			    &expressiondebug, _("\
+Set expression debugging."), _("\
+Show expression debugging."), _("\
+When non-zero, the internal representation of expressions will be printed."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setdebuglist, &showdebuglist);
 }

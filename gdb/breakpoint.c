@@ -7928,15 +7928,17 @@ an expression is either read or written."));
 	    _("Synonym for ``info breakpoints''."));
 
 
-  c = add_set_cmd ("can-use-hw-watchpoints", class_support, var_zinteger,
-		   (char *) &can_use_hw_watchpoints,
-		   "Set debugger's willingness to use watchpoint hardware.\n\
+  add_setshow_zinteger_cmd ("can-use-hw-watchpoints", class_support,
+			    &can_use_hw_watchpoints, _("\
+Set debugger's willingness to use watchpoint hardware."), _("\
+Show debugger's willingness to use watchpoint hardware."), _("\
 If zero, gdb will not use hardware for new watchpoints, even if\n\
 such is available.  (However, any hardware watchpoints that were\n\
 created before setting this to nonzero, will continue to use watchpoint\n\
-hardware.)",
-		   &setlist);
-  deprecated_add_show_from_set (c, &showlist);
+hardware.)"),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 
   can_use_hw_watchpoints = 1;
 

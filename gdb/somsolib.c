@@ -1569,15 +1569,16 @@ inferior.  Otherwise, symbols must be loaded manually, using `sharedlibrary'."),
 			   NULL, /* FIXME: i18n: */
 			   &setlist, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("auto-solib-limit", class_support, var_zinteger,
-		  (char *) &auto_solib_limit,
-		  "Set threshold (in Mb) for autoloading shared library symbols.\n\
+  add_setshow_zinteger_cmd ("auto-solib-limit", class_support,
+			    &auto_solib_limit, _("\
+Set threshold (in Mb) for autoloading shared library symbols."), _("\
+Show threshold (in Mb) for autoloading shared library symbols."), _("\
 When shared library autoloading is enabled, new libraries will be loaded\n\
 only until the total size of shared library symbols exceeds this\n\
-threshold in megabytes.  Is ignored when using `sharedlibrary'.",
-		  &setlist),
-     &showlist);
+threshold in megabytes.  Is ignored when using `sharedlibrary'."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 
   /* ??rehrauer: On HP-UX, the kernel parameter MAXDSIZ limits how
      much data space a process can use.  We ought to be reading

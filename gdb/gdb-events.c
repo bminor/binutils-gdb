@@ -1,6 +1,7 @@
 /* User Interface Events.
 
-   Copyright 1999, 2001, 2002, 2004 Free Software Foundation, Inc.
+   Copyright 1999, 2001, 2002, 2004, 2005 Free Software Foundation,
+   Inc.
 
    Contributed by Cygnus Solutions.
 
@@ -331,11 +332,12 @@ _initialize_gdb_events (void)
   queue_event_hooks.tracepoint_modify = queue_tracepoint_modify;
   queue_event_hooks.architecture_changed = queue_architecture_changed;
 
-  deprecated_add_show_from_set (add_set_cmd ("event",
-					     class_maintenance,
-					     var_zinteger,
-					     (char *) (&gdb_events_debug),
-					     "Set event debugging.\n\
-When non-zero, event/notify debugging is enabled.", &setdebuglist),
-				&showdebuglist);
+  add_setshow_zinteger_cmd ("event", class_maintenance,
+			    &gdb_events_debug, _("\
+Set event debugging."), _("\
+Show event debugging."), _("\
+When non-zero, event/notify debugging is enabled."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setdebuglist, &showdebuglist);
 }

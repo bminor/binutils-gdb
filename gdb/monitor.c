@@ -2303,11 +2303,12 @@ When enabled, a hashmark \'#\' is displayed."),
 			   NULL, /* FIXME: i18n: */
 			   &setlist, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("monitor", no_class, var_zinteger,
-		  (char *) &monitor_debug_p,
-		  "Set debugging of remote monitor communication.\n\
+  add_setshow_zinteger_cmd ("monitor", no_class, &monitor_debug_p, _("\
+Set debugging of remote monitor communication."), _("\
+Show debugging of remote monitor communication."), _("\
 When enabled, communication between GDB and the remote monitor\n\
-is displayed.", &setdebuglist),
-     &showdebuglist);
+is displayed."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setdebuglist, &showdebuglist);
 }

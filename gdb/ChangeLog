@@ -1,5 +1,14 @@
 2005-02-18  Andrew Cagney  <cagney@gnu.org>
 
+	Use add_setshow_zinteger_cmd through out.  Re-sync gdbarch.sh
+	and gdbarch.c.
+	* breakpoint.c, frame.c, gdb-events.sh, gdbarch.sh: Update.
+	* gdbtypes.c, infrun.c, linux-nat.c, maint.c, monitor.c: Update.
+	* pa64solib.c, parse.c, remote-mips.c, ser-go32.c: Update.
+	* serial.c, solib-frv.c, somsolib.c, target.c, top.c: Update.
+	* varobj.c, cli/cli-cmds.c: Update.
+	* gdbarch.c, gdb-events.c: Regenerate.
+	
 	Use add_setshow_boolean_command through out.  Delete #ifdef 0'ed
 	code adding set/show boolean commands.
 	* cp-valprint.c, dcache.c, exec.c, gdbtypes.c, infrun.c: Update.

@@ -1181,21 +1181,23 @@ is used, the same rules apply to its nested commands as to the first ones."));
 
   /* If target is open when baud changes, it doesn't take effect until the
      next open (I think, not sure).  */
-  deprecated_add_show_from_set
-    (add_set_cmd ("remotebaud", no_class,
-		  var_zinteger, (char *) &baud_rate,
-		  "Set baud rate for remote serial I/O.\n\
+  add_setshow_zinteger_cmd ("remotebaud", no_class, &baud_rate, _("\
+Set baud rate for remote serial I/O."), _("\
+Show baud rate for remote serial I/O."), _("\
 This value is used to set the speed of the serial port when debugging\n\
-using remote targets.", &setlist),
-		     &showlist);
+using remote targets."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("remote", no_class, var_zinteger,
-		  (char *) &remote_debug,
-		  "Set debugging of remote protocol.\n\
+  add_setshow_zinteger_cmd ("remote", no_class, &remote_debug, _("\
+Set debugging of remote protocol."), _("\
+Show debugging of remote protocol."), _("\
 When enabled, each packet sent or received with the remote target\n\
-is displayed.", &setdebuglist),
-		     &showdebuglist);
+is displayed."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setdebuglist, &showdebuglist);
 
   deprecated_add_show_from_set
     (add_set_cmd ("remotetimeout", no_class, var_integer, (char *) &remote_timeout,

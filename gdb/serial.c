@@ -702,12 +702,12 @@ by gdbserver."),
 		       &setlist),
      &showlist);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("serial",
-		  class_maintenance,
-		  var_zinteger,
-		  (char *)&global_serial_debug_p,
-		  "Set serial debugging.\n\
-When non-zero, serial port debugging is enabled.", &setdebuglist),
-     &showdebuglist);
+  add_setshow_zinteger_cmd ("serial", class_maintenance,
+			    &global_serial_debug_p, _("\
+Set serial debugging."), _("\
+Show serial debugging."), _("\
+When non-zero, serial port debugging is enabled."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setdebuglist, &showdebuglist);
 }

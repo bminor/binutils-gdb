@@ -3084,11 +3084,13 @@ Specify any of the following keywords for detailed info:\n\
 
   sigemptyset (&blocked_mask);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("lin-lwp", no_class, var_zinteger,
-		  (char *) &debug_linux_nat,
-		  "Set debugging of GNU/Linux lwp module.\n\
-Enables printf debugging output.\n", &setdebuglist), &showdebuglist);
+  add_setshow_zinteger_cmd ("lin-lwp", no_class, &debug_linux_nat, _("\
+Set debugging of GNU/Linux lwp module."), _("\
+Show debugging of GNU/Linux lwp module."), _("\
+Enables printf debugging output."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setdebuglist, &showdebuglist);
 }
 
 

@@ -3840,9 +3840,13 @@ There is no `stop' command, but you can set a hook on `stop'.\n\
 This allows you to set a list of commands to be run each time execution\n\
 of the program stops."), &cmdlist);
 
-  add_set_cmd ("infrun", class_maintenance, var_zinteger,
-	       &debug_infrun, "Set inferior debugging.\n\
-When non-zero, inferior specific debugging is enabled.", &setdebuglist);
+  add_setshow_zinteger_cmd ("infrun", class_maintenance, &debug_infrun, _("\
+Set inferior debugging."), _("\
+Show inferior debugging."), _("\
+When non-zero, inferior specific debugging is enabled."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setdebuglist, &showdebuglist);
 
   numsigs = (int) TARGET_SIGNAL_LAST;
   signal_stop = (unsigned char *) xmalloc (sizeof (signal_stop[0]) * numsigs);
@@ -3892,15 +3896,16 @@ When non-zero, inferior specific debugging is enabled.", &setdebuglist);
   signal_print[TARGET_SIGNAL_CANCEL] = 0;
 
 #ifdef SOLIB_ADD
-  deprecated_add_show_from_set
-    (add_set_cmd ("stop-on-solib-events", class_support, var_zinteger,
-		  (char *) &stop_on_solib_events,
-		  "Set stopping for shared library events.\n\
+  add_setshow_zinteger_cmd ("stop-on-solib-events", class_support,
+			    &stop_on_solib_events, _("\
+Set stopping for shared library events."), _("\
+Show stopping for shared library events."), _("\
 If nonzero, gdb will give control to the user when the dynamic linker\n\
 notifies gdb of shared library events.  The most common event of interest\n\
-to the user would be loading/unloading of a new library.\n", 
-		  &setlist), 
-     &showlist);
+to the user would be loading/unloading of a new library."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setlist, &showlist);
 #endif
 
   c = add_set_enum_cmd ("follow-fork-mode",

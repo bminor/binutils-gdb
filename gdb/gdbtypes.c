@@ -3707,9 +3707,11 @@ _initialize_gdbtypes (void)
 		 "builtin_type_ia64_quad_little",
 		 &floatformat_ia64_quad_little);
 
-  deprecated_add_show_from_set
-    (add_set_cmd ("overload", no_class, var_zinteger, (char *) &overload_debug,
-		  "Set debugging of C++ overloading.\n\
-When enabled, ranking of the functions is displayed.", &setdebuglist),
-     &showdebuglist);
+  add_setshow_zinteger_cmd ("overload", no_class, &overload_debug, _("\
+Set debugging of C++ overloading."), _("\
+Show debugging of C++ overloading."), _("\
+When enabled, ranking of the functions is displayed."),
+			    NULL,
+			    NULL, /* FIXME: i18n: */
+			    &setdebuglist, &showdebuglist);
 }
