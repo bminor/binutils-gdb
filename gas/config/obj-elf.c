@@ -1,5 +1,5 @@
 /* ELF object file format
-   Copyright (C) 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1992, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -220,6 +220,10 @@ elf_file_symbol (s)
       verify_symbol_chain (symbol_rootP, symbol_lastP);
 #endif
     }
+
+#ifdef NEED_ECOFF_DEBUG
+  ecoff_new_file (s);
+#endif
 }
 
 static void
@@ -1291,6 +1295,7 @@ const struct format_ops elf_format_ops =
   1,
   elf_frob_symbol,
   elf_frob_file,
+  elf_frob_file_after_relocs,
   elf_s_get_size, elf_s_set_size,
   elf_s_get_align, elf_s_set_align,
   elf_copy_symbol_attributes,
