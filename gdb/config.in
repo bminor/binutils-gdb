@@ -540,6 +540,15 @@
 /* Define if we can use the tkill syscall. */
 #undef HAVE_TKILL_SYSCALL
 
+/* Host float floatformat */
+#undef GDB_HOST_FLOAT_FORMAT
+
+/* Host double floatformat */
+#undef GDB_HOST_DOUBLE_FORMAT
+
+/* Host long double floatformat */
+#undef GDB_HOST_LONG_DOUBLE_FORMAT
+
 /* Define to the default OS ABI for this configuration. */
 #undef GDB_OSABI_DEFAULT
 

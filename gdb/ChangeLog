@@ -1,5 +1,23 @@
 2004-07-29  Andrew Cagney  <cagney@gnu.org>
 
+	* config/pa/xm-linux.h: Do not include "floatformat.h".
+	(HOST_FLOAT_FORMAT, HOST_DOUBLE_FORMAT)
+	(HOST_LONG_DOUBLE_FORMAT): Delete macros.
+	* config/i386/xm-i386.h: Do not include "floatformat.h".
+	(HOST_FLOAT_FORMAT, HOST_DOUBLE_FORMAT) 
+	(HOST_LONG_DOUBLE_FORMAT): Delete macros.
+	* doublest.c (HOST_FLOAT_FORMAT, HOST_DOUBLE_FORMAT)
+	(HOST_LONG_DOUBLE_FORMAT): Delete macros.  Use
+	GDB_HOST_FLOAT_FORMAT, GDB_HOST_DOUBLE_FORMAT and
+	GDB_HOST_LONG_DOUBLE_FORMAT instead.
+	* configure.in (GDB_HOST_FLOAT_FORMAT, GDB_HOST_DOUBLE_FORMAT)
+	(GDB_HOST_LONG_DOUBLE_FORMAT): Define.
+	* configure, config.in: Regenerate.	
+	* configure.host (gdb_host_float_format, gdb_host_double_format)
+	(gdb_host_long_double_format): Set according to the host.
+	
+2004-07-29  Andrew Cagney  <cagney@gnu.org>
+
 	* Makefile.in (CONFIG_CLEAN): Delete duplicate definition.
 
 2004-07-28  Andrew Cagney  <cagney@gnu.org>

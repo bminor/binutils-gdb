@@ -22,10 +22,4 @@
 #ifndef XM_I386_H
 #define XM_I386_H
 
-#include "floatformat.h"
-
-#define HOST_FLOAT_FORMAT &floatformat_ieee_single_little
-#define HOST_DOUBLE_FORMAT &floatformat_ieee_double_little
-#define HOST_LONG_DOUBLE_FORMAT &floatformat_i387_ext
-
 #endif /* xm-i386.h */

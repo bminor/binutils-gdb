@@ -1300,6 +1300,11 @@ AC_SUBST(CONFIG_CLEAN)
 AC_SUBST(CONFIG_INSTALL)
 AC_SUBST(CONFIG_UNINSTALL)
 
+# List of host floatformats.
+AC_DEFINE_UNQUOTED(GDB_HOST_FLOAT_FORMAT,$gdb_host_float_format,[Host float floatformat])
+AC_DEFINE_UNQUOTED(GDB_HOST_DOUBLE_FORMAT,$gdb_host_double_format,[Host double floatformat])
+AC_DEFINE_UNQUOTED(GDB_HOST_LONG_DOUBLE_FORMAT,$gdb_host_long_double_format,[Host long double floatformat])
+
 # target_subdir is used by the testsuite to find the target libraries.
 target_subdir=
 if test "${host}" != "${target}"; then

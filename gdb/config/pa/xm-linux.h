@@ -22,10 +22,4 @@
 #ifndef XM_HPPA_LINUX_H
 #define XM_HPPA_LINUX_H
 
-#include "floatformat.h"
-
-#define HOST_FLOAT_FORMAT &floatformat_ieee_single_big
-#define HOST_DOUBLE_FORMAT &floatformat_ieee_double_big
-#define HOST_LONG_DOUBLE_FORMAT &floatformat_ieee_double_big
-
 #endif /* xm-linux.h */

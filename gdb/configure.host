@@ -2,8 +2,11 @@
 # invoked from the autoconf generated configure script.
 
 # This file sets the following shell variables:
-#  gdb_host_cpu		generic name of host's CPU
-#  gdb_host		name of GDB host definition to use
+#  gdb_host_cpu			generic name of host's CPU
+#  gdb_host			name of GDB host definition to use
+#  gdb_host_float_format	host's float floatformat, or 0
+#  gdb_host_double_format	host's double floatformat, or 0
+#  gdb_host_long_double_format	host's long double floatformat, or 0
 
 # Map host cpu into the config cpu subdirectory name.
 # The default is $host_cpu.
@@ -144,4 +147,27 @@ x86_64-*-openbsd*)	gdb_host=obsd64 ;;
 
 m32r*-*-linux*)          gdb_host=linux ;;
 
+esac
+
+
+
+# Map the host/cpu onto the floatformat correspondong to C's "float",
+# "double" and "long double" types.
+
+case "${host}" in
+i[34567]86-*-*)
+	gdb_host_float_format="&floatformat_ieee_single_little"
+	gdb_host_double_format="&floatformat_ieee_double_little"
+	gdb_host_long_double_format="&floatformat_i387_ext"
+	;;
+hppa*-*-linux*)
+	gdb_host_float_format="&floatformat_ieee_single_big"
+	gdb_host_double_format="&floatformat_ieee_double_big"
+	gdb_host_long_double_format="&floatformat_ieee_double_big"
+	;;
+*)
+	gdb_host_float_format=0
+	gdb_host_double_format=0
+	gdb_host_long_double_format=0
+	;;
 esac

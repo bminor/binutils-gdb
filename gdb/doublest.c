@@ -91,10 +91,17 @@ get_field (unsigned char *data, enum floatformat_byteorders order,
     {
       result |= (unsigned long)*(data + cur_byte) << cur_bitshift;
       cur_bitshift += FLOATFORMAT_CHAR_BIT;
-      if (order == floatformat_little || order == floatformat_littlebyte_bigword)
-	++cur_byte;
-      else
-	--cur_byte;
+      switch (order)
+	{
+	case floatformat_little:
+	  ++cur_byte;
+	  break;
+	case floatformat_big:
+	  --cur_byte;
+	  break;
+	case floatformat_littlebyte_bigword:
+	  break;
+	}
     }
   if (len < sizeof(result) * FLOATFORMAT_CHAR_BIT)
     /* Mask out bits which are not part of the field */
@@ -554,19 +561,9 @@ floatformat_mantissa (const struct floatformat *fmt, char *val)
    increase precision as necessary.  Otherwise, we call the conversion
    routine and let it do the dirty work.  */
 
-#ifndef HOST_FLOAT_FORMAT
-#define HOST_FLOAT_FORMAT 0
-#endif
-#ifndef HOST_DOUBLE_FORMAT
-#define HOST_DOUBLE_FORMAT 0
-#endif
-#ifndef HOST_LONG_DOUBLE_FORMAT
-#define HOST_LONG_DOUBLE_FORMAT 0
-#endif
-
-static const struct floatformat *host_float_format = HOST_FLOAT_FORMAT;
-static const struct floatformat *host_double_format = HOST_DOUBLE_FORMAT;
-static const struct floatformat *host_long_double_format = HOST_LONG_DOUBLE_FORMAT;
+static const struct floatformat *host_float_format = GDB_HOST_FLOAT_FORMAT;
+static const struct floatformat *host_double_format = GDB_HOST_DOUBLE_FORMAT;
+static const struct floatformat *host_long_double_format = GDB_HOST_LONG_DOUBLE_FORMAT;
 
 void
 floatformat_to_doublest (const struct floatformat *fmt,
