@@ -1,3 +1,9 @@
+Wed Apr  2 16:19:41 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Undo March 26 change and
+	always create got section so that the _GLOBAL_OFFSET_TABLE_ label
+	is always created.
+
 Wed Apr  2 10:49:07 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf-m10200.c: Rename from elf32-mn10200.c.

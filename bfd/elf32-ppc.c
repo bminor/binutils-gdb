@@ -1527,14 +1527,11 @@ ppc_elf_adjust_dynamic_symbol (info, h)
   s = bfd_get_section_by_name (dynobj, ".dynbss");
   BFD_ASSERT (s != NULL);
 
-  /* If the symbol is currently defined in the .bss section of the
-     dynamic object, then it is OK to simply initialize it to zero.
-     If the symbol is in some other section, we must generate a
-     R_PPC_COPY reloc to tell the dynamic linker to copy the initial
-     value out of the dynamic object and into the runtime process
-     image.  We need to remember the offset into the .rela.bss section
-     we are going to use.  */
-  if ((h->root.u.def.section->flags & SEC_LOAD) != 0)
+  /* We must generate a R_PPC_COPY reloc to tell the dynamic linker to
+     copy the initial value out of the dynamic object and into the
+     runtime process image.  We need to remember the offset into the
+     .rela.bss section we are going to use.  */
+  if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
     {
       asection *srel;
 
@@ -1844,14 +1841,9 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	   bfd_get_filename (abfd));
 #endif
 
-  /* Create the linker generated sections all the time so that the special
-     symbols are created.  */
-  if ((got = elf_linker_section (abfd, LINKER_SECTION_GOT)) == NULL)
-    {
-      got = ppc_elf_create_linker_section (abfd, info, LINKER_SECTION_GOT);
-      if (!got)
-	ret = false;
-    }
+  /* Create the linker generated sections all the time so that the
+     special symbols are created.  The .got section is an exception,
+     so that we don't waste space allocating it when it is not needed.  */
 
 #if 0
   if ((plt = elf_linker_section (abfd, LINKER_SECTION_PLT)) == NULL)
@@ -1874,6 +1866,13 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
     {
       sdata2 = ppc_elf_create_linker_section (abfd, info, LINKER_SECTION_SDATA2);
       if (!sdata2)
+	ret = false;
+    }
+
+  if ((got = elf_linker_section (abfd, LINKER_SECTION_GOT)) == NULL)
+    {
+      got = ppc_elf_create_linker_section (abfd, info, LINKER_SECTION_GOT);
+      if (!got)
 	ret = false;
     }
 
@@ -1927,6 +1926,18 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 	      break;
 	    }
 
+	  if (got == NULL
+	      && (got = elf_linker_section (abfd, LINKER_SECTION_GOT)) == NULL)
+	    {
+	      got = ppc_elf_create_linker_section (abfd, info,
+						   LINKER_SECTION_GOT);
+	      if (!got)
+		{
+		  ret = false;
+		  break;
+		}
+	    }
+
 	  if (got->rel_section == NULL
 	      && (h != NULL || info->shared)
 	      && !_bfd_elf_make_linker_section_rela (dynobj, got, 2))
@@ -1949,6 +1960,18 @@ ppc_elf_check_relocs (abfd, info, sec, relocs)
 				     "R_PPC_EMB_SDA2I16");
 	      ret = false;
 	      break;
+	    }
+
+	  if (got == NULL
+	      && (got = elf_linker_section (abfd, LINKER_SECTION_GOT)) == NULL)
+	    {
+	      got = ppc_elf_create_linker_section (abfd, info,
+						   LINKER_SECTION_GOT);
+	      if (!got)
+		{
+		  ret = false;
+		  break;
+		}
 	    }
 
 	  if (got->rel_section == NULL
