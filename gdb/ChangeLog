@@ -1,3 +1,13 @@
+Sat May 27 16:24:04 1995  Angela Marie Thomas  <angela@cirdan.cygnus.com>
+
+        * sparclite/{Makefile,configure}.in: Add hooks for building with
+        -lsocket & -lnsl for solaris2.  Don't build aload/eload for DOS.
+
+Thu May 25 12:46:37 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdbserver/remote-utils.c (prepare_resume_reply): Add FIXME
+	comment regarding signal numbering.
+
 Wed May 24 15:49:47 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* arm-tdep.c (_initialize_arm_tdep): Use print_insn_little_arm
