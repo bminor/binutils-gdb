@@ -7,8 +7,9 @@
 #include "sky-device.h"
 #include "sky-vu0.h"
 
-static char vu0_mem0_buffer[VU0_MEM0_SIZE];
-static char vu0_mem1_buffer[VU0_MEM1_SIZE];
+static char* vu0_mem0_buffer = 0;
+static char* vu0_mem1_buffer = 0;
+
 
 void 
 vu0_issue(void) 
@@ -62,6 +63,7 @@ vu0_attach(SIM_DESC sd)
                    &vu0_device,
                    NULL /*buffer*/);
 
+  vu0_mem0_buffer = zalloc(VU0_MEM0_SIZE);
   sim_core_attach (sd,
 		   NULL,
                    0 /*level*/,
@@ -71,8 +73,9 @@ vu0_attach(SIM_DESC sd)
                    VU0_MEM0_SIZE /*nr_bytes*/,
                    0 /*modulo*/,
                    0 /*device*/,
-                   &vu0_mem0_buffer /*buffer*/);
+                   vu0_mem0_buffer /*buffer*/);
 
+  vu0_mem1_buffer = zalloc(VU0_MEM1_SIZE);
   sim_core_attach (sd,
 		   NULL,
                    0 /*level*/,
@@ -82,5 +85,5 @@ vu0_attach(SIM_DESC sd)
                    VU0_MEM1_SIZE /*nr_bytes*/,
                    0 /*modulo*/,
                    0 /*device*/,
-                   &vu0_mem1_buffer /*buffer*/);
+                   vu0_mem1_buffer /*buffer*/);
 }

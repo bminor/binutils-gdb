@@ -253,7 +253,7 @@ pke_io_read_buffer(device *me_,
 	case PKE_REG_C1:
 	case PKE_REG_C2:
 	case PKE_REG_C3:
-	  result[0] = me->regs[reg_num][0];
+	  result[0] = H2T_4(me->regs[reg_num][0]);
 	  break;
 
 	  /* handle common case of write-only registers */
@@ -336,6 +336,10 @@ pke_io_write_buffer(device *me_,
 
       /* write user-given bytes into input */
       memcpy(((unsigned_1*) &input) + reg_byte, src, nr_bytes);
+
+      /* make words host-endian */
+      input[0] = T2H_4(input[0]);
+      /* we may ignore other words */
 
       /* handle writes to individual registers; clear `writeable' on error */
       switch(reg_num)
@@ -443,7 +447,7 @@ pke_io_write_buffer(device *me_,
       unsigned_4 dma_tag_present = 0;
       int i;
 
-      /* collect potentially-partial quadword in write buffer */
+      /* collect potentially-partial quadword in write buffer; LE byte order */
       memcpy(((unsigned_1*)& me->fifo_qw_in_progress) + fifo_byte, src, nr_bytes);
       /* mark bytes written */
       for(i = fifo_byte; i < fifo_byte + nr_bytes; i++)
@@ -475,16 +479,18 @@ pke_io_write_buffer(device *me_,
 	  me->fifo_buffer_size = new_fifo_buffer_size;
 	}
 
-      /* add new quadword at end of FIFO */
+      /* add new quadword at end of FIFO; store data in host-endian */
       fqw = & me->fifo[me->fifo_num_elements];
       fqw->word_class[0] = fqw->word_class[1] = 
 	fqw->word_class[2] = fqw->word_class[3] = wc_unknown;
-      memcpy((void*) fqw->data, me->fifo_qw_in_progress, sizeof(quadword));
+      fqw->data[0] = T2H_4(me->fifo_qw_in_progress[0]);
+      fqw->data[1] = T2H_4(me->fifo_qw_in_progress[1]); 
+      fqw->data[2] = T2H_4(me->fifo_qw_in_progress[2]); 
+      fqw->data[3] = T2H_4(me->fifo_qw_in_progress[3]); 
       ASSERT(sizeof(unsigned_4) == 4);
       PKE_MEM_READ(me, (me->pke_number == 0 ? DMA_D0_MADR : DMA_D1_MADR),
-		   & fqw->source_address, /* target endian */
+		   & fqw->source_address, /* converted to host-endian */
 		   4);
-      fqw->source_address = T2H_4(fqw->source_address);
       PKE_MEM_READ(me, (me->pke_number == 0 ? DMA_D0_PKTFLAG : DMA_D1_PKTFLAG),
 		   & dma_tag_present,
 		   4);
@@ -1250,8 +1256,9 @@ pke_code_pkemscal(struct pke_device* me, unsigned_4 pkecode)
       if(me->pke_number == 1)
 	pke_flip_dbf(me);
 
-      /* compute new PC for VU */
+      /* compute new PC for VU (host byte-order) */
       vu_pc = BIT_MASK_GET(imm, 0, 15);
+      vu_pc = T2H_4(vu_pc);
 
       /* write new PC; callback function gets VU running */
       ASSERT(sizeof(unsigned_4) == 4);
@@ -1370,8 +1377,9 @@ pke_code_pkemscalf(struct pke_device* me, unsigned_4 pkecode)
       if(me->pke_number == 1)
 	pke_flip_dbf(me);
 
-      /* compute new PC for VU */
+      /* compute new PC for VU (host byte-order) */
       vu_pc = BIT_MASK_GET(imm, 0, 15);
+      vu_pc = T2H_4(vu_pc);
 
       /* rewrite new PC; callback function gets VU running */
       ASSERT(sizeof(unsigned_4) == 4);
@@ -1573,7 +1581,6 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 	      address_word vu_addr_max_size;
 	      unsigned_4 vu_lower_opcode, vu_upper_opcode;
 	      unsigned_4* operand;
-	      unsigned_4 source_addr;
 	      struct fifo_quadword* fq;
 	      int next_num;
 
@@ -1605,21 +1612,20 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 	      vu_upper_opcode = *pke_pc_operand(me, i*2 + 2);
 	      
 	      /* write data into VU memory */
-	      /* lower (scalar) opcode comes in first word */
+	      /* lower (scalar) opcode comes in first word ; macro performs H2T! */
 	      PKE_MEM_WRITE(me, vu_addr,
 			    & vu_lower_opcode,
 			    4);
-	      /* upper (vector) opcode comes in second word */
+	      /* upper (vector) opcode comes in second word ; H2T */
 	      ASSERT(sizeof(unsigned_4) == 4);
 	      PKE_MEM_WRITE(me, vu_addr + 4,
 			    & vu_upper_opcode,
 			    4);
 	      
 	      /* write tracking address in target byte-order */
-	      source_addr = H2T_4(fq->source_address);
 	      ASSERT(sizeof(unsigned_4) == 4);
 	      PKE_MEM_WRITE(me, vutrack_addr,
-			    & source_addr,
+			    & fq->source_address,
 			    4);
 	    } /* VU xfer loop */
 
@@ -1667,7 +1673,7 @@ pke_code_direct(struct pke_device* me, unsigned_4 pkecode)
     {
       /* VU idle */
       int i;
-      quadword fifo_data;
+      unsigned_16 fifo_data;
       
       /* "transferring" operand */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_XFER);
@@ -1678,14 +1684,14 @@ pke_code_direct(struct pke_device* me, unsigned_4 pkecode)
 	  unsigned_4* operand = pke_pc_operand(me, 1+i);
 	  
 	  /* collect word into quadword */
-	  fifo_data[i % 4] = *operand;
+	  *A4_16(&fifo_data, 3 - (i % 4)) = *operand;
 	  
 	  /* write to GPUIF FIFO only with full quadword */
 	  if(i % 4 == 3)
 	    {
 	      ASSERT(sizeof(fifo_data) == 16);
 	      PKE_MEM_WRITE(me, GIF_PATH2_FIFO_ADDR,
-			    fifo_data,
+			    & fifo_data,
 			    16);
 	    } /* write collected quadword */
 	  
@@ -1816,16 +1822,18 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 	  /* compute address of tracking table entry */
 	  vutrack_addr = vutrack_addr_base + ((signed_8)vu_addr - (signed_8)vu_addr_base) / 4;
 
-	  /* read old VU data word at address */
-	  ASSERT(sizeof(vu_old_data) == 16);
-	  PKE_MEM_READ(me, vu_addr,
-		       vu_old_data,
-		       16);
+	  /* read old VU data word at address; reverse words if needed */
+	  {
+	    unsigned_16 vu_old_badwords;
+	    ASSERT(sizeof(vu_old_badwords) == 16);
+	    PKE_MEM_READ(me, vu_addr,
+			 &vu_old_badwords, 16);
+	    vu_old_data[0] = * A4_16(& vu_old_badwords, 3);
+	    vu_old_data[1] = * A4_16(& vu_old_badwords, 2);
+	    vu_old_data[2] = * A4_16(& vu_old_badwords, 1);
+	    vu_old_data[3] = * A4_16(& vu_old_badwords, 0);
+	  }
 
-	  /* yank memory out of little-endian order */
-	  for(i=0; i<4; i++)
-	    vu_old_data[i] = LE2H_4(vu_old_data[i]);
-	  
 	  /* For cyclic unpack, next operand quadword may come from instruction stream
 	     or be zero. */
 	  if((num == 0 && cl == 0 && wl == 0) || /* shortcut clear */
@@ -1960,18 +1968,19 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 	      ;
 	    }
 
-	  /* yank memory into little-endian order */
-	  for(i=0; i<4; i++)
-	    vu_new_data[i] = H2LE_4(vu_new_data[i]);
-	  
-	  /* write replacement word */
-	  ASSERT(sizeof(vu_new_data) == 16);
-	  PKE_MEM_WRITE(me, vu_addr,
-			vu_new_data,
-			16);
+	  /* write new VU data word at address; reverse words if needed */
+	  {
+	    unsigned_16 vu_new_badwords;
+	    * A4_16(& vu_new_badwords, 3) = vu_new_data[0];
+	    * A4_16(& vu_new_badwords, 2) = vu_new_data[1];
+	    * A4_16(& vu_new_badwords, 1) = vu_new_data[2];
+	    * A4_16(& vu_new_badwords, 0) = vu_new_data[3];
+	    ASSERT(sizeof(vu_new_badwords) == 16);
+	    PKE_MEM_WRITE(me, vu_addr,
+			 &vu_new_badwords, 16);
+	  }
 
-	  /* write tracking address in target byte-order */
-	  source_addr = H2T_4(source_addr);
+	  /* write tracking address */
 	  ASSERT(sizeof(unsigned_4) == 4);
 	  PKE_MEM_WRITE(me, vutrack_addr,
 			& source_addr,

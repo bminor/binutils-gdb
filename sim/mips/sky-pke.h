@@ -422,10 +422,12 @@ struct pke_device
          if((me)->fifo_trace_file != NULL) \
 	   { \
 	     int i; \
+	     unsigned_##size value_te; \
+	     value_te = H2T_##size(value); \
 	     fprintf((me)->fifo_trace_file, "# Write %2d bytes  to  ", size); \
 	     fprintf((me)->fifo_trace_file, "0x%08lx: ", (unsigned long)(addr)); \
 	     for(i=0; i<size; i++) \
-	       fprintf((me)->fifo_trace_file, " %02x", ((unsigned_1*)(& value))[i]); \
+	       fprintf((me)->fifo_trace_file, " %02x", ((unsigned_1*)(& value_te))[i]); \
  	     fprintf((me)->fifo_trace_file, "\n"); \
 	   } \
         } while(0)      

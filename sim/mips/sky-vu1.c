@@ -17,8 +17,8 @@ VectorUnitState vu1_state;
 
 #define sim_warning printf
 
-static char vu1_umem_buffer[VU1_MEM0_SIZE] __attribute__ ((aligned(16)));
-static char vu1_mem_buffer[VU1_MEM1_SIZE]  __attribute__ ((aligned(16)));
+static char* vu1_umem_buffer = 0;
+static char* vu1_mem_buffer = 0;
 
 void init_vu1(void);
 void init_vu(VectorUnitState *state, char* umem_buffer, char* mem_buffer);
@@ -78,10 +78,11 @@ vu1_io_read_register_window(device *me,
 	    if (vu1_state.runState == VU_RUN || vu1_state.runState == VU_BREAK)
 		SET_BIT(stat, VPU_STAT_VBS1_BIT);
 	    
-	    *(u_long*)&source_buffer[VPE1_STAT - VU1_REGISTER_WINDOW_START] = stat;
+	    *(u_long*)&source_buffer[VPE1_STAT - VU1_REGISTER_WINDOW_START] = H2T_4(stat);
 	}
 
-	*(u_long*)&source_buffer[VU1_CIA  - VU1_REGISTER_WINDOW_START] = vu1_state.junk._vpepc;
+	*(u_long*)&source_buffer[VU1_CIA  - VU1_REGISTER_WINDOW_START] = H2T_4(vu1_state.junk._vpepc);
+	/* XXX: other H2T_N's needed around here. */
 
 #if 0
 	printf("%s: Read: %x, %d, dest: %x, space: %d, %x!\n", me->name, (int)addr, nr_bytes, (int)dest, space, *(int*)&(vu1_state.regs.VPE_STAT));
@@ -167,6 +168,7 @@ vu1_init(SIM_DESC sd)
                    &vu1_device,
                    NULL /*buffer*/);
 
+  vu1_umem_buffer = zalloc(VU1_MEM0_SIZE);
   sim_core_attach (sd,
 		   NULL,
                    0 /*level*/,
@@ -176,8 +178,9 @@ vu1_init(SIM_DESC sd)
                    VU1_MEM0_SIZE /*nr_bytes*/,
                    0 /*modulo*/,
                    0 /*device*/,
-                   &vu1_umem_buffer /*buffer*/);
+                   vu1_umem_buffer /*buffer*/);
 
+  vu1_mem_buffer = zalloc(VU1_MEM1_SIZE);
   sim_core_attach (sd,
 		   NULL,
                    0 /*level*/,
@@ -187,7 +190,7 @@ vu1_init(SIM_DESC sd)
                    VU1_MEM1_SIZE /*nr_bytes*/,
                    0 /*modulo*/,
                    0 /*device*/,
-                   &vu1_mem_buffer /*buffer*/);
+                   vu1_mem_buffer /*buffer*/);
 
   init_vu1();
   /*initvpe();*/
