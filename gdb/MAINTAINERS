@@ -57,7 +57,7 @@ MS Windows (N.T., CE, '00) host & native
 			Chris Faylor		cgf@cygnus.com
 GNU/Linux x86 native	Jim Blandy		jimb@cygnus.com
 GNU/Linux PPC native	Kevin Buettner		kevinb@cygnus.com
-hurd native		Mark Kettenis		kettenis@wins.va.nl
+hurd native		Mark Kettenis		kettenis@gnu.org
 macos host & native	Stan Shebs		shebs@apple.com
 hpux, hp pa native	Jeff Law		law@cygnus.com
 UnixWare Threads	Nick Duffek		nsd@cygnus.com
