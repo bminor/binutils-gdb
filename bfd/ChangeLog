@@ -1,3 +1,13 @@
+Tue May 16 10:29:51 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
+
+	* libbfd.c (bfd_stat): If bfd_cache_lookup returns an error,
+	return an error to the caller.  Call bfd_set_error on errors.
+
+Tue May 16 14:44:45 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* libcoff-in.h (coff_renumber_symbols): Modified prototypes in
+	accordance with 11 May libcoff.h change.
+
 Thu May 11 16:43:14 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	tekhex.c (first_phase): Understand type 0 symbols.
