@@ -66,7 +66,7 @@ int linenumber;
 "("             { return '('; }
 ")"             { return ')'; }
 ","             { return ','; }
-[A-Za-z0-9/$:.\-]+  { 	
+[A-Za-z0-9/$:.\-\_]+  { 	
 		yylval.name =  strdup(yytext);
 		return FILENAME;
 		}
@@ -75,3 +75,8 @@ int linenumber;
 " "		{ }
 "\n"	 	 { linenumber ++; return NEWLINE; }	
 
+%%
+#ifndef yywrap
+/* Needed for lex, though not flex. */
+int yywrap() { return 1; }
+#endif
