@@ -1,3 +1,7 @@
+Tue Aug 26 10:39:42 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-if.c (sim_kill): Delete.
+
 Mon Aug 25 17:50:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

@@ -140,14 +140,6 @@ sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
 }
 
 
-void
-sim_kill (SIM_DESC sd)
-{
-  TRACE(trace_gdb, ("sim_kill(void) called\n"));
-  /* do nothing, nothing to do */
-}
-
-
 int
 sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 {

@@ -144,12 +144,6 @@ sim_load (SIM_DESC sd, char *prog, bfd *abfd, int from_tty)
 }
 
 
-void
-sim_kill (SIM_DESC sd)
-{
-}
-
-
 int
 sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 {

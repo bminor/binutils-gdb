@@ -999,7 +999,6 @@ sim_close (sd, quitting)
   printf("DBG: sim_close: entered (quitting = %d)\n",quitting);
 #endif
 
-  /* Cannot assume sim_kill() has been called */
   /* "quitting" is non-zero if we cannot hang on errors */
 
   /* Ensure that any resources allocated through the callback
@@ -1452,23 +1451,6 @@ sim_create_inferior (sd, argv,env)
   }
 
   return SIM_RC_OK;
-}
-
-void
-sim_kill (sd)
-     SIM_DESC sd;
-{
-#if 1
-  /* This routine should be for terminating any existing simulation
-     thread. Since we are single-threaded only at the moment, this is
-     not an issue. It should *NOT* be used to terminate the
-     simulator. */
-#else /* do *NOT* call sim_close */
-  sim_close(sd, 1); /* Do not hang on errors */
-  /* This would also be the point where any memory mapped areas used
-     by the simulator should be released. */
-#endif
-  return;
 }
 
 typedef enum {e_terminate,e_help,e_setmemsize,e_reset} e_cmds;

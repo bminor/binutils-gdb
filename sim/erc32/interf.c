@@ -433,11 +433,6 @@ sim_trace (sd)
 }
 
 void
-sim_kill(SIM_DESC sd)
-{
-}
-
-void
 sim_do_command(sd, cmd)
      SIM_DESC sd;
     char           *cmd;

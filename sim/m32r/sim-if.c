@@ -135,13 +135,6 @@ sim_create_inferior (sd, argv, envp)
   return SIM_RC_OK;
 }
 
-void
-sim_kill (sd)
-     SIM_DESC sd;
-{
-  /* nothing to do */
-}
-
 int
 sim_stop (SIM_DESC sd)
 {

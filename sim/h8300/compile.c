@@ -2012,13 +2012,6 @@ set_h8300h (flag)
   h8300hmode = flag;
 }
 
-void
-sim_kill (sd)
-     SIM_DESC sd;
-{
-  /* nothing to do */
-}
-
 SIM_DESC
 sim_open (kind, ptr, abfd, argv)
      SIM_OPEN_KIND kind;

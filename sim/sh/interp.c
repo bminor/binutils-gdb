@@ -1258,13 +1258,6 @@ sim_create_inferior (sd, argv, env)
 }
 
 void
-sim_kill (sd)
-     SIM_DESC sd;
-{
-  /* nothing to do */
-}
-
-void
 sim_do_command (sd, cmd)
      SIM_DESC sd;
      char *cmd;

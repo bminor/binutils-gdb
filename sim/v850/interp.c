@@ -672,13 +672,6 @@ sim_create_inferior (sd, argv, env)
 }
 
 void
-sim_kill (sd)
-     SIM_DESC sd;
-{
-  /* nothing to do */
-}
-
-void
 sim_set_callbacks (p)
      host_callback *p;
 {

@@ -316,12 +316,6 @@ sim_info (verbose)
 
 
 void
-sim_kill ()
-{
-
-}
-
-void
 sim_open (kind, cb, abfd, argv)
      SIM_OPEN_KIND kind;
      host_callback *cb;
