@@ -194,12 +194,12 @@ m68hc11tim_port_event (struct hw *me,
           }
 
         /* Reset the state of Timer registers.  This also restarts
-           the timer events (overflow and RTI clock).  */
+           the timer events (overflow and RTI clock).  The pending
+           flags (TFLG2) must be cleared explicitly here.  */
         val = 0;
+        cpu->ios[M6811_TFLG2] = 0;
         m68hc11tim_io_write_buffer (me, &val, io_map,
                                     (unsigned_word) M6811_TMSK2, 1);
-        m68hc11tim_io_write_buffer (me, &val, io_map,
-                                    (unsigned_word) M6811_TFLG2, 1);
         m68hc11tim_io_write_buffer (me, &val, io_map,
                                     (unsigned_word) M6811_PACTL, 1);
         break;
@@ -436,17 +436,19 @@ const char*
 cycle_to_string (sim_cpu *cpu, signed64 t)
 {
   double dt;
+  char tbuf[32];
   static char buf[64];
-  
+
   dt = to_realtime (cpu, t);
   if (dt < 0.001)
-    sprintf (buf, "%llu cycle%s (%3.1f us)", t,
-             (t > 1 ? "s" : ""), dt * 1000000.0);
+    sprintf (tbuf, "(%3.1f us)", dt * 1000000.0);
   else if (dt < 1.0)
-    sprintf (buf, "%llu cycles (%3.1f ms)", t, dt * 1000.0);
+    sprintf (tbuf, "(%3.1f ms)", dt * 1000.0);
   else
-    sprintf (buf, "%llu cycles (%3.1f s)", t, dt);
+    sprintf (tbuf, "(%3.1f s)", dt);
 
+  sprintf (buf, "%llu cycle%s %10.10s", t,
+             (t > 1 ? "s" : ""), tbuf);
   return buf;
 }
 
@@ -501,6 +503,10 @@ m68hc11tim_info (struct hw *me)
 
   val = cpu->ios[M6811_PACTL];
   print_io_byte (sd, "PACTL", pactl_desc, val, base + M6811_PACTL);
+  sim_io_printf (sd, "\n");
+
+  val = cpu->ios[M6811_PACNT];
+  print_io_byte (sd, "PACNT", 0, val, base + M6811_PACNT);
   sim_io_printf (sd, "\n");
 
   /* Give info about the next timer interrupts.  */
@@ -625,7 +631,7 @@ m68hc11tim_io_write_buffer (struct hw *me,
 
         case M6811_TMSK2:
 
-      /* Timer prescaler cannot be changed after 64 bus cycles.  */
+          /* Timer prescaler cannot be changed after 64 bus cycles.  */
           if (cpu->cpu_absolute_cycle >= 64)
             {
               val &= ~(M6811_PR1 | M6811_PR0);
@@ -665,19 +671,20 @@ m68hc11tim_io_write_buffer (struct hw *me,
           break;
       
         case M6811_TFLG2:
-          if (val & M6811_TOF)
-            val &= ~M6811_TOF;
-          else
-            val |= cpu->ios[M6811_TFLG2] & M6811_TOF;
-
-      /* Clear the Real Time interrupt flag. */
-          if (val & M6811_RTIF)
-            val &= ~M6811_RTIF;
-          else
-            val |= cpu->ios[M6811_TFLG2] & M6811_RTIF;
-      
-          cpu->ios[base] = val;
+          val &= cpu->ios[M6811_TFLG2];
+          cpu->ios[M6811_TFLG2] &= ~val;
           interrupts_update_pending (&cpu->cpu_interrupts);
+          break;
+
+        case M6811_TMSK1:
+          cpu->ios[M6811_TMSK1] = val;
+          interrupts_update_pending (&cpu->cpu_interrupts);
+          break;
+
+        case M6811_TFLG1:
+          val &= cpu->ios[M6811_TFLG1];
+          cpu->ios[M6811_TFLG1] &= ~val;
+          interrupts_update_pending (&cpu->cpu_interrupts);          
           break;
 
         case M6811_TOC1:
@@ -689,7 +696,13 @@ m68hc11tim_io_write_buffer (struct hw *me,
           reset_compare = 1;
           break;
       
+        case M6811_TCTL1:
+        case M6811_TCTL2:
+          cpu->ios[base] = val;
+          break;
+
         default:
+          cpu->ios[base] = val;
           break;
         }
 

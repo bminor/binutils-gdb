@@ -1,5 +1,22 @@
 2002-03-07  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* m68hc11_sim.c (cpu_move8): Call sim_engine_abort in default case.
+	(cpu_move16): Likewise.
+	(sim_memory_error): Use sim_io_printf.
+	(cpu_option_handler): Fix compilation warning.
+	* interp.c (sim_hw_configure): Fix compilation warning; 
+	remove m68hc12sio@2 device.
+	(sim_open): Likewise.
+	* dv-m68hc11tim.c (m68hc11tim_port_event): Fix clear of TFLG2 
+	flags when reset.
+	(cycle_to_string): Improve convertion of cpu cycle number.
+	(m68hc11tim_info): Print info about PACNT.
+	(m68hc11tim_io_write_buffer): Fix clearing of TFLG2; handle
+	TCTL1 and TCTL2 registers.
+	* dv-m68hc11.c (m68hc11_info): Print 6811 current running mode.
+
+2002-03-07  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* interp.c (sim_hw_configure): Save the HW cpu pointer in the 
 	cpu struct.
 	(sim_hw_configure): Connect the capture input/output events.

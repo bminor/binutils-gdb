@@ -171,7 +171,6 @@ sim_hw_configure (SIM_DESC sd)
 {
   const struct bfd_arch_info *arch;
   struct hw *device_tree;
-  int m6811_mode;
   sim_cpu *cpu;
   
   arch = STATE_ARCHITECTURE (sd);
@@ -252,12 +251,6 @@ sim_hw_configure (SIM_DESC sd)
 	  sim_hw_parse (sd, "/m68hc12/m68hc12sio@1/backend stdio");
 	  sim_hw_parse (sd, "/m68hc12 > cpu-reset reset /m68hc12/m68hc12sio@1");
 	}
-      if (!hw_tree_find_property (device_tree, "/m68hc12/m68hc12sio@2/reg"))
-	{
-	  sim_hw_parse (sd, "/m68hc12/m68hc12sio@2/reg 0xC8 0x8");
-	  sim_hw_parse (sd, "/m68hc12/m68hc12sio@2/backend tcp");
-	  sim_hw_parse (sd, "/m68hc12 > cpu-reset reset /m68hc12/m68hc12sio@2");
-	}
       if (hw_tree_find_property (device_tree, "/m68hc12/m68hc12tim/reg") == 0)
 	{
 	  /* M68hc11 Timer configuration. */
@@ -312,10 +305,8 @@ SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *callback,
           struct _bfd *abfd, char **argv)
 {
-  char **p;
   SIM_DESC sd;
   sim_cpu *cpu;
-  struct hw *device_tree;
 
   sd = sim_state_alloc (kind, callback);
   cpu = STATE_CPU (sd, 0);

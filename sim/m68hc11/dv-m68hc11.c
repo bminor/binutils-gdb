@@ -591,7 +591,21 @@ m68hc11_info (struct hw *me)
 
   val = cpu->ios[M6811_HPRIO];
   print_io_byte (sd, "HPRIO ", hprio_desc, val, base + M6811_HPRIO);
-  sim_io_printf (sd, "\n");
+  switch (cpu->cpu_mode)
+    {
+    case M6811_MDA | M6811_SMOD:
+      sim_io_printf (sd, "[test]\n");
+      break;
+    case M6811_SMOD:
+      sim_io_printf (sd, "[bootstrap]\n");
+      break;
+    case M6811_MDA:
+      sim_io_printf (sd, "[extended]\n");
+      break;
+    default:
+      sim_io_printf (sd, "[single]\n");
+      break;
+    }
 
   val = cpu->ios[M6811_CONFIG];
   print_io_byte (sd, "CONFIG", config_desc, val, base + M6811_CONFIG);
