@@ -1,5 +1,9 @@
 2002-06-24  Tom Tromey  <tromey@redhat.com>
 
+	* cli/cli-decode.c (add_show_from_set): Fixed typo in comment.
+	* target.c (initialize_targets): Fixed typo in
+	trust-readonly-sections `show' documentation.
+
 	* main.c: Marked all strings with _().
 
 2002-06-24  Don Howard  <dhoward@redhat.com>

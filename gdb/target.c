@@ -2305,7 +2305,7 @@ Set mode for reading from readonly sections.\n\
 When this mode is on, memory reads from readonly sections (such as .text)\n\
 will be read from the object file instead of from the target.  This will\n\
 result in significant performance improvement for remote targets.", "\
-Set mode for reading from readonly sections.\n",
+Show mode for reading from readonly sections.\n",
 			   NULL, NULL,
 			   &setlist, &showlist);
 
