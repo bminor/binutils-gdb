@@ -60,6 +60,7 @@
 #include "demangle.h"
 #include "expression.h"
 #include "language.h"
+#include "charset.h"
 #include "annotate.h"
 #include "filenames.h"
 
@@ -1362,6 +1363,23 @@ query (const char *ctlstr,...)
 }
 
 
+/* Print an error message saying that we couldn't make sense of a
+   \^mumble sequence in a string or character constant.  START and END
+   indicate a substring of some larger string that contains the
+   erroneous backslash sequence, missing the initial backslash.  */
+static NORETURN int
+no_control_char_error (const char *start, const char *end)
+{
+  int len = end - start;
+  char *copy = alloca (end - start + 1);
+
+  memcpy (copy, start, len);
+  copy[len] = '\0';
+
+  error ("There is no control character `\\%s' in the `%s' character set.",
+         copy, target_charset ());
+}
+
 /* Parse a C escape sequence.  STRING_PTR points to a variable
    containing a pointer to the string to parse.  That pointer
    should point to the character after the \.  That pointer
@@ -1380,37 +1398,55 @@ query (const char *ctlstr,...)
 int
 parse_escape (char **string_ptr)
 {
+  int target_char;
   register int c = *(*string_ptr)++;
-  switch (c)
+  if (c_parse_backslash (c, &target_char))
+    return target_char;
+  else switch (c)
     {
-    case 'a':
-      return 007;		/* Bell (alert) char */
-    case 'b':
-      return '\b';
-    case 'e':			/* Escape character */
-      return 033;
-    case 'f':
-      return '\f';
-    case 'n':
-      return '\n';
-    case 'r':
-      return '\r';
-    case 't':
-      return '\t';
-    case 'v':
-      return '\v';
     case '\n':
       return -2;
     case 0:
       (*string_ptr)--;
       return 0;
     case '^':
-      c = *(*string_ptr)++;
-      if (c == '\\')
-	c = parse_escape (string_ptr);
-      if (c == '?')
-	return 0177;
-      return (c & 0200) | (c & 037);
+      {
+        /* Remember where this escape sequence started, for reporting
+           errors.  */
+        char *sequence_start_pos = *string_ptr - 1;
+
+        c = *(*string_ptr)++;
+
+        if (c == '?')
+          {
+            /* XXXCHARSET: What is `delete' in the host character set?  */
+            c = 0177;
+
+            if (! host_char_to_target (c, &target_char))
+              error ("There is no character corresponding to `Delete' "
+                     "in the target character set `%s'.",
+                     host_charset ());
+
+            return target_char;
+          }
+        else if (c == '\\')
+          target_char = parse_escape (string_ptr);
+        else
+          {
+            if (! host_char_to_target (c, &target_char))
+              no_control_char_error (sequence_start_pos, *string_ptr);
+          }          
+
+        /* Now target_char is something like `c', and we want to find
+           its control-character equivalent.  */
+        if (! target_char_to_control_char (target_char, &target_char))
+          no_control_char_error (sequence_start_pos, *string_ptr);
+
+        return target_char;
+      }
+
+      /* XXXCHARSET: we need to use isdigit and value-of-digit
+         methods of the host character set here.  */
 
     case '0':
     case '1':
@@ -1439,7 +1475,12 @@ parse_escape (char **string_ptr)
 	return i;
       }
     default:
-      return c;
+      if (! host_char_to_target (c, &target_char))
+        error ("The escape sequence `\%c' is equivalent to plain `%c', which"
+               " has no equivalent\n"
+               "in the `%s' character set.",
+               c, c, target_charset ());
+      return target_char;
     }
 }
 

@@ -49,6 +49,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h" /* Required by objfiles.h.  */
 #include "symfile.h" /* Required by objfiles.h.  */
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
+#include "charset.h"
 
 /* Flag indicating we're dealing with HP-compiled objects */ 
 extern int hp_som_som_object_present;
@@ -1314,6 +1315,15 @@ yylex ()
 	c = parse_escape (&lexptr);
       else if (c == '\'')
 	error ("Empty character constant.");
+      else if (! host_char_to_target (c, &c))
+        {
+          int toklen = lexptr - tokstart + 1;
+          char *tok = alloca (toklen + 1);
+          memcpy (tok, tokstart, toklen);
+          tok[toklen] = '\0';
+          error ("There is no character corresponding to %s in the target "
+                 "character set `%s'.", tok, target_charset ());
+        }
 
       yylval.typed_val_int.val = c;
       yylval.typed_val_int.type = builtin_type_char;
@@ -1464,6 +1474,8 @@ yylex ()
       tempbufindex = 0;
 
       do {
+        char *char_start_pos = tokptr;
+
 	/* Grow the static temp buffer if necessary, including allocating
 	   the first one on demand. */
 	if (tempbufindex + 1 >= tempbufsize)
@@ -1486,7 +1498,19 @@ yylex ()
 	    tempbuf[tempbufindex++] = c;
 	    break;
 	  default:
-	    tempbuf[tempbufindex++] = *tokptr++;
+	    c = *tokptr++;
+            if (! host_char_to_target (c, &c))
+              {
+                int len = tokptr - char_start_pos;
+                char *copy = alloca (len + 1);
+                memcpy (copy, char_start_pos, len);
+                copy[len] = '\0';
+
+                error ("There is no character corresponding to `%s' "
+                       "in the target character set `%s'.",
+                       copy, target_charset ());
+              }
+            tempbuf[tempbufindex++] = c;
 	    break;
 	  }
       } while ((*tokptr != '"') && (*tokptr != '\0'));

@@ -138,6 +138,9 @@ INTL_DEPS = @INTLDEPS@
 INTL_SRC = $(srcdir)/$(INTL_DIR)
 INTL_CFLAGS = -I$(INTL_DIR) -I$(INTL_SRC)
 
+# Where is the ICONV library?  This can be empty if libc has iconv.
+LIBICONV = @LIBICONV@
+
 #
 # CLI sub directory definitons
 #
@@ -369,6 +372,7 @@ INSTALLED_LIBS=-lbfd -lreadline -lopcodes -liberty \
 	-lmmalloc -lintl -liberty
 CLIBS = $(SIM) $(BFD) $(READLINE) $(OPCODES) $(INTL) $(LIBIBERTY) \
 	$(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ \
+	$(LIBICONV) \
 	$(MMALLOC) $(LIBIBERTY) $(WIN32LIBS)
 CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 	$(OPCODES) $(MMALLOC) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS)
@@ -526,6 +530,7 @@ TARGET_FLAGS_TO_PASS = \
 
 SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
+	charset.c \
 	buildsym.c c-exp.y c-lang.c c-typeprint.c c-valprint.c \
 	coffread.c \
 	complaints.c completer.c corefile.c cp-valprint.c dbxread.c \
@@ -767,6 +772,8 @@ tuiSourceWin_h = $(srcdir)/tui/tuiSourceWin.h
 tuiStack_h = $(srcdir)/tui/tuiStack.h
 tuiWin_h = $(srcdir)/tui/tuiWin.h
 
+charset_h =	charset.h
+
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
 # so that each .h file is listed exactly once (M-x tags-search works
@@ -818,6 +825,7 @@ TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 
 COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
+	charset.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	symtab.o symfile.o symmisc.o linespec.o infcmd.o infrun.o \
 	expprint.o environ.o stack.o thread.o \
@@ -1439,6 +1447,7 @@ z8k-tdep.o: $(srcdir)/z8k-tdep.c
 
 c-exp.tab.o: c-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
 	$(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) $(bfd_h) \
+	$(charset_h) \
 	$(symfile_h) $(objfiles_h)
 
 jv-exp.tab.o: jv-exp.tab.c jv-lang.h $(defs_h) $(expression_h) \
@@ -2578,4 +2587,8 @@ xdr_rdb.o: vx-share/xdr_rdb.c $(defs_h) vx-share/vxTypes.h \
 	vx-share/vxWorks.h vx-share/xdr_rdb.h
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/vx-share/xdr_rdb.c
 
+charset.o: charset.c $(defs_h) $(charset_h) $(gdbcmd_h) gdb_assert.h
+
+c-lang.o: $(charset_h)
+utils.o: $(charset_h)
 ### end of the gdb Makefile.in.

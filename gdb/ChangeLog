@@ -1,3 +1,34 @@
+2002-09-19  Jim Blandy  <jimb@redhat.com>
+
+	Add support for distinct host and target character sets.
+	* charset.c, charset.h: New files.
+	* c-exp.y: #include "charset.h".
+	(yylex): Convert character and string literals to the target
+	character set, before returning them as the semantic value of the
+	token.
+	* c-lang.c: #include "charset.h".
+	(c_emit_char): Use charset-specific methods to recognize
+	characters with backslash escape forms, to decide which characters
+	to print literally and which to print using numeric escape
+	sequences, and to convert target characters to host characters
+	before printing.
+	* utils.c: #include "charset.h".
+	(no_control_char_error): New function.
+	(parse_escape): Use charset-specific methods to recognize
+	backslash escapes, parse `control character' notation, and convert
+	characters from the host character set to the target character set.
+	* configure.in: Set the default host character set.
+	Check where to find iconv, and what its argument types might be.
+	* acinclude.m4 (AM_ICONV): New macro, borrowed from GCC.
+	* Makefile.in (SFILES): List charset.c.
+	(COMMON_OBS): List charset.o.	
+	(charset.o): New rule.
+	(charset_h): New header dependency variable.
+	(c-lang.o, utils.o, c-exp.tab.o): Note dependency on $(charset_h).
+	(LIBICONV): New variable, set by configure.
+	(CLIBS): Include $(LIBICONV) here.
+	* aclocal.m4, config.in, configure: Regenerated.
+
 2002-09-19  Joel Brobecker  <brobecker@gnat.com>
 
 	* ada-exp.y: Add missing semicolons to end rules. Fixes a

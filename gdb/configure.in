@@ -1362,6 +1362,18 @@ AC_LINK_FILES($files, $links)
 dnl Check for exe extension set on certain hosts (e.g. Win32)
 AC_EXEEXT
 
+dnl  Detect the character set used by this host.
+
+dnl  At the moment, we just assume it's ISO-8859-1 (which is a
+dnl  superset of ASCII containing the characters needed for French,
+dnl  German, Spanish, Italian, and possibly others), but if were
+dnl  *were* to support any host character sets other than ISO-8859-1,
+dnl  here's where we'd detect it.
+AC_DEFINE(GDB_DEFAULT_HOST_CHARSET, "ISO-8859-1",
+          [Define to be a string naming the default host character set.])
+
+AM_ICONV
+
 AC_CONFIG_SUBDIRS($configdirs)
 AC_OUTPUT(Makefile .gdbinit:gdbinit.in,
 [
