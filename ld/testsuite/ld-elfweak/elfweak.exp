@@ -25,9 +25,9 @@ if ![isnative] then {return}
 # This test can only be run on a couple of ELF platforms.
 # Square bracket expressions seem to confuse istarget.
 # This is similar to the test that is used in ld-shared, BTW.
-if {    ![istarget alpha*-*-linux*] } {
+if {    ![istarget alpha*-*-linux*] \
      && ![istarget arm*-*-linux*] \
-     && ![istarget hppa*64*-*-hpux*] \	    
+     && ![istarget hppa*64*-*-hpux*] \
      && ![istarget hppa*-*-linux*] \
      && ![istarget i?86-*-sysv4*] \
      && ![istarget i?86-*-unixware] \
