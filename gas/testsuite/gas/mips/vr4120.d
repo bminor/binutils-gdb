@@ -1,4 +1,4 @@
-#objdump: -dr -m mips:4120
+#objdump: -dr
 #name: MIPS VR4120
 #as: -march=vr4120
 

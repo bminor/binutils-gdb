@@ -5,7 +5,8 @@
 
 2002-09-30  H.J. Lu <hjl@gnu.org>
 
-	* gas/mips/vr4120.d: Pass -m mips:4120 to objdump.
+	* gas/mips/vr4120.d: Use "#pass" instead of "#..." to skip the
+	rest of output.
 
 2002-09-30  Gavin Romig-Koch  <gavin@redhat.com>
             Ken Raeburn  <raeburn@cygnus.com>
