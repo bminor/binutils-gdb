@@ -596,29 +596,6 @@ local_hex_format_custom (char *pre)
   return form;
 }
 
-#if 0
-/* FIXME: cagney/2000-03-04: This function does not appear to be used.
-   It can be deleted once 5.0 has been released. */
-/* FIXME: cagney/2000-03-04: This code assumes that the compiler
-   supports ``long long''. */
-/* Converts a number to hexadecimal (without leading "0x") and stores it in a
-   static string.  Returns a pointer to this string. */
-
-char *
-longest_raw_hex_string (LONGEST num)
-{
-  static char res_longest_raw_hex_string[50];
-  long long ll = num;		/* MERGEBUG ?? see below */
-  res_longest_raw_hex_string[0] = 0;
-  /* MERGEBUG ?? As a quick fix I am replacing this with sprintf 
-     strcat_address_numeric (num, 0, res_longest_raw_hex_string, 50); 
-   */
-
-  sprintf (res_longest_raw_hex_string, "%llx", ll);
-  return res_longest_raw_hex_string;
-}
-#endif
-
 /* Converts a number to hexadecimal and stores it in a static
    string.  Returns a pointer to this string. */
 char *
