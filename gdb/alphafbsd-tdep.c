@@ -81,10 +81,7 @@ alphafbsd_sigtramp_offset (CORE_ADDR pc)
 static CORE_ADDR
 alphafbsd_sigcontext_addr (struct frame_info *next_frame)
 {
-  ULONGEST sp;
-
-  frame_unwind_unsigned_register (next_frame, ALPHA_SP_REGNUM, &sp);
-  return sp + 24;
+  return frame_unwind_register_unsigned (next_frame, ALPHA_SP_REGNUM) + 24;
 }
 
 /* FreeBSD 5.0-RELEASE or later.  */
