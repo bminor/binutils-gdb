@@ -1,6 +1,6 @@
-/* This is a software floating point library which can be used instead of
-   the floating point routines in libgcc1.c for targets without hardware
-   floating point.  */
+/* This is a software floating point library which can be used instead
+   of the floating point routines in libgcc1.c for targets without
+   hardware floating point.  */
 
 /* Copyright (C) 1994,1997 Free Software Foundation, Inc.
 
@@ -44,109 +44,152 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef SIM_FPU_C
 #define SIM_FPU_C
 
-#include "sim-main.h"
+#include "sim-basics.h"
 #include "sim-fpu.h"
+
+#include "sim-io.h"
 #include "sim-assert.h"
 
-#include <math.h>
+
+/* Debugging support. */
+
+static void
+print_bits (unsigned64 x,
+	    int msbit,
+	    sim_fpu_print_func print,
+	    void *arg)
+{
+  unsigned64 bit = LSBIT64 (msbit);
+  int i = 4;
+  while (bit)
+    {
+      if (i == 0)
+	print (arg, ",");
+      if ((x & bit))
+	print (arg, "1");
+      else
+	print (arg, "0");
+      bit >>= 1;
+      i = (i + 1) % 4;
+    }
+}
 
 
-/* Floating point number is <SIGN:1><EXP:EXPBITS><FRAC:FRACBITS> */
 
-#define SP_NGARDS    7L
-#define SP_GARDROUND 0x3f
-#define SP_GARDMASK  ((unsigned) 0x7f)
-#define SP_GARDMSB   ((unsigned) 0x40)
-#define SP_EXPBITS 8
-#define SP_EXPBIAS 127
-#define SP_FRACBITS 23
-#define SP_EXPMAX ((unsigned) 0xff)
-#define SP_QUIET_NAN 0x100000L
-#define SP_FRAC_NBITS 32
-#define SP_FRACHIGH  0x80000000L
-#define SP_FRACHIGH2 0xc0000000L
+/* Quick and dirty conversion between a host double and host 64bit int */
 
-#define DP_NGARDS 8L
-#define DP_GARDROUND 0x7f
-#define DP_GARDMASK  ((unsigned) 0xff)
-#define DP_GARDMSB   ((unsigned) 0x80)
-#define DP_EXPBITS 11
-#define DP_EXPBIAS 1023
-#define DP_FRACBITS 52
-#define DP_EXPMAX ((unsigned) 0x7ff)
-#define DP_QUIET_NAN MSBIT64 (12) /* 0x0008000000000000LL */
-#define DP_FRAC_NBITS 64
-#define DP_FRACHIGH  MSMASK64 (1) /* 0x8000000000000000LL */
-#define DP_FRACHIGH2 MSMASK64 (2) /* 0xc000000000000000LL */
-
-#define EXPMAX (is_double ? DP_EXPMAX : SP_EXPMAX)
-#define EXPBITS (is_double ? DP_EXPBITS : SP_EXPBITS)
-#define EXPBIAS (is_double ? DP_EXPBIAS : SP_EXPBIAS)
-#define FRACBITS (is_double ? DP_FRACBITS : SP_FRACBITS)
-#define NGARDS (is_double ? DP_NGARDS : (SP_NGARDS ))
-#define SIGNBIT ((unsigned64)1 << (EXPBITS + FRACBITS))
-#define FRAC_NBITS (is_double ? DP_FRAC_NBITS : SP_FRAC_NBITS)
-#define GARDMASK (is_double ? DP_GARDMASK : SP_GARDMASK)
-#define GARDMSB (is_double ? DP_GARDMSB : SP_GARDMSB)
-#define GARDROUND (is_double ? DP_GARDROUND : SP_GARDROUND)
-
-/* F_D_BITOFF is the number of bits offset between the MSB of the mantissa
-   of a float and of a double. Assumes there are only two float types.
-   (double::FRAC_BITS+double::NGARGS-(float::FRAC_BITS-float::NGARDS))
- */
-#define F_D_BITOFF (is_double ? 0 : (52+8-(23+7)))
+typedef union {
+  double d;
+  unsigned64 i;
+} sim_fpu_map;  
 
 
-#if 0
-#define  (is_double ? DP_ : SP_)
-#endif
+/* A packed IEEE floating point number.
+
+   Form is <SIGN:1><BIASEDEXP:NR_EXPBITS><FRAC:NR_FRACBITS> for both
+   32 and 64 bit numbers.  This number is interpreted as:
+
+   Normalized (0 < BIASEDEXP && BIASEDEXP < EXPMAX):
+   (sign ? '-' : '+') 1.<FRAC> x 2 ^ (BIASEDEXP - EXPBIAS)
+
+   Denormalized (0 == BIASEDEXP && FRAC != 0):
+   (sign ? "-" : "+") 0.<FRAC> x 2 ^ (- EXPBIAS)
+
+   Zero (0 == BIASEDEXP && FRAC == 0):
+   (sign ? "-" : "+") 0.0
+   
+   Infinity (BIASEDEXP == EXPMAX && FRAC == 0):
+   (sign ? "-" : "+") "infinity"
+
+   SignalingNaN (BIASEDEXP == EXPMAX && FRAC > 0 && FRAC < QUIET_NAN):
+   SNaN.FRAC
+
+   QuietNaN (BIASEDEXP == EXPMAX && FRAC > 0 && FRAC > QUIET_NAN):
+   QNaN.FRAC
+
+   */
+
+#define NR_EXPBITS  (is_double ?   11 :   8)
+#define NR_FRACBITS (is_double ?   52 :  23)
+#define SIGNBIT     (is_double ? MSBIT64 (0) : MSBIT64 (32))
+
+#define EXPMAX      ((unsigned) (is_double ? 2047 : 255))
+#define EXPBIAS     (is_double ? 1023 : 127)
+
+#define QUIET_NAN   LSBIT64 (NR_FRACBITS - 1)
+
+
+
+/* An unpacked floating point number.
+
+   When unpacked, the fraction of both a 32 and 64 bit floating point
+   number is stored using the same format:
+
+   64 bit - <IMPLICIT_1:1><FRACBITS:52><GUARDS:8><PAD:00>
+   32 bit - <IMPLICIT_1:1><FRACBITS:23><GUARDS:7><PAD:30> */
+
+#define NR_PAD    (is_double ? 0 : 30)
+#define PADMASK   (is_double ? 0 : LSMASK64 (29, 0))
+#define NR_GUARDS  ((is_double ? 8 :  7 ) + NR_PAD)
+#define GUARDMASK  LSMASK64 (NR_GUARDS - 1, 0)
+#define GUARDMSB   LSBIT64  (NR_GUARDS - 1)
+#define GUARDLSB   LSBIT64  (NR_PAD)
+#define GUARDROUND LSMASK64 (NR_GUARDS - 2, 0)
+
+#define NR_FRAC_GUARD   (60)
+#define IMPLICIT_1 LSBIT64 (NR_FRAC_GUARD)
+#define IMPLICIT_2 LSBIT64 (NR_FRAC_GUARD + 1)
+#define IMPLICIT_4 LSBIT64 (NR_FRAC_GUARD + 2)
+#define NR_SPARE 2
+
+#define FRAC32MASK LSMASK64 (63, NR_FRAC_GUARD - 32 + 1)
 
 #define NORMAL_EXPMIN (-(EXPBIAS)+1)
-
-#define IMPLICIT_1 ((unsigned64)1 << (FRACBITS+NGARDS))
-#define IMPLICIT_2 ((unsigned64)1 << (FRACBITS+1+NGARDS))
-
-#define MAX_SI_INT   (is_double ? LSMASK64 (63) : LSMASK64 (31))
-#define MAX_USI_INT  (is_double ? LSMASK64 (64) : LSMASK64 (32))
+#define NORMAL_EXPMAX (EXPBIAS)
 
 
-typedef enum 
-{
-  sim_fpu_class_snan,
-  sim_fpu_class_qnan,
-  sim_fpu_class_zero,
-  sim_fpu_class_number,
-  sim_fpu_class_infinity,
-} sim_fpu_class;
+/* Integer constants */
 
-typedef struct _sim_ufpu {
-  sim_fpu_class class;
-  int normal_exp;
-  int sign;
-  unsigned64 fraction;
-  union {
-    double d;
-    unsigned64 i;
-  } val;
-} sim_ufpu;
+#define MAX_INT32  ((signed64) LSMASK64 (30, 0))
+#define MAX_UINT32 LSMASK64 (31, 0)
+#define MIN_INT32  ((signed64) LSMASK64 (63, 31))
 
+#define MAX_INT64  ((signed64) LSMASK64 (62, 0))
+#define MAX_UINT64 LSMASK64 (63, 0)
+#define MIN_INT64  ((signed64) LSMASK64 (63, 63))
+
+#define MAX_INT   (is_64bit ? MAX_INT64  : MAX_INT32)
+#define MIN_INT   (is_64bit ? MIN_INT64  : MIN_INT32)
+#define MAX_UINT  (is_64bit ? MAX_UINT64 : MAX_UINT32)
+#define NR_INTBITS (is_64bit ? 64 : 32)
 
 STATIC_INLINE_SIM_FPU (unsigned64)
-pack_fpu (const sim_ufpu *src, int is_double)
+pack_fpu (const sim_fpu *src,
+	  int is_double)
 {
-  unsigned64 fraction;
-  unsigned64 exp;
   int sign;
+  unsigned64 exp;
+  unsigned64 fraction;
+  unsigned64 packed;
 
   switch (src->class)
     {
-    default:
       /* create a NaN */
     case sim_fpu_class_qnan:
-    case sim_fpu_class_snan:
-      sign = 1; /* fixme - always a qNaN */
+      sign = src->sign;
       exp = EXPMAX;
+      /* force fraction to correct class */
       fraction = src->fraction;
+      fraction >>= NR_GUARDS;
+      fraction |= QUIET_NAN;
+      break;
+    case sim_fpu_class_snan:
+      sign = src->sign;
+      exp = EXPMAX;
+      /* force fraction to correct class */
+      fraction = src->fraction;
+      fraction >>= NR_GUARDS;
+      fraction &= ~QUIET_NAN;
       break;
     case sim_fpu_class_infinity:
       sign = src->sign;
@@ -159,31 +202,33 @@ pack_fpu (const sim_ufpu *src, int is_double)
       fraction = 0;
       break;
     case sim_fpu_class_number:
+      ASSERT (src->fraction >= IMPLICIT_1);
+      ASSERT (src->fraction < IMPLICIT_2);
       if (src->normal_exp < NORMAL_EXPMIN)
 	{
 	  /* This number's exponent is too low to fit into the bits
-	     available in the number, so we'll store 0 in the exponent and
-	     shift the fraction to the right to make up for it.  */
-
-	  int shift = NORMAL_EXPMIN - src->normal_exp;
-
-	  sign = src->sign;
-	  exp = 0;
-
-	  if (shift > (FRAC_NBITS - NGARDS))
+	     available in the number We'll denormalize the number by
+	     storing zero in the exponent and shift the fraction to
+	     the right to make up for it. */
+	  int nr_shift = NORMAL_EXPMIN - src->normal_exp;
+	  if (nr_shift > NR_FRACBITS)
 	    {
-	      /* No point shifting, since it's more that 64 out.  */
+	      /* underflow, just make the number zero */
+	      sign = src->sign;
+	      exp = 0;
 	      fraction = 0;
 	    }
 	  else
 	    {
+	      sign = src->sign;
+	      exp = 0;
 	      /* Shift by the value */
-	      fraction = src->fraction >> F_D_BITOFF;
-	      fraction >>= shift;
-	      fraction >>= NGARDS;
+	      fraction = src->fraction;
+	      fraction >>= NR_GUARDS;
+	      fraction >>= nr_shift;
 	    }
 	}
-      else if (src->normal_exp > EXPBIAS)
+      else if (src->normal_exp > NORMAL_EXPMAX)
 	{
 	  /* Infinity */
 	  sign = src->sign;
@@ -192,44 +237,68 @@ pack_fpu (const sim_ufpu *src, int is_double)
 	}
       else
 	{
-	  sign = src->sign;
 	  exp = (src->normal_exp + EXPBIAS);
-	  fraction = src->fraction >> F_D_BITOFF;
-	  /* IF the gard bits are the all zero, but the first, then we're
-	     half way between two numbers, choose the one which makes the
-	     lsb of the answer 0.  */
-	  if ((fraction & GARDMASK) == GARDMSB)
+	  sign = src->sign;
+	  fraction = src->fraction;
+	  /* FIXME: Need to round according to WITH_SIM_FPU_ROUNDING
+             or some such */
+	  /* Round to nearest: If the guard bits are the all zero, but
+	     the first, then we're half way between two numbers,
+	     choose the one which makes the lsb of the answer 0.  */
+	  if ((fraction & GUARDMASK) == GUARDMSB)
 	    {
-	      if (fraction & (1 << NGARDS))
-		fraction += GARDROUND + 1;
+	      if ((fraction & (GUARDMSB << 1)))
+		fraction += (GUARDMSB << 1);
 	    }
 	  else
 	    {
-	      /* Add a one to the guards to round up */
-	      fraction += GARDROUND;
+	      /* Add a one to the guards to force round to nearest */
+	      fraction += GUARDROUND;
 	    }
-	  if (fraction >= IMPLICIT_2)
+	  if ((fraction & IMPLICIT_2)) /* rounding resulted in carry */
 	    {
-	      fraction >>= 1;
 	      exp += 1;
+	      fraction >>= 1;
 	    }
-	  fraction >>= NGARDS;
+	  fraction >>= NR_GUARDS;
+	  /* When exp == EXPMAX (overflow from carry) fraction must
+	     have been made zero */
+	  ASSERT ((exp == EXPMAX) <= ((fraction & ~IMPLICIT_1) == 0));
 	}
+      break;
+    default:
+      abort ();
     }
 
-  return ((sign ? SIGNBIT : 0)
-	  | (exp << FRACBITS)
-	  | LSMASKED64 (fraction, FRACBITS));
+  packed = ((sign ? SIGNBIT : 0)
+	     | (exp << NR_FRACBITS)
+	     | LSMASKED64 (fraction, NR_FRACBITS - 1, 0));
+
+  /* trace operation */
+#if 0
+  if (is_double)
+    {
+    }
+  else
+    {
+      printf ("pack_fpu: ");
+      printf ("-> %c%0lX.%06lX\n",
+	      LSMASKED32 (packed, 31, 31) ? '8' : '0',
+	      (long) LSEXTRACTED32 (packed, 30, 23),
+	      (long) LSEXTRACTED32 (packed, 23 - 1, 0));
+    }
+#endif
+  
+  return packed;
 }
 
 
 STATIC_INLINE_SIM_FPU (void)
-unpack_fpu (sim_ufpu *dst, unsigned64 s, int is_double)
+unpack_fpu (sim_fpu *dst, unsigned64 packed, int is_double)
 {
-  unsigned64 fraction = LSMASKED64 (s, FRACBITS);
-  unsigned exp = LSMASKED64 (s >> FRACBITS, EXPBITS);
-
-  dst->sign = (s & SIGNBIT) != 0;
+  unsigned64 fraction = LSMASKED64 (packed, NR_FRACBITS - 1, 0);
+  unsigned exp = LSEXTRACTED64 (packed, NR_EXPBITS + NR_FRACBITS - 1, NR_FRACBITS);
+  int sign = (packed & SIGNBIT) != 0;
 
   if (exp == 0)
     {
@@ -238,6 +307,7 @@ unpack_fpu (sim_ufpu *dst, unsigned64 s, int is_double)
 	{
 	  /* tastes like zero */
 	  dst->class = sim_fpu_class_zero;
+	  dst->sign = sign;
 	}
       else
 	{
@@ -245,15 +315,15 @@ unpack_fpu (sim_ufpu *dst, unsigned64 s, int is_double)
 	     so there isn't a leading implicit one - we'll shift it so
 	     it gets one.  */
 	  dst->normal_exp = exp - EXPBIAS + 1;
-	  fraction <<= NGARDS;
-
 	  dst->class = sim_fpu_class_number;
+	  dst->sign = sign;
+	  fraction <<= NR_GUARDS;
 	  while (fraction < IMPLICIT_1)
 	    {
 	      fraction <<= 1;
 	      dst->normal_exp--;
 	    }
-	  dst->fraction = fraction << F_D_BITOFF;
+	  dst->fraction = fraction;
 	}
     }
   else if (exp == EXPMAX)
@@ -263,82 +333,1568 @@ unpack_fpu (sim_ufpu *dst, unsigned64 s, int is_double)
 	{
 	  /* Attached to a zero fraction - means infinity */
 	  dst->class = sim_fpu_class_infinity;
+	  dst->sign = sign;
+	  /* dst->normal_exp = EXPBIAS; */
+	  /* dst->fraction = 0; */
 	}
       else
 	{
-	  /* Non zero fraction, means nan */
-	  if (dst->sign)
-	    {
-	      dst->class = sim_fpu_class_snan;
-	    }
+	  /* Non zero fraction, means NaN */
+	  dst->sign = sign;
+	  dst->fraction = (fraction << NR_GUARDS);
+	  if (fraction >= QUIET_NAN)
+	    dst->class = sim_fpu_class_qnan;
 	  else
-	    {
-	      dst->class = sim_fpu_class_qnan;
-	    }
-	  /* Keep the fraction part as the nan number */
-	  dst->fraction = fraction << F_D_BITOFF;
+	    dst->class = sim_fpu_class_snan;
 	}
     }
   else
     {
       /* Nothing strange about this number */
-      dst->normal_exp = exp - EXPBIAS;
       dst->class = sim_fpu_class_number;
-      dst->fraction = ((fraction << NGARDS) | IMPLICIT_1) << F_D_BITOFF;
+      dst->sign = sign;
+      dst->fraction = ((fraction << NR_GUARDS) | IMPLICIT_1);
+      dst->normal_exp = exp - EXPBIAS;
     }
 
+  /* trace operation */
+#if 0
+  if (is_double)
+    {
+    }
+  else
+    {
+      printf ("unpack_fpu: %c%02lX.%06lX ->\n",
+	      LSMASKED32 (packed, 31, 31) ? '8' : '0',
+	      (long) LSEXTRACTED32 (packed, 30, 23),
+	      (long) LSEXTRACTED32 (packed, 23 - 1, 0));
+    }
+#endif
+
   /* sanity checks */
-  dst->val.i = -1;
-  dst->val.i = pack_fpu (dst, 1);
   {
+    sim_fpu_map val;
+    val.i = pack_fpu (dst, 1);
     if (is_double)
       {
-	ASSERT (dst->val.i == s);
+	ASSERT (val.i == packed);
       }
     else
       {
 	unsigned32 val = pack_fpu (dst, 0);
-	unsigned32 org = s;
+	unsigned32 org = packed;
 	ASSERT (val == org);
       }
   }
 }
 
-STATIC_INLINE_SIM_FPU (sim_fpu)
-ufpu2fpu (const sim_ufpu *d)
-{
-  sim_fpu ans;
-  ans.val.i = pack_fpu (d, 1);
-  return ans;
-}
 
-
-STATIC_INLINE_SIM_FPU (sim_ufpu)
-fpu2ufpu (const sim_fpu *d)
-{
-  sim_ufpu ans;
-  unpack_fpu (&ans, d->val.i, 1);
-  return ans;
-}
-
-#if 0
 STATIC_INLINE_SIM_FPU (int)
-is_ufpu_number (const sim_ufpu *d)
+fpu2i (signed64 *i,
+       const sim_fpu *s,
+       int is_64bit,
+       sim_fpu_round round)
 {
-  switch (d->class)
+  unsigned64 tmp;
+  int shift;
+  int status = 0;
+  if (sim_fpu_is_zero (s))
     {
-    case sim_fpu_class_zero:
-    case sim_fpu_class_number:
-      return 1;
-    default:
+      *i = 0;
       return 0;
     }
+  if (sim_fpu_is_snan (s))
+    {
+      *i = MIN_INT; /* FIXME */
+      return sim_fpu_status_invalid_cvi;
+    }
+  if (sim_fpu_is_qnan (s))
+    {
+      *i = MIN_INT; /* FIXME */
+      return sim_fpu_status_invalid_cvi;
+    }
+  /* map infinity onto MAX_INT... */
+  if (sim_fpu_is_infinity (s))
+    {
+      *i = s->sign ? MIN_INT : MAX_INT;
+      return sim_fpu_status_invalid_cvi;
+    }
+  /* it is a number, but a small one */
+  if (s->normal_exp < 0)
+    {
+      *i = 0;
+      return sim_fpu_status_inexact;
+    }
+  /* Is the floating point MIN_INT or just close? */
+  if (s->sign && s->normal_exp == (NR_INTBITS - 1))
+    {
+      *i = MIN_INT;
+      ASSERT (s->fraction >= IMPLICIT_1);
+      if (s->fraction == IMPLICIT_1)
+	return 0; /* exact */
+      if (is_64bit) /* can't round */
+	return sim_fpu_status_invalid_cvi; /* must be overflow */
+      /* For a 32bit with MAX_INT, rounding is possible */
+      switch (round)
+	{
+	case sim_fpu_round_default:
+	  abort ();
+	case sim_fpu_round_zero:
+	  if ((s->fraction & FRAC32MASK) != IMPLICIT_1)
+	    return sim_fpu_status_invalid_cvi;
+	  else
+	    return sim_fpu_status_inexact;
+	  break;
+	case sim_fpu_round_near:
+	  {
+	    if ((s->fraction & FRAC32MASK) != IMPLICIT_1)
+	      return sim_fpu_status_invalid_cvi;
+	    else if ((s->fraction & !FRAC32MASK) >= (~FRAC32MASK >> 1))
+	      return sim_fpu_status_invalid_cvi;
+	    else
+	      return sim_fpu_status_inexact;
+	  }
+	case sim_fpu_round_up:
+	  if ((s->fraction & FRAC32MASK) == IMPLICIT_1)
+	    return sim_fpu_status_inexact;
+	  else
+	    return sim_fpu_status_invalid_cvi;
+	case sim_fpu_round_down:
+	  return sim_fpu_status_invalid_cvi;
+	}
+    }
+  /* Would right shifting result in the FRAC being shifted into
+     (through) the integer's sign bit? */
+  if (s->normal_exp > (NR_INTBITS - 2))
+    {
+      *i = s->sign ? MIN_INT : MAX_INT;
+      return sim_fpu_status_invalid_cvi;
+    }
+  /* normal number shift it into place */
+  tmp = s->fraction;
+  shift = (s->normal_exp - (NR_FRAC_GUARD));
+  if (shift > 0)
+    {
+      tmp <<= shift;
+    }
+  else
+    {
+      shift = -shift;
+      if (tmp & ((SIGNED64 (1) << shift) - 1))
+	status |= sim_fpu_status_inexact;
+      tmp >>= shift;
+    }
+  *i = s->sign ? (-tmp) : (tmp);
+  return status;
+}
+
+STATIC_INLINE_SIM_FPU (int)
+i2fpu (sim_fpu *f, signed64 i, int is_64bit)
+{
+  int status = 0;
+  if (i == 0)
+    {
+      f->class = sim_fpu_class_zero;
+      f->sign = 0;
+    }
+  else
+    {
+      f->class = sim_fpu_class_number;
+      f->sign = (i < 0);
+      f->normal_exp = NR_FRAC_GUARD;
+
+      if (f->sign) 
+	{
+	  /* Special case for minint, since there is no corresponding
+	     +ve integer representation for it */
+	  if (i == MIN_INT)
+	    {
+	      f->fraction = IMPLICIT_1;
+	      f->normal_exp = NR_INTBITS - 1;
+	    }
+	  else
+	    f->fraction = (-i);
+	}
+      else
+	f->fraction = i;
+
+      if (f->fraction >= IMPLICIT_2)
+	{
+	  do 
+	    {
+	      f->fraction >>= 1;
+	      f->normal_exp += 1;
+	    }
+	  while (f->fraction >= IMPLICIT_2);
+	}
+      else if (f->fraction < IMPLICIT_1)
+	{
+	  do
+	    {
+	      f->fraction <<= 1;
+	      f->normal_exp -= 1;
+	    }
+	  while (f->fraction < IMPLICIT_1);
+	}
+    }
+
+  /* trace operation */
+#if 0
+  {
+    printf ("i2fpu: 0x%08lX ->\n", (long) i);
+  }
+#endif
+
+  /* sanity check */
+  {
+    signed64 val;
+    fpu2i (&val, f, is_64bit, sim_fpu_round_zero);
+    if (i >= MIN_INT32 && i <= MAX_INT32)
+      {
+	ASSERT (val == i);
+      }
+  }
+
+  return status;
+}
+
+
+STATIC_INLINE_SIM_FPU (int)
+fpu2u (unsigned64 *u, const sim_fpu *s, int is_64bit)
+{
+  const int is_double = 1;
+  unsigned64 tmp;
+  int shift;
+  if (sim_fpu_is_zero (s))
+    {
+      *u = 0;
+      return 0;
+    }
+  if (sim_fpu_is_nan (s))
+    {
+      *u = 0;
+      return 0;
+    }
+  /* it is a negative number */
+  if (s->sign)
+    {
+      *u = 0;
+      return 0;
+    }
+  /* get reasonable MAX_USI_INT... */
+  if (sim_fpu_is_infinity (s))
+    {
+      *u = MAX_UINT;
+      return 0;
+    }
+  /* it is a number, but a small one */
+  if (s->normal_exp < 0)
+    {
+      *u = 0;
+      return 0;
+    }
+  /* overflow */
+  if (s->normal_exp > (NR_INTBITS - 1))
+    {
+      *u = MAX_UINT;
+      return 0;
+    }
+  /* normal number */
+  tmp = (s->fraction & ~PADMASK);
+  shift = (s->normal_exp - (NR_FRACBITS + NR_GUARDS));
+  if (shift > 0)
+    {
+      tmp <<= shift;
+    }
+  else
+    {
+      shift = -shift;
+      tmp >>= shift;
+    }
+  *u = tmp;
+  return 0;
+}
+
+STATIC_INLINE_SIM_FPU (int)
+u2fpu (sim_fpu *f, unsigned64 u, int is_64bit)
+{
+  if (u == 0)
+    {
+      f->class = sim_fpu_class_zero;
+      f->sign = 0;
+    }
+  else
+    {
+      f->class = sim_fpu_class_number;
+      f->sign = 0;
+      f->normal_exp = NR_FRAC_GUARD;
+      f->fraction = u;
+
+      while (f->fraction < IMPLICIT_1)
+	{
+	  f->fraction <<= 1;
+	  f->normal_exp -= 1;
+	}
+    }
+  return 0;
+}
+
+
+/* register <-> sim_fpu */
+
+INLINE_SIM_FPU (void)
+sim_fpu_32to (sim_fpu *f, unsigned32 s)
+{
+  unpack_fpu (f, s, 0);
+}
+
+
+INLINE_SIM_FPU (void)
+sim_fpu_232to (sim_fpu *f, unsigned32 h, unsigned32 l)
+{
+  unsigned64 s = h;
+  s = (s << 32) | l;
+  unpack_fpu (f, s, 1);
+}
+
+
+INLINE_SIM_FPU (void)
+sim_fpu_64to (sim_fpu *f, unsigned64 s)
+{
+  unpack_fpu (f, s, 1);
+}
+
+
+INLINE_SIM_FPU (void)
+sim_fpu_to32 (unsigned32 *s,
+	      const sim_fpu *f)
+{
+  *s = pack_fpu (f, 0);
+}
+
+
+INLINE_SIM_FPU (void)
+sim_fpu_to232 (unsigned32 *h, unsigned32 *l,
+	       const sim_fpu *f)
+{
+  unsigned64 s = pack_fpu (f, 1);
+  *l = s;
+  *h = (s >> 32);
+}
+
+
+INLINE_SIM_FPU (void)
+sim_fpu_to64 (unsigned64 *u,
+	      const sim_fpu *f)
+{
+  *u = pack_fpu (f, 1);
+}
+
+
+/* Rounding */
+
+STATIC_INLINE_SIM_FPU (int)
+do_normal_overflow (sim_fpu *f,
+		    int is_double,
+		    sim_fpu_round round)
+{
+  switch (round)
+    {
+    case sim_fpu_round_default:
+      return 0;
+    case sim_fpu_round_near:
+      f->class = sim_fpu_class_infinity;
+      break;
+    case sim_fpu_round_up:
+      if (!f->sign)
+	f->class = sim_fpu_class_infinity;
+      break;
+    case sim_fpu_round_down:
+      if (f->sign)
+	f->class = sim_fpu_class_infinity;
+      break;
+    case sim_fpu_round_zero:
+      break;
+    }
+  f->normal_exp = NORMAL_EXPMAX;
+  f->fraction = LSMASK64 (NR_FRAC_GUARD, NR_GUARDS);
+  return (sim_fpu_status_overflow | sim_fpu_status_inexact);
+}
+
+STATIC_INLINE_SIM_FPU (int)
+do_normal_underflow (sim_fpu *f,
+		     int is_double,
+		     sim_fpu_round round)
+{
+  switch (round)
+    {
+    case sim_fpu_round_default:
+      return 0;
+    case sim_fpu_round_near:
+      f->class = sim_fpu_class_zero;
+      break;
+    case sim_fpu_round_up:
+      if (f->sign)
+	f->class = sim_fpu_class_zero;
+      break;
+    case sim_fpu_round_down:
+      if (!f->sign)
+	f->class = sim_fpu_class_zero;
+      break;
+    case sim_fpu_round_zero:
+      f->class = sim_fpu_class_zero;
+      break;
+    }
+  f->normal_exp = NORMAL_EXPMIN - NR_FRACBITS;
+  f->fraction = IMPLICIT_1;
+  return (sim_fpu_status_inexact | sim_fpu_status_underflow);
+}
+
+
+
+/* Round a number using NR_GUARDS.
+   Will return the rounded number or F->FRACTION == 0 when underflow */
+
+STATIC_INLINE_SIM_FPU (int)
+do_normal_round (sim_fpu *f,
+		 int nr_guards,
+		 sim_fpu_round round)
+{
+  unsigned64 guardmask = LSMASK64 (nr_guards - 1, 0);
+  unsigned64 guardmsb = LSBIT64 (nr_guards - 1);
+  unsigned64 fraclsb = guardmsb << 1;
+  if ((f->fraction & guardmask))
+    {
+      int status = sim_fpu_status_inexact;
+      switch (round)
+	{
+	case sim_fpu_round_default:
+	  return 0;
+	case sim_fpu_round_near:
+	  if ((f->fraction & guardmsb))
+	    {
+	      if ((f->fraction & fraclsb))
+		{
+		  status |= sim_fpu_status_rounded;
+		}
+	      else if ((f->fraction & (guardmask >> 1)))
+		{
+		  status |= sim_fpu_status_rounded;
+		}
+	    }
+	  break;
+	case sim_fpu_round_up:
+	  if (!f->sign)
+	    status |= sim_fpu_status_rounded;
+	  break;
+	case sim_fpu_round_down:
+	  if (f->sign)
+	    status |= sim_fpu_status_rounded;
+	  break;
+	case sim_fpu_round_zero:
+	  break;
+	}
+      f->fraction &= ~guardmask;
+      /* round if needed, handle resulting overflow */
+      if ((status & sim_fpu_status_rounded))
+	{
+	  f->fraction += fraclsb;
+	  if ((f->fraction & IMPLICIT_2))
+	    {
+	      f->fraction >>= 1;
+	      f->normal_exp += 1;
+	    }
+	}
+      return status;
+    }
+  else
+    return 0;
+}
+
+
+STATIC_INLINE_SIM_FPU (int)
+do_round (sim_fpu *f,
+	  int is_double,
+	  sim_fpu_round round,
+	  sim_fpu_denorm denorm)
+{
+  switch (f->class)
+    {
+    case sim_fpu_class_qnan:
+    case sim_fpu_class_zero:
+    case sim_fpu_class_infinity:
+      return 0;
+      break;
+    case sim_fpu_class_snan:
+      /* Quieten a SignalingNaN */ 
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+      break;
+    case sim_fpu_class_number:
+      {
+	int status;
+	ASSERT (f->fraction < IMPLICIT_2);
+	ASSERT (f->fraction >= IMPLICIT_1);
+	if (f->normal_exp < NORMAL_EXPMIN)
+	  {
+	    /* This number's exponent is too low to fit into the bits
+	       available in the number.  Round off any bits that will be
+	       discarded as a result of denormalization.  Edge case is
+	       the implicit bit shifted to GUARD0 and then rounded
+	       up. */
+	    int shift = NORMAL_EXPMIN - f->normal_exp;
+	    if (shift + NR_GUARDS <= NR_FRAC_GUARD + 1
+		&& !(denorm & sim_fpu_denorm_zero))
+	      {
+		
+		status = do_normal_round (f, shift + NR_GUARDS, round);
+		if (f->fraction == 0) /* rounding underflowed */
+		  status |= do_normal_underflow (f, is_double, round);
+		else if (f->normal_exp < NORMAL_EXPMIN) /* still underflow? */
+		  {
+		    status |= sim_fpu_status_denorm;
+		    /* Any loss of precision when denormalizing is
+		       underflow. Some processors check for underflow
+		       before rounding, some after! */
+		    if (status & sim_fpu_status_inexact)
+		      status |= sim_fpu_status_underflow;
+		  }
+		else if ((denorm & sim_fpu_denorm_underflow_inexact))
+		  {
+		    if ((status & sim_fpu_status_inexact))
+		      status |= sim_fpu_status_underflow;
+		  }
+	      }
+	    else
+	      {
+		status = do_normal_underflow (f, is_double, round);
+	      }
+	  }
+	else if (f->normal_exp > NORMAL_EXPMAX)
+	  {
+	    /* Infinity */
+	    status = do_normal_overflow (f, is_double, round);
+	  }
+	else
+	  {
+	    status = do_normal_round (f, NR_GUARDS, round);
+	    if (f->fraction == 0)
+	      /* f->class = sim_fpu_class_zero; */
+	      status |= do_normal_underflow (f, is_double, round);
+	    else if (f->normal_exp > NORMAL_EXPMAX)
+	      /* oops! rounding caused overflow */
+	      status |= do_normal_overflow (f, is_double, round);
+	  }
+	ASSERT ((f->class == sim_fpu_class_number)
+		<= (f->fraction < IMPLICIT_2 && f->fraction >= IMPLICIT_1));
+	return status;
+      }
+    }
+  return 0;
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_round_32 (sim_fpu *f,
+		  sim_fpu_round round,
+		  sim_fpu_denorm denorm)
+{
+  return do_round (f, 0, round, denorm);
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_round_64 (sim_fpu *f,
+		  sim_fpu_round round,
+		  sim_fpu_denorm denorm)
+{
+  return do_round (f, 1, round, denorm);
+}
+
+
+
+/* Arithmetic ops */
+
+INLINE_SIM_FPU (int)
+sim_fpu_add (sim_fpu *f,
+	     const sim_fpu *l,
+	     const sim_fpu *r)
+{
+  if (sim_fpu_is_snan (l))
+    {
+      *f = *l;
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+  if (sim_fpu_is_snan (r))
+    {
+      *f = *r;
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+  if (sim_fpu_is_qnan (l))
+    {
+      *f = *l;
+      return 0;
+    }
+  if (sim_fpu_is_qnan (r))
+    {
+      *f = *r;
+      return 0;
+    }
+  if (sim_fpu_is_infinity (l))
+    {
+      if (sim_fpu_is_infinity (r)
+	  && l->sign != r->sign)
+	{
+	  *f = sim_fpu_qnan;
+	  return sim_fpu_status_invalid_isi;
+	}
+      *f = *l;
+      return 0;
+    }
+  if (sim_fpu_is_infinity (r))
+    {
+      *f = *r;
+      return 0;
+    }
+  if (sim_fpu_is_zero (l))
+    {
+      if (sim_fpu_is_zero (r))
+	{
+	  *f = sim_fpu_zero;
+	  f->sign = l->sign & r->sign;
+	}
+      else
+	*f = *r;
+      return 0;
+    }
+  if (sim_fpu_is_zero (r))
+    {
+      *f = *l;
+      return 0;
+    }
+  {
+    int status = 0;
+    int shift = l->normal_exp - r->normal_exp;
+    unsigned64 lfraction;
+    unsigned64 rfraction;
+    /* use exp of larger */
+    if (shift >= NR_FRAC_GUARD)
+      {
+	/* left has much bigger magnitute */
+	*f = *l;
+	return sim_fpu_status_inexact;
+      }
+    if (shift <= - NR_FRAC_GUARD)
+      {
+	/* right has much bigger magnitute */
+	*f = *r;
+	return sim_fpu_status_inexact;
+      }
+    lfraction = l->fraction;
+    rfraction = r->fraction;
+    if (shift > 0)
+      {
+	f->normal_exp = l->normal_exp;
+	if (rfraction & LSMASK64 (shift - 1, 0))
+	  {
+	    status |= sim_fpu_status_inexact;
+	    rfraction |= LSBIT64 (shift); /* stick LSBit */
+	  }
+	rfraction >>= shift;
+      }
+    else if (shift < 0)
+      {
+	f->normal_exp = r->normal_exp;
+	if (lfraction & LSMASK64 (- shift - 1, 0))
+	  {
+	    status |= sim_fpu_status_inexact;
+	    lfraction |= LSBIT64 (- shift); /* stick LSBit */
+	  }
+	lfraction >>= -shift;
+      }
+    else
+      {
+	f->normal_exp = r->normal_exp;
+      }
+
+    /* perform the addition */
+    if (l->sign)
+      lfraction = - lfraction;
+    if (r->sign)
+      rfraction = - rfraction;
+    f->fraction = lfraction + rfraction;
+
+    /* zero? */
+    if (f->fraction == 0)
+      {
+	*f = sim_fpu_zero;
+	return 0;
+      }
+
+    /* sign? */
+    f->class = sim_fpu_class_number;
+    if ((signed64) f->fraction >= 0)
+      f->sign = 0;
+    else
+      {
+	f->sign = 1;
+	f->fraction = - f->fraction;
+      }
+
+    /* normalize it */
+    if ((f->fraction & IMPLICIT_2))
+      {
+	f->fraction = (f->fraction >> 1) | (f->fraction & 1);
+	f->normal_exp ++;
+      }
+    else if (f->fraction < IMPLICIT_1)
+      {
+	do
+	  {
+	    f->fraction <<= 1;
+	    f->normal_exp --;
+	  }
+	while (f->fraction < IMPLICIT_1);
+      }
+    ASSERT (f->fraction >= IMPLICIT_1 && f->fraction < IMPLICIT_2);
+    return status;
+  }
+}
+
+
+INLINE_SIM_FPU (int)
+sim_fpu_sub (sim_fpu *f,
+	     const sim_fpu *l,
+	     const sim_fpu *r)
+{
+  if (sim_fpu_is_snan (l))
+    {
+      *f = *l;
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+  if (sim_fpu_is_snan (r))
+    {
+      *f = *r;
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+  if (sim_fpu_is_qnan (l))
+    {
+      *f = *l;
+      return 0;
+    }
+  if (sim_fpu_is_qnan (r))
+    {
+      *f = *r;
+      return 0;
+    }
+  if (sim_fpu_is_infinity (l))
+    {
+      if (sim_fpu_is_infinity (r)
+	  && l->sign == r->sign)
+	{
+	  *f = sim_fpu_qnan;
+	  return sim_fpu_status_invalid_isi;
+	}
+      *f = *l;
+      return 0;
+    }
+  if (sim_fpu_is_infinity (r))
+    {
+      *f = *r;
+      f->sign = !r->sign;
+      return 0;
+    }
+  if (sim_fpu_is_zero (l))
+    {
+      if (sim_fpu_is_zero (r))
+	{
+	  *f = sim_fpu_zero;
+	  f->sign = l->sign & !r->sign;
+	}
+      else
+	{
+	  *f = *r;
+	  f->sign = !r->sign;
+	}
+      return 0;
+    }
+  if (sim_fpu_is_zero (r))
+    {
+      *f = *l;
+      return 0;
+    }
+  {
+    int status = 0;
+    int shift = l->normal_exp - r->normal_exp;
+    unsigned64 lfraction;
+    unsigned64 rfraction;
+    /* use exp of larger */
+    if (shift >= NR_FRAC_GUARD)
+      {
+	/* left has much bigger magnitute */
+	*f = *l;
+	return sim_fpu_status_inexact;
+      }
+    if (shift <= - NR_FRAC_GUARD)
+      {
+	/* right has much bigger magnitute */
+	*f = *r;
+	f->sign = !r->sign;
+	return sim_fpu_status_inexact;
+      }
+    lfraction = l->fraction;
+    rfraction = r->fraction;
+    if (shift > 0)
+      {
+	f->normal_exp = l->normal_exp;
+	if (rfraction & LSMASK64 (shift - 1, 0))
+	  {
+	    status |= sim_fpu_status_inexact;
+	    rfraction |= LSBIT64 (shift); /* stick LSBit */
+	  }
+	rfraction >>= shift;
+      }
+    else if (shift < 0)
+      {
+	f->normal_exp = r->normal_exp;
+	if (lfraction & LSMASK64 (- shift - 1, 0))
+	  {
+	    status |= sim_fpu_status_inexact;
+	    lfraction |= LSBIT64 (- shift); /* stick LSBit */
+	  }
+	lfraction >>= -shift;
+      }
+    else
+      {
+	f->normal_exp = r->normal_exp;
+      }
+
+    /* perform the subtraction */
+    if (l->sign)
+      lfraction = - lfraction;
+    if (!r->sign)
+      rfraction = - rfraction;
+    f->fraction = lfraction + rfraction;
+
+    /* zero? */
+    if (f->fraction == 0)
+      {
+	*f = sim_fpu_zero;
+	return 0;
+      }
+
+    /* sign? */
+    f->class = sim_fpu_class_number;
+    if ((signed64) f->fraction >= 0)
+      f->sign = 0;
+    else
+      {
+	f->sign = 1;
+	f->fraction = - f->fraction;
+      }
+
+    /* normalize it */
+    if ((f->fraction & IMPLICIT_2))
+      {
+	f->fraction = (f->fraction >> 1) | (f->fraction & 1);
+	f->normal_exp ++;
+      }
+    else if (f->fraction < IMPLICIT_1)
+      {
+	do
+	  {
+	    f->fraction <<= 1;
+	    f->normal_exp --;
+	  }
+	while (f->fraction < IMPLICIT_1);
+      }
+    ASSERT (f->fraction >= IMPLICIT_1 && f->fraction < IMPLICIT_2);
+    return status;
+  }
+}
+
+
+INLINE_SIM_FPU (int)
+sim_fpu_mul (sim_fpu *f,
+	     const sim_fpu *l,
+	     const sim_fpu *r)
+{
+  if (sim_fpu_is_snan (l))
+    {
+      *f = *l;
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+  if (sim_fpu_is_snan (r))
+    {
+      *f = *r;
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+  if (sim_fpu_is_qnan (l))
+    {
+      *f = *l;
+      return 0;
+    }
+  if (sim_fpu_is_qnan (r))
+    {
+      *f = *r;
+      return 0;
+    }
+  if (sim_fpu_is_infinity (l))
+    {
+      if (sim_fpu_is_zero (r))
+	{
+	  *f = sim_fpu_qnan;
+	  return sim_fpu_status_invalid_imz;
+	}
+      *f = *l;
+      f->sign = l->sign ^ r->sign;
+      return 0;
+    }
+  if (sim_fpu_is_infinity (r))
+    {
+      if (sim_fpu_is_zero (l))
+	{
+	  *f = sim_fpu_qnan;
+	  return sim_fpu_status_invalid_imz;
+	}
+      *f = *r;
+      f->sign = l->sign ^ r->sign;
+      return 0;
+    }
+  if (sim_fpu_is_zero (l) || sim_fpu_is_zero (r))
+    {
+      *f = sim_fpu_zero;
+      f->sign = l->sign ^ r->sign;
+      return 0;
+    }
+  /* Calculate the mantissa by multiplying both 64bit numbers to get a
+     128 bit number */
+  {
+    unsigned64 low;
+    unsigned64 high;
+    unsigned64 nl = l->fraction & 0xffffffff;
+    unsigned64 nh = l->fraction >> 32;
+    unsigned64 ml = r->fraction & 0xffffffff;
+    unsigned64 mh = r->fraction >>32;
+    unsigned64 pp_ll = ml * nl;
+    unsigned64 pp_hl = mh * nl;
+    unsigned64 pp_lh = ml * nh;
+    unsigned64 pp_hh = mh * nh;
+    unsigned64 res2 = 0;
+    unsigned64 res0 = 0;
+    unsigned64 ps_hh__ = pp_hl + pp_lh;
+    if (ps_hh__ < pp_hl)
+      res2 += UNSIGNED64 (0x100000000);
+    pp_hl = (ps_hh__ << 32) & UNSIGNED64 (0xffffffff00000000);
+    res0 = pp_ll + pp_hl;
+    if (res0 < pp_ll)
+      res2++;
+    res2 += ((ps_hh__ >> 32) & 0xffffffff) + pp_hh;
+    high = res2;
+    low = res0;
+    
+    f->normal_exp = l->normal_exp + r->normal_exp;
+    f->sign = l->sign ^ r->sign;
+    f->class = sim_fpu_class_number;
+
+    /* Input is bounded by [1,2)   ;   [2^60,2^61)
+       Output is bounded by [1,4)  ;   [2^120,2^122) */
+ 
+    /* Adjust the exponent according to where the decimal point ended
+       up in the high 64 bit word.  In the source the decimal point
+       was at NR_FRAC_GUARD. */
+    f->normal_exp += NR_FRAC_GUARD + 64 - (NR_FRAC_GUARD * 2);
+
+    /* The high word is bounded according to the above.  Consequently
+       it has never overflowed into IMPLICIT_2. */
+    ASSERT (high < LSBIT64 (((NR_FRAC_GUARD + 1) * 2) - 64));
+    ASSERT (high >= LSBIT64 ((NR_FRAC_GUARD * 2) - 64));
+    ASSERT (LSBIT64 (((NR_FRAC_GUARD + 1) * 2) - 64) < IMPLICIT_1);
+
+#if 0
+    printf ("\n");
+    print_bits (high, 63, (sim_fpu_print_func*)fprintf, stdout);
+    printf (";");
+    print_bits (low, 63, (sim_fpu_print_func*)fprintf, stdout);
+    printf ("\n");
+#endif
+
+    /* normalize */
+    do
+      {
+	f->normal_exp--;
+	high <<= 1;
+	if (low & LSBIT64 (63))
+	  high |= 1;
+	low <<= 1;
+      }
+    while (high < IMPLICIT_1);
+
+#if 0
+    print_bits (high, 63, (sim_fpu_print_func*)fprintf, stdout);
+    printf (";");
+    print_bits (low, 63, (sim_fpu_print_func*)fprintf, stdout);
+    printf ("\n");
+#endif
+
+    ASSERT (high >= IMPLICIT_1 && high < IMPLICIT_2);
+    if (low != 0)
+      {
+	f->fraction = (high | 1); /* sticky */
+	return sim_fpu_status_inexact;
+      }
+    else
+      {
+	f->fraction = high;
+	return 0;
+      }
+    return 0;
+  }
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_div (sim_fpu *f,
+	     const sim_fpu *l,
+	     const sim_fpu *r)
+{
+  if (sim_fpu_is_snan (l))
+    {
+      *f = *l;
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+  if (sim_fpu_is_snan (r))
+    {
+      *f = *r;
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+  if (sim_fpu_is_qnan (l))
+    {
+      *f = *l;
+      f->class = sim_fpu_class_qnan;
+      return 0;
+    }
+  if (sim_fpu_is_qnan (r))
+    {
+      *f = *r;
+      f->class = sim_fpu_class_qnan;
+      return 0;
+    }
+  if (sim_fpu_is_infinity (l))
+    {
+      if (sim_fpu_is_infinity (r))
+	{
+	  *f = sim_fpu_qnan;
+	  return sim_fpu_status_invalid_idi;
+	}
+      else
+	{
+	  *f = *l;
+	  f->sign = l->sign ^ r->sign;
+	  return 0;
+	}
+    }
+  if (sim_fpu_is_zero (l))
+    {
+      if (sim_fpu_is_zero (r))
+	{
+	  *f = sim_fpu_qnan;
+	  return sim_fpu_status_invalid_zdz;
+	}
+      else
+	{
+	  *f = *l;
+	  f->sign = l->sign ^ r->sign;
+	  return 0;
+	}
+    }
+  if (sim_fpu_is_infinity (r))
+    {
+      *f = sim_fpu_zero;
+      f->sign = l->sign ^ r->sign;
+      return 0;
+    }
+  if (sim_fpu_is_zero (r))
+    {
+      f->class = sim_fpu_class_infinity;
+      f->sign = l->sign ^ r->sign;
+      return sim_fpu_status_invalid_div0;
+    }
+
+  /* Calculate the mantissa by multiplying both 64bit numbers to get a
+     128 bit number */
+  {
+    /* quotient =  ( ( numerator / denominator)
+                      x 2^(numerator exponent -  denominator exponent)
+     */
+    unsigned64 numerator;
+    unsigned64 denominator;
+    unsigned64 quotient;
+    unsigned64 bit;
+
+    f->class = sim_fpu_class_number;
+    f->sign = l->sign ^ r->sign;
+    f->normal_exp = l->normal_exp - r->normal_exp;
+
+    numerator = l->fraction;
+    denominator = r->fraction;
+
+    /* Fraction will be less than 1.0 */
+    if (numerator < denominator)
+      {
+	numerator <<= 1;
+	f->normal_exp--;
+      }
+    ASSERT (numerator >= denominator);
+    
+    /* Gain extra precision, already used one spare bit */
+    numerator <<=    NR_SPARE;
+    denominator <<=  NR_SPARE;
+
+    /* Does divide one bit at a time.  Optimize???  */
+    quotient = 0;
+    bit = (IMPLICIT_1 << NR_SPARE);
+    while (bit)
+      {
+	if (numerator >= denominator)
+	  {
+	    quotient |= bit;
+	    numerator -= denominator;
+	  }
+	bit >>= 1;
+	numerator <<= 1;
+      }
+
+#if 0
+    printf ("\n");
+    print_bits (quotient, 63, (sim_fpu_print_func*)fprintf, stdout);
+    printf ("\n");
+    print_bits (numerator, 63, (sim_fpu_print_func*)fprintf, stdout);
+    printf ("\n");
+    print_bits (denominator, 63, (sim_fpu_print_func*)fprintf, stdout);
+    printf ("\n");
+#endif
+
+    /* discard (but save) the extra bits */
+    if ((quotient & LSMASK64 (NR_SPARE -1, 0)))
+      quotient = (quotient >> NR_SPARE) | 1;
+    else
+      quotient = (quotient >> NR_SPARE);
+
+    f->fraction = quotient;
+    ASSERT (f->fraction >= IMPLICIT_1 && f->fraction < IMPLICIT_2);
+    if (numerator != 0)
+      {
+	f->fraction |= 1; /* stick remaining bits */
+	return sim_fpu_status_inexact;
+      }
+    else
+      return 0;
+  }
+}
+
+
+INLINE_SIM_FPU (int)
+sim_fpu_neg (sim_fpu *f,
+	     const sim_fpu *r)
+{
+  if (sim_fpu_is_snan (r))
+    {
+      *f = *r;
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+  if (sim_fpu_is_qnan (r))
+    {
+      *f = *r;
+      return 0;
+    }
+  *f = *r;
+  f->sign = !r->sign;
+  return 0;
+}
+
+
+INLINE_SIM_FPU (int)
+sim_fpu_abs (sim_fpu *f,
+	     const sim_fpu *r)
+{
+  if (sim_fpu_is_snan (r))
+    {
+      *f = *r;
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+  if (sim_fpu_is_qnan (r))
+    {
+      *f = *r;
+      return 0;
+    }
+  *f = *r;
+  f->sign = 0;
+  return 0;
+}
+
+
+INLINE_SIM_FPU (int)
+sim_fpu_inv (sim_fpu *f,
+	     const sim_fpu *r)
+{
+  if (sim_fpu_is_snan (r))
+    {
+      *f = *r;
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+  if (sim_fpu_is_qnan (r))
+    {
+      *f = *r;
+      f->class = sim_fpu_class_qnan;
+      return 0;
+    }
+  if (sim_fpu_is_infinity (r))
+    {
+      *f = sim_fpu_zero;
+      f->sign = r->sign;
+      return 0;
+    }
+  if (sim_fpu_is_zero (r))
+    {
+      f->class = sim_fpu_class_infinity;
+      f->sign = r->sign;
+      return sim_fpu_status_invalid_div0;
+    }
+  *f = *r;
+  f->normal_exp = - r->normal_exp;
+  return 0;
+}
+
+
+INLINE_SIM_FPU (int)
+sim_fpu_sqrt (sim_fpu *f,
+	      const sim_fpu *r)
+{
+  if (sim_fpu_is_snan (r))
+    {
+      *f = sim_fpu_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+  if (sim_fpu_is_qnan (r))
+    {
+      *f = sim_fpu_qnan;
+      return 0;
+    }
+  if (sim_fpu_is_zero (r))
+    {
+      f->class = sim_fpu_class_zero;
+      f->sign = r->sign;
+      return 0;
+    }
+  if (sim_fpu_is_infinity (r))
+    {
+      if (r->sign)
+	{
+	  *f = sim_fpu_qnan;
+	  return sim_fpu_status_invalid_sqrt;
+	}
+      else
+	{
+	  f->class = sim_fpu_class_infinity;
+	  f->sign = 0;
+	  f->sign = 0;
+	  return 0;
+	}
+    }
+  if (r->sign)
+    {
+      *f = sim_fpu_qnan;
+      return sim_fpu_status_invalid_sqrt;
+    }
+
+  /* @(#)e_sqrt.c 5.1 93/09/24 */
+  /*
+   * ====================================================
+   * Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
+   *
+   * Developed at SunPro, a Sun Microsystems, Inc. business.
+   * Permission to use, copy, modify, and distribute this
+   * software is freely granted, provided that this notice 
+   * is preserved.
+   * ====================================================
+   */
+  
+  /* __ieee754_sqrt(x)
+   * Return correctly rounded sqrt.
+   *           ------------------------------------------
+   *           |  Use the hardware sqrt if you have one |
+   *           ------------------------------------------
+   * Method: 
+   *   Bit by bit method using integer arithmetic. (Slow, but portable) 
+   *   1. Normalization
+   *	Scale x to y in [1,4) with even powers of 2: 
+   *	find an integer k such that  1 <= (y=x*2^(2k)) < 4, then
+   *		sqrt(x) = 2^k * sqrt(y)
+   -
+   - Since:
+   -   sqrt ( x*2^(2m) )     = sqrt(x).2^m    ; m even
+   -   sqrt ( x*2^(2m + 1) ) = sqrt(2.x).2^m  ; m odd
+   - Define:
+   -   y = ((m even) ? x : 2.x)
+   - Then:
+   -   y in [1, 4)                            ; [IMPLICIT_1,IMPLICIT_4)
+   - And:
+   -   sqrt (y) in [1, 2)                     ; [IMPLICIT_1,IMPLICIT_2)
+   -
+   *   2. Bit by bit computation
+   *	Let q  = sqrt(y) truncated to i bit after binary point (q = 1),
+   *	     i							 0
+   *                                     i+1         2
+   *	    s  = 2*q , and	y  =  2   * ( y - q  ).		(1)
+   *	     i      i            i                 i
+   *                                                        
+   *	To compute q    from q , one checks whether 
+   *		    i+1       i                       
+   *
+   *			      -(i+1) 2
+   *			(q + 2      ) <= y.			(2)
+   *     			  i
+   *							      -(i+1)
+   *	If (2) is false, then q   = q ; otherwise q   = q  + 2      .
+   *		 	       i+1   i             i+1   i
+   *
+   *	With some algebric manipulation, it is not difficult to see
+   *	that (2) is equivalent to 
+   *                             -(i+1)
+   *			s  +  2       <= y			(3)
+   *			 i                i
+   *
+   *	The advantage of (3) is that s  and y  can be computed by 
+   *				      i      i
+   *	the following recurrence formula:
+   *	    if (3) is false
+   *
+   *	    s     =  s  ,	y    = y   ;			(4)
+   *	     i+1      i		 i+1    i
+   *
+   -
+   -                      NOTE: y    = 2*y
+   -                             i+1      i
+   -
+   *	    otherwise,
+   *                       -i                      -(i+1)
+   *	    s	  =  s  + 2  ,  y    = y  -  s  - 2  		(5)
+   *         i+1      i          i+1    i     i
+   *				
+   -
+   -                                                   -(i+1)
+   -                      NOTE: y    = 2 (y  -  s  -  2      ) 		
+   -                             i+1       i     i
+   -
+   *	One may easily use induction to prove (4) and (5). 
+   *	Note. Since the left hand side of (3) contain only i+2 bits,
+   *	      it does not necessary to do a full (53-bit) comparison 
+   *	      in (3).
+   *   3. Final rounding
+   *	After generating the 53 bits result, we compute one more bit.
+   *	Together with the remainder, we can decide whether the
+   *	result is exact, bigger than 1/2ulp, or less than 1/2ulp
+   *	(it will never equal to 1/2ulp).
+   *	The rounding mode can be detected by checking whether
+   *	huge + tiny is equal to huge, and whether huge - tiny is
+   *	equal to huge for some floating point number "huge" and "tiny".
+   *		
+   * Special cases:
+   *	sqrt(+-0) = +-0 	... exact
+   *	sqrt(inf) = inf
+   *	sqrt(-ve) = NaN		... with invalid signal
+   *	sqrt(NaN) = NaN		... with invalid signal for signaling NaN
+   *
+   * Other methods : see the appended file at the end of the program below.
+   *---------------
+   */
+
+  {
+    /* generate sqrt(x) bit by bit */
+    unsigned64 y;
+    unsigned64 q;
+    unsigned64 s;
+    unsigned64 b;
+
+    f->class = sim_fpu_class_number;
+    f->sign = 0;
+    y = r->fraction;
+    f->normal_exp = (r->normal_exp >> 1);	/* exp = [exp/2] */
+
+    /* odd exp, double x to make it even */
+    ASSERT (y >= IMPLICIT_1 && y < IMPLICIT_4);
+    if ((r->normal_exp & 1))
+      {
+	y += y;
+      }
+    ASSERT (y >= IMPLICIT_1 && y < (IMPLICIT_2 << 1));
+
+    /* Let loop determine first value of s (either 1 or 2) */
+    b = IMPLICIT_1;
+    q = 0;
+    s = 0;
+    
+    while (b)
+      {
+	unsigned64 t = s + b;
+	if (t <= y)
+	  {
+	    s |= (b << 1);
+	    y -= t;
+	    q |= b;
+	  }
+	y <<= 1;
+	b >>= 1;
+      }
+
+    ASSERT (q >= IMPLICIT_1 && q < IMPLICIT_2);
+    f->fraction = q;
+    if (y != 0)
+      {
+	f->fraction |= 1; /* stick remaining bits */
+	return sim_fpu_status_inexact;
+      }
+    else
+      return 0;
+  }
+}
+
+
+/* int/long <-> sim_fpu */
+
+INLINE_SIM_FPU (int)
+sim_fpu_i32to (sim_fpu *f,
+	       signed32 i,
+	       sim_fpu_round round)
+{
+  i2fpu (f, i, 0);
+  return 0;
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_u32to (sim_fpu *f,
+	       unsigned32 u,
+	       sim_fpu_round round)
+{
+  u2fpu (f, u, 0);
+  return 0;
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_i64to (sim_fpu *f,
+	       signed64 i,
+	       sim_fpu_round round)
+{
+  i2fpu (f, i, 1);
+  return 0;
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_u64to (sim_fpu *f,
+	       unsigned64 u,
+	       sim_fpu_round round)
+{
+  u2fpu (f, u, 1);
+  return 0;
+}
+
+
+INLINE_SIM_FPU (int)
+sim_fpu_to32i (signed32 *i,
+	       const sim_fpu *f,
+	       sim_fpu_round round)
+{
+  signed64 i64;
+  int status = fpu2i (&i64, f, 0, round);
+  *i = i64;
+  return status;
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_to32u (unsigned32 *u,
+	       const sim_fpu *f,
+	       sim_fpu_round round)
+{
+  unsigned64 u64;
+  int status = fpu2u (&u64, f, 0);
+  *u = u64;
+  return status;
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_to64i (signed64 *i,
+	       const sim_fpu *f,
+	       sim_fpu_round round)
+{
+  return fpu2i (i, f, 1, round);
+}
+
+
+INLINE_SIM_FPU (int)
+sim_fpu_to64u (unsigned64 *u,
+	       const sim_fpu *f,
+	       sim_fpu_round round)
+{
+  return fpu2u (u, f, 1);
+}
+
+
+
+/* sim_fpu -> host format */
+
+#if 0
+INLINE_SIM_FPU (float)
+sim_fpu_2f (const sim_fpu *f)
+{
+  return fval.d;
 }
 #endif
 
 
-STATIC_INLINE_SIM_FPU (int)
-is_ufpu_nan (const sim_ufpu *d)
+INLINE_SIM_FPU (double)
+sim_fpu_2d (const sim_fpu *s)
+{
+  sim_fpu_map val;
+  val.i = pack_fpu (s, 1);
+  return val.d;
+}
+
+
+#if 0
+INLINE_SIM_FPU (void)
+sim_fpu_f2 (sim_fpu *f,
+	    float s)
+{
+  sim_fpu_map val;
+  val.d = s;
+  unpack_fpu (f, val.i, 1);
+}
+#endif
+
+
+INLINE_SIM_FPU (void)
+sim_fpu_d2 (sim_fpu *f,
+	    double d)
+{
+  sim_fpu_map val;
+  val.d = d;
+  unpack_fpu (f, val.i, 1);
+}
+
+
+/* General */
+
+INLINE_SIM_FPU (int)
+sim_fpu_is_nan (const sim_fpu *d)
 {
   switch (d->class)
     {
@@ -350,9 +1906,32 @@ is_ufpu_nan (const sim_ufpu *d)
     }
 }
 
+INLINE_SIM_FPU (int)
+sim_fpu_is_qnan (const sim_fpu *d)
+{
+  switch (d->class)
+    {
+    case sim_fpu_class_qnan:
+      return 1;
+    default:
+      return 0;
+    }
+}
 
-STATIC_INLINE_SIM_FPU (int)
-is_ufpu_zero (const sim_ufpu *d)
+INLINE_SIM_FPU (int)
+sim_fpu_is_snan (const sim_fpu *d)
+{
+  switch (d->class)
+    {
+    case sim_fpu_class_snan:
+      return 1;
+    default:
+      return 0;
+    }
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_is_zero (const sim_fpu *d)
 {
   switch (d->class)
     {
@@ -363,9 +1942,8 @@ is_ufpu_zero (const sim_ufpu *d)
     }
 }
 
-
-STATIC_INLINE_SIM_FPU (int)
-is_ufpu_inf (const sim_ufpu *d)
+INLINE_SIM_FPU (int)
+sim_fpu_is_infinity (const sim_fpu *d)
 {
   switch (d->class)
     {
@@ -376,430 +1954,346 @@ is_ufpu_inf (const sim_ufpu *d)
     }
 }
 
-
-STATIC_INLINE_SIM_FPU (sim_fpu)
-fpu_nan (void)
+INLINE_SIM_FPU (int)
+sim_fpu_is_number (const sim_fpu *d)
 {
-  sim_ufpu tmp;
-  tmp.class = sim_fpu_class_snan;
-  tmp.fraction = 0;
-  tmp.sign = 1;
-  tmp.normal_exp = 0;
-  return ufpu2fpu (&tmp);
-}
-
-
-STATIC_INLINE_SIM_FPU (signed64)
-fpu2i (sim_fpu s, int is_double)
-{
-  sim_ufpu a = fpu2ufpu (&s);
-  unsigned64 tmp;
-  if (is_ufpu_zero (&a))
-    return 0;
-  if (is_ufpu_nan (&a))
-    return 0;
-  /* get reasonable MAX_SI_INT... */
-  if (is_ufpu_inf (&a))
-    return a.sign ? MAX_SI_INT : (-MAX_SI_INT)-1;
-  /* it is a number, but a small one */
-  if (a.normal_exp < 0)
-    return 0;
-  if (a.normal_exp > (FRAC_NBITS - 2))
-    return a.sign ? (-MAX_SI_INT)-1 : MAX_SI_INT;
-  if (a.normal_exp > (FRACBITS + NGARDS + F_D_BITOFF))
-    tmp = (a.fraction << (a.normal_exp - (FRACBITS + NGARDS)));
-  else
-    tmp = (a.fraction >> ((FRACBITS + NGARDS + F_D_BITOFF) - a.normal_exp));
-  return a.sign ? (-tmp) : (tmp);
-}
-
-STATIC_INLINE_SIM_FPU (unsigned64)
-fpu2u (sim_fpu s, int is_double)
-{
-  sim_ufpu a = fpu2ufpu (&s);
-  unsigned64 tmp;
-  if (is_ufpu_zero (&a))
-    return 0;
-  if (is_ufpu_nan (&a))
-    return 0;
-  /* get reasonable MAX_USI_INT... */
-  if (is_ufpu_inf (&a))
-    return a.sign ? MAX_USI_INT : 0;
-  /* it is a negative number */
-  if (a.sign)
-    return 0;
-  /* it is a number, but a small one */
-  if (a.normal_exp < 0)
-    return 0;
-  if (a.normal_exp > (FRAC_NBITS - 1))
-    return MAX_USI_INT;
-  if (a.normal_exp > (FRACBITS + NGARDS + F_D_BITOFF))
-    tmp = (a.fraction << (a.normal_exp - (FRACBITS + NGARDS + F_D_BITOFF)));
-  else
-    tmp = (a.fraction >> ((FRACBITS + NGARDS + F_D_BITOFF) - a.normal_exp));
-  return tmp;
-}
-
-
-/* register <-> sim_fpu */
-
-INLINE_SIM_FPU (sim_fpu)
-sim_fpu_32to (unsigned32 s)
-{
-  sim_ufpu tmp;
-  unpack_fpu (&tmp, s, 0);
-  return ufpu2fpu (&tmp);
-}
-
-
-INLINE_SIM_FPU (sim_fpu)
-sim_fpu_64to (unsigned64 s)
-{
-  sim_fpu ans;
-  ans.val.i = s;
-  return ans;
-}
-
-
-INLINE_SIM_FPU (unsigned32)
-sim_fpu_to32 (sim_fpu l)
-{
-  /* convert to single safely */
-  sim_ufpu tmp = fpu2ufpu (&l);
-  return pack_fpu (&tmp, 0);
-}
-
-
-INLINE_SIM_FPU (unsigned64)
-sim_fpu_to64 (sim_fpu s)
-{
-  return s.val.i;
-}
-
-
-/* Arithmetic ops */
-
-INLINE_SIM_FPU (sim_fpu)
-sim_fpu_add (sim_fpu l,
-	     sim_fpu r)
-{
-  sim_fpu ans;
-  ans.val.d = l.val.d + r.val.d;
-  return ans;
-}
-
-
-INLINE_SIM_FPU (sim_fpu)
-sim_fpu_sub (sim_fpu l,
-	     sim_fpu r)
-{
-  sim_fpu ans;
-  ans.val.d = l.val.d - r.val.d;
-  return ans;
-}
-
-
-INLINE_SIM_FPU (sim_fpu)
-sim_fpu_mul (sim_fpu l,
-	     sim_fpu r)
-{
-  sim_fpu ans;
-  ans.val.d = l.val.d * r.val.d;
-  return ans;
-}
-
-
-INLINE_SIM_FPU (sim_fpu)
-sim_fpu_div (sim_fpu l,
-	     sim_fpu r)
-{
-  const int is_double = 1;
-  sim_ufpu a = fpu2ufpu (&l);
-  sim_ufpu b = fpu2ufpu (&r);
-  unsigned64 bit;
-  unsigned64 numerator;
-  unsigned64 denominator;
-  unsigned64 quotient;
-
-  if (is_ufpu_nan (&a))
+  switch (d->class)
     {
-      return ufpu2fpu (&a);
+    case sim_fpu_class_number:
+      return 1;
+    default:
+      return 0;
     }
-  if (is_ufpu_nan (&b))
-    {
-      return ufpu2fpu (&b);
-    }
-  if (is_ufpu_inf (&a) || is_ufpu_zero (&a))
-    {
-      if (a.class == b.class)
-	return fpu_nan ();
-      return l;
-    }
-  a.sign = a.sign ^ b.sign;
-
-  if (is_ufpu_inf (&b))
-    {
-      a.fraction = 0;
-      a.normal_exp = 0;
-      return ufpu2fpu (&a);
-    }
-  if (is_ufpu_zero (&b))
-    {
-      a.class = sim_fpu_class_infinity;
-      return ufpu2fpu (&a);
-    }
-
-  /* Calculate the mantissa by multiplying both 64bit numbers to get a
-     128 bit number */
-  {
-    /* quotient =
-       ( numerator / denominator) * 2^(numerator exponent -  denominator exponent)
-     */
-
-    a.normal_exp = a.normal_exp - b.normal_exp;
-    numerator = a.fraction;
-    denominator = b.fraction;
-
-    if (numerator < denominator)
-      {
-	/* Fraction will be less than 1.0 */
-	numerator *= 2;
-	a.normal_exp--;
-      }
-    bit = IMPLICIT_1;
-    quotient = 0;
-    /* ??? Does divide one bit at a time.  Optimize.  */
-    while (bit)
-      {
-	if (numerator >= denominator)
-	  {
-	    quotient |= bit;
-	    numerator -= denominator;
-	  }
-	bit >>= 1;
-	numerator *= 2;
-      }
-
-    if ((quotient & GARDMASK) == GARDMSB)
-      {
-	if (quotient & (1 << NGARDS))
-	  {
-	    /* half way, so round to even */
-	    quotient += GARDROUND + 1;
-	  }
-	else if (numerator)
-	  {
-	    /* but we really weren't half way, more bits exist */
-	    quotient += GARDROUND + 1;
-	  }
-      }
-
-    a.fraction = quotient;
-    return ufpu2fpu (&a);
-  }
 }
-
-
-INLINE_SIM_FPU (sim_fpu)
-sim_fpu_inv (sim_fpu r)
-{
-  sim_fpu ans;
-  ans.val.d = 1 / r.val.d;
-  return ans;
-}
-
-
-INLINE_SIM_FPU (sim_fpu)
-sim_fpu_sqrt (sim_fpu r)
-{
-  sim_fpu ans;
-  ans.val.d = sqrt (r.val.d);
-  return ans;
-}
-
-
-/* int/long -> sim_fpu */
-
-INLINE_SIM_FPU (sim_fpu)
-sim_fpu_i32to (signed32 s)
-{
-  sim_fpu ans;
-  ans.val.d = s;
-  return ans;
-}
-
-
-INLINE_SIM_FPU (signed32)
-sim_fpu_to32i (sim_fpu s)
-{
-  return fpu2i (s, 0);
-}
-
-
-INLINE_SIM_FPU (sim_fpu)
-sim_fpu_u32to (unsigned32 s)
-{
-  sim_fpu ans;
-  ans.val.d = s;
-  return ans;
-}
-
-
-INLINE_SIM_FPU (unsigned32)
-sim_fpu_to32u (sim_fpu s)
-{
-  return fpu2u (s, 0);
-}
-
-
-INLINE_SIM_FPU (sim_fpu)
-sim_fpu_i64to (signed64 s)
-{
-  sim_fpu ans;
-  ans.val.d = s;
-  return ans;
-}
-
-
-INLINE_SIM_FPU (signed64)
-sim_fpu_to64i (sim_fpu s)
-{
-  return fpu2i (s, 1);
-}
-
-
-INLINE_SIM_FPU (sim_fpu)
-sim_fpu_u64to (unsigned64 s)
-{
-  sim_fpu ans;
-  ans.val.d = s;
-  return ans;
-}
-
-
-INLINE_SIM_FPU (unsigned64)
-sim_fpu_to64u (sim_fpu s)
-{
-  return fpu2u (s, 1);
-}
-
-
-/* sim_fpu -> host format */
-
-INLINE_SIM_FPU (float)
-sim_fpu_2f (sim_fpu f)
-{
-  return f.val.d;
-}
-
-
-INLINE_SIM_FPU (double)
-sim_fpu_2d (sim_fpu s)
-{
-  return s.val.d;
-}
-
-
-INLINE_SIM_FPU (sim_fpu)
-sim_fpu_f2 (float f)
-{
-  sim_fpu ans;
-  ans.val.d = f;
-  return ans;
-}
-
-
-INLINE_SIM_FPU (sim_fpu)
-sim_fpu_d2 (double d)
-{
-  sim_fpu ans;
-  ans.val.d = d;
-  return ans;
-}
-
-
-/* General */
 
 INLINE_SIM_FPU (int)
-sim_fpu_is_nan (sim_fpu d)
+sim_fpu_is (const sim_fpu *d)
 {
-  sim_ufpu tmp = fpu2ufpu (&d);
-  return is_ufpu_nan (&tmp);
+  switch (d->class)
+    {
+    case sim_fpu_class_qnan:
+      return SIM_FPU_IS_QNAN;
+    case sim_fpu_class_snan:
+      return SIM_FPU_IS_SNAN;
+    case sim_fpu_class_infinity:
+      return SIM_FPU_IS_NINF;
+      return SIM_FPU_IS_PINF;
+    case sim_fpu_class_number:
+      if (d->sign)
+	return SIM_FPU_IS_NNUM;
+      else
+	return SIM_FPU_IS_PNUM;
+#if 0
+      /* FIXME: Since the intermediate sim_fpu format can hold numbers
+	 far smaller then the targets FP format, the test for denorm
+	 is currently bogus.  Perhaphs the code converting a number to
+	 the internal format should flag such situtations with
+	 `ndemorm' */
+    case ???:
+      if (d->sign)
+	return SIM_FPU_IS_NDENORM;
+      else
+	return SIM_FPU_IS_PDENORM;
+#endif
+    case sim_fpu_class_zero:
+      if (d->sign)
+	return SIM_FPU_IS_NZERO;
+      else
+	return SIM_FPU_IS_PZERO;
+    default:
+      return -1;
+      abort ();
+    }
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_cmp (const sim_fpu *l, const sim_fpu *r)
+{
+  sim_fpu res;
+  sim_fpu_sub (&res, l, r);
+  return sim_fpu_is (&res);
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_is_lt (const sim_fpu *l, const sim_fpu *r)
+{
+  int status;
+  sim_fpu_lt (&status, l, r);
+  return status;
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_is_le (const sim_fpu *l, const sim_fpu *r)
+{
+  int is;
+  sim_fpu_le (&is, l, r);
+  return is;
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_is_eq (const sim_fpu *l, const sim_fpu *r)
+{
+  int is;
+  sim_fpu_eq (&is, l, r);
+  return is;
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_is_ne (const sim_fpu *l, const sim_fpu *r)
+{
+  int is;
+  sim_fpu_ne (&is, l, r);
+  return is;
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_is_ge (const sim_fpu *l, const sim_fpu *r)
+{
+  int is;
+  sim_fpu_ge (&is, l, r);
+  return is;
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_is_gt (const sim_fpu *l, const sim_fpu *r)
+{
+  int is;
+  sim_fpu_gt (&is, l, r);
+  return is;
 }
 
 
 /* Compare operators */
 
 INLINE_SIM_FPU (int)
-sim_fpu_is_lt (sim_fpu l,
-	       sim_fpu r)
+sim_fpu_lt (int *is,
+	    const sim_fpu *l,
+	    const sim_fpu *r)
 {
-  sim_ufpu tl = fpu2ufpu (&l);
-  sim_ufpu tr = fpu2ufpu (&r);
-  if (!is_ufpu_nan (&tl) && !is_ufpu_nan (&tr))
-    return (l.val.d < r.val.d);
+  if (!sim_fpu_is_nan (l) && !sim_fpu_is_nan (r))
+    {
+      sim_fpu_map lval;
+      sim_fpu_map rval;
+      lval.i = pack_fpu (l, 1);
+      rval.i = pack_fpu (r, 1);
+      (*is) = (lval.d < rval.d);
+      return 0;
+    }
+  else if (sim_fpu_is_snan (l) || sim_fpu_is_snan (r))
+    {
+      *is = 0;
+      return sim_fpu_status_invalid_snan;
+    }
   else
-    return 0;
+    {
+      *is = 0;
+      return sim_fpu_status_invalid_qnan;
+    }
 }
 
 INLINE_SIM_FPU (int)
-sim_fpu_is_le (sim_fpu l,
-	       sim_fpu r)
+sim_fpu_le (int *is,
+	    const sim_fpu *l,
+	    const sim_fpu *r)
 {
-  sim_ufpu tl = fpu2ufpu (&l);
-  sim_ufpu tr = fpu2ufpu (&r);
-  if (!is_ufpu_nan (&tl) && !is_ufpu_nan (&tr))
-    return (l.val.d <= r.val.d);
+  if (!sim_fpu_is_nan (l) && !sim_fpu_is_nan (r))
+    {
+      sim_fpu_map lval;
+      sim_fpu_map rval;
+      lval.i = pack_fpu (l, 1);
+      rval.i = pack_fpu (r, 1);
+      *is = (lval.d <= rval.d);
+      return 0;
+    }
+  else if (sim_fpu_is_snan (l) || sim_fpu_is_snan (r))
+    {
+      *is = 0;
+      return sim_fpu_status_invalid_snan;
+    }
   else
-    return 0;
+    {
+      *is = 0;
+      return sim_fpu_status_invalid_qnan;
+    }
 }
 
 INLINE_SIM_FPU (int)
-sim_fpu_is_eq (sim_fpu l,
-	       sim_fpu r)
+sim_fpu_eq (int *is,
+	    const sim_fpu *l,
+	    const sim_fpu *r)
 {
-  sim_ufpu tl = fpu2ufpu (&l);
-  sim_ufpu tr = fpu2ufpu (&r);
-  if (!is_ufpu_nan (&tl) && !is_ufpu_nan (&tr))
-    return (l.val.d == r.val.d);
+  if (!sim_fpu_is_nan (l) && !sim_fpu_is_nan (r))
+    {
+      sim_fpu_map lval;
+      sim_fpu_map rval;
+      lval.i = pack_fpu (l, 1);
+      rval.i = pack_fpu (r, 1);
+      (*is) = (lval.d == rval.d);
+      return 0;
+    }
+  else if (sim_fpu_is_snan (l) || sim_fpu_is_snan (r))
+    {
+      *is = 0;
+      return sim_fpu_status_invalid_snan;
+    }
   else
-    return 0;
+    {
+      *is = 0;
+      return sim_fpu_status_invalid_qnan;
+    }
 }
 
 INLINE_SIM_FPU (int)
-sim_fpu_is_ne (sim_fpu l,
-	       sim_fpu r)
+sim_fpu_ne (int *is,
+	    const sim_fpu *l,
+	    const sim_fpu *r)
 {
-  sim_ufpu tl = fpu2ufpu (&l);
-  sim_ufpu tr = fpu2ufpu (&r);
-  if (!is_ufpu_nan (&tl) && !is_ufpu_nan (&tr))
-    return (l.val.d != r.val.d);
+  if (!sim_fpu_is_nan (l) && !sim_fpu_is_nan (r))
+    {
+      sim_fpu_map lval;
+      sim_fpu_map rval;
+      lval.i = pack_fpu (l, 1);
+      rval.i = pack_fpu (r, 1);
+      (*is) = (lval.d != rval.d);
+      return 0;
+    }
+  else if (sim_fpu_is_snan (l) || sim_fpu_is_snan (r))
+    {
+      *is = 0;
+      return sim_fpu_status_invalid_snan;
+    }
   else
-    return 0;
+    {
+      *is = 0;
+      return sim_fpu_status_invalid_qnan;
+    }
 }
 
 INLINE_SIM_FPU (int)
-sim_fpu_is_ge (sim_fpu l,
-	       sim_fpu r)
+sim_fpu_ge (int *is,
+	    const sim_fpu *l,
+	    const sim_fpu *r)
 {
-  sim_ufpu tl = fpu2ufpu (&l);
-  sim_ufpu tr = fpu2ufpu (&r);
-  if (!is_ufpu_nan (&tl) && !is_ufpu_nan (&tr))
-    return (l.val.d >= r.val.d);
-  else
-    return 0;
+  return sim_fpu_le (is, r, l);
 }
 
 INLINE_SIM_FPU (int)
-sim_fpu_is_gt (sim_fpu l,
-	       sim_fpu r)
+sim_fpu_gt (int *is,
+	    const sim_fpu *l,
+	    const sim_fpu *r)
 {
-  sim_ufpu tl = fpu2ufpu (&l);
-  sim_ufpu tr = fpu2ufpu (&r);
-  if (!is_ufpu_nan (&tl) && !is_ufpu_nan (&tr))
-    return (l.val.d > r.val.d);
-  else
-    return 0;
+  return sim_fpu_lt (is, r, l);
+}
+
+
+/* A number of useful constants */
+
+const sim_fpu sim_fpu_zero = { sim_fpu_class_zero, };
+const sim_fpu sim_fpu_qnan = { sim_fpu_class_qnan, };
+
+
+/* For debugging */
+
+INLINE_SIM_FPU (void)
+sim_fpu_print_fpu (const sim_fpu *f,
+		   sim_fpu_print_func *print,
+		   void *arg)
+{
+  print (arg, "%s", f->sign ? "-" : "+");
+  switch (f->class)
+    {
+    case sim_fpu_class_qnan:
+      print (arg, "0.");
+      print_bits (f->fraction, NR_FRAC_GUARD - 1, print, arg);
+      print (arg, "*QuietNaN");
+      break;
+    case sim_fpu_class_snan:
+      print (arg, "0.");
+      print_bits (f->fraction, NR_FRAC_GUARD - 1, print, arg);
+      print (arg, "*SignalNaN");
+      break;
+    case sim_fpu_class_zero:
+      print (arg, "0.0");
+      break;
+    case sim_fpu_class_infinity:
+      print (arg, "INF");
+      break;
+    case sim_fpu_class_number:
+      print (arg, "1.");
+      print_bits (f->fraction, NR_FRAC_GUARD - 1, print, arg);
+      print (arg, "*2^%+-5d", f->normal_exp);
+      ASSERT (f->fraction >= IMPLICIT_1);
+      ASSERT (f->fraction < IMPLICIT_2);
+    }
+}
+
+
+INLINE_SIM_FPU (void)
+sim_fpu_print_status (int status,
+		      sim_fpu_print_func *print,
+		      void *arg)
+{
+  int i = 1;
+  char *prefix = "";
+  while (status >= i)
+    {
+      switch ((sim_fpu_status) (status & i))
+	{
+	case sim_fpu_status_denorm:
+	  print (arg, "%sD", prefix);
+	  break;
+	case sim_fpu_status_invalid_snan:
+	  print (arg, "%sSNaN", prefix);
+	  break;
+	case sim_fpu_status_invalid_qnan:
+	  print (arg, "%sQNaN", prefix);
+	  break;
+	case sim_fpu_status_invalid_isi:
+	  print (arg, "%sISI", prefix);
+	  break;
+	case sim_fpu_status_invalid_idi:
+	  print (arg, "%sIDI", prefix);
+	  break;
+	case sim_fpu_status_invalid_zdz:
+	  print (arg, "%sZDZ", prefix);
+	  break;
+	case sim_fpu_status_invalid_imz:
+	  print (arg, "%sIMZ", prefix);
+	  break;
+	case sim_fpu_status_invalid_cvi:
+	  print (arg, "%sCVI", prefix);
+	  break;
+	case sim_fpu_status_invalid_cmp:
+	  print (arg, "%sCMP", prefix);
+	  break;
+	case sim_fpu_status_invalid_sqrt:
+	  print (arg, "%sSQRT", prefix);
+	  break;
+	  break;
+	case sim_fpu_status_inexact:
+	  print (arg, "%sX", prefix);
+	  break;
+	  break;
+	case sim_fpu_status_overflow:
+	  print (arg, "%sO", prefix);
+	  break;
+	  break;
+	case sim_fpu_status_underflow:
+	  print (arg, "%sU", prefix);
+	  break;
+	  break;
+	case sim_fpu_status_invalid_div0:
+	  print (arg, "%s/", prefix);
+	  break;
+	  break;
+	case sim_fpu_status_rounded:
+	  print (arg, "%sR", prefix);
+	  break;
+	  break;
+	}
+      i <<= 1;
+      prefix = ",";
+    }
 }
 
 #endif

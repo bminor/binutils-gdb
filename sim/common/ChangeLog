@@ -1,3 +1,17 @@
+Fri Feb 20 18:08:51 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-fpu.c (sim_fpu_cmp): New function.
+
+Wed Feb 18 16:29:21 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* cgen-utils.h (sim_disassemble_insn): Use CGEN_INSN_BITSIZE
+	instead of abuf->length.
+	* sim-trace.c (trace_options): Have -t only trace a few useful things.
+	(set_trace_option_mask): Renamed from set_trace_options.
+	(set_trace_option): New function.
+	(trace_option_handler): Update calls to set_trace_option{,_mask}.
+	* sim-trace.h (TRACE_USEFUL_MASK): New macro.
+
 Wed Feb 18 12:42:15 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-basics.h: Declare struct _sim_fpu.
