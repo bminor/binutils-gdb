@@ -1,3 +1,7 @@
+Thu Aug 26 06:36:31 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* gdb.texinfo:  Change typo "Two two" to "The two".
+
 Mon Aug 23 18:33:55 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* snapshots.readme:  Update policy for daily full snapshots and
