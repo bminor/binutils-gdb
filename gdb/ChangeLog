@@ -1,5 +1,8 @@
 Wed Jul  5 11:38:36 1995  Kung Hsu  <kung@rtl.cygnus.com>
 
+	* defs.h: if __GO32__ or WIN32 the directory separating symbol should
+	be '\' not '/'.
+
 	* remote-nindy (nindy_wait): Use infinite timeout reading after
 	esacpe character.
 
