@@ -1,3 +1,9 @@
+Thu Apr 18 16:02:11 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* dep-in.sed: Substitute $(BFDDIR) for @BFDDIR@.
+	* Makefile.in: Rebuild dependencies.
+	(dep.sed): Substitute $(BFDDIR) for @BFDDIR@.
+
 Tue Apr 16 13:50:22 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* rdcoff.c: New file.
