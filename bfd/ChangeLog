@@ -1,3 +1,8 @@
+Fri Jan 28 18:34:05 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* hosts/vaxbsd.h (HOST_STACK_END_ADDR): Vax BSD doesn't define
+	KERNBASE, so hard-code 0x80000000 instead.
+
 Thu Jan 27 13:54:08 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* linker.c (generic_link_add_symbol_list): If symbol is common,
