@@ -1,3 +1,10 @@
+Thu Jan  9 11:44:40 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* sparc-tdep.c (sparc_frame_find_saved_regs): Don't use 
+	FP_REGISTER_BYTES to compute offsets into the saved frame, 
+	since it fails for SPARC targets configured without any
+	FP regs.  Instead, use DUMMY_STACK_REG_BUF_SIZE.  
+
 Mon Jan  6 11:15:14 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* symtab.c (fixup_symbol_section):  Handle NULL symbols without
