@@ -952,11 +952,13 @@ Run using @var{device} for your program's standard input and output.
 @cindex leaving @value{GDBN}
 
 @table @code
-@kindex quit
+@kindex quit @r{[}@var{expression}@r{]}
 @kindex q
 @item quit
 To exit @value{GDBN}, use the @code{quit} command (abbreviated @code{q}), or 
-type an end-of-file character (usually @kbd{C-d}).
+type an end-of-file character (usually @kbd{C-d}).  If you do not supply 
+@var{expression}, @value{GDBN} will terminate normally; otherwise it will 
+terminate using the result of @var{expression} as the error code.
 @end table
 
 @cindex interrupt
@@ -4974,6 +4976,11 @@ to the type of @code{$__}.
 The variable @code{$__} is automatically set by the @code{x} command
 to the value found in the last address examined.  Its type is chosen
 to match the format in which the data was printed.
+
+@item $_exitcode
+@kindex $_exitcode
+The variable @code{$_exitcode} is automatically set to the exit code when
+the program being debugged terminates.
 @end table
 
 @node Registers
