@@ -60,7 +60,7 @@ DEFUN(rel,(abfd, seclet, output_section),
 
   if (output_section->flags & SEC_HAS_CONTENTS )
   {
-    bfd_byte *data = alloca(seclet->size);
+    bfd_byte *data = (bfd_byte *)alloca(seclet->size);
     data = bfd_get_relocated_section_contents(abfd, seclet, data);
     if(bfd_set_section_contents(abfd,
 				output_section,
