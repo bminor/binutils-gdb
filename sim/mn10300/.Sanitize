@@ -16,10 +16,10 @@
 Do-first:
 
 am33_files="am33.igen"
-if ( echo $* | grep keep\-am30 > /dev/null ) ; then
-        keep_these_too="${am30_files} ${keep_these_too}"
+if ( echo $* | grep keep\-am33 > /dev/null ) ; then
+        keep_these_too="${am33_files} ${keep_these_too}"
 else
-        lose_these_too="${am30_files} ${lose_these_too}"
+        lose_these_too="${am33_files} ${lose_these_too}"
 fi
 
 am30_files="dv-mn103cpu.c dv-mn103int.c dv-mn103tim.c dv-mn103ser.c dv-mn103iop.c"
