@@ -963,27 +963,22 @@ coff_set_alignment_hook (abfd, section, scnhdr)
 #ifdef POWERPC_LE_PE
   if (strcmp (section->name, ".idata$2") == 0)
     {
-      fprintf(stderr, "Setting alignment for .idata$4\n");
       section->alignment_power = 0;
     }
   else if (strcmp (section->name, ".idata$3") == 0)
     {
-      fprintf(stderr, "Setting alignment for .idata$4\n");
       section->alignment_power = 0;
     }
   else if (strcmp (section->name, ".idata$4") == 0)
     {
-      fprintf(stderr, "Setting alignment for .idata$4\n");
       section->alignment_power = 2;
     }
   else if (strcmp (section->name, ".idata$5") == 0)
     {
-      fprintf(stderr, "Setting alignment for .idata$5\n");
       section->alignment_power = 2;
     }
   else if (strcmp (section->name, ".idata$6") == 0)
     {
-      fprintf(stderr, "Setting alignment for .idata$6\n");
       section->alignment_power = 1;
     }
 #endif
