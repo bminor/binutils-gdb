@@ -45,8 +45,9 @@ nltvals.def
 nrun.c
 run.c
 run.1
-sim-assert.h
+sim-abort.c
 sim-alu.h
+sim-assert.h
 sim-base.h
 sim-basics.h
 sim-bits.c
@@ -57,12 +58,12 @@ sim-core.c
 sim-core.h
 sim-endian.c
 sim-endian.h
+sim-engine.c
+sim-engine.h
 sim-events.c
 sim-events.h
 sim-fpu.c
 sim-fpu.h
-sim-halt.c
-sim-halt.h
 sim-inline.c
 sim-inline.h
 sim-io.c
@@ -79,6 +80,10 @@ sim-options.c
 sim-options.h
 sim-profile.c
 sim-profile.h
+sim-reason.c
+sim-resume.c
+sim-run.c
+sim-stop.c
 sim-trace.c
 sim-trace.h
 sim-types.h
