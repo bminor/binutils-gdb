@@ -146,7 +146,7 @@ print_insn_a29k (memaddr, buffer, stream)
 
   /* The four bytes of the instruction.  */
   unsigned char insn24, insn16, insn8, insn0;
-
+	unsigned long value;
   CONST struct am29k_opcode *opcode;
 
 #ifdef GDB
@@ -160,6 +160,7 @@ print_insn_a29k (memaddr, buffer, stream)
 
   find_bytes (insn, &insn0, &insn8, &insn16, &insn24);
 
+  value = (insn24 << 24) + (insn16 << 16) + (insn8 << 8) + insn0;
   /* Handle the nop (aseq 0x40,gr1,gr1) specially */
   if ((insn24==0x70) && (insn16==0x40) && (insn8==0x01) && (insn0==0x01)) {
     fprintf_filtered (stream,"nop");
@@ -263,11 +264,11 @@ print_insn_a29k (memaddr, buffer, stream)
 		  break;
 
 		case 'F':
-		  fprintf_filtered (stream, "%d", (insn0 >> 18) & 15);
+		  fprintf_filtered (stream, "%d", (value >> 18) & 0xf);
 		  break;
 
 		case 'C':
-		  fprintf_filtered (stream, "%d", (insn0 >> 16) & 3);
+		  fprintf_filtered (stream, "%d", (value >> 16)  & 3);
 		  break;
 
 		default:
