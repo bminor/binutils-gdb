@@ -23,18 +23,18 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
 #endif
 
-/* wait.h */
-#define HAVE_WAIT_STRUCT
-
 /* Get rid of any system-imposed stack limit if possible */
 
 #define	SET_STACK_LIMIT_HUGE
 
 /* This WOULD BE the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.
-   But Mips' ptrace works on regnums, not displacements */
+   But Mips' ptrace works on regnums, not displacements.  So since
+   REGISTER_U_ADDR is called for both core files and ptrace, use
+   BLOCKEND as a flag:  0 for core files, 1 for ptrace.  What a
+   kludge.  */
 
-#define KERNEL_U_ADDR (int)u.u_ar0
+#define KERNEL_U_ADDR (int)reg_ptr	/* Magic, causes a zero blockend */
 
 #define REGISTER_U_ADDR(addr, blockend, regno) 		\
    if (blockend == 0) {					\
@@ -55,7 +55,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */
 #define	ONE_PROCESS_WRITETEXT
-
-/* Interface definitions for kernel debugger KDB */
-
-/* I am not going to pretend I've done anything about this */

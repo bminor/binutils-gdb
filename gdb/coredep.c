@@ -25,9 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include <stdio.h>
 
-/* Some of these are needed on various systems, perhaps, to expand
-   REGISTER_U_ADDR appropriately?  */
-/* #include <sys/core.h> */
+/* These are needed on various systems to expand REGISTER_U_ADDR.  */
+#include <sys/types.h>
 #include <sys/param.h>
 #include <sys/dir.h>
 #include <sys/file.h>
