@@ -1,3 +1,10 @@
+2004-09-23  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.base/constvars.exp (local_compiler_xfail_check_2):
+	New proc.  Accept both gcc 3.x.x and gcc 4.x.x.
+	* gdb.base/volatile.exp (local_compiler_xfail_check_2):
+	Likewise.
+
 2004-09-20  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.java/jprint.exp: New test case for java inferior call.
