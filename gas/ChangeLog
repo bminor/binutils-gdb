@@ -1,3 +1,12 @@
+2000-06-29 Mark Elbrecht <snowball3@bigfoot.com>
+
+	* config/obj-coff.c (obj_coff_setcion) [BFD_ASSEMBLER]: If the
+	flags argument is not present, don't change an existing section's
+	section's attributes. If the flags argument is present, warn if the
+	attributes don't match the section's current attributes. When
+	long section names are supported, set SEC_LINK_ONCE and
+	SEC_LINK_DUPLICATES_DISCARD for a new .gnu.linkonce section.
+
 Thu Jun 29 21:30:00 2000  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config/obj-aout.c (obj_aout_type): Do not ignore for undefined

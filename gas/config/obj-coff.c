@@ -652,7 +652,7 @@ static void
 obj_coff_endef (ignore)
      int ignore ATTRIBUTE_UNUSED;
 {
-  symbolS *symbolP;
+  symbolS *symbolP = NULL;
 
   /* DIM BUG FIX sac@cygnus.com */
   dim_index = 0;
@@ -1353,7 +1353,7 @@ obj_coff_section (ignore)
   char c;
   char *name;
   unsigned int exp;
-  flagword flags;
+  flagword flags, oldflags;
   asection *sec;
 
   if (flag_mri)
@@ -1375,7 +1375,7 @@ obj_coff_section (ignore)
   SKIP_WHITESPACE ();
 
   exp = 0;
-  flags = SEC_LOAD;
+  flags = SEC_NO_FLAGS;
 
   if (*input_line_pointer == ',')
     {
@@ -1420,18 +1420,35 @@ obj_coff_section (ignore)
 
   sec = subseg_new (name, (subsegT) exp);
 
-  if (flags != SEC_NO_FLAGS)
+  oldflags = bfd_get_section_flags (stdoutput, sec);
+  if (oldflags == SEC_NO_FLAGS)
     {
-      flagword oldflags;
-
-      oldflags = bfd_get_section_flags (stdoutput, sec);
-      oldflags &= SEC_LINK_ONCE | SEC_LINK_DUPLICATES;
-      flags |= oldflags;
+      /* Set section flags for a new section just created by subseg_new.
+         Provide a default if no flags were parsed.  */
+      if (flags == SEC_NO_FLAGS)
+        flags = SEC_LOAD;
+          
+#ifdef COFF_LONG_SECTION_NAMES
+      /* Add SEC_LINK_ONCE and SEC_LINK_DUPLICATES_DISCARD to .gnu.linkonce
+         sections so adjust_reloc_syms in write.c will correctly handle
+         relocs which refer to non-local symbols in these sections.  */
+      if (strncmp (name, ".gnu.linkonce", sizeof(".gnu.linkonce") - 1) == 0)
+        flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
+#endif
 
       if (! bfd_set_section_flags (stdoutput, sec, flags))
-	as_warn (_("error setting flags for \"%s\": %s"),
-		 bfd_section_name (stdoutput, sec),
-		 bfd_errmsg (bfd_get_error ()));
+        as_warn (_("error setting flags for \"%s\": %s"),
+                 bfd_section_name (stdoutput, sec),
+                 bfd_errmsg (bfd_get_error ()));
+    }
+  else if (flags != SEC_NO_FLAGS)
+    {
+      /* This section's attributes have already been set. Warn if the
+         attributes don't match.  */
+      flagword matchflags = SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
+                           | SEC_DATA | SEC_SHARED;
+      if ((flags ^ oldflags) & matchflags)
+	as_warn (_("Ignoring changed section attributes for %s"), name);
     }
 
   demand_empty_rest_of_line ();
