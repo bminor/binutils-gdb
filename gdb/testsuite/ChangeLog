@@ -1,3 +1,8 @@
+2002-09-18  Fernando Nasser  <fnasser@redhat.com>
+
+	* gdb.base/ending-run.exp: Properly mark "continue after exit" and
+	"don't step after run" as unresolved or unsupported, instead of xfail.
+
 2002-09-18  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/ending-run.exp: Fix expected string for _wrap_main to
