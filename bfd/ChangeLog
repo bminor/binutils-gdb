@@ -1,3 +1,7 @@
+Tue Jan 19 09:06:14 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* libcoff-in.h: Update prototype for coff_count_linenumbers.
+
 Fri Jan 15 18:13:17 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* coff-msym.c (ecoff_swap_hdr_out, ecoff_swap_fdr_out,
