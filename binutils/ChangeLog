@@ -1,3 +1,50 @@
+Tue Apr 21 13:38:37 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: rework CFLAGS so that they can be passed on the
+	  command line to make.  Remove MINUS_G.  Default CFLAGS to -g.
+
+Wed Apr 15 14:33:07 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* arsup.c, arsup.h, arparse.y, arlex.l: support for archive
+	scripting language.
+
+Fri Mar  6 21:54:53 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: added check target.
+
+Thu Mar  5 21:35:49 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: added clean-info target.
+
+Tue Mar  3 15:36:37 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* Makefile.in: remove $(COPY_PROG) from PROGS.  It shouldn't be
+	  installed. added tooldir and program_prefix.
+
+Wed Feb 26 18:04:40 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in, configure.in: removed traces of namesubdir,
+	  -subdirs, $(subdir), $(unsubdir), some rcs triggers.  Forced
+	  copyrights to '92, changed some from Cygnus to FSF.
+
+Sun Feb 16 12:53:02 1992  Per Bothner  (bothner at cygnus.com)
+
+	* Makefile.in:  Bump version to 1.96, and remove -beta
+	suffix from distribution name.
+	* m68k-pinsn.c:  New macro COERCE_SIGNED_CHAR to extract
+	the signed value of a character (even if chars are unsigned).
+	* sparc-pinsn.c:  Add new operand types.
+
+Thu Feb  6 12:14:19 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* objdump.c (disassemble_data): don't print a section's contents
+	if it's not loadable (eg bss)
+
+Tue Jan 28 11:11:06 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* m68k-pinsn.c (print_insn_arg): fixed so that -ve branch
+	displacements don't get printed as large +ve ones.
+
 Fri Jan 24 14:47:53 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	* copy.c, nm.c, objdump.c, size.c : changed to use the

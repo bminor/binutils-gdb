@@ -1,5 +1,5 @@
 # Makefile for GNU binary-file utilities
-# Copyright (C) 1989-1991 Free Software Foundation, Inc.
+# Copyright (C) 1989-1992 Free Software Foundation, Inc.
 
 # This file is part of GNU binutils.
 
@@ -21,31 +21,56 @@
 
 srcdir = .
 
-ddestdir = /usr/local
-idestdir = $(ddestdir)
+prefix = /usr/local
+
+program_prefix =
+exec_prefix = $(prefix)
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+tooldir = $(libdir)
+
+datadir = $(prefix)/lib
+mandir = $(prefix)/man
+man1dir = $(mandir)/man1
+man2dir = $(mandir)/man2
+man3dir = $(mandir)/man3
+man4dir = $(mandir)/man4
+man5dir = $(mandir)/man5
+man6dir = $(mandir)/man6
+man7dir = $(mandir)/man7
+man8dir = $(mandir)/man8
+man9dir = $(mandir)/man9
+infodir = $(prefix)/info
+includedir = $(prefix)/include
+docdir = $(datadir)/doc
 
 SHELL = /bin/sh
-MAKEINFO=makeinfo
+
+INSTALL = install -c
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA = $(INSTALL)
+
+AR = ar
+AR_FLAGS = qv
+CFLAGS = -g
+BISON = bison -y
+FLEX = flex
+MAKEINFO = makeinfo
+RANLIB = ranlib
+BISONFLAGS = -tvd
 TEXI2ROFF=texi2roff
 
 # Distribution version
-VERSION=1.91
+VERSION=1.96
 # Distribution name
-DIST_NAME=binutils-beta-${VERSION}
+DIST_NAME=binutils-${VERSION}
 
-version=`$(unsubdir)/../gcc$(subdir)/gcc -dumpversion`
-prefix = $(ddestdir)
-bindir = $(prefix)/bin
-mandir = $(idestdir)/man
+version=`./../gcc/gcc -dumpversion`
 
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../texinfo/fsf
 
 MANPAGES= ar.1 nm.1 objdump.1 ranlib.1 size.1 strip.1
-
-#INSTALL = install -c
-#INSTALL_PROGRAM = $(INSTALL)
-#INSTALL_FILE = $(INSTALL)
 
 #CC=gcc -Wall
 # these two are almost the same program
@@ -61,19 +86,19 @@ SIZE_PROG=size
 NM_PROG=nm
 OBJDUMP_PROG=objdump
 
-PROGS = $(SIZE_PROG) $(COPY_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRIP_PROG) $(RANLIB_PROG)
+PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRIP_PROG) $(RANLIB_PROG)
 STAGESTUFF = $(PROGS) *.o
 
 BASEDIR = $(srcdir)/..
-LIBDIR  = $(unsubdir)/../bfd$(subdir)
+LIBDIR  = ./../bfd
 
-MINUS_G = -g
 #### host and target dependant Makefile fragments come in here.
 ###
 
 INCDIR = $(BASEDIR)/include
 
-CFLAGS  = $(MINUS_G) -I. -I$(srcdir) -I$(INCDIR) $(HDEFINES) $(TDEFINES)
+.c.o:
+	$(CC) -c $(CFLAGS) -I. -I$(srcdir) -I$(INCDIR) $(HDEFINES) $(TDEFINES) $<
 
 # When adding .o files, to make VPATH work in Sun Make, you have to
 # also add a foo.o: foo.c line at the bottom of the file.
@@ -95,7 +120,7 @@ DISASMS = m68k-pinsn.o i960-pinsn.o sparc-pinsn.o  am29k-pinsn.o
 # Use the GNU getopt unless you have problems with it.
 # The IRIS version could probably benefit from being assembled with
 # libmalloc rather than the ordinary malloc.
-LIBIBERTY = $(unsubdir)/../libiberty$(subdir)/libiberty.a
+LIBIBERTY = ./../libiberty/libiberty.a
 
 # Code shared by all the binutils.
 BULIBS = bucomm.o version.o filemode.o
@@ -108,7 +133,9 @@ BFD = $(LIBDIR)/libbfd.a
 
 all: $(ADDL_LIBS) $(PROGS)
 
-all-info: binutils.info
+check:
+
+info: binutils.info
 
 #$(BFD):$(LIBDIR)/../common/*.c
 #	(cd $(LIBDIR); make)
@@ -116,8 +143,11 @@ all-info: binutils.info
 $(SIZE_PROG): $(ADDL_LIBS) size.o $(BFD)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(SIZE_PROG) size.o $(ADDL_LIBS) $(LOADLIBES)
 
-$(COPY_PROG): $(ADDL_LIBS) copy.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(COPY_PROG) copy.o $(ADDL_LIBS) $(LOADLIBES)
+$(COPY_PROG): $(ADDL_LIBS) copy.o not-strip.o $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(COPY_PROG) copy.o not-strip.o $(ADDL_LIBS) $(LOADLIBES)
+
+$(STRIP_PROG): $(ADDL_LIBS) copy.o is-strip.o $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(STRIP_PROG) copy.o is-strip.o $(ADDL_LIBS) $(LOADLIBES)
 
 $(NM_PROG): $(ADDL_LIBS) nm.o $(BFD)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(LOADLIBES)
@@ -125,11 +155,20 @@ $(NM_PROG): $(ADDL_LIBS) nm.o $(BFD)
 $(OBJDUMP_PROG): $(ADDL_LIBS) size.o objdump.o $(DISASMS) $(BFD)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJDUMP_PROG) objdump.o $(DISASMS) $(ADDL_LIBS) $(LOADLIBES)
 
-$(AR_PROG): $(ADDL_LIBS) ar.o not-ranlib.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o not-ranlib.o $(ADDL_LIBS) $(LOADLIBES)
+arparse.c:arparse.y
+	$(BISON) $(BISONFLAGS)  $(VPATH)/arparse.y
+	mv y.tab.c arparse.c
+	mv y.tab.h arparse.h
 
-$(RANLIB_PROG): $(ADDL_LIBS) ar.o is-ranlib.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(RANLIB_PROG) ar.o is-ranlib.o $(ADDL_LIBS) $(LOADLIBES)
+
+arlex.c:arlex.l
+	$(FLEX) -I -Cem -t $(VPATH)/arlex.l >arlex.c
+
+$(AR_PROG): $(ADDL_LIBS) ar.o arparse.o arlex.o not-ranlib.o $(BFD) arsup.o
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(AR_PROG) ar.o arparse.o arlex.o arsup.o not-ranlib.o $(ADDL_LIBS) $(LOADLIBES)
+
+$(RANLIB_PROG): $(ADDL_LIBS) ar.o is-ranlib.o arparse.o arlex.o arsup.o $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(RANLIB_PROG) ar.o arparse.o arlex.o arsup.o is-ranlib.o $(ADDL_LIBS) $(LOADLIBES)
 
 # This rule creates a single binary that switches between ar and ranlib
 # by looking at argv[0].  Use this kludge to save some disk space.
@@ -143,7 +182,10 @@ ar_with_ranlib: $(ADDL_LIBS) ar.o maybe-ranlib.o $(BFD)
 	-rm -f $(RANLIB_PROG)
 	-ln $(AR_PROG) $(RANLIB_PROG)
 
-$(STRIP_PROG): $(COPY_PROG)
+# copy and strip in one binary that uses argv[0] to decide its action.
+
+copy_with_strip: $(ADDL_LIBS) copy.o maybe-strip.o $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(COPY_PROG) copy.o maybe-strip.o $(ADDL_LIBS) $(LOADLIBES)
 	-rm -f $(STRIP_PROG)
 	-ln $(COPY_PROG) $(STRIP_PROG)
 
@@ -210,7 +252,7 @@ binutils.ms: $(srcdir)/binutils.texi
 		-e 's/^@alphaenumerate/@enumerate/g' \
 		-e 's/^@end alphaenumerate/@end enumerate/g' \
 		$(srcdir)/binutils.texi | \
-	texi2roff -ms | \
+	$(TEXI2ROFF) -ms | \
 	sed -e 's/---/\\(em/g' \
 	>binutils.ms 
 
@@ -228,7 +270,7 @@ binutils.mm: $(srcdir)/binutils.texi
 		-e 's/^@alphaenumerate/@enumerate/g' \
 		-e 's/^@end alphaenumerate/@end enumerate/g' \
 		$(srcdir)/binutils.texi | \
-	texi2roff -mm | \
+	$(TEXI2ROFF) -mm | \
 	sed -e 's/---/\\(em/g' \
 		>binutils.mm
 
@@ -243,7 +285,7 @@ binutils.me: $(srcdir)/binutils.texi
 		-e 's/^@alphaenumerate/@enumerate/g' \
 		-e 's/^@end alphaenumerate/@end enumerate/g' \
 		$(srcdir)/binutils.texi | \
-	texi2roff -me | \
+	$(TEXI2ROFF) -me | \
 	sed -e 's/---/\\(em/g' \
 	>binutils.me 
 
@@ -263,22 +305,19 @@ realclean: clean
 
 install: all
 	for i in $(PROGS) ; do \
-		(cp $$i $(bindir)/$$i.new \
-			&& mv -f $(bindir)/$$i.new $(bindir)/$$i) \
-		|| exit 1 ; \
+		$(INSTALL_PROGRAM) $$i $(bindir)/$(program_prefix)$$i ; \
 	done
 	for i in $(MANPAGES) ; do \
-		(cp $(srcdir)/$$i $(mandir)/man1/$$i.new \
-			&& mv -f $(mandir)/man1/$$i.new $(mandir)/man1/$$i) \
-		|| exit 1 ; \
+		$(INSTALL_DATA) $(srcdir)/$$i $(man1dir)/$(program_prefix)$$i ; \
 	done
 
-install-info: all-info
+install-info: info
 	for i in *.info* ; do \
-		(cp $$i $(idestdir)/info/$$i.new \
-			&& mv -f $(idestdir)/info/$$i.new $(idestdir)/info/$$i) \
-		|| exit 1 ; \
+		$(INSTALL_DATA) $$i $(infodir)/$$i ; \
 	done
+
+clean-info:
+	-rm -rf *.info*
 
 dist: $(DIST_NAME).tar.Z
 
@@ -302,15 +341,19 @@ getopt1.o:getopt1.c
 gmalloc.o:gmalloc.c
 i960-pinsn.o: i960-pinsn.c
 is-ranlib.o:is-ranlib.c
+is-strip.o:is-strip.c
 m68k-pinsn.o: m68k-pinsn.c
 maybe-ranlib.o:maybe-ranlib.c
+maybe-strip.o:maybe-strip.c
 nm.o: nm.c
 not-ranlib.o:not-ranlib.c
+not-strip.o:not-strip.c
 objdump.o: objdump.c
 size.o: size.c
 sparc-pinsn.o: sparc-pinsn.c
 strip.o:strip.c
-version.o: version.c
+version.o: $(srcdir)/version.c
+	$(CC) $(CFLAGS) -I. -I$(srcdir) -I$(INCDIR) $(HDEFINES) $(TDEFINES) -DVERSION='"$(VERSION)"' -c $(srcdir)/version.c
 
 #-----------------------------------------------------------------------------
 #		'STANDARD' GNU/960 TARGETS BELOW THIS POINT
