@@ -1,5 +1,5 @@
 /* coff object file format
-   Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS.
    
@@ -59,7 +59,7 @@ const segT N_TYPE_seg [32] =
 	SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF,SEG_GOOF
     };
 
-#ifdef __STDC__
+#if __STDC__ == 1
 
 char *s_get_name(symbolS *s);
 static symbolS *tag_find_or_make(char *name);
@@ -83,7 +83,7 @@ static void obj_coff_val(void);
 static void tag_init(void);
 static void tag_insert(char *name, symbolS *symbolP);
 
-#else
+#else /* not __STDC__ */
 
 char *s_get_name();
 static symbolS *tag_find();
@@ -103,7 +103,7 @@ static void obj_coff_val();
 static void tag_init();
 static void tag_insert();
 
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 static struct hash_control *tag_hash;
 static symbolS *def_symbol_in_progress = NULL;

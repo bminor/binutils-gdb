@@ -297,12 +297,12 @@ typedef struct {
 #define OBJ_EMIT_LINENO(a, b, c)	{;}
 #define obj_pre_write_hook(a)		{;}
 
-#ifdef __STDC__
+#if __STDC__
 struct fix;
 void tc_aout_fix_to_chars(char *where, struct fix *fixP, relax_addressT segment_address);
-#else
+#else /* not __STDC__ */
 void tc_aout_fix_to_chars();
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 /*
  * Local Variables:

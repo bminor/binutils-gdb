@@ -1,6 +1,5 @@
-#define cypress 1234
 /* tc-sparc.c -- Assemble for the SPARC
-   Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -17,6 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+
+#define cypress 1234
 
 #include <stdio.h>
 #include <ctype.h>
@@ -111,17 +112,18 @@ int pcrel;
 enum reloc_type reloc;
 } the_insn, set_insn;
 
-#ifdef __STDC__
+#if __STDC__ == 1
 #if 0
 static void print_insn(struct sparc_it *insn);
 #endif
 static int getExpression(char *str);
-#else
+#else /* not __STDC__ */
 #if 0
 static void print_insn();
 #endif
 static int getExpression();
-#endif
+#endif /* not __STDC__ */
+
 static char *expr_end;
 static int special_case;
 
@@ -1496,7 +1498,7 @@ void tc_aout_fix_to_chars(where, fixP, segment_address_in_file)
 {
     long r_index;
     long r_extern;
-    long r_addend;
+    long r_addend = 0;
     long r_address;
     
     know(fixP->fx_addsy);

@@ -1,5 +1,5 @@
 /* a.out object file format
-   Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -57,15 +57,15 @@ const segT N_TYPE_seg [N_TYPE+2] = {	/* N_TYPE == 0x1E = 32-2 */
 	SEG_GOOF,
 };
 
-#ifdef __STDC__
+#if __STDC__ == 1
 static void obj_aout_stab(int what);
 static void obj_aout_line(void);
 static void obj_aout_desc(void);
-#else /* __STDC__ */
+#else /* not __STDC__ */
 static void obj_aout_desc();
 static void obj_aout_stab();
 static void obj_aout_line();
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 const pseudo_typeS obj_pseudo_table[] = {
 #ifndef IGNORE_DEBUG

@@ -19,7 +19,7 @@
 
 #define M_VAX 1
 
-#ifndef __STDC__
+#if __STDC__ != 1
 #define NO_STDARG
 #endif /* not ansi */
 

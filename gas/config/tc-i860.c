@@ -1,5 +1,5 @@
-/* i860.c -- Assemble for the I860
-   Copyright (C) 1989 Free Software Foundation, Inc.
+/* tc-i860.c -- Assemble for the I860
+   Copyright (C) 1989, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -132,13 +132,18 @@ struct i860_it {
 	enum reloc_type reloc;
 } the_insn;
 
-#ifdef __STDC__
+#if __STDC__ == 1
+
 static void print_insn(struct i860_it *insn);
 static int getExpression(char *str);
-#else
+
+#else /* not __STDC__ */
+
 static void print_insn();
 static int getExpression();
-#endif
+
+#endif /* not __STDC__ */
+
 static char *expr_end;
 static char last_expand;	/* error if expansion after branch */
 

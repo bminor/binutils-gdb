@@ -55,17 +55,17 @@
 #define strchr(s, c) index(s, c) 
 #endif
 
-#ifndef __STDC__
+#if __STDC__ != 1
 #define const
 #endif
 
-#ifdef __STDC__
+#if __STDC__ == 1
 extern char *cplus_demangle (const char *type);
 #else
 extern char *cplus_demangle ();
 #endif
 
-#ifdef __STDC__
+#if __STDC__ == 1
 extern char *xmalloc (int);
 extern char *xrealloc (char *, int);
 #else
@@ -119,7 +119,7 @@ typedef struct {
 	char *e;			/* pointer after end of allocated space */
 } string;
 
-#ifdef __STDC__
+#if __STDC__ == 1
 static void string_need (string *s, int n);
 static void string_delete (string *s);
 static void string_init (string *s);

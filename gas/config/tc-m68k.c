@@ -1,6 +1,7 @@
-/* m68k.c  All the m68020 specific stuff in one convenient, huge,
+/* tc-m68k.c  All the m68020 specific stuff in one convenient, huge,
    slow to compile, easy to find file.
-   Copyright (C) 1987, 1991 Free Software Foundation, Inc.
+
+   Copyright (C) 1987, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -381,7 +382,7 @@ struct m68k_incant {
 #define gettwo(x)	(((x)->m_opcode)&0xffff)
 
 
-#ifdef __STDC__
+#if __STDC__ == 1
 
 static char *crack_operand(char *str, struct m68k_op *opP);
 static int get_num(struct m68k_exp *exp, int ok);
@@ -397,7 +398,7 @@ static void s_data2(void);
 static void s_even(void);
 static void s_proc(void);
 
-#else /* __STDC__ */
+#else /* not __STDC__ */
 
 static char *crack_operand();
 static int get_num();
@@ -413,7 +414,7 @@ static void s_data2();
 static void s_even();
 static void s_proc();
 
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 static enum m68k_architecture current_architecture = 0;
 

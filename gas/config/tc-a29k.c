@@ -51,7 +51,7 @@ struct machine_it {
 	enum reloc_type reloc;
 } the_insn;
 
-#ifdef __STDC__
+#if __STDC__ == 1
 
 /* static int getExpression(char *str); */
 static void machine_ip(char *str);
@@ -59,7 +59,7 @@ static void machine_ip(char *str);
 static void s_data1(void);
 static void s_use(void);
 
-#else /* __STDC__ */
+#else /* not __STDC__ */
 
 /* static int getExpression(); */
 static void machine_ip();
@@ -67,7 +67,7 @@ static void machine_ip();
 static void s_data1();
 static void s_use();
 
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 const pseudo_typeS
     md_pseudo_table[] = {

@@ -1,5 +1,5 @@
 /* ns32k.c  -- Assemble on the National Semiconductor 32k series
-   Copyright (C) 1987 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -354,19 +354,19 @@ char disp_test[]={ 0,0,0,0,0,0,0,0,
 char disp_size[]={ 4,1,2,0,4 };
 
 
-#ifdef __STDC__
+#if __STDC__ == 1
 
 static segT evaluate_expr(expressionS *resultP, char *ptr);
 static void md_number_to_disp(char *buf, long val, int n);
 static void md_number_to_imm(char *buf, long val, int n);
 
-#else /* __STDC__ */
+#else /* not __STDC__ */
 
 static segT evaluate_expr();
 static void md_number_to_disp();
 static void md_number_to_imm();
 
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 /* Parses a general operand into an addressingmode struct 
    

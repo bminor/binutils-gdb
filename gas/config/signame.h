@@ -18,7 +18,7 @@
 /* Names for signals from 0 to NSIG-1.  */
 extern char *sys_siglist[];
 
-#ifdef __STDC__
+#if __STDC__ == 1
 /* Return the abbreviation (e.g. ABRT, FPE, etc.) for signal NUMBER.
    Do not return this as a const char *.  The caller might want to
    assign it to a char *.  */
@@ -32,12 +32,12 @@ int sig_number (const char *abbrev);
    a colon, and followed by a newline.  */
 void psignal (int signal, const char *message);
 
-#else
+#else /* not __STDC__ */
 
 char *sig_abbrev ();
 int sig_number ();
 void psignal ();
 
-#endif
+#endif /* not __STDC__ */
 
 /* end of signame.h */

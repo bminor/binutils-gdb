@@ -17,11 +17,11 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#ifndef __STDC__
+#if __STDC__ != 1
 #define NO_STDARG
 #endif /* not __STDC__ */
 
-#if !defined(__GNUC__) & !defined(__STDC__)
+#if !defined(__GNUC__) && (__STDC__ != 1)
 #include <memory.h>
 #else
 extern int memset();
@@ -35,23 +35,25 @@ extern int memset();
 
 /* externs for system libraries. */
 
-extern char *strchr();
+/*extern int abort();*/
+/*extern int exit();*/
 extern char *malloc();
 extern char *realloc();
+extern char *strchr();
 extern char *strrchr();
 extern int _filbuf();
 extern int _flsbuf();
-/*extern int abort();*/
 extern int bcopy();
 extern int bzero();
 extern int bzero();
-/*extern int exit();*/
 extern int fclose();
+extern int fgetc();
 extern int fprintf();
 extern int fread();
 extern int free();
 extern int perror();
 extern int printf();
+extern int rewind();
 extern int setvbuf();
 extern int sscanf();
 extern int strcmp();
@@ -61,6 +63,7 @@ extern int time();
 extern int ungetc();
 extern int vfprintf();
 extern int vprintf();
+extern int vsprintf();
 extern long atol();
 
 #ifndef tolower

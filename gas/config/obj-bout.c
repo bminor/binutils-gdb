@@ -53,15 +53,15 @@ const segT N_TYPE_seg [N_TYPE+2] = {	/* N_TYPE == 0x1E = 32-2 */
 	SEG_GOOF,
 };
 
-#ifdef __STDC__
+#if __STDC__ == 1
 static void obj_bout_stab(int what);
 static void obj_bout_line(void);
 static void obj_bout_desc(void);
-#else /* __STDC__ */
+#else /* not __STDC__ */
 static void obj_bout_desc();
 static void obj_bout_stab();
 static void obj_bout_line();
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 const pseudo_typeS obj_pseudo_table[] = {
 	/* stabs (aka a.out aka b.out directives for debug symbols) */

@@ -1,5 +1,5 @@
-/* ns32k-opcode.h -- Opcode table for National Semi 32k processor
-   Copyright (C) 1987 Free Software Foundation, Inc.
+/* tc-ns32k.h -- Opcode table for National Semi 32k processor
+   Copyright (C) 1987, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -34,7 +34,7 @@
 #define MAX_ARGS 4
 #define ARG_LEN 50
 
-#ifdef __STDC__
+#if __STDC__ == 1
 
 void fix_new_ns32k(fragS *frag,
 		   int where,
@@ -47,11 +47,11 @@ void fix_new_ns32k(fragS *frag,
 		   void *bit_fixP, /* really bit_fixS */
 		   int bsr);
 
-#else /* __STDC__ */
+#else /* not __STDC__ */
 
 void fix_new_ns32k();
 
-#endif /* __STDC__ */
+#endif /* not __STDC__ */
 
 
 /* end of tc-ns32k.h */
