@@ -622,12 +622,9 @@ z8k-tdep.o : ${srcdir}/z8k-tdep.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl
 c-exp.tab.o : c-exp.tab.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status ${srcdir}/expression.h ${srcdir}/parser-defs.h ${srcdir}/value.h ${srcdir}/symtab.h ${srcdir}/../include/obstack.h \
   ${srcdir}/gdbtypes.h ${srcdir}/language.h ${srcdir}/c-lang.h 
-	${CC} -c ${INTERNAL_CFLAGS}  c-exp.tab.c
 ch-exp.tab.o : ch-exp.tab.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status ${srcdir}/expression.h ${srcdir}/language.h ${srcdir}/value.h ${srcdir}/symtab.h ${srcdir}/../include/obstack.h \
   ${srcdir}/gdbtypes.h ${srcdir}/parser-defs.h ${srcdir}/ch-lang.h 
-	${CC} -c ${INTERNAL_CFLAGS}  ch-exp.tab.c
 m2-exp.tab.o : m2-exp.tab.c ${srcdir}/defs.h ${srcdir}/../include/ansidecl.h xm.h config.status nm.h ${srcdir}/../include/fopen-same.h \
   tm.h config.status ${srcdir}/expression.h ${srcdir}/language.h ${srcdir}/value.h ${srcdir}/symtab.h ${srcdir}/../include/obstack.h \
   ${srcdir}/gdbtypes.h ${srcdir}/parser-defs.h ${srcdir}/m2-lang.h 
-	${CC} -c ${INTERNAL_CFLAGS}  m2-exp.tab.c
