@@ -1,5 +1,5 @@
 /* Target machine definitions for GDB for an embedded SPARC.
-   Copyright 1989, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -22,6 +22,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define TARGET_SPARCLET 1
 
 /* overrides of tm-sparc.h */
+
+#undef TARGET_BYTE_ORDER
+#define TARGET_BYTE_ORDER_SELECTABLE
+
+/* Sequence of bytes for breakpoint instruction (ta 1). */
+#undef BREAKPOINT
+#define BIG_BREAKPOINT {0x91, 0xd0, 0x20, 0x01}
+#define LITTLE_BREAKPOINT {0x01, 0x20, 0xd0, 0x91}
 
 /* Initializer for an array of names of registers.
    There should be NUM_REGS strings in this initializer.  */

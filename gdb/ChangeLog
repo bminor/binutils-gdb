@@ -1,3 +1,10 @@
+Thu Dec  5 14:06:23 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/sparc/tm-sparclet.h (TARGET_BYTE_ORDER): Undef.
+	(TARGET_BYTE_ORDER_SELECTABLE): Define.
+	(BREAKPOINT): Undef.
+	({BIG,LITTLE}_BREAKPOINT): Define.
+
 Wed Dec  4 16:34:05 1996  Geoffrey Noer  <noer@cygnus.com>
 
 	* config/mn10300/mn10300.mt
