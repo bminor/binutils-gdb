@@ -73,6 +73,13 @@ INSTALL_TARGET = install.all
 ### for debugging
 #GCCVERBOSE=-v
 
+GXX = `if [ -d $${rootme}/gcc ] ; \
+	then echo $${rootme}/gcc/gcc -B$${rootme}/gcc/ ; \
+	else echo gcc ; fi`
+
+XTRAFLAGS = `if [ -d $${rootme}/gcc ] ; \
+	then echo -I$${rootme}/gcc/include ; \
+	else echo ; fi`
 
 #### host and target specific makefile fragments come in here.
 ###
@@ -101,16 +108,14 @@ FLAGS_TO_PASS = \
 all:	$(ALL)
 
 info:	cfg-paper.info configure.info standards.info
-	@rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)" "MAKEINFO=$(MAKEINFO)"
+	@rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
 
 # Note libg++ has to be handled specially (we can't compile it with CC=cc).
 check:
 	@rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=check \
-	"DODIRS=`echo $(SUBDIRS) | sed -e \"s/libg\+\+//\"" \
-	"MAKEINFO=$(MAKEINFO)"
+	  "DODIRS=`echo $(SUBDIRS) | sed -e \"s/libg\+\+//\"" $(FLAGS_TO_PASS)
 	@rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=check \
-	"DODIRS=libg++" "CC=${GXX}" "XTRAFLAGS=${XTRAFLAGS}" \
-	"MAKEINFO=$(MAKEINFO)"
+	  "DODIRS=libg++" $(FLAGS_TO_PASS) "CC=${GXX}" "XTRAFLAGS=${XTRAFLAGS}"
 
 clean-info:
 	@$(MAKE) subdir_do DO=clean-info "DODIRS=$(SUBDIRS)"
@@ -955,30 +960,12 @@ install-send_pr: force
 	fi
 
 ### libg++
-GXX = `if [ -d $${rootme}/gcc ] ; \
-	then echo $${rootme}/gcc/gcc -B$${rootme}/gcc/ ; \
-	else echo gcc ; fi`
-
-XTRAFLAGS = `if [ -d $${rootme}/gcc ] ; \
-	then echo -I$${rootme}/gcc/include ; \
-	else echo ; fi`
 
 all-libg++: all-gas all-ld all-gcc
 	@if [ -d ./libg++ ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libg++; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=${GXX}" \
-			"CFLAGS=$(CFLAGS)" \
-			"XTRAFLAGS=${XTRAFLAGS}" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			all) ; \
+		$(MAKE) $(FLAGS_TO_PASS) "CC=${GXX}" all) ; \
 	else \
 		true ; \
 	fi
@@ -987,17 +974,7 @@ clean-libg++: force
 	@if [ -d ./libg++ ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libg++; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			clean) ; \
+		$(MAKE) $(FLAGS_TO_PASS) "CC=${GXX}" clean) ; \
 	else \
 		true ; \
 	fi
@@ -1006,20 +983,7 @@ install-libg++: force
 	@if [ -d ./libg++ ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./libg++; \
-		$(MAKE) \
-			"AR=$(AR)" \
-			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
-			"CFLAGS=$(CFLAGS)" \
-			"RANLIB=$(RANLIB)" \
-			"LOADLIBES=$(LOADLIBES)" \
-			"LDFLAGS=$(LDFLAGS)" \
-			"BISON=$(BISON)" \
-			"MAKEINFO=$(MAKEINFO)" \
-			"INSTALL=$(INSTALL)" \
-			"INSTALL_DATA=$(INSTALL_DATA)" \
-			"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
-			install) ; \
+		$(MAKE) $(FLAGS_TO_PASS) "CC=${GXX}" install) ; \
 	else \
 		true ; \
 	fi

@@ -1,3 +1,9 @@
+Thu Jun  4 00:37:05 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* config.sub:  Add support for Linux.
+	* Makefile.in:  Use $(FLAGS_TO_PASS) more consistently
+	(at least for libg++).
+
 Tue Jun 02 20:03:00 1992  david d `zoo' zuhn (zoo@cygnus.com)
 
 	* configure.texi: fix doc for the -nfp option to configure
