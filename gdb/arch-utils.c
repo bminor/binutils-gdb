@@ -541,7 +541,7 @@ info_architecture (char *args, int from_tty)
   printf_filtered ("\n");
 }
 
-/* Set the dynamic target-system-dependant parameters (architecture,
+/* Set the dynamic target-system-dependent parameters (architecture,
    byte-order) using information found in the BFD */
 
 void

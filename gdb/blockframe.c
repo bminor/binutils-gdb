@@ -1037,7 +1037,7 @@ pc_in_call_dummy_at_entry_point (CORE_ADDR pc, CORE_ADDR sp,
  * The following code serves to maintain the dummy stack frames for
  * inferior function calls (ie. when gdb calls into the inferior via
  * call_function_by_hand).  This code saves the machine state before 
- * the call in host memory, so we must maintain an independant stack 
+ * the call in host memory, so we must maintain an independent stack 
  * and keep it consistant etc.  I am attempting to make this code 
  * generic enough to be used by many targets.
  *

@@ -358,7 +358,7 @@ fork_inferior (char *exec_file, char *allargs, char **env,
      correct program, and are poised at the first instruction of the
      new program.  */
 
-  /* Allow target dependant code to play with the new process.  This might be
+  /* Allow target dependent code to play with the new process.  This might be
      used to have target-specific code initialize a variable in the new process
      prior to executing the first instruction.  */
   TARGET_CREATE_INFERIOR_HOOK (pid);

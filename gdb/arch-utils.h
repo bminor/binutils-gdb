@@ -76,13 +76,13 @@ extern int frame_num_args_unknown (struct frame_info *fi);
    targets. */
 
 /* DEPRECATED pre- multi-arch interface.  Explicitly set the dynamic
-   target-system-dependant parameters based on bfd_architecture and
+   target-system-dependent parameters based on bfd_architecture and
    machine.  This function is deprecated, use
    set_gdbarch_from_arch_machine(). */
 
 extern void set_architecture_from_arch_mach (enum bfd_architecture, unsigned long);
 
-/* DEPRECATED pre- multi-arch interface.  Notify the target dependant
+/* DEPRECATED pre- multi-arch interface.  Notify the target dependent
    backend of a change to the selected architecture. A zero return
    status indicates that the target did not like the change. */
 
