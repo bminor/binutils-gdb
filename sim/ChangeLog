@@ -1,3 +1,9 @@
+2003-08-09  Andrew Cagney  <cagney@redhat.com>
+
+	* MAINTAINERS: Andrew Cagney (mips) and Geoff Keating (ppc) drop
+	maintenance.  List igen and sh maintainers.  Mention that target
+	and global maintainers pick up the slack.
+
 2003-07-09  Michael Snyder  <msnyder@redhat.com>
 
 	* configure.in: Add testsuite to extra_subdirs for sh.
