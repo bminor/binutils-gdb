@@ -83,9 +83,7 @@ maintainer works with the native maintainer when resolving API issues.
 	h8300		--target=h8300hms ,-Werror
 			Maintenance only
 
-	h8500		(--target=h8500hms broken)
-			Maintenance only
-			Not multi-arch, work in progress
+	h8500		(--target=h8500hms OBSOLETE)
 
 	i386		--target=i386-elf ,-Werror
 			Mark Kettenis           kettenis@gnu.org

@@ -663,8 +663,10 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
 		      1);
 
   if (num_storage_locs > 1
-#ifdef GDB_TARGET_IS_H8500
-      || TYPE_CODE (type) == TYPE_CODE_PTR
+#if 0
+      // OBSOLETE #ifdef GDB_TARGET_IS_H8500
+      // OBSOLETE       || TYPE_CODE (type) == TYPE_CODE_PTR
+      // OBSOLETE #endif
 #endif
     )
     {
@@ -680,76 +682,78 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
 
       /* Copy all of the data out, whereever it may be.  */
 
-#ifdef GDB_TARGET_IS_H8500
-/* This piece of hideosity is required because the H8500 treats registers
-   differently depending upon whether they are used as pointers or not.  As a
-   pointer, a register needs to have a page register tacked onto the front.
-   An alternate way to do this would be to have gcc output different register
-   numbers for the pointer & non-pointer form of the register.  But, it
-   doesn't, so we're stuck with this.  */
-
-      if (TYPE_CODE (type) == TYPE_CODE_PTR
-	  && len > 2)
-	{
-	  int page_regnum;
-
-	  switch (regnum)
-	    {
-	    case R0_REGNUM:
-	    case R1_REGNUM:
-	    case R2_REGNUM:
-	    case R3_REGNUM:
-	      page_regnum = SEG_D_REGNUM;
-	      break;
-	    case R4_REGNUM:
-	    case R5_REGNUM:
-	      page_regnum = SEG_E_REGNUM;
-	      break;
-	    case R6_REGNUM:
-	    case R7_REGNUM:
-	      page_regnum = SEG_T_REGNUM;
-	      break;
-	    }
-
-	  value_bytes[0] = 0;
-	  get_saved_register (value_bytes + 1,
-			      &optim,
-			      &addr,
-			      frame,
-			      page_regnum,
-			      &lval);
-
-	  if (register_cached (page_regnum) == -1)
-	    return NULL;	/* register value not available */
-
-	  if (lval == lval_register)
-	    reg_stor++;
-	  else
-	    mem_stor++;
-	  first_addr = addr;
-	  last_addr = addr;
-
-	  get_saved_register (value_bytes + 2,
-			      &optim,
-			      &addr,
-			      frame,
-			      regnum,
-			      &lval);
-
-	  if (register_cached (regnum) == -1)
-	    return NULL;	/* register value not available */
-
-	  if (lval == lval_register)
-	    reg_stor++;
-	  else
-	    {
-	      mem_stor++;
-	      mem_tracking = mem_tracking && (addr == last_addr);
-	    }
-	  last_addr = addr;
-	}
-      else
-#endif /* GDB_TARGET_IS_H8500 */
+#if 0
+      // OBSOLETE #ifdef GDB_TARGET_IS_H8500
+      // OBSOLETE /* This piece of hideosity is required because the H8500 treats registers
+      // OBSOLETE    differently depending upon whether they are used as pointers or not.  As a
+      // OBSOLETE    pointer, a register needs to have a page register tacked onto the front.
+      // OBSOLETE    An alternate way to do this would be to have gcc output different register
+      // OBSOLETE    numbers for the pointer & non-pointer form of the register.  But, it
+      // OBSOLETE    doesn't, so we're stuck with this.  */
+      // OBSOLETE 
+      // OBSOLETE       if (TYPE_CODE (type) == TYPE_CODE_PTR
+      // OBSOLETE 	  && len > 2)
+      // OBSOLETE 	{
+      // OBSOLETE 	  int page_regnum;
+      // OBSOLETE 
+      // OBSOLETE 	  switch (regnum)
+      // OBSOLETE 	    {
+      // OBSOLETE 	    case R0_REGNUM:
+      // OBSOLETE 	    case R1_REGNUM:
+      // OBSOLETE 	    case R2_REGNUM:
+      // OBSOLETE 	    case R3_REGNUM:
+      // OBSOLETE 	      page_regnum = SEG_D_REGNUM;
+      // OBSOLETE 	      break;
+      // OBSOLETE 	    case R4_REGNUM:
+      // OBSOLETE 	    case R5_REGNUM:
+      // OBSOLETE 	      page_regnum = SEG_E_REGNUM;
+      // OBSOLETE 	      break;
+      // OBSOLETE 	    case R6_REGNUM:
+      // OBSOLETE 	    case R7_REGNUM:
+      // OBSOLETE 	      page_regnum = SEG_T_REGNUM;
+      // OBSOLETE 	      break;
+      // OBSOLETE 	    }
+      // OBSOLETE 
+      // OBSOLETE 	  value_bytes[0] = 0;
+      // OBSOLETE 	  get_saved_register (value_bytes + 1,
+      // OBSOLETE 			      &optim,
+      // OBSOLETE 			      &addr,
+      // OBSOLETE 			      frame,
+      // OBSOLETE 			      page_regnum,
+      // OBSOLETE 			      &lval);
+      // OBSOLETE 
+      // OBSOLETE 	  if (register_cached (page_regnum) == -1)
+      // OBSOLETE 	    return NULL;	/* register value not available */
+      // OBSOLETE 
+      // OBSOLETE 	  if (lval == lval_register)
+      // OBSOLETE 	    reg_stor++;
+      // OBSOLETE 	  else
+      // OBSOLETE 	    mem_stor++;
+      // OBSOLETE 	  first_addr = addr;
+      // OBSOLETE 	  last_addr = addr;
+      // OBSOLETE 
+      // OBSOLETE 	  get_saved_register (value_bytes + 2,
+      // OBSOLETE 			      &optim,
+      // OBSOLETE 			      &addr,
+      // OBSOLETE 			      frame,
+      // OBSOLETE 			      regnum,
+      // OBSOLETE 			      &lval);
+      // OBSOLETE 
+      // OBSOLETE 	  if (register_cached (regnum) == -1)
+      // OBSOLETE 	    return NULL;	/* register value not available */
+      // OBSOLETE 
+      // OBSOLETE 	  if (lval == lval_register)
+      // OBSOLETE 	    reg_stor++;
+      // OBSOLETE 	  else
+      // OBSOLETE 	    {
+      // OBSOLETE 	      mem_stor++;
+      // OBSOLETE 	      mem_tracking = mem_tracking && (addr == last_addr);
+      // OBSOLETE 	    }
+      // OBSOLETE 	  last_addr = addr;
+      // OBSOLETE 	}
+      // OBSOLETE       else
+      // OBSOLETE #endif /* GDB_TARGET_IS_H8500 */
+#endif
 	for (local_regnum = regnum;
 	     value_bytes_copied < len;
 	     (value_bytes_copied += REGISTER_RAW_SIZE (local_regnum),

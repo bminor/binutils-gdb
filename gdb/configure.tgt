@@ -68,7 +68,7 @@ cris*)                  gdb_target=cris ;;
 d10v-*-*)		gdb_target=d10v ;;
 
 h8300-*-*)		gdb_target=h8300 ;;
-h8500-*-*)		gdb_target=h8500 ;;
+# OBSOLETE h8500-*-*)		gdb_target=h8500 ;;
 
 
 frv-*-*)		gdb_target=frv ;;

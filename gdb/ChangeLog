@@ -1,3 +1,13 @@
+2003-02-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS: Mark h8500 as obsolete.
+	* configure.tgt (h8500-*-*): Mark h8500 code as obsolete.
+	* findvar.c (value_from_register): Ditto.
+	* h8500-tdep.c: Mark file as obsolete.
+	* config/h8500/h8500.mt: Ditto.
+	* config/h8500/tm-h8500.h: Ditto.
+	* NEWS: Mention that h8500 is obsolete.
+
 2003-02-04  David Carlton  <carlton@math.stanford.edu>
 
 	* objfiles.c (allocate_objfile): Always set name.  Add comment at
