@@ -1,7 +1,7 @@
 \input texinfo   @c -*- texinfo -*-
 @setfilename gdbint.info
 @include gdb-cfg.texi
-@dircategory Programming & development tools.
+@dircategory Software development
 @direntry
 * Gdb-Internals: (gdbint).	The GNU debugger's internals.
 @end direntry

@@ -1,3 +1,10 @@
+2004-06-14  Andrew Cagney  <cagney@gnu.org>
+
+	Based on changes from Karl Berry.
+	* gdb.texinfo: Do not use @sc in a direntry.
+	* stabs.texinfo: Change @dircateogry to "Software development".
+	* gdbint.texinfo, gdb.texinfo, annotate.texinfo: Ditto.
+
 2004-03-28  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* gdb.texinfo (TUI Commands): Document tui reg commands.
