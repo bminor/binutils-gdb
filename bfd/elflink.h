@@ -1878,8 +1878,7 @@ elf_bfd_final_link (abfd, info)
   /* We have now assigned file positions for all the sections except
      .symtab and .strtab.  We start the .symtab section at the current
      file position, and write directly to it.  We build the .strtab
-     section in memory.  When we add .dynsym support, we will build
-     that in memory as well (.dynsym is smaller than .symtab).  */
+     section in memory.  */
   abfd->symcount = 0;
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   /* sh_name is set in prep_headers.  */
