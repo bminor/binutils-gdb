@@ -7,14 +7,10 @@
 #include <string.h>
 #include <sys/file.h>
 #include <alloca.h>
+#include <stdlib.h>
 
 /* Make the basic types 64-bit quantities on the host */
 #define	HOST_64_BIT	long 
-#ifndef DONTDECLARE_MALLOC
-extern PTR  EXFUN(malloc,(unsigned));
-extern PTR  EXFUN(realloc, (PTR, unsigned));
-#endif
-
 
 
 /* EXACT TYPES */
