@@ -1,3 +1,8 @@
+Fri Nov 12 16:51:47 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/obj-som.c (obj_som_version): Add missing ';'.
+	(som_frob_file): Delete whitespace at EOL.
+
 Fri Nov 12 15:26:21 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* Makefile.in (VERSION): Updated following 2.2 release.
