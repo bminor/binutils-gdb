@@ -1,5 +1,9 @@
 2002-07-30  Nick Clifton  <nickc@redhat.com>
 
+	* po/tr.po: Updated Turkish translation.
+
+2002-07-30  Nick Clifton  <nickc@redhat.com>
+
 	* alpha.c, cg_arcs.c, cg_dfn.c, gmon.h, gprof.c, gprof.h, hertz.c,
 	i386.c, mips.c, sparc.c, tahoe.c, utils.c, vax.c: Update Copyright
 	notice so that it applies even if the sources are modified.

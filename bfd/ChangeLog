@@ -1,3 +1,7 @@
+2002-07-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
 2002-07-30  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf.c (elf_fake_sections): Fix up .tbss sh_size and sh_type.
