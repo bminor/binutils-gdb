@@ -568,7 +568,7 @@ sh_skip_prologue (CORE_ADDR start_pc)
    All other aggregate types are returned by address. The caller
    function passes the address of an area large enough to hold the
    aggregate value in R2. The called function stores the result in
-   this location."
+   this location.
 
    To reiterate, structs smaller than 8 bytes could also be returned
    in memory, if they don't pass the "same size and alignment as an
@@ -581,6 +581,16 @@ sh_skip_prologue (CORE_ADDR start_pc)
 
    the return value from foo() will be in memory, not
    in R0, because there is no 3-byte integer type.
+
+   Similarly, in 
+
+   struct s { char c[2]; } wibble;
+   struct s foo(void) {  return wibble; }
+
+   because a struct containing two chars has alignment 1, that matches
+   type char, but size 2, that matches type short.  There's no integer
+   type that has alignment 1 and size 2, so the struct is returned in
+   memory.
 
 */
 
