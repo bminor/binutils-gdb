@@ -65,11 +65,6 @@ stabs.texinfo
 
 Things-to-lose:
 
-# Cygnus logo bitmap, huge file, no point in bundling all over the place.
-cyglogo.eps
-# Includes cyglogo.eps.
-cygref.tex
-
 # The README file for gdb testers using snapshots.
 snapshots.readme
 
