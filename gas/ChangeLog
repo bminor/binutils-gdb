@@ -1,3 +1,8 @@
+Fri Apr  5 17:01:35 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-h8300.c (get_specific): Remove some #if 0 code.
+	(build_bytes): Remove all ABSMOV related code; it's unnecessary.
+
 Fri Apr  5 15:13:10 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* config/atof-ieee.c: Fix handling of denormalized extended

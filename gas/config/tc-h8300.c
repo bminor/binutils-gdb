@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 
 /*
@@ -100,10 +100,6 @@ const char EXP_CHARS[] = "eE";
 /* or    0d1.2345e12 */
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
-
-const relax_typeS md_relax_table[1];
-
-
 static struct hash_control *opcode_hash_control;	/* Opcode mnemonics */
 
 /*
@@ -116,7 +112,6 @@ void
 md_begin ()
 {
   struct h8_opcode *opcode;
-  const struct reg_entry *reg;
   char prev_buffer[100];
   int idx = 0;
 
@@ -164,6 +159,7 @@ md_begin ()
 	opcode->length++;
     }
 
+  linkrelax = 1;
 }
 
 
@@ -293,15 +289,16 @@ skip_colonthing (ptr, exp, mode)
   if (*ptr == ':')
     {
       ptr++;
+      *mode &= ~SIZE;
       if (*ptr == '8')
 	{
 	  ptr++;
 	  /* ff fill any 8 bit quantity */
 	 /* exp->X_add_number -= 0x100;*/
+	  *mode |= L_8;
 	}
       else
 	{
-	  *mode &= ~SIZE;
 	  if (*ptr == '2')
 	    {
 	      *mode |= L_24;
@@ -371,13 +368,12 @@ get_operand (ptr, op, dst, direction)
      char **ptr;
      struct h8_op *op;
      unsigned int dst;
-
+     int direction;
 {
   char *src = *ptr;
   op_type mode;
   unsigned int num;
   unsigned int len;
-  unsigned int size;
 
   op->mode = E;
 
@@ -630,7 +626,7 @@ get_specific (opcode, operands)
 	  int x = operands[i].mode;
 
 	  if ((op & (DISP | REG)) == (DISP | REG)
-	      && ((x & DISP | REG) == (DISP | REG)))
+	      && ((x & (DISP | REG)) == (DISP | REG)))
 	    {
 	      dispreg = operands[i].reg;
 	    }
@@ -695,13 +691,6 @@ get_specific (opcode, operands)
 		  && ((op & SIZE) != (x & SIZE)))
 		found = 0;
 	    }
-#if 0
-	  else if ((op & ABSMOV) && (x & ABS))
-	    {
-	      /* An absmov is only
-	      /* Ok */
-	    }
-#endif
 	  else if ((op & MODE) != (x & MODE))
 	    {
 	      found = 0;
@@ -735,13 +724,15 @@ check_operand (operand, width, string)
 	  if (width == 255 
 	      && (operand->exp.X_add_number & 0xff00) == 0xff00)
 	    {
-	      /* Just ignore this one - which happens when trying to 
-	      fit a 16 bit address truncated into an 8 bit address of something like bset  */
+	      /* Just ignore this one - which happens when trying to
+		 fit a 16 bit address truncated into an 8 bit address
+		 of something like bset.  */
 	    }
 	  else 
 	    {
-	  as_warn ("operand %s0x%x out of range.", string, operand->exp.X_add_number);
-	}
+	      as_warn ("operand %s0x%lx out of range.", string,
+		       (unsigned long) operand->exp.X_add_number);
+	    }
 	}
     }
 
@@ -849,11 +840,8 @@ build_bytes (this_try, operand)
   unsigned int i;
 
   char *output = frag_more (this_try->length);
-  char *output_ptr = output;
   op_type *nibble_ptr = this_try->data.nib;
-  char part;
   op_type c;
-  char high;
   unsigned int nibble_count = 0;
   int absat;
   int immat;
@@ -863,7 +851,8 @@ build_bytes (this_try, operand)
 
   if (!(this_try->inbase || Hmode))
     {
-      as_warn ("Opcode `%s' only available on H8/300-H", this_try->name);
+      as_warn ("Opcode `%s' only available in this mode on H8/300-H",
+	       this_try->name);
     }
 
   while (*nibble_ptr != E)
@@ -887,14 +876,6 @@ build_bytes (this_try, operand)
 	  else if ((c & DISPREG) == (DISPREG))
 	    {
 	      nib = dispreg;
-	    }
-
-	  else if (c & ABSMOV)
-	    {
-	      operand[d].mode &= ~ABS;
-	      operand[d].mode |= ABSMOV;
-	      immat = nibble_count / 2;
-	      nib = 0;
 	    }
 	  else if (c &  ABS )
 	    {
@@ -989,8 +970,8 @@ build_bytes (this_try, operand)
 
 	  if (operand[i].exp.X_add_number & 1)
 	    {
-	      as_warn ("branch operand has odd offset (%x)\n",
-		       operand->exp.X_add_number);
+	      as_warn ("branch operand has odd offset (%lx)\n",
+		       (unsigned long) operand->exp.X_add_number);
 	    }
 
 	  operand[i].exp.X_add_number =
@@ -1011,15 +992,8 @@ build_bytes (this_try, operand)
 		       1,
 		       &operand[i].exp,
 		       0,
-		       R_RELBYTE);
+		       R_MEM_INDIRECT);
 	}
-
-      else if (x & ABSMOV)
-	{
-	  /* This mov is either absolute long or thru a memory loc */
-	  do_a_fix_imm (output - frag_now->fr_literal + immat, operand + i, 1);
-	}
-
       else if (x & ABSJMP)
 	{
 	  /* This jmp may be a jump or a branch */
@@ -1027,8 +1001,8 @@ build_bytes (this_try, operand)
 	  check_operand (operand + i, Hmode ? 0xffffff : 0xffff, "@");
 	  if (operand[i].exp.X_add_number & 1)
 	    {
-	      as_warn ("branch operand has odd offset (%x)\n",
-		       operand->exp.X_add_number);
+	      as_warn ("branch operand has odd offset (%lx)\n",
+		       (unsigned long) operand->exp.X_add_number);
 	    }
 	  if (!Hmode)
 	    operand[i].exp.X_add_number = (short) operand[i].exp.X_add_number;
@@ -1053,8 +1027,6 @@ clever_message (opcode, operand)
      struct h8_opcode *opcode;
      struct h8_op *operand;
 {
-  struct h8_opcode *scan = opcode;
-
   /* Find out if there was more than one possible opccode */
 
   if ((opcode + 1)->idx != opcode->idx)
@@ -1128,7 +1100,6 @@ md_assemble (str)
 {
   char *op_start;
   char *op_end;
-  unsigned int i;
   struct h8_op operand[2];
   struct h8_opcode *opcode;
   struct h8_opcode *prev_opcode;
@@ -1340,10 +1311,10 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
 }
 
 void
-md_convert_frag (headers, fragP)
+md_convert_frag (headers, seg, fragP)
      object_headers *headers;
+     segT seg;
      fragS *fragP;
-
 {
   printf ("call to md_convert_frag \n");
   abort ();
@@ -1382,14 +1353,7 @@ md_apply_fix (fixP, val)
       break;
     default:
       abort ();
-
     }
-}
-
-void
-md_operand (expressionP)
-     expressionS * expressionP;
-{
 }
 
 int md_long_jump_size;
@@ -1411,20 +1375,7 @@ md_number_to_chars (ptr, use, nbytes)
      valueT use;
      int nbytes;
 {
-  switch (nbytes)
-    {
-    case 4:
-      *ptr++ = (use >> 24) & 0xff;
-    case 3:
-      *ptr++ = (use >> 16) & 0xff;
-    case 2:
-      *ptr++ = (use >> 8) & 0xff;
-    case 1:
-      *ptr++ = (use >> 0) & 0xff;
-      break;
-    default:
-      abort ();
-    }
+  number_to_chars_bigendian (ptr, use, nbytes);
 }
 long
 md_pcrel_from (fixP)
@@ -1447,13 +1398,15 @@ tc_reloc_mangle (fix_ptr, intr, base)
 
   /* If this relocation is attached to a symbol then it's ok
      to output it */
-  if (fix_ptr->fx_r_type == RELOC_32)
+  if (fix_ptr->fx_r_type == TC_CONS_RELOC)
     {
       /* cons likes to create reloc32's whatever the size of the reloc..
        */
       switch (fix_ptr->fx_size)
 	{
-
+	case 4:
+	  intr->r_type = R_RELLONG;
+	  break;
 	case 2:
 	  intr->r_type = R_RELWORD;
 	  break;
@@ -1480,11 +1433,6 @@ tc_reloc_mangle (fix_ptr, intr, base)
     intr->r_symndx = -1;
 
 
-}
-
-tc_coff_sizemachdep ()
-{
-  abort ();
 }
 
 /* end of tc-h8300.c */
