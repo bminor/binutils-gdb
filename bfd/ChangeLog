@@ -1,5 +1,8 @@
 Thu Jan 13 12:33:27 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (som_set_reloc_info): Provide a default symbol for
+	relocations which don't actually have an associated symbol.
+
 	* som.c (hppa_som_reloc): Add new "error message" argument.
 
 Wed Jan 12 13:36:43 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
