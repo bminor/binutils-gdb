@@ -1,5 +1,7 @@
 Mon Jan 18 16:40:50 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
+	* ser-ocd.c (ocd_open): Handle Unix case gracefully.
+
 	* target.c (dummy_target): Don't initialize statically.
 	(init_dummy_target): New function, fills in dummy_target.
 	(initialize_targets): Use it.

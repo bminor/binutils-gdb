@@ -62,8 +62,10 @@ ocd_open (scb, name)
       if (dll_do_command == NULL)
 	error ("Can't find do_command function in Wigglers.dll");
     }
-#endif
-
+#else
+  /* No wiggler DLLs on Unix yet, fail.  */
+  error ("Wiggler library not available for this type of host.");
+#endif /* _WIN32 */
   return 0;
 }
 
