@@ -72,11 +72,12 @@
 	(is_arg_reg): New function.
 
 2001-12-03 Keith Walker <keith.walker@arm.com>
-	* gdbserver/low-linux.c (arm_register_u_addr): added.
-	(initialize_arch): added for ARM target.
-	* config/arm/nm-linux.h (U_REGS_OFFSET) defined.
-	(REGISTER_U_ADDR) defined.
-	* config/arm/tm-linux.h (ARM_GNULINUX_TARGET) defined.
+
+	* gdbserver/low-linux.c (arm_register_u_addr): Added.
+	(initialize_arch): Added for ARM target.
+	* config/arm/nm-linux.h (U_REGS_OFFSET): Defined.
+	(REGISTER_U_ADDR): Defined.
+	* config/arm/tm-linux.h (ARM_GNULINUX_TARGET): Defined.
 
 2001-12-04  Corinna Vinschen  <vinschen@redhat.com>
 
