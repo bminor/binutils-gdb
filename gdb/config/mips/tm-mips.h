@@ -99,10 +99,6 @@ typedef struct mips_extra_func_info
 #define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
 extern struct frame_info *setup_arbitrary_frame (int, CORE_ADDR *);
 
-/* These are defined in mdebugread.c and are used in mips-tdep.c  */
-extern CORE_ADDR sigtramp_address, sigtramp_end;
-extern void fixup_sigtramp (void);
-
 /* Functions for dealing with MIPS16 call and return stubs.  */
 #define IGNORE_HELPER_CALL(pc)			mips_ignore_helper (pc)
 extern int mips_ignore_helper (CORE_ADDR pc);

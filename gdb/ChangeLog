@@ -1,5 +1,14 @@
 2004-04-30  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_pc_in_sigtramp): Delete.
+	(mips_gdbarch_init): Do not set pc_in_sigtramp.
+	* mipsread.c (sigtramp_address): Delete extern variable.
+	(mipscoff_new_init): Delete reference.
+	* mdebugread.c (sigtramp_address, sigtramp_end): Delete variables.
+	(fixup_sigtramp): Delete function.
+	* config/mips/tm-mips.h (sigtramp_address, sigtramp_end)
+	(fixup_sigtramp): Delete declarations.
+
 	* ppcnbsd-tdep.c (ppcnbsd_init_abi): Do not set
 	deprecated_pc_in_sigtramp.
 	(ppcnbsd_pc_in_sigtramp): Delete function.

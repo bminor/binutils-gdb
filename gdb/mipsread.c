@@ -59,12 +59,9 @@ read_alphacoff_dynamic_symtab (struct section_offsets *,
    symbol file is specified (not just adding some symbols from another
    file, e.g. a shared library).  */
 
-extern CORE_ADDR sigtramp_address;
-
 static void
 mipscoff_new_init (struct objfile *ignore)
 {
-  sigtramp_address = 0;
   stabsread_new_init ();
   buildsym_new_init ();
 }

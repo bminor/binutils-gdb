@@ -4841,16 +4841,6 @@ mips_skip_prologue (CORE_ADDR pc)
     return mips32_skip_prologue (pc);
 }
 
-/* Exported procedure: Is PC in the signal trampoline code */
-
-static int
-mips_pc_in_sigtramp (CORE_ADDR pc, char *ignore)
-{
-  if (sigtramp_address == 0)
-    fixup_sigtramp ();
-  return (pc >= sigtramp_address && pc < sigtramp_end);
-}
-
 /* Root of all "set mips "/"show mips " commands. This will eventually be
    used for all MIPS-specific commands.  */
 
@@ -5781,7 +5771,6 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_type (gdbarch, mips_register_type);
 
   set_gdbarch_print_registers_info (gdbarch, mips_print_registers_info);
-  set_gdbarch_deprecated_pc_in_sigtramp (gdbarch, mips_pc_in_sigtramp);
 
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_mips);
 
