@@ -1,3 +1,10 @@
+2004-11-30  Randolph Chung  <tausq@debian.org>
+
+	* elf32-hppa.c (elf32_hppa_grok_prstatus): New function.
+	(elf32_hppa_grok_psinfo): New function.
+	(elf_backend_grok_prstatus): Define.
+	(elf_backend_grok_psinfo): Define.
+
 2004-11-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 574:
