@@ -1,5 +1,7 @@
 Fri Nov  8 12:29:51 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
+	* monitor.c: Fix some formatting and comments.
+
 	* remote-sim.c (simulator_command): Set up callbacks before
 	entering the simulator.
 
