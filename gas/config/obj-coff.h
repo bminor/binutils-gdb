@@ -43,6 +43,18 @@
 #undef internal_lineno
 
 /* CPU-specific setup:  */
+
+#ifdef TC_ARM
+#include "coff/arm.h"
+
+#ifdef TE_PE
+#define TARGET_FORMAT "pe-arm"
+#endif
+#ifndef TARGET_FORMAT
+#define TARGET_FORMAT "coff-arm"
+#endif
+#endif
+
 #ifdef TC_PPC
 #include "coff/rs6000.h"
 #endif
@@ -58,6 +70,11 @@
 
 #ifdef TC_I386
 #include "coff/i386.h"
+
+#ifdef TE_PE
+#define TARGET_FORMAT "pe-i386"
+#endif
+
 #ifndef TARGET_FORMAT
 #define TARGET_FORMAT "coff-i386"
 #endif
@@ -481,6 +498,8 @@ typedef struct
 #define SA_GET_SYM_ENDNDX(s)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_fcn.x_endndx.l)
 #define SA_GET_SYM_DIMEN(s,i)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_ary.x_dimen[(i)])
 #define SA_GET_FILE_FNAME(s)	(SYM_AUXENT (s)->x_file.x_fname)
+#define SA_GET_FILE_FNAME_OFFSET(s)  (SYM_AUXENT (s)->x_file.x_n.x_offset)
+#define SA_GET_FILE_FNAME_ZEROS(s)   (SYM_AUXENT (s)->x_file.x_n.x_zeroes)
 #define SA_GET_SCN_SCNLEN(s)	(SYM_AUXENT (s)->x_scn.x_scnlen)
 #define SA_GET_SCN_NRELOC(s)	(SYM_AUXENT (s)->x_scn.x_nreloc)
 #define SA_GET_SCN_NLINNO(s)	(SYM_AUXENT (s)->x_scn.x_nlinno)
@@ -494,6 +513,8 @@ typedef struct
 #define SA_SET_SYM_ENDNDX(s,v)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_fcn.x_endndx.l=(v))
 #define SA_SET_SYM_DIMEN(s,i,v)	(SYM_AUXENT (s)->x_sym.x_fcnary.x_ary.x_dimen[(i)]=(v))
 #define SA_SET_FILE_FNAME(s,v)	strncpy(SYM_AUXENT (s)->x_file.x_fname,(v),FILNMLEN)
+#define SA_SET_FILE_FNAME_OFFSET(s,v) (SYM_AUXENT (s)->x_file.x_n.x_offset=(v))
+#define SA_SET_FILE_FNAME_ZEROS(s,v)  (SYM_AUXENT (s)->x_file.x_n.x_zeroes=(v))
 #define SA_SET_SCN_SCNLEN(s,v)	(SYM_AUXENT (s)->x_scn.x_scnlen=(v))
 #define SA_SET_SCN_NRELOC(s,v)	(SYM_AUXENT (s)->x_scn.x_nreloc=(v))
 #define SA_SET_SCN_NLINNO(s,v)	(SYM_AUXENT (s)->x_scn.x_nlinno=(v))

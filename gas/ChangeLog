@@ -1,6 +1,14 @@
+Thu Jun 29 17:25:43 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	Support for long filenames non-bfd coff. bfd/7288
+	* config/obj-coff.c (filename_list_head, filename_list_tail): New.
+	(yank_symbols): Notice and record filenames which are too long.
+	(w_strings): Write out filename strings.
+	(c_dot_file_symbols): Put long filenames onto list.
+
 Wed Jun 28 17:33:13 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
-	* config/obj-coff.c (fixup_segment): PE doens't use
+	* config/obj-coff.c (fixup_segment): PE doesn't use
 	the strange common symbol format that other 386s formats
 	do.
 	* config/tc-i386.c (md_begin): If LEX_AT defined then

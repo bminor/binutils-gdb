@@ -27,6 +27,19 @@
 #define KEEP_RELOC_INFO
 #endif
 
+
+/* structure used to keep the filenames which
+   are too long around so that we can stick them
+   into the string table */
+struct filename_list 
+{
+  char *filename;
+  struct filename_list *next;
+};
+
+static struct filename_list *filename_list_head;
+static struct filename_list *filename_list_tail;
+
 const char *s_get_name PARAMS ((symbolS * s));
 static symbolS *def_symbol_in_progress;
 
@@ -2443,6 +2456,8 @@ yank_symbols ()
   unsigned int symbol_number = 0;
   unsigned int last_file_symno = 0;
 
+  struct filename_list *filename_list_scan = filename_list_head;
+
   for (symbolP = symbol_rootP;
        symbolP;
        symbolP = symbolP ? symbol_next (symbolP) : symbol_rootP)
@@ -2568,6 +2583,14 @@ yank_symbols ()
 	}
       else if (S_GET_STORAGE_CLASS (symbolP) == C_FILE)
 	{
+	  /* If the filename was too long to fit in the
+	     auxent, put it in the string table */
+	  if (SA_GET_FILE_FNAME_ZEROS (symbolP) == 0)
+	    {
+	      SA_SET_FILE_FNAME_OFFSET (symbolP, string_byte_count);
+	      string_byte_count += strlen (filename_list_scan->filename) + 1;
+	      filename_list_scan = filename_list_scan->next;
+	    }
 	  if (S_GET_VALUE (symbolP))
 	    {
 	      S_SET_VALUE (symbolP, last_file_symno);
@@ -2751,6 +2774,7 @@ w_strings (where)
      char *where;
 {
   symbolS *symbolP;
+  struct filename_list *filename_list_scan = filename_list_head;
 
   /* Gotta do md_ byte-ordering stuff for string_byte_count first - KWK */
   md_number_to_chars (where, (valueT) string_byte_count, 4);
@@ -2764,10 +2788,16 @@ w_strings (where)
       if (SF_GET_STRING (symbolP))
 	{
 	  size = strlen (S_GET_NAME (symbolP)) + 1;
-
 	  memcpy (where, S_GET_NAME (symbolP), size);
 	  where += size;
-
+	}
+      if (S_GET_STORAGE_CLASS (symbolP) == C_FILE
+	  && SA_GET_FILE_FNAME_ZEROS (symbolP) == 0)
+	{
+	  size = strlen (filename_list_scan->filename) + 1;
+	  memcpy (where, filename_list_scan->filename, size);
+	  filename_list_scan = filename_list_scan ->next;
+	  where += size;
 	}
     }
 }
@@ -3272,7 +3302,31 @@ c_dot_file_symbol (filename)
 
   S_SET_STORAGE_CLASS (symbolP, C_FILE);
   S_SET_NUMBER_AUXILIARY (symbolP, 1);
-  SA_SET_FILE_FNAME (symbolP, filename);
+
+  if (strlen (filename) > FILNMLEN)
+    {
+      /* Filename is too long to fit into an auxent,
+	 we stick it into the string table instead.  We keep
+	 a linked list of the filenames we find so we can emit
+	 them later.*/
+      struct filename_list *f = xmalloc (sizeof (struct filename_list));
+
+      f->filename = filename;
+      f->next = 0;
+
+      SA_SET_FILE_FNAME_ZEROS (symbolP, 0);
+      SA_SET_FILE_FNAME_OFFSET (symbolP, 0);
+
+      if (filename_list_tail) 
+	filename_list_tail->next = f;
+      else
+	filename_list_head = f;
+      filename_list_tail = f;      
+    }
+  else 
+    {
+      SA_SET_FILE_FNAME (symbolP, filename);
+    }
 #ifndef NO_LISTING
   {
     extern int listing;
