@@ -1,3 +1,19 @@
+2004-04-24  Chris Demetriou  <cgd@broadcom.com>
+
+	* elf32-mips.c (elf_mips_gnu_rel_hi16, elf_mips_gnu_rel_lo16)
+	(elf_mips_gnu_pcrel64, elf_mips_gnu_pcrel32): Remove.
+	(bfd_elf32_bfd_reloc_type_lookup): Remove cases for
+	BFD_RELOC_PCREL_HI16_S, BFD_RELOC_PCREL_LO16, BFD_RELOC_64_PCREL,
+	and BFD_RELOC_32_PCREL.
+	(mips_elf32_rtype_to_howto): Remove cases for R_MIPS_GNU_REL_HI16,
+	R_MIPS_GNU_REL_LO16, R_MIPS_PC64, R_MIPS_PC32.
+	* elfxx-mips.c (mips_elf_calculate_relocation): Likewise.
+	(_bfd_mips_elf_lo16_reloc): Remove handling for R_MIPS_GNU_REL_HI16.
+	(mips_elf_next_relocation): Move comment about matching HI/LO
+	relocations to...
+	(_bfd_mips_elf_relocate_section): Here.  Remove handling for
+	R_MIPS_GNU_REL_HI16.
+
 2004-04-23  Chris Demetriou  <cgd@broadcom.com>
 
 	* coff-mips.c (mips_relhi_reloc, mips_rello_reloc)

@@ -599,39 +599,6 @@ static reloc_howto_type elf_mips16_gprel_howto =
 	 0x07ff001f,	        /* dst_mask */
 	 FALSE);		/* pcrel_offset */
 
-/* GNU extensions for embedded-pic.  */
-/* High 16 bits of symbol value, pc-relative.  */
-static reloc_howto_type elf_mips_gnu_rel_hi16 =
-  HOWTO (R_MIPS_GNU_REL_HI16,	/* type */
-	 16,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
-	 TRUE,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 _bfd_mips_elf_hi16_reloc, /* special_function */
-	 "R_MIPS_GNU_REL_HI16",	/* name */
-	 TRUE,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 TRUE);			/* pcrel_offset */
-
-/* Low 16 bits of symbol value, pc-relative.  */
-static reloc_howto_type elf_mips_gnu_rel_lo16 =
-  HOWTO (R_MIPS_GNU_REL_LO16,	/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
-	 TRUE,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
-	 _bfd_mips_elf_lo16_reloc, /* special_function */
-	 "R_MIPS_GNU_REL_LO16",	/* name */
-	 TRUE,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 TRUE);			/* pcrel_offset */
-
 /* 16 bit offset for pc-relative branches.  */
 static reloc_howto_type elf_mips_gnu_rel16_s2 =
   HOWTO (R_MIPS_GNU_REL16_S2,	/* type */
@@ -646,38 +613,6 @@ static reloc_howto_type elf_mips_gnu_rel16_s2 =
 	 TRUE,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
-	 TRUE);			/* pcrel_offset */
-
-/* 64 bit pc-relative.  */
-static reloc_howto_type elf_mips_gnu_pcrel64 =
-  HOWTO (R_MIPS_PC64,		/* type */
-	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
-	 64,			/* bitsize */
-	 TRUE,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_signed, /* complain_on_overflow */
-	 _bfd_mips_elf_generic_reloc, /* special_function */
-	 "R_MIPS_PC64",		/* name */
-	 TRUE,			/* partial_inplace */
-	 MINUS_ONE,		/* src_mask */
-	 MINUS_ONE,		/* dst_mask */
-	 TRUE);			/* pcrel_offset */
-
-/* 32 bit pc-relative.  */
-static reloc_howto_type elf_mips_gnu_pcrel32 =
-  HOWTO (R_MIPS_PC32,		/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
-	 TRUE,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_signed, /* complain_on_overflow */
-	 _bfd_mips_elf_generic_reloc, /* special_function */
-	 "R_MIPS_PC32",		/* name */
-	 TRUE,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
-	 0xffffffff,		/* dst_mask */
 	 TRUE);			/* pcrel_offset */
 
 /* GNU extension to record C++ vtable hierarchy */
@@ -1134,16 +1069,8 @@ bfd_elf32_bfd_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
       return &elf_mips_gnu_vtinherit_howto;
     case BFD_RELOC_VTABLE_ENTRY:
       return &elf_mips_gnu_vtentry_howto;
-    case BFD_RELOC_PCREL_HI16_S:
-      return &elf_mips_gnu_rel_hi16;
-    case BFD_RELOC_PCREL_LO16:
-      return &elf_mips_gnu_rel_lo16;
     case BFD_RELOC_16_PCREL_S2:
       return &elf_mips_gnu_rel16_s2;
-    case BFD_RELOC_64_PCREL:
-      return &elf_mips_gnu_pcrel64;
-    case BFD_RELOC_32_PCREL:
-      return &elf_mips_gnu_pcrel32;
     }
 }
 
@@ -1163,16 +1090,8 @@ mips_elf32_rtype_to_howto (unsigned int r_type,
       return &elf_mips_gnu_vtinherit_howto;
     case R_MIPS_GNU_VTENTRY:
       return &elf_mips_gnu_vtentry_howto;
-    case R_MIPS_GNU_REL_HI16:
-      return &elf_mips_gnu_rel_hi16;
-    case R_MIPS_GNU_REL_LO16:
-      return &elf_mips_gnu_rel_lo16;
     case R_MIPS_GNU_REL16_S2:
       return &elf_mips_gnu_rel16_s2;
-    case R_MIPS_PC64:
-      return &elf_mips_gnu_pcrel64;
-    case R_MIPS_PC32:
-      return &elf_mips_gnu_pcrel32;
     default:
       BFD_ASSERT (r_type < (unsigned int) R_MIPS_max);
       return &elf_mips_howto_table_rel[r_type];

@@ -1220,13 +1220,6 @@ _bfd_mips_elf_lo16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 	 carry or borrow will induce a change of +1 or -1 in the high part.  */
       hi->rel.addend += (vallo + 0x8000) & 0xffff;
 
-      /* R_MIPS_GNU_REL_HI16 relocations are relative to the address of the
-	 lo16 relocation, not their own address.  If we're calculating the
-	 final value, and hence subtracting the "PC", subtract the offset
-	 of the lo16 relocation from here.  */
-      if (output_bfd == NULL && hi->rel.howto->type == R_MIPS_GNU_REL_HI16)
-	hi->rel.addend -= reloc_entry->address - hi->rel.address;
-
       ret = _bfd_mips_elf_generic_reloc (abfd, &hi->rel, symbol, hi->data,
 					 hi->input_section, output_bfd,
 					 error_message);
@@ -2728,12 +2721,6 @@ mips_elf_next_relocation (bfd *abfd ATTRIBUTE_UNUSED, unsigned int r_type,
 			  const Elf_Internal_Rela *relocation,
 			  const Elf_Internal_Rela *relend)
 {
-  /* According to the MIPS ELF ABI, the R_MIPS_LO16 relocation must be
-     immediately following.  However, for the IRIX6 ABI, the next
-     relocation may be a composed relocation consisting of several
-     relocations for the same address.  In that case, the R_MIPS_LO16
-     relocation may occur as one of these.  We permit a similar
-     extension in general, as that is useful for GCC.  */
   while (relocation < relend)
     {
       if (ELF_R_TYPE (abfd, relocation->r_info) == r_type)
@@ -3348,27 +3335,10 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       value &= howto->dst_mask;
       break;
 
-    case R_MIPS_PC32:
-    case R_MIPS_PC64:
-    case R_MIPS_GNU_REL_LO16:
-      value = symbol + addend - p;
-      value &= howto->dst_mask;
-      break;
-
     case R_MIPS_GNU_REL16_S2:
       value = symbol + _bfd_mips_elf_sign_extend (addend, 18) - p;
       overflowed_p = mips_elf_overflow_p (value, 18);
       value = (value >> 2) & howto->dst_mask;
-      break;
-
-    case R_MIPS_GNU_REL_HI16:
-      /* Instead of subtracting 'p' here, we should be subtracting the
-	 equivalent value for the LO part of the reloc, since the value
-	 here is relative to that address.  Because that's not easy to do,
-	 we adjust 'addend' in _bfd_mips_elf_relocate_section().  See also
-	 the comment there for more information.  */
-      value = mips_elf_high (addend + symbol - p);
-      value &= howto->dst_mask;
       break;
 
     case R_MIPS16_26:
@@ -6229,7 +6199,6 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		 combination of the addend stored in two different
 		 relocations.   */
 	      if (r_type == R_MIPS_HI16
-		  || r_type == R_MIPS_GNU_REL_HI16
 		  || (r_type == R_MIPS_GOT16
 		      && mips_elf_local_relocation_p (input_bfd, rel,
 						      local_sections, FALSE)))
@@ -6237,7 +6206,6 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  bfd_vma l;
 		  const Elf_Internal_Rela *lo16_relocation;
 		  reloc_howto_type *lo16_howto;
-		  unsigned int lo;
 
 		  /* The combined value is the sum of the HI16 addend,
 		     left-shifted by sixteen bits, and the LO16
@@ -6245,18 +6213,25 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		     a `lui' of the HI16 value, and then an `addiu' of
 		     the LO16 value.)
 
-		     Scan ahead to find a matching LO16 relocation.  */
-		  if (r_type == R_MIPS_GNU_REL_HI16)
-		    lo = R_MIPS_GNU_REL_LO16;
-		  else
-		    lo = R_MIPS_LO16;
-		  lo16_relocation = mips_elf_next_relocation (input_bfd, lo,
+		     Scan ahead to find a matching LO16 relocation.
+
+		     According to the MIPS ELF ABI, the R_MIPS_LO16
+		     relocation must be immediately following.
+		     However, for the IRIX6 ABI, the next relocation
+		     may be a composed relocation consisting of
+		     several relocations for the same address.  In
+		     that case, the R_MIPS_LO16 relocation may occur
+		     as one of these.  We permit a similar extension
+		     in general, as that is useful for GCC.  */
+		  lo16_relocation = mips_elf_next_relocation (input_bfd,
+							      R_MIPS_LO16,
 							      rel, relend);
 		  if (lo16_relocation == NULL)
 		    return FALSE;
 
 		  /* Obtain the addend kept there.  */
-		  lo16_howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd, lo, FALSE);
+		  lo16_howto = MIPS_ELF_RTYPE_TO_HOWTO (input_bfd,
+							R_MIPS_LO16, FALSE);
 		  l = mips_elf_obtain_contents (lo16_howto, lo16_relocation,
 						input_bfd, contents);
 		  l &= lo16_howto->src_mask;
@@ -6267,16 +6242,6 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 		  /* Compute the combined addend.  */
 		  addend += l;
-
-		  /* If PC-relative, subtract the difference between the
-		     address of the LO part of the reloc and the address of
-		     the HI part.  The relocation is relative to the LO
-		     part, but mips_elf_calculate_relocation() doesn't
-		     know its address or the difference from the HI part, so
-		     we subtract that difference here.  See also the
-		     comment in mips_elf_calculate_relocation().  */
-		  if (r_type == R_MIPS_GNU_REL_HI16)
-		    addend -= (lo16_relocation->r_offset - rel->r_offset);
 		}
 	      else if (r_type == R_MIPS16_GPREL)
 		{
@@ -6334,8 +6299,7 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  else
 	    {
 	      if (r_type == R_MIPS_HI16
-		  || r_type == R_MIPS_GOT16
-		  || r_type == R_MIPS_GNU_REL_HI16)
+		  || r_type == R_MIPS_GOT16)
 		addend = mips_elf_high (addend);
 	      else if (r_type == R_MIPS_HIGHER)
 		addend = mips_elf_higher (addend);

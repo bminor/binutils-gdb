@@ -1,3 +1,7 @@
+2004-04-24  Chris Demetriou  <cgd@broadcom.com>
+
+	* ld-elf/merge.d: XFAIL on all MIPS targets.
+
 2004-04-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlsexe32.d: Update.
