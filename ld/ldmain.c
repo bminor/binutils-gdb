@@ -145,9 +145,9 @@ main (argc, argv)
   emulation =  (char *) getenv(EMULATION_ENVIRON); 
 
   /* Initialize the data about options.  */
-  strip_symbols = STRIP_NONE;
+
   trace_files = false;
-  discard_locals = DISCARD_NONE;
+
 
   write_map = false;
   config.relocateable_output = false;
