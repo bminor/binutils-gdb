@@ -5,9 +5,6 @@ reliably without unexpected failures on the "standard" machines, etc.
 This list exists largely as "tests we can add when we are ready to
 risk destabilizing it again".
 
-return.exp--reenable test (there is nothing known to be wrong with the
-test, but it hasn't been tried on a wide range of architectures).
-
 nodebug.exp--test printing variables.
 
 Test printing of structures passed by value, for the 7th, 8th, and 9th
@@ -15,7 +12,7 @@ arguments (PR 1714).  Test printing structure arguments of
 2,4,6,8,12,16,and 20 bytes.  Same for structure return of all those
 sizes ("return", "finish", and call function).
 
-Get crossload tests to use --with-targets and reenable them.
+Get crossload tests to use --enable-targets and reenable them.
 
 corefile.exp:
 1.  Print variables from the core file (data and stack), and text
@@ -39,6 +36,9 @@ appropriately (integer registers in decimal, registers which always
 contain addresses (pc, probably sp and fp, maybe others) in hex,
 floating point).
 
+Test completer.  There is a list of test cases in main.c in the gdb
+source.  Test these with TAB, M-?, and the "complete" command.
+
 Test "info line" with all kinds of linespecs.  Test that the last line
 of the file works right.
 
@@ -53,8 +53,12 @@ these differently) (both a demangle test and some tests which also
 test the compiler).  Test calling a method of a class nested more than
 9 levels (for gdb_mangle_name and demangling).
 
-Test printing complex types, including functions, pointers to arrays
-of pointers of functions, functions which return pointers to
+Test static member functions (C++).  Test that "ptype" shows them
+correctly, both before and after they have been converted from stub
+methods.  Test that we can call them.
+
+Test printing complicated types, including functions, pointers to
+arrays of pointers of functions, functions which return pointers to
 functions, etc.
 
 Test GDB expressions--test all operators (and overloaded operators for
@@ -117,12 +121,20 @@ work even if the program is not being run.
 Write a test for the reentracy bug with rs6000_struct_return_address
 in rs6000-tdep.c.
 
-Test "return" from dummy frames.
+Test "return" from dummy frames.  Test "return" from non-innermost
+frame.  Test that "return" from a non-innermost frame restores
+registers which are saved not in that frame but in a frame more inner
+(I believe this currently works on few if any architectures).
 
 FORTRAN common blocks (a.out and xcoff--weird.exp has the start of
 one but it is not quite right as of 19 Nov 1993).
 
 Test that "x" command sets $_ and $__.  Test $_ in general.
+
+Test that "p/a" works when given addresses in text, data, and bss
+segments.  Test that it works if program is compiled with or without
+-g.  Test that it works if preceding symbol is static or if it is
+extern.
 
 Given `char abc[] = "abc\0def";' test "x/s abc" followed by "x/s"
 (should display "abc" followed by "def").  Test this works with no

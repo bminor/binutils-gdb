@@ -1,3 +1,10 @@
+Sat Dec 17 14:20:03 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/{funcargs.exp, funcargs.c} (call_after_alloca): New test.
+
+	* TODO: Remove item about enabling return.exp; it
+	is enabled.  Suggest a few more "return" tests.
+
 Sat Dec 17 02:33:37 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.c++/misc.cc, gdb.c++/inherit.exp:  Add testcases for
