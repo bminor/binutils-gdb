@@ -146,6 +146,7 @@ infptrace.c
 infrun.c
 inftarg.c
 irix4-nat.c
+irix5-nat.c
 isi-xdep.c
 kdb-start.c
 language.c
@@ -165,6 +166,7 @@ m88k-pinsn.c
 m88k-tdep.c
 main.c
 maint.c
+mdebugread.c
 mem-break.c
 minimon.h
 minsyms.c
