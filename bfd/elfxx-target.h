@@ -325,16 +325,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #else
 #undef USE_REL
 #define USE_REL 1
-#endif 
+#endif
 
 /* Use these in new code.  */
-#ifndef elf_backend_may_use_rel_p 
+#ifndef elf_backend_may_use_rel_p
 #define elf_backend_may_use_rel_p USE_REL
-#endif 
+#endif
 #ifndef elf_backend_may_use_rela_p
 #define elf_backend_may_use_rela_p !USE_REL
 #endif
-#ifndef elf_backend_default_use_rela_p 
+#ifndef elf_backend_default_use_rela_p
 #define elf_backend_default_use_rela_p !USE_REL
 #endif
 
@@ -608,7 +608,7 @@ const bfd_target TARGET_LITTLE_SYM =
 #else
   NULL,
 #endif
-  
+
   /* backend_data: */
   (PTR) &elfNN_bed
 };

@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-
 char*
 elf_core_file_failing_command (abfd)
      bfd *abfd;
@@ -32,7 +31,6 @@ elf_core_file_failing_signal (abfd)
   return elf_tdata (abfd)->core_signal;
 }
 
-
 boolean
 elf_core_file_matches_executable_p (core_bfd, exec_bfd)
      bfd *core_bfd;
@@ -40,7 +38,7 @@ elf_core_file_matches_executable_p (core_bfd, exec_bfd)
 {
   char* corename;
 
-  /* xvecs must match if both are ELF files for the same target. */
+  /* xvecs must match if both are ELF files for the same target.  */
 
   if (core_bfd->xvec != exec_bfd->xvec)
     {
@@ -48,7 +46,7 @@ elf_core_file_matches_executable_p (core_bfd, exec_bfd)
       return false;
     }
 
-  /* See if the name in the corefile matches the executable name. */
+  /* See if the name in the corefile matches the executable name.  */
 
   corename = elf_tdata (core_bfd)->core_program;
   if (corename != NULL)
@@ -62,7 +60,6 @@ elf_core_file_matches_executable_p (core_bfd, exec_bfd)
 
   return true;
 }
-
 
 /*  Core files are simply standard ELF formatted files that partition
     the file using the execution view of the file (program header table)
@@ -97,17 +94,17 @@ elf_core_file_p (abfd)
       return NULL;
     }
 
-  /* Check the magic number. */
+  /* Check the magic number.  */
   if (elf_file_p (&x_ehdr) == false)
     goto wrong;
 
   /* FIXME: Check EI_VERSION here ! */
 
-  /* Check the address size ("class"). */
+  /* Check the address size ("class").  */
   if (x_ehdr.e_ident[EI_CLASS] != ELFCLASS)
     goto wrong;
 
-  /* Check the byteorder. */
+  /* Check the byteorder.  */
   switch (x_ehdr.e_ident[EI_DATA])
     {
     case ELFDATA2MSB:		/* Big-endian */
@@ -122,14 +119,14 @@ elf_core_file_p (abfd)
       goto wrong;
     }
 
-  /* Give abfd an elf_obj_tdata. */
-  new_tdata = 
+  /* Give abfd an elf_obj_tdata.  */
+  new_tdata =
     (struct elf_obj_tdata *) bfd_zalloc (abfd, sizeof (struct elf_obj_tdata));
   if (new_tdata == NULL)
     return NULL;
-  elf_tdata (abfd) = new_tdata;  
+  elf_tdata (abfd) = new_tdata;
 
-  /* Swap in the rest of the header, now that we have the byte order. */
+  /* Swap in the rest of the header, now that we have the byte order.  */
   i_ehdrp = elf_elfheader (abfd);
   elf_swap_ehdr_in (abfd, &x_ehdr, i_ehdrp);
 
@@ -173,7 +170,7 @@ elf_core_file_p (abfd)
     }
 
   /* If there is no program header, or the type is not a core file, then
-     we are hosed. */
+     we are hosed.  */
   if (i_ehdrp->e_phoff == 0 || i_ehdrp->e_type != ET_CORE)
     goto wrong;
 
@@ -185,8 +182,8 @@ elf_core_file_p (abfd)
   /* Move to the start of the program headers.  */
   if (bfd_seek (abfd, i_ehdrp->e_phoff, SEEK_SET) != 0)
     goto wrong;
-  
-  /* Allocate space for the program headers. */
+
+  /* Allocate space for the program headers.  */
   i_phdrp = (Elf_Internal_Phdr *)
     bfd_alloc (abfd, sizeof (*i_phdrp) * i_ehdrp->e_phnum);
   if (!i_phdrp)
@@ -194,7 +191,7 @@ elf_core_file_p (abfd)
 
   elf_tdata (abfd)->phdr = i_phdrp;
 
-  /* Read and convert to internal form. */
+  /* Read and convert to internal form.  */
   for (phindex = 0; phindex < i_ehdrp->e_phnum; ++phindex)
     {
       Elf_External_Phdr x_phdr;
@@ -205,14 +202,14 @@ elf_core_file_p (abfd)
       elf_swap_phdr_in (abfd, &x_phdr, i_phdrp + phindex);
     }
 
-  /* Process each program header. */
+  /* Process each program header.  */
   for (phindex = 0; phindex < i_ehdrp->e_phnum; ++phindex)
     {
       if (!_bfd_elfcore_section_from_phdr (abfd, i_phdrp + phindex, phindex))
 	goto fail;
     }
 
-  /* Set the machine architecture. */
+  /* Set the machine architecture.  */
   if (! bfd_default_set_arch_mach (abfd, ebd->arch, 0))
     {
       /* It's OK if this fails for the generic target.  */
@@ -220,7 +217,7 @@ elf_core_file_p (abfd)
 	goto fail;
     }
 
-  /* Save the entry point from the ELF header. */
+  /* Save the entry point from the ELF header.  */
   bfd_get_start_address (abfd) = i_ehdrp->e_entry;
 
   /* Let the backend double check the format and override global

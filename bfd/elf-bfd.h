@@ -208,7 +208,7 @@ struct elf_link_local_dynamic_entry
 
   /* The index in the outgoing dynamic symbol table.  */
   long dynindx;
-  
+
   /* A copy of the input symbol.  */
   Elf_Internal_Sym isym;
 };
@@ -375,7 +375,7 @@ struct elf_backend_data
 							  unsigned int));
 
    /* A function to set the type of the info field.  Processor-specific
-     types should be handled here. */
+     types should be handled here.  */
   int (*elf_backend_get_symbol_type) PARAMS (( Elf_Internal_Sym *, int));
 
   /* A function to do additional processing on the ELF section header
@@ -397,7 +397,7 @@ struct elf_backend_data
 						Elf32_Internal_Shdr *));
 
   /* A function to handle unusual program segment types when creating BFD
-     sections from ELF program segments. */
+     sections from ELF program segments.  */
   boolean (*elf_backend_section_from_phdr) PARAMS ((bfd *,
 						    Elf32_Internal_Phdr *,
 						    int));
@@ -796,14 +796,14 @@ struct elf_obj_tdata
   file_ptr next_file_pos;
 #if 0
   /* we don't need these inside bfd anymore, and I think
-     these weren't used outside bfd. */
+     these weren't used outside bfd.  */
   void *prstatus;			/* The raw /proc prstatus structure */
   void *prpsinfo;			/* The raw /proc prpsinfo structure */
 #endif
   bfd_vma gp;				/* The gp value (MIPS only, for now) */
   unsigned int gp_size;			/* The gp size (MIPS only, for now) */
 
-  /* Information grabbed from an elf core file. */
+  /* Information grabbed from an elf core file.  */
   int core_signal;
   int core_pid;
   int core_lwpid;
@@ -825,7 +825,7 @@ struct elf_obj_tdata
      document the intent of any particular piece of code.  The field
      should be used as a count until size_dynamic_sections, at which
      point the contents of the .got is fixed.  Afterward, if an entry
-     is -1, then the symbol does not require a global offset table entry. */
+     is -1, then the symbol does not require a global offset table entry.  */
   union
     {
       bfd_signed_vma *refcounts;
@@ -851,7 +851,7 @@ struct elf_obj_tdata
      ELF emulation code, we need to add the shared object to the
      DT_NEEDED list of the resulting binary to indicate the dependency
      as if the -l option is passed to the linker. This field holds the
-     name of the loaded shared object. */
+     name of the loaded shared object.  */
   const char *dt_soname;
 
   /* Irix 5 often screws up the symbol table, sorting local symbols
@@ -873,10 +873,10 @@ struct elf_obj_tdata
      find_nearest_line.  */
   struct mips_elf_find_line *find_line_info;
 
-  /* A place to stash dwarf1 info for this bfd. */
+  /* A place to stash dwarf1 info for this bfd.  */
   struct dwarf1_debug *dwarf1_find_line_info;
 
-  /* A place to stash dwarf2 info for this bfd. */
+  /* A place to stash dwarf2 info for this bfd.  */
   PTR dwarf2_find_line_info;
 
   /* An array of stub sections indexed by symbol number, used by the

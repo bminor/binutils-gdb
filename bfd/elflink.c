@@ -163,7 +163,7 @@ _bfd_elf_create_dynamic_sections (abfd, info)
 	return false;
     }
 
-  s = bfd_make_section (abfd, 
+  s = bfd_make_section (abfd,
 			bed->default_use_rela_p ? ".rela.plt" : ".rel.plt");
   if (s == NULL
       || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
@@ -199,9 +199,9 @@ _bfd_elf_create_dynamic_sections (abfd, info)
      copy relocs.  */
       if (! info->shared)
 	{
-	  s = bfd_make_section (abfd, 
-				(bed->default_use_rela_p 
-				 ? ".rela.bss" : ".rel.bss")); 
+	  s = bfd_make_section (abfd,
+				(bed->default_use_rela_p
+				 ? ".rela.bss" : ".rel.bss"));
 	  if (s == NULL
 	      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
 	      || ! bfd_set_section_alignment (abfd, s, ptralign))

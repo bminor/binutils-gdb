@@ -25,7 +25,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "opcode/ia64.h"
 #include "elf/ia64.h"
 
-
 /*
  * THE RULES for all the stuff the linker creates --
  *
@@ -83,7 +82,7 @@ struct elfNN_ia64_dyn_sym_info
 
   /* The symbol table entry, if any, that this was derrived from.  */
   struct elf_link_hash_entry *h;
-  
+
   /* Used to count non-got, non-plt relocations for delayed sizing
      of relocation sections.  */
   struct elfNN_ia64_dyn_reloc_entry
@@ -188,7 +187,7 @@ static struct elfNN_ia64_local_hash_entry *elfNN_ia64_local_hash_lookup
 	   boolean create, boolean copy));
 static void elfNN_ia64_dyn_sym_traverse
   PARAMS ((struct elfNN_ia64_link_hash_table *ia64_info,
-	   boolean (*func)(struct elfNN_ia64_dyn_sym_info *, PTR),
+	   boolean (*func) (struct elfNN_ia64_dyn_sym_info *, PTR),
 	   PTR info));
 static boolean elfNN_ia64_create_dynamic_sections
   PARAMS ((bfd *abfd, struct bfd_link_info *info));
@@ -710,8 +709,8 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	    tsec = bfd_com_section_ptr;
 	  else if (isym.st_shndx > 0 && isym.st_shndx < SHN_LORESERVE)
 	    tsec = bfd_section_from_elf_index (abfd, isym.st_shndx);
-	  else 
-	    continue;	/* who knows. */
+	  else
+	    continue;	/* who knows.  */
 
 	  toff = isym.st_value;
 	}
@@ -1156,7 +1155,6 @@ elfNN_ia64_modify_segment_map (abfd)
   return true;
 }
 
-
 /* According to the Tahoe assembler spec, all labels starting with a
    '.' are local.  */
 
@@ -1204,7 +1202,7 @@ elfNN_ia64_local_hash_table_init (ht, abfd, new)
      bfd *abfd ATTRIBUTE_UNUSED;
      new_hash_entry_func new;
 {
-  memset (ht, 0, sizeof(*ht));
+  memset (ht, 0, sizeof (*ht));
   return bfd_hash_table_init (&ht->root, new);
 }
 
@@ -1227,7 +1225,7 @@ elfNN_ia64_new_loc_hash_entry (entry, table, string)
 
   /* Initialize our local data.  All zeros, and definitely easier
      than setting a handful of bit fields.  */
-  memset (ret, 0, sizeof(*ret));
+  memset (ret, 0, sizeof (*ret));
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct elfNN_ia64_local_hash_entry *)
@@ -1255,7 +1253,7 @@ elfNN_ia64_new_elf_hash_entry (entry, table, string)
 
   /* Initialize our local data.  All zeros, and definitely easier
      than setting a handful of bit fields.  */
-  memset (ret, 0, sizeof(*ret));
+  memset (ret, 0, sizeof (*ret));
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct elfNN_ia64_link_hash_entry *)
@@ -1274,7 +1272,7 @@ elfNN_ia64_hash_copy_indirect (xdir, xind)
   dir = (struct elfNN_ia64_link_hash_entry *)xdir;
   ind = (struct elfNN_ia64_link_hash_entry *)xind;
 
-  /* Copy down any references that we may have already seen to the 
+  /* Copy down any references that we may have already seen to the
      symbol which just became indirect.  */
 
   dir->root.elf_link_hash_flags |=
@@ -1488,7 +1486,7 @@ get_dyn_sym_info (ia64_info, h, abfd, rel, create)
   struct elfNN_ia64_dyn_sym_info **pp;
   struct elfNN_ia64_dyn_sym_info *dyn_i;
   bfd_vma addend = rel ? rel->r_addend : 0;
-  
+
   if (h)
     pp = &((struct elfNN_ia64_link_hash_entry *)h)->info;
   else
@@ -1500,7 +1498,7 @@ get_dyn_sym_info (ia64_info, h, abfd, rel, create)
       /* Construct a string for use in the elfNN_ia64_local_hash_table.
          The name describes what was once anonymous memory.  */
 
-      len = sizeof(void*)*2 + 1 + sizeof(bfd_vma)*4 + 1 + 1;
+      len = sizeof (void*)*2 + 1 + sizeof (bfd_vma)*4 + 1 + 1;
       len += 10;	/* %p slop */
 
       addr_name = alloca (len);
@@ -1512,7 +1510,7 @@ get_dyn_sym_info (ia64_info, h, abfd, rel, create)
       BFD_ASSERT (loc_h);
 
       pp = &loc_h->info;
-    }    
+    }
 
   for (dyn_i = *pp; dyn_i && dyn_i->addend != addend; dyn_i = *pp)
     pp = &dyn_i->next;
@@ -2047,7 +2045,7 @@ allocate_fptr (dyn_i, data)
   if (dyn_i->want_fptr)
     {
       struct elf_link_hash_entry *h = dyn_i->h;
-      
+
       if (h)
 	while (h->root.type == bfd_link_hash_indirect
 	       || h->root.type == bfd_link_hash_warning)
@@ -2504,7 +2502,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
       if (! bfd_elfNN_add_dynamic_entry (info, DT_RELA, 0)
 	  || ! bfd_elfNN_add_dynamic_entry (info, DT_RELASZ, 0)
 	  || ! bfd_elfNN_add_dynamic_entry (info, DT_RELAENT,
-					    sizeof(ElfNN_External_Rela)))
+					    sizeof (ElfNN_External_Rela)))
 	return false;
 
       if (reltext)
@@ -2541,7 +2539,7 @@ elfNN_ia64_install_value (abfd, hit_addr, val, r_type)
     case R_IA64_LDXMOV:
       return bfd_reloc_ok;
 
-      /* Instruction relocations. */
+      /* Instruction relocations.  */
 
     case R_IA64_IMM14:		opnd = IA64_OPND_IMM14; break;
 
@@ -2686,7 +2684,7 @@ elfNN_ia64_install_value (abfd, hit_addr, val, r_type)
 	case 0: shift =  5; break;
 	case 1: shift = 14; hit_addr += 3; break;
 	case 2: shift = 23; hit_addr += 6; break;
-	case 3: return bfd_reloc_notsupported; /* shouldn't happen... */
+	case 3: return bfd_reloc_notsupported; /* shouldn't happen...  */
 	}
       dword = bfd_get_64 (abfd, hit_addr);
       insn = (dword >> shift) & 0x1ffffffffffLL;
@@ -2765,7 +2763,7 @@ elfNN_ia64_install_dyn_reloc (abfd, info, sec, srel, offset, type,
   bfd_elfNN_swap_reloca_out (abfd, &outrel,
 			     ((ElfNN_External_Rela *) srel->contents
 			      + srel->reloc_count++));
-  BFD_ASSERT (sizeof(ElfNN_External_Rela) * srel->reloc_count
+  BFD_ASSERT (sizeof (ElfNN_External_Rela) * srel->reloc_count
 	      <= srel->_cooked_size);
 }
 
@@ -3057,7 +3055,7 @@ elfNN_ia64_final_link (abfd, info)
 	      (*_bfd_error_handler)
 		(_("%s: short data segment overflowed (0x%lx >= 0x400000)"),
 		 bfd_get_filename (abfd),
-		 (unsigned long)(max_short_vma - min_short_vma));
+		 (unsigned long) (max_short_vma - min_short_vma));
 	      return false;
 	    }
 	  else if ((gp_val > min_short_vma
@@ -3618,7 +3616,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (! dynamic_symbol_p)
 		{
 		  unsigned int dyn_r_type;
-		
+
 		  if (r_type == R_IA64_IPLTMSB)
 		    dyn_r_type = R_IA64_REL64MSB;
 		  else
@@ -3873,7 +3871,7 @@ elfNN_ia64_finish_dynamic_sections (abfd, info)
 
 	    case DT_RELASZ:
 	      /* Do not have RELASZ include JMPREL.  This makes things
-		 easier on ld.so.  This is not what the rest of BFD set up. */
+		 easier on ld.so.  This is not what the rest of BFD set up.  */
 	      dyn.d_un.d_val -= (ia64_info->minplt_entries
 				 * sizeof (ElfNN_External_Rela));
 	      break;
@@ -3903,7 +3901,7 @@ elfNN_ia64_finish_dynamic_sections (abfd, info)
 
 /* ELF file flag handling: */
 
-/* Function to keep IA-64 specific file flags. */
+/* Function to keep IA-64 specific file flags.  */
 static boolean
 elfNN_ia64_set_private_flags (abfd, flags)
      bfd *abfd;
@@ -4045,7 +4043,7 @@ elfNN_ia64_print_private_bfd_data (abfd, ptr)
 	   (flags & EF_IA_64_NOFUNCDESC_CONS_GP) ? "NOFUNCDESC_CONS_GP, " : "",
 	   (flags & EF_IA_64_ABSOLUTE) ? "ABSOLUTE, " : "",
 	   (flags & EF_IA_64_ABI64) ? "ABI64" : "ABI32");
-  
+
   _bfd_elf_print_private_bfd_data (abfd, ptr);
   return true;
 }

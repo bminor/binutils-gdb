@@ -1,6 +1,16 @@
 2001-01-03  Kazu Hirata  <kazu@hxi.com>
 
-	* libbfd.c: Fix formatting.
+	* ecoffswap.h: Fix formatting.
+	* elf-bfd.h: Likewise.
+	* elfarm-nabi.c: Likewise.
+	* elfarm-oabi.c: Likewise.
+	* elfcode.h: Likewise.
+	* elfcore.h: Likewise.
+	* elflink.c: Likewise.
+	* elflink.h: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* elfxx-target.h: Likewise.
+	* libbfd.c: Likewise
 	* linker.c: Likewise.
 	* lynx-core.c: Likewise.
 
