@@ -1,3 +1,7 @@
+Tue Aug 11 23:42:21 1992  Per Bothner  (bothner@cygnus.com)
+
+	* ar.c (main):  Don't *always* set the verbose flag!
+
 Wed Aug  5 11:25:27 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* copy.c:  When is_strip (because it is invoked as the strip

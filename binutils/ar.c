@@ -57,7 +57,6 @@ PROTO(void, ranlib_only, (char *archname));
 /** Globals and flags */
 
 char           *program_name = NULL;
-bfd             bogus_archive;
 bfd            *inarch;		/* The input arch we're manipulating */
 
 int mri_mode;
@@ -189,7 +188,6 @@ main(argc, argv)
   char           *temp;
 
   bfd_init();
-verbose = 1;
 #ifdef GNU960
   check_v960( argc, argv );
   default_target = bfd_make_targ_name(BFD_COFF_FORMAT,HOST_BYTE_ORDER_BIG_P);
@@ -204,7 +202,7 @@ verbose = 1;
    ++temp;
   if (is_ranlib > 0 || (is_ranlib < 0 && strcmp(temp, "ranlib") == 0)) {
     if (argc < 2)
-     bfd_fatal("Too few command arguments.");
+     fatal("Too few command arguments.");
     ranlib_only(argv[1]);
   }
 
@@ -213,7 +211,7 @@ verbose = 1;
     exit(0);
   }
   if (argc < 3)
-   bfd_fatal("Too few command arguments.");
+   fatal("Too few command arguments.");
 
   arg_ptr = argv[1];
 
@@ -333,16 +331,7 @@ verbose = 1;
 
 
     open_inarch(inarch_filename);
-    /*
-      If we have no archive, and we've been asked to replace then create one
-      */
-#if 0
-    if (operation == replace && inarch == &bogus_archive) {
-      silent_create = 1;
-      do_quick_append(inarch_filename, 0);
-      open_inarch(inarch_filename);
-    }
-#endif
+
     switch (operation) {
 
      case print_table:
@@ -411,45 +400,39 @@ open_inarch(archive_filename)
 	  maybequit();
 	  return 0;
 	}	
-	if (!silent_create)
-	    fprintf(stderr,
-		    "%s: creating %s\n", program_name, archive_filename);
 
-	inarch = &bogus_archive;
-	inarch->filename = archive_filename;
-	inarch->has_armap = true;
-
+	/* This routine is one way to forcibly create the archive. */
+	do_quick_append(archive_filename, 0);
     }
-    else {
+
 #ifdef GNU960
-	inarch = bfd_openr(archive_filename, default_target);
+    inarch = bfd_openr(archive_filename, default_target);
 #else
-	inarch = bfd_openr(archive_filename, NULL);
+    inarch = bfd_openr(archive_filename, NULL);
 #endif
-	if (inarch == NULL) {
-    bloser:
-	    bfd_perror(archive_filename);
-	    exit(1);
-	}
-
-	if (bfd_check_format(inarch, bfd_archive) != true)
-	    fatal("File %s is not an archive.", archive_filename);
-#ifdef GNU960
-	gnu960_verify_target(inarch);	/* Exits on failure */
-#endif
-	last_one = &(inarch->next);
-	/* Read all the contents right away, regardless. */
-	for (next_one = bfd_openr_next_archived_file(inarch, NULL);
-	     next_one;
-	     next_one = bfd_openr_next_archived_file(inarch, next_one)) {
-	    *last_one = next_one;
-	    last_one = &next_one->next;
-	}
-	*last_one = (bfd *) NULL;
-	if (bfd_error != no_more_archived_files)
-	    goto bloser;
+    if (inarch == NULL) {
+      bloser:
+	bfd_perror(archive_filename);
+	exit(1);
     }
-return 1;
+
+    if (bfd_check_format(inarch, bfd_archive) != true)
+	fatal("File %s is not an archive.", archive_filename);
+#ifdef GNU960
+    gnu960_verify_target(inarch);	/* Exits on failure */
+#endif
+    last_one = &(inarch->next);
+    /* Read all the contents right away, regardless. */
+    for (next_one = bfd_openr_next_archived_file(inarch, NULL);
+	 next_one;
+	 next_one = bfd_openr_next_archived_file(inarch, next_one)) {
+	*last_one = next_one;
+	last_one = &next_one->next;
+    }
+    *last_one = (bfd *) NULL;
+    if (bfd_error != no_more_archived_files)
+	goto bloser;
+    return 1;
 }
 
 
@@ -681,13 +664,7 @@ write_archive()
     int             namelen = strlen(inarch->filename);
     char           *new_name = xmalloc(namelen + 6);
     bfd            *contents_head = inarch->next;
-#if 0
-    if (inarch == &bogus_archive) {
-	/* How can this be ? */
-	return;
-    }
-    else {
-#endif
+
 	strcpy(new_name, inarch->filename);
 	strcpy(new_name + namelen, "-art");
 	obfd = bfd_openw(new_name,
@@ -712,9 +689,6 @@ write_archive()
 
 	if (rename(new_name, inarch->filename) != 0)
 	    bfd_fatal(inarch->filename);
-#if 0
-    }
-#endif
 }
 
 
@@ -965,6 +939,3 @@ print_descr(abfd)
 {
     print_arelt_descr(stdout,abfd, verbose);
 }
-
-
-
