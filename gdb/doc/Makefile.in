@@ -228,7 +228,7 @@ gdb.mm: gdb-${CONFIG}.texi ${READLINE_DIR}/doc/rluser.texinfo inc-hist.texi
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e '/^@ifinfo/,/^@end ifinfo/d' \
-		-e '/^@c/d' \
+		-e '/^@c /d' \
 		-e 's/{.*,,/{/' \
 		-e '/@noindent/d' \
 		-e 's/@ / /g' \
@@ -249,7 +249,7 @@ gdb.me: gdb-${CONFIG}.texi ${READLINE_DIR}/doc/rluser.texinfo inc-hist.texi
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e '/^@ifinfo/,/^@end ifinfo/d' \
-		-e '/^@c/d' \
+		-e '/^@c /d' \
 		-e 's/{.*,,/{/' \
 		-e 's/@ / /g' \
 		-e 's/^@alphaenumerate/@enumerate/g' \
@@ -269,7 +269,7 @@ gdb.ms: gdb-${CONFIG}.texi ${READLINE_DIR}/doc/rluser.texinfo inc-hist.texi
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e '/^@ifinfo/,/^@end ifinfo/d' \
-		-e '/^@c/d' \
+		-e '/^@c /d' \
 		-e 's/{.*,,/{/' \
 		-e 's/@ / /g' \
 		-e 's/^@alphaenumerate/@enumerate/g' \
