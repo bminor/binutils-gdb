@@ -1,4 +1,10 @@
 start-sanitize-r5900
+Thu Apr 23 12:32:07 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* mips-opc.c (msub.s): Correct mask pattern for disassembly.
+
+end-sanitize-r5900
+start-sanitize-r5900
 Mon Apr 20 19:11:55 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* mips-opc.c (madd.s): Correct mask pattern for disassembly.
