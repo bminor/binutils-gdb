@@ -122,7 +122,8 @@ changequote([,])dnl
       thumb*)		cpu_type=arm endian=little ;;
       hppa*)		cpu_type=hppa ;;
 changequote(,)dnl
-      i[456]86)		cpu_type=i386 ;;
+      i[456]86)		cpu_type=i386 arch=i386;;
+      x86_64)		cpu_type=i386 arch=x86_64;;
       ia64)		cpu_type=ia64 ;;
       m6811|m6812|m68hc12) cpu_type=m68hc11 ;;
       m680[012346]0)	cpu_type=m68k ;;
@@ -238,6 +239,7 @@ changequote([,])dnl
       i386-*-linux*aout* | i386-*-linuxoldld)   fmt=aout em=linux ;;
       i386-*-linux*coff*)   fmt=coff em=linux ;;
       i386-*-linux-gnu*)    fmt=elf em=linux bfd_gas=yes ;;
+      x86_64-*-linux-gnu*)  fmt=elf em=linux bfd_gas=yes ;;
       i386-*-lynxos*)       fmt=coff em=lynx ;;
 changequote(,)dnl
       i386-*-sysv[45]* | i386-*-solaris* | i386-*-elf)

@@ -1,3 +1,8 @@
+Sat Dec 30 19:02:48 MET 2000  Jan Hubicka  <jh@suse.cz>
+
+	* configure.in: Add support for x86_64 and x86_64-*-linux-gnu*
+	* NEWS: Add x86_64.
+
 2000-12-29  H.J. Lu  <hjl@gnu.org>
 
 	* listing.c (calc_hex): Print the variable part only if the
