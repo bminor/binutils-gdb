@@ -70,7 +70,7 @@ else
 	lose_these_too="${lose_these_too} ${cygnus_files}"
 fi
 
-gdbtk_files="tcl tk"
+gdbtk_files="tcl tk itcl tix"
 
 if ( echo $* | grep lose\-gdbtk > /dev/null) ; then
 	lose_these_too="${lose_these_too} ${gdbtk_files}"
