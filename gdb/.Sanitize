@@ -1,4 +1,4 @@
-# Sanitize.in for devo.
+# .Sanitize for devo/gdb.
 # $Id$
 #
 
@@ -71,7 +71,6 @@ cplus-dem.c
 createtags
 dbxread.c
 defs.h
-depend
 doc
 environ.c
 environ.h
@@ -105,7 +104,6 @@ inferior.h
 inflow.c
 infptrace.c
 infrun.c
-infrun.hacked.c
 inftarg.c
 kdb-start.c
 m68k-opcode.h
@@ -147,8 +145,6 @@ regex.h
 rem-multi.shar
 remote-eb.c
 remote-nindy.c
-remote-sa.sparc.c
-remote-vx.68.c
 remote-vx.c
 remote.c
 saber.suppress
@@ -163,8 +159,6 @@ sparc-tdep.c
 sparc-xdep.c
 stack.c
 standalone.c
-stddef.h
-stdlib.h
 stuff.c
 sun3-xdep.c
 sun386-xdep.c
@@ -263,24 +257,8 @@ xm-vax.h
 
 Do-last:
 
+echo "Making 'depend'."
+make -f Makefile.dist depend
 echo Done in `pwd`.
-
-#
-#
-# $Log$
-# Revision 2.1  1991/05/23 22:06:18  rich
-# First cut.
-#
-# Revision 1.2  1991/05/23  21:15:10  rich
-# Added bfd.
-#
-# Revision 1.1  1991/05/23  17:32:34  rich
-# Initial revision
-#
-# Revision 1.1  1991/05/23  17:18:12  rich
-# Initial revision
-#
-#
-#
 
 # End of file.
