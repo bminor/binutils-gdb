@@ -62,6 +62,7 @@ tahoe.h
 ultra3.h
 vaxbsd.h
 vaxult.h
+vaxult2.h
 we32k.h
 
 Do-last:

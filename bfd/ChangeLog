@@ -1,5 +1,10 @@
 Tue Mar  2 17:52:58 1993  Fred Fish  (fnf@cygnus.com)
 
+	(Ultrix 2.2 support from Michael Rendell <michael@mercury.cs.mun.ca>)
+	* configure.host (vax-*-ultrix2*):  Add triplet.
+	* hosts/vaxult2.h:  New file.
+	* config/vaxult2.mh:  New file.
+
 	* aoutx.h (string.h):  Include for strchr and friends.
 	* archive.c (string.h):  Include for memchr and friends.
 	* elf32.c (string.h):  Include for strrchr and friends.
