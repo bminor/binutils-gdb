@@ -1,3 +1,8 @@
+Thu Feb 24 18:19:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (SUBDIR_MI_CFLAGS): Fix typo, wrong brace.
+	* configure: Regenerate.
+	
 2000-02-24  Christopher Faylor  <cgf@cygnus.com>
 
 	* configure.tgt: Add arm, mips, sh wince targets.
