@@ -689,9 +689,14 @@ hppa_pop_frame ()
     write_register (SAR_REGNUM,
                     read_memory_integer (fsr.regs[SAR_REGNUM], 4));
 
+  /* If the PC was explicitly saved, then just restore it.  */
   if (fsr.regs[PCOQ_TAIL_REGNUM])
     write_register (PCOQ_TAIL_REGNUM,
                     read_memory_integer (fsr.regs[PCOQ_TAIL_REGNUM], 4));
+
+  /* Else use the value in %rp to set the new PC.  */
+  else 
+    target_write_pc (read_register (RP_REGNUM));
 
   write_register (FP_REGNUM, read_memory_integer (fp, 4));
 
