@@ -1,3 +1,8 @@
+Sun Feb  6 20:31:56 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ldlang.c (lang_size_sections): Check if bfd_relax_section set
+	bfd_errno. 
+
 Sat Feb  5 03:54:34 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* emultempl/lnk960.em (append), emultempl/hppaosf.em
