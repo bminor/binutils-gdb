@@ -1,3 +1,8 @@
+2002-04-07  Andreas Schwab  <schwab@suse.de>
+
+	* m68klinux-nat.c (fill_fpregset): Properly pass address of
+	buffer to regcache_collect.
+
 2002-04-06  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (PS_REGNUM): Add.  Document.  Default to -1.
