@@ -2147,6 +2147,7 @@ assemble_ppi (op_end, opcode)
      Make sure we encode a defined insn pattern.  */
   reg_x = 0;
   reg_y = 0;
+  reg_n = 0;
 
   for (;;)
     {
