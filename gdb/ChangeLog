@@ -1,3 +1,12 @@
+Sun Feb 25 13:58:33 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* configure.in (mips*-*-vxworks*): New config.
+	* configure: Regenerated.
+
+	* config/mips/vxmips.mt, config/mips/tm-vxmips.h: New files.
+	* remote-vxmips.c (vx_convert_to_virtual, vx_convert_from_virtual):
+	Remove, never used.
+
 Sat Feb 24 12:30:28 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* partial-stab.h (case N_FUN):  Function symbols generated

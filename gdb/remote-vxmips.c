@@ -199,31 +199,3 @@ vx_write_register (regno)
 			   PTRACE_SETFPREGS);
     }
 }
-
-/* Convert from an extended float to a double.
-   The extended float is stored as raw data pointed to by FROM.
-   Return the converted value as raw data in the double pointed to by TO.
-   NOTE: mips uses standard two word doubles.  */
-
-void
-vx_convert_to_virtual (regno, from, to)
-      int regno;
-      char *from;
-      char *to;
-{
-  bcopy (from, to, REGISTER_VIRTUAL_SIZE (regno));
-}
-
-/* The converse:  convert from a double to an extended float.
-   The double is stored as raw data pointed to by FROM.
-   Return the converted value as raw data in the extended
-   float pointed to by TO.  */
-
-void
-vx_convert_from_virtual (regno, from, to)
-     int regno;
-     char *from;
-     char *to;
-{
-  bcopy (from, to, REGISTER_VIRTUAL_SIZE (regno));
-}

@@ -541,6 +541,7 @@ mips*-*-mach3*)		gdb_target=mach3 ;;
 mips*-*-sysv4*)		gdb_target=mipsv4 ;;
 mips*-*-sysv*)		gdb_target=bigmips ;;
 mips*-*-riscos*)	gdb_target=bigmips ;;
+mips*-*-vxworks*)       gdb_target=vxmips ;;
 
 none-*-*)		gdb_target=none ;;
 
