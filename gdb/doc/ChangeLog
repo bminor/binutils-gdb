@@ -1,3 +1,15 @@
+2000-03-28  Stan Shebs  <shebs@apple.com>
+
+	* gdb.texinfo: Update dates, bump to Eighth Edition (note
+	expectation of additional changes before release), update
+	ISBN, add copy of top-level menu for @ifhtml, remove explicit
+	node links, rephrase and/or shorten lines to fix formatting
+	problem in both regular and @smallbook formats.
+	* annotate.texi: Shorten lines in example, use smallexample
+	consistently everywhere.
+	* Makefile.in: Add comment about texinfo 4.0 html generation.
+	(SFILES_INCLUDED): Add annotate.texi.
+
 2000-03-27  Daniel Berlin  <dan@cgsoftware.com>
 
         * gdb.texinfo (Debugging Output): Added new section, documenting
