@@ -1264,15 +1264,6 @@ if test "${enable_gdbtk}" = "yes"; then
            fi
 
            ENABLE_CFLAGS="${ENABLE_CFLAGS} \$(SUBDIR_GDBTK_CFLAGS)"
-	   # Tcl/Tk 8.1 require -fwritable strings.  I don't
-           # know whether 8.2 will or not, but I bet it will.
-           # I don't have to worry about 7.x since we don't support it.
-           GDBTK_CFLAGS=""
-	   if test "$GCC" = "yes"; then
-               if test "$TCL_VERSION" != "8.0" ; then
-                   GDBTK_CFLAGS="-fwritable-strings"
-	       fi
-           fi
 
 	   # Include some libraries that Tcl and Tk want.
 	   TCL_LIBS='$(LIBGUI) $(ITCL) $(ITK) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'

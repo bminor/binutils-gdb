@@ -1,3 +1,8 @@
+2005-03-23  Martin Hunt  <hunt@redhat.com>
+
+	* configure.ac: Remove -fwritable-strings from CFLAGS.
+	* configure: Regenerate.
+
 2005-03-21  Michael Snyder  <msnyder@redhat.com>
 
 	* mn10300-prologue.c (fix_frame_pointer): Delete.
