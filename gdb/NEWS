@@ -7,6 +7,10 @@
 
 x86 OpenBSD					i[3456]86-*-openbsd*
 
+* REMOVED configurations and files
+
+TI TMS320C80					tic80-*-*
+
 * Changes to command line processing
 
 The new `--args' feature can be used to specify command-line arguments

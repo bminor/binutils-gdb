@@ -1,3 +1,13 @@
+2001-12-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* NEWS: Mention deleted tic80-*-*.
+	* configure.tgt: Delete tic80-*-*.
+	* Makefile.in (tic80-tdep.o): Delete.
+	* config/tic80/tic80.mt: Delete.
+	* config/tic80/tm-tic80.h: Delete.
+	* tic80-tdep.c: Delete.
+	* MAINTAINERS: Note that tic80 was deleted.
+
 2001-11-30  Kevin Buettner  <kevinb@redhat.com>
 
 	* ppc-linux-tdep.c (solib-svr4.h): Include.

@@ -2088,8 +2088,6 @@ linespec.o: linespec.c $(linespec_h) $(defs_h) $(frame_h) $(value_h) \
 	$(objfiles_h) $(symfile_h) $(completer_h) $(symtab_h) \
 	$(demangle_h) $(command_h) $(cp_abi_h)
 
-tic80-tdep.o: tic80-tdep.c $(defs_h) $(regcache_h)
-
 target.o: target.c $(bfd_h) $(defs_h) $(gdbcmd_h) $(inferior_h) \
 	$(objfiles_h) $(symfile_h) $(target_h) $(gdb_string_h) $(regcache_h)
 
