@@ -1,3 +1,8 @@
+2002-07-17  H.J. Lu <hjl@gnu.org>
+
+	* gas/ia64/dv-branch.d: Updated.
+	* gas/ia64/opc-b.d: Likewise.
+
 2002-07-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/i386/intel16.s: New.
