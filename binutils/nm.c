@@ -1086,6 +1086,7 @@ print_symname (format, name, abfd)
   if (do_demangle && *name)
     {
       char *res;
+      const char *p;
 
       /* In this mode, give a user-level view of the symbol name
 	 even if it's not mangled; strip off any leading
@@ -1093,9 +1094,30 @@ print_symname (format, name, abfd)
       if (bfd_get_symbol_leading_char (abfd) == name[0])
 	name++;
 
-      res = cplus_demangle (name, DMGL_ANSI | DMGL_PARAMS);
+      /* This is a hack for XCOFF, PowerPC64-ELF or the MS PE format.
+	 These formats have a number of leading '.'s on at least some
+	 symbols, so we remove all dots to avoid confusing the
+	 demangler.  */
+      p = name;
+      while (*p == '.')
+	++p;
+
+      res = cplus_demangle (p, DMGL_ANSI | DMGL_PARAMS);
       if (res)
 	{
+	  size_t dots = p - name;
+
+	  /* Now put back any stripped dots.  */
+	  if (dots != 0)
+	    {
+	      size_t len = strlen (res) + 1;
+	      char *add_dots = xmalloc (len + dots);
+
+	      memcpy (add_dots, name, dots);
+	      memcpy (add_dots + dots, res, len);
+	      free (res);
+	      res = add_dots;
+	    }
 	  printf (format, res);
 	  free (res);
 	  return;
