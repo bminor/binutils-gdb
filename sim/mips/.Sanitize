@@ -31,13 +31,6 @@ else
         lose_these_too="${r5900_files} ${lose_these_too}"
 fi
 
-tx3904_files="dv-tx3904cpu.c dv-tx3904irc.c dv-tx3904tmr.c dv-tx3904sio.c"
-if ( echo $* | grep keep\-tx3904 > /dev/null ) ; then
-        keep_these_too="${tx3904_files} ${keep_these_too}"
-else
-        lose_these_too="${tx3904_files} ${lose_these_too}"
-fi
-
 sky_files="ChangeLog.sky sky-device.c sky-device.h sky-dma.c sky-dma.h sky-bits.h"
 sky_files="$sky_files sky-engine.c sky-gpuif.c sky-gpuif.h"
 sky_files="$sky_files sky-gs.c sky-gs.h"
@@ -74,6 +67,10 @@ acconfig.h
 config.in
 configure
 configure.in
+dv-tx3904cpu.c
+dv-tx3904irc.c
+dv-tx3904tmr.c
+dv-tx3904sio.c
 interp.c
 sim-main.c
 sim-main.h
@@ -298,35 +295,6 @@ else
 	done
 fi
 
-
-tx3904_files="ChangeLog configure configure.in interp.c"
-
-if ( echo $* | grep keep\-tx3904 > /dev/null ) ; then
-	for i in $tx3904_files ; do
-		if test ! -d $i && (grep sanitize-tx3904 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping tx3904 stuff in $i
-			fi
-		fi
-	done
-else
-	for i in * ; do
-		if test ! -d $i && (grep sanitize-tx3904 $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"tx3904\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-tx3904/,/end-\sanitize\-tx3904/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
 
 branchbug4011_files="interp.c mips.igen sim-main.h ChangeLog"
 if ( echo $* | grep keep\-branchbug4011 > /dev/null ) ; then
