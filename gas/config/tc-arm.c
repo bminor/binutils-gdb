@@ -468,16 +468,157 @@ static const struct asm_psr psrs[] =
   {"SPSR_cxsf",	false, PSR_c | PSR_x | PSR_s | PSR_f},
 };
 
-enum cirrus_regtype
-  {
-    CIRRUS_REGTYPE_MVF   = 1,
-    CIRRUS_REGTYPE_MVFX  = 2,
-    CIRRUS_REGTYPE_MVD   = 3,
-    CIRRUS_REGTYPE_MVDX  = 4,
-    CIRRUS_REGTYPE_MVAX  = 5,
-    CIRRUS_REGTYPE_DSPSC = 6,
-    CIRRUS_REGTYPE_ANY   = 7
-  };
+/* Structure for a hash table entry for a register.  */
+struct reg_entry
+{
+  const char * name;
+  int          number;
+};
+
+#define REG_SP  13
+#define REG_LR  14
+#define REG_PC	15
+
+/* These are the standard names.  Users can add aliases with .req.  */
+/* Integer Register Numbers.  */
+static const struct reg_entry rn_table[] =
+{
+  {"r0",  0},  {"r1",  1},      {"r2",  2},      {"r3",  3},
+  {"r4",  4},  {"r5",  5},      {"r6",  6},      {"r7",  7},
+  {"r8",  8},  {"r9",  9},      {"r10", 10},     {"r11", 11},
+  {"r12", 12}, {"r13", REG_SP}, {"r14", REG_LR}, {"r15", REG_PC},
+  /* ATPCS Synonyms.  */
+  {"a1",  0},  {"a2",  1},      {"a3",  2},      {"a4",  3},
+  {"v1",  4},  {"v2",  5},      {"v3",  6},      {"v4",  7},
+  {"v5",  8},  {"v6",  9},      {"v7",  10},     {"v8",  11},
+  /* Well-known aliases.  */
+						 {"wr",  7},
+	       {"sb",  9},      {"sl",  10},     {"fp",  11},
+  {"ip",  12}, {"sp",  REG_SP}, {"lr",  REG_LR}, {"pc",  REG_PC},
+  {NULL, 0}
+};
+
+/* Co-processor Numbers.  */
+static const struct reg_entry cp_table[] =
+{
+  {"p0",  0},  {"p1",  1},  {"p2",  2},  {"p3", 3},
+  {"p4",  4},  {"p5",  5},  {"p6",  6},  {"p7", 7},
+  {"p8",  8},  {"p9",  9},  {"p10", 10}, {"p11", 11},
+  {"p12", 12}, {"p13", 13}, {"p14", 14}, {"p15", 15},
+  {NULL, 0}
+};
+
+/* Co-processor Register Numbers.  */
+static const struct reg_entry cn_table[] =
+{
+  {"c0",   0},  {"c1",   1},  {"c2",   2},  {"c3",   3},
+  {"c4",   4},  {"c5",   5},  {"c6",   6},  {"c7",   7},
+  {"c8",   8},  {"c9",   9},  {"c10",  10}, {"c11",  11},
+  {"c12",  12}, {"c13",  13}, {"c14",  14}, {"c15",  15},
+  /* Not really valid, but kept for back-wards compatibility.  */
+  {"cr0",  0},  {"cr1",  1},  {"cr2",  2},  {"cr3",  3},
+  {"cr4",  4},  {"cr5",  5},  {"cr6",  6},  {"cr7",  7},
+  {"cr8",  8},  {"cr9",  9},  {"cr10", 10}, {"cr11", 11},
+  {"cr12", 12}, {"cr13", 13}, {"cr14", 14}, {"cr15", 15},
+  {NULL, 0}
+};
+
+/* FPA Registers.  */
+static const struct reg_entry fn_table[] =
+{
+  {"f0", 0},   {"f1", 1},   {"f2", 2},   {"f3", 3},
+  {"f4", 4},   {"f5", 5},   {"f6", 6},   {"f7", 7},
+  {NULL, 0}
+};
+
+/* Cirrus DSP coprocessor registers.  */
+static const struct reg_entry mav_mvf_table[] =
+{
+  {"mvf0",  0},  {"mvf1",  1},  {"mvf2",  2},  {"mvf3",  3},
+  {"mvf4",  4},  {"mvf5",  5},  {"mvf6",  6},  {"mvf7",  7},
+  {"mvf8",  8},  {"mvf9",  9},  {"mvf10", 10}, {"mvf11", 11},
+  {"mvf12", 12}, {"mvf13", 13}, {"mvf14", 14}, {"mvf15", 15},
+  {NULL, 0}
+};
+
+static const struct reg_entry mav_mvd_table[] =
+{
+  {"mvd0",  0},  {"mvd1",  1},  {"mvd2",  2},  {"mvd3",  3},
+  {"mvd4",  4},  {"mvd5",  5},  {"mvd6",  6},  {"mvd7",  7},
+  {"mvd8",  8},  {"mvd9",  9},  {"mvd10", 10}, {"mvd11", 11},
+  {"mvd12", 12}, {"mvd13", 13}, {"mvd14", 14}, {"mvd15", 15},
+  {NULL, 0}
+};
+
+static const struct reg_entry mav_mvfx_table[] =
+{
+  {"mvfx0",  0},  {"mvfx1",  1},  {"mvfx2",  2},  {"mvfx3",  3},
+  {"mvfx4",  4},  {"mvfx5",  5},  {"mvfx6",  6},  {"mvfx7",  7},
+  {"mvfx8",  8},  {"mvfx9",  9},  {"mvfx10", 10}, {"mvfx11", 11},
+  {"mvfx12", 12}, {"mvfx13", 13}, {"mvfx14", 14}, {"mvfx15", 15},
+  {NULL, 0}
+};
+
+static const struct reg_entry mav_mvdx_table[] =
+{
+  {"mvdx0",  0},  {"mvdx1",  1},  {"mvdx2",  2},  {"mvdx3",  3},
+  {"mvdx4",  4},  {"mvdx5",  5},  {"mvdx6",  6},  {"mvdx7",  7},
+  {"mvdx8",  8},  {"mvdx9",  9},  {"mvdx10", 10}, {"mvdx11", 11},
+  {"mvdx12", 12}, {"mvdx13", 13}, {"mvdx14", 14}, {"mvdx15", 15},
+  {NULL, 0}
+};
+
+static const struct reg_entry mav_mvax_table[] =
+{
+  {"mvax0", 0}, {"mvax1", 1}, {"mvax2", 2}, {"mvax3", 3},
+  {NULL, 0}
+};
+
+static const struct reg_entry mav_dspsc_table[] =
+{
+  {"dspsc", 0},
+  {NULL, 0}
+};
+
+struct reg_map
+{
+  const struct reg_entry *names;
+  int max_regno;
+  struct hash_control *htab;
+  const char *expected;
+};
+
+struct reg_map all_reg_maps[] =
+{
+  {rn_table,        15, NULL, N_("ARM register expected")},
+  {cp_table,        15, NULL, N_("Bad or missing co-processor number")},
+  {cn_table,        15, NULL, N_("Co-processor register expected")},
+  {fn_table,         7, NULL, N_("FPA register expected")},
+  {mav_mvf_table,   15, NULL, N_("Maverick MVF register expected")},
+  {mav_mvd_table,   15, NULL, N_("Maverick MVD register expected")},
+  {mav_mvfx_table,  15, NULL, N_("Maverick MVFX register expected")},
+  {mav_mvdx_table,  15, NULL, N_("Maverick MVFX register expected")},
+  {mav_mvax_table,   3, NULL, N_("Maverick MVAX register expected")},
+  {mav_dspsc_table,  0, NULL, N_("Maverick DSPSC register expected")},
+};
+
+/* Enumeration matching entries in table above.  */
+enum arm_reg_type
+{
+  REG_TYPE_RN = 0,
+#define REG_TYPE_FIRST REG_TYPE_RN
+  REG_TYPE_CP = 1,
+  REG_TYPE_CN = 2,
+  REG_TYPE_FN = 3,
+  REG_TYPE_MVF = 4,
+  REG_TYPE_MVD = 5,
+  REG_TYPE_MVFX = 6,
+  REG_TYPE_MVDX = 7,
+  REG_TYPE_MVAX = 8,
+  REG_TYPE_DSPSC = 9,
+
+  REG_TYPE_MAX = 10
+};
 
 /* Functions called by parser.  */
 /* ARM instructions.  */
@@ -555,34 +696,69 @@ static void do_mar		PARAMS ((char *));
 static void do_mra		PARAMS ((char *));
 
 /* Maverick.  */
-static void do_c_binops		PARAMS ((char *, int));
-static void do_c_binops_1	PARAMS ((char *));
-static void do_c_binops_2	PARAMS ((char *));
-static void do_c_binops_3	PARAMS ((char *));
-static void do_c_triple		PARAMS ((char *, int));
-static void do_c_triple_4	PARAMS ((char *));
-static void do_c_triple_5	PARAMS ((char *));
-static void do_c_quad		PARAMS ((char *, int));
-static void do_c_quad_6		PARAMS ((char *));
-static void do_c_dspsc		PARAMS ((char *, int));
+static void do_c_binops		PARAMS ((char *, int, enum arm_reg_type,
+					 enum arm_reg_type));
+static void do_c_binops_1a	PARAMS ((char *));
+static void do_c_binops_1b	PARAMS ((char *));
+static void do_c_binops_1c	PARAMS ((char *));
+static void do_c_binops_1d	PARAMS ((char *));
+static void do_c_binops_1e	PARAMS ((char *));
+static void do_c_binops_1f	PARAMS ((char *));
+static void do_c_binops_1g	PARAMS ((char *));
+static void do_c_binops_1h	PARAMS ((char *));
+static void do_c_binops_1i	PARAMS ((char *));
+static void do_c_binops_1j	PARAMS ((char *));
+static void do_c_binops_1k	PARAMS ((char *));
+static void do_c_binops_1l	PARAMS ((char *));
+static void do_c_binops_1m	PARAMS ((char *));
+static void do_c_binops_1n	PARAMS ((char *));
+static void do_c_binops_1o	PARAMS ((char *));
+static void do_c_binops_2a	PARAMS ((char *));
+static void do_c_binops_2b	PARAMS ((char *));
+static void do_c_binops_2c	PARAMS ((char *));
+static void do_c_binops_3a	PARAMS ((char *));
+static void do_c_binops_3b	PARAMS ((char *));
+static void do_c_binops_3c	PARAMS ((char *));
+static void do_c_binops_3d	PARAMS ((char *));
+static void do_c_triple		PARAMS ((char *, int, enum arm_reg_type, 
+					 enum arm_reg_type,
+					 enum arm_reg_type));
+static void do_c_triple_4a	PARAMS ((char *));
+static void do_c_triple_4b	PARAMS ((char *));
+static void do_c_triple_5a	PARAMS ((char *));
+static void do_c_triple_5b	PARAMS ((char *));
+static void do_c_triple_5c	PARAMS ((char *));
+static void do_c_triple_5d	PARAMS ((char *));
+static void do_c_triple_5e	PARAMS ((char *));
+static void do_c_triple_5f	PARAMS ((char *));
+static void do_c_triple_5g	PARAMS ((char *));
+static void do_c_triple_5h	PARAMS ((char *));
+static void do_c_quad		PARAMS ((char *, int, enum arm_reg_type, 
+					 enum arm_reg_type,
+					 enum arm_reg_type,
+					 enum arm_reg_type));
+static void do_c_quad_6a	PARAMS ((char *));
+static void do_c_quad_6b	PARAMS ((char *));
 static void do_c_dspsc_1	PARAMS ((char *));
 static void do_c_dspsc_2	PARAMS ((char *));
-static void do_c_shift		PARAMS ((char *, int));
+static void do_c_shift		PARAMS ((char *, enum arm_reg_type,
+					 enum arm_reg_type));
 static void do_c_shift_1	PARAMS ((char *));
 static void do_c_shift_2	PARAMS ((char *));
-static void do_c_ldst		PARAMS ((char *, int));
+static void do_c_ldst		PARAMS ((char *, enum arm_reg_type));
 static void do_c_ldst_1		PARAMS ((char *));
 static void do_c_ldst_2		PARAMS ((char *));
 static void do_c_ldst_3		PARAMS ((char *));
 static void do_c_ldst_4		PARAMS ((char *));
+
 static int cirrus_reg_required_here	PARAMS ((char **, int,
-						 enum cirrus_regtype));
-static int cirrus_valid_reg	PARAMS ((int, enum cirrus_regtype));
+						 enum arm_reg_type));
 static int cirrus_parse_offset	PARAMS ((char **, int *));
 
 static void fix_new_arm		PARAMS ((fragS *, int, short, expressionS *,
 					 int, int));
-static int arm_reg_parse	PARAMS ((char **));
+static int arm_reg_parse	PARAMS ((char **, struct hash_control *));
+static enum arm_reg_type arm_reg_parse_any PARAMS ((char *));
 static const struct asm_psr * arm_psr_parse PARAMS ((char **));
 static void symbol_locate	PARAMS ((symbolS *, const char *, segT, valueT,
 					 fragS *));
@@ -613,13 +789,16 @@ static int decode_shift		PARAMS ((char **, int));
 static int ldst_extend		PARAMS ((char **));
 static int ldst_extend_v4		PARAMS ((char **));
 static void thumb_add_sub	PARAMS ((char *, int));
-static void insert_reg		PARAMS ((int));
+static void insert_reg		PARAMS ((const struct reg_entry *,
+					 struct hash_control *));
 static void thumb_shift		PARAMS ((char *, int));
 static void thumb_mov_compare	PARAMS ((char *, int));
 static void build_arm_ops_hsh	PARAMS ((void));
 static void set_constant_flonums	PARAMS ((void));
 static valueT md_chars_to_number	PARAMS ((char *, int));
-static void insert_reg_alias	PARAMS ((char *, int));
+static void build_reg_hsh	PARAMS ((struct reg_map *));
+static void insert_reg_alias	PARAMS ((char *, int, struct hash_control *));
+static int create_register_alias	PARAMS ((char *, char *));
 static void output_inst		PARAMS ((void));
 static int accum0_required_here PARAMS ((char **));
 static int ld_mode_required_here PARAMS ((char **));
@@ -1312,74 +1491,74 @@ static const struct asm_opcode insns[] =
   {"cfstrd",     0xec400400, 6,  ARM_EXT_MAVERICK, do_c_ldst_2},
   {"cfstr32",    0xec000500, 7,  ARM_EXT_MAVERICK, do_c_ldst_3},
   {"cfstr64",    0xec400500, 7,  ARM_EXT_MAVERICK, do_c_ldst_4},
-  {"cfmvsr",     0xee000450, 6,  ARM_EXT_MAVERICK, do_c_binops_2},
-  {"cfmvrs",     0xee100450, 6,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfmvdlr",    0xee000410, 7,  ARM_EXT_MAVERICK, do_c_binops_2},
-  {"cfmvrdl",    0xee100410, 7,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfmvdhr",    0xee000430, 7,  ARM_EXT_MAVERICK, do_c_binops_2},
-  {"cfmvrdh",    0xee100430, 7,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfmv64lr",   0xee000510, 8,  ARM_EXT_MAVERICK, do_c_binops_2},
-  {"cfmvr64l",   0xee100510, 8,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfmv64hr",   0xee000530, 8,  ARM_EXT_MAVERICK, do_c_binops_2},
-  {"cfmvr64h",   0xee100530, 8,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfmval32",   0xee100610, 8,  ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmv32al",   0xee000610, 8,  ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmvam32",   0xee100630, 8,  ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmv32am",   0xee000630, 8,  ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmvah32",   0xee100650, 8,  ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmv32ah",   0xee000650, 8,  ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmv32a",    0xee000670, 7,  ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmva32",    0xee100670, 7,  ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmv64a",    0xee000690, 7,  ARM_EXT_MAVERICK, do_c_binops_3},
-  {"cfmva64",    0xee100690, 7,  ARM_EXT_MAVERICK, do_c_binops_3},
+  {"cfmvsr",     0xee000450, 6,  ARM_EXT_MAVERICK, do_c_binops_2a},
+  {"cfmvrs",     0xee100450, 6,  ARM_EXT_MAVERICK, do_c_binops_1a},
+  {"cfmvdlr",    0xee000410, 7,  ARM_EXT_MAVERICK, do_c_binops_2b},
+  {"cfmvrdl",    0xee100410, 7,  ARM_EXT_MAVERICK, do_c_binops_1b},
+  {"cfmvdhr",    0xee000430, 7,  ARM_EXT_MAVERICK, do_c_binops_2b},
+  {"cfmvrdh",    0xee100430, 7,  ARM_EXT_MAVERICK, do_c_binops_1b},
+  {"cfmv64lr",   0xee000510, 8,  ARM_EXT_MAVERICK, do_c_binops_2c},
+  {"cfmvr64l",   0xee100510, 8,  ARM_EXT_MAVERICK, do_c_binops_1c},
+  {"cfmv64hr",   0xee000530, 8,  ARM_EXT_MAVERICK, do_c_binops_2c},
+  {"cfmvr64h",   0xee100530, 8,  ARM_EXT_MAVERICK, do_c_binops_1c},
+  {"cfmval32",   0xee100610, 8,  ARM_EXT_MAVERICK, do_c_binops_3a},
+  {"cfmv32al",   0xee000610, 8,  ARM_EXT_MAVERICK, do_c_binops_3b},
+  {"cfmvam32",   0xee100630, 8,  ARM_EXT_MAVERICK, do_c_binops_3a},
+  {"cfmv32am",   0xee000630, 8,  ARM_EXT_MAVERICK, do_c_binops_3b},
+  {"cfmvah32",   0xee100650, 8,  ARM_EXT_MAVERICK, do_c_binops_3a},
+  {"cfmv32ah",   0xee000650, 8,  ARM_EXT_MAVERICK, do_c_binops_3b},
+  {"cfmva32",    0xee100670, 7,  ARM_EXT_MAVERICK, do_c_binops_3a},
+  {"cfmv32a",    0xee000670, 7,  ARM_EXT_MAVERICK, do_c_binops_3b},
+  {"cfmva64",    0xee100690, 7,  ARM_EXT_MAVERICK, do_c_binops_3c},
+  {"cfmv64a",    0xee000690, 7,  ARM_EXT_MAVERICK, do_c_binops_3d},
   {"cfmvsc32",   0xee1006b0, 8,  ARM_EXT_MAVERICK, do_c_dspsc_1},
   {"cfmv32sc",   0xee0006b0, 8,  ARM_EXT_MAVERICK, do_c_dspsc_2},
-  {"cfcpys",     0xee000400, 6,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcpyd",     0xee000420, 6,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcvtsd",    0xee000460, 7,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcvtds",    0xee000440, 7,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcvt32s",   0xee000480, 8,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcvt32d",   0xee0004a0, 8,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcvt64s",   0xee0004c0, 8,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcvt64d",   0xee0004e0, 8,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcvts32",   0xee100580, 8,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfcvtd32",   0xee1005a0, 8,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cftruncs32", 0xee1005c0, 10, ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cftruncd32", 0xee1005e0, 10, ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfrshl32",   0xee000550, 8,  ARM_EXT_MAVERICK, do_c_triple_4},
-  {"cfrshl64",   0xee000570, 8,  ARM_EXT_MAVERICK, do_c_triple_4},
+  {"cfcpys",     0xee000400, 6,  ARM_EXT_MAVERICK, do_c_binops_1d},
+  {"cfcpyd",     0xee000420, 6,  ARM_EXT_MAVERICK, do_c_binops_1e},
+  {"cfcvtsd",    0xee000460, 7,  ARM_EXT_MAVERICK, do_c_binops_1f},
+  {"cfcvtds",    0xee000440, 7,  ARM_EXT_MAVERICK, do_c_binops_1g},
+  {"cfcvt32s",   0xee000480, 8,  ARM_EXT_MAVERICK, do_c_binops_1h},
+  {"cfcvt32d",   0xee0004a0, 8,  ARM_EXT_MAVERICK, do_c_binops_1i},
+  {"cfcvt64s",   0xee0004c0, 8,  ARM_EXT_MAVERICK, do_c_binops_1j},
+  {"cfcvt64d",   0xee0004e0, 8,  ARM_EXT_MAVERICK, do_c_binops_1k},
+  {"cfcvts32",   0xee100580, 8,  ARM_EXT_MAVERICK, do_c_binops_1l},
+  {"cfcvtd32",   0xee1005a0, 8,  ARM_EXT_MAVERICK, do_c_binops_1m},
+  {"cftruncs32", 0xee1005c0, 10, ARM_EXT_MAVERICK, do_c_binops_1l},
+  {"cftruncd32", 0xee1005e0, 10, ARM_EXT_MAVERICK, do_c_binops_1m},
+  {"cfrshl32",   0xee000550, 8,  ARM_EXT_MAVERICK, do_c_triple_4a},
+  {"cfrshl64",   0xee000570, 8,  ARM_EXT_MAVERICK, do_c_triple_4b},
   {"cfsh32",     0xee000500, 6,  ARM_EXT_MAVERICK, do_c_shift_1},
   {"cfsh64",     0xee200500, 6,  ARM_EXT_MAVERICK, do_c_shift_2},
-  {"cfcmps",     0xee100490, 6,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfcmpd",     0xee1004b0, 6,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfcmp32",    0xee100590, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfcmp64",    0xee1005b0, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfabss",     0xee300400, 6,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfabsd",     0xee300420, 6,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfnegs",     0xee300440, 6,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfnegd",     0xee300460, 6,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfadds",     0xee300480, 6,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfaddd",     0xee3004a0, 6,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfsubs",     0xee3004c0, 6,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfsubd",     0xee3004e0, 6,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfmuls",     0xee100400, 6,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfmuld",     0xee100420, 6,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfabs32",    0xee300500, 7,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfabs64",    0xee300520, 7,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfneg32",    0xee300540, 7,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfneg64",    0xee300560, 7,  ARM_EXT_MAVERICK, do_c_binops_1},
-  {"cfadd32",    0xee300580, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfadd64",    0xee3005a0, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfsub32",    0xee3005c0, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfsub64",    0xee3005e0, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfmul32",    0xee100500, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfmul64",    0xee100520, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfmac32",    0xee100540, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfmsc32",    0xee100560, 7,  ARM_EXT_MAVERICK, do_c_triple_5},
-  {"cfmadd32",   0xee000600, 8,  ARM_EXT_MAVERICK, do_c_quad_6},
-  {"cfmsub32",   0xee100600, 8,  ARM_EXT_MAVERICK, do_c_quad_6},
-  {"cfmadda32",  0xee200600, 9,  ARM_EXT_MAVERICK, do_c_quad_6},
-  {"cfmsuba32",  0xee300600, 9,  ARM_EXT_MAVERICK, do_c_quad_6},
+  {"cfcmps",     0xee100490, 6,  ARM_EXT_MAVERICK, do_c_triple_5a},
+  {"cfcmpd",     0xee1004b0, 6,  ARM_EXT_MAVERICK, do_c_triple_5b},
+  {"cfcmp32",    0xee100590, 7,  ARM_EXT_MAVERICK, do_c_triple_5c},
+  {"cfcmp64",    0xee1005b0, 7,  ARM_EXT_MAVERICK, do_c_triple_5d},
+  {"cfabss",     0xee300400, 6,  ARM_EXT_MAVERICK, do_c_binops_1d},
+  {"cfabsd",     0xee300420, 6,  ARM_EXT_MAVERICK, do_c_binops_1e},
+  {"cfnegs",     0xee300440, 6,  ARM_EXT_MAVERICK, do_c_binops_1d},
+  {"cfnegd",     0xee300460, 6,  ARM_EXT_MAVERICK, do_c_binops_1e},
+  {"cfadds",     0xee300480, 6,  ARM_EXT_MAVERICK, do_c_triple_5e},
+  {"cfaddd",     0xee3004a0, 6,  ARM_EXT_MAVERICK, do_c_triple_5f},
+  {"cfsubs",     0xee3004c0, 6,  ARM_EXT_MAVERICK, do_c_triple_5e},
+  {"cfsubd",     0xee3004e0, 6,  ARM_EXT_MAVERICK, do_c_triple_5f},
+  {"cfmuls",     0xee100400, 6,  ARM_EXT_MAVERICK, do_c_triple_5e},
+  {"cfmuld",     0xee100420, 6,  ARM_EXT_MAVERICK, do_c_triple_5f},
+  {"cfabs32",    0xee300500, 7,  ARM_EXT_MAVERICK, do_c_binops_1n},
+  {"cfabs64",    0xee300520, 7,  ARM_EXT_MAVERICK, do_c_binops_1o},
+  {"cfneg32",    0xee300540, 7,  ARM_EXT_MAVERICK, do_c_binops_1n},
+  {"cfneg64",    0xee300560, 7,  ARM_EXT_MAVERICK, do_c_binops_1o},
+  {"cfadd32",    0xee300580, 7,  ARM_EXT_MAVERICK, do_c_triple_5g},
+  {"cfadd64",    0xee3005a0, 7,  ARM_EXT_MAVERICK, do_c_triple_5h},
+  {"cfsub32",    0xee3005c0, 7,  ARM_EXT_MAVERICK, do_c_triple_5g},
+  {"cfsub64",    0xee3005e0, 7,  ARM_EXT_MAVERICK, do_c_triple_5h},
+  {"cfmul32",    0xee100500, 7,  ARM_EXT_MAVERICK, do_c_triple_5g},
+  {"cfmul64",    0xee100520, 7,  ARM_EXT_MAVERICK, do_c_triple_5h},
+  {"cfmac32",    0xee100540, 7,  ARM_EXT_MAVERICK, do_c_triple_5g},
+  {"cfmsc32",    0xee100560, 7,  ARM_EXT_MAVERICK, do_c_triple_5g},
+  {"cfmadd32",   0xee000600, 8,  ARM_EXT_MAVERICK, do_c_quad_6a},
+  {"cfmsub32",   0xee100600, 8,  ARM_EXT_MAVERICK, do_c_quad_6a},
+  {"cfmadda32",  0xee200600, 9,  ARM_EXT_MAVERICK, do_c_quad_6b},
+  {"cfmsuba32",  0xee300600, 9,  ARM_EXT_MAVERICK, do_c_quad_6b},
 };
 
 /* Defines for various bits that we will want to toggle.  */
@@ -1608,85 +1787,6 @@ static const struct thumb_opcode tinsns[] =
   {"bkpt",	0xbe00,		2,	ARM_EXT_V5T, do_t_bkpt},
 };
 
-struct reg_entry
-{
-  const char * name;
-  int          number;
-};
-
-#define int_register(reg) ((reg) >= 0 && (reg) <= 15)
-#define cp_register(reg) ((reg) >= 32 && (reg) <= 47)
-#define fp_register(reg) ((reg) >= 16 && (reg) <= 23)
-
-#define ARM_EXT_MAVERICKSC_REG	134
-
-#define cirrus_register(reg)		((reg) >= 50 && (reg) <= 134)
-#define cirrus_mvf_register(reg)	((reg) >= 50 && (reg) <= 65)
-#define cirrus_mvd_register(reg)	((reg) >= 70 && (reg) <= 85)
-#define cirrus_mvfx_register(reg)	((reg) >= 90 && (reg) <= 105)
-#define cirrus_mvdx_register(reg)	((reg) >= 110 && (reg) <= 125)
-#define cirrus_mvax_register(reg)	((reg) >= 130 && (reg) <= 133)
-#define ARM_EXT_MAVERICKsc_register(reg) 	((reg) == ARM_EXT_MAVERICKSC_REG)
-
-#define REG_SP  13
-#define REG_LR  14
-#define REG_PC	15
-
-/* These are the standard names.  Users can add aliases with .req.  */
-static const struct reg_entry reg_table[] =
-{
-  /* Processor Register Numbers.  */
-  {"r0", 0},    {"r1", 1},      {"r2", 2},      {"r3", 3},
-  {"r4", 4},    {"r5", 5},      {"r6", 6},      {"r7", 7},
-  {"r8", 8},    {"r9", 9},      {"r10", 10},    {"r11", 11},
-  {"r12", 12},  {"r13", REG_SP},{"r14", REG_LR},{"r15", REG_PC},
-  /* APCS conventions.  */
-  {"a1", 0},	{"a2", 1},    {"a3", 2},     {"a4", 3},
-  {"v1", 4},	{"v2", 5},    {"v3", 6},     {"v4", 7},     {"v5", 8},
-  {"v6", 9},	{"sb", 9},    {"v7", 10},    {"sl", 10},
-  {"fp", 11},	{"ip", 12},   {"sp", REG_SP},{"lr", REG_LR},{"pc", REG_PC},
-  /* ATPCS additions to APCS conventions.  */
-  {"wr", 7},    {"v8", 11},
-  /* FP Registers.  */
-  {"f0", 16},   {"f1", 17},   {"f2", 18},   {"f3", 19},
-  {"f4", 20},   {"f5", 21},   {"f6", 22},   {"f7", 23},
-  {"c0", 32},   {"c1", 33},   {"c2", 34},   {"c3", 35},
-  {"c4", 36},   {"c5", 37},   {"c6", 38},   {"c7", 39},
-  {"c8", 40},   {"c9", 41},   {"c10", 42},  {"c11", 43},
-  {"c12", 44},  {"c13", 45},  {"c14", 46},  {"c15", 47},
-  {"cr0", 32},  {"cr1", 33},  {"cr2", 34},  {"cr3", 35},
-  {"cr4", 36},  {"cr5", 37},  {"cr6", 38},  {"cr7", 39},
-  {"cr8", 40},  {"cr9", 41},  {"cr10", 42}, {"cr11", 43},
-  {"cr12", 44}, {"cr13", 45}, {"cr14", 46}, {"cr15", 47},
-  /* ATPCS additions to float register names.  */
-  {"s0",16},	{"s1",17},	{"s2",18},	{"s3",19},
-  {"s4",20},	{"s5",21},	{"s6",22},	{"s7",23},
-  {"d0",16},	{"d1",17},	{"d2",18},	{"d3",19},
-  {"d4",20},	{"d5",21},	{"d6",22},	{"d7",23},
-  /* Cirrus DSP coprocessor registers.  */
-  {"mvf0", 50},	{"mvf1", 51},	{"mvf2", 52},	{"mvf3", 53},
-  {"mvf4", 54},	{"mvf5", 55},	{"mvf6", 56},	{"mvf7", 57},
-  {"mvf8", 58},	{"mvf9", 59},	{"mvf10", 60},	{"mvf11", 61},
-  {"mvf12", 62},{"mvf13", 63},	{"mvf14", 64},	{"mvf15", 65},
-  {"mvd0", 70},	{"mvd1", 71},	{"mvd2", 72},	{"mvd3", 73},
-  {"mvd4", 74},	{"mvd5", 75},	{"mvd6", 76},	{"mvd7", 77},
-  {"mvd8", 78},	{"mvd9", 79},	{"mvd10", 80},	{"mvd11", 81},
-  {"mvd12", 82},{"mvd13", 83},	{"mvd14", 84},	{"mvd15", 85},
-  {"mvfx0", 90},{"mvfx1", 91},	{"mvfx2", 92},	{"mvfx3", 93},
-  {"mvfx4", 94},{"mvfx5", 95},	{"mvfx6", 96},	{"mvfx7", 97},
-  {"mvfx8", 98},{"mvfx9", 99},	{"mvfx10", 100},{"mvfx11", 101},
-  {"mvfx12", 102},{"mvfx13", 103},{"mvfx14", 104},{"mvfx15", 105},
-  {"mvdx0", 110}, {"mvdx1", 111}, {"mvdx2", 112}, {"mvdx3", 113},
-  {"mvdx4", 114}, {"mvdx5", 115}, {"mvdx6", 116}, {"mvdx7", 117},
-  {"mvdx8", 118}, {"mvdx9", 119}, {"mvdx10", 120},{"mvdx11", 121},
-  {"mvdx12", 122},{"mvdx13", 123},{"mvdx14", 124},{"mvdx15", 125},
-  {"mvax0", 130}, {"mvax1", 131}, {"mvax2", 132}, {"mvax3", 133},
-  {"dspsc", ARM_EXT_MAVERICKSC_REG},
-  /* FIXME: At some point we need to add VFP register names.  */
-  /* Array terminator.  */
-  {NULL, 0}
-};
-
 #define BAD_ARGS 	_("Bad arguments to instruction")
 #define BAD_PC 		_("r15 not allowed here")
 #define BAD_COND 	_("Instruction is not conditional")
@@ -1696,7 +1796,6 @@ static struct hash_control * arm_ops_hsh   = NULL;
 static struct hash_control * arm_tops_hsh  = NULL;
 static struct hash_control * arm_cond_hsh  = NULL;
 static struct hash_control * arm_shift_hsh = NULL;
-static struct hash_control * arm_reg_hsh   = NULL;
 static struct hash_control * arm_psr_hsh   = NULL;
 
 /* This table describes all the machine specific pseudo-ops the assembler
@@ -2364,7 +2463,7 @@ reg_required_here (str, shift)
   int         reg;
   char *      start = * str;
 
-  if ((reg = arm_reg_parse (str)) != FAIL && int_register (reg))
+  if ((reg = arm_reg_parse (str, all_reg_maps[REG_TYPE_RN].htab)) != FAIL)
     {
       if (shift >= 0)
 	inst.instruction |= reg << shift;
@@ -2457,36 +2556,41 @@ psr_required_here (str)
 
 static int
 co_proc_number (str)
-     char ** str;
+     char **str;
 {
   int processor, pchar;
+  char *start;
 
-  skip_whitespace (* str);
+  skip_whitespace (*str);
+  start = *str;
 
   /* The data sheet seems to imply that just a number on its own is valid
      here, but the RISC iX assembler seems to accept a prefix 'p'.  We will
      accept either.  */
-  if (**str == 'p' || **str == 'P')
-    (*str)++;
-
-  pchar = *(*str)++;
-  if (pchar >= '0' && pchar <= '9')
+  if ((processor = arm_reg_parse (str, all_reg_maps[REG_TYPE_CP].htab))
+      == FAIL)
     {
-      processor = pchar - '0';
-      if (**str >= '0' && **str <= '9')
+      *str = start;
+
+      pchar = *(*str)++;
+      if (pchar >= '0' && pchar <= '9')
 	{
-	  processor = processor * 10 + *(*str)++ - '0';
-	  if (processor > 15)
+	  processor = pchar - '0';
+	  if (**str >= '0' && **str <= '9')
 	    {
-	      inst.error = _("Illegal co-processor number");
-	      return FAIL;
+	      processor = processor * 10 + *(*str)++ - '0';
+	      if (processor > 15)
+		{
+		  inst.error = _("Illegal co-processor number");
+		  return FAIL;
+		}
 	    }
 	}
-    }
-  else
-    {
-      inst.error = _("Bad or missing co-processor number");
-      return FAIL;
+      else
+	{
+	  inst.error = _("Bad or missing co-processor number");
+	  return FAIL;
+	}
     }
 
   inst.instruction |= processor << 8;
@@ -2531,9 +2635,8 @@ cp_reg_required_here (str, where)
   int    reg;
   char * start = *str;
 
-  if ((reg = arm_reg_parse (str)) != FAIL && cp_register (reg))
+  if ((reg = arm_reg_parse (str, all_reg_maps[REG_TYPE_CN].htab)) != FAIL)
     {
-      reg &= 15;
       inst.instruction |= reg << where;
       return reg;
     }
@@ -2555,9 +2658,8 @@ fp_reg_required_here (str, where)
   int    reg;
   char * start = * str;
 
-  if ((reg = arm_reg_parse (str)) != FAIL && fp_register (reg))
+  if ((reg = arm_reg_parse (str, all_reg_maps[REG_TYPE_FN].htab)) != FAIL)
     {
-      reg &= 7;
       inst.instruction |= reg << where;
       return reg;
     }
@@ -6563,54 +6665,9 @@ thumb_load_store (str, load_store, size)
   end_of_line (str);
 }
 
-/* Given a register and a register type, return 1 if
-   the register is of the given type, else return 0.  */
-
-static int
-cirrus_valid_reg (reg, regtype)
-     int reg;
-     enum cirrus_regtype regtype;
-{
-  switch (regtype)
-    {
-    case CIRRUS_REGTYPE_ANY:
-      return 1;
-
-    case CIRRUS_REGTYPE_MVF:
-      return cirrus_mvf_register (reg);
-
-    case CIRRUS_REGTYPE_MVFX:
-      return cirrus_mvfx_register (reg);
-
-    case CIRRUS_REGTYPE_MVD:
-      return cirrus_mvd_register (reg);
-
-    case CIRRUS_REGTYPE_MVDX:
-      return cirrus_mvdx_register (reg);
-
-    case CIRRUS_REGTYPE_MVAX:
-      return cirrus_mvax_register (reg);
-
-    case CIRRUS_REGTYPE_DSPSC:
-      return ARM_EXT_MAVERICKsc_register (reg);
-    }
-
-  return 0;
-}
-
 /* A register must be given at this point.
 
-   If the register is a Cirrus register, convert it's reg# appropriately.
-
    Shift is the place to put it in inst.instruction.
-
-   regtype is type register type expected, and is:
-   	CIRRUS_REGTYPE_MVF
-   	CIRRUS_REGTYPE_MVFX
-   	CIRRUS_REGTYPE_MVD
-   	CIRRUS_REGTYPE_MVDX
-   	CIRRUS_REGTYPE_MVAX
-   	CIRRUS_REGTYPE_DSPSC
 
    Restores input start point on err.
    Returns the reg#, or FAIL.  */
@@ -6619,54 +6676,25 @@ static int
 cirrus_reg_required_here (str, shift, regtype)
      char ** str;
      int shift;
-     enum cirrus_regtype regtype;
+     enum arm_reg_type regtype;
 {
-  static char buff [135]; /* XXX */
-  int         reg;
-  char *      start = * str;
+  int   reg;
+  char *start = *str;
 
-  if ((reg = arm_reg_parse (str)) != FAIL
-      && (int_register (reg)
-	  || cirrus_register (reg)))
+  if ((reg = arm_reg_parse (str, all_reg_maps[regtype].htab)) != FAIL)
     {
-      int orig_reg = reg;
-
-      /* Calculate actual register # for opcode.  */
-      if (cirrus_register (reg)
-	  && !ARM_EXT_MAVERICKsc_register (reg)) /* Leave this one as is.  */
-	{
-	  if (reg >= 130)
-	    reg -= 130;
-	  else if (reg >= 110)
-	    reg -= 110;
-	  else if (reg >= 90)
-	    reg -= 90;
-	  else if (reg >= 70)
-	    reg -= 70;
-	  else if (reg >= 50)
-	    reg -= 50;
-	}
-
-      if (!cirrus_valid_reg (orig_reg, regtype))
-	{
-	  sprintf (buff, _("invalid register type at '%.100s'"), start);
-	  inst.error = buff;
-	  return FAIL;
-	}
-
       if (shift >= 0)
 	inst.instruction |= reg << shift;
 
-      return orig_reg;
+      return reg;
     }
 
-  /* Restore the start point, we may have got a reg of the wrong class.  */
+  /* Restore the start point.  */
   *str = start;
   
   /* In the few cases where we might be able to accept something else
      this error can be overridden.  */
-  sprintf (buff, _("Cirrus register expected, not '%.100s'"), start);
-  inst.error = buff;
+  inst.error = _(all_reg_maps[regtype].expected);
   
   return FAIL;
 }
@@ -6676,120 +6704,348 @@ cirrus_reg_required_here (str, shift, regtype)
 /* Wrapper functions.  */
 
 static void
-do_c_binops_1 (str)
+do_c_binops_1a (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE1);
+  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_RN, REG_TYPE_MVF);
 }
 
 static void
-do_c_binops_2 (str)
+do_c_binops_1b (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE2);
+  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_RN, REG_TYPE_MVD);
 }
 
 static void
-do_c_binops_3 (str)
+do_c_binops_1c (str)
      char * str;
 {
-  do_c_binops (str, CIRRUS_MODE3);
+  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_RN, REG_TYPE_MVDX);
 }
 
 static void
-do_c_triple_4 (str)
+do_c_binops_1d (str)
      char * str;
 {
-  do_c_triple (str, CIRRUS_MODE4);
+  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVF, REG_TYPE_MVF);
 }
 
 static void
-do_c_triple_5 (str)
+do_c_binops_1e (str)
      char * str;
 {
-  do_c_triple (str, CIRRUS_MODE5);
+  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVD, REG_TYPE_MVD);
 }
 
 static void
-do_c_quad_6 (str)
+do_c_binops_1f (str)
      char * str;
 {
-  do_c_quad (str, CIRRUS_MODE6);
+  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVD, REG_TYPE_MVF);
 }
 
+static void
+do_c_binops_1g (str)
+     char * str;
+{
+  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVF, REG_TYPE_MVD);
+}
+
+static void
+do_c_binops_1h (str)
+     char * str;
+{
+  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVF, REG_TYPE_MVFX);
+}
+
+static void
+do_c_binops_1i (str)
+     char * str;
+{
+  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVD, REG_TYPE_MVFX);
+}
+
+static void
+do_c_binops_1j (str)
+     char * str;
+{
+  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVF, REG_TYPE_MVDX);
+}
+
+static void
+do_c_binops_1k (str)
+     char * str;
+{
+  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVD, REG_TYPE_MVDX);
+}
+
+static void
+do_c_binops_1l (str)
+     char * str;
+{
+  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVFX, REG_TYPE_MVF);
+}
+
+static void
+do_c_binops_1m (str)
+     char * str;
+{
+  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVFX, REG_TYPE_MVD);
+}
+
+static void
+do_c_binops_1n (str)
+     char * str;
+{
+  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVFX, REG_TYPE_MVFX);
+}
+
+static void
+do_c_binops_1o (str)
+     char * str;
+{
+  do_c_binops (str, CIRRUS_MODE1, REG_TYPE_MVDX, REG_TYPE_MVDX);
+}
+
+static void
+do_c_binops_2a (str)
+     char * str;
+{
+  do_c_binops (str, CIRRUS_MODE2, REG_TYPE_MVF, REG_TYPE_RN);
+}
+
+static void
+do_c_binops_2b (str)
+     char * str;
+{
+  do_c_binops (str, CIRRUS_MODE2, REG_TYPE_MVD, REG_TYPE_RN);
+}
+
+static void
+do_c_binops_2c (str)
+     char * str;
+{
+  do_c_binops (str, CIRRUS_MODE2, REG_TYPE_MVDX, REG_TYPE_RN);
+}
+
+static void
+do_c_binops_3a (str)
+     char * str;
+{
+  do_c_binops (str, CIRRUS_MODE3, REG_TYPE_MVAX, REG_TYPE_MVFX);
+}
+
+static void
+do_c_binops_3b (str)
+     char * str;
+{
+  do_c_binops (str, CIRRUS_MODE3, REG_TYPE_MVFX, REG_TYPE_MVAX);
+}
+
+static void
+do_c_binops_3c (str)
+     char * str;
+{
+  do_c_binops (str, CIRRUS_MODE3, REG_TYPE_MVAX, REG_TYPE_MVDX);
+}
+
+static void
+do_c_binops_3d (str)
+     char * str;
+{
+  do_c_binops (str, CIRRUS_MODE3, REG_TYPE_MVDX, REG_TYPE_MVAX);
+}
+
+static void
+do_c_triple_4a (str)
+     char * str;
+{
+  do_c_triple (str, CIRRUS_MODE4, REG_TYPE_MVFX, REG_TYPE_MVFX, REG_TYPE_RN);
+}
+
+static void
+do_c_triple_4b (str)
+     char * str;
+{
+  do_c_triple (str, CIRRUS_MODE4, REG_TYPE_MVDX, REG_TYPE_MVDX, REG_TYPE_RN);
+}
+
+static void
+do_c_triple_5a (str)
+     char * str;
+{
+  do_c_triple (str, CIRRUS_MODE5, REG_TYPE_RN, REG_TYPE_MVF, REG_TYPE_MVF);
+}
+
+static void
+do_c_triple_5b (str)
+     char * str;
+{
+  do_c_triple (str, CIRRUS_MODE5, REG_TYPE_RN, REG_TYPE_MVD, REG_TYPE_MVD);
+}
+
+static void
+do_c_triple_5c (str)
+     char * str;
+{
+  do_c_triple (str, CIRRUS_MODE5, REG_TYPE_RN, REG_TYPE_MVFX, REG_TYPE_MVFX);
+}
+
+static void
+do_c_triple_5d (str)
+     char * str;
+{
+  do_c_triple (str, CIRRUS_MODE5, REG_TYPE_RN, REG_TYPE_MVDX, REG_TYPE_MVDX);
+}
+
+static void
+do_c_triple_5e (str)
+     char * str;
+{
+  do_c_triple (str, CIRRUS_MODE5, REG_TYPE_MVF, REG_TYPE_MVF, REG_TYPE_MVF);
+}
+
+static void
+do_c_triple_5f (str)
+     char * str;
+{
+  do_c_triple (str, CIRRUS_MODE5, REG_TYPE_MVD, REG_TYPE_MVD, REG_TYPE_MVD);
+}
+
+static void
+do_c_triple_5g (str)
+     char * str;
+{
+  do_c_triple (str, CIRRUS_MODE5, REG_TYPE_MVFX, REG_TYPE_MVFX, REG_TYPE_MVFX);
+}
+
+static void
+do_c_triple_5h (str)
+     char * str;
+{
+  do_c_triple (str, CIRRUS_MODE5, REG_TYPE_MVDX, REG_TYPE_MVDX, REG_TYPE_MVDX);
+}
+
+static void
+do_c_quad_6a (str)
+     char * str;
+{
+  do_c_quad (str, CIRRUS_MODE6, REG_TYPE_MVAX, REG_TYPE_MVFX, REG_TYPE_MVFX,
+	     REG_TYPE_MVFX);
+}
+
+static void
+do_c_quad_6b (str)
+     char * str;
+{
+  do_c_quad (str, CIRRUS_MODE6, REG_TYPE_MVAX, REG_TYPE_MVAX, REG_TYPE_MVFX,
+	     REG_TYPE_MVFX);
+}
+
+/* cfmvsc32<cond> DSPSC,MVFX[15:0]. */
 static void
 do_c_dspsc_1 (str)
      char * str;
 {
-  do_c_dspsc (str, CIRRUS_MODE1);
+  skip_whitespace (str);
+
+  /* cfmvsc32.  */
+  if (cirrus_reg_required_here (&str, -1, REG_TYPE_DSPSC) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || cirrus_reg_required_here (&str, 16, REG_TYPE_MVFX) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+
+      return;
+    }
+
+  end_of_line (str);
 }
 
+/* cfmv32sc<cond> MVFX[15:0],DSPSC.  */
 static void
 do_c_dspsc_2 (str)
      char * str;
 {
-  do_c_dspsc (str, CIRRUS_MODE2);
+  skip_whitespace (str);
+
+  /* cfmv32sc.  */
+  if (cirrus_reg_required_here (&str, 0, REG_TYPE_MVFX) == FAIL
+      || skip_past_comma (&str) == FAIL
+      || cirrus_reg_required_here (&str, -1, REG_TYPE_DSPSC) == FAIL)
+    {
+      if (!inst.error)
+	inst.error = BAD_ARGS;
+
+      return;
+    }
+
+  end_of_line (str);
 }
 
 static void
 do_c_shift_1 (str)
      char * str;
 {
-  do_c_shift (str, CIRRUS_MODE1);
+  do_c_shift (str, REG_TYPE_MVFX, REG_TYPE_MVFX);
 }
 
 static void
 do_c_shift_2 (str)
      char * str;
 {
-  do_c_shift (str, CIRRUS_MODE2);
+  do_c_shift (str, REG_TYPE_MVDX, REG_TYPE_MVDX);
 }
 
 static void
 do_c_ldst_1 (str)
      char * str;
 {
-  do_c_ldst (str, CIRRUS_MODE1);
+  do_c_ldst (str, REG_TYPE_MVF);
 }
 
 static void
 do_c_ldst_2 (str)
      char * str;
 {
-  do_c_ldst (str, CIRRUS_MODE2);
+  do_c_ldst (str, REG_TYPE_MVD);
 }
 
 static void
 do_c_ldst_3 (str)
      char * str;
 {
-  do_c_ldst (str, CIRRUS_MODE3);
+  do_c_ldst (str, REG_TYPE_MVFX);
 }
 
 static void
 do_c_ldst_4 (str)
      char * str;
 {
-  do_c_ldst (str, CIRRUS_MODE4);
+  do_c_ldst (str, REG_TYPE_MVDX);
 }
 
 /* Isnsn like "foo X,Y".  */
 
 static void
-do_c_binops (str, mode)
+do_c_binops (str, mode, reg0, reg1)
      char * str;
      int mode;
+     enum arm_reg_type reg0;
+     enum arm_reg_type reg1;
 {
-  int shift1, shift2;
+  int shift0, shift1;
 
-  shift1 = mode & 0xff;
-  shift2 = (mode >> 8) & 0xff;
+  shift0 = mode & 0xff;
+  shift1 = (mode >> 8) & 0xff;
 
   skip_whitespace (str);
 
-  if (cirrus_reg_required_here (&str, shift1, CIRRUS_REGTYPE_ANY) == FAIL
+  if (cirrus_reg_required_here (&str, shift0, reg0) == FAIL
       || skip_past_comma (&str) == FAIL
-      || cirrus_reg_required_here (&str, shift2, CIRRUS_REGTYPE_ANY) == FAIL)
+      || cirrus_reg_required_here (&str, shift1, reg1) == FAIL)
     {
       if (!inst.error)
 	inst.error = BAD_ARGS;
@@ -6801,23 +7057,26 @@ do_c_binops (str, mode)
 /* Isnsn like "foo X,Y,Z".  */
 
 static void
-do_c_triple (str, mode)
+do_c_triple (str, mode, reg0, reg1, reg2)
      char * str;
      int mode;
+     enum arm_reg_type reg0;
+     enum arm_reg_type reg1;
+     enum arm_reg_type reg2;
 {
-  int shift1, shift2, shift3;
+  int shift0, shift1, shift2;
 
-  shift1 = mode & 0xff;
-  shift2 = (mode >> 8) & 0xff;
-  shift3 = (mode >> 16) & 0xff;
+  shift0 = mode & 0xff;
+  shift1 = (mode >> 8) & 0xff;
+  shift2 = (mode >> 16) & 0xff;
 
   skip_whitespace (str);
 
-  if (cirrus_reg_required_here (&str, shift1, CIRRUS_REGTYPE_ANY) == FAIL
+  if (cirrus_reg_required_here (&str, shift0, reg0) == FAIL
       || skip_past_comma (&str) == FAIL
-      || cirrus_reg_required_here (&str, shift2, CIRRUS_REGTYPE_ANY) == FAIL
+      || cirrus_reg_required_here (&str, shift1, reg1) == FAIL
       || skip_past_comma (&str) == FAIL
-      || cirrus_reg_required_here (&str, shift3, CIRRUS_REGTYPE_ANY) == FAIL)
+      || cirrus_reg_required_here (&str, shift2, reg2) == FAIL)
     {
       if (!inst.error)
 	inst.error = BAD_ARGS;
@@ -6830,31 +7089,30 @@ do_c_triple (str, mode)
     where W=MVAX[0:3] and X,Y,Z=MVFX[0:15].  */
 
 static void
-do_c_quad (str, mode)
+do_c_quad (str, mode, reg0, reg1, reg2, reg3)
      char * str;
      int mode;
+     enum arm_reg_type reg0;
+     enum arm_reg_type reg1;
+     enum arm_reg_type reg2;
+     enum arm_reg_type reg3;
 {
-  int shift1, shift2, shift3, shift4;
-  enum cirrus_regtype rt;
+  int shift0, shift1, shift2, shift3;
 
-  rt = (inst.instruction << 4 == 0xe2006000
-	|| inst.instruction << 4 == 0xe3006000) ? CIRRUS_REGTYPE_MVAX
-    : CIRRUS_REGTYPE_MVFX;
-
-  shift1 = mode & 0xff;
-  shift2 = (mode >> 8) & 0xff;
-  shift3 = (mode >> 16) & 0xff;
-  shift4 = (mode >> 24) & 0xff;
+  shift0= mode & 0xff;
+  shift1 = (mode >> 8) & 0xff;
+  shift2 = (mode >> 16) & 0xff;
+  shift3 = (mode >> 24) & 0xff;
 
   skip_whitespace (str);
 
-  if (cirrus_reg_required_here (&str, shift1, CIRRUS_REGTYPE_MVAX) == FAIL
+  if (cirrus_reg_required_here (&str, shift0, reg0) == FAIL
       || skip_past_comma (&str) == FAIL
-      || cirrus_reg_required_here (&str, shift2, rt) == FAIL
+      || cirrus_reg_required_here (&str, shift1, reg1) == FAIL
       || skip_past_comma (&str) == FAIL
-      || cirrus_reg_required_here (&str, shift3, CIRRUS_REGTYPE_MVFX) == FAIL
+      || cirrus_reg_required_here (&str, shift2, reg2) == FAIL
       || skip_past_comma (&str) == FAIL
-      || cirrus_reg_required_here (&str, shift4, CIRRUS_REGTYPE_MVFX) == FAIL)
+      || cirrus_reg_required_here (&str, shift3, reg3) == FAIL)
     {
       if (!inst.error)
 	inst.error = BAD_ARGS;
@@ -6863,56 +7121,15 @@ do_c_quad (str, mode)
     end_of_line (str);
 }
 
-/* cfmvsc32<cond> DSPSC,MVFX[15:0].
-   cfmv32sc<cond> MVFX[15:0],DSPSC.  */
-
-static void
-do_c_dspsc (str, mode)
-     char * str;
-     int mode;
-{
-  int error;
-
-  skip_whitespace (str);
-
-  error = 0;
-
-  if (mode == CIRRUS_MODE1)
-    {
-      /* cfmvsc32.  */
-      if (cirrus_reg_required_here (&str, -1, CIRRUS_REGTYPE_DSPSC) == FAIL
-	  || skip_past_comma (&str) == FAIL
-	  || cirrus_reg_required_here (&str, 16, CIRRUS_REGTYPE_MVFX) == FAIL)
-	error = 1;
-    }
-  else
-    {
-      /* cfmv32sc.  */
-      if (cirrus_reg_required_here (&str, 0, CIRRUS_REGTYPE_MVFX) == FAIL
-	  || skip_past_comma (&str) == FAIL
-	  || cirrus_reg_required_here (&str, -1, CIRRUS_REGTYPE_DSPSC) == FAIL)
-	error = 1;
-    }
-
-  if (error)
-    {
-      if (!inst.error)
-	inst.error = BAD_ARGS;
-    }
-  else
-    {
-      end_of_line (str);
-    }
-}
-
 /* Cirrus shift immediate instructions.
    cfsh32<cond> MVFX[15:0],MVFX[15:0],Shift[6:0].
    cfsh64<cond> MVDX[15:0],MVDX[15:0],Shift[6:0].  */
 
 static void
-do_c_shift (str, mode)
+do_c_shift (str, reg0, reg1)
      char * str;
-     int mode;
+     enum arm_reg_type reg0;
+     enum arm_reg_type reg1;
 {
   int error;
   int imm, neg = 0;
@@ -6921,15 +7138,9 @@ do_c_shift (str, mode)
 
   error = 0;
 
-  if (cirrus_reg_required_here (&str, 12,
-				(mode == CIRRUS_MODE1)
-				? CIRRUS_REGTYPE_MVFX
-				: CIRRUS_REGTYPE_MVDX) == FAIL
+  if (cirrus_reg_required_here (&str, 12, reg0) == FAIL
       || skip_past_comma (&str) == FAIL
-      || cirrus_reg_required_here (&str, 16,
-				   (mode == CIRRUS_MODE1)
-				   ? CIRRUS_REGTYPE_MVFX
-				   : CIRRUS_REGTYPE_MVDX) == FAIL
+      || cirrus_reg_required_here (&str, 16, reg1) == FAIL
       || skip_past_comma  (&str) == FAIL)
     {
       if (!inst.error)
@@ -7027,27 +7238,21 @@ cirrus_parse_offset (str, negative)
   <insn><cond> CRd,[Rn],<offset>.  */
 
 static void
-do_c_ldst (str, mode)
+do_c_ldst (str, reg0)
      char * str;
-     int mode;
+     enum arm_reg_type reg0;
 {
   int offset, negative;
-  enum cirrus_regtype rt;
-
-  rt = mode == CIRRUS_MODE1 ? CIRRUS_REGTYPE_MVF
-    : mode == CIRRUS_MODE2 ? CIRRUS_REGTYPE_MVD
-    : mode == CIRRUS_MODE3 ? CIRRUS_REGTYPE_MVFX
-    : mode == CIRRUS_MODE4 ? CIRRUS_REGTYPE_MVDX : CIRRUS_REGTYPE_MVF;
 
   skip_whitespace (str);
 
-  if (cirrus_reg_required_here (& str, 12, rt) == FAIL
-      || skip_past_comma (& str) == FAIL
+  if (cirrus_reg_required_here (&str, 12, reg0) == FAIL
+      || skip_past_comma (&str) == FAIL
       || *str++ != '['
-      || reg_required_here (& str, 16) == FAIL)
+      || reg_required_here (&str, 16) == FAIL)
     goto fail_ldst;
 
-  if (skip_past_comma (& str) == SUCCESS)
+  if (skip_past_comma (&str) == SUCCESS)
     {
       /* You are here: "<offset>]{!}".  */
       inst.instruction |= PRE_INDEX;
@@ -7513,10 +7718,11 @@ do_t_adr (str)
 }
 
 static void
-insert_reg (entry)
-     int entry;
+insert_reg (r, htab)
+     const struct reg_entry *r;
+     struct hash_control *htab;
 {
-  int    len  = strlen (reg_table[entry].name) + 2;
+  int    len  = strlen (r->name) + 2;
   char * buf  = (char *) xmalloc (len);
   char * buf2 = (char *) xmalloc (len);
   int    i    = 0;
@@ -7525,21 +7731,35 @@ insert_reg (entry)
   buf[i++] = REGISTER_PREFIX;
 #endif
 
-  strcpy (buf + i, reg_table[entry].name);
+  strcpy (buf + i, r->name);
 
   for (i = 0; buf[i]; i++)
     buf2[i] = TOUPPER (buf[i]);
 
   buf2[i] = '\0';
 
-  hash_insert (arm_reg_hsh, buf,  (PTR) & reg_table[entry]);
-  hash_insert (arm_reg_hsh, buf2, (PTR) & reg_table[entry]);
+  hash_insert (htab, buf,  (PTR) r);
+  hash_insert (htab, buf2, (PTR) r);
 }
 
 static void
-insert_reg_alias (str, regnum)
+build_reg_hsh (map)
+     struct reg_map *map;
+{
+  const struct reg_entry *r;
+
+  if ((map->htab = hash_new ()) == NULL)
+    as_fatal (_("Virtual memory exhausted"));
+
+  for (r = map->names; r->name != NULL; r++)
+    insert_reg (r, map->htab);
+}
+
+static void
+insert_reg_alias (str, regnum, htab)
      char *str;
      int regnum;
+     struct hash_control *htab;
 {
   struct reg_entry *new =
     (struct reg_entry *) xmalloc (sizeof (struct reg_entry));
@@ -7549,9 +7769,95 @@ insert_reg_alias (str, regnum)
   new->name = name;
   new->number = regnum;
 
-  hash_insert (arm_reg_hsh, name, (PTR) new);
+  hash_insert (htab, name, (PTR) new);
 }
 
+/* Look for the .req directive.  This is of the form:
+
+   	newname .req existing_name
+
+   If we find one, or if it looks sufficiently like one that we want to
+   handle any error here, return non-zero.  Otherwise return zero.  */
+static int
+create_register_alias (newname, p)
+     char *newname;
+     char *p;
+{
+  char *q;
+  char c;
+
+  q = p;
+  skip_whitespace (q);
+
+  c = *p;
+  *p = '\0';
+
+  if (*q && !strncmp (q, ".req ", 5))
+    {
+      char *copy_of_str;
+      char *r;
+
+#ifdef IGNORE_OPCODE_CASE
+      newname = original_case_string;
+#endif
+      copy_of_str = newname;
+
+      q += 4;
+      skip_whitespace (q);
+
+      for (r = q; *r != '\0'; r++)
+	if (*r == ' ')
+	  break;
+
+      if (r != q)
+	{
+	  enum arm_reg_type new_type, old_type;
+	  int old_regno;
+	  char d = *r;
+
+	  *r = '\0';
+	  old_type = arm_reg_parse_any (q);
+	  *r = d;
+
+	  new_type = arm_reg_parse_any (newname);
+
+	  if (new_type == REG_TYPE_MAX)
+	    {
+	      if (old_type != REG_TYPE_MAX)
+		{
+		  old_regno = arm_reg_parse (&q, all_reg_maps[old_type].htab);
+		  insert_reg_alias (newname, old_regno,
+				    all_reg_maps[old_type].htab);
+		}
+	      else
+		as_warn (_("register '%s' does not exist\n"), q);
+	    }
+	  else if (old_type == REG_TYPE_MAX)
+	    {
+	      as_warn (_("ignoring redefinition of register alias '%s' to non-existant register '%s'"),
+		       copy_of_str, q);
+	    }
+	  else
+	    {
+	      /* Do not warn about redefinitions to the same alias.  */
+	      if (new_type != old_type
+		  || (arm_reg_parse (&q, all_reg_maps[old_type].htab)
+		      != arm_reg_parse (&q, all_reg_maps[new_type].htab)))
+		as_warn (_("ignoring redefinition of register alias '%s'"),
+			 copy_of_str);
+
+	    }
+	}
+      else
+	as_warn (_("ignoring incomplete .req pseuso op"));
+
+      *p = c;
+      return 1;
+    }
+  *p = c;
+  return 0;
+}
+  
 static void
 set_constant_flonums ()
 {
@@ -7574,7 +7880,7 @@ build_arm_ops_hsh ()
 
   for (i = 0; i < sizeof (insns) / sizeof (struct asm_opcode); i++)
     {
-      CONST struct asm_opcode *insn = insns + i;
+      const struct asm_opcode *insn = insns + i;
 
       if (insn->cond_offset != 0)
 	{
@@ -7620,7 +7926,6 @@ md_begin ()
       || (arm_tops_hsh = hash_new ()) == NULL
       || (arm_cond_hsh = hash_new ()) == NULL
       || (arm_shift_hsh = hash_new ()) == NULL
-      || (arm_reg_hsh = hash_new ()) == NULL
       || (arm_psr_hsh = hash_new ()) == NULL)
     as_fatal (_("Virtual memory exhausted"));
 
@@ -7634,8 +7939,8 @@ md_begin ()
   for (i = 0; i < sizeof (psrs) / sizeof (struct asm_psr); i++)
     hash_insert (arm_psr_hsh, psrs[i].template, (PTR) (psrs + i));
 
-  for (i = 0; reg_table[i].name; i++)
-    insert_reg (i);
+  for (i = (int) REG_TYPE_FIRST; i < (int) REG_TYPE_MAX; i++)
+    build_reg_hsh (all_reg_maps + i);
 
   set_constant_flonums ();
 
@@ -7924,8 +8229,9 @@ md_undefined_symbol (name)
    advance the pointer.  */
 
 static int
-arm_reg_parse (ccp)
+arm_reg_parse (ccp, htab)
      register char ** ccp;
+     struct hash_control *htab;
 {
   char * start = * ccp;
   char   c;
@@ -7951,7 +8257,7 @@ arm_reg_parse (ccp)
     c = *p++;
 
   *--p = 0;
-  reg = (struct reg_entry *) hash_find (arm_reg_hsh, start);
+  reg = (struct reg_entry *) hash_find (htab, start);
   *p = c;
 
   if (reg)
@@ -7961,6 +8267,22 @@ arm_reg_parse (ccp)
     }
 
   return FAIL;
+}
+
+/* Search for the following register name in each of the possible reg name
+   tables.  Return the classification if found, or REG_TYPE_MAX if not
+   present.  */
+static enum arm_reg_type
+arm_reg_parse_any (cp)
+     char *cp;
+{
+  int i;
+
+  for (i = (int) REG_TYPE_FIRST; i < (int) REG_TYPE_MAX; i++)
+    if (arm_reg_parse (&cp, all_reg_maps[i].htab) != FAIL)
+      return (enum arm_reg_type) i;
+
+  return REG_TYPE_MAX;
 }
 
 void
@@ -8774,10 +9096,9 @@ void
 md_assemble (str)
      char * str;
 {
-  char   c;
-  char * p;
-  char * q;
-  char * start;
+  char  c;
+  char *p;
+  char *start;
 
   /* Align the instruction.
      This may not be the right thing to do but ...  */
@@ -8842,7 +9163,7 @@ md_assemble (str)
 
       c = *p;
       *p = '\0';
-      opcode = (CONST struct asm_opcode *) hash_find (arm_ops_hsh, str);
+      opcode = (const struct asm_opcode *) hash_find (arm_ops_hsh, str);
       *p = c;
 
       if (opcode)
@@ -8864,68 +9185,9 @@ md_assemble (str)
 
   /* It wasn't an instruction, but it might be a register alias of the form
      alias .req reg.  */
-  q = p;
-  skip_whitespace (q);
+  if (create_register_alias (str, p))
+    return;
 
-  c = *p;
-  *p = '\0';
-
-  if (*q && !strncmp (q, ".req ", 4))
-    {
-      int    reg;
-      char * copy_of_str;
-      char * r;
-
-#ifdef IGNORE_OPCODE_CASE
-      str = original_case_string;
-#endif
-      copy_of_str = str;
-
-      q += 4;
-      skip_whitespace (q);
-
-      for (r = q; *r != '\0'; r++)
-	if (*r == ' ')
-	  break;
-
-      if (r != q)
-	{
-	  int regnum;
-	  char d = *r;
-
-	  *r = '\0';
-	  regnum = arm_reg_parse (& q);
-	  *r = d;
-
-	  reg = arm_reg_parse (& str);
-
-	  if (reg == FAIL)
-	    {
-	      if (regnum != FAIL)
-		insert_reg_alias (str, regnum);
-	      else
-		as_warn (_("register '%s' does not exist\n"), q);
-	    }
-	  else if (regnum != FAIL)
-	    {
-	      if (reg != regnum)
-		as_warn (_("ignoring redefinition of register alias '%s'"),
-			 copy_of_str);
-
-	      /* Do not warn about redefinitions to the same alias.  */
-	    }
-	  else
-	    as_warn (_("ignoring redefinition of register alias '%s' to non-existant register '%s'"),
-		     copy_of_str, q);
-	}
-      else
-	as_warn (_("ignoring incomplete .req pseuso op"));
-
-      *p = c;
-      return;
-    }
-
-  *p = c;
   as_bad (_("bad instruction `%s'"), start);
 }
 

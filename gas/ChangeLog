@@ -1,3 +1,43 @@
+2002-01-10  Richard Earnshaw  <rearnsha@arm.com>
+
+	* tc-arm.c (struct reg_entry): Move before prototypes.
+	(int_register, cp_register, fp_register): Delete.
+	(reg_table): Delete.  Replaced with ...
+	(rn_table, cp_table, cn_table, fn_table, mav_mvf_table)
+	(mav_mvd_table, mav_mvfx_table, mav_mvdx_table, mav_mvax_table)
+	(mav_dspsc_table): ... one table per register set.
+	(arm_reg_hsh): Delete.
+	(struct reg_map): New structure.
+	(all_reg_maps): New array.
+	(enum arm_reg_type): New enums.
+	(build_reg_hsh): New function.
+	(insert_reg_alias): Use hash table passed by caller.  Adjust all
+	callers.
+	(create_register_alias): New function, split out from ...
+	(md_assemble): ... here.
+	(md_begin): Build new register hash tables.
+	(arm_reg_parse): New argument for the hash table to search.  Adjust all
+	callers.
+	(arm_reg_parse_any): New function.
+	(co_proc_number): Look up the processor number in the processor hash
+	table.
+	(cirrus_regtype): Delete.
+	(cirrus_register, cirrus_mvf_register, cirrus_mvd_register)
+	(cirrus_mvfx_register, cirrus_mvdx_register, cirrus_mvax_register)
+	(ARM_EXT_MAVERICKsc_register): Delete.
+	(do_c_binops_1, do_c_binops_2, do_c_binops_3): Delete.
+	(do_c_binops_1[a-o], do_c_binops_2[a-c], do_c_binops_3[a-d]): New
+	functions.
+	(do_c_triple_4, do_c_triple_5): Delete.
+	(do_c_triple_4[ab], do_c_triple_5[a-h]): New functions.
+	(do_c_quad_6): Delete.
+	(do_c_quad_6[ab]): New functions.
+	(do_c_binops, do_c_triple, do_c_quad, do_c_shift, do_c_ldst): Rework
+	arguments to use new register parsing methods.
+	(cirrus_reg_required_here): Likewise.
+	(insns): Reclassify cirrus maverick worker functions.
+	(cirrus_valid_reg): Delete.
+
 2002-01-07  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* configure.in (sh*le): Set cpu_type=sh and endian=little.
