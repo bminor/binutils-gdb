@@ -33,6 +33,20 @@
 #include "symfile.h"
 #include "objfiles.h"
 
+/* CALL_DUMMY_WORDS:
+   This sequence of words is the instructions
+
+   mov  lr, pc
+   mov  pc, r4
+   swi	bkpt_swi
+
+   Note this is 12 bytes.  */
+
+LONGEST arm_linux_call_dummy_words[] =
+{
+  0xe1a0e00f, 0xe1a0f004, 0xef9f001
+};
+
 #ifdef GET_LONGJMP_TARGET
 
 /* Figure out where the longjmp will land.  We expect that we have

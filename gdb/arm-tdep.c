@@ -1249,6 +1249,20 @@ arm_push_dummy_frame (void)
   write_register (SP_REGNUM, sp);
 }
 
+/* CALL_DUMMY_WORDS:
+   This sequence of words is the instructions
+
+   mov  lr,pc
+   mov  pc,r4
+   illegal
+
+   Note this is 12 bytes.  */
+
+LONGEST arm_call_dummy_words[] =
+{
+  0xe1a0e00f, 0xe1a0f004, 0xe7ffdefe
+};
+
 /* Fix up the call dummy, based on whether the processor is currently
    in Thumb or ARM mode, and whether the target function is Thumb or
    ARM.  There are three different situations requiring three

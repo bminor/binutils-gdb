@@ -406,15 +406,13 @@ void arm_pop_frame (void);
 
 #define POP_FRAME arm_pop_frame ()
 
-/* This sequence of words is the instructions
+#define CALL_DUMMY_P (1)
 
-   mov  lr,pc
-   mov  pc,r4
-   illegal
+#define CALL_DUMMY_WORDS arm_call_dummy_words
+extern LONGEST arm_call_dummy_words[];
 
-   Note this is 12 bytes.  */
+#define SIZEOF_CALL_DUMMY_WORDS (3 * sizeof (LONGEST))
 
-#define CALL_DUMMY {0xe1a0e00f, 0xe1a0f004, 0xe7ffdefe}
 #define CALL_DUMMY_START_OFFSET	 0	/* Start execution at beginning of dummy */
 
 #define CALL_DUMMY_BREAKPOINT_OFFSET arm_call_dummy_breakpoint_offset()

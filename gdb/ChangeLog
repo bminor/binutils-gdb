@@ -1,3 +1,13 @@
+2002-01-30  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-tdep.c (arm_call_dummy_words): Define.
+	* arm-linux-tdep.c (arm_linux_call_dummy_words): Define.
+	* config/arm/tm-arm.h (CALL_DUMMY_P): Define.
+	(CALL_DUMMY_WORDS): Define.
+	(arm_call_dummy_words): Declare.
+	* config/arm/tm-linux.h (CALL_DUMMY_WORDS): Define.
+	(arm_linux_call_dummy_words): Declare.
+
 2002-01-30  Andreas Schwab  <schwab@suse.de>
 
 	* m68klinux-nat.c: Fix last change to use regcache_collect

@@ -44,17 +44,9 @@ extern struct link_map_offsets *arm_linux_svr4_fetch_link_map_offsets (void);
 #undef ARM_LE_BREAKPOINT
 #define ARM_LE_BREAKPOINT	{0x01,0x00,0x9f,0xef}
 
-/* This sequence of words used in the CALL_DUMMY are the following 
-   instructions:
-
-   mov  lr, pc
-   mov  pc, r4
-   swi	bkpt_swi
-
-   Note this is 12 bytes.  */
-
-#undef CALL_DUMMY
-#define CALL_DUMMY {0xe1a0e00f, 0xe1a0f004, 0xef9f001}
+#undef CALL_DUMMY_WORDS
+#define CALL_DUMMY_WORDS arm_linux_call_dummy_words
+extern LONGEST arm_linux_call_dummy_words[];
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
