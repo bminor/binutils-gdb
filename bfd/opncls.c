@@ -1,6 +1,6 @@
 /* opncls.c -- open and close a BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000,
-   2001, 2002, 2003, 2004
+   2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    Written by Cygnus Support.
@@ -980,6 +980,7 @@ get_debug_link_info (bfd *abfd, unsigned long *crc32_out)
   unsigned long crc32;
   bfd_byte *contents;
   int crc_offset;
+  char *name;
 
   BFD_ASSERT (abfd);
   BFD_ASSERT (crc32_out);
@@ -997,13 +998,14 @@ get_debug_link_info (bfd *abfd, unsigned long *crc32_out)
     }
 
   /* Crc value is stored after the filename, aligned up to 4 bytes.  */
-  crc_offset = strlen (contents) + 1;
+  name = (char *) contents;
+  crc_offset = strlen (name) + 1;
   crc_offset = (crc_offset + 3) & ~3;
 
   crc32 = bfd_get_32 (abfd, contents + crc_offset);
 
   *crc32_out = crc32;
-  return contents;
+  return name;
 }
 
 /*
@@ -1022,7 +1024,7 @@ DESCRIPTION
 static bfd_boolean
 separate_debug_file_exists (const char *name, const unsigned long crc)
 {
-  static char buffer [8 * 1024];
+  static unsigned char buffer [8 * 1024];
   unsigned long file_crc = 0;
   int fd;
   bfd_size_type count;
@@ -1286,7 +1288,7 @@ bfd_fill_in_gnu_debuglink_section (bfd *abfd,
   char * contents;
   bfd_size_type crc_offset;
   FILE * handle;
-  static char buffer[8 * 1024];
+  static unsigned char buffer[8 * 1024];
   size_t count;
 
   if (abfd == NULL || sect == NULL || filename == NULL)

@@ -106,7 +106,7 @@ bfd_pef_print_symbol (abfd, afile, symbol, how)
       fprintf (file, " %-5s %s", symbol->section->name, symbol->name);
       if (strncmp (symbol->name, "__traceback_", strlen ("__traceback_")) == 0)
 	{
-	  char *buf = alloca (symbol->udata.i);
+	  unsigned char *buf = alloca (symbol->udata.i);
 	  size_t offset = symbol->value + 4;
 	  size_t len = symbol->udata.i;
 	  int ret;
@@ -884,7 +884,8 @@ static int bfd_pef_parse_function_stubs (abfd, codesec, codebuf, codelen,
 	  goto error;
 
 	max = loaderlen - (header.loader_strings_offset + imports[index].name);
-	symname = loaderbuf + header.loader_strings_offset + imports[index].name;
+	symname = (char *) loaderbuf;
+	symname += header.loader_strings_offset + imports[index].name;
 	namelen = 0;
 	for (s = symname; s < (symname + max); s++)
 	  {
@@ -978,7 +979,7 @@ static long bfd_pef_parse_symbols (abfd, csym)
   count = 0;
   if (codesec != NULL)
     {
-      unsigned long ncount = 0;
+      long ncount = 0;
       bfd_pef_parse_traceback_tables (abfd, codesec, codebuf, codelen,
 				      &ncount, csym);
       count += ncount;

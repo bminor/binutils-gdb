@@ -1,5 +1,5 @@
 /* BFD support for the ARM processor
-   Copyright 1994, 1997, 1999, 2000, 2002, 2003, 2004
+   Copyright 1994, 1997, 1999, 2000, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 
@@ -24,21 +24,12 @@
 #include "libbfd.h"
 #include "libiberty.h"
 
-static const bfd_arch_info_type * compatible
-  PARAMS ((const bfd_arch_info_type *, const bfd_arch_info_type *));
-static bfd_boolean scan
-  PARAMS ((const struct bfd_arch_info *, const char *));
-static bfd_boolean arm_check_note
-  PARAMS ((bfd *, char *, bfd_size_type, const char *, char **));
-
 /* This routine is provided two arch_infos and works out which ARM
    machine which would be compatible with both and returns a pointer
    to its info structure.  */
 
 static const bfd_arch_info_type *
-compatible (a,b)
-     const bfd_arch_info_type * a;
-     const bfd_arch_info_type * b;
+compatible (const bfd_arch_info_type *a, const bfd_arch_info_type *b)
 {
   /* If a & b are for different architecture we can do nothing.  */
   if (a->arch != b->arch)
@@ -105,9 +96,7 @@ processors[] =
 };
 
 static bfd_boolean
-scan (info, string)
-     const struct bfd_arch_info * info;
-     const char * string;
+scan (const struct bfd_arch_info *info, const char *string)
 {
   int  i;
 
@@ -162,9 +151,7 @@ const bfd_arch_info_type bfd_arm_arch =
    Returns TRUE if they were merged successfully or FALSE otherwise.  */
 
 bfd_boolean
-bfd_arm_merge_machines (ibfd, obfd)
-     bfd * ibfd;
-     bfd * obfd;
+bfd_arm_merge_machines (bfd *ibfd, bfd *obfd)
 {
   unsigned int in  = bfd_get_mach (ibfd);
   unsigned int out = bfd_get_mach (obfd);
@@ -226,12 +213,11 @@ typedef struct
 } arm_Note;
 
 static bfd_boolean
-arm_check_note (abfd, buffer, buffer_size, expected_name, description_return)
-     bfd *           abfd;
-     char *          buffer;
-     bfd_size_type   buffer_size;
-     const char *    expected_name;
-     char **         description_return;
+arm_check_note (bfd *abfd,
+		bfd_byte *buffer,
+		bfd_size_type buffer_size,
+		const char *expected_name,
+		char **description_return)
 {
   unsigned long namesz;
   unsigned long descsz;
@@ -246,7 +232,7 @@ arm_check_note (abfd, buffer, buffer_size, expected_name, description_return)
   namesz = bfd_get_32 (abfd, buffer);
   descsz = bfd_get_32 (abfd, buffer + offsetof (arm_Note, descsz));
   type   = bfd_get_32 (abfd, buffer + offsetof (arm_Note, type));
-  descr  = buffer + offsetof (arm_Note, name);
+  descr  = (char *) buffer + offsetof (arm_Note, name);
 
   /* Check for buffer overflow.  */
   if (namesz + descsz + offsetof (arm_Note, name) > buffer_size)
@@ -279,9 +265,7 @@ arm_check_note (abfd, buffer, buffer_size, expected_name, description_return)
 #define NOTE_ARCH_STRING 	"arch: "
 
 bfd_boolean
-bfd_arm_update_notes (abfd, note_section)
-     bfd * abfd;
-     const char * note_section;
+bfd_arm_update_notes (bfd *abfd, const char *note_section)
 {
   asection *     arm_arch_section;
   bfd_size_type  buffer_size;
@@ -329,7 +313,9 @@ bfd_arm_update_notes (abfd, note_section)
 
   if (strcmp (arch_string, expected) != 0)
     {
-      strcpy (buffer + offsetof (arm_Note, name) + ((strlen (NOTE_ARCH_STRING) + 3) & ~3), expected);
+      strcpy ((char *) buffer + (offsetof (arm_Note, name)
+				 + ((strlen (NOTE_ARCH_STRING) + 3) & ~3)),
+	      expected);
 
       if (! bfd_set_section_contents (abfd, arm_arch_section, buffer,
 				      (file_ptr) 0, buffer_size))
@@ -374,9 +360,7 @@ architectures[] =
 
 /* Extract the machine number stored in a note section.  */
 unsigned int
-bfd_arm_get_mach_from_notes (abfd, note_section)
-     bfd * abfd;
-     const char * note_section;
+bfd_arm_get_mach_from_notes (bfd *abfd, const char *note_section)
 {
   asection *     arm_arch_section;
   bfd_size_type  buffer_size;

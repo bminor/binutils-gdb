@@ -2170,7 +2170,7 @@ bfd_m68k_elf32_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
       bfd_put_32 (abfd, irel->r_offset + datasec->output_offset, p);
       memset (p + 4, 0, 8);
       if (targetsec != NULL)
-	strncpy (p + 4, targetsec->output_section->name, 8);
+	strncpy ((char *) p + 4, targetsec->output_section->name, 8);
     }
 
   if (isymbuf != NULL && symtab_hdr->contents != (unsigned char *) isymbuf)

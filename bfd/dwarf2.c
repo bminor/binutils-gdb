@@ -1,6 +1,6 @@
 /* DWARF 2 support.
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004 Free Software Foundation, Inc.
+   2004, 2005 Free Software Foundation, Inc.
 
    Adapted from gdb/dwarf2read.c by Gavin Koch of Cygnus Solutions
    (gavin@cygnus.com).
@@ -71,44 +71,44 @@ struct attribute
 struct dwarf_block
 {
   unsigned int size;
-  char *data;
+  bfd_byte *data;
 };
 
 struct dwarf2_debug
 {
   /* A list of all previously read comp_units.  */
-  struct comp_unit* all_comp_units;
+  struct comp_unit *all_comp_units;
 
   /* The next unread compilation unit within the .debug_info section.
      Zero indicates that the .debug_info section has not been loaded
      into a buffer yet.  */
-  char* info_ptr;
+  bfd_byte *info_ptr;
 
   /* Pointer to the end of the .debug_info section memory buffer.  */
-  char* info_ptr_end;
+  bfd_byte *info_ptr_end;
 
   /* Pointer to the section and address of the beginning of the
      section.  */
-  asection* sec;
-  char* sec_info_ptr;
+  asection *sec;
+  bfd_byte *sec_info_ptr;
 
   /* Pointer to the symbol table.  */
-  asymbol** syms;
+  asymbol **syms;
 
   /* Pointer to the .debug_abbrev section loaded into memory.  */
-  char* dwarf_abbrev_buffer;
+  bfd_byte *dwarf_abbrev_buffer;
 
   /* Length of the loaded .debug_abbrev section.  */
   unsigned long dwarf_abbrev_size;
 
   /* Buffer for decode_line_info.  */
-  char *dwarf_line_buffer;
+  bfd_byte *dwarf_line_buffer;
 
   /* Length of the loaded .debug_line section.  */
   unsigned long dwarf_line_size;
 
   /* Pointer to the .debug_str section loaded into memory.  */
-  char* dwarf_str_buffer;
+  bfd_byte *dwarf_str_buffer;
 
   /* Length of the loaded .debug_str section.  */
   unsigned long dwarf_str_size;
@@ -127,48 +127,48 @@ struct arange
 struct comp_unit
 {
   /* Chain the previously read compilation units.  */
-  struct comp_unit* next_unit;
+  struct comp_unit *next_unit;
 
   /* Keep the bdf convenient (for memory allocation).  */
-  bfd* abfd;
+  bfd *abfd;
 
   /* The lowest and higest addresses contained in this compilation
      unit as specified in the compilation unit header.  */
   struct arange arange;
 
   /* The DW_AT_name attribute (for error messages).  */
-  char* name;
+  char *name;
 
   /* The abbrev hash table.  */
-  struct abbrev_info** abbrevs;
+  struct abbrev_info **abbrevs;
 
   /* Note that an error was found by comp_unit_find_nearest_line.  */
   int error;
 
   /* The DW_AT_comp_dir attribute.  */
-  char* comp_dir;
+  char *comp_dir;
 
   /* TRUE if there is a line number table associated with this comp. unit.  */
   int stmtlist;
 
   /* Pointer to the current comp_unit so that we can find a given entry
      by its reference.  */
-  char *info_ptr_unit;
+  bfd_byte *info_ptr_unit;
 
   /* The offset into .debug_line of the line number table.  */
   unsigned long line_offset;
 
   /* Pointer to the first child die for the comp unit.  */
-  char *first_child_die_ptr;
+  bfd_byte *first_child_die_ptr;
 
   /* The end of the comp unit.  */
-  char *end_ptr;
+  bfd_byte *end_ptr;
 
   /* The decoded line number, NULL if not yet decoded.  */
-  struct line_info_table* line_table;
+  struct line_info_table *line_table;
 
   /* A list of the functions found in this comp. unit.  */
-  struct funcinfo* function_table;
+  struct funcinfo *function_table;
 
   /* Pointer to dwarf2_debug structure.  */
   struct dwarf2_debug *stash;
@@ -211,38 +211,38 @@ struct attr_abbrev
 /* Read dwarf information from a buffer.  */
 
 static unsigned int
-read_1_byte (bfd *abfd ATTRIBUTE_UNUSED, char *buf)
+read_1_byte (bfd *abfd ATTRIBUTE_UNUSED, bfd_byte *buf)
 {
   return bfd_get_8 (abfd, buf);
 }
 
 static int
-read_1_signed_byte (bfd *abfd ATTRIBUTE_UNUSED, char *buf)
+read_1_signed_byte (bfd *abfd ATTRIBUTE_UNUSED, bfd_byte *buf)
 {
   return bfd_get_signed_8 (abfd, buf);
 }
 
 static unsigned int
-read_2_bytes (bfd *abfd, char *buf)
+read_2_bytes (bfd *abfd, bfd_byte *buf)
 {
   return bfd_get_16 (abfd, buf);
 }
 
 static unsigned int
-read_4_bytes (bfd *abfd, char *buf)
+read_4_bytes (bfd *abfd, bfd_byte *buf)
 {
   return bfd_get_32 (abfd, buf);
 }
 
 static bfd_uint64_t
-read_8_bytes (bfd *abfd, char *buf)
+read_8_bytes (bfd *abfd, bfd_byte *buf)
 {
   return bfd_get_64 (abfd, buf);
 }
 
-static char *
+static bfd_byte *
 read_n_bytes (bfd *abfd ATTRIBUTE_UNUSED,
-	      char *buf,
+	      bfd_byte *buf,
 	      unsigned int size ATTRIBUTE_UNUSED)
 {
   /* If the size of a host char is 8 bits, we can return a pointer
@@ -253,27 +253,29 @@ read_n_bytes (bfd *abfd ATTRIBUTE_UNUSED,
 
 static char *
 read_string (bfd *abfd ATTRIBUTE_UNUSED,
-	     char *buf,
+	     bfd_byte *buf,
 	     unsigned int *bytes_read_ptr)
 {
   /* Return a pointer to the embedded string.  */
-  if (*buf == '\0')
+  char *str = (char *) buf;
+  if (*str == '\0')
     {
       *bytes_read_ptr = 1;
       return NULL;
     }
 
-  *bytes_read_ptr = strlen (buf) + 1;
-  return buf;
+  *bytes_read_ptr = strlen (str) + 1;
+  return str;
 }
 
 static char *
 read_indirect_string (struct comp_unit* unit,
-		      char *buf,
+		      bfd_byte *buf,
 		      unsigned int *bytes_read_ptr)
 {
   bfd_uint64_t offset;
   struct dwarf2_debug *stash = unit->stash;
+  char *str;
 
   if (unit->offset_size == 4)
     offset = read_4_bytes (unit->abfd, buf);
@@ -315,16 +317,16 @@ read_indirect_string (struct comp_unit* unit,
       return NULL;
     }
 
-  buf = stash->dwarf_str_buffer + offset;
-  if (*buf == '\0')
+  str = (char *) stash->dwarf_str_buffer + offset;
+  if (*str == '\0')
     return NULL;
-  return buf;
+  return str;
 }
 
 /* END VERBATIM */
 
 static bfd_uint64_t
-read_address (struct comp_unit *unit, char *buf)
+read_address (struct comp_unit *unit, bfd_byte *buf)
 {
   switch (unit->addr_size)
     {
@@ -370,7 +372,7 @@ static struct abbrev_info**
 read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
 {
   struct abbrev_info **abbrevs;
-  char *abbrev_ptr;
+  bfd_byte *abbrev_ptr;
   struct abbrev_info *cur_abbrev;
   unsigned int abbrev_number, bytes_read, abbrev_name;
   unsigned int abbrev_form, hash_number;
@@ -477,11 +479,11 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
 
 /* Read an attribute value described by an attribute form.  */
 
-static char *
+static bfd_byte *
 read_attribute_value (struct attribute *attr,
 		      unsigned form,
 		      struct comp_unit *unit,
-		      char *info_ptr)
+		      bfd_byte *info_ptr)
 {
   bfd *abfd = unit->abfd;
   unsigned int bytes_read;
@@ -605,11 +607,11 @@ read_attribute_value (struct attribute *attr,
 
 /* Read an attribute described by an abbreviated attribute.  */
 
-static char *
+static bfd_byte *
 read_attribute (struct attribute *attr,
 		struct attr_abbrev *abbrev,
 		struct comp_unit *unit,
-		char *info_ptr)
+		bfd_byte *info_ptr)
 {
   attr->name = abbrev->name;
   info_ptr = read_attribute_value (attr, abbrev->form, unit, info_ptr);
@@ -625,7 +627,7 @@ struct line_info
 {
   struct line_info* prev_line;
   bfd_vma address;
-  char* filename;
+  char *filename;
   unsigned int line;
   unsigned int column;
   int end_sequence;		/* End of (sequential) code sequence.  */
@@ -644,8 +646,8 @@ struct line_info_table
   bfd* abfd;
   unsigned int num_files;
   unsigned int num_dirs;
-  char* comp_dir;
-  char** dirs;
+  char *comp_dir;
+  char **dirs;
   struct fileinfo* files;
   struct line_info* last_line;  /* largest VMA */
   struct line_info* lcl_head;   /* local head; used in 'add_line_info' */
@@ -654,7 +656,7 @@ struct line_info_table
 struct funcinfo
 {
   struct funcinfo *prev_func;
-  char* name;
+  char *name;
   bfd_vma low;
   bfd_vma high;
 };
@@ -763,7 +765,7 @@ add_line_info (struct line_info_table *table,
 static char *
 concat_filename (struct line_info_table *table, unsigned int file)
 {
-  char* filename;
+  char *filename;
 
   if (file - 1 >= table->num_files)
     {
@@ -776,7 +778,7 @@ concat_filename (struct line_info_table *table, unsigned int file)
 
   if (! IS_ABSOLUTE_PATH (filename))
     {
-      char* dirname = (table->files[file - 1].dir
+      char *dirname = (table->files[file - 1].dir
 		       ? table->dirs[table->files[file - 1].dir - 1]
 		       : table->comp_dir);
 
@@ -846,8 +848,8 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 {
   bfd *abfd = unit->abfd;
   struct line_info_table* table;
-  char *line_ptr;
-  char *line_end;
+  bfd_byte *line_ptr;
+  bfd_byte *line_end;
   struct line_head lh;
   unsigned int i, bytes_read, offset_size;
   char *cur_file, *cur_dir;
@@ -1265,7 +1267,7 @@ static char *
 find_abstract_instance_name (struct comp_unit *unit, bfd_uint64_t die_ref)
 {
   bfd *abfd = unit->abfd;
-  char *info_ptr;
+  bfd_byte *info_ptr;
   unsigned int abbrev_number, bytes_read, i;
   struct abbrev_info *abbrev;
   struct attribute attr;
@@ -1306,7 +1308,7 @@ static bfd_boolean
 scan_unit_for_functions (struct comp_unit *unit)
 {
   bfd *abfd = unit->abfd;
-  char *info_ptr = unit->first_child_die_ptr;
+  bfd_byte *info_ptr = unit->first_child_die_ptr;
   int nesting_level = 1;
 
   while (nesting_level)
@@ -1315,7 +1317,7 @@ scan_unit_for_functions (struct comp_unit *unit)
       struct abbrev_info *abbrev;
       struct attribute attr;
       struct funcinfo *func;
-      char* name = 0;
+      char *name = 0;
 
       abbrev_number = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
@@ -1417,7 +1419,7 @@ static struct comp_unit *
 parse_comp_unit (bfd *abfd,
 		 struct dwarf2_debug *stash,
 		 bfd_vma unit_length,
-		 char *info_ptr_unit,
+		 bfd_byte *info_ptr_unit,
 		 unsigned int offset_size)
 {
   struct comp_unit* unit;
@@ -1428,8 +1430,8 @@ parse_comp_unit (bfd *abfd,
   unsigned int abbrev_number, bytes_read, i;
   struct abbrev_info *abbrev;
   struct attribute attr;
-  char *info_ptr = stash->info_ptr;
-  char *end_ptr = info_ptr + unit_length;
+  bfd_byte *info_ptr = stash->info_ptr;
+  bfd_byte *end_ptr = info_ptr + unit_length;
   bfd_size_type amt;
 
   version = read_2_bytes (abfd, info_ptr);
@@ -1527,7 +1529,7 @@ parse_comp_unit (bfd *abfd,
 
 	case DW_AT_comp_dir:
 	  {
-	    char* comp_dir = attr.u.str;
+	    char *comp_dir = attr.u.str;
 	    if (comp_dir)
 	      {
 		/* Irix 6.2 native cc prepends <machine>.: to the compilation
@@ -1791,7 +1793,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
       bfd_vma length;
       bfd_boolean found;
       unsigned int offset_size = addr_size;
-      char *info_ptr_unit = stash->info_ptr;
+      bfd_byte *info_ptr_unit = stash->info_ptr;
 
       length = read_4_bytes (abfd, stash->info_ptr);
       /* A 0xffffff length is the DWARF3 way of indicating we use

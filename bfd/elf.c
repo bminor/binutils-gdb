@@ -210,10 +210,10 @@ bfd_elf_hash (const char *namearg)
    file, into a newly allocated buffer, and return a pointer to the
    buffer.  */
 
-static char *
+static bfd_byte *
 elf_read (bfd *abfd, file_ptr offset, bfd_size_type size)
 {
-  char *buf;
+  bfd_byte *buf;
 
   if ((buf = bfd_alloc (abfd, size)) == NULL)
     return NULL;
@@ -253,15 +253,15 @@ char *
 bfd_elf_get_str_section (bfd *abfd, unsigned int shindex)
 {
   Elf_Internal_Shdr **i_shdrp;
-  char *shstrtab = NULL;
+  bfd_byte *shstrtab = NULL;
   file_ptr offset;
   bfd_size_type shstrtabsize;
 
   i_shdrp = elf_elfsections (abfd);
   if (i_shdrp == 0 || i_shdrp[shindex] == 0)
-    return 0;
+    return NULL;
 
-  shstrtab = (char *) i_shdrp[shindex]->contents;
+  shstrtab = i_shdrp[shindex]->contents;
   if (shstrtab == NULL)
     {
       /* No cached one, attempt to read, and cache what we read.  */
@@ -270,7 +270,7 @@ bfd_elf_get_str_section (bfd *abfd, unsigned int shindex)
       shstrtab = elf_read (abfd, offset, shstrtabsize);
       i_shdrp[shindex]->contents = shstrtab;
     }
-  return shstrtab;
+  return (char *) shstrtab;
 }
 
 char *
@@ -5576,8 +5576,8 @@ swap_out_syms (bfd *abfd,
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Shdr *symtab_shndx_hdr;
   Elf_Internal_Shdr *symstrtab_hdr;
-  char *outbound_syms;
-  char *outbound_shndx;
+  bfd_byte *outbound_syms;
+  bfd_byte *outbound_shndx;
   int idx;
   bfd_size_type amt;
   bfd_boolean name_local_sections;
@@ -7866,7 +7866,7 @@ bfd_elf_bfd_from_remote_memory
   (bfd *templ,
    bfd_vma ehdr_vma,
    bfd_vma *loadbasep,
-   int (*target_read_memory) (bfd_vma, char *, int))
+   int (*target_read_memory) (bfd_vma, bfd_byte *, int))
 {
   return (*get_elf_backend_data (templ)->elf_backend_bfd_from_remote_memory)
     (templ, ehdr_vma, loadbasep, target_read_memory);

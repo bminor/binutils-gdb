@@ -1,5 +1,5 @@
 /* SEC_MERGE support.
-   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
    Written by Jakub Jelinek <jakub@redhat.com>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -446,7 +446,8 @@ record_section (struct sec_merge_info *sinfo,
 	  eltalign = ((eltalign ^ (eltalign - 1)) + 1) >> 1;
 	  if (!eltalign || eltalign > mask)
 	    eltalign = mask + 1;
-	  entry = sec_merge_add (sinfo->htab, p, (unsigned) eltalign, secinfo);
+	  entry = sec_merge_add (sinfo->htab, (char *) p, (unsigned) eltalign,
+				 secinfo);
 	  if (! entry)
 	    goto error_return;
 	  p += entry->len;
@@ -477,7 +478,7 @@ record_section (struct sec_merge_info *sinfo,
 		  if (!nul && !((p - secinfo->contents) & mask))
 		    {
 		      nul = TRUE;
-		      entry = sec_merge_add (sinfo->htab, p,
+		      entry = sec_merge_add (sinfo->htab, (char *) p,
 					     (unsigned) mask + 1, secinfo);
 		      if (! entry)
 			goto error_return;
@@ -491,7 +492,7 @@ record_section (struct sec_merge_info *sinfo,
     {
       for (p = secinfo->contents; p < end; p += sec->entsize)
 	{
-	  entry = sec_merge_add (sinfo->htab, p, 1, secinfo);
+	  entry = sec_merge_add (sinfo->htab, (char *) p, 1, secinfo);
 	  if (! entry)
 	    goto error_return;
 	}
@@ -512,8 +513,8 @@ strrevcmp (const void *a, const void *b)
   struct sec_merge_hash_entry *B = *(struct sec_merge_hash_entry **) b;
   unsigned int lenA = A->len;
   unsigned int lenB = B->len;
-  const unsigned char *s = A->root.string + lenA - 1;
-  const unsigned char *t = B->root.string + lenB - 1;
+  const unsigned char *s = (const unsigned char *) A->root.string + lenA - 1;
+  const unsigned char *t = (const unsigned char *) B->root.string + lenB - 1;
   int l = lenA < lenB ? lenA : lenB;
 
   while (l)
@@ -537,8 +538,8 @@ strrevcmp_align (const void *a, const void *b)
   struct sec_merge_hash_entry *B = *(struct sec_merge_hash_entry **) b;
   unsigned int lenA = A->len;
   unsigned int lenB = B->len;
-  const unsigned char *s = A->root.string + lenA - 1;
-  const unsigned char *t = B->root.string + lenB - 1;
+  const unsigned char *s = (const unsigned char *) A->root.string + lenA - 1;
+  const unsigned char *t = (const unsigned char *) B->root.string + lenB - 1;
   int l = lenA < lenB ? lenA : lenB;
   int tail_align = (lenA & (A->alignment - 1)) - (lenB & (A->alignment - 1));
 
@@ -829,7 +830,7 @@ _bfd_merged_section_offset (bfd *output_bfd ATTRIBUTE_UNUSED, asection **psec,
     {
       p = secinfo->contents + (offset / sec->entsize) * sec->entsize;
     }
-  entry = sec_merge_hash_lookup (secinfo->htab, p, 0, FALSE);
+  entry = sec_merge_hash_lookup (secinfo->htab, (char *) p, 0, FALSE);
   if (!entry)
     {
       if (! secinfo->htab->strings)

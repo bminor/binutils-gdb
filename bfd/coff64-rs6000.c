@@ -1,5 +1,5 @@
 /* BFD back-end for IBM RS/6000 "XCOFF64" files.
-   Copyright 2000, 2001, 2002, 2003, 2004
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Written Clinton Popetz.
    Contributed by Cygnus Support.
@@ -564,7 +564,7 @@ _bfd_xcoff64_put_ldsymbol_name (abfd, ldinfo, ldsym, name)
   if (ldinfo->string_size + len + 3 > ldinfo->string_alc)
     {
       bfd_size_type newalc;
-      bfd_byte *newstrings;
+      char *newstrings;
 
       newalc = ldinfo->string_alc * 2;
       if (newalc == 0)
@@ -572,8 +572,7 @@ _bfd_xcoff64_put_ldsymbol_name (abfd, ldinfo, ldsym, name)
       while (ldinfo->string_size + len + 3 > newalc)
 	newalc *= 2;
 
-      newstrings = ((bfd_byte *)
-		    bfd_realloc ((PTR) ldinfo->strings, newalc));
+      newstrings = bfd_realloc (ldinfo->strings, newalc);
       if (newstrings == NULL)
 	{
 	  ldinfo->failed = TRUE;

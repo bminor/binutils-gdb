@@ -6110,7 +6110,7 @@ ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
   bfd_put_32 (abfd, sizeof APUINFO_LABEL, buffer);
   bfd_put_32 (abfd, num_entries * 4, buffer + 4);
   bfd_put_32 (abfd, 0x2, buffer + 8);
-  strcpy (buffer + 12, APUINFO_LABEL);
+  strcpy ((char *) buffer + 12, APUINFO_LABEL);
 
   length = 20;
   for (i = 0; i < num_entries; i++)

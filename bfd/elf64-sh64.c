@@ -1,5 +1,6 @@
 /* SuperH SH64-specific support for 64-bit ELF
-   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -107,70 +108,10 @@ struct elf_sh64_link_hash_table
 #define sh64_elf64_hash_table(p) \
   ((struct elf_sh64_link_hash_table *) ((p)->hash))
 
-static bfd_boolean sh_elf64_copy_private_data
-  (bfd *, bfd *);
-static bfd_boolean sh_elf64_copy_private_data_internal
-  (bfd *, bfd *);
-static bfd_boolean sh_elf64_merge_private_data
-  (bfd *, bfd *);
 static bfd_reloc_status_type sh_elf64_ignore_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type sh_elf64_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
-static reloc_howto_type *sh_elf64_reloc_type_lookup
-  (bfd *, bfd_reloc_code_real_type);
-static void sh_elf64_info_to_howto
-  (bfd *, arelent *, Elf_Internal_Rela *);
-static bfd_boolean sh_elf64_relocate_section
-  (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
-   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **);
-static bfd_byte *sh_elf64_get_relocated_section_contents
-  (bfd *, struct bfd_link_info *, struct bfd_link_order *, bfd_byte *,
-   bfd_boolean, asymbol **);
-static bfd_boolean sh_elf64_set_mach_from_flags
-  (bfd *);
-static bfd_boolean sh_elf64_set_private_flags
-  (bfd *, flagword);
-static asection *sh_elf64_gc_mark_hook
-  (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
-   struct elf_link_hash_entry *, Elf_Internal_Sym *);
-static bfd_boolean sh_elf64_gc_sweep_hook
-  (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
-static bfd_boolean sh_elf64_check_relocs
-  (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
-static int sh64_elf64_get_symbol_type
-  (Elf_Internal_Sym *, int);
-static bfd_boolean sh64_elf64_add_symbol_hook
-  (bfd *, struct bfd_link_info *, Elf_Internal_Sym *, const char **,
-   flagword *, asection **, bfd_vma *);
-static bfd_boolean sh64_elf64_link_output_symbol_hook
-  (struct bfd_link_info *, const char *, Elf_Internal_Sym *, asection *,
-   struct elf_link_hash_entry *);
-static bfd_boolean sh64_elf64_fake_sections
-  (bfd *, Elf_Internal_Shdr *, asection *);
-static void sh64_elf64_final_write_processing
-  (bfd *, bfd_boolean);
-static struct bfd_hash_entry *sh64_elf64_link_hash_newfunc
-  (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
-static struct bfd_link_hash_table *sh64_elf64_link_hash_table_create
-  (bfd *);
-inline static void movi_shori_putval
-  (bfd *, unsigned long, char *);
-inline static void movi_3shori_putval
-  (bfd *, bfd_vma, char *);
-static bfd_boolean sh64_elf64_create_dynamic_sections
-  (bfd *, struct bfd_link_info *);
-static bfd_boolean sh64_elf64_adjust_dynamic_symbol
-  (struct bfd_link_info *info, struct elf_link_hash_entry *);
-static bfd_boolean sh64_elf64_discard_copies
-  (struct elf_sh64_link_hash_entry *, void *);
-static bfd_boolean sh64_elf64_size_dynamic_sections
-  (bfd *, struct bfd_link_info *);
-static bfd_boolean sh64_elf64_finish_dynamic_symbol
-  (bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
-   Elf_Internal_Sym *);
-static bfd_boolean sh64_elf64_finish_dynamic_sections
-  (bfd *, struct bfd_link_info *);
 
 static reloc_howto_type sh_elf64_howto_table[] = {
   /* No relocation.  */
@@ -2271,7 +2212,7 @@ sh_elf64_get_relocated_section_contents (bfd *output_bfd,
 
 /* Set the SHF_SH5_ISA32 flag for ISA SHmedia code sections.  */
 
-bfd_boolean
+static bfd_boolean
 sh64_elf64_fake_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 			  Elf_Internal_Shdr *elf_section_hdr,
 			  asection *asect)
@@ -3199,7 +3140,7 @@ sh64_elf64_link_hash_table_create (bfd *abfd)
 }
 
 inline static void
-movi_shori_putval (bfd *output_bfd, unsigned long value, char *addr)
+movi_shori_putval (bfd *output_bfd, unsigned long value, bfd_byte *addr)
 {
   bfd_put_32 (output_bfd,
 	      bfd_get_32 (output_bfd, addr)
@@ -3212,7 +3153,7 @@ movi_shori_putval (bfd *output_bfd, unsigned long value, char *addr)
 }
 
 inline static void
-movi_3shori_putval (bfd *output_bfd, bfd_vma value, char *addr)
+movi_3shori_putval (bfd *output_bfd, bfd_vma value, bfd_byte *addr)
 {
   bfd_put_32 (output_bfd,
 	      bfd_get_32 (output_bfd, addr)

@@ -1,5 +1,5 @@
 /* MMIX-specific support for 64-bit ELF.
-   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
    Contributed by Hans-Peter Nilsson <hp@bitrange.com>
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -993,7 +993,7 @@ mmix_elf_perform_relocation (isec, howto, datap, addr, value)
 	     position for the stub.  There's supposed to be room allocated
 	     for the stub.  */
 	  bfd_byte *stubcontents
-	    = ((char *) datap
+	    = ((bfd_byte *) datap
 	       - (addr - (isec->output_section->vma + isec->output_offset))
 	       + size
 	       + mmix_elf_section_data (isec)->pjs.stub_offset);

@@ -269,7 +269,7 @@ struct cie
 {
   struct cie_header hdr;
   unsigned char version;
-  unsigned char augmentation[20];
+  char augmentation[20];
   bfd_vma code_align;
   bfd_signed_vma data_align;
   bfd_vma ra_column;
@@ -955,7 +955,7 @@ struct elf_backend_data
      see elf.c, elfcode.h.  */
   bfd *(*elf_backend_bfd_from_remote_memory)
      (bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
-      int (*target_read_memory) (bfd_vma vma, char *myaddr, int len));
+      int (*target_read_memory) (bfd_vma vma, bfd_byte *myaddr, int len));
 
   /* This function is used by `_bfd_elf_get_synthetic_symtab';
      see elf.c.  */
@@ -1780,10 +1780,10 @@ extern char *elfcore_write_lwpstatus
 
 extern bfd *_bfd_elf32_bfd_from_remote_memory
   (bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
-   int (*target_read_memory) (bfd_vma, char *, int));
+   int (*target_read_memory) (bfd_vma, bfd_byte *, int));
 extern bfd *_bfd_elf64_bfd_from_remote_memory
   (bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,
-   int (*target_read_memory) (bfd_vma, char *, int));
+   int (*target_read_memory) (bfd_vma, bfd_byte *, int));
 
 /* SH ELF specific routine.  */
 

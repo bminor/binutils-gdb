@@ -1,6 +1,6 @@
 /* vms-tir.c -- BFD back-end for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004, 2005
    Free Software Foundation, Inc.
 
    TIR record handling functions
@@ -1598,7 +1598,7 @@ tir_ctl (bfd *abfd, unsigned char *ptr)
     case TIR_S_C_CTL_SETRB:
       /* Set relocation base: pop stack, set image location counter
 	 arg: none.  */
-      dummy = _bfd_vms_pop (abfd, &psect);
+      dummy = _bfd_vms_pop (abfd, (int *) &psect);
       if (psect >= PRIV (section_count))
 	alloc_section (abfd, psect);
       image_set_ptr (abfd, (int) psect, (uquad) dummy);
@@ -1622,7 +1622,7 @@ tir_ctl (bfd *abfd, unsigned char *ptr)
     case TIR_S_C_CTL_STLOC:
       /* Set location: pop index, restore location counter from index
 	 arg: none.  */
-      dummy = _bfd_vms_pop (abfd, &psect);
+      dummy = _bfd_vms_pop (abfd, (int *) &psect);
       (*_bfd_error_handler) (_("%s: not fully implemented"),
 			     tir_cmd_name (ptr[-1]));
       break;
@@ -1630,7 +1630,7 @@ tir_ctl (bfd *abfd, unsigned char *ptr)
     case TIR_S_C_CTL_STKDL:
       /* Stack defined location: pop index, push location counter from index
 	 arg: none.  */
-      dummy = _bfd_vms_pop (abfd, &psect);
+      dummy = _bfd_vms_pop (abfd, (int *) &psect);
       (*_bfd_error_handler) (_("%s: not fully implemented"),
 			     tir_cmd_name (ptr[-1]));
       break;

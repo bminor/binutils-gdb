@@ -1,5 +1,5 @@
 /* Configurable Xtensa ISA support.
-   Copyright 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -120,7 +120,9 @@ byte_to_bit_index (int byte_index)
    both.  */
 
 int
-xtensa_insnbuf_to_chars (xtensa_isa isa, const xtensa_insnbuf insn, char *cp,
+xtensa_insnbuf_to_chars (xtensa_isa isa,
+			 const xtensa_insnbuf insn,
+			 unsigned char *cp,
 			 int num_chars)
 {
   xtensa_isa_internal *intisa = (xtensa_isa_internal *) isa;
@@ -178,7 +180,9 @@ xtensa_insnbuf_to_chars (xtensa_isa isa, const xtensa_insnbuf insn, char *cp,
    by endianness.  */
     
 void
-xtensa_insnbuf_from_chars (xtensa_isa isa, xtensa_insnbuf insn, const char *cp,
+xtensa_insnbuf_from_chars (xtensa_isa isa,
+			   xtensa_insnbuf insn,
+			   const unsigned char *cp,
 			   int num_chars)
 {
   xtensa_isa_internal *intisa = (xtensa_isa_internal *) isa;
@@ -392,7 +396,7 @@ xtensa_isa_maxlength (xtensa_isa isa)
 
 
 int
-xtensa_isa_length_from_chars (xtensa_isa isa, const char *cp)
+xtensa_isa_length_from_chars (xtensa_isa isa, const unsigned char *cp)
 {
   xtensa_isa_internal *intisa = (xtensa_isa_internal *) isa;
   return (intisa->length_decode_fn) (cp);

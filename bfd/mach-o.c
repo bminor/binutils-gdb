@@ -798,7 +798,7 @@ bfd_mach_o_scan_read_symtab_strtab (abfd, sym)
 	  bfd_set_error (bfd_error_file_truncated);
 	  return -1;
 	}
-      sym->strtab = b->buffer + sym->stroff;
+      sym->strtab = (char *) b->buffer + sym->stroff;
       return 0;
     }
 
@@ -2120,7 +2120,7 @@ bfd_mach_o_core_file_failing_command (abfd)
   if (ret < 0)
     return NULL;
 
-  return buf;
+  return (char *) buf;
 }
 
 int

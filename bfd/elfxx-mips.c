@@ -818,7 +818,7 @@ mips_elf_create_procedure_table (void *handle, bfd *abfd,
       ss = bfd_malloc (count);
       if (ss == NULL)
 	goto error_return;
-      if (! _bfd_ecoff_get_accumulated_ss (handle, ss))
+      if (! _bfd_ecoff_get_accumulated_ss (handle, (bfd_byte *) ss))
 	goto error_return;
 
       count = hdr->ipdMax;

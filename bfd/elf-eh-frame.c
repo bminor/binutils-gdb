@@ -453,7 +453,7 @@ _bfd_elf_discard_section_eh_frame
 
   for (;;)
     {
-      unsigned char *aug;
+      char *aug;
       bfd_byte *start, *end, *insns;
       bfd_size_type length;
 
@@ -563,10 +563,10 @@ _bfd_elf_discard_section_eh_frame
 
 	  /* Cannot handle unknown versions.  */
 	  REQUIRE (cie.version == 1 || cie.version == 3);
-	  REQUIRE (strlen (buf) < sizeof (cie.augmentation));
+	  REQUIRE (strlen ((char *) buf) < sizeof (cie.augmentation));
 
-	  strcpy (cie.augmentation, buf);
-	  buf = strchr (buf, '\0') + 1;
+	  strcpy (cie.augmentation, (char *) buf);
+	  buf = (bfd_byte *) strchr ((char *) buf, '\0') + 1;
 	  ENSURE_NO_RELOCS (buf);
 	  if (buf[0] == 'e' && buf[1] == 'h')
 	    {
@@ -1088,7 +1088,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	      || ent->need_lsda_relative
 	      || ent->per_encoding_relative)
 	    {
-	      unsigned char *aug;
+	      char *aug;
 	      unsigned int action, extra_string, extra_data;
 	      unsigned int per_width, per_encoding;
 
@@ -1102,8 +1102,8 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 
 	      /* Skip length, id and version.  */
 	      buf += 9;
-	      aug = buf;
-	      buf = strchr (buf, '\0') + 1;
+	      aug = (char *) buf;
+	      buf += strlen (aug) + 1;
 	      skip_leb128 (&buf, end);
 	      skip_leb128 (&buf, end);
 	      skip_leb128 (&buf, end);
@@ -1117,7 +1117,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 
 	      /* Make room for the new augmentation string and data bytes.  */
 	      memmove (buf + extra_string + extra_data, buf, end - buf);
-	      memmove (aug + extra_string, aug, buf - aug);
+	      memmove (aug + extra_string, aug, buf - (bfd_byte *) aug);
 	      buf += extra_string;
 	      end += extra_string + extra_data;
 

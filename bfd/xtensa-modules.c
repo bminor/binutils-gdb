@@ -1,5 +1,5 @@
 /* Xtensa configuration-specific ISA information.
-   Copyright 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -9074,7 +9074,7 @@ static int length_table[16] = {
 };
 
 static int
-length_decoder (const char *insn)
+length_decoder (const unsigned char *insn)
 {
   int op0 = (insn[0] >> 4) & 0xf;
   return length_table[op0];

@@ -1,5 +1,5 @@
 /* BFD back-end for mmo objects (MMIX-specific object-format).
-   Copyright 2001, 2002, 2003, 2004
+   Copyright 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Written by Hans-Peter Nilsson (hp@bitrange.com).
    Infrastructure and other bits originally copied from srec.c and
@@ -424,7 +424,7 @@ static bfd_boolean mmo_has_leading_or_trailing_zero_tetra_p (bfd *,
    particular input or caller; put such things into the bfd or elsewhere.
    Look ma, no static per-invocation data!  */
 
-static unsigned
+static
 char valid_mmo_symbol_character_set[/* A-Z a-z (we assume consecutive
 				       codes; sorry EBCDIC:ers!).  */
 				    + 'Z' - 'A' + 1 + 'z' - 'a' + 1
@@ -947,7 +947,7 @@ mmo_get_generic_spec_data_section (bfd *abfd, int spec_data_number)
 static asection *
 mmo_get_spec_section (bfd *abfd, int spec_data_number)
 {
-  bfd_byte *secname;
+  char *secname;
   asection *sec;
   bfd_byte buf[4];
   unsigned int secname_length;
@@ -996,7 +996,7 @@ mmo_get_spec_section (bfd *abfd, int spec_data_number)
       if (bfd_bread (secname + i * 4, 4, abfd) != 4)
 	goto format_error_free;
 
-      if (secname[i * 4] == LOP)
+      if (secname[i * 4] == (char) LOP)
 	{
 	  /* A bit of overkill, but we handle char 0x98 in a section name,
 	     and recognize misparsing.  */
@@ -2547,7 +2547,7 @@ EXAMPLE
 
   mmo_write_tetra_raw (abfd, LOP_SPEC_SECTION);
   mmo_write_tetra (abfd, (strlen (sec->name) + 3) / 4);
-  mmo_write_chunk (abfd, sec->name, strlen (sec->name));
+  mmo_write_chunk (abfd, (bfd_byte *) sec->name, strlen (sec->name));
   mmo_flush_chunk (abfd);
   /* FIXME: We can get debug sections (.debug_line & Co.) with a section
      flag still having SEC_RELOC set.  Investigate.  This might be true

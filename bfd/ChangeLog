@@ -1,3 +1,52 @@
+2005-02-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd-in.h (bfd_elf_bfd_from_remote_memory): Warning fix.
+	* coff-m68k.c (bfd_m68k_coff_create_embedded_relocs): Likewise.
+	* coff-rs6000.c (xcoff_write_armap_big): Warning fixes.  Remove
+	useless assignments.
+	(xcoff_write_archive_contents_big): Likewise.
+	(_bfd_xcoff_put_ldsymbol_name): Likewise.
+	* coff64-rs6000.c (_bfd_xcoff64_put_ldsymbol_name): Likewise.
+	* coffgen.c (coff_write_symbols): Make "written" a bfd_vma.
+	* cofflink.c (process_embedded_commands): Warning fixes.
+	* cpu-arm.c: Delete unnecessary prototypes.  Convert to C90.
+	Warning fixes.
+	* dwarf2.c: Warning fixes.
+	* elf-bfd.h: Likewise.
+	* elf-eh-frame.c: Likewise.
+	* elf-strtab.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf32-sh-symbian.c: Likewise.
+	* elf32-sh.c: Delete unnecessary prototypes.  Warning fixes.
+	* elf64-sh64.c: Likewise.
+	* peicode.h: Likewise.
+	* elf64-mmix.c: Warning fixes.
+	* elfcode.h: Likewise.
+	* elfxx-mips.c: Likewise.
+	* libbfd-in.h: Likewise.
+	* libbfd.c: Likewise.
+	* mach-o.c: Likewise.
+	* merge.c: Likewise.
+	* mmo.c: Likewise.
+	* opncls.c: Likewise.
+	* pef.c: Likewise.
+	* srec.c: Likewise.
+	* vms-hdr.c: Likewise.
+	* vms-tir.c: Likewise.
+	* xtensa-isa.c: Likewise.
+	* xtensa-modules.c: Likewise.
+	* xsym.c: Likewise.
+	(pstrcmp): Use correct choice of string lengths.  Fix return value.
+	(bfd_sym_module_name): Correct string length.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2005-02-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* coffgen.c (coff_write_symbols): Make "written" a bfd_vma.
+
 2005-02-17  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-frv.c (elf32_frv_relocate_section): Remove warning from

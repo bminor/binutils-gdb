@@ -1,6 +1,6 @@
 /* Support for the generic parts of PE/PEI, for BFD.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
-   Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
+   2005 Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -130,15 +130,6 @@ typedef struct
   struct internal_reloc * int_reltab;
 }
 pe_ILF_vars;
-
-static asection_ptr       pe_ILF_make_a_section   PARAMS ((pe_ILF_vars *, const char *, unsigned int, flagword));
-static void               pe_ILF_make_a_reloc     PARAMS ((pe_ILF_vars *, bfd_vma, bfd_reloc_code_real_type, asection_ptr));
-static void               pe_ILF_make_a_symbol    PARAMS ((pe_ILF_vars *, const char *, const char *, asection_ptr, flagword));
-static void               pe_ILF_save_relocs      PARAMS ((pe_ILF_vars *, asection_ptr));
-static void		  pe_ILF_make_a_symbol_reloc  PARAMS ((pe_ILF_vars *, bfd_vma, bfd_reloc_code_real_type, struct bfd_symbol **, unsigned int));
-static bfd_boolean        pe_ILF_build_a_bfd      PARAMS ((bfd *, unsigned int, bfd_byte *, bfd_byte *, unsigned int, unsigned int));
-static const bfd_target * pe_ILF_object_p         PARAMS ((bfd *));
-static const bfd_target * pe_bfd_object_p 	  PARAMS ((bfd *));
 #endif /* COFF_IMAGE_WITH_PE */
 
 /**********************************************************************/
@@ -740,8 +731,8 @@ static jump_table jtab[] =
 static bfd_boolean
 pe_ILF_build_a_bfd (bfd *           abfd,
 		    unsigned int    magic,
-		    bfd_byte *      symbol_name,
-		    bfd_byte *      source_dll,
+		    char *          symbol_name,
+		    char *          source_dll,
 		    unsigned int    ordinal,
 		    unsigned int    types)
 {
@@ -837,10 +828,10 @@ pe_ILF_build_a_bfd (bfd *           abfd,
   vars.int_reltab  = (struct internal_reloc *) ptr;
   ptr += SIZEOF_ILF_INT_RELOCS;
 
-  vars.string_table = ptr;
-  vars.string_ptr   = ptr + STRING_SIZE_SIZE;
+  vars.string_table = (char *) ptr;
+  vars.string_ptr   = (char *) ptr + STRING_SIZE_SIZE;
   ptr += SIZEOF_ILF_STRINGS;
-  vars.end_string_ptr = ptr;
+  vars.end_string_ptr = (char *) ptr;
 
   /* The remaining space in bim->buffer is used
      by the pe_ILF_make_a_section() function.  */
@@ -930,7 +921,7 @@ pe_ILF_build_a_bfd (bfd *           abfd,
       id6->contents[0] = ordinal & 0xff;
       id6->contents[1] = ordinal >> 8;
 
-      strcpy (id6->contents + 2, symbol);
+      strcpy ((char *) id6->contents + 2, symbol);
     }
 
   if (import_name_type != IMPORT_ORDINAL)
@@ -1042,7 +1033,7 @@ pe_ILF_build_a_bfd (bfd *           abfd,
 
       /* Create an import symbol for the DLL, without the
        .dll suffix.  */
-      ptr = strrchr (source_dll, '.');
+      ptr = (bfd_byte *) strrchr (source_dll, '.');
       if (ptr)
 	* ptr = 0;
       pe_ILF_make_a_symbol (& vars, "__IMPORT_DESCRIPTOR_", source_dll, NULL, 0);
@@ -1087,8 +1078,8 @@ pe_ILF_object_p (bfd * abfd)
 {
   bfd_byte        buffer[16];
   bfd_byte *      ptr;
-  bfd_byte *      symbol_name;
-  bfd_byte *      source_dll;
+  char *          symbol_name;
+  char *          source_dll;
   unsigned int    machine;
   bfd_size_type   size;
   unsigned int    ordinal;
@@ -1225,11 +1216,12 @@ pe_ILF_object_p (bfd * abfd)
       return NULL;
     }
 
-  symbol_name = ptr;
-  source_dll  = ptr + strlen (ptr) + 1;
+  symbol_name = (char *) ptr;
+  source_dll  = symbol_name + strlen (symbol_name) + 1;
 
   /* Verify that the strings are null terminated.  */
-  if (ptr[size - 1] != 0 || ((unsigned long) (source_dll - ptr) >= size))
+  if (ptr[size - 1] != 0
+      || (bfd_size_type) ((bfd_byte *) source_dll - ptr) >= size)
     {
       _bfd_error_handler
 	(_("%B: string not null terminated in ILF object file."), abfd);

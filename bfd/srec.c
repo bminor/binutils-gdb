@@ -1,6 +1,6 @@
 /* BFD back-end for s-record objects.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004
+   2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -1014,7 +1014,8 @@ srec_write_header (abfd)
     len = 40;
 
   return srec_write_record (abfd, 0, (bfd_vma) 0,
-			    abfd->filename, abfd->filename + len);
+			    (bfd_byte *) abfd->filename,
+			    (bfd_byte *) abfd->filename + len);
 }
 
 static bfd_boolean

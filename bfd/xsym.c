@@ -1,5 +1,5 @@
 /* xSYM symbol-file support for BFD.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -55,21 +55,20 @@
 #define bfd_sym_bfd_link_split_section _bfd_generic_link_split_section
 #define bfd_sym_get_section_contents_in_window  _bfd_generic_get_section_contents_in_window
 
-static int pstrcmp PARAMS ((unsigned char *, unsigned char *));
 static unsigned long compute_offset
   PARAMS ((unsigned long, unsigned long, unsigned long, unsigned long));
 
 extern const bfd_target sym_vec;
 
 static int
-pstrcmp (a, b)
-     unsigned char *a;
-     unsigned char *b;
+pstrcmp (const char *as, const char *bs)
 {
+  const unsigned char *a = (const unsigned char *) as;
+  const unsigned char *b = (const unsigned char *) bs;
   unsigned char clen;
   int ret;
 
-  clen = (a[0] > b[0]) ? a[0] : b[0];
+  clen = (a[0] > b[0]) ? b[0] : a[0];
   ret = memcmp (a + 1, b + 1, clen);
   if (ret != 0)
     return ret;
@@ -79,7 +78,7 @@ pstrcmp (a, b)
   else if (a[0] < b[0])
     return -1;
   else
-    return 0;
+    return 1;
 }
 
 static unsigned long
@@ -255,7 +254,7 @@ bfd_sym_read_version (abfd, version)
      bfd *abfd;
      bfd_sym_version *version;
 {
-  unsigned char version_string[32];
+  char version_string[32];
   long ret;
 
   ret = bfd_bread (version_string, sizeof (version_string), abfd);
@@ -1207,12 +1206,12 @@ bfd_sym_symbol_name (abfd, index)
   sdata = abfd->tdata.sym_data;
 
   if (index == 0)
-    return "";
+    return (const unsigned char *) "";
 
   index *= 2;
   if ((index / sdata->header.dshb_page_size)
       > sdata->header.dshb_nte.dti_page_count)
-    return "\009[INVALID]";
+    return (const unsigned char *) "\09[INVALID]";
 
   return (const unsigned char *) sdata->name_table + index;
 }
@@ -1225,7 +1224,7 @@ bfd_sym_module_name (abfd, index)
   bfd_sym_modules_table_entry entry;
 
   if (bfd_sym_fetch_modules_table_entry (abfd, &entry, index) < 0)
-    return "\011[INVALID]";
+    return (const unsigned char *) "\09[INVALID]";
 
   return bfd_sym_symbol_name (abfd, entry.mte_nte_index);
 }
@@ -1727,26 +1726,28 @@ bfd_sym_print_type_information (abfd, f, buf, len, offset, offsetptr)
 
     case 3:
       {
-	unsigned long value;
+	long value;
 
 	fprintf (f, "scalar (0x%x) of ", type);
 	bfd_sym_print_type_information (abfd, f, buf, len, offset, &offset);
 	bfd_sym_fetch_long (buf, len, offset, &offset, &value);
-	fprintf (f, " (%lu)", value);
+	fprintf (f, " (%lu)", (unsigned long) value);
 	break;
       }
 
     case 5:
       {
-	unsigned long lower, upper, nelem;
-	unsigned long i;
+	long lower, upper, nelem;
+	int i;
 
 	fprintf (f, "enumeration (0x%x) of ", type);
 	bfd_sym_print_type_information (abfd, f, buf, len, offset, &offset);
 	bfd_sym_fetch_long (buf, len, offset, &offset, &lower);
 	bfd_sym_fetch_long (buf, len, offset, &offset, &upper);
 	bfd_sym_fetch_long (buf, len, offset, &offset, &nelem);
-	fprintf (f, " from %lu to %lu with %lu elements: ", lower, upper, nelem);
+	fprintf (f, " from %lu to %lu with %lu elements: ",
+		 (unsigned long) lower, (unsigned long) upper,
+		 (unsigned long) nelem);
 
 	for (i = 0; i < nelem; i++)
 	  {

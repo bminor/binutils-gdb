@@ -1,5 +1,5 @@
 /* Renesas / SuperH specific support for Symbian 32-bit ELF files
-   Copyright 2004
+   Copyright 2004, 2005
    Free Software Foundation, Inc.
    Contributed by Red Hat
 
@@ -96,8 +96,8 @@
 typedef struct symbol_rename
 {
   struct symbol_rename *       next;
-  bfd_byte *                   current_name;
-  bfd_byte *                   new_name;
+  char *                       current_name;
+  char *                       new_name;
   struct elf_link_hash_entry * current_hash;
   unsigned long                new_symndx;
 }
@@ -109,7 +109,7 @@ static symbol_rename * rename_list = NULL;
 
 static bfd_boolean
 sh_symbian_import_as (struct bfd_link_info *info, bfd * abfd,
-		      bfd_byte * current_name, bfd_byte * new_name)
+		      char * current_name, char * new_name)
 {
   struct elf_link_hash_entry * new_hash;
   symbol_rename * node;
@@ -173,7 +173,7 @@ sh_symbian_import_as (struct bfd_link_info *info, bfd * abfd,
 
 
 static bfd_boolean
-sh_symbian_import (bfd * abfd ATTRIBUTE_UNUSED, bfd_byte * name)
+sh_symbian_import (bfd * abfd ATTRIBUTE_UNUSED, char * name)
 {
   if (DEBUG)
     fprintf (stderr, "IMPORT '%s'\n", name);
@@ -184,7 +184,7 @@ sh_symbian_import (bfd * abfd ATTRIBUTE_UNUSED, bfd_byte * name)
 }
 
 static bfd_boolean
-sh_symbian_export (bfd * abfd ATTRIBUTE_UNUSED, bfd_byte * name)
+sh_symbian_export (bfd * abfd ATTRIBUTE_UNUSED, char * name)
 {
   if (DEBUG)
     fprintf (stderr, "EXPORT '%s'\n", name);
@@ -202,14 +202,14 @@ static bfd_boolean
 sh_symbian_process_embedded_commands (struct bfd_link_info *info, bfd * abfd,
 				      asection * sec, bfd_byte * contents)
 {
-  bfd_byte *s;
-  bfd_byte *e;
+  char *s;
+  char *e;
   bfd_boolean result = TRUE;
   bfd_size_type sz = sec->rawsize ? sec->rawsize : sec->size;
 
-  for (s = contents, e = s + sz; s < e;)
+  for (s = (char *) contents, e = s + sz; s < e;)
     {
-      bfd_byte * directive = s;
+      char * directive = s;
 
       switch (*s)
 	{
@@ -229,9 +229,9 @@ sh_symbian_process_embedded_commands (struct bfd_link_info *info, bfd * abfd,
 	    result = FALSE;
 	  else
 	    {
-	      bfd_byte * new_name;
-	      bfd_byte * new_name_end;
-	      bfd_byte   name_end_char;
+	      char * new_name;
+	      char * new_name_end;
+	      char   name_end_char;
 
 	      /* Skip the IMPORT directive.  */
 	      s += strlen (DIRECTIVE_IMPORT);
@@ -282,9 +282,9 @@ sh_symbian_process_embedded_commands (struct bfd_link_info *info, bfd * abfd,
 		}
 	      else
 		{
-		  bfd_byte * current_name;
-		  bfd_byte * current_name_end;
-		  bfd_byte   current_name_end_char;
+		  char * current_name;
+		  char * current_name_end;
+		  char   current_name_end_char;
 
 		  /* Skip the 'AS '.  */
 		  s += strlen (DIRECTIVE_AS);
@@ -331,9 +331,9 @@ sh_symbian_process_embedded_commands (struct bfd_link_info *info, bfd * abfd,
 	    result = FALSE;
 	  else
 	    {
-	      bfd_byte * name;
-	      bfd_byte * name_end;
-	      bfd_byte   name_end_char;
+	      char * name;
+	      char * name_end;
+	      char   name_end_char;
 
 	      /* Skip the directive.  */
 	      s += strlen (DIRECTIVE_EXPORT);
@@ -374,7 +374,8 @@ sh_symbian_process_embedded_commands (struct bfd_link_info *info, bfd * abfd,
       if (! result)
 	{
 	  if (DEBUG)
-	    fprintf (stderr, "offset into .directive section: %d\n", directive - contents);
+	    fprintf (stderr, "offset into .directive section: %d\n",
+		     directive - (char *) contents);
 	  
 	  bfd_set_error (bfd_error_invalid_operation);
 	  _bfd_error_handler (_("%B: Unrecognised .directive command: %s"),

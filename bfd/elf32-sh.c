@@ -32,20 +32,6 @@ static bfd_reloc_status_type sh_elf_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 static bfd_reloc_status_type sh_elf_ignore_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
-static reloc_howto_type *sh_elf_reloc_type_lookup
-  (bfd *, bfd_reloc_code_real_type);
-static void sh_elf_info_to_howto
-  (bfd *, arelent *, Elf_Internal_Rela *);
-static bfd_boolean sh_elf_set_private_flags
-  (bfd *, flagword);
-static bfd_boolean sh_elf_copy_private_data
-  (bfd *, bfd *);
-static bfd_boolean sh_elf_merge_private_data
-  (bfd *, bfd *);
-static bfd_boolean sh_elf_set_mach_from_flags
-  (bfd *);
-static bfd_boolean sh_elf_relax_section
-  (bfd *, asection *, struct bfd_link_info *, bfd_boolean *);
 static bfd_boolean sh_elf_relax_delete_bytes
   (bfd *, asection *, bfd_vma, int);
 static bfd_boolean sh_elf_align_loads
@@ -54,67 +40,12 @@ static bfd_boolean sh_elf_align_loads
 static bfd_boolean sh_elf_swap_insns
   (bfd *, asection *, void *, bfd_byte *, bfd_vma);
 #endif
-static bfd_boolean sh_elf_relocate_section
-  (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
-   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **);
-static bfd_byte *sh_elf_get_relocated_section_contents
-  (bfd *, struct bfd_link_info *, struct bfd_link_order *, bfd_byte *,
-   bfd_boolean, asymbol **);
-static void sh_elf_copy_indirect_symbol
-  (const struct elf_backend_data *, struct elf_link_hash_entry *,
-   struct elf_link_hash_entry *);
 static int sh_elf_optimized_tls_reloc
   (struct bfd_link_info *, int, int);
-static bfd_boolean sh_elf_mkobject
-  (bfd *);
-static bfd_boolean sh_elf_object_p
-  (bfd *);
-static bfd_boolean sh_elf_check_relocs
-  (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
-static struct bfd_hash_entry *sh_elf_link_hash_newfunc
-  (struct bfd_hash_entry *, struct bfd_hash_table *, const char *);
-static struct bfd_link_hash_table *sh_elf_link_hash_table_create
-  (bfd *);
-static bfd_boolean sh_elf_adjust_dynamic_symbol
-  (struct bfd_link_info *, struct elf_link_hash_entry *);
-static bfd_boolean sh_elf_size_dynamic_sections
-  (bfd *, struct bfd_link_info *);
-static bfd_boolean sh_elf_finish_dynamic_symbol
-  (bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
-   Elf_Internal_Sym *);
-static bfd_boolean sh_elf_finish_dynamic_sections
-  (bfd *, struct bfd_link_info *);
-static bfd_reloc_status_type sh_elf_reloc_loop
-  (int, bfd *, asection *, bfd_byte *, bfd_vma, asection *, bfd_vma,
-   bfd_vma);
-static bfd_boolean create_got_section
-  (bfd *, struct bfd_link_info *);
-static bfd_boolean sh_elf_create_dynamic_sections
-  (bfd *, struct bfd_link_info *);
 static bfd_vma dtpoff_base
   (struct bfd_link_info *);
 static bfd_vma tpoff
   (struct bfd_link_info *, bfd_vma);
-static asection * sh_elf_gc_mark_hook
-  (asection *, struct bfd_link_info *, Elf_Internal_Rela *,
-   struct elf_link_hash_entry *, Elf_Internal_Sym *);
-static bfd_boolean sh_elf_gc_sweep_hook
-  (bfd *, struct bfd_link_info *, asection *, const Elf_Internal_Rela *);
-static bfd_boolean allocate_dynrelocs
-  (struct elf_link_hash_entry *, void *);
-static bfd_boolean readonly_dynrelocs
-  (struct elf_link_hash_entry *, void *);
-static enum elf_reloc_type_class sh_elf_reloc_type_class
-  (const Elf_Internal_Rela *);
-#ifdef INCLUDE_SHMEDIA
-inline static void movi_shori_putval (bfd *, unsigned long, char *);
-#endif
-#if !defined SH_TARGET_ALREADY_DEFINED
-static bfd_boolean elf32_shlin_grok_prstatus
-  (bfd *abfd, Elf_Internal_Note *note);
-static bfd_boolean elf32_shlin_grok_psinfo
-  (bfd *abfd, Elf_Internal_Note *note);
-#endif
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
@@ -3369,7 +3300,7 @@ static const bfd_byte *elf_sh_pic_plt_entry;
 #define elf_sh_plt_reloc_offset(info) (info->shared ? 52 : 44)
 
 inline static void
-movi_shori_putval (bfd *output_bfd, unsigned long value, char *addr)
+movi_shori_putval (bfd *output_bfd, unsigned long value, bfd_byte *addr)
 {
   bfd_put_32 (output_bfd,
 	      bfd_get_32 (output_bfd, addr)
