@@ -1,3 +1,9 @@
+Fri Apr  9 00:45:41 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* valarith.c (value_subscript):  Add COERCE_REF.
+	* ch-exp.y (operand_5):  We can generalize the 2nd operand
+	of a string repetition ot 'literal' without ambiguity.
+
 Thu Apr  8 10:15:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* breakpoint.h (struct bpstat): Remove momentary field.

@@ -337,9 +337,6 @@ undefined_value	:	FIXME_01
 /* Z.200, 4.2.1 */
 
 location	:	access_name
-			{
-			  $$ = 0;	/* FIXME */
-			}
   		|	primitive_value POINTER
 			{
 			  write_exp_elt_opcode (UNOP_IND);
@@ -837,7 +834,7 @@ operand_5	:	operand_6
 			{
 			  write_exp_elt_opcode (UNOP_LOGICAL_NOT);
 			}
-		|	parenthesised_expression CHARACTER_STRING_LITERAL
+		|	parenthesised_expression literal
 /* We require the string operand to be a literal, to avoid some
    nasty parsing ambiguities. */
 			{
