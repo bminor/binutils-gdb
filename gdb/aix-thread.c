@@ -48,6 +48,8 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "gdbcmd.h"
+#include "language.h"		/* for local_hex_string() */
+#include "ppc-tdep.h"
 
 #if 0
 #include "coff/internal.h"	/* for libcoff.h */
@@ -63,7 +65,6 @@
 #endif
 #include <sched.h>
 #include <sys/pthdebug.h>
-#include "ppc-tdep.h"
 
 /* Whether to emit debugging output.  */
 static int debug_aix_thread;
@@ -240,7 +241,7 @@ ptrace_check (int req, int id, int ret)
 	{
 	  if (debug_aix_thread)
 	    fprintf_unfiltered (gdb_stdlog, 
-				"ptrace (%d, %d) = %d (errno = %d)",
+				"ptrace (%d, %d) = %d (errno = %d)\n",
 				req, id, ret, errno);
 	  return ret == -1 ? 0 : 1;
 	}
@@ -295,7 +296,7 @@ pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
 
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog,
-      "pdc_symbol_addrs (user = %ld, symbols = 0x%lx, count = %d)",
+      "pdc_symbol_addrs (user = %ld, symbols = 0x%lx, count = %d)\n",
       user, (long) symbols, count);
 
   for (i = 0; i < count; i++)
@@ -303,7 +304,7 @@ pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
       name = symbols[i].name;
       if (debug_aix_thread)
 	fprintf_unfiltered (gdb_stdlog, 
-			    "  symbols[%d].name = \"%s\"", i, name);
+			    "  symbols[%d].name = \"%s\"\n", i, name);
 
       if (!*name)
 	symbols[i].addr = 0;
@@ -312,17 +313,17 @@ pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
 	  if (!(ms = lookup_minimal_symbol (name, NULL, NULL)))
 	    {
 	      if (debug_aix_thread)
-		fprintf_unfiltered (gdb_stdlog, " returning PDC_FAILURE");
+		fprintf_unfiltered (gdb_stdlog, " returning PDC_FAILURE\n");
 	      return PDC_FAILURE;
 	    }
 	  symbols[i].addr = SYMBOL_VALUE_ADDRESS (ms);
 	}
       if (debug_aix_thread)
-	fprintf_unfiltered (gdb_stdlog, "  symbols[%d].addr = 0x%llx",
-			    i, symbols[i].addr);
+	fprintf_unfiltered (gdb_stdlog, "  symbols[%d].addr = %s\n",
+			    i, local_hex_string (symbols[i].addr));
     }
   if (debug_aix_thread)
-    fprintf_unfiltered (gdb_stdlog, " returning PDC_SUCCESS");
+    fprintf_unfiltered (gdb_stdlog, " returning PDC_SUCCESS\n");
   return PDC_SUCCESS;
 }
 
@@ -351,8 +352,8 @@ pdc_read_regs (pthdb_user_t user,
   struct ptsprs sprs32;
   
   if (debug_aix_thread)
-    fprintf_unfiltered (gdb_stdlog, "pdc_read_regs tid=%d flags=%llx\n",
-                        (int) tid, flags);
+    fprintf_unfiltered (gdb_stdlog, "pdc_read_regs tid=%d flags=%s\n",
+                        (int) tid, local_hex_string (flags));
 
   /* General-purpose registers.  */
   if (flags & PTHDB_FLAG_GPRS)
@@ -417,8 +418,8 @@ pdc_write_regs (pthdb_user_t user,
      however this code is untested.  */
 
   if (debug_aix_thread)
-    fprintf_unfiltered (gdb_stdlog, "pdc_write_regs tid=%d flags=%llx\n",
-                        (int) tid, flags);
+    fprintf_unfiltered (gdb_stdlog, "pdc_write_regs tid=%d flags=%s\n",
+                        (int) tid, local_hex_string (flags));
 
   /* General-purpose registers.  */
   if (flags & PTHDB_FLAG_GPRS)
@@ -462,14 +463,14 @@ pdc_read_data (pthdb_user_t user, void *buf,
 
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog,
-      "pdc_read_data (user = %ld, buf = 0x%lx, addr = 0x%llx, len = %ld)",
-      user, (long) buf, addr, len);
+      "pdc_read_data (user = %ld, buf = 0x%lx, addr = %s, len = %ld)\n",
+      user, (long) buf, local_hex_string (addr), len);
 
   status = target_read_memory (addr, buf, len);
   ret = status == 0 ? PDC_SUCCESS : PDC_FAILURE;
 
   if (debug_aix_thread)
-    fprintf_unfiltered (gdb_stdlog, "  status=%d, returning %s",
+    fprintf_unfiltered (gdb_stdlog, "  status=%d, returning %s\n",
 			status, pd_status2str (ret));
   return ret;
 }
@@ -484,14 +485,14 @@ pdc_write_data (pthdb_user_t user, void *buf,
 
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog,
-      "pdc_write_data (user = %ld, buf = 0x%lx, addr = 0x%llx, len = %ld)",
-      user, (long) buf, addr, len);
+      "pdc_write_data (user = %ld, buf = 0x%lx, addr = %s, len = %ld)\n",
+      user, (long) buf, local_hex_string (addr), len);
 
   status = target_write_memory (addr, buf, len);
   ret = status == 0 ? PDC_SUCCESS : PDC_FAILURE;
 
   if (debug_aix_thread)
-    fprintf_unfiltered (gdb_stdlog, "  status=%d, returning %s", status,
+    fprintf_unfiltered (gdb_stdlog, "  status=%d, returning %s\n", status,
 			pd_status2str (ret));
   return ret;
 }
@@ -504,12 +505,12 @@ pdc_alloc (pthdb_user_t user, size_t len, void **bufp)
 {
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog,
-                        "pdc_alloc (user = %ld, len = %ld, bufp = 0x%lx)",
+                        "pdc_alloc (user = %ld, len = %ld, bufp = 0x%lx)\n",
 			user, len, (long) bufp);
   *bufp = xmalloc (len);
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, 
-			"  malloc returned 0x%lx", (long) *bufp);
+			"  malloc returned 0x%lx\n", (long) *bufp);
 
   /* Note: xmalloc() can't return 0; therefore PDC_FAILURE will never
      be returned.  */
@@ -526,12 +527,12 @@ pdc_realloc (pthdb_user_t user, void *buf, size_t len, void **bufp)
 {
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog,
-      "pdc_realloc (user = %ld, buf = 0x%lx, len = %ld, bufp = 0x%lx)",
+      "pdc_realloc (user = %ld, buf = 0x%lx, len = %ld, bufp = 0x%lx)\n",
       user, (long) buf, len, (long) bufp);
   *bufp = xrealloc (buf, len);
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, 
-			"  realloc returned 0x%lx", (long) *bufp);
+			"  realloc returned 0x%lx\n", (long) *bufp);
   return *bufp ? PDC_SUCCESS : PDC_FAILURE;
 }
 
@@ -543,7 +544,7 @@ pdc_dealloc (pthdb_user_t user, void *buf)
 {
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, 
-			"pdc_free (user = %ld, buf = 0x%lx)", user,
+			"pdc_free (user = %ld, buf = 0x%lx)\n", user,
                         (long) buf);
   xfree (buf);
   return PDC_SUCCESS;

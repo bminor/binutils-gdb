@@ -1,4 +1,27 @@
-2002-07-19  Michael Snyder  <msnyder@redhat.com>
+2002-07-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* aix-thread.c (language.h): Include.
+	(ptrace_check, pdc_symbol_addrs, pdc_read_regs, pdc_write_regs)
+	(pdc_read_data, pdc_write_data, pdc_alloc, pdc_realloc, pdc_dealloc):
+	Print newlines at end of debug messages.
+	(pdc_symbol_addrs, pdc_read_regs, pdc_write_regs, pdc_read_data)
+	(pdc_write_data): Use local_hex_string() instead of %llx formats.
+
+2002-07-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* aix-thread.c (ppc-tdep.h): Include.
+	(special_register_p): New function.
+	(supply_sprs64, supply_sprs32, fill_sprs64, fill_sprs32)
+	(store_regs_user_thread): Use register number information from
+	gdbarch_tdep struct instead of hardcoded offsets relative to
+	FIRST_UISA_SP_REGNUM.
+	(fetch_regs_kernel_thread, store_regs_kernel_thread):  Call
+	special_register_p() instead of using FPLAST_REGNUM and
+	LAST_UISA_SP_REGNUM as lower and upper bounds on the special
+	register numbers.  Also, don't assume that LAST_UISA_SP_REGNUM
+	will be MQ's register number.
+
+2002-07-22  Michael Snyder  <msnyder@redhat.com>
 
 	* aix-thread.c (ops): Rename to aix_thread_ops.
 	(base_ops): Rename to base_target.
@@ -20,7 +43,7 @@
 	(store_regs_lib):  Rename to store_regs_user_thread.
 	(store_regs_kern): Rename to store_regs_kernel_thread.
 
-2002-07-18  Michael Snyder  <msnyder@redhat.com>
+2002-07-22  Michael Snyder  <msnyder@redhat.com>
 
 	* aix-thread.c (ops_prepare_to_store): Eliminate.
 	(init_ops): Don't initialize ops.prepare_to_store.
