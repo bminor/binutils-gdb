@@ -27,9 +27,12 @@
 #include "opcode/dvp.h"
 #include "elf/mips.h"
 
-static DVP_INSN dvp_insert_operand
-     PARAMS ((DVP_INSN, dvp_cpu, const dvp_operand *,
-	      int, offsetT, char *, unsigned int));
+static void insert_operand 
+     PARAMS ((dvp_cpu, const dvp_opcode *, const dvp_operand *, int,
+	      DVP_INSN *, offsetT, const char **));
+static void insert_operand_final
+     PARAMS ((dvp_cpu, const dvp_operand *, int,
+	      DVP_INSN *, offsetT, char *, unsigned int));
 
 const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
@@ -513,12 +516,10 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 		     suffix.  */
 		  break;
 		}
+
 	      /* Insert the suffix's value into the insn.  */
-	      if (operand->insert)
-		(*operand->insert) (opcode, operand, mods,
-				    insn_buf, suf_value, NULL);
-	      else
-		*insn_buf |= suf_value << operand->shift;
+	      insert_operand (cpu, opcode, operand, mods, insn_buf,
+			      (offsetT) suf_value, &errmsg);
 
 	      /* FIXME: For suffixes that have a null "" value,
 		 this next line is wrong as we will skip over something
@@ -604,16 +605,11 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 		}
 
 	      /* Insert the register or expression into the instruction.  */
-	      if (operand->insert)
-		{
-		  const char *errmsg = NULL;
-		  (*operand->insert) (opcode, operand, mods,
-				      insn_buf, value, &errmsg);
-		  if (errmsg != (const char *) NULL)
-		    break;
-		}
-	      else
-		*insn_buf |= (value & ((1 << operand->bits) - 1)) << operand->shift;
+	      errmsg = NULL;
+	      insert_operand (cpu, opcode, operand, mods, insn_buf,
+			      (offsetT) value, &errmsg);
+	      if (errmsg != (const char *) NULL)
+		break;
 
 	      ++syn;
 	      ++num_operands;
@@ -805,8 +801,8 @@ md_apply_fix3 (fixP, valueP, seg)
       /* Fetch the instruction, insert the fully resolved operand
 	 value, and stuff the instruction back again.  */
       insn = bfd_getl32 ((unsigned char *) where);
-      insn = dvp_insert_operand (insn, cpu, operand, -1, (offsetT) value,
-				  fixP->fx_file, fixP->fx_line);
+      insert_operand_final (cpu, operand, DVP_MOD_THIS_WORD, &insn,
+			    (offsetT) value, fixP->fx_file, fixP->fx_line);
       bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
 
       if (fixP->fx_done)
@@ -970,12 +966,46 @@ md_atof (type, litP, sizeP)
 
 /* Insert an operand value into an instruction.  */
 
-static DVP_INSN
-dvp_insert_operand (insn, cpu, operand, mods, val, file, line)
-     DVP_INSN insn;
+static void
+insert_operand (cpu, opcode, operand, mods, insn_buf, val, errmsg)
+     dvp_cpu cpu;
+     const dvp_opcode *opcode;
+     const dvp_operand *operand;
+     int mods;
+     DVP_INSN *insn_buf;
+     offsetT val;
+     const char **errmsg;
+{
+  if (operand->insert)
+    {
+      (*operand->insert) (opcode, operand, mods, insn_buf, (long) val, errmsg);
+    }
+  else
+    {
+      /* We currently assume a field does not cross a word boundary.  */
+      int shift = ((mods & DVP_MOD_THIS_WORD)
+		   ? (operand->shift & 31)
+		   : operand->shift);
+      DVP_INSN *p = insn_buf + (shift / 32);
+      if (operand->bits == 32)
+	*p = val;
+      else
+	{
+	  shift = shift % 32;
+	  *p |= ((long) val & ((1 << operand->bits) - 1)) << shift;
+	}
+    }
+}
+
+/* Insert an operand's final value into an instruction.
+   Here we can give warning messages about operand values if we want to.  */
+
+static void
+insert_operand_final (cpu, operand, mods, insn_buf, val, file, line)
      dvp_cpu cpu;
      const dvp_operand *operand;
      int mods;
+     DVP_INSN *insn_buf;
      offsetT val;
      char *file;
      unsigned int line;
@@ -1030,18 +1060,12 @@ dvp_insert_operand (insn, cpu, operand, mods, val, file, line)
 	}
     }
 
-  if (operand->insert)
-    {
-      const char *errmsg = NULL;
-      (*operand->insert) (NULL, operand, mods, &insn, (long) val, &errmsg);
-      if (errmsg != (const char *) NULL)
-	as_warn (errmsg);
-    }
-  else
-    insn |= (((long) val & ((1 << operand->bits) - 1))
-	     << operand->shift);
-
-  return insn;
+  {
+    const char *errmsg = NULL;
+    insert_operand (cpu, NULL, operand, mods, insn_buf, val, &errmsg);
+    if (errmsg != NULL)
+      as_warn_where (file, line, errmsg);
+  }
 }
 
 static void
