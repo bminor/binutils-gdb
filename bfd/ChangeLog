@@ -1,3 +1,8 @@
+2001-09-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elf32-mips.c (mips_elf_calculate_relocation): Fix overflow handling
+	of R_MIPS_PC16.
+
 2001-09-06  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* elf64-mips.c (mips_elf64_howto_table_rel): Fix relocation HOWTO

@@ -22,7 +22,9 @@ text_label:
 	b	text_label
 	bal	text_label
 
+# Branch to an external label.
+	b	external_label
+	bal	external_label
+
 # Round to a 16 byte boundary, for ease in testing multiple targets.
-	nop
-	nop
 	nop

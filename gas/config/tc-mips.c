@@ -1898,6 +1898,10 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 		 | ((address_expr->X_add_number & 0x3fffc) >> 2));
 	      break;
 
+	    case BFD_RELOC_16_PCREL:
+	      ip->insn_opcode |= (address_expr->X_add_number >> 2) & 0xffff;
+	      break;
+
 	    case BFD_RELOC_16_PCREL_S2:
 	      goto need_reloc;
 
@@ -1914,7 +1918,8 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	    {
 	      fixp = fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
 				  address_expr,
-				  reloc_type == BFD_RELOC_16_PCREL_S2,
+				  (reloc_type == BFD_RELOC_16_PCREL
+				   || reloc_type == BFD_RELOC_16_PCREL_S2),
 				  reloc_type);
 	      if (unmatched_hi)
 		{
@@ -2699,7 +2704,10 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 	      ep = NULL;
 	    }
 	  else
-	    r = BFD_RELOC_16_PCREL_S2;
+	    if (mips_pic == EMBEDDED_PIC)
+	      r = BFD_RELOC_16_PCREL_S2;
+	    else
+	      r = BFD_RELOC_16_PCREL;
 	  continue;
 
 	case 'a':
@@ -7796,7 +7804,10 @@ mips_ip (str, ip)
 	      continue;
 
 	    case 'p':		/* pc relative offset */
-	      offset_reloc = BFD_RELOC_16_PCREL_S2;
+	      if (mips_pic == EMBEDDED_PIC)
+		offset_reloc = BFD_RELOC_16_PCREL_S2;
+	      else
+		offset_reloc = BFD_RELOC_16_PCREL;
 	      my_getExpression (&offset_expr, s);
 	      s = expr_end;
 	      continue;
@@ -9426,9 +9437,16 @@ md_pcrel_from (fixP)
       && fixP->fx_addsy != (symbolS *) NULL
       && ! S_IS_DEFINED (fixP->fx_addsy))
     {
-      /* This makes a branch to an undefined symbol be a branch to the
-	 current location.  */
-      return 4;
+      if (mips_pic == EMBEDDED_PIC)
+	{
+	  /* This makes a branch to an undefined symbol be a branch to the
+	     current location.  */
+	  return 4;
+	}
+      else
+	{
+	  return 1;
+	}
     }
 
   /* return the address of the delay slot */
@@ -9665,7 +9683,8 @@ md_apply_fix (fixP, valueP)
 	  /* BFD's REL handling, for MIPS, is _very_ weird.
 	     This gives the right results, but it can't possibly
 	     be the way things are supposed to work.  */
-	  if (fixP->fx_r_type != BFD_RELOC_16_PCREL_S2
+	  if ((fixP->fx_r_type != BFD_RELOC_16_PCREL
+	       && fixP->fx_r_type != BFD_RELOC_16_PCREL_S2)
 	      || S_GET_SEGMENT (fixP->fx_addsy) != undefined_section)
 	    value += fixP->fx_frag->fr_address + fixP->fx_where;
 	}
@@ -9811,15 +9830,18 @@ md_apply_fix (fixP, valueP)
       break;
 
     case BFD_RELOC_16_PCREL_S2:
+      if ((value & 0x3) != 0)
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("Branch to odd address (%lx)"), (long) value);
+
+      /* Fall through.  */
+
+    case BFD_RELOC_16_PCREL:
       /*
        * We need to save the bits in the instruction since fixup_segment()
        * might be deleting the relocation entry (i.e., a branch within
        * the current segment).
        */
-      if ((value & 0x3) != 0)
-	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("Branch to odd address (%lx)"), (long) value);
-
       if (!fixP->fx_done && value != 0)
 	break;
       /* If 'value' is zero, the remaining reloc code won't actually

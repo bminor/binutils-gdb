@@ -1,3 +1,21 @@
+2001-09-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* gas/mips/beq.d: Check branches to external labels.
+	* gas/mips/beq.s: Likewise.
+	* gas/mips/bge.d: Likewise.
+	* gas/mips/bge.s: Likewise.
+	* gas/mips/bgeu.d: Likewise.
+	* gas/mips/bgeu.s: Likewise.
+	* gas/mips/blt.d: Likewise.
+	* gas/mips/blt.s: Likewise.
+	* gas/mips/bltu.d: Likewise.
+	* gas/mips/bltu.s: Likewise.
+	* gas/mips/elempic.d: Switch from R_MIPS_GNU_REL16_S2 to R_MIPS_PC16.
+	* gas/mips/empic.d: Likewise.
+	* gas/mips/empic.s: Likewise.
+	* gas/mips/telempic.d: Likewise.
+	* gas/mips/tempic.d: Likewise.
+
 2001-09-06  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* gas/mips/tmips16-f.d: New file, testcase for big endian MIPS16
