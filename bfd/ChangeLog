@@ -1,3 +1,17 @@
+2003-08-23  Jason Eckhardt  <jle@rice.edu>
+
+        * coff-i860.c (coff_i860_reloc_nyi): New function.
+	(howto_table): Add entries for relocations PAIR, HIGHADJ, HIGH,
+	LOWn, SPLITn, and BRADDR.
+	(RTYPE2HOWTO): Check that the r_type is within the howto_table
+	before trying to access the entry.
+	(coff_i860_rtype_to_howto): Likewise.
+	(coff_i860_reloc_type_lookup): New function.
+	(i860_reloc_processing): New function.
+	(coff_bfd_reloc_type_lookup): Define macro.
+	(RELOC_PROCESSING): Define macro.
+	Minor formatting adjustments.
+
 2003-08-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h (elf_link_add_object_symbols): Don't crash on NULL owner.
