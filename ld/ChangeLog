@@ -1,5 +1,14 @@
 Thu Feb 27 11:41:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldmain.c (main): Don't initialize link_info.lprefix or
+	link_info.lprefix_len.
+	* emultempl/hppaelf.em (hppaelf_before_parse): Likewise.
+
+	* emultempl/m88kbcs.em: Remove.
+	* emulparams/m88kbcs.sh (TEMPLATE_NAME): Don't set.
+	* Makefile.in (em88kbcs.c): Depend upon generic.em rather than
+	m88kbcs.em.
+
 	* mri.c (mri_draw_tree): Pass noload_section, not SEC_NEVER_LOAD,
 	to lang_enter_output_section_statement.  From Mark Rasin
 	<mark.rasin@telrad.co.il>.

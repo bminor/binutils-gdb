@@ -33,7 +33,6 @@ gld960c.em
 hppaelf.em
 linux.em
 lnk960.em
-m88kbcs.em
 mipsecoff.em
 pe.em
 stringify.sed

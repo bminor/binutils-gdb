@@ -1,5 +1,5 @@
 # Makefile for the GNU linker ld (version 2)
-# Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 1996
+# Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 1997
 # Free Software Foundation, Inc.
 
 # This file is part of GNU ld.
@@ -260,6 +260,7 @@ ALL_EMULATIONS = \
 	emipsidt.o \
 	emipsidtl.o \
 	emipslit.o \
+	emipslnews.o \
 	enews.o \
 	ens32knbsd.o \
 	epc532macha.o \
@@ -387,6 +388,11 @@ ecoff_sparc.c: $(srcdir)/emulparams/coff_sparc.sh \
 ed10velf.c: $(srcdir)/emulparams/d10velf.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd10v.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} d10velf "$(tdir_d10v)"
+# start-sanitize-d30v
+ed30velf.c: $(srcdir)/emulparams/d30velf.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elfd30v.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} d30velf "$(tdir_d30v)"
+# end-sanitize-d30v
 edelta68.c: $(srcdir)/emulparams/delta68.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/delta68.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} delta68 "$(tdir_delta68)"
@@ -543,7 +549,7 @@ em68kpsos.c:	$(srcdir)/emulparams/m68kpsos.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/psos.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m68kpsos "$(tdir_m68kpsos)"
 em88kbcs.c: $(srcdir)/emulparams/m88kbcs.sh \
-  $(srcdir)/emultempl/m88kbcs.em $(srcdir)/scripttempl/m88kbcs.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/m88kbcs.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} m88kbcs "$(tdir_m88kbcs)"
 emipsbig.c:  $(srcdir)/emulparams/mipsbig.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
@@ -560,6 +566,9 @@ emipsidtl.c: $(srcdir)/emulparams/mipsidtl.sh \
 emipslit.c:  $(srcdir)/emulparams/mipslit.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mipslit "$(tdir_mipslit)"
+emipslnews.c:  $(srcdir)/emulparams/mipslnews.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} mipslnews
 emn10300.c: $(srcdir)/emulparams/mn10300.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mn10300 "$(tdir_mn10300)"
