@@ -21076,6 +21076,39 @@ Requests of this form may be added in the future.  When a stub does
 not recognize the @var{object} keyword, or its support for
 @var{object} does not recognize the @var{operation} keyword,
 the stub must respond with an empty packet.
+
+@item @code{qGetTLSAddr}:@var{thread-id},@var{offset},@var{lm} --- get thread local storage address
+
+Fetch the address associated with thread local storage specified
+by @var{thread-id}, @var{offset}, and @var{lm}.
+
+@var{thread-id} is the (big endian, hex encoded) thread id associated with the
+thread for which to fetch the TLS address.
+
+@var{offset} is the (big endian, hex encoded) offset associated with the
+thread local variable.  (This offset is obtained from the debug
+information associated with the variable.)
+
+@var{lm} is the (big endian, hex encoded) OS/ABI specific encoding of the
+the load module associated with the thread local storage.  For example,
+a @sc{gnu}/Linux system will pass the link map address of the shared
+object associated with the thread local storage under consideration. 
+Other operating environments may choose to represent the load module
+differently, so the precise meaning of this parameter will vary.
+
+Reply:
+@table @asis
+@item @var{XX@dots}
+Hex encoded (big endian) bytes representing the address of the thread
+local storage requested.
+
+@item @code{E}@var{nn} (where @var{nn} are hex digits)
+An error occurred.
+
+@item @code{""} (empty)
+An empty reply indicates that @code{qGetTLSAddr} is not supported by the stub.
+@end table
+
 @end table
 
 @node Register Packet Format
