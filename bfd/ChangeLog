@@ -1,3 +1,11 @@
+Sat Mar 15 10:16:42 1997  Fred Fish  <fnf@cygnus.com>
+
+	* config.bfd (powerpc-*-beos*): New target.
+	* configure.in (powerpc-*-beos*): Add case that explicitly
+	does not set COREFILE for now.  A future BeOS version is
+	expected to support core files.
+	* configure: Regenerate with autoconf.
+
 Fri Mar 14 16:43:22 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-mips.c (mips_elf_check_relocs): Give an error if CALL16 is
