@@ -108,7 +108,7 @@ static void ppc_pe_tocd PARAMS ((int));
    targets.  */
 
 /* Characters which always start a comment.  */
-const char comment_chars[] = "#";
+const char comment_chars[] = "#!";
 
 /* Characters which start a comment at the beginning of a line.  */
 const char line_comment_chars[] = "#";
