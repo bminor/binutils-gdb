@@ -545,7 +545,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	regcache.c reggroups.c remote.c remote-fileio.c \
 	scm-exp.c scm-lang.c scm-valprint.c \
 	sentinel-frame.c \
-	serial.c ser-unix.c source.c \
+	serial.c ser-base.c ser-unix.c source.c \
 	stabsread.c stack.c std-regs.c symfile.c symfile-mem.c symmisc.c \
 	symtab.c \
 	target.c thread.c top.c tracepoint.c \
@@ -764,6 +764,7 @@ scm_lang_h = scm-lang.h $(scm_tags_h)
 scm_tags_h = scm-tags.h
 sentinel_frame_h = sentinel-frame.h
 serial_h = serial.h
+ser_base_h = ser-base.h
 ser_unix_h = ser-unix.h
 shnbsd_tdep_h = shnbsd-tdep.h
 sh_tdep_h = sh-tdep.h
@@ -2485,11 +2486,13 @@ sentinel-frame.o: sentinel-frame.c $(defs_h) $(regcache_h) \
 ser-e7kpc.o: ser-e7kpc.c $(defs_h) $(serial_h) $(gdb_string_h)
 ser-go32.o: ser-go32.c $(defs_h) $(gdbcmd_h) $(serial_h) $(gdb_string_h)
 serial.o: serial.c $(defs_h) $(serial_h) $(gdb_string_h) $(gdbcmd_h)
-ser-pipe.o: ser-pipe.c $(defs_h) $(serial_h) $(ser_unix_h) $(gdb_vfork_h) \
+ser-base.o: ser-base.c $(defs_h) $(serial_h) $(ser_base_h) $(event_loop_h)
+ser-pipe.o: ser-pipe.c $(defs_h) $(serial_h) $(ser_base_h) $(ser_unix_h) \
+	$(gdb_vfork_h) $(gdb_string_h)
+ser-tcp.o: ser-tcp.c $(defs_h) $(serial_h) $(ser_base_h) $(ser_unix_h) \
 	$(gdb_string_h)
-ser-tcp.o: ser-tcp.c $(defs_h) $(serial_h) $(ser_unix_h) $(gdb_string_h)
-ser-unix.o: ser-unix.c $(defs_h) $(serial_h) $(ser_unix_h) $(terminal_h) \
-	$(gdb_string_h) $(event_loop_h)
+ser-unix.o: ser-unix.c $(defs_h) $(serial_h) $(ser_base_h) $(ser_unix_h) \
+	$(terminal_h) $(gdb_string_h)
 sh3-rom.o: sh3-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(srec_h) $(arch_utils_h) $(regcache_h) $(gdb_string_h) \
 	$(sh_tdep_h)

@@ -21,6 +21,7 @@
 
 #include "defs.h"
 #include "serial.h"
+#include "ser-base.h"
 #include "ser-unix.h"
 
 #include <sys/types.h>
