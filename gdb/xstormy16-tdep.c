@@ -1090,7 +1090,7 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_arguments (gdbarch, xstormy16_push_arguments);
   set_gdbarch_pop_frame (gdbarch, xstormy16_pop_frame);
   set_gdbarch_store_struct_return (gdbarch, xstormy16_store_struct_return);
-  set_gdbarch_store_return_value (gdbarch, xstormy16_store_return_value);
+  set_gdbarch_deprecated_store_return_value (gdbarch, xstormy16_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, xstormy16_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch,
 				     xstormy16_use_struct_convention);

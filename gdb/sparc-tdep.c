@@ -3220,7 +3220,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_num_regs (gdbarch, 72);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
-      set_gdbarch_store_return_value (gdbarch, sparc_store_return_value);
+      set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
       tdep->fp_register_bytes = 32 * 4;
       tdep->print_insn_mach = bfd_mach_sparc;
@@ -3231,7 +3231,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_num_regs (gdbarch, 32 + 32 + 8 + 8 + 8);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4 + 8*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparclet_register_name);
-      set_gdbarch_store_return_value (gdbarch, sparclet_store_return_value);
+      set_gdbarch_deprecated_store_return_value (gdbarch, sparclet_store_return_value);
       tdep->has_fpu = 0;	/* (all but sparclet and sparclite) */
       tdep->fp_register_bytes = 0;
       tdep->print_insn_mach = bfd_mach_sparc_sparclet;
@@ -3242,7 +3242,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_num_regs (gdbarch, 80);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparclite_register_name);
-      set_gdbarch_store_return_value (gdbarch, sparc_store_return_value);
+      set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
       tdep->has_fpu = 0;	/* (all but sparclet and sparclite) */
       tdep->fp_register_bytes = 0;
       tdep->print_insn_mach = bfd_mach_sparc_sparclite;
@@ -3253,7 +3253,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_num_regs (gdbarch, 72);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
-      set_gdbarch_store_return_value (gdbarch, sparc_store_return_value);
+      set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
       tdep->print_insn_mach = bfd_mach_sparc;
       tdep->fp_register_bytes = 32 * 4;
       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
@@ -3264,7 +3264,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_num_regs (gdbarch, 72);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
-      set_gdbarch_store_return_value (gdbarch, sparc_store_return_value);
+      set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
       tdep->fp_register_bytes = 32 * 4;
       tdep->print_insn_mach = bfd_mach_sparc;
@@ -3275,7 +3275,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_num_regs (gdbarch, 80);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparclite_register_name);
-      set_gdbarch_store_return_value (gdbarch, sparc_store_return_value);
+      set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
       tdep->has_fpu = 0;	/* (all but sparclet and sparclite) */
       tdep->fp_register_bytes = 0;
       tdep->print_insn_mach = bfd_mach_sparc_sparclite;
@@ -3286,7 +3286,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_num_regs (gdbarch, 125);
       set_gdbarch_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
       set_gdbarch_register_name (gdbarch, sparc64_register_name);
-      set_gdbarch_store_return_value (gdbarch, sparc_store_return_value);
+      set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
       tdep->fp_register_bytes = 64 * 4;
       tdep->print_insn_mach = bfd_mach_sparc_v9a;
@@ -3297,7 +3297,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_num_regs (gdbarch, 125);
       set_gdbarch_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
       set_gdbarch_register_name (gdbarch, sparc64_register_name);
-      set_gdbarch_store_return_value (gdbarch, sparc_store_return_value);
+      set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
       tdep->fp_register_bytes = 64 * 4;
       tdep->print_insn_mach = bfd_mach_sparc_v9a;

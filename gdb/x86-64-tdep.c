@@ -1096,7 +1096,7 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 /* Write into the appropriate registers a function return value stored
    in VALBUF of type TYPE, given in virtual format.  */
-  set_gdbarch_store_return_value (gdbarch, x86_64_store_return_value);
+  set_gdbarch_deprecated_store_return_value (gdbarch, x86_64_store_return_value);
 
 
 /* Offset from address of function to start of its code.  */

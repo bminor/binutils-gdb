@@ -63,7 +63,7 @@
 /* When it returns a float/double value, use fp0 in sysV68.  */
 /* When it returns a pointer value, use a0 in sysV68.  */
 
-#define STORE_RETURN_VALUE(TYPE,VALBUF) \
+#define DEPRECATED_STORE_RETURN_VALUE(TYPE,VALBUF) \
   if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)				\
       {									\
 	char raw_buf[REGISTER_RAW_SIZE (FP0_REGNUM)];			\

@@ -1,3 +1,53 @@
+2002-08-23  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (STORE_RETURN_VALUE): Add regcache parameter.
+	(DEPRECATED_STORE_RETURN_VALUE): New method.
+	(EXTRACT_RETURN_VALUE): Make buffer parameter a void pointer.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+	* values.c (set_return_value): Pass current_regcache to
+	STORE_RETURN_VALUE.
+	* arch-utils.h (legacy_store_return_value): Declare.
+	* arch-utils.c (legacy_store_return_value): New function.
+	(legacy_extract_return_value): Update parameters.
+
+	* config/pa/tm-hppa.h (DEPRECATED_STORE_RETURN_VALUE): Rename
+	STORE_RETURN_VALUE.
+	* config/pa/tm-hppa64.h (DEPRECATED_STORE_RETURN_VALUE): Ditto.
+	* config/sparc/tm-sparc.h (DEPRECATED_STORE_RETURN_VALUE): Ditto.
+	* config/z8k/tm-z8k.h (DEPRECATED_STORE_RETURN_VALUE): Ditto.
+	* config/sparc/tm-sparclet.h (DEPRECATED_STORE_RETURN_VALUE): Ditto.
+	* config/mn10200/tm-mn10200.h (DEPRECATED_STORE_RETURN_VALUE): Ditto.
+	* config/m68k/tm-linux.h (DEPRECATED_STORE_RETURN_VALUE): Ditto.
+	* config/m68k/tm-delta68.h (DEPRECATED_STORE_RETURN_VALUE): Ditto.
+	* config/m32r/tm-m32r.h (DEPRECATED_STORE_RETURN_VALUE): Ditto.
+	* config/h8500/tm-h8500.h (DEPRECATED_STORE_RETURN_VALUE): Ditto.
+	* config/h8300/tm-h8300.h (DEPRECATED_STORE_RETURN_VALUE): Ditto.
+
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* i386-tdep.c (i386_extract_return_value): Update.
+	* arch-utils.c (legacy_extract_return_value): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* d10v-tdep.c (d10v_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* m68k-tdep.c (m68k_gdbarch_init): Update.
+	* mcore-tdep.c (mcore_gdbarch_init): Update.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* sparc-tdep.c (sparc_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* x86-64-tdep.c (x86_64_gdbarch_init): Update.
+	* v850-tdep.c (v850_gdbarch_init): Update.
+	* avr-tdep.c (avr_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Update.
+	* vax-tdep.c (vax_gdbarch_init): Update.
+	* alpha-tdep.c (alpha_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* i386-tdep.c (i386_gdbarch_init): Update.
+
 2002-08-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/djgpp/fnchange.lst: Add entries for bfd/elf32-ppcqnx.c,
@@ -93,7 +143,6 @@
 	i960-*-vxworks* obsolete.
 	* MAINTAINERS: Note that the i960 is obsolete.
 
->>>>>>> 1.3141
 2002-08-21  Corinna Vinschen  <vinschen@redhat.com
 
 	* aix-thread.c (aix_thread_detach): Disable thread debugging on
@@ -124,7 +173,6 @@
 	* config/mips/tm-mips.h (DEFAULT_MIPS_TYPE): Delete unused macro.
 	* config/mips/tm-embed.h (DEFAULT_MIPS_TYPE): Delete unused macro.
 
->>>>>>> 1.3134
 2002-08-21  Jim Blandy  <jimb@redhat.com>
 
 	* valops.c (value_cast): Simplify and correct logic for doing a
@@ -287,7 +335,6 @@
 	mips_push_dummy_frame, mips_pop_frame, mips_skip_prologue,
 	mips_breakpoint_from_pc, mips_call_dummy_address): Make static.
 
->>>>>>> 1.3128
 2002-08-19  Michael Snyder  <msnyder@redhat.com>
 
 	* mips-tdep.c (mips_frame_num_args): New function.

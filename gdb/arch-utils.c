@@ -95,11 +95,25 @@ legacy_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
    register cache.  */
 void
 legacy_extract_return_value (struct type *type, struct regcache *regcache,
-			     char *valbuf)
+			     void *valbuf)
 {
   char *registers = deprecated_grub_regcache_for_registers (regcache);
-  DEPRECATED_EXTRACT_RETURN_VALUE (type, registers, valbuf);
+  bfd_byte *buf = valbuf;
+  DEPRECATED_EXTRACT_RETURN_VALUE (type, registers, buf);
 }
+
+/* Implementation of store return value that grubs the register cache.
+   Takes a local copy of the buffer to avoid const problems.  */
+void
+legacy_store_return_value (struct type *type, struct regcache *regcache,
+			   const void *buf)
+{
+  bfd_byte *b = alloca (TYPE_LENGTH (type));
+  gdb_assert (regcache == current_regcache);
+  memcpy (b, buf, TYPE_LENGTH (type));
+  DEPRECATED_STORE_RETURN_VALUE (type, b);
+}
+
 
 int
 legacy_register_sim_regno (int regnum)

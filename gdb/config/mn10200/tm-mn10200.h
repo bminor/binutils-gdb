@@ -148,7 +148,7 @@ extern CORE_ADDR mn10200_frame_saved_pc (struct frame_info *);
   extract_address (REGBUF + REGISTER_BYTE (4), \
 		   REGISTER_RAW_SIZE (4))
 
-#define STORE_RETURN_VALUE(TYPE, VALBUF) \
+#define DEPRECATED_STORE_RETURN_VALUE(TYPE, VALBUF) \
   { \
     if (TYPE_LENGTH (TYPE) > 8) \
       internal_error (__FILE__, __LINE__, "failed internal consistency check"); \

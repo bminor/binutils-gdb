@@ -117,8 +117,8 @@ enum {
 	     ? 0 : REGISTER_RAW_SIZE (O0_REGNUM) - TYPE_LENGTH(TYPE)), \
 	    TYPE_LENGTH(TYPE));                                        \
   }
-#undef STORE_RETURN_VALUE
-#define STORE_RETURN_VALUE(TYPE,VALBUF) \
+#undef DEPRECATED_STORE_RETURN_VALUE
+#define DEPRECATED_STORE_RETURN_VALUE(TYPE,VALBUF) \
   {                                                                    \
     /* Other values are returned in register %o0.  */                  \
     write_register_bytes (REGISTER_BYTE (O0_REGNUM), (VALBUF),         \

@@ -574,7 +574,7 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Return value info */
   set_gdbarch_store_struct_return (gdbarch, ns32k_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch, ns32k_extract_return_value);
-  set_gdbarch_store_return_value (gdbarch, ns32k_store_return_value);
+  set_gdbarch_deprecated_store_return_value (gdbarch, ns32k_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
                                             ns32k_extract_struct_value_address);
 

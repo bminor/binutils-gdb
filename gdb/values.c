@@ -1336,7 +1336,7 @@ set_return_value (struct value *val)
       || code == TYPE_CODE_UNION)	/* FIXME, implement struct return.  */
     error ("GDB does not support specifying a struct or union return value.");
 
-  STORE_RETURN_VALUE (type, VALUE_CONTENTS (val));
+  STORE_RETURN_VALUE (type, current_regcache, VALUE_CONTENTS (val));
 }
 
 void

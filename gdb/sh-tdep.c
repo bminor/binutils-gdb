@@ -4199,7 +4199,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
   gdbarch_register_name_ftype *sh_register_name;
-  gdbarch_store_return_value_ftype *sh_store_return_value;
+  gdbarch_deprecated_store_return_value_ftype *sh_store_return_value;
   gdbarch_register_virtual_type_ftype *sh_register_virtual_type;
   enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
@@ -4565,7 +4565,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, sh_push_return_address);
 
-  set_gdbarch_store_return_value (gdbarch, sh_store_return_value);
+  set_gdbarch_deprecated_store_return_value (gdbarch, sh_store_return_value);
   set_gdbarch_skip_prologue (gdbarch, sh_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);

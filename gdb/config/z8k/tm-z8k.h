@@ -148,7 +148,7 @@ extern int z8k_saved_pc_after_call (struct frame_info *frame);
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format. */
 
-#define STORE_RETURN_VALUE(TYPE,VALBUF) internal_error (__FILE__, __LINE__, "failed internal consistency check");
+#define DEPRECATED_STORE_RETURN_VALUE(TYPE,VALBUF) internal_error (__FILE__, __LINE__, "failed internal consistency check");
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,

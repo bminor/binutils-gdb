@@ -4161,7 +4161,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
       set_gdbarch_double_bit (gdbarch, 32);
       set_gdbarch_push_arguments (gdbarch, cris_abi_original_push_arguments);
-      set_gdbarch_store_return_value (gdbarch, 
+      set_gdbarch_deprecated_store_return_value (gdbarch, 
                                       cris_abi_original_store_return_value);
       set_gdbarch_deprecated_extract_return_value 
         (gdbarch, cris_abi_original_extract_return_value);
@@ -4172,7 +4172,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
       set_gdbarch_double_bit (gdbarch, 64);
       set_gdbarch_push_arguments (gdbarch, cris_abi_v2_push_arguments);
-      set_gdbarch_store_return_value (gdbarch, cris_abi_v2_store_return_value);
+      set_gdbarch_deprecated_store_return_value (gdbarch, cris_abi_v2_store_return_value);
       set_gdbarch_deprecated_extract_return_value
 	(gdbarch, cris_abi_v2_extract_return_value);
       set_gdbarch_reg_struct_has_addr (gdbarch, 

@@ -4780,7 +4780,7 @@ mips_o32_xfer_return_value (struct type *type,
 static void
 mips_o32_extract_return_value (struct type *type,
 			       struct regcache *regcache,
-			       char *valbuf)
+			       void *valbuf)
 {
   mips_o32_xfer_return_value (type, regcache, valbuf, NULL); 
 }
@@ -4888,7 +4888,7 @@ mips_n32n64_xfer_return_value (struct type *type,
 static void
 mips_n32n64_extract_return_value (struct type *type,
 				  struct regcache *regcache,
-				  char *valbuf)
+				  void *valbuf)
 {
   mips_n32n64_xfer_return_value (type, regcache, valbuf, NULL);
 }
@@ -5726,7 +5726,7 @@ mips_gdbarch_init (struct gdbarch_info info,
     {
     case MIPS_ABI_O32:
       set_gdbarch_push_arguments (gdbarch, mips_o32_push_arguments);
-      set_gdbarch_store_return_value (gdbarch, mips_o32_store_return_value);
+      set_gdbarch_deprecated_store_return_value (gdbarch, mips_o32_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, mips_o32_extract_return_value);
       tdep->mips_default_saved_regsize = 4;
       tdep->mips_default_stack_argsize = 4;
@@ -5745,7 +5745,7 @@ mips_gdbarch_init (struct gdbarch_info info,
       break;
     case MIPS_ABI_O64:
       set_gdbarch_push_arguments (gdbarch, mips_o64_push_arguments);
-      set_gdbarch_store_return_value (gdbarch, mips_o64_store_return_value);
+      set_gdbarch_deprecated_store_return_value (gdbarch, mips_o64_store_return_value);
       set_gdbarch_deprecated_extract_return_value (gdbarch, mips_o64_extract_return_value);
       tdep->mips_default_saved_regsize = 8;
       tdep->mips_default_stack_argsize = 8;
@@ -5764,7 +5764,7 @@ mips_gdbarch_init (struct gdbarch_info info,
       break;
     case MIPS_ABI_EABI32:
       set_gdbarch_push_arguments (gdbarch, mips_eabi_push_arguments);
-      set_gdbarch_store_return_value (gdbarch, mips_eabi_store_return_value);
+      set_gdbarch_deprecated_store_return_value (gdbarch, mips_eabi_store_return_value);
       set_gdbarch_deprecated_extract_return_value (gdbarch, mips_eabi_extract_return_value);
       tdep->mips_default_saved_regsize = 4;
       tdep->mips_default_stack_argsize = 4;
@@ -5783,7 +5783,7 @@ mips_gdbarch_init (struct gdbarch_info info,
       break;
     case MIPS_ABI_EABI64:
       set_gdbarch_push_arguments (gdbarch, mips_eabi_push_arguments);
-      set_gdbarch_store_return_value (gdbarch, mips_eabi_store_return_value);
+      set_gdbarch_deprecated_store_return_value (gdbarch, mips_eabi_store_return_value);
       set_gdbarch_deprecated_extract_return_value (gdbarch, mips_eabi_extract_return_value);
       tdep->mips_default_saved_regsize = 8;
       tdep->mips_default_stack_argsize = 8;
@@ -5802,7 +5802,7 @@ mips_gdbarch_init (struct gdbarch_info info,
       break;
     case MIPS_ABI_N32:
       set_gdbarch_push_arguments (gdbarch, mips_n32n64_push_arguments);
-      set_gdbarch_store_return_value (gdbarch, mips_n32n64_store_return_value);
+      set_gdbarch_deprecated_store_return_value (gdbarch, mips_n32n64_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, mips_n32n64_extract_return_value);
       tdep->mips_default_saved_regsize = 8;
       tdep->mips_default_stack_argsize = 8;
@@ -5833,7 +5833,7 @@ mips_gdbarch_init (struct gdbarch_info info,
       break;
     case MIPS_ABI_N64:
       set_gdbarch_push_arguments (gdbarch, mips_n32n64_push_arguments);
-      set_gdbarch_store_return_value (gdbarch, mips_n32n64_store_return_value);
+      set_gdbarch_deprecated_store_return_value (gdbarch, mips_n32n64_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, mips_n32n64_extract_return_value);
       tdep->mips_default_saved_regsize = 8;
       tdep->mips_default_stack_argsize = 8;

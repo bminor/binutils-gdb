@@ -333,7 +333,7 @@ extern use_struct_convention_fn hppa_use_struct_convention;
 
 
 extern void hppa_store_return_value (struct type *type, char *valbuf);
-#define STORE_RETURN_VALUE(TYPE,VALBUF) \
+#define DEPRECATED_STORE_RETURN_VALUE(TYPE,VALBUF) \
   hppa_store_return_value (TYPE, VALBUF);
 
 /* Extract from an array REGBUF containing the (raw) register state

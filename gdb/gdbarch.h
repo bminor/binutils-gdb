@@ -1417,35 +1417,6 @@ extern void set_gdbarch_return_value_on_stack (struct gdbarch *gdbarch, gdbarch_
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (EXTRACT_RETURN_VALUE)
-#define EXTRACT_RETURN_VALUE(type, regcache, valbuf) (legacy_extract_return_value (type, regcache, valbuf))
-#endif
-
-typedef void (gdbarch_extract_return_value_ftype) (struct type *type, struct regcache *regcache, char *valbuf);
-extern void gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, char *valbuf);
-extern void set_gdbarch_extract_return_value (struct gdbarch *gdbarch, gdbarch_extract_return_value_ftype *extract_return_value);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (EXTRACT_RETURN_VALUE)
-#error "Non multi-arch definition of EXTRACT_RETURN_VALUE"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (EXTRACT_RETURN_VALUE)
-#define EXTRACT_RETURN_VALUE(type, regcache, valbuf) (gdbarch_extract_return_value (current_gdbarch, type, regcache, valbuf))
-#endif
-#endif
-
-typedef void (gdbarch_deprecated_extract_return_value_ftype) (struct type *type, char *regbuf, char *valbuf);
-extern void gdbarch_deprecated_extract_return_value (struct gdbarch *gdbarch, struct type *type, char *regbuf, char *valbuf);
-extern void set_gdbarch_deprecated_extract_return_value (struct gdbarch *gdbarch, gdbarch_deprecated_extract_return_value_ftype *deprecated_extract_return_value);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_EXTRACT_RETURN_VALUE)
-#error "Non multi-arch definition of DEPRECATED_EXTRACT_RETURN_VALUE"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_EXTRACT_RETURN_VALUE)
-#define DEPRECATED_EXTRACT_RETURN_VALUE(type, regbuf, valbuf) (gdbarch_deprecated_extract_return_value (current_gdbarch, type, regbuf, valbuf))
-#endif
-#endif
-
-/* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (PUSH_ARGUMENTS)
 #define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) (default_push_arguments (nargs, args, sp, struct_return, struct_addr))
 #endif
@@ -1535,15 +1506,61 @@ extern void set_gdbarch_store_struct_return (struct gdbarch *gdbarch, gdbarch_st
 #endif
 #endif
 
-typedef void (gdbarch_store_return_value_ftype) (struct type *type, char *valbuf);
-extern void gdbarch_store_return_value (struct gdbarch *gdbarch, struct type *type, char *valbuf);
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (EXTRACT_RETURN_VALUE)
+#define EXTRACT_RETURN_VALUE(type, regcache, valbuf) (legacy_extract_return_value (type, regcache, valbuf))
+#endif
+
+typedef void (gdbarch_extract_return_value_ftype) (struct type *type, struct regcache *regcache, void *valbuf);
+extern void gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, void *valbuf);
+extern void set_gdbarch_extract_return_value (struct gdbarch *gdbarch, gdbarch_extract_return_value_ftype *extract_return_value);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (EXTRACT_RETURN_VALUE)
+#error "Non multi-arch definition of EXTRACT_RETURN_VALUE"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (EXTRACT_RETURN_VALUE)
+#define EXTRACT_RETURN_VALUE(type, regcache, valbuf) (gdbarch_extract_return_value (current_gdbarch, type, regcache, valbuf))
+#endif
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (STORE_RETURN_VALUE)
+#define STORE_RETURN_VALUE(type, regcache, valbuf) (legacy_store_return_value (type, regcache, valbuf))
+#endif
+
+typedef void (gdbarch_store_return_value_ftype) (struct type *type, struct regcache *regcache, const void *valbuf);
+extern void gdbarch_store_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, const void *valbuf);
 extern void set_gdbarch_store_return_value (struct gdbarch *gdbarch, gdbarch_store_return_value_ftype *store_return_value);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (STORE_RETURN_VALUE)
 #error "Non multi-arch definition of STORE_RETURN_VALUE"
 #endif
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (STORE_RETURN_VALUE)
-#define STORE_RETURN_VALUE(type, valbuf) (gdbarch_store_return_value (current_gdbarch, type, valbuf))
+#define STORE_RETURN_VALUE(type, regcache, valbuf) (gdbarch_store_return_value (current_gdbarch, type, regcache, valbuf))
+#endif
+#endif
+
+typedef void (gdbarch_deprecated_extract_return_value_ftype) (struct type *type, char *regbuf, char *valbuf);
+extern void gdbarch_deprecated_extract_return_value (struct gdbarch *gdbarch, struct type *type, char *regbuf, char *valbuf);
+extern void set_gdbarch_deprecated_extract_return_value (struct gdbarch *gdbarch, gdbarch_deprecated_extract_return_value_ftype *deprecated_extract_return_value);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_EXTRACT_RETURN_VALUE)
+#error "Non multi-arch definition of DEPRECATED_EXTRACT_RETURN_VALUE"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_EXTRACT_RETURN_VALUE)
+#define DEPRECATED_EXTRACT_RETURN_VALUE(type, regbuf, valbuf) (gdbarch_deprecated_extract_return_value (current_gdbarch, type, regbuf, valbuf))
+#endif
+#endif
+
+typedef void (gdbarch_deprecated_store_return_value_ftype) (struct type *type, char *valbuf);
+extern void gdbarch_deprecated_store_return_value (struct gdbarch *gdbarch, struct type *type, char *valbuf);
+extern void set_gdbarch_deprecated_store_return_value (struct gdbarch *gdbarch, gdbarch_deprecated_store_return_value_ftype *deprecated_store_return_value);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_STORE_RETURN_VALUE)
+#error "Non multi-arch definition of DEPRECATED_STORE_RETURN_VALUE"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_STORE_RETURN_VALUE)
+#define DEPRECATED_STORE_RETURN_VALUE(type, valbuf) (gdbarch_deprecated_store_return_value (current_gdbarch, type, valbuf))
 #endif
 #endif
 

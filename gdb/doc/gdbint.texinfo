@@ -3701,10 +3701,11 @@ delay slot.  If a breakpoint has been placed in the instruction's delay
 slot, @value{GDBN} will single-step over that instruction before resuming
 normally.  Currently only defined for the Mips.
 
-@item STORE_RETURN_VALUE (@var{type}, @var{valbuf})
+@item STORE_RETURN_VALUE (@var{type}, @var{regcache}, @var{valbuf})
 @findex STORE_RETURN_VALUE
-A C expression that stores a function return value of type @var{type},
-where @var{valbuf} is the address of the value to be stored.
+A C expression that writes the function return value, found in
+@var{valbuf}, into the @var{regcache}.  @var{type} is the type of the
+value that is to be returned.
 
 @item SUN_FIXED_LBRAC_BUG
 @findex SUN_FIXED_LBRAC_BUG
