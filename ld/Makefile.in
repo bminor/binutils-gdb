@@ -32,9 +32,9 @@ DEBUG	= -g
 TEXIDIR = $(srcdir)/../texinfo/fsf
 
 # Whether to get roff to put indexing entries on stderr
-#TEXI2OPT =
-# You neeed this to generate ld-index.ms
-TEXI2OPT = -i
+TEXI2OPT =
+# You neeed this to generate ld-index.ms (or .mm or .me)
+# TEXI2OPT = -i
 
 # Which roff program to use to generate index for texi2roff'd doc
 ROFF = groff
@@ -231,10 +231,10 @@ ld.dvi: ld.texinfo
 ld.info: ld.texinfo
 	makeinfo ld.texinfo
 
+#separate targets for "ms", "me", and "mm" forms of roff doc
+# (we don't use a variable because we don't trust all makes to handle
+# a var in the target name right).
 # roff output (-ms)
-#   edit instances of "ms" to "me" or "mm" to suit your preferences.
-#   (we don't use a variable because we don't trust all makes to handle
-#   a var in the target name right).
 ld.ms: ld.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
@@ -246,6 +246,33 @@ ld-index.ms: ld.ms
 	$(ROFF) -ms ld.ms 2>&1 1>/dev/null | \
 		sed -e '/: warning:/d' | \
 		texi2index >ld-index.ms
+
+# roff output (-mm)
+ld.mm: ld.texinfo
+	sed -e '/\\input texinfo/d' \
+		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
+		ld.texinfo | \
+	texi2roff $(TEXI2OPT) -mm >ld.mm 
+
+# index for roff output
+ld-index.mm: ld.mm
+	$(ROFF) -mm ld.mm 2>&1 1>/dev/null | \
+		sed -e '/: warning:/d' | \
+		texi2index >ld-index.mm
+
+# roff output (-me)
+ld.me: ld.texinfo
+	sed -e '/\\input texinfo/d' \
+		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
+		ld.texinfo | \
+	texi2roff $(TEXI2OPT) -me >ld.me 
+
+# index for roff output
+ld-index.me: ld.me
+	$(ROFF) -me ld.me 2>&1 1>/dev/null | \
+		sed -e '/: warning:/d' | \
+		texi2index >ld-index.me
+
 
 ######################################################################
 

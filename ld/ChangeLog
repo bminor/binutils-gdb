@@ -1,3 +1,7 @@
+Mon Oct 14 17:30:02 1991  Roland H. Pesch  (pesch at cygnus.com)
+
+	* Makefile.in: new targets ld.mm, ld.me
+
 Mon Oct 14 17:27:24 1991  Per Bothner  (bothner at cygnus.com)
 
 	* Makefile.in, ldtemplate:  Need to use separate scripts
