@@ -26,41 +26,6 @@
 #define GDB_MULTI_ARCH 1
 #endif
 
-/* The following define instruction sequences that will cause ARM
-   cpu's to take an undefined instruction trap.  These are used to
-   signal a breakpoint to GDB.
-   
-   The newer ARMv4T cpu's are capable of operating in ARM or Thumb
-   modes.  A different instruction is required for each mode.  The ARM
-   cpu's can also be big or little endian.  Thus four different
-   instructions are needed to support all cases.
-   
-   Note: ARMv4 defines several new instructions that will take the
-   undefined instruction trap.  ARM7TDMI is nominally ARMv4T, but does
-   not in fact add the new instructions.  The new undefined
-   instructions in ARMv4 are all instructions that had no defined
-   behaviour in earlier chips.  There is no guarantee that they will
-   raise an exception, but may be treated as NOP's.  In practice, it
-   may only safe to rely on instructions matching:
-   
-   3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 
-   1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
-   C C C C 0 1 1 x x x x x x x x x x x x x x x x x x x x 1 x x x x
-   
-   Even this may only true if the condition predicate is true. The
-   following use a condition predicate of ALWAYS so it is always TRUE.
-   
-   There are other ways of forcing a breakpoint.  ARM Linux, RISC iX,
-   and NetBSD will all use a software interrupt rather than an
-   undefined instruction to force a trap.  This can be handled by
-   redefining some or all of the following in a target dependent
-   fashion.  */
-
-#define ARM_LE_BREAKPOINT {0xFE,0xDE,0xFF,0xE7}
-#define ARM_BE_BREAKPOINT {0xE7,0xFF,0xDE,0xFE}
-#define THUMB_LE_BREAKPOINT {0xfe,0xdf}
-#define THUMB_BE_BREAKPOINT {0xdf,0xfe}
-
 /* Specify that for the native compiler variables for a particular
    lexical context are listed after the beginning LBRAC instead of
    before in the executables list of symbols.  */

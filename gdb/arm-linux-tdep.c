@@ -35,6 +35,15 @@
 #include "symfile.h"
 #include "objfiles.h"
 
+/* Under ARM Linux the traditional way of performing a breakpoint is to
+   execute a particular software interrupt, rather than use a particular
+   undefined instruction to provoke a trap.  Upon exection of the software
+   interrupt the kernel stops the inferior with a SIGTRAP, and wakes the
+   debugger.  Since ARM Linux is little endian, and doesn't support Thumb
+   at the moment we only override the ARM little-endian breakpoint.  */
+
+static const char arm_linux_arm_le_breakpoint[] = {0x01,0x00,0x9f,0xef};
+
 /* CALL_DUMMY_WORDS:
    This sequence of words is the instructions
 
@@ -537,6 +546,8 @@ arm_linux_init_abi (struct gdbarch_info info,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   tdep->lowest_pc = 0x8000;
+  tdep->arm_breakpoint = arm_linux_arm_le_breakpoint;
+  tdep->arm_breakpoint_size = sizeof (arm_linux_arm_le_breakpoint);
 }
 
 void

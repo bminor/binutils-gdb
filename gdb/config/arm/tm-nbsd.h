@@ -42,11 +42,6 @@ get_longjmp_target (CORE_ADDR *);
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
 
-/* For compatibility with previous implemenations of GDB on arm/NetBSD,
-   override the default little-endian breakpoint.  */
-#undef ARM_LE_BREAKPOINT
-#define ARM_LE_BREAKPOINT {0x11, 0x00, 0x00, 0xe6}
-
 /* By convention, NetBSD uses the "other" register names. */
 #define DEFAULT_REGISTER_NAMES additional_register_names
 

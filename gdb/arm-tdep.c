@@ -2044,6 +2044,56 @@ gdb_print_insn_arm (bfd_vma memaddr, disassemble_info *info)
     return print_insn_little_arm (memaddr, info);
 }
 
+/* The following define instruction sequences that will cause ARM
+   cpu's to take an undefined instruction trap.  These are used to
+   signal a breakpoint to GDB.
+   
+   The newer ARMv4T cpu's are capable of operating in ARM or Thumb
+   modes.  A different instruction is required for each mode.  The ARM
+   cpu's can also be big or little endian.  Thus four different
+   instructions are needed to support all cases.
+   
+   Note: ARMv4 defines several new instructions that will take the
+   undefined instruction trap.  ARM7TDMI is nominally ARMv4T, but does
+   not in fact add the new instructions.  The new undefined
+   instructions in ARMv4 are all instructions that had no defined
+   behaviour in earlier chips.  There is no guarantee that they will
+   raise an exception, but may be treated as NOP's.  In practice, it
+   may only safe to rely on instructions matching:
+   
+   3 3 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 
+   1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
+   C C C C 0 1 1 x x x x x x x x x x x x x x x x x x x x 1 x x x x
+   
+   Even this may only true if the condition predicate is true. The
+   following use a condition predicate of ALWAYS so it is always TRUE.
+   
+   There are other ways of forcing a breakpoint.  GNU/Linux, RISC iX,
+   and NetBSD all use a software interrupt rather than an undefined
+   instruction to force a trap.  This can be handled by by the
+   abi-specific code during establishment of the gdbarch vector.  */
+
+
+/* XXX for now we allow a non-multi-arch gdb to override these
+   definitions.  */
+#ifndef ARM_LE_BREAKPOINT
+#define ARM_LE_BREAKPOINT {0xFE,0xDE,0xFF,0xE7}
+#endif
+#ifndef ARM_BE_BREAKPOINT
+#define ARM_BE_BREAKPOINT {0xE7,0xFF,0xDE,0xFE}
+#endif
+#ifndef THUMB_LE_BREAKPOINT
+#define THUMB_LE_BREAKPOINT {0xfe,0xdf}
+#endif
+#ifndef THUMB_BE_BREAKPOINT
+#define THUMB_BE_BREAKPOINT {0xdf,0xfe}
+#endif
+
+static const char arm_default_arm_le_breakpoint[] = ARM_LE_BREAKPOINT;
+static const char arm_default_arm_be_breakpoint[] = ARM_BE_BREAKPOINT;
+static const char arm_default_thumb_le_breakpoint[] = THUMB_LE_BREAKPOINT;
+static const char arm_default_thumb_be_breakpoint[] = THUMB_BE_BREAKPOINT;
+
 /* Determine the type and size of breakpoint to insert at PCPTR.  Uses
    the program counter value to determine whether a 16-bit or 32-bit
    breakpoint should be used.  It returns a pointer to a string of
@@ -2060,37 +2110,18 @@ gdb_print_insn_arm (bfd_vma memaddr, disassemble_info *info)
 unsigned char *
 arm_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
   if (arm_pc_is_thumb (*pcptr) || arm_pc_is_thumb_dummy (*pcptr))
     {
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	{
-	  static char thumb_breakpoint[] = THUMB_BE_BREAKPOINT;
-	  *pcptr = UNMAKE_THUMB_ADDR (*pcptr);
-	  *lenptr = sizeof (thumb_breakpoint);
-	  return thumb_breakpoint;
-	}
-      else
-	{
-	  static char thumb_breakpoint[] = THUMB_LE_BREAKPOINT;
-	  *pcptr = UNMAKE_THUMB_ADDR (*pcptr);
-	  *lenptr = sizeof (thumb_breakpoint);
-	  return thumb_breakpoint;
-	}
+      *pcptr = UNMAKE_THUMB_ADDR (*pcptr);
+      *lenptr = tdep->thumb_breakpoint_size;
+      return tdep->thumb_breakpoint;
     }
   else
     {
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	{
-	  static char arm_breakpoint[] = ARM_BE_BREAKPOINT;
-	  *lenptr = sizeof (arm_breakpoint);
-	  return arm_breakpoint;
-	}
-      else
-	{
-	  static char arm_breakpoint[] = ARM_LE_BREAKPOINT;
-	  *lenptr = sizeof (arm_breakpoint);
-	  return arm_breakpoint;
-	}
+      *lenptr = tdep->arm_breakpoint_size;
+      return tdep->arm_breakpoint;
     }
 }
 
@@ -2710,21 +2741,33 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->abi_name = "<invalid>";
     }
 
-  /* Floating point sizes and format.  */
+  /* Breakpoints and floating point sizes and format.  */
   switch (info.byte_order)
     {
     case BFD_ENDIAN_BIG:
+      tdep->arm_breakpoint = arm_default_arm_be_breakpoint;
+      tdep->arm_breakpoint_size = sizeof (arm_default_arm_be_breakpoint);
+      tdep->thumb_breakpoint = arm_default_thumb_be_breakpoint;
+      tdep->thumb_breakpoint_size = sizeof (arm_default_thumb_be_breakpoint);
+
       set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_big);
       set_gdbarch_double_format (gdbarch, &floatformat_ieee_double_big);
       set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
+      
       break;
 
     case BFD_ENDIAN_LITTLE:
+      tdep->arm_breakpoint = arm_default_arm_le_breakpoint;
+      tdep->arm_breakpoint_size = sizeof (arm_default_arm_le_breakpoint);
+      tdep->thumb_breakpoint = arm_default_thumb_le_breakpoint;
+      tdep->thumb_breakpoint_size = sizeof (arm_default_thumb_le_breakpoint);
+
       set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_little);
       set_gdbarch_double_format (gdbarch,
 				 &floatformat_ieee_double_littlebyte_bigword);
       set_gdbarch_long_double_format (gdbarch,
 				 &floatformat_ieee_double_littlebyte_bigword);
+
       break;
 
     default:

@@ -123,6 +123,10 @@ struct gdbarch_tdep
   const char *abi_name;		/* Name of the above.  */
   CORE_ADDR lowest_pc;		/* Lowest address at which instructions 
 				   will appear.  */
+  const char *arm_breakpoint;
+  int arm_breakpoint_size;
+  const char *thumb_breakpoint;
+  int thumb_breakpoint_size;
 };
 
 #ifndef LOWEST_PC

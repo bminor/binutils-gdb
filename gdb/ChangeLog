@@ -1,5 +1,26 @@
 2002-02-15  Richard Earnshaw  <rearnsha@arm.com>
 
+	* arm-tdep.h (struct gdbarch_tdep): Add fields for breakpoint
+	descriptions.
+	* arm-tdep.c (arm_default_arm_le_breakpoint)
+	(arm_default_arm_be_breakpoint, arm_default_thumb_le_breakpoint)
+	(arm_default_thumb_be_breakpoint): New.  Initialize them from
+	traditional breakpoint defines.
+	(arm_breakpoint_from_pc): Use new gdbarch_tdep entries.
+	(arm_gdbarch_init): Initialize new breakpoint variables.
+	* arm-linux-tdep.c (arm_linux_arm_le_breakpoint): New.
+	(arm_linux_init_abi): Initialize linux-specific breakpoint.
+	* armnbsd-tdep.c (arm_nbsd_arm_le_breakpoint): New.
+	(arm_netbsd_aout_init_abi, arm_netbsd_elf_init_abi): Split common
+	code out to ...
+	(arm_netbsd_init_abi_common): ... here; new function.
+	* config/arm/tm-arm.h (ARM_LE_BREAKPOINT, ARM_BE_BREAKPOINT)
+	(THUMB_LE_BREAKPOINT, THUMB_BE_BREAKPOINT): Delete.
+	* config/arm/tm-linux.h (ARM_LE_BREAKPOINT): Delete.
+	* config/arm/tm-nbsd.h (ARM_LE_BREAKPOINT): Delete.
+
+2002-02-15  Richard Earnshaw  <rearnsha@arm.com>
+
 	* arm-tdep.h (enum arm_abi): New enum.
 	(struct gdbarch_tdep): New structure.
 	(LOWEST_PC): Provide a default.

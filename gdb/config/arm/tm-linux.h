@@ -34,16 +34,6 @@
 extern struct link_map_offsets *arm_linux_svr4_fetch_link_map_offsets (void);
 #define SVR4_FETCH_LINK_MAP_OFFSETS() arm_linux_svr4_fetch_link_map_offsets ()
 
-/* Under ARM Linux the traditional way of performing a breakpoint is to
-   execute a particular software interrupt, rather than use a particular
-   undefined instruction to provoke a trap.  Upon exection of the software
-   interrupt the kernel stops the inferior with a SIGTRAP, and wakes the
-   debugger.  Since ARM Linux is little endian, and doesn't support Thumb
-   at the moment we redefined ARM_LE_BREAKPOINT to use the correct software
-   interrupt.  */
-#undef ARM_LE_BREAKPOINT
-#define ARM_LE_BREAKPOINT	{0x01,0x00,0x9f,0xef}
-
 #undef CALL_DUMMY_WORDS
 #define CALL_DUMMY_WORDS arm_linux_call_dummy_words
 extern LONGEST arm_linux_call_dummy_words[];
