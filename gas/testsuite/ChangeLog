@@ -1,3 +1,9 @@
+2003-04-29  Nick Clifton  <nickc@redhat.com>
+
+	* gas/elf/elf.exp: Invoke symver test.
+        * gas/elf/symver.s: New test case.
+        * gas/elf/symver.d: Expected output.
+
 2003-04-24  Nick Clifton  <nickc@redhat.com>
 
 	* gas/ppc/astest2.s: Add tests for conditional branches with

@@ -1,3 +1,8 @@
+2003-04-29  Nick Clifton  <nickc@redhat.com>
+
+	* config/obj-elf.c (obj_elf_symver): Skip whitespace before the
+	start of a version name.
+
 2003-04-28  Chris Demetriou  <cgd@broadcom.com>
 
 	* configure.in (mips-*-*n*bsd*): Replace with...
