@@ -1,3 +1,8 @@
+1998-09-20  Michael Meissner  <meissner@cygnus.com>
+
+	* config/tc-ppc.c (md_apply_fix3): Do not break string into two
+	pieces, forcing the use of an ANSI compiler.
+
 Sun Sep 20 00:58:12 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* config/tc-m68k.h (TC_FORCE_RELOCATION): New macro.  Force vtable
