@@ -1,3 +1,18 @@
+Tue Feb 28 18:29:27 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-arm.c, config/tc-arm.h (md_operand): Replaced empty
+	function in .c file with empty macro in .h file.
+	* config/tc-h8500.*, config/tc-hppa.*, config/tc-i386.*,
+	config/tc-i860.*, config/tc-i960.*, config/tc-ns32k.*,
+	config/tc-ppc.*, config/tc-sh.*, config/tc-sparc.*,
+	config/tc-tahoe.*, config/tc-vax.*, config/tc-w65.*,
+	config/tc-z8k.*: Ditto.
+start-sanitize-rce
+	* config/tc-rce.*: Ditto.
+end-sanitize-rce
+
+	* read.c (s_app_line): Ignore non-positive line numbers.
+
 Tue Feb 28 15:34:14 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i386.c (tc_i386_fix_adjustable): Don't adjust PLT or
