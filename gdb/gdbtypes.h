@@ -347,6 +347,11 @@ struct cplus_struct_type
 
   B_TYPE *protected_field_bits;
 
+  /* for classes with fields to be ignored, either this is optimized out
+     or this field has length 0 */
+
+  B_TYPE *ignore_field_bits;
+
   /* For classes, structures, and unions, a description of each field,
      which consists of an overloaded name, followed by the types of
      arguments that the method expects, and then the name after it
@@ -484,12 +489,16 @@ allocate_cplus_struct_type PARAMS ((struct type *));
   TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits
 #define TYPE_FIELD_PROTECTED_BITS(thistype) \
   TYPE_CPLUS_SPECIFIC(thistype)->protected_field_bits
+#define TYPE_FIELD_IGNORE_BITS(thistype) \
+  TYPE_CPLUS_SPECIFIC(thistype)->ignore_field_bits
 #define TYPE_FIELD_VIRTUAL_BITS(thistype) \
   TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits
 #define SET_TYPE_FIELD_PRIVATE(thistype, n) \
   B_SET (TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits, (n))
 #define SET_TYPE_FIELD_PROTECTED(thistype, n) \
   B_SET (TYPE_CPLUS_SPECIFIC(thistype)->protected_field_bits, (n))
+#define SET_TYPE_FIELD_IGNORE(thistype, n) \
+  B_SET (TYPE_CPLUS_SPECIFIC(thistype)->ignore_field_bits, (n))
 #define SET_TYPE_FIELD_VIRTUAL(thistype, n) \
   B_SET (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (n))
 #define TYPE_FIELD_PRIVATE(thistype, n) \
@@ -498,6 +507,9 @@ allocate_cplus_struct_type PARAMS ((struct type *));
 #define TYPE_FIELD_PROTECTED(thistype, n) \
   (TYPE_CPLUS_SPECIFIC(thistype)->protected_field_bits == NULL ? 0 \
     : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->protected_field_bits, (n)))
+#define TYPE_FIELD_IGNORE(thistype, n) \
+  (TYPE_CPLUS_SPECIFIC(thistype)->ignore_field_bits == NULL ? 0 \
+    : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->ignore_field_bits, (n)))
 #define TYPE_FIELD_VIRTUAL(thistype, n) \
        B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (n))
 

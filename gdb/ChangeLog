@@ -1,3 +1,12 @@
+Fri Nov  5 17:19:30 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* gdbtypes.h : add a field 'ignore_field_bits in cplus_specific,
+	and macros to handle the bits.
+	* stabsread.c (read_one_struct_field): add VISIBILITY_IGNORE, and
+	for field of length 0, set this bit on.
+	* cp-valprint.c (cp_print_value_fields): for VISIBILITY_IGNORE
+	field, print <no value>.
+
 Fri Nov  5 14:43:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Version 4.11.2.

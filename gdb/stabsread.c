@@ -1730,6 +1730,7 @@ rs6000_builtin_type (typenum)
 #define VISIBILITY_PRIVATE	'0'	/* Stabs character for private field */
 #define VISIBILITY_PROTECTED	'1'	/* Stabs character for protected fld */
 #define VISIBILITY_PUBLIC	'2'	/* Stabs character for public field */
+#define VISIBILITY_IGNORE	'9'	/* artificial character for ignore the						   field */ 
 
 /* Read member function stabs info for C++ classes.  The form of each member
    function data is:
@@ -2217,7 +2218,9 @@ read_one_struct_field (fip, pp, p, type, objfile)
 	return;
       }
   }
-#if 0
+  /* kung: I add a new visibility type VISIBILITY_IGNORE, so that
+     when printing value, this field will print <no value>. ptype
+     will still print the type info of the field. */
   /* FIXME-tiemann: Can't the compiler put out something which
      lets us distinguish these? (or maybe just not put out anything
      for the field).  What is the story here?  What does the compiler
@@ -2240,12 +2243,11 @@ read_one_struct_field (fip, pp, p, type, objfile)
      stuff.  */
   if (fip -> list -> field.bitpos == 0 && fip -> list -> field.bitsize == 0)
     {
-      complain (&dbx_class_complaint);
+      /* complain (&dbx_class_complaint); */
       /* Ignore this field.  */
-      fip -> list = fip -> list -> next;
+      fip -> list-> visibility = VISIBILITY_IGNORE;
     }
   else
-#endif /* 0 */
     {
       /* Detect an unpacked field and mark it as such.
 	 dbx gives a bit size for all fields.
@@ -2664,6 +2666,10 @@ attach_fields_to_type (fip, type, objfile)
       TYPE_FIELD_PROTECTED_BITS (type) =
 	(B_TYPE *) TYPE_ALLOC (type, B_BYTES (nfields));
       B_CLRALL (TYPE_FIELD_PROTECTED_BITS (type), nfields);
+
+      TYPE_FIELD_IGNORE_BITS (type) =
+	(B_TYPE *) TYPE_ALLOC (type, B_BYTES (nfields));
+      B_CLRALL (TYPE_FIELD_IGNORE_BITS (type), nfields);
     }
 
   /* Copy the saved-up fields into the field vector.  Start from the head
@@ -2682,6 +2688,9 @@ attach_fields_to_type (fip, type, objfile)
 	  case VISIBILITY_PROTECTED:
 	    SET_TYPE_FIELD_PROTECTED (type, nfields);
 	    break;
+
+	  case VISIBILITY_IGNORE:
+	    SET_TYPE_FIELD_IGNORE (type, nfields);
 
 	  case VISIBILITY_PUBLIC:
 	    break;

@@ -296,17 +296,31 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 
 	      /* Bitfields require special handling, especially due to byte
 		 order problems.  */
-	      v = value_from_longest (TYPE_FIELD_TYPE (type, i),
+	      if (TYPE_FIELD_IGNORE (type, i))
+		{
+		   fputs_filtered ("<no value>", stream);
+		}
+	      else
+		{
+	           v = value_from_longest (TYPE_FIELD_TYPE (type, i),
 				   unpack_field_as_long (type, valaddr, i));
 
-	      c_val_print (TYPE_FIELD_TYPE (type, i), VALUE_CONTENTS (v), 0,
+                   c_val_print (TYPE_FIELD_TYPE(type, i), VALUE_CONTENTS (v), 0,
 			   stream, format, 0, recurse + 1, pretty);
+		}
 	    }
 	  else
 	    {
-	      c_val_print (TYPE_FIELD_TYPE (type, i), 
+	      if (TYPE_FIELD_IGNORE (type, i))
+		{
+		   fputs_filtered ("<no value>", stream);
+		}
+	      else
+		{
+	           c_val_print (TYPE_FIELD_TYPE (type, i), 
 			   valaddr + TYPE_FIELD_BITPOS (type, i) / 8,
 			   0, stream, format, 0, recurse + 1, pretty);
+		}
 	    }
 	}
       if (pretty)
