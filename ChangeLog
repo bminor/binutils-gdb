@@ -1,3 +1,10 @@
+Thu Oct 24 09:02:07 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* Makefile.in (FLAGS_TO_PASS):  Add $(HOST_FLAGS) to allow the
+	host to add it's own flags.
+	* config/mh-windows (HOST_FLAGS):  Set srcroot, which is needed
+	for MSVC build procedure.
+
 Tue Oct 22 15:20:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Handle GCC_FOR_TARGET like CC_FOR_TARGET.

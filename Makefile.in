@@ -357,7 +357,7 @@ EXTRA_HOST_FLAGS = \
 	'RANLIB=$(RANLIB)' 
 
 
-FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_HOST_FLAGS)
+FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_HOST_FLAGS) $(HOST_FLAGS)
 
 # Flags that are concerned with the location of the X11 include files
 # and library files
@@ -1058,7 +1058,9 @@ $(CONFIGURE_TARGET_MODULES):
 	  fi; \
 	fi; exit 0	# break command into two pieces
 	@dir=`echo $@ | sed -e 's/configure-target-//'`; \
-	if [ -f $(TARGET_SUBDIR)/$${dir}/Makefile ] ; then \
+	if [ ! -d $(TARGET_SUBDIR) ]; then \
+	  true; \
+	elif [ -f $(TARGET_SUBDIR)/$${dir}/Makefile ] ; then \
 	  true; \
 	elif echo " $(TARGET_CONFIGDIRS) " | grep " $${dir} " >/dev/null 2>&1; then \
 	  if [ -d $(srcdir)/$${dir} ]; then \
