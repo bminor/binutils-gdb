@@ -1,5 +1,5 @@
 /* tc-ppc.c -- Assemble for the PowerPC or POWER (RS/6000)
-   Copyright (C) 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -53,6 +53,7 @@ static int set_target_endian = 0;
 
 static boolean reg_names_p = TARGET_REG_NAMES_P;
 
+static boolean register_name PARAMS ((expressionS *));
 static void ppc_set_cpu PARAMS ((void));
 static unsigned long ppc_insert_operand
   PARAMS ((unsigned long insn, const struct powerpc_operand *operand,
@@ -1062,6 +1063,21 @@ ppc_insert_operand (insn, operand, val, file, line)
 	  else
 	    max = (1 << (operand->bits - 1)) - 1;
 	  min = - (1 << (operand->bits - 1));
+
+	  if (ppc_size == PPC_OPCODE_32)
+	    {
+	      /* Some people write 32 bit hex constants with the sign
+		 extension done by hand.  This shouldn't really be
+		 valid, but, to permit this code to assemble on a 64
+		 bit host, we sign extend the 32 bit value.  */
+	      if (val > 0
+		  && (val & 0x80000000) != 0
+		  && (val & 0xffffffff) == val)
+		{
+		  val -= 0x80000000;
+		  val -= 0x80000000;
+		}
+	    }
 	}
       else
 	{
@@ -1334,7 +1350,7 @@ ppc_elf_lcomm(xxx)
   symbolP = symbol_find_or_make (name);
   *p = c;
 
-  if (S_IS_DEFINED (symbolP))
+  if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
     {
       as_bad ("Ignoring attempt to re-define symbol `%s'.",
 	      S_GET_NAME (symbolP));
@@ -1373,7 +1389,7 @@ ppc_elf_lcomm(xxx)
   record_alignment (bss_section, align2);
   subseg_set (bss_section, 0);
   if (align2)
-    frag_align (align2, 0);
+    frag_align (align2, 0, 0);
   if (S_GET_SEGMENT (symbolP) == bss_section)
     symbolP->sy_frag->fr_symbol = 0;
   symbolP->sy_frag = frag_now;
@@ -1382,7 +1398,6 @@ ppc_elf_lcomm(xxx)
   *pfrag = 0;
   S_SET_SIZE (symbolP, size);
   S_SET_SEGMENT (symbolP, bss_section);
-  S_CLEAR_EXTERNAL (symbolP);
   subseg_set (old_sec, old_subsec);
   demand_empty_rest_of_line ();
 }
@@ -2326,7 +2341,7 @@ ppc_comm (lcomm)
 	}
 
       subseg_set (bss_section, 1);
-      frag_align (align, 0);
+      frag_align (align, 0, 0);
   
       def_sym->sy_frag = frag_now;
       pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, def_sym,
@@ -3076,7 +3091,7 @@ static void
 ppc_xcoff_cons (log_size)
      int log_size;
 {
-  frag_align (log_size, 0);
+  frag_align (log_size, 0, 0);
   record_alignment (now_seg, log_size);
   cons (1 << log_size);
 }
@@ -3164,7 +3179,7 @@ ppc_tc (ignore)
     ++input_line_pointer;
 
   /* Align to a four byte boundary.  */
-  frag_align (2, 0);
+  frag_align (2, 0, 0);
   record_alignment (now_seg, 2);
 
 #endif /* ! defined (OBJ_XCOFF) */
@@ -3483,7 +3498,7 @@ ppc_pe_comm(lcomm)
   symbolP = symbol_find_or_make (name);
 
   *p = c;
-  if (S_IS_DEFINED (symbolP))
+  if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
     {
       as_bad ("Ignoring attempt to re-define symbol `%s'.",
 	      S_GET_NAME (symbolP));
@@ -4456,7 +4471,35 @@ ppc_fix_adjustable (fix)
 	  while (csect->sy_tc.next != (symbolS *) NULL
 		 && (csect->sy_tc.next->sy_frag->fr_address
 		     <= fix->fx_addsy->sy_frag->fr_address))
-	    csect = csect->sy_tc.next;
+	    {
+	      /* If the csect address equals the symbol value, then we
+                 have to look through the full symbol table to see
+                 whether this is the csect we want.  Note that we will
+                 only get here if the csect has zero length.  */
+	      if ((csect->sy_frag->fr_address
+		   == fix->fx_addsy->sy_frag->fr_address)
+		  && S_GET_VALUE (csect) == S_GET_VALUE (fix->fx_addsy))
+		{
+		  symbolS *scan;
+
+		  for (scan = csect->sy_next;
+		       scan != NULL;
+		       scan = scan->sy_next)
+		    {
+		      if (scan->sy_tc.subseg != 0)
+			break;
+		      if (scan == fix->fx_addsy)
+			break;
+		    }
+
+		  /* If we found the symbol before the next csect
+                     symbol, then this is the csect we want.  */
+		  if (scan == fix->fx_addsy)
+		    break;
+		}
+
+	      csect = csect->sy_tc.next;
+	    }
 
 	  fix->fx_offset += (S_GET_VALUE (fix->fx_addsy)
 			     - csect->sy_frag->fr_address);
@@ -4538,9 +4581,9 @@ md_apply_fix3 (fixp, valuep, seg)
   /* FIXME FIXME FIXME: The value we are passed in *valuep includes
      the symbol values.  Since we are using BFD_ASSEMBLER, if we are
      doing this relocation the code in write.c is going to call
-     bfd_perform_relocation, which is also going to use the symbol
+     bfd_install_relocation, which is also going to use the symbol
      value.  That means that if the reloc is fully resolved we want to
-     use *valuep since bfd_perform_relocation is not being used.
+     use *valuep since bfd_install_relocation is not being used.
      However, if the reloc is not fully resolved we do not want to use
      *valuep, and must use fx_offset instead.  However, if the reloc
      is PC relative, we do want to use *valuep since it includes the
@@ -4798,7 +4841,7 @@ tc_gen_reloc (seg, fixp)
 {
   arelent *reloc;
 
-  reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
+  reloc = (arelent *) xmalloc (sizeof (arelent));
 
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;

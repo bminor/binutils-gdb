@@ -1,8 +1,3 @@
-Mon Jun 16 15:47:24 1997  Ian Lance Taylor  <ian@cygnus.com>
-
-	* Makefile.in (CFLAGS): Subsitute from configure script.  From
-	Jeff Makey <jeff@cts.com>.
-
 Mon Jun 16 13:59:18 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 
 	* symbols.c (copy_symbol_attributes): Copy BSF_OBJECT flag.
@@ -13,6 +8,12 @@ Mon Jun 16 13:59:18 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 	of obj_copy_symbol_attributes.
 
 Mon Jun 16 12:45:56 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-ppc.c (ppc_insert_operand): In 32 bit mode, with a
+	signed operand, sign extend a 32 bit value to the host size.
+
+	* Makefile.in (CFLAGS): Subsitute from configure script.  From
+	Jeff Makey <jeff@cts.com>.
 
 	* config/tc-i386.c (i386_operand): Use alloca rather than a fixed
 	buffer size to make a copy of the symbol.
