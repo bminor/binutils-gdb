@@ -95,7 +95,7 @@ mn10300_frame_chain (fi)
     {
 	/* printf("scanning prologue\n"); */
 	/* FIXME -- fill out this case later */
-        return 0x666; /* bogus value */
+        return 0x0; /* bogus value */
     }
 
   if (past_prologue) /* if we don't need to scan the prologue */

@@ -97,6 +97,7 @@ i960
 m68k
 m88k
 mips
+mn10200
 mn10300
 nm-empty.h
 nm-gnu.h
