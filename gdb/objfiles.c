@@ -77,8 +77,7 @@ add_to_objfile_sections (abfd, asect, objfile_p_char)
   flagword aflag;
 
   aflag = bfd_get_section_flags (abfd, asect);
-  /* FIXME, we need to handle BSS segment here...it alloc's but doesn't load */
-  if (!(aflag & SEC_LOAD))
+  if (!(aflag & SEC_ALLOC))
     return;
   if (0 == bfd_section_size (abfd, asect))
     return;
@@ -99,8 +98,11 @@ int
 build_objfile_section_table (objfile)
      struct objfile *objfile;
 {
-  if (objfile->sections)
-    abort();
+  /* objfile->sections can be already set when reading a mapped symbol
+     file.  I believe that we do need to rebuild the section table in
+     this case (we rebuild other things derived from the bfd), but we
+     can't free the old one (it's in the psymbol_obstack).  So we just
+     waste some memory.  */
 
   objfile->sections_end = 0;
   bfd_map_over_sections (objfile->obfd, add_to_objfile_sections, (char *)objfile);
