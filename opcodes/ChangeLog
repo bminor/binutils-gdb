@@ -1,3 +1,23 @@
+start-sanitize-sky
+Fri Mar  6 11:27:53 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp-dis.c (print_gif): Fix length calcs for gifimage.
+	(print_insn): Do mask comparison on proper opcode word.
+	* dvp-opc.c (u_parse_sdest): Return -1 if dest missing.
+	(parse_bc): Catch missing dest.
+	(parse_vfreg): Replace atoi call with strtol.
+	(parse_{bcftreg,ffstreg,freg,ireg,vi01,gif_prim,gif_nloop}): Likewise.
+	(parse_bcftreg,parse_ffstreg): Handle missing dest.
+	(extract_gif_eop): New function.
+	(gif_operands): Update eop entry.
+	(VGIFOP,VGIFNREGS): Fix calcs.
+	(extract_gif_prim): Set *pinvalid to 1 if prim not used.
+	(gif_regs): Add entry for unused 11 case.
+	(print_gif_regs): Print empty list instead of nothing.
+	(extract_gif_nloop): Fix value calc.
+	(print_gif_nloop): Always print value, even if 0.
+
+end-sanitize-sky
 Wed Mar  4 12:08:14 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r-opc.h,m32r-opc.c,m32r-asm.c,m32r-dis.c: Regenerate.
