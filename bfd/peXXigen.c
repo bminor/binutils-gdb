@@ -570,8 +570,7 @@ _bfd_XXi_swap_aouthdr_out (abfd, in, out)
   struct internal_extra_pe_aouthdr *extra = &pe->pe_opthdr;
   PEAOUTHDR *aouthdr_out = (PEAOUTHDR *) out;
   bfd_vma sa, fa, ib;
-  IMAGE_DATA_DIRECTORY idata2, idata5;
-
+  IMAGE_DATA_DIRECTORY idata2, idata5, tls;
   
   if (pe->force_minimum_alignment)
     {
@@ -590,6 +589,7 @@ _bfd_XXi_swap_aouthdr_out (abfd, in, out)
 
   idata2 = pe->pe_opthdr.DataDirectory[1];
   idata5 = pe->pe_opthdr.DataDirectory[12];
+  tls = pe->pe_opthdr.DataDirectory[9];
   
   if (aouthdr_in->tsize)
     {
@@ -641,6 +641,7 @@ _bfd_XXi_swap_aouthdr_out (abfd, in, out)
      a final link is going to be performed, it can overwrite them.  */
   extra->DataDirectory[1]  = idata2;
   extra->DataDirectory[12] = idata5;
+  extra->DataDirectory[9] = tls;
 
   if (extra->DataDirectory[1].VirtualAddress == 0)
     /* Until other .idata fixes are made (pending patch), the entry for
@@ -2025,7 +2026,19 @@ _bfd_XXi_final_link_postscript (abfd, pfinfo)
 	  + h1->root.u.def.section->output_offset)
 	 - pe_data (abfd)->pe_opthdr.DataDirectory[12].VirtualAddress);      
     }
-  
+
+  h1 = coff_link_hash_lookup (coff_hash_table (info),
+			      "__tls_used", FALSE, FALSE, TRUE);
+  if (h1 != NULL)
+    {
+      pe_data (abfd)->pe_opthdr.DataDirectory[9].VirtualAddress =
+	(h1->root.u.def.value
+	 + h1->root.u.def.section->output_section->vma
+	 + h1->root.u.def.section->output_offset
+	 - pe_data (abfd)->pe_opthdr.ImageBase);
+      pe_data (abfd)->pe_opthdr.DataDirectory[9].Size = 0x18;
+    }
+
   /* If we couldn't find idata$2, we either have an excessively
      trivial program or are in DEEP trouble; we have to assume trivial
      program....  */

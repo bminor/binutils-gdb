@@ -1,3 +1,9 @@
+2003-11-10  Jonathan Wilson <jonwil@tpgi.com.au>
+
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_out): Swap out tls pointer.
+	(_bfd_XXi_final_link_postscript): Look for __tks_used symbol.  If
+	found initialise the tls data directory entry.
+
 2003-11-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_install_value): Delete.

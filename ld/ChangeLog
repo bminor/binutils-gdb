@@ -1,3 +1,7 @@
+2003-11-10  Jonathan Wilson <jonwil@tpgi.com.au>
+
+	* scripttempl/pe.sc: Add support for TLS sections.
+
 2003-11-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.host (HOSTING_LIBS): Group libgcc and libc with
