@@ -44,6 +44,7 @@ linux.mh
 linux.mt
 ncr3000.mh
 ncr3000.mt
+netbsd386.mt
 nm-i386aix.h
 nm-i386bsd.h
 nm-i386lynx.h
