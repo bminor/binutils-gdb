@@ -1961,7 +1961,7 @@ md_assemble (str)
 		  if (((insn & 0x07e0) == 0x0200)
 		      && ex.X_op == O_constant
 		      && (ex.X_add_number < (-(1 << (operand->bits - 1)))
-			  || ex.X_add_number > ((1 << operand->bits) - 1)))
+			  || ex.X_add_number > ((1 << (operand->bits - 1)) - 1)))
 		    errmsg = _("immediate operand is too large");
 		}
 

@@ -4564,6 +4564,15 @@ stringer (append_zero)		/* Worker to do .ascii etc statements.  */
     {
       c = ',';			/* Do loop.  */
     }
+  /* If we have been switched into the abs_section then we
+     will not have an obstack onto which we can hang strings.  */
+  if (now_seg == absolute_section)
+    {
+      as_bad (_("strings must be placed into a section"));
+      c = 0;
+      ignore_rest_of_line ();
+    }
+  
   while (c == ',' || c == '<' || c == '"')
     {
       SKIP_WHITESPACE ();

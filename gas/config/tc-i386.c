@@ -104,8 +104,10 @@ static void output_insn PARAMS ((void));
 static void output_branch PARAMS ((void));
 static void output_jump PARAMS ((void));
 static void output_interseg_jump PARAMS ((void));
-static void output_imm PARAMS ((void));
-static void output_disp PARAMS ((void));
+static void output_imm PARAMS ((fragS *insn_start_frag,
+				offsetT insn_start_off));
+static void output_disp PARAMS ((fragS *insn_start_frag,
+				 offsetT insn_start_off));
 #ifndef I386COFF
 static void s_bss PARAMS ((int));
 #endif
@@ -1186,9 +1188,12 @@ reloc (size, pcrel, sign, other)
 
 int
 tc_i386_fix_adjustable (fixP)
-     fixS *fixP;
+     fixS *fixP ATTRIBUTE_UNUSED;
 {
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+  if (OUTPUT_FLAVOR != bfd_target_elf_flavour)
+    return 1;
+
   /* Prevent all adjustments to global symbols, or else dynamic
      linking will not work correctly.  */
   if (S_IS_EXTERNAL (fixP->fx_addsy)
@@ -1199,7 +1204,7 @@ tc_i386_fix_adjustable (fixP)
 	  && (S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE) != 0
 	  && fixP->fx_pcrel))
     return 0;
-#endif
+
   /* adjust_reloc_syms doesn't know about the GOT.  */
   if (fixP->fx_r_type == BFD_RELOC_386_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_386_PLT32
@@ -1208,6 +1213,8 @@ tc_i386_fix_adjustable (fixP)
       || fixP->fx_r_type == BFD_RELOC_386_TLS_LDM
       || fixP->fx_r_type == BFD_RELOC_386_TLS_LDO_32
       || fixP->fx_r_type == BFD_RELOC_386_TLS_IE_32
+      || fixP->fx_r_type == BFD_RELOC_386_TLS_IE
+      || fixP->fx_r_type == BFD_RELOC_386_TLS_GOTIE
       || fixP->fx_r_type == BFD_RELOC_386_TLS_LE_32
       || fixP->fx_r_type == BFD_RELOC_386_TLS_LE
       || fixP->fx_r_type == BFD_RELOC_X86_64_PLT32
@@ -1216,6 +1223,7 @@ tc_i386_fix_adjustable (fixP)
       || fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
+#endif
   return 1;
 }
 #else
@@ -1233,6 +1241,8 @@ tc_i386_fix_adjustable (fixP)
 #define BFD_RELOC_386_TLS_LDM		0
 #define BFD_RELOC_386_TLS_LDO_32	0
 #define BFD_RELOC_386_TLS_IE_32		0
+#define BFD_RELOC_386_TLS_IE		0
+#define BFD_RELOC_386_TLS_GOTIE		0
 #define BFD_RELOC_386_TLS_LE_32		0
 #define BFD_RELOC_386_TLS_LE		0
 #define BFD_RELOC_X86_64_PLT32		0
@@ -3082,13 +3092,20 @@ output_interseg_jump ()
   md_number_to_chars (p + size, (valueT) i.op[0].imms->X_add_number, 2);
 }
 
+
 static void
 output_insn ()
 {
+  fragS *insn_start_frag;
+  offsetT insn_start_off;
+
   /* Tie dwarf2 debug info to the address at the start of the insn.
      We can't do this after the insn has been output as the current
      frag may have been closed off.  eg. by frag_var.  */
   dwarf2_emit_insn (0);
+
+  insn_start_frag = frag_now;
+  insn_start_off = frag_now_fix ();
 
   /* Output jumps.  */
   if (i.tm.opcode_modifier & Jump)
@@ -3160,10 +3177,10 @@ output_insn ()
 	}
 
       if (i.disp_operands)
-	output_disp ();
+	output_disp (insn_start_frag, insn_start_off);
 
       if (i.imm_operands)
-	output_imm ();
+	output_imm (insn_start_frag, insn_start_off);
     }
 
 #ifdef DEBUG386
@@ -3175,7 +3192,9 @@ output_insn ()
 }
 
 static void
-output_disp ()
+output_disp (insn_start_frag, insn_start_off)
+    fragS *insn_start_frag;
+    offsetT insn_start_off;
 {
   char *p;
   unsigned int n;
@@ -3205,6 +3224,7 @@ output_disp ()
 	    }
 	  else
 	    {
+	      RELOC_ENUM reloc_type;
 	      int size = 4;
 	      int sign = 0;
 	      int pcrel = (i.flags[n] & Operand_PCrel) != 0;
@@ -3247,16 +3267,50 @@ output_disp ()
 		}
 
 	      p = frag_more (size);
+	      reloc_type = reloc (size, pcrel, sign, i.reloc[n]);
+#ifdef BFD_ASSEMBLER
+	      if (reloc_type == BFD_RELOC_32
+		  && GOT_symbol
+		  && GOT_symbol == i.op[n].disps->X_add_symbol
+		  && (i.op[n].disps->X_op == O_symbol
+		      || (i.op[n].disps->X_op == O_add
+			  && ((symbol_get_value_expression
+			       (i.op[n].disps->X_op_symbol)->X_op)
+			      == O_subtract))))
+		{
+		  offsetT add;
+
+		  if (insn_start_frag == frag_now)
+		    add = (p - frag_now->fr_literal) - insn_start_off;
+		  else
+		    {
+		      fragS *fr;
+
+		      add = insn_start_frag->fr_fix - insn_start_off;
+		      for (fr = insn_start_frag->fr_next;
+			   fr && fr != frag_now; fr = fr->fr_next)
+			add += fr->fr_fix;
+		      add += p - frag_now->fr_literal;
+		    }
+
+		  /* We don't support dynamic linking on x86-64 yet.  */
+		  if (flag_code == CODE_64BIT)
+		    abort ();
+		  reloc_type = BFD_RELOC_386_GOTPC;
+		  i.op[n].disps->X_add_number += add;
+		}
+#endif
 	      fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-			   i.op[n].disps, pcrel,
-			   reloc (size, pcrel, sign, i.reloc[n]));
+			   i.op[n].disps, pcrel, reloc_type);
 	    }
 	}
     }
 }
 
 static void
-output_imm ()
+output_imm (insn_start_frag, insn_start_off)
+    fragS *insn_start_frag;
+    offsetT insn_start_off;
 {
   char *p;
   unsigned int n;
@@ -3309,6 +3363,48 @@ output_imm ()
 	      p = frag_more (size);
 	      reloc_type = reloc (size, 0, sign, i.reloc[n]);
 #ifdef BFD_ASSEMBLER
+	      /*   This is tough to explain.  We end up with this one if we
+	       * have operands that look like
+	       * "_GLOBAL_OFFSET_TABLE_+[.-.L284]".  The goal here is to
+	       * obtain the absolute address of the GOT, and it is strongly
+	       * preferable from a performance point of view to avoid using
+	       * a runtime relocation for this.  The actual sequence of
+	       * instructions often look something like:
+	       *
+	       *	call	.L66
+	       * .L66:
+	       *	popl	%ebx
+	       *	addl	$_GLOBAL_OFFSET_TABLE_+[.-.L66],%ebx
+	       *
+	       *   The call and pop essentially return the absolute address
+	       * of the label .L66 and store it in %ebx.  The linker itself
+	       * will ultimately change the first operand of the addl so
+	       * that %ebx points to the GOT, but to keep things simple, the
+	       * .o file must have this operand set so that it generates not
+	       * the absolute address of .L66, but the absolute address of
+	       * itself.  This allows the linker itself simply treat a GOTPC
+	       * relocation as asking for a pcrel offset to the GOT to be
+	       * added in, and the addend of the relocation is stored in the
+	       * operand field for the instruction itself.
+	       *
+	       *   Our job here is to fix the operand so that it would add
+	       * the correct offset so that %ebx would point to itself.  The
+	       * thing that is tricky is that .-.L66 will point to the
+	       * beginning of the instruction, so we need to further modify
+	       * the operand so that it will point to itself.  There are
+	       * other cases where you have something like:
+	       *
+	       *	.long	$_GLOBAL_OFFSET_TABLE_+[.-.L66]
+	       *
+	       * and here no correction would be required.  Internally in
+	       * the assembler we treat operands of this form as not being
+	       * pcrel since the '.' is explicitly mentioned, and I wonder
+	       * whether it would simplify matters to do it this way.  Who
+	       * knows.  In earlier versions of the PIC patches, the
+	       * pcrel_adjust field was used to store the correction, but
+	       * since the expression is not pcrel, I felt it would be
+	       * confusing to do it this way.  */
+
 	      if (reloc_type == BFD_RELOC_32
 		  && GOT_symbol
 		  && GOT_symbol == i.op[n].imms->X_add_symbol
@@ -3318,11 +3414,26 @@ output_imm ()
 			       (i.op[n].imms->X_op_symbol)->X_op)
 			      == O_subtract))))
 		{
+		  offsetT add;
+
+		  if (insn_start_frag == frag_now)
+		    add = (p - frag_now->fr_literal) - insn_start_off;
+		  else
+		    {
+		      fragS *fr;
+
+		      add = insn_start_frag->fr_fix - insn_start_off;
+		      for (fr = insn_start_frag->fr_next;
+			   fr && fr != frag_now; fr = fr->fr_next)
+			add += fr->fr_fix;
+		      add += p - frag_now->fr_literal;
+		    }
+
 		  /* We don't support dynamic linking on x86-64 yet.  */
 		  if (flag_code == CODE_64BIT)
 		    abort ();
 		  reloc_type = BFD_RELOC_386_GOTPC;
-		  i.op[n].imms->X_add_number += 3;
+		  i.op[n].imms->X_add_number += add;
 		}
 #endif
 	      fix_new_exp (frag_now, p - frag_now->fr_literal, size,
@@ -3363,6 +3474,8 @@ lex_got (reloc, adjust)
     { "TPOFF",    { BFD_RELOC_386_TLS_LE_32,  0, 0                         } },
     { "NTPOFF",   { BFD_RELOC_386_TLS_LE,     0, 0                         } },
     { "DTPOFF",   { BFD_RELOC_386_TLS_LDO_32, 0, 0                         } },
+    { "GOTNTPOFF",{ BFD_RELOC_386_TLS_GOTIE,  0, 0                         } },
+    { "INDNTPOFF",{ BFD_RELOC_386_TLS_IE,     0, 0                         } },
     { "GOT",      { BFD_RELOC_386_GOT32,      0, BFD_RELOC_X86_64_GOT32    } }
   };
   char *cp;
@@ -3546,6 +3659,7 @@ i386_immediate (imm_start)
 #ifdef BFD_ASSEMBLER
 	   && OUTPUT_FLAVOR == bfd_target_aout_flavour
 #endif
+	   && exp_seg != absolute_section
 	   && exp_seg != text_section
 	   && exp_seg != data_section
 	   && exp_seg != bss_section
@@ -3760,10 +3874,15 @@ i386_displacement (disp_start, disp_end)
 #ifdef BFD_ASSEMBLER
       && OUTPUT_FLAVOR == bfd_target_aout_flavour
 #endif
+      && exp_seg != absolute_section
       && exp_seg != text_section
       && exp_seg != data_section
       && exp_seg != bss_section
-      && exp_seg != undefined_section)
+      && exp_seg != undefined_section
+#ifdef BFD_ASSEMBLER
+      && !bfd_is_com_section (exp_seg)
+#endif
+      )
     {
 #ifdef BFD_ASSEMBLER
       as_bad (_("unimplemented segment %s in operand"), exp_seg->name);
@@ -4189,8 +4308,9 @@ md_estimate_size_before_relax (fragP, segment)
      shared library.  */
   if (S_GET_SEGMENT (fragP->fr_symbol) != segment
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-      || S_IS_EXTERNAL (fragP->fr_symbol)
-      || S_IS_WEAK (fragP->fr_symbol)
+      || (OUTPUT_FLAVOR == bfd_target_elf_flavour
+	  && (S_IS_EXTERNAL (fragP->fr_symbol)
+	      || S_IS_WEAK (fragP->fr_symbol)))
 #endif
       )
     {
@@ -4464,15 +4584,16 @@ md_apply_fix3 (fixP, valP, seg)
 	}
     }
 
-  /* This is a hack.  There should be a better way to handle this.
-     This covers for the fact that bfd_install_relocation will
-     subtract the current location (for partial_inplace, PC relative
-     relocations); see more below.  */
-  if ((fixP->fx_r_type == BFD_RELOC_32_PCREL
-       || fixP->fx_r_type == BFD_RELOC_16_PCREL
-       || fixP->fx_r_type == BFD_RELOC_8_PCREL)
-      && fixP->fx_addsy && !use_rela_relocations)
+  if (fixP->fx_pcrel
+      && (fixP->fx_r_type == BFD_RELOC_32_PCREL
+	  || fixP->fx_r_type == BFD_RELOC_16_PCREL
+	  || fixP->fx_r_type == BFD_RELOC_8_PCREL)
+      && !use_rela_relocations)
     {
+      /* This is a hack.  There should be a better way to handle this.
+	 This covers for the fact that bfd_install_relocation will
+	 subtract the current location (for partial_inplace, PC relative
+	 relocations); see more below.  */
 #ifndef OBJ_AOUT
       if (OUTPUT_FLAVOR == bfd_target_elf_flavour
 #ifdef TE_PE
@@ -4523,60 +4644,15 @@ md_apply_fix3 (fixP, valP, seg)
 	   runtime we merely add the offset to the actual PLT entry.  */
 	value = -4;
 	break;
-      case BFD_RELOC_386_GOTPC:
 
-/*   This is tough to explain.  We end up with this one if we have
- * operands that look like "_GLOBAL_OFFSET_TABLE_+[.-.L284]".  The goal
- * here is to obtain the absolute address of the GOT, and it is strongly
- * preferable from a performance point of view to avoid using a runtime
- * relocation for this.  The actual sequence of instructions often look
- * something like:
- *
- *	call	.L66
- * .L66:
- *	popl	%ebx
- *	addl	$_GLOBAL_OFFSET_TABLE_+[.-.L66],%ebx
- *
- *   The call and pop essentially return the absolute address of
- * the label .L66 and store it in %ebx.  The linker itself will
- * ultimately change the first operand of the addl so that %ebx points to
- * the GOT, but to keep things simple, the .o file must have this operand
- * set so that it generates not the absolute address of .L66, but the
- * absolute address of itself.  This allows the linker itself simply
- * treat a GOTPC relocation as asking for a pcrel offset to the GOT to be
- * added in, and the addend of the relocation is stored in the operand
- * field for the instruction itself.
- *
- *   Our job here is to fix the operand so that it would add the correct
- * offset so that %ebx would point to itself.  The thing that is tricky is
- * that .-.L66 will point to the beginning of the instruction, so we need
- * to further modify the operand so that it will point to itself.
- * There are other cases where you have something like:
- *
- *	.long	$_GLOBAL_OFFSET_TABLE_+[.-.L66]
- *
- * and here no correction would be required.  Internally in the assembler
- * we treat operands of this form as not being pcrel since the '.' is
- * explicitly mentioned, and I wonder whether it would simplify matters
- * to do it this way.  Who knows.  In earlier versions of the PIC patches,
- * the pcrel_adjust field was used to store the correction, but since the
- * expression is not pcrel, I felt it would be confusing to do it this
- * way.  */
-
-	value -= 1;
-	break;
       case BFD_RELOC_386_GOT32:
       case BFD_RELOC_386_TLS_GD:
       case BFD_RELOC_386_TLS_LDM:
-      case BFD_RELOC_386_TLS_LDO_32:
       case BFD_RELOC_386_TLS_IE_32:
-      case BFD_RELOC_386_TLS_LE_32:
-      case BFD_RELOC_386_TLS_LE:
+      case BFD_RELOC_386_TLS_IE:
+      case BFD_RELOC_386_TLS_GOTIE:
       case BFD_RELOC_X86_64_GOT32:
 	value = 0; /* Fully resolved at runtime.  No addend.  */
-	break;
-      case BFD_RELOC_386_GOTOFF:
-      case BFD_RELOC_X86_64_GOTPCREL:
 	break;
 
       case BFD_RELOC_VTABLE_INHERIT:
@@ -4870,7 +4946,7 @@ i386_target_format ()
       {
 	if (flag_code == CODE_64BIT)
 	  use_rela_relocations = 1;
-	return flag_code == CODE_64BIT ? "elf64-x86-64" : "elf32-i386";
+	return flag_code == CODE_64BIT ? "elf64-x86-64" : ELF_TARGET_FORMAT;
       }
 #endif
     default:
@@ -5044,6 +5120,8 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_386_TLS_LDM:
     case BFD_RELOC_386_TLS_LDO_32:
     case BFD_RELOC_386_TLS_IE_32:
+    case BFD_RELOC_386_TLS_IE:
+    case BFD_RELOC_386_TLS_GOTIE:
     case BFD_RELOC_386_TLS_LE_32:
     case BFD_RELOC_386_TLS_LE:
     case BFD_RELOC_X86_64_32S:

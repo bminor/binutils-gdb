@@ -55,13 +55,17 @@ The following processor names are recognized:
 @code{21164a},
 @code{21164pc},
 @code{21264},
+@code{21264a},
+@code{21264b},
 @code{ev4},
 @code{ev5},
 @code{lca45},
 @code{ev5},
 @code{ev56},
 @code{pca56},
-@code{ev6}.
+@code{ev6},
+@code{ev67},
+@code{ev68}.
 The special name @code{all} may be used to allow the assembler to accept
 instructions valid for any Alpha processor.
 

@@ -576,6 +576,10 @@ static const struct cpu_type {
 		|AXP_OPCODE_MAX) },
   { "21264", (AXP_OPCODE_BASE|AXP_OPCODE_EV6|AXP_OPCODE_BWX
 	      |AXP_OPCODE_MAX|AXP_OPCODE_CIX) },
+  { "21264a", (AXP_OPCODE_BASE|AXP_OPCODE_EV6|AXP_OPCODE_BWX
+	      |AXP_OPCODE_MAX|AXP_OPCODE_CIX) },
+  { "21264b", (AXP_OPCODE_BASE|AXP_OPCODE_EV6|AXP_OPCODE_BWX
+	      |AXP_OPCODE_MAX|AXP_OPCODE_CIX) },
 
   { "ev4", AXP_OPCODE_BASE },
   { "ev45", AXP_OPCODE_BASE },
@@ -584,6 +588,8 @@ static const struct cpu_type {
   { "ev56", AXP_OPCODE_BASE|AXP_OPCODE_BWX },
   { "pca56", AXP_OPCODE_BASE|AXP_OPCODE_BWX|AXP_OPCODE_MAX },
   { "ev6", AXP_OPCODE_BASE|AXP_OPCODE_BWX|AXP_OPCODE_MAX|AXP_OPCODE_CIX },
+  { "ev67", AXP_OPCODE_BASE|AXP_OPCODE_BWX|AXP_OPCODE_MAX|AXP_OPCODE_CIX },
+  { "ev68", AXP_OPCODE_BASE|AXP_OPCODE_BWX|AXP_OPCODE_MAX|AXP_OPCODE_CIX },
 
   { "all", AXP_OPCODE_BASE },
   { 0, 0 }
@@ -1102,9 +1108,9 @@ md_show_usage (stream)
 Alpha options:\n\
 -32addr			treat addresses as 32-bit values\n\
 -F			lack floating point instructions support\n\
--mev4 | -mev45 | -mev5 | -mev56 | -mpca56 | -mev6 | -mall\n\
+-mev4 | -mev45 | -mev5 | -mev56 | -mpca56 | -mev6 | -mev67 | -mev68 | -mall\n\
 			specify variant of Alpha architecture\n\
--m21064 | -m21066 | -m21164 | -m21164a | -m21164pc | -m21264\n\
+-m21064 | -m21066 | -m21164 | -m21164a | -m21164pc | -m21264 | -m21264a | -m21264b\n\
 			these variants include PALcode opcodes\n"),
 	stream);
 #ifdef OBJ_EVAX

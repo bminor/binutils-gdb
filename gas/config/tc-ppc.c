@@ -1169,6 +1169,14 @@ md_begin ()
 	      || ((op->flags & (PPC_OPCODE_32 | PPC_OPCODE_64))
 		  == (ppc_cpu & (PPC_OPCODE_32 | PPC_OPCODE_64)))
 	      || (ppc_cpu & PPC_OPCODE_64_BRIDGE) != 0)
+	  /* Certain instructions (eg: extsw) do not exist in the
+	     32-bit BookE instruction set, but they do exist in the
+	     64-bit BookE instruction set, and other PPC instruction
+	     sets.  Check to see if the opcode has the BOOKE64 flag set.
+	     If it does make sure that the target CPU is not the BookE32.  */
+	  && ((op->flags & PPC_OPCODE_BOOKE64) == 0
+	      || (ppc_cpu & PPC_OPCODE_BOOKE64) == PPC_OPCODE_BOOKE64
+	      || (ppc_cpu & PPC_OPCODE_BOOKE) == 0)
 	  && ((op->flags & (PPC_OPCODE_POWER4 | PPC_OPCODE_NOPOWER4)) == 0
 	      || ((op->flags & PPC_OPCODE_POWER4)
 		  == (ppc_cpu & PPC_OPCODE_POWER4))))
@@ -1916,6 +1924,8 @@ md_assemble (str)
       if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0)
 	{
 	  unsigned int opcount;
+	  unsigned int num_operands_expected;
+	  unsigned int i;
 
 	  /* There is an optional operand.  Count the number of
 	     commas in the input line.  */
@@ -1932,10 +1942,16 @@ md_assemble (str)
 		}
 	    }
 
+	  /* Compute the number of expected operands.
+	     Do not count fake operands.  */
+	  for (num_operands_expected = 0, i = 0; opcode->operands[i]; i ++)
+	    if ((powerpc_operands [opcode->operands[i]].flags & PPC_OPERAND_FAKE) == 0)
+	      ++ num_operands_expected;
+
 	  /* If there are fewer operands in the line then are called
 	     for by the instruction, we want to skip the optional
 	     operand.  */
-	  if (opcount < strlen (opcode->operands))
+	  if (opcount < num_operands_expected)
 	    skip_optional = 1;
 
 	  break;
@@ -5223,7 +5239,14 @@ md_apply_fix3 (fixP, valP, seg)
       else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
 	  && operand->bits == 16
 	  && operand->shift == 0)
-	fixP->fx_r_type = BFD_RELOC_PPC_B16;
+	{
+	  fixP->fx_r_type = BFD_RELOC_PPC_B16;
+#ifdef OBJ_XCOFF
+	  fixP->fx_size = 2;
+	  if (target_big_endian)
+	    fixP->fx_where += 2;
+#endif
+	}
       else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0
 	       && operand->bits == 26
 	       && operand->shift == 0)
@@ -5231,7 +5254,14 @@ md_apply_fix3 (fixP, valP, seg)
       else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0
 	       && operand->bits == 16
 	       && operand->shift == 0)
-	fixP->fx_r_type = BFD_RELOC_PPC_BA16;
+	{
+	  fixP->fx_r_type = BFD_RELOC_PPC_BA16;
+#ifdef OBJ_XCOFF
+	  fixP->fx_size = 2;
+	  if (target_big_endian)
+	    fixP->fx_where += 2;
+#endif
+	}
 #if defined (OBJ_XCOFF) || defined (OBJ_ELF)
       else if ((operand->flags & PPC_OPERAND_PARENS) != 0
 	       && operand->bits == 16

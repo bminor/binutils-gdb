@@ -1148,6 +1148,7 @@ out_debug_abbrev (abbrev_seg)
       out_abbrev (DW_AT_low_pc, DW_FORM_addr);
       out_abbrev (DW_AT_high_pc, DW_FORM_addr);
     }
+  out_abbrev (DW_AT_name, DW_FORM_string);
   out_abbrev (DW_AT_comp_dir, DW_FORM_string);
   out_abbrev (DW_AT_producer, DW_FORM_string);
   out_abbrev (DW_AT_language, DW_FORM_data2);
@@ -1222,6 +1223,16 @@ out_debug_info (info_seg, abbrev_seg, line_seg)
       expr.X_add_number = 0;
       emit_expr (&expr, sizeof_address);
     }
+
+  /* DW_AT_name.  We don't have the actual file name that was present
+     on the command line, so assume files[1] is the main input file.
+     We're not supposed to get called unless at least one line number
+     entry was emitted, so this should always be defined.  */
+  if (!files || files_in_use < 1)
+    abort ();
+  len = strlen (files[1].filename) + 1;
+  p = frag_more (len);
+  memcpy (p, files[1].filename, len);
 
   /* DW_AT_comp_dir */
   comp_dir = getpwd ();

@@ -98,13 +98,20 @@ extern unsigned long i386_mach PARAMS ((void));
 #define AOUT_TARGET_FORMAT	"a.out-i386"
 #endif
 
+#ifdef TE_FreeBSD
+#define ELF_TARGET_FORMAT	"elf32-i386-freebsd"
+#endif
+#ifndef ELF_TARGET_FORMAT
+#define ELF_TARGET_FORMAT	"elf32-i386"
+#endif
+
 #if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \
      || defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF))
 extern const char *i386_target_format PARAMS ((void));
 #define TARGET_FORMAT i386_target_format ()
 #else
 #ifdef OBJ_ELF
-#define TARGET_FORMAT		"elf32-i386"
+#define TARGET_FORMAT		ELF_TARGET_FORMAT
 #endif
 #ifdef OBJ_AOUT
 #define TARGET_FORMAT		AOUT_TARGET_FORMAT

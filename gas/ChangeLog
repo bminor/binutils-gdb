@@ -1,3 +1,103 @@
+2002-09-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+	2002-09-22  Mark Elbrecht  <snowball3@softhome.net>
+	* write.c: Delete set_segment_vma and prototype. Update all callers.
+
+	2002-09-19  Jakub Jelinek  <jakub@redhat.com>
+	* config/tc-i386.c (tc_i386_fix_adjustable): Handle
+	BFD_RELOC_386_TLS_IE and BFD_RELOC_386_TLS_GOTIE.
+	(BFD_RELOC_386_TLS_IE, BFD_RELOC_386_TLS_GOTIE): Define to 0
+	if not defined.
+	(lex_got): Handle @GOTNTPOFF and @INDNTPOFF.
+	(md_apply_fix3, tc_gen_reloc): Handle BFD_RELOC_386_TLS_IE and
+	BFD_RELOC_386_TLS_GOTIE.
+
+	2002-09-16  Chris Demetriou  <cgd@broadcom.com>
+	* config/tc-mips.c (IS_SEXT_32BIT_NUM): Move closer to top of file.
+	(IS_SEXT_16BIT_NUM): New macro.
+	(macro_build_ldst_constoffset): New function, to build a set of
+	instructions to do a load or store from a constant offset relative
+	to a given register.
+	(macro, s_cprestore): Use macro_build_ldst_constoffset to implement
+	.cprestore pseudo-op.
+
+	2002-09-16  Elias Athanasopoulos  <eathan@otenet.gr>
+	* dwarf2dbg.c (out_debug_abbrev): Add support for the DW_AT_name field.
+	(out_debug_info): Likewise.
+
+	2002-09-13  Nick Clifton  <nickc@redhat.com>
+	* config/tc-ppc.c (md_assemble): Do not count FAKE operands
+	when deciding if any operands have been skipped.
+
+	2002-09-11  Jakub Jelinek  <jakub@redhat.com>
+	* config/tc-i386.c (md_apply_fix3): Allow addend for
+	BFD_RELOC_386_TLS_LDO_32, BFD_RELOC_386_TLS_LE and
+	BFD_RELOC_386_TLS_LE_32.
+
+	2002-09-11  Nick Clifton  <nickc@redhat.com>
+	* po/tr.po: Updated Turkish translation.
+
+	2002-09-04  Nick Clifton  <nickc@redhat.com>
+	* config/tc-ppc.c (md_begin): Do not insert non-BookE32
+	instructions into the hash table if the target cpu is the BookE32.
+
+	2002-08-20  Richard Sandiford  <rsandifo@redhat.com>
+	* config/tc-mips.c (macro2): Implement rotates by zero using shifts
+	by zero.
+
+	2002-08-15  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-mips.c (macro_build_jalr): Make sure we generate
+	the fix-up against on the right frag.
+	(s_cpsetup): Likewise.  Parse third argument as expression, to
+	handle global symbols and forward/backward labels correctly.
+
+	2002-08-14  Nick Clifton  <nickc@redhat.com>
+	* read.c (stringer): Catch attempts to create strings in the abs
+	section.
+
+	2002-08-12  Richard Sandiford  <rsandifo@redhat.com>
+	* config/tc-mips.c (mips_ip): Don't work out the value of
+	constant %hi()s here.
+
+	2002-08-10  Alan Modra  <amodra@bigpond.net.au>
+	* config/tc-i386.c (tc_i386_fix_adjustable): Test OUTPUT_FLAVOR
+	for ELF, and don't bother checking ELF relocs when non-ELF.
+	(i386_immediate): Allow absolute_section expressions for aout.
+	(i386_displacement): Likewise.  Also test bfd_is_com_section.
+	(md_estimate_size_before_relax): Test OUTPUT_FLAVOR for ELF.
+	(md_apply_fix3): Hack for bfd_install_relocation when fx_pcrel,
+	not when fx_addsy.  Remove dead code.
+
+	2002-08-06  George France <france@handhelds.org>
+	* config/tc-alpha.c (cpu_types): Enabled ev67, ev68,  -m21264a
+	and m21264b processor names and cpu types.
+	* doc/c-alpha.texi: Documented new types.
+
+	2002-08-06  Alan Modra  <amodra@bigpond.net.au>
+	* config/tc-ppc.c (md_apply_fix3): Adjust 16 bit XCOFF reloc offset.
+
+	2002-08-03  Jakub Jelinek  <jakub@redhat.com>
+	* config/tc-i386.c (output_insn): Save frag_now and frag_now_fix ()
+	at start of insn, pass it to output_disp and output_imm.
+	(output_disp): Added arguments.  If _GLOBAL_OFFSET_TABLE_ is seen
+	in displacement for R_386_32 reloc, use R_386_GOTPC and compute
+	properly addend.
+	(output_imm): Added arguments.  Compute properly addend for
+	R_386_GOTPC.
+	(md_apply_fix3): Remove R_386_GOTPC handling.
+
+	2002-07-31  Momchil Velikov  <velco@fadata.bg>
+	* config/tc-v850.c (md_assemble): Fix range check for immediate
+	operand.
+
+	2002-07-04  Bruno Haible  <bruno@clisp.org>
+	* config/tc-i386.h (ELF_TARGET_FORMAT): New macro.
+	(TARGET_FORMAT): Use ELF_TARGET_FORMAT instead of "elf32-i386".
+	* config/tc-i386.c (i386_target_format): Likewise.
+	* config/tc-alpha.h (ELF_TARGET_FORMAT): New macro.
+	(TARGET_FORMAT): Use ELF_TARGET_FORMAT instead of "elf64-alpha".
+
 2002-08-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-w65.c (md_section_align): Fix typo.
