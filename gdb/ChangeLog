@@ -1,3 +1,23 @@
+Tue May 12 14:15:48 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* breakpoint.c:  Change many printfs to printf_filtered.  Improve
+	help text for info breakpoints.
+
+Mon May 11 14:17:18 1992  John Gilmore  (gnu at cygnus.com)
+
+	* README:  Add pointer to internals doc, and describe reading
+	info files.
+	* utils.c (print_sys_errmsg):  Use stderr.  Reported by Pierre Willard.
+	* symtab.c (output_source_filename):  Remove old glop for wrapping
+	lines, use wrap_here.  Reported by Pierre Willard (pierre@la.tce.com).
+
+Thu May  7 11:45:03 1992  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in:  version.c should depend on Makefile, not Makefile.in.
+	* munch:  Add sort -u to avoid duplications.
+	* symtab.c (lookup_symbol):  Improve Stu's fix of 22 April.
+	Improved fix by hahn@sunshine.labs.tek.com (Doug Hahn).
+
 Mon May 11 13:27:46 1992  Fred Fish  (fnf@cygnus.com)
 
 	* cplus-dem.c (demangle_signature):  Recognize misplaced '_' to
@@ -29,15 +49,17 @@ Fri May  8 11:42:15 1992  Per Bothner  (bothner@rtl.cygnus.com)
 	* mipsread.c (parse_procedure):  Return rather than using
 	uninitialized variable 'b'.
 
-Fri May  8 07:48:27 1992  K. Richard Pixley  (rich@cygnus.com)
+Fri May  8 07:48:27 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in, remote-udi.c, remote-vx.c, 29k-share/dfe/mini2udi.c,
 	29k-share/dfe/yank.c, vx-share/xdr_ptrace.c, vx-share/xdr_regs.c:
 	Remove -I29k-share, -Ivx-share from Makefile.in.  Make #includes
 	relative to each source file.
 
+Fri May  8 07:48:27 1992  K. Richard Pixley  (rich@cygnus.com)
+
 	* Makefile.in: propogate INSTALL, INSTALL_DATA, INSTALL_PROGRAM on
-	  recursions.
+	recursions.
 
 Thu May  7 10:00:52 1992  Stu Grossman  (grossman at cygnus.com)
 
