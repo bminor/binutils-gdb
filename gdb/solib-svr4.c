@@ -33,6 +33,7 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "inferior.h"
+#include "gdbcmd.h"
 
 #include "solist.h"
 #include "solib-svr4.h"
@@ -115,6 +116,9 @@ static char *main_name_list[] =
   "main_$main",
   NULL
 };
+
+/* Control the printing of debugging statements.  */
+static int debug_solib;
 
 /* Macro to extract an address from a solib structure.  When GDB is
    configured for some 32-bit targets (e.g. Solaris 2.7 sparc), BFD is
@@ -432,14 +436,26 @@ elf_locate_base (void)
   /* Find the start address of the .dynamic section.  */
   dyninfo_sect = bfd_get_section_by_name (exec_bfd, ".dynamic");
   if (dyninfo_sect == NULL)
-    return 0;
+    { 
+      if (debug_solib)
+	fprintf_unfiltered (gdb_stdlog,
+			    "elf_locate_base: didn't find .dynamic in %s\n",
+			    exec_bfd->filename);
+      return 0;
+    }
   dyninfo_addr = bfd_section_vma (exec_bfd, dyninfo_sect);
 
   /* Read in .dynamic section, silently ignore errors.  */
   dyninfo_sect_size = bfd_section_size (exec_bfd, dyninfo_sect);
   buf = alloca (dyninfo_sect_size);
   if (target_read_memory (dyninfo_addr, buf, dyninfo_sect_size))
-    return 0;
+    { 
+      if (debug_solib)
+	fprintf_unfiltered (gdb_stdlog,
+			    "elf_locate_base: coudn't read 0x%s\n",
+			    paddr_nz (dyninfo_addr));
+      return 0;
+    }
 
   /* Find the DT_DEBUG entry in the the .dynamic section.
      For mips elf we look for DT_MIPS_RLD_MAP, mips elf apparently has
@@ -466,6 +482,10 @@ elf_locate_base (void)
 	    {
 	      dyn_ptr = bfd_h_get_32 (exec_bfd, 
 				      (bfd_byte *) x_dynp->d_un.d_ptr);
+              if (debug_solib)
+                fprintf_unfiltered (gdb_stdlog,
+				    "elf_locate_base: DT_DEBUG entry has value 0x%s\n",
+				    paddr_nz (dyn_ptr));
 	      return dyn_ptr;
 	    }
 	  else if (dyn_tag == DT_MIPS_RLD_MAP)
@@ -732,7 +752,12 @@ svr4_current_sos (void)
       /* If we can't find the dynamic linker's base structure, this
 	 must not be a dynamically linked executable.  Hmm.  */
       if (! debug_base)
-	return 0;
+	{
+	  if (debug_solib)
+	    fprintf_unfiltered (gdb_stdlog, 
+				"svr4_current_sos: no DT_DEBUG found\n");
+	  return 0;
+	}
     }
 
   /* Walk the inferior's link map list, and build our list of
@@ -784,6 +809,10 @@ svr4_current_sos (void)
 	      new->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
 	      xfree (buffer);
 	      strcpy (new->so_original_name, new->so_name);
+	      if (debug_solib)
+		fprintf_unfiltered (gdb_stdlog, 
+				    "svr4_current_sos: Processing DSO: %s\n",
+				    new->so_name);
 	    }
 
 	  /* If this entry has no name, or its name matches the name
@@ -976,6 +1005,10 @@ enable_break (void)
   /* Find the .interp section; if not found, warn the user and drop
      into the old breakpoint at symbol code.  */
   interp_sect = bfd_get_section_by_name (exec_bfd, ".interp");
+  if (debug_solib)
+    fprintf_unfiltered (gdb_stdlog,
+			"enable_break: search for .interp in %s\n",
+			exec_bfd->filename);
   if (interp_sect)
     {
       unsigned int interp_sect_size;
@@ -1007,6 +1040,10 @@ enable_break (void)
       tmp_fd  = solib_open (buf, &tmp_pathname);
       if (tmp_fd >= 0)
 	tmp_bfd = bfd_fdopenr (tmp_pathname, gnutarget, tmp_fd);
+
+      if (debug_solib)
+	fprintf_unfiltered (gdb_stdlog,
+                            "enable_break: opening %s\n", tmp_pathname);
 
       if (tmp_bfd == NULL)
 	goto bkpt_at_symbol;
@@ -1086,6 +1123,9 @@ enable_break (void)
       if (sym_addr != 0)
 	{
 	  create_solib_event_breakpoint (load_addr + sym_addr);
+          if (debug_solib)
+            fprintf_unfiltered (gdb_stdlog,
+				"enable_break: solib bp set\n");
 	  return 1;
 	}
 
@@ -1231,6 +1271,11 @@ svr4_relocate_main_executable (void)
 
 	 The same language also appears in Edition 4.0 of the System V
 	 ABI and is left unspecified in some of the earlier editions.  */
+
+      fprintf_unfiltered (gdb_stdlog,
+                          "relocate_main: current pc is %s, bfd_start_address is %s\n",
+                          paddr_nz (pc),
+                          paddr_nz (bfd_get_start_address (exec_bfd)));
 
       displacement = pc - bfd_get_start_address (exec_bfd);
       changed = 0;
@@ -1500,4 +1545,8 @@ _initialize_svr4_solib (void)
 
   /* FIXME: Don't do this here.  *_gdbarch_init() should set so_ops. */
   current_target_so_ops = &svr4_so_ops;
+  add_show_from_set (add_set_cmd ("solib", no_class, var_zinteger,
+				  (char *) &debug_solib,
+				  "Set debugging of GNU/Linux shlib module.\n\
+Enables printf debugging output.\n", &setdebuglist), &showdebuglist);
 }

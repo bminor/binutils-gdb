@@ -1,3 +1,15 @@
+2003-09-29  Elena Zannoni  <ezannoni@redhat.com>
+
+	* solib-svr4.c: Include gdbcmd.h.
+	(debug_solib): New variable.
+	(elf_locate_base): Add some debugging statements.
+	(svr4_current_sos): Likewise.
+	(enable_break): Likewise.
+	(svr4_relocate_main_executable): Likewise.
+	(_initialize_svr4_solib): Add new 'set' command to control
+	debugging output.
+	* Makefile.in (solib-svr4.o): Update dependencies.
+
 2003-09-16  Andrew Cagney  <cagney@redhat.com>
 
 	* buildsym.c: Remove more occurances of "register".
