@@ -2121,6 +2121,9 @@ txvu_opcode_init_tables (flags)
 	  lower_icode_map[icode_hash] = &txvu_lower_opcodes[i];
 	}
 
+      /* FIXME: We just hash everything to the same value for the rest.
+	 Quick hack while other things are worked on.  */
+
       /* PKE table.  */
 
       for (i = pke_opcodes_count - 2; i >= 0; --i)
