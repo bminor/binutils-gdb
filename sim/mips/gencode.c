@@ -1,10 +1,22 @@
 /*> gencode.c <*/
-/*---------------------------------------------------------------------------*/
-/* $Revision$ */
-/*   $Author$ */
-/*     $Date$ */
-/* Copyright (c) 1995, Cygnus Support */
-/*---------------------------------------------------------------------------*/
+/* Instruction handling support for the MIPS architecture simulator.
+
+   This file is part of the MIPS sim
+
+		THIS SOFTWARE IS NOT COPYRIGHTED
+
+   Cygnus offers the following for use in the public domain.  Cygnus
+   makes no warranty with regard to the software or it's performance
+   and the user accepts the software "AS IS" with all faults.
+
+   CYGNUS DISCLAIMS ANY WARRANTIES, EXPRESS OR IMPLIED, WITH REGARD TO
+   THIS SOFTWARE INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+   $Revision$
+     $Author$
+       $Date$
+*/
 
 #if 0
 #define DEBUG (1) /* Just for testing */
@@ -1028,22 +1040,22 @@ process_instructions(doarch,features)
         if (GETDATASIZE() == DOUBLEWORD) {
           printf("   uword64 mid;\n");
           printf("   uword64 temp;\n");
-          printf("   LO = ((op1 & 0xFFFFFFFF) * (op2 & 0xFFFFFFFF));\n");
-          printf("   HI = ((op1 >> 32) * (op2 >> 32));\n");
-          printf("   mid = ((op1 >> 32) * (op2 & 0xFFFFFFFF));\n");
-          printf("   temp = (LO + ((mid & 0xFFFFFFFF) << 32));\n");
+          printf("   LO = ((uword64)WORD64LO(op1) * WORD64LO(op2));\n");
+          printf("   HI = ((uword64)WORD64HI(op1) * WORD64HI(op2));\n");
+          printf("   mid = ((uword64)WORD64HI(op1) * WORD64LO(op2));\n");
+          printf("   temp = (LO + SET64HI(WORD64LO(mid)));\n");
           printf("   if ((temp == mid) ? (LO != 0) : (temp < mid))\n");
           printf("    HI += 1;\n");
-          printf("   HI += ((mid >> 32) & 0xFFFFFFFF);\n");
-          printf("   mid = ((op1 & 0xFFFFFFFF) * (op2 >> 32));\n");
-          printf("   LO = (temp + ((mid & 0xFFFFFFFF) << 32));\n");
+          printf("   HI += WORD64HI(mid);\n");
+          printf("   mid = ((uword64)WORD64LO(op1) * WORD64HI(op2));\n");
+          printf("   LO = (temp + SET64HI(WORD64LO(mid)));\n");
           printf("   if ((LO == mid) ? (temp != 0) : (LO < mid))\n");
           printf("    HI += 1;\n");
-          printf("   HI += ((mid >> 32) & 0xFFFFFFFF);\n");
+          printf("   HI += WORD64HI(mid);\n");
         } else {
           printf("   uword64 temp = (op1 * op2);\n");
-          printf("   LO = SIGNEXTEND((%s)(temp & 0xFFFFFFFF),32);\n",regtype);
-          printf("   HI = SIGNEXTEND((%s)((temp >> 32) & 0xFFFFFFFF),32);\n",regtype);
+          printf("   LO = SIGNEXTEND((%s)WORD64LO(temp),32);\n",regtype);
+          printf("   HI = SIGNEXTEND((%s)WORD64HI(temp),32);\n",regtype);
         }
         printf("   }\n");
         break ;
@@ -1251,9 +1263,9 @@ process_instructions(doarch,features)
         if (GETDATASIZE() == DOUBLEWORD) {
           printf("   LO = LO + temp;\n");
         } else { /* WORD */
-          printf("   temp += (((HI&0xFFFFFFFF) << 32) | (LO & 0xFFFFFFFF));\n");
-          printf("   LO = SIGNEXTEND((%s)(temp & 0xFFFFFFFF),32);\n",regtype);
-          printf("   HI = SIGNEXTEND((%s)((temp >> 32) & 0xFFFFFFFF),32);\n",regtype);
+          printf("   temp += (SET64HI(WORD64LO(HI)) | WORD64LO(LO));\n");
+          printf("   LO = SIGNEXTEND((%s)WORD64LO(temp),32);\n",regtype);
+          printf("   HI = SIGNEXTEND((%s)WORD64HI(temp),32);\n",regtype);
         }
         printf("   }\n");
         break;
@@ -1641,16 +1653,16 @@ process_instructions(doarch,features)
           printf("    if (to) {\n");
           if (doisa < 4) {
             printf("     if (fs == 0) {\n");
-            printf("      PENDING_FILL((fs + FCR0IDX),(GPR[ft]&0xFFFFFFFF));\n");
+            printf("      PENDING_FILL((fs + FCR0IDX),WORD64LO(GPR[ft]));\n");
             printf("     } else if (fs == 31) {\n");
-            printf("      PENDING_FILL((fs + FCR31IDX),(GPR[ft]&0xFFFFFFFF));\n");
+            printf("      PENDING_FILL((fs + FCR31IDX),WORD64LO(GPR[ft]));\n");
             printf("     } /* else NOP */\n");
             printf("     PENDING_FILL(COCIDX,0); /* special case */\n");
           } else {
             printf("     if (fs == 0) {\n");
-            printf("      FCR0 = (GPR[ft] & 0xFFFFFFFF);\n");
+            printf("      FCR0 = WORD64LO(GPR[ft]);\n");
             printf("     } else if (fs == 31) {\n");
-            printf("      FCR31 = (GPR[ft] & 0xFFFFFFFF);\n");
+            printf("      FCR31 = WORD64LO(GPR[ft]);\n");
             printf("     } /* else NOP */\n");
             printf("     SETFCC(0,((FCR31 & (1 << 23)) ? 1 : 0)); /* COC[1] */\n");
           }
@@ -1674,15 +1686,15 @@ process_instructions(doarch,features)
           if (GETDATASIZE() == WORD) {
             if (doisa < 4) { 
               printf("     if (SizeFGR() == 64) {\n");
-              printf("      PENDING_FILL((fs + FGRIDX),((unsigned long long)((unsigned long long)0xDEADC0DE << 32) | (GPR[ft]&0xFFFFFFFF)));\n");
+              printf("      PENDING_FILL((fs + FGRIDX),(SET64HI(0xDEADC0DE) | WORD64LO(GPR[ft])));\n");
               printf("     } else { \n");
-              printf("      PENDING_FILL((fs + FGRIDX),(GPR[ft]&0xFFFFFFFF));\n");
+              printf("      PENDING_FILL((fs + FGRIDX),WORD64LO(GPR[ft]));\n");
               printf("     }\n");
             } else {
               printf("     if (SizeFGR() == 64)\n");
-              printf("      FGR[fs] = ((unsigned long long)((unsigned long long)0xDEADC0DE << 32) | (GPR[ft] & 0xFFFFFFFF));\n");
+              printf("      FGR[fs] = (SET64HI(0xDEADC0DE) | WORD64LO(GPR[ft]));\n");
               printf("     else\n");
-              printf("      FGR[fs] = (GPR[ft] & 0xFFFFFFFF);\n");
+              printf("      FGR[fs] = WORD64LO(GPR[ft]);\n");
               printf("     fpr_state[fs] = fmt_uninterpreted;\n");
             }
           } else if (GETDATASIZE() == DOUBLEWORD) {
@@ -1692,8 +1704,8 @@ process_instructions(doarch,features)
               printf("     } else\n");
               printf("      if ((fs & 0x1) == 0)\n");
               printf("       {\n");
-              printf("        PENDING_FILL(((fs + 1) + FGRIDX),(GPR[ft]>>32));\n");
-              printf("        PENDING_FILL((fs + FGRIDX),(GPR[ft]&0xFFFFFFFF));\n");
+              printf("        PENDING_FILL(((fs + 1) + FGRIDX),WORD64HI(GPR[ft]));\n");
+              printf("        PENDING_FILL((fs + FGRIDX),WORD64LO(GPR[ft]));\n");
               printf("       }\n");
               if (features & FEATURE_WARN_RESULT) {
                 printf("      else\n");
@@ -1706,8 +1718,8 @@ process_instructions(doarch,features)
               printf("     } else\n");
               printf("      if ((fs & 0x1) == 0)\n");
               printf("       {\n");
-              printf("        FGR[fs + 1] = (GPR[ft] >> 32);\n");
-              printf("        FGR[fs] = (GPR[ft] & 0xFFFFFFFF);\n");
+              printf("        FGR[fs + 1] = WORD64HI(GPR[ft]);\n");
+              printf("        FGR[fs] = WORD64LO(GPR[ft]);\n");
 	      printf("        fpr_state[fs + 1] = fmt_uninterpreted;\n");
 	      printf("        fpr_state[fs] = fmt_uninterpreted;\n");
               printf("       }\n");
@@ -1732,9 +1744,9 @@ process_instructions(doarch,features)
               printf("      PENDING_FILL(ft,FGR[fs]);\n");
               printf("     } else\n");
               printf("      if ((fs & 0x1) == 0) {\n");
-              printf("       PENDING_FILL(ft,((FGR[fs+1]<<32)|FGR[fs]));\n");
+              printf("       PENDING_FILL(ft,(SET64HI(FGR[fs+1]) | FGR[fs]));\n");
               printf("      } else {\n");
-              printf("       PENDING_FILL(ft,((unsigned long long)0xDEADC0DE << 32) | 0xBAD0BAD0);\n");
+              printf("       PENDING_FILL(ft,SET64HI(0xDEADC0DE) | 0xBAD0BAD0);\n");
               if (features & FEATURE_WARN_RESULT)
               printf("        UndefinedResult();\n");
               printf("      }\n");
@@ -1743,9 +1755,9 @@ process_instructions(doarch,features)
               printf("      GPR[ft] = FGR[fs];\n");
               printf("     else\n");
               printf("      if ((fs & 0x1) == 0)\n");
-              printf("       GPR[ft] = ((FGR[fs + 1] << 32) | FGR[fs]);\n");
+              printf("       GPR[ft] = (SET64HI(FGR[fs + 1]) | FGR[fs]);\n");
               printf("      else {\n");
-              printf("       GPR[ft] = (((unsigned long long)0xDEADC0DE << 32) | 0xBAD0BAD0);\n");
+              printf("       GPR[ft] = (SET64HI(0xDEADC0DE) | 0xBAD0BAD0);\n");
               if (features & FEATURE_WARN_RESULT)
               printf("       UndefinedResult();\n");
               printf("      }\n");

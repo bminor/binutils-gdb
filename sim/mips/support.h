@@ -1,4 +1,22 @@
 /*> support.h <*/
+/* Support for the MIPS architecture simulator.
+
+   This file is part of the MIPS sim
+
+		THIS SOFTWARE IS NOT COPYRIGHTED
+
+   Cygnus offers the following for use in the public domain.  Cygnus
+   makes no warranty with regard to the software or it's performance
+   and the user accepts the software "AS IS" with all faults.
+
+   CYGNUS DISCLAIMS ANY WARRANTIES, EXPRESS OR IMPLIED, WITH REGARD TO
+   THIS SOFTWARE INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+   $Revision$
+     $Author$
+       $Date$
+*/
 
 #ifndef __support_h
 #define __support_h
@@ -18,7 +36,9 @@ typedef long long word64;
 typedef unsigned long long uword64;
 
 #define WORD64LO(t)     (unsigned int)((t)&0xFFFFFFFF)
-#define WORD64HI(t)     (unsigned int)((t)>>32)
+#define WORD64HI(t)     (unsigned int)(((uword64)(t))>>32)
+#define SET64LO(t)      (((uword64)(t))&0xFFFFFFFF)
+#define SET64HI(t)	(((uword64)(t))<<32)
 
 /* Sign-extend the given value (e) as a value (b) bits long. We cannot
    assume the HI32bits of the operand are zero, so we must perform a
@@ -45,13 +65,15 @@ typedef unsigned long long uword64;
 
 #error "non-GCC build to be completed" /* avoid using long long */
 
-typedef struct word64 {
+typedef struct uword64 {
  unsigned int lo;
  unsigned int hi;
-} word64;
+} uword64;
 
 #define WORD64LO(t)     (unsigned int)(t.lo)
 #define WORD64HI(t)     (unsigned int)(t.hi)
+#define SET64LO(t)      (..TODO..) /* need structure into which value will be placed */
+#define SET64HI(t)      (..TODO..) /* need structure into which value will be placed */
 
 /* TODO: Update these to manipulate the split structure values */
 #define SIGNEXTEND(e,b)         /* TODO */
