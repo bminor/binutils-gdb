@@ -1137,7 +1137,13 @@ hpread_type_translate (typep)
     case T_LONG:
       return FT_LONG;
     case T_UNS_LONG:
-      return FT_UNSIGNED_LONG;
+      if (typep.dntti.bitlength <= 8)
+	return FT_UNSIGNED_CHAR;
+      if (typep.dntti.bitlength <= 16)
+	return FT_UNSIGNED_SHORT;
+      if (typep.dntti.bitlength <= 32)
+	return FT_UNSIGNED_LONG;
+      return FT_UNSIGNED_LONG_LONG;
     case T_UNS_INT:
       if (typep.dntti.bitlength <= 8)
 	return FT_UNSIGNED_CHAR;

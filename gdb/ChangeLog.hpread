@@ -1,5 +1,9 @@
 Wed Sep 28 00:35:23 1994  Jeff Law  (law@snake.cs.utah.edu)
 
+	* hpread.c (hpread_type_translate): Handle T_UNS_LONG types with
+	lengths other than 32bits (HP C 9.69 represents an "unsigned char"
+	as an T_UNS_LONG with length 8).
+
 	* hpread.c (struct hpread_symfile_info): Delete have_module field
 	and accessor macro.  Minor indentation fix.
 	(hpread_build_psymtabs, case K_MODULE):  Only start a new psymtab
