@@ -1,3 +1,10 @@
+2002-07-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2cfi.c: Include "gcore.h".
+	(execute_stack_op): Fix implementation of the
+	DW_OP_deref and DW_OP_deref_size operators by letting do their
+	lookup in the target.
+
 2002-07-07  Mark Kettenis  <kettenis@gnu.org>
 
 	From Peter Schauer <Peter.Schauer@regent.e-technik.tu-muenchen.de>:

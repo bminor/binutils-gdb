@@ -21,6 +21,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "gdbcore.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
@@ -1119,32 +1120,21 @@ execute_stack_op (struct objfile *objfile,
 	    {
 	    case DW_OP_deref:
 	      {
-		char *ptr = (char *) result;
-		result = read_pointer (objfile->obfd, &ptr);
+		int len = TARGET_ADDR_BIT / TARGET_CHAR_BIT;
+		if (len != 4 && len != 8)
+		  internal_error (__FILE__, __LINE__,
+				  "execute_stack_op error");
+		result = read_memory_unsigned_integer (result, len);
 	      }
 	      break;
 
 	    case DW_OP_deref_size:
 	      {
-		char *ptr = (char *) result;
-		switch (*op_ptr++)
-		  {
-		  case 1:
-		    result = read_1u (objfile->obfd, &ptr);
-		    break;
-		  case 2:
-		    result = read_2u (objfile->obfd, &ptr);
-		    break;
-		  case 4:
-		    result = read_4u (objfile->obfd, &ptr);
-		    break;
-		  case 8:
-		    result = read_8u (objfile->obfd, &ptr);
-		    break;
-		  default:
-		    internal_error (__FILE__, __LINE__,
-				    "execute_stack_op error");
-		  }
+		int len = *op_ptr++;
+		if (len != 1 && len != 2 && len != 4 && len !=8)
+		  internal_error (__FILE__, __LINE__,
+				  "execute_stack_op error");
+		result = read_memory_unsigned_integer (result, len);
 	      }
 	      break;
 
