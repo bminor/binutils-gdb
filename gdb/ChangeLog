@@ -1,3 +1,8 @@
+Mon May 24 01:10:01 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* symmisc.c (dump_msymbols): Avoid gdb coredump with stripped
+	executable.
+
 Sat May 22 10:03:09 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* infrun.c (wait_for_inferior),
