@@ -1,3 +1,8 @@
+Wed Nov 27 13:25:39 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (md_section_align): Check for an alignment of
+	4, not an alignment of 16.  Corrects August 7 patch.
+
 Tue Nov 26 10:33:16 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure, conf.in: Rebuild with autoconf 2.12.
