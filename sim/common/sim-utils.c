@@ -174,7 +174,7 @@ sim_analyze_program (sd, prog_name, prog_bfd)
     return SIM_RC_OK;
 
   /* open a new copy of the prog_bfd */
-  prog_bfd = bfd_openr (prog_name, 0);
+  prog_bfd = bfd_openr (prog_name, STATE_TARGET (sd));
   if (prog_bfd == NULL)
     {
       sim_io_eprintf (sd, "%s: can't open \"%s\": %s\n", 
@@ -192,7 +192,8 @@ sim_analyze_program (sd, prog_name, prog_bfd)
       bfd_close (prog_bfd);
       return SIM_RC_FAIL;
     }
-
+  if (STATE_ARCHITECTURE (sd) != NULL)
+    bfd_set_arch_info (prog_bfd, STATE_ARCHITECTURE (sd));
 
   /* update the sim structure */
   if (STATE_PROG_BFD (sd) != NULL)

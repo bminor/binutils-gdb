@@ -1,3 +1,19 @@
+Thu Aug 28 12:09:15 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-base.h (STATE_ARCHITECTURE, STATE_TARGET): Add to simulator
+ 	base type.
+
+	* sim-options.c (standard_options): Add --architecture=MACHINE and
+ 	--target=TARGET options.
+	(OPTION_ARCHITECTURE, OPTION_TARGET): Define.
+	(standard_option_handler): Handle architecture and target options.
+	(bfd.h): Include.
+	
+	* sim-utils.c (sim_analyze_program): Pass STATE_TARGET to
+ 	bfd_openr.
+	(sim_analyze_program): Set prog_bfd architecture from
+ 	STATE_ARCHITECTURE if known.
+
 Wed Aug 27 18:13:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

@@ -36,6 +36,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sim-io.h"
 #include "sim-assert.h"
 
+#include "bfd.h"
+
 /* Add a set of options to the simulator.
    TABLE is an array of OPTIONS terminated by a NULL `opt.name' entry.
    This is intended to be called by modules in their `install' handler.  */
@@ -84,6 +86,8 @@ static DECLARE_OPTION_HANDLER (standard_option_handler);
 #define OPTION_DEBUG_INSN	(OPTION_START + 0)
 #define OPTION_DEBUG_FILE	(OPTION_START + 1)
 #define OPTION_DO_COMMAND	(OPTION_START + 2)
+#define OPTION_ARCHITECTURE     (OPTION_START + 3)
+#define OPTION_TARGET           (OPTION_START + 4)
 
 static const OPTION standard_options[] =
 {
@@ -125,6 +129,14 @@ static const OPTION standard_options[] =
 
   { {"help", no_argument, NULL, 'H'},
       'H', NULL, "Print help information",
+      standard_option_handler },
+
+  { {"architecture", required_argument, NULL, OPTION_ARCHITECTURE},
+      '\0', "MACHINE", "Specify the architecture to use",
+      standard_option_handler },
+
+  { {"target", required_argument, NULL, OPTION_TARGET},
+      '\0', "BFDNAME", "Specify the object-code format for the object files",
       standard_option_handler },
 
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
@@ -237,6 +249,24 @@ standard_option_handler (sd, opt, arg, is_command)
     case OPTION_DO_COMMAND:
       sim_do_command (sd, arg);
       break;
+
+    case OPTION_ARCHITECTURE:
+      {
+	const struct bfd_arch_info *ap = bfd_scan_arch (arg);
+	if (ap == NULL)
+	  {
+	    sim_io_eprintf (sd, "Architecture `%s' unknown\n", arg);
+	    return SIM_RC_FAIL;
+	  }
+	STATE_ARCHITECTURE (sd) = ap;
+	break;
+      }
+
+    case OPTION_TARGET:
+      {
+	STATE_TARGET (sd) = strdup (arg);
+	break;
+      }
 
     case 'H':
       sim_print_help (sd, is_command);

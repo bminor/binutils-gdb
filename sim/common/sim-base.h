@@ -67,12 +67,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 typedef struct _sim_cpu sim_cpu;
 
 #include "sim-module.h"
+
 #include "sim-trace.h"
 #include "sim-profile.h"
 #include "sim-model.h"
 #include "sim-core.h"
 #include "sim-events.h"
 #include "sim-io.h"
+#include "sim-engine.h"
+#include "sim-watch.h"
 
 
 /* Global pointer to current state while sim_resume is running.
@@ -138,6 +141,14 @@ typedef struct {
   int verbose_p;
 #define STATE_VERBOSE_P(sd) ((sd)->base.verbose_p)
 
+  /* If non NULL, the BFD architecture specified on the command line */
+  const struct bfd_arch_info *architecture;
+#define STATE_ARCHITECTURE(sd) ((sd)->base.architecture)
+
+  /* If non NULL, the bfd target specified on the command line */
+  const char *target;
+#define STATE_TARGET(sd) ((sd)->base.target)
+
   /* In standalone simulator, this is the program's arguments passed
      on the command line.  */
   char **prog_argv;
@@ -171,6 +182,8 @@ typedef struct {
 #ifdef SIM_HAVE_FLATMEM
   unsigned int mem_size;
 #define STATE_MEM_SIZE(sd) ((sd)->base.mem_size)
+  unsigned int mem_base;
+#define STATE_MEM_BASE(sd) ((sd)->base.mem_base)
   unsigned char *memory;
 #define STATE_MEMORY(sd) ((sd)->base.memory)
 #endif
@@ -182,6 +195,14 @@ typedef struct {
   /* event handler */
 #define STATE_EVENTS(sd) (&(sd)->base.events)
   sim_events events;
+
+  /* generic halt/resume engine */
+  sim_engine engine;
+#define STATE_ENGINE(sd) (&(sd)->base.engine)
+
+  /* generic watchpoint support */
+  sim_watchpoints watchpoints;
+#define STATE_WATCHPOINTS(sd) (&(sd)->base.watchpoints)
 
   /* Marker for those wanting to do sanity checks.
      This should remain the last member of this struct to help catch
@@ -202,8 +223,8 @@ typedef struct {
 #define CPU_STATE(cpu) ((cpu)->base.state)
 
   /* Processor specific core data */
-#define CPU_CORE(cpu) (& (cpu)->base.core)
   sim_cpu_core core;
+#define CPU_CORE(cpu) (& (cpu)->base.core)
 
   /* Trace data.  See sim-trace.h.  */
   TRACE_DATA trace_data;
