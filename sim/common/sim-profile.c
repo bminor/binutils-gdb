@@ -1,5 +1,5 @@
 /* Default profiling support.
-   Copyright (C) 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -564,7 +564,7 @@ profile_pc_init (SIM_DESC sd)
 				+ PROFILE_PC_NR_BUCKETS (data) - 1)
 			       / PROFILE_PC_NR_BUCKETS (data));
 	      PROFILE_PC_SHIFT (data) = 0;
-	      while (bucket_size < PROFILE_PC_BUCKET_SIZE (data))
+	      while (bucket_size > PROFILE_PC_BUCKET_SIZE (data))
 		{
 		  PROFILE_PC_SHIFT (data) += 1;
 		}
@@ -684,6 +684,12 @@ profile_print_pc (sim_cpu *cpu, int verbose)
 	  }
 	/* size of sample buffer (+ header) */
 	header[2] = PROFILE_PC_NR_BUCKETS (profile) * 2 + sizeof (header);
+
+	/* Header must be written out in target byte order.  */
+	H2T (header[0]);
+	H2T (header[1]);
+	H2T (header[2]);
+
 	ok = fwrite (&header, sizeof (header), 1, pf);
 	for (loop = 0;
 	     ok && (loop < PROFILE_PC_NR_BUCKETS (profile));

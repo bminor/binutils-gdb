@@ -1,3 +1,12 @@
+2001-02-09  Ben Elliston  <bje@redhat.com>
+
+	* (profile_print_pc): Write header out in target byte order.
+
+2001-02-09  Ben Elliston  <bje@redhat.com>
+
+	* sim-profile.c (profile_pc_init): Correct bug in loop logic when
+	adjusting the pc shift value.
+
 2001-01-12  Chris Demetriou  <cgd@sibyte.com>
 
 	* aclocal.m4 (SIM_AC_OPTION_SCACHE): Properly handle the case
