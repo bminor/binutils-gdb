@@ -1,3 +1,15 @@
+Thu Apr  8 16:01:21 1993  Fred Fish  (fnf@cygnus.com)
+
+	* symtab.c (find_methods, gdb_mangle_name):  Note that functions
+	are g++ specific.
+	* symtab.h (VTBL_FNADDR_OFFSET, OPNAME_PREFIX_P, VTBL_PREFIX_P,
+	DESTRUCTOR_PREFIX_P):  Note that macros are g++ specific.
+
+Thu Apr  8 12:45:32 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* i960-pinsn.c (tabent): Copied struct definition from
+	opcodes/i960-dis.c.
+
 Thu Apr  8 10:34:37 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* symtab.h (DESTRUCTOR_PREFIX_P): New macro to check if physname
