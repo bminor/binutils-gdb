@@ -1,5 +1,10 @@
 2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
 
+	* symtab.c (find_pc_sect_line): Don't consider end-of-function
+	lines.
+
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
 	* thread-db.c (attach_thread): Prototype.
 	(struct private_thread_info): Remove lwpid.  Add thread handle (th),
 	thread information (ti), and valid flags (th_valid, ti_valid).

@@ -1,8 +1,8 @@
 /* Symbol table lookup for the GNU debugger, GDB.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -2012,9 +2012,11 @@ find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
          the first line, prev will not be set.  */
 
       /* Is this file's best line closer than the best in the other files?
-         If so, record this file, and its best line, as best so far.  */
+         If so, record this file, and its best line, as best so far.  Don't
+         save prev if it represents the end of a function (i.e. line number
+         0) instead of a real line.  */
 
-      if (prev && (!best || prev->pc > best->pc))
+      if (prev && prev->line && (!best || prev->pc > best->pc))
 	{
 	  best = prev;
 	  best_symtab = s;
