@@ -1,5 +1,16 @@
 1999-07-30  Jakub Jelinek  <jj@ultra.linux.cz>
 
+	* elf64-sparc.c (sparc64_elf_build_plt): Cosmetic change - ABI
+	wants ba,a,pt %xcc instead of %icc.
+	Emit correct .PLT0-(.PLTN+4) initial value into the pointer slots
+	of large PLT entries.
+	(sparc64_elf_plt_ptr_offset): Fix calculation.
+	(sparc64_elf_finish_dynamic_symbol): Negative value of R_SPARC_JMP_SLOT
+	addend should be relative to load address, not .plt section start.
+	(sparc64_elf_size_info): Sparc64 uses 32bit .hash entries.
+
+1999-07-30  Jakub Jelinek  <jj@ultra.linux.cz>
+
 	* elf-bfd.h (struct elf_backend_data): Add
 	print_symbol_all and output_arch_syms backend methods.
 	* elfxx-target.h: Likewise.

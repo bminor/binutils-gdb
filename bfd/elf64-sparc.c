@@ -875,8 +875,8 @@ sparc64_elf_build_plt (output_bfd, contents, nentries)
       /* sethi (. - plt0), %g1 */
       sethi = 0x03000000 | (i * PLT_ENTRY_SIZE);
 
-      /* ba,a,pt %icc, plt1 */
-      ba = 0x30480000 | (((contents+PLT_ENTRY_SIZE) - (entry+4)) / 4 & 0x7ffff);
+      /* ba,a,pt %xcc, plt1 */
+      ba = 0x30680000 | (((contents+PLT_ENTRY_SIZE) - (entry+4)) / 4 & 0x7ffff);
 
       bfd_put_32 (output_bfd, sethi, entry);
       bfd_put_32 (output_bfd, ba, entry+4);
@@ -913,7 +913,7 @@ sparc64_elf_build_plt (output_bfd, contents, nentries)
 	  bfd_put_32 (output_bfd, 0x83c3c001, entry+16); /* jmpl %o7+%g1,%g1 */
 	  bfd_put_32 (output_bfd, 0x9e100005, entry+20); /* mov %g5,%o7 */
 
-	  bfd_put_64 (output_bfd, contents - entry+4, ptr);
+	  bfd_put_64 (output_bfd, contents - (entry+4), ptr);
 	}
     }
 }
@@ -948,11 +948,15 @@ sparc64_elf_plt_ptr_offset (index, max)
 
   /* See above for details.  */
 
-  block = (index - LARGE_PLT_THRESHOLD) / 160;
-  ofs = (index - LARGE_PLT_THRESHOLD) % 160;
-  last = (max - LARGE_PLT_THRESHOLD) % 160;
+  block = (((index - LARGE_PLT_THRESHOLD) / 160) * 160)
+	  + LARGE_PLT_THRESHOLD;
+  ofs = index - block;
+  if (block + 160 > max)
+    last = (max - LARGE_PLT_THRESHOLD) % 160;
+  else
+    last = 160;
 
-  return ((LARGE_PLT_THRESHOLD + block*160) * PLT_ENTRY_SIZE
+  return (block * PLT_ENTRY_SIZE
 	  + last * 6*4
 	  + ofs * 8);
 }
@@ -2566,7 +2570,8 @@ sparc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	{
 	  int max = splt->_raw_size / PLT_ENTRY_SIZE;
 	  rela.r_offset = sparc64_elf_plt_ptr_offset (h->plt.offset, max);
-	  rela.r_addend = -(sparc64_elf_plt_entry_offset (h->plt.offset) + 4);
+	  rela.r_addend = -(sparc64_elf_plt_entry_offset (h->plt.offset) + 4)
+			  -(splt->output_section->vma + splt->output_offset);
 	}
       rela.r_offset += (splt->output_section->vma + splt->output_offset);
       rela.r_info = ELF64_R_INFO (h->dynindx, R_SPARC_JMP_SLOT);
@@ -2896,7 +2901,7 @@ const struct elf_size_info sparc64_elf_size_info =
   sizeof (Elf64_External_Sym),
   sizeof (Elf64_External_Dyn),
   sizeof (Elf_External_Note),
-  8,		/* hash-table entry size */
+  4,		/* hash-table entry size */
   /* internal relocations per external relocations.
      For link purposes we use just 1 internal per
      1 external, for assembly and slurp symbol table
