@@ -1,5 +1,33 @@
 Tue Aug  8 13:07:05 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* struc-symbol.h (struct symbol): Add sy_mri_common bit.
+	* read.h (mri_comon_symbol): Declare.
+	(s_mri_common): Declare.
+	* read.c (mri_line_label): New static variable.
+	(mri_common_symbol): New global variable.
+	(potable): Add "common" and "common.s".
+	(read_a_source_file): In MRI mode, set mri_line_label for a label
+	at the start of a line.
+	(s_mri_common): New function.
+	(s_space): Handle mri_common_symbol.
+	* symbols.c (colon): Change return value from void to symbolS *,
+	and return new symbol.  If mri_common_symbol is set, attach the
+	new symbol to it.
+	(resolve_symbol_value): Handle an sy_mri_common symbol.
+	* symbols.h (colon): Change return value in declaration.
+	* subsegs.c (subseg_set_rest): Clear mri_common_symbol.
+	(subseg_set (both versions)): Likewise.
+	* frags.c (frag_more): Warn if mri_common_symbol is not NULL.
+	* write.c (adjust_reloc_syms): Skip sy_mri_common symbols.
+	(write_object_file): Discard sy_mri_common symbols.
+	(fixup_segment): Change relocations against sy_mri_common symbols
+	to be against the common symbol itself.
+	* config/obj-coff.c (yank_symbols): Discard sy_mri_common symbols.
+	(fixup_segment): Change relocations against sy_mri_common symbols
+	to be against the common symbol itself.
+	* config/obj-aout.c (obj_crawl_symbol_chain): Discard
+	sy_mri_common symbols.
+
 	* doc/c-m68k.texi: Add documentation for CPU specific options, and
 	for Motorola syntax.
 

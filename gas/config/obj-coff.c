@@ -2481,6 +2481,15 @@ yank_symbols ()
        symbolP;
        symbolP = symbolP ? symbol_next (symbolP) : symbol_rootP)
     {
+      if (symbolP->sy_mri_common)
+	{
+	  if (S_GET_STORAGE_CLASS (symbolP) == C_EXT)
+	    as_bad ("%s: global symbols not supported in common sections",
+		    S_GET_NAME (symbolP));
+	  symbol_remove (symbolP, &symbol_rootP, &symbol_lastP);
+	  continue;
+	}
+
       if (!SF_GET_DEBUG (symbolP))
 	{
 	  /* Debug symbols do not need all this rubbish */
@@ -3593,7 +3602,7 @@ fixup_segment (segP, this_segment_type)
   register fixS * fixP;
   register symbolS *add_symbolP;
   register symbolS *sub_symbolP;
-  register long add_number;
+  long add_number;
   register int size;
   register char *place;
   register long where;
@@ -3631,6 +3640,14 @@ fixup_segment (segP, this_segment_type)
       sub_symbolP = fixP->fx_subsy;
       add_number = fixP->fx_offset;
       pcrel = fixP->fx_pcrel;
+
+      if (add_symbolP->sy_mri_common)
+	{
+	  know (add_symbolP->sy_value.X_op == O_symbol);
+	  add_number += S_GET_VALUE (add_symbolP);
+	  fixP->fx_offset = add_number;
+	  add_symbolP = fixP->fx_addsy = add_symbolP->sy_value.X_add_symbol;
+	}
 
       if (add_symbolP)
 	{
@@ -3680,6 +3697,10 @@ fixup_segment (segP, this_segment_type)
 		  fixP->fx_addsy = NULL;
 		  fixP->fx_subsy = NULL;
 		  fixP->fx_done = 1;
+#ifdef TC_M68K /* is this right? */
+		  pcrel = 0;
+		  fixP->fx_pcrel = 0;
+#endif
 		}
 	    }
 	  else

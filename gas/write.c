@@ -630,6 +630,12 @@ adjust_reloc_syms (abfd, sec, xxx)
 	sym = fixp->fx_addsy;
 	symsec = sym->bsym->section;
 
+	if (sym->sy_mri_common)
+	  {
+	    /* These symbols are handled specially in fixup_segment.  */
+	    goto done;
+	  }
+
 	/* If it's one of these sections, assume the symbol is
 	   definitely going to be output.  The code in
 	   md_estimate_size_before_relax in tc-mips.c uses this test
@@ -1578,6 +1584,15 @@ write_object_file ()
 	  int punt = 0;
 	  const char *name;
 
+	  if (symp->sy_mri_common)
+	    {
+	      if (S_IS_EXTERNAL (symp))
+		as_bad ("%s: global symbols not supported in common sections",
+			S_GET_NAME (symp));
+	      symbol_remove (symp, &symbol_rootP, &symbol_lastP);
+	      continue;
+	    }
+
 	  name = S_GET_NAME (symp);
 	  if (name)
 	    {
@@ -2153,6 +2168,14 @@ fixup_segment (fixP, this_segment_type)
       add_number = fixP->fx_offset;
       pcrel = fixP->fx_pcrel;
       plt = fixP->fx_plt;
+
+      if (add_symbolP->sy_mri_common)
+	{
+	  know (add_symbolP->sy_value.X_op == O_symbol);
+	  add_number += S_GET_VALUE (add_symbolP);
+	  fixP->fx_offset = add_number;
+	  add_symbolP = fixP->fx_addsy = add_symbolP->sy_value.X_add_symbol;
+	}
 
       if (add_symbolP)
 	add_symbol_segment = S_GET_SEGMENT (add_symbolP);

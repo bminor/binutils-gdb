@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
  * Segments & sub-segments.
@@ -38,7 +38,7 @@ segment_info_type segment_info[SEG_MAXIMUM_ORDINAL];
 frchainS *data0_frchainP, *bss0_frchainP;
 
 #endif /* MANY_SEGMENTS */
-char *const seg_name[] =
+char const *const seg_name[] =
 {
   "absolute",
 #ifdef MANY_SEGMENTS
@@ -87,7 +87,6 @@ subsegs_begin ()
   know (SEG_MAXIMUM_ORDINAL == SEG_REGISTER);
 #endif
 
-  obstack_begin (&frags, 5000);
   frchain_root = NULL;
   frchain_now = NULL;		/* Warn new_subseg() that we are booting. */
   /* Fake up 1st frag.  It won't be used=> is ok if obstack...
@@ -198,7 +197,7 @@ subseg_set_rest (seg, subseg)
 
   if (frag_now)		/* If not bootstrapping. */
     {
-      frag_now->fr_fix = (char*) obstack_next_free (&frags) - frag_now->fr_literal;
+      frag_now->fr_fix = frag_now_fix ();
       frag_wane (frag_now);	/* Close off any frag in old subseg. */
     }
   /*
@@ -261,22 +260,22 @@ subseg_set_rest (seg, subseg)
        * This should be the only code that creates a frchainS.
        */
       newP = (frchainS *) obstack_alloc (&frags, sizeof (frchainS));
-      memset (newP, 0, sizeof (frchainS));
-      /* This begines on a good boundary because a obstack_done()
-	 preceeded it.  It implies an obstack_done(), so we expect
-	 the next object allocated to begin on a correct boundary. */
-      *lastPP = newP;
-      newP->frch_next = frcP;	/* perhaps NULL */
-      (frcP = newP)->frch_subseg = subseg;
+      newP->frch_root = 0;
+      newP->frch_subseg = subseg;
       newP->frch_seg = seg;
       newP->frch_last = NULL;
 #ifdef BFD_ASSEMBLER
       newP->fix_root = NULL;
       newP->fix_tail = NULL;
 #endif
+      obstack_begin (&newP->frch_obstack, 5000);
+
+      *lastPP = newP;
+      newP->frch_next = frcP;	/* perhaps NULL */
+      frcP = newP;
     }
   /*
-   * Here with frcP ->ing to the frchainS for subseg.
+   * Here with frcP pointing to the frchainS for subseg.
    */
   frchain_now = frcP;
   /*
@@ -308,6 +307,8 @@ subseg_set_rest (seg, subseg)
       frcP->frch_root = new_fragP;
     }
   frcP->frch_last = new_fragP;
+
+  mri_common_symbol = NULL;
 }
 
 /*
@@ -385,6 +386,7 @@ subseg_set (seg, subseg)	/* begin assembly for a new sub-segment */
     {				/* we just changed sub-segments */
       subseg_set_rest (seg, subseg);
     }
+  mri_common_symbol = NULL;
 }
 
 #else /* BFD_ASSEMBLER */
@@ -478,6 +480,7 @@ subseg_set (secptr, subseg)
 {
   if (! (secptr == now_seg && subseg == now_subseg))
     subseg_set_rest (secptr, subseg);
+  mri_common_symbol = NULL;
 }
 
 #ifndef obj_sec_sym_ok_for_reloc
@@ -516,14 +519,15 @@ section_symbol (sec)
 #define EMIT_SECTION_SYMBOLS 1
 #endif
 
-      if (EMIT_SECTION_SYMBOLS
+      if (! EMIT_SECTION_SYMBOLS
 #ifdef BFD_ASSEMBLER
 	  && symbol_table_frozen
 #endif
 	  )
-	s = symbol_new (sec->name, sec, 0, &zero_address_frag);
-      else
+	/* Here we know it won't be going into the symbol table.  */
 	s = symbol_create (sec->name, sec, 0, &zero_address_frag);
+      else
+	s = symbol_new (sec->name, sec, 0, &zero_address_frag);
       S_CLEAR_EXTERNAL (s);
 
       /* Use the BFD section symbol, if possible.  */

@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* #define DEBUG_SYMS / * to debug symbol list maintenance */
 
@@ -26,6 +26,10 @@
 
 #include "obstack.h"		/* For "symbols.h" */
 #include "subsegs.h"
+
+/* This is non-zero if symbols are case sensitive, which is the
+   default.  */
+int symbols_case_sensitive = 1;
 
 #ifndef WORKING_DOT_WORD
 extern int new_broken_words;
@@ -109,6 +113,15 @@ symbol_create (name, segment, valu, frag)
     tc_canonicalize_symbol_name (preserved_copy_of_name);
 #endif
 
+  if (! symbols_case_sensitive)
+    {
+      unsigned char *s;
+
+      for (s = (unsigned char *) preserved_copy_of_name; *s != '\0'; s++)
+	if (islower (*s))
+	  *s = toupper (*s);
+    }
+
   symbolP = (symbolS *) obstack_alloc (&notes, sizeof (symbolS));
 
   /* symbol must be born in some fixed state.  This seems as good as any. */
@@ -150,7 +163,7 @@ symbol_create (name, segment, valu, frag)
  * Gripes if we are redefining a symbol incompatibly (and ignores it).
  *
  */
-void 
+symbolS *
 colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
      register char *sym_name;	/* symbol name, as a cannonical string */
      /* We copy this string: OK to alter later. */
@@ -204,7 +217,7 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
     {
 #ifdef RESOLVE_SYMBOL_REDEFINITION
       if (RESOLVE_SYMBOL_REDEFINITION (symbolP))
-	return;
+	return symbolP;
 #endif
       /*
        *	Now check for undefined symbols
@@ -311,9 +324,23 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
       symbol_table_insert (symbolP);
     }				/* if we have seen this symbol before */
 
+  if (mri_common_symbol != NULL)
+    {
+      /* This symbol is actually being defined within an MRI common
+         section.  This requires special handling.  */
+      symbolP->sy_value.X_op = O_symbol;
+      symbolP->sy_value.X_add_symbol = mri_common_symbol;
+      symbolP->sy_value.X_add_number = S_GET_VALUE (mri_common_symbol);
+      symbolP->sy_frag = &zero_address_frag;
+      S_SET_SEGMENT (symbolP, expr_section);
+      symbolP->sy_mri_common = 1;
+    }
+
 #ifdef tc_frob_label
   tc_frob_label (symbolP);
 #endif
+
+  return symbolP;
 }
 
 
@@ -416,6 +443,17 @@ symbol_find_base (name, strip_underscore)
     name = tc_canonicalize_symbol_name (copy);
   }
 #endif
+
+  if (! symbols_case_sensitive)
+    {
+      unsigned char *copy;
+
+      copy = (unsigned char *) alloca (strlen (name) + 1);
+      name = (const char *) copy;
+      for (; *copy != '\0'; copy++)
+	if (islower (*copy))
+	  *copy = toupper (*copy);
+    }
 
   return ((symbolS *) hash_find (sy_hash, name));
 }
@@ -616,6 +654,16 @@ resolve_symbol_value (symp)
 	case O_symbol:
 	  resolve_symbol_value (symp->sy_value.X_add_symbol);
 
+	  if (symp->sy_mri_common)
+	    {
+	      /* This is a symbol inside an MRI common section.  The
+                 relocation routines are going to handle it specially.
+                 Don't change the value.  */
+	      S_SET_VALUE (symp, symp->sy_value.X_add_number);
+	      resolved = symp->sy_value.X_add_symbol->sy_resolved;
+	      break;
+	    }
+
 #if 0 /* I thought this was needed for some of the i386-svr4 PIC
 	 support, but it appears I was wrong, and it breaks rs6000
 	 support.  */
@@ -698,6 +746,12 @@ resolve_symbol_value (symp)
 	case O_bit_exclusive_or:
 	case O_bit_and:
 	case O_subtract:
+	case O_eq:
+	case O_ne:
+	case O_lt:
+	case O_le:
+	case O_ge:
+	case O_gt:
 	  resolve_symbol_value (symp->sy_value.X_add_symbol);
 	  resolve_symbol_value (symp->sy_value.X_op_symbol);
 	  seg_left = S_GET_SEGMENT (symp->sy_value.X_add_symbol);
@@ -727,6 +781,12 @@ resolve_symbol_value (symp)
 	    case O_bit_and:		val = left & right; break;
 	    case O_add:			val = left + right; break;
 	    case O_subtract:		val = left - right; break;
+	    case O_eq:		val = left == right ? ~ (offsetT) 0 : 0;
+	    case O_ne:		val = left != right ? ~ (offsetT) 0 : 0;
+	    case O_lt:		val = left <  right ? ~ (offsetT) 0 : 0;
+	    case O_le:		val = left <= right ? ~ (offsetT) 0 : 0;
+	    case O_ge:		val = left >= right ? ~ (offsetT) 0 : 0;
+	    case O_gt:		val = left >  right ? ~ (offsetT) 0 : 0;
 	    default:			abort ();
 	    }
 	  S_SET_VALUE (symp,
@@ -1205,17 +1265,22 @@ S_IS_LOCAL (s)
      symbolS *s;
 {
   flagword flags = s->bsym->flags;
+  const char *name;
 
   /* sanity check */
   if (flags & BSF_LOCAL && flags & BSF_GLOBAL)
     abort ();
 
-  return (S_GET_NAME (s)
+  name = S_GET_NAME (s);
+  return (name != NULL
 	  && ! S_IS_DEBUG (s)
-	  && (strchr (S_GET_NAME (s), '\001')
-	      || strchr (S_GET_NAME (s), '\002')
-	      || (S_LOCAL_NAME (s)
-		  && !flag_keep_locals)));
+	  && (strchr (name, '\001')
+	      || strchr (name, '\002')
+	      || (! flag_keep_locals
+		  && (LOCAL_LABEL (name)
+		      || (flag_mri
+			  && name[0] == '?'
+			  && name[1] == '?')))));
 }
 
 int
@@ -1455,6 +1520,24 @@ print_expr_1 (file, exp)
       break;
     case O_bit_and:
       fprintf (file, "bit_and");
+      break;
+    case O_eq:
+      fprintf (file, "eq");
+      break;
+    case O_ne:
+      fprintf (file, "ne");
+      break;
+    case O_lt:
+      fprintf (file, "lt");
+      break;
+    case O_le:
+      fprintf (file, "le");
+      break;
+    case O_ge:
+      fprintf (file, "ge");
+      break;
+    case O_gt:
+      fprintf (file, "gt");
       break;
     case O_add:
       indent_level++;

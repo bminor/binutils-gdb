@@ -42,7 +42,7 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 
 #include "as.h"
 #include "subsegs.h"
-
+#include "libiberty.h"
 #include "obstack.h"
 #include "listing.h"
 
@@ -84,7 +84,7 @@ die horribly;
 #endif
 
 /* used by is_... macros. our ctype[] */
-const char lex_type[256] =
+char lex_type[256] =
 {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* @ABCDEFGHIJKLMNO */
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* PQRSTUVWXYZ[\]^_ */
@@ -169,6 +169,15 @@ struct broken_word *broken_words;
 int new_broken_words;
 #endif
 
+/* If this line had an MRI style label, it is stored in this variable.
+   This is used by some of the MRI pseudo-ops.  */
+static symbolS *mri_line_label;
+
+/* This global variable is used to support MRI common sections.  We
+   translate such sections into a common symbol.  This variable is
+   non-NULL when we are in an MRI common section.  */
+symbolS *mri_common_symbol;
+
 char *demand_copy_string PARAMS ((int *lenP));
 int is_it_end_of_statement PARAMS ((void));
 static segT get_segmented_expression PARAMS ((expressionS *expP));
@@ -193,11 +202,14 @@ read_begin ()
   for (p = line_separator_chars; *p; p++)
     is_end_of_line[(unsigned char) *p] = 1;
   /* Use more.  FIXME-SOMEDAY. */
+
+  if (flag_mri)
+    lex_type['?'] = 3;
 }
 
 /* set up pseudo-op tables */
 
-struct hash_control *po_hash;
+static struct hash_control *po_hash;
 
 static const pseudo_typeS potable[] =
 {
@@ -209,7 +221,20 @@ static const pseudo_typeS potable[] =
 /* block */
   {"byte", cons, 1},
   {"comm", s_comm, 0},
+  {"common", s_mri_common, 0},
+  {"common.s", s_mri_common, 1},
   {"data", s_data, 0},
+  {"dc", cons, 2},
+  {"dc.b", cons, 1},
+  {"dc.d", float_cons, 'd'},
+  {"dc.l", cons, 4},
+  {"dc.s", float_cons, 'f'},
+  {"dc.w", cons, 2},
+  {"dc.x", float_cons, 'x'},
+  {"ds", s_space, 2},
+  {"ds.b", s_space, 1},
+  {"ds.l", s_space, 4},
+  {"ds.w", s_space, 2},
 #ifdef S_SET_DESC
   {"desc", s_desc, 0},
 #endif
@@ -282,6 +307,7 @@ static const pseudo_typeS potable[] =
 /* type */
 /* use */
 /* val */
+  {"xdef", s_globl, 0},
   {"xstabs", s_xstab, 's'},
   {"word", cons, 2},
   {"zero", s_space, 0},
@@ -385,22 +411,43 @@ read_a_source_file (name)
 	      if (input_line_pointer[-1] == '\n')
 		bump_line_counters ();
 
-#if defined (MRI) || defined (LABELS_WITHOUT_COLONS)
-	      /* Text at the start of a line must be a label, we run down
-		 and stick a colon in.  */
-	      if (is_name_beginner (*input_line_pointer))
-		{
-		  char *line_start = input_line_pointer;
-		  char c = get_symbol_end ();
-		  colon (line_start);
-		  *input_line_pointer = c;
-		  if (c == ':')
-		    input_line_pointer++;
-
-		}
+	      if (flag_mri
+#ifdef LABELS_WITHOUT_COLONS
+		  || 1
 #endif
-	    }
+		  )
+		{
+		  mri_line_label = NULL;
 
+		  /* Text at the start of a line must be a label, we
+		     run down and stick a colon in.  */
+		  if (is_name_beginner (*input_line_pointer))
+		    {
+		      char *line_start = input_line_pointer;
+		      char c = get_symbol_end ();
+
+		      /* In MRI mode, the EQU pseudoop must be handled
+                         specially.  */
+		      if (flag_mri)
+			{
+			  if ((strncasecmp (input_line_pointer + 1, "EQU", 3)
+			       == 0)
+			      && (input_line_pointer[4] == ' '
+				  || input_line_pointer[4] == '\t'))
+			    {
+			      input_line_pointer += 4;
+			      equals (line_start);
+			      continue;
+			    }
+			}
+
+		      mri_line_label = colon (line_start);
+		      *input_line_pointer = c;
+		      if (c == ':')
+			input_line_pointer++;
+		    }
+		}
+	    }
 
 	  /*
 	   * We are at the begining of a line, or similar place.
@@ -464,11 +511,6 @@ read_a_source_file (name)
 		}
 	      else
 		{		/* expect pseudo-op or machine instruction */
-#ifdef MRI
-		  if (!done_pseudo (s))
-
-#else
-
 		  pop = NULL;
 
 #define IGNORE_OPCODE_CASE
@@ -484,12 +526,18 @@ read_a_source_file (name)
 		  }
 #endif
 
+		  if (flag_mri
 #ifdef NO_PSEUDO_DOT
-		  /* The m88k uses pseudo-ops without a period.  */
-		  pop = (pseudo_typeS *) hash_find (po_hash, s);
-		  if (pop != NULL && pop->poc_handler == NULL)
-		    pop = NULL;
+		      || 1
 #endif
+		      )
+		    {
+		      /* The MRI assembler and the m88k use pseudo-ops
+                         without a period.  */
+		      pop = (pseudo_typeS *) hash_find (po_hash, s);
+		      if (pop != NULL && pop->poc_handler == NULL)
+			pop = NULL;
+		    }
 
 		  if (pop != NULL || *s == '.')
 		    {
@@ -528,7 +576,6 @@ read_a_source_file (name)
 		      (*pop->poc_handler) (pop->poc_val);
 		    }
 		  else
-#endif
 		    {		/* machine instruction */
 		      /* WARNING: c has char, which may be end-of-line. */
 		      /* Also: input_line_pointer->`\0` where c was. */
@@ -916,6 +963,104 @@ s_comm (ignore)
   know (symbolP->sy_frag == &zero_address_frag);
   demand_empty_rest_of_line ();
 }				/* s_comm() */
+
+/* The MRI COMMON pseudo-op.  We handle this by creating a common
+   symbol with the appropriate name.  We make s_space do the right
+   thing by increasing the size.  */
+
+void
+s_mri_common (small)
+     int small;
+{
+  char *name;
+  char c;
+  char *alc = NULL;
+  symbolS *sym;
+  offsetT align;
+
+  if (! flag_mri)
+    {
+      s_comm (0);
+      return;
+    }
+
+  SKIP_WHITESPACE ();
+
+  name = input_line_pointer;
+  if (! isdigit ((unsigned char) *name))
+    c = get_symbol_end ();
+  else
+    {
+      do
+	{
+	  ++input_line_pointer;
+	}
+      while (isdigit ((unsigned char) *input_line_pointer));
+      c = *input_line_pointer;
+      *input_line_pointer = '\0';
+
+      if (mri_line_label != NULL)
+	{
+	  alc = (char *) xmalloc (strlen (S_GET_NAME (mri_line_label))
+				  + (input_line_pointer - name)
+				  + 1);
+	  sprintf (alc, "%s%s", name, S_GET_NAME (mri_line_label));
+	  name = alc;
+	}
+    }
+
+  sym = symbol_find_or_make (name);
+  *input_line_pointer = c;
+  if (alc != NULL)
+    free (alc);
+
+  if (*input_line_pointer != ',')
+    align = 0;
+  else
+    {
+      ++input_line_pointer;
+      align = get_absolute_expression ();
+    }
+
+  if (S_IS_DEFINED (sym))
+    {
+#if defined (S_IS_COMMON) || defined (BFD_ASSEMBLER)
+      if (! S_IS_COMMON (sym))
+#endif
+	{
+	  as_bad ("attempt to re-define symbol `%s'", S_GET_NAME (sym));
+	  ignore_rest_of_line ();
+	  return;
+	}
+    }
+
+  S_SET_EXTERNAL (sym);
+  mri_common_symbol = sym;
+
+#ifdef S_SET_ALIGN
+  if (align != 0)
+    S_SET_ALIGN (sym, align);
+#endif
+
+  if (mri_line_label != NULL)
+    {
+      mri_line_label->sy_value.X_op = O_symbol;
+      mri_line_label->sy_value.X_add_symbol = sym;
+      mri_line_label->sy_value.X_add_number = S_GET_VALUE (sym);
+      mri_line_label->sy_frag = &zero_address_frag;
+      S_SET_SEGMENT (mri_line_label, expr_section);
+    }
+
+  /* FIXME: We just ignore the small argument, which distinguishes
+     COMMON and COMMON.S.  I don't know what we can do about it.  */
+
+  /* Ignore the type and hptype.  */
+  if (*input_line_pointer == ',')
+    input_line_pointer += 2;
+  if (*input_line_pointer == ',')
+    input_line_pointer += 2;
+  demand_empty_rest_of_line ();
+}
 
 void
 s_data (ignore)
@@ -1457,12 +1602,27 @@ s_space (mult)
 	  return;
 	}
 
+      /* If we are secretly in an MRI common section, then creating
+         space just increases the size of the common symbol.  */
+      if (mri_common_symbol != NULL)
+	{
+	  S_SET_VALUE (mri_common_symbol,
+		       S_GET_VALUE (mri_common_symbol) + repeat);
+	  demand_empty_rest_of_line ();
+	  return;
+	}
+
       if (!need_pass_2)
 	p = frag_var (rs_fill, 1, 1, (relax_substateT) 0, (symbolS *) 0,
 		      repeat, (char *) 0);
     }
   else
     {
+      if (mri_common_symbol != NULL)
+	{
+	  as_bad ("space allocation too complex in common section");
+	  mri_common_symbol = NULL;
+	}
       if (!need_pass_2)
 	p = frag_var (rs_space, 1, 1, (relax_substateT) 0,
 		      make_expr_symbol (&exp), 0L, (char *) 0);
@@ -1659,16 +1819,14 @@ pseudo_set (symbolP)
    are defined, which is the normal case, then only simple expressions
    are permitted.  */
 
+static void
+parse_mri_cons PARAMS ((expressionS *exp, unsigned int nbytes));
+
 #ifndef TC_PARSE_CONS_EXPRESSION
 #ifdef BITFIELD_CONS_EXPRESSIONS
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) parse_bitfield_cons (EXP, NBYTES)
 static void 
 parse_bitfield_cons PARAMS ((expressionS *exp, unsigned int nbytes));
-#endif
-#ifdef MRI
-#define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) parse_mri_cons (EXP)
-static void
-parse_mri_cons PARAMS ((expressionS *exp));
 #endif
 #ifdef REPEAT_CONS_EXPRESSIONS
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) parse_repeat_cons (EXP, NBYTES)
@@ -1703,7 +1861,10 @@ cons (nbytes)
 
   do
     {
-      TC_PARSE_CONS_EXPRESSION (&exp, (unsigned int) nbytes);
+      if (flag_mri)
+	parse_mri_cons (&exp, (unsigned int) nbytes);
+      else
+	TC_PARSE_CONS_EXPRESSION (&exp, (unsigned int) nbytes);
       emit_expr (&exp, (unsigned int) nbytes);
     }
   while (*input_line_pointer++ == ',');
@@ -2076,20 +2237,34 @@ parse_bitfield_cons (exp, nbytes)
 
 #endif /* BITFIELD_CONS_EXPRESSIONS */
 
-#ifdef MRI
+/* Handle an MRI style string expression.  */
 
 static void
 parse_mri_cons (exp, nbytes)
      expressionS *exp;
      unsigned int nbytes;
 {
-  if (*input_line_pointer == '\'')
+  if (*input_line_pointer != '\''
+      && (input_line_pointer[1] != '\''
+	  || (*input_line_pointer != 'A'
+	      && *input_line_pointer != 'E')))
+    TC_PARSE_CONS_EXPRESSION (exp, nbytes);
+  else
     {
-      /* An MRI style string, cut into as many bytes as will fit into
-	 a nbyte chunk, left justify if necessary, and separate with
-	 commas so we can try again later */
       int scan = 0;
       unsigned int result = 0;
+
+      /* An MRI style string.  Cut into as many bytes as will fit into
+	 a nbyte chunk, left justify if necessary, and separate with
+	 commas so we can try again later.  */
+      if (*input_line_pointer == 'A')
+	++input_line_pointer;
+      else if (*input_line_pointer == 'E')
+	{
+	  as_bad ("EBCDIC constants are not supported");
+	  ++input_line_pointer;
+	}
+
       input_line_pointer++;
       for (scan = 0; scan < nbytes; scan++)
 	{
@@ -2125,11 +2300,7 @@ parse_mri_cons (exp, nbytes)
       else
 	input_line_pointer++;
     }
-  else
-    expression (&exp);
 }
-
-#endif /* MRI */
 
 #ifdef REPEAT_CONS_EXPRESSIONS
 
@@ -2221,14 +2392,93 @@ float_cons (float_type)
       if (input_line_pointer[0] == '0' && isalpha (input_line_pointer[1]))
 	input_line_pointer += 2;
 
-      err = md_atof (float_type, temp, &length);
-      know (length <= MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT);
-      know (length > 0);
-      if (err)
+      /* Accept :xxxx, where the x's are hex digits, for a floating
+         point with the exact digits specified.  */
+      if (input_line_pointer[0] == ':')
 	{
-	  as_bad ("Bad floating literal: %s", err);
-	  ignore_rest_of_line ();
-	  return;
+	  int i;
+
+	  switch (float_type)
+	    {
+	    case 'f':
+	    case 'F':
+	    case 's':
+	    case 'S':
+	      length = 4;
+	      break;
+
+	    case 'd':
+	    case 'D':
+	    case 'r':
+	    case 'R':
+	      length = 8;
+	      break;
+
+	    case 'x':
+	    case 'X':
+	      length = 12;
+	      break;
+
+	    case 'p':
+	    case 'P':
+	      length = 12;
+	      break;
+
+	    default:
+	      as_bad ("Unknown floating type type '%c'", float_type);
+	      ignore_rest_of_line ();
+	      return;
+	    }
+
+	  /* It would be nice if we could go through expression to
+             parse the hex constant, but if we get a bignum it's a
+             pain to sort it into the buffer correctly.  */
+	  i = 0;
+	  ++input_line_pointer;
+	  while (hex_p (*input_line_pointer) || *input_line_pointer == '_')
+	    {
+	      int d;
+
+	      /* The MRI assembler accepts arbitrary underscores
+                 strewn about through the hex constant, so we ignore
+                 them as well. */
+	      if (*input_line_pointer == '_')
+		{
+		  ++input_line_pointer;
+		  continue;
+		}
+
+	      if (i >= length)
+		{
+		  as_warn ("Floating point constant too large");
+		  ignore_rest_of_line ();
+		  return;
+		}
+	      d = hex_value (*input_line_pointer) << 4;
+	      ++input_line_pointer;
+	      while (*input_line_pointer == '_')
+		++input_line_pointer;
+	      if (hex_p (*input_line_pointer))
+		{
+		  d += hex_value (*input_line_pointer);
+		  ++input_line_pointer;
+		}
+	      temp[i++] = d;
+	    }
+	  if (i < length)
+	    memset (temp + i, 0, length - i);
+	}
+      else
+	{
+	  err = md_atof (float_type, temp, &length);
+	  know (length <= MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT);
+	  know (length > 0);
+	  if (err)
+	    {
+	      as_bad ("Bad floating literal: %s", err);
+	      ignore_rest_of_line ();
+	      return;
+	    }
 	}
 
       if (!need_pass_2)

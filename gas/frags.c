@@ -1,90 +1,74 @@
 /* frags.c - manage frags -
-   Copyright (C) 1987, 1990, 1991 Free Software Foundation, Inc.
-   
+
+   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
+
    This file is part of GAS, the GNU Assembler.
-   
+
    GAS is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2, or (at your option)
    any later version.
-   
+
    GAS is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "as.h"
 #include "subsegs.h"
 #include "obstack.h"
 
-struct obstack  frags;	/* All, and only, frags live here. */
+struct obstack frags;		/* All, and only, frags live here. */
 
-fragS zero_address_frag = {
-	0,			/* fr_address */
-	NULL,			/* fr_next */
-	0,			/* fr_fix */
-	0,			/* fr_var */
-	0,			/* fr_symbol */
-	0,			/* fr_offset */
-	NULL,			/* fr_opcode */
-	rs_fill,		/* fr_type */
-	0,			/* fr_subtype */
-	0,			/* fr_pcrel_adjust */
-	0,			/* fr_bsr */
-	0			/* fr_literal [0] */
-    };
-
-fragS bss_address_frag = {
-	0,			/* fr_address. Gets filled in to make up
-				   sy_value-s. */
-	NULL,			/* fr_next */
-	0,			/* fr_fix */
-	0,			/* fr_var */
-	0,			/* fr_symbol */
-	0,			/* fr_offset */
-	NULL,			/* fr_opcode */
-	rs_fill,		/* fr_type */
-	0,			/* fr_subtype */
-	0,			/* fr_pcrel_adjust */
-	0,			/* fr_bsr */
-	0			/* fr_literal [0] */
-    };
+extern fragS zero_address_frag;
+extern fragS bss_address_frag;
+
+/* Initialization for frag routines.  */
+void
+frag_init ()
+{
+  zero_address_frag.fr_type = rs_fill;
+  bss_address_frag.fr_type = rs_fill;
+  obstack_begin (&frags, 5000);
+}
 
 /*
  *			frag_grow()
  *
- * Internal.
  * Try to augment current frag by nchars chars.
  * If there is no room, close of the current frag with a ".fill 0"
  * and begin a new frag. Unless the new frag has nchars chars available
  * do not return. Do not set up any fields of *now_frag.
  */
-static void frag_grow(nchars)
-unsigned int nchars;
+void 
+frag_grow (nchars)
+     unsigned int nchars;
 {
-	if (obstack_room (&frags) < nchars) {
-		unsigned int n,oldn;
-		long oldc;
-		
-		frag_wane(frag_now);
-		frag_new(0);
-		oldn=(unsigned)-1;
-		oldc=frags.chunk_size;
-		frags.chunk_size=2*nchars;
-		while((n=obstack_room(&frags))<nchars && n<oldn) {
-			frag_wane(frag_now);
-			frag_new(0);
-			oldn=n;
-		}
-		frags.chunk_size=oldc;
+  if (obstack_room (&frags) < nchars)
+    {
+      unsigned int n, oldn;
+      long oldc;
+
+      frag_wane (frag_now);
+      frag_new (0);
+      oldn = (unsigned) -1;
+      oldc = frags.chunk_size;
+      frags.chunk_size = 2 * nchars;
+      while ((n = obstack_room (&frags)) < nchars && n < oldn)
+	{
+	  frag_wane (frag_now);
+	  frag_new (0);
+	  oldn = n;
 	}
-	if (obstack_room (&frags) < nchars)
-	    as_fatal("Can't extend frag %d. chars", nchars);
-} /* frag_grow() */
+      frags.chunk_size = oldc;
+    }
+  if (obstack_room (&frags) < nchars)
+    as_fatal ("Can't extend frag %d. chars", nchars);
+}				/* frag_grow() */
 
 /*
  *			frag_new()
@@ -103,62 +87,54 @@ unsigned int nchars;
  * Make a new frag, initialising some components. Link new frag at end
  * of frchain_now.
  */
-void frag_new(old_frags_var_max_size)
-int old_frags_var_max_size;	/* Number of chars (already allocated on
+void 
+frag_new (old_frags_var_max_size)
+     int old_frags_var_max_size;/* Number of chars (already allocated on
 				   obstack frags) */
-/* in variable_length part of frag. */
+     /* in variable_length part of frag. */
 {
-	register    fragS * former_last_fragP;
-	/*    char   *throw_away_pointer; JF unused */
-	register    frchainS * frchP;
-	long	tmp;		/* JF */
-	
-	frag_now->fr_fix = (char *) (obstack_next_free (&frags)) -
-	    (frag_now->fr_literal) - old_frags_var_max_size;
-	/* Fix up old frag's fr_fix. */
-	
-	obstack_finish (&frags);
-	/* This will align the obstack so the */
-	/* next struct we allocate on it will */
-	/* begin at a correct boundary. */
-	frchP = frchain_now;
-	know (frchP);
-	former_last_fragP = frchP->frch_last;
-	know (former_last_fragP);
-	know (former_last_fragP == frag_now);
-	obstack_blank (&frags, SIZEOF_STRUCT_FRAG);
-	/* We expect this will begin at a correct */
-	/* boundary for a struct. */
-	tmp=obstack_alignment_mask(&frags);
-	obstack_alignment_mask(&frags)=0;		/* Turn off alignment */
-	/* If we ever hit a machine
-	   where strings must be
-	   aligned, we Lose Big */
-	frag_now=(fragS *)obstack_finish(&frags);
-	obstack_alignment_mask(&frags)=tmp;		/* Restore alignment */
-	
-	/* Just in case we don't get zero'd bytes */
-	bzero(frag_now, SIZEOF_STRUCT_FRAG);
-	
-	/*    obstack_unaligned_done (&frags, &frag_now); */
-	/*    know (frags.obstack_c_next_free == frag_now->fr_literal); */
-	/* Generally, frag_now->points to an */
-	/* address rounded up to next alignment. */
-	/* However, characters will add to obstack */
-	/* frags IMMEDIATELY after the struct frag, */
-	/* even if they are not starting at an */
-	/* alignment address. */
-	former_last_fragP->fr_next = frag_now;
-	frchP->frch_last = frag_now;
-	
+  register fragS *former_last_fragP;
+  register frchainS *frchP;
+  long tmp;
+
+  frag_now->fr_fix = frag_now_fix () - old_frags_var_max_size;
+  /* Fix up old frag's fr_fix. */
+
+  obstack_finish (&frags);
+  /* This will align the obstack so the next struct we allocate on it
+     will begin at a correct boundary. */
+  frchP = frchain_now;
+  know (frchP);
+  former_last_fragP = frchP->frch_last;
+  know (former_last_fragP);
+  know (former_last_fragP == frag_now);
+  obstack_blank (&frags, SIZEOF_STRUCT_FRAG);
+  /* We expect this will begin at a correct boundary for a struct. */
+  tmp = obstack_alignment_mask (&frags);
+  obstack_alignment_mask (&frags) = 0;	/* Turn off alignment */
+  /* If we ever hit a machine where strings must be aligned, we Lose
+     Big.  */
+  frag_now = (fragS *) obstack_finish (&frags);
+  obstack_alignment_mask (&frags) = tmp;	/* Restore alignment */
+
+  /* Just in case we don't get zero'd bytes */
+  memset (frag_now, '\0', SIZEOF_STRUCT_FRAG);
+
+  /* Generally, frag_now->points to an address rounded up to next
+     alignment.  However, characters will add to obstack frags
+     IMMEDIATELY after the struct frag, even if they are not starting
+     at an alignment address. */
+  former_last_fragP->fr_next = frag_now;
+  frchP->frch_last = frag_now;
+
 #ifndef NO_LISTING
-	{
-		extern struct list_info_struct *listing_tail;
-		frag_now->line = listing_tail;
-	}
+  {
+    extern struct list_info_struct *listing_tail;
+    frag_now->line = listing_tail;
+  }
 #endif
-	
-	frag_now->fr_next = NULL;
+
+  frag_now->fr_next = NULL;
 }				/* frag_new() */
 
 /*
@@ -171,15 +147,22 @@ int old_frags_var_max_size;	/* Number of chars (already allocated on
  * frag_now_growth past the new chars.
  */
 
-char *frag_more (nchars)
-int nchars;
+char *
+frag_more (nchars)
+     int nchars;
 {
-	register char  *retval;
-	
-	frag_grow (nchars);
-	retval = obstack_next_free (&frags);
-	obstack_blank_fast (&frags, nchars);
-	return (retval);
+  register char *retval;
+
+  if (mri_common_symbol != NULL)
+    {
+      as_bad ("attempt to allocate data in common section");
+      mri_common_symbol = NULL;
+    }
+
+  frag_grow (nchars);
+  retval = obstack_next_free (&frags);
+  obstack_blank_fast (&frags, nchars);
+  return (retval);
 }				/* frag_more() */
 
 /*
@@ -193,32 +176,33 @@ int nchars;
  * to write into.
  */
 
-char *frag_var(type, max_chars, var, subtype, symbol, offset, opcode)
-relax_stateT type;
-int max_chars;
-int var;
-relax_substateT subtype;
-symbolS *symbol;
-long offset;
-char *opcode;
+char *
+frag_var (type, max_chars, var, subtype, symbol, offset, opcode)
+     relax_stateT type;
+     int max_chars;
+     int var;
+     relax_substateT subtype;
+     symbolS *symbol;
+     long offset;
+     char *opcode;
 {
-	register char  *retval;
-	
-	frag_grow (max_chars);
-	retval = obstack_next_free (&frags);
-	obstack_blank_fast (&frags, max_chars);
-	frag_now->fr_var = var;
-	frag_now->fr_type = type;
-	frag_now->fr_subtype = subtype;
-	frag_now->fr_symbol = symbol;
-	frag_now->fr_offset = offset;
-	frag_now->fr_opcode = opcode;
-	/* default these to zero. */
-	frag_now->fr_pcrel_adjust = 0;
-	frag_now->fr_bsr = 0;
-	frag_new (max_chars);
-	return (retval);
-}				/* frag_var() */
+  register char *retval;
+
+  frag_grow (max_chars);
+  retval = obstack_next_free (&frags);
+  obstack_blank_fast (&frags, max_chars);
+  frag_now->fr_var = var;
+  frag_now->fr_type = type;
+  frag_now->fr_subtype = subtype;
+  frag_now->fr_symbol = symbol;
+  frag_now->fr_offset = offset;
+  frag_now->fr_opcode = opcode;
+  /* default these to zero. */
+  frag_now->fr_pcrel_adjust = 0;
+  frag_now->fr_bsr = 0;
+  frag_new (max_chars);
+  return (retval);
+}
 
 /*
  *			frag_variant()
@@ -229,32 +213,29 @@ char *opcode;
  *      Two new arguments have been added.
  */
 
-char *frag_variant(type, max_chars, var, subtype, symbol, offset, opcode, pcrel_adjust,bsr)
-relax_stateT	 type;
-int		 max_chars;
-int		 var;
-relax_substateT	 subtype;
-symbolS		*symbol;
-long		 offset;
-char		*opcode;
-int		 pcrel_adjust;
-char		 bsr;
+char *
+frag_variant (type, max_chars, var, subtype, symbol, offset, opcode)
+     relax_stateT type;
+     int max_chars;
+     int var;
+     relax_substateT subtype;
+     symbolS *symbol;
+     long offset;
+     char *opcode;
 {
-	register char  *retval;
-	
-	/*    frag_grow (max_chars); */
-	retval = obstack_next_free (&frags);
-	/*  obstack_blank_fast (&frags, max_chars); */ /* OVE: so far the only diff */
-	frag_now->fr_var = var;
-	frag_now->fr_type = type;
-	frag_now->fr_subtype = subtype;
-	frag_now->fr_symbol = symbol;
-	frag_now->fr_offset = offset;
-	frag_now->fr_opcode = opcode;
-	frag_now->fr_pcrel_adjust = pcrel_adjust;
-	frag_now->fr_bsr = bsr;
-	frag_new (max_chars);
-	return (retval);
+  register char *retval;
+
+  retval = obstack_next_free (&frags);
+  frag_now->fr_var = var;
+  frag_now->fr_type = type;
+  frag_now->fr_subtype = subtype;
+  frag_now->fr_symbol = symbol;
+  frag_now->fr_offset = offset;
+  frag_now->fr_opcode = opcode;
+  frag_now->fr_pcrel_adjust = 0;
+  frag_now->fr_bsr = 0;
+  frag_new (max_chars);
+  return (retval);
 }				/* frag_variant() */
 
 /*
@@ -262,12 +243,13 @@ char		 bsr;
  *
  * Reduce the variable end of a frag to a harmless state.
  */
-void frag_wane(fragP)
-register    fragS * fragP;
+void 
+frag_wane (fragP)
+     register fragS *fragP;
 {
-	fragP->fr_type = rs_fill;
-	fragP->fr_offset = 0;
-	fragP->fr_var = 0;
+  fragP->fr_type = rs_fill;
+  fragP->fr_offset = 0;
+  fragP->fr_var = 0;
 }
 
 /*
@@ -280,12 +262,45 @@ register    fragS * fragP;
  * (so far empty) frag, in the same subsegment as the last frag.
  */
 
-void frag_align(alignment, fill_character)
-int alignment;
-int fill_character;
+void 
+frag_align (alignment, fill_character)
+     int alignment;
+     int fill_character;
 {
-	*(frag_var (rs_align, 1, 1, (relax_substateT)0, (symbolS *)0,
-		    (long)alignment, (char *)0)) = fill_character;
-} /* frag_align() */
+  char *p;
+  p = frag_var (rs_align, 1, 1, (relax_substateT) 0,
+		(symbolS *) 0, (long) alignment, (char *) 0);
+  *p = fill_character;
+}
+
+void 
+frag_align_pattern (alignment, fill_pattern, n_fill)
+     int alignment;
+     const char *fill_pattern;
+     int n_fill;
+{
+  char *p;
+  p = frag_var (rs_align, n_fill, n_fill, (relax_substateT) 0,
+		(symbolS *) 0, (long) alignment, (char *) 0);
+  memcpy (p, fill_pattern, n_fill);
+}
+
+int
+frag_now_fix ()
+{
+  return (char*)obstack_next_free (&frags) - frag_now->fr_literal;
+}
+
+void
+frag_append_1_char (datum)
+     int datum;
+{
+  if (obstack_room (&frags) <= 1)
+    {
+      frag_wane (frag_now);
+      frag_new (0);
+    }
+  obstack_1grow (&frags, datum);
+}
 
 /* end of frags.c */

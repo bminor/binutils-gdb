@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 extern char *input_line_pointer;/* -> char we are parsing now. */
 
@@ -47,8 +47,10 @@ extern char *input_line_pointer;/* -> char we are parsing now. */
 #define is_a_char(c)	(((unsigned)(c)) <= CHAR_MASK)
 #endif /* is_a_char() */
 
-extern const char lex_type[];
+extern char lex_type[];
 extern char is_end_of_line[];
+
+extern int target_big_endian;
 
 /* These are initialized by the CPU specific target files (tc-*.c).  */
 extern const char comment_chars[];
@@ -57,6 +59,9 @@ extern const char line_separator_chars[];
 
 /* This flag whether to generate line info for asm file */
 extern int generate_asm_lineno;
+
+/* This is used to support MRI common sections.  */
+extern symbolS *mri_common_symbol;
 
 unsigned int get_stab_string_offset PARAMS ((const char *string,
 					     const char *stabstr_secname));
@@ -81,6 +86,7 @@ void s_align_ptwo PARAMS ((int));
 void s_app_file PARAMS ((int));
 void s_app_line PARAMS ((int));
 void s_comm PARAMS ((int));
+void s_mri_common PARAMS ((int));
 void s_data PARAMS ((int));
 void s_desc PARAMS ((int));
 void s_else PARAMS ((int arg));
