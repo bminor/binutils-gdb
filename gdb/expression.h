@@ -20,8 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #if !defined (EXPRESSION_H)
 #define EXPRESSION_H 1
 
-#include "value.h"
-
 #ifdef __STDC__
 struct block;	/* Forward declaration for prototypes */
 #endif
@@ -320,6 +318,8 @@ struct expression
     ((elements) * sizeof (union exp_element))
 #define BYTES_TO_EXP_ELEM(bytes) \
     (((bytes) + sizeof (union exp_element) - 1) / sizeof (union exp_element))
+
+#include "value.h"
 
 /* From parse.c */
 

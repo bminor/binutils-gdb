@@ -1,3 +1,8 @@
+Tue Feb 14 11:46:07 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* expression.h: Move include of value.h until after declaration of
+	enum exp_opcode.
+
 Sun Feb 12 13:47:30 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote-e7000.c: Comprehensive cleanup; removal of dead code,
