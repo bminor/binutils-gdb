@@ -1,3 +1,8 @@
+Tue Feb 28 17:36:07 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: If the --cache-file is used, pass it down to
+	configure in subdirectories.
+
 Mon Feb 27 12:52:46 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* config.sub: add vxworks29k configuration.

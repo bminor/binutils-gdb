@@ -19,8 +19,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-# Please email any bugs, comments, and/or additions to this file to:
+# Please report any problems running this configure script to
 # configure@cygnus.com
+# Please do not send reports about other problems to this address.  See
+# gdb/README, gas/README, etc., for info on where and how to report
+# problems about particular tools.
 
 # This file was written by K. Richard Pixley.
 
@@ -158,8 +161,11 @@ do
 		   ;;
 		esac
 		;;
-# Accepted for compatibility with new autoconf; ignored.
 	--cache*)
+		case "$option" in
+		*=*) other_options="${other_options} ${option}" ;;
+		*) other_options="${other_options} ${option}=${optarg}" ;;
+		esac
 		;;
 	--disable-*)
 		enableopt=`echo ${option} | sed 's:^--disable-:enable_:;s:-:_:g'`
@@ -485,8 +491,12 @@ esac
 
 # keep this filename short for &%*%$*# 14 char file names
 tmpfile=${TMPDIR}/cONf$$
-trap "rm -f ${tmpfile}.com ${tmpfile}.tgt ${tmpfile}.hst ${tmpfile}.pos; exit 1" 1 2 15
-trap "rm -f ${tmpfile}.com ${tmpfile}.tgt ${tmpfile}.hst ${tmpfile}.pos" 0
+# Note that under many versions of sh a trap handler for 0 will *override* any
+# exit status you explicitly specify!  At this point, the only non-error exit
+# is at the end of the script; these actions are duplicated there, minus
+# the "exit 1".  Don't use "exit 0" anywhere after this without resetting the
+# trap handler, or you'll lose.
+trap "rm -f ${tmpfile}.com ${tmpfile}.tgt ${tmpfile}.hst ${tmpfile}.pos; exit 1" 0 1 2 15
 
 # split ${srcdir}/configure.in into common, per-host, per-target,
 # and post-target parts.  Post-target is optional.
@@ -516,16 +526,25 @@ esac
 case "${build_alias}" in
 "")	;;
 *)
-	result=`${configsub} ${build_alias}`
-        buildopt="--build=${build_alias}"
-	build_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
-	build_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
-	build_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
-	build=${build_cpu}-${build_vendor}-${build_os}
+	if result=`${config_shell} ${configsub} ${build_alias}` ; then
+	    buildopt="--build=${build_alias}"
+	    build_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
+	    build_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
+	    build_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
+	    build=${build_cpu}-${build_vendor}-${build_os}
+	else
+	    echo "Unrecognized build system name ${build_alias}." 1>&2
+	    exit 1
+	fi
 	;;
 esac
 
-result=`${configsub} ${host_alias}`
+if result=`${config_shell} ${configsub} ${host_alias}` ; then
+    true
+else
+    echo "Unrecognized host system name ${host_alias}." 1>&2
+    exit 1
+fi
 host_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
 host_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 host_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
@@ -533,7 +552,12 @@ host=${host_cpu}-${host_vendor}-${host_os}
 
 . ${tmpfile}.hst
 
-result=`${configsub} ${target_alias}`
+if result=`${config_shell} ${configsub} ${target_alias}` ; then
+    true
+else
+    echo "Unrecognized target system name ${target_alias}." 1>&2
+    exit 1
+fi
 target_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
 target_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 target_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
@@ -577,10 +601,11 @@ if [ "${host_alias}" != "${target_alias}" ] ; then
     fi
 fi
 
-# Merge program_prefix and program_suffix onto program_transform_name
-# Use a double $ so that make ignores it
+# Merge program_prefix and program_suffix onto program_transform_name.
+# (program_suffix used to use $, but it's hard to preserve $ through both
+# make and sh.)
 if [ "${program_suffix}" != "" ] ; then
-    program_transform_name="-e s,\$\$,${program_suffix}, ${program_transform_name}"
+    program_transform_name="-e s,\\\\(.*\\\\),\\\\1${program_suffix}, ${program_transform_name}"
 fi
 
 if [ "${program_prefix}" != "" ] ; then
@@ -978,6 +1003,11 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
                 fi
         done
 fi
+
+# Perform the same cleanup as the trap handler, minus the "exit 1" of course,
+# and reset the trap handler.
+rm -f ${tmpfile}.com ${tmpfile}.tgt ${tmpfile}.hst ${tmpfile}.pos
+trap 0
 
 exit 0
 
