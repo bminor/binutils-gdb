@@ -117,12 +117,12 @@ else
 	PATH=$PATH:${PWD} ; export PATH
 fi
 
-configsub=`echo ${progname} | sed 's/configure$/config.sub/'`
+configsubr=`echo ${progname} | sed 's/configure$/config.subr/'`
 
-if ${configsub} none >/dev/null 2>&1 ; then
+if ${configsubr} none >/dev/null 2>&1 ; then
 	true
 else
-	echo '***' cannot find config.sub.
+	echo '***' cannot find config.subr.
 	echo 1
 fi
 
@@ -425,7 +425,7 @@ for host in ${hosts} ; do
 
 	host_alias=${host}
 
-	result=`${configsub} ${host}`
+	result=`${configsubr} ${host}`
 	host_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
 	host_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 	host_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
@@ -441,7 +441,7 @@ for host in ${hosts} ; do
 	for target in ${targets} ; do
 
 		target_alias=${target}
-		result=`${configsub} ${target}`
+		result=`${configsubr} ${target}`
 		target_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
 		target_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 		target_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
@@ -756,8 +756,8 @@ ${progname}" ${arguments}  "
 ### figure out what to do with srcdir
 					case "${srcdir}" in
 					".") ;; # do nothing.  We're building in place.
-					"..") srcdiroption="-srcdir=../../${configdir}" ;;
-					*) srcdiroption="-srcdir=${srcdir}/${configdir}" ;;
+					/*) srcdiroption="-srcdir=${srcdir}/${configdir}" ;; # absolute path
+					*) srcdiroption="-srcdir=../${srcdir}/${configdir}" ;; # otherwise relative
 					esac
 
 ### The recursion line is here.

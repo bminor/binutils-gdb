@@ -1,5 +1,9 @@
 Wed Dec 11 22:25:20 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
+	* configure, config.sub, config.subr: merge config.sub into
+	  config.subr, call the result config.subr, remove config.sub, use
+	  config.subr.
+
 	* Makefile.in: revised install for dir.info.
 
 Tue Dec 10 00:04:35 1991  K. Richard Pixley  (rich at rtl.cygnus.com)

@@ -71,22 +71,65 @@ case $os in
 		os=-iscsysv
 		basic_machine=i386-unknown
 		;;
+# start-sanitize-v9
+	-32)
+		basic_machine=sparc64-hal
+		os=-hal32
+		;;
+	-64)
+		basic_machine=sparc64-hal
+		os=-hal64
+		;;
+	-v7)
+		basic_machine=sparc64-hal
+		os=-v7
+		;;
+# end-sanitize-v9	
 esac
 
 # Decode aliases for certain CPU-COMPANY combinations.
 case $basic_machine in
 	# Recognize the basic CPU types with without company name.
-	tahoe | i386 | i860 | m68k | m68000 | m88k \
-	      | ns32k | arm | pyramid | tron | a29k)
+	tahoe | i386 | i860 | m68k | m68000 | m88k | ns32k | arm | pyramid \
+		| tron | a29k | 580 | i960 | h8300)
 		basic_machine=$basic_machine-unknown
 		;;
 	# Recognize the basic CPU types with with company name.
 	vax-* | tahoe-* | i386-* | i860-* | m68k-* | m68000-* | m88k-* \
 	      | sparc-* | ns32k-* | alliant-* | arm-* | c1-* | c2-* \
-	      | mips-* | pyramid-* | tron-* | a29k-* | romp-* | rs6000-*)
+	      | mips-* | pyramid-* | tron-* | a29k-* | romp-* | rs6000-* \
+		| none-* | 580-* | cray2-* | h8300-* | i960-* | xmp-* | ymp-*)
 		;;
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
+# start-sanitize-life
+	life-*) ;;
+	life)
+		basic_machine=life-philips
+		os=-none
+		;;
+# end-sanitize-life
+
+# start-sanitize-v9
+	sparc64-*) ;;
+	hal-32 | hal32)
+		basic_machine=sparc64-hal
+		os=-hal32
+		;;
+	hal-64 | hal64)
+		basic_machine=sparc64-hal
+		os=-hal64
+		;;
+	sparc64)
+		basic_machine=sparc64-sun
+		os=-v9
+		;;
+	sparc64-v7 | sparc64v7)
+		basic_machine=sparc64-sun
+		os=-v7
+		;;
+# end-sanitize-v9
+
 	vaxv)
 		basic_machine=vax-dec
 		os=-sysv
@@ -95,7 +138,11 @@ case $basic_machine in
 		basic_machine=vax-dec
 		os=-vms
 		;;
-	i386-sco* | sco)
+	i386v32)
+		basic_machine=i386-unknown
+		os=-sysv32
+		;;
+	i386-sco* | i386sco | sco)
 		basic_machine=i386-unknown
 		os=-scosysv322
 		;;
@@ -117,34 +164,40 @@ case $basic_machine in
 	alliant)
 		basic_machine=alliant-alliant
 		;;
-	c1)
+	c1 | convex-c1)
 		basic_machine=c1-convex
+		os=-sysv
 		;;
-	c2)
+	c2 | convex-c2)
 		basic_machine=c2-convex
+		os=-sysv
 		;;
 	m88k-omron*)
 		basic_machine=m88k-omron
 		;;
 	merlin)
-		basic_machine=ns32k-merlin
+		basic_machine=ns32k-utek
+		os=-sysv
 		;;
 	crds | unos)
 		basic_machine=m68k-crds
 		;;
-	encore)
+	encore | umax | mmax)
 		basic_machine=ns32k-encore
+		os=-sysv
 		;;
 	genix)
 		basic_machine=ns32k-ns
 		;;
 	iris | iris4d)
 		basic_machine=mips-sgi
+		os=-irix
 		;;
-	news | news800)
+	news | news700 | news800 | news900)
 		basic_machine=m68k-sony
+		os=-newsos
 		;;
-	3b1 | 7300 | 7300-att | att-7300)
+	3b1 | 7300 | 7300-att | att-7300 | pc7300 | safari | unixpc)
 		basic_machine=m68k-att
 		;;
 	delta | 3300 | motorola-3300 | motorola-delta \
@@ -153,18 +206,41 @@ case $basic_machine in
 		;;
 	balance)
 		basic_machine=ns32k-sequent
-		;;
-        mmax)
-		basic_machine=ns32k-encore
+		os=-dynix
 		;;
         pc532)
 		basic_machine=ns32k-pc532
 		;;
 	symmetry)
 		basic_machine=i386-sequent
+		os=-dynix
 		;;
 	sun2)
 		basic_machine=m68000-sun
+		;;
+	sun2os3)
+		basic_machine=m68000-sun
+		os=-sunos3
+		;;
+	sun2os4)
+		basic_machine=m68000-sun
+		os=-sunos4
+		;;
+	sun3os3)
+		basic_machine=m68k-sun
+		os=-sunos3
+		;;
+	sun3os4)
+		basic_machine=m68k-sun
+		os=-sunos4
+		;;
+	sun4os3)
+		basic_machine=sparc-sun
+		os=-sunos3
+		;;
+	sun4os4)
+		basic_machine=sparc-sun
+		os=-sunos4
 		;;
 	sun3)
 		basic_machine=m68k-sun
@@ -175,7 +251,7 @@ case $basic_machine in
 	pbd)
 		basic_machine=sparc-unicom
 		;;
-	sun386 | sun386i)
+	sun386 | sun386i | roadrunner)
 		basic_machine=i386-sun
 		;;
 	ps2)
@@ -183,6 +259,7 @@ case $basic_machine in
 		;;
 	next)
 		basic_machine=m68k-next
+		os=-sysv
 		;;
 	hp9k3[2-9][0-9])
 		basic_machine=m68k-hp
@@ -190,11 +267,13 @@ case $basic_machine in
 	hp9k31[0-9] | hp9k2[0-9][0-9])
 		basic_machine=m68000-hp
 		;;
-	isi68)
+	isi68 | isi)
 		basic_machine=m68k-isi
+		os=-sysv
 		;;
 	apollo68)
 		basic_machine=m68k-apollo
+		os=-sysv
 		;;
 	altos | altos3068)
 		basic_machine=m68k-altos
@@ -207,25 +286,127 @@ case $basic_machine in
 		;;
 	news-3600 | risc-news)
 		basic_machine=mips-sony
+		os=-newsos
 		;;
-	decstation-dec | decstation | decstation-3100 | pmax)
+	decstation-dec | decstation | decstation-3100 | pmax | pmin | dec3100 | decstatn)
 		basic_machine=mips-dec
 		;;
 	magnum | m3230)
 		basic_machine=mips-mips
+		os=-sysv
 		;;
 	gmicro)
-		basic_machine=tron-default
-		;;
-	convex-c1)
-		basic_machine=c1-convex
-		;;
-	convex-c2)
-		basic_machine=c2-convex
+		basic_machine=tron-gmicro
+		os=-sysv
 		;;
 	rtpc | rtpc-*)
 		basic_machine=romp-ibm
 		;;
+	am29k)
+		basic_machine=a29k-none
+		os=-bsd
+		;;
+	amdahl)
+		basic_machine=580-amdahl
+		os=-uts
+		;;
+	amigados)
+		basic_machine=m68k-cbm
+		os=-amigados
+		;;
+	amigaunix | amix)
+		basic_machine=m68k-cbm
+		os=-svr4
+		;;
+	cray | ymp)
+		basic_machine=ymp-cray
+		os=-unicos
+		;;
+	cray2)
+		basic_machine=cray2-cray
+		os=-unicos
+		;;
+	xmp)
+		basic_machine=xmp-cray
+		os=-unicos
+		;;
+	delta88)
+		basic_machine=m88k-motorola
+		os=-m88kbcs
+		;;
+	dpx2)
+		basic_machine=m68k-bull
+		os=-sysv
+		;;
+	ebmon29k)
+		basic_machine=a29k-amd
+		os=-ebmon
+		;;
+	h8300hds)
+		basic_machine=h8300-hitachi
+		os=-hds
+		;;
+	harris)
+		basic_machine=m88k-harris
+		os=-m88kbcs
+		;;
+	hp300bsd)
+		basic_machine=m68k-hp
+		os=-bsd
+		;;
+	hp300hpux)
+		basic_machine=m68k-hp
+		os=-hpux
+		;;
+	hp9k2[0-9][0-9] | hp9k31[0-9])
+		basic_machine=m68000-hp
+		os=-hpux
+		;;
+	hp9k3[2-9][0-9])
+		basic_machine=m68k-hp
+		os=-hpux
+		;;
+	hpux)
+		basic_machine=m68k-hp
+		os=-hpux
+		;;
+	ncr3000)
+		basic_machine=i386-ncr
+		os=-svr4
+		;;
+	news1000)
+		basic_machine=m68030-sony
+		os=-newsos
+		;;
+	nindy960)
+		basic_machine=i960-intel
+		os=-nindy
+		;;
+	pn)
+		basic_machine=pn-gould
+		os=-sysv
+		;;
+	np1)
+		basic_machine=np1-gould
+		os=-sysv
+		;;
+	ultra3)
+		basic_machine=a29k-nyu
+		os=-sym1
+		;;
+	vxworks960)
+		basic_machine=i960-wrs
+		os=-vxworks
+		;;
+	vxworks68)
+		basic_machine=m68k-wrs
+		os=-vxworks
+		;;
+	none)
+		basic_machine=none-none
+		os=-none
+		;;
+
 # Here we handle the default manufacturer of certain CPU types.  It is in
 # some cases the only manufacturer, in others, it is the most popular.
 	mips)
@@ -259,26 +440,16 @@ case $os in
 	# Each alternative must end in a *, to match a version number.
 	-bsd* | -sysv* | -mach* | -minix* | -genix* | -ultrix* \
 	      | -vms* | -sco* | -esix* | -isc* | -aix* | -sunos* | -hpux* \
-	      | -unos* | -osf* | -v88r* | -luna* | -dgux*)
+	      | -unos* | -osf* | -v88r* | -luna* | -dgux* | -amigados* \
+		| -msdos* | -aout* | -bout* | -elf* | -coff* | -ebmon* | -hds* \
+		| -irix* | -kern* | -m88kbcs | -nindy* | -none | -svr4 \
+		| -unicos* | -uts* | -vxworks* | -sym[1-9]* | -solari* \
+		| -dynix* | -aos* | -ctix* | -newsos* | -osf*)
 		;;
-	-newsos*)
-		os=-bsd
-		;;
-	-osfrose*)
-		os=-osf
-		;;
-	-osf*)
-		os=-bsd
-		;;
-	-dynix*)
-		os=-bsd
-		;;
-	-aos*)
-		os=-bsd
-		;;
-	-ctix*)
-		os=-sysv
-		;;
+# start-sanitize-v9
+	-v7 | -v9 | -hal32 | -hal64) ;;
+# end-sanitize-v9
+
 	*)
 		# Get rid of the `-' at the beginning of $os.
 		os=`echo $1 | sed 's/[^-]*-//'`
@@ -335,7 +506,7 @@ case $basic_machine in
 		os=-scosysv322
 		;;
 	*)
-		os=-bsd43
+		os=-none
 		;;
 esac
 fi
