@@ -28,9 +28,10 @@ if ![istarget sh*-*-*] {
     return
 }
 
+global ASFLAGS
+set asflags_save "$ASFLAGS"
+
 if {[istarget sh64*-*-*] || [istarget sh5*-*-*]} then {
-    global ASFLAGS
-    set asflags_save "$ASFLAGS"
     set ASFLAGS "$ASFLAGS -isa=SHcompact"
 }
 
