@@ -1,3 +1,7 @@
+Tue Nov  2 13:38:30 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* configure.in:  Configure gdb for alpha.
+
 Mon Nov  1 10:42:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (CXXFLAGS): Add -O.
