@@ -1,3 +1,9 @@
+Thu Jan  4 08:17:22 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/corefile.exp: When generating a core, discard any
+	error messages about ulimit not found and the "core dumped"
+	message from the shell that runs the coredumper.
+
 Wed Jan  3 01:30:41 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* lib/gdb.exp (skip_chill_tests): Skip them on the PA too.

@@ -57,7 +57,7 @@ if ![file exists ${objdir}/${subdir}/corefile] then {
     # Some systems append "core" to the name of the program; others append
     # the name of the program to "core".
     set found 0
-    catch "system \"cd ${objdir}/${subdir}; ulimit -c unlimited; ${binfile}\""
+    catch "system \"(cd ${objdir}/${subdir}; ulimit -c unlimited; ${binfile}; true) >/dev/null 2>&1\""
     #    execute_anywhere "${binfile}"
     foreach i "${objdir}/${subdir}/core ${objdir}/${subdir}/core.coremaker.c ${binfile}.core" {
 	set exec_output [execute_anywhere "ls $i"]
@@ -164,16 +164,14 @@ gdb_test "print coremaker_data" "\\\$$decimal = 202"
 gdb_test "print coremaker_bss" "\\\$$decimal = 10"
 gdb_test "print coremaker_ro" "\\\$$decimal = 201"
 
-# Linux GDB is unable to backtrace properly from an abort system call,
-# so trying to access a local variable in the stack fails too.
-setup_xfail "i*86-*-linux*" "i*86-*-sysv4*"
+setup_xfail "i*86-*-sysv4*"
 gdb_test "print func2::coremaker_local" "\\\$$decimal = {0, 1, 2, 3, 4}"
 
 # Somehow we better test the ability to read the registers out of the core
 # file correctly.  I don't think the other tests do this.
 
 # Haven't investigated this xfail
-setup_xfail "m68k-*-hpux*" "i*86-*-linux*" "i*86-*-sysv4*"
+setup_xfail "m68k-*-hpux*" "i*86-*-sysv4*"
 # Strange that this one depends upon being native compiled.
 gdb_test "bt" "abort.*func2.*func1.*main.*" "backtrace in corefile.exp"
 
