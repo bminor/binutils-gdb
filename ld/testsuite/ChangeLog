@@ -1,3 +1,12 @@
+2001-08-27  Alan Modra  <amodra@bigpond.net.au>
+	    Linus Nordberg  <linus@swox.se>
+
+	* ld-checks/checks.exp: .lcomm is incompatible with ppc coff.
+	* ld-scripts/cross1.t: Add .toc section.
+	* ld-scripts/cross2.t: Likewise.
+	* ld-scripts/phdrs.exp: powerpc64 is 64 bit.
+	* ld-srec/srec.exp: xfail powerpc64
+
 2001-08-21  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* ld-selective/selective.exp: Return if target is `vax-*-ultrix*'.
