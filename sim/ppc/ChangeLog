@@ -1,3 +1,23 @@
+1998-06-26  Michael Meissner  <meissner@cygnus.com>
+
+	* configure.in (AC_CHECK_HEADERS): Don't check for sys/mount.h.
+	* configure: Regenerate.
+	* emul_{netbsd,unix}.c (toplevel): No longer try to include
+	sys/mount.h. It conflicts on Linux when gnu libc2 is used.
+
+Tue May 12 12:10:33 PDT 1998  James Ingham  <jingham@leda.cygnus.com>
+
+	* Makefile.in: The run target depended on a target psim$(EXEEXT),
+	but there was no such target, only plain psim.  So I changed the
+	run target to depend on psim.
+
+Sat May  2 01:10:12 1998  Stu Grossman  <grossman@babylon-5.cygnus.com>
+
+	* aclocal.m4:  Remove defs of AM_EXEEXT and AM_CYGWIN32.  These are
+	now defined in ../common/aclocal.m4, and the double definition causes
+	problems with AC_SUBST of EXEEXT.
+	* configure:  Regenerate.
+	
 Wed Apr 29 15:44:52 1998  Geoffrey Noer  <noer@cygnus.com>
 
 	* aclocal.m4: new file for AM_EXEEXT macro
