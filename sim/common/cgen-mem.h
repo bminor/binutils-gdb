@@ -1,10 +1,8 @@
 /* Memory ops header for CGEN-based simlators.
+   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+   Contributed by Cygnus Solutions.
 
-This file is machine generated.
-
-Copyright (C) 1996, 1997 Free Software Foundation, Inc.
-
-This file is part of the GNU Binutils and/or GDB, the GNU debugger.
+This file is part of the GNU Simulators.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,9 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-
-*/
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef CGEN_MEM_H
 #define CGEN_MEM_H
@@ -31,473 +27,131 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MEMOPS_INLINE extern inline
 #endif
 
-/* Only used in this file.  */
-typedef unsigned char *ptr;
-
 #if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE QI
-GETTQI (ptr p)
-{
-  if (TARGET_BIG_ENDIAN)
-    return p[0];
-  else
-    return p[0];
+#define DECLARE_GETMEM(mode, size) \
+MEMOPS_INLINE mode \
+XCONCAT2 (GETMEM,mode) (SIM_CPU *cpu, ADDR a) \
+{ \
+  PROFILE_COUNT_READ (cpu, a, XCONCAT2 (MODE_,mode)); \
+  /* Don't read anything into "unaligned" here.  Bad name choice.  */\
+  return XCONCAT2 (sim_core_read_unaligned_,size) (cpu, NULL_CIA, sim_core_read_map, a); \
 }
 #else
-extern QI GETTQI (ptr);
+#define DECLARE_GETMEM(mode, size) \
+extern mode XCONCAT2 (GETMEM,mode) (SIM_CPU *, ADDR);
 #endif
+
+DECLARE_GETMEM (QI, 1)
+DECLARE_GETMEM (UQI, 1)
+DECLARE_GETMEM (HI, 2)
+DECLARE_GETMEM (UHI, 2)
+DECLARE_GETMEM (SI, 4)
+DECLARE_GETMEM (USI, 4)
+DECLARE_GETMEM (DI, 8)
+DECLARE_GETMEM (UDI, 8)
+
+#undef DECLARE_GETMEM
 
 #if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE HI
-GETTHI (ptr p)
-{
-  if (TARGET_BIG_ENDIAN)
-    return ((p[0] << 8) | p[1]);
-  else
-    return ((p[1] << 8) | p[0]);
+#define DECLARE_SETMEM(mode, size) \
+MEMOPS_INLINE void \
+XCONCAT2 (SETMEM,mode) (SIM_CPU *cpu, ADDR a, mode val) \
+{ \
+  PROFILE_COUNT_WRITE (cpu, a, XCONCAT2 (MODE_,mode)); \
+  /* Don't read anything into "unaligned" here.  Bad name choice.  */ \
+  XCONCAT2 (sim_core_write_unaligned_,size) (cpu, NULL_CIA, sim_core_write_map, a, val); \
 }
 #else
-extern HI GETTHI (ptr);
+#define DECLARE_SETMEM(mode, size) \
+extern void XCONCAT2 (SETMEM,mode) (SIM_CPU *, ADDR, mode);
 #endif
+
+DECLARE_SETMEM (QI, 1)
+DECLARE_SETMEM (UQI, 1)
+DECLARE_SETMEM (HI, 2)
+DECLARE_SETMEM (UHI, 2)
+DECLARE_SETMEM (SI, 4)
+DECLARE_SETMEM (USI, 4)
+DECLARE_SETMEM (DI, 8)
+DECLARE_SETMEM (UDI, 8)
+
+#undef DECLARE_SETMEM
 
 #if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE SI
-GETTSI (ptr p)
-{
-  if (TARGET_BIG_ENDIAN)
-    return ((p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3]);
-  else
-    return ((p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0]);
+#define DECLARE_GETIMEM(mode, size) \
+MEMOPS_INLINE mode \
+XCONCAT2 (GETIMEM,mode) (SIM_CPU *cpu, ADDR a) \
+{ \
+  /*PROFILE_COUNT_READ (cpu, a, XCONCAT2 (MODE_,mode));*/ \
+  /* Don't read anything into "unaligned" here.  Bad name choice.  */\
+  return XCONCAT2 (sim_core_read_unaligned_,size) (cpu, NULL_CIA, sim_core_execute_map, a); \
 }
 #else
-extern SI GETTSI (ptr);
+#define DECLARE_GETIMEM(mode, size) \
+extern mode XCONCAT2 (GETIMEM,mode) (SIM_CPU *, ADDR);
 #endif
+
+DECLARE_GETIMEM (UQI, 1)
+DECLARE_GETIMEM (UHI, 2)
+DECLARE_GETIMEM (USI, 4)
+DECLARE_GETIMEM (UDI, 8)
+
+#undef DECLARE_GETIMEM
+
+/* GETT<mode>: translate target value at P to host value.
+   ??? How inefficient is the current implementation?  */
 
 #if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE DI
-GETTDI (ptr p)
-{
-  if (TARGET_BIG_ENDIAN)
-    return MAKEDI ((p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3], (p[4] << 24) | (p[5] << 16) | (p[6] << 8) | p[7]);
-  else
-    return MAKEDI ((p[7] << 24) | (p[6] << 16) | (p[5] << 8) | p[4], (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0]);
+#define DECLARE_GETT(mode, size) \
+MEMOPS_INLINE mode \
+XCONCAT2 (GETT,mode) (unsigned char *p) \
+{ \
+  mode tmp; \
+  memcpy (&tmp, p, sizeof (mode)); \
+  return XCONCAT2 (T2H_,size) (tmp); \
 }
 #else
-extern DI GETTDI (ptr);
+#define DECLARE_GETT(mode, size) \
+extern mode XCONCAT2 (GETT,mode) (unsigned char *);
 #endif
+
+DECLARE_GETT (QI, 1)
+DECLARE_GETT (UQI, 1)
+DECLARE_GETT (HI, 2)
+DECLARE_GETT (UHI, 2)
+DECLARE_GETT (SI, 4)
+DECLARE_GETT (USI, 4)
+DECLARE_GETT (DI, 8)
+DECLARE_GETT (UDI, 8)
+
+#undef DECLARE_GETT
+
+/* SETT<mode>: translate host value to target value and store at P.
+   ??? How inefficient is the current implementation?  */
 
 #if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE UQI
-GETTUQI (ptr p)
-{
-  if (TARGET_BIG_ENDIAN)
-    return p[0];
-  else
-    return p[0];
+#define DECLARE_SETT(mode, size) \
+MEMOPS_INLINE mode \
+XCONCAT2 (SETT,mode) (unsigned char *buf, mode val) \
+{ \
+  mode tmp; \
+  tmp = XCONCAT2 (H2T_,size) (val); \
+  memcpy (buf, &tmp, sizeof (mode)); \
 }
 #else
-extern UQI GETTUQI (ptr);
+#define DECLARE_SETT(mode, size) \
+extern mode XCONCAT2 (GETT,mode) (unsigned char *, mode);
 #endif
 
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE UHI
-GETTUHI (ptr p)
-{
-  if (TARGET_BIG_ENDIAN)
-    return ((p[0] << 8) | p[1]);
-  else
-    return ((p[1] << 8) | p[0]);
-}
-#else
-extern UHI GETTUHI (ptr);
-#endif
+DECLARE_SETT (QI, 1)
+DECLARE_SETT (UQI, 1)
+DECLARE_SETT (HI, 2)
+DECLARE_SETT (UHI, 2)
+DECLARE_SETT (SI, 4)
+DECLARE_SETT (USI, 4)
+DECLARE_SETT (DI, 8)
+DECLARE_SETT (UDI, 8)
 
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE USI
-GETTUSI (ptr p)
-{
-  if (TARGET_BIG_ENDIAN)
-    return ((p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3]);
-  else
-    return ((p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0]);
-}
-#else
-extern USI GETTUSI (ptr);
-#endif
+#undef DECLARE_SETT
 
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE UDI
-GETTUDI (ptr p)
-{
-  if (TARGET_BIG_ENDIAN)
-    return MAKEDI ((p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3], (p[4] << 24) | (p[5] << 16) | (p[6] << 8) | p[7]);
-  else
-    return MAKEDI ((p[7] << 24) | (p[6] << 16) | (p[5] << 8) | p[4], (p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0]);
-}
-#else
-extern UDI GETTUDI (ptr);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE void
-SETTQI (ptr p, QI val)
-{
-  if (TARGET_BIG_ENDIAN)
-    do { p[0] = val; } while (0);
-else
-    do { p[0] = val; } while (0);
-}
-#else
-extern void SETTQI (ptr, QI);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE void
-SETTHI (ptr p, HI val)
-{
-  if (TARGET_BIG_ENDIAN)
-    do { p[0] = val >> 8; p[1] = val; } while (0);
-else
-    do { p[1] = val >> 8; p[0] = val; } while (0);
-}
-#else
-extern void SETTHI (ptr, HI);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE void
-SETTSI (ptr p, SI val)
-{
-  if (TARGET_BIG_ENDIAN)
-    do { p[0] = val >> 24; p[1] = val >> 16; p[2] = val >> 8; p[3] = val; } while (0);
-else
-    do { p[3] = val >> 24; p[2] = val >> 16; p[1] = val >> 8; p[0] = val; } while (0);
-}
-#else
-extern void SETTSI (ptr, SI);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE void
-SETTDI (ptr p, DI val)
-{
-  if (TARGET_BIG_ENDIAN)
-    do { SI t = GETHIDI (val); p[0] = t >> 24; p[1] = t >> 16; p[2] = t >> 8; p[3] = t; t = GETLODI (val); p[4] = t >> 24; p[5] = t >> 16; p[6] = t >> 8; p[7] = t; } while (0);
-else
-    do { SI t = GETHIDI (val); p[7] = t >> 24; p[6] = t >> 16; p[5] = t >> 8; p[4] = t; t = GETLODI (val); p[3] = t >> 24; p[2] = t >> 16; p[1] = t >> 8; p[0] = t; } while (0);
-}
-#else
-extern void SETTDI (ptr, DI);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE void
-SETTUQI (ptr p, UQI val)
-{
-  if (TARGET_BIG_ENDIAN)
-    do { p[0] = val; } while (0);
-else
-    do { p[0] = val; } while (0);
-}
-#else
-extern void SETTUQI (ptr, UQI);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE void
-SETTUHI (ptr p, UHI val)
-{
-  if (TARGET_BIG_ENDIAN)
-    do { p[0] = val >> 8; p[1] = val; } while (0);
-else
-    do { p[1] = val >> 8; p[0] = val; } while (0);
-}
-#else
-extern void SETTUHI (ptr, UHI);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE void
-SETTUSI (ptr p, USI val)
-{
-  if (TARGET_BIG_ENDIAN)
-    do { p[0] = val >> 24; p[1] = val >> 16; p[2] = val >> 8; p[3] = val; } while (0);
-else
-    do { p[3] = val >> 24; p[2] = val >> 16; p[1] = val >> 8; p[0] = val; } while (0);
-}
-#else
-extern void SETTUSI (ptr, USI);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE void
-SETTUDI (ptr p, UDI val)
-{
-  if (TARGET_BIG_ENDIAN)
-    do { SI t = GETHIDI (val); p[0] = t >> 24; p[1] = t >> 16; p[2] = t >> 8; p[3] = t; t = GETLODI (val); p[4] = t >> 24; p[5] = t >> 16; p[6] = t >> 8; p[7] = t; } while (0);
-else
-    do { SI t = GETHIDI (val); p[7] = t >> 24; p[6] = t >> 16; p[5] = t >> 8; p[4] = t; t = GETLODI (val); p[3] = t >> 24; p[2] = t >> 16; p[1] = t >> 8; p[0] = t; } while (0);
-}
-#else
-extern void SETTUDI (ptr, UDI);
-#endif
-
-
-/* FIXME: Need to merge with sim-core.  */
-/* FIXME: Don't perform >= 4, text section checks if OEA.  */
-#ifndef MEM_CHECK_READ
-#define MEM_CHECK_READ(addr, type) \
-     ((addr) >= 4 /*&& (addr) < STATE_MEM_SIZE (current_state)*/)
-#endif
-#ifndef MEM_CHECK_WRITE
-#define MEM_CHECK_WRITE(addr, type) \
-     ((addr) >= 4 /*&& (addr) < STATE_MEM_SIZE (current_state)*/ \
-      && ((addr) >= STATE_TEXT_END (current_state) \
-	  || (addr) < STATE_TEXT_START (current_state)))
-#endif
-#ifndef MEM_CHECK_ALIGNMENT
-#define MEM_CHECK_ALIGNMENT(addr, type) \
-     (((addr) & (sizeof (type) - 1)) == 0)
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE QI
-GETMEMQI (SIM_CPU *cpu, ADDR a)
-{
-  if (! MEM_CHECK_READ (a, QI))
-    { engine_signal (cpu, SIM_SIGACCESS); }
-  if (! MEM_CHECK_ALIGNMENT (a, QI))
-    { engine_signal (cpu, SIM_SIGALIGN); }
-  PROFILE_COUNT_READ (cpu, a, MODE_QI);
-  return sim_core_read_1 (CPU_STATE (cpu), sim_core_read_map, a);
-}
-#else
-extern QI GETMEMQI (SIM_CPU *, ADDR);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE HI
-GETMEMHI (SIM_CPU *cpu, ADDR a)
-{
-  if (! MEM_CHECK_READ (a, HI))
-    { engine_signal (cpu, SIM_SIGACCESS); }
-  if (! MEM_CHECK_ALIGNMENT (a, HI))
-    { engine_signal (cpu, SIM_SIGALIGN); }
-  PROFILE_COUNT_READ (cpu, a, MODE_HI);
-  return sim_core_read_2 (CPU_STATE (cpu), sim_core_read_map, a);
-}
-#else
-extern HI GETMEMHI (SIM_CPU *, ADDR);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE SI
-GETMEMSI (SIM_CPU *cpu, ADDR a)
-{
-  if (! MEM_CHECK_READ (a, SI))
-    { engine_signal (cpu, SIM_SIGACCESS); }
-  if (! MEM_CHECK_ALIGNMENT (a, SI))
-    { engine_signal (cpu, SIM_SIGALIGN); }
-  PROFILE_COUNT_READ (cpu, a, MODE_SI);
-  return sim_core_read_4 (CPU_STATE (cpu), sim_core_read_map, a);
-}
-#else
-extern SI GETMEMSI (SIM_CPU *, ADDR);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE DI
-GETMEMDI (SIM_CPU *cpu, ADDR a)
-{
-  if (! MEM_CHECK_READ (a, DI))
-    { engine_signal (cpu, SIM_SIGACCESS); }
-  if (! MEM_CHECK_ALIGNMENT (a, DI))
-    { engine_signal (cpu, SIM_SIGALIGN); }
-  PROFILE_COUNT_READ (cpu, a, MODE_DI);
-  return sim_core_read_8 (CPU_STATE (cpu), sim_core_read_map, a);
-}
-#else
-extern DI GETMEMDI (SIM_CPU *, ADDR);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE UQI
-GETMEMUQI (SIM_CPU *cpu, ADDR a)
-{
-  if (! MEM_CHECK_READ (a, UQI))
-    { engine_signal (cpu, SIM_SIGACCESS); }
-  if (! MEM_CHECK_ALIGNMENT (a, UQI))
-    { engine_signal (cpu, SIM_SIGALIGN); }
-  PROFILE_COUNT_READ (cpu, a, MODE_UQI);
-  return sim_core_read_1 (CPU_STATE (cpu), sim_core_read_map, a);
-}
-#else
-extern UQI GETMEMUQI (SIM_CPU *, ADDR);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE UHI
-GETMEMUHI (SIM_CPU *cpu, ADDR a)
-{
-  if (! MEM_CHECK_READ (a, UHI))
-    { engine_signal (cpu, SIM_SIGACCESS); }
-  if (! MEM_CHECK_ALIGNMENT (a, UHI))
-    { engine_signal (cpu, SIM_SIGALIGN); }
-  PROFILE_COUNT_READ (cpu, a, MODE_UHI);
-  return sim_core_read_2 (CPU_STATE (cpu), sim_core_read_map, a);
-}
-#else
-extern UHI GETMEMUHI (SIM_CPU *, ADDR);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE USI
-GETMEMUSI (SIM_CPU *cpu, ADDR a)
-{
-  if (! MEM_CHECK_READ (a, USI))
-    { engine_signal (cpu, SIM_SIGACCESS); }
-  if (! MEM_CHECK_ALIGNMENT (a, USI))
-    { engine_signal (cpu, SIM_SIGALIGN); }
-  PROFILE_COUNT_READ (cpu, a, MODE_USI);
-  return sim_core_read_4 (CPU_STATE (cpu), sim_core_read_map, a);
-}
-#else
-extern USI GETMEMUSI (SIM_CPU *, ADDR);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE UDI
-GETMEMUDI (SIM_CPU *cpu, ADDR a)
-{
-  if (! MEM_CHECK_READ (a, UDI))
-    { engine_signal (cpu, SIM_SIGACCESS); }
-  if (! MEM_CHECK_ALIGNMENT (a, UDI))
-    { engine_signal (cpu, SIM_SIGALIGN); }
-  PROFILE_COUNT_READ (cpu, a, MODE_UDI);
-  return sim_core_read_8 (CPU_STATE (cpu), sim_core_read_map, a);
-}
-#else
-extern UDI GETMEMUDI (SIM_CPU *, ADDR);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE void
-SETMEMQI (SIM_CPU *cpu, ADDR a, QI val)
-{
-  if (! MEM_CHECK_WRITE (a, QI))
-    { engine_signal (cpu, SIM_SIGACCESS); return; }
-  if (! MEM_CHECK_ALIGNMENT (a, QI))
-    { engine_signal (cpu, SIM_SIGALIGN); return; }
-  PROFILE_COUNT_WRITE (cpu, a, MODE_QI);
-  sim_core_write_1 (CPU_STATE (cpu), sim_core_read_map, a, val);
-}
-#else
-extern void SETMEMQI (SIM_CPU *, ADDR, QI);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE void
-SETMEMHI (SIM_CPU *cpu, ADDR a, HI val)
-{
-  if (! MEM_CHECK_WRITE (a, HI))
-    { engine_signal (cpu, SIM_SIGACCESS); return; }
-  if (! MEM_CHECK_ALIGNMENT (a, HI))
-    { engine_signal (cpu, SIM_SIGALIGN); return; }
-  PROFILE_COUNT_WRITE (cpu, a, MODE_HI);
-  sim_core_write_2 (CPU_STATE (cpu), sim_core_read_map, a, val);
-}
-#else
-extern void SETMEMHI (SIM_CPU *, ADDR, HI);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE void
-SETMEMSI (SIM_CPU *cpu, ADDR a, SI val)
-{
-  if (! MEM_CHECK_WRITE (a, SI))
-    { engine_signal (cpu, SIM_SIGACCESS); return; }
-  if (! MEM_CHECK_ALIGNMENT (a, SI))
-    { engine_signal (cpu, SIM_SIGALIGN); return; }
-  PROFILE_COUNT_WRITE (cpu, a, MODE_SI);
-  sim_core_write_4 (CPU_STATE (cpu), sim_core_read_map, a, val);
-}
-#else
-extern void SETMEMSI (SIM_CPU *, ADDR, SI);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE void
-SETMEMDI (SIM_CPU *cpu, ADDR a, DI val)
-{
-  if (! MEM_CHECK_WRITE (a, DI))
-    { engine_signal (cpu, SIM_SIGACCESS); return; }
-  if (! MEM_CHECK_ALIGNMENT (a, DI))
-    { engine_signal (cpu, SIM_SIGALIGN); return; }
-  PROFILE_COUNT_WRITE (cpu, a, MODE_DI);
-  sim_core_write_8 (CPU_STATE (cpu), sim_core_read_map, a, val);
-}
-#else
-extern void SETMEMDI (SIM_CPU *, ADDR, DI);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE void
-SETMEMUQI (SIM_CPU *cpu, ADDR a, UQI val)
-{
-  if (! MEM_CHECK_WRITE (a, UQI))
-    { engine_signal (cpu, SIM_SIGACCESS); return; }
-  if (! MEM_CHECK_ALIGNMENT (a, UQI))
-    { engine_signal (cpu, SIM_SIGALIGN); return; }
-  PROFILE_COUNT_WRITE (cpu, a, MODE_UQI);
-  sim_core_write_1 (CPU_STATE (cpu), sim_core_read_map, a, val);
-}
-#else
-extern void SETMEMUQI (SIM_CPU *, ADDR, UQI);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE void
-SETMEMUHI (SIM_CPU *cpu, ADDR a, UHI val)
-{
-  if (! MEM_CHECK_WRITE (a, UHI))
-    { engine_signal (cpu, SIM_SIGACCESS); return; }
-  if (! MEM_CHECK_ALIGNMENT (a, UHI))
-    { engine_signal (cpu, SIM_SIGALIGN); return; }
-  PROFILE_COUNT_WRITE (cpu, a, MODE_UHI);
-  sim_core_write_2 (CPU_STATE (cpu), sim_core_read_map, a, val);
-}
-#else
-extern void SETMEMUHI (SIM_CPU *, ADDR, UHI);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE void
-SETMEMUSI (SIM_CPU *cpu, ADDR a, USI val)
-{
-  if (! MEM_CHECK_WRITE (a, USI))
-    { engine_signal (cpu, SIM_SIGACCESS); return; }
-  if (! MEM_CHECK_ALIGNMENT (a, USI))
-    { engine_signal (cpu, SIM_SIGALIGN); return; }
-  PROFILE_COUNT_WRITE (cpu, a, MODE_USI);
-  sim_core_write_4 (CPU_STATE (cpu), sim_core_read_map, a, val);
-}
-#else
-extern void SETMEMUSI (SIM_CPU *, ADDR, USI);
-#endif
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-MEMOPS_INLINE void
-SETMEMUDI (SIM_CPU *cpu, ADDR a, UDI val)
-{
-  if (! MEM_CHECK_WRITE (a, UDI))
-    { engine_signal (cpu, SIM_SIGACCESS); return; }
-  if (! MEM_CHECK_ALIGNMENT (a, UDI))
-    { engine_signal (cpu, SIM_SIGALIGN); return; }
-  PROFILE_COUNT_WRITE (cpu, a, MODE_UDI);
-  sim_core_write_8 (CPU_STATE (cpu), sim_core_read_map, a, val);
-}
-#else
-extern void SETMEMUDI (SIM_CPU *, ADDR, UDI);
-#endif
-
-#endif /* CGEN_MEMS_H */
+#endif /* CGEN_MEM_H */

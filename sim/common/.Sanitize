@@ -109,7 +109,6 @@ sim-utils.c
 sim-utils.h
 sim-watch.c
 sim-watch.h
-sim-xcat.h
 syscall.c
 tconfig.in
 

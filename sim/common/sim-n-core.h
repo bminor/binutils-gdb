@@ -26,7 +26,15 @@
 #define M N
 #endif
 
-#include "sim-xcat.h"
+/* N: The number of bytes of data to transfer.
+   M: The number of bytes in the type used to transfer the data */
+
+#if (N > M)
+#error "N (nr bytes of data) must be <= M (nr of bytes in data type)"
+#endif
+
+
+#include "symcat.h"
 
 /* NOTE: see end of file for #undef of these macros */
 
@@ -43,6 +51,14 @@
 #define sim_core_write_unaligned_N XCONCAT2(sim_core_write_unaligned_,N)
 #define sim_core_write_misaligned_N XCONCAT2(sim_core_write_misaligned_,N)
 #define sim_core_trace_M XCONCAT2(sim_core_trace_,M)
+#define sim_core_dummy_M XCONCAT2(sim_core_dummy_,M)
+
+
+#if (M == N && N > 1)
+/* dummy variable used as a return value when nothing else is
+   available and the compiler is complaining */
+static unsigned_M sim_core_dummy_M;
+#endif
 
 
 /* TAGS: sim_core_trace_1 sim_core_trace_2 */
@@ -148,7 +164,7 @@ sim_core_read_aligned_N(sim_cpu *cpu,
 #if (WITH_DEVICES)
   if (WITH_CALLBACK_MEMORY && mapping->device != NULL) {
     unsigned_M data;
-    if (device_io_read_buffer (mapping->device, &data, mapping->space, addr, N) != N)
+    if (device_io_read_buffer (mapping->device, &data, mapping->space, addr, N, cpu, cia) != N)
       device_error (mapping->device, "internal error - %s - io_read_buffer should not fail",
 		    XSTRING (sim_core_read_aligned_N));
     val = T2H_M (data);
@@ -209,10 +225,7 @@ sim_core_read_unaligned_N(sim_cpu *cpu,
 			  "internal error - %s - bad switch",
 			  XSTRING (sim_core_read_unaligned_N));
 	/* to keep some compilers happy, we return a dummy */
-	{
-	  unsigned_M val[1] = { 0 };
-	  return val[0];
-	}
+	return sim_core_dummy_M;
       }
 }
 #endif
@@ -372,5 +385,6 @@ sim_core_write_misaligned_N(sim_cpu *cpu,
 #undef sim_core_write_unaligned_N
 #undef sim_core_write_misaligned_N
 #undef sim_core_trace_M
+#undef sim_core_dummy_M
 #undef M
 #undef N

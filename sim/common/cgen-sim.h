@@ -21,8 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef CGEN_SIM_H
 #define CGEN_SIM_H
 
-#include "sim-xcat.h"
-
 #define PC CPU (h_pc)
 
 /* Instruction field support macros.  */
@@ -44,49 +42,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* Forward decls.  Defined in the machine generated arch.h and cpu.h files.  */
 typedef struct argbuf ARGBUF;
 typedef struct scache SCACHE;
-typedef struct parallel_exec PARALLEL_EXEC;
-
-/* Types of the machine generated extract and semantic fns.  */
-typedef void (EXTRACT_FN) (SIM_CPU *, PCADDR, insn_t, ARGBUF *);
-/* ??? READ_FN isn't currently used anywhere, we always use a switch.  */
-typedef void (READ_FN) (SIM_CPU *, PCADDR, insn_t, PARALLEL_EXEC *);
-/*typedef CIA (SEMANTIC_FN) (SEM_ARG);*/
-typedef PCADDR (SEMANTIC_FN) (SIM_CPU *, ARGBUF *);
-#if 0 /* wip */
-typedef void (EXTRACT_CACHE_FN) (SIM_CPU *, PCADDR, insn_t, ARGBUF *);
-#endif
-typedef PCADDR (SEMANTIC_CACHE_FN) (SIM_CPU *, SCACHE *);
-
-typedef struct {
-  /* Using cgen_insn_type requires <cpu>-opc.h.  */
-  int /*enum cgen_insn_type*/ insn_type;
-  const struct cgen_insn *opcode;
-  EXTRACT_FN *extract;
-#ifdef HAVE_PARALLEL_EXEC
-#ifdef __GNUC__
-  void *read;
-#else
-  int read;
-#endif
-#endif
-  SEMANTIC_FN *semantic;
-  SEMANTIC_CACHE_FN *semantic_fast;
-#if WITH_SEM_SWITCH_FULL && defined (__GNUC__)
-  /* Set at runtime.  */
-  void *sem_full_lab;
-#endif
-#if WITH_SEM_SWITCH_FAST && defined (__GNUC__)
-  /* Set at runtime.  */
-  void *semantic_lab; /* FIXME: Rename to sem_fast_lab.  */
-#endif
-} DECODE;
-
-/* Execution support.
-
-   Semantic functions come in two versions.
-   One that uses the cache, and one that doesn't.
-   ??? The one that doesn't may eventually be thrown away or replaced with
-   something else.  */
+typedef struct parexec PAREXEC;
 
 #ifdef SCACHE_P
 
@@ -107,6 +63,57 @@ typedef PCADDR CIA;
 typedef ARGBUF *SEM_ARG;
 
 #endif /* ! SCACHE_P */
+
+/* Semantic functions come in two versions on two axis:
+   fast and full (featured), and using or not using scache.
+   A full featured simulator is always provided.  --enable-sim-fast includes
+   support for fast execution by duplicating the semantic code but leaving
+   out all features like tracing and profiling.
+   Using the scache is selected with --enable-sim-scache.  */
+/* FIXME: --enable-sim-fast not implemented yet.  */
+
+/* Types of the machine generated extract and semantic fns.  */
+/* FIXME: Eventually conditionalize EXTRACT_FN on WITH_SCACHE.  */
+typedef void (EXTRACT_FN) (SIM_CPU *, PCADDR, insn_t, ARGBUF *);
+#if WITH_SCACHE
+#ifdef HAVE_PARALLEL_EXEC
+typedef CIA (SEMANTIC_FN) (SIM_CPU *, SCACHE *, PAREXEC *);
+#else
+typedef CIA (SEMANTIC_FN) (SIM_CPU *, SCACHE *);
+#endif
+#else /* ! WITH_SCACHE */
+#ifdef HAVE_PARALLEL_EXEC
+typedef CIA (SEMANTIC_FN) (SIM_CPU *, ARGBUF *, PAREXEC *);
+#else
+typedef CIA (SEMANTIC_FN) (SIM_CPU *, ARGBUF *);
+#endif
+#endif
+
+/* DECODE struct, there is one per instruction.  */
+
+typedef struct {
+  /* Using cgen_insn_type requires <cpu>-opc.h.  */
+  int /*enum cgen_insn_type*/ insn_type;
+  const struct cgen_insn *opcode;
+  EXTRACT_FN *extract;
+#ifdef HAVE_PARALLEL_EXEC
+#ifdef __GNUC__
+  void *read;
+#else
+  int read;
+#endif
+#endif
+  SEMANTIC_FN *semantic;
+  SEMANTIC_FN *semantic_fast;
+#if WITH_SEM_SWITCH_FULL && defined (__GNUC__)
+  /* Set at runtime.  */
+  void *sem_full_lab;
+#endif
+#if WITH_SEM_SWITCH_FAST && defined (__GNUC__)
+  /* Set at runtime.  */
+  void *semantic_lab; /* FIXME: Rename to sem_fast_lab.  */
+#endif
+} DECODE;
 
 /* Scache data for each cpu.  */
 
@@ -182,16 +189,15 @@ do { \
 #define EXEC_SEQUENCE 0
 #define EXEC_PARALLEL 1
 
+/* These are used so that we can compile two copies of the semantic code,
+   one with full feature support and one without.  */
+/* FIXME: Eventually delete extraction if not using scache.  */
+#define EX_FN_NAME(cpu,fn) XCONCAT3 (cpu,_ex_,fn)
+#define SEM_FN_NAME(cpu,fn) XCONCAT3 (cpu,_sem_,fn)
+
 #ifdef SCACHE_P
 
 #define CIA_ADDR(cia) (cia)
-
-/* These are used so that we can compile two copies of the semantic code,
-   one with scache support and one without.  */
-/* FIXME: Do we want _ex_ or _exc_?  */
-/*#define EX_FN_NAME(cpu,fn) XCONCAT3 (cpu,_exc_,fn)*/
-#define EX_FN_NAME(cpu,fn) XCONCAT3 (cpu,_ex_,fn)
-#define SEM_FN_NAME(cpu,fn) XCONCAT3 (cpu,_semc_,fn)
 
 /* extract.c support */
 /* scache_unset is a cache entry that is never used.
@@ -214,11 +220,6 @@ do { (fld) = (val); } while (0)
 #else /* ! SCACHE_P */
 
 #define CIA_ADDR(cia) (cia)
-
-/* These are used so that we can compile two copies of the semantic code,
-   one with scache support and one without.  */
-#define EX_FN_NAME(cpu,fn) XCONCAT3 (cpu,_ex_,fn)
-#define SEM_FN_NAME(cpu,fn) XCONCAT3 (cpu,_sem_,fn)
 
 /* extract.c support */
 #define RECORD_IADDR(fld, val) \

@@ -1,3 +1,13 @@
+Mon Feb 23 13:08:35 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim-xcat.h: Delete.
+	* cgen-mem.h: Delete inclusion of sim-xcat.h.
+	* cgen-sim.h: Ditto.
+	* sim-alu.h: Replace sim-xcat.h with symcat.h.
+	* sim-n-bits.h: Ditto.
+	* sim-n-core.h: Ditto.
+	* sim-n-endian.h: Ditto.
+
 Mon Feb 23 13:19:58 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* syscall.c (cb_syscall): Handle short reads, and EOF.
