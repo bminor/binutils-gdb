@@ -5,6 +5,11 @@ Mon Oct 21 12:13:05 1996  Jeffrey A Law  (law@cygnus.com)
 
 Mon Oct 21 10:54:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-mips.c (elf_mips_howto_table): Describe R_MIPS_64.
+	(mips32_64bit_reloc): New static function.
+	(mips_reloc_map): Add entry for BFD_RELOC_64.
+	(mips_elf_relocate_section): Handle R_MIPS_64.
+
 	* linker.c (default_indirect_link_order): Print an error message
 	when attempting to do a relocateable link with different object
 	file formats, rather than calling abort.
