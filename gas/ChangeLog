@@ -1,3 +1,10 @@
+Fri Jul 24 16:31:49 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am (install-exec-local): Don't remove the file before
+	checking whether $(bindir) == $(tooldir)/bin.  From Maciej
+	W. Rozycki <macro@ds2.pg.gda.pl>.
+	* Makefile.in: Rebuild.
+
 Fri Jul 24 09:13:46 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* cgen.c: Include libiberty.h.
