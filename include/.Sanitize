@@ -30,6 +30,7 @@ ansidecl.h
 aout
 bfdlink.h
 bout.h
+callback.h
 coff
 demangle.h
 dis-asm.h
