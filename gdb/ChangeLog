@@ -18,7 +18,7 @@
 	(find_dummy_frame_regs, FUNC_LDIL_OFFSET, FUNC_LDO_OFFSET)
 	(find_proc_framesize, deposit_21, restore_pc_queue) 
 	(find_return_regnum, pc_in_interrupt_handler, deposit_14) 
-	(rp_saved, pc_in_linker_stub): 
+	(rp_saved, pc_in_linker_stub): Delete.
 
 	Unconditionally enable 64-bit frame and ABI code.
 	* hppa-tdep.c (hppa_gdbarch_init): Do not set deprecated
