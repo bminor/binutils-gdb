@@ -34,8 +34,32 @@ compare_new ()
 }
 
 
+# DEFAULT is a valid fallback definition of a MACRO when
+# multi-arch is not enabled.
+default_is_fallback_p ()
+{
+    [ "${default}" != "" -a "${invalid_p}" = "0" ]
+    # FIXME: cagney - not until after 5.0
+    false
+}
+
 # Format of the input table
-read="class level macro returntype function formal actual attrib default init invalid_p fmt print print_p description"
+read="class level macro returntype function formal actual attrib startup default invalid_p fmt print print_p description"
+
+do_read ()
+{
+    if eval read $read
+    then
+	test "${startup}" || startup=0
+	test "${fmt}" || fmt="%ld"
+	test "${print}" || print="(long) ${macro}"
+	#test "${default}" || default=0
+	:
+    else
+	false
+    fi
+}
+
 
 # dump out/verify the doco
 for field in ${read}
@@ -44,90 +68,102 @@ do
 
     class ) : ;;
 
-      # # -> line disable
-      # f -> function
-      #   hiding a function
-      # v -> variable
-      #   hiding a variable
-      # i -> set from info
-      #   hiding something from the ``struct info'' object
+	# # -> line disable
+	# f -> function
+	#   hiding a function
+	# v -> variable
+	#   hiding a variable
+	# i -> set from info
+	#   hiding something from the ``struct info'' object
 
     level ) : ;;
 
-      # See GDB_MULTI_ARCH description.  Having GDB_MULTI_ARCH >=
-      # LEVEL is a predicate on checking that a given method is
-      # initialized (using INVALID_P).
+	# See GDB_MULTI_ARCH description.  Having GDB_MULTI_ARCH >=
+	# LEVEL is a predicate on checking that a given method is
+	# initialized (using INVALID_P).
 
     macro ) : ;;
 
-      # The name of the MACRO that this method is to be accessed by.
+	# The name of the MACRO that this method is to be accessed by.
 
     returntype ) : ;;
 
-      # For functions, the return type; for variables, the data type
+	# For functions, the return type; for variables, the data type
 
     function ) : ;;
 
-      # For functions, the member function name; for variables, the
-      # variable name.  Member function names are always prefixed with
-      # ``gdbarch_'' for name-space purity.
+	# For functions, the member function name; for variables, the
+	# variable name.  Member function names are always prefixed with
+	# ``gdbarch_'' for name-space purity.
 
     formal ) : ;;
 
-      # The formal argument list.  It is assumed that the formal
-      # argument list includes the actual name of each list element.
-      # A function with no arguments shall have ``void'' as the formal
-      # argument list.
+	# The formal argument list.  It is assumed that the formal
+	# argument list includes the actual name of each list element.
+	# A function with no arguments shall have ``void'' as the
+	# formal argument list.
 
     actual ) : ;;
 
-      # The list of actual arguments.  The arguments specified shall
-      # match the FORMAL list given above.  Functions with out
-      # arguments leave this blank.
+	# The list of actual arguments.  The arguments specified shall
+	# match the FORMAL list given above.  Functions with out
+	# arguments leave this blank.
 
     attrib ) : ;;
 
-      # Any GCC attributes that should be attached to the function
-      # declaration.  At present this field is unused.
+	# Any GCC attributes that should be attached to the function
+	# declaration.  At present this field is unused.
+
+    startup ) : ;;
+
+	# To help with the GDB startup a static gdbarch object is
+	# created.  STARTUP is the value to insert into that static
+	# gdbarch object.
+
+	# By default ``0'' is used.
 
     default ) : ;;
 
-      # To help with the GDB startup a default static gdbarch object
-      # is created.  DEFAULT is the value to insert into the static
-      # gdbarch object. If empty ZERO is used.
+	# Any initial value to assign to a new gdbarch object after it
+	# as been malloc()ed.  Zero is used by default.
 
-    init ) : ;;
-
-      # Any initial value to assign to a new gdbarch object after it
-      # as been malloc()ed.  Zero is used by default.
+	# Specify a non-empty DEFAULT and a zero INVALID_P to create a
+	# fallback value or function for when multi-arch is disabled.
+	# Specify a zero DEFAULT function to make that fallback
+	# illegal to call.
 
     invalid_p ) : ;;
 
-      # A predicate equation that validates MEMBER. Non-zero is returned
-      # if the code creating the new architecture failed to initialize
-      # the MEMBER or initialized the member to something invalid.
-      # By default, a check that the value is no longer equal to INIT
-      # is performed.  The equation ``0'' disables the invalid_p check.
+	# A predicate equation that validates MEMBER. Non-zero is
+	# returned if the code creating the new architecture failed to
+	# initialize the MEMBER or initialized the member to something
+	# invalid. By default, a check that the value is no longer
+	# equal to DEFAULT ips performed.  The equation ``0'' disables
+	# the invalid_p check.
 
     fmt ) : ;;
 
-      # printf style format string that can be used to print out the
-      # MEMBER.  The default is to assume "%ld" is safe.  Sometimes
-      # "%s" is useful.  For functions, this is ignored and the
-      # function address is printed.
+	# printf style format string that can be used to print out the
+	# MEMBER.  Sometimes "%s" is useful.  For functions, this is
+	# ignored and the function address is printed.
+
+	# By default ```%ld'' is used.  
 
     print ) : ;;
 
-      # An optional equation that converts the MEMBER into a value
-      # suitable for that FMT.  By default it is assumed that the
-      # member's MACRO cast to long is safe.
+	# An optional equation that casts MEMBER to a value suitable
+	# for formatting by FMT.
+
+	# By default ``(long)'' is used.
 
     print_p ) : ;;
 
-      # An optional indicator for any predicte to wrap around the
-      # print member code.
-      #   # -> Wrap print up in ``#ifdef MACRO''
-      #   exp -> Wrap print up in ``if (${print_p}) ...
+	# An optional indicator for any predicte to wrap around the
+	# print member code.
+
+	#   # -> Wrap print up in ``#ifdef MACRO''
+	#   exp -> Wrap print up in ``if (${print_p}) ...
+	#   ``'' -> No predicate
 
     description ) : ;;
 
@@ -169,7 +205,7 @@ v:2:NUM_REGS:int:num_regs::::0:-1
 v:2:SP_REGNUM:int:sp_regnum::::0:-1
 v:2:FP_REGNUM:int:fp_regnum::::0:-1
 v:2:PC_REGNUM:int:pc_regnum::::0:-1
-f:2:REGISTER_NAME:char *:register_name:int regnr:regnr::0:0
+f:2:REGISTER_NAME:char *:register_name:int regnr:regnr:::legacy_register_name:0
 v:2:REGISTER_SIZE:int:register_size::::0:-1
 v:2:REGISTER_BYTES:int:register_bytes::::0:-1
 f:2:REGISTER_BYTE:int:register_byte:int reg_nr:reg_nr::0:0
@@ -188,55 +224,55 @@ v:1:CALL_DUMMY_BREAKPOINT_OFFSET_P:int:call_dummy_breakpoint_offset_p::::0:-1
 v:2:CALL_DUMMY_LENGTH:int:call_dummy_length::::0:-1::::CALL_DUMMY_LOCATION == BEFORE_TEXT_END || CALL_DUMMY_LOCATION == AFTER_TEXT_END
 f:2:PC_IN_CALL_DUMMY:int:pc_in_call_dummy:CORE_ADDR pc, CORE_ADDR sp, CORE_ADDR frame_address:pc, sp, frame_address::0:0
 v:1:CALL_DUMMY_P:int:call_dummy_p::::0:-1
-v:2:CALL_DUMMY_WORDS:LONGEST *:call_dummy_words::::0:::0x%08lx
-v:2:SIZEOF_CALL_DUMMY_WORDS:int:sizeof_call_dummy_words::::0:::0x%08lx
+v:2:CALL_DUMMY_WORDS:LONGEST *:call_dummy_words::::0:legacy_call_dummy_words:0:0x%08lx
+v:2:SIZEOF_CALL_DUMMY_WORDS:int:sizeof_call_dummy_words::::0:legacy_sizeof_call_dummy_words:0:0x%08lx
 v:1:CALL_DUMMY_STACK_ADJUST_P:int:call_dummy_stack_adjust_p::::0:-1::0x%08lx
 v:2:CALL_DUMMY_STACK_ADJUST:int:call_dummy_stack_adjust::::0::gdbarch->call_dummy_stack_adjust_p && gdbarch->call_dummy_stack_adjust == 0:0x%08lx::CALL_DUMMY_STACK_ADJUST_P
 f:2:FIX_CALL_DUMMY:void:fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p::0:0
 #
 v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion::::0:::::#
 v:2:BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type::::0:::::#
-f:2:COERCE_FLOAT_TO_DOUBLE:int:coerce_float_to_double:struct type *formal, struct type *actual:formal, actual:::default_coerce_float_to_double
+f:2:COERCE_FLOAT_TO_DOUBLE:int:coerce_float_to_double:struct type *formal, struct type *actual:formal, actual:::default_coerce_float_to_double:0
 f:1:GET_SAVED_REGISTER:void:get_saved_register:char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval:raw_buffer, optimized, addrp, frame, regnum, lval::generic_get_saved_register:0
 #
-f:1:REGISTER_CONVERTIBLE:int:register_convertible:int nr:nr::0:0
-f:2:REGISTER_CONVERT_TO_VIRTUAL:void:register_convert_to_virtual:int regnum, struct type *type, char *from, char *to:regnum, type, from, to::0:0
-f:2:REGISTER_CONVERT_TO_RAW:void:register_convert_to_raw:struct type *type, int regnum, char *from, char *to:type, regnum, from, to::0:0
+f:1:REGISTER_CONVERTIBLE:int:register_convertible:int nr:nr:::generic_register_convertible_not:0
+f:2:REGISTER_CONVERT_TO_VIRTUAL:void:register_convert_to_virtual:int regnum, struct type *type, char *from, char *to:regnum, type, from, to:::0:0
+f:2:REGISTER_CONVERT_TO_RAW:void:register_convert_to_raw:struct type *type, int regnum, char *from, char *to:type, regnum, from, to:::0:0
 #
 f:2:EXTRACT_RETURN_VALUE:void:extract_return_value:struct type *type, char *regbuf, char *valbuf:type, regbuf, valbuf::0:0
 f:1:PUSH_ARGUMENTS:CORE_ADDR:push_arguments:int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:nargs, args, sp, struct_return, struct_addr::0:0
-f:2:PUSH_DUMMY_FRAME:void:push_dummy_frame:void:-::0:0
-f:1:PUSH_RETURN_ADDRESS:CORE_ADDR:push_return_address:CORE_ADDR pc, CORE_ADDR sp:pc, sp::0:0
-f:2:POP_FRAME:void:pop_frame:void:-::0:0
+f:2:PUSH_DUMMY_FRAME:void:push_dummy_frame:void:-:::0
+f:1:PUSH_RETURN_ADDRESS:CORE_ADDR:push_return_address:CORE_ADDR pc, CORE_ADDR sp:pc, sp:::0
+f:2:POP_FRAME:void:pop_frame:void:-:::0
 #
 # I wish that these would just go away....
-f:2:D10V_MAKE_DADDR:CORE_ADDR:d10v_make_daddr:CORE_ADDR x:x::0:0
-f:2:D10V_MAKE_IADDR:CORE_ADDR:d10v_make_iaddr:CORE_ADDR x:x::0:0
-f:2:D10V_DADDR_P:int:d10v_daddr_p:CORE_ADDR x:x::0:0
-f:2:D10V_IADDR_P:int:d10v_iaddr_p:CORE_ADDR x:x::0:0
-f:2:D10V_CONVERT_DADDR_TO_RAW:CORE_ADDR:d10v_convert_daddr_to_raw:CORE_ADDR x:x::0:0
-f:2:D10V_CONVERT_IADDR_TO_RAW:CORE_ADDR:d10v_convert_iaddr_to_raw:CORE_ADDR x:x::0:0
+f:2:D10V_MAKE_DADDR:CORE_ADDR:d10v_make_daddr:CORE_ADDR x:x:::0:0
+f:2:D10V_MAKE_IADDR:CORE_ADDR:d10v_make_iaddr:CORE_ADDR x:x:::0:0
+f:2:D10V_DADDR_P:int:d10v_daddr_p:CORE_ADDR x:x:::0
+f:2:D10V_IADDR_P:int:d10v_iaddr_p:CORE_ADDR x:x:::0
+f:2:D10V_CONVERT_DADDR_TO_RAW:CORE_ADDR:d10v_convert_daddr_to_raw:CORE_ADDR x:x:::0
+f:2:D10V_CONVERT_IADDR_TO_RAW:CORE_ADDR:d10v_convert_iaddr_to_raw:CORE_ADDR x:x:::0
 #
-f:2:STORE_STRUCT_RETURN:void:store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp::0:0
-f:2:STORE_RETURN_VALUE:void:store_return_value:struct type *type, char *valbuf:type, valbuf::0:0
-f:2:EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:extract_struct_value_address:char *regbuf:regbuf::0:0
-f:2:USE_STRUCT_CONVENTION:int:use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type::0:0
+f:2:STORE_STRUCT_RETURN:void:store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp:::0
+f:2:STORE_RETURN_VALUE:void:store_return_value:struct type *type, char *valbuf:type, valbuf:::0
+f:2:EXTRACT_STRUCT_VALUE_ADDRESS:CORE_ADDR:extract_struct_value_address:char *regbuf:regbuf:::0
+f:2:USE_STRUCT_CONVENTION:int:use_struct_convention:int gcc_p, struct type *value_type:gcc_p, value_type:::0
 #
 f:2:FRAME_INIT_SAVED_REGS:void:frame_init_saved_regs:struct frame_info *frame:frame::0:0
-f:2:INIT_EXTRA_FRAME_INFO:void:init_extra_frame_info:int fromleaf, struct frame_info *frame:fromleaf, frame::0:0
+f:2:INIT_EXTRA_FRAME_INFO:void:init_extra_frame_info:int fromleaf, struct frame_info *frame:fromleaf, frame:::0
 #
 f:2:SKIP_PROLOGUE:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip::0:0
 f:2:INNER_THAN:int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs::0:0
-f:2:BREAKPOINT_FROM_PC:unsigned char *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr::0:0
+f:2:BREAKPOINT_FROM_PC:unsigned char *:breakpoint_from_pc:CORE_ADDR *pcptr, int *lenptr:pcptr, lenptr:::legacy_breakpoint_from_pc:0
 f:2:MEMORY_INSERT_BREAKPOINT:int:memory_insert_breakpoint:CORE_ADDR addr, char *contents_cache:addr, contents_cache::0:default_memory_insert_breakpoint:0
 f:2:MEMORY_REMOVE_BREAKPOINT:int:memory_remove_breakpoint:CORE_ADDR addr, char *contents_cache:addr, contents_cache::0:default_memory_remove_breakpoint:0
 v:2:DECR_PC_AFTER_BREAK:CORE_ADDR:decr_pc_after_break::::0:-1
 v:2:FUNCTION_START_OFFSET:CORE_ADDR:function_start_offset::::0:-1
 #
-f:2:REMOTE_TRANSLATE_XFER_ADDRESS:void:remote_translate_xfer_address:CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len:gdb_addr, gdb_len, rem_addr, rem_len::0:0
+f:2:REMOTE_TRANSLATE_XFER_ADDRESS:void:remote_translate_xfer_address:CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len:gdb_addr, gdb_len, rem_addr, rem_len:::generic_remote_translate_xfer_address:0
 #
 v:2:FRAME_ARGS_SKIP:CORE_ADDR:frame_args_skip::::0:-1
-f:2:FRAMELESS_FUNCTION_INVOCATION:int:frameless_function_invocation:struct frame_info *fi:fi::0:0
+f:2:FRAMELESS_FUNCTION_INVOCATION:int:frameless_function_invocation:struct frame_info *fi:fi:::generic_frameless_function_invocation_not:0
 f:2:FRAME_CHAIN:CORE_ADDR:frame_chain:struct frame_info *frame:frame::0:0
 f:1:FRAME_CHAIN_VALID:int:frame_chain_valid:CORE_ADDR chain, struct frame_info *thisframe:chain, thisframe::0:0
 f:2:FRAME_SAVED_PC:CORE_ADDR:frame_saved_pc:struct frame_info *fi:fi::0:0
@@ -254,14 +290,14 @@ EOF
 if true
 then
   exec > new-gdbarch
-  function_list | while eval read $read
+  function_list | while do_read # eval read $read
   do
     cat <<EOF
 ${class} ${macro}(${actual})
   ${returntype} ${function} ($formal)${attrib}
     level=${level}
+    startup=${startup}
     default=${default}
-    init=${init}
     invalid_p=${invalid_p}
     fmt=${fmt}
     print=${print}
@@ -369,7 +405,7 @@ EOF
 echo ""
 echo ""
 echo "/* The following are pre-initialized by GDBARCH. */"
-function_list | while eval read $read
+function_list | while do_read # eval read $read
 do
   case "${class}" in
     "i" )
@@ -389,7 +425,7 @@ done
 echo ""
 echo ""
 echo "/* The following are initialized by the target dependant code. */"
-function_list | while eval read $read
+function_list | while do_read # eval read $read
 do
   case "${class}" in
     "v" )
@@ -412,7 +448,10 @@ do
 	  echo "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch, ${formal});"
 	fi
 	echo "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, gdbarch_${function}_ftype *${function});"
-	echo "#if GDB_MULTI_ARCH"
+	if ! default_is_fallback_p
+	then
+	    echo "#if GDB_MULTI_ARCH"
+	fi
 	echo "#if (GDB_MULTI_ARCH > 1) || !defined (${macro})"
 	if [ "${actual}" = "" ]
 	then
@@ -424,7 +463,10 @@ do
 	  echo "#define ${macro}(${actual}) (gdbarch_${function} (current_gdbarch, ${actual}))"
 	fi
 	echo "#endif"
-	echo "#endif"
+	if ! default_is_fallback_p
+	then
+	    echo "#endif"
+	fi
 	;;
   esac
 done
@@ -770,6 +812,7 @@ copyright
 cat <<EOF
 
 #include "defs.h"
+#include "gdbarch-utils.h"
 
 #if GDB_MULTI_ARCH
 #include "gdbcmd.h"
@@ -825,7 +868,7 @@ echo ""
 echo "struct gdbarch"
 echo "{"
 echo "  /* basic architectural information */"
-function_list | while eval read $read
+function_list | while do_read # eval read $read
 do
   case "${class}" in
     "i" ) echo "  ${returntype} ${function};" ;;
@@ -861,7 +904,7 @@ cat <<EOF
      gdbarch_dump(): Add a fprintf_unfiltered call to so that the new
      field is dumped out
 
-     \`\`default_gdbarch()'': Append an initial value to the static
+     \`\`startup_gdbarch()'': Append an initial value to the static
      variable (base values on the host's c-type system).
 
      get_gdbarch(): Implement the set/get functions (probably using
@@ -870,7 +913,7 @@ cat <<EOF
      */
 
 EOF
-function_list | while eval read $read
+function_list | while do_read # eval read $read
 do
   case "${class}" in
     "v" ) echo "  ${returntype} ${function};" ;;
@@ -889,17 +932,13 @@ EOF
 echo ""
 echo "extern const struct bfd_arch_info bfd_default_arch_struct;"
 echo ""
-echo "struct gdbarch default_gdbarch = {"
+echo "struct gdbarch startup_gdbarch = {"
 echo "  /* basic architecture information */"
-function_list | while eval read $read
+function_list | while do_read # eval read $read
 do
   case "${class}" in
     "i" ) 
-      if [ "${default}" = "" ]; then
-        echo "  0,"
-      else
-        echo "  ${default},"
-      fi
+      echo "  ${startup},"
     ;;
   esac
 done
@@ -910,22 +949,18 @@ cat <<EOF
   0, NULL, NULL,
   /* Multi-arch values */
 EOF
-function_list | while eval read $read
+function_list | while do_read # eval read $read
 do
   case "${class}" in
     "f" | "v" )
-      if [ "${default}" = "" ]; then
-        echo "  0,"
-      else
-        echo "  ${default},"
-      fi
+      echo "  ${startup},"
     ;;
   esac
 done
 cat <<EOF
-  /* default_gdbarch() */
+  /* startup_gdbarch() */
 };
-struct gdbarch *current_gdbarch = &default_gdbarch;
+struct gdbarch *current_gdbarch = &startup_gdbarch;
 EOF
 
 # Create a new gdbarch struct
@@ -947,7 +982,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->tdep = tdep;
 EOF
 echo ""
-function_list | while eval read $read
+function_list | while do_read # eval read $read
 do
   case "${class}" in
     "i" ) echo "  gdbarch->${function} = info->${function};"
@@ -955,13 +990,13 @@ do
 done
 echo ""
 echo "  /* Force the explicit initialization of these. */"
-function_list | while eval read $read
+function_list | while do_read # eval read $read
 do
   case "${class}" in
     "f" | "v" )
-	if [ "${init}" != "" -a "${init}" != "0" ]
+	if [ "${default}" != "" -a "${default}" != "0" ]
 	then
-	  echo "  gdbarch->${function} = ${init};"
+	  echo "  gdbarch->${function} = ${default};"
 	fi
 	;;
   esac
@@ -1009,20 +1044,23 @@ verify_gdbarch (struct gdbarch *gdbarch)
     internal_error ("verify_gdbarch: bfd_arch_info unset");
   /* Check those that need to be defined for the given multi-arch level. */
 EOF
-function_list | while eval read $read
+function_list | while do_read # eval read $read
 do
   case "${class}" in
     "f" | "v" )
- 	if [ "${invalid_p}" ]
+	if [ "${invalid_p}" = "0" ]
 	then
-	  echo "  if ((GDB_MULTI_ARCH >= ${level})"
-	  echo "      && (${invalid_p}))"
-	  echo "    internal_error (\"gdbarch: verify_gdbarch: ${function} invalid\");"
-	elif [ "${init}" ]
+	    echo "  /* Skip verify of ${function}, invalid_p == 0 */"
+ 	elif [ "${invalid_p}" ]
 	then
-	  echo "  if ((GDB_MULTI_ARCH >= ${level})"
-	  echo "      && (gdbarch->${function} == ${init}))"
-	  echo "    internal_error (\"gdbarch: verify_gdbarch: ${function} invalid\");"
+	    echo "  if ((GDB_MULTI_ARCH >= ${level})"
+	    echo "      && (${invalid_p}))"
+	    echo "    internal_error (\"gdbarch: verify_gdbarch: ${function} invalid\");"
+	elif [ "${default}" ]
+	then
+	    echo "  if ((GDB_MULTI_ARCH >= ${level})"
+	    echo "      && (gdbarch->${function} == ${default}))"
+	    echo "    internal_error (\"gdbarch: verify_gdbarch: ${function} invalid\");"
 	fi
 	;;
   esac
@@ -1041,7 +1079,7 @@ void
 gdbarch_dump (void)
 {
 EOF
-function_list | while eval read $read
+function_list | while do_read # eval read $read
 do
   case "${class}" in
     "f" )
@@ -1051,8 +1089,6 @@ do
 	echo "                      /*${macro} ()*/);"
 	;;
     * )
-	test "${fmt}" || fmt="%ld"
-	test "${print}" || print="(long) ${macro}"
 	if [ "${print_p}" = "#" ]
 	then
 	  echo "#ifdef ${macro}"
@@ -1089,7 +1125,7 @@ gdbarch_tdep (struct gdbarch *gdbarch)
 }
 EOF
 echo ""
-function_list | while eval read $read
+function_list | while do_read # eval read $read
 do
   case "${class}" in
     "f" )
@@ -1102,6 +1138,19 @@ do
 	  echo "gdbarch_${function} (struct gdbarch *gdbarch, ${formal})"
 	fi
 	echo "{"
+	if default_is_fallback_p && [ "${default}" != "0" ]
+	then
+	    echo "  if (GDB_MULTI_ARCH == 0)"
+	    if [ "${returntype}" = "void" ]
+	    then
+		echo "    {"
+		echo "      ${default} (${actual});"
+		echo "      return;"
+		echo "    }"
+	    else
+		echo "    return ${default} (${actual});"
+	    fi
+	fi
         echo "  if (gdbarch->${function} == 0)"
         echo "    internal_error (\"gdbarch: gdbarch_${function} invalid\");"
 	echo "  if (gdbarch_debug >= 2)"
@@ -1127,13 +1176,16 @@ do
 	echo "${returntype}"
 	echo "gdbarch_${function} (struct gdbarch *gdbarch)"
 	echo "{"
-	if [ "${invalid_p}" ]
+	if [ "${invalid_p}" = "0" ]
+	then
+	    echo "  /* Skip verify of ${function}, invalid_p == 0 */"
+	elif [ "${invalid_p}" ]
 	then
 	  echo "  if (${invalid_p})"
 	  echo "    internal_error (\"gdbarch: gdbarch_${function} invalid\");"
-	elif [ "${init}" ]
+	elif [ "${default}" ]
 	then
-	  echo "  if (gdbarch->${function} == ${init})"
+	  echo "  if (gdbarch->${function} == ${default})"
 	  echo "    internal_error (\"gdbarch: gdbarch_${function} invalid\");"
 	fi
 	echo "  if (gdbarch_debug >= 2)"

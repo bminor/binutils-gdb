@@ -1,3 +1,26 @@
+Fri Mar 31 08:59:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch-utils.h, gdbarch-utils.c: New files.
+	* Makefile.in (SFILES, COMMON_OBS): Update.
+	(gdbarch_utils_h) Define.
+	(gdbarch-utils.o): Add dependencies.
+	
+	* gdbarch.c, gdbarch.sh: Include "gdbarch-utils.h". Fix code
+ 	handling default method values.
+	(startup_gdbarch): Rename default_gdbarch, name misleading.
+	(breakpoint_from_pc): Default to legacy_breakpoint_from_pc.
+	(register_name): Default to legacy_register_name.
+	(call_dummy_words): Default to legacy_call_dummy_words.
+	(sizeof_call_dummy_words): Default to
+ 	legacy_sizeof_call_dummy_words.
+	(register_convertible): Default to
+ 	generic_register_convertible_not.
+	(breakpoint_from_pc): Default to legacy_breakpoint_from_pc.
+	(remote_translate_xfer_address): Default to
+ 	generic_remote_translate_xfer_address.
+	(frameless_function_invocation): Default to
+ 	generic_frameless_function_invocation_not.
+
 2000-04-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-nat.c: Add copyright notice.

@@ -466,7 +466,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	demangle.c dwarfread.c dwarf2read.c elfread.c environ.c eval.c \
 	event-loop.c event-top.c \
 	expprint.c f-exp.y f-lang.c f-typeprint.c f-valprint.c \
-	findvar.c gdbarch.c gdbtypes.c \
+	findvar.c gdbarch.c gdbarch-utils.c gdbtypes.c \
 	inf-loop.c infcmd.c inflow.c infrun.c language.c \
 	kod.c kod-cisco.c \
 	ui-out.c cli-out.c \
@@ -548,6 +548,7 @@ remote_h =	remote.h
 version_h = 	version.h
 ui_out_h =      ui-out.h
 cli_out_h =	cli-out.h
+gdbarch_utils_h = gdbarch-utils.h
 
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
@@ -605,7 +606,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	symtab.o symfile.o symmisc.o infcmd.o infrun.o command.o \
 	expprint.o environ.o \
 	event-loop.o event-top.o inf-loop.o \
-	gdbarch.o gdbtypes.o copying.o $(DEPFILES) \
+	gdbarch.o gdbarch-utils.o gdbtypes.o copying.o $(DEPFILES) \
 	mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
 	kod.o kod-cisco.o \
 	gdb-events.o \
@@ -1353,6 +1354,9 @@ tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(tracepoint_h) \
 
 gdbarch.o: gdbarch.c $(defs_h) $(bfd_h) $(gdbcmd_h)
 
+gdbarch-utils.o: gdbarch-utils.c $(defs_h) $(bfd_h) $(gdbcmd_h) \
+	$(gdbarch_utils_h)
+
 gdbtypes.o: gdbtypes.c $(bfd_h) complaints.h $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h objfiles.h symfile.h $(symtab_h) target.h \
 	$(value_h) gdb_string.h
@@ -1522,6 +1526,7 @@ minsyms.o: minsyms.c $(bfd_h) $(defs_h) objfiles.h symfile.h \
 mips-nat.o: mips-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) 
 
 mips-tdep.o: mips-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
+	$(gdbarch_utils_h) \
 	$(inferior_h) language.h objfiles.h symfile.h gdb_string.h
 
 mipsread.o: mipsread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
