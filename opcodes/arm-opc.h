@@ -79,7 +79,7 @@ Thumb specific format options:
 /* Note: There is a partial ordering in this table - it must be searched from
    the top to obtain a correct match. */
 
-static struct arm_opcode arm_opcodes[] =
+static const struct arm_opcode arm_opcodes[] =
 {
     /* ARM instructions.  */
     {0xe1a00000, 0xffffffff, "nop\t\t\t(mov r0,r0)"},
@@ -395,7 +395,7 @@ static struct arm_opcode arm_opcodes[] =
 
 #define BDISP(x) ((((x) & 0xffffff) ^ 0x800000) - 0x800000) /* 26 bit */
 
-static struct thumb_opcode thumb_opcodes[] =
+static const struct thumb_opcode thumb_opcodes[] =
 {
   /* Thumb instructions.  */
 

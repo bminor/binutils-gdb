@@ -258,7 +258,7 @@ int length;
 int idx;
 } opcode_entry_type;
 #ifdef DEFINE_TABLE
-opcode_entry_type z8k_table[] = {
+const opcode_entry_type z8k_table[] = {
 
 
 /* 1011 0101 ssss dddd *** adc rd,rs */

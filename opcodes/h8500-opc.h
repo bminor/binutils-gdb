@@ -157,7 +157,7 @@ typedef struct {
 	int length;
 	struct { unsigned char contents;unsigned char mask; char insert; } bytes[6];
 } h8500_opcode_info;
-h8500_opcode_info h8500_table[]
+const h8500_opcode_info h8500_table[]
 #ifdef ASSEMBLER_TABLE
 #ifdef DEFINE_TABLE
 ={
@@ -3852,7 +3852,7 @@ IMM16,RD  'a','E','D','D'
 QIM,ABS16  'a','I','E','E'
 RNIND_D16,RD  'a','E','D','D'
 */
-{0,0,0,0,0,0,"",0,{0,0},0,{}}}
+{0,0,0,0,0,0,NULL,0,{0,0},0,{}}}
 #endif
 ;
 #endif

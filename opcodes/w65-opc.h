@@ -54,7 +54,7 @@ struct opinfo {
 	char *name;
 	int amode;
 };
-struct opinfo optable[257]={
+const struct opinfo optable[257]={
 #define O_adc 1
 #define O_and 2
 #define O_asl 3

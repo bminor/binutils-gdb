@@ -1,3 +1,18 @@
+2002-11-18  Klee Dienes  <kdienes@apple.com>
+
+	* arc-opc.c (arc_ext_opcodes): Define.
+	(arc_ext_operands): Define.
+	* i386-dis.c (Suffix3DNow): Declare as const.
+	* arm-opc.h (arm_opcodes): Declare as const.
+	(thumb_opcodes): Declare as const.
+	* h8500-opc.h (h8500_table): Declare as const.
+	(h8500_table): Use a NULL for the opcode in the terminator, so
+	that code testing (opcode->name) behaves correctly.
+	* mcore-opc.h (mcore_table): Declare as const.
+	* sh-opc.h (sh_table): Declare as const.
+	* w65-opc.h (optable): Declare as const.
+	* z8k-opc.h (z8k_table): Declare as const.
+
 2002-11-18  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* tic4x-dis.c: Added support for enhanced and special insn.

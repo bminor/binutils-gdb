@@ -3970,7 +3970,7 @@ OP_XS (bytemode, sizeflag)
     BadOp ();
 }
 
-static const char *Suffix3DNow[] = {
+static const char *const Suffix3DNow[] = {
 /* 00 */	NULL,		NULL,		NULL,		NULL,
 /* 04 */	NULL,		NULL,		NULL,		NULL,
 /* 08 */	NULL,		NULL,		NULL,		NULL,
