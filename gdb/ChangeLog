@@ -1,3 +1,14 @@
+2003-05-15  Jeff Johnston  <jjohnstn@redhat.com>
+ 
+	* ia64-tdep.c: Increase max_skip_non_prologue_insns to 40.
+	(examine_prologue): Support looking through leaf functions, knowing
+	they start with mov r2,r12.  Support skipping over indirect stores 
+	of the input registers.  Upon hitting a non-nop branch instruction 
+	or predicated instruction, bail out by setting lim_pc to the current 
+	pc value in the loop.  At the end, if the lim_pc value is still 
+	beyond our calculated value and we have trust_limit set,
+	use the lim_pc value.
+
 2003-05-15  Andrew Cagney  <cagney@redhat.com>
 
 	* dummy-frame.h (deprecated_find_dummy_frame_regcache): Rename

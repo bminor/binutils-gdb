@@ -737,7 +737,7 @@ ia64_frame_saved_pc (struct frame_info *frame)
 
 /* Limit the number of skipped non-prologue instructions since examining
    of the prologue is expensive.  */
-static int max_skip_non_prologue_insns = 10;
+static int max_skip_non_prologue_insns = 40;
 
 /* Given PC representing the starting address of a function, and
    LIM_PC which is the (sloppy) limit to which to scan when looking
@@ -825,10 +825,13 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
   CORE_ADDR spill_addr = 0;
   char instores[8];
   char infpstores[8];
+  char reg_contents[256];
   int trust_limit;
+  int frameless = 0;
 
   memset (instores, 0, sizeof instores);
   memset (infpstores, 0, sizeof infpstores);
+  memset (reg_contents, 0, sizeof reg_contents);
 
   if (frame && !get_frame_saved_regs (frame))
     {
@@ -843,13 +846,14 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
     return get_frame_extra_info (frame)->after_prologue;
 
   lim_pc = refine_prologue_limit (pc, lim_pc, &trust_limit);
-
-  /* Must start with an alloc instruction */
   next_pc = fetch_instruction (pc, &it, &instr);
+
+  /* We want to check if we have a recognizable function start before we
+     look ahead for a prologue.  */
   if (pc < lim_pc && next_pc 
       && it == M && ((instr & 0x1ee0000003fLL) == 0x02c00000000LL))
     {
-      /* alloc */
+      /* alloc - start of a regular function.  */
       int sor = (int) ((instr & 0x00078000000LL) >> 27);
       int sol = (int) ((instr & 0x00007f00000LL) >> 20);
       int sof = (int) ((instr & 0x000000fe000LL) >> 13);
@@ -864,9 +868,35 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
     }
   else
     {
-      pc = lim_pc;	/* Frameless: We're done early.  */
-      if (trust_limit)
-	last_prologue_pc = lim_pc;
+      /* Look for a leaf routine.  */
+      if (pc < lim_pc && next_pc
+	  && (it == I || it == M) 
+          && ((instr & 0x1ee00000000LL) == 0x10800000000LL))
+	{
+	  /* adds rN = imm14, rM   (or mov rN, rM  when imm14 is 0) */
+	  int imm = (int) ((((instr & 0x01000000000LL) ? -1 : 0) << 13) 
+	                   | ((instr & 0x001f8000000LL) >> 20)
+		           | ((instr & 0x000000fe000LL) >> 13));
+	  int rM = (int) ((instr & 0x00007f00000LL) >> 20);
+	  int rN = (int) ((instr & 0x00000001fc0LL) >> 6);
+	  int qp = (int) (instr & 0x0000000003fLL);
+	  if (qp == 0 && rN == 2 && imm == 0 && rM == 12 && fp_reg == 0)
+	    {
+	      /* mov r2, r12 - beginning of leaf routine */
+	      fp_reg = rN;
+	      frameless = 1;
+	      last_prologue_pc = next_pc;
+	    }
+	} 
+
+      /* If we don't recognize a regular function or leaf routine, we are
+	 done.  */
+      if (!fp_reg)
+	{
+	  pc = lim_pc;	
+	  if (trust_limit)
+	    last_prologue_pc = lim_pc;
+	}
     }
 
   /* Loop, looking for prologue instructions, keeping track of
@@ -882,6 +912,8 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
 	{
 	  /* Exit loop upon hitting a non-nop branch instruction 
 	     or a predicated instruction. */
+	  if (trust_limit)
+	    lim_pc = pc;
 	  break;
 	}
       else if (it == I && ((instr & 0x1eff8000000LL) == 0x00188000000LL))
@@ -940,6 +972,20 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
 			  + imm;
 	      spill_reg   = rN;
 	      last_prologue_pc = next_pc;
+	    }
+	  else if (qp == 0 && rM >= 32 && rM < 40 && !instores[rM] && 
+		   rN < 256 && imm == 0)
+	    {
+	      /* mov rN, rM where rM is an input register */
+	      reg_contents[rN] = rM;
+	      last_prologue_pc = next_pc;
+	    }
+	  else if (frameless && qp == 0 && rN == fp_reg && imm == 0 && 
+		   rM == 2)
+	    {
+	      /* mov r12, r2 */
+	      last_prologue_pc = next_pc;
+	      break;
 	    }
 	}
       else if (it == M 
@@ -1006,6 +1052,7 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
 	  int rN = (int) ((instr & 0x00007f00000LL) >> 20);
 	  int rM = (int) ((instr & 0x000000fe000LL) >> 13);
 	  int qp = (int) (instr & 0x0000000003fLL);
+	  int indirect = rM < 256 ? reg_contents[rM] : 0;
 	  if (qp == 0 && rN == spill_reg && spill_addr != 0
 	      && (rM == unat_save_reg || rM == pr_save_reg))
 	    {
@@ -1040,6 +1087,13 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
 	      instores[rM-32] = 1;
 	      last_prologue_pc = next_pc;
 	    }
+	  else if (qp == 0 && 32 <= indirect && indirect < 40 && 
+		   !instores[indirect-32])
+	    {
+	      /* Allow an indirect store of an input register.  */
+	      instores[indirect-32] = 1;
+	      last_prologue_pc = next_pc;
+	    }
 	}
       else if (it == M && ((instr & 0x1ff08000000LL) == 0x08c00000000LL))
 	{
@@ -1054,9 +1108,17 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
 	     register is permitted. */
 	  int rM = (int) ((instr & 0x000000fe000LL) >> 13);
 	  int qp = (int) (instr & 0x0000000003fLL);
+	  int indirect = rM < 256 ? reg_contents[rM] : 0;
 	  if (qp == 0 && 32 <= rM && rM < 40 && !instores[rM-32])
 	    {
 	      instores[rM-32] = 1;
+	      last_prologue_pc = next_pc;
+	    }
+	  else if (qp == 0 && 32 <= indirect && indirect < 40 && 
+		   !instores[indirect-32])
+	    {
+	      /* Allow an indirect store of an input register.  */
+	      instores[indirect-32] = 1;
 	      last_prologue_pc = next_pc;
 	    }
 	}
@@ -1146,6 +1208,10 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *frame)
       get_frame_extra_info (frame)->mem_stack_frame_size = mem_stack_frame_size;
       get_frame_extra_info (frame)->fp_reg = fp_reg;
     }
+
+  /* Try and trust the lim_pc value whenever possible.  */
+  if (trust_limit && lim_pc >= last_prologue_pc)
+    return lim_pc;
 
   return last_prologue_pc;
 }
