@@ -43,6 +43,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern char *getenv();
 extern void child_create_inferior (), child_attach ();
+extern void add_syms_addr_command ();
 extern void symbol_file_command ();
 
 /* The Binary File Descriptor handle for the executable file.  */
