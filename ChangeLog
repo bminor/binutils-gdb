@@ -1,3 +1,7 @@
+Sat Feb  4 12:11:35 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* config.guess (IRIX): Sed - to _.
+
 Fri Feb  3 11:54:42 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* Makefile.in (source-vault, binary-vault): New targets
