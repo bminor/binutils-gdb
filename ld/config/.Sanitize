@@ -41,6 +41,7 @@ sun3.mh
 coff-a29k.mt
 ebmon29k.mt
 coff-h8300.mt
+hp300bsd.mt
 i386-aout.mt
 i386v.mt
 m68k.mt
