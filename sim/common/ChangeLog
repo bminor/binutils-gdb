@@ -1,3 +1,27 @@
+Sat Aug 30 09:47:21 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-fpu.c (DP_GARDMSB, ...): Make unsigned.
+	(DP_FRACHIGH, DP_FRACHIGH2, ..): Use MSMASK to avoid LL.
+
+Fri Aug 29 13:37:44 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-core.c (sim_core_map_attach): Cast attach enum to int.
+	(sim_core_xor_read_buffer, sim_core_xor_write_buffer): Make
+ 	nr_transfered and nr_this_transfer unsigned.
+
+	* sim-events.c (sim_events_tickn): N is signed, as limited to
+ 	MAXINT.
+
+	* sim-n-endian.h (offset_N): Change size to unsigned.
+
+	* callback.c (os_poll_quit): Add prototypes for kbhit and getkey.
+
+Fri Aug 29 10:10:53 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-utils.c (sim_copy_argv): Delete, replaced by dupargv.
+
+	* sim-options.c (sim_parse_args): Use dupargv.
+
 Thu Aug 28 10:36:34 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sim-options.c (standard_option_handler): Use xstrdup, not strdup.

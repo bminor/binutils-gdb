@@ -410,7 +410,7 @@ sim_events_schedule_after_signal (SIM_DESC sd,
   /* allocate an event entry from the signal buffer */
   new_event = &events->held [events->nr_held];
   events->nr_held ++;
-  if (events->nr_held >= MAX_NR_SIGNAL_SIM_EVENTS)
+  if (events->nr_held > MAX_NR_SIGNAL_SIM_EVENTS)
     {
       sim_engine_abort (NULL, NULL, NULL_CIA,
 			"sim_events_schedule_after_signal - buffer oveflow");
@@ -864,7 +864,7 @@ sim_events_tick (SIM_DESC sd)
 INLINE_SIM_EVENTS\
 (int)
 sim_events_tickn (SIM_DESC sd,
-		  unsigned n)
+		  int n)
 {
   sim_events *events = STATE_EVENTS (sd);
 

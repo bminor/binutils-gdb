@@ -405,7 +405,7 @@ sim_parse_args (sd, argv)
       if (optc == -1)
 	{
 	  if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
-	    STATE_PROG_ARGV (sd) = sim_copy_argv (argv + optind);
+	    STATE_PROG_ARGV (sd) = dupargv (argv + optind);
 	  break;
 	}
       if (optc == '?')

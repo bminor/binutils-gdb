@@ -1,23 +1,44 @@
-/* Simulator Floating-point support.
-   Copyright (C) 1994, 1997 Free Software Foundation, Inc.
-   Contributed by Cygnus Support.
+/* This is a software floating point library which can be used instead of
+   the floating point routines in libgcc1.c for targets without hardware
+   floating point.  */
 
-This file is part of GDB, the GNU debugger.
+/* Copyright (C) 1994,1997 Free Software Foundation, Inc.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+This file is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 2, or (at your option) any
+later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+In addition to the permissions in the GNU General Public License, the
+Free Software Foundation gives you unlimited permission to link the
+compiled version of this file with other programs, and to distribute
+those programs without any restriction coming from the use of this
+file.  (The General Public License restrictions do apply in other
+respects; for example, they cover modification of the file, and
+distribution when not linked into another program.)
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+This file is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
 
+You should have received a copy of the GNU General Public License
+along with this program; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/* As a special exception, if you link this library with other files,
+   some of which are compiled with GCC, to produce an executable,
+   this library does not by itself cause the resulting executable
+   to be covered by the GNU General Public License.
+   This exception does not however invalidate any other reasons why
+   the executable file might be covered by the GNU General Public License.  */
+
+/* This implements IEEE 754 format arithmetic, but does not provide a
+   mechanism for setting the rounding mode, or for generating or handling
+   exceptions.
+
+   The original code by Steve Chamberlain, hacked by Mark Eichin and Jim
+   Wilson, all of Cygnus Support.  */
 
 
 #ifndef SIM_FPU_C
@@ -34,12 +55,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define SP_NGARDS    7L
 #define SP_GARDROUND 0x3f
-#define SP_GARDMASK  0x7f
-#define SP_GARDMSB   0x40
+#define SP_GARDMASK  ((unsigned) 0x7f)
+#define SP_GARDMSB   ((unsigned) 0x40)
 #define SP_EXPBITS 8
 #define SP_EXPBIAS 127
 #define SP_FRACBITS 23
-#define SP_EXPMAX (0xff)
+#define SP_EXPMAX ((unsigned) 0xff)
 #define SP_QUIET_NAN 0x100000L
 #define SP_FRAC_NBITS 32
 #define SP_FRACHIGH  0x80000000L
@@ -47,23 +68,23 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define DP_NGARDS 8L
 #define DP_GARDROUND 0x7f
-#define DP_GARDMASK  0xff
-#define DP_GARDMSB   0x80
+#define DP_GARDMASK  ((unsigned) 0xff)
+#define DP_GARDMSB   ((unsigned) 0x80)
 #define DP_EXPBITS 11
 #define DP_EXPBIAS 1023
 #define DP_FRACBITS 52
-#define DP_EXPMAX (0x7ff)
-#define DP_QUIET_NAN 0x8000000000000LL
+#define DP_EXPMAX ((unsigned) 0x7ff)
+#define DP_QUIET_NAN MSBIT64 (12) /* 0x0008000000000000LL */
 #define DP_FRAC_NBITS 64
-#define DP_FRACHIGH  0x8000000000000000LL
-#define DP_FRACHIGH2 0xc000000000000000LL
+#define DP_FRACHIGH  MSMASK64 (1) /* 0x8000000000000000LL */
+#define DP_FRACHIGH2 MSMASK64 (2) /* 0xc000000000000000LL */
 
 #define EXPMAX (is_double ? DP_EXPMAX : SP_EXPMAX)
 #define EXPBITS (is_double ? DP_EXPBITS : SP_EXPBITS)
 #define EXPBIAS (is_double ? DP_EXPBIAS : SP_EXPBIAS)
 #define FRACBITS (is_double ? DP_FRACBITS : SP_FRACBITS)
 #define NGARDS (is_double ? DP_NGARDS : (SP_NGARDS ))
-#define SIGNBIT (1LL << (EXPBITS + FRACBITS))
+#define SIGNBIT ((unsigned64)1 << (EXPBITS + FRACBITS))
 #define FRAC_NBITS (is_double ? DP_FRAC_NBITS : SP_FRAC_NBITS)
 #define GARDMASK (is_double ? DP_GARDMASK : SP_GARDMASK)
 #define GARDMSB (is_double ? DP_GARDMSB : SP_GARDMSB)
@@ -82,8 +103,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define NORMAL_EXPMIN (-(EXPBIAS)+1)
 
-#define IMPLICIT_1 (1LL<<(FRACBITS+NGARDS))
-#define IMPLICIT_2 (1LL<<(FRACBITS+1+NGARDS))
+#define IMPLICIT_1 ((unsigned64)1 << (FRACBITS+NGARDS))
+#define IMPLICIT_2 ((unsigned64)1 << (FRACBITS+1+NGARDS))
 
 #define MAX_SI_INT   (is_double ? LSMASK64 (63) : LSMASK64 (31))
 #define MAX_USI_INT  (is_double ? LSMASK64 (64) : LSMASK64 (32))
@@ -300,6 +321,7 @@ fpu2ufpu (const sim_fpu *d)
   return ans;
 }
 
+#if 0
 STATIC_INLINE_SIM_FPU (int)
 is_ufpu_number (const sim_ufpu *d)
 {
@@ -312,6 +334,7 @@ is_ufpu_number (const sim_ufpu *d)
       return 0;
     }
 }
+#endif
 
 
 STATIC_INLINE_SIM_FPU (int)

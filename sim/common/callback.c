@@ -44,6 +44,12 @@
 #include <unistd.h>
 #endif
 
+/* ??? sim_cb_printf should be cb_printf, but until the callback support is
+   broken out of the simulator directory, these are here to not require
+   sim-utils.h.  */
+void sim_cb_printf PARAMS ((host_callback *, const char *, ...));
+void sim_cb_eprintf PARAMS ((host_callback *, const char *, ...));
+
 extern int system PARAMS ((const char *));
 
 static int os_init PARAMS ((host_callback *));
@@ -133,6 +139,8 @@ os_poll_quit (p)
      host_callback *p;
 {
 #ifndef _MSC_VER
+  int kbhit ();
+  int getkey ();
   if (kbhit ())
     {
       int k = getkey ();

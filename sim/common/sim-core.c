@@ -59,13 +59,11 @@ STATIC_SIM_CORE\
 (SIM_RC)
 sim_core_init (SIM_DESC sd)
 {
-  sim_core *memory = STATE_CORE(sd);
+  sim_core *core = STATE_CORE(sd);
   sim_core_maps map;
-  for (map = 0;
-       map < nr_sim_core_maps;
-       map++) {
+  for (map = 0; map < nr_sim_core_maps; map++) {
     /* blow away old mappings */
-    sim_core_mapping *curr = memory->map[map].first;
+    sim_core_mapping *curr = core->common.map[map].first;
     while (curr != NULL) {
       sim_core_mapping *tbd = curr;
       curr = curr->next;
@@ -75,7 +73,21 @@ sim_core_init (SIM_DESC sd)
       }
       zfree(tbd);
     }
-    memory->map[map].first = NULL;
+    core->common.map[map].first = NULL;
+  }
+  core->byte_xor = 0;
+  /* Just copy this map to each of the processor specific data structures.
+     FIXME - later this will be replaced by true processor specific
+     maps. */
+  {
+    int i;
+    for (i = 0; i < MAX_NR_PROCESSORS; i++)
+      {
+	int j;
+	CPU_CORE (STATE_CPU (sd, i))->common = STATE_CORE (sd)->common;
+	for (j = 0; j < WITH_XOR_ENDIAN; j++)
+	  CPU_CORE (STATE_CPU (sd, i))->xor [j] = 0;
+      }
   }
   return SIM_RC_OK;
 }
@@ -195,8 +207,8 @@ sim_core_map_attach(SIM_DESC sd,
   next_mapping = access_map->first;
   last_mapping = &access_map->first;
   while(next_mapping != NULL
-	&& (next_mapping->level < attach
-	    || (next_mapping->level == attach
+	&& (next_mapping->level < (int) attach
+	    || (next_mapping->level == (int) attach
 		&& next_mapping->bound < addr))) {
     /* provided levels are the same */
     /* assert: next_mapping->base > all bases before next_mapping */
@@ -206,8 +218,8 @@ sim_core_map_attach(SIM_DESC sd,
   }
 
   /* check insertion point correct */
-  SIM_ASSERT(next_mapping == NULL || next_mapping->level >= attach);
-  if (next_mapping != NULL && next_mapping->level == attach
+  SIM_ASSERT (next_mapping == NULL || next_mapping->level >= (int) attach);
+  if (next_mapping != NULL && next_mapping->level == (int) attach
       && next_mapping->base < (addr + (nr_bytes - 1))) {
 #if (WITH_DEVICES)
     device_error(client, "map overlap when attaching %d:0x%lx (%ld)",
@@ -243,7 +255,6 @@ sim_core_attach(SIM_DESC sd,
   sim_core_maps map;
   void *buffer;
   int buffer_freed;
-  int i;
 
   /* check for for attempt to use unimplemented per-processor core map */
   if (cpu != NULL)
@@ -288,15 +299,15 @@ sim_core_attach(SIM_DESC sd,
     switch (map) {
     case sim_core_read_map:
       if (access & access_read)
-	sim_core_map_attach(sd, &memory->map[map],
-			attach,
-			space, addr, nr_bytes,
-			client, buffer, !buffer_freed);
+	sim_core_map_attach(sd, &memory->common.map[map],
+			    attach,
+			    space, addr, nr_bytes,
+			    client, buffer, !buffer_freed);
       buffer_freed ++;
       break;
     case sim_core_write_map:
       if (access & access_write)
-	sim_core_map_attach(sd, &memory->map[map],
+	sim_core_map_attach(sd, &memory->common.map[map],
 			attach,
 			space, addr, nr_bytes,
 			client, buffer, !buffer_freed);
@@ -304,7 +315,7 @@ sim_core_attach(SIM_DESC sd,
       break;
     case sim_core_execute_map:
       if (access & access_exec)
-	sim_core_map_attach(sd, &memory->map[map],
+	sim_core_map_attach(sd, &memory->common.map[map],
 			attach,
 			space, addr, nr_bytes,
 			client, buffer, !buffer_freed);
@@ -319,16 +330,19 @@ sim_core_attach(SIM_DESC sd,
   /* Just copy this map to each of the processor specific data structures.
      FIXME - later this will be replaced by true processor specific
      maps. */
-  for (i = 0; i < MAX_NR_PROCESSORS; i++)
-    {
-      CPU_CORE (STATE_CPU (sd, i))->common = *STATE_CORE (sd);
-    }
+  {
+    int i;
+    for (i = 0; i < MAX_NR_PROCESSORS; i++)
+      {
+	CPU_CORE (STATE_CPU (sd, i))->common = STATE_CORE (sd)->common;
+      }
+  }
 }
 
 
 STATIC_INLINE_SIM_CORE\
 (sim_core_mapping *)
-sim_core_find_mapping(sim_core *core,
+sim_core_find_mapping(sim_core_common *core,
 		      sim_core_maps map,
 		      address_word addr,
 		      unsigned nr_bytes,
@@ -359,8 +373,8 @@ sim_core_find_mapping(sim_core *core,
 
 STATIC_INLINE_SIM_CORE\
 (void *)
-sim_core_translate(sim_core_mapping *mapping,
-	       address_word addr)
+sim_core_translate (sim_core_mapping *mapping,
+		    address_word addr)
 {
   return (void *)(((char *)mapping->buffer) + addr - mapping->base);
 }
@@ -368,20 +382,22 @@ sim_core_translate(sim_core_mapping *mapping,
 
 EXTERN_SIM_CORE\
 (unsigned)
-sim_core_read_buffer(SIM_DESC sd,
-		     sim_core_maps map,
-		     void *buffer,
-		     address_word addr,
-		     unsigned len)
+sim_core_read_buffer (SIM_DESC sd,
+		      sim_cpu *cpu,
+		      sim_core_maps map,
+		      void *buffer,
+		      address_word addr,
+		      unsigned len)
 {
+  sim_core_common *core = (cpu == NULL ? &STATE_CORE (sd)->common : &CPU_CORE (cpu)->common);
   unsigned count = 0;
   while (count < len) {
     unsigned_word raddr = addr + count;
     sim_core_mapping *mapping =
-      sim_core_find_mapping(STATE_CORE (sd), map,
+      sim_core_find_mapping(core, map,
 			    raddr, /*nr-bytes*/1,
 			    read_transfer,
-			    0, NULL, NULL_CIA); /*dont-abort*/
+			    0 /*dont-abort*/, NULL, NULL_CIA);
     if (mapping == NULL)
       break;
 #if (WITH_DEVICES)
@@ -411,19 +427,22 @@ sim_core_read_buffer(SIM_DESC sd,
 
 EXTERN_SIM_CORE\
 (unsigned)
-sim_core_write_buffer(SIM_DESC sd,
-		      sim_core_maps map,
-		      const void *buffer,
-		      address_word addr,
-		      unsigned len)
+sim_core_write_buffer (SIM_DESC sd,
+		       sim_cpu *cpu,
+		       sim_core_maps map,
+		       const void *buffer,
+		       address_word addr,
+		       unsigned len)
 {
+  sim_core_common *core = (cpu == NULL ? &STATE_CORE (sd)->common : &CPU_CORE (cpu)->common);
   unsigned count = 0;
   while (count < len) {
     unsigned_word raddr = addr + count;
-    sim_core_mapping *mapping = sim_core_find_mapping(STATE_CORE (sd), map,
-						      raddr, /*nr-bytes*/1,
-						      write_transfer,
-						      0, NULL, NULL_CIA); /*dont-abort*/
+    sim_core_mapping *mapping =
+      sim_core_find_mapping(core, map,
+			    raddr, /*nr-bytes*/1,
+			    write_transfer,
+			    0 /*dont-abort*/, NULL, NULL_CIA);
     if (mapping == NULL)
       break;
 #if (WITH_DEVICES)
@@ -454,35 +473,160 @@ sim_core_write_buffer(SIM_DESC sd,
 
 EXTERN_SIM_CORE\
 (void)
-sim_core_set_xor (sim_cpu *cpu,
-		  sim_cia cia,
+sim_core_set_xor (SIM_DESC sd,
+		  sim_cpu *cpu,
 		  int is_xor)
 {
-  sim_cpu_core *cpu_core = CPU_CORE (cpu);
-  /* set up the XOR registers if required. */
+  /* set up the XOR map if required. */
   if (WITH_XOR_ENDIAN) {
     {
-      int i = 1;
-      unsigned mask;
-      if (is_xor)
-	mask = WITH_XOR_ENDIAN - 1;
-      else
-	mask = 0;
-      while (i - 1 < WITH_XOR_ENDIAN)
+      sim_core *core = STATE_CORE (sd);
+      sim_cpu_core *cpu_core = (cpu != NULL ? CPU_CORE (cpu) : NULL);
+      if (cpu_core != NULL)
 	{
-	  cpu_core->xor[i-1] = mask;
-	  mask = (mask << 1) & (WITH_XOR_ENDIAN - 1);
-	  i = (i << 1);
+	  int i = 1;
+	  unsigned mask;
+	  if (is_xor)
+	    mask = WITH_XOR_ENDIAN - 1;
+	  else
+	    mask = 0;
+	  while (i - 1 < WITH_XOR_ENDIAN)
+	    {
+	      cpu_core->xor[i-1] = mask;
+	      mask = (mask << 1) & (WITH_XOR_ENDIAN - 1);
+	      i = (i << 1);
+	    }
 	}
+      else
+	{
+	  if (is_xor)
+	    core->byte_xor = WITH_XOR_ENDIAN - 1;
+	  else
+	    core->byte_xor = 0;
+	}	  
     }
   }
   else {
     if (is_xor)
-      sim_engine_abort (CPU_STATE (cpu), cpu, cia,
+      sim_engine_abort (sd, cpu, NULL_CIA,
 			"Attempted to enable xor-endian mode when permenantly disabled.");
   }
 }
 
+STATIC_INLINE_SIM_CORE\
+(void)
+reverse_n (unsigned_1 *dest,
+	   const unsigned_1 *src,
+	   int nr_bytes)
+{
+  int i;
+  for (i = 0; i < nr_bytes; i++)
+    {
+      dest [nr_bytes - i - 1] = src [i];
+    }
+}
+
+
+EXTERN_SIM_CORE\
+(unsigned)
+sim_core_xor_read_buffer (SIM_DESC sd,
+			  sim_cpu *cpu,
+			  sim_core_maps map,
+			  void *buffer,
+			  address_word addr,
+			  unsigned nr_bytes)
+{
+  address_word byte_xor = (cpu == NULL ? STATE_CORE (sd)->byte_xor : CPU_CORE (cpu)->xor[0]);
+  if (!WITH_XOR_ENDIAN || !byte_xor)
+    return sim_core_read_buffer (sd, cpu, map, buffer, addr, nr_bytes);
+  else
+    /* only break up transfers when xor-endian is both selected and enabled */
+    {
+      unsigned_1 x[WITH_XOR_ENDIAN];
+      unsigned nr_transfered = 0;
+      address_word start = addr;
+      unsigned nr_this_transfer = (WITH_XOR_ENDIAN - (addr & ~(WITH_XOR_ENDIAN - 1)));
+      address_word stop;
+      /* initial and intermediate transfers are broken when they cross
+         an XOR endian boundary */
+      while (nr_transfered + nr_this_transfer < nr_bytes)
+	/* initial/intermediate transfers */
+	{
+	  /* since xor-endian is enabled stop^xor defines the start
+             address of the transfer */
+	  stop = start + nr_this_transfer - 1;
+	  SIM_ASSERT (start <= stop);
+	  SIM_ASSERT ((stop ^ byte_xor) <= (start ^ byte_xor));
+	  if (sim_core_read_buffer (sd, cpu, map, x, stop ^ byte_xor, nr_this_transfer)
+	      != nr_this_transfer)
+	    return nr_transfered;
+	  reverse_n (&((unsigned_1*)buffer)[nr_transfered], x, nr_this_transfer);
+	  nr_transfered += nr_this_transfer;
+	  nr_this_transfer = WITH_XOR_ENDIAN;
+	  start = stop + 1;
+	}
+      /* final transfer */
+      nr_this_transfer = nr_bytes - nr_transfered;
+      stop = start + nr_this_transfer - 1;
+      SIM_ASSERT (stop == (addr + nr_bytes - 1));
+      if (sim_core_read_buffer (sd, cpu, map, x, stop ^ byte_xor, nr_this_transfer)
+	  != nr_this_transfer)
+	return nr_transfered;
+      reverse_n (&((unsigned_1*)buffer)[nr_transfered], x, nr_this_transfer);
+      return nr_bytes;
+    }
+}
+  
+  
+EXTERN_SIM_CORE\
+(unsigned)
+sim_core_xor_write_buffer (SIM_DESC sd,
+			   sim_cpu *cpu,
+			   sim_core_maps map,
+			   const void *buffer,
+			   address_word addr,
+			   unsigned nr_bytes)
+{
+  address_word byte_xor = (cpu == NULL ? STATE_CORE (sd)->byte_xor : CPU_CORE (cpu)->xor[0]);
+  if (!WITH_XOR_ENDIAN || !byte_xor)
+    return sim_core_write_buffer (sd, cpu, map, buffer, addr, nr_bytes);
+  else
+    /* only break up transfers when xor-endian is both selected and enabled */
+    {
+      unsigned_1 x[WITH_XOR_ENDIAN];
+      unsigned nr_transfered = 0;
+      address_word start = addr;
+      unsigned nr_this_transfer = (WITH_XOR_ENDIAN - (addr & ~(WITH_XOR_ENDIAN - 1)));
+      address_word stop;
+      /* initial and intermediate transfers are broken when they cross
+         an XOR endian boundary */
+      while (nr_transfered + nr_this_transfer < nr_bytes)
+	/* initial/intermediate transfers */
+	{
+	  /* since xor-endian is enabled stop^xor defines the start
+             address of the transfer */
+	  stop = start + nr_this_transfer - 1;
+	  SIM_ASSERT (start <= stop);
+	  SIM_ASSERT ((stop ^ byte_xor) <= (start ^ byte_xor));
+	  reverse_n (x, &((unsigned_1*)buffer)[nr_transfered], nr_this_transfer);
+	  if (sim_core_read_buffer (sd, cpu, map, x, stop ^ byte_xor, nr_this_transfer)
+	      != nr_this_transfer)
+	    return nr_transfered;
+	  nr_transfered += nr_this_transfer;
+	  nr_this_transfer = WITH_XOR_ENDIAN;
+	  start = stop + 1;
+	}
+      /* final transfer */
+      nr_this_transfer = nr_bytes - nr_transfered;
+      stop = start + nr_this_transfer - 1;
+      SIM_ASSERT (stop == (addr + nr_bytes - 1));
+      reverse_n (x, &((unsigned_1*)buffer)[nr_transfered], nr_this_transfer);
+      if (sim_core_read_buffer (sd, cpu, map, x, stop ^ byte_xor, nr_this_transfer)
+	  != nr_this_transfer)
+	return nr_transfered;
+      return nr_bytes;
+    }
+}
 
 
 

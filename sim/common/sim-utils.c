@@ -110,43 +110,6 @@ sim_add_commas (char *buf, int sizeof_buf, unsigned long value)
   return endbuf;
 }
 
-/* Make a copy of ARGV.
-   This can also be used to copy the environment vector.
-   The result is a pointer to the malloc'd copy or NULL if insufficient
-   memory available.  */
-
-char **
-sim_copy_argv (argv)
-     char **argv;
-{
-  int argc;
-  char **copy;
-
-  if (argv == NULL)
-    return NULL;
-
-  /* the vector */
-  for (argc = 0; argv[argc] != NULL; argc++);
-  copy = (char **) malloc ((argc + 1) * sizeof (char *));
-  if (copy == NULL)
-    return NULL;
-
-  /* the strings */
-  for (argc = 0; argv[argc] != NULL; argc++)
-    {
-      int len = strlen (argv[argc]);
-      copy[argc] = malloc (sizeof (char *) * (len + 1));
-      if (copy[argc] == NULL)
-	{
-	  freeargv (copy);
-	  return NULL;
-	}
-      strcpy (copy[argc], argv[argc]);
-    }
-  copy[argc] = NULL;
-  return copy;
-}
-
 /* Analyze a prog_name/prog_bfd and set various fields in the state
    struct.  */
 

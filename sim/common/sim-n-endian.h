@@ -23,6 +23,8 @@
 #error "N must be #defined"
 #endif
 
+#include "sim-xcat.h"
+
 /* NOTE: See end of file for #undef */
 #define unsigned_N XCONCAT2(unsigned_,N)
 #define endian_t2h_N XCONCAT2(endian_t2h_,N)
@@ -126,22 +128,24 @@ endian_le2h_N(unsigned_N raw_in)
 
 INLINE_SIM_ENDIAN\
 (void*)
-offset_N(unsigned_N *x,
-	 int sizeof_word,
-	 int word)
+offset_N (unsigned_N *x,
+	  unsigned sizeof_word,
+	  unsigned word)
 {
   char *in = (char*)x;
   char *out;
-  int offset = sizeof_word * word;
-  ASSERT(offset + sizeof_word <= sizeof(unsigned_N));
-  ASSERT(word < (sizeof_word / sizeof(unsigned_N)));
-  ASSERT((sizeof(unsigned_N) % sizeof_word) == 0);
-  if (WITH_HOST_BYTE_ORDER == LITTLE_ENDIAN) {
-    out = in + sizeof(unsigned_N) - offset;
-  }
-  else {
-    out = in + offset;
-  }
+  unsigned offset = sizeof_word * word;
+  ASSERT (offset + sizeof_word <= sizeof(unsigned_N));
+  ASSERT (word < (sizeof (unsigned_N) / sizeof_word));
+  ASSERT ((sizeof (unsigned_N) % sizeof_word) == 0);
+  if (WITH_HOST_BYTE_ORDER == LITTLE_ENDIAN)
+    {
+      out = in + sizeof (unsigned_N) - offset - sizeof_word;
+    }
+  else
+    {
+      out = in + offset;
+    }
   return out;
 }
 

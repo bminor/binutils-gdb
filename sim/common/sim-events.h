@@ -153,8 +153,9 @@ EXTERN_SIM_EVENTS\
  void *data);
 
 
-/* Schedule an event when the NR_BYTES value at HOST_ADDR with
-   BYTE_ORDER lies within LB..UB (unsigned).
+/* Schedule an event when the test (IS_WITHIN == (VAL >= LB && VAL <=
+   UB)) of the NR_BYTES value at HOST_ADDR with BYTE_ORDER endian is
+   true.
 
    HOST_ADDR: pointer into the host address space.
    BYTE_ORDER: 0 - host endian; BIG_ENDIAN; LITTLE_ENDIAN */
@@ -165,14 +166,16 @@ EXTERN_SIM_EVENTS\
  void *host_addr,
  int nr_bytes,
  int byte_order,
+ int is_within,
  unsigned64 lb,
  unsigned64 ub,
  sim_event_handler *handler,
  void *data);
 
 
-/* Schedule an event when the NR_BYTES value at CORE_ADDR with BYTE_ORDER
-   lies between LB..UB.
+/* Schedule an event when the test (IS_WITHIN == (VAL >= LB && VAL <=
+   UB)) of the NR_BYTES value at CORE_ADDR in BYTE_ORDER endian is
+   true.
 
    CORE_ADDR/MAP: pointer into the target address space.
    BYTE_ORDER: 0 - current target endian; BIG_ENDIAN; LITTLE_ENDIAN */
@@ -184,6 +187,7 @@ EXTERN_SIM_EVENTS\
  sim_core_maps core_map,
  int nr_bytes,
  int byte_order,
+ int is_within,
  unsigned64 lb,
  unsigned64 ub,
  sim_event_handler *handler,
@@ -216,7 +220,7 @@ INLINE_SIM_EVENTS\
 /* Progress time - separated into two parts so that the main loop can
    save its context before the event queue is processed.
 
-   sim_events_tickn advances the clock by N cycles. */
+   sim_events_tickn advances the clock by N cycles (1..MAXINT) */
 
 INLINE_SIM_EVENTS\
 (int) sim_events_tick
@@ -225,7 +229,7 @@ INLINE_SIM_EVENTS\
 INLINE_SIM_EVENTS\
 (int) sim_events_tickn
 (SIM_DESC sd,
- unsigned n);
+ int n);
 
 INLINE_SIM_EVENTS\
 (void) sim_events_process
