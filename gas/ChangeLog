@@ -1,3 +1,8 @@
+Mon Mar 31 16:31:04 1997  Joel Sherrill  <joel@oarcorp.com>
+
+        * configure.in (hppa*-*-rtems*): New target, like hppa-*-*elf*.
+	* configure: Rebuild.
+
 Mon Mar 31 14:15:19 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (mips_pseudo_table): Add "stabn".
