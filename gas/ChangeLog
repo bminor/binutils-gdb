@@ -1,5 +1,7 @@
 Wed Jul  5 22:49:31 1995  Ken Raeburn  <raeburn@cygnus.com>
 
+	* conf.in: Regenerate with autoreconf.
+
 	Mon Jul  3 19:47:53 1995  Pat Rankin  (rankin@eql.caltech.edu)
 
 	* config/obj-vms.h (vms_resolve_symbol_redef): Use full prototype.
