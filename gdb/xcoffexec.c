@@ -868,12 +868,18 @@ xcoff_relocate_core ()
   int offset = 0;
   struct ld_info *ldip;
   struct vmap *vp;
-  
+
   /* Allocated size of buffer.  */
   int buffer_size = LDINFO_SIZE;
   char *buffer = xmalloc (buffer_size);
   struct cleanup *old = make_cleanup (free_current_contents, &buffer);
     
+  /* FIXME, this restriction should not exist.  For now, though I'll
+     avoid coredumps with error() pending a real fix.  */
+  if (vmap == NULL)
+    error
+      ("Can't debug a core file without an executable file (on the RS/6000)");
+  
   ldinfo_sec = bfd_get_section_by_name (core_bfd, ".ldinfo");
   if (ldinfo_sec == NULL)
     {

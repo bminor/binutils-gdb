@@ -1,7 +1,10 @@
 Tue Apr 20 08:55:11 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* xcoffexec.c (xcoff_relocate_core): If no exec file, error()
+	rather than dumping core.
+
 	* Makefile.in: Add ${srcdir}/ to all source files.
-	(alldeps.mak): Add "${srcdir}/" to files in alldeps.mak.
+	(alldeps.mak): Add "${srcdir}/" to files when generating alldeps.mak.
 	(TAGS): Deal with srcdir and new config directory scheme.
 	createtags: Remove.
 	Makefile.in (NONSRC): Remove createtags.
