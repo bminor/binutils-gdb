@@ -7,6 +7,10 @@ end-sanitize-m32r
 start-sanitize-v850
 Thu Oct 17 10:56:49 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* scripttempl/v850.sc (.zdata): Add this before .text.
+	(.sdata): Also include .rosdata as part of the .sdata.
+	(.tdata): Include this just before .sdata.
+
 	* emulparms/v850.sh (SCRIPT_NAME): Use "v850" not "elf".
 	* scripttempl/v850.sc: Wrap script with a "cat << EOF".
 

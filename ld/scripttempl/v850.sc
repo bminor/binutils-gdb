@@ -35,6 +35,7 @@ SECTIONS
   .rela.plt      : { *(.rela.plt)		}
   .init          : { *(.init)	} =0
   .plt      : { *(.plt)	}
+  .zdata    : { *(.zdata) *(.zrodata) *(.zbss*) }
   .text      :
   {
     *(.text)
@@ -71,10 +72,11 @@ SECTIONS
   }
   .got           : { *(.got.plt) *(.got) }
   .dynamic       : { *(.dynamic) }
+  .tdata     : { *(.tdata) }
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
-  .sdata     : { *(.sdata) }
+  .sdata     : { *(.rosdata) *(.sdata) }
   _edata  =  .;
   PROVIDE (edata = .);
   __bss_start = .;
