@@ -48,6 +48,7 @@ cache.c
 ctor.c
 coff-a29k.c
 coff-h8300.c
+coff-h8500.c
 coff-i386.c
 coff-i960.c
 coff-m68k.c
@@ -85,6 +86,7 @@ cpu-m68k.c
 cpu-mips.c
 cpu-vax.c
 cpu-h8300.c
+cpu-h8500.c
 cpu-hppa.c
 cpu-i960.c
 cpu-m88k.c

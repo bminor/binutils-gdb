@@ -1,3 +1,9 @@
+Thu Feb  4 12:52:40 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	Add support for the H8/500
+
+	* coff-h8500.c, cpu-h8500.c, archures.c, coffcode.h, targets.c
+
 Thu Feb  4 12:35:02 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* libecoff.h: New file.  Defines ECOFF backend data for gdb.
