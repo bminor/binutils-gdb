@@ -366,4 +366,11 @@ extern void get_saved_register (char *raw_buffer, int *optimized,
 extern int frame_register_read (struct frame_info *frame, int regnum,
 				void *buf);
 
+/* Map between a frame register number and its name.  A frame register
+   space is a superset of the cooked register space --- it also
+   includes builtin registers.  */
+
+extern int frame_map_name_to_regnum (const char *name, int strlen);
+extern const char *frame_map_regnum_to_name (int regnum);
+
 #endif /* !defined (FRAME_H)  */

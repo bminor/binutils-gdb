@@ -47,7 +47,6 @@
 #include "inferior.h"		/* for NUM_PSEUDO_REGS.  NOTE: replace 
 				   with "gdbarch.h" when appropriate.  */
 #include "doublest.h"
-#include "builtin-regs.h"
 #include "gdb_assert.h"
 
 
@@ -105,42 +104,6 @@ struct funcall
   };
 
 static struct funcall *funcall_chain;
-
-/* The generic method for targets to specify how their registers are
-   named.  The mapping can be derived from two sources: REGISTER_NAME;
-   or builtin regs.  */
-
-int
-target_map_name_to_register (char *str, int len)
-{
-  int i;
-
-  /* Search register name space. */
-  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
-    if (REGISTER_NAME (i) && len == strlen (REGISTER_NAME (i))
-	&& STREQN (str, REGISTER_NAME (i), len))
-      {
-	return i;
-      }
-
-  /* Try builtin registers.  */
-  i = builtin_reg_map_name_to_regnum (str, len);
-  if (i >= 0)
-    {
-      gdb_assert (i >= NUM_REGS + NUM_PSEUDO_REGS);
-      return i;
-    }
-
-  /* Try builtin registers.  */
-  i = builtin_reg_map_name_to_regnum (str, len);
-  if (i >= 0)
-    {
-      gdb_assert (i >= NUM_REGS + NUM_PSEUDO_REGS);
-      return i;
-    }
-
-  return -1;
-}
 
 /* Begin counting arguments for a function call,
    saving the data about any containing call.  */
@@ -491,7 +454,7 @@ write_dollar_variable (struct stoken str)
 
   /* Handle tokens that refer to machine registers:
      $ followed by a register name.  */
-  i = target_map_name_to_register (str.ptr + 1, str.length - 1);
+  i = frame_map_name_to_regnum (str.ptr + 1, str.length - 1);
   if (i >= 0)
     goto handle_register;
 

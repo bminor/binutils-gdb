@@ -1,3 +1,21 @@
+2002-09-25  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c: Include "gdb_string.h" and "builtin-regs.h".
+	(frame_map_regnum_to_name): New function.
+	(frame_map_name_to_regnum): New function.
+	* frame.h (frame_map_name_to_regnum): Declare.
+	(frame_map_regnum_to_name): Declare.
+	* builtin-regs.c (builtin_reg_map_regnum_to_name): New function.
+	* builtin-regs.h (builtin_reg_map_regnum_to_name): Declare.
+	* parse.c: Do not include "builtin-regs.h".
+	(target_map_name_to_register): Delete function.
+	(write_dollar_variable): Use frame_map_name_to_regnum.
+	* parser-defs.h (target_map_name_to_register): Delete declaration.
+	* expprint.c: Include "frame.h".
+	(print_subexp): Use frame_map_regnum_to_name.
+	* eval.c (evaluate_subexp_standard): Use frame_map_regnum_to_name.
+	* infcmd.c (registers_info): Use frame_map_name_to_regnum.
+
 2002-09-25  Andrew Cagney  <ac131313@redhat.com>
 
 	* rs6000-tdep.c (rs6000_frame_saved_pc): If the link register
