@@ -18,6 +18,27 @@
 
 2002-08-19  Michael Snyder  <msnyder@redhat.com>
 
+	* config/mips/tm-mips.h (ELF_MAKE_MSYMBOL_SPECIAL): Delete.
+	(MSYMBOL_IS_SPECIAL, MSYMBOL_SIZE): Change into functions.
+	(FIX_CALL_DUMMY, PUSH_RETURN_ADDRESS, PUSH_DUMMY_FRAME,
+	POP_FRAME, INIT_EXTRA_FRAME_INFO): Delete.
+	(CALL_DUMMY_START_OFFSET, CALL_DUMMY_BREAKPOINT_OFFSET,
+	CALL_DUMMY_ADDRESS): Delete.
+	* mips-tdep.c (mips_elf_make_msymbol_special, mips_msymbol_size,
+	mips_msymbol_is_special, mips_fix_call_dummy): New functions.
+	(mips_gdbarch_init): Set elf_make_msymbol_special, pop_frame, 
+	push_dummy_frame, fix_call_dummy, init_extra_frame_info, 
+	push_return_address.
+	(mips_register_raw_size, mips_eabi_use_struct_convention, 
+	mips_n32n64_use_struct_convention, mips_o32_use_struct_convention,
+	mips_o32_reg_struct_has_addr, mips_frame_saved_pc, mips_frame_chain,
+	mips_init_extra_frame_info, mips_eabi_push_arguments, 
+	mips_n32n64_push_arguments, mips_push_return_address,
+	mips_push_dummy_frame, mips_pop_frame, mips_skip_prologue,
+	mips_breakpoint_from_pc, mips_call_dummy_address): Make static.
+
+2002-08-19  Michael Snyder  <msnyder@redhat.com>
+
 	* mips-tdep.c (mips_frame_num_args): New function.
 	(mips_gdbarch_init): Set frame_chain, frameless_function_invocation,
 	frame_saved_pc, frame_args_address, frame_locals_address, 

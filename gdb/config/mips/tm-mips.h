@@ -171,39 +171,6 @@ extern void mips_register_convert_from_type (int regnum,
   mips_register_convert_from_type ((n), (type), (buffer))
 
 
-/* Things needed for making the inferior call functions.  */
-
-/* Stack must be aligned on 32-bit boundaries when synthesizing
-   function calls.  We don't need STACK_ALIGN, PUSH_ARGUMENTS will
-   handle it. */
-
-extern CORE_ADDR mips_push_return_address (CORE_ADDR pc, CORE_ADDR sp);
-#define PUSH_RETURN_ADDRESS(PC, SP) (mips_push_return_address ((PC), (SP)))
-
-/* Push an empty stack frame, to record the current PC, etc.  */
-
-#define PUSH_DUMMY_FRAME 	mips_push_dummy_frame()
-extern void mips_push_dummy_frame (void);
-
-/* Discard from the stack the innermost frame, restoring all registers.  */
-
-#define POP_FRAME		mips_pop_frame()
-extern void mips_pop_frame (void);
-
-#define CALL_DUMMY_START_OFFSET (0)
-
-#define CALL_DUMMY_BREAKPOINT_OFFSET (0)
-
-/* When calling functions on Irix 5 (or any MIPS SVR4 ABI compliant
-   platform), $t9 ($25) (Dest_Reg) contains the address of the callee
-   (used for PIC).  It doesn't hurt to do this on other systems; $t9
-   will be ignored.  */
-#define FIX_CALL_DUMMY(dummyname, start_sp, fun, nargs, args, rettype, gcc_p) \
-    write_register(T9_REGNUM, fun)
-
-#define CALL_DUMMY_ADDRESS() (mips_call_dummy_address ())
-extern CORE_ADDR mips_call_dummy_address (void);
-
 /* Special symbol found in blocks associated with routines.  We can hang
    mips_extra_func_info_t's off of this.  */
 
@@ -222,10 +189,6 @@ typedef struct mips_extra_func_info
     PDR pdr;			/* Procedure descriptor record */
   }
  *mips_extra_func_info_t;
-
-extern void mips_init_extra_frame_info (int fromleaf, struct frame_info *);
-#define INIT_EXTRA_FRAME_INFO(fromleaf, fci) \
-  mips_init_extra_frame_info(fromleaf, fci)
 
 extern void mips_print_extra_frame_info (struct frame_info *frame);
 #define	PRINT_EXTRA_FRAME_INFO(fi) \
@@ -302,18 +265,13 @@ typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
    the "info" field with the "special" bit masked out
  */
 
-#define ELF_MAKE_MSYMBOL_SPECIAL(sym,msym) \
- { \
-  if (((elf_symbol_type *)(sym))->internal_elf_sym.st_other == STO_MIPS16) { \
-    MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym)) | 0x80000000); \
-    SYMBOL_VALUE_ADDRESS (msym) |= 1; \
-  } \
- }
-
 #define MSYMBOL_IS_SPECIAL(msym) \
-  (((long) MSYMBOL_INFO (msym) & 0x80000000) != 0)
+  mips_msymbol_is_special (msym)
 #define MSYMBOL_SIZE(msym) \
-  ((long) MSYMBOL_INFO (msym) & 0x7fffffff)
+  mips_msymbol_size (msym)
+struct minimal_symbol;
+extern int mips_msymbol_is_special (struct minimal_symbol *msym);
+extern long mips_msymbol_size (struct minimal_symbol *msym);
 
 
 /* Command to set the processor type. */

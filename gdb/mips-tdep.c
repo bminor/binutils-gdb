@@ -476,7 +476,7 @@ mips_print_extra_frame_info (struct frame_info *fi)
 
 static int mips64_transfers_32bit_regs_p = 0;
 
-int
+static int
 mips_register_raw_size (int reg_nr)
 {
   if (mips64_transfers_32bit_regs_p)
@@ -653,19 +653,19 @@ show_mask_address (char *cmd, int from_tty, struct cmd_list_element *c)
 
 /* Should call_function allocate stack space for a struct return?  */
 
-int
+static int
 mips_eabi_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_LENGTH (type) > 2 * MIPS_SAVED_REGSIZE);
 }
 
-int
+static int
 mips_n32n64_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_LENGTH (type) > 2 * MIPS_SAVED_REGSIZE);
 }
 
-int
+static int
 mips_o32_use_struct_convention (int gcc_p, struct type *type)
 {
   return 1;	/* Structures are returned by ref in extra arg0.  */
@@ -693,7 +693,7 @@ mips_n32n64_reg_struct_has_addr (int gcc_p, struct type *type)
   return 0;	/* Assumption: N32/N64 never passes struct by ref.  */
 }
 
-int
+static int
 mips_o32_reg_struct_has_addr (int gcc_p, struct type *type)
 {
   return 0;	/* Assumption: O32/O64 never passes struct by ref.  */
@@ -718,6 +718,38 @@ pc_is_mips16 (bfd_vma memaddr)
     return MSYMBOL_IS_SPECIAL (sym);
   else
     return 0;
+}
+
+/* ELF_MAKE_MSYMBOL_SPECIAL tests whether an ELF symbol is "special",
+   i.e. refers to a 16-bit function, and sets a "special" bit in a
+   minimal symbol to mark it as a 16-bit function.  */
+
+static void
+mips_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
+{
+  if (((elf_symbol_type *)(sym))->internal_elf_sym.st_other == STO_MIPS16) 
+    { 
+      MSYMBOL_INFO (msym) = (char *) 
+	(((long) MSYMBOL_INFO (msym)) | 0x80000000); 
+      SYMBOL_VALUE_ADDRESS (msym) |= 1; 
+    } 
+}
+
+/* MSYMBOL_IS_SPECIAL tests the "special" bit in a minimal symbol.  */
+
+int
+mips_msymbol_is_special (struct minimal_symbol *msym) 
+{
+  return (((long) MSYMBOL_INFO (msym) & 0x80000000) != 0); 
+}
+
+/* MSYMBOL_SIZE returns the size of the minimal symbol, i.e.  the
+   "info" field with the "special" bit masked out.  */
+
+long
+mips_msymbol_size (struct minimal_symbol *msym)
+{
+  return ((long) MSYMBOL_INFO (msym) & 0x7fffffff);
 }
 
 /* MIPS believes that the PC has a sign extended value.  Perhaphs the
@@ -1649,7 +1681,7 @@ mips_init_frame_pc_first (int fromleaf, struct frame_info *prev)
 }
 
 
-CORE_ADDR
+static CORE_ADDR
 mips_frame_saved_pc (struct frame_info *frame)
 {
   CORE_ADDR saved_pc;
@@ -2361,7 +2393,7 @@ get_frame_pointer (struct frame_info *frame,
 
 mips_extra_func_info_t cached_proc_desc;
 
-CORE_ADDR
+static CORE_ADDR
 mips_frame_chain (struct frame_info *frame)
 {
   mips_extra_func_info_t proc_desc;
@@ -2392,13 +2424,13 @@ mips_frame_chain (struct frame_info *frame)
 	 and have frame size zero.  */
       && !frame->signal_handler_caller
       /* Check if this is a call dummy frame.  */
-      && frame->pc != mips_call_dummy_address ())
+      && frame->pc != CALL_DUMMY_ADDRESS ())
     return 0;
   else
     return get_frame_pointer (frame, proc_desc);
 }
 
-void
+static void
 mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 {
   int regnum;
@@ -2539,7 +2571,7 @@ mips_type_needs_double_align (struct type *type)
 #define ROUND_DOWN(n,a) ((n) & ~((a)-1))
 #define ROUND_UP(n,a) (((n)+(a)-1) & ~((a)-1))
 
-CORE_ADDR
+static CORE_ADDR
 mips_eabi_push_arguments (int nargs,
 			  struct value **args,
 			  CORE_ADDR sp,
@@ -2792,7 +2824,7 @@ mips_eabi_push_arguments (int nargs,
 
 /* N32/N64 version of push_arguments.  */
 
-CORE_ADDR
+static CORE_ADDR
 mips_n32n64_push_arguments (int nargs,
 			    struct value **args,
 			    CORE_ADDR sp,
@@ -3614,7 +3646,7 @@ mips_o64_push_arguments (int nargs,
   return sp;
 }
 
-CORE_ADDR
+static CORE_ADDR
 mips_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   /* Set the return address register to point to the entry
@@ -3649,7 +3681,7 @@ mips_push_register (CORE_ADDR * sp, int regno)
 /* MASK(i,j) == (1<<i) + (1<<(i+1)) + ... + (1<<j)). Assume i<=j<(MIPS_NUMREGS-1). */
 #define MASK(i,j) (((1 << ((j)+1))-1) ^ ((1 << (i))-1))
 
-void
+static void
 mips_push_dummy_frame (void)
 {
   int ireg;
@@ -3728,7 +3760,7 @@ mips_push_dummy_frame (void)
   PROC_PC_REG (proc_desc) = RA_REGNUM;
 }
 
-void
+static void
 mips_pop_frame (void)
 {
   register int regnum;
@@ -3784,6 +3816,13 @@ mips_pop_frame (void)
 			read_memory_integer (new_sp - 4 * MIPS_SAVED_REGSIZE,
 					     MIPS_SAVED_REGSIZE));
     }
+}
+
+static void
+mips_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, 
+		     struct value **args, struct type *type, int gcc_p)
+{
+  write_register(T9_REGNUM, fun);
 }
 
 /* Floating point register management.
@@ -4381,7 +4420,7 @@ mips16_skip_prologue (CORE_ADDR pc)
    We must skip more in the case where part of the prologue is in the
    delay slot of a non-prologue instruction).  */
 
-CORE_ADDR
+static CORE_ADDR
 mips_skip_prologue (CORE_ADDR pc)
 {
   /* See if we can determine the end of the prologue via the symbol table.
@@ -5097,7 +5136,7 @@ gdb_print_insn_mips (bfd_vma memaddr, disassemble_info *info)
    (if necessary) to point to the actual memory location where the
    breakpoint should be inserted.  */
 
-const unsigned char *
+static const unsigned char *
 mips_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
 {
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
@@ -5340,7 +5379,7 @@ mips_ignore_helper (CORE_ADDR pc)
    point (e.g. programs in ROM) should define a symbol __CALL_DUMMY_ADDRESS
    whose address is the location where the breakpoint should be placed.  */
 
-CORE_ADDR
+static CORE_ADDR
 mips_call_dummy_address (void)
 {
   struct minimal_symbol *sym;
@@ -5674,6 +5713,9 @@ mips_gdbarch_init (struct gdbarch_info info,
   tdep->found_abi = found_abi;
   tdep->mips_abi = mips_abi;
 
+  set_gdbarch_elf_make_msymbol_special (gdbarch, 
+					mips_elf_make_msymbol_special);
+
   switch (mips_abi)
     {
     case MIPS_ABI_O32:
@@ -5897,10 +5939,14 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, mips_call_dummy_address);
+  set_gdbarch_push_return_address (gdbarch, mips_push_return_address);
+  set_gdbarch_push_dummy_frame (gdbarch, mips_push_dummy_frame);
+  set_gdbarch_pop_frame (gdbarch, mips_pop_frame);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_length (gdbarch, 0);
+  set_gdbarch_fix_call_dummy (gdbarch, mips_fix_call_dummy);
   set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_at_entry_point);
   set_gdbarch_call_dummy_words (gdbarch, mips_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (mips_call_dummy_words));
