@@ -309,7 +309,7 @@ CODE_FRAGMENT
 .
 .	{* This section contains "short" data, and should be placed
 .	   "near" the GP.  *}
-.#define SEC_SHORT 0x2000000
+.#define SEC_SMALL_DATA 0x2000000
 .
 . 	{* This section contains data which may be shared with other
 .	   executables or shared objects.  *}

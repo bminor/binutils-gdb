@@ -1,3 +1,8 @@
+1999-08-08  Ian Lance Taylor  <ian@zembu.com>
+
+	* section.c (SEC_SMALL_DATA): Rename from SEC_SHORT.
+	* bfd-in2.h: Rebuild.
+
 1999-08-08  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* libcoff-in.h (struct coff_section_alignment_entry): Define.
