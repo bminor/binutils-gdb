@@ -1,3 +1,7 @@
+Fri Jul 11 11:57:11 1997  Martin M. Hunt  <hunt@cygnus.com>
+
+	* Makefile.in (GDB_TK): Depend on itcl and tix.
+
 Fri Jul  4 13:25:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (INSTALL_PROGRAM_ARGS): New variable.

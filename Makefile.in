@@ -1398,7 +1398,7 @@ all-gawk:
 ALL_GCC = all-gcc
 all-gcc: all-byacc all-binutils all-gas all-ld
 all-bootstrap: all-libiberty all-byacc all-binutils all-gas all-ld
-GDB_TK = all-tk all-tcl
+GDB_TK = all-tk all-tcl all-itcl all-tix
 all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-byacc all-sim $(gdbnlmrequirements) $(GDB_TK)
 all-gnuserv:
 configure-target-gperf: $(ALL_GCC)
