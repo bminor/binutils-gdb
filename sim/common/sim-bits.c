@@ -23,7 +23,7 @@
 #define _SIM_BITS_C_
 
 #include "sim-basics.h"
-
+#include "sim-assert.h"
 
 INLINE_SIM_BITS\
 (unsigned_word)

@@ -1,3 +1,33 @@
+Tue Mar 18 13:58:18 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* Make-common.in (sim-bits.c, sim-core.c, sim-endian.c,
+ 	sim-events.c, sim-inline.c, sim-io.c): Define rules for building
+ 	these.
+
+	* sim-events.c (sim_events_at_large_int): New function.  Just
+ 	schedules an event every large-int ticks.
+	(sim_events_init): Call.
+	(sim_events_tick, sim_events_process): Move async handing to
+ 	sim_events_process.  Move timer decrement so that it occures after
+ 	events have been processed.
+	
+	* sim-basics.h (struct _engine): Remove declaration.
+
+	* sim-events.h, sim-events.c: Rename type to sim_events.  Prefix
+ 	everything with same.  Rename global struct to SIM_DESC.
+	* sim-core.h, sim-core.c, sim-n-core.c: Ditto for sim_core.
+	* sim-io.h, sim-io.c: Ditto.
+	
+	* sim-assert.h: New file. Optional assertion checking macros.
+	* sim-io.c (sim_io_error): Make just this function tolerant to
+ 	null pointers.
+	
+	* sim-xcat.h: New file. Define concatenate macros.
+	* sim-basics.h (XCONCAT*): Move to sim-xcat.h.
+	* sim-n-core.h, sim-n-bits.h, sim-n-endian.h: Explicitly include
+ 	concat macros.
+	
+
 Tue Mar 18 12:44:55 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* sim-bits.h (LSMASK): New macro. Create mask of LS bits.
