@@ -1,3 +1,7 @@
+Sun Jul 18 16:28:08 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
+
+	* mips.h: Split the actual table out into ../../opcodes/mips-opc.c.
+
 Fri Jul 16 09:59:29 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* mips.h: Reworked the hazard information somewhat, and fixed some
