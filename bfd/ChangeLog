@@ -1,3 +1,47 @@
+start-sanitize-v850
+Mon Aug 18 11:36:19 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-v850.c (v850_elf_howto_table, v850_elf_reloc_map,
+	v850_elf_check_relocs, v850_elf_reloc,
+	v850_elf_final_link_relocate):  Add support for
+	BFD_RELOC_V850_16_PCREL relocation. 
+	
+	* reloc.c (COMMENT): Add suuport for BFD_RELOC_V850_16_PCREL
+	relocation.
+	
+	* libbfd.h: Add support for BFD_RELOC_V850_16_PCREL relocation.
+
+	* bfd-in2.h: Add support for BFD_RELOC_V850_16_PCREL relocation.
+end-sanitize-v850
+
+start-sanitize-v850e
+Mon Aug 18 11:33:56 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* cpu-v850e: New file.
+	
+	* elf.c (prep_headers): Add support for v850e target.
+	
+	* bfd-in2.h (bfd_architecture): Add support for v850e target. 
+	
+	* config.bfd: Add support for v850e target.
+
+	* archures.c: Add support for v850e target.
+end-sanitize-v850e
+
+start-sanitize-v850eq
+Mon Aug 18 11:33:56 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* cpu-v850eq: New file.
+	
+	* elf.c (prep_headers): Add support for v850eq target.
+	
+	* bfd-in2.h (bfd_architecture): Add support for v850eq target. 
+	
+	* config.bfd: Add support for v850eq target.
+
+	* archures.c: Add support for v850eq target.
+end-sanitize-v850eq
+
 Fri Aug 15 12:01:28 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffgen.c (coff_find_nearest_line): Correctly handle the offset
