@@ -141,7 +141,7 @@ FILE *instream;
 char *current_directory;
 
 /* The directory name is actually stored here (usually).  */
-static char dirbuf[MAXPATHLEN];
+static char dirbuf[1024];
 
 /* Function to call before reading a command, if nonzero.
    The function receives two args: an input stream,
@@ -358,7 +358,7 @@ main (argc, argv)
   line[0] = '\0';		/* Terminate saved (now empty) cmd line */
   instream = stdin;
 
-  getwd (dirbuf);
+  getcwd (dirbuf, sizeof (dirbuf));
   current_directory = dirbuf;
 
 #ifdef SET_STACK_LIMIT_HUGE
@@ -1672,7 +1672,7 @@ pwd_command (args, from_tty)
      int from_tty;
 {
   if (args) error ("The \"pwd\" command does not take an argument: %s", args);
-  getwd (dirbuf);
+  getcwd (dirbuf, sizeof (dirbuf));
 
   if (strcmp (dirbuf, current_directory))
     printf ("Working directory %s\n (canonically %s).\n",

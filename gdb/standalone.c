@@ -59,8 +59,9 @@ chdir ()
 {}
 
 char *
-getwd (buf)
+getcwd (buf, len)
      char *buf;
+     unsigned int len;
 {
   buf[0] = '/';
   buf[1] = 0;

@@ -40,17 +40,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define F_OK 0
 #endif
 
-#ifndef MAXPATHLEN
-#define MAXPATHLEN (1024)
-#endif
-
 /* Get sys/wait.h ie. from a Sun and edit it a little (mc68000 to m68k) */
 /* Why bother?  */
 #if 0
 #define HAVE_WAIT_STRUCT
 #endif
-
-#define vfork fork
 
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values. */

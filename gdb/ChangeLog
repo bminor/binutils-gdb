@@ -14,6 +14,10 @@ Thu Nov 21 10:23:52 1991  John Gilmore  (gnu at cygnus.com)
 	* exec.c (exec_files_info):  If `verbose' is set, show file offset
 	as well.
 
+	* main.c:  Use getcwd rather than getwd.
+	* standalone.c:  Fake getcwd rather than getwd.
+	* xm-*.h:  Remove fake values of MAXPATHLEN.
+
 	* xcoffexec.c:  Add /* */ to #if 0'd thing to help ANSI.
 
 Wed Nov 20 18:35:56 1991  John Gilmore  (gnu at cygnus.com)

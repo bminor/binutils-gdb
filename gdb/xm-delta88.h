@@ -23,8 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define USG 1
 #endif
 
-#define MAXPATHLEN 1024
-
 #include <sys/param.h>
 #include <sys/time.h>
 

@@ -22,8 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define HAVE_TERMIO
 #define USG
 
-#define MAXPATHLEN 200
-
 /* This is the amount to subtract from u.u_ar0
    to get the offset in the core file of the register values.  */
 

@@ -45,11 +45,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 # define F_OK 0
 #endif
 
-/* For dirbuf[] in main.c */
-#ifndef MAXPATHLEN
-#define MAXPATHLEN (1024)
-#endif
-
 /* Get rid of any system-imposed stack limit if possible */
 
 #define	SET_STACK_LIMIT_HUGE
@@ -69,6 +64,3 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* System uses a `short' to hold a process group ID.  */
 #define	SHORT_PGRP
-
-/* No vfork in this system.  */
-#define	vfork()	fork()
