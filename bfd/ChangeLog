@@ -7,6 +7,9 @@ Mon Jul 10 11:09:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-i960.c (coff_i960_relocate): Correct typo: use ! on strcmp,
 	not on string.
+	* cofflink.c (_bfd_coff_generic_relocate_section): Remove unused
+	local i.
+	* coff-arm.c (coff_arm_rtype_to_howto): Don't declare.
 
 	* aoutx.h (NAME(aout,link_hash_table_create)): Allocate hash table
 	using bfd_alloc, not malloc.

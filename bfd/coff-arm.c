@@ -373,12 +373,6 @@ arm_reloc_type_lookup(abfd,code)
 
 #define coff_bfd_reloc_type_lookup arm_reloc_type_lookup
 
-static reloc_howto_type *coff_arm_rtype_to_howto
-  PARAMS ((bfd *, asection *, struct internal_reloc *,
-	   struct coff_link_hash_entry *, struct internal_syment *,
-
-	   bfd_vma *));
-
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
 /* The page size is a guess based on ELF.  */
 #define COFF_PAGE_SIZE 0x1000
