@@ -1,3 +1,9 @@
+2002-04-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* symbols.c (resolve_symbol_value <O_uminus, O_bit_not,
+	O_logical_not>): Derive final_seg from add_symbol.
+	<O_multiply..O_logical_or>: More final_seg twiddles.
+
 2002-04-01  Jessica Han  <jessica@cup.hp.com>
 
         * config/tc-ia64.c (ia64_cons_fix_new): Handle 8 byte iplt reloc
