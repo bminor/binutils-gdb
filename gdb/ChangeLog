@@ -1,3 +1,8 @@
+2003-01-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Create "Checks for programs" section, and move
+	appropriate tests there.
+
 2003-01-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Create "Checks for libraries" section, and move

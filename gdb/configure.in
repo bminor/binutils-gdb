@@ -33,6 +33,14 @@ AM_PROG_CC_STDC
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
 AC_CANONICAL_SYSTEM
 
+# FIXME: kettenis/20030102: The AC_PROG_RANLIB from Autoconf 2.13
+# doesn't support cross-compilation, but the one from Autoconf 2.5x
+# does.  Override RANLIB here (i.e. before running AC_PROG_RANLIB) to
+# deal with the lossage.  Note that CY_GNU_GETTEXT currently calls
+# AC_PROG_RANLIB.  This can be removed when we switch to # Autoconf
+# 2.5x.
+AC_CHECK_TOOL(RANLIB, ranlib, :)
+
 dnl Set up for gettext.  PACKAGE is used when we call bindtextdomain.
 ALL_LINGUAS=
 CY_GNU_GETTEXT
@@ -95,18 +103,24 @@ if test x"${targ_defvec}" != x ; then
     AC_DEFINE_UNQUOTED(DEFAULT_BFD_VEC, ${targ_defvec})
 fi
 
+AC_ARG_PROGRAM
+
+# --------------------- #
+# Checks for programs.  #
+# --------------------- #
+
 AC_PROG_AWK
 AC_PROG_INSTALL
-AC_CHECK_TOOL(AR, ar)
-AC_CHECK_TOOL(RANLIB, ranlib, :)
-AC_CHECK_TOOL(DLLTOOL, dlltool)
-AC_CHECK_TOOL(WINDRES, windres)
+AC_PROG_LN_S
+AC_PROG_RANLIB
 AC_PROG_YACC
 
-dnl MiG is needed for the Hurd.
-AC_CHECK_TOOL(MIG, mig)
+AC_CHECK_TOOL(AR, ar)
+AC_CHECK_TOOL(DLLTOOL, dlltool)
+AC_CHECK_TOOL(WINDRES, windres)
 
-AC_ARG_PROGRAM
+# Needed for GNU/Hurd.
+AC_CHECK_TOOL(MIG, mig)
 
 # ---------------------- #
 # Checks for libraries.  #
@@ -1404,8 +1418,6 @@ if test "${nativefile}" != ""; then
     AC_DEFINE_UNQUOTED(GDB_NM_FILE, ${GDB_NM_FILE})
 fi
 AC_SUBST(nm_h)
-
-AC_PROG_LN_S
 
 AC_LINK_FILES($files, $links)
 
