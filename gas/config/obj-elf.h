@@ -1,5 +1,5 @@
 /* ELF object file format.
-   Copyright (C) 1992, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1992, 93, 94, 95, 1996 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -14,8 +14,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 
 /* HP PA-RISC support was contributed by the Center for Software Science
@@ -31,14 +32,14 @@
 #include <bfd.h>
 
 #define BYTES_IN_WORD 4		/* for now */
-#include "bfd/libelf.h"
+#include "bfd/elf-bfd.h"
 
 /* Use this to keep track of .size expressions that involve differences
    that we can't compute yet.  */
 #define OBJ_SYMFIELD_TYPE expressionS *
 
 /* Symbol fields used by the ELF back end.  */
-#define ELF_TARGET_SYMBOL_FIELDS int local:1; unsigned long sy_name_offset;
+#define ELF_TARGET_SYMBOL_FIELDS int local:1;
 
 /* Don't change this; change ELF_TARGET_SYMBOL_FIELDS instead.  */
 #define TARGET_SYMBOL_FIELDS ELF_TARGET_SYMBOL_FIELDS
@@ -112,14 +113,22 @@ extern void obj_elf_init_stab_section PARAMS ((segT));
 #undef SEPARATE_STAB_SECTIONS
 #undef INIT_STAB_SECTION
 #define OBJ_PROCESS_STAB(seg, what, string, type, other, desc) \
-  ecoff_stab ((what), (string), (type), (other), (desc))
+  ecoff_stab ((seg), (what), (string), (type), (other), (desc))
 
 #define OBJ_GENERATE_ASM_LINENO(filename, lineno) \
   ecoff_generate_asm_lineno ((filename), (lineno))
 
 #endif /* ECOFF_DEBUGGING */
 
-extern void elf_frob_symbol PARAMS ((struct symbol *));
-#define obj_frob_symbol(symp, punt) elf_frob_symbol (symp)
+extern void elf_frob_symbol PARAMS ((struct symbol *, int *));
+#define obj_frob_symbol(symp, punt) elf_frob_symbol (symp, &punt)
+
+extern void elf_pop_insert PARAMS ((void));
+#define obj_pop_insert()	elf_pop_insert()
+
+#ifndef OBJ_MAYBE_ELF
+#define obj_ecoff_set_ext elf_ecoff_set_ext
+extern void elf_ecoff_set_ext ();
+#endif
 
 #endif /* _OBJ_ELF_H */

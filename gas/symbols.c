@@ -46,7 +46,7 @@ symbolS abs_symbol;
 #ifdef DEBUG_SYMS
 #define debug_verify_symchain verify_symbol_chain
 #else
-#define debug_verify_symchain (void)
+#define debug_verify_symchain(root, last) ((void) 0)
 #endif
 
 struct obstack notes;
@@ -173,7 +173,7 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 
   /* Sun local labels go out of scope whenever a non-local symbol is
      defined.  */
-  if (LOCAL_LABELS_DOLLAR && *sym_name != 'L')
+  if (LOCAL_LABELS_DOLLAR && ! LOCAL_LABEL (sym_name))
     dollar_label_clear ();
 
 #ifndef WORKING_DOT_WORD

@@ -1,5 +1,37 @@
 Wed Jun 19 11:31:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (mips_ip): In cases 'I', 'i', and 'j', set
+	insn_error rather than calling check_absolute_expr.
+
+	* as.c (emulation_name): Remove unused static variable.
+	(default_emul_bfd_name): Add return NULL to avoid warning.
+	* ecoff.c (ecoff_stab): Remove unused variables name and
+	name_end.
+	* frags.c (frag_new): Remove unused variable tmp.
+	* hash.c (hash_grow): Parenthesize + within <<.
+	(hash_print_statistics): Use %lu, not %d, to print unsigned
+	long variables.
+	* messages.c: Include "libiberty.h".
+	(fprint_value): Add cast to avoid printf warning.
+	(sprint_value): Likewise.
+	* read.c: Include "ecoff.h".
+	(emit_expr): Add casts to avoid printf warnings.
+	* read.h: Use extern for function declarations.
+	(pop_insert): Declare.
+	* stabs.c: Include "ecoff.h".
+	* subsegs.c (subseg_set_rest): Remove unused variables tmp,
+	former_last_fragP, and new_fragP.
+	* subsegs.h (subsegs_print_statistics): Declare.
+	* symbols.c (debug_verify_symchain): Change macro to discard
+	arguments.
+	* write.c (dump_section_relocs): Likewise.
+	* write.h: Use extern for function declarations.
+	(write_print_statistics): Declare.
+	* config/e-mipsecoff.c (mipsecoff_bfd_name): Return NULL to avoid
+	warning.
+	* config/e-mipself.c (mipself_bfd_name): Likewise.
+	* config/obj-elf.h (elf_ecoff_set_ext): Declare.
+
 	* config/tc-sparc.h (TC_RELOC_RTSYM_LOC_FIXUP): If OBJ_ELF, always
 	emit relocations against external symbols.
 

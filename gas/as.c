@@ -129,7 +129,6 @@ Options:\n\
 extern struct emulation mipsbelf, mipslelf, mipself;
 extern struct emulation mipsbecoff, mipslecoff, mipsecoff;
 
-static const char *emulation_name;
 static struct emulation *const emulations[] = { EMULATIONS };
 static const int n_emulations = sizeof (emulations) / sizeof (emulations[0]);
 
@@ -183,6 +182,7 @@ const char *
 default_emul_bfd_name ()
 {
   abort ();
+  return NULL;
 }
 
 void
@@ -541,6 +541,7 @@ main (argc, argv)
   hex_init ();
 #ifdef BFD_ASSEMBLER
   bfd_init ();
+  bfd_set_error_program_name (myname);
 #endif
 
 #ifdef USE_EMULATIONS

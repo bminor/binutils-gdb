@@ -272,10 +272,12 @@ fix_new_exp (frag, where, size, exp, pcrel, r_type)
 
 #if defined(BFD_ASSEMBLER)
       r_type = BFD_RELOC_RVA;
-#elif defined(TC_RVA_RELOC)
+#else
+#if defined(TC_RVA_RELOC)
       r_type = TC_RVA_RELOC;
 #else
       as_fatal("rva not supported");
+#endif
 #endif
       break;
 
@@ -627,7 +629,7 @@ dump_section_relocs (abfd, sec, stream_)
     }
 }
 #else
-#define dump_section_relocs(ABFD,SEC,STREAM)	(void)(ABFD,SEC,STREAM)
+#define dump_section_relocs(ABFD,SEC,STREAM)	((void) 0)
 #endif
 
 #ifndef EMIT_SECTION_SYMBOLS
@@ -672,13 +674,27 @@ adjust_reloc_syms (abfd, sec, xxx)
 	    goto done;
 	  }
 
+	if (bfd_is_abs_section (symsec))
+	  {
+	    /* The fixup_segment routine will not use this symbol in a
+               relocation unless TC_FORCE_RELOCATION returns 1.  */
+	    if (TC_FORCE_RELOCATION (fixp))
+	      {
+		fixp->fx_addsy->sy_used_in_reloc = 1;
+#ifdef UNDEFINED_DIFFERENCE_OK
+		if (fixp->fx_subsy != NULL)
+		  fixp->fx_subsy->sy_used_in_reloc = 1;
+#endif
+	      }
+	    goto done;
+	  }
+
 	/* If it's one of these sections, assume the symbol is
 	   definitely going to be output.  The code in
 	   md_estimate_size_before_relax in tc-mips.c uses this test
 	   as well, so if you change this code you should look at that
 	   code.  */
 	if (bfd_is_und_section (symsec)
-	    || bfd_is_abs_section (symsec)
 	    || bfd_is_com_section (symsec))
 	  {
 	    fixp->fx_addsy->sy_used_in_reloc = 1;
