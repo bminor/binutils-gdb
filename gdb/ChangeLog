@@ -1,5 +1,8 @@
 Thu Oct 22 11:24:18 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* sparc-tdep.c:  include nm.h (for now) so that we get USE_PROC_FS
+	when necessary.
+
 	* alldeps.mak, depend:  Update.
 
 Thu Oct 22 03:14:36 1992  John Gilmore  (gnu@cygnus.com)
