@@ -1,3 +1,8 @@
+Tue Jan 16 15:10:49 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf.c (assign_file_positions_for_segments): Don't increment file
+	offset for a segment which contains no loadable sections.
+
 Mon Jan 15 17:46:27 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* reloc.c: Add new PowerPC relocations.

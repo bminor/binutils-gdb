@@ -1911,7 +1911,9 @@ assign_file_positions_for_segments (abfd)
       else
 	p->p_flags = 0;
 
-      if (p->p_type == PT_LOAD && m->count > 0)
+      if (p->p_type == PT_LOAD
+	  && m->count > 0
+	  && (m->sections[0]->flags & SEC_LOAD) != 0)
 	off += (m->sections[0]->vma - off) % bed->maxpagesize;
 
       if (m->count == 0)
@@ -2019,15 +2021,18 @@ assign_file_positions_for_segments (abfd)
 
 	      /* The section VMA must equal the file position modulo
                  the page size.  */
-	      adjust = (sec->vma - off) % bed->maxpagesize;
-	      if (adjust != 0)
+	      if ((flags & SEC_LOAD) != 0)
 		{
-		  if (i == 0)
-		    abort ();
-		  p->p_memsz += adjust;
-		  if ((flags & SEC_LOAD) != 0)
-		    p->p_filesz += adjust;
-		  off += adjust;
+		  adjust = (sec->vma - off) % bed->maxpagesize;
+		  if (adjust != 0)
+		    {
+		      if (i == 0)
+			abort ();
+		      p->p_memsz += adjust;
+		      if ((flags & SEC_LOAD) != 0)
+			p->p_filesz += adjust;
+		      off += adjust;
+		    }
 		}
 
 	      sec->filepos = off;
