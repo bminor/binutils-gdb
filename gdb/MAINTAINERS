@@ -126,6 +126,8 @@ libgui (w/foundry, sn)	Jim Ingham		jingham@cygnus.com
 mi (gdb/mi)		Andrew Cagney		cagney@cygnus.com
 			Elena Zannoni           ezannoni@cygnus.com
 			Fernando Nasser		fnasser@cygnus.com
+tui			Technical Contact Point	wdb@cup.hp.com
+			Jimmy Guo		guo@cup.hp.com
 
 
 Misc:

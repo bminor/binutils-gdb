@@ -1,3 +1,7 @@
+Fri Apr 21 16:14:38 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* MAINTAINERS: Make Jimmy Guo TUI maintainer.
+
 Fri Apr 21 14:37:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* command.h (help_all): Delete declaration.
