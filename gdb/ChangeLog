@@ -1,3 +1,18 @@
+Wed Dec 10 17:57:00 1997  David Taylor  <taylor@texas.cygnus.com>
+
+	* d30v-tdep.c : don't bury lots of magic numbers in the code
+	instead use defines for the opcodes and opcode masks; update
+	to use actual d30v patterns; fix register sizes to be 4 bytes
+	not 2 bytes; improve prologue testing now that we have a C
+	compiler; fix stack frame handling enough to get backtraces
+	working; initial changes to push and pop frames (so that gdb
+	can call functions in the inferior).
+
+	* config/d30v/tm-d30v.h: update DMEM_START, IMEM_START, and
+	STACK_START; change FR_REGNUM to 61 (was 11).  Reformat comment
+	about DUMMY FRAMES so that it is readable.  Fix SAVED_PC_AFTER_FRAME
+	macro.
+
 Wed Dec 10 17:41:07 1997  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* ch-valprint.c (chill_val_print): To avoid segfaults, don't print

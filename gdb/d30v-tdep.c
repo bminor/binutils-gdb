@@ -39,6 +39,56 @@ static void d30v_pop_dummy_frame PARAMS ((struct frame_info *fi));
 static void d30v_print_flags PARAMS ((void));
 static void print_flags_command PARAMS ((char *, int));
 
+/* the following defines assume:
+   fp is r61, lr is r62, sp is r63, and ?? is r22
+   if that changes, they will need to be updated */
+
+#define OP_MASK_ALL_BUT_RA	0x0ffc0fff /* throw away Ra, keep the rest */
+
+#define OP_STW_SPM		0x054c0fc0 /* stw Ra, @(sp-) */
+#define OP_STW_SP_R0		0x05400fc0 /* stw Ra, @(sp,r0) */
+#define OP_STW_SP_IMM0		0x05480fc0 /* st Ra, @(sp, 0x0) */
+#define OP_STW_R22P_R0		0x05440580 /* stw Ra, @(r22+,r0) */
+
+#define OP_ST2W_SPM		0x056c0fc0 /* st2w Ra, @(sp-) */
+#define OP_ST2W_SP_R0		0x05600fc0 /* st2w Ra, @(sp, r0) */
+#define OP_ST2W_SP_IMM0		0x05680fc0 /* st2w Ra, @(sp, 0x0) */
+#define OP_ST2W_R22P_R0		0x05640580 /* st2w Ra, @(r22+, r0) */
+
+#define OP_MASK_OPCODE		0x0ffc0000 /* just the opcode, ign operands */
+#define OP_NOP			0x00f00000 /* nop */
+
+#define OP_MASK_ALL_BUT_IMM	0x0fffffc0 /* throw away imm, keep the rest */
+#define OP_SUB_SP_IMM		0x082bffc0 /* sub sp,sp,imm */
+#define OP_ADD_SP_IMM		0x080bffc0 /* add sp,sp,imm */
+#define OP_ADD_R22_SP_IMM	0x08096fc0 /* add r22,sp,imm */
+#define OP_STW_FP_SP_IMM	0x054bdfc0 /* stw fp,@(sp,imm) */
+
+/* no mask */
+#define OP_OR_FP_R0_SP		0x03a3d03f /* or fp,r0,sp */
+#define OP_OR_FP_SP_R0		0x03a3dfc0 /* or fp,sp,r0 */
+#define OP_OR_FP_IMM0_SP	0x03abd03f /* or fp,0x0,sp */
+#define OP_STW_FP_R22P_R0	0x0547d580 /* stw fp,@(r22+,r0) */
+#define OP_STW_LR_R22P_R0	0x0547e580 /* stw lr,@(r22+,r0) */
+
+#define OP_MASK_OP_AND_RB	0x0ff80fc0 /* keep op and rb,throw away rest */
+#define OP_STW_SP_IMM		0x05480fc0 /* stw Ra,@(sp,imm) */
+#define OP_ST2W_SP_IMM		0x05680fc0 /* st2w Ra,@(sp,imm) */
+#define OP_STW_FP_IMM		0x05480f40 /* stw Ra,@(fp,imm) */
+#define OP_STW_FP_R0		0x05400f40 /* stw Ra,@(fp,r0) */
+
+#define OP_MASK_FM_BIT		0x80000000
+#define OP_MASK_CC_BITS		0x70000000
+#define OP_MASK_SUB_INST	0x0fffffff
+
+#define EXTRACT_RA(op)		(((op) >> 12) & 0x3f)
+#define EXTRACT_RB(op)		(((op) >> 6) & 0x3f)
+#define EXTRACT_RC(op)		(((op) & 0x3f)
+#define EXTRACT_UIMM6(op)	((op) & 0x3f)
+#define EXTRACT_IMM6(op)	((((int)EXTRACT_UIMM6(op)) << 26) >> 26)
+#define EXTRACT_IMM26(op)	((((op)&0x0ff00000) >> 2) | ((op)&0x0003ffff))
+#define EXTRACT_IMM32(opl, opr)	((EXTRACT_UIMM6(opl) << 26)|EXTRACT_IMM26(opr))
+
 /* Discard from the stack the innermost frame, restoring all saved
    registers.  */
 
@@ -75,15 +125,15 @@ d30v_pop_frame ()
     {
       if (fsr.regs[regnum])
 	{
-	  write_register (regnum, read_memory_unsigned_integer (fsr.regs[regnum], 2));
+	  write_register (regnum, read_memory_unsigned_integer (fsr.regs[regnum], 4));
 	}
     }
   if (fsr.regs[PSW_REGNUM])
     {
-      write_register (PSW_REGNUM, read_memory_unsigned_integer (fsr.regs[PSW_REGNUM], 2));
+      write_register (PSW_REGNUM, read_memory_unsigned_integer (fsr.regs[PSW_REGNUM], 4));
     }
 
-  write_register (PC_REGNUM, read_register(13));
+  write_register (PC_REGNUM, read_register(LR_REGNUM));
   write_register (SP_REGNUM, fp + frame->size);
   target_store_registers (-1);
   flush_cached_frames ();
@@ -91,35 +141,75 @@ d30v_pop_frame ()
 
 static int 
 check_prologue (op)
-     unsigned short op;
+     unsigned long op;
 {
-  /* st  rn, @-sp */
-  if ((op & 0x7E1F) == 0x6C1F)
+  /* add sp,sp,imm -- observed */
+  if ((op & OP_MASK_ALL_BUT_IMM) == OP_ADD_SP_IMM)
     return 1;
 
-  /* st2w  rn, @-sp */
-  if ((op & 0x7E3F) == 0x6E1F)
+  /* add r22,sp,imm -- observed */
+  if ((op & OP_MASK_ALL_BUT_IMM) == OP_ADD_R22_SP_IMM)
     return 1;
 
-  /* subi  sp, n */
-  if ((op & 0x7FE1) == 0x01E1)
-    return 1;
-
-  /* mv  r11, sp */
-  if (op == 0x417E)
+  /* or  fp,r0,sp -- observed */
+  if (op == OP_OR_FP_R0_SP)
     return 1;
 
   /* nop */
-  if (op == 0x5E00)
+  if ((op & OP_MASK_OPCODE) == OP_NOP)
     return 1;
 
-  /* st  rn, @sp */
-  if ((op & 0x7E1F) == 0x681E)
+  /* stw  Ra,@(sp,r0) */
+  if ((op & OP_MASK_ALL_BUT_RA) == OP_STW_SP_R0)
     return 1;
 
-  /* st2w  rn, @sp */
- if ((op & 0x7E3F) == 0x3A1E)
+  /* stw  Ra,@(sp,0x0) */
+  if ((op & OP_MASK_ALL_BUT_RA) == OP_STW_SP_IMM0)
+    return 1;
+
+  /* st2w  Ra,@(sp,r0) */
+ if ((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_SP_R0)
    return 1;
+
+  /* st2w  Ra,@(sp,0x0) */
+ if ((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_SP_IMM0)
+   return 1;
+
+ /* stw fp, @(r22+,r0) -- observed */
+ if (op == OP_STW_FP_R22P_R0)
+   return 1;
+
+ /* stw r62, @(r22+,r0) -- observed */
+ if (op == OP_STW_LR_R22P_R0)
+   return 1;
+
+ /* stw Ra, @(fp,r0) -- observed */
+ if ((op & OP_MASK_ALL_BUT_RA) == OP_STW_FP_R0)
+   return 1;			/* first arg */
+
+ /* stw Ra, @(fp,imm) -- observed */
+ if ((op & OP_MASK_OP_AND_RB) == OP_STW_FP_IMM)
+   return 1;			/* second and subsequent args */
+
+ /* stw fp,@(sp,imm) -- observed */
+ if ((op & OP_MASK_ALL_BUT_IMM) == OP_STW_FP_SP_IMM)
+   return 1;
+
+ /* st2w Ra,@(r22+,r0) */
+ if ((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_R22P_R0)
+   return 1;
+
+  /* stw  Ra, @(sp-) */
+  if ((op & OP_MASK_ALL_BUT_RA) == OP_STW_SPM)
+    return 1;
+
+  /* st2w  Ra, @(sp-) */
+  if ((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_SPM)
+    return 1;
+
+  /* sub.?  sp,sp,imm */
+  if ((op & OP_MASK_ALL_BUT_IMM) == OP_SUB_SP_IMM)
+    return 1;
 
   return 0;
 }
@@ -128,13 +218,14 @@ CORE_ADDR
 d30v_skip_prologue (pc)
      CORE_ADDR pc;
 {
-  unsigned long op;
-  unsigned short op1, op2;
+  unsigned long op[2];
+  unsigned long opl, opr;	/* left / right sub operations */
+  unsigned long fm0, fm1;	/* left / right mode bits */
+  unsigned long cc0, cc1;
+  unsigned long op1, op2;
   CORE_ADDR func_addr, func_end;
   struct symtab_and_line sal;
 
-  /* XXX -- these need to be updated, the instruction patterns are actually
-     for the d10v, not the d30v.  */
   /* If we have line debugging information, then the end of the */
   /* prologue should the first assembly instruction of  the first source line */
   if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
@@ -144,32 +235,44 @@ d30v_skip_prologue (pc)
 	return sal.end;
     }
   
-  if (target_read_memory (pc, (char *)&op, 4))
+  if (target_read_memory (pc, (char *)&op[0], 8))
     return pc;			/* Can't access it -- assume no prologue. */
 
   while (1)
     {
-      op = (unsigned long)read_memory_integer (pc, 4);
-      if ((op & 0xC0000000) == 0xC0000000)
+      opl = (unsigned long)read_memory_integer (pc, 4);
+      opr = (unsigned long)read_memory_integer (pc+4, 4);
+
+      fm0 = (opl & OP_MASK_FM_BIT);
+      fm1 = (opr & OP_MASK_FM_BIT);
+
+      cc0 = (opl & OP_MASK_CC_BITS);
+      cc1 = (opr & OP_MASK_CC_BITS);
+
+      opl = (opl & OP_MASK_SUB_INST);
+      opr = (opr & OP_MASK_SUB_INST);
+
+      if (fm0 && fm1)
 	{
-	  /* long instruction */
-	  if ( ((op & 0x3FFF0000) != 0x01FF0000) &&   /* add3 sp,sp,n */
-	       ((op & 0x3F0F0000) != 0x340F0000) &&   /* st  rn, @(offset,sp) */
- 	       ((op & 0x3F1F0000) != 0x350F0000))     /* st2w  rn, @(offset,sp) */
+	  /* long instruction (opl contains the opcode) */
+	  if (((opl & OP_MASK_ALL_BUT_IMM) != OP_ADD_SP_IMM) && /* add sp,sp,imm */
+	      ((opl & OP_MASK_ALL_BUT_IMM) != OP_ADD_R22_SP_IMM) && /* add r22,sp,imm */
+	      ((opl & OP_MASK_OP_AND_RB) != OP_STW_SP_IMM) && /* stw Ra, @(sp,imm) */
+	      ((opl & OP_MASK_OP_AND_RB) != OP_ST2W_SP_IMM)) /* st2w Ra, @(sp,imm) */
 	    break;
 	}
       else
 	{
 	  /* short instructions */
-	  if ((op & 0xC0000000) == 0x80000000)
+	  if (fm0 && !fm1)
 	    {
-	      op2 = (op & 0x3FFF8000) >> 15;
-	      op1 = op & 0x7FFF;
+	      op1 = opr;
+	      op2 = opl;
 	    } 
 	  else 
 	    {
-	      op1 = (op & 0x3FFF8000) >> 15;
-	      op2 = op & 0x7FFF;
+	      op1 = opl;
+	      op2 = opr;
 	    }
 	  if (check_prologue(op1))
 	    {
@@ -177,15 +280,15 @@ d30v_skip_prologue (pc)
 		{
 		  /* if the previous opcode was really part of the prologue */
 		  /* and not just a NOP, then we want to break after both instructions */
-		  if (op1 != 0x5E00)
-		    pc += 4;
+		  if ((op1 & OP_MASK_OPCODE) != OP_NOP)
+		    pc += 8;
 		  break;
 		}
 	    }
 	  else
 	    break;
 	}
-      pc += 4;
+      pc += 8;
     }
   return pc;
 }
@@ -214,78 +317,149 @@ d30v_frame_chain (frame)
       return fsr.regs[SP_REGNUM];
     }
 
-  if (!read_memory_unsigned_integer(fsr.regs[FP_REGNUM],2))
+  if (!read_memory_unsigned_integer(fsr.regs[FP_REGNUM],4))
     return (CORE_ADDR)0;
 
-  return read_memory_unsigned_integer(fsr.regs[FP_REGNUM],2)| DMEM_START;
+  return read_memory_unsigned_integer(fsr.regs[FP_REGNUM],4)| DMEM_START;
 }  
 
 static int next_addr, uses_frame;
+static int frame_size;
 
 static int 
 prologue_find_regs (op, fsr, addr)
-     unsigned short op;
+     unsigned long op;
      struct frame_saved_regs *fsr;
      CORE_ADDR addr;
 {
   int n;
+  int offset;
 
-  /* XXX -- these need to be updated, the instruction patterns are actually
-     for the d10v, not the d30v.  */
-  /* st  rn, @-sp */
-  if ((op & 0x7E1F) == 0x6C1F)
+  /* add sp,sp,imm -- observed */
+  if ((op & OP_MASK_ALL_BUT_IMM) == OP_ADD_SP_IMM)
     {
-      n = (op & 0x1E0) >> 5;
-      next_addr -= 2;
-      fsr->regs[n] = next_addr;
+      offset = EXTRACT_IMM6(op);
+      /*next_addr += offset;*/
+      frame_size += -offset;
       return 1;
     }
 
-  /* st2w  rn, @-sp */
-  else if ((op & 0x7E3F) == 0x6E1F)
+  /* add r22,sp,imm -- observed */
+  if ((op & OP_MASK_ALL_BUT_IMM) == OP_ADD_R22_SP_IMM)
     {
-      n = (op & 0x1E0) >> 5;
-      next_addr -= 4;
-      fsr->regs[n] = next_addr;
-      fsr->regs[n+1] = next_addr+2;
+      offset = EXTRACT_IMM6(op);
+      next_addr = (offset - frame_size);
       return 1;
     }
 
-  /* subi  sp, n */
-  if ((op & 0x7FE1) == 0x01E1)
+  /* stw Ra, @(fp, offset) -- observed */
+  if ((op & OP_MASK_OP_AND_RB) == OP_STW_FP_IMM)
     {
-      n = (op & 0x1E) >> 1;
-      if (n == 0)
-	n = 16;
-      next_addr -= n;
+      n = EXTRACT_RA(op);
+      offset = EXTRACT_IMM6(op);
+      fsr->regs[n] = (offset - frame_size);
       return 1;
     }
 
-  /* mv  r11, sp */
-  if (op == 0x417E)
+  /* stw Ra, @(fp, r0) -- observed */
+  if ((op & OP_MASK_ALL_BUT_RA) == OP_STW_FP_R0)
+    {
+      n = EXTRACT_RA(op);
+      fsr->regs[n] = (- frame_size);
+      return 1;
+    }
+
+  /* or  fp,0,sp -- observed */
+  if ((op == OP_OR_FP_R0_SP) ||
+      (op == OP_OR_FP_SP_R0) ||
+      (op == OP_OR_FP_IMM0_SP))
     {
       uses_frame = 1;
       return 1;
     }
 
   /* nop */
-  if (op == 0x5E00)
+  if ((op & OP_MASK_OPCODE) == OP_NOP)
     return 1;
 
-  /* st  rn, @sp */
-  if ((op & 0x7E1F) == 0x681E)
+  /* stw Ra,@(r22+,r0) -- observed */
+  if ((op & OP_MASK_ALL_BUT_RA) == OP_STW_R22P_R0)
     {
-      n = (op & 0x1E0) >> 5;
+      n = EXTRACT_RA(op);
+      fsr->regs[n] = next_addr;
+      next_addr += 4;
+      return 1;
+    }
+#if 0				/* subsumed in pattern above */
+  /* stw fp,@(r22+,r0) -- observed */
+  if (op == OP_STW_FP_R22P_R0)
+    {
+      fsr->regs[FP_REGNUM] = next_addr;	/* XXX */
+      next_addr += 4;
+      return 1;
+    }
+
+  /* stw r62,@(r22+,r0) -- observed */
+  if (op == OP_STW_LR_R22P_R0)
+    {
+      fsr->regs[LR_REGNUM] = next_addr;
+      next_addr += 4;
+      return 1;
+    }
+#endif
+  /* st2w Ra,@(r22+,r0) -- observed */
+  if ((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_R22P_R0)
+    {
+      n = EXTRACT_RA(op);
+      fsr->regs[n] = next_addr;
+      fsr->regs[n+1] = next_addr + 4;
+      next_addr += 8;
+      return 1;
+    }
+
+  /* stw  rn, @(sp-) */
+  if ((op & OP_MASK_ALL_BUT_RA) == OP_STW_SPM)
+    {
+      n = EXTRACT_RA(op);
+      fsr->regs[n] = next_addr;
+      next_addr -= 4;
+      return 1;
+    }
+
+  /* st2w  Ra, @(sp-) */
+  else if ((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_SPM)
+    {
+      n = EXTRACT_RA(op);
+      fsr->regs[n] = next_addr;
+      fsr->regs[n+1] = next_addr+4;
+      next_addr -= 8;
+      return 1;
+    }
+
+  /* sub  sp,sp,imm */
+  if ((op & OP_MASK_ALL_BUT_IMM) == OP_SUB_SP_IMM)
+    {
+      offset = EXTRACT_IMM6(op);
+      next_addr -= offset;
+      return 1;
+    }
+
+  /* st  rn, @(sp,0) */
+  if (((op & OP_MASK_ALL_BUT_RA) == OP_STW_SP_R0) ||
+      ((op & OP_MASK_ALL_BUT_RA) == OP_STW_SP_IMM0))
+    {
+      n = EXTRACT_RA(op);
       fsr->regs[n] = next_addr;
       return 1;
     }
 
-  /* st2w  rn, @sp */
-  if ((op & 0x7E3F) == 0x3A1E)
+  /* st2w  rn, @(sp,0) */
+  if (((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_SP_R0) ||
+      ((op & OP_MASK_ALL_BUT_RA) == OP_ST2W_SP_IMM0))
     {
-      n = (op & 0x1E0) >> 5;
+      n = EXTRACT_RA(op);
       fsr->regs[n] = next_addr;
-      fsr->regs[n+1] = next_addr+2;
+      fsr->regs[n+1] = next_addr+4;
       return 1;
     }
 
@@ -297,51 +471,65 @@ prologue_find_regs (op, fsr, addr)
    This includes special registers such as pc and fp saved in special
    ways in the stack frame.  sp is even more special: the address we
    return for it IS the sp for the next frame. */
-/* XXX -- these need to be updated, the instruction patterns are actually
-   for the d10v, not the d30v.  */
 void
 d30v_frame_find_saved_regs (fi, fsr)
      struct frame_info *fi;
      struct frame_saved_regs *fsr;
 {
   CORE_ADDR fp, pc;
-  unsigned long op;
-  unsigned short op1, op2;
+  unsigned long opl, opr;
+  unsigned long op1, op2;
+  unsigned long fm0, fm1;
   int i;
 
   fp = fi->frame;
   memset (fsr, 0, sizeof (*fsr));
   next_addr = 0;
+  frame_size = 0;
 
   pc = get_pc_function_start (fi->pc);
 
   uses_frame = 0;
   while (1)
     {
-      op = (unsigned long)read_memory_integer (pc, 4);
-      if ((op & 0xC0000000) == 0xC0000000)
+      opl = (unsigned long)read_memory_integer (pc, 4);
+      opr = (unsigned long)read_memory_integer (pc+4, 4);
+
+      fm0 = (opl & OP_MASK_FM_BIT);
+      fm1 = (opr & OP_MASK_FM_BIT);
+
+      opl = (opl & OP_MASK_SUB_INST);
+      opr = (opr & OP_MASK_SUB_INST);
+
+      if (fm0 && fm1)
 	{
 	  /* long instruction */
-	  if ((op & 0x3FFF0000) == 0x01FF0000)
+	  if ((opl & OP_MASK_ALL_BUT_IMM) == OP_ADD_SP_IMM)
 	    {
-	      /* add3 sp,sp,n */
-	      short n = op & 0xFFFF;
-	      next_addr += n;
+	      /* add sp,sp,n */
+	      long offset = EXTRACT_IMM32(opl, opr);
+	      frame_size += -offset;
 	    }
-	  else if ((op & 0x3F0F0000) == 0x340F0000)
+	  else if ((opl & OP_MASK_ALL_BUT_IMM) == OP_ADD_R22_SP_IMM)
 	    {
-	      /* st  rn, @(offset,sp) */
-	      short offset = op & 0xFFFF;
-	      short n = (op >> 20) & 0xF;
-	      fsr->regs[n] = next_addr + offset;
+	      /* add r22,sp,offset */
+	      long offset = EXTRACT_IMM32(opl,opr);
+	      next_addr = (offset - frame_size);
 	    }
-	  else if ((op & 0x3F1F0000) == 0x350F0000)
+	  else if ((opl & OP_MASK_OP_AND_RB) == OP_STW_SP_IMM)
 	    {
-	      /* st2w  rn, @(offset,sp) */
-	      short offset = op & 0xFFFF;
-	      short n = (op >> 20) & 0xF;
-	      fsr->regs[n] = next_addr + offset;
-	      fsr->regs[n+1] = next_addr + offset + 2;
+	      /* st Ra, @(sp,imm) */
+	      long offset = EXTRACT_IMM32(opl, opr);
+	      short n = EXTRACT_RA(opl);
+	      fsr->regs[n] = (offset - frame_size);
+	    }
+	  else if ((opl & OP_MASK_OP_AND_RB) == OP_ST2W_SP_IMM)
+	    {
+	      /* st2w Ra, @(sp,offset) */
+	      long offset = EXTRACT_IMM32(opl, opr);
+	      short n = EXTRACT_RA(opl);
+	      fsr->regs[n] = (offset - frame_size);
+	      fsr->regs[n+1] = (offset - frame_size) + 4;
 	    }
 	  else
 	    break;
@@ -349,37 +537,39 @@ d30v_frame_find_saved_regs (fi, fsr)
       else
 	{
 	  /* short instructions */
-	  if ((op & 0xC0000000) == 0x80000000)
+	  if (fm0 && !fm1)
 	    {
-	      op2 = (op & 0x3FFF8000) >> 15;
-	      op1 = op & 0x7FFF;
+	      op2 = opl;
+	      op1 = opr;
 	    } 
 	  else 
 	    {
-	      op1 = (op & 0x3FFF8000) >> 15;
-	      op2 = op & 0x7FFF;
+	      op1 = opl;
+	      op2 = opr;
 	    }
 	  if (!prologue_find_regs(op1,fsr,pc) || !prologue_find_regs(op2,fsr,pc))
 	    break;
 	}
-      pc += 4;
+      pc += 8;
     }
   
-  fi->size = -next_addr;
-
-  if (!(fp & 0xffff))
+  fi->size = frame_size;
+  if (!fp)
+#if 0
     fp = read_register(SP_REGNUM) | DMEM_START;
-
+#else
+    fp = read_register(SP_REGNUM);
+#endif
   for (i=0; i<NUM_REGS-1; i++)
     if (fsr->regs[i])
       {
-	fsr->regs[i] = fp - (next_addr - fsr->regs[i]); 
+	fsr->regs[i] = fsr->regs[i] + fp + frame_size;
       }
 
   if (fsr->regs[LR_REGNUM])
-    fi->return_pc = ((read_memory_unsigned_integer(fsr->regs[LR_REGNUM],2) - 1) << 2) | IMEM_START;
+    fi->return_pc = read_memory_unsigned_integer(fsr->regs[LR_REGNUM],4);
   else
-    fi->return_pc = ((read_register(LR_REGNUM) - 1) << 2) | IMEM_START;
+    fi->return_pc = read_register(LR_REGNUM);
   
   /* th SP is not normally (ever?) saved, but check anyway */
   if (!fsr->regs[SP_REGNUM])
@@ -404,10 +594,21 @@ d30v_init_extra_frame_info (fromleaf, fi)
 {
   struct frame_saved_regs dummy;
 
-  if (fi->next && ((fi->pc & 0xffff) == 0)) 
+  if (fi->next && (fi->pc == 0))
     fi->pc = fi->next->return_pc; 
 
   d30v_frame_find_saved_regs (fi, &dummy);
+}
+
+void
+d30v_init_frame_pc (fromleaf, prev)
+     int fromleaf;
+     struct frame_info *prev;
+{
+  /* default value, put here so we can breakpoint on it and
+     see if the default value is really the right thing to use */
+  prev->pc = (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) : \
+	      prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
 }
 
 static void d30v_print_register PARAMS ((int regnum, int tabular));
@@ -590,7 +791,7 @@ d30v_fix_call_dummy (dummyname, start_sp, fun, nargs, args, type, gcc_p)
   char buffer[MAX_REGISTER_RAW_SIZE];
   struct frame_info *frame = get_current_frame ();
   frame->dummy = start_sp;
-  start_sp |= DMEM_START;
+  /*start_sp |= DMEM_START;*/
 
   sp = start_sp;
   for (regnum = 0; regnum < NUM_REGS; regnum++)
@@ -599,9 +800,9 @@ d30v_fix_call_dummy (dummyname, start_sp, fun, nargs, args, type, gcc_p)
       store_address (buffer, REGISTER_RAW_SIZE(regnum), read_register(regnum));
       write_memory (sp, buffer, REGISTER_RAW_SIZE(regnum));
     }
-  write_register (SP_REGNUM, (LONGEST)(sp & 0xffff)); 
+  write_register (SP_REGNUM, (LONGEST)sp);
   /* now we need to load LR with the return address */
-  write_register (LR_REGNUM, (LONGEST)(d30v_call_dummy_address() & 0xffff) >> 2);  
+  write_register (LR_REGNUM, (LONGEST)d30v_call_dummy_address());  
   return sp;
 }
 
@@ -634,6 +835,7 @@ d30v_push_arguments (nargs, args, sp, struct_return, struct_addr)
   LONGEST val;
   CORE_ADDR ptrs[10];
 
+#if 0
   /* Pass 1. Put all large args on stack */
   for (i = 0; i < nargs; i++)
     {
@@ -650,7 +852,7 @@ d30v_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	  ptrs[index++] = sp;
 	}
     }
-
+#endif
   index = 0;
 
   for (i = 0; i < nargs; i++)
@@ -662,24 +864,34 @@ d30v_push_arguments (nargs, args, sp, struct_return, struct_addr)
       val = extract_signed_integer (contents, len);
       if (len > 4)
 	{
-	  /* use a pointer to previously saved data */
-	  if (regnum < 6)
-	    write_register (regnum++, ptrs[index++]);
-	  else
+	  /* we need multiple registers */
+	  int ndx;
+
+	  for (ndx = 0; ndx < len; ndx += 4, len -= 4)
 	    {
-	      /* no more registers available.  put it on the stack */
-	      sp -= 2;
-	      store_address (buffer, 2, ptrs[index++]);
-	      write_memory (sp, buffer, 2);
+	      if (regnum < 18)
+		{
+		  if (len > 4)
+		    val = extract_signed_integer (&contents[ndx], 4);
+		  else
+		    val = extract_signed_integer (&contents[ndx], len);
+
+		  write_register (regnum++, val);
+		}
+	      else
+		{
+		  /* no more registers available.  put it on the stack */
+		  sp -= len;
+		  write_memory (sp, &contents[ndx], len);
+		  break;
+		}
 	    }
 	}
       else
 	{
-	  if (regnum < 6 )
+	  if (regnum < 18 )
 	    {
-	      if (len == 4)
-		write_register (regnum++, val>>16);
-	      write_register (regnum++, val & 0xffff);
+	      write_register (regnum++, val);
 	    }
 	  else
 	    {
@@ -1043,7 +1255,7 @@ _initialize_d30v_tdep ()
 	   "Enable tracing of instruction execution.");
 
   add_com ("untrace", class_support, untrace_command,
-	   "Disable tracing of instruction execution.");
+ 	   "Disable tracing of instruction execution.");
 
   add_com ("tdisassemble", class_vars, tdisassemble_command,
 	   "Disassemble the trace buffer.\n\

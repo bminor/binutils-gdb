@@ -32,9 +32,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* these are the addresses the D30V-EVA board maps data */
 /* and instruction memory to. */
 
-#define DMEM_START	0x2000000
-#define IMEM_START	0x1000000
-#define STACK_START	0x2007ffe
+#define DMEM_START	0x20000000
+#define IMEM_START	0x00000000 /* was 0x10000000 */
+#define STACK_START	0x20007ffe
 
 #ifdef __STDC__		/* Forward decls for prototypes */
 struct frame_info;
@@ -87,7 +87,7 @@ extern CORE_ADDR d30v_skip_prologue ();
    but do serve to get the desired values when passed to read_register.  */
 
 #define R0_REGNUM	0
-#define FP_REGNUM	11
+#define FP_REGNUM	61
 #define LR_REGNUM 	62
 #define SP_REGNUM 	63
 #define SPI_REGNUM	64	/* Interrupt stack pointer */
@@ -218,17 +218,24 @@ extern void d30v_init_extra_frame_info PARAMS (( int fromleaf, struct frame_info
   (FRAMELESS) = frameless_look_for_prologue(FI)
 
 #define FRAME_CHAIN(FRAME)       d30v_frame_chain(FRAME)
+#if 0
 #define FRAME_CHAIN_VALID(chain,frame)	\
       ((chain) != 0 && (frame) != 0 && (frame)->pc > IMEM_START)
+#else
+#define FRAME_CHAIN_VALID(chain,fi)	\
+      ((chain) != 0 && (fi) != 0 && (fi)->frame <= STACK_START)
+#endif
 #define FRAME_SAVED_PC(FRAME)    ((FRAME)->return_pc)   
 #define FRAME_ARGS_ADDRESS(fi)   (fi)->frame
 #define FRAME_LOCALS_ADDRESS(fi) (fi)->frame
 
-/* Immediately after a function call, return the saved pc.  We can't */
-/* use frame->return_pc beause that is determined by reading R13 off the */
-/*stack and that may not be written yet. */
+#define INIT_FRAME_PC(fromleaf, prev)	d30v_init_frame_pc(fromleaf, prev)
 
-#define SAVED_PC_AFTER_CALL(frame) ((read_register(LR_REGNUM) << 2) | IMEM_START)
+/* Immediately after a function call, return the saved pc.  We can't */
+/* use frame->return_pc beause that is determined by reading R62 off the */
+/* stack and that may not be written yet. */
+
+#define SAVED_PC_AFTER_CALL(frame) (read_register(LR_REGNUM))
     
 /* Set VAL to the number of args passed to frame described by FI.
    Can set VAL to -1, meaning no way to tell.  */
@@ -254,14 +261,15 @@ extern void d30v_frame_find_saved_regs PARAMS ((struct frame_info *, struct fram
 
 #define NAMES_HAVE_UNDERSCORE
       
-/* 
-DUMMY FRAMES.  Need these to support inferior function calls.  They work
-like this on D30V:  First we set a breakpoint at 0 or __start.  Then we push
-all the registers onto the stack.  Then put the function arguments in the proper
-registers and set r13 to our breakpoint address.  Finally call the function directly.
-When it hits the breakpoint, clear the break point and pop the old register contents
-off the stack.
-*/
+/* DUMMY FRAMES.  Need these to support inferior function calls.
+   They work like this on D30V:
+   First we set a breakpoint at 0 or __start.
+   Then we push all the registers onto the stack.
+   Then put the function arguments in the proper registers and set r13
+   to our breakpoint address.
+   Finally call the function directly.
+   When it hits the breakpoint, clear the break point and pop the old
+   register contents off the stack. */
 
 #define CALL_DUMMY		{ }  
 #define PUSH_DUMMY_FRAME
