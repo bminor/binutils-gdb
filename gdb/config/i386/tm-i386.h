@@ -28,8 +28,4 @@
 extern void print_387_control_word (unsigned int);
 extern void print_387_status_word (unsigned int);
 
-/* Offset from SP to first arg on stack at first instruction of a function */
-
-#define SP_ARG0 (1 * 4)
-
 #endif /* ifndef TM_I386_H */

@@ -1,5 +1,8 @@
 2002-08-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* uw-thread.c (SP_ARG0): Define if not already defined.
+	* config/i386/tm-i386.h (SO_ARG0): Remove define.
+
 	* config/i386/tm-i386v4.h (HAVE_I387_REGS): Remove define.
 
 	* config/i386/tm-i386.h: Don't include "regcache.h".
