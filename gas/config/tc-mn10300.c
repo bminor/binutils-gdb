@@ -32,8 +32,6 @@ struct reg_name
   int value;
 };
 
-struct dwarf2_line_info debug_line;
-
 /* Generic assembler global variables which must be defined by all
    targets.  */
 
@@ -1792,19 +1790,7 @@ keep_going:
     }
 
   if (debug_type == DEBUG_DWARF2)
-    {
-      bfd_vma addr;
-
-      /* First update the notion of the current source line.  */
-      dwarf2_where (&debug_line);
-
-      /* We want the offset of the start of this instruction within the
-         the current frag.  */
-      addr = frag_now->fr_address + frag_now_fix () - real_size;
-
-      /* And record the information.  */
-      dwarf2_gen_line_info (addr, &debug_line);
-    }
+    dwarf2_generate_asm_lineno (real_size);
 }
 
 /* If while processing a fixup, a reloc really needs to be created
