@@ -1,3 +1,8 @@
+2000-09-29  Momchil Velikov <velco@fadata.bg>
+
+	* elf.c (elf_fake_sections): Do not mark the section SHT_NOBITS if
+	is has the SEC_HAS_CONTENTS flag set.
+
 2000-09-28  Örjan Friberg  <orjanf@axis.com>
 	    Hans-Peter Nilsson  <hp@axis.com>
 
