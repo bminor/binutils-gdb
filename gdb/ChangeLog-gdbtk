@@ -1,3 +1,27 @@
+Wed Jul  1 11:07:21 1998  Jim Ingham   <jingham@cygnus.com>
+
+	* gdbtk.c: removed all the commands and hooks from this file so
+	now it contains only the startup code.
+	* gdbtk.c (gdbtk_init): Fixed a bug in the startup code on Windows 
+	that caused gdbtk not to find the share directory unless
+	GDBTK_LIBRARY was set.
+ 	* gdbtk_cmds.c: New file - this contains all the Tcl commands that
+	gdb defines.  All the old commands were moved here, the
+	string-based commands were converted to object commands, and the
+	object-based commands were all converted to uniformly use the
+	call_wrapper.  A new function, Gdbtk_Init was added to centralize
+	initializing the gdb package.
+	* gdbtk_hooks.c: New file - All the hooks were moved here, and a new
+	function, gdbtk_add_hooks was added to centralize adding all these 
+	hook functions.  gdbtk_fputs was also modified to handle the new
+	result_ptr structure.  See the comments in gdbtk.h for more
+	details.
+	* gdbtk.h: New file - this contains all the defines and globals
+	shared by gdbtk.c, gdbtk_cmds.c & gdbtk_hooks.c
+	* Makefile.in, configure.in & configure: mutatis mutandi for the
+	new files.
+	
+
 Mon Jun 29 11:49:17 1998  Keith Seitz  <keiths@cygnus.com>
 
 	* main.c (main): Don't include gdbtk test code if GDBTK is
