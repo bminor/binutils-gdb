@@ -217,9 +217,9 @@ child_resume (pid, step, signal)
      written a new PC value to the child.)  */
 
   if (step)
-    ptrace (PT_SINGLE, inferior_pid, (PTRACE_ARG3_TYPE) 1, signal, 0);
+    ptrace (PT_SINGLE, pid, (PTRACE_ARG3_TYPE) 1, signal, 0);
   else
-    ptrace (PT_CONTIN, inferior_pid, (PTRACE_ARG3_TYPE) 1, signal, 0);
+    ptrace (PT_CONTIN, pid, (PTRACE_ARG3_TYPE) 1, signal, 0);
 
   if (errno)
     perror_with_name ("ptrace");
