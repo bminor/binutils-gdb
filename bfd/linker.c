@@ -2749,7 +2749,10 @@ default_indirect_link_order (output_bfd, info, output_section, link_order,
   /* Output the section contents.  */
   if (! bfd_set_section_contents (output_bfd, output_section,
 				  (PTR) new_contents,
-				  link_order->offset, link_order->size))
+				  (file_ptr)
+                                  (link_order->offset * 
+                                   bfd_octets_per_byte (output_bfd)), 
+                                  link_order->size))
     goto error_return;
 
   if (contents != NULL)
