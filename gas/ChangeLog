@@ -1,3 +1,13 @@
+Thu Feb  2 15:21:24 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-m68k.c (cpu32_control_regs): New macro.
+	(m68k_init_after_args): Use it, for cpu32 processors.
+
+Fri Jan 27 21:29:53 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.h (NO_STRING_ESCAPES): Don't define if we are
+	using ELF.
+
 Thu Jan 26 19:03:42 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/tc-h8300.c (get_specific): Add parens around | inside &.
