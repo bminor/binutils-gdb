@@ -1,3 +1,10 @@
+2002-02-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* regformats/reg-i386-linux.dat: New file, with $orig_eax.
+	* gdbserver/Makefile.in: Add rules for reg-i386-linux.o.
+	* gdbserver/configure.srv: Change i386-*-linux* to use
+	reg-i386-linux.o.
+
 2002-02-26  Andrew Cagney  <ac131313@redhat.com>
 
 	* x86-64-tdep.c: Re-indent.  Update copyright date.

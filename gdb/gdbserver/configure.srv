@@ -17,7 +17,7 @@ case "${target}" in
   arm*-*-linux*)	srv_regobj=reg-arm.o
 			srv_tgtobj="linux-low.o linux-arm-low.o"
 			;;
-  i[3456]86-*-linux*)	srv_regobj=reg-i386.o
+  i[3456]86-*-linux*)	srv_regobj=reg-i386-linux.o
 			srv_tgtobj="linux-low.o linux-i386-low.o"
 			;;
   ia64-*-linux*)	srv_regobj=reg-ia64.o

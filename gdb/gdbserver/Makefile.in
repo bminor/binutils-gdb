@@ -183,7 +183,7 @@ clean:
 	rm -f *.o ${ADD_FILES} *~
 	rm -f gdbserver gdbreplay core make.log
 	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m68k.c reg-mips.c
-	rm -f reg-ppc.c reg-sh.c
+	rm -f reg-ppc.c reg-sh.c reg-i386-linux.c
 
 distclean: clean
 	rm -f nm.h tm.h xm.h config.status
@@ -254,6 +254,9 @@ reg-arm.c : $(srcdir)/../regformats/reg-arm.dat $(regdat_sh)
 reg-i386.o : reg-i386.c $(regdef_h)
 reg-i386.c : $(srcdir)/../regformats/reg-i386.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-i386.dat reg-i386.c
+reg-i386-linux.o : reg-i386-linux.c $(regdef_h)
+reg-i386-linux.c : $(srcdir)/../regformats/reg-i386-linux.dat $(regdat_sh)
+	sh $(regdat_sh) $(srcdir)/../regformats/reg-i386-linux.dat reg-i386-linux.c
 reg-ia64.o : reg-ia64.c $(regdef_h)
 reg-ia64.c : $(srcdir)/../regformats/reg-ia64.dat $(regdat_sh)
 	sh $(regdat_sh) $(srcdir)/../regformats/reg-ia64.dat reg-ia64.c
