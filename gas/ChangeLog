@@ -1,3 +1,8 @@
+2003-10-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (macro_build_ldst_constoffset,load_register,macro):
+	Fix indentation. Better error message.
+
 2003-10-14  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xtensa_create_property_segments): Remove bfd
