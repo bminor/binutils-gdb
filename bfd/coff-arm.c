@@ -985,7 +985,7 @@ insert_thumb_branch (br_insn, rel_off)
   else if ((br_insn & HI_LOW_ORDER) == HI_LOW_ORDER)
     br_insn = HI_LOW_ORDER | (high_bits << 16) | low_bits;
   else
-    abort(); /* error - not a valid branch instruction form */
+    abort (); /* error - not a valid branch instruction form */
 
   /* FIXME: abort is probably not the right call. krk@cygnus.com */
 

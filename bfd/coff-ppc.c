@@ -88,7 +88,7 @@ extern void dump_toc PARAMS ((PTR));
     fprintf(stderr,\
     _("File %s, line %d, Hash check failure, bad eye %8s\n"), \
     __FILE__, __LINE__, addr->eye_catcher); \
-    abort(); \
+    abort (); \
  }
 
 #else
@@ -925,7 +925,7 @@ ppc_record_toc_entry(abfd, info, sec, sym, toc_kind)
 	  /* allocate a table */
 	  local_syms =
 	    (int *) bfd_zalloc (abfd,
-				obj_raw_syment_count(abfd) * sizeof(int));
+				obj_raw_syment_count(abfd) * sizeof (int));
 	  if (local_syms == 0)
 	    return false;
 	  obj_coff_local_toc_table(abfd) = local_syms;
@@ -1151,7 +1151,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
       if (r_type == IMAGE_REL_PPC_IMGLUE && h == 0)
 	{
 	  /* An IMGLUE reloc must have a name. Something is very wrong.  */
-	  abort();
+	  abort ();
 	}
 
       sec = NULL;
@@ -1219,7 +1219,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		if ( toc_section == NULL )
 		  {
 		    /* There is no toc section. Something is very wrong.  */
-		    abort();
+		    abort ();
 		  }
 	      }
 
@@ -1495,7 +1495,7 @@ coff_ppc_relocate_section (output_bfd, info, input_bfd, input_section,
 		    if (myh == 0)
 		      {
 			/* Missing magic cookies. Something is very wrong.  */
-			abort();
+			abort ();
 		      }
 
 		    val = myh->root.u.def.value +
@@ -1702,14 +1702,14 @@ ppc_allocate_toc_section (info)
   if (bfd_of_toc_owner == 0)
     {
       /* No toc owner? Something is very wrong.  */
-      abort();
+      abort ();
     }
 
   s = bfd_get_section_by_name ( bfd_of_toc_owner , TOC_SECTION_NAME);
   if (s == NULL)
     {
       /* No toc section? Something is very wrong.  */
-      abort();
+      abort ();
     }
 
   foo = (bfd_byte *) bfd_alloc(bfd_of_toc_owner, global_toc_size);
@@ -1752,7 +1752,7 @@ ppc_process_before_allocation (abfd, info)
     i=_bfd_coff_read_internal_relocs(abfd,sec,1,0,0,0);
 
     if (i == 0)
-      abort();
+      abort ();
 
     for (rel=i;rel<i+sec->reloc_count;++rel)
       {
@@ -2004,7 +2004,7 @@ ppc_imglue_reloc (abfd,
 
 
 #define MAX_RELOC_INDEX  \
-      (sizeof(ppc_coff_howto_table) / sizeof(ppc_coff_howto_table[0]) - 1)
+      (sizeof (ppc_coff_howto_table) / sizeof (ppc_coff_howto_table[0]) - 1)
 
 /* FIXME: There is a possiblity that when we read in a reloc from a file,
           that there are some bits encoded in the upper portion of the
@@ -2036,11 +2036,11 @@ ppc_coff_rtype2howto (relent, internal)
 
   /* the masking process only slices off the bottom byte for r_type.  */
   if ( r_type > MAX_RELOC_INDEX )
-    abort();
+    abort ();
 
   /* check for absolute crap */
   if ( junk != 0 )
-    abort();
+    abort ();
 
   switch(r_type)
     {
@@ -2107,11 +2107,11 @@ coff_ppc_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 
   /* the masking process only slices off the bottom byte for r_type.  */
   if ( r_type > MAX_RELOC_INDEX )
-    abort();
+    abort ();
 
   /* check for absolute crap */
   if ( junk != 0 )
-    abort();
+    abort ();
 
   switch(r_type)
     {
@@ -2278,7 +2278,7 @@ ppc_coff_swap_sym_in_hook (abfd, ext1, in1)
 	  || !bfd_set_section_alignment (abfd, s, 2))
 	{
 	  /* FIXME: set appropriate bfd error */
-	  abort();
+	  abort ();
 	}
 
       /* save the bfd for later allocation */
