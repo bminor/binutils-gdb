@@ -1,3 +1,10 @@
+2001-07-07  Kevin Buettner  <kevinb@redhat.com>
+
+	* procfs.c (create_procinfo): Allocate space for saved_entryset
+	and saved_exitset.
+	(destroy_one_procinfo): Free space allocated to saved_entryset
+	and saved_exitset.
+
 2001-07-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* TODO (5.1): Update.
