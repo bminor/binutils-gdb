@@ -1,3 +1,8 @@
+2002-10-05  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Set the type
+	of the other two relocations packed with a REL32 to NONE.
+
 2002-10-02  Stephen Clarke <stephen.clarke@superh.com>
 
 	* elf32-sh.c (elf_sh_link_hash_entry): Add gotplt_refcount.
