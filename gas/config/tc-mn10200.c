@@ -709,7 +709,6 @@ keep_going:
       number_to_chars_bigendian (f, insn, size > 4 ? 4 : size);
     }
 
-#if 0
   /* Create any fixups.  */
   for (i = 0; i < fc; i++)
     {
@@ -748,52 +747,32 @@ keep_going:
 	     implicitly 32bits.  */
 	  reloc_size = operand->bits;
 
+	  offset = size - reloc_size / 8;
+
 	  /* Is the reloc pc-relative?  */
 	  pcrel = (operand->flags & MN10200_OPERAND_PCREL) != 0;
 
- 	  /* Gross.  This disgusting hack is to make sure we
-	     get the right offset for the 16/32 bit reloc in 
-	     "call" instructions.  Basically they're a pain
-	     because the reloc isn't at the end of the instruction.  */
-	  if ((size == 5 || size == 7)
-	      && (((insn >> 24) & 0xff) == 0xcd
-		  || ((insn >> 24) & 0xff) == 0xdd))
-	    size -= 2;
-
-	  /* Similarly for certain bit instructions which don't
-	     hav their 32bit reloc at the tail of the instruction.  */
-	  if (size == 7
-	      && (((insn >> 16) & 0xffff) == 0xfe00
-		  || ((insn >> 16) & 0xffff) == 0xfe01
-		  || ((insn >> 16) & 0xffff) == 0xfe02))
-	    size -= 1;
-	
-	  offset = size - reloc_size / 8;
 
 	  /* Choose a proper BFD relocation type.  */
 	  if (pcrel)
 	    {
-	      if (size == 6)
-		reloc = BFD_RELOC_MN10200_32_PCREL;
-	      else if (size == 4)
-		reloc = BFD_RELOC_MN10200_16_PCREL;
-	      else if (reloc_size == 32)
-		reloc = BFD_RELOC_32_PCREL;
-	      else if (reloc_size == 16)
-		reloc = BFD_RELOC_16_PCREL;
-	      else if (reloc_size == 8)
+	      if (reloc_size == 8)
 		reloc = BFD_RELOC_8_PCREL;
+	      else if (reloc_size == 24)
+		reloc = BFD_RELOC_24_PCREL;
 	      else
 		abort ();
 	    }
 	  else
 	    {
 	      if (reloc_size == 32)
-		reloc = BFD_RELOC_MN10200_32B;
+		reloc = BFD_RELOC_32;
 	      else if (reloc_size == 16)
-		reloc = BFD_RELOC_MN10200_16B;
+		reloc = BFD_RELOC_16;
 	      else if (reloc_size == 8)
 		reloc = BFD_RELOC_8;
+	      else if (reloc_size == 24)
+		reloc = BFD_RELOC_24;
 	      else
 		abort ();
 	    }
@@ -804,7 +783,7 @@ keep_going:
 	    reloc_size = 0;
 	  else if (reloc_size == 16)
 	    reloc_size = 1;
-	  else if (reloc_size == 32)
+	  else if (reloc_size == 32 || reloc_size == 24)
 	    reloc_size = 2;
 
 	  fix_new_exp (frag_now, f - frag_now->fr_literal + offset, reloc_size,
@@ -812,7 +791,6 @@ keep_going:
 		       ((bfd_reloc_code_real_type) reloc));
 	}
     }
-#endif
 }
 
 

@@ -418,7 +418,7 @@ struct default_space_dict
 struct hppa_fix_struct
   {
     /* The field selector.  */
-    enum hppa_reloc_field_selector_type fx_r_field;
+    enum hppa_reloc_field_selector_type_alt fx_r_field;
 
     /* Type of fixup.  */
     int fx_r_type;
@@ -544,14 +544,17 @@ static int is_end_of_statement PARAMS ((void));
 static int reg_name_search PARAMS ((char *));
 static int pa_chk_field_selector PARAMS ((char **));
 static int is_same_frag PARAMS ((fragS *, fragS *));
-static void pa_build_unwind_subspace PARAMS ((struct call_info *));
 static void process_exit PARAMS ((void));
 static sd_chain_struct *pa_parse_space_stmt PARAMS ((char *, int));
 static int log2 PARAMS ((int));
 static int pa_next_subseg PARAMS ((sd_chain_struct *));
 static unsigned int pa_stringer_aux PARAMS ((char *));
 static void pa_spaces_begin PARAMS ((void));
+
+#ifdef OBJ_ELF
 static void hppa_elf_mark_end_of_function PARAMS ((void));
+static void pa_build_unwind_subspace PARAMS ((struct call_info *));
+#endif
 
 /* File and gloally scoped variable declarations.  */
 
@@ -967,7 +970,6 @@ static const struct fp_cond_map fp_cond_map[] =
 
 static const struct selector_entry selector_table[] =
 {
-  {"e", e_esel},
   {"f", e_fsel},
   {"l", e_lsel},
   {"ld", e_ldsel},
@@ -1197,7 +1199,7 @@ fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
      expressionS *exp;
      int pcrel;
      bfd_reloc_code_real_type r_type;
-     enum hppa_reloc_field_selector_type r_field;
+     enum hppa_reloc_field_selector_type_alt r_field;
      int r_format;
      long arg_reloc;
      int* unwind_bits;
@@ -1261,8 +1263,7 @@ cons_fix_new_hppa (frag, where, size, exp)
   else
     rel_type = R_HPPA;
 
-  if (hppa_field_selector != e_psel && hppa_field_selector != e_fsel
-      && hppa_field_selector != e_esel)
+  if (hppa_field_selector != e_psel && hppa_field_selector != e_fsel)
     as_warn ("Invalid field selector.  Assuming F%%.");
 
   fix_new_hppa (frag, where, size,
@@ -2629,7 +2630,8 @@ tc_gen_reloc (section, fixp)
 			       fixp->fx_r_type,
 			       hppa_fixp->fx_r_format,
 			       hppa_fixp->fx_r_field,
-			       fixp->fx_subsy != NULL);
+			       fixp->fx_subsy != NULL,
+			       fixp->fx_addsy->bsym);
 
   for (n_relocs = 0; codes[n_relocs]; n_relocs++)
     ;
@@ -2714,47 +2716,30 @@ tc_gen_reloc (section, fixp)
 	{
 	case R_COMP2:
 	  /* The only time we ever use a R_COMP2 fixup is for the difference
-	     of two symbols, or for an E% selector in exception handling
-	     tables.  With that in mind we fill in all relocs here and break
-	     out of the loop.  */
-	  if (fixp->fx_subsy != NULL)
-	    {
-	      assert (i == 1);
-	      relocs[0]->sym_ptr_ptr = &bfd_abs_symbol;
-	      relocs[0]->howto = bfd_reloc_type_lookup (stdoutput, *codes[0]);
-	      relocs[0]->address = fixp->fx_frag->fr_address + fixp->fx_where;
-	      relocs[0]->addend = 0;
-	      relocs[1]->sym_ptr_ptr = &fixp->fx_addsy->bsym;
-	      relocs[1]->howto = bfd_reloc_type_lookup (stdoutput, *codes[1]);
-	      relocs[1]->address = fixp->fx_frag->fr_address + fixp->fx_where;
-	      relocs[1]->addend = 0;
-	      relocs[2]->sym_ptr_ptr = &fixp->fx_subsy->bsym;
-	      relocs[2]->howto = bfd_reloc_type_lookup (stdoutput, *codes[2]);
-	      relocs[2]->address = fixp->fx_frag->fr_address + fixp->fx_where;
-	      relocs[2]->addend = 0;
-	      relocs[3]->sym_ptr_ptr = &bfd_abs_symbol;
-	      relocs[3]->howto = bfd_reloc_type_lookup (stdoutput, *codes[3]);
-	      relocs[3]->address = fixp->fx_frag->fr_address + fixp->fx_where;
-	      relocs[3]->addend = 0;
-	      relocs[4]->sym_ptr_ptr = &bfd_abs_symbol;
-	      relocs[4]->howto = bfd_reloc_type_lookup (stdoutput, *codes[4]);
-	      relocs[4]->address = fixp->fx_frag->fr_address + fixp->fx_where;
-	      relocs[4]->addend = 0;
-	      goto done;
-	    }
-	  else
-	    {
-	      assert (i == 0);
-	      relocs[0]->sym_ptr_ptr = &fixp->fx_addsy->bsym;
-	      relocs[0]->howto = bfd_reloc_type_lookup (stdoutput, *codes[0]);
-	      relocs[0]->address = fixp->fx_frag->fr_address + fixp->fx_where;
-	      relocs[0]->addend = 0;
-	      relocs[1]->sym_ptr_ptr = &bfd_abs_symbol;
-	      relocs[1]->howto = bfd_reloc_type_lookup (stdoutput, *codes[1]);
-	      relocs[1]->address = fixp->fx_frag->fr_address + fixp->fx_where;
-	      relocs[1]->addend = 0;
-	      goto done;
-	    }
+	     of two symbols.  With that in mind we fill in all four
+	     relocs now and break out of the loop.  */
+	  assert (i == 1);
+	  relocs[0]->sym_ptr_ptr = &bfd_abs_symbol;
+	  relocs[0]->howto = bfd_reloc_type_lookup (stdoutput, *codes[0]);
+	  relocs[0]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+	  relocs[0]->addend = 0;
+	  relocs[1]->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+	  relocs[1]->howto = bfd_reloc_type_lookup (stdoutput, *codes[1]);
+	  relocs[1]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+	  relocs[1]->addend = 0;
+	  relocs[2]->sym_ptr_ptr = &fixp->fx_subsy->bsym;
+	  relocs[2]->howto = bfd_reloc_type_lookup (stdoutput, *codes[2]);
+	  relocs[2]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+	  relocs[2]->addend = 0;
+	  relocs[3]->sym_ptr_ptr = &bfd_abs_symbol;
+	  relocs[3]->howto = bfd_reloc_type_lookup (stdoutput, *codes[3]);
+	  relocs[3]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+	  relocs[3]->addend = 0;
+	  relocs[4]->sym_ptr_ptr = &bfd_abs_symbol;
+	  relocs[4]->howto = bfd_reloc_type_lookup (stdoutput, *codes[4]);
+	  relocs[4]->address = fixp->fx_frag->fr_address + fixp->fx_where;
+	  relocs[4]->addend = 0;
+	  goto done;
 	case R_PCREL_CALL:
 	case R_ABS_CALL:
 	  relocs[i]->addend = HPPA_R_ADDEND (hppa_fixp->fx_arg_reloc, 0);
@@ -2935,7 +2920,7 @@ md_apply_fix (fixP, valp)
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   struct hppa_fix_struct *hppa_fixP;
-  long new_val, result;
+  long new_val, result = 0;
   unsigned int w1, w2, w, resulti;
 
   hppa_fixP = (struct hppa_fix_struct *) fixP->tc_fix_data;
@@ -2981,7 +2966,6 @@ md_apply_fix (fixP, valp)
 	  || hppa_fixP->fx_r_field == e_tsel
 	  || hppa_fixP->fx_r_field == e_rtsel
 	  || hppa_fixP->fx_r_field == e_ltsel
-	  || hppa_fixP->fx_r_field == e_esel
 #endif
 	  )
 	new_val = ((fmt == 12 || fmt == 17) ? 8 : 0);
@@ -6428,7 +6412,6 @@ hppa_fix_adjustable (fixp)
       || hppa_fix->fx_r_field == e_ltsel
       || hppa_fix->fx_r_field == e_rtsel
       || hppa_fix->fx_r_field == e_psel
-      || hppa_fix->fx_r_field == e_esel
       || hppa_fix->fx_r_field == e_rpsel
       || hppa_fix->fx_r_field == e_lpsel)
     return 0;

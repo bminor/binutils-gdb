@@ -1,3 +1,14 @@
+Fri Jan  3 16:47:08 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (struct hppa_fix_struct): Steak fx_r_field's type
+	to avoid warnings with the native HP compiler.
+	(fix_new_hppa): Similarly for the r_type argument.
+	(pa_build_unwind_subspace, hppa_elf_mark_end_of_function): Enclose
+	in an #if OBJ_ELF to keep gcc -Wall quiet.
+	(md_apply_fix): Always initialize "result".
+
+	* config/tc-mn10200.c (md_assemble): Generate relocations.
+
 Fri Jan  3 18:17:23 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* config/tc-m68k.c (s_even): Adjust the alignment of the current
