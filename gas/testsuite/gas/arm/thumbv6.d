@@ -1,5 +1,5 @@
 #name: THUMB V6 instructions
-#as: -march=armv6 -mthumb
+#as: -march=armv6j -mthumb
 #objdump: -dr --prefix-addresses --show-raw-insn -M force-thumb
 
 .*: +file format .*arm.*

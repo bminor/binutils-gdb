@@ -1,3 +1,8 @@
+2003-12-22  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/archv6.d (as): Use -march=armv6j.
+	* gas/arm/thumbv6.d (as): Likewise.
+
 2003-12-19  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* gas/m32r/m32rx.s: Changed pattern bncl to bncl.s.

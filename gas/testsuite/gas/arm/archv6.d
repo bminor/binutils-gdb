@@ -1,5 +1,5 @@
 #name: ARM V6 instructions
-#as: -march=armv6
+#as: -march=armv6j
 #objdump: -dr --prefix-addresses --show-raw-insn
 
 .*: +file format .*arm.*
