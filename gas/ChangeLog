@@ -1,3 +1,9 @@
+Wed Dec 29 14:37:26 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* write.h (struct fix): Field tc_fix_data should be type PTR, not
+	void*, for compatibility with non-ANSI compilers.  Added
+	single-bit field "fx_done".
+
 Wed Dec 29 11:31:44 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* app.c (do_scrub_next_char): Fix more bugs dealing with
