@@ -1,6 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -64,6 +64,9 @@ int xdb_commands = 0;
 
 /* Whether dbx commands will be handled */
 int dbx_commands = 0;
+
+/* System root path, used to find libraries etc.  */
+char *gdb_sysroot = 0;
 
 struct ui_file *gdb_stdout;
 struct ui_file *gdb_stderr;
@@ -200,6 +203,34 @@ captured_main (void *data)
 
   /* initialize error() */
   error_init ();
+
+  /* Set the sysroot path.  */
+#ifdef TARGET_SYSTEM_ROOT_RELOCATABLE
+  gdb_sysroot = make_relative_prefix (argv[0], BINDIR, TARGET_SYSTEM_ROOT);
+  if (gdb_sysroot)
+    {
+      struct stat s;
+      int res = 0;
+
+      if (stat (gdb_sysroot, &s) == 0)
+	if (S_ISDIR (s.st_mode))
+	  res = 1;
+
+      if (res == 0)
+	{
+	  free (gdb_sysroot);
+	  gdb_sysroot = TARGET_SYSTEM_ROOT;
+	}
+    }
+  else
+    gdb_sysroot = TARGET_SYSTEM_ROOT;
+#else
+#if defined (TARGET_SYSTEM_ROOT)
+  gdb_sysroot = TARGET_SYSTEM_ROOT;
+#else
+  gdb_sysroot = "";
+#endif
+#endif
 
   /* Parse arguments and options.  */
   {

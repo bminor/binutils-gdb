@@ -1,3 +1,15 @@
+2003-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (TARGET_SYSTEM_ROOT, TARGET_SYSTEM_ROOT_DEFINE): New
+	variables.
+	(main.o): Custom rule which uses $(TARGET_SYSTEM_ROOT_DEFINE).
+	* configure.in: Add --with-sysroot.
+	* configure: Regenerated.
+	* main.c (gdb_sysroot): New variable.
+	(captured_main): Initialize gdb_sysroot.
+	* defs.h (gdb_sysroot): New extern declaration.
+	* solib.c (_initialize_solib): Initialize solib_absolute_prefix.
+
 2003-01-12  Michael Chastain  <mec@shout.net>
 
 	* config/djgpp/fnchange.lst: add gdb/ChangeLog-2002.

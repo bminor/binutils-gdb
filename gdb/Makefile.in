@@ -136,6 +136,10 @@ INTL_CFLAGS = -I$(INTL_DIR) -I$(INTL_SRC)
 # Where is the ICONV library?  This can be empty if libc has iconv.
 LIBICONV = @LIBICONV@
 
+# Did the user give us a --with-sysroot option?
+TARGET_SYSTEM_ROOT = @TARGET_SYSTEM_ROOT@
+TARGET_SYSTEM_ROOT_DEFINE = @TARGET_SYSTEM_ROOT_DEFINE@
+
 #
 # CLI sub directory definitons
 #
@@ -1402,6 +1406,11 @@ hpux-thread.o: $(srcdir)/hpux-thread.c
 	$(CC) -c $(INTERNAL_CFLAGS) -I$(srcdir)/osf-share \
 		-I$(srcdir)/osf-share/HP800 -I/usr/include/dce \
 		$(srcdir)/hpux-thread.c
+
+# main.o needs an explicit build rule to get TARGET_SYSTEM_ROOT and BINDIR.
+main.o: main.c
+	$(CC) -c $(INTERNAL_CFLAGS) $(TARGET_SYSTEM_ROOT_DEFINE) \
+		-DBINDIR=\"$(bindir)\" $(srcdir)/main.c
 
 # FIXME: Procfs.o gets -Wformat errors because things like pid_t don't
 # match output format strings.

@@ -1,7 +1,7 @@
 /* Handle shared libraries for GDB, the GNU Debugger.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -874,6 +874,10 @@ For other (relative) files, you can add values using `set solib-search-path'.",
 		   &setlist);
   add_show_from_set (c, &showlist);
   set_cmd_completer (c, filename_completer);
+
+  /* Set the default value of "solib-absolute-prefix" from the sysroot, if
+     one is set.  */
+  solib_absolute_prefix = xstrdup (gdb_sysroot);
 
   c = add_set_cmd ("solib-search-path", class_support, var_string,
 		   (char *) &solib_search_path,

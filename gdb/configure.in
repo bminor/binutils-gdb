@@ -851,6 +851,38 @@ fi
 
 dnl Handle optional features that can be enabled.
 
+AC_ARG_WITH(sysroot,
+[  --with-sysroot[=DIR] Search for usr/lib et al within DIR.],
+[
+ case ${with_sysroot} in
+ yes) AC_ERROR(with-sysroot must specify path) ;;
+ *) TARGET_SYSTEM_ROOT=$with_sysroot ;;
+ esac
+
+ TARGET_SYSTEM_ROOT_DEFINE='-DTARGET_SYSTEM_ROOT=\"$(TARGET_SYSTEM_ROOT)\"'
+
+ if test "x$exec_prefix" = xNONE; then
+  if test "x$prefix" = xNONE; then
+   test_prefix=/usr/local
+  else
+   test_prefix=$prefix
+  fi
+ else
+  test_prefix=$exec_prefix
+ fi
+ case ${TARGET_SYSTEM_ROOT} in
+ ${test_prefix}*)
+   t="$TARGET_SYSTEM_ROOT_DEFINE -DTARGET_SYSTEM_ROOT_RELOCATABLE"
+   TARGET_SYSTEM_ROOT_DEFINE="$t"
+   ;;
+ esac
+], [
+ TARGET_SYSTEM_ROOT=
+ TARGET_SYSTEM_ROOT_DEFINE='-DTARGET_SYSTEM_ROOT=\"\"'
+])
+AC_SUBST(TARGET_SYSTEM_ROOT)
+AC_SUBST(TARGET_SYSTEM_ROOT_DEFINE)
+
 # NOTE: Don't add -Wall or -Wunused, they both include
 # -Wunused-parameter which reports bogus warnings.
 # NOTE: If you add to this list, remember to update
