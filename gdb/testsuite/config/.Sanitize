@@ -27,11 +27,11 @@ mips-gdb.exp
 mt-a29k-udi
 mt-hpux
 mt-i386-aout
-mt-i386-netware
 mt-i960-nindy
 mt-lynx
 mt-m68k
 mt-mips-ecoff
+mt-netware
 mt-slite
 mt-sparc-aout
 mt-unix

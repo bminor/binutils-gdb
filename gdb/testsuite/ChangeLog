@@ -1,3 +1,17 @@
+Fri Oct 21 11:10:16 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* configure.in (*-*-netware): Use config/mt-netware.
+
+	* config/mt-netware: New file.
+	* config/mt-i386-netware: Removed, separate configs for different
+	  netware architectures are no longer needed now that we have
+	  --with-headers.
+
+Sat Oct 15 03:43:00 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/exprs.exp:  Remove xfail for alpha, it is fixed
+	by the recent changes to use ANSI C arithmetic conversions.
+
 Sun Oct  9 07:44:06 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.base/corefile.exp: Add (xfail'd) test for reinit_frame_cache
