@@ -614,7 +614,6 @@ bfd_make_readable(abfd)
   abfd->arch_info = &bfd_default_arch_struct;
 
   abfd->where = 0;
-  abfd->sections = (asection *) NULL;
   abfd->format = bfd_unknown;
   abfd->my_archive = (bfd *) NULL;
   abfd->origin = 0;
@@ -633,7 +632,8 @@ bfd_make_readable(abfd)
   abfd->outsymbols = 0;
   abfd->tdata.any = 0;
 
-  bfd_check_format(abfd, bfd_object);
+  bfd_section_list_clear (abfd);
+  bfd_check_format (abfd, bfd_object);
 
   return true;
 }

@@ -1,5 +1,8 @@
 2002-04-26  Alan Modra  <amodra@bigpond.net.au>
 
+	* opncls.c (bfd_make_readable): Call bfd_section_list_clear.
+	* xcofflink.c (xcoff_link_add_dynamic_symbols): Likewise.
+
 	* elflink.h (elf_bfd_final_link): Ensure input bfd class is the
 	same as the output before calling elf_link_input_bfd.
 
