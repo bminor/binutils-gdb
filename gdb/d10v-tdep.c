@@ -68,7 +68,7 @@ enum
   {
     R0_REGNUM = 0,
     R3_REGNUM = 3,
-    _FP_REGNUM = 11,
+    D10V_FP_REGNUM = 11,
     LR_REGNUM = 13,
     _SP_REGNUM = 15,
     PSW_REGNUM = 16,
@@ -345,7 +345,7 @@ d10v_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if (reg_nr == PC_REGNUM)
     return builtin_type_void_func_ptr;
-  if (reg_nr == _SP_REGNUM || reg_nr == _FP_REGNUM)
+  if (reg_nr == _SP_REGNUM || reg_nr == D10V_FP_REGNUM)
     return builtin_type_void_data_ptr;
   else if (reg_nr >= A0_REGNUM
       && reg_nr < (A0_REGNUM + NR_A_REGS))
@@ -776,7 +776,7 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
       /* The SP was moved to the FP.  This indicates that a new frame
          was created.  Get THIS frame's FP value by unwinding it from
          the next frame.  */
-      frame_unwind_unsigned_register (next_frame, FP_REGNUM, &this_base);
+      frame_unwind_unsigned_register (next_frame, D10V_FP_REGNUM, &this_base);
       /* The FP points at the last saved register.  Adjust the FP back
          to before the first saved register giving the SP.  */
       prev_sp = this_base + info->size;
@@ -952,7 +952,7 @@ d10v_read_sp (void)
 static CORE_ADDR
 d10v_read_fp (void)
 {
-  return (d10v_make_daddr (read_register (FP_REGNUM)));
+  return (d10v_make_daddr (read_register (D10V_FP_REGNUM)));
 }
 
 /* When arguments must be pushed onto the stack, they go on in reverse
@@ -1632,7 +1632,6 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_num_regs (gdbarch, d10v_num_regs);
   set_gdbarch_sp_regnum (gdbarch, 15);
-  set_gdbarch_fp_regnum (gdbarch, 11);
   set_gdbarch_pc_regnum (gdbarch, 18);
   set_gdbarch_register_name (gdbarch, d10v_register_name);
   set_gdbarch_register_size (gdbarch, 2);

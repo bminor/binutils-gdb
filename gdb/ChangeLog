@@ -1,5 +1,9 @@
 2003-03-30  Andrew Cagney  <cagney@redhat.com>
 
+	* d10v-tdep.c: Replace _FP_REGNUM and FP_REGNUM with
+	D10V_FP_REGNUM.
+	(d10v_gdbarch_init): Do not set fp_regnum.
+
 	* frame.c (get_frame_base): Force ID initialization.
 	(get_prev_frame): Move computation of the frame ID from here ...
 	(get_frame_id): ... to here.
