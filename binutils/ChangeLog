@@ -1,3 +1,8 @@
+Wed Dec  8 10:09:04 1993  Ian Lance Taylor  (ian@deneb.cygnus.com)
+
+	* nlmheader.y (nlmheader_identify): New function.  Use it to print
+	the program name just once, instead of with every error message.
+
 Mon Dec  6 16:11:32 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* nlmconv.c (long_options): Changed --header-info to --header-file
