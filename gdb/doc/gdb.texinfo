@@ -2649,16 +2649,16 @@ a check is made to see if the load resoloves any pending breakpoint locations.
 If a pending breakpoint location has been resolved,
 a real breakpoint is created and the original pending breakpoint is removed.
 
-@cindex operations allowed on pending breakpoints 
-Normal breakpoint operations apply to pending breakpoints as well.  You may 
-specify a condition for a pending breakpoint and/or commands to run when the 
+@cindex operations allowed on pending breakpoints
+Normal breakpoint operations apply to pending breakpoints as well.  You may
+specify a condition for a pending breakpoint and/or commands to run when the
 breakpoint is reached.  You can also enable or disable
 the pending breakpoint.  When you specify a condition for a pending breakpoint,
 the parsing of the condition will be deferred until the point where the
 pending breakpoint location is resolved.  Disabling a pending breakpoint
 tells @value{GDBN} to not attempt to resolve the breakpoint on any subsequent
 shared library load.  When a pending breakpoint is re-enabled,
-@value{GDBN} checks to see if the location is already resolved. 
+@value{GDBN} checks to see if the location is already resolved.
 This is done because any number of shared library loads could have
 occurred since the time the breakpoint was disabled and one or more
 of these loads could resolve the location.
@@ -20422,6 +20422,82 @@ encoded).  @value{GDBN} will continue to supply the values of symbols
 (if available), until the target ceases to request them.
 @end table
 
+@item @code{qPart}:@var{object}:@code{read}:@var{annex}:@var{offset},@var{length} --- read special data
+
+Read uninterpreted bytes from the target's special data area
+identified by the keyword @code{object}.
+Request @var{length} bytes starting at @var{offset} bytes into the data.
+The content and encoding of @var{annex} is specific to the object;
+it can supply additional details about what data to access.
+
+Here are the specific requests of this form defined so far.
+All @samp{@code{qPart}:@var{object}:@code{read}:@dots{}}
+requests use the same reply formats, listed below.
+
+@table @asis
+@item @code{qPart}:@code{auxv}:@code{read}::@var{offset},@var{length}
+Access the target's @dfn{auxiliary vector}.  @xref{Auxiliary Vector}.
+Note @var{annex} must be empty.
+@end table
+
+Reply:
+@table @asis
+@item @code{OK}
+The @var{offset} in the request is at the end of the data.
+There is no more data to be read.
+
+@item @var{XX@dots{}}
+Hex encoded data bytes read.
+This may be fewer bytes than the @var{length} in the request.
+
+@item @code{E00}
+The request was malformed, or @var{annex} was invalid.
+
+@item @code{E}@var{nn}
+The offset was invalid, or there was an error encountered reading the data.
+@var{nn} is a hex-encoded @code{errno} value.
+
+@item @code{""} (empty)
+An empty reply indicates the @var{object} or @var{annex} string was not
+recognized by the stub.
+@end table
+
+@item @code{qPart}:@var{object}:@code{write}:@var{annex}:@var{offset}:@var{data@dots{}}
+
+Write uninterpreted bytes into the target's special data area
+identified by the keyword @code{object},
+starting at @var{offset} bytes into the data.
+@var{data@dots{}} is the hex-encoded data to be written.
+The content and encoding of @var{annex} is specific to the object;
+it can supply additional details about what data to access.
+
+No requests of this form are presently in use.  This specification
+serves as a placeholder to document the common format that new
+specific request specifications ought to use.
+
+Reply:
+@table @asis
+@item @var{nn}
+@var{nn} (hex encoded) is the number of bytes written.
+This may be fewer bytes than supplied in the request.
+
+@item @code{E00}
+The request was malformed, or @var{annex} was invalid.
+
+@item @code{E}@var{nn}
+The offset was invalid, or there was an error encountered writing the data.
+@var{nn} is a hex-encoded @code{errno} value.
+
+@item @code{""} (empty)
+An empty reply indicates the @var{object} or @var{annex} string was not
+recognized by the stub, or that the object does not support writing.
+@end table
+
+@item @code{qPart}:@var{object}:@var{operation}:@dots{}
+Requests of this form may be added in the future.  When a stub does
+not recognize the @var{object} keyword, or its support for
+@var{object} does not recognize the @var{operation} keyword,
+the stub must respond with an empty packet.
 @end table
 
 @node Register Packet Format
