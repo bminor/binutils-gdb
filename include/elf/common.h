@@ -82,15 +82,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define EM_MIPS_RS4_BE 10	/* MIPS R4000 big-endian */
 
-#define EM_SPARC64     11	/* SPARC v9 (not official) 64-bit */
-
 #define EM_PARISC      15	/* HPPA */
 
 #define EM_SPARC32PLUS 18	/* Sun's "v8plus" */
 
 #define EM_PPC	       20	/* PowerPC */
 
+#define EM_ARM	       40	/* ARM */
+
 #define EM_SH	       42	/* Hitachi SH */
+
+#define EM_SPARCV9     43	/* SPARC v9 64-bit */
 
 /* If it is necessary to assign new unofficial EM_* values, please pick large
    random numbers (0x8523, 0xa7f2, etc.) to minimize the chances of collision
@@ -102,6 +104,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Cygnus PowerPC ELF backend.  Written in the absence of an ABI.  */
 #define EM_CYGNUS_POWERPC 0x9025
+
+/* Old version of Sparc v9, from before the ABI; this should be
+   removed shortly.  */
+#define EM_OLD_SPARCV9	11
 
 /* Old version of PowerPC, this should be removed shortly. */
 #define EM_PPC_OLD	17
@@ -130,11 +136,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    Written in the absense of an ABI.  */
 #define EM_CYGNUS_MN10200	0xdead
 #define EM_CYGNUS_MN10300	0xbeef
-
-/* start-sanitize-sky */
-/* TXVU backend magic number.  Written in the absence of an ABI.  */
-#define EM_CYGNUS_TXVU	0xedac
-/* end-sanitize-sky */
 
 /* See the above comment before you add a new EM_* value here.  */
 

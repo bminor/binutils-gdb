@@ -1,3 +1,7 @@
+Tue Jun  9 09:35:29 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* common.h (EM_ARM): Add this constant.
+
 start-sanitize-sky
 Wed Jun  3 10:29:47 1998  Doug Evans  <devans@canuck.cygnus.com>
 
