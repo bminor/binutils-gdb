@@ -1,3 +1,11 @@
+Fri Feb 21 06:22:15 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* obj-aout.c: do not include stab.gnu.h if NO_LISTING.
+
+	* tc-i860.c, a.out.gnu.h: move i860 relocs to a proper place.
+
+	* a.out.h: removed.
+
 Fri Feb 21 02:17:22 1992  Minh Tran-Le (TRANLE@INTELLICORP.COM)
 
 	* tc-i386.c: tc-i386.c: added handling of the following opcodes:
