@@ -1790,15 +1790,15 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 	      }
 	    if (new_sa != 0)
 	      {
-		USI sa_handler
+		USI target_sa_handler
 		  = sim_core_read_unaligned_4 (current_cpu, pc, 0, new_sa);
-		USI sa_flags
+		USI target_sa_flags
 		  = sim_core_read_unaligned_4 (current_cpu, pc, 0, new_sa + 4);
-		USI sa_restorer
+		USI target_sa_restorer
 		  = sim_core_read_unaligned_4 (current_cpu, pc, 0, new_sa + 8);
-		USI sa_mask_low
+		USI target_sa_mask_low
 		  = sim_core_read_unaligned_4 (current_cpu, pc, 0, new_sa + 12);
-		USI sa_mask_high
+		USI target_sa_mask_high
 		  = sim_core_read_unaligned_4 (current_cpu, pc, 0, new_sa + 16);
 
 		/* We won't interrupt a syscall so we won't restart it,
@@ -1808,10 +1808,10 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 		   TARGET_SA_RESTORER, so don't look at it.  For the
 		   time being, we don't nest sighandlers, so we
 		   ignore the sa_mask, which simplifies things.  */
-		if ((sa_flags != 0
-		     && sa_flags != TARGET_SA_RESTART
-		     && sa_flags != (TARGET_SA_RESTART|TARGET_SA_SIGINFO))
-		    || sa_handler == 0)
+		if ((target_sa_flags != 0
+		     && target_sa_flags != TARGET_SA_RESTART
+		     && target_sa_flags != (TARGET_SA_RESTART|TARGET_SA_SIGINFO))
+		    || target_sa_handler == 0)
 		  {
 		    sim_io_eprintf (sd, "Unimplemented rt_sigaction "
 				    "syscall (0x%lx, "
@@ -1820,14 +1820,15 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 				    "0x%lx)\n",
 				    (unsigned long) arg1,
 				    (unsigned long) arg2,
-				    sa_handler, sa_flags, sa_restorer,
-				    sa_mask_low, sa_mask_high,
+				    target_sa_handler, target_sa_flags,
+				    target_sa_restorer,
+				    target_sa_mask_low, target_sa_mask_high,
 				    (unsigned long) arg3);
 		    sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped,
 				     SIM_SIGILL);
 		  }
 
-		current_cpu->sighandler[signum] = sa_handler;
+		current_cpu->sighandler[signum] = target_sa_handler;
 
 		/* Because we may have unblocked signals, one may now be
 		   pending, if there are threads, that is.  */

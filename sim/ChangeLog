@@ -1,3 +1,9 @@
+2005-03-24  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris/traps.c (cris_break_13_handler) <case
+	TARGET_SYS_rt_sigaction>: Rename sa_handler, sa_flags,
+	sa_restorer, sa_mask_low, sa_mask_high to target_sa_handler etc.
+
 2005-03-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* cris/configure: Regenerate.
