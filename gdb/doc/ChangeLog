@@ -1,3 +1,8 @@
+Thu Jul 29 13:16:09 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdbint.texinfo: Update statement about `some ancient Unix
+	systems, like Ultrix 4.0' to Ultrix 4.2.
+
 Wed Jul 28 15:26:53 1993  Roland H. Pesch  (pesch@el_bosque.cygnus.com)
 
 	* h8-cfg.texi, all-cfg.texi: new flag GDBSERVER
