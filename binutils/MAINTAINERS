@@ -14,14 +14,18 @@ The home page for binutils is:
 
 and patches should be sent to:
 
-  bug-binutils@gnu.org
+  bug-binutils@gnu.org    or    binutils@sources.redhat.com
   
 with "[Patch]" as part of the subject line.  Note - patches to the
-top level configure.in and config.sub scripts should be sent to:
+top level config.guess and config.sub scripts should be sent to:
 
   config-patches@gnu.org
 
-and not to the binutils list.
+and not to the binutils lists.  Patches to the other top level
+configure files (configure, configure.in, config-if, config-ml.in)
+should be sent to the binutils lists, and copied to the gcc and gdb
+lists as well (gcc-patches@gcc.gnu.org and
+gdb-patches@sources.redhat.com).
 
 		--------- Blanket Write Privs ---------
 

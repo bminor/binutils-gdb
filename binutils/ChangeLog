@@ -1,5 +1,12 @@
 2003-09-04  Nick Clifton  <nickc@redhat.com>
 
+	* MAINTAINERS: Make it clear what should be done with patches to
+	the top level configure files (other than config.guess and
+	config.sub).  Add binutils@sources.redhat.com as an address to
+	which patches can be sent.
+
+2003-09-04  Nick Clifton  <nickc@redhat.com>
+
 	* readelf.c (get_machine_flags): Recognise V850E1 machine type.
 
 2003-09-03  Andrew Cagney  <cagney@redhat.com>
