@@ -1,3 +1,9 @@
+2002-04-14  Andrew Cagney  <ac131313@redhat.com>
+
+	* acinclude.m4 (AM_PROG_CC_STDC): Import from automake 1.6.
+	* aclocal.m4, configure: Re-generate.
+	Fix PR gdb/391.
+	
 2002-04-14  Elena Zannoni  <ezannoni@redhat.com>
 
         * mi/mi-cmd-disas.c (dump_insns): Use TARGET_PRINT_INSN
