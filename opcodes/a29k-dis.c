@@ -136,7 +136,7 @@ print_insn (memaddr, info)
 
   find_byte_func_type find_byte_func = (find_byte_func_type)info->private_data;
 
-  struct a29k_opcode const * opcode;
+  struct a29k_opcode CONST * opcode;
 
   {
     int status =
