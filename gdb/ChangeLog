@@ -1,3 +1,7 @@
+2003-09-15  GDB Administrator  <gdbadmin@sourceware.org>
+
+	* version.in: Bump to version 5.3.92.
+
 2003-09-14  Andrew Cagney  <cagney@redhat.com>
 
 	* config/djgpp/fnchange.lst: Rename "amd64fbsd-tdep.c" and
