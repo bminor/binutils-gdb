@@ -37,6 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "frame.h"
 #include "expression.h"
 #include "language.h"
+#include "value.h"
 #include "parser-defs.h"
 
 /* These MUST be included in any grammar file!!!!
@@ -57,6 +58,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yyexca	m2_exca
 #define yyerrflag m2_errflag
 #define yynerrs	m2_nerrs
+#define	yyps	m2_ps
+#define	yypv	m2_pv
+#define	yys	m2_s
+#define	yystate	m2_state
+#define	yytmp	m2_tmp
+#define	yyv	m2_v
+#define	yyval	m2_val
+#define	yylloc	m2_lloc
 
 /* Forward decl's */
 void yyerror ();
@@ -653,7 +662,6 @@ parse_number (olen)
   register int c,i,ischar=0;
   register int base = input_radix;
   register int len = olen;
-  char *err_copy;
   int unsigned_p = number_sign == 1 ? 1 : 0;
 
   extern double atof ();
