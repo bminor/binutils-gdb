@@ -2149,6 +2149,11 @@ mention (b)
 {
   int say_where = 0;
 
+  /* FIXME: This is misplaced; mention() is called by things (like hitting a
+     watchpoint) other than breakpoint creation.  It should be possible to
+     clean this up and at the same time replace the random calls to
+     breakpoint_changed with this hook, as has already been done for
+     delete_breakpoint_hook and so on.  */
   if (create_breakpoint_hook)
     create_breakpoint_hook (b);
 
@@ -3238,8 +3243,6 @@ delete_breakpoint (bpt)
   if (bpt->source_file != NULL)
     free (bpt->source_file);
 
-  breakpoints_changed ();
-
   /* Be sure no bpstat's are pointing at it after it's been freed.  */
   /* FIXME, how can we find all bpstat's?
      We just check stop_bpstat for now.  */
@@ -3560,7 +3563,6 @@ enable_breakpoint (bpt)
         error ("Hardware breakpoints used exceeds limit.");
     }
   bpt->enable = enabled;
-  breakpoints_changed ();
   check_duplicates (bpt->address);
 
   if (bpt->type == bp_watchpoint || bpt->type == bp_hardware_watchpoint ||
@@ -3657,8 +3659,6 @@ disable_breakpoint (bpt)
     disable_breakpoint_hook (bpt);
 
   bpt->enable = disabled;
-
-  breakpoints_changed ();
 
   check_duplicates (bpt->address);
 }

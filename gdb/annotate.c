@@ -22,6 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "value.h"
 #include "target.h"
 #include "gdbtypes.h"
+#include "breakpoint.h"
 
 static void print_value_flags PARAMS ((struct type *));
 
@@ -519,3 +520,20 @@ annotate_array_section_end ()
     printf_filtered ("\n\032\032array-section-end\n");
 }
 
+static void
+breakpoint_changed (b)
+     struct breakpoint *b;
+{
+  breakpoints_changed ();
+}
+
+void
+_initialize_annotate ()
+{
+  if (annotation_level > 1)
+    {
+      delete_breakpoint_hook = breakpoint_changed;
+      enable_breakpoint_hook = breakpoint_changed;
+      disable_breakpoint_hook = breakpoint_changed;
+    }
+}

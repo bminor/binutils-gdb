@@ -1,3 +1,11 @@
+Mon Aug  1 16:43:24 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* breakpoint.c (mention), main.c (fputs_unfiltered): Add comments.
+	* breakpoint.c (delete_breakpoint, enable_breakpoint,
+	disable_breakpoint): Don't call breakpoints_changed; it is now
+	called via the *_breakpoint_hook functions.
+	* annotate.c (_initialize_annotate, breakpoint_changed): New functions.
+
 Mon Aug  1 13:38:04 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* stabsread.c (read_type): Fix a bug in enum size calculation.
