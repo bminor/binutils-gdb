@@ -1,3 +1,7 @@
+Mon Mar  9 11:59:03 1998  Jim Wilson  <wilson@cygnus.com>
+
+	* sim-fpu.c (NR_GUARDS64): Change NR_PAD32 to NR_PAD64.
+
 Tue Mar  3 10:53:05 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-types.h (SIGNED32, SIGNED64): Pacify GCC.
