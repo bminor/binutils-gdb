@@ -1,3 +1,10 @@
+2003-08-10  Mark Kettenis  <kettenis@gnu.org>
+
+	Based on a patch from Michael Elizabeth Chastain (mec@shout.net):
+	* i386-tdep.c (i386_analyze_frame_setup): Recognize more
+	instructions that GCC likes to mingle into the prologue.  Fixes
+	gdb/1253 and gdb/1255.
+
 2003-08-13  Jeff Johnston  <jjohnstn@redhat.com>
 
 	From 2003-07-24  Jeff Johnston  <jjohnstn@redhat.com>
