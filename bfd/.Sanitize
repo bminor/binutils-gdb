@@ -41,6 +41,7 @@ VERSION
 aix386-core.c
 aout-adobe.c
 aout-encap.c
+aout-ns32k.c
 aout-target.h
 aout0.c
 aout32.c
@@ -163,6 +164,7 @@ liboasys.h
 linker.c
 lynx-core.c
 m68klynx.c
+m88kmach3.c
 makefile.dos
 mipsbsd.c
 newsos3.c
@@ -180,6 +182,7 @@ nlmswap.h
 oasys.c
 opncls.c
 osf-core.c
+pc532-mach.c
 ptrace-core.c
 reloc.c
 reloc16.c

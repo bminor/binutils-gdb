@@ -60,11 +60,14 @@ irix4.h
 lynx.h
 m68klynx.h
 m68kv4.h
+m88kmach3.h
 miniframe.h
 mipsbsd.h
+mipsmach3.h
 news.h
 news-mips.h
 ncr3000.h
+pc532mach.h
 riscos.h
 rs6000.h
 rs6000lynx.h
