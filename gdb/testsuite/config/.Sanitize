@@ -62,6 +62,7 @@ slite.exp
 udi.exp
 unix.exp
 unknown.exp
+vr4300.exp
 vx.exp
 vxworks.exp
 vxworks29k.exp

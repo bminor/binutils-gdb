@@ -53,7 +53,7 @@ proc do_steps_and_nexts {} {
 
     for {set count 0} {$count < 20} {incr count} {
 	send "list\n"
-	expect {
+	gdb_expect {
 	    -re ".*symarg = NULL.*$gdb_prompt $" {
 		set description "step over symarg initialization"
 		set command "step"
@@ -144,7 +144,7 @@ proc do_steps_and_nexts {} {
 	    }
 	}
 	send "$command\n"
-	expect {
+	gdb_expect {
 	    -re ".*No such file or directory.\r\n$gdb_prompt $" {
 		fail "$description (no source available)"
 	    }
@@ -167,6 +167,7 @@ proc test_with_self { executable } {
     global det_file
     global decimal
     global timeout
+    global gdb_spawn_id
 
     # load yourself into the debugger
     # This can take a relatively long time, particularly for testing where
@@ -220,7 +221,7 @@ proc test_with_self { executable } {
 
     set description "run until breakpoint at main"
     send "run -nw\n"
-    expect {
+    gdb_expect {
 	-re "Starting program.*Breakpoint \[0-9\]+,.*main .argc.*argv.* at .*main.c:.*$gdb_prompt $" {
 	    pass "$description"
 	}
@@ -249,7 +250,7 @@ proc test_with_self { executable } {
 
     # do we have a version number ?
     send "print version\n"
-    expect {
+    gdb_expect {
 	-re ".\[0-9\]+ = +0x.*\[0-9.\]+.*$gdb_prompt $" {
 	    pass "printed version"
 	}
@@ -272,7 +273,7 @@ proc test_with_self { executable } {
     setup_xfail "alpha-*-*" "hppa*-*-*" "mips-*-*"
     set description "step into xmalloc call"
     send "step\n"
-    expect {
+    gdb_expect {
 	-re "xmalloc.*size=.*at.*utils.c.*$gdb_prompt $" {
 	    pass "$description"
 	}
@@ -292,7 +293,7 @@ proc test_with_self { executable } {
 
     # start the "xgdb" process
     send "continue\n"
-    expect {
+    gdb_expect {
 	-re "GNU gdb \[0-9\.\]*.*
 Copyright \[0-9\]* Free Software Foundation, Inc.*
 GDB is free software, covered by the GNU General Public License, and you are.*
@@ -312,7 +313,7 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $"\
     
     # set xgdb prompt so we can tell which is which
     send "set prompt (xgdb) \n"
-    expect {
+    gdb_expect {
 	-re "\[(\]xgdb\[)\].*\[(\]xgdb\[)\] $"	{ pass "Set xgdb prompt" }
 	-re ".*$gdb_prompt $"		{ fail "Set xgdb prompt" }
 	default				{ fail "(timeout) Set xgdb prompt" }
@@ -321,7 +322,7 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $"\
     # kill the xgdb process
     set description "send ^C to child process"
     send "\003"
-    expect {
+    gdb_expect {
 	-re "Program received signal SIGINT.*$gdb_prompt $" {
 	    pass "$description"
 	}
@@ -335,7 +336,7 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $"\
     
     set description "send SIGINT signal to child process"
     send "signal SIGINT\n"
-    expect {
+    gdb_expect {
 	-re "Continuing with signal SIGINT.*$gdb_prompt $" {
 	    pass "$description"
 	}
@@ -355,7 +356,7 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $"\
     setup_xfail "i*86-pc-linuxaout-gnu" "hppa*-*-hpux*"
     set description "backtrace through signal handler"
     send "backtrace\n"
-    expect {
+    gdb_expect {
 	-re "#0.*read.*in main \\(.*\\) at .*main\\.c.*$gdb_prompt $" {
 	    pass "$description"
 	}

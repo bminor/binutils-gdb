@@ -43,7 +43,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 proc bitfield_uniqueness {} {
     global decimal
     global hex
-    global prompt
+    global gdb_prompt
     global srcfile
 
     if [gdb_test "break break1" "Break.* at $hex: file .*$srcfile, line $decimal\\."] {
@@ -51,8 +51,8 @@ proc bitfield_uniqueness {} {
     }
 
     gdb_run_cmd
-    expect {
-	-re "Break.*break1 \\(\\) at .*$srcfile:$decimal.*$prompt $" {
+    gdb_expect {
+	-re "Break.*break1 \\(\\) at .*$srcfile:$decimal.*$gdb_prompt $" {
 	    pass "running to break1"
 	}
 	timeout { fail "(timeout) running to break1"; return }
@@ -131,7 +131,7 @@ proc bitfield_uniqueness {} {
 proc bitfield_containment {} {
     global decimal
     global hex
-    global prompt
+    global gdb_prompt
     global srcfile
 
     delete_breakpoints
@@ -141,8 +141,8 @@ proc bitfield_containment {} {
     }
 
     gdb_run_cmd
-    expect {
-	-re "Break.*break2 \\(\\) at .*$srcfile:$decimal.*$prompt $" {
+    gdb_expect {
+	-re "Break.*break2 \\(\\) at .*$srcfile:$decimal.*$gdb_prompt $" {
 	    pass "running to break2"
 	}
 	timeout { fail "(timeout) running to break2"; return }
@@ -171,7 +171,7 @@ proc bitfield_containment {} {
 proc bitfield_unsignedness {} {
     global decimal
     global hex
-    global prompt
+    global gdb_prompt
     global srcfile
 
     delete_breakpoints
@@ -181,8 +181,8 @@ proc bitfield_unsignedness {} {
     }
 
     gdb_run_cmd
-    expect {
-	-re "Break.*break3 \\(\\) at .*$srcfile:$decimal.*$prompt $" {
+    gdb_expect {
+	-re "Break.*break3 \\(\\) at .*$srcfile:$decimal.*$gdb_prompt $" {
 	    pass "running to break3"
 	}
 	timeout { fail "(timeout) running to break3"; return }
@@ -203,7 +203,7 @@ proc bitfield_unsignedness {} {
 proc bitfield_signedness {} {
     global decimal
     global hex
-    global prompt
+    global gdb_prompt
     global srcfile
 
     delete_breakpoints
@@ -213,8 +213,8 @@ proc bitfield_signedness {} {
     }
 
     gdb_run_cmd
-    expect {
-	-re "Break.*break4 \\(\\) at .*$srcfile:$decimal.*$prompt $" {
+    gdb_expect {
+	-re "Break.*break4 \\(\\) at .*$srcfile:$decimal.*$gdb_prompt $" {
 	    pass "running to break4"
 	}
 	timeout { fail "(timeout) running to break4"; return }
@@ -231,15 +231,15 @@ proc bitfield_signedness {} {
     # Determine if the target has signed bitfields so we can xfail the
     # the signed bitfield tests if it doesn't.
     send_gdb "print i\n"
-    expect {
-	-re ".* = -256.*$prompt $" {
+    gdb_expect {
+	-re ".* = -256.*$gdb_prompt $" {
 	    pass "determining signed-ness of bitfields"
 	}
-	-re ".* = 256.*$prompt $" {
+	-re ".* = 256.*$gdb_prompt $" {
 	    pass "determining signed-ness of bitfields"
 	    setup_xfail "*-*-*"
 	}
-	-re ".*$prompt $" {
+	-re ".*$gdb_prompt $" {
 	    fail "determining signed-ness of bitfields"
 	    return
 	}
@@ -263,7 +263,7 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-send_gdb "set print sevenbit-strings\n" ; expect -re "$prompt $"
+send_gdb "set print sevenbit-strings\n" ; gdb_expect -re "$gdb_prompt $"
 bitfield_uniqueness
 if [istarget "mips-idt-*"] then {
     # Restart because IDT/SIM runs out of file descriptors.

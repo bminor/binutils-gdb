@@ -33,13 +33,13 @@ proc set_lang_chill {} {
     global gdb_prompt
 
     send_gdb "set language chill\n"
-    expect {
+    gdb_expect {
 	-re ".*$gdb_prompt $" {}
 	timeout { fail "set language chill (timeout)" ; return 0 }
     }
 
     send_gdb "show language\n"
-    expect {
+    gdb_expect {
 	-re ".* source language is \"chill\".*$gdb_prompt $" {
 	    pass "set language to \"chill\""
 	    return 1

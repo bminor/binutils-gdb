@@ -45,7 +45,7 @@ proc set_lang_chill {} {
     gdb_load $binfile
 
     send_gdb "set language chill\n"
-    expect {
+    gdb_expect {
 	-re ".*$gdb_prompt $" {}
 	timeout { fail "set language chill (timeout)" ; return 0 }
     }
@@ -69,7 +69,7 @@ if ![set_lang_chill] then {
     runto hugo_
 
     send_gdb "set var \$i := d\n"
-    expect -re ".*$gdb_prompt $"
+    gdb_expect -re ".*$gdb_prompt $"
     gdb_test "print \$i" { = d}
     gdb_test "print size (\$i)" { = 1}
     gdb_test "print b+c" { = 3}

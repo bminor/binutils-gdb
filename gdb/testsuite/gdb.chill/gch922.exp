@@ -47,20 +47,20 @@ proc set_lang_chill {} {
     verbose "loading file '$binfile'"
     gdb_load $binfile
     send_gdb "set language chill\n"
-    expect {
+    gdb_expect {
 	-re ".*$gdb_prompt $" {}
 	timeout { fail "set language chill (timeout)" ; return 0 }
     }
 
     send_gdb "show language\n"
-    expect {
+    gdb_expect {
 	-re ".* source language is \"chill\".*$gdb_prompt $" {
 	    pass "set language to \"chill\""
 	    send_gdb "break xx_\n"
-	    expect {
+	    gdb_expect {
 		-re ".*$gdb_prompt $" {
 		    send_gdb "run\n" 
-		    expect -re ".*$gdb_prompt $" {}
+		    gdb_expect -re ".*$gdb_prompt $" {}
 		    return 1
 		}
 		timeout {
@@ -125,11 +125,11 @@ proc test_chars {} {
     gdb_test "set var a := (100)'\^(0,255)' ""
     test_print_accept "print a" {"\^\(0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255,0,255\)"}
 
-    send_gdb "set var a := (10)'\^(1)'//(26)\"\^(66,67)\"//\" \"//'I'//' '//'a'//'m'//\" Hugo\" \n" ; expect -re "$gdb_prompt $"
+    send_gdb "set var a := (10)'\^(1)'//(26)\"\^(66,67)\"//\" \"//'I'//' '//'a'//'m'//\" Hugo\" \n" ; gdb_expect -re "$gdb_prompt $"
     test_print_accept "print a" {"\^\(1,1,1,1,1,1,1,1,1,1\)BCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBC I am Hugo"}
-    send_gdb "set var b := \"Hugo \"\"\^(3,4)\"\"Otto\^(17)\" \n" ; expect -re "$gdb_prompt $"
+    send_gdb "set var b := \"Hugo \"\"\^(3,4)\"\"Otto\^(17)\" \n" ; gdb_expect -re "$gdb_prompt $"
     test_print_accept "print b" {"Hugo ""\^\(3,4\)""Otto\^\(17\)"}
-    send_gdb "set var c := (70)'b' // \"\^(2,3)Hugo \" // (70)'c' \n" ; expect -re "$gdb_prompt $"
+    send_gdb "set var c := (70)'b' // \"\^(2,3)Hugo \" // (70)'c' \n" ; gdb_expect -re "$gdb_prompt $"
     test_print_accept "print c" {'b'<repeats 70 times>//"\^\(2,3\)Hugo "//'c'<repeats 70 times>}
     gdb_test "set var d := '\^(199)' ""
     test_print_accept "print d" {'\^\(199\)'}
@@ -137,15 +137,15 @@ proc test_chars {} {
     test_print_accept "print (10)'\^(0)'//(26)\"\^(66,67)\"//\" \"//'I'//' '//'a'//'m'//\" Hugo\"" {"\^\(0,0,0,0,0,0,0,0,0,0\)BCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBCBC I am Hugo"}
     test_print_accept "print \"Jason\"\"\^(0,5)\"\"Hugo\^(10)\"" {"Jason""\^\(0,5\)""Hugo\^\(10\)"}
 
-    send_gdb "set var a := \"\" \n" ; expect -re "$gdb_prompt $"
+    send_gdb "set var a := \"\" \n" ; gdb_expect -re "$gdb_prompt $"
     test_print_accept "print a" {""}
-    send_gdb "set var a := \"\"\"\" \n" ; expect -re "$gdb_prompt $"
+    send_gdb "set var a := \"\"\"\" \n" ; gdb_expect -re "$gdb_prompt $"
     test_print_accept "print a" {""""}
-    send_gdb "set var a := \" \"\"\" \n" ; expect -re "$gdb_prompt $"
+    send_gdb "set var a := \" \"\"\" \n" ; gdb_expect -re "$gdb_prompt $"
     test_print_accept "print a" {" """}
-    send_gdb "set var a := \"\^\^\" \n" ; expect -re "$gdb_prompt $"
+    send_gdb "set var a := \"\^\^\" \n" ; gdb_expect -re "$gdb_prompt $"
     test_print_accept "print a" {"\^\^"}
-    send_gdb "set var a := \"'\" \n" ; expect -re "$gdb_prompt $"
+    send_gdb "set var a := \"'\" \n" ; gdb_expect -re "$gdb_prompt $"
     test_print_accept "print a" {"'"}
 }
 

@@ -49,8 +49,8 @@ proc do_tests {} {
     send_gdb "set language chill\n" ; 
 
     gdb_test "break pr-5984.ch:6 ""
-    send_gdb "run\n"; expect -re "Breakpoint .*pr-5984.ch:6"
-    expect -re "$gdb_prompt $"
+    send_gdb "run\n"; gdb_expect -re "Breakpoint .*pr-5984.ch:6"
+    gdb_expect -re "$gdb_prompt $"
     gdb_test "next" "Jason Dark.*" "next over Jason Dark"
 }
 

@@ -42,7 +42,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 proc gdbvar_simple_if_test {} {
-    global prompt
+    global gdb_prompt
 
     gdb_test "set \$foo = 0" "" "set foo in gdbvar_simple_if_test"
     # All this test should do is print 0xdeadbeef once.
@@ -52,7 +52,7 @@ proc gdbvar_simple_if_test {} {
 }
 
 proc gdbvar_simple_while_test {} {
-    global prompt
+    global gdb_prompt
 
     gdb_test "set \$foo = 5" "" "set foo in gdbvar_simple_while_test"
     # This test should print 0xfeedface five times.
@@ -60,7 +60,7 @@ proc gdbvar_simple_while_test {} {
 }
 
 proc gdbvar_complex_if_while_test {} {
-    global prompt
+    global gdb_prompt
 
     gdb_test "set \$foo = 4" "" "set foo in gdbvar complex_if_while_test"
     # This test should alternate between 0xdeadbeef and 0xfeedface two times.
@@ -68,7 +68,7 @@ proc gdbvar_complex_if_while_test {} {
 }
 
 proc progvar_simple_if_test {} {
-    global prompt
+    global gdb_prompt
 
     if [target_info exists gdb,noargs] { 
         verbose "Skipping progvar_simple_if_test because of noargs."
@@ -84,7 +84,7 @@ proc progvar_simple_if_test {} {
 }
 
 proc progvar_simple_while_test {} {
-    global prompt
+    global gdb_prompt
 
     if [target_info exists gdb,noargs] { 
         verbose "Skipping progvar_simple_while_test because of noargs."
@@ -98,7 +98,7 @@ proc progvar_simple_while_test {} {
 }
 
 proc progvar_complex_if_while_test {} {
-    global prompt
+    global gdb_prompt
 
     if [target_info exists gdb,noargs] { 
         verbose "Skipping progvar_simple_if_while_test because of noargs."
@@ -123,7 +123,7 @@ proc if_while_breakpoint_command_test {} {
     gdb_test "break factorial" "Breakpoint.*at.*"
 
     send_gdb "commands\n"
-    expect {
+    gdb_expect {
 	-re "End with" {
 	    pass "commands in if_while_breakpoint_command_test"
 	}
@@ -184,12 +184,12 @@ proc breakpoint_command_test {} {
 
 # Test a simple user defined command (with arguments)
 proc user_defined_command_test {} {
-    global prompt
+    global gdb_prompt
 
     gdb_test "set \$foo = 4" "" "set foo in user_defined_command_test"
 
     send_gdb "define mycommand\n"
-    expect {
+    gdb_expect {
 	-re "End with"  {
 	    pass "define mycommand in user_defined_command_test"
 	}

@@ -1,3 +1,11 @@
+Sun Feb 23 19:56:02 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/vr4300.exp: New file.
+
+	* gdb.*/*.exp: Call gdb_expect instead of expect.
+	
+	* lib/gdb.exp(gdb_expect): New function.
+
 Thu Feb 20 13:57:01 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* lib/gdb.exp(gdb_init): New function.

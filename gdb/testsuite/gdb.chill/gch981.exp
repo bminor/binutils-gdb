@@ -47,20 +47,20 @@ proc set_lang_chill {} {
     verbose "loading file '$binfile'"
     gdb_load $binfile
     send_gdb "set language chill\n"
-    expect {
+    gdb_expect {
 	-re ".*$gdb_prompt $" {}
 	timeout { fail "set language chill (timeout)" ; return 0 }
     }
 
     send_gdb "show language\n"
-    expect {
+    gdb_expect {
 	-re ".* source language is \"chill\".*$gdb_prompt $" {
 	    pass "set language to \"chill\""
 	    send_gdb "break xx_\n"
-	    expect {
+	    gdb_expect {
 		-re ".*$gdb_prompt $" {
 		    send_gdb "run\n" 
-		    expect -re ".*$gdb_prompt $" {}
+		    gdb_expect -re ".*$gdb_prompt $" {}
 		    return 1
 		}
 		timeout {
@@ -121,7 +121,7 @@ proc test_power {} {
     test_print_accept "print SIZE(v1_power1)" "1"
 
     gdb_test "set v1_power1 := \[b1\]  ""
-#   if GDB has rejected the improper values, we have to expect the same!
+#   if GDB has rejected the improper values, we have to gdb_expect the same!
     test_print_accept "print v1_power1" {\[e1:e5\]}
 
     gdb_test "set v1_power1 := \[a1,a2\]  ""
@@ -171,7 +171,7 @@ proc test_power {} {
     gdb_test "set v_power3 := \[b5:b7, b1\]  ""
     test_print_accept "print v_power3" {\[b1, b5:b7\]}
 
-    send_gdb "set v_power4 := \[\"b\"\] \n" ; expect -re "$gdb_prompt $"
+    send_gdb "set v_power4 := \[\"b\"\] \n" ; gdb_expect -re "$gdb_prompt $"
     test_print_accept "print v_power4" {\['b':'x'\]}
     gdb_test "set v_power4 := \[5\]  ""
     test_print_accept "print v_power4" {\['b':'x'\]}

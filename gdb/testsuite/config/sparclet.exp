@@ -47,9 +47,9 @@ proc gdb_start { } {
 
     if [target_info exists baud] {
 	send_gdb "set remotebaud [target_info baud]\n"
-	expect {
-	    -i $gdb_spawn_id -re ".*$gdb_prompt" { }
-	    -i $gdb_spawn_id default { 
+	gdb_expect {
+	     -re ".*$gdb_prompt" { }
+	     default { 
 		perror "Error setting baud rate."
 		return -1;
 	    }
@@ -74,31 +74,31 @@ proc gdb_sparclet_startup { } {
     set is_running_stub 0;
 
     send_gdb "target sparclet [target_info serial]\n";
-    expect {
-	-i $gdb_spawn_id -re ".*already.*y or n." {
+    gdb_expect {
+	 -re ".*already.*y or n." {
 	    gdb_send "y\n";
 	    exp_continue;
 	}
-	-i $gdb_spawn_id -re "Remote target.*connected to.*$gdb_prompt" { }
-	-i $gdb_spawn_id timeout {
+	 -re "Remote target.*connected to.*$gdb_prompt" { }
+	 timeout {
 	    verbose "timed out, checking if stub is already running"
 	    set timeout 10
 	    send_gdb "\003";
-	    expect {
-		-i $gdb_spawn_id -re ".*$gdb_prompt" {
+	    gdb_expect {
+		 -re ".*$gdb_prompt" {
 		}
-		-i $gdb_spawn_id default {
+		 default {
 		    perror "sparclet board isn't responding";
 		    return -1;
 		}
 	    }
 	    send_gdb "target remote [target_info gdb_serial]\n";
-	    expect {
-		-i $gdb_spawn_id -re ".*Remote debugging.*$gdb_prompt" {
+	    gdb_expect {
+		 -re ".*Remote debugging.*$gdb_prompt" {
 		    verbose "stub is already running"
 		    set is_running_stub 1;
 		}
-		-i $gdb_spawn_id default {
+		 default {
 		    perror "sparclet board isn't responding";
 		    return -1;
 		}
@@ -114,27 +114,27 @@ proc gdb_sparclet_startup { } {
 	}
 	set loader "loader";
 	send_gdb "file $loader\n";
-	expect {
-	    -i $gdb_spawn_id -re "A program is being debug.*Kill it.*y or n. $" {
+	gdb_expect {
+	     -re "A program is being debug.*Kill it.*y or n. $" {
 		send_gdb "y\n"
 		exp_continue
 	    }
-	    -i $gdb_spawn_id -re "Load new symbol table.*y or n. $" {
+	     -re "Load new symbol table.*y or n. $" {
 		send_gdb "y\n"
 		exp_continue
 	    }
-	    -i $gdb_spawn_id -re "Reading symbols from.*done..*$gdb_prompt $" {}
-	    -i $gdb_spawn_id -re "$gdb_prompt $" { perror "GDB couldn't find loader" }
-	    -i $gdb_spawn_id timeout { 
+	     -re "Reading symbols from.*done..*$gdb_prompt $" {}
+	     -re "$gdb_prompt $" { perror "GDB couldn't find loader" }
+	     timeout { 
 		perror "(timeout) read symbol file" ; 
 		return -1
 	    }
 	}
 
 	send_gdb "target [target_info gdb_protocol] [target_info serial]\n";
-	expect {
-	    -i $gdb_spawn_id -re "Remote target.*connected to.*$gdb_prompt" { }
-	    -i $gdb_spawn_id default {
+	gdb_expect {
+	     -re "Remote target.*connected to.*$gdb_prompt" { }
+	     default {
 		perror "Error reconnecting to sparclet.";
 		return -1;
 	    }
@@ -144,18 +144,18 @@ proc gdb_sparclet_startup { } {
 	verbose "Loading $loader into $GDB" 2
 	set timeout 1200
 	verbose "Timeout is now $timeout seconds" 2
-	expect {
-	    -i $gdb_spawn_id -re "Loading.*$gdb_prompt $" {
+	gdb_expect {
+	     -re "Loading.*$gdb_prompt $" {
 		verbose "Loaded $loader into $GDB" 1
 		set timeout 60
 		verbose "Timeout is now $timeout seconds" 2
 	    }
-	    -i $gdb_spawn_id -re "$gdb_prompt $"     {
+	     -re "$gdb_prompt $"     {
 		if $verbose>1 then {
 		    perror "GDB couldn't load."
 		}
 	    }
-	    -i $gdb_spawn_id timeout {
+	     timeout {
 		if $verbose>1 then {
 		    perror "Timed out trying to load $arg."
 		}
@@ -163,23 +163,23 @@ proc gdb_sparclet_startup { } {
 	}
 
 	send_gdb "run\n";
-	expect {
-	    -i $gdb_spawn_id -re "A program is being debug.*Kill it.*y or n. $" {
+	gdb_expect {
+	     -re "A program is being debug.*Kill it.*y or n. $" {
 		send_gdb "y\n"
 		exp_continue
 	    }
-	    -i $gdb_spawn_id -re "The program being debugged .*y or n. $" {
+	     -re "The program being debugged .*y or n. $" {
 		send_gdb "y\n"
 		exp_continue
 	    }
-	    -i $gdb_spawn_id -re ".*Starting program:.*loader.*$" { 
+	     -re ".*Starting program:.*loader.*$" { 
 		verbose "Starting loader succeeded" 
 	    }
-	    -i $gdb_spawn_id timeout { 
+	     timeout { 
 		perror "(timeout) starting the loader" ; 
 		return -1 
 	    }
-	    -i $gdb_spawn_id default {
+	     default {
 		perror "error starting the loader";
 	    }
 	}
@@ -188,19 +188,19 @@ proc gdb_sparclet_startup { } {
 	sleep 1;
 	send_gdb ""
 	verbose "Sent ^C^C"
-	expect {
-	    -i $gdb_spawn_id -re ".*Give up .and stop debugging it.*$" {
+	gdb_expect {
+	     -re ".*Give up .and stop debugging it.*$" {
 		send_gdb "y\n"
 		exp_continue
 	    }
-	    -i $gdb_spawn_id -re ".*$gdb_prompt $" { 
+	     -re ".*$gdb_prompt $" { 
 		verbose "Running loader succeeded" 
 	    }
-	    -i $gdb_spawn_id timeout { 
+	     timeout { 
 		perror "(timeout) interrupting the loader" ;
 		return -1 
 	    }
-	    -i $gdb_spawn_id default {
+	     default {
 		perror "error interrupting the loader";
 	    }
 	}
@@ -217,16 +217,16 @@ proc gdb_run_cmd { args } {
 
     gdb_breakpoint exit;
     send_gdb "set \$fp=0\n";
-    expect {
-	-i $gdb_spawn_id -re ".*$gdb_prompt" { }
+    gdb_expect {
+	 -re ".*$gdb_prompt" { }
     }
     send_gdb "jump start\n";
-    expect {
-	-i $gdb_spawn_id -re ".*y or n. $" {
+    gdb_expect {
+	 -re ".*y or n. $" {
 	    send_gdb "y\n"
 	}
-	-i $gdb_spawn_id -re "Continuing at.*\[\r\n\]" { }
-	-i $gdb_spawn_id default {
+	 -re "Continuing at.*\[\r\n\]" { }
+	 default {
 	    return "failed"
 	}
     }
@@ -258,18 +258,18 @@ proc gdb_load { arg } {
     }
 
     send_gdb "file $arg\n"
-    expect {
-	-i $gdb_spawn_id -re "A program is being debug.*Kill it.*y or n. $" {
+    gdb_expect {
+	 -re "A program is being debug.*Kill it.*y or n. $" {
 	    send_gdb "y\n"
 	    exp_continue
 	}
-        -i $gdb_spawn_id -re "Load new symbol table.*y or n. $" {
+         -re "Load new symbol table.*y or n. $" {
 	    send_gdb "y\n"
 	    exp_continue
 	}
-	-i $gdb_spawn_id -re "Reading symbols from.*done..*$gdb_prompt $" {}
-	-i $gdb_spawn_id -re "$gdb_prompt $" { perror "GDB couldn't read file" }
-	-i $gdb_spawn_id timeout { 
+	 -re "Reading symbols from.*done..*$gdb_prompt $" {}
+	 -re "$gdb_prompt $" { perror "GDB couldn't read file" }
+	 timeout { 
 	    perror "(timeout) read symbol file" ; 
 	    return -1 
 	}
@@ -277,15 +277,15 @@ proc gdb_load { arg } {
 
     if [target_info exists gdb_serial] {
 	send_gdb "target remote [target_info gdb_serial]\n"
-	expect {
-	    -i $gdb_spawn_id -re ".*Kill it?.*y or n.*" {
+	gdb_expect {
+	     -re ".*Kill it?.*y or n.*" {
 		send_gdb "y\n";
 		exp_continue
 	    }
-	    -i $gdb_spawn_id -re ".*$gdb_prompt $"	{
+	     -re ".*$gdb_prompt $"	{
 		verbose "Set remote target to [target_info serial]" 2
 	    }
-	    -i $gdb_spawn_id timeout { 
+	     timeout { 
 		set timeout 10
 		verbose "Timeout is now $timeout seconds" 2
 		perror "Couldn't set remote target."
@@ -302,27 +302,27 @@ proc gdb_load { arg } {
     verbose "Loading $arg into $GDB" 2
     set timeout 1200
     verbose "Timeout is now $timeout seconds" 2
-    expect {
-	-i $gdb_spawn_id -re "Loading.*$gdb_prompt $" {
+    gdb_expect {
+	 -re "Loading.*$gdb_prompt $" {
 	    verbose "Loaded $arg into $GDB" 1
 	    set timeout 60
 	    verbose "Timeout is now $timeout seconds" 2
 	}
-	-i $gdb_spawn_id -re "$gdb_prompt $"     {
+	 -re "$gdb_prompt $"     {
 	    if $verbose>1 then {
 		perror "GDB couldn't load."
 	    }
 	}
-	-i $gdb_spawn_id timeout {
+	 timeout {
 	    if $verbose>1 then {
 		perror "Timed out trying to load $arg."
 	    }
 	}
     }
     send_gdb "list main\n";
-    expect {
-	-i $gdb_spawn_id -re ".*$gdb_prompt" { }
-	-i $gdb_spawn_id default {
+    gdb_expect {
+	 -re ".*$gdb_prompt" { }
+	 default {
 	    perror "command for list main never completed";
 	    return -1;
 	}

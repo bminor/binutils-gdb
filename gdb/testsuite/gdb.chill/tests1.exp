@@ -43,20 +43,20 @@ proc set_lang_chill {} {
     verbose "loading file '$binfile'"
     gdb_load $binfile
     send_gdb "set language chill\n"
-    expect {
+    gdb_expect {
 	-re ".*$gdb_prompt $" {}
 	timeout { fail "set language chill (timeout)" ; return 0 }
     }
 
     send_gdb "show language\n"
-    expect {
+    gdb_expect {
 	-re ".* source language is \"chill\".*$gdb_prompt $" {
 	    pass "set language to \"chill\""
 	    send_gdb "break dummyfunc\n"
-	    expect {
+	    gdb_expect {
 		-re ".*$gdb_prompt $" {
 		    send_gdb "run\n" 
-		    expect -re ".*$gdb_prompt $" {}
+		    gdb_expect -re ".*$gdb_prompt $" {}
 		    return 1
 		}
 		timeout {

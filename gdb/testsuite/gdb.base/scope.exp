@@ -547,7 +547,7 @@ gdb_test "print 'scope0.c'::filelocal_ro" "= 201"
 # is responsible for clearing bss and that hasnt' happened yet.
 setup_xfail "hppa*-*-*pro*"
 send_gdb "print 'scope0.c'::filelocal_bss\n"
-expect {
+gdb_expect {
     -re " = 0\r\n$gdb_prompt $" {
 	pass "print 'scope0.c'::filelocal_bss before run"
     }

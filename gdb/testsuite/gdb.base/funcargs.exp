@@ -45,7 +45,7 @@ if [get_compiler_info ${binfile}] {
 #
 
 proc integral_args {} {
-    global prompt
+    global gdb_prompt
     global det_file
     global gcc_compiled
     global gdb_spawn_id
@@ -64,12 +64,12 @@ proc integral_args {} {
     setup_xfail "a29k-*-udi"
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     gdb_run_cmd
-    expect {
-	-i $gdb_spawn_id -re ".* call0a \\(c=97 'a', s=1, i=2, l=3\\) .*$prompt $" {
+    gdb_expect {
+	 -re ".* call0a \\(c=97 'a', s=1, i=2, l=3\\) .*$gdb_prompt $" {
 	    pass "run to call0a"
 	}
-	-i $gdb_spawn_id -re "$prompt $"  { fail "run to call0a" ; return }
-	-i $gdb_spawn_id timeout { fail "(timeout) run to call0a" ; return }
+	 -re "$gdb_prompt $"  { fail "run to call0a" ; return }
+	 timeout { fail "(timeout) run to call0a" ; return }
     }
 
     # Print each arg as a double check to see if we can print
@@ -105,7 +105,7 @@ proc integral_args {} {
 #
 
 proc unsigned_integral_args {} {
-    global prompt
+    global gdb_prompt
     global det_file
     global gcc_compiled
     global gdb_spawn_id
@@ -124,12 +124,12 @@ proc unsigned_integral_args {} {
     setup_xfail "a29k-*-udi"
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     gdb_run_cmd
-    expect {
-	-i $gdb_spawn_id -re ".* call1a \\(uc=98 'b', us=6, ui=7, ul=8\\) .*$prompt $" {
+    gdb_expect {
+	 -re ".* call1a \\(uc=98 'b', us=6, ui=7, ul=8\\) .*$gdb_prompt $" {
 	    pass "run to call1a"
 	}
-	-i $gdb_spawn_id -re "$prompt $" { fail "run to call1a" ; return }
-	-i $gdb_spawn_id timeout { fail "(timeout) run to call1a" ; return }
+	 -re "$gdb_prompt $" { fail "run to call1a" ; return }
+	 timeout { fail "(timeout) run to call1a" ; return }
     }
 
     # Print each arg as a double check to see if we can print
@@ -165,7 +165,7 @@ proc unsigned_integral_args {} {
 #
 
 proc float_and_integral_args {} {
-    global prompt
+    global gdb_prompt
     global det_file
     global gcc_compiled
     global gdb_spawn_id
@@ -189,10 +189,10 @@ proc float_and_integral_args {} {
     setup_xfail "a29k-*-udi"
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" "mips-sgi-irix5*" }
     gdb_run_cmd
-    expect {
-	-i $gdb_spawn_id -re ".* call2a \\(c=97 'a', f1=4, s=1, d1=5, i=2, f2=4, l=3, d2=5\\) .*$prompt $" { pass "run to call2a" }
-	-i $gdb_spawn_id -re "$prompt $" { fail "run to call2a" ; return }
-	-i $gdb_spawn_id timeout { fail "(timeout) run to call2a" ; return }
+    gdb_expect {
+	 -re ".* call2a \\(c=97 'a', f1=4, s=1, d1=5, i=2, f2=4, l=3, d2=5\\) .*$gdb_prompt $" { pass "run to call2a" }
+	 -re "$gdb_prompt $" { fail "run to call2a" ; return }
+	 timeout { fail "(timeout) run to call2a" ; return }
     }
 
     # Print each arg as a double check to see if we can print
@@ -258,7 +258,7 @@ proc float_and_integral_args {} {
 #
 
 proc pointer_args {} {
-    global prompt
+    global gdb_prompt
     global hex
     global det_file
     global gdb_spawn_id
@@ -276,10 +276,10 @@ proc pointer_args {} {
     # code is broken.
     setup_xfail "a29k-*-udi"
     gdb_run_cmd
-    expect {
-	-i $gdb_spawn_id -re ".* call3a \\(cp=$hex \"a\", sp=$hex, ip=$hex, lp=$hex\\) .*$prompt $" { pass "run to call3a" }
-	-i $gdb_spawn_id -re "$prompt $" { fail "run to call3a" ; return }
-	-i $gdb_spawn_id timeout { fail "(timeout) run to call3a" ; return }
+    gdb_expect {
+	 -re ".* call3a \\(cp=$hex \"a\", sp=$hex, ip=$hex, lp=$hex\\) .*$gdb_prompt $" { pass "run to call3a" }
+	 -re "$gdb_prompt $" { fail "run to call3a" ; return }
+	 timeout { fail "(timeout) run to call3a" ; return }
     }
 
     gdb_test "print *cp" ".* = 97 'a'"
@@ -315,7 +315,7 @@ proc pointer_args {} {
 #
 
 proc structs_by_reference {} {
-    global prompt
+    global gdb_prompt
     global hex
     global det_file
     global gdb_spawn_id
@@ -332,12 +332,12 @@ proc structs_by_reference {} {
     # code is broken.
     setup_xfail "a29k-*-udi"
     gdb_run_cmd
-    expect {
-	-i $gdb_spawn_id -re ".* call4a \\(stp=$hex\\) .*$prompt $" {
+    gdb_expect {
+	 -re ".* call4a \\(stp=$hex\\) .*$gdb_prompt $" {
 	    pass "run to call4a"
 	}
-	-i $gdb_spawn_id -re "$prompt $" { fail "run to call4a" ; return }
-	-i $gdb_spawn_id timeout { fail "(timeout) run to call4a" ; return }
+	 -re "$gdb_prompt $" { fail "run to call4a" ; return }
+	 timeout { fail "(timeout) run to call4a" ; return }
     }
 
     gdb_test "print *stp" ".* = \{s1 = 101, s2 = 102\}"
@@ -359,7 +359,7 @@ proc structs_by_reference {} {
 #
 
 proc structs_by_value {} {
-    global prompt
+    global gdb_prompt
     global hex
     global det_file
     global gdb_spawn_id
@@ -376,12 +376,12 @@ proc structs_by_value {} {
     # code is broken.
     setup_xfail "a29k-*-udi"
     gdb_run_cmd
-    expect {
-	-i $gdb_spawn_id -re ".* call5a \\(st=\{s1 = 101, s2 = 102\}\\) .*$prompt $" {
+    gdb_expect {
+	 -re ".* call5a \\(st=\{s1 = 101, s2 = 102\}\\) .*$gdb_prompt $" {
 	    pass "run to call5a"
 	}
-	-i $gdb_spawn_id -re "$prompt $" { fail "run to call5a" ; return }
-	-i $gdb_spawn_id timeout { fail "(timeout) run to call5a" ; return }
+	 -re "$gdb_prompt $" { fail "run to call5a" ; return }
+	 timeout { fail "(timeout) run to call5a" ; return }
     }
 
     gdb_test "print st" ".* = \{s1 = 101, s2 = 102\}"
@@ -403,7 +403,7 @@ proc structs_by_value {} {
 #
 
 proc discard_and_shuffle {} {
-    global prompt
+    global gdb_prompt
     global hex
     global decimal
     global det_file
@@ -428,10 +428,10 @@ proc discard_and_shuffle {} {
     # code is broken.
     setup_xfail "a29k-*-udi"
     gdb_run_cmd
-    expect {
-	-i $gdb_spawn_id -re ".*Breakpoint $decimal, call6a .*$prompt $" { pass "run to call6a" }
-	-i $gdb_spawn_id -re "$prompt $" { fail "run to call6a" ; return }
-	-i $gdb_spawn_id timeout { fail "(timeout) run to call6a" ; return }
+    gdb_expect {
+	 -re ".*Breakpoint $decimal, call6a .*$gdb_prompt $" { pass "run to call6a" }
+	 -re "$gdb_prompt $" { fail "run to call6a" ; return }
+	 timeout { fail "(timeout) run to call6a" ; return }
     }
 
     setup_xfail "rs6000-*-*"
@@ -548,7 +548,7 @@ proc discard_and_shuffle {} {
 #
 
 proc shuffle_round_robin {} {
-    global prompt
+    global gdb_prompt
     global hex
     global decimal
     global det_file
@@ -573,12 +573,12 @@ proc shuffle_round_robin {} {
     # code is broken.
     setup_xfail "a29k-*-udi"
     gdb_run_cmd
-    expect {
-	-i $gdb_spawn_id -re ".*Breakpoint $decimal, call7a .*$prompt $" {
+    gdb_expect {
+	 -re ".*Breakpoint $decimal, call7a .*$gdb_prompt $" {
 	    pass "run to call7a"
 	}
-	-i $gdb_spawn_id -re "$prompt $" { fail "run to call7a" ; return }
-	-i $gdb_spawn_id timeout { fail "(timeout) run to call7a" ; return }
+	 -re "$gdb_prompt $" { fail "run to call7a" ; return }
+	 timeout { fail "(timeout) run to call7a" ; return }
     }
 
     setup_xfail "i960-*-*" 1813
@@ -665,7 +665,7 @@ proc shuffle_round_robin {} {
 #
 
 proc recursive_structs_by_value {} {
-    global prompt
+    global gdb_prompt
     global hex
     global decimal
     global det_file
@@ -678,10 +678,10 @@ proc recursive_structs_by_value {} {
     # Run; should stop at hitbottom and print actual arguments.
     # Print backtrace.
     gdb_run_cmd
-    expect {
-	-i $gdb_spawn_id -re ".*Breakpoint $decimal, hitbottom .*$prompt $" { pass "run to hitbottom" }
-	-i $gdb_spawn_id -re "$prompt $" { fail "run to hitbottom" ; return }
-	-i $gdb_spawn_id timeout { fail "(timeout) run to hitbottom" ; return }
+    gdb_expect {
+	 -re ".*Breakpoint $decimal, hitbottom .*$gdb_prompt $" { pass "run to hitbottom" }
+	 -re "$gdb_prompt $" { fail "run to hitbottom" ; return }
+	 timeout { fail "(timeout) run to hitbottom" ; return }
     }
 
     if ![istarget sparclet-*-*] {
@@ -713,7 +713,7 @@ proc funcargs_reload { } {
 # Test for accessing local stack variables in functions which call alloca
 #
 proc localvars_after_alloca { } {
-    global prompt
+    global gdb_prompt
     global hex
     global decimal
     global gcc_compiled
@@ -745,7 +745,7 @@ proc localvars_after_alloca { } {
 }
 
 proc call_after_alloca { } {
-    global prompt
+    global gdb_prompt
     global hex
     global decimal
     global gcc_compiled
@@ -772,7 +772,7 @@ proc call_after_alloca { } {
 # these use a funky `dyncall' mechanism which GDB needs to know about.
 #
 proc localvars_in_indirect_call { } {
-    global prompt
+    global gdb_prompt
     global hex
     global decimal
     global gcc_compiled
@@ -814,19 +814,19 @@ proc localvars_in_indirect_call { } {
     #
 
     send_gdb "finish\n"
-    expect {
-	-i $gdb_spawn_id -re "\\(\\*pointer_to_call0a\\) \\(c, s, i, l\\);.*First.*$prompt $" {
+    gdb_expect {
+	 -re "\\(\\*pointer_to_call0a\\) \\(c, s, i, l\\);.*First.*$gdb_prompt $" {
 	    send_gdb "step\n"
 	    exp_continue
 	}
-	-i $gdb_spawn_id -re "\\(\\*pointer_to_call0a\\) \\(c, s, i, l\\);.*Second.*$prompt $" {
+	 -re "\\(\\*pointer_to_call0a\\) \\(c, s, i, l\\);.*Second.*$gdb_prompt $" {
 	    pass "finish from indirectly called function"
 	}
-	-i $gdb_spawn_id -re ".*$prompt $" {
+	 -re ".*$gdb_prompt $" {
 	    fail "finish from indirectly called function"
 	    return
 	}
-	-i $gdb_spawn_id default { fail "finish from indirectly called function" ; return }
+	 default { fail "finish from indirectly called function" ; return }
     }
 
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
@@ -841,7 +841,7 @@ proc localvars_in_indirect_call { } {
 # to handle trampolines.
 #
 proc test_stepping_over_trampolines { } {
-    global prompt
+    global gdb_prompt
     global hex
     global decimal
     global gdb_spawn_id
@@ -851,18 +851,18 @@ proc test_stepping_over_trampolines { } {
 
     # Cater for gdb stopping in midline, see comment for finish above.
     send_gdb "finish\n"
-    expect {
-	-i $gdb_spawn_id -re "marker_call_with_trampolines ..;.*$prompt $" {
+    gdb_expect {
+	 -re "marker_call_with_trampolines ..;.*$gdb_prompt $" {
 	    send_gdb "step\n"
 	    exp_continue
 	}
-	-i $gdb_spawn_id -re "pointer_to_call_with_trampolines.*$prompt $" {
+	 -re "pointer_to_call_with_trampolines.*$gdb_prompt $" {
 	    pass "finish from marker_call_with_trampolines"
 	}
-	-i $gdb_spawn_id -re ".*$prompt $" {
+	 -re ".*$gdb_prompt $" {
 	    fail "finish from marker_call_with_trampolines"
 	}
-	-i $gdb_spawn_id default { fail "finish from marker_call_with_trampolines" ; return 0 }
+	 default { fail "finish from marker_call_with_trampolines" ; return 0 }
     }
 
     # Try to step into the target function.
@@ -878,19 +878,19 @@ proc test_stepping_over_trampolines { } {
     # or immediately transfer control back to main if optimizations
     # are performed.
     send_gdb "step\n"
-    expect {
-	-i $gdb_spawn_id -re "main .* at.*$prompt $" {
+    gdb_expect {
+	 -re "main .* at.*$gdb_prompt $" {
 	    pass "stepping back to main from function called with trampolines" ;
 	    return 1
 	}
-	-i $gdb_spawn_id -re "\}.*End of call_with_trampolines.*$prompt $" {
+	 -re "\}.*End of call_with_trampolines.*$gdb_prompt $" {
 	    send_gdb "step\n"
 	    exp_continue
 	}
-	-i $gdb_spawn_id -re ".*$prompt $" {
+	 -re ".*$gdb_prompt $" {
 	    fail "stepping back to main from function called with trampolines"
 	}
-	-i $gdb_spawn_id default { fail "stepping back to main from function called with trampolines" ; return 0 }
+	 default { fail "stepping back to main from function called with trampolines" ; return 0 }
     }
 }
 

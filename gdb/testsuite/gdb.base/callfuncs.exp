@@ -63,13 +63,13 @@ proc set_lang_c {} {
     global gdb_prompt
 
     send_gdb "set language c\n"
-    expect {
+    gdb_expect {
 	-re ".*$gdb_prompt $" {}
 	timeout { fail "set language c (timeout)" ; return 0 }
     }
 
     send_gdb "show language\n"
-    expect {
+    gdb_expect {
 	-re ".* source language is \"c\".*$gdb_prompt $" {
 	    pass "set language to \"c\""
 	    return 1
@@ -95,6 +95,8 @@ proc set_lang_c {} {
 proc do_function_calls {} {
     global prototypes
     global gcc_compiled
+    # We need to up this because this can be really slow on some boards.
+    set timeout 60;
 
     gdb_test "p t_char_values(0,0)" " = 0"
     gdb_test "p t_char_values('a','b')" " = 1"

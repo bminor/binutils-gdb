@@ -45,7 +45,7 @@ proc set_lang_chill {} {
     gdb_load $binfile
 
     send_gdb "set language chill\n"
-    expect {
+    gdb_expect {
         -re ".*$gdb_prompt $" {}
         timeout { fail "set language chill (timeout)" ; return 0 }
     }
