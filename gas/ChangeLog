@@ -8,6 +8,11 @@ Tue Apr 28 12:16:30 1998  Ian Lance Taylor  <ian@cygnus.com>
 	(pa_block): Change i to unsigned int.
 	* config/obj-som.h (obj_som_copyright): Declare.
 
+Tue Apr 28 11:35:56 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* ecoff.c (ecoff_build_lineno): Do not use dummy first_lineno
+	for line numbers for assembly source.
+
 Mon Apr 27 15:58:46 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Change version number to 2.9.4
