@@ -1,5 +1,9 @@
 Wed Mar 29 12:01:30 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coff-i960.c (coff_i960_relocate): Cache the section symbol in
+	the used_by_bfd field of the section, to avoid looping for each
+	reloc.
+
 	* cpu-h8500.c (arch_info_struct): Change name from "H8/300" to
 	"h8300" for consistency with other cpu-* files.
 
