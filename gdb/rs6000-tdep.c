@@ -1118,8 +1118,10 @@ rs6000_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
    starting from r4.  */
 
 static CORE_ADDR
-rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-		       int struct_return, CORE_ADDR struct_addr)
+rs6000_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+			struct regcache *regcache, CORE_ADDR bp_addr,
+			int nargs, struct value **args, CORE_ADDR sp,
+			int struct_return, CORE_ADDR struct_addr)
 {
   int ii;
   int len = 0;
@@ -2967,9 +2969,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      64-bit code.  At some point in the future, this matter needs to be
      revisited.  */
   if (sysv_abi && wordsize == 4)
-    set_gdbarch_deprecated_push_arguments (gdbarch, ppc_sysv_abi_push_arguments);
+    set_gdbarch_push_dummy_call (gdbarch, ppc_sysv_abi_push_dummy_call);
   else
-    set_gdbarch_deprecated_push_arguments (gdbarch, rs6000_push_arguments);
+    set_gdbarch_push_dummy_call (gdbarch, rs6000_push_dummy_call);
 
   set_gdbarch_deprecated_store_struct_return (gdbarch, rs6000_store_struct_return);
   set_gdbarch_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);

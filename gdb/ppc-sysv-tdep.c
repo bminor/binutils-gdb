@@ -47,8 +47,10 @@
    starting from r4. */
 
 CORE_ADDR
-ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-			     int struct_return, CORE_ADDR struct_addr)
+ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+			      struct regcache *regcache, CORE_ADDR bp_addr,
+			      int nargs, struct value **args, CORE_ADDR sp,
+			      int struct_return, CORE_ADDR struct_addr)
 {
   int argno;
   /* Next available general register for non-float, non-vector arguments. */

@@ -1,5 +1,15 @@
 2003-09-09  Andrew Cagney  <cagney@redhat.com>
 
+	* ppc-tdep.h (ppc_sysv_abi_push_dummy_call): Replace
+	"ppc_sysv_abi_push_arguments".
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call): Replace
+	"ppc_sysv_abi_push_arguments".
+	* rs6000-tdep.c (rs6000_gdbarch_init): Set "push_dummy_call"
+	instead of "push_arguments".
+	(rs6000_push_dummy_call): Replace "rs6000_push_arguments".
+
+2003-09-09  Andrew Cagney  <cagney@redhat.com>
+
 	* sh64-tdep.c (sh64_push_return_address): Use ENTRY_POINT_ADDRESS
 	instead of CALL_DUMMY_ADDRESS.
 
