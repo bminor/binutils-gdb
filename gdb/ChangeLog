@@ -1,3 +1,18 @@
+2003-06-08  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (d10v-tdep.o): Update dependencies.
+	(SFILES): Add trad-frame.c.
+	(trad_frame_h): Define.
+	(COMMON_OBS): Add trad-frame.o.
+	(trad-frame.o): Specify dependencies.
+	* d10v-tdep.c: Include "trad-frame.h".
+	(saved_regs_unwinder): Delete function.
+	(d10v_frame_prev_register): Use trad_frame_prev_register.
+	(struct d10v_unwind_cache): Change type of "saved_regs" to "struct
+	trad_frame", delete "regs" and "prev_sp".
+	(prologue_find_regs): Use trad-frame.
+	* trad-frame.h, trad-frame.c: New files.
+
 2003-06-08  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2cfi.c, dwarf2cfi.h: Remove.

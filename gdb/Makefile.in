@@ -540,7 +540,9 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	sentinel-frame.c \
 	serial.c ser-unix.c source.c \
 	stabsread.c stack.c std-regs.c symfile.c symmisc.c symtab.c \
-	target.c thread.c top.c tracepoint.c typeprint.c \
+	target.c thread.c top.c tracepoint.c \
+	trad-frame.c \
+	typeprint.c \
 	tui/tui.c tui/tui.h tui/tuiCommand.c tui/tuiCommand.h \
 	tui/tuiData.c tui/tuiData.h tui/tuiDataWin.c tui/tuiDataWin.h \
 	tui/tuiDisassem.c tui/tuiDisassem.h tui/tuiGeneralWin.c \
@@ -729,6 +731,7 @@ symtab_h = symtab.h
 target_h = target.h $(bfd_h) $(symtab_h) $(dcache_h) $(memattr_h)
 terminal_h = terminal.h
 top_h = top.h
+trad_frame_h = trad-frame.h
 infttrace_h = infttrace.h
 tracepoint_h = tracepoint.h
 typeprint_h = typeprint.h
@@ -871,7 +874,8 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	frame-base.o \
 	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o cp-support.o \
 	cp-namespace.o \
-	reggroups.o
+	reggroups.o \
+	trad-frame.o
 
 OBS = $(COMMON_OBS) $(ANNOTATE_OBS)
 
@@ -1643,9 +1647,9 @@ cris-tdep.o: cris-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(inferior_h) \
 d10v-tdep.o: d10v-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(frame_base_h) $(symtab_h) $(gdbtypes_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(gdb_string_h) $(value_h) $(inferior_h) $(dis_asm_h) $(symfile_h) \
-	$(objfiles_h) $(language_h) $(arch_utils_h) $(regcache_h) \
-	$(remote_h) $(floatformat_h) $(gdb_sim_d10v_h) $(sim_regno_h) \
-	$(gdb_assert_h) $(disasm_h)
+	$(objfiles_h) $(language_h) $(arch_utils_h) $(regcache_h) $(remote_h) \
+	$(floatformat_h) $(gdb_sim_d10v_h) $(sim_regno_h) $(disasm_h) \
+	$(trad_frame_h) $(gdb_assert_h)
 dbug-rom.o: dbug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h) $(m68k_tdep_h)
 dbxread.o: dbxread.c $(defs_h) $(gdb_string_h) $(gdb_obstack_h) \
@@ -2309,6 +2313,7 @@ tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(gdbtypes_h) \
 	$(gdb_string_h) $(inferior_h) $(tracepoint_h) $(remote_h) \
 	$(linespec_h) $(regcache_h) $(completer_h) $(gdb_events_h) \
 	$(block_h) $(ax_h) $(ax_gdb_h) $(readline_h)
+trad-frame.o: trad-frame.c $(defs_h) $(frame_h) $(trad_frame_h) $(regcache_h)
 typeprint.o: typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(command_h) \
 	$(gdbcmd_h) $(target_h) $(language_h) $(cp_abi_h) $(gdb_string_h)
