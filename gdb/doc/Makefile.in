@@ -144,18 +144,18 @@ refcard.ps : $(srcdir)/refcard.tex
 
 #  "Readline" appendices.  Get them here so both TeX and texi2roff can find.
 rluser.texinfo: ${READLINE_DIR}/doc/rluser.texinfo
-	ln -s ${READLINE_DIR}/doc/rluser.texinfo $(unsubdir) || \
-	ln ${READLINE_DIR}/doc/rluser.texinfo $(unsubdir) || \
-	cp ${READLINE_DIR}/doc/rluser.texinfo $(unsubdir)
+	ln -s ${READLINE_DIR}/doc/rluser.texinfo . || \
+	ln ${READLINE_DIR}/doc/rluser.texinfo . || \
+	cp ${READLINE_DIR}/doc/rluser.texinfo .
 
 inc-hist.texi: ${READLINE_DIR}/doc/inc-hist.texi
-	ln -s ${READLINE_DIR}/doc/inc-hist.texi $(unsubdir) || \
-	ln ${READLINE_DIR}/doc/inc-hist.texi $(unsubdir) || \
-	cp ${READLINE_DIR}/doc/inc-hist.texi $(unsubdir)
+	ln -s ${READLINE_DIR}/doc/inc-hist.texi . || \
+	ln ${READLINE_DIR}/doc/inc-hist.texi . || \
+	cp ${READLINE_DIR}/doc/inc-hist.texi .
 
 # File to record current GDB version number (copied from main dir Makefile.in)
 gdbVN.m4 : $(srcdir)/${gdbdir}/Makefile.in
-	echo "_define__(<_GDB_VN__>,`sed <./../Makefile.in -n 's/VERSION = //p'`)" > ./gdbVN.m4
+	echo "_define__(<_GDB_VN__>,`sed <$(srcdir)/../Makefile.in -n 's/VERSION = //p'`)" > ./gdbVN.m4
 
 # GDB MANUAL: texinfo source, created by preprocessing w/m4
 # If you want other configs in the makefile, add or modify instructions for 
@@ -176,14 +176,14 @@ gdb-all.texi: ${SFILES_DOCDIR}
 	${M4} $(srcdir)/pretex.m4 $(srcdir)/none.m4 $(srcdir)/all.m4 \
 		gdbVN.m4 $(srcdir)/gdb.texinfo  >foobus.texinfo
 	rm -f gdb-all.texi
-	mv foobus.texinfo $(unsubdir)/gdb-all.texi
+	mv foobus.texinfo ./gdb-all.texi
 
 # GDB MANUAL: TeX dvi file
 gdb.dvi : gdb-${CONFIG}.texi rluser.texinfo inc-hist.texi
 	TEXINPUTS=${TEXIDIR}:.:$(srcdir):$$TEXINPUTS tex gdb-${CONFIG}.texi
 	texindex gdb-${CONFIG}.??
 	TEXINPUTS=${TEXIDIR}:.:$(srcdir):$$TEXINPUTS tex gdb-${CONFIG}.texi
-	mv gdb-${CONFIG}.dvi $(unsubdir)/gdb.dvi
+	mv gdb-${CONFIG}.dvi ./gdb.dvi
 	rm -f gdb-${CONFIG}.?? gdb-${CONFIG}.???
 
 # GDB MANUAL: info file
@@ -191,7 +191,7 @@ gdb.dvi : gdb-${CONFIG}.texi rluser.texinfo inc-hist.texi
 # cope with all the markup.  In the meantime, we distribute the info
 # files 
 gdb.info: gdb-${CONFIG}.texi
-	$(MAKEINFO) -o $(unsubdir)/gdb.info gdb-${CONFIG}.texi
+	$(MAKEINFO) -o ./gdb.info gdb-${CONFIG}.texi
 
 # GDB MANUAL: roff translations
 # Try to use a recent texi2roff.  v2 was put on prep in jan91.
@@ -210,9 +210,10 @@ gdb.info: gdb-${CONFIG}.texi
 #   try leaving them in
 # ditto special treatment of @ftable in rluser.texinfo
 gdb.mm: gdb-${CONFIG}.texi ${READLINE_DIR}/doc/rluser.texinfo inc-hist.texi
+	rm -f ./rluser.texinfo
 	sed -e 's/^@ftable/@table/g' \
 		-e 's/^@end ftable/@end table/g' \
-		${READLINE_DIR}/doc/rluser.texinfo > rluser.texinfo
+		${READLINE_DIR}/doc/rluser.texinfo > ./rluser.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e '/^@ifinfo/,/^@end ifinfo/d' \
@@ -226,13 +227,14 @@ gdb.mm: gdb-${CONFIG}.texi ${READLINE_DIR}/doc/rluser.texinfo inc-hist.texi
 	$(TEXI2ROFF) -mm | \
 	sed -e 's/---/\\(em/g' \
 	>gdb.mm 
-	rm rluser.texinfo
+	rm ./rluser.texinfo
 
 # gdb manual suitable for [gtn]roff -me
 gdb.me: gdb-${CONFIG}.texi ${READLINE_DIR}/doc/rluser.texinfo inc-hist.texi
+	rm -f ./rluser.texinfo
 	sed -e 's/^@ftable/@table/g' \
 		-e 's/^@end ftable/@end table/g' \
-		${READLINE_DIR}/doc/rluser.texinfo > rluser.texinfo
+		${READLINE_DIR}/doc/rluser.texinfo > ./rluser.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e '/^@ifinfo/,/^@end ifinfo/d' \
@@ -245,13 +247,14 @@ gdb.me: gdb-${CONFIG}.texi ${READLINE_DIR}/doc/rluser.texinfo inc-hist.texi
 	$(TEXI2ROFF) -me | \
 	sed -e 's/---/\\(em/g' \
 	>gdb.me 
-	rm rluser.texinfo
+	rm ./rluser.texinfo
 
 # gdb manual suitable for [gtn]roff -ms
 gdb.ms: gdb-${CONFIG}.texi ${READLINE_DIR}/doc/rluser.texinfo inc-hist.texi
+	rm -f ./rluser.texinfo
 	sed -e 's/^@ftable/@table/g' \
 		-e 's/^@end ftable/@end table/g' \
-		${READLINE_DIR}/doc/rluser.texinfo > rluser.texinfo
+		${READLINE_DIR}/doc/rluser.texinfo > ./rluser.texinfo
 	sed -e '/\\input texinfo/d' \
 		-e '/@c TEXI2ROFF-KILL/,/@c END TEXI2ROFF-KILL/d' \
 		-e '/^@ifinfo/,/^@end ifinfo/d' \
@@ -264,13 +267,13 @@ gdb.ms: gdb-${CONFIG}.texi ${READLINE_DIR}/doc/rluser.texinfo inc-hist.texi
 	$(TEXI2ROFF) -ms | \
 	sed -e 's/---/\\(em/g' \
 	>gdb.ms 
-	rm rluser.texinfo
+	rm ./rluser.texinfo
 
 # GDB INTERNALS MANUAL: TeX dvi file
 gdbint.dvi : gdbint.texinfo
-	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex gdbint.texinfo
+	TEXINPUTS=${TEXIDIR}:.:$(srcdir):$$TEXINPUTS tex gdbint.texinfo
 	texindex gdbint.??
-	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex gdbint.texinfo
+	TEXINPUTS=${TEXIDIR}:.:$(srcdir):$$TEXINPUTS tex gdbint.texinfo
 	rm -f gdbint.?? gdbint.aux gdbint.cps gdbint.fns gdbint.kys \
 		gdbint.log gdbint.pgs gdbint.toc gdbint.tps gdbint.vrs
 
