@@ -392,7 +392,7 @@ generic_register_raw_size (int regnum)
 int
 generic_register_virtual_size (int regnum)
 {
-  return REGISTER_VIRTUAL_TYPE (regnum);
+  return TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (regnum));
 }
 
 
