@@ -893,6 +893,7 @@ keep_going:
       else
 	{
 	  int reloc, pcrel, reloc_size, offset;
+	  fixS *fixP;
 
 	  reloc = BFD_RELOC_NONE;
 	  /* How big is the reloc?  Remember SPLIT relocs are
@@ -927,11 +928,7 @@ keep_going:
 	  /* Choose a proper BFD relocation type.  */
 	  if (pcrel)
 	    {
-	      if (size == 6)
-		reloc = BFD_RELOC_MN10300_32_PCREL;
-	      else if (size == 4)
-		reloc = BFD_RELOC_MN10300_16_PCREL;
-	      else if (reloc_size == 32)
+	      if (reloc_size == 32)
 		reloc = BFD_RELOC_32_PCREL;
 	      else if (reloc_size == 16)
 		reloc = BFD_RELOC_16_PCREL;
@@ -943,9 +940,9 @@ keep_going:
 	  else
 	    {
 	      if (reloc_size == 32)
-		reloc = BFD_RELOC_32
+		reloc = BFD_RELOC_32;
 	      else if (reloc_size == 16)
-		reloc = BFD_RELOC_16
+		reloc = BFD_RELOC_16;
 	      else if (reloc_size == 8)
 		reloc = BFD_RELOC_8;
 	      else
@@ -961,9 +958,12 @@ keep_going:
 	  else if (reloc_size == 32)
 	    reloc_size = 2;
 
-	  fix_new_exp (frag_now, f - frag_now->fr_literal + offset, reloc_size,
-		       &fixups[i].exp, pcrel,
-		       ((bfd_reloc_code_real_type) reloc));
+	  fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset,
+			      reloc_size, &fixups[i].exp, pcrel,
+			      ((bfd_reloc_code_real_type) reloc));
+
+	  if (pcrel)
+	    fixP->fx_offset += offset;
 	}
     }
 }
@@ -979,17 +979,28 @@ tc_gen_reloc (seg, fixp)
 {
   arelent *reloc;
   reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
-  reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
-  reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+
   reloc->howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
   if (reloc->howto == (reloc_howto_type *) NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
-                    "reloc %d not supported by object file format", (int)fixp->fx_r_type);
+                    "reloc %d not supported by object file format",
+		    (int)fixp->fx_r_type);
       return NULL;
     }
-  reloc->addend = fixp->fx_offset;
-  /*  printf("tc_gen_reloc: addr=%x  addend=%x\n", reloc->address, reloc->addend); */
+  reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+
+  if (fixp->fx_addsy && fixp->fx_subsy)
+    {
+      reloc->sym_ptr_ptr = &bfd_abs_symbol;
+      reloc->addend = (S_GET_VALUE (fixp->fx_addsy)
+		       - S_GET_VALUE (fixp->fx_subsy) + fixp->fx_offset);
+    }
+  else 
+    {
+      reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
+      reloc->addend = fixp->fx_offset;
+    }
   return reloc;
 }
 
