@@ -96,6 +96,12 @@ get_java_class_symtab (void)
       struct block *bl;
       class_symtab = allocate_symtab ("<java-classes>", objfile);
       class_symtab->language = language_java;
+      /* FIXME: carlton/2002-09-23: I noticed this wasn't set, so I
+	 set it to free_nothing (which is presumably what it would be
+	 set to automatically).  I _think_ that's the correct value;
+	 if somebody more knowledgeable than me agrees, then feel free
+	 to delete this comment.  */
+      class_symtab->free_code = free_nothing;
       bv = (struct blockvector *)
 	obstack_alloc (&objfile->symbol_obstack, sizeof (struct blockvector));
       BLOCKVECTOR_NBLOCKS (bv) = 1;

@@ -32,6 +32,7 @@
 #include "gdb_obstack.h"
 #include "language.h"
 #include "bcache.h"
+#include "dictionary.h"
 
 #include "gdb_string.h"
 
@@ -87,19 +88,27 @@ static void free_symtab_block (struct objfile *, struct block *);
 static void
 free_symtab_block (struct objfile *objfile, struct block *b)
 {
-  register int i, n;
-  struct symbol *sym, *next_sym;
+  struct dict_iterator iter;
+  struct symbol *sym, *prev_sym;
 
-  n = BLOCK_BUCKETS (b);
-  for (i = 0; i < n; i++)
+  prev_sym = dict_iterator_first (BLOCK_DICT (b), &iter);
+
+  /* Make sure there's at least one symbol to free!  */
+  if (prev_sym)
     {
-      for (sym = BLOCK_BUCKET (b, i); sym; sym = next_sym)
+      for (sym = dict_iterator_next (&iter); sym;
+	   sym = dict_iterator_next (&iter))
 	{
-	  next_sym = sym->hash_next;
-	  xmfree (objfile->md, SYMBOL_NAME (sym));
-	  xmfree (objfile->md, (PTR) sym);
+	  xmfree (objfile->md, SYMBOL_NAME (prev_sym));
+	  xmfree (objfile->md, (PTR) prev_sym);
+	  prev_sym = sym;
 	}
+
+      xmfree (objfile->md, SYMBOL_NAME (prev_sym));
+      xmfree (objfile->md, (PTR) prev_sym);
     }
+
+  dict_free (BLOCK_DICT (b));
   xmfree (objfile->md, (PTR) b);
 }
 
@@ -416,7 +425,8 @@ static void
 dump_symtab (struct objfile *objfile, struct symtab *symtab,
 	     struct ui_file *outfile)
 {
-  register int i, j;
+  register int i;
+  struct dict_iterator iter;
   int len, blen;
   register struct linetable *l;
   struct blockvector *bv;
@@ -465,6 +475,10 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
 	      fprintf_filtered (outfile, " under ");
 	      gdb_print_host_address (BLOCK_SUPERBLOCK (b), outfile);
 	    }
+
+	  /* NOTE: carlton/2002-09-23: If there is demand for it, we
+	     can cook up something to put in here.  */
+#if 0
 	  /* drow/2002-07-10: We could save the total symbols count
 	     even if we're using a hashtable, but nothing else but this message
 	     wants it.  */
@@ -473,6 +487,9 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
 	    fprintf_filtered (outfile, ", %d buckets in ", blen);
 	  else
 	    fprintf_filtered (outfile, ", %d syms in ", blen);
+#else
+	  fprintf_filtered (outfile, " in ");
+#endif
 	  print_address_numeric (BLOCK_START (b), 1, outfile);
 	  fprintf_filtered (outfile, "..");
 	  print_address_numeric (BLOCK_END (b), 1, outfile);
@@ -490,7 +507,7 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
 	  fprintf_filtered (outfile, "\n");
 	  /* Now print each symbol in this block (in no particular order, if
 	     we're using a hashtable).  */
-	  ALL_BLOCK_SYMBOLS (b, j, sym)
+	  ALL_BLOCK_SYMBOLS (b, iter, sym)
 	    {
 	      struct print_symbol_args s;
 	      s.symbol = sym;

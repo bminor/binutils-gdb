@@ -44,6 +44,7 @@
 #include "complaints.h"
 #include "target.h"
 #include "gdb_assert.h"
+#include "dictionary.h"
 
 extern void _initialize_coffread (void);
 
@@ -1413,12 +1414,12 @@ static void
 patch_opaque_types (struct symtab *s)
 {
   register struct block *b;
-  register int i;
+  struct dict_iterator iter;
   register struct symbol *real_sym;
 
   /* Go through the per-file symbols only */
   b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
-  ALL_BLOCK_SYMBOLS (b, i, real_sym)
+  ALL_BLOCK_SYMBOLS (b, iter, real_sym)
     {
       /* Find completed typedefs to use to fix opaque ones.
          Remove syms from the chain when their types are stored,

@@ -26,6 +26,7 @@
 #include "mi-cmds.h"
 #include "ui-out.h"
 #include "symtab.h"
+#include "dictionary.h"
 
 /* FIXME: these should go in some .h file but stack.c doesn't have a
    corresponding .h file. These wrappers will be obsolete anyway, once
@@ -213,7 +214,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 {
   struct block *block;
   struct symbol *sym;
-  int i, nsyms;
+  struct dict_iterator iter;
   static struct ui_stream *stb = NULL;
 
   stb = ui_out_stream_new (uiout);
@@ -224,7 +225,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 
   while (block != 0)
     {
-      ALL_BLOCK_SYMBOLS (block, i, sym)
+      ALL_BLOCK_SYMBOLS (block, iter, sym)
 	{
           int print_me = 0;
 

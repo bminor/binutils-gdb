@@ -39,6 +39,7 @@
 #include "inferior.h"
 #include "annotate.h"
 #include "ui-out.h"
+#include "dictionary.h"
 
 /* Prototypes for exported functions. */
 
@@ -1220,11 +1221,12 @@ static int
 print_block_frame_locals (struct block *b, register struct frame_info *fi,
 			  int num_tabs, register struct ui_file *stream)
 {
-  register int i, j;
+  struct dict_iterator iter;
+  register int j;
   register struct symbol *sym;
   register int values_printed = 0;
 
-  ALL_BLOCK_SYMBOLS (b, i, sym)
+  ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       switch (SYMBOL_CLASS (sym))
 	{
@@ -1255,11 +1257,11 @@ static int
 print_block_frame_labels (struct block *b, int *have_default,
 			  register struct ui_file *stream)
 {
-  register int i;
+  struct dict_iterator iter;
   register struct symbol *sym;
   register int values_printed = 0;
 
-  ALL_BLOCK_SYMBOLS (b, i, sym)
+  ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       if (STREQ (SYMBOL_NAME (sym), "default"))
 	{
@@ -1437,7 +1439,7 @@ print_frame_arg_vars (register struct frame_info *fi,
 {
   struct symbol *func = get_frame_function (fi);
   register struct block *b;
-  register int i;
+  struct dict_iterator iter;
   register struct symbol *sym, *sym2;
   register int values_printed = 0;
 
@@ -1448,7 +1450,7 @@ print_frame_arg_vars (register struct frame_info *fi,
     }
 
   b = SYMBOL_BLOCK_VALUE (func);
-  ALL_BLOCK_SYMBOLS (b, i, sym)
+  ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
       switch (SYMBOL_CLASS (sym))
 	{

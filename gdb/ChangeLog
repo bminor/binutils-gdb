@@ -1,3 +1,89 @@
+2002-09-23  David Carlton  <carlton@math.stanford.edu>
+
+	* dictionary.c (struct dict_vtbl): 'add_symbol' field.
+	(add_symbol_generic): New function.
+	(free_obstack): New function.
+	(dict_create_hashed): New function.
+	(lookup_hashed): New function.
+	(iterator_first_hashed): New function.
+	(iterator_hashed_advance): New function.
+	(iterator_next_hashed): New function.
+	* dictionary.h: A few more declarations.
+	* mdebugread.c (parse_symbol): Use dict_iterator when finding
+	parameters.
+	* Makefile.in (valops.o): Depend on dictionary_h.
+	* valops.c (value_of_this): Check empty block via dict_empty.
+	#include "dictionary.h"
+	* symfile.c (free_named_symtabs): Check empty block via dict_empty.
+	* dictionary.h: Declare dict_empty.
+	* symmisc.c (dump_symtab): Don't print out number of
+	symbols/buckets.
+	* printcmd.c (print_frame_args): Delete assertion that block isn't
+	a hashtable.
+	* symmisc.c (free_symtab_block): Update to use dictionary
+	methods.
+	* symtab.h (struct symtab): Comment on free_contents.
+	* jv-lang.c (get_java_class_symtab): Set class_symtab->free_code.
+	* mdebugread.c (add_symbol): Delete 'nsyms' variable.
+	(fixup_sigtramp): Add symbol via dict_add_symbol_block.
+	* Makefile.in (mi-cmd-stack.o): Depend on dictionary_h.
+	* ada-lang.c (symtab_for_sym): Update uses of ALL_BLOCK_SYMBOLS.
+	(ada_add_block_symbols): Ditto.
+	(debug_print_block): Ditto.
+	(fill_in_ada_prototype): Ditto.
+	* breakpoint.c (get_catch_sals): Ditto.
+	* coffread.c (patch_opaque_types): Ditto.
+	* tracepoint.c (add_local_symbols): Ditto.
+	(scope_info): Ditto.
+	* symtab.c (find_pc_sect_symtab): Ditto.
+	(search_symbols): Ditto.
+	(make_symbol_completion_list): Ditto.
+	(find_addr_symbol): Ditto.
+	(make_file_symbol_completion_list): Ditto.
+	(make_symbol_overload_list): Ditto.
+	* symmisc.c (dump_symtab): Ditto.
+	* stack.c (print_block_frame_locals): Ditto.
+	(print_block_frame_labels): Ditto.
+	(print_frame_arg_vars): Ditto.
+	* printcmd.c (print_frame_args): Ditto.
+	* objfiles.c (objfile_relocate): Ditto.
+	* mdebugread.c (mylookup_symbol): Ditto.
+	* Makefile.in (ada-lang.o): Depend on dictionary_h.
+	* Makefile.in (tracepoint.o): Ditto.
+	* Makefile.in (symmisc.o): Ditto.
+	* Makefile.in (stack.o): Ditto.
+	* Makefile.in (printcmd.o): Ditto.
+	* Makefile.in (objfiles.o): Ditto.
+	* Makefile.in (coffread.o): Ditto.
+	* Makefile.in (breakpoint.o): Ditto.
+	* ada-lang.c: #include "dictionary.h"
+	* tracepoint.c: Ditto.
+	* symmisc.c: Ditto.
+	* stack.c: Ditto.
+	* printcmd.c: Ditto.
+	* objfiles.c: Ditto.
+	* coffread.c: Ditto.
+	* breakpoint.c: Ditto.
+	* symtab.h: Comment out ALL_BLOCK_SYMBOLS.  (Moved to
+	dictionary.h.)
+	* dictionary.c: Dict_iterator accessor macros.
+	(struct dict_vtbl): Add iterator_first, iterator_next.
+	(dict_iterator_first): New function.
+	(dict_iterator_next): New function.
+	(iterator_first_block): New function.
+	(iterator_next_block): New function.
+	(iterator_block_hashed_advance): New function.
+	* dictionary.h: Add dict_iterator stuff.
+	* Makefile.in (symtab.o): Depend on dictionary_h.
+	* symtab.c: #include "dictionary.h"
+	* dictionary.c: Move down #include "dictionary.h", for now...
+	(free_block): Rename from dict_free_block.
+	(struct dict_vtbl): Add LOOKUP member.
+	(dict_lookup): New function.
+	(lookup_block): New function.
+	* dictionary.h: Declare dict_lookup.
+	* symtab.c (lookup_block_symbol): Use dict_lookup.
+
 2002-09-20  David Carlton  <carlton@math.stanford.edu>
 
 	* jv-lang.c (get_java_class_symtab): Use xmalloc to allocate

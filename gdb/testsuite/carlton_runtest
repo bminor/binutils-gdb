@@ -47,12 +47,12 @@ SLOWTESTS="gdb.base/callfuncs.exp \
 
 echo "Running fast tests."
 runtest ${FASTTESTS} 2>&1 | grep -v "^Test Run By" > /tmp/fastout
-diff -u {/tmp/,carlton_}fastout
+diff -u {carlton_,/tmp/}fastout
 echo "Running medium tests."
 runtest ${MEDTESTS} 2>&1 | grep -v "^Test Run By" > /tmp/medout
-diff -u {/tmp/,carlton_}medout
+diff -u {carlton_,/tmp/}medout
 echo "Running slow tests."
 runtest ${SLOWTESTS} 2>&1 | grep -v "^Test Run By" > /tmp/slowout
-diff -u {/tmp/,carlton_}slowout
+diff -u {carlton_,/tmp/}slowout
 
 echo "Done."

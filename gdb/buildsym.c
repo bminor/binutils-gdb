@@ -259,43 +259,20 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	  {
 	    BLOCK_SYM (block, --i) = next->symbol[j];
 	  }
+      BLOCK_DICT (block) = dict_create_block (block);
     }
   else
     {
-      int htab_size = BLOCK_HASHTABLE_SIZE (i);
-
       block = (struct block *) 
-	obstack_alloc (&objfile->symbol_obstack,
-		       (sizeof (struct block) + 
-			((htab_size - 1) * sizeof (struct symbol *))));
-      for (j = 0; j < htab_size; j++)
-	{
-	  BLOCK_BUCKET (block, j) = 0;
-	}
-      BLOCK_BUCKETS (block) = htab_size;
-      for (next = *listhead; next; next = next->next)
-	{
-	  for (j = next->nsyms - 1; j >= 0; j--)
-	    {
-	      struct symbol *sym;
-	      unsigned int hash_index;
-	      const char *name = SYMBOL_DEMANGLED_NAME (next->symbol[j]);
-	      if (name == NULL)
-		name = SYMBOL_NAME (next->symbol[j]);
-	      hash_index = msymbol_hash_iw (name);
-	      hash_index = hash_index % BLOCK_BUCKETS (block);
-	      sym = BLOCK_BUCKET (block, hash_index);
-	      BLOCK_BUCKET (block, hash_index) = next->symbol[j];
-	      next->symbol[j]->hash_next = sym;
-	    }
-	}
+	obstack_alloc (&objfile->symbol_obstack, sizeof (struct block));
+      BLOCK_DICT (block) = dict_create_hashed (&objfile->symbol_obstack,
+					       *listhead);
     }
 
   BLOCK_START (block) = start;
   BLOCK_END (block) = end;
   /* Superblock filled in when containing block is made */
   BLOCK_SUPERBLOCK (block) = NULL;
-  BLOCK_DICT (block) = dict_create_block (block);
 
   BLOCK_GCC_COMPILED (block) = processing_gcc_compilation;
 
@@ -307,6 +284,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
       SYMBOL_BLOCK_VALUE (symbol) = block;
       BLOCK_FUNCTION (block) = symbol;
       BLOCK_HASHTABLE (block) = 0;
+      struct dict_iterator iter;
 
       if (TYPE_NFIELDS (ftype) <= 0)
 	{
@@ -315,7 +293,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	     parameter symbols. */
 	  int nparams = 0, iparams;
 	  struct symbol *sym;
-	  ALL_BLOCK_SYMBOLS (block, i, sym)
+	  ALL_BLOCK_SYMBOLS (block, iter, sym)
 	    {
 	      switch (SYMBOL_CLASS (sym))
 		{

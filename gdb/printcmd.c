@@ -41,6 +41,7 @@
 #include "completer.h"		/* for completion functions */
 #include "ui-out.h"
 #include "gdb_assert.h"
+#include "dictionary.h"
 
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
 extern int addressprint;	/* Whether to print hex addresses in HLL " */
@@ -1767,7 +1768,7 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
 {
   struct block *b = NULL;
   int first = 1;
-  register int i;
+  struct dict_iterator iter;
   register struct symbol *sym;
   struct value *val;
   /* Offset of next stack argument beyond the one we have seen that is
@@ -1786,11 +1787,8 @@ print_frame_args (struct symbol *func, struct frame_info *fi, int num,
   if (func)
     {
       b = SYMBOL_BLOCK_VALUE (func);
-      /* Function blocks are order sensitive, and thus should not be
-	 hashed.  */
-      gdb_assert (BLOCK_HASHTABLE (b) == 0);
 
-      ALL_BLOCK_SYMBOLS (b, i, sym)
+      ALL_BLOCK_SYMBOLS (b, iter, sym)
         {
 	  QUIT;
 

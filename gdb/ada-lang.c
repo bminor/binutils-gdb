@@ -36,6 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "breakpoint.h"
 #include "gdbcore.h"
 #include "ada-lang.h"
+#include "dictionary.h"
 #ifdef UI_OUT
 #include "ui-out.h"
 #endif
@@ -3431,7 +3432,8 @@ symtab_for_sym (struct symbol *sym)
   struct objfile *objfile;
   struct block *b;
   struct symbol *tmp_sym;
-  int i, j;
+  int j;
+  struct dict_iterator iter;
 
   ALL_SYMTABS (objfile, s)
   {
@@ -3445,11 +3447,13 @@ symtab_for_sym (struct symbol *sym)
       case LOC_BLOCK:
       case LOC_CONST_BYTES:
 	b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-	ALL_BLOCK_SYMBOLS (b, i, tmp_sym) if (sym == tmp_sym)
-	  return s;
+	ALL_BLOCK_SYMBOLS (b, iter, tmp_sym)
+	  if (sym == tmp_sym)
+	    return s;
 	b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
-	ALL_BLOCK_SYMBOLS (b, i, tmp_sym) if (sym == tmp_sym)
-	  return s;
+	ALL_BLOCK_SYMBOLS (b, iter, tmp_sym)
+	  if (sym == tmp_sym)
+	    return s;
 	break;
       default:
 	break;
@@ -3470,8 +3474,9 @@ symtab_for_sym (struct symbol *sym)
 	     j < BLOCKVECTOR_NBLOCKS (BLOCKVECTOR (s)); j += 1)
 	  {
 	    b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), j);
-	    ALL_BLOCK_SYMBOLS (b, i, tmp_sym) if (sym == tmp_sym)
-	      return s;
+	    ALL_BLOCK_SYMBOLS (b, iter, tmp_sym)
+	      if (sym == tmp_sym)
+		return s;
 	  }
 	break;
       default:
@@ -3943,7 +3948,7 @@ ada_add_block_symbols (struct block *block, const char *name,
 		       namespace_enum namespace, struct objfile *objfile,
 		       int wild)
 {
-  int i;
+  struct dict_iterator;
   int name_len = strlen (name);
   /* A matching argument symbol, if any. */
   struct symbol *arg_sym;
@@ -3956,7 +3961,7 @@ ada_add_block_symbols (struct block *block, const char *name,
   if (wild)
     {
       struct symbol *sym;
-      ALL_BLOCK_SYMBOLS (block, i, sym)
+      ALL_BLOCK_SYMBOLS (block, iter, sym)
       {
 	if (SYMBOL_NAMESPACE (sym) == namespace &&
 	    wild_match (name, name_len, SYMBOL_NAME (sym)))
@@ -3984,7 +3989,7 @@ ada_add_block_symbols (struct block *block, const char *name,
     }
   else
     {
-      ALL_BLOCK_SYMBOLS (block, i, sym)
+      ALL_BLOCK_SYMBOLS (block, iter, sym)
 	  {
 	    if (SYMBOL_NAMESPACE (sym) == namespace)
 	      {
@@ -4028,10 +4033,8 @@ ada_add_block_symbols (struct block *block, const char *name,
       arg_sym = NULL;
       found_sym = 0;
 
-      ALL_BLOCK_SYMBOLS (block, i, sym)
+      ALL_BLOCK_SYMBOLS (block, iter, sym)
 	  {
-	    struct symbol *sym = BLOCK_SYM (block, i);
-
 	    if (SYMBOL_NAMESPACE (sym) == namespace)
 	      {
 		int cmp;
@@ -4091,7 +4094,7 @@ fill_in_ada_prototype (struct symbol *func)
 {
   struct block *b;
   int nargs, nsyms;
-  int i;
+  struct dict_iterator iter;
   struct type *ftype;
   struct type *rtype;
   size_t max_fields;
@@ -4117,7 +4120,7 @@ fill_in_ada_prototype (struct symbol *func)
   max_fields = 8;
   TYPE_FIELDS (ftype) =
     (struct field *) xmalloc (sizeof (struct field) * max_fields);
-  ALL_BLOCK_SYMBOLS (b, i, sym)
+  ALL_BLOCK_SYMBOLS (b, iter, sym)
   {
     GROW_VECT (TYPE_FIELDS (ftype), max_fields, nargs + 1);
 
@@ -4687,8 +4690,8 @@ debug_print_lines (struct linetable *lt)
 static void
 debug_print_block (struct block *b)
 {
-  int i;
-  struct symbol *i;
+  struct dict_iterator iter;
+  struct symbol *sym;
 
   fprintf (stderr, "Block: %p; [0x%lx, 0x%lx]",
 	   b, BLOCK_START (b), BLOCK_END (b));
@@ -4697,10 +4700,9 @@ debug_print_block (struct block *b)
   fprintf (stderr, "\n");
   fprintf (stderr, "\t    Superblock: %p\n", BLOCK_SUPERBLOCK (b));
   fprintf (stderr, "\t    Symbols:");
-  ALL_BLOCK_SYMBOLS (b, i, sym)
+  ALL_BLOCK_SYMBOLS (b, iter, sym)
   {
-    if (i > 0 && i % 4 == 0)
-      fprintf (stderr, "\n\t\t    ");
+    fprintf (stderr, "\n\t\t    ");
     fprintf (stderr, " %s", SYMBOL_NAME (sym));
   }
   fprintf (stderr, "\n");

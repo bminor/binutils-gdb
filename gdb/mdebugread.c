@@ -1225,10 +1225,14 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		  TYPE_NFIELDS (ftype) = nparams;
 		  TYPE_FIELDS (ftype) = (struct field *)
 		    TYPE_ALLOC (ftype, nparams * sizeof (struct field));
+		  struct dict_iterator iter;
 
-		  for (i = iparams = 0; iparams < nparams; i++)
+		  for (sym = dict_iterator_first (BLOCK_DICT (b), &iter),
+			 iparams = 0;
+		       iparams < nparams;
+		       sym = dict_iterator_next (&iter))
 		    {
-		      sym = BLOCK_SYM (b, i);
+		      gdb_assert (sym != NULL);
 		      switch (SYMBOL_CLASS (sym))
 			{
 			case LOC_ARG:
@@ -4388,11 +4392,12 @@ static struct symbol *
 mylookup_symbol (char *name, register struct block *block,
 		 namespace_enum namespace, enum address_class class)
 {
-  int i, inc;
+  struct dict_iterator iter;
+  int inc;
   struct symbol *sym;
 
   inc = name[0];
-  ALL_BLOCK_SYMBOLS (block, i, sym)
+  ALL_BLOCK_SYMBOLS (block, iter, sym)
     {
       if (SYMBOL_NAME (sym)[0] == inc
 	  && SYMBOL_NAMESPACE (sym) == namespace
@@ -4413,7 +4418,6 @@ mylookup_symbol (char *name, register struct block *block,
 static void
 add_symbol (struct symbol *s, struct block *b)
 {
-  int nsyms = BLOCK_NSYMS (b)++;
   struct block *newb;
   struct parse_stack *stackp;
 
@@ -4806,8 +4810,6 @@ fixup_sigtramp (void)
   BLOCK_END (b) = sigtramp_end;
   BLOCK_FUNCTION (b) = s;
   BLOCK_SUPERBLOCK (b) = BLOCK_SUPERBLOCK (b0);
-  add_block (b, st);
-  sort_blocks (st);
 
   /* Make a MIPS_EFI_SYMBOL_NAME entry for it */
   {
@@ -4843,7 +4845,9 @@ fixup_sigtramp (void)
     current_objfile = NULL;
   }
 
-  BLOCK_SYM (b, BLOCK_NSYMS (b)++) = s;
+  b = dict_add_symbol_block (BLOCK_DICT (b), s);
+  add_block (b, st);
+  sort_blocks (st);
 }
 
 #endif /* TM_MIPS_H */

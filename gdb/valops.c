@@ -33,6 +33,7 @@
 #include "gdbcmd.h"
 #include "regcache.h"
 #include "cp-abi.h"
+#include "dictionary.h"
 
 #include <errno.h>
 #include "gdb_string.h"
@@ -3337,8 +3338,7 @@ value_of_this (int complain)
     }
 
   b = SYMBOL_BLOCK_VALUE (func);
-  i = BLOCK_NSYMS (b);
-  if (i <= 0)
+  if (dict_empty (BLOCK_DICT (b)))
     {
       if (complain)
 	error ("no args, no `this'");

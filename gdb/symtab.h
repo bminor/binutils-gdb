@@ -439,6 +439,7 @@ struct block
 /* Macro used to set the size of a hashtable for N symbols.  */
 #define BLOCK_HASHTABLE_SIZE(n)	((n)/5 + 1)
 
+#if 0
 /* Macro to loop through all symbols in a block BL, in no particular order.
    i counts which bucket we are in, and sym points to the current symbol.  */
 
@@ -446,6 +447,7 @@ struct block
 	for ((i) = 0; (i) < BLOCK_BUCKETS ((bl)); (i)++)	\
 	  for ((sym) = BLOCK_BUCKET ((bl), (i)); (sym);		\
 	       (sym) = (sym)->hash_next)
+#endif
 
 
 
@@ -868,6 +870,8 @@ struct symtab
      free_linetable => free just the linetable.  FIXME: Is this redundant
      with the primary field?  */
 
+  /* FIXME: carlton/2002-09-23: free_contents isn't being used right
+     now.  */
   enum free_code
   {
     free_nothing, free_contents, free_linetable

@@ -47,6 +47,7 @@
 #include "gdb.h"
 #include "ui-out.h"
 #include "cli/cli-script.h"
+#include "dictionary.h"
 
 #include "gdb-events.h"
 
@@ -5803,10 +5804,10 @@ get_catch_sals (int this_level_only)
 	  if (blocks_searched[index] == 0)
 	    {
 	      struct block *b = BLOCKVECTOR_BLOCK (bl, index);
-	      register int i;
+	      struct dict_iterator iter;
 	      register struct symbol *sym;
 
-	      ALL_BLOCK_SYMBOLS (b, i, sym)
+	      ALL_BLOCK_SYMBOLS (b, iter, sym)
 		{
 		  if (STREQ (SYMBOL_NAME (sym), "default"))
 		    {

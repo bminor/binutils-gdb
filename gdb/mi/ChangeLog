@@ -1,3 +1,9 @@
+2002-09-23  David Carlton  <carlton@math.stanford.edu>
+
+	* mi-cmd-stack.c (list_args_or_locals): Update use of
+	ALL_BLOCK_SYMBOLS.
+	#include "dictionary.h"
+
 2002-09-11  Keith Seitz  <keiths@redhat.com>
 
 	* mi-main.c (mi_cmd_data_list_register_names): Use cleanups
