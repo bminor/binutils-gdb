@@ -23,7 +23,7 @@ Tue Apr 30 13:18:58 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 	target.c, inftarg.c, ieee-float.c, environ.c, defs.h,
 	command.h, inferior.h, gdbcore.h, symtab.h, expression.h,
 	symtab.c, cplus-dem.c, value.h, expread.y, valprint.c,
-	copying.awk, solib.c
+	copying.awk, solib.c, inflow.c, symmisc.c
 	: Lint.  Use read_memory not read_memory_integer on CORE_ADDR's.
 	Use {value_as,unpack}_pointer (added to values.c)
 	not {value_as,unpack}_long on CORE_ADDR's.
