@@ -877,7 +877,8 @@ corefile.lo: corefile.c $(INCDIR)/filenames.h
 format.lo: format.c $(INCDIR)/filenames.h
 init.lo: init.c $(INCDIR)/filenames.h
 libbfd.lo: libbfd.c $(INCDIR)/filenames.h
-opncls.lo: opncls.c $(INCDIR)/filenames.h $(INCDIR)/objalloc.h
+opncls.lo: opncls.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/objalloc.h
 reloc.lo: reloc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h
 section.lo: section.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h
 syms.lo: syms.c $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \

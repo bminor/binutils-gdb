@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -799,7 +799,7 @@ configure.in version.h
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(libbfd_a_SOURCES) $(libbfd_la_SOURCES)
 OBJECTS = $(libbfd_a_OBJECTS) $(libbfd_la_OBJECTS)
@@ -1410,7 +1410,8 @@ corefile.lo: corefile.c $(INCDIR)/filenames.h
 format.lo: format.c $(INCDIR)/filenames.h
 init.lo: init.c $(INCDIR)/filenames.h
 libbfd.lo: libbfd.c $(INCDIR)/filenames.h
-opncls.lo: opncls.c $(INCDIR)/filenames.h $(INCDIR)/objalloc.h
+opncls.lo: opncls.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/objalloc.h
 reloc.lo: reloc.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h
 section.lo: section.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h
 syms.lo: syms.c $(INCDIR)/filenames.h $(INCDIR)/safe-ctype.h \

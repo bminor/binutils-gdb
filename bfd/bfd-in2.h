@@ -880,6 +880,9 @@ bfd_make_writable PARAMS ((bfd *abfd));
 bfd_boolean
 bfd_make_readable PARAMS ((bfd *abfd));
 
+char *
+bfd_follow_gnu_debuglink PARAMS ((bfd *abfd, const char *dir));
+
 /* Extracted from libbfd.c.  */
 
 /* Byte swapping macros for user section data.  */

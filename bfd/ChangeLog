@@ -1,3 +1,14 @@
+2003-01-31  Graydon Hoare <graydon@redhat.com>
+
+	* Makefile.am (opncls.lo): Add dependency upon libiberty.h.
+	* Makefile.in: Regenerate.
+	* opncls.c (calc_crc32, get_debug_link_info,
+	seperate_debug_file_exists, find_seperate_debug_file): New
+	internal functions.
+	(bfd_follow_gnu_debuglink): New function.  Follow the pointer
+	contained inside a .gnu_debuglink section.
+	* bfd-in2.h: Regenerate.
+
 2003-01-29  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elfxx-mips.c (mips_elf_got_entry_hash): Don't dereference
