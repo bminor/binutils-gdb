@@ -126,7 +126,7 @@ TERMCAP = -ltermcap
 # Libraries and corresponding dependencies for compiling gdb.
 # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
 # TERMCAP comes after readline, since readline depends on it.
-CLIBS = ${BFD_LIB} ${LIBIBERTY} ${RL_LIB} ${TERMCAP} ${XM_CLIBS} ${TM_CLIBS}
+CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${LIBIBERTY} ${XM_CLIBS} ${TM_CLIBS}
 CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${LIBIBERTY} ${RL_LIB}
 
 ADD_FILES = ${REGEX} ${ALLOCA}  ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}

@@ -1,5 +1,7 @@
 Thu Nov  7 18:26:15 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 
+	* Makefile.in: link with libiberty after libreadline, since
+	readline might want something in libiberty.
 	* m88k-xdep.c: Fixed the register offsets in the ptrace_user
 	struct for BCS 88k machines.
 	* xm-m88k.h: don't define USIZE if already defined.
