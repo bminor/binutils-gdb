@@ -13,6 +13,8 @@ start-sanitize-sky
 	(s_enddirect): Validate length if prespecified.
 	(s_endmpg): Likewise.  Handle -no-dma-pke.
 	(s_endunpack): Handle -no-dma-pke.
+	(md_pcrel_from_section): Add offset to delay slot for
+	undefined symbols.
 end-sanitize-sky
 
 Fri Jan 30 11:47:02 1998  Ian Lance Taylor  <ian@cygnus.com>
