@@ -1,3 +1,18 @@
+2000-11-08  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/h8300.sc: Use ${CONSTRUCTING...} to enclose
+	constructors and destructors.
+	* scripttempl/h8300h.sc: Ditto.
+	* scripttempl/h8300s.sc: Ditto.
+	* scripttempl/h8500.sc: Ditto.
+	* scripttempl/h8500b.sc: Ditto.
+	* scripttempl/h8500c.sc: Ditto.
+	* scripttempl/h8500m.sc: Ditto.
+	* scripttempl/h8500s.sc: Ditto.
+	* scripttempl/v850.sc: Ditto.
+	* scripttempl/w65.sc: Ditto.
+	* scripttempl/z8000.sc: Ditto.
+
 2000-11-06  Alan Modra  <alan@linuxcare.com.au>
 
 	Merge most place_orphan changes from mainline.

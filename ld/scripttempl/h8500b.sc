@@ -1,3 +1,11 @@
+TORS="
+    ___ctors = . ;
+    *(.ctors)
+    ___ctors_end = . ;
+    ___dtors = . ;
+    *(.dtors)
+    ___dtors_end = . ;"
+
 cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
@@ -24,13 +32,9 @@ SECTIONS
 	{
 	*(.rdata); 
 	  *(.strings)
-	___ctors = . ;
-	*(.ctors)
-	___ctors_end = . ;
-	___dtors = . ;
-	*(.dtors)
-	___dtors_end = . ;
-} 
+	  
+	${CONSTRUCTING+${TORS}}
+	} 
 
 .bss  ${RELOCATING+ 0x40000} :
 	{
