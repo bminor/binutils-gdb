@@ -2614,6 +2614,9 @@ files named in the @code{rc} file.
 Specify a @option{-D} option to pass to the preprocessor when reading an
 @code{rc} file.
 
+@item -r
+Ignored for compatibility with rc.
+
 @item -v
 Enable verbose mode.  This tells you what the preprocessor is if you
 didn't specify one.

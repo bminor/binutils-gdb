@@ -1,3 +1,9 @@
+2003-04-01  Dimitrie O. Paun <dpaun@rogers.com>
+
+	* windres.c (usage): Report -r option.
+	(main): Ignore the -r option.
+	* doc/binutils.texi: Add -r to the list of options.
+
 2003-04-01  Bob Wilson  <bob.wilson@acm.org>
 
 	* MAINTAINERS: Add myself as Xtensa maintainer.

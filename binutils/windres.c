@@ -720,6 +720,7 @@ usage (stream, status)
      --yydebug                 Turn on parser debugging\n"));
 #endif
   fprintf (stream, _("\
+  -r                           Ignored for compatibility with rc\n\
   -h --help                    Print this help message\n\
   -V --version                 Print version information\n"));
   fprintf (stream, _("\
@@ -815,7 +816,7 @@ main (argc, argv)
   language = 0x409;   /* LANG_ENGLISH, SUBLANG_ENGLISH_US.  */
   use_temp_file = 0;
 
-  while ((c = getopt_long (argc, argv, "i:o:I:O:F:D:hHvV", long_options,
+  while ((c = getopt_long (argc, argv, "i:o:I:O:F:D:rhHvV", long_options,
 			   (int *) 0)) != EOF)
     {
       switch (c)
@@ -862,6 +863,10 @@ main (argc, argv)
 	      free (preprocargs);
 	      preprocargs = n;
 	    }
+	  break;
+
+	case 'r':
+	  /* Ignored for compatibility with rc */
 	  break;
 
 	case 'v':
