@@ -1,3 +1,10 @@
+1999-10-26  Nick Clifton  <nickc@cygnus.com>
+
+	* emultempl/armcoff.em (gld{}_finish): Remove extraneous
+	underscore from prototype.
+	* emultempl/armelf.em (gld{}_finish): Remove extraneous
+	underscore from prototype.
+
 1999-10-07  Geoffrey Keating  <geoffk@cygnus.com>
 
 	* scripttempl/elf.sc (.rel.sdata): Combine all the sdata relocs

@@ -65,7 +65,7 @@ static void gld${EMULATION_NAME}_before_allocation PARAMS ((void));
 static char *gld${EMULATION_NAME}_get_script PARAMS ((int *isfile));
 static int  gld${EMULATION_NAME}_parse_args PARAMS((int, char **));
 static void gld${EMULATION_NAME}_list_options PARAMS ((FILE *));
-static void gld_${EMULATION_NAME}_finish PARAMS ((void));
+static void gld${EMULATION_NAME}_finish PARAMS ((void));
 
 
 static int no_pipeline_knowledge = 0;
