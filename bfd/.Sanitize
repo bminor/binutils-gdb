@@ -123,6 +123,7 @@ i386aout.c
 i386bsd.c
 i386linux.c
 i386lynx.c
+i386mach3.c
 ieee.c
 init.c
 libaout.h
