@@ -99,6 +99,7 @@ gdb-stabs.h
 gdb.1
 gdbcmd.h
 gdbcore.h
+gdbserver
 gdbtypes.c
 gdbtypes.h
 go32-xdep.c
