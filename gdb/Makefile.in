@@ -712,6 +712,7 @@ inf_loop_h = inf-loop.h
 inflow_h = inflow.h $(terminal_h)
 inf_ptrace_h = inf-ptrace.h
 infttrace_h = infttrace.h
+inf_ttrace_h = inf-ttrace.h
 interps_h = interps.h
 jv_lang_h = jv-lang.h
 kod_h = kod.h
@@ -1383,6 +1384,7 @@ ALLDEPFILES = \
 	i386-sol2-nat.c i386-sol2-tdep.c \
 	i386gnu-nat.c i386gnu-tdep.c \
 	ia64-linux-nat.c ia64-linux-tdep.c ia64-tdep.c \
+	inf-ptrace.c inf-ttrace.c \
 	infptrace.c inftarg.c irix4-nat.c irix5-nat.c \
 	libunwind-frame.c \
 	lynx-nat.c m3-nat.c \
@@ -1970,7 +1972,8 @@ hppah-nat.o: hppah-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 	$(gdb_wait_h) $(regcache_h) $(gdb_string_h) $(infttrace_h) \
 	$(hppa_tdep_h)
 hppa-hpux-nat.o: hppa-hpux-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(target_h) $(gdb_assert_h) $(hppa_tdep_h) $(inf_ptrace_h)
+	$(target_h) $(gdb_assert_h) $(hppa_tdep_h) $(inf_ptrace_h) \
+	$(inf_ttrace_h)
 hppa-hpux-tdep.o: hppa-hpux-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h) \
 	$(osabi_h) $(gdb_string_h) $(frame_h) $(frame_unwind_h) \
 	$(trad_frame_h) $(symtab_h) $(objfiles_h) $(inferior_h) $(infcall_h) \
@@ -2085,6 +2088,9 @@ inflow.o: inflow.c $(defs_h) $(frame_h) $(inferior_h) $(command_h) \
 inf-ptrace.o: inf-ptrace.c $(defs_h) $(command_h) $(inferior_h) $(inflow_h) \
 	$(gdbcore_h) $(observer_h) $(gdb_string_h) $(gdb_ptrace_h) \
 	$(gdb_wait_h) $(inf_child_h)
+inf-ttrace.o: inf-ttrace.c $(defs_h) $(command_h) $(inferior_h) \
+	$(observer_h) $(target_h) $(gdb_assert_h) $(gdb_string_h) \
+	$(inf_child_h) $(inf_ttrace_h)
 infptrace.o: infptrace.c $(defs_h) $(command_h) $(frame_h) $(gdbcore_h) \
 	$(inferior_h) $(regcache_h) $(target_h) $(gdb_assert_h) \
 	$(gdb_wait_h) $(gdb_string_h) $(gdb_dirent_h) $(gdb_ptrace_h)

@@ -1,3 +1,21 @@
+2004-11-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* inf-ttrace.c: New file.
+	* inf-ttrace.h: New file.
+	* hppa-hpux-nat.c [HAVE_TTRACE]: Include <sys/ttrace>.
+	Include "inf-ttrace.h".
+	(ss_mpsfu_high): Define to ss_tlsp if necessary.
+	(hppa_hpux_fetch_register, hppa_hpux_store_register): Use
+	ptid_get_pid instead of PIDGET.  Modify to handle both ttrace and
+	ptrace systems.
+	(_initialize_hppa_hpux_nat) [HAVE_TTRACE]: Call inf_ttrace_traget
+	instead of inf_ptrace_target.
+	* config/pa/hpux.mh (NATDEPFILES): Add inf-ttrace.o.
+	* Makefile.in (inf_ttrace_h): New variable.
+	(hppa-hpux-nat.o): Update dependency.
+	(inf-ttrace.o): New dependency.
+	(ALLDEPFILES): Add inf-ptrace.c and inf-ttrace.c.
+
 2004-11-23  Randolph Chung  <tausq@debian.org>
 
 	* arch-utils.c (generic_instruction_nullified): New.

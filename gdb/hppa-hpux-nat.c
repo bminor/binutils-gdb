@@ -28,8 +28,20 @@
 #include <sys/ptrace.h>
 #include <machine/save_state.h>
 
+#ifdef HAVE_TTRACE
+#include <sys/ttrace.h>
+#endif
+
 #include "hppa-tdep.h"
 #include "inf-ptrace.h"
+#include "inf-ttrace.h"
+
+/* HP-UX 10.20 has a different name than HP-UX 11.00 and later.
+   Apparently, the intended usage changed.  Unfortunately HP didn't
+   care about backwards compatibility.  */
+#ifdef ss_tlsp
+#define ss_mpsfu_high ss_tlsp
+#endif
 
 int child_suppress_run = 0;     /* Non-zero if we should pretend not to be
 				   a runnable target.  */
@@ -179,6 +191,12 @@ hppa_hpux_cannot_store_register (int regnum)
   return hppa_hpux_cannot_fetch_register (regnum);
 }
 
+/* Just in case a future version of PA-RISC HP-UX won't have ptrace(2)
+   at all.  */
+#ifndef PTRACE_TYPE_RET
+#define PTRACE_TYPE_RET void
+#endif
+
 static void
 hppa_hpux_fetch_register (int regnum)
 {
@@ -194,26 +212,41 @@ hppa_hpux_fetch_register (int regnum)
       return;
     }
 
-  pid = PIDGET (inferior_ptid);
+  pid = ptid_get_pid (inferior_ptid);
 
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   addr = hppa_hpux_save_state_offset[regnum];
   size = register_size (current_gdbarch, regnum);
 
-  gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
+  gdb_assert (size == 4 || size == 8);
   buf = alloca (size);
 
-  /* Read the register contents from the inferior a chuck at the time.  */
-  for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
-    {
-      errno = 0;
-      buf[i] = ptrace (PT_RUREGS, pid, (PTRACE_TYPE_ARG3) addr, 0, 0);
-      if (errno != 0)
-	error ("Couldn't read register %s (#%d): %s.", REGISTER_NAME (regnum),
-	       regnum, safe_strerror (errno));
+#ifdef HAVE_TTRACE
+  {
+    lwpid_t lwp = ptid_get_lwp (inferior_ptid);
 
-      addr += sizeof (PTRACE_TYPE_RET);
-    }
+    if (ttrace (TT_LWP_RUREGS, pid, lwp, addr, size, (uintptr_t)buf) == -1)
+      error ("Couldn't read register %s (#%d): %s",
+	     REGISTER_NAME (regnum), regnum, safe_strerror (errno));
+  }
+#else
+  {
+    int i;
+
+    /* Read the register contents from the inferior a chuck at the time.  */
+    for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
+      {
+	errno = 0;
+	buf[i] = ptrace (PT_RUREGS, pid, (PTRACE_TYPE_ARG3) addr, 0, 0);
+	if (errno != 0)
+	  error ("Couldn't read register %s (#%d): %s",
+		 REGISTER_NAME (regnum), regnum, safe_strerror (errno));
+
+	addr += sizeof (PTRACE_TYPE_RET);
+      }
+  }
+#endif
+
   regcache_raw_supply (current_regcache, regnum, buf);
 }
 
@@ -236,32 +269,46 @@ hppa_hpux_store_register (int regnum)
   size_t size;
   PTRACE_TYPE_RET *buf;
   pid_t pid;
-  int i;
 
   if (hppa_hpux_cannot_store_register (regnum))
     return;
 
-  pid = PIDGET (inferior_ptid);
+  pid = ptid_get_pid (inferior_ptid);
 
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   addr = hppa_hpux_save_state_offset[regnum];
   size = register_size (current_gdbarch, regnum);
 
-  gdb_assert ((size % sizeof (PTRACE_TYPE_RET)) == 0);
+  gdb_assert (size == 4 || size == 8);
   buf = alloca (size);
 
-  /* Write the register contents into the inferior a chunk at the time.  */
   regcache_raw_collect (current_regcache, regnum, buf);
-  for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
-    {
-      errno = 0;
-      ptrace (PT_WUREGS, pid, (PTRACE_TYPE_ARG3) addr, buf[i], 0);
-      if (errno != 0)
-	error ("Couldn't write register %s (#%d): %s.", REGISTER_NAME (regnum),
-	       regnum, safe_strerror (errno));
 
-      addr += sizeof (PTRACE_TYPE_RET);
-    }
+#ifdef HAVE_TTRACE
+  {
+    lwpid_t lwp = ptid_get_lwp (inferior_ptid);
+
+    if (ttrace (TT_LWP_WUREGS, pid, lwp, addr, size, (uintptr_t)buf) == -1)
+      error ("Couldn't write register %s (#%d): %s",
+	     REGISTER_NAME (regnum), regnum, safe_strerror (errno));
+  }
+#else
+  {
+    int i;
+
+    /* Write the register contents into the inferior a chunk at the time.  */
+    for (i = 0; i < size / sizeof (PTRACE_TYPE_RET); i++)
+      {
+	errno = 0;
+	ptrace (PT_WUREGS, pid, (PTRACE_TYPE_ARG3) addr, buf[i], 0);
+	if (errno != 0)
+	  error ("Couldn't write register %s (#%d): %s",
+		 REGISTER_NAME (regnum), regnum, safe_strerror (errno));
+
+	addr += sizeof (PTRACE_TYPE_RET);
+      }
+  }
+#endif
 }
 
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
@@ -296,9 +343,15 @@ _initialize_hppa_hpux_nat (void)
 {
   struct target_ops *t;
 
+#ifdef HAVE_TTRACE
+  t = inf_ttrace_target ();
+#else
   t = inf_ptrace_target ();
+#endif
+
   t->to_fetch_registers = hppa_hpux_fetch_inferior_registers;
   t->to_store_registers = hppa_hpux_store_inferior_registers;
   t->to_can_run = hppa_hpux_child_can_run;
+
   add_target (t);
 }
