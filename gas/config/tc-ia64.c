@@ -77,6 +77,7 @@ enum reloc_func
     FUNC_FPTR_RELATIVE,
     FUNC_GP_RELATIVE,
     FUNC_LT_RELATIVE,
+    FUNC_PC_RELATIVE,
     FUNC_PLT_RELATIVE,
     FUNC_SEC_RELATIVE,
     FUNC_SEG_RELATIVE,
@@ -434,6 +435,7 @@ pseudo_func[] =
     { "fptr",	PSEUDO_FUNC_RELOC },
     { "gprel",	PSEUDO_FUNC_RELOC },
     { "ltoff",	PSEUDO_FUNC_RELOC },
+    { "pcrel",	PSEUDO_FUNC_RELOC },
     { "pltoff",	PSEUDO_FUNC_RELOC },
     { "secrel",	PSEUDO_FUNC_RELOC },
     { "segrel",	PSEUDO_FUNC_RELOC },
@@ -4003,9 +4005,11 @@ operand_match (idesc, index, e)
 	    fix->code = BFD_RELOC_IA64_PCREL21M;
 	  else if (opnd == IA64_OPND_TGT25c)
 	    fix->code = BFD_RELOC_IA64_PCREL21B;
-          else 
-            /* FIXME -- use appropriate relocation type */
-            as_bad (_("long branch targets not implemented"));
+          else if (opnd == IA64_OPND_TGT64)
+	    fix->code = BFD_RELOC_IA64_PCREL60B;
+	  else
+	    abort ();
+
 	  fix->code = ia64_gen_real_reloc_type (e->X_op_symbol, fix->code);
 	  fix->opnd = idesc->operands[index];
 	  fix->expr = *e;
@@ -4222,86 +4226,109 @@ build_insn (slot, insnp)
 
   for (i = 0; i < NELEMS (idesc->operands) && idesc->operands[i]; ++i)
     {
-      if (idesc->operands[i] == IA64_OPND_IMMU64)
+      if (slot->opnd[i].X_op == O_register
+	  || slot->opnd[i].X_op == O_constant
+	  || slot->opnd[i].X_op == O_index)
+	val = slot->opnd[i].X_add_number;
+      else if (slot->opnd[i].X_op == O_big)
 	{
-	  val = slot->opnd[i].X_add_number;
+	  /* This must be the value 0x10000000000000000.  */
+	  assert (idesc->operands[i] == IA64_OPND_IMM8M1U8);
+	  val = 0;
+	}
+      else
+	val = 0;
+
+      switch (idesc->operands[i])
+	{
+	case IA64_OPND_IMMU64:
 	  *insnp++ = (val >> 22) & 0x1ffffffffffLL;
 	  insn |= (((val & 0x7f) << 13) | (((val >> 7) & 0x1ff) << 27)
 		   | (((val >> 16) & 0x1f) << 22) | (((val >> 21) & 0x1) << 21)
 		   | (((val >> 63) & 0x1) << 36));
-	}
-      else if (idesc->operands[i] == IA64_OPND_IMMU62)
-        {
-          val = slot->opnd[i].X_add_number & 0x3fffffffffffffffULL;
+	  continue;
+
+	case IA64_OPND_IMMU62:
+          val &= 0x3fffffffffffffffULL;
           if (val != slot->opnd[i].X_add_number)
             as_warn (_("Value truncated to 62 bits"));
           *insnp++ = (val >> 21) & 0x1ffffffffffLL;
           insn |= (((val & 0xfffff) << 6) | (((val >> 20) & 0x1) << 36));
-        }
-      else if (idesc->operands[i] == IA64_OPND_TGT64)
-        {
-          // FIXME -- need to implement the target address encoding properly
-          as_bad (_("long branch target encoding not implemented"));
-          *insnp++ = 0;
-        }
-      else if (slot->opnd[i].X_op == O_register
-	       || slot->opnd[i].X_op == O_constant
-	       || slot->opnd[i].X_op == O_index
-	       || slot->opnd[i].X_op == O_big)
+	  continue;
+
+	case IA64_OPND_TGT64:
+	  val >>= 4;
+	  *insnp++ = ((val >> 20) & 0x7fffffffffLL) << 2;
+	  insn |= ((((val >> 59) & 0x1) << 36)
+		   | (((val >> 0) & 0xfffff) << 13));
+	  continue;
+
+	case IA64_OPND_AR3:
+	  val -= REG_AR;
+	  break;
+
+	case IA64_OPND_B1:
+	case IA64_OPND_B2:
+	  val -= REG_BR;
+	  break;
+
+	case IA64_OPND_CR3:
+	  val -= REG_CR;
+	  break;
+
+	case IA64_OPND_F1:
+	case IA64_OPND_F2:
+	case IA64_OPND_F3:
+	case IA64_OPND_F4:
+	  val -= REG_FR;
+	  break;
+
+	case IA64_OPND_P1:
+	case IA64_OPND_P2:
+	  val -= REG_P;
+	  break;
+
+	case IA64_OPND_R1:
+	case IA64_OPND_R2:
+	case IA64_OPND_R3:
+	case IA64_OPND_R3_2:
+	case IA64_OPND_CPUID_R3:
+	case IA64_OPND_DBR_R3:
+	case IA64_OPND_DTR_R3:
+	case IA64_OPND_ITR_R3:
+	case IA64_OPND_IBR_R3:
+	case IA64_OPND_MR3:
+	case IA64_OPND_MSR_R3:
+	case IA64_OPND_PKR_R3:
+	case IA64_OPND_PMC_R3:
+	case IA64_OPND_PMD_R3:
+	case IA64_OPND_RR_R3:    
+	  val -= REG_GR;
+	  break;
+
+	default:
+	  break;
+	}
+
+      odesc = elf64_ia64_operands + idesc->operands[i];
+      err = (*odesc->insert) (odesc, val, &insn);
+      if (err)
+	as_bad_where (slot->src_file, slot->src_line,
+		      "Bad operand value: %s", err);
+      if (idesc->flags & IA64_OPCODE_PSEUDO)
 	{
-	  if (slot->opnd[i].X_op == O_big)
+	  if ((idesc->flags & IA64_OPCODE_F2_EQ_F3)
+	      && odesc == elf64_ia64_operands + IA64_OPND_F3)
 	    {
-	      /* This must be the value 0x10000000000000000.  */
-	      assert (idesc->operands[i] == IA64_OPND_IMM8M1U8);
-	      val = 0;
+	      o2desc = elf64_ia64_operands + IA64_OPND_F2;
+	      (*o2desc->insert) (o2desc, val, &insn);
 	    }
-	  else
-	    val = slot->opnd[i].X_add_number;
-
-	  switch (idesc->operands[i])
+	  if ((idesc->flags & IA64_OPCODE_LEN_EQ_64MCNT)
+	      && (odesc == elf64_ia64_operands + IA64_OPND_CPOS6a
+		  || odesc == elf64_ia64_operands + IA64_OPND_POS6))
 	    {
-	    case IA64_OPND_AR3:				val -= REG_AR; break;
-	    case IA64_OPND_B1: case IA64_OPND_B2:	val -= REG_BR; break;
-	    case IA64_OPND_CR3:				val -= REG_CR; break;
-	    case IA64_OPND_F1: case IA64_OPND_F2:
-	    case IA64_OPND_F3: case IA64_OPND_F4:	val -= REG_FR; break;
-	    case IA64_OPND_P1: case IA64_OPND_P2:	val -= REG_P;  break;
-
-	    case IA64_OPND_R1:	     case IA64_OPND_R2:
-	    case IA64_OPND_R3:       case IA64_OPND_R3_2:
-	    case IA64_OPND_CPUID_R3: case IA64_OPND_DBR_R3:
-	    case IA64_OPND_DTR_R3:   case IA64_OPND_ITR_R3:
-	    case IA64_OPND_IBR_R3:   case IA64_OPND_MR3:
-	    case IA64_OPND_MSR_R3:   case IA64_OPND_PKR_R3:
-	    case IA64_OPND_PMC_R3:   case IA64_OPND_PMD_R3:
-	    case IA64_OPND_RR_R3:    
-	      val -= REG_GR;
-	      break;
-
-	    default:
-	      break;
-	    }
-	  odesc = elf64_ia64_operands + idesc->operands[i];
-	  err = (*odesc->insert) (odesc, val, &insn);
-	  if (err)
-	    as_bad_where (slot->src_file, slot->src_line,
-			  "Bad operand value: %s", err);
-	  if (idesc->flags & IA64_OPCODE_PSEUDO)
-	    {
-	      if ((idesc->flags & IA64_OPCODE_F2_EQ_F3)
-		  && odesc == elf64_ia64_operands + IA64_OPND_F3)
-		{
-		  o2desc = elf64_ia64_operands + IA64_OPND_F2;
-		  (*o2desc->insert) (o2desc, val, &insn);
-		      
-		}
-	      if ((idesc->flags & IA64_OPCODE_LEN_EQ_64MCNT)
-		  && (odesc == elf64_ia64_operands + IA64_OPND_CPOS6a
-		      || odesc == elf64_ia64_operands + IA64_OPND_POS6))
-		{
-		  o2desc = elf64_ia64_operands + IA64_OPND_LEN6;
-		  (*o2desc->insert) (o2desc, 64 - val, &insn);
-		}
+	      o2desc = elf64_ia64_operands + IA64_OPND_LEN6;
+	      (*o2desc->insert) (o2desc, 64 - val, &insn);
 	    }
 	}
     }
@@ -4795,6 +4822,10 @@ md_begin ()
 
   pseudo_func[FUNC_LT_RELATIVE].u.sym =
       symbol_new (".<ltoff>", undefined_section, FUNC_LT_RELATIVE,
+		  &zero_address_frag);
+
+  pseudo_func[FUNC_PC_RELATIVE].u.sym =
+      symbol_new (".<pcrel>", undefined_section, FUNC_PC_RELATIVE,
 		  &zero_address_frag);
 
   pseudo_func[FUNC_PLT_RELATIVE].u.sym =
@@ -7960,6 +7991,19 @@ ia64_gen_real_reloc_type (sym, r_type)
 	}
       break;
 
+    case FUNC_PC_RELATIVE:
+      switch (r_type)
+	{
+	case BFD_RELOC_IA64_IMM22:	new = BFD_RELOC_IA64_PCREL22; break;
+	case BFD_RELOC_IA64_IMM64:	new = BFD_RELOC_IA64_PCREL64I; break;
+	case BFD_RELOC_IA64_DIR32MSB:	new = BFD_RELOC_IA64_PCREL32MSB; break;
+	case BFD_RELOC_IA64_DIR32LSB:	new = BFD_RELOC_IA64_PCREL32LSB; break;
+	case BFD_RELOC_IA64_DIR64MSB:	new = BFD_RELOC_IA64_PCREL64MSB; break;
+	case BFD_RELOC_IA64_DIR64LSB:	new = BFD_RELOC_IA64_PCREL64LSB; break;
+	default:			break;
+	}
+      break;
+
     case FUNC_PLT_RELATIVE:
       switch (r_type)
 	{
@@ -8063,7 +8107,7 @@ fix_insn (fix, odesc, value)
   slot = fix->fx_where & 0x3;
   fixpos = fix->fx_frag->fr_literal + (fix->fx_where - slot);
 
-  /* bundles are always in little-endian byte order */
+  /* Bundles are always in little-endian byte order */
   t0 = bfd_getl64 (fixpos);
   t1 = bfd_getl64 (fixpos + 8);
   control_bits = t0 & 0x1f;
@@ -8071,18 +8115,40 @@ fix_insn (fix, odesc, value)
   insn[1] = ((t0 >> 46) & 0x3ffff) | ((t1 & 0x7fffff) << 18);
   insn[2] = (t1 >> 23) & 0x1ffffffffffLL;
 
-  err = (*odesc->insert) (odesc, value, insn + slot);
-  if (err)
+  err = NULL;
+  if (odesc - elf64_ia64_operands == IA64_OPND_IMMU64)
     {
-      as_bad_where (fix->fx_file, fix->fx_line, err);
-      return;
+      insn[1] = (value >> 22) & 0x1ffffffffffLL;
+      insn[2] |= (((value & 0x7f) << 13)
+		  | (((value >> 7) & 0x1ff) << 27)
+		  | (((value >> 16) & 0x1f) << 22)
+		  | (((value >> 21) & 0x1) << 21)
+		  | (((value >> 63) & 0x1) << 36));
     }
+  else if (odesc - elf64_ia64_operands == IA64_OPND_IMMU62)
+    {
+      if (value & ~0x3fffffffffffffffULL)
+	err = "integer operand out of range";
+      insn[1] = (value >> 21) & 0x1ffffffffffLL;
+      insn[2] |= (((value & 0xfffff) << 6) | (((value >> 20) & 0x1) << 36));
+    }
+  else if (odesc - elf64_ia64_operands == IA64_OPND_TGT64)
+    {
+      value >>= 4;
+      insn[1] = ((value >> 20) & 0x7fffffffffLL) << 2;
+      insn[2] |= ((((value >> 59) & 0x1) << 36)
+		  | (((value >> 0) & 0xfffff) << 13));
+    }
+  else
+    err = (*odesc->insert) (odesc, value, insn + slot);
+
+  if (err)
+    as_bad_where (fix->fx_file, fix->fx_line, err);
 
   t0 = control_bits | (insn[0] << 5) | (insn[1] << 46);
   t1 = ((insn[1] >> 18) & 0x7fffff) | (insn[2] << 23);
   md_number_to_chars (fixpos + 0, t0, 8);
   md_number_to_chars (fixpos + 8, t1, 8);
-  
 }
 
 /* Attempt to simplify or even eliminate a fixup.  The return value is

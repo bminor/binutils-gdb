@@ -1,3 +1,13 @@
+2000-05-22  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-ia64.c (FUNC_PC_RELATIVE): New.
+	(pseudo_func): Add pcrel.
+	(operand_match):  Handle IA64_OPND_TGT64.
+	(build_insn): Likewise.
+	(md_begin): Initialize pseudo_func[FUNC_PC_RELATIVE].
+	(ia64_gen_real_reloc_type): Handle FUNC_PC_RELATIVE.
+	(fix_insn): Handle all three 64-bit relocation types.
+
 Mon May 22 22:43:32 2000  Hans-Peter Nilsson  <hp@axis.com>
 
 	* obj.h (struct format_ops): New members begin, app_file,
@@ -410,7 +420,7 @@ Tue Apr 25 11:02:02 2000  Jeffrey A Law  (law@cygnus.com)
 Fri Apr 21 14:29:43 2000  Jeffrey A Law  (law@cygnus.com)
 			  Jason Eckhardt  <jle@cygnus.com>
 
-        * config/tc-hppa.c (md_apply_fix): Handle new PA2.0 formats.
+	* config/tc-hppa.c (md_apply_fix): Handle new PA2.0 formats.
 
 	* config/tc-hppa.c (CHECK_ALIGN): New macro.
 	Added handling of new operand types l,y,&,fe,fE,fx.
