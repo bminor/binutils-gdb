@@ -1,3 +1,19 @@
+Mon Dec 21 21:29:08 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* hppa.h:  Move handy aliases to the front.  Fix masks for extract
+	and deposit instructions.
+
+Sat Dec 12 16:09:48 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* i386.h: accept shld and shrd both with and without the shift
+	count argument, which is always %cl.
+
+Fri Nov 27 17:13:18 1992  Ken Raeburn  (raeburn at cambridge-laptop)
+
+	* i386.h (i386_optab_end, i386_regtab_end): Now const.
+	(one_byte_segment_defaults, two_byte_segment_defaults,
+	i386_prefixtab_end): Ditto.
+
 Mon Nov 23 10:47:25 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 	* vax.h (bb*): Use "v" (bitfield type), not "a" (address operand)
