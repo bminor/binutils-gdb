@@ -1,3 +1,15 @@
+Thu Sep  9 05:52:34 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* emulparms/elf64hppa.sh (OTHER_READWRITE_SECTIONS): Define.
+
+1999-09-08  Ulrich Drepper  <drepper@cygnus.com>
+
+	* emulparams/elf64hppa.sh (ELFSIZE): New.  Set to 64.
+
+Wed Sep  8 00:07:39 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* emulparms/elf64hppa.sh (ENTRY): Define to main.
+
 1999-09-03  Scott Bambrough  <scottb@netwinder.org>
 
 	* ld/configure.host: Added HOSTING_CRT0, HOSTING_LIBS for 
