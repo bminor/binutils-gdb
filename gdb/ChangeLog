@@ -128,7 +128,6 @@
 	* language.c (_initialize_language): Ditto.
 	* arc-tdep.c (_initialize_arc_tdep): Ditto.
 
->>>>>>> 1.2142
 2002-02-04  Michael Snyder  <msnyder@redhat.com>
 
 	* memattr.c (_initialize_mem): Elaborate the help for 'mem' command.
@@ -412,7 +411,6 @@
 	read pseudo-register as well as real register.
 	(legacy_write_register_gen): Ditto.
 
->>>>>>> 1.2132
 2002-01-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/mips/tm-wince.h (TARGET_BYTE_ORDER): Delete.
