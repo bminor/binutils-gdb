@@ -251,7 +251,8 @@ extern CORE_ADDR sparc_pc_adjust PARAMS ((CORE_ADDR));
 #define CANNOT_STORE_REGISTER(regno) ((regno) == G0_REGNUM)
 
 /* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function_by_hand. */
+   subroutine will return.  This is called from call_function_by_hand. 
+   The ultimate mystery is, tho, what is the value "16"?  */
 
 #define STORE_STRUCT_RETURN(ADDR, SP) \
   { char val[4]; \
@@ -466,6 +467,7 @@ extern CORE_ADDR sparc_frame_saved_pc PARAMS ((struct frame_info *));
 
 void sparc_push_dummy_frame PARAMS ((void)), sparc_pop_frame PARAMS ((void));
 
+#ifndef CALL_DUMMY
 /* This sequence of words is the instructions
 
  0:	mov	%g1, %fp
@@ -515,6 +517,7 @@ void sparc_push_dummy_frame PARAMS ((void)), sparc_pop_frame PARAMS ((void));
 
 #define CALL_DUMMY_STACK_ADJUST 68
 
+#endif
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 

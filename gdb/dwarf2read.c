@@ -1513,6 +1513,8 @@ read_file_scope (die, objfile)
       set_cu_language (DW_UNSND (attr));
     }
 
+  /* We assume that we're processing GCC output. */
+  processing_gcc_compilation = 2;
 #if 0
     /* FIXME:Do something here.  */
     if (dip->at_producer != NULL)

@@ -1902,10 +1902,17 @@ handle_producer (producer)
   /* If this compilation unit was compiled with g++ or gcc, then set the
      processing_gcc_compilation flag. */
 
-  processing_gcc_compilation =
-    STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER))
-      || STREQN (producer, CHILL_PRODUCER, strlen (CHILL_PRODUCER))
-      || STREQN (producer, GCC_PRODUCER, strlen (GCC_PRODUCER));
+  if (STREQN (producer, GCC_PRODUCER, strlen (GCC_PRODUCER)))
+    {
+      char version = producer[strlen (GCC_PRODUCER)];
+      processing_gcc_compilation = (version == '2' ? 2 : 1);
+    }
+  else
+    {
+      processing_gcc_compilation =
+	STREQN (producer, GPLUS_PRODUCER, strlen (GPLUS_PRODUCER))
+	|| STREQN (producer, CHILL_PRODUCER, strlen (CHILL_PRODUCER));
+    }
 
   /* Select a demangling style if we can identify the producer and if
      the current style is auto.  We leave the current style alone if it
