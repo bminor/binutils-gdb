@@ -1,3 +1,12 @@
+2002-06-08  Daniel Jacobowitz  <drow@mvista.com>
+
+	Based on patch from Matt Green:
+	* config/obj-elf.h (ECOFF_DEBUGGING): Make configurable.
+	* config/tc-mips.c (s_mips_file): Renamed from s_file.  
+	(s_mips_loc): New function.
+	(mips_nonecoff_pseudo_table): Call them.
+	(append_insn): Call dwarf2_emit_insn.   
+
 2002-06-08  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (mips_opts): Fix comment, all ASE fields are set

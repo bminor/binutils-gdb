@@ -37,6 +37,7 @@
 
 #include "opcode/mips.h"
 #include "itbl-ops.h"
+#include "dwarf2dbg.h"
 
 #ifdef DEBUG
 #define DBG(x) printf x
@@ -766,7 +767,8 @@ static void s_mips_frame PARAMS ((int));
 static void s_mips_mask PARAMS ((int));
 static void s_mips_stab PARAMS ((int));
 static void s_mips_weakext PARAMS ((int));
-static void s_file PARAMS ((int));
+static void s_mips_file PARAMS ((int));
+static void s_mips_loc PARAMS ((int));
 static int mips16_extended_frag PARAMS ((fragS *, asection *, long));
 static const char *mips_isa_to_str PARAMS ((int));
 static const char *mips_cpu_to_str PARAMS ((int));
@@ -899,10 +901,10 @@ static const pseudo_typeS mips_nonecoff_pseudo_table[] =
   {"end", s_mips_end, 0},
   {"endb", s_ignore, 0},
   {"ent", s_mips_ent, 0},
-  {"file", s_file, 0},
+  {"file", s_mips_file, 0},
   {"fmask", s_mips_mask, 'F'},
   {"frame", s_mips_frame, 0},
-  {"loc", s_ignore, 0},
+  {"loc", s_mips_loc, 0},
   {"mask", s_mips_mask, 'R'},
   {"verstamp", s_ignore, 0},
   { NULL, NULL, 0 },
@@ -2018,11 +2020,19 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
     }
 
   if (! mips_opts.mips16)
-    md_number_to_chars (f, ip->insn_opcode, 4);
+    {
+      md_number_to_chars (f, ip->insn_opcode, 4);
+#ifdef OBJ_ELF
+      dwarf2_emit_insn (4);
+#endif
+    }
   else if (*reloc_type == BFD_RELOC_MIPS16_JMP)
     {
       md_number_to_chars (f, ip->insn_opcode >> 16, 2);
       md_number_to_chars (f + 2, ip->insn_opcode & 0xffff, 2);
+#ifdef OBJ_ELF
+      dwarf2_emit_insn (4);
+#endif
     }
   else
     {
@@ -2032,6 +2042,9 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	  f += 2;
 	}
       md_number_to_chars (f, ip->insn_opcode, 2);
+#ifdef OBJ_ELF
+      dwarf2_emit_insn (ip->use_extend ? 4 : 2);
+#endif
     }
 
   /* Update the register mask information.  */
@@ -13346,14 +13359,30 @@ get_number ()
 }
 
 /* The .file directive; just like the usual .file directive, but there
-   is an initial number which is the ECOFF file index.  */
+   is an initial number which is the ECOFF file index.  In the non-ECOFF
+   case .file implies DWARF-2.  */
 
 static void
-s_file (x)
+s_mips_file (x)
      int x ATTRIBUTE_UNUSED;
 {
-  get_number ();
-  s_app_file (0);
+  if (ECOFF_DEBUGGING)
+    {
+      get_number ();
+      s_app_file (0);
+    }
+  else
+    dwarf2_directive_file (0);
+}
+
+/* The .loc directive, implying DWARF-2.  */
+
+static void
+s_mips_loc (x)
+     int x ATTRIBUTE_UNUSED;
+{
+  if (!ECOFF_DEBUGGING)
+    dwarf2_directive_loc (0);
 }
 
 /* The .end directive.  */
