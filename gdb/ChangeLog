@@ -1,3 +1,9 @@
+Sun Jul  5 11:03:53 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* energize-patches:  Change names of all cadillac procedure calls
+	to be energize procedure calls.  Simplify many hooks by moving
+	tests energize.c.  Configure energize, and build it automatically now.
+
 Sun Jul  5 09:43:28 1992  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (VERSION):  Bump to 4.5.7.
