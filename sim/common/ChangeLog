@@ -1,3 +1,9 @@
+Tue Apr 14 16:31:35 1998  John Metzler  <jmetzler@cygnus.com>
+
+	* sim-memopt.c (parse_addr): Sunos 4.5 does not hane strtol
+ 	declared so we need this cast to prevent long long addresses
+	from being misconfigures. Results in access to unmapped memory.
+
 Tue Apr 14 13:19:14 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* Make-common.in (RUNTESTFLAGS): Define.
