@@ -439,7 +439,6 @@ vax-tdep.c
 vx-share
 w65-tdep.c
 w89k-rom.c
-wigglers.def
 win32-nat.c
 xcoffread.c
 xcoffsolib.c
