@@ -3735,6 +3735,40 @@ set_default_breakpoint (int valid, CORE_ADDR addr, struct symtab *symtab,
   default_breakpoint_line = line;
 }
 
+/* Return true iff it is meaningful to use the address member of
+   BPT.  For some breakpoint types, the address member is irrelevant
+   and it makes no sense to attempt to compare it to other addresses
+   (or use it for any other purpose either).
+
+   More specifically, each of the following breakpoint types will always
+   have a zero valued address and we don't want check_duplicates() to mark
+   breakpoints of any of these types to be a duplicate of an actual
+   breakpoint at address zero:
+
+      bp_watchpoint
+      bp_hardware_watchpoint
+      bp_read_watchpoint
+      bp_access_watchpoint
+      bp_catch_exec
+      bp_longjmp_resume
+      bp_catch_fork
+      bp_catch_vork */
+
+static int
+breakpoint_address_is_meaningful (struct breakpoint *bpt)
+{
+  enum bptype type = bpt->type;
+
+  return (type != bp_watchpoint
+	  && type != bp_hardware_watchpoint
+	  && type != bp_read_watchpoint
+	  && type != bp_access_watchpoint
+	  && type != bp_catch_exec
+	  && type != bp_longjmp_resume
+	  && type != bp_catch_fork
+	  && type != bp_catch_vfork);
+}
+
 /* Rescan breakpoints at the same address and section as BPT,
    marking the first one as "first" and any others as "duplicates".
    This is so that the bpt instruction is only inserted once.
@@ -3750,11 +3784,7 @@ check_duplicates (struct breakpoint *bpt)
   CORE_ADDR address = bpt->address;
   asection *section = bpt->section;
 
-  /* Watchpoints are uninteresting.  */
-  if (bpt->type == bp_watchpoint
-      || bpt->type == bp_hardware_watchpoint
-      || bpt->type == bp_read_watchpoint
-      || bpt->type == bp_access_watchpoint)
+  if (! breakpoint_address_is_meaningful (bpt))
     return;
 
   ALL_BREAKPOINTS (b)
@@ -3762,7 +3792,8 @@ check_duplicates (struct breakpoint *bpt)
 	&& b->enable != shlib_disabled
 	&& b->enable != call_disabled
 	&& b->address == address
-	&& (overlay_debugging == 0 || b->section == section))
+	&& (overlay_debugging == 0 || b->section == section)
+	&& breakpoint_address_is_meaningful (b))
     {
       /* Have we found a permanent breakpoint?  */
       if (b->enable == permanent)
@@ -3800,7 +3831,8 @@ check_duplicates (struct breakpoint *bpt)
 		&& b->enable != shlib_disabled
 		&& b->enable != call_disabled
 		&& b->address == address
-		&& (overlay_debugging == 0 || b->section == section))
+		&& (overlay_debugging == 0 || b->section == section)
+		&& breakpoint_address_is_meaningful (b))
 	      b->duplicate = 1;
 	  }
     }
