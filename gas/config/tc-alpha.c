@@ -61,6 +61,10 @@
 /* @@ Will a simple 0x8000 work here?  If not, why not?  */
 #define GP_ADJUSTMENT	(0x8000 - 0x10)
 
+/* Which machine type is this?  Currently stores an integer for the
+   model, one of: 21064, 21066, 21164.  */
+static unsigned long machine;
+
 /* These are exported to relaxing code, even though we don't do any
    relaxing on this processor currently.  */
 const relax_typeS md_relax_table[1];
@@ -148,7 +152,8 @@ const pseudo_typeS md_pseudo_table[] =
 #define	T9	23
 #define	T10	24
 #define	T11	25
-#define RA	26
+#define T12	26
+#define RA	26		/* note: same as T12 */
 #define	PV	27
 #define	AT	28
 #define	GP	29
@@ -188,6 +193,7 @@ const char line_separator_chars[1];
 
 /* Chars that mean this number is a floating point constant, as in
    "0f12.456" or "0d1.2345e12".  */
+/* @@ Do all of these really get used on the alpha??  */
 char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 /* Also be aware that MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT may have to be
@@ -482,8 +488,74 @@ get_lit4_offset (val)
   return retval;
 }
 
+#define load_insn(NAME, OP)	(hash_insert (op_hash, (NAME), (PTR) (OP)))
+
+static void
+load_insn_table (ops, size)
+     struct alpha_opcode *ops;
+     int size;
+{
+  struct alpha_opcode *end = ops + size;
+  struct alpha_opcode *op;
+  const char *name;
+
+  for (op = ops; op < end; )
+    {
+      const char *retval;
+
+      name = op->name;
+
+      retval = load_insn (op->name, op);
+      if (retval)
+	as_fatal ("internal error: can't hash opcode `%s': %s",
+		  op->name, retval);
+
+      do
+	op++;
+      while (op < end
+	     && (op->name == name
+		 || !strcmp (op->name, name)));
+    }
+  /* Some opcodes include modifiers of various sorts with a "/mod"
+     syntax, like the architecture documentation suggests.  However,
+     for use with gcc at least, we also need to access those same
+     opcodes without the "/".  */
+  for (op = ops; op < end; )
+    {
+      name = op->name;
+
+      if (strchr (name, '/'))
+	{
+	  const char *name2, *p, *q;
+
+	  name2 = xmalloc (strlen (name));
+	  p = name2;
+	  q = name;
+
+	  while (*q)
+	    if (*q == '/')
+	      q++;
+	    else
+	      *p++ = *q++;
+	  *p = 0;
+	  /* Ignore failures -- the opcode table does duplicate some
+	     variants in different forms, like "hw_stq" and "hw_st/q".
+	     Maybe the variants can be eliminated, and this error checking
+	     restored.  */
+	  load_insn (name2, op);
+	}
+
+      do
+	op++;
+      while (op < end
+	     && (op->name == name
+		 || !strcmp (op->name, name)));
+    }
+}
+
 /* This function is called once, at assembler startup time.  It should
-   set up all the tables, etc. that the MD part of the assembler will need.  */
+   set up all the tables, etc. that the MD part of the assembler will
+   need, that can be determined before arguments are parsed.  */
 void
 md_begin ()
 {
@@ -492,64 +564,24 @@ md_begin ()
   unsigned int i = 0;
 
   op_hash = hash_new ();
+  load_insn_table (alpha_opcodes, NUMOPCODES);
 
-  for (i = 0; i < NUMOPCODES; )
+  /* Default to 21064 PAL instructions.  */
+  if (machine == 0)
+    machine = 21064;
+
+  switch (machine)
     {
-      const char *name = alpha_opcodes[i].name;
-      retval = hash_insert (op_hash, name, (PTR) & alpha_opcodes[i]);
-      if (retval)
-	{
-	  as_bad ("internal error: can't hash opcode `%s': %s",
-		  alpha_opcodes[i].name, retval);
-	  lose = 1;
-	}
-      do
-	++i;
-      while (i < NUMOPCODES
-	     && (alpha_opcodes[i].name == name
-		 || !strcmp (alpha_opcodes[i].name, name)));
+    case 21064:
+    case 21066:
+      load_insn_table (alpha_pal21064_opcodes, NUM21064OPCODES);
+      break;
+    case 21164:
+      load_insn_table (alpha_pal21164_opcodes, NUM21164OPCODES);
+      break;
+    default:
+      as_fatal ("palcode set unknown (internal error)");
     }
-  /* Some opcodes include modifiers of various sorts with a "/mod"
-     syntax, like the architecture documentation suggests.  However,
-     for use with gcc at least, we also need to access those same
-     opcodes without the "/".  */
-  for (i = 0; i < NUMOPCODES; )
-    {
-      const char *name = alpha_opcodes[i].name;
-      if (strchr (name, '/'))
-	{
-	  char *p = xmalloc (strlen (name));
-	  const char *q = name;
-	  char *q2 = p;
-
-	  for (; *q; q++)
-	    if (*q != '/')
-	      *q2++ = *q;
-
-	  *q2++ = 0;
-	  retval = hash_insert (op_hash, p, (PTR) & alpha_opcodes[i]);
-	  if (retval)
-	    {
-	      /* Ignore failures -- the opcode table does duplicate
-		 some variants in different forms, like "hw_st/q" and
-		 "hw_stq".  */
-#if 0
-	      as_bad ("internal error: can't hash opcode variant `%s': %s",
-		      p, retval);
-	      lose = 1;
-#endif
-	    }
-	}
-      do
-	++i;
-      while (i < NUMOPCODES
-	     && (alpha_opcodes[i].name == name
-		 || !strcmp (alpha_opcodes[i].name, name)));
-    }
-
-
-  if (lose)
-    as_fatal ("Broken assembler.  No assembly attempted.");
 
   lituse_basereg.X_op = O_constant;
   lituse_basereg.X_add_number = 1;
@@ -569,12 +601,48 @@ md_begin ()
 
 int optnum = 1;
 
+static void
+emit_insn (insn)
+     struct alpha_it *insn;
+{
+  char *toP;
+  int j;
+
+  toP = frag_more (4);
+
+  /* put out the opcode */
+  md_number_to_chars (toP, insn->opcode, 4);
+
+  /* put out the symbol-dependent stuff */
+  for (j = 0; j < MAX_RELOCS; j++)
+    {
+      struct reloc_data *r = &insn->reloc[j];
+      fixS *f;
+
+      if (r->code != BFD_RELOC_NONE)
+	{
+	  if (r->exp.X_op == O_constant)
+	    {
+	      r->exp.X_add_symbol = section_symbol (absolute_section);
+	      r->exp.X_op = O_symbol;
+	    }
+	  f = fix_new_exp (frag_now, (toP - frag_now->fr_literal), 4,
+			   &r->exp, r->pcrel, r->code);
+	}
+      if (r->code == BFD_RELOC_ALPHA_GPDISP_LO16)
+	{
+	  static bit_fixS cookie;
+	  /* @@ This'll make the range checking in write.c shut up.  */
+	  f->fx_bit_fixP = &cookie;
+	}
+    }
+}
+
 void
 md_assemble (str)
      char *str;
 {
-  char *toP;
-  int i, j, count;
+  int i, count;
 #define	MAX_INSNS	5
   struct alpha_it insns[MAX_INSNS];
 
@@ -583,36 +651,7 @@ md_assemble (str)
     return;
 
   for (i = 0; i < count; i++)
-    {
-      toP = frag_more (4);
-
-      /* put out the opcode */
-      md_number_to_chars (toP, insns[i].opcode, 4);
-
-      /* put out the symbol-dependent stuff */
-      for (j = 0; j < MAX_RELOCS; j++)
-	{
-	  struct reloc_data *r = &insns[i].reloc[j];
-	  fixS *f;
-
-	  if (r->code != BFD_RELOC_NONE)
-	    {
-	      if (r->exp.X_op == O_constant)
-		{
-		  r->exp.X_add_symbol = section_symbol (absolute_section);
-		  r->exp.X_op = O_symbol;
-		}
-	      f = fix_new_exp (frag_now, (toP - frag_now->fr_literal), 4,
-			       &r->exp, r->pcrel, r->code);
-	    }
-	  if (r->code == BFD_RELOC_ALPHA_GPDISP_LO16)
-	    {
-	      static bit_fixS cookie;
-	      /* This'll make the range checking in write.c shut up.  */
-	      f->fx_bit_fixP = &cookie;
-	    }
-	}
-    }
+    emit_insn (&insns[i]);
 }
 
 static inline void
@@ -672,6 +711,7 @@ alpha_force_relocation (f)
     case BFD_RELOC_8:
     case BFD_RELOC_23_PCREL_S2:
     case BFD_RELOC_14:
+    case BFD_RELOC_26:
       return 0;
     default:
       abort ();
@@ -712,13 +752,11 @@ md_section_align (seg, size)
 }
 
 /* Add this thing to the .lita section and produce a LITERAL reloc referring
-   to it.
+   to it.  */
 
-   TODO:
-   Remove duplicates.
-   Set GP value properly, and have values in LITERAL references set
-   accordingly.
-   */
+/* Are we currently eligible to emit a LITUSE reloc for the literal
+   references just generated?  */
+static int lituse_pending;
 
 static void
 load_symbol_address (reg, insn)
@@ -749,6 +787,7 @@ load_symbol_address (reg, insn)
   insn->reloc[0].exp.X_add_symbol = lita_sym;
   insn->reloc[0].exp.X_add_number = retval;
   insn->reloc[0].code = BFD_RELOC_ALPHA_LITERAL;
+  lituse_pending = 1;
 
   if (retval == 0x8000)
     /* Overflow? */
@@ -815,6 +854,7 @@ load_expression (reg, insn)
 			| (addend & 0xffff));
       insn[1].reloc[0].code = BFD_RELOC_ALPHA_LITUSE;
       insn[1].reloc[0].exp = lituse_basereg;
+      lituse_pending = 0;
     }
   return num_insns;
 }
@@ -876,6 +916,80 @@ getExpression (str, this_insn)
   /* XXX validate seg and exp, make sure they're reasonable */
   expr_end = input_line_pointer;
   input_line_pointer = save_in;
+}
+
+/* All of these should soon be changed to just emit words to the
+   output frag...  */
+static void
+emit_unaligned_io (dir, addr_reg, addr_offset, reg)
+     char *dir;
+     int addr_reg, reg;
+     valueT addr_offset;
+{
+  char buf[90];
+  sprintf (buf, "%sq_u $%d,%ld($%d)", dir, reg, (long) addr_offset, addr_reg);
+  md_assemble (buf);
+}
+
+static void
+emit_load_unal (addr_reg, addr_offset, reg)
+     int addr_reg, reg;
+     valueT addr_offset;
+{
+  emit_unaligned_io ("ld", addr_reg, addr_offset, reg);
+}
+
+static void
+emit_store_unal (addr_reg, addr_offset, reg)
+     int addr_reg, reg;
+     valueT addr_offset;
+{
+  emit_unaligned_io ("st", addr_reg, addr_offset, reg);
+}
+
+static void
+emit_byte_manip_r (op, in, mask, out, mode, which)
+     char *op;
+{
+  char buf[90];
+  sprintf (buf, "%s%c%c $%d,$%d,$%d", op, mode, which, in, mask, out);
+  md_assemble (buf);
+}
+
+static void
+emit_extract_r (in, mask, out, mode, which)
+{
+  emit_byte_manip_r ("ext", in, mask, out, mode, which);
+}
+
+static void
+emit_insert_r (in, mask, out, mode, which)
+{
+  emit_byte_manip_r ("ins", in, mask, out, mode, which);
+}
+
+static void
+emit_mask_r (in, mask, out, mode, which)
+{
+  emit_byte_manip_r ("msk", in, mask, out, mode, which);
+}
+
+static void
+emit_sign_extend (reg, size)
+{
+  char buf[90];
+  sprintf (buf, "sll $%d,0x%x,$%d", reg, 64 - size, reg);
+  md_assemble (buf);
+  sprintf (buf, "sra $%d,0x%x,$%d", reg, 64 - size, reg);
+  md_assemble (buf);
+}
+
+static void
+emit_bis_r (in1, in2, out)
+{
+  char buf[90];
+  sprintf (buf, "bis $%d,$%d,$%d", in1, in2, out);
+  md_assemble (buf);
 }
 
 /* Note that for now, this function is called recursively (by way of
@@ -1141,6 +1255,10 @@ alpha_ip (str, insns)
 	      insns[0].reloc[0].code = BFD_RELOC_8;
 	      goto immediate;
 
+	    case 'I':		/* 26 bit immediate, for PALcode */
+	      insns[0].reloc[0].code = BFD_RELOC_26;
+	      goto immediate;
+
 #if 0
 	    case 't':		/* 12 bit 0...11 */
 	      insns[0].reloc = RELOC_0_12;
@@ -1155,7 +1273,6 @@ alpha_ip (str, insns)
 #else
 	    case 't':
 	    case '8':
-	    case 'I':
 	      abort ();
 #endif
 	      /*FALLTHROUGH*/
@@ -1257,8 +1374,12 @@ alpha_ip (str, insns)
 		insns[0].reloc[0].exp.X_op = O_symbol;
 		offset &= 0xffff;
 		num_gen = load_expression (AT, &insns[0]);
-		insns[num_gen].reloc[0].code = BFD_RELOC_ALPHA_LITUSE;
-		insns[num_gen].reloc[0].exp = lituse_basereg;
+		if (lituse_pending)
+		  {
+		    insns[num_gen].reloc[0].code = BFD_RELOC_ALPHA_LITUSE;
+		    insns[num_gen].reloc[0].exp = lituse_basereg;
+		    lituse_pending = 0;
+		  }
 		insns[num_gen++].opcode = opcode | (AT << SB) | offset;
 		opcode = insns[0].opcode;
 		s = input_line_pointer;
@@ -1342,15 +1463,23 @@ alpha_ip (str, insns)
 		    tmp_reg = AT;
 		  num_gen = load_expression (tmp_reg, insns);
 		  opcode = insns[0].opcode;
-		  /* lda is opcode 8, 0x20000000 */
-		  if (OPCODE (old_opcode) != 0x08)
+		  /* lda is opcode 8, 0x20000000, and the macros that use
+		     this code have an opcode field of 0.  The latter
+		     require further processing, and we don't have the
+		     true opcode here.  */
+		  if (OPCODE (old_opcode) != 0
+		      && OPCODE (old_opcode) != 0x08)
 		    {
 		      struct alpha_it *i;
 		      i = &insns[num_gen++];
 		      i->opcode = old_opcode | (tmp_reg << SB);
 
-		      i->reloc[0].code = BFD_RELOC_ALPHA_LITUSE;
-		      i->reloc[0].exp = lituse_basereg;
+		      if (lituse_pending)
+			{
+			  i->reloc[0].code = BFD_RELOC_ALPHA_LITUSE;
+			  i->reloc[0].exp = lituse_basereg;
+			  lituse_pending = 0;
+			}
 		    }
 		}
 	      else
@@ -1422,7 +1551,8 @@ alpha_ip (str, insns)
 			insns[1].opcode |= addend & 0xffff;
 			insns[0].opcode |= ((addend >> 16)
 					    + (addend & 0x8000 ? 1 : 0));
-			ecoff_set_gp_prolog_size (0);
+			if (r2 == PV)
+			  ecoff_set_gp_prolog_size (0);
 		      }
 		      break;
 		    default:
@@ -1468,12 +1598,13 @@ alpha_ip (str, insns)
 				   | (mask << SA)
 				   | (PV << SB)
 				   | 0);
-		    if (num_gen == 2)
+		    if (lituse_pending)
 		      {
 			/* LITUSE wasn't emitted yet */
 			jsr->reloc[0].code = BFD_RELOC_ALPHA_LITUSE;
 			jsr->reloc[0].exp = lituse_jsr;
 			r = &jsr->reloc[1];
+			lituse_pending = 0;
 		      }
 		    else
 		      r = &jsr->reloc[0];
@@ -1483,6 +1614,187 @@ alpha_ip (str, insns)
 		    opcode = insns[0].opcode;
 		  }
 		  continue;
+
+		case 'd':
+		  /* Sub-word loads and stores.  We load the address into
+		     $at, which might involve using the `P' parameter
+		     processing too, then emit a sequence to get the job
+		     done, using unaligned memory accesses and byte
+		     manipulation, with t9 and t10 as temporaries.  */
+		  {
+		    /* Characteristics of access.  */
+		    int is_load, is_unsigned = 0, is_unaligned = 0;
+		    int mode_size, mode;
+		    /* Register operand.  */
+		    int reg;
+		    /* Addend for loads and stores.  */
+		    valueT addend;
+		    /* Which register do we use for the address?  */
+		    int addr;
+
+		    {
+		      /* Pick apart name and set flags.  */
+		      char *s = pattern->name;
+
+		      if (*s == 'u')
+			{
+			  is_unaligned = 1;
+			  s++;
+			}
+
+		      if (s[0] == 'l' && s[1] == 'd')
+			is_load = 1;
+		      else if (s[0] == 's' && s[1] == 't')
+			is_load = 0;
+		      else
+			as_fatal ("unrecognized sub-word access insn `%s'",
+				  str);
+		      s += 2;
+
+		      mode = *s++;
+		      if (mode == 'b') mode_size = 1;
+		      else if (mode == 'w') mode_size = 2;
+		      else if (mode == 'l') mode_size = 4;
+		      else if (mode == 'q') mode_size = 8;
+		      else abort ();
+
+		      if (*s == 'u')
+			{
+			  is_unsigned = 1;
+			  s++;
+			}
+
+		      assert (*s == 0);
+
+		      /* Longwords are always kept sign-extended.  */
+		      if (mode == 'l' && is_unsigned)
+			abort ();
+		      /* There's no special unaligned byte handling.  */
+		      if (mode == 'b' && is_unaligned)
+			abort ();
+		      /* Stores don't care about signedness.  */
+		      if (!is_load && is_unsigned)
+			abort ();
+		    }
+
+		    if (args[-2] == 'P')
+		      {
+			addr = AT;
+			addend = 0;
+		      }
+		    else
+		      {
+			/* foo r1,num(r2)
+			   r2 -> mask
+			   r1 -> (opcode >> SA) & 31
+			   num -> insns->reloc[0].*
+
+			   We want to emit "lda at,num(r2)", since these
+			   operations require the use of a single register
+			   with the starting address of the memory operand
+			   we want to access.
+
+			   We could probably get away without doing this
+			   (and use r2 below, with the addend for the
+			   actual reads and writes) in cases where the
+			   addend is known to be a multiple of 8.  */
+			int r2 = mask;
+			int r1 = (opcode >> SA) & 31;
+
+			if (insns[0].reloc[0].code == BFD_RELOC_NONE)
+			  addend = 0;
+			else if (insns[0].reloc[0].code == BFD_RELOC_16)
+			  {
+			    if (insns[0].reloc[0].exp.X_op != O_constant)
+			      abort ();
+			    addend = insns[0].reloc[0].exp.X_add_number;
+			  }
+			else
+			  abort ();
+
+			if (addend + mode_size - 1 < 0x7fff
+			    && (addend % 8) == 0
+			    && (r2 < T9 || r2 > T12))
+			  {
+			    addr = r2;
+			    num_gen = 0;
+			  }
+			else
+			  {
+			    /* Let later relocation processing deal
+			       with the addend field.  */
+			    insns[num_gen-1].opcode = (0x20000000 /* lda */
+						       | (AT << SA)
+						       | (r2 << SB));
+			    addr = AT;
+			    addend = 0;
+			  }
+			reg = r1;
+		      }
+
+		    /* Because the emit_* routines append directly to
+		       the current frag, we now need to flush any
+		       pending insns.  */
+		    {
+		      int i;
+		      for (i = 0; i < num_gen; i++)
+			emit_insn (&insns[i]);
+		      num_gen = 0;
+		    }
+
+		    if (is_load)
+		      {
+			int reg2, reg3;
+
+			if (is_unaligned)
+			  reg2 = T9, reg3 = T10;
+			else
+			  reg2 = reg;
+
+			emit_load_unal (addr, addend, T9);
+			if (is_unaligned)
+			  emit_load_unal (addr, addend + mode_size - 1, T10);
+			emit_extract_r (T9, addr, reg2, mode, 'l');
+			if (is_unaligned)
+			  {
+			    emit_extract_r (T10, addr, reg3, mode, 'h');
+			    emit_bis_r (T9, T10, reg);
+			  }
+			if (!is_unsigned)
+			  emit_sign_extend (reg, mode_size * 8);
+		      }
+		    else
+		      {
+			/* The second word gets processed first
+			   because if the address does turn out to be
+			   aligned, the processing for the second word
+			   will be pushing around all-zeros, and the
+			   entire value will be handled as the `first'
+			   word.  So we want to store the `first' word
+			   last.  */
+			/* Pair these up so that the memory loads get
+			   separated from each other, as well as being
+			   well in advance of the uses of the values
+			   loaded.  */
+			if (is_unaligned)
+			  {
+			    emit_load_unal (addr, addend + mode_size - 1, T11);
+			    emit_insert_r (reg, addr, T12, mode, 'h');
+			  }
+			emit_load_unal (addr, addend, T9);
+			emit_insert_r (reg, addr, T10, mode, 'l');
+			if (is_unaligned)
+			  emit_mask_r (T12, addr, T12, mode, 'h');
+			emit_mask_r (T10, addr, T10, mode, 'l');
+			if (is_unaligned)
+			  emit_bis_r (T11, T12, T11);
+			emit_bis_r (T9, T10, T9);
+			if (is_unaligned)
+			  emit_store_unal (addr, addend + mode_size - 1, T11);
+			emit_store_unal (addr, addend, T9);
+		      }
+		  }
+		  return 0;
 
 		  /* DIVISION and MODULUS. Yech.
 		       Convert	OP x,y,result
@@ -1733,6 +2045,34 @@ md_parse_option (argP, cntP, vecP)
       *argP += 5;
       return 1;
     }
+  if (**argP == 'm')
+    {
+      unsigned long mach;
+
+      (*argP)++;
+      if (!strcmp (*argP, "21064"))
+	mach = 21064;
+      else if (!strcmp (*argP, "21066"))
+	mach = 21066;
+      else if (!strcmp (*argP, "21164"))
+	mach = 21164;
+      else
+	{
+	  mach = 0;
+	  (*argP)--;
+	  return 0;
+	}
+      (*argP) += 5;
+
+      if (machine != 0 && machine != mach)
+	{
+	  as_warn ("machine type %lu already chosen, overriding with %lu",
+		   machine, mach);
+	}
+      machine = mach;
+
+      return 1;
+    }
   return 0;
 }
 
@@ -1920,6 +2260,28 @@ md_apply_fix (fixP, valueP)
 	  goto done;
 	}
       break;
+
+    case BFD_RELOC_26:
+      if (fixP->fx_addsy != 0
+	  && fixP->fx_addsy->bsym->section != absolute_section)
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      "PALcode instructions require immediate constant function code");
+      else if (value >> 26 != 0)
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      "overflow in 26-bit PALcode function field");
+      *p++ = value & 0xff;
+      value >>= 8;
+      *p++ = value & 0xff;
+      value >>= 8;
+      *p++ = value & 0xff;
+      value >>= 8;
+      {
+	char x = *p;
+	x &= ~3;
+	x |= (value & 3);
+	*p++ = x;
+      }
+      goto done;
 
     case BFD_RELOC_14:
       if (fixP->fx_addsy != 0
