@@ -1,3 +1,8 @@
+Tue Jan 10 16:22:41 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
+
+	* mips-tdep.c (mips_skip_prologue): Accept or as well as addu for
+	`move $s8, $sp' instruction.
+
 Sun Jan  8 12:45:34 1995  Jim Kingdon  <kingdon@deneb.cygnus.com>
 
 	* target.c, target.h (target_signal_from_command): New function.

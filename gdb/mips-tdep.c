@@ -45,6 +45,10 @@ static int mips_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
 
 void mips_set_processor_type_command PARAMS ((char *, int));
 
+int mips_set_processor_type PARAMS ((char *));
+
+static void mips_show_processor_type_command PARAMS ((char *, int));
+
 static void reinit_frame_cache_sfunc PARAMS ((char *, int,
 					      struct cmd_list_element *));
 
@@ -1091,8 +1095,12 @@ mips_skip_prologue (pc, lenient)
 	else if ((inst & 0xF3E00000) == 0xA3C00000 && (inst & 0x001F0000))
 						/* sx reg,n($s8) */
 	    continue;				/* reg != $zero */
-	else if (inst == 0x03A0F021)		/* move $s8,$sp */
+ 
+        /* move $s8,$sp.  With different versions of gas this will be either
+           `addu $s8,$sp,$zero' or `or $s8,$sp,$zero'.  Accept either.  */
+        else if (inst == 0x03A0F021 || inst == 0x03a0f025)
 	    continue;
+
 	else if ((inst & 0xFF9F07FF) == 0x00800021) /* move reg,$a0-$a3 */
 	    continue;
 	else if ((inst & 0xffff0000) == 0x3c1c0000) /* lui $gp,n */
@@ -1255,7 +1263,7 @@ mips_set_processor_type (str)
   int i, j;
 
   if (str == NULL)
-    return;
+    return 0;
 
   for (i = 0; mips_processor_type_table[i].name != NULL; ++i)
     {
