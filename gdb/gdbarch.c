@@ -514,8 +514,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->sdb_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->dwarf2_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->register_name = legacy_register_name;
-  current_gdbarch->register_size = -1;
-  current_gdbarch->register_bytes = -1;
   current_gdbarch->register_byte = generic_register_byte;
   current_gdbarch->register_raw_size = generic_register_size;
   current_gdbarch->register_virtual_size = generic_register_size;
@@ -643,12 +641,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of sdb_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of dwarf2_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of register_name, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->register_size == -1))
-    fprintf_unfiltered (log, "\n\tregister_size");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->register_bytes == -1))
-    fprintf_unfiltered (log, "\n\tregister_bytes");
   /* Skip verify of register_byte, invalid_p == 0 */
   /* Skip verify of register_raw_size, invalid_p == 0 */
   /* Skip verify of deprecated_max_register_raw_size, has predicate */
@@ -3286,9 +3278,6 @@ int
 gdbarch_register_size (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->register_size == -1)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_register_size invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_size called\n");
   return gdbarch->register_size;
@@ -3305,9 +3294,6 @@ int
 gdbarch_register_bytes (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->register_bytes == -1)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_register_bytes invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_bytes called\n");
   return gdbarch->register_bytes;

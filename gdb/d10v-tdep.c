@@ -73,7 +73,7 @@ enum
     LR_REGNUM = 13,
     D10V_SP_REGNUM = 15,
     PSW_REGNUM = 16,
-    _PC_REGNUM = 18,
+    D10V_PC_REGNUM = 18,
     NR_IMAP_REGS = 2,
     NR_A_REGS = 2,
     TS2_NUM_REGS = 37,
@@ -322,7 +322,7 @@ d10v_ts3_register_sim_regno (int nr)
 static struct type *
 d10v_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
-  if (reg_nr == PC_REGNUM)
+  if (reg_nr == D10V_PC_REGNUM)
     return builtin_type_void_func_ptr;
   if (reg_nr == D10V_SP_REGNUM || reg_nr == D10V_FP_REGNUM)
     return builtin_type_void_data_ptr;
@@ -811,7 +811,7 @@ d10v_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 
   {
     ULONGEST pc, psw, rpt_s, rpt_e, rpt_c;
-    frame_read_unsigned_register (frame, PC_REGNUM, &pc);
+    frame_read_unsigned_register (frame, D10V_PC_REGNUM, &pc);
     frame_read_unsigned_register (frame, PSW_REGNUM, &psw);
     frame_read_unsigned_register (frame, frame_map_name_to_regnum ("rpt_s", -1), &rpt_s);
     frame_read_unsigned_register (frame, frame_map_name_to_regnum ("rpt_e", -1), &rpt_e);
@@ -895,7 +895,7 @@ d10v_read_pc (ptid_t ptid)
 
   save_ptid = inferior_ptid;
   inferior_ptid = ptid;
-  pc = (int) read_register (PC_REGNUM);
+  pc = (int) read_register (D10V_PC_REGNUM);
   inferior_ptid = save_ptid;
   retval = d10v_make_iaddr (pc);
   return retval;
@@ -908,7 +908,7 @@ d10v_write_pc (CORE_ADDR val, ptid_t ptid)
 
   save_ptid = inferior_ptid;
   inferior_ptid = ptid;
-  write_register (PC_REGNUM, d10v_convert_iaddr_to_raw (val));
+  write_register (D10V_PC_REGNUM, d10v_convert_iaddr_to_raw (val));
   inferior_ptid = save_ptid;
 }
 
@@ -1207,7 +1207,7 @@ d10v_eva_prepare_to_trace (void)
   if (!tracing)
     return;
 
-  last_pc = read_register (PC_REGNUM);
+  last_pc = read_register (D10V_PC_REGNUM);
 }
 
 /* Collect trace data from the target board and format it into a form
@@ -1373,7 +1373,7 @@ static CORE_ADDR
 d10v_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST pc;
-  frame_unwind_unsigned_register (next_frame, PC_REGNUM, &pc);
+  frame_unwind_unsigned_register (next_frame, D10V_PC_REGNUM, &pc);
   return d10v_make_iaddr (pc);
 }
 
@@ -1477,7 +1477,7 @@ d10v_frame_prev_register (struct frame_info *next_frame,
 {
   struct d10v_unwind_cache *info
     = d10v_frame_unwind_cache (next_frame, this_prologue_cache);
-  if (regnum == PC_REGNUM)
+  if (regnum == D10V_PC_REGNUM)
     {
       /* The call instruction saves the caller's PC in LR.  The
 	 function prologue of the callee may then save the LR on the
@@ -1582,11 +1582,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_num_regs (gdbarch, d10v_num_regs);
   set_gdbarch_sp_regnum (gdbarch, D10V_SP_REGNUM);
-  set_gdbarch_pc_regnum (gdbarch, 18);
   set_gdbarch_register_name (gdbarch, d10v_register_name);
-  set_gdbarch_register_size (gdbarch, 2);
-  set_gdbarch_register_bytes (gdbarch, (d10v_num_regs - 2) * 2 + 16);
-  set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
   set_gdbarch_register_type (gdbarch, d10v_register_type);
 
   set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);

@@ -726,10 +726,8 @@ extern void set_gdbarch_register_size (struct gdbarch *gdbarch, int register_siz
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_SIZE)
 #error "Non multi-arch definition of REGISTER_SIZE"
 #endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_SIZE)
+#if !defined (REGISTER_SIZE)
 #define REGISTER_SIZE (gdbarch_register_size (current_gdbarch))
-#endif
 #endif
 
 extern int gdbarch_register_bytes (struct gdbarch *gdbarch);
@@ -737,10 +735,8 @@ extern void set_gdbarch_register_bytes (struct gdbarch *gdbarch, int register_by
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_BYTES)
 #error "Non multi-arch definition of REGISTER_BYTES"
 #endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_BYTES)
+#if !defined (REGISTER_BYTES)
 #define REGISTER_BYTES (gdbarch_register_bytes (current_gdbarch))
-#endif
 #endif
 
 /* Default (function) for non- multi-arch platforms. */

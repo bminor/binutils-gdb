@@ -1,3 +1,15 @@
+2003-05-02  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (REGISTER_SIZE, REGISTER_BYTES): Make optional.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* d10v-tdep.c (d10v_gdbarch_init): Do not set register_size,
+	register_virtual_size, pc_regnum, or register_bytes.
+	(D10V_PC_REGNUM): Rename _PC_REGNUM.
+	(d10v_register_type): Use D10V_PC_REGNUM.
+	(d10v_print_registers_info, d10v_read_pc): Ditto.
+	(d10v_write_pc, d10v_eva_prepare_to_trace): Ditto.
+	(d10v_unwind_pc, d10v_frame_prev_register): Ditto.
+
 2003-05-02  David Carlton  <carlton@bactrian.org>
 
 	* objfiles.c (allocate_objfile): For anonymous objfiles, allocate
