@@ -3433,7 +3433,7 @@ ecoff_frob_symbol (sym)
     S_SET_SEGMENT (sym, undefined_section);
   else if (S_IS_COMMON (sym)
 	   && S_GET_VALUE (sym) > 0
-	   && S_GET_VALUE (sym) < bfd_get_gp_size (stdoutput))
+	   && S_GET_VALUE (sym) <= bfd_get_gp_size (stdoutput))
     {
       static asection scom_section;
       static asymbol scom_symbol;
