@@ -1,3 +1,11 @@
+2000-04-04  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* config/tc-mn10300.c (md_pseudo_table): Use constant names.
+	(md_begin): Likewise.
+	(HAVE_AM33): New macro.
+	(md_assemble): Use it.  Match r_regs and xr_regs only if
+	HAVE_AM33.
+
 2000-04-03  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-i386.c (i386_immediate): Don't assume a constant
