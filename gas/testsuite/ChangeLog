@@ -1,5 +1,10 @@
 2003-05-20  Jason Eckhardt  <jle@rice.edu>
 
+	* gas/i860/branch.{s,d}: New files.
+	* gas/i860/system.{s,d}: New files.
+
+2003-05-20  Jason Eckhardt  <jle@rice.edu>
+
 	* gas/i860/bitwise.{s,d}: New files.
 	* gas/i860/bte.{s,d}: New files.
 	* gas/i860/fldst01.{s,d}: New files.
