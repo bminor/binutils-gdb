@@ -4415,6 +4415,7 @@ ecoff_frob_file ()
   tag_t *ptag;
   tag_t *ptag_next;
   efdr_t *fil_ptr;
+  int end_warning;
   efdr_t *hold_file_ptr;
   proc_t * hold_proc_ptr;
   bfd_vma addr;
@@ -4454,11 +4455,21 @@ ecoff_frob_file ()
   /* Output an ending symbol for all the files.  We have to do this
      here for the last file, so we may as well do it for all of the
      files.  */
+  end_warning = 0;
   for (fil_ptr = first_file;
        fil_ptr != (efdr_t *) NULL;
        fil_ptr = fil_ptr->next_file)
     {
       cur_file_ptr = fil_ptr;
+      while (cur_file_ptr->cur_scope->prev != (scope_t *) NULL)
+	{
+	  cur_file_ptr->cur_scope = cur_file_ptr->cur_scope->prev;
+	  if (! end_warning)
+	    {
+	      as_warn ("Missing .end or .bend at end of file");
+	      end_warning = 1;
+	    }
+	}
       (void) add_ecoff_symbol ((const char *) NULL,
 			       st_End, sc_Text,
 			       (symbolS *) NULL,

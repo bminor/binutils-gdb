@@ -1,5 +1,8 @@
 Thu Jul 15 11:51:03 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/obj-ecoff.c (ecoff_frob_file): Discard all open scopes,
+	with a warning.
+
 	* config/obj-coffbfd.c (fixup_segment): If TC_M88K, don't adjust
 	by md_pcrel_from if we are relocating against a symbol (we still
 	need md_pcrel_from for a PC relative relocation within the same
