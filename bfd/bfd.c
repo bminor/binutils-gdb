@@ -1,5 +1,5 @@
 /* Generic BFD library interface and support routines.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -175,6 +175,8 @@ CODE_FRAGMENT
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
+#include "coff/sym.h"
+#include "libecoff.h"
 
 #undef strerror
 extern char *strerror();
@@ -196,7 +198,8 @@ CONST short _bfd_host_big_endian = 0x0100;
 
 bfd_ec bfd_error = no_error;
 
-CONST char *CONST bfd_errmsgs[] = { "No error",
+CONST char *CONST bfd_errmsgs[] = {
+                        "No error",
                         "System call error",
                         "Invalid target",
                         "File in wrong format",
@@ -213,6 +216,7 @@ CONST char *CONST bfd_errmsgs[] = { "No error",
                         "Nonrepresentable section on output",
 			"Symbol needs debug section which does not exist",
 			"Bad value",
+			"File truncated",
                         "#<Invalid error code>"
                        };
 
@@ -567,6 +571,50 @@ bfd_get_size (abfd)
 
 /*
 FUNCTION
+	The bfd_get_gp_size function
+
+SYNOPSIS
+	int bfd_get_gp_size(bfd *);
+
+DESCRIPTION
+	Get the maximum size of objects to be optimized using the GP
+	register under MIPS ECOFF.  This is typically set by the -G
+	argument to the compiler, assembler or linker.
+*/
+
+int
+bfd_get_gp_size (abfd)
+     bfd *abfd;
+{
+  if (abfd->xvec->flavour == bfd_target_ecoff_flavour)
+    return ecoff_data (abfd)->gp_size;
+  return 0;
+}
+
+/*
+FUNCTION
+	The bfd_set_gp_size function
+
+SYNOPSIS
+	void bfd_set_gp_size(bfd *, int);
+
+DESCRIPTION
+	Set the maximum size of objects to be optimized using the GP
+	register under MIPS ECOFF.  This is typically set by the -G
+	argument to the compiler, assembler or linker.
+*/
+
+void
+bfd_set_gp_size (abfd, i)
+     bfd *abfd;
+     int i;
+{
+  if (abfd->xvec->flavour == bfd_target_ecoff_flavour)
+    ecoff_data (abfd)->gp_size = i;
+}
+
+/*
+FUNCTION
 	stuff
 
 DESCRIPTION
@@ -595,16 +643,13 @@ DESCRIPTION
 .#define bfd_set_arch_mach(abfd, arch, mach)\
 .        BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
 .
-.#define bfd_get_relocated_section_contents(abfd, seclet, data) \
-.	BFD_SEND (abfd, _bfd_get_relocated_section_contents, (abfd, seclet, data))
+.#define bfd_get_relocated_section_contents(abfd, seclet, data, relocateable) \
+.	BFD_SEND (abfd, _bfd_get_relocated_section_contents, (abfd, seclet, data, relocateable))
 . 
 .#define bfd_relax_section(abfd, section, symbols) \
 .       BFD_SEND (abfd, _bfd_relax_section, (abfd, section, symbols))
+.
+.#define bfd_seclet_link(abfd, data, relocateable) \
+.       BFD_SEND (abfd, _bfd_seclet_link, (abfd, data, relocateable))
 
 */
-
-
-
-
-
-

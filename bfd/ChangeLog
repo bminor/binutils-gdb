@@ -1,3 +1,15 @@
+Thu Apr 15 09:09:18 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* bfd-in.h (bfd_error), bfd.c (bfd_errmsgs): Add file_truncated.
+
+	* format.c (bfd_check_error): Check error return from
+	_bfd_check_format routines.
+
+Wed Apr 14 23:48:25 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* rs6000-core.c (rs6000coff_core_p): Improve error checking and
+	recognize .data section if present. 
+
 Thu Apr 15 01:00:29 1993  John Gilmore  (gnu@cygnus.com)
 
 	* aoutx.h (aout_*_adjust_sizes_and_vmas):  Avoid `sanity'
