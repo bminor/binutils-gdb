@@ -170,7 +170,6 @@ int do_notes;
 int is_32bit_elf;
 int have_frame_base;
 int need_base_address;
-unsigned long saved_base_address;
 
 struct group_list
 {
@@ -7895,120 +7894,6 @@ decode_location_expression (unsigned char * data,
   return need_frame_base;
 }
 
-/* Decode a DW_AT_ranges attribute for 64bit DWARF3 .  */
-
-static void
-decode_64bit_range (unsigned long offset, bfd_vma base_address)
-{
-  const char * start = debug_range_contents + offset;
-  const char * end   = debug_range_contents + debug_range_size;
-
-  do
-    {
-      bfd_vma a;
-      bfd_vma b;
-
-      a = byte_get ((unsigned char *) start, 8);
-      b = byte_get ((unsigned char *) start + 8, 8);
-
-      if (a == 0xffffffff)
-	{
-	  base_address = b;
-	}
-      else if (a == 0 && b == 0)
-	break;
-      else if (a > b)
-	printf (_(" [corrupt: start > end]"));
-      else
-	{
-	  printf (" ");
-	  print_vma (base_address + a, PREFIX_HEX);
-	  printf (" - ");
-	  print_vma (base_address + b, PREFIX_HEX);
-	  printf (", ");
-	}
-
-      start += 16;
-    }
-  while (start < end);
-}
-
-/* Decode a DW_AT_ranges attribute.  */
-
-static void
-decode_range (unsigned long offset, bfd_vma base_address)
-{
-  const char * start;
-  const char * end;
-
-  if (offset >= (debug_range_size - 8))
-    {
-      printf (_("[corrupt: offset is outside the .debug_ranges section]"));
-      return;
-    }
-
-  /* Since all entries in the .debug_ranges section are pairs of either
-     4-byte integers (32-bit DWARF3) or 8-byte integers (64-bit DWARF3)
-     the offset should always be a multiple of 8 bytes.  */
-  if (offset % 8)
-    {
-      printf (_("[corrupt: offset is not a multiple of 8]"));
-      return;
-    }  
-
-  start = debug_range_contents + offset;
-
-  if (offset > 0
-      /* Be paranoid - check to see if the previous
-	 two words were and end-of-range marker.  */
-      && (byte_get ((unsigned char *) start - 4, 4) != 0
-	  || byte_get ((unsigned char *) start - 8, 4) != 0))
-    {
-      printf (_("[corrupt: offset is not at the start of a range]"));
-      return;
-    }  
-
-  end = debug_range_contents + debug_range_size;
-
-  printf ("(");
-  do
-    {
-      unsigned long a;
-      unsigned long b;
-
-      a = byte_get ((unsigned char *) start, 4);
-      b = byte_get ((unsigned char *) start + 4, 4);
-
-      if (a == 0xffffffff)
-	{
-	  if (b == 0xffffffff)
-	    {
-	      decode_64bit_range (offset, base_address);
-	      return;
-	    }
-
-	  base_address = b;
-	}
-      else if (a == 0 && b == 0)
-	break;
-      else if (a > b)
-	printf (_("[corrupt: start > end]"));
-      else
-	{
-	  if (start > debug_range_contents + offset)
-	    printf (", ");
-
-	  printf (_("0x%lx - 0x%lx"),
-		  (unsigned long) base_address + a,
-		  (unsigned long) base_address + b);
-	}
-
-      start += 8;
-    }
-  while (start < end);
-  printf (")");
-}
-
 /* This structure records the information that
    we extract from the.debug_info section.  */
 typedef struct
@@ -8021,6 +7906,9 @@ typedef struct
   int		*have_frame_base;
   unsigned int   num_loc_offsets;
   unsigned int   max_loc_offsets;
+  unsigned long *range_lists;
+  unsigned int   num_range_lists;
+  unsigned int   max_range_lists;
 }
 debug_info;
 
@@ -8154,7 +8042,7 @@ read_and_display_attr_value (unsigned long attribute,
 	  printf (" %lx", uvalue);
 	  printf (" %lx", (unsigned long) byte_get (data + 4, 4));
 	}
-      if ((do_loc || do_debug_loc)
+      if ((do_loc || do_debug_loc || do_debug_ranges)
 	  && num_debug_info_entries == 0)
 	{
 	  if (sizeof (uvalue) == 8)
@@ -8223,7 +8111,7 @@ read_and_display_attr_value (unsigned long attribute,
     }
 
   /* For some attributes we can display further information.  */
-  if ((do_loc || do_debug_loc)
+  if ((do_loc || do_debug_loc || do_debug_ranges)
       && num_debug_info_entries == 0)
     {
       switch (attribute)
@@ -8265,6 +8153,26 @@ read_and_display_attr_value (unsigned long attribute,
 	case DW_AT_low_pc:
 	  if (need_base_address)
 	    debug_info_p->base_address = uvalue;
+	  break;
+
+	case DW_AT_ranges:
+	  if (form == DW_FORM_data4 || form == DW_FORM_data8)
+	    {
+	      /* Process range list.  */
+	      unsigned int max = debug_info_p->max_range_lists;
+	      unsigned int num = debug_info_p->num_range_lists;
+
+	      if (max == 0 || num >= max)
+		{
+		  max += 1024;
+		  debug_info_p->range_lists
+		    = xrealloc (debug_info_p->range_lists,
+				max * sizeof (*debug_info_p->range_lists));
+		  debug_info_p->max_range_lists = max;
+		}
+	      debug_info_p->range_lists [num] = uvalue;
+	      debug_info_p->num_range_lists++;
+	    }
 	  break;
 
 	default:
@@ -8447,15 +8355,6 @@ read_and_display_attr_value (unsigned long attribute,
 
       break;
 
-    case DW_AT_low_pc:
-      if (need_base_address)
-	saved_base_address = uvalue;
-      break;
-
-    case DW_AT_ranges:
-      decode_range (uvalue, saved_base_address);
-      break;
-
     default:
       break;
     }
@@ -8612,7 +8511,7 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
   unsigned int unit;
   unsigned int num_units = 0;
 
-  if ((do_loc || do_debug_loc)
+  if ((do_loc || do_debug_loc || do_debug_ranges)
       && num_debug_info_entries == 0)
     {
       unsigned long length;
@@ -8708,7 +8607,7 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
 
       compunit.cu_pointer_size = byte_get (hdrptr, 1);
       hdrptr += 1;
-      if ((do_loc || do_debug_loc)
+      if ((do_loc || do_debug_loc || do_debug_ranges)
 	  && num_debug_info_entries == 0)
 	{
 	  debug_information [unit].cu_offset = cu_offset;
@@ -8719,6 +8618,9 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
 	  debug_information [unit].have_frame_base = NULL;
 	  debug_information [unit].max_loc_offsets = 0;
 	  debug_information [unit].num_loc_offsets = 0;
+	  debug_information [unit].range_lists = NULL;
+	  debug_information [unit].max_range_lists= 0;
+	  debug_information [unit].num_range_lists = 0;
 	}
 
       tags = hdrptr;
@@ -8811,7 +8713,6 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
 	      break;
 	    case DW_TAG_compile_unit:
 	      need_base_address = 1;
-	      saved_base_address = 0;
 	      break;
 	    case DW_TAG_entry_point:
 	    case DW_TAG_inlined_subroutine:
@@ -8837,9 +8738,9 @@ process_debug_info (Elf_Internal_Shdr *section, unsigned char *start,
  	}
     }
  
-  /* Set num_debug_info_entries here so that it can be used
-     to check if we need to proecess .debug_loc section.  */
-  if ((do_loc || do_debug_loc)
+  /* Set num_debug_info_entries here so that it can be used to check if
+     we need to proecess .debug_loc and .debug_ranges sections.  */
+  if ((do_loc || do_debug_loc || do_debug_ranges)
       && num_debug_info_entries == 0)
     num_debug_info_entries = num_units;
       
@@ -9752,91 +9653,147 @@ display_debug_aranges (Elf_Internal_Shdr *section,
 }
 
 static int
-display_64bit_debug_ranges (unsigned char * start, unsigned char * end)
-{
-  bfd_vma base_address = 0;
-
-  while (start < end)
-    {
-      bfd_vma a, b;
-
-      a = byte_get (start, 8);
-      b = byte_get (start + 8, 8);
-
-      if (a == 0xffffffffffffffffLL)
-	{
-	  printf (_(" set base address to "));
-	  print_vma (b, PREFIX_HEX);
-	  base_address = b;
-	}
-      else if (a == 0 && b == 0)
-	printf ( _("end of range"));
-      else if (a > b)
-	printf (_(" <corrupt range entry, start is greater than end>"));
-      else if (base_address == 0)
-	{
-	  printf ("range from base address + ");
-	  print_vma (a, PREFIX_HEX);
-	  printf (" to base address + ");
-	  print_vma (b, PREFIX_HEX);
-	}
-      else
-	{
-	  printf ("range from ");
-	  print_vma (base_address + a, PREFIX_HEX);
-	  printf (" to ");
-	  print_vma (base_address + b, PREFIX_HEX);
-	}
-
-      start += 16;
-      printf ("\n");
-    }
-
-  return 1;
-}
-
-static int
 display_debug_ranges (Elf_Internal_Shdr *section,
 		      unsigned char *start,
 		      FILE *file ATTRIBUTE_UNUSED)
 {
-  unsigned long base_address = 0;
-  unsigned char *end = start + section->sh_size;
+  unsigned char *section_end;
+  unsigned long bytes;
+  unsigned char *section_begin = start;
+  unsigned int num_range_list = 0;
+  unsigned long last_offset = 0;
+  unsigned int first = 0;
+  unsigned int i;
+  unsigned int j;
+  int seen_first_offset = 0;
+  int use_debug_info = 1;
+  unsigned char *next;
 
-  printf (_("The section %s contains:\n\n"), SECTION_NAME (section));
+  bytes = section->sh_size;
+  section_end = start + bytes;
 
-  while (start < end)
+  if (bytes == 0)
     {
-      unsigned long a;
-      unsigned long b;
-
-      a = byte_get (start, 4);
-      b = byte_get (start + 4, 4);
-
-      if (a == 0xffffffff)
-	{
-	  /* Attempt to handle 64-bit DWARF3 format.  This assumes
-	     that in a 32-bit DWARF3 file the base address will
-	     never be 0xffffffff, and that the .debug_ranges section
-	     will never contain a mixture of 32-bit and 64-bit entries.  */
-	  if (b == 0xffffffff)
-	    return display_64bit_debug_ranges (start, end);
-      
-	  printf (_(" set base address to 0x%lx\n"), b);
-	  base_address = b;
-	}
-      else if (a == 0 && b == 0)
-	printf (_(" end of range\n"));
-      else if (a > b)
-	printf (_(" <corrupt range entry, start is greater than end>\n"));
-      else if (base_address == 0)
-	printf (_(" range from base address + 0x%lx to base address + 0x%lx\n"), a, b);
-      else
-	printf (_(" range from 0x%lx to 0x%lx\n"), base_address + a, base_address + b);
-
-      start += 8;
+      printf (_("\nThe .debug_ranges section is empty.\n"));
+      return 0;
     }
 
+  get_debug_info (file);
+
+  /* Check the order of range list in .debug_info section. If
+     offsets of range lists are in the ascending order, we can
+     use `debug_information' directly.  */
+  for (i = 0; i < num_debug_info_entries; i++)
+    {
+      unsigned int num;
+
+      num = debug_information [i].num_range_lists;
+      num_range_list += num;
+
+      /* Check if we can use `debug_information' directly.  */
+      if (use_debug_info && num != 0)
+	{
+	  if (!seen_first_offset)
+	    {
+	      /* This is the first range list.  */
+	      last_offset = debug_information [i].range_lists [0];
+	      first = i;
+	      seen_first_offset = 1;
+	      j = 1;
+	    }
+	  else
+	    j = 0;
+
+	  for (; j < num; j++)
+	    {
+	      if (last_offset >
+		  debug_information [i].range_lists [j])
+		{
+		  use_debug_info = 0;
+		  break;
+		}
+	      last_offset = debug_information [i].range_lists [j];
+	    }
+	}
+    }
+
+  if (!use_debug_info)
+    /* FIXME: Should we handle this case?  */
+    error (_("Range lists in .debug_info section aren't in ascending order!\n"));
+
+  if (!seen_first_offset)
+    error (_("No range lists in .debug_info section!\n"));
+
+  if (debug_information [first].range_lists [0] != 0)
+    warn (_("Range lists in .debug_ranges section start at 0x%lx\n"),
+	  debug_information [first].range_lists [0]);
+
+  printf (_("Contents of the .debug_ranges section:\n\n"));
+  printf (_("    Offset   Begin    End\n"));
+
+  seen_first_offset = 0;
+  for (i = first; i < num_debug_info_entries; i++)
+    {
+      unsigned long begin;
+      unsigned long end;
+      unsigned long offset;
+      unsigned int pointer_size;
+      unsigned long base_address;
+
+      pointer_size = debug_information [i].pointer_size;
+
+      for (j = 0; j < debug_information [i].num_range_lists; j++)
+	{
+	  offset = debug_information [i].range_lists [j];
+	  next = section_begin + offset;
+	  base_address = debug_information [i].base_address;
+
+	  if (!seen_first_offset)
+	    seen_first_offset = 1;
+	  else
+	    {
+	      if (start < next)
+		warn (_("There is a hole [0x%lx - 0x%lx] in .debug_ranges section.\n"),
+		      start - section_begin, next - section_begin);
+	      else if (start > next)
+		warn (_("There is an overlap [0x%lx - 0x%lx] in .debug_ranges section.\n"),
+		      start - section_begin, next - section_begin);
+	    }
+	  start = next;
+
+	  while (1)
+	    {
+	      begin = byte_get (start, pointer_size);
+	      start += pointer_size;
+	      end = byte_get (start, pointer_size);
+	      start += pointer_size;
+
+	      if (begin == 0 && end == 0)
+		break;
+
+	      /* Check base address specifiers.  */
+	      if (begin == -1UL && end != -1UL)
+		{
+		  base_address = end;
+		  printf ("    %8.8lx %8.8lx %8.8lx (base address)\n",
+			  offset, begin, end);
+		  continue;
+		}
+
+	      printf ("    %8.8lx %8.8lx %8.8lx",
+		      offset, begin + base_address, end + base_address);
+
+	      if (begin == end)
+		fputs (_(" (start == end)"), stdout);
+	      else if (begin > end)
+		fputs (_(" (start > end)"), stdout);
+
+	      putchar ('\n');
+	    }
+	  fputs (_("  <End of list>\n"), stdout);
+	}
+    }
+  putchar ('\n');
   return 1;
 }
 
@@ -11804,11 +11761,15 @@ process_object (char *file_name, FILE *file)
   if (debug_information)
     {
       for (i = 0; i < num_debug_info_entries; i++)
-	if (!debug_information [i].max_loc_offsets)
-	  {
-	    free (debug_information [i].loc_offsets);
-	    free (debug_information [i].have_frame_base);
-	  }
+	{
+	  if (!debug_information [i].max_loc_offsets)
+	    {
+	      free (debug_information [i].loc_offsets);
+	      free (debug_information [i].have_frame_base);
+	    }
+	  if (!debug_information [i].max_range_lists)
+	    free (debug_information [i].range_lists);
+	}
       free (debug_information);
       debug_information = NULL;
       num_debug_info_entries = 0;

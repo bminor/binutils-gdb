@@ -1,3 +1,17 @@
+2005-01-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	BZ 635
+	readelf.c (saved_base_address): Removed.
+	(decode_64bit_range): Likewise.
+	(decode_range): Likewise.
+	(display_64bit_debug_ranges): Likewise.
+	(debug_info): Add range_lists, num_range_lists and
+	max_range_lists.
+	(read_and_display_attr_value): Handle do_debug_ranges.
+	(process_debug_info): Likewise.
+	(display_debug_ranges): Rewrite.
+	(process_object): Free range_lists.
+
 2005-01-10  Andreas Schwab  <schwab@suse.de>
 
 	* configure.in: Don't define SKIP_ZEROES.
