@@ -1,40 +1,3 @@
-dnl
-dnl This ugly hack is needed because the Cygnus configure script won't
-dnl tell us what CC is going to be, and "cc" isn't always right.  (The
-dnl top-level Makefile will always override anything we choose here, so
-dnl the usual gcc/cc selection is useless.)
-dnl
-dnl It knows where it is in the tree; don't try using it elsewhere.
-dnl
-undefine([AC_PROG_CC])dnl
-AC_DEFUN(AC_PROG_CC,
-[AC_BEFORE([$0], [AC_PROG_CPP])dnl
-dnl
-dnl The ugly bit...
-dnl
-AC_MSG_CHECKING([for CC])
-dnl Don't bother with cache.
-test -z "$CC" && CC=`egrep '^CC *=' ../Makefile | tail -1 | sed 's/^CC *= *//'`
-test -z "$CC" && CC=cc
-AC_MSG_RESULT(setting CC to $CC)
-AC_SUBST(CC)
-dnl
-dnl
-# Find out if we are using GNU C, under whatever name.
-cat > conftest.c <<EOF
-#ifdef __GNUC__
-  yes
-#endif
-EOF
-${CC-cc} -E conftest.c > conftest.out 2>&1
-if egrep yes conftest.out >/dev/null 2>&1; then
-  GCC=yes
-else
-  GCC=
-fi
-rm -f conftest*
-])dnl
-dnl
 dnl GAS_CHECK_DECL_NEEDED(name, typedefname, typedef, headers)
 AC_DEFUN(GAS_CHECK_DECL_NEEDED,[
 AC_MSG_CHECKING(whether declaration is required for $1)
@@ -75,16 +38,61 @@ AC_MSG_RESULT($gas_cv_assert_ok)
 test $gas_cv_assert_ok = yes || AC_DEFINE(BROKEN_ASSERT)
 ])dnl
 dnl
-dnl GAS_GDBINIT
-dnl Generates a .gdbinit file in the build directory pointing gdb to
-dnl srcdir, if srcdir != PWD.
-AC_DEFUN(GAS_GDBINIT,
-[if test `cd $srcdir;pwd` = `pwd` ; then
-  rm -f .gdbinit
-  cat > .gdbinit << EOF
-dir $srcdir
-dir .
-source $srcdir/.gdbinit
-EOF
-fi
+dnl Since many Bourne shell implementations lack subroutines, use this
+dnl hack to simplify the code in configure.in.
+dnl GAS_UNIQ(listvar)
+AC_DEFUN(GAS_UNIQ,
+[_gas_uniq_list="[$]$1"
+_gas_uniq_newlist=""
+dnl Protect against empty input list.
+for _gas_uniq_i in _gas_uniq_dummy [$]_gas_uniq_list ; do
+  case [$]_gas_uniq_i in
+  _gas_uniq_dummy) ;;
+  *) case " [$]_gas_uniq_newlist " in
+       *" [$]_gas_uniq_i "*) ;;
+       *) _gas_uniq_newlist="[$]_gas_uniq_newlist [$]_gas_uniq_i" ;;
+     esac ;;
+  esac
+done
+$1=[$]_gas_uniq_newlist
 ])dnl
+
+# Check to see if we're running under Cygwin32, without using
+# AC_CANONICAL_*.  If so, set output variable CYGWIN32 to "yes".
+# Otherwise set it to "no".
+
+AC_DEFUN(CY_CYGWIN32,
+[AC_CACHE_CHECK(for Cygwin32 environment, am_cv_cygwin32,
+[AC_TRY_COMPILE(,[int main () { return __CYGWIN32__; }],
+am_cv_cygwin32=yes, am_cv_cygwin32=no)
+rm -f conftest*])
+CYGWIN32=
+test "$am_cv_cygwin32" = yes && CYGWIN32=yes])
+# Check to see if we're running under Win32, without using
+# AC_CANONICAL_*.  If so, set output variable EXEEXT to ".exe".
+# Otherwise set it to "".
+
+dnl This knows we add .exe if we're building in the Cygwin32
+dnl environment. But if we're not, then it compiles a test program
+dnl to see if there is a suffix for executables.
+AC_DEFUN(CY_EXEEXT,
+dnl AC_REQUIRE([AC_PROG_CC])AC_REQUIRE([CY_CYGWIN32])
+AC_MSG_CHECKING([for executable suffix])
+[AC_CACHE_VAL(am_cv_exeext,
+[if test "$CYGWIN32" = yes; then
+am_cv_exeext=.exe
+else
+cat > am_c_test.c << 'EOF'
+int main() {
+/* Nothing needed here */
+}
+EOF
+${CC-cc} -o am_c_test $CFLAGS $CPPFLAGS $LDFLAGS am_c_test.c $LIBS 1>&5
+am_cv_exeext=`ls am_c_test.* | grep -v am_c_test.c | sed -e s/am_c_test//`
+rm -f am_c_test*])
+test x"${am_cv_exeext}" = x && am_cv_exeext=no
+fi
+EXEEXT=""
+test x"${am_cv_exeext}" != xno && EXEEXT=${am_cv_exeext}
+AC_MSG_RESULT(${am_cv_exeext})
+AC_SUBST(EXEEXT)])
