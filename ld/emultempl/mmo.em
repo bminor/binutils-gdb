@@ -152,6 +152,17 @@ mmo_place_orphan (file, s)
   /* Restore the global list pointer.  */
   stat_ptr = old;
 
+  /* We need an output section for .text as a root, so if there was none
+     (might happen with a peculiar linker script such as in "map
+     addresses", map-address.exp), we grab the output section created
+     above.  */
+  if (hold_text.os == NULL)
+    {
+      if (os == NULL)
+	return false;
+      hold_text.os = os;
+    }
+
   snew = os->bfd_section;
   bfd_section = place->os->bfd_section;
   if (place->section == NULL && bfd_section == NULL)
