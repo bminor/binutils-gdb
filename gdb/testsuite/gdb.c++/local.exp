@@ -1,4 +1,4 @@
-# Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 
 # tests for local variables
 # Written by Satish Pai <pai@apollo.hp.com> 1997-07-08
+# Cleaned by Michael Chastain <mec@shout.net> 2002-04-08
 
 
 # This file is part of the gdb testsuite
@@ -68,28 +69,43 @@ if ![runto 'marker1'] then {
 
 gdb_test "up" ".*main.*" "up from marker1"
 
-
-# srikanth, These tests have always been run only with aCC. Now in
-# the new scheme of things, we run it twice, once with aCC, and once
-# with g++. Flag these tests as expected failures when run with g++.
-# as these are failing now and were never known to pass with g++.
-global gcc_compiled
-if {$gcc_compiled} then  {
-setup_xfail "*-*-*"
-}
-
 # Local classes in g++ get names like "main.1::InnerLocal", just like local
 # static variables.  Some targets use "___" instead of ".".
+
+# ---
+# Pattern 1:
+# PASS
+#   dwarf-2
+#     gcc 2.95.3
+#
+# Pattern 2:
+# FAIL
+# This has a duplicate "char loc_foo" line.  This is a bug.
+# Historically this has been an XFAIL.
+#   dwarf-2
+#     gcc 2.96-rh, 3.0.4, gcc-3_1-branch, HEAD
+#
+# Pattern 3:
+# PASS
+#   stabs+
+#     gcc 2.95.3, 2.96-rh, 3.0.4, gcc-3_1-branch, HEAD
+#
+# Pattern 4:
+# This an old pattern from the hppa aCC version of this file.
+# I left it alone.
+#
+# chastain 2002-04-08
+
 set sep "(\[.\]|___)\[0-9\]"
 
 send_gdb "ptype Local\n"
 gdb_expect {
-    -re "type = class Local \{\r\n\[\t \]*public:\r\n\[\t \]*int loc1;\r\n\r\n\[\t \]*.char loc_foo\\(char\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:10\\).*$gdb_prompt $" { pass "ptype Local" }
-    -re "type = class Local \{\r\n\[\t \]*public:\r\n\[\t \]*int loc1;\r\n\r\n\[\t \]*.char loc_foo\\(char\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:\[0-9\]*\\).*$gdb_prompt $" { pass "ptype Local (incorrect line number?)" }
-    -re "type = class Local \{\r\n\[\t \]*public:\r\n\[\t \]*int loc1;\r\n\r\n\[\t \]*Local & operator=\\((foobar__Fi${sep}::|)Local const &\\);\r\n\[\t \]*Local\\((foobar__Fi${sep}::|)Local const &\\);\r\n\[\t \]*Local\\(void\\);\r\n\[\t \]*char loc_foo\\(char\\);\r\n\[\t \]*\}*.*$gdb_prompt $" { pass "ptype Local" }
-    -re "type = class Local \{\r\n\[\t \]*public:\r\n\[\t \]*int loc1;\r\n\r\n\[\t \]*char loc_foo\\(char\\);\r\n\[\t \]*\\(Local at.*local\\.cc:\[0-9\]*\\)\r\n\}.*$gdb_prompt $" { pass "ptype Local (aCC)" }
-    -re ".*$gdb_prompt $"   {  fail "ptype Local" }
-    timeout             { fail "(timeout) ptype Local" }
+  -re "type = class Local \{\[\r\n\t \]*public:\[\r\n\t \]*int loc1;\[\r\n\t \]*char loc_foo\\((const *|)char\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype Local" }
+  -re "type = class Local \{\[\r\n\t \]*public:\[\r\n\t \]*int loc1;\[\r\n\t \]*char loc_foo\\((const *|)char\\);\[\r\n\t \]*char loc_foo\\((const *|)char\\);\[\r\n\t \]*\}.*$gdb_prompt $" { fail "ptype Local (double loc_foo)" }
+  -re "type = class Local \{\[\r\n\t \]*public:\[\r\n\t \]*int loc1;\[\r\n\t \]*Local & operator *=\\((foobar__Fi${sep}::|)Local const *&\\);\[\r\n\t \]*Local\\((foobar__Fi${sep}::|)Local const *&\\);\[\r\n\t \]*Local\\((void|)\\);\[\r\n\t \]*char loc_foo\\(char\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype Local" }
+  -re "type = class Local \{\r\n\[\t \]*public:\r\n\[\t \]*int loc1;\r\n\r\n\[\t \]*char loc_foo\\(char\\);\r\n\[\t \]*\\(Local at.*local\\.cc:\[0-9\]*\\)\r\n\}.*$gdb_prompt $" { xpass "ptype Local (old aCC)" }
+  -re ".*$gdb_prompt $"   {  fail "ptype Local" }
+  timeout             { fail "(timeout) ptype Local" }
 }
 
 # DTS CLLbs14316 and CLLbs17058
@@ -99,49 +115,79 @@ gdb_expect {
 #   There is a number at the end of InnerLocal4 which should not be there,
 #       DTS CLLbs14316
 #   The line number for the class 
-setup_xfail "hppa*-*-*" CLLbs14316
+# setup_xfail "hppa*-*-*" CLLbs14316
+
+# ---
+# Pattern 1:
+# PASS
+#   dwarf-2
+#     2.95.3, 2.96-rh, 3.0.4, gcc-3_1-branch, HEAD
+#
+# Pattern 2:
+# PASS
+#   stabs+
+#     2.95.3, 2.96-rh, 3.0.4, gcc-3_1-branch, HEAD
+#
+# Pattern 3:
+# Old hppa pattern.
+#
+# Pattern 4:
+# Old hppa pattern.
+#
+# chastain 2002-04-08
+
 send_gdb "ptype InnerLocal\n"
 gdb_expect {
-    -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*InnerLocal::NestedInnerLocal nest1;\r\n\r\n\[\t \]*.int il_foo\\(const unsigned char &\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:36\\).*$gdb_prompt $" { pass "ptype InnerLocal" }
-    -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*class InnerLocal::NestedInnerLocal nest1;\r\n\r\n\[\t \]*.int il_foo\\(const unsigned char &\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:36\\).*$gdb_prompt $" { pass "ptype InnerLocal" }
-    -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*InnerLocal::NestedInnerLocal nest1;\r\n\r\n\[\t \]*.int il_foo\\(const unsigned char &\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:\[0-9\]*\\).*$gdb_prompt $" { pass "ptype InnerLocal (incorrect line number?" }
-    -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*class InnerLocal::NestedInnerLocal nest1;\r\n\r\n\[\t \]*.int il_foo\\(const unsigned char &\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:\[0-9\]*\\).*$gdb_prompt $" { pass "ptype InnerLocal (incorrect line number?" }
-    -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*InnerLocal::NestedInnerLocal nest1;\r\n\r\n\[\t \]*.int il_foo\\(unsigned char const &\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:36\\).*$gdb_prompt $" { pass "ptype InnerLocal HP aCC" }
-    -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*NestedInnerLocal nest1;\r\n\r\n\[\t \]*InnerLocal & operator=\\((main${sep}::|)InnerLocal const &\\);\r\n\[\t \]*InnerLocal\\((main${sep}::|)InnerLocal const &\\);\r\n\[\t \]*InnerLocal\\(void\\);\r\n\[\t \]*int il_foo\\(unsigned char const &\\);\r\n\*\}\r\n*.*$gdb_prompt $" { pass "ptype InnerLocal" }
-    -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*class InnerLocal4::NestedInnerLocal nest1;\r\n\r\n\[\t \]*int il_foo\\(unsigned char const &\\);\r\n\[\t \]*\\(Local at.*local\.cc:\[0-9\]+\\)\r\n\}.*$gdb_prompt $" { pass "ptype InnerLocal (aCC)" }
-    -re ".*$gdb_prompt $"   {  fail "ptype InnerLocal" }
-    timeout             { fail "(timeout) ptype InnerLocal" }
+  -re "type = class InnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*char ilc;\[\r\n\t \]*int \\* *ip;\[\r\n\t \]*NestedInnerLocal nest1;\[\r\n\t \]*int il_foo\\((unsigned char const|const unsigned char) *&\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal" }
+  -re "type = class InnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*char ilc;\[\r\n\t \]*int \\* *ip;\[\r\n\t \]*NestedInnerLocal nest1;\[\r\n\t \]*InnerLocal *& operator *=\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((main${sep}::|)InnerLocal const *&\\);\[\r\n\t \]*InnerLocal\\((void|)\\);\[\r\n\t \]*int il_foo\\(unsigned char const *&\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal" }
+  -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*InnerLocal::NestedInnerLocal nest1;\r\n\r\n\[\t \]*.int il_foo\\(unsigned char const &\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:36\\).*$gdb_prompt $" { pass "ptype InnerLocal (old HP aCC)" }
+  -re "type = class InnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*char ilc;\r\n\[\t \]*int \\*ip;\r\n\[\t \]*class InnerLocal4::NestedInnerLocal nest1;\r\n\r\n\[\t \]*int il_foo\\(unsigned char const &\\);\r\n\[\t \]*\\(Local at.*local\.cc:\[0-9\]+\\)\r\n\}.*$gdb_prompt $" { pass "ptype InnerLocal (old HP aCC)" }
+  -re ".*$gdb_prompt $"   {  fail "ptype InnerLocal" }
+  timeout             { fail "(timeout) ptype InnerLocal" }
 }
+
+#---
+# Pattern 1:
+# PASS
+#   dwarf-2
+#     gcc 2.95.3, 2.96-rh, 3.0.4, gcc-3_1-branch, HEAD
+#
+# Pattern 2:
+# PASS
+#   stabs+
+#     gcc 2.95.3, 2.96-rh, 3.0.4, gcc-3_1-branch, HEAD
+#
+# chastain 2002-04-08
 
 send_gdb "ptype NestedInnerLocal\n"
 gdb_expect {
-    -re "type = class InnerLocal::NestedInnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*int nil;\r\n\r\n\[\t \]*.int nil_foo\\(int\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:44\\).*$gdb_prompt $" { pass "ptype NestedInnerLocal" }
-    -re "type = class InnerLocal::NestedInnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*int nil;\r\n\r\n\[\t \]*.int nil_foo\\(int\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:\[0-9\]*\\).*$gdb_prompt $" { pass "ptype NestedInnerLocal (incorrect line number?)" }
-    -re "type = class NestedInnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*int nil;\r\n\r\n\[\t \]*NestedInnerLocal & operator=\\((main${sep}::InnerLocal::|)NestedInnerLocal const &\\);\r\n\[\t \]*NestedInnerLocal\\((main${sep}::InnerLocal::|)NestedInnerLocal const &\\);\r\n\[\t \]*NestedInnerLocal\\(void\\);\r\n\[\t \]*int nil_foo\\(int\\);\r\n\}\r\n*.*$gdb_prompt $" { pass "ptype NestedInnerLocal" }
-    -re "No symbol.*in current context.*$gdb_prompt $" { pass "ptype NestedInnerLocal (known aCC limitation)" }
-    -re ".*$gdb_prompt $"   {  fail "ptype NestedInnerLocal" }
-    timeout             { fail "(timeout) ptype NestedInnerLocal" }
-}     
-
-# srikanth, These tests have always been run only with aCC. Now in
-# the new scheme of things, we run it twice, once with aCC, and once
-# with g++. Flag these tests as expected failures when run with g++.
-# as these are failing now and were never known to pass with g++.
-global gcc_compiled
-if {$gcc_compiled} then  {
-setup_xfail "*-*-*"
+  -re "type = class NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype NestedInnerLocal" }
+  -re "type = class NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*NestedInnerLocal *& *operator *= *\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((void|)\\);\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype NestedInnerLocal" }
+  -re ".*$gdb_prompt $"   {  fail "ptype NestedInnerLocal" }
+  timeout             { fail "(timeout) ptype NestedInnerLocal" }
 }
 
 # gdb incorrectly interprets the NestedInnerLocal in
 # InnerLocal::NestedInnerLocal as field name instead of a type name;
 # See CLLbs14784.
-setup_xfail *-*-* CLLbs14784
+
+#---
+# Pattern 3:
+# FAIL
+# The comment above, about CLLbs14784, is still correct.
+#   dwarf-2
+#     gcc 2.95.3, 2.96-rh, 3.0.4, gcc-3_1-branch, HEAD
+#   stabs+
+#     gcc 2.95.3, 2.96-rh, 3.0.4, gcc-3_1-branch, HEAD
+#
+# chastain 2002-04-08
+
 send_gdb "ptype InnerLocal::NestedInnerLocal\n"
 gdb_expect {
-    -re "type = class InnerLocal::NestedInnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*int nil;\r\n\r\n\[\t \]*.int nil_foo\\(int\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:44\\).*$gdb_prompt $" { pass "ptype InnerLocal::NestedInnerLocal" }
-    -re "type = class InnerLocal::NestedInnerLocal \{\r\n\[\t \]*public:\r\n\[\t \]*int nil;\r\n\r\n\[\t \]*.int nil_foo\\(int\\);\r\n\[\t \]*\}\[\t \]*\\(Local at.*local\\.cc:\[0-9\]*\\).*$gdb_prompt $" { pass "ptype InnerLocal::NestedInnerLocal (incorrect line number?)" }
-    -re ".*$gdb_prompt $"   {  fail "ptype InnerLocal::NestedInnerLocal" }
-    timeout             { fail "(timeout) ptype InnerLocal::NestedInnerLocal" }
+  -re "type = class InnerLocal::NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal::NestedInnerLocal" }
+  -re "type = class InnerLocal::NestedInnerLocal \{\[\r\n\t \]*public:\[\r\n\t \]*int nil;\[\r\n\t \]*NestedInnerLocal *& *operator *= *\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((main${sep}::|)InnerLocal::NestedInnerLocal const *&\\);\[\r\n\t \]*NestedInnerLocal\\((void|)\\);\[\r\n\t \]*int nil_foo\\(int\\);\[\r\n\t \]*\}.*$gdb_prompt $" { pass "ptype InnerLocal::NestedInnerLocal" }
+  -re "There is no field named NestedInnerLocal.*$gdb_prompt $" { fail "ptype InnerLocal::NestedInnerLocal (bogus field lookup)" }
+  -re "No symbol .*NestedInnerLocal.* in current context.*$gdb_prompt $" { fail "ptype InnerLocal::NestedInnerLocal (bogus symbol lookup)" }
+  -re ".*$gdb_prompt $"   {  fail "ptype InnerLocal::NestedInnerLocal" }
+  timeout             { fail "(timeout) ptype InnerLocal::NestedInnerLocal" }
 }
-
-

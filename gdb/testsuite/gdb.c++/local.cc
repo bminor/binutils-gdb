@@ -56,12 +56,6 @@ int main()
 
    il.ilc = 'b';
    il.ip = &c;
+   marker1();
  }
- marker1();
 }
-
-  
-
-  
-  
-    

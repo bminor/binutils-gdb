@@ -1,3 +1,11 @@
+2002-04-09  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/local.cc (main): Move call to marker1() inside nested
+	scope so that the nested scope tests will make sense.
+	* gdb.c++/local.exp: Write patterns that actually work with gcc
+	(the HP patterns "were never known to work with gcc").
+	Keep the old aCC patterns too.
+
 2002-04-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/attach.exp: Correct target board test.
