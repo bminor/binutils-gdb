@@ -1,3 +1,9 @@
+Fri Mar 19 21:46:50 1993  John Gilmore  (gnu@cygnus.com)
+
+	* gdbint.texinfo:  Doc NO_MMALLOC and NO_MMALLOC_CHECK as
+	host conditionals.
+	* stabs.texinfo:  More array fixes inspired by Jim's.
+
 Fri Mar 19 10:23:34 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* stabs.texinfo: Fixes re arrays and continuations.

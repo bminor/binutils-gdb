@@ -1027,11 +1027,12 @@ variables.
 @end example
 
 The type definition of argv is interesting because it defines two new
-types in terms of an existing one.  The array argv contains character
-pointers.  The type of the array name is a pointer to the type the
-array holds. Thus the type of argv is ptr to ptr to char.  The stab
-for argv contains nested type_definitions.  Type 21 is ptr to type 2
-(char) and argv (type 20) is ptr to type 21.
+types in terms of an existing one.  The ``array'' argv is really a
+pointer, according to C language rules, since it is declared as a
+parameter.  Its element type is character pointers.  Thus the type of
+argv is ptr to ptr to char.  The stab for argv contains nested
+type_definitions.  Type 21 is ptr to type 2 (char) and argv (type 20)
+is ptr to type 21.
  
 @node Aggregate Types
 @chapter Aggregate Types 
@@ -1064,7 +1065,7 @@ type definition.
 @item Symbol Descriptor:
 @code{T}
 @item Type Descriptor:
-@code{ar}
+@code{a}
 @end table
 
 As an example of an array type consider the global variable below.
@@ -1079,11 +1080,16 @@ string field, also says the array is a global variable.  Following the
 G is a definition for type (19) as shown by the equals sign after the
 type number.  
 
-After the equals sign is a type descriptor, ar, which says that the
-type being defined is an array.  Following the type descriptor for an
-array is the type of the index, the lower bound for array indexing
-(always 0 in C), the upper bound for array indexing (in C: one less
-than the length of the array), and the type of the array elements.
+After the equals sign is a type descriptor, a, which says that the type
+being defined is an array.  Following the type descriptor for an array
+is the type of the index, a semicolon, and the type of the array elements.
+
+The type of the index is often a range type, expressed as the letter r
+and some parameters.  It defines the size of the array.  In in the
+example below, the range @code{r1;0;2;} defines an index type which is
+a subrange of type 1 (integer), with a lower bound of 0 and an upper
+bound of 2.  This defines the valid range of subscripts of a
+three-element C array.
 
 The array definition above generates the assembly language that
 follows.
@@ -1091,7 +1097,7 @@ follows.
 @example
 @exdent <32> N_GSYM - global variable
 @exdent .stabs "name:sym_desc(global)type_def(19)=type_desc(array)
-@exdent index_type_ref(int);NIL;high_bound(2);element_type_ref(char)";
+@exdent index_type_ref(range of int from 0 to 2);element_type_ref(char)";
 @exdent N_GSYM, NIL, NIL, NIL
 
 32 .stabs "char_vec:G19=ar1;0;2;2",32,0,0,0
@@ -1202,8 +1208,9 @@ element.
         struct_bytes
         elem_name:type_ref(int),bit_offset,field_bits;
         elem_name:type_ref(float),bit_offset,field_bits;
-        elem_name:type_def(17)=type_desc(dynamic array) index_type(int);NIL;
-        high_bound(7);element_type(char),bit_offset,field_bits;;",
+        elem_name:type_def(17)=type_desc(array)
+	index_type(range of int from 0 to 7);
+        element_type(char),bit_offset,field_bits;;",
         N_LSYM,NIL,NIL,NIL
 
 30 .stabs "s_tag:T16=s20s_int:1,0,32;s_float:12,32,32;
@@ -1902,9 +1909,9 @@ Next there is a type definition for the vtable pointer type (21).
 This is in turn defined as a pointer to another new type (22).  
 
 Type 22 is the vtable itself, which is defined as an array, indexed by
-integers, with a high bound of 1, and elements of type 17.  Type 17
-was the vtable record type defined by the boilerplate C++ type
-definitions, as shown earlier.  
+a range of integers between 0 and 1, and whose elements are of type
+17.  Type 17 was the vtable record type defined by the boilerplate C++
+type definitions, as shown earlier.
 
 The bit offset of the vtable pointer field is 32.  The number of bits
 in the field are not specified when the field is a vtable pointer.
@@ -1939,7 +1946,8 @@ class.  This is preceeded by `~%' and followed by a final semi-colon.
 .stabs "class_name(A):type_def(20)=sym_desc(struct)struct_bytes(8)
         field_name(Adat):type_ref(int),bit_offset(0),field_bits(32);
         field_name(A virt func ptr):type_def(21)=type_desc(ptr to)type_def(22)=
-        sym_desc(array)index_type_ref(int);NIL;elem_type_ref(vtbl elem type);
+        sym_desc(array)index_type_ref(range of int from 0 to 1);
+	elem_type_ref(vtbl elem type),
         bit_offset(32);
         meth_name(A_virt)::typedef(23)=sym_desc(method)returning(int);
         :arg_type(int),protection(public)normal(yes)virtual(yes)
@@ -2833,8 +2841,8 @@ stabs. "name", N_PSYM, NIL, NIL, value
                      # -> p  (value parameter)
                        -> i  (value parameter by reference, indirect access)
                        -> v  (variable parameter by reference)
-                       -> C  ( read-only parameter, conformant array bound)
-                       -> x  (confomant array value parameter)
+                       -> C  (read-only parameter, conformant array bound)
+                       -> x  (conformant array value parameter)
                        -> pP (<<??>>)
                        -> pF (<<??>>)
                        -> X  (function result variable)
@@ -3126,13 +3134,6 @@ N_LENG          unknown
 @item
 GNU C stabs define *all* types, file or procedure scope, as
 N_LSYM.  Sun doc talks about using N_GSYM too.
-
-@item
-@c FIXME: are you sure?  The 'a' is usually followed by an 'r' which means
-@c "range type" but that doesn't mean the type descriptor is 'ar'.
-@c A (non-C) array could be indexed by an enum, for example. -kingdon
-GNU C stabs use `ar' as type descriptor when defining arrays vs. just
-`a' in Sun doc.
 
 @item
 Stabs describing block scopes, N_LBRAC and N_RBRAC are supposed to
