@@ -1,3 +1,10 @@
+2004-05-07  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-frv.c (elf32_frvfdpic_modify_segment_map): Return
+	immediately if there's no link info.
+	(elf32_frvfdpic_copy_private_bfd_data): New.
+	(bfd_elf32_bfd_copy_private_bfd_data): Use it for frvfdpic.
+
 2004-05-06  Zack Weinberg  <zack@codesourcery.com>
 
 	* dwarf2.c (add_line_info): Also set info->filename to NULL if

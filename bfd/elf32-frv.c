@@ -3686,6 +3686,11 @@ elf32_frvfdpic_modify_segment_map (bfd *output_bfd,
 {
   struct elf_segment_map *m;
 
+  /* objcopy and strip preserve what's already there using
+     elf32_frvfdpic_copy_private_bfd_data ().  */
+  if (! info)
+    return TRUE;
+
   for (m = elf_tdata (output_bfd)->segment_map; m != NULL; m = m->next)
     if (m->p_type == PT_GNU_STACK)
       break;
@@ -4311,6 +4316,50 @@ frv_elf_arch_extension_p (flagword base, flagword extension)
   return FALSE;
 }
 
+static bfd_boolean
+elf32_frvfdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
+{
+  unsigned i;
+
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return TRUE;
+
+  if (! frv_elf_copy_private_bfd_data (ibfd, obfd))
+    return FALSE;
+
+  if (! elf_tdata (ibfd) || ! elf_tdata (ibfd)->phdr
+      || ! elf_tdata (obfd) || ! elf_tdata (obfd)->phdr)
+    return TRUE;
+
+  /* Copy the stack size.  */
+  for (i = 0; i < elf_elfheader (ibfd)->e_phnum; i++)
+    if (elf_tdata (ibfd)->phdr[i].p_type == PT_GNU_STACK)
+      {
+	Elf_Internal_Phdr *iphdr = &elf_tdata (ibfd)->phdr[i];
+
+	for (i = 0; i < elf_elfheader (obfd)->e_phnum; i++)
+	  if (elf_tdata (obfd)->phdr[i].p_type == PT_GNU_STACK)
+	    {
+	      memcpy (&elf_tdata (obfd)->phdr[i], iphdr, sizeof (*iphdr));
+
+	      /* Rewrite the phdrs, since we're only called after they
+		 were first written.  */
+	      if (bfd_seek (obfd, (bfd_signed_vma) get_elf_backend_data (obfd)
+			    ->s->sizeof_ehdr, SEEK_SET) != 0
+		  || get_elf_backend_data (obfd)->s
+		  ->write_out_phdrs (obfd, elf_tdata (obfd)->phdr,
+				     elf_elfheader (obfd)->e_phnum) != 0)
+		return FALSE;
+	      break;
+	    }
+
+	break;
+      }
+
+  return TRUE;
+}
+
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
@@ -4726,6 +4775,9 @@ frv_elf_print_private_bfd_data (abfd, ptr)
 #undef elf_backend_modify_segment_map
 #define elf_backend_modify_segment_map \
 		elf32_frvfdpic_modify_segment_map
+#undef bfd_elf32_bfd_copy_private_bfd_data
+#define bfd_elf32_bfd_copy_private_bfd_data \
+		elf32_frvfdpic_copy_private_bfd_data
 
 #undef elf_backend_create_dynamic_sections
 #define elf_backend_create_dynamic_sections \
