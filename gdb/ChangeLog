@@ -1,3 +1,8 @@
+2003-11-04  Michael Snyder  <msnyder@redhat.com>
+
+	* MAINTAINERS: Remove myself as owner of breakpoints and 
+	of sparc/solaris.
+
 2003-11-03  Corinna Vinschen  <vinschen@redhat.com>
 
 	* sh-tdep.c (sh_sh4_nofpu_register_name): New function.

@@ -199,7 +199,7 @@ GNU/Linux ARM native	Scott Bambrough		scottb@netwinder.org
 Solaris/x86 native & host (devolved)
 			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 Solaris/SPARC native & host (devolved)
-                        Michael Snyder          msnyder@redhat.com
+                        (Global Maintainers)
 
 
 
@@ -233,7 +233,7 @@ tracing bytecode stuff  Jim Blandy              jimb@redhat.com
 tracing			Michael Snyder		msnyder@redhat.com
 threads			Michael Snyder		msnyder@redhat.com
 			Mark Kettenis		kettenis@gnu.org
-breakpoints		Michael Snyder		msnyder@redhat.com
+breakpoints		(Global Maintainers)
 language support	(Blanket Write Privs Maintainers)
   C++			Daniel Jacobowitz	dan@debian.org
   Java support		(Global Maintainers)
