@@ -841,7 +841,6 @@ elf_object_p (abfd)
   bfd_set_error (bfd_error_wrong_format);
 
  got_no_match:
-  abfd->arch_info = preserve.arch_info;
   if (preserve.marker != NULL)
     bfd_preserve_restore (abfd, &preserve);
   return NULL;
