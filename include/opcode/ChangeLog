@@ -1,3 +1,14 @@
+Mon Jan 12 11:37:36 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen.h (*): Clean up pass over `struct foo' usage.
+	(CGEN_ATTR): Make unsigned char.
+	(CGEN_ATTR_TYPE): Update.
+	(CGEN_ATTR_{ENTRY,TABLE}): New types.
+	(cgen_base): Move member `attrs' to cgen_insn.
+	(CGEN_KEYWORD): New member `null_entry'.
+	(CGEN_{SYNTAX,FORMAT}): New types.
+	(cgen_insn): Format and syntax separated from each other.
+
 start-sanitize-sky
 Mon Jan  5 13:33:21 1998  Doug Evans  <devans@seba.cygnus.com>
 
