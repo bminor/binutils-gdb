@@ -1,8 +1,10 @@
 2001-02-23  Andrew Cagney  <ac131313@redhat.com>
 
+	* CONTRIBUTE: Document how to cite a problem report.
+	* TODO: Note need to replace CONTRIBUTE with generated file.
+
 	* CONTRIBUTE: Mention that patches do not need to include the
 	generated files gdbarch.h and gdbarch.c.
-	
 	
 2001-02-21  Andrew Cagney  <ac131313@redhat.com>
 

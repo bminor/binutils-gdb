@@ -158,3 +158,12 @@ o	If ``gdb/gdbarch.sh'' is modified, you don't
 	``gdbarch.h'' and ``gdbarch.c''.
 
 	See ``gdb/configure.in'' above.
+
+
+o	When submitting a patch that fixes a bug
+	in GDB's bug database a brief reference
+	to the bug can be included in the ChangeLog
+	vis
+
+	* CONTRIBUTE: Mention PR convention. Fix
+	gdb/4705.

@@ -519,6 +519,11 @@ coverage analysis).
 
 --
 
+Replace the file gdb/CONTRIBUTE with a file that is generated from the
+gdb/doc/*.texinfo directory.
+
+--
+
 			New Features and Fixes
 			======================
 
