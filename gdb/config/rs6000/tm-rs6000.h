@@ -81,11 +81,6 @@ extern void aix_process_linenos (void);
 #define FP0_REGNUM 32		/* Floating point register 0 */
 #define FPLAST_REGNUM 63	/* Last floating point register */
 
-/* These #defines are used to parse core files and talk to ptrace, so they
-   must remain fixed.  */
-#define	FIRST_UISA_SP_REGNUM 64	/* first special register number */
-#define LAST_UISA_SP_REGNUM  70	/* last special register number */
-
 /* Define other aspects of the stack frame.  */
 
 #define INIT_FRAME_PC_FIRST(fromleaf, prev) \

@@ -45,10 +45,6 @@ static bfd_byte * mn10200_elf_get_relocated_section_contents
   PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
 	   bfd_byte *, boolean, asymbol **));
 
-/* We have to use RELA instructions since md_apply_fix3 in the assembler
-   does absolutely nothing.  */
-#define USE_RELA
-
 enum reloc_type {
   R_MN10200_NONE = 0,
   R_MN10200_32,

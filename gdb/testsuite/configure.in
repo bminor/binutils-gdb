@@ -19,7 +19,6 @@ configdirs="gdb.arch \
             gdb.c++ \
             gdb.java \
             gdb.disasm \
-            gdb.chill \
             gdb.mi \
             gdb.threads \
             gdb.trace"

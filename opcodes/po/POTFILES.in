@@ -54,6 +54,13 @@ ia64-opc-i.c
 ia64-opc-m.c
 ia64-opc.c
 ia64-opc.h
+ip2k-asm.c
+ip2k-desc.c
+ip2k-desc.h
+ip2k-dis.c
+ip2k-ibld.c
+ip2k-opc.c
+ip2k-opc.h
 m10200-dis.c
 m10200-opc.c
 m10300-dis.c

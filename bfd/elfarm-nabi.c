@@ -749,4 +749,6 @@ elf32_arm_nabi_grok_psinfo (abfd, note)
 #define elf_backend_grok_prstatus	elf32_arm_nabi_grok_prstatus
 #define elf_backend_grok_psinfo		elf32_arm_nabi_grok_psinfo
 
+#ifndef ELFARM_NABI_C_INCLUDED
 #include "elf32-arm.h"
+#endif

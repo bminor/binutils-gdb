@@ -178,6 +178,7 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
   flagword oflags = abfd->flags;
   bfd_vma ostart = bfd_get_start_address (abfd);
   PTR tdata;
+  PTR tdata_save;
   bfd_size_type readsize;	/* length of file_info */
   unsigned int scnhsz;
   char *external_sections;
@@ -206,9 +207,10 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
 
   /* Set up the tdata area.  ECOFF uses its own routine, and overrides
      abfd->flags.  */
+  tdata_save = abfd->tdata.any;
   tdata = bfd_coff_mkobject_hook (abfd, (PTR) internal_f, (PTR) internal_a);
   if (tdata == NULL)
-    return 0;
+    goto fail2;
 
   scnhsz = bfd_coff_scnhsz (abfd);
   readsize = (bfd_size_type) nscns * scnhsz;
@@ -245,6 +247,8 @@ coff_real_object_p (abfd, nscns, internal_f, internal_a)
 
  fail:
   bfd_release (abfd, tdata);
+ fail2:
+  abfd->tdata.any = tdata_save;
   abfd->flags = oflags;
   bfd_get_start_address (abfd) = ostart;
   return (const bfd_target *) NULL;
@@ -270,12 +274,13 @@ coff_object_p (abfd)
 
   filehdr = bfd_alloc (abfd, filhsz);
   if (filehdr == NULL)
-    return 0;
+    return NULL;
   if (bfd_bread (filehdr, filhsz, abfd) != filhsz)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
-      return 0;
+      bfd_release (abfd, filehdr);
+      return NULL;
     }
   bfd_coff_swap_filehdr_in (abfd, filehdr, &internal_f);
   bfd_release (abfd, filehdr);
@@ -292,7 +297,7 @@ coff_object_p (abfd)
       || internal_f.f_opthdr > aoutsz)
     {
       bfd_set_error (bfd_error_wrong_format);
-      return 0;
+      return NULL;
     }
   nscns = internal_f.f_nscns;
 
@@ -302,13 +307,15 @@ coff_object_p (abfd)
 
       opthdr = bfd_alloc (abfd, aoutsz);
       if (opthdr == NULL)
-	return 0;
+	return NULL;
       if (bfd_bread (opthdr, (bfd_size_type) internal_f.f_opthdr, abfd)
 	  != internal_f.f_opthdr)
 	{
-	  return 0;
+	  bfd_release (abfd, opthdr);
+	  return NULL;
 	}
       bfd_coff_swap_aouthdr_in (abfd, opthdr, (PTR) &internal_a);
+      bfd_release (abfd, opthdr);
     }
 
   return coff_real_object_p (abfd, nscns, &internal_f,

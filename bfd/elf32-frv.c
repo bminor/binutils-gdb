@@ -621,9 +621,6 @@ frv_final_link_relocate (howto, input_bfd, input_section, contents, rel, relocat
 
 
 /* Relocate an FRV ELF section.
-   There is some attempt to make this function usable for many architectures,
-   both USE_REL and USE_RELA ['twould be nice if such a critter existed],
-   if only to serve as a learning tool.
 
    The RELOCATE_SECTION function is called by the new ELF backend linker
    to handle the relocations for a section.
@@ -655,7 +652,7 @@ frv_final_link_relocate (howto, input_bfd, input_section, contents, rel, relocat
 
 static boolean
 elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
-			   contents, relocs, local_syms, local_sections)
+			    contents, relocs, local_syms, local_sections)
      bfd *                   output_bfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *  info;
      bfd *                   input_bfd;
@@ -669,6 +666,9 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
   struct elf_link_hash_entry ** sym_hashes;
   Elf_Internal_Rela *           rel;
   Elf_Internal_Rela *           relend;
+
+  if (info->relocateable)
+    return true;
 
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -692,29 +692,8 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	  || r_type == R_FRV_GNU_VTENTRY)
 	continue;
       
-      r_symndx = ELF32_R_SYM (rel->r_info);
-
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-             anything, unless the reloc is against a section symbol,
-             in which case we have to adjust according to where the
-             section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections [r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-	  continue;
-	}
-
       /* This is a final link.  */
+      r_symndx = ELF32_R_SYM (rel->r_info);
       howto  = elf32_frv_howto_table + ELF32_R_TYPE (rel->r_info);
       h      = NULL;
       sym    = NULL;
@@ -1389,6 +1368,7 @@ frv_elf_print_private_bfd_data (abfd, ptr)
 #define elf_backend_add_symbol_hook             elf32_frv_add_symbol_hook
 
 #define elf_backend_can_gc_sections		1
+#define elf_backend_rela_normal			1
 
 #define bfd_elf32_bfd_reloc_type_lookup		frv_reloc_type_lookup
 #define bfd_elf32_bfd_set_private_flags		frv_elf_set_private_flags

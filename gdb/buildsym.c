@@ -28,7 +28,7 @@
 
 #include "defs.h"
 #include "bfd.h"
-#include "obstack.h"
+#include "gdb_obstack.h"
 #include "symtab.h"
 #include "symfile.h"		/* Needed for "struct complaint" */
 #include "objfiles.h"

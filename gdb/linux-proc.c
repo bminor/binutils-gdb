@@ -31,6 +31,7 @@
 #include "gdbthread.h"	/* for struct thread_info etc. */
 #include "elf-bfd.h"	/* for elfcore_write_* */
 #include "cli/cli-decode.h"	/* for add_info */
+#include "gdb_string.h"
 
 /* Function: child_pid_to_exec_file
  *

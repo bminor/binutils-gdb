@@ -242,8 +242,8 @@ do { COERCE_REF(arg);							\
   do { COERCE_ARRAY(arg);  COERCE_ENUM(arg); } while (0)
 
 #define COERCE_VARYING_ARRAY(arg, real_arg_type)	\
-{ if (chill_varying_type (real_arg_type))  \
-    arg = varying_to_slice (arg), real_arg_type = VALUE_TYPE (arg); }
+/* OBSOLETE { if (chill_varying_type (real_arg_type)) */  \
+/* OBSOLETE     arg = varying_to_slice (arg), real_arg_type = VALUE_TYPE (arg); } */ 
 
 /* If ARG is an enum, convert it to an integer.  */
 

@@ -37,7 +37,7 @@
 #include <sys/types.h>
 #include "gdb_stat.h"
 #include <fcntl.h>
-#include "obstack.h"
+#include "gdb_obstack.h"
 #include "gdb_string.h"
 
 #include "breakpoint.h"

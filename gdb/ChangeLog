@@ -117,6 +117,763 @@
 	(mi_execute_command): Don't print the prompt if the command return
 	is MI_CMD_QUIET.
 
+2002-08-09  Grace Sainsbury  <graces@redhat.com>
+        
+	* remote.c: (remote_wait, remote_async_wait): Add check for awatch
+        T-packets; the 'a' is not taken as a register number.
+	(remote_check_watch_resources, remote_stopped_by_watchpoint)
+        (remote_stopped_data_address): New functions; add to target
+        vector.
+        (remote_insert_hw_breakpoint, remote_remove_hw_breakpoint): Change
+        prototypes to match other implementations of this
+        function. replace integer argument with pointer -- the length
+        field in the Z-packet is the length of what is pointed to or 1 if
+        pointer is null. Add to target vector.
+        (remote_insert_watchpoint, remote_remove_watchpoint): Add to
+        target vector.
+
+        From Mark Salter:
+        * remote.c (remote_wait): Add support to extract optional
+        watchpoint information from T-packet. Ignore unrecognized
+        optional info in T-packet.
+        (remote_async_wait): Ditto.
+
+2002-08-09  Corinna Vinschen  <vinschen@redhat.com>
+
+	* cli/cli-dump.c: Change fopen modes to use binary open modes
+	as defined in include/fopen-bin.h throughout.
+
+2002-08-08  Michael Snyder  <msnyder@redhat.com>
+
+	* mips-tdep.c: Minor whitespace and indentation clean-ups.
+
+2002-08-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* doublest.c (store_floating): Avoid floatformat_from_doublest()
+	assertion failure by returning early after a warning.
+
+2002-08-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_find_saved_regs): Make static.
+	(mips_frame_init_saved_regs): New function.
+	(mips_gdbarch_init): Setup FRAME_INIT_SAVED_REGS method.
+	* config/mips/tm-mips.h (FRAME_INIT_SAVED_REGS): Delete macro.
+	(mips_find_saved_regs): Delete declaration.
+
+2002-08-08  Grace Sainsbury  <graces@redhat.com>
+
+	* remote.c (remote_wait, remote_async_wait): Change
+        thread_num from int to ULONGEST.
+	(unpack_varlen_hex): Change result parameter from
+	int * to ULONGEST *.
+
+2002-08-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure.tgt: Replace powerpc-*-sysv*, powerpc-*-elf*,
+	powerpcle-*-eabi*, powerpcle-*-sysv* and powerpcle-*-elf* with
+	powerpc*-*-*.
+	* MAINTAINERS: Remove redundant rs6000-ibm-aix4.1 target.
+
+2002-08-08  Andrew Cagney  <cagney@redhat.com>
+
+	* gcore.c (override_derive_stack_segment): Delete variable.
+	(preempt_derive_stack_segment): Delete function.
+	(derive_stack_segment): Delete function.
+	(default_derive_stack_segment): Renamed to derive_stack_segment.
+	(override_derive_heap_segment): Delete variable.
+	(preempt_derive_heap_segment): Delete function.
+	(derive_heap_segment): Delete function.
+	(default_derive_heap_segment): Rename to derive_heap_segment.
+
+2002-08-06  Michael Snyder  <msnyder@redhat.com>
+
+	* config/mips/tm-mips.h: Remove #define USE_STRUCT_CONVENTION.
+	* mips-tdep.c (mips_EABI_use_struct_convention, 
+	mips_OABI_use_struct_convention, mips_NABI_use_struct_convention):
+	New functions.  (mips_use_struct_convention): Delete.
+	(mips_gdbarch_init): set use_gdbarch_convention.
+
+2002-08-06  Michael Snyder  <msnyder@redhat.com>
+
+	*  mips-tdep.c: gdbarch-ify reg_struct_has_addr.
+	(mips_eabi_reg_struct_has_addr, mips_n32n64_reg_struct_has_addr, 
+	mips_o32_reg_struct_has_addr): New functions.
+	(mips_gdbarch_init): Set gdbarch reg_struct_has_addr.
+
+2002-08-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* regcache.c (pseudo_register): Delete function.
+	(fetch_register): Delete function.
+	(store_register): Delete function.
+	(regcache_raw_read, legacy_read_register_gen): Use
+	target_fetch_registers instead of fetch_register.
+	(legacy_write_register_gen, regcache_raw_write): Use
+	target_store_register instead of store_register.
+	(write_register_bytes): Ditto.
+
+	* gdbarch.sh (FETCH_PSEUDO_REGISTER): Delete.
+	(STORE_PSEUDO_REGISTER): Delete.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+2002-08-06  Corinna Vinschen  <vinschen@redhat.com>
+
+	* cli/cli-dump.c (add_dump_command): Explicitely use "b" flag to
+	write dump file binary.
+
+2002-08-05  Michael Snyder  <msnyder@redhat.com>
+
+	*  mips-tdep.c (mips_find_saved_regs): Adjust stack according
+	to MIPS_SAVED_REGSIZE, not GDB_TARGET_IS_MIPS64.  Enhance comment.
+	(mips_gdbarch_init): Set N32 target to be mips64.
+
+2002-08-06  Kevin Buettner  <kevinb@redhat.com>
+
+	* frame.c (find_saved_register): Break out of loop once saved
+	register address is found.  Don't mention sparc in loop comment
+	anymore.
+
+2002-08-06  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_gdbarch_init): For the N32 ABI, set
+	mips_default_saved_regsize to 8.
+
+2002-08-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* gcore.c: Do not include <sys/procfs.h>.
+	* Makefile.in (gcore.o): Update dependencies.
+
+2002-08-06  Andrew Cagney  <cagney@redhat.com>
+
+	* configure.tgt: Make arc-*-* obsolete.
+	* NEWS: Mention that arc-*-* has been identifed as obsolete.
+	* MAINTAINERS: Make arc-elf obsolete.
+	* arc-tdep.c: Make file obsolete.
+	* config/arc/arc.mt: Ditto.
+	* config/arc/tm-arc.h: Ditto.
+
+2002-08-05  Theodore A. Roth  <troth@verinet.com>
+
+	* gdb/avr-tdep.c(avr_skip_prologue): Fix to return the correct pc.
+
+2002-08-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* mcore-tdep.c (mcore_gdbarch_init): Use
+	generic_unwind_get_saved_register instead of
+	generic_get_saved_register.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* frv-tdep.c (frv_gdbarch_init): Ditto.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* s390-tdep.c (s390_gdbarch_init): Ditto.
+	* d10v-tdep.c (d10v_gdbarch_init): Ditto.
+	* config/mn10200/tm-mn10200.h (GET_SAVED_REGISTER): Ditto.
+	* config/h8300/tm-h8300.h (GET_SAVED_REGISTER): Ditto.
+
+2002-08-05  Joel Brobecker  <brobecker@gnat.com>
+
+	* objfiles.h: Add missing #include "symfile.h"
+
+	* Makefile.in (objfiles_h): Add dependency on symfile.h and dependents.
+
+2002-08-04  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2002-08-01 david carlton <carlton@math.stanford.edu>:
+	* hpread.c (hpread_read_struct_type): Deleted superfluous setting
+	of FIELD_BITSIZE.
+
+2002-08-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* NEWS: Cleanup and nitpick.
+
+2002-08-03  Andrew Cagney  <ac131313@redhat.com>
+
+	* NEWS: Cleanup.  Use *-linux*-gnu*.  Only use `*' for headings.
+
+2002-08-03  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (gdbtk-bp.o): Update dependencies.
+	(gdbtk-register.o): Ditto.
+	(gdbtk-varobj.o): Ditto.
+
+2002-08-03  Andrew Cagney  <cagney@redhat.com>
+
+	* m68hc11-tdep.c (m68hc11_pseudo_register_read): Replace
+	m68hc11_fetch_pseudo_register.
+	(m68hc11_pseudo_register_write): Replace
+	m68hc11_store_pseudo_register.
+	(m68hc11_gdbarch_init): Update.
+
+Fri Aug  2 15:53:50 2002  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh: Include "gdb_string.h".
+	* gdbarch.c: Regenerate.
+
+	* regcache.c: Include "gdb_string.h".
+	* ax-general.c: Ditto.
+	* varobj.c: Ditto.
+	* std-regs.c: Ditto.
+	* fbsd-proc.c: Ditto.
+	* thread.c: Ditto.
+
+	* Makefile.in (regcache.o): Update dependencies.
+	(thread.o, gdbarch.o): Ditto.
+	(ax-general.o, gdbarch.o): Ditto.
+	(varobj.o, std-regs.o): Ditto.
+	(fbsd-proc.o): Specify dependencies.
+
+2002-08-02  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.c (regcache_cooked_read): Rename rawnum parameter to
+	regnum.
+	(regcache_cooked_write): Ditto.
+
+2002-08-02  Andrew Cagney  <ac131313@redhat.com>
+
+	* regcache.c (regcache_cooked_read): New function.
+	(regcache_cooked_write): New function.
+	(read_register_gen): Rewrite using regcache_cooked_read.
+	(write_register_gen): Rewrite using regcache_cooked_write.
+
+	* regcache.h (regcache_cooked_read, regcache_cooked_write):
+	Declare.
+
+2002-08-02  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (pseudo_register_read, pseudo_register_write):
+	Replace the architecture methods register_read and register_write.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* regcache.c (init_regcache_descr): Update.
+	(read_register_gen): Update.
+	(write_register_gen): Update.
+	(supply_register): Update comment.
+
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	(sh_pseudo_register_read, sh64_pseudo_register_read): Add
+	`regcache' and `gdbarch' parameters.  Make `buffer' a void
+	pointer.  Update code.
+	(sh_pseudo_register_write, sh64_pseudo_register_write): Add
+	`regcache' and `gdbarch' parameters.  Make `buffer' a constant
+	void pointer.  Update code.
+	(sh64_register_write): Delete.
+	(sh4_register_read): Delete.
+	(sh64_register_read): Delete.
+	(sh4_register_write): Delete.
+	(sh_sh4_register_convert_to_raw): Make `from' parameter a constant
+	void pointer, `to' parameter a void pointer.
+	(sh_sh64_register_convert_to_raw): Ditto.
+
+2002-08-01  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_register_virtual_type): Use architecture
+	invariant return values.
+
+2002-08-01  Andrew Cagney  <cagney@redhat.com>
+
+	* linux-proc.c: Include "gdb_string.h".
+	* Makefile.in (linux-proc.o): Update dependency list.
+
+2002-08-01  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Add comments.  Fix typo in
+	comment.
+
+2002-08-01  Grace Sainsbury  <graces@redhat.com>
+
+	* target.h: Add to_insert_hw_breakpoint, to_remove_hw_breakpoint,
+	to_insert_watchpoint, to_remove_watchpoint,
+	to_stopped_by_watchpoint, to_stopped_data_address,
+	to_region_size_ok_for_hw_watchpoint, to_can_use_hw_breakpoint to
+	target vecctor. Define their corresponding macros so they call
+	them.
+	
+	* target.c: Add default and debug versions of for
+	to_insert_hw_breakpoint, to_remove_hw_breakpoint,
+	to_insert_watchpoint, to_remove_watchpoint,
+	to_stopped_by_watchpoint, to_stopped_data_address,
+	to_region_size_ok_for_hw_watchpoint, to_can_use_hw_breakpoint.
+
+2002-08-01  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_register_virtual_type): New function.
+	(mips_gdbarch_init): Register mips_register_virtual_type()
+	with gdbarch machinery.
+	* config/mips/tm-irix6.h (mips/tm-bigmips64.h): Include
+	this file instead of tm-bigmips.h.
+	(MIPS_REGSIZE): Delete this macro.
+	(REGISTER_VIRTUAL_TYPE): Delete macro.  Undef macro so that
+	multiarch version in mips-tdep.c will be found.
+
+2002-08-01  Andrew Cagney  <cagney@redhat.com>
+
+	* NEWS: Menion that CHILL has been made obsolete.
+
+	* gdbtypes.c (chill_varying_type): Make chill references obsolete.
+	* gdbserver/Makefile.in: Ditto.
+	* stabsread.c (read_range_type): Ditto.
+	* gdbtypes.h: Ditto.
+	* language.c (binop_type_check): Ditto.
+	(binop_result_type): Ditto.
+	(integral_type): Ditto.
+	(character_type): Ditto.
+	(string_type): Ditto.
+	(boolean_type): Ditto.
+	(structured_type): Ditto.
+	(lang_bool_type): Ditto.
+	(binop_type_check): Ditto.
+	* language.h (_LANG_chill): Ditto.
+	* dwarfread.c (set_cu_language): Ditto.
+	* dwarfread.c (CHILL_PRODUCER): Ditto.
+	* dwarfread.c (handle_producer): Ditto.
+	* expression.h (enum exp_opcode): Ditto.
+	* eval.c: Ditto for comments.
+	* typeprint.c (typedef_print) [_LANG_chill]: Ditto.
+	* expprint.c (print_subexp): Ditto.
+	(print_subexp): Ditto.
+	* valops.c (value_cast): Ditto.
+	(search_struct_field): Ditto.
+	* value.h (COERCE_VARYING_ARRAY): Ditto.
+	* symfile.c (init_filename_language_table): Ditto.
+	(add_psymbol_with_dem_name_to_list): Ditto.
+	* valarith.c (value_binop): Ditto.
+	(value_neg): Ditto.
+	* valops.c (value_slice): Ditto.
+	* symtab.h (union language_specific): Ditto.
+	(SYMBOL_INIT_LANGUAGE_SPECIFIC): Ditto.
+	(SYMBOL_DEMANGLED_NAME): Ditto.
+	(SYMBOL_CHILL_DEMANGLED_NAME): Ditto.
+	* defs.h (enum language): Ditto.
+	* symtab.c (got_symtab): Ditto.
+	* utils.c (fprintf_symbol_filtered): Ditto.
+
+	* ch-typeprint.c: Make file obsolete.
+	* ch-valprint.c: Make file obsolete.
+	* ch-lang.h: Make file obsolete.
+	* ch-exp.c: Make file obsolete.
+	* ch-lang.c: Make file obsolete.
+
+	* Makefile.in (FLAGS_TO_PASS): Do not pass CHILL or CHILLFLAGS or
+	CHILL_LIB.
+	(TARGET_FLAGS_TO_PASS): Ditto.
+	(CHILLFLAGS): Obsolete.
+	(CHILL): Obsolete.
+	(CHILL_FOR_TARGET): Obsolete.
+	(CHILL_LIB): Obsolete.
+	(SFILES): Remove ch-exp.c, ch-lang.c, ch-typeprint.c and
+	ch-valprint.c.
+	(HFILES_NO_SRCDIR): Remove ch-lang.h.
+	(COMMON_OBS): Remove ch-valprint.o, ch-typeprint.o, ch-exp.o and
+	ch-lang.o.
+	(ch-exp.o, ch-lang.o, ch-typeprint.o, ch-valprint.o): Delete
+	targets.
+
+2002-07-31  Joel Brobecker  <brobecker@gnat.com>
+
+	* dwarf2read.c (set_cu_language): Add handler for LANG_Ada95.
+	This does not change anything at the moment, but will be helpful
+	later when full Ada support is integrated.
+
+2002-07-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (_initialize_mips_tdep): Add "n64" to "set mips abi"
+	help message.
+
+2002-07-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_push_arguments): Fetch gdbarch_tdep struct
+	and save it in a local variable.  Use variable in later test.
+
+2002-07-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_find_abi_section): Add N64 ABI recognition
+	test.  (Thanks to Daniel Jacobowitz.)
+	
+2002-07-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (enum mips_abi): Add MIPS_ABI_N64.
+	(mips_abi_strings): Add "n64".
+	(mips_gdbarch_init): Add test for n64 abi.  Add MIPS_ABI_N64 case.
+
+2002-07-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* config/mips/tm-irix6.h (MIPS_REGSIZE): Define to be 8.
+	(REGISTER_VIRTUAL_TYPE): Some registers are now 64 bits wide.
+
+2002-07-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* utils.c (host_pointer_to_address, address_to_host_pointer):
+	Use gdb_assert() instead of explicit call to internal_error().
+
+2002-07-30  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in (rs6000-nat.o): Update dependencies.
+
+	From Nicholas Duffek:
+	* Makefile.in (ALLDEPFILES): Add aix-thread.c.
+	(aix-thread.o): New rule.
+	* configure.host (gdb_host): Set to aix432 on AIX 4.3.2+.
+	* config/powerpc/aix432.mh: New file.
+
+2002-07-30  Daniel Jacobowitz  <drow@mvista.com>
+
+	* ppc-linux-tdep.c (ELF_NGREG, ELF_NFPREG, ELF_NVRREG)
+	(ELF_FPREGSET_SIZE, ELF_GREGSET_SIZE): New enums.
+	(fetch_core_registers, ppc_linux_supply_gregset)
+	(ppc_linux_supply_fpregset): New functions.
+	(ppc_linux_regset_core_fns): New.
+	(_initialize_ppc_linux_tdep): Call add_core_fns.
+	* ppc-tdep.h: Add prototypes for ppc_linux_supply_fpregset
+	and ppc_linux_supply_gregset.
+	* ppc-linux-nat.c (supply_gregset): Call ppc_linux_supply_gregset.
+	(supply_fpregset): Call ppc_linux_supply_fpregset.
+	* config/powerpc/linux.mh (NATDEPFILES): Remove core-regset.o and
+	corelow.o.
+	* config/powerpc/linux.mt (TDEPFILES): Add corelow.o.
+
+2002-07-30  Daniel Jacobowitz  <drow@mvista.com>
+
+	* symtab.c (lookup_symbol): Demangle before lowercasing.
+
+2002-07-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* symtab.h: Replace #include "gdb_obstack.h" with opaque
+	declaration.
+	* cli/cli-cmds.c, cli/cli-script.c: Include "gdb_string.h".
+	* gnu-v3-abi.c, arc-tdep.c, cli/cli-decode.c: Ditto.
+	* avr-tdep.c, mon960-rom.c, i960-tdep.c: Ditto.
+	* arch-utils.c, cli/cli-setshow.c: Unconditionally include
+	"gdb_string.h".
+	* Makefile.in (cli-script.o, cli-cmds.o): Update dependencies.
+	(gnu-v3-abi.o, cli-setshow.o, i960-tdep.o): Ditto.
+	(cli-decode.o, mi-cmd-var.o, mi-cmd-disas.o): Ditto.
+	(avr-tdep.o, mon960-rom.o): Ditto.
+	(aout_stabs_gnu_h): Define.
+	(symtab_h): Remove $(gdb_obstack_h).
+
+2002-07-30  Jim Blandy  <jimb@redhat.com>
+
+	Patch from David Carlton <carlton@math.stanford.edu>:
+	* gdbinit.in: Move the `dir' commands that add GDB's own source
+	directory to the search path to the end, so that the `gdb' source
+	directory will be searched first.
+
+2002-07-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb_obstack.h: New file.
+	* symtab.h: Include "gdb_obstack.h" instead of "obstack.h".
+	(obstack_chunk_alloc, obstack_chunk_free): Delete macros.
+	* objfiles.h: Include "gdb_obstack.h".
+	* Makefile.in (gdb_obstack_h): Define.
+	(symtab_h): Add $(gdb_obstack_h).
+	(objfiles_h): Add $(gdb_obstack_h).
+	
+	* objfiles.c: Include "gdb_obstack.h" instead of "obstack.h".
+	* macrotab.c, cp-valprint.c, dbxread.c: Ditto.
+	* ch-typeprint.c, ch-valprint.c, dstread.c: Ditto.
+	* macroexp.c, p-typeprint.c, stabsread.c: Ditto.
+	* symtab.c, f-typeprint.c, mdebugread.c: Ditto.
+	* p-valprint.c, symmisc.c, typeprint.c: Ditto.
+	* symfile.c, coffread.c, c-typeprint.c: Ditto.
+	* buildsym.c, bcache.c, ada-typeprint.c: Ditto.
+
+	* Makefile.in (bcache.o): Update dependencies.
+	(buildsym.o, c-typeprint.o, ch-typeprint.o): Ditto.
+	(ch-valprint.o, coffread.o, cp-valprint.o): Ditto.
+	(dbxread.o, dstread.o, f-typeprint.o): Ditto.
+	(objfiles.o, p-typeprint.o, p-valprint.o): Ditto.
+	(stabsread.o, symfile.o, symmisc.o): Ditto.
+	(symtab.o, typeprint.o, macroexp.o): Ditto.
+	(macrotab.o, mdebugread.o): Ditto.
+	(f_lang_h, coff_sym_h, coff_symconst_h): Define.
+	(coff_ecoff_h, aout_aout64_h): Define.
+	(aout_stabs_gnu_h, libaout_h): Define.
+
+2002-07-29  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.c (struct regcache_descr): Rename nr_registers to
+	nr_cooked_registers.  Revise comments describing the structure
+	member fields.
+	(init_regcache_descr): Update.
+	(init_legacy_regcache_descr): Update.
+	(read_register_gen, write_register_gen): When a cooked register in
+	the raw register range, directly access the value from the raw
+	register cache.
+
+2002-07-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* z8k-tdep.c: Do not include "obstack.h".
+	* h8300-tdep.c, h8500-tdep.c: Ditto.
+	* m68hc11-tdep.c, sh-tdep.c: Ditto.
+	* valprint.c, v850-tdep.c: Ditto.
+	* d10v-tdep.c, mn10300-tdep.c: Ditto.
+	* mn10200-tdep.c: Ditto.
+
+	* Makefile.in (z8k-tdep.o): Update dependencies.
+	(m68hc11-tdep.o, valprint.o): Ditto.
+	(v850-tdep.o, d10v-tdep.o): Ditto.
+	(mn10300-tdep.o, sparc-tdep.o): Ditto.
+	(sh-tdep.o, h8500-tdep.o, h8300-tdep.o): Ditto.
+	(m32r-tdep.o, mn10200-tdep.o): Specify dependencies.
+	(sh_opc_h, gdb_sim_sh_h): Define.
+	(elf_sh_h, elf_bfd_h): Define.
+	(opcode_m68hc11_h): Define.
+	(OPCODES_SRC, OPCODES_DIR): define.
+	(OPCODES): Use $(OPCODES_DIR).
+	(gdb_sim_d10v_h): Rename sim_d10v_h.
+	(gdb_sim_arm_h): Rename sim_arm_h.
+
+2002-07-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* utils.c (host_pointer_to_address, address_to_host_pointer):
+	Change internal_error() message to indicate function responsible
+	for the error.
+
+2002-07-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* ui-out.c (ui_out_field_core_addr): Remove unnecessary cast in
+	calls to local_hex_string_custom().
+
+2002-07-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* irix5-nat.c: Move IRIX shared library support from here...
+	* solib-irix.c: ...to here.  Revised substantially to work with
+	generic solib framework.
+
+	* osabi.h (gdb_osabi): Add new enum constant GDB_OSABI_IRIX.
+	* osabi.c (gdb_osabi_names): Add corresponding string for Irix.
+	* mips-irix-tdep.c: New file.
+
+	* Makefile.in (ALLDEPFILES): Add mips-irix-tdep.c and solib-irix.c.
+	(mips-irix-tdep.o, solib-irix.o): New rules.
+	* config/mips/irix5.mt (TDEPFILES): Add mips-irix-tdep.o, solib.o,
+	solib-irix.o.
+	* config/mips/irix6.mt (TDEPFILES): Likewise.
+	* config/mips/irix6.mh (NATDEPFILES): Remove solib.o.
+
+2002-07-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* aix-thread.c (coff/internal.h, bfd/libcoff.h, pthread.h): Remove
+	disabled (via ``#if 0'') includes.
+
+2002-07-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* aix-thread.c (special_register_p, supply_sprs64, supply_sprs32)
+	(fetch_regs_user_thread, fetch_regs_kernel_thread, fill_sprs64)
+	(fill_sprs32, store_regs_user_thread, store_regs_kernel_thread):
+	Add support for the fpscr register.
+	* rs6000-nat.c (regmap, fetch_inferior_registers)
+	(store_inferior_registers, fetch_core_registers): Likewise.
+
+2002-07-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* rs6000-nat.c (language.h): Include.
+	(special_regs): Delete this array.
+	(regmap): New function.
+	(fetch_register, store_register):  Use regmap() to map gdb
+	register numbers to ptrace register numbers.  Also, use
+	outputs from regmap() to make decisions regarding type of
+	ptrace() call to make.  In particular, don't compare against
+	FIRST_UISA_SP_REGNUM or LAST_UISA_SP_REGNUM.
+	(fetch_inferior_registers, store_inferior_registers): Where
+	possible, obtain register numbers from tdep struct.  Don't
+	refer to FIRST_UISA_SP_REGNUM or LAST_UISA_SP_REGNUM.
+	* config/rs6000/tm-rs6000.h (FIRST_UISA_SP_REGNUM)
+	(LAST_UISA_SP_REGNUM): Delete.
+	
+2002-07-25  Kevin Buettner  <kevinb@redhat.com>
+
+	* rs6000-nat.c (ppc-tdep.h): Include.
+	(fetch_registers, store_register, fetch_core_registers): Don't
+	access registers[] directly.  Instead, use supply_register() or
+	regcache_collect() as appropriate.
+	(find_toc_address): Format hex address with local_hex_string().
+
+2002-07-25  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/djgpp/fnchange.lst: Rename bfd/elf32-fr30.c and
+	bfd/elf32-frv.c.
+
+2002-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* jv-exp.y: Marked all strings with _().
+	(ClassInstanceCreationExpression, ArrayCreationExpression): Use
+	internal_error.
+	(MethodInvocation, CastExpression, parse_number, yyerror,
+	java_type_from_name, push_expression_name, yylex): Typo fixes.
+
+2002-07-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	* ui-file.c (struct tee_file, tee_file_new, tee_file_delete)
+	(tee_file_flush, tee_file_write, tee_file_fputs)
+	(tee_file_isatty): New.
+	* ui-file.h (tee_file_new): Add prototype.
+
+2002-07-24  Aidan Skinner <aidan@velvet.net>
+
+	* ada-lang.c: Change k&r style function definitions to prototyped
+	form.
+	* ada-typeprint.c: Change k&r style function definitions to prototyped
+	form.
+	* ada-valprint.c: Change k&r style function definitions to prototyped
+	form.
+	
+2002-07-24  Andrew Cagney  <cagney@redhat.com>
+
+	* README: Remove reference to remote-bug.
+	* Makefile.in (ALLDEPFILES): Remove m88k-nat.c, m88k-tdep.c and
+	remote-bug.c.
+	(m88k-nat.o): Delete rule.
+	(m88k-tdep.o): Delete rule.
+	(remote-bug.o): Delete rule.
+	* MAINTAINERS: Mark as obsolete.
+	* elfread.c (elf_symtab_read): Mention that m88k is obsolete.
+	* m88k-tdep.c: Make file obsolete.
+	* config/m88k/m88k.mh: Ditto.
+	* config/m88k/delta88v4.mh: Ditto.
+	* config/m88k/delta88v4.mt: Ditto.
+	* config/m88k/delta88.mt: Ditto.
+	* config/m88k/delta88.mh: Ditto.
+	* remote-bug.c: Ditto.
+	* config/m88k/tm-delta88.h: Ditto.
+	* config/m88k/nm-delta88v4.h: Ditto.
+	* config/m88k/xm-delta88.h: Ditto.
+	* config/m88k/xm-dgux.h: Ditto.
+	* config/m88k/tm-m88k.h: Ditto.
+	* config/m88k/nm-m88k.h: Ditto.
+	* config/m88k/tm-delta88v4.h: Ditto.
+	* m88k-nat.c: Ditto.
+	* cxux-nat.c: Ditto.
+	* configure.host: Make m88*-motorola-sysv4*, m88*-motorola-sysv*
+	and m88*-*-* obsolete.
+	* configure.tgt: Make m88*-motorola-sysv4*, m88*-motorola-* and
+	m88*-*-* obsolete.
+
+2002-07-24  Andrew Cagney  <cagney@redhat.com>
+
+	* findvar.c (extract_unsigned_integer): Make `addr' parameter
+	constant.  Same for local pointer variables.
+	(extract_signed_integer): Ditto.
+	* defs.h (extract_unsigned_integer): Update.
+	(extract_signed_integer): Update.
+
+2002-07-24  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdbserver/configure.in (unistd.h): Add to AC_CHECK_HEADERS list.
+	* gdbserver/configure: Regenerate.
+	* gdbserver/config.in: Regenerate.
+
+2002-07-24  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.c (regcache_raw_write): Change buf parameter to a
+	constant void pointer.
+	(regcache_raw_read): Change buf parameter to a void pointer.
+	(legacy_write_register_gen): Change myaddr parameter a constant
+	void pointer.
+	(supply_register): Change val parameter to a const void pointer.
+	* regcache.h (regcache_raw_write): Update declaration.
+	(regcache_raw_read): Update declaration.
+	(supply_register): Update declaration.
+
+2002-07-24  Tom Tromey  <tromey@redhat.com>
+
+	* defs.h (gdb_readline_wrapper): Declare.
+	* utils.c (prompt_for_continue): Use gdb_readline_wrapper.
+	* tracepoint.c (read_actions): Use gdb_readline_wrapper.
+	* top.c (gdb_readline_wrapper): New function.
+	(command_line_input): Use it.
+
+2002-07-24  Andrew Cagney  <cagney@redhat.com>
+
+	* regcache.h (regcache_raw_read, regcache_raw_write): Replace
+	regcache_read and regcache_write.
+	(regcache_raw_read_as_address): Replace regcache_read_as_address.
+	* regcache.c: Update.
+	* sh-tdep.c (sh64_push_arguments): Update comment.
+	(sh_pseudo_register_read): Update.
+	(sh_pseudo_register_write): Update.
+	(sh4_register_read): Update.
+	(sh4_register_write): Update.
+	(sh64_pseudo_register_read): Update.
+	(sh64_pseudo_register_write): Update.
+	(sh64_register_read): Update.
+	(sh64_register_write): Update.
+	* i386-tdep.c (i386_extract_return_value): Update.
+	(i386_extract_struct_value_address): Update.
+	(i386_extract_return_value): Update.
+	* blockframe.c (generic_read_register_dummy): Update.
+	(generic_call_dummy_register_unwind): Update
+	* infrun.c (write_inferior_status_register): Update.
+
+2002-07-23  Jim Blandy  <jimb@redhat.com>
+
+	* parser-defs.h (expression_context_pc): Make this extern.
+	(Thanks to Michael Snyder.)
+
+2002-07-23  Andrew Cagney  <ac131313@redhat.com>
+
+	GDB 5.2.1 released from 5.2 branch.
+	* NEWS: Mention changes in 5.2.1 including addition of AVR target.
+	* README: Update to mention 5.2.1.
+
+2002-07-23  Mark Salter  <msalter@redhat.com>
+
+	* remote.c (remote_read_bytes): Fix check for error.
+
+2002-07-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* aix-thread.c (language.h): Include.
+	(ptrace_check, pdc_symbol_addrs, pdc_read_regs, pdc_write_regs)
+	(pdc_read_data, pdc_write_data, pdc_alloc, pdc_realloc, pdc_dealloc):
+	Print newlines at end of debug messages.
+	(pdc_symbol_addrs, pdc_read_regs, pdc_write_regs, pdc_read_data)
+	(pdc_write_data): Use local_hex_string() instead of %llx formats.
+
+2002-07-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* aix-thread.c (ppc-tdep.h): Include.
+	(special_register_p): New function.
+	(supply_sprs64, supply_sprs32, fill_sprs64, fill_sprs32)
+	(store_regs_user_thread): Use register number information from
+	gdbarch_tdep struct instead of hardcoded offsets relative to
+	FIRST_UISA_SP_REGNUM.
+	(fetch_regs_kernel_thread, store_regs_kernel_thread):  Call
+	special_register_p() instead of using FPLAST_REGNUM and
+	LAST_UISA_SP_REGNUM as lower and upper bounds on the special
+	register numbers.  Also, don't assume that LAST_UISA_SP_REGNUM
+	will be MQ's register number.
+
+2002-07-22  Michael Snyder  <msnyder@redhat.com>
+
+	* aix-thread.c (ops): Rename to aix_thread_ops.
+	(base_ops): Rename to base_target.
+	(ops_attach): Rename to aix_thread_attach.
+	(ops_detach): Rename to aix_thread_detach.
+	(ops_resume): Rename to aix_thread_detach.
+	(ops_wait):   Rename to aix_thread_wait.
+	(ops_kill):   Rename to aix_thread_kill.
+	(init_ops):   Rename to init_aix_thread_ops.
+	(ops_fetch_register): Rename to aix_thread_fetch_register.
+	(ops_store_register): Rename to aix_thread_store_register.
+	(ops_mourn_inferior): Rename to aix_thread_mourn_inferior.
+	(ops_thread_alive):   Rename to aix_thread_thread_alive.
+	(ops_extra_thread_info: Rename to aix_thread_extra_thread_info.
+	(ops_pid_to_str):  Rename to aix_thread_pid_to_str.
+	(ops_xfer_memory): Rename to aix_thread_xfer_memory.
+	(fetch_regs_lib):  Rename to fetch_regs_user_thread.
+	(fetch_regs_kern): Rename to fetch_regs_kernel_thread.
+	(store_regs_lib):  Rename to store_regs_user_thread.
+	(store_regs_kern): Rename to store_regs_kernel_thread.
+
+2002-07-22  Michael Snyder  <msnyder@redhat.com>
+
+	* aix-thread.c (ops_prepare_to_store): Eliminate.
+	(init_ops): Don't initialize ops.prepare_to_store.
+	(store_regs_kern): Pre-fetch register buffers from child, 
+	because some registers may not be in the cache.  Copy
+	regs from register cache only if they are cached.
+	(store_regs_lib): Copy regs from register cache only
+	if they are cached.
+	(fill_sprs32, (fill_sprs64, fill_fprs, fill_gprs32,
+	fill_gprs64): Ditto.
+
 2002-07-22  Kevin Buettner  <kevinb@redhat.com>
 
 	* aix-thread.c (gdb_assert.h): Include.

@@ -22,7 +22,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "obstack.h"
+#include "gdb_obstack.h"
 #include "bcache.h"
 #include "gdb_string.h"		/* For memcpy declaration */
 

@@ -429,6 +429,9 @@ elf32_h8_relocate_section (output_bfd, info, input_bfd, input_section,
   struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel, *relend;
 
+  if (info->relocateable)
+    return true;
+
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
 
@@ -444,29 +447,9 @@ elf32_h8_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_vma relocation;
       bfd_reloc_status_type r;
 
+      /* This is a final link.  */
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
-
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-             anything, unless the reloc is against a section symbol,
-             in which case we have to adjust according to where the
-             section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections[r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-	  continue;
-	}
-
-      /* This is a final link.  */
       h = NULL;
       sym = NULL;
       sec = NULL;
@@ -1465,6 +1448,7 @@ elf32_h8_get_relocated_section_contents (output_bfd, link_info, link_order,
 
 /* Use an H8 specific linker, not the ELF generic linker.  */
 #define elf_backend_relocate_section elf32_h8_relocate_section
+#define elf_backend_rela_normal		1
 
 /* And relaxing stuff.  */
 #define bfd_elf32_bfd_relax_section     elf32_h8_relax_section

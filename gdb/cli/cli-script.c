@@ -27,6 +27,7 @@
 #include <ctype.h>
 
 #include "ui-out.h"
+#include "gdb_string.h"
 
 #include "top.h"
 #include "cli/cli-cmds.h"

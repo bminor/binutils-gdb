@@ -4038,7 +4038,6 @@ hpread_read_struct_type (dnttpointer hp_type, union dnttentry *dn_bufp,
 	      list = new;
 
 	      list->field.name = VT (objfile) + fn_fieldp->dsvar.name;
-	      FIELD_BITSIZE (list->field) = -1;		/* indicates static member */
 	      SET_FIELD_PHYSNAME (list->field, 0);	/* initialize to empty */
 	      memtype = hpread_type_lookup (fn_fieldp->dsvar.type, objfile);
 

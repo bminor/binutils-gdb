@@ -213,7 +213,7 @@ extern use_struct_convention_fn mn10200_use_struct_convention;
 /* Override the default get_saved_register function with
    one that takes account of generic CALL_DUMMY frames.  */
 #define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
-      generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
+      generic_unwind_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
 /* Define this for Wingdb */
 #define TARGET_MN10200

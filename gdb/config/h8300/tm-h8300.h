@@ -311,4 +311,4 @@ extern void h8300_pop_frame (void);
 /* override the standard get_saved_register function with 
    one that takes account of generic CALL_DUMMY frames */
 #define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
-     generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
+     generic_unwind_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)

@@ -28,7 +28,7 @@
 #include "breakpoint.h"
 
 #include "bfd.h"
-#include "obstack.h"
+#include "gdb_obstack.h"
 
 #include "gdb_string.h"
 #include <ctype.h>

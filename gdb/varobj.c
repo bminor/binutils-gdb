@@ -23,6 +23,7 @@
 #include "language.h"
 #include "wrapper.h"
 #include "gdbcmd.h"
+#include "gdb_string.h"
 #include <math.h>
 
 #include "varobj.h"

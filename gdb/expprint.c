@@ -217,8 +217,9 @@ print_subexp (register struct expression *exp, register int *pos,
 	}
       else
 	{
-	  int is_chill = exp->language_defn->la_language == language_chill;
-	  fputs_filtered (is_chill ? " [" : " {", stream);
+	  /* OBSOLETE int is_chill = exp->language_defn->la_language == language_chill; */
+	  /* OBSOLETE fputs_filtered (is_chill ? " [" : " {", stream); */
+	  fputs_filtered (" {", stream);
 	  for (tem = 0; tem < nargs; tem++)
 	    {
 	      if (tem != 0)
@@ -227,7 +228,8 @@ print_subexp (register struct expression *exp, register int *pos,
 		}
 	      print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
 	    }
-	  fputs_filtered (is_chill ? "]" : "}", stream);
+	  /* OBSOLETE fputs_filtered (is_chill ? "]" : "}", stream); */
+	  fputs_filtered ("}", stream);
 	}
       return;
 
@@ -235,15 +237,17 @@ print_subexp (register struct expression *exp, register int *pos,
       tem = longest_to_int (exp->elts[pc + 1].longconst);
       (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
 
-      if (exp->language_defn->la_language == language_chill)
-	{
-	  fputs_filtered (".", stream);
-	  fputs_filtered (&exp->elts[pc + 2].string, stream);
-	  fputs_filtered (exp->elts[*pos].opcode == OP_LABELED ? ", "
-			  : ": ",
-			  stream);
-	}
-      else
+#if 0
+      if (0 /* OBSOLETE exp->language_defn->la_language == language_chill */)
+	{ /* OBSOLETE */
+	  fputs_filtered (".", stream); /* OBSOLETE */
+	  fputs_filtered (&exp->elts[pc + 2].string, stream); /* OBSOLETE */
+	  fputs_filtered (exp->elts[*pos].opcode == OP_LABELED ? ", " /* OBSOLETE */
+			  : ": ", /* OBSOLETE */
+			  stream); /* OBSOLETE */
+	} /* OBSOLETE */
+      else /* OBSOLETE */
+#endif
 	{
 	  /* Gcc support both these syntaxes.  Unsure which is preferred.  */
 #if 1

@@ -265,8 +265,6 @@ extern void mips_store_return_value (struct type *, char *);
   (extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \
 		    REGISTER_RAW_SIZE (V0_REGNUM)))
 
-extern use_struct_convention_fn mips_use_struct_convention;
-#define USE_STRUCT_CONVENTION(gcc_p, type) mips_use_struct_convention (gcc_p, type)
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
@@ -306,19 +304,6 @@ extern int mips_frame_num_args (struct frame_info *);
 
 #define FRAME_ARGS_SKIP 0
 
-/* Put here the code to store, into a struct frame_saved_regs,
-   the addresses of the saved registers of frame described by FRAME_INFO.
-   This includes special registers such as pc and fp saved in special
-   ways in the stack frame.  sp is even more special:
-   the address we return for it IS the sp for the next frame.  */
-
-#define FRAME_INIT_SAVED_REGS(frame_info) \
-  do { \
-    if ((frame_info)->saved_regs == NULL) \
-      mips_find_saved_regs (frame_info); \
-    (frame_info)->saved_regs[SP_REGNUM] = (frame_info)->frame; \
-  } while (0)
-extern void mips_find_saved_regs (struct frame_info *);
 
 
 /* Things needed for making the inferior call functions.  */

@@ -46,9 +46,6 @@ static boolean elf32_avr_relocate_section
 static void bfd_elf_avr_final_write_processing PARAMS ((bfd *, boolean));
 static boolean elf32_avr_object_p PARAMS ((bfd *));
 
-/* Use RELA instead of REL */
-#undef USE_REL
-
 static reloc_howto_type elf_avr_howto_table[] =
 {
   HOWTO (R_AVR_NONE,		/* type */
@@ -722,6 +719,9 @@ elf32_avr_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *           rel;
   Elf_Internal_Rela *           relend;
 
+  if (info->relocateable)
+    return true;
+
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
   relend     = relocs + input_section->reloc_count;
@@ -738,30 +738,9 @@ elf32_avr_relocate_section (output_bfd, info, input_bfd, input_section,
       const char *                 name = NULL;
       int                          r_type;
 
+      /* This is a final link.  */
       r_type = ELF32_R_TYPE (rel->r_info);
       r_symndx = ELF32_R_SYM (rel->r_info);
-
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-             anything, unless the reloc is against a section symbol,
-             in which case we have to adjust according to where the
-             section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections [r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-	  continue;
-	}
-
-      /* This is a final link.  */
       howto  = elf_avr_howto_table + ELF32_R_TYPE (rel->r_info);
       h      = NULL;
       sym    = NULL;
@@ -952,6 +931,7 @@ elf32_avr_object_p (abfd)
 #define elf_backend_gc_sweep_hook            elf32_avr_gc_sweep_hook
 #define elf_backend_check_relocs             elf32_avr_check_relocs
 #define elf_backend_can_gc_sections          1
+#define elf_backend_rela_normal		     1
 #define elf_backend_final_write_processing \
 					bfd_elf_avr_final_write_processing
 #define elf_backend_object_p		elf32_avr_object_p

@@ -250,6 +250,7 @@ struct remote_state
   long remote_packet_size;
 };
 
+
 /* Handle for retreving the remote protocol data from gdbarch.  */
 static struct gdbarch_data *remote_gdbarch_data_handle;
 
@@ -340,7 +341,17 @@ packet_reg_from_pnum (struct remote_state *rs, LONGEST pnum)
   return NULL;
 }
 
-/* */
+/* FIXME: graces/2002-08-08: These variables should eventually be
+   bound to an instance of the target object (as in gdbarch-tdep()),
+   when such a thing exists.  */
+
+/* This is set to the data address of the access causing the target
+   to stop for a watchpoint.  */
+static CORE_ADDR remote_watch_data_address;
+
+/* This is non-zero if taregt stopped for a watchpoint. */
+static int remote_stopped_by_watchpoint_p;
+
 
 static struct target_ops remote_ops;
 
@@ -1107,7 +1118,7 @@ struct gdb_ext_thread_info
 
 #define BUF_THREAD_ID_SIZE (OPAQUETHREADBYTES*2)
 
-char *unpack_varlen_hex (char *buff, int *result);
+char *unpack_varlen_hex (char *buff, ULONGEST *result);
 
 static char *unpack_nibble (char *buf, int *val);
 
@@ -1228,7 +1239,7 @@ stub_unpack_int (char *buff, int fieldlength)
 
 char *
 unpack_varlen_hex (char *buff,	/* packet to parse */
-		   int *result)
+		   ULONGEST *result)
 {
   int nibble;
   int retval = 0;
@@ -3007,7 +3018,8 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   struct remote_state *rs = get_remote_state ();
   unsigned char *buf = alloca (rs->remote_packet_size);
-  int thread_num = -1;
+  ULONGEST thread_num = -1;
+  ULONGEST addr;
 
   status->kind = TARGET_WAITKIND_EXITED;
   status->value.integer = 0;
@@ -3024,6 +3036,8 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
          collection of trace data) every time the target stops.  */
       if (target_wait_loop_hook)
 	(*target_wait_loop_hook) ();
+
+      remote_stopped_by_watchpoint_p = 0;
 
       switch (buf[0])
 	{
@@ -3048,24 +3062,52 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 		unsigned char *p1;
 		char *p_temp;
 		int fieldsize;
+		LONGEST pnum = 0;
 
-		/* Read the ``P'' register number.  */
-		LONGEST pnum = strtol ((const char *) p, &p_temp, 16);
-		p1 = (unsigned char *) p_temp;
+		/* If the packet contains a register number save it in pnum
+		   and set p1 to point to the character following it. 
+		   Otherwise p1 points to p.  */
+
+		/* If this packet is an awatch packet, don't parse the 'a'
+		   as a register number.  */
+
+		if (strncmp (p, "awatch", strlen("awatch")) != 0)
+		  {
+		    /* Read the ``P'' register number.  */
+		    pnum = strtol (p, &p_temp, 16);
+		    p1 = (unsigned char *) p_temp;
+		  }
+		else 
+		  p1 = p;
 
 		if (p1 == p)	/* No register number present here */
 		  {
-		    p1 = (unsigned char *) strchr ((const char *) p, ':');
+		    p1 = (unsigned char *) strchr (p, ':');
 		    if (p1 == NULL)
 		      warning ("Malformed packet(a) (missing colon): %s\n\
 Packet: '%s'\n",
 			       p, buf);
-		    if (strncmp ((const char *) p, "thread", p1 - p) == 0)
+		    if (strncmp (p, "thread", p1 - p) == 0)
 		      {
 			p_temp = unpack_varlen_hex (++p1, &thread_num);
 			record_currthread (thread_num);
 			p = (unsigned char *) p_temp;
 		      }
+		    else if ((strncmp (p, "watch", p1 - p) == 0)
+			     || (strncmp (p, "rwatch", p1 - p) == 0)
+			     || (strncmp (p, "awatch", p1 - p) == 0))
+		      {
+			remote_stopped_by_watchpoint_p = 1;
+			p = unpack_varlen_hex (++p1, &addr);
+			remote_watch_data_address = (CORE_ADDR)addr;
+		      }
+		    else
+ 		      {
+ 			/* Silently skip unknown optional info.  */
+ 			p_temp = strchr (p1 + 1, ';');
+ 			if (p_temp)
+			  p = (unsigned char *) p_temp;
+ 		      }
 		  }
 		else
 		  {
@@ -3221,10 +3263,13 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   struct remote_state *rs = get_remote_state ();
   unsigned char *buf = alloca (rs->remote_packet_size);
-  int thread_num = -1;
+  ULONGEST thread_num = -1;
+  ULONGEST addr;
 
   status->kind = TARGET_WAITKIND_EXITED;
   status->value.integer = 0;
+
+  remote_stopped_by_watchpoint_p = 0;
 
   while (1)
     {
@@ -3268,25 +3313,54 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 		unsigned char *p1;
 		char *p_temp;
 		int fieldsize;
+		long pnum = 0;
 
-		/* Read the register number */
-		long pnum = strtol ((const char *) p, &p_temp, 16);
-		p1 = (unsigned char *) p_temp;
+		/* If the packet contains a register number, save it in pnum
+		   and set p1 to point to the character following it. 
+		   Otherwise p1 points to p.  */
+
+		/* If this packet is an awatch packet, don't parse the 'a'
+		   as a register number.  */
+		
+		if (!strncmp (p, "awatch", strlen ("awatch")) != 0)
+		  {
+		    /* Read the register number.  */
+		    pnum = strtol (p, &p_temp, 16);
+		    p1 = (unsigned char *) p_temp;
+		  }
+		else 
+		  p1 = p;
 
 		if (p1 == p)	/* No register number present here */
 		  {
-		    p1 = (unsigned char *) strchr ((const char *) p, ':');
+		    p1 = (unsigned char *) strchr (p, ':');
 		    if (p1 == NULL)
 		      warning ("Malformed packet(a) (missing colon): %s\n\
 Packet: '%s'\n",
 			       p, buf);
-		    if (strncmp ((const char *) p, "thread", p1 - p) == 0)
+		    if (strncmp (p, "thread", p1 - p) == 0)
 		      {
 			p_temp = unpack_varlen_hex (++p1, &thread_num);
 			record_currthread (thread_num);
 			p = (unsigned char *) p_temp;
 		      }
+		    else if ((strncmp (p, "watch", p1 - p) == 0)
+			     || (strncmp (p, "rwatch", p1 - p) == 0)
+			     || (strncmp (p, "awatch", p1 - p) == 0))
+		      {
+			remote_stopped_by_watchpoint_p = 1;
+			p = unpack_varlen_hex (++p1, &addr);
+			remote_watch_data_address = (CORE_ADDR)addr;
+		      }
+		    else
+ 		      {
+ 			/* Silently skip unknown optional info.  */
+ 			p_temp = (unsigned char *) strchr (p1 + 1, ';');
+ 			if (p_temp)
+			  p = p_temp;
+ 		      }
 		  }
+		
 		else
 		  {
 		    struct packet_reg *reg = packet_reg_from_pnum (rs, pnum);
@@ -3953,7 +4027,9 @@ remote_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
       putpkt (buf);
       getpkt (buf, sizeof_buf, 0);
 
-      if (buf[0] == 'E')
+      if (buf[0] == 'E'
+	  && isxdigit (buf[1]) && isxdigit (buf[2])
+	  && buf[3] == '\0')
 	{
 	  /* There is no correspondance between what the remote protocol uses
 	     for errors and errno codes.  We would like a cleaner way of
@@ -4792,10 +4868,7 @@ watchpoint_to_Z_packet (int type)
     }
 }
 
-/* FIXME: This function should be static and a member of the remote
-   target vector. */
-
-int
+static int
 remote_insert_watchpoint (CORE_ADDR addr, int len, int type)
 {
   struct remote_state *rs = get_remote_state ();
@@ -4829,10 +4902,8 @@ remote_insert_watchpoint (CORE_ADDR addr, int len, int type)
 		  "remote_insert_watchpoint: reached end of function");
 }
 
-/* FIXME: This function should be static and a member of the remote
-   target vector. */
 
-int
+static int
 remote_remove_watchpoint (CORE_ADDR addr, int len, int type)
 {
   struct remote_state *rs = get_remote_state ();
@@ -4865,16 +4936,60 @@ remote_remove_watchpoint (CORE_ADDR addr, int len, int type)
 		  "remote_remove_watchpoint: reached end of function");
 }
 
-/* FIXME: This function should be static and a member of the remote
-   target vector. */
+
+int remote_hw_watchpoint_limit = 0;
+int remote_hw_breakpoint_limit = 0;
 
 int
-remote_insert_hw_breakpoint (CORE_ADDR addr, int len)
+remote_check_watch_resources (int type, int cnt, int ot)
 {
+  if (type == bp_hardware_breakpoint)
+    {
+      if (remote_hw_breakpoint_limit == 0)
+	return 0;
+      else if (cnt <= remote_hw_breakpoint_limit)
+	return 1;
+    }
+  else
+    {
+      if (remote_hw_watchpoint_limit == 0)
+	return 0;
+      else if (ot)
+	return -1;
+      else if (cnt <= remote_hw_watchpoint_limit)
+	return 1;
+    }
+  return -1;
+}
+
+int
+remote_stopped_by_watchpoint (void)
+{
+    return remote_stopped_by_watchpoint_p;
+}
+
+CORE_ADDR
+remote_stopped_data_address (void)
+{
+  if (remote_stopped_by_watchpoint ())
+    return remote_watch_data_address;
+  return (CORE_ADDR)0;
+}
+
+
+static int
+remote_insert_hw_breakpoint (CORE_ADDR addr, char *shadow)
+{
+  int len = 0;
   struct remote_state *rs = get_remote_state ();
   char *buf = alloca (rs->remote_packet_size);
   char *p = buf;
       
+  /* The length field should be set to soething so that the packet is
+     well formed.  */
+
+  len = strlen (shadow);
+  len = len ? len : 1;
   if (remote_protocol_Z[Z_PACKET_HARDWARE_BP].support == PACKET_DISABLE)
     error ("Can't set hardware breakpoint without the '%s' (%s) packet\n",
 	   remote_protocol_Z[Z_PACKET_HARDWARE_BP].name,
@@ -4900,19 +5015,19 @@ remote_insert_hw_breakpoint (CORE_ADDR addr, int len)
       return 0;
     }
   internal_error (__FILE__, __LINE__,
-		  "remote_remove_watchpoint: reached end of function");
+		  "remote_insert_hw_breakpoint: reached end of function");
 }
 
-/* FIXME: This function should be static and a member of the remote
-   target vector. */
 
-int 
-remote_remove_hw_breakpoint (CORE_ADDR addr, int len)
+static int 
+remote_remove_hw_breakpoint (CORE_ADDR addr, char *shadow)
 {
+  int len;
   struct remote_state *rs = get_remote_state ();
   char *buf = alloca (rs->remote_packet_size);
   char *p = buf;
   
+  len = sizeof (shadow);
   if (remote_protocol_Z[Z_PACKET_HARDWARE_BP].support == PACKET_DISABLE)
     error ("Can't clear hardware breakpoint without the '%s' (%s) packet\n",
 	   remote_protocol_Z[Z_PACKET_HARDWARE_BP].name,
@@ -4938,7 +5053,7 @@ remote_remove_hw_breakpoint (CORE_ADDR addr, int len)
       return 0;
     }
   internal_error (__FILE__, __LINE__,
-		  "remote_remove_watchpoint: reached end of function");
+		  "remote_remove_hw_breakpoint: reached end of function");
 }
 
 /* Some targets are only capable of doing downloads, and afterwards
@@ -5415,6 +5530,13 @@ Specify the serial device it is connected to\n\
   remote_ops.to_files_info = remote_files_info;
   remote_ops.to_insert_breakpoint = remote_insert_breakpoint;
   remote_ops.to_remove_breakpoint = remote_remove_breakpoint;
+  remote_ops.to_stopped_by_watchpoint = remote_stopped_by_watchpoint;
+  remote_ops.to_stopped_data_address = remote_stopped_data_address;
+  remote_ops.to_can_use_hw_breakpoint = remote_check_watch_resources;
+  remote_ops.to_insert_hw_breakpoint = remote_insert_hw_breakpoint;
+  remote_ops.to_remove_hw_breakpoint = remote_remove_hw_breakpoint;
+  remote_ops.to_insert_watchpoint = remote_insert_watchpoint;
+  remote_ops.to_remove_watchpoint = remote_remove_watchpoint;
   remote_ops.to_kill = remote_kill;
   remote_ops.to_load = generic_load;
   remote_ops.to_mourn_inferior = remote_mourn;
@@ -5830,7 +5952,14 @@ Specify the serial device it is connected to (e.g. host:2020).";
   remote_cisco_ops.to_xfer_memory = remote_xfer_memory;
   remote_cisco_ops.to_files_info = remote_files_info;
   remote_cisco_ops.to_insert_breakpoint = remote_insert_breakpoint;
-  remote_cisco_ops.to_remove_breakpoint = remote_remove_breakpoint;
+  remote_cisco_ops.to_remove_breakpoint = remote_remove_breakpoint;  
+  remote_cisco_ops.to_remove_hw_breakpoint = remote_remove_hw_breakpoint;
+  remote_cisco_ops.to_insert_hw_breakpoint = remote_insert_hw_breakpoint;
+  remote_cisco_ops.to_insert_watchpoint = remote_insert_watchpoint;
+  remote_cisco_ops.to_remove_watchpoint = remote_remove_watchpoint;
+  remote_cisco_ops.to_stopped_by_watchpoint = remote_stopped_by_watchpoint;
+  remote_cisco_ops.to_stopped_data_address = remote_stopped_data_address;
+  remote_cisco_ops.to_can_use_hw_breakpoint = remote_check_watch_resources;
   remote_cisco_ops.to_kill = remote_kill;
   remote_cisco_ops.to_load = generic_load;
   remote_cisco_ops.to_mourn_inferior = remote_cisco_mourn;
@@ -5920,6 +6049,13 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_files_info = remote_files_info;
   remote_async_ops.to_insert_breakpoint = remote_insert_breakpoint;
   remote_async_ops.to_remove_breakpoint = remote_remove_breakpoint;
+  remote_async_ops.to_can_use_hw_breakpoint = remote_check_watch_resources;
+  remote_async_ops.to_insert_hw_breakpoint = remote_insert_hw_breakpoint;
+  remote_async_ops.to_remove_hw_breakpoint = remote_remove_hw_breakpoint;
+  remote_async_ops.to_insert_watchpoint = remote_insert_watchpoint;
+  remote_async_ops.to_remove_watchpoint = remote_remove_watchpoint;
+  remote_async_ops.to_stopped_by_watchpoint = remote_stopped_by_watchpoint;
+  remote_async_ops.to_stopped_data_address = remote_stopped_data_address;
   remote_async_ops.to_terminal_inferior = remote_async_terminal_inferior;
   remote_async_ops.to_terminal_ours = remote_async_terminal_ours;
   remote_async_ops.to_kill = remote_async_kill;

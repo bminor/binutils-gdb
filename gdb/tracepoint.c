@@ -854,7 +854,7 @@ read_actions (struct tracepoint *t)
 	line = (*readline_hook) (prompt);
       else if (instream == stdin && ISATTY (instream))
 	{
-	  line = readline (prompt);
+	  line = gdb_readline_wrapper (prompt);
 	  if (line && *line)	/* add it to command history */
 	    add_history (line);
 	}

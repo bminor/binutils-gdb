@@ -34,6 +34,7 @@
 #include "gdbcmd.h"
 #include "regcache.h"
 #include "gdb.h"
+#include "gdb_string.h"
 
 #include <ctype.h>
 #include <sys/types.h>

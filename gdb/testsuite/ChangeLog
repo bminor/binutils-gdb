@@ -16,6 +16,32 @@
 	out what version of MI is running. Use this to determine the proper
 	output of setting a breakpoint.
 
+2002-08-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* lib/gdb.exp (gdb_expect_list): Only print one pass, fail, or
+	supress message.
+
+2002-08-01  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (TARGET_FLAGS_TO_PASS): Remove CHILLFLAGS, CHILL,
+	CHILL_FOR_TARGET and CHILL_LIB.
+	* configure.in (configdirs): Remove gdb.chill.
+	* configure: Regenerate.
+	* lib/gdb.exp: Obsolete references to chill.
+	* gdb.fortran/types.exp: Ditto.
+	* gdb.fortran/exprs.exp: Ditto.
+
+2002-07-30  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.base/shlib-call.exp (additional_flags): Conditionally
+	set Irix-specific compile and link flags.
+
+2002-07-29  Kevin Buettner  <kevinb@redhat.com>
+
+	* lib/gdb.exp (mips*-*-irix*): Use alternate method for preprocessing
+	source files.  The ``-o'' option doesn't work with the ``-E'' option
+	when using the Irix compiler.
+
 2002-07-19  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/gdbserver.exp (gdb_load): Don't use TCL varargs.

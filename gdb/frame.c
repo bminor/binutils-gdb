@@ -94,10 +94,9 @@ find_saved_register (struct frame_info *frame, int regnum)
   if (frame == NULL)		/* No regs saved if want current frame */
     return 0;
 
-  /* Note that this next routine assumes that registers used in
-     frame x will be saved only in the frame that x calls and
-     frames interior to it.  This is not true on the sparc, but the
-     above macro takes care of it, so we should be all right. */
+  /* Note that the following loop assumes that registers used in
+     frame x will be saved only in the frame that x calls and frames
+     interior to it.  */
   while (1)
     {
       QUIT;
@@ -107,7 +106,10 @@ find_saved_register (struct frame_info *frame, int regnum)
       frame = frame1;
       FRAME_INIT_SAVED_REGS (frame1);
       if (frame1->saved_regs[regnum])
-	addr = frame1->saved_regs[regnum];
+	{
+	  addr = frame1->saved_regs[regnum];
+	  break;
+	}
     }
 
   return addr;

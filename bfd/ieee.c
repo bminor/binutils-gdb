@@ -1414,7 +1414,7 @@ ieee_archive_p (abfd)
 
   abfd->tdata.ieee_ar_data = (ieee_ar_data_type *) bfd_alloc (abfd, amt);
   if (!abfd->tdata.ieee_ar_data)
-    goto error_return;
+    goto error_ret_restore;
   ieee = IEEE_AR_DATA (abfd);
 
   /* Ignore the return value here.  It doesn't matter if we don't read
@@ -1530,13 +1530,13 @@ ieee_archive_p (abfd)
   return abfd->xvec;
 
  got_wrong_format_error:
-  bfd_release (abfd, ieee);
-  abfd->tdata.ieee_ar_data = save;
   bfd_set_error (bfd_error_wrong_format);
-
  error_return:
   if (elts != NULL)
     free (elts);
+  bfd_release (abfd, ieee);
+ error_ret_restore:
+  abfd->tdata.ieee_ar_data = save;
 
   return NULL;
 }
@@ -1732,7 +1732,7 @@ ieee_object_p (abfd)
 got_wrong_format:
   bfd_set_error (bfd_error_wrong_format);
 fail:
-  (void) bfd_release (abfd, ieee);
+  bfd_release (abfd, ieee);
   abfd->tdata.ieee_data = save;
   return (const bfd_target *) NULL;
 }

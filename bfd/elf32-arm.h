@@ -42,10 +42,6 @@ static struct elf_link_hash_entry *find_thumb_glue
   PARAMS ((struct bfd_link_info *, const char *, bfd *));
 static struct elf_link_hash_entry *find_arm_glue
   PARAMS ((struct bfd_link_info *, const char *, bfd *));
-static void record_arm_to_thumb_glue
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
-static void record_thumb_to_arm_glue
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 static void elf32_arm_post_process_headers
   PARAMS ((bfd *, struct bfd_link_info *));
 static int elf32_arm_to_thumb_stub
@@ -84,15 +80,22 @@ static struct bfd_hash_entry * elf32_arm_link_hash_newfunc
 static void arm_add_to_rel
   PARAMS ((bfd *, bfd_byte *, reloc_howto_type *, bfd_signed_vma));
 #endif
+static enum elf_reloc_type_class elf32_arm_reloc_type_class
+  PARAMS ((const Elf_Internal_Rela *));
 
+#ifndef ELFARM_NABI_C_INCLUDED
+static void record_arm_to_thumb_glue
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
+static void record_thumb_to_arm_glue
+  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 boolean bfd_elf32_arm_allocate_interworking_sections
   PARAMS ((struct bfd_link_info *));
 boolean bfd_elf32_arm_get_bfd_for_interworking
   PARAMS ((bfd *, struct bfd_link_info *));
 boolean bfd_elf32_arm_process_before_allocation
   PARAMS ((bfd *, struct bfd_link_info *, int));
-static enum elf_reloc_type_class elf32_arm_reloc_type_class
-  PARAMS ((const Elf_Internal_Rela *));
+#endif
+
 
 #define INTERWORK_FLAG(abfd)   (elf_elfheader (abfd)->e_flags & EF_ARM_INTERWORK)
 
@@ -367,6 +370,7 @@ static const insn16 t2a4_bx_insn = 0x4730;
 static const insn32 t2a5_pop_insn = 0xe8bd4040;
 static const insn32 t2a6_bx_insn = 0xe12fff1e;
 
+#ifndef ELFARM_NABI_C_INCLUDED
 boolean
 bfd_elf32_arm_allocate_interworking_sections (info)
      struct bfd_link_info * info;
@@ -779,6 +783,7 @@ error_return:
 
   return false;
 }
+#endif
 
 /* The thumb form of a long branch is a bit finicky, because the offset
    encoding is split over two fields, each in it's own instruction. They
@@ -3609,7 +3614,9 @@ elf32_arm_reloc_type_class (rela)
 
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_MACHINE_CODE		EM_ARM
+#ifndef ELF_MAXPAGESIZE
 #define ELF_MAXPAGESIZE			0x8000
+#endif
 
 #define bfd_elf32_bfd_copy_private_bfd_data	elf32_arm_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data	elf32_arm_merge_private_bfd_data
@@ -3644,3 +3651,4 @@ elf32_arm_reloc_type_class (rela)
 #define elf_backend_plt_header_size	PLT_ENTRY_SIZE
 
 #include "elf32-target.h"
+

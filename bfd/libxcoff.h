@@ -39,12 +39,18 @@ struct xcoff_backend_data_rec
   long _xcoff_machine;
 
   /* Function pointers to xcoff specific swap routines.  */
-  void (* _xcoff_swap_ldhdr_in)(bfd *, const PTR, struct internal_ldhdr *);
-  void (* _xcoff_swap_ldhdr_out)(bfd *, const struct internal_ldhdr *, PTR);
-  void (* _xcoff_swap_ldsym_in)(bfd *, const PTR, struct internal_ldsym *);
-  void (* _xcoff_swap_ldsym_out)(bfd *, const struct internal_ldsym *, PTR);
-  void (* _xcoff_swap_ldrel_in)(bfd *, const PTR, struct internal_ldrel *);
-  void (* _xcoff_swap_ldrel_out)(bfd *, const struct internal_ldrel *, PTR);
+  void (* _xcoff_swap_ldhdr_in)
+    PARAMS ((bfd *, const PTR, struct internal_ldhdr *));
+  void (* _xcoff_swap_ldhdr_out)
+    PARAMS ((bfd *, const struct internal_ldhdr *, PTR));
+  void (* _xcoff_swap_ldsym_in)
+    PARAMS ((bfd *, const PTR, struct internal_ldsym *));
+  void (* _xcoff_swap_ldsym_out)
+    PARAMS ((bfd *, const struct internal_ldsym *, PTR));
+  void (* _xcoff_swap_ldrel_in)
+    PARAMS ((bfd *, const PTR, struct internal_ldrel *));
+  void (* _xcoff_swap_ldrel_out)
+    PARAMS ((bfd *, const struct internal_ldrel *, PTR));
 
   /* Size of the external struct.  */
   unsigned int _xcoff_ldhdrsz;
@@ -63,29 +69,33 @@ struct xcoff_backend_data_rec
   unsigned long _xcoff_ldhdr_version;
 
   boolean (* _xcoff_put_symbol_name)
-       PARAMS ((bfd *, struct bfd_strtab_hash *, struct internal_syment *,
-		const char *));
+    PARAMS ((bfd *, struct bfd_strtab_hash *, struct internal_syment *,
+	     const char *));
 
   boolean (* _xcoff_put_ldsymbol_name)
-       PARAMS ((bfd *, struct xcoff_loader_info *, struct internal_ldsym *,
-		const char *));
+    PARAMS ((bfd *, struct xcoff_loader_info *, struct internal_ldsym *,
+	     const char *));
 
   reloc_howto_type *_xcoff_dynamic_reloc;
 
   asection * (* _xcoff_create_csect_from_smclas)
-       PARAMS ((bfd *, union internal_auxent *, const char *));
+    PARAMS ((bfd *, union internal_auxent *, const char *));
 
   /* Line number and relocation overflow.
      XCOFF32 overflows to another section when the line number or the 
      relocation count exceeds 0xffff.  XCOFF64 does not overflow.  */
-  boolean (*_xcoff_is_lineno_count_overflow)(bfd *, bfd_vma);
-  boolean (*_xcoff_is_reloc_count_overflow)(bfd *, bfd_vma);
+  boolean (*_xcoff_is_lineno_count_overflow)
+    PARAMS ((bfd *, bfd_vma));
+  boolean (*_xcoff_is_reloc_count_overflow)
+    PARAMS ((bfd *, bfd_vma));
 
   /* Loader section symbol and relocation table offset
      XCOFF32 is after the .loader header
      XCOFF64 is offset in .loader header.  */
-  bfd_vma (*_xcoff_loader_symbol_offset)(bfd *, struct internal_ldhdr *);
-  bfd_vma (*_xcoff_loader_reloc_offset)(bfd *, struct internal_ldhdr *);
+  bfd_vma (*_xcoff_loader_symbol_offset)
+    PARAMS ((bfd *, struct internal_ldhdr *));
+  bfd_vma (*_xcoff_loader_reloc_offset)
+    PARAMS ((bfd *, struct internal_ldhdr *));
   
   /* Global linkage.  The first word of global linkage code must be be 
      modified by filling in the correct TOC offset.  */
@@ -96,8 +106,8 @@ struct xcoff_backend_data_rec
 
   /* rtinit.  */
   unsigned int _xcoff_rtinit_size;
-  boolean (*_xcoff_generate_rtinit)(bfd *, const char *, const char *, 
-				    boolean);
+  boolean (*_xcoff_generate_rtinit)
+    PARAMS ((bfd *, const char *, const char *, boolean));
 };
 
 /* Look up an entry in an XCOFF link hash table.  */
@@ -218,9 +228,9 @@ struct xcoff_backend_data_rec
   bfd *, bfd_vma, bfd_vma, struct reloc_howto_struct *howto
 
 extern boolean (*xcoff_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION])
-     (XCOFF_RELOC_FUNCTION_ARGS);
+  PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));
 extern boolean (*xcoff_complain_overflow[XCOFF_MAX_COMPLAIN_OVERFLOW])
-     (XCOFF_COMPLAIN_FUNCTION_ARGS);
+  PARAMS ((XCOFF_COMPLAIN_FUNCTION_ARGS));
 
 /* Relocation functions */
 boolean xcoff_reloc_type_noop PARAMS ((XCOFF_RELOC_FUNCTION_ARGS));

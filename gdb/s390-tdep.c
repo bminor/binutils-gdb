@@ -1811,7 +1811,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, S390_NUM_REGS);
   set_gdbarch_cannot_fetch_register (gdbarch, s390_cannot_fetch_register);
   set_gdbarch_cannot_store_register (gdbarch, s390_cannot_fetch_register);
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
   set_gdbarch_use_struct_convention (gdbarch, s390_use_struct_convention);
   set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
   set_gdbarch_register_name (gdbarch, s390_register_name);

@@ -1098,7 +1098,7 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, 64);
   set_gdbarch_sp_regnum (gdbarch, 0);
   set_gdbarch_fp_regnum (gdbarch, 0);
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
 
   /* Call Dummies:  */
 

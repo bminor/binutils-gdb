@@ -531,23 +531,23 @@ fr30-ibld.lo: fr30-ibld.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 fr30-opc.lo: fr30-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h fr30-desc.h $(INCDIR)/opcode/cgen.h \
   fr30-opc.h $(INCDIR)/libiberty.h
-frv-asm.lo: frv-asm.c sysdep.h config.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h frv-desc.h \
+frv-asm.lo: frv-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h frv-desc.h $(INCDIR)/opcode/cgen.h \
+  frv-opc.h opintl.h $(INCDIR)/xregex.h $(INCDIR)/xregex2.h \
+  $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h
+frv-desc.lo: frv-desc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h frv-desc.h $(INCDIR)/opcode/cgen.h \
+  frv-opc.h opintl.h $(INCDIR)/libiberty.h
+frv-dis.lo: frv-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h frv-desc.h \
   $(INCDIR)/opcode/cgen.h frv-opc.h opintl.h
-frv-desc.lo: frv-desc.c sysdep.h config.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h frv-desc.h \
-  $(INCDIR)/opcode/cgen.h frv-opc.h opintl.h
-frv-dis.lo: frv-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
-  $(BFD_H) $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h frv-desc.h $(INCDIR)/opcode/cgen.h \
-  frv-opc.h opintl.h
-frv-ibld.lo: frv-ibld.c sysdep.h config.h $(INCDIR)/dis-asm.h \
-  $(BFD_H) $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h frv-desc.h $(INCDIR)/opcode/cgen.h \
-  frv-opc.h opintl.h
-frv-opc.lo: frv-opc.c sysdep.h config.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h frv-desc.h \
-  $(INCDIR)/opcode/cgen.h frv-opc.h
+frv-ibld.lo: frv-ibld.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h frv-desc.h \
+  $(INCDIR)/opcode/cgen.h frv-opc.h opintl.h $(INCDIR)/safe-ctype.h
+frv-opc.lo: frv-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h frv-desc.h $(INCDIR)/opcode/cgen.h \
+  frv-opc.h $(INCDIR)/libiberty.h $(INCDIR)/elf/frv.h \
+  $(INCDIR)/elf/reloc-macros.h
 h8300-dis.lo: h8300-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/h8300.h $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/symcat.h opintl.h
@@ -590,23 +590,22 @@ ia64-gen.lo: ia64-gen.c $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
   ia64-opc-a.c ia64-opc-i.c ia64-opc-m.c ia64-opc-b.c \
   ia64-opc-f.c ia64-opc-x.c ia64-opc-d.c
 ia64-asmtab.lo: ia64-asmtab.c
-ip2k-asm.lo: ip2k-asm.c sysdep.h config.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h ip2k-desc.h \
+ip2k-asm.lo: ip2k-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h ip2k-desc.h $(INCDIR)/opcode/cgen.h \
+  ip2k-opc.h opintl.h $(INCDIR)/xregex.h $(INCDIR)/xregex2.h \
+  $(INCDIR)/libiberty.h $(INCDIR)/safe-ctype.h
+ip2k-desc.lo: ip2k-desc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h ip2k-desc.h $(INCDIR)/opcode/cgen.h \
+  ip2k-opc.h opintl.h $(INCDIR)/libiberty.h
+ip2k-dis.lo: ip2k-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h ip2k-desc.h \
   $(INCDIR)/opcode/cgen.h ip2k-opc.h opintl.h
-ip2k-desc.lo: ip2k-desc.c sysdep.h config.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h ip2k-desc.h \
-  $(INCDIR)/opcode/cgen.h ip2k-opc.h opintl.h
-ip2k-dis.lo: ip2k-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
-  $(BFD_H) $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h ip2k-desc.h $(INCDIR)/opcode/cgen.h \
-  ip2k-opc.h opintl.h
-ip2k-ibld.lo: ip2k-ibld.c sysdep.h config.h $(INCDIR)/dis-asm.h \
-  $(BFD_H) $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h ip2k-desc.h $(INCDIR)/opcode/cgen.h \
-  ip2k-opc.h opintl.h
-ip2k-opc.lo: ip2k-opc.c sysdep.h config.h $(BFD_H) \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h ip2k-desc.h \
-  $(INCDIR)/opcode/cgen.h ip2k-opc.h
+ip2k-ibld.lo: ip2k-ibld.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h ip2k-desc.h \
+  $(INCDIR)/opcode/cgen.h ip2k-opc.h opintl.h $(INCDIR)/safe-ctype.h
+ip2k-opc.lo: ip2k-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h ip2k-desc.h $(INCDIR)/opcode/cgen.h \
+  ip2k-opc.h $(INCDIR)/libiberty.h
 m32r-asm.lo: m32r-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h m32r-desc.h $(INCDIR)/opcode/cgen.h \
   m32r-opc.h opintl.h $(INCDIR)/xregex.h $(INCDIR)/xregex2.h \

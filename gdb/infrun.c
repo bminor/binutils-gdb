@@ -3917,7 +3917,7 @@ write_inferior_status_register (struct inferior_status *inf_status, int regno,
   int size = REGISTER_RAW_SIZE (regno);
   void *buf = alloca (size);
   store_signed_integer (buf, size, val);
-  regcache_write (inf_status->registers, regno, buf);
+  regcache_raw_write (inf_status->registers, regno, buf);
 }
 
 /* Save all of the information associated with the inferior<==>gdb

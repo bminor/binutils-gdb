@@ -375,7 +375,7 @@ static bfd *reldyn_sorting_bfd;
 
 /* Nonzero if ABFD is using the N64 ABI.  */
 #define ABI_64_P(abfd) \
-  ((get_elf_backend_data (abfd)->s->elfclass == ELFCLASS64) != 0)
+  (get_elf_backend_data (abfd)->s->elfclass == ELFCLASS64)
 
 /* Nonzero if ABFD is using NewABI conventions.  */
 #define NEWABI_P(abfd) (ABI_N32_P (abfd) || ABI_64_P (abfd))
@@ -1446,15 +1446,18 @@ mips_elf_global_got_index (abfd, h)
   bfd_vma index;
   asection *sgot;
   struct mips_got_info *g;
+  long global_got_dynindx = 0;
 
   g = mips_elf_got_info (abfd, &sgot);
+  if (g->global_gotsym != NULL)
+    global_got_dynindx = g->global_gotsym->dynindx;
 
   /* Once we determine the global GOT entry with the lowest dynamic
      symbol table index, we must put all dynamic symbols with greater
      indices into the GOT.  That makes it easy to calculate the GOT
      offset.  */
-  BFD_ASSERT (h->dynindx >= g->global_gotsym->dynindx);
-  index = ((h->dynindx - g->global_gotsym->dynindx + g->local_gotno)
+  BFD_ASSERT (h->dynindx >= global_got_dynindx);
+  index = ((h->dynindx - global_got_dynindx + g->local_gotno)
 	   * MIPS_ELF_GOT_SIZE (abfd));
   BFD_ASSERT (index < sgot->_raw_size);
 
@@ -2932,7 +2935,8 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
 
       /* The relocation is always an REL32 relocation because we don't
 	 know where the shared library will wind up at load-time.  */
-      outrel[0].r_info = ELF_R_INFO (output_bfd, indx, R_MIPS_REL32);
+      outrel[0].r_info = ELF_R_INFO (output_bfd, (unsigned long) indx,
+				     R_MIPS_REL32);
 
       /* Adjust the output offset of the relocation to reference the
 	 correct location in the output file.  */
@@ -7801,6 +7805,15 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
 	}
       new_flags &= ~EF_MIPS_ABI;
       old_flags &= ~EF_MIPS_ABI;
+    }
+
+  /* For now, allow arbitrary mixing of ASEs (retain the union).  */
+  if ((new_flags & EF_MIPS_ARCH_ASE) != (old_flags & EF_MIPS_ARCH_ASE))
+    {
+      elf_elfheader (obfd)->e_flags |= new_flags & EF_MIPS_ARCH_ASE;
+
+      new_flags &= ~ EF_MIPS_ARCH_ASE;
+      old_flags &= ~ EF_MIPS_ARCH_ASE;
     }
 
   /* Warn about any other mismatches */

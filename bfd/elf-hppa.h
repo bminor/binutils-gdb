@@ -1376,8 +1376,12 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
-  struct elf64_hppa_link_hash_table *hppa_info = elf64_hppa_hash_table (info);
+  struct elf64_hppa_link_hash_table *hppa_info;
 
+  if (info->relocateable)
+    return true;
+
+  hppa_info = elf64_hppa_hash_table (info);
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
 
   rel = relocs;
@@ -1405,28 +1409,8 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	  return false;
 	}
 
-      r_symndx = ELF_R_SYM (rel->r_info);
-
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-	     anything, unless the reloc is against a section symbol,
-	     in which case we have to adjust according to where the
-	     section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sym_sec = local_sections[r_symndx];
-		  rel->r_addend += sym_sec->output_offset;
-		}
-	    }
-
-	  continue;
-	}
-
       /* This is a final link.  */
+      r_symndx = ELF_R_SYM (rel->r_info);
       h = NULL;
       sym = NULL;
       sym_sec = NULL;

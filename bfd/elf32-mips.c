@@ -1387,7 +1387,7 @@ struct elf_reloc_map {
 
 static const struct elf_reloc_map mips_reloc_map[] =
 {
-  { BFD_RELOC_NONE, R_MIPS_NONE, },
+  { BFD_RELOC_NONE, R_MIPS_NONE },
   { BFD_RELOC_16, R_MIPS_16 },
   { BFD_RELOC_32, R_MIPS_32 },
   /* There is no BFD reloc for R_MIPS_REL32.  */
@@ -1569,6 +1569,9 @@ mips_elf32_object_p (abfd)
      and the sh_info field in the symbol table is not always right.  */
   if (SGI_COMPAT (abfd))
     elf_bad_symtab (abfd) = true;
+
+  if (ABI_N32_P (abfd))
+    return false;
 
   mach = _bfd_elf_mips_mach (elf_elfheader (abfd)->e_flags);
   bfd_default_set_arch_mach (abfd, bfd_arch_mips, mach);

@@ -221,11 +221,7 @@ extract_string (CORE_ADDR addr, char *buf)
    updating *OLD_VECT and *SIZE as necessary. */
 
 void
-grow_vect (old_vect, size, min_size, element_size)
-     void** old_vect;
-     size_t* size;
-     size_t min_size;
-     int element_size;
+grow_vect (void** old_vect, size_t* size, size_t min_size, int element_size)
 {
   if (*size < min_size) {
     *size *= 2;
@@ -239,9 +235,7 @@ grow_vect (old_vect, size, min_size, element_size)
    suffix of FIELD_NAME beginning "___" */
 
 static int
-field_name_match (field_name, target)
-     const char *field_name;
-     const char *target;
+field_name_match (const char *field_name, const char *target)
 {
   int len = strlen (target);
   return 
@@ -255,8 +249,7 @@ field_name_match (field_name, target)
 /* The length of the prefix of NAME prior to any "___" suffix. */
 
 int
-ada_name_prefix_len (name)
-     const char* name;
+ada_name_prefix_len (const char* name)
 {
   if (name == NULL)
     return 0;
@@ -286,10 +279,7 @@ is_suffix (const char* str, const char* suffix)
  * is non-null, and whose memory address (in the inferior) is
  * ADDRESS. */
 struct value*
-value_from_contents_and_address (type, valaddr, address)
-     struct type* type;
-     char* valaddr;
-     CORE_ADDR address;
+value_from_contents_and_address (struct type* type, char* valaddr, CORE_ADDR address)
 {
   struct value* v = allocate_value (type);
   if (valaddr == NULL) 
@@ -306,10 +296,7 @@ value_from_contents_and_address (type, valaddr, address)
    value of type TYPE.  The result is an lval in memory if VAL is. */
 
 static struct value*
-coerce_unspec_val_to_type (val, offset, type)
-     struct value* val;
-     long offset;
-     struct type *type;
+coerce_unspec_val_to_type (struct value* val, long offset, struct type *type)
 {
   CHECK_TYPEDEF (type);
   if (VALUE_LVAL (val) == lval_memory)
@@ -334,9 +321,7 @@ coerce_unspec_val_to_type (val, offset, type)
 }
 
 static char*
-cond_offset_host (valaddr, offset)
-     char* valaddr;
-     long offset;
+cond_offset_host (char* valaddr, long offset)
 {
   if (valaddr == NULL)
     return NULL;
@@ -345,9 +330,7 @@ cond_offset_host (valaddr, offset)
 }
 
 static CORE_ADDR
-cond_offset_target (address, offset)
-     CORE_ADDR address;
-     long offset;
+cond_offset_target (CORE_ADDR address, long offset)
 {
   if (address == 0)
     return 0;
@@ -391,9 +374,7 @@ do_command (const char* arg, ...)
    MAIN_PST is not used. */
    
 enum language
-ada_update_initial_language (lang, main_pst)
-     enum language lang;
-     struct partial_symtab* main_pst;
+ada_update_initial_language (enum language lang, struct partial_symtab* main_pst)
 {
   if (lookup_minimal_symbol ("adainit", (const char*) NULL,
 			     (struct objfile*) NULL) != NULL)
@@ -438,8 +419,7 @@ const struct ada_opname_map ada_opname_table[] =
 
 /* True if STR should be suppressed in info listings. */
 static int
-is_suppressed_name (str) 
-     const char* str;
+is_suppressed_name (const char* str) 
 {
   if (STREQN (str, "_ada_", 5))
     str += 5;
@@ -475,8 +455,7 @@ is_suppressed_name (str)
 /* The "mangled" form of DEMANGLED, according to GNAT conventions.
  * The result is valid until the next call to ada_mangle. */
 char *
-ada_mangle (demangled)
-     const char* demangled;
+ada_mangle (const char* demangled)
 {
   static char* mangling_buffer = NULL;
   static size_t mangling_buffer_size = 0;
@@ -563,8 +542,7 @@ ada_fold_name (const char* name)
   */
 
 char *
-ada_demangle (mangled)
-     const char* mangled;
+ada_demangle (const char* mangled)
 {
   int i, j;
   int len0;
@@ -685,10 +663,7 @@ Suppress:
  * either argument is NULL. */
 
 int
-ada_match_name (sym_name, name, wild)
-     const char* sym_name;
-     const char* name;
-     int wild;
+ada_match_name (const char* sym_name, const char* name, int wild)
 {
   if (sym_name == NULL || name == NULL)
     return 0;
@@ -708,8 +683,7 @@ ada_match_name (sym_name, name, wild)
    suppressed in info listings. */
 
 int
-ada_suppress_symbol_printing (sym)
-     struct symbol *sym;
+ada_suppress_symbol_printing (struct symbol *sym)
 {
   if (SYMBOL_NAMESPACE (sym) == STRUCT_NAMESPACE)
     return 1;
@@ -735,10 +709,7 @@ static char* bound_name[] = {
 /* Like modify_field, but allows bitpos > wordlength. */
 
 static void
-modify_general_field (addr, fieldval, bitpos, bitsize)
-     char *addr;
-     LONGEST fieldval;
-     int bitpos, bitsize;
+modify_general_field (char *addr, LONGEST fieldval, int bitpos, int bitsize)
 {
   modify_field (addr + sizeof (LONGEST) * bitpos / (8 * sizeof (LONGEST)), 
 		fieldval, bitpos % (8 * sizeof (LONGEST)), 
@@ -752,8 +723,7 @@ modify_general_field (addr, fieldval, bitpos, bitsize)
 /* The descriptor or array type, if any, indicated by TYPE; removes
    level of indirection, if needed. */
 static struct type*
-desc_base_type (type)
-     struct type* type;
+desc_base_type (struct type* type)
 {
   if (type == NULL)
     return NULL;
@@ -818,8 +788,7 @@ is_thick_pntr (struct type* type)
 /* If TYPE is the type of an array descriptor (fat or thin pointer) or a 
    pointer to one, the type of its bounds data; otherwise, NULL. */
 static struct type*
-desc_bounds_type (type)
-     struct type* type;
+desc_bounds_type (struct type* type)
 {
   struct type* r;
 
@@ -848,8 +817,7 @@ desc_bounds_type (type)
 /* If ARR is an array descriptor (fat or thin pointer), or pointer to
    one, a pointer to its bounds data.   Otherwise NULL. */
 static struct value*
-desc_bounds (arr)
-     struct value* arr;
+desc_bounds (struct value* arr)
 {
   struct type* type = check_typedef (VALUE_TYPE (arr));
   if (is_thin_pntr (type)) 
@@ -883,8 +851,7 @@ desc_bounds (arr)
 /* If TYPE is the type of an array-descriptor (fat pointer), the bit
    position of the field containing the address of the bounds data. */
 static int
-fat_pntr_bounds_bitpos (type)
-     struct type* type;
+fat_pntr_bounds_bitpos (struct type* type)
 {
   return TYPE_FIELD_BITPOS (desc_base_type (type), 1);
 }
@@ -892,8 +859,7 @@ fat_pntr_bounds_bitpos (type)
 /* If TYPE is the type of an array-descriptor (fat pointer), the bit
    size of the field containing the address of the bounds data. */
 static int
-fat_pntr_bounds_bitsize (type)
-     struct type* type;
+fat_pntr_bounds_bitsize (struct type* type)
 {
   type = desc_base_type (type);
 
@@ -908,8 +874,7 @@ fat_pntr_bounds_bitsize (type)
    pointer-to-array-with-no-bounds type); otherwise,  NULL.  Use
    ada_type_of_array to get an array type with bounds data. */
 static struct type*
-desc_data_type (type)
-     struct type* type;
+desc_data_type (struct type* type)
 {
   type = desc_base_type (type);
 
@@ -926,8 +891,7 @@ desc_data_type (type)
 /* If ARR is an array descriptor (fat or thin pointer), a pointer to
    its array data.  */
 static struct value*
-desc_data (arr)
-     struct value* arr;
+desc_data (struct value* arr)
 {
   struct type* type = VALUE_TYPE (arr);
   if (is_thin_pntr (type))
@@ -943,8 +907,7 @@ desc_data (arr)
 /* If TYPE is the type of an array-descriptor (fat pointer), the bit
    position of the field containing the address of the data. */
 static int
-fat_pntr_data_bitpos (type)
-     struct type* type;
+fat_pntr_data_bitpos (struct type* type)
 {
   return TYPE_FIELD_BITPOS (desc_base_type (type), 0);
 }
@@ -952,8 +915,7 @@ fat_pntr_data_bitpos (type)
 /* If TYPE is the type of an array-descriptor (fat pointer), the bit
    size of the field containing the address of the data. */
 static int
-fat_pntr_data_bitsize (type)
-     struct type* type;
+fat_pntr_data_bitsize (struct type* type)
 {
   type = desc_base_type (type);
 
@@ -967,10 +929,7 @@ fat_pntr_data_bitsize (type)
    the Ith lower bound stored in it, if WHICH is 0, and the Ith upper
    bound, if WHICH is 1.  The first bound is I=1. */
 static struct value*
-desc_one_bound (bounds, i, which)
-     struct value* bounds;
-     int i;
-     int which;
+desc_one_bound (struct value* bounds, int i, int which)
 {
   return value_struct_elt (&bounds, NULL, bound_name[2*i+which-2], NULL,
 			   "Bad GNAT array descriptor bounds");
@@ -980,10 +939,7 @@ desc_one_bound (bounds, i, which)
    of the Ith lower bound stored in it, if WHICH is 0, and the Ith upper
    bound, if WHICH is 1.  The first bound is I=1. */
 static int
-desc_bound_bitpos (type, i, which)
-     struct type* type;
-     int i;
-     int which;
+desc_bound_bitpos (struct type* type, int i, int which)
 {
   return TYPE_FIELD_BITPOS (desc_base_type (type), 2*i+which-2);
 }
@@ -992,10 +948,7 @@ desc_bound_bitpos (type, i, which)
    of the Ith lower bound stored in it, if WHICH is 0, and the Ith upper
    bound, if WHICH is 1.  The first bound is I=1. */
 static int
-desc_bound_bitsize (type, i, which)
-     struct type* type;
-     int i;
-     int which;
+desc_bound_bitsize (struct type* type, int i, int which)
 {
   type = desc_base_type (type);
 
@@ -1008,9 +961,7 @@ desc_bound_bitsize (type, i, which)
 /* If TYPE is the type of an array-bounds structure, the type of its
    Ith bound (numbering from 1). Otherwise, NULL. */ 
 static struct type* 
-desc_index_type (type, i)
-     struct type* type;
-     int i;
+desc_index_type (struct type* type, int i)
 {
   type = desc_base_type (type);
 
@@ -1023,8 +974,7 @@ desc_index_type (type, i)
 /* The number of index positions in the array-bounds type TYPE.  0
    if TYPE is NULL. */
 static int
-desc_arity (type)
-     struct type* type;
+desc_arity (struct type* type)
 {
   type = desc_base_type (type);
 
@@ -1036,8 +986,7 @@ desc_arity (type)
 
 /* Non-zero iff type is a simple array type (or pointer to one). */
 int
-ada_is_simple_array (type)
-     struct type* type;
+ada_is_simple_array (struct type* type)
 {
   if (type == NULL)
     return 0;
@@ -1049,8 +998,7 @@ ada_is_simple_array (type)
 
 /* Non-zero iff type belongs to a GNAT array descriptor. */
 int
-ada_is_array_descriptor (type)
-     struct type* type;
+ada_is_array_descriptor (struct type* type)
 {
   struct type* data_type = desc_data_type (type);
 
@@ -1072,8 +1020,7 @@ ada_is_array_descriptor (type)
    debugging output from GNAT.  Re-examine periodically to see if it
    is still needed. */
 int
-ada_is_bogus_array_descriptor (type)
-     struct type *type;
+ada_is_bogus_array_descriptor (struct type *type)
 {
   return 
     type != NULL
@@ -1092,9 +1039,7 @@ ada_is_bogus_array_descriptor (type)
    returns NULL.  The result is simply the type of ARR if ARR is not 
    a descriptor.  */
 struct type*
-ada_type_of_array (arr, bounds)
-     struct value* arr;
-     int bounds;
+ada_type_of_array (struct value* arr, int bounds)
 {
   if (ada_is_packed_array_type (VALUE_TYPE (arr)))
     return decode_packed_array_type (VALUE_TYPE (arr));
@@ -1142,8 +1087,7 @@ ada_type_of_array (arr, bounds)
    appropriately or, if ARR is a non-null fat pointer, a pointer to a standard 
    GDB array.  Returns NULL if ARR is a null fat pointer. */
 struct value*
-ada_coerce_to_simple_array_ptr (arr)
-     struct value* arr;
+ada_coerce_to_simple_array_ptr (struct value* arr)
 {
   if (ada_is_array_descriptor (VALUE_TYPE (arr)))
     {
@@ -1162,8 +1106,7 @@ ada_coerce_to_simple_array_ptr (arr)
    Otherwise, returns a standard GDB array describing ARR (which may
    be ARR itself if it already is in the proper form). */
 struct value*
-ada_coerce_to_simple_array (arr)
-     struct value* arr;
+ada_coerce_to_simple_array (struct value* arr)
 {
   if (ada_is_array_descriptor (VALUE_TYPE (arr)))
     {
@@ -1182,8 +1125,7 @@ ada_coerce_to_simple_array (arr)
    ordinary GDB array type (possibly with BITSIZE fields indicating
    packing). For other types, is the identity. */
 struct type*
-ada_coerce_to_simple_array_type (type)
-     struct type* type;
+ada_coerce_to_simple_array_type (struct type*type)
 {
   struct value* mark = value_mark ();
   struct value* dummy = value_from_longest (builtin_type_long, 0);
@@ -1196,8 +1138,7 @@ ada_coerce_to_simple_array_type (type)
 
 /* Non-zero iff TYPE represents a standard GNAT packed-array type. */
 int
-ada_is_packed_array_type (type)
-     struct type* type;
+ada_is_packed_array_type (struct type* type)
 {
   if (type == NULL)
     return 0;
@@ -1216,9 +1157,7 @@ ada_is_packed_array_type (type)
    TYPE_FIELD_BITSIZE values, and with *ELT_BITS set to its total size 
    in bits. */
 static struct type*
-packed_array_type (type, elt_bits)
-     struct type* type;
-     long* elt_bits;
+packed_array_type (struct type* type, long* elt_bits)
 {
   struct type* new_elt_type;
   struct type* new_type;
@@ -1255,8 +1194,7 @@ packed_array_type (type, elt_bits)
 /* The array type encoded by TYPE, where ada_is_packed_array_type (TYPE).
  */
 static struct type*
-decode_packed_array_type (type)
-     struct type* type;
+decode_packed_array_type (struct type* type)
 {
   struct symbol** syms;
   struct block** blocks;
@@ -1307,8 +1245,7 @@ decode_packed_array_type (type)
    type length is set appropriately. */
 
 static struct value*
-decode_packed_array (arr)
-     struct value* arr;
+decode_packed_array (struct value* arr)
 {
   struct type* type = decode_packed_array_type (VALUE_TYPE (arr));
 
@@ -1326,10 +1263,7 @@ decode_packed_array (arr)
    given in IND.   ARR must be a simple array. */
 
 static struct value*
-value_subscript_packed (arr, arity, ind)
-     struct value* arr;
-     int arity;
-     struct value** ind;
+value_subscript_packed (struct value* arr, int arity, struct value** ind)
 {
   int i;
   int bits, elt_off, bit_off;
@@ -1381,8 +1315,7 @@ value_subscript_packed (arr, arity, ind)
 /* Non-zero iff TYPE includes negative integer values. */
 
 static int
-has_negatives (type)
-     struct type* type;
+has_negatives (struct type* type)
 {
   switch (TYPE_CODE (type)) {
   default:
@@ -1405,14 +1338,8 @@ has_negatives (type)
    Assumes 0 <= BIT_OFFSET < HOST_CHAR_BIT. */
 
 struct value*
-ada_value_primitive_packed_val (obj, valaddr, offset, bit_offset, 
-				bit_size, type)
-     struct value* obj;
-     char* valaddr;
-     long offset;
-     int bit_offset;
-     int bit_size;
-     struct type* type;
+ada_value_primitive_packed_val (struct value* obj, char* valaddr, long offset, int bit_offset, 
+				int bit_size, struct type* type)
 {
   struct value* v;
   int src,			/* Index into the source area. */
@@ -1682,10 +1609,7 @@ ada_value_assign (struct value* toval, struct value* fromval)
    thereto.  */
 
 struct value*
-ada_value_subscript (arr, arity, ind)
-     struct value* arr;
-     int arity;
-     struct value** ind;
+ada_value_subscript (struct value* arr, int arity, struct value** ind)
 {
   int k;
   struct value* elt;
@@ -1712,11 +1636,7 @@ ada_value_subscript (arr, arity, ind)
    IND. Does not read the entire array into memory. */
 
 struct value*
-ada_value_ptr_subscript (arr, type, arity, ind)
-     struct value* arr;
-     struct type* type;
-     int arity;
-     struct value** ind;
+ada_value_ptr_subscript (struct value* arr, struct type* type, int arity, struct value** ind)
 {
   int k;
 
@@ -1747,8 +1667,7 @@ ada_value_ptr_subscript (arr, type, arity, ind)
    type designation. Otherwise, returns 0. */
 
 int
-ada_array_arity (type)
-     struct type* type;
+ada_array_arity (struct type* type)
 {
   int arity;
 
@@ -1776,9 +1695,7 @@ ada_array_arity (type)
    NINDICES is -1. Otherwise, returns NULL. */
 
 struct type*
-ada_array_element_type (type, nindices)
-     struct type* type;
-     int nindices;
+ada_array_element_type (struct btype* type, int nindices)
 {
   type = desc_base_type (type);
 
@@ -1821,9 +1738,7 @@ ada_array_element_type (type, nindices)
    not examine memory. */
 
 struct type*
-ada_index_type (type, n)
-     struct type* type;
-     int n;
+ada_index_type (struct type* type, int n)
 {
   type = desc_base_type (type);
 
@@ -1851,11 +1766,7 @@ ada_index_type (type, n)
    run-time quantities other than discriminants. */
 
 LONGEST
-ada_array_bound_from_type (arr_type, n, which, typep)
-     struct type* arr_type;
-     int n; 
-     int which;
-     struct type** typep;
+ada_array_bound_from_type (struct type* arr_type, int n, int which, struct type** typep)
 {
   struct type* type;
   struct type* index_type_desc;
@@ -1944,9 +1855,7 @@ ada_array_bound (arr, n, which)
    clauses at the moment. */ 
 
 struct value*
-ada_array_length (arr, n)
-     struct value* arr;
-     int n; 
+ada_array_length (struct value* arr, int n)
 {
   struct type* arr_type = check_typedef (VALUE_TYPE (arr));
   struct type* index_type_desc;
@@ -1979,8 +1888,7 @@ ada_array_length (arr, n)
    to op. */
 
 static const char*
-ada_op_name (op)
-     enum exp_opcode op;
+ada_op_name (enum exp_opcode op)
 {
   int i;
 
@@ -2004,9 +1912,7 @@ ada_op_name (op)
    May change (expand) *EXP.  */
 
 void
-ada_resolve (expp, context_type)
-     struct expression** expp;
-     struct type* context_type;
+ada_resolve (struct expression** expp, struct type* context_type)
 {
   int pc;
   pc = 0;
@@ -2022,11 +1928,7 @@ ada_resolve (expp, context_type)
    EXP. The CONTEXT_TYPE functions as in ada_resolve, above. */
 
 static struct value*
-ada_resolve_subexp (expp, pos, deprocedure_p, context_type) 
-     struct expression** expp;
-     int *pos;
-     int deprocedure_p;
-     struct type* context_type;
+ada_resolve_subexp (struct expression** expp, int *pos, int deprocedure_p, struct type* context_type) 
 {
   int pc = *pos;
   int i;
@@ -2471,10 +2373,7 @@ ada_type_match (ftype, atype, may_deref)
    argument function. */
 
 static int
-ada_args_match (func, actuals, n_actuals)
-     struct symbol* func;
-     struct value** actuals;
-     int n_actuals;
+ada_args_match (struct symbol* func, struct value** actuals, int n_actuals)
 {
   int i;
   struct type* func_type = SYMBOL_TYPE (func);
@@ -2506,9 +2405,7 @@ ada_args_match (func, actuals, n_actuals)
    or an enumerated type.  A null CONTEXT_TYPE indicates any non-void type.  */
 
 static int
-return_match (func_type, context_type)
-     struct type* func_type;
-     struct type* context_type;
+return_match (struct type* func_type, struct type* context_type)
 {
   struct type* return_type;
 
@@ -2547,13 +2444,9 @@ return_match (func_type, context_type)
    is modified in parallel to SYMS. */
 
 int
-ada_resolve_function (syms, blocks, nsyms, args, nargs, name, context_type)
-     struct symbol* syms[];
-     struct block* blocks[];
-     struct value** args;
-     int nsyms, nargs;
-     const char* name;
-     struct type* context_type;
+ada_resolve_function (struct symbol* syms[], struct block* blocks[], int nsyms,
+		      struct value** args, int nargs, const char* name,
+		      struct type* context_type)
 {
   int k;
   int m;			/* Number of hits */
@@ -2639,10 +2532,7 @@ mangled_ordered_before (char* N0, char* N1)
 /* mangled names, rearranging BLOCKS[0..NSYMS-1] according to the same */
 /* permutation. */
 static void 
-sort_choices (syms, blocks, nsyms)
-     struct symbol* syms[];
-     struct block* blocks[];
-     int nsyms;
+sort_choices (struct symbol* syms[], struct block* blocks[], int nsyms)
 {
   int i, j;
   for (i = 1; i < nsyms; i += 1) 
@@ -2675,11 +2565,8 @@ sort_choices (syms, blocks, nsyms)
    to be re-integrated one of these days. */
 
 int
-user_select_syms (syms, blocks, nsyms, max_results)
-     struct symbol* syms[];
-     struct block* blocks[];
-     int nsyms;
-     int max_results;
+user_select_syms (struct symbol* syms[], struct block* blocks[], int nsyms,
+		  int max_results)
 {
   int i;
   int* chosen = (int*) alloca (sizeof(int) * nsyms);
@@ -2781,13 +2668,8 @@ user_select_syms (syms, blocks, nsyms, max_results)
    prompts (for use with the -f switch). */
 
 int
-get_selections (choices, n_choices, max_results, is_all_choice, 
-		annotation_suffix)
-     int* choices;
-     int n_choices;
-     int max_results;
-     int is_all_choice;
-     char* annotation_suffix;
+get_selections (int* choices, int n_choices, int max_results,
+		int is_all_choice, char* annotation_suffix)
 {
   int i;
   char* args;
@@ -2864,11 +2746,9 @@ get_selections (choices, n_choices, max_results, is_all_choice,
 /* arguments.  Update *EXPP as needed to hold more space. */
 
 static void
-replace_operator_with_call (expp, pc, nargs, oplen, sym, block)
-     struct expression** expp;
-     int pc, nargs, oplen;
-     struct symbol* sym;
-     struct block* block; 
+replace_operator_with_call (struct expression** expp, int pc, int nargs,
+			    int oplen, struct symbol* sym,
+			    struct block* block)
 {
   /* A new expression, with 6 more elements (3 for funcall, 4 for function
      symbol, -oplen for operator being replaced). */
@@ -2900,8 +2780,7 @@ replace_operator_with_call (expp, pc, nargs, oplen, sym, block)
 /* FLOAT.) */
 
 static int
-numeric_type_p (type)
-     struct type* type;
+numeric_type_p (struct type* type)
 {
   if (type == NULL)
     return 0;
@@ -2923,8 +2802,7 @@ numeric_type_p (type)
 /* True iff TYPE is integral (an INT or RANGE of INTs). */
 
 static int
-integer_type_p (type)
-     struct type* type;
+integer_type_p (struct type* type)
 {
   if (type == NULL)
     return 0;
@@ -2945,8 +2823,7 @@ integer_type_p (type)
 /* True iff TYPE is scalar (INT, RANGE, FLOAT, ENUM). */
 
 static int
-scalar_type_p (type)
-     struct type* type;
+scalar_type_p (struct type* type)
 {
   if (type == NULL)
     return 0;
@@ -2967,8 +2844,7 @@ scalar_type_p (type)
 /* True iff TYPE is discrete (INT, RANGE, ENUM). */
 
 static int
-discrete_type_p (type)
-     struct type* type;
+discrete_type_p (struct type* type)
 {
   if (type == NULL)
     return 0;
@@ -2990,9 +2866,7 @@ discrete_type_p (type)
    (i.e., result 0). */
 
 static int
-possible_user_operator_p (op, args)
-     enum exp_opcode op;
-     struct value* args[];
+possible_user_operator_p (enum exp_opcode op, struct value* args[])
 {
   struct type* type0 = check_typedef (VALUE_TYPE (args[0]));
   struct type* type1 = 
@@ -3057,8 +2931,7 @@ possible_user_operator_p (op, args)
  * an exception renaming, and XRS for a subprogram renaming.  Returns
  * NULL if NAME encodes none of these. */
 const char*
-ada_renaming_type (type)
-     struct type* type;
+ada_renaming_type (struct type* type)
 {
   if (type != NULL && TYPE_CODE (type) == TYPE_CODE_ENUM)
     {
@@ -3076,8 +2949,7 @@ ada_renaming_type (type)
 
 /* Return non-zero iff SYM encodes an object renaming. */
 int
-ada_is_object_renaming (sym)
-     struct symbol* sym;
+ada_is_object_renaming (struct symbol* sym)
 {
   const char* renaming_type = ada_renaming_type (SYMBOL_TYPE (sym));
   return renaming_type != NULL 
@@ -3088,8 +2960,7 @@ ada_is_object_renaming (sym)
  * name of the renamed entity.   The name is good until the end of
  * parsing. */
 const char*
-ada_simple_renamed_entity (sym)
-     struct symbol* sym;
+ada_simple_renamed_entity (struct symbol* sym)
 {
   struct type* type;
   const char* raw_name;
@@ -3120,9 +2991,7 @@ ada_simple_renamed_entity (sym)
    pointer. Return VAL as an lvalue. */
 
 static struct value*
-place_on_stack (val, sp)
-    struct value* val;
-     CORE_ADDR* sp;
+place_on_stack (struct value* val, CORE_ADDR* sp)
 {
   CORE_ADDR old_sp = *sp;
 
@@ -3149,10 +3018,7 @@ place_on_stack (val, sp)
    values not residing in memory, updating it as needed. */ 
 
 static struct value*
-convert_actual (actual, formal_type0, sp)
-     struct value* actual;
-     struct type* formal_type0;
-     CORE_ADDR* sp;
+convert_actual (struct value* actual, struct type* formal_type0, CORE_ADDR* sp)
 {
   struct type* actual_type = check_typedef (VALUE_TYPE (actual));
   struct type* formal_type = check_typedef (formal_type0);
@@ -3200,10 +3066,7 @@ convert_actual (actual, formal_type0, sp)
    representing a pointer to this descriptor. */
 
 static struct value*
-make_array_descriptor (type, arr, sp)
-     struct type* type;
-     struct value* arr;
-     CORE_ADDR* sp;
+make_array_descriptor (struct type* type, struct value* arr, CORE_ADDR* sp)
 {
   struct type* bounds_type = desc_bounds_type (type);
   struct type* desc_type = desc_base_type (type);
@@ -3253,11 +3116,7 @@ make_array_descriptor (type, arr, sp)
    value as needed. */
 
 void
-ada_convert_actuals (func, nargs, args, sp)
-     struct value* func;
-     int nargs;
-     struct value* args[];
-     CORE_ADDR* sp;
+ada_convert_actuals (struct value* func, int nargs, struct value* args[], CORE_ADDR* sp)
 {
   int i;
 
@@ -3292,9 +3151,7 @@ static struct block** defn_blocks = NULL;
  * given NAMESPACE. */
 
 static struct symbol*
-standard_lookup (name, namespace)
-     const char* name;
-     namespace_enum namespace;
+standard_lookup (const char* name, namespace_enum namespace)
 {
   struct symbol* sym;
   struct symtab* symtab;
@@ -3307,9 +3164,7 @@ standard_lookup (name, namespace)
 /* in SYMS[0..N-1].  We treat enumerals as functions, since they */
 /* contend in overloading in the same way. */ 
 static int
-is_nonfunction (syms, n)
-     struct symbol* syms[];
-     int n;
+is_nonfunction (struct symbol* syms[], int n)
 {
   int i;
 
@@ -3325,9 +3180,7 @@ is_nonfunction (syms, n)
    struct types.  Otherwise, they may not. */
 
 static int
-equiv_types (type0, type1)
-     struct type* type0;
-     struct type* type1;
+equiv_types (struct type* type0, struct type* type1)
 {
   if (type0 == type1) 
     return 1;
@@ -3347,9 +3200,7 @@ equiv_types (type0, type1)
    no more defined than that of SYM1. */
 
 static int
-lesseq_defined_than (sym0, sym1)
-     struct symbol* sym0;
-     struct symbol* sym1;
+lesseq_defined_than (struct symbol* sym0, struct symbol* sym1)
 {
   if (sym0 == sym1)
     return 1;
@@ -3387,9 +3238,7 @@ lesseq_defined_than (sym0, sym1)
    defn_blocks as needed.   Do not include SYM if it is a duplicate.  */
 
 static void
-add_defn_to_vec (sym, block)
-     struct symbol* sym;
-     struct block* block;
+add_defn_to_vec (struct symbol* sym, struct block* block)
 {
   int i;
   size_t tmp;
@@ -3422,12 +3271,7 @@ add_defn_to_vec (sym, block)
    wild-card match if WILD. */
 
 static struct partial_symbol *
-ada_lookup_partial_symbol (pst, name, global, namespace, wild)
-     struct partial_symtab *pst;
-     const char *name;
-     int global;
-     namespace_enum namespace;
-     int wild;
+ada_lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global, namespace_enumnamespace, int wild)
 {
   struct partial_symbol **start;
   int name_len = strlen (name);
@@ -3554,8 +3398,7 @@ ada_lookup_partial_symbol (pst, name, global, namespace, wild)
 
 /* Find a symbol table containing symbol SYM or NULL if none.  */
 static struct symtab*
-symtab_for_sym (sym)
-     struct symbol* sym;
+symtab_for_sym (struct symbol* sym)
 {
   struct symtab* s;
   struct objfile *objfile;
@@ -3618,8 +3461,7 @@ symtab_for_sym (sym)
    rules. Returns NULL if there is no such minimal symbol. */
 
 struct minimal_symbol*
-ada_lookup_minimal_symbol (name)
-     const char* name;
+ada_lookup_minimal_symbol (const char* name)
 {
   struct objfile* objfile;
   struct minimal_symbol* msymbol;
@@ -3645,10 +3487,7 @@ ada_lookup_minimal_symbol (name)
  * frame as a static link, and then searches up the call stack for a
  * frame with that same local-variable base. */
 static void
-add_symbols_from_enclosing_procs (name, namespace, wild_match)
-     const char* name;
-     namespace_enum namespace;
-     int wild_match;
+add_symbols_from_enclosing_procs (const char* name, namespace_enum namespace, int wild_match)
 {
 #ifdef i386
   static struct symbol static_link_sym;
@@ -3708,8 +3547,7 @@ add_symbols_from_enclosing_procs (name, namespace, wild_match)
 /* True if TYPE is definitely an artificial type supplied to a symbol
  * for which no debugging information was given in the symbol file. */
 static int
-is_nondebugging_type (type)
-     struct type* type;
+is_nondebugging_type (struct type* type)
 {
   char* name = ada_type_name (type);
   return (name != NULL && STREQ (name, "<variable, no debug info>"));
@@ -3724,10 +3562,7 @@ is_nondebugging_type (type)
  * correspondence between SYMS[i] and BLOCKS[i].  Returns the number
  * of symbols in the modified list. */
 static int
-remove_extra_symbols (syms, blocks, nsyms)
-     struct symbol** syms;
-     struct block** blocks;
-     int nsyms;
+remove_extra_symbols (struct symbol** syms, struct block** blocks, int nsyms)
 {
   int i, j;
 
@@ -3776,12 +3611,9 @@ remove_extra_symbols (syms, blocks, nsyms)
    surrounding BLOCK0, then these alone are returned. */
 
 int
-ada_lookup_symbol_list (name, block0, namespace, syms, blocks)
-     const char *name;
-     struct block *block0;
-     namespace_enum namespace;
-     struct symbol*** syms;
-     struct block*** blocks;
+ada_lookup_symbol_list (const char *name, struct block *block0,
+			namespace_enum namespace, struct symbol*** syms,
+			struct block*** blocks)
 {
   struct symbol *sym;
   struct symtab *s;
@@ -3948,10 +3780,7 @@ ada_lookup_symbol_list (name, block0, namespace, syms, blocks)
  * disambiguated by user query if needed. */
 
 struct symbol*
-ada_lookup_symbol (name, block0, namespace)
-     const char *name;
-     struct block *block0;
-     namespace_enum namespace;
+ada_lookup_symbol (const char *name, struct block *block0, namespace_enum namespace)
 {
   struct symbol** candidate_syms;
   struct block** candidate_blocks;
@@ -3978,8 +3807,7 @@ ada_lookup_symbol (name, block0, namespace)
  * 
  */
 static int
-is_name_suffix (str)
-     const char* str;
+is_name_suffix (const char* str)
 {
   int k;
   if (str[0] == 'X')
@@ -4031,10 +3859,7 @@ is_name_suffix (str)
  * informational suffixes of NAME (i.e., for which is_name_suffix is
  * true). */ 
 static int
-wild_match (patn, patn_len, name)
-     const char* patn;
-     int patn_len;
-     const char* name;
+wild_match (const char* patn, int patn_len, const char* name)
 {
   int name_len;
   int s, e;
@@ -4081,12 +3906,9 @@ wild_match (patn, patn_len, name)
    wildcard prefix. OBJFILE is the section containing BLOCK. */
 
 static void 
-ada_add_block_symbols (block, name, namespace, objfile, wild)
-     struct block* block;
-     const char* name;
-     namespace_enum namespace;
-     struct objfile* objfile;
-     int wild;
+ada_add_block_symbols (struct block* block, const char* name,
+		       namespace_enum namespace, struct objfile* objfile,
+		       int wild)
 {
   int i;
   int name_len = strlen (name);
@@ -4290,8 +4112,7 @@ ada_add_block_symbols (block, name, namespace, objfile, wild)
    with prototype information, if it is not already there.  */
 
 static void
-fill_in_ada_prototype (func)
-     struct symbol* func;
+fill_in_ada_prototype (struct symbol* func)
 {
   struct block* b;
   int nargs, nsyms;
@@ -4388,8 +4209,7 @@ char no_symtab_msg[] = "No symbol table is loaded.  Use the \"file\" command.";
    of that name.  This is the first ':', ' ', or end of LINE. 
 */
 char*
-ada_start_decode_line_1 (line)
-     char* line;
+ada_start_decode_line_1 (char* line)
 {
   /* [NOTE: strpbrk would be more elegant, but I am reluctant to be
      the first to use such a library function in GDB code.] */
@@ -4443,11 +4263,8 @@ ada_start_decode_line_1 (line)
    is the caller's responsibility to free them.   */
 
 struct symtabs_and_lines
-ada_finish_decode_line_1 (spec, file_table, funfirstline, canonical)
-     char** spec;
-     struct symtab* file_table;
-     int funfirstline;
-     char*** canonical;
+ada_finish_decode_line_1 (char** spec, struct symtab* file_table, 
+			  int funfirstline, char*** canonical)
 {
   struct symbol** symbols;
   struct block** blocks;
@@ -4628,11 +4445,8 @@ ada_finish_decode_line_1 (spec, file_table, funfirstline, canonical)
    with file name FILENAME that occurs in one of the functions listed 
    in SYMBOLS[0 .. NSYMS-1]. */   
 static struct symtabs_and_lines
-find_sal_from_funcs_and_line (filename, line_num, symbols, nsyms)
-     const char* filename;
-     int line_num;
-     struct symbol** symbols;
-     int nsyms;
+find_sal_from_funcs_and_line (const char* filename, int line_num,
+			      struct symbol** symbols, int nsyms)
 {
   struct symtabs_and_lines sals;
   int best_index, best;
@@ -4696,12 +4510,8 @@ find_sal_from_funcs_and_line (filename, line_num, symbols, nsyms)
    pc falls within one of the functions denoted by SYMBOLS[0..NSYMS-1].  
    Set *EXACTP to the 1 if the match is exact, and 0 otherwise. */
 static int
-find_line_in_linetable (linetable, line_num, symbols, nsyms, exactp)
-     struct linetable* linetable;
-     int line_num;
-     struct symbol** symbols;
-     int nsyms;
-     int* exactp;
+find_line_in_linetable (struct linetable* linetable, int line_num,
+			struct symbol** symbols, int nsyms, int* exactp)
 {
   int i, len, best_index, best;
 
@@ -4746,9 +4556,7 @@ find_line_in_linetable (linetable, line_num, symbols, nsyms, exactp)
    LINETABLE, and k falls strictly within a named function that begins at
    or before LINE_NUM.  Return -1 if there is no such k. */
 static int
-nearest_line_number_in_linetable (linetable, line_num)
-     struct linetable* linetable;
-     int line_num;
+nearest_line_number_in_linetable (struct linetable* linetable, int line_num)
 {
   int i, len, best;
 
@@ -4807,11 +4615,8 @@ nearest_line_number_in_linetable (linetable, line_num)
    IND == -1 corresponds to no function. */
 
 static int
-find_next_line_in_linetable (linetable, line_num, starting_line, ind)
-     struct linetable* linetable;
-     int line_num;
-     int starting_line;
-     int ind;
+find_next_line_in_linetable (struct linetable* linetable, int line_num,
+			     int starting_line, int ind)
 {
   int i, len;
 
@@ -4874,9 +4679,7 @@ find_next_line_in_linetable (linetable, line_num, starting_line, ind)
 /* True iff function symbol SYM starts somewhere at or before line #
    LINE_NUM. */
 static int
-is_plausible_func_for_line (sym, line_num)
-     struct symbol* sym;
-     int line_num;
+is_plausible_func_for_line (struct symbol* sym, int line_num)
 {
   struct symtab_and_line start_sal;
 
@@ -4889,8 +4692,7 @@ is_plausible_func_for_line (sym, line_num)
 }
 
 static void
-debug_print_lines (lt)
-     struct linetable* lt;
+debug_print_lines (struct linetable* lt)
 {
   int i;
 
@@ -4904,8 +4706,7 @@ debug_print_lines (lt)
 }
 
 static void
-debug_print_block (b)
-     struct block* b;
+debug_print_block (struct block* b)
 {
   int i;
   struct symbol *i;
@@ -4927,8 +4728,7 @@ debug_print_block (b)
 }
 
 static void
-debug_print_blocks (bv)
-     struct blockvector* bv;
+debug_print_blocks (struct blockvector* bv)
 {
   int i;
 
@@ -4941,8 +4741,7 @@ debug_print_blocks (bv)
 }
 
 static void
-debug_print_symtab (s)
-     struct symtab* s;
+debug_print_symtab (struct symtab* s)
 {
   fprintf (stderr, "Symtab %p\n    File: %s; Dir: %s\n", s,
 	   s->filename, s->dirname);
@@ -4956,8 +4755,7 @@ debug_print_symtab (s)
 /* Read in all symbol tables corresponding to partial symbol tables
    with file name FILENAME. */
 static void
-read_all_symtabs (filename)
-     const char* filename;
+read_all_symtabs (const char* filename)
 {
   struct partial_symtab* ps;
   struct objfile* objfile;
@@ -4975,10 +4773,7 @@ read_all_symtabs (filename)
    FILENAME, as filtered by the user.  If CANONICAL is not null, set
    it to a corresponding array of canonical line specs. */
 static struct symtabs_and_lines
-all_sals_for_line (filename, line_num, canonical)
-     const char* filename;
-     int line_num;
-     char*** canonical;
+all_sals_for_line (const char* filename, int line_num, char*** canonical)
 {
   struct symtabs_and_lines result;
   struct objfile* objfile;
@@ -5088,9 +4883,7 @@ all_sals_for_line (filename, line_num, canonical)
    allocated. */
 
 static char*
-extended_canonical_line_spec (sal, name)
-     struct symtab_and_line sal;
-     const char* name;
+extended_canonical_line_spec (struct symtab_and_line sal, const char* name)
 {
   char* r;
 
@@ -5116,9 +4909,7 @@ begin_cleanup (void* dummy)
 }
 
 static void
-begin_command (args, from_tty)
-     char *args;
-     int from_tty;
+begin_command (char *args, int from_tty)
 {
   struct minimal_symbol *msym;
   CORE_ADDR main_program_name_addr;
@@ -5180,8 +4971,7 @@ begin_command (args, from_tty)
 }
 
 int
-is_ada_runtime_file (filename)
-     char *filename;
+is_ada_runtime_file (char *filename)
 {
   return (STREQN (filename, "s-", 2) ||
 	  STREQN (filename, "a-", 2) ||
@@ -5193,9 +4983,7 @@ is_ada_runtime_file (filename)
    part of the Ada run-time, starting from fi and moving upward. */
 
 int
-find_printable_frame (fi, level)
-     struct frame_info *fi;
-     int level;
+find_printable_frame (struct frame_info *fi, int level)
 {
   struct symtab_and_line sal;
   
@@ -5231,8 +5019,7 @@ find_printable_frame (fi, level)
 }
 
 void
-ada_report_exception_break (b)
-     struct breakpoint *b;
+ada_report_exception_break (struct breakpoint *b)
 {
 #ifdef UI_OUT
   /* FIXME: break_on_exception should be defined in breakpoint.h */
@@ -5368,9 +5155,7 @@ char* ada_breakpoint_rewrite (char* arg, int* break_on_exceptionp)
    to be invisible to users. */
 
 int
-ada_is_ignored_field (type, field_num)
-     struct type *type;
-     int field_num;
+ada_is_ignored_field (struct type *type, int field_num)
 {
   if (field_num < 0 || field_num > TYPE_NFIELDS (type))
     return 1;
@@ -5385,8 +5170,7 @@ ada_is_ignored_field (type, field_num)
 /* True iff structure type TYPE has a tag field. */
 
 int
-ada_is_tagged_type (type)
-     struct type *type;
+ada_is_tagged_type (struct type *type)
 {
   if (type == NULL || TYPE_CODE (type) != TYPE_CODE_STRUCT)
     return 0;
@@ -5397,8 +5181,7 @@ ada_is_tagged_type (type)
 /* The type of the tag on VAL. */
 
 struct type*
-ada_tag_type (val)
-     struct value* val;
+ada_tag_type (struct value* val)
 {
   return ada_lookup_struct_elt_type (VALUE_TYPE (val), "_tag", 0, NULL);
 }
@@ -5406,8 +5189,7 @@ ada_tag_type (val)
 /* The value of the tag on VAL. */
 
 struct value*
-ada_value_tag (val)
-     struct value* val;
+ada_value_tag (struct value* val)
 {
   return ada_value_struct_elt (val, "_tag", "record");
 }
@@ -5415,8 +5197,7 @@ ada_value_tag (val)
 /* The parent type of TYPE, or NULL if none. */
 
 struct type*
-ada_parent_type (type)
-     struct type *type;
+ada_parent_type (struct type *type)
 {
   int i;
 
@@ -5437,9 +5218,7 @@ ada_parent_type (type)
    a structure type with at least FIELD_NUM+1 fields. */
 
 int
-ada_is_parent_field (type, field_num)
-     struct type *type;
-     int field_num;
+ada_is_parent_field (struct type *type, int field_num)
 {
   const char* name = TYPE_FIELD_NAME (check_typedef (type), field_num);
   return (name != NULL && 
@@ -5453,9 +5232,7 @@ ada_is_parent_field (type, field_num)
    structures. */
 
 int
-ada_is_wrapper_field (type, field_num)
-     struct type *type;
-     int field_num;
+ada_is_wrapper_field (struct type *type, int field_num)
 {
   const char* name = TYPE_FIELD_NAME (type, field_num);
   return (name != NULL 
@@ -5469,9 +5246,7 @@ ada_is_wrapper_field (type, field_num)
    FIELD_NUM+1 fields. */ 
 
 int
-ada_is_variant_part (type, field_num)
-     struct type *type;
-     int field_num;
+ada_is_variant_part (struct type *type, int field_num)
 {
   struct type* field_type = TYPE_FIELD_TYPE (type, field_num);
   return (TYPE_CODE (field_type) == TYPE_CODE_UNION
@@ -5484,9 +5259,7 @@ ada_is_variant_part (type, field_num)
    returns the type of the controlling discriminant for the variant.  */
 
 struct type*
-ada_variant_discrim_type (var_type, outer_type)
-     struct type *var_type;
-     struct type *outer_type;
+ada_variant_discrim_type (struct type *var_type, struct type *outer_type)
 {
   char* name = ada_variant_discrim_name (var_type);
   struct type *type = 
@@ -5502,9 +5275,7 @@ ada_variant_discrim_type (var_type, outer_type)
    represents a 'when others' clause; otherwise 0. */
 
 int
-ada_is_others_clause (type, field_num)
-     struct type *type;
-     int field_num;
+ada_is_others_clause (struct type *type, int field_num)
 {
   const char* name = TYPE_FIELD_NAME (type, field_num);
   return (name != NULL && name[0] == 'O');
@@ -5515,8 +5286,7 @@ ada_is_others_clause (type, field_num)
    value is valid until the next call to ada_variant_discrim_name. */
 
 char * 
-ada_variant_discrim_name (type0)
-     struct type *type0;
+ada_variant_discrim_name (struct type *type0)
 {
   static char* result = NULL;
   static size_t result_len = 0;
@@ -5569,11 +5339,7 @@ ada_variant_discrim_name (type0)
    does not occur. */
 
 int
-ada_scan_number (str, k, R, new_k)
-     const char str[];
-     int k;
-     LONGEST *R;
-     int *new_k;
+ada_scan_number (const char str[], int k, LONGEST *R, int *new_k)
 {
   ULONGEST RU;
 
@@ -5615,10 +5381,7 @@ ada_scan_number (str, k, R, new_k)
    in the range encoded by field FIELD_NUM of TYPE; otherwise 0. */
 
 int 
-ada_in_variant (val, type, field_num)
-     LONGEST val;
-     struct type *type;
-     int field_num;
+ada_in_variant (LONGEST val, struct type *type, int field_num)
 {
   const char* name = TYPE_FIELD_NAME (type, field_num);
   int p;
@@ -5665,11 +5428,8 @@ ada_in_variant (val, type, field_num)
    in that it can handle packed values of arbitrary type. */
 
 struct value*
-ada_value_primitive_field (arg1, offset, fieldno, arg_type)
-     struct value* arg1;
-     int offset;
-     int fieldno;
-     struct type *arg_type;
+ada_value_primitive_field (struct value* arg1, int offset, int fieldno,
+			   struct type *arg_type)
 {
   struct value* v;
   struct type *type;
@@ -5700,11 +5460,8 @@ ada_value_primitive_field (arg1, offset, fieldno, arg_type)
    Searches recursively through wrapper fields (e.g., '_parent'). */
 
 struct value*
-ada_search_struct_field (name, arg, offset, type)
-     char *name;
-     struct value* arg;
-     int offset;
-     struct type *type;
+ada_search_struct_field (char *name, struct value* arg, int offset,
+			 struct type *type)
 {
   int i;
   CHECK_TYPEDEF (type);
@@ -5762,10 +5519,7 @@ ada_search_struct_field (name, arg, offset, type)
    of entity that ARG is supposed to be. */
 
 struct value*
-ada_value_struct_elt (arg, name, err)
-     struct value* arg;
-     char *name;
-     char *err;
+ada_value_struct_elt (struct value *arg, char *name, char *err)
 {
   struct type *t;
   struct value* v;
@@ -5809,11 +5563,7 @@ ada_value_struct_elt (arg, name, err)
    If NOERR is nonzero, return NULL if NAME is not suitably defined. */
 
 struct type *
-ada_lookup_struct_elt_type (type, name, noerr, dispp)
-     struct type *type;
-     char *name;
-     int noerr;
-     int *dispp;
+ada_lookup_struct_elt_type (struct type *type, char *name, int noerr, int *dispp)
 {
   int i;
 
@@ -5911,10 +5661,8 @@ BadName:
    numbering from 0) is applicable.  Returns -1 if none are. */
 
 int 
-ada_which_variant_applies (var_type, outer_type, outer_valaddr)
-     struct type *var_type;
-     struct type *outer_type;
-     char* outer_valaddr;
+ada_which_variant_applies (struct type *var_type, struct type *outer_type,
+			   char* outer_valaddr)
 {
   int others_clause;
   int i;
@@ -5984,8 +5732,7 @@ ada_which_variant_applies (var_type, outer_type, outer_valaddr)
    dynamic-sized types. */
 
 struct value*
-ada_value_ind (val0)
-     struct value* val0;
+ada_value_ind (struct value* val0)
 {
   struct value* val = unwrap_value (value_ind (val0));
   return ada_to_fixed_value (VALUE_TYPE (val), 0,
@@ -5996,8 +5743,7 @@ ada_value_ind (val0)
 /* The value resulting from dereferencing any "reference to"
  * qualifiers on VAL0. */
 static struct value* 
-ada_coerce_ref (val0)
-     struct value* val0;
+ada_coerce_ref (struct value* val0)
 {
   if (TYPE_CODE (VALUE_TYPE (val0)) == TYPE_CODE_REF) {
     struct value* val = val0;
@@ -6014,9 +5760,7 @@ ada_coerce_ref (val0)
    ALIGNMENT (a power of 2). */
 
 static unsigned int
-align_value (off, alignment)
-     unsigned int off;
-     unsigned int alignment;
+align_value (unsigned int off, unsigned int alignment)
 {
   return (off + alignment - 1) & ~(alignment - 1);
 }
@@ -6025,9 +5769,7 @@ align_value (off, alignment)
    type TYPE. */
 
 static unsigned int
-field_offset (type, f)
-     struct type *type;
-     int f;
+field_offset (struct type *type, int f)
 {
   int n = TYPE_FIELD_BITPOS (type, f);
   /* Kludge (temporary?) to fix problem with dwarf output. */
@@ -6041,9 +5783,7 @@ field_offset (type, f)
 /* Return the bit alignment required for field #F of template type TYPE. */
 
 static unsigned int
-field_alignment (type, f)
-     struct type *type;
-     int f;
+field_alignment (struct type *type, int f)
 {
   const char* name = TYPE_FIELD_NAME (type, f);
   int len = (name == NULL) ? 0 : strlen (name);
@@ -6065,8 +5805,7 @@ field_alignment (type, f)
 
 /* Find a type named NAME.  Ignores ambiguity.  */
 struct type*
-ada_find_any_type (name)
-     const char *name;
+ada_find_any_type (const char *name)
 {
   struct symbol* sym;
 
@@ -6086,9 +5825,7 @@ ada_find_any_type (name)
    that of TYPE1 for purposes of type printing, return non-zero;
    otherwise return 0. */
 int
-ada_prefer_type (type0, type1)
-     struct type* type0;
-     struct type* type1;
+ada_prefer_type (struct type* type0, struct type* type1)
 {
   if (type1 == NULL)
     return 1;
@@ -6111,8 +5848,7 @@ ada_prefer_type (type0, type1)
 /* The name of TYPE, which is either its TYPE_NAME, or, if that is
    null, its TYPE_TAG_NAME.  Null if TYPE is null. */
 char*
-ada_type_name (type)
-     struct type* type;
+ada_type_name (struct type* type)
 {
   if (type == NULL) 
     return NULL;
@@ -6126,9 +5862,7 @@ ada_type_name (type)
    SUFFIX to the name of TYPE. */
 
 struct type*
-ada_find_parallel_type (type, suffix)
-     struct type *type;
-     const char *suffix;
+ada_find_parallel_type (struct type *type, const char *suffix)
 {
   static char* name;
   static size_t name_len = 0;
@@ -6156,8 +5890,7 @@ ada_find_parallel_type (type, suffix)
    type describing its fields.  Otherwise, return NULL. */
 
 static struct type*
-dynamic_template_type (type)
-     struct type* type;
+dynamic_template_type (struct type* type)
 {
   CHECK_TYPEDEF (type);
 
@@ -6178,9 +5911,7 @@ dynamic_template_type (type)
    non-zero iff field FIELD_NUM of TEMPL_TYPE has dynamic size. */
 
 static int 
-is_dynamic_field (templ_type, field_num)
-     struct type* templ_type;
-     int field_num;
+is_dynamic_field (struct type* templ_type, int field_num)
 {
   const char *name = TYPE_FIELD_NAME (templ_type, field_num);
   return name != NULL 
@@ -6192,8 +5923,7 @@ is_dynamic_field (templ_type, field_num)
    contains a variant part. */
 
 static int 
-contains_variant_part (type)
-     struct type* type;
+contains_variant_part (struct type* type)
 {
   int f;
 
@@ -6205,8 +5935,7 @@ contains_variant_part (type)
 
 /* A record type with no fields, . */
 static struct type*
-empty_record (objfile) 
-     struct objfile* objfile;
+empty_record (struct objfile* objfile) 
 {
   struct type* type = alloc_type (objfile);
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
@@ -6232,12 +5961,8 @@ empty_record (objfile)
  * byte-aligned.  */
 
 static struct type*
-template_to_fixed_record_type (type, valaddr, address, dval0)
-     struct type* type;
-     char* valaddr;
-     CORE_ADDR address;
-     struct value* dval0;
-
+template_to_fixed_record_type (struct type* type, char* valaddr,
+			       CORE_ADDR address, struct value* dval0)
 {
   struct value* mark = value_mark();
   struct value* dval;
@@ -6350,8 +6075,7 @@ template_to_fixed_record_type (type, valaddr, address, dval0)
    function in the TYPE_TARGET_TYPE of the template type. */
 
 static struct type*
-template_to_static_fixed_type (templ_type)
-     struct type* templ_type;
+template_to_static_fixed_type (struct type* templ_type)
 {
   struct type *type;
   int nfields;
@@ -6401,11 +6125,8 @@ template_to_static_fixed_type (templ_type)
    part -- in which the variant part is replaced with the appropriate
    branch. */
 static struct type*
-to_record_with_fixed_variant_part (type, valaddr, address, dval)
-     struct type* type;
-     char* valaddr;
-     CORE_ADDR address;
-     struct value* dval;
+to_record_with_fixed_variant_part (struct type* type, char* valaddr,
+				   CORE_ADDR address, struct value* dval)
 {
   struct value* mark = value_mark();
   struct type* rtype;
@@ -6463,11 +6184,8 @@ to_record_with_fixed_variant_part (type, valaddr, address, dval)
    of the variant. */ 
 
 static struct type*
-to_fixed_record_type (type0, valaddr, address, dval)
-     struct type* type0;
-     char* valaddr;
-     CORE_ADDR address;
-     struct value* dval;
+to_fixed_record_type (struct type* type0, char* valaddr, CORE_ADDR address,
+		      struct value* dval)
 {
   struct type* templ_type;
 
@@ -6498,11 +6216,8 @@ to_fixed_record_type (type0, valaddr, address, dval)
    indicated in the union's type name. */
 
 static struct type*
-to_fixed_variant_branch_type (var_type0, valaddr, address, dval)
-     struct type* var_type0;
-     char* valaddr;
-     CORE_ADDR address;
-     struct value* dval;
+to_fixed_variant_branch_type (struct type* var_type0, char* valaddr,
+			      CORE_ADDR address, struct value* dval)
 {
   int which;
   struct type* templ_type;
@@ -6547,10 +6262,8 @@ to_fixed_variant_branch_type (var_type0, valaddr, address, dval)
 */
 
 static struct type*
-to_fixed_array_type (type0, dval, ignore_too_big)
-     struct type* type0;
-     struct value* dval;
-     int ignore_too_big;
+to_fixed_array_type (struct type* type0, struct value* dval,
+		     int ignore_too_big)
 {
   struct type* index_type_desc;
   struct type* result;
@@ -6614,11 +6327,8 @@ to_fixed_array_type (type0, dval, ignore_too_big)
    and may be NULL if there are none. */
 
 struct type*
-ada_to_fixed_type (type, valaddr, address, dval)
-     struct type* type;
-     char* valaddr;
-     CORE_ADDR address;
-     struct value* dval;
+ada_to_fixed_type (struct type* type, char* valaddr, CORE_ADDR address,
+		   struct value* dval)
 {
   CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type)) {
@@ -6640,8 +6350,7 @@ ada_to_fixed_type (type, valaddr, address, dval)
    TYPE0, but based on no runtime data. */
 
 static struct type*
-to_static_fixed_type (type0)
-     struct type* type0;
+to_static_fixed_type (struct type* type0)
 {
   struct type* type;
 
@@ -6673,8 +6382,7 @@ to_static_fixed_type (type0)
 
 /* A static approximation of TYPE with all type wrappers removed. */
 static struct type*
-static_unwrap_type (type)
-     struct type* type;
+static_unwrap_type (struct type* type)
 {
   if (ada_is_aligner_type (type))
     {
@@ -6708,8 +6416,7 @@ static_unwrap_type (type)
 /* A type equivalent to TYPE that is not a non-record stub, if one
    exists, otherwise TYPE. */
 struct type*
-ada_completed_type (type)
-     struct type* type;
+ada_completed_type (struct type* type)
 {
   CHECK_TYPEDEF (type);
   if (type == NULL || TYPE_CODE (type) != TYPE_CODE_ENUM
@@ -6731,11 +6438,8 @@ ada_completed_type (type)
    creation of struct values]. */ 
 
 struct value*
-ada_to_fixed_value (type0, valaddr, address, val0)
-     struct type* type0;
-     char* valaddr;
-     CORE_ADDR address;
-     struct value* val0;
+ada_to_fixed_value (struct type* type0, char* valaddr, CORE_ADDR address,
+		    struct value* val0)
 {
   struct type* type = ada_to_fixed_type (type0, valaddr, address, NULL);
   if (type == type0 && val0 != NULL)
@@ -6749,8 +6453,7 @@ ada_to_fixed_value (type0, valaddr, address, val0)
    types, therefore, the type of the result is likely to be inaccurate. */
 
 struct value*
-ada_to_static_fixed_value (val)
-     struct value* val;
+ada_to_static_fixed_value (struct value* val)
 {
   struct type *type = 
     to_static_fixed_type (static_unwrap_type (VALUE_TYPE (val)));
@@ -6787,8 +6490,7 @@ static const char* attribute_names[] = {
 };
 
 const char*
-ada_attribute_name (n)
-     int n;
+ada_attribute_name (int n)
 {
   if (n > 0 && n < (int) ATR_END)
     return attribute_names[n];
@@ -6799,8 +6501,7 @@ ada_attribute_name (n)
 /* Evaluate the 'POS attribute applied to ARG. */
 
 static struct value*
-value_pos_atr (arg)
-     struct value* arg;
+value_pos_atr (struct value* arg)
 {
   struct type *type = VALUE_TYPE (arg);
 
@@ -6826,9 +6527,7 @@ value_pos_atr (arg)
 /* Evaluate the TYPE'VAL attribute applied to ARG. */
 
 static struct value*
-value_val_atr (type, arg)
-     struct type *type;
-     struct value* arg;
+value_val_atr (struct type *type, struct value* arg)
 {
   if (! discrete_type_p (type))
     error ("'VAL only defined on discrete types");
@@ -6855,8 +6554,7 @@ value_val_atr (type, arg)
  * It is a heuristic test that could stand improvement]. */
 
 int 
-ada_is_character_type (type)
-     struct type* type;
+ada_is_character_type (struct type* type)
 {
   const char* name = ada_type_name (type);
   return 
@@ -6871,8 +6569,7 @@ ada_is_character_type (type)
 /* True if TYPE appears to be an Ada string type. */
 
 int
-ada_is_string_type (type)
-     struct type *type;
+ada_is_string_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   if (type != NULL 
@@ -6894,8 +6591,7 @@ ada_is_string_type (type)
    distinctive name. */
 
 int
-ada_is_aligner_type (type)
-     struct type *type;
+ada_is_aligner_type (struct type *type)
 {
   CHECK_TYPEDEF (type);
   return (TYPE_CODE (type) == TYPE_CODE_STRUCT
@@ -6907,8 +6603,7 @@ ada_is_aligner_type (type)
    the parallel type. */
 
 struct type*
-ada_get_base_type (raw_type)
-     struct type* raw_type;
+ada_get_base_type (struct type* raw_type)
 {
   struct type* real_type_namer;
   struct type* raw_real_type;
@@ -6933,8 +6628,7 @@ ada_get_base_type (raw_type)
 /* The type of value designated by TYPE, with all aligners removed. */
 
 struct type*
-ada_aligned_type (type)
-     struct type* type;
+ada_aligned_type (struct type* type)
 {
   if (ada_is_aligner_type (type))
     return ada_aligned_type (TYPE_FIELD_TYPE (type, 0));
@@ -6947,9 +6641,7 @@ ada_aligned_type (type)
    having type TYPE.  Assumes ada_is_aligner_type (TYPE). */
 
 char*
-ada_aligned_value_addr (type, valaddr)
-     struct type *type;
-     char *valaddr;
+ada_aligned_value_addr (struct type *type, char *valaddr)
 {
   if (ada_is_aligner_type (type)) 
     return ada_aligned_value_addr (TYPE_FIELD_TYPE (type, 0),
@@ -6962,8 +6654,7 @@ ada_aligned_value_addr (type, valaddr)
 /* The printed representation of an enumeration literal with encoded
    name NAME. The value is good to the next call of ada_enum_name. */
 const char*
-ada_enum_name (name)
-     const char* name;
+ada_enum_name (const char* name)
 {
   char* tmp;
 
@@ -7003,11 +6694,8 @@ ada_enum_name (name)
 }
 
 static struct value*
-evaluate_subexp (expect_type, exp, pos, noside)
-     struct type *expect_type;
-     struct expression *exp;
-     int *pos;
-     enum noside noside;
+evaluate_subexp (struct type *expect_type, struct expression *exp, int *pos,
+		 enum noside noside)
 {
   return (*exp->language_defn->evaluate_exp) (expect_type, exp, pos, noside);
 }
@@ -7017,9 +6705,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
    expression. */
 
 static struct value*
-evaluate_subexp_type (exp, pos)
-     struct expression* exp;
-     int* pos;
+evaluate_subexp_type (struct expression* exp, int* pos)
 {
   return (*exp->language_defn->evaluate_exp) 
     (NULL_TYPE, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
@@ -7029,8 +6715,7 @@ evaluate_subexp_type (exp, pos)
    value it wraps. */ 
 
 static struct value*
-unwrap_value (val)
-     struct value* val;
+unwrap_value (struct value* val)
 {
   struct type* type = check_typedef (VALUE_TYPE (val));
   if (ada_is_aligner_type (type))
@@ -7060,9 +6745,7 @@ unwrap_value (val)
 }
     
 static struct value*
-cast_to_fixed (type, arg)
-     struct type *type;
-     struct value* arg;
+cast_to_fixed (struct type *type, struct value* arg)
 {
   LONGEST val;
 
@@ -7083,8 +6766,7 @@ cast_to_fixed (type, arg)
 }
 
 static struct value*
-cast_from_fixed_to_double (arg)
-     struct value* arg;
+cast_from_fixed_to_double (struct value* arg)
 {
   DOUBLEST val = ada_fixed_to_float (VALUE_TYPE (arg),
 				     value_as_long (arg));
@@ -7094,9 +6776,7 @@ cast_from_fixed_to_double (arg)
 /* Coerce VAL as necessary for assignment to an lval of type TYPE, and 
  * return the converted value. */
 static struct value*
-coerce_for_assign (type, val)
-     struct type* type;
-     struct value* val;
+coerce_for_assign (struct type* type, struct value* val)
 {
   struct type* type2 = VALUE_TYPE (val);
   if (type == type2)
@@ -7124,11 +6804,8 @@ coerce_for_assign (type, val)
 }
 
 struct value*
-ada_evaluate_subexp (expect_type, exp, pos, noside)
-     struct type *expect_type;
-     struct expression *exp;
-     int *pos;
-     enum noside noside;
+ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
+		     int *pos, enum noside noside)
 {
   enum exp_opcode op;
   enum ada_attribute atr;
@@ -7898,8 +7575,7 @@ nosideret:
    Otherwise, return NULL. */
 
 static const char*
-fixed_type_info (type)
-     struct type *type;
+fixed_type_info (struct type *type)
 {
   const char* name = ada_type_name (type);
   enum type_code code = (type == NULL) ? TYPE_CODE_UNDEF : TYPE_CODE (type);
@@ -7922,8 +7598,7 @@ fixed_type_info (type)
 /* Returns non-zero iff TYPE represents an Ada fixed-point type. */
 
 int
-ada_is_fixed_point_type (type)
-     struct type *type;
+ada_is_fixed_point_type (struct type *type)
 {
   return fixed_type_info (type) != NULL;
 }
@@ -7933,8 +7608,7 @@ ada_is_fixed_point_type (type)
    delta cannot be determined. */
 
 DOUBLEST
-ada_delta (type)
-     struct type *type;
+ada_delta (struct type *type)
 {
   const char *encoding = fixed_type_info (type);
   long num, den;
@@ -7949,8 +7623,7 @@ ada_delta (type)
    factor ('SMALL value) associated with the type. */
 
 static DOUBLEST
-scaling_factor (type)
-     struct type *type;
+scaling_factor (struct type *type)
 {
   const char *encoding = fixed_type_info (type);
   unsigned long num0, den0, num1, den1;
@@ -7971,9 +7644,7 @@ scaling_factor (type)
    type TYPE, return its floating-point equivalent. */
 
 DOUBLEST
-ada_fixed_to_float (type, x)
-     struct type *type;
-     LONGEST x;
+ada_fixed_to_float (struct type *type, LONGEST x)
 {
   return (DOUBLEST) x * scaling_factor (type);
 }
@@ -7982,9 +7653,7 @@ ada_fixed_to_float (type, x)
    corresponding to the value X. */
 
 LONGEST
-ada_float_to_fixed (type, x)
-     struct type *type;
-     DOUBLEST x;
+ada_float_to_fixed (struct type *type, DOUBLEST x)
 {
   return (LONGEST) (x / scaling_factor (type) + 0.5);
 }
@@ -7995,8 +7664,7 @@ ada_float_to_fixed (type, x)
 /* Non-zero iff TYPE represents one of the special VAX floating-point
    types. */
 int
-ada_is_vax_floating_type (type)
-     struct type* type;
+ada_is_vax_floating_type (struct type* type)
 {
   int name_len = 
     (ada_type_name (type) == NULL) ? 0 : strlen (ada_type_name (type));
@@ -8010,8 +7678,7 @@ ada_is_vax_floating_type (type)
 /* The type of special VAX floating-point type this is, assuming
    ada_is_vax_floating_point */
 int
-ada_vax_float_type_suffix (type)
-     struct type* type;
+ada_vax_float_type_suffix (struct type* type)
 {
   return ada_type_name (type)[strlen (ada_type_name (type))-1];
 }
@@ -8020,9 +7687,7 @@ ada_vax_float_type_suffix (type)
    VAX floating-point values of the type represented by TYPE.  Assumes
    ada_is_vax_floating_type (TYPE). */
 struct value*
-ada_vax_float_print_function (type)
-
-     struct type* type;
+ada_vax_float_print_function (struct type* type)
 {
   switch (ada_vax_float_type_suffix (type)) {
   case 'F':
@@ -8049,12 +7714,7 @@ ada_vax_float_print_function (type)
    not alter *PX and *PNEW_K if unsuccessful. */
 
 static int
-scan_discrim_bound (str, k, dval, px, pnew_k)
-     char *str;
-     int k;
-     struct value* dval;
-     LONGEST *px;
-     int *pnew_k;
+scan_discrim_bound (char *, int k, struct value* dval, LONGEST *px, int *pnew_k)
 {
   static char *bound_buffer = NULL;
   static size_t bound_buffer_len = 0;
@@ -8095,9 +7755,7 @@ scan_discrim_bound (str, k, dval, px, pnew_k)
    no such variable found, then if ERR_MSG is null, returns 0, and
    otherwise causes an error with message ERR_MSG. */
 static struct value*
-get_var_value (name, err_msg)
-     char* name;
-     char* err_msg;
+get_var_value (char* name, char* err_msg)
 {
   struct symbol** syms;
   struct block** blocks;
@@ -8121,10 +7779,7 @@ get_var_value (name, err_msg)
    no such variable found, then if ERR_MSG is null, returns 0, and sets
    *FLAG to 0.  If successful, sets *FLAG to 1. */
 LONGEST
-get_int_var_value (name, err_msg, flag)
-     char* name;
-     char* err_msg;
-     int* flag;
+get_int_var_value (char* name, char* err_msg, int* flag)
 {
   struct value* var_val = get_var_value (name, err_msg);
   
@@ -8152,10 +7807,7 @@ get_int_var_value (name, err_msg, flag)
    the named range type. */
 
 static struct type*
-to_fixed_range_type (name, dval, objfile)
-     char *name;
-     struct value *dval;
-     struct objfile *objfile;
+to_fixed_range_type (char *name, struct value *dval, struct objfile *objfile)
 {
   struct type *raw_type = ada_find_any_type (name);
   struct type *base_type;
@@ -8229,8 +7881,7 @@ to_fixed_range_type (name, dval, objfile)
 
 /* True iff NAME is the name of a range type. */
 int
-ada_is_range_type_name (name)
-     const char* name;
+ada_is_range_type_name (const char* name)
 {
   return (name != NULL && strstr (name, "___XD"));
 }	  
@@ -8240,8 +7891,7 @@ ada_is_range_type_name (name)
 
 /* True iff TYPE is an Ada modular type. */
 int
-ada_is_modular_type (type)
-     struct type* type;
+ada_is_modular_type (struct type* type)
 {
   /* FIXME: base_type should be declared in gdbtypes.h, implemented in
      valarith.c */  
@@ -8254,8 +7904,7 @@ ada_is_modular_type (type)
 
 /* Assuming ada_is_modular_type (TYPE), the modulus of TYPE. */
 LONGEST
-ada_modulus (type)
-     struct type* type;
+ada_modulus (struct type* type)
 {
     return TYPE_HIGH_BOUND (type) + 1;
 }
@@ -8486,9 +8135,7 @@ the \"run\" command (q.v.).");
    debugging information supplied by the compiler.  fnf@cygnus.com */
 
 static struct type *
-ada_create_fundamental_type (objfile, typeid)
-     struct objfile *objfile;
-     int typeid;
+ada_create_fundamental_type (struct objfile *objfile, int typeid)
 {
   struct type *type = NULL;
 

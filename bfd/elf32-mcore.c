@@ -29,8 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf/mcore.h"
 #include <assert.h>
 
-#define	USE_RELA	/* Only USE_REL is actually significant, but this is
-			   here are a reminder...  */
+/* RELA relocs are used here...  */
 
 static void mcore_elf_howto_init
   PARAMS ((void));

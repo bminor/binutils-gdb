@@ -27,7 +27,6 @@
 #include "arch-utils.h"
 #include "frame.h"
 #include "inferior.h"
-#include "obstack.h"
 #include "target.h"
 #include "value.h"
 #include "bfd.h"

@@ -415,17 +415,17 @@ extern void set_gdbarch_virtual_frame_pointer (struct gdbarch *gdbarch, gdbarch_
 #endif
 #endif
 
-extern int gdbarch_register_read_p (struct gdbarch *gdbarch);
+extern int gdbarch_pseudo_register_read_p (struct gdbarch *gdbarch);
 
-typedef void (gdbarch_register_read_ftype) (struct gdbarch *gdbarch, int regnum, char *buf);
-extern void gdbarch_register_read (struct gdbarch *gdbarch, int regnum, char *buf);
-extern void set_gdbarch_register_read (struct gdbarch *gdbarch, gdbarch_register_read_ftype *register_read);
+typedef void (gdbarch_pseudo_register_read_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, void *buf);
+extern void gdbarch_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, void *buf);
+extern void set_gdbarch_pseudo_register_read (struct gdbarch *gdbarch, gdbarch_pseudo_register_read_ftype *pseudo_register_read);
 
-extern int gdbarch_register_write_p (struct gdbarch *gdbarch);
+extern int gdbarch_pseudo_register_write_p (struct gdbarch *gdbarch);
 
-typedef void (gdbarch_register_write_ftype) (struct gdbarch *gdbarch, int regnum, char *buf);
-extern void gdbarch_register_write (struct gdbarch *gdbarch, int regnum, char *buf);
-extern void set_gdbarch_register_write (struct gdbarch *gdbarch, gdbarch_register_write_ftype *register_write);
+typedef void (gdbarch_pseudo_register_write_ftype) (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, const void *buf);
+extern void gdbarch_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache, int cookednum, const void *buf);
+extern void set_gdbarch_pseudo_register_write (struct gdbarch *gdbarch, gdbarch_pseudo_register_write_ftype *pseudo_register_write);
 
 extern int gdbarch_num_regs (struct gdbarch *gdbarch);
 extern void set_gdbarch_num_regs (struct gdbarch *gdbarch, int num_regs);
@@ -1288,88 +1288,6 @@ extern void set_gdbarch_value_to_register (struct gdbarch *gdbarch, gdbarch_valu
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (VALUE_TO_REGISTER)
 #define VALUE_TO_REGISTER(type, regnum, from, to) (gdbarch_value_to_register (current_gdbarch, type, regnum, from, to))
-#endif
-#endif
-
-/* This function is called when the value of a pseudo-register needs to
-   be updated.  Typically it will be defined on a per-architecture
-   basis. */
-
-#if defined (FETCH_PSEUDO_REGISTER)
-/* Legacy for systems yet to multi-arch FETCH_PSEUDO_REGISTER */
-#if !defined (FETCH_PSEUDO_REGISTER_P)
-#define FETCH_PSEUDO_REGISTER_P() (1)
-#endif
-#endif
-
-/* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (FETCH_PSEUDO_REGISTER_P)
-#define FETCH_PSEUDO_REGISTER_P() (0)
-#endif
-
-extern int gdbarch_fetch_pseudo_register_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FETCH_PSEUDO_REGISTER_P)
-#error "Non multi-arch definition of FETCH_PSEUDO_REGISTER"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FETCH_PSEUDO_REGISTER_P)
-#define FETCH_PSEUDO_REGISTER_P() (gdbarch_fetch_pseudo_register_p (current_gdbarch))
-#endif
-
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (FETCH_PSEUDO_REGISTER)
-#define FETCH_PSEUDO_REGISTER(regnum) (internal_error (__FILE__, __LINE__, "FETCH_PSEUDO_REGISTER"), 0)
-#endif
-
-typedef void (gdbarch_fetch_pseudo_register_ftype) (int regnum);
-extern void gdbarch_fetch_pseudo_register (struct gdbarch *gdbarch, int regnum);
-extern void set_gdbarch_fetch_pseudo_register (struct gdbarch *gdbarch, gdbarch_fetch_pseudo_register_ftype *fetch_pseudo_register);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FETCH_PSEUDO_REGISTER)
-#error "Non multi-arch definition of FETCH_PSEUDO_REGISTER"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FETCH_PSEUDO_REGISTER)
-#define FETCH_PSEUDO_REGISTER(regnum) (gdbarch_fetch_pseudo_register (current_gdbarch, regnum))
-#endif
-#endif
-
-/* This function is called when the value of a pseudo-register needs to
-   be set or stored.  Typically it will be defined on a
-   per-architecture basis. */
-
-#if defined (STORE_PSEUDO_REGISTER)
-/* Legacy for systems yet to multi-arch STORE_PSEUDO_REGISTER */
-#if !defined (STORE_PSEUDO_REGISTER_P)
-#define STORE_PSEUDO_REGISTER_P() (1)
-#endif
-#endif
-
-/* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (STORE_PSEUDO_REGISTER_P)
-#define STORE_PSEUDO_REGISTER_P() (0)
-#endif
-
-extern int gdbarch_store_pseudo_register_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (STORE_PSEUDO_REGISTER_P)
-#error "Non multi-arch definition of STORE_PSEUDO_REGISTER"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (STORE_PSEUDO_REGISTER_P)
-#define STORE_PSEUDO_REGISTER_P() (gdbarch_store_pseudo_register_p (current_gdbarch))
-#endif
-
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (STORE_PSEUDO_REGISTER)
-#define STORE_PSEUDO_REGISTER(regnum) (internal_error (__FILE__, __LINE__, "STORE_PSEUDO_REGISTER"), 0)
-#endif
-
-typedef void (gdbarch_store_pseudo_register_ftype) (int regnum);
-extern void gdbarch_store_pseudo_register (struct gdbarch *gdbarch, int regnum);
-extern void set_gdbarch_store_pseudo_register (struct gdbarch *gdbarch, gdbarch_store_pseudo_register_ftype *store_pseudo_register);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (STORE_PSEUDO_REGISTER)
-#error "Non multi-arch definition of STORE_PSEUDO_REGISTER"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (STORE_PSEUDO_REGISTER)
-#define STORE_PSEUDO_REGISTER(regnum) (gdbarch_store_pseudo_register (current_gdbarch, regnum))
 #endif
 #endif
 

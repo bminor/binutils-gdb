@@ -3641,6 +3641,77 @@
 }
 
 
+// Helper:
+//
+// Load a double word FP value using 2 32-bit memory cycles a la MIPS II
+// or MIPS32.  do_load cannot be used instead because it returns an
+// unsigned_word, which is limited to the size of the machine's registers.
+//
+
+:function:::unsigned64:do_load_double:address_word base, address_word offset
+*mipsII:
+*mips32:
+{
+  int bigendian = (BigEndianCPU ? ! ReverseEndian : ReverseEndian);
+  address_word vaddr;
+  address_word paddr;
+  int uncached;
+  unsigned64 memval;
+  unsigned64 v;
+
+  vaddr = loadstore_ea (SD_, base, offset);
+  if ((vaddr & AccessLength_DOUBLEWORD) != 0)
+    {
+      SIM_CORE_SIGNAL (SD, STATE_CPU (SD, 0), cia, read_map,
+		       AccessLength_DOUBLEWORD + 1, vaddr, read_transfer,
+		       sim_core_unaligned_signal);
+    }
+  AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &uncached, isTARGET,
+		      isREAL);
+  LoadMemory (&memval, NULL, uncached, AccessLength_WORD, paddr, vaddr,
+	      isDATA, isREAL);
+  v = (unsigned64)memval;
+  LoadMemory (&memval, NULL, uncached, AccessLength_WORD, paddr + 4, vaddr + 4,
+	      isDATA, isREAL);
+  return (bigendian ? ((v << 32) | memval) : (v | (memval << 32)));
+}
+
+
+// Helper:
+//
+// Store a double word FP value using 2 32-bit memory cycles a la MIPS II
+// or MIPS32.  do_load cannot be used instead because it returns an
+// unsigned_word, which is limited to the size of the machine's registers.
+//
+
+:function:::void:do_store_double:address_word base, address_word offset, unsigned64 v
+*mipsII:
+*mips32:
+{
+  int bigendian = (BigEndianCPU ? ! ReverseEndian : ReverseEndian);
+  address_word vaddr;
+  address_word paddr;
+  int uncached;
+  unsigned64 memval;
+
+  vaddr = loadstore_ea (SD_, base, offset);
+  if ((vaddr & AccessLength_DOUBLEWORD) != 0)
+    {
+      SIM_CORE_SIGNAL (SD, STATE_CPU(SD, 0), cia, read_map,
+		       AccessLength_DOUBLEWORD + 1, vaddr, write_transfer,
+		       sim_core_unaligned_signal);
+    }
+  AddressTranslation (vaddr, isDATA, isSTORE, &paddr, &uncached, isTARGET,
+		      isREAL);
+  memval = (bigendian ? (v >> 32) : (v & 0xFFFFFFFF));
+  StoreMemory (uncached, AccessLength_WORD, memval, 0, paddr, vaddr,
+	       isREAL);
+  memval = (bigendian ? (v & 0xFFFFFFFF) : (v >> 32));
+  StoreMemory (uncached, AccessLength_WORD, memval, 0, paddr + 4, vaddr + 4,
+	       isREAL);
+}
+
+
 010001,10,3.FMT,00000,5.FS,5.FD,000101:COP1:32,f::ABS.fmt
 "abs.%s<FMT> f<FD>, f<FS>"
 *mipsI:
@@ -4186,13 +4257,21 @@
 }
 
 
-110101,5.BASE,5.FT,16.OFFSET:COP1:32,f::LDC1
+110101,5.BASE,5.FT,16.OFFSET:COP1:32,f::LDC1a
 "ldc1 f<FT>, <OFFSET>(r<BASE>)"
 *mipsII:
+*mips32:
+{
+  check_fpu (SD_);
+  COP_LD (1, FT, do_load_double (SD_, GPR[BASE], EXTEND16 (OFFSET)));
+}
+
+
+110101,5.BASE,5.FT,16.OFFSET:COP1:32,f::LDC1b
+"ldc1 f<FT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
 *mipsV:
-*mips32:
 *mips64:
 *vr4100:
 *vr5000:
@@ -4650,13 +4729,21 @@
 }
 
 
-111101,5.BASE,5.FT,16.OFFSET:COP1:32,f::SDC1
+111101,5.BASE,5.FT,16.OFFSET:COP1:32,f::SDC1a
 "sdc1 f<FT>, <OFFSET>(r<BASE>)"
 *mipsII:
+*mips32:
+{
+  check_fpu (SD_);
+  do_store_double (SD_, GPR[BASE], EXTEND16 (OFFSET), COP_SD (1, FT));
+}
+
+
+111101,5.BASE,5.FT,16.OFFSET:COP1:32,f::SDC1b
+"sdc1 f<FT>, <OFFSET>(r<BASE>)"
 *mipsIII:
 *mipsIV:
 *mipsV:
-*mips32:
 *mips64:
 *vr4100:
 *vr5000:

@@ -1,23 +1,23 @@
 /* BFD back-end for ns32k a.out-ish binaries.
-   Copyright 1990, 1991, 1992, 1994, 1995, 1996, 1998, 2000, 2001
+   Copyright 1990, 1991, 1992, 1994, 1995, 1996, 1998, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Contributed by Ian Dall (idall@eleceng.adelaide.edu.au).
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define BYTES_IN_WORD 4
 
@@ -49,16 +49,16 @@ void bfd_ns32k_arch PARAMS ((void));
 
 #define MY(OP) MYNS(OP)
 
-#define MY_swap_std_reloc_in MY(swap_std_reloc_in)
+#define MY_swap_std_reloc_in  MY(swap_std_reloc_in)
 #define MY_swap_std_reloc_out MY(swap_std_reloc_out)
 
 static void
-MY_swap_std_reloc_in PARAMS ((bfd *abfd, struct reloc_std_external *bytes,
-			      arelent *cache_ptr, asymbol **symbols,
-			      bfd_size_type symcount));
+MY_swap_std_reloc_in PARAMS ((bfd *, struct reloc_std_external *,
+			      arelent *, asymbol **,
+			      bfd_size_type));
 static void
-MY_swap_std_reloc_out PARAMS ((bfd *abfd, arelent *g,
-			       struct reloc_std_external *natptr));
+MY_swap_std_reloc_out PARAMS ((bfd *, arelent *,
+			       struct reloc_std_external *));
 reloc_howto_type *
 MY(reloc_howto) PARAMS ((bfd *, struct reloc_std_external *,
 			 int *, int *, int *));
@@ -94,47 +94,48 @@ MY(put_reloc) PARAMS ((bfd *, int, int, bfd_vma, reloc_howto_type *,
 
    In addition, for historical reasons the encoding of the relocation types
    in the a.out format relocation entries is such that even the relocation
-   methods which are standard are not encoded the standard way. */
+   methods which are standard are not encoded the standard way.  */
 
 reloc_howto_type MY(howto_table)[] =
   {
+    /* type           rs   size bsz  pcrel bitpos ovrf                  sf name          part_inpl readmask setmask pcdone */
     /* ns32k immediate operands.  */
-    HOWTO (BFD_RELOC_NS32K_IMM_8, 0, 0, 8, false, 0, true,
+    HOWTO (BFD_RELOC_NS32K_IMM_8, 0, 0, 8, false, 0, complain_overflow_signed,
 	   _bfd_ns32k_reloc_imm, "NS32K_IMM_8",
 	   true, 0x000000ff,0x000000ff, false),
-    HOWTO (BFD_RELOC_NS32K_IMM_16, 0, 1, 16, false, 0, true,
+    HOWTO (BFD_RELOC_NS32K_IMM_16, 0, 1, 16, false, 0, complain_overflow_signed,
 	   _bfd_ns32k_reloc_imm,  "NS32K_IMM_16",
 	   true, 0x0000ffff,0x0000ffff, false),
-    HOWTO (BFD_RELOC_NS32K_IMM_32, 0, 2, 32, false, 0, true,
+    HOWTO (BFD_RELOC_NS32K_IMM_32, 0, 2, 32, false, 0, complain_overflow_signed,
 	   _bfd_ns32k_reloc_imm, "NS32K_IMM_32",
 	   true, 0xffffffff,0xffffffff, false),
-    HOWTO (BFD_RELOC_NS32K_IMM_8_PCREL, 0, 0, 8, true, 0, false,
+    HOWTO (BFD_RELOC_NS32K_IMM_8_PCREL, 0, 0, 8, true, 0, complain_overflow_signed,
 	   _bfd_ns32k_reloc_imm, "PCREL_NS32K_IMM_8",
 	   true, 0x000000ff, 0x000000ff, false),
-    HOWTO (BFD_RELOC_NS32K_IMM_16_PCREL, 0, 1, 16, true, 0, false,
+    HOWTO (BFD_RELOC_NS32K_IMM_16_PCREL, 0, 1, 16, true, 0, complain_overflow_signed,
 	   _bfd_ns32k_reloc_imm, "PCREL_NS32K_IMM_16",
 	   true, 0x0000ffff,0x0000ffff, false),
-    HOWTO (BFD_RELOC_NS32K_IMM_32_PCREL, 0, 2, 32, true, 0, false,
+    HOWTO (BFD_RELOC_NS32K_IMM_32_PCREL, 0, 2, 32, true, 0, complain_overflow_signed,
 	   _bfd_ns32k_reloc_imm, "PCREL_NS32K_IMM_32",
 	   true, 0xffffffff,0xffffffff, false),
 
     /* ns32k displacements.  */
-    HOWTO (BFD_RELOC_NS32K_DISP_8, 0, 0, 8, false, 0, true,
+    HOWTO (BFD_RELOC_NS32K_DISP_8, 0, 0, 7, false, 0, complain_overflow_signed,
 	   _bfd_ns32k_reloc_disp, "NS32K_DISP_8",
 	   true, 0x000000ff,0x000000ff, false),
-    HOWTO (BFD_RELOC_NS32K_DISP_16, 0, 1, 16, false, 0, true,
+    HOWTO (BFD_RELOC_NS32K_DISP_16, 0, 1, 14, false, 0, complain_overflow_signed,
 	   _bfd_ns32k_reloc_disp, "NS32K_DISP_16",
 	   true, 0x0000ffff, 0x0000ffff, false),
-    HOWTO (BFD_RELOC_NS32K_DISP_32, 0, 2, 32, false, 0, true,
+    HOWTO (BFD_RELOC_NS32K_DISP_32, 0, 2, 30, false, 0, complain_overflow_signed,
 	   _bfd_ns32k_reloc_disp, "NS32K_DISP_32",
 	   true, 0xffffffff, 0xffffffff, false),
-    HOWTO (BFD_RELOC_NS32K_DISP_8_PCREL, 0, 0, 8, true, 0, false,
+    HOWTO (BFD_RELOC_NS32K_DISP_8_PCREL, 0, 0, 7, true, 0, complain_overflow_signed,
 	   _bfd_ns32k_reloc_disp, "PCREL_NS32K_DISP_8",
 	   true, 0x000000ff,0x000000ff, false),
-    HOWTO (BFD_RELOC_NS32K_DISP_16_PCREL, 0, 1, 16, true, 0, false,
+    HOWTO (BFD_RELOC_NS32K_DISP_16_PCREL, 0, 1, 14, true, 0, complain_overflow_signed,
 	   _bfd_ns32k_reloc_disp, "PCREL_NS32K_DISP_16",
 	   true, 0x0000ffff,0x0000ffff, false),
-    HOWTO (BFD_RELOC_NS32K_DISP_32_PCREL, 0, 2, 32, true, 0, false,
+    HOWTO (BFD_RELOC_NS32K_DISP_32_PCREL, 0, 2, 30, true, 0, complain_overflow_signed,
 	   _bfd_ns32k_reloc_disp, "PCREL_NS32K_DISP_32",
 	   true, 0xffffffff,0xffffffff, false),
 
@@ -355,7 +356,7 @@ _bfd_ns32k_relocate_contents (howto, input_bfd, relocation, location)
 {
   int r_ns32k_type = (howto - MY(howto_table)) / 6;
   bfd_vma (*get_data) PARAMS ((bfd_byte *, int));
-  int (*put_data) PARAMS ((bfd_vma, bfd_byte *, int));
+  void (*put_data) PARAMS ((bfd_vma, bfd_byte *, int));
 
   switch (r_ns32k_type)
     {

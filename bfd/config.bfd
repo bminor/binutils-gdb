@@ -128,6 +128,10 @@ case "${targ}" in
     targ_selvecs="bfd_elf32_littlearm_vec bfd_elf32_bigarm_vec"
     targ_underscore=yes
     ;;
+  arm-*-nto* | nto*arm*)
+    targ_defvec=bfd_elf32_littlearmqnx_vec
+    targ_selvecs=bfd_elf32_bigarmqnx_vec
+    ;;
   arm-*-riscix*)
     targ_defvec=riscix_vec
     ;;
@@ -416,6 +420,7 @@ case "${targ}" in
   i[3456]86-*-linux-gnu*)
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs="i386linux_vec bfd_efi_app_ia32_vec"
+    targ64_selvecs=bfd_elf64_x86_64_vec
     ;;
 #ifdef BFD64
   x86_64-*-freebsd*)
@@ -744,21 +749,23 @@ case "${targ}" in
     ;;
 #ifdef BFD64
   mips64*el-*-linux*)
-    targ_defvec=bfd_elf32_tradlittlemips_vec
-    targ_selvecs="bfd_elf32_tradbigmips_vec bfd_elf64_tradlittlemips_vec bfd_elf64_tradbigmips_vec"
+    targ_defvec=bfd_elf32_ntradlittlemips_vec
+    targ_selvecs="bfd_elf32_ntradbigmips_vec bfd_elf32_tradlittlemips_vec bfd_elf32_tradbigmips_vec bfd_elf64_tradlittlemips_vec bfd_elf64_tradbigmips_vec"
     ;;
   mips64*-*-linux*)
-    targ_defvec=bfd_elf32_tradbigmips_vec
-    targ_selvecs="bfd_elf32_tradlittlemips_vec bfd_elf64_tradbigmips_vec bfd_elf64_tradlittlemips_vec"
+    targ_defvec=bfd_elf32_ntradbigmips_vec
+    targ_selvecs="bfd_elf32_ntradlittlemips_vec bfd_elf32_tradbigmips_vec bfd_elf32_tradlittlemips_vec bfd_elf64_tradbigmips_vec bfd_elf64_tradlittlemips_vec"
     ;;
 #endif
   mips*el-*-linux*)
     targ_defvec=bfd_elf32_tradlittlemips_vec
-    targ_selvecs="bfd_elf32_tradbigmips_vec bfd_elf64_tradlittlemips_vec bfd_elf64_tradbigmips_vec ecoff_little_vec ecoff_big_vec"
+    targ_selvecs="bfd_elf32_tradbigmips_vec ecoff_little_vec ecoff_big_vec"
+    targ64_selvecs="bfd_elf32_ntradlittlemips_vec bfd_elf64_tradlittlemips_vec bfd_elf32_ntradbigmips_vec bfd_elf64_tradbigmips_vec"
     ;;
   mips*-*-linux*)
     targ_defvec=bfd_elf32_tradbigmips_vec
-    targ_selvecs="bfd_elf32_tradlittlemips_vec bfd_elf64_tradbigmips_vec bfd_elf64_tradlittlemips_vec ecoff_big_vec ecoff_little_vec"
+    targ_selvecs="bfd_elf32_tradlittlemips_vec ecoff_big_vec ecoff_little_vec"
+    targ64_selvecs="bfd_elf32_ntradbigmips_vec bfd_elf64_tradbigmips_vec bfd_elf32_ntradlittlemips_vec bfd_elf64_tradlittlemips_vec"
     ;;
 #ifdef BFD64
   mmix-*-*)
@@ -862,6 +869,14 @@ case "${targ}" in
   powerpc-*-netware*)
     targ_defvec=bfd_elf32_powerpc_vec
     targ_selvecs="nlm32_powerpc_vec rs6000coff_vec"
+    ;;
+  powerpc-*-nto*)
+    targ_defvec=bfd_elf32_powerpcqnx_vec
+    targ_selvecs="rs6000coff_vec bfd_elf32_powerpcleqnx_vec ppcboot_vec"
+    ;;
+  powerpcle-*-nto*)
+    targ_defvec=bfd_elf32_powerpcleqnx_vec
+    targ_selvecs="rs6000coff_vec bfd_elf32_powerpcqnx_vec ppcboot_vec"
     ;;
   powerpcle-*-elf* | powerpcle-*-sysv4* | powerpcle-*-eabi* | \
   powerpcle-*-solaris2* | powerpcle-*-linux-gnu* | powerpcle-*-vxworks* |\
@@ -1176,7 +1191,7 @@ esac
 # to be used on an arbitrary ELF file for anything other than
 # relocation information.
 case "${targ_defvec} ${targ_selvecs}" in
-  *bfd_elf64*)
+  *bfd_elf64* | *bfd_elf32_n*mips*)
     targ_selvecs="${targ_selvecs} bfd_elf64_little_generic_vec bfd_elf64_big_generic_vec bfd_elf32_little_generic_vec bfd_elf32_big_generic_vec"
     ;;
   *bfd_elf32*)

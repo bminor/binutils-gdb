@@ -83,6 +83,11 @@
 	remove redundant breakpoint info on "-break-insert" and "-break-watch".
 	The event now supplies everything that is needed.
 
+2002-07-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-cmd-var.c: Include "gdb_string.h".
+	* mi-cmd-disas.c: Ditto.
+
 2002-06-17  Keith Seitz  <keiths@redhat.com>
 
 	* gdbmi.texinfo: Update command examples with real MI behavior.

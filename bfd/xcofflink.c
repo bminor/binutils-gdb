@@ -5887,7 +5887,10 @@ xcoff_write_global_symbol (h, inf)
       isym.n_value = (h->root.u.def.section->output_section->vma
 		      + h->root.u.def.section->output_offset
 		      + h->root.u.def.value);
-      isym.n_scnum = h->root.u.def.section->output_section->target_index;
+      if (bfd_is_abs_section (h->root.u.def.section->output_section))
+	isym.n_scnum = N_ABS;
+      else
+	isym.n_scnum = h->root.u.def.section->output_section->target_index;
       isym.n_sclass = C_HIDEXT;
       aux.x_csect.x_smtyp = XTY_SD;
 

@@ -2724,7 +2724,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_fake_sections	elf_hppa_fake_sections
 #define elf_backend_add_symbol_hook	elf_hppa_add_symbol_hook
 
-#define elf_backend_relocate_section	    elf_hppa_relocate_section
+#define elf_backend_relocate_section	elf_hppa_relocate_section
 
 #define bfd_elf64_bfd_final_link	elf_hppa_final_link
 
@@ -2770,6 +2770,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_type_change_ok true
 #define elf_backend_get_symbol_type	     elf64_hppa_elf_get_symbol_type
 #define elf_backend_reloc_type_class	     elf64_hppa_reloc_type_class
+#define elf_backend_rela_normal		     1
 
 #include "elf64-target.h"
 

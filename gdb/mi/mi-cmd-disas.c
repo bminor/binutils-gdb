@@ -25,6 +25,7 @@
 #include "mi-cmds.h"
 #include "mi-getopt.h"
 #include "ui-out.h"
+#include "gdb_string.h"
 
 /* Disassemble functions. FIXME: these do not really belong here. We
    should get rid of all the duplicate code in gdb that does the same

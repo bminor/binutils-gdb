@@ -931,8 +931,7 @@ m32r_elf_final_sda_base (output_bfd, info, error_message, psb)
 
 /* Relocate an M32R/D ELF section.
    There is some attempt to make this function usable for many architectures,
-   both USE_REL and USE_RELA ['twould be nice if such a critter existed],
-   if only to serve as a learning tool.
+   both for RELA and REL type relocs, if only to serve as a learning tool.
 
    The RELOCATE_SECTION function is called by the new ELF backend linker
    to handle the relocations for a section.

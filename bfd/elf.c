@@ -2,21 +2,21 @@
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software 
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software 
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*  SECTION
 
@@ -2443,7 +2443,20 @@ elf_fake_sections (abfd, asect, failedptrarg)
   if ((asect->flags & SEC_GROUP) == 0 && elf_group_name (asect) != NULL)
     this_hdr->sh_flags |= SHF_GROUP;
   if ((asect->flags & SEC_THREAD_LOCAL) != 0)
-    this_hdr->sh_flags |= SHF_TLS;
+    {
+      this_hdr->sh_flags |= SHF_TLS;
+      if (asect->_raw_size == 0 && (asect->flags & SEC_HAS_CONTENTS) == 0)
+	{
+	  struct bfd_link_order *o;
+                                          
+	  this_hdr->sh_size = 0;
+	  for (o = asect->link_order_head; o != NULL; o = o->next)
+	    if (this_hdr->sh_size < o->offset + o->size)
+	      this_hdr->sh_size = o->offset + o->size;
+	  if (this_hdr->sh_size)
+	    this_hdr->sh_type = SHT_NOBITS;
+	}
+    }
 
   /* Check for processor-specific section types.  */
   if (bed->elf_backend_fake_sections
@@ -4813,9 +4826,11 @@ copy_private_bfd_data (ibfd, obfd)
 
 	      /* The Solaris native linker always sets p_paddr to 0.
 		 We try to catch that case here, and set it to the
-		 correct value.  */
+		 correct value.  Note - some backends require that
+		 p_paddr be left as zero.  */
 	      if (segment->p_paddr == 0
 		  && segment->p_vaddr != 0
+		  && (! bed->want_p_paddr_set_to_zero)
 		  && isec == 0
 		  && output_section->lma != 0
 		  && (output_section->vma == (segment->p_vaddr
@@ -4832,7 +4847,10 @@ copy_private_bfd_data (ibfd, obfd)
 		 LMA address of the output section.  */
 	      if (IS_CONTAINED_BY_LMA (output_section, segment, map->p_paddr)
 		  || IS_CONTAINED_BY_FILEPOS (section, segment, bed)
-		  || IS_COREFILE_NOTE (segment, section))
+		  || IS_COREFILE_NOTE (segment, section)
+		  || (bed->want_p_paddr_set_to_zero &&
+		      IS_CONTAINED_BY_VMA (output_section, segment))
+                )
 		{
 		  if (matching_lma == 0)
 		    matching_lma = output_section->lma;

@@ -193,19 +193,16 @@ static boolean
 ihex_mkobject (abfd)
      bfd *abfd;
 {
-  if (abfd->tdata.ihex_data == NULL)
-    {
-      struct ihex_data_struct *tdata;
-      bfd_size_type amt = sizeof (struct ihex_data_struct);
+  struct ihex_data_struct *tdata;
+  bfd_size_type amt = sizeof (struct ihex_data_struct);
 
-      tdata = (struct ihex_data_struct *) bfd_alloc (abfd, amt);
-      if (tdata == NULL)
-	return false;
-      abfd->tdata.ihex_data = tdata;
-      tdata->head = NULL;
-      tdata->tail = NULL;
-    }
+  tdata = (struct ihex_data_struct *) bfd_alloc (abfd, amt);
+  if (tdata == NULL)
+    return false;
 
+  abfd->tdata.ihex_data = tdata;
+  tdata->head = NULL;
+  tdata->tail = NULL;
   return true;
 }
 
@@ -513,6 +510,7 @@ static const bfd_target *
 ihex_object_p (abfd)
      bfd *abfd;
 {
+  PTR tdata_save;
   bfd_byte b[9];
   unsigned int i;
   unsigned int type;
@@ -551,9 +549,14 @@ ihex_object_p (abfd)
     }
 
   /* OK, it looks like it really is an Intel Hex file.  */
-  if (! ihex_mkobject (abfd)
-      || ! ihex_scan (abfd))
-    return NULL;
+  tdata_save = abfd->tdata.any;
+  if (! ihex_mkobject (abfd) || ! ihex_scan (abfd))
+    {
+      if (abfd->tdata.any != tdata_save && abfd->tdata.any != NULL)
+	bfd_release (abfd, abfd->tdata.any);
+      abfd->tdata.any = tdata_save;
+      return NULL;
+    }
 
   return abfd->xvec;
 }

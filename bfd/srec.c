@@ -230,22 +230,23 @@ static boolean
 srec_mkobject (abfd)
      bfd *abfd;
 {
+  bfd_size_type amt;
+  tdata_type *tdata;
+
   srec_init ();
 
-  if (abfd->tdata.srec_data == NULL)
-    {
-      bfd_size_type amt = sizeof (tdata_type);
-      tdata_type *tdata = (tdata_type *) bfd_alloc (abfd, amt);
-      if (tdata == NULL)
-	return false;
-      abfd->tdata.srec_data = tdata;
-      tdata->type = 1;
-      tdata->head = NULL;
-      tdata->tail = NULL;
-      tdata->symbols = NULL;
-      tdata->symtail = NULL;
-      tdata->csymbols = NULL;
-    }
+  amt = sizeof (tdata_type);
+  tdata = (tdata_type *) bfd_alloc (abfd, amt);
+  if (tdata == NULL)
+    return false;
+    
+  abfd->tdata.srec_data = tdata;
+  tdata->type = 1;
+  tdata->head = NULL;
+  tdata->tail = NULL;
+  tdata->symbols = NULL;
+  tdata->symtail = NULL;
+  tdata->csymbols = NULL;
 
   return true;
 }
@@ -640,6 +641,7 @@ static const bfd_target *
 srec_object_p (abfd)
      bfd *abfd;
 {
+  PTR tdata_save;
   bfd_byte b[4];
 
   srec_init ();
@@ -654,9 +656,14 @@ srec_object_p (abfd)
       return NULL;
     }
 
-  if (! srec_mkobject (abfd)
-      || ! srec_scan (abfd))
-    return NULL;
+  tdata_save = abfd->tdata.any;
+  if (! srec_mkobject (abfd) || ! srec_scan (abfd))
+    {
+      if (abfd->tdata.any != tdata_save && abfd->tdata.any != NULL)
+	bfd_release (abfd, abfd->tdata.any);
+      abfd->tdata.any = tdata_save;
+      return NULL;
+    }
 
   if (abfd->symcount > 0)
     abfd->flags |= HAS_SYMS;
@@ -670,6 +677,7 @@ static const bfd_target *
 symbolsrec_object_p (abfd)
      bfd *abfd;
 {
+  PTR tdata_save;
   char b[2];
 
   srec_init ();
@@ -684,9 +692,14 @@ symbolsrec_object_p (abfd)
       return NULL;
     }
 
-  if (! srec_mkobject (abfd)
-      || ! srec_scan (abfd))
-    return NULL;
+  tdata_save = abfd->tdata.any;
+  if (! srec_mkobject (abfd) || ! srec_scan (abfd))
+    {
+      if (abfd->tdata.any != tdata_save && abfd->tdata.any != NULL)
+	bfd_release (abfd, abfd->tdata.any);
+      abfd->tdata.any = tdata_save;
+      return NULL;
+    }
 
   if (abfd->symcount > 0)
     abfd->flags |= HAS_SYMS;

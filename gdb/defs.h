@@ -209,7 +209,7 @@ enum language
     language_c,			/* C */
     language_cplus,		/* C++ */
     language_java,		/* Java */
-    language_chill,		/* Chill */
+    /* OBSOLETE language_chill,	*/	/* Chill */
     language_fortran,		/* Fortran */
     language_m2,		/* Modula-2 */
     language_asm,		/* Assembly language */
@@ -300,9 +300,9 @@ extern int inside_entry_file (CORE_ADDR addr);
 
 extern int inside_main_func (CORE_ADDR pc);
 
-/* From ch-lang.c, for the moment. (FIXME) */
+/* OBSOLETE From ch-lang.c, for the moment. (FIXME) */
 
-extern char *chill_demangle (const char *);
+/* OBSOLETE extern char *chill_demangle (const char *); */
 
 /* From utils.c */
 
@@ -534,6 +534,8 @@ typedef void initialize_file_ftype (void);
 extern char *skip_quoted (char *);
 
 extern char *gdb_readline (char *);
+
+extern char *gdb_readline_wrapper (char *);
 
 extern char *command_line_input (char *, int, char *);
 
@@ -1069,9 +1071,9 @@ extern void *alloca ();
 
 /* In findvar.c.  */
 
-extern LONGEST extract_signed_integer (void *, int);
+extern LONGEST extract_signed_integer (const void *, int);
 
-extern ULONGEST extract_unsigned_integer (void *, int);
+extern ULONGEST extract_unsigned_integer (const void *, int);
 
 extern int extract_long_unsigned_integer (void *, int, LONGEST *);
 

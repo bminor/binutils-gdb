@@ -48,19 +48,13 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "gdbcmd.h"
-
-#if 0
-#include "coff/internal.h"	/* for libcoff.h */
-#include "bfd/libcoff.h"	/* for xcoff_data */
-#endif
+#include "language.h"		/* for local_hex_string() */
+#include "ppc-tdep.h"
 
 #include <procinfo.h>
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <sys/reg.h>
-#if 0
-#include <pthread.h>
-#endif
 #include <sched.h>
 #include <sys/pthdebug.h>
 
@@ -109,13 +103,13 @@ struct pd_thread {
 
 /* This module's target-specific operations, active while pd_able is true.  */
 
-static struct target_ops ops;
+static struct target_ops aix_thread_ops;
 
 /* Copy of the target over which ops is pushed.  
    This is more convenient than a pointer to child_ops or core_ops,
    because they lack current_target's default callbacks.  */
 
-static struct target_ops base_ops;
+static struct target_ops base_target;
 
 /* Address of the function that libpthread will call when libpthdebug
    is ready to be initialized.  */
@@ -239,7 +233,7 @@ ptrace_check (int req, int id, int ret)
 	{
 	  if (debug_aix_thread)
 	    fprintf_unfiltered (gdb_stdlog, 
-				"ptrace (%d, %d) = %d (errno = %d)",
+				"ptrace (%d, %d) = %d (errno = %d)\n",
 				req, id, ret, errno);
 	  return ret == -1 ? 0 : 1;
 	}
@@ -266,7 +260,7 @@ ptrace32 (int req, int id, int *addr, int data, int *buf)
 {
   errno = 0;
   return ptrace_check (req, id, 
-		       ptrace (req, id, (int *)addr, data, buf));
+		       ptrace (req, id, (int *) addr, data, buf));
 }
 
 /* If *PIDP is a composite process/thread id, convert it to a
@@ -294,7 +288,7 @@ pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
 
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog,
-      "pdc_symbol_addrs (user = %ld, symbols = 0x%lx, count = %d)",
+      "pdc_symbol_addrs (user = %ld, symbols = 0x%lx, count = %d)\n",
       user, (long) symbols, count);
 
   for (i = 0; i < count; i++)
@@ -302,7 +296,7 @@ pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
       name = symbols[i].name;
       if (debug_aix_thread)
 	fprintf_unfiltered (gdb_stdlog, 
-			    "  symbols[%d].name = \"%s\"", i, name);
+			    "  symbols[%d].name = \"%s\"\n", i, name);
 
       if (!*name)
 	symbols[i].addr = 0;
@@ -311,17 +305,17 @@ pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
 	  if (!(ms = lookup_minimal_symbol (name, NULL, NULL)))
 	    {
 	      if (debug_aix_thread)
-		fprintf_unfiltered (gdb_stdlog, " returning PDC_FAILURE");
+		fprintf_unfiltered (gdb_stdlog, " returning PDC_FAILURE\n");
 	      return PDC_FAILURE;
 	    }
 	  symbols[i].addr = SYMBOL_VALUE_ADDRESS (ms);
 	}
       if (debug_aix_thread)
-	fprintf_unfiltered (gdb_stdlog, "  symbols[%d].addr = 0x%llx",
-			    i, symbols[i].addr);
+	fprintf_unfiltered (gdb_stdlog, "  symbols[%d].addr = %s\n",
+			    i, local_hex_string (symbols[i].addr));
     }
   if (debug_aix_thread)
-    fprintf_unfiltered (gdb_stdlog, " returning PDC_SUCCESS");
+    fprintf_unfiltered (gdb_stdlog, " returning PDC_SUCCESS\n");
   return PDC_SUCCESS;
 }
 
@@ -350,8 +344,8 @@ pdc_read_regs (pthdb_user_t user,
   struct ptsprs sprs32;
   
   if (debug_aix_thread)
-    fprintf_unfiltered (gdb_stdlog, "pdc_read_regs tid=%d flags=%llx\n",
-                        (int)tid, flags);
+    fprintf_unfiltered (gdb_stdlog, "pdc_read_regs tid=%d flags=%s\n",
+                        (int) tid, local_hex_string (flags));
 
   /* General-purpose registers.  */
   if (flags & PTHDB_FLAG_GPRS)
@@ -416,23 +410,23 @@ pdc_write_regs (pthdb_user_t user,
      however this code is untested.  */
 
   if (debug_aix_thread)
-    fprintf_unfiltered (gdb_stdlog, "pdc_write_regs tid=%d flags=%llx\n",
-                        (int)tid, flags);
+    fprintf_unfiltered (gdb_stdlog, "pdc_write_regs tid=%d flags=%s\n",
+                        (int) tid, local_hex_string (flags));
 
   /* General-purpose registers.  */
   if (flags & PTHDB_FLAG_GPRS)
     {
       if (arch64)
 	ptrace64aix (PTT_WRITE_GPRS, tid, 
-		     (unsigned long)context->gpr, 0, NULL);
+		     (unsigned long) context->gpr, 0, NULL);
       else
-	ptrace32 (PTT_WRITE_GPRS, tid, (int *)context->gpr, 0, NULL);
+	ptrace32 (PTT_WRITE_GPRS, tid, (int *) context->gpr, 0, NULL);
     }
 
  /* Floating-point registers.  */
   if (flags & PTHDB_FLAG_FPRS)
     {
-      ptrace32 (PTT_WRITE_FPRS, tid, (int *)context->fpr, 0, NULL);
+      ptrace32 (PTT_WRITE_FPRS, tid, (int *) context->fpr, 0, NULL);
     }
 
   /* Special-purpose registers.  */
@@ -445,7 +439,7 @@ pdc_write_regs (pthdb_user_t user,
 	}
       else
 	{
-	  ptrace32 (PTT_WRITE_SPRS, tid, (int *)&context->msr, 0, NULL);
+	  ptrace32 (PTT_WRITE_SPRS, tid, (int *) &context->msr, 0, NULL);
 	}
     }
   return 0;
@@ -461,14 +455,14 @@ pdc_read_data (pthdb_user_t user, void *buf,
 
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog,
-      "pdc_read_data (user = %ld, buf = 0x%lx, addr = 0x%llx, len = %ld)",
-      user, (long) buf, addr, len);
+      "pdc_read_data (user = %ld, buf = 0x%lx, addr = %s, len = %ld)\n",
+      user, (long) buf, local_hex_string (addr), len);
 
   status = target_read_memory (addr, buf, len);
   ret = status == 0 ? PDC_SUCCESS : PDC_FAILURE;
 
   if (debug_aix_thread)
-    fprintf_unfiltered (gdb_stdlog, "  status=%d, returning %s",
+    fprintf_unfiltered (gdb_stdlog, "  status=%d, returning %s\n",
 			status, pd_status2str (ret));
   return ret;
 }
@@ -483,14 +477,14 @@ pdc_write_data (pthdb_user_t user, void *buf,
 
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog,
-      "pdc_write_data (user = %ld, buf = 0x%lx, addr = 0x%llx, len = %ld)",
-      user, (long) buf, addr, len);
+      "pdc_write_data (user = %ld, buf = 0x%lx, addr = %s, len = %ld)\n",
+      user, (long) buf, local_hex_string (addr), len);
 
   status = target_write_memory (addr, buf, len);
   ret = status == 0 ? PDC_SUCCESS : PDC_FAILURE;
 
   if (debug_aix_thread)
-    fprintf_unfiltered (gdb_stdlog, "  status=%d, returning %s", status,
+    fprintf_unfiltered (gdb_stdlog, "  status=%d, returning %s\n", status,
 			pd_status2str (ret));
   return ret;
 }
@@ -503,12 +497,12 @@ pdc_alloc (pthdb_user_t user, size_t len, void **bufp)
 {
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog,
-                        "pdc_alloc (user = %ld, len = %ld, bufp = 0x%lx)",
+                        "pdc_alloc (user = %ld, len = %ld, bufp = 0x%lx)\n",
 			user, len, (long) bufp);
   *bufp = xmalloc (len);
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, 
-			"  malloc returned 0x%lx", (long) *bufp);
+			"  malloc returned 0x%lx\n", (long) *bufp);
 
   /* Note: xmalloc() can't return 0; therefore PDC_FAILURE will never
      be returned.  */
@@ -525,12 +519,12 @@ pdc_realloc (pthdb_user_t user, void *buf, size_t len, void **bufp)
 {
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog,
-      "pdc_realloc (user = %ld, buf = 0x%lx, len = %ld, bufp = 0x%lx)",
+      "pdc_realloc (user = %ld, buf = 0x%lx, len = %ld, bufp = 0x%lx)\n",
       user, (long) buf, len, (long) bufp);
   *bufp = xrealloc (buf, len);
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, 
-			"  realloc returned 0x%lx", (long) *bufp);
+			"  realloc returned 0x%lx\n", (long) *bufp);
   return *bufp ? PDC_SUCCESS : PDC_FAILURE;
 }
 
@@ -542,7 +536,7 @@ pdc_dealloc (pthdb_user_t user, void *buf)
 {
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, 
-			"pdc_free (user = %ld, buf = 0x%lx)", user,
+			"pdc_free (user = %ld, buf = 0x%lx)\n", user,
                         (long) buf);
   xfree (buf);
   return PDC_SUCCESS;
@@ -876,8 +870,8 @@ pd_enable (void)
     return;
 
   /* Prepare for thread debugging.  */
-  base_ops = current_target;
-  push_target (&ops);
+  base_target = current_target;
+  push_target (&aix_thread_ops);
   pd_able = 1;
 
   /* If we're debugging a core file or an attached inferior, the
@@ -896,7 +890,7 @@ pd_disable (void)
   if (pd_active)
     pd_deactivate ();
   pd_able = 0;
-  unpush_target (&ops);
+  unpush_target (&aix_thread_ops);
 }
 
 /* target_new_objfile_hook callback.
@@ -921,26 +915,26 @@ new_objfile (struct objfile *objfile)
 /* Attach to process specified by ARGS.  */
 
 static void
-ops_attach (char *args, int from_tty)
+aix_thread_attach (char *args, int from_tty)
 {
-  base_ops.to_attach (args, from_tty);
+  base_target.to_attach (args, from_tty);
   pd_activate (1);
 }
 
-/* Detach from the process attached to by ops_attach().  */
+/* Detach from the process attached to by aix_thread_attach().  */
 
 static void
-ops_detach (char *args, int from_tty)
+aix_thread_detach (char *args, int from_tty)
 {
   pd_deactivate ();
-  base_ops.to_detach (args, from_tty);
+  base_target.to_detach (args, from_tty);
 }
 
 /* Tell the inferior process to continue running thread PID if != -1
    and all threads otherwise.  */
 
 static void
-ops_resume (ptid_t ptid, int step, enum target_signal sig)
+aix_thread_resume (ptid_t ptid, int step, enum target_signal sig)
 {
   struct thread_info *thread;
   pthdb_tid_t tid[2];
@@ -949,7 +943,7 @@ ops_resume (ptid_t ptid, int step, enum target_signal sig)
     {
       struct cleanup *cleanup = save_inferior_ptid ();
       inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
-      base_ops.to_resume (ptid, step, sig);
+      base_target.to_resume (ptid, step, sig);
       do_cleanups (cleanup);
     }
   else
@@ -967,10 +961,10 @@ ops_resume (ptid_t ptid, int step, enum target_signal sig)
 
       if (arch64)
 	ptrace64aix (PTT_CONTINUE, tid[0], 1, 
-		     target_signal_to_host (sig), (int *)tid);
+		     target_signal_to_host (sig), (int *) tid);
       else
 	ptrace32 (PTT_CONTINUE, tid[0], (int *) 1,
-		  target_signal_to_host (sig), (int *)tid);
+		  target_signal_to_host (sig), (int *) tid);
     }
 }
 
@@ -979,14 +973,14 @@ ops_resume (ptid_t ptid, int step, enum target_signal sig)
    thread.  */
 
 static ptid_t
-ops_wait (ptid_t ptid, struct target_waitstatus *status)
+aix_thread_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   struct cleanup *cleanup = save_inferior_ptid ();
 
   pid_to_prc (&ptid);
 
   inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
-  ptid = base_ops.to_wait (ptid, status);
+  ptid = base_target.to_wait (ptid, status);
   do_cleanups (cleanup);
 
   if (PIDGET (ptid) == -1)
@@ -1031,21 +1025,40 @@ supply_fprs (double *vals)
     supply_register (regno + FP0_REGNUM, (char *) (vals + regno));
 }
 
+/* Predicate to test whether given register number is a "special" register.  */
+static int
+special_register_p (int regno)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  return regno == PC_REGNUM
+      || regno == tdep->ppc_ps_regnum
+      || regno == tdep->ppc_cr_regnum
+      || regno == tdep->ppc_lr_regnum
+      || regno == tdep->ppc_ctr_regnum
+      || regno == tdep->ppc_xer_regnum
+      || regno == tdep->ppc_fpscr_regnum
+      || (tdep->ppc_mq_regnum >= 0 && regno == tdep->ppc_mq_regnum);
+}
+
+
 /* Record that the special registers contain the specified 64-bit and
    32-bit values.  */
 
 static void
 supply_sprs64 (uint64_t iar, uint64_t msr, uint32_t cr,
-	       uint64_t lr, uint64_t ctr, uint32_t xer)
+	       uint64_t lr, uint64_t ctr, uint32_t xer,
+	       uint32_t fpscr)
 {
-  int regno = FIRST_UISA_SP_REGNUM;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  supply_register (regno,     (char *) &iar);
-  supply_register (regno + 1, (char *) &msr);
-  supply_register (regno + 2, (char *) &cr);
-  supply_register (regno + 3, (char *) &lr);
-  supply_register (regno + 4, (char *) &ctr);
-  supply_register (regno + 5, (char *) &xer);
+  supply_register (PC_REGNUM,     (char *) &iar);
+  supply_register (tdep->ppc_ps_regnum, (char *) &msr);
+  supply_register (tdep->ppc_cr_regnum, (char *) &cr);
+  supply_register (tdep->ppc_lr_regnum, (char *) &lr);
+  supply_register (tdep->ppc_ctr_regnum, (char *) &ctr);
+  supply_register (tdep->ppc_xer_regnum, (char *) &xer);
+  supply_register (tdep->ppc_fpscr_regnum, (char *) &fpscr);
 }
 
 /* Record that the special registers contain the specified 32-bit
@@ -1053,16 +1066,18 @@ supply_sprs64 (uint64_t iar, uint64_t msr, uint32_t cr,
 
 static void
 supply_sprs32 (uint32_t iar, uint32_t msr, uint32_t cr,
-	       uint32_t lr, uint32_t ctr, uint32_t xer)
+	       uint32_t lr, uint32_t ctr, uint32_t xer,
+	       uint32_t fpscr)
 {
-  int regno = FIRST_UISA_SP_REGNUM;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  supply_register (regno,     (char *) &iar);
-  supply_register (regno + 1, (char *) &msr);
-  supply_register (regno + 2, (char *) &cr);
-  supply_register (regno + 3, (char *) &lr);
-  supply_register (regno + 4, (char *) &ctr);
-  supply_register (regno + 5, (char *) &xer);
+  supply_register (PC_REGNUM,     (char *) &iar);
+  supply_register (tdep->ppc_ps_regnum, (char *) &msr);
+  supply_register (tdep->ppc_cr_regnum, (char *) &cr);
+  supply_register (tdep->ppc_lr_regnum, (char *) &lr);
+  supply_register (tdep->ppc_ctr_regnum, (char *) &ctr);
+  supply_register (tdep->ppc_xer_regnum, (char *) &xer);
+  supply_register (tdep->ppc_fpscr_regnum, (char *) &fpscr);
 }
 
 /* Fetch all registers from pthread PDTID, which doesn't have a kernel
@@ -1073,13 +1088,14 @@ supply_sprs32 (uint32_t iar, uint32_t msr, uint32_t cr,
    function.  */
 
 static void
-fetch_regs_lib (pthdb_pthread_t pdtid)
+fetch_regs_user_thread (pthdb_pthread_t pdtid)
 {
   int status, i;
   pthdb_context_t ctx;
 
   if (debug_aix_thread)
-    fprintf_unfiltered (gdb_stdlog, "fetch_regs_lib %lx\n", (long)pdtid);
+    fprintf_unfiltered (gdb_stdlog, 
+			"fetch_regs_user_thread %lx\n", (long) pdtid);
   status = pthdb_pthread_context (pd_session, pdtid, &ctx);
   if (status != PTHDB_SUCCESS)
     error ("aix-thread: fetch_registers: pthdb_pthread_context returned %s",
@@ -1100,9 +1116,11 @@ fetch_regs_lib (pthdb_pthread_t pdtid)
   /* Special registers.  */
 
   if (arch64)
-    supply_sprs64 (ctx.iar, ctx.msr, ctx.cr, ctx.lr, ctx.ctr, ctx.xer);
+    supply_sprs64 (ctx.iar, ctx.msr, ctx.cr, ctx.lr, ctx.ctr, ctx.xer,
+                   ctx.fpscr);
   else
-    supply_sprs32 (ctx.iar, ctx.msr, ctx.cr, ctx.lr, ctx.ctr, ctx.xer);
+    supply_sprs32 (ctx.iar, ctx.msr, ctx.cr, ctx.lr, ctx.ctr, ctx.xer,
+                   ctx.fpscr);
 }
 
 /* Fetch register REGNO if != -1 or all registers otherwise from
@@ -1121,7 +1139,7 @@ fetch_regs_lib (pthdb_pthread_t pdtid)
    be retrieved.  */
 
 static void
-fetch_regs_kern (int regno, pthdb_tid_t tid)
+fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
 {
   uint64_t gprs64[32];
   uint32_t gprs32[32];
@@ -1132,8 +1150,8 @@ fetch_regs_kern (int regno, pthdb_tid_t tid)
 
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog,
-			"fetch_regs_kern tid=%lx regno=%d arch64=%d\n",
-			(long)tid, regno, arch64);
+	"fetch_regs_kernel_thread tid=%lx regno=%d arch64=%d\n",
+	(long) tid, regno, arch64);
 
   /* General-purpose registers.  */
   if (regno == -1 || regno < FP0_REGNUM)
@@ -1165,8 +1183,7 @@ fetch_regs_kern (int regno, pthdb_tid_t tid)
 
   /* Special-purpose registers.  */
 
-  if (regno == -1 || 
-      (regno > FPLAST_REGNUM && regno <= LAST_UISA_SP_REGNUM))
+  if (regno == -1 || special_register_p (regno))
     {
       if (arch64)
 	{
@@ -1174,17 +1191,21 @@ fetch_regs_kern (int regno, pthdb_tid_t tid)
 			    (unsigned long) &sprs64, 0, NULL))
 	    memset (&sprs64, 0, sizeof (sprs64));
 	  supply_sprs64 (sprs64.pt_iar, sprs64.pt_msr, sprs64.pt_cr,
-			 sprs64.pt_lr, sprs64.pt_ctr, sprs64.pt_xer);
+			 sprs64.pt_lr, sprs64.pt_ctr, sprs64.pt_xer,
+			 sprs64.pt_fpscr);
 	}
       else
 	{
+	  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
 	  if (!ptrace32 (PTT_READ_SPRS, tid, (int *) &sprs32, 0, NULL))
 	    memset (&sprs32, 0, sizeof (sprs32));
 	  supply_sprs32 (sprs32.pt_iar, sprs32.pt_msr, sprs32.pt_cr,
-			 sprs32.pt_lr, sprs32.pt_ctr, sprs32.pt_xer);
+			 sprs32.pt_lr, sprs32.pt_ctr, sprs32.pt_xer,
+			 sprs32.pt_fpscr);
 
-	  if (REGISTER_RAW_SIZE (LAST_UISA_SP_REGNUM))
-	    supply_register (LAST_UISA_SP_REGNUM, (char *) &sprs32.pt_mq);
+	  if (tdep->ppc_mq_regnum >= 0)
+	    supply_register (tdep->ppc_mq_regnum, (char *) &sprs32.pt_mq);
 	}
     }
 }
@@ -1193,22 +1214,22 @@ fetch_regs_kern (int regno, pthdb_tid_t tid)
    thread/process specified by inferior_ptid.  */
 
 static void
-ops_fetch_registers (int regno)
+aix_thread_fetch_registers (int regno)
 {
   struct thread_info *thread;
   pthdb_tid_t tid;
 
   if (!PD_TID (inferior_ptid))
-    base_ops.to_fetch_registers (regno);
+    base_target.to_fetch_registers (regno);
   else
     {
       thread = find_thread_pid (inferior_ptid);
       tid = thread->private->tid;
 
       if (tid == PTHDB_INVALID_TID)
-	fetch_regs_lib (thread->private->pdtid);
+	fetch_regs_user_thread (thread->private->pdtid);
       else
-	fetch_regs_kern (regno, tid);
+	fetch_regs_kernel_thread (regno, tid);
     }
 }
 
@@ -1220,7 +1241,8 @@ fill_gprs64 (uint64_t *vals)
   int regno;
 
   for (regno = 0; regno < FP0_REGNUM; regno++)
-    regcache_collect (regno, vals + regno);
+    if (register_cached (regno))
+      regcache_collect (regno, vals + regno);
 }
 
 static void 
@@ -1229,7 +1251,8 @@ fill_gprs32 (uint32_t *vals)
   int regno;
 
   for (regno = 0; regno < FP0_REGNUM; regno++)
-    regcache_collect (regno, vals + regno);
+    if (register_cached (regno))
+      regcache_collect (regno, vals + regno);
 }
 
 /* Store the floating point registers into a double array.  */
@@ -1239,7 +1262,8 @@ fill_fprs (double *vals)
   int regno;
 
   for (regno = FP0_REGNUM; regno < FPLAST_REGNUM; regno++)
-    regcache_collect (regno, vals + regno);
+    if (register_cached (regno))
+      regcache_collect (regno, vals + regno);
 }
 
 /* Store the special registers into the specified 64-bit and 32-bit
@@ -1247,38 +1271,67 @@ fill_fprs (double *vals)
 
 static void
 fill_sprs64 (uint64_t *iar, uint64_t *msr, uint32_t *cr,
-	     uint64_t *lr, uint64_t *ctr, uint32_t *xer)
+	     uint64_t *lr, uint64_t *ctr, uint32_t *xer,
+	     uint32_t *fpscr)
 {
-  int regno = FIRST_UISA_SP_REGNUM;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  gdb_assert (sizeof (*iar) == REGISTER_RAW_SIZE (regno));
+  /* Verify that the size of the size of the IAR buffer is the
+     same as the raw size of the PC (in the register cache).  If
+     they're not, then either GDB has been built incorrectly, or
+     there's some other kind of internal error.  To be really safe,
+     we should check all of the sizes.   */
+  gdb_assert (sizeof (*iar) == REGISTER_RAW_SIZE (PC_REGNUM));
 
-  regcache_collect (regno,     iar);
-  regcache_collect (regno + 1, msr);
-  regcache_collect (regno + 2, cr);
-  regcache_collect (regno + 3, lr);
-  regcache_collect (regno + 4, ctr);
-  regcache_collect (regno + 5, xer);
+  if (register_cached (PC_REGNUM))
+    regcache_collect (PC_REGNUM, iar);
+  if (register_cached (tdep->ppc_ps_regnum))
+    regcache_collect (tdep->ppc_ps_regnum, msr);
+  if (register_cached (tdep->ppc_cr_regnum))
+    regcache_collect (tdep->ppc_cr_regnum, cr);
+  if (register_cached (tdep->ppc_lr_regnum))
+    regcache_collect (tdep->ppc_lr_regnum, lr);
+  if (register_cached (tdep->ppc_ctr_regnum))
+    regcache_collect (tdep->ppc_ctr_regnum, ctr);
+  if (register_cached (tdep->ppc_xer_regnum))
+    regcache_collect (tdep->ppc_xer_regnum, xer);
+  if (register_cached (tdep->ppc_fpscr_regnum))
+    regcache_collect (tdep->ppc_fpscr_regnum, fpscr);
 }
 
 static void
 fill_sprs32 (unsigned long *iar, unsigned long *msr, unsigned long *cr,
-	     unsigned long *lr,  unsigned long *ctr, unsigned long *xer)
+	     unsigned long *lr,  unsigned long *ctr, unsigned long *xer,
+	     unsigned long *fpscr)
 {
-  int regno = FIRST_UISA_SP_REGNUM;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  /* If this assert() fails, the most likely reason is that GDB was
+  /* Verify that the size of the size of the IAR buffer is the
+     same as the raw size of the PC (in the register cache).  If
+     they're not, then either GDB has been built incorrectly, or
+     there's some other kind of internal error.  To be really safe,
+     we should check all of the sizes. 
+
+     If this assert() fails, the most likely reason is that GDB was
      built incorrectly.  In order to make use of many of the header
      files in /usr/include/sys, GDB needs to be configured so that
      sizeof (long) == 4).  */
-  gdb_assert (sizeof (*iar) == REGISTER_RAW_SIZE (regno));
+  gdb_assert (sizeof (*iar) == REGISTER_RAW_SIZE (PC_REGNUM));
 
-  regcache_collect (regno,     iar);
-  regcache_collect (regno + 1, msr);
-  regcache_collect (regno + 2, cr);
-  regcache_collect (regno + 3, lr);
-  regcache_collect (regno + 4, ctr);
-  regcache_collect (regno + 5, xer);
+  if (register_cached (PC_REGNUM))
+    regcache_collect (PC_REGNUM, iar);
+  if (register_cached (tdep->ppc_ps_regnum))
+    regcache_collect (tdep->ppc_ps_regnum, msr);
+  if (register_cached (tdep->ppc_cr_regnum))
+    regcache_collect (tdep->ppc_cr_regnum, cr);
+  if (register_cached (tdep->ppc_lr_regnum))
+    regcache_collect (tdep->ppc_lr_regnum, lr);
+  if (register_cached (tdep->ppc_ctr_regnum))
+    regcache_collect (tdep->ppc_ctr_regnum, ctr);
+  if (register_cached (tdep->ppc_xer_regnum))
+    regcache_collect (tdep->ppc_xer_regnum, xer);
+  if (register_cached (tdep->ppc_fpscr_regnum))
+    regcache_collect (tdep->ppc_fpscr_regnum, fpscr);
 }
 
 /* Store all registers into pthread PDTID, which doesn't have a kernel
@@ -1288,7 +1341,7 @@ fill_sprs32 (unsigned long *iar, unsigned long *msr, unsigned long *cr,
    but I doubt it's worth the effort.  */
 
 static void
-store_regs_lib (pthdb_pthread_t pdtid)
+store_regs_user_thread (pthdb_pthread_t pdtid)
 {
   int status, i;
   pthdb_context_t ctx;
@@ -1298,7 +1351,7 @@ store_regs_lib (pthdb_pthread_t pdtid)
 
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, 
-			"store_regs_lib %lx\n", (long)pdtid);
+			"store_regs_user_thread %lx\n", (long) pdtid);
 
   /* Retrieve the thread's current context for its non-register
      values.  */
@@ -1310,18 +1363,19 @@ store_regs_lib (pthdb_pthread_t pdtid)
   /* Collect general-purpose register values from the regcache.  */
 
   for (i = 0; i < 32; i++)
-    {
-      if (arch64)
-	{
-	  regcache_collect (i, (void *) &int64);
-	  ctx.gpr[i] = int64;
-	}
-      else
-	{
-	  regcache_collect (i, (void *) &int32);
-	  ctx.gpr[i] = int32;
-	}
-    }
+    if (register_cached (i))
+      {
+	if (arch64)
+	  {
+	    regcache_collect (i, (void *) &int64);
+	    ctx.gpr[i] = int64;
+	  }
+	else
+	  {
+	    regcache_collect (i, (void *) &int32);
+	    ctx.gpr[i] = int32;
+	  }
+      }
 
   /* Collect floating-point register values from the regcache.  */
   fill_fprs (ctx.fpr);
@@ -1329,7 +1383,8 @@ store_regs_lib (pthdb_pthread_t pdtid)
   /* Special registers (always kept in ctx as 64 bits).  */
   if (arch64)
     {
-      fill_sprs64 (&ctx.iar, &ctx.msr, &ctx.cr, &ctx.lr, &ctx.ctr, &ctx.xer);
+      fill_sprs64 (&ctx.iar, &ctx.msr, &ctx.cr, &ctx.lr, &ctx.ctr, &ctx.xer,
+                   &ctx.fpscr);
     }
   else
     {
@@ -1337,15 +1392,26 @@ store_regs_lib (pthdb_pthread_t pdtid)
 	 Solution: use 32-bit temp variables.  (The assert() in fill_sprs32()
 	 will fail if the size of an unsigned long is incorrect.  If this
 	 happens, GDB needs to be reconfigured so that longs are 32-bits.)  */
-      unsigned long tmp_iar, tmp_msr, tmp_cr, tmp_lr, tmp_ctr, tmp_xer;
+      unsigned long tmp_iar, tmp_msr, tmp_cr, tmp_lr, tmp_ctr, tmp_xer,
+                    tmp_fpscr;
+      struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-      fill_sprs32 (&tmp_iar, &tmp_msr, &tmp_cr, &tmp_lr, &tmp_ctr, &tmp_xer);
-      ctx.iar = tmp_iar;
-      ctx.msr = tmp_msr;
-      ctx.cr  = tmp_cr;
-      ctx.lr  = tmp_lr;
-      ctx.ctr = tmp_ctr;
-      ctx.xer = tmp_xer;
+      fill_sprs32 (&tmp_iar, &tmp_msr, &tmp_cr, &tmp_lr, &tmp_ctr, &tmp_xer,
+                   &tmp_fpscr);
+      if (register_cached (PC_REGNUM))
+	ctx.iar = tmp_iar;
+      if (register_cached (tdep->ppc_ps_regnum))
+	ctx.msr = tmp_msr;
+      if (register_cached (tdep->ppc_cr_regnum))
+	ctx.cr  = tmp_cr;
+      if (register_cached (tdep->ppc_lr_regnum))
+	ctx.lr  = tmp_lr;
+      if (register_cached (tdep->ppc_ctr_regnum))
+	ctx.ctr = tmp_ctr;
+      if (register_cached (tdep->ppc_xer_regnum))
+	ctx.xer = tmp_xer;
+      if (register_cached (tdep->ppc_xer_regnum))
+	ctx.fpscr = tmp_fpscr;
     }
 
   status = pthdb_pthread_setcontext (pd_session, pdtid, &ctx);
@@ -1363,7 +1429,7 @@ store_regs_lib (pthdb_pthread_t pdtid)
    group.  */
 
 static void
-store_regs_kern (int regno, pthdb_tid_t tid)
+store_regs_kernel_thread (int regno, pthdb_tid_t tid)
 {
   uint64_t gprs64[32];
   uint32_t gprs32[32];
@@ -1371,21 +1437,27 @@ store_regs_kern (int regno, pthdb_tid_t tid)
   struct ptxsprs sprs64;
   struct ptsprs  sprs32;
   int i;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   if (debug_aix_thread)
-    fprintf_unfiltered (gdb_stdlog, "store_regs_kern tid=%lx regno=%d\n",
-                        (long)tid, regno);
+    fprintf_unfiltered (gdb_stdlog, 
+			"store_regs_kernel_thread tid=%lx regno=%d\n",
+                        (long) tid, regno);
 
   /* General-purpose registers.  */
   if (regno == -1 || regno < FP0_REGNUM)
     {
       if (arch64)
 	{
+	  /* Pre-fetch: some regs may not be in the cache.  */
+	  ptrace64aix (PTT_READ_GPRS, tid, (unsigned long) gprs64, 0, NULL);
 	  fill_gprs64 (gprs64);
 	  ptrace64aix (PTT_WRITE_GPRS, tid, (unsigned long) gprs64, 0, NULL);
 	}
       else
 	{
+	  /* Pre-fetch: some regs may not be in the cache.  */
+	  ptrace32 (PTT_READ_GPRS, tid, gprs32, 0, NULL);
 	  fill_gprs32 (gprs32);
 	  ptrace32 (PTT_WRITE_GPRS, tid, gprs32, 0, NULL);
 	}
@@ -1395,35 +1467,39 @@ store_regs_kern (int regno, pthdb_tid_t tid)
 
   if (regno == -1 || (regno >= FP0_REGNUM && regno <= FPLAST_REGNUM))
     {
+      /* Pre-fetch: some regs may not be in the cache.  */
+      ptrace32 (PTT_READ_FPRS, tid, (int *) fprs, 0, NULL);
       fill_fprs (fprs);
       ptrace32 (PTT_WRITE_FPRS, tid, (int *) fprs, 0, NULL);
     }
 
   /* Special-purpose registers.  */
 
-  if (regno == -1 || 
-      (regno > FPLAST_REGNUM && regno <= LAST_UISA_SP_REGNUM))
+  if (regno == -1 || special_register_p (regno))
     {
       if (arch64)
 	{
-	  /* Must read first, not all of it's in the cache.  */
+	  /* Pre-fetch: some registers won't be in the cache.  */
 	  ptrace64aix (PTT_READ_SPRS, tid, 
 		       (unsigned long) &sprs64, 0, NULL);
 	  fill_sprs64 (&sprs64.pt_iar, &sprs64.pt_msr, &sprs64.pt_cr,
-		       &sprs64.pt_lr,  &sprs64.pt_ctr, &sprs64.pt_xer);
+		       &sprs64.pt_lr,  &sprs64.pt_ctr, &sprs64.pt_xer,
+		       &sprs64.pt_fpscr);
 	  ptrace64aix (PTT_WRITE_SPRS, tid, 
 		       (unsigned long) &sprs64, 0, NULL);
 	}
       else
 	{
-	  /* Must read first, not all of it's in the cache.  */
+	  /* Pre-fetch: some registers won't be in the cache.  */
 	  ptrace32 (PTT_READ_SPRS, tid, (int *) &sprs32, 0, NULL);
 
 	  fill_sprs32 (&sprs32.pt_iar, &sprs32.pt_msr, &sprs32.pt_cr,
-		       &sprs32.pt_lr,  &sprs32.pt_ctr, &sprs32.pt_xer);
+		       &sprs32.pt_lr,  &sprs32.pt_ctr, &sprs32.pt_xer,
+		       &sprs32.pt_fpscr);
 
-	  if (REGISTER_RAW_SIZE (LAST_UISA_SP_REGNUM))
-	    regcache_collect (LAST_UISA_SP_REGNUM, &sprs32.pt_mq);
+	  if (tdep->ppc_mq_regnum >= 0)
+	    if (register_cached (tdep->ppc_mq_regnum))
+	      regcache_collect (tdep->ppc_mq_regnum, &sprs32.pt_mq);
 
 	  ptrace32 (PTT_WRITE_SPRS, tid, (int *) &sprs32, 0, NULL);
 	}
@@ -1434,55 +1510,39 @@ store_regs_kern (int regno, pthdb_tid_t tid)
    thread/process specified by inferior_ptid.  */
 
 static void
-ops_store_registers (int regno)
+aix_thread_store_registers (int regno)
 {
   struct thread_info *thread;
   pthdb_tid_t tid;
 
   if (!PD_TID (inferior_ptid))
-    base_ops.to_store_registers (regno);
+    base_target.to_store_registers (regno);
   else
     {
       thread = find_thread_pid (inferior_ptid);
       tid = thread->private->tid;
 
       if (tid == PTHDB_INVALID_TID)
-	store_regs_lib (thread->private->pdtid);
+	store_regs_user_thread (thread->private->pdtid);
       else
-	store_regs_kern (regno, tid);
+	store_regs_kernel_thread (regno, tid);
     }
-}
-
-/* Prepare to copy the register cache to the child:
-   The register cache must be fully fetched and up to date.  */
-
-static void
-ops_prepare_to_store (void)
-{
-  int regno;
-
-  if (!PD_TID (inferior_ptid))
-    base_ops.to_prepare_to_store ();
-  else
-    for (regno = 0; regno < NUM_REGS; regno++)
-      if (!register_cached (regno))
-	target_fetch_registers (regno);
 }
 
 /* Transfer LEN bytes of memory from GDB address MYADDR to target
    address MEMADDR if WRITE and vice versa otherwise.  */
 
 static int
-ops_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
-                 struct mem_attrib *attrib,
-		 struct target_ops *target)
+aix_thread_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		      struct mem_attrib *attrib,
+		      struct target_ops *target)
 {
   int n;
   struct cleanup *cleanup = save_inferior_ptid ();
 
   inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
-  n = base_ops.to_xfer_memory (memaddr, myaddr, len, 
-			       write, attrib, &base_ops);
+  n = base_target.to_xfer_memory (memaddr, myaddr, len, 
+				  write, attrib, &base_target);
   do_cleanups (cleanup);
 
   return n;
@@ -1491,31 +1551,31 @@ ops_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 /* Kill and forget about the inferior process.  */
 
 static void
-ops_kill (void)
+aix_thread_kill (void)
 {
   struct cleanup *cleanup = save_inferior_ptid ();
 
   inferior_ptid = pid_to_ptid (PIDGET (inferior_ptid));
-  base_ops.to_kill ();
+  base_target.to_kill ();
   do_cleanups (cleanup);
 }
 
 /* Clean up after the inferior exits.  */
 
 static void
-ops_mourn_inferior (void)
+aix_thread_mourn_inferior (void)
 {
   pd_deactivate ();
-  base_ops.to_mourn_inferior ();
+  base_target.to_mourn_inferior ();
 }
 
 /* Return whether thread PID is still valid.  */
 
 static int
-ops_thread_alive (ptid_t ptid)
+aix_thread_thread_alive (ptid_t ptid)
 {
   if (!PD_TID (ptid))
-    return base_ops.to_thread_alive (ptid);
+    return base_target.to_thread_alive (ptid);
 
   /* We update the thread list every time the child stops, so all
      valid threads should be in the thread list.  */
@@ -1526,12 +1586,12 @@ ops_thread_alive (ptid_t ptid)
    "info threads" output.  */
 
 static char *
-ops_pid_to_str (ptid_t ptid)
+aix_thread_pid_to_str (ptid_t ptid)
 {
   static char *ret = NULL;
 
   if (!PD_TID (ptid))
-    return base_ops.to_pid_to_str (ptid);
+    return base_target.to_pid_to_str (ptid);
 
   /* Free previous return value; a new one will be allocated by
      xasprintf().  */
@@ -1545,7 +1605,7 @@ ops_pid_to_str (ptid_t ptid)
    THREAD, for use in "info threads" output.  */
 
 static char *
-ops_extra_thread_info (struct thread_info *thread)
+aix_thread_extra_thread_info (struct thread_info *thread)
 {
   struct ui_file *buf;
   int status;
@@ -1598,32 +1658,31 @@ ops_extra_thread_info (struct thread_info *thread)
   return ret;
 }
 
-/* Initialize target ops.  */
+/* Initialize target aix_thread_ops.  */
 
 static void
-init_ops (void)
+init_aix_thread_ops (void)
 {
-  ops.to_shortname          = "aix-threads";
-  ops.to_longname           = "AIX pthread support";
-  ops.to_doc                = "AIX pthread support";
+  aix_thread_ops.to_shortname          = "aix-threads";
+  aix_thread_ops.to_longname           = "AIX pthread support";
+  aix_thread_ops.to_doc                = "AIX pthread support";
 
-  ops.to_attach             = ops_attach;
-  ops.to_detach             = ops_detach;
-  ops.to_resume             = ops_resume;
-  ops.to_wait               = ops_wait;
-  ops.to_fetch_registers    = ops_fetch_registers;
-  ops.to_store_registers    = ops_store_registers;
-  ops.to_prepare_to_store   = ops_prepare_to_store;
-  ops.to_xfer_memory        = ops_xfer_memory;
-  /* No need for ops.to_create_inferior, because we activate thread
+  aix_thread_ops.to_attach             = aix_thread_attach;
+  aix_thread_ops.to_detach             = aix_thread_detach;
+  aix_thread_ops.to_resume             = aix_thread_resume;
+  aix_thread_ops.to_wait               = aix_thread_wait;
+  aix_thread_ops.to_fetch_registers    = aix_thread_fetch_registers;
+  aix_thread_ops.to_store_registers    = aix_thread_store_registers;
+  aix_thread_ops.to_xfer_memory        = aix_thread_xfer_memory;
+  /* No need for aix_thread_ops.to_create_inferior, because we activate thread
      debugging when the inferior reaches pd_brk_addr.  */
-  ops.to_kill               = ops_kill;
-  ops.to_mourn_inferior     = ops_mourn_inferior;
-  ops.to_thread_alive       = ops_thread_alive;
-  ops.to_pid_to_str         = ops_pid_to_str;
-  ops.to_extra_thread_info  = ops_extra_thread_info;
-  ops.to_stratum            = thread_stratum;
-  ops.to_magic              = OPS_MAGIC;
+  aix_thread_ops.to_kill               = aix_thread_kill;
+  aix_thread_ops.to_mourn_inferior     = aix_thread_mourn_inferior;
+  aix_thread_ops.to_thread_alive       = aix_thread_thread_alive;
+  aix_thread_ops.to_pid_to_str         = aix_thread_pid_to_str;
+  aix_thread_ops.to_extra_thread_info  = aix_thread_extra_thread_info;
+  aix_thread_ops.to_stratum            = thread_stratum;
+  aix_thread_ops.to_magic              = OPS_MAGIC;
 }
 
 /* Module startup initialization function, automagically called by
@@ -1632,8 +1691,8 @@ init_ops (void)
 void
 _initialize_aix_thread (void)
 {
-  init_ops ();
-  add_target (&ops);
+  init_aix_thread_ops ();
+  add_target (&aix_thread_ops);
 
   /* Notice when object files get loaded and unloaded.  */
   target_new_objfile_chain = target_new_objfile_hook;

@@ -37,8 +37,6 @@
 #define NUM_ELEM(a) (sizeof (a) / sizeof (a)[0])
 #endif
 
-#define USE_RELA
-
 #define TARGET_LITTLE_SYM               bfd_elf32_littlearm_oabi_vec
 #define TARGET_LITTLE_NAME              "elf32-littlearm-oabi"
 #define TARGET_BIG_SYM                  bfd_elf32_bigarm_oabi_vec

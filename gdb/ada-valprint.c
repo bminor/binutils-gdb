@@ -88,9 +88,7 @@ adjust_type_signedness (type)
    otherwise 0. */
 
 static int 
-print_optional_low_bound (stream, type)
-     struct ui_file *stream;
-     struct type *type;
+print_optional_low_bound (struct ui_file *stream, struct type *type)
 {
   struct type *index_type;
   long low_bound;
@@ -135,15 +133,10 @@ print_optional_low_bound (stream, type)
     by ada_coerce_to_simple_array).  */ 
 
 static void
-val_print_packed_array_elements (type, valaddr, bitoffset, stream, format, 
-				 recurse, pretty)
-     struct type *type;
-     char *valaddr;
-     int bitoffset;
-     struct ui_file *stream;
-     int format;
-     int recurse;
-     enum val_prettyprint pretty;
+val_print_packed_array_elements (struct type *type, char *valaddr,
+				 int bitoffset, struct ui_file *stream,
+				 int format, int recurse,
+				 enum val_prettyprint pretty)
 {
   unsigned int i;
   unsigned int things_printed = 0;
@@ -254,9 +247,7 @@ val_print_packed_array_elements (type, valaddr, bitoffset, stream, format,
 }
 
 static struct type*
-printable_val_type (type, valaddr)
-     struct type* type;
-     char* valaddr;
+printable_val_type (struct type* type, char* valaddr)
 {
   return ada_to_fixed_type (ada_aligned_type (type), valaddr, 0, NULL);
 }
@@ -266,11 +257,7 @@ printable_val_type (type, valaddr)
    (1 or 2) of the character. */
 
 void
-ada_emit_char (c, stream, quoter, type_len)
-     int c;
-     struct ui_file *stream;
-     int quoter;
-     int type_len;
+ada_emit_char (int c, struct ui_file *stream, int quoter, int type_len)
 {
   if (type_len != 2)
     type_len = 1;
@@ -292,10 +279,7 @@ ada_emit_char (c, stream, quoter, type_len)
    or 2) of a character. */
 
 static int
-char_at (string, i, type_len)
-     char* string;
-     int i;
-     int type_len;
+char_at (char* string, int i, int type_len)
 {
   if (type_len == 1)
     return string[i];
@@ -304,9 +288,7 @@ char_at (string, i, type_len)
 }
 
 void
-ada_printchar (c, stream)
-     int c;
-     struct ui_file *stream;
+ada_printchar (int c, struct ui_file *stream)
 {
   fputs_filtered ("'", stream);
   ada_emit_char (c, stream, '\'', 1);
@@ -317,10 +299,7 @@ ada_printchar (c, stream)
    form appropriate for TYPE. */
 
 void
-ada_print_scalar (type, val, stream)
-     struct type *type;
-     LONGEST val;
-     struct ui_file *stream;
+ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
 {
   unsigned int i;
   unsigned len;
@@ -396,12 +375,8 @@ ada_print_scalar (type, val, stream)
  */
 
 static void
-printstr (stream, string, length, force_ellipses, type_len)
-     struct ui_file *stream;
-     char *string;
-     unsigned int length;
-     int force_ellipses;
-     int type_len;
+printstr (struct ui_file *stream, char *string, unsigned int length,
+	  int force_ellipses, int type_len)
 {
   unsigned int i;
   unsigned int things_printed = 0;
@@ -487,12 +462,8 @@ printstr (stream, string, length, force_ellipses, type_len)
 }
 
 void
-ada_printstr (stream, string, length, force_ellipses, width)
-     struct ui_file *stream;
-     char *string;
-     unsigned int length;
-     int force_ellipses;
-     int width;
+ada_printstr (struct ui_file *stream, char *string, unsigned int length,
+	      int force_ellipses, int width)
 {
   printstr (stream, string, length, force_ellipses, width);
 }
@@ -518,17 +489,9 @@ ada_printstr (stream, string, length, force_ellipses, width)
    arrays.)  */
 
 int
-ada_val_print (type, valaddr0, embedded_offset, address, stream,
-	       format, deref_ref, recurse, pretty)
-     struct type* type;
-     char* valaddr0;
-     int embedded_offset;
-     CORE_ADDR address;
-     struct ui_file *stream;
-     int format;
-     int deref_ref;
-     int recurse;
-     enum val_prettyprint pretty;
+ada_val_print (struct type* type, char* valaddr0, int embedded_offset,
+	       CORE_ADDR address, struct ui_file *stream, int format,
+	       int deref_ref, int recurse, enum val_prettyprint pretty)
 {
   struct ada_val_print_args args;
   args.type = type; args.valaddr0 = valaddr0; 
@@ -559,17 +522,9 @@ ada_val_print_stub (PTR args0)
  * does not catch evaluation errors (leaving that to ada_val_print). */
 
 static int
-ada_val_print_1 (type, valaddr0, embedded_offset, address, stream,
-		 format, deref_ref, recurse, pretty)
-     struct type* type;
-     char* valaddr0;
-     int embedded_offset;
-     CORE_ADDR address;
-     struct ui_file *stream;
-     int format;
-     int deref_ref;
-     int recurse;
-     enum val_prettyprint pretty;
+ada_val_print_1 (struct type* type, char* valaddr0, int embedded_offset,
+		 CORE_ADDR address, struct ui_file *stream, int format,
+		 int deref_ref, int recurse, enum val_prettyprint pretty)
 {
   unsigned int len;
   int i;
@@ -826,19 +781,10 @@ ada_val_print_1 (type, valaddr0, embedded_offset, address, stream,
 }
 
 static int
-print_variant_part (type, field_num, valaddr, 
-		    stream, format, recurse, pretty, comma_needed,
-		    outer_type, outer_valaddr)
-     struct type *type;
-     int field_num;
-     char *valaddr;
-     struct ui_file *stream;
-     int format;
-     int recurse;
-     enum val_prettyprint pretty;
-     int comma_needed;
-     struct type *outer_type;
-     char *outer_valaddr;
+print_variant_part (struct type *type, int field_num, char *valaddr,
+		    struct ui_file *stream, int format, int recurse,
+		    enum val_prettyprint pretty, int comma_needed,
+		    struct type *outer_type, char *outer_valaddr)
 {
   struct type *var_type = TYPE_FIELD_TYPE (type, field_num);
   int which = 
@@ -856,11 +802,8 @@ print_variant_part (type, field_num, valaddr,
 }
 
 int
-ada_value_print (val0, stream, format, pretty)
-     struct value* val0;
-     struct ui_file *stream;
-     int format;
-     enum val_prettyprint pretty;
+ada_value_print (struct value* val0, struct ui_file *stream, int format,
+		 enum val_prettyprint pretty)
 {
   char* valaddr = VALUE_CONTENTS (val0);
   CORE_ADDR address = VALUE_ADDRESS (val0) + VALUE_OFFSET (val0);
@@ -906,13 +849,8 @@ ada_value_print (val0, stream, format, pretty)
 }
  
 static void
-print_record (type, valaddr, stream, format, recurse, pretty)
-     struct type *type;
-     char *valaddr;
-     struct ui_file *stream;
-     int format;
-     int recurse;
-     enum val_prettyprint pretty;
+print_record (struct type *type, char *valaddr, struct ui_file *stream,
+	      int format, int recurse, enum val_prettyprint pretty)
 {
   CHECK_TYPEDEF (type);
 
@@ -944,17 +882,10 @@ print_record (type, valaddr, stream, format, recurse, pretty)
    Returns 1 if COMMA_NEEDED or any fields were printed. */
 
 static int
-print_field_values (type, valaddr, stream, format, recurse, pretty, 
-		    comma_needed, outer_type, outer_valaddr)
-     struct type *type;
-     char *valaddr;
-     struct ui_file *stream;
-     int format;
-     int recurse;
-     enum val_prettyprint pretty;
-     int comma_needed;
-     struct type *outer_type;
-     char *outer_valaddr;
+print_field_values (struct type *type, char *valaddr, struct ui_file *stream,
+		    int format, int recurse, enum val_prettyprint pretty,
+		    int comma_needed, struct type *outer_type,
+		    char *outer_valaddr)
 {
   int i, len;
 

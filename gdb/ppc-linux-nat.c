@@ -475,21 +475,7 @@ store_inferior_registers (int regno)
 void
 supply_gregset (gdb_gregset_t *gregsetp)
 {
-  int regi;
-  register elf_greg_t *regp = (elf_greg_t *) gregsetp;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
-
-  for (regi = 0; regi < 32; regi++)
-    supply_register (regi, (char *) (regp + regi));
-
-  supply_register (PC_REGNUM, (char *) (regp + PT_NIP));
-  supply_register (tdep->ppc_lr_regnum, (char *) (regp + PT_LNK));
-  supply_register (tdep->ppc_cr_regnum, (char *) (regp + PT_CCR));
-  supply_register (tdep->ppc_xer_regnum, (char *) (regp + PT_XER));
-  supply_register (tdep->ppc_ctr_regnum, (char *) (regp + PT_CTR));
-  if (tdep->ppc_mq_regnum != -1)
-    supply_register (tdep->ppc_mq_regnum, (char *) (regp + PT_MQ));
-  supply_register (tdep->ppc_ps_regnum, (char *) (regp + PT_MSR));
+  ppc_linux_supply_gregset ((char *) gregsetp);
 }
 
 void
@@ -525,12 +511,7 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
 void
 supply_fpregset (gdb_fpregset_t * fpregsetp)
 {
-  int regi;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
-
-  for (regi = 0; regi < 32; regi++)
-    supply_register (FP0_REGNUM + regi, (char *) (*fpregsetp + regi));
-  supply_register (tdep->ppc_fpscr_regnum, (char *) (*fpregsetp + 32));
+  ppc_linux_supply_fpregset ((char *) fpregsetp);
 }
 
 /* Given a pointer to a floating point register set in /proc format

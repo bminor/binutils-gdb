@@ -34,8 +34,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf-bfd.h"
 #include "elf/i370.h"
 
-#define USE_RELA		/* we want RELA relocations, not REL */
-
 /* i370 relocations */
 /* Note that there is really just one relocation that we currently
  * support (and only one that we seem to need, at the moment), and

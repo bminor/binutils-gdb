@@ -428,8 +428,8 @@ f::TARGET_WRITE_SP:void:write_sp:CORE_ADDR val:val::0:generic_target_write_sp::0
 # serious shakedown.
 f::TARGET_VIRTUAL_FRAME_POINTER:void:virtual_frame_pointer:CORE_ADDR pc, int *frame_regnum, LONGEST *frame_offset:pc, frame_regnum, frame_offset::0:legacy_virtual_frame_pointer::0
 #
-M:::void:register_read:int regnum, char *buf:regnum, buf:
-M:::void:register_write:int regnum, char *buf:regnum, buf:
+M:::void:pseudo_register_read:struct regcache *regcache, int cookednum, void *buf:regcache, cookednum, buf:
+M:::void:pseudo_register_write:struct regcache *regcache, int cookednum, const void *buf:regcache, cookednum, buf:
 #
 v:2:NUM_REGS:int:num_regs::::0:-1
 # This macro gives the number of pseudo-registers that live in the
@@ -514,14 +514,6 @@ f:2:REGISTER_CONVERT_TO_RAW:void:register_convert_to_raw:struct type *type, int 
 f:1:CONVERT_REGISTER_P:int:convert_register_p:int regnum:regnum::0:legacy_convert_register_p::0
 f:1:REGISTER_TO_VALUE:void:register_to_value:int regnum, struct type *type, char *from, char *to:regnum, type, from, to::0:legacy_register_to_value::0
 f:1:VALUE_TO_REGISTER:void:value_to_register:struct type *type, int regnum, char *from, char *to:type, regnum, from, to::0:legacy_value_to_register::0
-# This function is called when the value of a pseudo-register needs to
-# be updated.  Typically it will be defined on a per-architecture
-# basis.
-F:2:FETCH_PSEUDO_REGISTER:void:fetch_pseudo_register:int regnum:regnum:
-# This function is called when the value of a pseudo-register needs to
-# be set or stored.  Typically it will be defined on a
-# per-architecture basis.
-F:2:STORE_PSEUDO_REGISTER:void:store_pseudo_register:int regnum:regnum:
 #
 f:2:POINTER_TO_ADDRESS:CORE_ADDR:pointer_to_address:struct type *type, void *buf:type, buf:::unsigned_pointer_to_address::0
 f:2:ADDRESS_TO_POINTER:void:address_to_pointer:struct type *type, void *buf, CORE_ADDR addr:type, buf, addr:::unsigned_address_to_pointer::0
@@ -1238,6 +1230,7 @@ cat <<EOF
 #include "floatformat.h"
 
 #include "gdb_assert.h"
+#include "gdb_string.h"
 #include "gdb-events.h"
 
 /* Static function declarations */

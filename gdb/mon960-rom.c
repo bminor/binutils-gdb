@@ -30,6 +30,7 @@
 #include "symtab.h"
 #include "symfile.h"		/* for generic_load */
 #include "inferior.h"		/* for write_pc() */
+#include "gdb_string.h"
 
 #define USE_GENERIC_LOAD
 

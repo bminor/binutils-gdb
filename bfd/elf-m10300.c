@@ -134,10 +134,6 @@ static void compute_function_info
   PARAMS ((bfd *, struct elf32_mn10300_link_hash_entry *,
 	   bfd_vma, unsigned char *));
 
-/* We have to use RELA instructions since md_apply_fix3 in the assembler
-   does absolutely nothing.  */
-#define USE_RELA
-
 static reloc_howto_type elf_mn10300_howto_table[] = {
   /* Dummy relocation.  Does nothing.  */
   HOWTO (R_MN10300_NONE,

@@ -40,7 +40,7 @@
 #include "linespec.h"
 #include "filenames.h"		/* for FILENAME_CMP */
 
-#include "obstack.h"
+#include "gdb_obstack.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -438,24 +438,26 @@ symbol_init_demangled_name (struct general_symbol_info *gsymbol,
           gsymbol->language_specific.cplus_specific.demangled_name = NULL;
         }
     }
-  if (demangled == NULL
-      && (gsymbol->language == language_chill
-          || gsymbol->language == language_auto))
-    {
-      demangled =
-        chill_demangle (gsymbol->name);
-      if (demangled != NULL)
-        {
-          gsymbol->language = language_chill;
-          gsymbol->language_specific.chill_specific.demangled_name =
-            obsavestring (demangled, strlen (demangled), obstack);
-          xfree (demangled);
-        }
-      else
-        {
-          gsymbol->language_specific.chill_specific.demangled_name = NULL;
-        }
-    }
+#if 0
+  /* OBSOLETE if (demangled == NULL */
+  /* OBSOLETE     && (gsymbol->language == language_chill */
+  /* OBSOLETE         || gsymbol->language == language_auto)) */
+  /* OBSOLETE   { */
+  /* OBSOLETE     demangled = */
+  /* OBSOLETE       chill_demangle (gsymbol->name); */
+  /* OBSOLETE     if (demangled != NULL) */
+  /* OBSOLETE       { */
+  /* OBSOLETE         gsymbol->language = language_chill; */
+  /* OBSOLETE         gsymbol->language_specific.chill_specific.demangled_name = */
+  /* OBSOLETE           obsavestring (demangled, strlen (demangled), obstack); */
+  /* OBSOLETE         xfree (demangled); */
+  /* OBSOLETE       } */
+  /* OBSOLETE     else */
+  /* OBSOLETE       { */
+  /* OBSOLETE         gsymbol->language_specific.chill_specific.demangled_name = NULL; */
+  /* OBSOLETE       } */
+  /* OBSOLETE   } */
+#endif
 }
 
 
@@ -679,11 +681,26 @@ lookup_symbol (const char *name, const struct block *block,
 	       const namespace_enum namespace, int *is_a_field_of_this,
 	       struct symtab **symtab)
 {
-  char *modified_name = NULL;
-  char *modified_name2 = NULL;
+  char *demangled_name = NULL;
+  const char *modified_name = NULL;
   const char *mangled_name = NULL;
   int needtofreename = 0;
   struct symbol *returnval;
+
+  modified_name = name;
+
+  /* If we are using C++ language, demangle the name before doing a lookup, so
+     we can always binary search. */
+  if (current_language->la_language == language_cplus)
+    {
+      demangled_name = cplus_demangle (name, DMGL_ANSI | DMGL_PARAMS);
+      if (demangled_name)
+	{
+	  mangled_name = name;
+	  modified_name = demangled_name;
+	  needtofreename = 1;
+	}
+    }
 
   if (case_sensitivity == case_sensitive_off)
     {
@@ -697,26 +714,11 @@ lookup_symbol (const char *name, const struct block *block,
       copy[len] = 0;
       modified_name = copy;
     }
-  else 
-      modified_name = (char *) name;
-
-  /* If we are using C++ language, demangle the name before doing a lookup, so
-     we can always binary search. */
-  if (current_language->la_language == language_cplus)
-    {
-      modified_name2 = cplus_demangle (modified_name, DMGL_ANSI | DMGL_PARAMS);
-      if (modified_name2)
-	{
-	  mangled_name = name;
-	  modified_name = modified_name2;
-	  needtofreename = 1;
-	}
-    }
 
   returnval = lookup_symbol_aux (modified_name, mangled_name, block,
 				 namespace, is_a_field_of_this, symtab);
   if (needtofreename)
-    xfree (modified_name2);
+    xfree (demangled_name);
 
   return returnval;	 
 }

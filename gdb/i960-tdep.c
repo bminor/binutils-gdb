@@ -32,6 +32,7 @@
 #include "gdbcore.h"
 #include "inferior.h"
 #include "regcache.h"
+#include "gdb_string.h"
 
 static CORE_ADDR next_insn (CORE_ADDR memaddr,
 			    unsigned int *pword1, unsigned int *pword2);

@@ -468,9 +468,6 @@ fr30_final_link_relocate (howto, input_bfd, input_section, contents, rel, reloca
 }
 
 /* Relocate an FR30 ELF section.
-   There is some attempt to make this function usable for many architectures,
-   both USE_REL and USE_RELA ['twould be nice if such a critter existed],
-   if only to serve as a learning tool.
 
    The RELOCATE_SECTION function is called by the new ELF backend linker
    to handle the relocations for a section.

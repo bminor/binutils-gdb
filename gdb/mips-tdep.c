@@ -64,6 +64,7 @@ enum mips_abi
     MIPS_ABI_UNKNOWN = 0,
     MIPS_ABI_N32,
     MIPS_ABI_O32,
+    MIPS_ABI_N64,
     MIPS_ABI_O64,
     MIPS_ABI_EABI32,
     MIPS_ABI_EABI64,
@@ -76,6 +77,7 @@ static const char *mips_abi_strings[] = {
   "auto",
   "n32",
   "o32",
+  "n64",
   "o64",
   "eabi32",
   "eabi64",
@@ -481,6 +483,42 @@ mips_register_convert_to_raw (struct type *virtual_type, int n,
 	    TYPE_LENGTH (virtual_type));
 }
 
+/* Return the GDB type object for the "standard" data type
+   of data in register REG.  
+   
+   Note: kevinb/2002-08-01: The definition below should faithfully
+   reproduce the behavior of each of the REGISTER_VIRTUAL_TYPE
+   definitions found in config/mips/tm-*.h.  I'm concerned about
+   the ``FCRCS_REGNUM <= reg && reg <= LAST_EMBED_REGNUM'' clause
+   though.  In some cases FP_REGNUM is in this range, and I doubt
+   that this code is correct for the 64-bit case.  */
+
+static struct type *
+mips_register_virtual_type (int reg)
+{
+  if (FP0_REGNUM <= reg && reg < FP0_REGNUM + 32)
+    {
+      /* Floating point registers...  */
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	return builtin_type_ieee_double_big;
+      else
+	return builtin_type_ieee_double_little;
+    }
+  else if (reg == PS_REGNUM /* CR */)
+    return builtin_type_uint32;
+  else if (FCRCS_REGNUM <= reg && reg <= LAST_EMBED_REGNUM)
+    return builtin_type_uint32;
+  else
+    {
+      /* Everything else...
+         Return type appropriate for width of register.  */
+      if (MIPS_REGSIZE == TYPE_LENGTH (builtin_type_uint64))
+	return builtin_type_uint64;
+      else
+	return builtin_type_uint32;
+    }
+}
+
 /* Should the upper word of 64-bit addresses be zeroed? */
 enum auto_boolean mask_address_var = AUTO_BOOLEAN_AUTO;
 
@@ -526,13 +564,51 @@ show_mask_address (char *cmd, int from_tty, struct cmd_list_element *c)
 }
 
 /* Should call_function allocate stack space for a struct return?  */
+
 int
-mips_use_struct_convention (int gcc_p, struct type *type)
+mips_eabi_use_struct_convention (int gcc_p, struct type *type)
 {
-  if (MIPS_EABI)
-    return (TYPE_LENGTH (type) > 2 * MIPS_SAVED_REGSIZE);
-  else
-    return 1;			/* Structures are returned by ref in extra arg0 */
+  return (TYPE_LENGTH (type) > 2 * MIPS_SAVED_REGSIZE);
+}
+
+int
+mips_n32n64_use_struct_convention (int gcc_p, struct type *type)
+{
+  return 1;	/* Structures are returned by ref in extra arg0.  */
+}
+
+int
+mips_o32_use_struct_convention (int gcc_p, struct type *type)
+{
+  return 1;	/* Structures are returned by ref in extra arg0.  */
+}
+
+/* Should call_function pass struct by reference? 
+   For each architecture, structs are passed either by
+   value or by reference, depending on their size.  */
+
+static int
+mips_eabi_reg_struct_has_addr (int gcc_p, struct type *type)
+{
+  enum type_code typecode = TYPE_CODE (check_typedef (type));
+  int len = TYPE_LENGTH (check_typedef (type));
+
+  if (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
+    return (len > MIPS_SAVED_REGSIZE);
+
+  return 0;
+}
+
+static int
+mips_n32n64_reg_struct_has_addr (int gcc_p, struct type *type)
+{
+  return 0;	/* Assumption: N32/N64 never passes struct by ref.  */
+}
+
+int
+mips_o32_reg_struct_has_addr (int gcc_p, struct type *type)
+{
+  return 0;	/* Assumption: O32/O64 never passes struct by ref.  */
 }
 
 /* Tell if the program counter value in MEMADDR is in a MIPS16 function.  */
@@ -1035,7 +1111,6 @@ static CORE_ADDR
 add_offset_16 (CORE_ADDR pc, int offset)
 {
   return ((offset << 2) | ((pc + 2) & (0xf0000000)));
-
 }
 
 static CORE_ADDR
@@ -1183,7 +1258,7 @@ mips_next_pc (CORE_ADDR pc)
 /* Guaranteed to set fci->saved_regs to some values (it never leaves it
    NULL).  */
 
-void
+static void
 mips_find_saved_regs (struct frame_info *fci)
 {
   int ireg;
@@ -1333,9 +1408,20 @@ mips_find_saved_regs (struct frame_info *fci)
      were saved.  */
   reg_position = fci->frame + PROC_FREG_OFFSET (proc_desc);
 
-  /* The freg_offset points to where the first *double* register
-     is saved.  So skip to the high-order word. */
-  if (!GDB_TARGET_IS_MIPS64)
+  /* Apparently, the freg_offset gives the offset to the first 64 bit
+     saved.
+
+     When the ABI specifies 64 bit saved registers, the FREG_OFFSET
+     designates the first saved 64 bit register.
+
+     When the ABI specifies 32 bit saved registers, the ``64 bit saved
+     DOUBLE'' consists of two adjacent 32 bit registers, Hence
+     FREG_OFFSET, designates the address of the lower register of the
+     register pair.  Adjust the offset so that it designates the upper
+     register of the pair -- i.e., the address of the first saved 32
+     bit register.  */
+
+  if (MIPS_SAVED_REGSIZE == 4)
     reg_position += MIPS_SAVED_REGSIZE;
 
   /* Fill in the offsets for the float registers which float_mask says
@@ -1348,6 +1434,23 @@ mips_find_saved_regs (struct frame_info *fci)
       }
 
   fci->saved_regs[PC_REGNUM] = fci->saved_regs[RA_REGNUM];
+}
+
+/* Set up the 'saved_regs' array.  This is a data structure containing
+   the addresses on the stack where each register has been saved, for
+   each stack frame.  Registers that have not been saved will have
+   zero here.  The stack pointer register is special:  rather than the
+   address where the stack register has been saved, saved_regs[SP_REGNUM]
+   will have the actual value of the previous frame's stack register.  */
+
+static void
+mips_frame_init_saved_regs (struct frame_info *frame)
+{
+  if (frame->saved_regs == NULL)
+    {
+      mips_find_saved_regs (frame);
+    }
+  frame->saved_regs[SP_REGNUM] = frame->frame;
 }
 
 static CORE_ADDR
@@ -2108,7 +2211,7 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame, int cur_frame)
 	{
 	  struct symtab_and_line val;
 	  struct symbol *proc_symbol =
-	  PROC_DESC_IS_DUMMY (proc_desc) ? 0 : PROC_SYMBOL (proc_desc);
+	    PROC_DESC_IS_DUMMY (proc_desc) ? 0 : PROC_SYMBOL (proc_desc);
 
 	  if (proc_symbol)
 	    {
@@ -2120,8 +2223,8 @@ find_proc_desc (CORE_ADDR pc, struct frame_info *next_frame, int cur_frame)
 	  if (!proc_symbol || pc < val.pc)
 	    {
 	      mips_extra_func_info_t found_heuristic =
-	      heuristic_proc_desc (PROC_LOW_ADDR (proc_desc),
-				   pc, next_frame, cur_frame);
+		heuristic_proc_desc (PROC_LOW_ADDR (proc_desc),
+				     pc, next_frame, cur_frame);
 	      if (found_heuristic)
 		proc_desc = found_heuristic;
 	    }
@@ -2154,9 +2257,10 @@ static CORE_ADDR
 get_frame_pointer (struct frame_info *frame,
 		   mips_extra_func_info_t proc_desc)
 {
-  return ADDR_BITS_REMOVE (
-		   read_next_frame_reg (frame, PROC_FRAME_REG (proc_desc)) +
-	     PROC_FRAME_OFFSET (proc_desc) - PROC_FRAME_ADJUST (proc_desc));
+  return ADDR_BITS_REMOVE (read_next_frame_reg (frame, 
+						PROC_FRAME_REG (proc_desc)) +
+			   PROC_FRAME_OFFSET (proc_desc) - 
+			   PROC_FRAME_ADJUST (proc_desc));
 }
 
 mips_extra_func_info_t cached_proc_desc;
@@ -2203,7 +2307,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 
   /* Use proc_desc calculated in frame_chain */
   mips_extra_func_info_t proc_desc =
-  fci->next ? cached_proc_desc : find_proc_desc (fci->pc, fci->next, 1);
+    fci->next ? cached_proc_desc : find_proc_desc (fci->pc, fci->next, 1);
 
   fci->extra_info = (struct frame_extra_info *)
     frame_obstack_alloc (sizeof (struct frame_extra_info));
@@ -2293,7 +2397,7 @@ fp_register_arg_p (enum type_code typecode, struct type *arg_type)
 	       && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
 	       && TYPE_NFIELDS (arg_type) == 1
 	       && TYPE_CODE (TYPE_FIELD_TYPE (arg_type, 0)) == TYPE_CODE_FLT))
-	   && MIPS_FPU_TYPE != MIPS_FPU_NONE);
+	  && MIPS_FPU_TYPE != MIPS_FPU_NONE);
 }
 
 /* On o32, argument passing in GPRs depends on the alignment of the type being
@@ -2337,6 +2441,7 @@ mips_push_arguments (int nargs,
   int argnum;
   int len = 0;
   int stack_offset = 0;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   /* Macros to round N up or down to the next A boundary; A must be
      a power of two. */
@@ -2513,7 +2618,7 @@ mips_push_arguments (int nargs,
 				  (len % MIPS_SAVED_REGSIZE != 0));
 	  /* Structures should be aligned to eight bytes (even arg registers)
 	     on MIPS_ABI_O32 if their first member has double precision. */
-	  if (gdbarch_tdep (current_gdbarch)->mips_abi == MIPS_ABI_O32
+	  if (tdep->mips_abi == MIPS_ABI_O32
 	      && mips_type_needs_double_align (arg_type))
 	    {
 	      if ((argreg & 1))
@@ -4250,6 +4355,8 @@ mips_find_abi_section (bfd *abfd, asection *sect, void *obj)
     *abip = MIPS_ABI_O32;
   else if (strcmp (name, ".mdebug.abiN32") == 0)
     *abip = MIPS_ABI_N32;
+  else if (strcmp (name, ".mdebug.abiN64") == 0)
+    *abip = MIPS_ABI_N64;
   else if (strcmp (name, ".mdebug.abiO64") == 0)
     *abip = MIPS_ABI_O64;
   else if (strcmp (name, ".mdebug.eabi32") == 0)
@@ -4336,7 +4443,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   if (info.abfd == NULL && arches != NULL)
     mips_abi = gdbarch_tdep (arches->gdbarch)->found_abi;
 
-  /* Try the architecture for any hint of the corect ABI */
+  /* Try the architecture for any hint of the correct ABI.  */
   if (mips_abi == MIPS_ABI_UNKNOWN
       && info.bfd_arch_info != NULL
       && info.bfd_arch_info->arch == bfd_arch_mips)
@@ -4352,7 +4459,14 @@ mips_gdbarch_init (struct gdbarch_info info,
 	  break;
 	case bfd_mach_mips8000:
 	case bfd_mach_mips10000:
-	  mips_abi = MIPS_ABI_N32;
+	  /* On Irix, ELF64 executables use the N64 ABI.  The
+	     pseudo-sections which describe the ABI aren't present
+	     on IRIX.  (Even for executables created by gcc.)  */
+	  if (bfd_get_flavour (info.abfd) == bfd_target_elf_flavour
+	      && elf_elfheader (info.abfd)->e_ident[EI_CLASS] == ELFCLASS64)
+	    mips_abi = MIPS_ABI_N64;
+	  else
+	    mips_abi = MIPS_ABI_N32;
 	  break;
 	}
     }
@@ -4430,6 +4544,10 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
+      set_gdbarch_reg_struct_has_addr (gdbarch, 
+				       mips_o32_reg_struct_has_addr);
+      set_gdbarch_use_struct_convention (gdbarch, 
+					 mips_o32_use_struct_convention);
       break;
     case MIPS_ABI_O64:
       tdep->mips_default_saved_regsize = 8;
@@ -4443,6 +4561,10 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
+      set_gdbarch_reg_struct_has_addr (gdbarch, 
+				       mips_o32_reg_struct_has_addr);
+      set_gdbarch_use_struct_convention (gdbarch, 
+					 mips_o32_use_struct_convention);
       break;
     case MIPS_ABI_EABI32:
       tdep->mips_default_saved_regsize = 4;
@@ -4456,6 +4578,10 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
+      set_gdbarch_reg_struct_has_addr (gdbarch, 
+				       mips_eabi_reg_struct_has_addr);
+      set_gdbarch_use_struct_convention (gdbarch, 
+					 mips_eabi_use_struct_convention);
       break;
     case MIPS_ABI_EABI64:
       tdep->mips_default_saved_regsize = 8;
@@ -4469,15 +4595,19 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_bit (gdbarch, 64);
       set_gdbarch_ptr_bit (gdbarch, 64);
       set_gdbarch_long_long_bit (gdbarch, 64);
+      set_gdbarch_reg_struct_has_addr (gdbarch, 
+				       mips_eabi_reg_struct_has_addr);
+      set_gdbarch_use_struct_convention (gdbarch, 
+					 mips_eabi_use_struct_convention);
       break;
     case MIPS_ABI_N32:
-      tdep->mips_default_saved_regsize = 4;
+      tdep->mips_default_saved_regsize = 8;
       tdep->mips_default_stack_argsize = 8;
       tdep->mips_fp_register_double = 1;
       tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 8 - 1;
       tdep->mips_regs_have_home_p = 0;
-      tdep->gdb_target_is_mips64 = 0;
+      tdep->gdb_target_is_mips64 = 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
@@ -4493,6 +4623,40 @@ mips_gdbarch_init (struct gdbarch_info info,
 	tm_print_insn_info.mach = info.bfd_arch_info->mach;
       else
 	tm_print_insn_info.mach = bfd_mach_mips8000;
+
+      set_gdbarch_use_struct_convention (gdbarch, 
+					 mips_n32n64_use_struct_convention);
+      set_gdbarch_reg_struct_has_addr (gdbarch, 
+				       mips_n32n64_reg_struct_has_addr);
+      break;
+    case MIPS_ABI_N64:
+      tdep->mips_default_saved_regsize = 8;
+      tdep->mips_default_stack_argsize = 8;
+      tdep->mips_fp_register_double = 1;
+      tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
+      tdep->mips_last_fp_arg_regnum = FPA0_REGNUM + 8 - 1;
+      tdep->mips_regs_have_home_p = 0;
+      tdep->gdb_target_is_mips64 = 1;
+      tdep->default_mask_address_p = 0;
+      set_gdbarch_long_bit (gdbarch, 64);
+      set_gdbarch_ptr_bit (gdbarch, 64);
+      set_gdbarch_long_long_bit (gdbarch, 64);
+
+      /* Set up the disassembler info, so that we get the right
+	 register names from libopcodes.  */
+      tm_print_insn_info.flavour = bfd_target_elf_flavour;
+      tm_print_insn_info.arch = bfd_arch_mips;
+      if (info.bfd_arch_info != NULL
+	  && info.bfd_arch_info->arch == bfd_arch_mips
+	  && info.bfd_arch_info->mach)
+	tm_print_insn_info.mach = info.bfd_arch_info->mach;
+      else
+	tm_print_insn_info.mach = bfd_mach_mips8000;
+
+      set_gdbarch_use_struct_convention (gdbarch, 
+					 mips_n32n64_use_struct_convention);
+      set_gdbarch_reg_struct_has_addr (gdbarch, 
+				       mips_n32n64_reg_struct_has_addr);
       break;
     default:
       internal_error (__FILE__, __LINE__,
@@ -4568,6 +4732,7 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   /* Initialize a frame */
   set_gdbarch_init_extra_frame_info (gdbarch, mips_init_extra_frame_info);
+  set_gdbarch_frame_init_saved_regs (gdbarch, mips_frame_init_saved_regs);
 
   /* MIPS version of CALL_DUMMY */
 
@@ -4601,6 +4766,10 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_pointer_to_address (gdbarch, signed_pointer_to_address);
   set_gdbarch_address_to_pointer (gdbarch, address_to_signed_pointer);
   set_gdbarch_integer_to_address (gdbarch, mips_integer_to_address);
+
+  /* There are MIPS targets which do not yet use this since they still
+     define REGISTER_VIRTUAL_TYPE.  */
+  set_gdbarch_register_virtual_type (gdbarch, mips_register_virtual_type);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch, osabi);
@@ -5093,6 +5262,7 @@ This option can be set to one of:\n\
      "  o32\n"
      "  o64\n"
      "  n32\n"
+     "  n64\n"
      "  eabi32\n"
      "  eabi64",
      &setmipscmdlist);
