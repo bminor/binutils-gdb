@@ -336,7 +336,7 @@ proc test_dis { command var } {
 
 # See if we can look at a global variable, three ways
 gdb_test "print globalvar" ".* = 11" "look at global variable"
-test_dis "x/i globalvar" "globalvar"
+test_dis "x/i &globalvar" "globalvar"
 test_dis "disassem &globalvar &globalvar+1" "globalvar"
 
 # See if we can look at a static variable, three ways

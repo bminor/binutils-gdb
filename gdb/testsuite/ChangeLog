@@ -1,3 +1,8 @@
+2003-06-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.asm/asm-source.exp: Dissassemble from &globalvar instead
+	of globalvar.
+
 2003-06-01  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.asm/asm-source.exp: Check for memory read errors in
