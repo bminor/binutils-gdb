@@ -1,3 +1,10 @@
+<<<<<<< ChangeLog
+Tue Jun  8 14:42:10 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
+
+	* Move config/m68k/tm-m68k.h (FRAME_FIND_SAVED_REGS) to
+	m68k-tdep.c (m68k_find_saved_regs).  Don't duplicate code between
+	68881 and non-68881 cases.  Check for a pair of movel instructions.
+=======
 Tue Jun  8 14:52:55 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	First cut at sparc-vxworks targetting.
@@ -7,6 +14,7 @@ Tue Jun  8 14:52:55 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 	* remote-eb.c, remote.c: symfile.h requires bfd.h so include it.
 
 Tue Jun  8 14:42:10 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
+>>>>>>> 1.1342
 
 	* config/m68k/xm-news.h: add "extern int errno".
 
