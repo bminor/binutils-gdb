@@ -7,6 +7,7 @@
 	* binutils-all/readelf.s: New file: Expected results for 'readelf -S'
 	* binutils-all/readelf.ss: New file: Expected results for 'readelf -s'
 	* binutils-all/readelf.r: New file: Expected results for 'readelf -r'
+	* binutils-all/readelf.wi: New file: Expected results for 'readelf -wi'
 
 Wed Dec  9 19:11:39 1998  Jeffrey A Law  (law@cygnus.com)
 

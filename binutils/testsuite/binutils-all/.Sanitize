@@ -29,6 +29,12 @@ hppa
 nm.exp
 objcopy.exp
 objdump.exp
+readelf.exp
+readelf.h
+readelf.s
+readelf.ss
+readelf.r
+readelf.wi
 size.exp
 testprog.c
 
