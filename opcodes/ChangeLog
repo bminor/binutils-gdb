@@ -1,3 +1,10 @@
+2002-05-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (sh-dis.lo): Don't put make commands in deps.
+	* Makefile.in: Regenerate.
+	* arc-dis.c: Use #include "" instead of <> for local header files.
+	* m68k-dis.c: Likewise.
+
 Wed May 22 20:11:51 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* Makefile.am (sh-dis.lo): Compile with @archdefs@.
