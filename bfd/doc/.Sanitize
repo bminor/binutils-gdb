@@ -24,7 +24,8 @@ echo Sanitizing `pwd`.
 # with rm -rf.
 
 Things-to-keep:
-Makefile
+Makefile.in
+configure.in
 awkscan
 awkscan-ip
 awkscan-p
@@ -53,7 +54,10 @@ Do-last:
 echo Done in `pwd`.
 
 # $Log$
-# Revision 1.1  1991/08/23 09:06:52  gnu
+# Revision 1.2  1991/11/15 03:29:15  bothner
+# Add Makefile.in, configure.in.  Remove Makefile.
+#
+# Revision 1.1  1991/08/23  09:06:52  gnu
 # Initial revision
 #
 
