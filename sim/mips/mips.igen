@@ -78,6 +78,7 @@
 //
 
 
+
 000000,5.RS,5.RT,5.RD,00000,100000:SPECIAL:32::ADD
 "add r<RD>, r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -100,6 +101,7 @@
   ALU32_ADD (GPR[RT]);
   ALU32_END (GPR[RD]);
 }
+
 
 
 001000,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ADDI
@@ -126,6 +128,13 @@
 }
 
 
+
+:function:::void:do_addiu:int rs, int rt, unsigned16 immediate
+{
+  signed32 temp = GPR[rs] + EXTEND16 (immediate);
+  GPR[rt] = EXTEND32 (temp);
+}
+
 001001,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ADDIU
 "addu r<RT>, r<RS>, <IMMEDIATE>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -144,10 +153,16 @@
 *tx19:
 // end-sanitize-tx19
 {
-  signed32 temp = GPR[RS] + EXTEND16 (IMMEDIATE);
-  GPR[RT] = EXTEND32 (temp);
+  do_addiu (SD_, RS, RT, IMMEDIATE);
 }
 
+
+
+:function:::void:do_addu:int rs, int rt, int rd
+{
+  signed32 temp = GPR[rs] + GPR[rt];
+  GPR[rd] = EXTEND32 (temp);
+}
 
 000000,5.RS,5.RT,5.RD,00000,100001:SPECIAL:32::ADDU
 "addu r<RD>, r<RS>, r<RT>"
@@ -167,10 +182,15 @@
 *tx19:
 // end-sanitize-tx19
 {
-  signed32 temp = GPR[RS] + GPR[RT];
-  GPR[RD] = EXTEND32 (temp);
+  do_addu (SD_, RS, RT, RD);
 }
 
+
+
+:function:::void:do_and:int rs, int rt, int rd
+{
+  GPR[rd] = GPR[rs] & GPR[rt];
+}
 
 000000,5.RS,5.RT,5.RD,00000,100100:SPECIAL:32::AND
 "and r<RD>, r<RS>, r<RT>"
@@ -190,8 +210,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RD] = GPR[RS] & GPR[RT];
+  do_and (SD_, RS, RT, RD);
 }
+
 
 
 001100,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::ANDI
@@ -216,6 +237,7 @@
 }
 
 
+
 000100,5.RS,5.RT,16.OFFSET:NORMAL:32::BEQ
 "beq r<RS>, r<RT>, <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -238,6 +260,7 @@
   if ((signed_word) GPR[RS] == (signed_word) GPR[RT])
     DELAY_SLOT (NIA + offset);
 }
+
 
 
 010100,5.RS,5.RT,16.OFFSET:NORMAL:32::BEQL
@@ -268,6 +291,7 @@
 }
 
 
+
 000001,5.RS,00001,16.OFFSET:REGIMM:32::BGEZ
 "bgez r<RS>, <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -290,6 +314,7 @@
   if ((signed_word) GPR[RS] >= 0)
     DELAY_SLOT (NIA + offset);
 }
+
 
 
 000001,5.RS!31,10001,16.OFFSET:REGIMM:32::BGEZAL
@@ -315,6 +340,7 @@
   if ((signed_word) GPR[RS] >= 0)
     DELAY_SLOT (NIA + offset);
 }
+
 
 
 000001,5.RS!31,10011,16.OFFSET:REGIMM:32::BGEZALL
@@ -348,6 +374,7 @@
 }
 
 
+
 000001,5.RS,00011,16.OFFSET:REGIMM:32::BGEZL
 "bgezl r<RS>, <OFFSET>"
 *mipsII:
@@ -376,6 +403,7 @@
 }
 
 
+
 000111,5.RS,00000,16.OFFSET:NORMAL:32::BGTZ
 "bgtz r<RS>, <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -398,6 +426,7 @@
   if ((signed_word) GPR[RS] > 0)
     DELAY_SLOT (NIA + offset);
 }
+
 
 
 010111,5.RS,00000,16.OFFSET:NORMAL:32::BGTZL
@@ -430,6 +459,7 @@
 }
 
 
+
 000110,5.RS,00000,16.OFFSET:NORMAL:32::BLEZ
 "blez r<RS>, <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -454,6 +484,7 @@
   if ((signed_word) GPR[RS] <= 0)
     DELAY_SLOT (NIA + offset);
 }
+
 
 
 010110,5.RS,00000,16.OFFSET:NORMAL:32::BLEZL
@@ -484,6 +515,7 @@
 }
 
 
+
 000001,5.RS,00000,16.OFFSET:REGIMM:32::BLTZ
 "bltz r<RS>, <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -506,6 +538,7 @@
   if ((signed_word) GPR[RS] < 0)
     DELAY_SLOT (NIA + offset);
 }
+
 
 
 000001,5.RS!31,10000,16.OFFSET:REGIMM:32::BLTZAL
@@ -535,6 +568,7 @@
 }
 
 
+
 000001,5.RS!31,10010,16.OFFSET:REGIMM:32::BLTZALL
 "bltzall r<RS>, <OFFSET>"
 *mipsII:
@@ -562,6 +596,7 @@
   else
     NULLIFY_NEXT_INSTRUCTION ();
 }
+
 
 
 000001,5.RS,00010,16.OFFSET:REGIMM:32::BLTZL
@@ -594,6 +629,7 @@
 }
 
 
+
 000101,5.RS,5.RT,16.OFFSET:NORMAL:32::BNE
 "bne r<RS>, r<RT>, <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -616,6 +652,7 @@
   if ((signed_word) GPR[RS] != (signed_word) GPR[RT])
     DELAY_SLOT (NIA + offset);
 }
+
 
 
 010101,5.RS,5.RT,16.OFFSET:NORMAL:32::BNEL
@@ -646,6 +683,7 @@
 }
 
 
+
 000000,20.CODE,001101:SPECIAL:32::BREAK
 "break"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -668,6 +706,7 @@
 }
 
 
+
 0100,ZZ!0!1!3,26.COP_FUN:NORMAL:32::COPz
 "cop<ZZ> <COP_FUN>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -681,6 +720,7 @@
 {
   DecodeCoproc (instruction_0);
 }
+
 
 
 000000,5.RS,5.RT,5.RD,00000,101100:SPECIAL:64::DADD
@@ -708,6 +748,7 @@
 }
 
 
+
 011000,5.RS,5.RT,16.IMMEDIATE:NORMAL:64::DADDI
 "daddi r<RT>, r<RS>, <IMMEDIATE>"
 *mipsIII:
@@ -732,6 +773,12 @@
 }
 
 
+
+:function:64::void:do_daddiu:int rs, int rt, unsigned16 immediate
+{
+  GPR[rt] = GPR[rs] + EXTEND16 (immediate);
+}
+
 011001,5.RS,5.RT,16.IMMEDIATE:NORMAL:64::DADDIU
 "daddu r<RT>, r<RS>, <IMMEDIATE>"
 *mipsIII:
@@ -750,9 +797,15 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RT] = GPR[RS] + EXTEND16 (IMMEDIATE);
+  do_daddiu (SD_, RS, RT, IMMEDIATE);
 }
 
+
+
+:function:::void:do_daddu:int rs, int rt, int rd
+{
+  GPR[rd] = GPR[rs] + GPR[rt];
+}
 
 000000,5.RS,5.RT,5.RD,00000,101101:SPECIAL:64::DADDU
 "daddu r<RD>, r<RS>, r<RT>"
@@ -772,9 +825,34 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RD] = GPR[RS] + GPR[RT];
+  do_daddu (SD_, RS, RT, RD);
 }
 
+
+
+:function:64::void:do_ddiv:int rs, int rt
+{
+  CHECKHILO ("Division");
+  {
+    signed64 n = GPR[rs];
+    signed64 d = GPR[rt];
+    if (d == 0)
+      {
+	LO = SIGNED64 (0x8000000000000000);
+	HI = 0;
+      }
+    else if (d == -1 && n == SIGNED64 (0x8000000000000000))
+      {
+	LO = SIGNED64 (0x8000000000000000);
+	HI = 0;
+      }
+    else
+      {
+	LO = (n / d);
+	HI = (n % d);
+      }
+  }
+}
 
 000000,5.RS,5.RT,0000000000011110:SPECIAL:64::DDIV
 "ddiv r<RS>, r<RT>"
@@ -794,16 +872,18 @@
 *tx19:
 // end-sanitize-tx19
 {
+  do_ddiv (SD_, RS, RT);
+}
+
+
+
+:function:64::void:do_ddivu:int rs, int rt
+{
   CHECKHILO ("Division");
   {
-    signed64 n = GPR[RS];
-    signed64 d = GPR[RT];
+    unsigned64 n = GPR[rs];
+    unsigned64 d = GPR[rt];
     if (d == 0)
-      {
-	LO = SIGNED64 (0x8000000000000000);
-	HI = 0;
-      }
-    else if (d == -1 && n == SIGNED64 (0x8000000000000000))
       {
 	LO = SIGNED64 (0x8000000000000000);
 	HI = 0;
@@ -815,8 +895,6 @@
       }
   }
 }
-
-
 
 000000,5.RS,5.RT,0000000000,011111:SPECIAL:64::DDIVU
 "ddivu r<RS>, r<RT>"
@@ -833,23 +911,34 @@
 *tx19:
 // end-sanitize-tx19
 {
-  CHECKHILO ("Division");
+  do_ddivu (SD_, RS, RT);
+}
+
+
+
+:function:::void:do_div:int rs, int rt
+{
+  CHECKHILO("Division");
   {
-    unsigned64 n = GPR[RS];
-    unsigned64 d = GPR[RT];
+    signed32 n = GPR[rs];
+    signed32 d = GPR[rt];
     if (d == 0)
       {
-	LO = SIGNED64 (0x8000000000000000);
-	HI = 0;
+	LO = EXTEND32 (0x80000000);
+	HI = EXTEND32 (0);
+      }
+    else if (n == SIGNED32 (0x80000000) && d == -1)
+      {
+	LO = EXTEND32 (0x80000000);
+	HI = EXTEND32 (0);
       }
     else
       {
-	LO = (n / d);
-	HI = (n % d);
+	LO = EXTEND32 (n / d);
+	HI = EXTEND32 (n % d);
       }
   }
 }
-
 
 000000,5.RS,5.RT,0000000000011010:SPECIAL:32::DIV
 "div r<RS>, r<RT>"
@@ -869,28 +958,29 @@
 *tx19:
 // end-sanitize-tx19
 {
-  CHECKHILO("Division");
+  do_div (SD_, RS, RT);
+}
+
+
+
+:function:::void:do_divu:int rs, int rt
+{
+  CHECKHILO ("Division");
   {
-    signed32 n = GPR[RS];
-    signed32 d = GPR[RT];
+    unsigned32 n = GPR[rs];
+    unsigned32 d = GPR[rt];
     if (d == 0)
       {
 	LO = EXTEND32 (0x80000000);
 	HI = EXTEND32 (0);
       }
-    else if (n == SIGNED32 (0x80000000) && d == -1)
-      {
-	LO = EXTEND32 (0x80000000);
-	HI = EXTEND32 (0);
-      }
-    else
-      {
-	LO = EXTEND32 (n / d);
-	HI = EXTEND32 (n % d);
-      }
+   else
+     {
+       LO = EXTEND32 (n / d);
+       HI = EXTEND32 (n % d);
+     }
   }
 }
-
 
 000000,5.RS,5.RT,0000000000011011:SPECIAL:32::DIVU
 "divu r<RS>, r<RT>"
@@ -910,25 +1000,12 @@
 *tx19:
 // end-sanitize-tx19
 {
-  CHECKHILO ("Division");
-  {
-    unsigned32 n = GPR[RS];
-    unsigned32 d = GPR[RT];
-    if (d == 0)
-      {
-	LO = EXTEND32 (0x80000000);
-	HI = EXTEND32 (0);
-      }
-   else
-     {
-       LO = EXTEND32 (n / d);
-       HI = EXTEND32 (n % d);
-     }
-  }
+  do_divu (SD_, RS, RT);
 }
 
 
-:function:::void:do_dmult:int rs, int rt, int rd, int signed_p
+
+:function:::void:do_dmultx:int rs, int rt, int rd, int signed_p
 {
   unsigned64 lo;
   unsigned64 hi;
@@ -986,6 +1063,10 @@
     GPR[rd] = lo;
 }
 
+:function:::void:do_dmult:int rs, int rt, int rd
+{
+  do_dmultx (SD_, rs, rt, rd, 1);
+}
 
 000000,5.RS,5.RT,0000000000011100:SPECIAL:64::DMULT
 "dmult r<RS>, r<RT>"
@@ -997,7 +1078,7 @@
 *vr4320:
 // end-sanitize-vr4320
 {
-  do_dmult (SD_, RS, RT, 0, 1);
+  do_dmult (SD_, RS, RT, 0);
 }
 
 000000,5.RS,5.RT,5.RD,00000011100:SPECIAL:64::DMULT
@@ -1008,10 +1089,15 @@
 *vr5400:
 // end-sanitize-vr5400
 {
-  do_dmult (SD_, RS, RT, RD, 1);
+  do_dmult (SD_, RS, RT, RD);
 }
 
 
+
+:function:::void:do_dmultu:int rs, int rt, int rd
+{
+  do_dmultx (SD_, rs, rt, rd, 0);
+}
 
 000000,5.RS,5.RT,0000000000011101:SPECIAL:64::DMULTU
 "dmultu r<RS>, r<RT>"
@@ -1023,7 +1109,7 @@
 *vr4320:
 // end-sanitize-vr4320
 {
-  do_dmult (SD_, RS, RT, 0, 0);
+  do_dmultu (SD_, RS, RT, 0);
 }
 
 000000,5.RS,5.RT,5.RD,00000011101:SPECIAL:64::DMULTU
@@ -1034,7 +1120,7 @@
 *vr5400:
 // end-sanitize-vr5400
 {
-  do_dmult (SD_, RS, RT, RD, 0);
+  do_dmultu (SD_, RS, RT, RD);
 }
 
 
@@ -1085,6 +1171,7 @@
 }
 
 
+
 000000,5.RS,5.RT,5.RD,00000010100:SPECIAL:64::DSLLV
 "dsllv r<RD>, r<RT>, r<RS>"
 *mipsIII:
@@ -1106,6 +1193,7 @@
   int s = MASKED64 (GPR[RS], 5, 0);
   GPR[RD] = GPR[RT] << s;
 }
+
 
 
 00000000000,5.RT,5.RD,5.SHIFT,111011:SPECIAL:64::DSRA
@@ -1154,6 +1242,12 @@
 }
 
 
+:function:::void:do_srav:int rs, int rt, int rd
+{
+  int s = MASKED64 (GPR[rs], 5, 0);
+  GPR[rd] = ((signed64) GPR[rt]) >> s;
+}
+
 000000,5.RS,5.RT,5.RD,00000010111:SPECIAL:64::DSRAV
 "dsra32 r<RT>, r<RD>, r<RS>"
 *mipsIII:
@@ -1172,8 +1266,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = MASKED64 (GPR[RS], 5, 0);
-  GPR[RD] = ((signed64) GPR[RT]) >> s;
+  do_srav (SD_, RS, RT, RD);
 }
 
 
@@ -1270,6 +1363,11 @@
 }
 
 
+:function:::void:do_dsubu:int rs, int rt, int rd
+{
+  GPR[rd] = GPR[rs] - GPR[rt];
+}
+
 000000,5.RS,5.RT,5.RD,00000101111:SPECIAL:64::DSUBU
 "dsubu r<RD>, r<RS>, r<RT>"
 *mipsIII:
@@ -1288,7 +1386,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RD] = GPR[RS] - GPR[RT];
+  do_dsubu (SD_, RS, RT, RD);
 }
 
 
@@ -1883,6 +1981,14 @@
 }
 
 
+:function:::void:do_mfhi:int rd
+{
+  GPR[rd] = HI;
+#if 0
+  HIACCESS = 3;
+#endif
+}
+
 000000,0000000000,5.RD,00000,010000:SPECIAL:32::MFHI
 "mfhi r<RD>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -1901,12 +2007,18 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RD] = HI;
-#if 0
-  HIACCESS = 3;
-#endif
+  do_mfhi (SD_, RD);
 }
 
+
+
+:function:::void:do_mflo:int rd
+{
+  GPR[rd] = LO;
+#if 0
+  LOACCESS = 3; /* 3rd instruction will be safe */
+#endif
+}
 
 000000,0000000000,5.RD,00000,010010:SPECIAL:32::MFLO
 "mflo r<RD>"
@@ -1926,11 +2038,9 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RD] = LO;
-#if 0
-  LOACCESS = 3; /* 3rd instruction will be safe */
-#endif
+  do_mflo (SD_, RD);
 }
+
 
 
 000000,5.RS,5.RT,5.RD,00000001011:SPECIAL:32::MOVN
@@ -1952,6 +2062,7 @@
 }
 
 
+
 000000,5.RS,5.RT,5.RD,00000001010:SPECIAL:32::MOVZ
 "movz r<RD>, r<RS>, r<RT>"
 *mipsIV:
@@ -1969,6 +2080,7 @@
   if (GPR[RT] == 0)
     GPR[RD] = GPR[RS];
 }
+
 
 
 000000,5.RS,000000000000000,010001:SPECIAL:32::MTHI
@@ -2000,6 +2112,7 @@
 }
 
 
+
 000000,5.RS,000000000000000010011:SPECIAL:32::MTLO
 "mtlo r<RS>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -2029,6 +2142,19 @@
 }
 
 
+
+:function:::void:do_mult:int rs, int rt, int rd
+{
+  signed64 prod;
+  CHECKHILO ("Multiplication");
+  prod = (((signed64)(signed32) GPR[rs])
+	  * ((signed64)(signed32) GPR[rt]));
+  LO = EXTEND32 (VL4_8 (prod));
+  HI = EXTEND32 (VH4_8 (prod));
+  if (rd != 0)
+    GPR[rd] = LO;
+}
+
 000000,5.RS,5.RT,00000,00000011000:SPECIAL:32::MULT
 "mult r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -2036,12 +2162,7 @@
 *vr4320:
 // end-sanitize-vr4320
 {
-  signed64 prod;
-  CHECKHILO ("Multiplication");
-  prod = (((signed64)(signed32) GPR[RS])
-	  * ((signed64)(signed32) GPR[RT]));
-  LO = EXTEND32 (VL4_8 (prod));
-  HI = EXTEND32 (VH4_8 (prod));
+  do_mult (SD_, RS, RT, 0);
 }
 
 
@@ -2059,16 +2180,21 @@
 *tx19:
 // end-sanitize-tx19
 {
-  signed64 prod;
-  CHECKHILO ("Multiplication");
-  prod = (((signed64)(signed32) GPR[RS])
-	  * ((signed64)(signed32) GPR[RT]));
-  LO = EXTEND32 (VL4_8 (prod));
-  HI = EXTEND32 (VH4_8 (prod));
-  if (RD != 0)
-    GPR[RD] = LO;
+  do_mult (SD_, RS, RT, RD);
 }
 
+
+:function:::void:do_multu:int rs, int rt, int rd
+{
+  unsigned64 prod;
+  CHECKHILO ("Multiplication");
+  prod = (((unsigned64)(unsigned32) GPR[rs])
+	  * ((unsigned64)(unsigned32) GPR[rt]));
+  LO = EXTEND32 (VL4_8 (prod));
+  HI = EXTEND32 (VH4_8 (prod));
+  if (rd != 0)
+    GPR[rd] = LO;
+}
 
 000000,5.RS,5.RT,00000,00000011001:SPECIAL:32::MULTU
 "multu r<RS>, r<RT>"
@@ -2077,13 +2203,9 @@
 *vr4320:
 // end-sanitize-vr4320
 {
-  unsigned64 prod;
-  CHECKHILO ("Multiplication");
-  prod = (((unsigned64)(unsigned32) GPR[RS])
-	  * ((unsigned64)(unsigned32) GPR[RT]));
-  LO = EXTEND32 (VL4_8 (prod));
-  HI = EXTEND32 (VH4_8 (prod));
+  do_multu (SD_, RS, RT, 0);
 }
+
 000000,5.RS,5.RT,5.RD,00000011001:SPECIAL:32::MULTU
 "multu r<RD>, r<RS>, r<RT>"
 *vr5000:
@@ -2098,16 +2220,14 @@
 *tx19:
 // end-sanitize-tx19
 {
-  unsigned64 prod;
-  CHECKHILO ("Multiplication");
-  prod = (((unsigned64)(unsigned32) GPR[RS])
-	  * ((unsigned64)(unsigned32) GPR[RT]));
-  LO = EXTEND32 (VL4_8 (prod));
-  HI = EXTEND32 (VH4_8 (prod));
-  if (RD != 0)
-    GPR[RD] = LO;
+  do_multu (SD_, RS, RT, 0);
 }
 
+
+:function:::void:do_nor:int rs, int rt, int rd
+{
+  GPR[rd] = ~ (GPR[rs] | GPR[rt]);
+}
 
 000000,5.RS,5.RT,5.RD,00000,100111:SPECIAL:32::NOR
 "nor r<RD>, r<RS>, r<RT>"
@@ -2127,9 +2247,14 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RD] = ~ (GPR[RS] | GPR[RT]);
+  do_nor (SD_, RS, RT, RD);
 }
 
+
+:function:::void:do_or:int rs, int rt, int rd
+{
+  GPR[rd] = (GPR[rs] | GPR[rt]);
+}
 
 000000,5.RS,5.RT,5.RD,00000,100101:SPECIAL:32::OR
 "or r<RD>, r<RS>, r<RT>"
@@ -2149,7 +2274,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RD] = (GPR[RS] | GPR[RT]);
+  do_or (SD_, RS, RT, RD);
 }
 
 
@@ -2455,6 +2580,12 @@
 }
 
 
+:function:::void:do_sll:int rt, int rd, int shift
+{
+  unsigned32 temp = (GPR[rt] << shift);
+  GPR[rd] = EXTEND32 (temp);
+}
+
 00000000000,5.RT,5.RD,5.SHIFT,000000:SPECIAL:32::SLL
 "sll r<RD>, r<RT>, <SHIFT>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -2473,11 +2604,16 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = SHIFT;
-  unsigned32 temp = (GPR[RT] << s);
-  GPR[RD] = EXTEND32 (temp);
+  do_sll (SD_, RT, RD, SHIFT);
 }
 
+
+:function:::void:do_sllv:int rs, int rt, int rd
+{
+  int s = MASKED (GPR[rs], 4, 0);
+  unsigned32 temp = (GPR[rt] << s);
+  GPR[rd] = EXTEND32 (temp);
+}
 
 000000,5.RS,5.RT,5.RD,00000000100:SPECIAL:32::SLLV
 "sllv r<RD>, r<RT>, r<RS>"
@@ -2497,11 +2633,14 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = MASKED (GPR[RS], 4, 0);
-  unsigned32 temp = (GPR[RT] << s);
-  GPR[RD] = EXTEND32 (temp);
+  do_sllv (SD_, RS, RT, RD);
 }
 
+
+:function:::void:do_slt:int rs, int rt, int rd
+{
+  GPR[rd] = ((signed_word) GPR[rs] < (signed_word) GPR[rt]);
+}
 
 000000,5.RS,5.RT,5.RD,00000101010:SPECIAL:32::SLT
 "slt r<RD>, r<RS>, r<RT>"
@@ -2521,9 +2660,14 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RD] = ((signed_word) GPR[RS] < (signed_word) GPR[RT]);
+  do_slt (SD_, RS, RT, RD);
 }
 
+
+:function:::void:do_slti:int rs, int rt, unsigned16 immediate
+{
+  GPR[rt] = ((signed_word) GPR[rs] < (signed_word) EXTEND16 (immediate));
+}
 
 001010,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::SLTI
 "slti r<RT>, r<RS>, <IMMEDIATE>"
@@ -2543,9 +2687,14 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RT] = ((signed_word) GPR[RS] < (signed_word) EXTEND16 (IMMEDIATE));
+  do_slti (SD_, RS, RT, IMMEDIATE);
 }
 
+
+:function:::void:do_sltiu:int rs, int rt, unsigned16 immediate
+{
+  GPR[rt] = ((unsigned_word) GPR[rs] < (unsigned_word) EXTEND16 (immediate));
+}
 
 001011,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::SLTIU
 "sltiu r<RT>, r<RS>, <IMMEDIATE>"
@@ -2565,7 +2714,14 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RT] = ((unsigned_word) GPR[RS] < (unsigned_word) EXTEND16 (IMMEDIATE));
+  do_sltiu (SD_, RS, RT, IMMEDIATE);
+}
+
+
+
+:function:::void:do_sltu:int rs, int rt, int rd
+{
+  GPR[rd] = ((unsigned_word) GPR[rs] < (unsigned_word) GPR[rt]);
 }
 
 000000,5.RS,5.RT,5.RD,00000101011:SPECIAL:32::SLTU
@@ -2586,9 +2742,15 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RD] = ((unsigned_word) GPR[RS] < (unsigned_word) GPR[RT]);
+  do_sltiu (SD_, RS, RT, RD);
 }
 
+
+:function:::void:do_sra:int rt, int rd, int shift
+{
+  signed32 temp = (signed32) GPR[rt] >> shift;
+  GPR[rd] = EXTEND32 (temp);
+}
 
 000000,00000,5.RT,5.RD,5.SHIFT,000011:SPECIAL:32::SRA
 "sra r<RD>, r<RT>, <SHIFT>"
@@ -2608,9 +2770,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = SHIFT;
-  signed32 temp = (signed32) GPR[RT] >> s;
-  GPR[RD] = EXTEND32 (temp);
+  do_sra (SD_, RT, RD, SHIFT);
 }
 
 
@@ -2638,6 +2798,12 @@
 }
 
 
+:function:::void:do_srl:int rt, int rd, int shift
+{
+  unsigned32 temp = (unsigned32) GPR[rt] >> shift;
+  GPR[rd] = EXTEND32 (temp);
+}
+
 000000,00000,5.RT,5.RD,5.SHIFT,000010:SPECIAL:32::SRL
 "srl r<RD>, r<RT>, <SHIFT>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -2656,11 +2822,16 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = SHIFT;
-  unsigned32 temp = (unsigned32) GPR[RT] >> s;
-  GPR[RD] = EXTEND32 (temp);
+  do_srl (SD_, RT, RD, SHIFT);
 }
 
+
+:function:::void:do_srlv:int rs, int rt, int rd
+{
+  int s = MASKED (GPR[rs], 4, 0);
+  unsigned32 temp = (unsigned32) GPR[rt] >> s;
+  GPR[rd] = EXTEND32 (temp);
+}
 
 000000,5.RS,5.RT,5.RD,00000000110:SPECIAL:32::SRLV
 "srlv r<RD>, r<RT>, r<RS>"
@@ -2680,9 +2851,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  int s = MASKED (GPR[RS], 4, 0);
-  unsigned32 temp = (unsigned32) GPR[RT] >> s;
-  GPR[RD] = EXTEND32 (temp);
+  do_srlv (SD_, RS, RT, RD);
 }
 
 
@@ -2710,6 +2879,12 @@
 }
 
 
+:function:::void:do_subu:int rs, int rt, int rd
+{
+  signed32 temp = GPR[rs] - GPR[rt];
+  GPR[rd] = EXTEND32 (temp);
+}
+
 000000,5.RS,5.RT,5.RD,00000100011:SPECIAL:32::SUBU
 "subu r<RD>, r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -2728,7 +2903,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RD] = EXTEND32 (GPR[RS] - GPR[RT]);
+  do_subu (SD_, RS, RT, RD);
 }
 
 
@@ -3199,6 +3374,11 @@
 }
 
 
+:function:::void:do_xor:int rs, int rt, int rd
+{
+  GPR[rd] = GPR[rs] ^ GPR[rt];
+}
+
 000000,5.RS,5.RT,5.RD,00000100110:SPECIAL:32::XOR
 "xor r<RD>, r<RS>, r<RT>"
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -3217,9 +3397,14 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RD] = GPR[RS] ^ GPR[RT];
+  do_xor (SD_, RS, RT, RD);
 }
 
+
+:function:::void:do_xori:int rs, int rt, unsigned16 immediate
+{
+  GPR[rt] = GPR[rs] ^ immediate;
+}
 
 001110,5.RS,5.RT,16.IMMEDIATE:NORMAL:32::XORI
 "xori r<RT>, r<RS>, <IMMEDIATE>"
@@ -3239,7 +3424,7 @@
 *tx19:
 // end-sanitize-tx19
 {
-  GPR[RT] = GPR[RS] ^ IMMEDIATE;
+  do_xori (SD_, RS, RT, IMMEDIATE);
 }
 
 

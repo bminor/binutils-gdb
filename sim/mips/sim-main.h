@@ -456,8 +456,6 @@ struct _sim_cpu {
     NIA = CIA + 8; \
   } while (0)
 
-
-
   /* State of the simulator */
   unsigned int state;
   unsigned int dsstate;
@@ -574,8 +572,12 @@ struct _sim_cpu {
 #define A1      (REGISTERS[5])
 #define A2      (REGISTERS[6])
 #define A3      (REGISTERS[7])
-#define SP      (REGISTERS[29])
-#define RA      (REGISTERS[31])
+#define T8IDX   24
+#define T8	(REGISTERS[T8IDX])
+#define SPIDX   29
+#define SP      (REGISTERS[SPIDX])
+#define RAIDX   31
+#define RA      (REGISTERS[RAIDX])
 
   /* Keep the current format state for each register: */
   FP_formats fpr_state[32];
@@ -865,7 +867,7 @@ prefetch (SD, CPU, cia, CCA, pAddr, vAddr, DATA, hint)
 INLINE_SIM_MAIN (unsigned32) ifetch32 PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr));
 #define IMEM32(CIA) ifetch32 (SD, CPU, (CIA), (CIA))
 unsigned16 ifetch16 PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr));
-#define IMEM16(CIA,NR) ifetch16 (SD, CPU, (CIA), ((CIA) & ~1) + 2 * (NR))
+#define IMEM16(CIA) ifetch16 (SD, CPU, (CIA), ((CIA) & ~1))
 #define IMEM16_IMMED(CIA,NR) ifetch16 (SD, CPU, (CIA), ((CIA) & ~1) + 2 * (NR))
 
 void dotrace PARAMS ((SIM_DESC sd, sim_cpu *cpu, FILE *tracefh, int type, SIM_ADDR address, int width, char *comment, ...));

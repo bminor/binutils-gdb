@@ -1,5 +1,23 @@
+Wed Apr 15 00:17:25 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* m16run.c (sim_engine_run): Use IMEM16 and IMEM32 to fetch an
+ 	instruction.
+
+	* m16.igen: Implement MIPS16 instructions.
+	
+	* mips.igen (do_addiu, do_addu, do_and, do_daddiu, do_daddu,
+ 	do_ddiv, do_ddivu, do_div, do_divu, do_dmultx, do_dmultu, do_srav,
+ 	do_dsubu, do_mfhi, do_mflo, do_mult, do_multu, do_nor, do_or,
+ 	do_sll, do_sllv, do_slt, do_slti, do_sltiu, do_sltu, do_sra,
+ 	do_srl, do_srlv, do_subu, do_xor, do_xori): New functions.  Move
+ 	bodies of corresponding code from 32 bit insn to these.  Also used
+ 	by MIPS16 versions of functions.
+	
+	* sim-main.h (RAIDX, T8IDX, T8, SPIDX): Define.
+	(IMEM16): Drop NR argument from macro.
+
 start-sanitize-sky
-	Mon Apr 13 16:28:52 1998  Frank Ch. Eigler  <fche@cygnus.com>
+Mon Apr 13 16:28:52 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* interp.c (decode_coproc): Add proper 1000000 bit-string at top
 	of VU lower instruction.
@@ -15,7 +33,7 @@ Thu Apr  9 16:38:23 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 end-sanitize-sky
 start-sanitize-sky
-	Wed Apr  8 18:12:13 1998  Frank Ch. Eigler  <fche@cygnus.com>
+Wed Apr  8 18:12:13 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* Makefile.in (SIM_SKY_OBJS): Added sky-vudis.o.
 
@@ -25,7 +43,7 @@ start-sanitize-sky
 	
 end-sanitize-sky
 start-sanitize-sky
-	Tue Apr  7 18:32:49 1998  Frank Ch. Eigler  <fche@cygnus.com>
+Tue Apr  7 18:32:49 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* interp.c (decode_coproc): Do not apply superfluous E (end) flag
  	to upper code of generated VU instruction.
