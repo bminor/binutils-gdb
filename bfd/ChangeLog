@@ -1,5 +1,8 @@
 1999-11-25  Nick Clifton  <nickc@cygnus.com>
 
+	* coff-arm.c (bfd_arm_get_bfd_for_interworking):  Add
+	SEC_CODE and SEC_READONLY flags to glue sections.
+
 	* elf32-arm.h (bfd_elf32_arm_get_bfd_for_interworking): Add
 	SEC_CODE and SEC_READONLY flags to glue sections.
 
