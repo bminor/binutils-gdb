@@ -180,7 +180,7 @@ hp9k31[0-9] | hp9k2[0-9][0-9])
 i386sco)
 	cpu=i386
 	vendor=sco
-	os=sysv32 # maybe?
+	os=sysv # maybe?
 	;;
 i386v)
 	cpu=i386
@@ -283,7 +283,7 @@ pn)
 	vendor=gould
 	os=sysv # maybe?
 	;;
-rs6000)
+powersys | rs6000)
 	cpu=rs6000
 	vendor=ibm
 	os=aix
