@@ -135,6 +135,11 @@ extern CORE_ADDR h8300_skip_prologue ();
 #define REGISTER_NAMES \
   {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "sp", "ccr","pc","cycles","tick","inst"}
 
+/* An array of names of registers. */
+
+extern char **h8300_register_names;
+#define REGISTER_NAME(i) h8300_register_names[i]
+
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
    and correspond to the general registers of the machine,

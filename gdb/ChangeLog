@@ -1,3 +1,26 @@
+Wed Jan 20 15:45:15 1999  Mark Alexander  <marka@cygnus.com>
+
+	* h8300-tdep.c (original_register_names, h8300h_register_names,
+	h8300_register_names): Define new variables.
+	(set_register_names): New function to set register names based on
+	current CPU type.
+	(h8300_command, h8300h_command, h8300s_command): Call
+	set_register_names.
+	* config/h8300/tm-h8300.h (h8300_register_names): Declare.
+	(REGISTER_NAME): Define to refer to h8300_register_names.
+
+1999-01-19  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* sol-thread.c abug-rom.c cpu32bug-rom.c dbug-rom.c m32r-rom.c 
+	mac-nat.c mon960-rom.c op50-rom.c ppc-bdm.c remote-adapt.c 
+	remote-array.c remote-bug.c remote-e7000.c remote-eb.c remote-es.c 
+	remote-est.c remote-hms.c remote-mm.c remote-nindy.c remote-nrom.c 
+	remote-os9k.c remote-rdp.c remote-sds.c remote-sim.c remote-st.c 
+	remote-udi.c rom68k-rom.c sh3-rom.c sparcl-tdep.c sparclet-rom.c 
+	v850ice.c win32-nat.c: cosmetic changes to conform to coding
+	standards. 
+
+
 1999-01-19  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	Use aclocal to generate GDB's aclocal.m4 script.  

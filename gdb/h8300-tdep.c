@@ -50,6 +50,19 @@ extern int h8300hmode, h8300smode;
 #define IS_MOVK_R5(x) (x==0x7905)
 #define IS_SUB_R5SP(x) (x==0x1957)
 
+
+/* The register names change depending on whether the h8300h processor
+   type is selected. */
+
+static char *original_register_names[] = REGISTER_NAMES;
+
+static char *h8300h_register_names[] =
+  {"er0", "er1", "er2", "er3", "er4", "er5", "er6",
+    "sp", "ccr","pc","cycles","tick","inst" };
+
+char **h8300_register_names = original_register_names;
+
+
 /* Local function declarations.  */
 
 static CORE_ADDR examine_prologue ();
@@ -756,11 +769,21 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 struct cmd_list_element *setmemorylist;
 
 static void
+set_register_names ()
+{
+  if (h8300hmode != 0)
+    h8300_register_names = h8300h_register_names;
+  else
+    h8300_register_names = original_register_names;
+}
+
+static void
 h8300_command(args, from_tty)
 {
   extern int h8300hmode;
   h8300hmode = 0;
   h8300smode = 0;
+  set_register_names ();
 }
 
 static void
@@ -769,7 +792,9 @@ h8300h_command(args, from_tty)
   extern int h8300hmode;
   h8300hmode = 1;
   h8300smode = 0;
+  set_register_names ();
 }
+
 static void
 h8300s_command(args, from_tty)
 {
@@ -777,6 +802,7 @@ h8300s_command(args, from_tty)
   extern int h8300hmode;
   h8300smode = 1;
   h8300hmode = 1;
+  set_register_names ();
 }
 
 
@@ -816,6 +842,7 @@ set_machine_hook (filename)
       h8300smode = 0;
       h8300hmode = 0;
     }
+  set_register_names ();
 }
 
 void
