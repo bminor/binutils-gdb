@@ -48,6 +48,7 @@ libiberty.h
 mpw
 nlm
 oasys.h
+objalloc.h
 obstack.h
 os9k.h
 opcode
