@@ -1,5 +1,9 @@
 Wed Jul  3 14:59:47 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* i386aout.c: Include "aout/aout64.h".
+ 	(i386aout_write_object_contents): New static function.
+	(MY_write_object_contents): Define.
+
 	* netbsd.h (MY(write_object_contents)): Make sure that
 	adjust_sizes_and_vmas is called before fiddling with the magic
 	number.
