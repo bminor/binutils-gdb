@@ -1,3 +1,8 @@
+2001-04-06  Geoffrey Keating  <geoffk@redhat.com>
+
+	* config/rs6000/nm-rs6000.h (PTRACE_ATTACH): Don't define.
+	(PTRACE_DETACH): Don't define.
+
 2001-04-06  David Smith  <dsmith@redhat.com>
 
 	* arch-utils.c (default_prepare_to_proceed)

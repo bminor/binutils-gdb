@@ -23,9 +23,6 @@
 
 #define ATTACH_DETACH
 
-#define PTRACE_ATTACH PT_ATTACH
-#define PTRACE_DETACH PT_DETACH
-
 /* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
 
 #define FETCH_INFERIOR_REGISTERS
