@@ -1,3 +1,10 @@
+Tue Oct 24 15:21:33 1995  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (md_pseudo_table): Add new ".nsubspa" opcode.
+	(pa_subspace): For ".nsubspa", always create a new subspace
+	with the given attributes, even if one already exists with the
+	same name.
+
 Tue Oct 24 14:50:38 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.h (TC_FORCE_RELOCATION_SECTION): Rename from
