@@ -245,6 +245,7 @@ all.normal: all-autoconf all-libiberty all-mmalloc all-texinfo \
 	all-gcc all-binutils  all-libg++ all-readline all-gdb \
 	all-make all-rcs all-cvs all-diff all-grep \
 	all-patch all-emacs all-ispell all-etc \
+	all-tcl all-tk all-expect \
 	all-newlib all-gprof all-send_pr all-libm all-deja-gnu
 
 all.cross: all-libiberty all-mmalloc all-gas all-byacc all-flex all-ld \
@@ -257,6 +258,7 @@ clean: clean-autoconf clean-libiberty clean-mmalloc clean-texinfo \
 	clean-gcc clean-readline clean-glob clean-gdb \
 	clean-make clean-diff clean-grep clean-rcs \
 	clean-cvs clean-patch clean-emacs clean-ispell \
+	clean-tcl clean-tk clean-expect \
 	clean-libg++ clean-gprof clean-send_pr clean-libm clean-xiberty \
 	clean-deja-gnu
 	-rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
@@ -289,6 +291,7 @@ install-no-fixedincludes: install-dirs gcc-no-fixedincludes \
 	install-deja-gnu \
 	install-emacs \
 	install-etc \
+	install-expect \
 	install-flex \
 	install-gas \
 	install-gdb \
@@ -307,7 +310,9 @@ install-no-fixedincludes: install-dirs gcc-no-fixedincludes \
 	install-rcs \
 	install-readline \
 	install-send_pr \
-	install-texinfo 
+	install-tcl \
+	install-texinfo \
+	install-tk 
 	
 gcc-no-fixedincludes:
 	@if [ -f ./gcc/Makefile ] ; then \
@@ -1206,6 +1211,100 @@ install-libg++: force
 	else \
 		true ; \
 	fi
+### tcl
+all-tcl: 
+	@if [ -f ./tcl/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
+		(cd ./tcl; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+clean-tcl: force
+	@if [ -f ./tcl/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
+		(cd ./tcl; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
+	else \
+		true ; \
+	fi
+
+install-tcl: force
+	@if [ -f ./tcl/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
+		(cd ./tcl; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+
+### tk
+all-tk: all-tcl
+	@if [ -f ./tk/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
+		(cd ./tk; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+clean-tk: force
+	@if [ -f ./tk/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
+		(cd ./tk; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
+	else \
+		true ; \
+	fi
+
+install-tk: force
+	@if [ -f ./tk/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
+		(cd ./tk; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+### tk
+all-expect: all-tcl
+	@if [ -f ./expect/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
+		(cd ./expect; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+clean-expect: force
+	@if [ -f ./expect/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
+		(cd ./expect; \
+		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
+	else \
+		true ; \
+	fi
+
+install-expect: force
+	@if [ -f ./expect/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		srcroot=`cd $(srcdir); pwd`; export srcroot ; \
+		(cd ./expect; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
 
 ### other supporting targets
 

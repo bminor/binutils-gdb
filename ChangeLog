@@ -1,3 +1,9 @@
+Fri Nov  6 20:59:00 1992  david d `zoo' zuhn  (zoo@cygnus.com)
+
+	* Makefile.in: added rules to handle tcl, tk, and expect
+
+	* configure.in: handle those directories if they exist
+
 Thu Nov  5 14:35:41 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* config.sub: removed bogus hppabsd and hppahpux names, since

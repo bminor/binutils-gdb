@@ -3,7 +3,7 @@
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-configdirs="autoconf mmalloc libiberty texinfo flex byacc bison opcodes bfd binutils gcc readline glob ld gas gdb emacs ispell make grep diff rcs cvs patch send_pr libg++ newlib gprof gdbtest libm tgas etc deja-gnu"
+configdirs="autoconf mmalloc libiberty texinfo flex byacc bison opcodes bfd binutils gcc readline glob ld gas gdb emacs ispell make grep diff rcs cvs patch send_pr libg++ newlib gprof gdbtest libm tgas etc tcl expect tk deja-gnu"
 srctrigger=move-if-change
 srcname="gnu development package"
 
