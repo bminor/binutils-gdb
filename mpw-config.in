@@ -17,82 +17,11 @@ If "`Exists "{objdir}"extra-include`" == ""
 	NewFolder "{objdir}"extra-include
 End If
 
-Set extradir "{objdir}extra-include:"
+Set edir "{objdir}extra-include:"
 
-Echo '/* Imitation sys/types.h. */' >"{extradir}"'sys/types.h'
-Echo '#ifndef __SYS_TYPES_H__' >>"{extradir}"'sys/types.h'
-Echo '#define __SYS_TYPES_H__' >>"{extradir}"'sys/types.h'
-Echo '#include <Types.h>' >>"{extradir}"'sys/types.h'
-Echo 'typedef short dev_t' >>"{extradir}"'sys/types.h'
-Echo 'typedef short ino_t' >>"{extradir}"'sys/types.h'
-Echo 'typedef unsigned short mode_t' >>"{extradir}"'sys/types.h'
-Echo 'typedef unsigned short uid_t' >>"{extradir}"'sys/types.h'
-Echo 'typedef unsigned short gid_t' >>"{extradir}"'sys/types.h'
-Echo 'typedef long off_t' >>"{extradir}"'sys/types.h'
-Echo '#endif /* __SYS_TYPES_H__ */' >>"{extradir}"'sys/types.h'
-
-Echo '/* Imitation sys/time.h. */' >"{extradir}"'sys/time.h'
-Echo '#ifndef __SYS_TIME_H__' >>"{extradir}"'sys/time.h'
-Echo '#define __SYS_TIME_H__' >>"{extradir}"'sys/time.h'
-Echo '#include <Time.h>' >"{extradir}"'sys/time.h'
-Echo 'struct timeval {' >>"{extradir}"'sys/time.h'
-Echo '  long tv_sec;' >>"{extradir}"'sys/time.h'
-Echo '  long tv_usec;' >>"{extradir}"'sys/time.h'
-Echo '};' >>"{extradir}"'sys/time.h'
-Echo '#endif /* __SYS_TIME_H__ */' >>"{extradir}"'sys/time.h'
-
-Echo '/* Imitation sys/resource.h. */' >"{extradir}"'sys/resource.h'
-Echo '#ifndef __SYS_RESOURCE_H__' >>"{extradir}"'sys/resource.h'
-Echo '#define __SYS_RESOURCE_H__' >>"{extradir}"'sys/resource.h'
-Echo 'struct rusage {' >"{extradir}"'sys/resource.h'
-Echo '  struct timeval ru_utime;' >>"{extradir}"'sys/resource.h'
-Echo '  struct timeval ru_stime;' >>"{extradir}"'sys/resource.h'
-Echo '};' >>"{extradir}"'sys/resource.h'
-Echo '#endif /* __SYS_RESOURCE_H__ */' >>"{extradir}"'sys/resource.h'
-
-Echo "/* varargs.h. */" >"{extradir}"varargs.h
-Echo "#ifndef __va_list__" >>"{extradir}"varargs.h
-Echo "#define __va_list__" >>"{extradir}"varargs.h
-Echo "typedef char *va_list;" >>"{extradir}"varargs.h
-Echo "#endif" >>"{extradir}"varargs.h
-Echo "#define va_dcl int va_alist;" >>"{extradir}"varargs.h
-Echo "#define va_start(list) list = (char *) &va_alist" >>"{extradir}"varargs.h
-Echo "#define va_end(list)" >>"{extradir}"varargs.h
-Echo "#define va_arg(list,mode) ((mode *)(list += sizeof(mode)))[-1]" >>"{extradir}"varargs.h
-
-Echo '/* empty */' >"{extradir}"'sys/param.h'
-
-Echo '/* empty */' >"{extradir}"'sys/file.h'
-
-Echo '/* Imitation stat.h */' >"{extradir}"'sys/stat.h'
-Echo '#ifndef __SYS_STAT_H__' >>"{extradir}"'sys/stat.h'
-Echo '#define __SYS_STAT_H__' >>"{extradir}"'sys/stat.h'
-Echo '#include  <sys/types.h>' >>"{extradir}"'sys/stat.h'
-Echo '#include  <Time.h>' >>"{extradir}"'sys/stat.h'
-Echo 'struct  stat {' >>"{extradir}"'sys/stat.h'
-Echo '        dev_t   st_dev;' >>"{extradir}"'sys/stat.h'
-Echo '        ino_t   st_ino;' >>"{extradir}"'sys/stat.h'
-Echo '        mode_t  st_mode;' >>"{extradir}"'sys/stat.h'
-Echo '        short   st_nlink;' >>"{extradir}"'sys/stat.h'
-Echo '        uid_t   st_uid;' >>"{extradir}"'sys/stat.h'
-Echo '        gid_t   st_gid;' >>"{extradir}"'sys/stat.h'
-Echo '        dev_t   st_rdev;' >>"{extradir}"'sys/stat.h'
-Echo '        off_t   st_size;' >>"{extradir}"'sys/stat.h'
-Echo '        time_t  st_atime;' >>"{extradir}"'sys/stat.h'
-Echo '        int     st_spare1;' >>"{extradir}"'sys/stat.h'
-Echo '        time_t  st_mtime;' >>"{extradir}"'sys/stat.h'
-Echo '        int     st_spare2;' >>"{extradir}"'sys/stat.h'
-Echo '        time_t  st_ctime;' >>"{extradir}"'sys/stat.h'
-Echo '        int     st_spare3;' >>"{extradir}"'sys/stat.h'
-Echo '        long    st_blksize;' >>"{extradir}"'sys/stat.h'
-Echo '        long    st_blocks;' >>"{extradir}"'sys/stat.h'
-Echo '        long    st_spare4[2];' >>"{extradir}"'sys/stat.h'
-Echo '};' >>"{extradir}"'sys/stat.h'
-Echo '#define S_IFDIR		0x0010' >>"{extradir}"'sys/stat.h'
-Echo '#define S_IFMT		0x0020' >>"{extradir}"'sys/stat.h'
-Echo '#define S_IREAD		0x0040' >>"{extradir}"'sys/stat.h'
-Echo '#define S_IWRITE	0x0080' >>"{extradir}"'sys/stat.h'
-Echo '#define S_IEXEC		0x0100' >>"{extradir}"'sys/stat.h'
-Echo 'int stat (char *path, struct stat *buf);' >>"{extradir}"'sys/stat.h'
-Echo 'int fstat(int, struct stat *);' >>"{extradir}"'sys/stat.h'
-Echo '#endif /* __SYS_STAT_H___ */' >>"{extradir}"'sys/stat.h'
+forward-include "{srcdir}"include:mpw:sys:file.h "{edir}"'sys/file.h'
+forward-include "{srcdir}"include:mpw:sys:param.h "{edir}"'sys/param.h'
+forward-include "{srcdir}"include:mpw:sys:resource.h "{edir}"'sys/resource.h'
+forward-include "{srcdir}"include:mpw:sys:stat.h "{edir}"'sys/stat.h'
+forward-include "{srcdir}"include:mpw:sys:time.h "{edir}"'sys/time.h'
+forward-include "{srcdir}"include:mpw:sys:types.h "{edir}"'sys/types.h'

@@ -82,6 +82,7 @@ If "`Exists "{srcdir}"mpw-make.in`" != ""
 	Echo "srcdir = " {srcdir} >> "{objdir}"Makefile.tem
 	Echo "target_canonical = " {target_canonical} >> "{objdir}"Makefile.tem
 	Echo "mdname = " {mdname} >> "{objdir}"Makefile.tem
+	Echo "EMUL = " {emulname} >> "{objdir}"Makefile.tem
 	Echo "host_makefile_frag = " >> "{objdir}"Makefile.tem
 	Echo "target_makefile_frag = " >> "{objdir}"Makefile.tem
 	mpw-7to8 "{srcroot}"config:mpw-mh-mpw >>"{objdir}"Makefile.tem
