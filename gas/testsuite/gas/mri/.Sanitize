@@ -1,6 +1,4 @@
-# Sanitize.in for devo.
-# $Id$
-#
+# .Sanitize for devo/gas/testsuite/gas/mri.
 
 # Each directory to survive it's way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -17,11 +15,6 @@
 
 Do-first:
 
-if ( echo $* | grep keep\-arc > /dev/null ) ; then
-	keep_these_too="arc ${keep_these_too}"
-else
-	lose_these_too="arc ${lose_these_too}"
-fi
 
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
@@ -31,21 +24,19 @@ fi
 
 Things-to-keep:
 
-all
-alpha
-arm
-h8300
-hppa
-i386
-ieee-fp
-m68k
-m68k-coff
-mips
-mri
-sparc-solaris
-sun4
-template
-vax
+char.d
+char.s
+constants.d
+constants.s
+equ.d
+equ.s
+expr.d
+expr.s
+float.d
+float.s
+label.d
+label.s
+mri.exp
 
 Things-to-lose:
 
