@@ -1,3 +1,9 @@
+Fri Jan 21 14:11:16 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* sunos.c (MY(read_dynamic_relocs)): Compare info->dynrel with NULL,
+	not (struct external_nlist *) NULL.  info->dynrel is a PTR, not
+	a struct external_nlist *.
+
 Fri Jan 21 09:29:01 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* aoutx.h (translate_to_native_sym_flags), bfd-in.h (bfd_ec),
