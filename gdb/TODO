@@ -11,8 +11,6 @@ Below is a list of problems identified during the GDB 5.0 release
 cycle.  People hope to have these problems fixed in a follow-on
 release.
 
-(The names in paren indicate people that posted the original problem.)
-
 --
 
 The BFD directory requires bug-fixed AUTOMAKE et.al.
@@ -26,22 +24,7 @@ and	ftp://sourceware.cygnus.com/pub/binutils
 
 --
 
-Possible regressions with some devel GCCs.
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00475.html
-
-gcc-2.95.2 outputs a line note *before* the prologue (and one for the
-closing brace after the epilogue, instead of before it, as it used to
-be). By disabling the RTL-style prologue generating mechanism
-(undocumented GCC option -mno-schedule-prologue), you get back the
-traditional behaviour.
-http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00510.html
-
-This should now be fixed.
-
---
-
 RFD: infrun.c: No bpstat_stop_status call after proceed over break?
-(Peter Schauer)
 http://sourceware.cygnus.com/ml/gdb-patches/2000-q1/msg00665.html
 
 GDB misses watchpoint triggers after proceeding over a breakpoint on
@@ -94,6 +77,10 @@ Dan Nicolaescu writes:
 
 --
 
+GDB 5.0 doesn't work on Linux/SPARC
+
+--
+
 		Code Cleanups: Next Release
 		===========================
 
@@ -108,7 +95,7 @@ Patches in the database.
 
 --
 
-Purge PARAMS
+Purge PARAMS.
 
 Eliminate all uses of PARAMS in GDB's source code.
 
@@ -135,14 +122,6 @@ http://sourceware.cygnus.com/ml/gdb-patches/2000-05/msg00467.html
 
 The following are more general cleanups and fixes.  They are not tied
 to any specific release.
-
---
-
-ATTRIBUTE_UNUSED
-
-The need for this as almost been eliminated.  The next version of GCC
-(assuming cagney gets the relevant patch committed) will be able to
-supress unused parameter warnings.
 
 --
 
@@ -560,19 +539,22 @@ Modify gdb to work correctly with Pascal.
 
 Re: Various C++ things
 
-value_headof/value_from_vtable_info are worthless, and should be removed.
-The one place in printcmd.c that uses it should use the RTTI functions.
+value_headof/value_from_vtable_info are worthless, and should be
+removed.  The one place in printcmd.c that uses it should use the RTTI
+functions.
 
-RTTI for g++ should be using the typeinfo functions rather than the vtables.
-The typeinfo functions are always at offset 4 from the beginning of the vtable,
-and are always right. The vtables will have weird names like E::VB sometimes.
-The typeinfo function will always be "E type_info function", or somesuch.
+RTTI for g++ should be using the typeinfo functions rather than the
+vtables.  The typeinfo functions are always at offset 4 from the
+beginning of the vtable, and are always right. The vtables will have
+weird names like E::VB sometimes.  The typeinfo function will always
+be "E type_info function", or somesuch.
 
-value_virtual_fn_field needs to be fixed so there are no failures for virtual
-functions for C++ using g++.
+value_virtual_fn_field needs to be fixed so there are no failures for
+virtual functions for C++ using g++.
 
-Testsuite cases are the major priority right now for C++ support, since i have
-to make a lot of changes that could potentially break each other.
+Testsuite cases are the major priority right now for C++ support,
+since i have to make a lot of changes that could potentially break
+each other.
 
 --
 
@@ -626,6 +608,18 @@ http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00237.html
 
 --
 
+Resolve how to scale things to support very large packets.
+
+--
+
+Resolve how to handle a target that changes things like its endianess
+on the fly - should it be returned in the ``T'' packet?
+
+Underlying problem is that the register file is target endian.  If the
+target endianess changes gdb doesn't know.
+
+--
+
 			Symbol Support
 			==============
 
@@ -660,6 +654,39 @@ conversions.
 
 Consequence of recent symtab clarification.  No marks for figuring out
 who maintains the MIPS.
+
+--
+
+			Testsuite Support
+			=================
+
+There are never to many testcases.
+
+--
+
+Better thread testsuite.
+
+--
+
+Better C++ testsuite.
+
+--
+
+Look at adding a GDB specific testsuite directory so that white box
+tests of key internals can be added (eg ui_file).
+
+--
+
+Separate out tests that involve the floating point (FP).
+
+(Something for people brining up new targets).  FP and non-fp tests
+are combined.  I think there should be set of basic tests that
+exercise pure integer support and then a more expanded set that
+exercise FP and FP/integer interactions.
+
+As an example, the MIPS, for n32 as problems with passing FP's and
+structs.  Since most inferior call tests include FP it is difficult to
+determine of the integer tests are ok.
 
 --
 
@@ -944,8 +971,7 @@ gdb_stdtarg is easily confused with gdb_stdarg.
 
 Extra ui_file methods - dump.
 
-These are for debugging / testing.  An aside is to set up a whitebox
-testsuite for key internals such as ui_file.
+Very useful for whitebox testing.
 
 --
 
@@ -1126,6 +1152,24 @@ to a server running under gdb.
 
 --
 
+			TODO FAQ
+			========
+
+Frequently requested but not approved requests.
+
+--
+
+Eliminate unused argument warnings using ATTRIBUTE_UNUSED.
+
+The benefits on this one are thought to be marginal - GDBs design
+means that unused parameters are very common.  GCC 3.0 will also
+include the option -Wno-unused-parameter which means that ``-Wall
+-Wno-unused-parameters -Werror'' can be specified.
+
+--
+
+
+
 			Legacy Wish List
 			================
 
@@ -1157,6 +1201,11 @@ re-evaluation" after new symbols are loaded.
 --
 
 Make single_step() insert and remove breakpoints in one operation.
+
+[If this is talking about having single_step() insert the breakpoints,
+run the target then pull the breakpoints then it is wrong.  The
+function has to return as control has to eventually be passed back to
+the main event loop.]
 
 --
 
