@@ -1,0 +1,416 @@
+#   Copyright (C) 1997, 1998 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+# Written by Satish Pai <pai@apollo.hp.com> 1997-07-07
+#    In the spirit of constvars.exp: added volatile, const-volatile stuff.
+
+# This file is part of the gdb testsuite
+# Tests for:
+#           volatile vars
+#           pointers to volatile vars
+#           const volatile vars
+#           pointers to const volatile vars
+#           const pointers to volatile vars
+#           volatile pointers to const vars
+#           const volatile pointers to const vars
+#           const volatile pointers to volatile vars
+#           ... etc.  (you get the idea)
+# Mostly with char and unsigned char.                    
+
+if $tracelevel then {
+        strace $tracelevel
+        }
+
+#
+# test running programs
+#
+set prms_id 0
+set bug_id 0
+
+set testfile "constvars"
+set srcfile ${testfile}.c
+set binfile ${objdir}/${subdir}/${testfile}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+remote_exec build "rm -f ${binfile}.ci"
+if  [get_compiler_info ${binfile}] {
+    return -1
+}
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+
+source ${binfile}.ci
+
+#
+# set it up at a breakpoint so we can play with the variable values
+#
+if ![runto_main] then {
+    perror "couldn't run to breakpoint"
+    continue
+}
+
+send_gdb "break marker1\n" ; gdb_expect -re ".*$gdb_prompt $"
+
+    send_gdb "cont\n"
+    gdb_expect {
+        -re "Break.* marker1 \\(\\) at .*:$decimal.*$gdb_prompt $" {
+            send_gdb "up\n"
+            gdb_expect {
+                -re ".*$gdb_prompt $" {}
+                timeout { fail "up from marker1" }
+            }
+        }
+        -re "Break.* marker1__.* \\(\\) at .*:$decimal.*$gdb_prompt $" {
+	    fail "continue to marker1 (demangling)"
+            send_gdb "up\n"
+            gdb_expect {
+                -re ".*$gdb_prompt $" {}
+                timeout { fail "up from marker1" }
+            }
+        }
+        -re "$gdb_prompt $" { fail "continue to marker1"  }
+        timeout { fail "(timeout) continue to marker1"  }
+    }
+
+
+send_gdb "ptype vox\n"
+gdb_expect {
+    -re "type = volatile char.*$gdb_prompt $"  { pass "ptype vox" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vox" }
+    timeout             { fail "(timeout) ptype vox" }
+}
+
+send_gdb "ptype victuals\n"
+gdb_expect {
+    -re "type = volatile unsigned char.*$gdb_prompt $"  { pass "ptype victuals" }
+    -re ".*$gdb_prompt $"   {  fail "ptype victuals" }
+    timeout             { fail "(timeout) ptype victuals" }
+}
+
+send_gdb "ptype vixen\n"
+gdb_expect {
+    -re "type = volatile short.*$gdb_prompt $"  { pass "ptype vixen" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vixen" }
+    timeout             { fail "(timeout) ptype vixen" }
+}
+
+send_gdb "ptype vitriol\n"
+gdb_expect {
+    -re "type = volatile unsigned short.*$gdb_prompt $"  { pass "ptype vitriol" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vitriol" }
+    timeout             { fail "(timeout) ptype vitriol" }
+}
+
+send_gdb "ptype vellum\n"
+gdb_expect {
+    -re "type = volatile long.*$gdb_prompt $"  { pass "ptype vellum" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vellum" }
+    timeout             { fail "(timeout) ptype vellum" }
+}
+
+send_gdb "ptype valve\n"
+gdb_expect {
+    -re "type = volatile unsigned long.*$gdb_prompt $"  { pass "ptype valve" }
+    -re ".*$gdb_prompt $"   {  fail "ptype valve" }
+    timeout             { fail "(timeout) ptype valve" }
+}
+
+send_gdb "ptype vacuity\n"
+gdb_expect {
+    -re "type = volatile float.*$gdb_prompt $"  { pass "ptype vacuity" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vacuity" }
+    timeout             { fail "(timeout) ptype vacuity" }
+}
+
+send_gdb "ptype vertigo\n"
+gdb_expect {
+    -re "type = volatile double.*$gdb_prompt $"  { pass "ptype vertigo" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vertigo" }
+    timeout             { fail "(timeout) ptype vertigo" }
+}
+
+send_gdb "ptype vampire\n"
+gdb_expect {
+    -re "type = volatile char \\*.*$gdb_prompt $"  { pass "ptype vampire" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vampire" }
+    timeout             { fail "(timeout) ptype vampire" }
+}
+
+send_gdb "ptype viper\n"
+gdb_expect {
+    -re "type = volatile unsigned char \\*.*$gdb_prompt $"  { pass "ptype viper" }
+    -re ".*$gdb_prompt $"   {  fail "ptype viper" }
+    timeout             { fail "(timeout) ptype viper" }
+}
+
+send_gdb "ptype vigour\n"
+gdb_expect {
+    -re "type = volatile short \\*.*$gdb_prompt $"  { pass "ptype vigour" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vigour" }
+    timeout             { fail "(timeout) ptype vigour" }
+}
+
+send_gdb "ptype vapour\n"
+gdb_expect {
+    -re "type = volatile unsigned short \\*.*$gdb_prompt $"  { pass "ptype vapour" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vapour" }
+    timeout             { fail "(timeout) ptype vapour" }
+}
+
+send_gdb "ptype ventricle\n"
+gdb_expect {
+    -re "type = volatile long \\*.*$gdb_prompt $"  { pass "ptype ventricle" }
+    -re ".*$gdb_prompt $"   {  fail "ptype ventricle" }
+    timeout             { fail "(timeout) ptype ventricle" }
+}
+
+send_gdb "ptype vigintillion\n"
+gdb_expect {
+    -re "type = volatile unsigned long \\*.*$gdb_prompt $"  { pass "ptype vigintillion" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vigintillion" }
+    timeout             { fail "(timeout) ptype vigintillion" }
+}
+
+send_gdb "ptype vocation\n"
+gdb_expect {
+    -re "type = volatile float \\*.*$gdb_prompt $"  { pass "ptype vocation" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vocation" }
+    timeout             { fail "(timeout) ptype vocation" }
+}
+
+send_gdb "ptype veracity\n"
+gdb_expect {
+    -re "type = volatile double \\*.*$gdb_prompt $"  { pass "ptype veracity" }
+    -re ".*$gdb_prompt $"   {  fail "ptype veracity" }
+    timeout             { fail "(timeout) ptype veracity" }
+}
+
+send_gdb "ptype vapidity\n"
+gdb_expect {
+    -re "type = volatile char \\* volatile.*$gdb_prompt $"  { pass "ptype vapidity" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vapidity" }
+    timeout             { fail "(timeout) ptype vapidity" }
+}
+
+send_gdb "ptype velocity\n"
+gdb_expect {
+    -re "type = volatile unsigned char \\* volatile.*$gdb_prompt $"  { pass "ptype velocity" }
+    -re ".*$gdb_prompt $"   {  fail "ptype velocity" }
+    timeout             { fail "(timeout) ptype velocity" }
+}
+
+send_gdb "ptype veneer\n"
+gdb_expect {
+    -re "type = volatile short \\* volatile.*$gdb_prompt $"  { pass "ptype veneer" }
+    -re ".*$gdb_prompt $"   {  fail "ptype veneer" }
+    timeout             { fail "(timeout) ptype veneer" }
+}
+
+send_gdb "ptype video\n"
+gdb_expect {
+    -re "type = volatile unsigned short \\* volatile.*$gdb_prompt $"  { pass "ptype video" }
+    -re ".*$gdb_prompt $"   {  fail "ptype video" }
+    timeout             { fail "(timeout) ptype video" }
+}
+
+send_gdb "ptype vacuum\n"
+gdb_expect {
+    -re "type = volatile long \\* volatile.*$gdb_prompt $"  { pass "ptype vacuum" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vacuum" }
+    timeout             { fail "(timeout) ptype vacuum" }
+}
+
+send_gdb "ptype veniality\n"
+gdb_expect {
+    -re "type = volatile unsigned long \\* volatile.*$gdb_prompt $"  { pass "ptype veniality" }
+    -re ".*$gdb_prompt $"   {  fail "ptype veniality" }
+    timeout             { fail "(timeout) ptype veniality" }
+}
+
+send_gdb "ptype vitality\n"
+gdb_expect {
+    -re "type = volatile float \\* volatile.*$gdb_prompt $"  { pass "ptype vitality" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vitality" }
+    timeout             { fail "(timeout) ptype vitality" }
+}
+
+send_gdb "ptype voracity\n"
+gdb_expect {
+    -re "type = volatile double \\* volatile.*$gdb_prompt $"  { pass "ptype voracity" }
+    -re ".*$gdb_prompt $"   {  fail "ptype voracity" }
+    timeout             { fail "(timeout) ptype voracity" }
+}
+
+send_gdb "ptype victor\n"
+gdb_expect {
+    -re "type = const volatile char.*$gdb_prompt $"  { pass "ptype victor" }
+    -re ".*$gdb_prompt $"   {  fail "ptype victor" }
+    timeout             { fail "(timeout) ptype victor" }
+}
+
+send_gdb "ptype vicar\n"
+gdb_expect {
+    -re "type = const volatile unsigned char.*$gdb_prompt $"  { pass "ptype vicar" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vicar" }
+    timeout             { fail "(timeout) ptype vicar" }
+}
+
+send_gdb "ptype victory\n"
+gdb_expect {
+    -re "type = const volatile char \\*.*$gdb_prompt $"  { pass "ptype victory" }
+    -re ".*$gdb_prompt $"   {  fail "ptype victory" }
+    timeout             { fail "(timeout) ptype victory" }
+}
+
+send_gdb "ptype vicarage\n"
+gdb_expect {
+    -re "type = const volatile unsigned char \\*.*$gdb_prompt $"  { pass "ptype vicarage" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vicarage" }
+    timeout             { fail "(timeout) ptype vicarage" }
+}
+
+send_gdb "ptype vein\n"
+gdb_expect {
+    -re "type = volatile char \\* const.*$gdb_prompt $"  { pass "ptype vein" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vein" }
+    timeout             { fail "(timeout) ptype vein" }
+}
+
+send_gdb "ptype vogue\n"
+gdb_expect {
+    -re "type = volatile unsigned char \\* const.*$gdb_prompt $"  { pass "ptype vogue" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vogue" }
+    timeout             { fail "(timeout) ptype vogue" }
+}
+
+send_gdb "ptype cavern\n"
+gdb_expect {
+    -re "type = const volatile char \\* const.*$gdb_prompt $"  { pass "ptype cavern" }
+    -re ".*$gdb_prompt $"   {  fail "ptype cavern" }
+    timeout             { fail "(timeout) ptype cavern" }
+}
+
+send_gdb "ptype coverlet\n"
+gdb_expect {
+    -re "type = const volatile unsigned char \\* const.*$gdb_prompt $"  { pass "ptype coverlet" }
+    -re ".*$gdb_prompt $"   {  fail "ptype coverlet" }
+    timeout             { fail "(timeout) ptype coverlet" }
+}
+
+send_gdb "ptype caveat\n"
+gdb_expect {
+    -re "type = const char \\* volatile.*$gdb_prompt $"  { pass "ptype caveat" }
+    -re ".*$gdb_prompt $"   {  fail "ptype caveat" }
+    timeout             { fail "(timeout) ptype caveat" }
+}
+
+send_gdb "ptype covenant\n"
+gdb_expect {
+    -re "type = const unsigned char \\* volatile.*$gdb_prompt $"  { pass "ptype covenant" }
+    -re ".*$gdb_prompt $"   {  fail "ptype covenant" }
+    timeout             { fail "(timeout) ptype covenant" }
+}
+
+send_gdb "ptype vizier\n"
+gdb_expect {
+    -re "type = const volatile char \\* volatile.*$gdb_prompt $"  { pass "ptype vizier" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vizier" }
+    timeout             { fail "(timeout) ptype vizier" }
+}
+
+send_gdb "ptype vanadium\n"
+gdb_expect {
+    -re "type = const volatile unsigned char \\* volatile.*$gdb_prompt $"  { pass "ptype vanadium" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vanadium" }
+    timeout             { fail "(timeout) ptype vanadium" }
+}
+
+send_gdb "ptype vane\n"
+gdb_expect {
+    -re "type = char \\* const volatile.*$gdb_prompt $"  { pass "ptype vane" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vane" }
+    timeout             { fail "(timeout) ptype vane" }
+}
+
+send_gdb "ptype veldt\n"
+gdb_expect {
+    -re "type = unsigned char \\* const volatile.*$gdb_prompt $"  { pass "ptype veldt" }
+    -re ".*$gdb_prompt $"   {  fail "ptype veldt" }
+    timeout             { fail "(timeout) ptype veldt" }
+}
+
+send_gdb "ptype cove\n"
+gdb_expect {
+    -re "type = const char \\* const volatile.*$gdb_prompt $"  { pass "ptype cove" }
+    -re ".*$gdb_prompt $"   {  fail "ptype cove" }
+    timeout             { fail "(timeout) ptype cove" }
+}
+
+send_gdb "ptype cavity\n"
+gdb_expect {
+    -re "type = const unsigned char \\* const volatile.*$gdb_prompt $"  { pass "ptype cavity" }
+    -re ".*$gdb_prompt $"   {  fail "ptype cavity" }
+    timeout             { fail "(timeout) ptype cavity" }
+}
+
+send_gdb "ptype vagus\n"
+gdb_expect {
+    -re "type = volatile char \\* const volatile.*$gdb_prompt $"  { pass "ptype vagus" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vagus" }
+    timeout             { fail "(timeout) ptype vagus" }
+}
+
+send_gdb "ptype vagrancy\n"
+gdb_expect {
+    -re "type = volatile unsigned char \\* const volatile.*$gdb_prompt $"  { pass "ptype vagrancy" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vagrancy" }
+    timeout             { fail "(timeout) ptype vagrancy" }
+}
+
+send_gdb "ptype vagary\n"
+gdb_expect {
+    -re "type = const volatile char \\* const volatile.*$gdb_prompt $"  { pass "ptype vagary" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vagary" }
+    timeout             { fail "(timeout) ptype vagary" }
+}
+
+send_gdb "ptype vendor\n"
+gdb_expect {
+    -re "type = const volatile unsigned char \\* const volatile.*$gdb_prompt $"  { pass "ptype vendor" }
+    -re ".*$gdb_prompt $"   {  fail "ptype vendor" }
+    timeout             { fail "(timeout) ptype vendor" }
+}
+
+# test function parameters
+send_gdb "ptype qux2\n"
+gdb_expect {
+    -re "type = int \\(volatile unsigned char, const volatile int, volatile short &, volatile long \\*, float \\* volatile, const volatile signed char \\* const volatile\\)" {
+        pass "ptype qux2"
+    }
+    -re ".*$gdb_prompt $" { fail "ptype qux2" }
+    timeout           { fail "(timeout) ptype qux2" }
+  }   
+
+
