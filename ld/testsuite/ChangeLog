@@ -1,3 +1,8 @@
+2002-10-03  H.J. Lu <hjl@gnu.org>
+
+	* ld-elfvers/vers21.c (_old_foobar): Initialized to -1 for gcc
+	3.x.
+
 2002-10-03  Chris Demetriou  <cgd@broadcom.com>
 
 	* ld-mips-elf/branch-misc-1.d: Link at 0x500000 and use -N, to be

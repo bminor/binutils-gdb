@@ -27,6 +27,6 @@ _old_foo ()
   return foo ();
 }
 
-int _old_foobar = 0;
+int _old_foobar = -1;
 
 int foobar = 1;
