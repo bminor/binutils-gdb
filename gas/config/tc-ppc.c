@@ -1156,7 +1156,8 @@ ppc_set_cpu ()
     }
 }
 
-/* Figure out the BFD architecture to use.  */
+/* Figure out the BFD architecture to use.  This function and ppc_mach
+   are called well before md_begin, when the output file is opened.  */
 
 enum bfd_architecture
 ppc_arch ()
@@ -1891,6 +1892,7 @@ void
 ppc_frob_file_before_adjust ()
 {
   symbolS *symp;
+  asection *toc;
 
   if (!ppc_obj64)
     return;
@@ -1921,6 +1923,11 @@ ppc_frob_file_before_adjust ()
 	symbol_mark_used (symp);
 
     }
+
+  toc = bfd_get_section_by_name (stdoutput, ".toc");
+  if (toc != NULL
+      && bfd_section_size (stdoutput, toc) > 0x10000)
+    as_warn (_("TOC section size exceeds 64k"));
 
   /* Don't emit .TOC. symbol.  */
   symp = symbol_find (".TOC.");

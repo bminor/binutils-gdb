@@ -1,3 +1,8 @@
+2004-07-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.c (ppc_frob_file_before_adjust): Warn if .toc too big.
+	(ppc_arch): Expand comment.
+
 2004-07-27  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* config/tc-crx.c: Support evaluating the difference between two
