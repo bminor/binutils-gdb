@@ -1815,7 +1815,8 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	 target.  */
       bytes_reserved = (lengths[i] + REGISTER_SIZE - 1) & -REGISTER_SIZE;
 
-      offset[i] = cum_bytes_reserved + lengths[i];
+      offset[i] = (cum_bytes_reserved
+		   + (lengths[i] > 4 ? bytes_reserved : lengths[i]));
 
       /* If the argument is a double word argument, then it needs to be
 	 double word aligned.  */
