@@ -3690,6 +3690,16 @@ Some machine configurations provide additional directives.
 * Balign::                      @code{.balign @var{abs-expr} , @var{abs-expr}}
 * Byte::                        @code{.byte @var{expressions}}
 * Comm::                        @code{.comm @var{symbol} , @var{length} }
+
+* CFI directives::		@code{.cfi_startproc}
+				@code{.cfi_endproc}
+				@code{.cfi_def_cfa @var{register}, @var{offset}}
+				@code{.cfi_def_cfa_register @var{register}}
+				@code{.cfi_def_cfa_offset @var{offset}}
+				@code{.cfi_adjust_cfa_offset @var{offset}}
+				@code{.cfi_offset @var{register}, @var{offset}}
+				@code{.cfi_verbose [1|0]}
+
 * Data::                        @code{.data @var{subsection}}
 @ifset COFF
 * Def::                         @code{.def @var{name}}
@@ -3965,6 +3975,48 @@ undefined.
 @cindex integers, one byte
 @code{.byte} expects zero or more expressions, separated by commas.
 Each expression is assembled into the next byte.
+
+@node CFI directives
+@section @code{.cfi_startproc}
+@cindex @code{cfi_startproc} directive
+@code{.cfi_startproc} is used at the beginning of each function that
+should have an entry in @code{.eh_frame}. It initializes some internal
+data structures and emits architecture dependent initial CFI instructions.
+Don't forget to close the function by 
+@code{.cfi_endproc}.
+
+@section @code{.cfi_endproc}
+@cindex @code{cfi_endproc} directive
+@code{.cfi_endproc} is used at the end of a function where it closes its
+unwind entry previously opened by
+@code{.cfi_startproc}. and emits it to @code{.eh_frame}.
+
+@section @code{.cfi_def_cfa @var{register}, @var{offset}}
+@code{.cfi_def_cfa} defines a rule for computing CFA as: @i{take 
+address from @var{register} and add @var{offset} to it}.
+
+@section @code{.cfi_def_cfa_register @var{register}}
+@code{.cfi_def_cfa_register} modifies a rule for computing CFA. From
+now on @var{register} will be used instead of the old one. Offset
+remains the same.
+
+@section @code{.cfi_def_cfa_offset @var{offset}}
+@code{.cfi_def_cfa_offset} modifies a rule for computing CFA. Register
+remains the same, but @var{offset} is new. Note that it is the
+absolute offset that will be added to a defined register to compute
+CFA address.
+
+@section @code{.cfi_adjust_cfa_offset @var{offset}}
+Same as @code{.cfi_def_cfa_offset} but @var{offset} is a relative
+value that is added/substracted from the previous offset.
+
+@section @code{.cfi_offset @var{register}, @var{offset}}
+Previous value of @var{register} is saved at offset @var{offset} from
+CFA. 
+
+@section @code{.cfi_verbose [1|0]}
+Switch on/off verbosity of the CFI machinery. @value{AS} will print
+lots of useful messages to standard output if you use this directive.
 
 @node Comm
 @section @code{.comm @var{symbol} , @var{length} }

@@ -43,6 +43,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "obstack.h"
 #include "listing.h"
 #include "ecoff.h"
+#include "dw2gencfi.h"
 
 #ifndef TC_START_LABEL
 #define TC_START_LABEL(x,y) (x == ':')
@@ -451,6 +452,10 @@ pop_insert (table)
 #define obj_pop_insert()	pop_insert(obj_pseudo_table)
 #endif
 
+#ifndef cfi_pop_insert
+#define cfi_pop_insert()	pop_insert(cfi_pseudo_table)
+#endif
+
 static void
 pobegin ()
 {
@@ -468,6 +473,12 @@ pobegin ()
   /* Now portable ones.  Skip any that we've seen already.  */
   pop_table_name = "standard";
   pop_insert (potable);
+  
+#ifdef TARGET_USE_CFIPOP
+  pop_table_name = "cfi";
+  pop_override_ok = 1;
+  cfi_pop_insert ();
+#endif
 }
 
 #define HANDLE_CONDITIONAL_ASSEMBLY()					\

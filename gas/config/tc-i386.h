@@ -545,4 +545,19 @@ void i386_print_statistics PARAMS ((FILE *));
 extern void sco_id PARAMS ((void));
 #endif
 
+/* We want .cfi_* pseudo-ops for generating unwind info.  */
+#define TARGET_USE_CFIPOP
+#ifdef TARGET_USE_CFIPOP
+
+#define tc_cfi_init() tc_x86_cfi_init ()
+extern void tc_x86_cfi_init PARAMS ((void));
+
+#define tc_regname_to_dw2regnum tc_x86_regname_to_dw2regnum
+extern unsigned long tc_x86_regname_to_dw2regnum PARAMS ((const char *regname));
+
+#define tc_cfi_frame_initial_instructions tc_x86_frame_initial_instructions
+extern void tc_x86_frame_initial_instructions PARAMS ((void));
+
+#endif /* TARGET_USE_CFIPOP */
+
 #endif /* TC_I386 */

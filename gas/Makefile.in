@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -291,6 +291,7 @@ GAS_CFILES = \
 	cond.c \
 	depend.c \
 	dwarf2dbg.c \
+	dw2gencfi.c \
 	ecoff.c \
 	ehopt.c \
 	expr.c \
@@ -323,6 +324,7 @@ HFILES = \
 	bit_fix.h \
 	cgen.h \
 	dwarf2dbg.h \
+	dw2gencfi.h \
 	ecoff.h \
 	emul-target.h \
 	emul.h \
@@ -546,6 +548,7 @@ GENERIC_OBJS = \
 	cond.o \
 	depend.o \
 	dwarf2dbg.o \
+	dw2gencfi.o \
 	ehopt.o \
 	expr.o \
 	flonum-konst.o \
@@ -824,15 +827,14 @@ DEPTC_frv_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
 DEPTC_h8300_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-h8300.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/h8300.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h \
-  $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/h8300.h \
-  $(INCDIR)/safe-ctype.h dwarf2dbg.h 
+  $(INCDIR)/bfdlink.h subsegs.h $(INCDIR)/obstack.h dwarf2dbg.h \
+  $(INCDIR)/opcode/h8300.h $(INCDIR)/safe-ctype.h
 
 DEPTC_h8300_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-h8300.h \
-  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/opcode/h8300.h \
-  $(INCDIR)/safe-ctype.h $(INCDIR)/elf/h8.h $(INCDIR)/elf/reloc-macros.h \
-  dwarf2dbg.h 
+  subsegs.h $(INCDIR)/obstack.h dwarf2dbg.h $(INCDIR)/opcode/h8300.h \
+  $(INCDIR)/safe-ctype.h $(INCDIR)/elf/h8.h $(INCDIR)/elf/reloc-macros.h
 
 DEPTC_h8500_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-h8500.h $(INCDIR)/coff/internal.h \
@@ -886,19 +888,20 @@ DEPTC_i370_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
 DEPTC_i386_aout = $(INCDIR)/symcat.h $(srcdir)/config/obj-aout.h \
   $(srcdir)/config/tc-i386.h $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
-  dwarf2dbg.h $(INCDIR)/opcode/i386.h
+  dwarf2dbg.h dw2gencfi.h $(INCDIR)/elf/dwarf2.h $(INCDIR)/opcode/i386.h
 
 DEPTC_i386_coff = $(INCDIR)/symcat.h $(srcdir)/config/obj-coff.h \
   $(srcdir)/config/tc-i386.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/i386.h $(INCDIR)/coff/external.h $(BFDDIR)/libcoff.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/safe-ctype.h subsegs.h \
-  $(INCDIR)/obstack.h dwarf2dbg.h $(INCDIR)/opcode/i386.h
+  $(INCDIR)/obstack.h dwarf2dbg.h dw2gencfi.h $(INCDIR)/elf/dwarf2.h \
+  $(INCDIR)/opcode/i386.h
 
 DEPTC_i386_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(srcdir)/config/tc-i386.h \
   $(INCDIR)/safe-ctype.h subsegs.h $(INCDIR)/obstack.h \
-  dwarf2dbg.h $(INCDIR)/opcode/i386.h
+  dwarf2dbg.h dw2gencfi.h $(INCDIR)/elf/dwarf2.h $(INCDIR)/opcode/i386.h
 
 DEPTC_i860_elf = $(INCDIR)/symcat.h $(srcdir)/config/obj-elf.h \
   $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
@@ -2469,13 +2472,13 @@ itbl_test_DEPENDENCIES =  itbl-tops.o itbl-test.o \
 itbl_test_LDFLAGS = 
 as_new_OBJECTS =  app.$(OBJEXT) as.$(OBJEXT) atof-generic.$(OBJEXT) \
 bignum-copy.$(OBJEXT) cond.$(OBJEXT) depend.$(OBJEXT) \
-dwarf2dbg.$(OBJEXT) ecoff.$(OBJEXT) ehopt.$(OBJEXT) expr.$(OBJEXT) \
-flonum-copy.$(OBJEXT) flonum-konst.$(OBJEXT) flonum-mult.$(OBJEXT) \
-frags.$(OBJEXT) hash.$(OBJEXT) input-file.$(OBJEXT) \
-input-scrub.$(OBJEXT) listing.$(OBJEXT) literal.$(OBJEXT) \
-macro.$(OBJEXT) messages.$(OBJEXT) output-file.$(OBJEXT) read.$(OBJEXT) \
-sb.$(OBJEXT) stabs.$(OBJEXT) subsegs.$(OBJEXT) symbols.$(OBJEXT) \
-write.$(OBJEXT)
+dwarf2dbg.$(OBJEXT) dw2gencfi.$(OBJEXT) ecoff.$(OBJEXT) ehopt.$(OBJEXT) \
+expr.$(OBJEXT) flonum-copy.$(OBJEXT) flonum-konst.$(OBJEXT) \
+flonum-mult.$(OBJEXT) frags.$(OBJEXT) hash.$(OBJEXT) \
+input-file.$(OBJEXT) input-scrub.$(OBJEXT) listing.$(OBJEXT) \
+literal.$(OBJEXT) macro.$(OBJEXT) messages.$(OBJEXT) \
+output-file.$(OBJEXT) read.$(OBJEXT) sb.$(OBJEXT) stabs.$(OBJEXT) \
+subsegs.$(OBJEXT) symbols.$(OBJEXT) write.$(OBJEXT)
 as_new_LDFLAGS = 
 SCRIPTS =  $(noinst_SCRIPTS)
 
@@ -2494,7 +2497,7 @@ configure configure.in gdbinit.in itbl-lex.c itbl-parse.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(itbl_test_SOURCES) $(as_new_SOURCES) $(EXTRA_as_new_SOURCES)
 OBJECTS = $(itbl_test_OBJECTS) $(as_new_OBJECTS)
@@ -2830,7 +2833,7 @@ distclean-generic:
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
-	-test -z "itbl-lexlconfig/m68k-parsehconfig/m68k-parsecitbl-parsehitbl-parsec" || rm -f itbl-lexl config/m68k-parseh config/m68k-parsec itbl-parseh itbl-parsec
+	-test -z "itbl-lex.cconfig/m68k-parse.hconfig/m68k-parse.citbl-parse.hitbl-parse.c" || rm -f itbl-lex.c config/m68k-parse.h config/m68k-parse.c itbl-parse.h itbl-parse.c
 mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstPROGRAMS \
 		mostlyclean-compile mostlyclean-libtool \
 		mostlyclean-tags mostlyclean-generic
@@ -3315,13 +3318,17 @@ dep-am: DEP
 #MKDEP    DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING BELOW.
 app.o: app.c $(INCDIR)/symcat.h
 as.o: as.c $(INCDIR)/symcat.h subsegs.h $(INCDIR)/obstack.h \
-  output-file.h sb.h macro.h dwarf2dbg.h $(BFDVER_H)
+  output-file.h sb.h macro.h dwarf2dbg.h dw2gencfi.h \
+  $(INCDIR)/elf/dwarf2.h $(BFDVER_H)
 atof-generic.o: atof-generic.c $(INCDIR)/symcat.h $(INCDIR)/safe-ctype.h
 bignum-copy.o: bignum-copy.c $(INCDIR)/symcat.h
 cond.o: cond.c $(INCDIR)/symcat.h macro.h sb.h $(INCDIR)/obstack.h
 depend.o: depend.c $(INCDIR)/symcat.h
 dwarf2dbg.o: dwarf2dbg.c $(INCDIR)/symcat.h dwarf2dbg.h \
-  subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/dwarf2.h
+  $(INCDIR)/filenames.h subsegs.h $(INCDIR)/obstack.h \
+  $(INCDIR)/elf/dwarf2.h
+dw2gencfi.o: dw2gencfi.c $(INCDIR)/symcat.h dw2gencfi.h \
+  $(INCDIR)/elf/dwarf2.h
 ecoff.o: ecoff.c $(INCDIR)/symcat.h ecoff.h
 ehopt.o: ehopt.c $(INCDIR)/symcat.h subsegs.h $(INCDIR)/obstack.h \
   $(INCDIR)/elf/dwarf2.h
@@ -3344,7 +3351,8 @@ macro.o: macro.c $(INCDIR)/safe-ctype.h sb.h macro.h
 messages.o: messages.c $(INCDIR)/symcat.h
 output-file.o: output-file.c $(INCDIR)/symcat.h output-file.h
 read.o: read.c $(INCDIR)/symcat.h $(INCDIR)/safe-ctype.h \
-  subsegs.h $(INCDIR)/obstack.h sb.h macro.h ecoff.h
+  subsegs.h $(INCDIR)/obstack.h sb.h macro.h ecoff.h \
+  dw2gencfi.h $(INCDIR)/elf/dwarf2.h
 sb.o: sb.c sb.h
 stabs.o: stabs.c $(INCDIR)/symcat.h $(INCDIR)/obstack.h \
   subsegs.h ecoff.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def

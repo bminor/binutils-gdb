@@ -136,10 +136,15 @@ config/tc-w65.c
 config/tc-w65.h
 config/tc-xstormy16.c
 config/tc-xstormy16.h
+config/tc-xtensa.c
+config/tc-xtensa.h
 config/tc-z8k.c
 config/tc-z8k.h
 depend.c
 depend.c
+dw2gencfi.c
+dw2gencfi.c
+dw2gencfi.h
 dwarf2dbg.c
 dwarf2dbg.c
 dwarf2dbg.h

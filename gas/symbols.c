@@ -182,8 +182,6 @@ symbol_create (name, segment, valu, frag)
 /* Local symbol support.  If we can get away with it, we keep only a
    small amount of information for local symbols.  */
 
-static struct local_symbol *local_symbol_make PARAMS ((const char *, segT,
-						       valueT, fragS *));
 static symbolS *local_symbol_convert PARAMS ((struct local_symbol *));
 
 /* Used for statistics.  */
@@ -205,7 +203,7 @@ static unsigned long local_symbol_conversion_count;
 
 /* Create a local symbol and insert it into the local hash table.  */
 
-static struct local_symbol *
+struct local_symbol *
 local_symbol_make (name, section, value, frag)
      const char *name;
      segT section;

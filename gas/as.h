@@ -474,6 +474,9 @@ extern enum debug_info_type debug_type;
 /* Maximum level of macro nesting.  */
 extern int max_macro_nest;
 
+/* Verbosity level.  */
+extern int verbose;
+
 /* Obstack chunk size.  Keep large for efficient space use, make small to
    increase malloc calls for monitoring memory allocation.  */
 extern int chunksize;

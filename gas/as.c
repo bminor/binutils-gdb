@@ -42,6 +42,7 @@
 #include "sb.h"
 #include "macro.h"
 #include "dwarf2dbg.h"
+#include "dw2gencfi.h"
 
 #ifdef BFD_ASSEMBLER
 #include "bfdver.h"
@@ -97,6 +98,9 @@ int chunksize = 0;
 /* To monitor memory allocation more effectively, make this non-zero.
    Then the chunk sizes for gas and bfd will be reduced.  */
 int debug_memory = 0;
+
+/* Enable verbose mode.  */
+int verbose = 0;
 
 /* We build a list of defsyms as we read the options, and then define
    them after we have initialized everything.  */
@@ -497,6 +501,7 @@ parse_args (pargc, pargv)
 #endif
 	      case OPTION_VERBOSE:
 		print_version_id ();
+		verbose = 1;
 	      break;
 	    }
 	  /* Fall through.  */
@@ -832,6 +837,10 @@ main (argc, argv)
   bfd_set_error_program_name (myname);
 #endif
 
+#ifdef TARGET_USE_CFIPOP
+  tc_cfi_init ();
+#endif
+
 #ifdef USE_EMULATIONS
   select_emulation_mode (argc, argv);
 #endif
@@ -905,6 +914,10 @@ main (argc, argv)
   /* If we've been collecting dwarf2 .debug_line info, either for
      assembly debugging or on behalf of the compiler, emit it now.  */
   dwarf2_finish ();
+
+#ifdef TARGET_USE_CFIPOP
+  cfi_finish ();
+#endif
 
   if (seen_at_least_1_file ()
       && (flag_always_generate_output || had_errors () == 0))

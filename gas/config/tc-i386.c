@@ -30,6 +30,7 @@
 #include "safe-ctype.h"
 #include "subsegs.h"
 #include "dwarf2dbg.h"
+#include "dw2gencfi.h"
 #include "opcode/i386.h"
 
 #ifndef REGISTER_WARNINGS
@@ -6298,4 +6299,86 @@ intel_putback_token ()
   prev_token.code = T_NIL;
   prev_token.reg = NULL;
   prev_token.str = NULL;
+}
+
+void
+tc_x86_cfi_init (void)
+{
+  struct cfi_config cfi_config;
+
+  if (flag_code == CODE_64BIT)
+    {
+      cfi_config.addr_length = 8;
+      cfi_config.eh_align = 8;
+      cfi_config.code_align = 1;
+      cfi_config.data_align = -8;
+      cfi_config.ra_column = 0x10;
+      cfi_config.reloc_type = BFD_RELOC_64;
+    }
+  else
+    {
+      cfi_config.addr_length = 4;
+      cfi_config.eh_align = 4;
+      cfi_config.code_align = 1;
+      cfi_config.data_align = -4;
+      cfi_config.ra_column = 0x08;
+      cfi_config.reloc_type = BFD_RELOC_32;
+    }
+
+  cfi_set_config (&cfi_config);
+}
+
+unsigned long
+tc_x86_regname_to_dw2regnum (const char *regname)
+{
+  unsigned int regnum;
+  unsigned int regnames_count;
+  char *regnames_32[] =
+    {
+      "eax", "ebx", "ecx", "edx",
+      "edi", "esi", "ebp", "esp",
+      "eip"
+    };
+  char *regnames_64[] =
+    {
+      "rax", "rbx", "rcx", "rdx",
+      "rdi", "rsi", "rbp", "rsp",
+      "r8", "r9", "r10", "r11",
+      "r12", "r13", "r14", "r15",
+      "rip"
+    };
+  char **regnames;
+
+  if (flag_code == CODE_64BIT)
+    {
+      regnames = regnames_64;
+      regnames_count = sizeof (regnames_64);
+    }
+  else
+    {
+      regnames = regnames_32;
+      regnames_count = sizeof (regnames_32);
+    }
+
+  for (regnum = 0; regnum < regnames_count; regnum++)
+    if (strcmp (regname, regnames[regnum]) == 0)
+      return regnum;
+
+  as_bad (_("unknown register name '%s'"), regname);
+  return -1;
+}
+
+void
+tc_x86_frame_initial_instructions (void)
+{
+  if (flag_code == CODE_64BIT)
+    {
+      cfi_add_insn (CFA_def_cfa, tc_x86_regname_to_dw2regnum ("rsp"), 8);
+      cfi_add_insn (CFA_offset, tc_x86_regname_to_dw2regnum ("rip"), -8);
+    }
+  else
+    {
+      cfi_add_insn (CFA_def_cfa, tc_x86_regname_to_dw2regnum ("esp"), 4);
+      cfi_add_insn (CFA_offset, tc_x86_regname_to_dw2regnum ("eip"), -4);
+    }
 }

@@ -1,6 +1,25 @@
+2003-05-20  Michal Ludvig  <mludvig@suse.cz>
+
+	* dw2gencfi.c, dw2gencfi.h: New files.
+	* config/tc-i386.c (tc_x86_cfi_init): New function.
+	* config/tc-i386.h (TARGET_USE_CFIPOP, tc_cfi_init): New defines.
+	* as.c (parse_args): Set verbose flag on --verbose.
+	(main): Call tc_cfi_init()/cfi_finish().
+	* as.h (verbose): New external variable.
+	* read.c (pobegin): Insert CFI pops to the list.
+	* symbols.c (local_symbol_make): Make symbol external.
+	* symbols.h (local_symbol_make): New prototype.
+	* Makefile.am: Add dw2gencfi.[ch] files.  Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* doc/as.texinfo: Added node "CFI directives" with description of
+	all implemented .cfi_* directives.
+	* doc/Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2003-05-19  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
-	* config/tc-tic4x.c (md_assemble): Added support for one-line parallel insns.
+	* config/tc-tic4x.c (md_assemble): Added support for one-line parallel
+	insns.
 	* config/tc-tic4x.h: Added DOUBLEBAR_PARALLEL definition
 
 2003-05-18  Jason Eckhardt  <jle@rice.edu>
@@ -20,7 +39,7 @@
 2003-05-13  Hans-Peter Nilsson  <hp@axis.com>
 
 	* read.c (old_buffer, old_input, old_limit): Remove variables.
- 	(read_a_source_file): Delete label contin.
+	(read_a_source_file): Delete label contin.
 	<handling #APP/#NO_APP>: Use an "sb" to push #APP expansion into
 	input as with macros, instead of in separate old_* variables.
 	Zero-terminate string being scrubbed.
@@ -113,7 +132,7 @@
 
 2003-05-02  Michael Snyder  <msnyder@redhat.com>
 
-	* write.h (FAKE_LABEL_NAME): Allow override 
+	* write.h (FAKE_LABEL_NAME): Allow override
 	(for targets that like eg. a leading dot in a local label).
 
 2003-05-02  Nick Clifton  <nickc@redhat.com>
@@ -150,7 +169,7 @@
 2003-05-01  Christian Groessler <chris@groessler.org>
 
 	* expr.h: Fix comments in operatorT typedef.
-	* config/tc-z8k.c: Add 2003 to copyright message.  
+	* config/tc-z8k.c: Add 2003 to copyright message.
 	Fold s_segm() and s_unseg() into one function s_segm(parm) which
 	decides by the parameter.
 	(md_begin): Don't set linkrelax.  Only set Z8002 default if no
@@ -282,8 +301,8 @@
 
 2003-04-21  Richard Henderson  <rth@redhat.com>
 
-        * dwarf2dbg.c (get_filenum): Skip as-yet unassigned file numbers.
-        (out_file_list): Assign non-null filename after generating error.
+	* dwarf2dbg.c (get_filenum): Skip as-yet unassigned file numbers.
+	(out_file_list): Assign non-null filename after generating error.
 
 2003-04-18  Jakub Jelinek  <jakub@redhat.com>
 
@@ -418,32 +437,31 @@
 
 2003-04-01  Bob Wilson  <bob.wilson@acm.org>
 
-        * Makefile.am (CPU_TYPES): Add xtensa.
-        (TARGET_CPU_CFILES): Add config/tc-xtensa.c.
-        (TARGET_CPU_HFILES): Add config/tc-xtensa.h.
-        (xtensa-relax.o): New target.
-        Run "make dep-am".
-        * Makefile.in: Regenerate.
-        * configure.in: Handle xtensa-*-*.  Add xtensa-relax.o to
-        extra_objects for xtensa targets.
-        * configure: Regenerate.
-        * write.c (write_object_file): Add new md_post_relax_hook.
-        * config/tc-xtensa.c: New file.
-        * config/tc-xtensa.h: Likewise.
-        * config/xtensa-istack.h: Likewise.
-        * config/xtensa-relax.c: Likewise.
-        * config/xtensa-relax.h: Likewise.
-        * doc/Makefile.am (CPU_DOCS): Add c-xtensa.texi.
-        * doc/Makefile.in: Regenerate.
-        * doc/all.texi: Set new XTENSA variable.
-        * doc/as.texinfo: Set new Xtensa variable.  Describe
-        Xtensa-specific options.  Define line comment character for
-        Xtensa.  Add Xtensa processors to list of ELF targets where
-        alignment is specified in bytes.  Add new Xtensa-Dependent node.
-        Add acknowledgements for those contributing to the Xtensa port.
-        * doc/internals.texi: Describe new md_post_relax_hook.
-        * doc/c-xtensa.texi: New file.
-
+	* Makefile.am (CPU_TYPES): Add xtensa.
+	(TARGET_CPU_CFILES): Add config/tc-xtensa.c.
+	(TARGET_CPU_HFILES): Add config/tc-xtensa.h.
+	(xtensa-relax.o): New target.
+	Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* configure.in: Handle xtensa-*-*.  Add xtensa-relax.o to
+	extra_objects for xtensa targets.
+	* configure: Regenerate.
+	* write.c (write_object_file): Add new md_post_relax_hook.
+	* config/tc-xtensa.c: New file.
+	* config/tc-xtensa.h: Likewise.
+	* config/xtensa-istack.h: Likewise.
+	* config/xtensa-relax.c: Likewise.
+	* config/xtensa-relax.h: Likewise.
+	* doc/Makefile.am (CPU_DOCS): Add c-xtensa.texi.
+	* doc/Makefile.in: Regenerate.
+	* doc/all.texi: Set new XTENSA variable.
+	* doc/as.texinfo: Set new Xtensa variable.  Describe
+	Xtensa-specific options.  Define line comment character for
+	Xtensa.  Add Xtensa processors to list of ELF targets where
+	alignment is specified in bytes.  Add new Xtensa-Dependent node.
+	Add acknowledgements for those contributing to the Xtensa port.
+	* doc/internals.texi: Describe new md_post_relax_hook.
+	* doc/c-xtensa.texi: New file.
 
 2003-04-01  Nick Clifton  <nickc@redhat.com>
 	    Richard Earnshaw  <rearnsha@arm.com>
@@ -457,8 +475,7 @@
 
 2003-03-26  Eric Christopher  <echristo@redhat.com>
 
-	* config/tc-mips.c (nopic_need_relax): Check for
-        S_IS_EXTERN.
+	* config/tc-mips.c (nopic_need_relax): Check for S_IS_EXTERN.
 
 2003-03-25  Stan Cox   <scox@redhat.com>
 	    Nick Clifton  <nickc@redhat.com>
@@ -763,15 +780,12 @@
 
 2003-01-23  Nick Clifton  <nickc@redhat.com>
 
-        NEWS: Announce sh2e support.
+	* NEWS: Announce sh2e support.
 
-	* Add sh2e support:
-
+	Add sh2e support:
 	2002-04-02  Alexandre Oliva  <aoliva@redhat.com>
-
-		* config/tc-sh.c (md_show_usage): Added sh2e next to
-		sh3e.
-		(sh_elf_final_processing): Handle arch_sh2e.
+	* config/tc-sh.c (md_show_usage): Added sh2e next to sh3e.
+	(sh_elf_final_processing): Handle arch_sh2e.
 
 2003-01-23  Alan Modra  <amodra@bigpond.net.au>
 
@@ -945,8 +959,8 @@
 
 2003-01-01  John David Anglin  <dave.anglin@nrc.ca>
 
-        * config/obj-elf.c (special_sections): Work around HP's incorrect usage
-        of .init and .fini sections for array initializers and finalizers.
+	* config/obj-elf.c (special_sections): Work around HP's incorrect usage
+	of .init and .fini sections for array initializers and finalizers.
 
 2002-12-31  Chris Demetriou  <cgd@broadcom.com>
 
