@@ -374,12 +374,12 @@ TAGS: force
 	etags $(INCDIR)/*.h $(srcdir)/*.h $(srcdir)/*.c
 
 do_mostlyclean:
-	rm -f *.o *~ core *.E *.p *.ip aout-params.h gen-aout
+	rm -f *.o *~ core *.E *.p *.ip aout-params.h gen-aout config.log
 do_clean: do_mostlyclean
 	rm -f libbfd.a TAGS bfd.h stmp-bfd.h ofiles \
 		elf32-target.h elf64-target.h
 do_distclean: do_clean
-	rm -f Makefile config.status sysdep.h
+	rm -f Makefile config.status sysdep.h config.cache
 
 # Should we remove $(srcdir)/libcoff.h $(srcdir)/libbfd.h $(srcdir)/bfd-in2.h?
 # make-stds.texi says it depends on whether they can be regenerated using
