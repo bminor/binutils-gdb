@@ -4688,7 +4688,9 @@ copy_private_bfd_data (ibfd, obfd)
 	 pointers that we are interested in.  As these sections get assigned
 	 to a segment, they are removed from this array.  */
 
-      amt = (bfd_size_type) section_count * sizeof (asection *);
+      /* Gcc 2.96 miscompiles this code on mips. Don't do casting here
+	 to work around this long long bug.  */
+      amt = section_count * sizeof (asection *);
       sections = (asection **) bfd_malloc (amt);
       if (sections == NULL)
 	return false;

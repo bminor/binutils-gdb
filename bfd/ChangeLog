@@ -1,3 +1,8 @@
+2002-06-08  H.J. Lu <hjl@gnu.org>
+
+	* elf.c (copy_private_bfd_data): Don't cast to bfd_size_type to
+	work around a long long bug in gcc 2.96 on mips.
+
 2002-06-08  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.am (BFD32_BACKENDS): Add vax1knetbsd.lo.
