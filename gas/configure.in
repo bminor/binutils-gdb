@@ -199,6 +199,16 @@ changequote([,])dnl
       hppa-*-lites*)        fmt=elf em=hppa ;;
       hppa-*-osf*)          fmt=som em=hppa ;;
       hppa-*-rtems*)        fmt=elf em=hppa ;;
+# Disabled until configury issues are sorted out across the various
+# projects
+#      hppa-*-hpux11*)	    em=hppa
+#			    case ${cpu} in
+#				hppa*w)
+#					fmt=elf;;
+#				hppa*)
+#					fmt=som;;
+#			    esac
+#			    ;;
       hppa-*-hpux*)         fmt=som em=hppa ;;
       hppa-*-mpeix*)        fmt=som em=hppa ;;
       hppa-*-bsd*)          fmt=som em=hppa ;;
