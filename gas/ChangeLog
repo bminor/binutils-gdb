@@ -1,3 +1,8 @@
+Tue Feb 28 15:34:14 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-i386.c (tc_i386_fix_adjustable): Don't adjust PLT or
+	GOT relocs either.
+
 Mon Feb 27 13:03:41 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* configure.in: add a29k-*-vxworks configuration.

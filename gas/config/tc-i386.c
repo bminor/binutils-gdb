@@ -27,6 +27,7 @@
 #include <ctype.h>
 
 #include "as.h"
+#include "subsegs.h"
 
 #include "obstack.h"
 #include "opcode/i386.h"
@@ -686,15 +687,20 @@ reloc (size, pcrel, other)
  * to make sure that the dynamic relocations are done correctly, so in
  * some cases we force the original symbol to be used.
  */
+int
 tc_i386_fix_adjustable(fixP)
      fixS * fixP;
 {
+#ifndef OBJ_AOUT
   /* Prevent all adjustments to global symbols. */
-  if (!S_IS_LOCAL (fixP->fx_addsy))
+  if (S_IS_EXTERN (fixP->fx_addsy))
     return 0;
+#endif
 #ifdef BFD_ASSEMBLER
   /* adjust_reloc_syms doesn't know about the GOT */
-  if (fixP->fx_r_type == BFD_RELOC_386_GOTOFF)
+  if (fixP->fx_r_type == BFD_RELOC_386_GOTOFF
+      || fixP->fx_r_type == BFD_RELOC_386_PLT32
+      || fixP->fx_r_type == BFD_RELOC_386_GOT32)
     return 0;
 #endif
   return 1;
@@ -1788,9 +1794,12 @@ md_assemble (line)
 			insn_size += size;
 #ifdef BFD_ASSEMBLER
 			if (r_type == BFD_RELOC_32
-			    && i.imms[n]->X_op == O_symbol
 			    && GOT_symbol
-			    && GOT_symbol == i.imms[n]->X_add_symbol)
+			    && GOT_symbol == i.imms[n]->X_add_symbol
+			    && (i.imms[n]->X_op == O_symbol
+				|| (i.imms[n]->X_op == O_add
+				    && (i.imms[n]->X_op_symbol->sy_value.X_op
+					== O_subtract))))
 			  {
 			    r_type = BFD_RELOC_386_GOTPC;
 			    i.imms[n]->X_add_number += 3;
@@ -2158,7 +2167,7 @@ i386_operand (operand_string)
 	     * into a temporary buffer...
 	     */
 	    register char *cp;
-	    if (cp = strchr(input_line_pointer,'@')) {
+	    if ((cp = strchr (input_line_pointer,'@')) != NULL) {
 	      char tmpbuf[BUFSIZ];
 	      
 	      if(!GOT_symbol)
