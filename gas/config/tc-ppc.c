@@ -755,14 +755,13 @@ md_begin ()
 		 601 and a different value on other PowerPC
 		 processors.  It's easier to permit a duplication than
 		 to define a new instruction type flag.  When using
-		 -many, the comparison instructions are a harmless
+		 -many/-mcom, the comparison instructions are a harmless
 		 special case.  */
 	      if (strcmp (retval, "exists") != 0
 		  || (((ppc_cpu & PPC_OPCODE_601) == 0
 		       || strcmp (op->name, "mfdec") != 0)
-		      && (ppc_cpu != (PPC_OPCODE_POWER
-				      | PPC_OPCODE_POWER2
-				      | PPC_OPCODE_PPC)
+		      && (((ppc_cpu & ~PPC_OPCODE_POWER2)
+			  == (PPC_OPCODE_POWER | PPC_OPCODE_PPC))
 			  || (strcmp (op->name, "cmpli") != 0
 			      && strcmp (op->name, "cmpi") != 0
 			      && strcmp (op->name, "cmp") != 0
