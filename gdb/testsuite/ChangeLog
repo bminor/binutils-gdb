@@ -1,5 +1,14 @@
 Sun Apr  9 09:02:36 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.base/recurse.exp: Fix comment.
+
+	* TODO: Remove item about printing variables in nodebug.exp.  Add
+	item about enabling tests which are only run on some targets.
+
+	* gdb.base/watchpoint.exp: Various cleanups (make each test pass or
+	fail, make test names unique, use new gdb_test convention
+	regarding pattern, use gdb_test more, etc.).
+
 	* gdb.base/bitfields.exp: Various cleanups (make each test pass or
 	fail, make test names unique, etc.).
 
