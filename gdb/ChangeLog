@@ -1,3 +1,10 @@
+2004-03-29  Corinna Vinschen  <vinschen@redhat.com>
+
+	* minsyms.c (install_minimal_symbols): Move dropping leading
+	char from linkage name from here...
+	(prim_record_minimal_symbol_and_info): ...to here.  Simplify
+	test for "__gnu_compiled*" symbols.
+
 2004-03-28  Jim Blandy  <jimb@redhat.com>
 
 	* rs6000-tdep.c (skip_prologue): Recognize moves from argument
