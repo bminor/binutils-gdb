@@ -1,3 +1,8 @@
+2004-09-04  Joel Brobecker  <brobecker@gnat.com>
+
+	* config/rs6000/xm-rs6000.h: Remove this file.
+	* config/rs6000/rs6000.mh (XM_FILE): Remove.
+
 2004-09-03  Andrew Cagney  <cagney@gnu.org>
 
 	* mips-tdep.c (PROC_DESC_IS_DUMMY, SET_PROC_DESC_IS_DUMMY)
