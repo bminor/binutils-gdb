@@ -46,6 +46,8 @@ static void set_flags (char *arg, int *is_quoted, char **paren_pointer);
 
 static struct symtabs_and_lines decode_indirect (char **argptr);
 
+static char *locate_first_half (char **argptr, int *is_quote_enclosed);
+
 static void cplusplus_error (const char *name, const char *fmt, ...) ATTR_FORMAT (printf, 2, 3);
 
 static int total_number_of_methods (struct type *type);
@@ -530,11 +532,11 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   struct symtabs_and_lines values;
   struct symtab_and_line val;
   register char *p, *p1;
-  char *q, *ii, *p2;
+  char *q, *p2;
 #if 0
   char *q1;
 #endif
-  register struct symtab *s;
+  register struct symtab *s = NULL;
 
   register struct symbol *sym;
   /* The symtab that SYM was found in.  */
@@ -550,8 +552,8 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* This says whether or not something in *ARGPTR is quoted with
      completer_quotes (i.e. with single quotes).  */
   int is_quoted;
+  /* Is part of *ARGPTR is enclosed in double quotes?  */
   int is_quote_enclosed;
-  int has_comma = 0;
   struct symbol **sym_arr;
   struct type *t;
   char *saved_arg = *argptr;
@@ -576,84 +578,14 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 
   set_flags (*argptr, &is_quoted, &paren_pointer);
 
-  /* Maybe we were called with a line range FILENAME:LINENUM,FILENAME:LINENUM
-     and we must isolate the first half.  Outer layers will call again later
-     for the second half.
+  /* Check to see if it's a multipart linespec (with colons or
+     periods).  */
 
-     Don't count commas that appear in argument lists of overloaded
-     functions, or in quoted strings.  It's stupid to go to this much
-     trouble when the rest of the function is such an obvious roach hotel.  */
-  ii = find_toplevel_char (*argptr, ',');
-  has_comma = (ii != 0);
+  /* Locate the end of the first half of the linespec.  */
 
-  /* Temporarily zap out second half to not
-   * confuse the code below.
-   * This is undone below. Do not change ii!!
-   */
-  if (has_comma)
-    {
-      *ii = '\0';
-    }
+  p = locate_first_half (argptr, &is_quote_enclosed);
 
-  /* Maybe arg is FILE : LINENUM or FILE : FUNCTION */
-  /* May also be CLASS::MEMBER, or NAMESPACE::NAME */
-  /* Look for ':', but ignore inside of <> */
-
-  s = NULL;
-  p = *argptr;
-  if (p[0] == '"')
-    {
-      is_quote_enclosed = 1;
-      (*argptr)++;
-      p++;
-    }
-  else
-    is_quote_enclosed = 0;
-  for (; *p; p++)
-    {
-      if (p[0] == '<')
-	{
-	  char *temp_end = find_template_name_end (p);
-	  if (!temp_end)
-	    error ("malformed template specification in command");
-	  p = temp_end;
-	}
-      /* Check for the end of the first half of the linespec.  End of line,
-         a tab, a double colon or the last single colon, or a space.  But
-         if enclosed in double quotes we do not break on enclosed spaces */
-      if (!*p
-	  || p[0] == '\t'
-	  || ((p[0] == ':')
-	      && ((p[1] == ':') || (strchr (p + 1, ':') == NULL)))
-	  || ((p[0] == ' ') && !is_quote_enclosed))
-	break;
-      if (p[0] == '.' && strchr (p, ':') == NULL)	/* Java qualified method. */
-	{
-	  /* Find the *last* '.', since the others are package qualifiers. */
-	  for (p1 = p; *p1; p1++)
-	    {
-	      if (*p1 == '.')
-		p = p1;
-	    }
-	  break;
-	}
-    }
-  while (p[0] == ' ' || p[0] == '\t')
-    p++;
-
-  /* if the closing double quote was left at the end, remove it */
-  if (is_quote_enclosed)
-    {
-      char *closing_quote = strchr (p - 1, '"');
-      if (closing_quote && closing_quote[1] == '\0')
-	*closing_quote = '\0';
-    }
-
-  /* Now that we've safely parsed the first half,
-   * put back ',' so outer layers can see it 
-   */
-  if (has_comma)
-    *ii = ',';
+  /* Does it look like there actually were two parts?  */
 
   if ((p[0] == ':' || p[0] == '.') && paren_pointer == NULL)
     {
@@ -1251,6 +1183,101 @@ decode_indirect (char **argptr)
   values.sals[0].section = find_pc_overlay (pc);
 
   return values;
+}
+
+
+
+/* Locate the first half of the linespec, ending in a colon, period,
+   or whitespace.  (More or less.)  Also, check to see if *ARGPTR is
+   enclosed in double quotes; if so, set is_quote_enclosed, advance
+   ARGPTR past that and zero out the trailing double quote.  */
+
+static char *
+locate_first_half (char **argptr, int *is_quote_enclosed)
+{
+  char *ii;
+  char *p, *p1;
+  int has_comma;
+
+  /* Maybe we were called with a line range FILENAME:LINENUM,FILENAME:LINENUM
+     and we must isolate the first half.  Outer layers will call again later
+     for the second half.
+
+     Don't count commas that appear in argument lists of overloaded
+     functions, or in quoted strings.  It's stupid to go to this much
+     trouble when the rest of the function is such an obvious roach hotel.  */
+  ii = find_toplevel_char (*argptr, ',');
+  has_comma = (ii != 0);
+
+  /* Temporarily zap out second half to not
+   * confuse the code below.
+   * This is undone below. Do not change ii!!
+   */
+  if (has_comma)
+    {
+      *ii = '\0';
+    }
+
+  /* Maybe arg is FILE : LINENUM or FILE : FUNCTION */
+  /* May also be CLASS::MEMBER, or NAMESPACE::NAME */
+  /* Look for ':', but ignore inside of <> */
+
+  p = *argptr;
+  if (p[0] == '"')
+    {
+      *is_quote_enclosed = 1;
+      (*argptr)++;
+      p++;
+    }
+  else
+    *is_quote_enclosed = 0;
+  for (; *p; p++)
+    {
+      if (p[0] == '<')
+	{
+	  char *temp_end = find_template_name_end (p);
+	  if (!temp_end)
+	    error ("malformed template specification in command");
+	  p = temp_end;
+	}
+      /* Check for the end of the first half of the linespec.  End of line,
+         a tab, a double colon or the last single colon, or a space.  But
+         if enclosed in double quotes we do not break on enclosed spaces */
+      if (!*p
+	  || p[0] == '\t'
+	  || ((p[0] == ':')
+	      && ((p[1] == ':') || (strchr (p + 1, ':') == NULL)))
+	  || ((p[0] == ' ') && !*is_quote_enclosed))
+	break;
+      if (p[0] == '.' && strchr (p, ':') == NULL)	/* Java qualified method. */
+	{
+	  /* Find the *last* '.', since the others are package qualifiers. */
+	  for (p1 = p; *p1; p1++)
+	    {
+	      if (*p1 == '.')
+		p = p1;
+	    }
+	  break;
+	}
+    }
+  while (p[0] == ' ' || p[0] == '\t')
+    p++;
+
+  /* if the closing double quote was left at the end, remove it */
+  if (*is_quote_enclosed)
+    {
+      char *closing_quote = strchr (p - 1, '"');
+      if (closing_quote && closing_quote[1] == '\0')
+	*closing_quote = '\0';
+    }
+
+  /* Now that we've safely parsed the first half,
+   * put back ',' so outer layers can see it 
+   */
+  if (has_comma)
+    *ii = ',';
+
+  return p;
 }
 
 
