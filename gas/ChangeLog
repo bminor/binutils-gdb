@@ -1,3 +1,20 @@
+Tue Mar  9 07:40:06 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* write.c (chain_frchains_together): Check that seg_info (section)
+	is not NULL.
+	(write_object_file): Call obj_frob_file after setting the symbols,
+	not before.
+
+Mon Mar  8 14:57:10 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* config/tc-i386.h (TC_COUNT_RELOC): Look for fx_addsy only.
+
+Fri Mar  5 09:05:55 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* read.h: Define stringer here.
+	read.c, config/obj-ieee.c, config/obj-tcm88k.c: Not any of these
+	places.
+
 Thu Mar  4 11:52:23 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* read.c (s_space): Multiply repeat count by mult, not fill.
