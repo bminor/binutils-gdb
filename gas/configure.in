@@ -41,7 +41,8 @@ changequote([,])dnl
   m8*)		cpu_type=m88k ;;
   mips*el)	cpu_type=mips endian=little;;
   mips*)	cpu_type=mips endian=big ;;
-  powerpc*)	cpu_type=ppc ;;
+  powerpcle*)	cpu_type=ppc endian=little;;
+  powerpc*)	cpu_type=ppc endian=big;;
   rs6000*)	cpu_type=ppc ;;
   sparc64)	cpu_type=sparc obj_format=elf
 		AC_DEFINE(sparcv9) ;;
@@ -161,10 +162,14 @@ case ${generic_target} in
 			esac
 			;;
   ppc-*-aix*)		obj_format=coff ;;
-  ppc-*-elf*)		obj_format=elf ;;
-  ppc-*-eabi*)		obj_format=elf ;;
+  ppc-*-elf* | ppc-*-eabi* | ppc-*-sysv4*)
+			obj_format=elf
+			case "$endian" in
+			big) gas_target=ppc-big ;;
+			*)   gas_target=ppc-lit ;;
+			esac
+			;;
   ppc-*-netware*)	obj_format=elf emulation=ppcnw ;;
-  ppc-*-sysv4*)		obj_format=elf ;;
 
   sh-*-coff)		obj_format=coff ;;
 

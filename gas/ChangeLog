@@ -1,3 +1,23 @@
+Tue May  9 17:07:41 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in: Add little endian PowerPC support.
+	* configure: Rebuild with autoconf.
+	* config/ppc-big.mt: New file for big endian PowerPC systems.
+	* config/ppc-lit.mt: New file for little endian PowerPC systems.
+
+	* config/tc-ppc.h (target_big_endian): Declare.
+	(TARGET_FORMAT): Deal with little and big endian ELF variants.
+	(TARGET_BYTES_BIG_ENDIAN): Define as 1, not empty.
+
+	* config/tc-ppc.c (ppc_big_endian): Delete variable, use
+	target_big_endian instead.
+	(md_parse_option): Parse -mlittle and -mlittle-endian to use
+	little endian support.  Parse -mbig and -mbig-endian to use big
+	endian support.
+	(md_show_usage): Update to reflect current switches.
+	(ppc_set_cpu): Recognize powerpcle as little endian PowerPC.  Use
+	as_fatal, not abort if unknown machine.
+
 Tue May  9 10:58:41 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (md_apply_fix): Cast *valp to an integer when

@@ -71,6 +71,8 @@ obj-som.c
 obj-som.h
 obj-vms.c
 obj-vms.h
+ppc-big.mt
+ppc-lit.mt
 tc-a29k.c
 tc-a29k.h
 tc-alpha.c
