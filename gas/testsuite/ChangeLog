@@ -1,3 +1,9 @@
+2003-12-17  Nick Clifton  <nickc@redhat.com>
+
+	* gas/m32r/error.exp: Add parallel.s
+        * gas/m32r/parallel.s: New file: Test warning and error
+        messages produced for parallel conflicts.
+
 2003-12-16  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/arm.exp: Run special versions of the inst, ldconst,

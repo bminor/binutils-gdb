@@ -116,9 +116,12 @@ static int enable_special_float = 0;
    instruction might have constraint violations.  */
 static int warn_explicit_parallel_conflicts = 1;
 
-/* Non-zero if the programmer should receive an error message when an
-   explicit parallel instruction might have constraint violations.  */
-static int error_explicit_parallel_conflicts = 1;
+/* Non-zero if the programmer should not receive any messages about
+   parallel instruction with potential or real constraint violations.
+   The ability to suppress these messages is intended only for hardware
+   vendors testing the chip.  It superceedes
+   warn_explicit_parallel_conflicts.  */
+static int ignore_parallel_conflicts = 0;
 
 /* Non-zero if insns can be made parallel.  */
 static int use_parallel = 1;
@@ -197,22 +200,22 @@ const char *md_shortopts = M32R_SHORTOPTS;
 
 struct option md_longopts[] =
 {
-#define OPTION_M32R		 (OPTION_MD_BASE)
-#define OPTION_M32RX		 (OPTION_M32R + 1)
-#define OPTION_M32R2		 (OPTION_M32RX + 1)
-#define OPTION_BIG               (OPTION_M32R2 + 1)
-#define OPTION_LITTLE            (OPTION_BIG + 1)
-#define OPTION_PARALLEL          (OPTION_LITTLE + 1)
-#define OPTION_NO_PARALLEL       (OPTION_PARALLEL + 1)
-#define OPTION_WARN_PARALLEL	 (OPTION_NO_PARALLEL + 1)
-#define OPTION_NO_WARN_PARALLEL	 (OPTION_WARN_PARALLEL + 1)
-#define OPTION_ERROR_PARALLEL    (OPTION_NO_WARN_PARALLEL + 1)
-#define OPTION_NO_ERROR_PARALLEL (OPTION_ERROR_PARALLEL + 1)
-#define OPTION_SPECIAL		 (OPTION_NO_ERROR_PARALLEL + 1)
-#define OPTION_SPECIAL_M32R      (OPTION_SPECIAL + 1)
-#define OPTION_SPECIAL_FLOAT     (OPTION_SPECIAL_M32R + 1)
-#define OPTION_WARN_UNMATCHED 	 (OPTION_SPECIAL_FLOAT + 1)
-#define OPTION_NO_WARN_UNMATCHED (OPTION_WARN_UNMATCHED + 1)
+#define OPTION_M32R		  (OPTION_MD_BASE)
+#define OPTION_M32RX		  (OPTION_M32R + 1)
+#define OPTION_M32R2		  (OPTION_M32RX + 1)
+#define OPTION_BIG                (OPTION_M32R2 + 1)
+#define OPTION_LITTLE             (OPTION_BIG + 1)
+#define OPTION_PARALLEL           (OPTION_LITTLE + 1)
+#define OPTION_NO_PARALLEL        (OPTION_PARALLEL + 1)
+#define OPTION_WARN_PARALLEL	  (OPTION_NO_PARALLEL + 1)
+#define OPTION_NO_WARN_PARALLEL	  (OPTION_WARN_PARALLEL + 1)
+#define OPTION_IGNORE_PARALLEL    (OPTION_NO_WARN_PARALLEL + 1)
+#define OPTION_NO_IGNORE_PARALLEL (OPTION_IGNORE_PARALLEL + 1)
+#define OPTION_SPECIAL		  (OPTION_NO_IGNORE_PARALLEL + 1)
+#define OPTION_SPECIAL_M32R       (OPTION_SPECIAL + 1)
+#define OPTION_SPECIAL_FLOAT      (OPTION_SPECIAL_M32R + 1)
+#define OPTION_WARN_UNMATCHED 	  (OPTION_SPECIAL_FLOAT + 1)
+#define OPTION_NO_WARN_UNMATCHED  (OPTION_WARN_UNMATCHED + 1)
   {"m32r",  no_argument, NULL, OPTION_M32R},
   {"m32rx", no_argument, NULL, OPTION_M32RX},
   {"m32r2", no_argument, NULL, OPTION_M32R2},
@@ -226,10 +229,10 @@ struct option md_longopts[] =
   {"Wp", no_argument, NULL, OPTION_WARN_PARALLEL},
   {"no-warn-explicit-parallel-conflicts", no_argument, NULL, OPTION_NO_WARN_PARALLEL},
   {"Wnp", no_argument, NULL, OPTION_NO_WARN_PARALLEL},
-  {"error-explicit-parallel-conflicts", no_argument, NULL, OPTION_ERROR_PARALLEL},
-  {"Ep", no_argument, NULL, OPTION_ERROR_PARALLEL},
-  {"no-error-explicit-parallel-conflicts", no_argument, NULL, OPTION_NO_ERROR_PARALLEL},
-  {"Enp", no_argument, NULL, OPTION_NO_ERROR_PARALLEL},
+  {"ignore-parallel-conflicts", no_argument, NULL, OPTION_IGNORE_PARALLEL},
+  {"Ip", no_argument, NULL, OPTION_IGNORE_PARALLEL},
+  {"no-ignore-parallel-conflicts", no_argument, NULL, OPTION_NO_IGNORE_PARALLEL},
+  {"nIp", no_argument, NULL, OPTION_NO_IGNORE_PARALLEL},
   {"hidden", no_argument, NULL, OPTION_SPECIAL},
   {"bitinst", no_argument, NULL, OPTION_SPECIAL_M32R},
   {"float", no_argument, NULL, OPTION_SPECIAL_FLOAT},
@@ -318,22 +321,18 @@ md_parse_option (c, arg)
 
     case OPTION_WARN_PARALLEL:
       warn_explicit_parallel_conflicts = 1;
-      error_explicit_parallel_conflicts = 0;
       break;
 
     case OPTION_NO_WARN_PARALLEL:
       warn_explicit_parallel_conflicts = 0;
-      error_explicit_parallel_conflicts = 0;
       break;
 
-    case OPTION_ERROR_PARALLEL:
-      warn_explicit_parallel_conflicts = 1;
-      error_explicit_parallel_conflicts = 1;
+    case OPTION_IGNORE_PARALLEL:
+      ignore_parallel_conflicts = 1;
       break;
 
-    case OPTION_NO_ERROR_PARALLEL:
-      error_explicit_parallel_conflicts = 0;
-      warn_explicit_parallel_conflicts = 0;
+    case OPTION_NO_IGNORE_PARALLEL:
+      ignore_parallel_conflicts = 0;
       break;
 
     case OPTION_SPECIAL:
@@ -406,27 +405,27 @@ md_show_usage (stream)
   fprintf (stream, _("\
   -warn-explicit-parallel-conflicts     warn when parallel instructions\n"));
   fprintf (stream, _("\
-                                         violate contraints\n"));
+                                         might violate contraints\n"));
   fprintf (stream, _("\
   -no-warn-explicit-parallel-conflicts  do not warn when parallel\n"));
   fprintf (stream, _("\
-                                         instructions violate contraints\n"));
+                                         instructions might violate contraints\n"));
   fprintf (stream, _("\
   -Wp                     synonym for -warn-explicit-parallel-conflicts\n"));
   fprintf (stream, _("\
   -Wnp                    synonym for -no-warn-explicit-parallel-conflicts\n"));
   fprintf (stream, _("\
-  -error-explicit-parallel-conflicts     error when parallel instructions\n"));
+  -ignore-parallel-conflicts            do not check parallel instructions\n"));
   fprintf (stream, _("\
-                                         violate contraints\n"));
+                                         fo contraint violations\n"));
   fprintf (stream, _("\
-  -no-error-explicit-parallel-conflicts  do not error when parallel\n"));
+  -no-ignore-parallel-conflicts         check parallel instructions for\n"));
   fprintf (stream, _("\
-                                         instructions violate contraints\n"));
+                                         contraint violations\n"));
   fprintf (stream, _("\
-  -Ep                     synonym for -error-explicit-parallel-conflicts\n"));
+  -Ip                     synonym for -ignore-parallel-conflicts\n"));
   fprintf (stream, _("\
-  -Enp                    synonym for -no-error-explicit-parallel-conflicts\n"));
+  -nIp                    synonym for -no-ignore-parallel-conflicts\n"));
 
   fprintf (stream, _("\
   -warn-unmatched-high    warn when an (s)high reloc has no matching low reloc\n"));
@@ -756,6 +755,9 @@ first_writes_to_seconds_operands (a, b, check_outputs)
   const CGEN_OPINST *b_ops = CGEN_INSN_OPERANDS (b->insn);
   int a_index;
 
+  if (ignore_parallel_conflicts)
+    return 0;
+
   /* If at least one of the instructions takes no operands, then there is
      nothing to check.  There really are instructions without operands,
      eg 'nop'.  */
@@ -870,7 +872,7 @@ can_make_parallel (a, b)
     abort ();
 
   if (first_writes_to_seconds_operands (a, b, TRUE))
-    return _("Instructions write to the same destination register.");
+    return _("instructions write to the same destination register.");
 
   a_pipe = CGEN_INSN_ATTR_VALUE (a->insn, CGEN_INSN_PIPE);
   b_pipe = CGEN_INSN_ATTR_VALUE (b->insn, CGEN_INSN_PIPE);
@@ -1154,17 +1156,13 @@ assemble_two_insns (str, str2, parallel_p)
 
   if (parallel_p && warn_explicit_parallel_conflicts)
     {
-      void (* func)(const char *, ...);
-
-      func = error_explicit_parallel_conflicts ? as_bad : as_warn;
-
       if (first_writes_to_seconds_operands (&first, &second, FALSE))
 	/* xgettext:c-format  */
-	func (_("%s: output of 1st instruction is the same as an input to 2nd instruction - is this intentional ?"), str2);
+	as_warn (_("%s: output of 1st instruction is the same as an input to 2nd instruction - is this intentional ?"), str2);
 
       if (first_writes_to_seconds_operands (&second, &first, FALSE))
 	/* xgettext:c-format  */
-	func (_("%s: output of 2nd instruction is the same as an input to 1st instruction - is this intentional ?"), str2);
+	as_warn (_("%s: output of 2nd instruction is the same as an input to 1st instruction - is this intentional ?"), str2);
     }
 
   if (!parallel_p

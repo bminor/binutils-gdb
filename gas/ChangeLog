@@ -1,3 +1,17 @@
+2003-12-17  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-m32r.c (error_explicit_parallel_conflicts): Rename
+        to 'ignore_parallel_conflicts'.
+        (md_longopts): Change option names as well.
+        (md_parse_option): Separate the	warn_explicit and ignore
+        parallel conflicts options.
+        (md_show_usage): Update descriptions of these options.
+        (first_writes_to_seconds_operands): Do not run this check if
+        ignoring parallel conflicts.
+        (assemble_two_insns): Remove code that checked
+        error_explicit_parallel_conflicts.
+        * doc/c-m32r.texi: Update descriptions of the options.
+        
 2003-12-16  Dmitry Semyonov  <Dmitry.Semyonov@oktet.ru>
 
 	* tc-arm.c (do_adr): Do not adjust pc by -8 if TE_WINCE is

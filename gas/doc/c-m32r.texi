@@ -119,27 +119,26 @@ questionable parallel instructions are encountered.
 This is a shorter synonym for the @emph{-no-warn-explicit-parallel-conflicts}
 option.
 
-@item -error-explicit-parallel-conflicts
-@cindex @samp{-error-explicit-parallel-conflicts} option, M32RX
-This option performs the same thing as the
-@emph{-warn-explicit-parallel-conflicts} expcept that instead of
-warning messages being produced, error messages will be produced.  If
-any error messages are generated then GAS will not produce an output
-file.
+@item -ignore-parallel-conflicts
+@cindex @samp{-ignore-parallel-conflicts} option, M32RX
+This option tells the assembler's to stop checking parallel
+instructions for contraint violations.  This ability is provided for
+hardware vendors testing chip designs and should not be used under
+normal circumstances.
 
-@item -no-error-explicit-parallel-conflicts
-@cindex @samp{-no-error-explicit-parallel-conflicts} option, M32RX
-This option disables a previously enabled
-@emph{-error-explicit-parallel-conflicts} option.
+@item -no-ignore-parallel-conflicts
+@cindex @samp{-no-ignore-parallel-conflicts} option, M32RX
+This option restores the assembler's default behaviour of checking
+parallel instructions to detect constraint violations.
 
-@item -Ep
-@cindex @samp{-Ep} option, M32RX
-This is a shorter synonym for the @emph{-error-explicit-parallel-conflicts}
+@item -Ip
+@cindex @samp{-Ip} option, M32RX
+This is a shorter synonym for the @emph{-ignore-parallel-conflicts}
 option.
 
-@item -Enp
-@cindex @samp{-Enp} option, M32RX
-This is a shorter synonym for the @emph{-no-error-explicit-parallel-conflicts}
+@item -nIp
+@cindex @samp{-nIp} option, M32RX
+This is a shorter synonym for the @emph{-no-ignore-parallel-conflicts}
 option.
 
 @item -warn-unmatched-high
