@@ -19,6 +19,11 @@ if ( echo $* | grep keep\-chill > /dev/null ) ; then
 	keep_these_too="chillrt test-chill"
 fi
 
+if ( echo $* | grep keep\-cygnus > /dev/null) ; then
+	keep_these_too="${keep_these_too} release release-info"
+fi
+
+
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
