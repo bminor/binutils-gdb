@@ -28,6 +28,10 @@ static char sccsid[] = "@(#)lookup.c	5.4 (Berkeley) 6/1/90";
      *	    this deals with misses by mapping them to the next lower 
      *	    entry point.
      */
+#ifdef DEBUG
+nltype *dbg_nllookup();
+#endif
+     
 nltype *
 nllookup( address )
     unsigned long	address;
@@ -59,9 +63,49 @@ nllookup( address )
 	    low = middle + 1;
 	}
     }
+    if(nl[middle+1].value == address) {
+#	    ifdef DEBUG
+      if (debug & LOOKUPDEBUG ) {
+	printf("[nllookup] %d (%d) probes, fall off\n", probes, nname-1);
+      }
+#	    endif
+      return &nl[middle];
+    }
+    fprintf( stderr , "[nllookup] binary search fails???\n" );
+#ifdef DEBUG
+    dbg_nllookup(address);
+#endif    
+    return 0;
+}
+
+#ifdef DEBUG
+nltype *
+dbg_nllookup( address )
+    unsigned long	address;
+{
+    register long	low;
+    register long	middle;
+    register long	high;
+    fprintf(stderr,"[nllookup] address 0x%x\n",address);
+    
+    for ( low = 0 , high = nname - 1 ; low != high ; ) {
+      
+      middle = ( high + low ) >> 1;
+      fprintf(stderr, "[nllookup] low 0x%x middle 0x%x high 0x%x nl[m] 0x%x nl[m+1] 0x%x\n",
+	      low,middle,high,nl[middle].value,nl[middle+1].value);
+      if ( nl[ middle ].value <= address && nl[ middle+1 ].value > address) {
+	return &nl[ middle ];
+      }
+      if ( nl[ middle ].value > address ) {
+	high = middle;
+      } else {
+	low = middle + 1;
+      }
+    }
     fprintf( stderr , "[nllookup] binary search fails???\n" );
     return 0;
 }
+#endif DEBUG
 
 arctype *
 arclookup( parentp , childp )

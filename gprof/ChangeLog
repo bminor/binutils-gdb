@@ -1,0 +1,7 @@
+Thu Jun  4 11:34:02 1992  Mark Eichin  (eichin at cygnus.com)
+
+	* lookup.c: fixed fencepost in nllookup and added dbg_nllookup for
+	help in debugging the problem (with -DDEBUG)
+	* gprof.c: symbol values are now real values, don't add the vma
+	anymore. (done for solaris; should verify this on other platforms)
+	* ChangeLog: created.
