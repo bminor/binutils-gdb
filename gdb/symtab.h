@@ -818,6 +818,11 @@ extern struct type *lookup_member_type ();
 extern struct type *lookup_method_type ();
 extern struct type *lookup_class ();
 extern void smash_to_method_type ();
+void smash_to_member_type (
+#ifdef __STDC__
+			   struct type *, struct type *, struct type *
+#endif
+			   );
 extern struct type *allocate_stub_method ();
 /* end of C++ stuff.  */
 
@@ -902,6 +907,16 @@ void symbol_file_add ();
 /* source.c */
 int identify_source_line ();
 void print_source_lines ();
+void forget_cached_source_info (
+#ifdef __STDC__
+				void
+#endif
+				);
+void select_source_symtab (
+#ifdef __STDC__
+			   struct symtab *
+#endif
+			   );
 
 char **make_symbol_completion_list ();
 

@@ -394,7 +394,7 @@ make_blockvector ()
 
 /* Manage the vector of line numbers.  */
 
-static
+static void
 record_line (line, pc)
      int line;
      CORE_ADDR pc;
@@ -616,6 +616,7 @@ coff_symfile_init (sf)
    of the line table (minimum and maximum file offset) so that the
    mainline code can read the whole thing for efficiency.  */
 
+/* ARGSUSED */
 static void
 find_linenos (abfd, asect, vpinfo)
      bfd *abfd;
@@ -652,6 +653,11 @@ find_linenos (abfd, asect, vpinfo)
     info->max_lineno_offset = maxoff;
 }
 
+
+/* The BFD for this file -- only good while we're actively reading
+   symbols into a psymtab or a symtab.  */
+
+static bfd *symfile_bfd;
 
 /* Read a symbol file, after initialization by coff_symfile_init.  */
 /* FIXME!  Addr and Mainline are not used yet -- this will not work for
@@ -1897,6 +1903,7 @@ read_struct_type (index, length, lastsym)
 /* Read a definition of an enumeration type,
    and create and return a suitable type object.
    Also defines the symbols that represent the values of the type.  */
+/* Currently assumes it's sizeof (int) and doesn't use length.  */
 
 static struct type *
 read_enum_type (index, length, lastsym)
@@ -1960,6 +1967,7 @@ read_enum_type (index, length, lastsym)
 
   /* Now fill in the fields of the type-structure.  */
 
+  /* FIXME: Should be sizeof (int) on target, not host.  */
   TYPE_LENGTH (type) = sizeof (int);
   TYPE_CODE (type) = TYPE_CODE_ENUM;
   TYPE_NFIELDS (type) = nsyms;

@@ -756,6 +756,7 @@ print_frame_label_vars (frame, this_level_only, stream)
   return values_printed;
 }
 
+/* ARGSUSED */
 static void
 locals_info (args, from_tty)
      char *args;
@@ -972,6 +973,7 @@ frame_command (level_exp, from_tty)
 /* Select the frame up one or COUNT stack levels
    from the previously selected frame, and print it briefly.  */
 
+/* ARGSUSED */
 static void
 up_silently_command (count_exp, from_tty)
      char *count_exp;
@@ -1004,6 +1006,7 @@ up_command (count_exp, from_tty)
 /* Select the frame down one or COUNT stack levels
    from the previously selected frame, and print it briefly.  */
 
+/* ARGSUSED */
 static void
 down_silently_command (count_exp, from_tty)
      char *count_exp;

@@ -769,7 +769,9 @@ really_free_pendings (foo)
      int foo;
 {
   struct pending *next, *next1;
+#if 0
   struct pending_block *bnext, *bnext1;
+#endif
 
   for (next = free_pendings; next; next = next1)
     {
@@ -1252,6 +1254,11 @@ record_misc_function (name, address, type)
 			     address, misc_type);
 }
 
+/* The BFD for this file -- only good while we're actively reading
+   symbols into a psymtab or a symtab.  */
+
+static bfd *symfile_bfd;
+
 /* Scan and build partial symbols for a symbol file.
    We have been initialized by a call to dbx_symfile_init, which 
    put all the relevant info into a "struct dbx_symfile_info"
@@ -2888,7 +2895,7 @@ read_ofile_symtab (desc, stringtab, stringtab_size, sym_offset,
 
       if (type & N_STAB)
 	{
-	  short desc = bufp->n_desc;
+	  short bufp_n_desc = bufp->n_desc;
 	  unsigned long valu = bufp->n_value;
 
 	  /* Check for a pair of N_SO symbols.  */
@@ -2912,15 +2919,15 @@ read_ofile_symtab (desc, stringtab, stringtab_size, sym_offset,
 			   bufp->n_un.n_strx);
 		  namestring2 = bufp->n_un.n_strx + stringtab;
 
-		  process_symbol_pair (N_SO, desc, valu, namestring,
+		  process_symbol_pair (N_SO, bufp_n_desc, valu, namestring,
 				       N_SO, bufp->n_desc, bufp->n_value,
 				       namestring2);
 		}
 	      else
-		process_one_symbol(type, desc, valu, namestring);
+		process_one_symbol(type, bufp_n_desc, valu, namestring);
 	    }
 	  else
-	    process_one_symbol (type, desc, valu, namestring);
+	    process_one_symbol (type, bufp_n_desc, valu, namestring);
 	}
       /* We skip checking for a new .o or -l file; that should never
          happen in this routine. */
@@ -3377,13 +3384,14 @@ define_symbol (valu, string, desc, type)
 	case 'r':
 	  {
 	    double d = atof (p);
-	    char *valu;
+	    char *dbl_valu;
 
 	    SYMBOL_TYPE (sym) = builtin_type_double;
-	    valu = (char *) obstack_alloc (symbol_obstack, sizeof (double));
-	    bcopy (&d, valu, sizeof (double));
-	    SWAP_TARGET_AND_HOST (valu, sizeof (double));
-	    SYMBOL_VALUE_BYTES (sym) = valu;
+	    dbl_valu =
+	      (char *) obstack_alloc (symbol_obstack, sizeof (double));
+	    bcopy (&d, dbl_valu, sizeof (double));
+	    SWAP_TARGET_AND_HOST (dbl_valu, sizeof (double));
+	    SYMBOL_VALUE_BYTES (sym) = dbl_valu;
 	    SYMBOL_CLASS (sym) = LOC_CONST_BYTES;
 	  }
 	  break;
@@ -3433,7 +3441,7 @@ define_symbol (valu, string, desc, type)
     }
   else
     {
-      struct type *type;
+      struct type *type_read;
       synonym = *p == 't';
 
       if (synonym)
@@ -3443,13 +3451,13 @@ define_symbol (valu, string, desc, type)
 					    strlen (SYMBOL_NAME (sym)));
 	}
 
-      type = read_type (&p);
+      type_read = read_type (&p);
 
       if ((deftype == 'F' || deftype == 'f')
-	  && TYPE_CODE (type) != TYPE_CODE_FUNC)
-	SYMBOL_TYPE (sym) = lookup_function_type (type);
+	  && TYPE_CODE (type_read) != TYPE_CODE_FUNC)
+	SYMBOL_TYPE (sym) = lookup_function_type (type_read);
       else
-	SYMBOL_TYPE (sym) = type;
+	SYMBOL_TYPE (sym) = type_read;
     }
 
   switch (deftype)
@@ -4330,7 +4338,8 @@ read_struct_type (pp, type)
 	  /* Special GNU C++ name.  */
 	  if (*++p == 'v')
 	    {
-	      char *prefix, *name = 0;
+	      const char *prefix;
+	      char *name = 0;
 	      struct type *context;
 
 	      switch (*++p)

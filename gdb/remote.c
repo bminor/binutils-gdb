@@ -138,6 +138,7 @@ remote_start()
 
 /* Clean up connection to a remote debugger.  */
 
+/* ARGSUSED */
 void
 remote_close (quitting)
      int quitting;
@@ -196,7 +197,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
 #endif
 
   /* Set up read timeout timer.  */
-  if ((void (*)) signal (SIGALRM, remote_timer) == (void (*)) -1)
+  if ((void (*)()) signal (SIGALRM, remote_timer) == (void (*)()) -1)
     perror ("remote_open: error in signal");
 #endif
 
@@ -276,7 +277,9 @@ remote_resume (step, siggnal)
 }
 
 /* Wait until the remote machine stops, then return,
-   storing status in STATUS just as `wait' would.  */
+   storing status in STATUS just as `wait' would.
+   Returns "pid" (though it's not clear what, if anything, that
+   means in the case of this target).  */
 
 int
 remote_wait (status)
@@ -291,10 +294,13 @@ remote_wait (status)
   if (buf[0] != 'S')
     error ("Invalid remote reply: %s", buf);
   WSETSTOP ((*status), (((fromhex (buf[1])) << 4) + (fromhex (buf[2]))));
+  return 0;
 }
 
 /* Read the remote registers into the block REGS.  */
 
+/* Currently we just read all the registers, so we don't use regno.  */
+/* ARGSUSED */
 int
 remote_fetch_registers (regno)
      int regno;
@@ -336,6 +342,7 @@ remote_prepare_to_store ()
 /* Store the remote registers from the contents of the block REGISTERS. 
    FIXME, eventually just store one register if that's all that is needed.  */
 
+/* ARGSUSED */
 int
 remote_store_registers (regno)
      int regno;
@@ -466,15 +473,15 @@ remote_read_bytes (memaddr, myaddr, len)
 }
 
 /* Read or write LEN bytes from inferior memory at MEMADDR, transferring
-   to or from debugger address MYADDR.  Write to inferior if WRITE is
+   to or from debugger address MYADDR.  Write to inferior if SHOULD_WRITE is
    nonzero.  Returns length of data written or read; 0 for error.  */
 
 int
-remote_xfer_inferior_memory(memaddr, myaddr, len, write)
+remote_xfer_inferior_memory(memaddr, myaddr, len, should_write)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
-     int write;
+     int should_write;
 {
   int origlen = len;
   int xfersize;
@@ -485,7 +492,7 @@ remote_xfer_inferior_memory(memaddr, myaddr, len, write)
       else
 	xfersize = len;
 
-      if (write)
+      if (should_write)
         remote_write_bytes(memaddr, myaddr, xfersize);
       else
 	remote_read_bytes (memaddr, myaddr, xfersize);

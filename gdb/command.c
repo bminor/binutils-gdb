@@ -15,11 +15,11 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "command.h"
 #include "symtab.h"
 #include "value.h"
-#include <stdio.h>
 #include <ctype.h>
 #include <string.h>
 
@@ -160,6 +160,7 @@ add_abbrev_prefix_cmd (name, class, fun, doc, prefixlist, prefixname,
   return c;
 }
 
+/* ARGSUSED */
 void
 not_just_help_class_command (args, from_tty, c)
      char *args;
@@ -253,8 +254,6 @@ delete_cmd (name, list)
 	  c = c->next;
       }
 }
-
-void help_cmd (), help_list (), help_cmd_list ();
 
 /* This command really has to deal with two things:
  *     1) I want documentation on *this string* (usually called by
@@ -1083,6 +1082,7 @@ cmd_show_list (list, from_tty, prefix)
   }
 }
 
+/* ARGSUSED */
 static void
 shell_escape (arg, from_tty)
      char *arg;

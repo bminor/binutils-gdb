@@ -693,6 +693,7 @@ lines_to_list ()
   return 10;
 }
 
+/* ARGSUSED */
 static void 
 set_width_command (args, from_tty, c)
      char *args;
@@ -1205,11 +1206,11 @@ char *
 strstr (in, find)
      const char *in, *find;
 {
-  register char *p = in - 1;
+  register const char *p = in - 1;
 
   while (0 != (p = strchr (p+1, *find))) {
     if (strcmp (p, find))
-      return p;
+      return (char *)p;
   }
   return 0;
 }

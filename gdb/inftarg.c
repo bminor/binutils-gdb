@@ -123,6 +123,8 @@ child_prepare_to_store ()
 /* Convert data from raw format for register REGNUM
    to virtual format for register REGNUM.  */
 
+/* Some machines won't need to use regnum.  */
+/* ARGSUSED */
 void
 host_convert_to_virtual (regnum, from, to)
      int regnum;
@@ -135,6 +137,7 @@ host_convert_to_virtual (regnum, from, to)
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 
+/* ARGSUSED */
 void
 host_convert_from_virtual (regnum, from, to)
      int regnum;
@@ -153,6 +156,7 @@ child_files_info ()
 	  attach_flag? "attached": "child", inferior_pid);
 }
 
+/* ARGSUSED */
 static void
 child_open (arg, from_tty)
      char *arg;

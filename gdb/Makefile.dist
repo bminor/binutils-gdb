@@ -488,14 +488,10 @@ gdb.cxref: $(SFILES)
 
 force_update :
 
-# When used with GDB, the demangler should never look for leading underscores
-# because GDB strips them off during symbol read-in.  Thus -Dnounderscore.
-# Adding "param.h" gets us the USG define without having to edit cplus-dem.c
-# (which is used by other programs which may or may not have a "param.h").
-# (no newline is added, so line numbers still work right).
+# When used with GDB, the demangler should never look for leading
+# underscores because GDB strips them off during symbol read-in.  Thus
+# -Dnounderscore.  
+
 cplus-dem.o : cplus-dem.c
-	sed <`echo ${srcdir}/cplus-dem.c | sed 's,^\./,,'` \
-	  >cplus.tmp.c \
-	  '1s,^,#include "param.h" ,'
-	${CC} -c ${CFLAGS} -Dnounderscore cplus.tmp.c
-	mv cplus.tmp.o cplus-dem.o
+	${CC} -c ${CFLAGS} -Dnounderscore \
+	  `echo ${srcdir}/cplus-dem.c | sed 's,^\./,,'`

@@ -64,6 +64,10 @@
 #include <stdio.h>
 #include <ctype.h>
 
+/* GDB-specific, FIXME.  */
+#include "defs.h"
+#include "param.h"
+
 #ifdef USG
 #include <memory.h>
 #include <string.h>
@@ -194,21 +198,19 @@ static void remember_type ();
 #endif
 
 /* Takes operator name as e.g. "++" and returns mangled
-   operator name (e.g. "postincrement_expr").  */
+   operator name (e.g. "postincrement_expr"), or NULL if not found.  */
 char *
 cplus_mangle_opname (opname)
      char *opname;
 {
   int i, len = strlen (opname);
-  string name;
 
   for (i = 0; i < sizeof (optable)/sizeof (optable[0]); i++)
     {
       if (strlen (optable[i].out) == len
 	  && memcmp (optable[i].out, opname, len) == 0)
-	return optable[i].in;
+	return (char *)optable[i].in;
     }
-  error ("no mangling for `%s'", opname);
   return 0;
 }
 
@@ -440,7 +442,7 @@ do_type (type, result, arg_mode)
 	    success = 0;
 	  *type += 2;
 	  while (n-- > 0)
-	    do_type (type, result);
+	    do_type (type, result, arg_mode);
 	  break;
 
 	case 'P':

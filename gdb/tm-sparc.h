@@ -286,7 +286,12 @@ extern CORE_ADDR skip_prologue ();
    as a CORE_ADDR (or an expression that can be used as one).  */
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
-  (read_memory_integer (((int *)(REGBUF))[SP_REGNUM]+(16*4), 4))
+  (sparc_extract_struct_value_address (REGBUF))
+CORE_ADDR sparc_extract_struct_value_address (
+#ifdef __STDC__
+					      char [REGISTER_BYTES]
+#endif
+					      );
 
 
 /* Describe the pointer in each stack frame to the previous stack frame
@@ -295,9 +300,6 @@ extern CORE_ADDR skip_prologue ();
 /* If you're not compiling this on a sun, you'll have to get a copy
    of <sun4/reg.h> (also known as <machine/reg.h>).  */
 #include <sun4/reg.h>
-
-#define GET_RWINDOW_REG(FRAME, REG) \
-  (read_memory_integer ((CORE_ADDR)&((struct rwindow *)FRAME)->REG, 4))
 
 /* FRAME_CHAIN takes a frame's nominal address
    and produces the frame's chain-pointer.
@@ -337,8 +339,8 @@ extern CORE_ADDR skip_prologue ();
      (fci)->next->bottom : (fci)->next->frame) :	\
     read_register (SP_REGNUM));
 
-#define FRAME_CHAIN(thisframe) \
-   GET_RWINDOW_REG ((thisframe)->frame, rw_in[6])
+#define FRAME_CHAIN(thisframe) (sparc_frame_chain (thisframe))
+CORE_ADDR sparc_frame_chain ();
 
 #define FRAME_CHAIN_VALID(chain, thisframe) \
   (chain != 0 && (outside_startup_file (FRAME_SAVED_PC (thisframe))))

@@ -532,6 +532,19 @@ value_as_double (val)
     error ("Invalid floating value found in program.");
   return foo;
 }
+/* Extract a value as a C pointer.
+   Does not deallocate the value.  */
+CORE_ADDR
+value_as_pointer (val)
+     value val;
+{
+  /* This coerces arrays and functions, which is necessary (e.g.
+     in disassemble_command).  It also dereferences references, which
+     I suspect is the most logical thing to do.  */
+  if (TYPE_CODE (VALUE_TYPE (val)) != TYPE_CODE_ENUM)
+    COERCE_ARRAY (val);
+  return unpack_pointer (VALUE_TYPE (val), VALUE_CONTENTS (val));
+}
 
 /* Unpack raw data (copied from debugee, target byte order) at VALADDR
    as a long, or as a double, assuming the raw data is described
@@ -674,10 +687,13 @@ unpack_long (type, valaddr)
 	  error ("That operation is not possible on an integer of that size.");
 	}
     }
+#if 0
+  /* There is no guarantee that a pointer can fit within a LONGEST.
+     Callers should use unpack_pointer instead.  */
   else if (code == TYPE_CODE_PTR
 	   || code == TYPE_CODE_REF)
     {
-      if (len == sizeof (char *))
+      if (len == sizeof (CORE_ADDR))
 	{
 	  CORE_ADDR retval;
 	  bcopy (valaddr, &retval, sizeof (retval));
@@ -685,10 +701,15 @@ unpack_long (type, valaddr)
 	  return retval;
 	}
     }
+#endif
   else if (code == TYPE_CODE_MEMBER)
     error ("not implemented: member types in unpack_long");
 
+#if 0
   error ("Value not integer or pointer.");
+#else
+  error ("Value not integer.");
+#endif
   return 0; 	/* For lint -- never reached */
 }
 
@@ -735,6 +756,7 @@ unpack_double (type, valaddr, invp)
       else
 	{
 	  error ("Unexpected type of floating point number.");
+	  return 0; /* Placate lint.  */
 	}
     }
   else if (nosign) {
@@ -748,6 +770,46 @@ unpack_double (type, valaddr, invp)
     /* Signed -- we are OK with unpack_long.  */
     return unpack_long (type, valaddr);
   }
+}
+
+/* Unpack raw data (copied from debugee, target byte order) at VALADDR
+   as a CORE_ADDR, assuming the raw data is described by type TYPE.
+   We don't assume any alignment for the raw data.  Return value is in
+   host byte order.
+
+   If you want functions and arrays to be coerced to pointers, and
+   references to be dereferenced, call value_as_pointer() instead.
+
+   C++: It is assumed that the front-end has taken care of
+   all matters concerning pointers to members.  A pointer
+   to member which reaches here is considered to be equivalent
+   to an INT (or some size).  After all, it is only an offset.  */
+
+CORE_ADDR
+unpack_pointer (type, valaddr)
+     struct type *type;
+     char *valaddr;
+{
+  register enum type_code code = TYPE_CODE (type);
+  register int len = TYPE_LENGTH (type);
+
+  if (code == TYPE_CODE_PTR
+      || code == TYPE_CODE_REF)
+    {
+      if (len == sizeof (CORE_ADDR))
+	{
+	  CORE_ADDR retval;
+	  bcopy (valaddr, &retval, sizeof (retval));
+	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
+	  return retval;
+	}
+      error ("Unrecognized pointer size.");
+    }
+  else if (code == TYPE_CODE_MEMBER)
+    error ("not implemented: member types in unpack_pointer");
+
+  error ("Value is not a pointer.");
+  return 0; 	/* For lint -- never reached */
 }
 
 /* Given a value ARG1 (offset by OFFSET bytes)
@@ -922,6 +984,7 @@ value_headof (arg, btype, dtype)
   /* First collect the vtables we must look at for this object.  */
   /* FIXME-tiemann: right now, just look at top-most vtable.  */
   value vtbl, entry, best_entry = 0;
+  /* FIXME: entry_type is never used.  */
   struct type *entry_type;
   int i, nelems;
   int offset, best_offset = 0;
@@ -954,11 +1017,11 @@ value_headof (arg, btype, dtype)
   /* Now search through the virtual function table.  */
   entry = value_ind (vtbl);
   entry_type = VALUE_TYPE (entry);
-  nelems = value_as_long (value_field (entry, 2));
+  nelems = longest_to_int (value_as_long (value_field (entry, 2)));
   for (i = 1; i <= nelems; i++)
     {
       entry = value_subscript (vtbl, value_from_long (builtin_type_int, i));
-      offset = value_as_long (value_field (entry, 0));
+      offset = longest_to_int (value_as_long (value_field (entry, 0)));
       if (offset < best_offset)
 	{
 	  best_offset = offset;
@@ -970,7 +1033,7 @@ value_headof (arg, btype, dtype)
 
   /* Move the pointer according to BEST_ENTRY's offset, and figure
      out what type we should return as the new pointer.  */
-  pc_for_sym = value_as_long (value_field (best_entry, 2));
+  pc_for_sym = value_as_pointer (value_field (best_entry, 2));
   sym = find_pc_function (pc_for_sym);
   demangled_name = cplus_demangle (SYMBOL_NAME (sym), -1);
   *(strchr (demangled_name, ':')) = '\0';
@@ -1111,7 +1174,8 @@ baseclass_addr (type, index, valaddr, valuep, errp)
 	      CORE_ADDR addr;
 	      int status;
 
-	      addr = unpack_long (TYPE_FIELD_TYPE (type, i),
+	      addr
+		= unpack_pointer (TYPE_FIELD_TYPE (type, i),
 				  valaddr + (TYPE_FIELD_BITPOS (type, i) / 8));
 
 	      status = target_read_memory (addr,
@@ -1143,7 +1207,7 @@ baseclass_addr (type, index, valaddr, valuep, errp)
 	{
 	  char *baddr;
 
-	  baddr = baseclass_addr (type, i, valaddr, valuep);
+	  baddr = baseclass_addr (type, i, valaddr, valuep, errp);
 	  if (baddr)
 	    return baddr;
 	}
@@ -1190,6 +1254,8 @@ check_stub_method (type, i, j)
   if (OPNAME_PREFIX_P (field_name))
     {
       char *opname = cplus_mangle_opname (field_name + 3);
+      if (opname == NULL)
+	error ("No mangling for \"%s\"", field_name);
       mangled_name_len += strlen (opname);
       mangled_name = (char *)xmalloc (mangled_name_len);
 

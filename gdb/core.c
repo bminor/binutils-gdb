@@ -56,6 +56,7 @@ extern struct target_ops core_ops;
 /* Discard all vestiges of any previous core file
    and mark data and stack spaces as empty.  */
 
+/* ARGSUSED */
 void
 core_close (quitting)
      int quitting;
@@ -390,6 +391,8 @@ core_xfer_memory (memaddr, myaddr, len, write)
    independent part.  Fetch_core_registers is the machine-dependent
    part, typically implemented in the xm-file for each architecture.  */
 
+/* We just get all the registers, so we don't use regno.  */
+/* ARGSUSED */
 static int
 get_core_registers (regno)
      int regno;

@@ -76,18 +76,15 @@ struct target_ops **current_target_stack;
 
 static struct cmd_list_element *targetlist = NULL;
 
-/* Docstring for target (as in "help target").  */
-
-static char *target_doc = NULL;
-
 /* The user just typed 'target' without the name of a target.  */
 
+/* ARGSUSED */
 static void
 target_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  fputs_filtered ("Argument required (target name).", stdout);
+  fputs_filtered ("Argument required (target name).\n", stdout);
 }
 
 /* Add a possible target architecture to the list.  */
@@ -160,6 +157,7 @@ noprocess ()
   error ("You can't do that without a process to debug");
 }
 
+/* ARGSUSED */
 static int
 nosymbol (name, addrp)
      char *name;
@@ -168,6 +166,7 @@ nosymbol (name, addrp)
   return 1;		/* Symbol does not exist in target env */
 }
 
+/* ARGSUSED */
 static void
 default_terminal_info (args, from_tty)
      char *args;
@@ -214,6 +213,7 @@ static void
 kill_or_be_killed (from_tty)
      int from_tty;
 {
+  /* FIXME: What is savecur for?  Why isn't it used?  */
   struct target_ops *savecur;
 
   if (target_has_execution)
@@ -467,6 +467,7 @@ bump:
 }
 
 
+/* ARGSUSED */
 static void
 target_info (args, from_tty)
      char *args;

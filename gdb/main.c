@@ -1455,6 +1455,7 @@ error_no_arg (why)
   error ("Argument required (%s).", why);
 }
 
+/* ARGSUSED */
 static void
 help_command (command, from_tty)
      char *command;
@@ -1584,6 +1585,7 @@ GDB is free software and you are welcome to distribute copies of it\n\
  under certain conditions; type \"info copying\" to see the conditions.\n");
 }
 
+/* ARGSUSED */
 static void
 show_version (args, from_tty)
      char *args;
@@ -1629,6 +1631,7 @@ input_from_terminal_p ()
   return (instream == stdin) & caution;
 }
 
+/* ARGSUSED */
 static void
 pwd_command (args, from_tty)
      char *args;
@@ -1710,6 +1713,7 @@ cd_command (dir, from_tty)
     pwd_command ((char *) 0, 1);
 }
 
+/* ARGSUSED */
 static void
 source_command (args, from_tty)
      char *args;
@@ -1885,6 +1889,7 @@ show_commands (args, from_tty)
 }
 
 /* Called by do_setshow_command.  */
+/* ARGSUSED */
 static void
 set_history_size_command (args, from_tty, c)
      char *args;
@@ -1897,6 +1902,7 @@ set_history_size_command (args, from_tty, c)
     stifle_history (history_size);
 }
 
+/* ARGSUSED */
 static void
 set_history (args, from_tty)
      char *args;
@@ -1906,6 +1912,7 @@ set_history (args, from_tty)
   help_list (sethistlist, "set history ", -1, stdout);
 }
 
+/* ARGSUSED */
 static void
 show_history (args, from_tty)
      char *args;
@@ -1917,6 +1924,7 @@ show_history (args, from_tty)
 int info_verbose = 0;		/* Default verbose msgs off */
 
 /* Called by do_setshow_command.  An elaborate joke.  */
+/* ARGSUSED */
 static void 
 set_verbose (args, from_tty, c)
      char *args;

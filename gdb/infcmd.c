@@ -122,6 +122,7 @@ CORE_ADDR read_pc ();
 void breakpoint_clear_ignore_counts ();
 
 
+/* ARGSUSED */
 void
 tty_command (file, from_tty)
      char *file;
@@ -218,6 +219,7 @@ continue_command (proc_count_exp, from_tty)
 /* Step until outside of current statement.  */
 static void step_1 ();
 
+/* ARGSUSED */
 static void
 step_command (count_string, from_tty)
      char * count_string;
@@ -228,6 +230,7 @@ step_command (count_string, from_tty)
 
 /* Likewise, but skip over subroutine calls as if single instructions.  */
 
+/* ARGSUSED */
 static void
 next_command (count_string, from_tty)
      char * count_string;
@@ -238,6 +241,7 @@ next_command (count_string, from_tty)
 
 /* Likewise, but step only one instruction.  */
 
+/* ARGSUSED */
 static void
 stepi_command (count_string, from_tty)
      char * count_string;
@@ -246,6 +250,7 @@ stepi_command (count_string, from_tty)
   step_1 (0, 1, count_string);
 }
 
+/* ARGSUSED */
 static void
 nexti_command (count_string, from_tty)
      char * count_string;
@@ -453,6 +458,7 @@ The expression which contained the function call has been discarded.");
    we set.  I'm going to postpone this until after a hopeful rewrite
    of wait_for_inferior and the proceed status code. -- randy */
 
+/* ARGSUSED */
 void
 until_next_command (from_tty)
      int from_tty;
@@ -584,6 +590,7 @@ finish_command (arg, from_tty)
     }
 }
 
+/* ARGSUSED */
 static void
 program_info (args, from_tty)
     char *args;
@@ -732,6 +739,7 @@ unset_environment_command (var, from_tty)
 
 const static char path_var_name[] = "PATH";
 
+/* ARGSUSED */
 void
 path_info (args, from_tty)
      char *args;
@@ -752,11 +760,11 @@ path_command (dirname, from_tty)
 
   dont_repeat ();
   exec_path = strsave (get_in_environ (inferior_environ, path_var_name));
-  mod_path (dirname, from_tty, &exec_path);
+  mod_path (dirname, &exec_path);
   set_in_environ (inferior_environ, path_var_name, exec_path);
   free (exec_path);
   if (from_tty)
-    path_info ();
+    path_info ((char *)NULL, from_tty);
 }
 
 CORE_ADDR

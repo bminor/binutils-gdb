@@ -286,7 +286,7 @@ extern struct ext_format ext_format_68881 [];
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF))
+#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(CORE_ADDR *)(REGBUF))
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */

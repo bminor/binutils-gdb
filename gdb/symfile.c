@@ -82,7 +82,7 @@ char *symfile = 0;
 
 /* The modification date of the file when they were loaded.  */
 
-int symfile_mtime = 0;
+long /* really time_t */ symfile_mtime = 0;
 
 /* Structures with which to manage partial symbol allocation.  */
 
@@ -595,6 +595,7 @@ symfile_init (sym_bfd)
 	}
     }
   error ("I'm sorry, Dave, I can't do that.  Symbol format unknown.");
+  return 0; /* Appease lint.  */
 }
 
 /* This function runs the load command of our current target.  */
@@ -623,6 +624,7 @@ add_symbol_file_command (args, from_tty)
 
 /* This function allows the addition of incrementally linked object files.  */
 
+/* ARGSUSED */
 void
 add_syms_addr_command (arg_string, from_tty)
      char* arg_string;
@@ -801,6 +803,7 @@ clear_symtab_users_once ()
 
 /* Delete the specified psymtab, and any others that reference it.  */
 
+static void
 cashier_psymtab (pst)
      struct partial_symtab *pst;
 {
@@ -859,7 +862,6 @@ free_named_symtabs (name)
   register struct symtab *s;
   register struct symtab *prev;
   register struct partial_symtab *ps;
-  register struct partial_symtab *pprev;
   struct blockvector *bv;
   int blewit = 0;
 

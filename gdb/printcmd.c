@@ -363,7 +363,7 @@ print_scalar_formatted (valaddr, type, format, size, stream)
       break;
 
     case 'a':
-      print_address ((CORE_ADDR) val_long, stream);
+      print_address (unpack_pointer (type, valaddr), stream);
       break;
 
     case 'c':
@@ -670,6 +670,7 @@ print_command_1 (exp, inspect, voidprint)
   inspect_it = 0;	/* Reset print routines to normal */
 }
 
+/* ARGSUSED */
 static void
 print_command (exp, from_tty)
      char *exp;
@@ -679,6 +680,7 @@ print_command (exp, from_tty)
 }
 
 /* Same as print, except in epoch, it gets its own window */
+/* ARGSUSED */
 static void
 inspect_command (exp, from_tty)
      char *exp;
@@ -690,6 +692,7 @@ inspect_command (exp, from_tty)
 }
 
 /* Same as print, except it doesn't print void results. */
+/* ARGSUSED */
 static void
 call_command (exp, from_tty)
      char *exp;
@@ -698,6 +701,7 @@ call_command (exp, from_tty)
   print_command_1 (exp, 0, 0);
 }
 
+/* ARGSUSED */
 static void
 output_command (exp, from_tty)
      char *exp;
@@ -727,6 +731,7 @@ output_command (exp, from_tty)
   do_cleanups (old_chain);
 }
 
+/* ARGSUSED */
 static void
 set_command (exp, from_tty)
      char *exp;
@@ -739,13 +744,14 @@ set_command (exp, from_tty)
   do_cleanups (old_chain);
 }
 
+/* ARGSUSED */
 static void
 address_info (exp, from_tty)
      char *exp;
      int from_tty;
 {
   register struct symbol *sym;
-  register CORE_ADDR val;
+  register long val;
   int is_a_field_of_this;	/* C++: lookup_symbol sets this to nonzero
 				   if exp is a field of `this'. */
 
@@ -803,19 +809,19 @@ address_info (exp, from_tty)
       break;
       
     case LOC_ARG:
-      printf ("an argument at offset %d", (int)val);
+      printf ("an argument at offset %ld", val);
       break;
 
     case LOC_LOCAL_ARG:
-      printf ("an argument at frame offset %d", (int)val);
+      printf ("an argument at frame offset %ld", val);
       break;
 
     case LOC_LOCAL:
-      printf ("a local variable at frame offset %d", (int)val);
+      printf ("a local variable at frame offset %ld", val);
       break;
 
     case LOC_REF_ARG:
-      printf ("a reference argument at offset %d", (int)val);
+      printf ("a reference argument at offset %ld", val);
       break;
 
     case LOC_TYPEDEF:
@@ -882,7 +888,7 @@ x_command (exp, from_tty)
 	  && VALUE_LVAL (val) == lval_memory)
 	next_address = VALUE_ADDRESS (val);
       else
-	next_address = (CORE_ADDR) value_as_long (val);
+	next_address = value_as_pointer (val);
       do_cleanups (old_chain);
     }
 
@@ -931,6 +937,7 @@ whatis_exp (exp, show)
     do_cleanups (old_chain);
 }
 
+/* ARGSUSED */
 static void
 whatis_command (exp, from_tty)
      char *exp;
@@ -943,6 +950,7 @@ whatis_command (exp, from_tty)
 }
 
 /* TYPENAME is either the name of a type, or an expression.  */
+/* ARGSUSED */
 static void
 ptype_command (typename, from_tty)
      char *typename;
@@ -1256,7 +1264,7 @@ do_one_display (d)
       else
 	printf_filtered ("  ");
       
-      addr = (CORE_ADDR) value_as_long (evaluate_expression (d->exp));
+      addr = value_as_pointer (evaluate_expression (d->exp));
       if (d->format.format == 'i')
 	addr = ADDR_BITS_REMOVE (addr);
       
@@ -1385,6 +1393,7 @@ enable_display (args)
       }
 }
 
+/* ARGSUSED */
 void
 disable_display_command (args, from_tty)
      char *args;
@@ -1454,7 +1463,7 @@ print_frame_args (func, fi, num, stream)
   /* Offset of next stack argument beyond the one we have seen that is
      at the highest offset.
      -1 if we haven't come to a stack argument yet.  */
-  int highest_offset = -1;
+  long highest_offset = -1;
   int arg_size;
   /* Number of ints of arguments that we have printed so far.  */
   int args_printed = 0;
@@ -1489,7 +1498,7 @@ print_frame_args (func, fi, num, stream)
       case LOC_ARG:
       case LOC_REF_ARG:
 	{
-	  int current_offset = SYMBOL_VALUE (sym);
+	  long current_offset = SYMBOL_VALUE (sym);
 
 	  arg_size = TYPE_LENGTH (SYMBOL_TYPE (sym));
 	  
@@ -1536,7 +1545,7 @@ print_frame_args (func, fi, num, stream)
      enough about the stack to find them.  */
   if (num != -1)
     {
-      int start;
+      long start;
       CORE_ADDR addr;
 
       if (highest_offset == -1)
@@ -1559,7 +1568,7 @@ print_frame_args (func, fi, num, stream)
 static void
 print_frame_nameless_args (argsaddr, start, num, first, stream)
      CORE_ADDR argsaddr;
-     int start;
+     long start;
      int num;
      int first;
      FILE *stream;
@@ -1584,6 +1593,7 @@ print_frame_nameless_args (argsaddr, start, num, first, stream)
     }
 }
 
+/* ARGSUSED */
 static void
 printf_command (arg, from_tty)
      char *arg;
@@ -1740,8 +1750,9 @@ printf_command (arg, from_tty)
 	if (argclass[i] == string_arg)
 	  {
 	    char *str;
-	    int tem, j;
-	    tem = value_as_long (val_args[i]);
+	    CORE_ADDR tem;
+	    int j;
+	    tem = value_as_pointer (val_args[i]);
  
 	    /* This is a %s argument.  Find the length of the string.  */
 	    for (j = 0; ; j++)
@@ -1777,8 +1788,8 @@ printf_command (arg, from_tty)
 	  else
 #endif
 	    {
-	      *((int *) &arg_bytes[argindex]) = value_as_long (val_args[i]);
-	      argindex += sizeof (int);
+	      *((long *) &arg_bytes[argindex]) = value_as_long (val_args[i]);
+	      argindex += sizeof (long);
 	    }
       }
   }
@@ -1831,6 +1842,7 @@ containing_function_bounds (pc, low, high)
    Two arguments are interpeted as bounds within which to dump
    assembly.  */
 
+/* ARGSUSED */
 static void
 disassemble_command (arg, from_tty)
      char *arg;

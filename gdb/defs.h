@@ -118,6 +118,11 @@ extern void free_current_contents ();
 extern int myread ();
 extern int query ();
 extern int lines_to_list ();
+extern void wrap_here (
+#ifdef __STDC__
+		       char *
+#endif
+		       );
 extern void reinitialize_more_filter ();
 extern void fputs_filtered ();
 extern void puts_filtered ();
@@ -135,6 +140,13 @@ extern void print_sys_errmsg ();
 /* From printcmd.c */
 extern void print_address_symbolic ();
 extern void print_address ();
+
+/* From source.c */
+void mod_path (
+#ifdef __STDC__
+	       char *, char **
+#endif
+	       );
 
 /* From readline (but not in any readline .h files).  */
 extern char *tilde_expand ();
@@ -170,6 +182,15 @@ char *baud_rate;
 #define LONG_MAX 0x7fffffff
 #endif
 
+#if !defined (INT_MAX)
+#define INT_MAX 0x7fffffff
+#endif
+
+#if !defined (INT_MIN)
+/* Two's complement, 32 bit.  */
+#define INT_MIN -0x80000000
+#endif
+
 /* Just like CHAR_BIT in <limits.h> but describes the target machine.  */
 #if !defined (TARGET_CHAR_BIT)
 #define TARGET_CHAR_BIT 8
@@ -180,5 +201,19 @@ char *baud_rate;
 #if !defined (TARGET_LONG_LONG_BIT)
 #define TARGET_LONG_LONG_BIT 64
 #endif
+
+/* Convert a LONGEST to an int.  This is used in contexts (e.g. number
+   of arguments to a function, number in a value history, register
+   number, etc.) where the value must not be larger than can fit
+   in an int.  */
+#if !defined (longest_to_int)
+#if defined (LONG_LONG)
+#define longest_to_int(x) (((x) > INT_MAX || (x) < INT_MIN) \
+			   ? error ("Value out of range.") : (int) (x))
+#else /* No LONG_LONG.  */
+/* Assume sizeof (int) == sizeof (long).  */
+#define longest_to_int(x) ((int) (x))
+#endif /* No LONG_LONG.  */
+#endif /* No longest_to_int.  */
 
 #endif /* no DEFS_H */

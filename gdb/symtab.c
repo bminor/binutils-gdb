@@ -226,7 +226,7 @@ check_stub_type(type)
       struct symbol *sym;
       if (name == 0)
 	{
-	  complain (&stub_noname_complaint, 0, 0);
+	  complain (&stub_noname_complaint, 0);
 	  return;
 	}
       if (sym = lookup_symbol (name, 0, STRUCT_NAMESPACE, 0, 

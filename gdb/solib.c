@@ -158,7 +158,7 @@ int i;
 
 	     status = target_read_memory (
 			(CORE_ADDR)so_list_ptr->inferior_lm_add,
-			&so_list_ptr->inferior_lm,
+			(char *)&so_list_ptr->inferior_lm,
 			sizeof(struct link_map));
 	     if (status == 0)
 	       inferior_lm = so_list_ptr->inferior_lm.lm_next;

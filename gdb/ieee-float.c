@@ -34,30 +34,30 @@ ieee_extended_to_double (ext_format, from, to)
 {
   unsigned char *ufrom = (unsigned char *)from;
   double dto;
-  unsigned long mant0, mant1, exp;
+  unsigned long mant0, mant1, exponent;
   
   bcopy (&from[MANBYTE_H], &mant0, 4);
   bcopy (&from[MANBYTE_L], &mant1, 4);
-  exp = ((ufrom[EXPBYTE_H] & (unsigned char)~SIGNMASK) << 8) | ufrom[EXPBYTE_L];
+  exponent = ((ufrom[EXPBYTE_H] & (unsigned char)~SIGNMASK) << 8) | ufrom[EXPBYTE_L];
 
 #if 0
   /* We can't do anything useful with a NaN anyway, so ignore its
      difference.  It will end up as Infinity or something close.  */
-  if (exp == EXT_EXP_NAN) {
+  if (exponent == EXT_EXP_NAN) {
     /* We have a NaN source.  */
     dto = 0.123456789;	/* Not much else useful to do -- we don't know if 
 			   the host system even *has* NaNs, nor how to
 			   generate an innocuous one if it does.  */
   } else
 #endif
-         if (exp == 0 && mant0 == 0 && mant1 == 0) {
+         if (exponent == 0 && mant0 == 0 && mant1 == 0) {
     dto = 0;
   } else {
     /* Build the result algebraically.  Might go infinite, underflow, etc;
        who cares. */
     mant0 |= 0x80000000;
-    dto = ldexp  ((double)mant0, exp - EXT_EXP_BIAS - 31);
-    dto += ldexp ((double)mant1, exp - EXT_EXP_BIAS - 31 - 32);
+    dto = ldexp  ((double)mant0, exponent - EXT_EXP_BIAS - 31);
+    dto += ldexp ((double)mant1, exponent - EXT_EXP_BIAS - 31 - 32);
     if (ufrom[EXPBYTE_H] & SIGNMASK)	/* If negative... */
       dto = -dto;			/* ...negate.  */
   }
@@ -75,7 +75,7 @@ double_to_ieee_extended (ext_format, from, to)
 {
   double dfrom = *from;
   unsigned long twolongs[2];
-  unsigned long mant0, mant1, exp;
+  unsigned long mant0, mant1, exponent;
   unsigned char twobytes[2];
 
   bzero (to, TOTALSIZE);
@@ -97,27 +97,27 @@ double_to_ieee_extended (ext_format, from, to)
   bcopy (from, twolongs, 8);
   bcopy (from, twobytes, 2);
 #if HOST_BYTE_ORDER == BIG_ENDIAN
-  exp = ((twobytes[1] & 0xF0) >> 4) | (twobytes[0] & 0x7F) << 4;
+  exponent = ((twobytes[1] & 0xF0) >> 4) | (twobytes[0] & 0x7F) << 4;
   mant0 = (twolongs[0] << 11) | twolongs[1] >> 21;
   mant1 = (twolongs[1] << 11);
 #else
-  exp = ((twobytes[0] & 0xF0) >> 4) | (twobytes[1] & 0x7F) << 4;
+  exponent = ((twobytes[0] & 0xF0) >> 4) | (twobytes[1] & 0x7F) << 4;
   mant0 = (twolongs[1] << 11) | twolongs[0] >> 21;
   mant1 = (twolongs[0] << 11);
 #endif
 
   /* Fiddle with leading 1-bit, implied in double, explicit in extended. */
-  if (exp == 0)
+  if (exponent == 0)
     mant0 &= 0x7FFFFFFF;
   else
     mant0 |= 0x80000000;
 
-  exp -= DBL_EXP_BIAS;				/* Get integer exp */
-  exp += EXT_EXP_BIAS;				/* Offset for extended *&/
+  exponent -= DBL_EXP_BIAS;				/* Get integer exp */
+  exponent += EXT_EXP_BIAS;				/* Offset for extended */
 
   /* OK, now store it in extended format. */
-  to[EXPBYTE_H] |= (unsigned char)(exp >> 8);	/* Retain sign */
-  to[EXPBYTE_L] =  (unsigned char) exp;
+  to[EXPBYTE_H] |= (unsigned char)(exponent >> 8);	/* Retain sign */
+  to[EXPBYTE_L] =  (unsigned char) exponent;
   
   bcopy (&mant0, &to[MANBYTE_H], 4);
   bcopy (&mant1, &to[MANBYTE_L], 4);

@@ -45,6 +45,12 @@ void read_memory ();
 /* Read an integer from debugged memory, given address and number of bytes.  */
 long read_memory_integer ();
 
+void write_memory (
+#ifdef __STDC__
+		   CORE_ADDR, char *, int
+#endif
+		   );
+
 /* Hook for `exec_file_command' command to call.  */
 
 extern void (*exec_file_display_hook) ();

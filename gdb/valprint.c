@@ -669,6 +669,10 @@ val_print (type, valaddr, address, stream, format,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_ARRAY:
+      /* FIXME: TYPE_LENGTH (type) is unsigned and therefore always
+	 0.  Is "> 0" meant? I'm not sure what an "array of
+	 unspecified length" (mentioned in the comment for the else-part
+	 of this if) is.  */
       if (TYPE_LENGTH (type) >= 0
 	  && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
 	{
@@ -762,9 +766,11 @@ val_print (type, valaddr, address, stream, format,
 	  struct fn_field *f;
 	  int j, len2;
 	  char *kind = "";
+	  CORE_ADDR addr;
 
-	  val = unpack_long (builtin_type_int, valaddr);
-	  if (val < 128)
+	  addr = unpack_pointer (lookup_pointer_type (builtin_type_void),
+				valaddr);
+	  if (addr < 128)
 	    {
 	      len = TYPE_NFN_FIELDS (domain);
 	      for (i = 0; i < len; i++)
@@ -775,7 +781,7 @@ val_print (type, valaddr, address, stream, format,
 		  for (j = 0; j < len2; j++)
 		    {
 		      QUIT;
-		      if (TYPE_FN_FIELD_VOFFSET (f, j) == val)
+		      if (TYPE_FN_FIELD_VOFFSET (f, j) == addr)
 			{
 			  kind = "virtual";
 			  goto common;
@@ -785,7 +791,7 @@ val_print (type, valaddr, address, stream, format,
 	    }
 	  else
 	    {
-	      struct symbol *sym = find_pc_function ((CORE_ADDR) val);
+	      struct symbol *sym = find_pc_function (addr);
 	      if (sym == 0)
 		error ("invalid pointer to member function");
 	      len = TYPE_NFN_FIELDS (domain);
@@ -821,7 +827,7 @@ val_print (type, valaddr, address, stream, format,
 	    }
 	  fprintf_filtered (stream, "(");
   	  type_print (type, "", stream, -1);
-	  fprintf_filtered (stream, ") %d", (int) val >> 3);
+	  fprintf_filtered (stream, ") %d", (int) addr >> 3);
 	}
       else if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_MEMBER)
 	{
@@ -869,7 +875,7 @@ val_print (type, valaddr, address, stream, format,
 	}
       else
 	{
-	  CORE_ADDR addr = (CORE_ADDR) unpack_long (type, valaddr);
+	  CORE_ADDR addr = unpack_pointer (type, valaddr);
 	  elttype = TYPE_TARGET_TYPE (type);
 
 	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
@@ -968,7 +974,7 @@ val_print (type, valaddr, address, stream, format,
 	  else /* print vtbl's nicely */
  	  if (is_vtbl_member(type))
   	    {
-	      CORE_ADDR vt_address = (CORE_ADDR) unpack_long (type, valaddr);
+	      CORE_ADDR vt_address = unpack_pointer (type, valaddr);
 
 	      int vt_index = find_pc_misc_function (vt_address);
 	      if (vt_index >= 0
@@ -981,11 +987,11 @@ val_print (type, valaddr, address, stream, format,
 		}
 	      if (vtblprint)
 	        {
-		  value val;
+		  value vt_val;
 
-		  val = value_at (TYPE_TARGET_TYPE (type), vt_address);
-		  val_print (VALUE_TYPE (val), VALUE_CONTENTS (val),
-			     VALUE_ADDRESS (val), stream, format,
+		  vt_val = value_at (TYPE_TARGET_TYPE (type), vt_address);
+		  val_print (VALUE_TYPE (vt_val), VALUE_CONTENTS (vt_val),
+			     VALUE_ADDRESS (vt_val), stream, format,
 			     deref_ref, recurse + 1, pretty);
 		  if (pretty)
 		    {
@@ -1018,11 +1024,13 @@ val_print (type, valaddr, address, stream, format,
 	{
 	  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_UNDEF)
 	    {
-	      value val = value_at (TYPE_TARGET_TYPE (type),
-	  		            (CORE_ADDR) unpack_long (builtin_type_int,
-							     valaddr));
-	      val_print (VALUE_TYPE (val), VALUE_CONTENTS (val),
-			 VALUE_ADDRESS (val), stream, format,
+	      value deref_val =
+		value_at
+		  (TYPE_TARGET_TYPE (type),
+		   unpack_pointer (lookup_pointer_type (builtin_type_void),
+				   valaddr));
+	      val_print (VALUE_TYPE (deref_val), VALUE_CONTENTS (deref_val),
+			 VALUE_ADDRESS (deref_val), stream, format,
 			 deref_ref, recurse + 1, pretty);
 	    }
 	  else
@@ -1066,7 +1074,11 @@ val_print (type, valaddr, address, stream, format,
       if (i < len)
 	fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
       else
-	fprintf_filtered (stream, "%d", (int) val);
+#ifdef LONG_LONG
+	fprintf_filtered (stream, "%lld", val);
+#else
+	fprintf_filtered (stream, "%ld", val);
+#endif
       break;
 
     case TYPE_CODE_FUNC:
@@ -1100,7 +1112,7 @@ val_print (type, valaddr, address, stream, format,
 	      char *p;
 	      /* Pointer to first (i.e. lowest address) nonzero character.  */
 	      char *first_addr;
-	      unsigned len = TYPE_LENGTH (type);
+	      len = TYPE_LENGTH (type);
 
 #if TARGET_BYTE_ORDER == BIG_ENDIAN
 	      for (p = valaddr;
@@ -1442,8 +1454,8 @@ type_print_varspec_suffix (type, stream, show, passed_a_ptr)
 	fprintf_filtered (stream, ")");
       
       fprintf_filtered (stream, "[");
-      if (TYPE_LENGTH (type) >= 0
-	  && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
+      if (/* always true */ /* TYPE_LENGTH (type) >= 0
+	  && */ TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
 	fprintf_filtered (stream, "%d",
 			  (TYPE_LENGTH (type)
 			   / TYPE_LENGTH (TYPE_TARGET_TYPE (type))));
@@ -1763,10 +1775,12 @@ type_print_base (type, stream, show, level)
     }
 }
 
+#if 0
 /* Validate an input or output radix setting, and make sure the user
    knows what they really did here.  Radix setting is confusing, e.g.
    setting the input radix to "10" never changes it!  */
 
+/* ARGSUSED */
 static void
 set_input_radix (args, from_tty, c)
      char *args;
@@ -1779,7 +1793,9 @@ set_input_radix (args, from_tty, c)
     printf_filtered ("Input radix set to decimal %d, hex %x, octal %o\n",
 	radix, radix, radix);
 }
+#endif
 
+/* ARGSUSED */
 static void
 set_output_radix (args, from_tty, c)
      char *args;

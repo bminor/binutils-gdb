@@ -21,8 +21,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    param-no-tm.h.  Any future inclusions of param.h will be protected
    against by the #if !defined stuff below.  */
 
-/* Some tm files need CORE_ADDR, for example.  */
-#include "defs.h"
+/* This file requires defs.h.  */
 
 #if !defined (PARAM_H)
 #include "tm.h"

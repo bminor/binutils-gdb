@@ -177,7 +177,7 @@ read_relative_register_raw_bytes (regnum, myaddr)
       return 0;
     }
 
-  get_saved_register (myaddr, &optim, (CORE_ADDR) NULL, selected_frame,
+  get_saved_register (myaddr, &optim, (CORE_ADDR *) NULL, selected_frame,
                       regnum, (enum lval_type *)NULL);
   return optim;
 }
@@ -366,7 +366,6 @@ read_var_value (var, frame)
   struct frame_info *fi;
   struct type *type = SYMBOL_TYPE (var);
   CORE_ADDR addr;
-  int val;
   register int len;
 
   v = allocate_value (type);
@@ -378,8 +377,7 @@ read_var_value (var, frame)
   switch (SYMBOL_CLASS (var))
     {
     case LOC_CONST:
-      val = SYMBOL_VALUE (var);
-      bcopy (&val, VALUE_CONTENTS_RAW (v), len);
+      bcopy (&SYMBOL_VALUE (var), VALUE_CONTENTS_RAW (v), len);
       SWAP_TARGET_AND_HOST (VALUE_CONTENTS_RAW (v), len);
       VALUE_LVAL (v) = not_lval;
       return v;
@@ -430,7 +428,7 @@ read_var_value (var, frame)
 	return 0;
       }
       addr += SYMBOL_VALUE (var);
-      addr = read_memory_integer (addr, sizeof (CORE_ADDR));
+      read_memory (addr, &addr, sizeof (CORE_ADDR));
       break;
       
     case LOC_LOCAL:
@@ -460,7 +458,7 @@ read_var_value (var, frame)
 	
 	v = value_from_register (type, SYMBOL_VALUE (var), frame);
 
-	if (REG_STRUCT_HAS_ADDR(b->gcc_compile_flag)
+	if (REG_STRUCT_HAS_ADDR (BLOCK_GCC_COMPILED (b))
 	    && TYPE_CODE (type) == TYPE_CODE_STRUCT)
 	  addr = *(CORE_ADDR *)VALUE_CONTENTS (v);
 	else
@@ -665,7 +663,7 @@ locate_var_value (var, frame)
 	{
 	  char *buf = alloca (TYPE_LENGTH (type));
 	  read_memory (addr, buf, TYPE_LENGTH (type));
-	  addr = unpack_long (type, buf);
+	  addr = unpack_pointer (type, buf);
 	  type = TYPE_TARGET_TYPE (type);
 	}
 
