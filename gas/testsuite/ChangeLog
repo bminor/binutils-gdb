@@ -1,3 +1,7 @@
+2002-11-26  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/cris/rd-bcnst.d, gas/cris/rd-bcnst.d: New test.
+
 2002-11-25  DJ Delorie  <dj@redhat.com>
 
 	* gas/xstormy16/allinsn.d: Fix sdiv/sdivlh encodings.
