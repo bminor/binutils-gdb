@@ -1,3 +1,14 @@
+start-sanitize-arc
+Thu Apr  6 20:38:36 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* emulparams/arcelf.sh (ENTRY): Define.
+end-sanitize-arc
+
+Tue Apr  4 17:55:18 1995  Steve Chamberlain  <sac@bang.hack.com>
+
+	* ldwrite.c (clone_section): Align clone sections on even
+	boundaries.
+
 Thu Mar 30 14:32:26 1995  H.J. Lu (hjl@nynexst.com)
 
 	* configure.in: Change linux to default to elf.  Using
@@ -7,6 +18,9 @@ Thu Mar 30 14:32:26 1995  H.J. Lu (hjl@nynexst.com)
 	* config/i386-lelf.mt: Remove.
 
 Thu Mar 30 13:09:46 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldmain.c (main): If opening the map file fails, call
+        bfd_set_error before calling einfo.
 
 	* ld.texinfo, ld.1: Document the -no-keep-memory option.
 
