@@ -60,6 +60,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 
 set dm_operator_comma		","
 set dm_type_char_star		"char*"
+set dm_type_char_star_quoted    "char\\*"
 set dm_type_foo_ref 		"foo&"
 set dm_type_int_star		"int*"
 set dm_type_long_star		"long*"
@@ -71,6 +72,7 @@ proc probe_demangler { } {
     global gdb_prompt
     global dm_operator_comma
     global dm_type_char_star
+    global dm_type_char_star_quoted
     global dm_type_foo_ref
     global dm_type_int_star
     global dm_type_long_star
@@ -102,6 +104,7 @@ proc probe_demangler { } {
 	-re ".*dm_type_char_star\\(char \\*\\).*\r\n$gdb_prompt $" {
 	    # v2 demangler
 	    set dm_type_char_star "char *"
+	    set dm_type_char_star_quoted "char \\*"
 	    pass "detect dm_type_char_star"
 	}
 	-re ".*dm_type_char_star\\(char\\*\\).*\r\n$gdb_prompt $" {
@@ -312,6 +315,7 @@ proc print_addr { name } {
 proc test_lookup_operator_functions {} {
     global dm_operator_comma
     global dm_type_char_star
+    global dm_type_char_star_quoted
     global dm_type_foo_ref
     global dm_type_void
     global dm_type_void_star
@@ -323,7 +327,8 @@ proc test_lookup_operator_functions {} {
 	return
     }
 
-    info_func "operator*("	"void foo::operator*($dm_type_foo_ref);"
+    # operator* requires quoting so that GDB does not treat it as a regexp.
+    info_func "operator\\*("	"void foo::operator*($dm_type_foo_ref);"
     info_func "operator%("	"void foo::operator%($dm_type_foo_ref);"
     info_func "operator-("	"void foo::operator-($dm_type_foo_ref);"
     info_func "operator>>("	"void foo::operator>>($dm_type_foo_ref);"
@@ -336,7 +341,8 @@ proc test_lookup_operator_functions {} {
     info_func "operator++("	"void foo::operator++(int);"
     info_func "operator=("	"void foo::operator=($dm_type_foo_ref);"
     info_func "operator+=("	"void foo::operator+=($dm_type_foo_ref);"
-    info_func "operator*=("	"void foo::operator*=($dm_type_foo_ref);"
+    # operator*= requires quoting so that GDB does not treat it as a regexp.
+    info_func "operator\\*=("	"void foo::operator*=($dm_type_foo_ref);"
     info_func "operator%=("	"void foo::operator%=($dm_type_foo_ref);"
     info_func "operator>>=("	"void foo::operator>>=($dm_type_foo_ref);"
     info_func "operator|=("	"void foo::operator|=($dm_type_foo_ref);"
@@ -359,10 +365,13 @@ proc test_lookup_operator_functions {} {
     info_func "operator<<=("	"void foo::operator<<=($dm_type_foo_ref);"
     info_func "operator&=("	"void foo::operator&=($dm_type_foo_ref);"
     info_func "operator^=("	"void foo::operator^=($dm_type_foo_ref);"
-    info_func "operator->*("	"void foo::operator->*($dm_type_foo_ref);"
+    # operator->* requires quoting so that GDB does not treat it as a regexp.
+    info_func "operator->\\*("	"void foo::operator->*($dm_type_foo_ref);"
 
-    # operator[] needs backslashes to protect against TCL evaluation.
-    info_func "operator\[\]("	"void foo::operator\[\]($dm_type_foo_ref);"
+    # operator[] needs double backslashes, so that a single backslash
+    # will be sent to GDB, preventing the square brackets from being
+    # evaluated as a regular expression. 
+    info_func "operator\\\[\\\](" "void foo::operator\[\]($dm_type_foo_ref);"
 
     # These are gnarly because they might end with 'static'.
     set dm_type_void_star_regexp [string_to_regexp $dm_type_void_star]
@@ -371,7 +380,7 @@ proc test_lookup_operator_functions {} {
 
     info_func "operator int("	"int foo::operator int($dm_type_void);"
     info_func "operator()("	"void foo::operator()($dm_type_foo_ref);"
-    info_func "operator $dm_type_char_star\(" \
+    info_func "operator $dm_type_char_star_quoted\(" \
 				"char *foo::operator $dm_type_char_star\($dm_type_void);"
 
 }
