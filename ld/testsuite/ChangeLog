@@ -1,3 +1,14 @@
+2004-12-21  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* ld-crx/reloc-abs32.d: Update reference file according 
+	to disassembler printing method.
+ 	* ld-crx/reloc-rel16.d: Likewise.
+	* ld-crx/reloc-rel24.d: Likewise.
+	* ld-crx/reloc-rel32.d: Likewise.
+	* ld-crx/reloc-rel4.d: Likewise.
+	* ld-crx/reloc-rel8-cmp.d: Likewise.
+	* ld-crx/reloc-rel8.d: Likewise.
+
 2004-12-16  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ld-v850: New directory.
