@@ -1,3 +1,7 @@
+2000-01-11  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (get_dynamic_type): Remove DT_ENCODING.
+
 2000-01-10  Nick Clifton  <nickc@cygnus.com>
 
 	* readelf.c (get_note_type): Display NT_WIN32PSTATUS notes.

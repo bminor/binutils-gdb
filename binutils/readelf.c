@@ -1059,7 +1059,7 @@ get_dynamic_type (type)
     case DT_FINI_ARRAYSZ: return "FINI_ARRAYSZ";
     case DT_RUNPATH:    return "RUNPATH";
     case DT_FLAGS:      return "FLAGS";
-    case DT_ENCODING:   return "ENCODING";
+
     case DT_PREINIT_ARRAY: return "PREINIT_ARRAY";
     case DT_PREINIT_ARRAYSZ: return "PREINIT_ARRAYSZ";
 
