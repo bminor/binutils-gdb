@@ -1,3 +1,12 @@
+2002-10-11  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (lookup_symbol_aux): Move chunks of code into separate
+	functions.
+	(lookup_symbol_aux_local): New function.
+	(lookup_symbol_aux_symtabs): New function.
+	(lookup_symbol_aux_psymtabs): New function.
+	(lookup_symbol_aux_minsyms): New function.
+
 2002-10-05  Daniel Jacobowitz  <drow@mvista.com>
 
 	* stabsread.c (read_member_functions): Update comment.

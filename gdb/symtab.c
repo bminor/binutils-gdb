@@ -88,6 +88,32 @@ static struct symbol *lookup_symbol_aux (const char *name,
 					 int *is_a_field_of_this,
 					 struct symtab **symtab);
 
+static struct symbol *lookup_symbol_aux_local (const char *name,
+					       const char *mangled_name,
+					       const struct block *block,
+					       const namespace_enum namespace,
+					       struct symtab **symtab);
+
+static
+struct symbol *lookup_symbol_aux_symtabs (int block_index,
+					  const char *name,
+					  const char *mangled_name,
+					  const namespace_enum namespace,
+					  struct symtab **symtab);
+
+static
+struct symbol *lookup_symbol_aux_psymtabs (int block_index,
+					   const char *name,
+					   const char *mangled_name,
+					   const namespace_enum namespace,
+					   struct symtab **symtab);
+static
+struct symbol *lookup_symbol_aux_minsyms (const char *name,
+					  const char *mangled_name,
+					  const namespace_enum namespace,
+					  int *is_a_field_of_this,
+					  struct symtab **symtab);
+
 
 static struct symbol *find_active_alias (struct symbol *sym, CORE_ADDR addr);
 
@@ -729,17 +755,124 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 		   const struct block *block, const namespace_enum namespace,
 		   int *is_a_field_of_this, struct symtab **symtab)
 {
-  register struct symbol *sym;
-  register struct symtab *s = NULL;
-  register struct partial_symtab *ps;
-  register struct blockvector *bv;
-  register struct objfile *objfile = NULL;
-  register struct block *b;
-  register struct minimal_symbol *msymbol;
-
+  struct symbol *sym;
 
   /* Search specified block and its superiors.  */
 
+  sym = lookup_symbol_aux_local (name, mangled_name, block, namespace,
+				 symtab);
+  if (sym != NULL)
+    return sym;
+
+  /* C++: If requested to do so by the caller, 
+     check to see if NAME is a field of `this'. */
+  if (is_a_field_of_this)
+    {
+      struct value *v = value_of_this (0);
+
+      *is_a_field_of_this = 0;
+      if (v && check_field (v, name))
+	{
+	  *is_a_field_of_this = 1;
+	  if (symtab != NULL)
+	    *symtab = NULL;
+	  return NULL;
+	}
+    }
+
+  /* Now search all global blocks.  Do the symtab's first, then
+     check the psymtab's. If a psymtab indicates the existence
+     of the desired name as a global, then do psymtab-to-symtab
+     conversion on the fly and return the found symbol. */
+
+  sym = lookup_symbol_aux_symtabs (GLOBAL_BLOCK, name, mangled_name,
+				   namespace, symtab);
+  if (sym != NULL)
+    return sym;
+
+  sym = lookup_symbol_aux_psymtabs (GLOBAL_BLOCK, name, mangled_name,
+				    namespace, symtab);
+  if (sym != NULL)
+    return sym;
+
+#ifndef HPUXHPPA
+
+  /* Check for the possibility of the symbol being a function or a
+     mangled variable that is stored in one of the minimal symbol
+     tables.  Eventually, all global symbols might be resolved in this
+     way.  */
+
+  sym = lookup_symbol_aux_minsyms (name, mangled_name,
+				   namespace, is_a_field_of_this,
+				   symtab);
+  if (sym != NULL)
+    return sym;
+
+#endif
+
+  /* Now search all static file-level symbols.  Not strictly correct,
+     but more useful than an error.  Do the symtabs first, then check
+     the psymtabs.  If a psymtab indicates the existence of the
+     desired name as a file-level static, then do psymtab-to-symtab
+     conversion on the fly and return the found symbol. */
+
+  sym = lookup_symbol_aux_symtabs (STATIC_BLOCK, name, mangled_name,
+				   namespace, symtab);
+  if (sym != NULL)
+    return sym;
+  
+  sym = lookup_symbol_aux_psymtabs (STATIC_BLOCK, name, mangled_name,
+				    namespace, symtab);
+  if (sym != NULL)
+    return sym;
+
+
+#ifdef HPUXHPPA
+
+  /* Check for the possibility of the symbol being a function or a
+     global variable that is stored in one of the minimal symbol
+     tables.  The "minimal symbol table" is built from linker-supplied
+     info.
+
+     RT: I moved this check to last, after the complete search of the
+     global (p)symtab's and static (p)symtab's. For HP-generated
+     symbol tables, this check was causing a premature exit from
+     lookup_symbol with NULL return, and thus messing up symbol
+     lookups of things like "c::f". It seems to me a check of the
+     minimal symbol table ought to be a last resort in any case. I'm
+     vaguely worried about the comment within
+     lookup_symbol_aux_minsyms which talks about FORTRAN routines
+     "foo_" though... is it saying we need to do the "minsym" check
+     before the static check in this case?  */
+
+  sym = lookup_symbol_aux_minsyms (name, mangled_name,
+				   namespace, is_a_field_of_this,
+				   symtab);
+  if (sym != NULL)
+    return sym;
+
+#endif
+
+  if (symtab != NULL)
+    *symtab = NULL;
+  return NULL;
+}
+
+/* Check to see if the symbol is defined in BLOCK or its
+   superiors.  */
+
+static struct symbol *
+lookup_symbol_aux_local (const char *name, const char *mangled_name,
+			 const struct block *block,
+			 const namespace_enum namespace,
+			 struct symtab **symtab)
+{
+  struct symbol *sym;
+  struct objfile *objfile = NULL;
+  struct blockvector *bv;
+  struct block *b;
+  struct symtab *s = NULL;
+  
   while (block != 0)
     {
       sym = lookup_block_symbol (block, name, mangled_name, namespace);
@@ -767,72 +900,30 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
       block = BLOCK_SUPERBLOCK (block);
     }
 
-  /* FIXME: this code is never executed--block is always NULL at this
-     point.  What is it trying to do, anyway?  We already should have
-     checked the STATIC_BLOCK above (it is the superblock of top-level
-     blocks).  Why is VAR_NAMESPACE special-cased?  */
-  /* Don't need to mess with the psymtabs; if we have a block,
-     that file is read in.  If we don't, then we deal later with
-     all the psymtab stuff that needs checking.  */
-  /* Note (RT): The following never-executed code looks unnecessary to me also.
-   * If we change the code to use the original (passed-in)
-   * value of 'block', we could cause it to execute, but then what
-   * would it do? The STATIC_BLOCK of the symtab containing the passed-in
-   * 'block' was already searched by the above code. And the STATIC_BLOCK's
-   * of *other* symtabs (those files not containing 'block' lexically)
-   * should not contain 'block' address-wise. So we wouldn't expect this
-   * code to find any 'sym''s that were not found above. I vote for 
-   * deleting the following paragraph of code.
-   */
-  if (namespace == VAR_NAMESPACE && block != NULL)
-    {
-      struct block *b;
-      /* Find the right symtab.  */
-      ALL_SYMTABS (objfile, s)
-      {
-	bv = BLOCKVECTOR (s);
-	b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	if (BLOCK_START (b) <= BLOCK_START (block)
-	    && BLOCK_END (b) > BLOCK_START (block))
-	  {
-	    sym = lookup_block_symbol (b, name, mangled_name, VAR_NAMESPACE);
-	    if (sym)
-	      {
-		block_found = b;
-		if (symtab != NULL)
-		  *symtab = s;
-		return fixup_symbol_section (sym, objfile);
-	      }
-	  }
-      }
-    }
+  return NULL;
+}
 
+/* Check to see if the symbol is defined in one of the symtabs.
+   BLOCK_INDEX should be either GLOBAL_BLOCK or STATIC_BLOCK,
+   depending on whether or not we want to search global symbols or
+   static symbols.  */
 
-  /* C++: If requested to do so by the caller, 
-     check to see if NAME is a field of `this'. */
-  if (is_a_field_of_this)
-    {
-      struct value *v = value_of_this (0);
-
-      *is_a_field_of_this = 0;
-      if (v && check_field (v, name))
-	{
-	  *is_a_field_of_this = 1;
-	  if (symtab != NULL)
-	    *symtab = NULL;
-	  return NULL;
-	}
-    }
-
-  /* Now search all global blocks.  Do the symtab's first, then
-     check the psymtab's. If a psymtab indicates the existence
-     of the desired name as a global, then do psymtab-to-symtab
-     conversion on the fly and return the found symbol. */
+static struct symbol *
+lookup_symbol_aux_symtabs (int block_index,
+			   const char *name, const char *mangled_name,
+			   const namespace_enum namespace,
+			   struct symtab **symtab)
+{
+  struct symbol *sym;
+  struct objfile *objfile;
+  struct blockvector *bv;
+  const struct block *block;
+  struct symtab *s;
 
   ALL_SYMTABS (objfile, s)
   {
     bv = BLOCKVECTOR (s);
-    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+    block = BLOCKVECTOR_BLOCK (bv, block_index);
     sym = lookup_block_symbol (block, name, mangled_name, namespace);
     if (sym)
       {
@@ -843,17 +934,105 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
       }
   }
 
-#ifndef HPUXHPPA
+  return NULL;
+}
 
-  /* Check for the possibility of the symbol being a function or
-     a mangled variable that is stored in one of the minimal symbol tables.
-     Eventually, all global symbols might be resolved in this way.  */
+/* Check to see if the symbol is defined in one of the partial
+   symtabs.  BLOCK_INDEX should be either GLOBAL_BLOCK or
+   STATIC_BLOCK, depending on whether or not we want to search global
+   symbols or static symbols.  */
+
+static struct symbol *
+lookup_symbol_aux_psymtabs (int block_index, const char *name,
+			    const char *mangled_name,
+			    const namespace_enum namespace,
+			    struct symtab **symtab)
+{
+  struct symbol *sym;
+  struct objfile *objfile;
+  struct blockvector *bv;
+  const struct block *block;
+  struct partial_symtab *ps;
+  struct symtab *s;
+  const int psymtab_index = (block_index == GLOBAL_BLOCK ? 1 : 0);
+
+  ALL_PSYMTABS (objfile, ps)
+  {
+    if (!ps->readin
+	&& lookup_partial_symbol (ps, name, psymtab_index, namespace))
+      {
+	s = PSYMTAB_TO_SYMTAB (ps);
+	bv = BLOCKVECTOR (s);
+	block = BLOCKVECTOR_BLOCK (bv, block_index);
+	sym = lookup_block_symbol (block, name, mangled_name, namespace);
+	if (!sym)
+	  {
+	    /* This shouldn't be necessary, but as a last resort try
+	       looking in the statics even though the psymtab claimed
+	       the symbol was global, or vice-versa. It's possible
+	       that the psymtab gets it wrong in some cases.  */
+
+	    /* FIXME: carlton/2002-09-30: Should we really do that?
+	       If that happens, isn't it likely to be a GDB error, in
+	       which case we should fix the GDB error rather than
+	       silently dealing with it here?  So I'd vote for
+	       removing the check for the symbol in the other
+	       block.  */
+	    block = BLOCKVECTOR_BLOCK (bv,
+				       block_index == GLOBAL_BLOCK ?
+				       STATIC_BLOCK : GLOBAL_BLOCK);
+	    sym = lookup_block_symbol (block, name, mangled_name, namespace);
+	    if (!sym)
+	      error ("Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n%s may be an inlined function, or may be a template function\n(if a template, try specifying an instantiation: %s<type>).",
+		     block_index == GLOBAL_BLOCK ? "global" : "static",
+		     name, ps->filename, name, name);
+	  }
+	if (symtab != NULL)
+	  *symtab = s;
+	return fixup_symbol_section (sym, objfile);
+      }
+  }
+
+  return NULL;
+}
+
+/* Check for the possibility of the symbol being a function or a
+   mangled variable that is stored in one of the minimal symbol
+   tables.  Eventually, all global symbols might be resolved in this
+   way.  */
+
+static struct symbol *
+lookup_symbol_aux_minsyms (const char *name,
+			   const char *mangled_name,
+			   const namespace_enum namespace,
+			   int *is_a_field_of_this,
+			   struct symtab **symtab)
+{
+  struct symbol *sym;
+  struct blockvector *bv;
+  const struct block *block;
+  struct minimal_symbol *msymbol;
+  struct symtab *s;
 
   if (namespace == VAR_NAMESPACE)
     {
       msymbol = lookup_minimal_symbol (name, NULL, NULL);
       if (msymbol != NULL)
 	{
+	  /* OK, we found a minimal symbol in spite of not finding any
+	     symbol. There are various possible explanations for
+	     this. One possibility is the symbol exists in code not
+	     compiled -g. Another possibility is that the 'psymtab'
+	     isn't doing its job.  A third possibility, related to #2,
+	     is that we were confused by name-mangling. For instance,
+	     maybe the psymtab isn't doing its job because it only
+	     know about demangled names, but we were given a mangled
+	     name...  */
+
+	  /* We first use the address in the msymbol to try to locate
+	     the appropriate symtab. Note that find_pc_sect_symtab()
+	     has a side-effect of doing psymtab-to-symtab expansion,
+	     for the found symtab.  */
 	  s = find_pc_sect_symtab (SYMBOL_VALUE_ADDRESS (msymbol),
 				   SYMBOL_BFD_SECTION (msymbol));
 	  if (s != NULL)
@@ -862,19 +1041,20 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	      bv = BLOCKVECTOR (s);
 	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 
-              /* This call used to pass `SYMBOL_NAME (msymbol)' as the
-                 `name' argument to lookup_block_symbol.  But the name
-                 of a minimal symbol is always mangled, so that seems
-                 to be clearly the wrong thing to pass as the
-                 unmangled name.  */
-	      sym = lookup_block_symbol (block, name, mangled_name, namespace);
+	      /* This call used to pass `SYMBOL_NAME (msymbol)' as the
+	         `name' argument to lookup_block_symbol.  But the name
+	         of a minimal symbol is always mangled, so that seems
+	         to be clearly the wrong thing to pass as the
+	         unmangled name.  */
+	      sym =
+		lookup_block_symbol (block, name, mangled_name, namespace);
 	      /* We kept static functions in minimal symbol table as well as
 	         in static scope. We want to find them in the symbol table. */
 	      if (!sym)
 		{
 		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 		  sym = lookup_block_symbol (block, name,
-                                             mangled_name, namespace);
+					     mangled_name, namespace);
 		}
 
 	      /* sym == 0 if symbol was found in the minimal symbol table
@@ -892,7 +1072,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 
 	      if (symtab != NULL)
 		*symtab = s;
-	      return fixup_symbol_section (sym, objfile);
+	      return fixup_symbol_section (sym, s->objfile);
 	    }
 	  else if (MSYMBOL_TYPE (msymbol) != mst_text
 		   && MSYMBOL_TYPE (msymbol) != mst_file_text
@@ -900,200 +1080,14 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
 	    {
 	      /* This is a mangled variable, look it up by its
 	         mangled name.  */
-	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), mangled_name, block,
-					namespace, is_a_field_of_this, symtab);
-	    }
-	  /* There are no debug symbols for this file, or we are looking
-	     for an unmangled variable.
-	     Try to find a matching static symbol below. */
-	}
-    }
-
-#endif
-
-  ALL_PSYMTABS (objfile, ps)
-  {
-    if (!ps->readin && lookup_partial_symbol (ps, name, 1, namespace))
-      {
-	s = PSYMTAB_TO_SYMTAB (ps);
-	bv = BLOCKVECTOR (s);
-	block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	sym = lookup_block_symbol (block, name, mangled_name, namespace);
-	if (!sym)
-	  {
-	    /* This shouldn't be necessary, but as a last resort
-	     * try looking in the statics even though the psymtab
-	     * claimed the symbol was global. It's possible that
-	     * the psymtab gets it wrong in some cases.
-	     */
-	    block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	    sym = lookup_block_symbol (block, name, mangled_name, namespace);
-	    if (!sym)
-	      error ("Internal: global symbol `%s' found in %s psymtab but not in symtab.\n\
-%s may be an inlined function, or may be a template function\n\
-(if a template, try specifying an instantiation: %s<type>).",
-		     name, ps->filename, name, name);
-	  }
-	if (symtab != NULL)
-	  *symtab = s;
-	return fixup_symbol_section (sym, objfile);
-      }
-  }
-
-  /* Now search all static file-level symbols.
-     Not strictly correct, but more useful than an error.
-     Do the symtabs first, then check the psymtabs.
-     If a psymtab indicates the existence
-     of the desired name as a file-level static, then do psymtab-to-symtab
-     conversion on the fly and return the found symbol. */
-
-  ALL_SYMTABS (objfile, s)
-  {
-    bv = BLOCKVECTOR (s);
-    block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-    sym = lookup_block_symbol (block, name, mangled_name, namespace);
-    if (sym)
-      {
-	block_found = block;
-	if (symtab != NULL)
-	  *symtab = s;
-	return fixup_symbol_section (sym, objfile);
-      }
-  }
-
-  ALL_PSYMTABS (objfile, ps)
-  {
-    if (!ps->readin && lookup_partial_symbol (ps, name, 0, namespace))
-      {
-	s = PSYMTAB_TO_SYMTAB (ps);
-	bv = BLOCKVECTOR (s);
-	block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	sym = lookup_block_symbol (block, name, mangled_name, namespace);
-	if (!sym)
-	  {
-	    /* This shouldn't be necessary, but as a last resort
-	     * try looking in the globals even though the psymtab
-	     * claimed the symbol was static. It's possible that
-	     * the psymtab gets it wrong in some cases.
-	     */
-	    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	    sym = lookup_block_symbol (block, name, mangled_name, namespace);
-	    if (!sym)
-	      error ("Internal: static symbol `%s' found in %s psymtab but not in symtab.\n\
-%s may be an inlined function, or may be a template function\n\
-(if a template, try specifying an instantiation: %s<type>).",
-		     name, ps->filename, name, name);
-	  }
-	if (symtab != NULL)
-	  *symtab = s;
-	return fixup_symbol_section (sym, objfile);
-      }
-  }
-
-#ifdef HPUXHPPA
-
-  /* Check for the possibility of the symbol being a function or
-     a global variable that is stored in one of the minimal symbol tables.
-     The "minimal symbol table" is built from linker-supplied info.
-
-     RT: I moved this check to last, after the complete search of
-     the global (p)symtab's and static (p)symtab's. For HP-generated
-     symbol tables, this check was causing a premature exit from
-     lookup_symbol with NULL return, and thus messing up symbol lookups
-     of things like "c::f". It seems to me a check of the minimal
-     symbol table ought to be a last resort in any case. I'm vaguely
-     worried about the comment below which talks about FORTRAN routines "foo_"
-     though... is it saying we need to do the "minsym" check before
-     the static check in this case? 
-   */
-
-  if (namespace == VAR_NAMESPACE)
-    {
-      msymbol = lookup_minimal_symbol (name, NULL, NULL);
-      if (msymbol != NULL)
-	{
-	  /* OK, we found a minimal symbol in spite of not
-	   * finding any symbol. There are various possible
-	   * explanations for this. One possibility is the symbol
-	   * exists in code not compiled -g. Another possibility
-	   * is that the 'psymtab' isn't doing its job.
-	   * A third possibility, related to #2, is that we were confused 
-	   * by name-mangling. For instance, maybe the psymtab isn't
-	   * doing its job because it only know about demangled
-	   * names, but we were given a mangled name...
-	   */
-
-	  /* We first use the address in the msymbol to try to
-	   * locate the appropriate symtab. Note that find_pc_symtab()
-	   * has a side-effect of doing psymtab-to-symtab expansion,
-	   * for the found symtab.
-	   */
-	  s = find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol));
-	  if (s != NULL)
-	    {
-	      bv = BLOCKVECTOR (s);
-	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-              /* This call used to pass `SYMBOL_NAME (msymbol)' as the
-                 `name' argument to lookup_block_symbol.  But the name
-                 of a minimal symbol is always mangled, so that seems
-                 to be clearly the wrong thing to pass as the
-                 unmangled name.  */
-	      sym = lookup_block_symbol (block, name, mangled_name, namespace);
-	      /* We kept static functions in minimal symbol table as well as
-	         in static scope. We want to find them in the symbol table. */
-	      if (!sym)
-		{
-		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-		  sym = lookup_block_symbol (block, name,
-                                             mangled_name, namespace);
-		}
-	      /* If we found one, return it */
-	      if (sym)
-		{
-		  if (symtab != NULL)
-		    *symtab = s;
-		  return sym;
-		}
-
-	      /* If we get here with sym == 0, the symbol was 
-	         found in the minimal symbol table
-	         but not in the symtab.
-	         Fall through and return 0 to use the msymbol 
-	         definition of "foo_".
-	         (Note that outer code generally follows up a call
-	         to this routine with a call to lookup_minimal_symbol(),
-	         so a 0 return means we'll just flow into that other routine).
-
-	         This happens for Fortran  "foo_" symbols,
-	         which are "foo" in the symtab.
-
-	         This can also happen if "asm" is used to make a
-	         regular symbol but not a debugging symbol, e.g.
-	         asm(".globl _main");
-	         asm("_main:");
-	       */
-	    }
-
-	  /* If the lookup-by-address fails, try repeating the
-	   * entire lookup process with the symbol name from
-	   * the msymbol (if different from the original symbol name).
-	   */
-	  else if (MSYMBOL_TYPE (msymbol) != mst_text
-		   && MSYMBOL_TYPE (msymbol) != mst_file_text
-		   && !STREQ (name, SYMBOL_NAME (msymbol)))
-	    {
 	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), mangled_name,
-					block, namespace, is_a_field_of_this,
+					NULL, namespace, is_a_field_of_this,
 					symtab);
 	    }
 	}
     }
 
-#endif
-
-  if (symtab != NULL)
-    *symtab = NULL;
-  return 0;
+  return NULL;
 }
 								
 /* Look, in partial_symtab PST, for symbol NAME.  Check the global
@@ -1335,10 +1329,9 @@ lookup_block_symbol (register const struct block *block, const char *name,
 		     const char *mangled_name,
 		     const namespace_enum namespace)
 {
-  register int bot, top, inc;
+  register int bot, top;
   register struct symbol *sym;
   register struct symbol *sym_found = NULL;
-  register int do_linear_search = 1;
 
   if (BLOCK_HASHTABLE (block))
     {
@@ -1355,103 +1348,27 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	}
       return NULL;
     }
-
-  /* If the blocks's symbols were sorted, start with a binary search.  */
-
-  if (BLOCK_SHOULD_SORT (block))
+  else
     {
-      /* Reset the linear search flag so if the binary search fails, we
-         won't do the linear search once unless we find some reason to
-         do so */
-
-      do_linear_search = 0;
-      top = BLOCK_NSYMS (block);
-      bot = 0;
-
-      /* Advance BOT to not far before the first symbol whose name is NAME. */
-
-      while (1)
-	{
-	  inc = (top - bot + 1);
-	  /* No need to keep binary searching for the last few bits worth.  */
-	  if (inc < 4)
-	    {
-	      break;
-	    }
-	  inc = (inc >> 1) + bot;
-	  sym = BLOCK_SYM (block, inc);
-	  if (!do_linear_search && (SYMBOL_LANGUAGE (sym) == language_java))
-	    {
-	      do_linear_search = 1;
-	    }
-	  if (SYMBOL_SOURCE_NAME (sym)[0] < name[0])
-	    {
-	      bot = inc;
-	    }
-	  else if (SYMBOL_SOURCE_NAME (sym)[0] > name[0])
-	    {
-	      top = inc;
-	    }
-	  else if (strcmp (SYMBOL_SOURCE_NAME (sym), name) < 0)
-	    {
-	      bot = inc;
-	    }
-	  else
-	    {
-	      top = inc;
-	    }
-	}
-
-      /* Now scan forward until we run out of symbols, find one whose
-         name is greater than NAME, or find one we want.  If there is
-         more than one symbol with the right name and namespace, we
-         return the first one; I believe it is now impossible for us
-         to encounter two symbols with the same name and namespace
-         here, because blocks containing argument symbols are no
-         longer sorted.  The exception is for C++, where multiple functions
-	 (cloned constructors / destructors, in particular) can have
-	 the same demangled name.  So if we have a particular
-	 mangled name to match, try to do so.  */
-
-      top = BLOCK_NSYMS (block);
-      while (bot < top)
-	{
-	  sym = BLOCK_SYM (block, bot);
-	  if (SYMBOL_NAMESPACE (sym) == namespace
-	      && (mangled_name
-		  ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0
-		  : SYMBOL_MATCHES_NAME (sym, name)))
-	    {
-	      return sym;
-	    }
-          if (SYMBOL_SOURCE_NAME (sym)[0] > name[0])
-            {
-              break;
-            }
-	  bot++;
-	}
-    }
-
-  /* Here if block isn't sorted, or we fail to find a match during the
-     binary search above.  If during the binary search above, we find a
-     symbol which is a Java symbol, then we have re-enabled the linear
-     search flag which was reset when starting the binary search.
-
-     This loop is equivalent to the loop above, but hacked greatly for speed.
-
-     Note that parameter symbols do not always show up last in the
-     list; this loop makes sure to take anything else other than
-     parameter symbols first; it only uses parameter symbols as a
-     last resort.  Note that this only takes up extra computation
-     time on a match.  */
-
-  if (do_linear_search)
-    {
+      /* Note that parameter symbols do not always show up last in the
+	 list.  This loop makes sure to take anything else other than
+	 parameter symbols first; it only uses parameter symbols as a
+	 last resort.  Note that this only takes up extra computation
+	 time on a match.  */
       top = BLOCK_NSYMS (block);
       bot = 0;
       while (bot < top)
 	{
 	  sym = BLOCK_SYM (block, bot);
+	  /* If there is more than one symbol with the right name and
+	     namespace, we return the first one; I believe it is now
+	     impossible for us to encounter two symbols with the same
+	     name and namespace here, because blocks containing
+	     argument symbols are no longer sorted.  The exception is
+	     for C++, where multiple functions (cloned constructors /
+	     destructors, in particular) can have the same demangled
+	     name.  So if we have a particular mangled name to match,
+	     try to do so.  */
 	  if (SYMBOL_NAMESPACE (sym) == namespace
 	      && (mangled_name
 		  ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0
@@ -1493,8 +1410,8 @@ lookup_block_symbol (register const struct block *block, const char *name,
 	    }
 	  bot++;
 	}
+      return (sym_found);		/* Will be NULL if not found. */
     }
-  return (sym_found);		/* Will be NULL if not found. */
 }
 
 /* Given a main symbol SYM and ADDR, search through the alias
