@@ -1,3 +1,14 @@
+Thu Sep  3 14:19:30 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* ldver.c:  Call it version 2.0.
+
+Wed Sep  2 00:21:33 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* ldver.c:  Bump to version 0.98.
+	* TODO:  New file.
+
+	* Makefile.in:  Added mostlyclean, distclean, realclean rules.
+
 Tue Sep  1 23:42:16 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* ldmisc.c (xrealloc):  New (needed by ../libiberty/cplus.dem.c).
