@@ -1,5 +1,9 @@
 2004-01-17  Daniel Jacobowitz  <drow@mvista.com>
 
+	* remote.c: Update copyright years.
+
+2004-01-17  Daniel Jacobowitz  <drow@mvista.com>
+
 	* remote.c (remote_vcont_resume): Use xstrprintf instead of sprintf.
 
 2004-01-17  Andrew Cagney  <cagney@redhat.com>
