@@ -1,3 +1,13 @@
+2003-09-13  Andrew Cagney  <cagney@redhat.com>
+
+	* values.c (using_struct_return): Delete "function" and "funcaddr"
+	parameters.
+	* value.h (using_struct_return): Update declaration.
+	* infcmd.c (finish_command_continuation): Update.
+	(finish_command): Update.
+	* infcall.c (call_function_by_hand): Update.
+	* eval.c (evaluate_subexp_standard): Update.
+
 2003-09-13  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c: Just rely on CONTEXT_EXTENDED_REGISTER being defined for

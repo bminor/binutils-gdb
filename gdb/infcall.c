@@ -512,8 +512,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   /* Are we returning a value using a structure return or a normal
      value return? */
 
-  struct_return = using_struct_return (function, funaddr, value_type,
-				       using_gcc);
+  struct_return = using_struct_return (value_type, using_gcc);
 
   /* Determine the location of the breakpoint (and possibly other
      stuff) that the called function will return to.  The SPARC, for a

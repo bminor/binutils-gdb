@@ -1272,17 +1272,13 @@ generic_use_struct_convention (int gcc_p, struct type *value_type)
 	       || TYPE_LENGTH (value_type) == 8));
 }
 
-/* Return true if the function specified is using the structure returning
-   convention on this machine to return arguments, or 0 if it is using
-   the value returning convention.  FUNCTION is the value representing
-   the function, FUNCADDR is the address of the function, and VALUE_TYPE
-   is the type returned by the function.  GCC_P is nonzero if compiled
+/* Return true if the function returning the specified type is using
+   the convention of returning structures in memory (passing in the
+   address as a hidden first parameter).  GCC_P is nonzero if compiled
    with GCC.  */
 
-/* ARGSUSED */
 int
-using_struct_return (struct value *function, CORE_ADDR funcaddr,
-		     struct type *value_type, int gcc_p)
+using_struct_return (struct type *value_type, int gcc_p)
 {
   register enum type_code code = TYPE_CODE (value_type);
 

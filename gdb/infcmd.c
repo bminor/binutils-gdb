@@ -1149,9 +1149,7 @@ finish_command_continuation (struct continuation_arg *arg)
 
       funcaddr = BLOCK_START (SYMBOL_BLOCK_VALUE (function));
 
-      struct_return = using_struct_return (value_of_variable (function, NULL),
-					   funcaddr,
-					   check_typedef (value_type),
+      struct_return = using_struct_return (check_typedef (value_type),
 					   BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function)));
 
       print_return_value (struct_return, value_type); 
@@ -1277,9 +1275,7 @@ finish_command (char *arg, int from_tty)
 	  funcaddr = BLOCK_START (SYMBOL_BLOCK_VALUE (function));
 
 	  struct_return =
-	    using_struct_return (value_of_variable (function, NULL),
-				 funcaddr,
-				 check_typedef (value_type),
+	    using_struct_return (check_typedef (value_type),
 			BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function)));
 
 	  print_return_value (struct_return, value_type); 

@@ -855,11 +855,11 @@ evaluate_subexp_standard (struct type *expect_type,
 		  value_type = expect_type;
 	      }
 
-	    struct_return = using_struct_return (method, funaddr, value_type, using_gcc);
+	    struct_return = using_struct_return (value_type, using_gcc);
 	  }
 	else if (expect_type != NULL)
 	  {
-	    struct_return = using_struct_return (NULL, addr, check_typedef (expect_type), using_gcc);
+	    struct_return = using_struct_return (check_typedef (expect_type), using_gcc);
 	  }
 	
 	/* Found a function symbol.  Now we will substitute its
