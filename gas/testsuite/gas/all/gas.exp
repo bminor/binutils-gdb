@@ -24,7 +24,7 @@ if { [istarget hppa*-*-*] || [istarget *c54x*-*-*] } then {
 }
 
 # No floating point support in assembly code for CRIS.
-if ![istarget cris-*-*] then {
+if { ![istarget cris-*-*] && ![istarget crisv32-*-*] } then {
     gas_test "float.s" ""   "" "simple FP constants"
 }
 

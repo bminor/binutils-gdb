@@ -1,3 +1,40 @@
+2004-11-04  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/all/gas.exp: Exclude float.s for crisv32-*-*.
+	* gas/cris/operand-err-1.s (test.m constant): Remove xfail marker
+	and update rationale.  Mark "ba [external_symbol]" and "ba [r3]"
+	as invalid.
+	* gas/ieee-fp/x930509a.exp: setup_xfail for crisv32-*-*.
+	* gas/macros/macros.exp: setup_xfail strings for crisv32-*-*.
+	* gas/cris/abs32-1.s, gas/cris/arch-err-1.s,
+	gas/cris/arch-err-2.s, gas/cris/arch-err-3.s,
+	gas/cris/arch-err-4.s, gas/cris/arch-err-5.s,
+	gas/cris/bound-err-1.s, gas/cris/brokw-3b.s,
+	gas/cris/march-err-1.s, gas/cris/march-err-2.s,
+	gas/cris/push-err-1.s, gas/cris/push-err-2.s,
+	gas/cris/pushpopv32.s, gas/cris/rd-abs32-1.d,
+	gas/cris/rd-abs32-2.d, gas/cris/rd-arch-1.d, gas/cris/rd-arch-2.d,
+	gas/cris/rd-arch-3.d, gas/cris/rd-bkw1b.d, gas/cris/rd-bkw2b.d,
+	gas/cris/rd-bkw3b.d, gas/cris/rd-bound1.d, gas/cris/rd-bound1.s,
+	gas/cris/rd-bound2.d, gas/cris/rd-bound3.d, gas/cris/rd-bound4.d,
+	gas/cris/rd-break32.d, gas/cris/rd-ppv1032.d, gas/cris/rd-ppv32.d,
+	gas/cris/rd-spr-1.d, gas/cris/rd-spr-1.s, gas/cris/rd-usp-1.d,
+	gas/cris/rd-usp-1b.d, gas/cris/rd-v10_32o-1.d,
+	gas/cris/rd-v10_32o-2.d, gas/cris/rd-v10_32o-2.s,
+	gas/cris/rd-v32-b1.d, gas/cris/rd-v32-b1.s, gas/cris/rd-v32-b2.d,
+	gas/cris/rd-v32-b2.s, gas/cris/rd-v32-b3.d, gas/cris/rd-v32-b3.s,
+	gas/cris/rd-v32-f1.d, gas/cris/rd-v32-f1.s, gas/cris/rd-v32-i1.d,
+	gas/cris/rd-v32-i1.s, gas/cris/rd-v32-l1.d, gas/cris/rd-v32-l1.s,
+	gas/cris/rd-v32-l3.d, gas/cris/rd-v32-l3.s, gas/cris/rd-v32-l4.d,
+	gas/cris/rd-v32-l4.s, gas/cris/rd-v32o-1.d, gas/cris/rd-v32s-1.d,
+	gas/cris/rd-v32s-2.d, gas/cris/rd-v32s-2.s, gas/cris/rd-v32s-3.d,
+	gas/cris/rd-v32s-3.s, gas/cris/rd-v32s-4.d, gas/cris/rd-v32s-4.s,
+	gas/cris/rd-vao-1.d, gas/cris/v32-err-1.s, gas/cris/v32-err-10.s,
+	gas/cris/v32-err-11.s, gas/cris/v32-err-2.s, gas/cris/v32-err-3.s,
+	gas/cris/v32-err-4.s, gas/cris/v32-err-5.s, gas/cris/v32-err-6.s,
+	gas/cris/v32-err-7.s, gas/cris/v32-err-8.s, gas/cris/v32-err-9.s:
+	New tests.
+
 2004-11-04 Jan Beulich <jbeulich@novell.com>
 
 	* gas/i386/i386.exp: Execute new tests intelbad and intelok.
