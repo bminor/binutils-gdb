@@ -1,6 +1,6 @@
 /* MI Command Set - breakpoint and watchpoint commands.
    Copyright (C) 2000, Free Software Foundation, Inc.
-   Contributed by Cygnus Solutions.
+   Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
 

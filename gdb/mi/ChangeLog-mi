@@ -1,3 +1,10 @@
+Wed Feb 23 17:09:39 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mi-cmd-break.c, mi-cmd-disas.c, mi-cmd-stack.c, mi-cmd-var.c,
+ 	mi-cmds.c, mi-cmds.h, mi-console.c, mi-console.h, mi-getopt.c,
+ 	mi-getopt.h, mi-main.c, mi-out.c, mi-out.h, mi-parse.c,
+ 	mi-parse.h: Update copyright information.
+
 Wed Feb 23 13:31:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mi-cmd-disas.c (gdb_dis_asm_read_memory): Change LEN to unsigned
