@@ -1,3 +1,7 @@
+2001-12-13  Andreas Schwab  <schwab@suse.de>
+
+	* MAINTAINERS (write-after-approval): Add myself.
+
 2001-12-12  Jim Blandy  <jimb@redhat.com>
 
 	* Makefile.in (c-exp.tab.o): Add missing dependencies.
