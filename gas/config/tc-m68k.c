@@ -5471,7 +5471,7 @@ mri_chip ()
   else
     current_architecture &= m68881 | m68851;
   current_architecture |= archs[i].arch;
-  current_chip |= archs[i].chip;
+  current_chip = archs[i].chip;
 
   while (*input_line_pointer == '/')
     {
@@ -7264,7 +7264,7 @@ md_parse_option (c, arg)
 		  {
 		    current_architecture &= ~m68000up;
 		    current_architecture |= arch;
-		    current_chip |= archs[i].chip;
+		    current_chip = archs[i].chip;
 		  }
 		else if (arch == m68881)
 		  {
