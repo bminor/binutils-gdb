@@ -146,42 +146,6 @@ f_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
     }
 }
 
-#if 0				/* Currently unused */
-
-static void
-f_type_print_args (struct type *type, struct ui_file *stream)
-{
-  int i;
-  struct type **args;
-
-  fprintf_filtered (stream, "(");
-  args = TYPE_ARG_TYPES (type);
-  if (args != NULL)
-    {
-      if (args[1] == NULL)
-	{
-	  fprintf_filtered (stream, "...");
-	}
-      else
-	{
-	  for (i = 1; args[i] != NULL && args[i]->code != TYPE_CODE_VOID; i++)
-	    {
-	      f_print_type (args[i], "", stream, -1, 0);
-	      if (args[i + 1] == NULL)
-		fprintf_filtered (stream, "...");
-	      else if (args[i + 1]->code != TYPE_CODE_VOID)
-		{
-		  fprintf_filtered (stream, ",");
-		  wrap_here ("    ");
-		}
-	    }
-	}
-    }
-  fprintf_filtered (stream, ")");
-}
-
-#endif /* 0 */
-
 /* Print any array sizes, function arguments or close parentheses
    needed after the variable name (to describe its type).
    Args work like c_type_print_varspec_prefix.  */

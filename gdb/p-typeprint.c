@@ -37,8 +37,6 @@
 #include <errno.h>
 #include <ctype.h>
 
-static void pascal_type_print_args (struct type *, struct ui_file *);
-
 static void pascal_type_print_varspec_suffix (struct type *, struct ui_file *, int, int, int);
 
 static void pascal_type_print_derivation_info (struct ui_file *, struct type *);
@@ -302,52 +300,6 @@ pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
 }
 
 static void
-pascal_type_print_args (struct type *type, struct ui_file *stream)
-{
-  int i;
-  struct type **args;
-
-  /*  fprintf_filtered (stream, "(");
-     no () for procedures !! */
-  args = TYPE_ARG_TYPES (type);
-  if (args != NULL)
-    {
-      if ((args[1] != NULL && args[1]->code != TYPE_CODE_VOID) ||
-	  (args[2] != NULL))
-	{
-	  fprintf_filtered (stream, "(");
-	}
-      if (args[1] == NULL)
-	{
-	  fprintf_filtered (stream, "...");
-	}
-      else
-	{
-	  for (i = 1;
-	       args[i] != NULL && args[i]->code != TYPE_CODE_VOID;
-	       i++)
-	    {
-	      pascal_print_type (args[i], "", stream, -1, 0);
-	      if (args[i + 1] == NULL)
-		{
-		  fprintf_filtered (stream, "...");
-		}
-	      else if (args[i + 1]->code != TYPE_CODE_VOID)
-		{
-		  fprintf_filtered (stream, ",");
-		  wrap_here ("    ");
-		}
-	    }
-	}
-      if ((args[1] != NULL && args[1]->code != TYPE_CODE_VOID) ||
-	  (args[2] != NULL))
-	{
-	  fprintf_filtered (stream, ")");
-	}
-    }
-}
-
-static void
 pascal_print_func_args (struct type *type, struct ui_file *stream)
 {
   int i, len = TYPE_NFIELDS (type);
@@ -412,7 +364,6 @@ pascal_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
       pascal_type_print_method_args ("",
 				     "",
 				     stream);
-      /* pascal_type_print_args (type, stream); */
       if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
 	{
 	  fprintf_filtered (stream, " : ");

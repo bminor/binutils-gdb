@@ -1,5 +1,10 @@
 2002-01-20  Daniel Jacobowitz  <drow@mvista.com>
 
+	* f-typeprint.c: Delete unused function f_type_print_args.
+	* p-typeprint.c: Delete unused function pascal_type_print_args.
+
+2002-01-20  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdbtypes.h (struct type): Fix whitespace.  Remove obsolete
 	comment.  Add ``artificial'' to ``union field_location''.
 
