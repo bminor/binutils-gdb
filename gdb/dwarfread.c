@@ -23,6 +23,46 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
+   If you are looking for DWARF-2 support, you are in the wrong file.
+   Go look in dwarf2read.c.  This file is for the original DWARF.
+
+   DWARF (also known as DWARF-1) is headed for obsoletion.
+
+   In gcc 3.2.1, these targets prefer dwarf-1:
+
+     i[34567]86-sequent-ptx4*   # TD-R2
+     i[34567]86-sequent-sysv4*  # TD-R2
+     i[34567]86-dg-dgux*        # obsolete in gcc 3.2.1, to be removed in 3.3
+     m88k-dg-dgux*              # TD-R2
+     mips-sni-sysv4             # TD-R2
+     sparc-hal-solaris2*        # TD-R2
+
+    Configurations marked with "# TD-R2" are on Zach Weinberg's list
+    of "Target Deprecation, Round 2".  This is a candidate list of
+    targets to be deprecated in gcc 3.3 and removed in gcc 3.4.
+
+      http://gcc.gnu.org/ml/gcc/2002-12/msg00702.html
+
+    gcc 2.95.3 had many configurations which prefer dwarf-1.
+    We may have to support dwarf-1 as long as we support gcc 2.95.3.
+    This could use more analysis.
+
+    DG/UX (Data General Unix) used dwarf-1 for its native format.
+    DG/UX uses gcc for its system C compiler, but they have their
+    own linker and their own debuggers.
+
+    Takis Psarogiannakopoulos has a complete gnu toolchain for DG/UX
+    with gcc 2.95.3, gdb 5.1, and debug formats of dwarf-2 and stabs.
+    For more info, see PR gdb/979 and PR gdb/1013; also:
+
+      http://sources.redhat.com/ml/gdb/2003-02/msg00074.html
+
+    There may be non-gcc compilers that still emit dwarf-1.
+
+    -- chastain 2003-02-04
+*/
+
+/*
 
    FIXME: Do we need to generate dependencies in partial symtabs?
    (Perhaps we don't need to).
