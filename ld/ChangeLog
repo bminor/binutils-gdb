@@ -1,3 +1,8 @@
+Thu May 23 16:07:44 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/aix.em (gld${EMULATION_NAME}_read_file): Initialize
+	file, not impfile.
+
 Wed May 22 11:31:30 1996  Doug Evans  <dje@seba.cygnus.com>
 
 	* ldlang.c (wild_doit): Don't copy over SEC_LINK_{ONCE,DUPLICATES}
