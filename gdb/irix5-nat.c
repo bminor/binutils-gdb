@@ -83,6 +83,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 {
   int regi;
   greg_t *regp = &(*gregsetp)[0];
+  LONGEST regval;
 
   /* Under Irix6, if GDB is built with N32 ABI and is debugging an O32
      executable, we have to sign extend the registers to 64 bits before
@@ -90,30 +91,39 @@ fill_gregset (gregset_t *gregsetp, int regno)
 
   for (regi = 0; regi <= CTX_RA; regi++)
     if ((regno == -1) || (regno == regi))
-      *(regp + regi) =
-	extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)],
-				register_size (current_gdbarch, regi));
+      {
+        regcache_raw_read_signed (current_regcache, regi, &regval);
+        *(regp + regi) = regval;
+      }
 
   if ((regno == -1) || (regno == PC_REGNUM))
-    *(regp + CTX_EPC) =
-      extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->pc)],
-			      register_size (current_gdbarch, mips_regnum (current_gdbarch)->pc));
+    {
+      regcache_raw_read_signed
+        (current_regcache, mips_regnum (current_gdbarch)->pc, &regval);
+      *(regp + CTX_EPC) = regval;
+    }
 
   if ((regno == -1) || (regno == mips_regnum (current_gdbarch)->cause))
-    *(regp + CTX_CAUSE) =
-      extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->cause)],
-			      register_size (current_gdbarch, mips_regnum (current_gdbarch)->cause));
+    {
+      regcache_raw_read_signed
+        (current_regcache, mips_regnum (current_gdbarch)->cause, &regval);
+      *(regp + CTX_CAUSE) = regval;
+    }
 
   if ((regno == -1)
       || (regno == mips_regnum (current_gdbarch)->hi))
-    *(regp + CTX_MDHI) =
-      extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->hi)],
-			      register_size (current_gdbarch, mips_regnum (current_gdbarch)->hi));
+    {
+      regcache_raw_read_signed
+        (current_regcache, mips_regnum (current_gdbarch)->hi, &regval);
+      *(regp + CTX_MDHI) = regval;
+    }
 
   if ((regno == -1) || (regno == mips_regnum (current_gdbarch)->lo))
-    *(regp + CTX_MDLO) =
-      extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->lo)],
-			      register_size (current_gdbarch, mips_regnum (current_gdbarch)->lo));
+    {
+      regcache_raw_read_signed
+        (current_regcache, mips_regnum (current_gdbarch)->lo, &regval);
+      *(regp + CTX_MDLO) = regval;
+    }
 }
 
 /*
@@ -158,15 +168,16 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
     {
       if ((regno == -1) || (regno == regi))
 	{
-	  from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)];
 	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi - FP0_REGNUM]);
-	  memcpy (to, from, register_size (current_gdbarch, regi));
+          regcache_raw_read (current_regcache, regi, to);
 	}
     }
 
   if ((regno == -1)
       || (regno == mips_regnum (current_gdbarch)->fp_control_status))
-    fpregsetp->fp_csr = *(unsigned *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (mips_regnum (current_gdbarch)->fp_control_status)];
+    regcache_raw_read (current_regcache,
+                       mips_regnum (current_gdbarch)->fp_control_status, 
+                       &fpregsetp->fp_csr);
 }
 
 
