@@ -1,3 +1,8 @@
+Thu Oct  8 09:05:25 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* ldmisc.c (demangle,vfinfo): use the new underscore in bfd to 
+	to demangle symbols better
+
 Tue Oct  6 13:08:54 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* ldlang.c (lang_finish): don't warn if -e start symbol does not
