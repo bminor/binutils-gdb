@@ -511,6 +511,23 @@ AC_MSG_RESULT($gdb_cv_scanf_has_long_double)
 
 AC_FUNC_MMAP
 
+case ${host_os} in
+aix*)
+  AC_CACHE_CHECK([for -bbigtoc option], [gdb_cv_bigtoc], [
+    SAVE_LDFLAGS=$LDFLAGS
+
+    case $GCC in
+    yes) gdb_cv_bigtoc=-Wl,-bbigtoc ;;
+    *) gdb_cv_bigtoc=-bbigtoc ;;
+    esac
+
+    LDFLAGS=$LDFLAGS\ $gdb_cv_bigtoc
+    AC_TRY_LINK([], [int i;], [], [gdb_cv_bigtoc=])
+  ])
+  CONFIG_LDFLAGS="${CONFIG_LDFLAGS} ${gdb_cv_bigtoc}"
+  ;;
+esac
+
 dnl See if thread_db library is around for Solaris thread debugging.  Note that
 dnl we must explicitly test for version 1 of the library because version 0
 dnl (present on Solaris 2.4 or earlier) doesn't have the same API.
