@@ -5,6 +5,8 @@
 #define PKE_DEBUG 
 
 
+#include "config.h"
+
 #include <stdlib.h>
 #include "sky-pke.h"
 #include "sky-dma.h"
@@ -14,6 +16,14 @@
 #include "sky-vu1.h"
 #include "sky-gpuif.h"
 #include "sky-device.h"
+
+#ifdef HAVE_STRING_H
+#include <string.h>
+#else
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
+#endif
 
 
 /* Internal function declarations */
@@ -519,8 +529,7 @@ pke_issue(SIM_DESC sd, struct pke_device* me)
 {
   struct fifo_quadword* fqw;
   unsigned_4 fw;
-  unsigned_4 cmd, intr, num;
-  unsigned_4 imm;
+  unsigned_4 cmd, intr;
 
   /* 1 -- fetch PKE instruction */
 
