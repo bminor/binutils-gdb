@@ -1,3 +1,20 @@
+Wed Apr 14 16:38:47 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t07/watchpoint.exp:  Remove setup_xfail for i486
+	watchpoint problem that is now fixed.
+	* gdb.t30/chexp.exp:  Remove setup_xfail for printing
+	uninitialized convenience variables.
+	* gdb.t31/chillvars.exp:  Fix expected patterns for printing
+	structures.
+
+Wed Apr 14 12:55:58 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.t00/help.exp: Compensate for bug in mips-*-ultrix* OS
+	which causes expect to get out of sync with gdb on long output
+	from help set.
+	* gdb.t09/corefile.exp: Make expected pattern for core file
+	failing signal and frame output format less sun specific.
+
 Tue Apr 13 23:18:07 1993  Per Bothner  (bothner@cygnus.com)
 
 	* gdb.t31/chillvars.exp:  Add and remove initial dummy
