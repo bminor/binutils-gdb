@@ -123,6 +123,8 @@ struct ARMul_State
 
   const struct Dbg_HostosInterface *hostif;
 
+  unsigned is_StrongARM;	/* Are we emulating a StrongARM? */
+
   int verbose;			/* non-zero means print various messages like the banner */
 };
 
@@ -146,6 +148,7 @@ struct ARMul_State
 #define ARM_Debug_Prop   0x10
 #define ARM_Isync_Prop   ARM_Debug_Prop
 #define ARM_Lock_Prop    0x20
+#define ARM_Strong_Prop  0x40
 
 /* ARM2 family */
 #define ARM2    (ARM_Fix26_Prop)
@@ -164,6 +167,7 @@ struct ARMul_State
 #define ARM610  ARM6
 #define ARM620  ARM6
 
+#define STRONGARM (ARM_Strong_Prop)
 
 /***************************************************************************\
 *                   Macros to extract instruction fields                    *

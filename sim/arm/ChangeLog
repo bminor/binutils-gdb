@@ -1,5 +1,14 @@
 2000-07-04  Alexandre Oliva  <aoliva@redhat.com>
 
+	* armdefs.h (struct ARMul_State): Add is_StrongARM.
+	(ARM_Strong_Prop, STRONGARM): Define.
+	* arminit.c (ARMul_NewState): Reset is_StrongARM.
+	(ARMul_SelectProcessor): Set is_StrongARM.
+	* wrapper.c (sim_create_inferior): Use bfd machine type to
+	determine processor type to emulate.
+	* armemu.h (BUSUSEDINCPCS, BUSUSEDINCPCN): Don't increment PC
+	when emulating StrongARM.
+
 	* armemu.c (ARMul_Emulate, t_undefined): Proceed to next insn.
 
 	* armemu.h (INSN_SIZE): New macro.

@@ -231,10 +231,14 @@ extern ARMword isize;
 
 #define NORMALCYCLE state->NextInstr = 0
 #define BUSUSEDN state->NextInstr |= 1	/* the next fetch will be an N cycle */
-#define BUSUSEDINCPCS state->Reg[15] += isize ; /* a standard PC inc and an S cycle */ \
-                      state->NextInstr = (state->NextInstr & 0xff) | 2
-#define BUSUSEDINCPCN state->Reg[15] += isize ; /* a standard PC inc and an N cycle */ \
-                      state->NextInstr |= 3
+#define BUSUSEDINCPCS do { if (! state->is_StrongARM) { \
+			state->Reg[15] += isize ; /* a standard PC inc and an S cycle */ \
+			state->NextInstr = (state->NextInstr & 0xff) | 2; \
+		      } } while (0)
+#define BUSUSEDINCPCN do { if (state->is_StrongARM) BUSUSEDN; else { \
+			state->Reg[15] += isize ; /* a standard PC inc and an N cycle */ \
+			state->NextInstr |= 3; \
+		      } } while (0)
 #define INCPC state->Reg[15] += isize ; /* a standard PC inc */ \
               state->NextInstr |= 2
 #define FLUSHPIPE state->NextInstr |= PRIMEPIPE

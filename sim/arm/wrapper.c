@@ -1,5 +1,5 @@
 /* run front end support for arm
-   Copyright (C) 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996, 1997, 2000 Free Software Foundation, Inc.
 
 This file is part of ARM SIM.
 
@@ -198,6 +198,7 @@ sim_create_inferior (sd, abfd, argv, env)
      char **env;
 {
   int argvlen = 0;
+  int mach;
   char **arg;
 
   if (abfd != NULL)
@@ -205,12 +206,38 @@ sim_create_inferior (sd, abfd, argv, env)
   else
     ARMul_SetPC (state, 0);	/* ??? */
 
-  /* We explicitly select a processor capable of supporting the ARM
-     32bit mode.  JGS  */
-  ARMul_SelectProcessor (state, ARM600);
-  /* And then we force the simulated CPU into the 32bit User mode.  */
-  ARMul_SetCPSR (state, USER32MODE);
+  mach = bfd_get_mach (abfd);
 
+  switch (mach) {
+  default:
+    (*sim_callback->printf_filtered) (sim_callback,
+				      "Unknown machine type; please update sim_create_inferior.\n");
+    /* fall through */
+
+  case 0: /* arm */
+    /* We wouldn't set the machine type with earlier toolchains, so we
+       explicitly select a processor capable of supporting all ARM
+       32bit mode. */
+    /* fall through */
+
+  case 5: /* armv4 */
+  case 6: /* armv4t */
+  case 7: /* armv5 */
+  case 8: /* armv5t */
+    ARMul_SelectProcessor (state, STRONGARM);
+    break;
+
+  case 3: /* armv3 */
+  case 4: /* armv3m */
+    ARMul_SelectProcessor (state, ARM600);
+    break;
+    
+  case 1: /* armv2 */
+  case 2: /* armv2a */
+    ARMul_SelectProcessor (state, ARM2);
+    break;
+  }
+    
   if (argv != NULL)
     {
       /*

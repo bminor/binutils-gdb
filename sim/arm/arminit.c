@@ -124,6 +124,8 @@ ARMul_NewState (void)
   state->lateabtSig = LOW;
   state->bigendSig = LOW;
 
+  state->is_StrongARM = LOW;
+
   ARMul_Reset (state);
   return (state);
 }
@@ -147,6 +149,8 @@ ARMul_SelectProcessor (ARMul_State * state, unsigned processor)
     }
 
   state->lateabtSig = LOW;
+
+  state->is_StrongARM = (processor & ARM_Strong_Prop) ? HIGH : LOW;
 }
 
 /***************************************************************************\
