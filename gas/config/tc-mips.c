@@ -242,11 +242,20 @@ static int mips_4900 = -1;
 /* Whether the processor uses hardware interlocks to protect reads
    from the GPRs, and thus does not require nops to be inserted.  */
 #define gpr_interlocks (mips_opts.isa >= 2 || mips_3900)
+/* start-sanitize-vr5400 */
+#undef gpr_interlocks
+#define gpr_interlocks (mips_opts.isa >= 2 || mips_3900 || mips_5400)
+/* end-sanitize-vr5400 */
+
 
 /* As with other "interlocks" this is used by hardware that has FP
    (co-processor) interlocks.  */
 /* Itbl support may require additional care here. */
 #define cop_interlocks (mips_cpu == 4300)
+/* start-sanitize-vr5400 */
+#undef cop_interlocks
+#define cop_interlocks (mips_cpu == 4300 || mips_cpu == 5400)
+/* end-sanitize-vr5400 */
 
 /* MIPS PIC level.  */
 
@@ -2400,9 +2409,7 @@ macro_build (place, counter, ep, name, fmt, va_alist)
   /* Search until we get a match for NAME.  */
   while (1)
     {
-      if (insn.insn_mo->pinfo == INSN_MACRO)
-	insn_isa = insn.insn_mo->match;
-      else if ((insn.insn_mo->membership & INSN_ISA) == INSN_ISA1)
+      if ((insn.insn_mo->membership & INSN_ISA) == INSN_ISA1)
 	insn_isa = 1;
       else if ((insn.insn_mo->membership & INSN_ISA) == INSN_ISA2)
 	insn_isa = 2;
@@ -4651,6 +4658,11 @@ macro (ip)
       lr = 1;
       goto ld;
     case M_LDC1_AB:
+      if (mips_4650)
+	{
+	  as_bad ("opcode not supported on this processor");
+	  return;
+	}
       s = "ldc1";
       /* Itbl support may require additional care here. */
       coproc = 1;
@@ -4735,6 +4747,11 @@ macro (ip)
       s = "scd";
       goto st;
     case M_SDC1_AB:
+      if (mips_4650)
+	{
+	  as_bad ("opcode not supported on this processor");
+	  return;
+	}
       s = "sdc1";
       coproc = 1;
       /* Itbl support may require additional care here. */
@@ -5190,6 +5207,11 @@ macro (ip)
 	}
 
     case M_L_DOB:
+      if (mips_4650)
+	{
+	  as_bad ("opcode not supported on this processor");
+	  return;
+	}
       /* Even on a big endian machine $fn comes before $fn+1.  We have
 	 to adjust when loading from memory.  */
       r = BFD_RELOC_LO16;
@@ -5226,6 +5248,11 @@ macro (ip)
        * But, the resulting address is the same after relocation so why
        * generate the extra instruction?
        */
+      if (mips_4650)
+	{
+	  as_bad ("opcode not supported on this processor");
+	  return;
+	}
       /* Itbl support may require additional care here. */
       coproc = 1;
       if (mips_opts.isa >= 2)
@@ -5239,6 +5266,12 @@ macro (ip)
       goto ldd_std;
 
     case M_S_DAB:
+      if (mips_4650)
+	{
+	  as_bad ("opcode not supported on this processor");
+	  return;
+	}
+
       if (mips_opts.isa >= 2)
 	{
 	  s = "sdc1";
@@ -5820,6 +5853,11 @@ macro2 (ip)
       break;
 
     case M_S_DOB:
+      if (mips_4650)
+	{
+	  as_bad ("opcode not supported on this processor");
+	  return;
+	}
       assert (mips_opts.isa < 2);
       /* Even on a big endian machine $fn comes before $fn+1.  We have
 	 to adjust when storing to memory.  */
@@ -6672,8 +6710,8 @@ validate_mips_insn (opc)
       case 'w':	USE_BITS (OP_MASK_RT,		OP_SH_RT);	break;
       case 'x': break;
       case 'z': break;
-	/* start-sanitize-vr5400 */
       case 'P': USE_BITS (OP_MASK_PERFREG,	OP_SH_PERFREG);	break;
+	/* start-sanitize-vr5400 */
       case 'e': USE_BITS (OP_MASK_VECBYTE,	OP_SH_VECBYTE);	break;
       case '%': USE_BITS (OP_MASK_VECALIGN,	OP_SH_VECALIGN); break;
       case '[': break;
@@ -6750,9 +6788,7 @@ mips_ip (str, ip)
 
       assert (strcmp (insn->name, str) == 0);
 
-      if (insn->pinfo == INSN_MACRO)
-	insn_isa = insn->match;
-      else if ((insn->membership & INSN_ISA) == INSN_ISA1)
+      if ((insn->membership & INSN_ISA) == INSN_ISA1)
 	insn_isa = 1;
       else if ((insn->membership & INSN_ISA) == INSN_ISA2)
 	insn_isa = 2;
@@ -6780,17 +6816,16 @@ mips_ip (str, ip)
 	       || (mips_5400 && (insn->membership & INSN_5400) != 0)
 	       /* end-sanitize-vr5400 */
 	       || (mips_3900 && (insn->membership & INSN_3900) != 0))
-	{
-	  ok = true;
-	  if (mips_4650 && (insn->pinfo & FP_D) != 0)
-	    ok = false;
-	  /* start-sanitize-r5900 */
-	  if (mips_5900 && (insn->pinfo & FP_D) != 0)
-	    ok = false;
-	  /* end-sanitize-r5900 */
-	}
+	ok = true;
       else
 	ok = false;
+
+      if (mips_4650 && (insn->pinfo & FP_D) != 0)
+	ok = false;
+      /* start-sanitize-r5900 */
+      if (mips_5900 && (insn->pinfo & FP_D) != 0)
+	ok = false;
+      /* end-sanitize-r5900 */
 
       if (! ok)
 	{
@@ -6964,9 +6999,7 @@ mips_ip (str, ip)
 	    case 'G':		/* coprocessor destination register */
 	    case 'x':		/* ignore register name */
 	    case 'z':		/* must be zero register */
-	      /* start-sanitize-vr5400 */
 	    case 'P':		/* performance register */
-	      /* end-sanitize-vr5400 */
 	      s_reset = s;
 	      if (s[0] == '$')
 		{
@@ -7049,6 +7082,7 @@ mips_ip (str, ip)
 		  if (regno == AT
 		      && ! mips_opts.noat
 		      && *args != 'E'
+		      && *args != 'P'
 		      && *args != 'G')
 		    as_warn ("Used $at without \".set noat\"");
 		  c = *args;
@@ -7103,6 +7137,9 @@ mips_ip (str, ip)
 		      break;
 		    case 'D':
 		      /* Itbl operand; not yet implemented. FIXME ?? */
+		      break;
+		    case 'P':
+		      ip->insn_opcode |= regno << 1;
 		      break;
 		      /* What about all other operands like 'i', which
 			 can be specified in the opcode table? */

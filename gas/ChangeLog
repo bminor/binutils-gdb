@@ -1,3 +1,10 @@
+Mon Dec 22 12:54:07 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (macro): The 4650 doesn't permit M_LDC1_AB,
+	M_SDC1_AB, M_L_DOB, M_L_DAB, M_S_DAB, or M_S_DOB.
+	(mips_ip): Always check for FP_D, not just for instructions that
+	are not part of the regular ISA.
+
 Thu Dec 18 16:49:28 1997  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-d10v.c (build_insn): Make `number' a long for 64-bit hosts.
