@@ -1,5 +1,10 @@
 2001-11-05  Jim Blandy  <jimb@redhat.com>
 
+	* config/s390/s390.mh (NATDEPFILES): Don't split this across
+	several lines with backslashes; the `sed' command in
+	configure.in's AC_OUTPUT clause that comments out the NATDEPFILES
+	assignment doesn't handle lines extended with backslashes.
+
 	* configure.in (AC_OUTPUT): Handle assignments to NATDEPFILES
 	using `+=' as well as `='.
 	* configure: Regenerated.
