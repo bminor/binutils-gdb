@@ -1,3 +1,9 @@
+2004-06-09  Andrew Cagney  <cagney@gnu.org>
+
+	* config/pa/tm-hppa64.h (HPREAD_ADJUST_STACK_ADDRESS): Delete
+	unreferenced macro.
+	(hpread_adjust_stack_address): Delete declaration.
+
 2004-06-08  Andrew Cagney  <cagney@gnu.org>
 
 	* infptrace.c [ATTACH_DETACH]: Remove #ifdef wrappers.

@@ -48,13 +48,6 @@ struct frame_info;
 #define SR5_REGNUM 48
 
 
-/* For a number of horrible reasons we may have to adjust the location
-   of variables on the stack.  Ugh.  jimb: why? */
-#define HPREAD_ADJUST_STACK_ADDRESS(ADDR) hpread_adjust_stack_address(ADDR)
-
-extern int hpread_adjust_stack_address (CORE_ADDR);
-
-
 /* jimb: omitted dynamic linking stuff here */
 
 #undef FUNC_LDIL_OFFSET
