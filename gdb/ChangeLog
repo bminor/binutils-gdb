@@ -1,3 +1,8 @@
+Sun Dec 29 09:15:03 1996  Mark Alexander  <marka@cygnus.com>
+
+	* config/i386/xm-windows.h: Make SIGTRAP and SIGQUIT consistent
+	with sim/mips/support.h.
+
 Fri Dec 27 14:53:40 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* v850-tdep.c (struct pifsr): Add cur_frameoffset field.
