@@ -1924,8 +1924,9 @@ map_program_segments (abfd, off, first, phdr_size)
     }
 
   /* Make sure the return value from get_program_header_size matches
-     what we computed here.  */
-  if (phdr_count != phdr_size / sizeof (Elf_External_Phdr))
+     what we computed here.  Actually, it's OK if we allocated too
+     much space in the program header.  */
+  if (phdr_count > phdr_size / sizeof (Elf_External_Phdr))
     abort ();
 
   /* Set up program header information.  */
@@ -5855,10 +5856,7 @@ elf_link_output_extsym (h, data)
   sym.st_size = h->size;
   sym.st_other = 0;
   if (h->root.type == bfd_link_hash_weak
-      || ((h->elf_link_hash_flags & ELF_LINK_HASH_DEFINED_WEAK) != 0
-	  && ((h->elf_link_hash_flags & (ELF_LINK_HASH_REF_REGULAR
-					 | ELF_LINK_HASH_REF_DYNAMIC))
-	      == 0)))
+      || (h->elf_link_hash_flags & ELF_LINK_HASH_DEFINED_WEAK) != 0)
     sym.st_info = ELF_ST_INFO (STB_WEAK, h->type);
   else
     sym.st_info = ELF_ST_INFO (STB_GLOBAL, h->type);

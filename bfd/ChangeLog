@@ -1,3 +1,9 @@
+Fri Sep 23 15:15:31 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* elfcode.h (map_program_segments): Don't abort if we allocated
+	too much space for the program header, only if we allocated too
+	little.
+
 Tue Sep 20 13:17:07 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* libaout.h: Fix comment.
@@ -5,6 +11,11 @@ Tue Sep 20 13:17:07 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 	  libaout.h.
 
 Tue Sep 20 15:23:21 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* Makefile.in: Rebuilt dependencies.
+	(BFD32_BACKENDS): Add sparcnetbsd.o.
+	(CFILES): Add ns32knetbsd.c and sparcnetbsd.c.
+	* targets.c: ns32knetbsd_vec was renamed to pc532netbsd_vec.
 
 	* coff-sh.c (rtype2howto): Remove; unused.
 	(coff_sh_relocate_section): Remove unused local variable rstat.
