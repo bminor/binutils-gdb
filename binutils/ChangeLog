@@ -1,3 +1,8 @@
+2002-05-27  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add sv
+	* po/sv.po: New file.
+
 2002-05-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* unwind-ia64.c (unw_print_brmask): Don't use sprintf.
