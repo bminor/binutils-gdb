@@ -166,6 +166,7 @@ static void               add_abbrev                  PARAMS ((unsigned long, un
 static void               add_abbrev_attr             PARAMS ((unsigned long, unsigned long));
 static unsigned char *    read_and_display_attr       PARAMS ((unsigned long, unsigned long, unsigned char *, unsigned long));
 static unsigned char *    display_block               PARAMS ((unsigned char *, unsigned long));
+static void               decode_location_expression  PARAMS ((unsigned char *, unsigned int));
 
 typedef int Elf32_Word;
 
@@ -3389,7 +3390,8 @@ read_leb128 (data, length_return, sign)
     }
   while (byte & 0x80);
 
-  * length_return = num_read;
+  if (length_return != NULL)
+    * length_return = num_read;
 
   if (sign && (shift < 32) && (byte & 0x40))
     result |= -1 << shift;
@@ -4128,6 +4130,175 @@ display_block (data, length)
   return data;
 }
 
+static void
+decode_location_expression (data, pointer_size)
+     unsigned char * data;
+     unsigned int    pointer_size;
+{
+  unsigned char op;
+  int           bytes_read;
+    
+  op = * data ++;
+
+  switch (op)
+    {
+    case DW_OP_addr:	printf ("DW_OP_addr: %x", byte_get (data, pointer_size)); break;
+    case DW_OP_deref:	printf ("DW_OP_deref"); break;
+    case DW_OP_const1u:	printf ("DW_OP_const1u: %u", byte_get (data, 1)); break;
+    case DW_OP_const1s:	printf ("DW_OP_const1s: %d", byte_get (data, 1)); break;
+    case DW_OP_const2u:	printf ("DW_OP_const2u: %u", byte_get (data, 2)); break;
+    case DW_OP_const2s:	printf ("DW_OP_const2s: %d", byte_get (data, 2)); break;
+    case DW_OP_const4u:	printf ("DW_OP_const4u: %u", byte_get (data, 4)); break;
+    case DW_OP_const4s:	printf ("DW_OP_const4s: %d", byte_get (data, 4)); break;
+    case DW_OP_const8u:	printf ("DW_OP_const8u: %u %u", byte_get (data, 4), byte_get (data, 4)); break;
+    case DW_OP_const8s:	printf ("DW_OP_const8s: %d %d", byte_get (data, 4), byte_get (data, 4)); break;
+    case DW_OP_constu:	printf ("DW_OP_constu: %lu", read_leb128 (data, NULL, 0)); break;
+    case DW_OP_consts:	printf ("DW_OP_consts: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_dup:	printf ("DW_OP_dup"); break;
+    case DW_OP_drop:	printf ("DW_OP_drop"); break;
+    case DW_OP_over:	printf ("DW_OP_over"); break;
+    case DW_OP_pick:	printf ("DW_OP_pick: %d", byte_get (data, 1)); break;
+    case DW_OP_swap:	printf ("DW_OP_swap"); break;
+    case DW_OP_rot:	printf ("DW_OP_rot"); break;
+    case DW_OP_xderef:	printf ("DW_OP_xderef"); break;
+    case DW_OP_abs:	printf ("DW_OP_abs"); break;
+    case DW_OP_and:	printf ("DW_OP_and"); break;
+    case DW_OP_div:	printf ("DW_OP_div"); break;
+    case DW_OP_minus:	printf ("DW_OP_minus"); break;
+    case DW_OP_mod:	printf ("DW_OP_mod"); break;
+    case DW_OP_mul:	printf ("DW_OP_mul"); break;
+    case DW_OP_neg:	printf ("DW_OP_neg"); break;
+    case DW_OP_not:	printf ("DW_OP_not"); break;
+    case DW_OP_or:	printf ("DW_OP_or"); break;
+    case DW_OP_plus:	printf ("DW_OP_plus"); break;
+    case DW_OP_plus_uconst:	printf ("DW_OP_plus_uconst: %lu", read_leb128 (data, NULL, 0)); break;
+    case DW_OP_shl:	printf ("DW_OP_shl"); break;
+    case DW_OP_shr:	printf ("DW_OP_shr"); break;
+    case DW_OP_shra:	printf ("DW_OP_shra"); break;
+    case DW_OP_xor:	printf ("DW_OP_xor"); break;
+    case DW_OP_bra:	printf ("DW_OP_bra: %d", byte_get (data, 2)); break;
+    case DW_OP_eq:	printf ("DW_OP_eq"); break;
+    case DW_OP_ge:	printf ("DW_OP_ge"); break;
+    case DW_OP_gt:	printf ("DW_OP_gt"); break;
+    case DW_OP_le:	printf ("DW_OP_le"); break;
+    case DW_OP_lt:	printf ("DW_OP_lt"); break;
+    case DW_OP_ne:	printf ("DW_OP_ne"); break;
+    case DW_OP_skip:	printf ("DW_OP_skip: %d", byte_get (data, 2)); break;
+    case DW_OP_lit0:	printf ("DW_OP_lit0"); break;
+    case DW_OP_lit1:	printf ("DW_OP_lit1"); break;
+    case DW_OP_lit2:	printf ("DW_OP_lit2"); break;
+    case DW_OP_lit3:	printf ("DW_OP_lit3"); break;
+    case DW_OP_lit4:	printf ("DW_OP_lit4"); break;
+    case DW_OP_lit5:	printf ("DW_OP_lit5"); break;
+    case DW_OP_lit6:	printf ("DW_OP_lit6"); break;
+    case DW_OP_lit7:	printf ("DW_OP_lit7"); break;
+    case DW_OP_lit8:	printf ("DW_OP_lit8"); break;
+    case DW_OP_lit9:	printf ("DW_OP_lit9"); break;
+    case DW_OP_lit10:	printf ("DW_OP_lit10"); break;
+    case DW_OP_lit11:	printf ("DW_OP_lit11"); break;
+    case DW_OP_lit12:	printf ("DW_OP_lit12"); break;
+    case DW_OP_lit13:	printf ("DW_OP_lit13"); break;
+    case DW_OP_lit14:	printf ("DW_OP_lit14"); break;
+    case DW_OP_lit15:	printf ("DW_OP_lit15"); break;
+    case DW_OP_lit16:	printf ("DW_OP_lit16"); break;
+    case DW_OP_lit17:	printf ("DW_OP_lit17"); break;
+    case DW_OP_lit18:	printf ("DW_OP_lit18"); break;
+    case DW_OP_lit19:	printf ("DW_OP_lit19"); break;
+    case DW_OP_lit20:	printf ("DW_OP_lit20"); break;
+    case DW_OP_lit21:	printf ("DW_OP_lit21"); break;
+    case DW_OP_lit22:	printf ("DW_OP_lit22"); break;
+    case DW_OP_lit23:	printf ("DW_OP_lit23"); break;
+    case DW_OP_lit24:	printf ("DW_OP_lit24"); break;
+    case DW_OP_lit25:	printf ("DW_OP_lit25"); break;
+    case DW_OP_lit26:	printf ("DW_OP_lit26"); break;
+    case DW_OP_lit27:	printf ("DW_OP_lit27"); break;
+    case DW_OP_lit28:	printf ("DW_OP_lit28"); break;
+    case DW_OP_lit29:	printf ("DW_OP_lit29"); break;
+    case DW_OP_lit30:	printf ("DW_OP_lit30"); break;
+    case DW_OP_lit31:	printf ("DW_OP_lit31"); break;
+    case DW_OP_reg0:	printf ("DW_OP_reg0"); break;
+    case DW_OP_reg1:	printf ("DW_OP_reg1"); break;
+    case DW_OP_reg2:	printf ("DW_OP_reg2"); break;
+    case DW_OP_reg3:	printf ("DW_OP_reg3"); break;
+    case DW_OP_reg4:	printf ("DW_OP_reg4"); break;
+    case DW_OP_reg5:	printf ("DW_OP_reg5"); break;
+    case DW_OP_reg6:	printf ("DW_OP_reg6"); break;
+    case DW_OP_reg7:	printf ("DW_OP_reg7"); break;
+    case DW_OP_reg8:	printf ("DW_OP_reg8"); break;
+    case DW_OP_reg9:	printf ("DW_OP_reg9"); break;
+    case DW_OP_reg10:	printf ("DW_OP_reg10"); break;
+    case DW_OP_reg11:	printf ("DW_OP_reg11"); break;
+    case DW_OP_reg12:	printf ("DW_OP_reg12"); break;
+    case DW_OP_reg13:	printf ("DW_OP_reg13"); break;
+    case DW_OP_reg14:	printf ("DW_OP_reg14"); break;
+    case DW_OP_reg15:	printf ("DW_OP_reg15"); break;
+    case DW_OP_reg16:	printf ("DW_OP_reg16"); break;
+    case DW_OP_reg17:	printf ("DW_OP_reg17"); break;
+    case DW_OP_reg18:	printf ("DW_OP_reg18"); break;
+    case DW_OP_reg19:	printf ("DW_OP_reg19"); break;
+    case DW_OP_reg20:	printf ("DW_OP_reg20"); break;
+    case DW_OP_reg21:	printf ("DW_OP_reg21"); break;
+    case DW_OP_reg22:	printf ("DW_OP_reg22"); break;
+    case DW_OP_reg23:	printf ("DW_OP_reg23"); break;
+    case DW_OP_reg24:	printf ("DW_OP_reg24"); break;
+    case DW_OP_reg25:	printf ("DW_OP_reg25"); break;
+    case DW_OP_reg26:	printf ("DW_OP_reg26"); break;
+    case DW_OP_reg27:	printf ("DW_OP_reg27"); break;
+    case DW_OP_reg28:	printf ("DW_OP_reg28"); break;
+    case DW_OP_reg29:	printf ("DW_OP_reg29"); break;
+    case DW_OP_reg30:	printf ("DW_OP_reg30"); break;
+    case DW_OP_reg31:	printf ("DW_OP_reg31"); break;
+    case DW_OP_breg0:	printf ("DW_OP_breg0: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg1:	printf ("DW_OP_breg1: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg2:	printf ("DW_OP_breg2: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg3:	printf ("DW_OP_breg3: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg4:	printf ("DW_OP_breg4: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg5:	printf ("DW_OP_breg5: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg6:	printf ("DW_OP_breg6: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg7:	printf ("DW_OP_breg7: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg8:	printf ("DW_OP_breg8: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg9:	printf ("DW_OP_breg9: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg10:	printf ("DW_OP_breg10: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg11:	printf ("DW_OP_breg11: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg12:	printf ("DW_OP_breg12: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg13:	printf ("DW_OP_breg13: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg14:	printf ("DW_OP_breg14: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg15:	printf ("DW_OP_breg15: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg16:	printf ("DW_OP_breg16: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg17:	printf ("DW_OP_breg17: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg18:	printf ("DW_OP_breg18: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg19:	printf ("DW_OP_breg19: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg20:	printf ("DW_OP_breg20: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg21:	printf ("DW_OP_breg21: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg22:	printf ("DW_OP_breg22: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg23:	printf ("DW_OP_breg23: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg24:	printf ("DW_OP_breg24: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg25:	printf ("DW_OP_breg25: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg26:	printf ("DW_OP_breg26: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg27:	printf ("DW_OP_breg27: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg28:	printf ("DW_OP_breg28: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg29:	printf ("DW_OP_breg29: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg30:	printf ("DW_OP_breg30: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_breg31:	printf ("DW_OP_breg31: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_regx:	printf ("DW_OP_regx: %lu", read_leb128 (data, NULL, 0)); break;
+    case DW_OP_fbreg:	printf ("DW_OP_fbreg: %ld", read_leb128 (data, NULL, 1)); break;
+    case DW_OP_bregx:	printf ("DW_OP_bregx: %lu %ld", read_leb128 (data, & bytes_read, 0), read_leb128 (data + bytes_read, NULL, 1)); break;
+    case DW_OP_piece:	printf ("DW_OP_piece: %lu", read_leb128 (data, NULL, 0)); break;
+    case DW_OP_deref_size:	printf ("DW_OP_deref_size: %d", byte_get (data, 1)); break;
+    case DW_OP_xderef_size:	printf ("DW_OP_xderef_size: %d", byte_get (data, 1)); break;
+    case DW_OP_nop:	printf ("DW_OP_nop"); break;
+
+    default:
+      if (op >= DW_OP_lo_user
+	  && op <= DW_OP_hi_user)
+	printf (_("(User defined location op)"));
+      else
+	printf (_("(Unknown location op)"));
+      break;
+    }
+}
+
+
 static unsigned char *
 read_and_display_attr (attribute, form, data, pointer_size)
      unsigned long   attribute;
@@ -4135,8 +4306,9 @@ read_and_display_attr (attribute, form, data, pointer_size)
      unsigned char * data;
      unsigned long   pointer_size;
 {
-  unsigned long uvalue;
-  int           bytes_read;
+  unsigned long   uvalue;
+  unsigned char * block_start;
+  int             bytes_read;
   
   printf ("     %-18s:", get_AT_name (attribute));
   
@@ -4198,26 +4370,30 @@ read_and_display_attr (attribute, form, data, pointer_size)
       
     case DW_FORM_block:
       uvalue = read_leb128 (data, & bytes_read, 0);
-      data   = display_block (data + bytes_read, uvalue);
-      uvalue = * (data - uvalue);
+      block_start = data + bytes_read;
+      data = display_block (block_start, uvalue);
+      uvalue = * block_start;
       break;
 	    
     case DW_FORM_block1: 
-      uvalue = byte_get (data ++, 1);
-      data   = display_block (data, uvalue);
-      uvalue = * (data - uvalue);
+      uvalue = byte_get (data, 1);
+      block_start = data + 1;
+      data = display_block (block_start, uvalue);
+      uvalue = * block_start;
       break;
 	    
     case DW_FORM_block2:
       uvalue = byte_get (data, 2);
-      data   = display_block (data + 2, uvalue);
-      uvalue = * (data - uvalue);
+      block_start = data + 2;
+      data = display_block (block_start, uvalue);
+      uvalue = * block_start;
       break;
 	    
     case DW_FORM_block4:
       uvalue = byte_get (data, 4);
-      data   = display_block (data + 4, uvalue);
-      uvalue = * (data - uvalue);
+      block_start = data + 4;
+      data = display_block (block_start, uvalue);
+      uvalue = * block_start;
       break;
       
     case DW_FORM_strp: 
@@ -4290,6 +4466,69 @@ read_and_display_attr (attribute, form, data, pointer_size)
 	    printf ("(unknown type)");
 	  break;
 	}
+      break;
+      
+    case DW_AT_accessibility:
+      switch (uvalue)
+	{
+	case DW_ACCESS_public:		printf ("(public)"); break;
+	case DW_ACCESS_protected:	printf ("(protected)"); break;
+	case DW_ACCESS_private:		printf ("(private)"); break;
+	default:		        printf ("(unknown accessibility)"); break;
+	}
+      break;
+      
+    case DW_AT_visibility:
+      switch (uvalue)
+	{
+	case DW_VIS_local:	printf ("(local)"); break;
+	case DW_VIS_exported:	printf ("(exported)"); break;
+	case DW_VIS_qualified:	printf ("(qualified)"); break;
+	default:		printf ("(unknown visibility)"); break;
+	}
+      break;
+      
+    case DW_AT_virtuality:
+      switch (uvalue)
+	{
+	case DW_VIRTUALITY_none:	printf ("(none)"); break;
+	case DW_VIRTUALITY_virtual:	printf ("(virtual)"); break;
+	case DW_VIRTUALITY_pure_virtual:printf ("(pure_virtual)"); break;
+	default:		        printf ("(unknown virtuality)"); break;
+	}
+      break;
+      
+    case DW_AT_identifier_case:
+      switch (uvalue)
+	{
+	case DW_ID_case_sensitive:	printf ("(case_sensitive)"); break;
+	case DW_ID_up_case:		printf ("(up_case)"); break;
+	case DW_ID_down_case:		printf ("(down_case)"); break;
+	case DW_ID_case_insensitive:	printf ("(case_insensitive)"); break;
+	default:		        printf ("(unknown case)"); break;
+	}
+      break;
+      
+    case DW_AT_calling_convention:
+      switch (uvalue)
+	{
+	case DW_CC_normal:	printf ("(normal)"); break;
+	case DW_CC_program:	printf ("(program)"); break;
+	case DW_CC_nocall:	printf ("(nocall)"); break;
+	default:
+	  if (uvalue >= DW_CC_lo_user
+	      && uvalue <= DW_CC_hi_user)
+	    printf ("(user defined)");
+	  else
+	    printf ("(unknown convention)");
+	}
+      break;
+      
+    case DW_AT_location:
+      printf ("(");
+      decode_location_expression (block_start, pointer_size);
+      printf (")");
+      break;
       
     default:
       break;
@@ -4306,7 +4545,8 @@ display_debug_info (section, start, file)
      FILE *                file;
 {
   unsigned char * end = start + section->sh_size;
-
+  unsigned char * section_begin = start;
+  
   printf (_("The section %s contains:\n\n"), SECTION_NAME (section));
 
   while (start < end)
@@ -4315,6 +4555,7 @@ display_debug_info (section, start, file)
       DWARF2_Internal_CompUnit   compunit;
       unsigned char *            tags;
       int                        i;
+      int                        extra = 0;
       
       external = (DWARF2_External_CompUnit *) start;
 
@@ -4346,7 +4587,7 @@ display_debug_info (section, start, file)
       {
 	Elf32_Internal_Shdr * sec;
 	unsigned char *       begin;
-      
+	
 	/* Locate the .debug_abbrev section and process it.  */
 	for (i = 0, sec = section_headers;
 	     i < elf_header.e_shnum;
@@ -4380,7 +4621,15 @@ display_debug_info (section, start, file)
 	  tags += bytes_read;
 
 	  if (abbrev_number == 0)
-	    break;
+	    {
+	      if (tags < start && ! extra)
+		{
+		  printf (_("\n   Extra data at end of comp unit:\n"));
+		  extra = 1;
+		}
+	      
+	      continue;
+	    }
 	  
 	  /* Scan through the abbreviation list until we reach the
 	     correct entry.  */
@@ -4396,9 +4645,16 @@ display_debug_info (section, start, file)
 	      return 0;
 	    }
 
-	  printf (_("    Abbrev Number: %d (%s)\n"),
-		  abbrev_number,
-		  get_TAG_name (entry->tag));
+	  if (extra)
+	    printf (_(" %x: Abbrev Number: %d (%s)\n"),
+		    tags - section_begin - bytes_read,
+		    abbrev_number,
+		    get_TAG_name (entry->tag));
+	  else
+	    printf (_("    Abbrev Number: %d (%s)\n"),
+		    abbrev_number,
+		    get_TAG_name (entry->tag));
+	    
 
 	  for (attr = entry->first_attr; attr; attr = attr->next)
 	    tags = read_and_display_attr (attr->attribute,
@@ -4496,15 +4752,18 @@ struct
 }
 debug_displays[] =
 {
-  { ".debug_info",     display_debug_info },
-  { ".debug_abbrev",   display_debug_abbrev },
-  { ".debug_line",     display_debug_lines },
-  { ".debug_aranges",  display_debug_aranges },
-  { ".debug_pubnames", display_debug_pubnames },
-  { ".debug_macinfo",  display_debug_not_supported },
-  { ".debug_frame",    display_debug_not_supported },
-  { ".debug_loc",      display_debug_not_supported },
-  { ".debug_str",      display_debug_not_supported }
+  { ".debug_info",        display_debug_info },
+  { ".debug_abbrev",      display_debug_abbrev },
+  { ".debug_line",        display_debug_lines },
+  { ".debug_aranges",     display_debug_aranges },
+  { ".debug_pubnames",    display_debug_pubnames },
+  { ".debug_macinfo",     display_debug_not_supported },
+  { ".debug_frame",       display_debug_not_supported },
+  { ".debug_str",         display_debug_not_supported },
+  { ".debug_static_func", display_debug_not_supported },
+  { ".debug_static_vars", display_debug_not_supported },
+  { ".debug_types",       display_debug_not_supported },
+  { ".debug_weaknames",   display_debug_not_supported }
 };
 
 static int
