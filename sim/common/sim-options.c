@@ -256,7 +256,7 @@ standard_option_handler (sd, opt, arg)
 
     case OPTION_TRACE_INSN :
       if (! (WITH_TRACE & (1 << TRACE_INSN_IDX)))
-	sim_io_eprintf (sd, "Tracing not compiled in, `--trace-insn' ignored\n");
+	sim_io_eprintf (sd, "Instruction tracing not compiled in, `--trace-insn' ignored\n");
       else
 	{
 	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
@@ -266,7 +266,7 @@ standard_option_handler (sd, opt, arg)
 
     case OPTION_TRACE_DECODE :
       if (! (WITH_TRACE & (1 << TRACE_DECODE_IDX)))
-	sim_io_eprintf (sd, "Tracing not compiled in, `--trace-decode' ignored\n");
+	sim_io_eprintf (sd, "Decode tracing not compiled in, `--trace-decode' ignored\n");
       else
 	{
 	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
@@ -276,7 +276,7 @@ standard_option_handler (sd, opt, arg)
 
     case OPTION_TRACE_EXTRACT :
       if (! (WITH_TRACE & (1 << TRACE_EXTRACT_IDX)))
-	sim_io_eprintf (sd, "Tracing not compiled in, `--trace-extract' ignored\n");
+	sim_io_eprintf (sd, "Extract tracing not compiled in, `--trace-extract' ignored\n");
       else
 	{
 	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
@@ -286,7 +286,7 @@ standard_option_handler (sd, opt, arg)
 
     case OPTION_TRACE_LINENUM :
       if (! (WITH_TRACE & (1 << TRACE_LINENUM_IDX)))
-	sim_io_eprintf (sd, "Tracing not compiled in, `--trace-linenum' ignored\n");
+	sim_io_eprintf (sd, "Line number tracing not compiled in, `--trace-linenum' ignored\n");
       else
 	{
 	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
@@ -296,7 +296,7 @@ standard_option_handler (sd, opt, arg)
 
     case OPTION_TRACE_MEMORY :
       if (! (WITH_TRACE & (1 << TRACE_MEMORY_IDX)))
-	sim_io_eprintf (sd, "Tracing not compiled in, `--trace-memory' ignored\n");
+	sim_io_eprintf (sd, "Memory tracing not compiled in, `--trace-memory' ignored\n");
       else
 	{
 	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
@@ -306,7 +306,7 @@ standard_option_handler (sd, opt, arg)
 
     case OPTION_TRACE_MODEL :
       if (! (WITH_TRACE & (1 << TRACE_MODEL_IDX)))
-	sim_io_eprintf (sd, "Tracing not compiled in, `--trace-model' ignored\n");
+	sim_io_eprintf (sd, "Model tracing not compiled in, `--trace-model' ignored\n");
       else
 	{
 	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
@@ -316,7 +316,7 @@ standard_option_handler (sd, opt, arg)
 
     case OPTION_TRACE_ALU :
       if (! (WITH_TRACE & (1 << TRACE_ALU_IDX)))
-	sim_io_eprintf (sd, "Tracing not compiled in, `--trace-alu' ignored\n");
+	sim_io_eprintf (sd, "ALU tracing not compiled in, `--trace-alu' ignored\n");
       else
 	{
 	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
@@ -398,7 +398,7 @@ standard_option_handler (sd, opt, arg)
 
     case OPTION_PROFILE_INSN :
       if (! (WITH_PROFILE & (1 << PROFILE_INSN_IDX)))
-	sim_io_eprintf (sd, "Profiling not compiled in, `--profile-insn' ignored\n");
+	sim_io_eprintf (sd, "Instruction profiling not compiled in, `--profile-insn' ignored\n");
       else
 	{
 	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
@@ -408,7 +408,7 @@ standard_option_handler (sd, opt, arg)
 
     case OPTION_PROFILE_MEMORY :
       if (! (WITH_PROFILE & (1 << PROFILE_MEMORY_IDX)))
-	sim_io_eprintf (sd, "Profiling not compiled in, `--profile-memory' ignored\n");
+	sim_io_eprintf (sd, "Memory profiling not compiled in, `--profile-memory' ignored\n");
       else
 	{
 	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
@@ -418,7 +418,7 @@ standard_option_handler (sd, opt, arg)
 
     case OPTION_PROFILE_MODEL :
       if (! (WITH_PROFILE & (1 << PROFILE_MODEL_IDX)))
-	sim_io_eprintf (sd, "Profiling not compiled in, `--profile-model' ignored\n");
+	sim_io_eprintf (sd, "Model profiling not compiled in, `--profile-model' ignored\n");
       else
 	{
 	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
@@ -428,7 +428,7 @@ standard_option_handler (sd, opt, arg)
 
     case OPTION_PROFILE_SIMCACHE :
       if (! (WITH_PROFILE & (1 << PROFILE_SIMCACHE_IDX)))
-	sim_io_eprintf (sd, "Profiling not compiled in, `--profile-simcache' ignored\n");
+	sim_io_eprintf (sd, "Simulator cache profiling not compiled in, `--profile-simcache' ignored\n");
       else
 	{
 	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
@@ -543,7 +543,7 @@ sim_parse_args (sd, argv)
   /* The `val' option struct entry is dynamically assigned for options that
      only come in the long form.  ORIG_VAL is used to get the original value
      back.  */
-  char *orig_val;
+  unsigned char *orig_val;
   struct option *lp, *long_options;
   const struct option_list *ol;
   const OPTION *opt;
@@ -575,7 +575,7 @@ sim_parse_args (sd, argv)
 #endif
   handlers = (OPTION_HANDLER **) alloca (256 * sizeof (OPTION_HANDLER *));
   memset (handlers, 0, 256 * sizeof (OPTION_HANDLER *));
-  orig_val = (char *) alloca (256);
+  orig_val = (unsigned char *) alloca (256);
   for (i = OPTION_START, ol = STATE_OPTIONS (sd); ol != NULL; ol = ol->next)
     for (opt = ol->options; opt->opt.name != NULL; ++opt)
       {
