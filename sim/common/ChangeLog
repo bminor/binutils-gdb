@@ -1,3 +1,11 @@
+Thu Mar 13 12:32:42 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* run.c: #include "libiberty.h".
+	(main): New locals sd,no_args,sim_argv.
+	Run buildargv on -a option.  Pass argv to sim_open, argv[0]
+	is program name.  Update call to sim_set_callbacks.
+	Record result of sim_open, pass to other sim_foo routines.
+
 Thu Mar 13 10:24:05 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* callback.c (os_printf_filtered): Do not call exit(1) or print a
