@@ -396,8 +396,13 @@ changequote([,])dnl
       s390x-*-linux-gnu*)   fmt=elf em=linux ;;
       s390-*-linux-gnu*)    fmt=elf em=linux ;;
 
-      sh*eb-*-linux*)	    fmt=elf em=linux endian=big ;;
-      sh*-*-linux*)	    fmt=elf em=linux endian=little ;;
+      sh*-*-linux*)	    fmt=elf em=linux
+			    case ${cpu} in
+				sh*eb)
+					endian=big ;;
+				sh*)
+					endian=little ;;
+			    esac ;;
       sh-*-elf*)	    fmt=elf ;;
       sh-*-coff*)           fmt=coff bfd_gas=yes;;
       sh-*-pe*)             fmt=coff em=pe bfd_gas=yes endian=little ;;

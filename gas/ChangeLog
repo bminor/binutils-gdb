@@ -1,3 +1,9 @@
+2001-12-18  Niibe Yutaka  <gniibe@m17n.org>
+
+	* configure.in (assign object format): Bug fix for setting
+	endian.
+	* configure: Regenerate.
+
 2001-12-18  matthew green  <mrg@eterna.com.au>
 
 	* configure.in (m68k-*-netbsdelf*): New target.
@@ -1322,7 +1328,7 @@
 	* config/tc-alpha.h (tc_adjust_symtab): Always define.
 	(struct alpha_fix_tag): Name members less literal specific.
 
-Tue Sep  4 20:01:19 2001  Jeffrey A Law  (law@cygnus.com)
+2001-09-04  Jeffrey A Law  (law@cygnus.com)
 
 	* tc-h8300.c (tc_gen_reloc): Give an error if we try to take the
 	address of two symbols in different sections.
@@ -1333,8 +1339,8 @@ Tue Sep  4 20:01:19 2001  Jeffrey A Law  (law@cygnus.com)
 	* config/tc-mips.c (mips_cpu_info): Add support for mipsisa32,
 	5kc, and 20kc.  Clean up old entries.
 
-Fri Aug 31 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
-			  Jeff Law <law@redhat.com>
+2001-08-31  J"orn Rennecke <amylaar@redhat.com>
+	    Jeff Law <law@redhat.com>
 
 	* config/tc-h8300.c (build_bytes): For OBJ_ELF, make relocation's
 	offset match H8 ELF spec.
@@ -1348,14 +1354,14 @@ Fri Aug 31 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 	(md_convert_frag): Update definiton based on BFD_ASSEMBLER.
 	* tc-h8300.h (relocation mappings): Add.
 
-Thu Aug 30 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
+2001-08-30  J"orn Rennecke <amylaar@redhat.com>
 
 	* tc-h8300.c (tc_crawl_symbol_chain, tc_headers_hook): Don't
 	define for BFD_ASSEMBLER.
 	(tc_reloc_mangle): Likewise.
 	(tc_gen_reloc): New function for BFD_ASSEMBLER.
 
-Wed Aug 29 12:49:58 2001  Jeffrey A Law  (law@cygnus.com)
+2001-08-29  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-h8300.c (h8300hmode): Record the machine type
 	if BFD_ASSEMBLER is defined.
@@ -1367,7 +1373,7 @@ Wed Aug 29 12:49:58 2001  Jeffrey A Law  (law@cygnus.com)
 	default from coff to elf.
 	* configure: Regenerate.
 
-Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
+2001-08-29  J"orn Rennecke <amylaar@redhat.com>
 
 	* tc-h8300.c: If OBJ_ELF, include elf/h8.h, and define
 	assorted coff relocations to the corresponding elf relocations.
@@ -1376,7 +1382,7 @@ Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 	* configure.in: Add case for h8300-*-elf.
 	* configure: Regenerate.
 
-Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
+2001-08-29  J"orn Rennecke <amylaar@redhat.com>
 
 	* doc/internals.texi (MD_PCREL_FROM_SECTION): Change
 	documentation to reflect reality.
@@ -3159,7 +3165,7 @@ Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 	operators.  Instead return operator size via new param num_chars.
 	(expr): Use above to parse multi-char operators correctly.
 
-Mon Feb 12 17:45:50 CET 2001  Jan Hubicka  <jh@suse.cz>
+2001-02-12  Jan Hubicka  <jh@suse.cz>
 
 	* config/tc-i386.c (i386_displacement): Fix handling of
 	BFD_RELOC_X86_64_GOTPCREL.
@@ -3405,7 +3411,7 @@ Mon Feb 12 17:45:50 CET 2001  Jan Hubicka  <jh@suse.cz>
 	and don't bother storing `m' for "ce" completer.  Tidy handling of
 	'J' and 'K' operands to suit.  Handle '<' and '>' operands.
 
-Sun Jan 14 00:36:42 MET 2001  Jan Hubicka  <jh@suse.cz>
+2001-01-14  Jan Hubicka  <jh@suse.cz>
 
 	* config/tc-i386.h (TARGET_MACH): New macro.
 	(i386_mach): Declare.
@@ -3419,7 +3425,7 @@ Sun Jan 14 00:36:42 MET 2001  Jan Hubicka  <jh@suse.cz>
 	character for all systems, not just GNU/Linux.  Make it explicit
 	that `-k' doesn't affect code generation, just ELF flags.
 
-Sat Jan 13 01:47:35 MET 2001  Jan Hubicka <jh@suse.cz>
+2001-01-13  Jan Hubicka <jh@suse.cz>
 
 	* config/tc-i386.c (md_assemble): Check cpu_flags even for nullary
 	instructions.
@@ -3526,7 +3532,7 @@ Sat Jan 13 01:47:35 MET 2001  Jan Hubicka <jh@suse.cz>
 	reports.
 	* README: Likewise.
 
-Sat Jan  6 13:33:10 MET 2001  Jan Hubicka  <jh@suse.cz>
+2001-01-06  Jan Hubicka  <jh@suse.cz>
 
 	* configure.in: Define DEFAULT_ARCH for i386.
 	* config/tc-i386.c (md_assemble): Return after the error message;
@@ -3539,21 +3545,21 @@ Sat Jan  6 13:33:10 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* doc/c-i386.texi: Document x86_64 extensions.
 
-Fri Jan  5 13:26:42 MET 2001  Jan Hubicka  <jh@suse.cz>
+2001-01-05  Jan Hubicka  <jh@suse.cz>
 
 	* config/tc-i386.c (md_assemble): Handle third byte of the opcode as prefix.
 
-Thu Jan  4 22:25:26 MET 2001  Jan Hubicka  <jh@suse.cz>
+2001-01-04  Jan Hubicka  <jh@suse.cz>
 
 	* config/tc-i386.c (cpu_arch): Add Pentium4 and modify sledgehammer entry.
 	* NEWS: Add note about Pentium4 support.
 
-Wed Jan  3 17:26:32 MET 2001  Jan Hubicka  <jh@suse.cz>
+2001-01-04  Jan Hubicka  <jh@suse.cz>
 
 	* config/tc-i387.c (pi, pte, pt): Update.
 	(type_names): Add new types.
 
-Wed Jan  3 16:26:52 MET 2001  Jan Hubicka  <jh@suse.cz>
+2001-01-03  Jan Hubicka  <jh@suse.cz>
 
 	* config/tc-i386.h (CpuK6, CpuAthlon, CpuSledgehammer, CpuMMX, Cpu3dnow,
 	CpuUnknown): Renumber
@@ -3579,7 +3585,7 @@ Wed Jan  3 16:26:52 MET 2001  Jan Hubicka  <jh@suse.cz>
 	* doc/internals.texi (Relaxing with a table) <after relaxation>:
 	Point out caveats with generating fixups for the opcode in a frag.
 
-Sat Dec 30 19:02:48 MET 2000  Jan Hubicka  <jh@suse.cz>
+2000-12-30  Jan Hubicka  <jh@suse.cz>
 
 	* configure.in: Add support for x86_64 and x86_64-*-linux-gnu*
 	* NEWS: Add x86_64.
@@ -3666,7 +3672,7 @@ Sat Dec 30 19:02:48 MET 2000  Jan Hubicka  <jh@suse.cz>
 
 	* dwarf2dbg.c (dwarf2_finish): Remove #if BFD_ASSEMBLER.
 
-Wed Dec 20 14:21:22 MET 2000  Jan Hubicka  <jh@suse.cz>
+2000-12-20  Jan Hubicka  <jh@suse.cz>
 
 	* config/tc-i386.h (i386_target_format): Define even for ELFs.
 	(QWORD_MNEM_SUFFIX): New macro.
@@ -3794,7 +3800,7 @@ Wed Dec 20 14:21:22 MET 2000  Jan Hubicka  <jh@suse.cz>
 	* config/tc-mips.c: Fix formatting.
 	* doc/c-mips.texi: Fix formatting.
 
-Mon Dec 11 14:35:42 MET 2000  Jan hubicka  <jh@suse.cz>
+2000-12-11  Jan hubicka  <jh@suse.cz>
 
 	* config/tc-i386.c (md_assemble): Refuse 's' and 'l' suffixes in the intel
 	mode; convert 'd' suffix to 's' or 'l'; remove all DWORD_MNEM_SUFFIX
@@ -5082,7 +5088,7 @@ Mon Dec 11 14:35:42 MET 2000  Jan hubicka  <jh@suse.cz>
 
 	* NEWS: Mention support for CRIS.
 
-Thu Aug 24 20:41:05 2000  Denis Chertykov  <denisc@overta.ru>
+2000-08-24  Denis Chertykov  <denisc@overta.ru>
 
 	* config/tc-avr.h (TC_IMPLICIT_LCOMM_ALIGNMENT): New macros.
 	Sets `.lcomm' alignment to zero.
@@ -5260,7 +5266,7 @@ Thu Aug 24 20:41:05 2000  Denis Chertykov  <denisc@overta.ru>
 
 	* NEWS: Mention i860 support.
 
-Mon Aug 14 11:49:12 2000  Jeffrey A Law  (law@cygnus.com)
+2000-08-14  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.h (DWARF2_LINE_MIN_INSN_LENGTH): Define.
 
@@ -5287,7 +5293,7 @@ Mon Aug 14 11:49:12 2000  Jeffrey A Law  (law@cygnus.com)
 	* symbols.c: Fix formatting.
 	* expr.c: Likewise.
 
-Wed Aug  9 16:28:21 EDT 2000	Diego Novillo <dnovillo@cygnus.com>
+2000-08-09  Diego Novillo <dnovillo@cygnus.com>
 
 	* config/tc-i386.c (md_assemble): Skip suffix check if the opcode
 	modifier has the IgnoreSize bit set.
@@ -5447,7 +5453,7 @@ Wed Aug  9 16:28:21 EDT 2000	Diego Novillo <dnovillo@cygnus.com>
 	(md_show_usage): Show available options.
 	* config/tc-hppa.h (WARN_COMMENTS): Define if TE_LINUX
 
-Thu Jul 27 11:25:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+2000-07-27  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/tc-mn10300.c (md_convert_frag): Fix printfs.
 	(tc_gen_reloc): Add cast when assigning bfd_abs_symbol to
@@ -5724,11 +5730,11 @@ Thu Jul 27 11:25:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* doc/internals.texi (CPU Backend): Describe
 	TC_COFF_SECTION_DEFAULT_ATTRIBUTES.
 
-Thu Jul  6 17:20:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+2000-06-06  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* as.c (parse_args): NULL terminate the long option list.
 
-Tue Jul  4 14:08:28 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+2000-06-04  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/tc-d30v.h: Include "write.h" for fixS.
 	(d30v_start_line, md_pcrel_from_section): Add function prototypes.
@@ -5788,7 +5794,7 @@ Tue Jul  4 14:08:28 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	long section names are supported, set SEC_LINK_ONCE and
 	SEC_LINK_DUPLICATES_DISCARD for a new .gnu.linkonce section.
 
-Thu Jun 29 21:30:00 2000  Hans-Peter Nilsson  <hp@axis.com>
+2000-06-29  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config/obj-aout.c (obj_aout_type): Do not ignore for undefined
 	symbols; create them.
@@ -5985,7 +5991,7 @@ Thu Jun 29 21:30:00 2000  Hans-Peter Nilsson  <hp@axis.com>
 	* macro.c (getstring): Make it possible to escape the quote
 	character.
 
-Tue Jun 13 20:58:28 2000  Catherine Moore <clm@redhat.com>
+2000-06-13  Catherine Moore <clm@redhat.com>
 
 	* config/tc-hppa.c (pa_export): Weak symbols can be global.
 
@@ -6048,11 +6054,11 @@ Tue Jun 13 20:58:28 2000  Catherine Moore <clm@redhat.com>
 	* config/tc-ia64.c: Add missing prototypes.
 	(generate_unwind_image): Cast argument to output_unw_records call.
 
-Wed Jun  7 22:44:14 2000  Denis Chertykov  <denisc@overta.ru>
+2000-06-07  Denis Chertykov  <denisc@overta.ru>
 
 	* config/tc-avr.c (avr_operand): fix the formatting of the comment.
 
-Wed Jun  7 21:26:15 2000  Denis Chertykov  <denisc@overta.ru>
+2000-06-07  Denis Chertykov  <denisc@overta.ru>
 
 	* config/tc-avr.c (AVR_ISA_???): moved to include/opcode/avr.h
 	(REGISTER_P): likewise.
@@ -6132,7 +6138,7 @@ Wed Jun  7 21:26:15 2000  Denis Chertykov  <denisc@overta.ru>
 	(md_parse_options, md_show_usage): Likewise.
 	(md_apply_fix3): Optimize tail call into branch always if possible.
 
-Thu May  4 15:27:07 2000  Donald Lindsay  <dlindsay@cygnus.com>
+2000-05-04  Donald Lindsay  <dlindsay@cygnus.com>
 
 	* config/tc-d10v.c (write_2_short, parallel_ok, md_assemble,
 	d10v_cleanup) implement Mitsubishi's newly explained branch-packing
@@ -6239,7 +6245,7 @@ Thu May  4 15:27:07 2000  Donald Lindsay  <dlindsay@cygnus.com>
 	(dot_vframe): Implement.
 	(dot_vframesp, dot_vframepsp): New function.
 
-Tue May 23 00:57:05 2000  Hans-Peter Nilsson  <hp@axis.com>
+2000-05-23  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure.in (i386-*-freebsd a.out entry): Quote properly.
 	* configure: Regenerate.
@@ -6263,7 +6269,7 @@ Tue May 23 00:57:05 2000  Hans-Peter Nilsson  <hp@axis.com>
 	(ia64_gen_real_reloc_type): Handle FUNC_PC_RELATIVE.
 	(fix_insn): Handle all three 64-bit relocation types.
 
-Mon May 22 22:43:32 2000  Hans-Peter Nilsson  <hp@axis.com>
+2000-05-22  Hans-Peter Nilsson  <hp@axis.com>
 
 	* obj.h (struct format_ops): New members begin, app_file,
 	s_set_other, s_set_desc, s_get_type, s_set_type,
@@ -6326,7 +6332,7 @@ Mon May 22 22:43:32 2000  Hans-Peter Nilsson  <hp@axis.com>
 	(md_estimate_size_before_relax): Ensure jumps to weak and
 	externally visible symbols are relocatable.
 
-Sat May 20 16:41:55 2000  Hans-Peter Nilsson  <hp@axis.com>
+2000-05-20  Hans-Peter Nilsson  <hp@axis.com>
 
 	* stabs.c (aout_process_stab): Make global.
 	(s_desc): Add ATTRIBUTE_UNUSED to args as appropriate.
@@ -6351,7 +6357,7 @@ Sat May 20 16:41:55 2000  Hans-Peter Nilsson  <hp@axis.com>
 	* config/tc-hppa.c (md_apply_fix): Mask out immediate bits of
 	instruction to reflect change in re_assemble_*.
 
-Thu May 18 10:52:14 2000  Jeffrey A Law  (law@cygnus.com)
+2000-05-18  Jeffrey A Law  (law@cygnus.com)
 
 	* configure.in (hppa-*-hpux11*): If the cpu is hppa*64*, then
 	build PA64 ELF tools.
@@ -6569,11 +6575,11 @@ Thu May 18 10:52:14 2000  Jeffrey A Law  (law@cygnus.com)
 	(pa_type_args): Conditionally declare symbol if OBJ_SOM.
 	(pa_end_of_source): Return type is void.
 
-Mon May  1 08:54:23 2000  Catherine Moore  <clm@cygnus.com>
+2000-05-01  Catherine Moore  <clm@cygnus.com>
 
 	* macro.c (macro_expand_body): Don't prepend macro number with zeroes.
 
-Mon May  1 14:19:39 2000  Denis Chertykov  <denisc@overta.ru>
+2000-05-01  Denis Chertykov  <denisc@overta.ru>
 
 	* config/tc-avr.c: ATTRIBUTE_UNUSED added to the necessary places.
 	More comments added.
@@ -6604,7 +6610,7 @@ Mon May  1 14:19:39 2000  Denis Chertykov  <denisc@overta.ru>
 	TE_FreeBSD.
 	(line_comment_chars): Set to '/' if TE_FreeBSD.
 
-Tue Apr 25 11:02:02 2000  Jeffrey A Law  (law@cygnus.com)
+2000-04-25  Jeffrey A Law  (law@cygnus.com)
 
 	* configure.in: Configury support for PA64 (currently disabled).
 	* configure: Rebuilt.
@@ -6630,7 +6636,7 @@ Tue Apr 25 11:02:02 2000  Jeffrey A Law  (law@cygnus.com)
 
 	* config/obj-som.c: Terminate obj_pseudo_table.
 
-Mon Apr 24 15:21:11 2000  Clinton Popetz  <cpopetz@cygnus.com>
+2000-04-24  Clinton Popetz  <cpopetz@cygnus.com>
 
 	* as.c (parse_args): Allow md_parse_option to override -a listing
 	option.
@@ -6649,7 +6655,7 @@ Mon Apr 24 15:21:11 2000  Clinton Popetz  <cpopetz@cygnus.com>
 	(TARGET_FORMAT): Move to function.
 	(SUB_SEGMENT_ALIGN): Use ppc_subseg_align.
 
-Sun Apr 23 16:45:45 2000  Denis Chertykov  <denisc@overta.ru>
+2000-04-23  Denis Chertykov  <denisc@overta.ru>
 
 	* config/tc-avr.c: New AVR_ISA_ defined.
 	(md_assemble): Handle opcodes with optional operands (lpm,elpm).
@@ -6672,19 +6678,19 @@ Sun Apr 23 16:45:45 2000  Denis Chertykov  <denisc@overta.ru>
 	* configure.in: Add NetBSD/sparc ELF and NetBSD/sparc64 support.
 	* configure: Rebuilt.
 
-Fri Apr 21 14:29:43 2000  Jeffrey A Law  (law@cygnus.com)
-			  Jason Eckhardt  <jle@cygnus.com>
+2000-04-21  Jeffrey A Law  (law@cygnus.com)
+	    Jason Eckhardt  <jle@cygnus.com>
 
 	* config/tc-hppa.c (md_apply_fix): Handle new PA2.0 formats.
 
 	* config/tc-hppa.c (CHECK_ALIGN): New macro.
 	Added handling of new operand types l,y,&,fe,fE,fx.
 
-Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
-			  David Mosberger  <davidm@hpl.hp.com>
-			  Timothy Wall <twall@cygnus.com>
-			  Andrew MacLeod  <amacleod@cygnus.com>
-			  Jim Wilson  <wilson@cygnus.com>
+2000-04-21  Richard Henderson  <rth@cygnus.com>
+	    David Mosberger  <davidm@hpl.hp.com>
+	    Timothy Wall <twall@cygnus.com>
+	    Andrew MacLeod  <amacleod@cygnus.com>
+	    Jim Wilson  <wilson@cygnus.com>
 
 	* Makefile.am (CPU_TYPES): Add ia64.
 	(TARGET_CPU_CFILES): Add config/tc-ia64.c.
@@ -6786,7 +6792,7 @@ Fri Apr 21 13:20:53 2000  Richard Henderson  <rth@cygnus.com>
 
 	* doc/as.texinfo: Add M32R documentation.
 
-Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+2000-04-07  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (WARN_CFLAGS): Set to -W -Wall by default.  Add
 	--enable-build-warnings option.
@@ -6802,12 +6808,12 @@ Fri Apr  7 15:56:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	(arm_force_relocation): Force relocations for
 	BFD_RELOC_{ARM|THUMB}_PCREL_BLX as well.
 
-Wed Apr  5 22:26:32 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+2000-04-05  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* config/tc-sh.c (get_operands): There's no third operand if the
 	first operand is an immediate.
 
-Wed Apr  5 22:07:19 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+2000-04-05  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* config/tc-sh.c (immediate): Delete.
 	(sh_operand_info): Add immediate member.
@@ -6825,11 +6831,11 @@ Wed Apr  5 22:07:19 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	(md_apply_fix): Likewise.
 	(tc_gen_reloc): Likewise.  Check for a pcrel BFD_RELOC_SH_LABEL.
 
-Wed Apr  5 06:35:45 2000  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
+2000-04-05  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
 
 	* config/tc-sparc.c (sparc_ip): Avoid string pasting.
 
-Tue Apr  4 19:27:50 2000  Hans-Peter Nilsson  <hp@axis.com>
+2000-04-04  Hans-Peter Nilsson  <hp@axis.com>
 
 	* internals.texi (CPU backend): Document
 	TC_CHECK_ADJUSTED_BROKEN_DOT_WORD.
@@ -6869,7 +6875,7 @@ Tue Apr  4 19:27:50 2000  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config/tc-sparc.c (md_show_usage): Add a trailing newline.
 
-Mon Apr  3 13:56:03 2000  Hans-Peter Nilsson  <hp@axis.com>
+2000-04-03  Hans-Peter Nilsson  <hp@axis.com>
 
 	* write.c (write_object_file) [! WORKING_DOT_WORD]: If defined,
 	call TC_CHECK_ADJUSTED_BROKEN_DOT_WORD for each word after
@@ -6989,20 +6995,20 @@ Mon Apr  3 13:56:03 2000  Hans-Peter Nilsson  <hp@axis.com>
 	that have a destingation >= 0x400000.
 	Fix compile time warning messages.
 
-Thu Mar 16 23:45:16 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+2000-03-16  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* config/tc-sh.c (md_begin): When encountering insn that are
 	not supported by the current arch, only change the name if
 	its contents are the same as prev_name.
 	(get_specific): If the the architecture doesn't match, fail.
 
-Thu Mar 16 21:18:13 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+2000-03-16  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* config/tc-sh.c (IDENT_CHAR): Define.
 	(parse_reg): Use it instead of isalnum.  Put r[0..7]_bank operand
 	matching back where it came from.
 
-Thu Mar 16 20:58:10 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+2000-03-16  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* config/tc-sh.c (md_show_usage): Add description of -dsp.
 
@@ -7015,12 +7021,12 @@ Thu Mar 16 20:58:10 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* config/tc-h8300.c: Add ATTRIBUTE_UNUSED as appropriate.
 
-Mon Mar 13 22:02:59 2000  Hans-Peter Nilsson  <hp@axis.se>
+2000-03-13  Hans-Peter Nilsson  <hp@axis.se>
 
 	* expr.c (operand) [case 'f']: When testing if '0f' can start a
 	floating-point-number, make sure 'f' is in FLT_CHARS.
 
-Sat Mar 11 00:01:39 2000  Hans-Peter Nilsson  <hp@axis.se>
+2000-03-11  Hans-Peter Nilsson  <hp@axis.se>
 
 	* read.c (TC_IMPLICIT_LCOMM_ALIGNMENT): New default-definition.
 	(s_lcomm_internal): Use it.
@@ -7315,7 +7321,7 @@ Sat Mar 11 00:01:39 2000  Hans-Peter Nilsson  <hp@axis.se>
 	* config/tc-d10v.c (find_opcode): Add a symbol's value to
 	the computed frag offset, rather than overwriting it.
 
-Thu Feb 17 00:11:08 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
+2000-02-17  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* config/tc-sh.c ("elf/sh.h"): Include.
 	(sh_dsp, valid_arch, reg_x, reg_y, reg_efg): New static variables.
@@ -7334,7 +7340,7 @@ Thu Feb 17 00:11:08 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 	* config/tc-sh.h (elf_tc_final_processing): Define.
 	(sh_elf_final_processing): Declare.
 
-Fri Feb 11 14:21:51 2000  Jeffrey A Law  (law@cygnus.com)
+2000-02-11  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (pa_build_unwind_subspace): Use subseg_new to create
 	the unwinder subspace.  Save the current seg/subseg before creating
