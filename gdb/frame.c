@@ -48,6 +48,77 @@ static int frame_debug;
 
 static int backtrace_below_main;
 
+static void
+fprint_frame_id (struct ui_file *file, struct frame_id id)
+{
+  fprintf_unfiltered (file, "{stack=0x%s,code=0x%s}",
+		      paddr_nz (id.stack_addr),
+		      paddr_nz (id.code_addr));
+}
+
+static void
+fprint_frame_type (struct ui_file *file, enum frame_type type)
+{
+  switch (type)
+    {
+    case UNKNOWN_FRAME:
+      fprintf_unfiltered (file, "UNKNOWN_FRAME");
+      return;
+    case NORMAL_FRAME:
+      fprintf_unfiltered (file, "NORMAL_FRAME");
+      return;
+    case DUMMY_FRAME:
+      fprintf_unfiltered (file, "DUMMY_FRAME");
+      return;
+    case SIGTRAMP_FRAME:
+      fprintf_unfiltered (file, "SIGTRAMP_FRAME");
+      return;
+    default:
+      fprintf_unfiltered (file, "<unknown type>");
+      return;
+    };
+}
+
+static void
+fprint_frame (struct ui_file *file, struct frame_info *fi)
+{
+  if (fi == NULL)
+    {
+      fprintf_unfiltered (file, "<NULL frame>");
+      return;
+    }
+  fprintf_unfiltered (file, "{");
+  fprintf_unfiltered (file, "level=%d", fi->level);
+  fprintf_unfiltered (file, ",");
+  fprintf_unfiltered (file, "type=");
+  fprint_frame_type (file, fi->type);
+  fprintf_unfiltered (file, ",");
+  fprintf_unfiltered (file, "unwind=");
+  if (fi->unwind != NULL)
+    gdb_print_host_address (fi->unwind, file);
+  else
+    fprintf_unfiltered (file, "<unknown>");
+  fprintf_unfiltered (file, ",");
+  fprintf_unfiltered (file, "pc=");
+  if (fi->next != NULL && fi->next->prev_pc.p)
+    fprintf_unfiltered (file, "0x%s", paddr_nz (fi->next->prev_pc.value));
+  else
+    fprintf_unfiltered (file, "<unknown>");
+  fprintf_unfiltered (file, ",");
+  fprintf_unfiltered (file, "id=");
+  if (fi->this_id.p)
+    fprint_frame_id (file, fi->this_id.value);
+  else
+    fprintf_unfiltered (file, "<unknown>");
+  fprintf_unfiltered (file, ",");
+  fprintf_unfiltered (file, "func=");
+  if (fi->next != NULL && fi->next->prev_func.p)
+    fprintf_unfiltered (file, "0x%s", paddr_nz (fi->next->prev_func.addr));
+  else
+    fprintf_unfiltered (file, "<unknown>");
+  fprintf_unfiltered (file, "}");
+}
+
 /* Return a frame uniq ID that can be used to, later, re-find the
    frame.  */
 
@@ -61,9 +132,18 @@ get_frame_id (struct frame_info *fi)
   if (!fi->this_id.p)
     {
       gdb_assert (!legacy_frame_p (current_gdbarch));
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog, "{ get_frame_id (fi=%d) ",
+			    fi->level);
       /* Find THIS frame's ID.  */
       fi->unwind->this_id (fi->next, &fi->prologue_cache, &fi->this_id.value);
       fi->this_id.p = 1;
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame_id (gdb_stdlog, fi->this_id.value);
+	  fprintf_unfiltered (gdb_stdlog, " }\n");
+	}
     }
   return frame_id_build (fi->this_id.value.stack_addr, get_frame_pc (fi));
 }
@@ -85,6 +165,12 @@ frame_id_p (struct frame_id l)
   int p;
   /* The .code can be NULL but the .stack cannot.  */
   p = (l.stack_addr != 0);
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "{ frame_id_p (l=");
+      fprint_frame_id (gdb_stdlog, l);
+      fprintf_unfiltered (gdb_stdlog, ") -> %d }\n", p);
+    }
   return p;
 }
 
@@ -109,6 +195,14 @@ frame_id_eq (struct frame_id l, struct frame_id r)
        this because most frame ID's are not being initialized
        correctly.  */
     eq = 1;
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "{ frame_id_eq (l=");
+      fprint_frame_id (gdb_stdlog, l);
+      fprintf_unfiltered (gdb_stdlog, ",r=");
+      fprint_frame_id (gdb_stdlog, r);
+      fprintf_unfiltered (gdb_stdlog, ") -> %d }\n", eq);
+    }
   return eq;
 }
 
@@ -125,6 +219,14 @@ frame_id_inner (struct frame_id l, struct frame_id r)
        functions are not strictly inner than (same .stack but
        different .code).  */
     inner = INNER_THAN (l.stack_addr, r.stack_addr);
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "{ frame_id_inner (l=");
+      fprint_frame_id (gdb_stdlog, l);
+      fprintf_unfiltered (gdb_stdlog, ",r=");
+      fprint_frame_id (gdb_stdlog, r);
+      fprintf_unfiltered (gdb_stdlog, ") -> %d }\n", inner);
+    }
   return inner;
 }
 
@@ -204,6 +306,11 @@ frame_pc_unwind (struct frame_info *this_frame)
 	internal_error (__FILE__, __LINE__, "No gdbarch_unwind_pc method");
       this_frame->prev_pc.value = pc;
       this_frame->prev_pc.p = 1;
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "{ frame_pc_unwind (this_frame=%d) -> 0x%s }\n",
+			    this_frame->level,
+			    paddr_nz (this_frame->prev_pc.value));
     }
   return this_frame->prev_pc.value;
 }
@@ -215,6 +322,10 @@ frame_func_unwind (struct frame_info *fi)
     {
       fi->prev_func.p = 1;
       fi->prev_func.addr = get_pc_function_start (frame_pc_unwind (fi));
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "{ frame_func_unwind (fi=%d) -> 0x%s }\n",
+			    fi->level, paddr_nz (fi->prev_func.addr));
     }
   return fi->prev_func.addr;
 }
@@ -280,6 +391,13 @@ frame_register_unwind (struct frame_info *frame, int regnum,
 {
   struct frame_unwind_cache *cache;
 
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "{ frame_register_unwind (frame=%d,regnum=\"%s\",...) ",
+			  frame->level, frame_map_regnum_to_name (regnum));
+    }
+
   /* Require all but BUFFERP to be valid.  A NULL BUFFERP indicates
      that the value proper does not need to be fetched.  */
   gdb_assert (optimizedp != NULL);
@@ -300,6 +418,26 @@ frame_register_unwind (struct frame_info *frame, int regnum,
   frame->unwind->prev_register (frame->next, &frame->prologue_cache, regnum,
 				optimizedp, lvalp, addrp, realnump, bufferp);
 
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "->");
+      fprintf_unfiltered (gdb_stdlog, " *optimizedp=%d", (*optimizedp));
+      fprintf_unfiltered (gdb_stdlog, " *lvalp=%d", (int) (*lvalp));
+      fprintf_unfiltered (gdb_stdlog, " *addrp=0x%s", paddr_nz ((*addrp)));
+      fprintf_unfiltered (gdb_stdlog, " *bufferp=");
+      if (bufferp == NULL)
+	fprintf_unfiltered (gdb_stdlog, "<NULL>");
+      else
+	{
+	  int i;
+	  const char *buf = bufferp;
+	  fprintf_unfiltered (gdb_stdlog, "[");
+	  for (i = 0; i < register_size (current_gdbarch, regnum); i++)
+	    fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
+	  fprintf_unfiltered (gdb_stdlog, "]");
+	}
+      fprintf_unfiltered (gdb_stdlog, " }\n");
+    }
 }
 
 void
@@ -543,6 +681,12 @@ create_sentinel_frame (struct regcache *regcache)
      comparisons with it should fail.  */
   frame->this_id.p = 1;
   frame->this_id.value = null_frame_id;
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "{ create_sentinel_frame (...) -> ");
+      fprint_frame (gdb_stdlog, frame);
+      fprintf_unfiltered (gdb_stdlog, " }\n");
+    }
   return frame;
 }
 
@@ -984,6 +1128,13 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 {
   struct frame_info *fi;
 
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "{ create_new_frame (addr=0x%s, pc=0x%s) ",
+			  paddr_nz (addr), paddr_nz (pc));
+    }
+
   fi = frame_obstack_zalloc (sizeof (struct frame_info));
 
   fi->next = create_sentinel_frame (current_regcache);
@@ -1001,6 +1152,13 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   if (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ())
     DEPRECATED_INIT_EXTRA_FRAME_INFO (0, fi);
+
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "-> ");
+      fprint_frame (gdb_stdlog, fi);
+      fprintf_unfiltered (gdb_stdlog, " }\n");
+    }
 
   return fi;
 }
@@ -1030,6 +1188,8 @@ flush_cached_frames (void)
   current_frame = NULL;		/* Invalidate cache */
   select_frame (NULL);
   annotate_frames_invalid ();
+  if (frame_debug)
+    fprintf_unfiltered (gdb_stdlog, "{ flush_cached_frames () }\n");
 }
 
 /* Flush the frame cache, and start a new one if necessary.  */
@@ -1055,6 +1215,9 @@ legacy_get_prev_frame (struct frame_info *this_frame)
   CORE_ADDR address = 0;
   struct frame_info *prev;
   int fromleaf;
+
+  /* Don't frame_debug print legacy_get_prev_frame() here, just
+     confuses the output.  */
 
   /* Allocate the new frame.
 
@@ -1119,8 +1282,12 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	  /* The allocated PREV_FRAME will be reclaimed when the frame
 	     obstack is next purged.  */
 	  if (frame_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"Outermost frame - unwound PC zero\n");
+	    {
+	      fprintf_unfiltered (gdb_stdlog, "-> ");
+	      fprint_frame (gdb_stdlog, NULL);
+	      fprintf_unfiltered (gdb_stdlog,
+				  " // unwound legacy PC zero }\n");
+	    }
 	  return NULL;
 	}
 
@@ -1170,8 +1337,12 @@ legacy_get_prev_frame (struct frame_info *this_frame)
       if (!frame_id_p (prev->this_id.value))
 	{
 	  if (frame_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"Outermost legacy sentinel frame - unwound frame ID invalid\n");
+	    {
+	      fprintf_unfiltered (gdb_stdlog, "-> ");
+	      fprint_frame (gdb_stdlog, NULL);
+	      fprintf_unfiltered (gdb_stdlog,
+				  " // unwound legacy ID invalid }\n");
+	    }
 	  return NULL;
 	}
 
@@ -1198,6 +1369,12 @@ legacy_get_prev_frame (struct frame_info *this_frame)
       if (DEPRECATED_INIT_EXTRA_FRAME_INFO_P ())
 	{
 	  DEPRECATED_INIT_EXTRA_FRAME_INFO (0, prev);
+	}
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, prev);
+	  fprintf_unfiltered (gdb_stdlog, " } // legacy innermost frame\n");
 	}
       return prev;
     }
@@ -1253,10 +1430,28 @@ legacy_get_prev_frame (struct frame_info *this_frame)
       address = DEPRECATED_FRAME_CHAIN (this_frame);
 
       if (!legacy_frame_chain_valid (address, this_frame))
-	return 0;
+	{
+	  if (frame_debug)
+	    {
+	      fprintf_unfiltered (gdb_stdlog, "-> ");
+	      fprint_frame (gdb_stdlog, NULL);
+	      fprintf_unfiltered (gdb_stdlog,
+				  " // legacy frame chain invalid }\n");
+	    }
+	  return NULL;
+	}
     }
   if (address == 0)
-    return 0;
+    {
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog,
+			      " // legacy frame chain NULL }\n");
+	}
+      return NULL;
+    }
 
   /* Link in the already allocated prev frame.  */
   this_frame->prev = prev;
@@ -1361,6 +1556,13 @@ legacy_get_prev_frame (struct frame_info *this_frame)
     {
       this_frame->prev = NULL;
       obstack_free (&frame_cache_obstack, prev);
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog,
+			      " // legacy this.id == prev.id }\n");
+	}
       return NULL;
     }
 
@@ -1376,6 +1578,12 @@ legacy_get_prev_frame (struct frame_info *this_frame)
   if (prev->unwind->type != UNKNOWN_FRAME)
     {
       prev->type = prev->unwind->type;
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, prev);
+	  fprintf_unfiltered (gdb_stdlog, " } // legacy with unwound type\n");
+	}
       return prev;
     }
 
@@ -1412,6 +1620,13 @@ legacy_get_prev_frame (struct frame_info *this_frame)
          go away.  */
     }
 
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "-> ");
+      fprint_frame (gdb_stdlog, prev);
+      fprintf_unfiltered (gdb_stdlog, " } // legacy with confused type\n");
+    }
+
   return prev;
 }
 
@@ -1423,6 +1638,16 @@ struct frame_info *
 get_prev_frame (struct frame_info *this_frame)
 {
   struct frame_info *prev_frame;
+
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "{ get_prev_frame (this_frame=");
+      if (this_frame != NULL)
+	fprintf_unfiltered (gdb_stdlog, "%d", this_frame->level);
+      else
+	fprintf_unfiltered (gdb_stdlog, "<NULL>");
+      fprintf_unfiltered (gdb_stdlog, ") ");
+    }
 
   /* Return the inner-most frame, when the caller passes in NULL.  */
   /* NOTE: cagney/2002-11-09: Not sure how this would happen.  The
@@ -1473,14 +1698,21 @@ get_prev_frame (struct frame_info *this_frame)
        allow unwinds past main(), that just happens.  */
     {
       if (frame_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Outermost frame - inside main func.\n");
+	fprintf_unfiltered (gdb_stdlog, "-> NULL // inside main func }\n");
       return NULL;
     }
 
   /* Only try to do the unwind once.  */
   if (this_frame->prev_p)
-    return this_frame->prev;
+    {
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, this_frame->prev);
+	  fprintf_unfiltered (gdb_stdlog, " // cached \n");
+	}
+      return this_frame->prev;
+    }
   this_frame->prev_p = 1;
 
 #if 0
@@ -1508,8 +1740,11 @@ get_prev_frame (struct frame_info *this_frame)
       && inside_entry_file (get_frame_pc (this_frame)))
     {
       if (frame_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Outermost frame - inside entry file\n");
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog, " // inside entry file }\n");
+	}
       return NULL;
     }
 #endif
@@ -1526,8 +1761,11 @@ get_prev_frame (struct frame_info *this_frame)
       && inside_entry_func (get_frame_pc (this_frame)))
     {
       if (frame_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Outermost frame - inside entry func\n");
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog, "// inside entry func }\n");
+	}
       return NULL;
     }
 
@@ -1536,9 +1774,6 @@ get_prev_frame (struct frame_info *this_frame)
   if (legacy_frame_p (current_gdbarch))
     {
       prev_frame = legacy_get_prev_frame (this_frame);
-      if (frame_debug && prev_frame == NULL)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Outermost frame - legacy_get_prev_frame NULL.\n");
       return prev_frame;
     }
 
@@ -1548,8 +1783,11 @@ get_prev_frame (struct frame_info *this_frame)
   if (this_frame->level >= 0 && !frame_id_p (get_frame_id (this_frame)))
     {
       if (frame_debug)
- 	fprintf_filtered (gdb_stdlog,
- 			  "Outermost frame - this ID is NULL\n");
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog, " // this ID is NULL }\n");
+	}
       return NULL;
     }
 
@@ -1610,8 +1848,11 @@ get_prev_frame (struct frame_info *this_frame)
       /* The allocated PREV_FRAME will be reclaimed when the frame
 	 obstack is next purged.  */
       if (frame_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Outermost frame - unwound PC zero\n");
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog, " // unwound PC zero }\n");
+	}
       return NULL;
     }
 
@@ -1647,6 +1888,13 @@ get_prev_frame (struct frame_info *this_frame)
   /* Link it in.  */
   this_frame->prev = prev_frame;
   prev_frame->next = this_frame;
+
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "-> ");
+      fprint_frame (gdb_stdlog, prev_frame);
+      fprintf_unfiltered (gdb_stdlog, " }\n");
+    }
 
   return prev_frame;
 }
@@ -1790,6 +2038,10 @@ frame_extra_info_zalloc (struct frame_info *fi, long size)
 void
 deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
 {
+  if (frame_debug)
+    fprintf_unfiltered (gdb_stdlog,
+			"{ deprecated_update_frame_pc_hack (frame=%d,pc=0x%s) }\n",
+			frame->level, paddr_nz (pc));
   /* NOTE: cagney/2003-03-11: Some architectures (e.g., Arm) are
      maintaining a locally allocated frame object.  Since such frame's
      are not in the frame chain, it isn't possible to assume that the
@@ -1807,6 +2059,10 @@ deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
 void
 deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
 {
+  if (frame_debug)
+    fprintf_unfiltered (gdb_stdlog,
+			"{ deprecated_update_frame_base_hack (frame=%d,base=0x%s) }\n",
+			frame->level, paddr_nz (base));
   /* See comment in "frame.h".  */
   frame->this_id.value.stack_addr = base;
 }

@@ -1,3 +1,16 @@
+2003-04-10  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (fprint_frame_id): New function.
+	(fprint_frame_type, fprint_frame): New function.
+	(frame_pc_unwind, frame_func_unwind): Add/update trace code.
+	(create_sentinel_frame, get_frame_id): Ditto.
+	(frame_id_p, frame_id_eq): Ditto.
+	(frame_id_inner, create_new_frame): Ditto.
+	(legacy_get_prev_frame, get_prev_frame): Ditto.
+	(deprecated_update_frame_pc_hack): Ditto.
+	(frame_register_unwind): Ditto.
+	(deprecated_update_frame_base_hack): Ditto.
+
 2003-04-10  Corinna Vinschen  <vinschen@redhat.com>
 
 	* i386-cygwin-tdep.c (i386_cygwin_frame_chain): New function.
