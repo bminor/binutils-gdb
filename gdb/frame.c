@@ -226,6 +226,19 @@ get_frame_id (struct frame_info *fi)
       if (frame_debug)
 	fprintf_unfiltered (gdb_stdlog, "{ get_frame_id (fi=%d) ",
 			    fi->level);
+      /* Find the unwinder.  */
+      if (fi->unwind == NULL)
+	{
+	  fi->unwind = frame_unwind_find_by_pc (current_gdbarch,
+						get_frame_pc (fi));
+	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
+	     type in the frame, the unwinder's type should be returned
+	     directly.  Unfortunatly, legacy code, called by
+	     legacy_get_prev_frame, explicitly set the frames type
+	     using the method deprecated_set_frame_type().  */
+	  gdb_assert (fi->unwind->type != UNKNOWN_FRAME);
+	  fi->type = fi->unwind->type;
+	}
       /* Find THIS frame's ID.  */
       fi->unwind->this_id (fi->next, &fi->prologue_cache, &fi->this_id.value);
       fi->this_id.p = 1;
@@ -502,6 +515,20 @@ frame_register_unwind (struct frame_info *frame, int regnum,
      isn't, there is some pretty busted code as it should have
      detected the problem before calling here.  */
   gdb_assert (frame != NULL);
+
+  /* Find the unwinder.  */
+  if (frame->unwind == NULL)
+    {
+      frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
+					       get_frame_pc (frame));
+      /* FIXME: cagney/2003-04-02: Rather than storing the frame's
+	 type in the frame, the unwinder's type should be returned
+	 directly.  Unfortunatly, legacy code, called by
+	 legacy_get_prev_frame, explicitly set the frames type using
+	 the method deprecated_set_frame_type().  */
+      gdb_assert (frame->unwind->type != UNKNOWN_FRAME);
+      frame->type = frame->unwind->type;
+    }
 
   /* Ask this frame to unwind its register.  See comment in
      "frame-unwind.h" for why NEXT frame and this unwind cace are
@@ -1899,22 +1926,12 @@ get_prev_frame (struct frame_info *this_frame)
       return NULL;
     }
 
-  /* Set the unwind functions based on that identified PC.  */
-  prev_frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
-						frame_pc_unwind (this_frame));
+  /* Don't yet compute ->unwind (and hence ->type).  It is computed
+     on-demand in get_frame_type, frame_register_unwind, and
+     get_frame_id.  */
 
-  /* FIXME: cagney/2003-04-02: Rather than storing the frame's type in
-     the frame, the unwinder's type should be returned directly.
-     Unfortunatly, legacy code, called by legacy_get_prev_frame,
-     explicitly set the frames type using the method
-     deprecated_set_frame_type().  */
-  gdb_assert (prev_frame->unwind->type != UNKNOWN_FRAME);
-  prev_frame->type = prev_frame->unwind->type;
-
-  /* Can the frame's type and unwinder be computed on demand?  That
-     would make a frame's creation really really lite!  */
-
-  /* The prev's frame's ID is computed by demand in get_frame_id().  */
+  /* Don't yet compute the frame's ID.  It is computed on-demand by
+     get_frame_id().  */
 
   /* The unwound frame ID is validate at the start of this function,
      as part of the logic to decide if that frame should be further
@@ -2052,6 +2069,20 @@ get_frame_type (struct frame_info *frame)
   if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES
       && deprecated_frame_in_dummy (frame))
     return DUMMY_FRAME;
+  if (frame->unwind == NULL)
+    {
+      /* Initialize the frame's unwinder because it is that which
+         provides the frame's type.  */
+      frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
+					       get_frame_pc (frame));
+      /* FIXME: cagney/2003-04-02: Rather than storing the frame's
+	 type in the frame, the unwinder's type should be returned
+	 directly.  Unfortunatly, legacy code, called by
+	 legacy_get_prev_frame, explicitly set the frames type using
+	 the method deprecated_set_frame_type().  */
+      gdb_assert (frame->unwind->type != UNKNOWN_FRAME);
+      frame->type = frame->unwind->type;
+    }
   if (frame->type == UNKNOWN_FRAME)
     return NORMAL_FRAME;
   else

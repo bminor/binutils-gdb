@@ -1,5 +1,12 @@
 2003-04-16  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (get_prev_frame): Do not initialize "unwind" or "type",
+	update comments.
+	(get_frame_type): Initialize unwind and type when needed.
+	(get_frame_id, frame_register_unwind): Ditto.
+
+2003-04-16  Andrew Cagney  <cagney@redhat.com>
+
 	* NEWS: Mention that sparclet-*-* and sparclite-*-* have been made
 	obsolete.
 	* sparc-tdep.c: Obsolete SPARCLET and SPARCLITE code.
