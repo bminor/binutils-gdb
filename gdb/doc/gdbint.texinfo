@@ -1734,7 +1734,7 @@ mach386-xdep.c
 @item FP_REGNUM
 parse.c
 @item FPU
-Unused?  6-oct-92 rich@cygnus.com.  FIXME.
+Unused?  6-oct-92 rich@@cygnus.com.  FIXME.
 @item FRAMELESS_FUNCTION_INVOCATION
 blockframe.c
 @item FRAME_ARGS_ADDRESS_CORRECT
@@ -2141,7 +2141,7 @@ coffread.c
 @chapter Native Conditionals
 
 
-
+@table @code
 @item ATTACH_DETACH
 If defined, then gdb will include support for the @code{attach} and
 @code{detach} commands.
