@@ -45,6 +45,8 @@ sshift.s
 sshift.d
 st.s
 st.d
+warn.exp
+warn.s
 
 Things-to-lose:
 
