@@ -1,3 +1,10 @@
+Sun Nov 15 20:28:25 1998  Richard Henderson  <rth@cygnus.com>
+
+	* elf64-alpha.c (elf64_alpha_relax_section): Search for the proper
+	element of the gotentry list for local symbols too.
+	(elf64_alpha_relocate_section): Unify local and global handling.
+	Assert that gotent->use_count > 0.
+
 Sat Nov 14 15:16:01 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in (vms_alpha_vec): Rename from evax_alpha_vec, and
