@@ -1491,7 +1491,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	    dbl_valu = (char *)
 	      obstack_alloc (&objfile->symbol_obstack,
 			     TYPE_LENGTH (SYMBOL_TYPE (sym)));
-	    store_floating (dbl_valu, TYPE_LENGTH (SYMBOL_TYPE (sym)), d);
+	    store_typed_floating (dbl_valu, SYMBOL_TYPE (sym), d);
 	    SYMBOL_VALUE_BYTES (sym) = dbl_valu;
 	    SYMBOL_CLASS (sym) = LOC_CONST_BYTES;
 	  }

@@ -763,8 +763,7 @@ value_binop (value_ptr arg1, value_ptr arg2, enum exp_opcode op)
       else
 	val = allocate_value (builtin_type_double);
 
-      store_floating (VALUE_CONTENTS_RAW (val), TYPE_LENGTH (VALUE_TYPE (val)),
-		      v);
+      store_typed_floating (VALUE_CONTENTS_RAW (val), VALUE_TYPE (val), v);
     }
   else if (TYPE_CODE (type1) == TYPE_CODE_BOOL
 	   &&

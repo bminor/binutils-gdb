@@ -31,6 +31,7 @@
 #include "floatformat.h"
 #include "gdb_assert.h"
 #include "gdb_string.h"
+#include "gdbtypes.h"
 #include <math.h>		/* ldexp */
 
 /* The odds that CHAR_BIT will be anything but 8 are low enough that I'm not
@@ -606,8 +607,12 @@ floatformat_from_doublest (const struct floatformat *fmt,
 }
 
 
-/* Extract/store a floating-point number from a target-order
-   byte-stream at ADDR.  Returns the value as type DOUBLEST.  */
+/* Extract/store a target floating-point number from byte-stream at
+   ADDR to/from a DOUBLEST.  The LEN is used to select between the
+   pre-defined target type FLOAT, DOUBLE or LONG_DOUBLE.  These
+   functions are used when extract/store typed floating() find that
+   the ``struct type'' did not include a FLOATFORMAT (e.g. some symbol
+   table readers and XXX-language support modules).  */
 
 DOUBLEST
 extract_floating (const void *addr, int len)
@@ -651,4 +656,35 @@ store_floating (void *addr, int len, DOUBLEST val)
     {
       error ("Can't deal with a floating point number of %d bytes.", len);
     }
+}
+
+/* Extract/store a floating-point number of format TYPE from a
+   target-ordered byte-stream at ADDR to/from an internal DOUBLEST
+   accroding to its TYPE_FORMAT().  When GDB reads in debug
+   information, it is sometimes only provided with the type name, its
+   length and the fact that it is a float (TYPE_FORMAT() is not set).
+   For such types, the old extract/store floating() functions are
+   used. */
+
+DOUBLEST
+extract_typed_floating (const void *addr, const struct type *type)
+{
+  DOUBLEST retval;
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
+  if (TYPE_FLOATFORMAT (type) == NULL)
+    retval = extract_floating (addr, TYPE_LENGTH (type));
+  else
+    floatformat_to_doublest (TYPE_FLOATFORMAT (type), addr, &retval);
+  return retval;
+}
+
+void
+store_typed_floating (void *addr, const struct type *type, DOUBLEST val)
+{
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
+  memset (addr, 0, TYPE_LENGTH (type));
+  if (TYPE_FLOATFORMAT (type) == NULL)
+    store_floating (addr, TYPE_LENGTH (type), val);
+  else
+    floatformat_from_doublest (TYPE_FLOATFORMAT (type), &val, addr);
 }

@@ -61,7 +61,13 @@ extern int floatformat_is_negative (const struct floatformat *, char *);
 extern int floatformat_is_nan (const struct floatformat *, char *);
 extern char *floatformat_mantissa (const struct floatformat *, char *);
 
-extern DOUBLEST extract_floating (const void *in, int);
-extern void store_floating (void *, int, DOUBLEST);
+/* Use extract_typed_float() and store_typed_float(). */
+extern DOUBLEST extract_floating (const void *in, int); /* DEPRECATED */
+extern void store_floating (void *, int, DOUBLEST); /* DEPRECATED */
+
+extern DOUBLEST extract_typed_floating (const void *addr,
+					const struct type *type);
+extern void store_typed_floating (void *addr, const struct type *type,
+				  DOUBLEST val);
 
 #endif

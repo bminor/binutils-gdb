@@ -645,7 +645,7 @@ unpack_long (struct type *type, char *valaddr)
 	return extract_signed_integer (valaddr, len);
 
     case TYPE_CODE_FLT:
-      return extract_floating (valaddr, len);
+      return extract_typed_floating (valaddr, type);
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
@@ -689,7 +689,7 @@ unpack_double (struct type *type, char *valaddr, int *invp)
 	  return 1.234567891011121314;
 	}
 #endif
-      return extract_floating (valaddr, len);
+      return extract_typed_floating (valaddr, type);
     }
   else if (nosign)
     {
@@ -1297,7 +1297,7 @@ value_from_double (struct type *type, DOUBLEST num)
 
   if (code == TYPE_CODE_FLT)
     {
-      store_floating (VALUE_CONTENTS_RAW (val), len, num);
+      store_typed_floating (VALUE_CONTENTS_RAW (val), base_type, num);
     }
   else
     error ("Unexpected type encountered for floating constant.");

@@ -1,3 +1,16 @@
+2001-09-24  Andrew Cagney  <ac131313@redhat.com>
+
+	* doublest.h (store_floating, extract_floating): Add comment
+	indicating these functions are deprecated.
+	(extract_typed_floating, store_typed_floating): Declare.
+	* doublest.c: Include "gdbtypes.h".
+	(extract_typed_floating, store_typed_floating): Define.
+
+	* stabsread.c (define_symbol): Use store_typed_floating.
+	* valarith.c (value_binop): Ditto.
+	* values.c (unpack_long): Use extract_typed_floating.
+	(unpack_double): Ditto.
+
 2001-09-24  Orjan Friberg  <orjanf@axis.com>
 
 	* cris-tdep.c (reg_mode_add_sub_cmp_and_or_move_op): Fetch operand1
