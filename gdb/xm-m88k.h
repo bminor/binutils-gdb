@@ -53,8 +53,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define HAVE_TERMIO
 
-
+#ifndef USIZE
 #define USIZE 2048
+#endif
 #define NBPG NBPC
 #define UPAGES USIZE
 
