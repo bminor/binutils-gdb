@@ -28,6 +28,8 @@
 #include "serial.h"
 #include "regcache.h"
 
+#define CCR_REGNUM 8
+
 static void hms_open (char *args, int from_tty);
 static void
 hms_supply_register (char *regname, int regnamelen, char *val, int vallen)

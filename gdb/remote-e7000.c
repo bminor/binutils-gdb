@@ -893,12 +893,14 @@ e7000_fetch_registers (void)
 {
   int regno;
   char *wanted = NULL;
+  int realregs = 0;
 
   puts_e7000debug ("R\r");
 
   if (TARGET_ARCHITECTURE->arch == bfd_arch_sh)
     {
       wanted = want_sh;
+      realregs = 59;
       switch (TARGET_ARCHITECTURE->mach)
 	{
 	case bfd_mach_sh3:
@@ -910,6 +912,7 @@ e7000_fetch_registers (void)
   if (TARGET_ARCHITECTURE->arch == bfd_arch_h8300)
     {
       wanted = want_h8300h;
+      realregs = 10;
       switch (TARGET_ARCHITECTURE->mach)
 	{
 	case bfd_mach_h8300s:
@@ -917,13 +920,14 @@ e7000_fetch_registers (void)
 	case bfd_mach_h8300sx:
 	case bfd_mach_h8300sxn:
 	  wanted = want_h8300s;
+	  realregs = 11;
 	}
     }
 
   fetch_regs_from_dump (gch, wanted);
 
   /* And supply the extra ones the simulator uses */
-  for (regno = NUM_REALREGS; regno < NUM_REGS; regno++)
+  for (regno = realregs; regno < NUM_REGS; regno++)
     {
       int buf = 0;
 
@@ -946,8 +950,18 @@ static void
 e7000_store_registers (void)
 {
   int regno;
+  int realregs = 0;
 
-  for (regno = 0; regno < NUM_REALREGS; regno++)
+  if (TARGET_ARCHITECTURE->arch == bfd_arch_sh)
+    realregs = 59;
+  if (TARGET_ARCHITECTURE->arch == bfd_arch_h8300) {
+    realregs = ((TARGET_ARCHITECTURE->mach == bfd_mach_h8300s ||
+		 TARGET_ARCHITECTURE->mach == bfd_mach_h8300sn ||
+		 TARGET_ARCHITECTURE->mach == bfd_mach_h8300sx ||
+		 TARGET_ARCHITECTURE->mach == bfd_mach_h8300sxn) ? 11 : 10);
+  }
+
+  for (regno = 0; regno < realregs; regno++)
     e7000_store_register (regno);
 
   registers_changed ();
@@ -1998,6 +2012,7 @@ e7000_wait (ptid_t ptid, struct target_waitstatus *status)
   int had_sleep = 0;
   int loop = 1;
   char *wanted_nopc = NULL;
+  int realregs = 0;
 
   /* Then echo chars until PC= string seen */
   gch ();			/* Drop cr */
@@ -2039,6 +2054,7 @@ e7000_wait (ptid_t ptid, struct target_waitstatus *status)
   if (TARGET_ARCHITECTURE->arch == bfd_arch_sh)
     {
       wanted_nopc = want_nopc_sh;
+      realregs = 59;
       switch (TARGET_ARCHITECTURE->mach)
 	{
 	case bfd_mach_sh3:
@@ -2050,6 +2066,7 @@ e7000_wait (ptid_t ptid, struct target_waitstatus *status)
   if (TARGET_ARCHITECTURE->arch == bfd_arch_h8300)
     {
       wanted_nopc = want_nopc_h8300h;
+      realregs = 10;
       switch (TARGET_ARCHITECTURE->mach)
 	{
 	case bfd_mach_h8300s:
@@ -2057,12 +2074,13 @@ e7000_wait (ptid_t ptid, struct target_waitstatus *status)
 	case bfd_mach_h8300sx:
 	case bfd_mach_h8300sxn:
 	  wanted_nopc = want_nopc_h8300s;
+	  realregs = 11;
 	}
     }
   fetch_regs_from_dump (gch, wanted_nopc);
 
   /* And supply the extra ones the simulator uses */
-  for (regno = NUM_REALREGS; regno < NUM_REGS; regno++)
+  for (regno = realregs; regno < NUM_REGS; regno++)
     {
       int buf = 0;
       regcache_raw_supply (current_regcache, regno, (char *) &buf);

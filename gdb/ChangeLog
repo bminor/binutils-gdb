@@ -1,3 +1,12 @@
+2005-02-16  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* remote-e7000.c: unuse TM_FILE defined macro.
+	(e7000_fetch_registers)	
+	(e7000_store_registers)
+	(e7000_wait): delete NUM_REALREGS.
+	* remote-hms.c: move TM_FILE macro.
+	(CCR_REGNO): move define from tm-h8300.h.
+	
 2005-02-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64-linux-tdep.c: Update copyright year.
