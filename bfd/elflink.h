@@ -27,6 +27,14 @@ static boolean elf_export_symbol
   PARAMS ((struct elf_link_hash_entry *, PTR));
 static boolean elf_adjust_dynamic_symbol
   PARAMS ((struct elf_link_hash_entry *, PTR));
+static boolean elf_link_find_version_dependencies
+  PARAMS ((struct elf_link_hash_entry *, PTR));
+static boolean elf_link_find_version_dependencies
+  PARAMS ((struct elf_link_hash_entry *, PTR));
+static boolean elf_link_assign_sym_version
+  PARAMS ((struct elf_link_hash_entry *, PTR));
+static boolean elf_link_renumber_dynsyms
+  PARAMS ((struct elf_link_hash_entry *, PTR));
 
 /* This struct is used to pass information to routines called via
    elf_link_hash_traverse which must return failure.  */
@@ -147,8 +155,36 @@ elf_link_add_archive_symbols (abfd, info)
 
 	  h = elf_link_hash_lookup (elf_hash_table (info), symdef->name,
 				    false, false, false);
-	  if (h == (struct elf_link_hash_entry *) NULL)
+
+	  if (h == NULL)
+	    {
+	      char *p, *copy;
+
+	      /* If this is a default version (the name contains @@),
+		 look up the symbol again without the version.  The
+		 effect is that references to the symbol without the
+		 version will be matched by the default symbol in the
+		 archive.  */
+
+	      p = strchr (symdef->name, ELF_VER_CHR);
+	      if (p == NULL || p[1] != ELF_VER_CHR)
+		continue;
+
+	      copy = bfd_alloc (abfd, p - symdef->name + 1);
+	      if (copy == NULL)
+		goto error_return;
+	      memcpy (copy, symdef->name, p - symdef->name);
+	      copy[p - symdef->name] = '\0';
+
+	      h = elf_link_hash_lookup (elf_hash_table (info), copy,
+					false, false, false);
+
+	      bfd_release (abfd, copy);
+	    }
+
+	  if (h == NULL)
 	    continue;
+
 	  if (h->root.type != bfd_link_hash_undefined)
 	    {
 	      if (h->root.type != bfd_link_hash_undefweak)
@@ -246,6 +282,9 @@ elf_link_add_object_symbols (abfd, info)
   Elf_External_Sym *buf = NULL;
   struct elf_link_hash_entry **sym_hash;
   boolean dynamic;
+  bfd_byte *dynver = NULL;
+  Elf_External_Versym *extversym = NULL;
+  Elf_External_Versym *ever;
   Elf_External_Dyn *dynbuf = NULL;
   struct elf_link_hash_entry *weaks;
   Elf_External_Sym *esym;
@@ -253,6 +292,22 @@ elf_link_add_object_symbols (abfd, info)
 
   add_symbol_hook = get_elf_backend_data (abfd)->elf_add_symbol_hook;
   collect = get_elf_backend_data (abfd)->collect;
+
+  if ((abfd->flags & DYNAMIC) == 0)
+    dynamic = false;
+  else
+    {
+      dynamic = true;
+
+      /* You can't use -r against a dynamic object.  Also, there's no
+	 hope of using a dynamic object which does not exactly match
+	 the format of the output file.  */
+      if (info->relocateable || info->hash->creator != abfd->xvec)
+	{
+	  bfd_set_error (bfd_error_invalid_operation);
+	  goto error_return;
+	}
+    }
 
   /* As a GNU extension, any input sections which are named
      .gnu.warning.SYMBOL are treated as warning symbols for the given
@@ -283,8 +338,7 @@ elf_link_add_object_symbols (abfd, info)
 		 fix is to keep track of what warnings we are supposed
 		 to emit, and then handle them all at the end of the
 		 link.  */
-	      if ((abfd->flags & DYNAMIC) != 0
-		  && abfd->xvec == info->hash->creator)
+	      if (dynamic && abfd->xvec == info->hash->creator)
 		{
 		  struct elf_link_hash_entry *h;
 
@@ -327,17 +381,89 @@ elf_link_add_object_symbols (abfd, info)
 	}
     }
 
-  /* A stripped shared library might only have a dynamic symbol table,
-     not a regular symbol table.  In that case we can still go ahead
-     and link using the dynamic symbol table.  */
-  if (elf_onesymtab (abfd) == 0
-      && elf_dynsymtab (abfd) != 0)
+  /* If this is a dynamic object, we always link against the .dynsym
+     symbol table, not the .symtab symbol table.  The dynamic linker
+     will only see the .dynsym symbol table, so there is no reason to
+     look at .symtab for a dynamic object.  */
+
+  if (! dynamic || elf_dynsymtab (abfd) == 0)
+    hdr = &elf_tdata (abfd)->symtab_hdr;
+  else
+    hdr = &elf_tdata (abfd)->dynsymtab_hdr;
+
+  if (dynamic)
     {
-      elf_onesymtab (abfd) = elf_dynsymtab (abfd);
-      elf_tdata (abfd)->symtab_hdr = elf_tdata (abfd)->dynsymtab_hdr;
+      /* Read in any version definitions.  */
+
+      if (elf_dynverdef (abfd) != 0)
+	{
+	  Elf_Internal_Shdr *verdefhdr;
+	  bfd_byte *dynver;
+	  int i;
+	  const Elf_External_Verdef *extverdef;
+	  Elf_Internal_Verdef *intverdef;
+
+	  verdefhdr = &elf_tdata (abfd)->dynverdef_hdr;
+	  elf_tdata (abfd)->verdef =
+	    ((Elf_Internal_Verdef *)
+	     bfd_zalloc (abfd,
+			 verdefhdr->sh_info * sizeof (Elf_Internal_Verdef)));
+	  if (elf_tdata (abfd)->verdef == NULL)
+	    goto error_return;
+
+	  dynver = (bfd_byte *) bfd_malloc (verdefhdr->sh_size);
+	  if (dynver == NULL)
+	    goto error_return;
+
+	  if (bfd_seek (abfd, verdefhdr->sh_offset, SEEK_SET) != 0
+	      || (bfd_read ((PTR) dynver, 1, hdr->sh_size, abfd)
+		  != hdr->sh_size))
+	    goto error_return;
+
+	  extverdef = (const Elf_External_Verdef *) dynver;
+	  intverdef = elf_tdata (abfd)->verdef;
+	  for (i = 0; i < verdefhdr->sh_info; i++, intverdef++)
+	    {
+	      const Elf_External_Verdaux *extverdaux;
+	      Elf_Internal_Verdaux intverdaux;
+
+	      _bfd_elf_swap_verdef_in (abfd, extverdef, intverdef);
+
+	      /* Pick up the name of the version.  */
+	      extverdaux = ((const Elf_External_Verdaux *)
+			    (bfd_byte *) extverdef + intverdef->vd_aux);
+	      _bfd_elf_swap_verdaux_in (abfd, extverdaux, &intverdaux);
+
+	      intverdef->vd_bfd = abfd;
+	      intverdef->vd_nodename =
+		bfd_elf_string_from_elf_section (abfd, verdefhdr->sh_link,
+						 intverdaux.vda_name);
+
+	      extverdef = ((const Elf_External_Verdef *)
+			   (bfd_byte *) extverdef + intverdef->vd_next);
+	    }
+
+	  free (dynver);
+	  dynver = NULL;
+	}
+
+      /* Read in the symbol versions, but don't bother to convert them
+         to internal format.  */
+      if (elf_dynversym (abfd) != 0)
+	{
+	  Elf_Internal_Shdr *versymhdr;
+
+	  versymhdr = &elf_tdata (abfd)->dynversym_hdr;
+	  extversym = (Elf_External_Versym *) bfd_malloc (hdr->sh_size);
+	  if (extversym == NULL)
+	    goto error_return;
+	  if (bfd_seek (abfd, versymhdr->sh_offset, SEEK_SET) != 0
+	      || (bfd_read ((PTR) extversym, 1, versymhdr->sh_size, abfd)
+		  != versymhdr->sh_size))
+	    goto error_return;
+	}
     }
 
-  hdr = &elf_tdata (abfd)->symtab_hdr;
   symcount = hdr->sh_size / sizeof (Elf_External_Sym);
 
   /* The sh_info field of the symtab header tells us where the
@@ -368,10 +494,8 @@ elf_link_add_object_symbols (abfd, info)
     goto error_return;
   elf_sym_hashes (abfd) = sym_hash;
 
-  if (elf_elfheader (abfd)->e_type != ET_DYN)
+  if (! dynamic)
     {
-      dynamic = false;
-
       /* If we are creating a shared library, create all the dynamic
          sections immediately.  We need to attach them to something,
          so we attach them to this BFD, provided it is the right
@@ -392,18 +516,6 @@ elf_link_add_object_symbols (abfd, info)
       const char *name;
       bfd_size_type oldsize;
       bfd_size_type strindex;
-
-      dynamic = true;
-
-      /* You can't use -r against a dynamic object.  Also, there's no
-	 hope of using a dynamic object which does not exactly match
-	 the format of the output file.  */
-      if (info->relocateable
-	  || info->hash->creator != abfd->xvec)
-	{
-	  bfd_set_error (bfd_error_invalid_operation);
-	  goto error_return;
-	}
 
       /* Find the name to use in a DT_NEEDED entry that refers to this
 	 object.  If the object has a DT_SONAME entry, we use it.
@@ -540,6 +652,8 @@ elf_link_add_object_symbols (abfd, info)
 		    {
 		      if (buf != NULL)
 			free (buf);
+		      if (extversym != NULL)
+			free (extversym);
 		      return true;
 		    }
 		}
@@ -565,8 +679,11 @@ elf_link_add_object_symbols (abfd, info)
 
   weaks = NULL;
 
+  ever = extversym != NULL ? extversym + hdr->sh_info : NULL;
   esymend = buf + extsymcount;
-  for (esym = buf; esym < esymend; esym++, sym_hash++)
+  for (esym = buf;
+       esym < esymend;
+       esym++, sym_hash++, ever = (ever != NULL ? ever + 1 : NULL))
     {
       Elf_Internal_Sym sym;
       int bind;
@@ -667,6 +784,51 @@ elf_link_add_object_symbols (abfd, info)
       type_change_ok = get_elf_backend_data (abfd)->type_change_ok;
       if (info->hash->creator->flavour == bfd_target_elf_flavour)
 	{
+	  Elf_Internal_Versym iver;
+	  int vernum;
+	  boolean override;
+
+	  if (ever != NULL)
+	    {
+	      _bfd_elf_swap_versym_in (abfd, ever, &iver);
+	      vernum = iver.vs_vers & VERSYM_VERSION;
+
+	      /* If this is a hidden symbol, or if it is not version
+                 1, we append the version name to the symbol name.
+                 However, we do not modify a non-hidden absolute
+                 symbol, because it might be the version symbol
+                 itself.  FIXME: What if it isn't?  */
+	      if ((iver.vs_vers & VERSYM_HIDDEN) != 0
+		  || (vernum > 1 && ! bfd_is_abs_section (sec)))
+		{
+		  const char *verstr;
+		  int namelen, newlen;
+		  char *newname, *p;
+
+		  if (vernum > 1)
+		    verstr = elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
+		  else
+		    verstr = "";
+
+		  namelen = strlen (name);
+		  newlen = namelen + strlen (verstr) + 2;
+		  if ((iver.vs_vers & VERSYM_HIDDEN) == 0)
+		    ++newlen;
+
+		  newname = (char *) bfd_alloc (abfd, newlen);
+		  if (newname == NULL)
+		    goto error_return;
+		  strcpy (newname, name);
+		  p = newname + namelen;
+		  *p++ = ELF_VER_CHR;
+		  if ((iver.vs_vers & VERSYM_HIDDEN) == 0)
+		    *p++ = ELF_VER_CHR;
+		  strcpy (p, verstr);
+
+		  name = newname;
+		}
+	    }
+
 	  /* We need to look up the symbol now in order to get some of
 	     the dynamic object handling right.  We pass the hash
 	     table entry in to _bfd_generic_link_add_one_symbol so
@@ -702,6 +864,8 @@ elf_link_add_object_symbols (abfd, info)
 	      || h->root.type == bfd_link_hash_undefined)
 	    size_change_ok = true;
 
+	  override = false;
+
 	  /* If we are looking at a dynamic object, and this is a
 	     definition, we need to see if it has already been defined
 	     by some other object.  If it has, we want to use the
@@ -721,6 +885,7 @@ elf_link_add_object_symbols (abfd, info)
 		      && (bind == STB_WEAK
 			  || ELF_ST_TYPE (sym.st_info) == STT_FUNC)))
 		{
+		  override = true;
 		  sec = bfd_und_section_ptr;
 		  definition = false;
 		  size_change_ok = true;
@@ -743,11 +908,9 @@ elf_link_add_object_symbols (abfd, info)
 	      && (h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak)
 	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
-	      && (bfd_get_flavour (h->root.u.def.section->owner)
-		  == bfd_target_elf_flavour)
-	      && (elf_elfheader (h->root.u.def.section->owner)->e_type
-		  == ET_DYN))
+	      && (h->root.u.def.section->owner->flags & DYNAMIC) != 0)
 	    {
+	      override = true;
 	      /* Change the hash table entry to undefined, and let
 		 _bfd_generic_link_add_one_symbol do the right thing
 		 with the new definition.  */
@@ -756,7 +919,19 @@ elf_link_add_object_symbols (abfd, info)
 	      size_change_ok = true;
 	      if (bfd_is_com_section (sec))
 		type_change_ok = true;
+
+	      /* This union may have been set to be non-NULL when this
+                 symbol was seen in a dynamic object.  We must force
+                 the union to be NULL, so that it is correct for a
+                 regular symbol.  */
+	      h->verinfo.vertree = NULL;
 	    }
+
+	  if (ever != NULL
+	      && ! override
+	      && vernum > 1
+	      && (h->verinfo.verdef == NULL || definition))
+	    h->verinfo.verdef = &elf_tdata (abfd)->verdef[vernum - 1];
 	}
 
       if (! (_bfd_generic_link_add_one_symbol
@@ -869,6 +1044,41 @@ elf_link_add_object_symbols (abfd, info)
 	    }
 
 	  h->elf_link_hash_flags |= new_flag;
+
+	  /* If this symbol has a version, and it is the default
+             version, we create an indirect symbol from the default
+             name to the fully decorated name.  This will cause
+             external references which do not specify a version to be
+             bound to this version of the symbol.  */
+	  if (definition)
+	    {
+	      char *p;
+
+	      p = strchr (name, ELF_VER_CHR);
+	      if (p != NULL && p[1] == ELF_VER_CHR)
+		{
+		  char *shortname;
+		  struct elf_link_hash_entry *hi;
+
+		  shortname = bfd_hash_allocate (&info->hash->table,
+						 p - name + 1);
+		  if (shortname == NULL)
+		    goto error_return;
+		  strncpy (shortname, name, p - name);
+		  shortname[p - name] = '\0';
+
+		  hi = NULL;
+		  if (! (_bfd_generic_link_add_one_symbol
+			 (info, abfd, shortname, BSF_INDIRECT,
+			  bfd_ind_section_ptr, (bfd_vma) 0, name, false,
+			  collect, (struct bfd_link_hash_entry **) &hi)))
+		    goto error_return;
+
+		  if (hi->root.type == bfd_link_hash_indirect)
+		    hi->elf_link_hash_flags &= ~ ELF_LINK_NON_ELF;
+		}
+	    }
+
 	  if (dynsym && h->dynindx == -1)
 	    {
 	      if (! _bfd_elf_link_record_dynamic_symbol (info, h))
@@ -964,6 +1174,12 @@ elf_link_add_object_symbols (abfd, info)
       buf = NULL;
     }
 
+  if (extversym != NULL)
+    {
+      free (extversym);
+      extversym = NULL;
+    }
+
   /* If this object is the same format as the output object, and it is
      not a shared library, then let the backend look through the
      relocs.
@@ -1050,6 +1266,10 @@ elf_link_add_object_symbols (abfd, info)
     free (buf);
   if (dynbuf != NULL)
     free (dynbuf);
+  if (dynver != NULL)
+    free (dynver);
+  if (extversym != NULL)
+    free (extversym);
   return false;
 }
 
@@ -1093,6 +1313,26 @@ elf_link_create_dynamic_sections (abfd, info)
 	  || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY))
 	return false;
     }
+
+  /* Create sections to hold version informations.  These are removed
+     if they are not needed.  */
+  s = bfd_make_section (abfd, ".gnu.version_d");
+  if (s == NULL
+      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
+      || ! bfd_set_section_alignment (abfd, s, 2))
+    return false;
+
+  s = bfd_make_section (abfd, ".gnu.version");
+  if (s == NULL
+      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
+      || ! bfd_set_section_alignment (abfd, s, 1))
+    return false;
+
+  s = bfd_make_section (abfd, ".gnu.version_r");
+  if (s == NULL
+      || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
+      || ! bfd_set_section_alignment (abfd, s, 2))
+    return false;
 
   s = bfd_make_section (abfd, ".dynsym");
   if (s == NULL
@@ -1363,6 +1603,39 @@ NAME(bfd_elf,record_link_assignment) (output_bfd, info, name, provide)
   return true;
 }
 
+/* This structure is used to pass information to
+   elf_link_assign_sym_version.  */
+
+struct elf_assign_sym_version_info
+{
+  /* Output BFD.  */
+  bfd *output_bfd;
+  /* General link information.  */
+  struct bfd_link_info *info;
+  /* Version tree.  */
+  struct bfd_elf_version_tree *verdefs;
+  /* Whether we are exporting all dynamic symbols.  */
+  boolean export_dynamic;
+  /* Whether we removed any symbols from the dynamic symbol table.  */
+  boolean removed_dynamic;
+  /* Whether we had a failure.  */
+  boolean failed;
+};
+
+/* This structure is used to pass information to
+   elf_link_find_version_dependencies.  */
+
+struct elf_find_verdep_info
+{
+  /* Output BFD.  */
+  bfd *output_bfd;
+  /* General link information.  */
+  struct bfd_link_info *info;
+  /* The number of dependencies.  */
+  unsigned int vers;
+  /* Whether we had a failure.  */
+  boolean failed;
+};
 
 /* Array used to determine the number of hash table buckets to use
    based on the number of symbols there are.  If there are fewer than
@@ -1384,7 +1657,8 @@ static const size_t elf_buckets[] =
 boolean
 NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 				     export_dynamic, filter_shlib,
-				     auxiliary_filters, info, sinterpptr)
+				     auxiliary_filters, info, sinterpptr,
+				     verdefs)
      bfd *output_bfd;
      const char *soname;
      const char *rpath;
@@ -1393,11 +1667,15 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
      const char * const *auxiliary_filters;
      struct bfd_link_info *info;
      asection **sinterpptr;
+     struct bfd_elf_version_tree *verdefs;
 {
+  bfd_size_type soname_indx;
   bfd *dynobj;
   struct elf_backend_data *bed;
 
   *sinterpptr = NULL;
+
+  soname_indx = -1;
 
   if (info->hash->creator->flavour != bfd_target_elf_flavour)
     return true;
@@ -1441,12 +1719,10 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
       if (soname != NULL)
 	{
-	  bfd_size_type indx;
-
-	  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr, soname,
-				     true, true);
-	  if (indx == (bfd_size_type) -1
-	      || ! elf_add_dynamic_entry (info, DT_SONAME, indx))
+	  soname_indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
+					    soname, true, true);
+	  if (soname_indx == (bfd_size_type) -1
+	      || ! elf_add_dynamic_entry (info, DT_SONAME, soname_indx))
 	    return false;
 	}
 
@@ -1548,13 +1824,375 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       size_t bucketcount = 0;
       Elf_Internal_Sym isym;
 
+      /* Set up the version definition section.  */
+      s = bfd_get_section_by_name (dynobj, ".gnu.version_d");
+      BFD_ASSERT (s != NULL);
+      if (verdefs == NULL)
+	{
+	  struct elf_assign_sym_version_info sinfo;
+	  asection **spp;
+
+	  /* No version script was used.  In this case, we just check
+             that there were no version overrides for any symbols.  */
+	  sinfo.output_bfd = output_bfd;
+	  sinfo.info = info;
+	  sinfo.verdefs = verdefs;
+	  sinfo.removed_dynamic = false;
+	  sinfo.export_dynamic = export_dynamic;
+	  sinfo.failed = false;
+
+	  elf_link_hash_traverse (elf_hash_table (info),
+				  elf_link_assign_sym_version,
+				  (PTR) &sinfo);
+	  if (sinfo.failed)
+	    return false;
+
+	  /* Don't include this section in the output file.  */
+	  for (spp = &output_bfd->sections;
+	       *spp != s->output_section;
+	       spp = &(*spp)->next)
+	    ;
+	  *spp = s->output_section->next;
+	  --output_bfd->section_count;
+	}
+      else
+	{
+	  struct elf_assign_sym_version_info sinfo;
+	  unsigned int cdefs;
+	  bfd_size_type size;
+	  struct bfd_elf_version_tree *t;
+	  bfd_byte *p;
+	  Elf_Internal_Verdef def;
+	  Elf_Internal_Verdaux defaux;
+
+	  /* Attach all of the symbols to their version information.
+             This may cause some symbols to be unexported.  */
+	  sinfo.output_bfd = output_bfd;
+	  sinfo.info = info;
+	  sinfo.verdefs = verdefs;
+	  sinfo.export_dynamic = export_dynamic;
+	  sinfo.removed_dynamic = false;
+	  sinfo.failed = false;
+	  elf_link_hash_traverse (elf_hash_table (info),
+				  elf_link_assign_sym_version,
+				  (PTR) &sinfo);
+	  if (sinfo.failed)
+	    return false;
+
+	  if (sinfo.removed_dynamic)
+	    {
+	      /* Some dynamic symbols were changed to be local
+                 symbols.  In this case, we renumber all of the
+                 dynamic symbols, so that we don't have a hole.
+                 FIXME: The names of the removed symbols will still be
+                 in the dynamic string table, wasting space.  */
+	      elf_hash_table (info)->dynsymcount = 1;
+	      elf_link_hash_traverse (elf_hash_table (info),
+				      elf_link_renumber_dynsyms,
+				      (PTR) info);
+	    }
+
+	  cdefs = 0;
+	  size = 0;
+
+	  /* Make space for the base version.  */
+	  size += sizeof (Elf_External_Verdef);
+	  size += sizeof (Elf_External_Verdaux);
+	  ++cdefs;
+
+	  for (t = verdefs; t != NULL; t = t->next)
+	    {
+	      struct bfd_elf_version_deps *n;
+
+	      size += sizeof (Elf_External_Verdef);
+	      size += sizeof (Elf_External_Verdaux);
+	      ++cdefs;
+
+	      for (n = t->deps; n != NULL; n = n->next)
+		size += sizeof (Elf_External_Verdaux);
+	    }
+
+	  s->_raw_size = size;
+	  s->contents = (bfd_byte *) bfd_alloc (output_bfd, s->_raw_size);
+	  if (s->contents == NULL && s->_raw_size != 0)
+	    return false;
+
+	  /* Fill in the version definition section.  */
+
+	  p = s->contents;
+
+	  def.vd_version = VER_DEF_CURRENT;
+	  def.vd_flags = VER_FLG_BASE;
+	  def.vd_ndx = 1;
+	  def.vd_cnt = 1;
+	  def.vd_aux = sizeof (Elf_External_Verdef);
+	  def.vd_next = (sizeof (Elf_External_Verdef)
+			 + sizeof (Elf_External_Verdaux));
+
+	  if (soname_indx != -1)
+	    {
+	      def.vd_hash = bfd_elf_hash ((const unsigned char *) soname);
+	      defaux.vda_name = soname_indx;
+	    }
+	  else
+	    {
+	      const char *name;
+	      bfd_size_type indx;
+
+	      name = output_bfd->filename;
+	      def.vd_hash = bfd_elf_hash ((const unsigned char *) name);
+	      indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
+					    name, true, false);
+	      if (indx == (bfd_size_type) -1)
+		return false;
+	      defaux.vda_name = indx;
+	    }
+	  defaux.vda_next = 0;
+
+	  _bfd_elf_swap_verdef_out (output_bfd, &def,
+				    (Elf_External_Verdef *)p);
+	  p += sizeof (Elf_External_Verdef);
+	  _bfd_elf_swap_verdaux_out (output_bfd, &defaux,
+				     (Elf_External_Verdaux *) p);
+	  p += sizeof (Elf_External_Verdaux);
+
+	  for (t = verdefs; t != NULL; t = t->next)
+	    {
+	      unsigned int cdeps;
+	      struct bfd_elf_version_deps *n;
+	      struct elf_link_hash_entry *h;
+
+	      cdeps = 0;
+	      for (n = t->deps; n != NULL; n = n->next)
+		++cdeps;
+
+	      /* Add a symbol representing this version.  */
+	      h = NULL;
+	      if (! (_bfd_generic_link_add_one_symbol
+		     (info, dynobj, t->name, BSF_GLOBAL, bfd_abs_section_ptr,
+		      (bfd_vma) 0, (const char *) NULL, false,
+		      get_elf_backend_data (dynobj)->collect,
+		      (struct bfd_link_hash_entry **) &h)))
+		return false;
+	      h->elf_link_hash_flags &= ~ ELF_LINK_NON_ELF;
+	      h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+	      h->type = STT_OBJECT;
+	      h->verinfo.vertree = t;
+
+	      if (info->shared)
+		{
+		  if (! _bfd_elf_link_record_dynamic_symbol (info, h))
+		    return false;
+		}
+
+	      def.vd_version = VER_DEF_CURRENT;
+	      def.vd_flags = 0;
+	      if (t->globals == NULL && t->locals == NULL && ! t->used)
+		def.vd_flags |= VER_FLG_WEAK;
+	      def.vd_ndx = t->vernum + 1;
+	      def.vd_cnt = cdeps + 1;
+	      def.vd_hash = bfd_elf_hash ((const unsigned char *) t->name);
+	      def.vd_aux = sizeof (Elf_External_Verdef);
+	      if (t->next != NULL)
+		def.vd_next = (sizeof (Elf_External_Verdef)
+			       + (cdeps + 1) * sizeof (Elf_External_Verdaux));
+	      else
+		def.vd_next = 0;
+
+	      _bfd_elf_swap_verdef_out (output_bfd, &def,
+					(Elf_External_Verdef *) p);
+	      p += sizeof (Elf_External_Verdef);
+
+	      defaux.vda_name = h->dynstr_index;
+	      if (t->deps == NULL)
+		defaux.vda_next = 0;
+	      else
+		defaux.vda_next = sizeof (Elf_External_Verdaux);
+	      t->name_indx = defaux.vda_name;
+
+	      _bfd_elf_swap_verdaux_out (output_bfd, &defaux,
+					 (Elf_External_Verdaux *) p);
+	      p += sizeof (Elf_External_Verdaux);
+
+	      for (n = t->deps; n != NULL; n = n->next)
+		{
+		  defaux.vda_name = n->version_needed->name_indx;
+		  if (n->next == NULL)
+		    defaux.vda_next = 0;
+		  else
+		    defaux.vda_next = sizeof (Elf_External_Verdaux);
+
+		  _bfd_elf_swap_verdaux_out (output_bfd, &defaux,
+					     (Elf_External_Verdaux *) p);
+		  p += sizeof (Elf_External_Verdaux);
+		}
+	    }
+
+	  if (! elf_add_dynamic_entry (info, DT_VERDEF, 0)
+	      || ! elf_add_dynamic_entry (info, DT_VERDEFNUM, cdefs))
+	    return false;
+
+	  elf_tdata (output_bfd)->cverdefs = cdefs;
+	}
+
+      /* Work out the size of the version reference section.  */
+
+      s = bfd_get_section_by_name (dynobj, ".gnu.version_r");
+      BFD_ASSERT (s != NULL);
+      {
+	struct elf_find_verdep_info sinfo;
+
+	sinfo.output_bfd = output_bfd;
+	sinfo.info = info;
+	sinfo.vers = elf_tdata (output_bfd)->cverdefs;
+	if (sinfo.vers == 0)
+	  sinfo.vers = 1;
+	sinfo.failed = false;
+
+	elf_link_hash_traverse (elf_hash_table (info),
+				elf_link_find_version_dependencies,
+				(PTR) &sinfo);
+
+	if (elf_tdata (output_bfd)->verref == NULL)
+	  {
+	    asection **spp;
+
+	    /* We don't have any version definitions, so we can just
+               remove the section.  */
+
+	    for (spp = &output_bfd->sections;
+		 *spp != s->output_section;
+		 spp = &(*spp)->next)
+	      ;
+	    *spp = s->output_section->next;
+	    --output_bfd->section_count;
+	  }
+	else
+	  {
+	    Elf_Internal_Verneed *t;
+	    unsigned int size;
+	    unsigned int crefs;
+	    bfd_byte *p;
+
+	    /* Build the version definition section.  */
+	    for (t = elf_tdata (output_bfd)->verref;
+		 t != NULL;
+		 t = t->vn_nextref)
+	      {
+		Elf_Internal_Vernaux *a;
+
+		size += sizeof (Elf_External_Verneed);
+		++crefs;
+		for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+		  size += sizeof (Elf_External_Vernaux);
+	      }
+
+	    s->_raw_size = size;
+	    s->contents = (bfd_byte *) bfd_alloc (output_bfd, size);
+	    if (s->contents == NULL)
+	      return false;
+
+	    p = s->contents;
+	    for (t = elf_tdata (output_bfd)->verref;
+		 t != NULL;
+		 t = t->vn_nextref)
+	      {
+		unsigned int caux;
+		Elf_Internal_Vernaux *a;
+		bfd_size_type indx;
+
+		caux = 0;
+		for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+		  ++caux;
+
+		t->vn_version = VER_NEED_CURRENT;
+		t->vn_cnt = caux;
+		indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
+					   t->vn_bfd->filename, true, false);
+		if (indx == (bfd_size_type) -1)
+		  return false;
+		t->vn_file = indx;
+		t->vn_aux = sizeof (Elf_External_Verneed);
+		if (t->vn_nextref == NULL)
+		  t->vn_next = 0;
+		else
+		  t->vn_next = (sizeof (Elf_External_Verneed)
+				+ caux * sizeof (Elf_External_Vernaux));
+
+		_bfd_elf_swap_verneed_out (output_bfd, t,
+					   (Elf_External_Verneed *) p);
+		p += sizeof (Elf_External_Verneed);
+
+		for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+		  {
+		    a->vna_hash = bfd_elf_hash ((const unsigned char *)
+						a->vna_nodename);
+		    indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
+					       a->vna_nodename, true, false);
+		    if (indx == (bfd_size_type) -1)
+		      return false;
+		    a->vna_name = indx;
+		    if (a->vna_nextptr == NULL)
+		      a->vna_next = 0;
+		    else
+		      a->vna_next = sizeof (Elf_External_Vernaux);
+
+		    _bfd_elf_swap_vernaux_out (output_bfd, a,
+					       (Elf_External_Vernaux *) p);
+		    p += sizeof (Elf_External_Vernaux);
+		  }
+	      }
+
+	    if (! elf_add_dynamic_entry (info, DT_VERNEED, 0)
+		|| ! elf_add_dynamic_entry (info, DT_VERNEEDNUM, crefs))
+	      return false;
+
+	    elf_tdata (output_bfd)->cverrefs = crefs;
+	  }
+      }
+
+      dynsymcount = elf_hash_table (info)->dynsymcount;
+
+      /* Work out the size of the symbol version section.  */
+      s = bfd_get_section_by_name (dynobj, ".gnu.version");
+      BFD_ASSERT (s != NULL);
+      if (dynsymcount == 0
+	  || (verdefs == NULL && elf_tdata (output_bfd)->verref == NULL))
+	{
+	  asection **spp;
+
+	  /* We don't need any symbol versions; just discard the
+             section.  */
+	  for (spp = &output_bfd->sections;
+	       *spp != s->output_section;
+	       spp = &(*spp)->next)
+	    ;
+	  *spp = s->output_section->next;
+	  --output_bfd->section_count;
+	}
+      else
+	{
+	  Elf_Internal_Versym intversym;
+
+	  s->_raw_size = dynsymcount * sizeof (Elf_External_Versym);
+	  s->contents = (bfd_byte *) bfd_alloc (output_bfd, s->_raw_size);
+	  if (s->contents == NULL)
+	    return false;
+
+	  intversym.vs_vers = 0;
+	  _bfd_elf_swap_versym_out (output_bfd, &intversym,
+				    (Elf_External_Versym *) s->contents);
+
+	  if (! elf_add_dynamic_entry (info, DT_VERSYM, 0))
+	    return false;
+	}
+
       /* Set the size of the .dynsym and .hash sections.  We counted
 	 the number of dynamic symbols in elf_link_add_object_symbols.
 	 We will build the contents of .dynsym and .hash when we build
 	 the final symbol table, because until then we do not know the
 	 correct value to give the symbols.  We built the .dynstr
 	 section as we went along in elf_link_add_object_symbols.  */
-      dynsymcount = elf_hash_table (info)->dynsymcount;
       s = bfd_get_section_by_name (dynobj, ".dynsym");
       BFD_ASSERT (s != NULL);
       s->_raw_size = dynsymcount * sizeof (Elf_External_Sym);
@@ -1603,32 +2241,6 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
   return true;
 }
 
-
-/* This routine is used to export all defined symbols into the dynamic
-   symbol table.  It is called via elf_link_hash_traverse.  */
-
-static boolean
-elf_export_symbol (h, data)
-     struct elf_link_hash_entry *h;
-     PTR data;
-{
-  struct elf_info_failed *eif = (struct elf_info_failed *) data;
-
-  if (h->dynindx == -1
-      && (h->elf_link_hash_flags
-	  & (ELF_LINK_HASH_DEF_REGULAR | ELF_LINK_HASH_REF_REGULAR)) != 0)
-    {
-      if (! _bfd_elf_link_record_dynamic_symbol (eif->info, h))
-	{
-	  eif->failed = true;
-	  return false;
-	}
-    }
-
-  return true;
-}
-
-
 /* Make the backend pick a good value for a dynamic symbol.  This is
    called via elf_link_hash_traverse, and also calls itself
    recursively.  */
@@ -1641,6 +2253,10 @@ elf_adjust_dynamic_symbol (h, data)
   struct elf_info_failed *eif = (struct elf_info_failed *) data;
   bfd *dynobj;
   struct elf_backend_data *bed;
+
+  /* Ignore indirect symbols.  There are added by the versioning code.  */
+  if (h->root.type == bfd_link_hash_indirect)
+    return true;
 
   /* If this symbol was mentioned in a non-ELF file, try to set
      DEF_REGULAR and REF_REGULAR correctly.  This is the only way to
@@ -1785,6 +2401,271 @@ elf_adjust_dynamic_symbol (h, data)
   return true;
 }
 
+/* This routine is used to export all defined symbols into the dynamic
+   symbol table.  It is called via elf_link_hash_traverse.  */
+
+static boolean
+elf_export_symbol (h, data)
+     struct elf_link_hash_entry *h;
+     PTR data;
+{
+  struct elf_info_failed *eif = (struct elf_info_failed *) data;
+
+  if (h->dynindx == -1
+      && (h->elf_link_hash_flags
+	  & (ELF_LINK_HASH_DEF_REGULAR | ELF_LINK_HASH_REF_REGULAR)) != 0)
+    {
+      if (! _bfd_elf_link_record_dynamic_symbol (eif->info, h))
+	{
+	  eif->failed = true;
+	  return false;
+	}
+    }
+
+  return true;
+}
+
+/* Look through the symbols which are defined in other shared
+   libraries and referenced here.  Update the list of version
+   dependencies.  This will be put into the .gnu.version_r section.
+   This function is called via elf_link_hash_traverse.  */
+
+static boolean
+elf_link_find_version_dependencies (h, data)
+     struct elf_link_hash_entry *h;
+     PTR data;
+{
+  struct elf_find_verdep_info *rinfo = (struct elf_find_verdep_info *) data;
+  Elf_Internal_Verneed *t;
+  Elf_Internal_Vernaux *a;
+
+  /* We only care about symbols defined in shared objects with version
+     information.  */
+  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
+      || h->dynindx == -1
+      || h->verinfo.verdef == NULL)
+    return true;
+
+  /* See if we already know about this version.  */
+  for (t = elf_tdata (rinfo->output_bfd)->verref; t != NULL; t = t->vn_nextref)
+    {
+      if (t->vn_bfd == h->verinfo.verdef->vd_bfd)
+	continue;
+
+      for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+	if (a->vna_nodename == h->verinfo.verdef->vd_nodename)
+	  return true;
+
+      break;
+    }
+
+  /* This is a new version.  Add it to tree we are building.  */
+
+  if (t == NULL)
+    {
+      t = (Elf_Internal_Verneed *) bfd_zalloc (rinfo->output_bfd, sizeof *t);
+      if (t == NULL)
+	{
+	  rinfo->failed = true;
+	  return false;
+	}
+
+      t->vn_bfd = h->verinfo.verdef->vd_bfd;
+      t->vn_nextref = elf_tdata (rinfo->output_bfd)->verref;
+      elf_tdata (rinfo->output_bfd)->verref = t;
+    }
+
+  a = (Elf_Internal_Vernaux *) bfd_zalloc (rinfo->output_bfd, sizeof *a);
+
+  /* Note that we are copying a string pointer here, and testing it
+     above.  If bfd_elf_string_from_elf_section is ever changed to
+     discard the string data when low in memory, this will have to be
+     fixed.  */
+  a->vna_nodename = h->verinfo.verdef->vd_nodename;
+
+  a->vna_flags = h->verinfo.verdef->vd_flags;
+  a->vna_nextptr = t->vn_auxptr;
+
+  h->verinfo.verdef->vd_exp_refno = rinfo->vers;
+  ++rinfo->vers;
+
+  a->vna_other = h->verinfo.verdef->vd_exp_refno + 1;
+
+  t->vn_auxptr = a;
+
+  return true;
+}
+
+/* Figure out appropriate versions for all the symbols.  We may not
+   have the version number script until we have read all of the input
+   files, so until that point we don't know which symbols should be
+   local.  This function is called via elf_link_hash_traverse.  */
+
+static boolean
+elf_link_assign_sym_version (h, data)
+     struct elf_link_hash_entry *h;
+     PTR data;
+{
+  struct elf_assign_sym_version_info *sinfo =
+    (struct elf_assign_sym_version_info *) data;
+  struct bfd_link_info *info = sinfo->info;
+  char *p;
+
+  /* We only need version numbers for symbols defined in regular
+     objects.  */
+  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+    return true;
+
+  p = strchr (h->root.root.string, ELF_VER_CHR);
+  if (p != NULL && h->verinfo.vertree == NULL)
+    {
+      struct bfd_elf_version_tree *t;
+      boolean hidden;
+
+      hidden = true;
+
+      /* There are two consecutive ELF_VER_CHR characters if this is
+         not a hidden symbol.  */
+      ++p;
+      if (*p == ELF_VER_CHR)
+	{
+	  hidden = false;
+	  ++p;
+	}
+
+      /* If there is no version string, we can just return out.  */
+      if (*p == '\0')
+	{
+	  if (hidden)
+	    h->elf_link_hash_flags |= ELF_LINK_HIDDEN;
+	  return true;
+	}
+
+      /* Look for the version.  If we find it, it is no longer weak.  */
+      for (t = sinfo->verdefs; t != NULL; t = t->next)
+	{
+	  if (strcmp (t->name, p) == 0)
+	    {
+	      h->verinfo.vertree = t;
+	      t->used = true;
+	      break;
+	    }
+	}
+
+      if (t == NULL)
+	{
+	  /* We could not find the version.  Return an error.
+	     FIXME: Why?  */
+	  (*_bfd_error_handler)
+	    ("%s: invalid version %s", bfd_get_filename (sinfo->output_bfd),
+	     h->root.root.string);
+	  bfd_set_error (bfd_error_bad_value);
+	  sinfo->failed = true;
+	  return false;
+	}
+
+      if (hidden)
+	h->elf_link_hash_flags |= ELF_LINK_HIDDEN;
+    }
+
+  /* If we don't have a version for this symbol, see if we can find
+     something.  */
+  if (h->verinfo.vertree == NULL && sinfo->verdefs != NULL)
+    {
+      struct bfd_elf_version_tree *t;
+      struct bfd_elf_version_tree *deflt;
+      struct bfd_elf_version_expr *d;
+
+      /* See if can find what version this symbol is in.  If the
+         symbol is supposed to eb local, then don't actually register
+         it.  */
+      deflt = NULL;
+      for (t = sinfo->verdefs; t != NULL; t = t->next)
+	{
+	  if (t->globals != NULL)
+	    {
+	      for (d = t->globals; d != NULL; d = d->next)
+		{
+		  if (fnmatch (d->match, h->root.root.string, 0) == 0)
+		    {
+		      h->verinfo.vertree = t;
+		      break;
+		    }
+		}
+
+	      if (d != NULL)
+		break;
+	    }
+
+	  if (t->locals != NULL)
+	    {
+	      for (d = t->locals; d != NULL; d = d->next)
+		{
+		  if (d->match[0] == '*' && d->match[1] == '\0')
+		    deflt = t;
+		  else if (fnmatch (d->match, h->root.root.string, 0) == 0)
+		    {
+		      h->verinfo.vertree = t;
+		      if (h->dynindx != -1
+			  && info->shared
+			  && ! sinfo->export_dynamic
+			  && (h->elf_link_hash_flags
+			      & ELF_LINK_HASH_NEEDS_PLT) == 0)
+			{
+			  sinfo->removed_dynamic = true;
+			  h->dynindx = -1;
+			  /* FIXME: The name of the symbol has already
+			     been recorded in the dynamic string table
+			     section.  */
+			}
+		      break;
+		    }
+		}
+
+	      if (d != NULL)
+		break;
+	    }
+	}
+
+      if (deflt != NULL && h->verinfo.vertree == NULL)
+	{
+	  h->verinfo.vertree = deflt;
+	  if (h->dynindx != -1
+	      && info->shared
+	      && ! sinfo->export_dynamic
+	      && (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) == 0)
+	    {
+	      sinfo->removed_dynamic = true;
+	      h->dynindx = -1;
+	      /* FIXME: The name of the symbol has already been
+		 recorded in the dynamic string table section.  */
+	    }
+	}
+    }
+
+  return true;
+}
+
+/* This function is used to renumber the dynamic symbols, if some of
+   them are removed because they are marked as local.  This is called
+   via elf_link_hash_traverse.  */
+
+static boolean
+elf_link_renumber_dynsyms (h, data)
+     struct elf_link_hash_entry *h;
+     PTR data;
+{
+  struct bfd_link_info *info = (struct bfd_link_info *) data;
+
+  if (h->dynindx != -1)
+    {
+      h->dynindx = elf_hash_table (info)->dynsymcount;
+      ++elf_hash_table (info)->dynsymcount;
+    }
+
+  return true;
+}
+
 /* Final phase of ELF linker.  */
 
 /* A structure we use to avoid passing large numbers of arguments.  */
@@ -1801,6 +2682,8 @@ struct elf_final_link_info
   asection *dynsym_sec;
   /* .hash section.  */
   asection *hash_sec;
+  /* symbol version section (.gnu.version).  */
+  asection *symver_sec;
   /* Buffer large enough to hold contents of any section.  */
   bfd_byte *contents;
   /* Buffer large enough to hold external relocs of any section.  */
@@ -1885,17 +2768,22 @@ elf_bfd_final_link (abfd, info)
   finfo.symstrtab = elf_stringtab_init ();
   if (finfo.symstrtab == NULL)
     return false;
+
   if (! dynamic)
     {
       finfo.dynsym_sec = NULL;
       finfo.hash_sec = NULL;
+      finfo.symver_sec = NULL;
     }
   else
     {
       finfo.dynsym_sec = bfd_get_section_by_name (dynobj, ".dynsym");
       finfo.hash_sec = bfd_get_section_by_name (dynobj, ".hash");
       BFD_ASSERT (finfo.dynsym_sec != NULL && finfo.hash_sec != NULL);
+      finfo.symver_sec = bfd_get_section_by_name (dynobj, ".gnu.version");
+      /* Note that it is OK if symver_sec is NULL.  */
     }
+
   finfo.contents = NULL;
   finfo.external_relocs = NULL;
   finfo.internal_relocs = NULL;
@@ -1944,7 +2832,8 @@ elf_bfd_final_link (abfd, info)
 
 	      /* We are interested in just local symbols, not all
 		 symbols.  */
-	      if (bfd_get_flavour (sec->owner) == bfd_target_elf_flavour)
+	      if (bfd_get_flavour (sec->owner) == bfd_target_elf_flavour
+		  && (sec->owner->flags & DYNAMIC) == 0)
 		{
 		  size_t sym_count;
 
@@ -2366,6 +3255,15 @@ elf_bfd_final_link (abfd, info)
 	      goto get_vma;
 	    case DT_SYMTAB:
 	      name = ".dynsym";
+	      goto get_vma;
+	    case DT_VERDEF:
+	      name = ".gnu.version_d";
+	      goto get_vma;
+	    case DT_VERNEED:
+	      name = ".gnu.version_r";
+	      goto get_vma;
+	    case DT_VERSYM:
+	      name = ".gnu.version";
 	    get_vma:
 	      o = bfd_get_section_by_name (abfd, name);
 	      BFD_ASSERT (o != NULL);
@@ -2700,9 +3598,7 @@ elf_link_output_extsym (h, data)
 	  }
 	else
 	  {
-	    BFD_ASSERT ((bfd_get_flavour (input_sec->owner)
-			 == bfd_target_elf_flavour)
-			&& elf_elfheader (input_sec->owner)->e_type == ET_DYN);
+	    BFD_ASSERT ((input_sec->owner->flags & DYNAMIC) != 0);
 	    sym.st_shndx = SHN_UNDEF;
 	    input_sec = bfd_und_section_ptr;
 	  }
@@ -2716,9 +3612,18 @@ elf_link_output_extsym (h, data)
       break;
 
     case bfd_link_hash_indirect:
+      /* These symbols are created by symbol versioning.  They point
+         to the decorated version of the name.  For example, if the
+         symbol foo@@GNU_1.2 is the default, which should be used when
+         foo is used with no version, then we add an indirect symbol
+         foo which points to foo@@GNU_1.2.  */
+      if ((h->elf_link_hash_flags & ELF_LINK_NON_ELF) != 0)
+	return true;
+
+      /* Fall through.  */
     case bfd_link_hash_warning:
-      /* We can't represent these symbols in ELF.  A warning symbol
-         may have come from a .gnu.warning.SYMBOL section anyhow.  We
+      /* We can't represent these symbols in ELF, although a warning
+         symbol may have come from a .gnu.warning.SYMBOL section.  We
          just put the target symbol in the hash table.  If the target
          symbol does not really exist, don't do anything.  */
       if (h->root.u.i.link->type == bfd_link_hash_new)
@@ -2734,6 +3639,8 @@ elf_link_output_extsym (h, data)
       && elf_hash_table (finfo->info)->dynamic_sections_created)
     {
       struct elf_backend_data *bed;
+      char *p, *copy;
+      const char *name;
       size_t bucketcount;
       size_t bucket;
       bfd_byte *bucketpos;
@@ -2757,9 +3664,22 @@ elf_link_output_extsym (h, data)
 				   finfo->dynsym_sec->contents)
 				  + h->dynindx));
 
+      /* We didn't include the version string in the dynamic string
+         table, so we must not consider it in the hash table.  */
+      name = h->root.root.string;
+      p = strchr (name, ELF_VER_CHR);
+      if (p == NULL)
+	copy = NULL;
+      else
+	{
+	  copy = bfd_alloc (finfo->output_bfd, p - name + 1);
+	  strncpy (copy, name, p - name);
+	  copy[p - name] = '\0';
+	  name = copy;
+	}
+
       bucketcount = elf_hash_table (finfo->info)->bucketcount;
-      bucket = (bfd_elf_hash ((const unsigned char *) h->root.root.string)
-		% bucketcount);
+      bucket = bfd_elf_hash ((const unsigned char *) name) % bucketcount;
       bucketpos = ((bfd_byte *) finfo->hash_sec->contents
 		   + (bucket + 2) * (ARCH_SIZE / 8));
       chain = get_word (finfo->output_bfd, bucketpos);
@@ -2767,6 +3687,37 @@ elf_link_output_extsym (h, data)
       put_word (finfo->output_bfd, chain,
 		((bfd_byte *) finfo->hash_sec->contents
 		 + (bucketcount + 2 + h->dynindx) * (ARCH_SIZE / 8)));
+
+      if (copy != NULL)
+	bfd_release (finfo->output_bfd, copy);
+
+      if (finfo->symver_sec != NULL && finfo->symver_sec->contents != NULL)
+	{
+	  Elf_Internal_Versym iversym;
+
+	  if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+	    {
+	      if (h->verinfo.verdef == NULL)
+		iversym.vs_vers = 0;
+	      else
+		iversym.vs_vers = h->verinfo.verdef->vd_exp_refno + 1;
+	    }
+	  else
+	    {
+	      if (h->verinfo.vertree == NULL)
+		iversym.vs_vers = 1;
+	      else
+		iversym.vs_vers = h->verinfo.vertree->vernum + 1;
+	    }
+
+	  if ((h->elf_link_hash_flags & ELF_LINK_HIDDEN) != 0)
+	    iversym.vs_vers |= VERSYM_HIDDEN;
+
+	  _bfd_elf_swap_versym_out (finfo->output_bfd, &iversym,
+				    (((Elf_External_Versym *)
+				      finfo->symver_sec->contents)
+				     + h->dynindx));
+	}
     }
 
   /* If we're stripping it, then it was just a dynamic symbol, and
@@ -2818,7 +3769,7 @@ elf_link_input_bfd (finfo, input_bfd)
   /* If this is a dynamic object, we don't want to do anything here:
      we don't want the local symbols, and we don't want the section
      contents.  */
-  if (elf_elfheader (input_bfd)->e_type == ET_DYN)
+  if ((input_bfd->flags & DYNAMIC) != 0)
     return true;
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
