@@ -157,6 +157,9 @@ struct gdbarch_tdep
 #define I386_SSE_SIZEOF_REGS	(I386_SIZEOF_GREGS + I386_SIZEOF_FREGS \
 				 + I386_SIZEOF_XREGS)
 
+/* Size of the largest register.  */
+#define I386_MAX_REGISTER_SIZE	16
+
 /* Return the name of register REG.  */
 extern char const *i386_register_name (int reg);
 

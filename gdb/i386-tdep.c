@@ -841,7 +841,7 @@ i386_do_pop_frame (struct frame_info *frame)
 {
   CORE_ADDR fp;
   int regnum;
-  char regbuf[MAX_REGISTER_RAW_SIZE];
+  char regbuf[I386_MAX_REGISTER_SIZE];
 
   fp = FRAME_FP (frame);
   i386_frame_init_saved_regs (frame);
@@ -936,14 +936,16 @@ i386_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
    into VALBUF.  */
 
 static void
-i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
+i386_extract_return_value (struct type *type, struct regcache *regcache,
+			   char *valbuf)
 {
   int len = TYPE_LENGTH (type);
+  char buf[I386_MAX_REGISTER_SIZE];
 
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT
       && TYPE_NFIELDS (type) == 1)
     {
-      i386_extract_return_value (TYPE_FIELD_TYPE (type, 0), regbuf, valbuf);
+      i386_extract_return_value (TYPE_FIELD_TYPE (type, 0), regcache, valbuf);
       return;
     }
 
@@ -960,8 +962,8 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	 its contents to the desired type.  This is probably not
 	 exactly how it would happen on the target itself, but it is
 	 the best we can do.  */
-      convert_typed_floating (&regbuf[REGISTER_BYTE (FP0_REGNUM)],
-			      builtin_type_i387_ext, valbuf, type);
+      regcache_read (regcache, FP0_REGNUM, buf);
+      convert_typed_floating (buf, builtin_type_i387_ext, valbuf, type);
     }
   else
     {
@@ -969,13 +971,16 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
       int high_size = REGISTER_RAW_SIZE (HIGH_RETURN_REGNUM);
 
       if (len <= low_size)
-	memcpy (valbuf, &regbuf[REGISTER_BYTE (LOW_RETURN_REGNUM)], len);
+	{
+	  regcache_read (regcache, LOW_RETURN_REGNUM, buf);
+	  memcpy (valbuf, buf, len);
+	}
       else if (len <= (low_size + high_size))
 	{
-	  memcpy (valbuf,
-		  &regbuf[REGISTER_BYTE (LOW_RETURN_REGNUM)], low_size);
-	  memcpy (valbuf + low_size,
-		  &regbuf[REGISTER_BYTE (HIGH_RETURN_REGNUM)], len - low_size);
+	  regcache_read (regcache, LOW_RETURN_REGNUM, buf);
+	  memcpy (valbuf, buf, low_size);
+	  regcache_read (regcache, HIGH_RETURN_REGNUM, buf);
+	  memcpy (valbuf + low_size, buf, len - low_size);
 	}
       else
 	internal_error (__FILE__, __LINE__,
@@ -1059,10 +1064,9 @@ i386_store_return_value (struct type *type, char *valbuf)
    as a CORE_ADDR.  */
 
 static CORE_ADDR
-i386_extract_struct_value_address (char *regbuf)
+i386_extract_struct_value_address (struct regcache *regcache)
 {
-  return extract_address (&regbuf[REGISTER_BYTE (LOW_RETURN_REGNUM)],
-			  REGISTER_RAW_SIZE (LOW_RETURN_REGNUM));
+  return regcache_read_as_address (regcache, LOW_RETURN_REGNUM);
 }
 
 
@@ -1437,8 +1441,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_bytes (gdbarch, I386_SIZEOF_GREGS + I386_SIZEOF_FREGS);
   set_gdbarch_register_byte (gdbarch, i386_register_byte);
   set_gdbarch_register_raw_size (gdbarch, i386_register_raw_size);
-  set_gdbarch_max_register_raw_size (gdbarch, 16);
-  set_gdbarch_max_register_virtual_size (gdbarch, 16);
+  set_gdbarch_max_register_raw_size (gdbarch, I386_MAX_REGISTER_SIZE);
+  set_gdbarch_max_register_virtual_size (gdbarch, I386_MAX_REGISTER_SIZE);
   set_gdbarch_register_virtual_type (gdbarch, i386_register_virtual_type);
 
   set_gdbarch_get_longjmp_target (gdbarch, i386_get_longjmp_target);
@@ -1473,15 +1477,14 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      depending on the size of the argument" -- from the x86 ABI.  */
   set_gdbarch_parm_boundary (gdbarch, 32);
 
-  set_gdbarch_deprecated_extract_return_value (gdbarch,
-					       i386_extract_return_value);
+  set_gdbarch_extract_return_value (gdbarch, i386_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, i386_push_return_address);
   set_gdbarch_pop_frame (gdbarch, i386_pop_frame);
   set_gdbarch_store_struct_return (gdbarch, i386_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, i386_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
+  set_gdbarch_extract_struct_value_address (gdbarch,
 					    i386_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, i386_use_struct_convention);
 

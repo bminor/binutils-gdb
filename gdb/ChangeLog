@@ -1,5 +1,15 @@
 2002-07-04  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.h (I386_MAX_REGISTER_SIZE): New define.
+	* i386-tdep.c (i386_do_pop_frame): Use I386_MAX_REGISTER_SIZE
+	instead of MAX_REGISTER_RAW_SIZE.
+	(i386_extract_return_value, i386_extract_struct_value_address):
+	Convert to use regcache.
+	(i386_gdbarch_init): Set max_register_raw_size and
+	max_register_virtual_size to I386_MAX_REGISTER_SIZE.
+	Set extract_return_value and extract_struct_value_address instead
+	of their deprecated variants.
+
 	Convert i386 target to generic dummy frames.
 	* i386-tdep.c: Include "symfile.h".
 	(i386_frameless_signal_p): Consider a function to be frameless if
