@@ -1,6 +1,6 @@
 \input texinfo @c                               -*-Texinfo-*-
 @c  Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-@c  2001, 2002, 2003
+@c  2001, 2002, 2003, 2004
 @c  Free Software Foundation, Inc.
 @c UPDATE!!  On future updates--
 @c   (1)   check for new machine-dep cmdline options in
@@ -350,7 +350,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset MIPS
 
 @emph{Target MIPS options:}
-   [@b{-nocpp}] [@b{-EL}] [@b{-EB}] [@b{-n}] [@b{-O}[@var{optimization level}]]
+   [@b{-nocpp}] [@b{-EL}] [@b{-EB}] [@b{-O}[@var{optimization level}]]
    [@b{-g}[@var{debug level}]] [@b{-G} @var{num}] [@b{-KPIC}] [@b{-call_shared}]
    [@b{-non_shared}] [@b{-xgot}] [@b{--membedded-pic}]
    [@b{-mabi}=@var{ABI}] [@b{-32}] [@b{-n32}] [@b{-64}] [@b{-mfp32}] [@b{-mgp32}]

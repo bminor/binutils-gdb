@@ -379,9 +379,6 @@ static int mips_32bitmode = 0;
 
 enum mips_pic_level mips_pic;
 
-/* Warn about all NOPS that the assembler generates.  */
-static int warn_nops = 0;
-
 /* 1 if we should generate 32 bit offsets from the $gp register in
    SVR4_PIC mode.  Currently has no meaning in other modes.  */
 static int mips_big_got = 0;
@@ -4196,19 +4193,9 @@ macro (struct mips_cl_insn *ip)
 	do_false:
 	  /* result is always false */
 	  if (! likely)
-	    {
-	      if (warn_nops)
-		as_warn (_("Branch %s is always false (nop)"),
-			 ip->insn_mo->name);
-	      macro_build (NULL, &icnt, NULL, "nop", "", 0);
-	    }
+	    macro_build (NULL, &icnt, NULL, "nop", "", 0);
 	  else
-	    {
-	      if (warn_nops)
-		as_warn (_("Branch likely %s is always false"),
-			 ip->insn_mo->name);
-	      macro_build (NULL, &icnt, &offset_expr, "bnel", "s,t,p", 0, 0);
-	    }
+	    macro_build (NULL, &icnt, &offset_expr, "bnel", "s,t,p", 0, 0);
 	  return;
 	}
       if (imm_expr.X_op != O_constant)
@@ -10428,7 +10415,7 @@ static int support_64bit_objects(void)
 }
 #endif /* OBJ_ELF */
 
-const char *md_shortopts = "nO::g::G:";
+const char *md_shortopts = "O::g::G:";
 
 struct option md_longopts[] =
 {
@@ -10611,10 +10598,6 @@ md_parse_option (int c, char *arg)
 
     case OPTION_EL:
       target_big_endian = 0;
-      break;
-
-    case 'n':
-      warn_nops = 1;
       break;
 
     case 'O':
@@ -14705,7 +14688,6 @@ MIPS options:\n\
 -mfp32			use 32-bit FPRs, regardless of the chosen ISA\n\
 -O0			remove unneeded NOPs, do not swap branches\n\
 -O			remove unneeded NOPs and swap branches\n\
--n			warn about NOPs generated from macros\n\
 --[no-]construct-floats [dis]allow floating point values to be constructed\n\
 --trap, --no-break	trap exception on div by 0 and mult overflow\n\
 --break, --no-trap	break exception on div by 0 and mult overflow\n"));

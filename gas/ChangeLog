@@ -1,5 +1,14 @@
 2004-01-08  Ian Lance Taylor  <ian@wasabisystems.com>
 
+	* config/tc-mips.c (warn_nops): Remove static variable.
+	(macro): Remove test of warn_nops.
+	(md_shortops): Remove 'n'.
+	(md_parse_option): Remove 'n' case.
+	(md_show_usage): Remove -n.
+	* doc/as.texinfo (Overview): Remove MIPS -n option.
+	* doc/c-mips.texi (MIPS Opts): Remove mention -n.
+	* NEWS: Mention removal of MIPS -n option.
+
 	* config/tc-mips.c (ISA_HAS_COPROC_DELAYS): Remove.
 	(cop_interlocks): Check ISA level.
 	(cop_mem_interlocks): Define.

@@ -1,4 +1,5 @@
-@c Copyright 1991, 1992, 1993, 1994, 1995, 1997, 1999, 2000, 2001, 2002, 2003
+@c Copyright 1991, 1992, 1993, 1994, 1995, 1997, 1999, 2000, 2001,
+@c 2002, 2003, 2004
 @c Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
@@ -237,10 +238,6 @@ error is detected.  This is the default.
 @itemx -mno-pdr
 Control generation of @code{.pdr} sections.  Off by default on IRIX, on
 elsewhere.
-
-@item -n
-When this option is used, @code{@value{AS}} will issue a warning every
-time it generates a nop instruction from a macro.
 @end table
 
 @node MIPS Object
