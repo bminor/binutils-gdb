@@ -24,6 +24,10 @@
 #define FRAME_H 1
 
 struct symtab_and_line;
+struct frame_unwind;
+
+/* The traditional frame unwinder.  */
+extern const struct frame_unwind *trad_frame_unwind;
 
 /* The frame object.  */
 
@@ -302,43 +306,6 @@ extern CORE_ADDR frame_pc_unwind (struct frame_info *frame);
    caller's frame.  */
 extern struct frame_id frame_id_unwind (struct frame_info *frame);
 
-
-/* Return the location (and possibly value) of REGNUM for the previous
-   (older, up) frame.  All parameters except VALUEP can be assumed to
-   be non NULL.  When VALUEP is NULL, just the location of the
-   register should be returned.
-
-   UNWIND_CACHE is provided as mechanism for implementing a per-frame
-   local cache.  It's initial value being NULL.  Memory for that cache
-   should be allocated using frame_obstack_zalloc().
-
-   Register window architectures (eg SPARC) should note that REGNUM
-   identifies the register for the previous frame.  For instance, a
-   request for the value of "o1" for the previous frame would be found
-   in the register "i1" in this FRAME.  */
-
-typedef void (frame_register_unwind_ftype) (struct frame_info *frame,
-					    void **unwind_cache,
-					    int regnum,
-					    int *optimized,
-					    enum lval_type *lvalp,
-					    CORE_ADDR *addrp,
-					    int *realnump,
-					    void *valuep);
-
-/* Same as for registers above, but return the address at which the
-   calling frame would resume.  */
-
-typedef CORE_ADDR (frame_pc_unwind_ftype) (struct frame_info *frame,
-					   void **unwind_cache);
-
-/* Same as for registers above, but return the ID of the frame that
-   called this one.  */
-
-typedef void (frame_id_unwind_ftype) (struct frame_info *frame,
-				      void **unwind_cache,
-				      struct frame_id *id);
-
 /* Describe the saved registers of a frame.  */
 
 #if defined (EXTRA_FRAME_INFO) || defined (FRAME_FIND_SAVED_REGS)
@@ -426,18 +393,14 @@ struct frame_info
        better all agree as to the contents.  */
     void *unwind_cache;
 
-    /* See description above.  The previous frame's registers.  */
-    frame_register_unwind_ftype *register_unwind;
+    /* The frame's unwinder.  */
+    const struct frame_unwind *unwind;
 
-    /* See description above.  The previous frame's resume address.
-       Save the previous PC in a local cache.  */
-    frame_pc_unwind_ftype *pc_unwind;
+    /* Cached copy of the previous frame's resume address.  */
     int pc_unwind_cache_p;
     CORE_ADDR pc_unwind_cache;
 
-    /* See description above.  The previous frame's resume address.
-       Save the previous PC in a local cache.  */
-    frame_id_unwind_ftype *id_unwind;
+    /* Cached copy of the previous frame's ID.  */
     int id_unwind_cache_p;
     struct frame_id id_unwind_cache;
 

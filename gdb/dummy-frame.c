@@ -28,6 +28,7 @@
 #include "frame.h"
 #include "inferior.h"
 #include "gdb_assert.h"
+#include "frame-unwind.h"
 
 /* Dummy frame.  This saves the processor state just prior to setting
    up the inferior function call.  Older targets save the registers
@@ -304,7 +305,7 @@ generic_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 /* Given a call-dummy dummy-frame, return the registers.  Here the
    register value is taken from the local copy of the register buffer.  */
 
-void
+static void
 dummy_frame_register_unwind (struct frame_info *frame, void **cache,
 			     int regnum, int *optimized,
 			     enum lval_type *lvalp, CORE_ADDR *addrp,
@@ -331,7 +332,10 @@ dummy_frame_register_unwind (struct frame_info *frame, void **cache,
     }
 }
 
-CORE_ADDR
+/* Assuming that FRAME is a dummy, return the resume address for the
+   previous frame.  */
+
+static CORE_ADDR
 dummy_frame_pc_unwind (struct frame_info *frame,
 		       void **cache)
 {
@@ -345,8 +349,12 @@ dummy_frame_pc_unwind (struct frame_info *frame,
 }
 
 
-void
-dummy_frame_id_unwind (struct frame_info *frame, void **cache,
+/* Assuming that FRAME is a dummy, return the ID of the calling frame
+   (the frame that the dummy has the saved state of).  */
+
+static void
+dummy_frame_id_unwind (struct frame_info *frame,
+		       void **cache,
 		       struct frame_id *id)
 {
   struct dummy_frame *dummy = cached_find_dummy_frame (frame, cache);
@@ -359,3 +367,20 @@ dummy_frame_id_unwind (struct frame_info *frame, void **cache,
     (*id) = dummy->id;
 }
 
+static struct frame_unwind dummy_frame_unwind =
+{
+  dummy_frame_pc_unwind,
+  dummy_frame_id_unwind,
+  dummy_frame_register_unwind
+};
+
+const struct frame_unwind *
+dummy_frame_p (CORE_ADDR pc)
+{
+  if (DEPRECATED_PC_IN_CALL_DUMMY_P ()
+      ? DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0)
+      : pc_in_dummy_frame (pc))
+    return &dummy_frame_unwind;
+  else
+    return NULL;
+}

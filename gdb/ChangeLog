@@ -1,5 +1,36 @@
 2003-01-18  Andrew Cagney  <ac131313@redhat.com>
 
+	* dummy-frame.h (dummy_frame_id_unwind): Delete declaration.
+	(dummy_frame_pc_unwind, dummy_frame_register_unwind): Ditto.
+	(struct frame_unwind): Declare opaque.
+	(dummy_frame_p): Declare function.
+	* dummy-frame.c (dummy_frame_id_unwind): Make static.
+	(dummy_frame_pc_unwind, dummy_frame_register_unwind): Ditto.
+	* dummy-frame.c: Include "frame-unwind.h".
+	(dummy_frame_p): New function.
+	(dummy_frame_unwind): New variable.
+	* frame.c: Include "frame-unwind.h".
+	(frame_pc_unwind, frame_id_unwind, frame_register_unwind): Update
+	to use the new unwind field.
+	(set_unwind_by_pc): Delete function.
+	(create_new_frame, get_prev_frame): Set unwind field using
+	frame_unwind_find_by_pc.
+	(trad_frame_unwind, trad_frame_unwinder): New variables.
+	* frame.h (trad_frame_unwind): Declare variable.
+	(frame_id_unwind_ftype): Delete declaration.
+	(frame_pc_unwind_ftype, frame_register_unwind_ftype): Ditto.
+	(struct frame_unwind): Declare opaque.
+	(struct frame_info): Replace the fields id_unwind, pc_unwind and
+	register_unwind with a single unwind pointer.
+	* frame-unwind.h, frame-unwind.c: New files.
+	* Makefile.in (SFILES): Add frame-unwind.c.
+	(frame_unwind_h): Define.
+	(COMMON_OBS): Add frame-unwind.o.
+	(frame-unwind.o): Specify dependencies.
+	(frame.o, dummy-frame.o): Update dependencies.
+	
+2003-01-18  Andrew Cagney  <ac131313@redhat.com>
+
 	* ada-valprint.c: Eliminate PTR.
 	* breakpoint.c, corelow.c, cris-tdep.c, dbxread.c: Ditto.
 	* defs.h, dve3900-rom.c, dwarf2read.c, dwarfread.c: Ditto.

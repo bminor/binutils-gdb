@@ -34,6 +34,7 @@
 #include "gdbcore.h"
 #include "annotate.h"
 #include "language.h"
+#include "frame-unwind.h"
 
 /* Return a frame uniq ID that can be used to, later, re-find the
    frame.  */
@@ -127,7 +128,7 @@ frame_pc_unwind (struct frame_info *frame)
 {
   if (!frame->pc_unwind_cache_p)
     {
-      frame->pc_unwind_cache = frame->pc_unwind (frame, &frame->unwind_cache);
+      frame->pc_unwind_cache = frame->unwind->pc (frame, &frame->unwind_cache);
       frame->pc_unwind_cache_p = 1;
     }
   return frame->pc_unwind_cache;
@@ -138,7 +139,7 @@ frame_id_unwind (struct frame_info *frame)
 {
   if (!frame->id_unwind_cache_p)
     {
-      frame->id_unwind (frame, &frame->unwind_cache, &frame->id_unwind_cache);
+      frame->unwind->id (frame, &frame->unwind_cache, &frame->id_unwind_cache);
       frame->id_unwind_cache_p = 1;
     }
   return frame->id_unwind_cache;
@@ -185,8 +186,8 @@ frame_register_unwind (struct frame_info *frame, int regnum,
     }
 
   /* Ask this frame to unwind its register.  */
-  frame->register_unwind (frame, &frame->unwind_cache, regnum,
-			  optimizedp, lvalp, addrp, realnump, bufferp);
+  frame->unwind->reg (frame, &frame->unwind_cache, regnum,
+		      optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
 void
@@ -714,6 +715,14 @@ frame_saved_regs_id_unwind (struct frame_info *next_frame, void **cache,
   id->base = base;
 }
 	
+const struct frame_unwind trad_frame_unwinder = {
+  frame_saved_regs_pc_unwind,
+  frame_saved_regs_id_unwind,
+  frame_saved_regs_register_unwind
+};
+const struct frame_unwind *trad_frame_unwind = &trad_frame_unwinder;
+
+
 /* Function: get_saved_register
    Find register number REGNUM relative to FRAME and put its (raw,
    target format) contents in *RAW_BUFFER.  
@@ -813,42 +822,6 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
     deprecated_read_register_gen (regnum, raw_buffer);
 }
 
-/* Using the PC, select a mechanism for unwinding a frame returning
-   the previous frame.  The register unwind function should, on
-   demand, initialize the ->context object.  */
-
-static void
-set_unwind_by_pc (CORE_ADDR pc, CORE_ADDR fp,
-		  frame_register_unwind_ftype **unwind_register,
-		  frame_pc_unwind_ftype **unwind_pc,
-		  frame_id_unwind_ftype **unwind_id)
-{
-  if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
-    {
-      /* Still need to set this to something.  The ``info frame'' code
-	 calls this function to find out where the saved registers are.
-	 Hopefully this is robust enough to stop any core dumps and
-	 return vaguely correct values..  */
-      *unwind_register = frame_saved_regs_register_unwind;
-      *unwind_pc = frame_saved_regs_pc_unwind;
-      *unwind_id = frame_saved_regs_id_unwind;
-    }
-  else if (DEPRECATED_PC_IN_CALL_DUMMY_P ()
-	   ? DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0)
-	   : pc_in_dummy_frame (pc))
-    {
-      *unwind_register = dummy_frame_register_unwind;
-      *unwind_pc = dummy_frame_pc_unwind;
-      *unwind_id = dummy_frame_id_unwind;
-    }
-  else
-    {
-      *unwind_register = frame_saved_regs_register_unwind;
-      *unwind_pc = frame_saved_regs_pc_unwind;
-      *unwind_id = frame_saved_regs_id_unwind;
-    }
-}
-
 /* Create an arbitrary (i.e. address specified by user) or innermost frame.
    Always returns a non-NULL value.  */
 
@@ -891,8 +864,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
     INIT_EXTRA_FRAME_INFO (0, fi);
 
   /* Select/initialize an unwind function.  */
-  set_unwind_by_pc (fi->pc, fi->frame, &fi->register_unwind,
-		    &fi->pc_unwind, &fi->id_unwind);
+  fi->unwind = frame_unwind_find_by_pc (current_gdbarch, fi->pc);
 
   return fi;
 }
@@ -1135,8 +1107,7 @@ get_prev_frame (struct frame_info *next_frame)
      (and probably other architectural information).  The PC lets you
      check things like the debug info at that point (dwarf2cfi?) and
      use that to decide how the frame should be unwound.  */
-  set_unwind_by_pc (prev->pc, prev->frame, &prev->register_unwind,
-		    &prev->pc_unwind, &prev->id_unwind);
+  prev->unwind = frame_unwind_find_by_pc (current_gdbarch, prev->pc);
 
   /* NOTE: cagney/2002-11-18: The code segments, found in
      create_new_frame and get_prev_frame(), that initializes the
