@@ -1717,7 +1717,7 @@ sim_resume (sd, step, siggnal)
     }
   /* Check for SIGBUS due to insn fetch.  */
   else if (! saved_state.asregs.exception)
-    saved_state.asregs.exception == SIGBUS;
+    saved_state.asregs.exception = SIGBUS;
 
   saved_state.asregs.ticks += get_now () - tick_start;
   saved_state.asregs.cycles += cycles;

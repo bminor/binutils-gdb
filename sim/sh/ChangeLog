@@ -1,3 +1,8 @@
+Tue Jun 18 16:53:11 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* interp.c (sim_resume): Fix setting of bus error for
+	instruction fetch.
+
 2002-06-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
