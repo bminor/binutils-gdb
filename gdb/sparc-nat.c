@@ -23,7 +23,6 @@
 #include "inferior.h"
 #include "target.h"
 #include "gdbcore.h"
-#include "sparc-nat.c"
 #include "regcache.h"
 
 #include <signal.h>

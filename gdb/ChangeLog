@@ -1,3 +1,7 @@
+2001-03-02  Kevin Buettner  <kevinb@redhat.com>
+
+	* sparc-nat.c (sparc-nat.c): Don't include.
+
 2001-03-01  J.T. Conklin  <jtc@redback.com>
 
 	* defs.h (__CYGWIN__): Moved conditional which defines __CYGWIN__
