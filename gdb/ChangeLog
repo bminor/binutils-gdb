@@ -1,3 +1,8 @@
+Sat Apr  6 08:55:22 1996  Fred Fish  <fnf@cygnus.com>
+
+	* bcache.c (bcache): When size of chunk to cache is exactly equal to
+ 	BCACHE_MAXLENGTH, stash chunk as unique copy.
+
 Sat Apr  6 00:46:26 1996  Fred Fish  <fnf@cygnus.com>
 
 	* symfile.c (INLINE_ADD_PSYMBOL): Remove ifdef.

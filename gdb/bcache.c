@@ -91,7 +91,7 @@ bcache (bytes, count, bcachep)
   struct hashlink **linkpp;
   struct hashlink ***hashtablepp;
 
-  if (count > BCACHE_MAXLENGTH)
+  if (count >= BCACHE_MAXLENGTH)
     {
       /* Rare enough to just stash unique copies */
       location = (void *) obstack_alloc (&bcachep->cache, count);
