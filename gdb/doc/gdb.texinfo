@@ -59,7 +59,6 @@ m4; Berkeley won't do) a file suitable for formatting.  See the text in
 _1__
 
 _fi__(0)
-_include__(gdbVN.m4)_dnl__
 @c
 @ifinfo
 This file documents the GNU debugger _GDBN__.
@@ -7018,7 +7017,9 @@ things without first using the debugger to find the facts.
 @end itemize
 
 @iftex
-@include rdl-apps.texi
+@c appendices describing GNU readline.  Distributed with readline code.
+@include rluser.texinfo
+@include inc-hist.texi
 @end iftex
 
 @node Renamed Commands, Installing _GDBN__, _GDBN__ Bugs, Top
