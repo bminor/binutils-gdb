@@ -1,0 +1,12 @@
+#!/bin/ksh
+#
+# This script is a "wrapper" to use the auto_solib_add_threshold.mk
+# Makefile.  See the comments in auto_solib_add_threshold.exp
+# regarding why this script exists.
+#
+
+#set -o xtrace
+#set -o verbose
+
+MAKEFLAGS=
+make -f solib_threshold.mk require_shlibs all
