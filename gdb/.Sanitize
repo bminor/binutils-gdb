@@ -34,7 +34,7 @@ NEWS
 Projects
 README
 TODO
-a68v-xdep.c
+a68v-nat.c
 alldeps.mak
 alloca.c
 altos-xdep.c
@@ -144,6 +144,8 @@ munch
 news-xdep.c
 nindy-share
 nindy-tdep.c
+nm-apollo68b.h
+nm-apollo68v.h
 nm-delta88.h
 nm-hppab.h
 nm-hppah.h

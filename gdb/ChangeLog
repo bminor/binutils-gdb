@@ -2,6 +2,7 @@ Tue Oct 27 17:08:45 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	Apollo native support (untested).
 
+	* Makefile.in (HFILES): added nm-apollo68[bv].h.
 	* a68v-nat.c, nm-apollo68[bv].h: new files.
 	* xm-apollo68[bv].h (FETCH_INFERIOR_REGISTERS): removed.
 	* xm-apollo68b.h (PTRACE_IN_WRONG_PLACE): removed.
