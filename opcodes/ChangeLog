@@ -1,3 +1,9 @@
+2003-08-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (PPC440): Define.
+	(powerpc_opcodes): Allow mac*, mul*, nmac*, dccci, dcread, iccci,
+	icread instructions when PPC440.  Add dlmzb instruction.
+
 2003-08-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* dep-in.sed: Remove libintl.h.
