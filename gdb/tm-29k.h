@@ -32,15 +32,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Floating point uses IEEE representations.  */
 #define IEEE_FLOAT
 
-/* We can either use a.out, encapsulated, or can use COFF */
-#ifndef COFF_ENCAPSULATE
-#define COFF_FORMAT
-/* This just has to do with what coff header files are in use.  */
-#define COFF_CHECK_X_ZEROES
-#endif
-
 /* Recognize our magic number.  */
-#define BADMAG(x) ((x)->f_magic != 0572)
+#define BADMAG(x) ((x).f_magic != 0572)
 
 /* Define this if the C compiler puts an underscore at the front
    of external names before giving them to the linker.  */
@@ -114,6 +107,10 @@ CORE_ADDR skip_prologue ();
 
 #define REGISTER_TYPE long
 
+/* Allow the register declarations here to be overridden for remote
+   kernel debugging.  */
+#if !defined (REGISTER_NAMES)
+
 /* Number of machine registers */
 
 #define NUM_REGS 205
@@ -153,17 +150,20 @@ CORE_ADDR skip_prologue ();
   "pc0", "pc1", "pc2", "mmu", "lru", "fpe", "int", "fps", "exo", "gr1",  \
   "alu", "ipc", "ipa", "ipb" }
 
-/* Special register #x.  */
+/* Convert Processor Special register #x to REGISTER_NAMES register # */
 #define SR_REGNUM(x) \
   ((x) < 15  ? VAB_REGNUM + (x)					 \
-   : (x) >= 128 && (x) < 131 ? IPC_REGNUM + (x)			 \
+   : (x) >= 128 && (x) < 131 ? IPC_REGNUM + (x) - 128		 \
    : (x) == 131 ? Q_REGNUM					 \
    : (x) == 132 ? ALU_REGNUM					 \
-   : (x) >= 133 && (x) < 136 ? BP_REGNUM + (x)			 \
-   : (x) >= 160 && (x) < 163 ? FPE_REGNUM + (x)			 \
+   : (x) >= 133 && (x) < 136 ? BP_REGNUM + (x) - 133		 \
+   : (x) >= 160 && (x) < 163 ? FPE_REGNUM + (x) - 160		 \
    : (x) == 164 ? EXO_REGNUM                                     \
    : (error ("Internal error in SR_REGNUM"), 0))
 #define GR96_REGNUM 0
+/* Define the return register separately, so it can be overridden for
+   kernel procedure calling conventions. */
+#define	RETURN_REGNUM	GR96_REGNUM
 #define GR1_REGNUM 200
 /* This needs to be the memory stack pointer, not the register stack pointer,
    to make call_function work right.  */
@@ -182,23 +182,37 @@ CORE_ADDR skip_prologue ();
 /* Register Stack Pointer.  */
 #define RSP_REGNUM GR1_REGNUM
 #define LR0_REGNUM 32
-#define PC_REGNUM 192 /* pc1 */
-#define NPC_REGNUM 191 /* pc0 */
-#define PC2_REGNUM 193
 #define BP_REGNUM 177
 #define FC_REGNUM 178
 #define CR_REGNUM 179
 #define Q_REGNUM 180
 #define VAB_REGNUM 181
-#define LRU_REGNUM 195
-#define FPE_REGNUM 196
-#define INT_REGNUM 197
-#define FPS_REGNUM 198
-#define EXO_REGNUM 199
-#define PS_REGNUM 201
-#define ALU_REGNUM 201
-#define IPC_REGNUM 202
-#define IPB_REGNUM 204
+#define OPS_REGNUM (VAB_REGNUM + 1)
+#define CPS_REGNUM (VAB_REGNUM + 2)
+#define CFG_REGNUM (VAB_REGNUM + 3)
+#define CHA_REGNUM (VAB_REGNUM + 4)
+#define CHD_REGNUM (VAB_REGNUM + 5)
+#define CHC_REGNUM (VAB_REGNUM + 6)
+#define RBP_REGNUM (VAB_REGNUM + 7)
+#define TMC_REGNUM (VAB_REGNUM + 8)
+#define TMR_REGNUM (VAB_REGNUM + 9)
+#define NPC_REGNUM (VAB_REGNUM + 10)  /* pc0 */
+#define PC_REGNUM  (VAB_REGNUM + 11)  /* pc1 */
+#define PC2_REGNUM (VAB_REGNUM + 12)
+#define MMU_REGNUM (VAB_REGNUM + 13)
+#define LRU_REGNUM (VAB_REGNUM + 14)
+#define FPE_REGNUM (VAB_REGNUM + 15)
+#define INT_REGNUM (VAB_REGNUM + 16)
+#define FPS_REGNUM (VAB_REGNUM + 17)
+#define EXO_REGNUM (VAB_REGNUM + 18)
+/* gr1 is defined above as 200 = VAB_REGNUM + 19 */
+#define ALU_REGNUM (VAB_REGNUM + 20)
+#define PS_REGNUM  ALU_REGNUM
+#define IPC_REGNUM (VAB_REGNUM + 21)
+#define IPA_REGNUM (VAB_REGNUM + 22)
+#define IPB_REGNUM (VAB_REGNUM + 23)
+
+#endif	/* !defined(REGISTER_NAMES) */
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
@@ -281,7 +295,7 @@ CORE_ADDR skip_prologue ();
 	read_memory (*((int *)(REGBUF) + LRP_REGNUM), (VALBUF) + 16 * 4,   \
 		     TYPE_LENGTH (TYPE) - 16 * 4);			   \
       }									   \
-    bcopy (((int *)(REGBUF))+GR96_REGNUM, (VALBUF), reg_length);	   \
+    bcopy (((int *)(REGBUF))+RETURN_REGNUM, (VALBUF), reg_length);	   \
   }
 
 /* Write into appropriate registers a function return value
@@ -297,7 +311,7 @@ CORE_ADDR skip_prologue ();
 		      (char *)(VALBUF) + 16 * 4,			  \
 		      TYPE_LENGTH (TYPE) - 16 * 4);			  \
       }									  \
-    write_register_bytes (REGISTER_BYTE (GR96_REGNUM), (char *)(VALBUF),  \
+    write_register_bytes (REGISTER_BYTE (RETURN_REGNUM), (char *)(VALBUF),  \
 			  TYPE_LENGTH (TYPE));				  \
   }
 
@@ -446,11 +460,10 @@ void init_frame_pc ();
 /* Not sure how to figure out where the bottom frame is.  There is
    no frame for start.  In my tests so far the
    pc has been outside the text segment, though, so check for that.
+   FIXME!!!
    However, allow a pc in a call dummy.  */
 #define FRAME_CHAIN_VALID(chain, thisframe) \
-  (outside_startup_file (FRAME_SAVED_PC (thisframe))   \
-   && FRAME_SAVED_PC (thisframe) >= text_start         \
-   && FRAME_SAVED_PC (thisframe) < text_end + CALL_DUMMY_LENGTH)
+  (outside_startup_file (FRAME_SAVED_PC (thisframe)))
 
 #define FRAME_CHAIN_COMBINE(chain, thisframe) (0)
 
@@ -555,12 +568,12 @@ extern CORE_ADDR frame_locals_address ();
 
 /* Number of special registers (sr128-) to save.  */
 #define DUMMY_SAVE_SR128 8
-/* Number of general (gr96-) registers to save.  */
-#define DUMMY_SAVE_GR96 29
+/* Number of general (gr96- or gr64-) registers to save.  */
+#define DUMMY_SAVE_GREGS 29
 
 #define DUMMY_FRAME_RSIZE \
 (4 /* mfp_dummy */     	       	       	       	   \
- + DUMMY_SAVE_GR96 * 4                             \
+ + DUMMY_SAVE_GREGS * 4                             \
  + DUMMY_SAVE_SR128 * 4				   \
  + DUMMY_ARG					   \
  )
