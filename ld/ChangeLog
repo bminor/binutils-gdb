@@ -1,3 +1,31 @@
+Thu May 19 13:31:33 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Add support for ELF shared libraries.
+	* ld.h (ld_config_type): Add field dynamic_link.
+	* ldmain.c (main): Initialize config.dynamic_link to false.  Warn
+	on attempts to use -r with -relax, -call_shared or -s.
+	* lexsup.c (longopts): Separate OPTION_CALL_SHARED from
+	OPTION_NON_SHARED.  Add OPTION_IGNORE.  Adjust macro values
+	accordingly.  Add "dy" and "non_shared" options.  Change "Qy" to
+	OPTION_IGNORE for now.  Handle OPTION_CALL_SHARED and
+	OPTION_NON_SHARED by setting dynamic_link field accordingly.
+	Handle OPTION_IGNORE by ignoring it.  Clear dynamic_link field for
+	-r and -Ur.
+	* ldfile.c (ldfile_open_file): If config.dynamic_link is true, try
+	opening a file with a .so extension first.
+	* emultempl/elf32.em: New file.
+	* emulparams/elf32_sparc.sh (TEXT_START_ADDR): Change to 0x10000.
+	(NONPAGED_TEXT_START_ADDR): Likewise.
+	(TEMPLATE_NAME): Define as elf32.
+	(DATA_PLT): Define.
+	* emulparams/elf_i386.sh (TEMPLATE_NAME): Define as elf32.
+	* scripttempl/elf.sc: Add placement for new dynamic sections.
+	Don't use CREATE_OBJECT_SYMBOLS.  Define _etext, _edata and _end
+	outside of any section.  Don't use ALIGN(8); just let one section
+	VMA follow another.  Put .dynbss in .bss.  Don't mention debugging
+	sections; they'll be handled correctly anyhow.
+	* Makefile.in (eelf_i386.c): Depend upon elf32.em, not generic.em.
+
 Wed May 18 10:15:39 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (install): Redirect output of ln to /dev/null.

@@ -72,9 +72,6 @@ boolean trace_file_tries;
    instead of complaining if no input files are given.  */
 boolean version_printed;
 
-/* 1 => write load map.  */
-boolean write_map;
-
 args_type command_line;
 
 ld_config_type config;
@@ -93,11 +90,10 @@ static boolean multiple_common PARAMS ((struct bfd_link_info *,
 					bfd_vma));
 static boolean add_to_set PARAMS ((struct bfd_link_info *,
 				   struct bfd_link_hash_entry *,
-				   unsigned int bitsize,
+				   bfd_reloc_code_real_type,
 				   bfd *, asection *, bfd_vma));
 static boolean constructor_callback PARAMS ((struct bfd_link_info *,
 					     boolean constructor,
-					     unsigned int bitsize,
 					     const char *name,
 					     bfd *, asection *, bfd_vma));
 static boolean warning_callback PARAMS ((struct bfd_link_info *,
@@ -162,8 +158,8 @@ main (argc, argv)
 
   /* Initialize the data about options.  */
   trace_files = trace_file_tries = version_printed = false;
-  write_map = false;
   config.build_constructors = true;
+  config.dynamic_link = false;
   command_line.force_common_definition = false;
 
   link_info.callbacks = &link_callbacks;
@@ -195,6 +191,16 @@ main (argc, argv)
   lang_has_input_file = false;
   parse_args (argc, argv);
 
+  if (link_info.relocateable)
+    {
+      if (command_line.relax)
+	einfo ("%P%F: -relax and -r may not be used together\n");
+      if (config.dynamic_link)
+	einfo ("%P%F: -r and -call_shared may not be used together\n");
+      if (link_info.strip == strip_all)
+	einfo ("%P%F: -r and -s may not be used together\n");
+    }
+
   /* This essentially adds another -L directory so this must be done after
      the -L's in argv have been processed.  */
   set_scripts_dir ();
@@ -213,10 +219,6 @@ main (argc, argv)
       yyparse ();
     }
 
-  if (link_info.relocateable && command_line.relax)
-    {
-      einfo ("%P%F: -relax and -r may not be used together\n");
-    }
   lang_final ();
 
   if (lang_has_input_file == false)
@@ -296,7 +298,8 @@ main (argc, argv)
     }
   else
     {
-      bfd_close (output_bfd);
+      if (! bfd_close (output_bfd))
+	einfo ("%F%B: final close failed: %E\n", output_bfd);
     }
 
   if (config.stats)
@@ -568,8 +571,8 @@ add_archive_element (info, abfd, name)
 
   ldlang_add_file (input);
 
-  if (write_map)
-    info_msg ("%s needed due to %T\n", abfd->filename, name);
+  if (config.map_file != (FILE *) NULL)
+    minfo ("%s needed due to %T\n", abfd->filename, name);
 
   if (trace_files || trace_file_tries)
     info_msg ("%I\n", input);
@@ -664,15 +667,28 @@ multiple_common (info, name, obfd, otype, osize, nbfd, ntype, nsize)
 
 /*ARGSUSED*/
 static boolean
-add_to_set (info, h, bitsize, abfd, section, value)
+add_to_set (info, h, reloc, abfd, section, value)
      struct bfd_link_info *info;
      struct bfd_link_hash_entry *h;
-     unsigned int bitsize;
+     bfd_reloc_code_real_type reloc;
      bfd *abfd;
      asection *section;
      bfd_vma value;
 {
-  ldctor_add_set_entry (h, bitsize, section, value);
+  if (! config.build_constructors)
+    return true;
+
+  ldctor_add_set_entry (h, reloc, section, value);
+
+  if (h->type == bfd_link_hash_new)
+    {
+      h->type = bfd_link_hash_undefined;
+      h->u.undef.abfd = abfd;
+      /* We don't call bfd_link_add_undef to add this to the list of
+	 undefined symbols because we are going to define it
+	 ourselves.  */
+    }
+
   return true;
 }
 
@@ -682,10 +698,9 @@ add_to_set (info, h, bitsize, abfd, section, value)
    adding an element to a set, but less general.  */
 
 static boolean
-constructor_callback (info, constructor, bitsize, name, abfd, section, value)
+constructor_callback (info, constructor, name, abfd, section, value)
      struct bfd_link_info *info;
      boolean constructor;
-     unsigned int bitsize;
      const char *name;
      bfd *abfd;
      asection *section;
@@ -698,6 +713,11 @@ constructor_callback (info, constructor, bitsize, name, abfd, section, value)
   if (! config.build_constructors)
     return true;
 
+  /* Ensure that BFD_RELOC_CTOR exists now, so that we can give a
+     useful error message.  */
+  if (bfd_reloc_type_lookup (output_bfd, BFD_RELOC_CTOR) == NULL)
+    einfo ("%P%F: BFD backend error: BFD_RELOC_CTOR unsupported");
+
   set_name = (char *) alloca (1 + sizeof "__CTOR_LIST__");
   s = set_name;
   if (bfd_get_symbol_leading_char (abfd) != '\0')
@@ -707,8 +727,9 @@ constructor_callback (info, constructor, bitsize, name, abfd, section, value)
   else
     strcpy (s, "__DTOR_LIST__");
 
-  if (write_map)
-    info_msg ("Adding %s to constructor/destructor set %s\n", name, set_name);
+  if (config.map_file != (FILE *) NULL)
+    fprintf (config.map_file,
+	     "Adding %s to constructor/destructor set %s\n", name, set_name);
 
   h = bfd_link_hash_lookup (info->hash, set_name, true, true, true);
   if (h == (struct bfd_link_hash_entry *) NULL)
@@ -722,7 +743,7 @@ constructor_callback (info, constructor, bitsize, name, abfd, section, value)
 	 ourselves.  */
     }
 
-  ldctor_add_set_entry (h, bitsize, section, value);
+  ldctor_add_set_entry (h, BFD_RELOC_CTOR, section, value);
   return true;
 }
 
@@ -790,8 +811,11 @@ reloc_overflow (info, name, reloc_name, addend, abfd, section, address)
      asection *section;
      bfd_vma address;
 {
-  einfo ("%X%C: relocation truncated to fit: %s %T", abfd, section,
-	 address, reloc_name, name);
+  if (abfd == (bfd *) NULL)
+    einfo ("%P%X: generated");
+  else
+    einfo ("%X%C:", abfd, section, address);
+  einfo (" relocation truncated to fit: %s %T", reloc_name, name);
   if (addend != 0)
     einfo ("+%v", addend);
   einfo ("\n");
@@ -809,7 +833,11 @@ reloc_dangerous (info, message, abfd, section, address)
      asection *section;
      bfd_vma address;
 {
-  einfo ("%X%C: dangerous relocation: %s\n", abfd, section, address, message);
+  if (abfd == (bfd *) NULL)
+    einfo ("%P%X: generated");
+  else
+    einfo ("%X%C:", abfd, section, address);
+  einfo ("dangerous relocation: %s\n", message);
   return true;
 }
 
@@ -825,8 +853,11 @@ unattached_reloc (info, name, abfd, section, address)
      asection *section;
      bfd_vma address;
 {
-  einfo ("%X%C: reloc refers to symbol `%T' which is not being output\n",
-	 abfd, section, address, name);
+  if (abfd == (bfd *) NULL)
+    einfo ("%P%X: generated");
+  else
+    einfo ("%X%C:", abfd, section, address);
+  einfo (" reloc refers to symbol `%T' which is not being output\n", name);
   return true;
 }
 

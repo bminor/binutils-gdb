@@ -8,12 +8,18 @@
 #		(e.g., .PARISC.global)
 #	EXECUTABLE_SYMBOLS - symbols that must be defined for an
 #		executable (e.g., _DYNAMIC_LINK)
+#	TEXT_START_SYMBOLS - symbols that appear at the start of the
+#		.text section.
+#	DATA_START_SYMBOLS - symbols that appear at the start of the
+#		.data section.
 #	OTHER_BSS_SYMBOLS - symbols that appear at the start of the
 #		.bss section besides __bss_start.
+#	DATA_PLT - .plt should be in data segment, not text segment.
 #
 # When adding sections, do note that the names of some sections are used
 # when specifying the start address of the next.
 #
+PLT=".plt    ${RELOCATING-0} : { *(.plt)	}"
 cat <<EOF
 OUTPUT_FORMAT("${OUTPUT_FORMAT}")
 OUTPUT_ARCH(${ARCH})
@@ -29,62 +35,58 @@ ${RELOCATING- /* For some reason, the Solaris linker makes bad executables
 SECTIONS
 {
   /* Read-only sections, merged into text segment: */
-  .text ${RELOCATING+${TEXT_START_ADDR}} ${RELOCATING-0} :
+  ${RELOCATING+. = ${TEXT_START_ADDR} + SIZEOF_HEADERS;}
+  .interp   ${RELOCATING-0} : { *(.interp) 	}
+  .hash     ${RELOCATING-0} : { *(.hash)	}
+  .dynsym   ${RELOCATING-0} : { *(.dynsym)	}
+  .dynstr   ${RELOCATING-0} : { *(.dynstr)	}
+  .rel.bss  ${RELOCATING-0} : { *(.rel.bss)	}
+  .rel.plt  ${RELOCATING-0} : { *(.rel.plt)	}
+  .rela.bss ${RELOCATING-0} : { *(.rela.bss)	}
+  .rela.plt ${RELOCATING-0} : { *(.rela.plt)	}
+  .init     ${RELOCATING-0} : { *(.init)	} =${NOP-0}
+  ${DATA_PLT-${PLT}}
+  .text    ${RELOCATING-0} :
   {
+    ${RELOCATING+${TEXT_START_SYMBOLS}}
     *(.text)
-    CREATE_OBJECT_SYMBOLS
-    ${RELOCATING+_etext = .;}
   }
-  .init    ${RELOCATING+ALIGN(8)} ${RELOCATING-0} : { *(.init)    } =${NOP-0}
-  .fini    ${RELOCATING+ALIGN(8)} ${RELOCATING-0} : { *(.fini)    } =${NOP-0}
-  .ctors   ${RELOCATING+ALIGN(8)} ${RELOCATING-0} : { *(.ctors)   }
-  .dtors   ${RELOCATING+ALIGN(8)} ${RELOCATING-0} : { *(.dtors)   }
-  .rodata  ${RELOCATING+ALIGN(8)} ${RELOCATING-0} : { *(.rodata)  }
-  .rodata1 ${RELOCATING+ALIGN(8)} ${RELOCATING-0} :
-    {
-      *(.rodata1)
-      ${RELOCATING+. = ALIGN(8);}
-    }
+  ${RELOCATING+_etext = .;}
+  .fini    ${RELOCATING-0} : { *(.fini)    } =${NOP-0}
+  .ctors   ${RELOCATING-0} : { *(.ctors)   }
+  .dtors   ${RELOCATING-0} : { *(.dtors)   }
+  .rodata  ${RELOCATING-0} : { *(.rodata)  }
+  .rodata1 ${RELOCATING-0} : { *(.rodata1) }
   ${RELOCATING+${OTHER_READONLY_SECTIONS}}
-  /* also: .hash .dynsym .dynstr .plt(if r/o) .rel.got */
 
   /* Read-write section, merged into data segment: */
-  .data  ${RELOCATING+
-	    ${DATA_ADDR- ADDR(.rodata1)+SIZEOF(.rodata1)+${MAXPAGESIZE}}
-	  }
-	 ${RELOCATING-0} :
+  ${RELOCATING+. = ${DATA_ADDR- ALIGN(8) + ${MAXPAGESIZE}};}
+  .data  ${RELOCATING-0} :
   {
+    ${RELOCATING+${DATA_START_SYMBOLS}}
     *(.data)
     ${CONSTRUCTING+CONSTRUCTORS}
   }
-  .data1 ${RELOCATING+ALIGN(8)} ${RELOCATING-0} : { *(.data1) }
+  .data1 ${RELOCATING-0} : { *(.data1) }
   ${RELOCATING+${OTHER_READWRITE_SECTIONS}}
-  /* also (before uninitialized portion): .dynamic .got .plt(if r/w)
-     (or does .dynamic go into its own segment?) */
+  .got         ${RELOCATING-0} : { *(.got)     }
+  .dynamic     ${RELOCATING-0} : { *(.dynamic) }
+  ${DATA_PLT+${PLT}}
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
-  .sdata   ${RELOCATING+ALIGN(8)} ${RELOCATING-0} : { *(.sdata) }
+  .sdata   ${RELOCATING-0} : { *(.sdata) }
   ${RELOCATING+_edata  =  .;}
-  ${RELOCATING+__bss_start = ALIGN(8);}
+  ${RELOCATING+__bss_start = .;}
   ${RELOCATING+${OTHER_BSS_SYMBOLS}}
-  .sbss    ${RELOCATING+ALIGN(8)} ${RELOCATING-0} : { *(.sbss) *(.scommon) }
-  .bss     ${RELOCATING+ALIGN(8)} ${RELOCATING-0} :
+  .sbss    ${RELOCATING-0} : { *(.sbss) *(.scommon) }
+  .bss     ${RELOCATING-0} :
   {
+   *(.dynbss)
    *(.bss)
    *(COMMON)
-   ${RELOCATING+_end = . };
-   ${RELOCATING+end = . };
   }
-
-  /* Debug sections.  These should never be loadable, but they must have
-     zero addresses for the debuggers to work correctly.  */
-  .line			0 : { *(.line)			}
-  .debug		0 : { *(.debug)			}
-  .debug_sfnames	0 : { *(.debug_sfnames)		}
-  .debug_srcinfo	0 : { *(.debug_srcinfo)		}
-  .debug_macinfo	0 : { *(.debug_macinfo)		}
-  .debug_pubnames	0 : { *(.debug_pubnames)	}
-  .debug_aranges	0 : { *(.debug_aranges)		}
+  ${RELOCATING+_end = . ;}
+  ${RELOCATING+end = . ;}
 }
 EOF

@@ -1,5 +1,4 @@
-
-/* Copyright (C) 1991 Free Software Foundation, Inc.
+/* Copyright (C) 1991, 92, 93, 94 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -32,6 +31,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldlang.h"
 #include "ldfile.h"
 #include "ldmain.h"
+#include "ldgram.h"
 #include "ldlex.h"
 
 #include <ctype.h>
@@ -89,7 +89,7 @@ ldfile_add_library_path(name)
 char *name;
 {
   search_dirs_type *new =
-    (search_dirs_type *)ldmalloc((bfd_size_type)(sizeof(search_dirs_type)));
+    (search_dirs_type *)xmalloc((bfd_size_type)(sizeof(search_dirs_type)));
   new->name = name;
   new->next = (search_dirs_type*)NULL;
   *search_tail_ptr = new;
@@ -160,40 +160,41 @@ open_a(arch, entry, lib, suffix)
 
 void
 ldfile_open_file (entry)
-lang_input_statement_type *entry;
+     lang_input_statement_type *entry;
 {
-
-  if (entry->superfile)
+  if (entry->superfile != NULL)
     ldfile_open_file (entry->superfile);
 
-  if (entry->search_dirs_flag)
+  if (! entry->search_dirs_flag)
+    entry->the_bfd = cached_bfd_openr (entry->filename, entry);
+  else
     {
       search_arch_type *arch;
+
       /* Try to open <filename><suffix> or lib<filename><suffix>.a */
-  
       for (arch = search_arch_head;
-	   arch != (search_arch_type *)NULL;
-	   arch = arch->next) {
-	if (open_a(arch->name,entry,"lib",".a") != (bfd *)NULL) {
-	  return;
-	}
+	   arch != (search_arch_type *) NULL;
+	   arch = arch->next)
+	{
+	  if (config.dynamic_link)
+	    {
+	      /* FIXME: Perhaps we will sometimes want something other
+		 than .so.  */
+	      if (open_a (arch->name, entry, "lib", ".so") != (bfd *) NULL)
+		return;
+	    }
+	  if (open_a (arch->name, entry, "lib", ".a") != (bfd *) NULL)
+	    return;
 #ifdef VMS
-	if (open_a(arch->name,entry,":lib",".a") != (bfd *)NULL) {
-	  return;
-	}
+	  if (open_a (arch->name, entry, ":lib", ".a") != (bfd *) NULL)
+	    return;
 #endif
-
-      }
-
+	}
     }
-  else {
-    entry->the_bfd = cached_bfd_openr (entry->filename, entry);
-  }
 
-  if (!entry->the_bfd)
+  if (entry->the_bfd == NULL)
     einfo("%F%P: cannot open %s: %E\n", entry->local_sym_name);
 }
-
 
 /* Try to open NAME; if that fails, try NAME with EXTEN appended to it.  */
 
@@ -264,6 +265,7 @@ char *name;
   ldlex_input_stack = ldfile_find_command_file(name, "");
 
   if (ldlex_input_stack == (FILE *)NULL) {
+    bfd_set_error (bfd_error_system_call);
     einfo("%P%F: cannot open linker script file %s: %E\n",name);
   }
   lex_push_file(ldlex_input_stack, name);
@@ -316,7 +318,7 @@ ldfile_add_arch(name)
 char *name;
 {
   search_arch_type *new =
-    (search_arch_type *)ldmalloc((bfd_size_type)(sizeof(search_arch_type)));
+    (search_arch_type *)xmalloc((bfd_size_type)(sizeof(search_arch_type)));
 
 
   if (*name != '\0') {
@@ -343,7 +345,7 @@ ldfile_add_arch (in_name)
 {
   char *name = buystring(in_name);
   search_arch_type *new =
-    (search_arch_type *)ldmalloc((bfd_size_type)(sizeof(search_arch_type)));
+    (search_arch_type *)xmalloc((bfd_size_type)(sizeof(search_arch_type)));
 
   ldfile_output_machine_name = in_name;
 

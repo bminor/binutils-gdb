@@ -57,50 +57,53 @@ parse_args (argc, argv)
 
   static struct option longopts[] = {
 #define OPTION_CALL_SHARED 150
+#define OPTION_NON_SHARED 151
     {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
     {"dc", no_argument, NULL, 'd'},
-#define OPTION_DEFSYM 151
+#define OPTION_DEFSYM 152
     {"defsym", required_argument, NULL, OPTION_DEFSYM},
-    {"dn", no_argument, NULL, OPTION_CALL_SHARED},
+    {"dn", no_argument, NULL, OPTION_NON_SHARED},
     {"dp", no_argument, NULL, 'd'},
-#define OPTION_EB 152
+    {"dy", no_argument, NULL, OPTION_CALL_SHARED},
+#define OPTION_EB 153
     {"EB", no_argument, NULL, OPTION_EB},
-#define OPTION_EL 153
+#define OPTION_EL 154
     {"EL", no_argument, NULL, OPTION_EL},
     {"format", required_argument, NULL, 'b'},
-#define OPTION_HELP 154
+#define OPTION_HELP 155
     {"help", no_argument, NULL, OPTION_HELP},
-#define OPTION_MAP 155
+#define OPTION_MAP 156
     {"Map", required_argument, NULL, OPTION_MAP},
-#define OPTION_NO_KEEP_MEMORY 156
+#define OPTION_NO_KEEP_MEMORY 157
     {"no-keep-memory", no_argument, NULL, OPTION_NO_KEEP_MEMORY},
-#define OPTION_NOINHIBIT_EXEC 157
+#define OPTION_NOINHIBIT_EXEC 158
     {"noinhibit-exec", no_argument, NULL, OPTION_NOINHIBIT_EXEC},
     {"noinhibit_exec", no_argument, NULL, OPTION_NOINHIBIT_EXEC},
-    {"non_shared", no_argument, NULL, OPTION_CALL_SHARED},
-#define OPTION_OFORMAT 158
+    {"non_shared", no_argument, NULL, OPTION_NON_SHARED},
+#define OPTION_OFORMAT 159
     {"oformat", required_argument, NULL, OPTION_OFORMAT},
-    {"Qy", no_argument, NULL, OPTION_CALL_SHARED},
-#define OPTION_RELAX 159
+#define OPTION_IGNORE 160
+    {"Qy", no_argument, NULL, OPTION_IGNORE},
+#define OPTION_RELAX 161
     {"relax", no_argument, NULL, OPTION_RELAX},
-#define OPTION_RETAIN_SYMBOLS_FILE 160
+#define OPTION_RETAIN_SYMBOLS_FILE 162
     {"retain-symbols-file", no_argument, NULL, OPTION_RETAIN_SYMBOLS_FILE},
-#define OPTION_SORT_COMMON 161
+#define OPTION_SORT_COMMON 163
     {"sort-common", no_argument, NULL, OPTION_SORT_COMMON},
     {"sort_common", no_argument, NULL, OPTION_SORT_COMMON},
-#define OPTION_STATS 162
+#define OPTION_STATS 164
     {"stats", no_argument, NULL, OPTION_STATS},
-#define OPTION_TBSS 163
+#define OPTION_TBSS 165
     {"Tbss", required_argument, NULL, OPTION_TBSS},
-#define OPTION_TDATA 164
+#define OPTION_TDATA 166
     {"Tdata", required_argument, NULL, OPTION_TDATA},
-#define OPTION_TTEXT 165
+#define OPTION_TTEXT 167
     {"Ttext", required_argument, NULL, OPTION_TTEXT},
-#define OPTION_UR 166
+#define OPTION_UR 168
     {"Ur", no_argument, NULL, OPTION_UR},
-#define OPTION_VERSION 167
+#define OPTION_VERSION 169
     {"version", no_argument, NULL, OPTION_VERSION},
-#define OPTION_WARN_COMMON 168
+#define OPTION_WARN_COMMON 170
     {"warn-common", no_argument, NULL, OPTION_WARN_COMMON},
     {NULL, no_argument, NULL, 0}
   };
@@ -124,6 +127,8 @@ parse_args (argc, argv)
 			       (char *) NULL);
 	  break;
 
+	case OPTION_IGNORE:
+	  break;
 	case 'A':
 	  ldfile_add_arch (optarg);
 	  break;
@@ -139,7 +144,10 @@ parse_args (argc, argv)
 	  yyparse ();
 	  break;
 	case OPTION_CALL_SHARED:
-	  set_default_dirlist ((char *) longopts[longind].name);
+	  config.dynamic_link = true;
+	  break;
+	case OPTION_NON_SHARED:
+	  config.dynamic_link = false;
 	  break;
 	case 'd':
 	  command_line.force_common_definition = true;
@@ -194,7 +202,6 @@ parse_args (argc, argv)
 	  /* Ignore.  Was handled in a pre-parse.   */
 	  break;
 	case OPTION_MAP:
-	  write_map = true;
 	  config.map_filename = optarg;
 	  break;
 	case 'N':
@@ -229,6 +236,7 @@ parse_args (argc, argv)
 	  config.build_constructors = false;
 	  config.magic_demand_paged = false;
 	  config.text_read_only = false;
+	  config.dynamic_link = false;
 	  break;
 	case 'R':
 	  lang_add_input_file (optarg,
@@ -275,6 +283,7 @@ parse_args (argc, argv)
 	  config.build_constructors = true;
 	  config.magic_demand_paged = false;
 	  config.text_read_only = false;
+	  config.dynamic_link = false;
 	  break;
 	case 'u':
 	  ldlang_add_undef (optarg);
