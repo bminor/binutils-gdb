@@ -1,3 +1,8 @@
+2001-02-20  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_finish_dynamic_symbol): Don't make
+	PLT entries that could serve as a definition for a weak symbol.
+
 2001-02-18  David O'Brien  <obrien@FreeBSD>
 
 	* configure.in: Recognize FreeBSD/arm, FreeBSD/PowerPC, and treat
@@ -14,7 +19,7 @@
 	checking.
 	(pe_bfd_object_p): Rewrite with external_PEI_DOS_hdr and
 	external_PEI_IMAGE_hdr.
-	
+
 2001-02-14  Bo Thorsen  <bo@suse.de>
 
         * elf64-x86-64.c: Small formatting fixes and rearrangements of code.
