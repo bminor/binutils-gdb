@@ -1,3 +1,10 @@
+2004-08-31  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2read.c (is_vtable_name): New function, based on logic from
+	read_structure_type, but passing the correct length to strncmp,
+	and using 'sizeof' instead of 'strlen'.
+	(read_structure_type): Call it.
+
 2004-08-31  Joel Brobecker  <brobecker@gnat.com>
 
 	* config/powerpc/aix.mh: Add comment.

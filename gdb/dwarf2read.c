@@ -3265,6 +3265,23 @@ dwarf2_attach_fn_fields_to_type (struct field_info *fip, struct type *type,
   TYPE_NFN_FIELDS_TOTAL (type) = total_length;
 }
 
+
+/* Returns non-zero if NAME is the name of a vtable member in CU's
+   language, zero otherwise.  */
+static int
+is_vtable_name (const char *name, struct dwarf2_cu *cu)
+{
+  static const char vptr[] = "_vptr";
+
+  /* C++ and some implementations of Java use this name.  */
+  if (strncmp (name, vptr, sizeof (vptr) - 1) == 0
+      && is_cplus_marker (name[sizeof (vptr) - 1]))
+    return 1;
+
+  return 0;
+}
+
+
 /* Called when we find the DIE that starts a structure or union scope
    (definition) to process all dies that define the members of the
    structure or union.
@@ -3403,8 +3420,6 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 	      TYPE_VPTR_BASETYPE (type) = t;
 	      if (type == t)
 		{
-		  static const char vptr_name[] =
-		  {'_', 'v', 'p', 't', 'r', '\0'};
 		  int i;
 
 		  /* Our own class provides vtbl ptr.  */
@@ -3414,10 +3429,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 		    {
 		      char *fieldname = TYPE_FIELD_NAME (t, i);
 
-		      if ((strncmp (fieldname, vptr_name,
-                                    strlen (vptr_name) - 1)
-                           == 0)
-			  && is_cplus_marker (fieldname[strlen (vptr_name)]))
+                      if (is_vtable_name (fieldname, cu))
 			{
 			  TYPE_VPTR_FIELDNO (type) = i;
 			  break;
