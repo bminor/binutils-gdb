@@ -45,8 +45,8 @@ const char line_separator_chars[] = "";
 const char EXP_CHARS[] = "eE";
 
 /* Characters which mean that a number is a floating point constant, 
-   as in 0d1.0.  */
-const char FLT_CHARS[] = "dD";
+   as in 0f1.0.  */
+const char FLT_CHARS[] = "fF";
 
 /* This table describes all the machine specific pseudo-ops the assembler
    has to support.  The fields are:
@@ -418,9 +418,14 @@ find_opcode (opcode, myops)
 		  match = 0;
 		}
 	      break;
+	    case O_big:
+	      if ((num > 0) || !(flags & TIC80_OPERAND_FLOAT))
+		{
+		  match = 0;
+		}
+	      break;
 	    case O_illegal:
 	    case O_symbol_rva:
-	    case O_big:
 	    case O_uminus:
 	    case O_bit_not:
 	    case O_logical_not:
@@ -664,9 +669,23 @@ build_insn (opcode, opers)
 	      internal_error_a ("unhandled operand modifier", opers[expi].X_add_number);
 	    }
 	  break;
+	case O_big:
+	  extended++;
+	  {
+	    union {
+	      unsigned long l;
+	      LITTLENUM_TYPE words[10];
+	    } u;
+	    gen_to_words (u.words, 2, 8L);	/* FIXME: magic numbers */
+	    /* FIXME: More magic, swap the littlenums */
+	    u.words[2] = u.words[0];
+	    u.words[0] = u.words [1];
+	    u.words[1] = u.words [2];
+	    insn[1] = u.l;
+	  }
+	  break;
 	case O_illegal:
 	case O_symbol_rva:
-	case O_big:
 	case O_uminus:
 	case O_bit_not:
 	case O_logical_not:
