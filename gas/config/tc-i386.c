@@ -1519,6 +1519,8 @@ md_assemble (line)
 	/* Check the suffix, except for some instructions in intel mode.  */
 	if ((t->opcode_modifier & suffix_check)
 	    && !(intel_syntax
+		 && (t->opcode_modifier & IgnoreSize))
+	    && !(intel_syntax
 		 && t->base_opcode == 0xd9
 		 && (t->extension_opcode == 5	/* 0xd9,5 "fldcw"  */
 		     || t->extension_opcode == 7))) /* 0xd9,7 "f{n}stcw"  */
@@ -1808,6 +1810,9 @@ md_assemble (line)
 		}
 #endif
 	  }
+	else if (intel_syntax && (i.tm.opcode_modifier & IgnoreSize))
+	  /* Do nothing if the instruction is going to ignore the prefix.  */
+	  ;
 	else
 	  abort ();
       }
