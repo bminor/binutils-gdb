@@ -1067,7 +1067,7 @@ size_of_encoded_value (unsigned char encoding)
 
 static CORE_ADDR
 read_encoded_value (struct comp_unit *unit, unsigned char encoding,
-		    char *buf, unsigned int *bytes_read_ptr)
+		    unsigned char *buf, unsigned int *bytes_read_ptr)
 {
   int ptr_len = size_of_encoded_value (DW_EH_PE_absptr);
   ptrdiff_t offset;
@@ -1088,7 +1088,7 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
       break;
     case DW_EH_PE_pcrel:
       base = bfd_get_section_vma (unit->bfd, unit->dwarf_frame_section);
-      base += (buf - unit->dwarf_frame_buffer);
+      base += ((char *) buf - unit->dwarf_frame_buffer);
       break;
     case DW_EH_PE_datarel:
       base = unit->dbase;
@@ -1106,7 +1106,7 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
       break;
     case DW_EH_PE_aligned:
       base = 0;
-      offset = buf - unit->dwarf_frame_buffer;
+      offset = (char *) buf - unit->dwarf_frame_buffer;
       if ((offset % ptr_len) != 0)
 	{
 	  *bytes_read_ptr = ptr_len - (offset % ptr_len);
@@ -1122,6 +1122,13 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
 
   switch (encoding & 0x0f)
     {
+    case DW_EH_PE_uleb128:
+      {
+	ULONGEST value;
+	unsigned char *end_buf = buf + (sizeof (value) + 1) * 8 / 7;
+	*bytes_read_ptr = read_uleb128 (buf, end_buf, &value) - buf;
+	return base + value;
+      }
     case DW_EH_PE_udata2:
       *bytes_read_ptr += 2;
       return (base + bfd_get_16 (unit->abfd, (bfd_byte *) buf));
@@ -1131,6 +1138,13 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
     case DW_EH_PE_udata8:
       *bytes_read_ptr += 8;
       return (base + bfd_get_64 (unit->abfd, (bfd_byte *) buf));
+    case DW_EH_PE_sleb128:
+      {
+	LONGEST value;
+	char *end_buf = buf + (sizeof (value) + 1) * 8 / 7;
+	*bytes_read_ptr = read_sleb128 (buf, end_buf, &value) - buf;
+	return base + value;
+      }
     case DW_EH_PE_sdata2:
       *bytes_read_ptr += 2;
       return (base + bfd_get_signed_16 (unit->abfd, (bfd_byte *) buf));

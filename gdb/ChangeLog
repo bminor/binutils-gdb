@@ -1,3 +1,8 @@
+2004-11-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (read_encoded_value): Change type of third
+	argument to `unsigned char *'.  Add support for LEB128 encodings.
+
 2004-11-04  Jim Blandy  <jimb@redhat.com>
 
 	* gdbtypes.c (make_qualified_type): Doc fix.  Add assertion to
