@@ -15,3 +15,10 @@ label:
 	sxtb   r1, r2
 	uxth   r3, r4
 	uxtb   r5, r6
+
+	# Add four nop instructions to ensure that the output is
+	# 32-byte aligned as required for arm-aout.
+	nop
+	nop
+	nop
+	nop

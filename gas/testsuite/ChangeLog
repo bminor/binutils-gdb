@@ -1,3 +1,8 @@
+2003-12-14  Mark Mitchell  <mark@codesourcery.com>
+
+	* gas/arm/thumbv6.s: Add nops.
+	* gas/arm/thumbv6.d: Use -M force-thumb option to objdump.  Add nops.
+	
 2003-12-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/mmix/basep-8.d: Update for lcomm symbol type change.
