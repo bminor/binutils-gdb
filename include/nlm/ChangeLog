@@ -1,3 +1,27 @@
+Wed Oct 27 11:45:56 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* common.h (NLM_SIGNATURE): Do not define (it's different for each
+	backend).
+
+Tue Aug 31 13:24:15 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* internal.h: Change length fields of type char to type unsigned
+	char.
+
+Sat Jul 31 02:12:14 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* common.h (NLM_HIBIT, NLM_HEADER_VERSION): Define.
+
+Thu Jul 22 16:09:47 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* common.h (NLM_CAT*, NLM_ARCH_SIZE, NLM_TARGET_LONG_SIZE,
+	NLM_TARGET_ADDRESS_SIZE, NLM_NAME, NlmNAME, nlmNAME):  New
+	macros.
+	* external.h (TARGET_LONG_SIZE, TARGET_ADDRESS_SIZE): Remove
+	macros, convert usages to NLM_ equivalents.
+	* external.h:  Use nlmNAME and NlmNAME macros to derive both
+	32 and 64 bit versions.
+
 Mon Jul 19 22:12:40 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* (common.h, external.h, internal.h):  New files for NLM/NetWare

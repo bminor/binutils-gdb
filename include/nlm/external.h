@@ -37,25 +37,23 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    (3)	A auxiliary header that has various optional fields in no specific
         order.  There is no way to identify the end of the auxiliary headers
 	except by finding a header without a recognized 'stamp'.
+
 */
    
-#define TARGET_LONG_SIZE 4
-#define TARGET_ADDRESS_SIZE 4
+/* NLM Header */
 
-/* NLM Header (32-bit implementations) */
-
-typedef struct nlm32_external_fixed_header
+typedef struct nlmNAME(external_fixed_header)
 {
 
   /* The signature field identifies the file as an NLM.  It must contain
-     the string defined by NLM_SIGNATURE. */
+     the signature string, which depends upon the NLM target. */
 
   unsigned char signature[NLM_SIGNATURE_SIZE];
 
   /* The version of the header.  At this time, the highest version number
      is 4. */
 
-  unsigned char version[TARGET_LONG_SIZE];
+  unsigned char version[NLM_TARGET_LONG_SIZE];
 
   /* The name of the module, which must be a DOS name (1-8 characters followed
      by a period and a 1-3 character extension).  The first byte is the byte
@@ -67,104 +65,104 @@ typedef struct nlm32_external_fixed_header
 
   /* The byte offset of the code image from the start of the file. */
 
-  unsigned char codeImageOffset[TARGET_LONG_SIZE];
+  unsigned char codeImageOffset[NLM_TARGET_LONG_SIZE];
 
   /* The size of the code image, in bytes. */
 
-  unsigned char codeImageSize[TARGET_LONG_SIZE];
+  unsigned char codeImageSize[NLM_TARGET_LONG_SIZE];
 
   /* The byte offset of the data image from the start of the file. */
 
-  unsigned char dataImageOffset[TARGET_LONG_SIZE];
+  unsigned char dataImageOffset[NLM_TARGET_LONG_SIZE];
 
   /* The size of the data image, in bytes. */
 
-  unsigned char dataImageSize[TARGET_LONG_SIZE];
+  unsigned char dataImageSize[NLM_TARGET_LONG_SIZE];
 
   /* The size of the uninitialized data region that the loader is to be
      allocated at load time.  Uninitialized data follows the initialized
      data in the NLM address space. */
 
-  unsigned char uninitializedDataSize[TARGET_LONG_SIZE];
+  unsigned char uninitializedDataSize[NLM_TARGET_LONG_SIZE];
 
   /* The byte offset of the custom data from the start of the file.  The
      custom data is set by the CUSTOM keyword to NLMLINK.  It is possible
      for this to be EOF if there is no custom data. */
 
-  unsigned char customDataOffset[TARGET_LONG_SIZE];
+  unsigned char customDataOffset[NLM_TARGET_LONG_SIZE];
 
   /* The size of the custom data, in bytes. */
 
-  unsigned char customDataSize[TARGET_LONG_SIZE];
+  unsigned char customDataSize[NLM_TARGET_LONG_SIZE];
 
   /* The byte offset of the module dependencies from the start of the file.
      The module dependencies are determined by the MODULE keyword in
      NLMLINK. */
 
-  unsigned char moduleDependencyOffset[TARGET_LONG_SIZE];
+  unsigned char moduleDependencyOffset[NLM_TARGET_LONG_SIZE];
 
   /* The number of module dependencies at the moduleDependencyOffset. */
 
-  unsigned char numberOfModuleDependencies[TARGET_LONG_SIZE];
+  unsigned char numberOfModuleDependencies[NLM_TARGET_LONG_SIZE];
 
   /* The byte offset of the relocation fixup data from the start of the file */
      
-  unsigned char relocationFixupOffset[TARGET_LONG_SIZE];
+  unsigned char relocationFixupOffset[NLM_TARGET_LONG_SIZE];
 
-  unsigned char numberOfRelocationFixups[TARGET_LONG_SIZE];
+  unsigned char numberOfRelocationFixups[NLM_TARGET_LONG_SIZE];
 
-  unsigned char externalReferencesOffset[TARGET_LONG_SIZE];
+  unsigned char externalReferencesOffset[NLM_TARGET_LONG_SIZE];
 
-  unsigned char numberOfExternalReferences[TARGET_LONG_SIZE];
+  unsigned char numberOfExternalReferences[NLM_TARGET_LONG_SIZE];
 
-  unsigned char publicsOffset[TARGET_LONG_SIZE];
+  unsigned char publicsOffset[NLM_TARGET_LONG_SIZE];
 
-  unsigned char numberOfPublics[TARGET_LONG_SIZE];
+  unsigned char numberOfPublics[NLM_TARGET_LONG_SIZE];
 
   /* The byte offset of the internal debug info from the start of the file.
      It is possible for this to be EOF if there is no debug info. */
 
-  unsigned char debugInfoOffset[TARGET_LONG_SIZE];
+  unsigned char debugInfoOffset[NLM_TARGET_LONG_SIZE];
 
-  unsigned char numberOfDebugRecords[TARGET_LONG_SIZE];
+  unsigned char numberOfDebugRecords[NLM_TARGET_LONG_SIZE];
 
-  unsigned char codeStartOffset[TARGET_LONG_SIZE];
+  unsigned char codeStartOffset[NLM_TARGET_LONG_SIZE];
 
-  unsigned char exitProcedureOffset[TARGET_LONG_SIZE];
+  unsigned char exitProcedureOffset[NLM_TARGET_LONG_SIZE];
 
-  unsigned char checkUnloadProcedureOffset[TARGET_LONG_SIZE];
+  unsigned char checkUnloadProcedureOffset[NLM_TARGET_LONG_SIZE];
 
-  unsigned char moduleType[TARGET_LONG_SIZE];
+  unsigned char moduleType[NLM_TARGET_LONG_SIZE];
 
-  unsigned char flags[TARGET_LONG_SIZE];
+  unsigned char flags[NLM_TARGET_LONG_SIZE];
 
-} Nlm32_External_Fixed_Header;
+} NlmNAME(External_Fixed_Header);
 
 /* The version header is one of the optional auxiliary headers and
    follows the fixed length and variable length NLM headers. */
 
-typedef struct nlm32_external_version_header
+typedef struct nlmNAME(external_version_header)
 {
 
   /* The header is recognized by "VeRsIoN#" in the stamp field. */
   char stamp[8];
 
-  unsigned char majorVersion[TARGET_LONG_SIZE];
+  unsigned char majorVersion[NLM_TARGET_LONG_SIZE];
 
-  unsigned char minorVersion[TARGET_LONG_SIZE];
+  unsigned char minorVersion[NLM_TARGET_LONG_SIZE];
 
-  unsigned char revision[TARGET_LONG_SIZE];
+  unsigned char revision[NLM_TARGET_LONG_SIZE];
 
-  unsigned char year[TARGET_LONG_SIZE];
+  unsigned char year[NLM_TARGET_LONG_SIZE];
 
-  unsigned char month[TARGET_LONG_SIZE];
+  unsigned char month[NLM_TARGET_LONG_SIZE];
 
-  unsigned char day[TARGET_LONG_SIZE];
+  unsigned char day[NLM_TARGET_LONG_SIZE];
 
-} Nlm32_External_Version_Header;
+} NlmNAME(External_Version_Header);
 
 
-typedef struct nlm32_external_copyright_header
+typedef struct nlmNAME(external_copyright_header)
 {
 
   /* The header is recognized by "CoPyRiGhT=" in the stamp field. */
@@ -176,84 +174,83 @@ typedef struct nlm32_external_copyright_header
   /* There is a variable length field here called 'copyrightMessage'
      that is the length specified by copyrightMessageLength. */
 
-} Nlm32_External_Copyright_Header;
+} NlmNAME(External_Copyright_Header);
 
 
-typedef struct nlm32_external_extended_header
+typedef struct nlmNAME(external_extended_header)
 {
 
   /* The header is recognized by "MeSsAgEs" in the stamp field. */
 
   char stamp[8];
 
-  unsigned char languageID[TARGET_LONG_SIZE];
+  unsigned char languageID[NLM_TARGET_LONG_SIZE];
 
-  unsigned char messageFileOffset[TARGET_LONG_SIZE];
+  unsigned char messageFileOffset[NLM_TARGET_LONG_SIZE];
 
-  unsigned char messageFileLength[TARGET_LONG_SIZE];
+  unsigned char messageFileLength[NLM_TARGET_LONG_SIZE];
 
-  unsigned char messageCount[TARGET_LONG_SIZE];
+  unsigned char messageCount[NLM_TARGET_LONG_SIZE];
 
-  unsigned char helpFileOffset[TARGET_LONG_SIZE];
+  unsigned char helpFileOffset[NLM_TARGET_LONG_SIZE];
 
-  unsigned char helpFileLength[TARGET_LONG_SIZE];
+  unsigned char helpFileLength[NLM_TARGET_LONG_SIZE];
 
-  unsigned char RPCDataOffset[TARGET_LONG_SIZE];
+  unsigned char RPCDataOffset[NLM_TARGET_LONG_SIZE];
 
-  unsigned char RPCDataLength[TARGET_LONG_SIZE];
+  unsigned char RPCDataLength[NLM_TARGET_LONG_SIZE];
 
-  unsigned char sharedCodeOffset[TARGET_LONG_SIZE];
+  unsigned char sharedCodeOffset[NLM_TARGET_LONG_SIZE];
 
-  unsigned char sharedCodeLength[TARGET_LONG_SIZE];
+  unsigned char sharedCodeLength[NLM_TARGET_LONG_SIZE];
 
-  unsigned char sharedDataOffset[TARGET_LONG_SIZE];
+  unsigned char sharedDataOffset[NLM_TARGET_LONG_SIZE];
 
-  unsigned char sharedDataLength[TARGET_LONG_SIZE];
+  unsigned char sharedDataLength[NLM_TARGET_LONG_SIZE];
 
-  unsigned char sharedRelocationFixupOffset[TARGET_LONG_SIZE];
+  unsigned char sharedRelocationFixupOffset[NLM_TARGET_LONG_SIZE];
 
-  unsigned char sharedRelocationFixupCount[TARGET_LONG_SIZE];
+  unsigned char sharedRelocationFixupCount[NLM_TARGET_LONG_SIZE];
 
-  unsigned char sharedExternalReferenceOffset[TARGET_LONG_SIZE];
+  unsigned char sharedExternalReferenceOffset[NLM_TARGET_LONG_SIZE];
 
-  unsigned char sharedExternalReferenceCount[TARGET_LONG_SIZE];
+  unsigned char sharedExternalReferenceCount[NLM_TARGET_LONG_SIZE];
 
-  unsigned char sharedPublicsOffset[TARGET_LONG_SIZE];
+  unsigned char sharedPublicsOffset[NLM_TARGET_LONG_SIZE];
 
-  unsigned char sharedPublicsCount[TARGET_LONG_SIZE];
+  unsigned char sharedPublicsCount[NLM_TARGET_LONG_SIZE];
 
-  unsigned char sharedInitializationOffset[TARGET_ADDRESS_SIZE];
+  unsigned char sharedInitializationOffset[NLM_TARGET_ADDRESS_SIZE];
 
-  unsigned char SharedExitProcedureOffset[TARGET_ADDRESS_SIZE];
+  unsigned char SharedExitProcedureOffset[NLM_TARGET_ADDRESS_SIZE];
 
-  unsigned char productID[TARGET_LONG_SIZE];
+  unsigned char productID[NLM_TARGET_LONG_SIZE];
 
-  unsigned char reserved0[TARGET_LONG_SIZE];
+  unsigned char reserved0[NLM_TARGET_LONG_SIZE];
 
-  unsigned char reserved1[TARGET_LONG_SIZE];
+  unsigned char reserved1[NLM_TARGET_LONG_SIZE];
 
-  unsigned char reserved2[TARGET_LONG_SIZE];
+  unsigned char reserved2[NLM_TARGET_LONG_SIZE];
 
-  unsigned char reserved3[TARGET_LONG_SIZE];
+  unsigned char reserved3[NLM_TARGET_LONG_SIZE];
 
-  unsigned char reserved4[TARGET_LONG_SIZE];
+  unsigned char reserved4[NLM_TARGET_LONG_SIZE];
 
-  unsigned char reserved5[TARGET_LONG_SIZE];
+  unsigned char reserved5[NLM_TARGET_LONG_SIZE];
 
-} Nlm32_External_Extended_Header;
+} NlmNAME(External_Extended_Header);
 
 
-typedef struct nlm32_external_custom_header
+typedef struct nlmNAME(external_custom_header)
 {
 
   /* The header is recognized by "CuStHeAd" in the stamp field. */
   char stamp[8];
 
-  unsigned char dataLength[TARGET_LONG_SIZE];
+  unsigned char dataLength[NLM_TARGET_LONG_SIZE];
 
-  unsigned char debugRecOffset[TARGET_LONG_SIZE];
+  unsigned char debugRecOffset[NLM_TARGET_LONG_SIZE];
 
-  unsigned char debugRecLength[TARGET_LONG_SIZE];
+  unsigned char debugRecLength[NLM_TARGET_LONG_SIZE];
 
-} Nlm32_External_Custom_Header;
-
+} NlmNAME(External_Custom_Header);
