@@ -47,6 +47,8 @@ static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void mips_info_to_howto_rel
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
+static void mips_info_to_howto_rela
+  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
 static void bfd_mips_elf32_swap_gptab_in
   PARAMS ((bfd *, const Elf32_External_gptab *, Elf32_gptab *));
 static void bfd_mips_elf32_swap_gptab_out
@@ -296,6 +298,10 @@ static void bfd_elf32_swap_crinfo_out
   PARAMS ((bfd *, const Elf32_crinfo *, Elf32_External_crinfo *));
 
 #define USE_REL	1		/* MIPS uses REL relocations instead of RELA */
+
+/* In case we're on a 32-bit machine, construct a 64-bit "-1" value
+   from smaller values.  Start with zero, widen, *then* decrement.  */
+#define MINUS_ONE	(((bfd_vma)0) - 1)
 
 static reloc_howto_type elf_mips_howto_table[] =
 {
@@ -634,8 +640,21 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 0x0000ffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* 64 bit subtraction.  Presumably not used in 32 bit ELF.  */
-  { R_MIPS_SUB },
+  /* 64 bit subtraction.  Used in the N32 ABI.  */
+  /* FIXME: Not handled correctly.  */
+  HOWTO (R_MIPS_SUB,		/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS_SUB",		/* name */
+	 true,			/* partial_inplace */
+	 MINUS_ONE,		/* src_mask */
+	 MINUS_ONE,		/* dst_mask */
+	 false),		/* pcrel_offset */
 
   /* Used to cause the linker to insert and delete instructions?  */
   { R_MIPS_INSERT_A },
@@ -1607,7 +1626,11 @@ static CONST struct elf_reloc_map mips_reloc_map[] =
   { BFD_RELOC_MIPS_GOT_HI16, R_MIPS_GOT_HI16 },
   { BFD_RELOC_MIPS_GOT_LO16, R_MIPS_GOT_LO16 },
   { BFD_RELOC_MIPS_CALL_HI16, R_MIPS_CALL_HI16 },
-  { BFD_RELOC_MIPS_CALL_LO16, R_MIPS_CALL_LO16 }
+  { BFD_RELOC_MIPS_CALL_LO16, R_MIPS_CALL_LO16 },
+  { BFD_RELOC_MIPS_SUB, R_MIPS_SUB },
+  { BFD_RELOC_MIPS_GOT_PAGE, R_MIPS_GOT_PAGE },
+  { BFD_RELOC_MIPS_GOT_OFST, R_MIPS_GOT_OFST },
+  { BFD_RELOC_MIPS_GOT_DISP, R_MIPS_GOT_DISP }
 };
 
 /* Given a BFD reloc type, return a howto structure.  */
@@ -1651,7 +1674,7 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
     }
 }
 
-/* Given a MIPS reloc type, fill in an arelent structure.  */
+/* Given a MIPS Elf32_Internal_Rel, fill in an arelent structure.  */
 
 static void
 mips_info_to_howto_rel (abfd, cache_ptr, dst)
@@ -1691,6 +1714,23 @@ mips_info_to_howto_rel (abfd, cache_ptr, dst)
       && (r_type == (unsigned int) R_MIPS_GPREL16
 	  || r_type == (unsigned int) R_MIPS_LITERAL))
     cache_ptr->addend = elf_gp (abfd);
+}
+
+/* Given a MIPS Elf32_Internal_Rela, fill in an arelent structure.  */
+
+static void
+mips_info_to_howto_rela (abfd, cache_ptr, dst)
+     bfd *abfd;
+     arelent *cache_ptr;
+     Elf32_Internal_Rela *dst;
+{
+  /* Since an Elf32_Internal_Rel is an initial prefix of an
+     Elf32_Internal_Rela, we can just use mips_info_to_howto_rel
+     above.  */
+  mips_info_to_howto_rel (abfd, cache_ptr, (Elf32_Internal_Rel *) dst);
+
+  /* If we ever need to do any extra processing with dst->r_addend
+     (the field omitted in an Elf32_Internal_Rel) we can do it here.  */
 }
 
 /* A .reginfo section holds a single Elf32_RegInfo structure.  These
@@ -1992,7 +2032,7 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
 	  sec = bfd_get_section_by_name (abfd,
 					 name + sizeof ".MIPS.content" - 1);
 	  BFD_ASSERT (sec != NULL);
-	  (*hdrpp)->sh_info = elf_section_data (sec)->this_idx;
+	  (*hdrpp)->sh_link = elf_section_data (sec)->this_idx;
 	  break;
 
 	case SHT_MIPS_SYMBOL_LIB:
@@ -2527,9 +2567,10 @@ _bfd_mips_elf_fake_sections (abfd, hdr, sec)
       hdr->sh_type = SHT_MIPS_IFACE;
       hdr->sh_flags |= SHF_MIPS_NOSTRIP;
     }
-  else if (strcmp (name, ".MIPS.content") == 0)
+  else if (strncmp (name, ".MIPS.content", strlen (".MIPS.content")) == 0)
     {
       hdr->sh_type = SHT_MIPS_CONTENT;
+      hdr->sh_flags |= SHF_MIPS_NOSTRIP;
       /* The sh_info field is set in final_write_processing.  */
     }
   else if (strcmp (name, ".options") == 0
@@ -7743,7 +7784,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap =
 #define elf_backend_collect		true
 #define elf_backend_type_change_ok	true
 #define elf_backend_can_gc_sections	true
-#define elf_info_to_howto		0
+#define elf_info_to_howto		mips_info_to_howto_rela
 #define elf_info_to_howto_rel		mips_info_to_howto_rel
 #define elf_backend_sym_is_global	mips_elf_sym_is_global
 #define elf_backend_object_p		mips_elf32_object_p

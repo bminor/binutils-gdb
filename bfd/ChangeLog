@@ -1,3 +1,26 @@
+Tue Jun  1 17:57:58 1999  Mark P. Mitchell  <mitchell@n02.acl.lanl.gov>
+
+	* reloc.c (BFD_RELOC_MIPS_SUB): New relocation.
+	(BFD_RELOC_MIPS_GOT_PAGE): Likewise.
+	(BFD_RELOC_MIPS_GOT_OFST): Likewise.
+	(BFD_RELOC_MIPS_GOT_DISP): Likewise.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+	* elf32-mips.c (mips_info_to_howto_rela): New function.
+	(USE_REL): Adjust for new conventions.
+	(MINUS_ONE): New macro.
+	(elf_mips_howto_table): Add R_MIPS_SUB.
+	(mips_r): Add entries for MIPS_SUB, MIPS_GOT_PAGE, MIPS_GOT_OFST, 
+	and MIPS_GOT_DISP.
+	(mips_elf_final_write_processing): Set sh_link, not sh_info, for a
+	.MIPS.content section.
+	(_bfd_mips_elf_fake_sections): Treat all sections that begin
+	with .MIPS.content as .MIPS.content sections.  Set
+	SHF_MNIPS_NOSTRIP for such section.
+	(elf_info_to_howto): Define to mips_info_to_howto_rela.
+	* elf64-mips.c (mips_r):  Add entries for MIPS_SUB, MIPS_GOT_PAGE,
+	MIPS_GOT_OFST, and MIPS_GOT_DISP.
+
 Wed Jun  2 11:51:12 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* vms-misc.c (_bfd_vms_hash_newfunc): Fix use of uninitialized
