@@ -51,7 +51,7 @@ struct regcache_descr
   /* The raw register cache.  Each raw (or hard) register is supplied
      by the target interface.  The raw cache should not contain
      redundant information - if the PC is constructed from two
-     registers then those regigisters and not the PC lives in the raw
+     registers then those registers and not the PC lives in the raw
      cache.  */
   int nr_raw_registers;
   long sizeof_raw_registers;

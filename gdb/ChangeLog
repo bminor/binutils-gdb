@@ -1,3 +1,7 @@
+2005-03-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* regcache.c: Fix typo in comment.
+
 2005-03-09  David Lecomber  <david@lecomber.net>
 
 	* proc-api.c (_initialize_proc_api): Fix invalid multi-line 
