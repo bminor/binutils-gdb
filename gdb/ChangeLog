@@ -1,3 +1,9 @@
+Wed Aug  7 21:45:52 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* dbxread.c:  Don't include param.h or sys/file.h.
+	* (dbx_symfile_read):  Determine symfile_relocatable from bfd
+	flags instead of file extension.  Also clean up a little bit.
+
 Wed Aug  7 17:18:37 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* dwarf2read.c dwarfread.c exec.c infcmd.c infrun.c main.c
