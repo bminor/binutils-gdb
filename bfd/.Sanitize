@@ -271,7 +271,7 @@ else
 	done
 fi
 
-rce_files="ChangeLog archures.c bfd-in2.h config.bfd configure.in targets.c aoutx.h libaout.h"
+rce_files="ChangeLog Makefile.in archures.c bfd-in2.h config.bfd configure.in targets.c aoutx.h libaout.h"
 if ( echo $* | grep keep\-rce > /dev/null ) ; then
 	for i in $rce_files ; do
 		if test ! -d $i && (grep sanitize-rce $i > /dev/null) ; then
@@ -299,7 +299,7 @@ else
 	done
 fi
 
-arc_files="ChangeLog archures.c reloc.c targets.c config.bfd configure.in bfd-in2.h elfcode.h libbfd.h"
+arc_files="ChangeLog Makefile.in archures.c reloc.c targets.c config.bfd configure.in bfd-in2.h elfcode.h libbfd.h"
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do
 		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
