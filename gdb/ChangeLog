@@ -1,3 +1,9 @@
+2003-10-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64fbsd-nat.c (fetch_inferior_registers,
+	store_inferior_registers): Remove functions.
+	* config/i386/fbsd64.mh (NATDEPFILES): Add amd64bsd-nat.o.
+
 2003-10-18  Mark Kettenis  <kettenis@gnu.org>
 
 	Add NetBSD/amd64 native configuration:
