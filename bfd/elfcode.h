@@ -1824,7 +1824,7 @@ map_program_segments (abfd, off, first, phdr_size)
      Elf_Internal_Shdr *first;
      bfd_size_type phdr_size;
 {
-  Elf_Internal_Phdr phdrs[5];
+  Elf_Internal_Phdr phdrs[10];
   unsigned int phdr_count;
   Elf_Internal_Phdr *phdr;
   int phdr_size_adjust;
@@ -1835,6 +1835,8 @@ map_program_segments (abfd, off, first, phdr_size)
   Elf_Internal_Ehdr *i_ehdrp;
 
   BFD_ASSERT ((abfd->flags & EXEC_P) != 0);
+  BFD_ASSERT (phdr_size / sizeof (Elf_Internal_Phdr)
+	      <= sizeof phdrs / sizeof (phdrs[0]));
 
   phdr_count = 0;
   phdr = phdrs;
@@ -1995,10 +1997,6 @@ map_program_segments (abfd, off, first, phdr_size)
       ++phdr;
       ++phdr_count;
     }
-
-  /* Make sure we didn't run off our array.  */
-  if (phdr_count > sizeof (phdrs) / sizeof (phdr[0]))
-    abort ();
 
   /* Make sure the return value from get_program_header_size matches
      what we computed here.  */
