@@ -59,7 +59,7 @@ struct simops
 
 struct _state
 {
-  reg_t regs[9];		/* registers, d0-d3, a0-a3, sp */
+  reg_t regs[10];		/* registers, d0-d3, a0-a3, sp, mdr */
   reg_t sregs[8];		/* system registers, including psw */
   reg_t pc;
   uint8 *mem;			/* main memory */
@@ -81,6 +81,7 @@ extern unsigned long insn, extension;
 #define REG_D0 0
 #define REG_A0 4
 #define REG_SP 8
+#define REG_MDR 9
 
 #define SEXT3(x)	((((x)&0x7)^(~0x3))+0x4)	
 

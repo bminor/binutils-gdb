@@ -1,5 +1,10 @@
 Tue Nov 26 15:43:41 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10300_sim.h (_state): Add another register (MDR).
+	(REG_MDR): Define.
+	* simops.c: Implement "cmp", "calls", "rets", "jmp" and
+	a few additional random insns.
+
 	* mn10300_sim.h (PSW_*): Define for CC status tracking.
 	(REG_D0, REG_A0, REG_SP): Define.
 	* simops.c: Implement "add", "addc" and a few other random
