@@ -1,5 +1,13 @@
 2005-01-28  Andrew Cagney  <cagney@gnu.org>
 
+	* valprint.h (print_octal_chars, print_char_chars)
+	(print_hex_chars, print_decimal_chars, print_binary_chars): Make
+	buffer a const bfd_byte.
+	* valprint.c (print_binary_chars, print_octal_chars)
+	(print_decimal_chars, print_hex_chars, print_char_chars): Make
+	"valaddr"buffer a const bfd_byte, ditto for local variables
+	referencing that buffer.
+
 	* m2-valprint.c: Include "c-lang.h".
 	(c_val_print): Delete extern declaration.
 	* scm-valprint.c: Include "c-lang.h".

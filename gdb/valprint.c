@@ -344,13 +344,13 @@ print_floating (char *valaddr, struct type *type, struct ui_file *stream)
 }
 
 void
-print_binary_chars (struct ui_file *stream, unsigned char *valaddr,
+print_binary_chars (struct ui_file *stream, const bfd_byte *valaddr,
 		    unsigned len)
 {
 
 #define BITS_IN_BYTES 8
 
-  unsigned char *p;
+  const bfd_byte *p;
   unsigned int i;
   int b;
 
@@ -404,9 +404,10 @@ print_binary_chars (struct ui_file *stream, unsigned char *valaddr,
  * Print it in octal on stream or format it in buf.
  */
 void
-print_octal_chars (struct ui_file *stream, unsigned char *valaddr, unsigned len)
+print_octal_chars (struct ui_file *stream, const bfd_byte *valaddr,
+		   unsigned len)
 {
-  unsigned char *p;
+  const bfd_byte *p;
   unsigned char octa1, octa2, octa3, carry;
   int cycle;
 
@@ -551,7 +552,7 @@ print_octal_chars (struct ui_file *stream, unsigned char *valaddr, unsigned len)
  * Print it in decimal on stream or format it in buf.
  */
 void
-print_decimal_chars (struct ui_file *stream, unsigned char *valaddr,
+print_decimal_chars (struct ui_file *stream, const bfd_byte *valaddr,
 		     unsigned len)
 {
 #define TEN             10
@@ -568,7 +569,7 @@ print_decimal_chars (struct ui_file *stream, unsigned char *valaddr,
 #define LOW_NIBBLE(  x ) ( (x) & 0x00F)
 #define HIGH_NIBBLE( x ) (((x) & 0x0F0) >> 4)
 
-  unsigned char *p;
+  const bfd_byte *p;
   unsigned char *digits;
   int carry;
   int decimal_len;
@@ -686,9 +687,10 @@ print_decimal_chars (struct ui_file *stream, unsigned char *valaddr,
 /* VALADDR points to an integer of LEN bytes.  Print it in hex on stream.  */
 
 void
-print_hex_chars (struct ui_file *stream, unsigned char *valaddr, unsigned len)
+print_hex_chars (struct ui_file *stream, const bfd_byte *valaddr,
+		 unsigned len)
 {
-  unsigned char *p;
+  const bfd_byte *p;
 
   /* FIXME: We should be not printing leading zeroes in most cases.  */
 
@@ -717,9 +719,10 @@ print_hex_chars (struct ui_file *stream, unsigned char *valaddr, unsigned len)
    Omit any leading zero chars.  */
 
 void
-print_char_chars (struct ui_file *stream, unsigned char *valaddr, unsigned len)
+print_char_chars (struct ui_file *stream, const bfd_byte *valaddr,
+		  unsigned len)
 {
-  unsigned char *p;
+  const bfd_byte *p;
 
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {

@@ -55,18 +55,18 @@ extern void val_print_array_elements (struct type *, char *, CORE_ADDR,
 extern void val_print_type_code_int (struct type *, char *,
 				     struct ui_file *);
 
-extern void print_binary_chars (struct ui_file *, unsigned char *,
+extern void print_binary_chars (struct ui_file *, const bfd_byte *,
 				unsigned int);
 
-extern void print_octal_chars (struct ui_file *, unsigned char *,
+extern void print_octal_chars (struct ui_file *, const bfd_byte *,
 			       unsigned int);
 
-extern void print_decimal_chars (struct ui_file *, unsigned char *,
+extern void print_decimal_chars (struct ui_file *, const bfd_byte *,
 				 unsigned int);
 
-extern void print_hex_chars (struct ui_file *, unsigned char *,
+extern void print_hex_chars (struct ui_file *, const bfd_byte *,
 			     unsigned int);
 
-extern void print_char_chars (struct ui_file *, unsigned char *,
+extern void print_char_chars (struct ui_file *, const bfd_byte *,
 			      unsigned int);
 #endif
