@@ -1,6 +1,6 @@
 /* Native-dependent code for SPARC.
 
-   Copyright 2003 Free Software Foundation, Inc.
+   Copyright 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -36,7 +36,7 @@
 
 /* With some trickery we can use the code in this file for most (if
    not all) ptrace(2) based SPARC systems, which includes SunOS 4,
-   Linux and the various SPARC BSD's.
+   GNU/Linux and the various SPARC BSD's.
 
    First, we need a data structure for use with ptrace(2).  SunOS has
    `struct regs' and `struct fp_status' in <machine/reg.h>.  BSD's

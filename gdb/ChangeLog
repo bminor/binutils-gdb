@@ -1,5 +1,14 @@
 2004-01-12  Andrew Cagney  <cagney@redhat.com>
 
+	* stack.c (frame_info): Delete DEPRECATED_PRINT_EXTRA_FRAME_INFO
+	call.  Never defined.
+	* sparc-tdep.h (struct frame_info): Add opaque declaration.
+	* sparc64-tdep.h (struct gdbarch): Add opaque declaration.
+	(struct sparc_gregset, struct regcache): Ditto.
+	* sparc-nat.c: Update copyright.  Specify "GNU/Linux".
+
+2004-01-12  Andrew Cagney  <cagney@redhat.com>
+
 	* mi/ChangeLog: Delete file.  Renamed to ...
 	* mi/ChangeLog-1999-2003: New file.
 	* tui/ChangeLog: Delete file.  Renamed to ...

@@ -22,6 +22,10 @@
 #ifndef SPARC64_TDEP_H
 #define SPARC64_TDEP_H 1
 
+struct gdbarch;
+struct sparc_gregset;
+struct regcache;
+
 #include "sparc-tdep.h"
 
 /* The stack pointer is offset from the stack frame by a BIAS of 2047

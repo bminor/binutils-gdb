@@ -26,6 +26,7 @@ struct gdbarch;
 struct regcache;
 struct regset;
 struct trad_frame_saved_reg;
+struct frame_info;
 
 /* Register offsets for the general-purpose register set.  */
 
