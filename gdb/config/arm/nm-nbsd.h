@@ -28,6 +28,6 @@
 	(addr) = arm_register_u_addr ((blockend),(regno));
 
 extern int
-arm_register_u_addr PARAMS ((int, int));
+arm_register_u_addr (int, int);
 
 #endif /* NM_NBSD_H */

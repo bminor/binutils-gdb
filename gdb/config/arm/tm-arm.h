@@ -457,7 +457,7 @@ void arm_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 #define SOFTWARE_SINGLE_STEP_P() 1
 
 #define SOFTWARE_SINGLE_STEP(sig,bpt) arm_software_single_step((sig), (bpt))
-void arm_software_single_step PARAMS((int, int));
+void arm_software_single_step (int, int);
 
 CORE_ADDR arm_get_next_pc (CORE_ADDR pc);
 
