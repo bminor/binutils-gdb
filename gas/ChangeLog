@@ -1,3 +1,13 @@
+2003-06-19  Christian Groessler  <chris@groessler.org>
+
+	* config/tc-z8k.c (parse_reg): Invalid registers generate an error
+	now, not only a warning.  Add some more checks to detect invalid
+	registers.
+	(get_operand): For CLASS_IR remember register size in mode struct.
+	(get_specific): Handle new CLASS_IRO type.  Add register size
+	checks for CLASS_IR and CLASS_IRO.
+        (md_apply_fix3): Fix undefined usage of buf.
+
 2003-06-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (ppc_csect): Pass alignment to ppc_change_csect.

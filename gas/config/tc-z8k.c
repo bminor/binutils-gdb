@@ -193,8 +193,8 @@ struct z8k_exp {
 };
 
 typedef struct z8k_op {
-  /* 'b','w','r','q'.  */
-  char regsize;
+  /* CLASS_REG_xxx.  */
+  int regsize;
 
   /* 0 .. 15.  */
   unsigned int reg;
@@ -311,7 +311,9 @@ parse_reg (src, mode, reg)
 	  res = whatreg (reg, src + 2);
 	  regno = *reg;
 	  if (regno > 14)
-	    as_warn (_("register rr%d, out of range."), regno);
+	    as_bad (_("register rr%d out of range"), regno);
+	  if (regno & 1)
+	    as_bad (_("register rr%d does not exist"), regno);
 	}
       else if (src[1] == 'h')
 	{
@@ -321,7 +323,7 @@ parse_reg (src, mode, reg)
 	  res = whatreg (reg, src + 2);
 	  regno = *reg;
 	  if (regno > 7)
-	    as_warn (_("register rh%d, out of range."), regno);
+	    as_bad (_("register rh%d out of range"), regno);
 	}
       else if (src[1] == 'l')
 	{
@@ -331,7 +333,7 @@ parse_reg (src, mode, reg)
 	  res = whatreg (reg, src + 2);
 	  regno = *reg;
 	  if (regno > 7)
-	    as_warn (_("register rl%d, out of range."), regno);
+	    as_bad (_("register rl%d out of range"), regno);
 	  *reg += 8;
 	}
       else if (src[1] == 'q')
@@ -342,7 +344,9 @@ parse_reg (src, mode, reg)
 	  res = whatreg (reg, src + 2);
 	  regno = *reg;
 	  if (regno > 12)
-	    as_warn (_("register rq%d, out of range."), regno);
+	    as_bad (_("register rq%d out of range"), regno);
+	  if (regno & 3)
+	    as_bad (_("register rq%d does not exist"), regno);
 	}
       else
 	{
@@ -352,7 +356,7 @@ parse_reg (src, mode, reg)
 	  res = whatreg (reg, src + 1);
 	  regno = *reg;
 	  if (regno > 15)
-	    as_warn (_("register r%d, out of range."), regno);
+	    as_bad (_("register r%d out of range"), regno);
 	}
     }
   return res;
@@ -578,7 +582,7 @@ get_interrupt_operand (ptr, mode, dst)
       ;
     }
   /* No interrupt type specified, opcode won't do anything.  */
-  as_warn (_("opcode has no effect."));
+  as_warn (_("opcode has no effect"));
   the_interrupt = 0x0;
   return;
 }
@@ -666,10 +670,8 @@ get_operand (ptr, mode, dst)
     }
   else if (*src == '@')
     {
-      int d;
-
       mode->mode = CLASS_IR;
-      src = parse_reg (src + 1, &d, &mode->reg);
+      src = parse_reg (src + 1, &mode->regsize, &mode->reg);
     }
   else
     {
@@ -871,6 +873,11 @@ get_specific (opcode, operands)
 	{
 	  unsigned int mode = operands[i].mode;
 
+          if (((mode & CLASS_MASK) == CLASS_IR) && ((this_try->arg_info[i] & CLASS_MASK) == CLASS_IRO))
+            {
+              mode = operands[i].mode = (operands[i].mode & ~CLASS_MASK) | CLASS_IRO;
+            }
+
 	  if ((mode & CLASS_MASK) != (this_try->arg_info[i] & CLASS_MASK))
 	    {
 	      /* It could be a pc rel operand, if this is a da mode
@@ -907,8 +914,18 @@ get_specific (opcode, operands)
 	    {
 	    default:
 	      break;
-	    case CLASS_X:
+	    case CLASS_IRO:
+	      if (operands[i].regsize != CLASS_REG_WORD)
+		as_bad (_("invalid indirect register size"));
+	      reg[this_try->arg_info[i] & ARG_MASK] = operands[i].reg;
+	      break;
 	    case CLASS_IR:
+	      if ((segmented_mode && operands[i].regsize != CLASS_REG_LONG)
+		  || (!segmented_mode && operands[i].regsize != CLASS_REG_WORD))
+		as_bad (_("invalid indirect register size"));
+	      reg[this_try->arg_info[i] & ARG_MASK] = operands[i].reg;
+	      break;
+	    case CLASS_X:
 	    case CLASS_BA:
 	    case CLASS_BX:
 	    case CLASS_DISP:
@@ -951,7 +968,7 @@ check_operand (operand, width, string)
       if ((operand->exp.X_add_number & ~width) != 0 &&
 	  (operand->exp.X_add_number | width) != (~0))
 	{
-	  as_warn (_("operand %s0x%x out of range."),
+	  as_warn (_("operand %s0x%x out of range"),
 		   string, operand->exp.X_add_number);
 	}
     }
@@ -1479,7 +1496,8 @@ md_apply_fix3 (fixP, valP, segment)
       if (val > 8191 || val < -8192)
         as_bad (_("relative call out of range"));
       val = -val;
-      *buf++ = (buf[0] & 0xf0) | ((val >> 8) & 0xf);
+      *buf = (*buf & 0xf0) | ((val >> 8) & 0xf);
+      buf++;
       *buf++ = val & 0xff;
       break;
 
