@@ -1,3 +1,9 @@
+1999-07-29  Richard Henderson  <rth@cygnus.com>
+
+	* elf32-mips.c (mips_info_to_howto_rel): Split out switch to ...
+	(mips_rtype_to_howto): ... new function.
+	(_bfd_mips_elf_relocate_section): Use it.
+
 1999-07-28  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-mips.c (_bfd_mips_elf_relocate_section): Fix typo.

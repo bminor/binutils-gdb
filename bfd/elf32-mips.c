@@ -98,6 +98,8 @@ static bfd_reloc_status_type mips32_64bit_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
+static reloc_howto_type *mips_rtype_to_howto
+  PARAMS ((unsigned int));
 static void mips_info_to_howto_rel
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
 static void mips_info_to_howto_rela
@@ -1890,6 +1892,34 @@ bfd_elf32_bfd_reloc_type_lookup (abfd, code)
 
 /* Given a MIPS Elf32_Internal_Rel, fill in an arelent structure.  */
 
+static reloc_howto_type *
+mips_rtype_to_howto (r_type)
+     unsigned int r_type;
+{
+  switch (r_type)
+    {
+    case R_MIPS16_26:
+      return &elf_mips16_jump_howto;
+      break;
+    case R_MIPS16_GPREL:
+      return &elf_mips16_gprel_howto;
+      break;
+    case R_MIPS_GNU_VTINHERIT:
+      return &elf_mips_gnu_vtinherit_howto;
+      break;
+    case R_MIPS_GNU_VTENTRY:
+      return &elf_mips_gnu_vtentry_howto;
+      break;
+
+    default:
+      BFD_ASSERT (r_type < (unsigned int) R_MIPS_max);
+      return &elf_mips_howto_table[r_type];
+      break;
+    }
+}
+
+/* Given a MIPS Elf32_Internal_Rel, fill in an arelent structure.  */
+
 static void
 mips_info_to_howto_rel (abfd, cache_ptr, dst)
      bfd *abfd;
@@ -1899,26 +1929,7 @@ mips_info_to_howto_rel (abfd, cache_ptr, dst)
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  switch (r_type)
-    {
-    case R_MIPS16_26:
-      cache_ptr->howto = &elf_mips16_jump_howto;
-      break;
-    case R_MIPS16_GPREL:
-      cache_ptr->howto = &elf_mips16_gprel_howto;
-      break;
-    case R_MIPS_GNU_VTINHERIT:
-      cache_ptr->howto = &elf_mips_gnu_vtinherit_howto;
-      break;
-    case R_MIPS_GNU_VTENTRY:
-      cache_ptr->howto = &elf_mips_gnu_vtentry_howto;
-      break;
-
-    default:
-      BFD_ASSERT (r_type < (unsigned int) R_MIPS_max);
-      cache_ptr->howto = &elf_mips_howto_table[r_type];
-      break;
-    }
+  cache_ptr->howto = mips_rtype_to_howto (r_type);
 
   /* The addend for a GPREL16 or LITERAL relocation comes from the GP
      value for the object file.  We get the addend now, rather than
@@ -6461,7 +6472,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	   stored value is sign-extended to 64 bits.  */
 	howto = elf_mips_howto_table + R_MIPS_32;
       else
-	howto = elf_mips_howto_table + r_type;
+	howto = mips_rtype_to_howto (r_type);
 
       if (!use_saved_addend_p)
 	{
