@@ -3886,8 +3886,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	   && (bfd_hash_lookup (finfo->info->keep_hash, name, false, false)
 	       == NULL))
 	  || (finfo->info->discard == discard_l
-	      && strncmp (name, finfo->info->lprefix,
-			  finfo->info->lprefix_len) == 0))
+	      && bfd_is_local_label_name (input_bfd, name)))
 	continue;
 
       /* If we get here, we are going to output this symbol.  */

@@ -1,5 +1,26 @@
 Thu Feb 27 18:36:23 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aoutx.h (aout_link_write_symbols): Use bfd_is_local_label_name
+	rather than comparing against info->lprefix.
+	* cofflink.c (_bfd_coff_link_input_bfd): Likewise.
+	* elflink.h (elf_link_input_bfd): Likewise.
+	* linker.c (_bfd_generic_link_output_symbols): Likewise.
+	* xcofflink.c (xcoff_link_input_bfd): Likewise.
+
+	* elfxx-target.h (bfd_elfNN_bfd_is_local_label_name): Define as
+	_bfd_elf_is_local_label_name if not already defined.
+	* elf.c (_bfd_elf_is_local_label_name): New function.
+	* elf-bfd.h (_bfd_elf_is_local_label_name): Declare.
+
+	* coff-m88k.c (coff_bfd_is_local_label_name): Define.
+	(m88k_is_local_label_name): New static function.
+
+	* coffcode.h (coff_bfd_is_local_label_name): Define as
+	_bfd_coff_is_local_label_name if not already defined.
+	* coffgen.c (_bfd_coff_is_local_label_name): New function.
+	* libcoff-in.h (_bfd_coff_is_local_label_name): Declare.
+	* libcoff.h: Rebuild.
+	
 	* targets.c (BFD_JUMP_TABLE_SYMBOLS): Change _bfd_is_local_label
 	to _bfd_is_local_label_name.
 	(bfd_target): Likewise.
