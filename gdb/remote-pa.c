@@ -147,7 +147,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcmd.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"
-
+#include "remote-utils.h"
 #include "dcache.h"
 
 #ifdef USG
@@ -205,7 +205,8 @@ remote_send PARAMS ((char *buf));
 static int
 readchar PARAMS ((int timeout));
 
-static int remote_wait PARAMS ((int pid, struct target_waitstatus *status));
+static int
+remote_wait PARAMS ((int pid, struct target_waitstatus *status));
 
 static int
 tohex PARAMS ((int nib));
@@ -225,6 +226,9 @@ remote_interrupt_twice PARAMS ((int signo));
 static void
 interrupt_query PARAMS ((void));
 
+static void
+hppro_load PARAMS ((char *name, int from_tty));
+
 extern struct target_ops remote_ops;	/* Forward decl */
 
 /* This was 5 seconds, which is a long time to sit and wait.
@@ -240,7 +244,7 @@ int icache;
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
    remote_open knows that we don't have a file open when the program
    starts.  */
-serial_t remote_hppro_desc = NULL;
+extern serial_t remote_desc;
 
 /* Having this larger than 400 causes us to be incompatible with m68k-stub.c
    and i386-stub.c.  Normally, no one would notice because it only matters
@@ -266,6 +270,20 @@ serial_t remote_hppro_desc = NULL;
    doesn't support 'P', the only consequence is some unnecessary traffic.  */
 static int stub_supports_P = 1;
 
+/* sets the download protocol, choices are srec, generic, boot */
+char *loadtype;
+static char *loadtype_str;
+static void set_loadtype_command
+PARAMS ((char *, int, struct cmd_list_element *));
+
+static void
+hppro_load (file,  from_tty)
+     char *file;
+     int  from_tty;
+{
+  puts ("Loading... HA!");
+}
+
 
 /* Clean up connection to a remote debugger.  */
 
@@ -274,9 +292,9 @@ static void
 remote_close (quitting)
      int quitting;
 {
-  if (remote_hppro_desc)
-    SERIAL_CLOSE (remote_hppro_desc);
-  remote_hppro_desc = NULL;
+  if (remote_desc)
+    SERIAL_CLOSE (remote_desc);
+  remote_desc = NULL;
 }
 
 /* Query the remote side for the text, data and bss offsets. */
@@ -336,19 +354,62 @@ get_offsets ()
   objfile_relocate (symfile_objfile, offs);
 }
 
-/* Stub for catch_errors.  */
+#define INBUFSIZE 10
 
+void
+boot_board()
+{
+  char c;
+  char buf[INBUFSIZE];
+  char *ptr;
+
+  /* See if we can connect to the boot ROM command line */
+  ptr = buf;
+  while (1) {
+      SERIAL_WRITE (remote_desc, "\r\n", 2);
+      c = readchar (2);
+      if ((sr_get_debug() > 2) && (isascii(c)))
+	putchar (c);
+      if (c == SERIAL_TIMEOUT) {
+	if (sr_get_debug())
+	  puts_filtered ("Timed out.\n");
+	break;
+      } 
+      if (c == '&') {
+	if (sr_get_debug() > 2)
+	  puts ("Got ACK from stub");
+	break;
+      }
+      if (c == '>') {
+	if (sr_get_debug() > 2)
+	  puts ("Got prompt from ROM monitor");
+	break;
+      }
+    }
+  
+}
+
+/* Stub for catch_errors.  */
 static int
 remote_start_remote (dummy)
      char *dummy;
 {
+  int  timeout;
+
   immediate_quit = 1;		/* Allow user to interrupt it */
 
   /* Ack any packet which the remote side has already sent.  */
 
-  SERIAL_WRITE (remote_hppro_desc, "+", 1);
+  if (sr_get_debug())
+    puts ("Trying a '+' to ACK the target.");
+
+  SERIAL_WRITE (remote_desc, "+", 1);
+  
+#if 0
+  boot_board();
 
   get_offsets ();		/* Get text, data & bss offsets */
+#endif
 
   putpkt ("?");			/* initiate a query from remote machine */
   immediate_quit = 0;
@@ -379,24 +440,24 @@ device is attached to the remote system (e.g. /dev/ttya).");
 
   remote_dcache = dcache_init (remote_read_bytes, remote_write_bytes);
 
-  remote_hppro_desc = SERIAL_OPEN (name);
-  if (!remote_hppro_desc)
+  remote_desc = SERIAL_OPEN (name);
+  if (!remote_desc)
     perror_with_name (name);
 
   if (baud_rate != -1)
     {
-      if (SERIAL_SETBAUDRATE (remote_hppro_desc, baud_rate))
+      if (SERIAL_SETBAUDRATE (remote_desc, baud_rate))
 	{
-	  SERIAL_CLOSE (remote_hppro_desc);
+	  SERIAL_CLOSE (remote_desc);
 	  perror_with_name (name);
 	}
     }
 
-  SERIAL_RAW (remote_hppro_desc);
+  SERIAL_RAW (remote_desc);
 
   /* If there is something sitting in the buffer we might take it as a
      response to a command, which would be bad.  */
-  SERIAL_FLUSH_INPUT (remote_hppro_desc);
+  SERIAL_FLUSH_INPUT (remote_desc);
 
   if (from_tty)
     {
@@ -489,8 +550,7 @@ remote_resume (pid, step, siggnal)
       target_terminal_ours_for_output ();
       printf_filtered
 	("Can't send signals to a remote system.  %s not sent.\n",
-	 target_signal_to_name (siggnal));
-      target_terminal_inferior ();
+	 target_signal_to_name (siggnal));      target_terminal_inferior ();
     }
 
   dcache_flush (remote_dcache);
@@ -513,7 +573,7 @@ remote_interrupt (signo)
   if (remote_debug)
     printf_unfiltered ("remote_interrupt called\n");
 
-  SERIAL_WRITE (remote_hppro_desc, "\003", 1); /* Send a ^C */
+  SERIAL_WRITE (remote_desc, "\003", 1); /* Send a ^C */
 }
 
 static void (*ofunc)();
@@ -1063,7 +1123,7 @@ readchar (timeout)
 {
   int ch;
 
-  ch = SERIAL_READCHAR (remote_hppro_desc, timeout);
+  ch = SERIAL_READCHAR (remote_desc, timeout);
 
   switch (ch)
     {
@@ -1096,7 +1156,6 @@ remote_send (buf)
 
 /* Send a packet to the remote machine, with error checking.
    The data of the packet is in BUF.  */
-
 static void
 putpkt (buf)
      char *buf;
@@ -1138,7 +1197,7 @@ putpkt (buf)
 	  printf_unfiltered ("Sending packet: %s...", buf2);
 	  gdb_flush(gdb_stdout);
 	}
-      if (SERIAL_WRITE (remote_hppro_desc, buf2, p - buf2))
+      if (SERIAL_WRITE (remote_desc, buf2, p - buf2))
 	perror_with_name ("putpkt: write failed");
 
       /* read until either a timeout occurs (-2) or '+' is read */
@@ -1165,7 +1224,7 @@ putpkt (buf)
 	    {
 	    case '+':
 	      if (remote_debug)
-		printf_unfiltered("Ack\n");
+		printf_unfiltered("Got Ack\n");
 	      return;
 	    case SERIAL_TIMEOUT:
 	      break;		/* Retransmit buffer */
@@ -1347,19 +1406,19 @@ getpkt (buf, forever)
 	{
 	  if (remote_debug)
 	    fprintf_unfiltered (gdb_stderr, "Packet received: %s\n", buf);
-	  SERIAL_WRITE (remote_hppro_desc, "+", 1);
+	  SERIAL_WRITE (remote_desc, "+", 1);
 	  return;
 	}
 
       /* Try the whole thing again.  */
 retry:
-      SERIAL_WRITE (remote_hppro_desc, "-", 1);
+      SERIAL_WRITE (remote_desc, "-", 1);
     }
 
   /* We have tried hard enough, and just can't receive the packet.  Give up. */
 
   printf_unfiltered ("Ignoring packet error, continuing...\n");
-  SERIAL_WRITE (remote_hppro_desc, "+", 1);
+  SERIAL_WRITE (remote_desc, "+", 1);
 }
 
 static void
@@ -1430,9 +1489,10 @@ remote_remove_breakpoint (addr, contents_cache)
 
 struct target_ops remote_hppro_ops = {
   "hppro",			/* to_shortname */
-  "Remote serial target in gdb-specific protocol",	/* to_longname */
+  "Remote serial target for HP-PRO targets",	/* to_longname */
   "Use a remote computer via a serial line, using a gdb-specific protocol.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya). or telnet port",  /* to_doc */
+This is for targets that supports the HP-PRO standard.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya) or telnet port.",  /* to_doc */
   remote_open,			/* to_open */
   remote_close,			/* to_close */
   NULL,				/* to_attach */
@@ -1454,7 +1514,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya). or telnet port", 
   NULL,				/* to_terminal_ours */
   NULL,				/* to_terminal_info */
   remote_kill,			/* to_kill */
-  generic_load,			/* to_load */
+  hppro_load,			/* to_load */
   NULL,				/* to_lookup_symbol */
   NULL,				/* to_create_inferior */
   remote_mourn,			/* to_mourn_inferior */
@@ -1472,12 +1532,6 @@ Specify the serial device it is connected to (e.g. /dev/ttya). or telnet port", 
   OPS_MAGIC			/* to_magic */
 };
 
-/* sets the download protocol, choices are srec, generic, boot */
-char *loadtype;
-static char *loadtype_str;
-static void set_loadtype_command
-  PARAMS ((char *, int, struct cmd_list_element *));
-
 void
 _initialize_remote_hppro ()
 {
@@ -1489,20 +1543,19 @@ _initialize_remote_hppro ()
        "Set the type of the remote load protocol.\n", &setlist);
   c->function.sfunc =  set_loadtype_command;
   add_show_from_set (c, &showlist);
-  c->var = "generic";
-  if (getenv ("LOADTYPE"))
-    c->var = savestring (getenv ("LOADTYPE"), strlen ("LOADTYPE"));
+  loadtype_str = savestring ("generic", 8);
+
+  /* this adds a command to boot the board */
+    add_com ("boot", class_support, boot_board,
+           "Boot the damn target board.\n");
 }
 
 static void
-set_loadtype_command (newtype, from_tty, c)
-     char *newtype;
+set_loadtype_command (ignore, from_tty, c)
+     char *ignore;
      int from_tty;
      struct cmd_list_element *c;
 {
-  loadtype_str = savestring (newtype, strlen (newtype));
+  loadtype_str = savestring (*(char **) c->var, strlen (*(char **) c->var));
 }
-
-
-
 
