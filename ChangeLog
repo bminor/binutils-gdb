@@ -1,3 +1,14 @@
+Tue Sep 29 14:11:18 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in: added -nostdinc to XTRAFLAGS if we are using gcc
+	from the same source tree and not building a cross-compiler.  This
+	matters for the libg++ configuration if reconfiguring a tree that
+	has already been installed.
+
+Sep 20 08:53:10 1992  Fred Fish  (fnf@cygnus.com)
+
+	* config.sub (i486v/i486v4):  Merge in from FSF version.
+
 Fri Sep 18 00:32:00 1992  Mark Eichin  (eichin@cygnus.com)
 
 	* configure: only set PWD if it is already set.
