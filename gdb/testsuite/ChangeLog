@@ -1,3 +1,18 @@
+2004-01-18  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/gdbserver.exp (gdbserver_gdb_load): Rename from gdb_load.
+	Remove downloading, guessing the host executable, the calls to
+	gdb_file_cmd and gdb_target_cmd, and "load" support.
+	(infer_host_exec): New function broken out from gdb_load.
+	(gdb_load): New wrapper for gdbserver_gdb_load.
+	* lib/mi-support.exp (mi_gdb_target_cmd): New function, based on
+	gdb_target_cmd.  Use -target-select.
+	(mi_gdb_file_cmd): New function, broken out from mi_gdb_load.
+	Download binaries to the host.  Clear last_mi_remote_file when
+	we load a new binary.
+	(mi_gdb_load): Call mi_gdb_file_cmd.  If gdbserver.exp is loaded,
+	call gdbserver_gdb_load and mi_gdb_target_cmd.
+
 2004-01-17  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.cp/templates.exp: Accept more spaces with "<foo, ?bar>"

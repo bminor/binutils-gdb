@@ -1,4 +1,4 @@
-# Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
+# Copyright 1999, 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -281,35 +281,94 @@ proc mi_gdb_reinitialize_dir { subdir } {
     }
 }
 
+# Send GDB the "target" command.
+# FIXME: Some of these patterns are not appropriate for MI.  Based on
+# config/monitor.exp:gdb_target_command.
+proc mi_gdb_target_cmd { targetname serialport } {
+    global mi_gdb_prompt
+
+    for {set i 1} {$i <= 3} {incr i} {
+	send_gdb "47-target-select $targetname $serialport\n"
+	gdb_expect 60 {
+	    -re "47\\^connected.*$mi_gdb_prompt$" {
+		verbose "Set target to $targetname";
+		return 0;
+	    }
+	    -re "Couldn't establish connection to remote.*$mi_gdb_prompt$" {
+		verbose "Connection failed";
+	    }
+	    -re "Remote MIPS debugging.*$mi_gdb_prompt$" {
+		verbose "Set target to $targetname";
+		return 0;
+	    }
+	    -re "Remote debugging using .*$serialport.*$mi_gdb_prompt$" {
+		verbose "Set target to $targetname";
+		return 0;
+	    }
+	    -re "Remote target $targetname connected to.*$mi_gdb_prompt$" {
+		verbose "Set target to $targetname";
+		return 0;
+	    }
+	    -re "Connected to.*$mi_gdb_prompt$" { 
+		verbose "Set target to $targetname";
+		return 0;
+	    }
+	    -re "Ending remote.*$mi_gdb_prompt$" { }
+	    -re "Connection refused.*$mi_gdb_prompt$" {
+		verbose "Connection refused by remote target.  Pausing, and trying again."
+		sleep 5
+		continue
+	    }
+	    -re "Timeout reading from remote system.*$mi_gdb_prompt$" {
+		verbose "Got timeout error from gdb.";
+	    }
+	    timeout {
+		send_gdb "";
+		break
+	    }
+	}
+    }
+    return 1
+}
+
 #
-# load a file into the debugger.
+# load a file into the debugger (file command only).
 # return a -1 if anything goes wrong.
 #
-proc mi_gdb_load { arg } {
+proc mi_gdb_file_cmd { arg } {
     global verbose
     global loadpath
     global loadfile
     global GDB
     global mi_gdb_prompt
     global last_mi_gdb_file
+    global last_mi_remote_file
     upvar timeout timeout
 
     if { $arg == "" } {
 	set arg $last_mi_gdb_file;
+    } else {
+	set last_mi_gdb_file $arg
+	if { [ info exists last_mi_remote_file ] } {
+	    unset last_mi_remote_file
+	}
     }
 
-    set last_mi_gdb_file $arg;
+    if [is_remote host] {
+	set arg [remote_download host $arg];
+	if { $arg == "" } {
+	    error "download failed"
+	    return -1;
+	}
+    }
 
-    # ``gdb_unload''
-
-    # ``gdb_file_cmd''
 # FIXME: Several of these patterns are only acceptable for console
 # output.  Queries are an error for mi.
     send_gdb "105-file-exec-and-symbols $arg\n"
     gdb_expect 120 {
         -re "Reading symbols from.*done.*$mi_gdb_prompt$" {
             verbose "\t\tLoaded $arg into the $GDB"
-            # All OK
+            return 0
         }
         -re "has no symbol-table.*$mi_gdb_prompt$" {
             perror "$arg wasn't compiled with \"-g\""
@@ -338,14 +397,15 @@ proc mi_gdb_load { arg } {
             return -1
         }
         -re "105-file-exec-and-symbols .*\r\n105\\\^done\r\n$mi_gdb_prompt$" {
-            # We are just giving the prompt back for now
-	    # All OK
-            }
+            # We (MI) are just giving the prompt back for now, instead of giving
+	    # some acknowledgement.
+	    return 0
+	}
         timeout {
             perror "couldn't load $arg into $GDB (timed out)."
             return -1
         }
-        eof {
+	eof {
             # This is an attempt to detect a core dump, but seems not to
             # work.  Perhaps we need to match .* followed by eof, in which
             # gdb_expect does not seem to have a way to do that.
@@ -353,9 +413,46 @@ proc mi_gdb_load { arg } {
             return -1
         }
     }
-    
+}
+
+#
+# load a file into the debugger.
+# return a -1 if anything goes wrong.
+#
+proc mi_gdb_load { arg } {
+    global verbose
+    global loadpath
+    global loadfile
+    global GDB
+    global mi_gdb_prompt
+    upvar timeout timeout
+
+    # ``gdb_unload''
+    if { $arg != "" } {
+	mi_gdb_file_cmd $arg
+    }
+
     # ``load''
-    if { [info procs send_target_sid] != "" } {
+    if { [info procs gdbserver_gdb_load] != "" } {
+	global last_mi_gdb_file
+	global last_mi_remote_file
+
+	if { ! [info exists last_mi_remote_file] } {
+	    if [is_remote target] {
+		set last_mi_remote_file [remote_download target $arg]
+	    } else {
+		set last_mi_remote_file $last_mi_gdb_file
+	    }
+	}
+
+	set res [gdbserver_gdb_load $last_mi_remote_file]
+	set protocol [lindex $res 0]
+	set gdbport [lindex $res 1]
+
+	if { [mi_gdb_target_cmd $protocol $gdbport] != 0 } {
+	    return -1
+	}
+    } elseif { [info procs send_target_sid] != "" } {
 	# For SID, things get complex
 	send_target_sid
 	gdb_expect 60 {
