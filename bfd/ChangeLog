@@ -1,3 +1,9 @@
+Sun Aug 13 00:40:58 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* som.h (R_HPPA_BEGIN_BRTAB): Define.
+	(R_HPPA_END_BRTAB): Likewise.
+	* som.c (som_write_fixups): Handle R_BEGIN_BRTAB and R_END_BRTAB.
+
 Thu Aug 10 15:53:29 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffswap.h (coff_swap_aux_in): Swap the array dimensions
