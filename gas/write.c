@@ -18,16 +18,7 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* 
-  
-  This thing should be set up to do byteordering correctly.  But...
-  
-  In order to cross-assemble the target machine must have an a.out header
-  similar to the one in a.out.h on THIS machine.  Byteorder doesn't matter,
-  we take special care of it, but the numbers must be the same SIZE (# of
-  bytes) and in the same PLACE.  If this is not true, you will have some
-  trouble.
-  */
+/* This thing should be set up to do byteordering correctly.  But... */
 
 #include "as.h"
 #include "subsegs.h"
@@ -45,11 +36,9 @@
 #ifndef MANY_SEGMENTS
 static struct frag *text_frag_root;
 static struct frag *data_frag_root;
-static struct frag *bss_frag_root;
 
 static struct frag *text_last_frag;	/* Last frag in segment. */
 static struct frag *data_last_frag;	/* Last frag in segment. */
-static struct frag *bss_last_frag;	/* Last frag in segment. */
 #endif
 
 static object_headers headers;
@@ -94,7 +83,9 @@ symbolS *add_symbol;	/* X_add_symbol. */
 symbolS *sub_symbol;	/* X_subtract_symbol. */
 long offset;		/* X_add_number. */
 int pcrel;		/* TRUE if PC-relative relocation. */
-enum reloc_type	r_type;	/* Relocation type */
+#if defined(TC_SPARC) || defined(TC_A29K)
+int 	r_type;	/* Relocation type */
+#endif
 {
 	fixS *fixP;
 	
@@ -107,8 +98,9 @@ enum reloc_type	r_type;	/* Relocation type */
 	fixP->fx_subsy	= sub_symbol;
 	fixP->fx_offset	= offset;
 	fixP->fx_pcrel	= pcrel;
+#if defined(TC_SPARC) || defined(TC_A29K)
 	fixP->fx_r_type	= r_type;
-	
+#endif
 	/* JF these 'cuz of the NS32K stuff */
 	fixP->fx_im_disp = 0;
 	fixP->fx_pcrel_adjust = 0;
@@ -207,23 +199,17 @@ void write_object_file()
 	for (frchainP = frchain_root; frchainP; frchainP = next_frchainP) {
 		know( frchainP->frch_root );
 		* prev_fragPP = frchainP->frch_root;
-		prev_fragPP   = & frchainP->frch_last->fr_next;
-		next_frchainP = frchainP->frch_next;
-
-		if (next_frchainP == NULL)
-		  {
-		    bss_last_frag  = frchainP->frch_last;
-		  }
-		else if (next_frchainP == data0_frchainP)
-		  {
-		    text_last_frag = frchainP->frch_last;
-		    prev_fragPP    = & data_frag_root;
-		  }
-		else if (next_frchainP == bss0_frchainP)
-		  {
-		    data_last_frag = frchainP->frch_last;
-		    prev_fragPP    = & bss_frag_root;
-		  }
+		prev_fragPP = & frchainP->frch_last->fr_next;
+		
+		if (((next_frchainP = frchainP->frch_next) == NULL)
+		    || next_frchainP == data0_frchainP) {
+			prev_fragPP = & data_frag_root;
+			if (next_frchainP) {
+				text_last_frag = frchainP->frch_last;
+			} else {
+				data_last_frag = frchainP->frch_last;
+			}
+		}
 	} /* walk the frag chain */
 	
 	/*
@@ -248,7 +234,6 @@ void write_object_file()
 	
 	relax_segment(text_frag_root, SEG_TEXT);
 	relax_segment(data_frag_root, SEG_DATA);
-	relax_segment(bss_frag_root,  SEG_BSS);
 	/*
 	 * Now the addresses of frags are correct within the segment.
 	 */
@@ -287,18 +272,7 @@ void write_object_file()
 	bss_address_frag.fr_address = (H_GET_TEXT_SIZE(&headers) + 
 				       H_GET_DATA_SIZE(&headers));
 	
-	H_SET_BSS_SIZE(&headers, bss_last_frag->fr_address);
-
-	/*
-	 * now fixup all bss frags addresses
-	 */
-	if (bss_frag_root)
-	  {
-	    relax_addressT	slide;
-	    slide = bss_address_frag.fr_address;
-	    for (fragP = bss_frag_root; fragP; fragP = fragP->fr_next)
-	      fragP->fr_address += slide;
-	  }
+	H_SET_BSS_SIZE(&headers,local_bss_counter);
 	
 	/*
 	 *
@@ -410,11 +384,17 @@ void write_object_file()
 					  lie->sub,
 					  lie->addnum,
 					  0, 0, 2, 0, 0);
-#else /* TC_NS32K */
+#elif defined(TC_SPARC) || defined(TC_A29K)
 			    fix_new(	lie->frag,  lie->word_goes_here - lie->frag->fr_literal,
 				    2,  lie->add,
 				    lie->sub,  lie->addnum,
 				    0,  NO_RELOC);
+#else
+			    fix_new(	lie->frag,  lie->word_goes_here - lie->frag->fr_literal,
+				    2,  lie->add,
+				    lie->sub,  lie->addnum,
+				    0,  0);
+
 #endif /* TC_NS32K */
 			    /* md_number_to_chars(lie->word_goes_here,
 			       S_GET_VALUE(lie->add)
@@ -620,14 +600,14 @@ void write_object_file()
 
 void relax_segment(segment_frag_root, segment)
 struct frag *	segment_frag_root;
-segT		segment; /* SEG_DATA or SEG_TEXT or SEG_BSS */
+segT		segment; /* SEG_DATA or SEG_TEXT */
 {
 	register struct frag *	fragP;
 	register relax_addressT	address;
 	/* register relax_addressT	old_address; JF unused */
 	/* register relax_addressT	new_address; JF unused */
 #ifndef MANY_SEGMENTS	
-	know(segment == SEG_DATA || segment == SEG_TEXT || segment == SEG_BSS);
+	know(segment == SEG_DATA || segment == SEG_TEXT);
 #endif
 	/* In case md_estimate_size_before_relax() wants to make fixSs. */
 	subseg_change(segment, 0);
@@ -768,10 +748,7 @@ segT		segment; /* SEG_DATA or SEG_TEXT or SEG_BSS */
 					if (symbolP) {
 #ifdef MANY_SEGMENTS
 #else
-						know((S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE)
-						     || (S_GET_SEGMENT(symbolP) == SEG_DATA)
-						     || (S_GET_SEGMENT(symbolP) == SEG_TEXT)
-						     || (S_GET_SEGMENT(symbolP) == SEG_BSS));
+						know((S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE) || (S_GET_SEGMENT(symbolP) == SEG_DATA) || (S_GET_SEGMENT(symbolP) == SEG_TEXT));
 						know(symbolP->sy_frag);
 						know(!(S_GET_SEGMENT(symbolP) == SEG_ABSOLUTE) || (symbolP->sy_frag == &zero_address_frag));
 #endif
@@ -1084,16 +1061,10 @@ segT		this_segment_type; /* N_TYPE bits for segment. */
 #endif /* TC_I960 */
 
 #ifdef OBJ_COFF
-					/* This really needed to be
-					   like this for COFF output.
-					   - mtranle@paris
-
-					   But I'm not sure it's right
-					   for i960 or a29k coff.
-					   xoxorich.  */
-
+#ifdef TE_I386AIX
 					if (S_IS_COMMON(add_symbolP))
 					    add_number += S_GET_VALUE(add_symbolP);
+#endif /* TE_I386AIX */
 #endif /* OBJ_COFF */
 					++seg_reloc_count;
 					

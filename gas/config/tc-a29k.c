@@ -48,7 +48,10 @@ struct machine_it {
 	expressionS exp;
 	int pcrel;
 	int  reloc_offset;		/* Offset of reloc within insn */
-	enum reloc_type reloc;
+
+	int reloc;
+
+
 } the_insn;
 
 #if __STDC__ == 1
@@ -860,10 +863,6 @@ long val;
 short tc_coff_fix2rtype(fixP)
 fixS *fixP;
 {
-	
-	/* FIXME-NOW: relocation type handling is not yet written for
-	   a29k. */
-	
 	
 	switch (fixP->fx_r_type) {
 	case RELOC_32:	return(R_WORD);

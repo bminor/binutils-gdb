@@ -40,6 +40,20 @@
 #elif defined(TC_A29K)
 #include "coff/a29k.h"
 #define TARGET_FORMAT "coff-a29k-big"
+
+/* Allow translate from aout relocs to coff relocs */
+#define NO_RELOC 20
+#define RELOC_32 1
+#define RELOC_8 2
+#define RELOC_CONST 3
+#define RELOC_CONSTH 4
+#define RELOC_JUMPTARG 5
+#define RELOC_BASE22 6
+#define RELOC_HI22 7
+#define RELOC_LO10 8
+#define RELOC_BASE13 9
+#define RELOC_WDISP22 10
+#define RELOC_WDISP30 11
 #else
 help me
 #endif

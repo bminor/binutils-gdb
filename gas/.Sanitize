@@ -30,6 +30,7 @@ Things-to-keep:
 .gdbinit
 COPYING
 ChangeLog
+Makefile.bat
 Makefile.in
 NOTES
 NOTES.config
@@ -51,7 +52,7 @@ bignum-copy.c
 bignum.h
 cond.c
 config
-configdos.bat
+configure.bat
 configure.in
 debug.c
 doc
@@ -105,7 +106,33 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.9  1992/02/17 15:52:52  rich
+# Revision 1.10  1992/02/22 20:44:46  sac
+# 	* app.c: MRI compatibility - allow single quote to start a string.
+# 	* as.c: fix typo recently introduced.
+# 	* as.h : Don't include aout/reloc.h - it's not right for COFF!
+# 	* expr.c: Much rewriting, to accomodate MRI syntax for
+# 	expressions. Also easier to read now.
+# 	* listing.c: Put back defuns
+# 	* read.c: modified to accept MRI syntax, put back listing pseudo
+# 	ops so that an assembler built with NO_LISTING ignores list ops
+# 	rather than pukes.
+# 	* write.c, write.h: fixs - only keep a reloc type in a fix if the target
+# 	machine is a SPARC or a 29K.
+# 	* config/obj-aout.c: added s_sect pseudo op
+# 	* config/obj-coffbfd.c: lints, set the filehdr flags right and
+# 	fill in the timestamp.
+# 	* config/obj-coffbfd.h: Since we don't include aout/reloc.h
+# 	anymore, define all the relocs which the tc-<x> bit will use so we
+# 	can translate from them to the coff types.
+# 	* config/tc-a29k.c: reloc_type isn't ane enum any more
+# 	* config/tc-m68k.c: Added NO_RELOC definition.
+#
+# Now compiles for sparc aout, 68k aout (MRI and MIT syntax),
+# 29k coff.
+#
+# So far works as replacement for sparc and 68k /bin/as.
+#
+# Revision 1.9  1992/02/17  15:52:52  rich
 # fighting bitrot in a major way
 #
 # Revision 1.8  1992/02/14  00:21:34  pesch

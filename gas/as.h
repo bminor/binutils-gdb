@@ -65,7 +65,7 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include "listing.h"
+
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free xfree
 
@@ -263,7 +263,7 @@ struct frag			/* a code fragment */
 
 typedef struct frag fragS;
 
-COMMON fragS *	frag_now;	/* -> current frag we are building. */
+COMMON fragS *frag_now;	/* -> current frag we are building. */
 /* This frag is incomplete. */
 /* It is, however, included in frchain_now. */
 /* Frag_now->fr_fix is bogus. Use: */
@@ -389,7 +389,8 @@ void subsegs_begin();
 
 /* these define types needed by the interfaces */
 #include "struc-symbol.h"
-#include "aout/reloc.h"
+/*#include "aout/reloc.h"*/
+
 #include "write.h"
 #include "expr.h"
 #include "frags.h"
@@ -399,6 +400,8 @@ void subsegs_begin();
 
 #include "tc.h"
 #include "obj.h"
+
+#include "listing.h"
 
 /*
  * Local Variables:
