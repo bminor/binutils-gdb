@@ -1,3 +1,8 @@
+2004-04-15  Joel Brobecker  <brobecker@gnat.com>
+
+	* dwarf2read.c (read_structure_scope): Identify stub types
+	using die_is_declaration() only.
+
 2004-04-15  Roland McGrath  <roland@redhat.com>
 
 	* symfile.c (symbol_file_add_with_addrs_or_offsets): Take ABFD as

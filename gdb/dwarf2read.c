@@ -3141,6 +3141,9 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
       TYPE_LENGTH (type) = 0;
     }
 
+  if (die_is_declaration (die, cu))
+    TYPE_FLAGS (type) |= TYPE_FLAG_STUB;
+
   /* We need to add the type field to the die immediately so we don't
      infinitely recurse when dealing with pointers to the structure
      type within the structure itself. */
@@ -3236,11 +3239,6 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
 
       do_cleanups (back_to);
-    }
-  else
-    {
-      /* No children, must be stub. */
-      TYPE_FLAGS (type) |= TYPE_FLAG_STUB;
     }
 
   processing_current_prefix = previous_prefix;
