@@ -182,10 +182,14 @@ case "${target}" in
 ## end-sanitize-chill
     ;;
   hppa*-*-osf)
-# Do configure ld/binutils/gas for this case.
+    # Do configure ld/binutils/gas for this case.
     ;;
   hppa*-*-*)
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
+    ;;
+  i[34]86-*-go32)
+    # add the go32 support tools to the list
+    configdirs=`echo go32 ${configdirs}`
     ;;
   rs6000-*-*)
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//;s/gprof//'`
