@@ -1,7 +1,7 @@
 2002-12-10  James Cownie <jcownie@etnus.com>
 
 	* readelf.h (get_TAG_name, get_AT_name,
-	read_and_display_attr_value): Add support for UPC extenstions to
+	read_and_display_attr_value): Add support for UPC extensions to
 	DWARF2 spec.
 	* NEWS: Mention this new support.
 
