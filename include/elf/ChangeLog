@@ -1,3 +1,13 @@
+Fri Oct 30 11:54:15 1998  Catherine Moore  <clm@cygnus.com>
+
+        From Philip Blundell <pb@nexus.co.uk>:
+        * arm.h (R_ARM_COPY, et al.): New relocs, used by Linux for PIC.
+        (EF_ALIGN8): New flag.
+
+Tue Oct 20 11:19:50 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* common.h (NT_LWPSTATUS): Close comment accidentally left open.
+
 Mon Oct 19 20:24:11 1998  Catherine Moore  <clm@cygnus.com>
 
         * sh.h:  Add vtable relocs.
