@@ -222,7 +222,6 @@ case "${target}" in
         *) ;;
     esac
     # but that's okay since emacs doesn't work anyway
-    echo "no emacs for today"
     configdirs=`echo ${configdirs} | sed -e 's/emacs//'`
     ;;
   rs6000-*-*)
