@@ -73,4 +73,6 @@ FILE *mpw_fopen();
 
 #define ABORT_ON_ERROR
 
+#define LOSING_COMPILER
+
 /* end of ho-mpw.h */

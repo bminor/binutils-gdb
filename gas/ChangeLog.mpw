@@ -1,3 +1,8 @@
+Fri Jan  7 11:18:48 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-make.in: Replace 8-bit chars with their names.
+	* config/ho-mpw.h (LOSING_COMPILER): Define.
+
 Tue Jan  4 12:25:35 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-config.in: New file, MPW version of configure.in.
