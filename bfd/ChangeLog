@@ -1,5 +1,12 @@
 2000-10-23  Philip Blundell  <pb@futuretv.com>
 
+	From 2000-05-23  H.J. Lu  <hjl@gnu.org>
+	* elf64-alpha.c (elf64_alpha_relocate_section): Check
+	h->root.other not h->other.
+	* elf32-mips.c (mips_elf_calculate_relocation): Likewise.
+
+2000-10-23  Philip Blundell  <pb@futuretv.com>
+
 	* elf32-arm.h (elf32_arm_finish_dynamic_symbol): Undo previous
 	accidental checkin.
 
