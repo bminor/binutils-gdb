@@ -1,3 +1,10 @@
+2002-10-16  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-i386qnx.c (TARGET_LITTLE_NAME): Define.
+	* elf32-ppcqnx.c (TARGET_LITTLE_NAME, TARGET_BIG_NAME): Define.
+	* elf32-shqnx.c (TARGET_LITTLE_NAME, TARGET_BIG_NAME): Define.
+	* elfarmqnx-nabi.c (TARGET_LITTLE_NAME, TARGET_BIG_NAME): Define.
+
 2002-10-15  Richard Henderson  <rth@redhat.com>
 
 	* Makefile.am (BFD64_BACKENDS): Remove elf64-alpha-fbsd.

@@ -24,8 +24,12 @@
 
 #undef  TARGET_LITTLE_SYM 
 #define TARGET_LITTLE_SYM       bfd_elf32_littlearmqnx_vec
+#undef  TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME	"elf32-littlearm-nto"
 #undef  TARGET_BIG_SYM
 #define TARGET_BIG_SYM          bfd_elf32_bigarmqnx_vec
+#undef  TARGET_BIG_NAME
+#define TARGET_BIG_NAME		"elf32-bigarm-nto"
 
 /* QNX Neutrino for ARM has a max pagesize of 0x1000.  */
 #undef  ELF_MAXPAGESIZE

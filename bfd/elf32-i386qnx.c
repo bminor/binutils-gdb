@@ -24,7 +24,8 @@
 #include "elf32-qnx.h"
 
 #undef  TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		    bfd_elf32_i386qnx_vec
+#define TARGET_LITTLE_SYM		bfd_elf32_i386qnx_vec
+#undef  TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME		"elf32-i386-nto"
 
 #include "elf32-target.h"
-

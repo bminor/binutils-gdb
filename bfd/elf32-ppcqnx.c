@@ -25,8 +25,11 @@
 
 #undef  TARGET_LITTLE_SYM 
 #define TARGET_LITTLE_SYM       bfd_elf32_powerpcleqnx_vec
+#undef  TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME	"elf32-powerpcle-nto"
 #undef  TARGET_BIG_SYM
 #define TARGET_BIG_SYM          bfd_elf32_powerpcqnx_vec
+#undef  TARGET_BIG_NAME
+#define TARGET_BIG_NAME		"elf32-powerpc-nto"
 
 #include "elf32-target.h"
-

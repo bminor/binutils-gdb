@@ -24,8 +24,11 @@
 
 #undef  TARGET_LITTLE_SYM 
 #define TARGET_LITTLE_SYM       bfd_elf32_shlqnx_vec
+#undef  TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME	"elf32-shl-nto"
 #undef  TARGET_BIG_SYM
 #define TARGET_BIG_SYM          bfd_elf32_shqnx_vec
+#undef  TARGET_BIG_NAME
+#define TARGET_BIG_NAME		"elf32-sh-nto"
 
 #include "elf32-target.h"
-
