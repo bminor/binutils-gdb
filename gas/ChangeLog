@@ -1,3 +1,8 @@
+2004-01-02  Nutan Singh <nutan@kpitcummins.com>
+
+	* doc/c-sh.texi: Update description about floating point behavior
+	of SH family.
+
 2004-01-02  Bernardo Innocenti  <bernie@develer.com>
 
 	* configure.in: Add m68k-uClinux target.
