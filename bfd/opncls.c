@@ -20,8 +20,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
-#include <sysdep.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 #include "obstack.h"
 extern void bfd_cache_init();
@@ -31,7 +31,7 @@ FILE *bfd_open_file();
    if we do that we can't use fcntl.  */
 
 
-#define obstack_chunk_alloc malloc
+#define obstack_chunk_alloc bfd_xmalloc
 #define obstack_chunk_free free
 
 /* Return a new BFD.  All BFD's are allocated through this routine.  */
@@ -44,8 +44,11 @@ bfd *new_bfd()
   if (!nbfd)
     return 0;
 
-  obstack_begin(&nbfd->memory, 128);
-  
+  bfd_check_init();
+  obstack_begin((PTR)&nbfd->memory, 128);
+
+  nbfd->arch_info = &bfd_default_arch_struct;
+
   nbfd->direction = no_direction;
   nbfd->iostream = NULL;
   nbfd->where = 0;
@@ -172,8 +175,12 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
     return NULL;
   }
 
+#ifdef FASCIST_FDOPEN
+  nbfd->iostream = (char *) fdopen (fd, "r"); 
+#else
   /* if the fd were open for read only, this still would not hurt: */
   nbfd->iostream = (char *) fdopen (fd, "r+"); 
+#endif
   if (nbfd->iostream == NULL) {
     (void) obstack_free (&nbfd->memory, (PTR)0);
     return NULL;
@@ -186,7 +193,8 @@ DEFUN(bfd_fdopenr,(filename, target, fd),
   /* As a special case we allow a FD open for read/write to
      be written through, although doing so requires that we end
      the previous clause with a preposition.  */
-  switch (fdflags & O_ACCMODE) {
+  /* (O_ACCMODE) parens are to avoid Ultrix header file bug */
+  switch (fdflags & (O_ACCMODE)) {
   case O_RDONLY: nbfd->direction = read_direction; break;
   case O_WRONLY: nbfd->direction = write_direction; break;  
   case O_RDWR: nbfd->direction = both_direction; break;
@@ -287,7 +295,51 @@ DEFUN(bfd_close,(abfd),
     chmod(abfd->filename,buf.st_mode | S_IXUSR | S_IXGRP | S_IXOTH);
   }
   (void) obstack_free (&abfd->memory, (PTR)0);
-  /* FIXME, shouldn't we de-allocate the bfd as well? */
+  (void) free(abfd);
+  return true;
+}
+
+/*proto* bfd_close_all_done
+This function closes a BFD. It differs from @code{bfd_close} since it
+does not complete any pending operations.  This routine would be used
+if the application had just used BFD for swapping and didn't want to
+use any of the writing code.
+
+If the created file is executable, then @code{chmod} is called to mark
+it as such.
+
+All memory attached to the BFD's obstacks is released. 
+
+@code{true} is returned if all is ok, otherwise @code{false}.
+*; PROTO(boolean, bfd_close_all_done,(bfd *));
+*/
+
+boolean
+DEFUN(bfd_close_all_done,(abfd),
+      bfd *abfd)
+{
+  bfd_cache_close(abfd);
+
+  /* If the file was open for writing and is now executable,
+     make it so */
+  if (abfd->direction == write_direction 
+      && abfd->flags & EXEC_P) {
+    struct stat buf;
+    stat(abfd->filename, &buf);
+#ifndef S_IXUSR
+#define S_IXUSR 0100	/* Execute by owner.  */
+#endif
+#ifndef S_IXGRP
+#define S_IXGRP 0010	/* Execute by group.  */
+#endif
+#ifndef S_IXOTH
+#define S_IXOTH 0001	/* Execute by others.  */
+#endif
+
+    chmod(abfd->filename,buf.st_mode | S_IXUSR | S_IXGRP | S_IXOTH);
+  }
+  (void) obstack_free (&abfd->memory, (PTR)0);
+  (void) free(abfd);
   return true;
 }
 

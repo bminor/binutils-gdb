@@ -1,3 +1,15 @@
+Mon Nov 11 18:36:47 1991  Per Bothner  (bothner at cygnus.com)
+
+	* aoutx.h (NAME(aout,find_nearest_line)):  Handle the case
+	of two N_SO stabs, one for directory, and one for filename.
+
+	* bfd-in.h (print_vma):  Factor out duplicate definition.
+
+	Exit a little more gracefully when malloc returns NULL.
+	* libbfd.c: New function bfd_xmalloc (malloc wrapper).
+	* opncls.c, syms.c, bout.c, aoutx.h:  Replace malloc by bfd_xmalloc.
+	* libbfd.h: Rre-generated due to libbfd.c update.
+
 Sat Nov  9 13:45:01 1991  Fred Fish  (fnf at cygnus.com)
 
 	* config/mt-m68k-elf:  Define DEFAULT_VECTOR as elf_big_vec.
