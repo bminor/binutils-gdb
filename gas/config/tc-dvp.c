@@ -276,6 +276,7 @@ static void s_endmpg PARAMS ((int));
 static void s_endunpack PARAMS ((int));
 static void s_endgif PARAMS ((int));
 static void s_state PARAMS ((int));
+static void s_dvp_func PARAMS ((int));
 
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
@@ -290,6 +291,10 @@ const pseudo_typeS md_pseudo_table[] =
   { "endunpack", s_endunpack, 0 },
   { "endgif", s_endgif, 0 },
   { "vu", s_state, ASM_VU },
+  /* We need to intercept .func/.endfunc so that we can prepend _$.
+     ??? Not sure this is right though as _$foo is the lma version.  */
+  { "func", s_dvp_func, 0 },
+  { "endfunc", s_dvp_func, 1 },
   { NULL, NULL, 0 }
 };
 
@@ -3191,4 +3196,13 @@ s_state (state)
   set_asm_state (state);
 
   demand_empty_rest_of_line ();
+}
+
+/* Same as read.c:s_func except prepend VU_LABEL_PREFIX by default.  */
+
+static void
+s_dvp_func (end_p)
+     int end_p;
+{
+  do_s_func (end_p, VU_LABEL_PREFIX);
 }
