@@ -1,3 +1,10 @@
+2002-01-23  Steve Ellcey <sje@cup.hp.com>
+
+	* bfd/targets.c (bfd_elf32_ia64_hpux_big_vec): Add to
+	DEFAULT_VECTOR.
+	(bfd_elf64_ia64_hpux_big_vec): Ditto.
+	(bfd_elf32_h8300_vec): Ditto.
+
 2002-01-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c: Remove stale part of ABI comment.

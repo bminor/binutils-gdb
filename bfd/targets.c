@@ -759,6 +759,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf32_d10v_vec,
 	&bfd_elf32_d30v_vec,
 	&bfd_elf32_fr30_vec,
+	&bfd_elf32_h8300_vec,
 	&bfd_elf32_hppa_linux_vec,
 	&bfd_elf32_hppa_vec,
 	&bfd_elf32_i370_vec,
@@ -769,6 +770,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 #if 0
 	&bfd_elf32_ia64_big_vec,
 #endif
+	&bfd_elf32_ia64_hpux_big_vec,
 	&bfd_elf32_little_generic_vec,
 	&bfd_elf32_littlearc_vec,
 	&bfd_elf32_littlearm_oabi_vec,
@@ -810,6 +812,7 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&bfd_elf64_ia64_aix_big_vec,
 	&bfd_elf64_ia64_aix_little_vec,
 	&bfd_elf64_ia64_big_vec,
+	&bfd_elf64_ia64_hpux_big_vec,
 	&bfd_elf64_ia64_little_vec,
 	&bfd_elf64_little_generic_vec,
 	&bfd_elf64_littlemips_vec,
