@@ -791,9 +791,9 @@ configuration files.  If not, add it.  Also see @ref{configure.in}.
 Look in @file{configure.in} for the variables @samp{files},
 @samp{links}, @samp{host_makefile_frag}, and
 @samp{target_makefile_frag}.  The values assigned to these variables are
-the names of the configuration files that the program uses.  Make sure
-that copies of the files exist for your host.  If not, create them.  See
-also @ref{Configure Variables}.
+the names of the configuration files, relative to @code{srcdir} that the
+program uses.  Make sure that copies of the files exist for your host.
+If not, create them.  See also @ref{Configure Variables}.
 @end itemize
 
 This should be enough to configure for a new host or target
@@ -1207,17 +1207,17 @@ either the @code{-srcdir=} or the @code{-subdirs} options.  Note that
 @end defvar
 
 @defvar{host_makefile_frag}
-If set by @file{configure.in}, this variable should name a file to be
-included in the resulting Makefile.  If the named file does not exist,
-@code{configure} will print a warning message.  This variable is not set
-by @code{configure}.
+If set by @file{configure.in}, this variable should be the name a file,
+relative to @code{srcdir} to be included in the resulting Makefile.  If
+the named file does not exist, @code{configure} will print a warning
+message.  This variable is not set by @code{configure}.
 @end defvar
 
 @defvar{target_makefile_frag}
-If set by @file{configure.in}, this variable should name a file to be
-included in the resulting Makefile.  If the named file does not exist,
-@code{configure} will print a warning message.  This variable is not set
-by @code{configure}.
+If set by @file{configure.in}, this variable should be the name of a
+file, relative to @code{srcdir}, to be included in the resulting
+Makefile.  If the named file does not exist, @code{configure} will print
+a warning message.  This variable is not set by @code{configure}.
 @end defvar
 
 @defvar{site_makefile_frag} 

@@ -535,8 +535,9 @@ EOF
 			case "${host_makefile_frag}" in
 			"") mv Makefile.tem ${Makefile} ;;
 			*)
+				host_makefile_frag=${srcdir}/${host_makefile_frag}
 				if [ -f ${host_makefile_frag} ] ; then
-					sed -e "/^####/  r ${host_makefile_frag}" Makefile.tem >> ${Makefile}
+					sed -e "/^####/  r ${host_makefile_frag}" Makefile.tem > ${Makefile}
 				else
 					echo '***' Expected host makefile fragment \"${host_makefile_frag}\" 1>&2
 					echo '***' is missing in ${PWD}. 1>&2
@@ -546,13 +547,18 @@ EOF
 			# working copy now in ${Makefile}
 
 			# Conditionalize the makefile for this target.
-			target_makefile_frag=${srcdir}/${target_makefile_frag}
-			if [ -f ${target_makefile_frag} ] ; then
-				sed -e "/^####/  r ${target_makefile_frag}" ${Makefile} >> Makefile.tem
-			else
-				mv ${Makefile} Makefile.tem
-				target_makefile_frag=
-			fi
+			case "${target_makefile_frag}" in
+			"") mv ${Makefile} Makefile.tem ;;
+			*)
+				target_makefile_frag=${srcdir}/${target_makefile_frag}
+				if [ -f ${target_makefile_frag} ] ; then
+					sed -e "/^####/  r ${target_makefile_frag}" ${Makefile} >> Makefile.tem
+				else
+					mv ${Makefile} Makefile.tem
+					target_makefile_frag=
+				fi
+				;;
+			esac
 			# real copy now in Makefile.tem
 
 			# prepend warning about editting, and a bunch of variables.

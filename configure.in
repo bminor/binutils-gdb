@@ -25,10 +25,7 @@ case "${host_vendor}" in
 sco*)		host_makefile_frag=config/mh-sco ;;
 esac
 
-host_makefile_frag=${srcdir}/${host_makefile_frag}
-
 # per-target:
-
 
 bfd_target=
 
@@ -50,9 +47,7 @@ case "${target_cpu}" in
 	;;
 esac
 
-
-target_makefile_frag=${srcdir}/config/mt-${bfd_target}
-
+target_makefile_frag=config/mt-${bfd_target}
 
 #
 # Local Variables:

@@ -91,6 +91,7 @@ configure.info: configure.texi
 install-info: install-info-dirs force
 	$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)"
 	$(INSTALL_DATA) cfg-paper.info $(infodir)/cfg-paper.info
+	$(INSTALL_DATA) configure.info $(infodir)/configure.info
 	$(MAKE) dir.info install-dir.info
 
 install-dir.info:
@@ -1548,6 +1549,7 @@ install-fileutils: force
 .PHONY: all-libg++ just-libg++
 all-libg++: just-gcc just-libg++
 # NOTE!  We have added GXX= and XTRAFLAGS to the $(MAKE) line!!!
+# and CC == GXX
 # Do not clone this one.
 just-libg++: force
 	if [ -d $(unsubdir)/libg++ ] ; then \
@@ -1561,7 +1563,7 @@ just-libg++: force
 			"against=$(against)" \
 			"AR=$(AR)" \
 			"AR_FLAGS=$(AR_FLAGS)" \
-			"CC=$(CC)" \
+			CC=`cd $(unsubdir)/..$(subdir); pwd`"/gcc/gcc -B"`cd $(unsubdir)/..$(subdir);pwd`"/gcc/" \
 			"RANLIB=$(RANLIB)" \
 			"LOADLIBES=$(LOADLIBES)" \
 			"LDFLAGS=$(LDFLAGS)" \
