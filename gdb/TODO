@@ -26,6 +26,10 @@ and most likely also:
 
 --
 
+Obsolete ser-ocd.c.
+
+--
+
 Wow, three bug reports for the same problem in one day!  We should
 probably make fixing this a real priority :-).
 
@@ -242,9 +246,13 @@ Makefile.in and configure.in.
 
 Compiler warnings.
 
-Eliminate all warnings for at least one host/target for the flags:
--Wimplicit -Wreturn-type -Wcomment -Wtrigraphs -Wformat -Wparentheses
--Wpointer-arith -Wuninitialized
+Eliminate warnings for all targets on at least one host for one of the
+-W flags.  Flags up for debate include: -Wswitch -Wcomment -trigraphs
+-Wtrigraphs -Wunused-function -Wunused-label -Wunused-variable
+-Wunused-value -Wchar-subscripts -Wtraditional -Wshadow -Wcast-qual
+-Wcast-align -Wwrite-strings -Wconversion -Wstrict-prototypes
+-Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
+-Woverloaded-virtual -Winline
 
 --
 
@@ -297,6 +305,25 @@ Deprecate, if not delete, the following:
 	REGISTER_BYTES
 		The size of the cache can be computed
 		on the fly.
+
+	IS_TRAPPED_INTERNALVAR
+		The pseudo registers should eventually make
+		this redundant.
+
+--
+
+Obsolete the targets.
+
+arm*-wince-pe
+mips*-*-pe
+sh*-*-pe
+
+Obsolete the protocols:
+
+RDB
+
+``As of version 5.3, WindRiver has removed the RDB server (RDB
+protocol support is built into gdb).''  -- Till.
 
 --
 
@@ -607,6 +634,11 @@ coverage analysis).
 
 Replace the file gdb/CONTRIBUTE with a file that is generated from the
 gdb/doc/*.texinfo directory.
+
+--
+
+Rewrite/break up sparcl-tdep.c so that it uses ser*.c as the mechanism
+for accessing either the serial or UDP port.
 
 --
 
@@ -1052,6 +1084,14 @@ on the fly - should it be returned in the ``T'' packet?
 Underlying problem is that the register file is target endian.  If the
 target endianess changes gdb doesn't know.
 
+Suggest encoding registers as NN!VALUE.
+
+--
+
+GDB should allow incomming packets to be larger than outgoing ones.  A
+fully loaded T packet (containing all registers) can be very large -
+definitly larger than a corresponding Gg packet.
+
 --
 
 			Symbol Support
@@ -1330,6 +1370,9 @@ The name is wrong for starters.  ``target_signal'' should probably be
 ``gdb_signal''.  ``from_host'' should be ``from_target_signal''.
 After that it needs to be multi-arched and made independent of any
 host signal numbering.
+
+Once this is done, the signal enum can probably be moved to
+include/gdb so that it is available to embedded stubs.
 
 --
 
