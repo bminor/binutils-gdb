@@ -25,11 +25,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "xm-sysv4.h"
 
-/* SVR4's can't seem to agree on what to call the type that contains the
-   general registers.  Kludge around it with a #define.  */
+/* gdb wants to use the prgregset_t interface rather than
+   the gregset_t interface, partly because that's what's
+   used in core-sol2.c */
 
-#define	gregset_t	prgregset_t
-#define	fpregset_t	prfpregset_t
+#define GDB_GREGSET_TYPE prgregset_t
+#define GDB_FPREGSET_TYPE prfpregset_t
 
 /* These are not currently used in SVR4 (but should be, FIXME!).  */
 #undef	DO_DEFERRED_STORES

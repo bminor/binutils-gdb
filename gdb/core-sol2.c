@@ -26,9 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    and sparc-nat.c to be able to read both flavours.  */
 
 #include "defs.h"
-#undef gregset_t
-#undef fpregset_t
-
 #include <time.h>
 #include <sys/types.h>
 #include <sys/regset.h>

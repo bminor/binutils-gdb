@@ -116,6 +116,25 @@ regardless of whether or not the actual target has floating point hardware.
 #  endif
 #endif /* HAVE_MULTIPLE_PROC_FDS */
 
+
+/* These #ifdefs are for sol2.x in particular.  sol2.x has
+   both a "gregset_t" and a "prgregset_t", which have
+   similar uses but different layouts.  sol2.x gdb tries to
+   use prgregset_t (and prfpregset_t) everywhere. */
+
+#ifdef GDB_GREGSET_TYPE
+  typedef GDB_GREGSET_TYPE gdb_gregset_t;
+#else
+  typedef gregset_t gdb_gregset_t;
+#endif
+
+#ifdef GDB_FPREGSET_TYPE
+  typedef GDB_FPREGSET_TYPE gdb_fpregset_t;
+#else
+  typedef fpregset_t gdb_fpregset_t;
+#endif
+
+
 #define MAX_PROC_NAME_SIZE sizeof("/proc/1234567890/status")
 
 extern struct target_ops procfs_ops;		/* Forward declaration */
@@ -149,13 +168,13 @@ struct proc_ctl {
 /* set general registers */
 struct greg_ctl {
         int             cmd;
-        gregset_t       gregset;
+        gdb_gregset_t	gregset;
 };
 
 /* set fp registers */
 struct fpreg_ctl {
         int             cmd;
-        fpregset_t      fpregset;
+        gdb_fpregset_t	fpregset;
 };
 
 /* set signals to be traced */
@@ -221,6 +240,8 @@ struct procinfo {
 				   currently installed */
 				/* Pointer to list of syscall trap handlers */
   struct procfs_syscall_handler *syscall_handlers; 
+  int saved_rtnval;		/* return value and status for wait(), */
+  int saved_statval;		/*  as supplied by a syscall handler. */
   int new_child;		/* Non-zero if it's a new thread */
 };
 
@@ -635,14 +656,14 @@ static void procfs_resume PARAMS ((int pid, int step,
 /* External function prototypes that can't be easily included in any
    header file because the args are typedefs in system include files. */
 
-extern void supply_gregset PARAMS ((gregset_t *));
+extern void supply_gregset PARAMS ((gdb_gregset_t *));
 
-extern void fill_gregset PARAMS ((gregset_t *, int));
+extern void fill_gregset PARAMS ((gdb_gregset_t *, int));
 
 #ifdef FP0_REGNUM
-extern void supply_fpregset PARAMS ((fpregset_t *));
+extern void supply_fpregset PARAMS ((gdb_fpregset_t *));
 
-extern void fill_fpregset PARAMS ((fpregset_t *, int));
+extern void fill_fpregset PARAMS ((gdb_fpregset_t *, int));
 #endif
 
 /*
@@ -1997,7 +2018,7 @@ procfs_store_registers (regno)
       procfs_read_status (pi);
       memcpy ((char *) &greg.gregset,
          (char *) &pi->prstatus.pr_lwp.pr_context.uc_mcontext.gregs,
-         sizeof (gregset_t));
+         sizeof (gdb_gregset_t));
     }
   fill_gregset (&greg.gregset, regno);
   greg.cmd = PCSREG;
@@ -2023,7 +2044,7 @@ procfs_store_registers (regno)
       procfs_read_status (pi);
       memcpy ((char *) &fpreg.fpregset,
           (char *) &pi->prstatus.pr_lwp.pr_context.uc_mcontext.fpregs,
-          sizeof (fpregset_t));
+          sizeof (gdb_fpregset_t));
     }
   fill_fpregset (&fpreg.fpregset, regno);
   fpreg.cmd = PCSFPREG;
@@ -3359,30 +3380,67 @@ procfs_wait (pid, ourstatus)
   struct procinfo *pi;
   struct proc_ctl pctl;
 
-  if (pid != -1)		/* Non-specific process? */
-    pi = NULL;
-  else
-    for (pi = procinfo_list; pi; pi = pi->next)
-      if (pi->had_event)
-	break;
+scan_again:
+
+  /* handle all syscall events first, otherwise we might not
+     notice a thread was created until too late. */
+
+  for (pi = procinfo_list; pi; pi = pi->next)
+    {
+      if (!pi->had_event)
+	continue;
+
+#ifdef UNIXWARE
+      if (! (pi->prstatus.pr_lwp.pr_flags & (PR_STOPPED | PR_ISTOP)) )
+	continue;
+
+      why = pi->prstatus.pr_lwp.pr_why;
+      what = pi->prstatus.pr_lwp.pr_what;
+#else
+      if (! (pi->prstatus.pr_flags & (PR_STOPPED | PR_ISTOP)) )
+	continue;
+
+      why = pi->prstatus.pr_why;
+      what = pi->prstatus.pr_what;
+#endif
+      if (why == PR_SYSENTRY || why == PR_SYSEXIT)
+	{
+	  int i;
+	  int found_handler = 0;
+
+	  for (i = 0; i < pi->num_syscall_handlers; i++)
+	    if (pi->syscall_handlers[i].syscall_num == what)
+	      {
+		found_handler = 1;
+		pi->saved_rtnval = pi->pid;
+		pi->saved_statval = 0;
+		if (!pi->syscall_handlers[i].func
+		    (pi, what, why, &pi->saved_rtnval, &pi->saved_statval))
+		  pi->had_event = 0;
+		break;
+	      }
+
+	  if (!found_handler)
+	    {
+	      if (why == PR_SYSENTRY)
+		error ("PR_SYSENTRY, unhandled system call %d", what);
+	      else
+		error ("PR_SYSEXIT, unhandled system call %d", what);
+	    }
+	}
+    }
+
+  /* find a relevant process with an event */
+
+  for (pi = procinfo_list; pi; pi = pi->next)
+    if (pi->had_event && (pid == -1 || pi->pid == pid))
+      break;
 
   if (!pi)
     {
-    wait_again:
-
-      if (pi)
-	pi->had_event = 0;
-
-      pi = wait_fd ();
+      wait_fd ();
+      goto scan_again;
     }
-
-  if (pid != -1)
-    for (pi = procinfo_list; pi; pi = pi->next)
-      if (pi->pid == pid && pi->had_event)
-	break;
-
-  if (!pi && !checkerr)
-    goto wait_again;
 
 #ifdef UNIXWARE
   if (!checkerr && !(pi->prstatus.pr_lwp.pr_flags & (PR_STOPPED | PR_ISTOP)))
@@ -3438,27 +3496,8 @@ procfs_wait (pid, ourstatus)
 	  break;
 	case PR_SYSENTRY:
 	case PR_SYSEXIT:
-	  {
-	    int i;
-	    int found_handler = 0;
-
-	    for (i = 0; i < pi->num_syscall_handlers; i++)
-	      if (pi->syscall_handlers[i].syscall_num == what)
-		{
-		  found_handler = 1;
-		  if (!pi->syscall_handlers[i].func (pi, what, why,
-						     &rtnval, &statval))
-		    goto wait_again;
-
-		  break;
-		}
-
-	    if (!found_handler)
-	      if (why == PR_SYSENTRY)
-		error ("PR_SYSENTRY, unhandled system call %d", what);
-	      else
-		error ("PR_SYSEXIT, unhandled system call %d", what);
-	  }
+	  rtnval = pi->saved_rtnval;
+	  statval = pi->saved_statval;
 	  break;
 	case PR_REQUESTED:
 	  statval = (SIGSTOP << 8) | 0177;

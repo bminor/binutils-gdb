@@ -1,3 +1,13 @@
+1998-11-24  Felix Lee  <flee@cygnus.com>
+
+	* procfs.c (procfs_wait): handle syscall events first.
+	
+	* procfs.c (GDB_GREGSET_TYPE, GDB_FPREGSET_TYPE): new macros.
+	* config/sparc/xm-sun4sol2.h: use them.
+	* core-sol2.c: don't #undef gregset_t and fpregset_t.
+	* sol-thread.c: ditto.
+	* sparc-tdep.c: ditto.
+	
 Tue Nov 24 14:13:10 1998  Andrew Cagney  <cagney@chook>
 
 	* breakpoint.c (memory_breakpoint_size): Delete global.

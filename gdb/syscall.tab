@@ -1,0 +1,1249 @@
+/* This file is semi-automatically updated by merge-syscalls.sh */
+#if defined (SYS_BSD_getime)
+  syscall_table[SYS_BSD_getime] = "BSD_getime";
+#endif
+#if defined (SYS_BSDgetpgrp)
+  syscall_table[SYS_BSDgetpgrp] = "BSDgetpgrp";
+#endif
+#if defined (SYS_BSDsetpgrp)
+  syscall_table[SYS_BSDsetpgrp] = "BSDsetpgrp";
+#endif
+#if defined (SYS__llseek)
+  syscall_table[SYS__llseek] = "_llseek";
+#endif
+#if defined (SYS__newselect)
+  syscall_table[SYS__newselect] = "_newselect";
+#endif
+#if defined (SYS__sysctl)
+  syscall_table[SYS__sysctl] = "_sysctl";
+#endif
+#if defined (SYS_acancel)
+  syscall_table[SYS_acancel] = "acancel";
+#endif
+#if defined (SYS_accept)
+  syscall_table[SYS_accept] = "accept";
+#endif
+#if defined (SYS_access)
+  syscall_table[SYS_access] = "access";
+#endif
+#if defined (SYS_acct)
+  syscall_table[SYS_acct] = "acct";
+#endif
+#if defined (SYS_acl)
+  syscall_table[SYS_acl] = "acl";
+#endif
+#if defined (SYS_aclipc)
+  syscall_table[SYS_aclipc] = "aclipc";
+#endif
+#if defined (SYS_adjtime)
+  syscall_table[SYS_adjtime] = "adjtime";
+#endif
+#if defined (SYS_adjtimex)
+  syscall_table[SYS_adjtimex] = "adjtimex";
+#endif
+#if defined (SYS_afs_syscall)
+  syscall_table[SYS_afs_syscall] = "afs_syscall";
+#endif
+#if defined (SYS_alarm)
+  syscall_table[SYS_alarm] = "alarm";
+#endif
+#if defined (SYS_async)
+  syscall_table[SYS_async] = "async";
+#endif
+#if defined (SYS_async_daemon)
+  syscall_table[SYS_async_daemon] = "async_daemon";
+#endif
+#if defined (SYS_attr_get)
+  syscall_table[SYS_attr_get] = "attr_get";
+#endif
+#if defined (SYS_attr_getf)
+  syscall_table[SYS_attr_getf] = "attr_getf";
+#endif
+#if defined (SYS_attr_list)
+  syscall_table[SYS_attr_list] = "attr_list";
+#endif
+#if defined (SYS_attr_listf)
+  syscall_table[SYS_attr_listf] = "attr_listf";
+#endif
+#if defined (SYS_attr_multi)
+  syscall_table[SYS_attr_multi] = "attr_multi";
+#endif
+#if defined (SYS_attr_multif)
+  syscall_table[SYS_attr_multif] = "attr_multif";
+#endif
+#if defined (SYS_attr_remove)
+  syscall_table[SYS_attr_remove] = "attr_remove";
+#endif
+#if defined (SYS_attr_removef)
+  syscall_table[SYS_attr_removef] = "attr_removef";
+#endif
+#if defined (SYS_attr_set)
+  syscall_table[SYS_attr_set] = "attr_set";
+#endif
+#if defined (SYS_attr_setf)
+  syscall_table[SYS_attr_setf] = "attr_setf";
+#endif
+#if defined (SYS_auditbuf)
+  syscall_table[SYS_auditbuf] = "auditbuf";
+#endif
+#if defined (SYS_auditctl)
+  syscall_table[SYS_auditctl] = "auditctl";
+#endif
+#if defined (SYS_auditdmp)
+  syscall_table[SYS_auditdmp] = "auditdmp";
+#endif
+#if defined (SYS_auditevt)
+  syscall_table[SYS_auditevt] = "auditevt";
+#endif
+#if defined (SYS_auditlog)
+  syscall_table[SYS_auditlog] = "auditlog";
+#endif
+#if defined (SYS_auditsys)
+  syscall_table[SYS_auditsys] = "auditsys";
+#endif
+#if defined (SYS_bdflush)
+  syscall_table[SYS_bdflush] = "bdflush";
+#endif
+#if defined (SYS_bind)
+  syscall_table[SYS_bind] = "bind";
+#endif
+#if defined (SYS_block)
+  syscall_table[SYS_block] = "block";
+#endif
+#if defined (SYS_break)
+  syscall_table[SYS_break] = "break";
+#endif
+#if defined (SYS_brk)
+  syscall_table[SYS_brk] = "brk";
+#endif
+#if defined (SYS_cachectl)
+  syscall_table[SYS_cachectl] = "cachectl";
+#endif
+#if defined (SYS_cacheflush)
+  syscall_table[SYS_cacheflush] = "cacheflush";
+#endif
+#if defined (SYS_cancelblock)
+  syscall_table[SYS_cancelblock] = "cancelblock";
+#endif
+#if defined (SYS_chdir)
+  syscall_table[SYS_chdir] = "chdir";
+#endif
+#if defined (SYS_chmod)
+  syscall_table[SYS_chmod] = "chmod";
+#endif
+#if defined (SYS_chown)
+  syscall_table[SYS_chown] = "chown";
+#endif
+#if defined (SYS_chroot)
+  syscall_table[SYS_chroot] = "chroot";
+#endif
+#if defined (SYS_clocal)
+  syscall_table[SYS_clocal] = "clocal";
+#endif
+#if defined (SYS_clock_getres)
+  syscall_table[SYS_clock_getres] = "clock_getres";
+#endif
+#if defined (SYS_clock_gettime)
+  syscall_table[SYS_clock_gettime] = "clock_gettime";
+#endif
+#if defined (SYS_clock_settime)
+  syscall_table[SYS_clock_settime] = "clock_settime";
+#endif
+#if defined (SYS_clone)
+  syscall_table[SYS_clone] = "clone";
+#endif
+#if defined (SYS_close)
+  syscall_table[SYS_close] = "close";
+#endif
+#if defined (SYS_connect)
+  syscall_table[SYS_connect] = "connect";
+#endif
+#if defined (SYS_context)
+  syscall_table[SYS_context] = "context";
+#endif
+#if defined (SYS_creat)
+  syscall_table[SYS_creat] = "creat";
+#endif
+#if defined (SYS_creat64)
+  syscall_table[SYS_creat64] = "creat64";
+#endif
+#if defined (SYS_create_module)
+  syscall_table[SYS_create_module] = "create_module";
+#endif
+#if defined (SYS_delete_module)
+  syscall_table[SYS_delete_module] = "delete_module";
+#endif
+#if defined (SYS_devstat)
+  syscall_table[SYS_devstat] = "devstat";
+#endif
+#if defined (SYS_dmi)
+  syscall_table[SYS_dmi] = "dmi";
+#endif
+#if defined (SYS_door)
+  syscall_table[SYS_door] = "door";
+#endif
+#if defined (SYS_dup)
+  syscall_table[SYS_dup] = "dup";
+#endif
+#if defined (SYS_dup2)
+  syscall_table[SYS_dup2] = "dup2";
+#endif
+#if defined (SYS_evsys)
+  syscall_table[SYS_evsys] = "evsys";
+#endif
+#if defined (SYS_evtrapret)
+  syscall_table[SYS_evtrapret] = "evtrapret";
+#endif
+#if defined (SYS_exec)
+  syscall_table[SYS_exec] = "exec";
+#endif
+#if defined (SYS_execv)
+  syscall_table[SYS_execv] = "execv";
+#endif
+#if defined (SYS_execve)
+  syscall_table[SYS_execve] = "execve";
+#endif
+#if defined (SYS_exit)
+  syscall_table[SYS_exit] = "exit";
+#endif
+#if defined (SYS_exportfs)
+  syscall_table[SYS_exportfs] = "exportfs";
+#endif
+#if defined (SYS_facl)
+  syscall_table[SYS_facl] = "facl";
+#endif
+#if defined (SYS_fchdir)
+  syscall_table[SYS_fchdir] = "fchdir";
+#endif
+#if defined (SYS_fchmod)
+  syscall_table[SYS_fchmod] = "fchmod";
+#endif
+#if defined (SYS_fchown)
+  syscall_table[SYS_fchown] = "fchown";
+#endif
+#if defined (SYS_fchroot)
+  syscall_table[SYS_fchroot] = "fchroot";
+#endif
+#if defined (SYS_fcntl)
+  syscall_table[SYS_fcntl] = "fcntl";
+#endif
+#if defined (SYS_fdatasync)
+  syscall_table[SYS_fdatasync] = "fdatasync";
+#endif
+#if defined (SYS_fdevstat)
+  syscall_table[SYS_fdevstat] = "fdevstat";
+#endif
+#if defined (SYS_fdsync)
+  syscall_table[SYS_fdsync] = "fdsync";
+#endif
+#if defined (SYS_filepriv)
+  syscall_table[SYS_filepriv] = "filepriv";
+#endif
+#if defined (SYS_flock)
+  syscall_table[SYS_flock] = "flock";
+#endif
+#if defined (SYS_flvlfile)
+  syscall_table[SYS_flvlfile] = "flvlfile";
+#endif
+#if defined (SYS_fork)
+  syscall_table[SYS_fork] = "fork";
+#endif
+#if defined (SYS_fork1)
+  syscall_table[SYS_fork1] = "fork1";
+#endif
+#if defined (SYS_forkall)
+  syscall_table[SYS_forkall] = "forkall";
+#endif
+#if defined (SYS_fpathconf)
+  syscall_table[SYS_fpathconf] = "fpathconf";
+#endif
+#if defined (SYS_fstat)
+  syscall_table[SYS_fstat] = "fstat";
+#endif
+#if defined (SYS_fstat64)
+  syscall_table[SYS_fstat64] = "fstat64";
+#endif
+#if defined (SYS_fstatfs)
+  syscall_table[SYS_fstatfs] = "fstatfs";
+#endif
+#if defined (SYS_fstatvfs)
+  syscall_table[SYS_fstatvfs] = "fstatvfs";
+#endif
+#if defined (SYS_fstatvfs64)
+  syscall_table[SYS_fstatvfs64] = "fstatvfs64";
+#endif
+#if defined (SYS_fsync)
+  syscall_table[SYS_fsync] = "fsync";
+#endif
+#if defined (SYS_ftime)
+  syscall_table[SYS_ftime] = "ftime";
+#endif
+#if defined (SYS_ftruncate)
+  syscall_table[SYS_ftruncate] = "ftruncate";
+#endif
+#if defined (SYS_ftruncate64)
+  syscall_table[SYS_ftruncate64] = "ftruncate64";
+#endif
+#if defined (SYS_fxstat)
+  syscall_table[SYS_fxstat] = "fxstat";
+#endif
+#if defined (SYS_get_kernel_syms)
+  syscall_table[SYS_get_kernel_syms] = "get_kernel_syms";
+#endif
+#if defined (SYS_getcontext)
+  syscall_table[SYS_getcontext] = "getcontext";
+#endif
+#if defined (SYS_getdents)
+  syscall_table[SYS_getdents] = "getdents";
+#endif
+#if defined (SYS_getdents64)
+  syscall_table[SYS_getdents64] = "getdents64";
+#endif
+#if defined (SYS_getdomainname)
+  syscall_table[SYS_getdomainname] = "getdomainname";
+#endif
+#if defined (SYS_getegid)
+  syscall_table[SYS_getegid] = "getegid";
+#endif
+#if defined (SYS_geteuid)
+  syscall_table[SYS_geteuid] = "geteuid";
+#endif
+#if defined (SYS_getfh)
+  syscall_table[SYS_getfh] = "getfh";
+#endif
+#if defined (SYS_getgid)
+  syscall_table[SYS_getgid] = "getgid";
+#endif
+#if defined (SYS_getgroups)
+  syscall_table[SYS_getgroups] = "getgroups";
+#endif
+#if defined (SYS_gethostid)
+  syscall_table[SYS_gethostid] = "gethostid";
+#endif
+#if defined (SYS_gethostname)
+  syscall_table[SYS_gethostname] = "gethostname";
+#endif
+#if defined (SYS_getitimer)
+  syscall_table[SYS_getitimer] = "getitimer";
+#endif
+#if defined (SYS_getksym)
+  syscall_table[SYS_getksym] = "getksym";
+#endif
+#if defined (SYS_getloadavg)
+  syscall_table[SYS_getloadavg] = "getloadavg";
+#endif
+#if defined (SYS_getmountid)
+  syscall_table[SYS_getmountid] = "getmountid";
+#endif
+#if defined (SYS_getmsg)
+  syscall_table[SYS_getmsg] = "getmsg";
+#endif
+#if defined (SYS_getpagesize)
+  syscall_table[SYS_getpagesize] = "getpagesize";
+#endif
+#if defined (SYS_getpeername)
+  syscall_table[SYS_getpeername] = "getpeername";
+#endif
+#if defined (SYS_getpgid)
+  syscall_table[SYS_getpgid] = "getpgid";
+#endif
+#if defined (SYS_getpgrp)
+  syscall_table[SYS_getpgrp] = "getpgrp";
+#endif
+#if defined (SYS_getpid)
+  syscall_table[SYS_getpid] = "getpid";
+#endif
+#if defined (SYS_getpmsg)
+  syscall_table[SYS_getpmsg] = "getpmsg";
+#endif
+#if defined (SYS_getppid)
+  syscall_table[SYS_getppid] = "getppid";
+#endif
+#if defined (SYS_getpriority)
+  syscall_table[SYS_getpriority] = "getpriority";
+#endif
+#if defined (SYS_getrlimit)
+  syscall_table[SYS_getrlimit] = "getrlimit";
+#endif
+#if defined (SYS_getrlimit64)
+  syscall_table[SYS_getrlimit64] = "getrlimit64";
+#endif
+#if defined (SYS_getrusage)
+  syscall_table[SYS_getrusage] = "getrusage";
+#endif
+#if defined (SYS_getsid)
+  syscall_table[SYS_getsid] = "getsid";
+#endif
+#if defined (SYS_getsockname)
+  syscall_table[SYS_getsockname] = "getsockname";
+#endif
+#if defined (SYS_getsockopt)
+  syscall_table[SYS_getsockopt] = "getsockopt";
+#endif
+#if defined (SYS_gettimeofday)
+  syscall_table[SYS_gettimeofday] = "gettimeofday";
+#endif
+#if defined (SYS_getuid)
+  syscall_table[SYS_getuid] = "getuid";
+#endif
+#if defined (SYS_gtty)
+  syscall_table[SYS_gtty] = "gtty";
+#endif
+#if defined (SYS_hrtsys)
+  syscall_table[SYS_hrtsys] = "hrtsys";
+#endif
+#if defined (SYS_idle)
+  syscall_table[SYS_idle] = "idle";
+#endif
+#if defined (SYS_init_module)
+  syscall_table[SYS_init_module] = "init_module";
+#endif
+#if defined (SYS_inst_sync)
+  syscall_table[SYS_inst_sync] = "inst_sync";
+#endif
+#if defined (SYS_install_utrap)
+  syscall_table[SYS_install_utrap] = "install_utrap";
+#endif
+#if defined (SYS_ioctl)
+  syscall_table[SYS_ioctl] = "ioctl";
+#endif
+#if defined (SYS_ioperm)
+  syscall_table[SYS_ioperm] = "ioperm";
+#endif
+#if defined (SYS_iopl)
+  syscall_table[SYS_iopl] = "iopl";
+#endif
+#if defined (SYS_ipc)
+  syscall_table[SYS_ipc] = "ipc";
+#endif
+#if defined (SYS_kaio)
+  syscall_table[SYS_kaio] = "kaio";
+#endif
+#if defined (SYS_keyctl)
+  syscall_table[SYS_keyctl] = "keyctl";
+#endif
+#if defined (SYS_kill)
+  syscall_table[SYS_kill] = "kill";
+#endif
+#if defined (SYS_ksigaction)
+  syscall_table[SYS_ksigaction] = "ksigaction";
+#endif
+#if defined (SYS_ksigprocmask)
+  syscall_table[SYS_ksigprocmask] = "ksigprocmask";
+#endif
+#if defined (SYS_ksigqueue)
+  syscall_table[SYS_ksigqueue] = "ksigqueue";
+#endif
+#if defined (SYS_lchown)
+  syscall_table[SYS_lchown] = "lchown";
+#endif
+#if defined (SYS_link)
+  syscall_table[SYS_link] = "link";
+#endif
+#if defined (SYS_listen)
+  syscall_table[SYS_listen] = "listen";
+#endif
+#if defined (SYS_llseek)
+  syscall_table[SYS_llseek] = "llseek";
+#endif
+#if defined (SYS_lock)
+  syscall_table[SYS_lock] = "lock";
+#endif
+#if defined (SYS_lseek)
+  syscall_table[SYS_lseek] = "lseek";
+#endif
+#if defined (SYS_lseek64)
+  syscall_table[SYS_lseek64] = "lseek64";
+#endif
+#if defined (SYS_lstat)
+  syscall_table[SYS_lstat] = "lstat";
+#endif
+#if defined (SYS_lstat64)
+  syscall_table[SYS_lstat64] = "lstat64";
+#endif
+#if defined (SYS_lvldom)
+  syscall_table[SYS_lvldom] = "lvldom";
+#endif
+#if defined (SYS_lvlequal)
+  syscall_table[SYS_lvlequal] = "lvlequal";
+#endif
+#if defined (SYS_lvlfile)
+  syscall_table[SYS_lvlfile] = "lvlfile";
+#endif
+#if defined (SYS_lvlipc)
+  syscall_table[SYS_lvlipc] = "lvlipc";
+#endif
+#if defined (SYS_lvlproc)
+  syscall_table[SYS_lvlproc] = "lvlproc";
+#endif
+#if defined (SYS_lvlvfs)
+  syscall_table[SYS_lvlvfs] = "lvlvfs";
+#endif
+#if defined (SYS_lwp_alarm)
+  syscall_table[SYS_lwp_alarm] = "lwp_alarm";
+#endif
+#if defined (SYS_lwp_cond_broadcast)
+  syscall_table[SYS_lwp_cond_broadcast] = "lwp_cond_broadcast";
+#endif
+#if defined (SYS_lwp_cond_signal)
+  syscall_table[SYS_lwp_cond_signal] = "lwp_cond_signal";
+#endif
+#if defined (SYS_lwp_cond_wait)
+  syscall_table[SYS_lwp_cond_wait] = "lwp_cond_wait";
+#endif
+#if defined (SYS_lwp_continue)
+  syscall_table[SYS_lwp_continue] = "lwp_continue";
+#endif
+#if defined (SYS_lwp_create)
+  syscall_table[SYS_lwp_create] = "lwp_create";
+#endif
+#if defined (SYS_lwp_exit)
+  syscall_table[SYS_lwp_exit] = "lwp_exit";
+#endif
+#if defined (SYS_lwp_getprivate)
+  syscall_table[SYS_lwp_getprivate] = "lwp_getprivate";
+#endif
+#if defined (SYS_lwp_info)
+  syscall_table[SYS_lwp_info] = "lwp_info";
+#endif
+#if defined (SYS_lwp_kill)
+  syscall_table[SYS_lwp_kill] = "lwp_kill";
+#endif
+#if defined (SYS_lwp_mutex_init)
+  syscall_table[SYS_lwp_mutex_init] = "lwp_mutex_init";
+#endif
+#if defined (SYS_lwp_mutex_lock)
+  syscall_table[SYS_lwp_mutex_lock] = "lwp_mutex_lock";
+#endif
+#if defined (SYS_lwp_mutex_trylock)
+  syscall_table[SYS_lwp_mutex_trylock] = "lwp_mutex_trylock";
+#endif
+#if defined (SYS_lwp_mutex_unlock)
+  syscall_table[SYS_lwp_mutex_unlock] = "lwp_mutex_unlock";
+#endif
+#if defined (SYS_lwp_mutex_wakeup)
+  syscall_table[SYS_lwp_mutex_wakeup] = "lwp_mutex_wakeup";
+#endif
+#if defined (SYS_lwp_self)
+  syscall_table[SYS_lwp_self] = "lwp_self";
+#endif
+#if defined (SYS_lwp_sema_post)
+  syscall_table[SYS_lwp_sema_post] = "lwp_sema_post";
+#endif
+#if defined (SYS_lwp_sema_trywait)
+  syscall_table[SYS_lwp_sema_trywait] = "lwp_sema_trywait";
+#endif
+#if defined (SYS_lwp_sema_wait)
+  syscall_table[SYS_lwp_sema_wait] = "lwp_sema_wait";
+#endif
+#if defined (SYS_lwp_setprivate)
+  syscall_table[SYS_lwp_setprivate] = "lwp_setprivate";
+#endif
+#if defined (SYS_lwp_sigredirect)
+  syscall_table[SYS_lwp_sigredirect] = "lwp_sigredirect";
+#endif
+#if defined (SYS_lwp_suspend)
+  syscall_table[SYS_lwp_suspend] = "lwp_suspend";
+#endif
+#if defined (SYS_lwp_wait)
+  syscall_table[SYS_lwp_wait] = "lwp_wait";
+#endif
+#if defined (SYS_lwpcontinue)
+  syscall_table[SYS_lwpcontinue] = "lwpcontinue";
+#endif
+#if defined (SYS_lwpcreate)
+  syscall_table[SYS_lwpcreate] = "lwpcreate";
+#endif
+#if defined (SYS_lwpexit)
+  syscall_table[SYS_lwpexit] = "lwpexit";
+#endif
+#if defined (SYS_lwpinfo)
+  syscall_table[SYS_lwpinfo] = "lwpinfo";
+#endif
+#if defined (SYS_lwpkill)
+  syscall_table[SYS_lwpkill] = "lwpkill";
+#endif
+#if defined (SYS_lwpprivate)
+  syscall_table[SYS_lwpprivate] = "lwpprivate";
+#endif
+#if defined (SYS_lwpself)
+  syscall_table[SYS_lwpself] = "lwpself";
+#endif
+#if defined (SYS_lwpsuspend)
+  syscall_table[SYS_lwpsuspend] = "lwpsuspend";
+#endif
+#if defined (SYS_lwpwait)
+  syscall_table[SYS_lwpwait] = "lwpwait";
+#endif
+#if defined (SYS_lxstat)
+  syscall_table[SYS_lxstat] = "lxstat";
+#endif
+#if defined (SYS_madvise)
+  syscall_table[SYS_madvise] = "madvise";
+#endif
+#if defined (SYS_memcntl)
+  syscall_table[SYS_memcntl] = "memcntl";
+#endif
+#if defined (SYS_mincore)
+  syscall_table[SYS_mincore] = "mincore";
+#endif
+#if defined (SYS_mkdir)
+  syscall_table[SYS_mkdir] = "mkdir";
+#endif
+#if defined (SYS_mkmld)
+  syscall_table[SYS_mkmld] = "mkmld";
+#endif
+#if defined (SYS_mknod)
+  syscall_table[SYS_mknod] = "mknod";
+#endif
+#if defined (SYS_mldmode)
+  syscall_table[SYS_mldmode] = "mldmode";
+#endif
+#if defined (SYS_mlock)
+  syscall_table[SYS_mlock] = "mlock";
+#endif
+#if defined (SYS_mlockall)
+  syscall_table[SYS_mlockall] = "mlockall";
+#endif
+#if defined (SYS_mmap)
+  syscall_table[SYS_mmap] = "mmap";
+#endif
+#if defined (SYS_mmap64)
+  syscall_table[SYS_mmap64] = "mmap64";
+#endif
+#if defined (SYS_modadm)
+  syscall_table[SYS_modadm] = "modadm";
+#endif
+#if defined (SYS_modctl)
+  syscall_table[SYS_modctl] = "modctl";
+#endif
+#if defined (SYS_modify_ldt)
+  syscall_table[SYS_modify_ldt] = "modify_ldt";
+#endif
+#if defined (SYS_modload)
+  syscall_table[SYS_modload] = "modload";
+#endif
+#if defined (SYS_modpath)
+  syscall_table[SYS_modpath] = "modpath";
+#endif
+#if defined (SYS_modstat)
+  syscall_table[SYS_modstat] = "modstat";
+#endif
+#if defined (SYS_moduload)
+  syscall_table[SYS_moduload] = "moduload";
+#endif
+#if defined (SYS_mount)
+  syscall_table[SYS_mount] = "mount";
+#endif
+#if defined (SYS_mprotect)
+  syscall_table[SYS_mprotect] = "mprotect";
+#endif
+#if defined (SYS_mpx)
+  syscall_table[SYS_mpx] = "mpx";
+#endif
+#if defined (SYS_mremap)
+  syscall_table[SYS_mremap] = "mremap";
+#endif
+#if defined (SYS_msgsys)
+  syscall_table[SYS_msgsys] = "msgsys";
+#endif
+#if defined (SYS_msync)
+  syscall_table[SYS_msync] = "msync";
+#endif
+#if defined (SYS_munlock)
+  syscall_table[SYS_munlock] = "munlock";
+#endif
+#if defined (SYS_munlockall)
+  syscall_table[SYS_munlockall] = "munlockall";
+#endif
+#if defined (SYS_munmap)
+  syscall_table[SYS_munmap] = "munmap";
+#endif
+#if defined (SYS_nanosleep)
+  syscall_table[SYS_nanosleep] = "nanosleep";
+#endif
+#if defined (SYS_nfssvc)
+  syscall_table[SYS_nfssvc] = "nfssvc";
+#endif
+#if defined (SYS_nfssys)
+  syscall_table[SYS_nfssys] = "nfssys";
+#endif
+#if defined (SYS_ngetdents)
+  syscall_table[SYS_ngetdents] = "ngetdents";
+#endif
+#if defined (SYS_ngetdents64)
+  syscall_table[SYS_ngetdents64] = "ngetdents64";
+#endif
+#if defined (SYS_nice)
+  syscall_table[SYS_nice] = "nice";
+#endif
+#if defined (SYS_nsproc)
+  syscall_table[SYS_nsproc] = "nsproc";
+#endif
+#if defined (SYS_ntp_adjtime)
+  syscall_table[SYS_ntp_adjtime] = "ntp_adjtime";
+#endif
+#if defined (SYS_ntp_gettime)
+  syscall_table[SYS_ntp_gettime] = "ntp_gettime";
+#endif
+#if defined (SYS_nuname)
+  syscall_table[SYS_nuname] = "nuname";
+#endif
+#if defined (SYS_oldfstat)
+  syscall_table[SYS_oldfstat] = "oldfstat";
+#endif
+#if defined (SYS_oldlstat)
+  syscall_table[SYS_oldlstat] = "oldlstat";
+#endif
+#if defined (SYS_oldolduname)
+  syscall_table[SYS_oldolduname] = "oldolduname";
+#endif
+#if defined (SYS_oldstat)
+  syscall_table[SYS_oldstat] = "oldstat";
+#endif
+#if defined (SYS_olduname)
+  syscall_table[SYS_olduname] = "olduname";
+#endif
+#if defined (SYS_online)
+  syscall_table[SYS_online] = "online";
+#endif
+#if defined (SYS_open)
+  syscall_table[SYS_open] = "open";
+#endif
+#if defined (SYS_open64)
+  syscall_table[SYS_open64] = "open64";
+#endif
+#if defined (SYS_p_online)
+  syscall_table[SYS_p_online] = "p_online";
+#endif
+#if defined (SYS_pagelock)
+  syscall_table[SYS_pagelock] = "pagelock";
+#endif
+#if defined (SYS_pathconf)
+  syscall_table[SYS_pathconf] = "pathconf";
+#endif
+#if defined (SYS_pause)
+  syscall_table[SYS_pause] = "pause";
+#endif
+#if defined (SYS_pcsample)
+  syscall_table[SYS_pcsample] = "pcsample";
+#endif
+#if defined (SYS_personality)
+  syscall_table[SYS_personality] = "personality";
+#endif
+#if defined (SYS_pgrpsys)
+  syscall_table[SYS_pgrpsys] = "pgrpsys";
+#endif
+#if defined (SYS_phys)
+  syscall_table[SYS_phys] = "phys";
+#endif
+#if defined (SYS_pipe)
+  syscall_table[SYS_pipe] = "pipe";
+#endif
+#if defined (SYS_plock)
+  syscall_table[SYS_plock] = "plock";
+#endif
+#if defined (SYS_poll)
+  syscall_table[SYS_poll] = "poll";
+#endif
+#if defined (SYS_prctl)
+  syscall_table[SYS_prctl] = "prctl";
+#endif
+#if defined (SYS_pread)
+  syscall_table[SYS_pread] = "pread";
+#endif
+#if defined (SYS_pread64)
+  syscall_table[SYS_pread64] = "pread64";
+#endif
+#if defined (SYS_prepblock)
+  syscall_table[SYS_prepblock] = "prepblock";
+#endif
+#if defined (SYS_priocntl)
+  syscall_table[SYS_priocntl] = "priocntl";
+#endif
+#if defined (SYS_priocntllst)
+  syscall_table[SYS_priocntllst] = "priocntllst";
+#endif
+#if defined (SYS_priocntlsys)
+  syscall_table[SYS_priocntlsys] = "priocntlsys";
+#endif
+#if defined (SYS_procblk)
+  syscall_table[SYS_procblk] = "procblk";
+#endif
+#if defined (SYS_processor_bind)
+  syscall_table[SYS_processor_bind] = "processor_bind";
+#endif
+#if defined (SYS_processor_exbind)
+  syscall_table[SYS_processor_exbind] = "processor_exbind";
+#endif
+#if defined (SYS_processor_info)
+  syscall_table[SYS_processor_info] = "processor_info";
+#endif
+#if defined (SYS_procpriv)
+  syscall_table[SYS_procpriv] = "procpriv";
+#endif
+#if defined (SYS_prof)
+  syscall_table[SYS_prof] = "prof";
+#endif
+#if defined (SYS_profil)
+  syscall_table[SYS_profil] = "profil";
+#endif
+#if defined (SYS_pset)
+  syscall_table[SYS_pset] = "pset";
+#endif
+#if defined (SYS_ptrace)
+  syscall_table[SYS_ptrace] = "ptrace";
+#endif
+#if defined (SYS_putmsg)
+  syscall_table[SYS_putmsg] = "putmsg";
+#endif
+#if defined (SYS_putpmsg)
+  syscall_table[SYS_putpmsg] = "putpmsg";
+#endif
+#if defined (SYS_pwrite)
+  syscall_table[SYS_pwrite] = "pwrite";
+#endif
+#if defined (SYS_pwrite64)
+  syscall_table[SYS_pwrite64] = "pwrite64";
+#endif
+#if defined (SYS_quotactl)
+  syscall_table[SYS_quotactl] = "quotactl";
+#endif
+#if defined (SYS_rdblock)
+  syscall_table[SYS_rdblock] = "rdblock";
+#endif
+#if defined (SYS_read)
+  syscall_table[SYS_read] = "read";
+#endif
+#if defined (SYS_readdir)
+  syscall_table[SYS_readdir] = "readdir";
+#endif
+#if defined (SYS_readlink)
+  syscall_table[SYS_readlink] = "readlink";
+#endif
+#if defined (SYS_readv)
+  syscall_table[SYS_readv] = "readv";
+#endif
+#if defined (SYS_reboot)
+  syscall_table[SYS_reboot] = "reboot";
+#endif
+#if defined (SYS_recv)
+  syscall_table[SYS_recv] = "recv";
+#endif
+#if defined (SYS_recvfrom)
+  syscall_table[SYS_recvfrom] = "recvfrom";
+#endif
+#if defined (SYS_recvmsg)
+  syscall_table[SYS_recvmsg] = "recvmsg";
+#endif
+#if defined (SYS_rename)
+  syscall_table[SYS_rename] = "rename";
+#endif
+#if defined (SYS_resolvepath)
+  syscall_table[SYS_resolvepath] = "resolvepath";
+#endif
+#if defined (SYS_rfsys)
+  syscall_table[SYS_rfsys] = "rfsys";
+#endif
+#if defined (SYS_rmdir)
+  syscall_table[SYS_rmdir] = "rmdir";
+#endif
+#if defined (SYS_rpcsys)
+  syscall_table[SYS_rpcsys] = "rpcsys";
+#endif
+#if defined (SYS_sched_get_priority_max)
+  syscall_table[SYS_sched_get_priority_max] = "sched_get_priority_max";
+#endif
+#if defined (SYS_sched_get_priority_min)
+  syscall_table[SYS_sched_get_priority_min] = "sched_get_priority_min";
+#endif
+#if defined (SYS_sched_getparam)
+  syscall_table[SYS_sched_getparam] = "sched_getparam";
+#endif
+#if defined (SYS_sched_getscheduler)
+  syscall_table[SYS_sched_getscheduler] = "sched_getscheduler";
+#endif
+#if defined (SYS_sched_rr_get_interval)
+  syscall_table[SYS_sched_rr_get_interval] = "sched_rr_get_interval";
+#endif
+#if defined (SYS_sched_setparam)
+  syscall_table[SYS_sched_setparam] = "sched_setparam";
+#endif
+#if defined (SYS_sched_setscheduler)
+  syscall_table[SYS_sched_setscheduler] = "sched_setscheduler";
+#endif
+#if defined (SYS_sched_yield)
+  syscall_table[SYS_sched_yield] = "sched_yield";
+#endif
+#if defined (SYS_schedctl)
+  syscall_table[SYS_schedctl] = "schedctl";
+#endif
+#if defined (SYS_secadvise)
+  syscall_table[SYS_secadvise] = "secadvise";
+#endif
+#if defined (SYS_secsys)
+  syscall_table[SYS_secsys] = "secsys";
+#endif
+#if defined (SYS_select)
+  syscall_table[SYS_select] = "select";
+#endif
+#if defined (SYS_semsys)
+  syscall_table[SYS_semsys] = "semsys";
+#endif
+#if defined (SYS_send)
+  syscall_table[SYS_send] = "send";
+#endif
+#if defined (SYS_sendmsg)
+  syscall_table[SYS_sendmsg] = "sendmsg";
+#endif
+#if defined (SYS_sendto)
+  syscall_table[SYS_sendto] = "sendto";
+#endif
+#if defined (SYS_setcontext)
+  syscall_table[SYS_setcontext] = "setcontext";
+#endif
+#if defined (SYS_setdomainname)
+  syscall_table[SYS_setdomainname] = "setdomainname";
+#endif
+#if defined (SYS_setegid)
+  syscall_table[SYS_setegid] = "setegid";
+#endif
+#if defined (SYS_seteuid)
+  syscall_table[SYS_seteuid] = "seteuid";
+#endif
+#if defined (SYS_setfsgid)
+  syscall_table[SYS_setfsgid] = "setfsgid";
+#endif
+#if defined (SYS_setfsuid)
+  syscall_table[SYS_setfsuid] = "setfsuid";
+#endif
+#if defined (SYS_setgid)
+  syscall_table[SYS_setgid] = "setgid";
+#endif
+#if defined (SYS_setgroups)
+  syscall_table[SYS_setgroups] = "setgroups";
+#endif
+#if defined (SYS_sethostid)
+  syscall_table[SYS_sethostid] = "sethostid";
+#endif
+#if defined (SYS_sethostname)
+  syscall_table[SYS_sethostname] = "sethostname";
+#endif
+#if defined (SYS_setitimer)
+  syscall_table[SYS_setitimer] = "setitimer";
+#endif
+#if defined (SYS_setpgid)
+  syscall_table[SYS_setpgid] = "setpgid";
+#endif
+#if defined (SYS_setpgrp)
+  syscall_table[SYS_setpgrp] = "setpgrp";
+#endif
+#if defined (SYS_setpriority)
+  syscall_table[SYS_setpriority] = "setpriority";
+#endif
+#if defined (SYS_setregid)
+  syscall_table[SYS_setregid] = "setregid";
+#endif
+#if defined (SYS_setreuid)
+  syscall_table[SYS_setreuid] = "setreuid";
+#endif
+#if defined (SYS_setrlimit)
+  syscall_table[SYS_setrlimit] = "setrlimit";
+#endif
+#if defined (SYS_setrlimit64)
+  syscall_table[SYS_setrlimit64] = "setrlimit64";
+#endif
+#if defined (SYS_setsid)
+  syscall_table[SYS_setsid] = "setsid";
+#endif
+#if defined (SYS_setsockopt)
+  syscall_table[SYS_setsockopt] = "setsockopt";
+#endif
+#if defined (SYS_settimeofday)
+  syscall_table[SYS_settimeofday] = "settimeofday";
+#endif
+#if defined (SYS_setuid)
+  syscall_table[SYS_setuid] = "setuid";
+#endif
+#if defined (SYS_setup)
+  syscall_table[SYS_setup] = "setup";
+#endif
+#if defined (SYS_sgetmask)
+  syscall_table[SYS_sgetmask] = "sgetmask";
+#endif
+#if defined (SYS_sgifastpath)
+  syscall_table[SYS_sgifastpath] = "sgifastpath";
+#endif
+#if defined (SYS_sgikopt)
+  syscall_table[SYS_sgikopt] = "sgikopt";
+#endif
+#if defined (SYS_sginap)
+  syscall_table[SYS_sginap] = "sginap";
+#endif
+#if defined (SYS_shmsys)
+  syscall_table[SYS_shmsys] = "shmsys";
+#endif
+#if defined (SYS_shutdown)
+  syscall_table[SYS_shutdown] = "shutdown";
+#endif
+#if defined (SYS_sigaction)
+  syscall_table[SYS_sigaction] = "sigaction";
+#endif
+#if defined (SYS_sigaltstack)
+  syscall_table[SYS_sigaltstack] = "sigaltstack";
+#endif
+#if defined (SYS_signal)
+  syscall_table[SYS_signal] = "signal";
+#endif
+#if defined (SYS_signotify)
+  syscall_table[SYS_signotify] = "signotify";
+#endif
+#if defined (SYS_signotifywait)
+  syscall_table[SYS_signotifywait] = "signotifywait";
+#endif
+#if defined (SYS_sigpending)
+  syscall_table[SYS_sigpending] = "sigpending";
+#endif
+#if defined (SYS_sigpoll)
+  syscall_table[SYS_sigpoll] = "sigpoll";
+#endif
+#if defined (SYS_sigprocmask)
+  syscall_table[SYS_sigprocmask] = "sigprocmask";
+#endif
+#if defined (SYS_sigqueue)
+  syscall_table[SYS_sigqueue] = "sigqueue";
+#endif
+#if defined (SYS_sigreturn)
+  syscall_table[SYS_sigreturn] = "sigreturn";
+#endif
+#if defined (SYS_sigsendset)
+  syscall_table[SYS_sigsendset] = "sigsendset";
+#endif
+#if defined (SYS_sigsendsys)
+  syscall_table[SYS_sigsendsys] = "sigsendsys";
+#endif
+#if defined (SYS_sigstack)
+  syscall_table[SYS_sigstack] = "sigstack";
+#endif
+#if defined (SYS_sigsuspend)
+  syscall_table[SYS_sigsuspend] = "sigsuspend";
+#endif
+#if defined (SYS_sigtimedwait)
+  syscall_table[SYS_sigtimedwait] = "sigtimedwait";
+#endif
+#if defined (SYS_sigwait)
+  syscall_table[SYS_sigwait] = "sigwait";
+#endif
+#if defined (SYS_sleep)
+  syscall_table[SYS_sleep] = "sleep";
+#endif
+#if defined (SYS_so_socket)
+  syscall_table[SYS_so_socket] = "so_socket";
+#endif
+#if defined (SYS_so_socketpair)
+  syscall_table[SYS_so_socketpair] = "so_socketpair";
+#endif
+#if defined (SYS_sockconfig)
+  syscall_table[SYS_sockconfig] = "sockconfig";
+#endif
+#if defined (SYS_socket)
+  syscall_table[SYS_socket] = "socket";
+#endif
+#if defined (SYS_socketcall)
+  syscall_table[SYS_socketcall] = "socketcall";
+#endif
+#if defined (SYS_socketpair)
+  syscall_table[SYS_socketpair] = "socketpair";
+#endif
+#if defined (SYS_sparc_utrap_install)
+  syscall_table[SYS_sparc_utrap_install] = "sparc_utrap_install";
+#endif
+#if defined (SYS_sproc)
+  syscall_table[SYS_sproc] = "sproc";
+#endif
+#if defined (SYS_sprocsp)
+  syscall_table[SYS_sprocsp] = "sprocsp";
+#endif
+#if defined (SYS_ssetmask)
+  syscall_table[SYS_ssetmask] = "ssetmask";
+#endif
+#if defined (SYS_stat)
+  syscall_table[SYS_stat] = "stat";
+#endif
+#if defined (SYS_stat64)
+  syscall_table[SYS_stat64] = "stat64";
+#endif
+#if defined (SYS_statfs)
+  syscall_table[SYS_statfs] = "statfs";
+#endif
+#if defined (SYS_statvfs)
+  syscall_table[SYS_statvfs] = "statvfs";
+#endif
+#if defined (SYS_statvfs64)
+  syscall_table[SYS_statvfs64] = "statvfs64";
+#endif
+#if defined (SYS_stime)
+  syscall_table[SYS_stime] = "stime";
+#endif
+#if defined (SYS_stty)
+  syscall_table[SYS_stty] = "stty";
+#endif
+#if defined (SYS_swapctl)
+  syscall_table[SYS_swapctl] = "swapctl";
+#endif
+#if defined (SYS_swapoff)
+  syscall_table[SYS_swapoff] = "swapoff";
+#endif
+#if defined (SYS_swapon)
+  syscall_table[SYS_swapon] = "swapon";
+#endif
+#if defined (SYS_symlink)
+  syscall_table[SYS_symlink] = "symlink";
+#endif
+#if defined (SYS_sync)
+  syscall_table[SYS_sync] = "sync";
+#endif
+#if defined (SYS_syscall)
+  syscall_table[SYS_syscall] = "syscall";
+#endif
+#if defined (SYS_sysconfig)
+  syscall_table[SYS_sysconfig] = "sysconfig";
+#endif
+#if defined (SYS_sysfs)
+  syscall_table[SYS_sysfs] = "sysfs";
+#endif
+#if defined (SYS_sysi86)
+  syscall_table[SYS_sysi86] = "sysi86";
+#endif
+#if defined (SYS_sysinfo)
+  syscall_table[SYS_sysinfo] = "sysinfo";
+#endif
+#if defined (SYS_syslog)
+  syscall_table[SYS_syslog] = "syslog";
+#endif
+#if defined (SYS_sysmips)
+  syscall_table[SYS_sysmips] = "sysmips";
+#endif
+#if defined (SYS_sysmp)
+  syscall_table[SYS_sysmp] = "sysmp";
+#endif
+#if defined (SYS_sysppc)
+  syscall_table[SYS_sysppc] = "sysppc";
+#endif
+#if defined (SYS_syssgi)
+  syscall_table[SYS_syssgi] = "syssgi";
+#endif
+#if defined (SYS_syssun)
+  syscall_table[SYS_syssun] = "syssun";
+#endif
+#if defined (SYS_systeminfo)
+  syscall_table[SYS_systeminfo] = "systeminfo";
+#endif
+#if defined (SYS_time)
+  syscall_table[SYS_time] = "time";
+#endif
+#if defined (SYS_timer_create)
+  syscall_table[SYS_timer_create] = "timer_create";
+#endif
+#if defined (SYS_timer_delete)
+  syscall_table[SYS_timer_delete] = "timer_delete";
+#endif
+#if defined (SYS_timer_getoverrun)
+  syscall_table[SYS_timer_getoverrun] = "timer_getoverrun";
+#endif
+#if defined (SYS_timer_gettime)
+  syscall_table[SYS_timer_gettime] = "timer_gettime";
+#endif
+#if defined (SYS_timer_settime)
+  syscall_table[SYS_timer_settime] = "timer_settime";
+#endif
+#if defined (SYS_times)
+  syscall_table[SYS_times] = "times";
+#endif
+#if defined (SYS_truncate)
+  syscall_table[SYS_truncate] = "truncate";
+#endif
+#if defined (SYS_truncate64)
+  syscall_table[SYS_truncate64] = "truncate64";
+#endif
+#if defined (SYS_tsolsys)
+  syscall_table[SYS_tsolsys] = "tsolsys";
+#endif
+#if defined (SYS_uadmin)
+  syscall_table[SYS_uadmin] = "uadmin";
+#endif
+#if defined (SYS_ulimit)
+  syscall_table[SYS_ulimit] = "ulimit";
+#endif
+#if defined (SYS_umask)
+  syscall_table[SYS_umask] = "umask";
+#endif
+#if defined (SYS_umount)
+  syscall_table[SYS_umount] = "umount";
+#endif
+#if defined (SYS_uname)
+  syscall_table[SYS_uname] = "uname";
+#endif
+#if defined (SYS_unblock)
+  syscall_table[SYS_unblock] = "unblock";
+#endif
+#if defined (SYS_unlink)
+  syscall_table[SYS_unlink] = "unlink";
+#endif
+#if defined (SYS_uselib)
+  syscall_table[SYS_uselib] = "uselib";
+#endif
+#if defined (SYS_ustat)
+  syscall_table[SYS_ustat] = "ustat";
+#endif
+#if defined (SYS_utime)
+  syscall_table[SYS_utime] = "utime";
+#endif
+#if defined (SYS_utimes)
+  syscall_table[SYS_utimes] = "utimes";
+#endif
+#if defined (SYS_utssys)
+  syscall_table[SYS_utssys] = "utssys";
+#endif
+#if defined (SYS_vfork)
+  syscall_table[SYS_vfork] = "vfork";
+#endif
+#if defined (SYS_vhangup)
+  syscall_table[SYS_vhangup] = "vhangup";
+#endif
+#if defined (SYS_vm86)
+  syscall_table[SYS_vm86] = "vm86";
+#endif
+#if defined (SYS_vtrace)
+  syscall_table[SYS_vtrace] = "vtrace";
+#endif
+#if defined (SYS_wait)
+  syscall_table[SYS_wait] = "wait";
+#endif
+#if defined (SYS_wait4)
+  syscall_table[SYS_wait4] = "wait4";
+#endif
+#if defined (SYS_waitpid)
+  syscall_table[SYS_waitpid] = "waitpid";
+#endif
+#if defined (SYS_waitsys)
+  syscall_table[SYS_waitsys] = "waitsys";
+#endif
+#if defined (SYS_write)
+  syscall_table[SYS_write] = "write";
+#endif
+#if defined (SYS_writev)
+  syscall_table[SYS_writev] = "writev";
+#endif
+#if defined (SYS_xenix)
+  syscall_table[SYS_xenix] = "xenix";
+#endif
+#if defined (SYS_xmknod)
+  syscall_table[SYS_xmknod] = "xmknod";
+#endif
+#if defined (SYS_xstat)
+  syscall_table[SYS_xstat] = "xstat";
+#endif
+#if defined (SYS_yield)
+  syscall_table[SYS_yield] = "yield";
+#endif
