@@ -1,3 +1,8 @@
+Wed Sep 23 16:09:31 1998  Richard Henderson  <rth@cygnus.com>
+
+        * elflink.h (elf_link_add_object_symbols): Don't record a dynamic
+        symbol for the indirect alias to a versioned symbol.
+
 Mon Sep 21 12:15:22 1998  Catherine Moore  <clm@cygnus.com>
 
         * elf32-i386.c (elf32_i386_vtinherit_howto): New.
