@@ -40,18 +40,6 @@
    included by one source file per executable.  */
 #include "opcode/m68k.h"
 
-#ifndef BFD_ASSEMBLER
-#ifdef TE_SUN
-/* This variable contains the value to write out at the beginning of
-   the a.out file.  The 2<<16 means that this is a 68020 file instead
-   of an old-style 68000 file */
-
-long omagic = 2 << 16 | OMAGIC;	/* Magic byte for header file */
-#else
-long omagic = OMAGIC;
-#endif
-#endif
-
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful */
 CONST char comment_chars[] = "|";
@@ -82,8 +70,8 @@ CONST char FLT_CHARS[] = "rRsSfFdDxXeEpP";
 const int md_reloc_size = 8;	/* Size of relocation record */
 
 /* Are we trying to generate PIC code?  If so, absolute references
-   ought to be made PC-relative.  They aren't yet, but we can parse
-   the option now so the user doesn't get an error...  */
+   ought to be made into linkage table references or pc-relative
+   references.  */
 int flag_want_pic;
 
 /* Its an arbitrary name:  This means I don't approve of it */
@@ -2284,7 +2272,7 @@ m68k_ip (instring)
 				    TAB (PCLEA, SZ_UNDEF));
 #else
 			  addword (0x0170);
-			  add_fix ('l', opP->con1, 0);
+			  add_fix ('l', opP->con1, 1);
 			  addword (0), addword (0);
 #endif
 			  break;
@@ -3541,6 +3529,11 @@ init_regtable ()
 
 static int no_68851, no_68881;
 
+#ifdef OBJ_AOUT
+/* a.out machine type.  Default to 68020.  */
+int m68k_aout_machtype = 2;
+#endif
+
 void
 md_assemble (str)
      char *str;
@@ -3615,7 +3608,18 @@ md_assemble (str)
 	as_bad ("options for 68881 and no-68881 both given");
       if (no_68851 && (current_architecture & m68851))
 	as_bad ("options for 68851 and no-68851 both given");
-      done_first_time = 1;
+
+#ifdef OBJ_AOUT
+      /* Work out the magic number.  This isn't very general.  */
+      if (current_architecture & m68000)
+	m68k_aout_machtype = 0;
+      else if (current_architecture & m68010)
+	m68k_aout_machtype = 1;
+      else if (current_architecture & m68020)
+	m68k_aout_machtype = 2;
+      else
+	m68k_aout_machtype = 2;
+#endif
     }
 
   memset ((char *) (&the_ins), '\0', sizeof (the_ins));
@@ -3825,7 +3829,7 @@ md_begin ()
 
       retval = hash_insert (op_hash, ins->name, (char *) hack);
       /* Didn't his mommy tell him about null pointers? */
-      if (retval && *retval)
+      if (retval)
 	as_bad ("Internal Error:  Can't hash %s: %s", ins->name, retval);
     }
 
@@ -4874,7 +4878,8 @@ s_proc (ignore)
  *		so don't use or document it, but that's the way the parsing
  *		works).
  *
- *	-k	Ignored for now.  (Sun 3 only.  Indicates PIC.)
+ *	-pic	Indicates PIC.
+ *	-k	Indicates PIC.  (Sun 3 only.)
  *
  * MAYBE_FLOAT_TOO is defined below so that specifying a processor type
  * (e.g. m68020) also requests that float instructions be included.  This
@@ -4903,12 +4908,6 @@ md_parse_option (argP, cntP, vecP)
 				   jsr's.  */
       break;
 
-#ifdef TE_SUN3
-    case 'k':
-      flag_want_pic = 1;
-      break;
-#endif
-
     case 'A':
       (*argP)++;
       /* intentional fall-through */
@@ -4928,9 +4927,6 @@ md_parse_option (argP, cntP, vecP)
 	}
       else if (!strcmp (*argP, "68010"))
 	{
-#ifdef TE_SUN
-	  omagic = 1 << 16 | OMAGIC;
-#endif
 	  current_architecture |= m68010;
 	}
       else if (!strcmp (*argP, "68020"))
@@ -4994,15 +4990,21 @@ md_parse_option (argP, cntP, vecP)
     case 'p':
       if (!strcmp (*argP, "pic"))
 	{
-	  (*argP) += 3;
+	  *argP += 3;
+	  flag_want_pic = 1;
 	  break;		/* -pic, Position Independent Code */
 	}
       else
-	{
-	  return 0;
-	}			/* pic or not */
+	goto bad_arg;
+
+#ifdef TE_SUN3
+    case 'k':
+      flag_want_pic = 1;
+      break;
+#endif
 
     default:
+    bad_arg:
       return 0;
     }
   return 1;

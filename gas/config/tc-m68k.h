@@ -24,6 +24,10 @@
 #define TARGET_FORMAT "a.out-sunos-big"
 #endif
 
+#ifdef TE_LYNX
+#define TARGET_FORMAT		"coff-m68k-lynx"
+#endif
+
 #define COFF_MAGIC MC68MAGIC
 #define BFD_ARCH bfd_arch_m68k
 #define COFF_FLAGS F_AR32W
@@ -40,7 +44,8 @@
 #endif /* TE_SUN3 */
 
 #ifndef AOUT_MACHTYPE
-#define AOUT_MACHTYPE 0x2
+#define AOUT_MACHTYPE m68k_aout_machtype
+extern int m68k_aout_machtype;
 #endif
 
 #define tc_crawl_symbol_chain(a)	{;}	/* not used */

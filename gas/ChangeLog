@@ -1,8 +1,19 @@
+Tue Oct 19 18:13:26 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-m68k.h (AOUT_MACHTYPE): Define to be external variable
+	m68k_aout_machtype.
+	* config/tc-m68k.c (omagic): Remove obsolete and unused variable.
+	(m68k_aout_machtype): New variable, if OBJ_AOUT.
+	(md_assemble): Initialize m68k_aout_machtype based on
+	current_architecture, if OBJ_AOUT.
+	(md_parse_option): Remove obsolete reference to omagic.
+
 Thu Oct 14 16:51:00 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (md_pseudo_table): Ignore .livereg pseudo-op.
 	(s_option): Ignore .option O* and .option pic*.
 	(s_ent): Skip whitespace between symbol and optional digit.
+	(my_getSmallExpression): Handle ($xx) correctly: assume 0($xx).
 
 	* app.c (do_scrub_next_char): Always accept 'x' and 'X' as escape
 	characters in state 6.
