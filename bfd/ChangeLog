@@ -1,3 +1,12 @@
+Wed Jun 21 10:16:10 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* versados.c: Second pass/rewrite.
+
+Mon Jun 19 08:40:45 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* syms.c (coff_section_type): Compare only the front part
+	of a section name. (bfd/7238)
+
 Sat Jun 17 09:40:44 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* elf32-hppa.c (elf32_hppa_size_stubs): Set the size of the stub
