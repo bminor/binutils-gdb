@@ -560,6 +560,7 @@ demo64.o: demo64.c aoutf1.h $(INCDIR)/aout/sun4.h libaout.h \
 coff-i960.o: coff-i960.c $(INCDIR)/coff/i960.h $(INCDIR)/coff/internal.h \
   libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
 srec.o: srec.c
+binary.o: binary.c
 tekhex.o: tekhex.c
 oasys.o: oasys.c $(INCDIR)/oasys.h liboasys.h
 ieee.o: ieee.c $(INCDIR)/ieee.h libieee.h
