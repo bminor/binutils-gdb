@@ -1,3 +1,16 @@
+Wed Jun 12 14:10:44 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* write.c (adjust_reloc_syms): Don't set sy_used_in_reloc for an
+	absolute symbol unless TC_FORCE_RELOCATION returns true.
+
+	* config/obj-coff.c (previous_file_symbol): Remove BFD_ASSEMBLER
+	version.
+	(c_dot_file_symbol): BFD_ASSEMBLER version: Don't set the value of
+	the symbol to a pointer.  Don't set previous_file_symbol.
+	Simplify symbol list rearrangement.
+	(coff_frob_symbol): Don't do anything with C_FILE symbols.
+	(coff_adjust_symtab): Don't check previous_file_symbol.
+
 Mon Jun 10 14:52:29 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (ppc_elf_lcomm): New function for .lcomm
