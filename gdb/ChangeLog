@@ -1,3 +1,7 @@
+Mon Apr 27 10:43:04 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+        * gdb_string.h (strdup): Don't specify arguments in prototype.
+
 Sun Apr 26 07:57:21 1998  Peter Schauer <pes@regent.e-technik.tu-muenchen.de>
 
 	* rs6000-nat.c (vmap_ldinfo):  Issue warning instead of error if

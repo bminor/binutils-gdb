@@ -62,7 +62,7 @@ extern char *strerror PARAMS ((int));	/* X3.159-1989  4.11.6.2 */
 #endif
 
 #ifndef strdup
-extern char *strdup PARAMS ((const char *));
+extern char *strdup (); /* full prototype collides w/ some OSes (AIX 3.2.5) */
 #endif
 
 #endif	/* !defined(GDB_STRING_H) */
