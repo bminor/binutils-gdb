@@ -1,3 +1,41 @@
+Thu Dec 23 12:23:11 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	gcc -Wall lint:
+	* ar.c (main): Put parens around assignment used as truth value.
+	* objcopy.c (strip_main): Remove unused variables.  Return 0.
+	(copy_main): Remove unused variables.  Return 0.
+	* objdump.c (display_bfd): Declare return value as void.
+	(stab_print): Use "" instead of 0 to initialize array.
+	(dump_stabs_1): Print vma using printf_vma.
+	(display_info): Put parens around assignment used as truth value.
+	* strings.c (print_strings): Cast printf arguments.
+
+	* objcopy.c (copy_main): Use copy_options, not strip_options.
+
+	* nlmheader.y (command): Warn about illegal date values.
+
+Wed Dec 15 11:18:03 1993  David J. MacKenzie  (djm@frosty.eng.umd.edu)
+
+	* bucomm.c bucomm.h: Run through indent.  De-ansidecl-ify.
+	(bfd_nonfatal): New function.
+	(bfd_fatal): Call it.
+
+	* objcopy.c (smart_rename): Do a copy if the dest file has
+	multiple hard links.  Remove source file on successful copy.
+	Try to preserve mode and owner on successful rename.
+
+	* objcopy.c: Run through indent.  Clean up a bit.
+	Make global variables static.
+	Make {input,output}_{target,filename}, show_version local
+	to various functions.
+	New global variable `status' for exit status.
+	(strip_main, copy_main): New functions with code from main.
+	(nonfatal): New macro.  Use it globally instead of bfd_perror and
+	bfd_fatal.
+
+	(copy_object): Call mangle_sections with bfd_map_over_sections.
+	(mangle_sections): Adjust for new calling convention.
+
 Fri Dec 10 11:28:11 1993  Ian Lance Taylor  (ian@deneb.cygnus.com)
 
 	* nlmheader.y (command): Accept MAP and FULLMAP without arguments.
