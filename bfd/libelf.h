@@ -1,10 +1,47 @@
+/* BFD back-end data structures for ELF files.
+   Copyright (C) 1992, 1993 Free Software Foundation, Inc.
+   Written by Cygnus Support.
+
+This file is part of BFD, the Binary File Descriptor library.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+#ifndef _LIBELF_H_
+#define _LIBELF_H_ 1
+
 #include "elf/common.h"
 #include "elf/internal.h"
 #include "elf/external.h"
 
+typedef struct
+{
+  asymbol symbol;
+  Elf_Internal_Sym internal_elf_sym;
+  Elf_External_Sym native_elf_sym;
+  /* these are used for the generation of .stabX symbols (?) */
+  short desc;
+  unsigned char type;
+  char other;
+} elf_symbol_type;
+
 struct elf_backend_data {
   void (*elf_info_to_howto) PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
   enum bfd_architecture arch;
+
+  /* WTF?? */
+  elf_symbol_type *global_sym;
 };
 
 extern bfd_target *elf_object_p PARAMS ((bfd *));
@@ -35,3 +72,5 @@ extern int elf_sizeof_headers PARAMS ((bfd *, boolean));
 /* If the target doesn't have reloc handling written yet:  */
 extern void elf_no_info_to_howto PARAMS ((bfd *, arelent *,
 					  Elf_Internal_Rela *));
+
+#endif /* _LIBELF_H_ */
