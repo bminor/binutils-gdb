@@ -1,3 +1,8 @@
+Thu Oct  8 18:41:45 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* config.sub: Complain if no argument is given.  Added support for
+	386bsd as OS and target alias.
+
 Thu Oct  8 15:07:22 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (XTRAFLAGS): include newlib directories if
