@@ -128,7 +128,7 @@ h8500_frame_chain (thisframe)
 {
 
   if (!inside_entry_file (thisframe->pc))
-      return read_memory_integer(thisframe->frame, 2)
+      return (read_memory_integer(thisframe->frame, 2) & 0xffff)
 	| (read_register(SEG_T_REGNUM) << 16);
   else
     return 0;
