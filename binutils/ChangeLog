@@ -1,3 +1,12 @@
+Mon Nov 25 16:53:18 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (disassemble_data): Don't crash if there is no
+	symbol.
+
+Fri Nov 22 17:29:14 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* ar.c (open_inarch): Don't call bfd_openr with a null name.
+
 Fri Nov  1 12:08:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* binutils.texi: Add section on reporting bugs.
