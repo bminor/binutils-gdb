@@ -1,4 +1,4 @@
-# Sanitize.in for devo.
+# .Sanitize for devo.
 # $Id$
 #
 
@@ -13,14 +13,12 @@
 
 # The lines between the "Do-first:" line and the "Things-to-keep:"
 # line are executed as a /bin/sh shell script before anything else is
-# done in this 
+# done in this directory.
 
 Do-first:
 
-echo Sanitizing `pwd`...
-
 # All files listed between the "Things-to-keep:" line and the
-# "Files-to-sed:" line will be kept.  All other files will be removed.
+# "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
 # called.  Directories not listed will be removed in their entirety
 # with rm -rf.
@@ -55,6 +53,10 @@ prms
 rcs
 readline
 texinfo
+
+# The lines between the "Do-last:" line and the end of the file
+# are executed as a /bin/sh shell script after everything else is
+# done.
 
 Do-last:
 
@@ -110,4 +112,3 @@ if grep 'sanitize' * ; then
 	echo Some mentions of Sanitize are still left in the sources!
 fi
 
-echo Done in `pwd`.
