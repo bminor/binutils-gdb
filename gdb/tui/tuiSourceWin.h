@@ -36,11 +36,8 @@ extern void tuiEraseSourceContent (TuiWinInfoPtr, int);
 extern void tuiEraseAllSourceWinsContent (int);
 extern void tuiSetSourceContentNil (TuiWinInfoPtr, char *);
 extern void tuiShowSourceContent (TuiWinInfoPtr);
-extern void tuiShowAllSourceWinsContent (void);
 extern void tuiHorizontalSourceScroll (TuiWinInfoPtr, TuiScrollDirection,
 				       int);
-extern void tuiUpdateOnEnd (void);
-
 extern TuiStatus tuiSetExecInfoContent (TuiWinInfoPtr);
 extern void tuiShowExecInfoContent (TuiWinInfoPtr);
 extern void tuiShowAllExecInfosContent (void);

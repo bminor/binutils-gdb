@@ -29,8 +29,6 @@ extern void tuiClearWin (TuiGenWinInfoPtr);
 extern void unhighlightWin (TuiWinInfoPtr);
 extern void makeVisible (TuiGenWinInfoPtr, int);
 extern void makeAllVisible (int);
-extern void scrollWinForward (TuiGenWinInfoPtr, int);
-extern void scrollWinBackward (TuiGenWinInfoPtr, int);
 extern void makeWindow (TuiGenWinInfoPtr, int);
 extern TuiWinInfoPtr copyWin (TuiWinInfoPtr);
 extern void boxWin (TuiGenWinInfoPtr, int);

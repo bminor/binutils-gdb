@@ -45,12 +45,6 @@
 #include "tuiGeneralWin.h"
 #include "tuiWin.h"
 
-/*
-   ** local support functions
- */
-static void _winResize (void);
-
-
 /***********************
 ** PUBLIC FUNCTIONS
 ***********************/
@@ -296,90 +290,6 @@ makeAllVisible (int visible)
 
   return;
 }				/* makeAllVisible */
-
-
-/*
-   ** scrollWinForward
- */
-void
-scrollWinForward (TuiGenWinInfoPtr winInfo, int numLines)
-{
-  if (winInfo->content != (OpaquePtr) NULL &&
-      winInfo->lastVisibleLine < winInfo->contentSize - 1)
-    {
-      int i, firstLine, newLastLine;
-
-      firstLine = winInfo->lastVisibleLine - winInfo->viewportHeight + 1;
-      if (winInfo->lastVisibleLine + numLines > winInfo->contentSize)
-	newLastLine = winInfo->contentSize - 1;
-      else
-	newLastLine = winInfo->lastVisibleLine + numLines - 1;
-
-      for (i = (newLastLine - winInfo->viewportHeight);
-	   (i <= newLastLine); i++)
-	{
-	  TuiWinElementPtr line;
-	  int lineHeight;
-
-	  line = (TuiWinElementPtr) winInfo->content[i];
-	  if (line->highlight)
-	    wstandout (winInfo->handle);
-	  mvwaddstr (winInfo->handle,
-		     i - (newLastLine - winInfo->viewportHeight),
-		     1,
-		     displayableWinContentOf (winInfo, line));
-	  if (line->highlight)
-	    wstandend (winInfo->handle);
-	  lineHeight = winElementHeight (winInfo, line);
-	  newLastLine += (lineHeight - 1);
-	}
-      winInfo->lastVisibleLine = newLastLine;
-    }
-
-  return;
-}				/* scrollWinForward */
-
-
-/*
-   ** scrollWinBackward
- */
-void
-scrollWinBackward (TuiGenWinInfoPtr winInfo, int numLines)
-{
-  if (winInfo->content != (OpaquePtr) NULL &&
-      (winInfo->lastVisibleLine - winInfo->viewportHeight) > 0)
-    {
-      int i, newLastLine, firstLine;
-
-      firstLine = winInfo->lastVisibleLine - winInfo->viewportHeight + 1;
-      if ((firstLine - numLines) < 0)
-	newLastLine = winInfo->viewportHeight - 1;
-      else
-	newLastLine = winInfo->lastVisibleLine - numLines + 1;
-
-      for (i = newLastLine - winInfo->viewportHeight; (i <= newLastLine); i++)
-	{
-	  TuiWinElementPtr line;
-	  int lineHeight;
-
-	  line = (TuiWinElementPtr) winInfo->content[i];
-	  if (line->highlight)
-	    wstandout (winInfo->handle);
-	  mvwaddstr (winInfo->handle,
-		     i - (newLastLine - winInfo->viewportHeight),
-		     1,
-		     displayableWinContentOf (winInfo, line));
-	  if (line->highlight)
-	    wstandend (winInfo->handle);
-	  lineHeight = winElementHeight (winInfo, line);
-	  newLastLine += (lineHeight - 1);
-	}
-      winInfo->lastVisibleLine = newLastLine;
-    }
-
-  return;
-}				/* scrollWinBackward */
-
 
 /*
    ** refreshAll().

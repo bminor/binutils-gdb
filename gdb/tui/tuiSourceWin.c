@@ -66,44 +66,6 @@
 extern int current_source_line;
 extern struct symtab *current_source_symtab;
 
-
-/*****************************************
-** STATIC LOCAL FUNCTIONS FORWARD DECLS    **
-******************************************/
-
-/*****************************************
-** STATIC LOCAL DATA                    **
-******************************************/
-
-
-/*****************************************
-** PUBLIC FUNCTIONS                        **
-******************************************/
-
-/*********************************
-** SOURCE/DISASSEM  FUNCTIONS    **
-*********************************/
-
-/*
-   ** tuiSrcWinIsDisplayed().
- */
-int
-tuiSrcWinIsDisplayed (void)
-{
-  return (m_winPtrNotNull (srcWin) && srcWin->generic.isVisible);
-}				/* tuiSrcWinIsDisplayed */
-
-
-/*
-   ** tuiAsmWinIsDisplayed().
- */
-int
-tuiAsmWinIsDisplayed (void)
-{
-  return (m_winPtrNotNull (disassemWin) && disassemWin->generic.isVisible);
-}				/* tuiAsmWinIsDisplayed */
-
-
 /*
    ** tuiDisplayMainFunction().
    **        Function to display the "main" routine"
@@ -402,21 +364,6 @@ tuiShowSourceContent (TuiWinInfoPtr winInfo)
 
 
 /*
-   ** tuiShowAllSourceWinsContent()
- */
-void
-tuiShowAllSourceWinsContent (void)
-{
-  int i;
-
-  for (i = 0; i < (sourceWindows ())->count; i++)
-    tuiShowSourceContent ((TuiWinInfoPtr) (sourceWindows ())->list[i]);
-
-  return;
-}				/* tuiShowAllSourceWinsContent */
-
-
-/*
    ** tuiHorizontalSourceScroll().
    **      Scroll the source forward or backward horizontally
  */
@@ -686,22 +633,6 @@ tuiEraseExecInfoContent (TuiWinInfoPtr winInfo)
   return;
 }				/* tuiEraseExecInfoContent */
 
-
-/*
-   ** tuiEraseAllExecInfosContent()
- */
-void
-tuiEraseAllExecInfosContent (void)
-{
-  int i;
-
-  for (i = 0; i < (sourceWindows ())->count; i++)
-    tuiEraseExecInfoContent ((TuiWinInfoPtr) (sourceWindows ())->list[i]);
-
-  return;
-}				/* tuiEraseAllExecInfosContent */
-
-
 /*
    ** tuiClearExecInfoContent().
  */
@@ -713,22 +644,6 @@ tuiClearExecInfoContent (TuiWinInfoPtr winInfo)
 
   return;
 }				/* tuiClearExecInfoContent */
-
-
-/*
-   ** tuiClearAllExecInfosContent()
- */
-void
-tuiClearAllExecInfosContent (void)
-{
-  int i;
-
-  for (i = 0; i < (sourceWindows ())->count; i++)
-    tuiClearExecInfoContent ((TuiWinInfoPtr) (sourceWindows ())->list[i]);
-
-  return;
-}				/* tuiClearAllExecInfosContent */
-
 
 /*
    ** tuiUpdateExecInfo().
@@ -755,55 +670,6 @@ tuiUpdateAllExecInfos (void)
 
   return;
 }				/* tuiUpdateAllExecInfos */
-
-
-
-/* tuiUpdateOnEnd()
-   **       elz: This function clears the execution info from the source windows
-   **       and resets the locator to display no line info, procedure info, pc
-   **       info.  It is called by stack_publish_stopped_with_no_frame, which
-   **       is called then the target terminates execution
- */
-void
-tuiUpdateOnEnd (void)
-{
-  int i;
-  TuiGenWinInfoPtr locator;
-  char *filename;
-  TuiWinInfoPtr winInfo;
-
-  locator = locatorWinInfoPtr ();
-
-  /* for all the windows (src, asm) */
-  for (i = 0; i < (sourceWindows ())->count; i++)
-    {
-      TuiLineOrAddress l;
-      
-      winInfo = (TuiWinInfoPtr) (sourceWindows ())->list[i];
-
-      l.addr = -1;
-      l.lineNo = -1;
-      tuiSetIsExecPointAt (l, winInfo);	/* the target is'n running */
-      /* -1 should not match any line number or pc */
-      tuiSetExecInfoContent (winInfo);	/*set winInfo so that > is'n displayed */
-      tuiShowExecInfoContent (winInfo);		/* display the new contents */
-    }
-
-  /*now update the locator */
-  tuiClearLocatorDisplay ();
-  tuiGetLocatorFilename (locator, &filename);
-  tuiSetLocatorInfo (
-		      filename,
-		      (char *) NULL,
-		      0,
-		      (CORE_ADDR) 0,
-	   &((TuiWinElementPtr) locator->content[0])->whichElement.locator);
-  tuiShowLocatorContent ();
-
-  return;
-}				/* tuiUpdateOnEnd */
-
-
 
 TuiStatus
 tuiAllocSourceBuffer (TuiWinInfoPtr winInfo)

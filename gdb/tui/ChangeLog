@@ -1,5 +1,21 @@
 2002-08-24  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tuiSourceWin.c (tuiSrcWinIsDisplayed): Remove.
+	(tuiAsmWinIsDisplayed): Remove.
+	(tuiShowAllSourceWinsContent): Remove.
+	(tuiUpdateOnEnd): Remove.
+	* tuiGeneralWin.c (scrollWinForward): Remove.
+	(scrollWinBackward): Remove.
+	(_winResize): Don't declare.
+	* tui.h (tuiUpdateOnEnd): Don't declare.
+	(vcatch_errors, va_catch_errors): Likewise.
+	* tuiSourceWin.h (tuiUpdateOnEnd): Likewise.
+	(tuiShowAllSourceWinsContent): Likewise.
+	* tuiGeneralWin.h (scrollWinForward): Likewise.
+	(scrollWinBackward): Likewise.
+
+2002-08-24  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tuiRegs.c (_tuiRegisterFormat): Use gdbarch_print_registers_info.
 
 2002-08-18  Daniel Jacobowitz  <drow@mvista.com>
