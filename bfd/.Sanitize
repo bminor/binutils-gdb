@@ -137,12 +137,11 @@ libnlm.h
 liboasys.h
 mipsbsd.c
 newsos3.c
+nlm-target.h
 nlm.c
 nlm32-gen.c
-nlm32-target.h
 nlm32.c
 nlm64-gen.c
-nlm64-target.h
 nlm64.c
 nlmcode.h
 oasys.c

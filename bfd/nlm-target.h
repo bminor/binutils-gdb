@@ -1,4 +1,4 @@
-/* Target definitions for 32-bit NLM (NetWare Loadable Module)
+/* Target definitions for 32/64-bit NLM (NetWare Loadable Module)
    Copyright (C) 1993 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -25,80 +25,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    There are two such structures here:  one for big-endian machines and
    one for little-endian machines.   */
 
-/* We don't have core files.  */
-
-#define bfd_nlm32_core_file_p \
-		((bfd_target *(*) PARAMS ((bfd *))) bfd_nullvoidptr)
-#define	bfd_nlm32_core_file_failing_command \
-		_bfd_dummy_core_file_failing_command
-#define	bfd_nlm32_core_file_failing_signal \
-		_bfd_dummy_core_file_failing_signal
-#define	bfd_nlm32_core_file_matches_executable_p \
-		_bfd_dummy_core_file_matches_executable_p
-
-/* Archives are generic or unimplemented.  */
-
-#define bfd_nlm32_slurp_armap \
-		bfd_slurp_coff_armap
-#define bfd_nlm32_slurp_extended_name_table \
-		_bfd_slurp_extended_name_table
-#define bfd_nlm32_truncate_arname \
-		bfd_dont_truncate_arname
-#define bfd_nlm32_openr_next_archived_file \
-		bfd_generic_openr_next_archived_file
-#define bfd_nlm32_generic_stat_arch_elt \
-		bfd_generic_stat_arch_elt
-#define	bfd_nlm32_write_armap \
-		coff_write_armap
-
-/* Ordinary section reading and writing */
-#define bfd_nlm32_get_section_contents \
-		bfd_generic_get_section_contents
-#define	bfd_nlm32_close_and_cleanup \
-		bfd_generic_close_and_cleanup
-
-#define bfd_nlm32_bfd_debug_info_start \
-		bfd_void
-#define bfd_nlm32_bfd_debug_info_end \
-		bfd_void
-#define bfd_nlm32_bfd_debug_info_accumulate \
-		(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
-#define bfd_nlm32_bfd_get_relocated_section_contents \
-		bfd_generic_get_relocated_section_contents
-#define bfd_nlm32_bfd_relax_section \
-		bfd_generic_relax_section
-#define bfd_nlm32_bfd_seclet_link \
-		bfd_generic_seclet_link
-#define bfd_nlm32_bfd_make_debug_symbol \
-  ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
-
-#define	bfd_nlm32_set_section_contents \
-		bfd_generic_set_section_contents
-#define bfd_nlm32_new_section_hook \
-		_bfd_dummy_new_section_hook
-
-#define bfd_nlm32_get_reloc_upper_bound \
-  ((unsigned int (*) PARAMS ((bfd *, sec_ptr))) bfd_0u)
-
-#define bfd_nlm32_canonicalize_reloc \
-  ((unsigned int (*) PARAMS ((bfd *, sec_ptr, arelent **, asymbol **))) bfd_0u)
-
-#define bfd_nlm32_print_symbol \
-  ((void (*) PARAMS ((bfd *, PTR, asymbol *, bfd_print_symbol_type))) bfd_false)
-
-#define bfd_nlm32_get_lineno \
-  ((alent * (*) PARAMS ((bfd *, asymbol *))) bfd_false)
-
-#define bfd_nlm32_find_nearest_line \
-  ((boolean (*) PARAMS ((bfd *, asection *, asymbol **, bfd_vma, \
-			 CONST char **, CONST char **, unsigned int *))) \
-   bfd_false)
-
-#define bfd_nlm32_sizeof_headers \
-  ((int (*) PARAMS ((bfd *, boolean))) bfd_0u)
-
-#define bfd_nlm32_write_object_contents \
-  ((boolean (*) PARAMS ((bfd *))) bfd_false)
 
 #ifdef TARGET_BIG_SYM
 bfd_target TARGET_BIG_SYM =
@@ -154,28 +80,28 @@ bfd_target TARGET_BIG_SYM =
 
   /* bfd_check_format: check the format of a file being read */
   { _bfd_dummy_target,		/* unknown format */
-    bfd_nlm32_object_p,		/* assembler/linker output (object file) */
+    nlmNAME(object_p),		/* assembler/linker output (object file) */
     bfd_generic_archive_p,	/* an archive */
-    bfd_nlm32_core_file_p	/* a core file */
+    nlmNAME(core_file_p)	/* a core file */
   },
 
   /* bfd_set_format: set the format of a file being written */
   { bfd_false,
-    bfd_nlm_mkobject,
+    nlm_mkobject,
     _bfd_generic_mkarchive,
     bfd_false
   },
 
   /* bfd_write_contents: write cached information into a file being written */
   { bfd_false,
-    bfd_nlm32_write_object_contents,
+    nlmNAME(write_object_contents),
     _bfd_write_archive_contents,
     bfd_false
   },
 
   /* Initialize a jump table with the standard macro.  All names start with
      "nlm" */
-  JUMP_TABLE(bfd_nlm32),
+  JUMP_TABLE(JUMP_TABLE_PREFIX),
 
   /* backend_data: */
   (PTR) NULL,
@@ -236,28 +162,28 @@ bfd_target TARGET_LITTLE_SYM =
 
   /* bfd_check_format: check the format of a file being read */
   { _bfd_dummy_target,		/* unknown format */
-    bfd_nlm32_object_p,		/* assembler/linker output (object file) */
+    nlmNAME(object_p),		/* assembler/linker output (object file) */
     bfd_generic_archive_p,	/* an archive */
-    bfd_nlm32_core_file_p	/* a core file */
+    nlmNAME(core_file_p)	/* a core file */
   },
 
   /* bfd_set_format: set the format of a file being written */
   { bfd_false,
-    bfd_nlm_mkobject,
+    nlm_mkobject,
     _bfd_generic_mkarchive,
     bfd_false
   },
 
   /* bfd_write_contents: write cached information into a file being written */
   { bfd_false,
-    bfd_nlm32_write_object_contents,
+    nlmNAME(write_object_contents),
     _bfd_write_archive_contents,
     bfd_false
   },
 
   /* Initialize a jump table with the standard macro.  All names start with
      "nlm" */
-  JUMP_TABLE(bfd_nlm32),
+  JUMP_TABLE(JUMP_TABLE_PREFIX),
 
   /* backend_data: */
   (PTR) NULL,

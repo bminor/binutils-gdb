@@ -1,3 +1,16 @@
+Thu Jul 22 15:57:29 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* nlm{32,64}-target.h:  Remove.
+	* nlm-target.h:  New file, merged from nlm{32,64}-target.h
+	* libnlm.h (NLM_ARCH_SIZE):  Define to ARCH_SIZE.
+	* nlm.c (ARCH_SIZE):  Remove define to zero.
+	* nlm32-gen.c (ARCH_SIZE):  Define to 32.
+	* nlm32-gen.c (JUMP_TABLE_PREFIX):  Define to nlm32.
+	* nlm{32,64}-gen.c (nlm-target.h):  Include.
+	* targets.c, libnlm.h, nlm.c, nlm{32,64}-gen.c, nlm{32,64}.c,
+	nlmcode.h:  Convert prefixes from bfd_nlm<size> to just
+	nlm<size>, and use macros select size.
+
 Thu Jul 22 15:40:14 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* Makefile.in (Makefile): add configure.in, drop redundant
