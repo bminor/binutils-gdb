@@ -1,3 +1,13 @@
+2003-07-15  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (get_prev_frame): Move disabled inside_entry_func to
+	before code inhibiting repeated unwind attempts.  Add to
+	commentary on that test's problems.
+	* blockframe.c (inside_main_func): Look for "main" in the minimal
+	symbol table.
+	* d10v-tdep.c (d10v_frame_this_id): Delete check that frames are
+	identical.
+
 2003-07-15  Michal Ludvig  <mludvig@suse.cz>
 
 	* x86-64-linux-nat.c (regmap): Removed.

@@ -1843,6 +1843,44 @@ get_prev_frame (struct frame_info *this_frame)
       return NULL;
     }
 
+  /* If we're already inside the entry function for the main objfile,
+     then it isn't valid.  Don't apply this test to a dummy frame -
+     dummy frame PC's typically land in the entry func.  Don't apply
+     this test to the sentinel frame.  Sentinel frames should always
+     be allowed to unwind.  */
+  /* NOTE: cagney/2003-02-25: Don't enable until someone has found
+     hard evidence that this is needed.  */
+  /* NOTE: cagney/2003-07-07: Fixed a bug in inside_main_func - wasn't
+     checking for "main" in the minimal symbols.  With that fixed
+     asm-source tests now stop in "main" instead of halting the
+     backtrace in wierd and wonderful ways somewhere inside the entry
+     file.  Suspect that inside_entry_file and inside_entry_func tests
+     were added to work around that (now fixed) case.  */
+  /* NOTE: cagney/2003-07-15: danielj (if I'm reading it right)
+     suggested having the inside_entry_func test use the
+     inside_main_func msymbol trick (along with entry_point_address I
+     guess) to determine the address range of the start function.
+     That should provide a far better stopper than the current
+     heuristics.  */
+  /* NOTE: cagney/2003-07-15: Need to add a "set backtrace
+     beyond-entry-func" command so that this can be selectively
+     disabled.  */
+  if (0
+#if 0
+      && backtrace_beyond_entry_func
+#endif
+      && this_frame->type != DUMMY_FRAME && this_frame->level >= 0
+      && inside_entry_func (get_frame_pc (this_frame)))
+    {
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog, "// inside entry func }\n");
+	}
+      return NULL;
+    }
+
   /* Only try to do the unwind once.  */
   if (this_frame->prev_p)
     {
@@ -1889,26 +1927,6 @@ get_prev_frame (struct frame_info *this_frame)
       return NULL;
     }
 #endif
-
-  /* If we're already inside the entry function for the main objfile,
-     then it isn't valid.  Don't apply this test to a dummy frame -
-     dummy frame PC's typically land in the entry func.  Don't apply
-     this test to the sentinel frame.  Sentinel frames should always
-     be allowed to unwind.  */
-  /* NOTE: cagney/2003-02-25: Don't enable until someone has found
-     hard evidence that this is needed.  */
-  if (0
-      && this_frame->type != DUMMY_FRAME && this_frame->level >= 0
-      && inside_entry_func (get_frame_pc (this_frame)))
-    {
-      if (frame_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "-> ");
-	  fprint_frame (gdb_stdlog, NULL);
-	  fprintf_unfiltered (gdb_stdlog, "// inside entry func }\n");
-	}
-      return NULL;
-    }
 
   /* If any of the old frame initialization methods are around, use
      the legacy get_prev_frame method.  */
