@@ -1,3 +1,10 @@
+Tue Jul 22 18:50:38 1997  Robert Hoehne <robert.hoehne@Mathematik.TU-Chemnitz.DE>
+
+	* emulparams/i386go32.sh (OUTPUT_FORMAT): Set to "coff-go32".
+	(SEGMENT_SIZE): Set to 0x200.
+	* scripttempl/i386go32.sc: Rewrite.
+	* configure.tgt (i[3456]86-*-msdosdjgpp*): New target.
+
 start-sanitize-r5900
 Tue Jul 15 10:18:09 1997  Jeffrey A Law  (law@cygnus.com)
 
