@@ -1,3 +1,7 @@
+Thu Aug  8 12:43:52 1996  Klaus Kaempf  <kkaempf@progis.de>
+
+	* makefile.vms: Update for alpha-opc changes.
+
 Wed Aug  7 11:55:10 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i386-dis.c (print_insn_i386): Actually return the correct value.
