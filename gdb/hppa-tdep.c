@@ -40,6 +40,9 @@
 #include "symtab.h"
 #include "infcall.h"
 #include "dis-asm.h"
+#include "trad-frame.h"
+#include "frame-unwind.h"
+#include "frame-base.h"
 
 #ifdef USG
 #include <sys/types.h>
@@ -4237,6 +4240,297 @@ hppa_frame_init_saved_regs (struct frame_info *frame)
   hppa_frame_find_saved_regs (frame, deprecated_get_frame_saved_regs (frame));
 }
 
+struct hppa_frame_cache
+{
+  CORE_ADDR base;
+  struct trad_frame_saved_reg *saved_regs;
+};
+
+static struct hppa_frame_cache *
+hppa_frame_cache (struct frame_info *next_frame, void **this_cache)
+{
+  struct hppa_frame_cache *cache;
+  long saved_gr_mask;
+  long saved_fr_mask;
+  CORE_ADDR this_sp;
+  long frame_size;
+  struct unwind_table_entry *u;
+  int i;
+
+  if ((*this_cache) != NULL)
+    return (*this_cache);
+  cache = FRAME_OBSTACK_ZALLOC (struct hppa_frame_cache);
+  (*this_cache) = cache;
+  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+
+  /* Yow! */
+  u = find_unwind_entry (frame_func_unwind (next_frame));
+  if (!u)
+    return;
+
+  /* Turn the Entry_GR field into a bitmask.  */
+  saved_gr_mask = 0;
+  for (i = 3; i < u->Entry_GR + 3; i++)
+    {
+      /* Frame pointer gets saved into a special location.  */
+      if (u->Save_SP && i == DEPRECATED_FP_REGNUM)
+	continue;
+	
+      saved_gr_mask |= (1 << i);
+    }
+
+  /* Turn the Entry_FR field into a bitmask too.  */
+  saved_fr_mask = 0;
+  for (i = 12; i < u->Entry_FR + 12; i++)
+    saved_fr_mask |= (1 << i);
+
+  /* Loop until we find everything of interest or hit a branch.
+
+     For unoptimized GCC code and for any HP CC code this will never ever
+     examine any user instructions.
+
+     For optimized GCC code we're faced with problems.  GCC will schedule
+     its prologue and make prologue instructions available for delay slot
+     filling.  The end result is user code gets mixed in with the prologue
+     and a prologue instruction may be in the delay slot of the first branch
+     or call.
+
+     Some unexpected things are expected with debugging optimized code, so
+     we allow this routine to walk past user instructions in optimized
+     GCC code.  */
+  {
+    int final_iteration = 0;
+    CORE_ADDR pc;
+    CORE_ADDR end_pc = skip_prologue_using_sal (pc);
+    int looking_for_sp = u->Save_SP;
+    int looking_for_rp = u->Save_RP;
+    int fp_loc = -1;
+    if (end_pc == 0)
+      end_pc = frame_pc_unwind (next_frame);
+    frame_size = 0;
+    for (pc = frame_func_unwind (next_frame);
+	 ((saved_gr_mask || saved_fr_mask
+	   || looking_for_sp || looking_for_rp
+	   || frame_size < (u->Total_frame_size << 3))
+	  && pc <= end_pc);
+	 pc += 4)
+      {
+	int reg;
+	char buf4[4];
+	long status = target_read_memory (pc, buf4, sizeof buf4);
+	long inst = extract_unsigned_integer (buf4, sizeof buf4);
+	
+	/* Note the interesting effects of this instruction.  */
+	frame_size += prologue_inst_adjust_sp (inst);
+	
+	/* There are limited ways to store the return pointer into the
+	   stack.  */
+	if (inst == 0x6bc23fd9) /* stw rp,-0x14(sr0,sp) */
+	  {
+	    looking_for_rp = 0;
+	    cache->saved_regs[RP_REGNUM].addr = -20;
+	  }
+	else if (inst == 0x0fc212c1) /* std rp,-0x10(sr0,sp) */
+	  {
+	    looking_for_rp = 0;
+	    cache->saved_regs[RP_REGNUM].addr = -16;
+	  }
+	
+	/* Check to see if we saved SP into the stack.  This also
+	   happens to indicate the location of the saved frame
+	   pointer.  */
+	if ((inst & 0xffffc000) == 0x6fc10000  /* stw,ma r1,N(sr0,sp) */
+	    || (inst & 0xffffc00c) == 0x73c10008) /* std,ma r1,N(sr0,sp) */
+	  {
+	    looking_for_sp = 0;
+	    cache->saved_regs[DEPRECATED_FP_REGNUM].addr = 0;
+	  }
+	
+	/* Account for general and floating-point register saves.  */
+	reg = inst_saves_gr (inst);
+	if (reg >= 3 && reg <= 18
+	    && (!u->Save_SP || reg != DEPRECATED_FP_REGNUM))
+	  {
+	    saved_gr_mask &= ~(1 << reg);
+	    if ((inst >> 26) == 0x1b && extract_14 (inst) >= 0)
+	      /* stwm with a positive displacement is a _post_
+		 _modify_.  */
+	      cache->saved_regs[reg].addr = 0;
+	    else if ((inst & 0xfc00000c) == 0x70000008)
+	      /* A std has explicit post_modify forms.  */
+	      cache->saved_regs[reg].addr = 0;
+	    else
+	      {
+		CORE_ADDR offset;
+		
+		if ((inst >> 26) == 0x1c)
+		  offset = (inst & 0x1 ? -1 << 13 : 0) | (((inst >> 4) & 0x3ff) << 3);
+		else if ((inst >> 26) == 0x03)
+		  offset = low_sign_extend (inst & 0x1f, 5);
+		else
+		  offset = extract_14 (inst);
+		
+		/* Handle code with and without frame pointers.  */
+		if (u->Save_SP)
+		  cache->saved_regs[reg].addr = offset;
+		else
+		  cache->saved_regs[reg].addr = (u->Total_frame_size << 3) + offset;
+	      }
+	  }
+
+	/* GCC handles callee saved FP regs a little differently.  
+	   
+	   It emits an instruction to put the value of the start of
+	   the FP store area into %r1.  It then uses fstds,ma with a
+	   basereg of %r1 for the stores.
+
+	   HP CC emits them at the current stack pointer modifying the
+	   stack pointer as it stores each register.  */
+	
+	/* ldo X(%r3),%r1 or ldo X(%r30),%r1.  */
+	if ((inst & 0xffffc000) == 0x34610000
+	    || (inst & 0xffffc000) == 0x37c10000)
+	  fp_loc = extract_14 (inst);
+	
+	reg = inst_saves_fr (inst);
+	if (reg >= 12 && reg <= 21)
+	  {
+	    /* Note +4 braindamage below is necessary because the FP
+	       status registers are internally 8 registers rather than
+	       the expected 4 registers.  */
+	    saved_fr_mask &= ~(1 << reg);
+	    if (fp_loc == -1)
+	      {
+		/* 1st HP CC FP register store.  After this
+		   instruction we've set enough state that the GCC and
+		   HPCC code are both handled in the same manner.  */
+		cache->saved_regs[reg + FP4_REGNUM + 4].addr = 0;
+		fp_loc = 8;
+	      }
+	    else
+	      {
+		cache->saved_regs[reg + FP0_REGNUM + 4].addr = fp_loc;
+		fp_loc += 8;
+	      }
+	  }
+	
+	/* Quit if we hit any kind of branch the previous iteration. */
+	if (final_iteration)
+	  break;
+	/* We want to look precisely one instruction beyond the branch
+	   if we have not found everything yet.  */
+	if (is_branch (inst))
+	  final_iteration = 1;
+      }
+  }
+
+  {
+    /* The frame base always represents the value of %sp at entry to
+       the current function (and is thus equivalent to the "saved"
+       stack pointer.  */
+    CORE_ADDR this_sp = frame_unwind_register_unsigned (next_frame, SP_REGNUM);
+    /* FIXME: cagney/2004-02-22: This assumes that the frame has been
+       created.  If it hasn't everything will be out-of-wack.  */
+    if (u->Save_SP && trad_frame_addr_p (cache->saved_regs, SP_REGNUM))
+      /* Both we're expecting the SP to be saved and the SP has been
+	 saved.  The entry SP value is saved at this frame's SP
+	 address.  */
+      cache->base = read_memory_integer (this_sp, TARGET_PTR_BIT / 8);
+    else
+      /* The prologue has been slowly allocating stack space.  Adjust
+	 the SP back.  */
+      cache->base = this_sp - frame_size;
+    trad_frame_set_value (cache->saved_regs, SP_REGNUM, cache->base);
+  }
+
+  /* The PC is found in the "return register".  */
+  if (u->Millicode)
+    cache->saved_regs[PC_REGNUM] = cache->saved_regs[31];
+  else
+    cache->saved_regs[PC_REGNUM] = cache->saved_regs[RP_REGNUM];
+
+  {
+    /* Convert all the offsets into addresses.  */
+    int reg;
+    for (reg = 0; reg < NUM_REGS; reg++)
+      {
+	if (trad_frame_addr_p (cache->saved_regs, reg))
+	  cache->saved_regs[reg].addr += cache->base;
+      }
+  }
+
+  return (*this_cache);
+}
+
+static void
+hppa_frame_this_id (struct frame_info *next_frame, void **this_cache,
+			   struct frame_id *this_id)
+{
+  struct hppa_frame_cache *info = hppa_frame_cache (next_frame, this_cache);
+  (*this_id) = frame_id_build (info->base, frame_func_unwind (next_frame));
+}
+
+static void
+hppa_frame_prev_register (struct frame_info *next_frame,
+				 void **this_cache,
+				 int regnum, int *optimizedp,
+				 enum lval_type *lvalp, CORE_ADDR *addrp,
+				 int *realnump, void *valuep)
+{
+  struct hppa_frame_cache *info = hppa_frame_cache (next_frame, this_cache);
+  trad_frame_prev_register (next_frame, info->saved_regs, regnum,
+			    optimizedp, lvalp, addrp, realnump, valuep);
+}
+
+static const struct frame_unwind hppa_frame_unwind =
+{
+  NORMAL_FRAME,
+  hppa_frame_this_id,
+  hppa_frame_prev_register
+};
+
+static const struct frame_unwind *
+hppa_frame_unwind_sniffer (struct frame_info *next_frame)
+{
+  return &hppa_frame_unwind;
+}
+
+static CORE_ADDR
+hppa_frame_base_address (struct frame_info *next_frame,
+				void **this_cache)
+{
+  struct hppa_frame_cache *info = hppa_frame_cache (next_frame,
+							   this_cache);
+  return info->base;
+}
+
+static const struct frame_base hppa_frame_base = {
+  &hppa_frame_unwind,
+  hppa_frame_base_address,
+  hppa_frame_base_address,
+  hppa_frame_base_address
+};
+
+static const struct frame_base *
+hppa_frame_base_sniffer (struct frame_info *next_frame)
+{
+  return &hppa_frame_base;
+}
+
+static struct frame_id
+hppa_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  return frame_id_build (frame_unwind_register_unsigned (next_frame,
+							 SP_REGNUM),
+			 frame_pc_unwind (next_frame));
+}
+
+static CORE_ADDR
+hppa_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  return frame_unwind_register_signed (next_frame, PC_REGNUM) & ~3;
+}
+
 /* Exception handling support for the HP-UX ANSI C++ compiler.
    The compiler (aCC) provides a callback for exception events;
    GDB can set a breakpoint on this callback and find out what
@@ -5219,6 +5513,10 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Frame unwind methods.  */
   if (0)
     {
+      set_gdbarch_unwind_dummy_id (gdbarch, hppa_unwind_dummy_id);
+      set_gdbarch_unwind_pc (gdbarch, hppa_unwind_pc);
+      frame_unwind_append_sniffer (gdbarch, hppa_frame_unwind_sniffer);
+      frame_base_append_sniffer (gdbarch, hppa_frame_base_sniffer);
     }
   else
     {

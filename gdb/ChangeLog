@@ -1,5 +1,18 @@
 2004-02-22  Andrew Cagney  <cagney@redhat.com>
 
+	* hppa-tdep.c: Include "trad-frame.h", "frame-unwind.h", and
+	"frame-base.h".
+	(struct hppa_frame_cache): Define.
+	(hppa_frame_cache, hppa_frame_this_id): New functions.
+	(hppa_frame_prev_register): New function.
+	(hppa_frame_unwind, hppa_frame_base): New variables.
+	(hppa_frame_unwind_sniffer): New function.
+	(hppa_frame_base_address, hppa_unwind_pc): New function.
+	(hppa_gdbarch_init): Set unwind_dummy_id, unwind_pc, frame unwind
+	sniffer, and frame base sniffer; keep disabled.
+	(hppa_frame_base_sniffer, hppa_unwind_dummy_id): New functions.
+	* Makefile.in: Update dependencies, fix s/nbsd/obsd/ typo.
+
 	* frame-unwind.c (frame_unwind_find_by_frame): Add legacy_frame_p
 	to predicates for "seriously old code".
 

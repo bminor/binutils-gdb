@@ -1524,7 +1524,7 @@ amd64fbsd-nat.o: amd64fbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(gdb_assert_h) $(gregset_h) $(x86_64_tdep_h) $(amd64_nat_h)
 amd64fbsd-tdep.o: amd64fbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 	$(gdbcore_h) $(regcache_h) $(osabi_h) $(gdb_string_h) \
-	$(x86_64_tdep_h)  $(solib_svr4_h)
+	$(x86_64_tdep_h) $(solib_svr4_h)
 amd64-nat.o: amd64-nat.c $(defs_h) $(gdbarch_h) $(regcache_h) \
 	$(gdb_assert_h) $(i386_tdep_h) $(x86_64_tdep_h)
 amd64nbsd-nat.o: amd64nbsd-nat.c $(defs_h) $(gdb_assert_h) $(x86_64_tdep_h) \
@@ -1532,11 +1532,11 @@ amd64nbsd-nat.o: amd64nbsd-nat.c $(defs_h) $(gdb_assert_h) $(x86_64_tdep_h) \
 amd64nbsd-tdep.o: amd64nbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 	$(gdbcore_h) $(osabi_h) $(gdb_assert_h) $(x86_64_tdep_h) \
 	$(nbsd_tdep_h) $(solib_svr4_h)
-amd64obsd-nat.o: amd64nbsd-nat.c $(defs_h) $(gdb_assert_h) $(x86_64_tdep_h) \
+amd64obsd-nat.o: amd64obsd-nat.c $(defs_h) $(gdb_assert_h) $(x86_64_tdep_h) \
 	$(amd64_nat_h)
-amd64obsd-tdep.o: amd64nbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
-	$(gdbcore_h) $(osabi_h) $(regset_h) $(target_h) $(gdb_assert_h) \
-	$(gdb_string_h) $(x86_64_tdep_h) $(i387_tdep_h) $(solib_svr4_h)
+amd64obsd-tdep.o: amd64obsd-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
+	$(osabi_h) $(regset_h) $(target_h) $(gdb_assert_h) $(gdb_string_h) \
+	$(x86_64_tdep_h) $(i387_tdep_h) $(solib_svr4_h)
 annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) \
 	$(gdbtypes_h) $(breakpoint_h)
 arch-utils.o: arch-utils.c $(defs_h) $(arch_utils_h) $(buildsym_h) \
@@ -1800,9 +1800,11 @@ hppa-hpux-tdep.o: hppa-hpux-tdep.c $(defs_h) $(arch_utils_h) $(gdbcore_h) \
 	$(osabi_h) $(gdb_string_h) $(frame_h)
 hppa-tdep.o: hppa-tdep.c $(defs_h) $(frame_h) $(bfd_h) $(inferior_h) \
 	$(value_h) $(regcache_h) $(completer_h) $(language_h) $(osabi_h) \
-	$(gdb_assert_h) $(infttrace_h) $(symtab_h) $(infcall_h) $(dis_asm_h) \
-	$(a_out_encap_h) $(gdb_stat_h) $(gdb_wait_h) $(gdbcore_h) \
-	$(gdbcmd_h) $(target_h) $(symfile_h) $(objfiles_h) $(hppa_tdep_h)
+	$(gdb_assert_h) $(infttrace_h) $(arch_utils_h) $(symtab_h) \
+	$(infcall_h) $(dis_asm_h) $(trad_frame_h) $(frame_unwind_h) \
+	$(frame_base_h) $(a_out_encap_h) $(gdb_stat_h) $(gdb_wait_h) \
+	$(gdbcore_h) $(gdbcmd_h) $(target_h) $(symfile_h) $(objfiles_h) \
+	$(hppa_tdep_h)
 hpread.o: hpread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(hp_symtab_h) \
 	$(syms_h) $(symtab_h) $(symfile_h) $(objfiles_h) $(buildsym_h) \
 	$(complaints_h) $(gdb_stabs_h) $(gdbtypes_h) $(demangle_h) \
