@@ -1,9 +1,25 @@
+Thu Aug  8 16:47:43 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+
+	* coffcode.h: fixed bug where string table size wasn't being swapped.
+
+Thu Aug  1 16:35:28 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+
+	* section.c: added SEC_CONSTRUCTOR_TEXT|DATA|BSS flags
+
+	* syms.c: added BSF_CONSTRUCTOR, BSF_WARNING and BSF_INDIRECT
+	flags. (bfd_print_symbol_vandf) now knows what to do with the
+	above flags.
+
+	* aoutx.h: made translate_from_native_sym_flags and
+	translate_to_native_sym_flags produce the above flags.
+		
+
 Wed Jul 31 09:53:52 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* all files:  update copyright notices for GPL version 2.
 	Install header comments and attribute most modules to their
 	authors.  BFD's name is now officially "Binary File Descriptor",
-	so remove any conflicting perjoratives.
+	so remove any conflicting pejoratives.
 	archures.h:  Consists solely of comments; remove it.
 
 Fri Jul 26 18:11:34 1991  Steve Chamberlain  (steve at cygint.cygnus.com)

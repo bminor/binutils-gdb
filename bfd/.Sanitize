@@ -31,6 +31,22 @@ ChangeLog
 Makefile.in
 TODO
 VERSION
+awkscan
+awkscan-ip
+awkscan-p
+blins-p
+exfilter
+exmerge
+intobfd
+mergecom-p
+movecom-p
+scanit
+scanph
+sedscript
+sedscript-p
+startcom-p
+tolibbfd
+tolibcoff
 amdcoff.c
 aout32.c
 aout64.c
@@ -107,7 +123,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.13  1991/08/01 14:37:51  steve
+# Revision 1.14  1991/08/17 00:17:00  steve
+# Documentation
+#
+# Revision 1.13  1991/08/01  14:37:51  steve
 # *** empty log message ***
 #
 # Revision 1.12  1991/08/01  05:33:39  gnu

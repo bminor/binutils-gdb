@@ -1,23 +1,22 @@
 /* bfd backend for oasys objects.
-   Written by Steve Chamberlain of Cygnus Support <steve@cygnus.com> */
+   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Written by Steve Chamberlain of Cygnus Support <steve@cygnus.com>.
 
-/* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+This file is part of BFD, the Binary File Descriptor library.
 
-This file is part of BFD, the Binary File Diddler.
-
-BFD is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-BFD is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with BFD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
@@ -161,7 +160,7 @@ DEFUN(oasys_slurp_symbol_table,(abfd),
 	  dest->name = string_ptr;
 	  dest->the_bfd = abfd;
 	  dest->udata = (PTR)NULL;
-	  dest->value = bfd_h_get_32(abfd, &record.symbol.value[0]);
+	  dest->value = bfd_h_get_32(abfd, (bfd_byte *)&record.symbol.value[0]);
 
 #ifdef UNDERSCORE_HACK
 	  if (record.symbol.name[0] != '_') {
@@ -225,7 +224,7 @@ DEFUN(oasys_archive_p,(abfd),
       bfd *abfd)
 {
   oasys_archive_header_type header;
-  oasys_external_archive_header_type header_ext;
+  oasys_extarchive_header_type header_ext;
   unsigned int i;
   file_ptr filepos;  
   bfd_seek(abfd, (file_ptr) 0, false);
@@ -234,14 +233,14 @@ DEFUN(oasys_archive_p,(abfd),
   bfd_read((PTR)&header_ext, 1, sizeof(header_ext), abfd);
 
 
-  header.version = bfd_h_get_32(abfd, header_ext.version);
-  header.mod_count = bfd_h_get_32(abfd, header_ext.mod_count);
-  header.mod_tbl_offset = bfd_h_get_32(abfd, header_ext.mod_tbl_offset);
-  header.sym_tbl_size = bfd_h_get_32(abfd, header_ext.sym_tbl_size);
-  header.sym_count = bfd_h_get_32(abfd, header_ext.sym_count);
-  header.sym_tbl_offset = bfd_h_get_32(abfd, header_ext.sym_tbl_offset);
-  header.xref_count = bfd_h_get_32(abfd, header_ext.xref_count);
-  header.xref_lst_offset = bfd_h_get_32(abfd, header_ext.xref_lst_offset);
+  header.version = bfd_h_get_32(abfd, (bfd_byte *)header_ext.version);
+  header.mod_count = bfd_h_get_32(abfd, (bfd_byte *)header_ext.mod_count);
+  header.mod_tbl_offset = bfd_h_get_32(abfd, (bfd_byte *)header_ext.mod_tbl_offset);
+  header.sym_tbl_size = bfd_h_get_32(abfd, (bfd_byte *)header_ext.sym_tbl_size);
+  header.sym_count = bfd_h_get_32(abfd, (bfd_byte *)header_ext.sym_count);
+  header.sym_tbl_offset = bfd_h_get_32(abfd, (bfd_byte *)header_ext.sym_tbl_offset);
+  header.xref_count = bfd_h_get_32(abfd, (bfd_byte *)header_ext.xref_count);
+  header.xref_lst_offset = bfd_h_get_32(abfd, (bfd_byte *)header_ext.xref_lst_offset);
 
   /*
     There isn't a magic number in an Oasys archive, so the best we
@@ -283,16 +282,16 @@ DEFUN(oasys_archive_p,(abfd),
 	/* There are two ways of specifying the archive header */
 
 	if (0) {
-	  oasys_external_module_table_type_a_type record_ext;
+	  oasys_extmodule_table_type_a_type record_ext;
 	  bfd_read((PTR)&record_ext, 1, sizeof(record_ext), abfd);
 	
-	  record.mod_size = bfd_h_get_32(abfd, record_ext.mod_size);
+	  record.mod_size = bfd_h_get_32(abfd, (bfd_byte *)record_ext.mod_size);
 	  record.file_offset = bfd_h_get_32(abfd,
-					    record_ext.file_offset);
+					 (bfd_byte *)   record_ext.file_offset);
 
-	  record.dep_count = bfd_h_get_32(abfd, record_ext.dep_count);
-	  record.depee_count = bfd_h_get_32(abfd, record_ext.depee_count);
-	  record.sect_count = bfd_h_get_32(abfd, record_ext.sect_count);
+	  record.dep_count = bfd_h_get_32(abfd, (bfd_byte *)record_ext.dep_count);
+	  record.depee_count = bfd_h_get_32(abfd,(bfd_byte *) record_ext.depee_count);
+	  record.sect_count = bfd_h_get_32(abfd, (bfd_byte *) record_ext.sect_count);
 
 
 	  module[i].name = bfd_alloc(abfd,33);
@@ -305,17 +304,17 @@ DEFUN(oasys_archive_p,(abfd),
 		  record.sect_count * 8 + 187;
 	}
 	else {
-	  oasys_external_module_table_type_b_type record_ext;
+	  oasys_extmodule_table_type_b_type record_ext;
 	  bfd_read((PTR)&record_ext, 1, sizeof(record_ext), abfd);
 	
-	  record.mod_size = bfd_h_get_32(abfd, record_ext.mod_size);
+	  record.mod_size = bfd_h_get_32(abfd, (bfd_byte *) record_ext.mod_size);
 	  record.file_offset = bfd_h_get_32(abfd,
-					    record_ext.file_offset);
+					    (bfd_byte *)record_ext.file_offset);
 
-	  record.dep_count = bfd_h_get_32(abfd, record_ext.dep_count);
-	  record.depee_count = bfd_h_get_32(abfd, record_ext.depee_count);
-	  record.sect_count = bfd_h_get_32(abfd, record_ext.sect_count);
-	  record.module_name_size = bfd_h_get_32(abfd, record_ext.mod_name_length);
+	  record.dep_count = bfd_h_get_32(abfd, (bfd_byte *) record_ext.dep_count);
+	  record.depee_count = bfd_h_get_32(abfd, (bfd_byte *) record_ext.depee_count);
+	  record.sect_count = bfd_h_get_32(abfd, (bfd_byte *) record_ext.sect_count);
+	  record.module_name_size = bfd_h_get_32(abfd, (bfd_byte *) record_ext.mod_name_length);
 
 	  module[i].name = bfd_alloc(abfd,record.module_name_size + 1);
 	  bfd_read((PTR)module[i].name, 1, record.module_name_size, abfd);
@@ -412,8 +411,8 @@ DEFUN(oasys_object_p,(abfd),
 	    BFD_FAIL();
 	  }
 
-	  s->size  = bfd_h_get_32(abfd, & record.section.value[0]) ;
-	  s->vma = bfd_h_get_32(abfd, &record.section.vma[0]);
+	  s->size  = bfd_h_get_32(abfd, (bfd_byte *) & record.section.value[0]) ;
+	  s->vma = bfd_h_get_32(abfd, (bfd_byte *)&record.section.vma[0]);
 	  s->flags= 0;
 	  had_usefull = true;
 	}
@@ -744,7 +743,7 @@ DEFUN(oasys_get_section_contents,(abfd, section, location, offset, count),
       }
   else 
       {
-	(void) memcpy(location, p->data + offset, (int)count);
+	(void) memcpy(location,(PTR)( p->data + offset), (int)count);
       }
   return true;
 }
@@ -868,7 +867,7 @@ DEFUN(oasys_write_syms, (abfd),
       l++;
     }
 
-    bfd_h_put_32(abfd, g->value, symbol.value);
+    bfd_h_put_32(abfd, g->value, (bfd_byte*) symbol.value);
 
       
     if (g->flags & BSF_LOCAL) {
@@ -903,8 +902,8 @@ DEFUN(oasys_write_sections, (abfd),
 						    s->name);
 	}
     out.relb = RELOCATION_TYPE_REL | s->target_index;
-    bfd_h_put_32(abfd, s->size, out.value);
-    bfd_h_put_32(abfd, s->vma, out.vma);
+    bfd_h_put_32(abfd, s->size, (bfd_byte *) out.value);
+    bfd_h_put_32(abfd, s->vma, (bfd_byte *) out.vma);
 
     oasys_write_record(abfd,
 		       oasys_record_is_section_enum,
@@ -949,8 +948,8 @@ DEFUN(oasys_write_end,(abfd),
   oasys_end_record_type end;
   uint8e_type null = 0;
   end.relb = RELOCATION_TYPE_ABS;
-  bfd_h_put_32(abfd, abfd->start_address, end.entry); 
-  bfd_h_put_16(abfd, 0, end.fill);
+  bfd_h_put_32(abfd, abfd->start_address, (bfd_byte *)end.entry); 
+  bfd_h_put_16(abfd, 0, (bfd_byte *)end.fill);
   end.zero =0;
   oasys_write_record(abfd,
 		     oasys_record_is_end_enum,
@@ -1151,7 +1150,7 @@ DEFUN(oasys_set_section_contents,(abfd, section, location, offset, count),
 	  oasys_per_section(section)->data =
 	    (bfd_byte *)(bfd_alloc(abfd,section->size));    
 	}
-    (void) memcpy(oasys_per_section(section)->data + offset,
+    (void) memcpy((PTR)(oasys_per_section(section)->data + offset),
 		  location,
 		  count);
   }
@@ -1291,7 +1290,7 @@ bfd_target oasys_vec =
    |SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-    1,				/* minimum alignment */
+  1,				/* minimum alignment */
   _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
   _do_getb64, _do_putb64, _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 
@@ -1313,4 +1312,4 @@ bfd_target oasys_vec =
       bfd_false,
     },
   JUMP_TABLE(oasys)
-  };
+};

@@ -1,3 +1,23 @@
+/* BFD support for handling relocation entries.
+   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Written by Cygnus Support.
+
+This file is part of BFD, the Binary File Descriptor library.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
 /*doc*
 @section Relocations
 
@@ -24,7 +44,7 @@ particuar section, and fill in the right bits:
 #include "bfd.h"
 #include "libbfd.h"
 /*doc
-*node typedef arelent, Relocations, reloc handling functions, Relocations
+@node typedef arelent, Relocations, reloc handling functions, Relocations
 @section typedef arelent
 
 
@@ -482,14 +502,14 @@ DEFUN(bfd_perform_relocation,(abfd,
       {
         /*
           Anything which started out as pc relative should end up that
-          way too. 
-
-          There are two ways we can see a pcrel instruction. Sometimes
-          the pcrel displacement has been partially calculated, it
-          includes the distance from the start of the section to the
-          instruction in it (eg sun3), and sometimes the field is
-          totally blank - eg m88kbcs.
-          */
+	  way too. 
+	  
+	  There are two ways we can see a pcrel instruction. Sometimes
+	  the pcrel displacement has been partially calculated, it
+	  includes the distance from the start of the section to the
+	  instruction in it (eg sun3), and sometimes the field is
+	  totally blank - eg m88kbcs.
+	  */
 
         
         relocation -= 
@@ -505,9 +525,9 @@ DEFUN(bfd_perform_relocation,(abfd,
     if ( howto->partial_inplace == false)  {
       /*
         This is a partial relocation, and we want to apply the relocation
-        to the reloc entry rather than the raw data. Modify the reloc
-        inplace to reflect what we now know.
-        */
+	to the reloc entry rather than the raw data. Modify the reloc
+	inplace to reflect what we now know.
+	*/
       reloc_entry->addend = relocation  ;
       reloc_entry->section = reloc_target_input_section;
       if (reloc_target_input_section != (asection *)NULL) {
@@ -521,8 +541,17 @@ DEFUN(bfd_perform_relocation,(abfd,
     else 
         {
           /* This is a partial relocation, but inplace, so modify the
-             reloc record a bit
-             */
+	     reloc record a bit. 
+	     
+	     If we've relocated with a symbol with a section, change
+	     into a ref to  the section belonging to the symbol
+	     */
+
+	  if (symbol != (asymbol *)NULL && reloc_target_input_section != (asection *)NULL) 
+	      {
+		reloc_entry->section = reloc_target_input_section;
+		reloc_entry->sym_ptr_ptr  = (asymbol **)NULL;
+	      }
 
         }
   }
@@ -602,6 +631,7 @@ DEFUN(bfd_perform_relocation,(abfd,
             }      
           break;
         case 3:
+
           /* Do nothing */
           break;
         default:
@@ -610,3 +640,5 @@ DEFUN(bfd_perform_relocation,(abfd,
 
   return flag;
 }
+
+

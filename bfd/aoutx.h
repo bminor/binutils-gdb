@@ -74,6 +74,8 @@ requires all the names from aout32.c, and produces the jump vector
 
 */
 
+#define KEEPIT flags
+#define KEEPITTYPE int
 
 #include "bfd.h"
 #include <sysdep.h>
@@ -232,24 +234,24 @@ static  reloc_howto_type howto_table_ext[] =
   HOWTO(RELOC_RELATIVE,0, 2,	0,  false, 0, false,	true,0,"RELATIVE",	false, 0,0x00000000, false),
 
 /* start-sanitize-v9 */
-#ifdef HOST_64_BIT												
+
   HOWTO(RELOC_11, 0,  2, 	21, true,  0, false, true,r64,"11",	false, 0,/*0x00000000001fffff*/0, false),
   HOWTO(RELOC_WDISP2_14, 0, 2, 	21, true,  0, false, true,r64,"DISP2_14",false, 0,/*0x00000000001fffff*/0, false),
   HOWTO(RELOC_WDISP19, 0,  3, 	64, true,  0, false, true,r64,"DISP19", false, 0,/*0xffffffffffffffff*/0, false),  
   HOWTO(RELOC_HHI22,  42, 3, 	22, false, 0, false, true,hhi22,"HHI22",false, 0,/*0x003fffff00000000*/0, false),
   HOWTO(RELOC_HLO10,  32, 3, 	10, false, 0, false, true,hlo10,"HLO10", false, 0,/*0x000003ff00000000*/0, false),
-#endif
+
   HOWTO(RELOC_JUMPTARG,2, 13,	16, true,  0, false, true,0,"JUMPTARG",	false, 0,0x0000ffff, false),
   HOWTO(RELOC_CONST,	0, 13,	16, false, 0, false, true,0,"CONST",	false, 0,0x0000ffff, false),
   HOWTO(RELOC_CONSTH, 16, 13,	16, false, 0, false, true,0,"CONSTH",	false, 0,0x0000ffff, false),
 
-#ifdef HOST_64_BIT
+
   HOWTO(RELOC_64,     0,  3, 	64, false, 0, true,  true,reloc64,"64",     false, 0,/*0xffffffffffffffff*/0, false),
   HOWTO(RELOC_DISP64, 0,  3, 	64, true,  0, false, true,disp64,"DISP64", false, 0,/*0xffffffffffffffff*/0, false),  
   HOWTO(RELOC_WDISP21,2,  2, 	21, true,  0, false, true,r64,"WDISP21",false, 0,/*0x00000000001fffff*/0, false),
   HOWTO(RELOC_DISP21, 0,  2, 	21, true,  0, false, true,r64,"DISP21",	false, 0,/*0x00000000001fffff*/0, false),
   HOWTO(RELOC_DISP14, 0,  2, 	14, true,  0, false, true,r64,"DISP21",	false, 0,/*0x0000000000003fff*/0, false),
-#endif
+
 /* end-sanitize-v9 */
 };
 
@@ -749,62 +751,62 @@ DEFUN(translate_from_native_sym_flags,(sym_pointer, cache_ptr, abfd),
       struct external_nlist *sym_pointer AND
       aout_symbol_type *cache_ptr AND
       bfd *abfd)
-{
-  switch (cache_ptr->type & N_TYPE) {
-  case N_SETA:
-  case N_SETT:
-  case N_SETD:
-  case N_SETB:
-      {
-	char *copy = bfd_alloc(abfd, strlen(cache_ptr->symbol.name)+1);
-	asection *section ;
-	arelent_chain *reloc = (arelent_chain *)bfd_alloc(abfd, sizeof(arelent_chain));
-	strcpy(copy, cache_ptr->symbol.name);
-        section = bfd_make_section(abfd,copy);
-	switch ( (cache_ptr->type  & N_TYPE) ) {
-	case N_SETA:
-	  section->flags = SEC_CONSTRUCTOR;
-	  reloc->relent.section =  (asection *)NULL;
-	  cache_ptr->symbol.section = (asection *)NULL;
-	  break;
-	case N_SETT:
-	  section->flags = SEC_CONSTRUCTOR_TEXT;
-	  reloc->relent.section = (asection *)obj_textsec(abfd);
-	  cache_ptr->symbol.value -= reloc->relent.section->vma;
-	  break;
-	case N_SETD:
-	  section->flags = SEC_CONSTRUCTOR_DATA;
-	  reloc->relent.section = (asection *)obj_datasec(abfd);
-	  cache_ptr->symbol.value -= reloc->relent.section->vma;
-	  break;
-	case N_SETB:
-	  section->flags = SEC_CONSTRUCTOR_BSS;
-	  reloc->relent.section = (asection *)obj_bsssec(abfd);
-	  cache_ptr->symbol.value -= reloc->relent.section->vma;
-	  break;
-	}
-	cache_ptr->symbol.section = reloc->relent.section;
-	reloc->relent.addend = cache_ptr->symbol.value ;
+  {
+    switch (cache_ptr->type & N_TYPE) {
+    case N_SETA:
+    case N_SETT:
+    case N_SETD:
+    case N_SETB:
+	{
+	  char *copy = bfd_alloc(abfd, strlen(cache_ptr->symbol.name)+1);
+	  asection *section ;
+	  arelent_chain *reloc = (arelent_chain *)bfd_alloc(abfd, sizeof(arelent_chain));
+	  strcpy(copy, cache_ptr->symbol.name);
+	  section = bfd_make_section(abfd,copy);
+	  switch ( (cache_ptr->type  & N_TYPE) ) {
+	  case N_SETA:
+	    section->flags = SEC_CONSTRUCTOR;
+	    reloc->relent.section =  (asection *)NULL;
+	    cache_ptr->symbol.section = (asection *)NULL;
+	    break;
+	  case N_SETT:
+	    section->flags = SEC_CONSTRUCTOR_TEXT;
+	    reloc->relent.section = (asection *)obj_textsec(abfd);
+	    cache_ptr->symbol.value -= reloc->relent.section->vma;
+	    break;
+	  case N_SETD:
+	    section->flags = SEC_CONSTRUCTOR_DATA;
+	    reloc->relent.section = (asection *)obj_datasec(abfd);
+	    cache_ptr->symbol.value -= reloc->relent.section->vma;
+	    break;
+	  case N_SETB:
+	    section->flags = SEC_CONSTRUCTOR_BSS;
+	    reloc->relent.section = (asection *)obj_bsssec(abfd);
+	    cache_ptr->symbol.value -= reloc->relent.section->vma;
+	    break;
+	  }
+	  cache_ptr->symbol.section = reloc->relent.section;
+	  reloc->relent.addend = cache_ptr->symbol.value ;
 	  
-	/* We modify the symbol to belong to a section depending upon the
-	   name of the symbol - probably __CTOR__ or __DTOR__ but we don't
-	   really care, and add to the size of the section to contain a
-	   pointer to the symbol. Build a reloc entry to relocate to this
-	   symbol attached to this section.  */
-	
-	
-	section->reloc_count++;
-	section->alignment_power = 2;
-	reloc->relent.sym_ptr_ptr = (asymbol **)NULL;
-	reloc->next = section->constructor_chain;
-	section->constructor_chain = reloc;
-	reloc->relent.address = section->size;
-	section->size += sizeof(int *);
-	
-	reloc->relent.howto = howto_table_ext +CTOR_TABLE_RELOC_IDX;
-	cache_ptr->symbol.flags |=  BSF_DEBUGGING  | BSF_CONSTRUCTOR;
-      }
-    break;
+	  /* We modify the symbol to belong to a section depending upon the
+	    name of the symbol - probably __CTOR__ or __DTOR__ but we don't
+	      really care, and add to the size of the section to contain a
+		pointer to the symbol. Build a reloc entry to relocate to this
+		  symbol attached to this section.  */
+	  
+	  
+	  section->reloc_count++;
+	  section->alignment_power = 2;
+	  reloc->relent.sym_ptr_ptr = (asymbol **)NULL;
+	  reloc->next = section->constructor_chain;
+	  section->constructor_chain = reloc;
+	  reloc->relent.address = section->size;
+	  section->size += sizeof(int *);
+	  
+	  reloc->relent.howto = howto_table_ext +CTOR_TABLE_RELOC_IDX;
+	  cache_ptr->symbol.flags |=  BSF_DEBUGGING  | BSF_CONSTRUCTOR;
+	}
+	break;
   default:
     if (cache_ptr->type ==  N_WARNING) 
 	{
@@ -816,7 +818,7 @@ DEFUN(translate_from_native_sym_flags,(sym_pointer, cache_ptr, abfd),
       (sym_pointer+1)->e_type[0] = 0xff;
       break;
     }
-    if (cache_ptr->type == N_INDR) {
+    if ((cache_ptr->type | N_EXT) == (N_INDR | N_EXT)) {
       /* Two symbols in a row for an INDR message. The first symbol
 	 contains the name we will match, the second symbol contains the
 	 name the first name is translated into. It is supplied to us
@@ -1114,7 +1116,7 @@ DEFUN(NAME(aout,write_syms),(abfd),
 		bfd_write((PTR)g->name, 1, length, abfd);
 	      }
 	  if ((g->flags & BSF_FAKE)==0) {
-	    g->name = itos(count);	/* smash the generic symbol */
+	    g->KEEPIT = (KEEPITTYPE) count;
 	  }
 	}
   }
@@ -1174,7 +1176,7 @@ DEFUN(NAME(aout,swap_std_reloc_out),(abfd, g, natptr),
 	    r_addend += (*(g->sym_ptr_ptr))->section->vma;
 	  }
 	  
-	  r_index = stoi((*(g->sym_ptr_ptr))->name);
+	  r_index = ((*(g->sym_ptr_ptr))->KEEPIT);
 	  r_extern = 1;
 	}
     else {
@@ -1260,7 +1262,7 @@ DEFUN(NAME(aout,swap_ext_reloc_out),(abfd, g, natptr),
 	r_addend += (*(g->sym_ptr_ptr))->section->vma;
       }
 
-      r_index = stoi((*(g->sym_ptr_ptr))->name);
+      r_index = stoi((*(g->sym_ptr_ptr))->KEEPIT);
       r_extern = 1;
     }
   else {
