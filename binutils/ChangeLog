@@ -1,3 +1,8 @@
+2004-03-30  Stan Shebs  <shebs@apple.com>
+
+	* mpw-config.in, mpw-make.sed, mac-binutils.r: Remove MPW
+	support files, no longer used.
+
 2004-03-23  Paul Brook  <paul@codesourcery.com>
 
 	* readelf.c (decode_ARM_machine_flags): Add EABI v3.
