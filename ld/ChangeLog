@@ -1,3 +1,11 @@
+2004-11-19  Mark Mitchell  <mark@codesourcery.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add earmelf_linux_eabi.o.
+	(earmelf_linux_eabi.c): New target.
+	* configure.tgt (arm*-*-linux-gnueabi): Handle it.
+	* emulparams/armelf_linux_eabi.sh: New file.
+	* Makefile.in: Regenerated.
+
 2004-11-19  Nick Clifton  <nickc@redhat.com>
 
 	PR 518
