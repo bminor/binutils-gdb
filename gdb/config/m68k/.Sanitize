@@ -47,6 +47,8 @@ m68klynx.mt
 m68kv4.mh
 m68kv4.mt
 monitor.mt
+nbsd.mh
+nbsd.mt
 news.mh
 news.mt
 news1000.mh
@@ -57,6 +59,7 @@ nm-dpx2.h
 nm-hp300bsd.h
 nm-hp300hpux.h
 nm-m68klynx.h
+nm-nbsd.h
 nm-news.h
 nm-sun2.h
 nm-sun3.h
@@ -86,6 +89,7 @@ tm-isi.h
 tm-m68kv4.h
 tm-mac.h
 tm-monitor.h
+tm-nbsd.h
 tm-news.h
 tm-os68k.h
 tm-st2000.h

@@ -1,3 +1,11 @@
+Thu Feb 22 00:52:42 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* config/m68k/{nbsd.mh,nbsd.mt,nm-nbsd.h,tm-nbsd.h,xm-nbsd.h},
+	m68knbsd-nat.c: New files, support for NetBSD/m68k.
+
+	* configure.in (m68k-*-netbsd*): New config.
+	* configure: Regenerated.
+
 Wed Feb 21 19:00:21 1996  Fred Fish  <fnf@ninemoons.com>
 
 	* standalone.c (open, _initialize_standalone): Fix obvious typos
