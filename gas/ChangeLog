@@ -38,6 +38,7 @@
 	(md_convert_frag): Handle STATE_COND_BRANCH_V32,
 	STATE_COND_BRANCH_COMMON, STATE_ABS_BRANCH_V32, STATE_LAPC.
 	(cris_create_short_jump): Adjust for CRISv32.
+	(cris_relax_frag): Handle new states.
 	(md_create_long_jump): Ditto.  Emit error for common_v10_v32.
 	(md_begin): Define symbols "..asm.arch.cris.v32",
 	"..asm.arch.cris.v10", "..asm.arch.cris.common_v10_v32" and
