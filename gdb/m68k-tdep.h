@@ -61,6 +61,14 @@ struct m68k_sigtramp_info
   int *sc_reg_offset;
 };
 
+/* Convention for returning structures.  */
+
+enum struct_return
+{
+  pcc_struct_return,		/* Return "short" structures in memory.  */
+  reg_struct_return		/* Return "short" structures in registers.  */
+};
+
 /* Target-dependent structure in gdbarch.  */
 struct gdbarch_tdep
 {
@@ -72,6 +80,9 @@ struct gdbarch_tdep
 
   /* Get info about sigtramp.  */
   struct m68k_sigtramp_info (*get_sigtramp_info) (struct frame_info *);
+
+  /* Convention for returning structures.  */
+  enum struct_return struct_return;
 };
 
 #endif /* M68K_TDEP_H */
