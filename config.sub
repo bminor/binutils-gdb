@@ -1,6 +1,6 @@
 #! /bin/sh
 # Configuration validation subroutine script, version 1.1.
-#   Copyright (C) 1991, 92-97, 1998 Free Software Foundation, Inc.
+#   Copyright (C) 1991, 92-97, 1998, 1999 Free Software Foundation, Inc.
 # This file is (in principle) common to ALL GNU software.
 # The presence of a machine in this file suggests that SOME GNU software
 # can handle that machine.  It does not imply ALL GNU software can.
@@ -214,6 +214,9 @@ case $basic_machine in
 		| h8500 | w65 | fr30) # CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
+	strongarm) # CYGNUS LOCAL nickc/strongarm
+		basic_machine=$basic_machine-unknown
+		;;
 	thumb)
 		basic_machine=$basic_machine-unknown
 		;;
@@ -318,6 +321,8 @@ case $basic_machine in
 	      | fr30-*) # CYGNUS LOCAL
 		;;
 	m88110-* | m680[01234]0-* | m683?2-* | m68360-* | z8k-* | h8500-* | d10v-*) # CYGNUS LOCAL
+		;;
+	strongarm-*) # CYGNUS LOCAL nickc/strongarm
 		;;
 	thumb-*) # CYGNUS LOCAL angela/thumb
 		;;
@@ -1075,7 +1080,7 @@ case $os in
 	      | -nindy* | -vxsim* | -vxworks* | -ebmon* | -hms* | -mvs* \
 	      | -clix* | -riscos* | -uniplus* | -iris* | -rtu* | -xenix* \
 	      | -hiux* | -386bsd* | -netbsd* | -openbsd* | -freebsd* | -riscix* \
-	      | -lynxos* | -bosx* | -nextstep* | -cxux* | -aout* | -elf* \
+	      | -lynxos* | -bosx* | -nextstep* | -cxux* | -aout* | -elf* | -oabi* \
 	      | -ptx* | -coff* | -ecoff* | -winnt* | -domain* | -vsta* \
 	      | -udi* | -eabi* | -lites* | -ieee* | -go32* | -aux* \
 	      | -cygwin* | -pe* | -psos* | -moss* | -proelf* | -rtems* \
