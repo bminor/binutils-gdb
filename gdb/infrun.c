@@ -1325,6 +1325,11 @@ adjust_pc_after_break (struct execution_control_state *ecs)
 
   /* If we've hit a breakpoint, we'll normally be stopped with SIGTRAP.  If
      we aren't, just return.
+
+     We assume that waitkinds other than TARGET_WAITKIND_STOPPED are not
+     affected by DECR_PC_AFTER_BREAK.  Other waitkinds which are implemented
+     by software breakpoints should be handled through the normal breakpoint
+     layer.
      
      NOTE drow/2004-01-31: On some targets, breakpoints may generate
      different signals (SIGILL or SIGEMT for instance), but it is less
@@ -1584,13 +1589,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       stop_pc = read_pc ();
 
-      /* Assume that catchpoints are not really software breakpoints.  If
-	 some future target implements them using software breakpoints then
-	 that target is responsible for fudging DECR_PC_AFTER_BREAK.  Thus
-	 we pass 1 for the NOT_A_SW_BREAKPOINT argument, so that
-	 bpstat_stop_status will not decrement the PC.  */
-
-      stop_bpstat = bpstat_stop_status (&stop_pc, 1);
+      stop_bpstat = bpstat_stop_status (stop_pc);
 
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
 
@@ -1639,13 +1638,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       ecs->saved_inferior_ptid = inferior_ptid;
       inferior_ptid = ecs->ptid;
 
-      /* Assume that catchpoints are not really software breakpoints.  If
-	 some future target implements them using software breakpoints then
-	 that target is responsible for fudging DECR_PC_AFTER_BREAK.  Thus
-	 we pass 1 for the NOT_A_SW_BREAKPOINT argument, so that
-	 bpstat_stop_status will not decrement the PC.  */
-
-      stop_bpstat = bpstat_stop_status (&stop_pc, 1);
+      stop_bpstat = bpstat_stop_status (stop_pc);
 
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
       inferior_ptid = ecs->saved_inferior_ptid;
@@ -2035,29 +2028,8 @@ handle_inferior_event (struct execution_control_state *ecs)
       else
 	{
 	  /* See if there is a breakpoint at the current PC.  */
+	  stop_bpstat = bpstat_stop_status (stop_pc);
 
-	  /* The second argument of bpstat_stop_status is meant to help
-	     distinguish between a breakpoint trap and a singlestep trap.
-	     This is only important on targets where DECR_PC_AFTER_BREAK
-	     is non-zero.  The prev_pc test is meant to distinguish between
-	     singlestepping a trap instruction, and singlestepping thru a
-	     jump to the instruction following a trap instruction.
-
-             Therefore, pass TRUE if our reason for stopping is
-             something other than hitting a breakpoint.  We do this by
-             checking that either: we detected earlier a software single
-             step trap or, 1) stepping is going on and 2) we didn't hit
-             a breakpoint in a signal handler without an intervening stop
-             in sigtramp, which is detected by a new stack pointer value
-             below any usual function calling stack adjustments.  */
-	  stop_bpstat =
-            bpstat_stop_status
-              (&stop_pc,
-               sw_single_step_trap_p
-               || (currently_stepping (ecs)
-                   && prev_pc != stop_pc - DECR_PC_AFTER_BREAK
-                   && !(step_range_end
-                        && INNER_THAN (read_sp (), (step_sp - 16)))));
 	  /* Following in case break condition called a
 	     function.  */
 	  stop_print_frame = 1;

@@ -1,5 +1,13 @@
 2004-01-31  Daniel Jacobowitz  <drow@mvista.com>
 
+	* breakpoint.c (bpstat_stop_status): Remove not_a_sw_breakpoint
+	argument, and change first argument to a CORE_ADDR.
+	* breakpoint.h (bpstat_stop_status): Update prototype.
+	* infrun.c (adjust_pc_after_break): Add a new comment.
+	(handle_inferior_event): Update calls to bpstat_stop_status.
+
+2004-01-31  Daniel Jacobowitz  <drow@mvista.com>
+
 	* breakpoint.h: Update copyright years.
 
 2004-01-31  Daniel Jacobowitz  <drow@mvista.com>

@@ -2570,11 +2570,8 @@ which its expression is valid.\n");
     }
 }
 
-/* Get a bpstat associated with having just stopped at address *PC
-   and frame address CORE_ADDRESS.  Update *PC to point at the
-   breakpoint (if we hit a breakpoint).  NOT_A_SW_BREAKPOINT is nonzero
-   if this is known to not be a real breakpoint (it could still be a
-   watchpoint, though).  */
+/* Get a bpstat associated with having just stopped at address
+   BP_ADDR.  */
 
 /* Determine whether we stopped at a breakpoint, etc, or whether we
    don't understand this stop.  Result is a chain of bpstat's such that:
@@ -2591,18 +2588,15 @@ which its expression is valid.\n");
    commands, FIXME??? fields.  */
 
 bpstat
-bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
+bpstat_stop_status (CORE_ADDR bp_addr)
 {
   struct breakpoint *b, *temp;
-  CORE_ADDR bp_addr;
   /* True if we've hit a breakpoint (as opposed to a watchpoint).  */
   int real_breakpoint = 0;
   /* Root of the chain of bpstat's */
   struct bpstats root_bs[1];
   /* Pointer to the last thing in the chain currently.  */
   bpstat bs = root_bs;
-
-  bp_addr = *pc;
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
@@ -2630,7 +2624,7 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 
     if (b->type == bp_hardware_breakpoint)
       {
-	if (b->loc->address != *pc)
+	if (b->loc->address != bp_addr)
 	  continue;
 	if (overlay_debugging		/* unmapped overlay section */
 	    && section_is_overlay (b->loc->section) 
