@@ -1,3 +1,18 @@
+start-sanitize-armelf
+Fri Jul 31 16:14:45 1998  Catherine Moore  <clm@cygnus.com>
+
+        * configure.in: (arm-*-elf):  Handle.
+        (thumb-*-elf): Handle.
+        * configure:  Regenerate.
+        * read.c (stringer): Fix typo in comment.
+        * write.c (fixup_segment): Don't add symbol value to addend if
+        TC_ARM and OBJ_ELF.
+        * config/tc-arm.c (md_section_align):  Don't align dwarf debug
+        sections.
+        (tc_gen_reloc):  Always set the reloc addend to fixp->fx_offset
+        for OBJ_ELF.
+
+end-sanitize-armelf
 Thu Jul 30 21:38:43 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* config/tc-d30v.c ({cur,prev}_left_kills_right_p): New variables.
