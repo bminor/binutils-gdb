@@ -2,12 +2,9 @@ o - strip
 	Implement various options
 	Make faster by using ftruncate if available (and format is suitable).
 
-OLD:
+o - See also ../ld/TODO and ../bfd/TODO.
 
-o - merge:
-	copy and strip
-	ar and ranlib
-	nm, size, and objdump
+OLD:
 
 o - make the long options more consistent.
 
