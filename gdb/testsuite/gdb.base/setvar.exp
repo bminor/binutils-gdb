@@ -1,4 +1,5 @@
-#   Copyright (C) 1988, 1990, 1991, 1992 Free Software Foundation, Inc.
+#   Copyright (C) 1988, 1990, 1991, 1992, 1994, 1995
+#   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,7 +13,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -41,12 +42,14 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load $objdir/$subdir/$binfile
 
+source gdb.base/setvar.ci
+
 #
 # set it up at a breakpoint so we canplay with the variable values
 #
 send "set print sevenbit-strings\n" ; expect -re "$prompt $"
 
-if ![runto main] then {
+if ![runto_main] then {
     perror "couldn't run to breakpoint"
     continue
 }
@@ -334,36 +337,13 @@ expect {
 }                         
 
 
-send "set variable v_signed_char=-1\n"
-expect {
-    -re "$prompt $"\
-	{
-	send "print v_signed_char\n"
-	expect {
-	    -re ".\[0-9\]* = -1 \'.377\'.*$prompt $"       { pass "set variable signed char=-1 (-1)" }
-	    -re "$prompt $"                      { fail "set variable signed char=-1 (minus)" }
-	    timeout                              { fail "(timeout) set variable signed char=-1 (minus)" }
-	}
-    }
-    -re "$prompt $"                              { fail "set variable signed char=-1 (minus)" }
-    timeout                                      { fail "(timeout) set variable signed char=-1 (minus)" }
-}                         
+gdb_test "set variable v_signed_char=-1" ""
+gdb_test "print v_signed_char" ".\[0-9\]* = -1 \'.377\'" \
+    "set variable signed char=-1 (-1)"
 
-
-send "set variable v_signed_char=0xFF\n"
-expect {
-    -re "$prompt $"\
-	{
-	send "print v_signed_char\n"
-	expect {
-	    -re ".\[0-9\]* = -1 \'.377\'.*$prompt $"       { pass "set variable signed char=0xFF (0xFF)" }
-	    -re "$prompt $"                      { fail "set variable signed char=0xFF (hex)" }
-	    timeout                              { fail "(timeout) set variable signed char=0xFF (hex)" }
-	}
-    }
-    -re "$prompt $"                              { fail "set variable signed char=0xFF (hex)" }
-    timeout                                      { fail "(timeout) set variable signed char=0xFF (hex)" }
-}                         
+gdb_test "set variable v_signed_char=0xFF" ""
+gdb_test "print v_signed_char" ".\[0-9\]* = -1 \'.377\'" \
+    "set variable signed char=0xFF (0xFF)"
 
 
 #
@@ -1477,61 +1457,23 @@ expect {
 #
 # test "set variable" for type "signed short *"
 #
-send "set v_signed_short_pointer=v_signed_short_array\n"
-expect -re "set.*$prompt $"
-send "set variable *(v_signed_short_pointer)=123\n"
-expect -re "set.*$prompt $"
-send "set variable *(v_signed_short_pointer+1)=-456\n"
-expect {
-    -re "set.*$prompt $" {
-	send "print v_signed_short_array\n"
-	expect {
-	    -re "print.*.\[0-9\]* =.*\{123,.*-456\}.*$prompt $" {
-		send "print *(v_signed_short_pointer+1)\n"
-		expect {
-		    -re "print.*.\[0-9\]*.*=.*-456.*$prompt $"    { pass "set variable signed short pointer" }
-		    -re "$prompt $"                { fail "set variable signed short pointer (FIXME)" }
-		    timeout                              { fail "(timeout) set variable signed short pointer (FIXME)" }
-
-		}
-	    }
-	    -re "$prompt $"                { fail "set variable signed short pointer (FIXME)" }
-	    timeout                              { fail "(timeout) set variable signed short pointer (FIXME)" }
-	}
-    }
-    -re "$prompt $"                { fail "set variable signed short pointer (FIXME)" }
-    timeout                                      { fail "(timeout) set variable signed short pointer (FIXME)" }
-}                         
+gdb_test "set v_signed_short_pointer=v_signed_short_array" ""
+gdb_test "set variable *(v_signed_short_pointer)=123" ""
+gdb_test "set variable *(v_signed_short_pointer+1)=-456" ""
+gdb_test "print v_signed_short_array" ".\[0-9\]* =.*\{123,.*-456\}" \
+    "set variable signed short pointer"
+gdb_test "print *(v_signed_short_pointer+1)" ".\[0-9\]*.*=.*-456"
 
 
 #
 # test "set variable" for type "unsigned short *"
 #
-send "set v_unsigned_short_pointer=v_unsigned_short_array\n"
-expect -re "set.*$prompt $"
-send "set variable *(v_unsigned_short_pointer)=123\n"
-expect -re "set.*$prompt $"
-send "set variable *(v_unsigned_short_pointer+1)=-456\n"
-expect {
-    -re "set.*$prompt $" {
-	send "print v_unsigned_short_array\n"
-	expect {
-	    -re "print.*.\[0-9\]* =.*\{123,.*65080\}.*$prompt $" {
-		send "print *(v_unsigned_short_pointer+1)\n"
-		expect {
-		    -re "print.*.\[0-9\]* = 65080.*$prompt $"    { pass "set variable unsigned short pointer" }
-		    -re "$prompt $"                { fail "set variable unsigned short pointer (FIXME)" }
-		    timeout                              { fail "(timeout) set variable unsigned short pointer (FIXME)" }
-
-		}
-	    }
-	    -re "$prompt $"                { fail "set variable unsigned short pointer (FIXME)" }
-	    timeout                              { fail "(timeout) set variable unsigned short pointer (FIXME)" }
-	}
-    }
-    -re "$prompt $"                { fail "set variable unsigned short pointer (FIXME)" }
-    timeout                                      { fail "(timeout) set variable unsigned short pointer (FIXME)" }
-}                         
+gdb_test "set v_unsigned_short_pointer=v_unsigned_short_array" ""
+gdb_test "set variable *(v_unsigned_short_pointer)=123" ""
+gdb_test "set variable *(v_unsigned_short_pointer+1)=-456" ""
+gdb_test "print v_unsigned_short_array" ".\[0-9\]* =.*\{123,.*65080\}" \
+    "set variable unsigned short pointer"
+gdb_test "print *(v_unsigned_short_pointer+1)" ".\[0-9\]* = 65080"
 
 
 #
@@ -1873,17 +1815,35 @@ expect {
 }                         
 
 
+gdb_test "print v_struct1" \
+  "print.*.\[0-9\]* = \{.*v_char_member = 104 \'h\',.*v_short_member = 1,\
+.*v_int_member = 2,.*\
+v_long_member = 3,.*v_float_member = 4,.*v_double_member = 5.*\}" \
+  "set print structure #1"
 
-send "print v_struct1\n"
-expect {
-    -re "print.*.\[0-9\]* = \{.*v_char_member = 104 \'h\',.*v_short_member = 1,.*v_int_member = 2,.*\
-v_long_member = 3,.*v_float_member = 4,.*v_double_member = 5.*\}.*$prompt $"\
-	                                 { pass "set print structure" }
-    -re "$prompt $"                      { fail "set print structure" }
-    timeout                              { fail "(timeout) set print structure" }
-}
+# This should be an error.  GCC extensions for structure constants require
+# the type of the structure to be specified, as in
+# v_struct1 = (struct t_struct) {32, 33, 34, 35, 36, 37}
+# GDB should do the same if it wants to provide this feature.
+gdb_test "set variable v_struct1 = {32, 33, 34, 35, 36, 37}" "Invalid.*"
 
-if [istarget "a29k-*-udi"] then {
-    # FIXME: If PR 2415 is fixed, this is not needed.
-    gdb_target_udi
+# And after the error the structure should be unchanged.
+gdb_test "print v_struct1" \
+  "print.*.\[0-9\]* = \{.*v_char_member = 104 \'h\',.*v_short_member = 1,\
+.*v_int_member = 2,.*\
+v_long_member = 3,.*v_float_member = 4,.*v_double_member = 5.*\}" \
+  "set print structure #2"
+
+# Test printing of enumeration bitfields.
+# GNU C supports them, some other compilers don't.
+
+if {$gcc_compiled} then {
+    gdb_test "print sef.field=sm1" "print.*.\[0-9\]* = sm1"
+    gdb_test "print sef.field" "print.*.\[0-9\]* = sm1" "print sef.field (sm1)"
+    gdb_test "print sef.field=s1" "print.*.\[0-9\]* = s1"
+    gdb_test "print sef.field" "print.*.\[0-9\]* = s1" "print sef.field (s1)"
+    gdb_test "print uef.field=u1" "print.*.\[0-9\]* = u1"
+    gdb_test "print uef.field" "print.*.\[0-9\]* = u1" "print uef.field (u1)"
+    gdb_test "print uef.field=u2" "print.*.\[0-9\]* = u2"
+    gdb_test "print uef.field" "print.*.\[0-9\]* = u2" "print uef.field (u2)"
 }

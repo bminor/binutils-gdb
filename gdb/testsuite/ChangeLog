@@ -1,3 +1,10 @@
+Sat Aug 26 00:26:11 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.base/setvar.c, gdb.base/setvar.exp:  Add new tests for
+	enumeration bitfields if compiling with GNU C.
+	* lib/gdb.exp:  Consume `(y or n) ' in `Reinitialize source path
+	to empty' prompt.
+
 Tue Aug 22 00:30:37 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gdb.base/scope.exp: xfail 'scope0.c'::filelocal_bss before run
