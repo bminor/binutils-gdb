@@ -1,3 +1,8 @@
+Tue Apr 16 15:17:40 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-arm.c (my_get_float_expression): Update call to
+	gen_to_words, X_PRECISION changed from 6 to 5.
+
 Tue Apr 16 10:25:42 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (register_name,reg_name_search): Move register
