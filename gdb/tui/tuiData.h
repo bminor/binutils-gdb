@@ -170,7 +170,7 @@ TuiSourceElement, *TuiSourceElementPtr;
 /* Elements in the data display window content */
 typedef struct _TuiDataElement
   {
-    char *name;
+    const char *name;
     int itemNo;			/* the register number, or data display number */
     TuiDataType type;
     Opaque value;
