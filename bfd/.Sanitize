@@ -168,7 +168,7 @@ Things-to-lose:
 
 Do-last:
 
-v9files="configure.in elfcode.h reloc.c bfd-in2.h"
+v9files="configure.in elfcode.h reloc.c bfd-in2.h targets.c"
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
 	if [ -n "${verbose}" ] ; then
 		echo Keeping v9 stuff in $v9files.
