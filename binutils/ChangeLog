@@ -1,5 +1,20 @@
 1999-08-08  Ian Lance Taylor  <ian@zembu.com>
 
+	* configure.in: Define and substitute DEMANGLER_NAME.
+	* Makefile.am (DEMANGLER_PROG): Set to cxxfilt.
+	(man_MANS): Use DEMANGLER_NAME rather than DEMANGLER_PROG.
+	(bin_PROGRAMS): Remove $(DEMANGLER_PROG).
+	(noinst_PROGRAMS): Add $(DEMANGLER_PROG).
+	(cxxfilt_SOURCES): Rename from c__filt_SOURCES.
+	(cxxfilt_LDADD): Rename from c__filt_LDADD.
+	($(DEMANGLER_NAME).1): Rename from $(DEMANGLER_PROG).1.  Use
+	DEMANGLER_NAME rather than DEMANGLER_PROG in substitution.
+	(MOSTLYCLEANFILES): Use DEMANGLER_NAME rather than
+	DEMANGLER_PROG.
+	(install-exec-local): When installing noinst_PROGRAMS, change
+	cxxfilt to $(DEMANGLER_NAME).
+	* configure, Makefile.in: Rebuild.
+
 	* Makefile.am: Rename .dep* files to DEP*.  Change DEP variable to
 	MKDEP.
 	* Makefile.in: Rebuild.

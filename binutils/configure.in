@@ -65,6 +65,13 @@ AC_PROG_INSTALL
 
 BFD_CC_FOR_BUILD
 
+DEMANGLER_NAME=c++filt
+case "${host}" in
+  *-*-go32* | *-*-msdos*)
+    DEMANGLER_NAME=cxxfilt
+esac
+AC_SUBST(DEMANGLER_NAME)
+
 AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h fcntl.h sys/file.h)
 AC_HEADER_SYS_WAIT
 AC_FUNC_ALLOCA

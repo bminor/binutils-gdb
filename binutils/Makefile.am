@@ -38,7 +38,7 @@ OBJDUMP_PROG=objdump
 
 # This is the demangler, as a standalone program.
 # Note: This one is used as the installed name too, unlike the above.
-DEMANGLER_PROG=c++filt
+DEMANGLER_PROG=cxxfilt
 
 ADDR2LINE_PROG=addr2line
 
@@ -50,14 +50,15 @@ DLLWRAP_PROG=dllwrap
 SRCONV_PROG=srconv$(EXEEXT) sysdump$(EXEEXT) coffdump$(EXEEXT) 
 
 man_MANS = ar.1 nm.1 objdump.1 ranlib.1 size.1 strings.1 strip.1 objcopy.1 \
-	addr2line.1 nlmconv.1 $(DEMANGLER_PROG).1
+	addr2line.1 nlmconv.1 $(DEMANGLER_NAME).1
 
 PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRINGS_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG) @BUILD_DLLWRAP@ @BUILD_MISC@
 
-bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG) @BUILD_DLLWRAP@ @BUILD_MISC@
+bin_PROGRAMS = $(SIZE_PROG) $(OBJDUMP_PROG) $(AR_PROG) $(STRINGS_PROG) $(RANLIB_PROG) $(OBJCOPY_PROG) @BUILD_NLMCONV@ @BUILD_SRCONV@ @BUILD_DLLTOOL@ @BUILD_WINDRES@ $(ADDR2LINE_PROG) $(READELF_PROG) @BUILD_DLLWRAP@ @BUILD_MISC@
 
-## We need a special rule to install the programs which are built with -new
-noinst_PROGRAMS = $(NM_PROG) $(STRIP_PROG)
+## We need a special rule to install the programs which are built with
+## -new, and to rename cxxfilt to c++filt.
+noinst_PROGRAMS = $(NM_PROG) $(STRIP_PROG) $(DEMANGLER_PROG)
 
 EXTRA_PROGRAMS = $(NLMCONV_PROG) srconv sysdump coffdump $(DLLTOOL_PROG) $(WINDRES_PROG) $(DLLWRAP_PROG)
 
@@ -178,8 +179,8 @@ stamp-under: Makefile
 cplus-dem.o: $(BASEDIR)/libiberty/cplus-dem.c $(INCDIR)/getopt.h
 	$(COMPILE) -c -DMAIN -DVERSION='"$(VERSION)"' $(BASEDIR)/libiberty/cplus-dem.c
 
-c__filt_SOURCES =
-c__filt_LDADD = cplus-dem.o underscore.o $(LIBIBERTY) $(INTLLIBS)
+cxxfilt_SOURCES =
+cxxfilt_LDADD = cplus-dem.o underscore.o $(LIBIBERTY) $(INTLLIBS)
 
 ar_SOURCES = arparse.y arlex.l ar.c not-ranlib.c arsup.c rename.c $(BULIBS)
 ar_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(INTLLIBS)
@@ -322,11 +323,11 @@ binutils.info: $(srcdir)/binutils.texi config.texi
 
 MAINTAINERCLEANFILES = config.texi
 
-$(DEMANGLER_PROG).1: cxxfilt.man Makefile
-	sed -e 's/@PROGRAM@/$(DEMANGLER_PROG)/' < $(srcdir)/cxxfilt.man \
-		> $(DEMANGLER_PROG).1
+$(DEMANGLER_NAME).1: cxxfilt.man Makefile
+	sed -e 's/@PROGRAM@/$(DEMANGLER_NAME)/' < $(srcdir)/cxxfilt.man \
+		> $(DEMANGLER_NAME).1
 
-MOSTLYCLEANFILES = sysinfo $(DEMANGLER_PROG).1 binutils.log binutils.sum \
+MOSTLYCLEANFILES = sysinfo $(DEMANGLER_NAME).1 binutils.log binutils.sum \
 	abcdefgh*
 mostlyclean-local:
 	-rm -rf tmpdir
@@ -338,8 +339,8 @@ CLEANFILES = dep.sed DEP DEP1
 install-exec-local: $(bin_PROGRAMS) $(noinst_PROGRAMS)
 	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
+	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//' -e 's/cxxfilt/$(DEMANGLER_NAME)/'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed -e 's/$(EXEEXT)$$//' -e 's/-new//' -e 's/cxxfilt/$(DEMANGLER_NAME)/'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	  else :; fi; \
 	done
 	$(mkinstalldirs) $(tooldir)/bin
