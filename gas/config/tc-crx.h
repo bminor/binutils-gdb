@@ -69,4 +69,12 @@ extern int crx_force_relocation (struct fix *);
 	: LEN == 4 ? BFD_RELOC_CRX_NUM32 \
 	: BFD_RELOC_NONE);
 
+/* Give an error if a frag containing code is not aligned to a 2-byte 
+   boundary.  */
+#define md_frag_check(FRAGP) \
+  if ((FRAGP)->has_code							\
+      && (((FRAGP)->fr_address + (FRAGP)->insn_addr) & 1) != 0)		\
+     as_bad_where ((FRAGP)->fr_file, (FRAGP)->fr_line,			\
+		   _("instruction address is not a multiple of 2"));
+
 #endif /* TC_CRX_H */

@@ -1,3 +1,8 @@
+2004-11-08  Tomer Levi  <Tomer.Levi@nsc.com>
+
+	* config/tc-crx.c (print_insn): Check and set insn_addr.
+	* config/tc-crx.h (md_frag_check): Define.
+
 2004-11-08  Inderpreet Singh   <inderpreetb@nioda.hcltech.com>
 	    Vineet Sharma      <vineets@noida.hcltech.com>
 

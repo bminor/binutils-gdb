@@ -1229,7 +1229,7 @@ set_operand (char *operand, ins * crx_ins)
       operandS++;
     case arg_c:	    /* Case 0x18.  */
       /* Set constant.  */
-      process_label_constant (operandS, crx_ins/*, op_num*/);
+      process_label_constant (operandS, crx_ins);
       
       if (cur_arg->type != arg_ic)
 	cur_arg->type = arg_c;
@@ -1242,7 +1242,7 @@ set_operand (char *operand, ins * crx_ins)
       while (*operandE != '(')
 	operandE++;
       *operandE = '\0';
-      process_label_constant (operandS, crx_ins/*, op_num*/);
+      process_label_constant (operandS, crx_ins);
       operandS = operandE;    
     case arg_rbase: /* Case (r1).  */
       operandS++;
@@ -2382,6 +2382,7 @@ print_insn (ins *insn)
   unsigned int i, j, insn_size;
   char *this_frag;
   unsigned short words[4];
+  int addr_mod;
 
   /* Arrange the insn encodings in a WORD size array.  */
   for (i = 0, j = 0; i < 2; i++)
@@ -2442,6 +2443,13 @@ print_insn (ins *insn)
 		       insn->rtype);
 	}
     }
+
+  /* Verify a 2-byte code alignment.  */
+  addr_mod = frag_now_fix () & 1;
+  if (frag_now->has_code && frag_now->insn_addr != addr_mod)
+    as_bad (_("instruction address is not a multiple of 2"));
+  frag_now->insn_addr = addr_mod;
+  frag_now->has_code = 1;
 
   /* Write the instruction encoding to frag.  */
   for (i = 0; i < insn_size; i++)
