@@ -1,5 +1,39 @@
 Mon Oct 17 11:38:16 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* elfcode.h (elf_map_symbols): Sort the symbols into a new array,
+	rather than messing with Elf_Sym_Extra.  Store the symbol index in
+	the udata.i field.
+	(swap_out_syms): Use outbound_syms as a pointer rather than as an
+	array.  Don't worry about elf_sym_num.
+	* libelf.h (struct elf_sym_extra): Don't define.
+	(Elf_Sym_Extra): Don't define.
+	(struct elf_obj_tdata): Remove sym_extra field.
+	(elf_sym_extra): Don't define.
+	* elf32-hppa.c (elf32_hppa_backend_final_write_processing): Use
+	udata.i rather than elf_sym_extra array.
+
+	* syms.c (asymbol): Change udata field into a union.
+	* bfd-in2.h: Rebuild.
+	* aoutx.h (NAME(aout,translate_symbol_table)): Use udata.p rather
+	than just udata.
+	* bout.c (perform_slip): Likewise.
+	* hp300hpux.c (MY(slurp_symbol_table)): Likewise.
+	* ieee.c (ieee_slurp_external_symbols): Likewise.
+	* linker.c (generic_link_add_symbol_list): Likewise.
+	(default_indirect_link_order): Likewise.
+	* oasys.c (oasys_slurp_symbol_table): Likewise.
+	* reloc16.c (bfd_perform_slip): Likewise.
+	* srec.c (fillup_symbols): Likewise.
+	* coffcode.h (get_index): Use udata.i rather than just udata.
+	(coff_slurp_symbol_table): Likewise.
+	* coffgen.c (set_index): Likewise.
+	* ecoff.c (ecoff_set_symbol_info): Likewise.
+	* elfcode.h (elf_symbol_from_bfd_symbol): Likewise.
+	* libecoff.h (ecoff_get_sym_index, ecoff_set_sym_index): Likewise.
+	* som.c (compare_syms): Likewise.
+	(som_prep_for_fixups): Likewise.
+	(som_write_fixups): Likewise.
+
 	Use a hash table when writing out ELF symbol names.
 	* elfcode.h (elf_stringtab_init): New static function.
 	(bfd_new_strtab, bfd_add_to_strtab, bfd_add_2_to_strtab): Remove.
@@ -75,6 +109,8 @@ Mon Oct 17 11:38:16 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 	* elf32-hppa.c (elf32_hppa_read_symext_info): Use bfd_section
 	rather than rawdata.
 	(elf32_hppa_size_stubs): Likewise.
+	(elf32_hppa_backend_symbol_table_processing): Don't set
+	symextn_hdr->size; just use sh_size.
 	* elf32-mips.c (mips_elf_final_write_processing): Use bfd_section
 	rathern than rawdata.
 	(mips_elf_section_from_shdr): Likewise.

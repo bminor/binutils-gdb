@@ -148,7 +148,7 @@ oasys_slurp_symbol_table (abfd)
 	      {
 	      case RELOCATION_TYPE_ABS:
 		dest = dest_defined--;
-		dest->section = &bfd_abs_section;
+		dest->section = bfd_abs_section_ptr;
 		dest->flags = 0;
 
 		break;
@@ -176,14 +176,14 @@ oasys_slurp_symbol_table (abfd)
 		break;
 	      case RELOCATION_TYPE_UND:
 		dest = data->symbols + bfd_h_get_16 (abfd, record.symbol.refno);
-		dest->section = &bfd_und_section;
+		dest->section = bfd_und_section_ptr;
 		break;
 	      case RELOCATION_TYPE_COM:
 		dest = dest_defined--;
 		dest->name = string_ptr;
 		dest->the_bfd = abfd;
 
-		dest->section = &bfd_com_section;
+		dest->section = bfd_com_section_ptr;
 
 		break;
 	      default:
@@ -193,7 +193,7 @@ oasys_slurp_symbol_table (abfd)
 	      }
 	    dest->name = string_ptr;
 	    dest->the_bfd = abfd;
-	    dest->udata = (PTR) NULL;
+	    dest->udata.p = (PTR) NULL;
 	    dest->value = bfd_h_get_32 (abfd, record.symbol.value);
 
 #ifdef UNDERSCORE_HACK
@@ -954,13 +954,13 @@ oasys_write_syms (abfd)
 	  bfd_h_put_16 (abfd, index, symbol.refno);
 	  index++;
 	}
-      else if (g->section == &bfd_abs_section)
+      else if (bfd_is_abs_section (g->section))
 	{
 	  symbol.relb = RELOCATION_TYPE_ABS;
 	  bfd_h_put_16 (abfd, 0, symbol.refno);
 
 	}
-      else if (g->section == &bfd_und_section)
+      else if (bfd_is_und_section (g->section))
 	{
 	  symbol.relb = RELOCATION_TYPE_UND;
 	  bfd_h_put_16 (abfd, index, symbol.refno);
@@ -1480,6 +1480,7 @@ oasys_sizeof_headers (abfd, exec)
   ((boolean (*) \
     PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int))) \
    bfd_true)
+#define oasys_update_armap_timestamp bfd_true
 
 #define oasys_bfd_is_local_label bfd_generic_is_local_label
 #define oasys_get_lineno _bfd_nosymbols_get_lineno
