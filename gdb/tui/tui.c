@@ -74,7 +74,7 @@ static int tui_finish_init = 1;
 
 /* Switch the output mode between TUI/standard gdb.  */
 static int
-tui_switch_mode (void)
+tui_rl_switch_mode (void)
 {
   if (tui_active)
     {
@@ -107,15 +107,16 @@ tui_switch_mode (void)
   return 0;
 }
 
-/* Change the TUI layout to show a next layout.
+/* TUI readline command.
+   Change the TUI layout to show a next layout.
    This function is bound to CTRL-X 2.  It is intended to provide
    a functionality close to the Emacs split-window command.  We always
    show two windows (src+asm), (src+regs) or (asm+regs).  */
 static int
-tui_change_windows (void)
+tui_rl_change_windows (void)
 {
   if (!tui_active)
-    tui_switch_mode ();
+    tui_rl_switch_mode ();
 
   if (tui_active)
     {
@@ -157,13 +158,13 @@ tui_change_windows (void)
   return 0;
 }
 
-
-/* Delete the second TUI window to only show one.  */
+/* TUI readline command.
+   Delete the second TUI window to only show one.  */
 static int
-tui_delete_other_windows (void)
+tui_rl_delete_other_windows (void)
 {
   if (!tui_active)
-    tui_switch_mode ();
+    tui_rl_switch_mode ();
 
   if (tui_active)
     {
@@ -199,12 +200,12 @@ tui_initialize_readline ()
 {
   rl_initialize ();
 
-  rl_add_defun ("tui-switch-mode", tui_switch_mode, -1);
-  rl_bind_key_in_map ('a', tui_switch_mode, emacs_ctlx_keymap);
-  rl_bind_key_in_map ('A', tui_switch_mode, emacs_ctlx_keymap);
-  rl_bind_key_in_map (CTRL ('A'), tui_switch_mode, emacs_ctlx_keymap);
-  rl_bind_key_in_map ('1', tui_delete_other_windows, emacs_ctlx_keymap);
-  rl_bind_key_in_map ('2', tui_change_windows, emacs_ctlx_keymap);
+  rl_add_defun ("tui-switch-mode", tui_rl_switch_mode, -1);
+  rl_bind_key_in_map ('a', tui_rl_switch_mode, emacs_ctlx_keymap);
+  rl_bind_key_in_map ('A', tui_rl_switch_mode, emacs_ctlx_keymap);
+  rl_bind_key_in_map (CTRL ('A'), tui_rl_switch_mode, emacs_ctlx_keymap);
+  rl_bind_key_in_map ('1', tui_rl_delete_other_windows, emacs_ctlx_keymap);
+  rl_bind_key_in_map ('2', tui_rl_change_windows, emacs_ctlx_keymap);
 }
 
 /* Enter in the tui mode (curses).
