@@ -200,7 +200,7 @@ elf_i386_info_to_howto_rel (abfd, cache_ptr, dst)
 /* The first entry in an absolute procedure linkage table looks like
    this.  See the SVR4 ABI i386 supplement to see how this works.  */
 
-static bfd_byte elf_i386_plt0_entry[PLT_ENTRY_SIZE] =
+static const bfd_byte elf_i386_plt0_entry[PLT_ENTRY_SIZE] =
 {
   0xff, 0x35,	/* pushl contents of address */
   0, 0, 0, 0,	/* replaced with address of .got + 4.  */
@@ -212,7 +212,7 @@ static bfd_byte elf_i386_plt0_entry[PLT_ENTRY_SIZE] =
 /* Subsequent entries in an absolute procedure linkage table look like
    this.  */
 
-static bfd_byte elf_i386_plt_entry[PLT_ENTRY_SIZE] =
+static const bfd_byte elf_i386_plt_entry[PLT_ENTRY_SIZE] =
 {
   0xff, 0x25,	/* jmp indirect */
   0, 0, 0, 0,	/* replaced with address of this symbol in .got.  */
@@ -224,7 +224,7 @@ static bfd_byte elf_i386_plt_entry[PLT_ENTRY_SIZE] =
 
 /* The first entry in a PIC procedure linkage table look like this.  */
 
-static bfd_byte elf_i386_pic_plt0_entry[PLT_ENTRY_SIZE] =
+static const bfd_byte elf_i386_pic_plt0_entry[PLT_ENTRY_SIZE] =
 {
   0xff, 0xb3, 4, 0, 0, 0,	/* pushl 4(%ebx) */	
   0xff, 0xa3, 8, 0, 0, 0,	/* jmp *8(%ebx) */	
@@ -233,7 +233,7 @@ static bfd_byte elf_i386_pic_plt0_entry[PLT_ENTRY_SIZE] =
 
 /* Subsequent entries in a PIC procedure linkage table look like this.  */
 
-static bfd_byte elf_i386_pic_plt_entry[PLT_ENTRY_SIZE] =
+static const bfd_byte elf_i386_pic_plt_entry[PLT_ENTRY_SIZE] =
 {
   0xff, 0xa3,	/* jmp *offset(%ebx) */
   0, 0, 0, 0,	/* replaced with offset of this symbol in .got.  */
