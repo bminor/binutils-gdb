@@ -1347,7 +1347,7 @@ extern void recursive_dump_type (struct type *, int);
 
 /* printcmd.c */
 
-extern void print_scalar_formatted (void *, struct type *, int, int,
+extern void print_scalar_formatted (const void *, struct type *, int, int,
 				    struct ui_file *);
 
 extern int can_dereference (struct type *);

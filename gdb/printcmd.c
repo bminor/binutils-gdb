@@ -334,8 +334,8 @@ print_formatted (struct value *val, int format, int size,
    with a format.  */
 
 void
-print_scalar_formatted (void *valaddr, struct type *type, int format, int size,
-			struct ui_file *stream)
+print_scalar_formatted (const void *valaddr, struct type *type,
+			int format, int size, struct ui_file *stream)
 {
   LONGEST val_long = 0;
   unsigned int len = TYPE_LENGTH (type);
