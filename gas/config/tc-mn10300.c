@@ -891,7 +891,12 @@ mn10300_insert_operand (insnp, extensionp, operand, val, file, line, shift)
         }
     }
 
-  if ((operand->flags & MN10300_OPERAND_EXTENDED) == 0)
+  if ((operand->flags & MN10300_OPERAND_SPLIT) != 0)
+    {
+      *insnp |= (val >> 16) & 0xffff;
+      *extensionp |= val & 0xffff;
+    }
+  else if ((operand->flags & MN10300_OPERAND_EXTENDED) == 0)
     {
       *insnp |= (((long) val & ((1 << operand->bits) - 1))
 		 << (operand->shift + shift));
