@@ -108,11 +108,18 @@ fi])dnl
 
 AC_ARG_ENABLE(sim-icache,
 [  --enable-sim-icache=size		Specify instruction cache size.],
+icache=""
 [case "${enableval}" in
-  yes)	sim_icache="-r 1024";;
+  yes)	sim_icache="-r 1024"; icache="1024";;
   no)	sim_icache="";;
-  *)	sim_icache="-r ${enableval}";;
-esac],[sim_icache="-r 1024"])dnl
+  *)	sim_icache="-r ${enableval}"; icache="${enableval}";;
+esac
+if test x"$silent" != x"yes" && test x"$icache" != x""; then
+  echo "Setting instruction cache size to $icache"
+fi],[sim_icache="-r 1024"
+if test x"$silent" != x"yes"; then
+  echo "Setting instruction cache size to 1024"
+fi])dnl
 
 AC_ARG_ENABLE(sim-inline,
 [  --enable-sim-inline=inlines		Specify which functions should be inlined.],
@@ -127,13 +134,13 @@ case "$enableval" in
        case "$x" in
 	 *_INLINE=*)	new_flag="-D$x";;
 	 *_INLINE)	new_flag="-D$x=2";;
-	 *=*)		new_flag=`sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
+	 *=*)		new_flag=`echo "$x" | sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
 	 *)		new_flag="-D$x""_INLINE=2";;
        esac
-       if x"$sim_inline" = x""; then
+       if test x"$sim_inline" = x""; then
 	 sim_inline="$new_flag"
        else
-	 sim_inline="$flags $new_flag"
+	 sim_inline="$sim_inline $new_flag"
        fi
      done;;
 esac
