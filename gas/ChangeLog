@@ -1,5 +1,8 @@
 Wed Sep 10 10:07:08 1997  Nick Clifton  <nickc@cygnus.com>
 
+start-sanitize-v850e
+	* config/tc-v850.c (md_assemble): Corrected spelling mistake.
+end-sanitize-v850e
 	* configure.in (emulations): Add v850 emulation.
 
 Tue Sep  9 17:14:33 1997  Doug Evans  <dje@canuck.cygnus.com>

@@ -1484,7 +1484,7 @@ md_assemble (str)
       /* Special case: 32 bit MOV */
       if ((insn & 0xffe0) == 0x0620)
 	insn_size = 2;
-/* end_sanitize-v850e */
+/* end-sanitize-v850e */
       
       f = frag_more (insn_size);
       

@@ -332,12 +332,12 @@ else
 	done
  else
 	for i in $v850e_files ; do
-		if test -r $i && (grep sanitize-v850e $i > /dev/null) ; then
+		if test -r $i && (grep sanitize-v850eq $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850e\" from $i...
+				echo Removing traces of \"v850eq\" from $i...
 			fi
 			cp $i new
-			sed '/start\-sanitize\-v850e/,/end\-sanitize\-v850e/d' < $i > new
+			sed '/start\-sanitize\-v850eq/,/end\-sanitize\-v850eq/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
@@ -346,12 +346,12 @@ else
 			fi
 			mv new $i
 		fi
-		if test -r $i && (grep sanitize-v850eq $i > /dev/null) ; then
+		if test -r $i && (grep sanitize-v850e $i > /dev/null) ; then
 			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"v850eq\" from $i...
+				echo Removing traces of \"v850e\" from $i...
 			fi
 			cp $i new
-			sed '/start\-sanitize\-v850eq/,/end\-sanitize\-v850eq/d' < $i > new
+			sed '/start\-sanitize\-v850e/,/end\-sanitize\-v850e/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
