@@ -1,5 +1,12 @@
 2001-04-17  Michael Snyder  <msnyder@redhat.com>
 	
+	* remote.c (remote_open_1): On opening the remote target, activate
+	the solib_create_inferior_hook, so that it can detect when the
+	target loads shared libraries.
+	(remote_async_open_1): Ditto.
+
+2001-04-17  Michael Snyder  <msnyder@redhat.com>
+	
 	* breakpoint.c (print_one_breakpoint): Handle 64-bit addresses.
 	* tracepoint.c (tracepoints_info): Handle 64-bit addresses.
 	* testsuite/gdb.trace/deltrace.exp: Allow for 64-bit addresses.

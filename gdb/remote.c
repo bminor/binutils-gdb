@@ -50,6 +50,8 @@
 #include <signal.h>
 #include "serial.h"
 
+#include "gdbcore.h" /* for exec_bfd */
+
 /* Prototypes for local functions */
 static void cleanup_sigint_signal_handler (void *dummy);
 static void initialize_sigint_signal_handler (void);
@@ -2148,11 +2150,20 @@ serial device is attached to the remote system\n\
 
   if (extended_p)
     {
-      /* tell the remote that we're using the extended protocol.  */
+      /* Tell the remote that we are using the extended protocol.  */
       char *buf = alloca (PBUFSIZ);
       putpkt ("!");
       getpkt (buf, PBUFSIZ, 0);
     }
+  /* FIXME: need a master target_open vector from which all 
+     remote_opens can be called, so that stuff like this can 
+     go there.  Failing that, the following code must be copied
+     to the open function for any remote target that wants to 
+     support svr4 shared libraries.  */
+#ifdef SOLIB_CREATE_INFERIOR_HOOK
+  if (exec_bfd) 	/* No use without an exec file. */
+    SOLIB_CREATE_INFERIOR_HOOK (inferior_pid);
+#endif
 }
 
 /* Just like remote_open but with asynchronous support. */
@@ -2242,11 +2253,20 @@ serial device is attached to the remote system\n\
 
   if (extended_p)
     {
-      /* tell the remote that we're using the extended protocol.  */
+      /* Tell the remote that we are using the extended protocol.  */
       char *buf = alloca (PBUFSIZ);
       putpkt ("!");
       getpkt (buf, PBUFSIZ, 0);
     }
+  /* FIXME: need a master target_open vector from which all 
+     remote_opens can be called, so that stuff like this can 
+     go there.  Failing that, the following code must be copied
+     to the open function for any remote target that wants to 
+     support svr4 shared libraries.  */
+#ifdef SOLIB_CREATE_INFERIOR_HOOK
+  if (exec_bfd) 	/* No use without an exec file. */
+    SOLIB_CREATE_INFERIOR_HOOK (inferior_pid);
+#endif
 }
 
 /* This takes a program previously attached to and detaches it.  After
