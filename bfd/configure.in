@@ -91,7 +91,7 @@ i386)
 sparc)
 	case "${host_os}" in
 	sunos64)	my_host=sparc-ll ;;
-	sysv4|sunos5*)	my_host=sysv4 ;;
+	sysv4|solaris2)	my_host=sysv4 ;;
 	sysv64)		my_host=sysv4-ll ;;
 	*)		my_host=sparc ;;
 	esac
@@ -184,7 +184,7 @@ sun)
 	case "${target_cpu}" in
 	m68k|m680[01234]0)	bfd_target=m68k-aout ;;
 	sparc)	case "${target_os}" in
-		sysv4|sunos5*)	bfd_target=sparc-elf ;;
+		sysv4|solaris2)	bfd_target=sparc-elf ;;
 		*)	bfd_target=sparc-aout ;;
 		esac
 		;;
