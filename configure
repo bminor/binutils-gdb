@@ -79,7 +79,8 @@ target=
 targets=
 targetsubdir=
 verbose=
-version_path="yes"
+# or maybe grab from gcc/version.c
+version_path="1.95.02"
 for arg in $*;
 do
 	# handle things that might have args following as separate words
@@ -109,7 +110,7 @@ do
 			clib=clib
 			;;
 		-noversion | +noversion)
-			version_path="no"
+			version_path=""
 			;;
 		-ddestdir=* | +ddestdir=* | +ddestdi=* | +ddestd=* | +ddest=* | +ddes=* | +dde=* | +dd=*)
 			ddestdir=`echo ${arg} | sed 's/[+-]dd[a-z]*=//'`
@@ -528,7 +529,7 @@ for host in ${hosts} ; do
 			echo "host_cpu = ${host_cpu}" >> ${Makefile}
 			echo "host_vendor = ${host_vendor}" >> ${Makefile}
 			echo "host_os = ${host_os}" >> ${Makefile}
-
+			echo "version_path = ${version_path}" >> ${Makefile}
 			echo "target_alias = ${target_alias}" >> ${Makefile}
 			echo "target_cpu = ${target_cpu}" >> ${Makefile}
 			echo "target_vendor = ${target_vendor}" >> ${Makefile}
@@ -720,7 +721,11 @@ exit 0
 #
 #
 # $Log$
-# Revision 1.70  1991/11/13 19:49:17  sac
+# Revision 1.71  1991/11/13 20:56:11  sac
+# Passes down version_path for things which install themselves into
+# libsubdir.
+#
+# Revision 1.70  1991/11/13  19:49:17  sac
 # The +noversion flag will make an installation happen to the machine/..
 # directory rather than the machine/version/.. directory.
 #
