@@ -563,6 +563,16 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "elf_e_flags3"
 	run_dump_test "elf_e_flags4"
 
+	# Check EF_MIPS_ARCH markings for each supported architecture.
+	run_dump_test "elf_arch_mips1"
+	run_dump_test "elf_arch_mips2"
+	run_dump_test "elf_arch_mips3"
+	run_dump_test "elf_arch_mips4"
+	run_dump_test "elf_arch_mips5"
+	run_dump_test "elf_arch_mips32"
+	run_dump_test "elf_arch_mips32r2"
+	run_dump_test "elf_arch_mips64"
+
 	# Verify that ASE markings are handled properly.
 	if { !$no_mips16 } { run_dump_test "elf_ase_mips16" }
 

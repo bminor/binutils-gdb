@@ -1,5 +1,5 @@
 # name: ELF MIPS16 ASE markings
-# source: elf_ase_mips16.s
+# source: empty.s
 # objdump: -p
 # as: -mips16
 
