@@ -1974,6 +1974,7 @@ relocatable address and the linker turns it into an absolute address.
 @menu
 * Transformations On Static Variables::
 * Transformations On Global Variables::
+* ELF Transformations::	       In ELF, things are a bit different.
 @end menu
 
 @node Transformations On Static Variables
@@ -2047,6 +2048,49 @@ entry now holds an absolute address:
 00000000 - 00 0000  GSYM g_foo:G2
 @dots{}
 0000e008 D _g_foo
+@end example
+
+@node ELF Transformations
+@subsection Transformations of Stabs in ELF Files
+
+For ELF files, use @code{objdump --stabs} instead of @code{nm} to show
+the stabs in an object or executable file.  @code{objdump} is a GNU
+utility; Sun does not provide any equivalent.
+
+The following example is for a stab whose value is an address is
+relative to the compilation unit (@pxref{Stabs In ELF}).  For example,
+if the source line
+
+@example
+static int ld = 5;
+@end example
+
+appears within a function, then the assembly language output from the
+compiler contains:
+
+@example
+.Ddata.data:
+@dots{}
+        .stabs "ld:V(0,3)",0x26,0,4,.L18-Ddata.data    # @r{0x26 is N_STSYM}
+@dots{}
+.L18:
+        .align 4
+        .word 0x5
+@end example
+
+Because the value is formed by subtracting one symbol from another, the
+value is absolute, not relocatable, and so the object file contains
+
+@example
+Symnum n_type n_othr n_desc n_value  n_strx String
+31     STSYM  0      4      00000004 680    ld:V(0,3)
+@end example
+
+without any relocations, and the executable file also contains
+
+@example
+Symnum n_type n_othr n_desc n_value  n_strx String
+31     STSYM  0      4      00000004 680    ld:V(0,3)
 @end example
 
 @node Cplusplus
@@ -3611,26 +3655,27 @@ symbols giving the address of each section for a given source file.
 Since these are ELF (not stab) symbols, the linker can relocate them
 correctly.  They are named @code{Bbss.bss} for the bss section,
 @code{Ddata.data} for the data section, and @code{Drodata.rodata} for
-the rodata section.  For the text section, there is no such symbol.  GCC
+the rodata section.  For the text section, there is no such symbol.  For
+an example of how these symbols work, @xref{ELF Transformations}.  GCC
 does not provide these symbols; it instead relies on the stabs getting
 relocated, which loses for Solaris 2.3 (see below).  Thus address which
 would normally be relative to @code{Bbss.bss}, etc., are absolute.  The
 linker provided with Solaris 2.2 and earlier relocates stabs using
 relocation information from a @code{.rela.stab} section, which means
 that the value of an @code{N_FUN} stab in an executable is the actual
-address.  I think this is pretty much just standard ELF relocations, as
-it would do for any section, rather than a special-purpose stabs hack.
-For Solaris 2.3 and later, the linker ignores relocations for the stabs
-section.  The value of a @code{N_FUN} stab is zero and the address of a
-function can be obtained from the ELF (non-stab) symbols.  Sun, in
-reference to bug 1142109, has verified that this is intentional.
-Because looking things up in the ELF symbols is slow and GDB lacks code
-to do this this, it would probably be better to use a @code{Ttext.text}
-symbol for stabs-in-elf on non-Solaris machines, and make the address in
-the @code{N_FUN} relative to the @code{Ttext.text} symbol.  In addition
-to @code{N_FUN} symbols, whether the linker relocates stabs also affects
-some @code{N_ROSYM}, @code{N_STSYM}, and @code{N_LCSYM} symbols; see
-@ref{Statics}.
+address.  I think this is just standard ELF relocations, as it would do
+for any section, rather than a special-purpose stabs hack.  For Solaris
+2.3 and later, the linker ignores relocations for the stabs section.
+The value of a @code{N_FUN} stab is zero and the address of a function
+can be obtained from the ELF (non-stab) symbols.  Sun, in reference to
+bug 1142109, has verified that this is intentional.  Because looking
+things up in the ELF symbols would probably be slow, and this doesn't
+provide any way to deal with nested functions, it would probably be
+better to use a @code{Ttext.text} symbol for stabs-in-elf on non-Solaris
+machines, and make the address in the @code{N_FUN} relative to the
+@code{Ttext.text} symbol.  In addition to @code{N_FUN} symbols, whether
+the linker relocates stabs also affects some @code{N_ROSYM},
+@code{N_STSYM}, and @code{N_LCSYM} symbols; see @ref{Statics}.
 
 @node Symbol Types Index
 @unnumbered Symbol Types Index
