@@ -1993,7 +1993,7 @@ parse_stab_enum_type (void *dhandle, const char **pp)
    describing the type.
 
    PP points to a character pointer that points to the next unconsumed token
-   in the the stabs string.  For example, given stabs "A:T4=s4a:1,0,32;;",
+   in the stabs string.  For example, given stabs "A:T4=s4a:1,0,32;;",
    *PP will point to "4a:1,0,32;;".  */
 
 static debug_type

@@ -1234,7 +1234,7 @@ parse_ieee_be (struct ieee_info *info, const bfd_byte **pp)
   switch (info->blockstack.bsp->kind)
     {
     case 2:
-      /* When we end the global typedefs block, we copy out the the
+      /* When we end the global typedefs block, we copy out the
          contents of info->vars.  This is because the variable indices
          may be reused in the local blocks.  However, we need to
          preserve them so that we can locate a function returning a

@@ -5215,7 +5215,7 @@ that are not being renamed, and do @emph{not} use the
 @samp{--export-all-symbols} option.  If you list only the 
 renamed symbols in the DEF file, and use @samp{--export-all-symbols} 
 to handle the other symbols, then the both the new names @emph{and} 
-the original names for the the renamed symbols will be exported.  
+the original names for the renamed symbols will be exported.  
 In effect, you'd be aliasing those symbols, not renaming them, 
 which is probably not what you wanted.
 @end table

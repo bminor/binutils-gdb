@@ -1,3 +1,7 @@
+2003-11-06  Bruno Rohee  <bruno@rohee.com>
+
+	* ls.texinfo: Fix "the the" typo.
+
 2003-11-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open): Only do

@@ -199,7 +199,7 @@ use this to determine the ABI being used by.
 
 @cindex @code{-mapcs-float} command line option, ARM
 @item -mapcs-float
-This indicates the the floating point variant of the APCS should be
+This indicates the floating point variant of the APCS should be
 used.  In this variant floating point arguments are passed in FP
 registers rather than integer registers.
 

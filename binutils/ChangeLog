@@ -1,4 +1,9 @@
-2003-10-30  Marshall T. Vandegrift <llasram at wuli dot nu>
+2003-11-06  Bruno Rohee  <bruno@rohee.com>
+
+	* ieee.c: Fix "the the" typo.
+	* stabs.c: Likewise.
+
+2003-10-30  Marshall T. Vandegrift  <llasram@wuli.nu>
 
 	* readelf.c (dump_section): Do not dump the contents of SHT_NOBITS
 	sections - they have no file space assigned to their contents.

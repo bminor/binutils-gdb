@@ -1,3 +1,7 @@
+2003-11-06  Bruno Rohee  <bruno@rohee.com>
+
+	* gprof.texi: Fix "the the" typo.
+
 2003-10-30  Nick Clifton  <nickc@redhat.com>
 
 	* gprof.texi (Compiling): Describe how to use gprof when source

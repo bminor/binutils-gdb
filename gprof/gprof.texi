@@ -1635,7 +1635,7 @@ gprof @var{executable-file} gmon.sum > @var{output-file}
 @section Estimating @code{children} Times
 
 Some of the figures in the call graph are estimates---for example, the
-@code{children} time values and all the the time figures in caller and
+@code{children} time values and all the time figures in caller and
 subroutine lines.
 
 There is no direct information about these measurements in the profile
