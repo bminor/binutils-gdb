@@ -1,3 +1,7 @@
+Fri Dec 15 10:01:27 1995  Stan Cox  <coxs@dg-rtp.dg.com>
+
+	* config.sub (i*86*) Change [345] to [3456]
+
 Wed Dec 20 17:41:40 1995  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
 	* configure.in (noconfigdirs): Add gas or ld if --with-gnu-as=no or
