@@ -1,4 +1,21 @@
 Tue Mar  4 09:35:56 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+	
+	* sim-alu.h (ALU_SUB_CA, ALU*_SUB_CA): New alu operation.
+
+	* sim-bits.h, sim-bits-n.h, sim-bits.c (LSMASKED*): New macro's
+ 	extract the tail or least signifiant bits from an integer of the
+ 	specified size.
+	
+	* sim-bits.h, sim-bits.c: Clean up conditionally compiled #if
+ 	WITH_TARGET_BITSIZE so that the compilation will fail when an
+ 	unsupported bitsize value is defined.
+
+	(INSERTED*): Convert to functions.
+	(EXTRACTED*): Ditto.
+	
+	(SIGN_EXTEND, SEXT): Change to more terse name.
+	
+Tue Mar  4 09:35:56 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* sim-inline.h: Allow explicit control over which .c files will be
  	included by their header.
@@ -10,6 +27,21 @@ Tue Mar  4 09:35:56 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
  	icache.c, idecode.c, semantics.c or support.c.  Those names are
  	not generally applicable.
 	
+Thu Feb 27 10:17:23 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* sim-bits.c, sim-bits-n.h (new): Split sim-bits.c into two parts
+ 	in a fashion similar to sim-endian-n.
+
+	* sim-endian.h: (H_word, L_word, AL_*, VL_*): Extend to include
+ 	both value and address macro's.
+
+Tue Feb 25 18:51:57 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* sim-alu.h (ALU16_BEGIN, ALU16_SET, ...): Fill in.
+
+	* sim-endian.h (L_word, H_word): Replace MS2W_4, LS2W_4 with more
+ 	generic L_word, H_word macro's.
+
 Thu Feb 20 18:36:55 1997  Andrew Cagney  <cagney@critters.cygnus.com>
 
 	* sim-basics.h: Borrow code from ppc directory.
