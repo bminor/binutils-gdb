@@ -1,3 +1,8 @@
+2001-03-15  Martin Hunt  <hunt@redhat.com>
+
+	* linespec.c (decode_line_1): Remove trailing quote
+	when parsing double quotes.
+
 2001-03-15  Kevin Buettner  <kevinb@redhat.com>
 
 	* uw-thread.c (read_thr_debug, read_map, read_lwp, thread_iter)

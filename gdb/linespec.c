@@ -1,6 +1,6 @@
 /* Parser for linespec for the GNU debugger, GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000
+   1996, 1997, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -612,10 +612,11 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 
   s = NULL;
   p = *argptr;
-  if (**argptr == '"')
+  if (p[0] == '"')
     {
       is_quote_enclosed = 1;
       (*argptr)++;
+      p++;
     }
   else
     is_quote_enclosed = 0;
@@ -654,7 +655,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   /* if the closing double quote was left at the end, remove it */
   if (is_quote_enclosed)
     {
-      char *closing_quote = strchr (p, '"');
+      char *closing_quote = strchr (p - 1, '"');
       if (closing_quote && closing_quote[1] == '\0')
 	*closing_quote = '\0';
     }
@@ -1091,9 +1092,6 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
     {
       p = skip_quoted (*argptr);
     }
-
-  if (is_quote_enclosed && **argptr == '"')
-    (*argptr)++;
 
   copy = (char *) alloca (p - *argptr + 1);
   memcpy (copy, *argptr, p - *argptr);
