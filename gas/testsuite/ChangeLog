@@ -1,5 +1,10 @@
 2004-07-20  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* gas/mips/elf-rel19.d: Pass -march=mips1 to gas as the test
+	expects load delay slots.
+
+2004-07-20  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* gas/mips/vr5400.d: Update for a correct disassembly of
 	"racm.ob".
 

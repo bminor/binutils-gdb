@@ -1,5 +1,5 @@
 #objdump: -dr
-#as: -mabi=32 -KPIC
+#as: -mabi=32 -march=mips1 -KPIC
 
 .*:     file format .*
 
