@@ -1,4 +1,9 @@
 start-sanitize-d10v
+Tue Jul 23 10:49:36 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c (md_apply_fix3): Fix all instruction
+	addresses to be right-shifted by 2.
+
 Mon Jul 22 11:32:36 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config/tc-d10v.c: Many changes to get relocs working.

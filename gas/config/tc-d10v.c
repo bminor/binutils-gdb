@@ -369,6 +369,7 @@ d10v_insert_operand (insn, op_type, value, left)
     shift += 15;
 
   bits = d10v_operands[op_type].bits;
+
   /* truncate to the proper number of bits */
   /* FIXME: overflow checking here? */
   value &= 0x7FFFFFFF >> (31 - bits);
@@ -866,9 +867,9 @@ md_apply_fix3 (fixp, valuep, seg)
      valueT *valuep;
      segT seg;
 {
-  valueT value;
   char *where;
   unsigned long insn;
+  long value;
   int op_type;
   int left=0;
 
@@ -911,9 +912,23 @@ md_apply_fix3 (fixp, valuep, seg)
      value, and stuff the instruction back again.  */
   where = fixp->fx_frag->fr_literal + fixp->fx_where;
   insn = bfd_getb32 ((unsigned char *) where);
-  /* printf("   insn=%x  value=%x\n",insn,value);  */
 
-  insn = d10v_insert_operand (insn, op_type, (offsetT) value, left);
+  switch (fixp->fx_r_type)
+    {
+    case BFD_RELOC_D10V_10_PCREL_L:
+    case BFD_RELOC_D10V_10_PCREL_R:
+    case BFD_RELOC_D10V_18_PCREL:
+      /* instruction addresses are always right-shifted by 2 
+         and pc-relative */
+      if (!fixp->fx_pcrel)
+	value -= fixp->fx_where;
+      value >>= 2;
+    default:
+      break;
+    }
+  /* printf("   insn=%x  value=%x where=%x  pcrel=%x\n",insn,value,fixp->fx_where,fixp->fx_pcrel); */ 
+ 
+  insn = d10v_insert_operand (insn, op_type, (offsetT)value, left);
   
   /* printf("   new insn=%x\n",insn); */
   
