@@ -1,3 +1,7 @@
+2001-04-14  Jakub Jelinek <jakub@redhat.com>
+
+	* section.c (STD_SECTION): Add entsize.
+
 2001-04-13  H.J. Lu  <hjl@gnu.org>
 
 	* section.c (SEC_MERGE): Define new flag for merging.

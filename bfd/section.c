@@ -1,6 +1,6 @@
 /* Object file "section" support for the BFD library.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000
+   2000, 2001
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -590,11 +590,11 @@ static const asymbol global_syms[] =
     /* line_filepos, userdata, contents, lineno, lineno_count,       */	\
        0,            NULL,     NULL,     NULL,   0,			\
 									\
-    /* comdat, kept_section, moving_line_filepos, target_index,      */	\
-       NULL,   NULL,         0,                   0,			\
+    /* entsize, comdat, kept_section, moving_line_filepos,           */	\
+       0,       NULL,   NULL,         0,				\
 									\
-    /* used_by_bfd, constructor_chain, owner,                        */	\
-       NULL,        NULL,              NULL,				\
+    /* target_index, used_by_bfd, constructor_chain, owner,          */	\
+       0,            NULL,        NULL,              NULL,		\
 									\
     /* symbol,                                                       */	\
        (struct symbol_cache_entry *) &global_syms[IDX],			\
