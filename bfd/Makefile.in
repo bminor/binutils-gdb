@@ -119,6 +119,9 @@ ALL_MACHINES = \
 	$(start-sanitize-d10v) \
 	cpu-d10v.o \
 	$(end-sanitize-d10v) \
+	$(start-sanitize-d30v) \
+	cpu-d30v.o \
+	$(end-sanitize-d30v) \
 	cpu-h8300.o \
 	cpu-h8500.o \
 	cpu-hppa.o \
@@ -220,6 +223,9 @@ BFD32_BACKENDS = \
 	$(start-sanitize-d10v) \
 	elf32-d10v.o \
 	$(end-sanitize-d10v) \
+	$(start-sanitize-d30v) \
+	elf32-d30v.o \
+	$(end-sanitize-d30v) \
 	elf32-gen.o \
 	elf32-hppa.o \
 	elf32-i386.o \
@@ -857,6 +863,12 @@ elf32-d10v.o: elf32-d10v.c elf-bfd.h $(INCDIR)/elf/common.h \
   elf32-target.h
 end-sanitize-d10v:
 
+start-sanitize-d30v:
+elf32-d30v.o: elf32-d30v.c elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  elf32-target.h
+end-sanitize-d30v:
+
 start-sanitize-m32r:
 elf32-m32r.o: elf32-m32r.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
@@ -873,7 +885,7 @@ end-sanitize-v850:
 start-sanitize-tic80:
 cpu-tic80.o: cpu-tic80.c
 coff-tic80.o: coff-tic80.c $(INCDIR)/bfdlink.h elf-bfd.h \
-  $(INCDIR)/coff/internal.h
+  $(INCDIR)/coff/internal.h coffcode.h
 end-sanitize-tic80:
 
 $(OFILES): stamp-picdir

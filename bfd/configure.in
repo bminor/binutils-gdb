@@ -446,6 +446,9 @@ do
 # start-sanitize-d10v
     bfd_elf32_d10v_vec)		tb="$tb elf32-d10v.o elf32.o $elf" ;;
 # end-sanitize-d10v
+# start-sanitize-d30v
+    bfd_elf32_d30v_vec)		tb="$tb elf32-d30v.o elf32.o $elf" ;;
+# end-sanitize-d30v
     bfd_elf32_hppa_vec)		tb="$tb elf32-hppa.o elf32.o $elf" ;;
     bfd_elf32_i386_vec)		tb="$tb elf32-i386.o elf32.o $elf" ;;
     bfd_elf32_i860_vec)		tb="$tb elf32-i860.o elf32.o $elf" ;;
@@ -628,7 +631,7 @@ AC_SUBST(tdefaults)
 dnl AC_CHECK_HEADERS(sys/mman.h)
 AC_FUNC_MMAP
 AC_CHECK_FUNCS(madvise mprotect)
-case ${want_mmap}+${ac_cv_func_mmap} in
+case ${want_mmap}+${ac_cv_func_mmap_fixed_mapped} in
   true+yes )  AC_DEFINE(USE_MMAP) ;;
 esac
 

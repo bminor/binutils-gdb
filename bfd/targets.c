@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
+#include "fnmatch.h"
 
 /*
 SECTION 
@@ -492,6 +493,9 @@ extern const bfd_target bfd_elf64_bigmips_vec;
 /* start-sanitize-d10v */
 extern const bfd_target bfd_elf32_d10v_vec;
 /* end-sanitize-d10v */
+/* start-sanitize-d30v */
+extern const bfd_target bfd_elf32_d30v_vec;
+/* end-sanitize-d30v */
 extern const bfd_target bfd_elf32_hppa_vec;
 extern const bfd_target bfd_elf32_i386_vec;
 extern const bfd_target bfd_elf32_i860_vec;
@@ -581,6 +585,9 @@ extern const bfd_target sparcnetbsd_vec;
 extern const bfd_target sparccoff_vec;
 extern const bfd_target sunos_big_vec;
 extern const bfd_target tekhex_vec;
+/* start-sanitize-tic80 */
+extern const bfd_target tic80coff_vec;
+/* end-sanitize-tic80 */
 extern const bfd_target versados_vec;
 extern const bfd_target we32kcoff_vec;
 extern const bfd_target w65_vec;
@@ -651,6 +658,9 @@ const bfd_target * const bfd_target_vector[] = {
 /* start-sanitize-d10v */
 	&bfd_elf32_d10v_vec,
 /* end-sanitize-d10v */
+/* start-sanitize-d30v */
+	&bfd_elf32_d30v_vec,
+/* end-sanitize-d30v */
 	&bfd_elf32_hppa_vec,
 	&bfd_elf32_i386_vec,
 	&bfd_elf32_i860_vec,
@@ -791,6 +801,9 @@ const bfd_target * const bfd_target_vector[] = {
 	&sunos_big_vec,
 	&aout0_big_vec,
 	&tekhex_vec,
+/* start-sanitize-tic80 */
+	&tic80coff_vec,
+/* end-sanitize-tic80 */
 	&we32kcoff_vec,
 	&versados_vec,
 	&z8kcoff_vec,
@@ -850,6 +863,27 @@ const bfd_target * const bfd_default_vector[] = {
    number of entries that the array could possibly need.  */
 const size_t _bfd_target_vector_entries = sizeof(bfd_target_vector)/sizeof(*bfd_target_vector);
 
+/* This array maps configuration triplets onto BFD vectors.  */
+
+struct targmatch
+{
+  /* The configuration triplet.  */
+  const char *triplet;
+  /* The BFD vector.  If this is NULL, then the vector is found by
+     searching forward for the next structure with a non NULL vector
+     field.  If this is UNSUPPORTED_TARGET, then the target is not
+     supported.  */
+  const bfd_target *vector;
+};
+
+#define UNSUPPORTED_TARGET ((const bfd_target *) 1)
+
+/* targmatch.h is built by Makefile out of config.bfd.  */
+static const struct targmatch bfd_target_match[] = {
+#include "targmatch.h"
+  { NULL, NULL }
+};
+
 /*
 FUNCTION
 	bfd_find_target
@@ -871,28 +905,57 @@ DESCRIPTION
 
 const bfd_target *
 bfd_find_target (target_name, abfd)
-     CONST char *target_name;
+     const char *target_name;
      bfd *abfd;
 {
   const bfd_target * const *target;
-  extern char *getenv ();
-  CONST char *targname = (target_name ? target_name : 
-			  (CONST char *) getenv ("GNUTARGET"));
+  const char *targname;
+  const struct targmatch *match;
+
+  if (target_name != NULL)
+    targname = target_name;
+  else
+    targname = getenv ("GNUTARGET");
 
   /* This is safe; the vector cannot be null */
-  if (targname == NULL || !strcmp (targname, "default")) {
-    abfd->target_defaulted = true;
-    return abfd->xvec = bfd_target_vector[0];
-  }
+  if (targname == NULL || strcmp (targname, "default") == 0)
+    {
+      abfd->target_defaulted = true;
+      abfd->xvec = bfd_target_vector[0];
+      return bfd_target_vector[0];
+    }
 
   abfd->target_defaulted = false;
 
-  for (target = &bfd_target_vector[0]; *target != NULL; target++) {
-    if (!strcmp (targname, (*target)->name))
-      return abfd->xvec = *target;
-  }
+  for (target = &bfd_target_vector[0]; *target != NULL; target++)
+    {
+      if (strcmp (targname, (*target)->name) == 0)
+	{
+	  abfd->xvec = *target;
+	  return *target;
+	}
+    }
+
+  /* If we couldn't match on the exact name, try matching on the
+     configuration triplet.  FIXME: We should run the triplet through
+     config.sub first, but that is hard.  */
+  for (match = &bfd_target_match[0]; match->triplet != NULL; match++)
+    {
+      if (fnmatch (match->triplet, targname, 0) == 0)
+	{
+	  while (match->vector == NULL)
+	    ++match;
+	  if (match->vector != UNSUPPORTED_TARGET)
+	    {
+	      abfd->xvec = match->vector;
+	      return match->vector;
+	    }
+	  break;
+	}
+    }
 
   bfd_set_error (bfd_error_invalid_target);
+
   return NULL;
 }
 

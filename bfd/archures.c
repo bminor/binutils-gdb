@@ -1,5 +1,5 @@
 /* BFD library support routines for architectures.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
    Hacked by John Gilmore and Steve Chamberlain of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -124,6 +124,9 @@ DESCRIPTION
 . {* start-sanitize-d10v *}
 .  bfd_arch_d10v,      {* Mitsubishi D10V *}
 . {* end-sanitize-d10v *}
+. {* start-sanitize-d30v *}
+.  bfd_arch_d30v,      {* Mitsubishi D30V *}
+. {* end-sanitize-d30v *}
 .  bfd_arch_z8k,       {* Zilog Z8000 *}
 .#define bfd_mach_z8001		1
 .#define bfd_mach_z8002		2
@@ -133,6 +136,9 @@ DESCRIPTION
 .  bfd_arch_arm,       {* Advanced Risc Machines ARM *}
 .  bfd_arch_ns32k,     {* National Semiconductors ns32000 *}
 .  bfd_arch_w65,       {* WDC 65816 *}
+. {* start-sanitize-tic80 *}
+.  bfd_arch_tic80,     {* TI TMS320c80 (MVP) *}
+. {* end-sanitize-tic80 *}
 . {* start-sanitize-v850 *}
 .  bfd_arch_v850,      {* NEC V850 *}
 . {* end-sanitize-v850 *}
@@ -195,6 +201,9 @@ extern const bfd_arch_info_type bfd_arm_arch;
 /* start-sanitize-d10v */
 extern const bfd_arch_info_type bfd_d10v_arch;
 /* end-sanitize-d10v */
+/* start-sanitize-d30v */
+extern const bfd_arch_info_type bfd_d30v_arch;
+/* end-sanitize-d30v */
 extern const bfd_arch_info_type bfd_h8300_arch;
 extern const bfd_arch_info_type bfd_h8500_arch;
 extern const bfd_arch_info_type bfd_hppa_arch;
@@ -239,6 +248,9 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
 /* start-sanitize-d10v */
   &bfd_d10v_arch,
 /* end-sanitize-d10v */
+/* start-sanitize-d30v */
+  &bfd_d30v_arch,
+/* end-sanitize-d30v */
   &bfd_h8300_arch,
   &bfd_h8500_arch,
   &bfd_hppa_arch,
@@ -257,6 +269,9 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
   &bfd_rs6000_arch,
   &bfd_sh_arch,
   &bfd_sparc_arch,
+/* start-sanitize-tic80 */
+  &bfd_tic80_arch,
+/* end-sanitize-tic80 */
   &bfd_vax_arch,
   &bfd_we32k_arch,
   &bfd_z8k_arch,

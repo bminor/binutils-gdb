@@ -636,6 +636,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_ALPHA_LITUSE",
   "BFD_RELOC_ALPHA_HINT",
   "BFD_RELOC_ALPHA_LINKAGE",
+  "BFD_RELOC_ALPHA_CODEADDR",
   "BFD_RELOC_MIPS_JMP",
   "BFD_RELOC_MIPS16_JMP",
   "BFD_RELOC_MIPS16_GPREL",
@@ -748,6 +749,16 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_D10V_18",
   "BFD_RELOC_D10V_18_PCREL",
 /* end-sanitize-d10v */
+
+/* start-sanitize-d30v */
+  "BFD_RELOC_D30V_6",
+  "BFD_RELOC_D30V_15",
+  "BFD_RELOC_D30V_15_PCREL",
+  "BFD_RELOC_D30V_21",
+  "BFD_RELOC_D30V_21_PCREL",
+  "BFD_RELOC_D30V_32",
+  "BFD_RELOC_D30V_32_PCREL",
+/* end-sanitize-d30v */
 
 /* start-sanitize-m32r */
   "BFD_RELOC_M32R_24",

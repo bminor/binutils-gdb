@@ -2269,6 +2269,46 @@ COMMENT
 {* end-sanitize-d10v *}
 
 COMMENT
+{* start-sanitize-d30v *}
+ENUM
+  BFD_RELOC_D30V_6
+ENUMDOC
+  Mitsubishi D30V relocs.
+  This is a 6-bit absolute reloc.
+ENUM
+  BFD_RELOC_D30V_15
+ENUMDOC
+  Mitsubishi D30V relocs.
+  This is a 12-bit absolute reloc with the 
+  right 3 bitsassumed to be 0.  
+ENUM
+  BFD_RELOC_D30V_15_PCREL
+ENUMDOC
+  Mitsubishi D30V relocs.
+  This is a 12-bit pc-relative reloc with 
+  the right 3 bits assumed to be 0.  
+ENUM
+  BFD_RELOC_D30V_21
+ENUMDOC
+  This is an 18-bit absolute reloc with 
+  the right 3 bits assumed to be 0.
+ENUM
+  BFD_RELOC_D30V_21_PCREL
+ENUMDOC
+  This is an 18-bit pc-relative reloc with 
+  the right 3 bits assumed to be 0.
+ENUM
+  BFD_RELOC_D30V_32
+ENUMDOC
+  This is a 32-bit absolute reloc.
+ENUM
+  BFD_RELOC_D30V_32_PCREL
+ENUMDOC
+  This is a 32-bit pc-relative reloc.
+COMMENT
+{* end-sanitize-d30v *}
+
+COMMENT
 {* start-sanitize-m32r *}
 ENUM
   BFD_RELOC_M32R_24
