@@ -1,3 +1,9 @@
+start-sanitize-r5900
+Fri Feb 14 13:56:51 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* mips-opc.c: bug fix, can't mark insns INSN_5900 and INSN_ISA4
+
+end-sanitize-r5900
 Thu Feb 13 21:56:51 1997  Klaus Kaempf  <kkaempf@progis.de>
 
 	* makefile.vms: Remove 8 bit characters.  Update to latest
