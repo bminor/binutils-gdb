@@ -1,3 +1,13 @@
+Tue Feb 17 17:27:30 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen-sim.h (SEMANTIC_CACHE_FN): Delete.
+	(SEMANTIC_FN): Rewrite declaration.
+	(DECODE): Update type of semantic_fast member.
+	({EX,SEM}_FN_NAME): Have only one version.
+	* cgen.sh: Support building cpu.c.
+	* sim-base.h (sim_state_base): Delete conditionals surrounding
+	member scache_size.
+
 Tue Feb 10 18:31:49 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-load.c (sim_load_file): Print LMA/VMA according to value
