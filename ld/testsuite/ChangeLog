@@ -1,3 +1,28 @@
+Mon Oct 20 14:36:39 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-srec/sr3.cc: Add definitions for terminate, __terminate, and
+ 	__throw, since the current g++ expects them to be defined.
+
+Fri Oct  3 12:24:03 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-elfvers/vers.exp (objdump_emptyverstuff): Accept the output
+	file if the string libc appears in it.
+	(objdump_versionstuff): Accept unexpected lines in the output
+	file.  Compare lines using string match.
+	* ld-elfvers/vers6.ver: Permit any value in the vna_other field.
+
+Tue Aug 12 16:01:22 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-scripts/crossref.exp: Correct string quoting.
+
+Sat Aug  9 00:56:03 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/default.exp: Change ld, as, nm and strip from .new to
+	-new.  Load ld-lib.exp rather than ld.exp.
+	* ld-bootstrap/bootstrap.exp: Use ld-new rather than ld.new.
+	* lib/ld-lib.exp: Rename from lib/ld.exp, for the benefit of
+	DejaGnu changes.
+
 Thu Jun 26 12:07:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-elfvers/vers.exp: Use egrep rather than grep when looking for

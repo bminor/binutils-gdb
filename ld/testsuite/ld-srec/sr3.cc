@@ -26,6 +26,14 @@ main ()
   return 0;
 }
 
+void
+terminate(void)
+{
+  /* This recursive call prevents a compiler warning that the noreturn
+     function terminate actually does return.  */
+  terminate ();
+}
+
 extern "C" {
 int
 __main ()
@@ -42,15 +50,13 @@ __builtin_new ()
 {
 }
 
-/* V_SPILL and V_FILL are used by a29k-amd-udi.  */
-
-int
-V_SPILL ()
+void
+__throw ()
 {
 }
 
-int
-V_FILL ()
+void
+__terminate ()
 {
 }
 }
