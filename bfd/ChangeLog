@@ -1,3 +1,9 @@
+Wed Jan 31 16:23:57 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elflink.c (_bfd_elf_create_linker_section): If the symbol
+	attached to the section has already been created as an undefined
+	symbol, treat it as if it hasn't been created yet.
+
 Wed Jan 31 16:16:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_bfd_final_link): Don't output initial dummy
