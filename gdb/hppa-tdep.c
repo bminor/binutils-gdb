@@ -540,7 +540,8 @@ frame_chain_valid (chain, thisframe)
      FRAME_ADDR chain;
      FRAME thisframe;
 {
-  struct minimal_symbol *msym;
+  struct minimal_symbol *msym_us;
+  struct minimal_symbol *msym_start;
   struct unwind_table_entry *u;
 
   if (!chain)
@@ -548,9 +549,17 @@ frame_chain_valid (chain, thisframe)
 
   u = find_unwind_entry (thisframe->pc);
 
-  msym = lookup_minimal_symbol_by_pc (FRAME_SAVED_PC (thisframe));
-  if (msym
-      && (strcmp (SYMBOL_NAME (msym), "_start") == 0))
+  /* We can't just check that the same of msym_us is "_start", because
+     someone idiotically decided that they were going to make a Ltext_end
+     symbol with the same address.  This Ltext_end symbol is totally
+     indistinguishable (as nearly as I can tell) from the symbol for a function
+     which is (legitimately, since it is in the user's namespace)
+     named Ltext_end, so we can't just ignore it.  */
+  msym_us = lookup_minimal_symbol_by_pc (FRAME_SAVED_PC (thisframe));
+  msym_start = lookup_minimal_symbol ("_start", NULL);
+  if (msym_us
+      && msym_start
+      && SYMBOL_VALUE_ADDRESS (msym_us) == SYMBOL_VALUE_ADDRESS (msym_start))
     return 0;
 
   if (u == NULL)

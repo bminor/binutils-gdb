@@ -157,7 +157,10 @@ pa_symtab_read (abfd, addr, objfile)
 	    }
 	  break;
 
+#if 0
+	  /* SS_GLOBAL and SS_LOCAL are two names for the same thing (!).  */
 	case SS_GLOBAL:
+#endif
 	case SS_LOCAL:
 	  switch (bufp->symbol_type)
 	    {
@@ -167,19 +170,18 @@ pa_symtab_read (abfd, addr, objfile)
 
 	    case ST_CODE:
 	      symname = bufp->name.n_strx + stringtab;
+	      ms_type = mst_file_text;
+	      bufp->symbol_value &= ~0x3; /* clear out permission bits */
+
+	    check_strange_names:
 	      /* GAS leaves symbols with the prefixes "LS$", "LBB$",
 		 and "LBE$" in .o files after assembling.  And thus
 		 they appear in the final executable.  This can
 		 cause problems if these special symbols have the
-		 same value as real symbols.  So ignore them.  Is this
-		 meant as a feature, or is it just a GAS bug?  */
+		 same value as real symbols.  So ignore them.  Also "LC$".  */
 	      if (*symname == 'L'
-		  && (symname[2] == '$' && symname[1] == 'S'
-		      || (symname[3] == '$' && symname[1] == 'B'
-			  && (symname[2] == 'B' || symname[2] == 'E'))))
+		  && (symname[2] == '$' || symname[3] == '$'))
 		continue;
-	      ms_type = mst_file_text;
-	      bufp->symbol_value &= ~0x3; /* clear out permission bits */
 	      break;
 
 	    case ST_PRI_PROG:
@@ -190,13 +192,17 @@ pa_symtab_read (abfd, addr, objfile)
 	      ms_type = mst_file_text;
 	      bufp->symbol_value &= ~0x3; /* clear out permission bits */
 	      break;
+
 	    case ST_DATA:
 	      symname = bufp->name.n_strx + stringtab;
 	      ms_type = mst_file_data;
-	      break;
+	      goto check_strange_names;
+
 	    default:
 	      continue;
 	    }
+	  break;
+
 	default:
 	  continue;
 	}
