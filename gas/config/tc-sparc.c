@@ -202,7 +202,7 @@ s_reserve (ignore)
   if (strncmp (input_line_pointer, ",\"bss\"", 6) != 0
       && strncmp (input_line_pointer, ",\".bss\"", 7) != 0)
     {
-      as_bad ("bad .reserve segment: `%s'", input_line_pointer);
+      as_bad ("bad .reserve segment -- expected BSS segment", input_line_pointer);
       return;
     }
 
@@ -2110,7 +2110,13 @@ tc_gen_reloc (section, fixp)
       abort ();
     }
   reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
-  assert (reloc->howto != 0);
+  if (reloc->howto == 0)
+    {
+      as_bad_where (fixp->fx_file, fixp->fx_line,
+		    "internal error: can't export reloc type %d",
+		    fixp->fx_r_type);
+      return 0;
+    }
   assert (!fixp->fx_pcrel == !reloc->howto->pc_relative);
 
   /* @@ Why fx_addnumber sometimes and fx_offset other times?  */
