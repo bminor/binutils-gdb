@@ -1,5 +1,5 @@
 /* Opcode table for the ARC.
-   Copyright 1994 Free Software Foundation, Inc.
+   Copyright 1994, 1995 Free Software Foundation, Inc.
    Contributed by Doug Evans (dje@cygnus.com).
    
    This program is free software; you can redistribute it and/or modify
@@ -15,6 +15,9 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/* The ARC may eventually be bi-endian.
+   Keep this file byte order independent.  */
 
 #include "ansidecl.h"
 #include "opcode/arc.h"
@@ -43,6 +46,7 @@ INSERT_FN (insert_multshift);
 EXTRACT_FN (extract_reg);
 EXTRACT_FN (extract_flag);
 EXTRACT_FN (extract_cond);
+EXTRACT_FN (extract_reladdr);
 EXTRACT_FN (extract_unopmacro);
 EXTRACT_FN (extract_multshift);
 
@@ -69,14 +73,15 @@ EXTRACT_FN (extract_multshift);
    'y'	SIZE22		size field in st c,[b,shimm]
    'x'	SIGN0		sign extend field ld a,[b,c]
    'X'	SIGN9		sign extend field ld a,[b,shimm]
-   'u'	ADDRESS3	update field in ld a,[b,c]
-   'v'	ADDRESS12	update field in ld a,[b,shimm]
-   'w'	ADDRESS24	update field in st c,[b,shimm]
+   'w'	ADDRESS3	write-back field in ld a,[b,c]
+   'W'	ADDRESS12	write-back field in ld a,[b,shimm]
+   'v'	ADDRESS24	write-back field in st c,[b,shimm]
    'D'	CACHEBYPASS5	direct to memory enable (cache bypass) in ld a,[b,c]
    'e'	CACHEBYPASS14	direct to memory enable (cache bypass) in ld a,[b,shimm]
    'E'	CACHEBYPASS26	direct to memory enable (cache bypass) in st c,[b,shimm]
+   'u'	UNSIGNED	unsigned multiply
+   's'	SATURATION	saturation limit in audio arc mac insn
    'U'	UNOPMACRO	fake operand to copy REGB to REGC for unop macros
-   'M'	MULTSHIFT	fake operand to check if target has multiply/shifter
 
    The following modifiers may appear between the % and char (eg: %.f):
 
@@ -149,7 +154,7 @@ const struct arc_operand arc_operands[] =
 
 /* branch address b, bl, and lp insns */
 #define BRANCH (FORCELIMM + 1)
-  { 'B', 20, 7, ARC_OPERAND_RELATIVE + ARC_OPERAND_SIGNED, insert_reladdr },
+  { 'B', 20, 7, ARC_OPERAND_RELATIVE + ARC_OPERAND_SIGNED, insert_reladdr, extract_reladdr },
 
 /* size field, stored in bit 1,2 */
 #define SIZE1 (BRANCH + 1)
@@ -173,39 +178,42 @@ const struct arc_operand arc_operands[] =
 
 /* address write back, stored in bit 3 */
 #define ADDRESS3 (SIGN9 + 1)
-  { 'u', 1, 3, ARC_OPERAND_SUFFIX },
+  { 'w', 1, 3, ARC_OPERAND_SUFFIX },
 
 /* address write back, stored in bit 12 */
 #define ADDRESS12 (ADDRESS3 + 1)
-  { 'v', 1, 12, ARC_OPERAND_SUFFIX },
+  { 'W', 1, 12, ARC_OPERAND_SUFFIX },
 
 /* address write back, stored in bit 24 */
 #define ADDRESS24 (ADDRESS12 + 1)
-  { 'w', 1, 24, ARC_OPERAND_SUFFIX },
+  { 'v', 1, 24, ARC_OPERAND_SUFFIX },
 
-/* address write back, stored in bit 3 */
+/* cache bypass, stored in bit 5 */
 #define CACHEBYPASS5 (ADDRESS24 + 1)
   { 'D', 1, 5, ARC_OPERAND_SUFFIX },
 
-/* address write back, stored in bit 12 */
+/* cache bypass, stored in bit 14 */
 #define CACHEBYPASS14 (CACHEBYPASS5 + 1)
   { 'e', 1, 14, ARC_OPERAND_SUFFIX },
 
-/* address write back, stored in bit 24 */
+/* cache bypass, stored in bit 26 */
 #define CACHEBYPASS26 (CACHEBYPASS14 + 1)
   { 'E', 1, 26, ARC_OPERAND_SUFFIX },
 
+/* unsigned multiply */
+#define UNSIGNED (CACHEBYPASS26 + 1)
+  { 'u', 1, 27, ARC_OPERAND_SUFFIX },
+
+/* unsigned multiply */
+#define SATURATION (UNSIGNED + 1)
+  { 's', 1, 28, ARC_OPERAND_SUFFIX },
+
 /* unop macro, used to copy REGB to REGC */
-#define UNOPMACRO (CACHEBYPASS26 + 1)
+#define UNOPMACRO (SATURATION + 1)
   { 'U', 6, ARC_SHIFT_REGC, ARC_OPERAND_FAKE, insert_unopmacro, extract_unopmacro },
 
-/* multiply/shifter detector */
-/* ??? Using ARC_OPERAND_FAKE this way is probably taking things too far.  */
-#define MULTSHIFT (UNOPMACRO + 1)
-  { 'M', 0, 0, ARC_OPERAND_FAKE, insert_multshift, extract_multshift },
-
 /* '.' modifier ('.' required).  */
-#define MODDOT (MULTSHIFT + 1)
+#define MODDOT (UNOPMACRO + 1)
   { '.', 1, 0, ARC_MOD_DOT },
 
 /* Dummy 'r' modifier for the register table.
@@ -255,18 +263,22 @@ unsigned char arc_operand_map[256];
    together.  */
 
 const struct arc_opcode arc_opcodes[] = {
+  { "mac%u%.s%.q%.f %a,%b,%c%F%S%L",	I(-4),		I(24),		ARC_MACH_AUDIO },
   /* Note that "mov" is really an "and".  */
   { "mov%.q%.f %a,%b%F%S%L%U",		I(-1),		I(12) },
-  { "mul%M%.q%.f %a,%b,%c%F%S%L",	I(-1),		I(20) },
-  { "mulu%M%.q%.f %a,%b,%c%F%S%L",	I(-1),		I(21) },
+  { "mul%u%.q%.f %a,%b,%c%F%S%L",	I(-2),		I(28),		ARC_MACH_AUDIO },
+  /* ??? This insn allows an optional "0," preceding the args.  */
+  /* We can't use %u here because it's not a suffix (the "64" is in the way).  */
+  { "mul64%.q%.f %b,%c%F%S%L",		I(-1)+A(-1),	I(20)+A(-1),	ARC_MACH_HOST+ARC_MACH_GRAPHICS },
+  { "mulu64%.q%.f %b,%c%F%S%L",		I(-1)+A(-1),	I(21)+A(-1),	ARC_MACH_HOST+ARC_MACH_GRAPHICS },
 
   { "adc%.q%.f %a,%b,%c%F%S%L",		I(-1),		I(9) },
   { "add%.q%.f %a,%b,%c%F%S%L",		I(-1),		I(8) },
   { "and%.q%.f %a,%b,%c%F%S%L",		I(-1),		I(12) },
-  { "asl%M%.q%.f %a,%b,%c%F%S%L",	I(-1),		I(16) },
+  { "asl%.q%.f %a,%b,%c%F%S%L",		I(-1),		I(16),		ARC_MACH_HOST+ARC_MACH_GRAPHICS },
   /* Note that "asl" is really an "add".  */
   { "asl%.q%.f %a,%b%F%S%L%U",		I(-1),		I(8) },
-  { "asr%M%.q%.f %a,%b,%c%F%S%L",	I(-1),		I(18) },
+  { "asr%.q%.f %a,%b,%c%F%S%L",		I(-1),		I(18),		ARC_MACH_HOST+ARC_MACH_GRAPHICS },
   { "asr%.q%.f %a,%b%F%S%L",		I(-1)+C(-1),	I(3)+C(1) },
   { "bic%.q%.f %a,%b,%c%F%S%L",		I(-1),		I(14) },
   { "b%q%.n %B",			I(-1),		I(4) },
@@ -285,14 +297,22 @@ const struct arc_opcode arc_opcodes[] = {
   { "lr %a,[%Ab]%S%L",			I(-1)+C(-1),	I(1)+C(0x10) },
   /* Note that "lsl" is really an "add".  */
   { "lsl%.q%.f %a,%b%F%S%L%U",		I(-1),		I(8) },
-  { "lsr%M%.q%.f %a,%b,%c%F%S%L",	I(-1),		I(17) },
+  { "lsr%.q%.f %a,%b,%c%F%S%L",		I(-1),		I(17),		ARC_MACH_HOST+ARC_MACH_GRAPHICS },
   { "lsr%.q%.f %a,%b%F%S%L",		I(-1)+C(-1),	I(3)+C(2) },
   /* Note that "nop" is really an "xor".  */
   { "nop",				0xffffffff,	0x7fffffff },
   { "or%.q%.f %a,%b,%c%F%S%L",		I(-1),		I(13) },
+  /* ??? The %a here should be %p or something.  */
+  { "padc%.q%.f %a,%b,%c%F%S%L",	I(-1),		I(25),		ARC_MACH_GRAPHICS },
+  { "padd%.q%.f %a,%b,%c%F%S%L",	I(-1),		I(24),		ARC_MACH_GRAPHICS },
+  /* Note that "pmov" is really a "pand".  */
+  { "pmov%.q%.f %a,%b%F%S%L%U",		I(-1),		I(28),		ARC_MACH_GRAPHICS },
+  { "pand%.q%.f %a,%b,%c%F%S%L",	I(-1),		I(28),		ARC_MACH_GRAPHICS },
+  { "psbc%.q%.f %a,%b,%c%F%S%L",	I(-1),		I(27),		ARC_MACH_GRAPHICS },
+  { "psub%.q%.f %a,%b,%c%F%S%L",	I(-1),		I(26),		ARC_MACH_GRAPHICS },
   /* Note that "rlc" is really an "adc".  */
   { "rlc%.q%.f %a,%b%F%S%L%U",		I(-1),		I(9) },
-  { "ror%M%.q%.f %a,%b,%c%F%S%L",	I(-1),		I(19) },
+  { "ror%.q%.f %a,%b,%c%F%S%L",		I(-1),		I(19),		ARC_MACH_HOST+ARC_MACH_GRAPHICS },
   { "ror%.q%.f %a,%b%F%S%L",		I(-1)+C(-1),	I(3)+C(3) },
   { "rrc%.q%.f %a,%b%F%S%L",		I(-1)+C(-1),	I(3)+C(4) },
   { "sbc%.q%.f %a,%b,%c%F%S%L",		I(-1),		I(11) },
@@ -303,6 +323,7 @@ const struct arc_opcode arc_opcodes[] = {
   { "st%y%.w%.E %0%c,[%b]%L",		I(-1)+R(-1,25,3)+R(-1,21,1)+R(-1,0,511),	I(2)+R(0,25,3)+R(0,21,1)+R(0,0,511) },
   { "st%y%.w%.E %c,[%b,%d]%S%L",	I(-1)+R(-1,25,3)+R(-1,21,1),			I(2)+R(0,25,3)+R(0,21,1) },
   { "sub%.q%.f %a,%b,%c%F%S%L",		I(-1),		I(10) },
+  { "swap%.q%.f %a,%b%F%S%L",		I(-1)+C(-1),	I(3)+C(9),	ARC_MACH_AUDIO },
   { "xor%.q%.f %a,%b,%c%F%S%L",		I(-1),		I(15) }
 };
 int arc_opcodes_count = sizeof (arc_opcodes) / sizeof (arc_opcodes[0]);
@@ -334,12 +355,82 @@ const struct arc_operand_value arc_reg_names[] =
   { "r27", 27, REG }, { "r28", 28, REG },
 
   /* Standard auxiliary registers.  */
-  { "status", 0, AUXREG },
+  { "status",	0, AUXREG },
   { "semaphore", 1, AUXREG },
-  { "lp_start", 2, AUXREG },
-  { "lp_end", 3, AUXREG },
-  { "identity", 4, AUXREG },
-  { "debug", 5, AUXREG },
+  { "lp_start",	2, AUXREG },
+  { "lp_end",	3, AUXREG },
+  { "identity",	4, AUXREG },
+  { "debug",	5, AUXREG },
+
+  /* Host ARC Extensions.  */
+  { "mlo",	57, REG, ARC_MACH_HOST },
+  { "mmid",	58, REG, ARC_MACH_HOST },
+  { "mhi",	59, REG, ARC_MACH_HOST },
+  { "ivic",	0x10, AUXREG, ARC_MACH_HOST },
+  { "ivdc",	0x11, AUXREG, ARC_MACH_HOST },
+  { "ivdcn",	0x12, AUXREG, ARC_MACH_HOST },
+  { "flushd",	0x13, AUXREG, ARC_MACH_HOST },
+  { "saha",	0x14, AUXREG, ARC_MACH_HOST },
+  { "gahd",	0x15, AUXREG, ARC_MACH_HOST },
+  { "aahd",	0x16, AUXREG, ARC_MACH_HOST },
+  { "rrcr",	0x17, AUXREG, ARC_MACH_HOST },
+  { "rpcr",	0x18, AUXREG, ARC_MACH_HOST },
+  { "flushdn",	0x19, AUXREG, ARC_MACH_HOST },
+  { "dbgad1",	0x1a, AUXREG, ARC_MACH_HOST },
+  { "dbgad2",	0x1b, AUXREG, ARC_MACH_HOST },
+  { "dbgmde",	0x1c, AUXREG, ARC_MACH_HOST },
+  { "dbgstat",	0x1d, AUXREG, ARC_MACH_HOST },
+  { "wag",	0x1e, AUXREG, ARC_MACH_HOST },
+  { "mulhi",	0x1f, AUXREG, ARC_MACH_HOST },
+  { "intwide",	0x20, AUXREG, ARC_MACH_HOST },
+  { "intgen",	0x21, AUXREG, ARC_MACH_HOST },
+  { "rfsh_n",	0x22, AUXREG, ARC_MACH_HOST },
+
+  /* Graphics ARC Extensions.  */
+  { "mlo",	57, REG, ARC_MACH_GRAPHICS },
+  { "mmid",	58, REG, ARC_MACH_GRAPHICS },
+  { "mhi",	59, REG, ARC_MACH_GRAPHICS },
+  { "ivic",	0x10, AUXREG, ARC_MACH_GRAPHICS },
+  { "wag",	0x1e, AUXREG, ARC_MACH_GRAPHICS },
+  { "mulhi",	0x1f, AUXREG, ARC_MACH_GRAPHICS },
+  { "intwide",	0x20, AUXREG, ARC_MACH_GRAPHICS },
+  { "intgen",	0x21, AUXREG, ARC_MACH_GRAPHICS },
+  { "pix",	0x100, AUXREG, ARC_MACH_GRAPHICS },
+  { "scratch",	0x120, AUXREG, ARC_MACH_GRAPHICS },
+
+  /* Audio ARC Extensions.  */
+  { "macmode",	39, REG, ARC_MACH_AUDIO },
+  { "rs1",	40, REG, ARC_MACH_AUDIO },
+  { "rs1n",	41, REG, ARC_MACH_AUDIO },
+  { "rs1start",	42, REG, ARC_MACH_AUDIO },
+  { "rs1size",	43, REG, ARC_MACH_AUDIO },
+  { "rs1delta",	44, REG, ARC_MACH_AUDIO },
+  { "rs1pos",	45, REG, ARC_MACH_AUDIO },
+  { "rd1",	46, REG, ARC_MACH_AUDIO },
+  { "rd1n",	47, REG, ARC_MACH_AUDIO },
+  { "rd1d",	48, REG, ARC_MACH_AUDIO },
+  { "rd1pos",	49, REG, ARC_MACH_AUDIO },
+  { "rs2",	50, REG, ARC_MACH_AUDIO },
+  { "rs2n",	51, REG, ARC_MACH_AUDIO },
+  { "rs2start",	52, REG, ARC_MACH_AUDIO },
+  { "rs2size",	53, REG, ARC_MACH_AUDIO },
+  { "rs2delta",	54, REG, ARC_MACH_AUDIO },
+  { "rs2pos",	55, REG, ARC_MACH_AUDIO },
+  { "rd2",	56, REG, ARC_MACH_AUDIO },
+  { "rd2n",	57, REG, ARC_MACH_AUDIO },
+  { "rd2d",	58, REG, ARC_MACH_AUDIO },
+  { "rd2pos",	59, REG, ARC_MACH_AUDIO },
+  { "ivic",	0x10, AUXREG, ARC_MACH_AUDIO },
+  { "wag",	0x1e, AUXREG, ARC_MACH_AUDIO },
+  { "intwide",	0x20, AUXREG, ARC_MACH_AUDIO },
+  { "intgen",	0x21, AUXREG, ARC_MACH_AUDIO },
+  { "bm_sstart", 0x30, AUXREG, ARC_MACH_AUDIO },
+  { "bm_length", 0x31, AUXREG, ARC_MACH_AUDIO },
+  { "bm_rstart", 0x32, AUXREG, ARC_MACH_AUDIO },
+  { "bm_go",	0x33, AUXREG, ARC_MACH_AUDIO },
+  { "xtp_newval", 0x40, AUXREG, ARC_MACH_AUDIO },
+  { "sram",	0x400, AUXREG, ARC_MACH_AUDIO },
+  { "reg_file",	0x800, AUXREG, ARC_MACH_AUDIO },
 };
 int arc_reg_names_count = sizeof (arc_reg_names) / sizeof (arc_reg_names[0]);
 
@@ -399,6 +490,13 @@ const struct arc_operand_value arc_suffixes[] =
   { "di", 1, CACHEBYPASS5 },
   { "di", 1, CACHEBYPASS14 },
   { "di", 1, CACHEBYPASS26 },
+
+  /* Audio ARC Extensions.  */
+  /* ??? The values here are guesses.  */
+  { "ss", 16, COND, ARC_MACH_AUDIO },
+  { "sc", 17, COND, ARC_MACH_AUDIO },
+  { "mh", 18, COND, ARC_MACH_AUDIO },
+  { "ml", 19, COND, ARC_MACH_AUDIO },
 };
 int arc_suffixes_count = sizeof (arc_suffixes) / sizeof (arc_suffixes[0]);
 
@@ -410,20 +508,48 @@ static int cpu_type;
 /* Initialize any tables that need it.
    Must be called once at start up (or when first needed).
 
-   CPU is a set of bits that say what version of the cpu we have.  */
+   FLAGS is a set of bits that say what version of the cpu we have.  */
 
 void
-arc_opcode_init_tables (cpu)
-     int cpu;
+arc_opcode_init_tables (flags)
+     int flags;
 {
   register int i,n;
+
+  cpu_type = flags;
 
   memset (arc_operand_map, 0, sizeof (arc_operand_map));
   n = sizeof (arc_operands) / sizeof (arc_operands[0]);
   for (i = 0; i < n; i++)
     arc_operand_map[arc_operands[i].fmt] = i;
+}
 
-  cpu_type = cpu;
+/* Return non-zero if OPCODE is supported on the specified cpu.
+   Cpu selection is made when calling `arc_opcode_init_tables'.  */
+
+int
+arc_opcode_supported (opcode)
+     const struct arc_opcode *opcode;
+{
+  if (ARC_OPCODE_MACH (opcode->flags) == 0)
+    return 1;
+  if (ARC_OPCODE_MACH (opcode->flags) & ARC_HAVE_MACH (cpu_type))
+    return 1;
+  return 0;
+}
+
+/* Return non-zero if OPVAL is supported on the specified cpu.
+   Cpu selection is made when calling `arc_opcode_init_tables'.  */
+
+int
+arc_opval_supported (opval)
+     const struct arc_operand_value *opval;
+{
+  if (ARC_OPVAL_MACH (opval->flags) == 0)
+    return 1;
+  if (ARC_OPVAL_MACH (opval->flags) & ARC_HAVE_MACH (cpu_type))
+    return 1;
+  return 0;
 }
 
 /* Nonzero if we've seen an 'f' suffix (in certain insns).  */
@@ -725,25 +851,9 @@ insert_reladdr (insn, operand, mods, reg, value, errmsg)
      long value;
      const char **errmsg;
 {
-  /* FIXME: Addresses are stored * 4.  Do we want to handle that here?  */
-  insn |= (value & ((1 << operand->bits) - 1)) << operand->shift;
-  return insn;
-}
-
-/* Fake operand to disallow the multiply and variable shift insns if the cpu
-   doesn't have them.  */
-
-static arc_insn
-insert_multshift (insn, operand, mods, reg, value, errmsg)
-     arc_insn insn;
-     const struct arc_operand *operand;
-     int mods;
-     const struct arc_operand_value *reg;
-     long value;
-     const char **errmsg;
-{
-  if (!(cpu_type & ARC_HAVE_MULT_SHIFT))
-    *errmsg = "cpu doesn't support this insn";
+  if (value & 3)
+    *errmsg = "branch address not on 4 byte boundary";
+  insn |= ((value >> 2) & ((1 << operand->bits) - 1)) << operand->shift;
   return insn;
 }
 
@@ -897,6 +1007,27 @@ extract_cond (insn, operand, mods, opval, invalid)
   return cond;
 }
 
+/* Extract a branch address.
+   We return the value as a real address (not right shifted by 2).  */
+
+static long
+extract_reladdr (insn, operand, mods, opval, invalid)
+     arc_insn *insn;
+     const struct arc_operand *operand;
+     int mods;
+     const struct arc_operand_value **opval;
+     int *invalid;
+{
+  long addr;
+
+  addr = (insn[0] >> operand->shift) & ((1 << operand->bits) - 1);
+  if ((operand->flags & ARC_OPERAND_SIGNED)
+      && (addr & (1 << (operand->bits - 1))))
+    addr -= 1 << operand->bits;
+
+  return addr << 2;
+}
+
 /* The only thing this does is set the `invalid' flag if B != C.
    This is needed because the "mov" macro appears before it's real insn "and"
    and we don't want the disassembler to confuse them.  */
@@ -917,22 +1048,6 @@ extract_unopmacro (insn, operand, mods, opval, invalid)
     if (invalid)
       *invalid = 1;
 
-  return 0;
-}
-
-/* Don't recognize the multiply and variable shift insns if the cpu doesn't
-   have them.
-
-   ??? Actually, we probably should anyway.  */
-
-static long
-extract_multshift (insn, operand, mods, opval, invalid)
-     arc_insn *insn;
-     const struct arc_operand *operand;
-     int mods;
-     const struct arc_operand_value **opval;
-     int *invalid;
-{
   return 0;
 }
 
