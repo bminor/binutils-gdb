@@ -3,6 +3,11 @@
 	* aclocal.m4 (libiberty_AC_FUNC_STRNCMP): Use anon mmap as 2nd try.
 	* configure: Regenerated.
 
+2001-12-24  Douglas B. Rupp  <rupp@gnat.com>
+
+	* configure.in (uintptr_t): Use AC_CHECK_TYPE.
+	* configure: Regenerated.
+
 2001-12-12  Craig Rodrigues  <rodrigc@gcc.gnu.org>
 
 	PR other/2719
@@ -28,7 +33,7 @@ Tue Dec 11 07:08:57 2001  Douglas B. Rupp  <rupp@gnat.com>
 	then AC_REPLACE_FUNCS(_doprnt).
 
 2001-11-26  DJ Delorie  <dj@redhat.com>
-            Daniel Jacobowitz  <drow@mvista.com>
+	    Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (stamp-h): Depend on Makefile for proper
 	serialization.
