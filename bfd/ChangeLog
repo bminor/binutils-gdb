@@ -1,3 +1,10 @@
+1999-06-03  Ian Lance Taylor  <ian@zembu.com>
+
+	* bfd-in.h (bfd_elf32_arm_allocate_interworking_sections): Correct
+	prototype.
+	(bfd_elf32_arm_process_before_allocation): Likewise.
+	* bfd-in2.h: Rebuild.
+
 1999-06-03  David Mosberger  <davidm@hpl.hp.com>
 
 	* dwarf2.c (struct line_info): Add member END_SEQUENCE to keep

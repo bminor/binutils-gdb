@@ -725,10 +725,10 @@ extern boolean bfd_arm_get_bfd_for_interworking
 
 /* ELF ARM Interworking support.  Called from linker.  */
   extern boolean bfd_elf32_arm_allocate_interworking_sections
-    PARAMS ((struct bfd_link_info *, int));
+    PARAMS ((struct bfd_link_info *));
  
   extern boolean bfd_elf32_arm_process_before_allocation
-    PARAMS ((bfd *, struct bfd_link_info *));
+    PARAMS ((bfd *, struct bfd_link_info *, int));
  
   extern boolean bfd_elf32_arm_get_bfd_for_interworking
     PARAMS ((bfd *, struct bfd_link_info *));
