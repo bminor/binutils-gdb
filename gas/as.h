@@ -91,6 +91,12 @@
 /* COMMON now defined */
 #define DEBUG /* temporary */
 
+#ifdef BROKEN_ASSERT
+/* turn off all assertion checks */
+#undef DEBUG
+#define NDEBUG
+#endif
+
 #ifdef DEBUG
 #undef NDEBUG
 #ifndef know
@@ -141,6 +147,7 @@
 
 
 #ifdef MANY_SEGMENTS
+#include "bfd.h"
 #define N_SEGMENTS 10
 #define SEG_NORMAL(x) ((x) >= SEG_E0 && (x) <= SEG_E9)
 #define SEG_LIST SEG_E0,SEG_E1,SEG_E2,SEG_E3,SEG_E4,SEG_E5,SEG_E6,SEG_E7,SEG_E8,SEG_E9

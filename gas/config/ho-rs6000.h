@@ -17,6 +17,18 @@
    along with GAS; see the file COPYING.  If not, write to
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define M_RS6000 1
+/* M_RS6000 is used in aout_gnu.h as an enumerator.
+   Nothing tests for the macro being defined, so don't bother defining it.  */
+/* #define M_RS6000 1 */
+
+/* The assert.h macros assume that cpp DTRT when substituting for
+   a macro argument inside a string, including requoting.  The non-STDC
+   cpp on the rs6k botches the requoting.  (Many non-STDC cpps do, but
+   the assert.h here relies on it working.)  */
+#ifndef __STDC__
+#define BROKEN_ASSERT
+#endif
+
+extern void free ();
 
 /* end of ho-rs6000.h */
