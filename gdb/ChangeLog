@@ -1,3 +1,7 @@
+Tue Sep 10 23:08:29 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* Makefile.in (VERSION):  Update to 4.0.3.
+
 Tue Sep 10 09:19:29 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* core.c (core_file_command):  Print frame at coredump with
