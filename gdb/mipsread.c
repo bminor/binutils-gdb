@@ -817,8 +817,14 @@ parse_symbol (sh, ax, ext_sh, bigend)
       add_symbol (s, top_stack->cur_block);
       break;
 
+    case stStaticProc:
+      /* I believe this is used only for file-local functions.
+	 The comment in symconst.h ("load time only static procs") isn't
+	 particularly clear on this point.  */
+      prim_record_minimal_symbol (name, sh->value, mst_file_text);
+      /* FALLTHROUGH */
+
     case stProc:		/* Procedure, usually goes into global block */
-    case stStaticProc:		/* Static procedure, goes into current block */
       s = new_symbol (name);
       SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
       SYMBOL_CLASS (s) = LOC_BLOCK;
@@ -922,11 +928,12 @@ parse_symbol (sh, ax, ext_sh, bigend)
 
 	    ecoff_swap_sym_in (cur_bfd, ext_tsym, &tsym);
 
-	    if (tsym.st == stEnd)
-	      break;
-
-	    if (tsym.st == stMember)
+	    switch (tsym.st)
 	      {
+	      case stEnd:
+		goto end_of_fields;
+
+	      case stMember:
 		if (nfields == 0 && type_code == TYPE_CODE_UNDEF)
 		  /* If the type of the member is Nil (or Void),
 		     without qualifiers, assume the tag is an
@@ -945,29 +952,47 @@ parse_symbol (sh, ax, ext_sh, bigend)
 		nfields++;
 		if (tsym.value > max_value)
 		  max_value = tsym.value;
+		break;
+
+	      case stTypedef:
+	      case stConstant:
+	      case stStaticProc:
+		complain (&block_member_complaint, tsym.st);
+		/* These are said to show up in cfront-generated programs.
+		   Apparently processing them like the following prevents
+		   core dumps.  */
+		/* FALLTHROUGH */
+
+	      case stBlock:
+	      case stUnion:
+	      case stEnum:
+	      case stStruct:
+	      case stParsed:
+		{
+#if 0
+		  /* This is a no-op; is it trying to tell us something
+		     we should be checking?  */
+		  if (tsym.sc == scVariant);	/*UNIMPLEMENTED*/
+#endif
+		  if (tsym.index != 0)
+		    {
+		      /* This is something like a struct within a
+			 struct.  Skip over the fields of the inner
+			 struct.  The -1 is because the for loop will
+			 increment ext_tsym.  */
+		      ext_tsym = (ecoff_data (cur_bfd)->external_sym
+				  + cur_fdr->isymBase
+				  + tsym.index
+				  - 1);
+		    }
+		}
+		break;
+
+	      default:
+		complain (&block_member_complaint, tsym.st);
 	      }
-	    else if (tsym.st == stBlock
-		     || tsym.st == stUnion
-		     || tsym.st == stEnum
-		     || tsym.st == stStruct
-		     || tsym.st == stParsed)
-	      {
-		if (tsym.sc == scVariant);	/*UNIMPLEMENTED*/
-		if (tsym.index != 0)
-		  {
-		    /* This is something like a struct within a
-		       struct.  Skip over the fields of the inner
-		       struct.  The -1 is because the for loop will
-		       increment ext_tsym.  */
-		    ext_tsym = (ecoff_data (cur_bfd)->external_sym
-				+ cur_fdr->isymBase
-				+ tsym.index
-				- 1);
-		  }
-	      }
-	    else
-	      complain (&block_member_complaint, tsym.st);
 	  }
+      end_of_fields:;
 
 	/* In an stBlock, there is no way to distinguish structs,
 	   unions, and enums at this point.  This is a bug in the

@@ -1,5 +1,8 @@
 Mon Jul 26 13:17:36 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* mipsread.c (parse_symbol): Put stStaticProc symbols in minimal
+	symbols as mst_file_text.
+
 	* hppa-tdep.c (pc_in_linker_stub): Return 0 if can't read memory.
 
 	* stabsread.c (rs6000_builtin_type): Make logical types be
