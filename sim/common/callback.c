@@ -420,7 +420,7 @@ os_truncate (p, file, len)
      const char *file;
      long len;
 {
-  return wrap (p, stat (file, len));
+  return wrap (p, truncate (file, len));
 }
 
 static int
