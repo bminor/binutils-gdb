@@ -2423,6 +2423,9 @@ bfd_set_error_handler  PARAMS ((bfd_error_handler_type));
 void 
 bfd_set_error_program_name  PARAMS ((const char *));
 
+bfd_error_handler_type 
+bfd_get_error_handler  PARAMS ((void));
+
 long 
 bfd_get_reloc_upper_bound PARAMS ((bfd *abfd, asection *sect));
 

@@ -1,3 +1,8 @@
+Thu Jan 22 21:26:48 1998  Richard Henderson  <rth@cygnus.com>
+
+	* bfd.c (bfd_get_error_handler): Add orthogonal function.
+	* bfd-in2.h: Regenerate.
+
 Thu Jan 22 21:13:39 1998  Richard Henderson  <rth@cygnus.com>
 
 	* tekhex.c (tekhex_write_object_contents): Check for no symbols.
