@@ -1,3 +1,11 @@
+Mon May 12 08:55:07 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-options.h (struct OPTION): Add doc_opt as the documenting
+ 	name of the option - or family of options.
+
+	* sim-options.c (sim_args_command): Match command `a-b c' with
+ 	option `--a-b-c' from option table.
+
 Thu May  8 12:40:07 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-options.c (sim_print_help): For optional arguments, wrap
