@@ -23,7 +23,8 @@ SECTIONS
   { 					
    *(.bss)	 			
    [COMMON] 				
-     _end = .;				
-    } 					
+     _end = .;
+     __end = .;
+  } 					
 }
 
