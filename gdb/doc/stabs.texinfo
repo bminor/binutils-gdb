@@ -1027,7 +1027,7 @@ symbol is an offset relative to the local variables for that function,
 not relative to the arguments (on some machines those are the same
 thing, but not on all).
 
-The following are said to go with N_PSYM:
+The following are said to go with @samp{N_PSYM}:
 
 @example
 "name" -> "param_name:#type"
@@ -2448,9 +2448,13 @@ n_type  n_type  name      used to describe
 @node Symbol descriptors
 @section Table C: Symbol descriptors
 
+@c Please keep this alphabetical
 @table @code
 @item (empty)
 Local variable, @xref{Automatic variables}.
+
+@item C
+@xref{Parameters}.
 
 @item f
 Local function, @xref{Procedures}.
@@ -2458,14 +2462,24 @@ Local function, @xref{Procedures}.
 @item F
 Global function, @xref{Procedures}.
 
-@item t
-Type name, @xref{Typedefs}.
-
-@item T
-enumeration, struct or union tag, @xref{Unions}.
-
 @item G
 Global variable, @xref{Global Variables}.
+
+@item i
+@xref{Parameters}.
+
+@item p
+Argument list parameter @xref{Parameters}.
+
+@item pP
+@xref{Parameters}.
+
+@item pF
+@xref{Parameters}.
+
+@item P
+@itemx R
+Register parameter @xref{Parameters}.
 
 @item r
 Register variable, @xref{Register variables}.
@@ -2474,16 +2488,21 @@ Register variable, @xref{Register variables}.
 Static file scope variable @xref{Initialized statics},
 @xref{Un-initialized statics}.
 
+@item t
+Type name, @xref{Typedefs}.
+
+@item T
+enumeration, struct or union tag, @xref{Unions}.
+
+@item v
+Call by reference, @xref{Parameters}.
+
 @item V
 Static procedure scope variable @xref{Initialized statics},
 @xref{Un-initialized statics}.
 
-@item p
-Argument list parameter @xref{Parameters}.
-
-@item P
-@item R
-Register parameter @xref{Parameters}.
+@item X
+Function return variable, @xref{Parameters}.
 @end table
 
 @node Type Descriptors
