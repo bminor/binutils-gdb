@@ -1,3 +1,8 @@
+Fri Jan 14 14:42:48 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlmconv.c (setup_sections): Make sure that we align the
+	output_offset of each input section appropriately.
+
 Thu Jan 13 17:32:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* objdump.c (dump_relocs): Don't crash if section name is NULL.

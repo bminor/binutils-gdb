@@ -97,9 +97,11 @@ static struct option long_options[] =
   { "debug", no_argument, 0, 'd' },
   { "header-file", required_argument, 0, 'T' },
   { "help", no_argument, 0, 'h' },
-  { "input-format", required_argument, 0, 'I' },
+  { "input-target", required_argument, 0, 'I' },
+  { "input-format", required_argument, 0, 'I' }, /* Obsolete */
   { "linker", required_argument, 0, 'l' },
-  { "output-format", required_argument, 0, 'O' },
+  { "output-target", required_argument, 0, 'O' },
+  { "output-format", required_argument, 0, 'O' }, /* Obsolete */
   { "version", no_argument, 0, 'V' },
   { NULL, no_argument, 0, 0 }
 };
@@ -804,7 +806,7 @@ main (argc, argv)
     }
   if (map_file != NULL)
     fprintf (stderr,
-	     "%s: MAP and FULLMAP are not supported; try ld -M\n",
+	     "%s: warning: MAP and FULLMAP are not supported; try ld -M\n",
 	     program_name);
   if (help_file != NULL)
     {
@@ -989,8 +991,8 @@ show_usage (file, status)
      int status;
 {
   fprintf (file, "\
-Usage: %s [-dhV] [-I format] [-O format] [-T header-file] [-l linker]\n\
-       [--input-format=format] [--output-format=format]\n\
+Usage: %s [-dhV] [-I bfdname] [-O bfdname] [-T header-file] [-l linker]\n\
+       [--input-target=bfdname] [--output-target=bfdname]\n\
        [--header-file=file] [--linker=linker] [--debug]\n\
        [--help] [--version]\n\
        [in-file [out-file]]\n",
@@ -1039,6 +1041,9 @@ setup_sections (inbfd, insec, data_ptr)
   flagword f;
   const char *outname;
   asection *outsec;
+  bfd_vma offset;
+  bfd_size_type align;
+  bfd_size_type add;
 
   /* FIXME: We don't want to copy the .reginfo section of an ECOFF
      file.  However, I don't have a good way to describe this section.
@@ -1066,11 +1071,16 @@ setup_sections (inbfd, insec, data_ptr)
     }
 
   insec->output_section = outsec;
-  insec->output_offset = bfd_section_size (outbfd, outsec);
+
+  offset = bfd_section_size (outbfd, outsec);
+  align = 1 << bfd_section_alignment (inbfd, insec);
+  add = ((offset + align - 1) &~ (align - 1)) - offset;
+  insec->output_offset = offset + add;
 
   if (! bfd_set_section_size (outbfd, outsec,
 			      (bfd_section_size (outbfd, outsec)
-			       + bfd_section_size (inbfd, insec))))
+			       + bfd_section_size (inbfd, insec)
+			       + add)))
     bfd_fatal ("set section size");
 
   if ((bfd_section_alignment (inbfd, insec)
