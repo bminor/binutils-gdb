@@ -1,5 +1,6 @@
 /* coff object file format
-   Copyright (C) 1989, 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994
+   Free Software Foundation, Inc.
 
    This file is part of GAS.
 
@@ -76,6 +77,7 @@ static void obj_coff_endef PARAMS ((int));
 static void obj_coff_line PARAMS ((int));
 static void obj_coff_ln PARAMS ((int));
 static void obj_coff_scl PARAMS ((int));
+static void obj_coff_section PARAMS ((int));
 static void obj_coff_size PARAMS ((int));
 static void obj_coff_tag PARAMS ((int));
 static void obj_coff_type PARAMS ((int));
@@ -84,7 +86,6 @@ static void tag_init PARAMS ((void));
 static void tag_insert PARAMS ((const char *name, symbolS * symbolP));
 
 #ifdef BFD_ASSEMBLER
-static void SA_SET_SYM_ENDNDX PARAMS ((symbolS *, symbolS *));
 static void SA_SET_SYM_TAGNDX PARAMS ((symbolS *, symbolS *));
 #endif
 
@@ -123,6 +124,10 @@ const pseudo_typeS obj_pseudo_table[] =
   {"type", s_ignore, 0},
   {"val", s_ignore, 0},
 #endif /* ignore debug */
+
+#ifdef MANY_SECTIONS
+  { "section", obj_coff_section, 0 },
+#endif
 
   {"ident", s_ignore, 0},	/* we don't yet handle this. */
 
@@ -174,7 +179,7 @@ fetch_coff_debug_section ()
   return debug_section;
 }
 
-static void
+void
 SA_SET_SYM_ENDNDX (sym, val)
      symbolS *sym;
      symbolS *val;
@@ -207,7 +212,7 @@ S_GET_DATA_TYPE (sym)
   return coffsymbol (sym->bsym)->native->u.syment.n_type;
 }
 
-static int
+int
 S_SET_DATA_TYPE (sym, val)
      symbolS *sym;
      int val;
@@ -527,92 +532,106 @@ obj_symbol_to_chars (where, symbolP)
     }
 
 #else /* BFD_HEADERS */
-  SYMENT *syment = &symbolP->sy_symbol.ost_entry;
-  int i;
-  char numaux = syment->n_numaux;
-  unsigned short type = S_GET_DATA_TYPE (symbolP);
+  {
+    SYMENT *syment = &symbolP->sy_symbol.ost_entry;
+    int i;
+    char numaux = syment->n_numaux;
+    unsigned short type = S_GET_DATA_TYPE (symbolP);
 
 #ifdef CROSS_COMPILE
-  md_number_to_chars (*where, syment->n_value, sizeof (syment->n_value));
-  *where += sizeof (syment->n_value);
-  md_number_to_chars (*where, syment->n_scnum, sizeof (syment->n_scnum));
-  *where += sizeof (syment->n_scnum);
-  md_number_to_chars (*where, 0, sizeof (short));	/* pad n_flags */
-  *where += sizeof (short);
-  md_number_to_chars (*where, syment->n_type, sizeof (syment->n_type));
-  *where += sizeof (syment->n_type);
-  md_number_to_chars (*where, syment->n_sclass, sizeof (syment->n_sclass));
-  *where += sizeof (syment->n_sclass);
-  md_number_to_chars (*where, syment->n_numaux, sizeof (syment->n_numaux));
-  *where += sizeof (syment->n_numaux);
+    md_number_to_chars (*where, syment->n_value, sizeof (syment->n_value));
+    *where += sizeof (syment->n_value);
+    md_number_to_chars (*where, 0xffff & syment->n_scnum,
+			sizeof (syment->n_scnum));
+    *where += sizeof (syment->n_scnum);
+    md_number_to_chars (*where, 0, sizeof (short));	/* pad n_flags */
+    *where += sizeof (short);
+    md_number_to_chars (*where, syment->n_type, sizeof (syment->n_type));
+    *where += sizeof (syment->n_type);
+    md_number_to_chars (*where, syment->n_sclass, sizeof (syment->n_sclass));
+    *where += sizeof (syment->n_sclass);
+    md_number_to_chars (*where, syment->n_numaux, sizeof (syment->n_numaux));
+    *where += sizeof (syment->n_numaux);
 #else /* CROSS_COMPILE */
-  append (where, (char *) syment, sizeof (*syment));
+    append (where, (char *) syment, sizeof (*syment));
 #endif /* CROSS_COMPILE */
 
-  /* Should do the following:
-     if (.file entry) MD(..)... else if (static entry) MD(..) */
-  if (numaux > OBJ_COFF_MAX_AUXENTRIES)
-    {
+    /* Should do the following:
+       if (.file entry) MD(..)... else if (static entry) MD(..) */
+    if (numaux > OBJ_COFF_MAX_AUXENTRIES)
       as_bad ("Internal error? too many auxents for symbol");
-    }				/* too many auxents */
 
-  for (i = 0; i < numaux; ++i)
-    {
+    for (i = 0; i < numaux; ++i)
+      {
 #ifdef CROSS_COMPILE
-#if 0				/* This code has never been tested */
-      /* The most common case, x_sym entry. */
-      if ((SF_GET (symbolP) & (SF_FILE | SF_STATICS)) == 0)
-	{
-	  md_number_to_chars (*where, auxP->x_sym.x_tagndx, sizeof (auxP->x_sym.x_tagndx));
-	  *where += sizeof (auxP->x_sym.x_tagndx);
-	  if (ISFCN (type))
-	    {
-	      md_number_to_chars (*where, auxP->x_sym.x_misc.x_fsize, sizeof (auxP->x_sym.x_misc.x_fsize));
-	      *where += sizeof (auxP->x_sym.x_misc.x_fsize);
-	    }
-	  else
-	    {
-	      md_number_to_chars (*where, auxP->x_sym.x_misc.x_lnno, sizeof (auxP->x_sym.x_misc.x_lnno));
-	      *where += sizeof (auxP->x_sym.x_misc.x_lnno);
-	      md_number_to_chars (*where, auxP->x_sym.x_misc.x_size, sizeof (auxP->x_sym.x_misc.x_size));
-	      *where += sizeof (auxP->x_sym.x_misc.x_size);
-	    }
-	  if (ISARY (type))
-	    {
-	      register int index;
-	      for (index = 0; index < DIMNUM; index++)
-		md_number_to_chars (*where, auxP->x_sym.x_fcnary.x_ary.x_dimen[index], sizeof (auxP->x_sym.x_fcnary.x_ary.x_dimen[index]));
-	      *where += sizeof (auxP->x_sym.x_fcnary.x_ary.x_dimen[index]);
-	    }
-	  else
-	    {
-	      md_number_to_chars (*where, auxP->x_sym.x_fcnary.x_fcn.x_lnnoptr, sizeof (auxP->x_sym.x_fcnary.x_fcn.x_lnnoptr));
-	      *where += sizeof (auxP->x_sym.x_fcnary.x_fcn.x_lnnoptr);
-	      md_number_to_chars (*where, auxP->x_sym.x_fcnary.x_fcn.x_endndx, sizeof (auxP->x_sym.x_fcnary.x_fcn.x_endndx));
-	      *where += sizeof (auxP->x_sym.x_fcnary.x_fcn.x_endndx);
-	    }
-	  md_number_to_chars (*where, auxP->x_sym.x_tvndx, sizeof (auxP->x_sym.x_tvndx));
-	  *where += sizeof (auxP->x_sym.x_tvndx);
-	}
-      else if (SF_GET_FILE (symbolP))
-	{			/* .file */
-	  ;
-	}
-      else if (SF_GET_STATICS (symbolP))
-	{			/* .text, .data, .bss symbols */
-	  md_number_to_chars (*where, auxP->x_scn.x_scnlen, sizeof (auxP->x_scn.x_scnlen));
-	  *where += sizeof (auxP->x_scn.x_scnlen);
-	  md_number_to_chars (*where, auxP->x_scn.x_nreloc, sizeof (auxP->x_scn.x_nreloc));
-	  *where += sizeof (auxP->x_scn.x_nreloc);
-	  md_number_to_chars (*where, auxP->x_scn.x_nlinno, sizeof (auxP->x_scn.x_nlinno));
-	  *where += sizeof (auxP->x_scn.x_nlinno);
-	}
-#endif /* 0 */
-#else /* CROSS_COMPILE */
-      append (where, (char *) &symbolP->sy_symbol.ost_auxent[i], sizeof (symbolP->sy_symbol.ost_auxent[i]));
-#endif /* CROSS_COMPILE */
+	this code does not work;
 
-    };				/* for each aux in use */
+	foo *auxP = SYM_AUXENT (symbolP);
+	/* The most common case, x_sym entry. */
+	if ((SF_GET (symbolP) & SF_STATICS) == 0)
+	  {
+	    md_number_to_chars (*where, auxP->x_sym.x_tagndx,
+				sizeof (auxP->x_sym.x_tagndx));
+	    *where += sizeof (auxP->x_sym.x_tagndx);
+	    if (ISFCN (type))
+	      {
+		md_number_to_chars (*where, auxP->x_sym.x_misc.x_fsize,
+				    sizeof (auxP->x_sym.x_misc.x_fsize));
+		*where += sizeof (auxP->x_sym.x_misc.x_fsize);
+	      }
+	    else
+	      {
+		md_number_to_chars (*where, auxP->x_sym.x_misc.x_lnno,
+				    sizeof (auxP->x_sym.x_misc.x_lnno));
+		*where += sizeof (auxP->x_sym.x_misc.x_lnno);
+		md_number_to_chars (*where, auxP->x_sym.x_misc.x_size,
+				    sizeof (auxP->x_sym.x_misc.x_size));
+		*where += sizeof (auxP->x_sym.x_misc.x_size);
+	      }
+	    if (ISARY (type))
+	      {
+		int index;
+		for (index = 0; index < DIMNUM; index++)
+		  md_number_to_chars (*where, auxP->x_sym.x_fcnary.x_ary.x_dimen[index],
+				      sizeof (auxP->x_sym.x_fcnary.x_ary.x_dimen[index]));
+		*where += sizeof (auxP->x_sym.x_fcnary.x_ary.x_dimen[index]);
+	      }
+	    else
+	      {
+		md_number_to_chars (*where,
+				    auxP->x_sym.x_fcnary.x_fcn.x_lnnoptr,
+				    sizeof (auxP->x_sym.x_fcnary.x_fcn.x_lnnoptr));
+		*where += sizeof (auxP->x_sym.x_fcnary.x_fcn.x_lnnoptr);
+		md_number_to_chars (*where,
+				    auxP->x_sym.x_fcnary.x_fcn.x_endndx,
+				    sizeof (auxP->x_sym.x_fcnary.x_fcn.x_endndx));
+		*where += sizeof (auxP->x_sym.x_fcnary.x_fcn.x_endndx);
+	      }
+	    md_number_to_chars (*where, auxP->x_sym.x_tvndx,
+				sizeof (auxP->x_sym.x_tvndx));
+	    *where += sizeof (auxP->x_sym.x_tvndx);
+	  }
+	else if (S_GET_STORAGE_CLASS (symbolP) == C_FILE)
+	  /* .file */
+	  ;
+	else if (SF_GET_STATICS (symbolP))
+	  {			/* .text, .data, .bss symbols */
+	    md_number_to_chars (*where, auxP->x_scn.x_scnlen,
+				sizeof (auxP->x_scn.x_scnlen));
+	    *where += sizeof (auxP->x_scn.x_scnlen);
+	    md_number_to_chars (*where, auxP->x_scn.x_nreloc,
+				sizeof (auxP->x_scn.x_nreloc));
+	    *where += sizeof (auxP->x_scn.x_nreloc);
+	    md_number_to_chars (*where, auxP->x_scn.x_nlinno,
+				sizeof (auxP->x_scn.x_nlinno));
+	    *where += sizeof (auxP->x_scn.x_nlinno);
+	  }
+#else /* CROSS_COMPILE */
+	append (where, (char *) &symbolP->sy_symbol.ost_auxent[i],
+		sizeof (symbolP->sy_symbol.ost_auxent[i]));
+#endif /* CROSS_COMPILE */
+      }
+  }
 #endif /* BFD_HEADERS */
 }
 
@@ -2267,13 +2286,22 @@ obj_pre_write_hook (headers)
 
 #ifdef BFD_ASSEMBLER
 
+symbolS *coff_last_function;
+
 void
 coff_frob_symbol (symp, punt)
      symbolS *symp;
      int *punt;
 {
-  static symbolS *last_functionP, *last_tagP;
+  static symbolS *last_tagP;
   static stack *block_stack;
+  static symbolS *set_end;
+
+  if (symp == &abs_symbol)
+    {
+      *punt = 1;
+      return;
+    }
 
   if (current_lineno_sym)
     coff_add_linesym ((symbolS *) 0);
@@ -2319,13 +2347,13 @@ coff_frob_symbol (symp, punt)
 		  if (begin == 0)
 		    as_warn ("mismatched .eb");
 		  else
-		    SA_SET_SYM_ENDNDX (begin, begin);
+		    set_end = begin;
 		}
 	    }
-	  if (last_functionP == 0 && SF_GET_FUNCTION (symp))
+	  if (coff_last_function == 0 && SF_GET_FUNCTION (symp))
 	    {
 	      union internal_auxent *auxp;
-	      last_functionP = symp;
+	      coff_last_function = symp;
 	      if (S_GET_NUMBER_AUXILIARY (symp) < 1)
 		S_SET_NUMBER_AUXILIARY (symp, 1);
 	      auxp = &coffsymbol (symp->bsym)->native[1].u.auxent;
@@ -2334,19 +2362,19 @@ coff_frob_symbol (symp, punt)
 	    }
 	  if (S_GET_STORAGE_CLASS (symp) == C_EFCN)
 	    {
-	      if (last_functionP == 0)
+	      if (coff_last_function == 0)
 		as_fatal ("C_EFCN symbol out of scope");
-	      SA_SET_SYM_FSIZE (last_functionP,
+	      SA_SET_SYM_FSIZE (coff_last_function,
 				(long) (S_GET_VALUE (symp)
-					- S_GET_VALUE (last_functionP)));
-	      SA_SET_SYM_ENDNDX (last_functionP, symp);
-	      last_functionP = 0;
+					- S_GET_VALUE (coff_last_function)));
+	      set_end = coff_last_function;
+	      coff_last_function = 0;
 	    }
 	}
       else if (SF_GET_TAG (symp))
 	last_tagP = symp;
       else if (S_GET_STORAGE_CLASS (symp) == C_EOS)
-	SA_SET_SYM_ENDNDX (last_tagP, symp);
+	set_end = last_tagP;
       else if (S_GET_STORAGE_CLASS (symp) == C_FILE)
 	{
 	  if (S_GET_VALUE (symp))
@@ -2361,6 +2389,14 @@ coff_frob_symbol (symp, punt)
 	*punt = 1;
       /* more ... */
     }
+
+  if (set_end != (symbolS *) NULL
+      && ! *punt)
+    {
+      SA_SET_SYM_ENDNDX (set_end, symp);
+      set_end = NULL;
+    }
+
   if (coffsymbol (symp->bsym)->lineno)
     {
       int i, n;
@@ -2384,37 +2420,95 @@ coff_frob_symbol (symp, punt)
     }
 }
 
-void 
-DEFUN_VOID(obj_coff_section)
+/*
+ * implement the .section pseudo op:
+ *	.section name {, "flags"}
+ *                ^         ^
+ *                |         +--- optional flags: 'b' for bss
+ *                |                              'i' for info
+ *                +-- section name               'l' for lib
+ *                                               'n' for noload
+ *                                               'o' for over
+ *                                               'w' for data
+ *						 'd' (apparently m88k for data)
+ *                                               'x' for text
+ * But if the argument is not a quoted string, treat it as a
+ * subsegment number.
+ */
+
+void
+obj_coff_section (ignore)
+     int ignore;
 {
   /* Strip out the section name */
-  char *section_name ;
-  char *section_name_end;
+  char *section_name;
   char c;
-
-  unsigned int len;
+  char *name;
   unsigned int exp;
+  flagword flags;
+  asection *sec;
 
-  section_name =  input_line_pointer;
-  c =   get_symbol_end();
-  section_name_end =  input_line_pointer;
+  section_name = input_line_pointer;
+  c = get_symbol_end ();
 
-  len = section_name_end - section_name ;
-  input_line_pointer++;
-  SKIP_WHITESPACE();
-  if (c == ',')
-    exp = get_absolute_expression();
-  else if (*input_line_pointer == ',')
+  name = xmalloc (input_line_pointer - section_name + 1);
+  strcpy (name, section_name);
+
+  *input_line_pointer = c;
+
+  SKIP_WHITESPACE ();
+
+  exp = 0;
+  flags = SEC_NO_FLAGS;
+
+  if (*input_line_pointer == ',')
     {
-      input_line_pointer++;
-      exp = get_absolute_expression();
-    }
-  else
-    {
-      exp = 0;
+      ++input_line_pointer;
+      SKIP_WHITESPACE ();
+      if (*input_line_pointer != '"')
+	exp = get_absolute_expression ();
+      else
+	{
+	  ++input_line_pointer;
+	  while (*input_line_pointer != '"'
+		 && ! is_end_of_line[(unsigned char) *input_line_pointer])
+	    {
+	      switch (*input_line_pointer)
+		{
+		case 'b': flags |= SEC_ALLOC; flags &=~ SEC_LOAD; break;
+		case 'n': flags &=~ SEC_LOAD; break;
+		case 'd':
+		case 'w': flags &=~ SEC_READONLY; break;
+		case 'x': flags |= SEC_CODE; break;
+
+		case 'i': /* STYP_INFO */
+		case 'l': /* STYP_LIB */
+		case 'o': /* STYP_OVER */
+		  as_warn ("unsupported section attribute '%c'",
+			   *input_line_pointer);
+		  break;
+
+		default:
+		  as_warn("unknown section attribute '%c'",
+			  *input_line_pointer);
+		  break;
+		}
+	      ++input_line_pointer;
+	    }
+	  if (*input_line_pointer == '"')
+	    ++input_line_pointer;
+	}
     }
 
-  *section_name_end = c;
+  sec = subseg_new (name, (subsegT) exp);
+
+  if (flags != SEC_NO_FLAGS)
+    {
+      if (! bfd_set_section_flags (stdoutput, sec, flags))
+	as_warn ("error setting flags for \"%s\": %s",
+		 bfd_section_name (stdoutput, sec),
+		 bfd_errmsg (bfd_get_error ()));
+    }
 }
 
 void
