@@ -1,3 +1,11 @@
+Mon Aug 24 14:53:42 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* ar.c (map_over_members): if the element of the archive has a
+	null name, fill it in.
+
+	* nm.c (do_one_rel_file): only warn if a bfd's flags say there
+	will be symbols and there aren't any.
+
 Wed Aug 19 11:20:25 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* m68k-pinsn.c: handle new operand type 'r', introduced for cas2.
