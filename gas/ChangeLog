@@ -1,3 +1,29 @@
+2002-05-30  Chris G. Demetriou  <cgd@broadcom.com>
+            Ed Satterthwaite  <ehs@broadcom.com>
+
+	* config/tc-mips.c (mips_set_options): New "ase_mdmx" member.
+	(mips_opts): Initialize "ase_mdmx" member.
+	(file_ase_mdmx): New variable.
+	(CPU_HAS_MDMX): New macro.
+	(md_begin): Initialize mips_opts.ase_mdmx and file_ase_mdmx
+	based on command line options and configuration defaults.
+	(macro_build): Note in comment that use of MDMX in macros is
+	not currently allowed.
+	(validate_mips_insn): Add support for the "O", "Q", "X", "Y", and
+	"Z" MDMX operand types.
+	(mips_ip): Accept MDMX instructions if mips_opts.ase_mdmx is set,
+	and add support for the "O", "Q", "X", "Y", and "Z" MDMX operand
+	types.
+	(OPTION_MDMX, OPTION_NO_MDMX, md_longopts, md_parse_option):
+	Add support for "-mdmx" and "-no-mdmx" options.
+	(OPTION_ELF_BASE): Move to accomodate new options.
+	(s_mipsset): Support ".set mdmx" and ".set nomdmx".
+	(mips_elf_final_processing): Set MDMX ASE ELF header flag if
+	file_ase_mdmx was set.
+	* doc/as.texinfo: Document -mdmx and -no-mdmx options.
+	* doc/c-mips.texi: Likewise, and document ".set mdmx" and ".set
+	nomdmx" directives.
+
 2002-05-31  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (OPTION_NO_M7000_HILO_FIX): Rename to

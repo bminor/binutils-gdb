@@ -375,6 +375,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mips32}] [@b{-mips64}]
    [@b{-m4650}] [@b{-no-m4650}]
    [@b{-mips3d}] [@b{-no-mips3d}]
+   [@b{-mdmx}] [@b{-no-mdmx}]
    [@b{--trap}] [@b{--break}] [@b{-n}]
    [@b{--emulation}=@var{name} ]
 @end ifset
@@ -887,6 +888,12 @@ instructions around accesses to the @samp{HI} and @samp{LO} registers.
 Generate code for the MIPS-3D Application Specific Extension.
 This tells the assembler to accept MIPS-3D instructions.
 @samp{-no-mips3d} turns off this option.
+
+@item -mdmx
+@itemx -no-mdmx
+Generate code for the MDMX Application Specific Extension.
+This tells the assembler to accept MDMX instructions.
+@samp{-no-mdmx} turns off this option.
 
 @item -mcpu=@var{CPU}
 Generate code for a particular MIPS cpu.  It is exactly equivalent to

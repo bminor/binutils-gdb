@@ -105,6 +105,12 @@ Generate code for the MIPS-3D Application Specific Extension.
 This tells the assembler to accept MIPS-3D instructions.
 @samp{-no-mips3d} turns off this option.
 
+@item -mdmx
+@itemx -no-mdmx
+Generate code for the MDMX Application Specific Extension.
+This tells the assembler to accept MDMX instructions.
+@samp{-no-mdmx} turns off this option.
+
 @item -mfix7000
 @itemx -mno-fix7000
 Cause nops to be inserted if the read of the destination register
@@ -341,6 +347,14 @@ Traditional @sc{mips} assemblers do not support these directives.
 The directive @code{.set mips3d} makes the assembler accept instructions
 from the MIPS-3D Application Specific Extension from that point on
 in the assembly.  The @code{.set nomips3d} directive prevents MIPS-3D
+instructions from being accepted.
+
+@cindex MIPS MDMX instruction generation override
+@kindex @code{.set mdmx}
+@kindex @code{.set nomdmx}
+The directive @code{.set mdmx} makes the assembler accept instructions
+from the MDMX Application Specific Extension from that point on
+in the assembly.  The @code{.set nomdmx} directive prevents MDMX
 instructions from being accepted.
 
 Traditional @sc{mips} assemblers do not support these directives.

@@ -152,6 +152,7 @@ if { [istarget mips*-*-*] } then {
     run_dump_test "mips32"
     run_dump_test "mips64"
     run_dump_test "mips64-mips3d"
+    run_dump_test "mips64-mdmx"
     run_dump_test "sb1-ext-ps"
 
     # It will always fail until someone fixes it.

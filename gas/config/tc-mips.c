@@ -141,6 +141,7 @@ struct mips_set_options
      if they have not been initialized.  Changed by `.set <asename>', by
      command line options, and based on the default architecture.  */
   int ase_mips3d;
+  int ase_mdmx;
   /* Whether we are assembling for the mips16 processor.  0 if we are
      not, 1 if we are, and -1 if the value has not been initialized.
      Changed by `.set mips16' and `.set nomips16', and the -mips16 and
@@ -189,7 +190,7 @@ static int file_mips_fp32 = -1;
 
 static struct mips_set_options mips_opts =
 {
-  ISA_UNKNOWN, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, NO_ABI
+  ISA_UNKNOWN, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, NO_ABI
 };
 
 /* These variables are filled in with the masks of registers used.
@@ -204,6 +205,10 @@ static int file_mips_isa = ISA_UNKNOWN;
 /* True if -mips3d was passed or implied by arguments passed on the
    command line (e.g., by -march).  */
 static int file_ase_mips3d;
+
+/* True if -mdmx was passed or implied by arguments passed on the
+   command line (e.g., by -march).  */
+static int file_ase_mdmx;
 
 /* The argument of the -mcpu= flag.  Historical for code generation.  */
 static int mips_cpu = CPU_UNKNOWN;
@@ -273,6 +278,10 @@ static int mips_32bitmode = 0;
 
 /* Return true if the given CPU supports the MIPS3D ASE.  */
 #define CPU_HAS_MIPS3D(cpu)	((cpu) == CPU_SB1      \
+				 )
+
+/* Return true if the given CPU supports the MDMX ASE.  */
+#define CPU_HAS_MDMX(cpu)	(0		      \
 				 )
 
 /* Whether the processor uses hardware interlocks to protect
@@ -1241,6 +1250,8 @@ md_begin ()
      generation of code for them.  */
   if (mips_opts.ase_mips3d == -1 && CPU_HAS_MIPS3D (mips_arch))
     mips_opts.ase_mips3d = 1;
+  if (mips_opts.ase_mdmx == -1 && CPU_HAS_MDMX (mips_arch))
+    mips_opts.ase_mdmx = 1;
 
   if (! bfd_set_arch_mach (stdoutput, bfd_arch_mips, mips_arch))
     as_warn (_("Could not set architecture and machine"));
@@ -1253,6 +1264,7 @@ md_begin ()
   file_mips_isa = mips_opts.isa;
   file_mips_abi = mips_opts.abi;
   file_ase_mips3d = mips_opts.ase_mips3d;
+  file_ase_mdmx = mips_opts.ase_mdmx;
   mips_opts.gp32 = file_mips_gp32;
   mips_opts.fp32 = file_mips_fp32;
 
@@ -2917,8 +2929,8 @@ macro_build (place, counter, ep, name, fmt, va_alist)
   /* Search until we get a match for NAME.  */
   while (1)
     {
-      /* It is assumed here that macros will never generate
-         MIPS-3D instructions.  */
+      /* It is assumed here that macros will never generate 
+         MDMX or MIPS-3D instructions.  */
       if (strcmp (fmt, insn.insn_mo->args) == 0
 	  && insn.insn_mo->pinfo != INSN_MACRO
 	  && OPCODE_IS_MEMBER (insn.insn_mo, mips_opts.isa, mips_arch)
@@ -7795,11 +7807,17 @@ validate_mips_insn (opc)
       case 'L': break;
       case 'M':	USE_BITS (OP_MASK_CCC,		OP_SH_CCC);	break;
       case 'N':	USE_BITS (OP_MASK_BCC,		OP_SH_BCC);	break;
+      case 'O':	USE_BITS (OP_MASK_ALN,		OP_SH_ALN);	break;
+      case 'Q':	USE_BITS (OP_MASK_VSEL,		OP_SH_VSEL);
+		USE_BITS (OP_MASK_FT,		OP_SH_FT);	break;
       case 'R':	USE_BITS (OP_MASK_FR,		OP_SH_FR);	break;
       case 'S':	USE_BITS (OP_MASK_FS,		OP_SH_FS);	break;
       case 'T':	USE_BITS (OP_MASK_FT,		OP_SH_FT);	break;
       case 'V':	USE_BITS (OP_MASK_FS,		OP_SH_FS);	break;
       case 'W':	USE_BITS (OP_MASK_FT,		OP_SH_FT);	break;
+      case 'X':	USE_BITS (OP_MASK_FD,		OP_SH_FD);	break;
+      case 'Y':	USE_BITS (OP_MASK_FS,		OP_SH_FS);	break;
+      case 'Z':	USE_BITS (OP_MASK_FT,		OP_SH_FT);	break;
       case 'a':	USE_BITS (OP_MASK_TARGET,	OP_SH_TARGET);	break;
       case 'b':	USE_BITS (OP_MASK_RS,		OP_SH_RS);	break;
       case 'c':	USE_BITS (OP_MASK_CODE,		OP_SH_CODE);	break;
@@ -7918,6 +7936,7 @@ mips_ip (str, ip)
 
       if (OPCODE_IS_MEMBER (insn,
 			    (mips_opts.isa
+	      		     | (mips_opts.ase_mdmx ? INSN_MDMX : 0)
 			     | (mips_opts.ase_mips3d ? INSN_MIPS3D : 0)),
 			    mips_arch))
 	ok = true;
@@ -7961,7 +7980,10 @@ mips_ip (str, ip)
       insn_error = NULL;
       for (args = insn->args;; ++args)
 	{
+	  int is_mdmx;
+
 	  s += strspn (s, " \t");
+	  is_mdmx = 0;
 	  switch (*args)
 	    {
 	    case '\0':		/* end of args */
@@ -8310,6 +8332,47 @@ mips_ip (str, ip)
 		}
 	      break;
 
+	    case 'O':		/* MDMX alignment immediate constant.  */
+	      my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+	      if ((unsigned long) imm_expr.X_add_number > OP_MASK_ALN)
+		{
+		  as_warn ("Improper align amount (%ld), using low bits",
+			   (long) imm_expr.X_add_number);
+		  imm_expr.X_add_number &= OP_MASK_ALN;
+		}
+	      ip->insn_opcode |= imm_expr.X_add_number << OP_SH_ALN;
+	      imm_expr.X_op = O_absent;
+	      s = expr_end;
+	      continue;
+
+	    case 'Q':		/* MDMX vector, element sel, or const.  */
+	      if (s[0] != '$')
+		{
+		  /* MDMX Immediate.  */
+		  my_getExpression (&imm_expr, s);
+		  check_absolute_expr (ip, &imm_expr);
+		  if ((unsigned long) imm_expr.X_add_number > OP_MASK_FT)
+		    {
+		      as_warn (_("Invalid MDMX Immediate (%ld)"),
+			       (long) imm_expr.X_add_number);
+		      imm_expr.X_add_number &= OP_MASK_FT;
+		    }
+		  imm_expr.X_add_number &= OP_MASK_FT;
+		  if (ip->insn_opcode & (OP_MASK_VSEL << OP_SH_VSEL))
+		    ip->insn_opcode |= MDMX_FMTSEL_IMM_QH << OP_SH_VSEL;
+		  else
+		    ip->insn_opcode |= MDMX_FMTSEL_IMM_OB << OP_SH_VSEL;
+		  ip->insn_opcode |= imm_expr.X_add_number << OP_SH_FT;
+		  imm_expr.X_op = O_absent;
+		  s = expr_end;
+		  continue;
+		}
+	      /* Not MDMX Immediate.  Fall through.  */
+	    case 'X':           /* MDMX destination register.  */
+	    case 'Y':           /* MDMX source register.  */
+	    case 'Z':           /* MDMX target register.  */
+	      is_mdmx = 1;
 	    case 'D':		/* floating point destination register */
 	    case 'S':		/* floating point source register */
 	    case 'T':		/* floating point target register */
@@ -8317,8 +8380,11 @@ mips_ip (str, ip)
 	    case 'V':
 	    case 'W':
 	      s_reset = s;
-	      if (s[0] == '$' && s[1] == 'f'
-		  && ISDIGIT (s[2]))
+	      /* Accept $fN for FP and MDMX register numbers, and in
+                 addition accept $vN for MDMX register numbers.  */
+	      if ((s[0] == '$' && s[1] == 'f' && ISDIGIT (s[2]))
+		  || (is_mdmx != 0 && s[0] == '$' && s[1] == 'v'
+		      && ISDIGIT (s[2])))
 		{
 		  s += 2;
 		  regno = 0;
@@ -8359,14 +8425,51 @@ mips_ip (str, ip)
 		  switch (c)
 		    {
 		    case 'D':
+		    case 'X':
 		      ip->insn_opcode |= regno << OP_SH_FD;
 		      break;
 		    case 'V':
 		    case 'S':
+		    case 'Y':
 		      ip->insn_opcode |= regno << OP_SH_FS;
 		      break;
+		    case 'Q':
+		      /* This is like 'Z', but also needs to fix the MDMX
+			 vector/scalar select bits.  Note that the
+			 scalar immediate case is handled above.  */
+		      if (*s == '[')
+			{
+			  int is_qh = (ip->insn_opcode & (1 << OP_SH_VSEL));
+			  int max_el = (is_qh ? 3 : 7);
+			  s++;
+			  my_getExpression(&imm_expr, s);
+			  check_absolute_expr (ip, &imm_expr);
+			  s = expr_end;
+			  if (imm_expr.X_add_number > max_el)
+			    as_bad(_("Bad element selector %ld"),
+				   (long) imm_expr.X_add_number);
+			  imm_expr.X_add_number &= max_el;
+			  ip->insn_opcode |= (imm_expr.X_add_number
+					      << (OP_SH_VSEL +
+						  (is_qh ? 2 : 1)));
+			  if (*s != ']')
+			    as_warn(_("Expecting ']' found '%s'"), s);
+			  else
+			    s++;
+			}
+		      else
+                        {
+                          if (ip->insn_opcode & (OP_MASK_VSEL << OP_SH_VSEL))
+                            ip->insn_opcode |= (MDMX_FMTSEL_VEC_QH
+						<< OP_SH_VSEL);
+			  else
+			    ip->insn_opcode |= (MDMX_FMTSEL_VEC_OB <<
+						OP_SH_VSEL);
+			}
+                      /* Fall through */
 		    case 'W':
 		    case 'T':
+		    case 'Z':
 		      ip->insn_opcode |= regno << OP_SH_FT;
 		      break;
 		    case 'R':
@@ -9992,8 +10095,12 @@ struct option md_longopts[] =
   {"mips3d", no_argument, NULL, OPTION_MIPS3D},
 #define OPTION_NO_MIPS3D (OPTION_MD_BASE + 34)
   {"no-mips3d", no_argument, NULL, OPTION_NO_MIPS3D},
+#define OPTION_MDMX (OPTION_MD_BASE + 35)
+  {"mdmx", no_argument, NULL, OPTION_MDMX},
+#define OPTION_NO_MDMX (OPTION_MD_BASE + 36)
+  {"no-mdmx", no_argument, NULL, OPTION_NO_MDMX},
 #ifdef OBJ_ELF
-#define OPTION_ELF_BASE    (OPTION_MD_BASE + 35)
+#define OPTION_ELF_BASE    (OPTION_MD_BASE + 37)
 #define OPTION_CALL_SHARED (OPTION_ELF_BASE + 0)
   {"KPIC",        no_argument, NULL, OPTION_CALL_SHARED},
   {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
@@ -10196,6 +10303,14 @@ md_parse_option (c, arg)
       break;
 
     case OPTION_NO_M3900:
+      break;
+
+    case OPTION_MDMX:
+      mips_opts.ase_mdmx = 1;
+      break;
+
+    case OPTION_NO_MDMX:
+      mips_opts.ase_mdmx = 0;
       break;
 
     case OPTION_MIPS16:
@@ -11532,6 +11647,10 @@ s_mipsset (x)
     {
       mips_opts.nobopt = 1;
     }
+  else if (strcmp (name, "mdmx") == 0)
+    mips_opts.ase_mdmx = 1;
+  else if (strcmp (name, "nomdmx") == 0)
+    mips_opts.ase_mdmx = 0;
   else if (strcmp (name, "mips16") == 0
 	   || strcmp (name, "MIPS-16") == 0)
     mips_opts.mips16 = 1;
@@ -13021,6 +13140,8 @@ mips_elf_final_processing ()
   if (file_ase_mips3d)
     elf_elfheader (stdoutput)->e_flags |= ???;
 #endif
+  if (file_ase_mdmx)
+    elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ARCH_ASE_MDMX;
 
   /* Set the MIPS ELF ABI flags.  */
   if (file_mips_abi == NO_ABI)

@@ -284,6 +284,53 @@ print_insn_arg (d, l, pc, info)
 			     (l >> OP_SH_SEL) & OP_MASK_SEL);
       break;
 
+    case 'O':
+      (*info->fprintf_func) (info->stream, "%d",
+			     (l >> OP_SH_ALN) & OP_MASK_ALN);
+      break;
+
+    case 'Q':
+      {
+	unsigned int vsel = (l >> OP_SH_VSEL) & OP_MASK_VSEL;
+	if ((vsel & 0x10) == 0)
+	  {
+	    int fmt;
+	    vsel &= 0x0f;
+	    for (fmt = 0; fmt < 3; fmt++, vsel >>= 1)
+	      if ((vsel & 1) == 0)
+		break;
+	    (*info->fprintf_func) (info->stream, "$v%d[%d]",
+				   (l >> OP_SH_FT) & OP_MASK_FT, 
+				   vsel >> 1);
+	  }
+	else if ((vsel & 0x08) == 0)
+	  {
+	    (*info->fprintf_func) (info->stream, "$v%d",
+				   (l >> OP_SH_FT) & OP_MASK_FT);
+	  }
+	else
+	  {
+	    (*info->fprintf_func) (info->stream, "0x%x",
+				   (l >> OP_SH_FT) & OP_MASK_FT);
+	  }
+      }
+      break;
+
+    case 'X':
+      (*info->fprintf_func) (info->stream, "$v%d",
+			     (l >> OP_SH_FD) & OP_MASK_FD);
+      break;
+
+    case 'Y':
+      (*info->fprintf_func) (info->stream, "$v%d",
+			     (l >> OP_SH_FS) & OP_MASK_FS);
+      break;
+
+    case 'Z':
+      (*info->fprintf_func) (info->stream, "$v%d",
+			     (l >> OP_SH_FT) & OP_MASK_FT);
+      break;
+
     default:
       /* xgettext:c-format */
       (*info->fprintf_func) (info->stream,
@@ -378,8 +425,8 @@ mips_isa_type (mach, isa, cputype)
     case bfd_mach_mipsisa32:
       *cputype = CPU_MIPS32;
       /* For stock MIPS32, disassemble all applicable MIPS-specified ASEs.
-	 Note that MIPS-3D is not applicable to MIPS32.  (See _MIPS32
-	 Architecture For Programmers Volume I: Introduction to the
+	 Note that MIPS-3D and MDMX are not applicable to MIPS32.  (See
+	 _MIPS32 Architecture For Programmers Volume I: Introduction to the
 	 MIPS32 Architecture_ (MIPS Document Number MD00082, Revision 0.95),
 	 page 1.  */
       *isa = ISA_MIPS32;
@@ -387,7 +434,7 @@ mips_isa_type (mach, isa, cputype)
     case bfd_mach_mipsisa64:
       *cputype = CPU_MIPS64;
       /* For stock MIPS64, disassemble all applicable MIPS-specified ASEs.  */
-      *isa = ISA_MIPS64 | INSN_MIPS3D;
+      *isa = ISA_MIPS64 | INSN_MDMX | INSN_MIPS3D;
       break;
 
     default:
