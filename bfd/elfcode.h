@@ -641,7 +641,8 @@ DEFUN (bfd_section_from_shdr, (abfd, shindex),
 	bfd_section_from_shdr (abfd, hdr->sh_info);	/* target */
 	bfd_section_from_shdr (abfd, hdr->sh_link);	/* symbol table */
 	target_sect = section_from_elf_index (abfd, hdr->sh_info);
-	if (target_sect == NULL)
+	if (target_sect == NULL
+	    || elf_section_data (target_sect) == NULL)
 	  return false;
 
 	hdr2 = &elf_section_data (target_sect)->rel_hdr;
@@ -823,7 +824,7 @@ DEFUN (elf_object_p, (abfd), bfd * abfd)
   Elf_Internal_Shdr *i_shdrp;	/* Section header table, internal form */
   int shindex;
   char *shstrtab;		/* Internal copy of section header stringtab */
-  struct elf_backend_data *ebd;	/* Use to get ELF_ARCH stored in xvec */
+  struct elf_backend_data *ebd;
   struct elf_obj_tdata *preserved_tdata = elf_tdata (abfd);
 
   /* Read in the ELF header in external format.  */
@@ -877,51 +878,65 @@ DEFUN (elf_object_p, (abfd), bfd * abfd)
   if (i_ehdrp->e_shoff == 0)
     goto got_wrong_format_error;
 
+  /* As a simple sanity check, verify that the what BFD thinks is the
+     size of each section header table entry actually matches the size
+     recorded in the file. */
+  if (i_ehdrp->e_shentsize != sizeof (x_shdr))
+    goto got_wrong_format_error;
+
+  ebd = get_elf_backend_data (abfd);
+
+  /* Check that the ELF e_machine field matches what this particular
+     BFD format expects.  */
+  if (ebd->elf_machine_code != i_ehdrp->e_machine)
+    {
+      bfd_target **target_ptr;
+
+      if (ebd->elf_machine_code != EM_NONE)
+	goto got_wrong_format_error;
+
+      /* This is the generic ELF target.  Let it match any ELF target
+	 for which we do not have a specific backend.  */
+      for (target_ptr = target_vector; *target_ptr != NULL; target_ptr++)
+	{
+	  struct elf_backend_data *back;
+
+	  if ((*target_ptr)->flavour != bfd_target_elf_flavour)
+	    continue;
+	  back = (struct elf_backend_data *) (*target_ptr)->backend_data;
+	  if (back->elf_machine_code == i_ehdrp->e_machine)
+	    {
+	      /* target_ptr is an ELF backend which matches this
+		 object file, so reject the generic ELF target.  */
+	      goto got_wrong_format_error;
+	    }
+	}
+    }
+
+
+  /* Set the flags and architecture before calling the backend so that
+     it can override them.  */
   if (i_ehdrp->e_type == ET_EXEC)
     abfd->flags |= EXEC_P;
   else if (i_ehdrp->e_type == ET_DYN)
     abfd->flags |= DYNAMIC;
 
-  /* Retrieve the architecture information from the xvec and verify
-     that it matches the machine info stored in the ELF header.
-     This allows us to resolve ambiguous formats that might not
-     otherwise be distinguishable. */
+  bfd_default_set_arch_mach (abfd, ebd->arch, 0);
 
-  ebd = get_elf_backend_data (abfd);
+  /* Remember the entry point specified in the ELF file header. */
+  bfd_get_start_address (abfd) = i_ehdrp->e_entry;
 
-  /* Perhaps the elf architecture value should be another field in the
-     elf backend data?  If you change this to work that way, make sure
-     that you still get bfd_arch_unknown for unknown architecture types,
-     and that it still gets accepted by the `generic' elf target.  */
-  {
-    int i;
-    enum bfd_architecture arch = bfd_arch_unknown;
-
-    for (i = 0; i < bfd_elf_arch_map_size; i++)
-      {
-	if (bfd_elf_arch_map[i].elf_arch == i_ehdrp->e_machine)
-	  {
-	    arch = bfd_elf_arch_map[i].bfd_arch;
-	    break;
-	  }
-      }
-    /* start-sanitize-v9 */
-    if (i_ehdrp->e_machine == EM_SPARC64)
-      arch = bfd_arch_sparc;
-    /* end-sanitize-v9 */
-    if (ebd->arch != arch)
-      goto got_wrong_format_error;
-    bfd_default_set_arch_mach (abfd, arch, 0);
-  }
-
+  /* Let the backend double check the format and override global
+     information.  */
+  if (ebd->elf_backend_object_p)
+    {
+      if ((*ebd->elf_backend_object_p) (abfd) == false)
+	goto got_wrong_format_error;
+    }
+    
   /* Allocate space for a copy of the section header table in
      internal form, seek to the section header table in the file,
-     read it in, and convert it to internal form.  As a simple sanity
-     check, verify that the what BFD thinks is the size of each section
-     header table entry actually matches the size recorded in the file. */
-
-  if (i_ehdrp->e_shentsize != sizeof (x_shdr))
-    goto got_wrong_format_error;
+     read it in, and convert it to internal form.  */
   i_shdrp = (Elf_Internal_Shdr *)
     bfd_alloc (abfd, sizeof (*i_shdrp) * i_ehdrp->e_shnum);
   elf_elfsections (abfd) =
@@ -985,10 +1000,6 @@ DEFUN (elf_object_p, (abfd), bfd * abfd)
     {
       bfd_section_from_shdr (abfd, shindex);
     }
-
-  /* Remember the entry point specified in the ELF file header. */
-
-  bfd_get_start_address (abfd) = i_ehdrp->e_entry;
 
   return (abfd->xvec);
 
@@ -1071,7 +1082,11 @@ DEFUN (elf_make_sections, (abfd, asect, obj),
       rela_hdr->sh_flags = 0;
       rela_hdr->sh_addr = 0;
       rela_hdr->sh_offset = 0;
-      rela_hdr->sh_addralign = 0;
+
+      /* FIXME: Systems I've checked use an alignment of 4, but it is
+	 possible that some systems use a different alignment.  */
+      rela_hdr->sh_addralign = 4;
+
       rela_hdr->size = 0;
     }
   if (asect->flags & SEC_ALLOC)
@@ -1291,7 +1306,11 @@ DEFUN (elf_fake_sections, (abfd, asect, obj),
 	rela_hdr->sh_addr = 0;
 	rela_hdr->sh_size = 0;
 	rela_hdr->sh_offset = 0;
-	rela_hdr->sh_addralign = 0;
+
+	/* FIXME: Systems I've checked use an alignment of 4, but some
+	   systems may use a different alignment.  */
+	rela_hdr->sh_addralign = 4;
+
 	rela_hdr->size = 0;
       }
   }
@@ -1313,9 +1332,15 @@ DEFUN (elf_fake_sections, (abfd, asect, obj),
    all local symbols to be at the head of the list.  */
 
 static INLINE int
-sym_is_global (sym)
+sym_is_global (abfd, sym)
+     bfd *abfd;
      asymbol *sym;
 {
+  /* If the backend has a special mapping, use it.  */
+  if (get_elf_backend_data (abfd)->elf_backend_sym_is_global)
+    return ((*get_elf_backend_data (abfd)->elf_backend_sym_is_global)
+	    (abfd, sym));
+
   if (sym->flags & (BSF_GLOBAL | BSF_WEAK))
     {
       if (sym->flags & BSF_LOCAL)
@@ -1419,7 +1444,7 @@ DEFUN (elf_map_symbols, (abfd), bfd * abfd)
   /* Identify and classify all of the symbols.  */
   for (idx = 0; idx < symcount; idx++)
     {
-      if (!sym_is_global (syms[idx]))
+      if (!sym_is_global (abfd, syms[idx]))
 	num_locals++;
       else
 	num_globals++;
@@ -1430,7 +1455,7 @@ DEFUN (elf_map_symbols, (abfd), bfd * abfd)
   for (idx = 0; idx < symcount; idx++)
     {
       syms[idx]->udata = (PTR) &sym_extra[idx];
-      if (!sym_is_global (syms[idx]))
+      if (!sym_is_global (abfd, syms[idx]))
 	sym_extra[idx].elf_sym_num = 1 + num_locals2++;
       else
 	sym_extra[idx].elf_sym_num = 1 + num_locals + num_globals2++;
@@ -1619,7 +1644,7 @@ map_program_segments (abfd)
 
   done = (char *) alloca (i_ehdrp->e_shnum);
   memset (done, 0, i_ehdrp->e_shnum);
-  for (i = 0; i < i_ehdrp->e_shnum; i++)
+  for (i = 1; i < i_ehdrp->e_shnum; i++)
     {
       i_shdrp = i_shdrpp[i];
       /* If it's going to be mapped in, it's been assigned a position.  */
@@ -1681,7 +1706,7 @@ map_program_segments (abfd)
       if (i_shdrp->sh_type == SHT_PROGBITS)
 	file_size = i_shdrp->sh_size;
 
-      for (i = 0; i < i_ehdrp->e_shnum; i++)
+      for (i = 1; i < i_ehdrp->e_shnum; i++)
 	{
 	  file_ptr f1;
 
@@ -1786,6 +1811,7 @@ assign_file_positions_except_relocs (abfd)
      The order, for now: <ehdr> <shdr> <sec1> <sec2> <sec3> ... <rel1> ...
      or:                 <ehdr> <phdr> <sec1> <sec2> ... <shdr> <rel1> ... */
 
+  struct elf_obj_tdata *t = elf_tdata (abfd);
   file_ptr off;
   int i;
   Elf_Internal_Shdr **i_shdrpp = elf_elfsections (abfd);
@@ -1802,11 +1828,17 @@ assign_file_positions_except_relocs (abfd)
       off = align_file_position (off);
       i_ehdrp->e_shoff = off;
       off += i_ehdrp->e_shnum * i_ehdrp->e_shentsize;
-
       off = assign_file_positions_for_symtab_and_strtabs (abfd, off);
     }
-  for (i = 0; i < i_ehdrp->e_shnum; i++)
+  for (i = 1; i < i_ehdrp->e_shnum; i++)
     {
+      /* The symtab and strtab sections are placed by
+	 assign_file_positions_for_symtab_and_strtabs.  */
+      if (i == t->symtab_section
+	  || i == t->strtab_section
+	  || i == t->shstrtab_section)
+	continue;
+
       i_shdrp = i_shdrpp[i];
       if (i_shdrp->sh_type == SHT_REL || i_shdrp->sh_type == SHT_RELA)
 	{
@@ -1871,7 +1903,7 @@ assign_file_positions_except_relocs (abfd)
 
       off = assign_file_positions_for_symtab_and_strtabs (abfd, off);
 
-      for (i = 0; i < i_ehdrp->e_shnum; i++)
+      for (i = 1; i < i_ehdrp->e_shnum; i++)
 	{
 	  i_shdrp = i_shdrpp[i];
 	  if (i_shdrp->sh_offset + 1 == 0
@@ -2012,6 +2044,11 @@ swap_out_syms (abfd)
     symtab_hdr->sh_size = symtab_hdr->sh_entsize * (symcount + 1);
     symtab_hdr->sh_info = elf_num_locals (abfd) + 1;
 
+    /* FIXME: Systems I've checked use 4 byte alignment for .symtab,
+       but it is possible that there are systems which use a different
+       alignment.  */
+    symtab_hdr->sh_addralign = 4;
+
     /* see assert in elf_fake_sections that supports this: */
     symstrtab_hdr = &elf_tdata (abfd)->strtab_hdr;
     symstrtab_hdr->sh_type = SHT_STRTAB;
@@ -2126,7 +2163,7 @@ swap_out_syms (abfd)
     symstrtab_hdr->sh_entsize = 0;
     symstrtab_hdr->sh_link = 0;
     symstrtab_hdr->sh_info = 0;
-    symstrtab_hdr->sh_addralign = 0;
+    symstrtab_hdr->sh_addralign = 1;
     symstrtab_hdr->size = 0;
   }
 
@@ -2141,7 +2178,7 @@ swap_out_syms (abfd)
     this_hdr->sh_flags = 0;
     this_hdr->sh_addr = 0;
     this_hdr->sh_entsize = 0;
-    this_hdr->sh_addralign = 0;
+    this_hdr->sh_addralign = 1;
     this_hdr->size = 0;
   }
 }
@@ -2202,7 +2239,7 @@ assign_file_positions_for_relocs (abfd)
   int i;
   Elf_Internal_Shdr **shdrpp = elf_elfsections (abfd);
   Elf_Internal_Shdr *shdrp;
-  for (i = 0; i < elf_elfheader(abfd)->e_shnum; i++)
+  for (i = 1; i < elf_elfheader(abfd)->e_shnum; i++)
     {
       shdrp = shdrpp[i];
       if (shdrp->sh_type != SHT_REL && shdrp->sh_type != SHT_RELA)
@@ -2216,6 +2253,7 @@ assign_file_positions_for_relocs (abfd)
 boolean
 DEFUN (NAME(bfd_elf,write_object_contents), (abfd), bfd * abfd)
 {
+  struct elf_backend_data *bed = get_elf_backend_data (abfd);
   Elf_Internal_Ehdr *i_ehdrp;
   Elf_Internal_Shdr **i_shdrp;
   int count;
@@ -2234,10 +2272,8 @@ DEFUN (NAME(bfd_elf,write_object_contents), (abfd), bfd * abfd)
   assign_file_positions_for_relocs (abfd);
 
   /* After writing the headers, we need to write the sections too... */
-  for (count = 0; count < i_ehdrp->e_shnum; count++)
+  for (count = 1; count < i_ehdrp->e_shnum; count++)
     {
-      struct elf_backend_data *bed = get_elf_backend_data (abfd);
-
       if (bed->elf_backend_section_processing)
 	(*bed->elf_backend_section_processing) (abfd, i_shdrp[count]);
       if (i_shdrp[count]->contents)
@@ -2247,6 +2283,10 @@ DEFUN (NAME(bfd_elf,write_object_contents), (abfd), bfd * abfd)
 		     abfd);
 	}
     }
+
+  if (bed->elf_backend_final_write_processing)
+    (*bed->elf_backend_final_write_processing) (abfd);
+
   return write_shdrs_and_ehdr (abfd);
 }
 
