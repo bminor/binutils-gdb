@@ -1,6 +1,6 @@
 /* MIPS-specific support for ELF
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+   2003 Free Software Foundation, Inc.
 
    Most of the information added by Ian Lance Taylor, Cygnus Support,
    <ian@cygnus.com>.
@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
+#include "libiberty.h"
 #include "elf-bfd.h"
 #include "elfxx-mips.h"
 #include "elf/mips.h"
@@ -382,11 +383,12 @@ static bfd_boolean mips_elf_create_dynamic_relocation
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Rela *,
 	   struct mips_elf_link_hash_entry *, asection *,
 	   bfd_vma, bfd_vma *, asection *));
-static INLINE int elf_mips_isa PARAMS ((flagword));
+static void mips_set_isa_flags PARAMS ((bfd *));
 static INLINE char* elf_mips_abi_name PARAMS ((bfd *));
 static void mips_elf_irix6_finish_dynamic_symbol
   PARAMS ((bfd *, const char *, Elf_Internal_Sym *));
-static bfd_boolean _bfd_mips_elf_mach_extends_p PARAMS ((flagword, flagword));
+static bfd_boolean mips_mach_extends_p PARAMS ((unsigned long, unsigned long));
+static bfd_boolean mips_32bit_flags_p PARAMS ((flagword));
 static hashval_t mips_elf_got_entry_hash PARAMS ((const PTR));
 static int mips_elf_got_entry_eq PARAMS ((const PTR, const PTR));
 
@@ -3080,34 +3082,6 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
   return TRUE;
 }
 
-/* Return the ISA for a MIPS e_flags value.  */
-
-static INLINE int
-elf_mips_isa (flags)
-     flagword flags;
-{
-  switch (flags & EF_MIPS_ARCH)
-    {
-    case E_MIPS_ARCH_1:
-      return 1;
-    case E_MIPS_ARCH_2:
-      return 2;
-    case E_MIPS_ARCH_3:
-      return 3;
-    case E_MIPS_ARCH_4:
-      return 4;
-    case E_MIPS_ARCH_5:
-      return 5;
-    case E_MIPS_ARCH_32:
-      return 32;
-    case E_MIPS_ARCH_64:
-      return 64;
-    case E_MIPS_ARCH_32R2:
-      return 33;
-    }
-  return 4;
-}
-
 /* Return the MACH for a MIPS e_flags value.  */
 
 unsigned long
@@ -5967,20 +5941,14 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
   return TRUE;
 }
 
-/* The final processing done just before writing out a MIPS ELF object
-   file.  This gets the MIPS architecture right based on the machine
-   number.  This is used by both the 32-bit and the 64-bit ABI.  */
 
-void
-_bfd_mips_elf_final_write_processing (abfd, linker)
+/* Set ABFD's EF_MIPS_ARCH and EF_MIPS_MACH flags.  */
+
+static void
+mips_set_isa_flags (abfd)
      bfd *abfd;
-     bfd_boolean linker ATTRIBUTE_UNUSED;
 {
-  unsigned long val;
-  unsigned int i;
-  Elf_Internal_Shdr **hdrpp;
-  const char *name;
-  asection *sec;
+  flagword val;
 
   switch (bfd_get_mach (abfd))
     {
@@ -6059,9 +6027,31 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
       val = E_MIPS_ARCH_32R2;
       break;
     }
-
   elf_elfheader (abfd)->e_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH);
   elf_elfheader (abfd)->e_flags |= val;
+
+}
+
+
+/* The final processing done just before writing out a MIPS ELF object
+   file.  This gets the MIPS architecture right based on the machine
+   number.  This is used by both the 32-bit and the 64-bit ABI.  */
+
+void
+_bfd_mips_elf_final_write_processing (abfd, linker)
+     bfd *abfd;
+     bfd_boolean linker ATTRIBUTE_UNUSED;
+{
+  unsigned int i;
+  Elf_Internal_Shdr **hdrpp;
+  const char *name;
+  asection *sec;
+
+  /* Keep the existing EF_MIPS_MACH and EF_MIPS_ARCH flags if the former
+     is nonzero.  This is for compatibility with old objects, which used
+     a combination of a 32-bit EF_MIPS_ARCH and a 64-bit EF_MIPS_MACH.  */
+  if ((elf_elfheader (abfd)->e_flags & EF_MIPS_MACH) == 0)
+    mips_set_isa_flags (abfd);
 
   /* Set the sh_info field for .gptab sections and other appropriate
      info for each special section.  */
@@ -7731,25 +7721,96 @@ _bfd_mips_elf_final_link (abfd, info)
   return TRUE;
 }
 
-/* Return TRUE if machine EXTENSION is an extension of machine BASE,
-   meaning that it should be safe to link code for the two machines
-   and set the output machine to EXTENSION.  EXTENSION and BASE are
-   both submasks of EF_MIPS_MACH.  */
+/* Structure for saying that BFD machine EXTENSION extends BASE.  */
+
+struct mips_mach_extension {
+  unsigned long extension, base;
+};
+
+
+/* An array describing how BFD machines relate to one another.  The entries
+   are ordered topologically with MIPS I extensions listed last.  */
+
+static const struct mips_mach_extension mips_mach_extensions[] = {
+  /* MIPS64 extensions.  */
+  { bfd_mach_mips_sb1, bfd_mach_mipsisa64 },
+
+  /* MIPS V extensions.  */
+  { bfd_mach_mipsisa64, bfd_mach_mips5 },
+
+  /* R10000 extensions.  */
+  { bfd_mach_mips12000, bfd_mach_mips10000 },
+
+  /* R5000 extensions.  Note: the vr5500 ISA is an extension of the core
+     vr5400 ISA, but doesn't include the multimedia stuff.  It seems
+     better to allow vr5400 and vr5500 code to be merged anyway, since
+     many libraries will just use the core ISA.  Perhaps we could add
+     some sort of ASE flag if this ever proves a problem.  */
+  { bfd_mach_mips5500, bfd_mach_mips5400 },
+  { bfd_mach_mips5400, bfd_mach_mips5000 },
+
+  /* MIPS IV extensions.  */
+  { bfd_mach_mips5, bfd_mach_mips8000 },
+  { bfd_mach_mips10000, bfd_mach_mips8000 },
+  { bfd_mach_mips5000, bfd_mach_mips8000 },
+
+  /* VR4100 extensions.  */
+  { bfd_mach_mips4120, bfd_mach_mips4100 },
+  { bfd_mach_mips4111, bfd_mach_mips4100 },
+
+  /* MIPS III extensions.  */
+  { bfd_mach_mips8000, bfd_mach_mips4000 },
+  { bfd_mach_mips4650, bfd_mach_mips4000 },
+  { bfd_mach_mips4600, bfd_mach_mips4000 },
+  { bfd_mach_mips4400, bfd_mach_mips4000 },
+  { bfd_mach_mips4300, bfd_mach_mips4000 },
+  { bfd_mach_mips4100, bfd_mach_mips4000 },
+  { bfd_mach_mips4010, bfd_mach_mips4000 },
+
+  /* MIPS32 extensions.  */
+  { bfd_mach_mipsisa32r2, bfd_mach_mipsisa32 },
+
+  /* MIPS II extensions.  */
+  { bfd_mach_mips4000, bfd_mach_mips6000 },
+  { bfd_mach_mipsisa32, bfd_mach_mips6000 },
+
+  /* MIPS I extensions.  */
+  { bfd_mach_mips6000, bfd_mach_mips3000 },
+  { bfd_mach_mips3900, bfd_mach_mips3000 }
+};
+
+
+/* Return true if bfd machine EXTENSION is an extension of machine BASE.  */
 
 static bfd_boolean
-_bfd_mips_elf_mach_extends_p (base, extension)
-     flagword base, extension;
+mips_mach_extends_p (base, extension)
+     unsigned long base, extension;
 {
-  /* The vr5500 ISA is an extension of the core vr5400 ISA, but doesn't
-     include the multimedia stuff.  It seems better to allow vr5400
-     and vr5500 code to be merged anyway, since many libraries will
-     just use the core ISA.  Perhaps we could add some sort of ASE
-     flag if this ever proves a problem.  */
-  return (base == 0
-	  || (base == E_MIPS_MACH_5400 && extension == E_MIPS_MACH_5500)
-	  || (base == E_MIPS_MACH_4100 && extension == E_MIPS_MACH_4111)
-	  || (base == E_MIPS_MACH_4100 && extension == E_MIPS_MACH_4120));
+  size_t i;
+
+  for (i = 0; extension != base && i < ARRAY_SIZE (mips_mach_extensions); i++)
+    if (extension == mips_mach_extensions[i].extension)
+      extension = mips_mach_extensions[i].base;
+
+  return extension == base;
 }
+
+
+/* Return true if the given ELF header flags describe a 32-bit binary.  */
+
+static bfd_boolean
+mips_32bit_flags_p (flags)
+     flagword flags;
+{
+  return ((flags & EF_MIPS_32BITMODE) != 0
+	  || (flags & EF_MIPS_ABI) == E_MIPS_ABI_O32
+	  || (flags & EF_MIPS_ABI) == E_MIPS_ABI_EABI32
+	  || (flags & EF_MIPS_ARCH) == E_MIPS_ARCH_1
+	  || (flags & EF_MIPS_ARCH) == E_MIPS_ARCH_2
+	  || (flags & EF_MIPS_ARCH) == E_MIPS_ARCH_32
+	  || (flags & EF_MIPS_ARCH) == E_MIPS_ARCH_32R2);
+}
+
 
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
@@ -7846,68 +7907,50 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
       ok = FALSE;
     }
 
-  /* Compare the ISA's.  */
-  if ((new_flags & (EF_MIPS_ARCH | EF_MIPS_MACH))
-      != (old_flags & (EF_MIPS_ARCH | EF_MIPS_MACH)))
+  /* Compare the ISAs.  */
+  if (mips_32bit_flags_p (old_flags) != mips_32bit_flags_p (new_flags))
     {
-      int new_mach = new_flags & EF_MIPS_MACH;
-      int old_mach = old_flags & EF_MIPS_MACH;
-      int new_isa = elf_mips_isa (new_flags);
-      int old_isa = elf_mips_isa (old_flags);
-
-      /* If either has no machine specified, just compare the general isa's.
-	 Some combinations of machines are ok, if the isa's match.  */
-      if (new_mach == old_mach
-	  || _bfd_mips_elf_mach_extends_p (new_mach, old_mach)
-	  || _bfd_mips_elf_mach_extends_p (old_mach, new_mach))
+      (*_bfd_error_handler)
+	(_("%s: linking 32-bit code with 64-bit code"),
+	 bfd_archive_filename (ibfd));
+      ok = FALSE;
+    }
+  else if (!mips_mach_extends_p (bfd_get_mach (ibfd), bfd_get_mach (obfd)))
+    {
+      /* OBFD's ISA isn't the same as, or an extension of, IBFD's.  */
+      if (mips_mach_extends_p (bfd_get_mach (obfd), bfd_get_mach (ibfd)))
 	{
-	  /* Don't warn about mixing code using 32-bit ISAs, or mixing code
-	     using 64-bit ISAs.  They will normally use the same data sizes
-	     and calling conventions.  */
+	  /* Copy the architecture info from IBFD to OBFD.  Also copy
+	     the 32-bit flag (if set) so that we continue to recognise
+	     OBFD as a 32-bit binary.  */
+	  bfd_set_arch_info (obfd, bfd_get_arch_info (ibfd));
+	  elf_elfheader (obfd)->e_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH);
+	  elf_elfheader (obfd)->e_flags
+	    |= new_flags & (EF_MIPS_ARCH | EF_MIPS_MACH | EF_MIPS_32BITMODE);
 
-	  if ((  (new_isa == 1 || new_isa == 2 || new_isa == 32
-		  || new_isa == 33)
-	       ^ (old_isa == 1 || old_isa == 2 || old_isa == 32
-		  || old_isa == 33)) != 0)
-	    {
-	      (*_bfd_error_handler)
-	       (_("%s: ISA mismatch (-mips%d) with previous modules (-mips%d)"),
-		bfd_archive_filename (ibfd), new_isa, old_isa);
-	      ok = FALSE;
-	    }
-	  else
-	    {
-	      /* Do we need to update the mach field?  */
-	      if (_bfd_mips_elf_mach_extends_p (old_mach, new_mach))
-		{
-		  elf_elfheader (obfd)->e_flags &= ~EF_MIPS_MACH;
-		  elf_elfheader (obfd)->e_flags |= new_mach;
-		}
-
-	      /* Do we need to update the ISA field?  */
-	      if (new_isa > old_isa)
-		{
-		  elf_elfheader (obfd)->e_flags &= ~EF_MIPS_ARCH;
-		  elf_elfheader (obfd)->e_flags
-		    |= new_flags & EF_MIPS_ARCH;
-		}
-	    }
+	  /* Copy across the ABI flags if OBFD doesn't use them
+	     and if that was what caused us to treat IBFD as 32-bit.  */
+	  if ((old_flags & EF_MIPS_ABI) == 0
+	      && mips_32bit_flags_p (new_flags)
+	      && !mips_32bit_flags_p (new_flags & ~EF_MIPS_ABI))
+	    elf_elfheader (obfd)->e_flags |= new_flags & EF_MIPS_ABI;
 	}
       else
 	{
+	  /* The ISAs aren't compatible.  */
 	  (*_bfd_error_handler)
-	    (_("%s: ISA mismatch (%d) with previous modules (%d)"),
+	    (_("%s: linking %s module with previous %s modules"),
 	     bfd_archive_filename (ibfd),
-	     _bfd_elf_mips_mach (new_flags),
-	     _bfd_elf_mips_mach (old_flags));
+	     bfd_printable_name (ibfd),
+	     bfd_printable_name (obfd));
 	  ok = FALSE;
 	}
-
-      new_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH);
-      old_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH);
     }
 
-  /* Compare ABI's.  The 64-bit ABI does not use EF_MIPS_ABI.  But, it
+  new_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH | EF_MIPS_32BITMODE);
+  old_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH | EF_MIPS_32BITMODE);
+
+  /* Compare ABIs.  The 64-bit ABI does not use EF_MIPS_ABI.  But, it
      does set EI_CLASS differently from any 32-bit ABI.  */
   if ((new_flags & EF_MIPS_ABI) != (old_flags & EF_MIPS_ABI)
       || (elf_elfheader (ibfd)->e_ident[EI_CLASS]

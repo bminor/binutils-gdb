@@ -1,3 +1,17 @@
+2003-01-02  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elfxx-mips.c: Include libiberty.h.
+	(elf_mips_isa, _bfd_mips_elf_mach_extends_p): Remove.
+	(mips_set_isa_flags): New function, split out from...
+	(_bfd_mips_elf_final_write_processing): ...here.  Only call
+	mips_set_isa_flags if the EF_MIPS_MACH bits are clear.
+	(mips_mach_extensions): New array.
+	(mips_32bit_flags_p): New function.
+	(_bfd_mips_elf_merge_private_bfd_data): Rework architecture checks.
+	Use mips_32bit_flags_p to check if one binary is 32-bit and the
+	other is 64-bit.  When adopting IBFD's architecture, adopt the
+	bfd_mach as well as the flags.
+
 2003-01-02  Nick Kelsey  <nickk@ubicom.com>
 
 	* elf32-ip2k.c: Re-work of linker relaxation code for the ip2k to

@@ -1,3 +1,8 @@
+2003-01-02  Richard Sandiford  <rsandifo@redhat.com>
+
+	* ld-mips-elf/jr.s: New file.
+	* ld-mips-elf/mips-elf-flags.exp: New test.
+
 2002-12-18  Ralf Habacker  <ralf.habacker@freenet.de>
 
 	* ld-auto-import: New directory.
