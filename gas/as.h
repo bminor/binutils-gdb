@@ -427,6 +427,9 @@ COMMON unsigned char flag_readonly_data_in_text; /* -R */
 /* True if warnings should be inhibited.  */
 COMMON int flag_no_warnings; /* -W */
 
+/* True if warnings count as errors.  */
+COMMON int flag_fatal_warnings; /* --fatal-warnings */
+
 /* True if we should attempt to generate output even if non-fatal errors
    are detected.  */
 COMMON unsigned char flag_always_generate_output; /* -Z */

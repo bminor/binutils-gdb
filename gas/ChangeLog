@@ -1,3 +1,13 @@
+Mon Oct 11 14:02:40 1999  Geoffrey Keating  <geoffk@cygnus.com>
+
+	* as.c (show_usage): Document new options.
+	(parse_args): Add --no-warn, --warn, --fatal-warnings,
+	which become 'W', OPTION_WARN, and OPTION_WARN_FATAL.
+	(parse_args): Parse the new options.
+	(main): If there were warnings, and --fatal-warnings
+	was specified, print an error.
+	* as.h: New variable, flag_fatal_warnings, for new option.
+
 Sun Oct 10 01:47:23 1999  Jerry Quinn <jerry.quinn.adv91@alum.dartmouth.org>
 
 	* config/tc-hppa.c (pa_ip):  Add new codes 'cc', 'cd', 'cC', 'co',

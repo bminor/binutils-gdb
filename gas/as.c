@@ -170,7 +170,9 @@ Options:\n\
   --strip-local-absolute  strip local absolute symbols\n\
   --traditional-format	  Use same format as native assembler when possible\n\
   --version		  print assembler version number and exit\n\
-  -W			  suppress warnings\n\
+  -W  --no-warn		  suppress warnings\n\
+  --warn		  don't suppress warnings\n\
+  --fatal-warnings	  treat warnings as errors\n\
   --itbl INSTTBL	  extend instruction set to include instructions\n\
 			  matching the specifications defined in file INSTTBL\n\
   -w			  ignored\n\
@@ -371,7 +373,12 @@ parse_args (pargc, pargv)
 #define OPTION_TRADITIONAL_FORMAT (OPTION_STD_BASE + 16)
     {"traditional-format", no_argument, NULL, OPTION_TRADITIONAL_FORMAT},
 #define OPTION_GDWARF2 (OPTION_STD_BASE + 17)
-    {"gdwarf2", no_argument, NULL, OPTION_GDWARF2}
+    {"gdwarf2", no_argument, NULL, OPTION_GDWARF2},
+    {"no-warn", no_argument, NULL, 'W'},
+#define OPTION_WARN (OPTION_STD_BASE + 18)
+    {"warn", no_argument, NULL, OPTION_WARN},
+#define OPTION_WARN_FATAL (OPTION_STD_BASE + 19)
+    {"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL}
   };
 
   /* Construct the option lists from the standard list and the
@@ -604,6 +611,16 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	  flag_no_warnings = 1;
 	  break;
 
+	case OPTION_WARN:
+	  flag_no_warnings = 0;
+	  flag_fatal_warnings = 0;
+	  break;
+
+	case OPTION_WARN_FATAL:
+	  flag_no_warnings = 0;
+	  flag_fatal_warnings = 1;
+	  break;
+
 	case 'Z':
 	  flag_always_generate_output = 1;
 	  break;
@@ -833,6 +850,9 @@ main (argc, argv)
 #endif
     output_file_close (out_file_name);
 #endif
+
+  if (flag_fatal_warnings && had_warnings() > 0 && had_errors () == 0)
+    as_bad (_("%d warnings, treating warnings as errors"), had_warnings());
 
   if (had_errors () > 0 && ! flag_always_generate_output)
     keep_it = 0;

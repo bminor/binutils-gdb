@@ -204,7 +204,8 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @value{AS} [ -a[cdhlns][=file] ] [ -D ]  [ --defsym @var{sym}=@var{val} ]
  [ -f ] [ --gstabs ] [ --gdwarf2 ] [ --help ] [ -I @var{dir} ] [ -J ] [ -K ] [ -L ]
  [ --keep-locals ] [ -o @var{objfile} ] [ -R ] [ --statistics ] [ -v ]
- [ -version ] [ --version ] [ -W ] [ -w ] [ -x ] [ -Z ]
+ [ -version ] [ --version ] [ -W ] [ --warn ] [ --fatal-warnings ] 
+ [ -w ] [ -x ] [ -Z ]
 @ifset A29K
 @c am29k has no machine-dependent assembler options
 @end ifset
@@ -370,7 +371,14 @@ Print the @code{as} version.
 Print the @code{as} version and exit.
 
 @item -W
+@itemx --no-warn
 Suppress warning messages.
+
+@item --fatal-warnings
+Treat warnings as errors.
+
+@item --warn
+Don't suppress warning messages or treat them as errors.
 
 @item -w
 Ignored.
@@ -1024,7 +1032,7 @@ assembler.)
 * statistics::    --statistics to see statistics about assembly
 * traditional-format:: --traditional-format for compatible output
 * v::             -v to announce version
-* W::             -W to suppress warnings
+* W::             -W, --no-warn, --warn, --fatal-warnings to control warnings
 * Z::             -Z to make object file even after errors
 @end menu
 
@@ -1400,19 +1408,32 @@ option @samp{-v} (which you can also spell as @samp{-version}) on the
 command line.
 
 @node W
-@section Suppress Warnings: @code{-W}
+@section Control Warnings: @code{-W}, @code{--warn}, @code{--no-warn}, @code{--fatal-warnings}
 
-@kindex -W
-@cindex suppressing warnings
-@cindex warnings, suppressing
 @code{@value{AS}} should never give a warning or error message when
 assembling compiler output.  But programs written by people often
 cause @code{@value{AS}} to give a warning that a particular assumption was
 made.  All such warnings are directed to the standard error file.
-If you use this option, no warnings are issued.  This option only
-affects the warning messages: it does not change any particular of how
-@code{@value{AS}} assembles your file.  Errors, which stop the assembly, are
-still reported.
+
+@kindex @samp{-W}
+@kindex @samp{--no-warn}
+@cindex suppressing warnings
+@cindex warnings, suppressing
+If you use the @code{-W} and @code{--no-warn} options, no warnings are issued.
+This only affects the warning messages: it does not change any particular of
+how @code{@value{AS}} assembles your file.  Errors, which stop the assembly,
+are still reported.
+
+@kindex @samp{--fatal-warnings}
+@cindex errors, caused by warnings
+@cindex warnings, causing error
+If you use the @code{--fatal-warnings} option, @code{@value{AS}} considers
+files that generate warnings to be in error.
+
+@kindex @samp{--warn}
+@cindex warnings, switching on
+You can switch these options off again by specifying @code{--warn}, which
+causes warnings to be output as usual.
 
 @node Z
 @section Generate Object File in Spite of Errors: @code{-Z}
