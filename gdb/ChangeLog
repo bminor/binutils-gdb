@@ -1,5 +1,11 @@
+Fri Jan  8 11:57:24 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* exec.c (exec_ops): Don't initialize statically.
+	(init_exec_ops): New function, fills in exec_ops.
+	(_initialize_exec): Use it.
 
 Thu Jan  7 17:50:15 EST 1999  Zdenek Radouch   (radouch@cygnus.com)
+
 	Beta FR30 port.
 	* fr30-tdep.c
 	* config/fr30/tm-fr30.h
