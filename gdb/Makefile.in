@@ -566,6 +566,7 @@ callback_h =	$(INCLUDE_DIR)/gdb/callback.h
 coff_sym_h =	$(INCLUDE_DIR)/coff/sym.h
 coff_symconst_h =	$(INCLUDE_DIR)/coff/symconst.h
 coff_ecoff_h =	$(INCLUDE_DIR)/coff/ecoff.h
+coff_internal_h =	$(INCLUDE_DIR)/coff/internal.h
 dis_asm_h =	$(INCLUDE_DIR)/dis-asm.h 
 elf_sh_h =	$(INCLUDE_DIR)/elf/sh.h
 elf_bfd_h =	$(BFD_SRC)/elf-bfd.h
@@ -1527,9 +1528,9 @@ arm-linux-tdep.o: arm-linux-tdep.c $(defs_h) $(target_h) $(value_h) \
 	$(osabi_h)
 arm-tdep.o: arm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(symfile_h) $(gdb_string_h) $(dis_asm_h) $(regcache_h) \
-	$(doublest_h) $(value_h) $(arch_utils_h) $(solib_svr4_h) \
-	$(arm_tdep_h) $(gdb_sim_arm_h) $(elf_bfd_h) $(coff_internal_h) \
-	$(elf_arm_h) $(gdb_assert_h) $(bfd_in2_h) $(libcoff_h) $(osabi_h)
+	$(doublest_h) $(value_h) $(arch_utils_h) $(solib_svr4_h) $(osabi_h) \
+	$(arm_tdep_h) $(sim_arm_h) $(elf_bfd_h) $(coff_internal_h) \
+	$(INCLUDE_DIR)/elf/arm.h $(gdb_assert_h)
 armnbsd-nat.o: armnbsd-nat.c $(defs_h) $(arm_tdep_h) $(inferior_h) \
 	$(regcache_h) $(gdbcore_h)
 armnbsd-tdep.o: armnbsd-tdep.c $(defs_h) $(arm_tdep_h) $(nbsd_tdep_h) \

@@ -1,5 +1,10 @@
 2003-03-22  Richard Earnshaw  <rearnsha@arm.com>
 
+	* Makefile.in (coff_internal_h): Define.
+	(arm-tdep.o): Update dependencies.
+
+2003-03-22  Richard Earnshaw  <rearnsha@arm.com>
+
 	* arm-tdep.c (prologue_cache): Delete.
 	(check_prologue_cache, save_prologue_cache): Delete.
 	(arm_scan_prologue): Don't check or update the prologue_cache.
