@@ -434,6 +434,12 @@ add_lineno (frag, offset, num)
     {
       abort ();
     }
+  if (num <= 0) 
+    {
+      /* Zero is used as an end marker in the file.  */
+      as_bad (_("Line numbers must be positive integers\n"));
+      return;
+    }
   new_line->next = line_nos;
   new_line->frag = frag;
   new_line->l.line_number = num;
