@@ -1,6 +1,10 @@
 Mon May 31 10:37:04 1993  Jim Kingdon  (kingdon@cygnus.com)
 
-	* stabread.c (read_type): Skip type attributes if present.
+	* printcmd.c (print_scalar_formatted): Print integers bigger than
+	LONGEST in hex no matter how big, and no matter what the format
+	and size.
+
+	* stabsread.c (read_type): Skip type attributes if present.
 
 	* stabsread.c (read_huge_number): Don't accept '0' + radix as part
 	of number, just through '0' + radix - 1.
