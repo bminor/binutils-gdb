@@ -1,5 +1,5 @@
 /* objdump.c -- dump information about an object file.
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -219,9 +219,10 @@ int remove_useless_symbols (syms, count)
 }
 
 
-/* Sort symbols into value order */
+/* Sort symbols into value order. */
+
 static int 
-comp (ap, bp)
+compare_symbols (ap, bp)
      PTR ap;
      PTR bp;
 {
@@ -431,7 +432,7 @@ disassemble_data (abfd)
   symcount = remove_useless_symbols (syms, symcount);
 
   /* Sort the symbols into section and symbol order */
-  (void) qsort (syms, symcount, sizeof (asymbol *), comp);
+  (void) qsort (syms, symcount, sizeof (asymbol *), compare_symbols);
 
   if (machine != (char *) NULL)
     {

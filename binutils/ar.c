@@ -1,5 +1,5 @@
 /* ar.c - Archive modify and extract.
-   Copyright 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1994 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -28,7 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include "bucomm.h"
 #include "aout/ar.h"
-#include "../bfd/libbfd.h"
+#include "libbfd.h"
 #include "arsup.h"
 #include <stdio.h>
 #ifdef POSIX_UTIME
@@ -334,7 +334,7 @@ main(argc, argv)
       mri_mode = 1;
       break;
      default:
-      fprintf(stderr, "%s: illegal option -- %c", program_name, c);
+      fprintf(stderr, "%s: illegal option -- %c\n", program_name, c);
       usage ();
     }
   }

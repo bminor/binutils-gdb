@@ -1,5 +1,5 @@
 # Makefile for GNU binary-file utilities
-# Copyright (C) 1992, 1993 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1993, 1994 Free Software Foundation, Inc.
 
 # This file is part of GNU binutils.
 
@@ -79,7 +79,7 @@ version=`./../gcc/gcc -dumpversion`
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../texinfo
 
-MANPAGES= ar nm objdump ranlib size strings strip c++filt objcopy
+MANPAGES= ar nm objdump ranlib size strings strip c++filt objcopy nlmconv
 
 #CC=gcc -Wall
 # these two are almost the same program
@@ -115,8 +115,10 @@ INCLUDES = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR)
 #### host and target dependant Makefile fragments come in here.
 ###
 
+ALL_CFLAGS = $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CFLAGS)
+
 .c.o:
-	$(CC) -c $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CFLAGS) $<
+	$(CC) -c $(ALL_CFLAGS) $<
 
 #
 ## Random definitions
@@ -130,6 +132,8 @@ INCLUDES = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR)
 # fail unnecessarily.  I've also seen some Unix malloc's fail, even when
 # there is enough memory.  So use the new GNU malloc.
 # MALLOC = gmalloc.o
+# Use this if the system malloc is good enough.
+MALLOC =
 
 # Use the GNU getopt unless you have problems with it.
 # The IRIS version could probably benefit from being assembled with
@@ -232,7 +236,7 @@ cplus-dem.o: $(BASEDIR)/libiberty/cplus-dem.c $(INCDIR)/getopt.h demangle.o
 $(DEMANGLER_PROG): cplus-dem.o $(LIBIBERTY) underscore.o version.o
 	$(CC) $(CFLAGS) $(LDFLAGS)  -o $(DEMANGLER_PROG) cplus-dem.o $(LIBIBERTY) $(EXTRALIBS) underscore.o version.o
 
-arparse.c: arparse.y
+arparse.h arparse.c: arparse.y
 	$(BISON) $(BISONFLAGS)  $(srcdir)/arparse.y
 	-mv y.tab.c arparse.c
 	-mv y.tab.h arparse.h
@@ -271,6 +275,10 @@ nlmheader.c: nlmheader.y
 	rm -f nlmheader.c
 	-mv y.tab.c nlmheader.c
 
+nlmconv.o: nlmconv.c
+	ldname=`t='$(program_transform_name)'; echo ld | sed -e "" $$t`; \
+	$(CC) -c -DLD_NAME="\"$${ldname}\"" $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CFLAGS) $(srcdir)/nlmconv.c
+
 $(NLMCONV_PROG): nlmconv.o nlmheader.o $(ADDL_LIBS) $(BFD)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ nlmconv.o nlmheader.o $(ADDL_LIBS) $(EXTRALIBS)
 
@@ -282,7 +290,7 @@ $(NLMCONV_PROG): nlmconv.o nlmheader.o $(ADDL_LIBS) $(BFD)
 
 bucomm.o: bucomm.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
-  $(INCDIR)/fopen-same.h 
+  $(INCDIR)/fopen-same.h bucomm.h
 filemode.o: filemode.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h ../bfd/sysdep.h $(BFDDIR)/hosts/std-host.h \
   $(INCDIR)/fopen-same.h 
@@ -319,8 +327,8 @@ is-ranlib.o: is-ranlib.c
 not-strip.o: not-strip.c 
 nlmheader.o: nlmheader.c nlmconv.h $(INCDIR)/nlm/common.h \
   $(INCDIR)/nlm/internal.h
-nlmconv.o: nlmconv.c nlmconv.h $(INCDIR)/nlm/common.h \
-  $(INCDIR)/nlm/internal.h $(BFDDIR)/libnlm.h bucomm.h
+nlmconv.o: $(INCDIR)/nlm/common.h $(INCDIR)/nlm/internal.h \
+  $(BFDDIR)/libnlm.h bucomm.h
 
 stage1: force
 	- mkdir stage1

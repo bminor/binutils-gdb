@@ -1,3 +1,11 @@
+Sat Jan 22 16:20:46 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* Makefile.in (MALLOC): Set to emptiness by default.
+	(ALL_CFLAGS): Add and use.
+	(arparse.h): Make it depend on arparse.y.
+	* ar.c (libbfd.h): Don't require to be in ../bfd.
+	* objdump.c (comp): Rename to compare_symbols.
+
 Fri Jan 21 20:22:30 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* objdump.c (list_matching_formats): If the file format is ambiguous,
