@@ -63,6 +63,8 @@ static boolean sparc64_elf_add_symbol_hook
 static void sparc64_elf_symbol_processing
   PARAMS ((bfd *, asymbol *));
 
+static boolean sparc64_elf_copy_private_bfd_data
+  PARAMS ((bfd *, bfd *));
 static boolean sparc64_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 
@@ -2895,6 +2897,24 @@ sparc64_elf_finish_dynamic_sections (output_bfd, info)
 
 /* Functions for dealing with the e_flags field.  */
 
+/* Copy backend specific data from one object module to another */
+static boolean
+sparc64_elf_copy_private_bfd_data (ibfd, obfd)
+     bfd *ibfd, *obfd;
+{
+  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  BFD_ASSERT (!elf_flags_init (obfd)
+              || (elf_elfheader (obfd)->e_flags
+                  == elf_elfheader (ibfd)->e_flags));
+
+  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
+  elf_flags_init (obfd) = true;
+  return true;
+}
+
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
@@ -3116,7 +3136,8 @@ const struct elf_size_info sparc64_elf_size_info =
   sparc64_elf_print_symbol_all
 #define elf_backend_output_arch_syms \
   sparc64_elf_output_arch_syms
-
+#define bfd_elf64_bfd_copy_private_bfd_data \
+  sparc64_elf_copy_private_bfd_data
 #define bfd_elf64_bfd_merge_private_bfd_data \
   sparc64_elf_merge_private_bfd_data
 
