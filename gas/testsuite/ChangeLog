@@ -1,3 +1,13 @@
+Mon May 18 13:11:45 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* gas/mips/{div,ld,mul}.d: Add assembler -mcpu= flag to match
+ 	disassembler.
+start-sanitize-r5900
+	* gas/mips/break5900.[sd]: Test that break instructions generated
+ 	in div/etc. macro instructions are of 20-bit variety for R5900.
+end-sanitize-r5900
+
+	
 Fri May 15 14:51:01 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* gas/mips/mips.exp: Distinguish chains with 32-bit addresses.
