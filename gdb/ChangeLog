@@ -1,3 +1,8 @@
+2004-05-04  Jim Blandy  <jimb@redhat.com>
+
+	* aix-thread.c (fill_fprs): Fix off-by-one error comparing regno
+	with FPLAST_REGNUM.
+
 2004-05-03  Joel Brobecker  <brobecker@gnat.com>
 
 	* dwarf2read.c (dwarf2_create_include_psymtab): Fix build

@@ -1262,7 +1262,7 @@ fill_fprs (double *vals)
 {
   int regno;
 
-  for (regno = FP0_REGNUM; regno < FPLAST_REGNUM; regno++)
+  for (regno = FP0_REGNUM; regno <= FPLAST_REGNUM; regno++)
     if (register_cached (regno))
       regcache_collect (regno, vals + regno);
 }
