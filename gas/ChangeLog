@@ -1,3 +1,7 @@
+Wed Dec  1 23:37:14 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* Makefile (clean): Depend on clean-here.
+
 Wed Dec  1 11:35:21 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* config/ho-go32.h: Include fopen-bin.h.
