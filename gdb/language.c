@@ -394,7 +394,8 @@ set_lang_str ()
 {
   char *prefix = "";
 
-  free (language);
+  if (language)
+    free (language);
   if (language_mode == language_mode_auto)
     prefix = "auto; currently ";
 
@@ -406,7 +407,8 @@ set_type_str ()
 {
   char *tmp = NULL, *prefix = "";
 
-  free (type);
+  if (type)
+    free (type);
   if (type_mode == type_mode_auto)
     prefix = "auto; currently ";
 
@@ -451,7 +453,8 @@ set_range_str ()
       error ("Unrecognized range check setting.");
     }
 
-  free (range);
+  if (range)
+    free (range);
   range = concat (pref, tmp, NULL);
 }
 
