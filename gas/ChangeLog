@@ -1,4 +1,46 @@
+Wed Mar 31 17:53:54 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* subsegs.c (subseg_new): Set output_section of new section.
+	* as.c (perform_an_assemly_pass): Don't set output_section here.
+	* expr.c (expr_part, expr): Turn off section assertions for ECOFF,
+	since it has additional sections.
+	* read.c (s_lcomm): For MIPS ECOFF, put small objects in .sbss,
+	not bss_section.
+	* config/obj-ecoff.h (TARGET_SYMBOL_FIELDS): Added
+	ecoff_undefined field.
+	* config/obj-ecoff.c (obj_symbol_new_hook): Initialize
+	ecoff_undefined field.
+	(add_file): If using stabs, just output a stabs symbol rather than
+	creating a new fdr.
+	(obj_ecoff_begin, obj_ecoff_bend): Ignore line number by reading
+	it with get_absolute_expression, rather than skipping it by hand.
+	(obj_ecoff_loc): If using stabs, just output a stabs symbol rather
+	than ECOFF line number information.
+	(obj_ecoff_stab): Accept non-zero values for stabs line number.
+	(ecoff_build_symbols): Set ifilesym correctly.  Set storage class
+	to small, undefined and/or readonly sections if appropriate.
+	Don't output symbol names containing \001 characters.
+	(ecoff_frob_file): Make sure at least one fdr is output.
+	* config/tc-mips.h: Define TC_MIPS.
+	* config/tc-mips.c (g_switch_value): New static variable.
+	(md_assemble): Set gp size of output BFD.
+	(gp_reference): New function; returns 1 if expression can be
+	accesssed via gp.  Always returns 0 if not using ECOFF.
+	(macro_build): Convert BFD_RELOC_LO16 to BFD_RELOC_MIPS_GPREL if
+	possible.
+	(macro): Generate sequences using gp if possible.
+	(md_parse_option): Ignore -EL and -EB.  Parse -G.
+	(md_apply_fix): Added BFD_RELOC_MIPS_GPREL to ignored case.
+	(s_change_sec): Handle .rdata and .sdata for ECOFF.
+	(s_extern): Mark symbol as external.  Set ecoff_undefined field.
+
 Tue Mar 30 10:11:41 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* output-file.c (output_file_create): Don't call as_perror for
+	filename rejected by application.
+
+	* as.c (main) [BFD_ASSEMBLER]: If errors occur, close and unlink
+	the output file.
 
 	* doc/as.texinfo: Don't use @value in node names for the moment;
 	references don't appear to work right.

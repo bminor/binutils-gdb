@@ -30,6 +30,8 @@
 #include "aout/stab_gnu.h"
 #include "../bfd/libecoff.h"
 
+#include <ctype.h>
+
 /* Why isn't this in coff/sym.h?  */
 #define ST_RFDESCAPE 0xfff
 
@@ -1578,6 +1580,7 @@ obj_symbol_new_hook (symbolP)
 {
   symbolP->ecoff_file = cur_file_ptr;
   symbolP->ecoff_symbol = 0;
+  symbolP->ecoff_undefined = 0;
 }
 
 /* Add a page to a varray object.  */
@@ -2203,6 +2206,8 @@ add_procedure (func)
 
   new_proc_ptr->pdr.isym = -1;
   new_proc_ptr->pdr.iline = -1;
+  new_proc_ptr->pdr.lnLow = -1;
+  new_proc_ptr->pdr.lnHigh = -1;
 
   /* Push the start of the function.  */
   new_proc_ptr->sym = add_ecoff_symbol ((const char *) NULL, st_Proc, sc_Text,
@@ -2259,6 +2264,17 @@ add_file (file_name, indx)
 	  if (file_name == (const char *) NULL)
 	    file_name = "UNKNOWN";
 	}
+    }
+
+  /* If we're creating stabs, then we don't actually make a new FDR.
+     Instead, we just create a stabs symbol.  */
+  if (stabs_seen)
+    {
+      (void) add_ecoff_symbol (file_name, st_Nil, sc_Nil,
+			       symbol_new ("L0\001", now_seg,
+					   frag_now_fix (), frag_now),
+			       0, MIPS_MARK_STAB (N_SOL));
+      return;
     }
 
   first_ch = *file_name;
@@ -2440,9 +2456,8 @@ obj_ecoff_begin (ignore)
   *input_line_pointer = name_end;
 
   /* The line number follows, but we don't use it.  */
-  while (! is_end_of_line[*input_line_pointer])
-    input_line_pointer++;
-  input_line_pointer++;
+  (void) get_absolute_expression ();
+  demand_empty_rest_of_line ();
 }
 
 /* Parse .bend directives which have a label as the first argument
@@ -2486,9 +2501,8 @@ obj_ecoff_bend (ignore)
   *input_line_pointer = name_end;
 
   /* The line number follows, but we don't use it.  */
-  while (! is_end_of_line[*input_line_pointer])
-    input_line_pointer++;
-  input_line_pointer++;
+  (void) get_absolute_expression ();
+  demand_empty_rest_of_line ();
 }
 
 /* COFF debugging information is provided as a series of directives
@@ -3201,7 +3215,6 @@ static void
 obj_ecoff_loc (ignore)
      int ignore;
 {
-  char buf[20];
   lineno_list_t *list;
 
   if (cur_file_ptr == (efdr_t *) NULL)
@@ -3222,6 +3235,17 @@ obj_ecoff_loc (ignore)
   SKIP_WHITESPACE ();
   get_absolute_expression ();
   SKIP_WHITESPACE ();
+
+  /* If we're building stabs, then output a special label rather than
+     ECOFF line number info.  */
+  if (stabs_seen)
+    {
+      (void) add_ecoff_symbol ((char *) NULL, st_Label, sc_Text,
+			       symbol_new ("L0\001", now_seg,
+					   frag_now_fix (), frag_now),
+			       0, get_absolute_expression ());
+      return;
+    }
 
   list = allocate_lineno_list ();
 
@@ -3395,17 +3419,14 @@ obj_ecoff_stab (type)
 
       value = 0;
       st = st_Label;
-      sc = sc_Undefined;
+      sc = sc_Text;
     }
   else
     {
-      /* Skip 0, */
-      if (get_absolute_expression () != 0)
-	{
-	  as_warn ("Bad .stab%c directive (expected 0)", type);
-	  demand_empty_rest_of_line ();
-	  return;
-	}
+      /* The next number is sometimes the line number of the
+	 declaration.  We have nowhere to put it, so we just ignore
+	 it.  */
+      (void) get_absolute_expression ();
       
       SKIP_WHITESPACE ();
       if (*input_line_pointer++ != ',')
@@ -3442,17 +3463,8 @@ obj_ecoff_stab (type)
 
 	  sym = symbol_find_or_make (name);
 
-	  /* Traditionally, N_LBRAC and N_RBRAC are *not* relocated. */
-	  if (code == N_LBRAC || code == N_RBRAC)
-	    {
-	      sc = sc_Nil;
-	      st = st_Nil;
-	    }
-	  else
-	    {
-	      sc = sc_Undefined;
-	      st = st_Nil;
-	    }
+	  sc = sc_Nil;
+	  st = st_Nil;
 	  value = 0;
 
 	  *input_line_pointer = name_end;
@@ -3512,6 +3524,7 @@ ecoff_longword_adjust (buf, bufend, offset, bufptrptr)
       add = 4 - (offset & 3);
       if (*bufend - (*buf + offset) < add)
 	(void) ecoff_add_bytes (buf, bufend, *buf + offset, add);
+      memset (*buf + offset, 0, add);
       offset += add;
       if (bufptrptr != (char **) NULL)
 	*bufptrptr = *buf + offset;
@@ -3536,6 +3549,7 @@ ecoff_build_lineno (buf, bufend, offset, linecntptr)
   proc_t *proc;
   long c;
   long iline;
+  long totcount;
 
   bufptr = *buf + offset;
 
@@ -3544,11 +3558,28 @@ ecoff_build_lineno (buf, bufend, offset, linecntptr)
   last = (lineno_list_t *) NULL;
   c = offset;
   iline = 0;
+  totcount = 0;
   for (l = first_lineno; l != (lineno_list_t *) NULL; l = l->next)
     {
       long count;
       long delta;
-      int didone;
+
+      /* Get the offset to the memory address of the next line number
+	 (in words).  Do this first, so that we can skip ahead to the
+	 next useful line number entry.  */
+      if (l->next == (lineno_list_t *) NULL)
+	count = 0;
+      else
+	{
+	  count = ((l->next->frag->fr_address + l->next->paddr
+		    - (l->frag->fr_address + l->paddr))
+		   >> 2);
+	  if (count <= 0)
+	    {
+	      /* Don't change last, so we still get the right delta.  */
+	      continue;
+	    }
+	}
 
       if (l->file != file || l->proc != proc)
 	{
@@ -3557,10 +3588,10 @@ ecoff_build_lineno (buf, bufend, offset, linecntptr)
 	  if (l->file != file && file != (efdr_t *) NULL)
 	    {
 	      file->fdr.cbLine = c - file->fdr.cbLineOffset;
-	      file->fdr.cline = iline - file->fdr.ilineBase;
+	      /* The cline field is ill-documented.  This is a guess
+		 at the right value.  */
+	      file->fdr.cline = totcount + count;
 	    }
-
-	  c = ecoff_longword_adjust (buf, bufend, c, &bufptr);
 
 	  if (l->file != file)
 	    {
@@ -3573,33 +3604,18 @@ ecoff_build_lineno (buf, bufend, offset, linecntptr)
 	      proc = l->proc;
 	      if (proc != (proc_t *) NULL)
 		{
-		  /* The iline field is ill-documented.  This is a
-		     guess at the right value.  */
-		  proc->pdr.iline = l->frag->fr_address + l->paddr;
 		  proc->pdr.lnLow = l->lineno;
 		  proc->pdr.cbLineOffset = c - file->fdr.cbLineOffset;
+		  /* The iline field is ill-documented.  This is a
+		     guess at the right value.  */
+		  proc->pdr.iline = totcount;
 		}
 	    }
 
 	  last = (lineno_list_t *) NULL;
 	}      
 
-      /* Get the offset to the memory address of the next line number
-	 (in words).  */
-      if (l->next == (lineno_list_t *) NULL)
-	count = 0;
-      else
-	{
-	  count = (((l->next->frag->fr_address + l->next->paddr
-		     - (l->frag->fr_address + l->paddr))
-		    >> 2)
-		   - 1);
-	  if (count < 0)
-	    {
-	      /* Don't change last, so we still get the right delta.  */
-	      continue;
-	    }
-	}
+      totcount += count;
 
       /* Get the offset to this line number.  */
       if (last == (lineno_list_t *) NULL)
@@ -3607,40 +3623,30 @@ ecoff_build_lineno (buf, bufend, offset, linecntptr)
       else
 	delta = l->lineno - last->lineno;
 
-      /* We can only adjust the address by 16 words at a time.  */
-      didone = 0;
-      while (count > 0x10)
+      /* Put in the offset to this line number.  */
+      while (delta != 0)
 	{
-	  if (bufptr >= *bufend)
-	    bufptr = ecoff_add_bytes (buf, bufend, bufptr, (long) 1);
-	  if (delta >= 7)
+	  int setcount;
+
+	  /* 1 is added to each count read.  */
+	  --count;
+	  /* We can only adjust the word count by up to 15 words at a
+	     time.  */
+	  if (count <= 0x0f)
 	    {
-	      *bufptr++ = 0x0f + (7 << 4);
-	      delta -= 7;
-	    }
-	  else if (delta <= -7)
-	    {
-	      *bufptr++ = 0x0f + (-7 << 4);
-	      delta += 7;
+	      setcount = count;
+	      count = 0;
 	    }
 	  else
 	    {
-	      *bufptr++ = 0x0f + (delta << 4);
-	      delta = 0;
+	      setcount = 0x0f;
+	      count -= 0x0f;
 	    }
-	  ++c;
-	  count -= 0x10;
-	  didone = 1;
-	}
-
-      /* Put in the offset to this line number.  */
-      while (delta != 0 || ! didone)
-	{
 	  if (delta >= -7 && delta <= 7)
 	    {
 	      if (bufptr >= *bufend)
 		bufptr = ecoff_add_bytes (buf, bufend, bufptr, (long) 1);
-	      *bufptr++ = count + (delta << 4);
+	      *bufptr++ = setcount + (delta << 4);
 	      delta = 0;
 	      ++c;
 	    }
@@ -3650,7 +3656,7 @@ ecoff_build_lineno (buf, bufend, offset, linecntptr)
 
 	      if (*bufend - bufptr < 3)
 		bufptr = ecoff_add_bytes (buf, bufend, bufptr, (long) 3);
-	      *bufptr++ = count + (8 << 4);
+	      *bufptr++ = setcount + (8 << 4);
 	      if (delta < -0x8000)
 		{
 		  set = -0x8000;
@@ -3670,8 +3676,26 @@ ecoff_build_lineno (buf, bufend, offset, linecntptr)
 	      *bufptr++ = set & 0xffff;
 	      c += 3;
 	    }
-	  count = 0;
-	  didone = 1;
+	}
+
+      /* Finish adjusting the count.  */
+      while (count > 0)
+	{
+	  if (bufptr >= *bufend)
+	    bufptr = ecoff_add_bytes (buf, bufend, bufptr, (long) 1);
+	  /* 1 is added to each count read.  */
+	  --count;
+	  if (count > 0x0f)
+	    {
+	      *bufptr++ = 0x0f;
+	      count -= 0x0f;
+	    }
+	  else
+	    {
+	      *bufptr++ = count;
+	      count = 0;
+	    }
+	  ++c;
 	}
 
       ++iline;
@@ -3683,7 +3707,7 @@ ecoff_build_lineno (buf, bufend, offset, linecntptr)
   if (file != (efdr_t *) NULL)
     {
       file->fdr.cbLine = c - file->fdr.cbLineOffset;
-      file->fdr.cline = iline - file->fdr.ilineBase;
+      file->fdr.cline = totcount;
     }
 
   c = ecoff_longword_adjust (buf, bufend, c, &bufptr);
@@ -3736,8 +3760,6 @@ ecoff_build_symbols (buf,
       efdr_t *fil_ptr;
       efdr_t *fil_end;
 
-      ifilesym = isym;
-
       if (file_link->next == (vlinks_t *) NULL)
 	fil_cnt = file_desc.objects_last_page;
       else
@@ -3749,6 +3771,7 @@ ecoff_build_symbols (buf,
 	  vlinks_t *sym_link;
 
 	  fil_ptr->fdr.isymBase = isym;
+	  ifilesym = isym;
 	  for (sym_link = fil_ptr->symbols.first;
 	       sym_link != (vlinks_t *) NULL;
 	       sym_link = sym_link->next)
@@ -3782,35 +3805,79 @@ ecoff_build_symbols (buf,
 		  as_sym = sym_ptr->as_sym;
 		  if (as_sym != (symbolS *) NULL)
 		    {
-		      sym_ptr->ecoff_sym.value = S_GET_VALUE (as_sym);
+		      symint_t indx;
+
+		      /* The value of a block start symbol is the
+			 offset from the start of the procedure.  For
+			 other symbols we just use the gas value.  */
+		      if (sym_ptr->ecoff_sym.st == (int) st_Block
+			  && sym_ptr->ecoff_sym.sc == (int) sc_Text)
+			{
+			  know (sym_ptr->proc_ptr != (proc_t *) NULL);
+			  sym_ptr->ecoff_sym.value =
+			    (S_GET_VALUE (as_sym)
+			     - S_GET_VALUE (sym_ptr->proc_ptr->sym->as_sym));
+			}
+		      else
+			sym_ptr->ecoff_sym.value = S_GET_VALUE (as_sym);
 
 		      /* Get the type and storage class based on where
-			 the symbol actually wound up.  */
+			 the symbol actually wound up.  Traditionally,
+			 N_LBRAC and N_RBRAC are *not* relocated. */
+		      indx = sym_ptr->ecoff_sym.index;
 		      if (sym_ptr->ecoff_sym.st == st_Nil
 			  && sym_ptr->ecoff_sym.sc == sc_Nil
-			  && ! MIPS_IS_STAB (&sym_ptr->ecoff_sym))
+			  && (! MIPS_IS_STAB (&sym_ptr->ecoff_sym)
+			      || ((MIPS_UNMARK_STAB (indx) != N_LBRAC)
+				  && (MIPS_UNMARK_STAB (indx) != N_RBRAC))))
 			{
+			  segT seg;
+			  const char *segname;
 			  st_t st;
 			  sc_t sc;
+
+			  seg = S_GET_SEGMENT (as_sym);
+			  segname = segment_name (seg);
 
 			  if (S_IS_EXTERNAL (as_sym)
 			      || ! S_IS_DEFINED (as_sym))
 			    st = st_Global;
-			  else if (S_GET_SEGMENT (as_sym) == text_section)
+			  else if (seg == text_section)
 			    st = st_Label;
 			  else
 			    st = st_Static;
 
-			  if (! S_IS_DEFINED (as_sym))
-			    sc = sc_Undefined;
+			  if (! S_IS_DEFINED (as_sym)
+			      || as_sym->ecoff_undefined)
+			    {
+			      if (S_GET_VALUE (as_sym) > 0
+				  && (S_GET_VALUE (as_sym)
+				      <= bfd_get_gp_size (stdoutput)))
+				sc = sc_SUndefined;
+			      else
+				sc = sc_Undefined;
+			    }
 			  else if (S_IS_COMMON (as_sym))
-			    sc = sc_Common;
-			  else if (S_GET_SEGMENT (as_sym) == text_section)
+			    {
+			      if (S_GET_VALUE (as_sym) > 0
+				  && (S_GET_VALUE (as_sym)
+				      <= bfd_get_gp_size (stdoutput)))
+				sc = sc_SCommon;
+			      else
+				sc = sc_Common;
+			    }
+			  else if (seg == text_section)
 			    sc = sc_Text;
-			  else if (S_GET_SEGMENT (as_sym) == data_section)
+			  else if (seg == data_section)
 			    sc = sc_Data;
-			  else if (S_GET_SEGMENT (as_sym) == bss_section)
+			  else if (strcmp (segname, ".rdata") == 0)
+			    sc = sc_RData;
+			  else if (strcmp (segname, ".sdata") == 0)
+			    sc = sc_SData;
+			  else if (seg == bss_section)
 			    sc = sc_Bss;
+			  else if (strcmp (segname, ".sbss") == 0)
+			    sc = sc_SBss;
 			  else
 			    abort ();
 
@@ -3827,13 +3894,17 @@ ecoff_build_symbols (buf,
 		      if ((S_IS_EXTERNAL (as_sym)
 			   || ! S_IS_DEFINED (as_sym))
 			  && sym_ptr->proc_ptr == (proc_t *) NULL
-			  && sym_ptr->ecoff_sym.st != (int) st_Nil)
+			  && sym_ptr->ecoff_sym.st != (int) st_Nil
+			  && ! MIPS_IS_STAB (&sym_ptr->ecoff_sym))
 			local = 0;
 
 		      /* If an st_end symbol has an associated gas
 			 symbol, then it is a local label created for
-			 a .bend or .end directive.  */
-		      if (local && sym_ptr->ecoff_sym.st != st_End)
+			 a .bend or .end directive.  Stabs line
+			 numbers will have \001 in the names.  */
+		      if (local
+			  && sym_ptr->ecoff_sym.st != st_End
+			  && strchr (sym_ptr->name, '\001') == 0)
 			sym_ptr->ecoff_sym.iss =
 			  add_string (&fil_ptr->strings,
 				      fil_ptr->str_hash,
@@ -3876,16 +3947,26 @@ ecoff_build_symbols (buf,
 			}
 
 		      /* The value of the symbol marking the end of a
-			 procedure or block is the size of the
-			 procedure or block.  */
-		      if ((begin_type == st_Proc || begin_type == st_Block)
-			  && sym_ptr->ecoff_sym.sc != (int) sc_Info)
+			 procedure is the size of the procedure.  The
+			 value of the symbol marking the end of a
+			 block is the offset from the start of the
+			 procedure to the block.  */
+		      if (begin_type == st_Proc)
 			{
 			  know (as_sym != (symbolS *) NULL);
 			  know (begin_ptr->as_sym != (symbolS *) NULL);
 			  sym_ptr->ecoff_sym.value =
 			    (S_GET_VALUE (as_sym)
 			     - S_GET_VALUE (begin_ptr->as_sym));
+			}
+		      else if (begin_type == st_Block
+			       && sym_ptr->ecoff_sym.sc != (int) sc_Info)
+			{
+			  know (as_sym != (symbolS *) NULL);
+			  know (sym_ptr->proc_ptr != (proc_t *) NULL);
+			  sym_ptr->ecoff_sym.value =
+			    (S_GET_VALUE (as_sym)
+			     - S_GET_VALUE (sym_ptr->proc_ptr->sym->as_sym));
 			}
 		    }
 
@@ -3908,18 +3989,21 @@ ecoff_build_symbols (buf,
 		      ecoff_swap_sym_out (stdoutput, &sym_ptr->ecoff_sym,
 					  sym_out);
 		      ++sym_out;
+
 		      sym_ptr->sym_index = isym;
-		      ++isym;
 
 		      if (sym_ptr->proc_ptr != (proc_t *) NULL
 			  && sym_ptr->proc_ptr->sym == sym_ptr)
 			sym_ptr->proc_ptr->pdr.isym = isym - ifilesym;
+
+		      ++isym;
 		    }
 
 		  /* If this is an external symbol, swap it out.  */
 		  if (as_sym != (symbolS *) NULL
 		      && (S_IS_EXTERNAL (as_sym)
-			  || ! S_IS_DEFINED (as_sym)))
+			  || ! S_IS_DEFINED (as_sym))
+		      && ! MIPS_IS_STAB (&sym_ptr->ecoff_sym))
 		    {
 		      EXTR ext;
 
@@ -4325,6 +4409,10 @@ ecoff_frob_file ()
   struct hash_control *ext_str_hash;
   char *set;
 
+  /* Make sure we have a file.  */
+  if (first_file == (efdr_t *) NULL)
+    add_file ((const char *) NULL, 0);
+
   /* Handle any top level tags.  */
   for (ptag = top_tag_head->first_tag;
        ptag != (tag_t *) NULL;
@@ -4476,8 +4564,6 @@ ecoff_frob_file ()
   SET (external_ext, iextMax, struct ext_ext);
 
 #undef SET
-
-  /* FIXME: set the gp value.  */
 
   /* FIXME: set the register masks.  */
 
