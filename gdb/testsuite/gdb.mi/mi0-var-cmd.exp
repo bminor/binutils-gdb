@@ -603,8 +603,3 @@ mi_gdb_test "-var-delete l" \
 
 mi_gdb_exit
 return 0
-
-# Local variables: 
-# change-log-default-name: "ChangeLog-mi"
-# End:
-

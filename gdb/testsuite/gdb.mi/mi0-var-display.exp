@@ -619,11 +619,3 @@ mi_gdb_test "-var-create a2 $fp a" \
 
 mi_gdb_exit
 return 0
-
-# Local variables: 
-# change-log-default-name: "ChangeLog-mi"
-# End:
-
-
-
-

@@ -1,3 +1,8 @@
+2001-06-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* lib/mi-support.exp: Remove local emacs variable defining
+	change-log-default-name.
+
 2001-06-22  Michael Chastain  <chastain@redhat.com>
 
 	* gdb.base/arithmet.exp: Use gdb_test instead of send_gdb/gdb_expect.

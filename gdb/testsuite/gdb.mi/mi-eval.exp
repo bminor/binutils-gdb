@@ -99,8 +99,3 @@ mi_gdb_test "511-data-evaluate-expression \"A + 3\"" "511\\^done,value=\"4\"" "e
 
 mi_gdb_exit
 return 0
-
-# Local variables: 
-# change-log-default-name: "ChangeLog-mi"
-# End: 
-

@@ -189,8 +189,3 @@ test_watchpoint_triggering
 
 mi_gdb_exit
 return 0
-
-# Local variables: 
-# change-log-default-name: "ChangeLog-mi"
-# End: 
-

@@ -98,7 +98,3 @@ mi_gdb_test "6-data-read-memory shorts+64 o 2 1 1" \
 
 mi_gdb_exit
 return 0
-
-# Local variables: 
-# change-log-default-name: "ChangeLog-mi"
-# End: 

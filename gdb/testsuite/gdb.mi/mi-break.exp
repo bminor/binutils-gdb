@@ -136,7 +136,3 @@ test_rbreak_creation_and_listing
 
 mi_gdb_exit
 return 0
-
-# Local variables: 
-# change-log-default-name: "ChangeLog-mi"
-# End: 

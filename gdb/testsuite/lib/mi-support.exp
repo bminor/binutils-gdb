@@ -686,8 +686,3 @@ proc mi_step { test } {
 	}
     }
 }
-
-
-# Local variables: 
-# change-log-default-name: "../gdb.mi/ChangeLog-mi"
-# End: 
