@@ -1,3 +1,7 @@
+Fri Jan  7 10:27:27 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* aoutf1.h (sunos4_aout_backend): Comment the fields' meanings.
+
 Fri Jan  7 15:40:16 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff.c (ecoff_mkobject_hook): Don't set SEC_SHARED_LIBRARY flag
