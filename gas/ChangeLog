@@ -1,3 +1,9 @@
+Thu Sep  2 10:43:57 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (macro): If $0 is destination of divide, just
+	generate the simple machine instruction, for compatibility with
+	the MIPS assembler.
+
 Wed Sep  1 15:56:42 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* write.c (write_relocs) [RELOC_EXPANSION_POSSIBLE]: Declare

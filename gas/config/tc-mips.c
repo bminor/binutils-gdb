@@ -737,6 +737,25 @@ append_insn (ip, address_expr, reloc_type)
 				     & OP_MASK_RD),
 				    0))
 	      /* If the branch writes a register that the previous
+		 instruction sets, we can not swap (we know that
+		 branches write only to RD or to $31).  */
+	      || ((prev_insn.insn_mo->pinfo & INSN_WRITE_GPR_T)
+		  && (((ip->insn_mo->pinfo & INSN_WRITE_GPR_D)
+		       && (((prev_insn.insn_opcode >> OP_SH_RT) & OP_MASK_RT)
+			   == ((ip->insn_opcode >> OP_SH_RD) & OP_MASK_RD)))
+		      || ((ip->insn_mo->pinfo & INSN_WRITE_GPR_31)
+			  && (((prev_insn.insn_opcode >> OP_SH_RT)
+			       & OP_MASK_RT)
+			      == 31))))
+	      || ((prev_insn.insn_mo->pinfo & INSN_WRITE_GPR_D)
+		  && (((ip->insn_mo->pinfo & INSN_WRITE_GPR_D)
+		       && (((prev_insn.insn_opcode >> OP_SH_RD) & OP_MASK_RD)
+			   == ((ip->insn_opcode >> OP_SH_RD) & OP_MASK_RD)))
+		      || ((ip->insn_mo->pinfo & INSN_WRITE_GPR_31)
+			  && (((prev_insn.insn_opcode >> OP_SH_RD)
+			       & OP_MASK_RD)
+			      == 31))))
+	      /* If the branch writes a register that the previous
 		 instruction reads, we can not swap (we know that
 		 branches only write to RD or to $31).  */
 	      || ((ip->insn_mo->pinfo & INSN_WRITE_GPR_D)
@@ -1743,6 +1762,15 @@ macro (ip)
 	{
 	  as_warn ("Divide by zero.");
 	  macro_build (&icnt, NULL, "break", "c", 7);
+	  return;
+	}
+      if (dreg == 0)
+	{
+	  /* The MIPS assembler treats a destination of $0 as a
+	     request for just the machine instruction.  */
+	  macro_build (&icnt, NULL,
+		       dbl ? "ddiv" : "div",
+		       "s,t", sreg, treg);
 	  return;
 	}
 
@@ -3923,6 +3951,7 @@ mips_align (to, fill)
       assert (S_GET_SEGMENT (insn_label) == now_seg);
       insn_label->sy_frag = frag_now;
       S_SET_VALUE (insn_label, frag_now_fix ());
+      insn_label = NULL;
     }
 }
 
@@ -3985,6 +4014,7 @@ s_stringer (append_zero)
      int append_zero;
 {
   mips_emit_delays ();
+  insn_label = NULL;
   stringer (append_zero);
 }
 
@@ -4041,6 +4071,7 @@ s_cons (log_size)
   mips_emit_delays ();
   if (log_size > 0 && auto_align)
     mips_align (log_size, 0);
+  insn_label = NULL;
   cons (1 << log_size);
 }
 
@@ -4083,6 +4114,8 @@ s_float_cons (type)
       mips_align (3, 0);
     else
       mips_align (2, 0);
+
+  insn_label = NULL;
 
   float_cons (type);
 }
@@ -4172,6 +4205,7 @@ s_mips_space (param)
      int param;
 {
   mips_emit_delays ();
+  insn_label = NULL;
   s_space (param);
 }
 
