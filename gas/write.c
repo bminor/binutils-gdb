@@ -1629,6 +1629,9 @@ write_object_file ()
 #ifdef BFD_ASSEMBLER
 	    to_addr -= symbol_get_frag (lie->sub)->fr_address;
 #endif
+#ifdef TC_CHECK_ADJUSTED_BROKEN_DOT_WORD
+	    TC_CHECK_ADJUSTED_BROKEN_DOT_WORD (to_addr, lie);
+#endif
 	    md_number_to_chars (lie->word_goes_here, to_addr, 2);
 	    for (untruth = lie->next_broken_word; untruth && untruth->dispfrag == fragP; untruth = untruth->next_broken_word)
 	      {

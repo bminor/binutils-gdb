@@ -1,3 +1,9 @@
+Mon Apr  3 13:56:03 2000  Hans-Peter Nilsson  <hp@axis.com>
+
+	* write.c (write_object_file) [! WORKING_DOT_WORD]: If defined,
+	call TC_CHECK_ADJUSTED_BROKEN_DOT_WORD for each word after
+	adjustments.
+
 2000-04-03  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-i386.c (i386_immediate): Don't assume a constant
