@@ -1,3 +1,13 @@
+Sat Feb 28 17:28:55 1998  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-alpha.c (md_shortopts, md_longopts, md_parse_option):
+	Recognize -GN and -relax.
+	(md_begin): Initialize gp size from -G switch.
+	(alpha_force_relocation): Always force if -relax.
+	(alpha_align): Take a new argument that will specify when to 
+	emit an R_ALPHA_ALIGN relocation (though we don't do that now).
+	Change all callers.  Emit nop alignment padding as nop+unop pair.
+
 Sat Feb 28 17:06:22 1998  Richard Henderson  <rth@cygnus.com>
 
 	* config/obj-elf.c [TC_ALPHA]: Include <elf/alpha.h>.
