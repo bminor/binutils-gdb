@@ -45,7 +45,24 @@ struct v850_opcode
 
   /* Which (if any) operand is a memory operand.  */
   unsigned int memop;
+
+  /* Target processor(s).  A bit field of processors which support
+     this instruction.  Note a bit field is used as some instructions
+     are available on multiple, different processor types, whereas
+     other instructions are only available on one specific type.  */
+  unsigned int processors;
 };
+
+/* Values for the processors field in the v850_opcode structure.  */
+#define PROCESSOR_V850		(1 << 0)		/* Just the V850.  */
+#define PROCESSOR_ALL		-1			/* Any processor.  */
+/* start-sanitize-v850e */
+#define PROCESSOR_V850E		(1 << 1)		/* Just the V850E. */
+#define PROCESSOR_NOT_V850	(~ PROCESSOR_V850)	/* Any processor except the V850.  */
+/* end-sanitize-v850e */
+/* start-sanitize-v850eq */
+#define PROCESSOR_V850EQ	(1 << 2)		/* Just the V850EQ. */
+/* start-sanitize-v850eq */
 
 /* The table itself is sorted by major opcode number, and is otherwise
    in the order in which the disassembler should consider
