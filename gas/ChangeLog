@@ -1,3 +1,15 @@
+start-sanitize-arc
+Wed Apr 12 07:35:44 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-arc.c (delay_slot_type): New function.
+	(md_assemble): Use hashed list of insns.
+	Print warning if 8 byte insn appears in delay slot.
+	(md_operand): Handle %st(sym1-sym2).
+	(get_arc_exp_reloc_type): Likewise.
+	(md_apply_fix, case BFD_RELOC_ARC_B26): Now using implicit addends
+	so must store them here.
+end-sanitize-arc
+
 Tue Apr 11 01:42:36 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* configure.in: Require at least autoconf 2.3, because earlier
