@@ -153,6 +153,7 @@ static const char *       get_dynamic_type            PARAMS ((unsigned long));
 static int                dump_relocations            PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *, unsigned long, char *, int));
 static char *             get_file_type               PARAMS ((unsigned));
 static char *             get_machine_name            PARAMS ((unsigned));
+static void		  decode_ARM_machine_flags    PARAMS ((unsigned, char []));
 static char *             get_machine_flags           PARAMS ((unsigned, unsigned));
 static const char *       get_mips_segment_type       PARAMS ((unsigned long));
 static const char *       get_parisc_segment_type     PARAMS ((unsigned long));
@@ -1246,6 +1247,116 @@ get_machine_name (e_machine)
     }
 }
 
+static void
+decode_ARM_machine_flags (e_flags, buf)
+     unsigned e_flags;
+     char buf[];
+{
+  unsigned eabi;
+  int unknown = 0;
+
+  eabi = EF_ARM_EABI_VERSION (e_flags);
+  e_flags &= ~ EF_ARM_EABIMASK;
+
+  /* Handle "generic" ARM flags.  */
+  if (e_flags & EF_ARM_RELEXEC)
+    {
+      strcat (buf, ", relocatable executable");
+      e_flags &= ~ EF_ARM_RELEXEC;
+    }
+	      
+  if (e_flags & EF_ARM_HASENTRY)
+    {
+      strcat (buf, ", has entry point");
+      e_flags &= ~ EF_ARM_HASENTRY;
+    }
+  
+  /* Now handle EABI specific flags.  */
+  switch (eabi)
+    {
+    default:
+      strcat (buf, ", <unknown EABI>");
+      if (e_flags)
+	unknown = 1;
+      break;
+
+    case EF_ARM_EABI_VER1:
+      while (e_flags)
+	{
+	  unsigned flag;
+	  
+	  /* Process flags one bit at a time.  */
+	  flag = e_flags & - e_flags;
+	  e_flags &= ~ flag;
+	  
+	  switch (flag)
+	    {
+	    case EF_ARM_SYMSARESORTED: /* Conflicts with EF_INTERWORK.  */
+	      strcat (buf, ", sorted symbol tables");
+	      break;
+	      
+	    default:
+	      unknown = 1;
+	      break;
+	    }
+	}
+      break;
+      
+    case EF_ARM_EABI_UNKNOWN:
+      while (e_flags)
+	{
+	  unsigned flag;
+	  
+	  /* Process flags one bit at a time.  */
+	  flag = e_flags & - e_flags;
+	  e_flags &= ~ flag;
+	  
+	  switch (flag)
+	    {
+	    case EF_INTERWORK:
+	      strcat (buf, ", interworking enabled");
+	      break;
+	  
+	    case EF_APCS_26:
+	      strcat (buf, ", uses APCS/26");
+	      break;
+	  
+	    case EF_APCS_FLOAT:
+	      strcat (buf, ", uses APCS/float");
+	      break;
+	  
+	    case EF_PIC:
+	      strcat (buf, ", position independent");
+	      break;
+	  
+	    case EF_ALIGN8:
+	      strcat (buf, ", 8 bit structure alignment");
+	      break;
+	  
+	    case EF_NEW_ABI:
+	      strcat (buf, ", uses new ABI");
+	      break;
+	  
+	    case EF_OLD_ABI:
+	      strcat (buf, ", uses old ABI");
+	      break;
+	  
+	    case EF_SOFT_FLOAT:
+	      strcat (buf, ", software FP");
+	      break;
+	  
+	    default:
+	      unknown = 1;
+	      break;
+	    }
+	}
+    }
+  
+
+  if (unknown)
+    strcat (buf,", <unknown>");
+}
+
 static char *
 get_machine_flags (e_flags, e_machine)
      unsigned e_flags;
@@ -1262,6 +1373,10 @@ get_machine_flags (e_flags, e_machine)
 	default:
 	  break;
 
+	case EM_ARM:
+	  decode_ARM_machine_flags (e_flags, buf);
+	  break;
+	  
         case EM_68K:
           if (e_flags & EF_CPU32)
             strcat (buf, ", cpu32");
@@ -3174,7 +3289,7 @@ process_dynamic_segment (file)
     {
       if (do_dynamic)
 	{
-	  const char *dtype;
+	  const char * dtype;
 
 	  putchar (' ');
 	  print_vma (entry->d_tag, FULL_HEX);
@@ -3749,7 +3864,7 @@ process_version_sections (file)
 	    for (cnt = 0; cnt < total; cnt += 4)
 	      {
 		int j, nn;
-		char *name;
+		char * name;
 
 		printf ("  %03x:", cnt);
 
@@ -6992,8 +7107,7 @@ process_corefile_note_segment (file, offset, length)
   external = pnotes;
 
   printf (_("\nNotes at offset 0x%08lx with length 0x%08lx:\n"),
-	  (unsigned long) offset,
-	  (unsigned long) length);
+	  (unsigned long) offset, (unsigned long) length);
   printf (_("  Owner\t\tData size\tDescription\n"));
 
   while (external < (Elf_External_Note *)((char *) pnotes + length))

@@ -1,3 +1,9 @@
+2000-04-06  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (decode_ARM_machine_flags): New function.
+	(get_machine_flags): Call decode_ARM_machine_flags for ARM
+	targets.
+
 2000-04-05  Alan Modra  <alan@linuxcare.com.au>
 
 	* binutils.texi: Remove optional `=' from long options that have
