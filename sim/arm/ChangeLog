@@ -1,3 +1,22 @@
+Mon Jun  1 17:14:19 1998  Anthony Thompson (athompso@cambridge.arm.com)
+
+	* armos.c (ARMul_OSHandleSWI::SWI_Open): Handle special case
+	of ":tt" to catch stdin in addition to stdout.
+	(ARMul_OSHandleSWI::SWI_Seek): Return 0 or 1 to indicate failure
+	or success of lseek().
+
+Wed May 20 17:36:25 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* armos.c (ARMul_OSHandleSWI): Special case code to catch attempts
+	to open stdout.
+
+Wed Apr 29 15:29:55 1998  Jeff Johnston  <jjohnstn@cygnus.com>
+
+	* armos.c (ARMul_OSHandleSWI): Added code for SWI_Clock,
+	SWI_Flen, and SWI_Time.  Also fixed SWI_Seek code to only
+	seek from offset 0 and not to use R2 for whence since it is
+	not passed as part of the SWI call.
+
 Tue Apr 28 18:33:31 1998  Geoffrey Noer  <noer@cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
