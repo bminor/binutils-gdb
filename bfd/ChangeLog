@@ -1,4 +1,4 @@
-Mon Nov 16 22:19:21 1998  DJ Delorie  <dj@indy.delorie.com>
+Mon Nov 16 22:19:21 1998  DJ Delorie  <dj@cygnus.com>
 
 	* archive.c (bfd_ar_hdr_from_filesystem): support BFD_IN_MEMORY
  	bfds; they have no "file" so we fake it.
