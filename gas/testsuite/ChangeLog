@@ -1,3 +1,9 @@
+Thu Jan 20 16:44:51 1994  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* gas/all/gas.exp, lib/gas-defs.exp, sun4/addend.exp,
+	sparc-solaris/addend.exp: Tweaked to fix a few bugs and to run
+	well under either version of expect.
+
 Mon Jan 17 00:25:03 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/basic/fp_misc.s: Delete copr instruction.  It's tested
