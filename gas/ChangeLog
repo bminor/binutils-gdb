@@ -1,5 +1,9 @@
 2003-07-28  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
 
+	* read.c (s_space): Don't warn about .space 0.
+
+2003-07-28  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
+
 	* config/tc-mips.c (mips_flag_pdr): Define.
 	(md_begin) [OBJ_ELF]: Use it to control .pdr creation.
 	(s_mips_end) [OBJ_ELF]: Likewise.
