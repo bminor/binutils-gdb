@@ -89,6 +89,11 @@ DEFUN(make_a_section_from_file,(abfd, hdr, target_index),
 
   return_section->target_index = target_index;
 
+  /* At least on i386-coff, the line number count for a shared library
+     section must be ignored.  */
+  if ((return_section->flags & SEC_SHARED_LIBRARY) != 0)
+    return_section->lineno_count = 0;
+
   if (hdr->s_nreloc != 0)
     return_section->flags |= SEC_RELOC;
   /* FIXME: should this check 'hdr->s_size > 0' */
@@ -827,13 +832,12 @@ DEFUN(coff_write_symbols,(abfd),
   else {
     /* We would normally not write anything here, but we'll write
        out 4 so that any stupid coff reader which tries to read
-       the string table even when there isn't one won't croak.
-       */
+       the string table even when there isn't one won't croak.  */
+    unsigned int size = 4;
+    bfd_byte buffer[4];
 
-    uint32e_type size = 4;
-    size =  size;
-    bfd_write((PTR)&size, 1, sizeof(size), abfd);
-
+    bfd_h_put_32 (abfd, size, buffer);
+    bfd_write((PTR) buffer, 1, sizeof (buffer), abfd);
   }
 }
 
@@ -1257,11 +1261,13 @@ DEFUN (coff_make_empty_symbol, (abfd),
   return &new->symbol;
 }
 
+/* Make a debugging symbol.  */
+
 asymbol *
-DEFUN (coff_make_debug_symbol, (abfd, ptr, sz),
-       bfd *abfd AND
-       PTR ptr AND
-       unsigned long sz)
+coff_bfd_make_debug_symbol (abfd, ptr, sz)
+     bfd *abfd;
+     PTR ptr;
+     unsigned long sz;
 {
   coff_symbol_type *new = (coff_symbol_type *) bfd_alloc(abfd, sizeof(coff_symbol_type));
   if (new == NULL) {
@@ -1275,6 +1281,15 @@ DEFUN (coff_make_debug_symbol, (abfd, ptr, sz),
   new->done_lineno = false;
   new->symbol.the_bfd = abfd;
   return &new->symbol;
+}
+
+void
+coff_get_symbol_info (abfd, symbol, ret)
+     bfd *abfd;
+     asymbol *symbol;
+     symbol_info *ret;
+{
+  bfd_symbol_info (symbol, ret);
 }
 
 /* Print out information about COFF symbol.  */
@@ -1298,15 +1313,6 @@ coff_print_symbol (abfd, filep, symbol, how)
       fprintf (file, "coff %s %s",
 	       coffsymbol(symbol)->native ? "n" : "g",
 	       coffsymbol(symbol)->lineno ? "l" : " ");
-      break;
-
-    case bfd_print_symbol_nm:
-      bfd_print_symbol_vandf ((PTR) file, symbol);
-      fprintf (file, " %-5s %s %s %s",
-	       symbol->section->name,
-	       coffsymbol(symbol)->native ? "n" : "g",
-	       coffsymbol(symbol)->lineno ? "l" : " ",
-	       symbol->name);
       break;
 
     case bfd_print_symbol_all:
