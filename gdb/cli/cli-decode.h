@@ -292,16 +292,6 @@ extern struct cmd_list_element *add_set_cmd (char *name, enum
 					     char *doc,
 					     struct cmd_list_element **list);
 
-extern struct cmd_list_element *add_set_enum_cmd (char *name,
-						  enum command_class class,
-						  const char *enumlist[],
-						  const char **var,
-						  char *doc,
-						  struct cmd_list_element **list);
-
-extern struct cmd_list_element *deprecated_add_show_from_set (struct cmd_list_element *,
-							      struct cmd_list_element **);
-
 /* Functions that implement commands about CLI commands. */
 
 extern void help_cmd (char *, struct ui_file *);

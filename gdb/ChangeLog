@@ -1,5 +1,16 @@
 2005-02-21  Andrew Cagney  <cagney@gnu.org>
 
+	* cli/cli-decode.c (add_set_enum_cmd): Delete function.
+	(deprecated_add_show_from_set): Delete function.
+	* command.h (add_set_enum_cmd): Delete declaration.
+	(deprecated_add_show_from_set): Delete declaration.
+	* cli/cli-decode.h (add_set_enum_cmd): Delete declaration.
+	(deprecated_add_show_from_set): Delete declaration.
+	* arm-tdep.c (_initialize_arm_tdep): Update comment.
+	* kod.c (kod_set_os): Simplify.
+	* infrun.c (set_schedlock_func): Simplify.
+	* cli/cli-dump.c (add_dump_command): Update comment.
+
 	Replace string variables with a filename completer with
 	add_setshow_optional_filename_cmd.
 	* solib.c, symfile.c: Update.

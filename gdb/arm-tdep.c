@@ -2848,7 +2848,8 @@ _initialize_arm_tdep (void)
   /* Sync the opcode insn printer with our register viewer.  */
   parse_arm_disassembler_option ("reg-names-std");
 
-  /* Initialize the array that will be passed to add_set_enum_cmd().  */
+  /* Initialize the array that will be passed to
+     add_setshow_enum_cmd().  */
   valid_disassembly_styles
     = xmalloc ((num_disassembly_options + 1) * sizeof (char *));
   for (i = 0; i < num_disassembly_options; i++)

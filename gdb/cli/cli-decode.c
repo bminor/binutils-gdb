@@ -378,29 +378,6 @@ add_set_cmd (char *name,
   return add_set_or_show_cmd (name, set_cmd, class, var_type, var, doc, list);
 }
 
-/* Add element named NAME to command list LIST (the list for set
-   or some sublist thereof).
-   CLASS is as in add_cmd.
-   ENUMLIST is a list of strings which may follow NAME.
-   VAR is address of the variable which will contain the matching string
-   (from ENUMLIST).
-   DOC is the documentation string.  */
-
-struct cmd_list_element *
-add_set_enum_cmd (char *name,
-		  enum command_class class,
-		  const char *enumlist[],
-		  const char **var,
-		  char *doc,
-		  struct cmd_list_element **list)
-{
-  struct cmd_list_element *c
-  = add_set_cmd (name, class, var_enum, var, doc, list);
-  c->enums = enumlist;
-
-  return c;
-}
-
 /* Add element named NAME to command list LIST (the list for set or
    some sublist thereof).  CLASS is as in add_cmd.  ENUMLIST is a list
    of strings which may follow NAME.  VAR is address of the variable
@@ -615,33 +592,6 @@ add_setshow_zinteger_cmd (char *name, enum command_class class,
 			set_func, show_func,
 			set_list, show_list,
 			NULL, NULL);
-}
-
-/* Where SETCMD has already been added, add the corresponding show
-   command to LIST and return a pointer to the added command (not
-   necessarily the head of LIST).  */
-/* NOTE: cagney/2002-03-17: The original version of
-   deprecated_add_show_from_set used memcpy() to clone `set' into
-   `show'.  This meant that in addition to all the needed fields (var,
-   name, et.al.) some unnecessary fields were copied (namely the
-   callback function).  The function explictly copies relevant fields.
-   For a `set' and `show' command to share the same callback, the
-   caller must set both explicitly.  */
-struct cmd_list_element *
-deprecated_add_show_from_set (struct cmd_list_element *setcmd,
-			      struct cmd_list_element **list)
-{
-  char *doc;
-  const static char setstring[] = "Set ";
-
-  /* Create a doc string by replacing "Set " at the start of the
-     `set'' command's doco with "Show ".  */
-  gdb_assert (strncmp (setcmd->doc, setstring, sizeof (setstring) - 1) == 0);
-  doc = concat ("Show ", setcmd->doc + sizeof (setstring) - 1, NULL);
-
-  /* Insert the basic command.  */
-  return add_set_or_show_cmd (setcmd->name, show_cmd, setcmd->class,
-			      setcmd->var_type, setcmd->var, doc, list);
 }
 
 /* Remove the command named NAME from the command list.  */

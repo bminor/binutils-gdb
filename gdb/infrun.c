@@ -469,21 +469,11 @@ static const char *scheduler_enums[] = {
 static void
 set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
 {
-  /* NOTE: cagney/2002-03-17: The deprecated_add_show_from_set()
-     function clones the set command passed as a parameter.  The clone
-     operation will include (BUG?) any ``set'' command callback, if
-     present.  Commands like ``info set'' call all the ``show''
-     command callbacks.  Unfortunately, for ``show'' commands cloned
-     from ``set'', this includes callbacks belonging to ``set''
-     commands.  Making this worse, this only occures if
-     deprecated_add_show_from_set() is called after add_cmd_sfunc()
-     (BUG?).  */
-  if (cmd_type (c) == set_cmd)
-    if (!target_can_lock_scheduler)
-      {
-	scheduler_mode = schedlock_off;
-	error (_("Target '%s' cannot support this command."), target_shortname);
-      }
+  if (!target_can_lock_scheduler)
+    {
+      scheduler_mode = schedlock_off;
+      error (_("Target '%s' cannot support this command."), target_shortname);
+    }
 }
 
 

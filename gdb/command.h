@@ -156,15 +156,6 @@ extern void execute_cmd_pre_hook (struct cmd_list_element *cmd);
 extern void execute_cmd_post_hook (struct cmd_list_element *cmd);
 
 /* Return the type of the command.  */
-/* NOTE: cagney/2002-03-17: The deprecated_add_show_from_set()
-   function clones the set command passed as a parameter.  The clone
-   operation will include (BUG?) any ``set'' command callback, if
-   present.  Commands like ``info set'' call all the ``show'' command
-   callbacks.  Unfortunately, for ``show'' commands cloned from
-   ``set'', this includes callbacks belonging to ``set'' commands.
-   Making this worse, this only occures if
-   deprecated_add_show_from_set() is called after add_cmd_sfunc()
-   (BUG?).  */
 extern enum cmd_types cmd_type (struct cmd_list_element *cmd);
 
 
@@ -219,13 +210,6 @@ extern struct cmd_list_element *add_set_cmd (char *name, enum
 					     var_types var_type, void *var,
 					     char *doc,
 					     struct cmd_list_element **list);
-
-extern struct cmd_list_element *add_set_enum_cmd (char *name,
-						  enum command_class class,
-						  const char *enumlist[],
-						  const char **var,
-						  char *doc,
-						  struct cmd_list_element **list);
 
 /* Method for show a set/show variable's VALUE on FILE.  If this
    method isn't supplied deprecated_show_value_hack() is called (which
@@ -347,9 +331,6 @@ extern void add_setshow_zinteger_cmd (char *name,
 				      show_value_ftype *show_func,
 				      struct cmd_list_element **set_list,
 				      struct cmd_list_element **show_list);
-
-extern struct cmd_list_element *deprecated_add_show_from_set (struct cmd_list_element *,
-							      struct cmd_list_element **);
 
 /* Do a "show" command for each thing on a command list.  */
 
