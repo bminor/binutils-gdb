@@ -28,6 +28,12 @@ if ![istarget sh*-*-*] {
     return
 }
 
+if {[istarget sh64*-*-*] || [istarget sh5*-*-*]} then {
+    global ASFLAGS
+    set asflags_save "$ASFLAGS"
+    set ASFLAGS "$ASFLAGS -isa=SHcompact"
+}
+
 set rd_test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
 foreach shtest $rd_test_list {
     # We need to strip the ".d", but can leave the dirname.
@@ -44,3 +50,4 @@ foreach shtest $rd_test_list {
 	# FIXME: What if it fails?  Need we do something?
     }
 }
+set ASFLAGS "$asflags_save"

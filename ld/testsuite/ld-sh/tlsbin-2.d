@@ -82,7 +82,7 @@ Relocation section '\.rela\.dyn' at offset 0x[0-9a-f]+ contains 19 entries:
 
 Relocation section '\.rela\.plt' at offset 0x[0-9a-f]+ contains 1 entries:
  Offset +Info +Type +Sym\.Value +Sym\. Name \+ Addend
-0+4130cc  000005a4 R_SH_JMP_SLOT +[0-9a-f]+ +__tls_get_addr \+ 0
+0+4130cc  000005a4 R_SH_JMP_SLOT +[0-9a-f]+ +__tls_get_addr \+ [0-9a-f]+
 
 Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
@@ -141,5 +141,6 @@ Symbol table '\.symtab' contains [0-9]+ entries:
  +[0-9]+: 00000014 +0 TLS +GLOBAL HIDDEN +10 sh2
  +[0-9]+: 0000001c +0 TLS +GLOBAL DEFAULT +11 bg2
  +[0-9]+: 00000018 +0 TLS +GLOBAL DEFAULT +11 bg1
- +[0-9]+: [0-9a-f]+ +0 NOTYPE  GLOBAL DEFAULT +9 __data_start
+#...
+ +[0-9]+: .*
 #pass

@@ -1,3 +1,12 @@
+2002-11-03  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ld-sh/rd-sh.exp: Add -isa=SHcompact to ASFLAGS for SH-5.
+	* ld-sh/tlsbin-1.d: Handle GOT_BIAS appropriately for SH-5.
+	* ld-sh/tlspic-1.d: Likewise.
+	* ld-sh/tlspic-2.d: Likewise.
+	* ld-sh/tlsbin-2.d: Likewise. Make it robust for the symbols
+	defined by the linker scripts.
+
 2002-10-14  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* ld-m68hc11/m68hc11.exp: Specific tests for 68HC11/68HC12.
