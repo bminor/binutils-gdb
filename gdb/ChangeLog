@@ -1,3 +1,7 @@
+2004-08-05  Nathanael Nerode  <neroden@gcc.gnu.org>
+
+	* MAINTAINERS: Add self to Write-After-Approval.
+
 2004-08-05  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* libunwind-frame.c (LIBUNWIND_SO): Change to be of form:
