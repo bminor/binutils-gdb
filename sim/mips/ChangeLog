@@ -1,3 +1,13 @@
+Wed May 13 09:59:27 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* mips/mips.igen (check_op_hilo,check_mult_hilo,check_div_hilo):
+	Replace check_op_hilo with check_mult_hilo and check_div_hilo.
+	Add special r3900 version of do_mult_hilo.  
+	(do_dmultx,do_mult,do_multu): Replace calls to check_op_hilo
+	with calls to check_mult_hilo.
+	(do_ddiv,do_ddivu,do_div,do_divu): Replace calls to check_op_hilo
+	with calls to check_div_hilo.
+
 Tue May 12 15:22:11 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (SUBTARGET_R3900): Define for mipstx39 target.
