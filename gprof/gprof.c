@@ -265,11 +265,7 @@ bfd	*abfd;
 #	    endif DEBUG
 	continue;
       }
-#if 0
       npe->value = syms[i]->value + syms[i]->section->vma;
-#else
-      npe->value = syms[i]->value;
-#endif
       npe->name = syms[i]->name;
 #	ifdef DEBUG
       if ( debug & AOUTDEBUG ) {
