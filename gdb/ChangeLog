@@ -1,3 +1,9 @@
+Wed Aug 17 23:17:33 1994  Rob Savoye  (rob@darkstar.cygnus.com)
+
+	* remote-pa.c: New file for HPPA embedded support. Currently it's
+	a copy of remote.c.
+	* config/pa/hppabsd.mt,hppahpux.mt,hppaosf.mt: User remote-pa.c.
+
 Wed Aug 17 13:19:52 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* config/m68k/tm-delta68.h (EXTRACT_RETURN_VALUE,
