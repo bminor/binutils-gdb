@@ -1,3 +1,33 @@
+Fri Oct  7 17:54:02 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-m88k.h (TC_KEEP_FX_OFFSET): Define.
+	* config/obj-coff.c (do_relocs_for): Test only TC_KEEP_FX_OFFSET,
+	rather than both it and TC_M88K.
+	(coff_adjust_section_syms): New function.
+	(coff_frob_section): For non-empty sections, create aux entry for
+	the section symbol, indicating the size.
+	(n_line_nos): New variable.
+	(add_lineno): Increment it.
+	(coff_add_linesym): Increment n_line_nos, don't call add_lineno.
+	(coff_frob_file): New function; map coff_adjust_section_syms over
+	sections.
+	(obj_coff_line): Only reset line_base for .bf symbols.
+	* config/obj-coff.h (coff_adjust_section_syms, coff_frob_file):
+	Declare.
+	(obj_frob_file): New macro.
+
+	* config/obj-coff.h (OBJ_COPY_SYMBOL_ATTRIBUTES): Renamed from
+	obj_frob_forward_symbol, and rewritten for new parameter list.
+
+	Mon Oct  3 21:02:38 1994  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* config/obj-vms.h (S_IS_LOCAL): fix obsolete flagseen[] reference.
+
+Wed Oct  5 11:49:26 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* config/obj-ecoff.c (obj_pseudo_table): Accept .esize and .etype
+	as synonyms for .size and .type.
+
 Wed Oct  5 00:08:10 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-coff.c (coff_frob_section): Remove assert about
