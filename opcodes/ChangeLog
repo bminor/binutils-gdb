@@ -1,5 +1,9 @@
 2000-09-22  Jim Wilson  <wilson@cygnus.com>
 
+	* ia64-opc-f.c (ia64_opcodes_f): Add fpcmp pseudo-ops for
+	gt, ge, ngt, and nge.
+	* ia64-asmtab.c: Regenerate.
+
 	* ia64-dis.c (print_insn_ia64): Revert Aug 7 byte skip count change.
 	* ia64-gen.c (parse_semantics): Handle IA64_DVS_STOP.
 	(lookup_specifier): Handle "PR%, 1 to 15" and "PR%, 16 to 62".

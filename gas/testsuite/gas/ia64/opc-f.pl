@@ -51,9 +51,20 @@ print "\tfselect f4 = f5, f6, f7\n\n";
 @cmp = ( ".eq", ".lt", ".le", ".unord", ".gt", ".ge", ".neq", ".nlt", 
 	 ".nle", ".ngt", ".nge", ".ord" );
 
+@fctype = ( "", ".unc" );
+
+foreach $c (@cmp) {
+  foreach $u (@fctype) {
+    foreach $s (@sf) {
+      print "\tfcmp${c}${u}${s} p3, p4 = f4, f5\n";
+    }
+  }
+  print "\n";
+}
+
 # Floating Point Class
 
-foreach $u ( "", ".unc" ) {
+foreach $u (@fctype) {
   foreach $c ( '@nat', '@qnan', '@snan', '@pos', '@neg', '@unorm',
 	       '@norm', '@inf', '0x1ff' ) {
     foreach $m ( ".m", ".nm" ) {
@@ -93,7 +104,7 @@ foreach $i ( "fmin", "fmax", "famin", "famax",
 
 foreach $c (@cmp) {
   foreach $s (@sf) {
-    print "\tfcmp${c}${u}${s} p3, p4 = f4, f5\n";
+    print "\tfpcmp${c}${s} f3 = f4, f5\n";
   }
   print "\n";
 }

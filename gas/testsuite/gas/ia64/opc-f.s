@@ -188,6 +188,138 @@ _start:
 
 	fselect f4 = f5, f6, f7
 
+	fcmp.eq p3, p4 = f4, f5
+	fcmp.eq.s0 p3, p4 = f4, f5
+	fcmp.eq.s1 p3, p4 = f4, f5
+	fcmp.eq.s2 p3, p4 = f4, f5
+	fcmp.eq.s3 p3, p4 = f4, f5
+	fcmp.eq.unc p3, p4 = f4, f5
+	fcmp.eq.unc.s0 p3, p4 = f4, f5
+	fcmp.eq.unc.s1 p3, p4 = f4, f5
+	fcmp.eq.unc.s2 p3, p4 = f4, f5
+	fcmp.eq.unc.s3 p3, p4 = f4, f5
+
+	fcmp.lt p3, p4 = f4, f5
+	fcmp.lt.s0 p3, p4 = f4, f5
+	fcmp.lt.s1 p3, p4 = f4, f5
+	fcmp.lt.s2 p3, p4 = f4, f5
+	fcmp.lt.s3 p3, p4 = f4, f5
+	fcmp.lt.unc p3, p4 = f4, f5
+	fcmp.lt.unc.s0 p3, p4 = f4, f5
+	fcmp.lt.unc.s1 p3, p4 = f4, f5
+	fcmp.lt.unc.s2 p3, p4 = f4, f5
+	fcmp.lt.unc.s3 p3, p4 = f4, f5
+
+	fcmp.le p3, p4 = f4, f5
+	fcmp.le.s0 p3, p4 = f4, f5
+	fcmp.le.s1 p3, p4 = f4, f5
+	fcmp.le.s2 p3, p4 = f4, f5
+	fcmp.le.s3 p3, p4 = f4, f5
+	fcmp.le.unc p3, p4 = f4, f5
+	fcmp.le.unc.s0 p3, p4 = f4, f5
+	fcmp.le.unc.s1 p3, p4 = f4, f5
+	fcmp.le.unc.s2 p3, p4 = f4, f5
+	fcmp.le.unc.s3 p3, p4 = f4, f5
+
+	fcmp.unord p3, p4 = f4, f5
+	fcmp.unord.s0 p3, p4 = f4, f5
+	fcmp.unord.s1 p3, p4 = f4, f5
+	fcmp.unord.s2 p3, p4 = f4, f5
+	fcmp.unord.s3 p3, p4 = f4, f5
+	fcmp.unord.unc p3, p4 = f4, f5
+	fcmp.unord.unc.s0 p3, p4 = f4, f5
+	fcmp.unord.unc.s1 p3, p4 = f4, f5
+	fcmp.unord.unc.s2 p3, p4 = f4, f5
+	fcmp.unord.unc.s3 p3, p4 = f4, f5
+
+	fcmp.gt p3, p4 = f4, f5
+	fcmp.gt.s0 p3, p4 = f4, f5
+	fcmp.gt.s1 p3, p4 = f4, f5
+	fcmp.gt.s2 p3, p4 = f4, f5
+	fcmp.gt.s3 p3, p4 = f4, f5
+	fcmp.gt.unc p3, p4 = f4, f5
+	fcmp.gt.unc.s0 p3, p4 = f4, f5
+	fcmp.gt.unc.s1 p3, p4 = f4, f5
+	fcmp.gt.unc.s2 p3, p4 = f4, f5
+	fcmp.gt.unc.s3 p3, p4 = f4, f5
+
+	fcmp.ge p3, p4 = f4, f5
+	fcmp.ge.s0 p3, p4 = f4, f5
+	fcmp.ge.s1 p3, p4 = f4, f5
+	fcmp.ge.s2 p3, p4 = f4, f5
+	fcmp.ge.s3 p3, p4 = f4, f5
+	fcmp.ge.unc p3, p4 = f4, f5
+	fcmp.ge.unc.s0 p3, p4 = f4, f5
+	fcmp.ge.unc.s1 p3, p4 = f4, f5
+	fcmp.ge.unc.s2 p3, p4 = f4, f5
+	fcmp.ge.unc.s3 p3, p4 = f4, f5
+
+	fcmp.neq p3, p4 = f4, f5
+	fcmp.neq.s0 p3, p4 = f4, f5
+	fcmp.neq.s1 p3, p4 = f4, f5
+	fcmp.neq.s2 p3, p4 = f4, f5
+	fcmp.neq.s3 p3, p4 = f4, f5
+	fcmp.neq.unc p3, p4 = f4, f5
+	fcmp.neq.unc.s0 p3, p4 = f4, f5
+	fcmp.neq.unc.s1 p3, p4 = f4, f5
+	fcmp.neq.unc.s2 p3, p4 = f4, f5
+	fcmp.neq.unc.s3 p3, p4 = f4, f5
+
+	fcmp.nlt p3, p4 = f4, f5
+	fcmp.nlt.s0 p3, p4 = f4, f5
+	fcmp.nlt.s1 p3, p4 = f4, f5
+	fcmp.nlt.s2 p3, p4 = f4, f5
+	fcmp.nlt.s3 p3, p4 = f4, f5
+	fcmp.nlt.unc p3, p4 = f4, f5
+	fcmp.nlt.unc.s0 p3, p4 = f4, f5
+	fcmp.nlt.unc.s1 p3, p4 = f4, f5
+	fcmp.nlt.unc.s2 p3, p4 = f4, f5
+	fcmp.nlt.unc.s3 p3, p4 = f4, f5
+
+	fcmp.nle p3, p4 = f4, f5
+	fcmp.nle.s0 p3, p4 = f4, f5
+	fcmp.nle.s1 p3, p4 = f4, f5
+	fcmp.nle.s2 p3, p4 = f4, f5
+	fcmp.nle.s3 p3, p4 = f4, f5
+	fcmp.nle.unc p3, p4 = f4, f5
+	fcmp.nle.unc.s0 p3, p4 = f4, f5
+	fcmp.nle.unc.s1 p3, p4 = f4, f5
+	fcmp.nle.unc.s2 p3, p4 = f4, f5
+	fcmp.nle.unc.s3 p3, p4 = f4, f5
+
+	fcmp.ngt p3, p4 = f4, f5
+	fcmp.ngt.s0 p3, p4 = f4, f5
+	fcmp.ngt.s1 p3, p4 = f4, f5
+	fcmp.ngt.s2 p3, p4 = f4, f5
+	fcmp.ngt.s3 p3, p4 = f4, f5
+	fcmp.ngt.unc p3, p4 = f4, f5
+	fcmp.ngt.unc.s0 p3, p4 = f4, f5
+	fcmp.ngt.unc.s1 p3, p4 = f4, f5
+	fcmp.ngt.unc.s2 p3, p4 = f4, f5
+	fcmp.ngt.unc.s3 p3, p4 = f4, f5
+
+	fcmp.nge p3, p4 = f4, f5
+	fcmp.nge.s0 p3, p4 = f4, f5
+	fcmp.nge.s1 p3, p4 = f4, f5
+	fcmp.nge.s2 p3, p4 = f4, f5
+	fcmp.nge.s3 p3, p4 = f4, f5
+	fcmp.nge.unc p3, p4 = f4, f5
+	fcmp.nge.unc.s0 p3, p4 = f4, f5
+	fcmp.nge.unc.s1 p3, p4 = f4, f5
+	fcmp.nge.unc.s2 p3, p4 = f4, f5
+	fcmp.nge.unc.s3 p3, p4 = f4, f5
+
+	fcmp.ord p3, p4 = f4, f5
+	fcmp.ord.s0 p3, p4 = f4, f5
+	fcmp.ord.s1 p3, p4 = f4, f5
+	fcmp.ord.s2 p3, p4 = f4, f5
+	fcmp.ord.s3 p3, p4 = f4, f5
+	fcmp.ord.unc p3, p4 = f4, f5
+	fcmp.ord.unc.s0 p3, p4 = f4, f5
+	fcmp.ord.unc.s1 p3, p4 = f4, f5
+	fcmp.ord.unc.s2 p3, p4 = f4, f5
+	fcmp.ord.unc.s3 p3, p4 = f4, f5
+
 	fclass.m p3, p4 = f4, @nat
 	fclass.nm p3, p4 = f4, @nat
 	fclass.m p3, p4 = f4, @qnan
@@ -298,77 +430,77 @@ _start:
 	fpamax.s2 f4 = f5, f6
 	fpamax.s3 f4 = f5, f6
 
-	fcmp.eq p3, p4 = f4, f5
-	fcmp.eq.s0 p3, p4 = f4, f5
-	fcmp.eq.s1 p3, p4 = f4, f5
-	fcmp.eq.s2 p3, p4 = f4, f5
-	fcmp.eq.s3 p3, p4 = f4, f5
+	fpcmp.eq f3 = f4, f5
+	fpcmp.eq.s0 f3 = f4, f5
+	fpcmp.eq.s1 f3 = f4, f5
+	fpcmp.eq.s2 f3 = f4, f5
+	fpcmp.eq.s3 f3 = f4, f5
 
-	fcmp.lt p3, p4 = f4, f5
-	fcmp.lt.s0 p3, p4 = f4, f5
-	fcmp.lt.s1 p3, p4 = f4, f5
-	fcmp.lt.s2 p3, p4 = f4, f5
-	fcmp.lt.s3 p3, p4 = f4, f5
+	fpcmp.lt f3 = f4, f5
+	fpcmp.lt.s0 f3 = f4, f5
+	fpcmp.lt.s1 f3 = f4, f5
+	fpcmp.lt.s2 f3 = f4, f5
+	fpcmp.lt.s3 f3 = f4, f5
 
-	fcmp.le p3, p4 = f4, f5
-	fcmp.le.s0 p3, p4 = f4, f5
-	fcmp.le.s1 p3, p4 = f4, f5
-	fcmp.le.s2 p3, p4 = f4, f5
-	fcmp.le.s3 p3, p4 = f4, f5
+	fpcmp.le f3 = f4, f5
+	fpcmp.le.s0 f3 = f4, f5
+	fpcmp.le.s1 f3 = f4, f5
+	fpcmp.le.s2 f3 = f4, f5
+	fpcmp.le.s3 f3 = f4, f5
 
-	fcmp.unord p3, p4 = f4, f5
-	fcmp.unord.s0 p3, p4 = f4, f5
-	fcmp.unord.s1 p3, p4 = f4, f5
-	fcmp.unord.s2 p3, p4 = f4, f5
-	fcmp.unord.s3 p3, p4 = f4, f5
+	fpcmp.unord f3 = f4, f5
+	fpcmp.unord.s0 f3 = f4, f5
+	fpcmp.unord.s1 f3 = f4, f5
+	fpcmp.unord.s2 f3 = f4, f5
+	fpcmp.unord.s3 f3 = f4, f5
 
-	fcmp.gt p3, p4 = f4, f5
-	fcmp.gt.s0 p3, p4 = f4, f5
-	fcmp.gt.s1 p3, p4 = f4, f5
-	fcmp.gt.s2 p3, p4 = f4, f5
-	fcmp.gt.s3 p3, p4 = f4, f5
+	fpcmp.gt f3 = f4, f5
+	fpcmp.gt.s0 f3 = f4, f5
+	fpcmp.gt.s1 f3 = f4, f5
+	fpcmp.gt.s2 f3 = f4, f5
+	fpcmp.gt.s3 f3 = f4, f5
 
-	fcmp.ge p3, p4 = f4, f5
-	fcmp.ge.s0 p3, p4 = f4, f5
-	fcmp.ge.s1 p3, p4 = f4, f5
-	fcmp.ge.s2 p3, p4 = f4, f5
-	fcmp.ge.s3 p3, p4 = f4, f5
+	fpcmp.ge f3 = f4, f5
+	fpcmp.ge.s0 f3 = f4, f5
+	fpcmp.ge.s1 f3 = f4, f5
+	fpcmp.ge.s2 f3 = f4, f5
+	fpcmp.ge.s3 f3 = f4, f5
 
-	fcmp.neq p3, p4 = f4, f5
-	fcmp.neq.s0 p3, p4 = f4, f5
-	fcmp.neq.s1 p3, p4 = f4, f5
-	fcmp.neq.s2 p3, p4 = f4, f5
-	fcmp.neq.s3 p3, p4 = f4, f5
+	fpcmp.neq f3 = f4, f5
+	fpcmp.neq.s0 f3 = f4, f5
+	fpcmp.neq.s1 f3 = f4, f5
+	fpcmp.neq.s2 f3 = f4, f5
+	fpcmp.neq.s3 f3 = f4, f5
 
-	fcmp.nlt p3, p4 = f4, f5
-	fcmp.nlt.s0 p3, p4 = f4, f5
-	fcmp.nlt.s1 p3, p4 = f4, f5
-	fcmp.nlt.s2 p3, p4 = f4, f5
-	fcmp.nlt.s3 p3, p4 = f4, f5
+	fpcmp.nlt f3 = f4, f5
+	fpcmp.nlt.s0 f3 = f4, f5
+	fpcmp.nlt.s1 f3 = f4, f5
+	fpcmp.nlt.s2 f3 = f4, f5
+	fpcmp.nlt.s3 f3 = f4, f5
 
-	fcmp.nle p3, p4 = f4, f5
-	fcmp.nle.s0 p3, p4 = f4, f5
-	fcmp.nle.s1 p3, p4 = f4, f5
-	fcmp.nle.s2 p3, p4 = f4, f5
-	fcmp.nle.s3 p3, p4 = f4, f5
+	fpcmp.nle f3 = f4, f5
+	fpcmp.nle.s0 f3 = f4, f5
+	fpcmp.nle.s1 f3 = f4, f5
+	fpcmp.nle.s2 f3 = f4, f5
+	fpcmp.nle.s3 f3 = f4, f5
 
-	fcmp.ngt p3, p4 = f4, f5
-	fcmp.ngt.s0 p3, p4 = f4, f5
-	fcmp.ngt.s1 p3, p4 = f4, f5
-	fcmp.ngt.s2 p3, p4 = f4, f5
-	fcmp.ngt.s3 p3, p4 = f4, f5
+	fpcmp.ngt f3 = f4, f5
+	fpcmp.ngt.s0 f3 = f4, f5
+	fpcmp.ngt.s1 f3 = f4, f5
+	fpcmp.ngt.s2 f3 = f4, f5
+	fpcmp.ngt.s3 f3 = f4, f5
 
-	fcmp.nge p3, p4 = f4, f5
-	fcmp.nge.s0 p3, p4 = f4, f5
-	fcmp.nge.s1 p3, p4 = f4, f5
-	fcmp.nge.s2 p3, p4 = f4, f5
-	fcmp.nge.s3 p3, p4 = f4, f5
+	fpcmp.nge f3 = f4, f5
+	fpcmp.nge.s0 f3 = f4, f5
+	fpcmp.nge.s1 f3 = f4, f5
+	fpcmp.nge.s2 f3 = f4, f5
+	fpcmp.nge.s3 f3 = f4, f5
 
-	fcmp.ord p3, p4 = f4, f5
-	fcmp.ord.s0 p3, p4 = f4, f5
-	fcmp.ord.s1 p3, p4 = f4, f5
-	fcmp.ord.s2 p3, p4 = f4, f5
-	fcmp.ord.s3 p3, p4 = f4, f5
+	fpcmp.ord f3 = f4, f5
+	fpcmp.ord.s0 f3 = f4, f5
+	fpcmp.ord.s1 f3 = f4, f5
+	fpcmp.ord.s2 f3 = f4, f5
+	fpcmp.ord.s3 f3 = f4, f5
 
 	fmerge.s f4 = f5, f6
 	fmerge.ns f4 = f5, f6

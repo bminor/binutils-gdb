@@ -1,5 +1,8 @@
 2000-09-22  Jim Wilson  <wilson@cygnus.com>
 
+	* gas/ia64/opc-f.pl: Add missing fcmp and fpcmp tests.
+	* gas/ia64/opc-f.s, gas/ia64/opc-f.d: Regenerate.
+
 	* gas/ia64/dv-raw-err.s: Add new testcases for PR%, 16 - 62.
 	* gas/ia64/dv-waw-err.s: Likewise.
 	* gas/ia64/dv-imply.d: Regenerate.
