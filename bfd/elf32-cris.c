@@ -482,7 +482,7 @@ cris_elf_grok_prstatus (abfd, note)
       default:
 	return false;
 
-      case 166:		/* Linux/CRIS */
+      case 214:		/* Linux/CRIS */
 	/* pr_cursig */
 	elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
 
@@ -491,7 +491,7 @@ cris_elf_grok_prstatus (abfd, note)
 
 	/* pr_reg */
 	offset = 70;
-	raw_size = 92;
+	raw_size = 140;
 
 	break;
     }
