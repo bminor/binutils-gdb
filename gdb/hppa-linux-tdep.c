@@ -415,21 +415,12 @@ hppa_linux_sigtramp_frame_prev_register (struct frame_info *next_frame,
 					 int regnum, int *optimizedp,
 					 enum lval_type *lvalp, 
 					 CORE_ADDR *addrp,
-					 int *realnump, void *bufferp)
+					 int *realnump, void *valuep)
 {
   struct hppa_linux_sigtramp_unwind_cache *info
     = hppa_linux_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);
-  int pcoqt = (regnum == HPPA_PCOQ_TAIL_REGNUM);
-
-  if (pcoqt)
-    regnum = HPPA_PCOQ_HEAD_REGNUM;
-
-  trad_frame_prev_register (next_frame, info->saved_regs, regnum,
-                            optimizedp, lvalp, addrp, realnump, bufferp);
-
-  if (pcoqt)
-    store_unsigned_integer (bufferp, 4, 
-		      	    extract_unsigned_integer (bufferp, 4) + 4);
+  hppa_frame_prev_register_helper (next_frame, info->saved_regs, regnum,
+		                   optimizedp, lvalp, addrp, realnump, valuep);
 }
 
 static const struct frame_unwind hppa_linux_sigtramp_frame_unwind = {

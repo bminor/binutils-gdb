@@ -1856,42 +1856,14 @@ hppa_frame_this_id (struct frame_info *next_frame, void **this_cache,
 
 static void
 hppa_frame_prev_register (struct frame_info *next_frame,
-				 void **this_cache,
-				 int regnum, int *optimizedp,
-				 enum lval_type *lvalp, CORE_ADDR *addrp,
-				 int *realnump, void *valuep)
+			  void **this_cache,
+			  int regnum, int *optimizedp,
+			  enum lval_type *lvalp, CORE_ADDR *addrp,
+			  int *realnump, void *valuep)
 {
   struct hppa_frame_cache *info = hppa_frame_cache (next_frame, this_cache);
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
-  if (regnum == HPPA_PCOQ_TAIL_REGNUM)
-    {
-      /* The PCOQ TAIL, or NPC, needs to be computed from the unwound
-	 PC register.  */
-      *optimizedp = 0;
-      *lvalp = not_lval;
-      *addrp = 0;
-      *realnump = 0;
-      if (valuep)
-	{
-	  int regsize = register_size (gdbarch, HPPA_PCOQ_HEAD_REGNUM);
-	  CORE_ADDR pc;
-	  int optimized;
-	  enum lval_type lval;
-	  CORE_ADDR addr;
-	  int realnum;
-	  bfd_byte value[MAX_REGISTER_SIZE];
-	  trad_frame_prev_register (next_frame, info->saved_regs,
-				    HPPA_PCOQ_HEAD_REGNUM, &optimized, &lval, &addr,
-				    &realnum, &value);
-	  pc = extract_unsigned_integer (&value, regsize);
-	  store_unsigned_integer (valuep, regsize, pc + 4);
-	}
-    }
-  else
-    {
-      trad_frame_prev_register (next_frame, info->saved_regs, regnum,
-				optimizedp, lvalp, addrp, realnump, valuep);
-    }
+  hppa_frame_prev_register_helper (next_frame, info->saved_regs, regnum,
+		                   optimizedp, lvalp, addrp, realnump, valuep);
 }
 
 static const struct frame_unwind hppa_frame_unwind =
@@ -1904,7 +1876,116 @@ static const struct frame_unwind hppa_frame_unwind =
 static const struct frame_unwind *
 hppa_frame_unwind_sniffer (struct frame_info *next_frame)
 {
-  return &hppa_frame_unwind;
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+
+  if (find_unwind_entry (pc))
+    return &hppa_frame_unwind;
+
+  return NULL;
+}
+
+/* This is a generic fallback frame unwinder that kicks in if we fail all
+   the other ones.  Normally we would expect the stub and regular unwinder
+   to work, but in some cases we might hit a function that just doesn't
+   have any unwind information available.  In this case we try to do
+   unwinding solely based on code reading.  This is obviously going to be
+   slow, so only use this as a last resort.  Currently this will only
+   identify the stack and pc for the frame.  */
+
+static struct hppa_frame_cache *
+hppa_fallback_frame_cache (struct frame_info *next_frame, void **this_cache)
+{
+  struct hppa_frame_cache *cache;
+  CORE_ADDR pc, start_pc, end_pc, cur_pc;
+
+  cache = FRAME_OBSTACK_ZALLOC (struct hppa_frame_cache);
+  (*this_cache) = cache;
+  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+
+  pc = frame_func_unwind (next_frame);
+  cur_pc = frame_pc_unwind (next_frame);
+
+  find_pc_partial_function (pc, NULL, &start_pc, &end_pc);
+
+  if (start_pc == 0 || end_pc == 0)
+    {
+      error ("Cannot find bounds of current function (@0x%s), unwinding will "
+	     "fail.", paddr_nz (pc));
+      return cache;
+    }
+
+  if (end_pc > cur_pc)
+    end_pc = cur_pc;
+
+  for (pc = start_pc; pc < end_pc; pc += 4)
+    {
+      unsigned int insn;
+
+      insn = read_memory_unsigned_integer (pc, 4);
+
+      /* There are limited ways to store the return pointer into the
+	 stack.  */
+      if (insn == 0x6bc23fd9) /* stw rp,-0x14(sr0,sp) */
+	{
+	  cache->saved_regs[HPPA_RP_REGNUM].addr = -20;
+	  break;
+	}
+      else if (insn == 0x0fc212c1) /* std rp,-0x10(sr0,sp) */
+	{
+	  cache->saved_regs[HPPA_RP_REGNUM].addr = -16;
+	  break;
+	}
+    }
+
+  cache->base = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
+
+  if (trad_frame_addr_p (cache->saved_regs, HPPA_RP_REGNUM))
+    {
+      cache->saved_regs[HPPA_RP_REGNUM].addr += cache->base;
+      cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM] = cache->saved_regs[HPPA_RP_REGNUM];
+    }
+  else
+    {
+      ULONGEST rp = frame_unwind_register_unsigned (next_frame, HPPA_RP_REGNUM);
+      trad_frame_set_value (cache->saved_regs, HPPA_PCOQ_HEAD_REGNUM, rp);
+    }
+
+  return cache;
+}
+
+static void
+hppa_fallback_frame_this_id (struct frame_info *next_frame, void **this_cache,
+			     struct frame_id *this_id)
+{
+  struct hppa_frame_cache *info = 
+    hppa_fallback_frame_cache (next_frame, this_cache);
+  (*this_id) = frame_id_build (info->base, frame_func_unwind (next_frame));
+}
+
+static void
+hppa_fallback_frame_prev_register (struct frame_info *next_frame,
+			  void **this_cache,
+			  int regnum, int *optimizedp,
+			  enum lval_type *lvalp, CORE_ADDR *addrp,
+			  int *realnump, void *valuep)
+{
+  struct hppa_frame_cache *info = 
+    hppa_fallback_frame_cache (next_frame, this_cache);
+  hppa_frame_prev_register_helper (next_frame, info->saved_regs, regnum,
+		                   optimizedp, lvalp, addrp, realnump, valuep);
+}
+
+static const struct frame_unwind hppa_fallback_frame_unwind =
+{
+  NORMAL_FRAME,
+  hppa_fallback_frame_this_id,
+  hppa_fallback_frame_prev_register
+};
+
+static const struct frame_unwind *
+hppa_fallback_unwind_sniffer (struct frame_info *next_frame)
+{
+  return &hppa_fallback_frame_unwind;
 }
 
 static CORE_ADDR
@@ -1971,23 +2052,12 @@ hppa_stub_frame_prev_register (struct frame_info *next_frame,
 			       void **this_prologue_cache,
 			       int regnum, int *optimizedp,
 			       enum lval_type *lvalp, CORE_ADDR *addrp,
-			       int *realnump, void *bufferp)
+			       int *realnump, void *valuep)
 {
   struct hppa_stub_unwind_cache *info
     = hppa_stub_frame_unwind_cache (next_frame, this_prologue_cache);
-  int pcoqt = (regnum == HPPA_PCOQ_TAIL_REGNUM);
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
-  int regsize = register_size (gdbarch, HPPA_PCOQ_HEAD_REGNUM);
-
-  if (pcoqt)
-    regnum = HPPA_PCOQ_HEAD_REGNUM;
-
-  trad_frame_prev_register (next_frame, info->saved_regs, regnum,
-                            optimizedp, lvalp, addrp, realnump, bufferp);
-
-  if (pcoqt)
-    store_unsigned_integer (bufferp, regsize, 
-		      	    extract_unsigned_integer (bufferp, regsize) + 4);
+  hppa_frame_prev_register_helper (next_frame, info->saved_regs, regnum,
+		                   optimizedp, lvalp, addrp, realnump, valuep);
 }
 
 static const struct frame_unwind hppa_stub_frame_unwind = {
@@ -2230,6 +2300,28 @@ hppa_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
     store_unsigned_integer (buf, sizeof(tmp), tmp);
 }
 
+void
+hppa_frame_prev_register_helper (struct frame_info *next_frame,
+			         struct trad_frame_saved_reg saved_regs[],
+				 int regnum, int *optimizedp,
+				 enum lval_type *lvalp, CORE_ADDR *addrp,
+				 int *realnump, void *valuep)
+{
+  int pcoqt = (regnum == HPPA_PCOQ_TAIL_REGNUM);
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  int regsize = register_size (gdbarch, HPPA_PCOQ_HEAD_REGNUM);
+
+  if (pcoqt)
+    regnum = HPPA_PCOQ_HEAD_REGNUM;
+
+  trad_frame_prev_register (next_frame, saved_regs, regnum,
+                            optimizedp, lvalp, addrp, realnump, valuep);
+
+  if (pcoqt)
+    store_unsigned_integer (valuep, regsize, 
+		      	    extract_unsigned_integer (valuep, regsize) + 4);
+}
+
 /* Here is a table of C type sizes on hppa with various compiles
    and options.  I measured this on PA 9000/800 with HP-UX 11.11
    and these compilers:
@@ -2391,6 +2483,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Hook in the default unwinders.  */
   frame_unwind_append_sniffer (gdbarch, hppa_stub_unwind_sniffer);
   frame_unwind_append_sniffer (gdbarch, hppa_frame_unwind_sniffer);
+  frame_unwind_append_sniffer (gdbarch, hppa_fallback_unwind_sniffer);
   frame_base_append_sniffer (gdbarch, hppa_frame_base_sniffer);
 
   return gdbarch;

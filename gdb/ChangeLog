@@ -1,3 +1,18 @@
+2004-05-07  Randolph Chung  <tausq@debian.org>
+
+	* hppa-tdep.c (hppa_frame_prev_register_helper): New function to 
+	do common handling of the pcoqt register.
+	(hppa_frame_prev_register, hppa_stub_frame_prev_register): Convert
+	to use helper function.
+	(hppa_frame_unwind_sniffer): Only use if unwind entry is present.
+	(hppa_fallback_frame_cache, hppa_fallback_frame_this_id)
+	(hppa_fallback_frame_prev_register, hppa_fallback_frame_unwind): New
+	generic fallback unwinder when all else fails.
+	(hppa_gdbarch_init): Add fallback sniffer.
+	* hppa-tdep.h (hppa_frame_prev_register_helper): Prototype.
+	* hppa-linux-tdep.c (hppa_linux_sigtramp_frame_prev_register): Convert
+	to use helper function.
+
 2004-05-08  Joel Brobecker  <brobecker@gnat.com>
 
 	* config/djgpp/fnchange.lst: Add translation rules for
