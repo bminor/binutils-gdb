@@ -1,6 +1,6 @@
 ## Process this file with automake to generate Makefile.in
 
-AUTOMAKE_OPTIONS = cygnus
+AUTOMAKE_OPTIONS = 1.8 cygnus
 
 # What version of the manual you want; "all" includes everything
 CONFIG=all
@@ -67,8 +67,7 @@ as.dvi: $(srcdir)/as.texinfo asconfig.texi gasver.texi $(CPU_DOCS)
 
 # We want install to imply install-info as per GNU standards, despite the
 # cygnus option.
-install: install-info
-install-info: install-info-am
+install-data-local: install-info
 
 # This one isn't ready for prime time yet.  Not even a little bit.
 

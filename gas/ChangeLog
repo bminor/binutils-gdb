@@ -1,3 +1,13 @@
+2004-01-05  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* Makefile.am (install, install-info, RECURSIVE_TARGETS): Remove.
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* doc/Makefile.am (install, install-info): Remove.
+	(install-data-local): A new hook for install-info.
+	(AUTOMAKE_OPTIONS): Require automake 1.8.
+	* doc/Makefile.in: Regenerate.
+
 2004-01-02  Nutan Singh <nutan@kpitcummins.com>
 
 	* doc/c-sh.texi: Update description about floating point behavior
