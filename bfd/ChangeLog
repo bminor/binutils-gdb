@@ -1,3 +1,11 @@
+Tue Apr  8 18:09:29 1997  Jamie Lokier  <jamie@rebellion.co.uk>
+
+	* stabs.c (struct stab_section_info): New field
+	`cumulative_skips'.
+	(_bfd_link_section_stabs): Fill the above array.
+	(_bfd_stab_section_offset): Use `cumulative_skips' to
+	speed up offset calculation.
+
 Tue Apr  8 00:01:31 1997  Jeffrey A Law  (law@cygnus.com)
 
         * elf-mn10300.c (mn10300_elf_relax_section): Don't forget the
