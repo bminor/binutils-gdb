@@ -3,6 +3,8 @@ Tue Apr 21 10:49:03 1998  Doug Evans  <devans@canuck.cygnus.com>
 	* lib/sim-defs.exp (run_sim_test): Don't exit early if one mach fails,
 	try all machs.
 
+	* sim/m32r/addx.cgs: Test (-1)+(-1)+1.
+
 Fri Apr 17 16:00:52 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* sim/m32r/mv[ft]achi.cgs: Fix expected result
