@@ -1,3 +1,14 @@
+2000-07-14  Nicholas Duffek  <nsd@redhat.com>
+
+	* ppcbug-rom.c (ppcbug_regnames[]): Make array size implicit.
+	* rs6000-tdep.c (DEFAULT_LR_SAVE): Move to config/*/tm-*.h.
+	(rs6000_gdbarch_init): Use generic_pc_in_call_dummy instead of
+	rs6000_pc_in_call_dummy.
+	* config/rs6000/tm-rs6000.h (DEFAULT_LR_SAVE): Move here from
+	rs6000-tdep.c.
+	* config/powerpc/tm-ppc-eabi.h: Remove various definitions
+	handled by multi-arched rs6000-tdep.c.
+
 2000-07-14  Nick Clifton  <nickc@cygnus.com>
 
 	* config/mcore/tm-mcore.h (SKIP_PROLOGUE): Fix defintion to avoid

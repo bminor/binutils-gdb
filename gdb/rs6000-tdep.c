@@ -56,9 +56,6 @@
 #define SIG_FRAME_LR_OFFSET 108
 #define SIG_FRAME_FP_OFFSET 284
 
-/* Default offset from SP where the LR is stored */
-#define	DEFAULT_LR_SAVE 8
-
 /* To be used by skip_prologue. */
 
 struct rs6000_framedata
@@ -2048,7 +2045,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_pc_in_call_dummy (gdbarch, rs6000_pc_in_call_dummy);
+  set_gdbarch_pc_in_call_dummy (gdbarch, generic_pc_in_call_dummy);
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);

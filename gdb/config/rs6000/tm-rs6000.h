@@ -94,6 +94,9 @@ extern void aix_process_linenos (void);
 	      prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
 #define INIT_FRAME_PC(fromleaf, prev)	/* nothing */
 
+/* Default offset from SP where the LR is stored */
+#define	DEFAULT_LR_SAVE 8
+
 /* Usually a function pointer's representation is simply the address
    of the function. On the RS/6000 however, a function pointer is
    represented by a pointer to a TOC entry. This TOC entry contains

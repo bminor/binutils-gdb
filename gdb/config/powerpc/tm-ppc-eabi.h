@@ -30,8 +30,6 @@
 #undef	DEFAULT_LR_SAVE
 #define	DEFAULT_LR_SAVE 4	/* eabi saves LR at 4 off of SP */
 
-#define GDB_TARGET_POWERPC
-
 #undef PC_LOAD_SEGMENT
 #undef PROCESS_LINENUMBER_HOOK
 
@@ -42,38 +40,6 @@
 #define ELF_OBJECT_FORMAT 1
 
 #define TARGET_BYTE_ORDER_SELECTABLE_P 1
-
-/* return true if a given `pc' value is in `call dummy' function. */
-/* FIXME: This just checks for the end of the stack, which is broken
-   for things like stepping through gcc nested function stubs.  */
-#undef PC_IN_CALL_DUMMY
-
-/* generic dummy frame stuff */
-
-
-
-/* target-specific dummy_frame stuff */
-
-extern struct frame_info *rs6000_pop_frame (struct frame_info *frame);
-
-extern CORE_ADDR ppc_push_return_address (CORE_ADDR, CORE_ADDR);
-
-#undef PUSH_DUMMY_FRAME
-#define PUSH_DUMMY_FRAME             generic_push_dummy_frame ()
-
-#define PUSH_RETURN_ADDRESS(PC, SP)      ppc_push_return_address (PC, SP)
-
-/* override the standard get_saved_register function with 
-   one that takes account of generic CALL_DUMMY frames */
-#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
-      generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
-
-#define USE_GENERIC_DUMMY_FRAMES 1
-#define CALL_DUMMY_BREAKPOINT_OFFSET (0)
-#define CALL_DUMMY_LOCATION          AT_ENTRY_POINT
-#define CALL_DUMMY_ADDRESS()         entry_point_address ()
-#undef CALL_DUMMY_START_OFFSET
-#define CALL_DUMMY_START_OFFSET      0
 
 /* The value of symbols of type N_SO and N_FUN maybe null when 
    it shouldn't be. */
