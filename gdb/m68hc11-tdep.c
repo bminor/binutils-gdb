@@ -55,7 +55,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define HARD_A_REGNUM   5
 #define HARD_B_REGNUM   6
 #define HARD_CCR_REGNUM 7
-#define M68HC11_LAST_HARD_REG (HARD_CCR_REGNUM)
+
+/* 68HC12 page number register.
+   Note: to keep a compatibility with gcc register naming, we must
+   not have to rename FP and other soft registers.  The page register
+   is a real hard register and must therefore be counted by NUM_REGS.
+   For this it has the same number as Z register (which is not used).  */
+#define HARD_PAGE_REGNUM 8
+#define M68HC11_LAST_HARD_REG (HARD_PAGE_REGNUM)
 
 /* Z is replaced by X or Y by gcc during machine reorg.
    ??? There is no way to get it and even know whether
@@ -114,7 +121,7 @@ static char *
 m68hc11_register_names[] =
 {
   "x",    "d",    "y",    "sp",   "pc",   "a",    "b",
-  "ccr",  "z",    "frame","tmp",  "zs",   "xy",   0,
+  "ccr",  "page", "frame","tmp",  "zs",   "xy",   0,
   "d1",   "d2",   "d3",   "d4",   "d5",   "d6",   "d7",
   "d8",   "d9",   "d10",  "d11",  "d12",  "d13",  "d14",
   "d15",  "d16",  "d17",  "d18",  "d19",  "d20",  "d21",
@@ -891,7 +898,17 @@ m68hc11_call_dummy_address (void)
 static struct type *
 m68hc11_register_virtual_type (int reg_nr)
 {
-  return builtin_type_uint16;
+  switch (reg_nr)
+    {
+    case HARD_PAGE_REGNUM:
+    case HARD_A_REGNUM:
+    case HARD_B_REGNUM:
+    case HARD_CCR_REGNUM:
+      return builtin_type_uint8;
+
+    default:
+      return builtin_type_uint16;
+    }
 }
 
 static void
@@ -1014,7 +1031,17 @@ m68hc11_register_byte (int reg_nr)
 static int
 m68hc11_register_raw_size (int reg_nr)
 {
-  return M68HC11_REG_SIZE;
+  switch (reg_nr)
+    {
+    case HARD_PAGE_REGNUM:
+    case HARD_A_REGNUM:
+    case HARD_B_REGNUM:
+    case HARD_CCR_REGNUM:
+      return 1;
+
+    default:
+      return M68HC11_REG_SIZE;
+    }
 }
 
 static int
