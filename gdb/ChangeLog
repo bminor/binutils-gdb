@@ -7,6 +7,7 @@ Wed Jan 22 01:31:16 1997  Geoffrey Noer  <noer@cygnus.com>
 	* config/mn10200/tm-mn10200.h: new, REGISTER_SIZE is 24 bits not 32,
 	SP_REGNUM and FP_REGNUM are different, also no lar or lir.
 	* config/mn10200/mn10200.mt: new
+	* configure.tgt: add mn10200 entry
 
 Tue Jan 21 18:32:23 1997  Stu Grossman  (grossman@lisa.cygnus.com)
 
