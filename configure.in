@@ -63,7 +63,7 @@ target_tools="groff"
 
 # directories to be built in the native environment only
 #
-native_only="autoconf cvs diff emacs fileutils find grep groff gzip hello indent
+native_only="autoconf cvs emacs fileutils find grep groff gzip hello indent
              ispell m4 rcs recode sed shellutils tar textutils tk uudecode wdiff
 	     gprof"
 
@@ -159,6 +159,7 @@ case "${host}" in
     configdirs=`echo ${configdirs} | sed -e 's/patch//;s/flex//;s/byacc//'`
     configdirs=`echo ${configdirs} | sed -e 's/send-pr//;s/gprof//'`
     configdirs=`echo ${configdirs} | sed -e 's/uudecode//;s/dejagnu//'`
+    configdirs=`echo ${configdirs} | sed -e 's/diff//'`
     ;;
 esac
 
