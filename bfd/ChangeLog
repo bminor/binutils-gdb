@@ -10,6 +10,10 @@ Thu Mar 17 10:37:07 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 Thu Mar 17 11:44:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* osf-core.c (osf_core_bfd_copy_private_bfd_data): Remove
+	duplicate definition.
+	(osf_core_bfd_is_local_label): Define.
+
 	* reloc.c (bfd_generic_get_relocated_section_contents): Don't fail
 	if malloc (0) fails.  bfd_canonicalize_reloc returning 0 is not a
 	failure indication, it merely means there are no relocs.
