@@ -1,3 +1,8 @@
+2002-03-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2002-03-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gprof.texi: Wrap @menu in @ifnottex, not @ifinfo.
