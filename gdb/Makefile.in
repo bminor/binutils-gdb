@@ -611,7 +611,7 @@ make-proto-gdb-1: $(TARFILES) $(TARDIRS) gdb.info
 	    cd $$i; \
 	    ln -s $${rootme}/$$i/* .; \
 	    rm -rf SCCS CVS CVS.adm RCS config.status; \
-	    if test -f Makefile.in; then rm Makefile; else true; fi;); \
+	    if test -f Makefile.in; then rm -f Makefile; else true; fi;); \
 	  done ; \
 	  for i in `echo $(TARFILES)`; do \
 	    (cd proto-gdb.dir ; \
