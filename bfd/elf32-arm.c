@@ -5575,6 +5575,25 @@ static struct bfd_elf_special_section const
 static bfd_boolean
 elf32_arm_symbian_modify_segment_map
   PARAMS ((bfd *, struct bfd_link_info *));
+static void
+elf32_arm_symbian_begin_write_processing
+  PARAMS ((bfd *, bfd_boolean));
+
+static void
+elf32_arm_symbian_begin_write_processing (abfd, linker)
+     bfd *abfd;
+     bfd_boolean linker;
+{
+  /* BPABI objects are never loaded directly by an OS kernel; they are
+     processed by a postlinker first, into an OS-specific format.  If
+     the D_PAGED bit is set on the file, BFD will align segments on
+     page boundaries, so that an OS can directly map the file.  With
+     BPABI objects, that just results in wasted space.  In addition,
+     because we clear the D_PAGED bit, map_sections_to_segments will
+     recognize that the program headers should not be mapped into any
+     loadable segment.  */
+  abfd->flags &= ~D_PAGED;
+}
 
 static bfd_boolean
 elf32_arm_symbian_modify_segment_map (abfd, info)
@@ -5583,16 +5602,6 @@ elf32_arm_symbian_modify_segment_map (abfd, info)
 {
   struct elf_segment_map *m;
   asection *dynsec;
-
-  /* The first PT_LOAD segment will have the program headers and file
-     headers in it by default -- but BPABI object files should not
-     include these headers in any loadable segment.  */
-  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
-    if (m->p_type == PT_LOAD)
-      {
-	m->includes_filehdr = 0;
-	m->includes_phdrs = 0;
-      }
 
   /* BPABI shared libraries and executables should have a PT_DYNAMIC
      segment.  However, because the .dynamic section is not marked
@@ -5624,6 +5633,10 @@ elf32_arm_symbian_modify_segment_map (abfd, info)
 
 #undef elf_backend_special_sections
 #define elf_backend_special_sections elf32_arm_symbian_special_sections
+
+#undef elf_backend_begin_write_processing
+#define elf_backend_begin_write_processing \
+    elf32_arm_symbian_begin_write_processing
 
 #undef elf_backend_modify_segment_map
 #define elf_backend_modify_segment_map elf32_arm_symbian_modify_segment_map

@@ -1,3 +1,10 @@
+2004-11-01  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_symbian_begin_write_processing): Clear
+	D_PAGED. 
+	(elf32_arm_symbian_modify_segment_map): Don't
+	reset includes_filehdr and includes_phdrs here.
+
 2004-11-04  Daniel Jacobowitz  <dan@debian.org>
 
 	* Makefile.am (BFD32_BACKENDS, BFD32_BACKENDS_CFILES): Replace
