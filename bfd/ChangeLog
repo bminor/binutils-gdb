@@ -1,3 +1,8 @@
+2001-03-20  H.J. Lu  <hjl@gnu.org>
+
+	* configure.in: Remove the redundent AC_ARG_PROGRAM.
+	* configure: Rebuild.
+
 2001-03-20  Andreas Schwab  <schwab@suse.de>
 
 	* elf32-m68k.c (elf_m68k_relocate_section): Don't need the

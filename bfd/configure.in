@@ -76,7 +76,6 @@ AM_CONFIG_HEADER(config.h:config.in)
 if test -z "$target" ; then
     AC_MSG_ERROR(Unrecognized target system type; please check config.sub.)
 fi
-AC_ARG_PROGRAM
 
 AM_MAINTAINER_MODE
 AC_EXEEXT
