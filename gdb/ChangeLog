@@ -1,3 +1,13 @@
+Mon Jun 10 14:17:19 1996  Fred Fish  <fnf@cygnus.com>
+
+	* config/sparc/{xm-sun4sol2.h,xm-sun4os4.h} (MMAP_BASE_ADDRESS):
+ 	Change from 0xE0000000 to 0xC0000000.
+
+Thu Jun  6 17:10:32 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/powerpc/xm-solaris.h: Initial version of support for
+	Solaris on PowerPC.
+
 Wed Jun  5 01:52:57 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
  	* configure.in (configdirs): Force 4100 builds to use 4300 GDB
