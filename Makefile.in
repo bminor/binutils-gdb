@@ -186,10 +186,10 @@ REALLY_SET_LIB_PATH = \
 
 ALL = all.normal
 INSTALL_TARGET = installdirs \
+	install-gcc \
 	$(INSTALL_MODULES) \
 	$(INSTALL_TARGET_MODULES) \
 	$(INSTALL_X11_MODULES) \
-	install-gcc \
 	$(INSTALL_DOSREL)
 
 
@@ -352,6 +352,7 @@ BASE_FLAGS_TO_PASS = \
 	"CXXFLAGS_FOR_TARGET=$(CXXFLAGS_FOR_TARGET)" \
 	"CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
 	"DLLTOOL_FOR_TARGET=$(DLLTOOL_FOR_TARGET)" \
+	"gxx_include_dir=$(gxx_include_dir)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
@@ -363,6 +364,7 @@ BASE_FLAGS_TO_PASS = \
 	"LIBCFLAGS_FOR_TARGET=$(LIBCFLAGS_FOR_TARGET)" \
 	"LIBCXXFLAGS=$(LIBCXXFLAGS)" \
 	"LIBCXXFLAGS_FOR_TARGET=$(LIBCXXFLAGS_FOR_TARGET)" \
+	"local_prefix=$(local_prefix)" \
 	"M4=$(M4)" \
 	"MAKE=$(MAKE)" \
 	"MAKEINFO=$(MAKEINFO) $(MAKEINFOFLAGS)" \
@@ -370,6 +372,7 @@ BASE_FLAGS_TO_PASS = \
 	"PICFLAG=$(PICFLAG)" \
 	"PICFLAG_FOR_TARGET=$(PICFLAG_FOR_TARGET)" \
 	"RANLIB_FOR_TARGET=$(RANLIB_FOR_TARGET)" \
+	"RPATH_ENVVAR=$(RPATH_ENVVAR)" \
 	"SHELL=$(SHELL)" \
 	"EXPECT=$(EXPECT)" \
 	"RUNTEST=$(RUNTEST)" \
@@ -515,7 +518,9 @@ ALL_MODULES = \
 	all-ld \
 	all-libgui \
 	all-libiberty \
+	$(start-sanitize-ide) \
 	all-libide \
+	$(end-sanitize-ide) \
 	all-m4 \
 	all-make \
 	all-mmalloc \
@@ -590,7 +595,9 @@ CROSS_CHECK_MODULES = \
 	check-ld \
 	check-libgui \
 	check-libiberty \
+	$(start-sanitize-ide) \
 	check-libide \
+	$(end-sanitize-ide) \
 	check-m4 \
 	check-make \
 	check-mmcheckoc \
@@ -666,7 +673,9 @@ INSTALL_MODULES = \
 	install-ld \
 	install-libgui \
 	install-libiberty \
+	$(start-sanitize-ide) \
 	install-libide \
+	$(end-sanitize-ide) \
 	install-m4 \
 	install-make \
 	install-mmalloc \
@@ -825,7 +834,9 @@ CLEAN_MODULES = \
 	clean-ld \
 	clean-libgui \
 	clean-libiberty \
+	$(start-sanitize-ide) \
 	clean-libide \
+	$(end-sanitize-ide) \
 	clean-m4 \
 	clean-make \
 	clean-mmalloc \
@@ -1466,7 +1477,10 @@ all-gawk:
 ALL_GCC = all-gcc
 all-gcc: all-bison all-byacc all-binutils all-gas all-ld
 all-bootstrap: all-libiberty all-bison all-byacc all-binutils all-gas all-ld
+GDB_TK = all-tk all-tcl all-itcl all-tix all-libgui
+# start-sanitize-ide
 GDB_TK = all-tk all-tcl all-itcl all-tix all-libgui all-libide
+# end-sanitize-ide
 all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-bison all-byacc all-sim $(gdbnlmrequirements) $(GDB_TK)
 all-gnuserv:
 configure-target-gperf: $(ALL_GCC)
@@ -1499,9 +1513,8 @@ check-target-libio: all-target-libstdc++
 all-libgui: all-tcl all-tk all-itcl
 all-libiberty:
 # start-sanitize-ide
-all-libide: all-ilu
+all-libide: all-tcl all-tk all-itcl all-ilu all-libgui
 # end-sanitize-ide
-all-libide: all-tcl all-tk all-itcl
 configure-target-librx: $(ALL_GCC) configure-target-newlib
 all-target-librx: configure-target-librx
 configure-target-libstdc++: $(ALL_GCC)
