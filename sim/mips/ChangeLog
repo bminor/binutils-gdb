@@ -1,3 +1,8 @@
+Fri Jul 25 15:00:45 1997  Gavin Koch  <gavin@cygnus.com>
+ 
+ 	* gencode.c (build_instruction): Two arg MADD should
+ 	not assign result to $0.
+ 
 start-sanitize-r5900
 Thu Jul 10 11:58:48 1997  Andrew Cagney  <cagney@critters.cygnus.com>
 

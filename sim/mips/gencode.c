@@ -3320,8 +3320,9 @@ build_instruction (doisa, features, mips16, insn)
               prodtype, (notsigned ? "WORD64LO" : "SIGNEXTEND"), (notsigned ? "" : ",32"),
               prodtype, (notsigned ? "WORD64LO" : "SIGNEXTEND"), (notsigned ? "" : ",32")
               );
-       printf("GPR[destreg] = LO%s = SIGNEXTEND(prod,32);\n", pipeline );
+       printf("LO%s = SIGNEXTEND(prod,32);\n", pipeline );
        printf("HI%s = SIGNEXTEND( WORD64HI(prod), 32);\n", pipeline );
+       printf("if( destreg != 0 ) GPR[destreg] = LO%s;\n", pipeline );
        break;
      }
 
