@@ -12,12 +12,42 @@ enum _leftright { LEFT_FIRST, RIGHT_FIRST };
 
 int d10v_debug;
 host_callback *d10v_callback;
-long ins_type_counters[ (int)INS_MAX ];
-long left_nops, right_nops;
+unsigned long ins_type_counters[ (int)INS_MAX ];
 
 uint16 OP[4];
 
+static long hash PARAMS ((long insn, int format));
 static struct hash_entry *lookup_hash PARAMS ((uint32 ins, int size));
+static void get_operands PARAMS ((struct simops *s, uint32 ins));
+static void do_long PARAMS ((uint32 ins));
+static void do_2_short PARAMS ((uint16 ins1, uint16 ins2, enum _leftright leftright));
+static void do_parallel PARAMS ((uint16 ins1, uint16 ins2));
+static char *add_commas PARAMS ((char *buf, int sizeof_buf, unsigned long value));
+extern void sim_size PARAMS ((int power));
+static void init_system PARAMS ((void));
+extern int sim_write PARAMS ((SIM_ADDR addr, unsigned char *buffer, int size));
+extern void sim_open PARAMS ((char *args));
+extern void sim_close PARAMS ((int quitting));
+extern void sim_set_profile PARAMS ((int n));
+extern void sim_set_profile_size PARAMS ((int n));
+extern void sim_resume PARAMS ((int step, int siggnal));
+extern void sim_info PARAMS ((int verbose));
+extern void sim_create_inferior PARAMS ((SIM_ADDR start_address, char **argv, char **env));
+extern void sim_kill PARAMS ((void));
+extern void sim_set_callbacks PARAMS ((host_callback *p));
+extern void sim_stop_reason PARAMS ((enum sim_stop *reason, int *sigrc));
+extern void sim_fetch_register PARAMS ((int rn, unsigned char *memory));
+extern void sim_store_register PARAMS ((int rn, unsigned char *memory));
+extern int sim_read PARAMS ((SIM_ADDR addr, unsigned char *buffer, int size));
+extern void sim_do_command PARAMS ((char *cmd));
+
+#ifndef INLINE
+#if defined(__GNUC__) && defined(__OPTIMIZE__)
+#define INLINE __inline__
+#else
+#define INLINE
+#endif
+#endif
 
 #define MAX_HASH  63
 struct hash_entry
@@ -30,7 +60,7 @@ struct hash_entry
 
 struct hash_entry hash_table[MAX_HASH+1];
 
-static long 
+INLINE static long 
 hash(insn, format)
      long insn;
      int format;
@@ -41,7 +71,7 @@ hash(insn, format)
     return((insn & 0x7E00) >> 9);
 }
 
-static struct hash_entry *
+INLINE static struct hash_entry *
 lookup_hash (ins, size)
      uint32 ins;
      int size;
@@ -53,19 +83,19 @@ lookup_hash (ins, size)
   else
     h = &hash_table[(ins & 0x7E00) >> 9];
 
-  while ( (ins & h->mask) != h->opcode)
+  while ((ins & h->mask) != h->opcode)
     {
       if (h->next == NULL)
 	{
 	  (*d10v_callback->printf_filtered) (d10v_callback, "ERROR looking up hash for %x at PC %x\n",ins, PC);
-	  exit(1);
+	  exit (1);
 	}
       h = h->next;
     }
   return (h);
 }
 
-static void
+INLINE static void
 get_operands (struct simops *s, uint32 ins)
 {
   int i, shift, bits, flags;
@@ -142,28 +172,36 @@ do_parallel (ins1, ins2)
   if (h1->ops->exec_type == PARONLY)
     {
       get_operands (h1->ops, ins1);
-      State.ins_type = INS_LEFT;
+      State.ins_type = INS_LEFT_COND_TEST;
       ins_type_counters[ (int)State.ins_type ]++;
       (h1->ops->func)();
       if (State.exe)
 	{
+	  ins_type_counters[ (int)INS_COND_TRUE ]++;
 	  get_operands (h2->ops, ins2);
-	  State.ins_type = INS_RIGHT;
+	  State.ins_type = INS_RIGHT_COND_EXE;
+	  ins_type_counters[ (int)State.ins_type ]++;
 	  (h2->ops->func)();
 	}
+      else
+	ins_type_counters[ (int)INS_COND_FALSE ]++;
     }
   else if (h2->ops->exec_type == PARONLY)
     {
       get_operands (h2->ops, ins2);
-      State.ins_type = INS_RIGHT;
+      State.ins_type = INS_RIGHT_COND_TEST;
       ins_type_counters[ (int)State.ins_type ]++;
       (h2->ops->func)();
       if (State.exe)
 	{
+	  ins_type_counters[ (int)INS_COND_TRUE ]++;
 	  get_operands (h1->ops, ins1);
-	  State.ins_type = INS_LEFT;
+	  State.ins_type = INS_LEFT_COND_EXE;
+	  ins_type_counters[ (int)State.ins_type ]++;
 	  (h1->ops->func)();
 	}
+      else
+	ins_type_counters[ (int)INS_COND_FALSE ]++;
     }
   else
     {
@@ -181,6 +219,28 @@ do_parallel (ins1, ins2)
     }
 }
  
+static char *
+add_commas(buf, sizeof_buf, value)
+     char *buf;
+     int sizeof_buf;
+     unsigned long value;
+{
+  int comma = 3;
+  char *endbuf = buf + sizeof_buf - 1;
+
+  *--endbuf = '\0';
+  do {
+    if (comma-- == 0)
+      {
+	*--endbuf = ',';
+	comma = 2;
+      }
+
+    *--endbuf = (value % 10) + '0';
+  } while ((value /= 10) != 0);
+
+  return endbuf;
+}
 
 void
 sim_size (power)
@@ -207,8 +267,13 @@ sim_size (power)
 #ifdef DEBUG
   if ((d10v_debug & DEBUG_MEMSIZE) != 0)
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "Allocated %d bytes instruction memory and\n",1<<IMEM_SIZE);
-      (*d10v_callback->printf_filtered) (d10v_callback, "          %d bytes data memory.\n",          1<<DMEM_SIZE);
+      char buffer[20];
+      (*d10v_callback->printf_filtered) (d10v_callback,
+					 "Allocated %s bytes instruction memory and\n",
+					 add_commas (buffer, sizeof (buffer), (1UL<<IMEM_SIZE)));
+
+      (*d10v_callback->printf_filtered) (d10v_callback, "          %s bytes data memory.\n",
+					 add_commas (buffer, sizeof (buffer), (1UL<<IMEM_SIZE)));
     }
 #endif
 }
@@ -249,7 +314,7 @@ sim_open (args)
      char *args;
 {
   struct simops *s;
-  struct hash_entry *h, *prev;
+  struct hash_entry *h;
   static int init_p = 0;
 
   if (args != NULL)
@@ -312,63 +377,63 @@ sim_resume (step, siggnal)
      int step, siggnal;
 {
   uint32 inst;
-  int i;
-  reg_t oldpc;
+  reg_t oldpc = 0;
 
 /*   (*d10v_callback->printf_filtered) (d10v_callback, "sim_resume (%d,%d)  PC=0x%x\n",step,siggnal,PC); */
 
   State.exception = 0;
- do
-   {
-     uint32 byte_pc = ((uint32)PC) << 2;
-     if ((byte_pc < State.mem_min) || (byte_pc > State.mem_max))
-       {
-	 (*d10v_callback->printf_filtered) (d10v_callback,
-					    "PC (0x%lx) out of range, oldpc = 0x%lx, min = 0x%lx, max = 0x%lx\n",
-					    (long)byte_pc, (long)oldpc, (long)State.mem_min, (long)State.mem_max);
-	 State.exception = SIGILL;
-       }
-     else
-       {
-	 inst = RLW (byte_pc); 
-	 oldpc = PC;
-	 switch (inst & 0xC0000000)
-	   {
-	   case 0xC0000000:
-	     /* long instruction */
-	     do_long (inst & 0x3FFFFFFF);
-	     break;
-	   case 0x80000000:
-	     /* R -> L */
-	     do_2_short ( inst & 0x7FFF, (inst & 0x3FFF8000) >> 15, 0);
-	     break;
-	   case 0x40000000:
-	     /* L -> R */
-	     do_2_short ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF, 1);
-	     break;
-	   case 0:
-	     do_parallel ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF);
-	     break;
-	   }
+  do
+    {
+      uint32 byte_pc = ((uint32)PC) << 2;
+      if ((byte_pc < State.mem_min) || (byte_pc > State.mem_max))
+	{
+	  (*d10v_callback->printf_filtered) (d10v_callback,
+					     "PC (0x%lx) out of range, oldpc = 0x%lx, min = 0x%lx, max = 0x%lx\n",
+					     (long)byte_pc, (long)oldpc, (long)State.mem_min, (long)State.mem_max);
+	  State.exception = SIGILL;
+	}
+      else
+	{
+	  inst = RLW (byte_pc); 
+	  oldpc = PC;
+	  ins_type_counters[ (int)INS_CYCLES ]++;
+	  switch (inst & 0xC0000000)
+	    {
+	    case 0xC0000000:
+	      /* long instruction */
+	      do_long (inst & 0x3FFFFFFF);
+	      break;
+	    case 0x80000000:
+	      /* R -> L */
+	      do_2_short ( inst & 0x7FFF, (inst & 0x3FFF8000) >> 15, 0);
+	      break;
+	    case 0x40000000:
+	      /* L -> R */
+	      do_2_short ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF, 1);
+	      break;
+	    case 0:
+	      do_parallel ((inst & 0x3FFF8000) >> 15, inst & 0x7FFF);
+	      break;
+	    }
      
-	 if (State.RP && PC == RPT_E)
-	   {
-	     RPT_C -= 1;
-	     if (RPT_C == 0)
-	       State.RP = 0;
-	     else
-	       PC = RPT_S;
-	   }
+	  if (State.RP && PC == RPT_E)
+	    {
+	      RPT_C -= 1;
+	      if (RPT_C == 0)
+		State.RP = 0;
+	      else
+		PC = RPT_S;
+	    }
 
-	 /* FIXME */
-	 if (PC == oldpc)
-	   PC++;
-       }
-   } 
- while ( !State.exception && !step);
+	  /* FIXME */
+	  if (PC == oldpc)
+	    PC++;
+	}
+    } 
+  while ( !State.exception && !step);
 
- if (step && !State.exception)
-   State.exception = SIGTRAP;
+  if (step && !State.exception)
+    State.exception = SIGTRAP;
 }
 
 int
@@ -385,36 +450,77 @@ void
 sim_info (verbose)
      int verbose;
 {
-  char buf[40];
-  int size;
-  long total = (ins_type_counters[ (int)INS_LONG ]
-		+ ins_type_counters[ (int)INS_LEFT ]
-		+ ins_type_counters[ (int)INS_LEFT_PARALLEL ]
-		+ ins_type_counters[ (int)INS_RIGHT ]
-		+ ins_type_counters[ (int)INS_RIGHT_PARALLEL ]);
+  char buf1[40];
+  char buf2[40];
+  char buf3[40];
+  char buf4[40];
+  char buf5[40];
+  unsigned long left		= ins_type_counters[ (int)INS_LEFT ] + ins_type_counters[ (int)INS_LEFT_COND_EXE ];
+  unsigned long left_nops	= ins_type_counters[ (int)INS_LEFT_NOPS ];
+  unsigned long left_parallel	= ins_type_counters[ (int)INS_LEFT_PARALLEL ];
+  unsigned long left_cond	= ins_type_counters[ (int)INS_LEFT_COND_TEST ];
+  unsigned long left_total	= left + left_parallel + left_cond + left_nops;
 
-  sprintf (buf, "%ld", total);
-  size = strlen (buf);
+  unsigned long right		= ins_type_counters[ (int)INS_RIGHT ] + ins_type_counters[ (int)INS_RIGHT_COND_EXE ];
+  unsigned long right_nops	= ins_type_counters[ (int)INS_RIGHT_NOPS ];
+  unsigned long right_parallel	= ins_type_counters[ (int)INS_RIGHT_PARALLEL ];
+  unsigned long right_cond	= ins_type_counters[ (int)INS_RIGHT_COND_TEST ];
+  unsigned long right_total	= right + right_parallel + right_cond + right_nops;
+
+  unsigned long unknown		= ins_type_counters[ (int)INS_UNKNOWN ];
+  unsigned long ins_long	= ins_type_counters[ (int)INS_LONG ];
+  unsigned long cond_true	= ins_type_counters[ (int)INS_COND_TRUE ];
+  unsigned long cond_false	= ins_type_counters[ (int)INS_COND_FALSE ];
+  unsigned long cycles		= ins_type_counters[ (int)INS_CYCLES ];
+  unsigned long total		= (unknown + left_total + right_total + ins_long);
+
+  int size			= strlen (add_commas (buf1, sizeof (buf1), total));
+  int parallel_size		= strlen (add_commas (buf1, sizeof (buf1),
+						      (left_parallel > right_parallel) ? left_parallel : right_parallel));
+  int cond_size			= strlen (add_commas (buf1, sizeof (buf1), (left_cond > right_cond) ? left_cond : right_cond));
+  int nop_size			= strlen (add_commas (buf1, sizeof (buf1), (left_nops > right_nops) ? left_nops : right_nops));
+  int normal_size		= strlen (add_commas (buf1, sizeof (buf1), (left > right) ? left : right));
 
   (*d10v_callback->printf_filtered) (d10v_callback,
-				     "executed %*ld instructions in the left  container, %*ld parallel, %*ld nops\n",
-				     size, ins_type_counters[ (int)INS_LEFT ] + ins_type_counters[ (int)INS_LEFT_PARALLEL ],
-				     size, ins_type_counters[ (int)INS_LEFT_PARALLEL ],
-				     size, left_nops);
+				     "executed %*s left  instructions, %*s normal, %*s parallel, %*s EXExxx, %*s nops\n",
+				     size, add_commas (buf1, sizeof (buf1), left_total),
+				     normal_size, add_commas (buf2, sizeof (buf2), left),
+				     parallel_size, add_commas (buf3, sizeof (buf3), left_parallel),
+				     cond_size, add_commas (buf4, sizeof (buf4), left_cond),
+				     nop_size, add_commas (buf5, sizeof (buf5), left_nops));
 
   (*d10v_callback->printf_filtered) (d10v_callback,
-				     "executed %*ld instructions in the right container, %*ld parallel, %*ld nops\n",
-				     size, ins_type_counters[ (int)INS_RIGHT ] + ins_type_counters[ (int)INS_RIGHT_PARALLEL ],
-				     size, ins_type_counters[ (int)INS_RIGHT_PARALLEL ],
-				     size, right_nops);
+				     "executed %*s right instructions, %*s normal, %*s parallel, %*s EXExxx, %*s nops\n",
+				     size, add_commas (buf1, sizeof (buf1), right_total),
+				     normal_size, add_commas (buf2, sizeof (buf2), right),
+				     parallel_size, add_commas (buf3, sizeof (buf3), right_parallel),
+				     cond_size, add_commas (buf4, sizeof (buf4), right_cond),
+				     nop_size, add_commas (buf5, sizeof (buf5), right_nops));
 
   (*d10v_callback->printf_filtered) (d10v_callback,
-				     "executed %*ld long instructions\n",
-				     size, ins_type_counters[ (int)INS_LONG ]);
+				     "executed %*s long instructions\n",
+				     size, add_commas (buf1, sizeof (buf1), ins_long));
+
+  if (unknown)
+    (*d10v_callback->printf_filtered) (d10v_callback,
+				       "executed %*s unknown instructions\n",
+				       size, add_commas (buf1, sizeof (buf1), unknown));
 
   (*d10v_callback->printf_filtered) (d10v_callback,
-				     "executed %*ld total instructions\n",
-				     size, total);
+				     "executed %*s instructions conditionally\n",
+				     size, add_commas (buf1, sizeof (buf1), cond_true));
+
+  (*d10v_callback->printf_filtered) (d10v_callback,
+				     "skipped  %*s instructions due to conditional failure\n",
+				     size, add_commas (buf1, sizeof (buf1), cond_false));
+
+  (*d10v_callback->printf_filtered) (d10v_callback,
+				     "executed %*s cycles\n",
+				     size, add_commas (buf1, sizeof (buf1), cycles));
+
+  (*d10v_callback->printf_filtered) (d10v_callback,
+				     "executed %*s total instructions\n",
+				     size, add_commas (buf1, sizeof (buf1), total));
 }
 
 void
@@ -520,6 +626,7 @@ sim_store_register (rn, memory)
     }
 }
 
+int
 sim_read (addr, buffer, size)
      SIM_ADDR addr;
      unsigned char *buffer;

@@ -73,17 +73,28 @@ struct simops
 
 enum _ins_type
 {
-  INS_UNKNOWN,
-  INS_LEFT,
-  INS_RIGHT,
-  INS_LEFT_PARALLEL,
-  INS_RIGHT_PARALLEL,
-  INS_LONG,
+  INS_UNKNOWN,			/* unknown instruction */
+  INS_LONG,			/* long instruction (both containers) */
+  INS_COND_TRUE,		/* # times EXExxx executed other instruction */
+  INS_COND_FALSE,		/* # times EXExxx did not execute other instruction */
+  INS_CYCLES,			/* # cycles */
+
+  INS_LEFT,			/* normal left instructions */
+  INS_LEFT_PARALLEL,		/* left side of || */
+  INS_LEFT_COND_TEST,		/* EXExx test on left side */
+  INS_LEFT_COND_EXE,		/* execution after EXExxx test on right side succeeded */
+  INS_LEFT_NOPS,		/* NOP on left side */
+
+  INS_RIGHT,			/* normal right instructions */
+  INS_RIGHT_PARALLEL,		/* right side of || */
+  INS_RIGHT_COND_TEST,		/* EXExx test on right side */
+  INS_RIGHT_COND_EXE,		/* execution after EXExxx test on left side succeeded */
+  INS_RIGHT_NOPS,		/* NOP on right side */
+
   INS_MAX
 };
 
-extern long ins_type_counters[ (int)INS_MAX ];
-extern long left_nops, right_nops;
+extern unsigned long ins_type_counters[ (int)INS_MAX ];
 
 struct _state
 {
