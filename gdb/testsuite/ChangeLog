@@ -11,7 +11,6 @@ Sun Feb 18 11:39:12 1996  Fred Fish  <fnf@cygnus.com>
  	gcc compiled for "print coremaker_bss", "print coremaker_ro",
 	"print func2::coremaker_local", and "backtrace in corefile.exp".
 	* gdb.base/signals.exp: Build and source signals.ci.
-	(test_handle_all_print): Add setup_xfail for "alpha-dec-osf2*".
 	Change "alpha-dec-osf2*" setup_xfail for "bt in signals.exp"
 	to be for gcc only.
 	* lib/gdb.exp: Move verbose statements outside conditionals.
