@@ -115,6 +115,7 @@ void (*create_tracepoint_hook) PARAMS ((struct tracepoint *));
 void (*delete_tracepoint_hook) PARAMS ((struct tracepoint *));
 void (*modify_tracepoint_hook) PARAMS ((struct tracepoint *));
 void (*trace_find_hook) PARAMS ((char *arg, int from_tty));
+void (*trace_start_stop_hook) PARAMS ((int start, int from_tty));
 
 struct tracepoint *get_tracepoint_by_number PARAMS ((char **));
 int get_traceframe_number PARAMS ((void));

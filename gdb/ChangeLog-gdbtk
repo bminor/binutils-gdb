@@ -1,3 +1,22 @@
+Thu Nov 12 15:20:15 1998  Jim Ingham   <jingham@cygnus.com>
+
+	* gdbtk-cmds.c (gdb_cmd): Added an optional second argument to the
+	gdb_cmd, which is from_tty.  This is passed to the gdb command
+	parser.  It is 0 by default, and the console window passes 1.
+
+	* gdbtk-cmds.c: moved disassemble_from_exec from gdbtk.c to gdbtk-cmds.c
+	with all the other link-var'ed variables
+
+	* gdbtk-hooks.c (gdbtk_trace_find): Only run the hook functions if 
+	we are called from_tty.
+
+	* gdbtk-hooks.c (gdbtk_trace_start_stop): Set the trace buttons
+	from a trace_start_command callback rather than doing it as a
+	special case in gdb_cmd.
+
+	* tracepoint.c (tstart_command, tstop_command): Add call to
+	trace_start_stop_hook here.
+	
 Wed Nov  4 12:41:42 1998  Jim Ingham  <jingham@cygnus.com>
 
 	* gdbtk-cmds.c (gdb_set_bp_addr): Pass the type, enable & thread

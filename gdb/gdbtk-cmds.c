@@ -152,6 +152,11 @@ extern struct breakpoint *set_raw_breakpoint (struct symtab_and_line sal);
 extern void set_breakpoint_count (int);
 extern int breakpoint_count;
 
+/* This variable determines where memory used for disassembly is read from.
+ * See note in gdbtk.h for details.
+ */
+int disassemble_from_exec = -1;
+
 
 /*
  * Declarations for routines exported from this file
@@ -330,6 +335,10 @@ Gdbtk_Init (interp)
   Tcl_LinkVar (interp, "gdb_context_id",
                (char *) &gdb_context,
                TCL_LINK_INT | TCL_LINK_READ_ONLY);
+  
+  /* Determine where to disassemble from */
+  Tcl_LinkVar (gdbtk_interp, "disassemble-from-exec", (char *) &disassemble_from_exec,
+	       TCL_LINK_INT);
 
   Tcl_PkgProvide(interp, "Gdbtk", GDBTK_VERSION);
   return TCL_OK;
@@ -666,11 +675,21 @@ gdb_cmd (clientData, interp, objc, objv)
      int objc;
      Tcl_Obj *CONST objv[];
 {
-
+  int from_tty = 0;
+  
   if (objc < 2)
     {
       Tcl_SetStringObj (result_ptr->obj_ptr, "wrong # args", -1);
       return TCL_ERROR;
+    }
+
+  if (objc == 3)
+    {
+      if (Tcl_GetBooleanFromObj (NULL, objv[2], &from_tty) != TCL_OK) {
+	Tcl_SetStringObj (result_ptr->obj_ptr, "from_tty must be a boolean.",
+			  -1);
+	return TCL_ERROR;
+      }
     }
 
   if (running_now || load_in_progress)
@@ -688,7 +707,7 @@ gdb_cmd (clientData, interp, objc, objv)
       load_in_progress = 1;
     }
 
-  execute_command (Tcl_GetStringFromObj (objv[1], NULL), 1);
+  execute_command (Tcl_GetStringFromObj (objv[1], NULL), from_tty);
 
   if (load_in_progress)
     {

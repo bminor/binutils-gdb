@@ -110,11 +110,6 @@ int gdb_context = 0;
  */
 int running_now;
 
-/* This variable determines where memory used for disassembly is read from.
- * See note in gdbtk.h for details.
- */
-int disassemble_from_exec = -1;
-
 /* This variable holds the name of a Tcl file which should be sourced by the
    interpreter when it goes idle at startup. Used with the testsuite. */
 static char *gdbtk_source_filename = NULL;
@@ -490,9 +485,6 @@ gdbtk_init ( argv0 )
 
   add_com ("tk", class_obscure, tk_command,
 	   "Send a command directly into tk.");
-
-  Tcl_LinkVar (gdbtk_interp, "disassemble-from-exec", (char *) &disassemble_from_exec,
-	       TCL_LINK_INT);
 
   /* find the gdb tcl library and source main.tcl */
 

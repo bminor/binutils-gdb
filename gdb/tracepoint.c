@@ -1748,6 +1748,9 @@ trace_start_command (args, from_tty)
       set_tracepoint_num (-1);
       set_traceframe_context(-1);
       trace_running_p = 1;
+      if (trace_start_stop_hook)
+	trace_start_stop_hook(1, from_tty);
+      
     }
   else
     error ("Trace can only be run on remote targets.");
@@ -1766,6 +1769,8 @@ trace_stop_command (args, from_tty)
       if (strcmp (target_buf, "OK"))
 	error ("Bogus reply from target: %s", target_buf);
       trace_running_p = 0;
+      if (trace_start_stop_hook)
+	trace_start_stop_hook(0, from_tty);
     }
   else
     error ("Trace can only be run on remote targets.");

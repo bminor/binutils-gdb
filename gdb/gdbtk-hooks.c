@@ -85,6 +85,7 @@ static void   gdbtk_create_tracepoint PARAMS ((struct tracepoint *));
 static void   gdbtk_delete_tracepoint PARAMS ((struct tracepoint *));
 static void   gdbtk_modify_tracepoint PARAMS ((struct tracepoint *));
 static void   gdbtk_trace_find  PARAMS ((char *arg, int from_tty));
+static void   gdbtk_trace_start_stop PARAMS ((int, int));
 static void   gdbtk_create_breakpoint PARAMS ((struct breakpoint *));
 static void   gdbtk_delete_breakpoint PARAMS ((struct breakpoint *));
 static void   gdbtk_modify_breakpoint PARAMS ((struct breakpoint *));
@@ -162,7 +163,7 @@ gdbtk_add_hooks(void)
   delete_tracepoint_hook = gdbtk_delete_tracepoint;
   modify_tracepoint_hook = gdbtk_modify_tracepoint;
   trace_find_hook        = gdbtk_trace_find;
-
+  trace_start_stop_hook  = gdbtk_trace_start_stop;
   pc_changed_hook = pc_changed;
   selected_frame_level_changed_hook = gdbtk_selected_frame_changed;
   context_hook = gdbtk_context_change;
@@ -464,34 +465,13 @@ gdbtk_call_command (cmdblk, arg, from_tty)
   if (cmdblk->class == class_run || cmdblk->class == class_trace)
     {
 
-      /* HACK! HACK! This is to get the gui to update the tstart/tstop
-         button only incase of tstart/tstop commands issued from the console
-         We don't want to update the src window, so we need to have specific
-         procedures to do tstart and tstop
-         Unfortunately this will not display errors from tstart or tstop in the 
-         console window itself, but as dialogs.*/
-
-      if (!strcmp(cmdblk->name, "tstart") && !No_Update)
-        {
-          Tcl_Eval (gdbtk_interp, "gdbtk_tcl_tstart"); 
-          (*cmdblk->function.cfunc)(arg, from_tty);
-        }
-      else if (!strcmp(cmdblk->name, "tstop") && !No_Update) 
-        {
-          Tcl_Eval (gdbtk_interp, "gdbtk_tcl_tstop"); 
-          (*cmdblk->function.cfunc)(arg, from_tty);
-        }
-      /* end of hack */
-      else 
-        {
-          running_now = 1;
-          if (!No_Update)
-            Tcl_Eval (gdbtk_interp, "gdbtk_tcl_busy");
-          (*cmdblk->function.cfunc)(arg, from_tty);
-          running_now = 0;
-          if (!No_Update)
-            Tcl_Eval (gdbtk_interp, "gdbtk_tcl_idle");
-        }
+      running_now = 1;
+      if (!No_Update)
+	Tcl_Eval (gdbtk_interp, "gdbtk_tcl_busy");
+      (*cmdblk->function.cfunc)(arg, from_tty);
+      running_now = 0;
+      if (!No_Update)
+	Tcl_Eval (gdbtk_interp, "gdbtk_tcl_idle");
     }
   else
     (*cmdblk->function.cfunc)(arg, from_tty);
@@ -712,14 +692,49 @@ gdbtk_trace_find (arg, from_tty)
 {
   Tcl_Obj *cmdObj;
   
-  Tcl_GlobalEval (gdbtk_interp, "debug {***In gdbtk_trace_find...}");
-  cmdObj = Tcl_NewListObj (0, NULL);
-  Tcl_ListObjAppendElement (gdbtk_interp, cmdObj,
-			   Tcl_NewStringObj ("gdbtk_tcl_trace_find_hook", -1));
-  Tcl_ListObjAppendElement (gdbtk_interp, cmdObj, Tcl_NewStringObj (arg, -1));
-  Tcl_ListObjAppendElement (gdbtk_interp, cmdObj, Tcl_NewIntObj(from_tty));
-  Tcl_GlobalEvalObj (gdbtk_interp, cmdObj);
+  if (from_tty) {
+    Tcl_GlobalEval (gdbtk_interp, "debug {*** In gdbtk_trace_find, from_tty is true}");
+    cmdObj = Tcl_NewListObj (0, NULL);
+    Tcl_ListObjAppendElement (gdbtk_interp, cmdObj,
+			      Tcl_NewStringObj ("gdbtk_tcl_trace_find_hook", -1));
+    Tcl_ListObjAppendElement (gdbtk_interp, cmdObj, Tcl_NewStringObj (arg, -1));
+    Tcl_ListObjAppendElement (gdbtk_interp, cmdObj, Tcl_NewIntObj(from_tty));
+    Tcl_GlobalEvalObj (gdbtk_interp, cmdObj);
+  } else {
+    Tcl_GlobalEval (gdbtk_interp, "debug {*** In gdbtk_trace_find, from_tty is false}");
+  }
+}
+
+/*
+ * gdbtk_trace_start_stop
+ *
+ * This is run by the trace_start_command and trace_stop_command.
+ * The START variable determines which, 1 meaning trace_start was run,
+ * 0 meaning trace_stop was run.
+ *
+ */
+
+static void
+gdbtk_trace_start_stop (start, from_tty)
+     int start;
+     int from_tty;
+{
+  Tcl_Obj *cmdObj;
   
+  if (from_tty) {
+    Tcl_GlobalEval (gdbtk_interp, "debug {*** In gdbtk_trace_start, from_tty is true}");
+    cmdObj = Tcl_NewListObj (0, NULL);
+    if (start)
+      Tcl_ListObjAppendElement (gdbtk_interp, cmdObj,
+				Tcl_NewStringObj ("gdbtk_tcl_tstart", -1));
+    else
+      Tcl_ListObjAppendElement (gdbtk_interp, cmdObj,
+				Tcl_NewStringObj ("gdbtk_tcl_tstop", -1));
+    Tcl_GlobalEvalObj (gdbtk_interp, cmdObj);
+  } else {
+    Tcl_GlobalEval (gdbtk_interp, "debug {*** In gdbtk_trace_startd, from_tty is false}");
+  }
+
 }
 
 static void
