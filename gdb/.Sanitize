@@ -390,7 +390,7 @@ else
 	    -e 's/ch-exp.y//g' \
 	    -e 's/ch-exp.tab.c//g' \
 	    -e 's/ch-exp.tab.o//g' \
-	' < Makefile.in > new
+	    < Makefile.in > new
 	if [ -n "${safe}" -a ! -f .Recover/Makefile.in ] ; then
 		echo Caching Makefile.in in .Recover...
 		mv Makefile.in .Recover
