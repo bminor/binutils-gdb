@@ -1,3 +1,8 @@
+2002-11-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* i386-tdep.h (i386_linux_orig_eax_regnum_p): Delete stray
+	declaration that snuck in from change below.
+
 2002-11-06  Andrew Cagney  <cagney@redhat.com>
 
 	* i386-tdep.c (i386_mmx_regnum_p): Rename mmx_regnum_p.  Update

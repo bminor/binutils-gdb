@@ -132,10 +132,6 @@ extern int i386_fpc_regnum_p (int regnum);
 extern int i386_sse_regnum_p (int regnum);
 extern int i386_mxcsr_regnum_p (int regnum);
 
-/* Return non-zero if REGNUM matches the ORIG_EAX register and the
-   register hack is active.  */
-extern int i386_linux_orig_eax_regnum_p (int regnum);
-
 /* FIXME: kettenis/2001-11-24: Obsolete macro's.  */
 #define FCS_REGNUM FISEG_REGNUM
 #define FCOFF_REGNUM FIOFF_REGNUM
