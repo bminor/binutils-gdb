@@ -25,92 +25,8 @@
 typedef unsigned long int insn32;
 typedef unsigned short int insn16;
 
-static bfd_boolean elf32_arm_set_private_flags
-  PARAMS ((bfd *, flagword));
-static bfd_boolean elf32_arm_copy_private_bfd_data
-  PARAMS ((bfd *, bfd *));
-static bfd_boolean elf32_arm_merge_private_bfd_data
-  PARAMS ((bfd *, bfd *));
-static bfd_boolean elf32_arm_print_private_bfd_data
-  PARAMS ((bfd *, PTR));
-static int elf32_arm_get_symbol_type
-  PARAMS (( Elf_Internal_Sym *, int));
-static struct bfd_link_hash_table *elf32_arm_link_hash_table_create
-  PARAMS ((bfd *));
-static bfd_reloc_status_type elf32_arm_final_link_relocate
-  PARAMS ((reloc_howto_type *, bfd *, bfd *, asection *, bfd_byte *,
-	   Elf_Internal_Rela *, bfd_vma, struct bfd_link_info *, asection *,
-	   const char *, int, struct elf_link_hash_entry *));
-static insn32 insert_thumb_branch
-  PARAMS ((insn32, int));
-static struct elf_link_hash_entry *find_thumb_glue
-  PARAMS ((struct bfd_link_info *, const char *, bfd *));
-static struct elf_link_hash_entry *find_arm_glue
-  PARAMS ((struct bfd_link_info *, const char *, bfd *));
-static void elf32_arm_post_process_headers
-  PARAMS ((bfd *, struct bfd_link_info *));
-static int elf32_arm_to_thumb_stub
-  PARAMS ((struct bfd_link_info *, const char *, bfd *, bfd *, asection *,
-	   bfd_byte *, asection *, bfd_vma, bfd_signed_vma, bfd_vma));
-static int elf32_thumb_to_arm_stub
-  PARAMS ((struct bfd_link_info *, const char *, bfd *, bfd *, asection *,
-	   bfd_byte *, asection *, bfd_vma, bfd_signed_vma, bfd_vma));
-static bfd_boolean elf32_arm_relocate_section
-  PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
-	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
-static asection * elf32_arm_gc_mark_hook
-  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
-	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
-static bfd_boolean elf32_arm_gc_sweep_hook
-  PARAMS ((bfd *, struct bfd_link_info *, asection *,
-	   const Elf_Internal_Rela *));
-static bfd_boolean elf32_arm_check_relocs
-  PARAMS ((bfd *, struct bfd_link_info *, asection *,
-	   const Elf_Internal_Rela *));
-static bfd_boolean elf32_arm_find_nearest_line
-  PARAMS ((bfd *, asection *, asymbol **, bfd_vma, const char **,
-	   const char **, unsigned int *));
-static bfd_boolean elf32_arm_adjust_dynamic_symbol
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
-static bfd_boolean elf32_arm_size_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
-static bfd_boolean elf32_arm_finish_dynamic_symbol
-  PARAMS ((bfd *, struct bfd_link_info *, struct elf_link_hash_entry *,
-	   Elf_Internal_Sym *));
-static bfd_boolean elf32_arm_finish_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
-static struct bfd_hash_entry * elf32_arm_link_hash_newfunc
-  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
-#if USE_REL
-static void arm_add_to_rel
-  PARAMS ((bfd *, bfd_byte *, reloc_howto_type *, bfd_signed_vma));
-#endif
-static bfd_boolean allocate_dynrelocs 
-  PARAMS ((struct elf_link_hash_entry *h, PTR inf));
-static bfd_boolean create_got_section 
-  PARAMS ((bfd * dynobj, struct bfd_link_info * info));
-static bfd_boolean elf32_arm_create_dynamic_sections 
-  PARAMS ((bfd * dynobj, struct bfd_link_info * info));
-static enum elf_reloc_type_class elf32_arm_reloc_type_class
-  PARAMS ((const Elf_Internal_Rela *));
-static bfd_boolean elf32_arm_object_p
-  PARAMS ((bfd *));
-
-#ifndef ELFARM_NABI_C_INCLUDED
-static void record_arm_to_thumb_glue
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
-static void record_thumb_to_arm_glue
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
-bfd_boolean bfd_elf32_arm_allocate_interworking_sections
-  PARAMS ((struct bfd_link_info *));
-bfd_boolean bfd_elf32_arm_get_bfd_for_interworking
-  PARAMS ((bfd *, struct bfd_link_info *));
-bfd_boolean bfd_elf32_arm_process_before_allocation
-  PARAMS ((bfd *, struct bfd_link_info *, int, int));
-#endif
-
-
-#define INTERWORK_FLAG(abfd)   (elf_elfheader (abfd)->e_flags & EF_ARM_INTERWORK)
+#define INTERWORK_FLAG(abfd)  \
+  (elf_elfheader (abfd)->e_flags & EF_ARM_INTERWORK)
 
 /* The linker script knows the section names for placement.
    The entry_names are used to do simple name mangling on the stubs.
@@ -241,7 +157,7 @@ struct elf32_arm_link_hash_entry
 #define elf32_arm_link_hash_traverse(table, func, info)			\
   (elf_link_hash_traverse						\
    (&(table)->root,							\
-    (bfd_boolean (*) PARAMS ((struct elf_link_hash_entry *, PTR))) (func), \
+    (bfd_boolean (*) (struct elf_link_hash_entry *, void *))) (func), \
     (info)))
 
 /* Get the ARM elf linker hash table from a link_info structure.  */
@@ -286,10 +202,9 @@ struct elf32_arm_link_hash_table
 /* Create an entry in an ARM ELF linker hash table.  */
 
 static struct bfd_hash_entry *
-elf32_arm_link_hash_newfunc (entry, table, string)
-     struct bfd_hash_entry * entry;
-     struct bfd_hash_table * table;
-     const char * string;
+elf32_arm_link_hash_newfunc (struct bfd_hash_entry * entry,
+                             struct bfd_hash_table * table,
+                             const char * string)
 {
   struct elf32_arm_link_hash_entry * ret =
     (struct elf32_arm_link_hash_entry *) entry;
@@ -297,17 +212,15 @@ elf32_arm_link_hash_newfunc (entry, table, string)
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
   if (ret == (struct elf32_arm_link_hash_entry *) NULL)
-    ret = ((struct elf32_arm_link_hash_entry *)
-	   bfd_hash_allocate (table,
-			      sizeof (struct elf32_arm_link_hash_entry)));
-  if (ret == (struct elf32_arm_link_hash_entry *) NULL)
+    ret = bfd_hash_allocate (table, sizeof (struct elf32_arm_link_hash_entry));
+  if (ret == NULL)
     return (struct bfd_hash_entry *) ret;
 
   /* Call the allocation method of the superclass.  */
   ret = ((struct elf32_arm_link_hash_entry *)
 	 _bfd_elf_link_hash_newfunc ((struct bfd_hash_entry *) ret,
 				     table, string));
-  if (ret != (struct elf32_arm_link_hash_entry *) NULL)
+  if (ret != NULL)
     ret->relocs_copied = NULL;
 
   return (struct bfd_hash_entry *) ret;
@@ -317,9 +230,7 @@ elf32_arm_link_hash_newfunc (entry, table, string)
    shortcuts to them in our hash table.  */
 
 static bfd_boolean
-create_got_section (dynobj, info)
-     bfd *dynobj;
-     struct bfd_link_info *info;
+create_got_section (bfd *dynobj, struct bfd_link_info *info)
 {
   struct elf32_arm_link_hash_table *htab;
 
@@ -348,9 +259,7 @@ create_got_section (dynobj, info)
    hash table.  */
 
 static bfd_boolean
-elf32_arm_create_dynamic_sections (dynobj, info)
-     bfd *dynobj;
-     struct bfd_link_info *info;
+elf32_arm_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
 {
   struct elf32_arm_link_hash_table *htab;
 
@@ -425,17 +334,16 @@ elf32_arm_copy_indirect_symbol (const struct elf_backend_data *bed,
 /* Create an ARM elf linker hash table.  */
 
 static struct bfd_link_hash_table *
-elf32_arm_link_hash_table_create (abfd)
-     bfd *abfd;
+elf32_arm_link_hash_table_create (bfd *abfd)
 {
   struct elf32_arm_link_hash_table *ret;
   bfd_size_type amt = sizeof (struct elf32_arm_link_hash_table);
 
-  ret = (struct elf32_arm_link_hash_table *) bfd_malloc (amt);
-  if (ret == (struct elf32_arm_link_hash_table *) NULL)
+  ret = bfd_malloc (amt);
+  if (ret == NULL)
     return NULL;
 
-  if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
+  if (!_bfd_elf_link_hash_table_init (& ret->root, abfd,
 				      elf32_arm_link_hash_newfunc))
     {
       free (ret);
@@ -462,10 +370,9 @@ elf32_arm_link_hash_table_create (abfd)
 /* Locate the Thumb encoded calling stub for NAME.  */
 
 static struct elf_link_hash_entry *
-find_thumb_glue (link_info, name, input_bfd)
-     struct bfd_link_info *link_info;
-     const char *name;
-     bfd *input_bfd;
+find_thumb_glue (struct bfd_link_info *link_info,
+		 const char *name,
+		 bfd *input_bfd)
 {
   char *tmp_name;
   struct elf_link_hash_entry *hash;
@@ -474,8 +381,8 @@ find_thumb_glue (link_info, name, input_bfd)
   /* We need a pointer to the armelf specific hash table.  */
   hash_table = elf32_arm_hash_table (link_info);
 
-  tmp_name = (char *) bfd_malloc ((bfd_size_type) strlen (name)
-				  + strlen (THUMB2ARM_GLUE_ENTRY_NAME) + 1);
+  tmp_name = bfd_malloc ((bfd_size_type) strlen (name)
+			 + strlen (THUMB2ARM_GLUE_ENTRY_NAME) + 1);
 
   BFD_ASSERT (tmp_name);
 
@@ -497,10 +404,9 @@ find_thumb_glue (link_info, name, input_bfd)
 /* Locate the ARM encoded calling stub for NAME.  */
 
 static struct elf_link_hash_entry *
-find_arm_glue (link_info, name, input_bfd)
-     struct bfd_link_info *link_info;
-     const char *name;
-     bfd *input_bfd;
+find_arm_glue (struct bfd_link_info *link_info,
+	       const char *name,
+	       bfd *input_bfd)
 {
   char *tmp_name;
   struct elf_link_hash_entry *myh;
@@ -509,8 +415,8 @@ find_arm_glue (link_info, name, input_bfd)
   /* We need a pointer to the elfarm specific hash table.  */
   hash_table = elf32_arm_hash_table (link_info);
 
-  tmp_name = (char *) bfd_malloc ((bfd_size_type) strlen (name)
-				  + strlen (ARM2THUMB_GLUE_ENTRY_NAME) + 1);
+  tmp_name = bfd_malloc ((bfd_size_type) strlen (name)
+			 + strlen (ARM2THUMB_GLUE_ENTRY_NAME) + 1);
 
   BFD_ASSERT (tmp_name);
 
@@ -566,8 +472,7 @@ static const insn32 t2a3_b_insn = 0xea000000;
 
 #ifndef ELFARM_NABI_C_INCLUDED
 bfd_boolean
-bfd_elf32_arm_allocate_interworking_sections (info)
-     struct bfd_link_info * info;
+bfd_elf32_arm_allocate_interworking_sections (struct bfd_link_info * info)
 {
   asection * s;
   bfd_byte * foo;
@@ -586,8 +491,7 @@ bfd_elf32_arm_allocate_interworking_sections (info)
 
       BFD_ASSERT (s != NULL);
 
-      foo = (bfd_byte *) bfd_alloc (globals->bfd_of_glue_owner,
-				    globals->arm_glue_size);
+      foo = bfd_alloc (globals->bfd_of_glue_owner, globals->arm_glue_size);
 
       s->size = globals->arm_glue_size;
       s->contents = foo;
@@ -602,8 +506,7 @@ bfd_elf32_arm_allocate_interworking_sections (info)
 
       BFD_ASSERT (s != NULL);
 
-      foo = (bfd_byte *) bfd_alloc (globals->bfd_of_glue_owner,
-				    globals->thumb_glue_size);
+      foo = bfd_alloc (globals->bfd_of_glue_owner, globals->thumb_glue_size);
 
       s->size = globals->thumb_glue_size;
       s->contents = foo;
@@ -613,9 +516,8 @@ bfd_elf32_arm_allocate_interworking_sections (info)
 }
 
 static void
-record_arm_to_thumb_glue (link_info, h)
-     struct bfd_link_info * link_info;
-     struct elf_link_hash_entry * h;
+record_arm_to_thumb_glue (struct bfd_link_info * link_info,
+			  struct elf_link_hash_entry * h)
 {
   const char * name = h->root.root.string;
   asection * s;
@@ -635,8 +537,7 @@ record_arm_to_thumb_glue (link_info, h)
 
   BFD_ASSERT (s != NULL);
 
-  tmp_name = (char *) bfd_malloc ((bfd_size_type) strlen (name)
-				  + strlen (ARM2THUMB_GLUE_ENTRY_NAME) + 1);
+  tmp_name = bfd_malloc ((bfd_size_type) strlen (name) + strlen (ARM2THUMB_GLUE_ENTRY_NAME) + 1);
 
   BFD_ASSERT (tmp_name);
 
@@ -652,9 +553,9 @@ record_arm_to_thumb_glue (link_info, h)
       return;
     }
 
-  /* The only trick here is using hash_table->arm_glue_size as the value. Even
-     though the section isn't allocated yet, this is where we will be putting
-     it.  */
+  /* The only trick here is using hash_table->arm_glue_size as the value.
+     Even though the section isn't allocated yet, this is where we will be
+     putting it.  */
   bh = NULL;
   val = globals->arm_glue_size + 1;
   _bfd_generic_link_add_one_symbol (link_info, globals->bfd_of_glue_owner,
@@ -669,9 +570,8 @@ record_arm_to_thumb_glue (link_info, h)
 }
 
 static void
-record_thumb_to_arm_glue (link_info, h)
-     struct bfd_link_info *link_info;
-     struct elf_link_hash_entry *h;
+record_thumb_to_arm_glue (struct bfd_link_info *link_info,
+			  struct elf_link_hash_entry *h)
 {
   const char *name = h->root.root.string;
   asection *s;
@@ -692,8 +592,8 @@ record_thumb_to_arm_glue (link_info, h)
 
   BFD_ASSERT (s != NULL);
 
-  tmp_name = (char *) bfd_malloc ((bfd_size_type) strlen (name)
-				  + strlen (THUMB2ARM_GLUE_ENTRY_NAME) + 1);
+  tmp_name = bfd_malloc ((bfd_size_type) strlen (name)
+			 + strlen (THUMB2ARM_GLUE_ENTRY_NAME) + 1);
 
   BFD_ASSERT (tmp_name);
 
@@ -726,8 +626,8 @@ record_thumb_to_arm_glue (link_info, h)
 #define BACK_FROM_ARM "__%s_back_from_arm"
 
   /* Allocate another symbol to mark where we switch to Arm mode.  */
-  tmp_name = (char *) bfd_malloc ((bfd_size_type) strlen (name)
-				  + strlen (CHANGE_TO_ARM) + 1);
+  tmp_name = bfd_malloc ((bfd_size_type) strlen (name)
+			 + strlen (CHANGE_TO_ARM) + 1);
 
   BFD_ASSERT (tmp_name);
 
@@ -750,9 +650,8 @@ record_thumb_to_arm_glue (link_info, h)
    linker scripts in ld/emultempl/{armelf}.em.  */
 
 bfd_boolean
-bfd_elf32_arm_add_glue_sections_to_bfd (abfd, info)
-     bfd *abfd;
-     struct bfd_link_info *info;
+bfd_elf32_arm_add_glue_sections_to_bfd (bfd *abfd,
+					struct bfd_link_info *info)
 {
   flagword flags;
   asection *sec;
@@ -787,7 +686,8 @@ bfd_elf32_arm_add_glue_sections_to_bfd (abfd, info)
 
   if (sec == NULL)
     {
-      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_CODE | SEC_READONLY;
+      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
+	| SEC_CODE | SEC_READONLY;
 
       sec = bfd_make_section (abfd, THUMB2ARM_GLUE_SECTION_NAME);
 
@@ -807,9 +707,7 @@ bfd_elf32_arm_add_glue_sections_to_bfd (abfd, info)
    {armelf/pe}.em  */
 
 bfd_boolean
-bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
-     bfd *abfd;
-     struct bfd_link_info *info;
+bfd_elf32_arm_get_bfd_for_interworking (bfd *abfd, struct bfd_link_info *info)
 {
   struct elf32_arm_link_hash_table *globals;
 
@@ -832,13 +730,10 @@ bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
 }
 
 bfd_boolean
-bfd_elf32_arm_process_before_allocation (abfd, link_info,
-					 no_pipeline_knowledge,
-					 byteswap_code)
-     bfd *abfd;
-     struct bfd_link_info *link_info;
-     int no_pipeline_knowledge;
-     int byteswap_code;
+bfd_elf32_arm_process_before_allocation (bfd *abfd,
+					 struct bfd_link_info *link_info,
+					 int no_pipeline_knowledge,
+					 int byteswap_code)
 {
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *internal_relocs = NULL;
@@ -884,7 +779,7 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info,
 
       /* Load the relocs.  */
       internal_relocs
-	= _bfd_elf_link_read_relocs (abfd, sec, (PTR) NULL,
+	= _bfd_elf_link_read_relocs (abfd, sec, (void *) NULL,
 				     (Elf_Internal_Rela *) NULL, FALSE);
 
       if (internal_relocs == NULL)
@@ -915,7 +810,7 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info,
 	      else
 		{
 		  /* Go get them off disk.  */
-		  if (!bfd_malloc_and_get_section (abfd, sec, &contents))
+		  if (! bfd_malloc_and_get_section (abfd, sec, &contents))
 		    goto error_return;
 		}
 	    }
@@ -1017,9 +912,7 @@ error_return:
 #define HI_LOW_ORDER      0xF000F800
 
 static insn32
-insert_thumb_branch (br_insn, rel_off)
-     insn32 br_insn;
-     int rel_off;
+insert_thumb_branch (insn32 br_insn, int rel_off)
 {
   unsigned int low_bits;
   unsigned int high_bits;
@@ -1036,7 +929,7 @@ insert_thumb_branch (br_insn, rel_off)
     br_insn = HI_LOW_ORDER | (high_bits << 16) | low_bits;
   else
     /* FIXME: abort is probably not the right call. krk@cygnus.com  */
-    abort ();			/* error - not a valid branch instruction form.  */
+    abort ();	/* Error - not a valid branch instruction form.  */
 
   return br_insn;
 }
@@ -1044,18 +937,16 @@ insert_thumb_branch (br_insn, rel_off)
 /* Thumb code calling an ARM function.  */
 
 static int
-elf32_thumb_to_arm_stub (info, name, input_bfd, output_bfd, input_section,
-			 hit_data, sym_sec, offset, addend, val)
-     struct bfd_link_info * info;
-     const char *           name;
-     bfd *                  input_bfd;
-     bfd *                  output_bfd;
-     asection *             input_section;
-     bfd_byte *             hit_data;
-     asection *             sym_sec;
-     bfd_vma                offset;
-     bfd_signed_vma         addend;
-     bfd_vma                val;
+elf32_thumb_to_arm_stub (struct bfd_link_info * info,
+			 const char *           name,
+			 bfd *                  input_bfd,
+			 bfd *                  output_bfd,
+			 asection *             input_section,
+			 bfd_byte *             hit_data,
+			 asection *             sym_sec,
+			 bfd_vma                offset,
+			 bfd_signed_vma         addend,
+			 bfd_vma                val)
 {
   asection * s = 0;
   bfd_vma my_offset;
@@ -1109,7 +1000,8 @@ elf32_thumb_to_arm_stub (info, name, input_bfd, output_bfd, input_section,
 	/* Address of destination of the stub.  */
 	((bfd_signed_vma) val)
 	- ((bfd_signed_vma)
-	   /* Offset from the start of the current section to the start of the stubs.  */
+	   /* Offset from the start of the current section
+	      to the start of the stubs.  */
 	   (s->output_offset
 	    /* Offset of the start of this stub from the start of the stubs.  */
 	    + my_offset
@@ -1132,7 +1024,8 @@ elf32_thumb_to_arm_stub (info, name, input_bfd, output_bfd, input_section,
     /* Address of where the stub is located.  */
     (s->output_section->vma + s->output_offset + my_offset)
      /* Address of where the BL is located.  */
-    - (input_section->output_section->vma + input_section->output_offset + offset)
+    - (input_section->output_section->vma + input_section->output_offset
+       + offset)
     /* Addend in the relocation.  */
     - addend
     /* Biassing for PC-relative addressing.  */
@@ -1151,18 +1044,16 @@ elf32_thumb_to_arm_stub (info, name, input_bfd, output_bfd, input_section,
 /* Arm code calling a Thumb function.  */
 
 static int
-elf32_arm_to_thumb_stub (info, name, input_bfd, output_bfd, input_section,
-			 hit_data, sym_sec, offset, addend, val)
-     struct bfd_link_info * info;
-     const char *           name;
-     bfd *                  input_bfd;
-     bfd *                  output_bfd;
-     asection *             input_section;
-     bfd_byte *             hit_data;
-     asection *             sym_sec;
-     bfd_vma                offset;
-     bfd_signed_vma         addend;
-     bfd_vma                val;
+elf32_arm_to_thumb_stub (struct bfd_link_info * info,
+			 const char *           name,
+			 bfd *                  input_bfd,
+			 bfd *                  output_bfd,
+			 asection *             input_section,
+			 bfd_byte *             hit_data,
+			 asection *             sym_sec,
+			 bfd_vma                offset,
+			 bfd_signed_vma         addend,
+			 bfd_vma                val)
 {
   unsigned long int tmp;
   bfd_vma my_offset;
@@ -1237,21 +1128,18 @@ elf32_arm_to_thumb_stub (info, name, input_bfd, output_bfd, input_section,
 /* Perform a relocation as part of a final link.  */
 
 static bfd_reloc_status_type
-elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
-			       input_section, contents, rel, value,
-			       info, sym_sec, sym_name, sym_flags, h)
-     reloc_howto_type *     howto;
-     bfd *                  input_bfd;
-     bfd *                  output_bfd;
-     asection *             input_section;
-     bfd_byte *             contents;
-     Elf_Internal_Rela *    rel;
-     bfd_vma                value;
-     struct bfd_link_info * info;
-     asection *             sym_sec;
-     const char *           sym_name;
-     int		    sym_flags;
-     struct elf_link_hash_entry * h;
+elf32_arm_final_link_relocate (reloc_howto_type *           howto,
+			       bfd *                        input_bfd,
+			       bfd *                        output_bfd,
+			       asection *                   input_section,
+			       bfd_byte *                   contents,
+			       Elf_Internal_Rela *          rel,
+			       bfd_vma                      value,
+			       struct bfd_link_info *       info,
+			       asection *                   sym_sec,
+			       const char *                 sym_name,
+			       int		            sym_flags,
+			       struct elf_link_hash_entry * h)
 {
   unsigned long                 r_type = howto->type;
   unsigned long                 r_symndx;
@@ -1451,8 +1339,9 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	      /* Check for Arm calling Thumb function.  */
 	      if (sym_flags == STT_ARM_TFUNC)
 		{
-		  elf32_arm_to_thumb_stub (info, sym_name, input_bfd, output_bfd,
-					   input_section, hit_data, sym_sec, rel->r_offset,
+		  elf32_arm_to_thumb_stub (info, sym_name, input_bfd,
+					   output_bfd, input_section,
+					   hit_data, sym_sec, rel->r_offset,
 					   signed_addend, value);
 		  return bfd_reloc_ok;
 		}
@@ -1480,8 +1369,9 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 		  A is the addend (extracted from the instruction) in bytes.
 
 		 S is held in 'value'.
-		 P is the base address of the section containing the instruction
-		   plus the offset of the reloc into that section, ie:
+		 P is the base address of the section containing the
+		   instruction plus the offset of the reloc into that
+		   section, ie:
 		     (input_section->output_section->vma +
 		      input_section->output_offset +
 		      rel->r_offset).
@@ -1489,18 +1379,19 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 		     (signed_addend * 4)
 
 		 Note: None of these operations have knowledge of the pipeline
-		 size of the processor, thus it is up to the assembler to encode
-		 this information into the addend.  */
+		 size of the processor, thus it is up to the assembler to
+		 encode this information into the addend.  */
 	      value -= (input_section->output_section->vma
 			+ input_section->output_offset);
 	      value -= rel->r_offset;
 	      value += (signed_addend << howto->size);
 
-	      /* Previous versions of this code also used to add in the pipeline
-		 offset here.  This is wrong because the linker is not supposed
-		 to know about such things, and one day it might change.  In order
-		 to support old binaries that need the old behaviour however, so
-		 we attempt to detect which ABI was used to create the reloc.  */
+	      /* Previous versions of this code also used to add in the
+		 pipeline offset here.  This is wrong because the linker is
+		 not supposed to know about such things, and one day it might
+		 change.  In order to support old binaries that need the old
+		 behaviour however, so we attempt to detect which ABI was
+		 used to create the reloc.  */
 	      if (! globals->no_pipeline_knowledge)
 		{
 		  Elf_Internal_Ehdr * i_ehdrp; /* Elf file header, internal form */
@@ -1964,11 +1855,10 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 #if USE_REL
 /* Add INCREMENT to the reloc (of type HOWTO) at ADDRESS.  */
 static void
-arm_add_to_rel (abfd, address, howto, increment)
-     bfd *              abfd;
-     bfd_byte *         address;
-     reloc_howto_type * howto;
-     bfd_signed_vma     increment;
+arm_add_to_rel (bfd *              abfd,
+		bfd_byte *         address,
+		reloc_howto_type * howto,
+		bfd_signed_vma     increment)
 {
   bfd_signed_vma addend;
 
@@ -2036,16 +1926,14 @@ arm_add_to_rel (abfd, address, howto, increment)
 
 /* Relocate an ARM ELF section.  */
 static bfd_boolean
-elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
-			    contents, relocs, local_syms, local_sections)
-     bfd *output_bfd;
-     struct bfd_link_info *info;
-     bfd *input_bfd;
-     asection *input_section;
-     bfd_byte *contents;
-     Elf_Internal_Rela *relocs;
-     Elf_Internal_Sym *local_syms;
-     asection **local_sections;
+elf32_arm_relocate_section (bfd *                  output_bfd,
+			    struct bfd_link_info * info,
+			    bfd *                  input_bfd,
+			    asection *             input_section,
+			    bfd_byte *             contents,
+			    Elf_Internal_Rela *    relocs,
+			    Elf_Internal_Sym *     local_syms,
+			    asection **            local_sections)
 {
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
@@ -2170,7 +2058,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h, sec, relocation,
 				   unresolved_reloc, warned);
-	  
+
 	  if (unresolved_reloc || relocation != 0)
 	    {
 	      /* In these cases, we don't need the relocation value.
@@ -2301,11 +2189,10 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 /* Set the right machine number.  */
 
 static bfd_boolean
-elf32_arm_object_p (abfd)
-     bfd *abfd;
+elf32_arm_object_p (bfd *abfd)
 {
   unsigned int mach;
-  
+
   mach = bfd_arm_get_mach_from_notes (abfd, ARM_NOTE_SECTION);
 
   if (mach != bfd_mach_arm_unknown)
@@ -2322,9 +2209,7 @@ elf32_arm_object_p (abfd)
 
 /* Function to keep ARM specific flags in the ELF header.  */
 static bfd_boolean
-elf32_arm_set_private_flags (abfd, flags)
-     bfd *abfd;
-     flagword flags;
+elf32_arm_set_private_flags (bfd *abfd, flagword flags)
 {
   if (elf_flags_init (abfd)
       && elf_elfheader (abfd)->e_flags != flags)
@@ -2353,9 +2238,7 @@ elf32_arm_set_private_flags (abfd, flags)
 /* Copy backend specific data from one object module to another.  */
 
 static bfd_boolean
-elf32_arm_copy_private_bfd_data (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
+elf32_arm_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
   flagword in_flags;
   flagword out_flags;
@@ -2406,9 +2289,7 @@ elf32_arm_copy_private_bfd_data (ibfd, obfd)
    object file when linking.  */
 
 static bfd_boolean
-elf32_arm_merge_private_bfd_data (ibfd, obfd)
-     bfd * ibfd;
-     bfd * obfd;
+elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 {
   flagword out_flags;
   flagword in_flags;
@@ -2613,9 +2494,7 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
 /* Display the flags field.  */
 
 static bfd_boolean
-elf32_arm_print_private_bfd_data (abfd, ptr)
-     bfd *abfd;
-     PTR ptr;
+elf32_arm_print_private_bfd_data (bfd *abfd, void * ptr)
 {
   FILE * file = (FILE *) ptr;
   unsigned long flags;
@@ -2739,9 +2618,7 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
 }
 
 static int
-elf32_arm_get_symbol_type (elf_sym, type)
-     Elf_Internal_Sym * elf_sym;
-     int type;
+elf32_arm_get_symbol_type (Elf_Internal_Sym * elf_sym, int type)
 {
   switch (ELF_ST_TYPE (elf_sym->st_info))
     {
@@ -2765,12 +2642,11 @@ elf32_arm_get_symbol_type (elf_sym, type)
 }
 
 static asection *
-elf32_arm_gc_mark_hook (sec, info, rel, h, sym)
-       asection *sec;
-       struct bfd_link_info *info ATTRIBUTE_UNUSED;
-       Elf_Internal_Rela *rel;
-       struct elf_link_hash_entry *h;
-       Elf_Internal_Sym *sym;
+elf32_arm_gc_mark_hook (asection *                   sec,
+			struct bfd_link_info *       info ATTRIBUTE_UNUSED,
+			Elf_Internal_Rela *          rel,
+			struct elf_link_hash_entry * h,
+			Elf_Internal_Sym *           sym)
 {
   if (h != NULL)
     {
@@ -2804,11 +2680,10 @@ elf32_arm_gc_mark_hook (sec, info, rel, h, sym)
 /* Update the got entry reference counts for the section being removed.  */
 
 static bfd_boolean
-elf32_arm_gc_sweep_hook (abfd, info, sec, relocs)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     struct bfd_link_info *info ATTRIBUTE_UNUSED;
-     asection *sec ATTRIBUTE_UNUSED;
-     const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
+elf32_arm_gc_sweep_hook (bfd *                     abfd ATTRIBUTE_UNUSED,
+			 struct bfd_link_info *    info ATTRIBUTE_UNUSED,
+			 asection *                sec ATTRIBUTE_UNUSED,
+			 const Elf_Internal_Rela * relocs ATTRIBUTE_UNUSED)
 {
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
@@ -2886,11 +2761,8 @@ elf32_arm_gc_sweep_hook (abfd, info, sec, relocs)
 /* Look through the relocs for a section during the first phase.  */
 
 static bfd_boolean
-elf32_arm_check_relocs (abfd, info, sec, relocs)
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *sec;
-     const Elf_Internal_Rela *relocs;
+elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
+			asection *sec, const Elf_Internal_Rela *relocs)
 {
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
@@ -2950,9 +2822,8 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 		    bfd_size_type size;
 
 		    size = symtab_hdr->sh_info;
-		    size *= (sizeof (bfd_signed_vma) + sizeof(char));
-		    local_got_refcounts = ((bfd_signed_vma *)
-					   bfd_zalloc (abfd, size));
+		    size *= (sizeof (bfd_signed_vma) + sizeof (char));
+		    local_got_refcounts = bfd_zalloc (abfd, size);
 		    if (local_got_refcounts == NULL)
 		      return FALSE;
 		    elf_local_got_refcounts (abfd) = local_got_refcounts;
@@ -3072,21 +2943,22 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 		    /* Track dynamic relocs needed for local syms too.
 		       We really need local syms available to do this
 		       easily.  Oh well.  */
-		    
+
 		    asection *s;
 		    s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
 						   sec, r_symndx);
 		    if (s == NULL)
 		      return FALSE;
-		    
+
 		    head = ((struct elf32_arm_relocs_copied **)
 			    &elf_section_data (s)->local_dynrel);
 		  }
-		
+
 		p = *head;
 		if (p == NULL || p->section != sec)
 		  {
 		    bfd_size_type amt = sizeof *p;
+
 		    p = bfd_alloc (htab->root.dynobj, amt);
 		    if (p == NULL)
 		      return FALSE;
@@ -3095,7 +2967,7 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 		    p->section = sec;
 		    p->count = 0;
 		  }
-		
+
 		if (ELF32_R_TYPE (rel->r_info) == R_ARM_ABS32
 		    || ELF32_R_TYPE (rel->r_info) == R_ARM_REL32)
 		  p->count += 1;
@@ -3126,15 +2998,13 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
    that it also accepts STT_ARM_TFUNC as a symbol that names a function.  */
 
 static bfd_boolean
-elf32_arm_find_nearest_line
-  (abfd, section, symbols, offset, filename_ptr, functionname_ptr, line_ptr)
-     bfd *abfd;
-     asection *section;
-     asymbol **symbols;
-     bfd_vma offset;
-     const char **filename_ptr;
-     const char **functionname_ptr;
-     unsigned int *line_ptr;
+elf32_arm_find_nearest_line (bfd *          abfd,
+			     asection *     section,
+			     asymbol **     symbols,
+			     bfd_vma        offset,
+			     const char **  filename_ptr,
+			     const char **  functionname_ptr,
+			     unsigned int * line_ptr)
 {
   bfd_boolean found;
   const char *filename;
@@ -3211,9 +3081,8 @@ elf32_arm_find_nearest_line
    understand.  */
 
 static bfd_boolean
-elf32_arm_adjust_dynamic_symbol (info, h)
-     struct bfd_link_info * info;
-     struct elf_link_hash_entry * h;
+elf32_arm_adjust_dynamic_symbol (struct bfd_link_info * info,
+				 struct elf_link_hash_entry * h)
 {
   bfd * dynobj;
   asection * s;
@@ -3338,9 +3207,7 @@ elf32_arm_adjust_dynamic_symbol (info, h)
    dynamic relocs.  */
 
 static bfd_boolean
-allocate_dynrelocs (h, inf)
-     struct elf_link_hash_entry *h;
-     PTR inf;
+allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 {
   struct bfd_link_info *info;
   struct elf32_arm_link_hash_table *htab;
@@ -3508,9 +3375,8 @@ allocate_dynrelocs (h, inf)
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
-elf32_arm_size_dynamic_sections (output_bfd, info)
-     bfd * output_bfd ATTRIBUTE_UNUSED;
-     struct bfd_link_info * info;
+elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
+				 struct bfd_link_info * info)
 {
   bfd * dynobj;
   asection * s;
@@ -3601,7 +3467,7 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
 
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */
-  elf_link_hash_traverse (&htab->root, allocate_dynrelocs, (PTR) info);
+  elf_link_hash_traverse (& htab->root, allocate_dynrelocs, info);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
@@ -3730,11 +3596,8 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
    dynamic sections here.  */
 
 static bfd_boolean
-elf32_arm_finish_dynamic_symbol (output_bfd, info, h, sym)
-     bfd * output_bfd;
-     struct bfd_link_info * info;
-     struct elf_link_hash_entry * h;
-     Elf_Internal_Sym * sym;
+elf32_arm_finish_dynamic_symbol (bfd * output_bfd, struct bfd_link_info * info,
+				 struct elf_link_hash_entry * h, Elf_Internal_Sym * sym)
 {
   bfd * dynobj;
 
@@ -3801,7 +3664,7 @@ elf32_arm_finish_dynamic_symbol (output_bfd, info, h, sym)
 		  (splt->output_section->vma
 		   + splt->output_offset),
 		  sgot->contents + got_offset);
-      
+
       /* Fill in the entry in the .rel.plt section.  */
       rel.r_offset = (sgot->output_section->vma
 		      + sgot->output_offset
@@ -3898,9 +3761,7 @@ elf32_arm_finish_dynamic_symbol (output_bfd, info, h, sym)
 /* Finish up the dynamic sections.  */
 
 static bfd_boolean
-elf32_arm_finish_dynamic_sections (output_bfd, info)
-     bfd * output_bfd;
-     struct bfd_link_info * info;
+elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info)
 {
   bfd * dynobj;
   asection * sgot;
@@ -4047,9 +3908,7 @@ elf32_arm_finish_dynamic_sections (output_bfd, info)
 }
 
 static void
-elf32_arm_post_process_headers (abfd, link_info)
-     bfd * abfd;
-     struct bfd_link_info * link_info ATTRIBUTE_UNUSED;
+elf32_arm_post_process_headers (bfd * abfd, struct bfd_link_info * link_info ATTRIBUTE_UNUSED)
 {
   Elf_Internal_Ehdr * i_ehdrp;	/* ELF file header, internal form.  */
   struct elf32_arm_link_hash_table *globals;
@@ -4068,8 +3927,7 @@ elf32_arm_post_process_headers (abfd, link_info)
 }
 
 static enum elf_reloc_type_class
-elf32_arm_reloc_type_class (rela)
-     const Elf_Internal_Rela *rela;
+elf32_arm_reloc_type_class (const Elf_Internal_Rela *rela)
 {
   switch ((int) ELF32_R_TYPE (rela->r_info))
     {
@@ -4084,15 +3942,13 @@ elf32_arm_reloc_type_class (rela)
     }
 }
 
-static bfd_boolean elf32_arm_section_flags           PARAMS ((flagword *, const Elf_Internal_Shdr *));
-static void        elf32_arm_final_write_processing  PARAMS ((bfd *, bfd_boolean));
+static bfd_boolean elf32_arm_section_flags           (flagword *, const Elf_Internal_Shdr *);
+static void        elf32_arm_final_write_processing  (bfd *, bfd_boolean);
 
 /* Set the right machine number for an Arm ELF file.  */
 
 static bfd_boolean
-elf32_arm_section_flags (flags, hdr)
-     flagword *flags;
-     const Elf_Internal_Shdr *hdr;
+elf32_arm_section_flags (flagword *flags, const Elf_Internal_Shdr *hdr)
 {
   if (hdr->sh_type == SHT_NOTE)
     *flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_SAME_CONTENTS;
@@ -4101,9 +3957,7 @@ elf32_arm_section_flags (flags, hdr)
 }
 
 static void
-elf32_arm_final_write_processing (abfd, linker)
-     bfd *abfd;
-     bfd_boolean linker ATTRIBUTE_UNUSED;
+elf32_arm_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
 {
   bfd_arm_update_notes (abfd, ARM_NOTE_SECTION);
 }
@@ -4146,7 +4000,7 @@ elf32_arm_output_symbol_hook (struct bfd_link_info *info,
      mapping symbols per section.  */
   map = bfd_realloc (map, mapcount * sizeof (elf32_arm_section_map));
   elf32_arm_section_data (input_sec)->map = map;
-  
+
   map[mapcount - 1].vma = elfsym->st_value;
   map[mapcount - 1].type = name[1];
   return TRUE;
@@ -4194,7 +4048,7 @@ elf32_arm_write_section (bfd *output_bfd ATTRIBUTE_UNUSED, asection *sec,
   bfd_vma offset;
   bfd_byte tmp;
   int i;
-  
+
   mapcount = elf32_arm_section_data (sec)->mapcount;
   map = elf32_arm_section_data (sec)->map;
 
@@ -4212,7 +4066,7 @@ elf32_arm_write_section (bfd *output_bfd ATTRIBUTE_UNUSED, asection *sec,
 	end = sec->size;
       else
 	end = map[i + 1].vma - offset;
-      
+
       switch (map[i].type)
 	{
 	case 'a':
