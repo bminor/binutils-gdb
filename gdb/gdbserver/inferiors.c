@@ -29,6 +29,7 @@ struct inferior_info
 {
   int pid;
   void *target_data;
+  void *regcache_data;
   struct inferior_info *next;
 };
 
@@ -52,6 +53,8 @@ add_inferior (int pid)
   if (current_inferior == NULL)
     current_inferior = inferiors;
 
+  create_register_cache (new_inferior);
+
   if (signal_pid == 0)
     signal_pid = pid;
 }
@@ -67,6 +70,8 @@ clear_inferiors (void)
 
       if (inf->target_data)
 	free (inf->target_data);
+      if (inf->regcache_data)
+	free_register_cache (inf);
 
       free (inf);
       inf = next_inf;
@@ -85,4 +90,16 @@ void
 set_inferior_target_data (struct inferior_info *inferior, void *data)
 {
   inferior->target_data = data;
+}
+
+void *
+inferior_regcache_data (struct inferior_info *inferior)
+{
+  return inferior->regcache_data;
+}
+
+void
+set_inferior_regcache_data (struct inferior_info *inferior, void *data)
+{
+  inferior->regcache_data = data;
 }

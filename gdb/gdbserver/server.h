@@ -54,6 +54,9 @@
    least the size of a (void *).  */
 typedef long long CORE_ADDR;
 
+/* Opaque inferior process information.  */
+struct inferior_info;
+
 #include "regcache.h"
 #include "gdb/signals.h"
 
@@ -70,14 +73,14 @@ extern char *registers;
 
 /* From inferiors.c.  */
 
-struct inferior_info;
 extern struct inferior_info *current_inferior;
 extern int signal_pid;
 void add_inferior (int pid);
 void clear_inferiors (void);
 void *inferior_target_data (struct inferior_info *);
 void set_inferior_target_data (struct inferior_info *, void *);
-
+void *inferior_regcache_data (struct inferior_info *);
+void set_inferior_regcache_data (struct inferior_info *, void *);
 
 /* Public variables in server.c */
 

@@ -21,6 +21,14 @@
 #ifndef REGCACHE_H
 #define REGCACHE_H
 
+/* Create a new register cache for INFERIOR.  */
+
+void create_register_cache (struct inferior_info *inferior);
+
+/* Release all memory associated with the register cache for INFERIOR.  */
+
+void free_register_cache (struct inferior_info *inferior);
+
 /* Convert all registers to a string in the currently specified remote
    format.  */
 

@@ -1,5 +1,21 @@
 2002-04-20  Daniel Jacobowitz  <drow@mvista.com>
 
+	* gdbserver/inferiors.c (struct inferior_info): Add regcache_data.
+	(add_inferior): Call create_register_cache.
+	(clear_inferiors): Call free_register_cache.
+	(inferior_regcache_data, set_inferior_regcache_data): New functions.
+	* gdbserver/regcache.c (struct inferior_regcache_data): New.
+	(registers): Remove.
+	(get_regcache): New function.
+	(create_register_cache, free_register_cache): New functions.
+	(set_register_cache): Don't initialize the register cache here.
+	(registers_to_string, registers_from_string, register_data): Call
+	get_regcache.
+	* gdbserver/regcache.h: Add prototypes.
+	* gdbserver/server.h: Likewise.
+
+2002-04-20  Daniel Jacobowitz  <drow@mvista.com>
+
 	* gdbserver/mem-break.c: New file.
 	* gdbserver/mem-break.h: New file.
 	* gdbserver/Makefile.in: Add mem-break.o rule; update server.h
