@@ -1,3 +1,8 @@
+2001-04-02  Alan Modra  <alan@linuxcare.com.au>
+
+	* emulparams/hppalinux.sh (MAXPAGESIZE): Set to 64k.
+	(TEXT_START_ADDR, TARGET_PAGE_SIZE): Likewise.
+
 2001-03-27  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure.tgt (cris-*-*): Change default emulation to criself.
