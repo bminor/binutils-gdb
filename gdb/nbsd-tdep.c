@@ -23,12 +23,11 @@
 #include "solib-svr4.h"
 
 /* Fetch (and possibly build) an appropriate link_map_offsets
-   structure for NetBSD/sh targets using the struct offsets
-   defined in <link.h> (but without actual reference to that file).
+   structure for NetBSD targets using the struct offsets defined
+   in <link.h> (but without actual reference to that file).
   
-   This makes it possible to access NetBSD/sh shared libraries
-   from a GDB that was not built on a NetBSD/sh host (for cross
-   debugging).
+   This makes it possible to access NetBSD shared libraries from a
+   GDB that was not built on the same platform (for cross debugging).
 
    We provide versions for ILP32 and LP64 NetBSD targets here.  */
   

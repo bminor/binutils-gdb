@@ -1,5 +1,9 @@
 2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* nbsd-tdep.c: Fix comment.
+
+2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (ALLDEPFILES): Add nbsd-tdep.c.
 	(alphanbsd-tdep.o): Add nbsd-tdep.h to dependency list.
 	(nbsd-tdep.o): New dependency list.
