@@ -1,3 +1,8 @@
+Tue Nov 22 23:34:37 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* elf32-hppa.c (elf32_hppa_bfd_final_link_relocate): Do not add
+	input_section->vma to the relocation's offset.
+
 Mon Nov 21 12:37:25 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* srec.c (srec_get_reloc_upper_bound): Define.
