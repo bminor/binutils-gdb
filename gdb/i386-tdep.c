@@ -51,8 +51,7 @@
 #include "i386-tdep.h"
 #include "i387-tdep.h"
 
-/* Names of the registers.  The first 10 registers match the register
-   numbering scheme used by GCC for stabs and DWARF.  */
+/* Register names.  */
 
 static char *i386_register_names[] =
 {
@@ -71,7 +70,7 @@ static char *i386_register_names[] =
 
 static const int i386_num_register_names = ARRAY_SIZE (i386_register_names);
 
-/* MMX registers.  */
+/* Register names for MMX pseudo-registers.  */
 
 static char *i386_mmx_names[] =
 {
@@ -166,49 +165,15 @@ i386_register_name (int reg)
   return NULL;
 }
 
-
-/* FIXME: jimb/2004-04-01: I don't think these functions are right.
-   For a given platform, GCC always uses the same register numbering
-   in both STABS and Dwarf2: gcc/dbxout.c and gcc/dwarf2out.c both use
-   the DBX_REGISTER_NUMBER macro, as defined by the config headers.
-   If you compile a program so that its variables are allocated to
-   floating-point registers, first with STABS and again with Dwarf 2,
-   you'll see that the variable's register numbers are the same in
-   each case.
-
-   GCC does use (at least) two different register numberings on the
-   i386; they differ in how they number %ebp, %esp, %eflags, and the
-   floating-point registers.  And it has a third numbering for "64bit
-   mode", which I assume is x86_64.  But it always uses a given
-   numbering in both STABS and Dwarf.
-
-   This does not match the arrangement we have below, which presumes
-   that STABS and Dwarf numberings are different, and does some
-   strange mixing and matching (e.g., registering the Dwarf 2 function
-   as the STABS function for "Generic i386 ELF") to get close enough
-   to the right effect on the platforms we care about.
-
-   If we wanted to match GCC, we should have two separate register
-   number translation functions (we handle x86_64 in a separate tdep
-   file altogether), one corresponding to each of GCC's i386 register
-   maps.  And for a given platform, we would register one of them as
-   both the STABS and Dwarf 2 functions.
-
-   However, we don't aspire to match GCC; we aspire to match the
-   native system's tools.  I don't have access to lots of different
-   native compilers and debuggers to verify that GCC is matching their
-   behavior in this regard.  Is it sufficient to argue that we at
-   least want to match GNU's compiler, and say we'll fix bugs relative
-   to native tools as they're reported?  */
-
-
-/* Convert stabs register number REG to the appropriate register
+/* Convert a dbx register number REG to the appropriate register
    number used by GDB.  */
 
 static int
-i386_stab_reg_to_regnum (int reg)
+i386_dbx_reg_to_regnum (int reg)
 {
-  /* This implements what GCC calls the "default" register map.  */
+  /* This implements what GCC calls the "default" register map
+     (dbx_register_map[]).  */
+
   if (reg >= 0 && reg <= 7)
     {
       /* General-purpose registers.  The debug info calls %ebp
@@ -239,13 +204,16 @@ i386_stab_reg_to_regnum (int reg)
   return NUM_REGS + NUM_PSEUDO_REGS;
 }
 
-/* Convert DWARF register number REG to the appropriate register
-   number used by GDB.  */
+/* Convert SVR4 register number REG to the appropriate register number
+   used by GDB.  */
 
 static int
-i386_dwarf_reg_to_regnum (int reg)
+i386_svr4_reg_to_regnum (int reg)
 {
-  /* The DWARF register numbering includes %eip and %eflags, and
+  /* This implements the GCC register map that tries to be compatible
+     with the SVR4 C compiler for DWARF (svr4_dbx_register_map[]).  */
+
+  /* The SVR4 register numbering includes %eip and %eflags, and
      numbers the floating point registers differently.  */
   if (reg >= 0 && reg <= 9)
     {
@@ -259,8 +227,8 @@ i386_dwarf_reg_to_regnum (int reg)
     }
   else if (reg >= 21)
     {
-      /* The SSE and MMX registers have identical numbers as in stabs.  */
-      return i386_stab_reg_to_regnum (reg);
+      /* The SSE and MMX registers have the same numbers as with dbx.  */
+      return i386_dbx_reg_to_regnum (reg);
     }
 
   /* This will hopefully provoke a warning.  */
@@ -1819,9 +1787,9 @@ i386_svr4_sigcontext_addr (struct frame_info *next_frame)
 void
 i386_coff_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  /* We typically use DWARF-in-COFF with the stabs register numbering.  */
-  set_gdbarch_dwarf_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
-  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
+  /* We typically use DWARF-in-COFF with the dbx register numbering.  */
+  set_gdbarch_dwarf_reg_to_regnum (gdbarch, i386_dbx_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, i386_dbx_reg_to_regnum);
 }
 
 /* Generic ELF.  */
@@ -1829,8 +1797,8 @@ i386_coff_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 void
 i386_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  /* We typically use stabs-in-ELF with the DWARF register numbering.  */
-  set_gdbarch_stab_reg_to_regnum (gdbarch, i386_dwarf_reg_to_regnum);
+  /* We typically use stabs-in-ELF with the SVR4 register numbering.  */
+  set_gdbarch_stab_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
 }
 
 /* System V Release 4 (SVR4).  */
@@ -2024,13 +1992,43 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_ps_regnum (gdbarch, I386_EFLAGS_REGNUM); /* %eflags */
   set_gdbarch_fp0_regnum (gdbarch, I386_ST0_REGNUM); /* %st(0) */
 
-  /* Use the "default" register numbering scheme for stabs and COFF.  */
-  set_gdbarch_stab_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
-  set_gdbarch_sdb_reg_to_regnum (gdbarch, i386_stab_reg_to_regnum);
+  /* NOTE: kettenis/20040418: GCC does have two possible register
+     numbering schemes on the i386: dbx and SVR4.  These schemes
+     differ in how they number %ebp, %esp, %eflags, and the
+     floating-point registers, and are implemented by the attays
+     dbx_register_map[] and svr4_dbx_register_map in
+     gcc/config/i386.c.  GCC also defines a third numbering scheme in
+     gcc/config/i386.c, which it designates as the "default" register
+     map used in 64bit mode.  This last register numbering scheme is
+     implemented in dbx64_register_map, and us used for AMD64; see
+     amd64-tdep.c.
 
-  /* Use the DWARF register numbering scheme for DWARF and DWARF 2.  */
-  set_gdbarch_dwarf_reg_to_regnum (gdbarch, i386_dwarf_reg_to_regnum);
-  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, i386_dwarf_reg_to_regnum);
+     Currently, each GCC i386 target always uses the same register
+     numbering scheme across all its supported debugging formats
+     i.e. SDB (COFF), stabs and DWARF 2.  This is because
+     gcc/sdbout.c, gcc/dbxout.c and gcc/dwarf2out.c all use the
+     DBX_REGISTER_NUMBER macro which is defined by each target's
+     respective config header in a manner independent of the requested
+     output debugging format.
+
+     This does not match the arrangement below, which presumes that
+     the SDB and stabs numbering schemes differ from the DWARF and
+     DWARF 2 ones.  The reason for this arrangement is that it is
+     likely to get the numbering scheme for the target's
+     default/native debug format right.  For targets where GCC is the
+     native compiler (FreeBSD, NetBSD, OpenBSD, GNU/Linux) or for
+     targets where the native toolchain uses a different numbering
+     scheme for a particular debug format (stabs-in-ELF on Solaris)
+     the defaults below will have to be overridden, like the functions
+     i386_coff_init_abi() and i386_elf_init_abi() do.  */
+
+  /* Use the dbx register numbering scheme for stabs and COFF.  */
+  set_gdbarch_stab_reg_to_regnum (gdbarch, i386_dbx_reg_to_regnum);
+  set_gdbarch_sdb_reg_to_regnum (gdbarch, i386_dbx_reg_to_regnum);
+
+  /* Use the SVR4 register numbering scheme for DWARF and DWARF 2.  */
+  set_gdbarch_dwarf_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, i386_svr4_reg_to_regnum);
 
   /* We don't define ECOFF_REG_TO_REGNUM, since ECOFF doesn't seem to
      be in use on any of the supported i386 targets.  */

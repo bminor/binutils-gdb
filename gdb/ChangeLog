@@ -1,5 +1,13 @@
 2004-04-18  Mark Kettenis  <kettenis@gnu.org>
 
+	Based on a patch from Brian Ford <ford@vss.fsi.com>:
+	* i386-tdep.c: Correct register numbering scheme comments
+	throughout.
+	(i386_stab_reg_to_regnum): Rename to i386_dbx_reg_to_regnum.
+	(i386_dwarf_reg_to_regnum): Rename to i386_svr4_reg_to_regnum.
+	(i386_coff_init_abi, i386_elf_init_abi): Accomodate renames above.
+	(i386_gdb_arch_init): Likewise.
+
 	* Makefile.in (ALLDEPFILES): List ppc-sysv-tdep.c, ppcnbsd-nat.c
 	and ppcnbsd-tdep.c instead of ppc-sysv-tdep.o, ppcnbsd-nat.o and
 	ppcnbsd-tdep.o.
