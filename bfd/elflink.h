@@ -4053,9 +4053,18 @@ elf_bfd_final_link (abfd, info)
     for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
       for (o = sub->sections; o != NULL; o = o->next)
 	{
-	  asection* output_section = o->output_section;
+	  asection *output_section;
 
-	  if (output_section && (o->flags & SEC_RELOC) != 0)
+	  if (! o->linker_mark)
+	    {
+	      /* This section was omitted from the link.  */
+	      continue;
+	    }
+
+	  output_section = o->output_section;
+
+	  if (output_section != NULL
+	      && (o->flags & SEC_RELOC) != 0)
 	    {
 	      struct bfd_elf_section_data *esdi 
 		= elf_section_data (o);

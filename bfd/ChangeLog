@@ -1,3 +1,8 @@
+1999-09-03  Ian Lance Taylor  <ian@zembu.com>
+
+	* elflink.h (elf_bfd_final_link): When counting relocations, don't
+	count those in sections we are not including in the link.
+
 Thu Sep  2 17:41:20 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* elflink.h (elf_link_add_object_symbols): Work around bogus SH_LINK
