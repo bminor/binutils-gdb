@@ -1,3 +1,8 @@
+2003-07-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	From Kei Sakamoto <sakamoto.kei@renesas.com>:
+	* gdb.base/relocate.c (dummy): New padding array.
+
 2003-07-23  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/return2.exp: Don't test long-long return.
