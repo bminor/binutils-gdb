@@ -1,3 +1,34 @@
+Wed Apr  6 21:54:49 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Added -D (--dynamic) option to nm and -T (--dynamic-syms) and -R
+	(--dynamic-reloc) arguments to objdump.
+	* nm.c (dynamic): New static variable.
+	(long_options): Added "dynamic".
+	(usage): Mention -D and --dynamic.
+	(main): Add D to getopt string.  Handle -D by setting dynamic.
+	(display_rel_file): If dynamic is non-zero, read dynamic symbols
+	rather than normal symbols.
+	* nm.1: Updated for -D (--dynamic) option.
+	* objdump.c (dump_dynamic_symtab): New global variable.
+	(dump_dynamic_reloc_info): New global variable.
+	(dynsyms, dynsymcount): New global variables.
+	(usage): Mention -R, -T, --dynamic-syms and --dynamic-reloc.
+	(long_options): Added "dynamic-reloc" and "dynamic-syms".
+	(slurp_symtab): If no symbols, return rather than exit.
+	(slurp_dynamic_symtab): New function.
+	(display_bfd): Handle dump_dynamic_symtab and
+	dump_dynamic_reloc_info.
+	(dump_symbols): Take new dynamic argument, indicating whether to
+	display dynamic symbols.
+	(dump_relocs): Move most printing into dump_reloc_set.
+	(dump_dynamic_relocs): New function.
+	(dump_reloc_set): New function, extracted from dump_relocs.
+	(main): Add R and T to getopt string.  Handle -T by setting
+	dump_dynamic_symtab and -R by setting dump_dynamic_reloc_info.
+	* objdump.1: Updated for -R (--dynamic-reloc) and -T
+	(--dynamic-syms) options.
+	* binutils.texi: Updated for new nm and objdump options.
+
 Wed Mar 30 15:52:40 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Update for recent BFD changes to symbol and reloc reading.  Rename

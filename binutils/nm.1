@@ -19,6 +19,7 @@ nm \- list symbols from object files.
 .RB "[\|" \-g | \-\-extern\-only "\|]"
 .RB "[\|" \-B "\|]"  
 .RB "[\|" \-C | \-\-demangle "\|]" 
+.RB "[\|" \-D | \-\-dynamic "\|]" 
 .RB "[\|" \-s | \-\-print\-armap "\|]" 
 .RB "[\|" \-o | \-\-print\-file\-name "\|]"  
 .RB "[\|" \-n | \-\-numeric\-sort "\|]" 
@@ -80,6 +81,14 @@ The same as
 Decode (\fIdemangle\fP) low-level symbol names into user-level names.
 Besides removing any initial underscore prepended by the system, this
 makes C++ function names readable.
+
+.TP
+.B \-D
+.TP
+.B \-\-dynamic
+Display the dynamic symbols rather than the normal symbols.  This is
+only meaningful for dynamic objects, such as certain types of shared
+libraries.
 
 .TP
 .B "\-f \fIformat"

@@ -566,7 +566,7 @@ The GNU linker @code{ld} is now described in a separate manual.
 
 @smallexample
 nm [ -a | --debug-syms ]  [ -g | --extern-only ]
-   [ -B ]  [ -C | --demangle ]
+   [ -B ]  [ -C | --demangle ] [ -D | --dynamic ]
    [ -s | --print-armap ]  [ -A | -o | --print-file-name ]  
    [ -n | -v | --numeric-sort ]  [ -p | --no-sort ]
    [ -r | --reverse-sort ]  [ -u | --undefined-only ]  
@@ -652,6 +652,13 @@ Decode (@dfn{demangle}) low-level symbol names into user-level names.
 Besides removing any initial underscore prepended by the system, this
 makes C++ function names readable.  @xref{c++filt}, for more information
 on demangling.
+
+@item -D
+@itemx --dynamic
+@cindex dynamic symbols
+Display the dynamic symbols rather than the normal symbols.  This is
+only meaningful for dynamic objects, such as certain types of shared
+libraries.
 
 @item -f @var{format}
 @itemx --format=@var{format}
@@ -832,9 +839,9 @@ objdump [ -a | --archive-headers ]
         [ -j @var{section} | --section=@var{section} ]
         [ -l | --line-numbers ]
         [ -m @var{machine} | --architecture=@var{machine} ]  [ -r | --reloc ]
-        [ -s | --full-contents ]  [ --stabs ] [ -t | --syms ]
-        [ -x | --all-headers ]  [ --version ]  [ --help ]
-        @var{objfile}@dots{}
+        [ -R | --dynamic-reloc ] [ -s | --full-contents ]  [ --stabs ]
+        [ -t | --syms ] [ -T | --dynamic-syms ] [ -x | --all-headers ]
+        [ --version ]  [ --help ] @var{objfile}@dots{}
 @end smallexample
 
 @code{objdump} displays information about one or more object files.
@@ -940,6 +947,13 @@ option.
 @cindex relocation entries, in object file
 Print the relocation entries of the file.
 
+@item -R
+@itemx --dynamic-reloc
+@cindex dynamic relocation entries, in object file
+Print the dynamic relocation entries of the file.  This is only
+meaningful for dynamic objects, such as certain types of shared
+libraries.
+
 @item -s
 @itemx --full-contents
 @cindex sections, full contents
@@ -964,6 +978,14 @@ output.
 @cindex symbol table entries, printing
 Print the symbol table entries of the file.
 This is similar to the information provided by the @samp{nm} program.
+
+@item -T
+@itemx --dynamic-syms
+@cindex dynamic symbol table entries, printing
+Print the dynamic symbol table entries of the file.  This is only
+meaningful for dynamic objects, such as certain types of shared
+libraries.  This is similar to the information provided by the @samp{nm}
+program when given the @samp{-D} (@samp{--dynamic}) option.
 
 @item --version
 Print the version number of @code{objdump} and exit.

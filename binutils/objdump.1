@@ -38,9 +38,11 @@ objdump \- display information from object files.
 .I machine\c
 \&\|] 
 .RB "[\|" \-r | \-\-reloc "\|]" 
+.RB "[\|" \-R | \-\-dynamic\-reloc "\|]" 
 .RB "[\|" \-s | \-\-full\-contents "\|]"
 .RB "[\|" \-\-stabs "\|]"
 .RB "[\|" \-t | \-\-syms "\|]" 
+.RB "[\|" \-T | \-\-dynamic\-syms "\|]" 
 .RB "[\|" \-x | \-\-all\-headers "\|]"
 .RB "[\|" \-\-version "\|]"
 .RB "[\|" \-\-help "\|]"
@@ -200,6 +202,14 @@ option.
 Print the relocation entries of the file.
 
 .TP
+.B \-R
+.TP
+.B \-\-dynamic\-reloc
+Print the dynamic relocation entries of the file.  This is only
+meaningful for dynamic objects, such as certain types of shared
+libraries.
+
+.TP
 .B \-s
 .TP
 .B \-\-full\-contents
@@ -222,6 +232,19 @@ Symbol Table.  Print the symbol table entries of the file.
 This is similar to the information provided by the `\|\c
 .B nm\c
 \|' program.
+
+.TP
+.B \-T
+.TP
+.B \-\-dynamic\-syms
+Dynamic Symbol Table.  Print the dynamic symbol table entries of the
+file.  This is only meaningful for dynamic objects, such as certain
+types of shared libraries.  This is similar to the information
+provided by the `\|\c
+.B nm\c
+\|' program when given the
+.B \-D (\-\-dynamic)
+option.
 
 .TP
 .B \-\-version

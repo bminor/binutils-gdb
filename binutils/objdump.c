@@ -44,7 +44,9 @@ int dump_section_contents;	/* -s */
 int dump_section_headers;	/* -h */
 boolean dump_file_header;	/* -f */
 int dump_symtab;		/* -t */
+int dump_dynamic_symtab;	/* -T */
 int dump_reloc_info;		/* -r */
+int dump_dynamic_reloc_info;	/* -R */
 int dump_ar_hdrs;		/* -a */
 int with_line_numbers;		/* -l */
 int dump_stab_section_info;	/* --stabs */
@@ -67,6 +69,12 @@ asymbol **syms;
 /* Number of symbols in `syms'.  */
 long symcount = 0;
 
+/* The dynamic symbol table.  */
+asymbol **dynsyms;
+
+/* Number of symbols in `dynsyms'.  */
+long dynsymcount = 0;
+
 /* Forward declarations.  */
 
 static void
@@ -79,7 +87,13 @@ static void
 dump_relocs PARAMS ((bfd *abfd));
 
 static void
-dump_symbols PARAMS ((bfd *abfd));
+dump_dynamic_relocs PARAMS ((bfd * abfd));
+
+static void
+dump_reloc_set PARAMS ((bfd *, arelent **, long));
+
+static void
+dump_symbols PARAMS ((bfd *abfd, boolean dynamic));
 
 static void
 display_bfd PARAMS ((bfd *abfd));
@@ -93,11 +107,12 @@ usage (stream, status)
      int status;
 {
   fprintf (stream, "\
-Usage: %s [-ahifdrtxsl] [-b bfdname] [-m machine] [-j section-name]\n\
+Usage: %s [-ahifdrRtTxsl] [-b bfdname] [-m machine] [-j section-name]\n\
        [--archive-headers] [--target=bfdname] [--disassemble] [--file-headers]\n\
        [--section-headers] [--headers] [--info] [--section=section-name]\n\
        [--line-numbers] [--architecture=machine] [--reloc] [--full-contents]\n\
-       [--stabs] [--syms] [--all-headers] [--version] [--help] objfile...\n\
+       [--stabs] [--syms] [--all-headers] [--dynamic-syms] [--dynamic-reloc]\n\
+       [--version] [--help] objfile...\n\
 at least one option besides -l (--line-numbers) must be given\n",
 	   program_name);
   exit (status);
@@ -109,6 +124,8 @@ static struct option long_options[]=
   {"architecture", required_argument, NULL, 'm'},
   {"archive-headers", no_argument, NULL, 'a'},
   {"disassemble", no_argument, NULL, 'd'},
+  {"dynamic-reloc", no_argument, NULL, 'R'},
+  {"dynamic-syms", no_argument, NULL, 'T'},
   {"file-headers", no_argument, NULL, 'f'},
   {"full-contents", no_argument, NULL, 's'},
   {"headers", no_argument, NULL, 'h'},
@@ -196,11 +213,41 @@ slurp_symtab (abfd)
   if (symcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
   if (symcount == 0)
+    fprintf (stderr, "%s: %s: No symbols\n",
+	     program_name, bfd_get_filename (abfd));
+  return sy;
+}
+
+/* Read in the dynamic symbols.  */
+
+static asymbol **
+slurp_dynamic_symtab (abfd)
+     bfd *abfd;
+{
+  asymbol **sy = (asymbol **) NULL;
+  long storage;
+
+  if (!(bfd_get_file_flags (abfd) & DYNAMIC))
     {
-      fprintf (stderr, "%s: %s: Invalid symbol table\n",
+      fprintf (stderr, "%s: %s: not a dynamic object\n",
 	       program_name, bfd_get_filename (abfd));
-      exit (1);
+      return NULL;
     }
+
+  storage = bfd_get_dynamic_symtab_upper_bound (abfd);
+  if (storage < 0)
+    bfd_fatal (bfd_get_filename (abfd));
+
+  if (storage)
+    {
+      sy = (asymbol **) xmalloc (storage);
+    }
+  dynsymcount = bfd_canonicalize_dynamic_symtab (abfd, sy);
+  if (dynsymcount < 0)
+    bfd_fatal (bfd_get_filename (abfd));
+  if (dynsymcount == 0)
+    fprintf (stderr, "%s: %s: No dynamic symbols\n",
+	     program_name, bfd_get_filename (abfd));
   return sy;
 }
 
@@ -938,12 +985,20 @@ display_bfd (abfd)
     {
       syms = slurp_symtab (abfd);
     }
+  if (dump_dynamic_symtab || dump_dynamic_reloc_info)
+    {
+      dynsyms = slurp_dynamic_symtab (abfd);
+    }
   if (dump_symtab)
-    dump_symbols (abfd);
+    dump_symbols (abfd, false);
+  if (dump_dynamic_symtab)
+    dump_symbols (abfd, true);
   if (dump_stab_section_info)
     dump_stabs (abfd);
   if (dump_reloc_info)
     dump_relocs (abfd);
+  if (dump_dynamic_reloc_info)
+    dump_dynamic_relocs (abfd);
   if (dump_section_contents)
     dump_data (abfd);
   /* Note that disassemble_data re-orders the syms table, but that is
@@ -1065,17 +1120,33 @@ dump_data (abfd)
 
 /* Should perhaps share code and display with nm? */
 static void
-dump_symbols (abfd)
+dump_symbols (abfd, dynamic)
      bfd *abfd;
+     boolean dynamic;
 {
+  asymbol **current;
+  long max;
   long count;
-  asymbol **current = syms;
 
-  printf ("SYMBOL TABLE:\n");
-
-  for (count = 0; count < symcount; count++)
+  if (dynamic)
     {
+      current = dynsyms;
+      max = dynsymcount;
+      if (max == 0)
+	return;
+      printf ("DYNAMIC SYMBOL TABLE:\n");
+    }
+  else
+    {
+      current = syms;
+      max = symcount;
+      if (max == 0)
+	return;
+      printf ("SYMBOL TABLE:\n");
+    }
 
+  for (count = 0; count < max; count++)
+    {
       if (*current)
 	{
 	  bfd *cur_bfd = bfd_asymbol_bfd(*current);
@@ -1086,7 +1157,6 @@ dump_symbols (abfd)
 				*current, bfd_print_symbol_all);
 	      printf ("\n");
 	    }
-
 	}
       current++;
     }
@@ -1133,8 +1203,6 @@ dump_relocs (abfd)
 	}
       else
 	{
-	  arelent **p;
-
 	  relpp = (arelent **) xmalloc (relsize);
 	  /* Note that this must be done *before* we sort the syms table. */
 	  relcount = bfd_canonicalize_reloc (abfd, a, relpp, syms);
@@ -1147,63 +1215,110 @@ dump_relocs (abfd)
 	  else
 	    {
 	      printf ("\n");
-	      /* Get column headers lined up reasonably.  */
-	      {
-		static int width;
-		if (width == 0)
-		  {
-		    char buf[30];
-		    sprintf_vma (buf, (bfd_vma) -1);
-		    width = strlen (buf) - 7;
-		  }
-		printf ("OFFSET %*s TYPE %*s VALUE \n", width, "", 12, "");
-	      }
-
-	      for (p = relpp; relcount && *p != (arelent *) NULL; p++,
-		   relcount--)
-		{
-		  arelent *q = *p;
-		  CONST char *sym_name;
-		  CONST char *section_name;
-
-		  if (q->sym_ptr_ptr && *q->sym_ptr_ptr)
-		    {
-		      sym_name = (*(q->sym_ptr_ptr))->name;
-		      section_name = (*(q->sym_ptr_ptr))->section->name;
-		    }
-		  else
-		    {
-		      sym_name = NULL;
-		      section_name = NULL;
-		    }
-		  if (sym_name)
-		    {
-		      printf_vma (q->address);
-		      printf (" %-16s  %s",
-			      q->howto->name,
-			      sym_name);
-		    }
-		  else
-		    {
-		      if (section_name == (CONST char *) NULL)
-			section_name = "*unknown*";
-		      printf_vma (q->address);
-		      printf (" %-16s  [%s]",
-			      q->howto->name,
-			      section_name);
-		    }
-		  if (q->addend)
-		    {
-		      printf ("+0x");
-		      printf_vma (q->addend);
-		    }
-		  printf ("\n");
-		}
+	      dump_reloc_set (abfd, relpp, relcount);
 	      printf ("\n\n");
-	      free (relpp);
 	    }
+	  free (relpp);
 	}
+    }
+}
 
+static void
+dump_dynamic_relocs (abfd)
+     bfd *abfd;
+{
+  long relsize;
+  arelent **relpp;
+  long relcount;
+
+  printf ("DYNAMIC RELOCATION RECORDS");
+
+  relsize = bfd_get_dynamic_reloc_upper_bound (abfd);
+  if (relsize < 0)
+    bfd_fatal (bfd_get_filename (abfd));
+
+  if (relsize == 0)
+    {
+      printf (" (none)\n\n");
+    }
+  else
+    {
+      relpp = (arelent **) xmalloc (relsize);
+      relcount = bfd_canonicalize_dynamic_reloc (abfd, relpp, dynsyms);
+      if (relcount < 0)
+	bfd_fatal (bfd_get_filename (abfd));
+      else if (relcount == 0)
+	{
+	  printf (" (none)\n\n");
+	}
+      else
+	{
+	  printf ("\n");
+	  dump_reloc_set (abfd, relpp, relcount);
+	  printf ("\n\n");
+	}
+      free (relpp);
+    }
+}
+
+static void
+dump_reloc_set (abfd, relpp, relcount)
+     bfd *abfd;
+     arelent **relpp;
+     long relcount;
+{
+  arelent **p;
+
+  /* Get column headers lined up reasonably.  */
+  {
+    static int width;
+    if (width == 0)
+      {
+	char buf[30];
+	sprintf_vma (buf, (bfd_vma) -1);
+	width = strlen (buf) - 7;
+      }
+    printf ("OFFSET %*s TYPE %*s VALUE \n", width, "", 12, "");
+  }
+
+  for (p = relpp; relcount && *p != (arelent *) NULL; p++, relcount--)
+    {
+      arelent *q = *p;
+      CONST char *sym_name;
+      CONST char *section_name;
+
+      if (q->sym_ptr_ptr && *q->sym_ptr_ptr)
+	{
+	  sym_name = (*(q->sym_ptr_ptr))->name;
+	  section_name = (*(q->sym_ptr_ptr))->section->name;
+	}
+      else
+	{
+	  sym_name = NULL;
+	  section_name = NULL;
+	}
+      if (sym_name)
+	{
+	  printf_vma (q->address);
+	  printf (" %-16s  %s",
+		  q->howto->name,
+		  sym_name);
+	}
+      else
+	{
+	  if (section_name == (CONST char *) NULL)
+	    section_name = "*unknown*";
+	  printf_vma (q->address);
+	  printf (" %-16s  [%s]",
+		  q->howto->name,
+		  section_name);
+	}
+      if (q->addend)
+	{
+	  printf ("+0x");
+	  printf_vma (q->addend);
+	}
+      printf ("\n");
     }
 }
 
@@ -1352,7 +1467,7 @@ main (argc, argv)
 
   bfd_init ();
 
-  while ((c = getopt_long (argc, argv, "ib:m:Vdlfahrtxsj:", long_options,
+  while ((c = getopt_long (argc, argv, "ib:m:VdlfahrRtTxsj:", long_options,
 			   (int *) 0))
 	 != EOF)
     {
@@ -1389,6 +1504,9 @@ main (argc, argv)
 	case 't':
 	  dump_symtab = 1;
 	  break;
+	case 'T':
+	  dump_dynamic_symtab = 1;
+	  break;
 	case 'd':
 	  disassemble = true;
 	  break;
@@ -1397,6 +1515,9 @@ main (argc, argv)
 	  break;
 	case 'r':
 	  dump_reloc_info = 1;
+	  break;
+	case 'R':
+	  dump_dynamic_reloc_info = 1;
 	  break;
 	case 'a':
 	  dump_ar_hdrs = 1;
