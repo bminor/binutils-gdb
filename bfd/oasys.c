@@ -1,18 +1,28 @@
+/* bfd backend for oasys objects.
+   Written by Steve Chamberlain of Cygnus Support <steve@cygnus.com> */
+
+/* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+
+This file is part of BFD, the Binary File Diddler.
+
+BFD is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
+
+BFD is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with BFD; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/* $Id$ */
+
 #define UNDERSCORE_HACK 1
 #define offsetof(type, identifier) (size_t) &(((type *) 0)->identifier) 
-/*
-   
- bfd backend for oasys objects.
-
-
-  Written by Steve Chamberlain
-  steve@cygnus.com
-
- $Id$
-
-
- */
-
 
 #include <ansidecl.h>
 #include "sysdep.h"
@@ -21,11 +31,6 @@
 #include "obstack.h"
 #include "oasys.h"
 #include "liboasys.h"
-
-
-
-
-
 
 static void 
 DEFUN(oasys_read_record,(abfd, record),
@@ -253,7 +258,7 @@ DEFUN(oasys_archive_p,(abfd),
 
     oasys_module_table_type record;
 
-    oasys_ar_data(abfd) =ar;
+    set_tdata(abfd, ar);
     ar->module = module;
     ar->module_count = header.mod_count;
 
@@ -285,8 +290,8 @@ DEFUN(oasys_mkobject,(abfd),
 {
   oasys_data_type *oasys;
 
-  oasys_data(abfd) =
-    (oasys_data_type*)bfd_alloc(abfd, sizeof(oasys_data_type));
+  set_tdata (abfd,
+    (oasys_data_type*)bfd_alloc(abfd, sizeof(oasys_data_type)));
   oasys = oasys_data(abfd);
   return true;
 }
@@ -299,7 +304,8 @@ DEFUN(oasys_object_p,(abfd),
   oasys_data_type *oasys;
   boolean loop = true;
   boolean had_usefull = false;
-  oasys_data(abfd) = 0;
+
+  set_tdata (abfd, 0);
   oasys_mkobject(abfd);
   oasys = oasys_data(abfd);
   memset((PTR)oasys->sections, 0xff, sizeof(oasys->sections));
