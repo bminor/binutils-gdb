@@ -1,3 +1,7 @@
+2004-01-16  Ben Elliston  <bje@wasabisystems.com>
+
+	* Makefile.in (clean): Remove rm -f $(ALL), as $(ALL) is empty.
+
 2003-12-19  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
 
 	* sim-core.c (sim_core_trans_addr): Added for m32r-linux-run.

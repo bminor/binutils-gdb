@@ -105,7 +105,6 @@ TAGS: force
 
 clean:
 	rm -f *.[oa] *~ core
-	rm -f $(ALL)
 
 distclean mostlyclean maintainer-clean realclean: clean
 	rm -f TAGS
