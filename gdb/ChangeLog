@@ -1,3 +1,8 @@
+2003-02-24  Elena Zannoni  <ezannoni@redhat.com>
+
+	* MAINTAINERS (Core): Drop main.c and top.c. Clarify event loop
+	maintainership.
+
 2003-02-24  Kris Warkentin  <kewarken@qnx.com>
 
 	* solib.c (solib_open): call target defined search function after

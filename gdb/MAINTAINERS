@@ -209,8 +209,10 @@ generic arch support	Andrew Cagney		cagney@redhat.com
 			Any host/target maintainer can add to
 			gdbarch.{c,h,sh}.  Send tricky ones to cagney.
 target vector		Andrew Cagney		cagney@redhat.com
-main (main.c, top.c)	Elena Zannoni		ezannoni@redhat.com
+
 event loop		Elena Zannoni           ezannoni@redhat.com
+                        For the part of top.c related to the event loop,
+                        send questions to ezannoni@redhat.com
 
 generic symtabs		Jim Blandy		jimb@redhat.com
 			Elena Zannoni		ezannoni@redhat.com
