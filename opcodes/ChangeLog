@@ -1,3 +1,7 @@
+1999-06-23  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* i386-dis.c: Mention intel mode specials in macro char comment.
+
 1999-06-21  Ian Lance Taylor  <ian@zembu.com>
 
 	* alpha-dis.c: Don't include <stdlib.h>.

@@ -341,9 +341,9 @@ struct dis386 {
    'P' => print 'w' or 'l' if instruction has an operand size prefix,
                               or suffix_always is true
    'Q' => print 'w' or 'l' if no register operands or suffix_always is true
-   'R' => print 'w' or 'l'
+   'R' => print 'w' or 'l' ("wd" or "dq" in intel mode)
    'S' => print 'w' or 'l' if suffix_always is true
-   'W' => print 'b' or 'w'
+   'W' => print 'b' or 'w' ("w" or "de" in intel mode)
 */
 
 static const struct dis386 dis386_att[] = {
