@@ -1,5 +1,9 @@
 Sun Jan 16 12:33:11 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* chardefs.h: Don't declare xmalloc.
+
+	* keymaps.h: Include "chardefs.h" not <readline/chardefs.h>.
+
 	* Makefile.in (clean mostlyclean distclean realclean): Recurse
 	into subdirectories as well as doing this directory.  Add clean-dvi
 	target.

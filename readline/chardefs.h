@@ -11,7 +11,18 @@
 #endif /* HAVE_STRING_H */
 
 #ifndef savestring
+#if 0
+
+/* CYGNUS LOCAL--this declaration loses if xmalloc has already been
+   declared as void *xmalloc (), as in GDB.  The whole concept of
+   readline using xmalloc rather than just returning NULL when it runs
+   out of memory is questionable, but if we do want xmalloc we need a
+   better way to declare it (e.g. the client declares it, or the client
+   calls a rl_register_xmalloc function analagous to the way signal()
+   works.  */
+
 extern char *xmalloc ();
+#endif
 #  ifndef strcpy
 extern char *strcpy ();
 #  endif
