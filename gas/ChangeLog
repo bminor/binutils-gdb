@@ -1,3 +1,8 @@
+Thu Jul  8 12:32:23 1999  John David Anglin <dave@hiauly1.hia.nrc.ca>
+
+	* configure.in (hppa*-linux-gnu*): New target.
+	* configure: Rebuilt.
+
 1999-07-08  Nick Clifton  <nickc@cygnus.com>
 
 	* doc/c-arm.texi (ARM Directives): Document .thumb_set directive. 
