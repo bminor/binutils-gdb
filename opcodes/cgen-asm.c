@@ -26,6 +26,7 @@
 #include "bfd.h"
 #include "symcat.h"
 #include "opcode/cgen.h"
+#include "opintl.h"
 
 /* Operand parsing callback.  */
 const char * (*cgen_parse_operand_fn)
@@ -235,7 +236,7 @@ cgen_parse_keyword (strp, keyword_table, valuep)
     ++p;
 
   if (p - start >= (int) sizeof (buf))
-    return "unrecognized keyword/register name";
+    return _("unrecognized keyword/register name");
 
   memcpy (buf, start, p - start);
   buf[p - start] = 0;
@@ -331,11 +332,11 @@ cgen_validate_signed_integer (value, min, max)
 {
   if (value < min || value > max)
     {
-      const char *err =
-	"operand out of range (%ld not between %ld and %ld)";
       static char buf[100];
 
-      sprintf (buf, err, value, min, max);
+      /* xgettext:c-format */
+      sprintf (buf, _("operand out of range (%ld not between %ld and %ld)"),
+		      value, min, max);
       return buf;
     }
 
@@ -352,11 +353,10 @@ cgen_validate_unsigned_integer (value, min, max)
 {
   if (value < min || value > max)
     {
-      const char *err =
-	"operand out of range (%lu not between %lu and %lu)";
       static char buf[100];
 
-      sprintf (buf, err, value, min, max);
+      sprintf (buf, _("operand out of range (%lu not between %lu and %lu)"),
+	       value, min, max);
       return buf;
     }
 

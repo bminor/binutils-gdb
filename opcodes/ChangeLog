@@ -17,7 +17,30 @@ Mon Apr 27 14:31:00 1998  Nick Clifton  <nickc@cygnus.com>
 	* aclocal.m4: Rebuilt.
 	* config.in: Rebuilt.
 	* configure: Rebuilt.
+	* alpha-opc.c: Internationalised.
+	* arc-dis.c: Internationalised.
+	* arc-opc.c: Internationalised.
 	* arm-dis.c: Internationalised.
+	* cgen-asm.c: Internationalised.
+	* cgen-asm.in: Internationalised.
+	* cgen-dis.in: Internationalised.
+	* d30v-dis.c: Internationalised.
+	* dis-buf.c: Internationalised.
+	* dvp-dis.c: Internationalised.
+	* dvp-opc.c: Internationalised. 
+	* dvp-opc.c: Internationalised.
+	* h8300-dis.c: Internationalised.
+	* h8500-dis.c: Internationalised.
+	* i386-dis.c: Internationalised.
+	* m10200-dis.c: Internationalised.
+	* m10300-dis.c: Internationalised.
+	* m68k-dis.c: Internationalised.
+	* m88k-dis.c: Internationalised.
+	* mips-dis.c: Internationalised.
+	* ns32k-dis.c: Internationalised.
+	* opintl.h: Internationalised.
+	* ppc-opc.c: Internationalised.
+	* sparc-dis.c: Internationalised.
 	* v850-dis.c: Internationalised.
 	* v850-opc.c: Internationalised.
 	

@@ -1,5 +1,4 @@
 a29k-dis.c
-acconfig.h
 alpha-dis.c
 alpha-opc.c
 arc-dis.c
@@ -41,14 +40,12 @@ mips-dis.c
 mips-opc.c
 mips16-opc.c
 ns32k-dis.c
-opintl.h
 ppc-dis.c
 ppc-opc.c
 sh-dis.c
 sh-opc.h
 sparc-dis.c
 sparc-opc.c
-sysdep.h
 tic30-dis.c
 tic80-dis.c
 tic80-opc.c
