@@ -1,3 +1,38 @@
+2004-09-16  Andrew Cagney  <cagney@gnu.org>
+
+	* lin-lwp.c: Delete file.
+	* linux-nat.c: Include "gdb_assert.h", "gdb_string.h", <unistd.h>,
+	<sys/syscall.h>, "gdbthread.h", "gdbcmd.h", "regcache.h".
+	(status_to_str, init_lwp_list, add_lwp, delete_lwp)
+	(find_lwp_pid, iterate_over_lwps, lin_lwp_attach_lwp)
+	(linux_nat_attach, detach_callback, linux_nat_detach)
+	(resume_callback, resume_clear_callback, linux_nat_resume)
+	(kill_lwp, linux_nat_handle_extended, wait_lwp, stop_callback)
+	(stop_wait_callback, linux_nat_has_pending, flush_callback)
+	(status_callback, running_callback, count_events_callback)
+	(select_singlestep_lwp_callback, select_event_lwp_callback)
+	(cancel_breakpoints_callback, select_event_lwp, resumed_callback)
+	(child_wait, stop_and_resume_callback, linux_nat_wait)
+	(kill_callback, kill_wait_callback, linux_nat_kill)
+	(linux_nat_create_inferior, linux_nat_mourn_inferior)
+	(linux_nat_xfer_memory, linux_nat_thread_alive)
+	(linux_nat_pid_to_str, init_linux_nat_ops, sigchld_handler)
+	(_initialize_linux_nat): New functions.
+	* Makefile.in: Update all dependencies.
+	* config/sparc/linux64.mh (NATDEPFILES): Remove lin-lwp.o.
+	* config/sparc/linux.mh (NATDEPFILES): Remove lin-lwp.o.
+	* config/s390/s390.mh (NATDEPFILES): Remove lin-lwp.o.
+	* config/powerpc/ppc64-linux.mh (NATDEPFILES): Remove lin-lwp.o.
+	* config/powerpc/linux.mh (NATDEPFILES): Remove lin-lwp.o.
+	* config/pa/linux.mh (NATDEPFILES): Remove lin-lwp.o.
+	* config/mips/linux.mh (NATDEPFILES): Remove lin-lwp.o.
+	* config/m68k/linux.mh (NATDEPFILES): Remove lin-lwp.o.
+	* config/ia64/linux.mh (NATDEPFILES): Remove lin-lwp.o.
+	* config/i386/linux64.mh (NATDEPFILES): Remove lin-lwp.o.
+	* config/i386/linux.mh (NATDEPFILES): Remove lin-lwp.o.
+	* config/arm/linux.mh (NATDEPFILES): Remove lin-lwp.o.
+	* config/alpha/alpha-linux.mh (NATDEPFILES): Remove lin-lwp.o.
+
 2004-09-27  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/fbsd64.mh, config/i386/nbsd64.mh,
