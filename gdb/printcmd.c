@@ -355,39 +355,25 @@ print_scalar_formatted (valaddr, type, format, size, stream)
   LONGEST val_long;
   int len = TYPE_LENGTH (type);
 
-  if (size == 'g' && sizeof (LONGEST) < 8
-      && format == 'x')
+  if (len > sizeof (LONGEST)
+      && (format == 't'
+	  || format == 'c'
+	  || format == 'o'
+	  || format == 'u'
+	  || format == 'd'
+	  || format == 'x'))
     {
-      /* ok, we're going to have to get fancy here.  Assumption: a
-         long is four bytes.  FIXME.  */
-      unsigned long v1, v2;
-
-      v1 = unpack_long (builtin_type_long, valaddr);
-      v2 = unpack_long (builtin_type_long, valaddr + 4);
-
-#if TARGET_BYTE_ORDER == LITTLE_ENDIAN
-      /* Swap the two for printing */
-      {
-        unsigned long tmp;
-
-        tmp = v1;
-        v1 = v2;
-        v2 = tmp;
-      }
-#endif
-  
-      switch (format)
-	{
-	case 'x':
-	  fprintf_filtered (stream, local_hex_format_custom("08x%08"), v1, v2);
-	  break;
-	default:
-	  error ("Output size \"g\" unimplemented for format \"%c\".",
-		 format);
-	}
+      /* We can't print it normally, but we can print it in hex.
+         Printing it in the wrong radix is more useful than saying
+	 "use /x, you dummy".  */
+      /* FIXME:  we could also do octal or binary if that was the
+	 desired format.  */
+      /* FIXME:  we should be using the size field to give us a minimum
+	 field width to print.  */
+      val_print_type_code_int (type, valaddr, stream);
       return;
     }
-      
+
   val_long = unpack_long (type, valaddr);
 
   /* If value is unsigned, truncate it in case negative.  */

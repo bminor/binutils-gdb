@@ -304,7 +304,7 @@ val_print_type_code_int (type, valaddr, stream)
 		     unpack_long (type, valaddr));
 #endif
     }
-}			
+}
 
 /* Print a number according to FORMAT which is one of d,u,x,o,b,h,w,g.
    The raison d'etre of this function is to consolidate printing of LONG_LONG's
@@ -517,8 +517,10 @@ print_hex_chars (stream, valaddr, len)
      unsigned len;
 {
   unsigned char *p;
-  
-  fprintf_filtered (stream, "0x");
+
+  /* FIXME: We should be not printing leading zeroes in most cases.  */
+
+  fprintf_filtered (stream, local_hex_format_prefix ());
 #if TARGET_BYTE_ORDER == BIG_ENDIAN
   for (p = valaddr;
        p < valaddr + len;
@@ -531,6 +533,7 @@ print_hex_chars (stream, valaddr, len)
     {
       fprintf_filtered (stream, "%02x", *p);
     }
+  fprintf_filtered (stream, local_hex_format_suffix ());
 }
 
 /*  Called by various <lang>_val_print routines to print elements of an
