@@ -1,3 +1,8 @@
+1999-06-23  Ian Lance Taylor  <ian@zembu.com>
+
+	* ldlang.c (section_already_linked): Only discard link once
+	sections if we are building constructors.
+
 1999-06-22  Nick Clifton  <nickc@cygnus.com>
 
 	* ld.texinfo (Location Counter): Describe behaviour of

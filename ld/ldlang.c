@@ -890,6 +890,11 @@ section_already_linked (abfd, sec, data)
       return;
     }
 
+  /* If we aren't building constructors, don't discard link once
+     sections.  Otherwise we can get confused when generating relocs.  */
+  if (! config.build_constructors)
+    return;
+
   flags = bfd_get_section_flags (abfd, sec);
 
   if ((flags & SEC_LINK_ONCE) == 0)
