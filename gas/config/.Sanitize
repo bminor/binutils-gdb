@@ -62,8 +62,8 @@ obj-bout.c
 obj-bout.h
 obj-coff.c
 obj-coff.h
-obj-coff-bfd.c
-obj-coff-bfd.h
+obj-coffbfd.c
+obj-coffbfd.h
 obj-generic.c
 obj-generic.h
 obj-ieee.c
@@ -126,7 +126,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.11  1991/11/27 22:28:57  sac
+# Revision 1.12  1991/12/12 03:34:31  sac
+# renamed obj-coff-bfd to obj-coffbfd
+#
+# Revision 1.11  1991/11/27  22:28:57  sac
 # Added obj-coff-bfd* and mt-h8300hds
 #
 # Revision 1.10  1991/11/26  02:16:55  sac
