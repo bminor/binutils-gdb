@@ -1,3 +1,21 @@
+2002-05-30  Richard Henderson  <rth@redhat.com>
+
+	* expr.h (operatorT): Add O_md17..O_md32.
+	* config/tc-alpha.c (O_lituse_tlsgd, O_lituse_tlsldm, O_tlsgd,
+	O_tlsldm, O_gotdtprel, O_dtprelhi, O_dtprello, O_dtprel, O_gottprel,
+	O_tprelhi, O_tprello, O_tprel): New.
+	(USER_RELOC_P, alpha_reloc_op_tag, debug_exp): Include them.
+	(DUMMY_RELOC_LITUSE_TLSGD, DUMMY_RELOC_LITUSE_TLSLDM): New.
+	(LITUSE_TLSGD, LITUSE_TLSLDM): New.
+	(struct alpha_reloc_tag): Add master, saw_tlsgd, saw_tlsld,
+	saw_lu_tlsgd, saw_lu_tlsldm.  Make multi_section_p a bit field.
+	(md_apply_fix3): Handle TLS relocations.
+	(alpha_force_relocation, alpha_fix_adjustable): Likewise.
+	(alpha_adjust_symtab_relocs): Sort LITERAL relocs after the
+	associated TLS reloc.  Check lituse_tls relocs match up.
+	(emit_insn): Handle TLS relocations.
+	(ldX_op): Remove.
+
 2002-05-30  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (mips_gprel_offset): New variable.

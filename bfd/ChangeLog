@@ -1,3 +1,31 @@
+2002-05-30  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (ALPHA_ELF_LINK_HASH_LU_TLSGD,
+	ALPHA_ELF_LINK_HASH_LU_TLSLDM, ALPHA_ELF_LINK_HASH_LU_FUNC): New.
+	(ALPHA_ELF_GOT_ENTRY_RELOCS_DONE): Remove.
+	(ALPHA_ELF_GOT_ENTRY_RELOCS_XLATED): Remove.
+	(struct alpha_elf_got_entry): Add reloc_type, reloc_done, reloc_xlated.
+	(struct alpha_elf_obj_tdata): Rename total_got_entries and
+	n_local_got_entries to total_got_size and local_got_size.
+	(elf64_alpha_howto, elf64_alpha_reloc_map): Update for TLS relocs.
+	(alpha_got_entry_size): New.
+	(elf64_alpha_relax_with_lituse): Use it.
+	(elf64_alpha_relax_without_lituse): Likewise.
+	(MAX_GOT_SIZE): Rename from MAX_GOT_ENTRIES.
+	(get_got_entry): New.
+	(elf64_alpha_check_relocs): Handle TLS relocs.  Reorganize.
+	(elf64_alpha_adjust_dynamic_symbol): Test LU_FUNC as a mask.
+	(elf64_alpha_merge_ind_symbols): Check gotent->reloc_type.
+	(elf64_alpha_can_merge_gots, elf64_alpha_merge_gots): Likewise.
+	(elf64_alpha_calc_got_offsets_for_symbol): Use alpha_got_entry_size.
+	(elf64_alpha_calc_got_offsets): Likewise.
+	(alpha_dynamic_entries_for_reloc): New.
+	(elf64_alpha_calc_dynrel_sizes): Use it.
+	(elf64_alpha_size_dynamic_sections): Likewise.
+	(elf64_alpha_relocate_section): Handle TLS relocations.
+	* reloc.c: Add Alpha TLS relocations.
+	* bfd-in2.h, libbfd.h: Rebuild.
+
 2002-05-29 Ralf Habacker <ralf.habacker@freenet.de>
 
 	* peXXigen.c (pe_print_idata): Remove double printed
