@@ -63,6 +63,7 @@ Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define I2	INSN_ISA2
 #define I3	INSN_ISA3
+#define P3	INSN_4650
 
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
@@ -391,6 +392,8 @@ const struct mips_opcode mips_opcodes[] = {
 {"flush",   "t,A(b)",	2,    (int) M_LWR_AB,	INSN_MACRO	}, /* as lwr */
 {"lwu",     "t,o(b)",	0x9c000000, 0xfc000000,	LDD|RD_b|WR_t|I3},
 {"lwu",     "t,A(b)",	3,    (int) M_LWU_AB,	INSN_MACRO	},
+{"mad",	    "s,t",	0x70000000, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO|RD_HI|RD_LO|P3},
+{"madu",    "s,t",	0x70000001, 0xfc00ffff,	RD_s|RD_t|WR_HI|WR_LO|RD_HI|RD_LO|P3},
 {"mfc0",    "t,G",	0x40000000, 0xffe007ff,	LCD|WR_t|RD_C0	},
 {"mfc1",    "t,S",	0x44000000, 0xffe007ff,	LCD|WR_t|RD_S	},
 {"mfc1",    "t,G",	0x44000000, 0xffe007ff,	LCD|WR_t|RD_S	},
@@ -570,12 +573,16 @@ const struct mips_opcode mips_opcodes[] = {
 {"trunc.w.s", "D,S",	0x4600000d, 0xffff003f,	WR_D|RD_S|I2	},
 {"trunc.w.s", "D,S,x",	0x4600000d, 0xffff003f,	WR_D|RD_S|I2	},
 {"trunc.w.s", "D,S,t",	0,    (int) M_TRUNCWS,	INSN_MACRO	},
+{"uld",     "t,o(b)",	3,    (int) M_ULD,	INSN_MACRO	},
+{"uld",     "t,A",	3,    (int) M_ULD_A,	INSN_MACRO	},
 {"ulh",     "t,o(b)",	0,    (int) M_ULH,	INSN_MACRO	},
 {"ulh",     "t,A",	0,    (int) M_ULH_A,	INSN_MACRO	},
 {"ulhu",    "t,o(b)",	0,    (int) M_ULHU,	INSN_MACRO	},
 {"ulhu",    "t,A",	0,    (int) M_ULHU_A,	INSN_MACRO	},
 {"ulw",     "t,o(b)",	0,    (int) M_ULW,	INSN_MACRO	},
 {"ulw",     "t,A",	0,    (int) M_ULW_A,	INSN_MACRO	},
+{"usd",     "t,o(b)",	3,    (int) M_USD,	INSN_MACRO	},
+{"usd",     "t,A",	3,    (int) M_USD_A,	INSN_MACRO	},
 {"ush",     "t,o(b)",	0,    (int) M_USH,	INSN_MACRO	},
 {"ush",     "t,A",	0,    (int) M_USH_A,	INSN_MACRO	},
 {"usw",     "t,o(b)",	0,    (int) M_USW,	INSN_MACRO	},

@@ -1,4 +1,23 @@
+Wed Feb 15 15:45:20 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-opc.c: Add uld and usd macros for unaligned double load and
+        store.
+
+Tue Feb 14 13:17:37 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* ppc-opc.c (powerpc_opcodes): Add 403GA opcodes rfci, dccci,
+	mfdcr, mtdcr, icbt, iccci.
+
 start-sanitize-arc
+Mon Feb 13 11:09:17 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arc-dis.c (print_insn): Handle ARC_OPERAND_ADDRESS.
+	* arc-opc.c (arc_operands): New operand 'J' for jump addresses.
+	('L' operand): Mark as ARC_OPERAND_ADDRESS.
+	(arc_opcodes, j insn): Use 'J' operand type, not 'L'.
+	(arc_opcodes, ld/st insns): Fix address writeback operand letter.
+	(insert_absaddr): New function.
+
 Thu Feb  9 19:19:23 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* arc-dis.c (print_insn_arc): Rename to print_insn and make static.
