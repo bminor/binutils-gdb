@@ -1,5 +1,7 @@
 Thu Jul  4 12:01:03 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldver.c (ldversion): Set version to cygnus-2.7.1.
+
 	* Released binutils 2.7.
 
 	* emulparams/pc532macha.sh: Rename from pc532machaout.sh to avoid
