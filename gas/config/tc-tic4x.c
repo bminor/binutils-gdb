@@ -27,11 +27,11 @@
     should be possible to define a 32-bits pattern.
 
   o .align fills all section with NOP's when used regardless if has
-    been used in .text or .data. (However the .align is primarely
+    been used in .text or .data. (However the .align is primarily
     intended used in .text sections. If you require something else,
     use .align <size>,0x00)
 
-  o .align: Implement a 'bu' insn if the number of nop's exeeds 4
+  o .align: Implement a 'bu' insn if the number of nop's exceeds 4
     within the align frag. if(fragsize>4words) insert bu fragend+1
     first.
 
@@ -297,7 +297,7 @@ extern FLONUM_TYPE generic_floating_point_number;
 
 /* Precision in LittleNums.  */
 #define MAX_PRECISION (4)       /* Its a bit overkill for us, but the code
-                                   reqires it... */
+                                   requires it... */
 #define S_PRECISION (1)		/* Short float constants 16-bit.  */
 #define F_PRECISION (2)		/* Float and double types 32-bit.  */
 #define E_PRECISION (4)         /* Extended precision, 64-bit (real 40-bit). */
@@ -434,7 +434,7 @@ tic4x_gen_to_words (flonum, words, precision)
 
      We now have to left shift the other littlenums by the same amount,
      propagating the shifted bits into the more significant littlenums.
-     To save a lot of unecessary shifting we only have to consider
+     To save a lot of unnecessary shifting we only have to consider
      two or three littlenums, since the greatest number of mantissa
      bits required is 24 + 1 rounding bit.  While two littlenums
      provide 32 bits of precision, the most significant littlenum
@@ -3092,14 +3092,14 @@ tic4x_do_align (alignment, fill, len, max)
 {
   unsigned long nop = NOP_OPCODE;
 
-  /* Because we are talking lwords, not bytes, adjust aligment to do words */
+  /* Because we are talking lwords, not bytes, adjust alignment to do words */
   alignment += 2;
   
   if (alignment != 0 && !need_pass_2)
     {
       if (fill == NULL)
         {
-          /*if (subseg_text_p (now_seg))*/  /* FIXME: doesnt work for .text for some reason */
+          /*if (subseg_text_p (now_seg))*/  /* FIXME: doesn't work for .text for some reason */
           frag_align_pattern( alignment, (const char *)&nop, sizeof(nop), max);
           return 1;
           /*else
@@ -3111,7 +3111,7 @@ tic4x_do_align (alignment, fill, len, max)
 	frag_align_pattern (alignment, fill, len, max);
     }
   
-  /* Return 1 to skip the default aligment function */
+  /* Return 1 to skip the default alignment function */
   return 1;
 }
 

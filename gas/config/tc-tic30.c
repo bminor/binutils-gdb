@@ -33,7 +33,7 @@
 #include <varargs.h>
 #endif
 
-/* Put here all non-digit non-letter charcters that may occur in an
+/* Put here all non-digit non-letter characters that may occur in an
    operand.  */
 static char operand_special_chars[] = "%$-+(,)*._~/<>&^!:[@]";
 static char *ordinal_names[] = {

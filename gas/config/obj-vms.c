@@ -817,7 +817,7 @@ VMS_TBT_Routine_Begin (symbolS *symbolP, int Psect)
 /* Write a Traceback Routine End record.
 
    We *must* search the symbol table to find the next routine, since the
-   assember has a way of reassembling the symbol table OUT OF ORDER Thus
+   assembler has a way of reassembling the symbol table OUT OF ORDER Thus
    the next routine in the symbol list is not necessarily the next one in
    memory.  For debugging to work correctly we must know the size of the
    routine.  */

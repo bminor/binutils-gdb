@@ -937,9 +937,9 @@ skip_white_space ()
      { rX - rY, rZ }
      etc
 
-   and also parses constant epxressions whoes bits indicate the
+   and also parses constant expressions whoes bits indicate the
    registers in the lists.  The LSB in the expression refers to
-   the lowest numbered permissable register in the register list,
+   the lowest numbered permissible register in the register list,
    and so on upwards.  System registers are considered to be very
    high numbers.  */
 
@@ -1495,7 +1495,7 @@ handle_tdaoff (operand)
 
   return  operand->insert != NULL
     ? BFD_RELOC_V850_TDA_7_8_OFFSET     /* sld.h/sst.h, operand: D8_7  */
-    : BFD_RELOC_V850_TDA_7_7_OFFSET;    /* sld.b/sst.b, opreand: D7    */
+    : BFD_RELOC_V850_TDA_7_7_OFFSET;    /* sld.b/sst.b, operand: D7    */
 }
 
 /* Warning: The code in this function relies upon the definitions
@@ -1976,7 +1976,7 @@ md_assemble (str)
 
 		  if (ex.X_op != O_constant)
 		    {
-		      /* If this register is actually occuring too early on
+		      /* If this register is actually occurring too early on
 			 the parsing of the instruction, (because another
 			 field is missing) then report this.  */
 		      if (opindex_ptr[1] != 0
