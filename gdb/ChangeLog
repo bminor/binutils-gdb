@@ -1,3 +1,8 @@
+Tue Oct 24 16:12:00 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdba.el: Delete file.
+	* NEWS: Mention.
+
 2000-10-23 David B Anderson <davea@sgi.com>
 
 	* TODO: Correct spelling errors

@@ -22,6 +22,9 @@ x86 FreeBSD before 2.2				i[3456]86*-freebsd{1,2.[01]}*,
 
 Multi-arch support is enabled for all MIPS configurations.
 
+* gdba.el deleted
+
+GUD support is now a standard part of the EMACS distribution.
 
 *** Changes in GDB 5.0:
 
