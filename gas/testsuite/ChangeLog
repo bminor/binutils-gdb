@@ -1,3 +1,8 @@
+2003-08-08  Andreas Schwab  <schwab@suse.de>
+
+	* gas/cfi/cfi-m68k.s, gas/cfi/cfi-m68k.d: New test.
+	* gas/cfi/cfi.exp (run_list_test): Run it.
+
 2003-08-06  Jason Eckhardt  <jle@rice.edu>
 
 	* gas/i860/dir-align01.{s,d}: New files.

@@ -1,6 +1,6 @@
 /* tc-m68k.c -- Assemble for the m68k family
    Copyright 1987, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -25,6 +25,7 @@
 #include "obstack.h"
 #include "subsegs.h"
 #include "dwarf2dbg.h"
+#include "dw2gencfi.h"
 
 #include "opcode/m68k.h"
 #include "m68k-parse.h"
@@ -7146,3 +7147,34 @@ m68k_elf_final_processing ()
     elf_elfheader (stdoutput)->e_flags |= EF_M68000;
 }
 #endif
+
+int
+tc_m68k_regname_to_dw2regnum (const char *regname)
+{
+  unsigned int regnum;
+  static const char *const regnames[] =
+    {
+      "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7",
+      "a0", "a1", "a2", "a3", "a4", "a5", "a6", "sp",
+      "fp0", "fp1", "fp2", "fp3", "fp4", "fp5", "fp6", "fp7",
+      "pc"
+    };
+
+  for (regnum = 0; regnum < ARRAY_SIZE (regnames); regnum++)
+    if (strcmp (regname, regnames[regnum]) == 0)
+      return regnum;
+
+  return -1;
+}
+
+void
+tc_m68k_frame_initial_instructions (void)
+{
+  static int sp_regno = -1;
+
+  if (sp_regno < 0)
+    sp_regno = tc_m68k_regname_to_dw2regnum ("sp");
+
+  cfi_add_CFA_def_cfa (sp_regno, -DWARF2_CIE_DATA_ALIGNMENT);
+  cfi_add_CFA_offset (DWARF2_DEFAULT_RETURN_COLUMN, DWARF2_CIE_DATA_ALIGNMENT);
+}

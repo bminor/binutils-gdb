@@ -220,3 +220,15 @@ extern struct relax_type md_relax_table[];
   while (0)
 
 #define DWARF2_LINE_MIN_INSN_LENGTH 2
+
+/* We want .cfi_* pseudo-ops for generating unwind info.  */
+#define TARGET_USE_CFIPOP 1
+
+#define DWARF2_DEFAULT_RETURN_COLUMN 24
+#define DWARF2_CIE_DATA_ALIGNMENT (-4)
+
+#define tc_regname_to_dw2regnum tc_m68k_regname_to_dw2regnum
+extern int tc_m68k_regname_to_dw2regnum (const char *regname);
+
+#define tc_cfi_frame_initial_instructions tc_m68k_frame_initial_instructions
+extern void tc_m68k_frame_initial_instructions (void);

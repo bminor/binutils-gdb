@@ -1,3 +1,13 @@
+2003-08-08  Andreas Schwab  <schwab@suse.de>
+
+	* config/tc-m68k.h (TARGET_USE_CFIPOP)
+	(DWARF2_DEFAULT_RETURN_COLUMN, DWARF2_CIE_DATA_ALIGNMENT)
+	(tc_regname_to_dw2regnum, tc_cfi_frame_initial_instructions):
+	Define.
+	* config/tc-m68k.c: Include "dw2gencfi.h".
+	(tc_m68k_regname_to_dw2regnum)
+	(tc_m68k_frame_initial_instructions): New functions.
+
 2003-08-08 Dmitry Diky <diwil@mail.ru>
 
 	* config/tc-msp430.c: Add xW42 and xE42 parts. Sort MPU list
