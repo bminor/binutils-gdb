@@ -1,3 +1,8 @@
+2004-05-12  David Anderson <davea@sgi.com>
+
+	Committed by Jim Blandy <jimb@redhat.com>:
+	* regcache.c (struct regcache_descr): fix comment spelling.
+
 2004-05-13  J. Brobecker  <brobecker@gnat.com>
 
 	* aix-thread.c: s/ppc_floating_point_p/ppc_floating_point_unit_p/.

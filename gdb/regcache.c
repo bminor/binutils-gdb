@@ -64,9 +64,9 @@ struct regcache_descr
   /* The cooked register space.  Each cooked register in the range
      [0..NR_RAW_REGISTERS) is direct-mapped onto the corresponding raw
      register.  The remaining [NR_RAW_REGISTERS
-     .. NR_COOKED_REGISTERS) (a.k.a. pseudo regiters) are mapped onto
+     .. NR_COOKED_REGISTERS) (a.k.a. pseudo registers) are mapped onto
      both raw registers and memory by the architecture methods
-     gdbarch_register_read and gdbarch_register_write.  */
+     gdbarch_pseudo_register_read and gdbarch_pseudo_register_write.  */
   int nr_cooked_registers;
   long sizeof_cooked_registers;
   long sizeof_cooked_register_valid_p;
