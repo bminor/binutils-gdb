@@ -1,3 +1,8 @@
+2000-06-14  H.J. Lu  <hjl@gnu.org>
+
+	* vms-misc.c (_bfd_vms_next_record): Return -1 if PRIV(vms_rec)
+	is NULL.
+
 2000-06-13  H.J. Lu  <hjl@gnu.org>
 
 	* configure: Regenerate.

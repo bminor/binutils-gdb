@@ -459,6 +459,9 @@ _bfd_vms_next_record (abfd)
 	return -1;
     }
 
+  if (!PRIV(vms_rec))
+    return -1;
+
   if (PRIV(is_vax))
     {
       PRIV(rec_type) = *(PRIV(vms_rec));
