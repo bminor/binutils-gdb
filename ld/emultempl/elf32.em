@@ -1561,6 +1561,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  -z interpose\t\tMark object to interpose all DSOs but executable\n"));
   fprintf (file, _("  -z loadfltr\t\tMark object requiring immediate process\n"));
   fprintf (file, _("  -z nocombreloc\t\tDon't merge dynamic relocs into one section\n"));
+  fprintf (file, _("  -z nocopyreloc\t\tDon't create copy relocs\n"));
   fprintf (file, _("  -z nodefaultlib\tMark object not to use default search paths\n"));
   fprintf (file, _("  -z nodelete\t\tMark DSO non-deletable at runtime\n"));
   fprintf (file, _("  -z nodlopen\t\tMark DSO not available to dlopen\n"));

@@ -1,3 +1,8 @@
+2001-10-12  Vassili Karpov  <malc@pulsesoft.com>
+
+	* emultempl/elf32.em (gld_*_listoptions): Include -z nocopyreloc 
+	in usage.
+
 2001-10-11  Aleksey Romanov <aromanov@ennovatenetworks.com>
 
 	* scripttempl/armaout.sc: Place .bss section after end of aligned
