@@ -29,6 +29,7 @@ The Renease M32R version of @code{@value{AS}} has a few machine
 dependent options:
 
 @table @code
+
 @item -m32rx
 @cindex @samp{-m32rx} option, M32RX
 @cindex architecture options, M32RX
@@ -40,6 +41,13 @@ to the M32RX microprocessor, which adds some more instructions to the
 basic M32R instruction set, and some additional parameters to some of
 the original instructions.
 
+@item -m32r2
+@cindex @samp{-m32rx} option, M32R2
+@cindex architecture options, M32R2
+@cindex M32R architecture options
+This option changes the target processor to the the M32R2
+microprocessor.
+
 @item -m32r
 @cindex @samp{-m32r} option, M32R
 @cindex architecture options, M32R
@@ -47,6 +55,42 @@ the original instructions.
 This option can be used to restore the assembler's default behaviour of
 assembling for the M32R microprocessor.  This can be useful if the
 default has been changed by a previous command line option.
+
+@item -little
+@cindex @code{-little} option, M32R
+This option tells the assembler to produce little-endian code and
+data.  The default is dependent upon how the toolchain was
+configured.
+
+@item -EL
+@cindex @code{-EL} option, M32R
+This is a synonum for @emph{-little}.
+
+@item -big
+@cindex @code{-big} option, M32R
+This option tells the assembler to produce big-endian code and
+data.
+
+@item -EB
+@cindex @code{-EB} option, M32R
+This is a synonum for @emph{-big}.
+
+@item -parallel
+@cindex @code{-parallel} option, M32RX
+This option tells the assembler to attempts to combine two sequential
+instructions into a single, parallel instruction, where it is legal to
+do so.
+
+@item -no-parallel
+@cindex @code{-no-parallel} option, M32RX
+This option disables a previously enabled @emph{-parallel} option.
+
+@item -O
+@cindex @code{-O} option, M32RX
+This option tells the assembler to attempt to optimize the
+instructions that it produces.  This includes filling delay slots and
+converting sequential instructions into parallel ones.  This option
+implies @emph{-parallel}.
 
 @item -warn-explicit-parallel-conflicts
 @cindex @samp{-warn-explicit-parallel-conflicts} option, M32RX
@@ -75,6 +119,48 @@ questionable parallel instructions are encountered.
 This is a shorter synonym for the @emph{-no-warn-explicit-parallel-conflicts}
 option.
 
+@item -error-explicit-parallel-conflicts
+@cindex @samp{-error-explicit-parallel-conflicts} option, M32RX
+This option performs the same thing as the
+@emph{-warn-explicit-parallel-conflicts} expcept that instead of
+warning messages being produced, error messages will be produced.  If
+any error messages are generated then GAS will not produce an output
+file.
+
+@item -no-error-explicit-parallel-conflicts
+@cindex @samp{-no-error-explicit-parallel-conflicts} option, M32RX
+This option disables a previously enabled
+@emph{-error-explicit-parallel-conflicts} option.
+
+@item -Ep
+@cindex @samp{-Ep} option, M32RX
+This is a shorter synonym for the @emph{-error-explicit-parallel-conflicts}
+option.
+
+@item -Enp
+@cindex @samp{-Enp} option, M32RX
+This is a shorter synonym for the @emph{-no-error-explicit-parallel-conflicts}
+option.
+
+@item -warn-unmatched-high
+@cindex @samp{-warn-unmatched-high} option, M32R
+This option tells the assembler to produce a warning message if a
+@code{.high} pseudo op is encountered without a mathcing @code{.low}
+pseudo op.  The presence of such an unmatches pseudo op usually
+indicates a programming error.
+
+@item -no-warn-unmatched-high
+@cindex @samp{-no-warn-unmatched-high} option, M32R
+Disables a previously enabled @emph{-warn-unmatched-high} option.
+
+@item -Wuh
+@cindex @samp{-Wuh} option, M32RX
+This is a shorter synonym for the @emph{-warn-unmatched-high} option.
+
+@item -Wnuh
+@cindex @samp{-Wnuh} option, M32RX
+This is a shorter synonym for the @emph{-no-warn-unmatched-high} option.
+
 @end table
 
 @node M32R-Directives
@@ -86,9 +172,10 @@ The Renease M32R version of @code{@value{AS}} has a few architecture
 specific directives:
 
 @table @code
-@cindex @code{.low} directive, M32R
-@item .low @var{expression}
-The @code{.low} directive computes the value of its expression and
+
+@cindex @code{low} directive, M32R
+@item low @var{expression}
+The @code{low} directive computes the value of its expression and
 places the lower 16-bits of the result into the immediate-field of the
 instruction.  For example:
 
@@ -97,9 +184,9 @@ instruction.  For example:
    add3, r0, r0, #low(fred)   ; compute r0 = r0 + low 16-bits of address of fred
 @end smallexample
 
-@item .high @var{expression}
-@cindex @code{.high} directive, M32R
-The @code{.high} directive computes the value of its expression and
+@item high @var{expression}
+@cindex @code{high} directive, M32R
+The @code{high} directive computes the value of its expression and
 places the upper 16-bits of the result into the immediate-field of the
 instruction.  For example:
 
@@ -108,15 +195,15 @@ instruction.  For example:
    seth, r0, #high(fred)       ; compute r0 = upper 16-bits of address of fred
 @end smallexample
 
-@item .shigh @var{expression}
-@cindex @code{.shigh} directive, M32R
-The @code{.shigh} directive is very similar to the @code{.high}
+@item shigh @var{expression}
+@cindex @code{shigh} directive, M32R
+The @code{shigh} directive is very similar to the @code{high}
 directive.  It also computes the value of its expression and places
 the upper 16-bits of the result into the immediate-field of the 
-instruction.  The difference is that @code{.shigh} also checks to see
+instruction.  The difference is that @code{shigh} also checks to see
 if the lower 16-bits could be interpreted as a signed number, and if
 so it assumes that a borrow will occur from the upper-16 bits.  To
-compensate for this the @code{.shigh} directive pre-biases the upper
+compensate for this the @code{shigh} directive pre-biases the upper
 16 bit value by adding one to it.  For example:
 
 For example:
@@ -156,6 +243,40 @@ source code the lower 16-bits of the value are going set, so it cannot
 check to make sure that an @code{or3} instruction is being used rather
 than an @code{add3} instruction.  It is up to the programmer to make
 sure that correct directives are used.
+
+@cindex @code{.m32r} directive, M32R
+@item .m32r
+The directive performs a similar thing as the @emph{-m32r} command
+line option.  It tells the assembler to only accept M32R instructions
+from now on.  An instructions from later M32R architectures are
+refused.
+
+@cindex @code{.m32rx} directive, M32RX
+@item .m32rx
+The directive performs a similar thing as the @emph{-m32rx} command
+line option.  It tells the assembler to start accepting the extra
+instructions in the M32RX ISA as well as the ordinary M32R ISA.
+
+@cindex @code{.m32r2} directive, M32R2
+@item .m32r2
+The directive performs a similar thing as the @emph{-m32r2} command
+line option.  It tells the assembler to start accepting the extra
+instructions in the M32R2 ISA as well as the ordinary M32R ISA.
+
+@cindex @code{.little} directive, M32RX
+@item .little
+The directive performs a similar thing as the @emph{-little} command
+line option.  It tells the assembler to start producing little-endian
+code and data.  This option should be used with care as producing
+mixed-endian binary files is frought with danger.
+
+@cindex @code{.big} directive, M32RX
+@item .big
+The directive performs a similar thing as the @emph{-big} command
+line option.  It tells the assembler to start producing big-endian
+code and data.  This option should be used with care as producing
+mixed-endian binary files is frought with danger.
+
 @end table
 
 @node M32R-Warnings

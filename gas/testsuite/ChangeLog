@@ -1,3 +1,9 @@
+2003-12-02  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* gas/m32r/m32r2.exp: New file for m32r2.
+	* gas/m32r/m32r2.s: Likewise.
+	* gas/m32r/m32r2.d: Likewise.
+
 2003-12-03  Nick Clifton  <nickc@redhat.com>
 
 	* gas/vax/vax.exp (do_quad): Treat a vax-*-linux-gnu target as an

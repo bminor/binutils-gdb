@@ -1,5 +1,5 @@
 /* tc-m32r.h -- Header file for tc-m32r.c.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -22,20 +22,27 @@
 #define TC_M32R
 
 #ifndef BFD_ASSEMBLER
-/* leading space so will compile with cc */
+/* Leading space so will compile with cc.  */
  #error M32R support requires BFD_ASSEMBLER
 #endif
 
-#define LISTING_HEADER "M32R GAS "
+#define LISTING_HEADER \
+  (target_big_endian ? "M32R GAS" : "M32R GAS Little Endian")
 
 /* The target BFD architecture.  */
 #define TARGET_ARCH bfd_arch_m32r
 
-#define TARGET_FORMAT "elf32-m32r"
+/* The endianness of the target format may change based on command
+   line arguments.  */
+#define TARGET_FORMAT m32r_target_format()
+extern const char *m32r_target_format PARAMS ((void));
 
+/* Default to big endian.  */
+#ifndef TARGET_BYTES_BIG_ENDIAN
 #define TARGET_BYTES_BIG_ENDIAN 1
+#endif
 
-/* call md_pcrel_from_section, not md_pcrel_from */
+/* Call md_pcrel_from_section, not md_pcrel_from.  */
 long md_pcrel_from_section PARAMS ((struct fix *, segT));
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section(FIX, SEC)
 
@@ -101,3 +108,9 @@ int m32r_fill_insn PARAMS ((int));
 #define md_cleanup                 m32r_elf_section_change_hook
 #define md_elf_section_change_hook m32r_elf_section_change_hook
 extern void m32r_elf_section_change_hook PARAMS ((void));
+
+#define md_flush_pending_output()       m32r_flush_pending_output ()
+extern void m32r_flush_pending_output PARAMS ((void));
+                                                                                  
+#define elf_tc_final_processing 	m32r_elf_final_processing
+extern void m32r_elf_final_processing PARAMS ((void));

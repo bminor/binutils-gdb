@@ -100,6 +100,8 @@ my_print_insn (cd, pc, info)
   char *buf = buffer;
   int status;
   int buflen = (pc & 3) == 0 ? 4 : 2;
+  int big_p = CGEN_CPU_INSN_ENDIAN (cd) == CGEN_ENDIAN_BIG;
+  char *x;
 
   /* Read the base part of the insn.  */
 
@@ -111,22 +113,25 @@ my_print_insn (cd, pc, info)
     }
 
   /* 32 bit insn?  */
-  if ((pc & 3) == 0 && (buf[0] & 0x80) != 0)
+  x = (big_p ? &buf[0] : &buf[3]);
+  if ((pc & 3) == 0 && (*x & 0x80) != 0)
     return print_insn (cd, pc, info, buf, buflen);
 
   /* Print the first insn.  */
+  buf += (big_p ? 0 : 2);
   if ((pc & 3) == 0)
     {
       if (print_insn (cd, pc, info, buf, 2) == 0)
 	(*info->fprintf_func) (info->stream, UNKNOWN_INSN_MSG);
-      buf += 2;
     }
+  buf += (big_p ? 2 : -2);
 
-  if (buf[0] & 0x80)
+  x = (big_p ? &buf[0] : &buf[1]);
+  if (*x & 0x80)
     {
       /* Parallel.  */
       (*info->fprintf_func) (info->stream, " || ");
-      buf[0] &= 0x7f;
+      *x &= 0x7f;
     }
   else
     (*info->fprintf_func) (info->stream, " -> ");
@@ -235,11 +240,17 @@ m32r_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
     case M32R_OPERAND_UIMM24 :
       print_address (cd, info, fields->f_uimm24, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_ABS_ADDR), pc, length);
       break;
+    case M32R_OPERAND_UIMM3 :
+      print_normal (cd, info, fields->f_uimm3, 0|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);
+      break;
     case M32R_OPERAND_UIMM4 :
       print_normal (cd, info, fields->f_uimm4, 0|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);
       break;
     case M32R_OPERAND_UIMM5 :
       print_normal (cd, info, fields->f_uimm5, 0|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);
+      break;
+    case M32R_OPERAND_UIMM8 :
+      print_normal (cd, info, fields->f_uimm8, 0|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);
       break;
     case M32R_OPERAND_ULO16 :
       print_normal (cd, info, fields->f_uimm16, 0, pc, length);

@@ -147,7 +147,11 @@ parse_slo16 (cd, strp, opindex, valuep)
       ++*strp;
       if (errmsg == NULL
 	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
-	value &= 0xffff;
+        {
+	  value &= 0xffff;
+          if (value & 0x8000)
+             value |= 0xffff0000;
+        }
       *valuep = value;
       return errmsg;
     }
@@ -310,11 +314,17 @@ m32r_cgen_parse_operand (cd, opindex, strp, fields)
         fields->f_uimm24 = value;
       }
       break;
+    case M32R_OPERAND_UIMM3 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, M32R_OPERAND_UIMM3, &fields->f_uimm3);
+      break;
     case M32R_OPERAND_UIMM4 :
       errmsg = cgen_parse_unsigned_integer (cd, strp, M32R_OPERAND_UIMM4, &fields->f_uimm4);
       break;
     case M32R_OPERAND_UIMM5 :
       errmsg = cgen_parse_unsigned_integer (cd, strp, M32R_OPERAND_UIMM5, &fields->f_uimm5);
+      break;
+    case M32R_OPERAND_UIMM8 :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, M32R_OPERAND_UIMM8, &fields->f_uimm8);
       break;
     case M32R_OPERAND_ULO16 :
       errmsg = parse_ulo16 (cd, strp, M32R_OPERAND_ULO16, &fields->f_uimm16);

@@ -1,3 +1,14 @@
+2003-12-03  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* m32r-asm.c: Regenerate.
+	* m32r-desc.c: Regenerate.
+	* m32r-desc.h: Regenerate.
+	* m32r-dis.c: Regenerate.
+	* m32r-ibld.c: Regenerate.
+	* m32r-opc.c: Regenerate.
+	* m32r-opc.h: Regenerate.
+	* m32r-opinst.c: Regenerate.
+
 2003-12-02  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* alpha-opc.c: Remove ARGSUSED.

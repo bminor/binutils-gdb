@@ -2,21 +2,21 @@
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -1863,6 +1863,7 @@ m32r_elf_object_p (abfd)
     default:
     case E_M32R_ARCH:   (void) bfd_default_set_arch_mach (abfd, bfd_arch_m32r, bfd_mach_m32r);  break;
     case E_M32RX_ARCH:  (void) bfd_default_set_arch_mach (abfd, bfd_arch_m32r, bfd_mach_m32rx); break;
+    case E_M32R2_ARCH:  (void) bfd_default_set_arch_mach (abfd, bfd_arch_m32r, bfd_mach_m32r2); break;
     }
   return TRUE;
 }
@@ -1880,6 +1881,7 @@ m32r_elf_final_write_processing (abfd, linker)
     default:
     case bfd_mach_m32r:  val = E_M32R_ARCH; break;
     case bfd_mach_m32rx: val = E_M32RX_ARCH; break;
+    case bfd_mach_m32r2: val = E_M32R2_ARCH; break;
     }
 
   elf_elfheader (abfd)->e_flags &=~ EF_M32R_ARCH;
@@ -1946,7 +1948,9 @@ m32r_elf_merge_private_bfd_data (ibfd, obfd)
 
   if ((in_flags & EF_M32R_ARCH) != (out_flags & EF_M32R_ARCH))
     {
-      if ((in_flags & EF_M32R_ARCH) != E_M32R_ARCH)
+      if (   ((in_flags  & EF_M32R_ARCH) != E_M32R_ARCH)
+          || ((out_flags & EF_M32R_ARCH) == E_M32R_ARCH)
+          || ((in_flags  & EF_M32R_ARCH) == E_M32R2_ARCH))
 	{
 	  (*_bfd_error_handler)
 	    (_("%s: Instruction set mismatch with previous modules"),
@@ -1979,6 +1983,7 @@ m32r_elf_print_private_bfd_data (abfd, ptr)
     default:
     case E_M32R_ARCH:  fprintf (file, _(": m32r instructions"));  break;
     case E_M32RX_ARCH: fprintf (file, _(": m32rx instructions")); break;
+    case E_M32R2_ARCH: fprintf (file, _(": m32r2 instructions")); break;
     }
 
   fputc ('\n', file);

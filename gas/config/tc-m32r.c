@@ -27,6 +27,7 @@
 #include "opcodes/m32r-desc.h"
 #include "opcodes/m32r-opc.h"
 #include "cgen.h"
+#include "elf/m32r.h"
 
 /* Linked list of symbols that are debugging symbols to be defined as the
    beginning of the current instruction.  */
@@ -93,20 +94,40 @@ static const char *m32r_cpu_desc;
    shouldn't assume or require it to).  */
 static int warn_unmatched_high = 0;
 
-/* Non-zero if -m32rx has been specified, in which case support for the
-   extended M32RX instruction set should be enabled.  */
-static int enable_m32rx = 0;
+/* 1 if -m32rx has been specified, in which case support for
+     the extended M32RX instruction set should be enabled.
+   2 if -m32r2 has been specified, in which case support for
+     the extended M32R2 instruction set should be enabled.  */
+static int enable_m32rx = 0; /* Default to M32R.  */
 
 /* Non-zero if -m32rx -hidden has been specified, in which case support for
    the special M32RX instruction set should be enabled.  */
 static int enable_special = 0;
 
+/* Non-zero if -bitinst has been specified, in which case support
+   for extended M32R bit-field instruction set should be enabled.  */
+static int enable_special_m32r = 0;
+
+/* Non-zero if -float has been specified, in which case support for
+   extended M32R floating point instruction set should be enabled.  */
+static int enable_special_float = 0;
+
 /* Non-zero if the programmer should be warned when an explicit parallel
    instruction might have constraint violations.  */
 static int warn_explicit_parallel_conflicts = 1;
 
+/* Non-zero if the programmer should receive an error message when an
+   explicit parallel instruction might have constraint violations.  */
+static int error_explicit_parallel_conflicts = 1;
+
 /* Non-zero if insns can be made parallel.  */
+static int use_parallel = 1;
+
+/* Non-zero if optimizations should be performed.  */
 static int optimize;
+
+/* m32r er_flags.  */
+static int m32r_flags = 0;
 
 /* Stuff for .scomm symbols.  */
 static segT     sbss_section;
@@ -115,7 +136,7 @@ static asymbol  scom_symbol;
 
 const char comment_chars[]        = ";";
 const char line_comment_chars[]   = "#";
-const char line_separator_chars[] = "";
+const char line_separator_chars[] = "!";
 const char EXP_CHARS[]            = "eE";
 const char FLT_CHARS[]            = "dD";
 
@@ -146,17 +167,28 @@ struct m32r_hi_fixup
 
 static struct m32r_hi_fixup *m32r_hi_fixup_list;
 
-static void allow_m32rx PARAMS ((int));
+struct {
+  enum bfd_architecture bfd_mach;
+  int mach_flags;
+} mach_table[] =
+{
+  { bfd_mach_m32r,  (1<<MACH_M32R) },
+  { bfd_mach_m32rx, (1<<MACH_M32RX) },
+  { bfd_mach_m32r2, (1<<MACH_M32R2) }
+};
+
+static void allow_m32rx (int);
 
 static void
-allow_m32rx (on)
-     int on;
+allow_m32rx (int on)
 {
   enable_m32rx = on;
 
   if (stdoutput != NULL)
-    bfd_set_arch_mach (stdoutput, TARGET_ARCH,
-		       enable_m32rx ? bfd_mach_m32rx : bfd_mach_m32r);
+    bfd_set_arch_mach (stdoutput, TARGET_ARCH, mach_table[on].bfd_mach);
+
+  if (gas_cgen_cpu_desc != NULL)
+    gas_cgen_cpu_desc->machs = mach_table[on].mach_flags;
 }
 
 #define M32R_SHORTOPTS "O"
@@ -165,20 +197,42 @@ const char *md_shortopts = M32R_SHORTOPTS;
 
 struct option md_longopts[] =
 {
-#define OPTION_M32R		(OPTION_MD_BASE)
-#define OPTION_M32RX		(OPTION_M32R + 1)
-#define OPTION_WARN_PARALLEL	(OPTION_M32RX + 1)
-#define OPTION_NO_WARN_PARALLEL	(OPTION_WARN_PARALLEL + 1)
-#define OPTION_SPECIAL		(OPTION_NO_WARN_PARALLEL + 1)
-#define OPTION_WARN_UNMATCHED 	(OPTION_SPECIAL + 1)
+#define OPTION_M32R		 (OPTION_MD_BASE)
+#define OPTION_M32RX		 (OPTION_M32R + 1)
+#define OPTION_M32R2		 (OPTION_M32RX + 1)
+#define OPTION_BIG               (OPTION_M32R2 + 1)
+#define OPTION_LITTLE            (OPTION_BIG + 1)
+#define OPTION_PARALLEL          (OPTION_LITTLE + 1)
+#define OPTION_NO_PARALLEL       (OPTION_PARALLEL + 1)
+#define OPTION_WARN_PARALLEL	 (OPTION_NO_PARALLEL + 1)
+#define OPTION_NO_WARN_PARALLEL	 (OPTION_WARN_PARALLEL + 1)
+#define OPTION_ERROR_PARALLEL    (OPTION_NO_WARN_PARALLEL + 1)
+#define OPTION_NO_ERROR_PARALLEL (OPTION_ERROR_PARALLEL + 1)
+#define OPTION_SPECIAL		 (OPTION_NO_ERROR_PARALLEL + 1)
+#define OPTION_SPECIAL_M32R      (OPTION_SPECIAL + 1)
+#define OPTION_SPECIAL_FLOAT     (OPTION_SPECIAL_M32R + 1)
+#define OPTION_WARN_UNMATCHED 	 (OPTION_SPECIAL_FLOAT + 1)
 #define OPTION_NO_WARN_UNMATCHED (OPTION_WARN_UNMATCHED + 1)
   {"m32r",  no_argument, NULL, OPTION_M32R},
   {"m32rx", no_argument, NULL, OPTION_M32RX},
+  {"m32r2", no_argument, NULL, OPTION_M32R2},
+  {"big", no_argument, NULL, OPTION_BIG},
+  {"little", no_argument, NULL, OPTION_LITTLE},
+  {"EB", no_argument, NULL, OPTION_BIG},
+  {"EL", no_argument, NULL, OPTION_LITTLE},
+  {"parallel", no_argument, NULL, OPTION_PARALLEL},
+  {"no-parallel", no_argument, NULL, OPTION_NO_PARALLEL},
   {"warn-explicit-parallel-conflicts", no_argument, NULL, OPTION_WARN_PARALLEL},
   {"Wp", no_argument, NULL, OPTION_WARN_PARALLEL},
   {"no-warn-explicit-parallel-conflicts", no_argument, NULL, OPTION_NO_WARN_PARALLEL},
   {"Wnp", no_argument, NULL, OPTION_NO_WARN_PARALLEL},
+  {"error-explicit-parallel-conflicts", no_argument, NULL, OPTION_ERROR_PARALLEL},
+  {"Ep", no_argument, NULL, OPTION_ERROR_PARALLEL},
+  {"no-error-explicit-parallel-conflicts", no_argument, NULL, OPTION_NO_ERROR_PARALLEL},
+  {"Enp", no_argument, NULL, OPTION_NO_ERROR_PARALLEL},
   {"hidden", no_argument, NULL, OPTION_SPECIAL},
+  {"bitinst", no_argument, NULL, OPTION_SPECIAL_M32R},
+  {"float", no_argument, NULL, OPTION_SPECIAL_FLOAT},
   /* Sigh.  I guess all warnings must now have both variants.  */
   {"warn-unmatched-high", no_argument, NULL, OPTION_WARN_UNMATCHED},
   {"Wuh", no_argument, NULL, OPTION_WARN_UNMATCHED},
@@ -197,6 +251,29 @@ struct option md_longopts[] =
 
 size_t md_longopts_size = sizeof (md_longopts);
 
+static void little (int);
+static int parallel (void);
+
+static void
+little (int on)
+{
+  target_big_endian = ! on;
+}
+
+/* Use parallel execution.  */
+
+static int
+parallel (void)
+{
+  if (! enable_m32rx)
+    return 0;
+
+  if (use_parallel == 1)
+    return 1;
+
+  return 0;
+}
+
 int
 md_parse_option (c, arg)
      int c;
@@ -206,6 +283,7 @@ md_parse_option (c, arg)
     {
     case 'O':
       optimize = 1;
+      use_parallel = 1;
       break;
 
     case OPTION_M32R:
@@ -216,11 +294,45 @@ md_parse_option (c, arg)
       allow_m32rx (1);
       break;
 
+    case OPTION_M32R2:
+      allow_m32rx (2);
+      enable_special = 1;
+      enable_special_m32r = 1;
+      break;
+
+    case OPTION_BIG:
+      target_big_endian = 1;
+      break;
+
+    case OPTION_LITTLE:
+      target_big_endian = 0;
+      break;
+
+    case OPTION_PARALLEL:
+      use_parallel = 1;
+      break;
+
+    case OPTION_NO_PARALLEL:
+      use_parallel = 0;
+      break;
+
     case OPTION_WARN_PARALLEL:
       warn_explicit_parallel_conflicts = 1;
+      error_explicit_parallel_conflicts = 0;
       break;
 
     case OPTION_NO_WARN_PARALLEL:
+      warn_explicit_parallel_conflicts = 0;
+      error_explicit_parallel_conflicts = 0;
+      break;
+
+    case OPTION_ERROR_PARALLEL:
+      warn_explicit_parallel_conflicts = 1;
+      error_explicit_parallel_conflicts = 1;
+      break;
+
+    case OPTION_NO_ERROR_PARALLEL:
+      error_explicit_parallel_conflicts = 0;
       warn_explicit_parallel_conflicts = 0;
       break;
 
@@ -233,6 +345,14 @@ md_parse_option (c, arg)
 	  as_bad (_("Unrecognised option: -hidden"));
 	  return 0;
 	}
+      break;
+
+    case OPTION_SPECIAL_M32R:
+      enable_special_m32r = 1;
+      break;
+
+    case OPTION_SPECIAL_FLOAT:
+      enable_special_float = 1;
       break;
 
     case OPTION_WARN_UNMATCHED:
@@ -271,7 +391,17 @@ md_show_usage (stream)
   fprintf (stream, _("\
   -m32rx                  support the extended m32rx instruction set\n"));
   fprintf (stream, _("\
-  -O                      try to combine instructions in parallel\n"));
+  -m32r2                  support the extended m32r2 instruction set\n"));
+  fprintf (stream, _("\
+  -EL,-little             produce little endian code and data\n"));
+  fprintf (stream, _("\
+  -EB,-big                produce big endian code and data\n"));
+  fprintf (stream, _("\
+  -parallel               try to combine instructions in parallel\n"));
+  fprintf (stream, _("\
+  -no-parallel            disable -parallel\n"));
+  fprintf (stream, _("\
+  -O                      try to optimize code.  Implies -parallel\n"));
 
   fprintf (stream, _("\
   -warn-explicit-parallel-conflicts     warn when parallel instructions\n"));
@@ -285,6 +415,18 @@ md_show_usage (stream)
   -Wp                     synonym for -warn-explicit-parallel-conflicts\n"));
   fprintf (stream, _("\
   -Wnp                    synonym for -no-warn-explicit-parallel-conflicts\n"));
+  fprintf (stream, _("\
+  -error-explicit-parallel-conflicts     error when parallel instructions\n"));
+  fprintf (stream, _("\
+                                         violate contraints\n"));
+  fprintf (stream, _("\
+  -no-error-explicit-parallel-conflicts  do not error when parallel\n"));
+  fprintf (stream, _("\
+                                         instructions violate contraints\n"));
+  fprintf (stream, _("\
+  -Ep                     synonym for -error-explicit-parallel-conflicts\n"));
+  fprintf (stream, _("\
+  -Enp                    synonym for -no-error-explicit-parallel-conflicts\n"));
 
   fprintf (stream, _("\
   -warn-unmatched-high    warn when an (s)high reloc has no matching low reloc\n"));
@@ -319,14 +461,16 @@ const pseudo_typeS md_pseudo_table[] =
   { "fillinsn", fill_insn,	0 },
   { "scomm",	m32r_scomm,	0 },
   { "debugsym",	debug_sym,	0 },
-  /* Not documented as so far there is no need for them....  */
   { "m32r",	allow_m32rx,	0 },
   { "m32rx",	allow_m32rx,	1 },
+  { "m32r2",	allow_m32rx,	2 },
+  { "little",   little,         1 },
+  { "big",      little,         0 },
   { NULL, NULL, 0 }
 };
 
 /* FIXME: Should be machine generated.  */
-#define NOP_INSN 0x7000
+#define NOP_INSN     0x7000
 #define PAR_NOP_INSN 0xf000 /* Can only be used in 2nd slot.  */
 
 /* This is called from HANDLE_ALIGN in write.c.  Fill in the contents
@@ -459,6 +603,16 @@ expand_debug_syms (syms, align)
   input_line_pointer = save_input_line;
 }
 
+void
+m32r_flush_pending_output()
+{
+  if (debug_sym_link)
+    {
+      expand_debug_syms (debug_sym_link, 1);
+      debug_sym_link = (sym_linkS *) 0;
+    }
+}
+
 /* Cover function to fill_insn called after a label and at end of assembly.
    The result is always 1: we're called in a conditional to see if the
    current line is a label.  */
@@ -488,6 +642,24 @@ m32r_fill_insn (done)
   return 1;
 }
 
+/* The default target format to use.  */
+
+const char *
+m32r_target_format ()
+{
+#ifdef TE_LINUX
+  if (target_big_endian)
+    return "elf32-m32r-linux";
+  else
+    return "elf32-m32rle-linux";
+#else
+  if (target_big_endian)
+    return "elf32-m32r";
+  else
+    return "elf32-m32rle";
+#endif
+}
+
 void
 md_begin ()
 {
@@ -500,7 +672,8 @@ md_begin ()
   /* Set the machine number and endian.  */
   gas_cgen_cpu_desc = m32r_cgen_cpu_open (CGEN_CPU_OPEN_MACHS, 0,
 					  CGEN_CPU_OPEN_ENDIAN,
-					  CGEN_ENDIAN_BIG,
+					  (target_big_endian ?
+					   CGEN_ENDIAN_BIG : CGEN_ENDIAN_LITTLE),
 					  CGEN_CPU_OPEN_END);
   m32r_cgen_init_asm (gas_cgen_cpu_desc);
 
@@ -711,7 +884,8 @@ can_make_parallel (a, b)
      go away if the instructions are swapped, and we want to make
      sure that any other errors are detected before this happens.  */
   if (a_pipe == PIPE_S
-      || b_pipe == PIPE_O)
+      || b_pipe == PIPE_O
+      || (b_pipe == PIPE_O_OS && (enable_m32rx != 2)))
     return _("Instructions share the same execution pipeline");
 
   return NULL;
@@ -791,8 +965,26 @@ assemble_two_insns (str, str2, parallel_p)
       as_bad (_("not a 16 bit instruction '%s'"), str);
       return;
     }
+#ifdef E_M32R2_ARCH
+  else if ((enable_m32rx == 1)
+           /* FIXME: Need standard macro to perform this test.  */
+           && ((CGEN_INSN_ATTR_VALUE (first.insn, CGEN_INSN_MACH)
+                & (1 << MACH_M32R2))
+               && !((CGEN_INSN_ATTR_VALUE (first.insn, CGEN_INSN_MACH)
+                    & (1 << MACH_M32RX)))))
+    {
+      /* xgettext:c-format  */
+      as_bad (_("instruction '%s' is for the M32R2 only"), str);
+      return;
+    }
+  else if ((! enable_special
+            && CGEN_INSN_ATTR_VALUE (first.insn, CGEN_INSN_SPECIAL))
+           || (! enable_special_m32r
+               && CGEN_INSN_ATTR_VALUE (first.insn, CGEN_INSN_SPECIAL_M32R)))
+#else
   else if (! enable_special
       && CGEN_INSN_ATTR_VALUE (first.insn, CGEN_INSN_SPECIAL))
+#endif
     {
       /* xgettext:c-format  */
       as_bad (_("unknown instruction '%s'"), str);
@@ -887,8 +1079,26 @@ assemble_two_insns (str, str2, parallel_p)
       as_bad (_("not a 16 bit instruction '%s'"), str);
       return;
     }
+#ifdef E_M32R2_ARCH
+  else if ((enable_m32rx == 1)
+           /* FIXME: Need standard macro to perform this test.  */
+           && ((CGEN_INSN_ATTR_VALUE (first.insn, CGEN_INSN_MACH)
+                & (1 << MACH_M32R2))
+               && !((CGEN_INSN_ATTR_VALUE (first.insn, CGEN_INSN_MACH)
+                    & (1 << MACH_M32RX)))))
+    {
+      /* xgettext:c-format  */
+      as_bad (_("instruction '%s' is for the M32R2 only"), str);
+      return;
+    }
+  else if ((! enable_special
+            && CGEN_INSN_ATTR_VALUE (second.insn, CGEN_INSN_SPECIAL))
+           || (! enable_special_m32r
+               && CGEN_INSN_ATTR_VALUE (second.insn, CGEN_INSN_SPECIAL_M32R)))
+#else
   else if (! enable_special
       && CGEN_INSN_ATTR_VALUE (second.insn, CGEN_INSN_SPECIAL))
+#endif
     {
       /* xgettext:c-format  */
       as_bad (_("unknown instruction '%s'"), str);
@@ -944,13 +1154,17 @@ assemble_two_insns (str, str2, parallel_p)
 
   if (parallel_p && warn_explicit_parallel_conflicts)
     {
+      void (* func)(const char *, ...);
+
+      func = error_explicit_parallel_conflicts ? as_bad : as_warn;
+
       if (first_writes_to_seconds_operands (&first, &second, FALSE))
 	/* xgettext:c-format  */
-	as_warn (_("%s: output of 1st instruction is the same as an input to 2nd instruction - is this intentional ?"), str2);
+	func (_("%s: output of 1st instruction is the same as an input to 2nd instruction - is this intentional ?"), str2);
 
       if (first_writes_to_seconds_operands (&second, &first, FALSE))
 	/* xgettext:c-format  */
-	as_warn (_("%s: output of 2nd instruction is the same as an input to 1st instruction - is this intentional ?"), str2);
+	func (_("%s: output of 2nd instruction is the same as an input to 1st instruction - is this intentional ?"), str2);
     }
 
   if (!parallel_p
@@ -1001,6 +1215,16 @@ assemble_two_insns (str, str2, parallel_p)
       return;
     }
 
+  if (CGEN_INSN_ATTR_VALUE (first.insn, CGEN_INSN_SPECIAL)
+      || CGEN_INSN_ATTR_VALUE (second.insn, CGEN_INSN_SPECIAL))
+    m32r_flags |= E_M32R_HAS_HIDDEN_INST;
+  if (CGEN_INSN_ATTR_VALUE (first.insn, CGEN_INSN_SPECIAL_M32R)
+      || CGEN_INSN_ATTR_VALUE (second.insn, CGEN_INSN_SPECIAL_M32R))
+    m32r_flags |= E_M32R_HAS_BIT_INST;
+  if (CGEN_INSN_ATTR_VALUE (first.insn, CGEN_INSN_SPECIAL_FLOAT)
+      || CGEN_INSN_ATTR_VALUE (second.insn, CGEN_INSN_SPECIAL_FLOAT))
+    m32r_flags |= E_M32R_HAS_FLOAT_INST;
+
   /* Set these so m32r_fill_insn can use them.  */
   prev_seg    = now_seg;
   prev_subseg = now_subseg;
@@ -1021,6 +1245,7 @@ md_assemble (str)
   if ((str2 = strstr (str, "||")) != NULL)
     {
       assemble_two_insns (str, str2, 1);
+      m32r_flags |= E_M32R_HAS_PARALLEL;
       return;
     }
 
@@ -1043,8 +1268,26 @@ md_assemble (str)
       return;
     }
 
+#ifdef E_M32R2_ARCH
+  if ((enable_m32rx == 1)
+       /* FIXME: Need standard macro to perform this test.  */
+      && ((CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_MACH)
+           & (1 << MACH_M32R2))
+          && !((CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_MACH)
+               & (1 << MACH_M32RX)))))
+    {
+      /* xgettext:c-format  */
+      as_bad (_("instruction '%s' is for the M32R2 only"), str);
+      return;
+    }
+  else if ((! enable_special
+       && CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_SPECIAL))
+      || (! enable_special_m32r
+          && CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_SPECIAL_M32R)))
+#else
   if (! enable_special
       && CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_SPECIAL))
+#endif
     {
       /* xgettext:c-format  */
       as_bad (_("unknown instruction '%s'"), str);
@@ -1057,6 +1300,13 @@ md_assemble (str)
       as_bad (_("instruction '%s' is for the M32RX only"), str);
       return;
     }
+
+  if (CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_SPECIAL))
+    m32r_flags |= E_M32R_HAS_HIDDEN_INST;
+  if (CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_SPECIAL_M32R))
+    m32r_flags |= E_M32R_HAS_BIT_INST;
+  if (CGEN_INSN_ATTR_VALUE (insn.insn, CGEN_INSN_SPECIAL_FLOAT))
+    m32r_flags |= E_M32R_HAS_FLOAT_INST;
 
   if (CGEN_INSN_BITSIZE (insn.insn) == 32)
     {
@@ -1122,8 +1372,7 @@ md_assemble (str)
 	 Otherwise call can_make_parallel() with both orderings of the
 	 instructions to see if they can be combined.  */
       if (! on_32bit_boundary_p
-	  && enable_m32rx
-	  && optimize
+	  && parallel ()
 	  && CGEN_INSN_ATTR_VALUE (insn.orig_insn, CGEN_INSN_RELAXABLE) == 0
 	  && ! writes_to_pc (&prev_insn)
 	  && ! first_writes_to_seconds_operands (&prev_insn, &insn, FALSE))
@@ -1948,4 +2197,12 @@ m32r_fix_adjustable (fixP)
     return 0;
 
   return 1;
+}
+
+void
+m32r_elf_final_processing ()
+{
+  if (use_parallel)
+    m32r_flags |= E_M32R_HAS_PARALLEL;
+  elf_elfheader (stdoutput)->e_flags |= m32r_flags;
 }

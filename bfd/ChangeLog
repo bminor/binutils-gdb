@@ -1,3 +1,12 @@
+2003-12-03  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* archures.c (bfd_mach_m32r2): Add new machine type.
+	* bfd-in2.h: Regenerate.
+	* cpu-m32r.c : Add new machine type.
+	* elf32-m32r.c (m32r_elf_object_p, m32r_elf_final_write_processing,
+        m32r_elf_merge_private_bfd_data): Add support for new machine
+	type.
+
 2003-12-03  Dave Airlie  <airlied@linux.ie>
 
 	* config.bfd: Add vax-linux-gnu target.
