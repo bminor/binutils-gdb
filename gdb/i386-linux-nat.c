@@ -73,9 +73,6 @@
 
 /* Defines ps_err_e, struct ps_prochandle.  */
 #include "gdb_proc_service.h"
-
-/* Prototypes for local functions.  */
-static void dummy_sse_values (void);
 
 
 /* The register sets used in GNU/Linux ELF core-dumps are identical to
@@ -323,7 +320,6 @@ void
 supply_fpregset (elf_fpregset_t *fpregsetp)
 {
   i387_supply_fsave (current_regcache, -1, fpregsetp);
-  dummy_sse_values ();
 }
 
 /* Fill register REGNO (if it is a floating-point register) in
@@ -458,32 +454,10 @@ store_fpxregs (int tid, int regno)
   return 1;
 }
 
-/* Fill the XMM registers in the register array with dummy values.  For
-   cases where we don't have access to the XMM registers.  I think
-   this is cleaner than printing a warning.  For a cleaner solution,
-   we should gdbarchify the i386 family.  */
-
-static void
-dummy_sse_values (void)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  /* C doesn't have a syntax for NaN's, so write it out as an array of
-     longs.  */
-  static long dummy[4] = { 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
-  static long mxcsr = 0x1f80;
-  int reg;
-
-  for (reg = 0; reg < tdep->num_xmm_regs; reg++)
-    regcache_raw_supply (current_regcache, XMM0_REGNUM + reg, (char *) dummy);
-  if (tdep->num_xmm_regs > 0)
-    regcache_raw_supply (current_regcache, MXCSR_REGNUM, (char *) &mxcsr);
-}
-
 #else
 
 static int fetch_fpxregs (int tid) { return 0; }
 static int store_fpxregs (int tid, int regno) { return 0; }
-static void dummy_sse_values (void) {}
 
 #endif /* HAVE_PTRACE_GETFPXREGS */
 
@@ -659,7 +633,7 @@ i386_linux_dr_get (int regnum)
   /* FIXME: kettenis/2001-03-27: Calling perror_with_name if the
      ptrace call fails breaks debugging remote targets.  The correct
      way to fix this is to add the hardware breakpoint and watchpoint
-     stuff to the target vectore.  For now, just return zero if the
+     stuff to the target vector.  For now, just return zero if the
      ptrace call fails.  */
   errno = 0;
   value = ptrace (PTRACE_PEEKUSER, tid,
@@ -769,7 +743,7 @@ static const unsigned char linux_syscall[] = { 0xcd, 0x80 };
 #define LINUX_SYSCALL_LEN (sizeof linux_syscall)
 
 /* The system call number is stored in the %eax register.  */
-#define LINUX_SYSCALL_REGNUM 0	/* %eax */
+#define LINUX_SYSCALL_REGNUM I386_EAX_REGNUM
 
 /* We are specifically interested in the sigreturn and rt_sigreturn
    system calls.  */

@@ -1,5 +1,10 @@
 2004-08-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-linux-nat.c (dummy_sse_values): Remove function and
+	prototype.
+	(i386_linux_dr_get): Fix typo in comment.
+	(LINUX_SYSCALL_REGNUM): Define as I386_EAX_REGNUM.
+
 	* config/i386/obsd64.mt (TDEPFILES): Add i386obsd-tdep.o.
 
 	* defs.h (deprecated_error_hook): Remove RETURN and ATTR_NORETURN
