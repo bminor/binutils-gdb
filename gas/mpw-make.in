@@ -42,8 +42,8 @@ OBJECTS = \Option-d
 		"{o}"subsegs.c.o \Option-d
 		"{o}"symbols.c.o \Option-d
 		"{o}"write.c.o \Option-d
-		"{o}"ecoff.c.o \Option-d
-		"{o}"xmalloc.c.o \Option-d
+		"{o}"ecoff.c.o
+
 
 TARG_OBJECTS =  "{o}"obj-format.c.o "{o}"targ-cpu.c.o "{o}"atof-targ.c.o
 
@@ -59,9 +59,9 @@ CLIBS = ::libiberty:libiberty.o	::bfd:libbfd.o ::opcodes:libopcodes.o
 
 all \Option-f "{o}"config.h as.new
 
-as.new \Option-f\Option-f {OBJECTS} {TARG_OBJECTS} {CLIBS}
+as.new \Option-f\Option-f {OBJECTS} {TARG_OBJECTS} {CLIBS} "{o}"Version.r
+	Rez -rd -o as.new "{o}"Version.r -append
 	Link {LDFLAGS} -o as.new {OBJECTS} {TARG_OBJECTS} {CLIBS} {EXTRALIBS}
-
 
 "{o}"config.h \Option-f "{o}"config-stamp
 
@@ -104,9 +104,41 @@ as.new \Option-f\Option-f {OBJECTS} {TARG_OBJECTS} {CLIBS}
 	Echo '#define HAVE_ERRNO_H'			>> "{o}"config.new
 	Echo '#define HAVE_STDARG_H'			>> "{o}"config.new
 	Echo '#define BFD_ASSEMBLER'			>> "{o}"config.new
-    Echo '#endif /* GAS_VERSION */'			>> "{o}"config.new
+	Echo '#endif /* GAS_VERSION */'			>> "{o}"config.new
 	MoveIfChange "{o}"config.new "{o}"config.h
 	Echo ' ' >"{o}"config-stamp
+
+"{o}"Version.r \Option-f "{o}"version-stamp
+
+"{o}"version-stamp \Option-f Makefile
+	Delete -i -y "{o}"version.new "{o}"version-stamp
+	Set major 0
+	Set minor 0
+	Set release 0
+	Echo '/* Version resources. */'			 > "{o}"version.new
+	Echo '#include "SysTypes.r"'			>> "{o}"version.new
+	Echo ''						>> "{o}"version.new
+	Echo "resource 'vers' (1) " `open-brace`	>> "{o}"version.new
+	Echo "	{major},"				>> "{o}"version.new
+	Echo "	{minor},"				>> "{o}"version.new
+	Echo "	{release},"				>> "{o}"version.new
+	Echo '	0,'					>> "{o}"version.new
+	Echo '	verUs,'					>> "{o}"version.new
+	Echo '	"{VERSION}",'				>> "{o}"version.new
+	Echo '	"{VERSION} (c) 1986-95 FSF, Inc. "'	>> "{o}"version.new
+	Echo '};'					>> "{o}"version.new
+	Echo ''						>> "{o}"version.new
+	Echo "resource 'vers' (2, purgeable) " `open-brace`  >> "{o}"version.new
+	Echo "	{major},"				>> "{o}"version.new
+	Echo "	{minor},"				>> "{o}"version.new
+	Echo "	{release},"				>> "{o}"version.new
+	Echo '	0,'					>> "{o}"version.new
+	Echo '	verUs,'					>> "{o}"version.new
+	Echo '	"{VERSION}",'				>> "{o}"version.new
+	Echo '	"GNU AS for MPW"'			>> "{o}"version.new
+	Echo '};'					>> "{o}"version.new
+	MoveIfChange "{o}"version.new "{o}"Version.r
+	Echo ' ' > "{o}"version-stamp
 
 "{o}"app.c.o \Option-f "{s}"app.c {INCLUDES}
 "{o}"as.c.o \Option-f "{s}"as.c {INCLUDES}
@@ -129,7 +161,6 @@ as.new \Option-f\Option-f {OBJECTS} {TARG_OBJECTS} {CLIBS}
 "{o}"symbols.c.o \Option-f "{s}"symbols.c {INCLUDES}
 "{o}"write.c.o \Option-f "{s}"write.c {INCLUDES}
 "{o}"ecoff.c.o \Option-f "{s}"ecoff.c {INCLUDES}
-"{o}"xmalloc.c.o \Option-f "{s}"xmalloc.c {INCLUDES}
 
 "{o}"targ-cpu.c.o \Option-f "{o}"targ-cpu.c {INCLUDES}
 "{o}"obj-format.c.o \Option-f "{o}"obj-format.c {INCLUDES}

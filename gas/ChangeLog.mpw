@@ -1,3 +1,11 @@
+Fri Mar 17 16:48:12 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in (TDEFINES): Put empty definition into
+	makefile fragment.
+	* mpw-make.in (xmalloc.c.o): Remove.
+	(as.new): Depend on Version.r.
+	(Version.r): Generate from version info.
+
 Thu Jan 12 18:03:03 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* mpw-make.in: Delete references to hex-value.c.
