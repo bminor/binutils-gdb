@@ -1,3 +1,8 @@
+Thu Oct  7 06:22:43 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/sparc/sun4os4.mh: Add comment saying why we don't use
+	-lresolv.
+
 Thu Oct 07 09:29:11 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* breakpoint.c, breakpoint.h (breakpoint_init_inferior):  New function
