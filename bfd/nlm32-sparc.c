@@ -128,13 +128,17 @@ nlm_sparc_read_reloc (abfd, sym, secp, rel)
   int index;
   unsigned int type;
   struct nlm32_sparc_reloc_ext tmp_reloc;
+  asection *code_sec, *data_sec;
 
   if (bfd_read (&tmp_reloc, 12, 1, abfd) != 12) {
     bfd_error = system_call_error;
     return false;
   }
 
-  *secp = bfd_get_section_by_name (abfd, NLM_CODE_NAME);
+  code_sec = bfd_get_section_by_name (abfd, NLM_CODE_NAME);
+  data_sec = bfd_get_section_by_name (abfd, NLM_INITIALIZED_DATA_NAME);
+
+  *secp = code_sec;
 
   val = bfd_get_32 (abfd, tmp_reloc.offset);
   addend = bfd_get_32 (abfd, tmp_reloc.addend);
@@ -154,7 +158,7 @@ nlm_sparc_read_reloc (abfd, sym, secp, rel)
 
 #ifdef DEBUG
   fprintf (stderr, "%s:  address = %08lx, addend = %08lx, type = %d, howto = %08lx\n",
-	   __FILE__, rel->address, rel->addend, type, rel->howto);
+	   __FUNCTION__, rel->address, rel->addend, type, rel->howto);
 #endif
   return true;
 
@@ -207,11 +211,15 @@ nlm_sparc_write_reloc (abfd, sec, rel)
      segment.  This offset is the section vma, adjusted by the vma of
      the lowest section in that segment, plus the address of the
      relocation.  */
+#if 0
+  val = bfd_get_section_vma (abfd, (*rel->sym_ptr_ptr)->section) + rel->address;
+#else
   val = bfd_get_section_vma (abfd, sec) + rel->address;
+#endif
 
 #ifdef DEBUG
   fprintf (stderr, "%s:  val = %08lx, addend = %08lx, type = %d\n",
-	   __FILE__, val, rel->addend, rel->howto->type);
+	   __FUNCTION__, val, rel->addend, rel->howto->type);
 #endif
   bfd_put_32 (abfd, val, tmp_reloc.offset);
   bfd_put_32 (abfd, rel->addend, tmp_reloc.addend);
@@ -320,8 +328,28 @@ nlm_sparc_write_import (abfd, sec, rel)
      arelent *rel;
 {
   char temp[4];
+  asection *code, *data, *bss, *symsec;
+  bfd_vma base;
 
-  bfd_put_32 (abfd, (*rel->sym_ptr_ptr)->value, temp);
+  code = bfd_get_section_by_name (abfd, NLM_CODE_NAME);
+  data = bfd_get_section_by_name (abfd, NLM_INITIALIZED_DATA_NAME);
+  bss = bfd_get_section_by_name (abfd, NLM_UNINITIALIZED_DATA_NAME);
+  symsec = (*rel->sym_ptr_ptr)->section;
+
+  if (symsec == code) {
+    base = 0;
+  } else if (symsec == data) {
+    base = bfd_section_size (abfd, code);
+  } else if (symsec == bss) {
+    base = bfd_section_size (abfd, code) + bfd_section_size (abfd, data);
+  } else
+    base = 0;
+
+#ifdef DEBUG
+  fprintf (stderr, "%s:  <%x, 1>\n\t",
+	   __FUNCTION__, base + (*rel->sym_ptr_ptr)->value);
+#endif
+  bfd_put_32 (abfd, base + (*rel->sym_ptr_ptr)->value, temp);
   bfd_write ((PTR)temp, 4, 1, abfd);
   bfd_put_32 (abfd, 1, temp);
   bfd_write ((PTR)temp, 4, 1, abfd);
@@ -368,6 +396,33 @@ nlm_sparc_write_external (abfd, count, sym, relocs)
   return true;
 }
 
+static boolean
+nlm_sparc_write_export (abfd, sym, value)
+     bfd *abfd;
+     asymbol *sym;
+     bfd_vma value;
+{
+  bfd_byte len;
+  bfd_byte temp[4];
+
+#ifdef DEBUG
+  fprintf (stderr, "%s: <%x, %d, %s>\n",
+	   __FUNCTION__, value, strlen (sym->name), sym->name);
+#endif
+  bfd_put_32 (abfd, value, temp);
+  len = strlen (sym->name);
+
+  if (bfd_write (temp, 4, 1, abfd) != 4
+      || bfd_write (&len, 1, 1, abfd) != 1
+      || bfd_write (sym->name, len, 1, abfd) != len)
+    {
+      bfd_error = system_call_error;
+      return false;
+    }
+
+  return true;
+}
+
 #undef nlm_swap_fixed_header_in
 #undef nlm_swap_fixed_header_out
 
@@ -380,6 +435,7 @@ static const struct nlm_backend_data nlm32_sparc_backend =
   0,	/* optional_prefix_size */
   bfd_arch_sparc,
   0,
+  false,
   0,	/* backend_object_p */
   0,	/* write_prefix_func */
   nlm_sparc_read_reloc,
@@ -391,6 +447,7 @@ static const struct nlm_backend_data nlm32_sparc_backend =
   nlm_swap_fixed_header_in,
   nlm_swap_fixed_header_out,
   nlm_sparc_write_external,
+  nlm_sparc_write_export
 };
 
 #define TARGET_BIG_NAME		"nlm32-sparc"
