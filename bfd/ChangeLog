@@ -1,8 +1,16 @@
+Mon Sep 26 11:00:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* bfd-in.h (bfd_seek): Change declaration to not mark fp const.
+	* bfd-in2.h: Rebuild.
+	* libbfd.c (bfd_seek): Don't mark parameters const, to avoid
+	conflicts with declaration.
+
 Fri Sep 23 15:15:31 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* elfcode.h (map_program_segments): Don't abort if we allocated
 	too much space for the program header, only if we allocated too
 	little.
+	(assign_file_positions_except_relocs): Similar change.
 
 Tue Sep 20 13:17:07 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 

@@ -432,7 +432,7 @@ extern bfd_size_type bfd_read
   PARAMS ((PTR, bfd_size_type size, bfd_size_type nitems, bfd *abfd));
 extern bfd_size_type bfd_write
   PARAMS ((const PTR, bfd_size_type size, bfd_size_type nitems, bfd *abfd));
-extern int bfd_seek PARAMS ((bfd *abfd, const file_ptr fp, int direction));
+extern int bfd_seek PARAMS ((bfd *abfd, file_ptr fp, int direction));
 extern long bfd_tell PARAMS ((bfd *abfd));
 extern int bfd_flush PARAMS ((bfd *abfd));
 extern int bfd_stat PARAMS ((bfd *abfd, struct stat *));
@@ -1025,6 +1025,7 @@ enum bfd_architecture
   bfd_arch_h8500,      /* Hitachi H8/500 */
   bfd_arch_sh,         /* Hitachi SH */
   bfd_arch_alpha,      /* Dec Alpha */
+  bfd_arch_arm,        /* Advanced Risc Machines ARM */
   bfd_arch_ns32k,      /* National Semiconductors ns32000 */
   bfd_arch_last
   };
@@ -1482,6 +1483,19 @@ bits installed in bits 6 through 29 of instruction. */
 probably a 32 bit wide absolute relocation, but the target can choose.
 It generally does map to one of the other relocation types. */
   BFD_RELOC_CTOR,
+
+/* ARM 26 bit pc-relative branch.  The lowest two bits must be zero and are
+not stored in the instruction. */
+  BFD_RELOC_ARM_PCREL_BRANCH,
+
+/* These relocs are only used within the ARM assembler.  They are not
+(at present) written to any object files. */
+  BFD_RELOC_ARM_IMMEDIATE,
+  BFD_RELOC_ARM_OFFSET_IMM,
+  BFD_RELOC_ARM_SHIFT_IMM,
+  BFD_RELOC_ARM_SWI,
+  BFD_RELOC_ARM_MULTI,
+  BFD_RELOC_ARM_CP_OFF_IMM,
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 const struct reloc_howto_struct *
