@@ -39,7 +39,7 @@ struct ui_out_data
 /* These are the CLI output functions */
 
 static void cli_table_begin (struct ui_out *uiout, int nbrofcols,
-			     const char *tblid);
+			     int nr_rows, const char *tblid);
 static void cli_table_body (struct ui_out *uiout);
 static void cli_table_end (struct ui_out *uiout);
 static void cli_table_header (struct ui_out *uiout, int width,
@@ -108,6 +108,7 @@ static void out_field_fmt (struct ui_out *uiout, int fldno,
 
 void
 cli_table_begin (struct ui_out *uiout, int nbrofcols,
+		 int nr_rows,
 		 const char *tblid)
 {
 }

@@ -40,7 +40,7 @@ struct ui_out_data
 /* These are the MI output functions */
 
 static void mi_table_begin (struct ui_out *uiout, int nbrofcols,
-			    const char *tblid);
+			    int nr_rows, const char *tblid);
 static void mi_table_body (struct ui_out *uiout);
 static void mi_table_end (struct ui_out *uiout);
 static void mi_table_header (struct ui_out *uiout, int width,
@@ -106,6 +106,7 @@ static void out_field_fmt (struct ui_out *uiout, int fldno, char *fldname,
 
 void
 mi_table_begin (struct ui_out *uiout, int nbrofcols,
+		int nr_rows,
 		const char *tblid)
 {
   struct ui_out_data *data = ui_out_data (uiout);

@@ -1,3 +1,14 @@
+2001-06-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* ui-out.c (ui_out_table_begin): Add parameter ``nr_rows''.
+	(default_table_begin): Ditto.
+	(uo_table_begin): Ditto.
+	* cli-out.c (cli_table_begin): Ditto.
+	* ui-out.h (ui_out_table_begin): Update
+	(table_begin_ftype): Update.
+	* breakpoint.c (breakpoint_1): Pass nr_printable_breakpoints to
+	ui_out_table_begin.
+
 2001-06-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* breakpoint.c (breakpoint_1): Restructure.  Compute the

@@ -1,5 +1,10 @@
 2001-06-18  Andrew Cagney  <ac131313@redhat.com>
 
+	* mi-out.c: Include "gdb_assert.h".
+	(mi_table_begin): Add parameter ``nr_rows''.
+
+2001-06-18  Andrew Cagney  <ac131313@redhat.com>
+
 	* mi-main.c: Use strncmp as the "mi" test.  Allow "mi", "mi0" and
 	"mi1".
 	(mi_command_loop): Add parameter mi_version, pass to mi_out_new.

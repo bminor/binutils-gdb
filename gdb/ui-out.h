@@ -84,12 +84,13 @@ extern struct cleanup *ui_out_begin_cleanup_end (struct ui_out *uiout,
 						 enum ui_out_type level_type,
 						 const char *id);
 
-/* A table can be considered a special tuple/list combination with
-   the implied structure: ``table = { hdr = { header, ... } , body = [ {
-   field, ... }, ... ] }'' */
+/* A table can be considered a special tuple/list combination with the
+   implied structure: ``table = { hdr = { header, ... } , body = [ {
+   field, ... }, ... ] }''. If NR_ROWS is negative then there is at
+   least one row. */
 
 extern void ui_out_table_begin (struct ui_out *uiout, int nbrofcols,
-				const char *tblid);
+				int nr_rows, const char *tblid);
 
 extern void ui_out_table_header (struct ui_out *uiout, int width,
 				 enum ui_align align, const char *colhdr);
@@ -191,7 +192,8 @@ extern void gdb_query (struct ui_out *uiout, int qflags, char *qprompt);
 /* Type definition of all implementation functions. */
 
 typedef void (table_begin_ftype) (struct ui_out * uiout,
-				  int nbrofcols, const char *tblid);
+				  int nbrofcols, int nr_rows,
+				  const char *tblid);
 typedef void (table_body_ftype) (struct ui_out * uiout);
 typedef void (table_end_ftype) (struct ui_out * uiout);
 typedef void (table_header_ftype) (struct ui_out * uiout, int width,

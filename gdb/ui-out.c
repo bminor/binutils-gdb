@@ -135,7 +135,7 @@ pop_level (struct ui_out *uiout,
 /* These are the default implementation functions */
 
 static void default_table_begin (struct ui_out *uiout, int nbrofcols,
-				 const char *tblid);
+				 int nr_rows, const char *tblid);
 static void default_table_body (struct ui_out *uiout);
 static void default_table_end (struct ui_out *uiout);
 static void default_table_header (struct ui_out *uiout, int width,
@@ -209,7 +209,7 @@ struct ui_out *uiout = &def_uiout;
 /* These are the interfaces to implementation functions */
 
 static void uo_table_begin (struct ui_out *uiout, int nbrofcols,
-			    const char *tblid);
+			    int nr_rows, const char *tblid);
 static void uo_table_body (struct ui_out *uiout);
 static void uo_table_end (struct ui_out *uiout);
 static void uo_table_header (struct ui_out *uiout, int width,
@@ -256,6 +256,7 @@ static void init_ui_out_state (struct ui_out *uiout);
 
 void
 ui_out_table_begin (struct ui_out *uiout, int nbrofcols,
+		    int nr_rows,
 		    const char *tblid)
 {
   if (uiout->table_flag)
@@ -271,7 +272,7 @@ previous table_end.");
     uiout->table_id = NULL;
   clear_header_list (uiout);
 
-  uo_table_begin (uiout, nbrofcols, uiout->table_id);
+  uo_table_begin (uiout, nbrofcols, nr_rows, uiout->table_id);
 }
 
 void
@@ -710,7 +711,9 @@ gdb_query (struct ui_out *uiout, int qflags, char *qprompt)
 /* default gdb-out hook functions */
 
 static void
-default_table_begin (struct ui_out *uiout, int nbrofcols, const char *tblid)
+default_table_begin (struct ui_out *uiout, int nbrofcols,
+		     int nr_rows,
+		     const char *tblid)
 {
 }
 
@@ -808,11 +811,12 @@ default_flush (struct ui_out *uiout)
 
 void
 uo_table_begin (struct ui_out *uiout, int nbrofcols,
+		int nr_rows,
 		const char *tblid)
 {
   if (!uiout->impl->table_begin)
     return;
-  uiout->impl->table_begin (uiout, nbrofcols, tblid);
+  uiout->impl->table_begin (uiout, nbrofcols, nr_rows, tblid);
 }
 
 void

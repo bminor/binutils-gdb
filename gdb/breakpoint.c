@@ -3591,9 +3591,9 @@ breakpoint_1 (int bnum, int allflag)
 
 #ifdef UI_OUT
   if (addressprint)
-    ui_out_table_begin (uiout, 6, "BreakpointTable");
+    ui_out_table_begin (uiout, 6, nr_printable_breakpoints, "BreakpointTable");
   else
-    ui_out_table_begin (uiout, 5, "BreakpointTable");
+    ui_out_table_begin (uiout, 5, nr_printable_breakpoints, "BreakpointTable");
 #endif /* UI_OUT */
 
 #ifdef UI_OUT
