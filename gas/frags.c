@@ -27,6 +27,7 @@ extern fragS zero_address_frag;
 extern fragS bss_address_frag;
 
 /* Initialization for frag routines.  */
+
 void
 frag_init ()
 {
@@ -37,6 +38,7 @@ frag_init ()
 /* Allocate a frag on the specified obstack.
    Call this routine from everywhere else, so that all the weird alignment
    hackery can be done in just one place.  */
+
 fragS *
 frag_alloc (ob)
      struct obstack *ob;
@@ -53,15 +55,12 @@ frag_alloc (ob)
   return ptr;
 }
 
-/*
- *			frag_grow()
- *
- * Try to augment current frag by nchars chars.
- * If there is no room, close of the current frag with a ".fill 0"
- * and begin a new frag. Unless the new frag has nchars chars available
- * do not return. Do not set up any fields of *now_frag.
- */
-void 
+/* Try to augment current frag by nchars chars.
+   If there is no room, close of the current frag with a ".fill 0"
+   and begin a new frag. Unless the new frag has nchars chars available
+   do not return. Do not set up any fields of *now_frag.  */
+
+void
 frag_grow (nchars)
      unsigned int nchars;
 {
@@ -87,30 +86,27 @@ frag_grow (nchars)
     as_fatal (_("Can't extend frag %d. chars"), nchars);
 }
 
-/*
- *			frag_new()
- *
- * Call this to close off a completed frag, and start up a new (empty)
- * frag, in the same subsegment as the old frag.
- * [frchain_now remains the same but frag_now is updated.]
- * Because this calculates the correct value of fr_fix by
- * looking at the obstack 'frags', it needs to know how many
- * characters at the end of the old frag belong to the maximal
- * variable part;  The rest must belong to fr_fix.
- * It doesn't actually set up the old frag's fr_var.  You may have
- * set fr_var == 1, but allocated 10 chars to the end of the frag;
- * In this case you pass old_frags_var_max_size == 10.
- * In fact, you may use fr_var for something totally unrelated to the
- * size of the variable part of the frag;  None of the generic frag
- * handling code makes use of fr_var.
- *
- * Make a new frag, initialising some components. Link new frag at end
- * of frchain_now.
- */
-void 
+/* Call this to close off a completed frag, and start up a new (empty)
+   frag, in the same subsegment as the old frag.
+   [frchain_now remains the same but frag_now is updated.]
+   Because this calculates the correct value of fr_fix by
+   looking at the obstack 'frags', it needs to know how many
+   characters at the end of the old frag belong to the maximal
+   variable part;  The rest must belong to fr_fix.
+   It doesn't actually set up the old frag's fr_var.  You may have
+   set fr_var == 1, but allocated 10 chars to the end of the frag;
+   In this case you pass old_frags_var_max_size == 10.
+   In fact, you may use fr_var for something totally unrelated to the
+   size of the variable part of the frag;  None of the generic frag
+   handling code makes use of fr_var.
+
+   Make a new frag, initialising some components. Link new frag at end
+   of frchain_now.  */
+
+void
 frag_new (old_frags_var_max_size)
      /* Number of chars (already allocated on obstack frags) in
-	variable_length part of frag. */
+	variable_length part of frag.  */
      int old_frags_var_max_size;
 {
   fragS *former_last_fragP;
@@ -124,7 +120,7 @@ frag_new (old_frags_var_max_size)
   assert (frag_now->fr_type != 0);
 
   /* This will align the obstack so the next struct we allocate on it
-     will begin at a correct boundary. */
+     will begin at a correct boundary.  */
   obstack_finish (&frchain_now->frch_obstack);
   frchP = frchain_now;
   know (frchP);
@@ -138,7 +134,7 @@ frag_new (old_frags_var_max_size)
   /* Generally, frag_now->points to an address rounded up to next
      alignment.  However, characters will add to obstack frags
      IMMEDIATELY after the struct frag, even if they are not starting
-     at an alignment address. */
+     at an alignment address.  */
   former_last_fragP->fr_next = frag_now;
   frchP->frch_last = frag_now;
 
@@ -152,17 +148,13 @@ frag_new (old_frags_var_max_size)
   assert (frchain_now->frch_last == frag_now);
 
   frag_now->fr_next = NULL;
-}				/* frag_new() */
+}
 
-/*
- *			frag_more()
- *
- * Start a new frag unless we have n more chars of room in the current frag.
- * Close off the old frag with a .fill 0.
- *
- * Return the address of the 1st char to write into. Advance
- * frag_now_growth past the new chars.
- */
+/* Start a new frag unless we have n more chars of room in the current frag.
+   Close off the old frag with a .fill 0.
+
+   Return the address of the 1st char to write into. Advance
+   frag_now_growth past the new chars.  */
 
 char *
 frag_more (nchars)
@@ -186,18 +178,14 @@ frag_more (nchars)
   retval = obstack_next_free (&frchain_now->frch_obstack);
   obstack_blank_fast (&frchain_now->frch_obstack, nchars);
   return (retval);
-}				/* frag_more() */
+}
 
-/*
- *			frag_var()
- *
- * Start a new frag unless we have max_chars more chars of room in the current frag.
- * Close off the old frag with a .fill 0.
- *
- * Set up a machine_dependent relaxable frag, then start a new frag.
- * Return the address of the 1st char of the var part of the old frag
- * to write into.
- */
+/* Start a new frag unless we have max_chars more chars of room in the
+   current frag.  Close off the old frag with a .fill 0.
+
+   Set up a machine_dependent relaxable frag, then start a new frag.
+   Return the address of the 1st char of the var part of the old frag
+   to write into.  */
 
 char *
 frag_var (type, max_chars, var, subtype, symbol, offset, opcode)
@@ -233,13 +221,9 @@ frag_var (type, max_chars, var, subtype, symbol, offset, opcode)
   return (retval);
 }
 
-/*
- *			frag_variant()
- *
- * OVE: This variant of frag_var assumes that space for the tail has been
- *      allocated by caller.
- *      No call to frag_grow is done.
- */
+/* OVE: This variant of frag_var assumes that space for the tail has been
+	allocated by caller.
+	No call to frag_grow is done.  */
 
 char *
 frag_variant (type, max_chars, var, subtype, symbol, offset, opcode)
@@ -271,14 +255,11 @@ frag_variant (type, max_chars, var, subtype, symbol, offset, opcode)
   as_where (&frag_now->fr_file, &frag_now->fr_line);
   frag_new (max_chars);
   return (retval);
-}				/* frag_variant() */
+}
 
-/*
- *			frag_wane()
- *
- * Reduce the variable end of a frag to a harmless state.
- */
-void 
+/* Reduce the variable end of a frag to a harmless state.  */
+
+void
 frag_wane (fragP)
      register fragS *fragP;
 {
@@ -294,7 +275,7 @@ frag_wane (fragP)
    the maximum number of characters to skip when doing the alignment,
    or 0 if there is no maximum.  */
 
-void 
+void
 frag_align (alignment, fill_character, max)
      int alignment;
      int fill_character;
@@ -305,8 +286,8 @@ frag_align (alignment, fill_character, max)
       addressT new_off;
       addressT mask;
 
-      mask = (~ (addressT) 0) << alignment;
-      new_off = (abs_section_offset + ~ mask) & mask;
+      mask = (~(addressT) 0) << alignment;
+      new_off = (abs_section_offset + ~mask) & mask;
       if (max == 0 || new_off - abs_section_offset <= (addressT) max)
 	abs_section_offset = new_off;
     }
@@ -327,7 +308,7 @@ frag_align (alignment, fill_character, max)
    FILL_PATTERN.  MAX is the maximum number of characters to skip when
    doing the alignment, or 0 if there is no maximum.  */
 
-void 
+void
 frag_align_pattern (alignment, fill_pattern, n_fill, max)
      int alignment;
      const char *fill_pattern;
@@ -347,14 +328,14 @@ frag_now_fix_octets ()
   if (now_seg == absolute_section)
     return abs_section_offset;
 
-  return ((char*) obstack_next_free (&frchain_now->frch_obstack)
-          - frag_now->fr_literal);
+  return ((char *) obstack_next_free (&frchain_now->frch_obstack)
+	  - frag_now->fr_literal);
 }
 
 addressT
 frag_now_fix ()
 {
-  return frag_now_fix_octets() / OCTETS_PER_BYTE;
+  return frag_now_fix_octets () / OCTETS_PER_BYTE;
 }
 
 void
@@ -368,5 +349,3 @@ frag_append_1_char (datum)
     }
   obstack_1grow (&frchain_now->frch_obstack, datum);
 }
-
-/* end of frags.c */
