@@ -1,3 +1,17 @@
+Sun Aug 22 12:15:18 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (XCOFF-differences): Remove references to
+	non-existent types N_DECL and N_RPSYM.
+
+	* stabs.texinfo (String Field): Say that type attributes bug is
+	fixed in GDB 4.10, since it is.
+
+	* stabs.texinfo: Clean up djm cleanups, and more cleanups of my own.
+
+Sat Aug 21 04:32:28 1993  David MacKenzie  (djm@cygnus.com)
+
+	* stabs.texinfo: Formatting cleanups.
+
 Fri Aug 20 20:49:53 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo: When explaining the n_type of a stab, standardize
