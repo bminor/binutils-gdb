@@ -179,10 +179,6 @@ md_parse_option (c, arg)
 #endif
 
     default:
-      if (arg)
-	fprintf (stderr, _("%s: unrecognised command line option: -%c\n"), myname, c);
-      else
-	fprintf (stderr, _("%s: unrecognised command line option: -%c%s\n"), myname, c, arg);
       return 0;
     }
   return 1;

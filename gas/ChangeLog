@@ -1,3 +1,8 @@
+1999-08-29  Doug Evans  <devans@casey.cygnus.com>
+
+	* config/tc-m32r.c (md_parse_option): Delete unrecognized option
+	error message (done elsewhere).
+
 Sat Aug 28 01:23:11 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (pa_ip): Do not allow '*' in 32bit completers.
