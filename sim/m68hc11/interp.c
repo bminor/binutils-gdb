@@ -325,32 +325,6 @@ sim_create_inferior (SIM_DESC sd, struct _bfd *abfd,
   /* reset all state information */
   sim_board_reset (sd);
 
-  /* Get information about the number of pseudo registers.  */
-  for (i = FIRST_SOFT_REGNUM; i <= ZD32_REGNUM; i++)
-    {
-      switch (i)
-	{
-	case TMP_REGNUM:
-	  cpu->cpu_page0_reg[i - FIRST_SOFT_REGNUM] = 0;
-	  break;
-	case Z_REGNUM:
-	case ZS_REGNUM:
-	  cpu->cpu_page0_reg[i - FIRST_SOFT_REGNUM] = 2;
-	  break;
-	case XY_REGNUM:
-	  cpu->cpu_page0_reg[i - FIRST_SOFT_REGNUM] = 4;
-	  break;
-	case FP_REGNUM:
-	  cpu->cpu_page0_reg[i - FIRST_SOFT_REGNUM] = 6;
-	  break;
-	default:
-	  cpu->cpu_page0_reg[i - FIRST_SOFT_REGNUM]
-	    = ((i - FIRST_SOFT_REGNUM) * 2) - 2;
-	  break;
-	}
-    }
-  cpu->cpu_nb_pseudo_regs = 8;
-
   return SIM_RC_OK;
 }
 
@@ -403,21 +377,8 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
       val = cpu_get_ccr (cpu);
       break;
 
-
-      /* Read a pseudo register. Pseudo registers are located at
-         beginning of page 0.  Each of them is 2 bytes.  */
     default:
-      if (rn < FIRST_SOFT_REGNUM || rn >= ZD32_REGNUM)
-	{
-	  val = 0;
-	}
-      else
-	{
-	  uint16 addr;
-
-	  addr = cpu->cpu_page0_reg[rn - FIRST_SOFT_REGNUM];
-	  val = memory_read16 (cpu, addr);
-	}
+      val = 0;
       break;
     }
   memory[0] = val >> 8;
@@ -471,16 +432,7 @@ sim_store_register (SIM_DESC sd, int rn, unsigned char *memory, int length)
       cpu_set_ccr (cpu, val);
       break;
 
-      /* Write a pseudo register.  Pseudo registers are located at
-         beginning of page 0.  Each of them is 2 bytes.  */
     default:
-      if (rn >= FIRST_SOFT_REGNUM && rn <= ZD32_REGNUM)
-	{
-	  uint16 addr;
-
-	  addr = cpu->cpu_page0_reg[rn - FIRST_SOFT_REGNUM];
-	  memory_write16 (cpu, addr, val);
-	}
       break;
     }
 

@@ -1,5 +1,12 @@
 2000-09-10  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* interp.c (sim_store_register): Remove soft register hack.
+	(sim_fetch_register): Likewise.
+	(sim_create_inferior): Likewise.
+	* sim-main.h: Likewise.
+
+2000-09-10  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* interrupts.c (interrupts_update_pending): Clear the mask of
 	pending interrupts here.
 	(interrupts_get_current): Don't clear the mask of pending interrupts.

@@ -75,15 +75,6 @@ enum m68hc11_map_level
 #define B_REGNUM        6
 #define PSW_REGNUM 	7
 #define Z_REGNUM        8
-#define FP_REGNUM       9
-#define TMP_REGNUM     10
-#define ZS_REGNUM      11
-#define XY_REGNUM      12
-#define ZD1_REGNUM     13
-#define ZD32_REGNUM    (ZD1_REGNUM+31)
-
-#define FIRST_SOFT_REGNUM (Z_REGNUM)
-#define MAX_SOFT_REG      (ZD32_REGNUM - Z_REGNUM + 1)
 
 typedef struct m6811_regs {
     unsigned short      d;
@@ -186,8 +177,6 @@ struct _sim_cpu {
   int                   cpu_elf_start;
   
   uint16                cpu_insn_pc;
-  unsigned short	cpu_nb_pseudo_regs;
-  uint16                cpu_page0_reg[MAX_SOFT_REG];
 
   /* CPU frequency.  This is the quartz frequency.  It is divided by 4 to
      get the cycle time.  This is used for the timer rate and for the baud
