@@ -1,3 +1,8 @@
+Thu Dec 16 16:46:01 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips-tdep.c (read_next_frame_reg): If SIGFRAME_REG_SIZE is not
+	defined, define it as 4.
+
 Thu Dec 16 13:08:01 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/m68k/nm-hp300bsd.h: Correctly identify 4.3BSD vs 4.4BSD.
