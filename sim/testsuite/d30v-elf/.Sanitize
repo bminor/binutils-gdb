@@ -53,6 +53,7 @@ ls-ldhu.S
 ls-ldw.S
 ls-moddec.S
 ls-modinc.S
+ls-modaddr.S
 ls-st2h.S
 ls-st2w.S
 ls-st4hb.S
