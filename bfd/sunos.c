@@ -955,7 +955,7 @@ sunos_add_dynamic_symbols (abfd, info, symsp, sym_countp, stringsp)
     {
       bfd_byte buf[16];
       unsigned long name, flags;
-      unsigned short major, minor;
+      unsigned short major_vno, minor_vno;
       struct bfd_link_needed_list *needed, **pp;
       bfd_byte b;
 
@@ -968,11 +968,11 @@ sunos_add_dynamic_symbols (abfd, info, symsp, sym_countp, stringsp)
 
       name = bfd_get_32 (abfd, buf);
       flags = bfd_get_32 (abfd, buf + 4);
-      major = bfd_get_16 (abfd, buf + 8);
-      minor = bfd_get_16 (abfd, buf + 10);
+      major_vno = bfd_get_16 (abfd, buf + 8);
+      minor_vno = bfd_get_16 (abfd, buf + 10);
       need = bfd_get_32 (abfd, buf + 12);
 
-      needed = bfd_alloc (abfd, sizeof (struct bfd_link_needed_list));
+      needed = (struct bfd_link_needed_list *) bfd_alloc (abfd, sizeof (struct bfd_link_needed_list));
       if (needed == NULL)
 	{
 	  bfd_set_error (bfd_error_no_memory);
@@ -993,15 +993,15 @@ sunos_add_dynamic_symbols (abfd, info, symsp, sym_countp, stringsp)
 	  bfd_alloc_grow (abfd, &b, 1);
 	}
       while (b != '\0');
-      if (major != 0)
+      if (major_vno != 0)
 	{
 	  char verbuf[30];
 
-	  sprintf (verbuf, ".%d", major);
+	  sprintf (verbuf, ".%d", major_vno);
 	  bfd_alloc_grow (abfd, verbuf, strlen (verbuf));
-	  if (minor != 0)
+	  if (minor_vno != 0)
 	    {
-	      sprintf (verbuf, ".%d", minor);
+	      sprintf (verbuf, ".%d", minor_vno);
 	      bfd_alloc_grow (abfd, verbuf, strlen (verbuf));
 	    }
 	}
@@ -1169,6 +1169,9 @@ bfd_sunos_record_link_assignment (output_bfd, info, name)
 {
   struct sunos_link_hash_entry *h;
 
+  if (output_bfd->xvec != &MY(vec))
+    return true;
+
   /* This is called after we have examined all the input objects.  If
      the symbol does not exist, it merely means that no object refers
      to it, and we can just ignore it at this point.  */
@@ -1224,6 +1227,9 @@ bfd_sunos_size_dynamic_sections (output_bfd, info, sdynptr, sneedptr,
   *sneedptr = NULL;
   *srulesptr = NULL;
 
+  if (output_bfd->xvec != &MY(vec))
+    return true;
+
   /* Look through all the input BFD's and read their relocs.  It would
      be better if we didn't have to do this, but there is no other way
      to determine the number of dynamic relocs we need, and, more
@@ -1231,7 +1237,8 @@ bfd_sunos_size_dynamic_sections (output_bfd, info, sdynptr, sneedptr,
      get an entry in the procedure linkage table.  */
   for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
     {
-      if ((sub->flags & DYNAMIC) == 0)
+      if ((sub->flags & DYNAMIC) == 0
+	  && sub->xvec == output_bfd->xvec)
 	{
 	  if (! sunos_scan_relocs (info, sub, obj_textsec (sub),
 				   exec_hdr (sub)->a_trsize)
