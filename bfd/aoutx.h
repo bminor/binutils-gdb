@@ -136,6 +136,9 @@ static boolean translate_from_native_sym_flags
   PARAMS ((bfd *, aout_symbol_type *));
 static boolean translate_to_native_sym_flags
   PARAMS ((bfd *, asymbol *, struct external_nlist *));
+static void adjust_o_magic PARAMS ((bfd *, struct internal_exec *));
+static void adjust_z_magic PARAMS ((bfd *, struct internal_exec *));
+static void adjust_n_magic PARAMS ((bfd *, struct internal_exec *));
 
 /*
 SUBSECTION
@@ -582,9 +585,20 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
      guess at whether the file is executable.  If the entry point
      is within the text segment, assume it is.  (This makes files
      executable even if their entry point address is 0, as long as
-     their text starts at zero.).  */
-  if ((execp->a_entry >= obj_textsec(abfd)->vma) &&
-      (execp->a_entry < obj_textsec(abfd)->vma + obj_textsec(abfd)->_raw_size))
+     their text starts at zero.).
+
+     This test had to be changed to deal with systems where the text segment
+     runs at a different location than the default.  The problem is that the
+     entry address can appear to be outside the text segment, thus causing an
+     erroneous conclusion that the file isn't executable.
+
+     To fix this, we now accept any non-zero entry point as an indication of
+     executability.  This will work most of the time, since only the linker
+     sets the entry point, and that is likely to be non-zero for most systems. */
+
+  if (execp->a_entry != 0
+      || (execp->a_entry >= obj_textsec(abfd)->vma
+	  && execp->a_entry < obj_textsec(abfd)->vma + obj_textsec(abfd)->_raw_size))
     abfd->flags |= EXEC_P;
 #ifdef STAT_FOR_EXEC
   else
@@ -1941,6 +1955,9 @@ NAME(aout,get_symtab) (abfd, location)
 /* Standard reloc stuff */
 /* Output standard relocation information to a file in target byte order. */
 
+extern void  NAME(aout,swap_std_reloc_out)
+  PARAMS ((bfd *, arelent *, struct reloc_std_external *));
+
 void
 NAME(aout,swap_std_reloc_out) (abfd, g, natptr)
      bfd *abfd;
@@ -2035,6 +2052,9 @@ NAME(aout,swap_std_reloc_out) (abfd, g, natptr)
 
 /* Extended stuff */
 /* Output extended relocation information to a file in target byte order. */
+
+extern void NAME(aout,swap_ext_reloc_out)
+  PARAMS ((bfd *, arelent *, struct reloc_ext_external *));
 
 void
 NAME(aout,swap_ext_reloc_out) (abfd, g, natptr)
@@ -3860,10 +3880,15 @@ NAME(aout,final_link) (abfd, info, callback)
   obj_datasec (abfd)->reloc_count =
     exec_hdr (abfd)->a_drsize / obj_reloc_entry_size (abfd);
 
-  /* Write out the string table.  */
-  if (bfd_seek (abfd, obj_str_filepos (abfd), SEEK_SET) != 0)
-    goto error_return;
-  return emit_stringtab (abfd, aout_info.strtab);
+  /* Write out the string table, unless there are no symbols.  */
+  if (abfd->symcount > 0)
+    {
+      if (bfd_seek (abfd, obj_str_filepos (abfd), SEEK_SET) != 0
+	  || ! emit_stringtab (abfd, aout_info.strtab))
+	goto error_return;
+    }
+
+  return true;
 
  error_return:
   if (aout_info.contents != NULL)
