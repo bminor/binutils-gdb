@@ -43,6 +43,7 @@ gas
 gcc
 gdb
 gdbm
+glob
 gnulib
 grep
 include
