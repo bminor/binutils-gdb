@@ -1,4 +1,20 @@
+Wed Oct 25 11:27:25 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.texinfo: The MRI ALIGN directive is supported.
+
+Mon Oct 23 11:46:43 1995  James G. Smith  <jsmith@pasanda.cygnus.co.uk>
+
+	* emulparams/elf32vr4300.sh: Deleted.
+	* emulparams/elf32vr4300el.sh: Deleted.
+	* emulparams/elf32b4300.sh: Added.
+	* emulparams/elf32l4300.sh: Added.
+	* configure.tgt, Makefile.in: Updated the build to use the
+ 	new 8.3 unique names.
+
 Thu Oct 19 17:41:46 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (entry_symbol): Make non-static.
+	* ldlang.h (entry_symbol): Declare.
 
 	* ldlex.l: Treat PROVIDE as a keyword in expression state.
 

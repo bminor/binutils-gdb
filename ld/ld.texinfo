@@ -178,8 +178,9 @@ ld [ -o @var{output} ]  @var{objfile}@dots{}
   [ -Map @var{mapfile} ]  [ -m @var{emulation} ]  [ -N | -n ]
   [ -noinhibit-exec ]  [ -no-keep-memory ]  [ -oformat @var{output-format} ]
   [ -R @var{filename} ]  [ -relax ]  [ -retain-symbols-file @var{filename} ]
-  [ -r | -Ur ]  [ -rpath @var{dir} ] [ -S ]  [ -s ] [ -soname @var{name} ]
-  [ -shared ] [ -sort-common ] [ -stats ] [ -T @var{commandfile} ]
+  [ -r | -Ur ]  [ -rpath @var{dir} ] [-rpath-link @var{dir} ]
+  [ -S ]  [ -s ] [ -soname @var{name} ] [ -shared ] 
+  [ -sort-common ] [ -stats ] [ -T @var{commandfile} ]
   [ -Ttext @var{org} ]  [ -Tdata @var{org} ]
   [ -Tbss @var{org} ]  [ -t ] [ -traditional-format ]
   [ -u @var{symbol}]  [-V]  [-v]  [ -verbose]  [ -version ]
@@ -467,9 +468,9 @@ at the point in which the linker script appears in the command line.
 @cindex link map
 @kindex -M
 @item -M 
-Print (to the standard output) a link map---diagnostic information
-about where symbols are mapped by @code{ld}, and information on global
-common storage allocation.
+Print (to the standard output) a link map---diagnostic information about
+where symbols are mapped by @code{ld}, and information on global common
+storage allocation.
 
 @cindex link map
 @kindex -Map
@@ -600,15 +601,60 @@ line.  It overrides @samp{-s} and @samp{-S}.
 Add a directory to the runtime library search path.  This is used when
 linking an ELF executable with shared objects.  All @code{-rpath}
 arguments are concatenated and passed to the runtime linker, which uses
-them to locate shared objects at runtime.
+them to locate shared objects at runtime.  The @code{-rpath} option is
+also used when locating shared objects which are needed by shared
+objects explicitly included in the link; see the description of the
+@code{-rpath-link} option.
 
 The @code{-rpath} option may also be used on SunOS.  By default, on
 SunOS, the linker will form a runtime search patch out of all the
-@code{-L} options it is given.  If a @code{rpath} option is used, the
+@code{-L} options it is given.  If a @code{-rpath} option is used, the
 runtime search path will be formed exclusively using the @code{-rpath}
 options, ignoring the @code{-L} options.  This can be useful when using
 gcc, which adds many @code{-L} options which may be on NFS mounted
 filesystems.
+@end ifset
+
+@ifset GENERIC
+@cindex link-time runtime library search path
+@kindex -rpath-link
+@item -rpath-link @var{DIR}
+When using ELF or SunOS, one shared library may require another.  This
+happens when an @code{ld -shared} link includes a shared library as one
+of the input files.
+
+When the linker encounters such a dependency when doing a non-shared,
+non-relocateable link, it will automatically try to locate the required
+shared library and include it in the link, if it is not included
+explicitly.  In such a case, the @code{-rpath-link} option
+specifies the first set of directories to search.  The
+@code{-rpath-link} option may specify a sequence of directory names
+either by specifying a list of names separated by colons, or by
+appearing multiple times.
+
+The linker uses the following search paths to locate required shared
+libraries.
+@enumerate
+@item
+Any directories specified by @code{-rpath-link} options.
+@item
+Any directories specified by @code{-rpath} options.  The difference
+between @code{-rpath} and @code{-rpath-link} is that directories
+specified by @code{-rpath} options are included in the executable and
+used at runtime, whereas the @code{-rpath-link} option is only effective
+at link time.
+@item
+On SunOS, if the @code{-rpath} option was not used, search any
+directories specified using @code{-L} options.
+@item
+For a native linker, the contents of the environment variable
+@code{LD_LIBRARY_PATH}.
+@item
+The default directories, normally @file{/lib} and @file{/usr/lib}.
+@end enumerate
+
+If the required shared library is not found, the linker will issue a
+warning and continue with the link.
 @end ifset
 
 @cindex partial link
@@ -651,8 +697,10 @@ field rather than the using the file name given to the linker.
 @item -shared
 @cindex shared libraries
 @kindex -shared
-Create a shared library.  This is currently only supported on ELF
-platforms.
+Create a shared library.  This is currently only supported on ELF and
+SunOS platforms.  On SunOS, the linker will automatically create a
+shared library if the @code{-e} option is not used and there are
+undefined symbols in the link.
 
 @item -sort-common
 @kindex -sort-common
@@ -2440,6 +2488,11 @@ Use this command to place the data from input section @var{in-secname}
 in a section called @var{out-secname} in the linker output file.
 
 @var{in-secname} may be an integer.
+
+@cindex @code{ALIGN} (MRI)
+@item ALIGN @var{secname} = @var{expression}
+Align the section called @var{secname} to @var{expression}.  The
+@var{expression} should be a power of two.
 
 @cindex @code{BASE} (MRI)
 @item BASE @var{expression}
