@@ -1,5 +1,8 @@
 Fri Apr  2 08:54:57 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* config/tc-mips.h (LOCAL_LABEL): Treat any label starting with
+	'$' as local, for any object file format.
+
 	* config/tc-mips.c (macro): Optimizations to branching code and a
 	couple of bug fixes from ralphc@pyrps5.eng.pyramid.com (Ralph
 	Campbell).
