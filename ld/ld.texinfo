@@ -218,7 +218,7 @@ option.
 The exceptions---which may meaningfully be used more than once---are
 @samp{-A}, @samp{-b} (or its synonym @samp{-format}), @samp{-defsym},
 @samp{-L}, @samp{-l}, @samp{-R}, @samp{-u}, and @samp{-(} (or its
-synonym @samp{--start-group})..
+synonym @samp{--start-group}).
 @end ifclear
 @ifset SingleFormat
 The exceptions---which may meaningfully be used more than once---are
@@ -1188,7 +1188,7 @@ _as_hex = 0xdead;
 
 @cindex negative integers
 To write a negative integer, use
-the prefix operator @samp{-}; @pxref{Operators}.
+the prefix operator @samp{-} (@pxref{Operators}).
 @smallexample
 _as_neg = -57005;
 @end smallexample
@@ -1307,7 +1307,7 @@ precedence      associativity   Operators                Notes
 @end smallexample
 Notes:
 (1) Prefix operators 
-(2) @xref{Assignment}
+(2) @xref{Assignment}.
 @c TEXI2ROFF-KILL
 @end ifinfo
 @tex
@@ -1707,7 +1707,7 @@ sections go into it.
 
 You can also use the first two operations---defining the entry point and
 defining symbols---outside the @code{SECTIONS} command: @pxref{Entry
-Point}, and @pxref{Assignment}.  They are permitted here as well for
+Point}, and @ref{Assignment}.  They are permitted here as well for
 your convenience in reading the script, so that symbols and the entry
 point can be defined at meaningful points in your output-file layout.
 
@@ -1919,7 +1919,7 @@ SECTIONS @{
 The foregoing statements arrange, in your output file, data originating
 from your input files.  You can also place data directly in an output
 section from the link command script.  Most of these additional
-statements involve expressions; @pxref{Expressions}.  Although these
+statements involve expressions (@pxref{Expressions}).  Although these
 statements are shown separately here for ease of presentation, no such
 segregation is needed within a section definition in the @code{SECTIONS}
 command; you can intermix them freely with any of the statements we've
@@ -2069,7 +2069,7 @@ SECTIONS @{
 @end smallexample
 
 @var{secname} and @var{contents} are required.  @xref{Section
-Definition}, and @pxref{Section Placement} for details on
+Definition}, and @ref{Section Placement}, for details on
 @var{contents}.  The remaining elements---@var{start},
 @code{BLOCK(@var{align)}}, @code{(NOLOAD)}, @code{AT ( @var{ldadr} )},
 @code{>@var{region}}, @code{:@var{phdr}}, and @code{=@var{fill}}---are
@@ -2187,7 +2187,7 @@ Assign this section to a previously defined region of memory.
 @cindex program headers and sections
 @item :@var{phdr}
 Assign this section to a segment described by a program header.
-@xref{PHDRS}.  If a section is assigned to one or more segments, than
+@xref{PHDRS}.  If a section is assigned to one or more segments, then
 all subsequent allocated sections will be assigned to those segments as
 well, unless they use an explicitly @code{:@var{phdr}} modifier.  To
 prevent a section from being assigned to a segment when it would
