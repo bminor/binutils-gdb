@@ -173,7 +173,7 @@ get_label (register struct expression *exp, int *pos)
     return NULL;
 }
 
-/* This function evaluates tupes (in Chill) or brace-initializers
+/* This function evaluates tuples (in Chill) or brace-initializers
    (in C/C++) for structure types.  */
 
 static value_ptr
