@@ -1,3 +1,8 @@
+Tue Dec  5 18:33:43 1995  Brendan Kehoe  <brendan@lisa.cygnus.com>
+
+	* gdbtypes.c (check_stub_method): Make sure we get back a function
+	string in the demangled name before we try to use it.
+
 Tue Dec  5 18:08:29 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* monitor.c (monitor_expect_regexp):  Make static, add prototype.

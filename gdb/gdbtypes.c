@@ -974,14 +974,16 @@ check_stub_method (type, i, j)
   struct type **argtypes;
   struct type *mtype;
 
-  if (demangled_name == NULL)
-    {
-      error ("Internal: Cannot demangle mangled name `%s'.", mangled_name);
-    }
+  /* Make sure we got back a function string that we can use.  */
+  if (demangled_name)
+    p = strchr (demangled_name, '(');
+
+  if (demangled_name == NULL || p == NULL)
+    error ("Internal: Cannot demangle mangled name `%s'.", mangled_name);
 
   /* Now, read in the parameters that define this type.  */
-  argtypetext = strchr (demangled_name, '(') + 1;
-  p = argtypetext;
+  p += 1;
+  argtypetext = p;
   while (*p)
     {
       if (*p == '(')
