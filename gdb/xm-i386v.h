@@ -55,6 +55,8 @@ on those where it does, it occurs quite reliably.  */
 
 #define KERNEL_U_ADDR 0xe0000000
 
+#define REGISTER_U_ADDR(addr, blockend, regno) \
+	(addr) = i386_register_u_addr ((blockend),(regno));
 
 #if 0
 /* Interface definitions for kernel debugger KDB.  */

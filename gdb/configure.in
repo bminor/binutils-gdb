@@ -78,6 +78,7 @@ i386)
 		case "${host_os}" in
 		sysv)	gdb_host=i386v ;;
 		sysv32)	gdb_host=i386v32 ;;
+		mach)	gdb_host=i386mach ;;
 		esac
 		;;
 	esac
@@ -208,6 +209,7 @@ i386)
 		case "${target_os}" in
 		sysv)	gdb_target=i386v ;;
 		sysv32)	gdb_target=i386v32 ;;
+		mach)	gdb_target=i386mach ;;
 		esac
 	esac
 	;;
