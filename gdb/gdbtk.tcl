@@ -8,10 +8,8 @@ set screen_top 0
 set screen_bot 0
 set current_output_win .command.text
 set cfunc NIL
-
-proc test {} {
-	update_listing {termcap.c foo /etc/termcap 200}
-}
+option add *Foreground White
+option add *Background Blue
 
 proc echo string {puts stdout $string}
 
@@ -322,6 +320,8 @@ proc insert_breakpoint_tag {win line} {
 	$win delete $line.0
 	$win insert $line.0 "B"
 	$win tag add $line $line.0
+	$win tag add delete $line.0 "$line.0 lineend"
+	$win tag add margin $line.0 "$line.0 lineend"
 
 	$win configure -state disabled
 }
@@ -342,7 +342,55 @@ proc delete_breakpoint_tag {win line} {
 	$win delete $line.0
 	$win insert $line.0 " "
 	$win tag delete $line
+	$win tag add delete $line.0 "$line.0 lineend"
+	$win tag add margin $line.0 "$line.0 lineend"
 	$win configure -state disabled
+}
+
+proc gdbtk_tcl_busy {} {
+	.start configure -state disabled
+	.stop configure -state normal
+	.step configure -state disabled
+	.next configure -state disabled
+	.continue configure -state disabled
+	.finish configure -state disabled
+	.exit configure -state disabled
+	.up configure -state disabled
+	.down configure -state disabled
+	.bottom configure -state disabled
+	.asm_but configure -state disabled
+	.registers configure -state disabled
+	.asm.stepi configure -state disabled
+	.asm.nexti configure -state disabled
+	.asm.continue configure -state disabled
+	.asm.finish configure -state disabled
+	.asm.up configure -state disabled
+	.asm.down configure -state disabled
+	.asm.bottom configure -state disabled
+	.asm.close configure -state disabled
+}
+
+proc gdbtk_tcl_idle {} {
+	.start configure -state normal
+	.stop configure -state disabled
+	.step configure -state normal
+	.next configure -state normal
+	.continue configure -state normal
+	.finish configure -state normal
+	.exit configure -state normal
+	.up configure -state normal
+	.down configure -state normal
+	.bottom configure -state normal
+	.asm_but configure -state normal
+	.registers configure -state normal
+	.asm.stepi configure -state normal
+	.asm.nexti configure -state normal
+	.asm.continue configure -state normal
+	.asm.finish configure -state normal
+	.asm.up configure -state normal
+	.asm.down configure -state normal
+	.asm.bottom configure -state normal
+	.asm.close configure -state normal
 }
 
 #
@@ -623,6 +671,49 @@ proc do_nothing {} {}
 #
 # Local procedure:
 #
+#	create_expr_win - Creat expression display window
+#
+# Description:
+#
+#	Create the expression display window.
+#
+
+proc create_expr_win {} {
+	toplevel .expr
+	wm minsize .expr 1 1
+	wm title .expr Expression
+	canvas .expr.c -yscrollcommand {.expr.scroll set} -cursor hand2 \
+		-borderwidth 2 -relief groove
+	scrollbar .expr.scroll -orient vertical -command {.expr.c yview}
+	entry .expr.entry -borderwidth 2 -relief groove
+
+	pack .expr.entry -side bottom -fill x
+	pack .expr.c -side left -fill both -expand yes
+	pack .expr.scroll -side right -fill y
+
+	.expr.c create text 100 0 -text "Text string"
+	.expr.c create rectangle 245 195 255 205 -outline black -fill white
+}
+
+#
+# Local procedure:
+#
+#	display_expression (expression) - Display EXPRESSION in display window
+#
+# Description:
+#
+#	Display EXPRESSION and it's value in the expression display window.
+#
+
+proc display_expression {expression} {
+	if ![winfo exists .expr] {create_expr_win}
+
+
+}
+
+#
+# Local procedure:
+#
 #	create_file_win (filename) - Create a win for FILENAME.
 #
 # Return value:
@@ -669,8 +760,10 @@ proc create_file_win {filename} {
 # Setup all the bindings
 
 	bind $win <Enter> {focus %W}
-	bind $win <1> {listing_window_button_1 %W %X %Y %x %y}
+#	bind $win <1> {listing_window_button_1 %W %X %Y %x %y}
+	bind $win <1> do_nothing
 	bind $win <B1-Motion> do_nothing
+
 	bind $win n {gdb_cmd next ; update_ptr}
 	bind $win s {gdb_cmd step ; update_ptr}
 	bind $win c {gdb_cmd continue ; update_ptr}
@@ -688,7 +781,35 @@ proc create_file_win {filename} {
 	set numlines [lindex [split $numlines .] 0]
 	for {set i 1} {$i <= $numlines} {incr i} {
 		$win insert $i.0 [format "   %4d " $i]
+		$win tag add margin $i.0 $i.8
+		$win tag add source $i.8 "$i.0 lineend"
 		}
+
+	$win tag bind margin <1> {listing_window_button_1 %W %X %Y %x %y}
+	$win tag bind source <1> {
+		%W mark set anchor "@%x,%y wordstart"
+		set last [%W index "@%x,%y wordend"]
+		%W tag remove sel 0.0 anchor
+		%W tag remove sel $last end
+		%W tag add sel anchor $last
+		}
+#	$win tag bind source <Double-Button-1> {
+#		%W mark set anchor "@%x,%y wordstart"
+#		set last [%W index "@%x,%y wordend"]
+#		%W tag remove sel 0.0 anchor
+#		%W tag remove sel $last end
+#		%W tag add sel anchor $last
+#		echo "Selected [selection get]"
+#		}
+	$win tag bind source <B1-Motion> {
+		%W tag remove sel 0.0 anchor
+		%W tag remove sel $last end
+		%W tag add sel anchor @%x,%y
+		}
+	$win tag bind sel <1> do_nothing
+	$win tag bind sel <Double-Button-1> {display_expression [selection get]}
+	$win tag raise sel
+
 
 # Scan though the breakpoint data base and install any destined for this file
 
@@ -963,7 +1084,8 @@ proc asm_command {} {
 		text $win -height 25 -width 80 -relief raised -borderwidth 2 \
 			-setgrid true -cursor hand2 \
 			-yscrollcommand asmscrollproc
-		scrollbar .asm.scroll -orient vertical -command {$win yview}
+		scrollbar .asm.scroll -orient vertical \
+			-command {[asm_win_name $cfunc] yview}
 		frame .asm.buts
 
 		button .asm.stepi -text Stepi \
@@ -1011,7 +1133,7 @@ proc registers_command {} {
 		wm title .reg Registers
 		set win .reg.regs
 
-		text $win -height 25 -width 80 -relief raised \
+		text $win -height 41 -width 45 -relief raised \
 			-borderwidth 2 \
 			-setgrid true -cursor hand2
 
@@ -1044,7 +1166,7 @@ proc update_registers {} {
 	gdb_cmd "info registers"
 	set current_output_win .command.text
 
-	$win yview 1
+	$win yview 0
 	$win configure -state disabled
 }
 
@@ -1209,6 +1331,7 @@ button .start -text Start -command \
 	 gdb_cmd {enable delete $bpnum}
 	 gdb_cmd run
 	 update_ptr }
+button .stop -text Stop -fg red -activeforeground red -state disabled -command gdb_stop
 button .step -text Step -command {gdb_cmd step ; update_ptr}
 button .next -text Next -command {gdb_cmd next ; update_ptr}
 button .continue -text Continue -command {gdb_cmd continue ; update_ptr}
@@ -1243,7 +1366,7 @@ button .files -text Files -command files_command
 
 pack .listing -side bottom -fill both -expand yes
 #pack .test -side bottom -fill x
-pack .start .step .next .continue .finish .up .down .bottom .asm_but \
+pack .start .stop .step .next .continue .finish .up .down .bottom .asm_but \
 	.registers .files .exit -side left
 toplevel .command
 wm title .command Command
@@ -1251,10 +1374,12 @@ wm title .command Command
 # Setup command window
 
 label .command.label -text "* Command Buffer *" -borderwidth 2 -relief raised
-text .command.text -height 25 -width 80 -relief raised -borderwidth 2 -setgrid true -cursor hand2
+text .command.text -height 25 -width 80 -relief raised -borderwidth 2 -setgrid true -cursor hand2 -yscrollcommand {.command.scroll set}
+scrollbar .command.scroll -orient vertical -command {.command.text yview}
 
 pack .command.label -side top -fill x
-pack .command.text -side top -expand yes -fill both
+pack .command.text -side left -expand yes -fill both
+pack .command.scroll -side right -fill y
 
 set command_line {}
 
@@ -1262,6 +1387,10 @@ gdb_cmd {set language c}
 gdb_cmd {set height 0}
 gdb_cmd {set width 0}
 
+bind .command.text <Enter> {focus %W}
+bind .command.text <Delete> {delete_char %W}
+bind .command.text <BackSpace> {delete_char %W}
+bind .command.text <Control-u> {delete_line %W}
 bind .command.text <Any-Key> {
 	global command_line
 
@@ -1280,10 +1409,7 @@ bind .command.text <Key-Return> {
 	%W insert end "(gdb) "
 	%W yview -pickplace end
 	}
-bind .command.text <Enter> {focus %W}
-bind .command.text <Delete> {delete_char %W}
-bind .command.text <BackSpace> {delete_char %W}
-bind .command.text <Control-u> {delete_line %W}
+
 proc delete_char {win} {
 	global command_line
 

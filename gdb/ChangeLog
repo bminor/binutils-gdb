@@ -1,3 +1,33 @@
+Thu Oct 20 17:35:45 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* defs.h, infrun.c (wait_for_inferior), top.c:  Call
+	target_wait_hook to allow GUI to handle blocking for inferior.  Call
+	call_command_hook in execute_command to provide means for wrapping
+	commands with GUI state change updates.
+	* gdbtk.c (gdb_cmd):  Force GUI into idle mode when errors occur.
+	* (gdb_stop):  New tcl command to stop the target process.
+	* (x_event, gdbtk_wait):  Allow GUI to interrupt gdb out of target
+	waits.
+	* (gdbtk_call_command):  Wrapper around command processing to
+	alert GUI of target state changes.
+	* (gdbtk_init):  Get the fd of X server for doing async
+	notification of X events (via x_event).  Setup new hooks.
+	* gdbtk.tcl:  Add scrollbars to assembly and command windows.
+	* Change window foreground & background colors.
+	* Create margin tag for breakpoints in source and assembly windows.
+	* Add new routines to be invoked when target state changes to/from
+	idle.
+	* Add start of expression window.
+	* Change bindings of mouse button 1 in assembly and source window
+	to just set or clear breakpoints when in the margin tag.
+	* Change shape of register window to be more vertical to better
+	reflect it's contents.
+	* Add stop button.
+	* Cleanup some code around command window bindings.
+
+	* infrun.c (wait_for_inferior):  Make sure
+	through_sigtramp_breakpoint is non-null before deleting.
+
 Thu Oct 20 10:26:43 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
 
 	* config/powerpc/ppc-nw.mt (TDEPFILES): Removed exec.o.

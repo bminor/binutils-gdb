@@ -54,6 +54,8 @@ static Tcl_Interp *interp = NULL;
 /* Handle for TK main window */
 static Tk_Window mainWindow = NULL;
 
+static int x_fd;		/* X network socket */
+
 static void
 null_routine(arg)
      int arg;
@@ -336,6 +338,12 @@ gdb_cmd (clientData, interp, argc, argv)
 
   val = catch_errors (gdb_cmd_stub, argv[1], "", RETURN_MASK_ERROR);
 
+  /* In case of an error, we may need to force the GUI into idle mode because
+     gdbtk_call_command may have bombed out while in the command routine.  */
+
+  if (val == 0)
+    Tcl_VarEval (interp, "gdbtk_tcl_idle", NULL);
+
   bpstat_do_actions (&stop_bpstat);
   do_cleanups (old_chain);
 
@@ -367,6 +375,22 @@ gdb_listfiles (clientData, interp, argc, argv)
 
   return TCL_OK;
 }
+
+static int
+gdb_stop (clientData, interp, argc, argv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int argc;
+     char *argv[];
+{
+  extern pid_t inferior_process_group;
+
+  /* XXX - This is WRONG for remote targets.  Probably need a target vector
+     entry to do this right.  */
+
+  kill (-inferior_process_group, SIGINT);
+}
+
 
 static void
 tk_command (cmd, from_tty)
@@ -401,11 +425,59 @@ gdbtk_interactive ()
   /* Tk_DoOneEvent (TK_DONT_WAIT|TK_IDLE_EVENTS); */
 }
 
+/* Come here when there is activity on the X file descriptor. */
+
+static void
+x_event (signo)
+     int signo;
+{
+  /* Process pending events */
+
+  while (Tk_DoOneEvent (TK_DONT_WAIT|TK_ALL_EVENTS) != 0);
+}
+
+static int
+gdbtk_wait (pid, ourstatus)
+     int pid;
+     struct target_waitstatus *ourstatus;
+{
+  signal (SIGIO, x_event);
+
+  pid = target_wait (pid, ourstatus);
+
+  signal (SIGIO, SIG_IGN);
+
+  return pid;
+}
+
+/* This is called from execute_command, and provides a wrapper around
+   various command routines in a place where both protocol messages and
+   user input both flow through.  Mostly this is used for indicating whether
+   the target process is running or not.
+*/
+
+static void
+gdbtk_call_command (cmdblk, arg, from_tty)
+     struct cmd_list_element *cmdblk;
+     char *arg;
+     int from_tty;
+{
+  if (cmdblk->class == class_run)
+    {
+      Tcl_VarEval (interp, "gdbtk_tcl_busy", NULL);
+      (*cmdblk->function.cfunc)(arg, from_tty);
+      Tcl_VarEval (interp, "gdbtk_tcl_idle", NULL);
+    }
+  else
+    (*cmdblk->function.cfunc)(arg, from_tty);
+}
+
 static void
 gdbtk_init ()
 {
   struct cleanup *old_chain;
   char *gdbtk_filename;
+  int i;
 
   old_chain = make_cleanup (cleanup_init, 0);
 
@@ -430,6 +502,7 @@ gdbtk_init ()
   Tcl_CreateCommand (interp, "gdb_cmd", gdb_cmd, NULL, NULL);
   Tcl_CreateCommand (interp, "gdb_loc", gdb_loc, NULL, NULL);
   Tcl_CreateCommand (interp, "gdb_listfiles", gdb_listfiles, NULL, NULL);
+  Tcl_CreateCommand (interp, "gdb_stop", gdb_stop, NULL, NULL);
 
   gdbtk_filename = getenv ("GDBTK_FILENAME");
   if (!gdbtk_filename)
@@ -441,6 +514,19 @@ gdbtk_init ()
   if (Tcl_EvalFile (interp, gdbtk_filename) != TCL_OK)
     error ("Failure reading %s: %s", gdbtk_filename, interp->result);
 
+  /* XXX - Get the file descriptor for the network socket.  This is not Kosher
+     as it involves looking at data private to Xlib.  */
+
+  x_fd = Tk_Display (mainWindow) -> fd;
+
+  /* Setup for I/O interrupts */
+
+  signal (SIGIO, SIG_IGN);
+
+  i = fcntl (x_fd, F_GETFL, 0);
+  fcntl (x_fd, F_SETFL, i|FASYNC);
+  fcntl (x_fd, F_SETOWN, getpid()); 
+
   command_loop_hook = Tk_MainLoop;
   fputs_unfiltered_hook = gdbtk_fputs;
   print_frame_info_listing_hook = null_routine;
@@ -451,6 +537,8 @@ gdbtk_init ()
   enable_breakpoint_hook = gdbtk_enable_breakpoint;
   disable_breakpoint_hook = gdbtk_disable_breakpoint;
   interactive_hook = gdbtk_interactive;
+  target_wait_hook = gdbtk_wait;
+  call_command_hook = gdbtk_call_command;
 
   discard_cleanups (old_chain);
 

@@ -689,7 +689,7 @@ extern char *strerror PARAMS ((int));			/* 4.11.6.2 */
 # endif /* Not GNU C */
 #endif /* alloca not defined */
 
-/* TARGET_BYTE_ORDER and HOST_BYTE_ORDER must be defined to one of these.  */
+/* HOST_BYTE_ORDER must be defined to one of these.  */
 
 #if !defined (BIG_ENDIAN)
 #define BIG_ENDIAN 4321
@@ -705,6 +705,17 @@ extern char *strerror PARAMS ((int));			/* 4.11.6.2 */
    tm-*.h files, built by the `configure' script.  */
 
 #include "tm.h"
+
+#ifdef TARGET_BYTE_ORDER_SELECTABLE
+/* The target endianness is selectable at runtime.  Define
+   TARGET_BYTE_ORDER to be a variable.  The user can use the `set
+   endian' command to change it.  */
+#undef TARGET_BYTE_ORDER
+#define TARGET_BYTE_ORDER target_byte_order
+extern int target_byte_order;
+#endif
+
+extern void set_endian_from_file PARAMS ((bfd *));
 
 /* Number of bits in a char or unsigned char for the target machine.
    Just like CHAR_BIT in <limits.h> but describes the target machine.  */
@@ -778,6 +789,8 @@ extern char *strerror PARAMS ((int));			/* 4.11.6.2 */
    from byte/word byte order.  */
 
 #if !defined (BITS_BIG_ENDIAN)
+#ifndef TARGET_BYTE_ORDER_SELECTABLE
+
 #if TARGET_BYTE_ORDER == BIG_ENDIAN
 #define BITS_BIG_ENDIAN 1
 #endif /* Big endian.  */
@@ -785,6 +798,12 @@ extern char *strerror PARAMS ((int));			/* 4.11.6.2 */
 #if TARGET_BYTE_ORDER == LITTLE_ENDIAN
 #define BITS_BIG_ENDIAN 0
 #endif /* Little endian.  */
+
+#else /* defined (TARGET_BYTE_ORDER_SELECTABLE) */
+
+#define BITS_BIG_ENDIAN (TARGET_BYTE_ORDER == BIG_ENDIAN)
+
+#endif /* defined (TARGET_BYTE_ORDER_SELECTABLE) */
 #endif /* BITS_BIG_ENDIAN not defined.  */
 
 /* In findvar.c.  */
@@ -853,6 +872,17 @@ extern void (*delete_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 extern void (*enable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 extern void (*disable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 extern void (*interactive_hook) PARAMS ((void));
+
+#ifdef __STDC__
+struct target_waitstatus;
+struct cmd_list_element;
+#endif
+
+extern int (*target_wait_hook) PARAMS ((int pid,
+					struct target_waitstatus *status));
+
+extern void (*call_command_hook) PARAMS ((struct cmd_list_element *c,
+					  char *cmd, int from_tty));
 
 /* Inhibit window interface if non-zero. */
 

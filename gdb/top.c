@@ -379,6 +379,16 @@ void (*disable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 
 void (*interactive_hook) PARAMS ((void));
 
+/* Called when going to wait for the target.  Usually allows the GUI to run
+   while waiting for target events.  */
+
+int (*target_wait_hook) PARAMS ((int pid, struct target_waitstatus *status));
+
+/* Used by UI as a wrapper around command execution.  May do various things
+   like enabling/disabling buttons, etc...  */
+
+void (*call_command_hook) PARAMS ((struct cmd_list_element *c, char *cmd,
+				   int from_tty));
 
 /* Where to go for return_to_top_level (RETURN_ERROR).  */
 jmp_buf error_return;
@@ -858,6 +868,8 @@ execute_command (p, from_tty)
 	do_setshow_command (arg, from_tty & caution, c);
       else if (c->function.cfunc == NO_FUNCTION)
 	error ("That is not a command, just a help topic.");
+      else if (call_command_hook)
+	call_command_hook (c, arg, from_tty & caution);
       else
 	(*c->function.cfunc) (arg, from_tty & caution);
    }

@@ -308,7 +308,7 @@ proceed (addr, siggnal, step)
      breakpoint to be hit again, but you can always continue, so it's not
      a big deal.)  */
 
-  if (! step && PREPARE_TO_PROCEED && breakpoint_here_p (read_pc ()))
+  if (! step && PREPARE_TO_PROCEED (1) && breakpoint_here_p (read_pc ()))
     oneproc = 1;
 #endif /* PREPARE_TO_PROCEED */
 
@@ -362,10 +362,8 @@ The same program may be running in another process.");
    to be preserved over calls to it and cleared when the inferior
    is started.  */
 static CORE_ADDR prev_pc;
-static CORE_ADDR prev_sp;
 static CORE_ADDR prev_func_start;
 static char *prev_func_name;
-static CORE_ADDR prev_frame_address;
 
 
 /* Start remote-debugging of a machine over a serial link.  */
@@ -388,10 +386,8 @@ init_wait_for_inferior ()
 {
   /* These are meaningless until the first time through wait_for_inferior.  */
   prev_pc = 0;
-  prev_sp = 0;
   prev_func_start = 0;
   prev_func_name = NULL;
-  prev_frame_address = 0;
 
   trap_expected_after_continue = 0;
   breakpoints_inserted = 0;
@@ -423,7 +419,6 @@ wait_for_inferior ()
   struct target_waitstatus w;
   int another_trap;
   int random_signal;
-  CORE_ADDR stop_sp = 0;
   CORE_ADDR stop_func_start;
   CORE_ADDR stop_func_end;
   char *stop_func_name;
@@ -436,6 +431,7 @@ wait_for_inferior ()
   struct breakpoint *step_resume_breakpoint = NULL;
   struct breakpoint *through_sigtramp_breakpoint = NULL;
   int pid;
+  int update_step_sp = 0;
 
   old_cleanups = make_cleanup (delete_breakpoint_current_contents,
 			       &step_resume_breakpoint);
@@ -462,7 +458,10 @@ wait_for_inferior ()
 
       registers_changed ();
 
-      pid = target_wait (-1, &w);
+      if (target_wait_hook)
+	pid = target_wait_hook (-1, &w);
+      else
+	pid = target_wait (-1, &w);
 
       flush_cached_frames ();
 
@@ -473,6 +472,17 @@ wait_for_inferior ()
 	{
 	  fprintf_unfiltered (gdb_stderr, "[New %s]\n", target_pid_to_str (pid));
 	  add_thread (pid);
+
+	  /* We may want to consider not doing a resume here in order to give
+	     the user a chance to play with the new thread.  It might be good
+	     to make that a user-settable option.  */
+
+	  /* At this point, all threads are stopped (happens automatically in
+	     either the OS or the native code).  Therefore we need to continue
+	     all threads in order to make progress.  */
+
+	  target_resume (-1, 0, TARGET_SIGNAL_0);
+	  continue;
 	}
 
       switch (w.kind)
@@ -498,8 +508,7 @@ wait_for_inferior ()
 	    printf_filtered ("\nProgram exited with code 0%o.\n", 
 			     (unsigned int)w.value.integer);
 	  else
-	    if (!batch_mode())
-	      printf_filtered ("\nProgram exited normally.\n");
+	    printf_filtered ("\nProgram exited normally.\n");
 	  gdb_flush (gdb_stdout);
 	  target_mourn_inferior ();
 #ifdef NO_SINGLE_STEP
@@ -559,7 +568,11 @@ wait_for_inferior ()
 	      target_resume (pid, 1, TARGET_SIGNAL_0); /* Single step */
 	      /* FIXME: What if a signal arrives instead of the single-step
 		 happening?  */
-	      target_wait (pid, &w);
+
+	      if (target_wait_hook)
+		target_wait_hook (pid, &w);
+	      else
+		target_wait (pid, &w);
 	      insert_breakpoints ();
 	      target_resume (pid, 0, TARGET_SIGNAL_0);
 	      continue;
@@ -630,7 +643,6 @@ wait_for_inferior ()
 	      through_sigtramp_breakpoint = NULL;
 	    }
 	  prev_pc = 0;
-	  prev_sp = 0;
 	  prev_func_name = NULL;
 	  step_range_start = 0;
 	  step_range_end = 0;
@@ -653,9 +665,6 @@ wait_for_inferior ()
 	  resume (1, 0);
 	  continue;
 	}
-
-      set_current_frame (create_new_frame (read_fp (), stop_pc));
-      select_frame (get_current_frame (), 0);
 
 #ifdef HAVE_STEPPABLE_WATCHPOINT
       /* It may not be necessary to disable the watchpoint to stop over
@@ -696,8 +705,6 @@ wait_for_inferior ()
       STOPPED_BY_WATCHPOINT (w);
 #endif
 
-      stop_frame_address = FRAME_FP (get_current_frame ());
-      stop_sp = read_sp ();
       stop_func_start = 0;
       stop_func_name = 0;
       /* Don't care about return value; stop_func_start and stop_func_name
@@ -758,7 +765,7 @@ wait_for_inferior ()
 	    {
 	      /* See if there is a breakpoint at the current PC.  */
 	      stop_bpstat = bpstat_stop_status
-		(&stop_pc, stop_frame_address,
+		(&stop_pc,
 #if DECR_PC_AFTER_BREAK
 		 /* Notice the case of stepping through a jump
 		    that lands just after a breakpoint.
@@ -782,7 +789,8 @@ wait_for_inferior ()
 	      = !(bpstat_explains_signal (stop_bpstat)
 		  || trap_expected
 #ifndef CALL_DUMMY_BREAKPOINT_OFFSET
-		  || PC_IN_CALL_DUMMY (stop_pc, stop_sp, stop_frame_address)
+		  || PC_IN_CALL_DUMMY (stop_pc, read_sp (),
+				       FRAME_FP (get_current_frame ()))
 #endif /* No CALL_DUMMY_BREAKPOINT_OFFSET.  */
 		  || (step_range_end && step_resume_breakpoint == NULL));
 	  else
@@ -793,7 +801,8 @@ wait_for_inferior ()
 		       news) give another signal besides SIGTRAP,
 		       so check here as well as above.  */
 #ifndef CALL_DUMMY_BREAKPOINT_OFFSET
-		    || PC_IN_CALL_DUMMY (stop_pc, stop_sp, stop_frame_address)
+		    || PC_IN_CALL_DUMMY (stop_pc, read_sp (),
+					 FRAME_FP (get_current_frame ()))
 #endif /* No CALL_DUMMY_BREAKPOINT_OFFSET.  */
 		    );
 	      if (!random_signal)
@@ -904,7 +913,7 @@ wait_for_inferior ()
 #if 0
 	    /* FIXME - Need to implement nested temporary breakpoints */
 	    if (step_over_calls
-		&& (stop_frame_address
+		&& (FRAME_FP (get_current_frame ())
 		    INNER_THAN step_frame_address))
 	      {
 		another_trap = 1;
@@ -950,7 +959,8 @@ wait_for_inferior ()
 	    break;
 
 	  case BPSTAT_WHAT_THROUGH_SIGTRAMP:
-	    delete_breakpoint (through_sigtramp_breakpoint);
+	    if (through_sigtramp_breakpoint)
+	      delete_breakpoint (through_sigtramp_breakpoint);
 	    through_sigtramp_breakpoint = NULL;
 
 	    /* If were waiting for a trap, hitting the step_resume_break
@@ -983,7 +993,7 @@ wait_for_inferior ()
 	 just stop silently, unless the user was doing an si/ni, in which
 	 case she'd better know what she's doing.  */
 
-      if (PC_IN_CALL_DUMMY (stop_pc, stop_sp, stop_frame_address)
+      if (PC_IN_CALL_DUMMY (stop_pc, read_sp (), FRAME_FP (get_current_frame ()))
 	  && !step_range_end)
 	{
 	  stop_print_frame = 0;
@@ -1017,17 +1027,21 @@ wait_for_inferior ()
 	     step range and either the stack or frame pointers
 	     just changed, we've stepped outside */
 	  && !(stop_pc == step_range_start
-	       && stop_frame_address
-	       && (stop_sp INNER_THAN prev_sp
-		   || stop_frame_address != step_frame_address)))
+	       && FRAME_FP (get_current_frame ())
+	       && (read_sp () INNER_THAN step_sp
+		   || FRAME_FP (get_current_frame ()) != step_frame_address)))
 	{
 	  /* We might be doing a BPSTAT_WHAT_SINGLE and getting a signal.
 	     So definately need to check for sigtramp here.  */
 	  goto check_sigtramp2;
 	}
 
-      /* We stepped out of the stepping range.  See if that was due
-	 to a subroutine call that we should proceed to the end of.  */
+      /* We stepped out of the stepping range.  */
+
+      /* We can't update step_sp every time through the loop, because
+	 reading the stack pointer would slow down stepping too much.
+	 But we can update it every time we leave the step range.  */
+      update_step_sp = 1;
 
       /* Did we just take a signal?  */
       if (IN_SIGTRAMP (stop_pc, stop_func_name)
@@ -1052,8 +1066,7 @@ wait_for_inferior ()
 	    sr_sal.symtab = NULL;
 	    sr_sal.line = 0;
 	    /* We could probably be setting the frame to
-	       prev_frame_address; the reason we don't is that it didn't used
-	       to exist.  */
+	       step_frame_address; I don't think anyone thought to try it.  */
 	    step_resume_breakpoint =
 	      set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
 	    if (breakpoints_inserted)
@@ -1073,6 +1086,9 @@ wait_for_inferior ()
 	}
 
 #if 1
+      /* See if we left the step range due to a subroutine call that
+	 we should proceed to the end of.  */
+
       if (stop_func_start)
 	{
 	  struct symtab *s;
@@ -1096,7 +1112,7 @@ wait_for_inferior ()
 	   /* Might be a recursive call if either we have a prologue
 	      or the call instruction itself saves the PC on the stack.  */
 	   || prologue_pc != stop_func_start
-	   || stop_sp != prev_sp)
+	   || read_sp () != step_sp)
 	  && (/* PC is completely out of bounds of any known objfiles.  Treat
 		 like a subroutine call. */
 	      ! stop_func_start
@@ -1111,6 +1127,16 @@ wait_for_inferior ()
 		 jump back into them, so this check is OK.  */
 
 	      || stop_pc < prologue_pc
+
+	      /* ...and if it is a leaf function, the prologue might
+ 		 consist of gp loading only, so the call transfers to
+ 		 the first instruction after the prologue.  */
+ 	      || (stop_pc == prologue_pc
+
+		  /* Distinguish this from the case where we jump back
+		     to the first instruction after the prologue,
+		     within a function.  */
+		   && stop_func_start != prev_func_start)
 
 	      /* If we end up in certain places, it means we did a subroutine
 		 call.  I'm not completely sure this is necessary now that we
@@ -1183,7 +1209,7 @@ step_over_function:
 	    step_resume_breakpoint =
 	      set_momentary_breakpoint (sr_sal, get_current_frame (),
 					bp_step_resume);
-	    step_resume_breakpoint->frame = prev_frame_address;
+	    step_resume_breakpoint->frame = step_frame_address;
 	    if (breakpoints_inserted)
 	      insert_breakpoints ();
 	  }
@@ -1341,8 +1367,10 @@ step_into_function:
 					  been at the start of a
 					  function. */
       prev_func_name = stop_func_name;
-      prev_sp = stop_sp;
-      prev_frame_address = stop_frame_address;
+
+      if (update_step_sp)
+	step_sp = read_sp ();
+      update_step_sp = 0;
 
       /* If we did not do break;, it means we should keep
 	 running the inferior and not return to debugger.  */
@@ -1417,8 +1445,6 @@ step_into_function:
       prev_pc = read_pc ();
       prev_func_start = stop_func_start;
       prev_func_name = stop_func_name;
-      prev_sp = stop_sp;
-      prev_frame_address = stop_frame_address;
     }
   do_cleanups (old_cleanups);
 }
@@ -1492,6 +1518,8 @@ Further execution is probably impossible.\n");
      if we have one.  */
   if (!stop_stack_dummy)
     {
+      select_frame (get_current_frame (), 0);
+
       if (stop_print_frame)
 	{
 	  int source_only;
@@ -1499,7 +1527,7 @@ Further execution is probably impossible.\n");
 	  source_only = bpstat_print (stop_bpstat);
 	  source_only = source_only ||
 	        (   stop_step
-		 && step_frame_address == stop_frame_address
+		 && step_frame_address == FRAME_FP (get_current_frame ())
 		 && step_start_function == find_pc_function (stop_pc));
 
           print_stack_frame (selected_frame, -1, source_only? -1: 1);
@@ -1828,7 +1856,6 @@ save_inferior_status (inf_status, restore_stack_info)
 {
   inf_status->stop_signal = stop_signal;
   inf_status->stop_pc = stop_pc;
-  inf_status->stop_frame_address = stop_frame_address;
   inf_status->stop_step = stop_step;
   inf_status->stop_stack_dummy = stop_stack_dummy;
   inf_status->stopped_by_random_signal = stopped_by_random_signal;
@@ -1898,7 +1925,6 @@ restore_inferior_status (inf_status)
 {
   stop_signal = inf_status->stop_signal;
   stop_pc = inf_status->stop_pc;
-  stop_frame_address = inf_status->stop_frame_address;
   stop_step = inf_status->stop_step;
   stop_stack_dummy = inf_status->stop_stack_dummy;
   stopped_by_random_signal = inf_status->stopped_by_random_signal;
