@@ -195,6 +195,7 @@ store_register (int regno)
   register int i;
   unsigned int offset;		/* Offset of registers within the u area.  */
   int tid;
+  char *buf = alloca (MAX_REGISTER_RAW_SIZE);
 
   if (CANNOT_STORE_REGISTER (regno))
     {
@@ -208,11 +209,16 @@ store_register (int regno)
   offset = U_REGS_OFFSET;
 
   regaddr = register_addr (regno, offset);
+
+  /* Put the contents of regno into a local buffer */
+  regcache_collect (regno, buf);
+
+  /* Store the local buffer into the inferior a chunk at the time. */
   for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
       ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) regaddr,
-	      *(PTRACE_XFER_TYPE *) & registers[REGISTER_BYTE (regno) + i]);
+	      *(PTRACE_XFER_TYPE *) (buf + i));
       regaddr += sizeof (PTRACE_XFER_TYPE);
       if (errno != 0)
 	{
@@ -370,15 +376,12 @@ fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
   /* Fill in the floating-point registers.  */
   for (i = FP0_REGNUM; i < FP0_REGNUM + 8; i++)
     if (regno == -1 || regno == i)
-      memcpy (FPREG_ADDR (fpregsetp, regno - FP0_REGNUM),
-	      &registers[REGISTER_BYTE (regno)],
-	      REGISTER_RAW_SIZE(regno));
+      regcache_collect (regno, FPREG_ADDR (fpregsetp, regno - FP0_REGNUM));
 
   /* Fill in the floating-point control registers.  */
   for (i = FPC_REGNUM; i <= FPI_REGNUM; i++)
     if (regno == -1 || regno == i)
-      fpregsetp->fpcntl[regno - FPC_REGNUM]
-	= *(int *) &registers[REGISTER_BYTE (regno)];
+      regcache_collect (regno, fpregsetp->fpcntl[regno - FPC_REGNUM]);
 }
 
 #ifdef HAVE_PTRACE_GETREGS

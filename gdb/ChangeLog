@@ -1,3 +1,8 @@
+2002-01-30  Andreas Schwab  <schwab@suse.de>
+
+	* m68klinux-nat.c: Fix last change to use regcache_collect
+	instead of referencing registers[] directly.
+
 2002-01-29  Andrew Cagney  <ac131313@redhat.com>
 
 	* parse.c (target_map_name_to_register): Delete code wrapped in
