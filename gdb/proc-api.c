@@ -780,16 +780,16 @@ _initialize_proc_api (void)
 {
   struct cmd_list_element *c;
 
-  add_setshow_boolean_cmd ("procfs-trace", no_class, &procfs_trace, _("\ 
-Set tracing for /proc api calls."), _("\
-Show tracing for /proc api calls."), NULL,
+  add_setshow_boolean_cmd ("procfs-trace", no_class, &procfs_trace,
+			   _("Set tracing for /proc api calls."),
+			   _("Show tracing for /proc api calls."), NULL,
 			   set_procfs_trace_cmd,
 			   NULL, /* FIXME: i18n: */
 			   &setlist, &showlist);
 
-  add_setshow_filename_cmd ("procfs-file", no_class, &procfs_filename, _("\
-Set filename for /proc tracefile."), _("\
-Show filename for /proc tracefile."), NULL,
+  add_setshow_filename_cmd ("procfs-file", no_class, &procfs_filename,
+			    _("Set filename for /proc tracefile."),
+			    _("Show filename for /proc tracefile."), NULL,
 			    set_procfs_file_cmd,
 			    NULL, /* FIXME: i18n: */
 			    &setlist, &showlist);

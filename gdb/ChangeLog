@@ -1,3 +1,8 @@
+2005-03-09  David Lecomber  <david@lecomber.net>
+
+	* proc-api.c (_initialize_proc_api): Fix invalid multi-line 
+	i18n text.
+
 2005-03-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc-tdep.c (sparc_frame_cache): Adjust cached frame base
