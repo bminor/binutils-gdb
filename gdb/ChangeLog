@@ -1,3 +1,9 @@
+Thu Mar  4 08:22:55 1993  Fred Fish  (fnf@cygnus.com)
+
+	* dbxread.c (dbx_symfile_init):  Catch the case where there is
+	no string table, but the only way we find out is by reading zero
+	bytes from EOF.
+
 Wed Mar  3 15:51:28 1993  Fred Fish  (fnf@cygnus.com)
 
 	* dbxread.c (dbx_symfile_init):  Make size of the string table
