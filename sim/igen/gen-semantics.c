@@ -176,7 +176,7 @@ print_semantic_body(lf *file,
   /* Architecture expects r0 to be zero.  Instead of having to check
      every read to see if it is refering to r0 just zap the r0
      register */
-  if ((code & generate_with_zero_r0))
+  if ((code & generate_with_semantic_zero_r0))
     {
       lf_printf (file, "\n");
       lf_printf (file, "GPR(0) = 0;\n");

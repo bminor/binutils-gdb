@@ -27,8 +27,12 @@
 
 
 /* "core" module install handler.
+
    This is called via sim_module_install to install the "core" subsystem
    into the simulator.  */
+
+static MODULE_INIT_FN sim_core_init;
+static MODULE_UNINSTALL_FN sim_core_uninstall;
 
 EXTERN_SIM_CORE\
 (SIM_RC)
@@ -43,7 +47,7 @@ sim_core_install (SIM_DESC sd)
 
 /* Uninstall the "core" subsystem from the simulator.  */
 
-EXTERN_SIM_CORE\
+STATIC_SIM_CORE\
 (void)
 sim_core_uninstall (SIM_DESC sd)
 {
@@ -51,7 +55,7 @@ sim_core_uninstall (SIM_DESC sd)
 }
 
 
-EXTERN_SIM_CORE\
+STATIC_SIM_CORE\
 (SIM_RC)
 sim_core_init (SIM_DESC sd)
 {
@@ -82,7 +86,8 @@ sim_core_init (SIM_DESC sd)
 #define SIM_CORE_SIGNAL(SD,CPU,CIA,MAP,NR_BYTES,ADDR,TRANSFER,ERROR) \
 sim_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), (TRANSFER), (ERROR))
 
-static void
+STATIC_SIM_CORE\
+(void)
 sim_core_signal (SIM_DESC sd,
 		 sim_cpu *cpu,
 		 sim_cia cia,
@@ -107,10 +112,8 @@ sim_core_signal (SIM_DESC sd,
       sim_engine_abort (sd, cpu, cia, "sim_core_signal - internal error - bad switch");
     }
 }
-
-
-
 #endif
+
 
 STATIC_INLINE_SIM_CORE\
 (const char *)
@@ -126,12 +129,12 @@ sim_core_map_to_str (sim_core_maps map)
 }
 
 
-STATIC_INLINE_SIM_CORE\
+STATIC_SIM_CORE\
 (sim_core_mapping *)
 new_sim_core_mapping(SIM_DESC sd,
 		     attach_type attach,
 		     int space,
-		     unsigned_word addr,
+		     address_word addr,
 		     unsigned nr_bytes,
 		     device *device,
 		     void *buffer,
@@ -159,13 +162,13 @@ new_sim_core_mapping(SIM_DESC sd,
 }
 
 
-STATIC_INLINE_SIM_CORE\
+STATIC_SIM_CORE\
 (void)
 sim_core_map_attach(SIM_DESC sd,
 		    sim_core_map *access_map,
 		    attach_type attach,
 		    int space,
-		    unsigned_word addr,
+		    address_word addr,
 		    unsigned nr_bytes, /* host limited */
 		    device *client, /*callback/default*/
 		    void *buffer, /*raw_memory*/
@@ -224,14 +227,14 @@ sim_core_map_attach(SIM_DESC sd,
 }
 
 
-INLINE_SIM_CORE\
+EXTERN_SIM_CORE\
 (void)
 sim_core_attach(SIM_DESC sd,
 		sim_cpu *cpu,
 		attach_type attach,
 		access_type access,
 		int space,
-		unsigned_word addr,
+		address_word addr,
 		unsigned nr_bytes, /* host limited */
 		device *client,
 		void *optional_buffer)
@@ -317,7 +320,9 @@ sim_core_attach(SIM_DESC sd,
      FIXME - later this will be replaced by true processor specific
      maps. */
   for (i = 0; i < MAX_NR_PROCESSORS; i++)
-    *CPU_CORE (STATE_CPU (sd, i)) = *STATE_CORE (sd);
+    {
+      CPU_CORE (STATE_CPU (sd, i))->common = *STATE_CORE (sd);
+    }
 }
 
 
@@ -325,7 +330,7 @@ STATIC_INLINE_SIM_CORE\
 (sim_core_mapping *)
 sim_core_find_mapping(sim_core *core,
 		      sim_core_maps map,
-		      unsigned_word addr,
+		      address_word addr,
 		      unsigned nr_bytes,
 		      transfer_type transfer,
 		      int abort, /*either 0 or 1 - hint to inline/-O */
@@ -355,18 +360,18 @@ sim_core_find_mapping(sim_core *core,
 STATIC_INLINE_SIM_CORE\
 (void *)
 sim_core_translate(sim_core_mapping *mapping,
-	       unsigned_word addr)
+	       address_word addr)
 {
   return (void *)(((char *)mapping->buffer) + addr - mapping->base);
 }
 
 
-INLINE_SIM_CORE\
+EXTERN_SIM_CORE\
 (unsigned)
 sim_core_read_buffer(SIM_DESC sd,
 		     sim_core_maps map,
 		     void *buffer,
-		     unsigned_word addr,
+		     address_word addr,
 		     unsigned len)
 {
   unsigned count = 0;
@@ -404,12 +409,12 @@ sim_core_read_buffer(SIM_DESC sd,
 }
 
 
-INLINE_SIM_CORE\
+EXTERN_SIM_CORE\
 (unsigned)
 sim_core_write_buffer(SIM_DESC sd,
 		      sim_core_maps map,
 		      const void *buffer,
-		      unsigned_word addr,
+		      address_word addr,
 		      unsigned len)
 {
   unsigned count = 0;
@@ -445,6 +450,40 @@ sim_core_write_buffer(SIM_DESC sd,
   }
   return count;
 }
+
+
+EXTERN_SIM_CORE\
+(void)
+sim_core_set_xor (sim_cpu *cpu,
+		  sim_cia cia,
+		  int is_xor)
+{
+  sim_cpu_core *cpu_core = CPU_CORE (cpu);
+  /* set up the XOR registers if required. */
+  if (WITH_XOR_ENDIAN) {
+    {
+      int i = 1;
+      unsigned mask;
+      if (is_xor)
+	mask = WITH_XOR_ENDIAN - 1;
+      else
+	mask = 0;
+      while (i - 1 < WITH_XOR_ENDIAN)
+	{
+	  cpu_core->xor[i-1] = mask;
+	  mask = (mask << 1) & (WITH_XOR_ENDIAN - 1);
+	  i = (i << 1);
+	}
+    }
+  }
+  else {
+    if (is_xor)
+      sim_engine_abort (CPU_STATE (cpu), cpu, cia,
+			"Attempted to enable xor-endian mode when permenantly disabled.");
+  }
+}
+
+
 
 
 /* define the read/write 1/2/4/8/word functions */

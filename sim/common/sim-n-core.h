@@ -40,14 +40,22 @@ INLINE_SIM_CORE(unsigned_N)
 sim_core_read_aligned_N(sim_cpu *cpu,
 			sim_cia cia,
 			sim_core_maps map,
-			unsigned_word addr)
+			unsigned_word xaddr)
 {
+  sim_cpu_core *cpu_core = CPU_CORE (cpu);
+  sim_core *core = &cpu_core->common;
   unsigned_N val;
-  sim_core_mapping *mapping = sim_core_find_mapping (CPU_CORE (cpu), map,
-						     addr,
-						     sizeof (unsigned_N),
-						     1,
-						     cpu, cia); /*abort*/
+  sim_core_mapping *mapping;
+  address_word addr;
+  if (WITH_XOR_ENDIAN)
+    addr = xaddr ^ cpu_core->xor[(sizeof(unsigned_N) - 1) % WITH_XOR_ENDIAN];
+  else
+    addr = xaddr;
+  mapping = sim_core_find_mapping (core, map,
+				   addr,
+				   sizeof (unsigned_N),
+				   read_transfer,
+				   1 /*abort*/, cpu, cia);
 #if (WITH_DEVICES)
   if (WITH_CALLBACK_MEMORY && mapping->device != NULL) {
     unsigned_N data;
@@ -56,7 +64,8 @@ sim_core_read_aligned_N(sim_cpu *cpu,
 			       mapping->space,
 			       addr,
 			       sizeof (unsigned_N)) != sizeof (unsigned_N))
-      device_error (mapping->device, "internal error - sim_core_read_N() - io_read_buffer should not fail");
+      device_error (mapping->device, "internal error - %s - io_read_buffer should not fail",
+		    XSTRING (sim_core_read_aligned_N));
     val = T2H_N (data);
   }
   else
@@ -78,7 +87,7 @@ INLINE_SIM_CORE(unsigned_N)
 sim_core_read_unaligned_N(sim_cpu *cpu,
 			  sim_cia cia,
 			  sim_core_maps map,
-			  unsigned_word addr)
+			  address_word addr)
 {
   int alignment = sizeof (unsigned_N) - 1;
   /* if hardwired to forced alignment just do it */
@@ -90,9 +99,9 @@ sim_core_read_unaligned_N(sim_cpu *cpu,
     switch (CURRENT_ALIGNMENT)
       {
       case STRICT_ALIGNMENT:
-	/* FIXME - notify abort handler */
-	sim_io_error (CPU_STATE (cpu), "read-%d - misaligned access to 0x%lx",
-		      sizeof (unsigned_N), (unsigned long) addr);
+	SIM_CORE_SIGNAL (CPU_STATE (cpu), cpu, cia, map,
+			 sizeof (unsigned_N), addr,
+			 read_transfer, sim_core_unaligned_signal);
 	return -1;
       case NONSTRICT_ALIGNMENT:
 	{
@@ -100,18 +109,23 @@ sim_core_read_unaligned_N(sim_cpu *cpu,
 	  if (sim_core_read_buffer (CPU_STATE (cpu), map, &val, addr,
 				    sizeof(unsigned_N))
 	      != sizeof(unsigned_N))
-	    sim_io_error(CPU_STATE (cpu), "misaligned %d byte read to 0x%lx failed",
-			 sizeof(unsigned_N), (unsigned long) addr);
+	    SIM_CORE_SIGNAL (CPU_STATE (cpu), cpu, cia, map,
+			     sizeof (unsigned_N), addr,
+			     read_transfer, sim_core_unaligned_signal);
 	  val = T2H_N(val);
 	  return val;
 	}
       case FORCED_ALIGNMENT:
 	return sim_core_read_aligned_N (cpu, cia, map, addr & ~alignment);
       case MIXED_ALIGNMENT:
-	sim_io_error (CPU_STATE (cpu), "internal error - sim_core_read_unaligned_N - mixed alignment");
+	sim_engine_abort (CPU_STATE (cpu), cpu, cia,
+			  "internal error - %s - mixed alignment",
+			  XSTRING (sim_core_read_unaligned_N));
 	return 0;
       default:
-	sim_io_error (CPU_STATE (cpu), "internal error - sim_core_read_unaligned_N - bad switch");
+	sim_engine_abort (CPU_STATE (cpu), cpu, cia,
+			  "internal error - %s - bad switch",
+			  XSTRING (sim_core_read_unaligned_N));
 	return 0;
       }
 }
@@ -121,14 +135,22 @@ INLINE_SIM_CORE(void)
 sim_core_write_aligned_N(sim_cpu *cpu,
 			 sim_cia cia,
 			 sim_core_maps map,
-			 unsigned_word addr,
+			 unsigned_word xaddr,
 			 unsigned_N val)
 {
-  sim_core_mapping *mapping = sim_core_find_mapping(CPU_CORE (cpu), map,
-						    addr,
-						    sizeof (unsigned_N),
-						    1,
-						    cpu, cia); /*abort*/
+  sim_cpu_core *cpu_core = CPU_CORE (cpu);
+  sim_core *core = &cpu_core->common;
+  sim_core_mapping *mapping;
+  address_word addr;
+  if (WITH_XOR_ENDIAN)
+    addr = xaddr ^ cpu_core->xor[(sizeof(unsigned_N) - 1) % WITH_XOR_ENDIAN];
+  else
+    addr = xaddr;
+  mapping = sim_core_find_mapping(core, map,
+				  addr,
+				  sizeof (unsigned_N),
+				  write_transfer,
+				  1 /*abort*/, cpu, cia);
 #if (WITH_DEVICES)
   if (WITH_CALLBACK_MEMORY && mapping->device != NULL) {
     unsigned_N data = H2T_N (val);
@@ -139,7 +161,8 @@ sim_core_write_aligned_N(sim_cpu *cpu,
 				sizeof (unsigned_N), /* nr_bytes */
 				cpu,
 				cia) != sizeof (unsigned_N))
-      device_error (mapping->device, "internal error - sim_core_write_N() - io_write_buffer should not fail");
+      device_error (mapping->device, "internal error - %s - io_write_buffer should not fail",
+		    XSTRING (sim_core_write_aligned_N));
   }
   else
 #endif
@@ -159,7 +182,7 @@ INLINE_SIM_CORE(void)
 sim_core_write_unaligned_N(sim_cpu *cpu,
 			   sim_cia cia,
 			   sim_core_maps map,
-			   unsigned_word addr,
+			   address_word addr,
 			   unsigned_N val)
 {
   int alignment = sizeof (unsigned_N) - 1;
@@ -172,10 +195,9 @@ sim_core_write_unaligned_N(sim_cpu *cpu,
     switch (CURRENT_ALIGNMENT)
       {
       case STRICT_ALIGNMENT:
-	/* FIXME - notify abort handler */
-	sim_io_error (CPU_STATE (cpu),
-		      "write-%d - misaligned access to 0x%lx",
-		      sizeof (unsigned_N), (unsigned long) addr);
+	SIM_CORE_SIGNAL (CPU_STATE (cpu), cpu, cia, map,
+			 sizeof (unsigned_N), addr,
+			 write_transfer, sim_core_unaligned_signal);
 	break;
       case NONSTRICT_ALIGNMENT:
 	{
@@ -183,18 +205,22 @@ sim_core_write_unaligned_N(sim_cpu *cpu,
 	  if (sim_core_write_buffer (CPU_STATE (cpu), map, &val, addr,
 				     sizeof(unsigned_N))
 	      != sizeof(unsigned_N))
-	    sim_io_error(CPU_STATE (cpu),
-			 "misaligned %d byte read to 0x%lx failed",
-			 sizeof(unsigned_N), (unsigned long) addr);
+	    SIM_CORE_SIGNAL (CPU_STATE (cpu), cpu, cia, map,
+			     sizeof (unsigned_N), addr,
+			     write_transfer, sim_core_unaligned_signal);
 	  break;
 	}
       case FORCED_ALIGNMENT:
 	sim_core_write_aligned_N (cpu, cia, map, addr & ~alignment, val);
       case MIXED_ALIGNMENT:
-	sim_io_error (CPU_STATE (cpu), "internal error - sim_core_write_unaligned_N - mixed alignment");
+	sim_engine_abort (CPU_STATE (cpu), cpu, cia,
+			  "internal error - %s - mixed alignment",
+			  XSTRING (sim_core_write_unaligned_N));
 	break;
       default:
-	sim_io_error (CPU_STATE (cpu), "internal error - sim_core_write_unaligned_N - bad switch");
+	sim_engine_abort (CPU_STATE (cpu), cpu, cia,
+			  "internal error - %s - bad switch",
+			  XSTRING (sim_core_write_unaligned_N));
 	break;
       }
 }

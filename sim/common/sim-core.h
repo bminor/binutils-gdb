@@ -23,6 +23,18 @@
 #define _SIM_CORE_H_
 
 
+/* core signals (error conditions) */
+
+typedef enum {
+  sim_core_unmapped_signal,
+  sim_core_unaligned_signal,
+  nr_sim_core_signals,
+} sim_core_signals;
+
+/* define SIM_CORE_SIGNAL to catch these signals - see sim-core.c for details */
+
+
+
 /* basic types */
 
 typedef struct _sim_core_mapping sim_core_mapping;
@@ -66,9 +78,13 @@ struct _sim_core {
 };
 
 
-/* Per CPU distributed component of the core */
+/* Per CPU distributed component of the core.  At present this is
+   mostly a clone of the global core data structure. */
 
-typedef sim_core sim_cpu_core;
+typedef struct _sim_cpu_core {
+  sim_core common;
+  address_word xor[WITH_XOR_ENDIAN];
+} sim_cpu_core;
 
 
 /* Install the "core" module.  */
@@ -77,28 +93,21 @@ EXTERN_SIM_CORE\
 (SIM_RC) sim_core_install (SIM_DESC sd);
 
 
-/* Uninstall the "core" subsystem.  */
+
+/* Configure the per-cpu core's XOR endian transfer mode.  Only
+   applicable when WITH_XOR_ENDIAN is enabled.
+
+   Targets suporting XOR endian, shall notify the core of any changes
+   in state via this call.
+
+   FIXME - XOR endian memory transfers currently only work when made
+   through a correctly aligned cpu load/store. */
 
 EXTERN_SIM_CORE\
-(void)
-sim_core_uninstall (SIM_DESC sd);
-
-
-
-/* initialize */
-
-EXTERN_SIM_CORE\
-(SIM_RC) sim_core_init
-(SIM_DESC sd);
-
-
-
-/* tracing */
-
-INLINE_SIM_CORE\
-(void) sim_core_set_trace\
-(SIM_DESC sd,
- int level);
+(void) sim_core_set_xor\
+(sim_cpu *cpu,
+ sim_cia cia,
+ int is_xor);
 
 
 
@@ -107,14 +116,14 @@ INLINE_SIM_CORE\
    The CPU option (when non NULL) specifes the single processor that
    the memory space is to be attached to. (unimplemented) */
 
-INLINE_SIM_CORE\
+EXTERN_SIM_CORE\
 (void) sim_core_attach
 (SIM_DESC sd,
  sim_cpu *cpu,
  attach_type attach,
  access_type access,
  int address_space,
- unsigned_word addr,
+ address_word addr,
  unsigned nr_bytes, /* host limited */
  device *client,
  void *optional_buffer);
@@ -127,20 +136,20 @@ INLINE_SIM_CORE\
    target.  Should any problems occure, the number of bytes
    successfully transfered is returned. */
 
-INLINE_SIM_CORE\
+EXTERN_SIM_CORE\
 (unsigned) sim_core_read_buffer
 (SIM_DESC sd,
  sim_core_maps map,
  void *buffer,
- unsigned_word addr,
+ address_word addr,
  unsigned nr_bytes);
 
-INLINE_SIM_CORE\
+EXTERN_SIM_CORE\
 (unsigned) sim_core_write_buffer
 (SIM_DESC sd,
  sim_core_maps map,
  const void *buffer,
- unsigned_word addr,
+ address_word addr,
  unsigned nr_bytes);
 
 
@@ -161,7 +170,7 @@ INLINE_SIM_CORE\
 (sim_cpu *cpu, \
  sim_cia cia, \
  sim_core_maps map, \
- unsigned_word addr, \
+ address_word addr, \
  unsigned_##N val);
 
 DECLARE_SIM_CORE_WRITE_N(aligned,1)
@@ -190,7 +199,7 @@ INLINE_SIM_CORE\
 (sim_cpu *cpu, \
  sim_cia cia, \
  sim_core_maps map, \
- unsigned_word addr);
+ address_word addr);
 
 DECLARE_SIM_CORE_READ_N(aligned,1)
 DECLARE_SIM_CORE_READ_N(aligned,2)

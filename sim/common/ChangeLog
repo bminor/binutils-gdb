@@ -1,3 +1,27 @@
+Fri May 23 14:24:31 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-inline.h: Review description.
+	
+	* sim-core.h, sim-core.c: Reduce number of functions being inlined
+ 	to just those involved in data transfers and configuration.
+	
+	* sim-xcat.h (XSTRING): New macro, map macro definition onto
+ 	string.
+	* sim-n-core.h (sim_core_read_aligned_N): Use.
+	(sim_core_read_unaligned_N): Ditto.
+	(sim_core_read_unaligned_N): Ditto..
+	(sim_core_write_unaligned_N): Ditto.
+	
+	* sim-core.h: Add xor endian bitmap to main structure.  *
+	
+ 	sim-n-core.h (sim_core_write_aligned_N): Add suport for xor
+ 	endian.
+	(sim_core_read_aligned_N): Ditto.
+
+	* sim-core.c (sim_core_set_xor_endian): New function.
+	(sim_core_attach): Don't overwrite the per-cpu xor map when
+ 	cloning the global core.
+
 Fri May 23 10:53:13 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-engine.h: Update below so that it is using an enumerated
