@@ -10,6 +10,7 @@ gdb-patches@sources.redhat.com
 	Maintainers for particular sims:
 
 arm	        Nick Clifton <nickc@redhat.com>
+frv		Dave Brolley <brolley@redhat.com>
 igen		(igen simulators)
 ppc		Andrew Cagney <ac131313@redhat.com>
 m68hc11		Stephane Carrez <stcarrez@nerim.fr>
