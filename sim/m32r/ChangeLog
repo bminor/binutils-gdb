@@ -1,3 +1,10 @@
+Tue Apr 28 18:05:53 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* model.c: Rebuilt.
+start-sanitize-m32rx
+	* modelx.c: Rebuilt.
+end-sanitize-m32rx
+
 Mon Apr 27 15:36:30 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cpu.h,model.c,sem-switch.c,sem.c: Regenerated.  Mostly comment
