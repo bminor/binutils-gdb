@@ -1,3 +1,12 @@
+start-sanitize-m32rx
+Mon Jan 26 12:38:54 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c (reads_from_src_reg): Change second parameter
+	to a count of the number of matches to skip.
+	(can_make_parallel): Pass count of number of matches to skip to
+	reads_from_src_reg().
+
+end-sanitize-m32rx
 start-sanitize-sky
 Fri Jan 23 18:41:18 1998  Doug Evans  <devans@canuck.cygnus.com>
 
