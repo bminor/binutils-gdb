@@ -189,6 +189,12 @@ extern char const *i386_register_name (int reg);
 extern int i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 				     struct reggroup *group);
 
+/* Return the appropriate register set for the core section identified
+   by SECT_NAME and SECT_SIZE.  */
+extern const struct regset *
+  i386_regset_from_core_section (struct gdbarch *gdbarch,
+				 const char *sect_name, size_t sect_size);
+
 /* Initialize a basic ELF architecture variant.  */
 extern void i386_elf_init_abi (struct gdbarch_info, struct gdbarch *);
 

@@ -1,5 +1,10 @@
 2003-10-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_regset_from_core_section): New function.
+	(i386_gdbarch_init): Initialize regset_from_core_section if
+	appropriate.
+	* i386-tdep.h (i386_regset_from_core_section): New declaration.
+
 	* i386-tdep.h (struct regset): Declare opaque.
 
 	* gdbarch.sh (regset_from_core_section): New method.

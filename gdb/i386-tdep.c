@@ -1587,6 +1587,40 @@ i386_supply_fpregset (const struct regset *regset, struct regcache *regcache,
   gdb_assert (len == tdep->sizeof_fpregset);
   i387_supply_fsave (regcache, regnum, fpregs);
 }
+
+/* Return the appropriate register set for the core section identified
+   by SECT_NAME and SECT_SIZE.  */
+
+const struct regset *
+i386_regset_from_core_section (struct gdbarch *gdbarch,
+			       const char *sect_name, size_t sect_size)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (strcmp (sect_name, ".reg") == 0 && sect_size == tdep->sizeof_gregset)
+    {
+      if (tdep->gregset == NULL)
+	{
+	  tdep->gregset = XMALLOC (struct regset);
+	  tdep->gregset->descr = tdep;
+	  tdep->gregset->supply_regset = i386_supply_gregset;
+	}
+      return tdep->gregset;
+    }
+
+  if (strcmp (sect_name, ".reg2") == 0 && sect_size == tdep->sizeof_fpregset)
+    {
+      if (tdep->fpregset == NULL)
+	{
+	  tdep->fpregset = XMALLOC (struct regset);
+	  tdep->fpregset->descr = tdep;
+	  tdep->fpregset->supply_regset = i386_supply_fpregset;
+	}
+      return tdep->fpregset;
+    }
+
+  return NULL;
+}
 
 
 #ifdef STATIC_TRANSFORM_NAME
@@ -1976,6 +2010,13 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   frame_unwind_append_sniffer (gdbarch, i386_sigtramp_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, i386_frame_sniffer);
+
+  /* If we have a register mapping, enable the generic core file
+     support, unless it has already been enabled.  */
+  if (tdep->gregset_reg_offset
+      && !gdbarch_regset_from_core_section_p (gdbarch))
+    set_gdbarch_regset_from_core_section (gdbarch,
+					  i386_regset_from_core_section);
 
   /* Unless support for MMX has been disabled, make %mm0 the first
      pseudo-register.  */
