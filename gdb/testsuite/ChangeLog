@@ -1,4 +1,24 @@
+Mon Jan 19 08:53:04 1998  Mark Alexander  <marka@cygnus.com>
+
+	* gdb.base/break.exp: Increase timeout for slow TX39 boards.
+	* config/dve.exp: New file to support Densan boards.
+
+Mon Dec 15 22:38:05 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/interrupt.exp: Document problem of simulators, signals,
+ 	reads and BSD.
+
+Wed Nov 26 22:29:18 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/monitor.exp: Be a bit less picky about the "Remote debugging"
+	response.
+
+	* gdb.c++/misc.exp: Call runto_main instead of doint it manually.
+
 Tue Nov 25 12:46:36 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/mips_pro.exp: Add "mips64*-*-elf" xfail for backtrace
+ 	test.
 
 	* gdb.base/funcargs.exp: Query GDB for target_sizeof_int,
  	target_sizeof_long and target_bigendian_p.

@@ -1,4 +1,4 @@
-#   Copyright (C) 1988, 1990, 1991, 1992, 1994 Free Software Foundation, Inc.
+#   Copyright (C) 1988, 1990, 1991, 1992, 1994, 1997 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -34,8 +34,7 @@ set testfile "break"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-w}] != "" } {
-    perror "Couldn't compile ${srcfile}"
-    return -1
+    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
 gdb_exit
@@ -44,7 +43,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 if [target_info exists gdb_stub] {
-    gdb_test "step" "(main.* at .*|.*in .*start.*)" "step for stub"
+    gdb_step_for_stub;
 }
 #
 # test simple breakpoint setting commands
@@ -205,24 +204,24 @@ gdb_test "tbreak $srcfile:factorial" "Breakpoint.*at.* file .*$srcfile, line.*" 
 #
 send_gdb "tbreak 64\n"
 gdb_expect {
-    -re "Breakpoint.*at.* file .*$srcfile, line 64.*$gdb_prompt $" { pass "Temporary breakpoint line number" }
-	-re ".*$gdb_prompt $"   { pass "Temporary breakpoint line number" }
-	timeout	    { fail "breakpoint line number (timeout)" }
+    -re "Breakpoint.*at.* file .*$srcfile, line 64.*$gdb_prompt $" { pass "Temporary breakpoint line number #1" }
+	-re ".*$gdb_prompt $"   { pass "Temporary breakpoint line number #1" }
+	timeout	    { fail "breakpoint line number #1 (timeout)" }
 }
 
-gdb_test "tbreak 60" "Breakpoint.*at.* file .*$srcfile, line 60.*" "Temporary breakpoint line number"
+gdb_test "tbreak 60" "Breakpoint.*at.* file .*$srcfile, line 60.*" "Temporary breakpoint line number #2"
 
 #
 # test break at line number in file
 #
 send_gdb "tbreak $srcfile:70\n"
 gdb_expect {
-    -re "Breakpoint.*at.* file .*$srcfile, line 70.*$gdb_prompt $" { pass "Temporary breakpoint line number in file" }
-	-re ".*$gdb_prompt $"   { pass "Temporary breakpoint line number in file" }
-	timeout	    { fail "Temporary breakpoint line number in file (timeout)" }
+    -re "Breakpoint.*at.* file .*$srcfile, line 70.*$gdb_prompt $" { pass "Temporary breakpoint line number in file #1" }
+	-re ".*$gdb_prompt $"   { pass "Temporary breakpoint line number in file #1" }
+	timeout	    { fail "Temporary breakpoint line number in file #1 (timeout)" }
 }
 
-gdb_test  "tbreak $srcfile:66" "Breakpoint.*at.* file .*$srcfile, line 66.*" "Temporary breakpoint line number in file"
+gdb_test  "tbreak $srcfile:66" "Breakpoint.*at.* file .*$srcfile, line 66.*" "Temporary breakpoint line number in file #2"
 
 #
 # check to see what breakpoints are set (temporary this time)
@@ -230,8 +229,8 @@ gdb_test  "tbreak $srcfile:66" "Breakpoint.*at.* file .*$srcfile, line 66.*" "Te
 gdb_test "info break" "Num Type.*Disp Enb Address.*What.*\[\r\n\]\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$main_line.*\[\r\n\]\[0-9\]+\[\t \]+breakpoint     del.*y.*in factorial at .*$srcfile:76.*\[\r\n\]\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:64.*\[\r\n\]\[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:70.*" "Temporary breakpoint info"
 
 proc test_clear_command {} {
-    gdb_test "break main" "Breakpoint.*at.*"
-    gdb_test "break main" "Breakpoint.*at.*"
+    gdb_test "break main" "Breakpoint.*at.*" "break main #1"
+    gdb_test "break main" "Breakpoint.*at.*" "break main #2"
 
     # We don't test that it deletes the correct breakpoints.  We do at
     # least test that it deletes more than one breakpoint.
@@ -249,7 +248,7 @@ proc test_next_with_recursion {} {
 
     if [istarget "d10v-*-*"] {
 	# Doesn't work right now.
-	return;
+	gdb_suppress_tests;
     }
     if [target_info exists use_gdb_stub] {
 	# Reload the program.
@@ -273,7 +272,11 @@ proc test_next_with_recursion {} {
     }
     gdb_expect {
 	-re "Break.* factorial .value=6. .*$gdb_prompt $" {}
-	timeout { fail "run to factorial(6) (timeout)" ; return }
+	-re ".*$gdb_prompt $" {
+	    fail "run to factorial(6)";
+	    gdb_suppress_tests;
+	}
+	timeout { fail "run to factorial(6) (timeout)" ; gdb_suppress_tests }
     }
 
     # Continue until we call factorial recursively with 5.
@@ -281,7 +284,7 @@ proc test_next_with_recursion {} {
     send_gdb "continue\n"
     gdb_expect {
 	-re "Continuing.*Break.* factorial .value=5. .*$gdb_prompt $" {}
-	timeout { fail "continue to factorial(5) (timeout)" ; return }
+	timeout { fail "continue to factorial(5) (timeout)" ; gdb_suppress_tests }
     }
 
     # Do a backtrace just to confirm how many levels deep we are.
@@ -289,7 +292,7 @@ proc test_next_with_recursion {} {
     set result [gdb_test "backtrace" \
 	    "#0\[ \t\]+ factorial .value=5..*" \
 	    "backtrace from factorial(5)"]
-    if $result!=0 then { return }
+    if $result!=0 then { gdb_suppress_tests }
 
     # Now a "next" should position us at the recursive call, which
     # we will be performing with 4.
@@ -297,7 +300,7 @@ proc test_next_with_recursion {} {
     send_gdb "next\n"
     gdb_expect {
 	-re ".* factorial .value - 1.;.*$gdb_prompt $" {}
-	timeout { fail "next to recursive call (timeout)" ; return }
+	timeout { fail "next to recursive call (timeout)" ; gdb_suppress_tests }
     }
 
     # Disable the breakpoint at the entry to factorial by deleting them all.
@@ -308,7 +311,11 @@ proc test_next_with_recursion {} {
 
     delete_breakpoints
 
-    set timeout 20;
+    if [istarget "mips*tx39-*"] {
+	set timeout 60
+    } else {
+	set timeout 20
+    }
 
     gdb_test next "\[0-9\]*\[\t \]+return \\(value\\);.*" \
 	    "next over recursive call"
@@ -319,12 +326,12 @@ proc test_next_with_recursion {} {
     set result [gdb_test "backtrace" \
 	    "#0\[ \t\]+ factorial .value=120.*\r\n#1\[ \t\]+ \[0-9a-fx\]+ in factorial .value=6..*" \
 	    "backtrace from factorial(5.1)"]
-    if { $result != 0 } { return }
+    if { $result != 0 } { gdb_suppress_tests }
 
-    if [target_info exists gdb,noresults] { return }
+    if [target_info exists gdb,noresults] { gdb_suppress_tests }
     if [target_info exists use_gdb_stub] {
 	gdb_breakpoint "exit"
-	gdb_test "continue" "Continuing..*Breakpoint .*exit .code=0.*" "continue until exit in recursive next test"
+	gdb_test "continue" "Continuing..*Breakpoint .*exit \[(\].*=0\[)\].*" "continue until exit in recursive next test"
     } else {
     # Continue until we exit.  Should not stop again.
     # Don't bother to check the output of the program, that may be
@@ -333,6 +340,7 @@ proc test_next_with_recursion {} {
 		"Continuing.\[\r\n0-9\]+Program exited normally\\..*"\
 		"continue until exit in recursive next test"
     }
+    gdb_stop_suppressing_tests;
 }
 
 test_clear_command
