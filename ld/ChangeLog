@@ -1,3 +1,8 @@
+Thu Jun 17 16:53:56 1993  david d `zoo' zuhn (zoo@cygnus.com)
+	
+	* Makefile.in: canonicalize install.sh; for use within
+	this directory (and subdirs)
+
 Thu Jun 17 14:33:09 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldgram.y: Tweak grammar to make reporting of invalid options work.
