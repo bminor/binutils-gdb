@@ -810,7 +810,7 @@ specify archives, @code{objdump} shows information on each of the member
 object files.
 
 The long and short forms of options, shown here as alternatives, are
-equivalent.
+equivalent.  At least one option besides @samp{-l} must be given.
 
 @table @code
 @item -a
