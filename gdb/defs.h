@@ -1338,11 +1338,7 @@ extern int use_windows;
 #endif
 
 #ifndef SLASH_STRING
-#ifdef _WIN32
-#define SLASH_STRING "\\"
-#else
 #define SLASH_STRING "/"
-#endif
 #endif
 
 #ifdef __MSDOS__

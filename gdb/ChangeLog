@@ -1,3 +1,9 @@
+2001-08-02  Keith Seitz  <keiths@redhat.com>
+
+	* defs.h (SLASH_STRING): If not defined, set
+	to "/", regardless of _WIN32, __CYGWIN__, or
+	whatnot.
+
 2001-08-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* cli/cli-decode.h: Include "gdb_regex.h" instead of
