@@ -1,3 +1,10 @@
+2000-08-02  Jimmy Guo  <guo@hpcleara.cup.hp.com>
+
+	* gdbarch.sh: Add print_p field for CALL_DUMMY_BREAKPINT_OFFSET
+        to be printed only if CALL_DUMMY_BREAKPOINT_OFFSET_P.
+
+	* gdbarch.c: Regenerated.
+
 2000-08-02  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* remote-vx.c (vx_add_symbols): Fix typos.

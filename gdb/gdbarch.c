@@ -1524,9 +1524,10 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       (long) CALL_DUMMY_START_OFFSET);
 #endif
 #ifdef CALL_DUMMY_BREAKPOINT_OFFSET
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CALL_DUMMY_BREAKPOINT_OFFSET = 0x%08lx\n",
-                      (long) CALL_DUMMY_BREAKPOINT_OFFSET);
+  if (CALL_DUMMY_BREAKPOINT_OFFSET_P)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: CALL_DUMMY_BREAKPOINT_OFFSET = 0x%08lx\n",
+                        (long) CALL_DUMMY_BREAKPOINT_OFFSET);
 #endif
 #ifdef CALL_DUMMY_BREAKPOINT_OFFSET_P
   fprintf_unfiltered (file,
