@@ -1,3 +1,8 @@
+2001-08-13  Christopher Faylor  <cgf@cygnus.com>
+
+	* top.c (SIGSETJMP): Protect env argument with parentheses.
+	(SIGLONGJMP): Protect env argument with parentheses.
+
 2001-08-11  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/mn10300/mn10300.mt (TM_FILE): Delete.
