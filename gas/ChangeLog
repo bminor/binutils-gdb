@@ -1,3 +1,14 @@
+2005-01-19  Richard Sandiford  <rsandifo@redhat.com>
+
+	* read.c (convert_to_bignum): New function, split out from...
+	(emit_expr): ...here.  Handle the case where X_add_number is
+	positive and the input value is negative.
+	(output_big_sleb128): Fix setting of continuation bit.  Check whether
+	the final byte needs to be sign-extended.  Fix size-shrinking loop.
+	(emit_leb128_expr): When generating a signed leb128, see whether the
+	sign of an O_constant's X_add_number matches the sign of the input
+	value.  Use a bignum if not.
+
 2005-01-17  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* tc-sh.c (md_begin,md_parse_option): Change arch_sh1_up to

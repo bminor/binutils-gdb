@@ -1,6 +1,7 @@
 /* read.c - read a source file -
    Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
 
@@ -1080,6 +1081,29 @@ read_a_source_file (char *name)
 		     "first comment found here");
   }
 #endif
+}
+
+/* Convert O_constant expression EXP into the equivalent O_big representation.
+   Take the sign of the number from X_unsigned rather than X_add_number.  */
+
+static void
+convert_to_bignum (expressionS *exp)
+{
+  valueT value;
+  unsigned int i;
+
+  value = exp->X_add_number;
+  for (i = 0; i < sizeof (exp->X_add_number) / CHARS_PER_LITTLENUM; i++)
+    {
+      generic_bignum[i] = value & LITTLENUM_MASK;
+      value >>= LITTLENUM_NUMBER_OF_BITS;
+    }
+  /* Add a sequence of sign bits if the top bit of X_add_number is not
+     the sign of the original value.  */
+  if ((exp->X_add_number < 0) != !exp->X_unsigned)
+    generic_bignum[i++] = exp->X_unsigned ? 0 : LITTLENUM_MASK;
+  exp->X_op = O_big;
+  exp->X_add_number = i;
 }
 
 /* For most MRI pseudo-ops, the line actually ends at the first
@@ -3541,22 +3565,9 @@ emit_expr (expressionS *exp, unsigned int nbytes)
      pass to md_number_to_chars, handle it as a bignum.  */
   if (op == O_constant && nbytes > sizeof (valueT))
     {
-      valueT val;
-      int gencnt;
-
-      if (!exp->X_unsigned && exp->X_add_number < 0)
-	extra_digit = (valueT) -1;
-      val = (valueT) exp->X_add_number;
-      gencnt = 0;
-      do
-	{
-	  generic_bignum[gencnt] = val & LITTLENUM_MASK;
-	  val >>= LITTLENUM_NUMBER_OF_BITS;
-	  ++gencnt;
-	}
-      while (val != 0);
-      op = exp->X_op = O_big;
-      exp->X_add_number = gencnt;
+      extra_digit = exp->X_unsigned ? 0 : -1;
+      convert_to_bignum (exp);
+      op = O_big;
     }
 
   if (op == O_constant)
@@ -4276,36 +4287,48 @@ output_big_sleb128 (char *p, LITTLENUM_TYPE *bignum, int size)
   unsigned byte;
 
   /* Strip leading sign extensions off the bignum.  */
-  while (size > 0 && bignum[size - 1] == (LITTLENUM_TYPE) -1)
+  while (size > 1
+	 && bignum[size - 1] == LITTLENUM_MASK
+	 && bignum[size - 2] > LITTLENUM_MASK / 2)
     size--;
 
   do
     {
-      if (loaded < 7 && size > 0)
-	{
-	  val |= (*bignum << loaded);
-	  loaded += 8 * CHARS_PER_LITTLENUM;
-	  size--;
-	  bignum++;
-	}
+      /* OR in the next part of the littlenum.  */
+      val |= (*bignum << loaded);
+      loaded += LITTLENUM_NUMBER_OF_BITS;
+      size--;
+      bignum++;
 
-      byte = val & 0x7f;
-      loaded -= 7;
-      val >>= 7;
-
-      if (size == 0)
+      /* Add bytes until there are less than 7 bits left in VAL
+	 or until every non-sign bit has been written.  */
+      do
 	{
-	  if ((val == 0 && (byte & 0x40) == 0)
-	      || (~(val | ~(((valueT) 1 << loaded) - 1)) == 0
-		  && (byte & 0x40) != 0))
+	  byte = val & 0x7f;
+	  loaded -= 7;
+	  val >>= 7;
+	  if (size > 0
+	      || val != ((byte & 0x40) == 0 ? 0 : ((valueT) 1 << loaded) - 1))
 	    byte |= 0x80;
-	}
 
+	  if (orig)
+	    *p = byte;
+	  p++;
+	}
+      while ((byte & 0x80) != 0 && loaded >= 7);
+    }
+  while (size > 0);
+
+  /* Mop up any left-over bits (of which there will be less than 7).  */
+  if ((byte & 0x80) != 0)
+    {
+      /* Sign-extend VAL.  */
+      if (val & (1 << (loaded - 1)))
+	val |= ~0 << loaded;
       if (orig)
-	*p = byte;
+	*p = val & 0x7f;
       p++;
     }
-  while (byte & 0x80);
 
   return p - orig;
 }
@@ -4383,6 +4406,16 @@ emit_leb128_expr (expressionS *exp, int sign)
     {
       as_warn (_("register value used as expression"));
       op = O_constant;
+    }
+  else if (op == O_constant
+	   && sign
+	   && (exp->X_add_number < 0) != !exp->X_unsigned)
+    {
+      /* We're outputting a signed leb128 and the sign of X_add_number
+	 doesn't reflect the sign of the original value.  Convert EXP
+	 to a correctly-extended bignum instead.  */
+      convert_to_bignum (exp);
+      op = O_big;
     }
 
   /* Let check_eh_frame know that data is being emitted.  nbytes == -1 is
