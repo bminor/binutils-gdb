@@ -212,7 +212,7 @@ extern void set_gdbarch_double_bit (struct gdbarch *gdbarch, int double_bit);
 
 /* Default (value) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (TARGET_LONG_DOUBLE_BIT)
-#define TARGET_LONG_DOUBLE_BIT (2*TARGET_DOUBLE_BIT)
+#define TARGET_LONG_DOUBLE_BIT (8*TARGET_CHAR_BIT)
 #endif
 
 extern int gdbarch_long_double_bit (struct gdbarch *gdbarch);

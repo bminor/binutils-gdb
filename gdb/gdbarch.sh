@@ -393,7 +393,7 @@ v::TARGET_FLOAT_BIT:int:float_bit::::8 * sizeof (float):4*TARGET_CHAR_BIT::0
 # Number of bits in a double for the target machine.
 v::TARGET_DOUBLE_BIT:int:double_bit::::8 * sizeof (double):8*TARGET_CHAR_BIT::0
 # Number of bits in a long double for the target machine.
-v::TARGET_LONG_DOUBLE_BIT:int:long_double_bit::::8 * sizeof (long double):2*TARGET_DOUBLE_BIT::0
+v::TARGET_LONG_DOUBLE_BIT:int:long_double_bit::::8 * sizeof (long double):8*TARGET_CHAR_BIT::0
 # For most targets, a pointer on the target and its representation as an
 # address in GDB have the same size and "look the same".  For such a
 # target, you need only set TARGET_PTR_BIT / ptr_bit and TARGET_ADDR_BIT

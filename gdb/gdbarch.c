@@ -451,7 +451,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->long_long_bit = 2*TARGET_LONG_BIT;
   current_gdbarch->float_bit = 4*TARGET_CHAR_BIT;
   current_gdbarch->double_bit = 8*TARGET_CHAR_BIT;
-  current_gdbarch->long_double_bit = 2*TARGET_DOUBLE_BIT;
+  current_gdbarch->long_double_bit = 8*TARGET_CHAR_BIT;
   current_gdbarch->ptr_bit = TARGET_INT_BIT;
   current_gdbarch->bfd_vma_bit = TARGET_ARCHITECTURE->bits_per_address;
   current_gdbarch->char_signed = -1;
