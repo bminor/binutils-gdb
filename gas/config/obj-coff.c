@@ -1139,11 +1139,14 @@ coff_frob_symbol (symp, punt)
       symbolS *real;
       if (!SF_GET_LOCAL (symp)
 	  && !SF_GET_STATICS (symp)
+	  && S_GET_STORAGE_CLASS (symp) != C_LABEL
+	  && symbol_constant_p(symp)
 	  && (real = symbol_find_base (S_GET_NAME (symp), DO_NOT_STRIP))
 	  && real != symp)
 	{
 	  c_symbol_merge (symp, real);
 	  *punt = 1;
+	  return;
 	}
       if (!S_IS_DEFINED (symp) && !SF_GET_LOCAL (symp))
 	{
