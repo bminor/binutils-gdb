@@ -38,22 +38,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	mov sp,fp
 	add <size>,sp
 	Register saves for d2, d3, a1, a2 as needed.  Saves start
-	at fp - <size> and work towards higher addresses.  Note
-	that the saves are actually done off the stack pointer
-	in the prologue!  This makes for smaller code and easier
-	prologue scanning as the displacement fields will never
+	at fp - <size> + <outgoing_args_size> and work towards higher
+	addresses.  Note that the saves are actually done off the stack
+	pointer in the prologue!  This makes for smaller code and easier
+	prologue scanning as the displacement fields will unlikely
         be more than 8 bits!
 
      Without frame pointer:
         add <size>,sp
 	Register saves for d2, d3, a1, a2 as needed.  Saves start
-	at sp and work towards higher addresses.
+	at sp + <outgoing_args_size> and work towards higher addresses.
 
+     Out of line prologue:
+	add <local size>,sp  -- optional
+	jsr __prologue
+	add <outgoing_size>,sp -- optional
 
-   One day we might keep the stack pointer constant, that won't
-   change the code for prologues, but it will make the frame
-   pointerless case much more common.  */
-	
+   The stack pointer remains constant throughout the life of most
+   functions.  As a result the compiler will usually omit the
+   frame pointer, so we must handle frame pointerless functions.  */
+
 /* Analyze the prologue to determine where registers are saved,
    the end of the prologue, etc etc.  Return the end of the prologue
    scanned.
@@ -102,6 +106,7 @@ mn10200_analyze_prologue (fi, pc)
   unsigned char buf[4];
   int status;
   char *name;
+  int out_of_line_prologue = 0;
 
   /* Use the PC in the frame if it's provided to look up the
      start of this function.  */
@@ -302,10 +307,188 @@ mn10200_analyze_prologue (fi, pc)
 	  return addr;
 	}
     }
-  else
+
+  /* Now see if we have a call to __prologue for an out of line
+     prologue.  */
+  status = target_read_memory (addr, buf, 2);
+  if (status != 0)
+    return addr;
+
+  /* First check for 16bit pc-relative call to __prologue.  */
+  if (buf[0] == 0xfd)
     {
-      if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
-	fi->frame = read_sp ();
+      CORE_ADDR temp;
+      status = target_read_memory (addr + 1, buf, 2);
+      if (status != 0)
+	{
+  	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
+    	    fi->frame = read_sp ();
+	  return addr;
+	}
+      
+      /* Get the PC this instruction will branch to.  */
+      temp = (extract_signed_integer (buf, 2) + addr) & 0xffffff;
+
+      /* Get the name of the function at the target address.  */
+      status = find_pc_partial_function (temp, &name, NULL, NULL);
+      if (status == 0)
+	{
+  	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
+    	    fi->frame = read_sp ();
+	  return addr;
+	}
+
+      /* Note if it is an out of line prologue.  */
+      out_of_line_prologue = (strcmp (name, "__prologue") == 0);
+
+      /* This sucks up 3 bytes of instruction space.  */
+      if (out_of_line_prologue)
+	addr += 3;
+
+      if (addr >= stop)
+	{
+	  if (fi && fi->next == NULL)
+	    {
+	      fi->stack_size -= 16;
+	      fi->frame = read_sp () - fi->stack_size;
+	    }
+	  return addr;
+	}
+    }
+  /* Now check for the 24bit pc-relative call to __prologue.  */
+  else if (buf[0] == 0xf4 && buf[1] == 0xe1)
+    {
+      CORE_ADDR temp;
+      status = target_read_memory (addr + 2, buf, 3);
+      if (status != 0)
+	{
+  	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
+    	    fi->frame = read_sp ();
+	  return addr;
+	}
+      
+      /* Get the PC this instruction will branch to.  */
+      temp = (extract_signed_integer (buf, 3) + addr) & 0xffffff;
+
+      /* Get the name of the function at the target address.  */
+      status = find_pc_partial_function (temp, &name, NULL, NULL);
+      if (status == 0)
+	{
+  	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
+    	    fi->frame = read_sp ();
+	  return addr;
+	}
+
+      /* Note if it is an out of line prologue.  */
+      out_of_line_prologue = (strcmp (name, "__prologue") == 0);
+
+      /* This sucks up 5 bytes of instruction space.  */
+      if (out_of_line_prologue)
+	addr += 5;
+
+      if (addr >= stop)
+	{
+	  if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
+	    {
+	      fi->stack_size -= 16;
+	      fi->frame = read_sp () - fi->stack_size;
+	    }
+	  return addr;
+	}
+    }
+
+  /* Now actually handle the out of line prologue.  */
+  if (out_of_line_prologue)
+    {
+      int outgoing_args_size = 0;
+
+      /* First adjust the stack size for this function.  The out of
+	 line prologue saves 4 registers (16bytes of data).  */
+      if (fi)
+	fi->stack_size -= 16;
+
+      /* Update fi->frame if necessary.  */
+      if (fi && fi->next == NULL)
+	fi->frame = read_sp () - fi->stack_size;
+
+      /* After the out of line prologue, there may be another
+	 stack adjustment for the outgoing arguments.
+
+	 Search for add imm8,a3 (0xd3XX)
+	    or	add imm16,a3 (0xf70bXXXX)
+	    or	add imm24,a3 (0xf467XXXXXX).  */
+       
+      status = target_read_memory (addr, buf, 2);
+      if (status != 0)
+	{
+	  if (fi)
+	    {
+	      fi->fsr.regs[2] = fi->frame + fi->stack_size + 4;
+	      fi->fsr.regs[3] = fi->frame + fi->stack_size + 8;
+	      fi->fsr.regs[5] = fi->frame + fi->stack_size + 12;
+	      fi->fsr.regs[6] = fi->frame + fi->stack_size + 16;
+	    }
+	  return addr;
+	}
+
+      if (buf[0] == 0xd3)
+	{
+	  outgoing_args_size = extract_signed_integer (&buf[1], 1);
+	  addr += 2;
+	}
+      else if (buf[0] == 0xf7 && buf[1] == 0x0b)
+	{
+	  status = target_read_memory (addr + 2, buf, 2);
+	  if (status != 0)
+	    {
+	      if (fi)
+		{
+		  fi->fsr.regs[2] = fi->frame + fi->stack_size + 4;
+		  fi->fsr.regs[3] = fi->frame + fi->stack_size + 8;
+		  fi->fsr.regs[5] = fi->frame + fi->stack_size + 12;
+		  fi->fsr.regs[6] = fi->frame + fi->stack_size + 16;
+		}
+	      return addr;
+	    }
+	  outgoing_args_size = extract_signed_integer (buf, 2);
+	  addr += 4;
+	}
+      else if (buf[0] == 0xf4 && buf[1] == 0x67)
+	{
+	  status = target_read_memory (addr + 2, buf, 3);
+	  if (status != 0)
+	    {
+	      if (fi && fi->next == NULL)
+		{
+		  fi->fsr.regs[2] = fi->frame + fi->stack_size + 4;
+		  fi->fsr.regs[3] = fi->frame + fi->stack_size + 8;
+		  fi->fsr.regs[5] = fi->frame + fi->stack_size + 12;
+		  fi->fsr.regs[6] = fi->frame + fi->stack_size + 16;
+		}
+	      return addr;
+	    }
+	  outgoing_args_size = extract_signed_integer (buf, 3);
+	  addr += 5;
+	}
+      else
+	outgoing_args_size = 0;
+
+      /* Now that we know the size of the outgoing arguments, fix
+	 fi->frame again if this is the innermost frame.  */
+      if (fi && fi->next == NULL)
+	fi->frame -= outgoing_args_size;
+
+      /* Note the register save information and update the stack
+	 size for this frame too.  */
+      if (fi)
+	{
+	  fi->fsr.regs[2] = fi->frame + fi->stack_size + 4;
+	  fi->fsr.regs[3] = fi->frame + fi->stack_size + 8;
+	  fi->fsr.regs[5] = fi->frame + fi->stack_size + 12;
+	  fi->fsr.regs[6] = fi->frame + fi->stack_size + 16;
+	  fi->stack_size += outgoing_args_size;
+	}
+      /* There can be no more prologue insns, so return now.  */
       return addr;
     }
 

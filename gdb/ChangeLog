@@ -1,5 +1,9 @@
 Wed May 14 08:58:55 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10200-tdep.c (mn10200_analyze_prologue): Update prologue comments
+	to reflect current reality.  Gross attempt at handling out of
+	line prologues.
+
 	* mn10200-tdep.c (mn10200_skip_prologue): Don't look at the debug
 	symbols to find the end of the prologue.
 	* mn10300-tdep.c (mn10300_skip_prologue): Likewise.
