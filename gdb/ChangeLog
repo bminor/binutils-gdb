@@ -1,5 +1,27 @@
 2002-03-18  Andrew Cagney  <ac131313@redhat.com>
 
+	* defs.h (XMALLOC): Define.
+	* gdb-events.sh (XMALLOC): Delete macro.
+	* gdb-events.c, gdb-events.h: Regenerate.
+	* gdbarch.sh (XMALLOC): Delete macro.
+	* gdbarch.c: Regenerate.
+	* serial.c (XMALLOC): Delete macro.
+	* ui-file.c (XMALLOC): Ditto.
+	* ser-unix.h (XMALLOC): Ditto.
+	* sh-tdep.c (XMALLOC): Ditto.
+	* ui-out.c (XMALLOC): Ditto.
+	* utils.c (XMALLOC): Ditto.
+	* i386-tdep.c (XMALLOC): Ditto.
+	* gdb-events.c (XMALLOC): Ditto.
+	* d10v-tdep.c (XMALLOC): Ditto.
+	* cli-out.c (XMALLOC): Ditto.
+
+	* cli-out.c, d10v-tdep.c, gdb-events.c: Update copyright.
+	* gdb-events.sh, i386-tdep.c, ser-unix.h, serial.c: Ditto.
+	* ui-file.c, ui-out.c: Ditto.
+
+2002-03-18  Andrew Cagney  <ac131313@redhat.com>
+
 	* command.h (struct cmd_list_element): Add field context.
 	(set_cmd_context, get_cmd_context): Declare.
 	* cli/cli-decode.h: Ditto.

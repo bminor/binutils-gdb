@@ -1,5 +1,7 @@
 /* Output generating routines for GDB.
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+
    Contributed by Cygnus Solutions.
    Written by Fernando Nasser for Cygnus.
 
@@ -26,11 +28,6 @@
 #include "language.h"
 #include "ui-out.h"
 #include "gdb_assert.h"
-
-/* Convenience macro for allocting typesafe memory. */
-
-#undef XMALLOC
-#define XMALLOC(TYPE) (TYPE*) xmalloc (sizeof (TYPE))
 
 /* table header structures */
 

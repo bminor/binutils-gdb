@@ -1,3 +1,15 @@
+2002-03-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-main.c (XMALLOC): Delete macro.
+	* mi-out.c (XMALLOC): Ditto.
+	* mi-parse.c (XMALLOC): Ditto.
+	* mi-console.c (XMALLOC): Ditto.
+	* mi-cmd-var.c (XMALLOC): Ditto.
+	* mi-cmd-break.c (XMALLOC): Ditto.
+	
+	* mi/mi-cmd-var.c, mi/mi-console.c, mi/mi-out.c: Update copyright
+	* mi/mi-parse.c: Ditto.
+
 2002-02-24  Andrew Cagney  <ac131313@redhat.com>
 
 	From wiz at danbala:

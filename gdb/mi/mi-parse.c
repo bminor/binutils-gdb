@@ -1,5 +1,7 @@
 /* MI Command Set - MI parser.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -25,9 +27,6 @@
 
 #include <ctype.h>
 #include "gdb_string.h"
-
-#undef XMALLOC
-#define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
 static void
 mi_parse_argv (char *args, struct mi_parse *parse)

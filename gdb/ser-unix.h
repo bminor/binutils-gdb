@@ -1,5 +1,6 @@
 /* Serial interface for UN*X file-descriptor based connection.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+
+   Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,9 +21,6 @@
 
 #ifndef SER_UNIX_H
 #define SER_UNIX_H
-
-#undef XMALLOC
-#define XMALLOC(TYPE) (TYPE*) xmalloc (sizeof (TYPE))
 
 /* Generic UNIX/FD functions */
 

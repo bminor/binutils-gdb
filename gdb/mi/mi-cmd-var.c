@@ -1,5 +1,7 @@
 /* MI Command Set - varobj commands.
-   Copyright 2000 Free Software Foundation, Inc.
+
+   Copyright 2000, 2002 Free Software Foundation, Inc.
+
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -26,11 +28,6 @@
 #include "varobj.h"
 #include "value.h"
 #include <ctype.h>
-
-/* Convenience macro for allocting typesafe memory. */
-
-#undef XMALLOC
-#define XMALLOC(TYPE) (TYPE*) xmalloc (sizeof (TYPE))
 
 extern int varobjdebug;		/* defined in varobj.c */
 

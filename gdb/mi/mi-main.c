@@ -42,11 +42,6 @@
 #include <ctype.h>
 #include <sys/time.h>
 
-/* Convenience macro for allocting typesafe memory. */
-
-#undef XMALLOC
-#define XMALLOC(TYPE) (TYPE*) xmalloc (sizeof (TYPE))
-
 enum
   {
     FROM_TTY = 0

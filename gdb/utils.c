@@ -87,9 +87,6 @@ extern void free ();
 extern char *canonicalize_file_name (const char *);
 #endif
 
-#undef XMALLOC
-#define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
-
 /* readline defines this.  */
 #undef savestring
 

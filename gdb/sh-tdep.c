@@ -43,9 +43,6 @@
 
 #include "solib-svr4.h"
 
-#undef XMALLOC
-#define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
-
 void (*sh_show_regs) (void);
 CORE_ADDR (*skip_prologue_hard_way) (CORE_ADDR);
 void (*do_pseudo_register) (int);

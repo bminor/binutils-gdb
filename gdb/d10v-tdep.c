@@ -1,6 +1,7 @@
 /* Target-dependent code for Mitsubishi D10V, for GDB.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -40,9 +41,6 @@
 
 #include "floatformat.h"
 #include "sim-d10v.h"
-
-#undef XMALLOC
-#define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
 struct frame_extra_info
   {

@@ -840,6 +840,11 @@ extern void xmfree (void *md, void *ptr);
    "libiberty.h". */
 extern void xfree (void *);
 
+/* Utility macro to allocate typed memory.  Avoids errors like
+   ``struct foo *foo = xmalloc (sizeof bar)'' and ``struct foo *foo =
+   (struct foo *) xmalloc (sizeof bar)''.  */
+#define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
+
 /* Like asprintf/vasprintf but get an internal_error if the call
    fails. */
 extern void xasprintf (char **ret, const char *format, ...) ATTR_FORMAT (printf, 2, 3);
