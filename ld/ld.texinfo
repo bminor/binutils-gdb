@@ -2365,7 +2365,7 @@ at address @samp{0x8000000}.  After the linker places the @samp{.data}
 output section, the value of the location counter will be
 @samp{0x8000000} plus the size of the @samp{.data} output section.  The
 effect is that the linker will place the @samp{.bss} output section
-immediately after the @samp{.data} output section in memory
+immediately after the @samp{.data} output section in memory.
 
 The linker will ensure that each output section has the required
 alignment, by increasing the location counter if necessary.  In this
