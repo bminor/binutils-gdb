@@ -110,6 +110,11 @@ Tue Feb 21 20:48:42 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 	Also, make sure structs allocated for return values and invisible
 	reference don't violate STACK_ALIGN.
 
+Tue Feb 21 23:29:59 1995  Per Bothner  <bothner@rtl.cygnus.com>
+
+	* ch-exp.y (expression_conversion):  Recognize 'ARRAY () TYPE (EXPR)'
+	(same as C's '(TYPE[])EXPR')
+
 Tue Feb 21 11:47:26 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* top.c (print_gdb_version): Update the year.
