@@ -1,3 +1,8 @@
+2002-05-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* a29k-share/: Delete directory.
+	* remote-vx29k.c: Delete file.
+
 2002-05-30  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* config/djgpp/fnchange.lst: Add ns32knbsd-nat.c, ns32knbsd-tdep.c,
