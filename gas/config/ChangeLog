@@ -1,3 +1,10 @@
+Fri Sep 11 10:21:04 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	Support for i386 coff
+	* obj-coffbfd.h : added stuff 
+	* tc-i386.c (tc_coff_fix2rtype): new function
+	* tc-i386.h : new coff defines
+
 Wed Sep  9 11:10:24 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* tc-m68k.c (m68k_ip, m68k_ip_op, get_num, try_moto_index): merge

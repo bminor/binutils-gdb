@@ -45,6 +45,9 @@
 #include "coff/m68k.h"
 #define TARGET_FORMAT "coff-m68k"
 
+#elif defined(TC_I386)
+#include "coff/i386.h"
+#define TARGET_FORMAT "coff-i386"
 #elif defined(TC_A29K)
 #include "coff/a29k.h"
 #define TARGET_FORMAT "coff-a29k-big"
