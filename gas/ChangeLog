@@ -1,3 +1,18 @@
+start-sanitize-arc
+Mon Dec 19 12:57:09 1994  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-arc.c (arc_insert_operand): Change reg parm to pointer
+	to table entry.  All callers changed.
+	(md_shortopts): New argument -mmult.
+	(md_parse_option): Recognize it.
+	(md_show_usage): Print it.
+	(md_begin): If -mmult, say we have the new multiply and shift insns.
+	(md_assemble): Fix reloc generation for 32 bit immediate values.
+	Clean up modifier handling.  Try next insn if fake operand says there's
+	an error.  Update to new syntax of insertion/extraction fns.
+	Recognize predefined aux regs.  Don't abort if insertion fn missing.
+end-sanitize-arc
+
 Mon Dec 19 13:49:07 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* configure.in: Recognize mips-sony-bsd and mips-dec-bsd, but
