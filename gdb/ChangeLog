@@ -1,3 +1,11 @@
+2004-02-15  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in: (.SUFFIXES): Add ".l" and ".y".
+	(.y.c, .l.c): Specify implicit rule.  Instead of .tab.c, generate
+	.c.  Update references.  Delete unnecessary .tab.c and -lex.c rules.
+	(ada-exp.o, c-exp.o, f-exp.o): Replace ada-exp.tab.o et.al. rule.
+	(jv-exp.o, m2-exp.o, objc-exp.o, p-exp.o): Similar.
+	
 2004-02-14  Andrew Cagney  <cagney@redhat.com>
 
 	* arch-utils.c (legacy_convert_register_p): Check

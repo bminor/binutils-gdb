@@ -852,7 +852,7 @@ DEPFILES = $(TDEPFILES) $(SER_HARDWIRE) $(NATDEPFILES) \
 	   $(REMOTE_OBS) $(SIM_OBS) $(CONFIG_OBS)
 
 SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES) $(CONFIG_SRCS)
-# Don't include YYFILES (*.tab.c) because we already include *.y in SFILES,
+# Don't include YYFILES (*.c) because we already include *.y in SFILES,
 # and it's more useful to see it in the .y file.
 TAGFILES_NO_SRCDIR = $(SFILES) $(HFILES_NO_SRCDIR) $(ALLDEPFILES) \
 	$(SUBDIR_CLI_SRCS)
@@ -909,15 +909,15 @@ TSOBS = inflow.o
 SUBDIRS = @subdirs@
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
-YYFILES = c-exp.tab.c \
-	objc-exp.tab.c \
-	ada-exp.tab.c \
-	jv-exp.tab.c \
-	f-exp.tab.c m2-exp.tab.c p-exp.tab.c
-YYOBJ = c-exp.tab.o \
-	objc-exp.tab.o \
-	jv-exp.tab.o \
-	f-exp.tab.o m2-exp.tab.o p-exp.tab.o
+YYFILES = c-exp.c \
+	objc-exp.c \
+	ada-exp.c \
+	jv-exp.c \
+	f-exp.c m2-exp.c p-exp.c
+YYOBJ = c-exp.o \
+	objc-exp.o \
+	jv-exp.o \
+	f-exp.o m2-exp.o p-exp.o
 
 # Things which need to be built when making a distribution.
 
@@ -1144,7 +1144,7 @@ clean mostlyclean: $(CONFIG_CLEAN)
 	rm -f gdb$(EXEEXT) core make.log
 	rm -f gdb[0-9]$(EXEEXT)
 
-# This used to depend on c-exp.tab.c m2-exp.tab.c TAGS
+# This used to depend on c-exp.c m2-exp.c TAGS
 # I believe this is wrong; the makefile standards for distclean just
 # describe removing files; the only sort of "re-create a distribution"
 # functionality described is if the distributed files are unmodified.
@@ -1166,11 +1166,11 @@ realclean: maintainer-clean
 local-maintainer-clean:
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
-	rm -f c-exp.tab.c \
-		ada-lex.c ada-exp.tab.c \
-	        objc-exp.tab.c \
+	rm -f c-exp.c \
+		ada-lex.c ada-exp.c \
+	        objc-exp.c \
 		jv-exp.tab \
-		f-exp.tab.c m2-exp.tab.c p-exp.tab.c
+		f-exp.c m2-exp.c p-exp.c
 	rm -f TAGS $(INFOFILES)
 	rm -f $(YYFILES)
 	rm -f nm.h tm.h xm.h config.status
@@ -1379,21 +1379,17 @@ valprint.o: $(srcdir)/valprint.c
 #
 # YACC/LEX dependencies
 #
-# LANG-exp.tab.c is generated in objdir from LANG-exp.y if it doesn't
-# exist in srcdir, then compiled in objdir to LANG-exp.tab.o.  If we
-# said LANG-exp.tab.c rather than ./c-exp.tab.c some makes would
-# sometimes re-write it into $(srcdir)/c-exp.tab.c.  Remove bogus
+# LANG-exp.c is generated in objdir from LANG-exp.y if it doesn't
+# exist in srcdir, then compiled in objdir to LANG-exp.o.  If we
+# said LANG-exp.c rather than ./c-exp.c some makes would
+# sometimes re-write it into $(srcdir)/c-exp.c.  Remove bogus
 # decls for malloc/realloc/free which conflict with everything else.
-# Strictly speaking c-exp.tab.c should therefore depend on
+# Strictly speaking c-exp.c should therefore depend on
 # Makefile.in, but that was a pretty big annoyance.
 
-.PRECIOUS: ada-exp.tab.c
-ada-exp.tab.o: ada-exp.tab.c $(defs_h) $(expression_h) $(value_h) \
-	$(parser_defs_h) $(language_h) $(ada_lang_h) $(bfd_h) $(symfile_h) \
-	$(objfiles_h) $(frame_h) $(block_h) $(ada_lex_c)
-ada-exp.tab.c: ada-exp.y
-	$(SHELL) $(YLWRAP) "$(YACC)" \
-	    $(srcdir)/ada-exp.y  y.tab.c ada-exp.tmp -- $(YFLAGS)
+.SUFFIXES: .y .l
+.y.c: 
+	$(SHELL) $(YLWRAP) "$(YACC)" $< y.tab.c $@.tmp -- $(YFLAGS)
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -1401,124 +1397,27 @@ ada-exp.tab.c: ada-exp.y
 	     -e 's/malloc/xmalloc/g' \
 	     -e 's/realloc/xrealloc/g' \
 	     -e '/^#line.*y.tab.c/d' \
-	  < ada-exp.tmp > ada-exp.new
-	-rm ada-exp.tmp
-	mv ada-exp.new ./ada-exp.tab.c
-.PRECIOUS: ada-lex.c
-ada-lex.o: ada-lex.c
-ada-lex.c: ada-lex.l
+	  < $@.tmp > $@.new
+	-rm $@.tmp
+	mv $@.new ./$*.c
+.l.c:
 	@if [ "$(FLEX)" ] && $(FLEX) --version >/dev/null 2>&1; then \
-	    echo $(FLEX) -Isit $(srcdir)/ada-lex.l ">" ada-lex.c; \
-	    $(FLEX) -Isit $(srcdir)/ada-lex.l > ada-lex.c; \
-	elif [ ! -f ada-lex.c -a ! -f $(srcdir)/ada-lex.c ]; then \
+	    echo $(FLEX) -Isit $< ">" $@; \
+	    $(FLEX) -Isit $< > $@; \
+	elif [ ! -f $@ -a ! -f $< ]; then \
 	    echo "ada-lex.c missing and flex not available."; \
 	    false; \
-	elif [ ! -f ada-lex.c ]; then \
-	    echo "Warning: ada-lex.c older than ada-lex.l and flex not available."; \
+	elif [ ! -f $@ ]; then \
+	    echo "Warning: $*.c older than $*.l and flex not available."; \
 	fi
-.PRECIOUS: c-exp.tab.c
-c-exp.tab.o: c-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
-	$(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) $(bfd_h) \
-	$(symfile_h) $(objfiles_h) $(charset_h) $(block_h) $(cp_support_h)
-c-exp.tab.c: c-exp.y
-	$(SHELL) $(YLWRAP) "$(YACC)" \
-	    $(srcdir)/c-exp.y  y.tab.c c-exp.tmp -- $(YFLAGS)
-	-sed -e '/extern.*malloc/d' \
-	     -e '/extern.*realloc/d' \
-	     -e '/extern.*free/d' \
-	     -e '/include.*malloc.h/d' \
-	     -e 's/malloc/xmalloc/g' \
-	     -e 's/realloc/xrealloc/g' \
-	     -e '/^#line.*y.tab.c/d' \
-	  < c-exp.tmp > c-exp.new
-	-rm c-exp.tmp
-	mv c-exp.new ./c-exp.tab.c
-.PRECIOUS: f-exp.tab.c
-f-exp.tab.o: f-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
-	$(value_h) $(parser_defs_h) $(language_h) $(f_lang_h) $(bfd_h) \
-	$(symfile_h) $(objfiles_h) $(block_h)
-f-exp.tab.c: f-exp.y
-	$(SHELL) $(YLWRAP) "$(YACC)" \
-	    $(srcdir)/f-exp.y  y.tab.c f-exp.tmp -- $(YFLAGS)
-	-sed -e '/extern.*malloc/d' \
-	     -e '/extern.*realloc/d' \
-	     -e '/extern.*free/d' \
-	     -e '/include.*malloc.h/d' \
-	     -e 's/malloc/xmalloc/g' \
-	     -e 's/realloc/xrealloc/g' \
-	     -e '/^#line.*y.tab.c/d' \
-	  < f-exp.tmp > f-exp.new
-	-rm f-exp.tmp
-	mv f-exp.new ./f-exp.tab.c
-.PRECIOUS: jv-exp.tab.c
-jv-exp.tab.o: jv-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
-	$(value_h) $(parser_defs_h) $(language_h) $(jv_lang_h) $(bfd_h) \
-	$(symfile_h) $(objfiles_h) $(block_h)
-jv-exp.tab.c: jv-exp.y
-	$(SHELL) $(YLWRAP) "$(YACC)" \
-	    $(srcdir)/jv-exp.y  y.tab.c jv-exp.tmp -- $(YFLAGS)
-	-sed -e '/extern.*malloc/d' \
-	     -e '/extern.*realloc/d' \
-	     -e '/extern.*free/d' \
-	     -e '/include.*malloc.h/d' \
-	     -e 's/malloc/xmalloc/g' \
-	     -e 's/realloc/xrealloc/g' \
-	     -e '/^#line.*y.tab.c/d' \
-	  < jv-exp.tmp > jv-exp.new
-	-rm jv-exp.tmp
-	mv jv-exp.new ./jv-exp.tab.c
-.PRECIOUS: m2-exp.tab.c
-m2-exp.tab.o: m2-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
-	$(language_h) $(value_h) $(parser_defs_h) $(m2_lang_h) $(bfd_h) \
-	$(symfile_h) $(objfiles_h) $(block_h)
-m2-exp.tab.c: m2-exp.y
-	$(SHELL) $(YLWRAP) "$(YACC)" \
-	    $(srcdir)/m2-exp.y  y.tab.c m2-exp.tmp -- $(YFLAGS)
-	-sed -e '/extern.*malloc/d' \
-	     -e '/extern.*realloc/d' \
-	     -e '/extern.*free/d' \
-	     -e '/include.*malloc.h/d' \
-	     -e 's/malloc/xmalloc/g' \
-	     -e 's/realloc/xrealloc/g' \
-	     -e '/^#line.*y.tab.c/d' \
-	  < m2-exp.tmp > m2-exp.new
-	-rm m2-exp.tmp
-	mv m2-exp.new ./m2-exp.tab.c
-.PRECIOUS: objc-exp.tab.c
-objc-exp.tab.o: objc-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
-	$(objc_lang_h) $(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) \
-	$(bfd_h) $(symfile_h) $(objfiles_h) $(top_h) $(completer_h) \
-	$(block_h)
-objc-exp.tab.c: objc-exp.y
-	$(SHELL) $(YLWRAP) "$(YACC)" \
-	    $(srcdir)/objc-exp.y  y.tab.c objc-exp.tmp -- $(YFLAGS)
-	-sed -e '/extern.*malloc/d' \
-	     -e '/extern.*realloc/d' \
-	     -e '/extern.*free/d' \
-	     -e '/include.*malloc.h/d' \
-	     -e 's/malloc/xmalloc/g' \
-	     -e 's/realloc/xrealloc/g' \
-	     -e '/^#line.*y.tab.c/d' \
-	  < objc-exp.tmp > objc-exp.new
-	-rm objc-exp.tmp
-	mv objc-exp.new ./objc-exp.tab.c
-.PRECIOUS: p-exp.tab.c
-p-exp.tab.o: p-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
-	$(value_h) $(parser_defs_h) $(language_h) $(p_lang_h) $(bfd_h) \
-	$(symfile_h) $(objfiles_h) $(block_h)
-p-exp.tab.c: p-exp.y
-	$(SHELL) $(YLWRAP) "$(YACC)" \
-	    $(srcdir)/p-exp.y  y.tab.c p-exp.tmp -- $(YFLAGS)
-	-sed -e '/extern.*malloc/d' \
-	     -e '/extern.*realloc/d' \
-	     -e '/extern.*free/d' \
-	     -e '/include.*malloc.h/d' \
-	     -e 's/malloc/xmalloc/g' \
-	     -e 's/realloc/xrealloc/g' \
-	     -e '/^#line.*y.tab.c/d' \
-	  < p-exp.tmp > p-exp.new
-	-rm p-exp.tmp
-	mv p-exp.new ./p-exp.tab.c
+
+.PRECIOUS: ada-exp.c ada-lex.c
+.PRECIOUS: c-exp.c
+.PRECIOUS: f-exp.c
+.PRECIOUS: jv-exp.c
+.PRECIOUS: m2-exp.c
+.PRECIOUS: objc-exp.c
+.PRECIOUS: p-exp.c
 
 #
 # gdb/ dependencies
@@ -1526,11 +1425,15 @@ p-exp.tab.c: p-exp.y
 
 abug-rom.o: abug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h) $(m68k_tdep_h)
+ada-exp.o: ada-exp.c $(defs_h) $(expression_h) $(value_h) \
+	$(parser_defs_h) $(language_h) $(ada_lang_h) $(bfd_h) $(symfile_h) \
+	$(objfiles_h) $(frame_h) $(block_h) $(ada_lex_c)
 ada-lang.o: ada-lang.c $(gdb_string_h) $(demangle_h) $(defs_h) $(symtab_h) \
 	$(gdbtypes_h) $(gdbcmd_h) $(expression_h) $(parser_defs_h) \
 	$(language_h) $(c_lang_h) $(inferior_h) $(symfile_h) $(objfiles_h) \
 	$(breakpoint_h) $(gdbcore_h) $(ada_lang_h) $(ui_out_h) $(block_h) \
 	$(infcall_h) $(dictionary_h)
+ada-lex.o: ada-lex.c
 ada-tasks.o: ada-tasks.c $(defs_h) $(command_h) $(value_h) $(language_h) \
 	$(inferior_h) $(symtab_h) $(target_h) $(regcache_h) $(gdbcore_h) \
 	$(gregset_h) $(ada_lang_h)
@@ -1640,6 +1543,9 @@ buildsym.o: buildsym.c $(defs_h) $(bfd_h) $(gdb_obstack_h) $(symtab_h) \
 	$(cp_support_h) $(dictionary_h) $(buildsym_h) $(stabsread_h)
 charset.o: charset.c $(defs_h) $(charset_h) $(gdbcmd_h) $(gdb_assert_h) \
 	$(gdb_string_h)
+c-exp.o: c-exp.c $(defs_h) $(gdb_string_h) $(expression_h) \
+	$(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) $(bfd_h) \
+	$(symfile_h) $(objfiles_h) $(charset_h) $(block_h) $(cp_support_h)
 c-lang.o: c-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(parser_defs_h) $(language_h) $(c_lang_h) $(valprint_h) \
 	$(macroscope_h) $(gdb_assert_h) $(charset_h) $(gdb_string_h) \
@@ -1777,6 +1683,9 @@ findvar.o: findvar.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(frame_h) \
 	$(value_h) $(gdbcore_h) $(inferior_h) $(target_h) $(gdb_string_h) \
 	$(gdb_assert_h) $(floatformat_h) $(symfile_h) $(regcache_h) \
 	$(user_regs_h) $(block_h)
+f-exp.o: f-exp.c $(defs_h) $(gdb_string_h) $(expression_h) \
+	$(value_h) $(parser_defs_h) $(language_h) $(f_lang_h) $(bfd_h) \
+	$(symfile_h) $(objfiles_h) $(block_h)
 f-lang.o: f-lang.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(parser_defs_h) $(language_h) $(f_lang_h) \
 	$(valprint_h) $(value_h)
@@ -1955,6 +1864,9 @@ interps.o: interps.c $(defs_h) $(gdbcmd_h) $(ui_out_h) $(event_loop_h) \
 	$(gdb_events_h) $(gdb_assert_h) $(top_h)
 irix5-nat.o: irix5-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(target_h) \
 	$(regcache_h) $(gdb_string_h) $(gregset_h) $(mips_tdep_h)
+jv-exp.o: jv-exp.c $(defs_h) $(gdb_string_h) $(expression_h) \
+	$(value_h) $(parser_defs_h) $(language_h) $(jv_lang_h) $(bfd_h) \
+	$(symfile_h) $(objfiles_h) $(block_h)
 jv-lang.o: jv-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(parser_defs_h) $(language_h) $(gdbtypes_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(gdb_string_h) $(value_h) $(c_lang_h) \
@@ -1989,6 +1901,9 @@ linux-proc.o: linux-proc.c $(defs_h) $(inferior_h) $(gdb_stat_h) \
 	$(cli_decode_h) $(gdb_string_h) $(linux_nat_h)
 lynx-nat.o: lynx-nat.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(regcache_h)
+m2-exp.o: m2-exp.c $(defs_h) $(gdb_string_h) $(expression_h) \
+	$(language_h) $(value_h) $(parser_defs_h) $(m2_lang_h) $(bfd_h) \
+	$(symfile_h) $(objfiles_h) $(block_h)
 m2-lang.o: m2-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(parser_defs_h) $(language_h) $(m2_lang_h) $(c_lang_h) \
 	$(valprint_h)
@@ -2107,6 +2022,10 @@ nto-procfs.o: nto-procfs.c $(defs_h) $(gdb_dirent_h) $(gdb_string_h) \
 nto-tdep.o: nto-tdep.c $(gdb_stat_h) $(gdb_string_h) $(nto_tdep_h) $(top_h) \
 	$(cli_decode_h) $(cli_cmds_h) $(inferior_h) $(gdbarch_h) $(bfd_h) \
 	$(elf_bfd_h) $(solib_svr4_h) $(gdbcore_h)
+objc-exp.o: objc-exp.c $(defs_h) $(gdb_string_h) $(expression_h) \
+	$(objc_lang_h) $(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) \
+	$(bfd_h) $(symfile_h) $(objfiles_h) $(top_h) $(completer_h) \
+	$(block_h)
 objc-lang.o: objc-lang.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(parser_defs_h) $(language_h) $(c_lang_h) $(objc_lang_h) \
 	$(complaints_h) $(value_h) $(symfile_h) $(objfiles_h) \
@@ -2131,6 +2050,9 @@ parse.o: parse.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(frame_h) $(expression_h) $(value_h) $(command_h) $(language_h) \
 	$(parser_defs_h) $(gdbcmd_h) $(symfile_h) $(inferior_h) \
 	$(doublest_h) $(gdb_assert_h) $(block_h)
+p-exp.o: p-exp.c $(defs_h) $(gdb_string_h) $(expression_h) \
+	$(value_h) $(parser_defs_h) $(language_h) $(p_lang_h) $(bfd_h) \
+	$(symfile_h) $(objfiles_h) $(block_h)
 p-lang.o: p-lang.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(parser_defs_h) $(language_h) $(p_lang_h) \
 	$(valprint_h) $(value_h)
