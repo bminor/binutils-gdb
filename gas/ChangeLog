@@ -1,3 +1,8 @@
+Tue Mar  7 16:07:10 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* doc/as.texinfo: Add documentation for SPARC V9, from Doug Evans
+	<dje@cygnus.com>.
+
 Mon Mar  6 09:58:34 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c: Change all occurences of pa-89 with pa-11 to
