@@ -1,5 +1,9 @@
 2004-05-01  Andrew Cagney  <cagney@redhat.com>
 
+	* Makefile.in (m68klinux-tdep.o, m68klinux-nat.o): Fix
+	m68klinux-tdep.o's dependencies, were previously added to
+	m68klinux-nat.o.
+
 	* alpha-tdep.c (alpha_sigtramp_frame_sniffer): Use pc_in_sigtramp.
 	* alpha-tdep.h (struct gdbarch_tdep): Add pc_in_sigtramp.
 	* alphafbsd-tdep.c (alphafbsd_init_abi): Update.
