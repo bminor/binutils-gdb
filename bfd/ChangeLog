@@ -1,5 +1,11 @@
 2001-08-30  H.J. Lu  <hjl@gnu.org>
 
+	* Makefile.am (BFD32_BACKENDS): Add elf32-h8300.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-h8300.c.
+	* Makefile.in: Rebuild.
+
+2001-08-30  H.J. Lu  <hjl@gnu.org>
+
 	* elf32-mips.c (mips_elf_calculate_relocation): Don't create
 	dynamic relocation for undefined weak symbols when creating
 	executables. Check h->root.root.type, instead of h->root.type.

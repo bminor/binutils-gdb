@@ -311,6 +311,7 @@ BFD32_BACKENDS = \
 	elf32-d30v.lo \
 	elf32-fr30.lo \
 	elf32-gen.lo \
+	elf32-h8300.lo \
 	elf32-hppa.lo \
 	elf32-i370.lo \
 	elf32-i386.lo \
@@ -452,6 +453,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-d30v.c \
 	elf32-fr30.c \
 	elf32-gen.c \
+	elf32-h8300.c \
 	elf32-hppa.c \
 	elf32-i370.c \
 	elf32-i386.c \
