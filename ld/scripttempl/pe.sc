@@ -48,7 +48,7 @@ SECTIONS
 
 
 
-  .edata BLOCK(__section_alignment__) :   { 					
+  .edata BLOCK(__section_alignment__) :   {
     *(.edata)   ;
   }
 
@@ -97,7 +97,9 @@ SECTIONS
 
   .endjunk BLOCK(__section_alignment__) :
   {
+    /* end is deprecated, don't use it */
     ${RELOCATING+ end =  .};
+    ${RELOCATING+ __end__ =  .};
   }
 
   .stab BLOCK(__section_alignment__)  ${RELOCATING+(NOLOAD)} : 

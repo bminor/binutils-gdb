@@ -1,3 +1,7 @@
+Mon Apr 29 20:31:06 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* scripttempl/pe.sc (.endjunk): Define __end__.
+
 Mon Apr 29 17:05:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldlang.c (longest_section_name): Remove.
