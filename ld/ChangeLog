@@ -1,3 +1,7 @@
+1999-07-08  Felix Lee  <flee@cygnus.com>
+
+	* scripttempl/mcorepe.sc: fix quoting problem, for bash 2.x
+
 1999-07-08  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* ldfile.c (ldfile_open_file_search): Skip libraries made for
