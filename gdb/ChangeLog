@@ -1,3 +1,11 @@
+2003-02-14  Elena Zannoni  <ezannoni@redhat.com>
+
+        From Brian Ford  <ford@vss.fsi.com>
+
+	* cli/cli-decode.c (lookup_cmd_composition) [TUI]: Properly
+	conditionalize tui_active test.
+	(lookup_cmd_1): Ditto.
+
 2003-02-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* configure.in: Add check for _etext.

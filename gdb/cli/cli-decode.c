@@ -927,8 +927,10 @@ lookup_cmd_1 (char **text, struct cmd_list_element *clist,
      `tui_version'.  */
   for (p = *text;
        *p && (isalnum (*p) || *p == '-' || *p == '_' ||
+#if defined(TUI)
 	      (tui_active &&
 	       (*p == '+' || *p == '<' || *p == '>' || *p == '$')) ||
+#endif
 	      (xdb_commands && (*p == '!' || *p == '/' || *p == '?')));
        p++)
     ;
@@ -1299,8 +1301,10 @@ lookup_cmd_composition (char *text,
 	 `tui_version'.  */
       for (p = text;
          *p && (isalnum (*p) || *p == '-' || *p == '_' ||
+#if defined(TUI)
                 (tui_active &&
                  (*p == '+' || *p == '<' || *p == '>' || *p == '$')) ||
+#endif
                 (xdb_commands && (*p == '!' || *p == '/' || *p == '?')));
          p++)
       ;
