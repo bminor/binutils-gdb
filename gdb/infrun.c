@@ -925,7 +925,7 @@ proceed (addr, siggnal, step)
      PREPARE_TO_PROCEED checks the current thread against the thread
      that reported the most recent event.  If a step-over is required
      it returns TRUE and sets the current thread to the old thread. */
-  if (PREPARE_TO_PROCEED () && breakpoint_here_p (read_pc ()))
+  if (PREPARE_TO_PROCEED (1) && breakpoint_here_p (read_pc ()))
     {
       oneproc = 1;
       thread_step_needed = 1;

@@ -1,8 +1,8 @@
-/* sh-stub.c -- debugging stub for the Hitachi-SH. 
+/* sh-stub.c -- debugging stub for the Hitachi-SH.
 
  NOTE!! This code has to be compiled with optimization, otherwise the 
  function inlining which generates the exception handlers won't work.
- 
+
 */
 
 /*   This is originally based on an m68k software stub written by Glenn
@@ -147,33 +147,37 @@
 #include <string.h>
 #include <setjmp.h>
 
+/* Hitachi SH architecture instruction encoding masks */
 
+#define COND_BR_MASK   0xff00
+#define UCOND_DBR_MASK 0xe000
+#define UCOND_RBR_MASK 0xf0df
+#define TRAPA_MASK     0xff00
 
-#define COND_BR_MASK	0xff00
-#define UCOND_DBR_MASK	0xe000
-#define UCOND_RBR_MASK	0xf0df
-#define TRAPA_MASK		0xff00
+#define COND_DISP      0x00ff
+#define UCOND_DISP     0x0fff
+#define UCOND_REG      0x0f00
 
-#define COND_DISP		0x00ff
-#define UCOND_DISP		0x0fff
-#define UCOND_REG		0x0f00
+/* Hitachi SH instruction opcodes */
 
-#define BF_INSTR		0x8b00
-#define BT_INSTR		0x8900
-#define BRA_INSTR		0xa000
-#define BSR_INSTR		0xb000
-#define JMP_INSTR		0x402b
-#define JSR_INSTR		0x400b
-#define RTS_INSTR		0x000b
-#define RTE_INSTR		0x002b
-#define TRAPA_INSTR		0xc300
+#define BF_INSTR       0x8b00
+#define BT_INSTR       0x8900
+#define BRA_INSTR      0xa000
+#define BSR_INSTR      0xb000
+#define JMP_INSTR      0x402b
+#define JSR_INSTR      0x400b
+#define RTS_INSTR      0x000b
+#define RTE_INSTR      0x002b
+#define TRAPA_INSTR    0xc300
+#define SSTEP_INSTR    0xc3ff
 
-#define SSTEP_INSTR		0xc3ff
+/* Hitachi SH processor register masks */
 
-#define T_BIT_MASK		0x0001
+#define T_BIT_MASK     0x0001
+
 /*
  * BUFMAX defines the maximum number of characters in inbound/outbound
- * buffers at least NUMREGBYTES*2 are needed for register packets
+ * buffers. At least NUMREGBYTES*2 are needed for register packets.
  */
 #define BUFMAX 1024
 
@@ -228,22 +232,9 @@ void breakpoint (void);
 int init_stack[init_stack_size] __attribute__ ((section ("stack"))) = {0};
 int stub_stack[stub_stack_size] __attribute__ ((section ("stack"))) = {0};
 
-typedef struct
-  {
-    void (*func_cold) ();
-    int *stack_cold;
-    void (*func_warm) ();
-    int *stack_warm;
-    void (*(handler[256 - 4])) ();
-  }
-vec_type;
-
 
 void INIT ();
 void BINIT ();
-
-/* When you link take care that this is at address 0 -
-   or wherever your vbr points */
 
 #define CPU_BUS_ERROR_VEC  9
 #define DMA_BUS_ERROR_VEC 10
@@ -254,270 +245,6 @@ void BINIT ();
 #define IO_VEC            33
 #define USER_VEC         255
 
-
-#define BCR  (*(volatile short *)(0x05FFFFA0)) /* Bus control register */
-#define BAS  (0x800)				/* Byte access select */
-#define WCR1 (*(volatile short *)(0x05ffffA2)) /* Wait state control register */
-
-const vec_type vectable =
-{ 
-  &BINIT,			/* 0: Power-on reset PC */
-  init_stack + init_stack_size, /* 1: Power-on reset SP */
-  &BINIT,			/* 2: Manual reset PC */
-  init_stack + init_stack_size, /* 3: Manual reset SP */
-{
-  &catch_exception_4,		/* 4: General invalid instruction */
-  &catch_exception_random,	/* 5: Reserved for system */
-  &catch_exception_6,		/* 6: Invalid slot instruction */
-  &catch_exception_random,	/* 7: Reserved for system */
-  &catch_exception_random,	/* 8: Reserved for system */
-  &catch_exception_9,		/* 9: CPU bus error */
-  &catch_exception_10,		/* 10: DMA bus error */
-  &catch_exception_11,		/* 11: NMI */
-  &catch_exception_random,	/* 12: User break */
-  &catch_exception_random,	/* 13: Reserved for system */
-  &catch_exception_random,	/* 14: Reserved for system */
-  &catch_exception_random,	/* 15: Reserved for system */
-  &catch_exception_random,	/* 16: Reserved for system */
-  &catch_exception_random,	/* 17: Reserved for system */
-  &catch_exception_random,	/* 18: Reserved for system */
-  &catch_exception_random,	/* 19: Reserved for system */
-  &catch_exception_random,	/* 20: Reserved for system */
-  &catch_exception_random,	/* 21: Reserved for system */
-  &catch_exception_random,	/* 22: Reserved for system */
-  &catch_exception_random,	/* 23: Reserved for system */
-  &catch_exception_random,	/* 24: Reserved for system */
-  &catch_exception_random,	/* 25: Reserved for system */
-  &catch_exception_random,	/* 26: Reserved for system */
-  &catch_exception_random,	/* 27: Reserved for system */
-  &catch_exception_random,	/* 28: Reserved for system */
-  &catch_exception_random,	/* 29: Reserved for system */
-  &catch_exception_random,	/* 30: Reserved for system */
-  &catch_exception_random,	/* 31: Reserved for system */
-  &catch_exception_32,		/* 32: Trap instr (user vectors) */
-  &catch_exception_33,		/* 33: Trap instr (user vectors) */
-  &catch_exception_random,	/* 34: Trap instr (user vectors) */
-  &catch_exception_random,	/* 35: Trap instr (user vectors) */
-  &catch_exception_random,	/* 36: Trap instr (user vectors) */
-  &catch_exception_random,	/* 37: Trap instr (user vectors) */
-  &catch_exception_random,	/* 38: Trap instr (user vectors) */
-  &catch_exception_random,	/* 39: Trap instr (user vectors) */
-  &catch_exception_random,	/* 40: Trap instr (user vectors) */
-  &catch_exception_random,	/* 41: Trap instr (user vectors) */
-  &catch_exception_random,	/* 42: Trap instr (user vectors) */
-  &catch_exception_random,	/* 43: Trap instr (user vectors) */
-  &catch_exception_random,	/* 44: Trap instr (user vectors) */
-  &catch_exception_random,	/* 45: Trap instr (user vectors) */
-  &catch_exception_random,	/* 46: Trap instr (user vectors) */
-  &catch_exception_random,	/* 47: Trap instr (user vectors) */
-  &catch_exception_random,	/* 48: Trap instr (user vectors) */
-  &catch_exception_random,	/* 49: Trap instr (user vectors) */
-  &catch_exception_random,	/* 50: Trap instr (user vectors) */
-  &catch_exception_random,	/* 51: Trap instr (user vectors) */
-  &catch_exception_random,	/* 52: Trap instr (user vectors) */
-  &catch_exception_random,	/* 53: Trap instr (user vectors) */
-  &catch_exception_random,	/* 54: Trap instr (user vectors) */
-  &catch_exception_random,	/* 55: Trap instr (user vectors) */
-  &catch_exception_random,	/* 56: Trap instr (user vectors) */
-  &catch_exception_random,	/* 57: Trap instr (user vectors) */
-  &catch_exception_random,	/* 58: Trap instr (user vectors) */
-  &catch_exception_random,	/* 59: Trap instr (user vectors) */
-  &catch_exception_random,	/* 60: Trap instr (user vectors) */
-  &catch_exception_random,	/* 61: Trap instr (user vectors) */
-  &catch_exception_random,	/* 62: Trap instr (user vectors) */
-  &catch_exception_random,	/* 63: Trap instr (user vectors) */
-  &catch_exception_random,	/* 64: IRQ0 */
-  &catch_exception_random,	/* 65: IRQ1 */
-  &catch_exception_random,	/* 66: IRQ2 */
-  &catch_exception_random,	/* 67: IRQ3 */
-  &catch_exception_random,	/* 68: IRQ4 */
-  &catch_exception_random,	/* 69: IRQ5 */
-  &catch_exception_random,	/* 70: IRQ6 */
-  &catch_exception_random,	/* 71: IRQ7 */
-  &catch_exception_random,
-  &catch_exception_random,
-  &catch_exception_random,
-  &catch_exception_random,
-  &catch_exception_random,
-  &catch_exception_random,
-  &catch_exception_random,
-  &catch_exception_random,
-  &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_random,
-     &catch_exception_255}};
 
 
 char in_nmi;   /* Set when handling an NMI, so we don't reenter */
@@ -1085,6 +812,306 @@ breakpoint (void)
       BREAKPOINT ();
 }
 
+/**** Processor-specific routines start here ****/
+/**** Processor-specific routines start here ****/
+/**** Processor-specific routines start here ****/
+
+/* Note:
+
+   The Hitachi SH family uses two exception architectures:
+
+   SH1 & SH2:
+
+       These processors utilize an exception vector table.
+       Exceptions are vectored to the address stored at VBR + (exception_num * 4)
+
+  SH3, SH3E, & SH4:
+
+       These processors have fixed entry points relative to the VBR for
+       various exception classes.
+*/
+
+#if defined(__sh1__) || defined(__sh2__)
+
+/* SH1/SH2 exception vector table format */
+
+typedef struct
+  {
+    void (*func_cold) ();
+    int *stack_cold;
+    void (*func_warm) ();
+    int *stack_warm;
+    void (*(handler[256 - 4])) ();
+  }
+vec_type;
+
+/* vectable is the SH1/SH2 vector table. It must be at address 0
+   or wherever your vbr points. */
+
+const vec_type vectable =
+{ 
+  &BINIT,			/* 0: Power-on reset PC */
+  init_stack + init_stack_size, /* 1: Power-on reset SP */
+  &BINIT,			/* 2: Manual reset PC */
+  init_stack + init_stack_size, /* 3: Manual reset SP */
+{
+  &catch_exception_4,		/* 4: General invalid instruction */
+  &catch_exception_random,	/* 5: Reserved for system */
+  &catch_exception_6,		/* 6: Invalid slot instruction */
+  &catch_exception_random,	/* 7: Reserved for system */
+  &catch_exception_random,	/* 8: Reserved for system */
+  &catch_exception_9,		/* 9: CPU bus error */
+  &catch_exception_10,		/* 10: DMA bus error */
+  &catch_exception_11,		/* 11: NMI */
+  &catch_exception_random,	/* 12: User break */
+  &catch_exception_random,	/* 13: Reserved for system */
+  &catch_exception_random,	/* 14: Reserved for system */
+  &catch_exception_random,	/* 15: Reserved for system */
+  &catch_exception_random,	/* 16: Reserved for system */
+  &catch_exception_random,	/* 17: Reserved for system */
+  &catch_exception_random,	/* 18: Reserved for system */
+  &catch_exception_random,	/* 19: Reserved for system */
+  &catch_exception_random,	/* 20: Reserved for system */
+  &catch_exception_random,	/* 21: Reserved for system */
+  &catch_exception_random,	/* 22: Reserved for system */
+  &catch_exception_random,	/* 23: Reserved for system */
+  &catch_exception_random,	/* 24: Reserved for system */
+  &catch_exception_random,	/* 25: Reserved for system */
+  &catch_exception_random,	/* 26: Reserved for system */
+  &catch_exception_random,	/* 27: Reserved for system */
+  &catch_exception_random,	/* 28: Reserved for system */
+  &catch_exception_random,	/* 29: Reserved for system */
+  &catch_exception_random,	/* 30: Reserved for system */
+  &catch_exception_random,	/* 31: Reserved for system */
+  &catch_exception_32,		/* 32: Trap instr (user vectors) */
+  &catch_exception_33,		/* 33: Trap instr (user vectors) */
+  &catch_exception_random,	/* 34: Trap instr (user vectors) */
+  &catch_exception_random,	/* 35: Trap instr (user vectors) */
+  &catch_exception_random,	/* 36: Trap instr (user vectors) */
+  &catch_exception_random,	/* 37: Trap instr (user vectors) */
+  &catch_exception_random,	/* 38: Trap instr (user vectors) */
+  &catch_exception_random,	/* 39: Trap instr (user vectors) */
+  &catch_exception_random,	/* 40: Trap instr (user vectors) */
+  &catch_exception_random,	/* 41: Trap instr (user vectors) */
+  &catch_exception_random,	/* 42: Trap instr (user vectors) */
+  &catch_exception_random,	/* 43: Trap instr (user vectors) */
+  &catch_exception_random,	/* 44: Trap instr (user vectors) */
+  &catch_exception_random,	/* 45: Trap instr (user vectors) */
+  &catch_exception_random,	/* 46: Trap instr (user vectors) */
+  &catch_exception_random,	/* 47: Trap instr (user vectors) */
+  &catch_exception_random,	/* 48: Trap instr (user vectors) */
+  &catch_exception_random,	/* 49: Trap instr (user vectors) */
+  &catch_exception_random,	/* 50: Trap instr (user vectors) */
+  &catch_exception_random,	/* 51: Trap instr (user vectors) */
+  &catch_exception_random,	/* 52: Trap instr (user vectors) */
+  &catch_exception_random,	/* 53: Trap instr (user vectors) */
+  &catch_exception_random,	/* 54: Trap instr (user vectors) */
+  &catch_exception_random,	/* 55: Trap instr (user vectors) */
+  &catch_exception_random,	/* 56: Trap instr (user vectors) */
+  &catch_exception_random,	/* 57: Trap instr (user vectors) */
+  &catch_exception_random,	/* 58: Trap instr (user vectors) */
+  &catch_exception_random,	/* 59: Trap instr (user vectors) */
+  &catch_exception_random,	/* 60: Trap instr (user vectors) */
+  &catch_exception_random,	/* 61: Trap instr (user vectors) */
+  &catch_exception_random,	/* 62: Trap instr (user vectors) */
+  &catch_exception_random,	/* 63: Trap instr (user vectors) */
+  &catch_exception_random,	/* 64: IRQ0 */
+  &catch_exception_random,	/* 65: IRQ1 */
+  &catch_exception_random,	/* 66: IRQ2 */
+  &catch_exception_random,	/* 67: IRQ3 */
+  &catch_exception_random,	/* 68: IRQ4 */
+  &catch_exception_random,	/* 69: IRQ5 */
+  &catch_exception_random,	/* 70: IRQ6 */
+  &catch_exception_random,	/* 71: IRQ7 */
+  &catch_exception_random,
+  &catch_exception_random,
+  &catch_exception_random,
+  &catch_exception_random,
+  &catch_exception_random,
+  &catch_exception_random,
+  &catch_exception_random,
+  &catch_exception_random,
+  &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_random,
+     &catch_exception_255}};
+
+#define BCR  (*(volatile short *)(0x05FFFFA0)) /* Bus control register */
+#define BAS  (0x800)				/* Byte access select */
+#define WCR1 (*(volatile short *)(0x05ffffA2)) /* Wait state control register */
+
 asm ("_BINIT: mov.l  L1,r15");
 asm ("bra _INIT");
 asm ("nop");
@@ -1547,3 +1574,4 @@ handleError (char theSSR)
   SSR1 &= ~(SCI_ORER | SCI_PER | SCI_FER);
 }
 
+#endif

@@ -1,3 +1,17 @@
+1999-05-17  Keith Seitz  <keiths@cygnus.com>
+
+	* gdb.base/call-ar-st.exp: Skip "print print_double_array (double_array)"
+	when "skip_float_tests" set.
+	Ditto for "print print_double_array(array_d)", "print print_small_structs",
+	"print print_ten_doubles", and "step into print_long_arg_list".
+	Don't assume we can step into "print_long_arg_list": we could step into memcpy.
+	* gdb.base/call-rt-st.exp: Don't run float-related tests when "skip_float_tests"
+	is set: "print print_one_double(*d1)" and "print print_two_floats(*f3)".
+	* gdb.base/funcargs.exp: Don't run "float_and_integral_args" when
+	"skip_float_tests" is set.
+	* gdb.base/varargs.exp: Skip "print find_max_double(5,1.0,17.0,2.0,3.0,4.0)"
+	when "skip_float_tests" set.
+	
 1999-05-06  Keith Seitz  <keiths@cygnus.com>
 
 	* gdb.base/annota2.cc: Include stdio.h.

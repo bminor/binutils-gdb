@@ -24,7 +24,9 @@
 #include <signal.h>
 #include <unistd.h>
 #include <fcntl.h>
+#ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
+#endif
 #include "defs.h"
 
 /* An event loop listens for events from multiple event sources. When

@@ -763,23 +763,24 @@ get_command_line (type, arg)
 
 /* Recursively print a command (including full control structures).  */
 void
-print_command_line (cmd, depth)
+print_command_line (cmd, depth, stream)
      struct command_line *cmd;
      unsigned int depth;
+     GDB_FILE *stream;
 {
   unsigned int i;
 
   if (depth)
     {
       for (i = 0; i < depth; i++)
-	fputs_filtered ("  ", gdb_stdout);
+	fputs_filtered ("  ", stream);
     }
 
   /* A simple command, print it and return.  */
   if (cmd->control_type == simple_control)
     {
-      fputs_filtered (cmd->line, gdb_stdout);
-      fputs_filtered ("\n", gdb_stdout);
+      fputs_filtered (cmd->line, stream);
+      fputs_filtered ("\n", stream);
       return;
     }
 
@@ -787,14 +788,14 @@ print_command_line (cmd, depth)
      and return. */
   if (cmd->control_type == continue_control)
     {
-      fputs_filtered ("loop_continue\n", gdb_stdout);
+      fputs_filtered ("loop_continue\n", stream);
       return;
     }
 
   /* loop_break to break out of a while loop, print it and return.  */
   if (cmd->control_type == break_control)
     {
-      fputs_filtered ("loop_break\n", gdb_stdout);
+      fputs_filtered ("loop_break\n", stream);
       return;
     }
 
@@ -802,13 +803,13 @@ print_command_line (cmd, depth)
   if (cmd->control_type == while_control)
     {
       struct command_line *list;
-      fputs_filtered ("while ", gdb_stdout);
-      fputs_filtered (cmd->line, gdb_stdout);
-      fputs_filtered ("\n", gdb_stdout);
+      fputs_filtered ("while ", stream);
+      fputs_filtered (cmd->line, stream);
+      fputs_filtered ("\n", stream);
       list = *cmd->body_list;
       while (list)
 	{
-	  print_command_line (list, depth + 1);
+	  print_command_line (list, depth + 1, stream);
 	  list = list->next;
 	}
     }
@@ -816,11 +817,11 @@ print_command_line (cmd, depth)
   /* An if command.  Recursively print both arms before returning.  */
   if (cmd->control_type == if_control)
     {
-      fputs_filtered ("if ", gdb_stdout);
-      fputs_filtered (cmd->line, gdb_stdout);
-      fputs_filtered ("\n", gdb_stdout);
+      fputs_filtered ("if ", stream);
+      fputs_filtered (cmd->line, stream);
+      fputs_filtered ("\n", stream);
       /* The true arm. */
-      print_command_line (cmd->body_list[0], depth + 1);
+      print_command_line (cmd->body_list[0], depth + 1, stream);
 
       /* Show the false arm if it exists.  */
       if (cmd->body_count == 2)
@@ -828,17 +829,17 @@ print_command_line (cmd, depth)
 	    if (depth)
 	      {
 		for (i = 0; i < depth; i++)
-		  fputs_filtered ("  ", gdb_stdout);
+		  fputs_filtered ("  ", stream);
 	      }
-	    fputs_filtered ("else\n", gdb_stdout);
-	    print_command_line (cmd->body_list[1], depth + 1);
+	    fputs_filtered ("else\n", stream);
+	    print_command_line (cmd->body_list[1], depth + 1, stream);
 	  }
       if (depth)
 	{
 	  for (i = 0; i < depth; i++)
-	    fputs_filtered ("  ", gdb_stdout);
+	    fputs_filtered ("  ", stream);
 	}
-      fputs_filtered ("end\n", gdb_stdout);
+      fputs_filtered ("end\n", stream);
     }
 }
 

@@ -147,25 +147,25 @@ gdb_expect {
     timeout           { fail "(timeout) print_one_large_struct(*list1)" }
   }
 
-send_gdb "print print_one_double(*d1)\n"
-gdb_expect {
+if {![target_info exists gdb,skip_float_tests]} {
+  send_gdb "print print_one_double(*d1)\n"
+  gdb_expect {
     -re ".*Contents of one_double_t:\[ \r\n\]+1\\.111110\[ \r\n\]+.\[0-9\]+ = \{double1 = 1\\.11111\}.*$gdb_prompt $" {
-        pass "print print_one_double(*d1)"
-      }
+      pass "print print_one_double(*d1)"
+    }
     -re ".*$gdb_prompt $" { fail "print print_one_double(*d1)" }
     timeout           { fail "(timeout) print_one_double(*d1)" }
   }
 
-
-
-send_gdb "print print_two_floats(*f3)\n"
-gdb_expect {
+  send_gdb "print print_two_floats(*f3)\n"
+  gdb_expect {
     -re ".*Contents of two_floats_t:\[ \r\n\]+-2\\.345000\[ \t]+1\\.000000\[ \r\n\]+.\[0-9\]+ = \{float1 = -2\\.34500003, float2 = 1\}.*$gdb_prompt $" {
-        pass "print print_two_floats(*f3)"
-      }
+      pass "print print_two_floats(*f3)"
+    }
     -re ".*$gdb_prompt $" { fail "print print_two_floats(*f3)" }
     timeout           { fail "(timeout) print_two_floats(*f3)" }
   }
+}
 
 send_gdb "print print_bit_flags(*flags)\n"
 gdb_expect {

@@ -118,8 +118,8 @@ union
   word asints [1];		/* but accessed larger... */
 } cpu;
 
-#define LAST_VALID_CREG	12	/* only 0..12 implemented */
-#define	NUM_MCORE_REGS	(16 + 16 + LAST_VALID_CREG)
+#define LAST_VALID_CREG	32		/* only 0..12 implemented */
+#define	NUM_MCORE_REGS	(16 + 16 + LAST_VALID_CREG + 1)
 
 int memcycles = 1;
 
@@ -840,6 +840,7 @@ sim_resume (sd, step, siggnal)
 		{
 		case 0x0:				/* bkpt */
 		  cpu.asregs.exception = SIGTRAP;
+		  pc -= 2;
 		  break;
 		  
 		case 0x1:				/* sync */

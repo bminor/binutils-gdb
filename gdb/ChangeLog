@@ -1,3 +1,46 @@
+1999-05-19  Keith Seitz  <keiths@cygnus.com>
+
+	* monitor.c (monitor_open): Only assume we have eight
+	breakpoints if the monitor implementation does not tell
+	us how many there really are. Alloc memory for these
+	dynamically.
+	(monitor_close): Free memory associated with breakpoint
+	storage.
+	(monitor_insert_breakpoint): Don't rely on a hardcoded
+	number of breakpoints.
+	(monitor_remove_breakpoint): Ditto.
+	(NUM_MONITOR_BREAKPOINTS): Removed and replaced with monitor_ops
+	specification.
+	* monitor.h (struct monitor_ops): Add new member so that the
+	individual monitor implementations can tell us how many
+	breakpoints the monitor supports.
+
+1999-05-18  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	From Philippe De Muyter  <phdm@macqel.be>:
+	* event-loop.h: Include sys/wait.h only if HAVE_SYS_WAIT_H.
+	
+1999-05-17  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* top.c (print_command_line): added the missing stream argument.
+	* gdbcmd.h: added argument to prototype.
+	* command.c: fixed call to include extra argument.
+	* breakpoint.c: same.
+
+1999-05-14  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	Targets are #defining PREPARE_TO_PROCEED with inconsistent numbers
+	of arguments.  Since the Mach 3 target needs an argument, we'll
+	make things consistent by adding an argument everywhere.
+	* infrun.c (proceed): Pass an argument to PREPARE_TO_PROCEED.
+	* config/pa/nm-hppah.h (PREPARE_TO_PROCEED): Add ignored argument
+	to definition.
+
+1999-05-11  Stan Shebs  <shebs@andros.cygnus.com>
+
+	Fri Apr 23 13:27:34 PDT 1999  Toshiyasu Morita  (tm@netcom.com)
+	* sh-stub.c: Mostly localize processor dependencies.
+
 1999-05-10  Martin Hunt  <hunt@cygnus.com>
 
 	* debugify.c, debugify.h: Removed because they are no

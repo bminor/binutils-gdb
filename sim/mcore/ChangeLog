@@ -1,3 +1,9 @@
+1999-05-17  Keith Seitz  <keiths@cygnus.com>
+
+	* interp.c (NUM_MCORE_REGS): Increase by one to allow access to PC.
+	(sim_resume): Correct off by one instruction error when a breakpoint
+	is hit.
+
 1999-05-08  Felix Lee  <flee@cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

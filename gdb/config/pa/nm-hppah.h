@@ -56,7 +56,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* While this is for use by threaded programs, it doesn't appear
  * to hurt non-threaded ones.  This is used in infrun.c: */
-#define PREPARE_TO_PROCEED() hppa_prepare_to_proceed()
+#define PREPARE_TO_PROCEED(select_it) hppa_prepare_to_proceed()
 extern int hppa_prepare_to_proceed PARAMS(( void ));
 
 /* In infptrace.c or infttrace.c: */

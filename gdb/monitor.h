@@ -78,7 +78,8 @@ struct monitor_ops
   char *cont;			/* continue command */
   char *step;			/* single step */
   char *stop;			/* Interrupt program string */
-  char *set_break;		/* set a breakpoint */
+  char *set_break;		/* set a breakpoint. If NULL, monitor implementation
+				   sets its own to_insert_breakpoint method. */
   char *clr_break;		/* clear a breakpoint */
   char *clr_all_break;		/* Clear all breakpoints */
   char *fill;			/* Memory fill cmd (addr len val) */
@@ -111,6 +112,8 @@ struct monitor_ops
   struct target_ops *target;	/* target operations */
   int stopbits;			/* number of stop bits */
   char **regnames;		/* array of register names in ascii */
+  int num_breakpoints;          /* If set_break != NULL, number of supported
+				   breakpoints */
   int magic;			/* Check value */
 };
 

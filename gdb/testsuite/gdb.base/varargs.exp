@@ -128,12 +128,14 @@ gdb_expect {
   }
 
 
-send_gdb "print find_max_double(5,1.0,17.0,2.0,3.0,4.0)\n"
-gdb_expect {
+if {![target_info exists gdb,skip_float_tests]} {
+  send_gdb "print find_max_double(5,1.0,17.0,2.0,3.0,4.0)\n"
+  gdb_expect {
     -re ".*find_max\\(.*\\) returns 17\\.000000\[ \r\n\]+.\[0-9\]+ = 17.*$gdb_prompt $" {
-        pass "print find_max_double(5,1.0,17.0,2.0,3.0,4.0)"
-      }
+      pass "print find_max_double(5,1.0,17.0,2.0,3.0,4.0)"
+    }
     -re ".*$gdb_prompt $" { fail "print find_max_double(5,1.0,17.0,2.0,3.0,4.0)" }
     timeout           { fail "(timeout) print find_max_double(5,1.0,17.0,2.0,3.0,4.0)" }
   }
+}
 

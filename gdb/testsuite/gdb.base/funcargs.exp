@@ -994,7 +994,9 @@ integral_args
 funcargs_reload
 unsigned_integral_args
 funcargs_reload
-float_and_integral_args
+if {![target_info exists gdb,skip_float_tests]} {
+  float_and_integral_args
+}
 funcargs_reload
 pointer_args
 funcargs_reload

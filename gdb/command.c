@@ -1513,7 +1513,7 @@ show_user_1 (c, stream)
 
   while (cmdlines)
     {
-      print_command_line (cmdlines, 4);
+      print_command_line (cmdlines, 4, stream);
       cmdlines = cmdlines->next;
     }
   fputs_filtered ("\n", stream);

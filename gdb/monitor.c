@@ -120,6 +120,8 @@ static int in_monitor_wait = 0;	/* Non-zero means we are in monitor_wait() */
 
 static void (*ofunc)();		/* Old SIGINT signal handler */
 
+static CORE_ADDR *breakaddr;
+
 /* Extra remote debugging for developing a new rom monitor variation */
 #if ! defined(EXTRA_RDEBUG)
 #define EXTRA_RDEBUG 0
@@ -796,6 +798,16 @@ monitor_open (args, mon_ops, from_tty)
 
   SERIAL_FLUSH_INPUT (monitor_desc);
 
+  /* Alloc breakpoints */
+  if (mon_ops->set_break != NULL)
+    {
+      if (mon_ops->num_breakpoints == 0)
+	mon_ops->num_breakpoints = 8;
+
+      breakaddr = (CORE_ADDR *) xmalloc (mon_ops->num_breakpoints * sizeof (CORE_ADDR));
+      memset (breakaddr, 0, mon_ops->num_breakpoints * sizeof (CORE_ADDR));
+    }
+
   /* Remove all breakpoints */
 
   if (mon_ops->clr_all_break)
@@ -831,6 +843,14 @@ monitor_close (quitting)
 {
   if (monitor_desc)
     SERIAL_CLOSE (monitor_desc);
+
+  /* Free breakpoint memory */
+  if (breakaddr != NULL)
+    {
+      free (breakaddr);
+      breakaddr = NULL;
+    }
+
   monitor_desc = NULL;
 }
 
@@ -1981,10 +2001,6 @@ monitor_mourn_inferior ()
   generic_mourn_inferior ();	/* Do all the proper things now */
 }
 
-#define NUM_MONITOR_BREAKPOINTS 8
-
-static CORE_ADDR breakaddr[NUM_MONITOR_BREAKPOINTS] = {0};
-
 /* Tell the monitor to add a breakpoint.  */
 
 static int
@@ -2006,7 +2022,7 @@ monitor_insert_breakpoint (addr, shadow)
   /* Determine appropriate breakpoint size for this address.  */
   bp = memory_breakpoint_from_pc (&addr, &bplen);
 
-  for (i = 0; i < NUM_MONITOR_BREAKPOINTS; i++)
+  for (i = 0; i < current_monitor->num_breakpoints; i++)
     {
       if (breakaddr[i] == 0)
 	{
@@ -2018,7 +2034,7 @@ monitor_insert_breakpoint (addr, shadow)
 	}
     }
 
-  error ("Too many breakpoints (> %d) for monitor.", NUM_MONITOR_BREAKPOINTS);
+  error ("Too many breakpoints (> %d) for monitor.", current_monitor->num_breakpoints);
 }
 
 /* Tell the monitor to remove a breakpoint.  */
@@ -2037,7 +2053,7 @@ monitor_remove_breakpoint (addr, shadow)
   if (current_monitor->flags & MO_ADDR_BITS_REMOVE)
     addr = ADDR_BITS_REMOVE (addr);
 
-  for (i = 0; i < NUM_MONITOR_BREAKPOINTS; i++)
+  for (i = 0; i < current_monitor->num_breakpoints; i++)
     {
       if (breakaddr[i] == addr)
 	{

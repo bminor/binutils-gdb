@@ -112,15 +112,16 @@ gdb_test continue \
 
 
 #call print_double_array(double_array)
-send_gdb "print print_double_array(double_array)\n"
-gdb_expect {
+if {![target_info exists gdb,skip_float_tests]} {
+  send_gdb "print print_double_array(double_array)\n"
+  gdb_expect {
     -re "array_d :\[ \t\r\n\]+=========\[ \t\r\n\]+\[ \t\r\n\]+0.000000\[ \t\r\n\]+23.456700  46.913400  70.370100  93.826800  117.283500  140.740200  164.196900  187.653600\[ \t\r\n\]+211.110300  234.567000  258.023700  281.480400  304.937100  328.393800  351.850500  375.307200\[ \t\r\n\]+398.763900  422.220600  445.677300  469.134000  492.590700  516.047400  539.504100  562.960800\[ \t\r\n\]+586.417500  609.874200  633.330900  656.787600  680.244300  703.701000  727.157700  750.614400\[ \t\r\n\]+774.071100  797.527800  820.984500  844.441200  867.897900  891.354600  914.811300  938.268000\[ \t\r\n\]+961.724700  985.181400  1008.638100  1032.094800  1055.551500  1079.008200  1102.464900  1125.921600\[ \t\r\n\]+1149.378300  1172.835000  1196.291700  1219.748400  1243.205100  1266.661800  1290.118500  1313.575200\[ \t\r\n\]+1337.031900  1360.488600  1383.945300  1407.402000  1430.858700  1454.315400  1477.772100  1501.228800\[ \t\r\n\]+1524.685500  1548.142200  1571.598900  1595.055600  1618.512300  1641.969000  1665.425700  1688.882400\[ \t\r\n\]+1712.339100  1735.795800  1759.252500  1782.709200  1806.165900  1829.622600  1853.079300  1876.536000\[ \t\r\n\]+1899.992700  1923.449400  1946.906100  1970.362800  1993.819500  2017.276200  2040.732900  2064.189600\[ \t\r\n\]+2087.646300  2111.103000  2134.559700  2158.016400  2181.473100  2204.929800  2228.386500  2251.843200\[ \t\r\n\]+2275.299900  2298.756600  2322.213300\[ \t\r\n\]+\[ \t\r\n\]+.*$gdb_prompt $" {
-        pass "print print_double_array(double_array)"
-      }
+      pass "print print_double_array(double_array)"
+    }
     -re ".*$gdb_prompt $" { fail "print print_double_array(double_array)" }
     timeout           { fail "(timeout) print print_double_array(double_array)" }
   }
-
+}
 
 #call print_char_array(char_array)
 
@@ -191,15 +192,16 @@ gdb_test continue \
 
 
 #call print_double_array(array_d)
-send_gdb "print print_double_array(array_d)\n"
-gdb_expect {
+if {![target_info exists gdb,skip_float_tests]} {
+  send_gdb "print print_double_array(array_d)\n"
+  gdb_expect {
     -re "array_d :\[ \t\r\n\]+=========\[ \t\r\n\]+\[ \t\r\n\]+0.000000\[ \t\r\n\]+23.456700  46.913400  70.370100  93.826800  117.283500  140.740200  164.196900  187.653600\[ \t\r\n\]+211.110300  234.567000  258.023700  281.480400  304.937100  328.393800  351.850500  375.307200\[ \t\r\n\]+398.763900  422.220600  445.677300  469.134000  492.590700  516.047400  539.504100  562.960800\[ \t\r\n\]+586.417500  609.874200  633.330900  656.787600  680.244300  703.701000  727.157700  750.614400\[ \t\r\n\]+774.071100  797.527800  820.984500  844.441200  867.897900  891.354600  914.811300  938.268000\[ \t\r\n\]+961.724700  985.181400  1008.638100  1032.094800  1055.551500  1079.008200  1102.464900  1125.921600\[ \t\r\n\]+1149.378300  1172.835000  1196.291700  1219.748400  1243.205100  1266.661800  1290.118500  1313.575200\[ \t\r\n\]+1337.031900  1360.488600  1383.945300  1407.402000  1430.858700  1454.315400  1477.772100  1501.228800\[ \t\r\n\]+1524.685500  1548.142200  1571.598900  1595.055600  1618.512300  1641.969000  1665.425700  1688.882400\[ \t\r\n\]+1712.339100  1735.795800  1759.252500  1782.709200  1806.165900  1829.622600  1853.079300  1876.536000\[ \t\r\n\]+1899.992700  1923.449400  1946.906100  1970.362800  1993.819500  2017.276200  2040.732900  2064.189600\[ \t\r\n\]+2087.646300  2111.103000  2134.559700  2158.016400  2181.473100  2204.929800  2228.386500  2251.843200\[ \t\r\n\]+2275.299900  2298.756600  2322.213300\[ \t\r\n\]+\[ \t\r\n\]+.*$gdb_prompt $" {
-        pass "print print_double_array(array_d)"
-      }
+      pass "print print_double_array(array_d)"
+    }
     -re ".*$gdb_prompt $" { fail "print print_double_array(array_d)" }
     timeout           { fail "(timeout) print print_double_array(array_d)" }
   }
-
+}
 
 #go -until 1034
 gdb_test "tbreak 1034" \
@@ -298,15 +300,16 @@ gdb_expect {
 
 #call print_small_structs(*struct1, *struct2, *struct3, *struct4,*flags, *flags_combo,
 #*three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)
-send_gdb "print print_small_structs(*struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)\n"
-gdb_expect {
+if {![target_info exists gdb,skip_float_tests]} {
+  send_gdb "print print_small_structs(*struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)\n"
+  gdb_expect {
     -re ".*alpha\[\t\r\n \]+gamma\[\t\r\n \]+epsilon\[\t\r\n \]+alpha\[\t\r\n \]+gamma\[\t\r\n \]+epsilon\[\t\r\n \]+ch1: y\tch2: n\[\t\r\n \]+Contents of three_char_t:\[\t\r\n \]+a\tb\tc\[\t\r\n \]+Contents of five_char_t:\[\t\r\n \]+l\tm\tn\to\tp\[\t\r\n \]+Contents of int_char_combo_t:\[\t\r\n \]+123.*z\[\t\r\n \]+Sum of the 4 struct values and seed :\[\t\r\n \]+52\[\t\r\n \]+Contents of struct1:\[\t\r\n \]+6.*0\[\t\r\n \]+Contents of struct2:\[\t\r\n \]+10.*0\[\t\r\n \]+Contents of struct3:\[\t\r\n \]+12.*0\[\t\r\n \]+Contents of one_double_t:\[\t\r\n \]+10.500000\[\t\r\n \]+Contents of one_double_t:.*-3.340000\[\t\r\n \]+Contents of one_double_t:.*675.091230\[\t\r\n \]+Contents of two_floats_t:.*45.234001.*43.599998\[\t\r\n \]+Contents of two_floats_t:.*78.010002.*122.099998\[\t\r\n \]+Contents of two_floats_t:.*-1232.344971.*-199.210007\[\t\r\n \]+.*$gdb_prompt $" {
-        pass "print print_small_structs"
-      }
+      pass "print print_small_structs"
+    }
     -re ".*$gdb_prompt $" { fail "print print_small_structs" }
     timeout           { fail "(timeout) print_small_structs" }
   }
-
+}
 
 #call compute_with_small_structs(20)
 send_gdb "print compute_with_small_structs(20)\n"
@@ -320,14 +323,16 @@ gdb_expect {
 
 
 #call print_ten_doubles(123.456, 123.456, -0.12, -1.23, 343434.8, 89.098, 3.14, -5678.12345, -0.11111111, 216.97065)
-send_gdb "print print_ten_doubles(123.456, 123.456, -0.12, -1.23, 343434.8, 89.098, 3.14, -5678.12345, -0.11111111, 216.97065)\n"
-gdb_expect {
+if {![target_info exists gdb,skip_float_tests]} {
+  send_gdb "print print_ten_doubles(123.456, 123.456, -0.12, -1.23, 343434.8, 89.098, 3.14, -5678.12345, -0.11111111, 216.97065)\n"
+  gdb_expect {
     -re ".*Two Doubles : 123.456000.*123.456000\[\t\r\n \]+Two Doubles : -0.120000.*-1.230000\[\t\r\n \]+Two Doubles : 343434.800000.*89.098000\[\t\r\n \]+Two Doubles : 3.140000.*-5678.123450\[\t\r\n \]+Two Doubles : -0.111111.*216.970650\[\t\r\n \]+.*$gdb_prompt $" {
-        pass "print print_ten_doubles"
-      }
+      pass "print print_ten_doubles"
+    }
     -re ".*$gdb_prompt $" { fail "print print_ten_doubles" }
     timeout           { fail "(timeout) print_ten_doubles" }
   }
+}
 
 #go -until 1084
 gdb_test "tbreak 1084" \
@@ -336,25 +341,36 @@ gdb_test "tbreak 1084" \
 
 gdb_test continue "Continuing\\..*main \\(.*\\) at.*call-ar-st.c:1084\[\t\r\n \]+1084.*print_long_arg_list \\( a, b, c, d, e, f, .struct1, .struct2, .struct3, .struct4,.*" "continue to 1084"
 
-  
-    send_gdb "step\n"
-    gdb_expect {
-        -re ".*print_long_arg_list \\(a=22.219999999999999, b=33.332999999999998, c=0, d=-25, e=100, f=2345, struct1=\{value = 6, head = 0\}, struct2=\{value = 10, head = 0\}, struct3=\{value = 12, head = 0\}, struct4=\{value = 14, head = 0\}, flags=\{alpha = 1, beta = 0, gamma = 1, delta = 0, epsilon = 1, omega = 0\}, flags_combo=\{alpha = 1, beta = 0, ch1 = 121 \'y\', gamma = 1, delta = 0, ch2 = 110 \'n\', epsilon = 1, omega = 0\}, three_char=\{ch1 = 97 \'a\', ch2 = 98 \'b\', ch3 = 99 \'c\'\}, five_char=\{ch1 = 108 \'l\', ch2 = 109 \'m\', ch3 = 110 \'n\', ch4 = 111 \'o\', ch5 = 112 \'p\'\}, int_char_combo=\{int1 = 123, ch1 = 122 \'z\'\}, d1=\{double1 = 10.5\}, d2=\{double1 = -3.3399999999999999\}, d3=\{double1 = 675.09123\}, f1=\{float1 = 45.2340012, float2 = 43.5999985\}, f2=\{float1 = 78.0100021, float2 = 122.099998\}, f3=\{float1 = -1232.34497, float2 = -199.210007\}\\) at ${srcdir}/${subdir}/${srcfile}:813\[\r\n\]+813\[ \t\]+printf\\(\"double :.*\", a\\);.*$gdb_prompt $" {pass "step into print_long_arg_list"}
-        -re ".*$gdb_prompt $" { fail "step into print_long_arg_list" }
-        timeout { fail "step into print_long_arg_list (timeout)" }
-    }
-
+# We can't just assume that a "step" will get us into print_long_arg_list here,either.
+gdb_test "tbreak print_long_arg_list" \
+  "Breakpoint .* file .*call-ar-st.c, line .*" \
+  "tbreak in print_long_arg_list after stepping into memcpy"
+send_gdb "continue\n"
+if {![target_info exists gdb,skip_float_tests]} {
+  gdb_expect {
+    -re ".*print_long_arg_list \\(a=22.219999999999999, b=33.332999999999998, c=0, d=-25, e=100, f=2345, struct1=\{value = 6, head = 0\}, struct2=\{value = 10, head = 0\}, struct3=\{value = 12, head = 0\}, struct4=\{value = 14, head = 0\}, flags=\{alpha = 1, beta = 0, gamma = 1, delta = 0, epsilon = 1, omega = 0\}, flags_combo=\{alpha = 1, beta = 0, ch1 = 121 \'y\', gamma = 1, delta = 0, ch2 = 110 \'n\', epsilon = 1, omega = 0\}, three_char=\{ch1 = 97 \'a\', ch2 = 98 \'b\', ch3 = 99 \'c\'\}, five_char=\{ch1 = 108 \'l\', ch2 = 109 \'m\', ch3 = 110 \'n\', ch4 = 111 \'o\', ch5 = 112 \'p\'\}, int_char_combo=\{int1 = 123, ch1 = 122 \'z\'\}, d1=\{double1 = 10.5\}, d2=\{double1 = -3.3399999999999999\}, d3=\{double1 = 675.09123\}, f1=\{float1 = 45.2340012, float2 = 43.5999985\}, f2=\{float1 = 78.0100021, float2 = 122.099998\}, f3=\{float1 = -1232.34497, float2 = -199.210007\}\\) at ${srcdir}/${subdir}/${srcfile}:813\[\r\n\]+813\[ \t\]+printf\\(\"double :.*\", a\\);.*$gdb_prompt $" {pass "step into print_long_arg_list"}
+    -re ".*$gdb_prompt $" { fail "step into print_long_arg_list" }
+    timeout { fail "step into print_long_arg_list (timeout)" }
+  }
+} else {
+  gdb_expect {
+    -re ".*print_long_arg_list \\(.*\\).*$gdb_prompt $" { pass "step into print_long_arg_list" }
+    -re ".*$gdb_prompt $" { fail "step into print_long_arg_list" }
+    timeout { fail "step into print_long_arg_list (timeout)" }
+  }
+}
 
 #call print_small_structs(struct1, struct2, struct3, struct4, flags, flags_combo, three_char, five_char, int_char_combo, d1, d2, d3, f1, f2, f3)
-send_gdb "print print_small_structs(struct1, struct2, struct3, struct4, flags, flags_combo, three_char, five_char, int_char_combo, d1, d2, d3, f1, f2, f3)\n"
-gdb_expect {
+if {![target_info exists gdb,skip_float_tests]} {
+  send_gdb "print print_small_structs(struct1, struct2, struct3, struct4, flags, flags_combo, three_char, five_char, int_char_combo, d1, d2, d3, f1, f2, f3)\n"
+  gdb_expect {
     -re ".*alpha\[\t\r\n \]+gamma\[\t\r\n \]+epsilon\[\t\r\n \]+alpha\[\t\r\n \]+gamma\[\t\r\n \]+epsilon\[\t\r\n \]+ch1: y\tch2: n\[\t\r\n \]+Contents of three_char_t:\[\t\r\n \]+a\tb\tc\[\t\r\n \]+Contents of five_char_t:\[\t\r\n \]+l\tm\tn\to\tp\[\t\r\n \]+Contents of int_char_combo_t:\[\t\r\n \]+123.*z\[\t\r\n \]+Sum of the 4 struct values and seed :\[\t\r\n \]+52\[\t\r\n \]+Contents of struct1:\[\t\r\n \]+6.*0\[\t\r\n \]+Contents of struct2:\[\t\r\n \]+10.*0\[\t\r\n \]+Contents of struct3:\[\t\r\n \]+12.*0\[\t\r\n \]+Contents of one_double_t:\[\t\r\n \]+10.500000\[\t\r\n \]+Contents of one_double_t:\[\t\r\n \]+-3.340000\[\t\r\n \]+Contents of one_double_t:\[\t\r\n \]+675.091230\[\t\r\n \]+Contents of two_floats_t:\[\t\r\n \]+45.234001.*43.599998\[\t\r\n \]+Contents of two_floats_t:\[\t\r\n \]+78.010002.*122.099998\[\t\r\n \]+Contents of two_floats_t:\[\t\r\n \]+-1232.344971.*-199.210007\[\t\r\n \]+.*$gdb_prompt $" {
-        pass "print print_small_structs from print_long_arg_list "
-      }
+      pass "print print_small_structs from print_long_arg_list "
+    }
     -re ".*$gdb_prompt $" { fail "print print_small_structs from print_long_arg_list" }
     timeout           { fail "(timeout) print_small_structs from print_long_arg_list" }
   }
-
+}
 
 
 #go -until 1098
@@ -362,9 +378,8 @@ gdb_test "tbreak 1098" \
     "Breakpoint.* file .*call-ar-st.c, line 1098.*" \
     "tbreakpoint line 1098"
 
-gdb_test continue "Continuing\\..*Contents of two_floats_t:.*-1232.344971.*-199.210007.*main \\(\\) at.*call-ar-st.c:1098.*1098.*init_bit_flags_combo\\(flags_combo, \\(unsigned\\)1, \\(unsigned\\)0, .y.,.*" \
-"continue to 1098"
-
+gdb_test continue "Continuing\\..*Contents of two_floats_t:.*main \\(\\) at.*call-ar-st.c:1098.*1098.*init_bit_flags_combo\\(flags_combo, \\(unsigned\\)1, \\(unsigned\\)0, .y.,.*" \
+  "continue to 1098"
 
 #step
     send_gdb "step\n"
@@ -396,14 +411,16 @@ gdb_test continue "Continuing\\..*main \\(\\) at .*call-ar-st.c:1103\[\r\n\t \]+
 "continue to 1103"
 
 #call print_long_arg_list(a, b, c, d, e, f, *struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)
-send_gdb "print print_long_arg_list(a, b, c, d, e, f, *struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)\n"
-gdb_expect {
+if {![target_info exists gdb,skip_float_tests]} {
+  send_gdb "print print_long_arg_list(a, b, c, d, e, f, *struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)\n"
+  gdb_expect {
     -re ".*double : 22.220000.*double : 33.333000.*int : 0.*int : -25.*int : 100.*int : 2345.*alpha.*gamma.*epsilon.*ch1: y\tch2: n.*Contents of three_char_t:.*x\ty\tz.*Contents of five_char_t:.*h\te\tl\tl\to.*Contents of int_char_combo_t:.*123\tz.*Sum of the 4 struct values and seed :.*52.*Contents of struct1:.*6\[ \]+0.*Contents of struct2:.*10\[ \]+0.*Contents of struct3:.*12.*0.*Contents of one_double_t:\[ \n\r\t\]+1.111110\[ \n\r\t\]+Contents of one_double_t:\[ \n\r\t\]+-345.340000\[ \n\r\t\]+Contents of one_double_t:\[ \n\r\t\]+546464.200000\[ \n\r\t\]+Contents of two_floats_t:\[ \n\r\t\]+0.234000\t453.100006\[ \n\r\t\]+Contents of two_floats_t:\[ \n\r\t\]+78.345001\t23.090000\[ \n\r\t\]+Contents of two_floats_t:\[ \n\r\t\]+-2.345000\t1.000000.*$gdb_prompt $" {
-        pass "print print_long_arg_list"
-      }
+      pass "print print_long_arg_list"
+    }
     -re ".*$gdb_prompt $" { fail "print print_long_arg_list" }
     timeout           { fail "(timeout) print_long_arg_list" }
   }
+}
 
 
 #go -until 1109

@@ -219,7 +219,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19990510
+VERSION = 19990519
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -944,7 +944,8 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	infptrace.c inftarg.c irix4-nat.c irix5-nat.c isi-xdep.c \
 	lynx-nat.c m3-nat.c \
 	m68k-tdep.c \
-	m88k-nat.c m88k-tdep.c mac-nat.c mips-nat.c \
+	m88k-nat.c m88k-tdep.c mac-nat.c \
+	mips-nat.c \
 	mips-tdep.c mipsm3-nat.c mipsv4-nat.c news-xdep.c \
 	nindy-share/Onindy.c nindy-share/nindy.c \
 	nindy-share/ttyflush.c nindy-tdep.c \

@@ -2928,7 +2928,7 @@ breakpoint_1 (bnum, allflag)
 
 	    while (l)
 	      {
-		print_command_line (l, 4);
+		print_command_line (l, 4, gdb_stdout);
 		l = l->next;
 	      }
 	  }
