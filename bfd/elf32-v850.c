@@ -1434,7 +1434,7 @@ v850_elf_object_p (abfd)
 /* end-sanitize-v850e */
 /* start-sanitize-v850eq */
     case E_V850EQ_ARCH: (void) bfd_default_set_arch_mach (abfd, bfd_arch_v850, bfd_mach_v850eq); break;
-/* start-sanitize-v850eq */
+/* end-sanitize-v850eq */
     }
 }
 
