@@ -3054,6 +3054,15 @@ ppc64_elf_link_hash_table_create (abfd)
   if (!bfd_hash_table_init (&htab->branch_hash_table, branch_hash_newfunc))
     return NULL;
 
+  /* Initializing two fields of the union is just cosmetic.  We really
+     only care about glist, but when compiled on a 32-bit host the
+     bfd_vma fields are larger.  Setting the bfd_vma to zero makes
+     debugger inspection of these fields look nicer.  */
+  htab->elf.init_refcount.refcount = 0;
+  htab->elf.init_refcount.glist = NULL;
+  htab->elf.init_offset.offset = 0;
+  htab->elf.init_offset.glist = NULL;
+
   return &htab->elf.root;
 }
 
