@@ -29,8 +29,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/internal.h"
 #include "libcoff.h"
 
-#define NAMES_HAVE_UNDERSCORE
-
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
 
 #define coff_relocate_section _bfd_coff_generic_relocate_section
@@ -134,17 +132,9 @@ coff_tic80_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 #include "coffcode.h"
 
 const bfd_target 
-#ifdef TARGET_SYM
-  TARGET_SYM =
-#else
   tic80coff_vec =
-#endif
 {
-#ifdef TARGET_NAME
-  TARGET_NAME,
-#else
   "coff-tic80",			/* name */
-#endif
   bfd_target_coff_flavour,
   BFD_ENDIAN_LITTLE,		/* data byte order is little (arch supports both) */
   BFD_ENDIAN_LITTLE,		/* header byte order is little */
@@ -154,11 +144,7 @@ const bfd_target
    HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
-#ifdef NAMES_HAVE_UNDERSCORE
-  '_',
-#else
-  0,				/* leading underscore */
-#endif
+  '_',				/* leading underscore */
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
