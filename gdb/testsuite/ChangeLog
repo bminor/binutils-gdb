@@ -1,3 +1,56 @@
+Sun Jan 10 23:44:11 1999  David Taylor  <taylor@texas.cygnus.com>
+
+
+	The following files are part of the HP merge; some had longer
+	names at HP, but have been renamed to be no more than 14
+	characters in length.
+
+	* gdb.hp/ambiguous.cc: new file.
+	* gdb.hp/ambiguous.exp: new file.
+	* gdb.hp/attach.exp: new file.
+	* gdb.hp/attach2.exp: new file.
+	* gdb.hp/classes-hp.exp: new file.
+	* gdb.hp/ctti.exp: new file.
+	* gdb.hp/ctti-add.cc: new file.
+	* gdb.hp/ctti-add1.cc: new file.
+	* gdb.hp/ctti-add2.cc: new file.
+	* gdb.hp/ctti-add3.cc: new file.
+	* gdb.hp/dbx.exp: new file.
+	* gdb.hp/exception.cc: new file.
+	* gdb.hp/exception.exp: new file.
+	* gdb.hp/foll-exec.c: new file.
+	* gdb.hp/foll-exec.exp: new file.
+	* gdb.hp/foll-fork.c: new file.
+	* gdb.hp/foll-fork.exp: new file.
+	* gdb.hp/foll-vfork.c: new file.
+	* gdb.hp/foll-vfork.exp: new file.
+	* gdb.hp/inherit-hp.exp: new file.
+	* gdb.hp/more-steps.exp: new file.
+	* gdb.hp/namespace.cc: new file.
+	* gdb.hp/namespace.exp: new file.
+	* gdb.hp/optimize.exp: new file.
+	* gdb.hp/pxdb.c: new file.
+	* gdb.hp/pxdb.exp: new file.
+	* gdb.hp/quicksort.exp: new file.
+	* gdb.hp/reg-test.exp: new file.
+	* gdb.hp/reg-test.s: new file.
+	* gdb.hp/sized-enum.c: new file.
+	* gdb.hp/sized-enum.exp: new file.
+	* gdb.hp/start-stop.exp: new file.
+	* gdb.hp/templ-hp.cc: new file.
+	* gdb.hp/templ-hp.exp: new file.
+	* gdb.hp/thr-lib.c: new file.
+	* gdb.hp/thr-lib.exp: new file.
+	* gdb.hp/thr-lib.h: new file.
+	* gdb.hp/thr-liblib.c: new file.
+	* gdb.hp/virtfun-hp.c: new file.
+	* gdb.hp/virtfun-hp.exp: new file.
+	* gdb.hp/watch-cmd.exp: new file.
+	* gdb.hp/watch-hp.exp: new file.
+	* gdb.hp/xdb1.exp: new file.
+	* gdb.hp/xdb2.exp: new file.
+	* gdb.hp/xdb3.exp: new file.
+
 Wed Jan  6 18:41:15 1999  David Taylor  <taylor@texas.cygnus.com>
 
 	The following files are part of the HP merge; some had longer
@@ -11,15 +64,26 @@ Wed Jan  6 18:41:15 1999  David Taylor  <taylor@texas.cygnus.com>
 	* gdb.base/call-rt-st-exp: new file.
 	* gdb.base/call-strs.exp: new file.
 	* gdb.base/ena-dis-br.exp: new file.
-	* gdb.base/environment.exp: new file.
+	* gdb.base/environ.exp: new file.
+	* gdb.base/long_long.exp: new file.
 	* gdb.base/sect-cmd.exp: new file.
 	* gdb.base/shlib-cl2.exp: new file.
+	* gdb.base/smoke.exp: new file.
 	* gdb.base/so-impl-ld.c: new file.
 	* gdb.base/so-impl-ld.exp: new file.
 	* gdb.base/so-indr-cl.c: new file.
 	* gdb.base/so-indr-cl.exp: new file.
+	* gdb.base/varargs.exp: new file.
 	* gdb.base/volatile.exp: new file.
 	* gdb.base/whatis-exp.exp: new file.
+	* gdb.c++/derivation.exp: new file.
+	* gdb.c++/local.exp: new file.
+	* gdb.c++/member-ptr.exp: new file.
+	* gdb.c++/overload.exp: new file.
+	* gdb.c++/ovldbreak.exp: new file.
+	* gdb.c++/ref-types.exp: new file.
+	* gdb.c++/ref-types2.exp: new file.
+	* gdb.c++/userdef.exp: new file.
 	
 Wed Jan  6 13:50:57 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
