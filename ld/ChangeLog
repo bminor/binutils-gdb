@@ -1,3 +1,10 @@
+2001-08-31  Andreas Jaeger  <aj@suse.de>
+
+	* emultempl/pe.em: Add missing prototypes.
+	(gld_${EMULATION_NAME}_after_open): Remove extra args to
+	pe_find_data_imports.
+	(pr_sym): Add unused attribute.
+
 2001-08-29  Joel Sherrill <joel@OARcorp.com>
 
 	* configure.tgt (i[3456]86-*-rtems*, m68*-*-rtems*): Change 
