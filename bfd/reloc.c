@@ -340,8 +340,21 @@ CODE_FRAGMENT
 .       {* The textual name of the relocation type. *}
 .  char *name;
 .
-.       {* When performing a partial link, some formats must modify the
-.          relocations rather than the data - this flag signals this.*}
+.       {* Some formats record a relocation addend in the section contents
+.          rather than with the relocation.  For ELF formats this is the
+.          distinction between USE_REL and USE_RELA (though the code checks
+.          for USE_REL == 1/0).  The value of this field is TRUE if the
+.          addend is recorded with the section contents; when performing a
+.          partial link (ld -r) the section contents (the data) will be
+.          modified.  The value of this field is FALSE if addends are
+.          recorded with the relocation (in arelent.addend); when performing
+.          a partial link the relocation will be modified.
+.          All relocations for all ELF USE_RELA targets should set this field
+.          to FALSE (values of TRUE should be looked on with suspicion).
+.          However, the converse is not true: not all relocations of all ELF
+.          USE_REL targets set this field to TRUE.  Why this is so is peculiar
+.          to each particular target.  For relocs that aren't used in partial
+.          links (e.g. GOT stuff) it doesn't matter what this is set to.  *}
 .  boolean partial_inplace;
 .
 .       {* The src_mask selects which parts of the read in data

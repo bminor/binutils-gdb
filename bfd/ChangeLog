@@ -1,3 +1,8 @@
+2000-03-07  Doug Evans  <dje@casey.transmeta.com>
+
+	* reloc.c (reloc_howto_struct): Fix partial_inplace comment.
+	* bfd-in2.h: Rebuild.
+
 2000-03-06  Nick Clifton  <nickc@cygnus.com>
 
 	* peicode.h (struct pe_ILF_vars): Add sym_ptr_table and
