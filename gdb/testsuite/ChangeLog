@@ -1,5 +1,7 @@
 Sun Feb  6 15:36:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.t03/ptype.exp: For UDI, skip tests which call malloc.
+
 	* gdb.t02/whatis.exp: Remove xfails for PRs 1838 and 2417; they
 	are fixed.
 
@@ -13,7 +15,8 @@ Sun Feb  6 15:36:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* gdb.t01/run.exp: Only run shell test if isnative.
 
 	* config/udi-gdb.exp (gdb_load): Use "file", not "load" command,
-	since "run" automatically loads if necessary.
+	since "run" automatically loads if necessary.  Call gdb_target_udi
+	after the "file" since "file" kills any execution target.
 
 	* config/udi-gdb.exp (gdb_start): Don't send "set args main" to
 	GDB.  GDB doesn't work that way (not anymore at least) on UDI.

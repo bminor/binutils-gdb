@@ -42,20 +42,6 @@ proc gdb_version {} {
 }
 
 #
-# gdb_load -- load a file into the debugger.
-#             return a -1 if anything goes wrong.
-#
-proc gdb_load { arg } {
-    global verbose
-    global loadpath
-    global loadfile
-    global GDB
-    global prompt
-
-    return [gdb_file_cmd $arg]
-}
-
-#
 # gdb_target_udi
 # Set gdb to the desired UDI target
 #
@@ -92,6 +78,22 @@ proc gdb_target_udi { } {
 	}
     }
     set timeout 10
+}
+
+#
+# gdb_load -- load a file into the debugger.
+#             return a -1 if anything goes wrong.
+#
+proc gdb_load { arg } {
+    global verbose
+    global loadpath
+    global loadfile
+    global GDB
+    global prompt
+
+    if [gdb_file_cmd $arg] then { return -1 }
+
+    gdb_target_udi
 }
 
 #
