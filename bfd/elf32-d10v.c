@@ -52,12 +52,12 @@ static reloc_howto_type elf_d10v_howto_table[] =
 	   0,			/* rightshift */
 	   2,			/* size (0 = byte, 1 = short, 2 = long) */
 	   32,			/* bitsize */
-	   false,			/* pc_relative */
+	   false,		/* pc_relative */
 	   0,			/* bitpos */
-	   complain_overflow_bitfield, /* complain_on_overflow */
-	   bfd_elf_generic_reloc,	/* special_function */
-	   "R_D10V_NONE",		/* name */
-	   false,			/* partial_inplace */
+	   complain_overflow_dont, /* complain_on_overflow */
+	   bfd_elf_generic_reloc, /* special_function */
+	   "R_D10V_NONE",	/* name */
+	   false,		/* partial_inplace */
 	   0,			/* src_mask */
 	   0,			/* dst_mask */
 	   false),		/* pcrel_offset */
@@ -67,44 +67,44 @@ static reloc_howto_type elf_d10v_howto_table[] =
     HOWTO (R_D10V_10_PCREL_R,	/* type */
 	   2,	                /* rightshift */
 	   2,	                /* size (0 = byte, 1 = short, 2 = long) */
-	   10,	                /* bitsize */
-	   true,	                /* pc_relative */
+	   8,	                /* bitsize */
+	   true,	        /* pc_relative */
 	   0,	                /* bitpos */
-	   complain_overflow_bitfield, /* complain_on_overflow */
+	   complain_overflow_signed, /* complain_on_overflow */
 	   bfd_elf_generic_reloc, /* special_function */
 	   "R_D10V_10_PCREL_R",	/* name */
-	   false,	                /* partial_inplace */
-	   0xff,		        /* src_mask */
+	   false,	        /* partial_inplace */
+	   0xff,		/* src_mask */
 	   0xff,   		/* dst_mask */
-	   true),			/* pcrel_offset */
+	   true),		/* pcrel_offset */
 
     /* An PC Relative 10-bit relocation, shifted by 2  */
     /* left container */
     HOWTO (R_D10V_10_PCREL_L,	/* type */
 	   2,	                /* rightshift */
 	   2,	                /* size (0 = byte, 1 = short, 2 = long) */
-	   10,	                /* bitsize */
-	   true,	                /* pc_relative */
+	   8,	                /* bitsize */
+	   true,	        /* pc_relative */
 	   15,	                /* bitpos */
-	   complain_overflow_bitfield, /* complain_on_overflow */
+	   complain_overflow_signed, /* complain_on_overflow */
 	   bfd_elf_generic_reloc, /* special_function */
 	   "R_D10V_10_PCREL_L",	/* name */
-	   false,	                /* partial_inplace */
-	   0x07f8000,		        /* src_mask */
-	   0x07f8000,   		/* dst_mask */
-	   true),			/* pcrel_offset */
+	   false,	        /* partial_inplace */
+	   0x07f8000,		/* src_mask */
+	   0x07f8000,   	/* dst_mask */
+	   true),		/* pcrel_offset */
 
     /* A 16 bit absolute relocation */
     HOWTO (R_D10V_16,		/* type */
 	   0,			/* rightshift */
 	   1,			/* size (0 = byte, 1 = short, 2 = long) */
 	   16,			/* bitsize */
-	   false,			/* pc_relative */
+	   false,		/* pc_relative */
 	   0,			/* bitpos */
 	   complain_overflow_dont, /* complain_on_overflow */
-	   bfd_elf_generic_reloc,	/* special_function */
+	   bfd_elf_generic_reloc, /* special_function */
 	   "R_D10V_16",		/* name */
-	   false,			/* partial_inplace */
+	   false,		/* partial_inplace */
 	   0xffff,		/* src_mask */
 	   0xffff,		/* dst_mask */
 	   false),		/* pcrel_offset */
@@ -113,13 +113,13 @@ static reloc_howto_type elf_d10v_howto_table[] =
     HOWTO (R_D10V_18,		/* type */
 	   2,			/* rightshift */
 	   1,			/* size (0 = byte, 1 = short, 2 = long) */
-	   18,			/* bitsize */
-	   false,			/* pc_relative */
+	   16,			/* bitsize */
+	   false,		/* pc_relative */
 	   0,			/* bitpos */
 	   complain_overflow_dont, /* complain_on_overflow */
-	   bfd_elf_generic_reloc,	/* special_function */
+	   bfd_elf_generic_reloc, /* special_function */
 	   "R_D10V_18",		/* name */
-	   false,			/* partial_inplace */
+	   false,		/* partial_inplace */
 	   0xffff,		/* src_mask */
 	   0xffff,		/* dst_mask */
 	   false),		/* pcrel_offset */
@@ -128,13 +128,13 @@ static reloc_howto_type elf_d10v_howto_table[] =
     HOWTO (R_D10V_18_PCREL,	/* type */
 	   2,			/* rightshift */
 	   2,			/* size (0 = byte, 1 = short, 2 = long) */
-	   18,			/* bitsize */
-	   true,			/* pc_relative */
+	   16,			/* bitsize */
+	   true,		/* pc_relative */
 	   0,			/* bitpos */
 	   complain_overflow_signed, /* complain_on_overflow */
-	   bfd_elf_generic_reloc,	/* special_function */
+	   bfd_elf_generic_reloc, /* special_function */
 	   "R_D10V_18_PCREL",	/* name */
-	   false,			/* partial_inplace */
+	   false,		/* partial_inplace */
 	   0xffff,		/* src_mask */
 	   0xffff,		/* dst_mask */
 	   true),			/* pcrel_offset */
@@ -144,12 +144,12 @@ static reloc_howto_type elf_d10v_howto_table[] =
 	   0,			/* rightshift */
 	   2,			/* size (0 = byte, 1 = short, 2 = long) */
 	   32,			/* bitsize */
-	   false,			/* pc_relative */
+	   false,		/* pc_relative */
 	   0,			/* bitpos */
-	   complain_overflow_bitfield, /* complain_on_overflow */
-	   bfd_elf_generic_reloc,	/* special_function */
+	   complain_overflow_dont, /* complain_on_overflow */
+	   bfd_elf_generic_reloc, /* special_function */
 	   "R_D10V_32",		/* name */
-	   false,			/* partial_inplace */
+	   false,		/* partial_inplace */
 	   0xffffffff,		/* src_mask */
 	   0xffffffff,		/* dst_mask */
 	   false),		/* pcrel_offset */

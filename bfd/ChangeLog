@@ -1,3 +1,10 @@
+2001-12-04  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-d10v.c (elf_d10v_howto_table): Adjust bit-size of
+	R_D10V_10_PCREL_L, R_D10V_10_PCREL_R, R_D10V_18,
+	R_D10V_18_PCREL.  Check 10_PCREL relocations as signed.
+	Disable pointless overflow checking of NONE and 32.
+
 2001-12-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* reloc.c (bfd_install_relocation): Correct reloc address test.
