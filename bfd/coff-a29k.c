@@ -26,7 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "obstack.h"
-#include "amdcoff.h"
+#include "coff-a29k.h"
 #include "internalcoff.h"
 #include "libcoff.h"
 

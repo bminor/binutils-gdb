@@ -46,11 +46,10 @@ BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 BFD_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
 	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o
 
-BFD_BACKENDS = oasys.o ieee.o srec.o \
+BFD_BACKENDS = oasys.o ieee.o srec.o elf.o \
 	aout64.o aout32.o demo64.o sunos.o newsos3.o i386aout.o bout.o \
-	icoff.o amdcoff.o m68kcoff.o i386coff.o m88k-bcs.o ecoff.o elf.o \
-	rs6000coff.o
-
+	coff-i960.o coff-a29k.o coff-m68k.o coff-i386.o coff-m88k.o \
+	coff-mips.o coff-rs6000.o
 
 OPTIONAL_BACKENDS = trad-core.o
 
@@ -58,10 +57,10 @@ BFD_H=$(INCDIR)/bfd.h
 
 # C source files that correspond to .o's.
 CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
-	 i386coff.c aout64.c aout32.c sunos.c demo64.c icoff.c srec.c \
-	 oasys.c ieee.c m68kcoff.c amdcoff.c rs6000coff.c \
+	 coff-i386.c aout64.c aout32.c sunos.c demo64.c coff-i960.c srec.c \
+	 oasys.c ieee.c coff-m68k.c coff-a29k.c coff-rs6000.c \
 	 format.c section.c core.c syms.c reloc.c init.c \
-	 m88k-bcs.c ecoff.c trad-core.c newsos3.c i386aout.c bout.c elf.c \
+	 coff-m88k.c coff-mips.c trad-core.c newsos3.c i386aout.c bout.c elf.c \
 	cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c cpu-m88k.c \
  	cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c cpu-rs6000.c 
 
@@ -249,8 +248,8 @@ archive.o : archive.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
 targets.o : targets.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h 
 cache.o : cache.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h 
 archures.o : archures.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h 
-i386coff.o : i386coff.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
-  $(INCDIR)/i386coff.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
+coff-i386.o : coff-i386.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/coff-i386.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
 aout64.o : aout64.c 
 aout32.o : aout32.c aoutx.h $(INCDIR)/bfd.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/obstack.h libaout.h libbfd.h $(INCDIR)/aout64.h \
@@ -259,19 +258,19 @@ sunos.o : sunos.c aoutf1.h $(INCDIR)/bfd.h $(INCDIR)/obstack.h \
   libaout.h libbfd.h $(INCDIR)/aout64.h $(INCDIR)/stab.gnu.h \
   $(INCDIR)/stab.def $(INCDIR)/ar.h 
 demo64.o : demo64.c 
-icoff.o : icoff.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
-  $(INCDIR)/intel-coff.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
+coff-i960.o : coff-i960.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/coff-i960.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
 srec.o : srec.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h 
 oasys.o : oasys.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/oasys.h liboasys.h 
 ieee.o : ieee.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/ieee.h libieee.h 
-m68kcoff.o : m68kcoff.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
-  $(INCDIR)/m68kcoff.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
-amdcoff.o : amdcoff.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
-  $(INCDIR)/amdcoff.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
-rs6000coff.o: rs6000coff.c  $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
-  $(INCDIR)/rs6000coff.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
+coff-m68k.o : coff-m68k.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/coff-m68k.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
+coff-a29k.o : coff-a29k.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/coff-a29k.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
+coff-rs6000.o: coff-rs6000.c  $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/coff-rs6000.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
 format.o : format.c $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h libbfd.h 
 section.o : section.c $(INCDIR)/bfd.h \
@@ -282,10 +281,10 @@ syms.o : syms.c $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h libbfd.h 
 reloc.o : reloc.c $(INCDIR)/bfd.h \
   $(INCDIR)/obstack.h libbfd.h 
-m88k-bcs.o : m88k-bcs.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
-  $(INCDIR)/m88k-bcs.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
-ecoff.o : ecoff.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
-  $(INCDIR)/ecoff.h $(INCDIR)/internalcoff.h libcoff.h trad-core.h \
+coff-m88k.o : coff-m88k.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/coff-m88k.h $(INCDIR)/internalcoff.h libcoff.h coffcode.h 
+coff-mips.o : coff-mips.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
+  $(INCDIR)/coff-mips.h $(INCDIR)/internalcoff.h libcoff.h trad-core.h \
   coffcode.h 
 trad-core.o : trad-core.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h \
   libbfd.h libaout.h 

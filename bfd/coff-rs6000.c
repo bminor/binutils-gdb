@@ -26,13 +26,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Internalcoff.h and coffcode.h modify themselves based on this flag.  */
 #define RS6000COFF_C 1
 
-#include <ansidecl.h>
-#include <sysdep.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 #include "obstack.h"
 #include "internalcoff.h"
-#include "rs6000coff.h"
+#include "coff-rs6000.h"
 #include "libcoff.h"
 
 /* The main body of code is in coffcode.h.  */
@@ -58,7 +57,7 @@ static bfd_target *rs6000coff_real_object_p ();
 
 bfd_target rs6000coff_vec =
 {
-  "coff_rs6000",		/* name */
+  "coff-rs6000",		/* name */
   bfd_target_coff_flavour,	
   true,				/* data byte order is big */
   true,				/* header byte order is big */
@@ -497,4 +496,3 @@ rs6000coff_get_section_contents (abfd, section, location, offset, count)
 }
 
 #endif /* if 0 - for CORE */
-

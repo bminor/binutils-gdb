@@ -1,3 +1,13 @@
+Fri Oct 25 02:48:19 1991  John Gilmore  (gnu at cygnus.com)
+
+	* Rename COFF-related files in `coff-ARCH.c' form.
+	coff-a29k.c, coff-i386.c, coff-i960.c, coff-m68k.c, coff-m88k.c,
+	coff-mips.c, coff-rs6000.c to be exact.
+
+	* Makefile.in:  Only supply TARGET_DEFAULTS to targets.c, reducing
+	make output clutter.
+	* config/mt-*:  Ditto.
+
 Thu Oct 24 22:40:07 1991  John Gilmore  (gnu at cygnus.com)
 
 	RS/6000 support, by Metin G. Ozisik, Mimi Phûông-Thåo Võ, and
