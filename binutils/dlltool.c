@@ -160,12 +160,29 @@
 
 #define PAGE_SIZE 4096
 #define PAGE_MASK (-PAGE_SIZE)
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "getopt.h"
 #include "bfd.h"
-#include <wait.h>
+#include "libiberty.h"
+#include "bucomm.h"
+#include "getopt.h"
+
+#include <sys/types.h>
+
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#else
+#ifndef WIFEXITED
+#define WIFEXITED(w)	(((w)&0377) == 0)
+#endif
+#ifndef WIFSIGNALED
+#define WIFSIGNALED(w)	(((w)&0377) != 0177 && ((w)&~0377) == 0)
+#endif
+#ifndef WTERMSIG
+#define WTERMSIG(w)	((w) & 0177)
+#endif
+#ifndef WEXITSTATUS
+#define WEXITSTATUS(w)	(((w) >> 8) & 0377)
+#endif
+#endif
 
 char *ar_name = "ar";
 char *as_name = "as";
@@ -184,7 +201,6 @@ char *def_file;
 
 char *program_name;
 char *strrchr ();
-char *xmalloc ();
 char *strdup ();
 
 static int machine;
@@ -1092,10 +1108,12 @@ gen_lib_file ()
     {
       if (sol == 0)
 	{
-	  sol = sprintf (outfile, "crs %s", output_filename);
+	  sprintf (outfile, "crs %s", output_filename);
+	  sol = strlen (outfile);
 	}
 
-      sol += sprintf (outfile + sol, " %ss%d.o", prefix, i);
+      sprintf (outfile + sol, " %ss%d.o", prefix, i);
+      sol = strlen (outfile);
 
       if (sol >100)
 	{

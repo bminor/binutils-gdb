@@ -1,3 +1,16 @@
+Mon Sep 25 12:05:34 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Call AC_HEADER_SYS_WAIT.
+	* configure: Rebuild.
+	* config.in: Rebuild.
+	* dlltool.c: Include "libiberty.h" and "bucomm.h".  Don't include
+	<stdio.h>, <stdlib.h>, or <string.h>.  Don't include <wait.h>.
+	Include <sys/types.h>.  Use HAVE_SYS_WAIT_H to control whether to
+	include <sys/wait.h> or define the wait macros by hand.  Don't
+	declare xmalloc.
+	(gen_lib_file): Don't assume that sprintf returns the number of
+	characters; use strlen instead.
+
 Fri Sep 22 17:16:41 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c (disassemble_data): Don't use the old BFD based
