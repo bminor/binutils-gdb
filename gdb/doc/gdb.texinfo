@@ -7262,7 +7262,7 @@ make
 where @var{host} is an identifier such as @samp{sun4} or
 @samp{decstation}, that identifies the platform where _GDBN__ will run.
 
-This @code{configure} command builds the three libraries @file{bfd},
+These @code{configure} and @code {make} commands build the three libraries @file{bfd},
 @file{readline}, and @file{libiberty}, then @code{gdb} itself.  The
 configured source files, and the binaries, are left in the
 corresponding source directories.
@@ -7279,7 +7279,7 @@ If you run @code{configure} from a directory that contains source
 directories for multiple libraries or programs, such as the
 @file{gdb-_GDB_VN__} source directory for version _GDB_VN__, @code{configure}
 creates configuration files for every directory level underneath (unless
-you tell it not to, with th @samp{--norecursion} option).
+you tell it not to, with the @samp{--norecursion} option).
 
 You can run the @code{configure} script from any of the
 subordinate directories in the _GDBN__ distribution, if you only want to
