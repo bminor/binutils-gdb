@@ -2,6 +2,8 @@
 
 Changes in 2.10:
 
+New --fatal-warnings option.
+
 picoJava architecture support added.
 
 Motorola MCore 210 processor support added.
