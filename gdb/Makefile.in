@@ -478,7 +478,7 @@ clean:
 	rm -f init.c init.o version.c
 	rm -f gdb core gdb.tar gdb.tar.Z make.log
 	rm -f gdb[0-9]
-	cd doc; make clean
+	cd $(srcdir)/doc; make clean
 
 distclean: clean expread.tab.c TAGS
 	rm -f tm.h xm.h config.status
