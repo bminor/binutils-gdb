@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Tue Oct 8 15:43:17 PDT 1991, by rich@cygnus.com
+# Last Mod Wed Oct 9 23:25:49 PDT 1991, by rich@ok.cygnus.com
 #
 # $Id$
 
@@ -141,19 +141,22 @@ install: install-dirs install-fixed-includes
 # causing Make to quit.
 install-dirs: force
 	- mkdir $(destdir)
-	- mkdir $(destdir)/bin
-	- mkdir $(destdir)/lib
-	- mkdir $(destdir)/include
-	- mkdir $(destdir)/doc
-	- mkdir $(destdir)/man
-	- mkdir $(destdir)/man/man1
-	- mkdir $(destdir)/man/man2
-	- mkdir $(destdir)/man/man3
-	- mkdir $(destdir)/man/man4
-	- mkdir $(destdir)/man/man5
-	- mkdir $(destdir)/man/man6
-	- mkdir $(destdir)/man/man7
-	- mkdir $(destdir)/man/man8
+	- mkdir $(destdir)/H-$(host_alias)
+	- mkdir $(destdir)/H-$(host_alias)/T-$(target_alias)
+	- mkdir $(destdir)/H-$(host_alias)/T-$(target_alias)/bin
+	- mkdir $(destdir)/H-$(host_alias)/T-$(target_alias)/lib
+	- mkdir $(destdir)/H-independent
+	- mkdir $(destdir)/H-independent/include
+	- mkdir $(destdir)/H-independent/doc
+	- mkdir $(destdir)/H-independent/man
+	- mkdir $(destdir)/H-independent/man/man1
+	- mkdir $(destdir)/H-independent/man/man2
+	- mkdir $(destdir)/H-independent/man/man3
+	- mkdir $(destdir)/H-independent/man/man4
+	- mkdir $(destdir)/H-independent/man/man5
+	- mkdir $(destdir)/H-independent/man/man6
+	- mkdir $(destdir)/H-independent/man/man7
+	- mkdir $(destdir)/H-independent/man/man8
 	if [ -d $(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
                 then echo .$(target) ; fi`$(subdir) ] ; then \
 		(cd  $(unsubdir)/gcc`if [ -d $(unsubdir)/gcc.$(target) ] ; \
@@ -240,7 +243,10 @@ force_update:
 
 #
 # $Log$
-# Revision 1.40  1991/10/09 00:11:14  rich
+# Revision 1.41  1991/10/10 06:36:30  rich
+# New installed binary layout.
+#
+# Revision 1.40  1991/10/09  00:11:14  rich
 # Getting BISON right.
 #
 # Revision 1.39  1991/10/02  10:03:15  rich
