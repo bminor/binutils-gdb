@@ -1871,7 +1871,7 @@ macrocmd.o: macrocmd.c $(defs_h) $(macrotab_h) $(macroexp_h) $(macroscope_h) \
 macroexp.o: macroexp.c $(defs_h) $(gdb_obstack_h) $(bcache_h) $(macrotab_h) \
 	$(macroexp_h) $(gdb_assert_h)
 macroscope.o: macroscope.c $(defs_h) $(macroscope_h) $(symtab_h) $(target_h) \
-	$(frame_h) $(inferior_h) $(source_h)
+	$(frame_h) $(inferior_h) $(source_h) $(complaints_h)
 macrotab.o: macrotab.c $(defs_h) $(gdb_obstack_h) $(splay_tree_h) \
 	$(symtab_h) $(symfile_h) $(objfiles_h) $(macrotab_h) $(gdb_assert_h) \
 	$(bcache_h) $(complaints_h)

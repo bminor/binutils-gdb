@@ -1,3 +1,10 @@
+2002-11-07  Jim Blandy  <jimb@redhat.com>
+
+	* macroscope.c: #include "complaints.h".
+	(sal_macro_scope): Cope with filenames that appear in the symtabs,
+	but not in the macro table.
+	* Makefile.in (macroscope.o): Record dependency.
+
 2002-11-07  Joel Brobecker  <brobecker@gnat.com>
 
 	* PROBLEMS: Document gdb/816 (unable to read core file on alpha-osf).
