@@ -5,12 +5,9 @@
 #msg that the `nm' used in `munch' is GNU nm
 #msg
 
-# The headers in the directory hp-include override system headers
-# and tell GDB to use BSD executable file format (hence -Ihp-include)
-XDEPFILES= hp300ux-xdep.o
 XM_FILE= xm-hp300hpux.h
 NAT_FILE= nm-hp300hpux.h
-NATDEPFILES= exec.o infptrace.o inftarg.o fork-child.o 
+NATDEPFILES= exec.o infptrace.o inftarg.o fork-child.o hp300ux-nat.o
 SYSV_DEFINE=-DSYSV
 REGEX=regex.o
 REGEX1=regex.o

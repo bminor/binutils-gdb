@@ -1,5 +1,6 @@
 Thu Jan 28 19:09:02 1993  John Gilmore  (gnu@cygnus.com)
 
+	* config/hp300hpux.mh:  No cross-host file needed, just native.
 	* config/go32.mh:  Remove nonexistent "native" support.
 
 	M88K fixes reported by Carl Greco, <cgreco@Creighton.Edu>:
