@@ -1,3 +1,7 @@
+Tue Apr 24 12:12:55 1996  Dawn Perchik (dawn@cygnus.com)
+	* dbxread.c,stabsread.c,gdbtypes.c,partial-stab.h,valops.c: 
+	Add new support for parsing cfront stabs.
+
 Wed Apr 24 00:32:55 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* infrun.c (wait_for_inferior): Move "have_waited" label
