@@ -1,3 +1,8 @@
+2003-04-11  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.threads/pthreads.exp (test_startup): When setting a breakpoint
+        match on sourcefile name, instead of directory name.
+
 2003-04-10  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdb.base/completion.exp: Use string_to_regexp to match the 
