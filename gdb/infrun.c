@@ -173,13 +173,6 @@ static int may_follow_exec = MAY_FOLLOW_EXEC;
 #define SKIP_SOLIB_RESOLVER(pc) 0
 #endif
 
-/* In some shared library schemes, the return path from a shared library
-   call may need to go through a trampoline too.  */
-
-#ifndef IN_SOLIB_RETURN_TRAMPOLINE
-#define IN_SOLIB_RETURN_TRAMPOLINE(pc,name)	0
-#endif
-
 /* This function returns TRUE if pc is the address of an instruction
    that lies within the dynamic linker (such as the event hook, or the
    dld itself).

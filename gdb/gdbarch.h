@@ -2268,7 +2268,7 @@ extern void set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, gdbarch_s
 
 /* For SVR4 shared libraries, each call goes through a small piece of
    trampoline code in the ".plt" section.  IN_SOLIB_CALL_TRAMPOLINE evaluates
-   to nonzero if we are current stopped in one of these. */
+   to nonzero if we are currently stopped in one of these. */
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (IN_SOLIB_CALL_TRAMPOLINE)
@@ -2284,6 +2284,25 @@ extern void set_gdbarch_in_solib_call_trampoline (struct gdbarch *gdbarch, gdbar
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (IN_SOLIB_CALL_TRAMPOLINE)
 #define IN_SOLIB_CALL_TRAMPOLINE(pc, name) (gdbarch_in_solib_call_trampoline (current_gdbarch, pc, name))
+#endif
+#endif
+
+/* Some systems also have trampoline code for returning from shared libs. */
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (IN_SOLIB_RETURN_TRAMPOLINE)
+#define IN_SOLIB_RETURN_TRAMPOLINE(pc, name) (generic_in_solib_return_trampoline (pc, name))
+#endif
+
+typedef int (gdbarch_in_solib_return_trampoline_ftype) (CORE_ADDR pc, char *name);
+extern int gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc, char *name);
+extern void set_gdbarch_in_solib_return_trampoline (struct gdbarch *gdbarch, gdbarch_in_solib_return_trampoline_ftype *in_solib_return_trampoline);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (IN_SOLIB_RETURN_TRAMPOLINE)
+#error "Non multi-arch definition of IN_SOLIB_RETURN_TRAMPOLINE"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (IN_SOLIB_RETURN_TRAMPOLINE)
+#define IN_SOLIB_RETURN_TRAMPOLINE(pc, name) (gdbarch_in_solib_return_trampoline (current_gdbarch, pc, name))
 #endif
 #endif
 
