@@ -173,8 +173,8 @@ ld [ -o @var{output} ]  @var{objfile}@dots{}
   [ -m @var{emulation} ]  [ -N | -n ]  [ -noinhibit-exec ]
   [ -oformat @var{output-format} ]  [ -R @var{filename} ]  [ -relax ]
   [ -r | -Ur ]  [ -S ]  [ -s ]  [ -sort-common ]  [ -T @var{commandfile} ]
-  [ -Ttext @var{textorg} ]  [ -Tdata @var{dataorg} ]
-  [ -Tbss @var{bssorg} ]  [ -t ]  [ -u @var{symbol}]  [-V]  [-v]  [ --version ]
+  [ -Ttext @var{org} ]  [ -Tdata @var{org} ]
+  [ -Tbss @var{org} ]  [ -t ]  [ -u @var{symbol}]  [-V]  [-v]  [ --version ]
   [ -warn-common ]  [ -y@var{symbol} ]  [ -X ]  [-x ]
 @end smallexample
 
@@ -269,7 +269,7 @@ The default format is taken from the environment variable
 @xref{Environment}.
 @end ifset
 You can also define the input
-format from a script, using the command @code{TARGET}; see @ref{Other
+format from a script, using the command @code{TARGET}; see @ref{Option
 Commands}.
 @end ifclear
 
@@ -300,7 +300,7 @@ These three options are equivalent; multiple forms are supported for
 compatibility with other linkers.  They
 assign space to common symbols even if a relocatable output file is
 specified (with @samp{-r}).  The script command
-@code{FORCE_COMMON_ALLOCATION} has the same effect.  @xref{Other
+@code{FORCE_COMMON_ALLOCATION} has the same effect.  @xref{Option
 Commands}.
 
 @cindex symbols, from command line
@@ -333,11 +333,11 @@ entry point.
 Ignored.  Some older linkers used this option throughout a compilation
 toolchain for specifying object-file format for both input and output
 object files.  The mechanisms @code{ld} uses for this purpose (the
-@samp{-b} or @samp{-format} options for input files, the @code{TARGET}
-command in linker scripts for output files, the @code{GNUTARGET}
-environment variable) are more flexible, but @code{ld} accepts the
-@samp{-F} option for compatibility with scripts written to call the old
-linker.
+@samp{-b} or @samp{-format} options for input files, @samp{-oformat}
+option or the @code{TARGET} command in linker scripts for output files,
+the @code{GNUTARGET} environment variable) are more flexible, but
+@code{ld} accepts the @samp{-F} option for compatibility with scripts
+written to call the old linker.
 
 @kindex -format
 @item -format @var{input-format}
@@ -459,10 +459,10 @@ overrides it.  @xref{BFD}.
 @item -R @var{filename}
 @kindex -R @var{file}
 @cindex symbol-only input
-On some platforms, this option performs global optimizations
-that become possible when the linker resolves addressing in the
-program, such as relaxing address modes and synthesizing new
-instructions in the output object file.
+Read symbol names and their addresses from @var{filename}, but do not
+relocate it or include it in the output.  This allows your output file
+to refer symbolically to absolute locations of memory defined in other
+programs.
  
 @item -relax
 @kindex -relax
@@ -496,7 +496,7 @@ If this option is not specified, an absolute file is produced.  When
 linking C++ programs, this option @emph{will not} resolve references to
 constructors; to do that, use @samp{-Ur}.
 
-This option does the same as @code{-i}.
+This option does the same thing as @samp{-i}.
 
 @item -S 
 @kindex -S
@@ -514,12 +514,12 @@ appropriate output sections, it sorts them by size.  First come all the
 one byte symbols, then all the two bytes, then all the four bytes, and
 then everything else.  This option disables that sorting.
 
-@item -Tbss @var{bssorg}
-@kindex -Tbss @var{bssorg}
-@itemx -Tdata @var{dataorg}
-@kindex -Tdata @var{dataorg}
-@itemx -Ttext @var{textorg}
-@kindex -Ttext @var{textorg}
+@item -Tbss @var{org}
+@kindex -Tbss @var{org}
+@itemx -Tdata @var{org}
+@kindex -Tdata @var{org}
+@itemx -Ttext @var{org}
+@kindex -Ttext @var{org}
 @cindex segment origins, cmd line
 Use @var{org} as the starting address for---respectively---the
 @code{bss}, @code{data}, or the @code{text} segment of the output file.
@@ -717,7 +717,7 @@ input files
 @item 
 file formats
 @item 
-output file format
+output file layout
 @item 
 addresses of sections
 @item 
@@ -727,8 +727,7 @@ placement of common blocks
 You may supply a command file (also known as a link script) to the
 linker either explicitly through the @samp{-T} option, or implicitly as
 an ordinary file. If the linker opens a file which it cannot recognize
-as a supported object or archive format, it tries to interpret the file
-as a command file.
+as a supported object or archive format, it reports an error.
 
 @menu
 * Scripts::                     Linker Scripts
@@ -736,7 +735,7 @@ as a command file.
 * MEMORY::                      MEMORY Command
 * SECTIONS::                    SECTIONS Command
 * Entry Point::                 The Entry Point
-* Other Commands::              Other Commands
+* Option Commands::             Option Commands
 @end menu
 
 @node Scripts
@@ -795,7 +794,7 @@ You may call special purpose built-in functions.
 * Operators::                   Operators
 * Evaluation::                  Evaluation
 * Assignment::                  Assignment: Defining Symbols
-* Built-ins::                   Built-In Functions
+* Arithmetic Functions::        Built-In Functions
 @end menu
 
 @node Integers
@@ -1043,7 +1042,7 @@ relative to a particular section (@pxref{SECTIONS}).
 When a linker expression is evaluated and assigned to a variable, it is
 given either an absolute or a relocatable type. An absolute expression
 type is one in which the symbol contains the value that it will have in
-the output file, a relocatable expression type is one in which the
+the output file; a relocatable expression type is one in which the
 value is expressed as a fixed offset from the base of a section.
 
 The type of the expression is controlled by its position in the script
@@ -1086,8 +1085,8 @@ SECTIONS @{ @dots{}
 will cause the error message ``@code{Non constant expression for initial
 address}''. 
 
-@node Built-ins
-@subsection Built-In Functions
+@node Arithmetic Functions
+@subsection Arithmetic Functions
 @cindex functions in expression language
 The command language includes a number of built-in
 functions for use in link script expressions.
@@ -1211,7 +1210,7 @@ paging.
 @end table
 
 @node MEMORY
-@section MEMORY Command
+@section Memory Layout
 @kindex MEMORY
 @cindex regions of memory
 @cindex discontinuous memory
@@ -1225,7 +1224,7 @@ must avoid.  The linker does not shuffle sections to fit into the
 available regions, but does move the requested sections into the correct
 regions and issue errors when the regions become too full.  
 
-The command files may contain at most one use of the @code{MEMORY}
+A command file may contain at most one use of the @code{MEMORY}
 command; however, you can define as many blocks of memory within it as
 you wish.  The syntax is:
         
@@ -1257,7 +1256,7 @@ omit the parentheses around it as well.
 is the start address of the region in physical memory.  It is
 an expression that must evaluate to a constant before
 memory allocation is performed. The keyword @code{ORIGIN} may be
-abbreviated to @code{org} or @code{o}.
+abbreviated to @code{org} or @code{o} (but not, for example, @samp{ORG}).
 @item @var{len}
 @kindex LENGTH =
 @kindex len =
@@ -1285,13 +1284,13 @@ Options}).  If the combined output sections directed to a region are too
 big for the region, the linker will issue an error message.
 
 @node SECTIONS
-@section SECTIONS Command
+@section Specifying Output Sections
 @kindex SECTIONS
 The @code{SECTIONS} command controls exactly where input sections are
-placed into output sections, their order and to which output sections
-they are allocated.
+placed into output sections, their order in the output file, and to
+which output sections they are allocated.
 
-You may use at most one @code{SECTIONS} command in a commands file,
+You may use at most one @code{SECTIONS} command in a script file,
 but you can have as many statements within it as you wish.  Statements
 within the @code{SECTIONS} command can do one of three things:
 @itemize @bullet
@@ -1300,27 +1299,27 @@ define the entry point;
 @item 
 assign a value to a symbol;
 @item 
-describe the placement of a named output section, and what input
-sections make it up.
+describe the placement of a named output section, and which input
+sections go into it.
 @end itemize
 
-The first two possibilities---defining the entry point, and defining
+The first two operations---defining the entry point and defining
 symbols---can also be done outside the @code{SECTIONS} command:
-@pxref{Entry Point}, @pxref{Assignment}.  They are permitted here as
-well for your convenience in reading the script, so that symbols or the
+@pxref{Entry Point}, and @pxref{Assignment}.  They are permitted here as
+well for your convenience in reading the script, so that symbols and the
 entry point can be defined at meaningful points in your output-file
 layout.
 
-When no @code{SECTIONS} command is specified, the default action
-of the linker is to place each input section into an identically named
-output section in the order that the sections are first encountered in
-the input files; if all input sections are present in the first file,
-for example, the order of sections in the output file will match the
-order in the first input file.
+When no @code{SECTIONS} command is given, the linker places each input
+section into an identically named output section in the order that the
+sections are first encountered in the input files.  If all input sections
+are present in the first file, for example, the order of sections in the
+output file will match the order in the first input file.
 
 @menu
 * Section Definition::          Section Definitions
-* Section Contents::            Section Contents
+* Section Placement::           Section Placement
+* Section Data Expressions::    Section Data Expressions
 * Section Options::             Optional Section Attributes
 @end menu
 
@@ -1328,7 +1327,7 @@ order in the first input file.
 @subsection Section Definitions
 @cindex section definition
 The most frequently used statement in the @code{SECTIONS} command is
-the @dfn{section definition}, which you can use to specify the
+the @dfn{section definition}, which specifies the
 properties of an output section: its location, alignment, contents,
 fill pattern, and target memory region.  Most of
 these specifications are optional; the simplest form of a section
@@ -1344,9 +1343,9 @@ SECTIONS @{ @dots{}
 @noindent
 @var{secname} is the name of the output section, and @var{contents} a
 specification of what goes there---for example, a list of input files or
-sections of input files.  As you might assume, the whitespace shown is
-optional.  You do need the colon @samp{:} and the braces @samp{@{@}},
-however. 
+sections of input files (@pxref{Section Placement}).  As you might
+assume, the whitespace shown is optional.  You do need the colon
+@samp{:} and the braces @samp{@{@}}, however.
 
 @var{secname} must meet the constraints of your output format.  In
 formats which only support a limited number of sections, such as
@@ -1355,15 +1354,15 @@ formats which only support a limited number of sections, such as
 @code{.bss}). If the output format supports any number of sections, but
 with numbers and not names (as is the case for Oasys), the name should be
 supplied as a quoted numeric string.  A section name may consist of any
-sequence characters, but any name which does not conform to the standard
+sequence of characters, but any name which does not conform to the standard
 @code{ld} symbol name syntax must be quoted.
 @xref{Symbols, , Symbol Names}.
 
-@node Section Contents
-@subsection Section Contents
+@node Section Placement
+@subsection Section Placement
 @cindex contents of a section
 In a section definition, you can specify the contents of an output section by
-listing particular object files, by listing particular input-file
+listing particular input files, by listing particular input-file
 sections, or by a combination of the two.  You can also place arbitrary
 data in the section, and define symbols relative to the beginning of the
 section. 
@@ -1380,8 +1379,11 @@ whitespace.
 @cindex files, including in output sections
 You may simply name a particular input file to be placed in the current
 output section; @emph{all} sections from that file are placed in the
-current section definition. To specify a list of particular files by
-name:
+current section definition.  If the file name has already been mentioned
+in another section definition, with an explicit section name list, then
+only those sections which have not yet been allocated are used.
+
+To specify a list of particular files by name:
 @example
 .data : @{ afile.o bfile.o cfile.o @}
 @end example
@@ -1389,10 +1391,6 @@ name:
 The example also illustrates that multiple statements can be included in
 the contents of a section definition, since each file name is a separate
 statement. 
-
-If the file name has already been mentioned in another section
-definition, with an explicit section name list, then only those sections
-which have not yet been allocated are used.
 
 @item @var{filename}( @var{section} )
 @itemx @var{filename}( @var{section}, @var{section}, @dots{} )
@@ -1414,6 +1412,10 @@ script, you can refer to @emph{all} files from the @code{ld} command
 line: use @samp{*} instead of a particular file name before the
 parenthesized input-file section list.  
 
+If you have already explicitly included some files by name, @samp{*}
+refers to all @emph{remaining} files---those whose places in the output
+file have not yet been defined.
+
 For example, to copy sections @code{1} through @code{4} from an Oasys file
 into the @code{.text} section of an @code{a.out} file, and sections @code{13}
 and @code{14} into the @code{.data} section:
@@ -1428,10 +1430,6 @@ SECTIONS @{
         @}
 @}
 @end example
-
-If you have already explicitly included some files by name, @samp{*}
-refers to all @emph{remaining} files---those whose places in the output
-file have not yet been defined.
 
 @item [ @var{section} ]
 @itemx [ @var{section}, @var{section}, @dots{} ]
@@ -1498,8 +1496,10 @@ SECTIONS @{
 @}
 @end example        
 
-There are still more kinds of statements permitted in the contents of
-output section definitions.  The foregoing statements permitted you to
+@node Section Data Expressions
+@subsection Section Data Expressions
+@cindex expressions in a section
+The foregoing statements
 arrange, in your output file, data originating from your input files.
 You can also place data directly in an output section from the link
 command script.  Most of these additional statements involve
@@ -1515,7 +1515,7 @@ intermix them freely with any of the statements we've just described.
 @cindex filename symbols
 Create a symbol for each input file
 in the current section, set to the address of the first byte of
-data written from the input file.  For instance, with @code{a.out}
+data written from that input file.  For instance, with @code{a.out}
 files it is conventional to have a symbol for each input file.  You can
 accomplish this by defining the output @code{.text} section as follows:
 @example
@@ -1530,7 +1530,7 @@ SECTIONS @{
 @}
 @end example
 
-If @code{objsym} is a file containing this script, and @code{a.o},
+If @code{sample.ld} is a file containing this script, and @code{a.o},
 @code{b.o}, @code{c.o}, and @code{d.o} are four input files with
 contents like the following---
 @example
@@ -1542,7 +1542,7 @@ int abss;
 @end example
 
 @noindent
-@samp{ld -M sample a.o b.o c.o d.o} would create a map like this,
+@samp{ld -M -T sample.ld a.o b.o c.o d.o} would create a map like this,
 containing symbols matching the object file names:
 @example
 00000000 A __DYNAMIC
@@ -1613,7 +1613,7 @@ appropriate for the output file format (@pxref{BFD}).
 @kindex FILL(@var{expression})
 @cindex holes, filling
 @cindex unspecified memory
-Specifies the ``fill pattern'' for the current section.  Any otherwise
+Specify the ``fill pattern'' for the current section.  Any otherwise
 unspecified regions of memory within the section (for example, regions
 you skip over by assigning a new value to the location counter @samp{.})
 are filled with the two least significant bytes from the
@@ -1638,7 +1638,7 @@ SECTIONS @{
 @end smallexample
 
 @var{secname} and @var{contents} are required.  @xref{Section
-Definition}, and @pxref{Section Contents} for details on @var{contents}.
+Definition}, and @pxref{Section Placement} for details on @var{contents}.
 The remaining elements---@var{start}, @code{BLOCK(@var{align)}},
 @code{(NOLOAD)} @code{=@var{fill}}, and @code{>@var{region}}---are all
 optional.
@@ -1762,8 +1762,8 @@ whatever symbol contains the start address to @code{start}:
 start = other_symbol ;
 @end example
 
-@node Other Commands
-@section Other Commands
+@node Option Commands
+@section Option Commands
 The command language includes a number of other commands that you can
 use for specialized purposes.  They are similar in purpose to
 command-line options.
@@ -1808,10 +1808,10 @@ way are treated identically to object files listed on the command line.
 @cindex naming the output file
 Use this command to name the link output file @var{filename}.  The
 effect of @code{OUTPUT(@var{filename})} is identical to the effect of
-@w{@samp{-o @var{filename}}}, and whichever is encountered last will
-control the name actually used to name the output file.  In particular,
-you can use this command to supply a default output-file name other than
-@code{a.out}.
+@w{@samp{-o @var{filename}}}, and whichever is encountered last
+(@samp{-T} or @samp{-o} will control the name actually used to name the
+output file.  In particular, you can use this command to supply a
+default output-file name other than @code{a.out}.
 
 @ifclear SingleFormat
 @item OUTPUT_ARCH ( @var{bfdname} )
@@ -1827,7 +1827,9 @@ command.
 @kindex OUTPUT_FORMAT ( @var{bfdname} )
 @cindex format, output file
 Specify a particular output format, with one of the names used by the
-BFD back-end routines (@pxref{BFD}).  This selection will only affect
+BFD back-end routines (@pxref{BFD}).  The effect is identical to the
+effect of the @samp{-oformat} command-line option.
+This selection will only affect
 the output file; the related command @code{TARGET} affects primarily
 input files.
 @end ifclear
@@ -1852,11 +1854,10 @@ process.
 @kindex TARGET ( @var{format} )
 Change the input-file object code format (like the command-line option
 @samp{-b} or its synonym @samp{-format}).  The argument @var{format} is
-one of the strings used by BFD to name binary formats.  In the current
-@code{ld} implementation, if @code{TARGET} is specified but
-@code{OUTPUT_FORMAT} is not, the last @code{TARGET} argument is also
-used as the default format for the @code{ld} output file.
-@xref{BFD}.
+one of the strings used by BFD to name binary formats.  If @code{TARGET}
+is specified but @code{OUTPUT_FORMAT} is not, the last @code{TARGET}
+argument is also used as the default format for the @code{ld} output
+file.  @xref{BFD}.
 
 @kindex GNUTARGET
 If you don't use the @code{TARGET} command, @code{ld} uses the value of
@@ -2108,6 +2109,10 @@ described in @ref{Commands,,Command Language}.  MRI compatible linker
 scripts have a much simpler command set than the scripting language
 otherwise used with @code{ld}.  @sc{gnu} @code{ld} supports the most
 commonly used MRI linker commands; these commands are described here.
+
+In general, MRI scripts aren't of much use with the @code{a.out} object
+file format, since it only has three sections and MRI scripts lack some
+features to make use of them.
 
 You can specify a file containing an MRI-compatible script using the
 @samp{-c} command-line option.
