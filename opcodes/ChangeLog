@@ -1,6 +1,8 @@
 start-sanitize-v850
 Fri Aug 23 00:27:01 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* v850-opc.c (v850_operands): "not" is a two byte insn
+
 	* v850-opc.c (v850_opcodes): Correct bit pattern for setf.
 
 	* v850-opc.c (v850_operands): D16 inserts at offset 16!

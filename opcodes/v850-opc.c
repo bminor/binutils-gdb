@@ -176,7 +176,7 @@ const struct v850_opcode v850_opcodes[] = {
 { "andi",	OP(0x36),		OP_MASK,	IF6, 4 },
 { "xor",	OP(0x09),		OP_MASK,	IF1, 2 },
 { "xori",	OP(0x35),		OP_MASK,	IF6, 4 },
-{ "not",	OP(0x01),		OP_MASK,	IF1, 4 },
+{ "not",	OP(0x01),		OP_MASK,	IF1, 2 },
 { "sar",	OP(0x15),		OP_MASK,	{I5U, R2}, 2 },
 { "sar",	two(0x07e0,0x00a0),	two(0x07e0,0xffff),	{R1,R2}, 4 },
 { "shl",	OP(0x16),		OP_MASK,		{I5U, R2}, 2 },
