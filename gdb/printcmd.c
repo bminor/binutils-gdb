@@ -1396,8 +1396,7 @@ display_command (char *exp, int from_tty)
 
 #if defined(TUI)
   if (tui_version && *exp == '$')
-    display_it = ((TuiStatus) tuiDo (
-		  (TuiOpaqueFuncPtr) tui_vSetLayoutTo, exp) == TUI_FAILURE);
+    display_it = (tui_set_layout (exp) == TUI_FAILURE);
 #endif
 
   if (display_it)
@@ -2335,9 +2334,7 @@ disassemble_command (char *arg, int from_tty)
 	error ("No function contains program counter for selected frame.\n");
 #if defined(TUI)
       else if (tui_version)
-	low = (CORE_ADDR) tuiDo ((TuiOpaqueFuncPtr) tui_vGetLowDisassemblyAddress,
-				 (Opaque) low,
-				 (Opaque) pc);
+	low = tuiGetLowDisassemblyAddress (low, pc);
 #endif
       low += FUNCTION_START_OFFSET;
     }
@@ -2349,9 +2346,7 @@ disassemble_command (char *arg, int from_tty)
 	error ("No function contains specified address.\n");
 #if defined(TUI)
       else if (tui_version)
-	low = (CORE_ADDR) tuiDo ((TuiOpaqueFuncPtr) tui_vGetLowDisassemblyAddress,
-				 (Opaque) low,
-				 (Opaque) pc);
+	low = tuiGetLowDisassemblyAddress (low, pc);
 #endif
 #if 0
       if (overlay_debugging)
@@ -2378,8 +2373,7 @@ disassemble_command (char *arg, int from_tty)
     }
 
 #if defined(TUI)
-  if (!tui_version ||
-      m_winPtrIsNull (disassemWin) || !disassemWin->generic.isVisible)
+  if (!tui_is_window_visible (DISASSEM_WIN))
 #endif
     {
       printf_filtered ("Dump of assembler code ");
@@ -2427,8 +2421,7 @@ disassemble_command (char *arg, int from_tty)
 #if defined(TUI)
   else
     {
-      tuiDo ((TuiOpaqueFuncPtr) tui_vAddWinToLayout, DISASSEM_WIN);
-      tuiDo ((TuiOpaqueFuncPtr) tui_vUpdateSourceWindowsWithAddr, low);
+      tui_show_assembly (low);
     }
 #endif
 }

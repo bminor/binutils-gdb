@@ -1500,12 +1500,7 @@ void
 init_page_info (void)
 {
 #if defined(TUI)
-  if (tui_version && m_winPtrNotNull (cmdWin))
-    {
-      lines_per_page = cmdWin->generic.height;
-      chars_per_line = cmdWin->generic.width;
-    }
-  else
+  if (!tui_get_command_dimension (&chars_per_line, &lines_per_page))
 #endif
     {
       /* These defaults will be used if we are unable to get the correct

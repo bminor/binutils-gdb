@@ -1,3 +1,9 @@
+2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* utils.c (init_page_info): Use tui_get_command_dimension.
+	* printcmd.c (disassemble_command): Simplify tui specific code,
+	use tui_is_window_visible, tui_show_assembly.
+
 2001-07-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386bsd-nat.c: Do not include <sys/sysctl.h>.
