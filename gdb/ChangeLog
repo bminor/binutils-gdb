@@ -1,3 +1,16 @@
+Tue Apr 15 14:51:04 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbserver/Makefile.in (INSTALL_XFORM): Remove.
+	(INSTALL_XFORM1): Remove.
+	(install-only): Use $(program_transform_name) directly, rather
+	than using $(INSTALL_XFORM) and $(INSTALL_XFORM1).
+	(uninstall): Transform name.
+
+Mon Apr 14 17:06:27 1997  Mark Alexander  <marka@cygnus.com>
+
+	* remote-mips.c (mips_load): Ensure that PC gets updated
+	after a load on LSI target.
+
 Mon Apr 14 15:54:51 1997  Geoffrey Noer  <noer@pizza.cygnus.com>
 
 	* procfs.c (notice_signals): fix typo
