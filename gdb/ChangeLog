@@ -1,3 +1,7 @@
+2005-01-18  Andrew Cagney  <cagney@gnu.org>
+
+	* remote.c (remote_open_1): Use throw_exception.
+
 2005-01-17  Michael Snyder  <msnyder@redhat.com>
 
 	* mips-linux-tdep.c: Whitespace tweaks.

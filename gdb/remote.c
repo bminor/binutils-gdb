@@ -2257,14 +2257,12 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
      all the ``target ....'' commands to share a common callback
      function.  See cli-dump.c.  */
   ex = catch_exception (uiout, remote_start_remote, NULL, RETURN_MASK_ALL);
-  exception_fprintf (gdb_stderr, ex, "Couldn't establish connection to remote"
-		     " target\n");
   if (ex.reason < 0)
     {
       pop_target ();
       if (async_p)
 	wait_forever_enabled_p = 1;
-      throw_reason (ex.reason);
+      throw_exception (ex);
     }
 
   if (async_p)
