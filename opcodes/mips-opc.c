@@ -110,7 +110,7 @@ const struct mips_opcode mips_builtin_opcodes[] = {
 /* These instructions appear first so that the disassembler will find
    them first.  The assemblers uses a hash table based on the
    instruction name anyhow.  */
-/* name,    args,	match,	    mask,	pinfo */
+/* name,    args,	match,	    mask,	pinfo,          membership */
 {"nop",     "",		0x00000000, 0xffffffff,	0,		I1	},
 {"li",      "t,j",      0x24000000, 0xffe00000, WR_t,		I1	}, /* addiu */
 {"li",	    "t,i",	0x34000000, 0xffe00000, WR_t,		I1	}, /* ori */
