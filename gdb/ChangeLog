@@ -1,5 +1,10 @@
 2003-03-18  Kevin Buettner  <kevinb@redhat.com>
 
+	* mips-tdep.c (mips_register_name): Fix fencepost error involving
+	NUM_REGS bounds check.
+
+2003-03-18  Kevin Buettner  <kevinb@redhat.com>
+
 	* Makefile.in (mips-tdep.o): Add dependency on $(gdb_assert_h).
 	* mips-tdep.c (gdb_assert.h): Include.
 	(mips_generic_reg_names, mips_processor_reg_names): Make static.

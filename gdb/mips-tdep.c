@@ -402,7 +402,7 @@ mips_register_name (int regno)
       else
 	return mips_gpr_names[regno];
     }
-  else if (32 <= regno && regno <= NUM_REGS)
+  else if (32 <= regno && regno < NUM_REGS)
     return mips_processor_reg_names[regno - 32];
   else
     internal_error (__FILE__, __LINE__,
