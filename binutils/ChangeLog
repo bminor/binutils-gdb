@@ -1,6 +1,10 @@
+2000-07-05  Nick Clifton  <nickc@cygnus.com>
+
+	* MAINTAINERS: Add blanket write privs for Michael Meissner.
+
 2000-06-05  DJ Delorie  <dj@redhat.com>
 
-	* MAINTAINERS: new
+	* MAINTAINERS: New.
 
 2000-07-01  Eric Fifer  <EFifer@sanwaint.com>
 
