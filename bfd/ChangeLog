@@ -1,3 +1,65 @@
+Fri Sep  3 13:06:12 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* configure.in: Reorganized setting of makefile variables so
+	64-bit stuff works again.
+
+	* libbfd-in.h (_do_get*, _do_put*): Renamed via macros to clean up
+	namespace.
+
+	* libelf.h (elf32_symbol_type, elf64_symbol_type): Deleted
+	"native_elf_sym" field, merged to make new type "elf_symbol_type".
+	(struct elf_obj_tdata): Field symbols is now elf_symbol_type*.
+	Deleted field raw_syms.
+	(obj_symbols): Remove cast.
+	(obj_raw_syms): Deleted.
+	* elfcode.h (elf_slurp_symbol_table): Don't set raw_syms or
+	native_elf_sym fields.
+	* elf32-hppa.c: Changed uses of elf32_symbol_type to
+	elf_symbol_type.
+
+	From Pete Hoogenboom and Jeff Law:
+
+	* elf32-hppa.c (ELF_MAXPAGESIZE): Define.
+
+	* elf32-hppa.c (elf_hppa_tc_symbol): If the argument relocation
+	bits are zero (e.g., they specify no relocations), then do not
+	even bother adding their entries to the symextn section.
+
+	* elf32-hppa.c (elf_hppa_tc_symbol): Any function, regardless
+	of scope can have an argument relocation stub.
+
+	* elf32-hppa.c: (Elf32_hppa_Stub_description):  Rename this
+	structure and type to elf32_hppa_stub_description.  This makes
+	it consistent with the GNU coding conventions.
+	(elf32_hppa_stub_description): Added a 'next' field to allow
+	linking of stub description structures.
+	(elf32_hppa_stub_description): Added a 'stub_listP' field to
+	keep track of individual stubs.
+	(Elf32_hppa_Stub_list, Elf32_hppa_Stub_list_struct):  Removed.
+	Combined with the elf32_hppa_stub_description structure.
+	(elf32_hppa_stub_name_list):  New type to keep track of
+	individual stubs.
+	(add_stub):  Removed.
+	(add_stub_by_name): New function.
+	(find_stub_by_name): New function.
+	(hppa_elf_build_arg_reloc_stub): Allow reusing stubs that
+	already exist.
+	(hppa_elf_build_long_branch_stub): Allow reusing stubs that
+	already exist.
+
+	* elf32-hppa.c: (retval_mismatches):  The direction of argument
+	relocation was reversed.
+	(hppa_elf_build_arg_reloc_stub): Return address was not being
+	restored.
+	(hppa_elf_arg_reloc_needed_p): Add argument containing caller
+	argument relocation bits so this function can be used in the check
+	for plabel stubs.
+	(hppa_elf_stub_check): Pass caller argument relocation bits into
+	hppa_elf_arg_reloc_needed_p().
+	(hppa_look_for_stubs_in_section): Add check for plabel stubs and
+	pass caller argument relocation bits into
+	hppa_elf_arg_reloc_needed_p().
+
 Thu Sep  2 00:59:55 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* libhppa.h (hppa_field_adjust): Remove unused `init_value' variable.
