@@ -33,7 +33,6 @@ fi
 if test -z "$host" ; then
     AC_MSG_ERROR(Unrecognized host system type; please check config.sub.)
 fi
-AC_ARG_PROGRAM
 
 AC_PROG_CC
 

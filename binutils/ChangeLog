@@ -1,5 +1,9 @@
 Mon Aug  4 11:47:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Remove AC_ARG_PROGRAM; it's invoked by
+	AM_INIT_AUTOMAKE.
+	* configure: Rebuild.
+
 	* Makefile.am (install-exec-local): Create $(tooldir)/bin before
 	trying to install anything into it.
 	* Makefile.in: Rebuild.
