@@ -22,6 +22,7 @@
 #include "defs.h"
 #include "inferior.h"
 #include "regcache.h"
+#include "target.h"
 
 /* We include <signal.h> to make sure `struct fxsave64' is defined on
    NetBSD, since NetBSD's <machine/reg.h> needs it.  */
@@ -33,13 +34,14 @@
 
 #include "amd64-tdep.h"
 #include "amd64-nat.h"
+#include "inf-ptrace.h"
 
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers (including the floating-point registers).  */
 
-void
-fetch_inferior_registers (int regnum)
+static void
+amd64bsd_fetch_inferior_registers (int regnum)
 {
   if (regnum == -1 || amd64_native_gregset_supplies_p (regnum))
     {
@@ -69,8 +71,8 @@ fetch_inferior_registers (int regnum)
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers (including the floating-point registers).  */
 
-void
-store_inferior_registers (int regnum)
+static void
+amd64bsd_store_inferior_registers (int regnum)
 {
   if (regnum == -1 || amd64_native_gregset_supplies_p (regnum))
     {
@@ -104,4 +106,18 @@ store_inferior_registers (int regnum)
 		  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't write floating point status");
     }
+}
+
+/* Create a prototype *BSD/amd64 target.  The client can override it
+   with local methods.  */
+
+struct target_ops *
+amd64bsd_target (void)
+{
+  struct target_ops *t;
+
+  t = inf_ptrace_target ();
+  t->to_fetch_registers = amd64bsd_fetch_inferior_registers;
+  t->to_store_registers = amd64bsd_store_inferior_registers;
+  return t;
 }

@@ -25,7 +25,4 @@
 /* Get generic BSD native definitions.  */
 #include "config/nm-bsd.h"
 
-/* Override child_pid_to_exec_file in 'inftarg.c'.  */
-#define CHILD_PID_TO_EXEC_FILE
-
 #endif /* nm-fbsd64.h */

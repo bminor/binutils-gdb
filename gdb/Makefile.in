@@ -1646,9 +1646,11 @@ alpha-tdep.o: alpha-tdep.c $(defs_h) $(doublest_h) $(frame_h) \
 	$(regcache_h) $(reggroups_h) $(arch_utils_h) $(osabi_h) $(block_h) \
 	$(infcall_h) $(elf_bfd_h) $(alpha_tdep_h)
 amd64bsd-nat.o: amd64bsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(gdb_assert_h) $(amd64_tdep_h) $(amd64_nat_h)
+	$(target_h) $(gdb_assert_h) $(amd64_tdep_h) $(amd64_nat_h) \
+	$(inf_ptrace_h)
 amd64fbsd-nat.o: amd64fbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(gdb_assert_h) $(amd64_tdep_h) $(amd64_nat_h) $(bsd_kvm_h)
+	$(target_h) $(gdb_assert_h) $(fbsd_nat_h) $(amd64_tdep_h) \
+	$(amd64_nat_h) $(bsd_kvm_h)
 amd64fbsd-tdep.o: amd64fbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 	$(gdbcore_h) $(regcache_h) $(osabi_h) $(gdb_string_h) \
 	$(amd64_tdep_h) $(solib_svr4_h)
@@ -1661,13 +1663,13 @@ amd64-linux-tdep.o: amd64-linux-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
 	$(solib_svr4_h)
 amd64-nat.o: amd64-nat.c $(defs_h) $(gdbarch_h) $(regcache_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(i386_tdep_h) $(amd64_tdep_h)
-amd64nbsd-nat.o: amd64nbsd-nat.c $(defs_h) $(gdb_assert_h) $(amd64_tdep_h) \
-	$(amd64_nat_h)
+amd64nbsd-nat.o: amd64nbsd-nat.c $(defs_h) $(target_h) $(gdb_assert_h) \
+	$(amd64_tdep_h) $(amd64_nat_h)
 amd64nbsd-tdep.o: amd64nbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 	$(gdbcore_h) $(osabi_h) $(symtab_h) $(gdb_assert_h) $(amd64_tdep_h) \
 	$(nbsd_tdep_h) $(solib_svr4_h)
 amd64obsd-nat.o: amd64obsd-nat.c $(defs_h) $(gdbcore_h) $(regcache_h) \
-	$(gdb_assert_h) $(amd64_tdep_h) $(amd64_nat_h) $(bsd_kvm_h)
+	$(target_h) $(gdb_assert_h) $(amd64_tdep_h) $(amd64_nat_h) $(bsd_kvm_h)
 amd64obsd-tdep.o: amd64obsd-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
 	$(symtab_h) $(objfiles_h) $(osabi_h) $(regset_h) $(target_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(amd64_tdep_h) $(i387_tdep_h) \

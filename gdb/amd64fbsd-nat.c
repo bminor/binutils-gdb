@@ -22,6 +22,7 @@
 #include "defs.h"
 #include "inferior.h"
 #include "regcache.h"
+#include "target.h"
 
 #include "gdb_assert.h"
 #include <signal.h>
@@ -31,6 +32,7 @@
 #include <sys/sysctl.h>
 #include <machine/reg.h>
 
+#include "fbsd-nat.h"
 #include "amd64-tdep.h"
 #include "amd64-nat.h"
 
@@ -138,10 +140,21 @@ void _initialize_amd64fbsd_nat (void);
 void
 _initialize_amd64fbsd_nat (void)
 {
+  struct target_ops *t;
   int offset;
 
   amd64_native_gregset32_reg_offset = amd64fbsd32_r_reg_offset;
   amd64_native_gregset64_reg_offset = amd64fbsd64_r_reg_offset;
+
+  /* Add some extra features to the common *BSD/i386 target.  */
+  t = amd64bsd_target ();
+  t->to_pid_to_exec_file = fbsd_pid_to_exec_file;
+  t->to_find_memory_regions = fbsd_find_memory_regions;
+  t->to_make_corefile_notes = fbsd_make_corefile_notes;
+  add_target (t);
+
+  /* Support debugging kernel virtual memory images.  */
+  bsd_kvm_add_target (amd64fbsd_supply_pcb);
 
   /* To support the recognition of signal handlers, i386bsd-tdep.c
      hardcodes some constants.  Inclusion of this file means that we
@@ -219,7 +232,4 @@ Please report this to <bug-gdb@gnu.org>.",
 	amd64fbsd_sigtramp_end_addr = ps_strings;
       }
   }
-
-  /* Support debugging kernel virtual memory images.  */
-  bsd_kvm_add_target (amd64fbsd_supply_pcb);
 }

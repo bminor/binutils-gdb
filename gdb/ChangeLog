@@ -1,3 +1,29 @@
+2004-09-26  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64-nat.h: Update copyright year.
+	(amd64bsd_target): New prototype.
+	* amd64bsd-nat.c: Include "target.h" and "inf-ptrace.h".
+	(amd64bsd_target): New function.
+	(amd64bsd_fetch_inferior_registers): Rename from
+	fetch_inferior_registers.  Make static.
+	(amd64bsd_store_inferior_registers): Rename from
+	store_inferior_registers.  Make static.
+	* amd64fbsd-nat.c: Include "target.h" and "fbsd-nat.h".
+	(_initialize_amd64fbsd_nat): Construct and add target vector.
+	* amd64nbsd-nat.o: Include "target.h".
+	(_initialize_amd64nbsd_nat): Construct and add target vector.
+	* amd64obsd-nat.c: Include "target.h".
+	(_initialize_amd64obsd_nat): Construct and add target vector.
+	* config/i386/nm-fbsd64.h (CHILD_PID_TO_EXEC_FILE): Remove define.
+	* config/i386/fbsd64.mh (NATDEPFILES): Remove infptrace.o,
+	inftarg.o and fbsd-proc.o.  Add inf-child.o, inf-ptrace.o and
+	fbsd-nat.o.
+	* config/i386/nbsd64.mh, config/i386/obsd64.mh (NATDEPFILES):
+	Remove infptrace.o and inftarg.o.  Add inf-child.o and
+	inf-ptrace.o.
+	* Makefile.in (amd64bsd-nat.o, amd64fbsd-nat.o, amd64nbsd-nat.o)
+	(amd64obsd-nat.o): Update dependencies.
+
 2004-09-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/fbsd.mh (NATDEPFILES): Remove infptrace.o.
