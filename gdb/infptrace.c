@@ -359,7 +359,7 @@ fetch_register (int regno)
   char mess[128];		/* For messages */
   register int i;
   unsigned int offset;		/* Offset of registers within the u area.  */
-  char buf[MAX_REGISTER_RAW_SIZE];
+  char *buf = alloca (MAX_REGISTER_RAW_SIZE);
   int tid;
 
   if (CANNOT_FETCH_REGISTER (regno))
@@ -424,6 +424,7 @@ store_register (int regno)
   register int i;
   unsigned int offset;		/* Offset of registers within the u area.  */
   int tid;
+  char *buf = alloca (MAX_REGISTER_RAW_SIZE);
 
   if (CANNOT_STORE_REGISTER (regno))
     {
@@ -437,11 +438,16 @@ store_register (int regno)
   offset = U_REGS_OFFSET;
 
   regaddr = register_addr (regno, offset);
+
+  /* Put the contents of regno into a local buffer */
+  regcache_collect (regno, buf);
+
+  /* Store the local buffer into the inferior a chunk at the time. */
   for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
       ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) regaddr,
-	      *(PTRACE_XFER_TYPE *) & registers[REGISTER_BYTE (regno) + i]);
+	      *(PTRACE_XFER_TYPE *) (buf + i));
       regaddr += sizeof (PTRACE_XFER_TYPE);
       if (errno != 0)
 	{

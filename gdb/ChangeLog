@@ -1,3 +1,10 @@
+2001-11-19  Elena Zannoni  <ezannoni@redhat.com>
+
+	* infptrace.c (fetch_register): Dynamically allocate buffer for
+	register.
+	(store_register): Use regcache_collect, instead of accessing the
+	register buffer directly.
+
 2001-11-19  Daniel Jacobowitz  <drow@mvista.com>
 
 	* mips-tdep.c (find_proc_desc): Add cur_frame argument.  Pass
