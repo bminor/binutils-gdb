@@ -1,3 +1,11 @@
+Fri Feb 23 22:33:04 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* remote-e7000.c (e7000_load):  New routine to download via the
+	network.
+	* (e7000_wait):  Don't backup PC when we hit a breakpoint.
+	Apparantly new sh2 pods get this right...
+	* (e7000_ops):  Add call to e7000_load.
+
 Thu Feb 22 00:52:42 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* config/m68k/{nbsd.mh,nbsd.mt,nm-nbsd.h,tm-nbsd.h,xm-nbsd.h},

@@ -1,5 +1,5 @@
 /* Remote debugging interface for Hitachi E7000 ICE, for GDB
-   Copyright 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1996 Free Software Foundation, Inc.
    Contributed by Cygnus Support. 
 
    Written by Steve Chamberlain for Cygnus Support.
@@ -1376,6 +1376,167 @@ e7000_kill (args, from_tty)
 {
 }
 
+static void
+e7000_load (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  struct cleanup *old_chain;
+  asection *section;
+  bfd *pbfd;
+  bfd_vma entry;
+  int i;
+#define WRITESIZE 0x1000
+  char buf[2 + 4 + 4 + WRITESIZE]; /* `DT' + <addr> + <len> + <data> */
+  char *filename;
+  int quiet;
+  int nostart;
+
+  if (!strchr (dev_name, ':'))
+    {
+      generic_load (args, from_tty);
+      return;
+    }
+
+  buf[0] = 'D';
+  buf[1] = 'T';
+  quiet = 0;
+  nostart = 0;
+  filename = NULL;
+
+  while (*args != '\000')
+    {
+      char *arg;
+
+      while (isspace (*args)) args++;
+
+      arg = args;
+
+      while ((*args != '\000') && !isspace (*args)) args++;
+
+      if (*args != '\000')
+	*args++ = '\000';
+
+      if (*arg != '-')
+	filename = arg;
+      else if (strncmp (arg, "-quiet", strlen (arg)) == 0)
+	quiet = 1;
+      else if (strncmp (arg, "-nostart", strlen (arg)) == 0)
+	nostart = 1;
+      else
+	error ("unknown option `%s'", arg);
+    }
+
+  if (!filename)
+    filename = get_exec_file (1);
+
+  pbfd = bfd_openr (filename, gnutarget);
+  if (pbfd == NULL)
+    {
+      perror_with_name (filename);
+      return;
+    }
+  old_chain = make_cleanup (bfd_close, pbfd);
+
+  if (!bfd_check_format (pbfd, bfd_object)) 
+    error ("\"%s\" is not an object file: %s", filename,
+	   bfd_errmsg (bfd_get_error ()));
+
+  puts_e7000debug ("mw\r");
+
+  expect ("\nOK");
+
+  for (section = pbfd->sections; section; section = section->next) 
+    {
+      if (bfd_get_section_flags (pbfd, section) & SEC_LOAD)
+	{
+	  bfd_vma section_address;
+	  bfd_size_type section_size;
+	  file_ptr fptr;
+
+	  section_address = bfd_get_section_vma (pbfd, section);
+	  section_size = bfd_get_section_size_before_reloc (section);
+
+	  if (!quiet)
+	    printf_filtered ("[Loading section %s at 0x%x (%d bytes)]\n",
+			     bfd_get_section_name (pbfd, section),
+			     section_address,
+			     section_size);
+
+	  fptr = 0;
+	  
+	  while (section_size > 0)
+	    {
+	      int count;
+	      static char inds[] = "|/-\\";
+	      static int k = 0;
+
+	      QUIT;
+
+	      count = min (section_size, WRITESIZE);
+
+	      buf[2] = section_address >> 24;
+	      buf[3] = section_address >> 16;
+	      buf[4] = section_address >> 8;
+	      buf[5] = section_address;
+
+	      buf[6] = count >> 24;
+	      buf[7] = count >> 16;
+	      buf[8] = count >> 8;
+	      buf[9] = count;
+
+	      bfd_get_section_contents (pbfd, section, buf + 10, fptr, count);
+
+	      if (SERIAL_WRITE (e7000_desc, buf, count + 10))
+		fprintf_unfiltered (gdb_stderr, "e7000_load: SERIAL_WRITE failed: %s\n", safe_strerror(errno));
+
+	      expect ("OK");
+
+	      if (!quiet)
+		{
+		  printf_unfiltered ("\r%c", inds[k++ % 4]);
+		  gdb_flush (gdb_stdout);
+		}
+
+	      section_address += count;
+	      fptr += count;
+	      section_size -= count;
+	    }
+	}
+    }
+
+  write_e7000 ("ED");
+
+  expect_prompt ();
+
+/* Finally, make the PC point at the start address */
+
+  if (exec_bfd)
+    write_pc (bfd_get_start_address (exec_bfd));
+
+  inferior_pid = 0;		/* No process now */
+
+/* This is necessary because many things were based on the PC at the time that
+   we attached to the monitor, which is no longer valid now that we have loaded
+   new code (and just changed the PC).  Another way to do this might be to call
+   normal_stop, except that the stack may not be valid, and things would get
+   horribly confused... */
+
+  clear_symtab_users ();
+
+  if (!nostart)
+    {
+      entry = bfd_get_start_address (pbfd);
+
+      if (!quiet)
+	printf_unfiltered ("[Starting %s at 0x%x]\n", filename, entry);
+
+/*      start_routine (entry);*/
+    }
+
+  do_cleanups (old_chain);
+}
+
 /* Clean up when a program exits.
 
    The program actually lives on in the remote processor's RAM, and may be
@@ -1773,7 +1934,7 @@ e7000_wait (pid, status)
   switch (stop_reason)
     {
     case 1:			/* Breakpoint */
-      write_pc (read_pc () - 2); /* PC is always off by 2 for breakpoints */
+      write_pc (read_pc ()); /* PC is always off by 2 for breakpoints */
       status->value.sig = TARGET_SIGNAL_TRAP;      
       break;
     case 0:			/* Single step */
@@ -1846,7 +2007,7 @@ target e7000 foobar",
   0,				/* to_terminal_ours */
   0,				/* to_terminal_info */
   e7000_kill,			/* to_kill */
-  generic_load,			/* to_load */
+  e7000_load,			/* to_load */
   0,				/* to_lookup_symbol */
   e7000_create_inferior,	/* to_create_inferior */
   e7000_mourn_inferior,		/* to_mourn_inferior */
