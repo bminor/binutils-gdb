@@ -1,3 +1,12 @@
+2001-10-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (BFD_H_DEPS): Add symcat.h.  Ensure everything
+	depends on $(BFD_H) $(BFD_H_DEPS) $(LOCAL_H_DEPS), not just those
+	backends we configure.  Run "make dep-am".
+	(install-data-local): Install symcat.h.
+	* dep-in.sed: Remove symcat.h from dependencies.
+	* Makefile.in: Regenerate.
+
 2001-10-03  Vassili Karpov  <malc@pulsesoft.com>
 
 	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Handle nocopyreloc.
