@@ -1988,7 +1988,7 @@ elf_xtensa_relocate_section (output_bfd, info, input_bfd,
 	}
 
       /* Sanity check the address.  */
-      if (rel->r_offset >= input_section->size
+      if (rel->r_offset >= bfd_get_section_limit (input_bfd, input_section)
 	  && ELF32_R_TYPE (rel->r_info) != R_XTENSA_NONE)
 	{
 	  bfd_set_error (bfd_error_bad_value);
