@@ -1,3 +1,11 @@
+2004-11-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 528
+	* symbols.c (resolve_symbol_value): Convert weak symbols only
+	for Windows PECOFF.
+	(symbol_equated_reloc_p): Don't equate weaks when relocating
+	only for Windows PECOFF.
+
 2004-11-08  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* config/tc-crx.c (print_insn): Check and set insn_addr.
@@ -16,7 +24,7 @@
 2004-11-08  Aaron W. LaFramboise <aaron98wiridge9@aaronwl.com>
 
 	* symbols.c (any_external_name): Define.
-	(resolve_symbol_value): Do not convert weak symbols.
+	(resolve_symbol_value): Convert weak symbols.
 	(S_SET_EXTERNAL): Support any_external_name.
 	(S_SET_NAME): Qualify parameter const.
 	(symbol_equated_reloc_p): Don't equate weaks when relocating.

@@ -995,7 +995,7 @@ resolve_symbol_value (symbolS *symp)
 	     relocation to be against the symbol to which this symbol
 	     is equated.  */
 	  if (! S_IS_DEFINED (add_symbol)
-#if defined(BFD_ASSEMBLER) || defined(S_IS_WEAK)
+#if defined (OBJ_COFF) && defined (TE_PE) && (defined(BFD_ASSEMBLER) || defined(S_IS_WEAK))
 	      || S_IS_WEAK (add_symbol)
 #endif
 	      || S_IS_COMMON (add_symbol))
@@ -2239,7 +2239,7 @@ symbol_equated_reloc_p (symbolS *s)
      resolve_symbol_value to flag expression syms that have been
      equated.  */
   return (s->sy_value.X_op == O_symbol
-#if defined(BFD_ASSEMBLER) || defined(S_IS_WEAK)
+#if defined (OBJ_COFF) && defined (TE_PE) && (defined(BFD_ASSEMBLER) || defined(S_IS_WEAK))
 	  && ! S_IS_WEAK (s)
 #endif
 	  && ((s->sy_resolved && s->sy_value.X_op_symbol != NULL)
