@@ -1,5 +1,10 @@
 2003-10-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Also warn
+	undefined patterns with '*'.
+
+2003-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Don't
 	use the last CIE from a different section.
 	(_bfd_elf_write_section_eh_frame): Don't pad beyond the raw

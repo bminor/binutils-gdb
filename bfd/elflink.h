@@ -2125,8 +2125,7 @@ NAME(bfd_elf,size_dynamic_sections) (bfd *output_bfd,
 	  all_defined = TRUE;
 	  for (t = verdefs; t != NULL; t = t->next)
 	    for (d = t->globals; d != NULL; d = d->next)
-	      if (!d->symver && !d->script
-		  && strchr (d->pattern, '*') == NULL)
+	      if (!d->symver && !d->script)
 		{
 		  (*_bfd_error_handler)
 		    (_("%s: undefined version: %s"),
