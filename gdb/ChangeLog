@@ -1,3 +1,18 @@
+2002-12-02  Adam Fedor  <fedor@gnu.org>
+	    Klee Dienes  <kdienes@apple.com>
+
+	* objc-lang.c (objc_printstr): Add width arg to match
+	printstr prototype.
+	(compare_selectors): Add 'const' to arg types.
+	(compare_classes): Likewise.
+	(find_imps): Cast msym pointer to avoid compiler warning.
+	(print_object_command): Validate the address before
+	passing it to the print routine.
+	(find_objc_msgcall_submethod): Change function argument to
+	return an int.
+	* objc-lang.h: Add 'extern' to all function declarations.
+	(value_nsstring): Add declaration.
+
 2002-12-02  J. Brobecker  <brobecker@gnat.com>
 
 	* somsolib.c (dld_cache): Replace boolean by int for field is_valid.

@@ -370,7 +370,7 @@ objc_printchar (int c, struct ui_file *stream)
 
 static void
 objc_printstr (struct ui_file *stream, char *string, 
-	       unsigned int length, int force_ellipses)
+	       unsigned int length, int width, int force_ellipses)
 {
   register unsigned int i;
   unsigned int things_printed = 0;
@@ -796,14 +796,14 @@ int specialcmp(char *a, char *b)
 }
 
 /*
- * Function: compare_selectors (void *, void *)
+ * Function: compare_selectors (const void *, const void *)
  *
  * Comparison function for use with qsort.  Arguments are symbols or
  * msymbols Compares selector part of objc method name alphabetically.
  */
 
 static int
-compare_selectors (void *a, void *b)
+compare_selectors (const void *a, const void *b)
 {
   char *aname, *bname;
 
@@ -954,14 +954,14 @@ selectors_info (char *regexp, int from_tty)
 }
 
 /*
- * Function: compare_classes (void *, void *)
+ * Function: compare_classes (const void *, const void *)
  *
  * Comparison function for use with qsort.  Arguments are symbols or
  * msymbols Compares class part of objc method name alphabetically. 
  */
 
 static int
-compare_classes (void *a, void *b)
+compare_classes (const void *a, const void *b)
 {
   char *aname, *bname;
 
@@ -1363,7 +1363,7 @@ find_methods (struct symtab *symtab, char type,
       sym = find_pc_function (SYMBOL_VALUE_ADDRESS (msymbol));
       if (sym != NULL)
         {
-          const char    *newsymname = SYMBOL_DEMANGLED_NAME (sym);
+          const char *newsymname = SYMBOL_DEMANGLED_NAME (sym);
 	  
           if (newsymname == NULL)
             newsymname = SYMBOL_NAME (sym);
@@ -1461,7 +1461,7 @@ char *find_imps (struct symtab *symtab, struct block *block,
     if (msym != NULL) 
       {
 	if (syms)
-	  syms[csym] = msym;
+	  syms[csym] = (struct symbol *)msym;
 	csym++;
       }
   }
@@ -1538,7 +1538,7 @@ void
 print_object_command (char *args, int from_tty)
 {
   struct value *object, *function, *description;
-  CORE_ADDR string_addr;
+  CORE_ADDR string_addr, object_addr;
   int i = 0;
   char c = -1;
 
@@ -1552,18 +1552,17 @@ print_object_command (char *args, int from_tty)
       make_cleanup (free_current_contents, &expr);
     int pc = 0;
 
-#if 1
     object = expr->language_defn->evaluate_exp (builtin_type_void_data_ptr,
 						expr, &pc, EVAL_NORMAL);
-#else
-    object = evaluate_subexp (builtin_type_void_data_ptr, 
-			      expr, &pc, EVAL_NORMAL);
-#endif
     do_cleanups (old_chain);
   }
 
+  /* Validate the address for sanity.  */
+  object_addr = value_as_long (object);
+  read_memory (object_addr, &c, 1);
+
   function = find_function_in_inferior ("_NSPrintForDebugger");
-  if (!function)
+  if (function == NULL)
     error ("Unable to locate _NSPrintForDebugger in child process");
 
   description = call_function_by_hand (function, 1, &object);
@@ -1593,7 +1592,7 @@ print_object_command (char *args, int from_tty)
 struct objc_methcall {
   char *name;
  /* Return instance method to be called.  */
-  CORE_ADDR (*stop_at) (CORE_ADDR);
+  int (*stop_at) (CORE_ADDR, CORE_ADDR *);
   /* Start of pc range corresponding to method invocation.  */
   CORE_ADDR begin;
   /* End of pc range corresponding to method invocation.  */
@@ -1665,7 +1664,7 @@ find_objc_msgsend (void)
  */
 
 struct objc_submethod_helper_data {
-  CORE_ADDR (*f) (CORE_ADDR, CORE_ADDR *);
+  int (*f) (CORE_ADDR, CORE_ADDR *);
   CORE_ADDR pc;
   CORE_ADDR *new_pc;
 };
@@ -1683,7 +1682,7 @@ find_objc_msgcall_submethod_helper (void * arg)
 }
 
 int 
-find_objc_msgcall_submethod (CORE_ADDR (*f) (CORE_ADDR, CORE_ADDR *),
+find_objc_msgcall_submethod (int (*f) (CORE_ADDR, CORE_ADDR *),
 			     CORE_ADDR pc, 
 			     CORE_ADDR *new_pc)
 {
@@ -1732,7 +1731,7 @@ _initialize_objc_language (void)
   add_info ("classes", classes_info, 	    /* INFO CLASSES   command.  */
 	    "All Objective-C classes, or those matching REGEXP.");
   add_com ("print-object", class_vars, print_object_command, 
-	   "Ask an Objective-C object to print itself.\n");
+	   "Ask an Objective-C object to print itself.");
   add_com_alias ("po", "print-object", class_vars, 1);
 }
 

@@ -35,21 +35,23 @@ extern int c_value_print (struct value *, struct ui_file *,
 extern CORE_ADDR lookup_objc_class     (char *classname);
 extern int       lookup_child_selector (char *methodname);
 
-char *objc_demangle (const char *mangled);
+extern char *objc_demangle (const char *mangled);
 
-int find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc);
+extern int find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc);
 
-char *parse_selector (char *method, char **selector);
+extern char *parse_selector (char *method, char **selector);
 
-char *parse_method (char *method, char *type, 
-		    char **class, char **category, 
-		    char **selector);
+extern char *parse_method (char *method, char *type, 
+			   char **class, char **category, 
+			   char **selector);
 
-void find_methods (struct symtab *symtab, char type, 
-		   const char *class, const char *category, 
-		   const char *selector, struct symbol **syms, 
-		   unsigned int *nsym, unsigned int *ndebug);
+extern void find_methods (struct symtab *symtab, char type, 
+			  const char *class, const char *category, 
+			  const char *selector, struct symbol **syms, 
+			  unsigned int *nsym, unsigned int *ndebug);
 
-char *find_imps (struct symtab *symtab, struct block *block,
-		 char *method, struct symbol **syms, 
-		 unsigned int *nsym, unsigned int *ndebug);
+extern char *find_imps (struct symtab *symtab, struct block *block,
+			char *method, struct symbol **syms, 
+			unsigned int *nsym, unsigned int *ndebug);
+
+extern struct value *value_nsstring (char *ptr, int len);
