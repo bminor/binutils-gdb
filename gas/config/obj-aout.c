@@ -1,5 +1,5 @@
 /* a.out object file format
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -18,6 +18,8 @@ You should have received a copy of the GNU General Public License
 along with GAS; see the file COPYING.  If not, write to the Free
 Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 02111-1307, USA. */
+
+#define OBJ_HEADER "obj-aout.h"
 
 #include "as.h"
 #ifdef BFD_ASSEMBLER
@@ -67,7 +69,7 @@ static void obj_aout_line PARAMS ((int));
 static void obj_aout_weak PARAMS ((int));
 static void obj_aout_type PARAMS ((int));
 
-const pseudo_typeS obj_pseudo_table[] =
+const pseudo_typeS aout_pseudo_table[] =
 {
   {"line", obj_aout_line, 0},	/* source code line number */
   {"ln", obj_aout_line, 0},	/* coff line number that we use anyway */
@@ -94,8 +96,8 @@ const pseudo_typeS obj_pseudo_table[] =
   /* other stuff */
   {"ABORT", s_abort, 0},
 
-  {NULL}			/* end sentinel */
-};				/* obj_pseudo_table */
+  {NULL, NULL, 0}		/* end sentinel */
+};				/* aout_pseudo_table */
 
 
 #ifdef BFD_ASSEMBLER
@@ -110,9 +112,9 @@ obj_aout_frob_symbol (sym, punt)
   int desc, type, other;
 
   flags = symbol_get_bfdsym (sym)->flags;
-  desc = S_GET_DESC (sym);
-  type = S_GET_TYPE (sym);
-  other = S_GET_OTHER (sym);
+  desc = aout_symbol (symbol_get_bfdsym (sym))->desc;
+  type = aout_symbol (symbol_get_bfdsym (sym))->type;
+  other = aout_symbol (symbol_get_bfdsym (sym))->other;
   sec = S_GET_SEGMENT (sym);
 
   /* Only frob simple symbols this way right now.  */
@@ -187,7 +189,7 @@ obj_aout_frob_symbol (sym, punt)
       symbol_get_bfdsym (sym)->flags |= BSF_DEBUGGING;
     }
 
-  S_SET_TYPE (sym, type);
+  aout_symbol (symbol_get_bfdsym (sym))->type = type;
 
   /* Double check weak symbols.  */
   if (S_IS_WEAK (sym))
@@ -420,20 +422,23 @@ obj_aout_type (ignore)
 	    {
 	      ++input_line_pointer;
 	      if (strncmp (input_line_pointer, "object", 6) == 0)
+#ifdef BFD_ASSEMBLER
+		aout_symbol (symbol_get_bfdsym (sym))->other = 1;
+#else
 		S_SET_OTHER (sym, 1);
+#endif
 	      else if (strncmp (input_line_pointer, "function", 8) == 0)
+#ifdef BFD_ASSEMBLER
+		aout_symbol (symbol_get_bfdsym (sym))->other = 2;
+#else
 		S_SET_OTHER (sym, 2);
+#endif
 	    }
 	}
     }
 
   /* Ignore everything else on the line.  */
   s_ignore (0);
-}
-
-void
-obj_read_begin_hook ()
-{
 }
 
 #ifndef BFD_ASSEMBLER
@@ -629,5 +634,59 @@ DEFUN_VOID (s_sect)
 }
 
 #endif /* ! BFD_ASSEMBLER */
+
+#ifdef BFD_ASSEMBLER
+
+/* Support for an AOUT emulation.  */
+
+static void aout_pop_insert PARAMS ((void));
+static int obj_aout_s_get_other PARAMS ((symbolS *));
+static int obj_aout_s_get_desc PARAMS ((symbolS *));
+
+static void
+aout_pop_insert ()
+{
+  pop_insert (aout_pseudo_table);
+}
+
+static int
+obj_aout_s_get_other (sym)
+     symbolS *sym;
+{
+  return aout_symbol (symbol_get_bfdsym (sym))->other;
+}
+
+static int
+obj_aout_s_get_desc (sym)
+     symbolS *sym;
+{
+  return aout_symbol (symbol_get_bfdsym (sym))->desc;
+}
+
+
+const struct format_ops aout_format_ops =
+{
+  bfd_target_aout_flavour,
+  1,	/* dfl_leading_underscore */
+  0,	/* emit_section_symbols */
+  obj_aout_frob_symbol,
+  obj_aout_frob_file,
+  0,	/* frob_file_after_relocs */
+  0,	/* s_get_size */
+  0,	/* s_set_size */
+  0,	/* s_get_align */
+  0,	/* s_set_align */
+  obj_aout_s_get_other,
+  obj_aout_s_get_desc,
+  0,	/* copy_symbol_attributes */
+  0,	/* generate_asm_lineno */
+  0,	/* process_stab */
+  0,	/* sec_sym_ok_for_reloc */
+  aout_pop_insert,
+  0,	/* ecoff_set_ext */
+  0,	/* read_begin_hook */
+  0 	/* symbol_new_hook */
+};
+#endif BFD_ASSEMBLER
 
 /* end of obj-aout.c */

@@ -4527,7 +4527,7 @@ adjust_stab_section(abfd, seg)
 
 #endif /* not BFD_ASSEMBLER */
 
-const pseudo_typeS obj_pseudo_table[] =
+const pseudo_typeS coff_pseudo_table[] =
 {
   {"def", obj_coff_def, 0},
   {"dim", obj_coff_dim, 0},
@@ -4568,58 +4568,42 @@ const pseudo_typeS obj_pseudo_table[] =
   {"sdef", obj_coff_def, 0},
 #endif
   {NULL, NULL, 0}		/* end sentinel */
-};				/* obj_pseudo_table */
+};				/* coff_pseudo_table */
 
 #ifdef BFD_ASSEMBLER
 
-static void coff_pop_insert PARAMS ((void));
-static int coff_sec_sym_ok_for_reloc PARAMS ((asection *));
-
 /* Support for a COFF emulation.  */
+
+static void coff_pop_insert PARAMS ((void));
 
 static void
 coff_pop_insert ()
 {
-  pop_insert (obj_pseudo_table);
-}
-
-static int
-coff_sec_sym_ok_for_reloc (sec)
-     asection *sec ATTRIBUTE_UNUSED;
-{
-  return 0;
+  pop_insert (coff_pseudo_table);
 }
 
 const struct format_ops coff_format_ops =
 {
   bfd_target_coff_flavour,
-  0,
-  1,
+  0,	/* dfl_leading_underscore */
+  1,	/* emit_section_symbols */
   coff_frob_symbol,
-  0,
+  0,	/* frob_file */
   coff_frob_file_after_relocs,
-  0, 0,
-  0, 0,
-  0,
-#if 0
-  obj_generate_asm_lineno,
-#else
-  0,
-#endif
-#if 0
-  obj_stab,
-#else
-  0,
-#endif
-  coff_sec_sym_ok_for_reloc,
+  0,	/* s_get_size */
+  0,	/* s_set_size */
+  0,	/* s_get_align */
+  0,	/* s_set_align */
+  0,	/* s_get_other */
+  0,	/* s_get_desc */
+  0,	/* copy_symbol_attributes */
+  0,	/* generate_asm_lineno */
+  0,	/* process_stab */
+  0,	/* sec_sym_ok_for_reloc */
   coff_pop_insert,
-#if 0
-  obj_set_ext,
-#else
-  0,
-#endif
+  0,	/* ecoff_set_ext */
   coff_obj_read_begin_hook,
-  coff_obj_symbol_new_hook,
+  coff_obj_symbol_new_hook
 };
 
 #endif

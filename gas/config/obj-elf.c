@@ -1,5 +1,5 @@
 /* ELF object file format
-   Copyright (C) 1992, 93-98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1992, 93-99, 2000 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -219,6 +219,13 @@ elf_s_set_align (sym, align)
      bfd_vma align;
 {
   S_SET_ALIGN (sym, align);
+}
+
+int
+elf_s_get_other (sym)
+     symbolS *sym;
+{
+  return elf_symbol (symbol_get_bfdsym (sym))->internal_elf_sym.st_other;
 }
 
 static void
@@ -719,7 +726,7 @@ obj_elf_parse_section_letters (str, len)
 	    else
 #endif
 	      {
-		as_warn (bad_msg);
+		as_warn ("%s", bad_msg);
 		attr = -1;
 	      }
 	  }
@@ -1221,7 +1228,7 @@ obj_elf_vtable_entry (ignore)
 }
 
 void
-obj_read_begin_hook ()
+elf_obj_read_begin_hook ()
 {
 #ifdef NEED_ECOFF_DEBUG
   if (ECOFF_DEBUGGING)
@@ -1230,7 +1237,7 @@ obj_read_begin_hook ()
 }
 
 void
-obj_symbol_new_hook (symbolP)
+elf_obj_symbol_new_hook (symbolP)
      symbolS *symbolP;
 {
   struct elf_obj_sy *sy_obj;
@@ -1877,28 +1884,30 @@ sco_id ()
 const struct format_ops elf_format_ops =
 {
   bfd_target_elf_flavour,
-  0,
-  1,
+  0,	/* dfl_leading_underscore */
+  1,	/* emit_section_symbols */
   elf_frob_symbol,
   elf_frob_file,
   elf_frob_file_after_relocs,
   elf_s_get_size, elf_s_set_size,
   elf_s_get_align, elf_s_set_align,
+  elf_s_get_other,
+  0,	/* s_get_desc */
   elf_copy_symbol_attributes,
 #ifdef NEED_ECOFF_DEBUG
   ecoff_generate_asm_lineno,
   ecoff_stab,
 #else
-  0,
-  0,				/* process_stab */
+  0,	/* generate_asm_lineno */
+  0,	/* process_stab */
 #endif
   elf_sec_sym_ok_for_reloc,
   elf_pop_insert,
 #ifdef NEED_ECOFF_DEBUG
   elf_ecoff_set_ext,
 #else
-  0,
+  0,	/* ecoff_set_ext */
 #endif
-  obj_read_begin_hook,
-  obj_symbol_new_hook,
+  elf_obj_read_begin_hook,
+  elf_obj_symbol_new_hook,
 };

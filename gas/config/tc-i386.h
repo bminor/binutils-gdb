@@ -1,5 +1,5 @@
 /* tc-i386.h -- Header file for tc-i386.c
-   Copyright (C) 1989, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1989, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
@@ -74,35 +74,36 @@ extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
 
 #define TARGET_ARCH		bfd_arch_i386
 
-#ifdef OBJ_AOUT
 #ifdef TE_NetBSD
-#define TARGET_FORMAT		"a.out-i386-netbsd"
+#define AOUT_TARGET_FORMAT	"a.out-i386-netbsd"
 #endif
 #ifdef TE_386BSD
-#define TARGET_FORMAT		"a.out-i386-bsd"
+#define AOUT_TARGET_FORMAT	"a.out-i386-bsd"
 #endif
 #ifdef TE_LINUX
-#define TARGET_FORMAT		"a.out-i386-linux"
+#define AOUT_TARGET_FORMAT	"a.out-i386-linux"
 #endif
 #ifdef TE_Mach
-#define TARGET_FORMAT		"a.out-mach3"
+#define AOUT_TARGET_FORMAT	"a.out-mach3"
 #endif
 #ifdef TE_DYNIX
-#define TARGET_FORMAT		"a.out-i386-dynix"
+#define AOUT_TARGET_FORMAT	"a.out-i386-dynix"
 #endif
-#ifndef TARGET_FORMAT
-#define TARGET_FORMAT		"a.out-i386"
+#ifndef AOUT_TARGET_FORMAT
+#define AOUT_TARGET_FORMAT	"a.out-i386"
 #endif
-#endif /* OBJ_AOUT */
 
+#if ((defined (OBJ_MAYBE_ELF) && defined (OBJ_MAYBE_COFF)) \
+     || (defined (OBJ_MAYBE_ELF) && defined (OBJ_MAYBE_AOUT)) \
+     || (defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)))
+extern const char *i386_target_format PARAMS ((void));
+#define TARGET_FORMAT i386_target_format ()
+#else
 #ifdef OBJ_ELF
 #define TARGET_FORMAT		"elf32-i386"
 #endif
-
-#ifdef OBJ_MAYBE_ELF
-#ifdef OBJ_MAYBE_COFF
-extern const char *i386_target_format PARAMS ((void));
-#define TARGET_FORMAT i386_target_format ()
+#ifdef OBJ_AOUT
+#define TARGET_FORMAT		AOUT_TARGET_FORMAT
 #endif
 #endif
 

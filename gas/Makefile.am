@@ -321,6 +321,7 @@ TARG_ENV_HFILES = \
 # Multi files in config
 
 MULTI_CFILES = \
+	config/e-i386aout.c \
 	config/e-i386coff.c \
 	config/e-i386elf.c \
 	config/e-mipsecoff.c \
@@ -508,6 +509,8 @@ e-mipself.o : $(srcdir)/config/e-mipself.c
 	$(COMPILE) -c $(srcdir)/config/e-mipself.c
 e-mipsecoff.o : $(srcdir)/config/e-mipsecoff.c
 	$(COMPILE) -c $(srcdir)/config/e-mipsecoff.c
+e-i386aout.o: $(srcdir)/config/e-i386aout.c
+	$(COMPILE) -c $(srcdir)/config/e-i386aout.c
 e-i386coff.o: $(srcdir)/config/e-i386coff.c
 	$(COMPILE) -c $(srcdir)/config/e-i386coff.c
 e-i386elf.o: $(srcdir)/config/e-i386elf.c
@@ -756,7 +759,7 @@ DEPTC: $(TARGET_CPU_CFILES)
 	echo 'DEPTC_hppa_som = $$(srcdir)/config/tc-hppa.h subsegs.h \' >> DEPTCA
 	echo '  $$(INCDIR)/obstack.h $$(BFDDIR)/libhppa.h \' >> DEPTCA
 	echo '  $$(INCDIR)/opcode/hppa.h $$(BFDDIR)/som.h' >> DEPTCA
-	# We don't try to handle all multi cases.
+# We don't try to handle all multi cases.
 	for c in $(CPU_TYPES); do \
 	  $(CPU_MULTI_VALID) \
 	  if [ x$${valid} = xyes ]; then \
@@ -803,7 +806,7 @@ DEPOBJ: $(OBJ_FORMAT_CFILES)
 	echo '  $$(INCDIR)/obstack.h $$(BFDDIR)/libhppa.h \' >> DEPOBJA
 	echo '  $$(BFDDIR)/som.h  $$(INCDIR)/aout/stab_gnu.h \' >> DEPOBJA
 	echo '  $$(INCDIR)/aout/stab.def' >> DEPOBJA
-	# We don't try to handle all multi cases.
+# We don't try to handle all multi cases.
 	for c in $(CPU_TYPES); do \
 	  $(CPU_MULTI_VALID) \
 	  if [ x$${valid} = xyes ]; then \
@@ -920,6 +923,8 @@ symbols.o: symbols.c $(INCDIR)/obstack.h subsegs.h \
 write.o: write.c subsegs.h $(INCDIR)/obstack.h output-file.h
 gasp.o: gasp.c sb.h macro.h
 itbl-ops.o: itbl-ops.c itbl-ops.h itbl-parse.h
+e-i386aout.o: $(srcdir)/config/e-i386aout.c emul.h \
+  emul-target.h
 e-i386coff.o: $(srcdir)/config/e-i386coff.c emul.h \
   emul-target.h
 e-i386elf.o: $(srcdir)/config/e-i386elf.c emul.h emul-target.h

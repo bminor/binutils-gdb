@@ -1,5 +1,5 @@
 /* symbols.c -symbol table-
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -437,18 +437,24 @@ colon (sym_name)		/* just seen "x:" - rattle symbols & frags */
 		}
 	      else
 		{
-#if defined (S_GET_OTHER) && defined (S_GET_DESC)
-		  as_fatal (_("Symbol \"%s\" is already defined as \"%s\"/%d.%d.%ld."),
-			    sym_name,
-			    segment_name (S_GET_SEGMENT (symbolP)),
-			    S_GET_OTHER (symbolP), S_GET_DESC (symbolP),
-			    (long) S_GET_VALUE (symbolP));
+#if (!defined (OBJ_AOUT) && !defined (OBJ_MAYBE_AOUT) \
+     && !defined (OBJ_BOUT) && !defined (OBJ_MAYBE_BOUT))
+		  static const char *od_buf = "";
 #else
-		  as_fatal (_("Symbol \"%s\" is already defined as \"%s\"/%ld."),
+		  char od_buf[100];
+		  od_buf[0] = '\0';
+#ifdef BFD_ASSEMBLER
+		  if (OUTPUT_FLAVOR == bfd_target_aout_flavour)
+#endif
+		    sprintf(od_buf, "%d.%d.",
+			    S_GET_OTHER (symbolP),
+			    S_GET_DESC (symbolP));
+#endif
+		  as_fatal (_("Symbol \"%s\" is already defined as \"%s\"/%s%ld."),
 			    sym_name,
 			    segment_name (S_GET_SEGMENT (symbolP)),
+			    od_buf,
 			    (long) S_GET_VALUE (symbolP));
-#endif
 		}
 	    }			/* if the undefined symbol has no value */
 	}

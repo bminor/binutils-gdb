@@ -1,3 +1,131 @@
+2000-01-27  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* Makefile.am (MULTI_CFILES): Add config/e-i386aout.c
+	Add dependencies for e-i386aout.o.  Fix 2 comment lines.
+
+	* Makefile.in: Same here.
+	Update copyright.
+
+	* configure.in: Set bfd_gas for i386-aout when primary target
+	is bfd.  Handle i386aout emulation.  Don't use te_file=multi, as
+	we may need the primary te_file.  Remove incorrect comment.
+
+	* configure: Regenerate.
+
+	* config/e-i386aout.c: New file.
+
+	* as.c (USE_EMULATIONS): Move to before print_version_id.
+	(struct emulation): Add i386aout.
+	(show_usage): Split text strings.  Reformat -a text.  Add --em
+	help.
+	Update copyright.
+
+	* obj.h (struct format_ops): Add s_get_other and s_get_desc.
+	(aout_format_ops): New.
+	Update copyright.
+
+	* read.c (s_lcomm_internal): Rewrite OBJ_AOUT,OBJ_BOUT
+	preprocessor conditional and add aout USE_EMULATIONS tests.
+	(read_a_source_file): Don't pass error strings to printf as
+	format arg.
+	Update copyright.
+
+	* gasp.c (exp_get_abs): Don't pass error strings to printf as
+	format arg.
+	(do_data): Same here.
+	(process_file): And here.
+	Update copyright.
+
+	* symbols.c (colon): Rewrite "already defined" fatal message
+	code for aout with USE_EMULATIONS.
+	Update copyright.
+
+	* config/obj-aout.c (OBJ_HEADER): Define.
+	(obj_pseudo_table): Rename to aout_pseudo_table.  Init all
+	fields of sentinel. 
+	(obj_aout_frob_symbol): Expand S_GET_DESC, S_GET_TYPE,
+	S_GET_OTHER, S_SET_TYPE macros since we don't need obj-multi
+	forms here.
+	(obj_aout_type): Expand S_SET_OTHER here too.
+	(obj_read_begin_hook): Remove.
+	(aout_pop_insert): New.
+	(obj_aout_s_get_other): New.
+	(obj_aout_s_get_desc): New.
+	(aout_format_ops): New.
+	Update copyright.
+
+	* config/obj-aout.h (obj_pop_insert): Define so non-multi usage
+	gets aout_pseudo_table.
+	(aout_pseudo_table): Declare.
+	(obj_read_begin_hook): Define.
+	Update copyright.
+
+	* config/obj-coff.c (obj_pseudo_table): Rename to
+	coff_pseudo_table.
+	(coff_pop_insert): Use coff_pseudo_table.
+	(coff_sec_sym_ok_for_reloc): Remove.
+	(coff_format_ops): Add 0 entries for s_get_size, s_set_size,
+	and comment all zero entries and remove #if 0 code.
+	Update copyright.
+
+	* config/obj-coff.h (obj_pop_insert): Define.
+	(coff_pseudo_table): Declare.
+	Update copyright.
+
+	* config/obj-ecoff.c (ecoff_format_ops): Add 0 entries for
+	s_get_size, s_set_size.  Comment all zero entries.
+	Update copyright.
+
+	* config/obj-elf.c (elf_s_get_other): New function.
+	(obj_read_begin_hook): Rename to elf_obj_read_begin_hook.
+	(obj_symbol_new_hook): Rename to elf_obj_symbol_new_hook.
+	(elf_format_ops): Add elf_s_get_other, 0 s_get_size entry, and
+	comment.
+	(obj_elf_parse_section_letters): Don't pass error strings to
+	printf as format arg.
+	Update copyright.
+
+	* config/obj-elf.h (ECOFF_DEBUGGING): Define when
+	OBJ_MAYBE_ECOFF.
+	(elf_s_get_other): Declare.
+	(S_GET_OTHER) Define as elf_s_get_other if not already
+	defined.
+	(S_SET_OTHER): Only define when not already defined.
+	(elf_obj_read_begin_hook): Declare.
+	(obj_read_begin_hook): Define.
+	(elf_obj_symbol_new_hook): Declare.
+	(obj_symbol_new_hook): Define.
+	Update copyright.
+
+	* config/obj-multi.h: Add copyright header and protect against
+	multiple inclusion.  Add * to all function pointers.
+	(OBJ_HEADER): If defined, include it rather than other defines
+	in this file.
+	(obj_frob_file_after_relocs): Test for NULL.
+	(obj_symbol_new_hook): Here too.
+	(obj_sec_sym_ok_for_reloc): And here.
+	(S_GET_OTHER): Define.
+	(S_GET_DESC): Define.
+	(ECOFF_DEBUGGING): Remove as it's done in obj-elf.h
+	(OBJ_MAYBE_ELF): Update comment.
+
+	* config/tc-i386.c (i386_immediate): Add OBJ_MAYBE_AOUT to
+	OBJ_AOUT preprocessor conditional and handle emulation by
+	testing OUTPUT_FLAVOR.
+	(i386_displacement): Here too.
+	(md_section_align): Similarly here.
+	(i386_target_format): Conditionally compile when more than one
+	of OBJ_MAYBE_{ELF,COFF,AOUT} defined.  Add aout case.
+	(i386_immediate): Fix error message for aout BFD_ASSMBLER.
+	(i386_displacement): Here too.
+	Update copyright.
+
+	* config/tc-i386.h (AOUT_TARGET_FORMAT): Define for each TE_*.
+	Define TARGET_FORMAT for aout only when not multi.
+	Update copyright.
+
+	* config/te-multi.h: Delete file as it's identical to te-generic.h
+
 2000-01-15  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.h (DWORD_MNEM_SUFFIX): Delete.

@@ -394,9 +394,10 @@ changequote([,])dnl
       *-elf)	bfd_gas=yes ;;
       *-ecoff)	bfd_gas=yes ;;
       *-som)	bfd_gas=yes ;;
-    #enable bfd for coff to allow testing if a bfd target is the primary target,
-    #but not for coff as the primary target
+    #enable bfd for coff and aout to allow testing if a bfd target is
+    #the primary target, but not for coff or aout as the primary target
       i386-coff)	if test x${primary_bfd_gas} = xyes; then bfd_gas=yes; fi ;;
+      i386-aout)	if test x${primary_bfd_gas} = xyes; then bfd_gas=yes; fi ;;
       *)		;;
     esac
 
@@ -501,11 +502,13 @@ changequote([,])dnl
 			big)	emulation="mipsbelf mipslelf mipself" ;;
 			*)	emulation="mipslelf mipsbelf mipself" ;;
 			esac ;;
-      i386-*-elf)	emulation="i386elf" ;;
+      # Uncommenting the next line will turn on support for i386 AOUT
+      # for the default linux configuration
+      # i386-*-linux*-elf) emulation="i386elf i386aout" ;;
+      #
+      i386-*-aout)	emulation="i386aout" ;;
       i386-*-coff)	emulation="i386coff" ;;
-      # Uncommenting the next line will turn on support for i386 COFF
-      # in any i386 ELF configuration.
-      # i386-*-*-elf)	emulation="i386elf i386coff" ;;
+      i386-*-elf)	emulation="i386elf" ;;
     esac
 
     emulations="$emulations $emulation"
@@ -601,6 +604,8 @@ for em in . $emulations ; do
 	fmt=elf   file=mipself ;;
     mipsbecoff | mipslecoff)
 	fmt=ecoff file=mipsecoff ;;
+    i386aout)
+	fmt=aout  file=i386aout ;;
     i386coff)
 	fmt=coff  file=i386coff ;;
     i386elf)
@@ -637,7 +642,6 @@ if test `set . $emfiles ; shift ; echo $#` -gt 0 ; then
   # USE_EMULATIONS or include any of the e-files as they will only be bloat.
   case "${obj_format}${emfiles}" in
     multi* | *mips*)
-      te_file=multi
       extra_objects="$extra_objects $emfiles"
       AC_DEFINE(USE_EMULATIONS, 1, [Use emulation support?]) ;;
   esac

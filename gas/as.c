@@ -1,5 +1,5 @@
 /* as.c - GAS main program.
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1987, 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -111,96 +111,12 @@ struct itbl_file_list
 
 static struct itbl_file_list *itbl_files;
 
-void
-print_version_id ()
-{
-  static int printed;
-  if (printed)
-    return;
-  printed = 1;
-
-#ifdef BFD_ASSEMBLER
-  fprintf (stderr, _("GNU assembler version %s (%s) using BFD version %s"),
-	   VERSION, TARGET_ALIAS, BFD_VERSION);
-#else
-  fprintf (stderr, _("GNU assembler version %s (%s)"), VERSION, TARGET_ALIAS);
-#endif
-  fprintf (stderr, "\n");
-}
-
-static void
-show_usage (stream)
-     FILE *stream;
-{
-  fprintf (stream, _("Usage: %s [option...] [asmfile...]\n"), myname);
-
-  fprintf (stream, _("\
-Options:\n\
-  -a[sub-option...]	turn on listings\n\
-    Sub-options [default hls]:\n\
-    c   omit false conditionals\n\
-    d   omit debugging directives\n\
-    h   include high-level source\n\
-    l   include assembly\n\
-    m   include macro expansions\n\
-    n   omit forms processing\n\
-    s   include symbols\n\
-    L   include line debug statistics (if applicable)\n\
-    =file set listing file name (must be last sub-option)\n"));
-  
-  fprintf (stream, _("\
-  -D		          produce assembler debugging messages\n\
-  --defsym SYM=VAL        define symbol SYM to given value\n\
-  -f		          skip whitespace and comment preprocessing\n\
-  --gstabs	          generate stabs debugging information\n\
-  --gdwarf2	          generate DWARF2 debugging information\n\
-  --help		  show this message and exit\n\
-  -I DIR		  add DIR to search list for .include directives\n\
-  -J		          don't warn about signed overflow\n\
-  -K		          warn when differences altered for long displacements\n\
-  -L,--keep-locals        keep local symbols (e.g. starting with `L')\n"));
-  
-  fprintf (stream, _("\
-  -M,--mri	          assemble in MRI compatibility mode\n\
-  --MD FILE	          write dependency information in FILE (default none)\n\
-  -nocpp		  ignored\n\
-  -o OBJFILE	          name the object-file output OBJFILE (default a.out)\n\
-  -R		          fold data section into text section\n\
-  --statistics	          print various measured statistics from execution\n\
-  --strip-local-absolute  strip local absolute symbols\n\
-  --traditional-format	  Use same format as native assembler when possible\n\
-  --version		  print assembler version number and exit\n\
-  -W  --no-warn		  suppress warnings\n\
-  --warn		  don't suppress warnings\n\
-  --fatal-warnings	  treat warnings as errors\n\
-  --itbl INSTTBL	  extend instruction set to include instructions\n\
-			  matching the specifications defined in file INSTTBL\n\
-  -w			  ignored\n\
-  -X			  ignored\n\
-  -Z			  generate object file even after errors\n"));
-  
-  fprintf (stream, _("\
-  --listing-lhs-width	  set the width in words of the output data column of\n\
-			  the listing\n\
-  --listing-lhs-width2	  set the width in words of the continuation lines\n\
-			  of the output data column; ignored if smaller than\n\
-			  the width of the first line\n\
-  --listing-rhs-width	  set the max width in characters of the lines from\n\
-			  the source file\n\
-  --listing-cont-lines	  set the maximum number of continuation lines used\n\
-			  for the output data column of the listing\n"));
-
-  md_show_usage (stream);
-
-  fprintf (stream, _("\nReport bugs to bug-gnu-utils@gnu.org\n"));
-}
-
 #ifdef USE_EMULATIONS
 #define EMULATION_ENVIRON "AS_EMULATION"
 
 extern struct emulation mipsbelf, mipslelf, mipself;
 extern struct emulation mipsbecoff, mipslecoff, mipsecoff;
-extern struct emulation i386coff, i386elf;
+extern struct emulation i386coff, i386elf, i386aout;
 
 static struct emulation *const emulations[] = { EMULATIONS };
 static const int n_emulations = sizeof (emulations) / sizeof (emulations[0]);
@@ -281,6 +197,133 @@ common_emul_init ()
     }
 }
 #endif
+
+void
+print_version_id ()
+{
+  static int printed;
+  if (printed)
+    return;
+  printed = 1;
+
+#ifdef BFD_ASSEMBLER
+  fprintf (stderr, _("GNU assembler version %s (%s) using BFD version %s"),
+	   VERSION, TARGET_ALIAS, BFD_VERSION);
+#else
+  fprintf (stderr, _("GNU assembler version %s (%s)"), VERSION, TARGET_ALIAS);
+#endif
+  fprintf (stderr, "\n");
+}
+
+static void
+show_usage (stream)
+     FILE *stream;
+{
+  fprintf (stream, _("Usage: %s [option...] [asmfile...]\n"), myname);
+
+  fprintf (stream, _("\
+Options:\n\
+  -a[sub-option...]	  turn on listings\n\
+                      	  Sub-options [default hls]:\n\
+                      	  c      omit false conditionals\n\
+                      	  d      omit debugging directives\n\
+                      	  h      include high-level source\n\
+                      	  l      include assembly\n\
+                      	  m      include macro expansions\n\
+                      	  n      omit forms processing\n\
+                      	  s      include symbols\n\
+                      	  L      include line debug statistics (if applicable)\n\
+                      	  =FILE  list to FILE (must be last sub-option)\n"));
+
+  fprintf (stream, _("\
+  -D                      produce assembler debugging messages\n"));
+  fprintf (stream, _("\
+  --defsym SYM=VAL        define symbol SYM to given value\n"));
+#ifdef USE_EMULATIONS
+  {
+    int i;
+    char *def_em;
+
+    fprintf (stream, "\
+  --em=[");
+    for (i = 0; i < n_emulations-1; i++)
+      fprintf (stream, "%s | ", emulations[i]->name);
+    fprintf (stream, "%s]\n", emulations[i]->name);
+
+    def_em = getenv (EMULATION_ENVIRON);
+    if (!def_em) 
+      def_em = DEFAULT_EMULATION;
+    fprintf (stream, _("\
+                          emulate output (default %s)\n"), def_em);
+  }
+#endif
+  fprintf (stream, _("\
+  -f                      skip whitespace and comment preprocessing\n"));
+  fprintf (stream, _("\
+  --gstabs                generate stabs debugging information\n"));
+  fprintf (stream, _("\
+  --gdwarf2               generate DWARF2 debugging information\n"));
+  fprintf (stream, _("\
+  --help                  show this message and exit\n"));
+  fprintf (stream, _("\
+  -I DIR                  add DIR to search list for .include directives\n"));
+  fprintf (stream, _("\
+  -J                      don't warn about signed overflow\n"));
+  fprintf (stream, _("\
+  -K                      warn when differences altered for long displacements\n"));
+  fprintf (stream, _("\
+  -L,--keep-locals        keep local symbols (e.g. starting with `L')\n"));
+  fprintf (stream, _("\
+  -M,--mri                assemble in MRI compatibility mode\n"));
+  fprintf (stream, _("\
+  --MD FILE               write dependency information in FILE (default none)\n"));
+  fprintf (stream, _("\
+  -nocpp                  ignored\n"));
+  fprintf (stream, _("\
+  -o OBJFILE              name the object-file output OBJFILE (default a.out)\n"));
+  fprintf (stream, _("\
+  -R                      fold data section into text section\n"));
+  fprintf (stream, _("\
+  --statistics            print various measured statistics from execution\n"));
+  fprintf (stream, _("\
+  --strip-local-absolute  strip local absolute symbols\n"));
+  fprintf (stream, _("\
+  --traditional-format    Use same format as native assembler when possible\n"));
+  fprintf (stream, _("\
+  --version               print assembler version number and exit\n"));
+  fprintf (stream, _("\
+  -W  --no-warn           suppress warnings\n"));
+  fprintf (stream, _("\
+  --warn                  don't suppress warnings\n"));
+  fprintf (stream, _("\
+  --fatal-warnings        treat warnings as errors\n"));
+  fprintf (stream, _("\
+  --itbl INSTTBL          extend instruction set to include instructions\n\
+                          matching the specifications defined in file INSTTBL\n"));
+  fprintf (stream, _("\
+  -w                      ignored\n"));
+  fprintf (stream, _("\
+  -X                      ignored\n"));
+  fprintf (stream, _("\
+  -Z                      generate object file even after errors\n"));
+  fprintf (stream, _("\
+  --listing-lhs-width     set the width in words of the output data column of\n\
+                          the listing\n"));
+  fprintf (stream, _("\
+  --listing-lhs-width2    set the width in words of the continuation lines\n\
+                          of the output data column; ignored if smaller than\n\
+                          the width of the first line\n"));
+  fprintf (stream, _("\
+  --listing-rhs-width     set the max width in characters of the lines from\n\
+                          the source file\n"));
+  fprintf (stream, _("\
+  --listing-cont-lines    set the maximum number of continuation lines used\n\
+                          for the output data column of the listing\n"));
+
+  md_show_usage (stream);
+
+  fprintf (stream, _("\nReport bugs to bug-gnu-utils@gnu.org\n"));
+}
 
 /*
  * Since it is easy to do here we interpret the special arg "-"

@@ -1,5 +1,5 @@
 /* ELF object file format.
-   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -52,6 +52,12 @@ extern int alpha_flag_mdebug;
 #define ECOFF_DEBUGGING 1
 #endif /* MIPS_STABS_ELF */
 #endif /* TC_MIPS */
+
+#ifdef OBJ_MAYBE_ECOFF
+#ifndef ECOFF_DEBUGGING
+#define ECOFF_DEBUGGING 1
+#endif
+#endif
 
 /* Additional information we keep for each symbol.  */
 struct elf_obj_sy
@@ -106,10 +112,14 @@ extern void elf_begin PARAMS ((void));
   (elf_symbol (symbol_get_bfdsym (S))->internal_elf_sym.st_value = (V))
 #endif
 
-#define S_GET_OTHER(S) \
-  (elf_symbol (symbol_get_bfdsym (S))->internal_elf_sym.st_other)
+int elf_s_get_other PARAMS ((symbolS *));
+#ifndef S_GET_OTHER
+#define S_GET_OTHER(S)	(elf_s_get_other (S))
+#endif
+#ifndef S_SET_OTHER
 #define S_SET_OTHER(S,V) \
   (elf_symbol (symbol_get_bfdsym (S))->internal_elf_sym.st_other = (V))
+#endif
 
 extern asection *gdb_section;
 
@@ -139,6 +149,16 @@ extern void obj_elf_text PARAMS ((int));
    globally defined sections.  */
 #ifndef obj_sec_sym_ok_for_reloc
 #define obj_sec_sym_ok_for_reloc(SEC)	((SEC)->owner != 0)
+#endif
+
+void elf_obj_read_begin_hook PARAMS ((void));
+#ifndef obj_read_begin_hook
+#define obj_read_begin_hook	elf_obj_read_begin_hook
+#endif
+
+void elf_obj_symbol_new_hook PARAMS ((symbolS *));
+#ifndef obj_symbol_new_hook
+#define obj_symbol_new_hook	elf_obj_symbol_new_hook
 #endif
 
 /* When setting one symbol equal to another, by default we probably

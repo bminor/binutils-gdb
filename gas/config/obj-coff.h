@@ -1,5 +1,5 @@
 /* coff object file format
-   Copyright (C) 1989, 90, 91, 92, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1989, 90, 91, 92, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS.
@@ -820,6 +820,12 @@ extern void obj_coff_pe_handle_link_once ();
 #endif
 
 #endif /* not BFD_ASSEMBLER */
+
+extern const pseudo_typeS coff_pseudo_table[];
+
+#ifndef obj_pop_insert
+#define obj_pop_insert() pop_insert (coff_pseudo_table)
+#endif
 
 /* In COFF, if a symbol is defined using .def/.val SYM/.endef, it's OK
    to redefine the symbol later on.  This can happen if C symbols use

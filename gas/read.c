@@ -1,5 +1,5 @@
 /* read.c - read a source file -
-   Copyright (C) 1986, 87, 90, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1986, 87, 1990-99, 2000
    Free Software Foundation, Inc.
 
 This file is part of GAS, the GNU Assembler.
@@ -870,7 +870,7 @@ read_a_source_file (name)
 			  if (check_macro (s, &out, '\0', &err))
 			    {
 			      if (err != NULL)
-				as_bad (err);
+				as_bad ("%s", err);
 			      *input_line_pointer++ = c;
 			      input_scrub_include_sb (&out,
 						      input_line_pointer);
@@ -2057,12 +2057,17 @@ s_lcomm_internal (needs_align, bytes_p)
   *p = c;
 
   if (
-#if defined(OBJ_AOUT) | defined(OBJ_BOUT)
-       S_GET_OTHER (symbolP) == 0 &&
-       S_GET_DESC (symbolP) == 0 &&
-#endif /* OBJ_AOUT or OBJ_BOUT */
-       (S_GET_SEGMENT (symbolP) == bss_seg
-	|| (!S_IS_DEFINED (symbolP) && S_GET_VALUE (symbolP) == 0)))
+#if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT) \
+     || defined (OBJ_BOUT) || defined (OBJ_MAYBE_BOUT))
+#ifdef BFD_ASSEMBLER
+      (OUTPUT_FLAVOR != bfd_target_aout_flavour
+       || (S_GET_OTHER (symbolP) == 0 && S_GET_DESC (symbolP) == 0)) &&
+#else
+      (S_GET_OTHER (symbolP) == 0 && S_GET_DESC (symbolP) == 0) &&
+#endif
+#endif
+      (S_GET_SEGMENT (symbolP) == bss_seg
+       || (!S_IS_DEFINED (symbolP) && S_GET_VALUE (symbolP) == 0)))
     {
       char *pfrag;
 

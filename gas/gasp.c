@@ -1,5 +1,6 @@
 /* gasp.c - Gnu assembler preprocessor main program.
-   Copyright (C) 1994, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1994, 95, 96, 97, 98, 99, 2000
+   Free Software Foundation, Inc.
 
    Written by Steve and Judy Chamberlain of Cygnus Support,
       sac@cygnus.com
@@ -893,7 +894,7 @@ exp_get_abs (emsg, idx, in, val)
   exp_t res;
   idx = exp_parse (idx, in, &res);
   if (res.add_symbol.len || res.sub_symbol.len)
-    ERROR ((stderr, emsg));
+    ERROR ((stderr, "%s", emsg));
   *val = res.value;
   return idx;
 }
@@ -1384,7 +1385,7 @@ do_data (idx, in, size)
 	  idx = exp_parse (idx, in, &e);
 	  exp_string (&e, &acc);
 	  sb_add_char (&acc, 0);
-	  fprintf (outfile, acc.ptr);
+	  fprintf (outfile, "%s", acc.ptr);
 	  if (idx < in->len && in->ptr[idx] == ',')
 	    {
 	      fprintf (outfile, ",");
@@ -1922,7 +1923,7 @@ process_file ()
 		   || line.ptr[0] == '!'))
 	{
 	  /* MRI line comment.  */
-	  fprintf (outfile, sb_name (&line));
+	  fprintf (outfile, "%s", sb_name (&line));
 	}
       else
 	{

@@ -1,5 +1,5 @@
 /* obj-aout.h, a.out object file format for gas, the assembler.
-   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 98, 1999
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 95, 96, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -50,6 +50,12 @@ extern const segT N_TYPE_seg[];
 #endif /* DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE */
 
 #endif /* ! BFD_ASSEMBLER */
+
+extern const pseudo_typeS aout_pseudo_table[];
+
+#ifndef obj_pop_insert
+#define obj_pop_insert() pop_insert (aout_pseudo_table)
+#endif
 
 /* SYMBOL TABLE */
 /* Symbol table entry data type */
@@ -236,6 +242,7 @@ void tc_aout_fix_to_chars PARAMS ((char *where, struct fix *fixP, relax_addressT
 
 #endif
 
+#define obj_read_begin_hook()	{;}
 #define obj_symbol_new_hook(s)	{;}
 
 #define EMIT_SECTION_SYMBOLS		0

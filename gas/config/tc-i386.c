@@ -1,5 +1,5 @@
 /* i386.c -- Assemble code for the Intel 80386
-   Copyright (C) 1989, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1989, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
@@ -2586,8 +2586,12 @@ i386_immediate (imm_start)
 	  break;
 	}
     }
-#ifdef OBJ_AOUT
-  else if (exp_seg != text_section
+#if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
+  else if (
+#ifdef BFD_ASSEMBLER
+	   OUTPUT_FLAVOR == bfd_target_aout_flavour &&
+#endif
+	   exp_seg != text_section
 	   && exp_seg != data_section
 	   && exp_seg != bss_section
 	   && exp_seg != undefined_section
@@ -2596,7 +2600,11 @@ i386_immediate (imm_start)
 #endif
 	   )
     {
+#ifdef BFD_ASSEMBLER
+      as_bad (_("Unimplemented segment %s in operand"), exp_seg->name);
+#else
       as_bad (_("Unimplemented segment type %d in operand"), exp_seg);
+#endif
       return 0;
     }
 #endif
@@ -2821,13 +2829,21 @@ i386_displacement (disp_start, disp_end)
       if (fits_in_signed_byte (exp->X_add_number))
 	i.types[this_operand] |= Disp8;
     }
-#ifdef OBJ_AOUT
-  else if (exp_seg != text_section
+#if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
+  else if (
+#ifdef BFD_ASSEMBLER
+	   OUTPUT_FLAVOR == bfd_target_aout_flavour &&
+#endif
+	   exp_seg != text_section
 	   && exp_seg != data_section
 	   && exp_seg != bss_section
 	   && exp_seg != undefined_section)
     {
-      as_bad (_ ("Unimplemented segment type %d in operand"), exp_seg);
+#ifdef BFD_ASSEMBLER
+      as_bad (_("Unimplemented segment %s in operand"), exp_seg->name);
+#else
+      as_bad (_("Unimplemented segment type %d in operand"), exp_seg);
+#endif
       return 0;
     }
 #endif
@@ -4206,8 +4222,9 @@ md_show_usage (stream)
 }
 
 #ifdef BFD_ASSEMBLER
-#ifdef OBJ_MAYBE_ELF
-#ifdef OBJ_MAYBE_COFF
+#if ((defined (OBJ_MAYBE_ELF) && defined (OBJ_MAYBE_COFF)) \
+     || (defined (OBJ_MAYBE_ELF) && defined (OBJ_MAYBE_AOUT)) \
+     || (defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)))
 
 /* Pick the target format to use.  */
 
@@ -4216,18 +4233,25 @@ i386_target_format ()
 {
   switch (OUTPUT_FLAVOR)
     {
+#ifdef OBJ_MAYBE_AOUT
+    case bfd_target_aout_flavour:
+     return AOUT_TARGET_FORMAT;
+#endif
+#ifdef OBJ_MAYBE_COFF
     case bfd_target_coff_flavour:
       return "coff-i386";
+#endif
+#ifdef OBJ_MAYBE_ELF
     case bfd_target_elf_flavour:
       return "elf32-i386";
+#endif
     default:
       abort ();
       return NULL;
     }
 }
 
-#endif /* OBJ_MAYBE_COFF */
-#endif /* OBJ_MAYBE_ELF */
+#endif /* OBJ_MAYBE_ more than one */
 #endif /* BFD_ASSEMBLER */
 
 symbolS *
@@ -4257,17 +4281,20 @@ md_section_align (segment, size)
      segT segment ATTRIBUTE_UNUSED;
      valueT size;
 {
-#ifdef OBJ_AOUT
 #ifdef BFD_ASSEMBLER
-  /* For a.out, force the section size to be aligned.  If we don't do
-     this, BFD will align it for us, but it will not write out the
-     final bytes of the section.  This may be a bug in BFD, but it is
-     easier to fix it here since that is how the other a.out targets
-     work.  */
-  int align;
+#if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
+  if (OUTPUT_FLAVOR == bfd_target_aout_flavour)
+    {
+      /* For a.out, force the section size to be aligned.  If we don't do
+	 this, BFD will align it for us, but it will not write out the
+	 final bytes of the section.  This may be a bug in BFD, but it is
+	 easier to fix it here since that is how the other a.out targets
+	 work.  */
+      int align;
 
-  align = bfd_get_section_alignment (stdoutput, segment);
-  size = ((size + (1 << align) - 1) & ((valueT) -1 << align));
+      align = bfd_get_section_alignment (stdoutput, segment);
+      size = ((size + (1 << align) - 1) & ((valueT) -1 << align));
+    }
 #endif
 #endif
 
