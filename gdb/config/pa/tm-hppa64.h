@@ -35,9 +35,14 @@ struct frame_info;
    the conversion for hppa64 hasn't been completed yet.  */
 #define GDB_MULTI_ARCH 0
 
-/* FIXME: brobecker 2003-04-21: All the definition from this point until
-   the include of pa/tm-hppah.h are extracted from tm-hppa.h.  They have
-   been temporarily moved here, until hppa64 is multiarched too.  */
+/* FIXME: brobecker 2003-05-22: All the definition from this point until
+   the include of pa/tm-hppah.h are extracted from tm-hppa.h and tm-hppah.h.
+   They have been temporarily moved here, until hppa64 is multiarched too.  */
+
+#if !GDB_MULTI_ARCH
+extern int hppa_hpux_pc_in_sigtramp (CORE_ADDR pc, char *name);
+#define PC_IN_SIGTRAMP(pc, name) hppa_hpux_pc_in_sigtramp (pc, name)
+#endif
 
 #if !GDB_MULTI_ARCH
 extern int hppa_reg_struct_has_addr (int gcc_p, struct type *type);
@@ -278,17 +283,12 @@ extern CORE_ADDR hppa_frame_saved_pc (struct frame_info *frame);
 
 #if !GDB_MULTI_ARCH
 extern CORE_ADDR hppa_frame_args_address (struct frame_info *fi);
-#define FRAME_ARGS_ADDRESS(fi) hppa_frame_args_address (fi)
+#define DEPRECATED_FRAME_ARGS_ADDRESS(fi) hppa_frame_args_address (fi)
 #endif
 
 #if !GDB_MULTI_ARCH
 extern CORE_ADDR hppa_frame_locals_address (struct frame_info *fi);
-#define FRAME_LOCALS_ADDRESS(fi) hppa_frame_locals_address (fi)
-#endif
-
-#if !GDB_MULTI_ARCH
-extern int hppa_frame_num_args (struct frame_info *frame);
-#define FRAME_NUM_ARGS(fi) hppa_frame_num_args (fi)
+#define DEPRECATED_FRAME_LOCALS_ADDRESS(fi) hppa_frame_locals_address (fi)
 #endif
 
 #if !GDB_MULTI_ARCH
@@ -445,8 +445,8 @@ extern CORE_ADDR hppa_target_read_fp (void);
 /* We access locals from SP. This may not work for frames which call
    alloca; for those, we may need to consult unwind tables.
    jimb: FIXME.  */
-#undef FRAME_LOCALS_ADDRESS
-#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
+#undef DEPRECATED_FRAME_LOCALS_ADDRESS
+#define DEPRECATED_FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
 
 /* For a number of horrible reasons we may have to adjust the location
    of variables on the stack.  Ugh.  jimb: why? */

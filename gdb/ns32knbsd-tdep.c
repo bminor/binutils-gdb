@@ -61,6 +61,8 @@ ns32knbsd_aout_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_UNKNOWN;
 }
 
+extern initialize_file_ftype _initialize_ns32knbsd_tdep; /* -Wmissing-prototypes */
+
 void
 _initialize_ns32knbsd_tdep (void)
 {

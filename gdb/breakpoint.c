@@ -704,6 +704,35 @@ read_memory_nobpt (CORE_ADDR memaddr, char *myaddr, unsigned len)
 }
 
 
+/* A wrapper function for inserting catchpoints.  */
+int
+insert_catchpoint (struct ui_out *uo, void *args)
+{
+  struct breakpoint *b = (struct breakpoint *) args;
+  int val = -1;
+
+  switch (b->type)
+    {
+    case bp_catch_fork:
+      val = target_insert_fork_catchpoint (PIDGET (inferior_ptid));
+      break;
+    case bp_catch_vfork:
+      val = target_insert_vfork_catchpoint (PIDGET (inferior_ptid));
+      break;
+    case bp_catch_exec:
+      val = target_insert_exec_catchpoint (PIDGET (inferior_ptid));
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "unknown breakpoint type");
+      break;
+    }
+
+  if (val < 0)
+    throw_exception (RETURN_ERROR);
+
+  return 0;
+}
+
 /* insert_breakpoints is used when starting or continuing the program.
    remove_breakpoints is used when the program stops.
    Both return zero if successful,
@@ -1055,32 +1084,15 @@ insert_breakpoints (void)
 	     && !b->inserted
 	     && !b->duplicate)
       {
-	val = -1;
-	switch (b->type)
-	  {
-	  case bp_catch_fork:
-	    val = target_insert_fork_catchpoint (PIDGET (inferior_ptid));
-	    break;
-	  case bp_catch_vfork:
-	    val = target_insert_vfork_catchpoint (PIDGET (inferior_ptid));
-	    break;
-	  case bp_catch_exec:
-	    val = target_insert_exec_catchpoint (PIDGET (inferior_ptid));
-	    break;
-	  default:
-	    warning ("Internal error, %s line %d.", __FILE__, __LINE__);
-	    break;
-	  }
+	char prefix[64];
+
+	sprintf (prefix, "warning: inserting catchpoint %d: ", b->number);
+	val = catch_exceptions (uiout, insert_catchpoint, b, prefix,
+				RETURN_MASK_ERROR);
 	if (val < 0)
-	  {
-	    fprintf_unfiltered (tmp_error_stream, 
-				"Cannot insert catchpoint %d.", b->number);
-	  }
+	  b->enable_state = bp_disabled;
 	else
 	  b->inserted = 1;
-
-	if (val)
-	  return_val = val;	/* remember failure */
       }
   }
   
@@ -4608,7 +4620,7 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
    addresses found. ADDR_STRING contains a vector of (canonical)
    address strings. ARG points to the end of the SAL. */
 
-void
+static void
 parse_breakpoint_sals (char **address,
 		       struct symtabs_and_lines *sals,
 		       char ***addr_string)
@@ -4675,7 +4687,7 @@ parse_breakpoint_sals (char **address,
 /* Convert each SAL into a real PC.  Verify that the PC can be
    inserted as a breakpoint.  If it can't throw an error. */
 
-void
+static void
 breakpoint_sals_to_pc (struct symtabs_and_lines *sals,
 		       char *address)
 {    
@@ -6083,7 +6095,7 @@ handle_gnu_v3_exceptions (int tempflag, char *cond_string,
   sals = decode_line_1 (&nameptr, 1, NULL, 0, NULL);
   if (sals.nelts == 0)
     {
-      free (trigger_func_name);
+      xfree (trigger_func_name);
       return 0;
     }
 
@@ -6099,7 +6111,7 @@ handle_gnu_v3_exceptions (int tempflag, char *cond_string,
   b->disposition = tempflag ? disp_del : disp_donttouch;
   b->ops = &gnu_v3_exception_catchpoint_ops;
 
-  free (sals.sals);
+  xfree (sals.sals);
   mention (b);
   return 1;
 }

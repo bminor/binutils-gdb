@@ -24,6 +24,10 @@
 #include "gdb_string.h"
 #include <errno.h>
 #include <signal.h>
+#ifdef HAVE_TKILL_SYSCALL
+#include <unistd.h>
+#include <sys/syscall.h>
+#endif
 #include <sys/ptrace.h>
 #include "gdb_wait.h"
 
@@ -35,6 +39,8 @@
 
 static int debug_lin_lwp;
 extern char *strsignal (int sig);
+
+#include "linux-nat.h"
 
 /* On GNU/Linux there are no real LWP's.  The closest thing to LWP's
    are processes sharing the same VM space.  A multi-threaded process
@@ -68,43 +74,6 @@ extern char *strsignal (int sig);
      When debugged a multi-threaded process that spawns a lot of
      threads will run out of processes, even if the threads exit,
      because the "zombies" stay around.  */
-
-/* Structure describing a LWP.  */
-struct lwp_info
-{
-  /* The process id of the LWP.  This is a combination of the LWP id
-     and overall process id.  */
-  ptid_t ptid;
-
-  /* Non-zero if this LWP is cloned.  In this context "cloned" means
-     that the LWP is reporting to its parent using a signal other than
-     SIGCHLD.  */
-  int cloned;
-
-  /* Non-zero if we sent this LWP a SIGSTOP (but the LWP didn't report
-     it back yet).  */
-  int signalled;
-
-  /* Non-zero if this LWP is stopped.  */
-  int stopped;
-
-  /* Non-zero if this LWP will be/has been resumed.  Note that an LWP
-     can be marked both as stopped and resumed at the same time.  This
-     happens if we try to resume an LWP that has a wait status
-     pending.  We shouldn't let the LWP run until that wait status has
-     been processed, but we should not report that wait status if GDB
-     didn't try to let the LWP run.  */
-  int resumed;
-
-  /* If non-zero, a pending wait status.  */
-  int status;
-
-  /* Non-zero if we were stepping this LWP.  */
-  int step;
-
-  /* Next LWP in list.  */
-  struct lwp_info *next;
-};
 
 /* List of known LWPs.  */
 static struct lwp_info *lwp_list;
@@ -156,6 +125,7 @@ static sigset_t blocked_mask;
 
 /* Prototypes for local functions.  */
 static int stop_wait_callback (struct lwp_info *lp, void *data);
+static int lin_lwp_thread_alive (ptid_t ptid);
 
 /* Convert wait status STATUS to a string.  Used for printing debug
    messages only.  */
@@ -290,46 +260,6 @@ iterate_over_lwps (int (*callback) (struct lwp_info *, void *), void *data)
     }
 
   return NULL;
-}
-
-
-/* Implementation of the PREPARE_TO_PROCEED hook for the GNU/Linux LWP
-   layer.
-
-   Note that this implementation is potentially redundant now that
-   default_prepare_to_proceed() has been added.
-
-   FIXME This may not support switching threads after Ctrl-C
-   correctly. The default implementation does support this. */
-
-int
-lin_lwp_prepare_to_proceed (void)
-{
-  if (!ptid_equal (trap_ptid, null_ptid)
-      && !ptid_equal (inferior_ptid, trap_ptid))
-    {
-      /* Switched over from TRAP_PID.  */
-      CORE_ADDR stop_pc = read_pc ();
-      CORE_ADDR trap_pc;
-
-      /* Avoid switching where it wouldn't do any good, i.e. if both
-         threads are at the same breakpoint.  */
-      trap_pc = read_pc_pid (trap_ptid);
-      if (trap_pc != stop_pc && breakpoint_here_p (trap_pc))
-	{
-	  /* User hasn't deleted the breakpoint.  Return non-zero, and
-	     switch back to TRAP_PID.  */
-	  inferior_ptid = trap_ptid;
-
-	  /* FIXME: Is this stuff really necessary?  */
-	  flush_cached_frames ();
-	  registers_changed ();
-
-	  return 1;
-	}
-    }
-
-  return 0;
 }
 
 
@@ -627,6 +557,32 @@ lin_lwp_resume (ptid_t ptid, int step, enum target_signal signo)
 }
 
 
+/* Issue kill to specified lwp.  */
+
+static int tkill_failed;
+
+static int
+kill_lwp (int lwpid, int signo)
+{
+  errno = 0;
+
+/* Use tkill, if possible, in case we are using nptl threads.  If tkill
+   fails, then we are not using nptl threads and we should be using kill.  */
+
+#ifdef HAVE_TKILL_SYSCALL
+  if (!tkill_failed)
+    {
+      int ret = syscall (__NR_tkill, lwpid, signo);
+      if (errno != ENOSYS)
+	return ret;
+      errno = 0;
+      tkill_failed = 1;
+    }
+#endif
+
+  return kill (lwpid, signo);
+}
+
 /* Send a SIGSTOP to LP.  */
 
 static int
@@ -642,8 +598,15 @@ stop_callback (struct lwp_info *lp, void *data)
 			      "SC:  kill %s **<SIGSTOP>**\n",
 			      target_pid_to_str (lp->ptid));
 	}
-      ret = kill (GET_LWP (lp->ptid), SIGSTOP);
-      gdb_assert (ret == 0);
+      errno = 0;
+      ret = kill_lwp (GET_LWP (lp->ptid), SIGSTOP);
+      if (debug_lin_lwp)
+	{
+	  fprintf_unfiltered (gdb_stdlog,
+			      "SC:  lwp kill %d %s\n",
+			      ret,
+			      errno ? safe_strerror (errno) : "ERRNO-OK");
+	}
 
       lp->signalled = 1;
       gdb_assert (lp->status == 0);
@@ -667,11 +630,23 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 
       gdb_assert (lp->status == 0);
 
-      pid = waitpid (GET_LWP (lp->ptid), &status, lp->cloned ? __WCLONE : 0);
+      pid = waitpid (GET_LWP (lp->ptid), &status, 0);
       if (pid == -1 && errno == ECHILD)
-	/* OK, the proccess has disappeared.  We'll catch the actual
-	   exit event in lin_lwp_wait.  */
-	return 0;
+	{
+	  pid = waitpid (GET_LWP (lp->ptid), &status, __WCLONE);
+	  if (pid == -1 && errno == ECHILD)
+	    {
+	      /* The thread has previously exited.  We need to delete it now
+	         because in the case of nptl threads, there won't be an
+	         exit event unless it is the main thread.  */
+	      if (debug_lin_lwp)
+		fprintf_unfiltered (gdb_stdlog,
+				    "SWC: %s exited.\n",
+				    target_pid_to_str (lp->ptid));
+	      delete_lwp (lp->ptid);
+	      return 0;
+	    }
+	}
 
       gdb_assert (pid == GET_LWP (lp->ptid));
 
@@ -683,6 +658,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 			      status_to_str (status));
 	}
 
+      /* Check if the thread has exited.  */
       if (WIFEXITED (status) || WIFSIGNALED (status))
 	{
 	  gdb_assert (num_lwps > 1);
@@ -697,7 +673,31 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 				 target_pid_to_str (lp->ptid));
 	    }
 	  if (debug_lin_lwp)
-	    fprintf_unfiltered (gdb_stdlog, "SWC: %s exited.\n",
+	    fprintf_unfiltered (gdb_stdlog,
+				"SWC: %s exited.\n",
+				target_pid_to_str (lp->ptid));
+
+	  delete_lwp (lp->ptid);
+	  return 0;
+	}
+
+      /* Check if the current LWP has previously exited.  For nptl threads,
+         there is no exit signal issued for LWPs that are not the
+         main thread so we should check whenever the thread is stopped.  */
+      if (!lin_lwp_thread_alive (lp->ptid))
+	{
+	  if (in_thread_list (lp->ptid))
+	    {
+	      /* Core GDB cannot deal with us deleting the current
+	         thread.  */
+	      if (!ptid_equal (lp->ptid, inferior_ptid))
+		delete_thread (lp->ptid);
+	      printf_unfiltered ("[%s exited]\n",
+				 target_pid_to_str (lp->ptid));
+	    }
+	  if (debug_lin_lwp)
+	    fprintf_unfiltered (gdb_stdlog,
+				"SWC: %s already exited.\n",
 				target_pid_to_str (lp->ptid));
 
 	  delete_lwp (lp->ptid);
@@ -756,7 +756,14 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 	      /* If there's another event, throw it back into the queue. */
 	      if (lp->status)
 		{
-		  kill (GET_LWP (lp->ptid), WSTOPSIG (lp->status));
+		  if (debug_lin_lwp)
+		    {
+		      fprintf_unfiltered (gdb_stdlog,
+					  "SWC: kill %s, %s\n",
+					  target_pid_to_str (lp->ptid),
+					  status_to_str ((int) status));
+		    }
+		  kill_lwp (GET_LWP (lp->ptid), WSTOPSIG (lp->status));
 		}
 	      /* Save the sigtrap event. */
 	      lp->status = status;
@@ -800,7 +807,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 					  target_pid_to_str (lp->ptid),
 					  status_to_str ((int) status));
 		    }
-		  kill (GET_LWP (lp->ptid), WSTOPSIG (status));
+		  kill_lwp (GET_LWP (lp->ptid), WSTOPSIG (status));
 		}
 	      return 0;
 	    }
@@ -1027,6 +1034,23 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  save_errno = EINTR;
 	}
 
+      /* Check for stop events reported by a process we didn't already
+	 know about - in this case, anything other than inferior_ptid.
+
+	 If we're expecting to receive stopped processes after fork,
+	 vfork, and clone events, then we'll just add the new one to
+	 our list and go back to waiting for the event to be reported
+	 - the stopped process might be returned from waitpid before
+	 or after the event is.  If we want to handle debugging of
+	 CLONE_PTRACE processes we need to do more here, i.e. switch
+	 to multi-threaded mode.  */
+      if (pid != -1 && WIFSTOPPED (status) && WSTOPSIG (status) == SIGSTOP
+	  && pid != GET_PID (inferior_ptid))
+	{
+	  pid = -1;
+	  save_errno = EINTR;
+	}
+
       clear_sigio_trap ();
       clear_sigint_trap ();
     }
@@ -1048,6 +1072,25 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 }
 
 #endif
+
+/* Stop an active thread, verify it still exists, then resume it.  */
+
+static int
+stop_and_resume_callback (struct lwp_info *lp, void *data)
+{
+  struct lwp_info *ptr;
+
+  if (!lp->stopped && !lp->signalled)
+    {
+      stop_callback (lp, NULL);
+      stop_wait_callback (lp, NULL);
+      /* Resume if the lwp still exists.  */
+      for (ptr = lwp_list; ptr; ptr = ptr->next)
+	if (lp == ptr)
+	  resume_callback (lp, NULL);
+    }
+  return 0;
+}
 
 static ptid_t
 lin_lwp_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
@@ -1171,6 +1214,22 @@ retry:
 
 	  lp = find_lwp_pid (pid_to_ptid (lwpid));
 
+	  /* Check for stop events reported by a process we didn't
+	     already know about - anything not already in our LWP
+	     list.
+
+	     If we're expecting to receive stopped processes after
+	     fork, vfork, and clone events, then we'll just add the
+	     new one to our list and go back to waiting for the event
+	     to be reported - the stopped process might be returned
+	     from waitpid before or after the event is.  */
+	  if (WIFSTOPPED (status) && !lp)
+	    {
+	      linux_record_stopped_pid (lwpid);
+	      status = 0;
+	      continue;
+	    }
+
 	  /* Make sure we don't report an event for the exit of an LWP not in
 	     our list, i.e.  not part of the current process.  This can happen
 	     if we detach from a program we original forked and then it
@@ -1181,6 +1240,13 @@ retry:
 	      continue;
 	    }
 
+	  /* NOTE drow/2003-06-17: This code seems to be meant for debugging
+	     CLONE_PTRACE processes which do not use the thread library -
+	     otherwise we wouldn't find the new LWP this way.  That doesn't
+	     currently work, and the following code is currently unreachable
+	     due to the two blocks above.  If it's fixed some day, this code
+	     should be broken out into a function so that we can also pick up
+	     LWPs from the new interface.  */
 	  if (!lp)
 	    {
 	      lp = add_lwp (BUILD_LWP (lwpid, GET_PID (inferior_ptid)));
@@ -1206,10 +1272,61 @@ retry:
 		}
 	    }
 
-	  /* Make sure we don't report a TARGET_WAITKIND_EXITED or
-	     TARGET_WAITKIND_SIGNALLED event if there are still LWP's
-	     left in the process.  */
+	  /* Check if the thread has exited.  */
 	  if ((WIFEXITED (status) || WIFSIGNALED (status)) && num_lwps > 1)
+	    {
+	      if (in_thread_list (lp->ptid))
+		{
+		  /* Core GDB cannot deal with us deleting the current
+		     thread.  */
+		  if (!ptid_equal (lp->ptid, inferior_ptid))
+		    delete_thread (lp->ptid);
+		  printf_unfiltered ("[%s exited]\n",
+				     target_pid_to_str (lp->ptid));
+		}
+
+	      /* If this is the main thread, we must stop all threads and
+	         verify if they are still alive.  This is because in the nptl
+	         thread model, there is no signal issued for exiting LWPs
+	         other than the main thread.  We only get the main thread
+	         exit signal once all child threads have already exited.
+	         If we stop all the threads and use the stop_wait_callback
+	         to check if they have exited we can determine whether this
+	         signal should be ignored or whether it means the end of the
+	         debugged application, regardless of which threading model
+	         is being used.  */
+	      if (GET_PID (lp->ptid) == GET_LWP (lp->ptid))
+		{
+		  lp->stopped = 1;
+		  iterate_over_lwps (stop_and_resume_callback, NULL);
+		}
+
+	      if (debug_lin_lwp)
+		fprintf_unfiltered (gdb_stdlog,
+				    "LLW: %s exited.\n",
+				    target_pid_to_str (lp->ptid));
+
+	      delete_lwp (lp->ptid);
+
+	      /* If there is at least one more LWP, then the exit signal
+	         was not the end of the debugged application and should be
+	         ignored.  */
+	      if (num_lwps > 0)
+		{
+		  /* Make sure there is at least one thread running.  */
+		  gdb_assert (iterate_over_lwps (running_callback, NULL));
+
+		  /* Discard the event.  */
+		  status = 0;
+		  continue;
+		}
+	    }
+
+	  /* Check if the current LWP has previously exited.  In the nptl
+	     thread model, LWPs other than the main thread do not issue
+	     signals when they exit so we must check whenever the thread
+	     has stopped.  A similar check is made in stop_wait_callback().  */
+	  if (num_lwps > 1 && !lin_lwp_thread_alive (lp->ptid))
 	    {
 	      if (in_thread_list (lp->ptid))
 		{

@@ -36,6 +36,7 @@
 #include "dictionary.h"
 #include "block.h"
 #include "demangle.h"
+#include "dictionary.h"
 #include <ctype.h>
 
 struct type *java_int_type;
@@ -111,7 +112,8 @@ get_java_class_symtab (void)
 	 to delete this comment.  */
       class_symtab->free_code = free_nothing;
       bv = (struct blockvector *)
-	obstack_alloc (&objfile->symbol_obstack, sizeof (struct blockvector));
+	obstack_alloc (&objfile->symbol_obstack,
+		       sizeof (struct blockvector) + sizeof (struct block *));
       BLOCKVECTOR_NBLOCKS (bv) = 1;
       BLOCKVECTOR (class_symtab) = bv;
 
@@ -260,7 +262,7 @@ type_from_class (struct value *clas)
   char *nptr;
   CORE_ADDR addr;
   struct block *bl;
-  int i;
+  struct dict_iterator iter;
   int is_array = 0;
 
   type = check_typedef (VALUE_TYPE (clas));
@@ -275,9 +277,8 @@ type_from_class (struct value *clas)
 #if 0
   get_java_class_symtab ();
   bl = BLOCKVECTOR_BLOCK (BLOCKVECTOR (class_symtab), GLOBAL_BLOCK);
-  for (i = BLOCK_NSYMS (bl); --i >= 0;)
+  ALL_BLOCK_SYMBOLS (block, iter, sym)
     {
-      struct symbol *sym = BLOCK_SYM (bl, i);
       if (SYMBOL_VALUE_ADDRESS (sym) == addr)
 	return SYMBOL_TYPE (sym);
     }

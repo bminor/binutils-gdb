@@ -23,6 +23,47 @@
 #if !defined (FRAME_H)
 #define FRAME_H 1
 
+/* The following is the intended naming schema for frame functions.
+   It isn't 100% consistent, but it is aproaching that.  Frame naming
+   schema:
+
+   Prefixes:
+
+   get_frame_WHAT...(): Get WHAT from the THIS frame (functionaly
+   equivalent to THIS->next->unwind->what)
+
+   frame_unwind_WHAT...(): Unwind THIS frame's WHAT from the NEXT
+   frame.
+
+   put_frame_WHAT...(): Put a value into this frame (unsafe, need to
+   invalidate the frame / regcache afterwards) (better name more
+   strongly hinting at its unsafeness)
+
+   safe_....(): Safer version of various functions, doesn't throw an
+   error (leave this for later?).  Returns non-zero if the fetch
+   succeeds.   Return a freshly allocated error message?
+
+   Suffixes:
+
+   void /frame/_WHAT(): Read WHAT's value into the buffer parameter.
+
+   ULONGEST /frame/_WHAT_unsigned(): Return an unsigned value (the
+   alternative is *frame_unsigned_WHAT).
+
+   LONGEST /frame/_WHAT_signed(): Return WHAT signed value.
+
+   What:
+
+   /frame/_memory* (frame, coreaddr, len [, buf]): Extract/return
+   *memory.
+
+   /frame/_register* (frame, regnum [, buf]): extract/return register.
+
+   CORE_ADDR /frame/_{pc,sp,...} (frame): Resume address, innner most
+   stack *address, ...
+
+   */
+
 struct symtab_and_line;
 struct frame_unwind;
 struct frame_base;
@@ -154,6 +195,13 @@ extern void select_frame (struct frame_info *);
 extern struct frame_info *get_prev_frame (struct frame_info *);
 extern struct frame_info *get_next_frame (struct frame_info *);
 
+/* Given a FRAME, return the true next (more inner, younger) frame.
+   This one exposes the sentinel frame and, hence, never returns NULL.
+   It is here strictly to help old targets in their migration path to
+   the new frame code - the new code requires the NEXT, and not THIS
+   frame.  */
+extern struct frame_info *deprecated_get_next_frame_hack (struct frame_info *);
+
 /* Given a frame's ID, relocate the frame.  Returns NULL if the frame
    is not found.  */
 extern struct frame_info *frame_find_by_id (struct frame_id id);
@@ -165,6 +213,13 @@ extern struct frame_info *frame_find_by_id (struct frame_id id);
 
    This replaced: frame->pc; */
 extern CORE_ADDR get_frame_pc (struct frame_info *);
+
+/* The frame's inner-most bound.  AKA the stack-pointer.  Confusingly
+   known as top-of-stack.  */
+
+extern CORE_ADDR get_frame_sp (struct frame_info *);
+extern CORE_ADDR frame_sp_unwind (struct frame_info *);
+
 
 /* Following on from the `resume' address.  Return the entry point
    address of the function containing that resume address, or zero if
@@ -289,16 +344,31 @@ extern void frame_register_unwind (struct frame_info *frame, int regnum,
 				   CORE_ADDR *addrp, int *realnump,
 				   void *valuep);
 
-/* More convenient interface to frame_register_unwind().  */
-/* NOTE: cagney/2002-09-13: Return void as one day these functions may
-   be changed to return an indication that the read succeeded.  */
+/* Fetch a register from this, or unwind a register from the next
+   frame.  Note that the get_frame methods are wrappers to
+   frame->next->unwind.  They all [potentially] throw an error if the
+   fetch fails.  */
 
 extern void frame_unwind_register (struct frame_info *frame,
 				   int regnum, void *buf);
+extern void get_frame_register (struct frame_info *frame,
+				int regnum, void *buf);
 
+extern LONGEST frame_unwind_register_signed (struct frame_info *frame,
+					     int regnum);
+extern LONGEST get_frame_register_signed (struct frame_info *frame,
+					  int regnum);
+extern ULONGEST frame_unwind_register_unsigned (struct frame_info *frame,
+					       int regnum);
+extern ULONGEST get_frame_register_unsigned (struct frame_info *frame,
+					     int regnum);
+
+
+/* Use frame_unwind_register_signed.  */
 extern void frame_unwind_signed_register (struct frame_info *frame,
 					  int regnum, LONGEST *val);
 
+/* Use frame_unwind_register_signed.  */
 extern void frame_unwind_unsigned_register (struct frame_info *frame,
 					    int regnum, ULONGEST *val);
 
@@ -316,14 +386,23 @@ extern void frame_register (struct frame_info *frame, int regnum,
 /* NOTE: cagney/2002-09-13: Return void as one day these functions may
    be changed to return an indication that the read succeeded.  */
 
+/* Use get_frame_register.  */
 extern void frame_read_register (struct frame_info *frame, int regnum,
 				 void *buf);
 
+/* Use get_frame_register_signed.  */
 extern void frame_read_signed_register (struct frame_info *frame,
 					int regnum, LONGEST *val);
 
+/* Use get_frame_register_unsigned.  */
 extern void frame_read_unsigned_register (struct frame_info *frame,
 					  int regnum, ULONGEST *val);
+
+/* The reverse.  Store a register value relative to the specified
+   frame.  Note: this call makes the frame's state undefined.  The
+   register and frame caches must be flushed.  */
+extern void put_frame_register (struct frame_info *frame, int regnum,
+				const void *buf);
 
 /* Map between a frame register number and its name.  A frame register
    space is a superset of the cooked register space --- it also
@@ -342,6 +421,31 @@ extern CORE_ADDR frame_pc_unwind (struct frame_info *frame);
 /* Discard the specified frame.  Restoring the registers to the state
    of the caller.  */
 extern void frame_pop (struct frame_info *frame);
+
+/* Return memory from the specified frame.  A frame knows its thread /
+   LWP and hence can find its way down to a target.  The assumption
+   here is that the current and previous frame share a common address
+   space.
+
+   If the memory read fails, these methods throw an error.
+
+   NOTE: cagney/2003-06-03: Should there be unwind versions of these
+   methods?  That isn't clear.  Can code, for instance, assume that
+   this and the previous frame's memory or architecture are identical?
+   If architecture / memory changes are always separated by special
+   adaptor frames this should be ok.  */
+
+extern void get_frame_memory (struct frame_info *this_frame, CORE_ADDR addr,
+			      void *buf, int len);
+extern LONGEST get_frame_memory_signed (struct frame_info *this_frame,
+					CORE_ADDR memaddr, int len);
+extern ULONGEST get_frame_memory_unsigned (struct frame_info *this_frame,
+					   CORE_ADDR memaddr, int len);
+
+/* Return this frame's architecture.  */
+
+extern struct gdbarch *get_frame_arch (struct frame_info *this_frame);
+
 
 /* Values for the source flag to be used in print_frame_info_base(). */
 enum print_what
@@ -426,9 +530,6 @@ extern CORE_ADDR get_pc_function_start (CORE_ADDR);
 
 extern int frameless_look_for_prologue (struct frame_info *);
 
-extern void print_frame_args (struct symbol *, struct frame_info *,
-			      int, struct ui_file *);
-
 extern struct frame_info *find_relative_frame (struct frame_info *, int *);
 
 extern void show_and_print_stack_frame (struct frame_info *fi, int level,
@@ -463,19 +564,10 @@ extern int generic_pc_in_call_dummy (CORE_ADDR pc,
 
 extern char *deprecated_generic_find_dummy_frame (CORE_ADDR pc, CORE_ADDR fp);
 
-void generic_unwind_get_saved_register (char *raw_buffer,
-				        int *optimizedp,
-				        CORE_ADDR *addrp,
-				        struct frame_info *frame,
-				        int regnum,
-				        enum lval_type *lvalp);
 
-/* The function generic_get_saved_register() has been made obsolete.
-   DEPRECATED_GET_SAVED_REGISTER now defaults to the recursive
-   equivalent - generic_unwind_get_saved_register() - so there is no
-   need to even set DEPRECATED_GET_SAVED_REGISTER.  Architectures that
-   need to override the register unwind mechanism should modify
-   frame->unwind().  */
+/* The DEPRECATED_GET_SAVED_REGISTER architecture interface is
+   entirely redundant.  New architectures should implement per-frame
+   unwinders (ref "frame-unwind.h").  */
 extern void deprecated_generic_get_saved_register (char *, int *, CORE_ADDR *,
 						   struct frame_info *, int,
 						   enum lval_type *);

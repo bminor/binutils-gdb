@@ -267,18 +267,17 @@ extern CORE_ADDR sparc_skip_prologue (CORE_ADDR);
 /* Write into appropriate registers a function return value of type
    TYPE, given in virtual format.  */
 
-#define DEPRECATED_STORE_RETURN_VALUE(TYPE, VALBUF) \
-     sparc_store_return_value (TYPE, VALBUF)
-extern void sparc_store_return_value (struct type *, char *);
+#define STORE_RETURN_VALUE(TYPE, REGCACHE, VALBUF) \
+     sparc32_store_return_value (TYPE, REGCACHE, VALBUF)
+extern void sparc32_store_return_value (struct type *, struct regcache *,
+					const void *);
 
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value,
-   as a CORE_ADDR (or an expression that can be used as one).  */
+/* Extract from REGCACHE the address in which a function should return
+   its structure value.  */
 
-#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
-     sparc_extract_struct_value_address (REGBUF)
-
-extern CORE_ADDR sparc_extract_struct_value_address (char *);
+#define EXTRACT_STRUCT_VALUE_ADDRESS(REGCACHE) \
+     sparc_extract_struct_value_address (REGCACHE)
+extern CORE_ADDR sparc_extract_struct_value_address (struct regcache *);
 
 /* Stack must be aligned on 64-bit boundaries when synthesizing
    function calls (128-bit for sparc64).  */
@@ -442,16 +441,12 @@ extern CORE_ADDR sparc_frame_chain (struct frame_info *);
 extern CORE_ADDR sparc_frame_saved_pc (struct frame_info *);
 
 /* If the argument is on the stack, it will be here.  */
-#define FRAME_ARGS_ADDRESS(FI) (get_frame_base (FI))
+#define DEPRECATED_FRAME_ARGS_ADDRESS(FI) (get_frame_base (FI))
 
-#define FRAME_LOCALS_ADDRESS(FI) (get_frame_base (FI))
+#define DEPRECATED_FRAME_LOCALS_ADDRESS(FI) (get_frame_base (FI))
 
 /* Set VAL to the number of args passed to frame described by FI.
    Can set VAL to -1, meaning no way to tell.  */
-
-/* We can't tell how many args there are
-   now that the C compiler delays popping them.  */
-#define FRAME_NUM_ARGS(FI) (-1)
 
 /* Return number of bytes at start of arglist that are not really args.  */
 
@@ -668,9 +663,10 @@ extern CORE_ADDR sparc32_push_arguments (int, struct value **, CORE_ADDR, int,
    function return value of type TYPE, and copy that, in virtual
    format, into VALBUF.  */
 
-#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
-     sparc32_extract_return_value (TYPE, REGBUF, VALBUF)
-extern void sparc32_extract_return_value (struct type *, char[], char *);
+#define EXTRACT_RETURN_VALUE(TYPE, REGCACHE, VALBUF) \
+     sparc32_extract_return_value (TYPE, REGCACHE, VALBUF)
+extern void sparc32_extract_return_value (struct type *, struct regcache *,
+					  void *valbuf);
 
 #endif /* GDB_MULTI_ARCH */
 

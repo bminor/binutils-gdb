@@ -54,43 +54,49 @@ if ![runto_main] then {
 
 #
 
-proc check_set { t old new add } {
+proc check_set { t l r new add } {
     global gdb_prompt
     gdb_test "tbreak wack_${t}"
-    gdb_test "continue" "register ${t} l = u;" "continue set ${t}"
-    gdb_test "next" "l = add_${t} .l, v.;" "next ${t}"
-    gdb_test "print l" " = ${old}" "print old ${t}"
+    gdb_test "continue" "register ${t} l = u, r = v;" "continue to wack_${t}"
+    gdb_test "next" "l = add_${t} .l, r.;" "next ${t}"
+    gdb_test "print l" " = ${l}" "print old l - ${t}"
+    gdb_test "print r" " = ${r}" "print old r - ${t}"
     gdb_test "set variable l = 4"
-    gdb_test "print l" " = ${new}" "print new ${t}"
+    gdb_test "print l" " = ${new}" "print new l - ${t}"
     gdb_test "next" "return l;"
-    gdb_test "print l" " = ${add}" "print add ${t}"
+    gdb_test "print l" " = ${add}" "print add  - ${t}"
 }
 
-check_set "char" "1 ..001." "4 ..004." "6 ..006."
-check_set "short" "1" "4" "6"
-check_set "int" "1" "4" "6"
-check_set "long" "1" "4" "6"
-check_set "float" "1" "4" "6"
-check_set "double" "1" "4" "6"
+check_set "char" "-1 .*" "-2 .*" "4 ..004." "2 ..002."
+check_set "short" "-1" "-2" "4" "2"
+check_set "int" "-1" "-2" "4" "2"
+check_set "long" "-1" "-2" "4" "2"
+check_set "longest" "-1" "-2" "4" "2"
+check_set "float" "-1" "-2" "4" "2"
+check_set "double" "-1" "-2" "4" "2"
+check_set "doublest" "-1" "-2" "4" "2"
 
 #
 
-proc up_set { t old new } {
+proc up_set { t l r new } {
     global gdb_prompt
     gdb_test "tbreak add_${t}"
-    gdb_test "continue" "return u . v;" "continue up ${t}"
-    gdb_test "up" "l = add_${t} .l, v.;" "up ${t}"
-    gdb_test "print l" " = ${old}" "print old up ${t}"
+    gdb_test "continue" "return u . v;" "continue to add_${t}"
+    gdb_test "up" "l = add_${t} .l, r.;" "up ${t}"
+    gdb_test "print l" " = ${l}" "up print old l - ${t}"
+    gdb_test "print r" " = ${r}" "up print old r - ${t}"
     gdb_test "set variable l = 4"
-    gdb_test "print l" " = ${new}" "print new up ${t}"
+    gdb_test "print l" " = ${new}" "up print new l - ${t}"
 }
 
-up_set "char" "1 ..001." "4 ..004."
-up_set "short" "1" "4"
-up_set "int" "1" "4"
-up_set "long" "1" "4"
-up_set "float" "1" "4"
-up_set "double" "1" "4"
+up_set "char" "-1 .*" "-2 .*" "4 ..004."
+up_set "short" "-1" "-2" "4"
+up_set "int" "-1" "-2" "4"
+up_set "long" "-1" "-2" "4"
+up_set "longest" "-1" "-2" "4"
+up_set "float" "-1" "-2" "4"
+up_set "double" "-1" "-2" "4"
+up_set "doublest" "-1" "-2" "4"
 
 #
 
@@ -133,7 +139,11 @@ proc check_field { t } {
     gdb_test "tbreak wack_field_${t}"
     gdb_test "continue" "register struct f_${t} u = f_${t};" \
 	    "continue field ${t}"
-    gdb_test "next" "return u;" "next field ${t}"
+
+    # Match either the return statement, or the line immediatly after
+    # it.  The compiler can end up merging the return statement into
+    # the return instruction.
+    gdb_test "next" "(return u;|\})" "next field ${t}"
 
     gdb_test "print u" " = {i = 1, j = 1, k = 1}" "old field ${t}"
     gdb_test "set variable u = F_${t}"

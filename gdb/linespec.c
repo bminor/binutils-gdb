@@ -35,6 +35,7 @@
 #include "block.h"
 #include "objc-lang.h"
 #include "cp-support.h"
+#include "linespec.h"
 
 /* Prototypes for local functions.  */
 
@@ -327,8 +328,6 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
   return decode_variable (argptr, funfirstline, canonical, is_quoted,
 			  is_objc_method, paren_pointer, file_symtab);
 }
-
-
 
 /* Now, the helper functions.  */
 

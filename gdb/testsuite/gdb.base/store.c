@@ -31,6 +31,14 @@ add_long (register long u, register long v)
   return u + v;
 }
 
+typedef long long longest;
+
+longest
+add_longest (register longest u, register longest v)
+{
+  return u + v;
+}
+
 float
 add_float (register float u, register float v)
 {
@@ -43,55 +51,81 @@ add_double (register double u, register double v)
   return u + v;
 }
 
+typedef long double doublest;
+
+doublest
+add_doublest (register doublest u, register doublest v)
+{
+  return u + v;
+}
+
 /* */
 
 char
 wack_char (register char u, register char v)
 {
-  register char l = u;
-  l = add_char (l, v);
+  register char l = u, r = v;
+  l = add_char (l, r);
   return l;
 }
 
 short
 wack_short (register short u, register short v)
 {
-  register short l = u;
-  l = add_short (l, v);
+  register short l = u, r = v;
+  l = add_short (l, r);
   return l;
 }
 
 int
 wack_int (register int u, register int v)
 {
-  register int l = u;
-  l = add_int (l, v);
+  register int l = u, r = v;
+  l = add_int (l, r);
   return l;
 }
 
 long
 wack_long (register long u, register long v)
 {
-  register long l = u;
-  l = add_long (l, v);
+  register long l = u, r = v;
+  l = add_long (l, r);
+  return l;
+}
+
+long
+wack_longest (register longest u, register longest v)
+{
+  register longest l = u, r = v;
+  l = add_longest (l, r);
   return l;
 }
 
 float
 wack_float (register float u, register float v)
 {
-  register float l = u;
-  l = add_float (l, v);
+  register float l = u, r = v;
+  l = add_float (l, r);
   return l;
 }
 
 double
 wack_double (register double u, register double v)
 {
-  register double l = u;
-  l = add_double (l, v);
+  register double l = u, r = v;
+  l = add_double (l, r);
   return l;
 }
+
+doublest
+wack_doublest (register doublest u, register doublest v)
+{
+  register doublest l = u, r = v;
+  l = add_doublest (l, r);
+  return l;
+}
+
+/* */
 
 struct s_1 { short s[1]; } z_1, s_1;
 struct s_2 { short s[2]; } z_2, s_2;
@@ -219,20 +253,24 @@ int
 main ()
 {
   /* These calls are for current frame test.  */
-  wack_char (1, 2);
-  wack_short (1, 2);
-  wack_int (1, 2);
-  wack_long (1, 2);
-  wack_float (1, 2);
-  wack_double (1, 2);
+  wack_char (-1, -2);
+  wack_short (-1, -2);
+  wack_int (-1, -2);
+  wack_long (-1, -2);
+  wack_longest (-1, -2);
+  wack_float (-1, -2);
+  wack_double (-1, -2);
+  wack_doublest (-1, -2);
 
   /* These calls are for up frame.  */
-  wack_char (1, 2);
-  wack_short (1, 2);
-  wack_int (1, 2);
-  wack_long (1, 2);
-  wack_float (1, 2);
-  wack_double (1, 2);
+  wack_char (-1, -2);
+  wack_short (-1, -2);
+  wack_int (-1, -2);
+  wack_long (-1, -2);
+  wack_longest (-1, -2);
+  wack_float (-1, -2);
+  wack_double (-1, -2);
+  wack_doublest (-1, -2);
 
   /* These calls are for current frame test.  */
   wack_struct_1 ();

@@ -230,6 +230,16 @@ rs6000_saved_pc_after_call (struct frame_info *fi)
   return read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum);
 }
 
+/* Get the ith function argument for the current function.  */
+static CORE_ADDR
+rs6000_fetch_pointer_argument (struct frame_info *frame, int argi, 
+			       struct type *type)
+{
+  CORE_ADDR addr;
+  frame_read_register (frame, 3 + argi, &addr);
+  return addr;
+}
+
 /* Calculate the destination of a branch/jump.  Return -1 if not a branch.  */
 
 static CORE_ADDR
@@ -526,13 +536,13 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 
       if ((op & 0xfc1fffff) == 0x7c0802a6)
 	{			/* mflr Rx */
-	  lr_reg = (op & 0x03e00000) | 0x90010000;
+	  lr_reg = (op & 0x03e00000);
 	  continue;
 
 	}
       else if ((op & 0xfc1fffff) == 0x7c000026)
 	{			/* mfcr Rx */
-	  cr_reg = (op & 0x03e00000) | 0x90010000;
+	  cr_reg = (op & 0x03e00000);
 	  continue;
 
 	}
@@ -558,7 +568,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	    {
 	      fdata->saved_gpr = reg;
 	      if ((op & 0xfc1f0003) == 0xf8010000)
-		op = (op >> 1) << 1;
+		op &= ~3UL;
 	      fdata->gpr_offset = SIGNED_SHORT (op) + offset;
 	    }
 	  continue;
@@ -590,20 +600,42 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	  continue;
 
 	}
-      else if (lr_reg != -1 && (op & 0xffff0000) == lr_reg)
-	{			/* st Rx,NUM(r1) 
-				   where Rx == lr */
-	  fdata->lr_offset = SIGNED_SHORT (op) + offset;
+      else if (lr_reg != -1 &&
+	       /* std Rx, NUM(r1) || stdu Rx, NUM(r1) */
+	       (((op & 0xffff0000) == (lr_reg | 0xf8010000)) ||
+		/* stw Rx, NUM(r1) */
+		((op & 0xffff0000) == (lr_reg | 0x90010000)) ||
+		/* stwu Rx, NUM(r1) */
+		((op & 0xffff0000) == (lr_reg | 0x94010000))))
+	{	/* where Rx == lr */
+	  fdata->lr_offset = offset;
 	  fdata->nosavedpc = 0;
 	  lr_reg = 0;
+	  if ((op & 0xfc000003) == 0xf8000000 ||	/* std */
+	      (op & 0xfc000000) == 0x90000000)		/* stw */
+	    {
+	      /* Does not update r1, so add displacement to lr_offset.  */
+	      fdata->lr_offset += SIGNED_SHORT (op);
+	    }
 	  continue;
 
 	}
-      else if (cr_reg != -1 && (op & 0xffff0000) == cr_reg)
-	{			/* st Rx,NUM(r1) 
-				   where Rx == cr */
-	  fdata->cr_offset = SIGNED_SHORT (op) + offset;
+      else if (cr_reg != -1 &&
+	       /* std Rx, NUM(r1) || stdu Rx, NUM(r1) */
+	       (((op & 0xffff0000) == (cr_reg | 0xf8010000)) ||
+		/* stw Rx, NUM(r1) */
+		((op & 0xffff0000) == (cr_reg | 0x90010000)) ||
+		/* stwu Rx, NUM(r1) */
+		((op & 0xffff0000) == (cr_reg | 0x94010000))))
+	{	/* where Rx == cr */
+	  fdata->cr_offset = offset;
 	  cr_reg = 0;
+	  if ((op & 0xfc000003) == 0xf8000000 ||
+	      (op & 0xfc000000) == 0x90000000)
+	    {
+	      /* Does not update r1, so add displacement to cr_offset.  */
+	      fdata->cr_offset += SIGNED_SHORT (op);
+	    }
 	  continue;
 
 	}
@@ -647,30 +679,41 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 				   this branch */
 	  continue;
 
-	  /* update stack pointer */
 	}
-      else if ((op & 0xffff0000) == 0x94210000 ||	/* stu r1,NUM(r1) */
-	       (op & 0xffff0003) == 0xf8210001)		/* stdu r1,NUM(r1) */
-	{
+      /* update stack pointer */
+      else if ((op & 0xfc1f0000) == 0x94010000)
+	{		/* stu rX,NUM(r1) ||  stwu rX,NUM(r1) */
 	  fdata->frameless = 0;
-	  if ((op & 0xffff0003) == 0xf8210001)
-	    op = (op >> 1) << 1;
 	  fdata->offset = SIGNED_SHORT (op);
 	  offset = fdata->offset;
 	  continue;
-
 	}
-      else if (op == 0x7c21016e)
-	{			/* stwux 1,1,0 */
+      else if ((op & 0xfc1f016a) == 0x7c01016e)
+	{			/* stwux rX,r1,rY */
+	  /* no way to figure out what r1 is going to be */
 	  fdata->frameless = 0;
 	  offset = fdata->offset;
 	  continue;
-
-	  /* Load up minimal toc pointer */
 	}
-      else if ((op >> 22) == 0x20f
+      else if ((op & 0xfc1f0003) == 0xf8010001)
+	{			/* stdu rX,NUM(r1) */
+	  fdata->frameless = 0;
+	  fdata->offset = SIGNED_SHORT (op & ~3UL);
+	  offset = fdata->offset;
+	  continue;
+	}
+      else if ((op & 0xfc1f016a) == 0x7c01016a)
+	{			/* stdux rX,r1,rY */
+	  /* no way to figure out what r1 is going to be */
+	  fdata->frameless = 0;
+	  offset = fdata->offset;
+	  continue;
+	}
+      /* Load up minimal toc pointer */
+      else if (((op >> 22) == 0x20f	||	/* l r31,... or l r30,... */
+	       (op >> 22) == 0x3af)		/* ld r31,... or ld r30,... */
 	       && !minimal_toc_loaded)
-	{			/* l r31,... or l r30,... */
+	{
 	  minimal_toc_loaded = 1;
 	  continue;
 
@@ -1851,6 +1894,10 @@ rs6000_register_virtual_type (int n)
       int size = regsize (reg, tdep->wordsize);
       switch (size)
 	{
+	case 0:
+	  return builtin_type_int0;
+	case 4:
+	  return builtin_type_int32;
 	case 8:
 	  if (tdep->ppc_ev0_regnum <= n && n <= tdep->ppc_ev31_regnum)
 	    return builtin_type_vec64;
@@ -1861,8 +1908,8 @@ rs6000_register_virtual_type (int n)
 	  return builtin_type_vec128;
 	  break;
 	default:
-	  return builtin_type_int32;
-	  break;
+	  internal_error (__FILE__, __LINE__, "Register %d size %d unknown",
+			  n, size);
 	}
     }
 }
@@ -1901,7 +1948,7 @@ rs6000_register_convert_to_virtual (int n, struct type *type,
 
 static void
 rs6000_register_convert_to_raw (struct type *type, int n,
-				char *from, char *to)
+				const char *from, char *to)
 {
   if (TYPE_LENGTH (type) != REGISTER_RAW_SIZE (n))
     {
@@ -2121,7 +2168,7 @@ rs6000_create_inferior (int pid)
 /* Return real function address if ADDR (a function pointer) is in the data
    space and is therefore a special function pointer.  */
 
-CORE_ADDR
+static CORE_ADDR
 rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
 {
   struct obj_section *s;
@@ -2867,22 +2914,20 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     set_gdbarch_print_insn (gdbarch, gdb_print_insn_powerpc);
 
-  set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-  set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
-  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
   set_gdbarch_num_regs (gdbarch, v->nregs);
   set_gdbarch_num_pseudo_regs (gdbarch, v->npregs);
   set_gdbarch_register_name (gdbarch, rs6000_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, wordsize);
   set_gdbarch_deprecated_register_bytes (gdbarch, off);
-  set_gdbarch_register_byte (gdbarch, rs6000_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, rs6000_register_raw_size);
+  set_gdbarch_deprecated_register_byte (gdbarch, rs6000_register_byte);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, rs6000_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 16);
-  set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, generic_register_size);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 16);
-  set_gdbarch_register_virtual_type (gdbarch, rs6000_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, rs6000_register_virtual_type);
 
   set_gdbarch_ptr_bit (gdbarch, wordsize * TARGET_CHAR_BIT);
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
@@ -2899,13 +2944,13 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_deprecated_fix_call_dummy (gdbarch, rs6000_fix_call_dummy);
   set_gdbarch_frame_align (gdbarch, rs6000_frame_align);
-  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+  set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_deprecated_push_return_address (gdbarch, ppc_push_return_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
-  set_gdbarch_register_convertible (gdbarch, rs6000_register_convertible);
-  set_gdbarch_register_convert_to_virtual (gdbarch, rs6000_register_convert_to_virtual);
-  set_gdbarch_register_convert_to_raw (gdbarch, rs6000_register_convert_to_raw);
+  set_gdbarch_deprecated_register_convertible (gdbarch, rs6000_register_convertible);
+  set_gdbarch_deprecated_register_convert_to_virtual (gdbarch, rs6000_register_convert_to_virtual);
+  set_gdbarch_deprecated_register_convert_to_raw (gdbarch, rs6000_register_convert_to_raw);
   set_gdbarch_stab_reg_to_regnum (gdbarch, rs6000_stab_reg_to_regnum);
   /* Note: kevinb/2002-04-12: I'm not convinced that rs6000_push_arguments()
      is correct for the SysV ABI when the wordsize is 8, but I'm also
@@ -2954,13 +2999,12 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_convert_from_func_ptr_addr (gdbarch,
 	rs6000_convert_from_func_ptr_addr);
     }
-  set_gdbarch_frame_args_address (gdbarch, rs6000_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, rs6000_frame_args_address);
+  set_gdbarch_deprecated_frame_args_address (gdbarch, rs6000_frame_args_address);
+  set_gdbarch_deprecated_frame_locals_address (gdbarch, rs6000_frame_args_address);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, rs6000_saved_pc_after_call);
 
-  /* We can't tell how many args there are
-     now that the C compiler delays popping them.  */
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
+  /* Helpers for function argument information.  */
+  set_gdbarch_fetch_pointer_argument (gdbarch, rs6000_fetch_pointer_argument);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
@@ -2988,6 +3032,8 @@ rs6000_info_powerpc_command (char *args, int from_tty)
 }
 
 /* Initialization code.  */
+
+extern initialize_file_ftype _initialize_rs6000_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_rs6000_tdep (void)

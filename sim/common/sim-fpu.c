@@ -2,7 +2,7 @@
    of the floating point routines in libgcc1.c for targets without
    hardware floating point.  */
 
-/* Copyright (C) 1994,1997-1998 Free Software Foundation, Inc.
+/* Copyright 1994, 1997, 1998, 2003 Free Software Foundation, Inc.
 
 This file is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
@@ -2187,6 +2187,22 @@ sim_fpu_exp (const sim_fpu *d)
   return d->normal_exp;
 }
 
+
+INLINE_SIM_FPU (unsigned64)
+sim_fpu_fraction (const sim_fpu *d)
+{
+  return d->fraction;
+}
+
+
+INLINE_SIM_FPU (unsigned64)
+sim_fpu_guard (const sim_fpu *d, int is_double)
+{
+  unsigned64 rv;
+  unsigned64 guardmask = LSMASK64 (NR_GUARDS - 1, 0);
+  rv = (d->fraction & guardmask) >> NR_PAD;
+  return rv;
+}
 
 
 INLINE_SIM_FPU (int)

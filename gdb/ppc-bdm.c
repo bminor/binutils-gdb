@@ -346,6 +346,8 @@ a wiggler, specify wiggler and then the port it is connected to\n\
   bdm_ppc_ops.to_magic = OPS_MAGIC;
 }				/* init_bdm_ppc_ops */
 
+extern initialize_file_ftype _initialize_bdm_ppc; /* -Wmissing-prototypes */
+
 void
 _initialize_bdm_ppc (void)
 {

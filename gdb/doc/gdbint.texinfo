@@ -3012,24 +3012,26 @@ Similar to BREAKPOINT, but used for bi-endian targets.
 @code{BIG_BREAKPOINT} and @code{LITTLE_BREAKPOINT} have been deprecated in
 favor of @code{BREAKPOINT_FROM_PC}.
 
-@item REMOTE_BREAKPOINT
-@itemx LITTLE_REMOTE_BREAKPOINT
-@itemx BIG_REMOTE_BREAKPOINT
-@findex BIG_REMOTE_BREAKPOINT
-@findex LITTLE_REMOTE_BREAKPOINT
-@findex REMOTE_BREAKPOINT
-Similar to BREAKPOINT, but used for remote targets.
-
-@code{BIG_REMOTE_BREAKPOINT} and @code{LITTLE_REMOTE_BREAKPOINT} have been
-deprecated in favor of @code{BREAKPOINT_FROM_PC}.
+@item DEPRECATED_REMOTE_BREAKPOINT
+@itemx DEPRECATED_LITTLE_REMOTE_BREAKPOINT
+@itemx DEPRECATED_BIG_REMOTE_BREAKPOINT
+@findex DEPRECATED_BIG_REMOTE_BREAKPOINT
+@findex DEPRECATED_LITTLE_REMOTE_BREAKPOINT
+@findex DEPRECATED_REMOTE_BREAKPOINT
+Specify the breakpoint instruction sequence for a remote target.
+@code{DEPRECATED_REMOTE_BREAKPOINT},
+@code{DEPRECATED_BIG_REMOTE_BREAKPOINT} and
+@code{DEPRECATED_LITTLE_REMOTE_BREAKPOINT} have been deprecated in
+favor of @code{BREAKPOINT_FROM_PC} (@pxref{BREAKPOINT_FROM_PC}).
 
 @item BREAKPOINT_FROM_PC (@var{pcptr}, @var{lenptr})
 @findex BREAKPOINT_FROM_PC
-Use the program counter to determine the contents and size of a
-breakpoint instruction.  It returns a pointer to a string of bytes
-that encode a breakpoint instruction, stores the length of the string
-to *@var{lenptr}, and adjusts pc (if necessary) to point to the actual
-memory location where the breakpoint should be inserted.
+@anchor{BREAKPOINT_FROM_PC} Use the program counter to determine the
+contents and size of a breakpoint instruction.  It returns a pointer to
+a string of bytes that encode a breakpoint instruction, stores the
+length of the string to @code{*@var{lenptr}}, and adjusts the program
+counter (if necessary) to point to the actual memory location where the
+breakpoint should be inserted.
 
 Although it is common to use a trap instruction for a breakpoint, it's
 not required; for instance, the bit pattern could be an invalid
@@ -3233,10 +3235,6 @@ the direction of stack growth.
 
 By default, no frame based stack alignment is performed.
 
-@item FRAME_ARGS_ADDRESS_CORRECT
-@findex FRAME_ARGS_ADDRESS_CORRECT
-See @file{stack.c}.
-
 @item DEPRECATED_FRAME_CHAIN(@var{frame})
 @findex DEPRECATED_FRAME_CHAIN
 Given @var{frame}, return a pointer to the calling frame.
@@ -3290,6 +3288,23 @@ return d10v_make_iaddr (pc);
 
 @noindent
 @xref{DEPRECATED_FRAME_SAVED_PC}, which this method replaces.
+
+@item CORE_ADDR unwind_sp (struct frame_info *@var{this_frame})
+@findex unwind_sp
+@anchor{unwind_sp} Return the frame's inner most stack address.  This is
+commonly refered to as the frame's @dfn{stack pointer}.
+
+The implementation, which must be frame agnostic (work with any frame),
+is typically no more than:
+
+@smallexample
+ULONGEST sp;
+frame_unwind_unsigned_register (this_frame, D10V_SP_REGNUM, &sp);
+return d10v_make_daddr (sp);
+@end smallexample
+
+@noindent
+@xref{TARGET_READ_SP}, which this method replaces.
 
 @item FUNCTION_EPILOGUE_SIZE
 @findex FUNCTION_EPILOGUE_SIZE
@@ -3678,14 +3693,13 @@ definition is only used in generic code when parsing "$ps".)
 If defined, used by @code{frame_pop} to remove a stack frame.  This
 method has been superseeded by generic code.
 
-@item push_dummy_call (@var{gdbarch}, @var{regcache}, @var{dummy_addr}, @var{nargs}, @var{args}, @var{sp}, @var{struct_return}, @var{struct_addr})
+@item push_dummy_call (@var{gdbarch}, @var{func_addr}, @var{regcache}, @var{pc_addr}, @var{nargs}, @var{args}, @var{sp}, @var{struct_return}, @var{struct_addr})
 @findex push_dummy_call
 @findex DEPRECATED_PUSH_ARGUMENTS.
-@anchor{push_dummy_call}
-Define this to push the dummy frame's call to the inferior function onto
-the stack.  In addition to pushing @var{nargs}, the code should push
-@var{struct_addr} (when @var{struct_return}), and the return value (in
-the call dummy at @var{dummy_addr}).
+@anchor{push_dummy_call} Define this to push the dummy frame's call to
+the inferior function onto the stack.  In addition to pushing
+@var{nargs}, the code should push @var{struct_addr} (when
+@var{struct_return}), and the return address (@var{bp_addr}).
 
 Returns the updated top-of-stack pointer.
 
@@ -3891,14 +3905,16 @@ Number of bits in a short integer; defaults to @code{2 * TARGET_CHAR_BIT}.
 @findex write_pc
 @findex read_sp
 @findex read_fp
-These change the behavior of @code{read_pc}, @code{write_pc},
-@code{read_sp} and @code{deprecated_read_fp}.  For most targets, these
-may be left undefined.  @value{GDBN} will call the read and write
-register functions with the relevant @code{_REGNUM} argument.
+@anchor{TARGET_READ_SP} These change the behavior of @code{read_pc},
+@code{write_pc}, @code{read_sp} and @code{deprecated_read_fp}.  For most
+targets, these may be left undefined.  @value{GDBN} will call the read
+and write register functions with the relevant @code{_REGNUM} argument.
 
 These macros are useful when a target keeps one of these registers in a
 hard to get at place; for example, part in a segment register and part
 in an ordinary register.
+
+@xref{unwind_sp}, which replaces @code{TARGET_READ_SP}.
 
 @item TARGET_VIRTUAL_FRAME_POINTER(@var{pc}, @var{regp}, @var{offsetp})
 @findex TARGET_VIRTUAL_FRAME_POINTER
@@ -4477,23 +4493,6 @@ root directory.
 @findex ONE_PROCESS_WRITETEXT
 Define this to be able to, when a breakpoint insertion fails, warn the
 user that another process may be running with the same executable.
-
-@item PREPARE_TO_PROCEED (@var{select_it})
-@findex PREPARE_TO_PROCEED
-This (ugly) macro allows a native configuration to customize the way the
-@code{proceed} function in @file{infrun.c} deals with switching between
-threads.
-
-In a multi-threaded task we may select another thread and then continue
-or step.  But if the old thread was stopped at a breakpoint, it will
-immediately cause another breakpoint stop without any execution (i.e. it
-will report a breakpoint hit incorrectly).  So @value{GDBN} must step over it
-first.
-
-If defined, @code{PREPARE_TO_PROCEED} should check the current thread
-against the thread that reported the most recent event.  If a step-over
-is required, it returns TRUE.  If @var{select_it} is non-zero, it should
-reselect the old thread.
 
 @item PROC_NAME_FMT
 @findex PROC_NAME_FMT
@@ -5192,7 +5191,11 @@ of @value{GDBN}) must be added to @file{gdb/config/djgpp/fnchange.lst}.
 
 When @value{GDBN} has a local version of a system header file (ex
 @file{string.h}) the file name based on the POSIX header prefixed with
-@file{gdb_} (@file{gdb_string.h}).
+@file{gdb_} (@file{gdb_string.h}).  These headers should be relatively
+independent: they should use only macros defined by @file{configure},
+the compiler, or the host; they should include only system headers; they
+should refer only to system types.  They may be shared between multiple
+programs, e.g.@: @value{GDBN} and @sc{gdbserver}.
 
 For other files @samp{-} is used as the separator.
 

@@ -309,12 +309,12 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	      TYPE_FIELDS (ftype) = (struct field *)
 		TYPE_ALLOC (ftype, nparams * sizeof (struct field));
 
-	      for (sym = dict_iterator_first (BLOCK_DICT (block), &iter),
-		     iparams = 0;
-		   iparams < nparams;
-		   sym = dict_iterator_next (&iter))
+	      iparams = 0;
+	      ALL_BLOCK_SYMBOLS (block, iter, sym)
 		{
-		  gdb_assert (sym != NULL);
+		  if (iparams == nparams)
+		    break;
+
 		  switch (SYMBOL_CLASS (sym))
 		    {
 		    case LOC_ARG:
@@ -438,6 +438,7 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 
   record_pending_block (objfile, block, opblock);
 }
+
 
 /* Record BLOCK on the list of all blocks in the file.  Put it after
    OPBLOCK, or at the beginning if opblock is NULL.  This puts the

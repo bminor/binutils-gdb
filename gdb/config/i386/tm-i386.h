@@ -24,8 +24,4 @@
 
 #define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
 
-/* FIXME: kettenis/2000-06-12: These do not belong here.  */
-extern void print_387_control_word (unsigned int);
-extern void print_387_status_word (unsigned int);
-
 #endif /* ifndef TM_I386_H */

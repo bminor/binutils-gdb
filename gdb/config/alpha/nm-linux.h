@@ -45,6 +45,9 @@
    pointer to the first register.  */
 #define ALPHA_REGSET_BASE(regsetp)  ((long *) (regsetp))
 
+/* Given a pointer to a gregset_t, locate the UNIQUE value.  */
+#define ALPHA_REGSET_UNIQUE(regsetp)  ((long *)(regsetp) + 32)
+
 /* The address of UNIQUE for ptrace.  */
 #define ALPHA_UNIQUE_PTRACE_ADDR 65
 

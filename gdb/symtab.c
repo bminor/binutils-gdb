@@ -47,6 +47,7 @@
 
 #include "gdb_obstack.h"
 #include "block.h"
+#include "dictionary.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -78,11 +79,6 @@ static int find_line_common (struct linetable *, int, int *);
 /* This one is used by linespec.c */
 
 char *operator_chars (char *p, char **end);
-
-static struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
-						     const char *,
-						     const char *, int,
-						     domain_enum);
 
 static struct symbol *lookup_symbol_aux (const char *name,
 					 const char *linkage_name,
@@ -137,17 +133,6 @@ static void print_symbol_info (domain_enum,
 static void print_msymbol_info (struct minimal_symbol *);
 
 static void symtab_symbol_info (char *, domain_enum, int);
-
-static void overload_list_add_symbol (struct symbol *sym,
-				      const char *oload_name);
-
-static void make_symbol_overload_list_using (const char *func_name,
-					     const char *namespace,
-					     const struct block *block);
-
-static void make_symbol_overload_list_qualified (const char *func_name);
-
-static void read_in_psymtabs (const char *oload_name);
 
 void _initialize_symtab (void);
 
@@ -1226,7 +1211,7 @@ lookup_symbol_aux_minsyms (const char *name,
 	      bv = BLOCKVECTOR (s);
 	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 
-	      /* This call used to pass `DEPRECATED_SYMBOL_NAME (msymbol)' as the
+	      /* This call used to pass `SYMBOL_LINKAGE_NAME (msymbol)' as the
 	         `name' argument to lookup_block_symbol.  But the name
 	         of a minimal symbol is always mangled, so that seems
 	         to be clearly the wrong thing to pass as the
@@ -1494,7 +1479,7 @@ lookup_symbol_global (const char *name,
    linkage name matches it.  Check the global symbols if GLOBAL, the
    static symbols if not */
 
-static struct partial_symbol *
+struct partial_symbol *
 lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 		       const char *linkage_name, int global,
 		       domain_enum domain)
@@ -1770,10 +1755,11 @@ lookup_block_symbol (register const struct block *block, const char *name,
   if (!BLOCK_FUNCTION (block))
     {
       for (sym = dict_iter_name_first (BLOCK_DICT (block), name, &iter);
-	   sym; sym = dict_iter_name_next (name, &iter))
+	   sym != NULL;
+	   sym = dict_iter_name_next (name, &iter))
 	{
 	  if (SYMBOL_DOMAIN (sym) == domain
-	      && (linkage_name
+	      && (linkage_name != NULL
 		  ? strcmp (SYMBOL_LINKAGE_NAME (sym), linkage_name) == 0 : 1))
 	    return sym;
 	}
@@ -1782,20 +1768,20 @@ lookup_block_symbol (register const struct block *block, const char *name,
   else
     {
       /* Note that parameter symbols do not always show up last in the
-         list.  This loop makes sure to take anything else other than
-         parameter symbols first; it only uses parameter symbols as a
-         last resort.  Note that this only takes up extra computation
-         time on a match.  */
+	 list; this loop makes sure to take anything else other than
+	 parameter symbols first; it only uses parameter symbols as a
+	 last resort.  Note that this only takes up extra computation
+	 time on a match.  */
 
       struct symbol *sym_found = NULL;
 
       for (sym = dict_iter_name_first (BLOCK_DICT (block), name, &iter);
-	   sym; sym = dict_iter_name_next (name, &iter))
+	   sym != NULL;
+	   sym = dict_iter_name_next (name, &iter))
 	{
 	  if (SYMBOL_DOMAIN (sym) == domain
-	      && (linkage_name
+	      && (linkage_name != NULL
 		  ? strcmp (SYMBOL_LINKAGE_NAME (sym), linkage_name) == 0 : 1))
-
 	    {
 	      /* If SYM has aliases, then use any alias that is active
 	         at the current PC.  If no alias is active at the current
@@ -1941,12 +1927,12 @@ find_pc_sect_symtab (CORE_ADDR pc, asection *section)
 	    struct symbol *sym = NULL;
 
 	    ALL_BLOCK_SYMBOLS (b, iter, sym)
-	    {
-	      fixup_symbol_section (sym, objfile);
-	      if (section == SYMBOL_BFD_SECTION (sym))
-		break;
-	    }
-	    if ((sym == NULL))
+	      {
+		fixup_symbol_section (sym, objfile);
+		if (section == SYMBOL_BFD_SECTION (sym))
+		  break;
+	      }
+	    if (sym == NULL)
 	      continue;		/* no symbol in this symtab matches section */
 	  }
 	distance = BLOCK_END (b) - BLOCK_START (b);
@@ -2097,7 +2083,8 @@ find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
   if (msymbol != NULL)
     if (MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
       {
-	mfunsym = lookup_minimal_symbol_text (SYMBOL_LINKAGE_NAME (msymbol), NULL, NULL);
+	mfunsym = lookup_minimal_symbol_text (SYMBOL_LINKAGE_NAME (msymbol),
+					      NULL, NULL);
 	if (mfunsym == NULL)
 	  /* I eliminated this warning since it is coming out
 	   * in the following situation:
@@ -2108,12 +2095,12 @@ find_pc_sect_line (CORE_ADDR pc, struct sec *section, int notcurrent)
 	   * so of course we can't find the real func/line info,
 	   * but the "break" still works, and the warning is annoying.
 	   * So I commented out the warning. RT */
-	  /* warning ("In stub for %s; unable to find real function/line info", DEPRECATED_SYMBOL_NAME (msymbol)) */ ;
+	  /* warning ("In stub for %s; unable to find real function/line info", SYMBOL_LINKAGE_NAME (msymbol)) */ ;
 	/* fall through */
 	else if (SYMBOL_VALUE (mfunsym) == SYMBOL_VALUE (msymbol))
 	  /* Avoid infinite recursion */
 	  /* See above comment about why warning is commented out */
-	  /* warning ("In stub for %s; unable to find real function/line info", DEPRECATED_SYMBOL_NAME (msymbol)) */ ;
+	  /* warning ("In stub for %s; unable to find real function/line info", SYMBOL_LINKAGE_NAME (msymbol)) */ ;
 	/* fall through */
 	else
 	  return find_pc_line (SYMBOL_VALUE (mfunsym), 0);
@@ -3310,12 +3297,12 @@ rbreak_command (char *regexp, int from_tty)
     {
       if (p->msymbol == NULL)
 	{
-	  char *string = (char *) alloca (strlen (p->symtab->filename)
-					  + strlen (DEPRECATED_SYMBOL_NAME (p->symbol))
-					  + 4);
+	  char *string = alloca (strlen (p->symtab->filename)
+				 + strlen (SYMBOL_LINKAGE_NAME (p->symbol))
+				 + 4);
 	  strcpy (string, p->symtab->filename);
 	  strcat (string, ":'");
-	  strcat (string, DEPRECATED_SYMBOL_NAME (p->symbol));
+	  strcat (string, SYMBOL_LINKAGE_NAME (p->symbol));
 	  strcat (string, "'");
 	  break_command (string, from_tty);
 	  print_symbol_info (FUNCTIONS_DOMAIN,
@@ -3326,7 +3313,7 @@ rbreak_command (char *regexp, int from_tty)
 	}
       else
 	{
-	  break_command (DEPRECATED_SYMBOL_NAME (p->msymbol), from_tty);
+	  break_command (SYMBOL_LINKAGE_NAME (p->msymbol), from_tty);
 	  printf_filtered ("<function, no debug info> %s;\n",
 			   SYMBOL_PRINT_NAME (p->msymbol));
 	}
@@ -3343,17 +3330,8 @@ static int return_val_index;
 static char **return_val;
 
 #define COMPLETION_LIST_ADD_SYMBOL(symbol, sym_text, len, text, word) \
-  do { \
-    if (SYMBOL_DEMANGLED_NAME (symbol) != NULL) \
-      /* Put only the mangled name on the list.  */ \
-      /* Advantage:  "b foo<TAB>" completes to "b foo(int, int)" */ \
-      /* Disadvantage:  "b foo__i<TAB>" doesn't complete.  */ \
       completion_list_add_name \
-	(SYMBOL_DEMANGLED_NAME (symbol), (sym_text), (len), (text), (word)); \
-    else \
-      completion_list_add_name \
-	(DEPRECATED_SYMBOL_NAME (symbol), (sym_text), (len), (text), (word)); \
-  } while (0)
+	(SYMBOL_NATURAL_NAME (symbol), (sym_text), (len), (text), (word))
 
 /*  Test to see if the symbol specified by SYMNAME (which is already
    demangled for C++ symbols) matches SYM_TEXT in the first SYM_TEXT_LEN
@@ -3524,14 +3502,14 @@ language_search_unquoted_string (char *text, char *p)
 char **
 make_symbol_completion_list (char *text, char *word)
 {
-  register struct symbol *sym;
-  register struct symtab *s;
-  register struct partial_symtab *ps;
-  register struct minimal_symbol *msymbol;
-  register struct objfile *objfile;
-  register struct block *b, *surrounding_static_block = 0;
+  struct symbol *sym;
+  struct symtab *s;
+  struct partial_symtab *ps;
+  struct minimal_symbol *msymbol;
+  struct objfile *objfile;
+  struct block *b, *surrounding_static_block = 0;
   struct dict_iterator iter;
-  register int j;
+  int j;
   struct partial_symbol **psym;
   /* The symbol we are completing on.  Points in same buffer as text.  */
   char *sym_text;
@@ -3655,12 +3633,13 @@ make_symbol_completion_list (char *text, char *word)
          text string.  Only complete on types visible from current context. */
 
       ALL_BLOCK_SYMBOLS (b, iter, sym)
-      {
-	COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
-	if (SYMBOL_CLASS (sym) == LOC_TYPEDEF)
-	  {
-	    struct type *t = SYMBOL_TYPE (sym);
-	    enum type_code c = TYPE_CODE (t);
+	{
+	  QUIT;
+	  COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
+	  if (SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+	    {
+	      struct type *t = SYMBOL_TYPE (sym);
+	      enum type_code c = TYPE_CODE (t);
 
 	    if (c == TYPE_CODE_UNION || c == TYPE_CODE_STRUCT)
 	      {
@@ -3686,9 +3665,9 @@ make_symbol_completion_list (char *text, char *word)
     QUIT;
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
     ALL_BLOCK_SYMBOLS (b, iter, sym)
-    {
-      COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
-    }
+      {
+	COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
+      }
   }
 
   ALL_SYMTABS (objfile, s)
@@ -3699,9 +3678,9 @@ make_symbol_completion_list (char *text, char *word)
     if (b == surrounding_static_block)
       continue;
     ALL_BLOCK_SYMBOLS (b, iter, sym)
-    {
-      COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
-    }
+      {
+	COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
+      }
   }
 
   return (return_val);
@@ -3796,15 +3775,15 @@ make_file_symbol_completion_list (char *text, char *word, char *srcfile)
 
   b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
   ALL_BLOCK_SYMBOLS (b, iter, sym)
-  {
-    COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
-  }
+    {
+      COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
+    }
 
   b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
   ALL_BLOCK_SYMBOLS (b, iter, sym)
-  {
-    COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
-  }
+    {
+      COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
+    }
 
   return (return_val);
 }
@@ -4042,280 +4021,6 @@ in_prologue (CORE_ADDR pc, CORE_ADDR func_start)
   return func_addr <= pc && pc < sal.end;
 }
 
-
-/* Begin overload resolution functions */
-
-char *
-remove_params (const char *demangled_name)
-{
-  const char *argp;
-  char *new_name;
-  int depth;
-
-  if (demangled_name == NULL)
-    return NULL;
-
-  /* First find the end of the arg list.  */
-  argp = strrchr (demangled_name, ')');
-  if (argp == NULL)
-    return NULL;
-
-  /* Back up to the beginning.  */
-  depth = 1;
-
-  while (argp-- > demangled_name)
-    {
-      if (*argp == ')')
-	depth ++;
-      else if (*argp == '(')
-	{
-	  depth --;
-
-	  if (depth == 0)
-	    break;
-	}
-    }
-  if (depth != 0)
-    internal_error (__FILE__, __LINE__,
-		    "bad demangled name %s\n", demangled_name);
-  while (argp[-1] == ' ' && argp > demangled_name)
-    argp --;
-
-  new_name = xmalloc (argp - demangled_name + 1);
-  memcpy (new_name, demangled_name, argp - demangled_name);
-  new_name[argp - demangled_name] = '\0';
-  return new_name;
-}
-
-/* Helper routine for make_symbol_completion_list.  */
-
-static int sym_return_val_size;
-static int sym_return_val_index;
-static struct symbol **sym_return_val;
-
-/*  Test to see if the symbol specified by SYMNAME (which is already
-   demangled for C++ symbols) matches SYM_TEXT in the first SYM_TEXT_LEN
-   characters.  If so, add it to the current completion list. */
-
-static void
-overload_list_add_symbol (struct symbol *sym, const char *oload_name)
-{
-  int newsize;
-  int i;
-  char *sym_name;
-
-  /* If there is no type information, we can't do anything, so skip */
-  if (SYMBOL_TYPE (sym) == NULL)
-    return;
-
-  /* skip any symbols that we've already considered. */
-  for (i = 0; i < sym_return_val_index; ++i)
-    if (!strcmp (DEPRECATED_SYMBOL_NAME (sym), DEPRECATED_SYMBOL_NAME (sym_return_val[i])))
-      return;
-
-  /* Get the demangled name without parameters */
-  sym_name = remove_params (SYMBOL_DEMANGLED_NAME (sym));
-  if (!sym_name)
-    return;
-
-  /* skip symbols that cannot match */
-  if (strcmp (sym_name, oload_name) != 0)
-    {
-      xfree (sym_name);
-      return;
-    }
-
-  xfree (sym_name);
-
-  /* We have a match for an overload instance, so add SYM to the current list
-   * of overload instances */
-  if (sym_return_val_index + 3 > sym_return_val_size)
-    {
-      newsize = (sym_return_val_size *= 2) * sizeof (struct symbol *);
-      sym_return_val = (struct symbol **) xrealloc ((char *) sym_return_val, newsize);
-    }
-  sym_return_val[sym_return_val_index++] = sym;
-  sym_return_val[sym_return_val_index] = NULL;
-}
-
-/* Return a null-terminated list of pointers to function symbols that
-   match name of the supplied symbol FSYM and that occur within the
-   namespace given by the initial substring of NAMESPACE_NAME of
-   length NAMESPACE_LEN.  Apply using directives from BLOCK.  This is
-   used in finding all overloaded instances of a function name.  This
-   has been modified from make_symbol_completion_list.  */
-
-/* FIXME: carlton/2003-01-30: Should BLOCK be here?  Maybe it's better
-   to use get_selected_block (0).  */
-
-struct symbol **
-make_symbol_overload_list (const char *func_name,
-			   const char *namespace,
-			   const struct block *block)
-{
-  struct cleanup *old_cleanups;
-
-  sym_return_val_size = 100;
-  sym_return_val_index = 0;
-  sym_return_val = xmalloc ((sym_return_val_size + 1) *
-			    sizeof (struct symbol *));
-  sym_return_val[0] = NULL;
-
-  old_cleanups = make_cleanup (xfree, sym_return_val);
-
-  make_symbol_overload_list_using (func_name, namespace,
-				   block);
-
-  discard_cleanups (old_cleanups);
-
-  return sym_return_val;
-}
-
-/* This applies the using directives to add namespaces to search in,
-   and then searches for overloads in all of those namespaces.  It
-   adds the symbols found to sym_return_val.  Arguments are as in
-   make_symbol_overload_list.  */
-
-static void
-make_symbol_overload_list_using (const char *func_name,
-				 const char *namespace,
-				 const struct block *block)
-{
-  const struct using_direct *current;
-
-  /* First, go through the using directives.  If any of them apply,
-     look in the appropriate namespaces for new functions to match
-     on.  */
-
-  for (current = block_using (block);
-       current != NULL;
-       current = current->next)
-    {
-      if (strcmp (namespace, current->outer) == 0)
-	{
-	  make_symbol_overload_list_using (func_name,
-					   current->inner,
-					   block);
-	}
-    }
-
-  /* Now, add names for this namespace.  */
-  
-  if (namespace[0] == '\0')
-    {
-      make_symbol_overload_list_qualified (func_name);
-    }
-  else
-    {
-      char *concatenated_name
-	= alloca (strlen (namespace) + 2 + strlen (func_name) + 1);
-      strcpy (concatenated_name, namespace);
-      strcat (concatenated_name, "::");
-      strcat (concatenated_name, func_name);
-      make_symbol_overload_list_qualified (concatenated_name);
-    }
-}
-
-/* This does the bulk of the work of finding overloaded symbols.
-   FUNC_NAME is the name of the overloaded function we're looking for
-   (possibly including namespace info); NEW_LIST is 1 if we should
-   allocate a new list of overloads and 0 if we should continue using
-   the same old list.  */
-
-static void
-make_symbol_overload_list_qualified (const char *func_name)
-{
-  struct symbol *sym;
-  struct symtab *s;
-  struct objfile *objfile;
-  const struct block *b, *surrounding_static_block = 0;
-  struct dict_iterator iter;
-  const struct dictionary *dict;
-
-  /* Look through the partial symtabs for all symbols which begin
-     by matching FUNC_NAME.  Make sure we read that symbol table in. */
-
-  read_in_psymtabs (func_name);
-
-  /* Search upwards from currently selected frame (so that we can
-     complete on local vars.  */
-
-  for (b = get_selected_block (0); b != NULL; b = BLOCK_SUPERBLOCK (b))
-    {
-      dict = BLOCK_DICT (b);
-
-      for (sym = dict_iter_name_first (dict, func_name, &iter);
-	   sym;
-	   sym = dict_iter_name_next (func_name, &iter))
-	{
-	  overload_list_add_symbol (sym, func_name);
-	}
-    }
-
-  surrounding_static_block = block_static_block (get_selected_block (0));
-
-  /* Go through the symtabs and check the externs and statics for
-     symbols which match.  */
-
-  /* FIXME: carlton/2003-01-30: Why are we checking all the statics?
-     Also, this shouldn't check all the globals if there's an
-     anonymous namespace involved somewhere.  */
-
-  ALL_SYMTABS (objfile, s)
-  {
-    QUIT;
-    b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-    dict = BLOCK_DICT (b);
-
-    for (sym = dict_iter_name_first (dict, func_name, &iter);
-	 sym;
-	 sym = dict_iter_name_next (func_name, &iter))
-    {
-      overload_list_add_symbol (sym, func_name);
-    }
-  }
-
-  ALL_SYMTABS (objfile, s)
-  {
-    QUIT;
-    b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
-    /* Don't do this block twice.  */
-    if (b == surrounding_static_block)
-      continue;
-    dict = BLOCK_DICT (b);
-
-    for (sym = dict_iter_name_first (dict, func_name, &iter);
-	 sym;
-	 sym = dict_iter_name_next (func_name, &iter))
-    {
-      overload_list_add_symbol (sym, func_name);
-    }
-  }
-}
-
-/* Look through the partial symtabs for all symbols which begin
-   by matching FUNC_NAME.  Make sure we read that symbol table in. */
-
-static void
-read_in_psymtabs (const char *func_name)
-{
-  struct partial_symtab *ps;
-  struct objfile *objfile;
-
-  ALL_PSYMTABS (objfile, ps)
-  {
-    if (ps->readin)
-      continue;
-
-    if ((lookup_partial_symbol (ps, func_name, NULL, 1, VAR_DOMAIN)
-	 != NULL)
-	|| (lookup_partial_symbol (ps, func_name, NULL, 0, VAR_DOMAIN)
-	    != NULL))
-      psymtab_to_symtab (ps);
-  }
-}
-
-/* End of overload resolution functions */
 
 struct symtabs_and_lines
 decode_line_spec (char *string, int funfirstline)

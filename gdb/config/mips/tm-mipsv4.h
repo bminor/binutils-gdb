@@ -18,7 +18,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "mips/tm-bigmips.h"
+#include "mips/tm-mips.h"
 #include "config/tm-sysv4.h"
 
 /* The signal handler trampoline is called _sigtramp.  */

@@ -44,6 +44,7 @@
 #include "block.h"
 #include "infcall.h"
 #include "valprint.h"
+#include "gdb_assert.h"
 
 #include <ctype.h>
 
@@ -74,38 +75,6 @@ struct objc_method {
   CORE_ADDR types;
   CORE_ADDR imp;
 };
-
-/* Complaints about ObjC classes, selectors, etc.  */
-
-#if (!defined __GNUC__ || __GNUC__ < 2 || __GNUC_MINOR__ < (defined __cplusplus ? 6 : 4))
-#define __CHECK_FUNCTION ((__const char *) 0)
-#else
-#define __CHECK_FUNCTION __PRETTY_FUNCTION__
-#endif
-
-#define CHECK(expression) \
-  ((void) ((expression) ? 0 : gdb_check (#expression, __FILE__, __LINE__, \
-                                         __CHECK_FUNCTION)))
-
-#define CHECK_FATAL(expression) \
-  ((void) ((expression) ? 0 : gdb_check_fatal (#expression, __FILE__, \
-                              __LINE__, __CHECK_FUNCTION)))
-
-static void 
-gdb_check (const char *str, const char *file, 
-	   unsigned int line, const char *func)
-{
-  error ("assertion failure on line %u of \"%s\" in function \"%s\": %s\n",
-	 line, file, func, str);
-}
-
-static void 
-gdb_check_fatal (const char *str, const char *file, 
-		 unsigned int line, const char *func)
-{
-  internal_error (file, line, 
-		  "assertion failure in function \"%s\": %s\n", func, str);
-}
 
 /* Lookup a structure type named "struct NAME", visible in lexical
    block BLOCK.  If NOERR is nonzero, return zero if NAME is not
@@ -658,7 +627,7 @@ static const struct op_print objc_op_print_tab[] =
     {"sizeof ", UNOP_SIZEOF, PREC_PREFIX, 0},
     {"++", UNOP_PREINCREMENT, PREC_PREFIX, 0},
     {"--", UNOP_PREDECREMENT, PREC_PREFIX, 0},
-    {NULL, 0, 0, 0}
+    {NULL, OP_NULL, PREC_NULL, 0}
 };
 
 struct type ** const (objc_builtin_types[]) = 
@@ -806,7 +775,8 @@ end_msglist(void)
  * Used for qsorting lists of objc methods (either by class or selector).
  */
 
-int specialcmp(char *a, char *b)
+static int
+specialcmp (char *a, char *b)
 {
   while (*a && *a != ' ' && *a != ']' && *b && *b != ' ' && *b != ']')
     {
@@ -1153,7 +1123,7 @@ parse_selector (char *method, char **selector)
 
   char *nselector = NULL;
 
-  CHECK (selector != NULL);
+  gdb_assert (selector != NULL);
 
   s1 = method;
 
@@ -1212,10 +1182,10 @@ parse_method (char *method, char *type, char **class,
   char *ncategory = NULL;
   char *nselector = NULL;
 
-  CHECK (type != NULL);
-  CHECK (class != NULL);
-  CHECK (category != NULL);
-  CHECK (selector != NULL);
+  gdb_assert (type != NULL);
+  gdb_assert (class != NULL);
+  gdb_assert (category != NULL);
+  gdb_assert (selector != NULL);
   
   s1 = method;
 
@@ -1325,8 +1295,8 @@ find_methods (struct symtab *symtab, char type,
   static char *tmp = NULL;
   static unsigned int tmplen = 0;
 
-  CHECK (nsym != NULL);
-  CHECK (ndebug != NULL);
+  gdb_assert (nsym != NULL);
+  gdb_assert (ndebug != NULL);
 
   if (symtab)
     block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), STATIC_BLOCK);
@@ -1438,8 +1408,8 @@ char *find_imps (struct symtab *symtab, struct block *block,
   char *buf = NULL;
   char *tmp = NULL;
 
-  CHECK (nsym != NULL);
-  CHECK (ndebug != NULL);
+  gdb_assert (nsym != NULL);
+  gdb_assert (ndebug != NULL);
 
   if (nsym != NULL)
     *nsym = 0;
@@ -1451,6 +1421,7 @@ char *find_imps (struct symtab *symtab, struct block *block,
   tmp = parse_method (buf, &type, &class, &category, &selector);
 
   if (tmp == NULL) {
+    
     struct symbol *sym = NULL;
     struct minimal_symbol *msym = NULL;
     
@@ -1551,7 +1522,7 @@ char *find_imps (struct symtab *symtab, struct block *block,
   return method + (tmp - buf);
 }
 
-void 
+static void 
 print_object_command (char *args, int from_tty)
 {
   struct value *object, *function, *description;
@@ -1639,7 +1610,7 @@ static struct objc_methcall methcalls[] = {
  * case the functions have moved for some reason.  
  */
 
-void 
+static void 
 find_objc_msgsend (void)
 {
   unsigned int i;
@@ -1686,7 +1657,7 @@ struct objc_submethod_helper_data {
   CORE_ADDR *new_pc;
 };
 
-int 
+static int 
 find_objc_msgcall_submethod_helper (void * arg)
 {
   struct objc_submethod_helper_data *s = 
@@ -1698,7 +1669,7 @@ find_objc_msgcall_submethod_helper (void * arg)
     return 0;
 }
 
-int 
+static int 
 find_objc_msgcall_submethod (int (*f) (CORE_ADDR, CORE_ADDR *),
 			     CORE_ADDR pc, 
 			     CORE_ADDR *new_pc)
@@ -1742,6 +1713,8 @@ find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc)
   return 0;
 }
 
+extern initialize_file_ftype _initialize_objc_language; /* -Wmissing-prototypes */
+
 void
 _initialize_objc_language (void)
 {
@@ -1754,60 +1727,6 @@ _initialize_objc_language (void)
 	   "Ask an Objective-C object to print itself.");
   add_com_alias ("po", "print-object", class_vars, 1);
 }
-
-#if 1
-/* Disable these functions until we put them in the gdbarch vector.  */
-static unsigned long FETCH_ARGUMENT (int i)
-{
-  internal_error (__FILE__, __LINE__, "FETCH_ARGUMENT not implemented");
-  return 0;
-}
-static CORE_ADDR CONVERT_FUNCPTR (CORE_ADDR pc)
-{
-  internal_error (__FILE__, __LINE__, "CONVERT_FUNCPTR not implemented");
-  return pc;
-}
-#else
-#if defined (__powerpc__) || defined (__ppc__)
-static unsigned long FETCH_ARGUMENT (int i)
-{
-  return read_register (3 + i);
-}
-#elif defined (__i386__)
-static unsigned long FETCH_ARGUMENT (int i)
-{
-  CORE_ADDR stack = read_register (SP_REGNUM);
-  return read_memory_unsigned_integer (stack + (4 * (i + 1)), 4);
-}
-#elif defined (__sparc__)
-static unsigned long FETCH_ARGUMENT (int i)
-{
-  return read_register (O0_REGNUM + i);
-}
-#elif defined (__hppa__) || defined (__hppa)
-static unsigned long FETCH_ARGUMENT (int i)
-{
-  return read_register (R0_REGNUM + 26 - i);
-}
-#else
-#error unknown architecture
-#endif
-
-#if defined (__hppa__) || defined (__hppa)
-static CORE_ADDR CONVERT_FUNCPTR (CORE_ADDR pc)
-{
-  if (pc & 0x2)
-    pc = (CORE_ADDR) read_memory_integer (pc & ~0x3, 4);
-
-  return pc;
-}
-#else
-static CORE_ADDR CONVERT_FUNCPTR (CORE_ADDR pc)
-{
-  return pc;
-}
-#endif
-#endif
 
 static void 
 read_objc_method (CORE_ADDR addr, struct objc_method *method)
@@ -1827,7 +1746,7 @@ static void
 read_objc_methlist_method (CORE_ADDR addr, unsigned long num, 
 			   struct objc_method *method)
 {
-  CHECK_FATAL (num < read_objc_methlist_nmethods (addr));
+  gdb_assert (num < read_objc_methlist_nmethods (addr));
   read_objc_method (addr + 8 + (12 * num), method);
 }
   
@@ -1859,7 +1778,7 @@ read_objc_class (CORE_ADDR addr, struct objc_class *class)
   class->protocols = read_memory_unsigned_integer (addr + 36, 4);
 }
 
-CORE_ADDR
+static CORE_ADDR
 find_implementation_from_class (CORE_ADDR class, CORE_ADDR sel)
 {
   CORE_ADDR subclass = class;
@@ -1897,7 +1816,9 @@ find_implementation_from_class (CORE_ADDR class, CORE_ADDR sel)
 #endif
 
 	      if (meth_str.name == sel) 
-		return CONVERT_FUNCPTR (meth_str.imp);
+		/* FIXME: hppa arch was doing a pointer dereference
+		   here. There needs to be a better way to do that.  */
+		return meth_str.imp;
 	    }
 	  mlistnum++;
 	}
@@ -1907,7 +1828,7 @@ find_implementation_from_class (CORE_ADDR class, CORE_ADDR sel)
   return 0;
 }
 
-CORE_ADDR
+static CORE_ADDR
 find_implementation (CORE_ADDR object, CORE_ADDR sel)
 {
   struct objc_object ostr;
@@ -1921,6 +1842,9 @@ find_implementation (CORE_ADDR object, CORE_ADDR sel)
   return find_implementation_from_class (ostr.isa, sel);
 }
 
+#define OBJC_FETCH_POINTER_ARGUMENT(argi) \
+  FETCH_POINTER_ARGUMENT (get_current_frame (), argi, builtin_type_void_func_ptr)
+
 static int
 resolve_msgsend (CORE_ADDR pc, CORE_ADDR *new_pc)
 {
@@ -1928,8 +1852,8 @@ resolve_msgsend (CORE_ADDR pc, CORE_ADDR *new_pc)
   CORE_ADDR sel;
   CORE_ADDR res;
 
-  object = FETCH_ARGUMENT (0);
-  sel = FETCH_ARGUMENT (1);
+  object = OBJC_FETCH_POINTER_ARGUMENT (0);
+  sel = OBJC_FETCH_POINTER_ARGUMENT (1);
 
   res = find_implementation (object, sel);
   if (new_pc != 0)
@@ -1946,8 +1870,8 @@ resolve_msgsend_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
   CORE_ADDR sel;
   CORE_ADDR res;
 
-  object = FETCH_ARGUMENT (1);
-  sel = FETCH_ARGUMENT (2);
+  object = OBJC_FETCH_POINTER_ARGUMENT (1);
+  sel = OBJC_FETCH_POINTER_ARGUMENT (2);
 
   res = find_implementation (object, sel);
   if (new_pc != 0)
@@ -1966,8 +1890,8 @@ resolve_msgsend_super (CORE_ADDR pc, CORE_ADDR *new_pc)
   CORE_ADDR sel;
   CORE_ADDR res;
 
-  super = FETCH_ARGUMENT (0);
-  sel = FETCH_ARGUMENT (1);
+  super = OBJC_FETCH_POINTER_ARGUMENT (0);
+  sel = OBJC_FETCH_POINTER_ARGUMENT (1);
 
   read_objc_super (super, &sstr);
   if (sstr.class == 0)
@@ -1990,8 +1914,8 @@ resolve_msgsend_super_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
   CORE_ADDR sel;
   CORE_ADDR res;
 
-  super = FETCH_ARGUMENT (1);
-  sel = FETCH_ARGUMENT (2);
+  super = OBJC_FETCH_POINTER_ARGUMENT (1);
+  sel = OBJC_FETCH_POINTER_ARGUMENT (2);
 
   read_objc_super (super, &sstr);
   if (sstr.class == 0)

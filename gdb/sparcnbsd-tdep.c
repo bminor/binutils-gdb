@@ -1,5 +1,5 @@
 /* Target-dependent code for SPARC systems running NetBSD.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
    Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -25,6 +25,8 @@
 #include "target.h"
 #include "value.h"
 #include "osabi.h"
+
+#include "gdb_string.h"
 
 #include "sparcnbsd-tdep.h"
 #include "nbsd-tdep.h"
@@ -445,7 +447,7 @@ sparcnbsd_get_longjmp_target_32 (CORE_ADDR *pc)
   if (target_read_memory (jb_addr + 12, buf, sizeof (buf)))
     return 0;
 
-  *pc = extract_address (buf, sizeof (buf));
+  *pc = extract_unsigned_integer (buf, sizeof (buf));
 
   return 1;
 }
@@ -461,7 +463,7 @@ sparcnbsd_get_longjmp_target_64 (CORE_ADDR *pc)
   if (target_read_memory (jb_addr + 16, buf, sizeof (buf)))
     return 0;
 
-  *pc = extract_address (buf, sizeof (buf));
+  *pc = extract_unsigned_integer (buf, sizeof (buf));
 
   return 1;
 }

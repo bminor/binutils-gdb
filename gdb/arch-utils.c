@@ -73,6 +73,13 @@ legacy_store_return_value (struct type *type, struct regcache *regcache,
 
 
 int
+always_use_struct_convention (int gcc_p, struct type *value_type)
+{
+  return 1;
+}
+
+
+int
 legacy_register_sim_regno (int regnum)
 {
   /* Only makes sense to supply raw registers.  */
@@ -232,14 +239,7 @@ default_double_format (struct gdbarch *gdbarch)
 /* Misc helper functions for targets. */
 
 int
-frame_num_args_unknown (struct frame_info *fi)
-{
-  return -1;
-}
-
-
-int
-generic_register_convertible_not (int num)
+deprecated_register_convertible_not (int num)
 {
   return 0;
 }
@@ -270,66 +270,6 @@ int
 no_op_reg_to_regnum (int reg)
 {
   return reg;
-}
-
-/* Default prepare_to_procced().  */
-int
-default_prepare_to_proceed (int select_it)
-{
-  return 0;
-}
-
-/* Generic prepare_to_proceed().  This one should be suitable for most
-   targets that support threads. */
-int
-generic_prepare_to_proceed (int select_it)
-{
-  ptid_t wait_ptid;
-  struct target_waitstatus wait_status;
-
-  /* Get the last target status returned by target_wait().  */
-  get_last_target_status (&wait_ptid, &wait_status);
-
-  /* Make sure we were stopped either at a breakpoint, or because
-     of a Ctrl-C.  */
-  if (wait_status.kind != TARGET_WAITKIND_STOPPED
-      || (wait_status.value.sig != TARGET_SIGNAL_TRAP &&
-          wait_status.value.sig != TARGET_SIGNAL_INT))
-    {
-      return 0;
-    }
-
-  if (!ptid_equal (wait_ptid, minus_one_ptid)
-      && !ptid_equal (inferior_ptid, wait_ptid))
-    {
-      /* Switched over from WAIT_PID.  */
-      CORE_ADDR wait_pc = read_pc_pid (wait_ptid);
-
-      if (wait_pc != read_pc ())
-	{
-	  if (select_it)
-	    {
-	      /* Switch back to WAIT_PID thread.  */
-	      inferior_ptid = wait_ptid;
-
-	      /* FIXME: This stuff came from switch_to_thread() in
-		 thread.c (which should probably be a public function).  */
-	      flush_cached_frames ();
-	      registers_changed ();
-	      stop_pc = wait_pc;
-	      select_frame (get_current_frame ());
-	    }
-          /* We return 1 to indicate that there is a breakpoint here,
-             so we need to step over it before continuing to avoid
-             hitting it straight away. */
-          if (breakpoint_here_p (wait_pc))
-            {
-	      return 1;
-            }
-	}
-    }
-  return 0;
-  
 }
 
 CORE_ADDR
@@ -440,23 +380,29 @@ legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)
 }
 
 int
-legacy_convert_register_p (int regnum)
+legacy_convert_register_p (int regnum, struct type *type)
 {
-  return REGISTER_CONVERTIBLE (regnum);
+  return DEPRECATED_REGISTER_CONVERTIBLE (regnum);
 }
 
 void
-legacy_register_to_value (int regnum, struct type *type,
-			  char *from, char *to)
+legacy_register_to_value (struct frame_info *frame, int regnum,
+			  struct type *type, void *to)
 {
-  REGISTER_CONVERT_TO_VIRTUAL (regnum, type, from, to);
+  char from[MAX_REGISTER_SIZE];
+  frame_read_register (frame, regnum, from);
+  DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (regnum, type, from, to);
 }
 
 void
-legacy_value_to_register (struct type *type, int regnum,
-			  char *from, char *to)
+legacy_value_to_register (struct frame_info *frame, int regnum,
+			  struct type *type, const void *tmp)
 {
-  REGISTER_CONVERT_TO_RAW (type, regnum, from, to);
+  char to[MAX_REGISTER_SIZE];
+  char *from = alloca (TYPE_LENGTH (type));
+  memcpy (from, from, TYPE_LENGTH (type));
+  DEPRECATED_REGISTER_CONVERT_TO_RAW (type, regnum, from, to);
+  put_frame_register (frame, regnum, to);
 }
 
 
@@ -882,7 +828,7 @@ gdbarch_info_init (struct gdbarch_info *info)
 
 /* */
 
-extern initialize_file_ftype _initialize_gdbarch_utils;
+extern initialize_file_ftype _initialize_gdbarch_utils; /* -Wmissing-prototypes */
 
 void
 _initialize_gdbarch_utils (void)

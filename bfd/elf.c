@@ -936,7 +936,7 @@ const char *const bfd_elf_section_type_names[] = {
   "SHT_NOBITS", "SHT_REL", "SHT_SHLIB", "SHT_DYNSYM",
 };
 
-/* ELF relocs are against symbols.  If we are producing relocateable
+/* ELF relocs are against symbols.  If we are producing relocatable
    output, and the reloc is against an external symbol, and nothing
    has given us any additional addend, the resulting reloc will also
    be against the same symbol.  In such a case, we don't want to
@@ -944,7 +944,7 @@ const char *const bfd_elf_section_type_names[] = {
    all be done at final link time.  Rather than put special case code
    into bfd_perform_relocation, all the reloc types use this howto
    function.  It just short circuits the reloc if producing
-   relocateable output against an external symbol.  */
+   relocatable output against an external symbol.  */
 
 bfd_reloc_status_type
 bfd_elf_generic_reloc (abfd,
@@ -1070,6 +1070,7 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
 	    case PT_PHDR: pt = "PHDR"; break;
 	    case PT_TLS: pt = "TLS"; break;
 	    case PT_GNU_EH_FRAME: pt = "EH_FRAME"; break;
+	    case PT_GNU_STACK: pt = "STACK"; break;
 	    default: sprintf (buf, "0x%lx", p->p_type); pt = buf; break;
 	    }
 	  fprintf (f, "%8s off    0x", pt);
@@ -1837,7 +1838,7 @@ bfd_section_from_shdr (abfd, shindex)
          SHF_ALLOC is set, and this is a shared object, then we also
          treat this section as a BFD section.  We can not base the
          decision purely on SHF_ALLOC, because that flag is sometimes
-         set in a relocateable object file, which would confuse the
+         set in a relocatable object file, which would confuse the
          linker.  */
       if ((hdr->sh_flags & SHF_ALLOC) != 0
 	  && (abfd->flags & DYNAMIC) != 0
@@ -2295,6 +2296,9 @@ bfd_section_from_phdr (abfd, hdr, index)
     case PT_GNU_EH_FRAME:
       return _bfd_elf_make_section_from_phdr (abfd, hdr, index,
 					      "eh_frame_hdr");
+
+    case PT_GNU_STACK:
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "stack");
 
     default:
       /* Check for any processor-specific program segment types.
@@ -3513,6 +3517,21 @@ map_sections_to_segments (abfd)
       pm = &m->next;
     }
 
+  if (elf_tdata (abfd)->stack_flags)
+    {
+      amt = sizeof (struct elf_segment_map);
+      m = (struct elf_segment_map *) bfd_zalloc (abfd, amt);
+      if (m == NULL)
+	goto error_return;
+      m->next = NULL;
+      m->p_type = PT_GNU_STACK;
+      m->p_flags = elf_tdata (abfd)->stack_flags;
+      m->p_flags_valid = 1;
+
+      *pm = m;
+      pm = &m->next;
+    }
+
   free (sections);
   sections = NULL;
 
@@ -4096,6 +4115,12 @@ get_program_header_size (abfd)
   if (elf_tdata (abfd)->eh_frame_hdr)
     {
       /* We need a PT_GNU_EH_FRAME segment.  */
+      ++segs;
+    }
+
+  if (elf_tdata (abfd)->stack_flags)
+    {
+      /* We need a PT_GNU_STACK segment.  */
       ++segs;
     }
 
@@ -7015,18 +7040,30 @@ elfcore_grok_nto_status (abfd, note, tid)
   char buf[100];
   char *name;
   asection *sect;
+  short sig;
+  unsigned flags;
 
   /* nto_procfs_status 'pid' field is at offset 0.  */
   elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, (bfd_byte *) ddata);
 
-  /* nto_procfs_status 'tid' field is at offset 4.  */
-  elf_tdata (abfd)->core_lwpid = bfd_get_32 (abfd, (bfd_byte *) ddata + 4);
+  /* nto_procfs_status 'tid' field is at offset 4.  Pass it back.  */
+  *tid = bfd_get_32 (abfd, (bfd_byte *) ddata + 4);
+
+  /* nto_procfs_status 'flags' field is at offset 8.  */
+  flags = bfd_get_32 (abfd, (bfd_byte *) ddata + 8);
 
   /* nto_procfs_status 'what' field is at offset 14.  */
-  elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, (bfd_byte *) ddata + 14);
+  if ((sig = bfd_get_16 (abfd, (bfd_byte *) ddata + 14)) > 0)
+    {
+      elf_tdata (abfd)->core_signal = sig;
+      elf_tdata (abfd)->core_lwpid = *tid;
+    }
 
-  /* Pass tid back.  */
-  *tid = elf_tdata (abfd)->core_lwpid;
+  /* _DEBUG_FLAG_CURTID (current thread) is 0x80.  Some cores
+     do not come from signals so we make sure we set the current
+     thread just in case.  */
+  if (flags & 0x00000080)
+    elf_tdata (abfd)->core_lwpid = *tid;
 
   /* Make a ".qnx_core_status/%d" section.  */
   sprintf (buf, ".qnx_core_status/%d", *tid);
@@ -7075,7 +7112,11 @@ elfcore_grok_nto_gregs (abfd, note, tid)
   sect->flags           = SEC_HAS_CONTENTS;
   sect->alignment_power = 2;
 
-  return elfcore_maybe_make_sect (abfd, ".reg", sect);
+  /* This is the current thread.  */
+  if (elf_tdata (abfd)->core_lwpid == tid)
+    return elfcore_maybe_make_sect (abfd, ".reg", sect);
+
+  return TRUE;
 }
 
 #define BFD_QNT_CORE_INFO	7

@@ -27,6 +27,7 @@
 #include "frame.h"
 #include "regcache.h"
 #include "doublest.h"
+#include "solib-svr4.h"
 #include "osabi.h"
 
 #include "arm-tdep.h"
@@ -193,7 +194,7 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	  && NULL != target_type
 	  && TYPE_CODE_FUNC == TYPE_CODE (target_type))
 	{
-	  CORE_ADDR regval = extract_address (val, len);
+	  CORE_ADDR regval = extract_unsigned_integer (val, len);
 	  if (arm_pc_is_thumb (regval))
 	    store_unsigned_integer (val, len, MAKE_THUMB_ADDR (regval));
 	}
@@ -208,7 +209,7 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	  if (argreg <= ARM_LAST_ARG_REGNUM)
 	    {
 	      /* It's an argument being passed in a general register.  */
-	      regval = extract_address (val, partial_len);
+	      regval = extract_unsigned_integer (val, partial_len);
 	      write_register (argreg++, regval);
 	    }
 	  else
@@ -376,6 +377,49 @@ find_minsym_and_objfile (char *name, struct objfile **objfile_p)
 }
 
 
+/* Fetch, and possibly build, an appropriate link_map_offsets structure
+   for ARM linux targets using the struct offsets defined in <link.h>.
+   Note, however, that link.h is not actually referred to in this file.
+   Instead, the relevant structs offsets were obtained from examining
+   link.h.  (We can't refer to link.h from this file because the host
+   system won't necessarily have it, or if it does, the structs which
+   it defines will refer to the host system, not the target).  */
+
+static struct link_map_offsets *
+arm_linux_svr4_fetch_link_map_offsets (void)
+{
+  static struct link_map_offsets lmo;
+  static struct link_map_offsets *lmp = 0;
+
+  if (lmp == 0)
+    {
+      lmp = &lmo;
+
+      lmo.r_debug_size = 8;	/* Actual size is 20, but this is all we
+                                   need.  */
+
+      lmo.r_map_offset = 4;
+      lmo.r_map_size   = 4;
+
+      lmo.link_map_size = 20;	/* Actual size is 552, but this is all we
+                                   need.  */
+
+      lmo.l_addr_offset = 0;
+      lmo.l_addr_size   = 4;
+
+      lmo.l_name_offset = 4;
+      lmo.l_name_size   = 4;
+
+      lmo.l_next_offset = 12;
+      lmo.l_next_size   = 4;
+
+      lmo.l_prev_offset = 16;
+      lmo.l_prev_size   = 4;
+    }
+
+    return lmp;
+}
+
 static CORE_ADDR
 skip_hurd_resolver (CORE_ADDR pc)
 {
@@ -529,6 +573,9 @@ arm_linux_init_abi (struct gdbarch_info info,
 
   tdep->jb_pc = ARM_LINUX_JB_PC;
   tdep->jb_elt_size = ARM_LINUX_JB_ELEMENT_SIZE;
+
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, arm_linux_svr4_fetch_link_map_offsets);
 
   set_gdbarch_deprecated_call_dummy_words (gdbarch, arm_linux_call_dummy_words);
   set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (arm_linux_call_dummy_words));

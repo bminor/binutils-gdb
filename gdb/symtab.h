@@ -398,8 +398,9 @@ enum address_class
   /* Value is in register number SYMBOL_VALUE.  Just like LOC_REGISTER
      except this is an argument.  Probably the cleaner way to handle
      this would be to separate address_class (which would include
-     separate ARG and LOCAL to deal with FRAME_ARGS_ADDRESS versus
-     FRAME_LOCALS_ADDRESS), and an is_argument flag.
+     separate ARG and LOCAL to deal with the frame's arguments
+     (get_frame_args_address) versus the frame's locals
+     (get_frame_locals_address), and an is_argument flag.
 
      For some symbol formats (stabs, for some compilers at least),
      the compiler generates two symbols, an argument and a register.
@@ -443,9 +444,9 @@ enum address_class
 
   /* Value is arg at SYMBOL_VALUE offset in stack frame. Differs from
      LOC_LOCAL in that symbol is an argument; differs from LOC_ARG in
-     that we find it in the frame (FRAME_LOCALS_ADDRESS), not in the
-     arglist (FRAME_ARGS_ADDRESS).  Added for i960, which passes args
-     in regs then copies to frame.  */
+     that we find it in the frame (get_frame_locals_address), not in
+     the arglist (get_frame_args_address).  Added for i960, which
+     passes args in regs then copies to frame.  */
 
   LOC_LOCAL_ARG,
 
@@ -749,9 +750,6 @@ struct section_offsets
   (sizeof (struct section_offsets) \
    + sizeof (((struct section_offsets *) 0)->offsets) * ((n)-1))
 
-/* The maximum possible size of a section_offsets table.  */
-#define SIZEOF_SECTION_OFFSETS (SIZEOF_N_SECTION_OFFSETS (SECT_OFF_MAX))
-
 /* Each source file or header is represented by a struct symtab. 
    These objects are chained through the `next' field.  */
 
@@ -1050,6 +1048,13 @@ extern struct symbol *lookup_symbol_aux_block (const char *name,
 					       const domain_enum domain,
 					       struct symtab **symtab);
 
+/* Lookup a partial symbol.  */
+
+extern struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
+						     const char *,
+						     const char *, int,
+						     domain_enum);
+
 /* lookup a symbol by name, within a specified block */
 
 extern struct symbol *lookup_block_symbol (const struct block *, const char *,
@@ -1319,12 +1324,6 @@ extern void select_source_symtab (struct symtab *);
 extern char **make_symbol_completion_list (char *, char *);
 
 extern char **make_file_symbol_completion_list (char *, char *, char *);
-
-extern char *remove_params (const char *demangled_name);
-
-extern struct symbol **make_symbol_overload_list (const char *,
-						  const char *,
-						  const struct block *);
 
 extern char **make_source_files_completion_list (char *, char *);
 

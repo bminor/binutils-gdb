@@ -28,7 +28,7 @@
 #include "regcache.h"
 #include "doublest.h"
 #include "value.h"
-
+#include "gdb_assert.h"
 #include "objfiles.h"
 #include "elf/common.h"		/* for DT_PLTGOT value */
 #include "elf-bfd.h"
@@ -86,10 +86,6 @@ extern CORE_ADDR ia64_aix_sigcontext_register_address (CORE_ADDR, int);
 static gdbarch_init_ftype ia64_gdbarch_init;
 
 static gdbarch_register_name_ftype ia64_register_name;
-static gdbarch_register_raw_size_ftype ia64_register_raw_size;
-static gdbarch_register_virtual_size_ftype ia64_register_virtual_size;
-static gdbarch_register_virtual_type_ftype ia64_register_virtual_type;
-static gdbarch_register_byte_ftype ia64_register_byte;
 static gdbarch_breakpoint_from_pc_ftype ia64_breakpoint_from_pc;
 static gdbarch_skip_prologue_ftype ia64_skip_prologue;
 static gdbarch_deprecated_extract_return_value_ftype ia64_extract_return_value;
@@ -239,13 +235,13 @@ ia64_register_name (int reg)
   return ia64_register_names[reg];
 }
 
-int
+static int
 ia64_register_raw_size (int reg)
 {
   return (IA64_FR0_REGNUM <= reg && reg <= IA64_FR127_REGNUM) ? 16 : 8;
 }
 
-int
+static int
 ia64_register_virtual_size (int reg)
 {
   return (IA64_FR0_REGNUM <= reg && reg <= IA64_FR127_REGNUM) ? 16 : 8;
@@ -253,7 +249,7 @@ ia64_register_virtual_size (int reg)
 
 /* Return true iff register N's virtual format is different from
    its raw format. */
-int
+static int
 ia64_register_convertible (int nr)
 {
   return (IA64_FR0_REGNUM <= nr && nr <= IA64_FR127_REGNUM);
@@ -265,7 +261,7 @@ const struct floatformat floatformat_ia64_ext =
   floatformat_intbit_yes
 };
 
-void
+static void
 ia64_register_convert_to_virtual (int regnum, struct type *type,
                                   char *from, char *to)
 {
@@ -279,9 +275,9 @@ ia64_register_convert_to_virtual (int regnum, struct type *type,
     error("ia64_register_convert_to_virtual called with non floating point register number");
 }
 
-void
+static void
 ia64_register_convert_to_raw (struct type *type, int regnum,
-                              char *from, char *to)
+                              const char *from, char *to)
 {
   if (regnum >= IA64_FR0_REGNUM && regnum <= IA64_FR127_REGNUM)
     {
@@ -301,7 +297,7 @@ ia64_register_virtual_type (int reg)
     return builtin_type_long;
 }
 
-int
+static int
 ia64_register_byte (int reg)
 {
   return (8 * reg) +
@@ -623,7 +619,19 @@ ia64_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
   return breakpoint;
 }
 
-CORE_ADDR
+static CORE_ADDR
+ia64_read_fp (void)
+{
+  /* We won't necessarily have a frame pointer and even if we do, it
+     winds up being extraordinarly messy when attempting to find the
+     frame chain.  So for the purposes of creating frames (which is
+     all deprecated_read_fp() is used for), simply use the stack
+     pointer value instead.  */
+  gdb_assert (SP_REGNUM >= 0);
+  return read_register (SP_REGNUM);
+}
+
+static CORE_ADDR
 ia64_read_pc (ptid_t ptid)
 {
   CORE_ADDR psr_value = read_register_pid (IA64_PSR_REGNUM, ptid);
@@ -633,7 +641,7 @@ ia64_read_pc (ptid_t ptid)
   return pc_value | (slot_num * SLOT_MULTIPLIER);
 }
 
-void
+static void
 ia64_write_pc (CORE_ADDR new_pc, ptid_t ptid)
 {
   int slot_num = (int) (new_pc & 0xf) / SLOT_MULTIPLIER;
@@ -691,7 +699,7 @@ rse_address_add(CORE_ADDR addr, int nslots)
    represent the frame chain as the end of the previous frame instead
    of the beginning.  */
 
-CORE_ADDR
+static CORE_ADDR
 ia64_frame_chain (struct frame_info *frame)
 {
   if ((get_frame_type (frame) == SIGTRAMP_FRAME))
@@ -711,7 +719,7 @@ ia64_frame_chain (struct frame_info *frame)
     }
 }
 
-CORE_ADDR
+static CORE_ADDR
 ia64_frame_saved_pc (struct frame_info *frame)
 {
   if ((get_frame_type (frame) == SIGTRAMP_FRAME))
@@ -1222,7 +1230,7 @@ ia64_skip_prologue (CORE_ADDR pc)
   return examine_prologue (pc, pc+1024, 0);
 }
 
-void
+static void
 ia64_frame_init_saved_regs (struct frame_info *frame)
 {
   if (get_frame_saved_regs (frame))
@@ -1276,7 +1284,7 @@ ia64_frame_init_saved_regs (struct frame_info *frame)
     }
 }
 
-void
+static void
 ia64_get_saved_register (char *raw_buffer, 
                          int *optimized, 
 			 CORE_ADDR *addrp,
@@ -1508,7 +1516,7 @@ ia64_extract_struct_value_address (char *regbuf)
   return struct_return_address;
 }
 
-void
+static void
 ia64_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   /* FIXME: See above. */
@@ -1529,7 +1537,7 @@ ia64_saved_pc_after_call (struct frame_info *frame)
   return read_register (IA64_BR0_REGNUM);
 }
 
-CORE_ADDR
+static CORE_ADDR
 ia64_frame_args_address (struct frame_info *frame)
 {
   /* frame->frame points at the SP for this frame; But we want the start
@@ -1537,7 +1545,7 @@ ia64_frame_args_address (struct frame_info *frame)
   return ia64_frame_chain (frame);
 }
 
-CORE_ADDR
+static CORE_ADDR
 ia64_frame_locals_address (struct frame_info *frame)
 {
   /* frame->frame points at the SP for this frame; But we want the start
@@ -1545,7 +1553,7 @@ ia64_frame_locals_address (struct frame_info *frame)
   return ia64_frame_chain (frame);
 }
 
-void
+static void
 ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
   CORE_ADDR bsp, cfm;
@@ -1747,7 +1755,7 @@ generic_elf_find_global_pointer (CORE_ADDR faddr)
 		  status = target_read_memory (addr + 8, buf, sizeof (buf));
 		  if (status != 0)
 		    break;
-		  global_pointer = extract_address (buf, sizeof (buf));
+		  global_pointer = extract_unsigned_integer (buf, sizeof (buf));
 
 		  /* The payoff... */
 		  return global_pointer;
@@ -1844,7 +1852,7 @@ find_func_descr (CORE_ADDR faddr, CORE_ADDR *fdaptr)
   return fdesc; 
 }
 
-CORE_ADDR
+static CORE_ADDR
 ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		    int struct_return, CORE_ADDR struct_addr)
 {
@@ -1929,7 +1937,7 @@ ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	  char val_buf[8];
 
 	  store_unsigned_integer (val_buf, 8,
-				  find_func_descr (extract_address (VALUE_CONTENTS (arg), 8),
+				  find_func_descr (extract_unsigned_integer (VALUE_CONTENTS (arg), 8),
 						   &funcdescaddr));
 	  if (slotnum < rseslots)
 	    write_memory (rse_address_add (bsp, slotnum), val_buf, 8);
@@ -1994,14 +2002,15 @@ ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   /* Sync gdb's idea of what the registers are with the target. */
   target_store_registers (-1);
 
-  /* FIXME: This doesn't belong here!  Instead, SAVE_DUMMY_FRAME_TOS needs
-     to be defined to call generic_save_dummy_frame_tos().  But at the
-     time of this writing, SAVE_DUMMY_FRAME_TOS wasn't gdbarch'd, so
-     I chose to put this call here instead of using the old mechanisms. 
-     Once SAVE_DUMMY_FRAME_TOS is gdbarch'd, all we need to do is add the
-     line
+  /* FIXME: This doesn't belong here!  Instead,
+     DEPRECATED_SAVE_DUMMY_FRAME_TOS needs to be defined to call
+     generic_save_dummy_frame_tos().  But at the time of this writing,
+     DEPRECATED_SAVE_DUMMY_FRAME_TOS wasn't gdbarch'd, so I chose to
+     put this call here instead of using the old mechanisms.  Once
+     DEPRECATED_SAVE_DUMMY_FRAME_TOS is gdbarch'd, all we need to do
+     is add the line
 
-	set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+	set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
 
      to ia64_gdbarch_init() and remove the line below. */
   generic_save_dummy_frame_tos (sp);
@@ -2009,7 +2018,7 @@ ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   return sp;
 }
 
-CORE_ADDR
+static CORE_ADDR
 ia64_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   CORE_ADDR global_pointer = FIND_GLOBAL_POINTER (pc);
@@ -2021,7 +2030,7 @@ ia64_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
   return sp;
 }
 
-void
+static void
 ia64_store_return_value (struct type *type, char *valbuf)
 {
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
@@ -2035,7 +2044,7 @@ ia64_store_return_value (struct type *type, char *valbuf)
 				     valbuf, TYPE_LENGTH (type));
 }
 
-void
+static void
 ia64_pop_frame (void)
 {
   generic_pop_current_frame (ia64_pop_frame_regular);
@@ -2231,7 +2240,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_long_bit (gdbarch, 64);
   set_gdbarch_float_bit (gdbarch, 32);
   set_gdbarch_double_bit (gdbarch, 64);
-  set_gdbarch_long_double_bit (gdbarch, 64);
+  set_gdbarch_long_double_bit (gdbarch, 128);
   set_gdbarch_ptr_bit (gdbarch, 64);
 
   set_gdbarch_num_regs (gdbarch, ia64_num_regs);
@@ -2243,16 +2252,15 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, ia64_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, 8);
   set_gdbarch_deprecated_register_bytes (gdbarch, ia64_num_regs * 8 + 128*8);
-  set_gdbarch_register_byte (gdbarch, ia64_register_byte);
-  set_gdbarch_register_raw_size (gdbarch, ia64_register_raw_size);
+  set_gdbarch_deprecated_register_byte (gdbarch, ia64_register_byte);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, ia64_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 16);
-  set_gdbarch_register_virtual_size (gdbarch, ia64_register_virtual_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, ia64_register_virtual_size);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 16);
-  set_gdbarch_register_virtual_type (gdbarch, ia64_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, ia64_register_virtual_type);
 
   set_gdbarch_skip_prologue (gdbarch, ia64_skip_prologue);
 
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frameless_function_invocation (gdbarch, ia64_frameless_function_invocation);
 
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, ia64_saved_pc_after_call);
@@ -2263,9 +2271,9 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, ia64_frame_init_saved_regs);
   set_gdbarch_deprecated_get_saved_register (gdbarch, ia64_get_saved_register);
 
-  set_gdbarch_register_convertible (gdbarch, ia64_register_convertible);
-  set_gdbarch_register_convert_to_virtual (gdbarch, ia64_register_convert_to_virtual);
-  set_gdbarch_register_convert_to_raw (gdbarch, ia64_register_convert_to_raw);
+  set_gdbarch_deprecated_register_convertible (gdbarch, ia64_register_convertible);
+  set_gdbarch_deprecated_register_convert_to_virtual (gdbarch, ia64_register_convert_to_virtual);
+  set_gdbarch_deprecated_register_convert_to_raw (gdbarch, ia64_register_convert_to_raw);
 
   set_gdbarch_use_struct_convention (gdbarch, ia64_use_struct_convention);
   set_gdbarch_deprecated_extract_return_value (gdbarch, ia64_extract_return_value);
@@ -2288,21 +2296,20 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_call_dummy_words (gdbarch, ia64_call_dummy_words);
   set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (ia64_call_dummy_words));
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, ia64_init_extra_frame_info);
-  set_gdbarch_frame_args_address (gdbarch, ia64_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, ia64_frame_locals_address);
+  set_gdbarch_deprecated_frame_args_address (gdbarch, ia64_frame_args_address);
+  set_gdbarch_deprecated_frame_locals_address (gdbarch, ia64_frame_locals_address);
 
   /* We won't necessarily have a frame pointer and even if we do, it
      winds up being extraordinarly messy when attempting to find the
      frame chain.  So for the purposes of creating frames (which is
      all deprecated_read_fp() is used for), simply use the stack
      pointer value instead.  */
-  set_gdbarch_deprecated_target_read_fp (gdbarch, generic_target_read_sp);
+  set_gdbarch_deprecated_target_read_fp (gdbarch, ia64_read_fp);
 
   /* Settings that should be unnecessary.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
-  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_function_start_offset (gdbarch, 0);
@@ -2313,6 +2320,8 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   return gdbarch;
 }
+
+extern initialize_file_ftype _initialize_ia64_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_ia64_tdep (void)

@@ -1228,9 +1228,7 @@ java_type_from_name (name)
    Otherwise, return 0. */
 
 static int
-push_variable (name)
-     struct stoken name;
- 
+push_variable (struct stoken name)
 {
   char *tmp = copy_name (name);
   int is_a_field_of_this = 0;
@@ -1302,9 +1300,7 @@ push_fieldnames (name)
    Handle a qualified name, where DOT_INDEX is the index of the first '.' */
 
 static void
-push_qualified_expression_name (name, dot_index)
-     struct stoken name;
-     int dot_index;
+push_qualified_expression_name (struct stoken name, int dot_index)
 {
   struct stoken token;
   char *tmp;

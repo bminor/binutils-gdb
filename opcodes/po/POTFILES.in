@@ -137,6 +137,7 @@ xstormy16-dis.c
 xstormy16-ibld.c
 xstormy16-opc.c
 xstormy16-opc.h
+xtensa-dis.c
 z8k-dis.c
 z8k-opc.h
 z8kgen.c

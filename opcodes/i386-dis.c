@@ -93,6 +93,7 @@ static void OP_XS PARAMS ((int, int));
 static void OP_3DNowSuffix PARAMS ((int, int));
 static void OP_SIMD_Suffix PARAMS ((int, int));
 static void SIMD_Fixup PARAMS ((int, int));
+static void PNI_Fixup PARAMS ((int, int));
 static void BadOp PARAMS ((void));
 
 struct dis_private {
@@ -417,6 +418,12 @@ fetch_data (info, addr)
 #define PREGRP24  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 24, NULL, 0
 #define PREGRP25  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 25, NULL, 0
 #define PREGRP26  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 26, NULL, 0
+#define PREGRP27  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 27, NULL, 0
+#define PREGRP28  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 28, NULL, 0
+#define PREGRP29  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 29, NULL, 0
+#define PREGRP30  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 30, NULL, 0
+#define PREGRP31  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 31, NULL, 0
+#define PREGRP32  NULL, NULL, USE_PREFIX_USER_TABLE, NULL, 32, NULL, 0
 
 #define X86_64_0  NULL, NULL, X86_64_SPECIAL, NULL,  0, NULL, 0
 
@@ -776,11 +783,11 @@ static const struct dis386 dis386_twobyte[] = {
   /* 10 */
   { PREGRP8 },
   { PREGRP9 },
-  { "movlpX",		XM, EX, SIMD_Fixup, 'h' }, /* really only 2 operands */
+  { PREGRP30 },
   { "movlpX",		EX, XM, SIMD_Fixup, 'h' },
   { "unpcklpX",		XM, EX, XX },
   { "unpckhpX",		XM, EX, XX },
-  { "movhpX",		XM, EX, SIMD_Fixup, 'l' },
+  { PREGRP31 },
   { "movhpX",		EX, XM, SIMD_Fixup, 'l' },
   /* 18 */
   { GRP14 },
@@ -895,8 +902,8 @@ static const struct dis386 dis386_twobyte[] = {
   { "(bad)",		XX, XX, XX },
   { "(bad)",		XX, XX, XX },
   { "(bad)",		XX, XX, XX },
-  { "(bad)",		XX, XX, XX },
-  { "(bad)",		XX, XX, XX },
+  { PREGRP28 },
+  { PREGRP29 },
   { PREGRP23 },
   { PREGRP20 },
   /* 80 */
@@ -990,7 +997,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "bswap",		RMeSI, XX, XX },
   { "bswap",		RMeDI, XX, XX },
   /* d0 */
-  { "(bad)",		XX, XX, XX },
+  { PREGRP27 },
   { "psrlw",		MX, EM, XX },
   { "psrld",		MX, EM, XX },
   { "psrlq",		MX, EM, XX },
@@ -1026,7 +1033,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "pmaxsw",		MX, EM, XX },
   { "pxor",		MX, EM, XX },
   /* f0 */
-  { "(bad)",		XX, XX, XX },
+  { PREGRP32 },
   { "psllw",		MX, EM, XX },
   { "pslld",		MX, EM, XX },
   { "psllq",		MX, EM, XX },
@@ -1078,15 +1085,15 @@ static const unsigned char twobyte_has_modrm[256] = {
   /* 40 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 4f */
   /* 50 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 5f */
   /* 60 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 6f */
-  /* 70 */ 1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1, /* 7f */
+  /* 70 */ 1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1, /* 7f */
   /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
   /* 90 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* 9f */
   /* a0 */ 0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,1, /* af */
   /* b0 */ 1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1, /* bf */
   /* c0 */ 1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* df */
+  /* d0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* df */
   /* e0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* ef */
-  /* f0 */ 0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0  /* ff */
+  /* f0 */ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0  /* ff */
   /*       -------------------------------        */
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
 };
@@ -1095,21 +1102,21 @@ static const unsigned char twobyte_uses_SSE_prefix[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
   /*       -------------------------------        */
   /* 00 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 0f */
-  /* 10 */ 1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 1f */
+  /* 10 */ 1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0, /* 1f */
   /* 20 */ 0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,0, /* 2f */
   /* 30 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 3f */
   /* 40 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 4f */
   /* 50 */ 0,1,1,1,0,0,0,0,1,1,1,1,1,1,1,1, /* 5f */
   /* 60 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1, /* 6f */
-  /* 70 */ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1, /* 7f */
+  /* 70 */ 1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1, /* 7f */
   /* 80 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 8f */
   /* 90 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* 9f */
   /* a0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* af */
   /* b0 */ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, /* bf */
   /* c0 */ 0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0, /* cf */
-  /* d0 */ 0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, /* df */
+  /* d0 */ 1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, /* df */
   /* e0 */ 0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0, /* ef */
-  /* f0 */ 0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  /* ff */
+  /* f0 */ 1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0  /* ff */
   /*       -------------------------------        */
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
 };
@@ -1349,7 +1356,7 @@ static const struct dis386 grps[][8] = {
   /* GRP7 */
   {
     { "sgdtQ",	 M, XX, XX },
-    { "sidtQ",	 M, XX, XX },
+    { "sidtQ", PNI_Fixup, 0, XX, XX },
     { "lgdtQ",	 M, XX, XX },
     { "lidtQ",	 M, XX, XX },
     { "smswQ",	Ev, XX, XX },
@@ -1637,6 +1644,48 @@ static const struct dis386 prefix_user_table[][4] = {
     { "(bad)", XM, EX, XX },
     { "punpcklqdq", XM, EX, XX },
     { "(bad)", XM, EX, XX },
+  },
+  /* PREGRP27 */
+  {
+    { "(bad)", MX, EX, XX },
+    { "(bad)", XM, EX, XX },
+    { "addsubpd", XM, EX, XX },
+    { "addsubps", XM, EX, XX },
+  },
+  /* PREGRP28 */
+  {
+    { "(bad)", MX, EX, XX },
+    { "(bad)", XM, EX, XX },
+    { "haddpd", XM, EX, XX },
+    { "haddps", XM, EX, XX },
+  },
+  /* PREGRP29 */
+  {
+    { "(bad)", MX, EX, XX },
+    { "(bad)", XM, EX, XX },
+    { "hsubpd", XM, EX, XX },
+    { "hsubps", XM, EX, XX },
+  },
+  /* PREGRP30 */
+  {
+    { "movlpX", XM, EX, SIMD_Fixup, 'h' }, /* really only 2 operands */
+    { "movsldup", XM, EX, XX },
+    { "movlpd", XM, EX, XX },
+    { "movddup", XM, EX, XX },
+  },
+  /* PREGRP31 */
+  {
+    { "movhpX", XM, EX, SIMD_Fixup, 'l' },
+    { "movshdup", XM, EX, XX },
+    { "movhpd", XM, EX, XX },
+    { "(bad)", XM, EX, XX },
+  },
+  /* PREGRP32 */
+  {
+    { "(bad)", XM, EX, XX },
+    { "(bad)", XM, EX, XX },
+    { "(bad)", XM, EX, XX },
+    { "lddqu", XM, M, XX },
   },
 };
 
@@ -2294,7 +2343,7 @@ static const char *float_mem[] = {
   "fidivr{l||l|}",
   /* db */
   "fild{l||l|}",
-  "(bad)",
+  "fisttp{l||l|}",
   "fist{l||l|}",
   "fistp{l||l|}",
   "(bad)",
@@ -2312,7 +2361,7 @@ static const char *float_mem[] = {
   "fdivr{l||l|}",
   /* dd */
   "fld{l||l|}",
-  "(bad)",
+  "fisttpll",
   "fst{l||l|}",
   "fstp{l||l|}",
   "frstor",
@@ -2330,7 +2379,7 @@ static const char *float_mem[] = {
   "fidivr",
   /* df */
   "fild",
-  "(bad)",
+  "fisttp",
   "fist",
   "fistp",
   "fbld",
@@ -4135,6 +4184,33 @@ SIMD_Fixup (extrachar, sizeflag)
       *(p - 2) = *(p - 3);
       *(p - 3) = extrachar;
     }
+}
+
+static void
+PNI_Fixup (extrachar, sizeflag)
+     int extrachar ATTRIBUTE_UNUSED;
+     int sizeflag ATTRIBUTE_UNUSED;
+{
+  if (mod == 3 && reg == 1)
+    {
+      char *p = obuf + strlen (obuf);
+
+      /* Override "sidt".  */
+      if (rm)
+	{
+	  /* mwait %eax,%ecx  */
+	  strcpy (p - 4, "mwait   %eax,%ecx");
+	}
+      else
+	{
+	  /* monitor %eax,%ecx,%edx"  */
+	  strcpy (p - 4, "monitor %eax,%ecx,%edx");
+	}
+
+      codep++;
+    }
+  else
+    OP_E (0, sizeflag);
 }
 
 static void

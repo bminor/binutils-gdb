@@ -799,7 +799,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -1129,8 +1129,15 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 
 	case R_CRIS_32_GOTREL:
-	  /* This relocation must only be performed against local symbols.  */
-	  if (h != NULL && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
+	  /* This relocation must only be performed against local symbols.
+	     It's also ok when we link a program and the symbol is either
+	     defined in an ordinary (non-DSO) object or is undefined weak.  */
+	  if (h != NULL
+	      && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	      && !(!info->shared
+		   && ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
+		       || ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
+			   && h->root.type == bfd_link_hash_undefweak))))
 	    {
 	      (*_bfd_error_handler)
 		(_("%s: relocation %s is not allowed for global symbol: `%s' from %s section"),
@@ -2267,7 +2274,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
   asection *srelgot;
   asection *sreloc;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   dynobj = elf_hash_table (info)->dynobj;

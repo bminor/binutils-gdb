@@ -19,7 +19,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "mips/tm-bigmips64.h"
+#include "mips/tm-mips64.h"
 #include "solib.h"
 
 /* Redefine register numbers for SGI. */
@@ -62,11 +62,8 @@
 #define FCRIR_REGNUM 70		/* FP implementation/revision */
 
 
-#undef  DEPRECATED_REGISTER_BYTES
-#define DEPRECATED_REGISTER_BYTES (MIPS_NUMREGS * 8 + (NUM_REGS - MIPS_NUMREGS) * MIPS_REGSIZE)
-
-#undef  REGISTER_BYTE
-#define REGISTER_BYTE(N) \
+#undef  MIPS_REGISTER_BYTE
+#define MIPS_REGISTER_BYTE(N) \
      (((N) < FP0_REGNUM) ? (N) * MIPS_REGSIZE : \
       ((N) < FP0_REGNUM + 32) ?     \
       FP0_REGNUM * MIPS_REGSIZE + \
@@ -96,9 +93,5 @@
 #define SIGFRAME_FPREGSAVE_OFF	(SIGFRAME_BASE + 2 * 4 + 8 + 32 * 8 + 4)
 #define SIGFRAME_REG_SIZE	8
 
-/* Select the disassembler */
-#undef TM_PRINT_INSN_MACH
-#define TM_PRINT_INSN_MACH bfd_mach_mips8000
-
 /* Undefine those methods which have been multiarched.  */
-#undef REGISTER_VIRTUAL_TYPE
+#undef MIPS_REGISTER_TYPE

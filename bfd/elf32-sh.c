@@ -2034,7 +2034,7 @@ sh_elf_relax_section (abfd, sec, link_info, again)
 
   *again = FALSE;
 
-  if (link_info->relocateable
+  if (link_info->relocatable
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0)
     return TRUE;
@@ -4338,7 +4338,7 @@ sh_elf_size_dynamic_sections (output_bfd, info)
   if (htab->root.dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (! info->shared)
+      if (info->executable)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -4500,7 +4500,7 @@ sh_elf_size_dynamic_sections (output_bfd, info)
 #define add_dynamic_entry(TAG, VAL) \
   bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
 
-      if (! info->shared)
+      if (info->executable)
 	{
 	  if (! add_dynamic_entry (DT_DEBUG, 0))
 	    return FALSE;
@@ -4650,9 +4650,9 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	     (info,
 	      _("Unexpected STO_SH5_ISA32 on local symbol is not handled"),
 	      input_bfd, input_section, rel->r_offset));
-	  if (info->relocateable)
+	  if (info->relocatable)
 	    {
-	      /* This is a relocateable link.  We don't have to change
+	      /* This is a relocatable link.  We don't have to change
 		 anything, unless the reloc is against a section symbol,
 		 in which case we have to adjust according to where the
 		 section symbol winds up in the output section.  */
@@ -4721,8 +4721,8 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  /* Section symbol are never (?) placed in the hash table, so
 	     we can just ignore hash relocations when creating a
-	     relocateable object file.  */
-	  if (info->relocateable)
+	     relocatable object file.  */
+	  if (info->relocatable)
 	    continue;
 
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
@@ -5718,12 +5718,12 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 static bfd_byte *
 sh_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
-				       data, relocateable, symbols)
+				       data, relocatable, symbols)
      bfd *output_bfd;
      struct bfd_link_info *link_info;
      struct bfd_link_order *link_order;
      bfd_byte *data;
-     bfd_boolean relocateable;
+     bfd_boolean relocatable;
      asymbol **symbols;
 {
   Elf_Internal_Shdr *symtab_hdr;
@@ -5735,11 +5735,11 @@ sh_elf_get_relocated_section_contents (output_bfd, link_info, link_order,
 
   /* We only need to handle the case of relaxing, or of having a
      particular set of section contents, specially.  */
-  if (relocateable
+  if (relocatable
       || elf_section_data (input_section)->this_hdr.contents == NULL)
     return bfd_generic_get_relocated_section_contents (output_bfd, link_info,
 						       link_order, data,
-						       relocateable,
+						       relocatable,
 						       symbols);
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -6211,7 +6211,7 @@ sh_elf_check_relocs (abfd, info, sec, relocs)
   srelgot = NULL;
   sreloc = NULL;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;

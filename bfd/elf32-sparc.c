@@ -862,7 +862,7 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
   asection *sreloc;
   bfd_boolean checked_tlsgd = FALSE;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   htab = elf32_sparc_hash_table (info);
@@ -1820,7 +1820,7 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (! info->shared)
+      if (info->executable)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -1997,7 +1997,7 @@ elf32_sparc_size_dynamic_sections (output_bfd, info)
 #define add_dynamic_entry(TAG, VAL) \
   bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
 
-      if (!info->shared)
+      if (info->executable)
 	{
 	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return FALSE;
@@ -2126,7 +2126,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   htab = elf32_sparc_hash_table (info);

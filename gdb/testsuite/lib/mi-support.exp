@@ -636,7 +636,7 @@ proc mi_run_cmd {args} {
 	    }
 	    send_gdb "000-exec-continue\n";
 	    gdb_expect 60 {
-		-re "Continu\[^\r\n\]*\[\r\n\]" {}
+		-re "000\\^running\[\r\n\]+$mi_gdb_prompt$" {}
 		default {}
 	    }
 	    return;

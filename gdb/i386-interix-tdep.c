@@ -90,7 +90,7 @@ pei_adjust_objfile_offsets (struct objfile *objfile,
       return;
     }
 
-  for (i = 0; i < SECT_OFF_MAX; i++)
+  for (i = 0; i < objfile->num_sections; i++)
     {
       (objfile->section_offsets)->offsets[i] += symbols_offset;
     }

@@ -162,6 +162,8 @@ cpu32bug_open (char *args, int from_tty)
   monitor_open (args, &cpu32bug_cmds, from_tty);
 }
 
+extern initialize_file_ftype _initialize_cpu32bug_rom; /* -Wmissing-prototypes */
+
 void
 _initialize_cpu32bug_rom (void)
 {

@@ -1,5 +1,5 @@
 /* Common code for PA ELF implementations.
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -1159,7 +1159,7 @@ elf_hppa_unmark_useless_dynamic_symbols (h, data)
 
      Ultimately we should have better controls over the generic ELF BFD
      linker code.  */
-  if (! info->relocateable
+  if (! info->relocatable
       && ! (info->shared
 	    && !info->no_undefined)
       && h->root.type == bfd_link_hash_undefined
@@ -1195,7 +1195,7 @@ elf_hppa_remark_useless_dynamic_symbols (h, data)
 
      Ultimately we should have better controls over the generic ELF BFD
      linker code.  */
-  if (! info->relocateable
+  if (! info->relocatable
       && ! (info->shared
 	    && !info->no_undefined)
       && h->root.type == bfd_link_hash_undefined
@@ -1265,7 +1265,7 @@ elf_hppa_final_link (abfd, info)
   bfd_boolean retval;
   struct elf64_hppa_link_hash_table *hppa_info = elf64_hppa_hash_table (info);
 
-  if (! info->relocateable)
+  if (! info->relocatable)
     {
       struct elf_link_hash_entry *gp;
       bfd_vma gp_val;
@@ -1376,7 +1376,7 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *relend;
   struct elf64_hppa_link_hash_table *hppa_info;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   hppa_info = elf64_hppa_hash_table (info);

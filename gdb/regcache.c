@@ -82,7 +82,7 @@ struct regcache_descr
   struct type **register_type;
 };
 
-void
+static void
 init_legacy_regcache_descr (struct gdbarch *gdbarch,
 			    struct regcache_descr *descr)
 {
@@ -340,7 +340,7 @@ regcache_xfree (struct regcache *regcache)
   xfree (regcache);
 }
 
-void
+static void
 do_regcache_xfree (void *data)
 {
   regcache_xfree (data);
@@ -423,8 +423,7 @@ static int
 do_cooked_read (void *src, int regnum, void *buf)
 {
   struct regcache *regcache = src;
-  if (!regcache_valid_p (regcache, regnum)
-      && regcache->readonly_p)
+  if (!regcache->register_valid_p[regnum] && regcache->readonly_p)
     /* Don't even think about fetching a register from a read-only
        cache when the register isn't yet valid.  There isn't a target
        from which the register value can be fetched.  */
@@ -1064,7 +1063,7 @@ typedef void (regcache_read_ftype) (struct regcache *regcache, int regnum,
 typedef void (regcache_write_ftype) (struct regcache *regcache, int regnum,
 				     const void *buf);
 
-void
+static void
 regcache_xfer_part (struct regcache *regcache, int regnum,
 		    int offset, int len, void *in, const void *out,
 		    regcache_read_ftype *read, regcache_write_ftype *write)
@@ -1267,41 +1266,16 @@ regcache_collect (int regnum, void *buf)
 /* read_pc, write_pc, read_sp, deprecated_read_fp, etc.  Special
    handling for registers PC, SP, and FP.  */
 
-/* NOTE: cagney/2001-02-18: The functions generic_target_read_pc(),
-   read_pc_pid(), read_pc(), generic_target_write_pc(),
-   write_pc_pid(), write_pc(), generic_target_read_sp(), read_sp(),
-   generic_target_write_sp(), and deprecated_read_fp(), will
-   eventually be moved out of the reg-cache into either frame.[hc] or
-   to the multi-arch framework.  The are not part of the raw register
-   cache.  */
+/* NOTE: cagney/2001-02-18: The functions read_pc_pid(), read_pc(),
+   read_sp(), and deprecated_read_fp(), will eventually be replaced by
+   per-frame methods.  Instead of relying on the global INFERIOR_PTID,
+   they will use the contextual information provided by the FRAME.
+   These functions do not belong in the register cache.  */
 
-/* This routine is getting awfully cluttered with #if's.  It's probably
-   time to turn this into READ_PC and define it in the tm.h file.
-   Ditto for write_pc.
-
-   1999-06-08: The following were re-written so that it assumes the
-   existence of a TARGET_READ_PC et.al. macro.  A default generic
-   version of that macro is made available where needed.
-
-   Since the ``TARGET_READ_PC'' et.al. macro is going to be controlled
-   by the multi-arch framework, it will eventually be possible to
-   eliminate the intermediate read_pc_pid().  The client would call
-   TARGET_READ_PC directly. (cagney). */
-
-CORE_ADDR
-generic_target_read_pc (ptid_t ptid)
-{
-#ifdef PC_REGNUM
-  if (PC_REGNUM >= 0)
-    {
-      CORE_ADDR pc_val = ADDR_BITS_REMOVE ((CORE_ADDR) read_register_pid (PC_REGNUM, ptid));
-      return pc_val;
-    }
-#endif
-  internal_error (__FILE__, __LINE__,
-		  "generic_target_read_pc");
-  return 0;
-}
+/* NOTE: cagney/2003-06-07: The functions generic_target_write_pc(),
+   write_pc_pid(), write_pc(), and deprecated_read_fp(), all need to
+   be replaced by something that does not rely on global state.  But
+   what?  */
 
 CORE_ADDR
 read_pc_pid (ptid_t ptid)
@@ -1313,7 +1287,17 @@ read_pc_pid (ptid_t ptid)
   saved_inferior_ptid = inferior_ptid;
   inferior_ptid = ptid;
 
-  pc_val = TARGET_READ_PC (ptid);
+  if (TARGET_READ_PC_P ())
+    pc_val = TARGET_READ_PC (ptid);
+  /* Else use per-frame method on get_current_frame.  */
+  else if (PC_REGNUM >= 0)
+    {
+      CORE_ADDR raw_val = read_register_pid (PC_REGNUM, ptid);
+      CORE_ADDR pc_val = ADDR_BITS_REMOVE (raw_val);
+      return pc_val;
+    }
+  else
+    internal_error (__FILE__, __LINE__, "read_pc_pid: Unable to find PC");
 
   inferior_ptid = saved_inferior_ptid;
   return pc_val;
@@ -1362,34 +1346,24 @@ write_pc (CORE_ADDR pc)
 /* Cope with strage ways of getting to the stack and frame pointers */
 
 CORE_ADDR
-generic_target_read_sp (void)
-{
-#ifdef SP_REGNUM
-  if (SP_REGNUM >= 0)
-    return read_register (SP_REGNUM);
-#endif
-  internal_error (__FILE__, __LINE__,
-		  "generic_target_read_sp");
-}
-
-CORE_ADDR
 read_sp (void)
 {
-  return TARGET_READ_SP ();
+  if (TARGET_READ_SP_P ())
+    return TARGET_READ_SP ();
+  else if (gdbarch_unwind_sp_p (current_gdbarch))
+    return get_frame_sp (get_current_frame ());
+  else if (SP_REGNUM >= 0)
+    /* Try SP_REGNUM last: this makes all sorts of [wrong] assumptions
+       about the architecture so put it at the end.  */
+    return read_register (SP_REGNUM);
+  internal_error (__FILE__, __LINE__, "read_sp: Unable to find SP");
 }
 
 void
-generic_target_write_sp (CORE_ADDR val)
+deprecated_write_sp (CORE_ADDR val)
 {
-#ifdef SP_REGNUM
-  if (SP_REGNUM >= 0)
-    {
-      write_register (SP_REGNUM, val);
-      return;
-    }
-#endif
-  internal_error (__FILE__, __LINE__,
-		  "generic_target_write_sp");
+  gdb_assert (SP_REGNUM >= 0);
+  write_register (SP_REGNUM, val);
 }
 
 CORE_ADDR
@@ -1691,6 +1665,8 @@ maintenance_print_register_groups (char *args, int from_tty)
 {
   regcache_print (args, regcache_dump_groups);
 }
+
+extern initialize_file_ftype _initialize_regcache; /* -Wmissing-prototype */
 
 void
 _initialize_regcache (void)

@@ -374,7 +374,7 @@ rdp_init (int cold, int tty)
 }
 
 
-void
+static void
 send_rdp (char *template,...)
 {
   char buf[200];
@@ -1402,6 +1402,8 @@ init_remote_rdp_ops (void)
   remote_rdp_ops.to_has_execution = 1;
   remote_rdp_ops.to_magic = OPS_MAGIC;
 }
+
+extern initialize_file_ftype _initialize_remote_rdp; /* -Wmissing-prototypes */
 
 void
 _initialize_remote_rdp (void)

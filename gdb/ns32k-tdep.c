@@ -327,7 +327,7 @@ ns32k_sigtramp_saved_pc (struct frame_info *frame)
   /* Get sigcontext address, it is the third parameter on the stack.  */
   if (get_next_frame (frame))
     sigcontext_addr = read_memory_typed_address
-      (FRAME_ARGS_ADDRESS (get_next_frame (frame)) + FRAME_ARGS_SKIP + sigcontext_offs,
+      (DEPRECATED_FRAME_ARGS_ADDRESS (get_next_frame (frame)) + FRAME_ARGS_SKIP + sigcontext_offs,
        builtin_type_void_data_ptr);
   else
     sigcontext_addr = read_memory_typed_address
@@ -355,12 +355,6 @@ ns32k_frame_args_address (struct frame_info *frame)
     return (get_frame_base (frame));
 
   return (read_register (SP_REGNUM) - 4);
-}
-
-static CORE_ADDR
-ns32k_frame_locals_address (struct frame_info *frame)
-{
-  return (get_frame_base (frame));
 }
 
 /* Code to initialize the addresses of the saved registers of frame described
@@ -503,7 +497,7 @@ ns32k_store_return_value (struct type *valtype, char *valbuf)
 static CORE_ADDR
 ns32k_extract_struct_value_address (char *regbuf)
 {
-  return (extract_address (regbuf + REGISTER_BYTE (0), REGISTER_RAW_SIZE (0)));
+  return (extract_unsigned_integer (regbuf + REGISTER_BYTE (0), REGISTER_RAW_SIZE (0)));
 }
 
 void
@@ -513,7 +507,7 @@ ns32k_gdbarch_init_32082 (struct gdbarch *gdbarch)
 
   set_gdbarch_register_name (gdbarch, ns32k_register_name_32082);
   set_gdbarch_deprecated_register_bytes (gdbarch, NS32K_REGISTER_BYTES_32082);
-  set_gdbarch_register_byte (gdbarch, ns32k_register_byte_32082);
+  set_gdbarch_deprecated_register_byte (gdbarch, ns32k_register_byte_32082);
 }
 
 void
@@ -523,7 +517,7 @@ ns32k_gdbarch_init_32382 (struct gdbarch *gdbarch)
 
   set_gdbarch_register_name (gdbarch, ns32k_register_name_32382);
   set_gdbarch_deprecated_register_bytes (gdbarch, NS32K_REGISTER_BYTES_32382);
-  set_gdbarch_register_byte (gdbarch, ns32k_register_byte_32382);
+  set_gdbarch_deprecated_register_byte (gdbarch, ns32k_register_byte_32382);
 }
 
 /* Initialize the current architecture based on INFO.  If possible, re-use an
@@ -557,12 +551,12 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_num_regs (gdbarch, NS32K_PS_REGNUM);
 
   set_gdbarch_deprecated_register_size (gdbarch, NS32K_REGISTER_SIZE);
-  set_gdbarch_register_raw_size (gdbarch, ns32k_register_raw_size);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, ns32k_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, NS32K_MAX_REGISTER_RAW_SIZE);
-  set_gdbarch_register_virtual_size (gdbarch, ns32k_register_virtual_size);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, ns32k_register_virtual_size);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch,
                                          NS32K_MAX_REGISTER_VIRTUAL_SIZE);
-  set_gdbarch_register_virtual_type (gdbarch, ns32k_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, ns32k_register_virtual_type);
 
   /* Frame and stack info */
   set_gdbarch_skip_prologue (gdbarch, umax_skip_prologue);
@@ -575,8 +569,7 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_frame_chain (gdbarch, ns32k_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, ns32k_frame_saved_pc);
 
-  set_gdbarch_frame_args_address (gdbarch, ns32k_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, ns32k_frame_locals_address);
+  set_gdbarch_deprecated_frame_args_address (gdbarch, ns32k_frame_args_address);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, ns32k_frame_init_saved_regs);
 
@@ -611,13 +604,15 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_function_start_offset (gdbarch, 0);
 
   /* Should be using push_dummy_call.  */
-  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
   return (gdbarch);
 }
+
+extern initialize_file_ftype _initialize_ns32k_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_ns32k_tdep (void)

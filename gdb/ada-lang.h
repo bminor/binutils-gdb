@@ -27,9 +27,9 @@ struct partial_symbol;
 
 struct block;
 
-/* A macro to reorder the bytes of an address depending on the endiannes
-   of the target */
-#define EXTRACT_ADDRESS(x) ((void *) extract_address (&(x), sizeof (x)))
+/* A macro to reorder the bytes of an address depending on the
+   endiannes of the target.  */
+#define EXTRACT_ADDRESS(x) ((void *) extract_unsigned_integer (&(x), sizeof (x)))
 /* A macro to reorder the bytes of an int depending on the endiannes
    of the target */
 #define EXTRACT_INT(x) ((int) extract_signed_integer (&(x), sizeof (x)))

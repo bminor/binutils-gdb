@@ -130,15 +130,9 @@ EXTERN int n_this_object_header_files;
 
 EXTERN int n_allocated_this_object_header_files;
 
-extern struct type *read_type (char **, struct objfile *);
-
 extern void cleanup_undefined_types (void);
 
-extern struct type **dbx_lookup_type (int[2]);
-
 extern long read_number (char **, int);
-
-extern void add_undefined_type (struct type *);
 
 extern struct symbol *define_symbol (CORE_ADDR, char *, int, int,
 				     struct objfile *);

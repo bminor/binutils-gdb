@@ -1,3 +1,65 @@
+2003-06-24  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.texinfo (Unsupported languages): New section.
+	(Languages): Add link to new section.
+
+2003-06-22  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (Contributors): Mention 6.0 release engineer.
+
+2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbint.texinfo (Coding): Clarify use of gdb_XXX.h headers.
+
+2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (SFILES_INCLUDED): Add agentexpr.texi.
+	* agentexpr.texi: Retitle section, and change it to an appendix.
+	Comment out texinfo initialization.  Factor a @var{} into two
+	pieces to prevent makeinfo warnings.
+	* gdb.texinfo: Add Agent Expressions appendix.
+
+2003-06-19  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbint.texinfo (Native Conditionals): Remove PREPARE_TO_PROCEED.
+
+2003-06-18  Daniel Jacobowitz  <drow@mvista.com>
+
+        * gdb.texinfo (Remote Debugging): New section "Connecting to a
+	remote target".  Document the "detach" and "disconnect" commands.
+	(Server, Netware, Debug Session): Reference "Connecting to a
+	remote target".
+	(GDB/MI Target Manipulation): Document "-target-disconnect".
+
+2003-06-13  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Deprecate
+	REMOTE_BREAKPOINT, LITTLE_REMOTE_BREAKPOINT, and
+	BIG_REMOTE_BREAKPOINT.  Cross reference BREAKPOINT_FROM_PC.
+
+2003-06-09  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Separate Debug Files): Remove extra semicolon.
+
+2003-06-08  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	documentation on FRAME_ARGS_ADDRESS_CORRECT.
+
+2003-06-08  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	"unwind_sp".  Cross reference "unwind_sp" and TARGET_READ_SP.
+
+2003-06-07  Adam Fedor  <fedor@gnu.org>
+
+	* gdb.texinfo: Add Objective-C documentation.
+
+2003-06-01  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Add "func_addr"
+	parameter to "push_dummy_call".  Rename "dummy_addr" to "bp_addr".
+
 2003-05-21  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete

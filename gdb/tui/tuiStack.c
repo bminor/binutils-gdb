@@ -1,6 +1,6 @@
 /* TUI display locator.
 
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation,
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
    Inc.
 
    Contributed by Hewlett-Packard Company.
@@ -22,23 +22,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* FIXME: cagney/2002-02-28: The GDB coding standard indicates that
-   "defs.h" should be included first.  Unfortunatly some systems
-   (currently Debian GNU/Linux) include the <stdbool.h> via <curses.h>
-   and they clash with "bfd.h"'s definiton of true/false.  The correct
-   fix is to remove true/false from "bfd.h", however, until that
-   happens, hack around it by including "config.h" and <curses.h>
-   first.  */
-
-#include "config.h"
-#ifdef HAVE_NCURSES_H       
-#include <ncurses.h>
-#else
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#endif
-
 #include "defs.h"
 #include "symtab.h"
 #include "breakpoint.h"
@@ -56,6 +39,13 @@
 #include "tuiSourceWin.h"
 #include "tui-file.h"
 
+#ifdef HAVE_NCURSES_H       
+#include <ncurses.h>
+#else
+#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+#endif
 
 /* Get a printable name for the function at the address.
    The symbol name is demangled if demangling is turned on.
@@ -233,7 +223,7 @@ tui_get_function_from_frame (struct frame_info *fi)
   struct ui_file *stream = tui_sfileopen (256);
   char *p;
 
-  print_address_symbolic (fi->pc, stream, demangle, "");
+  print_address_symbolic (get_frame_pc (fi), stream, demangle, "");
   p = tui_file_get_strbuf (stream);
 
   /* Use simple heuristics to isolate the function name.  The symbol can
@@ -356,7 +346,7 @@ tuiShowFrameInfo (struct frame_info *fi)
       tui_set_locator_info (sal.symtab == 0 ? "??" : sal.symtab->filename,
                             tui_get_function_from_frame (fi),
                             sal.line,
-                            fi->pc);
+                            get_frame_pc (fi));
       tuiShowLocatorContent ();
       startLine = 0;
       for (i = 0; i < (sourceWindows ())->count; i++)
@@ -374,10 +364,11 @@ tuiShowFrameInfo (struct frame_info *fi)
 	    }
 	  else
 	    {
-	      if (find_pc_partial_function (fi->pc, (char **) NULL, &low, (CORE_ADDR) NULL) == 0)
+	      if (find_pc_partial_function (get_frame_pc (fi), (char **) NULL,
+					    &low, (CORE_ADDR) NULL) == 0)
 		error ("No function contains program counter for selected frame.\n");
 	      else
-		low = tuiGetLowDisassemblyAddress (low, fi->pc);
+		low = tuiGetLowDisassemblyAddress (low, get_frame_pc (fi));
 	    }
 
 	  if (winInfo == srcWin)

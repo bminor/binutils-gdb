@@ -2058,7 +2058,7 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
   /* We are not currently changing any sizes, so only one pass.  */
   *again = FALSE;
 
-  if (link_info->relocateable
+  if (link_info->relocatable
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0)
     return TRUE;
@@ -2465,7 +2465,7 @@ elf64_alpha_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd_vma *valp;
 {
   if (sym->st_shndx == SHN_COMMON
-      && !info->relocateable
+      && !info->relocatable
       && sym->st_size <= elf_gp_size (abfd))
     {
       /* Common symbols less than or equal to -G nn bytes are
@@ -3057,7 +3057,7 @@ elf64_alpha_check_relocs (abfd, info, sec, relocs)
   bfd_boolean got_created;
   bfd_size_type amt;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   dynobj = elf_hash_table(info)->dynobj;
@@ -3863,7 +3863,7 @@ elf64_alpha_always_size_sections (output_bfd, info)
 {
   bfd *i;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   /* First, take care of the indirect symbols created by versioning.  */
@@ -4090,7 +4090,7 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (!info->shared)
+      if (info->executable)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -4176,7 +4176,7 @@ elf64_alpha_size_dynamic_sections (output_bfd, info)
 #define add_dynamic_entry(TAG, VAL) \
   bfd_elf64_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
 
-      if (!info->shared)
+      if (info->executable)
 	{
 	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return FALSE;
@@ -4330,7 +4330,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
   const char *section_name;
 
   /* Handle relocatable links with a smaller loop.  */
-  if (info->relocateable)
+  if (info->relocatable)
     return elf64_alpha_relocate_section_r (output_bfd, info, input_bfd,
 					   input_section, contents, relocs,
 					   local_syms, local_sections);

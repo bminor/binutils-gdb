@@ -2,8 +2,8 @@
    definitions here are used when the _target_ system is running
    GNU/Linux.
 
-   Copyright 1996, 1998, 1999, 2000, 2002 Free Software Foundation,
-   Inc.
+   Copyright 1996, 1998, 1999, 2000, 2002, 2003
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,13 +26,6 @@
 #define TM_LINUXALPHA_H
 
 #include "alpha/tm-alpha.h"
-
-/* Get start and end address of sigtramp handler.  */
-
-extern LONGEST alpha_linux_sigtramp_offset (CORE_ADDR);
-#define SIGTRAMP_START(pc)	(pc - alpha_linux_sigtramp_offset (pc))
-#define SIGTRAMP_END(pc)	(SIGTRAMP_START(pc) + 3*4)
-
 
 /* Number of traps that happen between exec'ing the shell to run an
    inferior, and when we finally get to the inferior code.  This is 2

@@ -127,6 +127,7 @@ struct mi_cmd mi_cmds[] =
   {"target-attach", 0, 0},
   {"target-compare-sections", 0, 0},
   {"target-detach", "detach", 0},
+  {"target-disconnect", "disconnect", 0},
   {"target-download", 0, mi_cmd_target_download},
   {"target-exec-status", 0, 0},
   {"target-list-available-targets", 0, 0},

@@ -213,6 +213,8 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 		  struct value *vt_val;
 		  struct symbol *wsym = (struct symbol *) NULL;
 		  struct type *wtype;
+		  struct block *block = (struct block *) NULL;
+		  int is_this_fld;
 
 		  if (msymbol != NULL)
 		    wsym = lookup_symbol_minsym (msymbol);
@@ -589,7 +591,8 @@ c_value_print (struct value *val, struct ui_file *stream, int format,
       /* Otherwise, we end up at the return outside this "if" */
     }
 
-  return val_print (type, VALUE_CONTENTS_ALL (val), VALUE_EMBEDDED_OFFSET (val),
-		    VALUE_ADDRESS (val),
+  return val_print (type, VALUE_CONTENTS_ALL (val),
+		    VALUE_EMBEDDED_OFFSET (val),
+		    VALUE_ADDRESS (val) + VALUE_OFFSET (val),
 		    stream, format, 1, 0, pretty);
 }

@@ -60,6 +60,7 @@ struct type *builtin_type_long_double;
 struct type *builtin_type_complex;
 struct type *builtin_type_double_complex;
 struct type *builtin_type_string;
+struct type *builtin_type_int0;
 struct type *builtin_type_int8;
 struct type *builtin_type_uint8;
 struct type *builtin_type_int16;
@@ -434,7 +435,7 @@ address_space_int_to_name (int space_flag)
 /* Create a new type with instance flags NEW_FLAGS, based on TYPE.
    If STORAGE is non-NULL, create the new type instance there.  */
 
-struct type *
+static struct type *
 make_qualified_type (struct type *type, int new_flags,
 		     struct type *storage)
 {
@@ -1668,7 +1669,7 @@ check_typedef (struct type *type)
 /* Parse a type expression in the string [P..P+LENGTH).  If an error occurs,
    silently return builtin_type_void. */
 
-struct type *
+static struct type *
 safe_parse_type (char *p, int length)
 {
   struct ui_file *saved_gdb_stderr;
@@ -3417,6 +3418,10 @@ build_gdbtypes (void)
     init_type (TYPE_CODE_STRING, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,
 	       "string", (struct objfile *) NULL);
+  builtin_type_int0 =
+    init_type (TYPE_CODE_INT, 0 / 8,
+	       0,
+	       "int0_t", (struct objfile *) NULL);
   builtin_type_int8 =
     init_type (TYPE_CODE_INT, 8 / 8,
 	       0,

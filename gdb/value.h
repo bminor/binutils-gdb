@@ -25,6 +25,7 @@
 #define VALUE_H 1
 
 #include "doublest.h"
+#include "frame.h"		/* For struct frame_id.  */
 
 struct block;
 struct expression;
@@ -77,12 +78,12 @@ struct value
      For BITS_BIG_ENDIAN=1 targets, it is the position of the MSB. */
     int bitpos;
 
-  /* Frame value is relative to.  In practice, this address is only
-     used if the value is stored in several registers in other than
-     the current frame, and these registers have not all been saved
-     at the same place in memory.  This will be described in the
-     lval enum above as "lval_reg_frame_relative".  */
-  CORE_ADDR frame_addr;
+  /* Frame value is relative to.  In practice, this ID is only used if
+     the value is stored in several registers in other than the
+     current frame, and these registers have not all been saved at the
+     same place in memory.  This will be described in the lval enum
+     above as "lval_reg_frame_relative".  */
+  struct frame_id frame_id;
 
   /* Type of the value.  */
   struct type *type;
@@ -216,7 +217,7 @@ extern int value_fetch_lazy (struct value *val);
 #define VALUE_ADDRESS(val) (val)->location.address
 #define VALUE_INTERNALVAR(val) (val)->location.internalvar
 #define VALUE_FRAME_REGNUM(val) ((val)->location.regnum)
-#define VALUE_FRAME(val) ((val)->frame_addr)
+#define VALUE_FRAME_ID(val) ((val)->frame_id)
 #define VALUE_OFFSET(val) (val)->offset
 #define VALUE_BITSIZE(val) (val)->bitsize
 #define VALUE_BITPOS(val) (val)->bitpos

@@ -160,6 +160,8 @@ dbug_open (char *args, int from_tty)
   monitor_open (args, &dbug_cmds, from_tty);
 }
 
+extern initialize_file_ftype _initialize_dbug_rom; /* -Wmissing-prototypes */
+
 void
 _initialize_dbug_rom (void)
 {

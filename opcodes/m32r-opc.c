@@ -1187,7 +1187,7 @@ static const CGEN_IBASE m32r_cgen_macro_insn_table[] =
 /* bc $disp24 */
   {
     -1, "bc24r", "bc", 32,
-    { 0|A(RELAX)|A(COND_CTI)|A(ALIAS), { (1<<MACH_BASE), PIPE_NONE } }
+    { 0|A(RELAXED)|A(COND_CTI)|A(ALIAS), { (1<<MACH_BASE), PIPE_NONE } }
   },
 /* bl $disp8 */
   {
@@ -1197,7 +1197,7 @@ static const CGEN_IBASE m32r_cgen_macro_insn_table[] =
 /* bl $disp24 */
   {
     -1, "bl24r", "bl", 32,
-    { 0|A(RELAX)|A(UNCOND_CTI)|A(ALIAS), { (1<<MACH_BASE), PIPE_NONE } }
+    { 0|A(RELAXED)|A(UNCOND_CTI)|A(ALIAS), { (1<<MACH_BASE), PIPE_NONE } }
   },
 /* bcl $disp8 */
   {
@@ -1207,7 +1207,7 @@ static const CGEN_IBASE m32r_cgen_macro_insn_table[] =
 /* bcl $disp24 */
   {
     -1, "bcl24r", "bcl", 32,
-    { 0|A(RELAX)|A(COND_CTI)|A(ALIAS), { (1<<MACH_M32RX), PIPE_NONE } }
+    { 0|A(RELAXED)|A(COND_CTI)|A(ALIAS), { (1<<MACH_M32RX), PIPE_NONE } }
   },
 /* bnc $disp8 */
   {
@@ -1217,7 +1217,7 @@ static const CGEN_IBASE m32r_cgen_macro_insn_table[] =
 /* bnc $disp24 */
   {
     -1, "bnc24r", "bnc", 32,
-    { 0|A(RELAX)|A(COND_CTI)|A(ALIAS), { (1<<MACH_BASE), PIPE_NONE } }
+    { 0|A(RELAXED)|A(COND_CTI)|A(ALIAS), { (1<<MACH_BASE), PIPE_NONE } }
   },
 /* bra $disp8 */
   {
@@ -1227,7 +1227,7 @@ static const CGEN_IBASE m32r_cgen_macro_insn_table[] =
 /* bra $disp24 */
   {
     -1, "bra24r", "bra", 32,
-    { 0|A(RELAX)|A(UNCOND_CTI)|A(ALIAS), { (1<<MACH_BASE), PIPE_NONE } }
+    { 0|A(RELAXED)|A(UNCOND_CTI)|A(ALIAS), { (1<<MACH_BASE), PIPE_NONE } }
   },
 /* bncl $disp8 */
   {
@@ -1237,7 +1237,7 @@ static const CGEN_IBASE m32r_cgen_macro_insn_table[] =
 /* bncl $disp24 */
   {
     -1, "bncl24r", "bncl", 32,
-    { 0|A(RELAX)|A(COND_CTI)|A(ALIAS), { (1<<MACH_M32RX), PIPE_NONE } }
+    { 0|A(RELAXED)|A(COND_CTI)|A(ALIAS), { (1<<MACH_M32RX), PIPE_NONE } }
   },
 /* ld $dr,@($sr) */
   {

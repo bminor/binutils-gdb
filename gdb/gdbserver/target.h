@@ -48,6 +48,10 @@ struct target_ops
 
   void (*kill) (void);
 
+  /* Detach from all inferiors.  */
+
+  void (*detach) (void);
+
   /* Return 1 iff the thread with process ID PID is alive.  */
 
   int (*thread_alive) (int pid);
@@ -104,6 +108,9 @@ struct target_ops
      symbols.  */
 
   void (*look_up_symbols) (void);
+
+  /* Send a signal to the inferior process, however is appropriate.  */
+  void (*send_signal) (int);
 };
 
 extern struct target_ops *the_target;
@@ -118,6 +125,9 @@ void set_target_ops (struct target_ops *);
 
 #define kill_inferior() \
   (*the_target->kill) ()
+
+#define detach_inferior() \
+  (*the_target->detach) ()
 
 #define mythread_alive(pid) \
   (*the_target->thread_alive) (pid)

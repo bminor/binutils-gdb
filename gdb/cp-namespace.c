@@ -43,6 +43,9 @@ unsigned char processing_has_namespace_info;
    contain the name of the current namespace.  The string is
    temporary; copy it if you need it.  */
 
+/* FIXME: carlton/2003-06-12: This isn't entirely reliable: currently,
+   we get mislead by DW_AT_specification.  */
+
 const char *processing_current_prefix;
 
 /* List of using directives that are active in the current file.  */
@@ -232,6 +235,12 @@ cp_set_block_scope (const struct symbol *symbol,
 
   if (SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL)
     {
+#if 0
+      /* FIXME: carlton/2003-06-12: As mentioned above,
+	 'processing_has_namespace_info' currently isn't entirely
+	 reliable, so let's always use demangled names to get this
+	 information for now.  */
+
       if (processing_has_namespace_info)
 	{
 	  block_set_scope
@@ -241,6 +250,7 @@ cp_set_block_scope (const struct symbol *symbol,
 	     obstack);
 	}
       else
+#endif
 	{
 	  /* Try to figure out the appropriate namespace from the
 	     demangled name.  */

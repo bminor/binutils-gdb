@@ -1,5 +1,5 @@
 /* Native-dependent code for SuperH running NetBSD, for GDB.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
    Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -26,6 +26,7 @@
 #include "defs.h"
 #include "inferior.h"
 
+#include "sh-tdep.h"
 #include "shnbsd-tdep.h"
 
 /* Determine if PT_GETREGS fetches this register. */

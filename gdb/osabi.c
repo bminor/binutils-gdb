@@ -384,6 +384,14 @@ generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
 	      *os_ident_ptr = GDB_OSABI_SOLARIS;
 	      break;
 
+	    case GNU_ABI_TAG_FREEBSD:
+	      *os_ident_ptr = GDB_OSABI_FREEBSD_ELF;
+	      break;
+	      
+	    case GNU_ABI_TAG_NETBSD:
+	      *os_ident_ptr = GDB_OSABI_NETBSD_ELF;
+	      break;
+	      
 	    default:
 	      internal_error
 		(__FILE__, __LINE__,
@@ -531,7 +539,7 @@ set_osabi (char *args, int from_tty, struct cmd_list_element *c)
     internal_error (__FILE__, __LINE__, "Updating OS ABI failed.");
 }
 
-void
+static void
 show_osabi (char *args, int from_tty)
 {
   if (user_osabi_state == osabi_auto)
@@ -546,6 +554,8 @@ show_osabi (char *args, int from_tty)
 		     gdbarch_osabi_name (GDB_OSABI_DEFAULT));
 }
 
+extern initialize_file_ftype _initialize_gdb_osabi; /* -Wmissing-prototype */
+
 void
 _initialize_gdb_osabi (void)
 {

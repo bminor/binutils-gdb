@@ -46,8 +46,6 @@ static int remote_desc;
 extern int using_threads;
 extern int debug_threads;
 
-extern int signal_pid;
-
 /* Open a connection to a remote debugger.
    NAME is the filename used for communication.  */
 
@@ -326,7 +324,7 @@ putpkt (char *buf)
 
       /* Check for an input interrupt while we're here.  */
       if (buf3[0] == '\003')
-	kill (signal_pid, SIGINT);
+	(*the_target->send_signal) (SIGINT);
     }
   while (buf3[0] != '+');
 
@@ -363,7 +361,7 @@ input_interrupt (int unused)
 	  return;
 	}
       
-      kill (signal_pid, SIGINT);
+      (*the_target->send_signal) (SIGINT);
     }
 }
 

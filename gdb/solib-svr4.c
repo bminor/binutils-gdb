@@ -81,6 +81,17 @@ static char *solib_break_names[] =
   "_dl_debug_state",
   "rtld_db_dlactivity",
   "_rtld_debug_state",
+
+  /* On the 64-bit PowerPC, the linker symbol with the same name as
+     the C function points to a function descriptor, not to the entry
+     point.  The linker symbol whose name is the C function name
+     prefixed with a '.' points to the function's entry point.  So
+     when we look through this table, we ignore symbols that point
+     into the data section (thus skipping the descriptor's symbol),
+     and eventually try this one, giving us the real entry point
+     address.  */
+  "._dl_debug_state",
+
   NULL
 };
 
@@ -105,14 +116,16 @@ static char *main_name_list[] =
   NULL
 };
 
-/* Macro to extract an address from a solib structure.
-   When GDB is configured for some 32-bit targets (e.g. Solaris 2.7
-   sparc), BFD is configured to handle 64-bit targets, so CORE_ADDR is
-   64 bits.  We have to extract only the significant bits of addresses
-   to get the right address when accessing the core file BFD.  */
+/* Macro to extract an address from a solib structure.  When GDB is
+   configured for some 32-bit targets (e.g. Solaris 2.7 sparc), BFD is
+   configured to handle 64-bit targets, so CORE_ADDR is 64 bits.  We
+   have to extract only the significant bits of addresses to get the
+   right address when accessing the core file BFD.
+
+   Assume that the address is unsigned.  */
 
 #define SOLIB_EXTRACT_ADDRESS(MEMBER) \
-	extract_address (&(MEMBER), sizeof (MEMBER))
+	extract_unsigned_integer (&(MEMBER), sizeof (MEMBER))
 
 /* local data declarations */
 
@@ -132,7 +145,9 @@ LM_NEXT (struct so_list *so)
 {
   struct link_map_offsets *lmo = SVR4_FETCH_LINK_MAP_OFFSETS ();
 
-  return extract_address (so->lm_info->lm + lmo->l_next_offset, lmo->l_next_size);
+  /* Assume that the address is unsigned.  */
+  return extract_unsigned_integer (so->lm_info->lm + lmo->l_next_offset,
+				   lmo->l_next_size);
 }
 
 static CORE_ADDR
@@ -140,7 +155,9 @@ LM_NAME (struct so_list *so)
 {
   struct link_map_offsets *lmo = SVR4_FETCH_LINK_MAP_OFFSETS ();
 
-  return extract_address (so->lm_info->lm + lmo->l_name_offset, lmo->l_name_size);
+  /* Assume that the address is unsigned.  */
+  return extract_unsigned_integer (so->lm_info->lm + lmo->l_name_offset,
+				   lmo->l_name_size);
 }
 
 static int
@@ -148,8 +165,9 @@ IGNORE_FIRST_LINK_MAP_ENTRY (struct so_list *so)
 {
   struct link_map_offsets *lmo = SVR4_FETCH_LINK_MAP_OFFSETS ();
 
-  return extract_address (so->lm_info->lm + lmo->l_prev_offset,
-                          lmo->l_prev_size) == 0;
+  /* Assume that the address is unsigned.  */
+  return extract_unsigned_integer (so->lm_info->lm + lmo->l_prev_offset,
+				   lmo->l_prev_size) == 0;
 }
 
 static CORE_ADDR debug_base;	/* Base of dynamic linker structures */
@@ -587,7 +605,8 @@ first_link_map_member (void)
 
   read_memory (debug_base + lmo->r_map_offset, r_map_buf, lmo->r_map_size);
 
-  lm = extract_address (r_map_buf, lmo->r_map_size);
+  /* Assume that the address is unsigned.  */
+  lm = extract_unsigned_integer (r_map_buf, lmo->r_map_size);
 
   /* FIXME:  Perhaps we should validate the info somehow, perhaps by
      checking r_version for a known version number, or r_state for
@@ -645,8 +664,9 @@ open_symbol_file_object (void *from_ttyp)
   /* Read address of name from target memory to GDB.  */
   read_memory (lm + lmo->l_name_offset, l_name_buf, lmo->l_name_size);
 
-  /* Convert the address to host format.  */
-  l_name = extract_address (l_name_buf, lmo->l_name_size);
+  /* Convert the address to host format.  Assume that the address is
+     unsigned.  */
+  l_name = extract_unsigned_integer (l_name_buf, lmo->l_name_size);
 
   /* Free l_name_buf.  */
   do_cleanups (cleanups);
@@ -820,9 +840,9 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
       /* Read address of name from target memory to GDB.  */
       read_memory (lm + lmo->l_name_offset, l_name_buf, lmo->l_name_size);
 
-      /* Extract this object's name.  */
-      name_address = extract_address (l_name_buf,
-				      lmo->l_name_size);
+      /* Extract this object's name.  Assume that the address is
+         unsigned.  */
+      name_address = extract_unsigned_integer (l_name_buf, lmo->l_name_size);
       target_read_string (name_address, &buffer,
       			  SO_NAME_MAX_PATH_SIZE - 1, &errcode);
       make_cleanup (xfree, buffer);
@@ -843,9 +863,10 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
     	      return lm;
       	    }
   	}
-      /* Not the file we wanted, continue checking.  */
-      lm = extract_address (objfile_lm_info.lm + lmo->l_next_offset,
-			    lmo->l_next_size);
+      /* Not the file we wanted, continue checking.  Assume that the
+         address is unsigned.  */
+      lm = extract_unsigned_integer (objfile_lm_info.lm + lmo->l_next_offset,
+				     lmo->l_next_size);
       do_cleanups (old_chain);
     }
   return 0;
@@ -1444,6 +1465,8 @@ init_fetch_link_map_offsets (struct gdbarch *gdbarch)
 }
 
 static struct target_so_ops svr4_so_ops;
+
+extern initialize_file_ftype _initialize_svr4_solib; /* -Wmissing-prototypes */
 
 void
 _initialize_svr4_solib (void)

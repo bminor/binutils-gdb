@@ -3749,7 +3749,7 @@ NAME(aout,final_link) (abfd, info, callback)
   includes_hash_initialized = TRUE;
 
   /* Figure out the largest section size.  Also, if generating
-     relocateable output, count the relocs.  */
+     relocatable output, count the relocs.  */
   trsize = 0;
   drsize = 0;
   max_contents_size = 0;
@@ -3759,7 +3759,7 @@ NAME(aout,final_link) (abfd, info, callback)
     {
       bfd_size_type sz;
 
-      if (info->relocateable)
+      if (info->relocatable)
 	{
 	  if (bfd_get_flavour (sub) == bfd_target_aout_flavour)
 	    {
@@ -3773,7 +3773,7 @@ NAME(aout,final_link) (abfd, info, callback)
 		 work out the number of relocs needed, and then multiply
 		 by the reloc size.  */
 	      (*_bfd_error_handler)
-		(_("%s: relocateable link from %s to %s not supported"),
+		(_("%s: relocatable link from %s to %s not supported"),
 		 bfd_get_filename (abfd),
 		 sub->xvec->name, abfd->xvec->name);
 	      bfd_set_error (bfd_error_invalid_operation);
@@ -3803,7 +3803,7 @@ NAME(aout,final_link) (abfd, info, callback)
 	}
     }
 
-  if (info->relocateable)
+  if (info->relocatable)
     {
       if (obj_textsec (abfd) != (asection *) NULL)
 	trsize += (_bfd_count_link_order_relocs (obj_textsec (abfd)
@@ -4786,9 +4786,9 @@ aout_link_input_section (finfo, input_bfd, input_section, reloff_ptr,
 				  input_size))
     return FALSE;
 
-  /* If we are producing relocateable output, the relocs were
+  /* If we are producing relocatable output, the relocs were
      modified, and we now write them out.  */
-  if (finfo->info->relocateable && rel_size > 0)
+  if (finfo->info->relocatable && rel_size > 0)
     {
       if (bfd_seek (finfo->output_bfd, *reloff_ptr, SEEK_SET) != 0)
 	return FALSE;
@@ -4850,7 +4850,7 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 	     struct aout_link_hash_entry *, PTR, bfd_byte *, bfd_boolean *,
 	     bfd_vma *));
   bfd *output_bfd;
-  bfd_boolean relocateable;
+  bfd_boolean relocatable;
   struct external_nlist *syms;
   char *strings;
   struct aout_link_hash_entry **sym_hashes;
@@ -4866,7 +4866,7 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
   BFD_ASSERT (input_bfd->xvec->header_byteorder
 	      == output_bfd->xvec->header_byteorder);
 
-  relocateable = finfo->info->relocateable;
+  relocatable = finfo->info->relocatable;
   syms = obj_aout_external_syms (input_bfd);
   strings = obj_aout_external_strings (input_bfd);
   sym_hashes = obj_aout_sym_hashes (input_bfd);
@@ -4935,9 +4935,9 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
       }
 #endif
 
-      if (relocateable)
+      if (relocatable)
 	{
-	  /* We are generating a relocateable output file, and must
+	  /* We are generating a relocatable output file, and must
 	     modify the reloc accordingly.  */
 	  if (r_extern)
 	    {
@@ -5195,7 +5195,7 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 	     struct aout_link_hash_entry *, PTR, bfd_byte *, bfd_boolean *,
 	     bfd_vma *));
   bfd *output_bfd;
-  bfd_boolean relocateable;
+  bfd_boolean relocatable;
   struct external_nlist *syms;
   char *strings;
   struct aout_link_hash_entry **sym_hashes;
@@ -5211,7 +5211,7 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
   BFD_ASSERT (input_bfd->xvec->header_byteorder
 	      == output_bfd->xvec->header_byteorder);
 
-  relocateable = finfo->info->relocateable;
+  relocatable = finfo->info->relocatable;
   syms = obj_aout_external_syms (input_bfd);
   strings = obj_aout_external_strings (input_bfd);
   sym_hashes = obj_aout_sym_hashes (input_bfd);
@@ -5256,9 +5256,9 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 
       BFD_ASSERT (r_type < TABLE_SIZE (howto_table_ext));
 
-      if (relocateable)
+      if (relocatable)
 	{
-	  /* We are generating a relocateable output file, and must
+	  /* We are generating a relocatable output file, and must
 	     modify the reloc accordingly.  */
 	  if (r_extern
 	      || r_type == (unsigned int) RELOC_BASE10

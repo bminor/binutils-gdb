@@ -1,3 +1,27 @@
+2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
+
+        * mi-cmds.c (mi_cmds): Add "-target-disconnect".
+
+2003-06-11  David Carlton  <carlton@bactrian.org>
+
+	* mi-cmd-stack.c: Include dictionary.h.
+	(list_args_or_locals): Update use of ALL_BLOCK_SYMBOLS.
+
+2003-06-11  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c (get_register): Replace REGISTER_CONVERTIBLE with
+	DEPRECATED_REGISTER_CONVERTIBLE.
+
+2003-06-08  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-parse.c (_initialize_mi_parse): Delete function.
+	* mi-main.c: Include "mi-main.h".
+	* mi-interp.c (_initialize_mi_interp): Add declaration.
+	* mi-cmd-stack.c: Include "stack.h".
+	(select_frame_command_wrapper): Delete extern declaration.
+	(mi_cmd_stack_select_frame): Replace select_frame_command_wrapper
+	with select_frame_command.
+
 2003-05-16  Andrew Cagney  <cagney@redhat.com>
 
 	* mi-main.c (mi_setup_architecture_data): 

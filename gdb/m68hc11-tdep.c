@@ -419,12 +419,6 @@ m68hc11_frame_args_address (struct frame_info *frame)
   return addr;
 }
 
-static CORE_ADDR
-m68hc11_frame_locals_address (struct frame_info *frame)
-{
-  return get_frame_base (frame);
-}
-
 /* Discard from the stack the innermost frame, restoring all saved
    registers.  */
 
@@ -1057,7 +1051,7 @@ m68hc11_push_arguments (int nargs,
 
 /* Return a location where we can set a breakpoint that will be hit
    when an inferior function call returns.  */
-CORE_ADDR
+static CORE_ADDR
 m68hc11_call_dummy_address (void)
 {
   return entry_point_address ();
@@ -1171,8 +1165,8 @@ m68hc11_return_value_on_stack (struct type *type)
 static CORE_ADDR
 m68hc11_extract_struct_value_address (char *regbuf)
 {
-  return extract_address (&regbuf[HARD_D_REGNUM * 2],
-                          REGISTER_RAW_SIZE (HARD_D_REGNUM));
+  return extract_unsigned_integer (&regbuf[HARD_D_REGNUM * 2],
+				   REGISTER_RAW_SIZE (HARD_D_REGNUM));
 }
 
 /* Function: push_return_address (pc)
@@ -1358,6 +1352,9 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_ptr_bit (gdbarch, 16);
   set_gdbarch_long_long_bit (gdbarch, 64);
 
+  /* Characters are unsigned.  */
+  set_gdbarch_char_signed (gdbarch, 0);
+
   /* Set register info.  */
   set_gdbarch_fp0_regnum (gdbarch, -1);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 2);
@@ -1365,17 +1362,15 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, m68hc11_frame_init_saved_regs);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 
-  set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-  set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
-  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
   set_gdbarch_sp_regnum (gdbarch, HARD_SP_REGNUM);
   set_gdbarch_deprecated_fp_regnum (gdbarch, SOFT_FP_REGNUM);
   set_gdbarch_register_name (gdbarch, m68hc11_register_name);
   set_gdbarch_deprecated_register_size (gdbarch, 2);
   set_gdbarch_deprecated_register_bytes (gdbarch, M68HC11_ALL_REGS * 2);
-  set_gdbarch_register_virtual_type (gdbarch, m68hc11_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, m68hc11_register_virtual_type);
   set_gdbarch_pseudo_register_read (gdbarch, m68hc11_pseudo_register_read);
   set_gdbarch_pseudo_register_write (gdbarch, m68hc11_pseudo_register_write);
 
@@ -1391,15 +1386,11 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_store_struct_return (gdbarch, m68hc11_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, m68hc11_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, m68hc11_extract_struct_value_address);
-  set_gdbarch_register_convertible (gdbarch, generic_register_convertible_not);
-
 
   set_gdbarch_deprecated_frame_chain (gdbarch, m68hc11_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, m68hc11_frame_saved_pc);
-  set_gdbarch_frame_args_address (gdbarch, m68hc11_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, m68hc11_frame_locals_address);
+  set_gdbarch_deprecated_frame_args_address (gdbarch, m68hc11_frame_args_address);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, m68hc11_saved_pc_after_call);
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
 
   set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
 
@@ -1430,6 +1421,8 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
 
   return gdbarch;
 }
+
+extern initialize_file_ftype _initialize_m68hc11_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_m68hc11_tdep (void)

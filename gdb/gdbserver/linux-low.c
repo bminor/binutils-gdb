@@ -234,13 +234,28 @@ linux_kill_one_process (struct inferior_list_entry *entry)
     } while (WIFSTOPPED (wstat));
 }
 
-/* Return nonzero if the given thread is still alive.  */
 static void
 linux_kill (void)
 {
   for_each_inferior (&all_threads, linux_kill_one_process);
 }
 
+static void
+linux_detach_one_process (struct inferior_list_entry *entry)
+{
+  struct thread_info *thread = (struct thread_info *) entry;
+  struct process_info *process = get_thread_process (thread);
+
+  ptrace (PTRACE_DETACH, pid_of (process), 0, 0);
+}
+
+static void
+linux_detach (void)
+{
+  for_each_inferior (&all_threads, linux_detach_one_process);
+}
+
+/* Return nonzero if the given thread is still alive.  */
 static int
 linux_thread_alive (int tid)
 {
@@ -399,7 +414,7 @@ linux_wait_for_event (struct thread_info *child)
   /* Check for a process with a pending status.  */
   /* It is possible that the user changed the pending task's registers since
      it stopped.  We correctly handle the change of PC if we hit a breakpoint
-     (in check_removed_breakpoints); signals should be reported anyway.  */
+     (in check_removed_breakpoint); signals should be reported anyway.  */
   if (child == NULL)
     {
       event_child = (struct process_info *)
@@ -541,7 +556,7 @@ linux_wait_for_event (struct thread_info *child)
       if (check_breakpoints (stop_pc) != 0)
 	{
 	  /* We hit one of our own breakpoints.  We mark it as a pending
-	     breakpoint, so that check_removed_breakpoints () will do the PC
+	     breakpoint, so that check_removed_breakpoint () will do the PC
 	     adjustment for us at the appropriate time.  */
 	  event_child->pending_is_breakpoint = 1;
 	  event_child->pending_stop_pc = stop_pc;
@@ -587,7 +602,7 @@ linux_wait_for_event (struct thread_info *child)
 	 will give us a new action for this thread, but clear it for
 	 consistency anyway.  It's safe to clear the stepping flag
          because the only consumer of get_stop_pc () after this point
-	 is check_removed_breakpoints, and pending_is_breakpoint is not
+	 is check_removed_breakpoint, and pending_is_breakpoint is not
 	 set.  It might be wiser to use a step_completed flag instead.  */
       if (event_child->stepping)
 	{
@@ -786,7 +801,7 @@ linux_resume_one_process (struct inferior_list_entry *entry,
       process->pending_signals = p_sig;
     }
 
-  if (process->status_pending_p)
+  if (process->status_pending_p && !check_removed_breakpoint (process))
     return;
 
   saved_inferior = current_inferior;
@@ -976,7 +991,7 @@ usr_store_inferior_registers (int regno)
 	{
 	  errno = 0;
 	  ptrace (PTRACE_POKEUSER, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
-		  *(int *) (buf + i));
+		  *(PTRACE_XFER_TYPE *) (buf + i));
 	  if (errno != 0)
 	    {
 	      if ((*the_low_target.cannot_store_register) (regno) == 0)
@@ -989,7 +1004,7 @@ usr_store_inferior_registers (int regno)
 		  return;
 		}
 	    }
-	  regaddr += sizeof (int);
+	  regaddr += sizeof (PTRACE_XFER_TYPE);
 	}
     }
   else
@@ -1228,11 +1243,28 @@ linux_look_up_symbols (void)
 #endif
 }
 
+static void
+linux_send_signal (int signum)
+{
+  extern int signal_pid;
+
+  if (cont_thread > 0)
+    {
+      struct process_info *process;
+
+      process = get_thread_process (current_inferior);
+      kill (process->lwpid, signum);
+    }
+  else
+    kill (signal_pid, signum);
+}
+
 
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_attach,
   linux_kill,
+  linux_detach,
   linux_thread_alive,
   linux_resume,
   linux_wait,
@@ -1241,6 +1273,7 @@ static struct target_ops linux_target_ops = {
   linux_read_memory,
   linux_write_memory,
   linux_look_up_symbols,
+  linux_send_signal,
 };
 
 static void

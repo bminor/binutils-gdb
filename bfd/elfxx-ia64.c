@@ -1341,7 +1341,7 @@ elfNN_ia64_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
      bfd_vma *valp;
 {
   if (sym->st_shndx == SHN_COMMON
-      && !info->relocateable
+      && !info->relocatable
       && sym->st_size <= elf_gp_size (abfd))
     {
       /* Common symbols less than or equal to -G nn bytes are
@@ -2228,7 +2228,7 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel;
   asection *got, *fptr, *srel;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -2903,7 +2903,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 
   /* Set the contents of the .interp section to the interpreter.  */
   if (ia64_info->root.dynamic_sections_created
-      && !info->shared)
+      && info->executable)
     {
       sec = bfd_get_section_by_name (dynobj, ".interp");
       BFD_ASSERT (sec != NULL);
@@ -3078,7 +3078,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 	 later (in finish_dynamic_sections) but we must add the entries now
 	 so that we get the correct size for the .dynamic section.  */
 
-      if (!info->shared)
+      if (info->executable)
 	{
 	  /* The DT_DEBUG entry is filled in by the dynamic linker and used
 	     by the debugger.  */
@@ -3779,7 +3779,7 @@ elfNN_ia64_final_link (abfd, info)
   ia64_info = elfNN_ia64_hash_table (info);
 
   /* Make sure we've got ourselves a nice fat __gp value.  */
-  if (!info->relocateable)
+  if (!info->relocatable)
     {
       bfd_vma gp_val = _bfd_get_gp_value (abfd);
       struct elf_link_hash_entry *gp;
@@ -3805,7 +3805,7 @@ elfNN_ia64_final_link (abfd, info)
      of the .IA_64.unwind section.  Force this section to be relocated
      into memory rather than written immediately to the output file.  */
   unwind_output_sec = NULL;
-  if (!info->relocateable)
+  if (!info->relocatable)
     {
       asection *s = bfd_get_section_by_name (abfd, ELF_STRING_ia64_unwind);
       if (s)
@@ -3863,7 +3863,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
   ia64_info = elfNN_ia64_hash_table (info);
 
   /* Infect various flags from the input section to the output section.  */
-  if (info->relocateable)
+  if (info->relocatable)
     {
       bfd_vma flags;
 
@@ -4325,7 +4325,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  int i;
 		  for (i = m->count - 1; i >= 0; i--)
-		    if (m->sections[i] == sym_sec->output_section)
+		    if (m->sections[i] == input_section->output_section)
 		      break;
 		  if (i >= 0)
 		    break;

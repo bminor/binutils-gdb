@@ -1164,12 +1164,12 @@ DESCRIPTION
 
 bfd_byte *
 bfd_get_relocated_section_contents (abfd, link_info, link_order, data,
-				    relocateable, symbols)
+				    relocatable, symbols)
      bfd *abfd;
      struct bfd_link_info *link_info;
      struct bfd_link_order *link_order;
      bfd_byte *data;
-     bfd_boolean relocateable;
+     bfd_boolean relocatable;
      asymbol **symbols;
 {
   bfd *abfd2;
@@ -1188,7 +1188,7 @@ bfd_get_relocated_section_contents (abfd, link_info, link_order, data,
 
   fn = abfd2->xvec->_bfd_get_relocated_section_contents;
 
-  return (*fn) (abfd, link_info, link_order, data, relocateable, symbols);
+  return (*fn) (abfd, link_info, link_order, data, relocatable, symbols);
 }
 
 /* Record information about an ELF program header.  */

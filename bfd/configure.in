@@ -359,7 +359,9 @@ changequote([,])dnl
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/tahoe.h"'
 	;;
-  vax-*-netbsd*)	COREFILE=netbsd-core.lo ;;
+  vax-*-netbsd* | vax-*-openbsd*)
+  	COREFILE=netbsd-core.lo
+	;;
   vax-*-ultrix2*)
 	COREFILE=trad-core.lo
 	TRAD_HEADER='"hosts/vaxult2.h"'

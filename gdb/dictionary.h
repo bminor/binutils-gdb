@@ -136,6 +136,10 @@ extern struct symbol *dict_iter_name_first (const struct dictionary *dict,
 extern struct symbol *dict_iter_name_next (const char *name,
 					   struct dict_iterator *iterator);
 
+/* Return some notion of the size of the dictionary: the number of
+   symbols if we have that, the number of hash buckets otherwise.  */
+
+extern int dict_size (const struct dictionary *dict);
 
 /* Macro to loop through all symbols in a dictionary DICT, in no
    particular order.  ITER is a struct dict_iterator (NOTE: __not__ a

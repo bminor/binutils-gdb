@@ -285,7 +285,9 @@ static struct symbol *new_symbol (char *);
 
 static struct type *new_type (char *);
 
-static struct block *new_block (int function);
+enum block_type { FUNCTION_BLOCK, NON_FUNCTION_BLOCK };
+
+static struct block *new_block (enum block_type);
 
 static struct symtab *new_symtab (char *, int, struct objfile *);
 
@@ -832,7 +834,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	TYPE_FLAGS (SYMBOL_TYPE (s)) |= TYPE_FLAG_PROTOTYPED;
 
       /* Create and enter a new lexical context */
-      b = new_block (1);
+      b = new_block (FUNCTION_BLOCK);
       SYMBOL_BLOCK_VALUE (s) = b;
       BLOCK_FUNCTION (b) = s;
       BLOCK_START (b) = BLOCK_END (b) = sh->value;
@@ -1167,7 +1169,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	}
 
       top_stack->blocktype = stBlock;
-      b = new_block (0);
+      b = new_block (NON_FUNCTION_BLOCK);
       BLOCK_START (b) = sh->value + top_stack->procadr;
       BLOCK_SUPERBLOCK (b) = top_stack->cur_block;
       top_stack->cur_block = b;
@@ -1236,12 +1238,12 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		  TYPE_FIELDS (ftype) = (struct field *)
 		    TYPE_ALLOC (ftype, nparams * sizeof (struct field));
 
-		  for (sym = dict_iterator_first (BLOCK_DICT (b), &iter),
-			 iparams = 0;
-		       iparams < nparams;
-		       sym = dict_iterator_next (&iter))
+		  iparams = 0;
+		  ALL_BLOCK_SYMBOLS (b, iter, sym)
 		    {
-		      gdb_assert (sym != NULL);
+		      if (iparams == nparams)
+			break;
+
 		      switch (SYMBOL_CLASS (sym))
 			{
 			case LOC_ARG:
@@ -4059,8 +4061,6 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
       int maxlines;
       EXTR *ext_ptr;
 
-      /* How many symbols will we need */
-      /* FIXME, this does not count enum values. */
       if (fh == 0)
 	{
 	  maxlines = 0;
@@ -4467,9 +4467,6 @@ mylookup_symbol (char *name, register struct block *block,
 static void
 add_symbol (struct symbol *s, struct block *b)
 {
-  struct block *newb;
-  struct parse_stack *stackp;
-
   dict_add_symbol (BLOCK_DICT (b), s);
 }
 
@@ -4592,8 +4589,8 @@ sort_blocks (struct symtab *s)
 
 /* Constructor/restructor/destructor procedures */
 
-/* Allocate a new symtab for NAME.  Needs an estimate of how many symbols
-   and linenumbers MAXLINES we'll put in it */
+/* Allocate a new symtab for NAME.  Needs an estimate of how many
+   linenumbers MAXLINES we'll put in it */
 
 static struct symtab *
 new_symtab (char *name, int maxlines, struct objfile *objfile)
@@ -4606,11 +4603,12 @@ new_symtab (char *name, int maxlines, struct objfile *objfile)
 
   /* All symtabs must have at least two blocks */
   BLOCKVECTOR (s) = new_bvect (2);
-  global_block = new_block (0);
-  static_block = new_block (0);
-  BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK) = global_block;
-  BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK) = static_block;
-  BLOCK_SUPERBLOCK (static_block) = global_block;
+  BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK)
+    = new_block (NON_FUNCTION_BLOCK);
+  BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK)
+    = new_block (NON_FUNCTION_BLOCK);
+  BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK)) =
+    BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
 
   /* FIXME: carlton/2002-09-24: But how do the blocks get freed?
      Oy.  */
@@ -4700,11 +4698,11 @@ new_bvect (int nblocks)
    hashed.  */
 
 static struct block *
-new_block (int function)
+new_block (enum block_type type)
 {
   struct block *retval = xzalloc (sizeof (struct block));
 
-  if (function)
+  if (type == FUNCTION_BLOCK)
     BLOCK_DICT (retval) = dict_create_linear_expandable ();
   else
     BLOCK_DICT (retval) = dict_create_hashed_expandable ();
@@ -4846,7 +4844,7 @@ fixup_sigtramp (void)
   TYPE_TARGET_TYPE (SYMBOL_TYPE (s)) = mdebug_type_void;
 
   /* Need a block to allocate MIPS_EFI_SYMBOL_NAME in */
-  b = new_block (0);
+  b = new_block (NON_FUNCTION_BLOCK);
   SYMBOL_BLOCK_VALUE (s) = b;
   BLOCK_START (b) = sigtramp_address;
   BLOCK_END (b) = sigtramp_end;
@@ -4888,8 +4886,6 @@ fixup_sigtramp (void)
   }
 
   dict_add_symbol (BLOCK_DICT (b), s);
-  add_block (b, st);
-  sort_blocks (st);
 }
 
 #endif /* TM_MIPS_H */

@@ -168,6 +168,8 @@ est_open (char *args, int from_tty)
   monitor_open (args, &est_cmds, from_tty);
 }
 
+extern initialize_file_ftype _initialize_est; /* -Wmissing-prototypes */
+
 void
 _initialize_est (void)
 {

@@ -115,6 +115,10 @@ proc do_steps_and_nexts {} {
 		set description "next over init_malloc and everything it calls"
 		set command "next"
 	    }
+	    -re ".*lim_at_start.*$gdb_prompt $" {
+		set description "next over lim_at_start initialization"
+		set command "next"
+	    }
 	    -re ".*count . 0x3.*$gdb_prompt $" {
 		set description "next over conditional stack alignment code 1"
 		set command "next"

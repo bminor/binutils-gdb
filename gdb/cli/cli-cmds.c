@@ -26,6 +26,7 @@
 #include "gdb_wait.h"		/* For shell escape implementation */
 #include "gdb_regex.h"		/* Used by apropos_command */
 #include "gdb_string.h"
+#include "gdb_vfork.h"
 #include "linespec.h"
 #include "expression.h"
 #include "frame.h"
@@ -47,18 +48,6 @@
 #ifndef GDBINIT_FILENAME
 #define GDBINIT_FILENAME        ".gdbinit"
 #endif
-
-/* From gdb/top.c */
-
-extern void dont_repeat (void);
-
-extern void set_verbose (char *, int, struct cmd_list_element *);
-
-extern void show_history (char *, int);
-
-extern void set_history (char *, int);
-
-extern void show_commands (char *, int);
 
 /* Prototypes for local command functions */
 
@@ -510,19 +499,20 @@ shell_escape (char *arg, int from_tty)
 #endif
 #else /* Can fork.  */
   int rc, status, pid;
-  char *p, *user_shell;
 
-  if ((user_shell = (char *) getenv ("SHELL")) == NULL)
-    user_shell = "/bin/sh";
-
-  /* Get the name of the shell for arg0 */
-  if ((p = strrchr (user_shell, '/')) == NULL)
-    p = user_shell;
-  else
-    p++;			/* Get past '/' */
-
-  if ((pid = fork ()) == 0)
+  if ((pid = vfork ()) == 0)
     {
+      char *p, *user_shell;
+
+      if ((user_shell = (char *) getenv ("SHELL")) == NULL)
+	user_shell = "/bin/sh";
+
+      /* Get the name of the shell for arg0 */
+      if ((p = strrchr (user_shell, '/')) == NULL)
+	p = user_shell;
+      else
+	p++;			/* Get past '/' */
+
       if (!arg)
 	execl (user_shell, p, 0);
       else

@@ -564,7 +564,7 @@ bfd_elf32_arm_add_glue_sections_to_bfd (abfd, info)
 
   /* If we are only performing a partial
      link do not bother adding the glue.  */
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   sec = bfd_get_section_by_name (abfd, ARM2THUMB_GLUE_SECTION_NAME);
@@ -620,7 +620,7 @@ bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
 
   /* If we are only performing a partial link
      do not bother getting a bfd to hold the glue.  */
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   globals = elf32_arm_hash_table (info);
@@ -652,7 +652,7 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info, no_pipeline_knowledge)
 
   /* If we are only performing a partial link do not bother
      to construct any glue.  */
-  if (link_info->relocateable)
+  if (link_info->relocatable)
     return TRUE;
 
   /* Here we have a bfd that is to be included on the link.  We have a hook
@@ -1838,7 +1838,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   const char *name;
 
 #if !USE_REL
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 #endif
 
@@ -1870,9 +1870,9 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
       howto = bfd_reloc.howto;
 
 #if USE_REL
-      if (info->relocateable)
+      if (info->relocatable)
 	{
-	  /* This is a relocateable link.  We don't have to change
+	  /* This is a relocatable link.  We don't have to change
 	     anything, unless the reloc is against a section symbol,
 	     in which case we have to adjust according to where the
 	     section symbol winds up in the output section.  */
@@ -2630,7 +2630,7 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
   asection *sgot, *srelgot, *sreloc;
   bfd_vma *local_got_offsets;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   sgot = srelgot = sreloc = NULL;

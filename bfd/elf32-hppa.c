@@ -1214,7 +1214,7 @@ elf32_hppa_check_relocs (abfd, info, sec, relocs)
   asection *sreloc;
   asection *stubreloc;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   htab = hppa_link_hash_table (info);
@@ -3593,7 +3593,7 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
@@ -3666,16 +3666,11 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  else if (h->elf.root.type == bfd_link_hash_undefweak)
 	    ;
-	  else if (info->shared && !info->no_undefined
+	  else if (info->shared
+		   && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->elf.other) == STV_DEFAULT
 		   && h->elf.type != STT_PARISC_MILLI)
-	    {
-	      if (!((*info->callbacks->undefined_symbol)
-		    (info, h->elf.root.root.string, input_bfd,
-		     input_section, rel->r_offset, FALSE)))
-		return FALSE;
-	      warned_undef = TRUE;
-	    }
+	    ;
 	  else
 	    {
 	      if (!((*info->callbacks->undefined_symbol)

@@ -4,7 +4,8 @@
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 - the resultant file is machine generated, cgen-dis.in isn't
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+Free Software Foundation, Inc.
 
 This file is part of the GNU Binutils and GDB, the GNU debugger.
 
@@ -31,6 +32,7 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #include "dis-asm.h"
 #include "bfd.h"
 #include "symcat.h"
+#include "libiberty.h"
 #include "iq2000-desc.h"
 #include "iq2000-opc.h"
 #include "opintl.h"
@@ -127,14 +129,14 @@ iq2000_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
     case IQ2000_OPERAND_EXECODE :
       print_normal (cd, info, fields->f_excode, 0, pc, length);
       break;
+    case IQ2000_OPERAND_F_INDEX :
+      print_normal (cd, info, fields->f_index, 0, pc, length);
+      break;
     case IQ2000_OPERAND_HI16 :
       print_normal (cd, info, fields->f_imm, 0, pc, length);
       break;
     case IQ2000_OPERAND_IMM :
       print_normal (cd, info, fields->f_imm, 0, pc, length);
-      break;
-    case IQ2000_OPERAND_INDEX :
-      print_normal (cd, info, fields->f_index, 0, pc, length);
       break;
     case IQ2000_OPERAND_JMPTARG :
       print_address (cd, info, fields->f_jtarg, 0|(1<<CGEN_OPERAND_ABS_ADDR), pc, length);

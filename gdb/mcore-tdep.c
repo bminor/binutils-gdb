@@ -30,50 +30,9 @@
 #include "gdb_string.h"
 #include "disasm.h"
 
-/* Functions declared and used only in this file */
-
-static CORE_ADDR mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue);
-
-static struct frame_info *analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame);
-
+static CORE_ADDR mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc,
+					 int skip_prologue);
 static int get_insn (CORE_ADDR pc);
-
-/* Functions exported from this file */
-
-int mcore_use_struct_convention (int gcc_p, struct type *type);
-
-void _initialize_mcore (void);
-
-void mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi);
-
-CORE_ADDR mcore_frame_saved_pc (struct frame_info *fi);
-
-CORE_ADDR mcore_find_callers_reg (struct frame_info *fi, int regnum);
-
-CORE_ADDR mcore_frame_args_address (struct frame_info *fi);
-
-CORE_ADDR mcore_frame_locals_address (struct frame_info *fi);
-
-CORE_ADDR mcore_push_return_address (CORE_ADDR pc, CORE_ADDR sp);
-
-CORE_ADDR mcore_push_arguments (int nargs, struct value ** args, CORE_ADDR sp,
-			int struct_return, CORE_ADDR struct_addr);
-
-void mcore_pop_frame ();
-
-CORE_ADDR mcore_skip_prologue (CORE_ADDR pc);
-
-CORE_ADDR mcore_frame_chain (struct frame_info *fi);
-
-const unsigned char *mcore_breakpoint_from_pc (CORE_ADDR * bp_addr, int *bp_size);
-
-int mcore_use_struct_convention (int gcc_p, struct type *type);
-
-void mcore_store_return_value (struct type *type, char *valbuf);
-
-CORE_ADDR mcore_extract_struct_value_address (char *regbuf);
-
-void mcore_extract_return_value (struct type *type, char *regbuf, char *valbuf);
 
 #ifdef MCORE_DEBUG
 int mcore_debug = 0;
@@ -243,7 +202,7 @@ mcore_register_name (int regnum)
    instructions are 16 bits, this is all we need, regardless of
    address. bpkt = 0x0000 */
 
-const unsigned char *
+static const unsigned char *
 mcore_breakpoint_from_pc (CORE_ADDR * bp_addr, int *bp_size)
 {
   static char breakpoint[] =
@@ -647,7 +606,7 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
    then DEPRECATED_INIT_EXTRA_FRAME_INFO and DEPRECATED_INIT_FRAME_PC
    will be called for the new frame. */
 
-CORE_ADDR
+static CORE_ADDR
 mcore_frame_chain (struct frame_info * fi)
 {
   struct frame_info *dummy;
@@ -705,7 +664,7 @@ mcore_frame_chain (struct frame_info * fi)
 
 /* Skip the prologue of the function at PC. */
 
-CORE_ADDR
+static CORE_ADDR
 mcore_skip_prologue (CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
@@ -725,13 +684,13 @@ mcore_skip_prologue (CORE_ADDR pc)
 }
 
 /* Return the address at which function arguments are offset. */
-CORE_ADDR
+static CORE_ADDR
 mcore_frame_args_address (struct frame_info * fi)
 {
   return get_frame_base (fi) - get_frame_extra_info (fi)->framesize;
 }
 
-CORE_ADDR
+static CORE_ADDR
 mcore_frame_locals_address (struct frame_info * fi)
 {
   return get_frame_base (fi) - get_frame_extra_info (fi)->framesize;
@@ -739,7 +698,7 @@ mcore_frame_locals_address (struct frame_info * fi)
 
 /* Return the frame pointer in use at address PC. */
 
-void
+static void
 mcore_virtual_frame_pointer (CORE_ADDR pc, int *reg, LONGEST *offset)
 {
   struct frame_info *dummy = analyze_dummy_frame (pc, 0);
@@ -757,7 +716,7 @@ mcore_virtual_frame_pointer (CORE_ADDR pc, int *reg, LONGEST *offset)
 
 /* Find the value of register REGNUM in frame FI. */
 
-CORE_ADDR
+static CORE_ADDR
 mcore_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi != NULL; fi = get_next_frame (fi))
@@ -776,7 +735,7 @@ mcore_find_callers_reg (struct frame_info *fi, int regnum)
 
 /* Find the saved pc in frame FI. */
 
-CORE_ADDR
+static CORE_ADDR
 mcore_frame_saved_pc (struct frame_info * fi)
 {
 
@@ -793,7 +752,7 @@ mcore_frame_saved_pc (struct frame_info * fi)
 /* This routine gets called when either the user uses the "return"
    command, or the call dummy breakpoint gets hit. */
 
-void
+static void
 mcore_pop_frame (void)
 {
   int rn;
@@ -843,7 +802,7 @@ mcore_pop_frame (void)
    FIRST_ARGREG, since the MCORE treats struct returns (of less than eight
    bytes) as hidden first arguments. */
 
-CORE_ADDR
+static CORE_ADDR
 mcore_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		      int struct_return, CORE_ADDR struct_addr)
 {
@@ -953,7 +912,7 @@ mcore_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    opted to use generic call dummies, so we simply store the
    CALL_DUMMY_ADDRESS into the PR register (r15). */
 
-CORE_ADDR
+static CORE_ADDR
 mcore_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   write_register (PR_REGNUM, CALL_DUMMY_ADDRESS ());
@@ -979,7 +938,7 @@ mcore_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
    EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc
    and TYPE is the type (which is known to be struct, union or array). */
 
-int
+static int
 mcore_use_struct_convention (int gcc_p, struct type *type)
 {
   return (TYPE_LENGTH (type) > 8);
@@ -989,17 +948,17 @@ mcore_use_struct_convention (int gcc_p, struct type *type)
    this buffer was passed as a hidden first argument, so
    just return that address. */
 
-CORE_ADDR
+static CORE_ADDR
 mcore_extract_struct_value_address (char *regbuf)
 {
-  return extract_address (regbuf + REGISTER_BYTE (FIRST_ARGREG), DEPRECATED_REGISTER_SIZE);
+  return extract_unsigned_integer (regbuf + REGISTER_BYTE (FIRST_ARGREG), DEPRECATED_REGISTER_SIZE);
 }
 
 /* Given a function which returns a value of type TYPE, extract the
    the function's return value and place the result into VALBUF.
    REGBUF is the register contents of the target. */
 
-void
+static void
 mcore_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   /* Copy the return value (starting) in RETVAL_REGNUM to VALBUF. */
@@ -1019,7 +978,7 @@ mcore_extract_return_value (struct type *type, char *regbuf, char *valbuf)
    significant word) and r3 (least significant word, left justified).
    Note that this includes structures of less than eight bytes, too. */
 
-void
+static void
 mcore_store_return_value (struct type *type, char *valbuf)
 {
   int value_size;
@@ -1045,7 +1004,7 @@ mcore_store_return_value (struct type *type, char *valbuf)
    This includes allocating space for saved registers and analyzing
    the prologue of this frame. */
 
-void
+static void
 mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   if (fi && get_next_frame (fi))
@@ -1106,10 +1065,10 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, MCORE_REG_SIZE);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, MCORE_REG_SIZE);
   set_gdbarch_register_name (gdbarch, mcore_register_name);
-  set_gdbarch_register_virtual_type (gdbarch, mcore_register_virtual_type);
-  set_gdbarch_register_virtual_size (gdbarch, mcore_register_size);
-  set_gdbarch_register_raw_size (gdbarch, mcore_register_size);
-  set_gdbarch_register_byte (gdbarch, mcore_register_byte);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, mcore_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, mcore_register_size);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, mcore_register_size);
+  set_gdbarch_deprecated_register_byte (gdbarch, mcore_register_byte);
   set_gdbarch_deprecated_register_bytes (gdbarch, MCORE_REG_SIZE * MCORE_NUM_REGS);
   set_gdbarch_num_regs (gdbarch, MCORE_NUM_REGS);
   set_gdbarch_pc_regnum (gdbarch, 64);
@@ -1120,7 +1079,7 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_deprecated_call_dummy_words (gdbarch, call_dummy_words);
   set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
-  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+  set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, mcore_saved_pc_after_call);
   set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
@@ -1142,9 +1101,8 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 						       mcore_extract_struct_value_address);
   set_gdbarch_skip_prologue (gdbarch, mcore_skip_prologue);
   set_gdbarch_frame_args_skip (gdbarch, 0);
-  set_gdbarch_frame_args_address (gdbarch, mcore_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, mcore_frame_locals_address);
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
+  set_gdbarch_deprecated_frame_args_address (gdbarch, mcore_frame_args_address);
+  set_gdbarch_deprecated_frame_locals_address (gdbarch, mcore_frame_locals_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, mcore_pop_frame);
   set_gdbarch_virtual_frame_pointer (gdbarch, mcore_virtual_frame_pointer);
 
@@ -1159,7 +1117,7 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_reg_struct_has_addr (gdbarch, mcore_reg_struct_has_addr);
 
   /* Should be using push_dummy_call.  */
-  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
   return gdbarch;
 }
@@ -1169,6 +1127,8 @@ mcore_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 {
 
 }
+
+extern initialize_file_ftype _initialize_mcore_tdep; /* -Wmissing-prototypes */
 
 void
 _initialize_mcore_tdep (void)

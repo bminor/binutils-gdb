@@ -619,7 +619,7 @@ extern bfd_boolean bfd_ecoff_debug_accumulate_other
 extern bfd_boolean bfd_ecoff_debug_externals
   PARAMS ((bfd *abfd, struct ecoff_debug_info *debug,
 	   const struct ecoff_debug_swap *swap,
-	   bfd_boolean relocateable,
+	   bfd_boolean relocatable,
 	   bfd_boolean (*get_extr) (struct symbol_cache_entry *,
 				    struct ecoff_extr *),
 	   void (*set_index) (struct symbol_cache_entry *,

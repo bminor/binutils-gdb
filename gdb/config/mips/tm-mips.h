@@ -1,7 +1,7 @@
 /* Definitions to make GDB run on a mips box under 4.3bsd.
 
    Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2002 Free Software Foundation, Inc.
+   1997, 1998, 1999, 2000, 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by Per Bothner (bothner@cs.wisc.edu) at U.Wisconsin
    and by Alessandro Forin (af@cs.cmu.edu) at CMU..
@@ -45,15 +45,7 @@ extern int mips_step_skips_delay (CORE_ADDR);
 #define STEP_SKIPS_DELAY_P (1)
 #define STEP_SKIPS_DELAY(pc) (mips_step_skips_delay (pc))
 
-/* Say how long (ordinary) registers are.  This is a piece of bogosity
-   used in push_word and a few other places; REGISTER_RAW_SIZE is the
-   real way to know how big a register is.  */
-
-#define DEPRECATED_REGISTER_SIZE 4
-
-/* The size of a register.  This is predefined in tm-mips64.h.  We
-   can't use DEPRECATED_REGISTER_SIZE because that is used for various other
-   things.  */
+/* The size of a register.  This is predefined in tm-mips64.h.  */
 
 #ifndef MIPS_REGSIZE
 #define MIPS_REGSIZE 4
@@ -103,46 +95,22 @@ extern int mips_step_skips_delay (CORE_ADDR);
 #define	PRID_REGNUM 89		/* Processor ID */
 #define	LAST_EMBED_REGNUM 89	/* Last one */
 
-/* Total amount of space needed to store our copies of the machine's
-   register state, the array `registers'.  */
-
-#define DEPRECATED_REGISTER_BYTES (NUM_REGS*MIPS_REGSIZE)
-
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
-#define REGISTER_BYTE(N) ((N) * MIPS_REGSIZE)
+#define MIPS_REGISTER_BYTE(N) ((N) * MIPS_REGSIZE)
 
 /* Return the GDB type object for the "standard" data type of data in
    register N.  */
 
-#ifndef REGISTER_VIRTUAL_TYPE
-#define REGISTER_VIRTUAL_TYPE(N) \
+#ifndef MIPS_REGISTER_TYPE
+#define MIPS_REGISTER_TYPE(N) \
 	(((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32) ? builtin_type_float \
 	 : ((N) == 32 /*SR*/) ? builtin_type_uint32 \
 	 : ((N) >= 70 && (N) <= 89) ? builtin_type_uint32 \
 	 : builtin_type_int)
 #endif
 
-/* All mips targets store doubles in a register pair with the least
-   significant register in the lower numbered register.
-   If the target is big endian, double register values need conversion
-   between memory and register formats.  */
-
-extern void mips_register_convert_to_type (int regnum, 
-					   struct type *type,
-					   char *buffer);
-extern void mips_register_convert_from_type (int regnum, 
-					     struct type *type,
-					     char *buffer);
-
-#define REGISTER_CONVERT_TO_TYPE(n, type, buffer)	\
-  mips_register_convert_to_type ((n), (type), (buffer))
-
-#define REGISTER_CONVERT_FROM_TYPE(n, type, buffer)	\
-  mips_register_convert_from_type ((n), (type), (buffer))
-
-
 /* Special symbol found in blocks associated with routines.  We can hang
    mips_extra_func_info_t's off of this.  */
 
@@ -182,10 +150,6 @@ extern void mips_print_extra_frame_info (struct frame_info *frame);
 #define SETUP_ARBITRARY_FRAME(argc, argv) setup_arbitrary_frame (argc, argv)
 extern struct frame_info *setup_arbitrary_frame (int, CORE_ADDR *);
 
-/* Select the default mips disassembler */
-
-#define TM_PRINT_INSN_MACH 0
-
 /* These are defined in mdebugread.c and are used in mips-tdep.c  */
 extern CORE_ADDR sigtramp_address, sigtramp_end;
 extern void fixup_sigtramp (void);
@@ -197,21 +161,11 @@ extern char *mips_read_processor_type (void);
 #define IGNORE_HELPER_CALL(pc)			mips_ignore_helper (pc)
 extern int mips_ignore_helper (CORE_ADDR pc);
 
-#ifndef TARGET_MIPS
-#define TARGET_MIPS
-#endif
-
 /* Definitions and declarations used by mips-tdep.c and remote-mips.c  */
 #define MIPS_INSTLEN 4		/* Length of an instruction */
 #define MIPS16_INSTLEN 2	/* Length of an instruction on MIPS16 */
 #define MIPS_NUMREGS 32		/* Number of integer or float registers */
 typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
-
-/* MIPS16 function addresses are odd (bit 0 is set).  Here are some
-   macros to test, set, or clear bit 0 of addresses.  */
-#define IS_MIPS16_ADDR(addr)	 ((addr) & 1)
-#define MAKE_MIPS16_ADDR(addr)	 ((addr) | 1)
-#define UNMAKE_MIPS16_ADDR(addr) ((addr) & ~1)
 
 #endif /* TM_MIPS_H */
 

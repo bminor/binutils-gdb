@@ -1,3 +1,41 @@
+2003-06-18  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c: Replace "Hitachi" with "Renesas".
+	(decode): Distinguish AV_H8S from AV_H8H.
+	(sim_resume): H8SX can use any register for TAS.
+	(decode): Add support for VECIND.
+	(sim_resume): Implement rte/l and rts/l.
+	(GETSR): New macro (actually old macro reincarnated).
+	(decode): Add handling for IMM2.
+	(sim_resume): Drop extra block around jmp, jsr, rts.
+	Add handling for trapa and rte.
+	For divxu.b, change 0xffff mask to 0xff.
+	(set_h8300h): Add bfd_mach_h8300sxn machine.
+
+2003-06-18  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sim-main.h (enum h8_regnum): Turn around order of MACH, MACL
+	and SBR, VBR.
+
+2003-06-05  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c (sim_fetch_register): Handle SBR, VBR, MACH, MACL.
+	(sim_store_register): Ditto.
+
+2003-06-04  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c (sim_info): Fix typo in output.
+
+	* compile.c (set_h8300h): Replace 'flag' arguments
+	with a bfd_machine argument, and decode it inline.
+	Check for bfd_mach_h8300hn and bfd_mach_h8300sn.
+
+2003-06-03  Michael Snyder  <msnyder@redhat.com>
+
+	* compile.c: Add h8300sx insns and addressing modes.
+	* sim-main.h: Replaces h8300/inst.h.
+	* Makefile.in: Tweak to bring in some sim/common stuff.
+
 2003-04-13  Michael Snyder  <msnyder@redhat.com>
 
 	* compile.c (sim_resume): Implement 'daa' and 'das' instructions.

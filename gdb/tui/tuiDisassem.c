@@ -1,6 +1,6 @@
 /* Disassembly display.
 
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation,
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
    Inc.
 
    Contributed by Hewlett-Packard Company.
@@ -22,29 +22,13 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* FIXME: cagney/2002-02-28: The GDB coding standard indicates that
-   "defs.h" should be included first.  Unfortunatly some systems
-   (currently Debian GNU/Linux) include the <stdbool.h> via <curses.h>
-   and they clash with "bfd.h"'s definiton of true/false.  The correct
-   fix is to remove true/false from "bfd.h", however, until that
-   happens, hack around it by including "config.h" and <curses.h>
-   first.  */
-
-#include "config.h"
-#ifdef HAVE_NCURSES_H       
-#include <ncurses.h>
-#else
-#ifdef HAVE_CURSES_H
-#include <curses.h>
-#endif
-#endif
-
 #include "defs.h"
 #include "symtab.h"
 #include "breakpoint.h"
 #include "frame.h"
 #include "value.h"
 #include "source.h"
+#include "disasm.h"
 
 #include "tui.h"
 #include "tuiData.h"
@@ -53,6 +37,14 @@
 #include "tuiSourceWin.h"
 #include "tuiStack.h"
 #include "tui-file.h"
+
+#ifdef HAVE_NCURSES_H       
+#include <ncurses.h>
+#else
+#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+#endif
 
 struct tui_asm_line 
 {
@@ -408,7 +400,7 @@ tuiVerticalDisassemScroll (TuiScrollDirection scrollDirection,
 
       content = (TuiWinContent) disassemWin->generic.content;
       if (cursal.symtab == (struct symtab *) NULL)
-	s = find_pc_symtab (deprecated_selected_frame->pc);
+	s = find_pc_symtab (get_frame_pc (deprecated_selected_frame));
       else
 	s = cursal.symtab;
 

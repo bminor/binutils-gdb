@@ -399,8 +399,10 @@ CODE_FRAGMENT
 .  {* Nonzero if this section needs the relax finalize pass.  *}
 .  unsigned int need_finalize_relax:1;
 .
+.  {* Nonzero if this section has a gp reloc.  *}
+.  unsigned int has_gp_reloc:1;
+.
 .  {* Usused bits.  *}
-.  unsigned int flag12:1;
 .  unsigned int flag13:1;
 .  unsigned int flag14:1;
 .  unsigned int flag15:1;
@@ -490,6 +492,10 @@ CODE_FRAGMENT
 .
 .  {* Optional information about a COMDAT entry; NULL if not COMDAT.  *}
 .  struct bfd_comdat_info *comdat;
+.
+.  {* Points to the kept section if this section is a link-once section,
+.     and is discarded.  *}
+.  struct sec *kept_section;
 .
 .  {* When a section is being output, this value changes as more
 .     linenumbers are written out.  *}
@@ -617,8 +623,11 @@ static const asymbol global_syms[] =
     /* linker_mark, linker_has_input, gc_mark, segment_mark,         */	\
        0,           0,                1,       0,			\
 									\
-    /* sec_info_type, use_rela_p, has_tls_reloc, need_finalize_relax, flag12,     */ \
-       0,	      0,	  0,		 0,		      0,		\
+    /* sec_info_type, use_rela_p, has_tls_reloc,                     */ \
+       0,	      0,	  0,					\
+									\
+    /* need_finalize_relax, has_gp_reloc,                            */ \
+       0,		    0,						\
 									\
     /* flag13, flag14, flag15, flag16, flag20, flag24,               */ \
        0,      0,      0,      0,      0,      0,			\
@@ -635,8 +644,8 @@ static const asymbol global_syms[] =
     /* line_filepos, userdata, contents, lineno, lineno_count,       */	\
        0,            NULL,     NULL,     NULL,   0,			\
 									\
-    /* entsize, comdat, moving_line_filepos,                         */	\
-       0,       NULL,   0,						\
+    /* entsize, comdat, kept_section, moving_line_filepos,           */	\
+       0,       NULL,   NULL,	      0,				\
 									\
     /* target_index, used_by_bfd, constructor_chain, owner,          */	\
        0,            NULL,        NULL,              NULL,		\

@@ -1,5 +1,6 @@
 /* D10V-specific support for 32-bit ELF
-   Copyright 1996, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
    Contributed by Martin Hunt (hunt@cygnus.com).
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -303,7 +304,7 @@ elf32_d10v_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
@@ -388,9 +389,9 @@ elf32_d10v_relocate_section (output_bfd, info, input_bfd, input_section,
 
       howto = elf_d10v_howto_table + r_type;
 
-      if (info->relocateable)
+      if (info->relocatable)
 	{
-	  /* This is a relocateable link.  We don't have to change
+	  /* This is a relocatable link.  We don't have to change
 	     anything, unless the reloc is against a section symbol,
 	     in which case we have to adjust according to where the
 	     section symbol winds up in the output section.  */

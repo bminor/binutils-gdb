@@ -168,8 +168,6 @@ extern CORE_ADDR read_pc (void);
 
 extern CORE_ADDR read_pc_pid (ptid_t);
 
-extern CORE_ADDR generic_target_read_pc (ptid_t);
-
 extern void write_pc (CORE_ADDR);
 
 extern void write_pc_pid (CORE_ADDR, ptid_t);
@@ -178,9 +176,7 @@ extern void generic_target_write_pc (CORE_ADDR, ptid_t);
 
 extern CORE_ADDR read_sp (void);
 
-extern CORE_ADDR generic_target_read_sp (void);
-
-extern void generic_target_write_sp (CORE_ADDR);
+extern void deprecated_write_sp (CORE_ADDR);
 
 extern CORE_ADDR deprecated_read_fp (void);
 

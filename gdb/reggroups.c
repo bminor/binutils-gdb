@@ -245,6 +245,8 @@ struct reggroup *const all_reggroup = &all_group;
 struct reggroup *const save_reggroup = &save_group;
 struct reggroup *const restore_reggroup = &restore_group;
 
+extern initialize_file_ftype _initialize_reggroup; /* -Wmissing-prototypes */
+
 void
 _initialize_reggroup (void)
 {

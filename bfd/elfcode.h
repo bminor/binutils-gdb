@@ -1187,7 +1187,7 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 	  else
 	    sym->symbol.section = bfd_abs_section_ptr;
 
-	  /* If this is a relocateable file, then the symbol value is
+	  /* If this is a relocatable file, then the symbol value is
              already section relative.  */
 	  if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
 	    sym->symbol.value -= sym->symbol.section->vma;
@@ -1363,7 +1363,9 @@ elf_slurp_reloc_table_from_section (abfd, asect, rel_hdr, reloc_count,
 
       relent->addend = rela.r_addend;
 
-      if (entsize == sizeof (Elf_External_Rela))
+      if ((entsize == sizeof (Elf_External_Rela)
+	   && ebd->elf_info_to_howto != NULL)
+	  || ebd->elf_info_to_howto_rel == NULL)
 	(*ebd->elf_info_to_howto) (abfd, relent, &rela);
       else
 	(*ebd->elf_info_to_howto_rel) (abfd, relent, &rela);

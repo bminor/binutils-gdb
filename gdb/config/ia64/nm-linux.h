@@ -34,13 +34,6 @@ extern int ia64_cannot_fetch_register (int regno);
 #define CANNOT_STORE_REGISTER(regno) ia64_cannot_store_register(regno)
 extern int ia64_cannot_store_register (int regno);
 
-#ifdef GDBSERVER
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-	(addr) = ia64_register_u_addr ((blockend),(regno));
-
-extern int ia64_register_u_addr(int, int);
-#endif /* GDBSERVER */
-
 #define U_REGS_OFFSET 0
 
 #define PTRACE_ARG3_TYPE long

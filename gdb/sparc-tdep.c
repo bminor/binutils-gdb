@@ -466,13 +466,6 @@ sparc_frame_chain (struct frame_info *frame)
   return ~ (CORE_ADDR) 0;
 }
 
-CORE_ADDR
-sparc_extract_struct_value_address (char *regbuf)
-{
-  return extract_address (regbuf + REGISTER_BYTE (O0_REGNUM),
-			  REGISTER_RAW_SIZE (O0_REGNUM));
-}
-
 /* Find the pc saved in frame FRAME.  */
 
 CORE_ADDR
@@ -515,7 +508,7 @@ sparc_frame_saved_pc (struct frame_info *frame)
          stack layout has changed or the stack is corrupt.  */
       target_read_memory (sigcontext_addr + saved_pc_offset,
 			  scbuf, sizeof (scbuf));
-      return extract_address (scbuf, sizeof (scbuf));
+      return extract_unsigned_integer (scbuf, sizeof (scbuf));
     }
   else if (get_frame_extra_info (frame)->in_prologue ||
 	   (get_next_frame (frame) != NULL &&
@@ -541,7 +534,7 @@ sparc_frame_saved_pc (struct frame_info *frame)
     return PC_ADJUST (read_register (O7_REGNUM));
 
   read_memory (addr, buf, SPARC_INTREG_SIZE);
-  return PC_ADJUST (extract_address (buf, SPARC_INTREG_SIZE));
+  return PC_ADJUST (extract_unsigned_integer (buf, SPARC_INTREG_SIZE));
 }
 
 /* Since an individual frame in the frame cache is defined by two
@@ -1803,7 +1796,7 @@ get_longjmp_target (CORE_ADDR *pc)
 			  LONGJMP_TARGET_SIZE))
     return 0;
 
-  *pc = extract_address (buf, LONGJMP_TARGET_SIZE);
+  *pc = extract_unsigned_integer (buf, LONGJMP_TARGET_SIZE);
 
   return 1;
 }
@@ -2111,20 +2104,7 @@ sparc_print_registers (struct gdbarch *gdbarch,
 	  continue;
 	}
 
-      /* FIXME: cagney/2002-08-03: This code shouldn't be necessary.
-         The function frame_register_read() should have returned the
-         pre-cooked register so no conversion is necessary.  */
-      /* Convert raw data to virtual format if necessary.  */
-      if (REGISTER_CONVERTIBLE (i))
-	{
-	  REGISTER_CONVERT_TO_VIRTUAL (i, REGISTER_VIRTUAL_TYPE (i),
-				       raw_buffer, virtual_buffer);
-	}
-      else
-	{
-	  memcpy (virtual_buffer, raw_buffer,
-		  REGISTER_VIRTUAL_SIZE (i));
-	}
+      memcpy (virtual_buffer, raw_buffer, REGISTER_VIRTUAL_SIZE (i));
 
       /* If virtual format is floating, print it that way, and in raw
          hex.  */
@@ -2206,7 +2186,7 @@ sparc_do_registers_info (int regnum, int all)
 #endif
 
 
-int
+static int
 gdb_print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
 {
   /* It's necessary to override mach again because print_insn messes it up. */
@@ -2214,6 +2194,124 @@ gdb_print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
   return print_insn_sparc (memaddr, info);
 }
 
+
+#define SPARC_F0_REGNUM		FP0_REGNUM	/* %f0 */
+#define SPARC_F1_REGNUM		(FP0_REGNUM + 1)/* %f1 */
+#define SPARC_O0_REGNUM		O0_REGNUM	/* %o0 */
+#define SPARC_O1_REGNUM		O1_REGNUM	/* %o1 */
+
+/* Push the arguments onto the stack and into the appropriate registers.  */
+
+static CORE_ADDR
+sparc32_do_push_arguments (struct regcache *regcache, int nargs,
+			   struct value **args, CORE_ADDR sp)
+{
+  CORE_ADDR *addr;
+  int size = 0;
+  int i;
+
+  /* Structure, union and quad-precision arguments are passed by
+     reference.  We allocate space for these arguments on the stack
+     and record their addresses in an array.  Array elements for
+     arguments that are passed by value will be set to zero.*/
+  addr = alloca (nargs * sizeof (CORE_ADDR));
+
+  for (i = nargs - 1; i >= 0; i--)
+    {
+      struct type *type = VALUE_ENCLOSING_TYPE (args[i]);
+      enum type_code code = TYPE_CODE (type);
+      int len = TYPE_LENGTH (type);
+
+      /* Push the contents of structure, union and quad-precision
+	 arguments on the stack.  */
+      if (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION || len > 8)
+	{
+	  /* Keep the stack doubleword aligned.  */
+	  sp -= (len + 7) & ~7;
+	  write_memory (sp, VALUE_CONTENTS_ALL (args[i]), len);
+	  addr[i] = sp;
+	  size += 4;
+	}
+      else
+	{
+	  addr[i] = 0;
+	  size += (len > 4) ? 8 : 4;
+	}
+    }
+
+  /* The needed space for outgoing arguments should be a multiple of 4.  */
+  gdb_assert (size % 4 == 0);
+
+  /* Make sure we reserve space for the first six words of arguments
+     in the stack frame, even if we don't need them.  */
+  if (size < 24)
+    sp -= (24 - size);
+
+  /* Make sure we end up with a doubleword aligned stack in the end.
+     Reserve an extra word if necessary in order to accomplish this.  */
+  if ((sp - size) % 8 == 0)
+    sp -= 4;
+
+  /* Now push the arguments onto the stack.  */
+  for (i = nargs - 1; i >=0; i--)
+    {
+      char buf[8];
+      int len;
+
+      if (addr[i])
+	{
+	  store_unsigned_integer (buf, 4, addr[i]);
+	  len = 4;
+	}
+      else
+	{
+	  struct value *arg = args[i];
+
+	  len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
+
+	  /* Expand signed and unsigned bytes and halfwords as needed.  */
+	  if (len < 4)
+	    {
+	      arg = value_cast (builtin_type_long, arg);
+	      len = 4;
+	    }
+	  else if (len > 4 && len < 8)
+	    {
+	      arg = value_cast (builtin_type_long_long, arg);
+	      len = 4;
+	    }
+
+	  gdb_assert (len == 4 || len == 8);
+	  memcpy (buf, VALUE_CONTENTS_ALL (arg), len);
+	}
+
+      /* We always write the argument word on the stack.  */
+      sp -= len;
+      write_memory (sp, buf, len);
+
+      /* If this argument occupies one of the first 6 words, write it
+         into the appropriate register too.  */
+      size -= len;
+      if (size < 24)
+	{
+	  int regnum = SPARC_O0_REGNUM + (size / 4);
+
+	  regcache_cooked_write (regcache, regnum, buf);
+	  if (len == 8 && size < 20)
+	    regcache_cooked_write (regcache, regnum + 1, buf + 4);
+	}
+    }
+
+  /* Reserve space for the struct/union return value pointer.  */
+  sp -= 4;
+
+  /* Stack should be doubleword aligned at this point.  */
+  gdb_assert (sp % 8 == 0);
+
+  /* Return the adjusted stack pointer.  */
+  return sp;
+}
+
 /* The SPARC passes the arguments on the stack; arguments smaller
    than an int are promoted to an int.  The first 6 words worth of 
    args are also passed in registers o0 - o5.  */
@@ -2222,95 +2320,135 @@ CORE_ADDR
 sparc32_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 			int struct_return, CORE_ADDR struct_addr)
 {
-  int i, j, oregnum;
-  int accumulate_size = 0;
-  struct sparc_arg
-    {
-      char *contents;
-      int len;
-      int offset;
-    };
-  struct sparc_arg *sparc_args =
-    (struct sparc_arg *) alloca (nargs * sizeof (struct sparc_arg));
-  struct sparc_arg *m_arg;
+  sp = sparc32_do_push_arguments (current_regcache, nargs, args, sp);
 
-  /* Promote arguments if necessary, and calculate their stack offsets
-     and sizes. */
-  for (i = 0, m_arg = sparc_args; i < nargs; i++, m_arg++)
+  /* FIXME: kettenis/20030525: We don't let this function set the
+     struct/union return pointer just yet.  */
+#if 0
+  if (struct_return)
     {
-      struct value *arg = args[i];
-      struct type *arg_type = check_typedef (VALUE_TYPE (arg));
-      /* Cast argument to long if necessary as the compiler does it too.  */
-      switch (TYPE_CODE (arg_type))
-	{
-	case TYPE_CODE_INT:
-	case TYPE_CODE_BOOL:
-	case TYPE_CODE_CHAR:
-	case TYPE_CODE_RANGE:
-	case TYPE_CODE_ENUM:
-	  if (TYPE_LENGTH (arg_type) < TYPE_LENGTH (builtin_type_long))
-	    {
-	      arg_type = builtin_type_long;
-	      arg = value_cast (arg_type, arg);
-	    }
-	  break;
-	default:
-	  break;
-	}
-      m_arg->len = TYPE_LENGTH (arg_type);
-      m_arg->offset = accumulate_size;
-      accumulate_size = (accumulate_size + m_arg->len + 3) & ~3;
-      m_arg->contents = VALUE_CONTENTS (arg);
-    }
+      char buf[4];
 
-  /* Make room for the arguments on the stack.  */
-  accumulate_size += DEPRECATED_CALL_DUMMY_STACK_ADJUST;
-  sp = ((sp - accumulate_size) & ~7) + DEPRECATED_CALL_DUMMY_STACK_ADJUST;
-
-  /* `Push' arguments on the stack.  */
-  for (i = 0, oregnum = 0, m_arg = sparc_args; 
-       i < nargs;
-       i++, m_arg++)
-    {
-      write_memory (sp + m_arg->offset, m_arg->contents, m_arg->len);
-      for (j = 0; 
-	   j < m_arg->len && oregnum < 6; 
-	   j += SPARC_INTREG_SIZE, oregnum++)
-	deprecated_write_register_gen (O0_REGNUM + oregnum, m_arg->contents + j);
+      /* The space for the struct/union return value pointer has
+         already been reserved.  */
+      store_unsigned_integer (buf, 4, struct_addr);
+      write (sp, buf, 4);
     }
 
   return sp;
+#else
+  return sp + 4;
+#endif
 }
 
+/* Extract from REGCACHE a function return value of type TYPE and copy
+   that into VALBUF.
 
-/* Extract from an array REGBUF containing the (raw) register state
-   a function return value of type TYPE, and copy that, in virtual format,
-   into VALBUF.  */
+   Note that REGCACHE specifies the register values for the frame of
+   the calling function.  This means that we need to fetch the value
+   form %o0 and %o1, which correspond to %i0 and %i1 in the frame of
+   the called function.  */
 
 void
-sparc32_extract_return_value (struct type *type, char *regbuf, char *valbuf)
+sparc32_extract_return_value (struct type *type, struct regcache *regcache,
+			      void *valbuf)
 {
-  int typelen = TYPE_LENGTH (type);
-  int regsize = REGISTER_RAW_SIZE (O0_REGNUM);
+  int len = TYPE_LENGTH (type);
+  char buf[8];
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT && SPARC_HAS_FPU)
-    memcpy (valbuf, &regbuf[REGISTER_BYTE (FP0_REGNUM)], typelen);
+    {
+      if (len == 4 || len == 8)
+	{
+	  regcache_cooked_read (regcache, SPARC_F0_REGNUM, buf);
+	  regcache_cooked_read (regcache, SPARC_F1_REGNUM, buf + 4);
+	  memcpy (valbuf, buf, len);
+	  return;
+	}
+      else
+	internal_error (__FILE__, __LINE__, "\
+Cannot extract floating-point return value of %d bytes long.", len);
+    }
+
+  if (len <= 4)
+    {
+      regcache_cooked_read (regcache, SPARC_O0_REGNUM, buf);
+      memcpy (valbuf, buf + 4 - len, len);
+    }
+  else if (len <= 8)
+    {
+      regcache_cooked_read (regcache, SPARC_O0_REGNUM, buf);
+      regcache_cooked_read (regcache, SPARC_O1_REGNUM, buf + 4);
+      memcpy (valbuf, buf + 8 - len, len);
+    }
   else
-    memcpy (valbuf,
-	    &regbuf[O0_REGNUM * regsize +
-		    (typelen >= regsize
-		     || TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE ? 0
-		     : regsize - typelen)],
-	    typelen);
+    internal_error (__FILE__, __LINE__,
+		    "Cannot extract return value of %d bytes long.", len);
 }
 
-
-/* Write into appropriate registers a function return value
-   of type TYPE, given in virtual format.  On SPARCs with FPUs,
-   float values are returned in %f0 (and %f1).  In all other cases,
-   values are returned in register %o0.  */
+/* Write into REGBUF a function return value VALBUF of type TYPE.  */
 
 void
+sparc32_store_return_value (struct type *type, struct regcache *regcache,
+			    const void *valbuf)
+{
+  int len = TYPE_LENGTH (type);
+  char buf[8];
+
+  if (TYPE_CODE (type) == TYPE_CODE_FLT && SPARC_HAS_FPU)
+    {
+      const char *buf = valbuf;
+
+      if (len == 4)
+	{
+	  regcache_cooked_write (regcache, SPARC_F0_REGNUM, buf);
+	  return;
+	}
+      else if (len == 8)
+	{
+	  regcache_cooked_write (regcache, SPARC_F0_REGNUM, buf);
+	  regcache_cooked_write (regcache, SPARC_F1_REGNUM, buf + 4);
+	  return;
+	}
+      else
+	internal_error (__FILE__, __LINE__, "\
+Cannot extract floating-point return value of %d bytes long.", len);
+    }
+
+  /* Add leading zeros to the value.  */
+  memset (buf, 0, sizeof buf);
+
+  if (len <= 4)
+    {
+      memcpy (buf + 4 - len, valbuf, len);
+      regcache_cooked_write (regcache, SPARC_O0_REGNUM, buf);
+    }
+  else if (len <= 8)
+    {
+      memcpy (buf + 8 - len, valbuf, len);
+      regcache_cooked_write (regcache, SPARC_O0_REGNUM, buf);
+      regcache_cooked_write (regcache, SPARC_O1_REGNUM, buf);
+    }
+  else
+    internal_error (__FILE__, __LINE__,
+		    "Cannot extract return value of %d bytes long.", len);
+}
+
+/* Extract from REGCACHE the address in which a function should return
+   its structure value.  */
+
+CORE_ADDR
+sparc_extract_struct_value_address (struct regcache *regcache)
+{
+  ULONGEST addr;
+
+  regcache_cooked_read_unsigned (regcache, SPARC_O0_REGNUM, &addr);
+  return addr;
+}
+
+/* FIXME: kettenis/2003/05/24: Still used for sparc64.  */
+
+static void
 sparc_store_return_value (struct type *type, char *valbuf)
 {
   int regno;
@@ -2459,6 +2597,8 @@ static struct gdbarch * sparc_gdbarch_init (struct gdbarch_info info,
 					    struct gdbarch_list *arches);
 static void sparc_dump_tdep (struct gdbarch *, struct ui_file *);
 
+extern initialize_file_ftype _initialize_sparc_tdep; /* -Wmissing-prototypes */
+
 void
 _initialize_sparc_tdep (void)
 {
@@ -2473,7 +2613,7 @@ _initialize_sparc_tdep (void)
 /* Compensate for stack bias. Note that we currently don't handle
    mixed 32/64 bit code. */
 
-CORE_ADDR
+static CORE_ADDR
 sparc64_read_sp (void)
 {
   CORE_ADDR sp = read_register (SP_REGNUM);
@@ -2483,7 +2623,7 @@ sparc64_read_sp (void)
   return sp;
 }
 
-CORE_ADDR
+static CORE_ADDR
 sparc64_read_fp (void)
 {
   CORE_ADDR fp = read_register (DEPRECATED_FP_REGNUM);
@@ -2493,7 +2633,7 @@ sparc64_read_fp (void)
   return fp;
 }
 
-void
+static void
 sparc64_write_sp (CORE_ADDR val)
 {
   CORE_ADDR oldsp = read_register (SP_REGNUM);
@@ -2517,7 +2657,7 @@ sparc64_write_sp (CORE_ADDR val)
    for both; this means that if the arguments alternate between
    int and float, we will waste every other register of both types.  */
 
-CORE_ADDR
+static CORE_ADDR
 sparc64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 			int struct_return, CORE_ADDR struct_retaddr)
 {
@@ -2634,7 +2774,7 @@ sparc64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 /* Values <= 32 bytes are returned in o0-o3 (floating-point values are
    returned in f0-f3). */
 
-void
+static void
 sp64_extract_return_value (struct type *type, char *regbuf, char *valbuf,
 			   int bitoffset)
 {
@@ -2691,7 +2831,7 @@ sp64_extract_return_value (struct type *type, char *regbuf, char *valbuf,
     }
 }
 
-extern void
+static void
 sparc64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 {
   sp64_extract_return_value (type, regbuf, valbuf, 0);
@@ -2717,7 +2857,7 @@ sparc32_stack_align (CORE_ADDR addr)
   return ((addr + 7) & -8);
 }
 
-extern CORE_ADDR
+static CORE_ADDR
 sparc64_stack_align (CORE_ADDR addr)
 {
   return ((addr + 15) & -16);
@@ -2855,7 +2995,7 @@ sparc64_register_name (int regno)
 // OBSOLETE }
 #endif
 
-CORE_ADDR
+static CORE_ADDR
 sparc_push_return_address (CORE_ADDR pc_unused, CORE_ADDR sp)
 {
   if (CALL_DUMMY_LOCATION == AT_ENTRY_POINT)
@@ -3014,19 +3154,6 @@ sparc_saved_pc_after_call (struct frame_info *fi)
   return sparc_pc_adjust (read_register (RP_REGNUM));
 }
 
-/* Convert registers between 'raw' and 'virtual' formats.
-   They are the same on sparc, so there's nothing to do.  */
-
-static void
-sparc_convert_to_virtual (int regnum, struct type *type, char *from, char *to)
-{	/* do nothing (should never be called) */
-}
-
-static void
-sparc_convert_to_raw (struct type *type, int regnum, char *from, char *to)
-{	/* do nothing (should never be called) */
-}
-
 /* Init saved regs: nothing to do, just a place-holder function.  */
 
 static void
@@ -3061,7 +3188,7 @@ sparc_call_dummy_address (void)
 
 /* Supply the Y register number to those that need it.  */
 
-int
+static int
 sparc_y_regnum (void)
 {
   return gdbarch_tdep (current_gdbarch)->y_regnum;
@@ -3076,7 +3203,7 @@ sparc_reg_struct_has_addr (int gcc_p, struct type *type)
     return (gcc_p != 1);
 }
 
-int
+static int
 sparc_intreg_size (void)
 {
   return SPARC_INTREG_SIZE;
@@ -3090,6 +3217,16 @@ sparc_return_value_on_stack (struct type *type)
     return 1;
   else
     return 0;
+}
+
+/* Get the ith function argument for the current function.  */
+static CORE_ADDR
+sparc_fetch_pointer_argument (struct frame_info *frame, int argi,
+			      struct type *type)
+{
+  CORE_ADDR addr;
+  frame_read_register (frame, O0_REGNUM + argi, &addr);
+  return addr;
 }
 
 /*
@@ -3164,14 +3301,14 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, sparc_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sparc_extract_struct_value_address);
+  set_gdbarch_extract_struct_value_address (gdbarch,
+					   sparc_extract_struct_value_address);
   set_gdbarch_deprecated_fix_call_dummy (gdbarch, sparc_gdbarch_fix_call_dummy);
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_deprecated_fp_regnum (gdbarch, SPARC_FP_REGNUM);
   set_gdbarch_fp0_regnum (gdbarch, SPARC_FP0_REGNUM);
   set_gdbarch_deprecated_frame_chain (gdbarch, sparc_frame_chain);
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sparc_frame_init_saved_regs);
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, sparc_frame_saved_pc);
   set_gdbarch_frameless_function_invocation (gdbarch, 
 					     frameless_look_for_prologue);
@@ -3186,12 +3323,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_pop_frame (gdbarch, sparc_pop_frame);
   set_gdbarch_deprecated_push_return_address (gdbarch, sparc_push_return_address);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, sparc_push_dummy_frame);
-  set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
-  set_gdbarch_register_convert_to_raw (gdbarch, sparc_convert_to_raw);
-  set_gdbarch_register_convert_to_virtual (gdbarch, 
-					   sparc_convert_to_virtual);
-  set_gdbarch_register_convertible (gdbarch, 
-				    generic_register_convertible_not);
   set_gdbarch_reg_struct_has_addr (gdbarch, sparc_reg_struct_has_addr);
   set_gdbarch_return_value_on_stack (gdbarch, sparc_return_value_on_stack);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, sparc_saved_pc_after_call);
@@ -3201,6 +3332,9 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, SPARC_SP_REGNUM);
   set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
+
+  /* Helper for function argument information.  */
+  set_gdbarch_fetch_pointer_argument (gdbarch, sparc_fetch_pointer_argument);
 
   /*
    * Settings that depend only on 32/64 bit word size 
@@ -3291,14 +3425,12 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_pc_regnum (gdbarch, SPARC32_PC_REGNUM);
       set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       set_gdbarch_deprecated_push_arguments (gdbarch, sparc32_push_arguments);
-      set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
 
-      set_gdbarch_register_byte (gdbarch, sparc32_register_byte);
-      set_gdbarch_register_raw_size (gdbarch, sparc32_register_size);
+      set_gdbarch_deprecated_register_byte (gdbarch, sparc32_register_byte);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, sparc32_register_size);
       set_gdbarch_deprecated_register_size (gdbarch, 4);
-      set_gdbarch_register_virtual_size (gdbarch, sparc32_register_size);
-      set_gdbarch_register_virtual_type (gdbarch, 
-					 sparc32_register_virtual_type);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, sparc32_register_size);
+      set_gdbarch_deprecated_register_virtual_type (gdbarch, sparc32_register_virtual_type);
 #ifdef SPARC32_CALL_DUMMY_ON_STACK
       set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_32));
 #else
@@ -3309,7 +3441,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_deprecated_store_struct_return (gdbarch, sparc32_store_struct_return);
       set_gdbarch_use_struct_convention (gdbarch, 
 					 generic_use_struct_convention);
-      set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+      set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
       tdep->y_regnum = SPARC32_Y_REGNUM;
       tdep->fp_max_regnum = SPARC_FP0_REGNUM + 32;
       tdep->intreg_size = 4;
@@ -3347,12 +3479,11 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_read_sp (gdbarch, sparc64_read_sp);
       /* Some of the registers aren't 64 bits, but it's a lot simpler just
 	 to assume they all are (since most of them are).  */
-      set_gdbarch_register_byte (gdbarch, sparc64_register_byte);
-      set_gdbarch_register_raw_size (gdbarch, sparc64_register_size);
+      set_gdbarch_deprecated_register_byte (gdbarch, sparc64_register_byte);
+      set_gdbarch_deprecated_register_raw_size (gdbarch, sparc64_register_size);
       set_gdbarch_deprecated_register_size (gdbarch, 8);
-      set_gdbarch_register_virtual_size (gdbarch, sparc64_register_size);
-      set_gdbarch_register_virtual_type (gdbarch, 
-					 sparc64_register_virtual_type);
+      set_gdbarch_deprecated_register_virtual_size (gdbarch, sparc64_register_size);
+      set_gdbarch_deprecated_register_virtual_type (gdbarch, sparc64_register_virtual_type);
 #ifdef SPARC64_CALL_DUMMY_ON_STACK
       set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_64));
 #else
@@ -3379,11 +3510,11 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_sparc:
-      set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
+      set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
+      set_gdbarch_store_return_value (gdbarch, sparc32_store_return_value);
       set_gdbarch_num_regs (gdbarch, 72);
       set_gdbarch_deprecated_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
-      set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
 #if 0
       // OBSOLETE       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
 #endif
@@ -3415,11 +3546,11 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       // OBSOLETE       break;
 #endif
     case bfd_mach_sparc_v8plus:
-      set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
+      set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
+      set_gdbarch_store_return_value (gdbarch, sparc32_store_return_value);
       set_gdbarch_num_regs (gdbarch, 72);
       set_gdbarch_deprecated_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
-      set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
       tdep->print_insn_mach = bfd_mach_sparc;
       tdep->fp_register_bytes = 32 * 4;
 #if 0
@@ -3427,11 +3558,11 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 #endif
       break;
     case bfd_mach_sparc_v8plusa:
-      set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
+      set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
+      set_gdbarch_store_return_value (gdbarch, sparc32_store_return_value);
       set_gdbarch_num_regs (gdbarch, 72);
       set_gdbarch_deprecated_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
       set_gdbarch_register_name (gdbarch, sparc32_register_name);
-      set_gdbarch_deprecated_store_return_value (gdbarch, sparc_store_return_value);
 #if 0
       // OBSOLETE       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
 #endif

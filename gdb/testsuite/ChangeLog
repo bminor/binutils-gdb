@@ -1,3 +1,137 @@
+2003-06-24  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.base/bang.exp: New testcase.
+
+2003-06-23  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.base/langs.exp: Add some tests for the "minimal" language
+	support.
+
+2003-06-23  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.objc/basicclass.exp: Return -1 if we cannot compile
+	the testcase.
+
+2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/relocate.exp: Test add-symbol-file with a variable
+	offset.
+
+2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.c++/pr-1210.cc: New file.
+	* gdb.c++/pr-1210.exp: New file.
+
+2003-06-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	* lib/mi-support.exp (mi_run_cmd): Expect an MI response to
+	000-exec-continue.
+
+2003-06-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/attach.exp: Use -1 for the ID of a nonexistent process
+	on *-*-*bsd* instead of *-*-freebsd*.
+
+2003-06-14  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/store.exp: Test longest and doublest.  Test all
+	parameters.  Weaken return statement match.
+	* gdb.base/store.c: Add longest and doublest - aka long long and
+	long double functions.  Put all parameters into local register
+	variables.  Use negative values.
+
+2003-06-14  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/fileio.c: Include <errno.h>, and <sys/wait.h>.  Gag
+	-Wformat errors.  Add lost line.  Use WEXITSTATUS to get system
+	exit status.
+	* gdb.base/fileio.exp: Disable target when nointerrupts and
+	noinferiorio, instead of limiting it to remote.  Use remote_exec
+	instead of system.
+	
+2003-06-12  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gdb.base/float.exp: Add ia64 support.
+
+2003-06-12  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/fileio.exp: Run only on remote targets.
+
+2003-06-10  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/fileio.c: New file, testing File-I/O.
+	* gdb.base/fileio.exp: Ditto.
+
+2003-06-09  Raoul Gough  <RaoulGough@yahoo.co.uk>
+
+	* gdb.base/shreloc.exp: New file, check symbol values obtained from
+	shared objects after relocation at load time (gdb PR/1132).
+	* gdb.base/shreloc.c, gdb.base/shreloc1.c, gdb.base/shreloc2.c:
+        as above, part of the shared object relocation test.
+
+2003-06-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/readline.exp: Add tests for operate-and-get-next with a
+	fully filled history list.
+	* gdb.base/gdb_history: New file.
+
+	* gdb.base/signals.exp: XFAIL "continue to func1" on
+	i*86-*-freebsd*.
+
+	* gdb.base/attach.exp: When trying to attach to a nonexistent
+	process, make it possible to specify the PID based on the target,
+	and do so for *-*-freebsd*.
+
+2003-06-02  Richard Henderson  <rth@redhat.com>
+
+	* gdb.base/float.exp: Add expected regexp for alpha-*-*.
+
+2003-06-02  Richard Henderson  <rth@redhat.com>
+
+	* gdb.base/selftest.exp: Next over lim_at_start initialization.
+
+2003-06-02  Richard Henderson  <rth@redhat.com>
+
+	* gdb.base/dump.exp [alpha*-*-*]: Add -taso linker switch.
+
+2003-06-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.asm/asm-source.exp: Dissassemble from &globalvar instead
+	of globalvar.
+
+2003-06-01  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/asm-source.exp: Check for memory read errors in
+	disassembler test on *BSD too.
+
+2003-06-01  Richard Henderson  <rth@redhat.com>
+
+	* gdb.asm/alpha.inc (gdbasm_enter): Use numeric register names
+	for .frame.
+	(gdbasm_call): Lose ldgp.
+	(gdbasm_startup): Add frame information.
+	* gdb.asm/asm-source.exp (alpha*-*): Add -no-mdebug to asm-flags.
+
+2003-05-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/float.exp: Expect similar output for x86_64-*-* as for
+	i?86-*-*.
+
+2003-05-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.asm/asm-source.exp: Make sure the final link succeeds on
+	FreeBSD.
+
+2003-05-29  Richard Henderson  <rth@redhat.com>
+
+	* gdb.asm/alpha.inc: New file.
+	* gdb.asm/asm-source.exp: Use it.
+
+2003-05-29  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/corefile.exp: Find corefiles on Linux, which names them
+	'core.PID'.
+
 2003-06-16  David Carlton  <carlton@kealia.com>
 
 	* gdb.c++/namespace.exp: Add 'maint cp namespace' test.

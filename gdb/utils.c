@@ -689,42 +689,49 @@ static void
 internal_vproblem (struct internal_problem *problem,
 		   const char *file, int line, const char *fmt, va_list ap)
 {
-  static char msg[] = "Recursive internal problem.\n";
   static int dejavu;
   int quit_p;
   int dump_core_p;
+  char *reason;
 
   /* Don't allow infinite error/warning recursion.  */
-  switch (dejavu)
-    {
-    case 0:
-      dejavu = 1;
-      break;
-    case 1:
-      dejavu = 2;
-      fputs_unfiltered (msg, gdb_stderr);
-      abort ();			/* NOTE: GDB has only three calls to abort().  */
-    default:
-      dejavu = 3;
-      write (STDERR_FILENO, msg, sizeof (msg));
-      exit (1);
-    }
+  {
+    static char msg[] = "Recursive internal problem.\n";
+    switch (dejavu)
+      {
+      case 0:
+	dejavu = 1;
+	break;
+      case 1:
+	dejavu = 2;
+	fputs_unfiltered (msg, gdb_stderr);
+	abort ();	/* NOTE: GDB has only three calls to abort().  */
+      default:
+	dejavu = 3;
+	write (STDERR_FILENO, msg, sizeof (msg));
+	exit (1);
+      }
+  }
 
   /* Try to get the message out and at the start of a new line.  */
   target_terminal_ours ();
   begin_line ();
 
-  /* The error/warning message.  Format using a style similar to a
-     compiler error message.  */
-  fprintf_unfiltered (gdb_stderr, "%s:%d: %s: ", file, line, problem->name);
-  vfprintf_unfiltered (gdb_stderr, fmt, ap);
-  fputs_unfiltered ("\n", gdb_stderr);
-
-  /* Provide more details so that the user knows that they are living
-     on the edge.  */
-  fprintf_unfiltered (gdb_stderr, "\
-A problem internal to GDB has been detected.  Further\n\
-debugging may prove unreliable.\n");
+  /* Create a string containing the full error/warning message.  Need
+     to call query with this full string, as otherwize the reason
+     (error/warning) and question become separated.  Format using a
+     style similar to a compiler error message.  Include extra detail
+     so that the user knows that they are living on the edge.  */
+  {
+    char *msg;
+    xasprintf (&msg, fmt, ap);
+    xasprintf (&reason, "\
+%s:%d: %s: %s\n\
+A problem internal to GDB has been detected,\n\
+further debugging may prove unreliable.", file, line, problem->name, msg);
+    xfree (msg);
+    make_cleanup (xfree, reason);
+  }
 
   switch (problem->should_quit)
     {
@@ -732,7 +739,7 @@ debugging may prove unreliable.\n");
       /* Default (yes/batch case) is to quit GDB.  When in batch mode
          this lessens the likelhood of GDB going into an infinate
          loop.  */
-      quit_p = query ("Quit this debugging session? ");
+      quit_p = query ("%s\nQuit this debugging session? ", reason);
       break;
     case AUTO_BOOLEAN_TRUE:
       quit_p = 1;
@@ -750,7 +757,7 @@ debugging may prove unreliable.\n");
       /* Default (yes/batch case) is to dump core.  This leaves a GDB
          `dropping' so that it is easier to see that something went
          wrong in GDB.  */
-      dump_core_p = query ("Create a core file of GDB? ");
+      dump_core_p = query ("%s\nCreate a core file of GDB? ", reason);
       break;
       break;
     case AUTO_BOOLEAN_TRUE:

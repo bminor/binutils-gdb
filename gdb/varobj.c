@@ -1379,9 +1379,8 @@ make_cleanup_free_variable (struct varobj *var)
   return make_cleanup (do_free_variable_cleanup, var);
 }
 
-/* This returns the type of the variable. This skips past typedefs
-   and returns the real type of the variable. It also dereferences
-   pointers and references.
+/* This returns the type of the variable. It also skips past typedefs
+   to return the real type of the variable.
 
    NOTE: TYPE_TARGET_TYPE should NOT be used anywhere in this file
    except within get_target_type and get_type. */
@@ -1391,8 +1390,8 @@ get_type (struct varobj *var)
   struct type *type;
   type = var->type;
 
-  while (type != NULL && TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
-    type = TYPE_TARGET_TYPE (type);
+  if (type != NULL)
+    type = check_typedef (type);
 
   return type;
 }
@@ -1423,8 +1422,8 @@ get_target_type (struct type *type)
   if (type != NULL)
     {
       type = TYPE_TARGET_TYPE (type);
-      while (type != NULL && TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
-	type = TYPE_TARGET_TYPE (type);
+      if (type != NULL)
+	type = check_typedef (type);
     }
 
   return type;

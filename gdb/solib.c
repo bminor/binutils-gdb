@@ -87,12 +87,19 @@ static char *solib_search_path = NULL;
    (or set of directories, as in LD_LIBRARY_PATH) to search for all
    shared libraries if not found in SOLIB_ABSOLUTE_PREFIX.
 
-   Search order:
-   * If path is absolute, look in SOLIB_ABSOLUTE_PREFIX.
-   * If path is absolute or relative, look for it literally (unmodified).
+   Search algorithm:
+   * If there is a solib_absolute_prefix and path is absolute:
+   *   Search for solib_absolute_prefix/path.
+   * else
+   *   Look for it literally (unmodified).
    * Look in SOLIB_SEARCH_PATH.
-   * Look in inferior's $PATH.
-   * Look in inferior's $LD_LIBRARY_PATH.
+   * If available, use target defined search function.
+   * If solib_absolute_prefix is NOT set, perform the following two searches:
+   *   Look in inferior's $PATH.
+   *   Look in inferior's $LD_LIBRARY_PATH.
+   *   
+   * The last check avoids doing this search when targetting remote
+   * machines since solib_absolute_prefix will almost always be set.
 
    RETURNS
 
@@ -147,7 +154,7 @@ solib_open (char *in_pathname, char **found_pathname)
         in_pathname++;
     }
   
-  /* If not found, next search the solib_search_path (if any).  */
+  /* If not found, search the solib_search_path (if any).  */
   if (found_file < 0 && solib_search_path != NULL)
     found_file = openp (solib_search_path,
 			1, in_pathname, O_RDONLY, 0, &temp_pathname);
@@ -166,13 +173,13 @@ solib_open (char *in_pathname, char **found_pathname)
                  (in_pathname, O_RDONLY, &temp_pathname);
 
   /* If not found, next search the inferior's $PATH environment variable. */
-  if (found_file < 0 && solib_search_path != NULL)
+  if (found_file < 0 && solib_absolute_prefix == NULL)
     found_file = openp (get_in_environ (inferior_environ, "PATH"),
 			1, in_pathname, O_RDONLY, 0, &temp_pathname);
 
   /* If not found, next search the inferior's $LD_LIBRARY_PATH 
      environment variable. */
-  if (found_file < 0 && solib_search_path != NULL)
+  if (found_file < 0 && solib_absolute_prefix == NULL)
     found_file = openp (get_in_environ (inferior_environ, "LD_LIBRARY_PATH"),
 			1, in_pathname, O_RDONLY, 0, &temp_pathname);
 
@@ -381,7 +388,7 @@ symbol_add_stub (void *arg)
    the section table.  But we only use this for core files and
    processes we've just attached to, so that's okay.  */
 
-void
+static void
 update_solib_list (int from_tty, struct target_ops *target)
 {
   struct so_list *inferior = TARGET_SO_CURRENT_SOS ();
@@ -855,6 +862,8 @@ reload_shared_libraries (char *ignored, int from_tty)
   no_shared_libraries (NULL, from_tty);
   solib_add (NULL, from_tty, NULL, auto_solib_add);
 }
+
+extern initialize_file_ftype _initialize_solib; /* -Wmissing-prototypes */
 
 void
 _initialize_solib (void)

@@ -21,128 +21,26 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "doublest.h"
+#include "floatformat.h"
 #include "frame.h"
+#include "gdbcore.h"
 #include "inferior.h"
 #include "language.h"
-#include "value.h"
-#include "gdbcore.h"
-#include "floatformat.h"
 #include "regcache.h"
+#include "value.h"
+
 #include "gdb_assert.h"
 #include "gdb_string.h"
-#include "doublest.h"
 
 #include "i386-tdep.h"
+#include "i387-tdep.h"
 
-
-/* FIXME: The functions on this page are used by the old `info float'
-   implementations that a few of the i386 targets provide.  These
-   functions should be removed if all of these have been converted to
-   use the generic implementation based on the new register file
-   layout.  */
-
-static void print_387_control_bits (unsigned int control);
-static void print_387_status_bits (unsigned int status);
-
-static void
-print_387_control_bits (unsigned int control)
-{
-  switch ((control >> 8) & 3)
-    {
-    case 0:
-      puts_unfiltered (" 24 bit; ");
-      break;
-    case 1:
-      puts_unfiltered (" (bad); ");
-      break;
-    case 2:
-      puts_unfiltered (" 53 bit; ");
-      break;
-    case 3:
-      puts_unfiltered (" 64 bit; ");
-      break;
-    }
-  switch ((control >> 10) & 3)
-    {
-    case 0:
-      puts_unfiltered ("NEAR; ");
-      break;
-    case 1:
-      puts_unfiltered ("DOWN; ");
-      break;
-    case 2:
-      puts_unfiltered ("UP; ");
-      break;
-    case 3:
-      puts_unfiltered ("CHOP; ");
-      break;
-    }
-  if (control & 0x3f)
-    {
-      puts_unfiltered ("mask");
-      if (control & 0x0001)
-	puts_unfiltered (" INVAL");
-      if (control & 0x0002)
-	puts_unfiltered (" DENOR");
-      if (control & 0x0004)
-	puts_unfiltered (" DIVZ");
-      if (control & 0x0008)
-	puts_unfiltered (" OVERF");
-      if (control & 0x0010)
-	puts_unfiltered (" UNDER");
-      if (control & 0x0020)
-	puts_unfiltered (" LOS");
-      puts_unfiltered (";");
-    }
-
-  if (control & 0xe080)
-    warning ("\nreserved bits on: %s",
-	     local_hex_string (control & 0xe080));
-}
-
-void
-print_387_control_word (unsigned int control)
-{
-  printf_filtered ("control %s:", local_hex_string(control & 0xffff));
-  print_387_control_bits (control);
-  puts_unfiltered ("\n");
-}
-
-static void
-print_387_status_bits (unsigned int status)
-{
-  printf_unfiltered (" flags %d%d%d%d; ",
-		     (status & 0x4000) != 0,
-		     (status & 0x0400) != 0,
-		     (status & 0x0200) != 0,
-		     (status & 0x0100) != 0);
-  printf_unfiltered ("top %d; ", (status >> 11) & 7);
-  if (status & 0xff) 
-    {
-      puts_unfiltered ("excep");
-      if (status & 0x0001) puts_unfiltered (" INVAL");
-      if (status & 0x0002) puts_unfiltered (" DENOR");
-      if (status & 0x0004) puts_unfiltered (" DIVZ");
-      if (status & 0x0008) puts_unfiltered (" OVERF");
-      if (status & 0x0010) puts_unfiltered (" UNDER");
-      if (status & 0x0020) puts_unfiltered (" LOS");
-      if (status & 0x0040) puts_unfiltered (" STACK");
-    }
-}
-
-void
-print_387_status_word (unsigned int status)
-{
-  printf_filtered ("status %s:", local_hex_string (status & 0xffff));
-  print_387_status_bits (status);
-  puts_unfiltered ("\n");
-}
-
-
 /* Implement the `info float' layout based on the register definitions
    in `tm-i386.h'.  */
 
 /* Print the floating point number specified by RAW.  */
+
 static void
 print_i387_value (char *raw, struct ui_file *file)
 {
@@ -166,6 +64,7 @@ print_i387_value (char *raw, struct ui_file *file)
 }
 
 /* Print the classification for the register contents RAW.  */
+
 static void
 print_i387_ext (unsigned char *raw, struct ui_file *file)
 {
@@ -217,6 +116,7 @@ print_i387_ext (unsigned char *raw, struct ui_file *file)
 }
 
 /* Print the status word STATUS.  */
+
 static void
 print_i387_status_word (unsigned int status, struct ui_file *file)
 {
@@ -246,6 +146,7 @@ print_i387_status_word (unsigned int status, struct ui_file *file)
 }
 
 /* Print the control word CONTROL.  */
+
 static void
 print_i387_control_word (unsigned int control, struct ui_file *file)
 {
@@ -386,12 +287,60 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
   fprintf_filtered (file, "Opcode:              %s\n",
 		    local_hex_string_custom (fop ? (fop | 0xd800) : 0, "04"));
 }
+
 
-/* FIXME: kettenis/2000-05-21: Right now more than a few i386 targets
-   define their own routines to manage the floating-point registers in
-   GDB's register array.  Most (if not all) of these targets use the
-   format used by the "fsave" instruction in their communication with
-   the OS.  They should all be converted to use the routines below.  */
+/* Read a value of type TYPE from register REGNUM in frame FRAME, and
+   return its contents in TO.  */
+
+void
+i387_register_to_value (struct frame_info *frame, int regnum,
+			struct type *type, void *to)
+{
+  char from[I386_MAX_REGISTER_SIZE];
+
+  gdb_assert (i386_fp_regnum_p (regnum));
+
+  /* We only support floating-point values.  */
+  if (TYPE_CODE (type) != TYPE_CODE_FLT)
+    {
+      warning ("Cannot convert floating-point register value "
+	       "to non-floating-point type.");
+      return;
+    }
+
+  /* Convert to TYPE.  This should be a no-op if TYPE is equivalent to
+     the extended floating-point format used by the FPU.  */
+  frame_read_register (frame, regnum, from);
+  convert_typed_floating (from, builtin_type_i387_ext, to, type);
+}
+
+/* Write the contents FROM of a value of type TYPE into register
+   REGNUM in frame FRAME.  */
+
+void
+i387_value_to_register (struct frame_info *frame, int regnum,
+			struct type *type, const void *from)
+{
+  char to[I386_MAX_REGISTER_SIZE];
+
+  gdb_assert (i386_fp_regnum_p (regnum));
+
+  /* We only support floating-point values.  */
+  if (TYPE_CODE (type) != TYPE_CODE_FLT)
+    {
+      warning ("Cannot convert non-floating-point type "
+	       "to floating-point register value.");
+      return;
+    }
+
+  /* Convert from TYPE.  This should be a no-op if TYPE is equivalent
+     to the extended floating-point format used by the FPU.  */
+  convert_typed_floating (from, type, to, builtin_type_i387_ext);
+  put_frame_register (frame, regnum, to);
+}
+
+
+/* Handle FSAVE and FXSAVE formats.  */
 
 /* At fsave_offset[REGNUM] you'll find the offset to the location in
    the data structure used by the "fsave" instruction where GDB

@@ -407,7 +407,7 @@ maintenance_print_statistics (char *args, int from_tty)
   print_symbol_bcache_statistics ();
 }
 
-void
+static void
 maintenance_print_architecture (char *args, int from_tty)
 {
   if (args == NULL)

@@ -68,14 +68,16 @@ static char *main_name_list[] =
   NULL
 };
 
-/* Macro to extract an address from a solib structure.
-   When GDB is configured for some 32-bit targets (e.g. Solaris 2.7
-   sparc), BFD is configured to handle 64-bit targets, so CORE_ADDR is
-   64 bits.  We have to extract only the significant bits of addresses
-   to get the right address when accessing the core file BFD.  */
+/* Macro to extract an address from a solib structure.  When GDB is
+   configured for some 32-bit targets (e.g. Solaris 2.7 sparc), BFD is
+   configured to handle 64-bit targets, so CORE_ADDR is 64 bits.  We
+   have to extract only the significant bits of addresses to get the
+   right address when accessing the core file BFD.
+
+   Assume that the address is unsigned.  */
 
 #define SOLIB_EXTRACT_ADDRESS(MEMBER) \
-	extract_address (&(MEMBER), sizeof (MEMBER))
+	extract_unsigned_integer (&(MEMBER), sizeof (MEMBER))
 
 /* local data declarations */
 
@@ -108,7 +110,9 @@ LM_NEXT (struct so_list *so)
   int lm_next_offset = offsetof (struct link_map, lm_next);
   int lm_next_size = fieldsize (struct link_map, lm_next);
 
-  return extract_address (so->lm_info->lm + lm_next_offset, lm_next_size);
+  /* Assume that the address is unsigned.  */
+  return extract_unsigned_integer (so->lm_info->lm + lm_next_offset,
+				   lm_next_size);
 }
 
 static CORE_ADDR
@@ -117,7 +121,9 @@ LM_NAME (struct so_list *so)
   int lm_name_offset = offsetof (struct link_map, lm_name);
   int lm_name_size = fieldsize (struct link_map, lm_name);
 
-  return extract_address (so->lm_info->lm + lm_name_offset, lm_name_size);
+  /* Assume that the address is unsigned.  */
+  return extract_unsigned_integer (so->lm_info->lm + lm_name_offset,
+				   lm_name_size);
 }
 
 static CORE_ADDR debug_base;	/* Base of dynamic linker structures */

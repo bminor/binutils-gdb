@@ -393,6 +393,8 @@ mi_input (char *buf)
   return gdb_readline (NULL);
 }
 
+extern initialize_file_ftype _initialize_mi_interp; /* -Wmissing-prototypes */
+
 void
 _initialize_mi_interp (void)
 {

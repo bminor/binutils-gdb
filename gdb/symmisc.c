@@ -88,27 +88,19 @@ static void free_symtab_block (struct objfile *, struct block *);
 
 /* Free a struct block <- B and all the symbols defined in that block.  */
 
+/* FIXME: carlton/2003-04-28: I don't believe this is currently ever
+   used.  */
+
 static void
 free_symtab_block (struct objfile *objfile, struct block *b)
 {
   struct dict_iterator iter;
-  struct symbol *sym, *prev_sym;
+  struct symbol *sym;
 
-  prev_sym = dict_iterator_first (BLOCK_DICT (b), &iter);
-
-  /* Make sure there's at least one symbol to free!  */
-  if (prev_sym)
+  ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      for (sym = dict_iterator_next (&iter); sym;
-	   sym = dict_iterator_next (&iter))
-	{
-	  xmfree (objfile->md, DEPRECATED_SYMBOL_NAME (prev_sym));
-	  xmfree (objfile->md, prev_sym);
-	  prev_sym = sym;
-	}
-
-      xmfree (objfile->md, DEPRECATED_SYMBOL_NAME (prev_sym));
-      xmfree (objfile->md, prev_sym);
+      xmfree (objfile->md, DEPRECATED_SYMBOL_NAME (sym));
+      xmfree (objfile->md, sym);
     }
 
   dict_free (BLOCK_DICT (b));
@@ -158,7 +150,7 @@ free_symtab (register struct symtab *s)
       break;
     }
 
-  /* If there is other memory to free, free it.  */
+  /* If there is a single block of memory to free, free it.  */
   if (s->free_func != NULL)
     s->free_func (s);
 
@@ -453,13 +445,13 @@ static void
 dump_symtab (struct objfile *objfile, struct symtab *symtab,
 	     struct ui_file *outfile)
 {
-  register int i;
+  int i;
   struct dict_iterator iter;
   int len, blen;
-  register struct linetable *l;
+  struct linetable *l;
   struct blockvector *bv;
   struct symbol *sym;
-  register struct block *b;
+  struct block *b;
   int depth;
 
   fprintf_filtered (outfile, "\nSymtab for file %s\n", symtab->filename);
@@ -506,18 +498,8 @@ dump_symtab (struct objfile *objfile, struct symtab *symtab,
 
 	  /* NOTE: carlton/2002-09-23: If there is demand for it, we
 	     can cook up something to put in here.  */
-#if 0
-	  /* drow/2002-07-10: We could save the total symbols count
-	     even if we're using a hashtable, but nothing else but this message
-	     wants it.  */
-	  blen = BLOCK_BUCKETS (b);
-	  if (BLOCK_HASHTABLE (b))
-	    fprintf_filtered (outfile, ", %d buckets in ", blen);
-	  else
-	    fprintf_filtered (outfile, ", %d syms in ", blen);
-#else
-	  fprintf_filtered (outfile, " in ");
-#endif
+	  fprintf_filtered (outfile, ", %d syms/buckets in ",
+			    dict_size (BLOCK_DICT (b)));
 	  print_address_numeric (BLOCK_START (b), 1, outfile);
 	  fprintf_filtered (outfile, "..");
 	  print_address_numeric (BLOCK_END (b), 1, outfile);

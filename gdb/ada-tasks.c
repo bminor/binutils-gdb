@@ -22,6 +22,7 @@
 #include "inferior.h"
 #include "symtab.h"
 #include "target.h"
+#include "regcache.h"
 #include "gdbcore.h"
 
 #if (defined(__alpha__) && defined(__osf__) && !defined(__alpha_vxworks))
@@ -89,8 +90,6 @@ extern void *GET_CURRENT_THREAD ();
 
 #define READ_MEMORY(addr, var) read_memory (addr, (char*) &var, sizeof (var))
 /* external declarations */
-
-extern struct value *find_function_in_inferior (char *);
 
 /* Global visible variables */
 

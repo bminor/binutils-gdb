@@ -71,7 +71,12 @@ struct gdbarch_tdep
   /* Get address of sigcontext for sigtramp.  */
   CORE_ADDR (*sigcontext_addr) (struct frame_info *);
 
-  /* Offset of saved PC and SP in `struct sigcontext'.  */
+  /* Offset of registers in `struct sigcontext'.  */
+  int *sc_reg_offset;
+  int sc_num_regs;
+
+  /* Offset of saved PC and SP in `struct sigcontext'.  Usage of these
+     is deprecated, please use `sc_reg_offset' instead.  */
   int sc_pc_offset;
   int sc_sp_offset;
 };
@@ -136,8 +141,16 @@ extern int i386_mxcsr_regnum_p (int regnum);
 #define FCOFF_REGNUM FIOFF_REGNUM
 #define FDS_REGNUM FOSEG_REGNUM
 #define FDOFF_REGNUM FOOFF_REGNUM
-#define IS_FP_REGNUM(n) i386_fp_regnum_p (n)
-#define IS_SSE_REGNUM(n) i386_sse_regnum_p (n)
+
+/* Register numbers of various important registers.  */
+
+#define I386_EAX_REGNUM		0 /* %eax */
+#define I386_EDX_REGNUM		2 /* %edx */
+#define I386_ESP_REGNUM		4 /* %esp */
+#define I386_EBP_REGNUM		5 /* %ebp */
+#define I386_EIP_REGNUM		8 /* %eip */
+#define I386_EFLAGS_REGNUM	9 /* %eflags */
+#define I386_ST0_REGNUM		16 /* %st(0) */
 
 #define I386_NUM_GREGS	16
 #define I386_NUM_FREGS	16
@@ -145,16 +158,6 @@ extern int i386_mxcsr_regnum_p (int regnum);
 
 #define I386_SSE_NUM_REGS	(I386_NUM_GREGS + I386_NUM_FREGS \
 				 + I386_NUM_XREGS)
-
-/* Sizes of individual register sets.  These cover the entire register
-   file, so summing up the sizes of those portions actually present
-   yields DEPRECATED_REGISTER_BYTES.  */
-#define I386_SIZEOF_GREGS	(I386_NUM_GREGS * 4)
-#define I386_SIZEOF_FREGS	(8 * 10 + 8 * 4)
-#define I386_SIZEOF_XREGS	(8 * 16 + 4)
-
-#define I386_SSE_SIZEOF_REGS	(I386_SIZEOF_GREGS + I386_SIZEOF_FREGS \
-				 + I386_SIZEOF_XREGS)
 
 /* Size of the largest register.  */
 #define I386_MAX_REGISTER_SIZE	16
@@ -178,7 +181,6 @@ extern void i386_svr4_init_abi (struct gdbarch_info, struct gdbarch *);
 
 /* Functions exported from i386bsd-tdep.c.  */
 
-extern CORE_ADDR i386bsd_sigcontext_addr (struct frame_info *frame);
 extern void i386bsd_init_abi (struct gdbarch_info, struct gdbarch *);
 
 #endif /* i386-tdep.h */

@@ -73,10 +73,10 @@ struct ui_file *gdb_stdout;
 struct ui_file *gdb_stderr;
 struct ui_file *gdb_stdlog;
 struct ui_file *gdb_stdtarg;
-
-/* Used to initialize error() - defined in utils.c */
-
-extern void error_init (void);
+struct ui_file *gdb_stdin;
+/* target IO streams */
+struct ui_file *gdb_stdtargin;
+struct ui_file *gdb_stdtargerr;
 
 /* Whether to enable writing into executable and core files */
 extern int write_files;
@@ -168,6 +168,10 @@ captured_main (void *data)
   /* This needs to happen before the first use of malloc.  */
   init_malloc (NULL);
 
+#ifdef HAVE_SBRK
+  lim_at_start = (char *) sbrk (0);
+#endif
+
 #if defined (ALIGN_STACK_ON_STARTUP)
   i = (int) &count & 0x3;
   if (i != 0)
@@ -193,6 +197,9 @@ captured_main (void *data)
   gdb_stderr = stdio_fileopen (stderr);
   gdb_stdlog = gdb_stderr;	/* for moment */
   gdb_stdtarg = gdb_stderr;	/* for moment */
+  gdb_stdin = stdio_fileopen (stdin);
+  gdb_stdtargerr = gdb_stderr;	/* for moment */
+  gdb_stdtargin = gdb_stdin;	/* for moment */
 
   /* initialize error() */
   error_init ();

@@ -64,11 +64,6 @@ typedef struct alpha_extra_func_info
 #define mips_extra_func_info alpha_extra_func_info
 #define mips_extra_func_info_t alpha_extra_func_info_t
 
-
-#define PRINT_EXTRA_FRAME_INFO(fi) alpha_print_extra_frame_info ((fi))
-extern void alpha_print_extra_frame_info (struct frame_info *);
-
-
 /* It takes two values to specify a frame on the ALPHA.  Sigh.
 
    In fact, at the moment, the *PC* is the primary value that sets up

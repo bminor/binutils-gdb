@@ -222,9 +222,9 @@ pa64_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
   bfd *tmp_bfd;
   asection *sec;
   obj_private_data_t *obj_private;
-  struct section_addr_info section_addrs;
+  struct section_addr_info *section_addrs;
+  struct cleanup *my_cleanups;
 
-  memset (&section_addrs, 0, sizeof (section_addrs));
   /* We need the BFD so that we can look at its sections.  We open up the
      file temporarily, then close it when we are done.  */
   tmp_bfd = bfd_openr (name, gnutarget);
@@ -262,15 +262,18 @@ pa64_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
       text_addr += sec->filepos;
     }
 
+  section_addrs = alloc_section_addr_info (bfd_count_sections (tmp_bfd));
+  my_cleanups = make_cleanup (xfree, section_addrs);
+
   /* We are done with the temporary bfd.  Get rid of it and make sure
      nobody else can us it.  */
   bfd_close (tmp_bfd);
   tmp_bfd = NULL;
 
   /* Now let the generic code load up symbols for this library.  */
-  section_addrs.other[0].addr = text_addr;
-  section_addrs.other[0].name = ".text";
-  so->objfile = symbol_file_add (name, from_tty, &section_addrs, 0, OBJF_SHARED);
+  section_addrs->other[0].addr = text_addr;
+  section_addrs->other[0].name = ".text";
+  so->objfile = symbol_file_add (name, from_tty, section_addrs, 0, OBJF_SHARED);
   so->abfd = so->objfile->obfd;
 
   /* Mark this as a shared library and save private data.  */
@@ -289,6 +292,7 @@ pa64_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
   obj_private = (obj_private_data_t *) so->objfile->obj_private;
   obj_private->so_info = so;
   obj_private->dp = so->pa64_solib_desc.linkage_ptr;
+  do_cleanups (my_cleanups);
 }
 
 /* Load debugging information for a shared library.  TARGET may be

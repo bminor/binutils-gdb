@@ -36,6 +36,12 @@ set asm-flags ""
 set link-flags ""
 
 switch -glob -- [istarget] {
+    "alpha*-*-*" {
+        set asm-arch alpha
+	# ??? Won't work with ecoff systems like Tru64, but then we also
+	# don't have any other -g flag that creates mdebug output.
+        set asm-flags "-gdwarf2 -no-mdebug -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    }
     "*arm-*-*" {
         set asm-arch arm
     }
@@ -97,6 +103,15 @@ switch -glob -- [istarget] {
 
 if { "${asm-arch}" == "" } {
     gdb_suppress_entire_file "Assembly source test -- not implemented for this target."
+}
+
+# On FreeBSD, crt1.o the final link will fail because of unresolved
+# symbols.  It turns out that libc.so references symbols that are
+# normally provided by crt1.o, which isn't linked in since we specify
+# -nostartfiles.  Using -nostdlib doesn't help since target_compile
+# automatically adds -lm.  Linking statically avoids this mess.
+if [istarget "*-*-freebsd*"] then {
+    set link-flags "-static"
 }
 
 # Watch out, we are invoking the assembler, but the testsuite sets multilib
@@ -304,7 +319,7 @@ proc test_dis { command var } {
     global gdb_prompt
     send_gdb "${command}\n"
     gdb_expect {
-	-re "${var}.*:.*Cannot access" {
+	-re "${var}.*:.*(Cannot access|Bad address)" {
 	    # The "disassembler" was only accessing the local
 	    # executable and that would cause attempts to disassemble
 	    # variables to fail (memory not valid).
@@ -321,7 +336,7 @@ proc test_dis { command var } {
 
 # See if we can look at a global variable, three ways
 gdb_test "print globalvar" ".* = 11" "look at global variable"
-test_dis "x/i globalvar" "globalvar"
+test_dis "x/i &globalvar" "globalvar"
 test_dis "disassem &globalvar &globalvar+1" "globalvar"
 
 # See if we can look at a static variable, three ways

@@ -108,6 +108,7 @@ extern bfd_reloc_status_type _bfd_mips_elf32_gprel16_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 extern unsigned long _bfd_elf_mips_mach
   PARAMS ((flagword));
-extern bfd_boolean _bfd_mips_relax_section (bfd *, asection *,
-					    struct bfd_link_info *,
-					    bfd_boolean *);
+extern bfd_boolean _bfd_mips_relax_section
+  PARAMS ((bfd *, asection *, struct bfd_link_info *, bfd_boolean *));
+extern bfd_vma _bfd_mips_elf_sign_extend
+  PARAMS ((bfd_vma, int));

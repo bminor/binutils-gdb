@@ -68,6 +68,10 @@ static unsigned long insert_boe
   PARAMS ((unsigned long, long, int, const char **));
 static long extract_boe
   PARAMS ((unsigned long, int, int *));
+static unsigned long insert_dq
+  PARAMS ((unsigned long, long, int, const char **));
+static long extract_dq
+  PARAMS ((unsigned long, int, int *));
 static unsigned long insert_ds
   PARAMS ((unsigned long, long, int, const char **));
 static long extract_ds
@@ -104,12 +108,18 @@ static unsigned long insert_ral
   PARAMS ((unsigned long, long, int, const char **));
 static unsigned long insert_ram
   PARAMS ((unsigned long, long, int, const char **));
+static unsigned long insert_raq
+  PARAMS ((unsigned long, long, int, const char **));
 static unsigned long insert_ras
   PARAMS ((unsigned long, long, int, const char **));
 static unsigned long insert_rbs
   PARAMS ((unsigned long, long, int, const char **));
 static long extract_rbs
   PARAMS ((unsigned long, int, int *));
+static unsigned long insert_rsq
+  PARAMS ((unsigned long, long, int, const char **));
+static unsigned long insert_rtq
+  PARAMS ((unsigned long, long, int, const char **));
 static unsigned long insert_sh6
   PARAMS ((unsigned long, long, int, const char **));
 static long extract_sh6
@@ -279,9 +289,15 @@ const struct powerpc_operand powerpc_operands[] =
 #define DES DE + 1
   { 14, 0, insert_des, extract_des, PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED },
 
+  /* The DQ field in a DQ form instruction.  This is like D, but the
+     lower four bits are forced to zero. */
+#define DQ DES + 1
+  { 16, 0, insert_dq, extract_dq,
+      PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED | PPC_OPERAND_DQ },
+
   /* The DS field in a DS form instruction.  This is like D, but the
      lower two bits are forced to zero.  */
-#define DS DES + 1
+#define DS DQ + 1
   { 16, 0, insert_ds, extract_ds,
       PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED | PPC_OPERAND_DS },
 
@@ -389,15 +405,20 @@ const struct powerpc_operand powerpc_operands[] =
   { 16, 0, insert_nsi, extract_nsi,
       PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED },
 
-  /* The RA field in an D, DS, X, XO, M, or MDS form instruction.  */
+  /* The RA field in an D, DS, DQ, X, XO, M, or MDS form instruction.  */
 #define RA NSI + 1
 #define RA_MASK (0x1f << 16)
   { 5, 16, 0, 0, PPC_OPERAND_GPR },
 
+  /* The RA field in the DQ form lq instruction, which has special 
+     value restrictions.  */
+#define RAQ RA + 1
+  { 5, 16, insert_raq, 0, PPC_OPERAND_GPR },
+
   /* The RA field in a D or X form instruction which is an updating
      load, which means that the RA field may not be zero and may not
      equal the RT field.  */
-#define RAL RA + 1
+#define RAL RAQ + 1
   { 5, 16, insert_ral, 0, PPC_OPERAND_GPR },
 
   /* The RA field in an lmw instruction, which has special value
@@ -430,8 +451,18 @@ const struct powerpc_operand powerpc_operands[] =
 #define RT_MASK (0x1f << 21)
   { 5, 21, 0, 0, PPC_OPERAND_GPR },
 
+  /* The RS field of the DS form stq instruction, which has special 
+     value restrictions.  */
+#define RSQ RS + 1
+  { 5, 21, insert_rsq, 0, PPC_OPERAND_GPR },
+
+  /* The RT field of the DQ form lq instruction, which has special
+     value restrictions.  */
+#define RTQ RSQ + 1
+  { 5, 21, insert_rtq, 0, PPC_OPERAND_GPR },
+
   /* The SH field in an X or M form instruction.  */
-#define SH RS + 1
+#define SH RTQ + 1
 #define SH_MASK (0x1f << 11)
   { 5, 11, 0, 0, 0 },
 
@@ -870,6 +901,32 @@ extract_boe (insn, dialect, invalid)
   return value & 0x1e;
 }
 
+  /* The DQ field in a DQ form instruction.  This is like D, but the
+     lower four bits are forced to zero. */
+
+/*ARGSUSED*/
+static unsigned long
+insert_dq (insn, value, dialect, errmsg)
+     unsigned long insn;
+     long value;
+     int dialect ATTRIBUTE_UNUSED;
+     const char ** errmsg ATTRIBUTE_UNUSED;
+{
+  if ((value & 0xf) != 0 && errmsg != NULL)
+    *errmsg = _("offset not a multiple of 16");
+  return insn | (value & 0xfff0);
+}
+
+/*ARGSUSED*/
+static long
+extract_dq (insn, dialect, invalid)
+     unsigned long insn;
+     int dialect ATTRIBUTE_UNUSED;
+     int *invalid ATTRIBUTE_UNUSED;
+{
+  return ((insn & 0xfff0) ^ 0x8000) - 0x8000;
+}
+
 static unsigned long
 insert_ev2 (insn, value, dialect, errmsg)
      unsigned long insn;
@@ -1253,6 +1310,24 @@ insert_ram (insn, value, dialect, errmsg)
   return insn | ((value & 0x1f) << 16);
 }
 
+  /* The RA field in the DQ form lq instruction, which has special 
+     value restrictions.  */
+
+/*ARGSUSED*/
+static unsigned long
+insert_raq (insn, value, dialect, errmsg)
+     unsigned long insn;
+     long value;
+     int dialect ATTRIBUTE_UNUSED;
+     const char **errmsg;
+{
+  long rtvalue = (insn & RT_MASK) >> 21;
+
+  if (value == rtvalue && errmsg != NULL)
+    *errmsg = _("source and target register operands must be different");
+  return insn | ((value & 0x1f) << 16);
+}
+
 /* The RA field in a D or X form instruction which is an updating
    store or an updating floating point load, which means that the RA
    field may not be zero.  */
@@ -1296,6 +1371,38 @@ extract_rbs (insn, dialect, invalid)
       && ((insn >> 21) & 0x1f) != ((insn >> 11) & 0x1f))
     *invalid = 1;
   return 0;
+}
+
+  /* The RT field of the DQ form lq instruction, which has special
+     value restrictions.  */
+
+/*ARGSUSED*/
+static unsigned long
+insert_rtq (insn, value, dialect, errmsg)
+     unsigned long insn;
+     long value;
+     int dialect ATTRIBUTE_UNUSED;
+     const char **errmsg;
+{
+  if ((value & 1) != 0 && errmsg != NULL)
+    *errmsg = _("target register operand must be even");
+  return insn | ((value & 0x1f) << 21);
+}
+
+  /* The RS field of the DS form stq instruction, which has special 
+     value restrictions.  */
+
+/*ARGSUSED*/
+static unsigned long
+insert_rsq (insn, value, dialect, errmsg)
+     unsigned long insn;
+     long value ATTRIBUTE_UNUSED;
+     int dialect ATTRIBUTE_UNUSED;
+     const char **errmsg;
+{
+  if ((value & 1) != 0 && errmsg != NULL)
+    *errmsg = _("source register operand must be even");
+  return insn | ((value & 0x1f) << 21);
 }
 
 /* The SH field in an MD form instruction.  This is split.  */
@@ -1768,6 +1875,7 @@ extract_tbr (insn, dialect, invalid)
    sorted by major opcode.  */
 
 const struct powerpc_opcode powerpc_opcodes[] = {
+{ "attn",    X(0,256), X_MASK,		POWER4,		{ 0 } },
 { "tdlgti",  OPTO(2,TOLGT), OPTO_MASK,	PPC64,		{ RA, SI } },
 { "tdllti",  OPTO(2,TOLLT), OPTO_MASK,	PPC64,		{ RA, SI } },
 { "tdeqi",   OPTO(2,TOEQ), OPTO_MASK,	PPC64,		{ RA, SI } },
@@ -4335,6 +4443,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "stfdu",   OP(55),	OP_MASK,	COM,		{ FRS, D, RAS } },
 
+{ "lq",      OP(56),	OP_MASK,	POWER4,		{ RTQ, DQ, RAQ } },
+
 { "lfq",     OP(56),	OP_MASK,	POWER2,		{ FRT, D, RA } },
 
 { "lfqu",    OP(57),	OP_MASK,	POWER2,		{ FRT, D, RA } },
@@ -4410,6 +4520,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "std",     DSO(62,0),	DS_MASK,	PPC64,		{ RS, DS, RA } },
 
 { "stdu",    DSO(62,1),	DS_MASK,	PPC64,		{ RS, DS, RAS } },
+
+{ "stq",     DSO(62,2),	DS_MASK,	POWER4,		{ RSQ, DS, RA } },
 
 { "fcmpu",   X(63,0),	X_MASK|(3<<21),	COM,		{ BF, FRA, FRB } },
 

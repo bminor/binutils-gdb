@@ -405,6 +405,8 @@ extern void reinitialize_more_filter (void);
 
 /* Normal results */
 extern struct ui_file *gdb_stdout;
+/* Input stream */
+extern struct ui_file *gdb_stdin;
 /* Serious error notifications */
 extern struct ui_file *gdb_stderr;
 /* Log/debug/trace messages that should bypass normal stdout/stderr
@@ -417,6 +419,8 @@ extern struct ui_file *gdb_stdlog;
    very near future that restriction shall be removed - either call
    shall be unfiltered. (cagney 1999-07-02). */
 extern struct ui_file *gdb_stdtarg;
+extern struct ui_file *gdb_stdtargerr;
+extern struct ui_file *gdb_stdtargin;
 
 #if defined(TUI)
 #include "tui.h"
@@ -881,6 +885,9 @@ extern NORETURN void error (const char *fmt, ...) ATTR_NORETURN ATTR_FORMAT (pri
 
 extern NORETURN void error_stream (struct ui_file *) ATTR_NORETURN;
 
+/* Initialize the error buffer.  */
+extern void error_init (void);
+
 /* Returns a freshly allocate buffer containing the last error
    message.  */
 extern char *error_last_message (void);
@@ -1125,8 +1132,6 @@ extern LONGEST extract_signed_integer (const void *, int);
 extern ULONGEST extract_unsigned_integer (const void *, int);
 
 extern int extract_long_unsigned_integer (const void *, int, LONGEST *);
-
-extern CORE_ADDR extract_address (const void *, int);
 
 extern CORE_ADDR extract_typed_address (const void *buf, struct type *type);
 

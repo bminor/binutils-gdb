@@ -1509,7 +1509,7 @@ bfd_generic_get_relocated_section_contents PARAMS ((bfd *abfd,
     struct bfd_link_info *link_info,
     struct bfd_link_order *link_order,
     bfd_byte *data,
-    bfd_boolean relocateable,
+    bfd_boolean relocatable,
     asymbol **symbols));
 
 /* Extracted from archures.c.  */

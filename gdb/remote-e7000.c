@@ -781,7 +781,7 @@ gbyte (void)
   return (high << 4) + low;
 }
 
-void
+static void
 fetch_regs_from_dump (int (*nextchar) (), char *want)
 {
   int regno;
@@ -1873,7 +1873,7 @@ why_stop (void)
 /* Suck characters, if a string match, then return the strings index
    otherwise echo them.  */
 
-int
+static int
 expect_n (char **strings)
 {
   char *(ptr[10]);
@@ -2164,6 +2164,8 @@ target e7000 foobar";
   e7000_ops.to_has_execution = 1;
   e7000_ops.to_magic = OPS_MAGIC;
 };
+
+extern initialize_file_ftype _initialize_remote_e7000; /* -Wmissing-prototypes */
 
 void
 _initialize_remote_e7000 (void)

@@ -51,8 +51,8 @@
    their structs have the same initial data members.  Define accessor
    macros for your new data members.
 
-   * Implement all the functions in dict_vtbl as static functions,
-   whose name is the same as the corresponding member of dict_vtbl
+   * Implement all the functions in dict_vector as static functions,
+   whose name is the same as the corresponding member of dict_vector
    plus _<impl>.  You don't have to do this for those members where
    you can reuse existing generic functions
    (e.g. add_symbol_nonexpandable, free_obstack) or in the case where
@@ -60,7 +60,7 @@
    and where the variant doesn't affect the member function in
    question.
 
-   * Define a static const struct dict_vtbl dict_<impl>_vtbl.
+   * Define a static const struct dict_vector dict_<impl>_vector.
 
    * Define a function dict_create_<impl> to create these
    gizmos.  Add its declaration to dictionary.h.
@@ -68,7 +68,7 @@
    To add a new operation <op> on all existing implementations, what
    you should do is:
 
-   * Add a new member <op> to struct dict_vtbl.
+   * Add a new member <op> to struct dict_vector.
 
    * If there is useful generic behavior <op>, define a static
    function <op>_something_informative that implements that behavior.
@@ -78,10 +78,10 @@
    behavior for <op>, define a static function <op>_<impl>
    implementing it.
 
-   * Modify all existing dict_vtbl_<impl>'s to include the appropriate
+   * Modify all existing dict_vector_<impl>'s to include the appropriate
    member.
 
-   * Define a function dict_<op> that looks up <op> in the dict_vtbl
+   * Define a function dict_<op> that looks up <op> in the dict_vector
    and calls the appropriate function.  Add a declaration for
    dict_<op> to dictionary.h.
    
@@ -104,7 +104,7 @@ enum dict_type
 
 /* The virtual function table.  */
 
-struct dict_vtbl
+struct dict_vector
 {
   /* The type of the dictionary.  This is only here to make debugging
      a bit easier; it's not actually used.  */
@@ -123,6 +123,8 @@ struct dict_vtbl
 				     struct dict_iterator *iterator);
   struct symbol *(*iter_name_next) (const char *name,
 				    struct dict_iterator *iterator);
+  /* A size function, for maint print symtabs.  */
+  int (*size) (const struct dictionary *dict);
 };
 
 /* Now comes the structs used to store the data for different
@@ -165,7 +167,7 @@ struct dictionary_linear_expandable
 
 struct dictionary
 {
-  const struct dict_vtbl *vtbl;
+  const struct dict_vector *vector;
   union
   {
     struct dictionary_hashed hashed;
@@ -178,7 +180,7 @@ struct dictionary
 
 /* Accessor macros.  */
 
-#define DICT_VTBL(d)			(d)->vtbl
+#define DICT_VECTOR(d)			(d)->vector
 
 /* These can be used for DICT_HASHED_EXPANDABLE, too.  */
 
@@ -219,7 +221,7 @@ struct dictionary
    otherwise, this is unused.  */
 #define DICT_ITERATOR_CURRENT(iter)		(iter)->current
 
-/* Declarations of functions for vtbls.  */
+/* Declarations of functions for vectors.  */
 
 /* Functions that might work across a range of dictionary types.  */
 
@@ -243,12 +245,18 @@ static struct symbol *iter_name_first_hashed (const struct dictionary *dict,
 static struct symbol *iter_name_next_hashed (const char *name,
 					     struct dict_iterator *iterator);
 
+/* Functions only for DICT_HASHED.  */
+
+static int size_hashed (const struct dictionary *dict);
+
 /* Functions only for DICT_HASHED_EXPANDABLE.  */
 
 static void free_hashed_expandable (struct dictionary *dict);
 
 static void add_symbol_hashed_expandable (struct dictionary *dict,
 					  struct symbol *sym);
+
+static int size_hashed_expandable (const struct dictionary *dict);
 
 /* Functions for DICT_LINEAR and DICT_LINEAR_EXPANDABLE
    dictionaries.  */
@@ -265,6 +273,7 @@ static struct symbol *iter_name_first_linear (const struct dictionary *dict,
 static struct symbol *iter_name_next_linear (const char *name,
 					     struct dict_iterator *iterator);
 
+static int size_linear (const struct dictionary *dict);
 
 /* Functions only for DICT_LINEAR_EXPANDABLE.  */
 
@@ -273,40 +282,58 @@ static void free_linear_expandable (struct dictionary *dict);
 static void add_symbol_linear_expandable (struct dictionary *dict,
 					  struct symbol *sym);
 
-/* Various vtbls that we'll actually use.  */
+/* Various vectors that we'll actually use.  */
 
-static const struct dict_vtbl dict_hashed_vtbl =
+static const struct dict_vector dict_hashed_vector =
   {
-    DICT_HASHED, free_obstack, add_symbol_nonexpandable,
-    iterator_first_hashed, iterator_next_hashed,
-    iter_name_first_hashed, iter_name_next_hashed,
+    DICT_HASHED,			/* type */
+    free_obstack,			/* free */
+    add_symbol_nonexpandable,		/* add_symbol */
+    iterator_first_hashed,		/* iteractor_first */
+    iterator_next_hashed,		/* iterator_next */
+    iter_name_first_hashed,		/* iter_name_first */
+    iter_name_next_hashed,		/* iter_name_next */
+    size_hashed,			/* size */
   };
 
-static const struct dict_vtbl dict_hashed_expandable_vtbl =
+static const struct dict_vector dict_hashed_expandable_vector =
   {
-    DICT_HASHED_EXPANDABLE, free_hashed_expandable,
-    add_symbol_hashed_expandable,
-    iterator_first_hashed, iterator_next_hashed,
-    iter_name_first_hashed, iter_name_next_hashed,
+    DICT_HASHED_EXPANDABLE,		/* type */
+    free_hashed_expandable,		/* free */
+    add_symbol_hashed_expandable,	/* add_symbol */
+    iterator_first_hashed,		/* iteractor_first */
+    iterator_next_hashed,		/* iterator_next */
+    iter_name_first_hashed,		/* iter_name_first */
+    iter_name_next_hashed,		/* iter_name_next */
+    size_hashed_expandable,		/* size */
   };
 
-static const struct dict_vtbl dict_linear_vtbl =
+static const struct dict_vector dict_linear_vector =
   {
-    DICT_LINEAR, free_obstack,  add_symbol_nonexpandable,
-    iterator_first_linear, iterator_next_linear,
-    iter_name_first_linear, iter_name_next_linear,
+    DICT_LINEAR,			/* type */
+    free_obstack,			/* free */
+    add_symbol_nonexpandable,		/* add_symbol */
+    iterator_first_linear,		/* iteractor_first */
+    iterator_next_linear,		/* iterator_next */
+    iter_name_first_linear,		/* iter_name_first */
+    iter_name_next_linear,		/* iter_name_next */
+    size_linear,			/* size */
   };
 
-static const struct dict_vtbl dict_linear_expandable_vtbl =
+static const struct dict_vector dict_linear_expandable_vector =
   {
-    DICT_LINEAR_EXPANDABLE, free_linear_expandable,
-    add_symbol_linear_expandable, 
-    iterator_first_linear, iterator_next_linear,
-    iter_name_first_linear, iter_name_next_linear,
+    DICT_LINEAR_EXPANDABLE,		/* type */
+    free_linear_expandable,		/* free */
+    add_symbol_linear_expandable,	/* add_symbol */
+    iterator_first_linear,		/* iteractor_first */
+    iterator_next_linear,		/* iterator_next */
+    iter_name_first_linear,		/* iter_name_first */
+    iter_name_next_linear,		/* iter_name_next */
+    size_linear,			/* size */
   };
 
 /* Declarations of helper functions (i.e. ones that don't go into
-   vtbls).  */
+   vectors).  */
 
 static struct symbol *iterator_hashed_advance (struct dict_iterator *iter);
 
@@ -331,7 +358,7 @@ dict_create_hashed (struct obstack *obstack,
   const struct pending *list_counter;
 
   retval = obstack_alloc (obstack, sizeof (struct dictionary));
-  DICT_VTBL (retval) = &dict_hashed_vtbl;
+  DICT_VECTOR (retval) = &dict_hashed_vector;
 
   /* Calculate the number of symbols, and allocate space for them.  */
   for (list_counter = symbol_list;
@@ -371,7 +398,7 @@ dict_create_hashed_expandable (void)
   struct dictionary *retval;
 
   retval = xmalloc (sizeof (struct dictionary));
-  DICT_VTBL (retval) = &dict_hashed_expandable_vtbl;
+  DICT_VECTOR (retval) = &dict_hashed_expandable_vector;
   DICT_HASHED_NBUCKETS (retval) = DICT_EXPANDABLE_INITIAL_CAPACITY;
   DICT_HASHED_BUCKETS (retval) = xcalloc (DICT_EXPANDABLE_INITIAL_CAPACITY,
 					  sizeof (struct symbol *));
@@ -395,7 +422,7 @@ dict_create_linear (struct obstack *obstack,
   const struct pending *list_counter;
 
   retval = obstack_alloc (obstack, sizeof (struct dictionary));
-  DICT_VTBL (retval) = &dict_linear_vtbl;
+  DICT_VECTOR (retval) = &dict_linear_vector;
 
   /* Calculate the number of symbols, and allocate space for them.  */
   for (list_counter = symbol_list;
@@ -436,7 +463,7 @@ dict_create_linear_expandable (void)
   struct dictionary *retval;
 
   retval = xmalloc (sizeof (struct dictionary));
-  DICT_VTBL (retval) = &dict_linear_expandable_vtbl;
+  DICT_VECTOR (retval) = &dict_linear_expandable_vector;
   DICT_LINEAR_NSYMS (retval) = 0;
   DICT_LINEAR_EXPANDABLE_CAPACITY (retval)
     = DICT_EXPANDABLE_INITIAL_CAPACITY;
@@ -455,7 +482,7 @@ dict_create_linear_expandable (void)
 void
 dict_free (struct dictionary *dict)
 {
-  (DICT_VTBL (dict))->free (dict);
+  (DICT_VECTOR (dict))->free (dict);
 }
 
 /* Add SYM to DICT.  DICT had better be expandable.  */
@@ -463,7 +490,7 @@ dict_free (struct dictionary *dict)
 void
 dict_add_symbol (struct dictionary *dict, struct symbol *sym)
 {
-  (DICT_VTBL (dict))->add_symbol (dict, sym);
+  (DICT_VECTOR (dict))->add_symbol (dict, sym);
 }
 
 /* Initialize ITERATOR to point at the first symbol in DICT, and
@@ -473,7 +500,7 @@ struct symbol *
 dict_iterator_first (const struct dictionary *dict,
 		     struct dict_iterator *iterator)
 {
-  return (DICT_VTBL (dict))->iterator_first (dict, iterator);
+  return (DICT_VECTOR (dict))->iterator_first (dict, iterator);
 }
 
 /* Advance ITERATOR, and return the next symbol, or NULL if there are
@@ -482,7 +509,7 @@ dict_iterator_first (const struct dictionary *dict,
 struct symbol *
 dict_iterator_next (struct dict_iterator *iterator)
 {
-  return (DICT_VTBL (DICT_ITERATOR_DICT (iterator)))
+  return (DICT_VECTOR (DICT_ITERATOR_DICT (iterator)))
     ->iterator_next (iterator);
 }
 
@@ -491,14 +518,20 @@ dict_iter_name_first (const struct dictionary *dict,
 		      const char *name,
 		      struct dict_iterator *iterator)
 {
-  return (DICT_VTBL (dict))->iter_name_first (dict, name, iterator);
+  return (DICT_VECTOR (dict))->iter_name_first (dict, name, iterator);
 }
 
 struct symbol *
 dict_iter_name_next (const char *name, struct dict_iterator *iterator)
 {
-  return (DICT_VTBL (DICT_ITERATOR_DICT (iterator)))
+  return (DICT_VECTOR (DICT_ITERATOR_DICT (iterator)))
     ->iter_name_next (name, iterator);
+}
+
+int
+dict_size (const struct dictionary *dict)
+{
+  return (DICT_VECTOR (dict))->size (dict);
 }
  
 /* Now come functions (well, one function, currently) that are
@@ -643,9 +676,14 @@ insert_symbol_hashed (struct dictionary *dict,
 
   hash_index = (msymbol_hash_iw (SYMBOL_NATURAL_NAME (sym))
 		% DICT_HASHED_NBUCKETS (dict));
-  gdb_assert (sym != buckets[hash_index]);
   sym->hash_next = buckets[hash_index];
   buckets[hash_index] = sym;
+}
+
+static int
+size_hashed (const struct dictionary *dict)
+{
+  return DICT_HASHED_NBUCKETS (dict);
 }
 
 /* Functions only for DICT_HASHED_EXPANDABLE.  */
@@ -668,6 +706,12 @@ add_symbol_hashed_expandable (struct dictionary *dict,
 
   insert_symbol_hashed (dict, sym);
   DICT_HASHED_EXPANDABLE_NSYMS (dict) = nsyms;
+}
+
+static int
+size_hashed_expandable (const struct dictionary *dict)
+{
+  return DICT_HASHED_EXPANDABLE_NSYMS (dict);
 }
 
 static void
@@ -755,6 +799,12 @@ iter_name_next_linear (const char *name, struct dict_iterator *iterator)
   DICT_ITERATOR_INDEX (iterator) = i;
   
   return retval;
+}
+
+static int
+size_linear (const struct dictionary *dict)
+{
+  return DICT_LINEAR_NSYMS (dict);
 }
 
 /* Functions only for DICT_LINEAR_EXPANDABLE.  */

@@ -31,6 +31,7 @@
 #include "symfile.h"
 #include "regcache.h"
 #include "arch-utils.h"
+#include "gdb_assert.h"
 
 #define D0_REGNUM 0
 #define D2_REGNUM 2
@@ -131,8 +132,8 @@ mn10300_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 static CORE_ADDR
 mn10300_extract_struct_value_address (char *regbuf)
 {
-  return extract_address (regbuf + REGISTER_BYTE (4),
-			  REGISTER_RAW_SIZE (4));
+  return extract_unsigned_integer (regbuf + REGISTER_BYTE (4),
+				   REGISTER_RAW_SIZE (4));
 }
 
 static void
@@ -1091,6 +1092,14 @@ mn10300_do_registers_info (int regnum, int fpregs)
     }
 }
 
+static CORE_ADDR
+mn10300_read_fp (void)
+{
+  /* That's right, we're using the stack pointer as our frame pointer.  */
+  gdb_assert (SP_REGNUM >= 0);
+  return read_register (SP_REGNUM);
+}
+
 /* Dump out the mn10300 speciic architecture information. */
 
 static void
@@ -1149,11 +1158,11 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_register_size (gdbarch, 4);
   set_gdbarch_deprecated_register_bytes (gdbarch, num_regs * gdbarch_deprecated_register_size (gdbarch));
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
-  set_gdbarch_register_raw_size (gdbarch, mn10300_register_raw_size);
-  set_gdbarch_register_byte (gdbarch, mn10300_register_byte);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, mn10300_register_raw_size);
+  set_gdbarch_deprecated_register_byte (gdbarch, mn10300_register_byte);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4);
-  set_gdbarch_register_virtual_size (gdbarch, mn10300_register_virtual_size);
-  set_gdbarch_register_virtual_type (gdbarch, mn10300_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, mn10300_register_virtual_size);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, mn10300_register_virtual_type);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, mn10300_dwarf2_reg_to_regnum);
   set_gdbarch_deprecated_do_registers_info (gdbarch, mn10300_do_registers_info);
   set_gdbarch_sp_regnum (gdbarch, 8);
@@ -1182,9 +1191,8 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_pop_frame (gdbarch, mn10300_pop_frame);
   set_gdbarch_skip_prologue (gdbarch, mn10300_skip_prologue);
   set_gdbarch_frame_args_skip (gdbarch, 0);
-  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   /* That's right, we're using the stack pointer as our frame pointer.  */
-  set_gdbarch_deprecated_target_read_fp (gdbarch, generic_target_read_sp);
+  set_gdbarch_deprecated_target_read_fp (gdbarch, mn10300_read_fp);
 
   /* Calling functions in the inferior from GDB.  */
   set_gdbarch_deprecated_call_dummy_words (gdbarch, mn10300_call_dummy_words);
@@ -1193,13 +1201,13 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_push_arguments (gdbarch, mn10300_push_arguments);
   set_gdbarch_reg_struct_has_addr (gdbarch, mn10300_reg_struct_has_addr);
   set_gdbarch_deprecated_push_return_address (gdbarch, mn10300_push_return_address);
-  set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+  set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_use_struct_convention (gdbarch, mn10300_use_struct_convention);
 
   tdep->am33_mode = am33_mode;
 
   /* Should be using push_dummy_call.  */
-  set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
+  set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);
 
   return gdbarch;
 }

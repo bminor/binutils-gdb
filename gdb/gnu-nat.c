@@ -62,6 +62,7 @@
 #include "gdbcore.h"
 #include "gdbthread.h"
 #include "gdb_assert.h"
+#include "gdb_obstack.h"
 
 #include "gnu-nat.h"
 

@@ -111,6 +111,7 @@ cpu-vax.c
 cpu-w65.c
 cpu-we32k.c
 cpu-xstormy16.c
+cpu-xtensa.c
 cpu-z8k.c
 demo64.c
 dwarf1.c
@@ -149,6 +150,7 @@ elf32-iq2000.c
 elf32-m32r.c
 elf32-m68hc11.c
 elf32-m68hc12.c
+elf32-m68hc1x.c
 elf32-m68k.c
 elf32-m88k.c
 elf32-mcore.c
@@ -166,6 +168,7 @@ elf32-sparc.c
 elf32-v850.c
 elf32-vax.c
 elf32-xstormy16.c
+elf32-xtensa.c
 elf32.c
 elf64-alpha.c
 elf64-gen.c
@@ -304,3 +307,5 @@ xcoff-target.h
 xcofflink.c
 xsym.c
 xsym.h
+xtensa-isa.c
+xtensa-modules.c

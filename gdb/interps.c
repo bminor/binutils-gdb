@@ -290,7 +290,7 @@ interp_quiet_p (struct interp *interp)
     return current_interpreter->quiet_p;
 }
 
-int
+static int
 interp_set_quiet (struct interp *interp, int quiet)
 {
   int old_val = interp->quiet_p;
@@ -357,7 +357,7 @@ initialize_interps (void)
   /* Don't know if anything needs to be done here... */
 }
 
-void
+static void
 interpreter_exec_cmd (char *args, int from_tty)
 {
   struct interp *old_interp, *interp_to_use;

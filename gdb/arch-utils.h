@@ -32,13 +32,9 @@ struct gdbarch_info;
 extern int gdbarch_debug;
 
 /* Fallback for register convertible. */
-extern gdbarch_register_convertible_ftype generic_register_convertible_not;
+extern gdbarch_deprecated_register_convertible_ftype deprecated_register_convertible_not;
 
 extern CORE_ADDR generic_cannot_extract_struct_value_address (char *dummy);
-
-/* Helper function for targets that don't know how my arguments are
-   being passed */
-extern gdbarch_frame_num_args_ftype frame_num_args_unknown;
 
 /* Implementation of extract return value that grubs around in the
    register cache.  */
@@ -46,6 +42,10 @@ extern gdbarch_extract_return_value_ftype legacy_extract_return_value;
 
 /* Implementation of store return value that grubs the register cache.  */
 extern gdbarch_store_return_value_ftype legacy_store_return_value;
+
+/* To return any structure or union type by value, store it at the
+   address passed as an invisible first argument to the function.  */
+extern gdbarch_use_struct_convention_ftype always_use_struct_convention;
 
 /* Frameless functions not identifable. */
 extern gdbarch_frameless_function_invocation_ftype generic_frameless_function_invocation_not;
@@ -81,11 +81,6 @@ extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
 extern const struct floatformat *default_float_format (struct gdbarch *gdbarch);
 extern const struct floatformat *default_double_format (struct gdbarch *gdbarch);
 
-/* Helper function for targets that don't know how my arguments are
-   being passed */
-extern int frame_num_args_unknown (struct frame_info *fi);
-
-
 /* The following DEPRECATED interfaces are for pre- multi-arch legacy
    targets. */
 
@@ -109,12 +104,6 @@ extern CORE_ADDR core_addr_identity (CORE_ADDR addr);
 /* No-op conversion of reg to regnum. */
 
 extern int no_op_reg_to_regnum (int reg);
-
-/* Default prepare_to_procced. */
-
-extern int default_prepare_to_proceed (int select_it);
-
-extern int generic_prepare_to_proceed (int select_it);
 
 /* Versions of init_frame_pc().  Do nothing; do the default. */
 
@@ -165,9 +154,11 @@ extern int legacy_pc_in_sigtramp (CORE_ADDR pc, char *name);
    (something that is discouraged); and to convert a register to the
    type of a corresponding variable.  These legacy functions preserve
    that overloaded behavour in existing targets.  */
-extern int legacy_convert_register_p (int regnum);
-extern void legacy_register_to_value (int regnum, struct type *type, char *from, char *to);
-extern void legacy_value_to_register (struct type *type, int regnum, char *from, char *to);
+extern int legacy_convert_register_p (int regnum, struct type *type);
+extern void legacy_register_to_value (struct frame_info *frame, int regnum,
+				      struct type *type, void *to);
+extern void legacy_value_to_register (struct frame_info *frame, int regnum,
+				      struct type *type, const void *from);
 
 /* For compatibility with older architectures, returns
    (LEGACY_SIM_REGNO_IGNORE) when the register doesn't have a valid

@@ -956,7 +956,7 @@ elf32_m68hc11_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *     rel;
   const Elf_Internal_Rela *     rel_end;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
@@ -1152,9 +1152,9 @@ elf32_m68hc11_relocate_section (output_bfd, info, input_bfd, input_section,
           || r_type == R_M68HC11_GNU_VTINHERIT )
         continue;
 
-      if (info->relocateable)
+      if (info->relocatable)
 	{
-	  /* This is a relocateable link.  We don't have to change
+	  /* This is a relocatable link.  We don't have to change
 	     anything, unless the reloc is against a section symbol,
 	     in which case we have to adjust according to where the
 	     section symbol winds up in the output section.  */

@@ -81,7 +81,7 @@ extern int sim_disasm_sprintf (SFILE *, const char *, ...);
 #ifdef __BFD_H_SEEN__
 struct disassemble_info;
 extern int
-sim_disasm_read_memory (bfd_vma memaddr_, bfd_byte *myaddr_, int length_,
+sim_disasm_read_memory (bfd_vma memaddr_, bfd_byte *myaddr_, unsigned int length_,
 			struct disassemble_info *info_);
 extern void
 sim_disasm_perror_memory (int status_, bfd_vma memaddr_,

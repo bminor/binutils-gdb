@@ -1,7 +1,39 @@
-2003-04-24  Andrew Cagney  <cagney@redhat.com>
+2003-06-20  Daniel Jacobowitz  <drow@mvista.com>
 
-	* low-nbsd.c (fetch_inferior_registers): 
-	(store_inferior_registers): 
+	* Makefile.in (SFILES): Update.
+	* low-hppabsd.c, low-lynx.c, low-nbsd.c, low-sim.c, low-sparc.c,
+	low-sun3.c: Remove files.
+
+2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c: Move comment to linux_thread_alive where it belonged.
+	(linux_detach_one_process, linux_detach): New functions.
+	(linux_target_ops): Add linux_detach.
+	* server.c (main): Handle 'D' packet.
+	* target.h (struct target_ops): Add "detach" member.
+	(detach_inferior): Define.
+
+2003-06-13  Mark Kettenis  <kettenis@gnu.org>
+
+	From Kelley Cook  <kelleycook@wideopenwest.com>:
+	* configure.srv: Accept i[34567]86 variants.
+
+2003-06-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c (linux_wait_for_event): Correct comment typos.
+	(linux_resume_one_process): Call check_removed_breakpoint.
+	(linux_send_signal): New function.
+	(linux_target_ops): Add linux_send_signal.
+	* remote-utils.c (putpkt, input_interrupt): Use send_signal instead
+	of kill.
+	* target.h (struct target_ops): Add send_signal.
+
+2003-05-29  Jim Blandy  <jimb@redhat.com>
+
+	* linux-low.c (usr_store_inferior_registers): Transfer buf in
+	PTRACE_XFER_TYPE-sized chunks, not int-sized chunks.  Otherwise,
+	if 'int' is smaller than PTRACE_XFER_TYPE, you end up throwing
+	away part of the register's value.
 
 2003-03-26  Daniel Jacobowitz  <drow@mvista.com>
 

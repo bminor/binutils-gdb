@@ -129,9 +129,6 @@ static int restore_pc_queue (CORE_ADDR *);
 
 static int hppa_alignof (struct type *);
 
-/* To support multi-threading and stepping. */
-int hppa_prepare_to_proceed ();
-
 static int prologue_inst_adjust_sp (unsigned long);
 
 static int is_branch (unsigned long);
@@ -4670,92 +4667,6 @@ unwind_command (char *exp, int from_tty)
   pin (Total_frame_size);
 }
 
-#ifdef PREPARE_TO_PROCEED
-
-/* If the user has switched threads, and there is a breakpoint
-   at the old thread's pc location, then switch to that thread
-   and return TRUE, else return FALSE and don't do a thread
-   switch (or rather, don't seem to have done a thread switch).
-
-   Ptrace-based gdb will always return FALSE to the thread-switch
-   query, and thus also to PREPARE_TO_PROCEED.
-
-   The important thing is whether there is a BPT instruction,
-   not how many user breakpoints there are.  So we have to worry
-   about things like these:
-
-   o  Non-bp stop -- NO
-
-   o  User hits bp, no switch -- NO
-
-   o  User hits bp, switches threads -- YES
-
-   o  User hits bp, deletes bp, switches threads -- NO
-
-   o  User hits bp, deletes one of two or more bps
-   at that PC, user switches threads -- YES
-
-   o  Plus, since we're buffering events, the user may have hit a
-   breakpoint, deleted the breakpoint and then gotten another
-   hit on that same breakpoint on another thread which
-   actually hit before the delete. (FIXME in breakpoint.c
-   so that "dead" breakpoints are ignored?) -- NO
-
-   For these reasons, we have to violate information hiding and
-   call "breakpoint_here_p".  If core gdb thinks there is a bpt
-   here, that's what counts, as core gdb is the one which is
-   putting the BPT instruction in and taking it out.
-
-   Note that this implementation is potentially redundant now that
-   default_prepare_to_proceed() has been added.
-
-   FIXME This may not support switching threads after Ctrl-C
-   correctly. The default implementation does support this. */
-int
-hppa_prepare_to_proceed (void)
-{
-  pid_t old_thread;
-  pid_t current_thread;
-
-  old_thread = hppa_switched_threads (PIDGET (inferior_ptid));
-  if (old_thread != 0)
-    {
-      /* Switched over from "old_thread".  Try to do
-         as little work as possible, 'cause mostly
-         we're going to switch back. */
-      CORE_ADDR new_pc;
-      CORE_ADDR old_pc = read_pc ();
-
-      /* Yuk, shouldn't use global to specify current
-         thread.  But that's how gdb does it. */
-      current_thread = PIDGET (inferior_ptid);
-      inferior_ptid = pid_to_ptid (old_thread);
-
-      new_pc = read_pc ();
-      if (new_pc != old_pc	/* If at same pc, no need */
-	  && breakpoint_here_p (new_pc))
-	{
-	  /* User hasn't deleted the BP.
-	     Return TRUE, finishing switch to "old_thread". */
-	  flush_cached_frames ();
-	  registers_changed ();
-#if 0
-	  printf ("---> PREPARE_TO_PROCEED (was %d, now %d)!\n",
-		  current_thread, PIDGET (inferior_ptid));
-#endif
-
-	  return 1;
-	}
-
-      /* Otherwise switch back to the user-chosen thread. */
-      inferior_ptid = pid_to_ptid (current_thread);
-      new_pc = read_pc ();	/* Re-prime register cache */
-    }
-
-  return 0;
-}
-#endif /* PREPARE_TO_PROCEED */
-
 void
 hppa_skip_permanent_breakpoint (void)
 {
@@ -4958,26 +4869,6 @@ hppa_cannot_store_register (int regnum)
 }
 
 CORE_ADDR
-hppa_frame_args_address (struct frame_info *fi)
-{
-  return get_frame_base (fi);
-}
-
-CORE_ADDR
-hppa_frame_locals_address (struct frame_info *fi)
-{
-  return get_frame_base (fi);
-}
-
-int
-hppa_frame_num_args (struct frame_info *frame)
-{
-  /* We can't tell how many args there are now that the C compiler delays
-     popping them.  */
-  return -1;
-}
-
-CORE_ADDR
 hppa_smash_text_address (CORE_ADDR addr)
 {
   /* The low two bits of the PC on the PA contain the privilege level.
@@ -4988,6 +4879,16 @@ hppa_smash_text_address (CORE_ADDR addr)
      for our purposes to just ignore those bits.  */
 
   return (addr &= ~0x3);
+}
+
+/* Get the ith function argument for the current function.  */
+CORE_ADDR
+hppa_fetch_pointer_argument (struct frame_info *frame, int argi, 
+			     struct type *type)
+{
+  CORE_ADDR addr;
+  frame_read_register (frame, R0_REGNUM + 26 - argi, &addr);
+  return addr;
 }
 
 static struct gdbarch *
@@ -5032,13 +4933,13 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fp0_regnum (gdbarch, 64);
   set_gdbarch_pc_regnum (gdbarch, PCOQ_HEAD_REGNUM);
   set_gdbarch_npc_regnum (gdbarch, PCOQ_TAIL_REGNUM);
-  set_gdbarch_register_raw_size (gdbarch, hppa_register_raw_size);
+  set_gdbarch_deprecated_register_raw_size (gdbarch, hppa_register_raw_size);
   set_gdbarch_deprecated_register_bytes (gdbarch, hppa_num_regs * 4);
-  set_gdbarch_register_byte (gdbarch, hppa_register_byte);
-  set_gdbarch_register_virtual_size (gdbarch, hppa_register_raw_size);
+  set_gdbarch_deprecated_register_byte (gdbarch, hppa_register_byte);
+  set_gdbarch_deprecated_register_virtual_size (gdbarch, hppa_register_raw_size);
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 8);
-  set_gdbarch_register_virtual_type (gdbarch, hppa_register_virtual_type);
+  set_gdbarch_deprecated_register_virtual_type (gdbarch, hppa_register_virtual_type);
   set_gdbarch_deprecated_store_struct_return (gdbarch, hppa_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch,
                                                hppa_extract_return_value);
@@ -5053,9 +4954,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation
     (gdbarch, hppa_frameless_function_invocation);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, hppa_frame_saved_pc);
-  set_gdbarch_frame_args_address (gdbarch, hppa_frame_args_address);
-  set_gdbarch_frame_locals_address (gdbarch, hppa_frame_locals_address);
-  set_gdbarch_frame_num_args (gdbarch, hppa_frame_num_args);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, hppa_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, hppa_pop_frame);
@@ -5067,6 +4965,9 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_read_pc (gdbarch, hppa_target_read_pc);
   set_gdbarch_write_pc (gdbarch, hppa_target_write_pc);
   set_gdbarch_deprecated_target_read_fp (gdbarch, hppa_target_read_fp);
+
+  /* Helper for function argument information.  */
+  set_gdbarch_fetch_pointer_argument (gdbarch, hppa_fetch_pointer_argument);
 
   return gdbarch;
 }

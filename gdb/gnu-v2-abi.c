@@ -184,7 +184,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 }
 
 
-struct type *
+static struct type *
 gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
 {
   struct type *known_type;
@@ -400,6 +400,8 @@ init_gnuv2_ops (void)
   gnu_v2_abi_ops.rtti_type = gnuv2_value_rtti_type;
   gnu_v2_abi_ops.baseclass_offset = gnuv2_baseclass_offset;
 }
+
+extern initialize_file_ftype _initialize_gnu_v2_abi; /* -Wmissing-prototypes */
 
 void
 _initialize_gnu_v2_abi (void)

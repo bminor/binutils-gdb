@@ -1,3 +1,31 @@
+2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* tui-hooks.c: Update include order.
+	* tui.c: Likewise.
+	* tuiCommand.c: Likewise.
+	* tuiData.c: Likewise.
+	* tuiDataWin.c: Likewise.
+	* tuiDisassem.c: Likewise.
+	* tuiGeneralWin.c: Likewise.
+	* tuiIO.c: Likewise.
+	* tuiLayout.c: Likewise.
+	* tuiRegs.c: Likewise.
+	* tuiSource.c: Likewise.
+	* tuiSourceWin.c: Likewise.
+	* tuiStack.c: Likewise.
+	* tuiWin.c: Likewise.
+
+2003-06-12  Andreas Schwab  <schwab@suse.de>
+
+	* tuiSource.c (tuiVerticalSourceScroll): Use get_frame_pc.
+	* tuiSourceWin.c (tuiHorizontalSourceScroll): Likewise.
+	* tuiStack.c (tui_get_function_from_frame): Likewise.
+	(tuiShowFrameInfo): Likewise.
+	* tuiWin.c (_makeVisibleWithNewHeight): Likewise.
+	* tui-hooks.c (tui_selected_frame_level_changed_hook): Likewise.
+	* tuiDisassem.c (tuiVerticalDisassemScroll): Likewise.
+	Include "disasm.h".
+
 2003-05-08  Andrew Cagney  <cagney@redhat.com>
 
 	* tuiRegs.c: Use MAX_REGISTER_SIZE instead of

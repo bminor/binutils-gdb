@@ -1,3 +1,31 @@
+2003-06-23  Michael Snyder  <msnyder@redhat.com>
+
+	* nrun.c (main): Delete h8/300 ifdef (sim now handles signals).
+	* sim-reg.c: Fix cut-and-paste bug in comment.
+
+2003-06-22  Andrew Cagney  <cagney@redhat.com>
+
+	From matthew green <mrg@redhat.com>:
+        * sim-fpu.h: Update copyright.
+	(sim_fpu_fraction, sim_fpu_guard): New prototypes.
+        * sim-fpu.c: Update copyright.
+	(sim_fpu_fraction, sim_fpu_guard): New inline functions.
+
+2003-06-17  Frank Ch. Eigler  <fche@redhat.com>
+
+	From Doug Evans <dje@sebabeach.org>:
+	* cgen-trace.h (sim_disasm_read_memory): Update args to be compatible
+	with disassemble_info:read_memory_func.
+	* cgen-trace.c (sim_disasm_read_memory): Ditto.
+
+2003-06-04  Michael Snyder  <msnyder@redhat.com>
+
+	* common/run.c (main): Remove SIM_H8300 ifdef.
+	(usage): Ditto.
+	* common/sim-options.c (STANDARD_OPTIONS): Add SIM_H8300SX.
+	(standard_options): Add '-x' for h8/300sx.
+	(standard_option_handler): Add case for SIM_H8300SX.
+
 2003-04-13  Michael Snyder  <msnyder@redhat.com>
 
 	* Make-common.in (sim-events.o, sim-config.o): Depend on sim-main.h.

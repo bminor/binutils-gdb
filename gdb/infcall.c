@@ -34,6 +34,7 @@
 #include "gdbcmd.h"
 #include "command.h"
 #include "gdb_string.h"
+#include "infcall.h"
 
 /* NOTE: cagney/2003-04-16: What's the future of this code?
 
@@ -422,11 +423,11 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
       A follow-on change is to modify this interface so that it takes
       thread OR frame OR tpid as a parameter, and returns a dummy
       frame handle.  The handle can then be used further down as a
-      parameter SAVE_DUMMY_FRAME_TOS.  Hmm, thinking about it, since
-      everything is ment to be using generic dummy frames, why not
-      even use some of the dummy frame code to here - do a regcache
-      dup and then pass the duped regcache, along with all the other
-      stuff, at one single point.
+      parameter to generic_save_dummy_frame_tos().  Hmm, thinking
+      about it, since everything is ment to be using generic dummy
+      frames, why not even use some of the dummy frame code to here -
+      do a regcache dup and then pass the duped regcache, along with
+      all the other stuff, at one single point.
 
       In fact, you can even save the structure's return address in the
       dummy frame and fix one of those nasty lost struct return edge
@@ -473,15 +474,14 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 		    || (INNER_THAN (2, 1) && sp >= old_sp));
       }
     else
-      /* FIXME: cagney/2002-09-18: Hey, you loose!  Who knows how
-	 badly aligned the SP is!  Further, per comment above, if the
-	 generic dummy frame ends up empty (because nothing is pushed)
-	 GDB won't be able to correctly perform back traces.  If a
-	 target is having trouble with backtraces, first thing to do
-	 is add FRAME_ALIGN() to its architecture vector.  After that,
-	 try adding SAVE_DUMMY_FRAME_TOS() and modifying
-	 DEPRECATED_FRAME_CHAIN so that when the next outer frame is a
-	 generic dummy, it returns the current frame's base.  */
+      /* FIXME: cagney/2002-09-18: Hey, you loose!
+
+	 Who knows how badly aligned the SP is!  Further, per comment
+	 above, if the generic dummy frame ends up empty (because
+	 nothing is pushed) GDB won't be able to correctly perform
+	 back traces.  If a target is having trouble with backtraces,
+	 first thing to do is add FRAME_ALIGN() to the architecture
+	 vector. If that fails, try unwind_dummy_id().  */
       sp = old_sp;
   }
 
@@ -530,6 +530,17 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	}
       break;
     case AT_ENTRY_POINT:
+      if (DEPRECATED_FIX_CALL_DUMMY_P ())
+	{
+	  /* Sigh.  Some targets use DEPRECATED_FIX_CALL_DUMMY to
+             shove extra stuff onto the stack or into registers.  That
+             code should be in PUSH_DUMMY_CALL, however, in the mean
+             time ...  */
+	  /* If the target is manipulating DUMMY1, it looses big time.  */
+	  void *dummy1 = NULL;
+	  DEPRECATED_FIX_CALL_DUMMY (dummy1, sp, funaddr, nargs, args,
+				     value_type, using_gcc);
+	}
       real_pc = funaddr;
       dummy_addr = CALL_DUMMY_ADDRESS ();
       /* A call dummy always consists of just a single breakpoint, so
@@ -736,7 +747,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     /* When there is no push_dummy_call method, should this code
        simply error out.  That would the implementation of this method
        for all ABIs (which is probably a good thing).  */
-    sp = gdbarch_push_dummy_call (current_gdbarch, current_regcache,
+    sp = gdbarch_push_dummy_call (current_gdbarch, funaddr, current_regcache,
 				  bp_addr, nargs, args, sp, struct_return,
 				  struct_addr);
   else  if (DEPRECATED_PUSH_ARGUMENTS_P ())
@@ -798,20 +809,29 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   if (struct_return && DEPRECATED_STORE_STRUCT_RETURN_P ())
     DEPRECATED_STORE_STRUCT_RETURN (struct_addr, sp);
 
-  /* Write the stack pointer.  This is here because the statements above
-     might fool with it.  On SPARC, this write also stores the register
-     window into the right place in the new stack frame, which otherwise
-     wouldn't happen.  (See store_inferior_registers in sparc-nat.c.)  */
-  /* NOTE: cagney/2003-03-23: Disable this code when there is a
-     push_dummy_call() method.  Since that method will have already
-     stored the stack pointer (as part of creating the fake call
-     frame), and none of the code following that code adjusts the
-     stack-pointer value, the below call is entirely redundant.  */
+  /* Write the stack pointer.  This is here because the statements
+     above might fool with it.  On SPARC, this write also stores the
+     register window into the right place in the new stack frame,
+     which otherwise wouldn't happen (see store_inferior_registers in
+     sparc-nat.c).  */
+  /* NOTE: cagney/2003-03-23: Since the architecture method
+     push_dummy_call() should have already stored the stack pointer
+     (as part of creating the fake call frame), and none of the code
+     following that call adjusts the stack-pointer value, the below
+     call is entirely redundant.  */
   if (DEPRECATED_DUMMY_WRITE_SP_P ())
     DEPRECATED_DUMMY_WRITE_SP (sp);
 
-  if (SAVE_DUMMY_FRAME_TOS_P ())
-    SAVE_DUMMY_FRAME_TOS (sp);
+  if (gdbarch_unwind_dummy_id_p (current_gdbarch))
+    {
+      /* Sanity.  The exact same SP value is returned by
+	 PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
+	 unwind_dummy_id to form the frame ID's stack address.  */
+      gdb_assert (DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
+      generic_save_dummy_frame_tos (sp);
+    }
+  else if (DEPRECATED_SAVE_DUMMY_FRAME_TOS_P ())
+    DEPRECATED_SAVE_DUMMY_FRAME_TOS (sp);
 
   /* Now proceed, having reached the desired place.  */
   clear_proceed_status ();
@@ -830,17 +850,29 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
        set_momentary_breakpoint.  We need to give the breakpoint a
        frame ID so that the breakpoint code can correctly re-identify
        the dummy breakpoint.  */
-    /* The assumption here is that push_dummy_call() returned the
-       stack part of the frame ID.  Unfortunatly, many older
-       architectures were, via a convoluted mess, relying on the
-       poorly defined and greatly overloaded DEPRECATED_TARGET_READ_FP
-       or DEPRECATED_FP_REGNUM to supply the value.  */
-    if (DEPRECATED_TARGET_READ_FP_P ())
-      frame = frame_id_build (DEPRECATED_TARGET_READ_FP (), sal.pc);
-    else if (DEPRECATED_FP_REGNUM >= 0)
-      frame = frame_id_build (read_register (DEPRECATED_FP_REGNUM), sal.pc);
+    if (gdbarch_unwind_dummy_id_p (current_gdbarch))
+      {
+	/* Sanity.  The exact same SP value is returned by
+	 PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
+	 unwind_dummy_id to form the frame ID's stack address.  */
+	gdb_assert (DEPRECATED_USE_GENERIC_DUMMY_FRAMES);
+	frame = frame_id_build (sp, sal.pc);
+      }
     else
-      frame = frame_id_build (sp, sal.pc);
+      {
+	/* The assumption here is that push_dummy_call() returned the
+	   stack part of the frame ID.  Unfortunatly, many older
+	   architectures were, via a convoluted mess, relying on the
+	   poorly defined and greatly overloaded
+	   DEPRECATED_TARGET_READ_FP or DEPRECATED_FP_REGNUM to supply
+	   the value.  */
+	if (DEPRECATED_TARGET_READ_FP_P ())
+	  frame = frame_id_build (DEPRECATED_TARGET_READ_FP (), sal.pc);
+	else if (DEPRECATED_FP_REGNUM >= 0)
+	  frame = frame_id_build (read_register (DEPRECATED_FP_REGNUM), sal.pc);
+	else
+	  frame = frame_id_build (sp, sal.pc);
+      }
     bpt = set_momentary_breakpoint (sal, frame, bp_call_dummy);
     bpt->disposition = disp_del;
   }

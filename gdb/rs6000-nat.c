@@ -485,7 +485,8 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
 
       /* Fetch trailing memory needed for alignment. */
       if (addr + count * sizeof (int) > memaddr + len)
-	if (!read_word (addr, buf + count - 1, arch64))
+	if (!read_word (addr + (count - 1) * sizeof (int),
+                        buf + count - 1, arch64))
 	  return 0;
 
       /* Copy supplied data into memory buffer. */

@@ -1101,7 +1101,7 @@ sparc64_elf_check_relocs (abfd, info, sec, relocs)
   asection *srelgot;
   asection *sreloc;
 
-  if (info->relocateable || !(sec->flags & SEC_ALLOC))
+  if (info->relocatable || !(sec->flags & SEC_ALLOC))
     return TRUE;
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -1781,7 +1781,7 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (! info->shared)
+      if (info->executable)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -1880,7 +1880,7 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
       struct elf_strtab_hash *dynstr;
       struct elf_link_hash_table *eht = elf_hash_table (info);
 
-      if (!info->shared)
+      if (info->executable)
 	{
 	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return FALSE;
@@ -2022,7 +2022,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
-  if (info->relocateable)
+  if (info->relocatable)
     return TRUE;
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -2684,7 +2684,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	       overflows.  We don't, but this breaks stabs debugging
 	       info, whose relocations are only 32-bits wide.  Ignore
 	       overflows for discarded entries.  */
-	    if (r_type == R_SPARC_32
+	    if ((r_type == R_SPARC_32 || r_type == R_SPARC_DISP32)
 		&& _bfd_elf_section_offset (output_bfd, info, input_section,
 					    rel->r_offset) == (bfd_vma) -1)
 	      break;

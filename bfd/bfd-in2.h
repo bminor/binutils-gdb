@@ -1,7 +1,7 @@
-/* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically
-   generated from "bfd-in.h", "init.c", "opncls.c", "libbfd.c",
-   "bfdio.c", "bfdwin.c", "section.c", "archures.c", "reloc.c",
-   "syms.c", "bfd.c", "archive.c", "corefile.c", "targets.c", "format.c",
+/* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically 
+   generated from "bfd-in.h", "init.c", "opncls.c", "libbfd.c", 
+   "bfdio.c", "bfdwin.c", "section.c", "archures.c", "reloc.c", 
+   "syms.c", "bfd.c", "archive.c", "corefile.c", "targets.c", "format.c", 
    "linker.c" and "simple.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
@@ -626,7 +626,7 @@ extern bfd_boolean bfd_ecoff_debug_accumulate_other
 extern bfd_boolean bfd_ecoff_debug_externals
   PARAMS ((bfd *abfd, struct ecoff_debug_info *debug,
 	   const struct ecoff_debug_swap *swap,
-	   bfd_boolean relocateable,
+	   bfd_boolean relocatable,
 	   bfd_boolean (*get_extr) (struct symbol_cache_entry *,
 				    struct ecoff_extr *),
 	   void (*set_index) (struct symbol_cache_entry *,
@@ -905,8 +905,17 @@ bfd_make_writable PARAMS ((bfd *abfd));
 bfd_boolean
 bfd_make_readable PARAMS ((bfd *abfd));
 
+unsigned long
+bfd_calc_gnu_debuglink_crc32 PARAMS ((unsigned long crc, const unsigned char *buf, bfd_size_type len));
+
 char *
 bfd_follow_gnu_debuglink PARAMS ((bfd *abfd, const char *dir));
+
+struct sec *
+bfd_create_gnu_debuglink_section PARAMS ((bfd * abfd, const char * filename));
+
+bfd_boolean
+bfd_fill_in_gnu_debuglink_section PARAMS ((bfd * abfd, struct sec * sect, const char * filename));
 
 /* Extracted from libbfd.c.  */
 
@@ -1308,8 +1317,10 @@ typedef struct sec
   /* Nonzero if this section needs the relax finalize pass.  */
   unsigned int need_finalize_relax:1;
 
+  /* Nonzero if this section has a gp reloc.  */
+  unsigned int has_gp_reloc:1;
+
   /* Usused bits.  */
-  unsigned int flag12:1;
   unsigned int flag13:1;
   unsigned int flag14:1;
   unsigned int flag15:1;
@@ -1399,6 +1410,10 @@ typedef struct sec
 
   /* Optional information about a COMDAT entry; NULL if not COMDAT.  */
   struct bfd_comdat_info *comdat;
+
+  /* Points to the kept section if this section is a link-once section,
+     and is discarded.  */
+  struct sec *kept_section;
 
   /* When a section is being output, this value changes as more
      linenumbers are written out.  */
@@ -1652,6 +1667,7 @@ enum bfd_architecture
 #define bfd_mach_h8300hn  4
 #define bfd_mach_h8300sn  5
 #define bfd_mach_h8300sx  6
+#define bfd_mach_h8300sxn 7
   bfd_arch_pdp11,     /* DEC PDP-11 */
   bfd_arch_powerpc,   /* PowerPC */
 #define bfd_mach_ppc           32
@@ -1792,7 +1808,7 @@ enum bfd_architecture
 #define bfd_mach_msp43          43
 #define bfd_mach_msp44          44
 #define bfd_mach_msp15          15
-#define bfd_mach_msp16          16
+#define bfd_mach_msp16          16  
   bfd_arch_xtensa,    /* Tensilica's Xtensa cores.  */
 #define bfd_mach_xtensa        1
   bfd_arch_last
@@ -3480,14 +3496,14 @@ instruction opcode.  */
   BFD_RELOC_XTENSA_OP1,
   BFD_RELOC_XTENSA_OP2,
 
-/* Xtensa relocation to mark that the assembler expanded the
+/* Xtensa relocation to mark that the assembler expanded the 
 instructions from an original target.  The expansion size is
 encoded in the reloc size.  */
   BFD_RELOC_XTENSA_ASM_EXPAND,
 
-/* Xtensa relocation to mark that the linker should simplify
-assembler-expanded instructions.  This is commonly used
-internally by the linker after analysis of a
+/* Xtensa relocation to mark that the linker should simplify 
+assembler-expanded instructions.  This is commonly used 
+internally by the linker after analysis of a 
 BFD_RELOC_XTENSA_ASM_EXPAND.  */
   BFD_RELOC_XTENSA_ASM_SIMPLIFY,
   BFD_RELOC_UNUSED };

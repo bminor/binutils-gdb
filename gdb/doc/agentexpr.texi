@@ -1,14 +1,14 @@
-\input texinfo
+@c \input texinfo
 @c %**start of header
-@setfilename agentexpr.info
-@settitle GDB Agent Expressions
-@setchapternewpage off
+@c @setfilename agentexpr.info
+@c @settitle GDB Agent Expressions
+@c @setchapternewpage off
 @c %**end of header
 
-Revision: $Id$
+@c Revision: $Id$
 
-@node The GDB Agent Expression Mechanism
-@chapter The GDB Agent Expression Mechanism
+@node Agent Expressions
+@appendix The GDB Agent Expression Mechanism
 
 In some applications, it is not feasable for the debugger to interrupt
 the program's execution long enough for the developer to learn anything
@@ -299,7 +299,7 @@ Pop two integers from the stack; let @var{a} be the next-to-top value,
 and @var{b} be the top value.  Shift @var{a} left by @var{b} bits, and
 push the result.
 
-@item @code{rsh_signed} (0x0a): @var{a} @var{b} @result{} @var{@code{(signed)}a>>b}
+@item @code{rsh_signed} (0x0a): @var{a} @var{b} @result{} @code{(signed)}@var{a>>b}
 Pop two integers from the stack; let @var{a} be the next-to-top value,
 and @var{b} be the top value.  Shift @var{a} right by @var{b} bits,
 inserting copies of the top bit at the high end, and push the result.

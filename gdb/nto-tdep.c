@@ -72,7 +72,7 @@ nto_map_arch_to_cputype (const char *arch)
 {
   if (!strcmp (arch, "i386") || !strcmp (arch, "x86"))
     return CPUTYPE_X86;
-  if (!strcmp (arch, "rs6000") || !strcmp (arch, "ppc"))
+  if (!strcmp (arch, "rs6000") || !strcmp (arch, "powerpc"))
     return CPUTYPE_PPC;
   if (!strcmp (arch, "mips"))
     return CPUTYPE_MIPS;
@@ -97,7 +97,8 @@ nto_find_and_open_solib (char *solib, unsigned o_flags, char **temp_pathname)
       arch = "x86";
       endian = "";
     }
-  else if (strcmp (TARGET_ARCHITECTURE->arch_name, "rs6000") == 0)
+  else if (strcmp (TARGET_ARCHITECTURE->arch_name, "rs6000") == 0
+	   || strcmp (TARGET_ARCHITECTURE->arch_name, "powerpc") == 0)
     {
       arch = "ppc";
       endian = "be";
@@ -130,7 +131,8 @@ nto_init_solib_absolute_prefix (void)
       arch = "x86";
       endian = "";
     }
-  else if (strcmp (TARGET_ARCHITECTURE->arch_name, "rs6000") == 0)
+  else if (strcmp (TARGET_ARCHITECTURE->arch_name, "rs6000") == 0
+	   || strcmp (TARGET_ARCHITECTURE->arch_name, "powerpc") == 0)
     {
       arch = "ppc";
       endian = "be";
@@ -269,7 +271,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 		      int which, CORE_ADDR reg_addr)
 {
   nto_regset_t regset;
-  
+
 /* See corelow.c:get_core_registers for values of WHICH.  */
   if (which == 0)
     {
@@ -305,11 +307,11 @@ void
 _initialize_nto_tdep (void)
 {
   add_setshow_cmd ("nto-debug", class_maintenance, var_zinteger,
-		  &nto_internal_debugging, "Set QNX NTO internal debugging.\n\
+		   &nto_internal_debugging, "Set QNX NTO internal debugging.\n\
 When non-zero, nto specific debug info is\n\
 displayed. Different information is displayed\n\
-for different positive values.",  "Show QNX NTO internal debugging.\n",
-		  NULL, NULL, &setdebuglist, &showdebuglist);
+for different positive values.", "Show QNX NTO internal debugging.\n",
+		   NULL, NULL, &setdebuglist, &showdebuglist);
 
   /* We use SIG45 for pulses, or something, so nostop, noprint
      and pass them.  */

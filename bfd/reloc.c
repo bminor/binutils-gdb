@@ -606,7 +606,7 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
       return bfd_reloc_ok;
     }
 
-  /* If we are not producing relocateable output, return an error if
+  /* If we are not producing relocatable output, return an error if
      the symbol is not defined.  An undefined weak symbol is
      considered to have a value of zero (SVR4 ABI, p. 4-27).  */
   if (bfd_is_und_section (symbol->section)
@@ -675,7 +675,7 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
 	 include the position of the location; for example, m88kbcs,
 	 or ELF.  For those targets, pcrel_offset is TRUE.
 
-	 If we are producing relocateable output, then we must ensure
+	 If we are producing relocatable output, then we must ensure
 	 that this reloc will be correctly computed when the final
 	 relocation is done.  If pcrel_offset is FALSE we want to wind
 	 up with the negative of the location within the section,
@@ -684,7 +684,7 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
 	 we do not want to adjust the existing addend at all.
 
 	 FIXME: This seems logical to me, but for the case of
-	 producing relocateable output it is not what the code
+	 producing relocatable output it is not what the code
 	 actually does.  I don't want to change it, because it seems
 	 far too likely that something will break.  */
 
@@ -739,7 +739,7 @@ Hmmm.  The first obvious point is that bfd_perform_relocation should
 not have any tests that depend upon the flavour.  It's seem like
 entirely the wrong place for such a thing.  The second obvious point
 is that the current code ignores the reloc addend when producing
-relocateable output for COFF.  That's peculiar.  In fact, I really
+relocatable output for COFF.  That's peculiar.  In fact, I really
 have no idea what the point of the line you want to remove is.
 
 A typical COFF reloc subtracts the old value of the symbol and adds in
@@ -754,9 +754,9 @@ different story (we can't change it without losing backward
 compatibility with old object files) (coff-i386 does subtract the old
 value, to be compatible with existing coff-i386 targets, like SCO).
 
-So everything works fine when not producing relocateable output.  When
-we are producing relocateable output, logically we should do exactly
-what we do when not producing relocateable output.  Therefore, your
+So everything works fine when not producing relocatable output.  When
+we are producing relocatable output, logically we should do exactly
+what we do when not producing relocatable output.  Therefore, your
 patch is correct.  In fact, it should probably always just set
 reloc_entry->addend to 0 for all cases, since it is, in fact, going to
 add the value into the object file.  This won't hurt the COFF code,
@@ -764,7 +764,7 @@ which doesn't use the addend; I'm not sure what it will do to other
 formats (the thing to check for would be whether any formats both use
 the addend and set partial_inplace).
 
-When I wanted to make coff-i386 produce relocateable output, I ran
+When I wanted to make coff-i386 produce relocatable output, I ran
 into the problem that you are running into: I wanted to remove that
 line.  Rather than risk it, I made the coff-i386 relocs use a special
 function; it's coff_i386_reloc in coff-i386.c.  The function
@@ -1067,7 +1067,7 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
 	 include the position of the location; for example, m88kbcs,
 	 or ELF.  For those targets, pcrel_offset is TRUE.
 
-	 If we are producing relocateable output, then we must ensure
+	 If we are producing relocatable output, then we must ensure
 	 that this reloc will be correctly computed when the final
 	 relocation is done.  If pcrel_offset is FALSE we want to wind
 	 up with the negative of the location within the section,
@@ -1076,7 +1076,7 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
 	 we do not want to adjust the existing addend at all.
 
 	 FIXME: This seems logical to me, but for the case of
-	 producing relocateable output it is not what the code
+	 producing relocatable output it is not what the code
 	 actually does.  I don't want to change it, because it seems
 	 far too likely that something will break.  */
 
@@ -1128,7 +1128,7 @@ Hmmm.  The first obvious point is that bfd_install_relocation should
 not have any tests that depend upon the flavour.  It's seem like
 entirely the wrong place for such a thing.  The second obvious point
 is that the current code ignores the reloc addend when producing
-relocateable output for COFF.  That's peculiar.  In fact, I really
+relocatable output for COFF.  That's peculiar.  In fact, I really
 have no idea what the point of the line you want to remove is.
 
 A typical COFF reloc subtracts the old value of the symbol and adds in
@@ -1143,9 +1143,9 @@ different story (we can't change it without losing backward
 compatibility with old object files) (coff-i386 does subtract the old
 value, to be compatible with existing coff-i386 targets, like SCO).
 
-So everything works fine when not producing relocateable output.  When
-we are producing relocateable output, logically we should do exactly
-what we do when not producing relocateable output.  Therefore, your
+So everything works fine when not producing relocatable output.  When
+we are producing relocatable output, logically we should do exactly
+what we do when not producing relocatable output.  Therefore, your
 patch is correct.  In fact, it should probably always just set
 reloc_entry->addend to 0 for all cases, since it is, in fact, going to
 add the value into the object file.  This won't hurt the COFF code,
@@ -1153,7 +1153,7 @@ which doesn't use the addend; I'm not sure what it will do to other
 formats (the thing to check for would be whether any formats both use
 the addend and set partial_inplace).
 
-When I wanted to make coff-i386 produce relocateable output, I ran
+When I wanted to make coff-i386 produce relocatable output, I ran
 into the problem that you are running into: I wanted to remove that
 line.  Rather than risk it, I made the coff-i386 relocs use a special
 function; it's coff_i386_reloc in coff-i386.c.  The function
@@ -1331,7 +1331,7 @@ space consuming.  For each target:
    function than to try to deal with it.
 
    This routine does a final relocation.  Whether it is useful for a
-   relocateable link depends upon how the object format defines
+   relocatable link depends upon how the object format defines
    relocations.
 
    FIXME: This routine ignores any special_function in the HOWTO,
@@ -4066,7 +4066,7 @@ SYNOPSIS
 	     struct bfd_link_info *link_info,
 	     struct bfd_link_order *link_order,
 	     bfd_byte *data,
-	     bfd_boolean relocateable,
+	     bfd_boolean relocatable,
 	     asymbol **symbols);
 
 DESCRIPTION
@@ -4077,12 +4077,12 @@ DESCRIPTION
 
 bfd_byte *
 bfd_generic_get_relocated_section_contents (abfd, link_info, link_order, data,
-					    relocateable, symbols)
+					    relocatable, symbols)
      bfd *abfd;
      struct bfd_link_info *link_info;
      struct bfd_link_order *link_order;
      bfd_byte *data;
-     bfd_boolean relocateable;
+     bfd_boolean relocatable;
      asymbol **symbols;
 {
   /* Get enough memory to hold the stuff.  */
@@ -4131,10 +4131,10 @@ bfd_generic_get_relocated_section_contents (abfd, link_info, link_order, data,
 				    *parent,
 				    (PTR) data,
 				    input_section,
-				    relocateable ? abfd : (bfd *) NULL,
+				    relocatable ? abfd : (bfd *) NULL,
 				    &error_message);
 
-	  if (relocateable)
+	  if (relocatable)
 	    {
 	      asection *os = input_section->output_section;
 

@@ -90,7 +90,7 @@ allocate_value (struct type *type)
   VALUE_ENCLOSING_TYPE (val) = type;
   VALUE_LVAL (val) = not_lval;
   VALUE_ADDRESS (val) = 0;
-  VALUE_FRAME (val) = 0;
+  VALUE_FRAME_ID (val) = null_frame_id;
   VALUE_OFFSET (val) = 0;
   VALUE_BITPOS (val) = 0;
   VALUE_BITSIZE (val) = 0;
@@ -222,7 +222,7 @@ value_copy (struct value *arg)
   VALUE_OFFSET (val) = VALUE_OFFSET (arg);
   VALUE_BITPOS (val) = VALUE_BITPOS (arg);
   VALUE_BITSIZE (val) = VALUE_BITSIZE (arg);
-  VALUE_FRAME (val) = VALUE_FRAME (arg);
+  VALUE_FRAME_ID (val) = VALUE_FRAME_ID (arg);
   VALUE_REGNO (val) = VALUE_REGNO (arg);
   VALUE_LAZY (val) = VALUE_LAZY (arg);
   VALUE_OPTIMIZED_OUT (val) = VALUE_OPTIMIZED_OUT (arg);

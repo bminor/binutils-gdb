@@ -243,7 +243,7 @@ bfd_simple_get_relocated_section_contents (abfd, sec, outbuf, symbol_table)
 
   if (symbol_table == NULL)
     {
-      bfd_link_add_symbols (abfd, &link_info);
+      _bfd_generic_link_add_symbols (abfd, &link_info);
 
       storage_needed = bfd_get_symtab_upper_bound (abfd);
       symbol_table = (asymbol **) bfd_malloc (storage_needed);

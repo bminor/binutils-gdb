@@ -41,6 +41,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ui-out.h"
 #include "block.h"
 #include "infcall.h"
+#include "dictionary.h"
 
 struct cleanup *unresolved_names;
 
@@ -3186,7 +3187,6 @@ static struct symbol *
 standard_lookup (const char *name, domain_enum domain)
 {
   struct symbol *sym;
-
   sym = lookup_symbol (name, (struct block *) NULL, domain, 0, NULL);
   return sym;
 }
@@ -3439,8 +3439,8 @@ symtab_for_sym (struct symbol *sym)
   struct objfile *objfile;
   struct block *b;
   struct symbol *tmp_sym;
-  int j;
   struct dict_iterator iter;
+  int j;
 
   ALL_SYMTABS (objfile, s)
   {
@@ -3454,13 +3454,11 @@ symtab_for_sym (struct symbol *sym)
       case LOC_BLOCK:
       case LOC_CONST_BYTES:
 	b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-	ALL_BLOCK_SYMBOLS (b, iter, tmp_sym)
-	  if (sym == tmp_sym)
-	    return s;
+	ALL_BLOCK_SYMBOLS (b, iter, tmp_sym) if (sym == tmp_sym)
+	  return s;
 	b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
-	ALL_BLOCK_SYMBOLS (b, iter, tmp_sym)
-	  if (sym == tmp_sym)
-	    return s;
+	ALL_BLOCK_SYMBOLS (b, iter, tmp_sym) if (sym == tmp_sym)
+	  return s;
 	break;
       default:
 	break;
@@ -3483,9 +3481,8 @@ symtab_for_sym (struct symbol *sym)
 	     j < BLOCKVECTOR_NBLOCKS (BLOCKVECTOR (s)); j += 1)
 	  {
 	    b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), j);
-	    ALL_BLOCK_SYMBOLS (b, iter, tmp_sym)
-	      if (sym == tmp_sym)
-		return s;
+	    ALL_BLOCK_SYMBOLS (b, iter, tmp_sym) if (sym == tmp_sym)
+	      return s;
 	  }
 	break;
       default:
@@ -3567,7 +3564,7 @@ add_symbols_from_enclosing_procs (const char *name, domain_enum domain,
 	  QUIT;
 	  frame = get_prev_frame (frame);
 	}
-      while (frame != NULL && FRAME_LOCALS_ADDRESS (frame) != target_link);
+      while (frame != NULL && DEPRECATED_FRAME_LOCALS_ADDRESS (frame) != target_link);
 
       if (frame == NULL)
 	break;
@@ -4717,8 +4714,6 @@ debug_print_block (struct block *b)
   fprintf (stderr, "\t    Symbols:");
   ALL_BLOCK_SYMBOLS (b, iter, sym)
   {
-    if (i > 0 && i % 4 == 0)
-      fprintf (stderr, "\n\t\t    ");
     fprintf (stderr, " %s", DEPRECATED_SYMBOL_NAME (sym));
   }
   fprintf (stderr, "\n");
@@ -7718,7 +7713,7 @@ ada_vax_float_print_function (struct type *type)
    not alter *PX and *PNEW_K if unsuccessful. */
 
 static int
-scan_discrim_bound (char *, int k, struct value *dval, LONGEST * px,
+scan_discrim_bound (char *str, int k, struct value *dval, LONGEST * px,
 		    int *pnew_k)
 {
   static char *bound_buffer = NULL;

@@ -343,6 +343,8 @@ sh3_close (int quitting)
     }
 }
 
+extern initialize_file_ftype _initialize_sh3_rom; /* -Wmissing-prototypes */
+
 void
 _initialize_sh3_rom (void)
 {

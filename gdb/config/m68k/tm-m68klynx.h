@@ -34,6 +34,6 @@
 #include "m68k/tm-m68k.h"
 
 /* Disable dumbshit alternate breakpoint mechanism needed by 68k stub. */
-#undef REMOTE_BREAKPOINT
+#undef DEPRECATED_REMOTE_BREAKPOINT
 
 #endif /* TM_M68KLYNX_H */
