@@ -1,3 +1,9 @@
+2003-06-06  Jim Blandy  <jimb@redhat.com>
+
+	* ppc-linux-nat.c (ppc_register_u_addr): Correctly compute u-area
+	offsets for floating-point registers in both 32- and 64-bit
+	interfaces.
+
 2003-06-05  Jim Blandy  <jimb@redhat.com>
 
 	Recognize and skip 64-bit PowerPC Linux linkage functions.
