@@ -1350,8 +1350,6 @@ sim_info (sd,verbose)
      SIM_DESC sd;
      int verbose;
 {
-  
-  return;
   /* Accessed from the GDB "info files" command: */
   if (STATE_VERBOSE_P (sd) || verbose)
     {
