@@ -1,5 +1,8 @@
 Wed Feb  9 13:08:32 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* as.h (xmalloc, xrealloc): Declare using PTR rather than char *.
+	* xmalloc.c (xmalloc, xrealloc): Use PTR rather than char *.
+
 	* app.c (do_scrub_next_char): If NO_STRING_ESCAPES is defined,
 	don't treat backslash specially inside strings.
 	* read.c (next_char_of_string): Likewise.

@@ -45,11 +45,11 @@
 
 #define error as_fatal
 
-char *
+PTR
 xmalloc (n)
      unsigned long n;
 {
-  char *retval;
+  PTR retval;
 
   retval = malloc (n);
   if (retval == NULL)
@@ -57,9 +57,9 @@ xmalloc (n)
   return (retval);
 }
 
-char *
+PTR
 xrealloc (ptr, n)
-     register char *ptr;
+     register PTR ptr;
      unsigned long n;
 {
   ptr = realloc (ptr, n);
