@@ -1,3 +1,10 @@
+2003-07-23  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c: A few more fix-ups of refs and defs.
+	(frchg): Raise SIGILL if in double-precision mode.
+	(ldtlb): We don't simulate cache, so this is a no-op.
+	(movsxy_tab): Correct a few bit pattern errors.
+
 2003-07-09  Michael Snyder  <msnyder@redhat.com>
 
 	* gencode.c (prnd): Clear LSW of result to zeros.

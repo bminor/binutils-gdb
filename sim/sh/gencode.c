@@ -372,7 +372,7 @@ op tab[] =
     "}",
   },
   /* sh2e */
-  { "", "m", "fmov.s @<REG_M>+,<FREG_N>", "1111nnnnmmmm1001",
+  { "m", "m", "fmov.s @<REG_M>+,<FREG_N>", "1111nnnnmmmm1001",
     /* sh4 */
     "if (FPSCR_SZ) {",
     "  MA (2);",
@@ -442,7 +442,10 @@ op tab[] =
 
   /* sh4 */
   { "", "", "frchg", "1111101111111101",
-    "SET_FPSCR (GET_FPSCR() ^ FPSCR_MASK_FR);",
+    "if (FPSCR_PR)",
+    "  RAISE_EXCEPTION (SIGILL);",
+    "else",
+    "  SET_FPSCR (GET_FPSCR() ^ FPSCR_MASK_FR);",
   },
 
   /* sh4 */
@@ -573,7 +576,7 @@ op tab[] =
   },
 
   { "", "", "ldtlb", "0000000000111000",
-    "/* FIXME: XXX*/ abort();",
+    "/* We don't implement cache or tlb, so this is a noop.  */",
   },
 
   { "nm", "nm", "mac.l @<REG_M>+,@<REG_N>+", "0000nnnnmmmm1111",
@@ -800,17 +803,17 @@ op tab[] =
   },
 
   { "", "n", "ocbi @<REG_N>", "0000nnnn10010011",
-    "RSBAT (R[n]); /* Take exceptions like byte load.  */",
+    "RSBAT (R[n]); /* Take exceptions like byte load, otherwise noop.  */",
     "/* FIXME: Cache not implemented */",
   },
 
   { "", "n", "ocbp @<REG_N>", "0000nnnn10100011",
-    "RSBAT (R[n]); /* Take exceptions like byte load.  */",
+    "RSBAT (R[n]); /* Take exceptions like byte load, otherwise noop.  */",
     "/* FIXME: Cache not implemented */",
   },
 
   { "", "n", "ocbwb @<REG_N>", "0000nnnn10110011",
-    "RSBAT (R[n]); /* Take exceptions like byte load.  */",
+    "RSBAT (R[n]); /* Take exceptions like byte load, otherwise noop.  */",
     "/* FIXME: Cache not implemented */",
   },
 
@@ -1246,7 +1249,7 @@ op movsxy_tab[] =
     "R[n] += ((R[n] & 0xffff) == MOD_ME) ? MOD_DELTA : 2;",
     "iword &= 0xfd53; goto top;",
   },
-  { "n", "n8","movx.w @<REG_x>+REG_8,<DSP_XX>", "111100xxXX001000",
+  { "n", "n8","movx.w @<REG_x>+REG_8,<DSP_XX>", "111100xxXX001100",
     "DSP_R (m) = RSWAT (R[n]) << 16;",
     "R[n] += ((R[n] & 0xffff) == MOD_ME) ? MOD_DELTA : R[8];",
     "iword &= 0xfd53; goto top;",
@@ -1272,7 +1275,7 @@ op movsxy_tab[] =
     "DSP_R (m) = RSWAT (R[n]) << 16;",
     "R[n] += ((R[n] | ~0xffff) == MOD_ME) ? MOD_DELTA : 2;",
   },
-  { "n", "n9","movy.w @<REG_y>+REG_9,<DSP_YY>", "111100yyYY000010",
+  { "n", "n9","movy.w @<REG_y>+REG_9,<DSP_YY>", "111100yyYY000011",
     "DSP_R (m) = RSWAT (R[n]) << 16;",
     "R[n] += ((R[n] | ~0xffff) == MOD_ME) ? MOD_DELTA : R[9];",
   },
@@ -1283,7 +1286,7 @@ op movsxy_tab[] =
     "WWAT (R[n], DSP_R (m) >> 16);",
     "R[n] += ((R[n] | ~0xffff) == MOD_ME) ? MOD_DELTA : 2;",
   },
-  { "n", "n9", "movy.w <DSP_Aa>,@<REG_y>+REG_9", "111100yyAA010010",
+  { "n", "n9", "movy.w <DSP_Aa>,@<REG_y>+REG_9", "111100yyAA010011",
     "WWAT (R[n], DSP_R (m) >> 16);",
     "R[n] += ((R[n] | ~0xffff) == MOD_ME) ? MOD_DELTA : R[9];",
   },
@@ -2138,10 +2141,11 @@ gensim_caselist (p)
 	{
 	  switch (*s)
 	    {
-              fprintf (stderr, "gencode/gensim_caselist: illegal char '%c'\n",
-                       *s);
-              exit (1);
-              break;
+	    default:
+	      fprintf (stderr, "gencode/gensim_caselist: illegal char '%c'\n",
+		       *s);
+	      exit (1);
+	      break;
 	    case '0':
 	    case '1':
 	      s += 2;
@@ -2335,10 +2339,10 @@ expand_ppi_code (val, i, s)
     {
       switch (s[0])
 	{
-        default:
-          fprintf (stderr, "gencode/expand_ppi_code: Illegal char '%c'\n",
-                   s[0]);
-          exit (2);
+	default:
+	  fprintf (stderr, "gencode/expand_ppi_code: Illegal char '%c'\n",
+		   s[0]);
+	  exit (2);
 	  break;
 	/* The last eight bits are disregarded for the switch table.  */
 	case 'm':
