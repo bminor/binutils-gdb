@@ -1,7 +1,7 @@
 2000-12-14  Kevin Buettner  <kevinb@redhat.com>
 
-	* tui/tui-file.c, tui/tui.c, tui/tuiData.c, tui/tuiLayout.c:
-	Replace occurrences of free() with xfree().
+	* tui-file.c, tui.c, tuiData.c, tuiLayout.c: Replace occurrences
+	of free() with xfree().
 
 2000-06-22  Kevin Buettner  <kevinb@redhat.com>
 

@@ -1,8 +1,7 @@
 2000-12-14  Kevin Buettner  <kevinb@redhat.com>
 
-	* mi/mi-cmd-disas.c, mi/mi-cmd-var.c, mi/mi-console.c,
-	mi/mi-main.c, mi/mi-parse.c: Replace occurrences of free()
-	with xfree().
+	* mi-cmd-disas.c, mi-cmd-var.c, mi-console.c, mi-main.c,
+	mi-parse.c: Replace occurrences of free() with xfree().
 
 Fri Nov 17 16:07:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
