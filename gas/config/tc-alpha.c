@@ -593,8 +593,7 @@ md_begin ()
   create_lita_section ();
   /* For handling the GP, create a symbol that won't be output in the
      symbol table.  We'll edit it out of relocs later.  */
-  gp = symbol_new ("<GP value>", lita_sec, 0x8000, &zero_address_frag);
-  symbol_remove (gp, &symbol_rootP, &symbol_lastP);
+  gp = symbol_create ("<GP value>", lita_sec, 0x8000, &zero_address_frag);
 }
 
 int optnum = 1;
