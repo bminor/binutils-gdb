@@ -840,10 +840,10 @@ elf32-fr30.lo: elf32-fr30.c elf-bfd.h $(INCDIR)/elf/common.h \
 elf32-gen.lo: elf32-gen.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h
-elf32-hppa.lo: elf32-hppa.c $(INCDIR)/bfdlink.h elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  elf32-hppa.h libhppa.h $(INCDIR)/elf/hppa.h $(INCDIR)/elf/reloc-macros.h \
-  hppa_stubs.h elf32-target.h
+elf32-hppa.lo: elf32-hppa.c elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/hppa.h $(INCDIR)/elf/reloc-macros.h libhppa.h \
+  elf32-hppa.h elf-hppa.h hppa_stubs.h elf32-target.h
 elf32-i386.lo: elf32-i386.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/i386.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
@@ -897,12 +897,12 @@ elf32.lo: elf32.c elfcode.h $(INCDIR)/bfdlink.h elf-bfd.h \
   elfcore.h elflink.h
 elflink.lo: elflink.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
-epoc-pe-arm.lo: epoc-ep-arm.c pe-arm.c coff-arm.c $(INCDIR)/coff/arm.h \
+epoc-pe-arm.lo: epoc-pe-arm.c pe-arm.c coff-arm.c $(INCDIR)/coff/arm.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
   $(INCDIR)/bfdlink.h coffcode.h peicode.h
-epoc-pei-arm.lo: epoc-pei-arm.c pei-arm.c coff-arm.c $(INCDIR)/coff/arm.h \
-  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+epoc-pei-arm.lo: epoc-pei-arm.c pei-arm.c coff-arm.c \
+  $(INCDIR)/coff/arm.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h \
+  libcoff.h $(INCDIR)/bfdlink.h coffcode.h peicode.h
 hp300bsd.lo: hp300bsd.c libaout.h $(INCDIR)/bfdlink.h \
   aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
