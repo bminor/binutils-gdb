@@ -146,8 +146,6 @@ struct gdbarch
   gdbarch_register_name_ftype *register_name;
   gdbarch_register_type_ftype *register_type;
   gdbarch_deprecated_register_byte_ftype *deprecated_register_byte;
-  gdbarch_deprecated_register_raw_size_ftype *deprecated_register_raw_size;
-  gdbarch_deprecated_register_virtual_size_ftype *deprecated_register_virtual_size;
   gdbarch_unwind_dummy_id_ftype *unwind_dummy_id;
   int deprecated_fp_regnum;
   gdbarch_deprecated_target_read_fp_ftype *deprecated_target_read_fp;
@@ -286,8 +284,6 @@ struct gdbarch startup_gdbarch =
   0,  /* register_name */
   0,  /* register_type */
   generic_register_byte,  /* deprecated_register_byte */
-  generic_register_size,  /* deprecated_register_raw_size */
-  generic_register_size,  /* deprecated_register_virtual_size */
   0,  /* unwind_dummy_id */
   -1,  /* deprecated_fp_regnum */
   0,  /* deprecated_target_read_fp */
@@ -434,8 +430,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->sdb_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->dwarf2_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->deprecated_register_byte = generic_register_byte;
-  current_gdbarch->deprecated_register_raw_size = generic_register_size;
-  current_gdbarch->deprecated_register_virtual_size = generic_register_size;
   current_gdbarch->deprecated_fp_regnum = -1;
   current_gdbarch->call_dummy_location = AT_ENTRY_POINT;
   current_gdbarch->print_registers_info = default_print_registers_info;
@@ -560,8 +554,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of dwarf2_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of register_type, has predicate */
   /* Skip verify of deprecated_register_byte, has predicate */
-  /* Skip verify of deprecated_register_raw_size, has predicate */
-  /* Skip verify of deprecated_register_virtual_size, has predicate */
   /* Skip verify of unwind_dummy_id, has predicate */
   /* Skip verify of deprecated_fp_regnum, invalid_p == 0 */
   /* Skip verify of deprecated_target_read_fp, has predicate */
@@ -1148,24 +1140,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_register_byte = <0x%lx>\n",
                       (long) current_gdbarch->deprecated_register_byte);
-#ifdef DEPRECATED_REGISTER_RAW_SIZE_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_REGISTER_RAW_SIZE_P()",
-                      XSTRING (DEPRECATED_REGISTER_RAW_SIZE_P ()));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: gdbarch_deprecated_register_raw_size_p() = %d\n",
-                      gdbarch_deprecated_register_raw_size_p (current_gdbarch));
-#ifdef DEPRECATED_REGISTER_RAW_SIZE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_REGISTER_RAW_SIZE(reg_nr)",
-                      XSTRING (DEPRECATED_REGISTER_RAW_SIZE (reg_nr)));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: deprecated_register_raw_size = <0x%lx>\n",
-                      (long) current_gdbarch->deprecated_register_raw_size);
 #ifdef DEPRECATED_REGISTER_SIZE
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_REGISTER_SIZE # %s\n",
@@ -1174,24 +1148,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: deprecated_register_size = %s\n",
                       paddr_d (current_gdbarch->deprecated_register_size));
-#ifdef DEPRECATED_REGISTER_VIRTUAL_SIZE_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_REGISTER_VIRTUAL_SIZE_P()",
-                      XSTRING (DEPRECATED_REGISTER_VIRTUAL_SIZE_P ()));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: gdbarch_deprecated_register_virtual_size_p() = %d\n",
-                      gdbarch_deprecated_register_virtual_size_p (current_gdbarch));
-#ifdef DEPRECATED_REGISTER_VIRTUAL_SIZE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_REGISTER_VIRTUAL_SIZE(reg_nr)",
-                      XSTRING (DEPRECATED_REGISTER_VIRTUAL_SIZE (reg_nr)));
-#endif
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: deprecated_register_virtual_size = <0x%lx>\n",
-                      (long) current_gdbarch->deprecated_register_virtual_size);
 #ifdef DEPRECATED_SAVED_PC_AFTER_CALL_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -2525,56 +2481,6 @@ set_gdbarch_deprecated_register_byte (struct gdbarch *gdbarch,
                                       gdbarch_deprecated_register_byte_ftype deprecated_register_byte)
 {
   gdbarch->deprecated_register_byte = deprecated_register_byte;
-}
-
-int
-gdbarch_deprecated_register_raw_size_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_register_raw_size != generic_register_size;
-}
-
-int
-gdbarch_deprecated_register_raw_size (struct gdbarch *gdbarch, int reg_nr)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->deprecated_register_raw_size != NULL);
-  /* Do not check predicate: gdbarch->deprecated_register_raw_size != generic_register_size, allow call.  */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_register_raw_size called\n");
-  return gdbarch->deprecated_register_raw_size (reg_nr);
-}
-
-void
-set_gdbarch_deprecated_register_raw_size (struct gdbarch *gdbarch,
-                                          gdbarch_deprecated_register_raw_size_ftype deprecated_register_raw_size)
-{
-  gdbarch->deprecated_register_raw_size = deprecated_register_raw_size;
-}
-
-int
-gdbarch_deprecated_register_virtual_size_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_register_virtual_size != generic_register_size;
-}
-
-int
-gdbarch_deprecated_register_virtual_size (struct gdbarch *gdbarch, int reg_nr)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->deprecated_register_virtual_size != NULL);
-  /* Do not check predicate: gdbarch->deprecated_register_virtual_size != generic_register_size, allow call.  */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_register_virtual_size called\n");
-  return gdbarch->deprecated_register_virtual_size (reg_nr);
-}
-
-void
-set_gdbarch_deprecated_register_virtual_size (struct gdbarch *gdbarch,
-                                              gdbarch_deprecated_register_virtual_size_ftype deprecated_register_virtual_size)
-{
-  gdbarch->deprecated_register_virtual_size = deprecated_register_virtual_size;
 }
 
 int

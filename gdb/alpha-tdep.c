@@ -145,18 +145,6 @@ alpha_register_byte (int regno)
   return (regno * 8);
 }
 
-static int
-alpha_register_raw_size (int regno)
-{
-  return 8;
-}
-
-static int
-alpha_register_virtual_size (int regno)
-{
-  return 8;
-}
-
 /* The following represents exactly the conversion performed by
    the LDS instruction.  This applies to both single-precision
    floating point and 32-bit integers.  */
@@ -1531,8 +1519,6 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_register_name (gdbarch, alpha_register_name);
   set_gdbarch_deprecated_register_byte (gdbarch, alpha_register_byte);
-  set_gdbarch_deprecated_register_raw_size (gdbarch, alpha_register_raw_size);
-  set_gdbarch_deprecated_register_virtual_size (gdbarch, alpha_register_virtual_size);
   set_gdbarch_register_type (gdbarch, alpha_register_type);
 
   set_gdbarch_cannot_fetch_register (gdbarch, alpha_cannot_fetch_register);

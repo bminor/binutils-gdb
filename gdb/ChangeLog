@@ -1,5 +1,16 @@
 2004-08-02  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbarch.sh (deprecated_register_raw_size)
+	(deprecated_register_virtual_size:int): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* cris-tdep.c (cris_register_size): Delete.
+	(cris_gdbarch_init): Update.
+	* alpha-tdep.c (alpha_register_raw_size)
+	(alpha_register_virtual_size): Delete.
+	(alpha_gdbarch_init): Update.
+
+2004-08-02  Andrew Cagney  <cagney@gnu.org>
+
 	* gdbarch.sh (deprecated_register_virtual_type)
 	(deprecated_save_dummy_frame_tos, deprecated_push_return_address)
 	(deprecated_dummy_write_sp): Delete.

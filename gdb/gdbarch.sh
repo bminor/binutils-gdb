@@ -469,16 +469,6 @@ M::struct type *:register_type:int reg_nr:reg_nr
 # function works.  This simplifies the migration process - old code,
 # calling DEPRECATED_REGISTER_BYTE, doesn't need to be modified.
 F:=:int:deprecated_register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte
-# If all registers have identical raw and virtual sizes and those
-# sizes agree with the value computed from REGISTER_TYPE,
-# DEPRECATED_REGISTER_RAW_SIZE can be deleted.  See: maint print
-# registers.
-F:=:int:deprecated_register_raw_size:int reg_nr:reg_nr::generic_register_size:generic_register_size
-# If all registers have identical raw and virtual sizes and those
-# sizes agree with the value computed from REGISTER_TYPE,
-# DEPRECATED_REGISTER_VIRTUAL_SIZE can be deleted.  See: maint print
-# registers.
-F:=:int:deprecated_register_virtual_size:int reg_nr:reg_nr::generic_register_size:generic_register_size
 
 # See gdbint.texinfo, and PUSH_DUMMY_CALL.
 M::struct frame_id:unwind_dummy_id:struct frame_info *info:info
