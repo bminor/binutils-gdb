@@ -4,7 +4,7 @@
 # any existing configure script.
 
 configdirs="libiberty bfd binutils bison gcc readline ld gas gnulib clib gdb emacs make grep diff rcs gdbm cvs prms"
-srctrigger=README.configure
+srctrigger=README
 srcname="gnu development package"
 
 # per-host:
