@@ -862,93 +862,88 @@ if test ${host} = ${target} ; then
   fi
 fi
 
-dnl See if compiler supports "long long" type.
+# Check if the compiler supports the `long long' type.
 
-AC_MSG_CHECKING(for long long support in compiler)
-AC_CACHE_VAL(gdb_cv_c_long_long,
-[AC_TRY_COMPILE(, [
-  extern long long foo;
-  switch (foo & 2) { case 0: return 1; }
-],
-gdb_cv_c_long_long=yes, gdb_cv_c_long_long=no)])
-AC_MSG_RESULT($gdb_cv_c_long_long)
+AC_CACHE_CHECK([for long long support in compiler], gdb_cv_c_long_long,
+               [AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+[[extern long long foo;]],
+[[switch (foo & 2) { case 0: return 1; }]])],
+                                  gdb_cv_c_long_long=yes,
+                                  gdb_cv_c_long_long=no)])
 if test $gdb_cv_c_long_long = yes; then
-  AC_DEFINE(CC_HAS_LONG_LONG)
+  AC_DEFINE(CC_HAS_LONG_LONG, 1,
+            [Define to 1 if the compiler supports long long.])
 fi
 
-dnl See if the compiler and runtime support printing long long
+# Check if the compiler and runtime support printing long longs.
 
-AC_MSG_CHECKING(for long long support in printf)
-AC_CACHE_VAL(gdb_cv_printf_has_long_long,
-[AC_TRY_RUN([
-int main () {
-  char buf[32];
+AC_CACHE_CHECK([for long long support in printf],
+               gdb_cv_printf_has_long_long,
+               [AC_RUN_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
+[[char buf[32];
   long long l = 0;
   l = (l << 16) + 0x0123;
   l = (l << 16) + 0x4567;
   l = (l << 16) + 0x89ab;
   l = (l << 16) + 0xcdef;
   sprintf (buf, "0x%016llx", l);
-  return (strcmp ("0x0123456789abcdef", buf));
-}],
-gdb_cv_printf_has_long_long=yes,
-gdb_cv_printf_has_long_long=no,
-gdb_cv_printf_has_long_long=no)])
+  return (strcmp ("0x0123456789abcdef", buf));]])],
+                              gdb_cv_printf_has_long_long=yes,
+                              gdb_cv_printf_has_long_long=no,
+                              gdb_cv_printf_has_long_long=no)])
 if test $gdb_cv_printf_has_long_long = yes; then
-  AC_DEFINE(PRINTF_HAS_LONG_LONG)
-fi
-AC_MSG_RESULT($gdb_cv_printf_has_long_long)
-
-dnl See if compiler supports "long double" type.  Can't use AC_C_LONG_DOUBLE
-dnl because autoconf complains about cross-compilation issues.  However, this
-dnl code uses the same variables as the macro for compatibility.
-
-AC_MSG_CHECKING(for long double support in compiler)
-AC_CACHE_VAL(ac_cv_c_long_double,
-[AC_TRY_COMPILE(, [long double foo;],
-ac_cv_c_long_double=yes, ac_cv_c_long_double=no)])
-AC_MSG_RESULT($ac_cv_c_long_double)
-if test $ac_cv_c_long_double = yes; then
-  AC_DEFINE(HAVE_LONG_DOUBLE)
+  AC_DEFINE(PRINTF_HAS_LONG_LONG, 1,
+            [Define to 1 if the "%ll" format works to print long longs.])
 fi
 
-dnl See if the compiler and runtime support printing long doubles
+# Check if the compiler supports the `long double' type.  We can't use
+# AC_C_LONG_DOUBLE because that one does additional checks on the
+# constants defined in <float.h> that fail on some systems,
+# e.g. FreeBSD/i386 4.7 and OpenBSD/i386 3.6.
 
-AC_MSG_CHECKING(for long double support in printf)
-AC_CACHE_VAL(gdb_cv_printf_has_long_double,
-[AC_TRY_RUN([
-int main () {
-  char buf[16];
+AC_CACHE_CHECK([for long double support in compiler], gdb_cv_c_long_double,
+               [AC_COMPILE_IFELSE([AC_LANG_SOURCE([[long double foo;]])],
+                                  gdb_cv_c_long_double=yes,
+                                  gdb_cv_c_long_double=no)])
+if test $gdb_cv_c_long_double = yes; then
+  AC_DEFINE(HAVE_LONG_DOUBLE, 1,
+           [Define to 1 if the compiler supports long double.])
+fi
+
+# Check if the compiler and runtime support printing long doubles.
+
+AC_CACHE_CHECK([for long double support in printf],
+               gdb_cv_printf_has_long_double,
+               [AC_RUN_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
+[[char buf[16];
   long double f = 3.141592653;
   sprintf (buf, "%Lg", f);
-  return (strncmp ("3.14159", buf, 7));
-}],
-gdb_cv_printf_has_long_double=yes,
-gdb_cv_printf_has_long_double=no,
-gdb_cv_printf_has_long_double=no)])
+  return (strncmp ("3.14159", buf, 7));]])],
+                              gdb_cv_printf_has_long_double=yes,
+                              gdb_cv_printf_has_long_double=no,
+                              gdb_cv_printf_has_long_double=no)])
 if test $gdb_cv_printf_has_long_double = yes; then
-  AC_DEFINE(PRINTF_HAS_LONG_DOUBLE)
+  AC_DEFINE(PRINTF_HAS_LONG_DOUBLE, 1,
+            [Define to 1 if the "%Lg" format works to print long doubles.])
 fi
-AC_MSG_RESULT($gdb_cv_printf_has_long_double)
 
-dnl See if the compiler and runtime support scanning long doubles
+# Check if the compiler and runtime support scanning long doubles.
 
-AC_MSG_CHECKING(for long double support in scanf)
-AC_CACHE_VAL(gdb_cv_scanf_has_long_double,
-[AC_TRY_RUN([
-int main () {
-  char *buf = "3.141592653";
+AC_CACHE_CHECK([for long double support in scanf], 
+               gdb_cv_scanf_has_long_double,
+               [AC_RUN_IFELSE([AC_LANG_PROGRAM(
+[[#include <stdio.h>]],
+[[char *buf = "3.141592653";
   long double f = 0;
   sscanf (buf, "%Lg", &f);
-  return !(f > 3.14159 && f < 3.14160);
-}],
-gdb_cv_scanf_has_long_double=yes,
-gdb_cv_scanf_has_long_double=no,
-gdb_cv_scanf_has_long_double=no)])
+  return !(f > 3.14159 && f < 3.14160);]])],
+                              gdb_cv_scanf_has_long_double=yes,
+                              gdb_cv_scanf_has_long_double=no,
+                              gdb_cv_scanf_has_long_double=no)])
 if test $gdb_cv_scanf_has_long_double = yes; then
-  AC_DEFINE(SCANF_HAS_LONG_DOUBLE)
+  AC_DEFINE(SCANF_HAS_LONG_DOUBLE, 1,
+            [Define to 1 if the "%Lg" format works to scan long doubles.])
 fi
-AC_MSG_RESULT($gdb_cv_scanf_has_long_double)
 
 case ${host_os} in
 aix*)

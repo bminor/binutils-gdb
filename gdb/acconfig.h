@@ -83,18 +83,6 @@
 /* Define if ioctl argument PIOCSET is available. */
 #undef HAVE_PROCFS_PIOCSET
 
-/* Define if the `long long' type works.  */
-#undef CC_HAS_LONG_LONG
-
-/* Define if the "ll" format works to print long long ints. */
-#undef PRINTF_HAS_LONG_LONG
-
-/* Define if the "%Lg" format works to print long doubles. */
-#undef PRINTF_HAS_LONG_DOUBLE
-
-/* Define if the "%Lg" format works to scan long doubles. */
-#undef SCANF_HAS_LONG_DOUBLE
-
 /* Define if using Solaris thread debugging.  */
 #undef HAVE_THREAD_DB_LIB
 

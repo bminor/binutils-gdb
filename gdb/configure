@@ -18859,6 +18859,7 @@ _ACEOF
   fi
 fi
 
+# Check if the compiler supports the `long long' type.
 
 echo "$as_me:$LINENO: checking for long long support in compiler" >&5
 echo $ECHO_N "checking for long long support in compiler... $ECHO_C" >&6
@@ -18871,14 +18872,11 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-
+extern long long foo;
 int
 main ()
 {
-
-  extern long long foo;
-  switch (foo & 2) { case 0: return 1; }
-
+switch (foo & 2) { case 0: return 1; }
   ;
   return 0;
 }
@@ -18914,16 +18912,17 @@ gdb_cv_c_long_long=no
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
-
 echo "$as_me:$LINENO: result: $gdb_cv_c_long_long" >&5
 echo "${ECHO_T}$gdb_cv_c_long_long" >&6
 if test $gdb_cv_c_long_long = yes; then
-  cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define CC_HAS_LONG_LONG 1
 _ACEOF
 
 fi
 
+# Check if the compiler and runtime support printing long longs.
 
 echo "$as_me:$LINENO: checking for long long support in printf" >&5
 echo $ECHO_N "checking for long long support in printf... $ECHO_C" >&6
@@ -18939,9 +18938,11 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-
-int main () {
-  char buf[32];
+$ac_includes_default
+int
+main ()
+{
+char buf[32];
   long long l = 0;
   l = (l << 16) + 0x0123;
   l = (l << 16) + 0x4567;
@@ -18949,6 +18950,8 @@ int main () {
   l = (l << 16) + 0xcdef;
   sprintf (buf, "0x%016llx", l);
   return (strcmp ("0x0123456789abcdef", buf));
+  ;
+  return 0;
 }
 _ACEOF
 rm -f conftest$ac_exeext
@@ -18974,20 +18977,24 @@ fi
 rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
 fi
-
+echo "$as_me:$LINENO: result: $gdb_cv_printf_has_long_long" >&5
+echo "${ECHO_T}$gdb_cv_printf_has_long_long" >&6
 if test $gdb_cv_printf_has_long_long = yes; then
-  cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define PRINTF_HAS_LONG_LONG 1
 _ACEOF
 
 fi
-echo "$as_me:$LINENO: result: $gdb_cv_printf_has_long_long" >&5
-echo "${ECHO_T}$gdb_cv_printf_has_long_long" >&6
 
+# Check if the compiler supports the `long double' type.  We can't use
+# AC_C_LONG_DOUBLE because that one does additional checks on the
+# constants defined in <float.h> that fail on some systems,
+# e.g. FreeBSD/i386 4.7 and OpenBSD/i386 3.6.
 
 echo "$as_me:$LINENO: checking for long double support in compiler" >&5
 echo $ECHO_N "checking for long double support in compiler... $ECHO_C" >&6
-if test "${ac_cv_c_long_double+set}" = set; then
+if test "${gdb_cv_c_long_double+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -18996,14 +19003,7 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-
-int
-main ()
-{
 long double foo;
-  ;
-  return 0;
-}
 _ACEOF
 rm -f conftest.$ac_objext
 if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
@@ -19027,25 +19027,26 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  ac_cv_c_long_double=yes
+  gdb_cv_c_long_double=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-ac_cv_c_long_double=no
+gdb_cv_c_long_double=no
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
+echo "$as_me:$LINENO: result: $gdb_cv_c_long_double" >&5
+echo "${ECHO_T}$gdb_cv_c_long_double" >&6
+if test $gdb_cv_c_long_double = yes; then
 
-echo "$as_me:$LINENO: result: $ac_cv_c_long_double" >&5
-echo "${ECHO_T}$ac_cv_c_long_double" >&6
-if test $ac_cv_c_long_double = yes; then
-  cat >>confdefs.h <<\_ACEOF
+cat >>confdefs.h <<\_ACEOF
 #define HAVE_LONG_DOUBLE 1
 _ACEOF
 
 fi
 
+# Check if the compiler and runtime support printing long doubles.
 
 echo "$as_me:$LINENO: checking for long double support in printf" >&5
 echo $ECHO_N "checking for long double support in printf... $ECHO_C" >&6
@@ -19061,12 +19062,16 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-
-int main () {
-  char buf[16];
+$ac_includes_default
+int
+main ()
+{
+char buf[16];
   long double f = 3.141592653;
   sprintf (buf, "%Lg", f);
   return (strncmp ("3.14159", buf, 7));
+  ;
+  return 0;
 }
 _ACEOF
 rm -f conftest$ac_exeext
@@ -19092,16 +19097,17 @@ fi
 rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
 fi
-
+echo "$as_me:$LINENO: result: $gdb_cv_printf_has_long_double" >&5
+echo "${ECHO_T}$gdb_cv_printf_has_long_double" >&6
 if test $gdb_cv_printf_has_long_double = yes; then
-  cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define PRINTF_HAS_LONG_DOUBLE 1
 _ACEOF
 
 fi
-echo "$as_me:$LINENO: result: $gdb_cv_printf_has_long_double" >&5
-echo "${ECHO_T}$gdb_cv_printf_has_long_double" >&6
 
+# Check if the compiler and runtime support scanning long doubles.
 
 echo "$as_me:$LINENO: checking for long double support in scanf" >&5
 echo $ECHO_N "checking for long double support in scanf... $ECHO_C" >&6
@@ -19117,12 +19123,16 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-
-int main () {
-  char *buf = "3.141592653";
+#include <stdio.h>
+int
+main ()
+{
+char *buf = "3.141592653";
   long double f = 0;
   sscanf (buf, "%Lg", &f);
   return !(f > 3.14159 && f < 3.14160);
+  ;
+  return 0;
 }
 _ACEOF
 rm -f conftest$ac_exeext
@@ -19148,15 +19158,15 @@ fi
 rm -f core *.core gmon.out bb.out conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
 fi
-
+echo "$as_me:$LINENO: result: $gdb_cv_scanf_has_long_double" >&5
+echo "${ECHO_T}$gdb_cv_scanf_has_long_double" >&6
 if test $gdb_cv_scanf_has_long_double = yes; then
-  cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SCANF_HAS_LONG_DOUBLE 1
 _ACEOF
 
 fi
-echo "$as_me:$LINENO: result: $gdb_cv_scanf_has_long_double" >&5
-echo "${ECHO_T}$gdb_cv_scanf_has_long_double" >&6
 
 case ${host_os} in
 aix*)

@@ -1,8 +1,18 @@
+2005-01-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.ac: Modernize checks for `long long' and `long double'
+	support.
+	* configure: Regenerated.
+	* acconfig.h (CC_HAS_LONG_LONG, PRINTF_HAS_LONG_LONG)
+	(PRINT_HAS_LONG_DOUBLE,	SCANF_HAS_LONG_DOUBLE): Remove undefs.
+	* config.in: Regenerated.
+
 2005-01-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* acconfig.h (HAVE_STRUCT_SAVE_STATE_T)
 	(HAVE_STRUCT_MEMBER_SS_WIDE): Remove undefs.
 	* configure.ac: Remove checks for HP-UX save_state structure.
+
 	* configure: Regenerated.
 
 2005-01-19  Andrew Cagney  <cagney@gnu.org>
