@@ -5849,14 +5849,14 @@ formatted note of type NT_VERSION.  The note's name is set to @code{string}.
 @node VTableEntry
 @section @code{.vtable_entry @var{table}, @var{offset}}
 
-@cindex @code{vtable_entry}
+@cindex @code{vtable_entry} directive
 This directive finds or creates a symbol @code{table} and creates a
 @code{VTABLE_ENTRY} relocation for it with an addend of @code{offset}.
 
 @node VTableInherit
 @section @code{.vtable_inherit @var{child}, @var{parent}}
 
-@cindex @code{vtable_inherit}
+@cindex @code{vtable_inherit} directive
 This directive finds the symbol @code{child} and finds or creates the symbol
 @code{parent} and then creates a @code{VTABLE_INHERIT} relocation for the
 parent whose addend is the value of the child symbol.  As a special case the
@@ -6461,7 +6461,7 @@ things without first using the debugger to find the facts.
 @node Acknowledgements
 @chapter Acknowledgements
 
-If you have contributed to @command{@value{AS}} and your name isn't listed here,
+If you have contributed to GAS and your name isn't listed here,
 it is not meant as a slight.  We just don't know about it.  Send mail to the
 maintainer, and we'll correct the situation.  Currently 
 @c (January 1994), 
@@ -6522,7 +6522,7 @@ Ian Lance Taylor of Cygnus Support merged the Motorola and MIT syntax for the
 added support for MIPS ECOFF and ELF targets, wrote the initial RS/6000 and
 PowerPC assembler, and made a few other minor patches.
 
-Steve Chamberlain made @command{@value{AS}} able to generate listings.
+Steve Chamberlain made GAS able to generate listings.
 
 Hewlett-Packard contributed support for the HP9000/300.
 

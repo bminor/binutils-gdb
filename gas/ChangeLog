@@ -1,3 +1,9 @@
+2004-10-08  Bob Wilson  <bob.wilson@acm.org>
+
+	* doc/as.texinfo (VTableEntry, VTableInherit): Add "directive" to index
+	entries.
+	(Acknowledgements): Use "GAS" instead of AS variable.
+
 2004-10-08  Daniel Jacobowitz  <dan@debian.org>
 
 	* config/tc-i386.c: Include "elf/x86-64.h".
