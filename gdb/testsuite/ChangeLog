@@ -1,3 +1,9 @@
+2003-07-09  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.base/annota1.exp: Make sure that we properly escape the
+        full path of the source file. Xfail more permissive patterns,
+        due to a compiler debug info problem. 
+
 2003-07-07  Andreas Schwab  <schwab@suse.de>
 
 	* gdb.asm/m68k.inc: New file.
