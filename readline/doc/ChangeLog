@@ -1,3 +1,7 @@
+1998-12-17  Felix Lee  <flee@cygnus.com>
+
+	* inc-hist.texi: @node line "Using History" was wrong.
+
 Thu Jul  9 17:03:26 1998  Edith Epstein  <eepstein@sophia.cygnus.com>
 
 	* inc-hist.texi: one line change.
