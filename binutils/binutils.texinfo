@@ -54,8 +54,26 @@ into another language, under the above conditions for modified versions.
 @chapter Introduction
 
 This brief manual contains preliminary documentation for the GNU binary
-utilities (collectively version 1.90): @samp{ar}, @samp{objdump},
-@samp{nm}, @samp{size}, @samp{strip}, and @samp{ranlib}. @refill
+utilities (collectively version 1.90): 
+@table @code
+@item ar
+Create, modify, and extract from archives
+
+@item nm
+List symbols from object files
+
+@item objdump
+Display information from object files
+
+@item ranlib
+Generate index to archive contents
+
+@item size
+List section sizes and total size
+
+@item strip
+Discard symbols
+@end table
 
 @ifinfo
 Copyright @copyright{} 1991 Free Software Foundation, Inc.
@@ -98,7 +116,7 @@ into another language, under the above conditions for modified versions.
   ar [-]@var{p}@var{mod} [ @var{membername} ] @var{archive} @var{files}@dots{}
 @end smallexample
 
-The GNU @code{ar} program creates, modifies, and extracts
+The GNU @code{ar} program creates, modifies, and extracts from
 archives.  An @dfn{archive} is a single file holding a collection of
 other files in a structure that makes it possible to retrieve
 the original individual files (called @dfn{members} of the archive).
@@ -126,7 +144,6 @@ An archive with such an index speeds up linking to the library, and
 allows routines in the library to call each other without regard to
 their placement in the archive.
 
-
 You may use @samp{nm -s} or @samp{nm +print-armap} to list this index
 table.  If an archive lacks the table, another form of @code{ar} called
 @code{ranlib} can be used to add just the table.
@@ -141,7 +158,7 @@ specifying particular files to operate on.
 GNU @code{ar} allows you to mix the operation code @var{p} and modifier
 flags @var{mod} in any order, within the first command-line argument.
 
-If you wish, you may prefix the first command-line argument with a
+If you wish, you may begin the first command-line argument with a
 dash.
 
 The @var{p} keyletter specifies what operation to execute; it may be
@@ -296,7 +313,7 @@ when the modifier @samp{v} is appended.
 @node ld, nm, ar, Top
 @chapter ld
 The GNU linker @code{ld} is now described in a separate manual.
-@xref{Top, , Overview, , GLD: the GNU linker}.
+@xref{Top,, Overview,, GLD: the GNU linker}.
 
 @node nm, objdump, ld, Top
 @chapter nm
@@ -320,38 +337,38 @@ equivalent.
 Object files whose symbols are to be listed.  If no object files are
 listed as arguments, @code{nm} assumes @samp{a.out}.
 
-@item +debug-syms 
-@itemx -a
+@item -a
+@itemx +debug-syms 
 Display debugger-only symbols; normally these are not listed.
 
-@item +extern-only 
-@itemx -g
+@item -g
+@itemx +extern-only 
 Display only external symbols.
 
-@item +no-sort 
-@itemx -p
+@item -p
+@itemx +no-sort 
 Don't bother to sort the symbols in any order; just print them in the
 order encountered.
 
-@item +numeric-sort 
-@itemx -n
+@item -n
+@itemx +numeric-sort 
 Sort symbols numerically by their addresses, not alphabetically by their
 names. 
 
-@item +print-armap
-@itemx -s
+@item -s
+@itemx +print-armap
 When listing symbols from archives, list the index: a mapping (stored in
 the archive by @code{ar} or @code{ranlib}) of what modules contain
 definitions for what names.
 
-@item +print-file-name 
-@itemx -o
+@item -o
+@itemx +print-file-name 
 Precede each symbol by the name of the input file where it was found,
 rather than identifying the input file once only before all of its
 symbols. 
 
-@item +reverse-sort 
-@itemx -r
+@item -r
+@itemx +reverse-sort 
 Reverse the sense of the sort (whether numeric or alphabetic); let the
 last come first.
 
@@ -361,9 +378,8 @@ Specify an object code format other than your system's default format.
 @xref{objdump}, for information on listing available formats.
 @c FIXME what *does* +target/no arg do?
 
-
-@item +undefined-only 
-@itemx -u
+@item -u
+@itemx +undefined-only 
 Display only undefined symbols (those external to each object file).
 
 @end table
@@ -419,8 +435,8 @@ instructions from @var{objfiles}.
 File header.  Display summary information from the overall header of
 each file in @var{objfiles}.
 
-@item +header
-@itemx -h
+@item -h
+@itemx +header
 Header.  Display summary information from the section headers of the
 object file.
 
@@ -443,15 +459,15 @@ Specify the object files @var{objfiles} are for architecture
 @var{machine}.  You can list available architectures using the @samp{-i}
 option. 
 
-@item +reloc
-@itemx -r
+@item -r
+@itemx +reloc
 Relocation.  Print the relocation entries of the file.
 
 @item -s
 Display the full contents of any sections requested.
 
-@item +syms
-@itemx -t
+@item -t
+@itemx +syms
 Symbol Table.  Print the symbol table entries of the file.
 This is similar to the information provided by the @samp{nm} program.
 
@@ -482,7 +498,6 @@ their placement in the archive.
 The GNU @code{ranlib} program is another form of GNU @code{ar}; running
 @code{ranlib} is completely equivalent to executing @samp{ar -s}.
 @xref{ar}.
-
 
 @ignore
 @c FIXME vintage ranlib had options [ -t | +touch ]  [ -v | +verbose ] 
@@ -530,9 +545,9 @@ The command line options have the following meanings:
 @item @var{objfiles}@dots{}
 The object files to be examined.
 
-@item +format @var{compatibility}
-@itemx -A
+@item -A
 @itemx -B
+@itemx +format @var{compatibility}
 Using one of these options, you can choose whether the output from GNU
 @code{size} resembles output from System V @code{size} (using @samp{-A},
 or @samp{+format sysv}, or Berkeley @code{size} (using @samp{-B}, or
@@ -575,10 +590,10 @@ Total         388688
 @item +help
 Show a summary of acceptable arguments and options.
 
-@item +radix @var{number}
-@itemx -d
+@item -d
 @itemx -o
 @itemx -x
+@itemx +radix @var{number}
 Using one of these options, you can control whether the size of each
 section is given in decimal (@samp{-d}, or @samp{+radix 10}); octal
 (@samp{-o}, or @samp{+radix 8}); or hexadecimal (@samp{-x}, or
@@ -593,12 +608,11 @@ You can specify a particular object-code format for @var{objfiles} as
 automatically recognize many formats.  @xref{objdump}, for information
 on listing available formats.
 
-@item +version
-@itemx -V
+@item -V
+@itemx +version
 Display version number information on @code{size} itself.
 
 @end table
-
 
 @node strip,  , size, Top
 @chapter strip
@@ -625,23 +639,23 @@ The long and short forms of options, shown here as alternatives, are
 equivalent.
 
 @table @code
-@item +strip-all 
-@itemx -s
+@item -s
+@itemx +strip-all 
 This is the default case: strip all symbol entries from @var{objfiles}.
 
-@item +strip-debug 
-@itemx -g
+@item -g
 @itemx -S
+@itemx +strip-debug 
 Discard only debugging symbol information from @var{objfiles}.
 
-@item +discard-all 
-@itemx -x
+@item -x
+@itemx +discard-all 
 Discard all symbols local to each file in @var{objfiles}.
 @emph{WARNING:} Note that @code{+discard-all} discards only @emph{local}
 symbols, in spite of its name.
 
-@item +discard-locals 
-@itemx -X
+@item -X
+@itemx +discard-locals 
 Discard local symbols starting with @samp{L} from each file in
 @var{objfiles}.  (Some compilers produce internally-used symbols that
 begin with @samp{L}.)
@@ -655,5 +669,3 @@ available formats.
 
 @contents
 @bye
-
-
