@@ -1,3 +1,8 @@
+2003-11-27  Nick Clifton  <nickc@redhat.com>
+
+	* rename.c (smart_rename): Make sure that we have write
+	permission on the destination file before renaming.
+
 2003-11-26  Daniel Jacobowitz <drow@mvista.com>
             Nick Clifton  <nickc@redhat.com>
 

@@ -159,14 +159,18 @@ smart_rename (const char *from, const char *to, int preserve_dates)
   if (ret != 0)
     {
       /* We have to clean up here.  */
-
-      non_fatal (_("%s: rename: %s"), to, strerror (errno));
+      non_fatal (_("unable to rename '%s' reason: %s"), to, strerror (errno));
       unlink (from);
     }
 #else
   /* Use rename only if TO is not a symbolic link and has
-     only one hard link.  */
-  if (! exists || (!S_ISLNK (s.st_mode) && s.st_nlink == 1))
+     only one hard link, and we have permission to write to it.  */
+  if (! exists
+      || (!S_ISLNK (s.st_mode)
+	  && S_ISREG (s.st_mode)
+	  && (s.st_mode & S_IWUSR)
+	  && s.st_nlink == 1)
+      )
     {
       ret = rename (from, to);
       if (ret == 0)
@@ -193,7 +197,7 @@ smart_rename (const char *from, const char *to, int preserve_dates)
       else
 	{
 	  /* We have to clean up here.  */
-	  non_fatal (_("%s: rename: %s"), to, strerror (errno));
+	  non_fatal (_("unable to rename '%s' reason: %s"), to, strerror (errno));
 	  unlink (from);
 	}
     }
@@ -201,7 +205,7 @@ smart_rename (const char *from, const char *to, int preserve_dates)
     {
       ret = simple_copy (from, to);
       if (ret != 0)
-	non_fatal (_("%s: simple_copy: %s"), to, strerror (errno));
+	non_fatal (_("unable to copy file '%s' reason: %s"), to, strerror (errno));
 
       if (preserve_dates)
 	set_times (to, &s);
