@@ -19,9 +19,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "sparc/tm-sparc.h"
 #include "tm-sysv4.h"
-
-#undef IN_SOLIB_TRAMPOLINE
-#define IN_SOLIB_TRAMPOLINE(pc, name)	in_solib_trampoline((pc), (name))
  
 /* There are two different signal handler trampolines in Solaris2.  */
 #define IN_SIGTRAMP(pc, name) \
