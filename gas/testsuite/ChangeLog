@@ -1,3 +1,8 @@
+2000-11-28  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gas/sh/err.exp: New, framework for error-testing.
+	* gas/sh/err-1.s: New test.
+
 2000-11-26  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* gas/m68hc11/opers12.s: New test for movw operands.
