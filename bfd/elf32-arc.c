@@ -95,10 +95,10 @@ static reloc_howto_type elf_arc_howto_table[] =
 	 complain_overflow_signed, /* complain_on_overflow  */
 	 bfd_elf_generic_reloc,	/* special_function  */
 	 "R_ARC_B22_PCREL",	/* name  */
-	 false,			/* partial_inplace  */
+	 true,			/* partial_inplace  */
 	 0x07ffff80,		/* src_mask  */
 	 0x07ffff80,		/* dst_mask  */
-	 true),			/* pcrel_offset  */
+	 false),		/* pcrel_offset  */
 
 };
 

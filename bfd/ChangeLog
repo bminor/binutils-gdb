@@ -1,3 +1,9 @@
+2001-08-09  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* elf32-arc.c (R_ARC_B22_PCREL): Change 'partial_inplace' to
+	true (this target uses REL relocations) and 'pcrel_offset' to
+	false (the PC is implied, not stored in the offset).
+
 2001-08-08  Alan Modra  <amodra@bigpond.net.au>
 
 	1999-10-19  Linus Nordberg  <linus@swox.se>
