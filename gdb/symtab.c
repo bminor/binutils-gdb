@@ -684,7 +684,9 @@ symbol_demangled_name (struct general_symbol_info *gsymbol)
    linkage name of the symbol, depending on how it will be searched for.
    If there is no distinct demangled name, then returns the same value 
    (same pointer) as SYMBOL_LINKAGE_NAME. */
-char *symbol_search_name (const struct general_symbol_info *gsymbol) {
+char *
+symbol_search_name (const struct general_symbol_info *gsymbol)
+{
   if (gsymbol->language == language_ada)
     return gsymbol->name;
   else

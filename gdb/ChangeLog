@@ -1,3 +1,7 @@
+2004-10-21  Joel Brobecker  <brobecker@gnat.com>
+
+	* symtab.c (symbol_search_name): Minor reformatting.
+
 2004-10-20  Joel Brobecker  <brobecker@gnat.com>
 
 	* symtab.h: Fix typo in comment.
