@@ -1,3 +1,8 @@
+2002-05-13  Richard Earnshaw  <rearnsha@arm.com>
+
+	* builtin-regs.c (value_of_builtin_reg): Correctly calculate the
+	builtin reg number.
+
 2002-05-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* ax-gdb.c (gen_sign_extend, gen_fetch, gen_usual_unary)

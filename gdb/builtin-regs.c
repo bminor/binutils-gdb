@@ -71,7 +71,7 @@ builtin_reg_map_name_to_regnum (const char *name, int len)
 struct value *
 value_of_builtin_reg (int regnum, struct frame_info *frame)
 {
-  int reg = regnum - NUM_REGS + NUM_PSEUDO_REGS;
+  int reg = regnum - (NUM_REGS + NUM_PSEUDO_REGS);
   gdb_assert (reg >= 0 && reg < nr_builtin_regs);
   return builtin_regs[reg].value (frame);
 }
