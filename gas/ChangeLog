@@ -1,3 +1,9 @@
+2001-10-20  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (md_show_usage): Print "sb1" for Broadcom
+	SB-1 CPU for consistency.
+	(mips_cpu_info_table): Tweak comment about SB-1.
+
 2001-10-20  H.J. Lu  <hjl@gnu.org>
 
 	* config/tc-arm.c (do_c_shift): Use ISDIGIT instead of isdigit.

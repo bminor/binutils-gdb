@@ -9895,7 +9895,7 @@ MIPS options:\n\
   show (stream, "8000", &column, &first);
   show (stream, "10000", &column, &first);
   show (stream, "12000", &column, &first);
-  show (stream, "sb-1", &column, &first);
+  show (stream, "sb1", &column, &first);
   fputc ('\n', stream);
 
   fprintf (stream, _("\
@@ -12981,7 +12981,7 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "r5k",            0,      ISA_MIPS4,      CPU_R5000, },
   { "r7000",          0,      ISA_MIPS4,      CPU_R5000, },
 
-  /* SiByte SB-1 CPU */
+  /* Broadcom SB-1 CPU */
   { "SB-1",           0,      ISA_MIPS64,     CPU_SB1, },
   { "sb-1250",        0,      ISA_MIPS64,     CPU_SB1, },
   { "sb1",            0,      ISA_MIPS64,     CPU_SB1, },
