@@ -120,7 +120,7 @@ if ![ld_simple_link $ld tmpdir/relax "--relax -T $srcdir$subdir/relax.t tmpdir/r
 	    if [string match "*sll*" $l] {
 		continue
 	    }
-	    if ![regexp "lui (\[\$a-z0-9\]+),(\[0-9\]+)" $l whole reg upper] {
+	    if ![regexp "lui (\[\$a-z0-9\]+),(\[0-9a-fA-Fx\]+)" $l whole reg upper] {
 		send_log "fail 3\n"
 		send_log "$line\n"
 		send_log "$l\n"
@@ -169,7 +169,7 @@ if ![ld_simple_link $ld tmpdir/relax "--relax -T $srcdir$subdir/relax.t tmpdir/r
 		fail $testname
 		return
 	    }
-
+	    verbose "$l"	
 	    if [string match "*jalr*" $l] {
 		set dest [expr 0x$addr + 8 + ($upper << 16) + $lower]
 		if { $dest != $nm_output(foo) && $dest != $nm_output(bar) } {
