@@ -1,5 +1,17 @@
 2003-11-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* x86-64-tdep.c (RET_INT_REGS, RET_SSE_REGS): Remove defines.
+	(x86_64_use_struct_convention, x86_64_extract_return_value,
+	x86_64_store_return_value): Remove.
+	(amd64_reg_class): New enum.
+	(amd64_merge_classes, amd64_classify_aggregate, amd64_classify,
+	amd64_return_value): New functions.
+	(x86_64_init_abi): Don't set extract_return_value,
+	store_return_value and use_struct_convention.  Set return_value to
+	amd64_return_value.
+	* i387-tdep.h (i387_return_value): New prototype.
+	* i387-tdep.c (i387_return_value): New function.
+
 	* dwarf2-frame.c: Fix some comments and whitespace problems.
 
 	* i386nbsd-tdep.c: Don't include "gdbtypes.h".  Include

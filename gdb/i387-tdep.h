@@ -102,4 +102,9 @@ extern void i387_supply_fxsave (struct regcache *regcache, int regnum,
 
 extern void i387_fill_fxsave (void *fxsave, int regnum);
 
+/* Prepare the FPU stack in REGCACHE for a function return.  */
+
+extern void i387_return_value (struct gdbarch *gdbarch,
+			       struct regcache *regcache);
+
 #endif /* i387-tdep.h */

@@ -475,109 +475,6 @@ examine_argument (enum x86_64_reg_class classes[MAX_CLASSES],
   return 1;
 }
 
-#define RET_INT_REGS 2
-#define RET_SSE_REGS 2
-
-/* Check if the structure in value_type is returned in registers or in
-   memory. If this function returns 1, GDB will call
-   STORE_STRUCT_RETURN and EXTRACT_STRUCT_VALUE_ADDRESS else
-   STORE_RETURN_VALUE and EXTRACT_RETURN_VALUE will be used.  */
-
-static int
-x86_64_use_struct_convention (int gcc_p, struct type *value_type)
-{
-  enum x86_64_reg_class class[MAX_CLASSES];
-  int n = classify_argument (value_type, class, 0);
-  int needed_intregs;
-  int needed_sseregs;
-
-  return (!n ||
-	  !examine_argument (class, n, &needed_intregs, &needed_sseregs) ||
-	  needed_intregs > RET_INT_REGS || needed_sseregs > RET_SSE_REGS);
-}
-
-/* Extract from an array REGBUF containing the (raw) register state, a
-   function return value of TYPE, and copy that, in virtual format,
-   into VALBUF.  */
-
-static void
-x86_64_extract_return_value (struct type *type, struct regcache *regcache,
-			     void *valbuf)
-{
-  enum x86_64_reg_class class[MAX_CLASSES];
-  int n = classify_argument (type, class, 0);
-  int needed_intregs;
-  int needed_sseregs;
-  int intreg = 0;
-  int ssereg = 0;
-  int offset = 0;
-  int ret_int_r[RET_INT_REGS] = { X86_64_RAX_REGNUM, X86_64_RDX_REGNUM };
-  int ret_sse_r[RET_SSE_REGS] = { X86_64_XMM0_REGNUM, X86_64_XMM1_REGNUM };
-
-  if (!n ||
-      !examine_argument (class, n, &needed_intregs, &needed_sseregs) ||
-      needed_intregs > RET_INT_REGS || needed_sseregs > RET_SSE_REGS)
-    {				/* memory class */
-      CORE_ADDR addr;
-      regcache_cooked_read (regcache, X86_64_RAX_REGNUM, &addr);
-      read_memory (addr, valbuf, TYPE_LENGTH (type));
-      return;
-    }
-  else
-    {
-      int i;
-      for (i = 0; i < n; i++)
-	{
-	  switch (class[i])
-	    {
-	    case X86_64_NO_CLASS:
-	      break;
-	    case X86_64_INTEGER_CLASS:
-	      regcache_cooked_read (regcache, ret_int_r[(intreg + 1) / 2],
-				    (char *) valbuf + offset);
-	      offset += 8;
-	      intreg += 2;
-	      break;
-	    case X86_64_INTEGERSI_CLASS:
-	      regcache_cooked_read_part (regcache, ret_int_r[intreg / 2],
-					 0, 4, (char *) valbuf + offset);
-	      offset += 8;
-	      intreg++;
-	      break;
-	    case X86_64_SSEDF_CLASS:
-	    case X86_64_SSESF_CLASS:
-	    case X86_64_SSE_CLASS:
-	      regcache_cooked_read_part (regcache,
-					 ret_sse_r[(ssereg + 1) / 2], 0, 8,
-					 (char *) valbuf + offset);
-	      offset += 8;
-	      ssereg += 2;
-	      break;
-	    case X86_64_SSEUP_CLASS:
-	      regcache_cooked_read_part (regcache, ret_sse_r[ssereg / 2],
-					 0, 8, (char *) valbuf + offset);
-	      offset += 8;
-	      ssereg++;
-	      break;
-	    case X86_64_X87_CLASS:
-	      regcache_cooked_read_part (regcache, X86_64_ST0_REGNUM,
-					 0, 8, (char *) valbuf + offset);
-	      offset += 8;
-	      break;
-	    case X86_64_X87UP_CLASS:
-	      regcache_cooked_read_part (regcache, X86_64_ST0_REGNUM,
-					 8, 2, (char *) valbuf + offset);
-	      offset += 8;
-	      break;
-	    case X86_64_MEMORY_CLASS:
-	    default:
-	      internal_error (__FILE__, __LINE__,
-			      "Unexpected argument class");
-	    }
-	}
-    }
-}
-
 #define INT_REGS 6
 #define SSE_REGS 8
 
@@ -748,70 +645,260 @@ x86_64_push_arguments (struct regcache *regcache, int nargs,
   return sp;
 }
 
-/* Write into the appropriate registers a function return value stored
-   in VALBUF of type TYPE, given in virtual format.  */
+/* Register classes as defined in the psABI.  */
+
+enum amd64_reg_class
+{
+  AMD64_INTEGER,
+  AMD64_SSE,
+  AMD64_SSEUP,
+  AMD64_X87,
+  AMD64_X87UP,
+  AMD64_COMPLEX_X87,
+  AMD64_NO_CLASS,
+  AMD64_MEMORY
+};
+
+/* Return the union class of CLASS1 and CLASS2.  See the psABI for
+   details.  */
+
+static enum amd64_reg_class
+amd64_merge_classes (enum amd64_reg_class class1, enum amd64_reg_class class2)
+{
+  /* Rule (a): If both classes are equal, this is the resulting class.  */
+  if (class1 == class2)
+    return class1;
+
+  /* Rule (b): If one of the classes is NO_CLASS, the resulting class
+     is the other class.  */
+  if (class1 == AMD64_NO_CLASS)
+    return class2;
+  if (class2 == AMD64_NO_CLASS)
+    return class1;
+
+  /* Rule (c): If one of the classes is MEMORY, the result is MEMORY.  */
+  if (class1 == AMD64_MEMORY || class2 == AMD64_MEMORY)
+    return AMD64_MEMORY;
+
+  /* Rule (d): If one of the classes is INTEGER, the result is INTEGER.  */
+  if (class1 == AMD64_INTEGER || class2 == AMD64_INTEGER)
+    return AMD64_INTEGER;
+
+  /* Rule (e): If one of the classes is X87, X87UP, COMPLEX_X87 class,
+     MEMORY is used as class.  */
+  if (class1 == AMD64_X87 || class1 == AMD64_X87UP
+      || class1 == AMD64_COMPLEX_X87 || class2 == AMD64_X87
+      || class2 == AMD64_X87UP || class2 == AMD64_COMPLEX_X87)
+    return AMD64_MEMORY;
+
+  /* Rule (f): Otherwise class SSE is used.  */
+  return AMD64_SSE;
+}
+
+static void amd64_classify (struct type *type, enum amd64_reg_class class[2]);
+
+/* Classify TYPE according to the rules for aggregate (structures and
+   arrays) and union types, and store the result in CLASS.  */
 
 static void
-x86_64_store_return_value (struct type *type, struct regcache *regcache,
-			   const void *valbuf)
+amd64_classify_aggregate (struct type *type, enum amd64_reg_class class[2])
 {
   int len = TYPE_LENGTH (type);
 
-  /* First handle long doubles.  */
-  if (TYPE_CODE_FLT == TYPE_CODE (type) && len == 16)
+  /* 1. If the size of an object is larger than two eightbytes, or in
+        C++, is a non-POD structure or union type, or contains
+        unaligned fields, it has class memory.  */
+  if (len > 16)
     {
-      ULONGEST fstat;
-      char buf[I386_MAX_REGISTER_SIZE];
-
-      /* Returning floating-point values is a bit tricky.  Apart from
-         storing the return value in %st(0), we have to simulate the
-         state of the FPU at function return point.  */
-
-      /* Convert the value found in VALBUF to the extended
-	 floating-point format used by the FPU.  This is probably
-	 not exactly how it would happen on the target itself, but
-	 it is the best we can do.  */
-      convert_typed_floating (valbuf, type, buf, builtin_type_i387_ext);
-      regcache_raw_write (regcache, X86_64_ST0_REGNUM, buf);
-
-      /* Set the top of the floating-point register stack to 7.  The
-         actual value doesn't really matter, but 7 is what a normal
-         function return would end up with if the program started out
-         with a freshly initialized FPU.  */
-      regcache_raw_read_unsigned (regcache, FSTAT_REGNUM, &fstat);
-      fstat |= (7 << 11);
-      regcache_raw_write_unsigned (regcache, FSTAT_REGNUM, fstat);
-
-      /* Mark %st(1) through %st(7) as empty.  Since we set the top of
-         the floating-point register stack to 7, the appropriate value
-         for the tag word is 0x3fff.  */
-      regcache_raw_write_unsigned (regcache, FTAG_REGNUM, 0x3fff);
+      class[0] = class[1] = AMD64_MEMORY;
+      return;
     }
-  else if (TYPE_CODE_FLT == TYPE_CODE (type))
+
+  /* 2. Both eightbytes get initialized to class NO_CLASS.  */
+  class[0] = class[1] = AMD64_NO_CLASS;
+
+  /* 3. Each field of an object is classified recursively so that
+        always two fields are considered. The resulting class is
+        calculated according to the classes of the fields in the
+        eightbyte: */
+
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
     {
-      /* Handle double and float variables.  */
-      regcache_cooked_write_part (regcache, X86_64_XMM0_REGNUM,
-				  0, len, valbuf);
+      struct type *subtype = check_typedef (TYPE_TARGET_TYPE (type));
+
+      /* All fields in an array have the same type.  */
+      amd64_classify (subtype, class);
+      if (len > 8 && class[1] == AMD64_NO_CLASS)
+	class[1] = class[0];
     }
-  /* XXX: What about complex floating point types?  */
   else
     {
-      int low_size = register_size (current_gdbarch, X86_64_RAX_REGNUM);
-      int high_size = register_size (current_gdbarch, X86_64_RDX_REGNUM);
+      int i;
 
-      if (len <= low_size)
-        regcache_cooked_write_part (regcache, 0, 0, len, valbuf);
-      else if (len <= (low_size + high_size))
+      /* Structure or union.  */
+      gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
+		  || TYPE_CODE (type) == TYPE_CODE_UNION);
+
+      for (i = 0; i < TYPE_NFIELDS (type); i++)
 	{
- 	  regcache_cooked_write_part (regcache, 0, 0, low_size, valbuf);
- 	  regcache_cooked_write_part (regcache, 1, 0,
- 				      len - low_size,
- 				      (const char *) valbuf + low_size);
+	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
+	  int pos = TYPE_FIELD_BITPOS (type, i) / 64;
+	  enum amd64_reg_class subclass[2];
+
+	  gdb_assert (pos == 0 || pos == 1);
+
+	  amd64_classify (subtype, subclass);
+	  class[pos] = amd64_merge_classes (class[pos], subclass[0]);
+	  if (pos == 0)
+	    class[1] = amd64_merge_classes (class[1], subclass[1]);
 	}
-      else
-	internal_error (__FILE__, __LINE__,
-			"Cannot store return value of %d bytes long.", len);
     }
+
+  /* 4. Then a post merger cleanup is done:  */
+
+  /* Rule (a): If one of the classes is MEMORY, the whole argument is
+     passed in memory.  */
+  if (class[0] == AMD64_MEMORY || class[1] == AMD64_MEMORY)
+    class[0] = class[1] = AMD64_MEMORY;
+
+  /* Rule (b): If SSEUP is not preceeded by SSE, it is converted to
+     SSE.  */
+  if (class[0] == AMD64_SSEUP)
+    class[0] = AMD64_SSE;
+  if (class[1] == AMD64_SSEUP && class[0] != AMD64_SSE)
+    class[1] = AMD64_SSE;
+}
+
+/* Classify TYPE, and store the result in CLASS.  */
+
+static void
+amd64_classify (struct type *type, enum amd64_reg_class class[2])
+{
+  enum type_code code = TYPE_CODE (type);
+  int len = TYPE_LENGTH (type);
+
+  class[0] = class[1] = AMD64_NO_CLASS;
+
+  /* Arguments of types (signed and unsigned) _Bool, char, short, int,
+     long, long long, and pointers are in the INTEGER class.  */
+  if ((code == TYPE_CODE_INT || code == TYPE_CODE_ENUM
+       || code == TYPE_CODE_PTR || code == TYPE_CODE_REF)
+      && (len == 1 || len == 2 || len == 4 || len == 8))
+    class[0] = AMD64_INTEGER;
+
+  /* Arguments of types float, double and __m64 are in class SSE.  */
+  else if (code == TYPE_CODE_FLT && (len == 4 || len == 8))
+    /* FIXME: __m64 .  */
+    class[0] = AMD64_SSE;
+
+  /* Arguments of types __float128 and __m128 are split into two
+     halves.  The least significant ones belong to class SSE, the most
+     significant one to class SSEUP.  */
+  /* FIXME: __float128, __m128.  */
+
+  /* The 64-bit mantissa of arguments of type long double belongs to
+     class X87, the 16-bit exponent plus 6 bytes of padding belongs to
+     class X87UP.  */
+  else if (code == TYPE_CODE_FLT && len == 16)
+    /* Class X87 and X87UP.  */
+    class[0] = AMD64_X87, class[1] = AMD64_X87UP;
+
+  /* Aggregates.  */
+  else if (code == TYPE_CODE_ARRAY || code == TYPE_CODE_STRUCT
+	   || code == TYPE_CODE_UNION)
+    amd64_classify_aggregate (type, class);
+}
+
+static enum return_value_convention
+amd64_return_value (struct gdbarch *gdbarch, struct type *type,
+		    struct regcache *regcache,
+		    void *readbuf, const void *writebuf)
+{
+  enum amd64_reg_class class[2];
+  int len = TYPE_LENGTH (type);
+  static int integer_regnum[] = { X86_64_RAX_REGNUM, X86_64_RDX_REGNUM };
+  static int sse_regnum[] = { X86_64_XMM0_REGNUM, X86_64_XMM1_REGNUM };
+  int integer_reg = 0;
+  int sse_reg = 0;
+  int i;
+
+  gdb_assert (!(readbuf && writebuf));
+
+  /* 1. Classify the return type with the classification algorithm.  */
+  amd64_classify (type, class);
+
+  /* 2. If the type has class MEMORY, then the caller provides space
+        for the return value and passes the address of this storage in
+        %rdi as if it were the first argument to the function. In
+        effect, this address becomes a hidden first argument.  */
+  if (class[0] == AMD64_MEMORY)
+    return RETURN_VALUE_STRUCT_CONVENTION;
+
+  gdb_assert (class[1] != AMD64_MEMORY);
+  gdb_assert (len <= 16);
+
+  for (i = 0; len > 0; i++, len -= 8)
+    {
+      int regnum = -1;
+      int offset = 0;
+
+      switch (class[i])
+	{
+	case AMD64_INTEGER:
+	  /* 3. If the class is INTEGER, the next available register
+	     of the sequence %rax, %rdx is used.  */
+	  regnum = integer_regnum[integer_reg++];
+	  break;
+
+	case AMD64_SSE:
+	  /* 4. If the class is SSE, the next available SSE register
+             of the sequence %xmm0, %xmm1 is used.  */
+	  regnum = sse_regnum[sse_reg++];
+	  break;
+
+	case AMD64_SSEUP:
+	  /* 5. If the class is SSEUP, the eightbyte is passed in the
+	     upper half of the last used SSE register.  */
+	  gdb_assert (sse_reg > 0);
+	  regnum = sse_regnum[sse_reg - 1];
+	  offset = 8;
+	  break;
+
+	case AMD64_X87:
+	  /* 6. If the class is X87, the value is returned on the X87
+             stack in %st0 as 80-bit x87 number.  */
+	  regnum = X86_64_ST0_REGNUM;
+	  if (writebuf)
+	    i387_return_value (gdbarch, regcache);
+	  break;
+
+	case AMD64_X87UP:
+	  /* 7. If the class is X87UP, the value is returned together
+             with the previous X87 value in %st0.  */
+	  gdb_assert (i > 0 && class[0] == AMD64_X87);
+	  regnum = X86_64_ST0_REGNUM;
+	  offset = 8;
+	  len = 2;
+	  break;
+
+	case AMD64_NO_CLASS:
+	  continue;
+
+	default:
+	  gdb_assert (!"Unexpected register class.");
+	}
+
+      gdb_assert (regnum != -1);
+
+      if (readbuf)
+	regcache_raw_read_part (regcache, regnum, offset, min (len, 8),
+				(char *) readbuf + i * 8);
+      if (writebuf)
+	regcache_raw_write_part (regcache, regnum, offset, min (len, 8),
+				 (const char *) writebuf + i * 8);
+    }
+
+  return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
 
@@ -1300,12 +1387,9 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_register_to_value (gdbarch, i387_register_to_value);
   set_gdbarch_value_to_register (gdbarch, i387_value_to_register);
 
-  set_gdbarch_return_value (gdbarch, NULL);
-  set_gdbarch_extract_return_value (gdbarch, x86_64_extract_return_value);
-  set_gdbarch_store_return_value (gdbarch, x86_64_store_return_value);
+  set_gdbarch_return_value (gdbarch, amd64_return_value);
   /* Override, since this is handled by x86_64_extract_return_value.  */
   set_gdbarch_extract_struct_value_address (gdbarch, NULL);
-  set_gdbarch_use_struct_convention (gdbarch, x86_64_use_struct_convention);
 
   set_gdbarch_skip_prologue (gdbarch, x86_64_skip_prologue);
 
