@@ -1,3 +1,15 @@
+2002-01-07  Marek Michalkiewicz  <marekm@amelek.gda.pl>
+
+	* emulparams/avr1200.sh (DATA_START): Define as 0x60.
+	* emulparams/avr23xx.sh: Likewise.
+	* emulparams/avr4433.sh: Likewise.
+	* emulparams/avr44x4.sh: Likewise.
+	* emulparams/avr85xx.sh: Likewise.
+	* emulparams/avrmega103.sh: Likewise.
+	* emulparams/avrmega161.sh: Likewise.
+	* emulparams/avrmega603.sh: Likewise.
+	* scripttempl/elf32avr.sc: Use DATA_START instead of 0x60.
+
 2002-01-08  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ldlang.c (walk_wild_section): Exclude object file if enclosing
