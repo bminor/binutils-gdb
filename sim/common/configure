@@ -21,6 +21,8 @@ ac_help="$ac_help
   --enable-sim-stdio			Specify whether to use stdio for console input/output."
 ac_help="$ac_help
   --enable-sim-trace=opts		Enable tracing flags"
+ac_help="$ac_help
+  --enable-sim-profile=opts		Enable profiling flags"
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -539,13 +541,13 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 543 "configure"
+#line 545 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:549: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:551: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -554,13 +556,13 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 558 "configure"
+#line 560 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:564: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:566: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   :
@@ -794,7 +796,7 @@ else
   yes;
 #endif
 EOF
-if { ac_try='${CC-cc} -E conftest.c'; { (eval echo configure:798: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
+if { ac_try='${CC-cc} -E conftest.c'; { (eval echo configure:800: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
   ac_cv_prog_gcc=yes
 else
   ac_cv_prog_gcc=no
@@ -933,7 +935,9 @@ fi
 
 
 # Check for common headers.
-for ac_hdr in stdlib.h string.h strings.h unistd.h
+# FIXME: Seems to me this can cause problems for i386-windows hosts.
+# At one point there were hardcoded AC_DEFINE's if ${host} = i386-*-windows*.
+for ac_hdr in stdlib.h string.h strings.h unistd.h time.h sys/time.h sys/resource.h
 do
 ac_safe=`echo "$ac_hdr" | tr './\055' '___'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
@@ -941,12 +945,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 945 "configure"
+#line 949 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:950: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:954: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -963,6 +967,59 @@ if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
     ac_tr_hdr=HAVE_`echo $ac_hdr | tr 'abcdefghijklmnopqrstuvwxyz./\055' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ___'`
   cat >> confdefs.h <<EOF
 #define $ac_tr_hdr 1
+EOF
+ 
+else
+  echo "$ac_t""no" 1>&6
+fi
+done
+
+for ac_func in getrusage time
+do
+echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
+if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 985 "configure"
+#include "confdefs.h"
+/* System header to define __stub macros and hopefully few prototypes,
+    which can conflict with char $ac_func(); below.  */
+#include <assert.h>
+/* Override any gcc2 internal prototype to avoid an error.  */
+/* We use char because int might match the return type of a gcc2
+    builtin and then its argument prototype would still apply.  */
+char $ac_func();
+
+int main() { return 0; }
+int t() {
+
+/* The GNU C library defines this for functions which it implements
+    to always fail with ENOSYS.  Some functions are actually named
+    something starting with __ and the normal name is an alias.  */
+#if defined (__stub_$ac_func) || defined (__stub___$ac_func)
+choke me
+#else
+$ac_func();
+#endif
+
+; return 0; }
+EOF
+if { (eval echo configure:1009: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+  rm -rf conftest*
+  eval "ac_cv_func_$ac_func=yes"
+else
+  rm -rf conftest*
+  eval "ac_cv_func_$ac_func=no"
+fi
+rm -f conftest*
+
+fi
+if eval "test \"`echo '$ac_cv_func_'$ac_func`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+    ac_tr_func=HAVE_`echo $ac_func | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_func 1
 EOF
  
 else
@@ -1048,9 +1105,20 @@ fi
 if test "${enable_sim_trace+set}" = set; then
   enableval="$enable_sim_trace"
   case "${enableval}" in
-  yes)	sim_trace="-DTRACE=1 -DWITH_TRACE=1";;
+  yes)	sim_trace="-DTRACE=1 -DWITH_TRACE=-1";;
   no)	sim_trace="-DTRACE=0 -DWITH_TRACE=0";;
-  *)	sim_trace="-DTRACE='(${enableval})' -DWITH_TRACE='(${enableval})'";;
+  [-0-9]*)
+	sim_trace="-DTRACE='(${enableval})' -DWITH_TRACE='(${enableval})'";;
+  [a-z]*)
+	sim_trace=""
+	for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
+	  if test x"$sim_trace" = x; then
+	    sim_trace="-DWITH_TRACE='(TRACE_$x"
+	  else
+	    sim_trace="${sim_trace}|TRACE_$x"
+	  fi
+	done
+	sim_trace="$sim_trace)'" ;;
 esac
 if test x"$silent" != x"yes" && test x"$sim_trace" != x""; then
   echo "Setting sim trace = $sim_trace" 6>&1
@@ -1061,12 +1129,40 @@ fi
 
 
 
+# Check whether --enable-sim-profile or --disable-sim-profile was given.
+if test "${enable_sim_profile+set}" = set; then
+  enableval="$enable_sim_profile"
+  case "${enableval}" in
+  yes)	sim_profile="-DPROFILE=1 -DWITH_PROFILE=-1";;
+  no)	sim_profile="-DPROFILE=0 -DWITH_PROFILE=0";;
+  [-0-9]*)
+	sim_profile="-DPROFILE='(${enableval})' -DWITH_PROFILE='(${enableval})'";;
+  [a-z]*)
+	sim_profile=""
+	for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
+	  if test x"$sim_profile" = x; then
+	    sim_profile="-DWITH_PROFILE='(PROFILE_$x"
+	  else
+	    sim_profile="${sim_profile}|PROFILE_$x"
+	  fi
+	done
+	sim_profile="$sim_profile)'" ;;
+esac
+if test x"$silent" != x"yes" && test x"$sim_profile" != x""; then
+  echo "Setting sim profile = $sim_profile" 6>&1
+fi
+else
+  sim_profile=""
+fi
+
+
+
 echo $ac_n "checking return type of signal handlers""... $ac_c" 1>&6
 if eval "test \"`echo '$''{'ac_cv_type_signal'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1070 "configure"
+#line 1166 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
 #include <signal.h>
@@ -1084,7 +1180,7 @@ int t() {
 int i;
 ; return 0; }
 EOF
-if { (eval echo configure:1088: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:1184: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_type_signal=void
 else
@@ -1160,12 +1256,12 @@ if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1164 "configure"
+#line 1260 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1169: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1265: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1335,6 +1431,7 @@ s%@sim_cflags@%$sim_cflags%g
 s%@sim_debug@%$sim_debug%g
 s%@sim_stdio@%$sim_stdio%g
 s%@sim_trace@%$sim_trace%g
+s%@sim_profile@%$sim_profile%g
 s%@CPP_FOR_TARGET@%$CPP_FOR_TARGET%g
 s%@TARGET_SUBDIR@%$TARGET_SUBDIR%g
 

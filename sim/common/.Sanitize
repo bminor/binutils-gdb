@@ -55,11 +55,16 @@ sim-inline.h
 sim-io.c
 sim-io.h
 sim-load.c
+sim-model.h
+sim-module.c
+sim-module.h
 sim-n-bits.h
 sim-n-core.h
 sim-n-endian.h
 sim-options.c
 sim-options.h
+sim-profile.c
+sim-profile.h
 sim-trace.c
 sim-trace.h
 sim-types.h

@@ -1,3 +1,36 @@
+Thu Apr 24 00:00:07 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sim-module.h, sim-model.h, sim-profile.h: New files.
+	* sim-module.c, sim-profile.c: New files.
+	* Make-common.in (SIM_PROFILE): Define
+	(CONFIG_CFLAGS): Add $(SIM_PROFILE).
+	(sim_main_headers): Add sim-module.h, sim-model.h, sim-profile.h.
+	(sim_module.o,sim-profile.o): Add rules for.
+	* aclocal.m4 (--enable-sim-trace): Allow symbolic arguments.
+	(--enable-sim-profile): Add.
+	* configure: Regenerated.
+	* sim-base.h (sim_state_base): New members init_list, uninstall_list,
+	model.  Move trace and profile support to sim-{trace,profile}.h.
+ 	New members trace_data, profile_data.
+	* sim-basics.h: #include sim-module.h, sim-model.h, sim-profile.h.
+	* sim-config.h: Provide default definition of WITH_PROFILE.
+	(WITH_TRACE): Change default to -1.
+	(MAX_NR_PROCESSORS): Always define.
+	* sim-options.c: Move trace and profile support to
+	sim-{trace,profile}.h.
+	(sim_pre_argv_init): Moved to sim-model.c.
+	(standard_install): New function.
+	* sim-options.h (sim_pre_argv_init): Move decl to sim-model.c.
+	(standard_install): Declare.
+	* sim-trace.c: Tracing option handling moved here from sim-options.c.
+	(trace_install, trace_uninstall): New functions.
+	(trace_printf): Update reference to TRACE_FILE.
+	* sim-trace.h (TRACE_FOO_IDX): Moved here from sim-base.h.
+	(TRACE_foo): Bit masks for symbolic arguments to --enable-sim-trace.
+	(WITH_TRACE_FOO_P): Define.
+	(trace_install): Declare.
+	(TRACE_DATA): New struct.
+
 Wed Apr 23 17:23:15 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* run.c: Undo last exec_bfd patch.
