@@ -1,3 +1,19 @@
+Wed Mar 25 09:18:34 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dv-pal.c (hw_pal_countdown, hw_pal_countdown_value,
+ 	hw_pal_timer, hw_pal_timer_value): Define.
+	(hw_pal_io_read_buffer, hw_pal_io_write_buffer): Add timer support
+	(do_counter_event, do_counter_read, do_counter_value,
+ 	do_counter_write): new functions.
+
+Tue Mar 24 12:24:24 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* hw-tree.c (hw_printf): Send tree dump to stderr, same as other
+ 	trace output.
+
+	* hw-base.c (hw_create): Stop searching for a device when one is
+ 	found.
+
 Wed Mar 25 12:35:29 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

@@ -831,10 +831,13 @@ hw_tree_parse (struct hw *current,
 	    char *dest_hw_name = split_value (&spec);
 	    struct hw *dest;
 	    /* find my name */
-	    my_port = hw_port_decode (current, my_port_name,
-				      output_port);
+	    if (!hw_finished_p (current))
+	      hw_finish (current);
+	    my_port = hw_port_decode (current, my_port_name, output_port);
 	    /* find the dest device and port */
-	    dest = split_fill_path(current, dest_hw_name, &dest_spec);
+	    dest = split_fill_path (current, dest_hw_name, &dest_spec);
+	    if (!hw_finished_p (dest))
+	      hw_finish (dest);
 	    dest_port = hw_port_decode (dest, dest_port_name,
 					input_port);
 	    /* connect the two */
@@ -981,7 +984,7 @@ hw_printf (struct hw *me,
 {
   va_list ap;
   va_start (ap, fmt);
-  sim_io_vprintf (hw_system (me), fmt, ap);
+  sim_io_evprintf (hw_system (me), fmt, ap);
   va_end (ap);
 }
 
