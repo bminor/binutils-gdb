@@ -1,3 +1,9 @@
+2001-02-19  Andrew Cagney  <ac131313@redhat.com>
+
+	Frm 2001-02-09 Jim Kingdon <jkingdon@engr.sgi.com>:
+	* mips-tdep.c (mips_register_raw_size): If FP_REGISTER_DOUBLE,
+	then floating point registers are 8 bytes.
+
 2001-02-19  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
 
 	* parse.c (write_exp_msymbol): Make the type CORE_ADDR, to 

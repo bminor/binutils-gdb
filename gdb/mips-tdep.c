@@ -419,6 +419,11 @@ mips_register_raw_size (int reg_nr)
 {
   if (mips64_transfers_32bit_regs_p)
     return REGISTER_VIRTUAL_SIZE (reg_nr);
+  else if (reg_nr >= FP0_REGNUM && reg_nr < FP0_REGNUM + 32
+	   && FP_REGISTER_DOUBLE)
+    /* For MIPS_ABI_N32 (for example) we need 8 byte floating point
+       registers.  */
+    return 8;
   else
     return MIPS_REGSIZE;
 }
