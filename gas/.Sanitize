@@ -112,7 +112,7 @@ Things-to-lose:
 
 Do-last:
 
-arc_files="ChangeLog configure.in configure Makefile.in ChangeLog.1"
+arc_files="ChangeLog configure.in configure Makefile.am Makefile.in ChangeLog.1"
 if ( echo $* | grep keep\-arc > /dev/null ) ; then
 	for i in $arc_files ; do
 		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
@@ -168,7 +168,7 @@ else
 fi
 
 
-v850_files="ChangeLog configure.in configure Makefile.in write.c"
+v850_files="ChangeLog configure.in configure Makefile.am Makefile.in write.c"
 if ( echo $* | grep keep\-v850 > /dev/null ) ; then
 	for i in $v850_files ; do
 		if test ! -d $i && (grep sanitize-v850 $i > /dev/null) ; then
