@@ -1,5 +1,10 @@
 2002-04-16  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* readelf.c (fetch_location_list): Remove unused function.
+
+	* readelf.c (process_corefile_note_segment): Catch corrupt notes
+	and display a warning message, then exit the loop.
+
 	* rcparse.y: Set MEMFLAG_DISCARDABLE by default.
 
 2002-04-15  Nick Clifton  <nickc@cambridge.redhat.com>

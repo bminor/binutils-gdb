@@ -235,7 +235,6 @@ static void               free_debug_str              PARAMS ((void));
 static const char *       fetch_indirect_string       PARAMS ((unsigned long));
 static void               load_debug_loc              PARAMS ((FILE *));
 static void               free_debug_loc              PARAMS ((void));
-static const char *       fetch_location_list         PARAMS ((unsigned long));
 static unsigned long      read_leb128                 PARAMS ((unsigned char *, int *, int));
 static int                process_extended_line_op    PARAMS ((unsigned char *, int, int));
 static void               reset_state_machine         PARAMS ((int));
@@ -7241,18 +7240,7 @@ free_debug_loc ()
   debug_loc_size = 0;
 }
 
-static const char *
-fetch_location_list (offset)
-     unsigned long offset;
-{
-  if (debug_loc_contents == NULL)
-    return _("<no .debug_loc section>");
 
-  if (offset > debug_loc_size)
-    return _("<offset is too big>");
-
-  return debug_loc_contents + offset;
-}
 static int
 display_debug_loc (section, start, file)
      Elf32_Internal_Shdr * section;
@@ -9440,6 +9428,7 @@ process_corefile_note_segment (file, offset, length)
 
   while (external < (Elf_External_Note *)((char *) pnotes + length))
     {
+      Elf_External_Note * next;
       Elf32_Internal_Note inote;
       char * temp = NULL;
 
@@ -9450,7 +9439,18 @@ process_corefile_note_segment (file, offset, length)
       inote.descdata = inote.namedata + align_power (inote.namesz, 2);
       inote.descpos  = offset + (inote.descdata - (char *) pnotes);
 
-      external = (Elf_External_Note *)(inote.descdata + align_power (inote.descsz, 2));
+      next = (Elf_External_Note *)(inote.descdata + align_power (inote.descsz, 2));
+
+      if (((char *) next) > (((char *) pnotes) + length))
+	{
+	  warn (_("corrupt note found at offset %x into core notes\n"),
+		((char *) external) - ((char *) pnotes));
+	  warn (_(" type: %x, namesize: %08lx, descsize: %08lx\n"),
+		inote.type, inote.namesz, inote.descsz);
+	  break;
+	}
+
+      external = next;
 
       /* Verify that name is null terminated.  It appears that at least
 	 one version of Linux (RedHat 6.0) generates corefiles that don't
