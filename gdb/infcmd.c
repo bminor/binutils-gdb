@@ -1845,9 +1845,44 @@ interrupt_target_command (char *args, int from_tty)
 
 /* ARGSUSED */
 static void
-float_info (char *addr_exp, int from_tty)
+print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
+		  struct frame_info *frame, const char *args)
 {
-  gdbarch_print_float_info (current_gdbarch, gdb_stdout, selected_frame);
+  if (gdbarch_print_float_info_p (gdbarch))
+    gdbarch_print_float_info (gdbarch, file, frame, args);
+  else
+    {
+#ifdef FLOAT_INFO
+#if GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL
+#error "FLOAT_INFO defined in multi-arch"
+#endif
+      FLOAT_INFO;
+#else
+      int regnum;
+      int printed_something = 0;
+      for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
+	{
+	  if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
+	    {
+	      printed_something = 1;
+#if 0
+	      gdbarch_print_registers_info (gdbarch, file, frame, regnum, 1);
+#else
+	      do_registers_info (regnum, 1);
+#endif
+	    }
+	}
+      if (!printed_something)
+	fprintf_filtered (file, "\
+No floating-point info available for this processor.\n");
+#endif
+    }
+}
+
+static void
+float_info (char *args, int from_tty)
+{
+  print_float_info (current_gdbarch, gdb_stdout, selected_frame, args);
 }
 
 /* ARGSUSED */

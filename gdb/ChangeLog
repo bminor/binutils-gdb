@@ -1,3 +1,18 @@
+2002-08-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (PRINT_FLOAT_INFO): Change to a predicate method.
+	Add `args' parameter.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	
+	* arm-tdep.c (arm_print_float_info): Add the parameter `args'.
+	
+	* infcmd.c (float_info): Call print_float_info.
+	(print_float_info): New function.  By default, print the
+	floating-point registers.
+
+	* arch-utils.h (default_print_float_info): Delete declaration.
+	* arch-utils.c (default_print_float_info): Delete function.
+	
 2002-08-16  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/nm-i386v.h (FLOAT_INFO): Remove already commented

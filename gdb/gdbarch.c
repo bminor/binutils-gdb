@@ -322,7 +322,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
-  default_print_float_info,
+  0,
   0,
   0,
   0,
@@ -490,7 +490,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->register_virtual_size = generic_register_size;
   current_gdbarch->max_register_virtual_size = -1;
   current_gdbarch->do_registers_info = do_registers_info;
-  current_gdbarch->print_float_info = default_print_float_info;
   current_gdbarch->register_sim_regno = legacy_register_sim_regno;
   current_gdbarch->cannot_fetch_register = cannot_register_not;
   current_gdbarch->cannot_store_register = cannot_register_not;
@@ -637,7 +636,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->register_virtual_type == 0))
     fprintf_unfiltered (log, "\n\tregister_virtual_type");
   /* Skip verify of do_registers_info, invalid_p == 0 */
-  /* Skip verify of print_float_info, invalid_p == 0 */
+  /* Skip verify of print_float_info, has predicate */
   /* Skip verify of register_sim_regno, invalid_p == 0 */
   /* Skip verify of register_bytes_ok, has predicate */
   /* Skip verify of cannot_fetch_register, invalid_p == 0 */
@@ -2994,8 +2993,15 @@ set_gdbarch_do_registers_info (struct gdbarch *gdbarch,
   gdbarch->do_registers_info = do_registers_info;
 }
 
+int
+gdbarch_print_float_info_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->print_float_info != 0;
+}
+
 void
-gdbarch_print_float_info (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame)
+gdbarch_print_float_info (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame, const char *args)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->print_float_info == 0)
@@ -3003,7 +3009,7 @@ gdbarch_print_float_info (struct gdbarch *gdbarch, struct ui_file *file, struct 
                     "gdbarch: gdbarch_print_float_info invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_print_float_info called\n");
-  gdbarch->print_float_info (gdbarch, file, frame);
+  gdbarch->print_float_info (gdbarch, file, frame, args);
 }
 
 void

@@ -1585,7 +1585,7 @@ print_fpu_flags (int flags)
    (if present) or emulator.  */
 static void
 arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
-		      struct frame_info *frame)
+		      struct frame_info *frame, const char *args)
 {
   register unsigned long status = read_register (ARM_FPS_REGNUM);
   int type;
