@@ -1,3 +1,18 @@
+2000-05-22  Richard Henderson  <rth@cygnus.com>
+
+	* elf64-ia64.c (ia64_howto_table): Add PCREL60B, PCREL21BI,
+	PCREL22, PCREL64I.  Zero size of special relocs.
+	(elf64_ia64_reloc_type_lookup): Likewise.
+	(USE_BRL, oor_brl, oor_ip): New.
+	(elf64_ia64_relax_section): New.
+	(elf64_ia64_check_relocs): Handle PCREL60B, PCREL22, PCREL64I.
+	(elf64_ia64_install_value): Likewise, plus PCREL21BI.
+	(elf64_ia64_relocate_section): Likewise.
+	(bfd_elf64_bfd_relax_section): New.
+	* reloc.c (BFD_RELOC_IA64_PCREL21BI): New.
+	(BFD_RELOC_IA64_{PCREL22,PCREL60B,PCREL64I}): New.
+	* bfd-in2.h, libbfd.h: Regenerate.
+
 2000-05-22  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.in : Add peigen.lo to MIPS PE targets.
@@ -6,7 +21,7 @@
 2000-05-22  Momchil Velikov  <velco@fadata.bg>
 
 	* libbfd.c (_bfd_generic_verify_endian_match): Compare endianess
-        only if it is known for both input and output bfds. Separate
+	only if it is known for both input and output bfds. Separate
 	error message strings as in some languages, it may be necessary
 	to change more than one place in the string to change between
 	'big' and 'little'. 
@@ -689,10 +704,10 @@ Wed Apr  5 22:04:20 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 2000-04-03  Kevin Buettner  <kevinb@redhat.com>
 
-        * configure.in: Added corefile support for AIX 4.3.  In particular,
-        AIX_CORE_DUMPX_CORE will be defined in addition to AIX_CORE when
-        compiling rs6000-core.c.
-        * configure: Regenerated.
+	* configure.in: Added corefile support for AIX 4.3.  In particular,
+	AIX_CORE_DUMPX_CORE will be defined in addition to AIX_CORE when
+	compiling rs6000-core.c.
+	* configure: Regenerated.
 
 2000-04-03  H.J. Lu  <hjl@gnu.org>
 
@@ -779,7 +794,7 @@ Wed Mar 30 15:28:00 2000  Donald Lindsay  <dlindsay@cygnus.com>
 
 2000-03-14  Doug Evans  <dje@casey.transmeta.com>
  
-        * elf32-m32r.c (m32r_elf_lo16_reloc): Rewrite.
+	* elf32-m32r.c (m32r_elf_lo16_reloc): Rewrite.
  
 2000-03-14  Kazu Hirata  <kazu@hxi.com>
 
@@ -892,7 +907,7 @@ Wed Mar 30 15:28:00 2000  Donald Lindsay  <dlindsay@cygnus.com>
 	* coffcode.h (styp_to_sec_flags): Initialise 'target_name'.
 
 	* elf-m10300.c (mn10300_elf_relax_section): Initialise
-        'sym_sec'.
+	'sym_sec'.
 
 	* elf32-i370.c: Add ATTRIBUTE_UNUSED to unused function
 	parameters.
@@ -1102,10 +1117,10 @@ Fri Feb 25 18:39:26 2000  Rodney Brown (RodneyBrown@pmsc.com)
 	* elflink.h (elf_link_add_object_symbols): If a version symbol is
 	not defined, don't add a second ELF_VER_CHR.
 
-        * elflink.h (elf_bfd_final_link): Call output_extsym for global
+	* elflink.h (elf_bfd_final_link): Call output_extsym for global
 	symbols converted to local symbols even when stripping all
 	symbols.
-        (elf_link_output_extsym): Process global symbols converted to
+	(elf_link_output_extsym): Process global symbols converted to
 	local symbols even if they are being stripped.
 
 2000-02-21  Alan Modra  <alan@spri.levels.unisa.edu.au>
@@ -1303,25 +1318,25 @@ Thu Feb 10 20:07:50 GMT 2000  Toshiyasu Morita (toshi.morita@sega.com)
 
 2000-01-27  Thomas de Lellis  <tdel@windriver.com>
 
-        * syms.c (bfd_decode_symclass)
-        Two new class characters were added - 'V' and 'v'.  The
-        meaning of 'W' is now restricted to just weak non-object
-        symbols.  This allows differentiation between, for example,
-        weak functions vs weak objects.  nm for example now dumps:
-        'W' = weak global
-        'w' = weak unresolved
-        'V' = weak global object
-        'v' = weak unresolved object
+	* syms.c (bfd_decode_symclass)
+	Two new class characters were added - 'V' and 'v'.  The
+	meaning of 'W' is now restricted to just weak non-object
+	symbols.  This allows differentiation between, for example,
+	weak functions vs weak objects.  nm for example now dumps:
+	'W' = weak global
+	'w' = weak unresolved
+	'V' = weak global object
+	'v' = weak unresolved object
 
 	(bfd_is_undefined_symclass): New function.  Return true if the
 	given symbol class represents and undefined/unresolved symbol.
 	
-        (bfd_symbol_info): Use bfd_is_undefined_symclass to check for
+	(bfd_symbol_info): Use bfd_is_undefined_symclass to check for
 	unresolved symbols.
 
 	* bfd-in2.h: Add prototype for bfd_is_undefined_symbol().
 	
-        * elf32-arm.h (elf32_arm_get_symbol_type): If a symbol has the
+	* elf32-arm.h (elf32_arm_get_symbol_type): If a symbol has the
 	STT_ARM_16BIT flag set, but it is not attached to a data object
 	return STT_ARM_16BIT so that it will be treated as code by the
 	disassembler.
@@ -1339,7 +1354,7 @@ Thu Feb 10 20:07:50 GMT 2000  Toshiyasu Morita (toshi.morita@sega.com)
 
 2000-01-24  Robert Lipe  (robertl@sco.com)
 
-        * coffcode.h (coff_write_object_contents): Get buff via bfd_malloc
+	* coffcode.h (coff_write_object_contents): Get buff via bfd_malloc
 	instead of using GNU C extension.
 
 2000-01-21  Nick Clifton  <nickc@cygnus.com>
@@ -1516,8 +1531,8 @@ Thu Feb 10 20:07:50 GMT 2000  Toshiyasu Morita (toshi.morita@sega.com)
 1999-12-09  Nick Clifton  <nickc@cygnus.com>
 
 	* elflink.h (elf_link_add_archive_symbols): Add an archive
-        element even if contains a symbol which is currently only
-        considered to be a common.
+	element even if contains a symbol which is currently only
+	considered to be a common.
 
 	* targets.c (struct bfd_target): Add new field
 	_bfd_allow_commons_in_armap.
