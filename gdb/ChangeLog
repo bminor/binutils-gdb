@@ -1,5 +1,8 @@
 Fri Aug 23 14:07:09 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
+	* doc/gdb.texinfo: minor rewordings, crossref to ptype from print,
+	more on printsyms. 
+
 	* doc/Makefile, Makefile.in: generate "gdb-all.texi" rather than
 	"gdb-all.texinfo" 
 
