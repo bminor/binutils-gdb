@@ -249,7 +249,7 @@ typedef struct unwind_record
   } record;
 } unwind_record;
 
-/* This expression evaluates to false if the relocation is for a local 
+/* This expression evaluates to false if the relocation is for a local
    object for which we still want to do the relocation at runtime.
    True if we are willing to perform this relocation while building
    the .o file.  This is only used for pcrel relocations.  */
