@@ -356,8 +356,8 @@ i386_insert_aligned_watchpoint (CORE_ADDR addr, unsigned len_rw_bits)
   dr_control_mirror &= I386_DR_CONTROL_MASK;
 
   /* Finally, actually pass the info to the inferior.  */
-  I386_DR_LOW_SET_CONTROL (dr_control_mirror);
   I386_DR_LOW_SET_ADDR (i, addr);
+  I386_DR_LOW_SET_CONTROL (dr_control_mirror);
 
   return 0;
 }
@@ -384,8 +384,8 @@ i386_remove_aligned_watchpoint (CORE_ADDR addr, unsigned len_rw_bits)
 	      dr_mirror[i] = 0;
 	      I386_DR_DISABLE (i);
 	      /* Reset it in the inferior.  */
-	      I386_DR_LOW_RESET_ADDR (i);
 	      I386_DR_LOW_SET_CONTROL (dr_control_mirror);
+	      I386_DR_LOW_RESET_ADDR (i);
 	    }
 	  retval = 0;
 	}

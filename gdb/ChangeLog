@@ -1,5 +1,10 @@
 2001-03-31  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-nat.c (i386_insert_aligned_watchpoint): Set address
+	register before enabling it by setting the control register.
+	(i386_remove_aligned_watchpoint): Reset address register after
+	disabling it by setting the control register.
+
 	* i386-tdep.c (i386_extract_return_value): If the type of the
 	return value is TYPE_STRUCT and the number of fields is one, call
 	ourselves with TYPE set tp the type of the first field.
