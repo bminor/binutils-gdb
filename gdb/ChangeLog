@@ -1,3 +1,11 @@
+2002-02-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (TARGET_LONG_DOUBLE_FORMAT): Default to
+	default_double_format.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* findvar.c (floatformat_unknown): Delete variable definition.
+	* doublest.h (floatformat_unknown): Delete variable declaration.
+
 2002-02-09  Jim Blandy  <jimb@redhat.com>
 
 	* stabsread.c (read_type): Add code to parse Sun's syntax for

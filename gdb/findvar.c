@@ -34,12 +34,6 @@
 #include "symfile.h"		/* for overlay functions */
 #include "regcache.h"
 
-/* This is used to indicate that we don't know the format of the floating point
-   number.  Typically, this is useful for native ports, where the actual format
-   is irrelevant, since no conversions will be taking place.  */
-
-const struct floatformat floatformat_unknown;
-
 /* Basic byte-swapping routines.  GDB has needed these for a long time...
    All extract a target-format integer at ADDR which is LEN bytes long.  */
 

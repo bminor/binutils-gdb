@@ -767,7 +767,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if (gdbarch->double_format == 0)
     gdbarch->double_format = default_double_format (gdbarch);
   if (gdbarch->long_double_format == 0)
-    gdbarch->long_double_format = &floatformat_unknown;
+    gdbarch->long_double_format = default_double_format (gdbarch);
   /* Skip verify of convert_from_func_ptr_addr, invalid_p == 0 */
   /* Skip verify of addr_bits_remove, invalid_p == 0 */
   /* Skip verify of smash_text_address, invalid_p == 0 */

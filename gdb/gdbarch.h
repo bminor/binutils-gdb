@@ -2000,7 +2000,7 @@ extern void set_gdbarch_double_format (struct gdbarch *gdbarch, const struct flo
 
 /* Default (value) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (TARGET_LONG_DOUBLE_FORMAT)
-#define TARGET_LONG_DOUBLE_FORMAT (&floatformat_unknown)
+#define TARGET_LONG_DOUBLE_FORMAT (default_double_format (current_gdbarch))
 #endif
 
 extern const struct floatformat * gdbarch_long_double_format (struct gdbarch *gdbarch);

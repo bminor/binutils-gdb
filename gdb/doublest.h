@@ -35,8 +35,6 @@
 
 #include "floatformat.h"	/* For struct floatformat */
 
-extern const struct floatformat floatformat_unknown;
-
 /* Use `long double' if the host compiler supports it.  (Note that this is not
    necessarily any longer than `double'.  On SunOS/gcc, it's the same as
    double.)  This is necessary because GDB internally converts all floating
