@@ -88,7 +88,7 @@ init_buffer (struct macro_buffer *b, int n)
   if (n > 0)
     b->text = (char *) xmalloc (n);
   else
-    b->text = 0;
+    b->text = NULL;
   b->len = 0;
   b->shared = 0;
   b->last_token = -1;
@@ -646,7 +646,7 @@ static int
 currently_rescanning (struct macro_name_list *list, const char *name)
 {
   for (; list; list = list->next)
-    if (! strcmp (name, list->name))
+    if (strcmp (name, list->name) == 0)
       return 1;
 
   return 0;
@@ -692,7 +692,7 @@ gather_arguments (const char *name, struct macro_buffer *src, int *argc_p)
 {
   struct macro_buffer tok;
   int args_len, args_size;
-  struct macro_buffer *args = 0;
+  struct macro_buffer *args = NULL;
   struct cleanup *back_to = make_cleanup (free_current_contents, &args);
 
   /* Does SRC start with an opening paren token?  Read from a copy of
@@ -928,12 +928,12 @@ expand (const char *id,
     {
       struct cleanup *back_to = make_cleanup (null_cleanup, 0);
       int argc;
-      struct macro_buffer *argv = 0;
+      struct macro_buffer *argv = NULL;
       struct macro_buffer substituted;
       struct macro_buffer substituted_src;
 
       if (def->argc >= 1
-          && ! strcmp (def->argv[def->argc - 1], "..."))
+          && strcmp (def->argv[def->argc - 1], "...") == 0)
         error ("Varargs macros not implemented yet.");
 
       make_cleanup (free_current_contents, &argv);

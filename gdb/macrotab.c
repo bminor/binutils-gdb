@@ -479,7 +479,7 @@ struct macro_source_file *
 macro_lookup_inclusion (struct macro_source_file *source, const char *name)
 {
   /* Is SOURCE itself named NAME?  */
-  if (! strcmp (name, source->filename))
+  if (strcmp (name, source->filename) == 0)
     return source;
 
   /* The filename in the source structure is probably a full path, but
@@ -493,15 +493,15 @@ macro_lookup_inclusion (struct macro_source_file *source, const char *name)
        check for a slash here.  */
     if (name_len < src_name_len
         && source->filename[src_name_len - name_len - 1] == '/'
-        && ! strcmp (name, source->filename + src_name_len - name_len))
+        && strcmp (name, source->filename + src_name_len - name_len) == 0)
       return source;
   }
 
   /* It's not us.  Try all our children, and return the lowest.  */
   {
     struct macro_source_file *child;
-    struct macro_source_file *best = 0;
-    int best_depth;
+    struct macro_source_file *best = NULL;
+    int best_depth = 0;
 
     for (child = source->includes; child; child = child->next_included)
       {
@@ -618,7 +618,7 @@ find_definition (const char *name,
   query.name = name;
   query.start_file = file;
   query.start_line = line;
-  query.end_file = 0;
+  query.end_file = NULL;
 
   n = splay_tree_lookup (t->definitions, (splay_tree_key) &query);
   if (! n)
@@ -638,7 +638,7 @@ find_definition (const char *name,
              We just want to search within a given name's definitions.  */
           struct macro_key *found = (struct macro_key *) pred->key;
 
-          if (! strcmp (found->name, name))
+          if (strcmp (found->name, name) == 0)
             n = pred;
         }
     }
@@ -838,7 +838,7 @@ new_macro_table (struct obstack *obstack,
   memset (t, 0, sizeof (*t));
   t->obstack = obstack;
   t->bcache = b;
-  t->main_source = 0;
+  t->main_source = NULL;
   t->definitions = (splay_tree_new_with_allocator
                     (macro_tree_compare,
                      ((splay_tree_delete_key_fn) macro_tree_delete_key),

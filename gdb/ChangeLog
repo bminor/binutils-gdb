@@ -1,3 +1,16 @@
+2002-05-14  Jim Blandy  <jimb@redhat.com>
+
+	* macroexp.c (init_buffer, gather_arguments, expand): Use NULL, not 0.
+	* macrotab.c (macro_lookup_inclusion, find_definition,
+	new_macro_table): Same.
+	
+	* macroexp.c (currently_rescanning, expand): Use `strcmp () == 0',
+	not `! strcmp ()'.  This is a dubious improvement.
+	* macrotab.c (macro_lookup_inclusion, find_definition): Same.
+
+	* macrotab.c (macro_lookup_inclusion): Initialize `best_depth',
+	although it's not necessary, to avoid a warning.
+
 2002-05-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbtypes.h: Update accessor macros to use TYPE_MAIN_TYPE.
