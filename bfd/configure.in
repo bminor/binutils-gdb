@@ -7,7 +7,7 @@ AC_INIT(libbfd.c)
 AC_CANONICAL_SYSTEM
 AC_ISC_POSIX
 
-AM_INIT_AUTOMAKE(bfd, 2.8.4)
+AM_INIT_AUTOMAKE(bfd, 2.9.1)
 
 dnl These must be called before AM_PROG_LIBTOOL, because it may want
 dnl to call AC_CHECK_PROG.
@@ -16,7 +16,7 @@ AC_CHECK_TOOL(RANLIB, ranlib, :)
 
 dnl Default to a non shared library.  This may be overridden by the
 dnl configure option --enable-shared.
-libtool_enable_shared=no
+AM_DISABLE_SHARED
 
 AM_PROG_LIBTOOL
 
@@ -308,6 +308,20 @@ fi
 AC_SUBST(COREFILE)
 AC_SUBST(COREFLAG)
 
+# Horrible hacks to build DLLs on Windows.
+WIN32LDFLAGS=
+WIN32LIBADD=
+case "${host}" in
+*-*-cygwin32*)
+  if test "$enable_shared" = "yes"; then
+    WIN32LDFLAGS="-no-undefined"
+    WIN32LIBADD="-L`pwd`/../libiberty -liberty -lcygwin"
+  fi
+  ;;
+esac
+AC_SUBST(WIN32LDFLAGS)
+AC_SUBST(WIN32LIBADD)
+
 # target stuff:
 
 # Canonicalize the secondary target names.
@@ -380,7 +394,7 @@ selarchs="$f"
 # Target backend .o files.
 tb=
 
-elf="elflink.lo dwarf2.lo"
+elf="elf.lo elflink.lo dwarf2.lo"
 
 for vec in $selvecs
 do
@@ -391,8 +405,8 @@ do
     a_out_adobe_vec)		tb="$tb aout-adobe.lo aout32.lo" ;;
     armcoff_little_vec)		tb="$tb coff-arm.lo cofflink.lo " ;;
     armcoff_big_vec)		tb="$tb coff-arm.lo cofflink.lo " ;;
-    armpe_little_vec)		tb="$tb pe-arm.lo cofflink.lo " ;;
-    armpe_big_vec)		tb="$tb pe-arm.lo cofflink.lo " ;;
+    armpe_little_vec)		tb="$tb pe-arm.lo coff-arm.lo cofflink.lo " ;;
+    armpe_big_vec)		tb="$tb pe-arm.lo coff-arm.lo cofflink.lo " ;;
     armpei_little_vec)		tb="$tb pei-arm.lo cofflink.lo " ;;
     armpei_big_vec)		tb="$tb pei-arm.lo cofflink.lo " ;;
     aout0_big_vec)		tb="$tb aout0.lo aout32.lo" ;;
