@@ -1,3 +1,8 @@
+Mon Feb 26 14:01:13 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cofflink.c (_bfd_coff_link_input_bfd): Don't try to optimize a
+	struct/union/enum type with no elements.
+
 Sat Feb 24 11:38:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* bfd.c (bfd_errmsg): Handle a NULL return from strerror.
