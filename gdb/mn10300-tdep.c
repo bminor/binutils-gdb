@@ -326,7 +326,7 @@ mn10300_analyze_prologue (fi, pc)
       /* No more prologue insns follow, so begin preparation to return.  */
       /* Fix fi->frame if it's bogus at this point.  */
       if (fi && fi->next == NULL && (fi->status & MY_FRAME_IN_SP))
-	fi->frame = read_sp ();
+	fi->frame = read_sp () - stack_size;
 
       /* Note if/where callee saved registers were saved.  */
       set_movm_offsets (fi, found_movm);
@@ -416,8 +416,9 @@ mn10300_frame_chain (fi)
       /* end-sanitize-am33 */
 
       /* Our caller does not have a frame pointer.  So his frame starts
-	 at the base of our frame (fi->frame) + register save space. */
-      return fi->frame + adjust;
+	 at the base of our frame (fi->frame) + register save space
+	 + <his size>.  */
+      return fi->frame + adjust + -dummy_frame.stack_size;
     }
 }
 

@@ -1,3 +1,9 @@
+Mon Jul 27 15:38:07 1998  Mark Alexander  <marka@cygnus.com>
+
+	* mn10300-tdep.c (mn10300_analyze_prologue): Undo previous fix
+	for setting frame address in optimized code; made unnecessary
+	by compiler fixes.
+
 Mon Jul 27 10:45:56 1998  Martin M. Hunt  <hunt@cygnus.com>
 
 	* symtab.c (decode_line_1): For minimal symbol, call 
