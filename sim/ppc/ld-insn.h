@@ -134,6 +134,11 @@ typedef enum {
   model_default = insn_comment,
 } model_table_fields;
 
+typedef enum {
+  include_flags = insn_flags,
+  include_path = insn_name,
+} model_include_fields;
+
 typedef struct _insn insn;
 struct _insn {
   table_entry *file_entry;
@@ -183,7 +188,8 @@ typedef enum {
 extern insn_table *load_insn_table
 (const char *file_name,
  decode_table *decode_rules,
- filter *filters);
+ filter *filters,
+ table_include *includes);
 
 model *models;
 model *last_model;

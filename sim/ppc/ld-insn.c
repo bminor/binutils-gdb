@@ -191,6 +191,24 @@ parse_insn_format(table_entry *entry,
 }
 
 
+void
+parse_include_entry (table *file,
+                     table_entry *file_entry,
+		     filter *filters,
+		     table_include *includes)
+{
+  /* parse the include file_entry */
+  if (file_entry->nr_fields < 4)
+    error ("Incorrect nr fields for include record\n");
+  /* process it */
+  if (!is_filtered_out(file_entry->fields[include_flags], filters))
+    {
+      table_push (file, includes,
+                file_entry->fields[include_path],
+		file_entry->nr_fields, file_entry->nr_fields);
+    }
+}
+
 static void
 model_table_insert(insn_table *table,
 		   table_entry *file_entry)
@@ -313,7 +331,8 @@ insn_table_insert_insn(insn_table *table,
 insn_table *
 load_insn_table(const char *file_name,
 		decode_table *decode_rules,
-		filter *filters)
+		filter *filters,
+		table_include *includes)
 {
   table *file = table_open(file_name, nr_insn_table_fields, nr_insn_model_table_fields);
   insn_table *table = ZALLOC(insn_table);
@@ -342,6 +361,10 @@ load_insn_table(const char *file_name,
     }
     else if (it_is("model-data", file_entry->fields[insn_flags])) {
       model_table_insert_specific(table, file_entry, &model_data, &last_model_data);
+    }
+    else if (it_is("include", file_entry->fields[insn_form])
+             && !is_filtered_out(file_entry->fields[insn_flags], filters)) {
+      parse_include_entry (file, file_entry, filters, includes);
     }
     else {
       insn_fields *fields;
@@ -915,7 +938,7 @@ main(int argc, char **argv)
   hi_bit_nr = a2i(argv[2]);
   ASSERT(hi_bit_nr < insn_bit_size);
   decode_rules = load_decode_table(argv[3], hi_bit_nr);
-  instructions = load_insn_table(argv[4], decode_rules, filters);
+  instructions = load_insn_table(argv[4], decode_rules, filters, NULL);
   insn_table_expand_insns(instructions);
 
   dump_insn_table(instructions, 0, -1);

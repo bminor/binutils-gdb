@@ -1,3 +1,33 @@
+2002-01-12  matthew green  <mrg@redhat.com>
+
+	* Makefile.in (tmp-igen): Pass -I $(srcdir) to igen.
+	* igen.c (main): Change -I to add include paths for :include:
+	files.
+	Implement -G as per sim/igen, with just gen-icache=N support.
+	Call load_insn_table() with the built include path.
+
+	* ld-insn.c (parse_include_entry): New. Load an :include: file.
+	(load_insn_table): New `includes' argument.  Look for :include:
+	entries and call parse_include_entry() for them.
+	(main): Adjust load_insn_table() call.
+	* ld-insn.h (model_include_fields): New enum.
+	(load_insn_table): Update prototype.
+	* table.c (struct _open_table, struct _table): Rework
+	structures to handle included files.
+	(table_push): Move the guts of table_open() here.
+
+	* table.c (struct _open table, struct table): Make table object an
+	indirect ptr to the current table file.
+	(current_line, new_table_entry, next_line): Make file arg type
+	open_table.
+	(table_open): Use table_push.
+	(table_entry_read): Point variable file at current table, at eof, pop
+	last open table.
+
+	* misc.h (NZALLOC): New macro. From sim/igen.
+
+	* table.h, table.c (table_push): New function.
+
 2002-01-04  matthew green  <mrg@redhat.com>
 
 	* bits.c (LSMASKED64): New inline function.

@@ -347,6 +347,7 @@ main(int argc,
   decode_table *decode_rules = NULL;
   filter *filters = NULL;
   insn_table *instructions = NULL;
+  table_include *includes = NULL;
   char *real_file_name = NULL;
   int is_header = 0;
   int ch;
@@ -405,9 +406,49 @@ main(int argc,
     case 'E':
       generate_expanded_instructions = 1;
       break;
+    case 'G':
+      {
+	int enable_p;
+	char *argp;
+	if (strncmp (optarg, "no-", strlen ("no-")) == 0)
+	  {
+	    argp = optarg + strlen ("no-");
+	    enable_p = 0;
+	  }
+	else if (strncmp (optarg, "!", strlen ("!")) == 0)
+	  {
+	    argp = optarg + strlen ("no-");
+	    enable_p = 0;
+	  }
+	else
+	  {
+	    argp = optarg;
+	    enable_p = 1;
+	  }
+        if (strncmp (argp, "gen-icache", strlen ("gen-icache")) == 0)
+          {
+            switch (argp[strlen ("gen-icache")])
+              {
+              case '=':
+	        icache_size = atoi (argp + strlen ("gen-icache") + 1);
+	        code |= generate_with_icache;
+                break;
+              case '\0':
+	        code |= generate_with_icache;
+                break;
+              default:
+                error (NULL, "Expecting -Ggen-icache or -Ggen-icache=<N>\n");
+              }
+          }
+	}
     case 'I':
-      icache_size = a2i(optarg);
-      code |= generate_with_icache;
+      {
+	table_include **dir = &includes;
+	while ((*dir) != NULL)
+	  dir = &(*dir)->next;
+	(*dir) = ZALLOC (table_include);
+	(*dir)->dir = strdup (optarg);
+      }
       break;
     case 'N':
       generate_smp = a2i(optarg);
@@ -439,7 +480,7 @@ main(int argc,
 	fprintf(stderr, "Must specify decode and cache tables\n");
 	exit (1);
       }
-      instructions = load_insn_table(optarg, decode_rules, filters);
+      instructions = load_insn_table(optarg, decode_rules, filters, includes);
       fprintf(stderr, "\texpanding ...\n");
       insn_table_expand_insns(instructions);
       break;

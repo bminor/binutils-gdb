@@ -38,7 +38,8 @@
 #include <stdlib.h>
 #endif
 
-struct _table {
+typedef struct _open_table open_table;
+struct _open_table {
   size_t size;
   char *buffer;
   char *pos;
@@ -46,32 +47,70 @@ struct _table {
   int nr_fields;
   int nr_model_fields;
   char *file_name;
+  open_table *parent;
+  table *root;
+};
+struct _table {
+  open_table *current;
 };
 
-extern table *
-table_open(const char *file_name,
-	   int nr_fields,
-	   int nr_model_fields)
+void
+table_push (table *root,
+	    table_include *includes,
+	    const char *file_name,
+	    int nr_fields,
+	    int nr_model_fields)
+
 {
   int fd;
   struct stat stat_buf;
-  table *file;
+  open_table *file;
+  table_include dummy;
+  table_include *include = &dummy;
   int nr;
 
+  /* dummy up a search of this directory */
+  dummy.next = includes;
+  dummy.dir = "";
+
   /* create a file descriptor */
-  file = ZALLOC(table);
+  file = ZALLOC (open_table);
   ASSERT(file != NULL);
   file->nr_fields = nr_fields;
   file->nr_model_fields = nr_model_fields;
-
-  /* save the file name */
-  file->file_name = (char*)zalloc(strlen(file_name) + 1);
-  ASSERT(file->file_name != NULL);
-  strcpy(file->file_name, file_name);
-
-  /* open the file */
-  fd = open(file->file_name, O_RDONLY, 0);
-  ASSERT(fd >= 0);
+  file->root = root;
+  file->parent = root->current;
+  root->current = file;
+  
+  while (1)
+    {
+      /* save the file name */
+      char *dup_name = NZALLOC (char, strlen (include->dir) + strlen (file_name) + 2);
+      if (dup_name == NULL)
+	{
+	  perror (file_name);
+	  exit (1);
+	}
+      if (include->dir[0] != '\0')
+	{
+	  strcat (dup_name, include->dir);
+	  strcat (dup_name, "/");
+	}
+      strcat (dup_name, file_name);
+      file->file_name = dup_name;
+      /* open the file */
+      fd = open (dup_name, O_RDONLY, 0);
+      if (fd >= 0)
+	break;
+      /* zfree (dup_name); */
+      if (include->next == NULL)
+	{
+	  error ("Problem opening file `%s'\n", file_name);
+	  perror (file_name);
+	  exit (1);
+	}
+      include = include->next;
+  }
 
   /* determine the size */
   if (fstat(fd, &stat_buf) < 0) {
@@ -102,18 +141,47 @@ table_open(const char *file_name,
 
   /* done */
   close(fd);
-  return file;
 }
 
+extern table *
+table_open(const char *file_name,
+	   int nr_fields,
+	   int nr_model_fields)
+{
+  table *root;
+
+  /* create a file descriptor */
+  root = ZALLOC (table);
+  if (root == NULL)
+    {
+      perror (file_name);
+      exit (1);
+    }
+
+  table_push (root, NULL, file_name, nr_fields, nr_model_fields);
+  return root;
+}
 
 extern table_entry *
-table_entry_read(table *file)
+table_entry_read(table *root)
 {
+  open_table *file = root->current;
   int field;
   table_entry *entry;
 
   /* skip comments/blanks */
   while(1) {
+    /* end-of-file? */
+    while (*file->pos == '\0')
+      {
+        if (file->parent != NULL)
+          {
+            file = file->parent;
+            root->current = file;
+          }
+        else
+          return NULL;
+      }
     /* leading white space */
     while (*file->pos != '\0'
 	   && *file->pos != '\n'
@@ -133,8 +201,6 @@ table_entry_read(table *file)
     else
       break;
   }
-  if (*file->pos == '\0')
-    return NULL;
 
   /* create this new entry */
   entry = (table_entry*)zalloc(sizeof(table_entry)
