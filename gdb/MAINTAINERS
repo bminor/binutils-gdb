@@ -276,7 +276,7 @@ testsuite		Fernando Nasser		fnasser@redhat.com
   config                Mark Salter             msalter@redhat.com
   lib                   Mark Salter             msalter@redhat.com
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
-  c++ (gdb.c++)		Michael Chastain	chastain@redhat.com
+  c++ (gdb.c++)		Michael Chastain	mec@shout.net
   mi tests (gdb.mi)     Elena Zannoni           ezannoni@redhat.com
                         Andrew Cagney           cagney@redhat.com
   stabs (gdb.satbs)     Elena Zannoni           ezannoni@redhat.com
@@ -331,7 +331,6 @@ FSF assignment and have submitted one good patch.
 David Anderson					davea@sgi.com
 Philip Blundell					philb@gnu.org
 Joel Brobecker					brobecker@act-europe.fr
-Michael Chastain				chastain@redhat.com
 Nick Clifton					nickc@redhat.com
 Orjan Friberg					orjanf@axis.com
 Paul Hilfinger					hilfinger@gnat.com
@@ -370,6 +369,7 @@ Folks that have been caught up in a paper trail:
 
 Jim Kingdon					jkingdon@engr.sgi.com
 Chris G. Demetriou				cgd@sibyte.com
+Michael Chastain				mec@shout.net
 
 --
 
