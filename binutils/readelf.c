@@ -363,9 +363,6 @@ guess_is_rela (e_machine)
     case EM_CYGNUS_MN10200:
     case EM_CYGNUS_MN10300:
     case EM_CYGNUS_FR30:
-/* start-sanitize-venus */
-    case EM_CYGNUS_VENUS:
-/* end-sanitize-venus */
     case EM_SH:
     case EM_ALPHA:
     case EM_MCORE:
