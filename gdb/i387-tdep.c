@@ -21,16 +21,17 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "doublest.h"
+#include "floatformat.h"
 #include "frame.h"
+#include "gdbcore.h"
 #include "inferior.h"
 #include "language.h"
-#include "value.h"
-#include "gdbcore.h"
-#include "floatformat.h"
 #include "regcache.h"
+#include "value.h"
+
 #include "gdb_assert.h"
 #include "gdb_string.h"
-#include "doublest.h"
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
@@ -39,6 +40,7 @@
    in `tm-i386.h'.  */
 
 /* Print the floating point number specified by RAW.  */
+
 static void
 print_i387_value (char *raw, struct ui_file *file)
 {
@@ -62,6 +64,7 @@ print_i387_value (char *raw, struct ui_file *file)
 }
 
 /* Print the classification for the register contents RAW.  */
+
 static void
 print_i387_ext (unsigned char *raw, struct ui_file *file)
 {
@@ -113,6 +116,7 @@ print_i387_ext (unsigned char *raw, struct ui_file *file)
 }
 
 /* Print the status word STATUS.  */
+
 static void
 print_i387_status_word (unsigned int status, struct ui_file *file)
 {
@@ -142,6 +146,7 @@ print_i387_status_word (unsigned int status, struct ui_file *file)
 }
 
 /* Print the control word CONTROL.  */
+
 static void
 print_i387_control_word (unsigned int control, struct ui_file *file)
 {
@@ -335,11 +340,7 @@ i387_value_to_register (struct frame_info *frame, int regnum,
 }
 
 
-/* FIXME: kettenis/2000-05-21: Right now more than a few i386 targets
-   define their own routines to manage the floating-point registers in
-   GDB's register array.  Most (if not all) of these targets use the
-   format used by the "fsave" instruction in their communication with
-   the OS.  They should all be converted to use the routines below.  */
+/* Handle FSAVE and FXSAVE formats.  */
 
 /* At fsave_offset[REGNUM] you'll find the offset to the location in
    the data structure used by the "fsave" instruction where GDB

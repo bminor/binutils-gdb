@@ -1,3 +1,8 @@
+2003-06-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* i387-tdep.c: Reorder includes, fix some whitespace issues and
+	replace out-of-date comment.
+
 2003-06-15  Andrew Cagney  <cagney@redhat.com>
 
 	* rdi-share/host.h (Fail): Change to a varargs function.
