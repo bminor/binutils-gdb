@@ -1,3 +1,44 @@
+start-sanitize-d10v
+Thu Aug 15 13:24:30 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c: Add additional information to the opcode
+        table to help determinine which instructions can be done
+        in parallel. 
+
+end-sanitize-d10v	
+Thu Aug 15 17:01:31 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* config/tc-arm.c: Major changes to add Thumb support, with lots
+ 	of change input from <rearnsha@armltd.co.uk>.
+	Reverted to INSN_SIZE macro, rather than insn_size variable.
+	(insns): Added ARM "bx" instruction support.
+	(tinsns): Added Thumb instruction definition structure.
+	(arm_tops_hsh): Added hash structure for Thumb opcodes.
+	(md_pseudo_table): Added ".arm", ".thumb" and ".code" pseudo-ops.
+	(opcode_select,s_arm,s_thumb,s_code): Added.
+	(decode_shift): Allow upper-case RRX.
+	(do_ldst): Simpler halfword support.
+	(do_ldmstm): Improved.
+	(reg_list, do_bx, thumb_reg, thumb_add_sub, thumb_shift,
+ 	thumb_mov_compare, thumb_load_store, do_t_arit, do_t_add,
+ 	do_t_asr, do_t_branch, do_t_bx, do_t_compare, do_t_ldmstm,
+ 	do_t_ldrb, do_t_ldrh, do_t_lds, do_t_lsl, do_t_lsr, do_t_mov,
+ 	do_t_push_pop, do_t_str, do_t_strb, do_t_strh, do_t_sub, do_t_swi,
+ 	do_t_adr): Added.
+	(md_apply_fix3): Add support for BFD_RELOC_ARM_THUMB_* relocations.
+	(md_parse_option): Add support for -mthumb.
+	(md_show_usage): Updated to reflect new command line option.
+	(arm_data_in_code, arm_canonicalize_symbol_name): Added.
+	* config/tc-arm.h: Provide TC_FIX_TYPE to allow private ARM
+ 	fragment information to be held.
+
+Thu Aug 15 16:12:00 1996  Richard Earnshaw (rearnsha@armltd.co.uk)
+
+	* tc-arm.c (md_apply_fix3): Also set fixP->fx_done if fx_addsy is 
+	non-null, but is a constant.
+	(fix_new_arm): Call make_expr_symbol to make the expression symbol
+	so that error reporting will work correctly.
+
 Wed Aug 14 10:37:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i386.c (tc_i386_fix_adjustable): Don't adjust relocs
