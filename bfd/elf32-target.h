@@ -26,34 +26,33 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    one for little-endian machines.   */
 
 /* Archives are generic or unimplemented.  */
-#ifndef elf_slurp_armap
-#define elf_slurp_armap			bfd_slurp_coff_armap
+#ifndef bfd_elf32_slurp_armap
+#define bfd_elf32_slurp_armap		bfd_slurp_coff_armap
 #endif
-#define elf_slurp_extended_name_table	_bfd_slurp_extended_name_table
-#define elf_truncate_arname		bfd_dont_truncate_arname
-#define elf_openr_next_archived_file	bfd_generic_openr_next_archived_file
-#define elf_generic_stat_arch_elt	bfd_generic_stat_arch_elt
-#ifndef elf_write_armap
-#define	elf_write_armap			coff_write_armap
+#define bfd_elf32_slurp_extended_name_table	_bfd_slurp_extended_name_table
+#define bfd_elf32_truncate_arname		bfd_dont_truncate_arname
+#define bfd_elf32_openr_next_archived_file	bfd_generic_openr_next_archived_file
+#define bfd_elf32_generic_stat_arch_elt	bfd_generic_stat_arch_elt
+#ifndef bfd_elf32_write_armap
+#define	bfd_elf32_write_armap		coff_write_armap
 #endif
 
 /* Ordinary section reading and writing */
-#define elf_new_section_hook		_bfd_dummy_new_section_hook
-#define elf_get_section_contents	bfd_generic_get_section_contents
-/* #define elf_set_section_contents	bfd_generic_set_section_contents */
-#define	elf_close_and_cleanup		bfd_generic_close_and_cleanup
+#define bfd_elf32_new_section_hook		_bfd_dummy_new_section_hook
+#define bfd_elf32_get_section_contents	bfd_generic_get_section_contents
+#define	bfd_elf32_close_and_cleanup		bfd_generic_close_and_cleanup
 
-#define elf_bfd_debug_info_start	bfd_void
-#define elf_bfd_debug_info_end		bfd_void
-#define elf_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
-#define elf_bfd_get_relocated_section_contents \
+#define bfd_elf32_bfd_debug_info_start	bfd_void
+#define bfd_elf32_bfd_debug_info_end	bfd_void
+#define bfd_elf32_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
+#define bfd_elf32_bfd_get_relocated_section_contents \
  bfd_generic_get_relocated_section_contents
-#define elf_bfd_relax_section bfd_generic_relax_section
-#define elf_bfd_seclet_link bfd_generic_seclet_link
-#define elf_bfd_make_debug_symbol \
+#define bfd_elf32_bfd_relax_section bfd_generic_relax_section
+#define bfd_elf32_bfd_seclet_link bfd_generic_seclet_link
+#define bfd_elf32_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 
-static CONST struct elf_backend_data elf_bed =
+static CONST struct elf32_backend_data elf32_bed =
 {
   elf_info_to_howto,
   ELF_ARCH,
@@ -113,31 +112,31 @@ bfd_target TARGET_BIG_SYM =
 
   /* bfd_check_format: check the format of a file being read */
   { _bfd_dummy_target,		/* unknown format */
-    elf_object_p,		/* assembler/linker output (object file) */
+    bfd_elf32_object_p,		/* assembler/linker output (object file) */
     bfd_generic_archive_p,	/* an archive */
-    elf_core_file_p		/* a core file */
+    bfd_elf32_core_file_p	/* a core file */
   },
 
   /* bfd_set_format: set the format of a file being written */
   { bfd_false,
-    elf_mkobject,
+    bfd_elf32_mkobject,
     _bfd_generic_mkarchive,
     bfd_false
   },
 
   /* bfd_write_contents: write cached information into a file being written */
   { bfd_false,
-    elf_write_object_contents,
+    bfd_elf32_write_object_contents,
     _bfd_write_archive_contents,
     bfd_false
   },
 
   /* Initialize a jump table with the standard macro.  All names start with
      "elf" */
-  JUMP_TABLE(elf),
+  JUMP_TABLE(bfd_elf32),
 
   /* backend_data: */
-  (PTR) &elf_bed,
+  (PTR) &elf32_bed,
 };
 #endif
 
@@ -195,30 +194,30 @@ bfd_target TARGET_LITTLE_SYM =
 
   /* bfd_check_format: check the format of a file being read */
   { _bfd_dummy_target,		/* unknown format */
-    elf_object_p,		/* assembler/linker output (object file) */
+    bfd_elf32_object_p,		/* assembler/linker output (object file) */
     bfd_generic_archive_p,	/* an archive */
-    elf_core_file_p		/* a core file */
+    bfd_elf32_core_file_p	/* a core file */
   },
 
   /* bfd_set_format: set the format of a file being written */
   { bfd_false,
-    elf_mkobject,
+    bfd_elf32_mkobject,
     _bfd_generic_mkarchive,
     bfd_false
   },
 
   /* bfd_write_contents: write cached information into a file being written */
   { bfd_false,
-    elf_write_object_contents,
+    bfd_elf32_write_object_contents,
     _bfd_write_archive_contents,
     bfd_false
   },
 
   /* Initialize a jump table with the standard macro.  All names start with
      "elf" */
-  JUMP_TABLE(elf),
+  JUMP_TABLE(bfd_elf32),
 
   /* backend_data: */
-  (PTR) &elf_bed,
+  (PTR) &elf32_bed,
 };
 #endif

@@ -342,6 +342,7 @@ in this structure.
 
 /* All known xvecs.  They are listed a second time below, since
    we can't intermix extern's and initializers.  */
+extern bfd_target i386lynx_vec;
 extern bfd_target ecoff_little_vec;
 extern bfd_target ecoff_big_vec;
 extern bfd_target aout_mips_little_vec;
@@ -356,10 +357,10 @@ extern bfd_target b_out_vec_little_host;
 extern bfd_target b_out_vec_big_host;
 extern bfd_target icoff_little_vec;
 extern bfd_target icoff_big_vec;
-extern bfd_target elf32_sparc_vec;
-extern bfd_target elf32_i386_vec;
-extern bfd_target elf32_m68k_vec;
-extern bfd_target elf32_i860_vec;
+extern bfd_target bfd_elf32_sparc_vec;
+extern bfd_target bfd_elf32_i386_vec;
+extern bfd_target bfd_elf32_m68k_vec;
+extern bfd_target bfd_elf32_i860_vec;
 extern bfd_target ieee_vec;
 extern bfd_target oasys_vec;
 extern bfd_target m88kbcs_vec;
@@ -386,7 +387,6 @@ extern bfd_target hppa_vec;
 extern bfd_target DEFAULT_VECTOR;
 #endif
 
-
 bfd_target *target_vector[] = {
 
 #ifdef SELECT_VECS
@@ -401,6 +401,7 @@ bfd_target *target_vector[] = {
 
 	&i386coff_vec,
 	&i386aout_vec,
+	&i386lynx_vec,
 	&ecoff_little_vec,
 	&ecoff_big_vec,
 	&aout_mips_little_vec,
@@ -426,10 +427,10 @@ bfd_target *target_vector[] = {
 /*	&tekhex_vec,*/
 	&icoff_little_vec,
 	&icoff_big_vec,
-	&elf32_sparc_vec,
-	&elf32_i386_vec,
-	&elf32_m68k_vec,
-	&elf32_i860_vec,
+	&bfd_elf32_sparc_vec,
+	&bfd_elf32_i386_vec,
+	&bfd_elf32_m68k_vec,
+	&bfd_elf32_i860_vec,
 	&a_out_adobe_vec,
 	&b_out_vec_little_host,
 	&b_out_vec_big_host,
