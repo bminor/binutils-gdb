@@ -229,6 +229,9 @@ readchar(timeout)
     if (timeout == 0)
       return c;		/* Polls shouldn't generate timeout errors */
     error("Timeout reading from remote system.");
+#ifdef LOG_FILE
+      fputc ("ERROR: Timeout reading from remote system", log_file);
+#endif
   }
   perror_with_name("remote-monitor");
 }
@@ -257,8 +260,7 @@ expect (string, discard)
     if (c == *p++) {
       if (*p == '\0') {
 	immediate_quit = 0;
-	if (sr_get_debug())
-	  printf ("\nMatched\n");
+	debuglogs (4, "Matched");
 	return;
       }
     } else {
@@ -385,7 +387,7 @@ get_hex_word ()
   for (i = 0; i < 8; i++)
     val = (val << 4) + get_hex_digit (i == 0);
   
-  debuglogs (3, "get_hex_word() got a 0x%x.", val);
+  debuglogs (4, "get_hex_word() got a 0x%x.", val);
 
   return val;
 }
@@ -408,7 +410,7 @@ monitor_create_inferior (execfile, args, env)
 
   entry_pt = (int) bfd_get_start_address (exec_bfd);
 
-  debuglogs (2, "create_inferior(exexfile=%s, args=%s, env=%s)", execfile, args, env);
+  debuglogs (1, "create_inferior(exexfile=%s, args=%s, env=%s)", execfile, args, env);
 
 /* The "process" (board) is already stopped awaiting our commands, and
    the program is already downloaded.  We just set its PC and go.  */
@@ -458,15 +460,13 @@ monitor_open(args, name, from_tty)
   if (monitor_desc == NULL)
     perror_with_name(dev_name);
 
-  if (baud_rate != -1)
-    {
-      if (SERIAL_SETBAUDRATE (monitor_desc, baud_rate))
-	{
-	  SERIAL_CLOSE (monitor_desc);
-	  perror_with_name (name);
-	}
+  if (baud_rate != -1) {
+    if (SERIAL_SETBAUDRATE (monitor_desc, baud_rate)) {
+      SERIAL_CLOSE (monitor_desc);
+      perror_with_name (name);
     }
-
+  }
+  
   SERIAL_RAW(monitor_desc);
 
 #if defined (LOG_FILE)
@@ -485,8 +485,6 @@ monitor_open(args, name, from_tty)
 
   if (from_tty)
     printf("Remote target %s connected to %s\n", TARGET_NAME, dev_name);
-
-  
 }
 
 /*
@@ -523,7 +521,7 @@ monitor_detach (from_tty)
      int from_tty;
 {
 
-  debuglogs (4, "monitor_detach ()");
+  debuglogs (1, "monitor_detach ()");
 
   pop_target();		/* calls monitor_close to do the real work */
   if (from_tty)
@@ -541,13 +539,8 @@ monitor_attach (args, from_tty)
   if (from_tty)
     printf ("Starting remote %s debugging\n", target_shortname);
  
-#ifdef LOG_FILE
-  fprintf (log_file, "\nmonitor_attach (args=%s)\n", args);
-#endif
+  debuglogs (1, "monitor_attach (args=%s)", args);
   
-  if (sr_get_debug() > 4)
-    printf ("\nmonitor_attach (args=%s)\n", args);
-
   printf_monitor (GO_CMD);
   /* swallow the echo.  */
   expect (GO_CMD, 1);
@@ -561,24 +554,19 @@ monitor_resume (pid, step, sig)
      int pid, step;
      enum target_signal sig;
 {
-  debuglogs (4, "monitor_resume (step=%d, sig=%d)", step, sig);
+  debuglogs (1, "monitor_resume (step=%d, sig=%d)", step, sig);
 
   if (step) {
     printf_monitor (STEP_CMD);
-    /* wait for the echo.  */
-    expect (STEP_CMD, 1);
   } else {
     printf_monitor (CONT_CMD);
-    /* swallow the echo.  */
-    expect (CONT_CMD, 1);
   }
 }
 
 /*
- * _wait -- Wait until the remote machine stops, then return,
+ * monitor_wait -- Wait until the remote machine stops, then return,
  *          storing status in status just as `wait' would.
  */
-
 int
 monitor_wait (pid, status)
      int pid;
@@ -586,7 +574,7 @@ monitor_wait (pid, status)
 {
   int old_timeout = timeout;
 
-  debuglogs(4, "monitor_wait (), printing extraneous text.", log_file);
+  debuglogs(1, "monitor_wait (), printing extraneous text.");
   
   status->kind = TARGET_WAITKIND_EXITED;
   status->value.integer = 0;
@@ -594,10 +582,7 @@ monitor_wait (pid, status)
   timeout = 0;		/* Don't time out -- user program is running. */
 
   expect_prompt(0);    /* Wait for prompt, outputting extraneous text */
-  if (sr_get_debug() > 4)
-    puts ("monitor_wait(), got the prompt.");
-
-  debuglogs (4, "monitor_wait(%x), got the prompt.", 12345678);
+  debuglogs (4, "monitor_wait(), got the prompt.");
 
   status->kind = TARGET_WAITKIND_STOPPED;
   status->value.sig = TARGET_SIGNAL_TRAP;
@@ -660,7 +645,7 @@ monitor_fetch_register (regno)
 {
   int val, j;
 
-  debuglogs (1, "monitor_fetch_register (regno=%d)", get_reg_name (regno));
+  debuglogs (1, "monitor_fetch_register (reg=%s)", get_reg_name (regno));
 
   if (regno < 0) {
     monitor_fetch_registers ();
