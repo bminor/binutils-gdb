@@ -1,3 +1,14 @@
+2004-02-23  David Mosberger  <davidm@hpl.hp.com>
+
+	Committed by Kevin Buettner <kevinb@redhat.com>.
+
+	* ia64-tdep.h (ia64_write_pc, ia64_linux_write_pc): Declare.
+	* ia64-tdep.c (ia64_write_pc): Make it a global function.
+	(ia64_gdbarch_init): For Linux targets, use ia64_linux_write_pc()
+	instead of ia64_write_pc().
+	* ia64-linux-tdep.c (regcache.h): Include.
+	(ia64_linux_write_pc): New function.
+ 
 2004-02-23  Roland McGrath  <roland@redhat.com>
 
 	* auxv.c (info_auxv_command): Fix typos in error messages.
@@ -59,6 +70,7 @@
 	* breakpoint.c (print_one_breakpoint): Do not output spaces
 	after printing <PENDING> for a pending breakpoint.
 
+>>>>>>> 1.5456
 2004-02-23  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* printcmd.c (print_scalar_formatted): Initialize val_long
