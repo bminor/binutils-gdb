@@ -1,3 +1,8 @@
+2000-12-12  Frank Ch. Eigler  <fche@redhat.com>
+
+	* cgen-asm.in (@arch@_cgen_assemble_insn): Prefer printing insert-time
+	error messages over later parse-time ones.
+
 2000-12-12  Jim Wilson  <wilson@redhat.com>
 
 	* ia64-dis.c (print_insn_ia64): Cast away const on ia64_free_opcode

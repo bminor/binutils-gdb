@@ -200,7 +200,8 @@ const CGEN_INSN *
 {
   const char *start;
   CGEN_INSN_LIST *ilist;
-  const char *tmp_errmsg = NULL;
+  const char *parse_errmsg = NULL;
+  const char *insert_errmsg = NULL;
 
   /* Skip leading white space.  */
   while (isspace (* str))
@@ -235,14 +236,14 @@ const CGEN_INSN *
       /* Allow parse/insert handlers to obtain length of insn.  */
       CGEN_FIELDS_BITSIZE (fields) = CGEN_INSN_BITSIZE (insn);
 
-      tmp_errmsg = CGEN_PARSE_FN (cd, insn) (cd, insn, & str, fields);
-      if (tmp_errmsg != NULL)
+      parse_errmsg = CGEN_PARSE_FN (cd, insn) (cd, insn, & str, fields);
+      if (parse_errmsg != NULL)
 	continue;
 
       /* ??? 0 is passed for `pc' */
-      tmp_errmsg = CGEN_INSERT_FN (cd, insn) (cd, insn, fields, buf,
-					      (bfd_vma) 0);
-      if (tmp_errmsg != NULL)
+      insert_errmsg = CGEN_INSERT_FN (cd, insn) (cd, insn, fields, buf,
+						 (bfd_vma) 0);
+      if (insert_errmsg != NULL)
         continue;
 
       /* It is up to the caller to actually output the insn and any
@@ -250,15 +251,17 @@ const CGEN_INSN *
       return insn;
     }
 
-  /* Make sure we leave this with something at this point. */
-  if (tmp_errmsg == NULL)
-    tmp_errmsg = "unknown mnemonic";
-
   {
     static char errbuf[150];
+    const char *tmp_errmsg;
 
 #ifdef CGEN_VERBOSE_ASSEMBLER_ERRORS
-    /* if verbose error messages, use errmsg from CGEN_PARSE_FN */
+    /* If requesting verbose error messages, use insert_errmsg.
+       Failing that, use parse_errmsg */
+    tmp_errmsg = (insert_errmsg ? insert_errmsg :
+		  parse_errmsg ? parse_errmsg :
+		  _("unrecognized instruction"));
+
     if (strlen (start) > 50)
       /* xgettext:c-format */
       sprintf (errbuf, "%s `%.50s...'", tmp_errmsg, start);
