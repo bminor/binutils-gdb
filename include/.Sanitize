@@ -73,8 +73,6 @@ reloc.h
 sparc-opcode.h
 stab.def
 stab.gnu.h
-sys
-sysdep.h
 tahoe-opcode.h
 vax-opcode.h
 wait.h
@@ -104,7 +102,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.16  1991/10/05 06:18:24  gnu
+# Revision 1.17  1991/10/16 01:08:08  gnu
+# Remove include files to bfd/hosts.
+#
+# Revision 1.16  1991/10/05  06:18:24  gnu
 # a.out.vax.h gone.
 #
 # Revision 1.15  1991/10/03  22:24:27  gnu
