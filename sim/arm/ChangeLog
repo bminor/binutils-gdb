@@ -1,3 +1,8 @@
+2000-03-11  Philip Blundell  <philb@gnu.org>
+
+	* armemu.c (LoadSMult, LoadMult): Correct handling of aborts.
+	Patch from Allan Skillman <Allan.Skillman@arm.com>.
+
 Wed Mar 22 15:24:21 2000  glen mccready  <gkm@pobox.com>
 
 	* wrapper.c (sim_open,sim_close): Copy into myname, free myname.

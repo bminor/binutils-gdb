@@ -3457,7 +3457,7 @@ LoadMult (ARMul_State * state, ARMword instr, ARMword address, ARMword WBBase)
 	  state->Aborted = ARMul_DataAbortV;
       }
 
-  if (BIT (15))
+  if (BIT (15) && !state->Aborted)
     {				/* PC is in the reg list */
 #ifdef MODE32
       state->Reg[15] = PC;
@@ -3520,13 +3520,13 @@ LoadSMult (ARMul_State * state, ARMword instr,
       {				/* load this register */
 	address += 4;
 	dest = ARMul_LoadWordS (state, address);
-	if (!state->abortSig || state->Aborted)
+	if (!state->abortSig && !state->Aborted)
 	  state->Reg[temp] = dest;
 	else if (!state->Aborted)
 	  state->Aborted = ARMul_DataAbortV;
       }
 
-  if (BIT (15))
+  if (BIT (15) && !state->Aborted)
     {				/* PC is in the reg list */
 #ifdef MODE32
       if (state->Mode != USER26MODE && state->Mode != USER32MODE)
