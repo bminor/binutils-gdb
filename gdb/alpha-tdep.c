@@ -149,6 +149,40 @@ alpha_find_saved_regs (frame)
     obstack_alloc (&frame_cache_obstack, sizeof(struct frame_saved_regs));
   memset (frame->saved_regs, 0, sizeof (struct frame_saved_regs));
 
+  /* If it is the frame for __sigtramp, the saved registers are located
+     in a sigcontext structure somewhere on the stack. __sigtramp
+     passes a pointer to the sigcontext structure on the stack.
+     If the stack layout for __sigtramp changes, or if sigcontext offsets
+     change, we might have to update this code.  */
+#ifndef SIGFRAME_PC_OFF
+#define SIGFRAME_PC_OFF		(2 * 8)
+#define SIGFRAME_REGSAVE_OFF	(4 * 8)
+#define SIGFRAME_FPREGSAVE_OFF	(SIGFRAME_REGSAVE_OFF + 32 * 8 + 8)
+#endif
+  if (frame->signal_handler_caller)
+    {
+      CORE_ADDR sigcontext_pointer_addr;
+      CORE_ADDR sigcontext_addr;
+
+      if (frame->next)
+	sigcontext_pointer_addr = frame->next->frame;
+      else
+	sigcontext_pointer_addr = frame->frame;
+      sigcontext_addr = read_memory_integer(sigcontext_pointer_addr, 8);
+      for (ireg = 0; ireg < 32; ireg++)
+	{
+ 	  reg_position = sigcontext_addr + SIGFRAME_REGSAVE_OFF + ireg * 8;
+ 	  frame->saved_regs->regs[ireg] = reg_position;
+	}
+      for (ireg = 0; ireg < 32; ireg++)
+	{
+ 	  reg_position = sigcontext_addr + SIGFRAME_FPREGSAVE_OFF + ireg * 8;
+ 	  frame->saved_regs->regs[FP0_REGNUM + ireg] = reg_position;
+	}
+      frame->saved_regs->regs[PC_REGNUM] = sigcontext_addr + SIGFRAME_PC_OFF;
+      return;
+    }
+
   proc_desc = frame->proc_desc;
   if (proc_desc == NULL)
     /* I'm not sure how/whether this can happen.  Normally when we can't
@@ -164,7 +198,7 @@ alpha_find_saved_regs (frame)
 
   returnreg = PROC_PC_REG (proc_desc);
 
-  /* Note that RA is always saved first, regardless of it's actual
+  /* Note that RA is always saved first, regardless of its actual
      register number.  */
   if (mask & (1 << returnreg))
     {
@@ -202,30 +236,11 @@ read_next_frame_reg(fi, regno)
      struct frame_info *fi;
      int regno;
 {
-  /* If it is the frame for sigtramp we have a pointer to the sigcontext
-     on the stack.
-     If the stack layout for __sigtramp changes or if sigcontext offsets
-     change we might have to update this code.  */
-#ifndef SIGFRAME_PC_OFF
-#define SIGFRAME_PC_OFF		(2 * 8)
-#define SIGFRAME_REGSAVE_OFF	(4 * 8)
-#endif
   for (; fi; fi = fi->next)
     {
-      if (fi->signal_handler_caller)
-	{
-	  int offset;
-	  CORE_ADDR sigcontext_addr = read_memory_integer(fi->frame, 8);
-
-	  if (regno == PC_REGNUM)
-	    offset = SIGFRAME_PC_OFF;
-	  else if (regno < 32)
-	    offset = SIGFRAME_REGSAVE_OFF + regno * 8;
-	  else
-	    return 0;
-	  return read_memory_integer(sigcontext_addr + offset, 8);
-        }
-      else if (regno == SP_REGNUM)
+      /* We have to get the saved sp from the sigcontext
+	 if it is a signal handler frame.  */
+      if (regno == SP_REGNUM && !fi->signal_handler_caller)
 	return fi->frame;
       else
 	{

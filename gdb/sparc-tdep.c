@@ -1043,7 +1043,7 @@ sparc_pc_adjust(pc)
 
   err = target_read_memory (pc + 8, buf, sizeof(long));
   insn = extract_unsigned_integer (buf, 4);
-  if ((err == 0) && (insn & 0xfffffe00) == 0)
+  if ((err == 0) && (insn & 0xffc00000) == 0)
     return pc+12;
   else
     return pc+8;
@@ -1139,6 +1139,7 @@ prgregset_t *gregsetp;
 {
   register int regi;
   register prgreg_t *regp = (prgreg_t *) gregsetp;
+  static char zerobuf[MAX_REGISTER_RAW_SIZE] = {0};
 
   /* GDB register numbers for Gn, On, Ln, In all match /proc reg numbers.  */
   for (regi = G0_REGNUM ; regi <= I7_REGNUM ; regi++)
@@ -1151,6 +1152,11 @@ prgregset_t *gregsetp;
   supply_register (PC_REGNUM, (char *) (regp + R_PC));
   supply_register (NPC_REGNUM,(char *) (regp + R_nPC));
   supply_register (Y_REGNUM,  (char *) (regp + R_Y));
+
+  /* Fill inaccessible registers with zero.  */
+  supply_register (WIM_REGNUM, zerobuf);
+  supply_register (TBR_REGNUM, zerobuf);
+  supply_register (CPS_REGNUM, zerobuf);
 }
 
 void

@@ -1,3 +1,37 @@
+Sat Jul 29 01:45:56 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* alpha-tdep.c:  Move sigtramp handling of saved registers from
+	read_next_frame_reg to alpha_find_saved_regs, handle saved
+	floating point registers.
+	* mips-tdep.c:  Move sigtramp handling of saved registers from
+	read_next_frame_reg to mips_find_saved_regs, handle saved
+	floating point registers.
+	* config/mips/tm-irix3.h, config/mips/tm-irix5.h,
+	config/mips/tm-mipsv4.h (SIGFRAME_FPREGSAVE_OFF):  Define. 
+
+	* sparc-tdep.c (sparc_pc_adjust):  Fix check for `unimp'
+	instruction to handle functions returning structures with
+	large sizes properly.
+
+Fri Jul 28 11:50:17 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* configure, configure.in (z8k-*-sim): deleted.
+
+Thu Jul 27 12:49:28 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
+
+	* lynx-nat.c (child_wait): Handle threads exiting.
+
+Thu Jul 27 07:47:50 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* rs6000-tdep.c (skip_prologue): Don't assume the update stack
+	instruction is the last in the prologue, since xlc stores the lr
+	after the stack update.  Make sure offset is correct sign for
+	large frames.
+	(frame_saved_pc): Move test for signal before frameless.
+
+	* config/rs6000/tm-rs6000.h (DEFAULT_LR_SAVE): Define.
+	* config/powerpc/tm-ppc-eabi.h (DEFAULT_LR_SAVE): Redefine.
+
 Thu Jul 27 01:22:08 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* hppa-tdep.c (hppa_fix_call_dummy): Rewrite code for calling

@@ -43,6 +43,12 @@ extern struct obstack frame_cache_obstack;
 static int mips_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
 #endif
 
+static void mips_set_fpu_command PARAMS ((char *, int,
+					  struct cmd_list_element *));
+
+static void mips_show_fpu_command PARAMS ((char *, int,
+					   struct cmd_list_element *));
+
 void mips_set_processor_type_command PARAMS ((char *, int));
 
 int mips_set_processor_type PARAMS ((char *));
@@ -62,7 +68,9 @@ char *tmp_mips_processor_type;
 /* Some MIPS boards don't support floating point, so we permit the
    user to turn it off.  */
 
-int mips_fpu = 1;
+enum mips_fpu_type mips_fpu;
+
+static char *mips_fpu_string;
 
 /* A set of original names, to be used when restoring back to generic
    registers from a specific set.  */
@@ -120,6 +128,23 @@ char *mips_r3081_reg_names[] = {
 	"",	"",	"ehi",	"",	"",	"",	"epc",	"prid",
 };
 
+/* Names of LSI 33k registers.  */
+
+char *mips_lsi33k_reg_names[] = {
+	"zero",	"at",	"v0",	"v1",	"a0",	"a1",	"a2",	"a3",
+	"t0",	"t1",	"t2",	"t3",	"t4",	"t5",	"t6",	"t7",
+	"s0",	"s1",	"s2",	"s3",	"s4",	"s5",	"s6",	"s7",
+	"t8",	"t9",	"k0",	"k1",	"gp",	"sp",	"s8",	"ra",
+	"epc",	"hi",	"lo",	"sr",	"cause","badvaddr",
+	"dcic", "bpc",  "bda",  "",     "",     "",     "",      "",
+	"",     "",     "",     "",     "",     "",     "",      "",
+	"",     "",     "",     "",     "",     "",     "",      "",
+	"",     "",     "",     "",     "",     "",     "",      "",
+	"",     "",     "",	"",
+	"",	"",	"",	"",	"",	"",	"",	 "",
+	"",	"",	"",	"",	"",	"",	"",	 "",
+};
+
 struct {
   char *name;
   char **regnames;
@@ -129,6 +154,7 @@ struct {
   { "r3051", mips_r3051_reg_names },
   { "r3071", mips_r3081_reg_names },
   { "r3081", mips_r3081_reg_names },
+  { "lsi33k", mips_lsi33k_reg_names },
   { NULL, NULL }
 };
 
@@ -177,6 +203,39 @@ mips_find_saved_regs (fci)
   fci->saved_regs = (struct frame_saved_regs *)
     obstack_alloc (&frame_cache_obstack, sizeof(struct frame_saved_regs));
   memset (fci->saved_regs, 0, sizeof (struct frame_saved_regs));
+
+  /* If it is the frame for sigtramp, the saved registers are located
+     in a sigcontext structure somewhere on the stack.
+     If the stack layout for sigtramp changes we might have to change these
+     constants and the companion fixup_sigtramp in mdebugread.c  */
+#ifndef SIGFRAME_BASE
+/* To satisfy alignment restrictions, sigcontext is located 4 bytes
+   above the sigtramp frame.  */
+#define SIGFRAME_BASE		4
+#define SIGFRAME_PC_OFF		(SIGFRAME_BASE + 2 * 4)
+#define SIGFRAME_REGSAVE_OFF	(SIGFRAME_BASE + 3 * 4)
+#define SIGFRAME_FPREGSAVE_OFF	(SIGFRAME_REGSAVE_OFF + 32 * 4 + 3 * 4)
+#endif
+#ifndef SIGFRAME_REG_SIZE
+#define SIGFRAME_REG_SIZE	4
+#endif
+  if (fci->signal_handler_caller)
+    {
+      for (ireg = 0; ireg < 32; ireg++)
+	{
+ 	  reg_position = fci->frame + SIGFRAME_REGSAVE_OFF
+			 + ireg * SIGFRAME_REG_SIZE;
+ 	  fci->saved_regs->regs[ireg] = reg_position;
+	}
+      for (ireg = 0; ireg < 32; ireg++)
+	{
+ 	  reg_position = fci->frame + SIGFRAME_FPREGSAVE_OFF
+			 + ireg * SIGFRAME_REG_SIZE;
+ 	  fci->saved_regs->regs[FP0_REGNUM + ireg] = reg_position;
+	}
+      fci->saved_regs->regs[PC_REGNUM] = fci->frame + SIGFRAME_PC_OFF;
+      return;
+    }
 
   proc_desc = fci->proc_desc;
   if (proc_desc == NULL)
@@ -291,32 +350,12 @@ read_next_frame_reg(fi, regno)
      struct frame_info *fi;
      int regno;
 {
-  /* If it is the frame for sigtramp we have a complete sigcontext
-     somewhere above the frame and we get the saved registers from there.
-     If the stack layout for sigtramp changes we might have to change these
-     constants and the companion fixup_sigtramp in mdebugread.c  */
-#ifndef SIGFRAME_BASE
-/* To satisfy alignment restrictions the sigcontext is located 4 bytes
-   above the sigtramp frame.  */
-#define SIGFRAME_BASE		4
-#define SIGFRAME_PC_OFF		(SIGFRAME_BASE + 2 * 4)
-#define SIGFRAME_REGSAVE_OFF	(SIGFRAME_BASE + 3 * 4)
-#endif
-#ifndef SIGFRAME_REG_SIZE
-#define SIGFRAME_REG_SIZE	4
-#endif
   for (; fi; fi = fi->next)
     {
-      if (fi->signal_handler_caller)
-	{
-	  int offset;
-	  if (regno == PC_REGNUM) offset = SIGFRAME_PC_OFF;
-	  else if (regno < 32) offset = (SIGFRAME_REGSAVE_OFF
-					 + regno * SIGFRAME_REG_SIZE);
-	  else return 0;
-	  return read_memory_integer(fi->frame + offset, MIPS_REGSIZE);
-	}
-      else if (regno == SP_REGNUM) return fi->frame;
+      /* We have to get the saved sp from the sigcontext
+	 if it is a signal handler frame.  */
+      if (regno == SP_REGNUM && !fi->signal_handler_caller)
+	return fi->frame;
       else
 	{
 	  if (fi->saved_regs == NULL)
@@ -510,6 +549,11 @@ find_proc_desc (pc, next_frame)
 			     0, NULL);
     }
 
+  /* If we never found a PDR for this function in symbol reading, then
+     examine prologues to find the information.  */
+  if (sym && ((mips_extra_func_info_t) SYMBOL_VALUE (sym))->pdr.framereg == -1)
+    sym = NULL;
+
   if (sym)
     {
 	/* IF this is the topmost frame AND
@@ -681,7 +725,7 @@ mips_push_arguments(nargs, args, sp, struct_return, struct_addr)
   int fake_args = 0;
 
   for (i = 0, m_arg = mips_args; i < nargs; i++, m_arg++) {
-    value_ptr arg = value_arg_coerce (args[i]);
+    value_ptr arg = args[i];
     m_arg->len = TYPE_LENGTH (VALUE_TYPE (arg));
     /* This entire mips-specific routine is because doubles must be aligned
      * on 8-byte boundaries. It still isn't quite right, because MIPS decided
@@ -761,6 +805,9 @@ mips_push_dummy_frame()
 #define GEN_REG_SAVE_COUNT 22
 #define FLOAT_REG_SAVE_MASK MASK(0,19)
 #define FLOAT_REG_SAVE_COUNT 20
+#define FLOAT_SINGLE_REG_SAVE_MASK \
+  ((1<<18)|(1<<16)|(1<<14)|(1<<12)|(1<<10)|(1<<8)|(1<<6)|(1<<4)|(1<<2)|(1<<0))
+#define FLOAT_SINGLE_REG_SAVE_COUNT 10
 #define SPECIAL_REG_SAVE_COUNT 4
   /*
    * The registers we must save are all those not preserved across
@@ -784,7 +831,18 @@ mips_push_dummy_frame()
    *  (low memory)
    */
   PROC_REG_MASK(proc_desc) = GEN_REG_SAVE_MASK;
-  PROC_FREG_MASK(proc_desc) = mips_fpu ? FLOAT_REG_SAVE_MASK : 0;
+  switch (mips_fpu)
+    {
+    case MIPS_FPU_DOUBLE:
+      PROC_FREG_MASK(proc_desc) = FLOAT_REG_SAVE_MASK;
+      break;
+    case MIPS_FPU_SINGLE:
+      PROC_FREG_MASK(proc_desc) = FLOAT_SINGLE_REG_SAVE_MASK;
+      break;
+    case MIPS_FPU_NONE:
+      PROC_FREG_MASK(proc_desc) = 0;
+      break;
+    }
   PROC_REG_OFFSET(proc_desc) = /* offset of (Saved R31) from FP */
       -sizeof(long) - 4 * SPECIAL_REG_SAVE_COUNT;
   PROC_FREG_OFFSET(proc_desc) = /* offset of (Saved D18) from FP */
@@ -828,14 +886,16 @@ mips_push_dummy_frame()
   write_memory (sp - 8, buffer, REGISTER_RAW_SIZE (HI_REGNUM));
   read_register_gen (LO_REGNUM, buffer);
   write_memory (sp - 12, buffer, REGISTER_RAW_SIZE (LO_REGNUM));
-  if (mips_fpu)
+  if (mips_fpu != MIPS_FPU_NONE)
     read_register_gen (FCRCS_REGNUM, buffer);
   else
     memset (buffer, 0, REGISTER_RAW_SIZE (FCRCS_REGNUM));
   write_memory (sp - 16, buffer, REGISTER_RAW_SIZE (FCRCS_REGNUM));
-  sp -= 4 * (GEN_REG_SAVE_COUNT
-	     + (mips_fpu ? FLOAT_REG_SAVE_COUNT : 0)
-	     + SPECIAL_REG_SAVE_COUNT);
+  sp -= 4 * (GEN_REG_SAVE_COUNT + SPECIAL_REG_SAVE_COUNT);
+  if (mips_fpu == MIPS_FPU_DOUBLE)
+    sp -= 4 * FLOAT_REG_SAVE_COUNT;
+  else if (mips_fpu == MIPS_FPU_SINGLE)
+    sp -= 4 * FLOAT_SINGLE_REG_SAVE_COUNT;
   write_register (SP_REGNUM, sp);
   PROC_LOW_ADDR(proc_desc) = sp - CALL_DUMMY_SIZE + CALL_DUMMY_START_OFFSET;
   PROC_HIGH_ADDR(proc_desc) = sp;
@@ -894,7 +954,7 @@ mips_pop_frame()
 
       write_register (HI_REGNUM, read_memory_integer(new_sp - 8, 4));
       write_register (LO_REGNUM, read_memory_integer(new_sp - 12, 4));
-      if (mips_fpu)
+      if (mips_fpu != MIPS_FPU_NONE)
 	write_register (FCRCS_REGNUM, read_memory_integer(new_sp - 16, 4));
     }
 }
@@ -903,14 +963,7 @@ static void
 mips_print_register (regnum, all)
      int regnum, all;
 {
-  unsigned char raw_buffer[MAX_REGISTER_RAW_SIZE];
-  struct type *our_type =
-    init_type (TYPE_CODE_INT,
-	       /* We will fill in the length for each register.  */
-	       0,
-	       TYPE_FLAG_UNSIGNED,
-	       NULL,
-	       NULL);
+  char raw_buffer[MAX_REGISTER_RAW_SIZE];
 
   /* Get the data in raw format.  */
   if (read_relative_register_raw_bytes (regnum, raw_buffer))
@@ -921,19 +974,20 @@ mips_print_register (regnum, all)
 
   /* If an even floating pointer register, also print as double. */
   if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM+32
-      && !((regnum-FP0_REGNUM) & 1)) {
-    char dbuffer[MAX_REGISTER_RAW_SIZE]; 
+      && !((regnum-FP0_REGNUM) & 1))
+    {
+      char dbuffer[MAX_REGISTER_RAW_SIZE]; 
 
-    read_relative_register_raw_bytes (regnum, dbuffer);
-    read_relative_register_raw_bytes (regnum+1, dbuffer+4);
+      read_relative_register_raw_bytes (regnum, dbuffer);
+      read_relative_register_raw_bytes (regnum+1, dbuffer+4);
 #ifdef REGISTER_CONVERT_TO_TYPE
-    REGISTER_CONVERT_TO_TYPE(regnum, builtin_type_double, dbuffer);
+      REGISTER_CONVERT_TO_TYPE(regnum, builtin_type_double, dbuffer);
 #endif
-    printf_filtered ("(d%d: ", regnum-FP0_REGNUM);
-    val_print (builtin_type_double, dbuffer, 0,
-	       gdb_stdout, 0, 1, 0, Val_pretty_default);
-    printf_filtered ("); ");
-  }
+      printf_filtered ("(d%d: ", regnum-FP0_REGNUM);
+      val_print (builtin_type_double, dbuffer, 0,
+		 gdb_stdout, 0, 1, 0, Val_pretty_default);
+      printf_filtered ("); ");
+    }
   fputs_filtered (reg_names[regnum], gdb_stdout);
 
   /* The problem with printing numeric register names (r26, etc.) is that
@@ -1174,7 +1228,11 @@ mips_extract_return_value (valtype, regbuf, valbuf)
 {
   int regnum;
   
-  regnum = TYPE_CODE (valtype) == TYPE_CODE_FLT && mips_fpu ? FP0_REGNUM : 2;
+  regnum = 2;
+  if (TYPE_CODE (valtype) == TYPE_CODE_FLT
+       && (mips_fpu == MIPS_FPU_DOUBLE
+	   || (mips_fpu == MIPS_FPU_SINGLE && TYPE_LENGTH (valtype) <= 4)))
+    regnum = FP0_REGNUM;
 
   memcpy (valbuf, regbuf + REGISTER_BYTE (regnum), TYPE_LENGTH (valtype));
 #ifdef REGISTER_CONVERT_TO_TYPE
@@ -1192,7 +1250,12 @@ mips_store_return_value (valtype, valbuf)
   int regnum;
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
   
-  regnum = TYPE_CODE (valtype) == TYPE_CODE_FLT && mips_fpu ? FP0_REGNUM : 2;
+  regnum = 2;
+  if (TYPE_CODE (valtype) == TYPE_CODE_FLT
+       && (mips_fpu == MIPS_FPU_DOUBLE
+	   || (mips_fpu == MIPS_FPU_SINGLE && TYPE_LENGTH (valtype) <= 4)))
+    regnum = FP0_REGNUM;
+
   memcpy(raw_buffer, valbuf, TYPE_LENGTH (valtype));
 
 #ifdef REGISTER_CONVERT_FROM_TYPE
@@ -1216,6 +1279,69 @@ in_sigtramp (pc, ignore)
   if (sigtramp_address == 0)
     fixup_sigtramp ();
   return (pc >= sigtramp_address && pc < sigtramp_end);
+}
+
+/* Command to set FPU type.  mips_fpu_string will have been set to the
+   user's argument.  Set mips_fpu based on mips_fpu_string, and then
+   canonicalize mips_fpu_string.  */
+
+/*ARGSUSED*/
+static void
+mips_set_fpu_command (args, from_tty, c)
+     char *args;
+     int from_tty;
+     struct cmd_list_element *c;
+{
+  char *err = NULL;
+
+  if (mips_fpu_string == NULL || *mips_fpu_string == '\0')
+    mips_fpu = MIPS_FPU_DOUBLE;
+  else if (strcasecmp (mips_fpu_string, "double") == 0
+	   || strcasecmp (mips_fpu_string, "on") == 0
+	   || strcasecmp (mips_fpu_string, "1") == 0
+	   || strcasecmp (mips_fpu_string, "yes") == 0)
+    mips_fpu = MIPS_FPU_DOUBLE;
+  else if (strcasecmp (mips_fpu_string, "none") == 0
+	   || strcasecmp (mips_fpu_string, "off") == 0
+	   || strcasecmp (mips_fpu_string, "0") == 0
+	   || strcasecmp (mips_fpu_string, "no") == 0)
+    mips_fpu = MIPS_FPU_NONE;
+  else if (strcasecmp (mips_fpu_string, "single") == 0)
+    mips_fpu = MIPS_FPU_SINGLE;
+  else
+    err = strsave (mips_fpu_string);
+
+  if (mips_fpu_string != NULL)
+    free (mips_fpu_string);
+
+  switch (mips_fpu)
+    {
+    case MIPS_FPU_DOUBLE:
+      mips_fpu_string = strsave ("double");
+      break;
+    case MIPS_FPU_SINGLE:
+      mips_fpu_string = strsave ("single");
+      break;
+    case MIPS_FPU_NONE:
+      mips_fpu_string = strsave ("none");
+      break;
+    }
+
+  if (err != NULL)
+    {
+      struct cleanup *cleanups = make_cleanup (free, err);
+      error ("Unknown FPU type `%s'.  Use `double', `none', or `single'.",
+	     err);
+      do_cleanups (cleanups);
+    }
+}
+
+static void
+mips_show_fpu_command (args, from_tty, c)
+     char *args;
+     int from_tty;
+     struct cmd_list_element *c;
+{
 }
 
 /* Command to set the processor type.  */
@@ -1332,13 +1458,20 @@ _initialize_mips_tdep ()
   /* Let the user turn off floating point and set the fence post for
      heuristic_proc_start.  */
 
-  add_show_from_set
-    (add_set_cmd ("mipsfpu", class_support, var_boolean,
-		  (char *) &mips_fpu,
-		  "Set use of floating point coprocessor.\n\
-Turn off to avoid using floating point instructions when calling functions\n\
-or dealing with return values.", &setlist),
-     &showlist);
+  c = add_set_cmd ("mipsfpu", class_support, var_string_noescape,
+		   (char *) &mips_fpu_string,
+		   "Set use of floating point coprocessor.\n\
+Set to `none' to avoid using floating point instructions when calling\n\
+functions or dealing with return values.  Set to `single' to use only\n\
+single precision floating point as on the R4650.  Set to `double' for\n\
+normal floating point support.",
+		   &setlist);
+  c->function.sfunc = mips_set_fpu_command;
+  c = add_show_from_set (c, &showlist);
+  c->function.sfunc = mips_show_fpu_command;
+
+  mips_fpu = MIPS_FPU_DOUBLE;
+  mips_fpu_string = strsave ("double");
 
   c = add_set_cmd ("processor", class_support, var_string_noescape,
 		   (char *) &tmp_mips_processor_type,
