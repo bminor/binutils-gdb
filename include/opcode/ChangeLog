@@ -1,3 +1,15 @@
+Thu Jun  3 15:42:59 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* Patches from Jeffrey Law <law@cs.utah.edu>.
+	* hppa.h: Rework single precision FP 
+	instructions so that they correctly disassemble code
+	PA1.1 code.
+
+Thu May 27 19:21:22 1993  Bruce Bauman  (boot@osf.org)
+
+	* i386.h (i386_optab, mov pattern): Remove Mem16 restriction from
+	mov to allow instructions like mov ss,xyz(ecx) to assemble.
+
 Tue May 25 00:39:40 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* hppa.h: Use new version from Utah if OLD_TABLE isn't defined;
