@@ -1360,7 +1360,7 @@ find_default_create_inferior (char *exec_file, char *allargs, char **env)
 static int
 default_region_size_ok_for_hw_watchpoint (int byte_count)
 {
-  return (byte_count <= DEPRECATED_REGISTER_SIZE);
+  return (byte_count <= TYPE_LENGTH (builtin_type_void_data_ptr));
 }
 
 static int

@@ -1,3 +1,9 @@
+2004-01-19  Kevin Buettner  <kevinb@redhat.com>
+
+	* target.c (default_region_size_ok_for_hw_watchpoint): Compare
+	the region size against the size of a pointer, not the size of
+	a register as given by DEPRECATED_REGISTER_SIZE.
+
 2004-01-19  Andrew Cagney  <cagney@redhat.com>
 
 	* tui/tui-regs.h: Include "tui-data.h".
