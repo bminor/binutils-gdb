@@ -6055,7 +6055,7 @@ dump_section (Elf_Internal_Shdr *section, FILE *file)
 
   bytes = section->sh_size;
 
-  if (bytes == 0)
+  if (bytes == 0 || section->sh_type == SHT_NOBITS)
     {
       printf (_("\nSection '%s' has no data to dump.\n"),
 	      SECTION_NAME (section));
