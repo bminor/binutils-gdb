@@ -1,3 +1,9 @@
+2005-01-31  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi/po: New file: Vietnamese translation.
+	* configure.in: (ALL_LINGUAS): Add vi.
+	* configure: Regenerate.
+
 2005-01-27  Andrew Cagney  <cagney@gnu.org>
 
 	* configure: Regenerate to track ../gettext.m4 change.
