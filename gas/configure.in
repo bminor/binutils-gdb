@@ -52,8 +52,11 @@ case "${host}" in
   i386-sun-sunos*)
     gas_host=sun386  
     ;;
-  sparc-sun-*)
+  sparc-sun-sunos*)
     gas_host=sun4 
+    ;;
+  sparc-sun-solaris2)
+    gas_host=sysv
     ;;
   *-*-ansi | *-*-ultrix | *-*-hpux | *-*-sysv*)
     gas_host=${host_os} 
