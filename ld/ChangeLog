@@ -1,3 +1,7 @@
+Fri Feb 25 18:13:46 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* ldgram.y: Include ldlex.h after %token decls, for byacc.
+
 Fri Feb 25 10:47:25 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
         * emultempl/hppaelf.em: First attempt to clean this file up.
