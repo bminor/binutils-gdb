@@ -94,9 +94,8 @@ static void remote_async_open (char *name, int from_tty);
 static void extended_remote_open (char *name, int from_tty);
 static void extended_remote_async_open (char *name, int from_tty);
 
-static void remote_open_1 (char *, int, struct target_ops *, int extended_p);
-static void remote_async_open_1 (char *, int, struct target_ops *,
-				 int extended_p);
+static void remote_open_1 (char *, int, struct target_ops *, int extended_p,
+			   int async_p);
 
 static void remote_close (int quitting);
 
@@ -204,10 +203,6 @@ struct packet_config;
 static void show_packet_config_cmd (struct packet_config *config);
 
 static void update_packet_config (struct packet_config *config);
-
-/* Define the target subroutine names */
-
-void open_remote_target (char *, int, struct target_ops *, int);
 
 void _initialize_remote (void);
 
@@ -2160,14 +2155,14 @@ remote_start_remote (struct ui_out *uiout, void *dummy)
 static void
 remote_open (char *name, int from_tty)
 {
-  remote_open_1 (name, from_tty, &remote_ops, 0);
+  remote_open_1 (name, from_tty, &remote_ops, 0, 0);
 }
 
 /* Just like remote_open, but with asynchronous support. */
 static void
 remote_async_open (char *name, int from_tty)
 {
-  remote_async_open_1 (name, from_tty, &remote_async_ops, 0);
+  remote_open_1 (name, from_tty, &remote_async_ops, 0, 1);
 }
 
 /* Open a connection to a remote debugger using the extended
@@ -2176,14 +2171,16 @@ remote_async_open (char *name, int from_tty)
 static void
 extended_remote_open (char *name, int from_tty)
 {
-  remote_open_1 (name, from_tty, &extended_remote_ops, 1 /*extended_p */ );
+  remote_open_1 (name, from_tty, &extended_remote_ops, 1 /*extended_p */,
+		 0 /* async_p */);
 }
 
 /* Just like extended_remote_open, but with asynchronous support. */
 static void
 extended_remote_async_open (char *name, int from_tty)
 {
-  remote_async_open_1 (name, from_tty, &extended_async_remote_ops, 1 /*extended_p */ );
+  remote_open_1 (name, from_tty, &extended_async_remote_ops,
+		 1 /*extended_p */, 1 /* async_p */);
 }
 
 /* Generic code for opening a connection to a remote target.  */
@@ -2264,7 +2261,7 @@ remote_serial_open (char *name)
 
 static void
 remote_open_1 (char *name, int from_tty, struct target_ops *target,
-	       int extended_p)
+	       int extended_p, int async_p)
 {
   int ex;
   struct remote_state *rs = get_remote_state ();
@@ -2274,7 +2271,8 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
 	   "(e.g. /dev/ttyS0, /dev/ttya, COM1, etc.).");
 
   /* See FIXME above */
-  wait_forever_enabled_p = 1;
+  if (!async_p)
+    wait_forever_enabled_p = 1;
 
   target_preopen (from_tty);
 
@@ -2324,6 +2322,22 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
      someday have a notion of debugging several processes.  */
 
   inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
+
+  if (async_p)
+    {
+      /* With this target we start out by owning the terminal. */
+      remote_async_terminal_ours_p = 1;
+
+      /* FIXME: cagney/1999-09-23: During the initial connection it is
+	 assumed that the target is already ready and able to respond to
+	 requests. Unfortunately remote_start_remote() eventually calls
+	 wait_for_inferior() with no timeout.  wait_forever_enabled_p gets
+	 around this. Eventually a mechanism that allows
+	 wait_for_inferior() to expect/get timeouts will be
+	 implemented. */
+      wait_forever_enabled_p = 0;
+    }
+
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
   /* First delete any symbols previously loaded from shared libraries. */
   no_shared_libraries (NULL, 0);
@@ -2352,126 +2366,13 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
   if (ex < 0)
     {
       pop_target ();
+      if (async_p)
+	wait_forever_enabled_p = 1;
       throw_exception (ex);
     }
 
-  if (extended_p)
-    {
-      /* Tell the remote that we are using the extended protocol.  */
-      char *buf = alloca (rs->remote_packet_size);
-      putpkt ("!");
-      getpkt (buf, (rs->remote_packet_size), 0);
-    }
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
-  /* FIXME: need a master target_open vector from which all 
-     remote_opens can be called, so that stuff like this can 
-     go there.  Failing that, the following code must be copied
-     to the open function for any remote target that wants to 
-     support svr4 shared libraries.  */
-
-  /* Set up to detect and load shared libraries. */
-  if (exec_bfd) 	/* No use without an exec file. */
-    {
-      SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
-      remote_check_symbols (symfile_objfile);
-    }
-#endif
-}
-
-/* Just like remote_open but with asynchronous support. */
-static void
-remote_async_open_1 (char *name, int from_tty, struct target_ops *target,
-		     int extended_p)
-{
-  int ex;
-  struct remote_state *rs = get_remote_state ();
-  if (name == 0)
-    error ("To open a remote debug connection, you need to specify what\n"
-	   "serial device is attached to the remote system\n"
-	   "(e.g. /dev/ttyS0, /dev/ttya, COM1, etc.).");
-
-  target_preopen (from_tty);
-
-  unpush_target (target);
-
-  remote_desc = remote_serial_open (name);
-  if (!remote_desc)
-    perror_with_name (name);
-
-  if (baud_rate != -1)
-    {
-      if (serial_setbaudrate (remote_desc, baud_rate))
-	{
-	  serial_close (remote_desc);
-	  perror_with_name (name);
-	}
-    }
-
-  serial_raw (remote_desc);
-
-  /* If there is something sitting in the buffer we might take it as a
-     response to a command, which would be bad.  */
-  serial_flush_input (remote_desc);
-
-  if (from_tty)
-    {
-      puts_filtered ("Remote debugging using ");
-      puts_filtered (name);
-      puts_filtered ("\n");
-    }
-
-  push_target (target);		/* Switch to using remote target now */
-
-  init_all_packet_configs ();
-
-  general_thread = -2;
-  continue_thread = -2;
-
-  /* Probe for ability to use "ThreadInfo" query, as required.  */
-  use_threadinfo_query = 1;
-  use_threadextra_query = 1;
-
-  /* Without this, some commands which require an active target (such
-     as kill) won't work.  This variable serves (at least) double duty
-     as both the pid of the target process (if it has such), and as a
-     flag indicating that a target is active.  These functions should
-     be split out into seperate variables, especially since GDB will
-     someday have a notion of debugging several processes.  */
-  inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
-
-  /* With this target we start out by owning the terminal. */
-  remote_async_terminal_ours_p = 1;
-
-  /* FIXME: cagney/1999-09-23: During the initial connection it is
-     assumed that the target is already ready and able to respond to
-     requests. Unfortunately remote_start_remote() eventually calls
-     wait_for_inferior() with no timeout.  wait_forever_enabled_p gets
-     around this. Eventually a mechanism that allows
-     wait_for_inferior() to expect/get timeouts will be
-     implemented. */
-  wait_forever_enabled_p = 0;
-
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
-  /* First delete any symbols previously loaded from shared libraries. */
-  no_shared_libraries (NULL, 0);
-#endif
-
-  /* Start the remote connection; if error, discard this target.  See
-     the comments in remote_open_1() for further details such as the
-     need to re-throw the exception.  */
-  ex = catch_exceptions (uiout,
-			 remote_start_remote, NULL,
-			 "Couldn't establish connection to remote"
-			 " target\n",
-			 RETURN_MASK_ALL);
-  if (ex < 0)
-    {
-      pop_target ();
-      wait_forever_enabled_p = 1;
-      throw_exception (ex);
-    }
-
-  wait_forever_enabled_p = 1;
+  if (async_p)
+    wait_forever_enabled_p = 1;
 
   if (extended_p)
     {
@@ -5075,18 +4976,6 @@ push_remote_target (char *name, int from_tty)
 {
   printf_filtered ("Switching to remote protocol\n");
   remote_open (name, from_tty);
-}
-
-/* Other targets want to use the entire remote serial module but with
-   certain remote_ops overridden. */
-
-void
-open_remote_target (char *name, int from_tty, struct target_ops *target,
-		    int extended_p)
-{
-  printf_filtered ("Selecting the %sremote protocol\n",
-		   (extended_p ? "extended-" : ""));
-  remote_open_1 (name, from_tty, target, extended_p);
 }
 
 /* Table used by the crc32 function to calcuate the checksum. */
