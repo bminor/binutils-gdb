@@ -1,3 +1,29 @@
+2000-07-24  Nick Clifton  <nickc@cygnus.com>
+
+	* COPYING: New file: Describes GPL.
+	
+	* basic_blocks.c: Add copyright notice.
+	* basic_blocks.h: Add copyright notice.
+	* call_graph.c: Add copyright notice.
+	* call_graph.h: Add copyright notice.
+	* cg_print.c: Add copyright notice.
+	* cg_print.h: Add copyright notice.
+	* corefile.c: Add copyright notice.
+	* corefile.h: Add copyright notice.
+	* gmon_io.c: Add copyright notice.
+	* gmon_io.h: Add copyright notice.
+	* gmon_out.h: Add copyright notice.
+	* hist.c: Add copyright notice.
+	* hist.h: Add copyright notice.
+	* search_list.c: Add copyright notice.
+	* search_list.h: Add copyright notice.
+	* source.c: Add copyright notice.
+	* source.h: Add copyright notice.
+	* sym_ids.c: Add copyright notice.
+	* sym_ids.h: Add copyright notice.
+	* symtab.c: Add copyright notice.
+	* symtab.h: Add copyright notice.
+
 2000-07-05  Kenneth Block  <krblock@computer.org>
 
         * gprof/gprof.c: Add optional style to demangle switch
