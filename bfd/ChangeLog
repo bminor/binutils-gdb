@@ -1,5 +1,23 @@
 Sat Jan 28 12:48:57 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* som.c (compare_subspaces): New function to sort subspaces by
+	their location in the object file.
+	(setup_sections): When computing the index for each subspace,
+	handle case where setup_sections reads the subspaces in a
+	different order that they appear in the object file.
+	(som_is_space): Also examine the output section for the containing
+	section.
+	(som_is_subspace, som_is_container): Likewise.
+	(som_begin_writing): Don't prepare or write fixups here.  When
+	writing the symbol strings, use the unsorted symbol table.
+	(som_write_object_contents): Don't write the symbol table here.
+	(som_finish_writing): Prepare and write the fixups here.  Likewise
+	for the symbol table.
+	(som_bfd_derive_misc_symbol_info): Undefined symbols always have
+	type SS_UNSAT regardless of BSF_EXPORT.
+	(som_set_reloc_info): Unpack and attach argument location
+	information for R_PCREL_CALL and R_ABS_CALL relocations.
+
 	* som.c (som_object_setup): New heuristic to determine if the
 	entry and flags fields are switched in the exec header.
 
