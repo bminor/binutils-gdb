@@ -1,4 +1,9 @@
 start-sanitize-tic80
+Mon Feb 10 10:32:17 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80.h (tic80_symbol_to_value): Change prototype to match
+	change in function, added class parameter.
+
 Thu Feb  6 17:30:15 1997  Fred Fish  <fnf@cygnus.com>
 
 	* tic80.h (TIC80_OPERAND_ENDMASK): Add for flagging TIc80

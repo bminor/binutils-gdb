@@ -264,6 +264,6 @@ extern const struct predefined_symbol tic80_predefined_symbols[];	/* Translation
 extern const int tic80_num_predefined_symbols;				/* How many members in the array */
 
 const char *tic80_value_to_symbol PARAMS ((int val, int class));	/* Translate value to symbolic name */
-int tic80_symbol_to_value PARAMS ((char *name));			/* Translate symbolic name to value */
+int tic80_symbol_to_value PARAMS ((char *name, int class));		/* Translate symbolic name to value */
 
 #endif /* TIC80_H */
