@@ -11,6 +11,7 @@ if { ([istarget "*-*-elf*"]
      && ![istarget *-*-linux*coff*]
      && ![istarget *-*-linux*oldld*]
 } then {
+    run_dump_test "ehopt0"
     run_dump_test "section0" 
     run_dump_test "section1" 
 }

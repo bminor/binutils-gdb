@@ -1,3 +1,9 @@
+2001-05-14  Richard Henderson  <rth@redhat.com>
+
+	* gas/elf/ehopt0.s: New.
+	* gas/elf/ehopt0.d: New.
+	* gas/elf/elf.exp: Run it.
+
 2001-05-12  Peter Targett  <peter.targett@arccores.com>
 
 	* gas/arc/st.s: Add test case @h30 fixup.
