@@ -1,4 +1,16 @@
 start-sanitize-am33
+Thu Jul 23 09:22:09 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mn10300/am_*.s: Test autoincrement memory loads/stores.
+	* gas/mn10300/basic.exp: Corresponding changes.
+
+end-sanitize-am33
+Tue Jul 21 12:46:59 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* gas/i386/white.s: Add some more whitespace tests.
+	* gas/i386/white.l: Update accordingly.
+
+start-sanitize-am33
 Thu Jul 16 18:16:49 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10300/am33_5.s: Test 4 operand mul, mulu.
