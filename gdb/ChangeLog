@@ -1,3 +1,7 @@
+Fri Jun 13 13:44:47 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* config/mips/tm-tx39[l].h, tx39[l].mt: change r3900 target to tx39.
+
 Fri Jun 13 14:14:10 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-tdep.c (mn10300_analyze_prologue): Fix some comments.
@@ -17,8 +21,8 @@ Fri Jun 13 10:28:09 1997  Fred Fish  <fnf@cygnus.com>
 
 	* maint.c (maintenance_translate_address): Avoid assignment
 	inside if, per GNU coding standards.
-	* symfile.c (simple_read_overlay_table): Avoid assignments inside if, per
-	GNU coding standards.
+	* symfile.c (simple_read_overlay_table): Avoid assignments inside if, 
+	per GNU coding standards.
 
 	* monitor.c (parse_register_dump): Is really a void function.
 	Add prototype.
@@ -143,13 +147,11 @@ Thu Jun  5 11:39:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 	include the section address if the symbol has an appropriate
 	storage class.
 
-start-sanitize-r3900
 Tue Jun  3 16:24:46 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* configure.tgt: add mipsr3900-elf target
 	* config/mips/r3900.mt r3900l.mt tm-r3900.h tm-r3900l.h: ditto
 
-end-sanitize-r3900
 start-sanitize-gdbtk
 Tue Jun  3 15:46:51 1997  Tom Tromey  <tromey@cygnus.com>
 
