@@ -20,9 +20,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$
    $Log$
-   Revision 1.6  1991/05/23 03:49:10  rich
-   new sparc-opcode, new pinsn.
+   Revision 1.7  1991/06/09 20:38:03  rich
+   Don't sort the const array in place.
 
+ * Revision 1.6  1991/05/23  03:49:10  rich
+ * new sparc-opcode, new pinsn.
+ *
  * Revision 1.5  1991/05/22  01:40:35  rich
  * Oops.
  *
@@ -180,6 +183,7 @@ print_insn_sparc (memaddr, buffer,  stream)
 
   register unsigned int i;
 
+#ifdef comment
   if (!opcodes_sorted)
     {
       static int compare_opcodes ();
@@ -187,6 +191,7 @@ print_insn_sparc (memaddr, buffer,  stream)
 	     sizeof (sparc_opcodes[0]), compare_opcodes);
       opcodes_sorted = 1;
     }
+#endif /* comment */
 
 memcpy(&insn,buffer, sizeof (insn));
 
