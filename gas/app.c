@@ -310,7 +310,7 @@ do_scrub_next_char (get, unget)
 	  if (ch == '"')
 	    {
 	      (*unget) (ch);
-	      out_string = "\n.appfile ";
+	      out_string = "\n\t.appfile ";
 	      old_state = 7;
 	      state = -1;
 	      return *out_string++;
@@ -447,10 +447,6 @@ recycle:
 	  not_cpp_line = 1;
 	  goto recycle;
 	}
-#ifdef MRI
-      (*unget) (ch);		/* Put back */
-      return ' ';		/* Always return one space at start of line */
-#endif
 
       /* If we're in state 2, we've seen a non-white
 	 character followed by whitespace.  If the next
@@ -461,6 +457,29 @@ recycle:
 	  state = 0;
 	  return ch;
 	}
+
+#if defined (LABELS_WITHOUT_COLONS) || defined (MRI)
+      /* Like above, but handles case where labels are not
+	 required to have colons (and therefore must be identified
+	 by their *position* in the input stream.)  For a testcase
+	 see hppa/more.parse/labelbug.s.
+
+	 This also has the effect of sometimes leaving a whitespace
+	 before a newline.  Instead of trying to rework this horribly
+	 broken and hairy code I'm just going to zap the extra space here.  */
+      if (state == 2 && lex[ch] == LEX_IS_SYMBOL_COMPONENT)
+	{
+	  (*unget) (ch);
+	  return ' ';
+	}
+
+      /* Don't emit a space before a newline.  */
+      if (state == 2 && lex[ch] == LEX_IS_NEWLINE)
+	{
+	  state = 0;
+	  return ch;
+	}
+#endif
 
       switch (state)
 	{
@@ -640,7 +659,7 @@ recycle:
 	  (*unget) (ch);
 	  old_state = 4;
 	  state = -1;
-	  out_string = ".appline ";
+	  out_string = "\t.appline ";
 	  return *out_string++;
 	}
 
