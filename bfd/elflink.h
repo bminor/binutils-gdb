@@ -663,7 +663,8 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash, skip,
       if (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)
 	{
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_DEF_DYNAMIC;
-	  h->elf_link_hash_flags |= ELF_LINK_HASH_REF_DYNAMIC;
+	  h->elf_link_hash_flags |= (ELF_LINK_HASH_REF_DYNAMIC
+				     | ELF_LINK_DYNAMIC_DEF);
 	}
       /* FIXME: Should we check type and size for protected symbol?  */
       h->size = 0;
@@ -6612,7 +6613,7 @@ elf_link_output_extsym (h, data)
   if (! finfo->info->relocateable
       && ELF_ST_VISIBILITY (sym.st_other)
       && ELF_ST_BIND (sym.st_info) != STB_WEAK
-      && h->root.type != bfd_link_hash_undefweak
+      && h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
     {
       (*_bfd_error_handler)
