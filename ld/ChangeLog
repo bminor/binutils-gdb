@@ -1,5 +1,8 @@
 Thu Feb  1 10:50:46 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emulparams/elf_i386.sh (TEXT_START_ADDR): Change to 0x8048000,
+	for SVR4 compatibility.
+
 	* ldexp.c (exp_fold_tree): Correct handling of ABSOLUTE.
 
 Wed Jan 31 17:30:19 1996  Steve Chamberlain  <sac@slash.cygnus.com>
