@@ -1,3 +1,10 @@
+2001-04-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_saved_pc_after_call): New function.
+	* config/i386/tm-i386.h (SAVED_PC_AFTER_CALL): Redefine in terms
+	of i386_saved_pc_after_call.
+	(i386_saved_pc_after_call): New prototype.
+
 2001-04-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure.host (m68030-sony-*, m68*-isi-*, m68*-sony-*):

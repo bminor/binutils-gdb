@@ -365,6 +365,14 @@ i386_frame_chain (struct frame_info *frame)
   return 0;
 }
 
+/* Immediately after a function call, return the saved pc.  */
+
+CORE_ADDR
+i386_saved_pc_after_call (struct frame_info *frame)
+{
+  return read_memory_unsigned_integer (read_register (SP_REGNUM), 4);
+}
+
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 

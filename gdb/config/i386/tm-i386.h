@@ -68,12 +68,10 @@ struct type;
 
 extern int i386_skip_prologue (int);
 
-/* Immediately after a function call, return the saved pc.  Can't always go
-   through the frames for this because on some machines the new frame is not
-   set up until the new function executes some instructions.  */
+/* Immediately after a function call, return the saved pc.  */
 
-#define SAVED_PC_AFTER_CALL(frame) \
-     (read_memory_unsigned_integer (read_register (SP_REGNUM), 4))
+#define SAVED_PC_AFTER_CALL(frame) i386_saved_pc_after_call (frame)
+extern CORE_ADDR i386_saved_pc_after_call (struct frame_info *frame);
 
 /* Stack grows downward.  */
 
