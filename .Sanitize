@@ -289,6 +289,22 @@ else
 	done
 fi
 
+if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
+	echo Catering to RMS by removing traces of \"gdbtk\"...
+	if [ -n "${verbose}" ] ; then
+		echo Removing traces of \"gdbtk\" from Makefile.in...
+	fi
+	cp Makefile.in new
+	sed -e '/GDBTK_SUPPORT_DIRS=/d' -e 's/ $(GDBTK_SUPPORT_DIRS)//' < Makefile.in > new
+	if [ -n "${safe}" -a ! -f .Recover/Makefile.in ] ; then
+		if [ -n "${verbose}" ] ; then
+			echo Caching Makefile.in in .Recover...
+		fi
+		mv Makefile.in .Recover
+	fi
+	mv new Makefile.in
+fi
+
 for i in * ; do
 	if test ! -d $i && (grep sanitize $i > /dev/null) ; then
 		echo '***' Some mentions of Sanitize are still left in $i! 1>&2
