@@ -941,19 +941,12 @@ doc/gdb.dvi:
 doc/gdb.info:
 	cd doc; $(MAKE) gdb.info $(FLAGS_TO_PASS)
 
-# When DJGPP Make runs on MS-DOS, it downcases all file names, so
-# it doesn't find COPYING, and wants to make it...
-copying.txt:
-	test -f copying.txt || \
-	  (test "$$LN_S" = "ln -s" && \
-	    ln -s $(srcdir)/COPYING copying.txt;) || \
-	  cp -p $(srcdir)/COPYING copying.txt 2>/dev/null || \
-	  ln $(srcdir)/COPYING copying.txt 2>/dev/null || \
-	  cp $(srcdir)/COPYING copying.txt
-
 # Make copying.c from COPYING
-copying.c: copying.txt copying.awk
-	awk -f $(srcdir)/copying.awk < copying.txt > copying.c
+$(srcdir)/copying.c: @MAINTAINER_MODE_TRUE@ \
+		$(srcdir)/COPYING $(srcdir)/copying.awk
+	awk -f $(srcdir)/copying.awk \
+		< $(srcdir)/COPYING > $(srcdir)/copying.tmp
+	mv $(srcdir)/copying.tmp $(srcdir)/copying.c
 
 version.c: Makefile
 	rm -f version.c
@@ -1200,7 +1193,9 @@ complaints.o: complaints.c complaints.h $(defs_h) $(gdbcmd_h)
 # OBSOLETE convex-xdep.o: convex-xdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 # OBSOLETE	$(inferior_h)
 
-copying.o: copying.c $(defs_h) $(gdbcmd_h)
+# Provide explicit rule/dependency - works for more makes.
+copying.o: $(srcdir)/copying.c $(defs_h) $(gdbcmd_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/copying.c
 
 core-aout.o: core-aout.c $(defs_h) $(gdbcore_h) $(value_h) $(inferior_h)
 

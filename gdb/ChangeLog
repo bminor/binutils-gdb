@@ -1,3 +1,14 @@
+Thu Apr 13 13:24:27 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in: Add --enable-maintainer-mode.
+	* aclocal.m4, configure: Re-generate.
+
+	* Makefile.in ($(srcdir)/copying.c): Enable dependencies only when
+ 	on maintainer-mode.  Update copying.c in source directory.
+	(copying.txt): Delete rule.
+	(copying.o): Add explict paths to $(srcdir) and explicit make
+ 	rule.
+
 2000-04-12  Kevin Buettner  <kevinb@redhat.com>
 
 	* ia64-linux-nat.c (IA64_PSR_DB, IA64_PSR_DD): Define.

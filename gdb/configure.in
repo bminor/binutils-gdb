@@ -22,6 +22,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.13)dnl
 AC_INIT(main.c)
 AC_CONFIG_HEADER(config.h:config.in)
+AM_MAINTAINER_MODE
 
 AC_PROG_CC
 AC_AIX
