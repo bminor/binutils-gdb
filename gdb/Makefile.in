@@ -474,6 +474,7 @@ gdb-$(VERSION).tar.Z: ${TARFILES} ${TARDIRS}
 	cd $(DIST)/tconfig ; \
 	  for i in $(SFILES_SUBDIR) $(NONSRC_SUBDIR) $(ALLDEPFILES_SUBDIR); \
 	    do ln -s ../../$$i ../$$i ; done
+	chmod og=u `find $(DIST) -print`
 	tar chf - $(DIST) | compress >gdb-$(VERSION).tar.Z
 	rm -rf $(DIST)
 
