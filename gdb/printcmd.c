@@ -1143,7 +1143,7 @@ address_info (char *exp, int from_tty)
     case LOC_COMPUTED_ARG:
       /* FIXME: cagney/2004-01-26: It should be possible to
 	 unconditionally call the SYMBOL_OPS method when available.
-	 Unfortunatly DWARF 2 stores the frame-base (instead of the
+	 Unfortunately DWARF 2 stores the frame-base (instead of the
 	 function) location in a function's symbol.  Oops!  For the
 	 moment enable this when/where applicable.  */
       SYMBOL_OPS (sym)->describe_location (sym, gdb_stdout);
