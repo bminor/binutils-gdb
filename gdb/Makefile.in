@@ -603,7 +603,7 @@ init.c: $(OBS) $(TSOBS)
 	    -e 's/\.o/.c/' \
 	    -e 's|\([^  ][^     ]*\)|$(srcdir)/\1|g' | \
 	xargs grep -s '^_initialize_[a-z_0-9A-Z]* *(' | \
-	sed -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/  {extern void \1 PARAMS ((void)); \1 ();}/' >>init.c-tmp
+	sed -n -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/  {extern void \1 PARAMS ((void)); \1 ();}/' >>init.c-tmp
 	@echo '}' >>init.c-tmp
 	@mv init.c-tmp init.c
 
