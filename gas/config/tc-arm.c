@@ -11432,6 +11432,32 @@ arm_validate_fix (fixP)
     }
 }
 
+int
+arm_force_relocation (fixp)
+     struct fix * fixp;
+{
+#if defined (OBJ_COFF) && defined (TE_PE)
+  if (fixp->fx_r_type == BFD_RELOC_RVA)
+    return 1;
+#endif
+#ifdef OBJ_ELF
+  if (   fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
+      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
+      || fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH
+      || fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BLX
+      || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX
+      || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BRANCH23)
+    return 1;
+#endif
+
+  /* Resolve these relocations even if the symbol is extern or weak.  */
+  if (fixp->fx_r_type == BFD_RELOC_ARM_IMMEDIATE
+      || fixp->fx_r_type == BFD_RELOC_ARM_ADRL_IMMEDIATE)
+    return 0;
+
+  return S_FORCE_RELOC (fixp->fx_addsy);
+}
+
 #ifdef OBJ_COFF
 /* This is a little hack to help the gas/arm/adrl.s test.  It prevents
    local labels from being added to the output symbol table when they
@@ -11448,6 +11474,7 @@ arm_fix_adjustable (fixP)
   return 0;
 }
 #endif
+
 #ifdef OBJ_ELF
 /* Relocations against Thumb function names must be left unadjusted,
    so that the linker can use this information to correctly set the
@@ -11512,26 +11539,6 @@ armelf_frob_symbol (symp, puntp)
      int *     puntp;
 {
   elf_frob_symbol (symp, puntp);
-}
-
-int
-arm_force_relocation (fixp)
-     struct fix * fixp;
-{
-  if (   fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
-      || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY
-      || fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BRANCH
-      || fixp->fx_r_type == BFD_RELOC_ARM_PCREL_BLX
-      || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX
-      || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BRANCH23)
-    return 1;
-
-  /* Resolve these relocations even if the symbol is extern or weak.  */
-  if (fixp->fx_r_type == BFD_RELOC_ARM_IMMEDIATE
-      || fixp->fx_r_type == BFD_RELOC_ARM_ADRL_IMMEDIATE)
-    return 0;
-
-  return S_FORCE_RELOC (fixp->fx_addsy);
 }
 
 static bfd_reloc_code_real_type

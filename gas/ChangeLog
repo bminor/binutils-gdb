@@ -1,3 +1,11 @@
+2002-12-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-arm.c (arm_force_relocation): Move out of #if OBJ_ELF.
+	Move OBJ_COFF TC_FORCE_RELOCATION code here so that COFF handles
+	ARM_IMMEDIATE and ARM_ADRL_IMMEDIATE relocs as for ELF.
+	* config/tc-arm.h (TC_FORCE_RELOCATION): Define for both ELF and
+	COFF to call arm_force_relocation.
+
 2002-12-04  David Mosberger  <davidm@hpl.hp.com>
 
 	* config/tc-ia64.c (pseudo_func): Add "@pause" constant for "hint"

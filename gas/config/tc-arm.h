@@ -77,8 +77,6 @@ struct fix;
 
 #ifdef OBJ_COFF
 # if defined TE_PE
-#  define TC_FORCE_RELOCATION(x) \
-     ((x)->fx_r_type == BFD_RELOC_RVA || S_FORCE_RELOC ((x)->fx_addsy))
 #   ifdef TE_EPOC
 #    define TARGET_FORMAT (target_big_endian ? "epoc-pe-arm-big" : "epoc-pe-arm-little")
 #   else
@@ -92,10 +90,10 @@ struct fix;
 #ifdef OBJ_ELF
 # define TARGET_FORMAT elf32_arm_target_format()
   extern const char * elf32_arm_target_format PARAMS ((void));
-
-# define TC_FORCE_RELOCATION(FIX) arm_force_relocation (FIX)
-  extern int arm_force_relocation PARAMS ((struct fix *));
 #endif
+
+#define TC_FORCE_RELOCATION(FIX) arm_force_relocation (FIX)
+extern int arm_force_relocation PARAMS ((struct fix *));
 
 #define md_convert_frag(b, s, f) {as_fatal (_("arm convert_frag\n"));}
 
