@@ -1,5 +1,8 @@
 Thu Jul 18 15:39:10 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config.bfd (mips*-*-irix6*): New target.
+	* configure.host: Handle Irix 6 shared library like Irix 5.
+
 	* xcofflink.c (xcoff_link_add_symbols): Don't check an XMC_TD
 	symbol for a magic name.
 	(xcoff_link_input_bfd): Don't change the reloc symbol for an

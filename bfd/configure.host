@@ -56,9 +56,9 @@ SHLIB_CC='$(CC)'
 SHLIB_CFLAGS='-shared'
 if [ "${shared}" = "true" ]; then
   case "${host}" in
-  hppa*-*-*)		picfrag=../config/mh-papic ;;
-  i[3456]86-*-*)	picfrag=../config/mh-x86pic ;;
-  *-*-*)		picfrag=../config/mh-${host_cpu}pic ;;
+  hppa*-*-*)		picfrag=${srcdir}/../config/mh-papic ;;
+  i[3456]86-*-*)	picfrag=${srcdir}/../config/mh-x86pic ;;
+  *-*-*)		picfrag=${srcdir}/../config/mh-${host_cpu}pic ;;
   esac
   if [ -f "${picfrag}" ]; then
     pic=`sed -n -e 's/^PICFLAG[ 	]*=[ 	]*\(.*\)$/\1/p' ${picfrag}`
@@ -81,8 +81,8 @@ if [ "${shared}" = "true" ]; then
     HLDFLAGS='-Wl,+s,+b,$(libdir)'
     RPATH_ENVVAR=SHLIB_PATH
     ;;
-  *-*-irix5*)
-    # -fpic is not needed on Irix 5.
+  *-*-irix[56]*)
+    # -fpic is not needed on Irix 5 or 6.
     PICFLAG=
     SHLIB_CFLAGS='-shared -Wl,-soname,$(SONAME)'
     HLDFLAGS='-Wl,-rpath,$(libdir)'
