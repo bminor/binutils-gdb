@@ -44,68 +44,21 @@ proc gdb_version {} {
 # gdb_load -- load a file into the debugger.
 # We have to stop and start gdb each time we do this, because when
 # vxgdb loads two files in a row, the symbols in the first file loaded
-# take precedence.
+# take precedence. Returns -1 on error, else 0.
 #
 proc gdb_load { arg } {
     global shell_id
-#    global loadpath
-#    global loadfile
-    global base_dir
-    global prompt
-    global GDB
-    gdb_exit
-    spawn_vxgdb
-    set loadfile [file tail $arg]
-    set loadpath [file dirname $arg]
-#    send cd \"$base_dir\"\r
-#    expect {
-#	-re ".*No such file or directory.*$" {
-#	    error "Couldn't change directory. $base_dir doesn't exist"
-#	    return -1
-#	}
-#	"value = 0 = 0x0" {
-#	    verbose "VxWorks changed directory to $base_dir" 1
-#	}
-#	timeout		{ error "Couldn't load $arg into $GDB."; return }
-#    }
-    send "load $arg\n"
-    # Use a very generous timeout because we might be loading across
-    # the Internet.
-    set timeout 600
-    expect {
-	-re "load.*done.*$prompt $" {
-	    verbose "Loaded $arg" 1
-	    }
-	-i $shell_id "Login incorrect." {
-	    error "Login is incorrect."
-	    set timeout 10
-	    return
-	}
-	-re "Load failed on target machine.*$prompt $"	{
-	    error "Couldn't load $arg."
-	    set timeout 10
-	    return
-	}
-	-re "No such file or directory.*$prompt $" {
-	    error "$arg doesn't exist."
-	    set timeout 10
-	    return
-	}
-	-re ".*Reading symbols.*done..*$prompt $" {
-	    verbose "Loaded $arg" 1
-	}
-	-re "$prompt $" {
-	    error "Couldn't load $arg."
-	    set timeout 10
-	    return
-	}
-	timeout {
-	    error "(timeout) couldn't load $arg.";
-	    set timeout 10
-	    return
-	 }
+
+#    gdb_exit
+#    spawn_vxgdb
+    set result 0
+
+    if [vxworks_ld $shell_id $arg]<0 then {
+	error "Couldn't load $arg"
+	return -1
     }
-    set timeout 10
+
+    return [gdb_file_cmd $arg]
 }
 
 #
@@ -128,6 +81,7 @@ proc gdb_start { } {
 	error "Couldn't connect to $targetname."
 	return -1
     }
+    verbose "Spawn id for remote shell is $shell_id"
 
     # reboot vxworks to get a clean start
     if $reboot then {
@@ -150,13 +104,6 @@ proc gdb_start { } {
 	}
 	catch "close -i $shell_id" tmp
 	wait -i $shell_id
-#	exec sleep 30
-
-#	set timeout 60
-#	set shell_id [ eval $connectmode "$targetname" ]
-#	if $shell_id<0 then {
-#	    error "Couldn't connect to $targetname."
-#	}
     }
     set timeout 10
 
@@ -212,9 +159,7 @@ proc spawn_vxgdb { } {
     send "set args main\n"
     expect -re ".*$prompt $" {}
 
-    if $verbose>1 then {
-	send_user "Setting up target, Please wait...\n"
-    }
+    verbose "Setting up target, Please wait..."
     # set targets hostname
     send "target vxworks $targetname\n"
     set timeout 60
@@ -237,7 +182,9 @@ proc spawn_vxgdb { } {
 
 proc gdb_exit { } {
     global shell_id
-    exit_remote_shell $shell_id
+    if [info exists shell_id] then {
+	exit_remote_shell $shell_id
+    }
     catch default_gdb_exit
 }
 
