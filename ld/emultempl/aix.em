@@ -135,7 +135,8 @@ static unsigned int syscall_mask = 0x77;
 /* fake file for -binitfini support */
 static lang_input_statement_type *initfini_file;
 
-/* Whether to do run time linking */
+/* Whether to do run time linking 
+   -brtl enables, -bnortl and -bnortllib disable. */
 static int rtld;
 
 /* Explicit command line library path, -blibpath */
@@ -243,6 +244,8 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     {"bpT", required_argument, NULL, OPTION_PT},
     {"bro", no_argument, &textro, 1},
     {"brtl", no_argument, &rtld, 1},
+    {"bnortl", no_argument, &rtld, 0},
+    {"bnortllib", no_argument, &rtld, 0},
     {"bS", required_argument, NULL, OPTION_MAXSTACK},
     {"bso", no_argument, NULL, OPTION_AUTOIMP},
     {"bstrcmpct", no_argument, NULL, OPTION_STRCMPCT},

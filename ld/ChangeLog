@@ -1,3 +1,8 @@
+2002-05-18  Tom Rix  <trix@redhat.com>
+
+	* emultempl/aix.em (gld*_parse_args): Add -bnortl and -bnortllib 
+	support.
+
 2002-05-17  Marek Michalkiewicz  <marekm@amelek.gda.pl>
 
 	* Makefile.am: Add new emulations avr1, avr2, avr3, avr4, avr5.
