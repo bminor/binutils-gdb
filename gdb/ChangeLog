@@ -1,3 +1,9 @@
+Mon Oct  3 07:48:34 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdbserver/server.c (main): Silently accept all unrecognized
+	requests and send back a zero length acknowledge.  That is what
+	*-stub.c do and is what remote.c expects.
+
 Mon Oct  3 05:11:47 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* corelow.c (core_open):  Copy the modified to_sections_end
