@@ -469,7 +469,7 @@ coff_sh_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
 /* This structure is used to map BFD reloc codes to SH PE relocs.  */
 struct shcoff_reloc_map
 {
-  unsigned char bfd_reloc_val;
+  bfd_reloc_code_real_type bfd_reloc_val;
   unsigned char shcoff_reloc_val;
 };
 

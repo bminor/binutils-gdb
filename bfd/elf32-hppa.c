@@ -2217,10 +2217,6 @@ clobber_millicode_symbols (h, info)
       && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
     {
       elf32_hppa_hide_symbol (info, h, true);
-
-      /* ?!? We only want to remove these from the dynamic symbol table.
-	 Therefore we do not leave ELF_LINK_FORCED_LOCAL set.  */
-      h->elf_link_hash_flags &= ~ELF_LINK_FORCED_LOCAL;
     }
   return true;
 }
@@ -3475,21 +3471,27 @@ final_link_relocate (input_section, contents, rel, value, htab, sym_sec, h)
       r_field = e_fsel;
       break;
 
-    case R_PARISC_DIR21L:
-    case R_PARISC_PCREL21L:
-    case R_PARISC_DPREL21L:
-    case R_PARISC_PLABEL21L:
     case R_PARISC_DLTIND21L:
+    case R_PARISC_PCREL21L:
+    case R_PARISC_PLABEL21L:
+      r_field = e_lsel;
+      break;
+
+    case R_PARISC_DIR21L:
+    case R_PARISC_DPREL21L:
       r_field = e_lrsel;
       break;
 
-    case R_PARISC_DIR17R:
     case R_PARISC_PCREL17R:
-    case R_PARISC_DIR14R:
     case R_PARISC_PCREL14R:
-    case R_PARISC_DPREL14R:
     case R_PARISC_PLABEL14R:
     case R_PARISC_DLTIND14R:
+      r_field = e_rsel;
+      break;
+
+    case R_PARISC_DIR17R:
+    case R_PARISC_DIR14R:
+    case R_PARISC_DPREL14R:
       r_field = e_rrsel;
       break;
 

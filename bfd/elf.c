@@ -652,10 +652,15 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
 		 offset plus size lies within the segment's memory
 		 span and, if the section is loaded, the extent of the
 		 loaded data lies within the extent of the segment.  
-		 If the p_paddr field is not set, we don't alter the 
-		 LMA.  */
+
+		 Note - we used to check the p_paddr field as well, and
+		 refuse to set the LMA if it was 0.  This is wrong
+		 though, as a perfectly valid initialised segment can
+		 have a p_paddr of zero.  Some architectures, eg ARM,
+	         place special significance on the address 0 and
+	         executables need to be able to have a segment which
+	         covers this address.  */
 	      if (phdr->p_type == PT_LOAD
-		  && phdr->p_paddr
 		  && (bfd_vma) hdr->sh_offset >= phdr->p_offset
 		  && (hdr->sh_offset + hdr->sh_size
 		      <= phdr->p_offset + phdr->p_memsz)
@@ -663,15 +668,18 @@ _bfd_elf_make_section_from_shdr (abfd, hdr, name)
 		      || (phdr->p_offset + phdr->p_filesz
 			  >= hdr->sh_offset + hdr->sh_size)))
 		{
-		  /* We used to do a relative adjustment here, but
-		     that doesn't work if the segment is packed with
-		     code from multiple VMAs.  Instead we calculate
-		     the LMA absoultely, based on the LMA of the
-		     segment (it is assumed that the segment will
-		     contain sections with contiguous LMAs, even if
-		     the VMAs are not).  */
-		  newsect->lma = phdr->p_paddr
-		    + hdr->sh_offset - phdr->p_offset;
+		  if ((flags & SEC_LOAD) == 0)
+		    newsect->lma += phdr->p_paddr - phdr->p_vaddr;
+		  else
+		    /* We used to use the same adjustment for SEC_LOAD
+		       sections, but that doesn't work if the segment
+		       is packed with code from multiple VMAs.
+		       Instead we calculate the section LMA based on
+		       the segment LMA.  It is assumed that the
+		       segment will contain sections with contiguous
+		       LMAs, even if the VMAs are not.  */
+		    newsect->lma = (phdr->p_paddr
+				    + hdr->sh_offset - phdr->p_offset);
 		  break;
 		}
 	    }
@@ -1558,6 +1566,9 @@ bfd_section_from_shdr (abfd, shindex)
     case SHT_NOBITS:	/* .bss section.  */
     case SHT_HASH:	/* .hash section.  */
     case SHT_NOTE:	/* .note section.  */
+    case SHT_INIT_ARRAY:	/* .init_array section.  */
+    case SHT_FINI_ARRAY:	/* .fini_array section.  */
+    case SHT_PREINIT_ARRAY:	/* .preinit_array section.  */
       return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
 
     case SHT_SYMTAB:		/* A symbol table */
@@ -2172,6 +2183,12 @@ elf_fake_sections (abfd, asect, failedptrarg)
       this_hdr->sh_type = SHT_REL;
       this_hdr->sh_entsize = bed->s->sizeof_rel;
     }
+  else if (strcmp (asect->name, ".init_array") == 0)
+    this_hdr->sh_type = SHT_INIT_ARRAY;
+  else if (strcmp (asect->name, ".fini_array") == 0)
+    this_hdr->sh_type = SHT_FINI_ARRAY;
+  else if (strcmp (asect->name, ".preinit_array") == 0)
+    this_hdr->sh_type = SHT_PREINIT_ARRAY;
   else if (strncmp (asect->name, ".note", 5) == 0)
     this_hdr->sh_type = SHT_NOTE;
   else if (strncmp (asect->name, ".stab", 5) == 0
@@ -5096,7 +5113,9 @@ _bfd_elf_get_symtab_upper_bound (abfd)
   Elf_Internal_Shdr *hdr = &elf_tdata (abfd)->symtab_hdr;
 
   symcount = hdr->sh_size / get_elf_backend_data (abfd)->s->sizeof_sym;
-  symtab_size = (symcount - 1 + 1) * (sizeof (asymbol *));
+  symtab_size = (symcount + 1) * (sizeof (asymbol *));
+  if (symcount > 0)
+    symtab_size -= sizeof (asymbol *);
 
   return symtab_size;
 }
@@ -5116,7 +5135,9 @@ _bfd_elf_get_dynamic_symtab_upper_bound (abfd)
     }
 
   symcount = hdr->sh_size / get_elf_backend_data (abfd)->s->sizeof_sym;
-  symtab_size = (symcount - 1 + 1) * (sizeof (asymbol *));
+  symtab_size = (symcount + 1) * (sizeof (asymbol *));
+  if (symcount > 0)
+    symtab_size -= sizeof (asymbol *);
 
   return symtab_size;
 }
@@ -6149,6 +6170,8 @@ elfcore_grok_psinfo (abfd, note)
 #endif /* defined (HAVE_PRPSINFO_T) || defined (HAVE_PSINFO_T) */
 
 #if defined (HAVE_PSTATUS_T)
+static boolean elfcore_grok_pstatus PARAMS ((bfd *, Elf_Internal_Note *));
+
 static boolean
 elfcore_grok_pstatus (abfd, note)
      bfd *abfd;
@@ -6186,6 +6209,8 @@ elfcore_grok_pstatus (abfd, note)
 #endif /* defined (HAVE_PSTATUS_T) */
 
 #if defined (HAVE_LWPSTATUS_T)
+static boolean elfcore_grok_lwpstatus PARAMS ((bfd *, Elf_Internal_Note *));
+
 static boolean
 elfcore_grok_lwpstatus (abfd, note)
      bfd *abfd;
@@ -6599,6 +6624,38 @@ elfcore_write_prstatus (abfd, buf, bufsiz, pid, cursig, gregs)
 }
 #endif /* HAVE_PRSTATUS_T */
 
+#if defined (HAVE_LWPSTATUS_T)
+char *
+elfcore_write_lwpstatus (abfd, buf, bufsiz, pid, cursig, gregs)
+     bfd *abfd;
+     char *buf;
+     int *bufsiz;
+     long pid;
+     int cursig;
+     void *gregs;
+{
+  lwpstatus_t lwpstat;
+  char *note_name = "CORE";
+
+  memset (&lwpstat, 0, sizeof (lwpstat));
+  lwpstat.pr_lwpid  = pid >> 16;
+  lwpstat.pr_cursig = cursig;
+#if defined (HAVE_LWPSTATUS_T_PR_REG)
+  memcpy (lwpstat.pr_reg, gregs, sizeof (lwpstat.pr_reg));
+#elif defined (HAVE_LWPSTATUS_T_PR_CONTEXT)
+#if !defined(gregs)
+  memcpy (lwpstat.pr_context.uc_mcontext.gregs,
+	  gregs, sizeof (lwpstat.pr_context.uc_mcontext.gregs));
+#else
+  memcpy (lwpstat.pr_context.uc_mcontext.__gregs,
+	  gregs, sizeof (lwpstat.pr_context.uc_mcontext.__gregs));
+#endif
+#endif
+  return elfcore_write_note (abfd, buf, bufsiz, note_name, 
+			     NT_LWPSTATUS, &lwpstat, sizeof (lwpstat));
+}
+#endif /* HAVE_LWPSTATUS_T */
+
 #if defined (HAVE_PSTATUS_T)
 char *
 elfcore_write_pstatus (abfd, buf, bufsiz, pid, cursig, gregs)
@@ -6612,11 +6669,11 @@ elfcore_write_pstatus (abfd, buf, bufsiz, pid, cursig, gregs)
   pstatus_t pstat;
   char *note_name = "CORE";
 
-  memset (&pstat, 0, sizeof (prstat));
-  pstat.pr_pid = pid;
-  memcpy (pstat.pr_reg, gregs, sizeof (pstat.pr_reg));
-  return elfcore_write_note (abfd, buf, bufsiz, 
-			     note_name, NT_PSTATUS, &pstat, sizeof (pstat));
+  memset (&pstat, 0, sizeof (pstat));
+  pstat.pr_pid = pid & 0xffff;
+  buf = elfcore_write_note (abfd, buf, bufsiz, note_name, 
+			    NT_PSTATUS, &pstat, sizeof (pstat));
+  return buf;
 }
 #endif /* HAVE_PSTATUS_T */
 

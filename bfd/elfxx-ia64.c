@@ -1016,9 +1016,6 @@ elfNN_ia64_section_from_shdr (abfd, hdr, name)
   switch (hdr->sh_type)
     {
     case SHT_IA_64_UNWIND:
-    case SHT_INIT_ARRAY:
-    case SHT_FINI_ARRAY:
-    case SHT_PREINIT_ARRAY:
     case SHT_IA_64_HP_OPT_ANOT:
       break;
 
@@ -1076,12 +1073,6 @@ elfNN_ia64_fake_sections (abfd, hdr, sec)
     }
   else if (strcmp (name, ELF_STRING_ia64_archext) == 0)
     hdr->sh_type = SHT_IA_64_EXT;
-  else if (strcmp (name, ".init_array") == 0)
-    hdr->sh_type = SHT_INIT_ARRAY;
-  else if (strcmp (name, ".fini_array") == 0)
-    hdr->sh_type = SHT_FINI_ARRAY;
-  else if (strcmp (name, ".preinit_array") == 0)
-    hdr->sh_type = SHT_PREINIT_ARRAY;
   else if (strcmp (name, ".HP.opt_annot") == 0)
     hdr->sh_type = SHT_IA_64_HP_OPT_ANOT;
   else if (strcmp (name, ".reloc") == 0)

@@ -1,3 +1,135 @@
+2002-03-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+	Merge from mainline
+	2002-03-27  Gregory Steuck <greg@nest.cx>
+	* elf.c (_bfd_elf_get_symtab_upper_bound): Leave space for
+	terminating NULL if empty symbol table.
+	(_bfd_elf_get_dynamic_symtab_upper_bound): Likewise.
+
+	2002-03-26  Alan Modra  <amodra@bigpond.net.au>
+	* elflink.h (elf_gc_mark): Don't recurse into non-ELF sections.
+
+	2002-03-23  Alan Modra  <amodra@bigpond.net.au>
+	* elf.c (_bfd_elf_make_section_from_shdr): Don't set lma based on
+	section file offset for !SEC_LOAD sections.
+
+	2002-03-20  Daniel Jacobowitz  <drow@mvista.com>
+	* dwarf2.c (struct funcinfo): Move up.
+	(lookup_address_in_function_table): New argument function_ptr.
+	Set it.
+	(lookup_address_in_line_table): New argument function.  If function
+	is non-NULL, use it to handle ``addr'' before the first line note of
+	the function.
+	(comp_unit_find_nearest_line): Update and swap calls to
+	lookup_address_in_function_table and lookup_address_in_line_table.
+	* syms.c (_bfd_stab_section_find_nearest_line): Use the first
+	N_SLINE encountered if we see an N_FUN before any N_SLINE.
+
+	2002-03-18  Alan Modra  <amodra@bigpond.net.au>
+	* libbfd.c (bfd_write_bigendian_4byte_int): Return true iff success.
+	* libbfd.h: Regenerate.
+	* archive.c (coff_write_armap): Pass on failures from
+	bfd_write_bigendian_4byte_int.
+
+	2002-03-14  H.J. Lu <hjl@gnu.org>
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Set the BFD
+	error to bfd_error_nonrepresentable_section for reinit_array
+	section in DSO.
+
+	2002-03-14  Nick Clifton  <nickc@cambridge.redhat.com>
+	* coffcode.h (coff_slurp_symbol_table): When adding BSF_WEAK flag,
+	OR it in rather than replacing previously selected flags.
+	* elfxx-target.h (TARGET_BIG_SYM): Set ar_max_namelen to 15.
+	(TARGET_LITTLE_SYM): Set ar_max_namelen to 15.
+
+	2002-03-14  Alan Modra  <amodra@bigpond.net.au>
+	* elflink.h (elf_bfd_final_link): Revert last change.  Instead,
+	ensure reloc size matches before calling elf_link_input_bfd.
+	Add an assert to check reloc size when counting output relocs.
+
+	2002-03-14  Nick Clifton  <nickc@cambridge.redhat.com>
+	* mmo.c (mmo_get_loc): Return NULL rather than false.
+
+	2002-03-13  Alan Modra  <amodra@bigpond.net.au>
+	* elflink.h: Formatting fixes.
+	(elf_link_output_extsym): Merge undefined and undef weak cases.
+	* elflink.h (elf_bfd_final_link): Only call elf_link_input_bfd
+	when word size of input matches output word size.
+
+	2002-03-07  H.J. Lu  (hjl@gnu.org)
+	* coff-sh.c (shcoff_reloc_map): Use bfd_reloc_code_real_type
+	as the type for bfd_reloc_val.
+
+	2002-03-05  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+	* elf-hppa.h (elf_hppa_is_dynamic_loader_symbol): New function.
+	(elf_hppa_relocate_section): Ignore undefined dynamic loader symbols.
+	(elf_hppa_final_link_relocate): Correct relocations for indirect
+	references to local data through the DLT.  Fix .opd creation for
+	local symbols using R_PARISC_LTOFF_FPTR32 and R_PARISC_FPTR64
+	relocations.  Use e_lsel selector for R_PARISC_DLTIND21L,
+	R_PARISC_LTOFF_FPTR21L and R_PARISC_LTOFF_TP21L as per
+	"Processor-Specific ELF for PA_RISC, Version 1.43" document.
+	Similarly, use e_rsel for DLT and LTOFF 'R' relocations.
+	* elf32-hppa.c (final_link_relocate): Revise relocation selectors
+	as per "Processor-Specific ELF for PA_RISC, Version 1.43" document.
+
+	2002-03-05  Jakub Jelinek  <jakub@redhat.com>
+	* merge.c (_bfd_merge_sections): Don't segfault if there
+	is nothing to merge due to GC.
+
+	2002-03-05  Alan Modra  <amodra@bigpond.net.au>
+	* elf32-hppa.c (clobber_millicode_symbols): Remove hack to keep
+	symbols that have been forced local.
+	* elflink.h (elf_bfd_final_link): Call elf_link_output_extsym
+	to output forced local syms for non-shared link.
+	(elf_link_output_extsym): Tweak condition for calling backend
+	adjust_dynamic_symbol so that previous behaviour is kept.
+	Whitespace changes throughout file.
+
+	2002-03-04  H.J. Lu <hjl@gnu.org>
+	* elf.c (bfd_section_from_shdr): Handle special sections,
+	.init_array, .fini_array and .preinit_array.
+	(elf_fake_sections): Likewise.
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Create the
+	DT entry only if the section is in output for .init_array,
+	.fini_array and .preinit_array. Complain about .preinit_array
+	section in DSO.
+	(elf_bfd_final_link): Warn zero size for .init_array,
+	.fini_array and .preinit_array sections.
+	* elfxx-ia64.c (elfNN_ia64_section_from_shdr): Remove
+	SHT_INIT_ARRAY, SHT_FINI_ARRAY and SHT_PREINIT_ARRAY.
+	(elfNN_ia64_fake_sections): Remove .init_array, .fini_array and
+	.preinit_array.
+
+	2002-03-01  David Mosberger  <davidm@hpl.hp.com>
+	* elflink.h (size_dynamic_sections): If section named
+	".preinit_array" exists, create DT_PREINIT_ARRAY and
+	DT_PREINIT_ARRAYSZ entries in dynamic table.  Analogously for
+	".init_array" and ".fini_array".
+	(elf_bfd_final_link): Handle DT_PREINIT_ARRAYSZ, DT_INIT_ARRAYSZ,
+	DT_FINI_ARRAYSZ, DT_PREINIT_ARRAY, DT_INIT_ARRAY, and
+	DT_FINI_ARRAY.
+
+	2002-02-19  Frank Ch. Eigler  <fche@redhat.com>
+	* syms.c (stt[]): Sorted.  Added .init/.fini -> "t" mapping.
+
+	2002-02-13  Nick Clifton  <nickc@cambridge.redhat.com>
+	* elf.c (_bfd_elf_make_section_from_shdr): Do not insist on
+	non-zero physical addresses when adjusting the LMAs of new
+	sections.
+
+	2002-02-11  Michael Snyder  <msnyder@redhat.com>
+	* elf-bfd.h (elfcore_write_lwpstatus): Add prototype.
+	* elf.c (elfcore_grok_pstatus): Add prototype.
+	(elfcore_grok_lwpstatus): Add prototype.
+	(elfcore_write_lwpstatus): New function.
+	(elfcore_write_pstatus): Fix typo, eliminate unnecessary memcpy.
+
 2002-03-20  Tom Rix  <trix@redhat.com>
 
 	* coff-rs6000.c (_bfd_xcoff_stat_arch_elt): Renamed from 

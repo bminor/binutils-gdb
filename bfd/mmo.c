@@ -1523,7 +1523,7 @@ mmo_get_loc (sec, vma, size)
   entry = (mmo_data_list_type *)
     bfd_zalloc (sec->owner, sizeof (mmo_data_list_type) + allocated_size);
   if (entry == NULL)
-    return false;
+    return NULL;
   entry->where = vma;
   entry->size = size;
   entry->allocated_size = allocated_size;
