@@ -325,14 +325,14 @@ trace_output (result)
 
 	case OP_ACCUM:
 	case OP_ACCUM_OUTPUT:
-	  (*d10v_callback->printf_filtered) (d10v_callback, " :: %*s0x%.2x%.8lx F0=%d F1=%d C=%d\n", SIZE_VALUES-10, "",
+	  (*d10v_callback->printf_filtered) (d10v_callback, " :: %*s0x%.2x%.8lx F0=%d F1=%d C=%d\n", SIZE_VALUES-12, "",
 					     ((int)(State.a[OP[0]] >> 32) & 0xff),
 					     ((unsigned long)State.a[OP[0]]) & 0xffffffff,
 					     State.F0 != 0, State.F1 != 0, State.C != 0);
 	  break;
 
 	case OP_ACCUM_REVERSE:
-	  (*d10v_callback->printf_filtered) (d10v_callback, " :: %*s0x%.2x%.8lx F0=%d F1=%d C=%d\n", SIZE_VALUES-10, "",
+	  (*d10v_callback->printf_filtered) (d10v_callback, " :: %*s0x%.2x%.8lx F0=%d F1=%d C=%d\n", SIZE_VALUES-12, "",
 					     ((int)(State.a[OP[1]] >> 32) & 0xff),
 					     ((unsigned long)State.a[OP[1]]) & 0xffffffff,
 					     State.F0 != 0, State.F1 != 0, State.C != 0);
@@ -1913,8 +1913,14 @@ OP_3200 ()
 {
   int64 tmp;
   trace_input ("sll", OP_ACCUM, OP_REG, OP_VOID);
-  if (State.regs[OP[1]] & 31 <= 16)
+  if ((State.regs[OP[1]] & 31) <= 16)
     tmp = SEXT40 (State.a[OP[0]]) << (State.regs[OP[1]] & 31);
+  else
+    {
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: shift value %d too large.\n", State.regs[OP[1]] & 31);
+      State.exception = SIGILL;
+      return;
+    }
 
   if (State.ST)
     {
@@ -1990,8 +1996,15 @@ void
 OP_3400 ()
 {
   trace_input ("sra", OP_ACCUM, OP_REG, OP_VOID);
-  if (State.regs[OP[1]] & 31 <= 16)
+  if ((State.regs[OP[1]] & 31) <= 16)
     State.a[OP[0]] >>= (State.regs[OP[1]] & 31);
+  else
+    {
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: shift value %d too large.\n", State.regs[OP[1]] & 31);
+      State.exception = SIGILL;
+      return;
+    }
+
   trace_output (OP_ACCUM);
 }
 
@@ -2030,8 +2043,15 @@ void
 OP_3000 ()
 {
   trace_input ("srl", OP_ACCUM, OP_REG, OP_VOID);
-  if (State.regs[OP[1]] & 31 <= 16)
+  if ((State.regs[OP[1]] & 31) <= 16)
     State.a[OP[0]] >>= (State.regs[OP[1]] & 31);
+  else
+    {
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: shift value %d too large.\n", State.regs[OP[1]] & 31);
+      State.exception = SIGILL;
+      return;
+    }
+
   trace_output (OP_ACCUM);
 }
 

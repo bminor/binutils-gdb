@@ -1,3 +1,9 @@
+Mon Sep  9 13:27:26 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* simops.c (trace_output): Properly align accumulator output.
+	(OP_3{0,2,4}00): Properly parenthesize test expression.  Add error
+	if shift count is too high.
+
 Fri Sep  6 17:56:17 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* simops.c (OP_2600, OP_2601): Changed min and max comparisons
