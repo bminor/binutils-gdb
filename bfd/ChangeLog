@@ -1,3 +1,11 @@
+start-sanitize-sky
+Sat Dec 12 08:52:41 1998  Doug Evans  <devans@charmed.cygnus.com>
+
+	Mon Aug 10 18:59:42 EDT 1998  Jim Lemke  <jlemke@cygnus.com>
+
+	* config.bfd (mips64el-skyb-elf): added new target
+
+end-sanitize-sky
 1998-12-11  Ulrich Drepper  <drepper@cygnus.com>
 
 	* elf32-i386.c: Remove leaked development code from patch
