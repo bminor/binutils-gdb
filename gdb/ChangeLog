@@ -1,6 +1,15 @@
 Wed Sep  8 13:01:10 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	Gcc lint.
+	* blockframe.c (get_prev_frame_info): initialize address.
+	* breakpoint.c (bpstat_copy): initialize retval.
+	  (bpstat_stop_status): initialize value_is_zero.
+	  (bpstat_what): initialize bs_class.
+	  (breakpoint_1, mention): add do-nothing case for bp_step_resume.
+	  (break_command_1): initialize cond_end, addr_end, &
+	  canonical_strings_chain.
+	  (enable_breakpoint): initialize save_selected_frame.
+	* buildsym.c (end_symtab): initialize symtab & linetablesize.
 	* c-exp.y (parse_number): initialize i.
 	* c-typeprint.c (c_type_print_varspec_prefix): include
 	  TYPE_CODE_BITSTRING in switch statements and do nothing.

@@ -570,7 +570,7 @@ bpstat_copy (bs)
 {
   bpstat p = NULL;
   bpstat tmp;
-  bpstat retval;
+  bpstat retval = NULL;
 
   if (bs == NULL)
     return bs;
@@ -1100,7 +1100,7 @@ bpstat_stop_status (pc, frame_address)
 	bs->stop = 0;
       else
 	{
-	  int value_is_zero;
+	  int value_is_zero = 0;
 
 	  if (b->cond)
 	    {
@@ -1249,7 +1249,7 @@ bpstat_what (bs)
 
   for (; bs != NULL; bs = bs->next)
     {
-      enum class bs_class;
+      enum class bs_class = no_effect;
       if (bs->breakpoint_at == NULL)
 	/* I suspect this can happen if it was a momentary breakpoint
 	   which has since been deleted.  */
@@ -1352,12 +1352,6 @@ breakpoint_1 (bnum, allflag)
   static char bpenables[] = "ny";
   char wrap_indent[80];
 
-  if (!breakpoint_chain)
-    {
-      printf_filtered ("No breakpoints or watchpoints.\n");
-      return;
-    }
-  
   ALL_BREAKPOINTS (b)
     if (bnum == -1
 	|| bnum == b->number)
@@ -1409,6 +1403,9 @@ breakpoint_1 (bnum, allflag)
 	      }
 	    else
 	      print_address_symbolic (b->address, stdout, demangle, " ");
+	    /* intentional fall-through */
+	  case bp_step_resume: /* do nothing. */
+	    break;
 	  }
 
 	printf_filtered ("\n");
@@ -1434,9 +1431,13 @@ breakpoint_1 (bnum, allflag)
 	    }
       }
 
-  if (!found_a_breakpoint
-      && bnum != -1)
-    printf_filtered ("No breakpoint or watchpoint number %d.\n", bnum);
+  if (!found_a_breakpoint)
+    {
+      if (bnum == -1)
+        printf_filtered ("No breakpoints or watchpoints.\n");
+      else
+        printf_filtered ("No breakpoint or watchpoint number %d.\n", bnum);
+    }
   else
     /* Compare against (CORE_ADDR)-1 in case some compiler decides
        that a comparison of an unsigned with -1 is always false.  */
@@ -1743,6 +1744,7 @@ mention (b)
     case bp_finish:
     case bp_longjmp:
     case bp_longjmp_resume:
+    case bp_step_resume:
       break;
     }
   printf_filtered ("\n");
@@ -1801,13 +1803,13 @@ break_command_1 (arg, tempflag, from_tty)
 
   /* Pointers in arg to the start, and one past the end, of the condition.  */
   char *cond_start = NULL;
-  char *cond_end;
+  char *cond_end = NULL;
   /* Pointers in arg to the start, and one past the end,
      of the address part.  */
   char *addr_start = NULL;
-  char *addr_end;
+  char *addr_end = NULL;
   struct cleanup *old_chain;
-  struct cleanup *canonical_strings_chain;
+  struct cleanup *canonical_strings_chain = NULL;
   char **canonical = (char **)NULL;
   
   int i;
@@ -2615,12 +2617,30 @@ breakpoint_re_set_one (bint)
       for (i = 0; i < sals.nelts; i++)
 	{
 	  resolve_sal_pc (&sals.sals[i]);
+
+	  /* Reparse conditions, they might contain references to the
+	     old symtab.  */
+	  if (b->cond_string != NULL)
+	    {
+	      s = b->cond_string;
+	      if (b->cond)
+		free ((PTR)b->cond);
+	      b->cond = parse_exp_1 (&s, block_for_pc (sals.sals[i].pc), 0);
+	    }
+
+	  /* We need to re-set the breakpoint if the address changes...*/
 	  if (b->address != sals.sals[i].pc
+	      /* ...or new and old breakpoints both have source files, and
+		 the source file name or the line number changes...  */
 	      || (b->source_file != NULL
 		  && sals.sals[i].symtab != NULL
 		  && (!STREQ (b->source_file, sals.sals[i].symtab->filename)
 		      || b->line_number != sals.sals[i].line)
-		  ))
+		  )
+	      /* ...or we switch between having a source file and not having
+		 one.  */
+	      || ((b->source_file == NULL) != (sals.sals[i].symtab == NULL))
+	      )
 	    {
 	      if (b->source_file != NULL)
 		free (b->source_file);
@@ -2632,14 +2652,6 @@ breakpoint_re_set_one (bint)
 			      strlen (sals.sals[i].symtab->filename));
 	      b->line_number = sals.sals[i].line;
 	      b->address = sals.sals[i].pc;
-
-	      if (b->cond_string != NULL)
-		{
-		  s = b->cond_string;
-		  if (b->cond)
-		    free ((PTR)b->cond);
-		  b->cond = parse_exp_1 (&s, block_for_pc (sals.sals[i].pc), 0);
-		}
 	  
 	      check_duplicates (b->address);
 
@@ -2824,7 +2836,7 @@ static void
 enable_breakpoint (bpt)
      struct breakpoint *bpt;
 {
-  FRAME save_selected_frame;
+  FRAME save_selected_frame = NULL;
   int save_selected_frame_level = -1;
   
   bpt->enable = enabled;

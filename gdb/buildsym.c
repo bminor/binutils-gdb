@@ -653,7 +653,7 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile, section)
      struct objfile *objfile;
      int section;
 {
-  register struct symtab *symtab;
+  register struct symtab *symtab = NULL;
   register struct blockvector *blockvector;
   register struct subfile *subfile;
   register struct context_stack *cstk;
@@ -751,7 +751,7 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile, section)
 
   for (subfile = subfiles; subfile; subfile = nextsub)
     {
-      int linetablesize;
+      int linetablesize = 0;
       /* If we have blocks of symbols, make a symtab.
 	 Otherwise, just ignore this file and any line number info in it.  */
       symtab = NULL;
