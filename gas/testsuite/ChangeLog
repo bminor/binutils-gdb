@@ -1,3 +1,10 @@
+start-sanitize-sh3e
+Sun Aug 13 00:39:24 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/sh/basic.exp: Update now that we know the right
+	bit patters for the new sts instructions.
+
+end-sanitize-sh3e
 Thu Aug 10 00:46:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mri/char.d: Fix for little endian machines.

@@ -62,10 +62,10 @@ proc do_fp {} {
 	    -re "^ +\[0-9\]+ 0032 4356\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0034 436A\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0036 4366\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 0038 435A\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 003a 4356\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 003c 436A\[^\n\]*\n"	{ set x [expr $x+1] }
-	    -re "^ +\[0-9\]+ 003e 4366\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 0038 035A\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 003a 4352\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 003c 036A\[^\n\]*\n"	{ set x [expr $x+1] }
+	    -re "^ +\[0-9\]+ 003e 4362\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
 	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
