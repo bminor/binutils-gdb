@@ -1,5 +1,8 @@
 Mon Oct 16 11:27:06 1995  Stu Grossman  (grossman@cygnus.com)
 
+	* gdbtk.c (gdb_disassemble):  Use fprintf_unfiltered instead of
+	fprintf_filtered.
+
 	* Makefile.in sh3-rom.c config/sh/sh.mt config/sh/tm-sh.h:  Add
 	sh3 monitor support.
 	* monitor.c:  Cleanup regexp compilation stuff to make it easier

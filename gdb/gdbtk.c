@@ -790,7 +790,7 @@ gdb_disassemble (clientData, interp, argc, argv)
   CORE_ADDR pc, low, high;
   int mixed_source_and_assembly;
   static disassemble_info di = {
-    (fprintf_ftype) fprintf_filtered, /* fprintf_func */
+    (fprintf_ftype) fprintf_unfiltered, /* fprintf_func */
     gdb_stdout,			/* stream */
     NULL,			/* application_data */
     0,				/* flags */
