@@ -37,3 +37,7 @@ if { [istarget powerpc*-*-*] } then {
 	run_dump_test "booke"
     }
 }
+
+if { [istarget powerpc*-*-*] } then {
+   run_dump_test "e500"
+}
