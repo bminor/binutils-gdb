@@ -1,3 +1,8 @@
+Mon Jan 24 20:51:29 1994  John Gilmore  (gnu@cygnus.com)
+
+	* sparc-nat.c (fetch_inferior_registers, store_inferior_registers):
+	Clean up the changes of 11 Jan, as recommended by Peter Schauer.
+
 Fri Jan 21 19:10:44 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* ch-exp.y (match_string_literal):  Allow a zero-length string.

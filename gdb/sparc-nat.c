@@ -1,5 +1,5 @@
-/* Functions specific to running gdb native on a Sun 4 running sunos4.
-   Copyright (C) 1989, 1992, Free Software Foundation, Inc.
+/* Functions specific to running gdb native on a SPARC running SunOS4.
+   Copyright 1989, 1992, 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -85,12 +85,13 @@ fetch_inferior_registers (regno)
 	 all the regs every time it is called!  FIXME.  */
       register_valid[WIM_REGNUM] = 1;	/* Not true yet, FIXME */
       register_valid[TBR_REGNUM] = 1;	/* Not true yet, FIXME */
-      register_valid[FPS_REGNUM] = 1;	/* Not true yet, FIXME */
       register_valid[CPS_REGNUM] = 1;	/* Not true yet, FIXME */
     }
 
   /* Floating point registers */
-  if (regno == -1 || (regno >= FP0_REGNUM && regno <= FP0_REGNUM + 31))
+  if (regno == -1 ||
+      regno == FPS_REGNUM ||
+      (regno >= FP0_REGNUM && regno <= FP0_REGNUM + 31))
     {
       if (0 != ptrace (PTRACE_GETFPREGS, inferior_pid,
 		       (PTRACE_ARG3_TYPE) &inferior_fp_registers,
@@ -153,6 +154,8 @@ store_inferior_registers (regno)
 	  wanna_store = INT_REGS + STACK_REGS;
 	else if (regno < L0_REGNUM || regno > I7_REGNUM)
 	  wanna_store = INT_REGS;
+	else if (regno == FPS_REGNUM)
+	  wanna_store = FP_REGS;
 	else
 	  wanna_store = STACK_REGS;
       }
