@@ -1,3 +1,16 @@
+Tue Dec 20 13:58:01 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* elf32-i386.c (elf_i386_relocate_section): Correct and expand the
+	list of cases for which relocation need not be computed.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+
+start-sanitize-arc
+Tue Dec 20 09:01:01 1994  Doug Evans  <dje@canuck.cygnus.com>
+
+	* elf32-arc.c (elf_arc_howto_table, R_ARC_B22_PCREL): Value is
+	right-shifted 2 bits.  Fix dst_mask.
+end-sanitize-arc
+
 Mon Dec 19 23:09:16 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* elf32-hppa.c (elf32_hppa_read_symext_info): Delete do_locals and

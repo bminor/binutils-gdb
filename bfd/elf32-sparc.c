@@ -619,11 +619,13 @@ elf32_sparc_adjust_dynamic_symbol (info, h)
 	  return false;
 	}
 
-      /* If we are not generating a shared library, or if the symbol
-         is not defined, set the symbol to this location in the .plt.
-         This is required to make function pointers compare as equal
-         between the normal executable and the shared library.  */
-      if (! info->shared || h->root.type != bfd_link_hash_defined)
+      /* If this symbol is not defined in a regular file, and we are
+	 not generating a shared library, then set the symbol to this
+	 location in the .plt.  This is required to make function
+	 pointers compare as equal between the normal executable and
+	 the shared library.  */
+      if (! info->shared
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
 	  h->root.u.def.section = s;
 	  h->root.u.def.value = s->_raw_size;
@@ -1005,9 +1007,41 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (h->root.type == bfd_link_hash_defined)
 	    {
 	      sec = h->root.u.def.section;
-	      relocation = (h->root.u.def.value
-			    + sec->output_section->vma
-			    + sec->output_offset);
+	      if ((r_type == R_SPARC_WPLT30
+		   && h->plt_offset != (bfd_vma) -1)
+		  || ((r_type == R_SPARC_GOT10
+		       || r_type == R_SPARC_GOT13
+		       || r_type == R_SPARC_GOT22)
+		      && elf_hash_table (info)->dynamic_sections_created)
+		  || (info->shared
+		      && (input_section->flags & SEC_ALLOC) != 0
+		      && (r_type == R_SPARC_8
+			  || r_type == R_SPARC_16
+			  || r_type == R_SPARC_32
+			  || r_type == R_SPARC_DISP8
+			  || r_type == R_SPARC_DISP16
+			  || r_type == R_SPARC_DISP32
+			  || r_type == R_SPARC_WDISP30
+			  || r_type == R_SPARC_WDISP22
+			  || r_type == R_SPARC_HI22
+			  || r_type == R_SPARC_22
+			  || r_type == R_SPARC_13
+			  || r_type == R_SPARC_LO10
+			  || r_type == R_SPARC_UA32
+			  || ((r_type == R_SPARC_PC10
+			       || r_type == R_SPARC_PC22)
+			      && strcmp (h->root.root.string,
+					 "_GLOBAL_OFFSET_TABLE_") != 0))))
+		{
+		  /* In these cases, we don't need the relocation
+                     value.  We check specially because in some
+                     obscure cases sec->output_section will be NULL.  */
+		  relocation = 0;
+		}
+	      else
+		relocation = (h->root.u.def.value
+			      + sec->output_section->vma
+			      + sec->output_offset);
 	    }
 	  else if (h->root.type == bfd_link_hash_weak)
 	    relocation = 0;
