@@ -51,6 +51,7 @@ struct a29k_opcode {
      r        RND--bits 4-6 of the instruction.
      d        FD--bits 2-3 of the instruction.
      f        FS--bits 0-1 of the instruction.
+     I	      ID--bits 16-17 of the instruction.
 
      Extensions for 29050:
 
@@ -179,9 +180,9 @@ static CONST struct a29k_opcode a29k_opcodes[] =
 { "inbyte", 0x0d000000, "c,a,i" },
 { "inhw", 0x78000000, "c,a,b" },
 { "inhw", 0x79000000, "c,a,i" },
-{ "inv", 0x9f000000, "" },
+{ "inv", 0x9f000000, "I" },
 { "iret", 0x88000000, "" },
-{ "iretinv", 0x8c000000, "" },
+{ "iretinv", 0x8c000000, "I" },
 { "jmp", 0xa0000000, "P" },
 { "jmp", 0xa1000000, "A" },
 { "jmpf", 0xa4000000, "a,P" },
