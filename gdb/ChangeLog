@@ -1,3 +1,8 @@
+Fri Nov  4 23:47:07 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-tdep.c (hppa_frame_find_saved_regs): Change "frame" to
+	"frame_info" throughout.
+
 Fri Nov  4 16:26:59 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* sparcl-stub.c: get rid of defs.h.

@@ -2020,7 +2020,7 @@ skip_prologue (pc)
 
 void
 hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
-     struct frame_info *frame;
+     struct frame_info *frame_info;
      struct frame_saved_regs *frame_saved_regs;
 {
   CORE_ADDR pc;
@@ -2037,38 +2037,38 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
      examine the dummy code to determine locations of saved registers;
      instead, let find_dummy_frame_regs fill in the correct offsets
      for the saved registers.  */
-  if ((frame->pc >= frame->frame
-       && frame->pc <= (frame->frame + CALL_DUMMY_LENGTH
-			     + 32 * 4 + (NUM_REGS - FP0_REGNUM) * 8
-			     + 6 * 4)))
-    find_dummy_frame_regs (frame, frame_saved_regs);
+  if ((frame_info->pc >= frame_info->frame
+       && frame_info->pc <= (frame_info->frame + CALL_DUMMY_LENGTH
+			     + 32 * 4 +	 (NUM_REGS - FP0_REGNUM) * 8
+			     + 6 * 4)))	
+    find_dummy_frame_regs (frame_info, frame_saved_regs);
 
   /* Interrupt handlers are special too.  They lay out the register
      state in the exact same order as the register numbers in GDB.  */
-  if (pc_in_interrupt_handler (frame->pc))
+  if (pc_in_interrupt_handler (frame_info->pc))
     {
       for (i = 0; i < NUM_REGS; i++)
 	{
 	  /* SP is a little special.  */
 	  if (i == SP_REGNUM)
 	    frame_saved_regs->regs[SP_REGNUM]
-	      = read_memory_integer (frame->frame + SP_REGNUM * 4, 4);
+	      = read_memory_integer (frame_info->frame + SP_REGNUM * 4, 4);
 	  else
-	    frame_saved_regs->regs[i] = frame->frame + i * 4;
+	    frame_saved_regs->regs[i] = frame_info->frame + i * 4;
 	}
       return;
     }
 
   /* Handle signal handler callers.  */
-  if (frame->signal_handler_caller)
+  if (frame_info->signal_handler_caller)
     {
-      FRAME_FIND_SAVED_REGS_IN_SIGTRAMP (frame, frame_saved_regs);
+      FRAME_FIND_SAVED_REGS_IN_SIGTRAMP (frame_info, frame_saved_regs);
       return;
     }
 
   /* Get the starting address of the function referred to by the PC
      saved in frame.  */
-  pc = get_pc_function_start (frame->pc);
+  pc = get_pc_function_start (frame_info->pc);
 
   /* Yow! */
   u = find_unwind_entry (pc);
@@ -2101,7 +2101,7 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
   /* The frame always represents the value of %sp at entry to the
      current function (and is thus equivalent to the "saved" stack
      pointer.  */
-  frame_saved_regs->regs[SP_REGNUM] = frame->frame;
+  frame_saved_regs->regs[SP_REGNUM] = frame_info->frame;
 
   /* Loop until we find everything of interest or hit a branch.
 
@@ -2133,7 +2133,7 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
       if (inst == 0x6bc23fd9)
 	{
 	  save_rp = 0;
-	  frame_saved_regs->regs[RP_REGNUM] = frame->frame - 20;
+	  frame_saved_regs->regs[RP_REGNUM] = frame_info->frame - 20;
 	}
 
       /* Just note that we found the save of SP into the stack.  The
@@ -2151,16 +2151,16 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
 	  /* stwm with a positive displacement is a *post modify*.  */
 	  if ((inst >> 26) == 0x1b
 	      && extract_14 (inst) >= 0)
-	    frame_saved_regs->regs[reg] = frame->frame;
+	    frame_saved_regs->regs[reg] = frame_info->frame;
 	  else
 	    {
 	      /* Handle code with and without frame pointers.  */
 	      if (u->Save_SP)
 		frame_saved_regs->regs[reg]
-		  = frame->frame + extract_14 (inst);
+		  = frame_info->frame + extract_14 (inst);
 	      else
 		frame_saved_regs->regs[reg]
-		  = frame->frame + (u->Total_frame_size << 3)
+		  = frame_info->frame + (u->Total_frame_size << 3)
 		    + extract_14 (inst);
 	    }
 	}
@@ -2192,13 +2192,13 @@ hppa_frame_find_saved_regs (frame_info, frame_saved_regs)
 	      /* 1st HP CC FP register store.  After this instruction
 		 we've set enough state that the GCC and HPCC code are
 		 both handled in the same manner.  */
-	      frame_saved_regs->regs[reg + FP4_REGNUM + 4] = frame->frame;
+	      frame_saved_regs->regs[reg + FP4_REGNUM + 4] = frame_info->frame;
 	      fp_loc = 8;
 	    }
 	  else
 	    {
 	      frame_saved_regs->regs[reg + FP0_REGNUM + 4]
-		= frame->frame + fp_loc;
+		= frame_info->frame + fp_loc;
 	      fp_loc += 8;
 	    }
 	}
