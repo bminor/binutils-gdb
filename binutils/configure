@@ -4445,7 +4445,7 @@ do
     if test "x$targ" = "xall"; then
         all_targets=true
 	BUILD_NLMCONV='$(NLMCONV_PROG)$(EXEEXT)'
-	BUILD_SRCONV='$(SRCONV_PROG)$(EXEEXT)'
+	BUILD_SRCONV='$(SRCONV_PROG)'
 	NLMCONV_DEFS="-DNLMCONV_I386 -DNLMCONV_ALPHA -DNLMCONV_POWERPC -DNLMCONV_SPARC"
     else
 	case $targ in
@@ -4467,7 +4467,7 @@ do
 	  ;;
 	esac
 	case $targ in
-	*-*-hms*) BUILD_SRCONV='$(SRCONV_PROG)$(EXEEXT)' ;;
+	*-*-hms*) BUILD_SRCONV='$(SRCONV_PROG)' ;;
 	esac
 	case $targ in
 	arm-*pe*)
@@ -4533,7 +4533,7 @@ EOF
 # Ultrix sh set writes to stderr and can't be redirected directly,
 # and sets the high bit in the cache file unless we assign to the vars.
 (set) 2>&1 |
-  case `(ac_space=' '; set) 2>&1 | grep ac_space` in
+  case `(ac_space=' '; set) 2>&1` in
   *ac_space=\ *)
     # `set' does not quote correctly, so add quotes (double-quote substitution
     # turns \\\\ into \\, and sed turns \\ into \).
@@ -4924,7 +4924,6 @@ fi; done
 
 EOF
 cat >> $CONFIG_STATUS <<EOF
-
 
 EOF
 cat >> $CONFIG_STATUS <<\EOF

@@ -1,3 +1,12 @@
+Wed Apr 29 18:05:52 1998  Geoffrey Noer <noer@cygnus.com>
+
+	* configure.in: Stop appending EXEEXT to the end of
+	SRCONV_PROG (wrong because that variable may contain multiple
+	programs)
+	* Makefile.in: instead, add EXEEXTs to each SRCONV_PROG
+	program
+	* configure: regenerate
+
 Tue Apr 28 19:14:34 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* addr2line.c (main): Conditionally call setlocale.
