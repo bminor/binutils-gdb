@@ -1,3 +1,7 @@
+Sat Nov 11 07:27:41 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* options.c (print_options): Fix typo.
+
 Fri Nov 10 06:39:46 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (--enable-sim-{opcode,config}): Use $srcdir when
