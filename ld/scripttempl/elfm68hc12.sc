@@ -40,7 +40,7 @@ CTOR=".ctors ${CONSTRUCTING-0} :
 
     ${CONSTRUCTING+${CTOR_END}}
     ${CONSTRUCTING+ PROVIDE(__CTOR_END__ = .); }
-  } ${RELOCATING+ > ${DATA_MEMORY}}"
+  } ${RELOCATING+ > ${TEXT_MEMORY}}"
 
 DTOR="  .dtors	${CONSTRUCTING-0} :
   {
@@ -52,7 +52,7 @@ DTOR="  .dtors	${CONSTRUCTING-0} :
     KEEP (*(SORT(.dtors.*)))
     KEEP (*(.dtors)) */
     ${CONSTRUCTING+ PROVIDE(__DTOR_END__ = .); }
-  } ${RELOCATING+ > ${DATA_MEMORY}}"
+  } ${RELOCATING+ > ${TEXT_MEMORY}}"
 
 
 VECTORS="
