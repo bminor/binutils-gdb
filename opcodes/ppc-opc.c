@@ -2282,10 +2282,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "evmwhumi",  VX(4, 1100), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evmwhumia", VX(4, 1132), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evmwlssf",  VX(4, 1091), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
-{ "evmwlssfa", VX(4, 1123), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
-{ "evmwlsmf",  VX(4, 1099), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
-{ "evmwlsmfa", VX(4, 1131), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evmwlumi",  VX(4, 1096), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evmwlumia", VX(4, 1128), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
@@ -2296,9 +2292,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "evmwhusiaa",VX(4, 1348), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evmwhumiaa",VX(4, 1356), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evmwlssfaaw",VX(4, 1347), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evmwlssiaaw",VX(4, 1345), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
-{ "evmwlsmfaaw",VX(4, 1355), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evmwlsmiaaw",VX(4, 1353), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evmwlusiaaw",VX(4, 1344), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evmwlumiaaw",VX(4, 1352), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
@@ -2310,9 +2304,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "evmwhusian",VX(4, 1476), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evmwhumian",VX(4, 1484), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 
-{ "evmwlssfanw",VX(4, 1475), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evmwlssianw",VX(4, 1473), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
-{ "evmwlsmfanw",VX(4, 1483), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evmwlsmianw",VX(4, 1481), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evmwlusianw",VX(4, 1472), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
 { "evmwlumianw",VX(4, 1480), VX_MASK,	PPCSPE,		{ RS, RA, RB } },
