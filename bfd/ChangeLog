@@ -1,5 +1,9 @@
 Thu Mar  6 13:51:51 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* elf32-mn10300.c (mn10300_elf_final_link_relocate): New function.
+	(mn10300_elf_relocate_section): Likewise.
+	(elf_backend_relocate_section): Define.
+
 	* elf32-mn10300.c (reloc_type): Remove PCREL{8,16,32}_{1,2}BYTE
 	relocs.  Replace them with generic PCREL_{8,16,32} relocs.
 	(elf32_mn10300_howto_table): Likewise.

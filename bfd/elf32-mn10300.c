@@ -198,6 +198,254 @@ mn10300_info_to_howto (abfd, cache_ptr, dst)
   cache_ptr->howto = &elf_mn10300_howto_table[r_type];
 }
 
+/* Perform a relocation as part of a final link.  */
+static bfd_reloc_status_type
+mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
+				 input_section, contents, offset, value,
+				 addend, info, sym_sec, is_local)
+     reloc_howto_type *howto;
+     bfd *input_bfd;
+     bfd *output_bfd;
+     asection *input_section;
+     bfd_byte *contents;
+     bfd_vma offset;
+     bfd_vma value;
+     bfd_vma addend;
+     struct bfd_link_info *info;
+     asection *sym_sec;
+     int is_local;
+{
+  unsigned long r_type = howto->type;
+  bfd_byte *hit_data = contents + offset;
+
+  switch (r_type)
+    {
+
+    case R_MN10300_NONE:
+      return bfd_reloc_ok;
+
+    case R_MN10300_32:
+      value += addend;
+      bfd_put_32 (input_bfd, value, hit_data);
+      return bfd_reloc_ok;
+
+    case R_MN10300_16:
+      value += addend;
+
+      if ((long)value > 0x7fff || (long)value < -0x8000)
+	return bfd_reloc_overflow;
+
+      bfd_put_16 (input_bfd, value, hit_data);
+      return bfd_reloc_ok;
+
+    case R_MN10300_8:
+      value += addend;
+
+      if ((long)value > 0x7fff || (long)value < -0x8000)
+	return bfd_reloc_overflow;
+
+      bfd_put_8 (input_bfd, value, hit_data);
+      return bfd_reloc_ok;
+
+    case R_MN10300_PCREL8:
+      value -= (input_section->output_section->vma
+		+ input_section->output_offset);
+      value -= offset;
+      value += addend;
+
+      if ((long)value > 0xff || (long)value < -0x100)
+        return bfd_reloc_overflow;
+
+      bfd_put_8 (input_bfd, value, hit_data);
+      return bfd_reloc_ok;
+
+    case R_MN10300_PCREL16:
+      value -= (input_section->output_section->vma
+		+ input_section->output_offset);
+      value -= offset;
+      value += addend;
+
+      if ((long)value > 0xffff || (long)value < -0x10000)
+        return bfd_reloc_overflow;
+
+      bfd_put_16 (input_bfd, value, hit_data);
+      return bfd_reloc_ok;
+
+    case R_MN10300_PCREL32:
+      value -= (input_section->output_section->vma
+		+ input_section->output_offset);
+      value -= offset;
+      value += addend;
+
+      bfd_put_32 (input_bfd, value, hit_data);
+      return bfd_reloc_ok;
+
+    default:
+      return bfd_reloc_notsupported;
+    }
+}
+
+
+/* Relocate an MN10300 ELF section.  */
+static boolean
+mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
+			      contents, relocs, local_syms, local_sections)
+     bfd *output_bfd;
+     struct bfd_link_info *info;
+     bfd *input_bfd;
+     asection *input_section;
+     bfd_byte *contents;
+     Elf_Internal_Rela *relocs;
+     Elf_Internal_Sym *local_syms;
+     asection **local_sections;
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  struct elf_link_hash_entry **sym_hashes;
+  Elf_Internal_Rela *rel, *relend;
+
+  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+  sym_hashes = elf_sym_hashes (input_bfd);
+
+  rel = relocs;
+  relend = relocs + input_section->reloc_count;
+  for (; rel < relend; rel++)
+    {
+      int r_type;
+      reloc_howto_type *howto;
+      unsigned long r_symndx;
+      Elf_Internal_Sym *sym;
+      asection *sec;
+      struct elf_link_hash_entry *h;
+      bfd_vma relocation;
+      bfd_reloc_status_type r;
+
+      r_symndx = ELF32_R_SYM (rel->r_info);
+      r_type = ELF32_R_TYPE (rel->r_info);
+      howto = elf_mn10300_howto_table + r_type;
+
+      if (info->relocateable)
+	{
+	  /* This is a relocateable link.  We don't have to change
+             anything, unless the reloc is against a section symbol,
+             in which case we have to adjust according to where the
+             section symbol winds up in the output section.  */
+	  if (r_symndx < symtab_hdr->sh_info)
+	    {
+	      sym = local_syms + r_symndx;
+	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+		{
+		  sec = local_sections[r_symndx];
+		  rel->r_addend += sec->output_offset + sym->st_value;
+		}
+	    }
+
+	  continue;
+	}
+
+      /* This is a final link.  */
+      h = NULL;
+      sym = NULL;
+      sec = NULL;
+      if (r_symndx < symtab_hdr->sh_info)
+	{
+	  sym = local_syms + r_symndx;
+	  sec = local_sections[r_symndx];
+	  relocation = (sec->output_section->vma
+			+ sec->output_offset
+			+ sym->st_value);
+	}
+      else
+	{
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	    {
+	      sec = h->root.u.def.section;
+	      relocation = (h->root.u.def.value
+			    + sec->output_section->vma
+			    + sec->output_offset);
+	    }
+	  else if (h->root.type == bfd_link_hash_undefweak)
+	    relocation = 0;
+	  else
+	    {
+	      if (! ((*info->callbacks->undefined_symbol)
+		     (info, h->root.root.string, input_bfd,
+		      input_section, rel->r_offset)))
+		return false;
+	      relocation = 0;
+	    }
+	}
+
+      r = mn10300_elf_final_link_relocate (howto, input_bfd, output_bfd,
+					   input_section,
+					   contents, rel->r_offset,
+					   relocation, rel->r_addend,
+					   info, sec, h == NULL);
+
+      if (r != bfd_reloc_ok)
+	{
+	  const char *name;
+	  const char *msg = (const char *)0;
+
+	  if (h != NULL)
+	    name = h->root.root.string;
+	  else
+	    {
+	      name = (bfd_elf_string_from_elf_section
+		      (input_bfd, symtab_hdr->sh_link, sym->st_name));
+	      if (name == NULL || *name == '\0')
+		name = bfd_section_name (input_bfd, sec);
+	    }
+
+	  switch (r)
+	    {
+	    case bfd_reloc_overflow:
+	      if (! ((*info->callbacks->reloc_overflow)
+		     (info, name, howto->name, (bfd_vma) 0,
+		      input_bfd, input_section, rel->r_offset)))
+		return false;
+	      break;
+
+	    case bfd_reloc_undefined:
+	      if (! ((*info->callbacks->undefined_symbol)
+		     (info, name, input_bfd, input_section,
+		      rel->r_offset)))
+		return false;
+	      break;
+
+	    case bfd_reloc_outofrange:
+	      msg = "internal error: out of range error";
+	      goto common_error;
+
+	    case bfd_reloc_notsupported:
+	      msg = "internal error: unsupported relocation error";
+	      goto common_error;
+
+	    case bfd_reloc_dangerous:
+	      msg = "internal error: dangerous error";
+	      goto common_error;
+
+	    default:
+	      msg = "internal error: unknown error";
+	      /* fall through */
+
+	    common_error:
+	      if (!((*info->callbacks->warning)
+		    (info, msg, name, input_bfd, input_section,
+		     rel->r_offset)))
+		return false;
+	      break;
+	    }
+	}
+    }
+
+  return true;
+}
+
 #define TARGET_LITTLE_SYM	bfd_elf32_mn10300_vec
 #define TARGET_LITTLE_NAME	"elf32-mn10300"
 #define ELF_ARCH		bfd_arch_mn10300
@@ -206,6 +454,7 @@ mn10300_info_to_howto (abfd, cache_ptr, dst)
 
 #define elf_info_to_howto	mn10300_info_to_howto
 #define elf_info_to_howto_rel	0
+#define elf_backend_relocate_section mn10300_elf_relocate_section
 
 #define elf_symbol_leading_char '_'
 
