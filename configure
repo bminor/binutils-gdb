@@ -274,7 +274,7 @@ for host in ${hosts} ; do
 
 	host_alias=${host}
 
-	result=`${configsub} ${host}`
+	result=`/bin/sh ${configsub} ${host}`
 	host_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
 	host_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 	host_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
@@ -286,7 +286,7 @@ for host in ${hosts} ; do
 	for target in ${targets} ; do
 
 		target_alias=${target}
-		result=`${configsub} ${target}`
+		result=`/bin/sh ${configsub} ${target}`
 		target_cpu=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\1/'`
 		target_vendor=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\2/'`
 		target_os=`echo $result | sed 's/^\(.*\)-\(.*\)-\(.*\)$/\3/'`
@@ -620,7 +620,11 @@ exit 0
 #
 #
 # $Log$
-# Revision 1.52  1991/10/09 00:48:26  rich
+# Revision 1.53  1991/10/10 00:38:08  rich
+# Call config.sub as "/bin/sh config.sub" instead of directly.  This
+# protects us from the case where config.sub isn't executable.
+#
+# Revision 1.52  1991/10/09  00:48:26  rich
 # Another patch from jim.
 #
 # Revision 1.51  1991/10/08  06:07:58  wilson
