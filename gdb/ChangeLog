@@ -1,3 +1,8 @@
+2004-07-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc64obsd-tdep.c (sparc64obsd_sigreturn_offset): New variable.
+	(sparc64obsd_pc_in_sigtramp): Reorganize to avoid goto.
+
 2004-07-30  Andrew Cagney  <cagney@gnu.org>
 
 	* GDB 6.2 released from gdb_6_2-branch.
