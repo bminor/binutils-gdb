@@ -5,6 +5,13 @@
 	32-bit branch, just set fragP->fr_subtype.  Set fragP->fr_var.
 	<all cases>: Always set fragP->fr_var using md_cris_relax_table.
 	Add cases to cover all relax states.
+	(cris_insn_first_word_frag): New.
+	(md_assemble): Call cris_insn_first_word_frag to get the first
+	frag in an insn, not frag_more.  Don't call dwarf2_emit_insn at
+	end.  Drop variable insn_size.
+	(gen_bdap): Call cris_insn_first_word_frag, not frag_more.
+	(cris_sym_leading_underscore): Wrap first as_bad parameter in _().
+	(cris_sym_no_leading_underscore, s_cris_file, s_cris_loc): Ditto.
 
 	* write.c (write_object_file): Reset broken word state before
 	calling relax_seg.
