@@ -739,6 +739,11 @@ shmedia_md_apply_fix3 (fixS *fixP, valueT *valp)
 			      insn | ((val & (0x3ff << 2)) << (10 - 2)), 4);
 	  break;
 
+	case BFD_RELOC_SH_IMMS10BY8:
+	  md_number_to_chars (buf,
+			      insn | ((val & (0x3ff << 3)) << (10 - 3)), 4);
+	  break;
+
 	case BFD_RELOC_SH_SHMEDIA_CODE:
 	  /* We just ignore and remove this one for the moment.  FIXME:
 	     Use it when implementing relaxing.  */
