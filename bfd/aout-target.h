@@ -316,9 +316,6 @@ MY_bfd_final_link (abfd, info)
 #ifndef MY_write_armap
 #define MY_write_armap NAME(aout,write_armap)
 #endif
-#ifndef MY_close_and_cleanup
-#define MY_close_and_cleanup NAME(aout,close_and_cleanup)
-#endif
 #ifndef MY_set_section_contents
 #define MY_set_section_contents NAME(aout,set_section_contents)
 #endif
@@ -401,7 +398,11 @@ MY_bfd_final_link (abfd, info)
 #endif
 
 #ifndef MY_bfd_free_cached_info
-#define MY_bfd_free_cached_info bfd_true
+#define MY_bfd_free_cached_info NAME(aout,bfd_free_cached_info)
+#endif
+
+#ifndef MY_close_and_cleanup
+#define MY_close_and_cleanup MY_bfd_free_cached_info
 #endif
 
 /* Aout symbols normally have leading underscores */

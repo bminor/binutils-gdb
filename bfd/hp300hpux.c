@@ -119,7 +119,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define DEFAULT_ARCH bfd_arch_m68k
 
 #define MY_get_section_contents aout_32_get_section_contents
-#define MY_close_and_cleanup aout_32_close_and_cleanup
 #define MY_slurp_armap bfd_slurp_bsd_armap_f2
 
 /***********************************************/
@@ -136,6 +135,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define MY_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define MY_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define MY_bfd_final_link _bfd_generic_final_link
+
+/* Until and unless we convert the slurp_reloc and slurp_symtab
+   routines in this file, we can not use the default aout
+   free_cached_info routine which assumes that the relocs and symtabs
+   were allocated using malloc.  */
+#define MY_bfd_free_cached_info bfd_true
 
 #define hp300hpux_write_syms aout_32_write_syms
 

@@ -457,8 +457,10 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
   struct relocation_info *relocs;
   arelent *reloc_cache;
 
-  if (asect->relocation) return true;
-  if (!aout_32_slurp_symbol_table (abfd)) return false;
+  if (asect->relocation)
+    return true;
+  if (!aout_32_slurp_symbol_table (abfd))
+    return false;
 
   if (asect == obj_datasec (abfd)) {
     reloc_size = exec_hdr(abfd)->a_drsize;
@@ -474,7 +476,8 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
   return false;
 
  doit:
-  bfd_seek (abfd, (file_ptr)(asect->rel_filepos),  SEEK_SET);
+  if (bfd_seek (abfd, (file_ptr)(asect->rel_filepos),  SEEK_SET) != 0)
+    return false;
   count = reloc_size / sizeof (struct relocation_info);
 
   relocs = (struct relocation_info *) malloc (reloc_size);
@@ -1379,7 +1382,7 @@ b_out_get_relocated_section_contents (in_abfd, link_info, link_order, data,
 #define aout_32_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define aout_32_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define aout_32_bfd_final_link _bfd_generic_final_link
-#define aout_32_bfd_free_cached_info bfd_true
+#define aout_32_close_and_cleanup aout_32_bfd_free_cached_info
 
 bfd_target b_out_vec_big_host =
 {

@@ -484,7 +484,7 @@ aout_adobe_sizeof_headers (ignore_abfd, ignore)
 #define aout_32_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define aout_32_bfd_link_add_symbols _bfd_generic_link_add_symbols
 #define aout_32_bfd_final_link _bfd_generic_final_link
-#define aout_32_bfd_free_cached_info bfd_true
+#define aout_32_close_and_cleanup aout_32_bfd_free_cached_info
 
 bfd_target a_out_adobe_vec =
 {

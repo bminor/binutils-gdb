@@ -338,7 +338,7 @@ os9k_sizeof_headers (ignore_abfd, ignore)
 #define aout_32_bfd_reloc_type_lookup \
   ((CONST struct reloc_howto_struct *(*) PARAMS \
 ((bfd *, bfd_reloc_code_real_type))) bfd_nullvoidptr)
-#define aout_32_bfd_free_cached_info bfd_true
+#define aout_32_close_and_cleanup aout_32_bfd_free_cached_info
 
 bfd_target i386os9k_vec =
 {

@@ -133,6 +133,7 @@ DESCRIPTION
 #include "aout/stab_gnu.h"
 #include "aout/ar.h"
 
+static boolean aout_get_external_symbols PARAMS ((bfd *));
 static boolean translate_symbol_table PARAMS ((bfd *, aout_symbol_type *,
 					       struct external_nlist *,
 					       bfd_size_type, char *,
@@ -1086,6 +1087,82 @@ NAME(aout,set_section_contents) (abfd, section, location, offset, count)
 #define sym_is_indirect(sym) \
   (((sym)->type & N_ABS)== N_ABS)
 
+/* Read the external symbols from an a.out file.  */
+
+static boolean
+aout_get_external_symbols (abfd)
+     bfd *abfd;
+{
+  if (obj_aout_external_syms (abfd) == (struct external_nlist *) NULL)
+    {
+      bfd_size_type count;
+      struct external_nlist *syms;
+
+      count = exec_hdr (abfd)->a_syms / EXTERNAL_NLIST_SIZE;
+
+      /* We allocate using malloc to make the values easy to free
+	 later on.  If we put them on the obstack it might not be
+	 possible to free them.  */
+      syms = ((struct external_nlist *)
+	      malloc ((size_t) count * EXTERNAL_NLIST_SIZE));
+      if (syms == (struct external_nlist *) NULL && count != 0)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+
+      if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
+	  || (bfd_read (syms, 1, exec_hdr (abfd)->a_syms, abfd)
+	      != exec_hdr (abfd)->a_syms))
+	{
+	  free (syms);
+	  return false;
+	}
+
+      obj_aout_external_syms (abfd) = syms;
+      obj_aout_external_sym_count (abfd) = count;
+    }
+      
+  if (obj_aout_external_strings (abfd) == NULL)
+    {
+      unsigned char string_chars[BYTES_IN_WORD];
+      bfd_size_type stringsize;
+      char *strings;
+
+      /* Get the size of the strings.  */
+      if (bfd_seek (abfd, obj_str_filepos (abfd), SEEK_SET) != 0
+	  || (bfd_read ((PTR) string_chars, BYTES_IN_WORD, 1, abfd)
+	      != BYTES_IN_WORD))
+	return false;
+      stringsize = GET_WORD (abfd, string_chars);
+
+      strings = (char *) malloc ((size_t) stringsize + 1);
+      if (strings == NULL)
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
+
+      /* Skip space for the string count in the buffer for convenience
+	 when using indexes.  */
+      if (bfd_read (strings + BYTES_IN_WORD, 1, stringsize - BYTES_IN_WORD,
+		    abfd)
+	  != stringsize - BYTES_IN_WORD)
+	{
+	  free (strings);
+	  return false;
+	}
+
+      /* Sanity preservation.  */
+      strings[stringsize] = '\0';
+
+      obj_aout_external_strings (abfd) = strings;
+      obj_aout_external_string_size (abfd) = stringsize;
+    }
+
+  return true;
+}
+
 /* Only in their own functions for ease of debugging; when sym flags have
   stabilised these should be inlined into their (single) caller */
 
@@ -1465,30 +1542,28 @@ boolean
 NAME(aout,slurp_symbol_table) (abfd)
      bfd *abfd;
 {
-  bfd_size_type symbol_size;
-  bfd_size_type string_size;
-  unsigned char string_chars[BYTES_IN_WORD];
-  struct external_nlist *syms;
-  char *strings;
+  struct external_nlist *old_external_syms;
   aout_symbol_type *cached;
+  size_t cached_size;
   bfd_size_type dynsym_count = 0;
   struct external_nlist *dynsyms = NULL;
   char *dynstrs = NULL;
   bfd_size_type dynstr_size;
 
   /* If there's no work to be done, don't do any */
-  if (obj_aout_symbols (abfd) != (aout_symbol_type *)NULL) return true;
-  symbol_size = exec_hdr(abfd)->a_syms;
-  if (symbol_size == 0)
+  if (obj_aout_symbols (abfd) != (aout_symbol_type *) NULL)
+    return true;
+
+  old_external_syms = obj_aout_external_syms (abfd);
+
+  if (! aout_get_external_symbols (abfd))
+    return false;
+
+  if (obj_aout_external_sym_count (abfd) == 0)
     {
       bfd_set_error (bfd_error_no_symbols);
       return false;
     }
-
-  bfd_seek (abfd, obj_str_filepos (abfd), SEEK_SET);
-  if (bfd_read ((PTR)string_chars, BYTES_IN_WORD, 1, abfd) != BYTES_IN_WORD)
-    return false;
-  string_size = GET_WORD (abfd, string_chars);
 
   /* If this is a dynamic object, see if we can get the dynamic symbol
      table.  */
@@ -1501,59 +1576,52 @@ NAME(aout,slurp_symbol_table) (abfd)
 	return false;
     }
 
-  strings = (char *) bfd_alloc (abfd, string_size + 1);
-  cached = ((aout_symbol_type *)
-	    bfd_zalloc (abfd,
-			((bfd_get_symcount (abfd) + dynsym_count)
-			 * sizeof (aout_symbol_type))));
+  cached_size = ((obj_aout_external_sym_count (abfd) + dynsym_count)
+		 * sizeof (aout_symbol_type));
+  cached = (aout_symbol_type *) malloc (cached_size);
+  memset (cached, 0, cached_size);
 
-  /* Don't allocate on the obstack, so we can free it easily.  */
-  syms = (struct external_nlist *) malloc(symbol_size);
-  if (!strings || !cached || !syms)
+  if (cached == NULL)
     {
       bfd_set_error (bfd_error_no_memory);
       return false;
     }
-  bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET);
-  if (bfd_read ((PTR)syms, 1, symbol_size, abfd) != symbol_size)
+
+  /* Convert from external symbol information to internal.  */
+  if (! translate_symbol_table (abfd, cached,
+				obj_aout_external_syms (abfd),
+				obj_aout_external_sym_count (abfd),
+				obj_aout_external_strings (abfd),
+				obj_aout_external_string_size (abfd),
+				false)
+      || ! translate_symbol_table (abfd,
+				   (cached
+				    + obj_aout_external_sym_count (abfd)),
+				   dynsyms, dynsym_count, dynstrs,
+				   dynstr_size, true))
     {
-    bailout:
-      if (syms)
- 	free (syms);
-      if (cached)
-	bfd_release (abfd, cached);
-      if (strings)
-	bfd_release (abfd, strings);
+      free (cached);
       return false;
     }
 
-  bfd_seek (abfd, obj_str_filepos (abfd), SEEK_SET);
-  if (bfd_read ((PTR)strings, 1, string_size, abfd) != string_size)
+  bfd_get_symcount (abfd) = (obj_aout_external_sym_count (abfd)
+			     + dynsym_count);
+
+  obj_aout_symbols (abfd) = cached;
+
+  /* It is very likely that anybody who calls this function will not
+     want the external symbol information, so if it was allocated
+     because of our call to aout_get_external_symbols, we free it up
+     right away to save space.  */
+  if (old_external_syms == (struct external_nlist *) NULL
+      && obj_aout_external_syms (abfd) != (struct external_nlist *) NULL)
     {
-      goto bailout;
+      free (obj_aout_external_syms (abfd));
+      obj_aout_external_syms (abfd) = NULL;
     }
-  strings[string_size] = 0; /* Just in case. */
-
-  /* OK, now walk the new symtable, cacheing symbol properties */
-  if (! translate_symbol_table (abfd, cached, syms, bfd_get_symcount (abfd),
-				strings, string_size, false))
-    goto bailout;
-  if (dynsym_count > 0)
-    {
-      if (! translate_symbol_table (abfd, cached + bfd_get_symcount (abfd),
-				    dynsyms, dynsym_count, dynstrs,
-				    dynstr_size, true))
-	goto bailout;
-
-      bfd_get_symcount (abfd) += dynsym_count;
-    }
-
-  obj_aout_symbols (abfd) =  cached;
-  free((PTR)syms);
 
   return true;
 }
-
 
 /* Possible improvements:
    + look for strings matching trailing substrings of other strings
@@ -2315,7 +2383,7 @@ NAME(aout,swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols)
   MOVE_ADDRESS(0);
 }
 
-/* Reloc hackery */
+/* Read and swap the relocs for a section.  */
 
 boolean
 NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
@@ -2333,9 +2401,11 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
   unsigned int counter = 0;
   arelent *cache_ptr;
 
-  if (asect->relocation) return true;
+  if (asect->relocation)
+    return true;
 
-  if (asect->flags & SEC_CONSTRUCTOR) return true;
+  if (asect->flags & SEC_CONSTRUCTOR)
+    return true;
 
   if (asect == obj_datasec (abfd))
     reloc_size = exec_hdr(abfd)->a_drsize;
@@ -2356,34 +2426,34 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
 	return false;
     }
 
-  bfd_seek (abfd, asect->rel_filepos, SEEK_SET);
+  if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
+    return false;
+
   each_size = obj_reloc_entry_size (abfd);
 
   count = reloc_size / each_size;
 
-  reloc_cache = ((arelent *)
-		 bfd_zalloc (abfd,
-			     (size_t) ((count + dynrel_count)
-				       * sizeof (arelent))));
-  if (!reloc_cache)
+  reloc_cache = (arelent *) malloc ((size_t) ((count + dynrel_count)
+					      * sizeof (arelent)));
+  if (reloc_cache == NULL && count != 0)
     {
-    nomem:
+      bfd_set_error (bfd_error_no_memory);
+      return false;
+    }
+  memset (reloc_cache, 0, (count + dynrel_count) * sizeof (arelent));
+
+  relocs = malloc (reloc_size);
+  if (relocs == NULL && reloc_size != 0)
+    {
+      free (reloc_cache);
       bfd_set_error (bfd_error_no_memory);
       return false;
     }
 
-  relocs = (PTR) bfd_alloc (abfd, reloc_size);
-  if (!relocs)
-    {
-      bfd_release (abfd, reloc_cache);
-      goto nomem;
-    }
-
   if (bfd_read (relocs, 1, reloc_size, abfd) != reloc_size)
     {
-      bfd_release (abfd, relocs);
-      bfd_release (abfd, reloc_cache);
-      bfd_set_error (bfd_error_system_call);
+      free (relocs);
+      free (reloc_cache);
       return false;
     }
 
@@ -2398,12 +2468,14 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
     }
   else
     {
-      register struct reloc_std_external *rptr
-	= (struct reloc_std_external *) relocs;
+      register struct reloc_std_external *rptr =
+	(struct reloc_std_external *) relocs;
 
       for (; counter < count; counter++, rptr++, cache_ptr++)
 	NAME(aout,swap_std_reloc_in) (abfd, rptr, cache_ptr, symbols);
     }
+
+  free (relocs);
 
   if (dynrel_count > 0)
     {
@@ -2446,13 +2518,11 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
 	}
     }
 
-  bfd_release (abfd,relocs);
   asect->relocation = reloc_cache;
   asect->reloc_count = cache_ptr - reloc_cache;
+
   return true;
 }
-
-
 
 /* Write out a relocation section into an object file.  */
 
@@ -2794,6 +2864,26 @@ NAME(aout,sizeof_headers) (abfd, execable)
 {
   return adata(abfd).exec_bytes_size;
 }
+
+/* Free all information we have cached for this BFD.  We can always
+   read it again later if we need it.  */
+
+boolean
+NAME(aout,bfd_free_cached_info) (abfd)
+     bfd *abfd;
+{
+  asection *o;
+
+#define FREE(x) if (x != NULL) { free (x); x = NULL; }
+  FREE (obj_aout_symbols (abfd));
+  FREE (obj_aout_external_syms (abfd));
+  FREE (obj_aout_external_strings (abfd));
+  for (o = abfd->sections; o != (asection *) NULL; o = o->next)
+    FREE (o->relocation);
+#undef FREE
+
+  return true;
+}
 
 /* a.out link code.  */
 
@@ -2821,7 +2911,6 @@ static boolean aout_link_add_object_symbols
   PARAMS ((bfd *, struct bfd_link_info *));
 static boolean aout_link_check_archive_element
   PARAMS ((bfd *, struct bfd_link_info *, boolean *));
-static boolean aout_link_get_symbols PARAMS ((bfd *));
 static boolean aout_link_free_symbols PARAMS ((bfd *));
 static boolean aout_link_check_ar_symbols
   PARAMS ((bfd *, struct bfd_link_info *, boolean *pneeded));
@@ -2931,7 +3020,7 @@ aout_link_add_object_symbols (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-  if (! aout_link_get_symbols (abfd))
+  if (! aout_get_external_symbols (abfd))
     return false;
   if (! aout_link_add_symbols (abfd, info))
     return false;
@@ -2954,7 +3043,7 @@ aout_link_check_archive_element (abfd, info, pneeded)
      struct bfd_link_info *info;
      boolean *pneeded;
 {
-  if (! aout_link_get_symbols (abfd))
+  if (! aout_get_external_symbols (abfd))
     return false;
 
   if (! aout_link_check_ar_symbols (abfd, info, pneeded))
@@ -2975,69 +3064,6 @@ aout_link_check_archive_element (abfd, info, pneeded)
       if (! aout_link_free_symbols (abfd))
 	return false;
     }
-
-  return true;
-}
-
-/* Read the internal symbols from an a.out file.  */
-
-static boolean
-aout_link_get_symbols (abfd)
-     bfd *abfd;
-{
-  bfd_size_type count;
-  struct external_nlist *syms;
-  unsigned char string_chars[BYTES_IN_WORD];
-  bfd_size_type stringsize;
-  char *strings;
-
-  if (obj_aout_external_syms (abfd) != (struct external_nlist *) NULL)
-    {
-      /* We already have them.  */
-      return true;
-    }
-
-  count = exec_hdr (abfd)->a_syms / EXTERNAL_NLIST_SIZE;
-
-  /* We allocate using malloc to make the values easy to free
-     later on.  If we put them on the obstack it might not be possible
-     to free them.  */
-  syms = ((struct external_nlist *)
-	  malloc ((size_t) count * EXTERNAL_NLIST_SIZE));
-  if (syms == (struct external_nlist *) NULL && count != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
-
-  if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
-      || (bfd_read ((PTR) syms, 1, exec_hdr (abfd)->a_syms, abfd)
-	  != exec_hdr (abfd)->a_syms))
-    return false;
-
-  /* Get the size of the strings.  */
-  if (bfd_seek (abfd, obj_str_filepos (abfd), SEEK_SET) != 0
-      || (bfd_read ((PTR) string_chars, BYTES_IN_WORD, 1, abfd)
-	  != BYTES_IN_WORD))
-    return false;
-  stringsize = GET_WORD (abfd, string_chars);
-  strings = (char *) malloc ((size_t) stringsize);
-  if (strings == NULL && stringsize != 0)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
-
-  /* Skip space for the string count in the buffer for convenience
-     when using indexes.  */
-  if (bfd_read (strings + BYTES_IN_WORD, 1, stringsize - BYTES_IN_WORD, abfd)
-      != stringsize - BYTES_IN_WORD)
-    return false;
-
-  /* Save the data.  */
-  obj_aout_external_syms (abfd) = syms;
-  obj_aout_external_sym_count (abfd) = count;
-  obj_aout_external_strings (abfd) = strings;
 
   return true;
 }
@@ -3593,7 +3619,7 @@ aout_link_input_bfd (finfo, input_bfd)
 
   /* Get the symbols.  We probably have them already, unless
      finfo->info->keep_memory is false.  */
-  if (! aout_link_get_symbols (input_bfd))
+  if (! aout_get_external_symbols (input_bfd))
     return false;
 
   sym_count = obj_aout_external_sym_count (input_bfd);
@@ -4100,7 +4126,7 @@ aout_link_input_section (finfo, input_bfd, input_section, reloff_ptr,
       if (! aout_link_input_section_ext (finfo, input_bfd, input_section,
 					 (struct reloc_ext_external *) relocs,
 					 rel_size, contents, symbol_map))
-	return false;
+	goto error_return;
     }
 
   /* Write out the section contents.  */

@@ -252,6 +252,7 @@ struct aoutdata {
   struct external_nlist *external_syms;
   bfd_size_type external_sym_count;
   char *external_strings;
+  bfd_size_type external_string_size;
   struct aout_link_hash_entry **sym_hashes;
 
   /* A pointer for shared library information.  */
@@ -277,6 +278,7 @@ struct  aout_data_struct {
 #define obj_aout_external_syms(bfd) (adata(bfd).external_syms)
 #define obj_aout_external_sym_count(bfd) (adata(bfd).external_sym_count)
 #define obj_aout_external_strings(bfd) (adata(bfd).external_strings)
+#define obj_aout_external_string_size(bfd) (adata(bfd).external_string_size)
 #define obj_aout_sym_hashes(bfd) (adata(bfd).sym_hashes)
 #define obj_aout_dynamic_info(bfd) (adata(bfd).dynamic_info)
 
@@ -356,9 +358,6 @@ NAME(aout,get_symbol_info) PARAMS ((bfd *ignore_abfd,
                            asymbol *symbol, symbol_info *ret));
 
 boolean
-NAME(aout,close_and_cleanup) PARAMS ((bfd *abfd));
-
-boolean
 NAME(aout,find_nearest_line) PARAMS ((bfd *abfd, asection *section,
       asymbol **symbols, bfd_vma offset, CONST char **filename_ptr,
       CONST char **functionname_ptr, unsigned int *line_ptr));
@@ -389,6 +388,9 @@ NAME(aout,final_link) PARAMS ((bfd *, struct bfd_link_info *,
 			       void (*) (bfd *, file_ptr *, file_ptr *,
 					 file_ptr *)));
 
+boolean
+NAME(aout,bfd_free_cached_info) PARAMS ((bfd *));
+
 /* Prototypes for functions in stab-syms.c. */
 
 CONST char *
@@ -397,10 +399,8 @@ aout_stab_name PARAMS ((int code));
 /* A.out uses the generic versions of these routines... */
 
 #define	aout_32_get_section_contents	bfd_generic_get_section_contents
-#define	aout_32_close_and_cleanup	bfd_generic_close_and_cleanup
 
 #define	aout_64_get_section_contents	bfd_generic_get_section_contents
-#define	aout_64_close_and_cleanup	bfd_generic_close_and_cleanup
 #ifndef NO_WRITE_HEADER_KLUDGE
 #define NO_WRITE_HEADER_KLUDGE 0
 #endif

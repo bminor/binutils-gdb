@@ -367,7 +367,7 @@ NAME (lynx, swap_std_reloc_in) (abfd, bytes, cache_ptr, symbols)
 /* Reloc hackery */
 
 boolean
-NAME (lynx, slurp_reloc_table) (abfd, asect, symbols)
+NAME(lynx,slurp_reloc_table) (abfd, asect, symbols)
      bfd *abfd;
      sec_ptr asect;
      asymbol **symbols;
@@ -400,32 +400,33 @@ NAME (lynx, slurp_reloc_table) (abfd, asect, symbols)
   return false;
 
 doit:
-  bfd_seek (abfd, asect->rel_filepos, SEEK_SET);
+  if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
+    return false;
   each_size = obj_reloc_entry_size (abfd);
 
   count = reloc_size / each_size;
 
 
-  reloc_cache = (arelent *) bfd_zalloc (abfd, (size_t) (count * sizeof
-							(arelent)));
-  if (!reloc_cache)
+  reloc_cache = (arelent *) malloc (count * sizeof (arelent));
+  if (!reloc_cache && count != 0)
     {
     nomem:
       bfd_set_error (bfd_error_no_memory);
       return false;
     }
+  memset (reloc_cache, 0, count * sizeof (arelent));
 
   relocs = (PTR) bfd_alloc (abfd, reloc_size);
   if (!relocs)
     {
-      bfd_release (abfd, reloc_cache);
+      free (reloc_cache);
       goto nomem;
     }
 
   if (bfd_read (relocs, 1, reloc_size, abfd) != reloc_size)
     {
       bfd_release (abfd, relocs);
-      bfd_release (abfd, reloc_cache);
+      free (reloc_cache);
       return false;
     }
 
