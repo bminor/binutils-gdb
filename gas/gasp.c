@@ -1641,12 +1641,12 @@ do_print (idx, in)
   idx = sb_skip_white (idx, in);
   while (idx < in->len)
     {
-      if (strncmp (in->ptr + idx, "LIST", 4) == 0)
+      if (strncasecmp (in->ptr + idx, "LIST", 4) == 0)
 	{
 	  fprintf (outfile, ".list\n");
 	  idx += 4;
 	}
-      else if (strncmp (in->ptr + idx, "NOLIST", 6) == 0)
+      else if (strncasecmp (in->ptr + idx, "NOLIST", 6) == 0)
 	{
 	  fprintf (outfile, ".nolist\n");
 	  idx += 6;
@@ -1689,13 +1689,13 @@ do_form (idx, in)
   while (idx < in->len)
     {
 
-      if (strncmp (in->ptr + idx, "LIN=", 4) == 0)
+      if (strncasecmp (in->ptr + idx, "LIN=", 4) == 0)
 	{
 	  idx += 4;
 	  idx = exp_get_abs ("form LIN= needs absolute expresssion.\n", idx, in, &lines);
 	}
 
-      if (strncmp (in->ptr + idx, "COL=", 4) == 0)
+      if (strncasecmp (in->ptr + idx, "COL=", 4) == 0)
 	{
 	  idx += 4;
 	  idx = exp_get_abs ("form COL= needs absolute expresssion.\n", idx, in, &columns);
@@ -2490,9 +2490,9 @@ buffer_and_nest (from, to, ptr)
 	{
 	  if (ptr->ptr[i] == '.')
 	      i++;
-	  if (strncmp (ptr->ptr + i, from, from_len) == 0)
+	  if (strncasecmp (ptr->ptr + i, from, from_len) == 0)
 	    depth++;
-	  if (strncmp (ptr->ptr + i, to, to_len) == 0)
+	  if (strncasecmp (ptr->ptr + i, to, to_len) == 0)
 	    {
 	      depth--;
 	      if (depth == 0)
