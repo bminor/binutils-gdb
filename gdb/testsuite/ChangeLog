@@ -1,3 +1,31 @@
+2001-02-11  Michael Chastain  <chastain@redhat.com>
+
+	* gdb.c++/cplusfuncs.cc (dm_type_char_star): New function.
+	Helps the test script figure out which demangler is in use.
+	(dm_type_foo_ref): Ditto.
+	(dm_type_int_star): Ditto.
+	(dm_type_long_star): Ditto.
+	(dm_type_unsigned_int): Ditto.
+	(dm_type_void): Ditto.
+	(dm_type_void_star): Ditto.
+	* gdb.base/cplusfuncs.exp (probe_demangler): New function.
+	Probe the gdb demangler and set variables to accommodate
+	formatting differences.
+	(info_func_regexp): New function.  Same as info_func, but
+	matches against a regexp.
+	(info_func): Match against a literal string.
+	(print_addr_2): New function.  Match against a literal string,
+	which can be different from the input to gdb.
+	(print_addr): Simply call print_addr_2 with the same argument twice.
+	(test_lookup_operator_functions): Use demangler formatting variables.
+	Blow away the xfails and workarounds for gnats gdb bug gdb/18.  Sort
+	the tests in the same order as the C++ class declaration.
+	(test_paddr_operator_functions): Ditto.
+	(test_paddr_overloaded_functions): Ditto.
+	(test_paddr_hairy_functions): Use demangler formatting variables.
+	Add reference to gdb/19 for related tests.
+	(do_tests): Call probe_demangler.
+
 2001-01-30  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.c++/templates.cc (printf): Remove unused function definition.

@@ -1,4 +1,4 @@
-# Copyright (C) 1992, 1997, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1997, 1999, 2001 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 # bug-gdb@prep.ai.mit.edu
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
+# Adapted for g++ 3.0 ABI by Michael Chastain. (chastain@redhat.com)
 
 if $tracelevel then {
 	strace $tracelevel
@@ -38,52 +39,261 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 }
 
 #
-#  Cause gdb to lookup a specific C++ function and print the demangled
-#  form.
+# g++ changed its ABI between 2.95 and 3.0.  gdb has two demanglers
+# for the two different styles.  The two demanglers have some subtle
+# discrepancies in their output.
+#
+#   old demangler         new demangler
+#   --- ---------         --- ---------
+#   "operator, "          "operator,"
+#   "char *"              "char*"
+#   "int *"               "int*"
+#   "long *"              "long*"
+#   "void *"              "void*"
+#   "foo &"               "foo&"
+#   "unsigned int"        "unsigned"
+#   "void"                ""
+#
+# I probe for the forms in use.
+# The defaults are for the v3 demangler (as of 2001-02-13).
 #
 
-proc info_func { regex demangled } {
-    global gdb_prompt
+set dm_operator_comma		","
+set dm_type_char_star		"char*"
+set dm_type_foo_ref 		"foo&"
+set dm_type_int_star		"int*"
+set dm_type_long_star		"long*"
+set dm_type_unsigned_int	"unsigned"
+set dm_type_void		""
+set dm_type_void_star		"void*"
 
-    send_gdb "info function $regex\n"
+proc probe_demangler { } {
+    global gdb_prompt
+    global dm_operator_comma
+    global dm_type_char_star
+    global dm_type_foo_ref
+    global dm_type_int_star
+    global dm_type_long_star
+    global dm_type_unsigned_int
+    global dm_type_void
+    global dm_type_void_star
+
+    send_gdb "print &'foo::operator,(foo&)'\n"
     gdb_expect {
-	-re "File .*:\r\n$demangled\r\n.*$gdb_prompt $" {
-	    pass "info function for \"$regex\""
+	-re ".*foo::operator, \\(.*foo.*&.*\\).*\r\n$gdb_prompt $" {
+	    # v2 demangler
+	    set dm_operator_comma ", "
+	    pass "detect dm_operator_comma"
 	}
-	-re "File .*:\r\nclass $demangled\r\n.*$gdb_prompt $" {
-	    pass "info function for \"$regex\""
+	-re ".*foo::operator,\\(.*foo.*&.*\\).*\r\n$gdb_prompt $" {
+	    # v3 demangler
+	    pass "detect dm_operator_comma"
 	}
 	-re ".*$gdb_prompt $" {
-	    fail "info function for \"$regex\""
+	    fail "detect dm_operator_comma"
 	}
 	timeout {
-	    fail "info function for \"$regex\" (timeout)"
+	    fail "detect dm_operator_comma"
+	}
+    }
+
+    send_gdb "print &'dm_type_char_star'\n"
+    gdb_expect {
+	-re ".*dm_type_char_star\\(char \\*\\).*\r\n$gdb_prompt $" {
+	    # v2 demangler
+	    set dm_type_char_star "char *"
+	    pass "detect dm_type_char_star"
+	}
+	-re ".*dm_type_char_star\\(char\\*\\).*\r\n$gdb_prompt $" {
+	    # v3 demangler
+	    pass "detect dm_type_char_star"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "detect dm_type_char_star"
+	}
+	timeout {
+	    fail "detect dm_type_char_star (timeout)"
+	}
+    }
+
+    send_gdb "print &'dm_type_foo_ref'\n"
+    gdb_expect {
+	-re ".*dm_type_foo_ref\\(foo &\\).*\r\n$gdb_prompt $" {
+	    # v2 demangler
+	    set dm_type_foo_ref "foo &"
+	    pass "detect dm_type_foo_ref"
+	}
+	-re ".*dm_type_foo_ref\\(foo&\\).*\r\n$gdb_prompt $" {
+	    # v3 demangler
+	    pass "detect dm_type_foo_ref"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "detect dm_type_foo_ref"
+	}
+	timeout {
+	    fail "detect dm_type_foo_ref (timeout)"
+	}
+    }
+
+    send_gdb "print &'dm_type_int_star'\n"
+    gdb_expect {
+	-re ".*dm_type_int_star\\(int \\*\\).*\r\n$gdb_prompt $" {
+	    # v2 demangler
+	    set dm_type_int_star "int *"
+	    pass "detect dm_type_int_star"
+	}
+	-re ".*dm_type_int_star\\(int\\*\\).*\r\n$gdb_prompt $" {
+	    # v3 demangler
+	    pass "detect dm_type_int_star"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "detect dm_type_int_star"
+	}
+	timeout {
+	    fail "detect dm_type_int_star (timeout)"
+	}
+    }
+
+    send_gdb "print &'dm_type_long_star'\n"
+    gdb_expect {
+	-re ".*dm_type_long_star\\(long \\*\\).*\r\n$gdb_prompt $" {
+	    # v2 demangler
+	    set dm_type_long_star "long *"
+	    pass "detect dm_type_long_star"
+	}
+	-re ".*dm_type_long_star\\(long\\*\\).*\r\n$gdb_prompt $" {
+	    # v3 demangler
+	    pass "detect dm_type_long_star"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "detect dm_type_long_star"
+	}
+	timeout {
+	    fail "detect dm_type_long_star (timeout)"
+	}
+    }
+
+    send_gdb "print &'dm_type_unsigned_int'\n"
+    gdb_expect {
+	-re ".*dm_type_unsigned_int\\(unsigned int\\).*\r\n$gdb_prompt $" {
+	    # v2 demangler
+	    set dm_type_unsigned_int "unsigned int"
+	    pass "detect dm_type_unsigned_int"
+	}
+	-re ".*dm_type_unsigned_int\\(unsigned\\).*\r\n$gdb_prompt $" {
+	    # v3 demangler
+	    pass "detect dm_type_unsigned_int"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "detect dm_type_unsigned_int"
+	}
+	timeout {
+	    fail "detect dm_unsigned int (timeout)"
+	}
+    }
+
+    send_gdb "print &'dm_type_void'\n"
+    gdb_expect {
+	-re ".*dm_type_void\\(void\\).*\r\n$gdb_prompt $" {
+	    # v2 demangler
+	    set dm_type_void "void"
+	    pass "detect dm_type_void"
+	}
+	-re ".*dm_type_void\\(\\).*\r\n$gdb_prompt $" {
+	    # v3 demangler
+	    pass "detect dm_type_void"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "detect dm_type_void"
+	}
+	timeout {
+	    fail "detect dm_type_void (timeout)"
+	}
+    }
+
+    send_gdb "print &'dm_type_void_star'\n"
+    gdb_expect {
+	-re ".*dm_type_void_star\\(void \\*\\).*\r\n$gdb_prompt $" {
+	    # v2 demangler
+	    set dm_type_void_star "void *"
+	    pass "detect dm_type_void_star"
+	}
+	-re ".*dm_type_void_star\\(void\\*\\).*\r\n$gdb_prompt $" {
+	    # v3 demangler
+	    pass "detect dm_type_void_star"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "detect dm_type_void_star"
+	}
+	timeout {
+	    fail "detect dm_type_void_star (timeout)"
 	}
     }
 }
 
 #
-#  Run print &'$arg' on the input arg and verify that we can correctly
-#  lookup the fully qualified C++ function.
-#  We ignore the return type of the function since we are only interested
-#  in the rootname and arguments part.
+#  Lookup a specific C++ function and print the demangled type.
+#  This form accepts the demangled type as a regexp.
 #
 
-proc print_addr_of { arg } {
+proc info_func_regexp { name demangled } {
+    global gdb_prompt
+
+    send_gdb "info function $name\n"
+    gdb_expect {
+	-re ".*File .*:\r\n(class |)$demangled\r\n.*$gdb_prompt $" {
+	    pass "info function for \"$name\""
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "info function for \"$name\""
+	}
+	timeout {
+	    fail "info function for \"$name\" (timeout)"
+	}
+    }
+}
+
+#
+#  Lookup a specific C++ function and print the demangled type.
+#  This form accepts the demangled type as a literal string.
+#
+
+proc info_func { name demangled } {
+    info_func_regexp "$name" [string_to_regexp "$demangled"]
+}
+
+#
+# Print the address of a function.
+# This checks that I can lookup a fully qualified C++ function.
+# This also checks the argument types on the return string.
+#
+
+proc print_addr_2 { name good } {
     global gdb_prompt
     global hex
 
-    set pattern [string_to_regexp $arg]
-    send_gdb "print &'$arg'\n"
+    set good_pattern [string_to_regexp $good]
+
+    send_gdb "print &'$name'\n"
     gdb_expect {
-	-re ".* = .* $hex <$pattern>\r\n$gdb_prompt $" { pass "print &'$arg'" }
+	-re ".* = .* $hex <$good_pattern>\r\n$gdb_prompt $" {
+	    pass "print &'$name'"
+	}
 	-re ".*$gdb_prompt $" {
-	    fail "print &'$arg'"
+	    fail "print &'$name'"
 	}
 	timeout {
-	    fail "print &'$arg' (timeout)"
+	    fail "print &'$name' (timeout)"
 	}
     }
+}
+
+#
+#  Simple interfaces to print_addr_2.
+#
+
+proc print_addr { name } {
+    print_addr_2 "$name" "$name"
 }
 
 #
@@ -93,8 +303,18 @@ proc print_addr_of { arg } {
 # the one we are looking for.  I.E. "operator&" would match both
 # "operator&(foo &)" and "operator&&(foo &)".
 #
+# gdb-gnats bug gdb/18:
+#  "gdb can't parse "info func operator*" or "info func operator\*".
+#  The star in "operator*" is interpreted as a regexp, but the "\*"
+#  in  "operator\*" is not a legal operator.
+#
 
 proc test_lookup_operator_functions {} {
+    global dm_operator_comma
+    global dm_type_char_star
+    global dm_type_foo_ref
+    global dm_type_void
+    global dm_type_void_star
 
     # These tests don't work for COFF targets; don't even try them
     if [istarget "a29k-*-udi"] then {
@@ -103,127 +323,121 @@ proc test_lookup_operator_functions {} {
 	return
     }
 
-    info_func "operator&&("  "void foo::operator&&\\(foo &\\);"
-    info_func "operator&=("  "void foo::operator&=\\(foo &\\);"
-    info_func "operator&("  "void foo::operator&\\(foo &\\);"
-    info_func "operator/=("  "void foo::operator/=\\(foo &\\);"
-    info_func "operator^=("  "void foo::operator.=\\(foo &\\);"
-    info_func "operator<<=("  "void foo::operator<<=\\(foo &\\);"
-    info_func "operator%=("  "void foo::operator%=\\(foo &\\);"
-    info_func "operator-=("  "void foo::operator-=\\(foo &\\);"
+    info_func "operator*("	"void foo::operator*($dm_type_foo_ref);"
+    info_func "operator%("	"void foo::operator%($dm_type_foo_ref);"
+    info_func "operator-("	"void foo::operator-($dm_type_foo_ref);"
+    info_func "operator>>("	"void foo::operator>>($dm_type_foo_ref);"
+    info_func "operator!=("	"void foo::operator!=($dm_type_foo_ref);"
+    info_func "operator>("	"void foo::operator>($dm_type_foo_ref);"
+    info_func "operator>=("	"void foo::operator>=($dm_type_foo_ref);"
+    info_func "operator|("	"void foo::operator|($dm_type_foo_ref);"
+    info_func "operator&&("	"void foo::operator&&($dm_type_foo_ref);"
+    info_func "operator!("	"void foo::operator!($dm_type_void);"
+    info_func "operator++("	"void foo::operator++(int);"
+    info_func "operator=("	"void foo::operator=($dm_type_foo_ref);"
+    info_func "operator+=("	"void foo::operator+=($dm_type_foo_ref);"
+    info_func "operator*=("	"void foo::operator*=($dm_type_foo_ref);"
+    info_func "operator%=("	"void foo::operator%=($dm_type_foo_ref);"
+    info_func "operator>>=("	"void foo::operator>>=($dm_type_foo_ref);"
+    info_func "operator|=("	"void foo::operator|=($dm_type_foo_ref);"
+    info_func "operator$dm_operator_comma\("	\
+    				"void foo::operator$dm_operator_comma\($dm_type_foo_ref);"
+    info_func "operator/("	"void foo::operator/($dm_type_foo_ref);"
+    info_func "operator+("	"void foo::operator+($dm_type_foo_ref);"
+    info_func "operator<<("	"void foo::operator<<($dm_type_foo_ref);"
+    info_func "operator==("	"void foo::operator==($dm_type_foo_ref);"
+    info_func "operator<("	"void foo::operator<($dm_type_foo_ref);"
+    info_func "operator<=("	"void foo::operator<=($dm_type_foo_ref);"
+    info_func "operator&("	"void foo::operator&($dm_type_foo_ref);"
+    info_func "operator^("	"void foo::operator^($dm_type_foo_ref);"
+    info_func "operator||("	"void foo::operator||($dm_type_foo_ref);"
+    info_func "operator~("	"void foo::operator~($dm_type_void);"
+    info_func "operator--("	"void foo::operator--(int);"
+    info_func "operator->("	"foo *foo::operator->($dm_type_void);"
+    info_func "operator-=("	"void foo::operator-=($dm_type_foo_ref);"
+    info_func "operator/=("	"void foo::operator/=($dm_type_foo_ref);"
+    info_func "operator<<=("	"void foo::operator<<=($dm_type_foo_ref);"
+    info_func "operator&=("	"void foo::operator&=($dm_type_foo_ref);"
+    info_func "operator^=("	"void foo::operator^=($dm_type_foo_ref);"
+    info_func "operator->*("	"void foo::operator->*($dm_type_foo_ref);"
 
-    # There doesn't appear to be any way to get GDB to treat '*' as a
-    # character to match, rather than as a regex special character.
-    setup_xfail "*-*-*"
-    info_func "operator\*=("  "void foo::operator\\*=\\(foo &\\);"
+    # operator[] needs backslashes to protect against TCL evaluation.
+    info_func "operator\[\]("	"void foo::operator\[\]($dm_type_foo_ref);"
 
-    info_func "operator|=("  "void foo::operator\\|=\\(foo &\\);"
-    info_func "operator+=("  "void foo::operator.=\\(foo &\\);"
-    info_func "operator>>=("  "void foo::operator\>\>=\\(foo &\\);"
-    info_func "operator=("  "void foo::operator=\\(foo &\\);"
-    info_func "operator()("  "void foo::operator\\(\\)\\(foo &\\);"
+    # These are gnarly because they might end with 'static'.
+    set dm_type_void_star_regexp [string_to_regexp $dm_type_void_star]
+    info_func_regexp "operator new("     "void \\*foo::operator new\\(.*\\)(| static);"
+    info_func_regexp "operator delete("  "void foo::operator delete\\($dm_type_void_star_regexp\\)(| static);"
 
-    # The function should be "operator," not "operator, ".  (note space)
-    # This test will work; I've commented it out because it should not
-    # count as a pass, since it is incorrect.  Ian Taylor.
-    # info_func "operator, ("  "void foo::operator, \\(foo &\\);"
-    setup_xfail "*-*-*"
-    info_func "operator,("  "void foo::operator,\\(foo &\\);"
+    info_func "operator int("	"int foo::operator int($dm_type_void);"
+    info_func "operator()("	"void foo::operator()($dm_type_foo_ref);"
+    info_func "operator $dm_type_char_star\(" \
+				"char *foo::operator $dm_type_char_star\($dm_type_void);"
 
-    info_func "operator~("  "void foo::operator~\\(void\\);"
-    info_func "operator delete("  "void foo::operator delete\\(void \\*\\)(| static);"
-    info_func "operator/("  "void foo::operator/\\(foo &\\);"
-    info_func "operator==("  "void foo::operator==\\(foo &\\);"
-    info_func "operator^("  "void foo::operator\\^\\(foo &\\);"
-
-    info_func "operator>=("  "void foo::operator>=\\(foo &\\);"
-    info_func "operator>("  "void foo::operator>\\(foo &\\);"
-    info_func "operator<=("  "void foo::operator<=\\(foo &\\);"
-    info_func "operator<<("  "void foo::operator<<\\(foo &\\);"
-    info_func "operator<("  "void foo::operator<\\(foo &\\);"
-    info_func "operator%("  "void foo::operator%\\(foo &\\);"
-    info_func "operator-("  "void foo::operator-\\(foo &\\);"
-
-    # There doesn't appear to be anyway to get '*' treated as a character
-    # to match, rather than as a regex special character.
-    setup_xfail "*-*-*"
-    info_func "operator\*("  "void foo::operator\\*\\(foo &\\);"
-
-    info_func "operator--("  "void foo::operator--\\(int\\);"
-    info_func "operator!=("  "void foo::operator!=\\(foo &\\);"
-    info_func "operator!("  "void foo::operator!\\(void\\);"
-    info_func "operator new("  "void \\*foo::operator new\\(.*\\)(| static);"
-    info_func "operator||("  "void foo::operator\\|\\|\\(foo &\\);"
-    info_func "operator char \\*("  "char \\*foo::operator char \\*\\(void\\);"
-    info_func "operator int("  "int foo::operator int\\(void\\);"
-    info_func "operator|("  "void foo::operator\\|\\(foo &\\);"
-    info_func "operator+("  "void foo::operator\\+\\(foo &\\);"
-    info_func "operator++("  "void foo::operator\\+\\+\\(int\\);"
-    info_func "operator->("  "foo \\*foo::operator->\\(void\\);"
-    info_func "operator->\\*("  "void foo::operator->\\*\\(foo &\\);"
-    info_func "operator>>("  "void foo::operator\>\>\\(foo &\\);"
-
-    # GDB says "`operator \[\](' not supported".  I don't know why.
-    setup_xfail "*-*-*"
-    info_func "operator\\\[\\\](" "void foo::operator\\\[\\\]\\(foo &\\);"
-    # But this works, for some reason.
-    info_func ".perator\\\[\\\](" "void foo::operator\\\[\\\]\\(foo &\\);"
 }
 
 
 proc test_paddr_operator_functions {} {
     global hex
     global hp_aCC_compiler
+    global dm_operator_comma
+    global dm_type_char_star
+    global dm_type_foo_ref
+    global dm_type_long_star
+    global dm_type_unsigned_int
+    global dm_type_void
+    global dm_type_void_star
 
-    print_addr_of "foo::operator&&(foo &)"
-    print_addr_of "foo::operator&=(foo &)"
-    print_addr_of "foo::operator&(foo &)"
-    print_addr_of "foo::operator/=(foo &)"
-    print_addr_of "foo::operator^=(foo &)"
-    print_addr_of "foo::operator<<=(foo &)"
-    print_addr_of "foo::operator%=(foo &)"
-    print_addr_of "foo::operator-=(foo &)"
-    print_addr_of "foo::operator*=(foo &)"
-    print_addr_of "foo::operator|=(foo &)"
-    print_addr_of "foo::operator+=(foo &)"
-    print_addr_of "foo::operator>>=(foo &)"
-    print_addr_of "foo::operator=(foo &)"
-    print_addr_of "foo::operator()(foo &)"
-    print_addr_of "foo::operator, (foo &)"
-    print_addr_of "foo::operator~(void)"
-    if { !$hp_aCC_compiler } {
-	print_addr_of "foo::operator delete(void *)"
-    } else {
-	gdb_test "print &'foo::operator delete(void *) static'" \
-	    " = .*(0x\[0-9a-f\]+|) <foo::operator delete.*>"
-    }
-    print_addr_of "foo::operator/(foo &)"
-    print_addr_of "foo::operator==(foo &)"
-    print_addr_of "foo::operator^(foo &)"
-    print_addr_of "foo::operator>=(foo &)"
-    print_addr_of "foo::operator>(foo &)"
-    print_addr_of "foo::operator<=(foo &)"
-    print_addr_of "foo::operator<<(foo &)"
-    print_addr_of "foo::operator<(foo &)"
-    print_addr_of "foo::operator%(foo &)"
-    print_addr_of "foo::operator-(foo &)"
-    print_addr_of "foo::operator*(foo &)"
-    print_addr_of "foo::operator--(int)"
-    print_addr_of "foo::operator!=(foo &)"
-    print_addr_of "foo::operator!(void)"
+    print_addr "foo::operator*($dm_type_foo_ref)"
+    print_addr "foo::operator%($dm_type_foo_ref)"
+    print_addr "foo::operator-($dm_type_foo_ref)"
+    print_addr "foo::operator>>($dm_type_foo_ref)"
+    print_addr "foo::operator!=($dm_type_foo_ref)"
+    print_addr "foo::operator>($dm_type_foo_ref)"
+    print_addr "foo::operator>=($dm_type_foo_ref)"
+    print_addr "foo::operator|($dm_type_foo_ref)"
+    print_addr "foo::operator&&($dm_type_foo_ref)"
+    print_addr "foo::operator!($dm_type_void)"
+    print_addr "foo::operator++(int)"
+    print_addr "foo::operator=($dm_type_foo_ref)"
+    print_addr "foo::operator+=($dm_type_foo_ref)"
+    print_addr "foo::operator*=($dm_type_foo_ref)"
+    print_addr "foo::operator%=($dm_type_foo_ref)"
+    print_addr "foo::operator>>=($dm_type_foo_ref)"
+    print_addr "foo::operator|=($dm_type_foo_ref)"
+    print_addr "foo::operator$dm_operator_comma\($dm_type_foo_ref)"
+    print_addr "foo::operator/($dm_type_foo_ref)"
+    print_addr "foo::operator+($dm_type_foo_ref)"
+    print_addr "foo::operator<<($dm_type_foo_ref)"
+    print_addr "foo::operator==($dm_type_foo_ref)"
+    print_addr "foo::operator<($dm_type_foo_ref)"
+    print_addr "foo::operator<=($dm_type_foo_ref)"
+    print_addr "foo::operator&($dm_type_foo_ref)"
+    print_addr "foo::operator^($dm_type_foo_ref)"
+    print_addr "foo::operator||($dm_type_foo_ref)"
+    print_addr "foo::operator~($dm_type_void)"
+    print_addr "foo::operator--(int)"
+    print_addr "foo::operator->($dm_type_void)"
+    print_addr "foo::operator-=($dm_type_foo_ref)"
+    print_addr "foo::operator/=($dm_type_foo_ref)"
+    print_addr "foo::operator<<=($dm_type_foo_ref)"
+    print_addr "foo::operator&=($dm_type_foo_ref)"
+    print_addr "foo::operator^=($dm_type_foo_ref)"
+    print_addr "foo::operator->*($dm_type_foo_ref)"
+    print_addr "foo::operator\[\]($dm_type_foo_ref)"
+    print_addr "foo::operator()($dm_type_foo_ref)"
+
     gdb_test "print &'foo::operator new'" \
 	" = .* $hex <foo::operator new\\(.*\\)(| static)>"
-    print_addr_of "foo::operator||(foo &)"
-    print_addr_of "foo::operator char *(void)"
-    print_addr_of "foo::operator int(void)"
-    print_addr_of "foo::operator|(foo &)"
-    print_addr_of "foo::operator+(foo &)"
-    print_addr_of "foo::operator++(int)"
-    print_addr_of "foo::operator->(void)"
-    print_addr_of "foo::operator->*(foo &)"
-    print_addr_of "foo::operator>>(foo &)"
-    gdb_test "print &'foo::operator\[\](foo &)'" \
-	" = .*0x\[0-9a-f\]+ <foo::operator\\\[\\\]\\(foo &\\)>"
+    if { !$hp_aCC_compiler } {
+	print_addr "foo::operator delete($dm_type_void_star)"
+    } else {
+	gdb_test "print &'foo::operator delete($dm_type_void_star) static'" \
+	    " = .*(0x\[0-9a-f\]+|) <foo::operator delete.*>"
+    }
+
+    print_addr "foo::operator int($dm_type_void)"
+    print_addr "foo::operator $dm_type_char_star\($dm_type_void)"
 }
 
 #
@@ -231,39 +445,52 @@ proc test_paddr_operator_functions {} {
 #
 
 proc test_paddr_overloaded_functions {} {
-    print_addr_of "overload1arg(signed char)"
-    print_addr_of "overload1arg(unsigned char)"
-    print_addr_of "overload1arg(unsigned int)"
-    print_addr_of "overload1arg(unsigned long)"
-    print_addr_of "overload1arg(unsigned short)"
-    print_addr_of "overload1arg(char)"
-    print_addr_of "overload1arg(double)"
-    print_addr_of "overload1arg(float)"
-    print_addr_of "overload1arg(int)"
-    print_addr_of "overload1arg(long)"
-    print_addr_of "overload1arg(short)"
-    print_addr_of "overload1arg(void)"
-    print_addr_of "overloadargs(int)"
-    print_addr_of "overloadargs(int, int)"
-    print_addr_of "overloadargs(int, int, int)"
-    print_addr_of "overloadargs(int, int, int, int)"
-    print_addr_of "overloadargs(int, int, int, int, int)"
-    print_addr_of "overloadargs(int, int, int, int, int, int)"
-    print_addr_of "overloadargs(int, int, int, int, int, int, int)"
-    print_addr_of "overloadargs(int, int, int, int, int, int, int, int)"
-    print_addr_of "overloadargs(int, int, int, int, int, int, int, int, int)"
-    print_addr_of "overloadargs(int, int, int, int, int, int, int, int, int, int)"
-    print_addr_of "overloadargs(int, int, int, int, int, int, int, int, int, int, int)"
+    global dm_type_unsigned_int
+    global dm_type_void
+
+    print_addr "overload1arg($dm_type_void)"
+    print_addr "overload1arg(char)"
+    print_addr "overload1arg(signed char)"
+    print_addr "overload1arg(unsigned char)"
+    print_addr "overload1arg(short)"
+    print_addr "overload1arg(unsigned short)"
+    print_addr "overload1arg(int)"
+    print_addr "overload1arg($dm_type_unsigned_int)"
+    print_addr "overload1arg(long)"
+    print_addr "overload1arg(unsigned long)"
+    print_addr "overload1arg(float)"
+    print_addr "overload1arg(double)"
+
+    print_addr "overloadargs(int)"
+    print_addr "overloadargs(int, int)"
+    print_addr "overloadargs(int, int, int)"
+    print_addr "overloadargs(int, int, int, int)"
+    print_addr "overloadargs(int, int, int, int, int)"
+    print_addr "overloadargs(int, int, int, int, int, int)"
+    print_addr "overloadargs(int, int, int, int, int, int, int)"
+    print_addr "overloadargs(int, int, int, int, int, int, int, int)"
+    print_addr "overloadargs(int, int, int, int, int, int, int, int, int)"
+    print_addr "overloadargs(int, int, int, int, int, int, int, int, int, int)"
+    print_addr "overloadargs(int, int, int, int, int, int, int, int, int, int, int)"
 }
 
 proc test_paddr_hairy_functions {} {
-    print_addr_of "hairyfunc1(int)"
-    print_addr_of "hairyfunc2(int (*)(char *))"
-    print_addr_of "hairyfunc3(int (*)(short (*)(long *)))"
-    print_addr_of "hairyfunc4(int (*)(short (*)(char *)))"
-    print_addr_of "hairyfunc5(int (*(*)(char *))(long))"
-    print_addr_of "hairyfunc6(int (*(*)(int *))(long))"
-    print_addr_of "hairyfunc7(int (*(*)(int (*)(char *)))(long))"
+    global gdb_prompt
+    global hex
+    global dm_type_char_star
+    global dm_type_int_star
+    global dm_type_long_star
+
+    print_addr_2 "hairyfunc1" "hairyfunc1(int)"
+    print_addr_2 "hairyfunc2" "hairyfunc2(int (*)($dm_type_char_star))"
+    print_addr_2 "hairyfunc3" "hairyfunc3(int (*)(short (*)($dm_type_long_star)))"
+    print_addr_2 "hairyfunc4" "hairyfunc4(int (*)(short (*)($dm_type_char_star)))"
+
+    # gdb-gnats bug gdb/19:
+    # "gdb v3 demangler fails on hairyfunc5 hairyfunc6 hairyfunc7"
+    print_addr_2 "hairyfunc5" "hairyfunc5(int (*(*)($dm_type_char_star))(long))"
+    print_addr_2 "hairyfunc6" "hairyfunc6(int (*(*)($dm_type_int_star))(long))"
+    print_addr_2 "hairyfunc7" "hairyfunc7(int (*(*)(int (*)($dm_type_char_star)))(long))"
 }
 
 proc do_tests {} {
@@ -303,6 +530,7 @@ proc do_tests {} {
 	clear_xfail "*-*-*"
     }
 
+    probe_demangler
     test_paddr_overloaded_functions
     test_paddr_operator_functions
     test_paddr_hairy_functions
