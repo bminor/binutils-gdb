@@ -874,6 +874,13 @@ proc gdb_expect { args } {
     }
 }
 
+proc gdb_suppress_entire_file { reason } {
+    global suppress_flag;
+
+    warning "$reason\n";
+    set suppress_flag -1;
+}
+
 #
 # Set suppress_flag, which will cause all subsequent calls to send_gdb and
 # gdb_expect to fail immediately (until the next call to 
@@ -900,13 +907,19 @@ proc gdb_stop_suppressing_tests { } {
     global suppress_flag;
 
     if [info exists suppress_flag] {
-	if { $suppress_flag != 0 } {
+	if { $suppress_flag > 0 } {
 	    set suppress_flag 0;
 	    clone_output "Tests restarted.\n";
 	}
     } else {
 	set suppress_flag 0;
     }
+}
+
+proc gdb_clear_suppressed { } {
+    global suppress_flag;
+
+    set suppress_flag 0;
 }
 
 proc gdb_start { } {
@@ -932,7 +945,7 @@ proc gdb_continue { function } {
 }
 
 proc default_gdb_init { args } {
-    gdb_stop_suppressing_tests;
+    gdb_clear_suppressed;
 
     # Uh, this is lame. Really, really, really lame. But there's this *one*
     # testcase that will fail in random places if we don't increase this.

@@ -1,3 +1,22 @@
+#   Copyright (C) 1997 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
 # Test that GDB properly ignores invalid stabs.
 # Also test that GDB can debug a .o file, and that it doesn't mind
 # a file that's more minimal than what a compiler normally puts out.
@@ -8,10 +27,6 @@ if $tracelevel then {
 # If the test directory was not created by configure then skip
 # this test.
 if ![file isdirectory ${objdir}/${subdir}] then {
-    return 0
-}
-
-if ![file exists ${objdir}/${subdir}/weird.s] {
     return 0
 }
 
@@ -28,7 +43,7 @@ proc do_tests {} {
 	# will be lost.
 	# Skip the rest of the stabs tests for this case.
 	send_gdb "ptype inttype\n"
-	expect {
+	gdb_expect {
 		-re "^ptype inttype\r*\ntype = inttype.*$gdb_prompt $" {
 			pass "stabs found"
 		}
@@ -198,7 +213,7 @@ proc print_weird_var { var } {
 	# Make sure that the variable gets printed out correctly, without
 	# any sort of warning message.
 	send_gdb "print $var\n"
-	expect {
+	gdb_expect {
 		-re "^print $var\r*\n.\[0-9\]* = 42.*$gdb_prompt $" {
 			pass "variable $var printed properly"
 		}
@@ -268,8 +283,7 @@ if { [lindex $exec_output 0] != 0 } {
 }
 
 if  { [gdb_compile "${srcfile}" "${binfile}" object ""] != "" } {
-    perror "Couldn't compile ${srcfile}"
-    return -1
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
 remote_file build delete ${srcfile}
@@ -282,7 +296,7 @@ send_gdb "file $binfile\n"
 # But \[^\n\]* doesn't seem to work, so instead use the heuristic
 # that a filename won't contain a space and a warning message will.
 # But spaces following by backspaces aren't really spaces.
-expect {
+gdb_expect {
     -re "^file (\[^ \]| +\008)*\r*\nReading symbols from $binfile\.\.\.done\.\r*\n$gdb_prompt $" {
 	pass "weirdx.o read without error"
     }

@@ -1,3 +1,17 @@
+Sun Jun 29 16:43:30 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.base/overlays.exp: Preliminary fixes; temporarily disabled
+ 	until it has been modified to work with the new testsuite.
+
+	* gdb.*/*.exp: Instead of causing 1 unresolved test when the
+ 	testcase won't compile, cause all of the testcases in the file to
+ 	fail instead.
+
+	* lib/gdb.exp(gdb_suppress_entire_file): New procedure.
+	(gdb_clear_suppressed): New procedure.
+	(gdb_stop_suppressing_tests): Only clear suppress_flag if
+	it contains a positive value.
+
 Sat Jun 28 13:31:11 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* lib/gdb.exp(default_gdb_start): Use gdb_opts host feature.

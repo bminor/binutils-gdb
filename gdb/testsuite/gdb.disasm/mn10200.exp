@@ -37,8 +37,7 @@ set testfile "mn10200"
 set srcfile ${srcdir}/${subdir}/${testfile}.s
 set binfile ${objdir}/${subdir}/${testfile}
 if  { [gdb_compile "${srcfile}" "${binfile}" executable ""] != "" } {
-	perror "Couldn't compile ${srcfile}"
-	return -1
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
 proc add_tests { } {
