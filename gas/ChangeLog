@@ -15,6 +15,11 @@ Thu Oct 10 17:22:18 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 Thu Oct 10 12:05:45 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* config/mn10300.c (md_assemble): Pass an extra shift count
+	to mn10300_insert_operand based on the opcode format.
+	(mn10300_insert_operand): Accept and use extra shift count
+	parameter.
+
 	* config/tc-mn10300.c (md_assemble): Use FMT_* macros for
 	formats rather than hard-coded constants.
 
