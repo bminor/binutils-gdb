@@ -5834,11 +5834,11 @@ macro (ip)
 				offset_expr.X_add_symbol, 0, NULL);
 		  macro_build (p, &icnt, &offset_expr,
 			       HAVE_32BIT_ADDRESSES ? "lw" : "ld", "t,o(b)",
-			       tempreg, (int) BFD_RELOC_MIPS_GOT_PAGE,
+			       PIC_CALL_REG, (int) BFD_RELOC_MIPS_GOT_PAGE,
 			       mips_gp_register);
 		  macro_build (p + 4, &icnt, &offset_expr,
 			       HAVE_32BIT_ADDRESSES ? "addi" : "daddiu",
-			       "t,r,j", tempreg, tempreg,
+			       "t,r,j", PIC_CALL_REG, PIC_CALL_REG,
 			       (int) BFD_RELOC_MIPS_GOT_OFST);
 		}
 

@@ -1,3 +1,7 @@
+2003-05-22  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (macro): Don't use uninitialized tempreg.
+
 2003-05-22  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-xstormy16.c (md_pcrel_from_section): Do not produce
