@@ -1,5 +1,8 @@
 2004-05-24  Mark Kettenis  <kettenis@gnu.org>
- 
+
+	* netbsd-core.c: Correctly indent section that sets architecture
+	from machine ID.
+
 	From Miod Vallat <miod@online.fr>:
 	* m88kopenbsd.c: New file.
 	* targets.c (m88k_openbsd_vec): New.

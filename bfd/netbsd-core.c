@@ -166,56 +166,56 @@ netbsd_core_file_p (abfd)
       offset += coreseg.c_size;
     }
 
- /* Set architecture from machine ID.  */
- switch (CORE_GETMID (core))
-   {
-   case M_ALPHA_NETBSD:
-     bfd_default_set_arch_mach (abfd, bfd_arch_alpha, 0);
-     break;
+  /* Set architecture from machine ID.  */
+  switch (CORE_GETMID (core))
+    {
+    case M_ALPHA_NETBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_alpha, 0);
+      break;
 
-   case M_ARM6_NETBSD:
-     bfd_default_set_arch_mach (abfd, bfd_arch_arm, bfd_mach_arm_3);
-     break;
+    case M_ARM6_NETBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_arm, bfd_mach_arm_3);
+      break;
 
-   case M_X86_64_NETBSD:
-     bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_x86_64);
-     break;
+    case M_X86_64_NETBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_x86_64);
+      break;
 
-   case M_386_NETBSD:
-     bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_i386_i386);
-     break;
+    case M_386_NETBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_i386_i386);
+      break;
 
-   case M_68K_NETBSD:
-   case M_68K4K_NETBSD:
-     bfd_default_set_arch_mach (abfd, bfd_arch_m68k, 0);
-     break;
+    case M_68K_NETBSD:
+    case M_68K4K_NETBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_m68k, 0);
+      break;
 
-   case M_88K_OPENBSD:
-     bfd_default_set_arch_mach (abfd, bfd_arch_m88k, 0);
-     break;
+    case M_88K_OPENBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_m88k, 0);
+      break;
 
-   case M_HPPA_OPENBSD:
-     bfd_default_set_arch_mach (abfd, bfd_arch_hppa, bfd_mach_hppa11);
-     break;
+    case M_HPPA_OPENBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_hppa, bfd_mach_hppa11);
+      break;
 
-   case M_POWERPC_NETBSD:
-     bfd_default_set_arch_mach (abfd, bfd_arch_powerpc, bfd_mach_ppc);
-     break;
+    case M_POWERPC_NETBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_powerpc, bfd_mach_ppc);
+      break;
 
-   case M_SPARC_NETBSD:
-     bfd_default_set_arch_mach (abfd, bfd_arch_sparc, bfd_mach_sparc);
-     break;
+    case M_SPARC_NETBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sparc, bfd_mach_sparc);
+      break;
 
-   case M_SPARC64_NETBSD:
-   case M_SPARC64_OPENBSD:
-     bfd_default_set_arch_mach (abfd, bfd_arch_sparc, bfd_mach_sparc_v9);
-     break;
+    case M_SPARC64_NETBSD:
+    case M_SPARC64_OPENBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_sparc, bfd_mach_sparc_v9);
+      break;
 
-   case M_VAX_NETBSD:
-   case M_VAX4K_NETBSD:
-     bfd_default_set_arch_mach (abfd, bfd_arch_vax, 0);
-     break;
-   }
+    case M_VAX_NETBSD:
+    case M_VAX4K_NETBSD:
+      bfd_default_set_arch_mach (abfd, bfd_arch_vax, 0);
+      break;
+    }
 
   /* OK, we believe you.  You're a core file (sure, sure).  */
   return abfd->xvec;
