@@ -1,3 +1,7 @@
+2004-12-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* inftarg.c (child_create_inferior) [HPUXHPPA]: Remove code.
+
 2004-12-24  Mark Kettenis  <kettenis@gnu.org>
 
 	* target.h (TARGET_DISABLE_HW_WATCHPOINTS)

@@ -334,11 +334,8 @@ static void
 child_create_inferior (char *exec_file, char *allargs, char **env,
 		       int from_tty)
 {
-#ifdef HPUXHPPA
-  fork_inferior (exec_file, allargs, env, ptrace_me, ptrace_him, pre_fork_inferior, NULL);
-#else
   fork_inferior (exec_file, allargs, env, ptrace_me, ptrace_him, NULL, NULL);
-#endif
+
   /* We are at the first instruction we care about.  */
   observer_notify_inferior_created (&current_target, from_tty);
   /* Pedal to the metal... */
