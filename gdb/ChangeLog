@@ -1,3 +1,7 @@
+2002-03-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS (sh-elf): Change warning flag to -w.
+
 2002-03-23  Andrew Cagney  <cagney@redhat.com>
 
 	* defs.h (error): Add printf format attribute.
