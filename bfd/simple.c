@@ -79,6 +79,19 @@ simple_dummy_unattached_reloc (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
+static bfd_boolean
+simple_dummy_multiple_definition (struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
+				  const char *name ATTRIBUTE_UNUSED,
+				  bfd *obfd ATTRIBUTE_UNUSED,
+				  asection *osec ATTRIBUTE_UNUSED,
+				  bfd_vma oval ATTRIBUTE_UNUSED,
+				  bfd *nbfd ATTRIBUTE_UNUSED,
+				  asection *nsec ATTRIBUTE_UNUSED,
+				  bfd_vma nval ATTRIBUTE_UNUSED)
+{
+  return TRUE;
+}
+
 struct saved_output_info
 {
   bfd_vma offset;
@@ -173,6 +186,7 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   callbacks.reloc_overflow = simple_dummy_reloc_overflow;
   callbacks.reloc_dangerous = simple_dummy_reloc_dangerous;
   callbacks.unattached_reloc = simple_dummy_unattached_reloc;
+  callbacks.multiple_definition = simple_dummy_multiple_definition;
 
   memset (&link_order, 0, sizeof (link_order));
   link_order.next = NULL;

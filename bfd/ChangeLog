@@ -1,4 +1,10 @@
-2004-12-03 Jan Beulich  <jbeulich@novell.com>
+2004-12-06  Daniel Jacobowitz  <dan@debian.org>
+
+	Suggested by Fergal Daly <fergal@esatclear.ie>:
+	* simple.c (simple_dummy_multiple_definition): New function.
+	(bfd_simple_get_relocated_section_contents): Use it.
+
+2004-12-03  Jan Beulich  <jbeulich@novell.com>
 
 	* elf.c (elf_find_function): Don't use the last file symbol ever,
 	seen, but the last one seen prior to the symbol being reported.
