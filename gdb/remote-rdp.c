@@ -1363,13 +1363,6 @@ remote_rdp_create_inferior (char *exec_file, char *allargs, char **env)
   proceed (entry_point, TARGET_SIGNAL_DEFAULT, 0);
 }
 
-/* Accept any stray run/attach commands */
-static int
-remote_rdp_can_run (void)
-{
-  return 1;
-}
-
 /* Attach doesn't need to do anything */
 static void
 remote_rdp_attach (char *args, int from_tty)
@@ -1431,7 +1424,7 @@ init_remote_rdp_ops (void)
   remote_rdp_ops.to_reported_exec_events_per_exec_call = NULL;
   remote_rdp_ops.to_has_exited = NULL;
   remote_rdp_ops.to_mourn_inferior = generic_mourn_inferior;
-  remote_rdp_ops.to_can_run = remote_rdp_can_run;
+  remote_rdp_ops.to_can_run = NULL;
   remote_rdp_ops.to_notice_signals = 0;
   remote_rdp_ops.to_thread_alive = 0;
   remote_rdp_ops.to_stop = 0;

@@ -1,3 +1,7 @@
+2002-05-09  Michael Snyder  <msnyder@redhat.com>
+
+	* remote-rdp.c (remote_rdp_can_run): Remove.
+
 2002-05-09  Tom Tromey  <tromey@redhat.com>
 
 	* jv-valprint.c (java_val_print): Handle `char' as a special case
