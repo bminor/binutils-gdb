@@ -1,3 +1,18 @@
+Wed Nov  4 15:58:48 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* Makefile.am: Add FR30 target.
+	* Makefile.in: Add FR30 target.
+	* archures.c: Add support for FR30.
+	* config.bfd: Add support for FR30.
+	* configure.in: Add support for FR30.
+	* reloc.c: Add support for FR30 relocations.
+	* targets.c: Add support for FR30 relocations.	
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* libbfd.h:  Regenerate.
+	* cpu-fr30.c: New file.
+	* elf32-fr30.c: New file.
+	
 Mon Nov  2 14:59:33 1998  Geoffrey Noer  <noer@cygnus.com>
 
 	* configure.in: detect cygwin* instead of cygwin32*

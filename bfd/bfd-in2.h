@@ -1339,6 +1339,8 @@ enum bfd_architecture
   /* start-sanitize-am33 */
 #define bfd_mach_am33          330
   /* end-sanitize-am33 */
+  bfd_arch_fr30,
+#define bfd_mach_fr30          0x46523330
   bfd_arch_last
   };
 
@@ -2150,6 +2152,34 @@ instruction. */
 significant 8 bits of a 24 bit word are placed into the least
 significant 8 bits of the opcode. */
   BFD_RELOC_TIC30_LDP,
+
+/* This is a 32 bit reloc for the FR30 that stores 20 bits split up into
+two sections. */
+  BFD_RELOC_FR30_20,
+
+/* This is a 16 bit reloc for the FR30 that stores a 6 bit word offset in
+4 bits. */
+  BFD_RELOC_FR30_6_IN_4,
+
+/* This is a 16 bit reloc for the FR30 that stores an 8 bit byte offset
+into 8 bits. */
+  BFD_RELOC_FR30_8_IN_8,
+
+/* This is a 16 bit reloc for the FR30 that stores a 9 bit short offset
+into 8 bits. */
+  BFD_RELOC_FR30_9_IN_8,
+
+/* This is a 16 bit reloc for the FR30 that stores a 10 bit word offset
+into 8 bits. */
+  BFD_RELOC_FR30_10_IN_8,
+
+/* This is a 16 bit reloc for the FR30 that stores a 9 bit pc relative
+short offset into 8 bits. */
+  BFD_RELOC_FR30_9_PCREL,
+
+/* This is a 16 bit reloc for the FR30 that stores a 12 bit pc relative
+short offset into 11 bits. */
+  BFD_RELOC_FR30_12_PCREL,
 
 /* These two relocations are used by the linker to determine which of 
 the entries in a C++ virtual function table are actually used.  When

@@ -109,9 +109,19 @@ case "${targ}" in
     targ_selvecs=armcoff_big_vec
     targ_underscore=yes
     ;;
+  arm-*-elf)
+    targ_defvec=bfd_elf32_littlearm_vec
+    targ_selvecs=bfd_elf32_bigarm_vec
+    targ_underscore=yes
+    ;;
   thumb-*-coff)
     targ_defvec=armcoff_little_vec
     targ_selvecs=armcoff_big_vec
+    targ_underscore=yes
+    ;;
+  thumb-*-elf)
+    targ_defvec=bfd_elf32_littlearm_vec
+    targ_selvecs=bfd_elf32_bigarm_vec
     targ_underscore=yes
     ;;
   thumb-*-pe*)
@@ -143,6 +153,10 @@ case "${targ}" in
 
   d30v-*-*)
     targ_defvec=bfd_elf32_d30v_vec
+    ;;
+
+  fr30-*-elf)
+    targ_defvec=bfd_elf32_fr30_vec
     ;;
 
 # start-sanitize-sky
@@ -529,6 +543,10 @@ case "${targ}" in
   sparclet-*-aout*)
     targ_defvec=sunos_big_vec
     targ_selvecs=sparcle_aout_vec
+    targ_underscore=yes
+    ;;
+  sparc86x-*-aout*)
+    targ_defvec=sunos_big_vec
     targ_underscore=yes
     ;;
   sparclite-*-elf* | sparc86x-*-elf*)
