@@ -1,3 +1,8 @@
+Wed Apr 19 12:37:13 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (distclean): Delete config.status, config.h and
+ 	stamp-h.
+
 1997-09-06 02:10  Ulrich Drepper  <drepper@cygnus.com>
 
 	* intlh.inst.in: Reformat copyright.
