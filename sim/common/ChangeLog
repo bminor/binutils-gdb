@@ -1,5 +1,9 @@
 Fri Nov  7 00:37:36 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* callback.c (os_poll_quit): Replace _WIN32 with _MSC_VER.
+
+Fri Nov  7 00:37:36 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
 	* sim-events.c (sim_events_process): Delete redundant call to
  	update_time_from_event.
 	(sim_events_slip): Always decrement time_from_event.
