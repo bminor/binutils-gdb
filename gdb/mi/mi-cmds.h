@@ -48,6 +48,12 @@ enum mi_cmd_result
     MI_CMD_QUIET
   };
 
+enum print_values {
+   PRINT_NO_VALUES,
+   PRINT_ALL_VALUES,
+   PRINT_SIMPLE_VALUES
+};
+
 typedef enum mi_cmd_result (mi_cmd_argv_ftype) (char *command, char **argv, int argc);
 
 /* Older MI commands have this interface. Retained until all old
