@@ -17,7 +17,7 @@
 # along with GDB; see the file COPYING.  If not, write to
 # the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
-TDEPFILES= tdesc.o
-TM_CLIBS= tdesc/libdc.o
-TM_CDEPS= tdesc/libdc.o
+TDEPFILES= tdesc.o m88k-tdep.o m88k-pinsn.o exec.o coredep.o
+TM_CLIBS= tdesc-lib/libdc.o
+TM_CDEPS= tdesc-lib/libdc.o
 TM_FILE= tm-88k.h
