@@ -1203,39 +1203,6 @@ context_switch (struct execution_control_state *ecs)
   inferior_ptid = ecs->ptid;
 }
 
-/* Wrapper for DEPRECATED_PC_IN_SIGTRAMP that takes care of the need
-   to find the function's name.
-
-   In a classic example of "left hand VS right hand", "infrun.c" was
-   trying to improve GDB's performance by caching the result of calls
-   to calls to find_pc_partial_funtion, while at the same time
-   find_pc_partial_function was also trying to ramp up performance by
-   caching its most recent return value.  The below makes the the
-   function find_pc_partial_function solely responsibile for
-   performance issues (the local cache that relied on a global
-   variable - arrrggg - deleted).
-
-   Using the testsuite and gcov, it was found that dropping the local
-   "infrun.c" cache and instead relying on find_pc_partial_function
-   increased the number of calls to 12000 (from 10000), but the number
-   of times find_pc_partial_function's cache missed (this is what
-   matters) was only increased by only 4 (to 3569).  (A quick back of
-   envelope caculation suggests that the extra 2000 function calls
-   @1000 extra instructions per call make the 1 MIP VAX testsuite run
-   take two extra seconds, oops :-)
-
-   Long term, this function can be eliminated, replaced by the code:
-   get_frame_type(current_frame()) == SIGTRAMP_FRAME (for new
-   architectures this is very cheap).  */
-
-static int
-pc_in_sigtramp (CORE_ADDR pc)
-{
-  char *name;
-  find_pc_partial_function (pc, &name, NULL, NULL);
-  return DEPRECATED_PC_IN_SIGTRAMP (pc, name);
-}
-
 /* Handle the inferior event in the cases when we just stepped
    into a function.  */
 
@@ -2727,37 +2694,45 @@ currently_stepping (struct execution_control_state *ecs)
 static void
 check_sigtramp2 (struct execution_control_state *ecs)
 {
-  if (trap_expected
-      && pc_in_sigtramp (stop_pc)
-      && !pc_in_sigtramp (prev_pc)
-      && INNER_THAN (read_sp (), step_sp))
-    {
-      /* What has happened here is that we have just stepped the
-         inferior with a signal (because it is a signal which
-         shouldn't make us stop), thus stepping into sigtramp.
+  char *name;
+  struct symtab_and_line sr_sal;
 
-         So we need to set a step_resume_break_address breakpoint and
-         continue until we hit it, and then step.  FIXME: This should
-         be more enduring than a step_resume breakpoint; we should
-         know that we will later need to keep going rather than
-         re-hitting the breakpoint here (see the testsuite,
-         gdb.base/signals.exp where it says "exceedingly difficult").  */
+  /* Check that what has happened here is that we have just stepped
+     the inferior with a signal (because it is a signal which
+     shouldn't make us stop), thus stepping into sigtramp.  */
 
-      struct symtab_and_line sr_sal;
+  if (!trap_expected)
+    return;
+  if (get_frame_type (get_current_frame ()) != SIGTRAMP_FRAME)
+    return;
+  /* Long term, this function can be eliminated, replaced by the code:
+     get_frame_type(current_frame()) == SIGTRAMP_FRAME (for new
+     architectures this is very cheap).  */
+  find_pc_partial_function (prev_pc, &name, NULL, NULL);
+  if (DEPRECATED_PC_IN_SIGTRAMP (prev_pc, name))
+    return;
+  if (!INNER_THAN (read_sp (), step_sp))
+    return;
 
-      init_sal (&sr_sal);	/* initialize to zeroes */
-      sr_sal.pc = prev_pc;
-      sr_sal.section = find_pc_overlay (sr_sal.pc);
-      /* We perhaps could set the frame if we kept track of what the
-         frame corresponding to prev_pc was.  But we don't, so don't.  */
-      through_sigtramp_breakpoint =
-	set_momentary_breakpoint (sr_sal, null_frame_id, bp_through_sigtramp);
-      if (breakpoints_inserted)
-	insert_breakpoints ();
+  /* So we need to set a step_resume_break_address breakpoint and
+     continue until we hit it, and then step.  FIXME: This should be
+     more enduring than a step_resume breakpoint; we should know that
+     we will later need to keep going rather than re-hitting the
+     breakpoint here (see the testsuite, gdb.base/signals.exp where it
+     says "exceedingly difficult").  */
 
-      ecs->remove_breakpoints_on_following_step = 1;
-      ecs->another_trap = 1;
-    }
+  init_sal (&sr_sal);	/* initialize to zeroes */
+  sr_sal.pc = prev_pc;
+  sr_sal.section = find_pc_overlay (sr_sal.pc);
+  /* We perhaps could set the frame if we kept track of what the frame
+     corresponding to prev_pc was.  But we don't, so don't.  */
+  through_sigtramp_breakpoint =
+    set_momentary_breakpoint (sr_sal, null_frame_id, bp_through_sigtramp);
+  if (breakpoints_inserted)
+    insert_breakpoints ();
+
+  ecs->remove_breakpoints_on_following_step = 1;
+  ecs->another_trap = 1;
 }
 
 /* Subroutine call with source code we should not step over.  Do step

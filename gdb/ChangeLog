@@ -1,5 +1,11 @@
 2004-04-02  Andrew Cagney  <cagney@redhat.com>
 
+	* infrun.c (pc_in_sigtramp): Delete function.
+	(check_sigtramp2): Inline call to pc_in_sigtramp, use
+	get_frame_type.
+
+2004-04-02  Andrew Cagney  <cagney@redhat.com>
+
 	* infrun.c (handle_step_into_function): Delete code conditional on
 	legacy_frame_p.
 	(handle_inferior_event, step_over_function): Ditto.
