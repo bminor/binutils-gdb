@@ -1,5 +1,5 @@
 /* tc-h8300.c -- Assemble code for the Hitachi H8/300
-   Copyright (C) 1991 Free Software Foundation.
+   Copyright (C) 1991, 1992 Free Software Foundation.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -42,9 +42,18 @@ char line_separator_chars[] = { '$' ,0};
 
 void cons();
 
-const pseudo_typeS md_pseudo_table[] = {
-	{ "int",	cons,		2 },
-	{ 0,0,0 }
+const pseudo_typeS md_pseudo_table[] = 
+{
+{ "int",	cons,		2	},
+{ "data.b",     cons, 		1      },
+{ "data.w",     cons,		 2      },
+{ "data.l",     cons, 		4      },
+{ "form",     	listing_psize,	0      },
+{ "heading", 	listing_title,	0},
+{ "import", 	s_ignore, 	0},
+{ "page", 	listing_eject,	0},
+{ "program", 	s_ignore,	0},
+{ 0,0,0 }
 };
 
 int  md_reloc_size ;
@@ -319,148 +328,155 @@ static void
 	  struct h8_op *op AND 
 	  unsigned int dst)
 {
-	char *src = *ptr;
-	op_type mode;
-	unsigned   int num;
-	unsigned  int len;
-	unsigned int size;
-	op->mode = E;
+  char *src = *ptr;
+  op_type mode;
+  unsigned   int num;
+  unsigned  int len;
+  unsigned int size;
+  op->mode = E;
 	
-	len = parse_reg(src, &op->mode, &op->reg, dst);
-	if (len) {
-		*ptr = src + len;
-		return ;
+  len = parse_reg(src, &op->mode, &op->reg, dst);
+  if (len) {
+      *ptr = src + len;
+      return ;
+    }
+	
+  if (*src == '@') 
+  {
+    src++;
+    if (*src == '@') 
+    {
+      src++;
+      src = parse_exp(src,&op->exp);
+      src = skip_colonthing(src);
+				
+      *ptr = src;
+				
+      op->mode = MEMIND;
+      return;
+				
+    }
+		    
+		    
+    if (*src == '-') 
+    {	
+      src++;
+      len = parse_reg(src, &mode, &num, dst);
+      if (len == 0) 
+      {
+	/* Oops, not a reg after all, must be ordinary exp */
+	src--;
+	/* must be a symbol */
+	op->mode = abs_sord[dst];
+	*ptr = skip_colonthing(parse_exp(src, &op->exp));
+					    
+	return;
+					    
+					    
+      }
+				
+      if (mode != r16_sord[dst]) 
+      {
+	as_bad("@- needs word register");
+      }
+      op->mode = RDDEC;
+      op->reg = num;
+      *ptr = src + len;
+      return;
+    }
+    if (*src == '(' && ')') 
+    {
+      /* Disp */
+      src++;
+      src =      parse_exp(src, &op->exp);
+				
+      if (*src == ')') 
+      {
+	src++;
+	op->mode = abs_sord[dst];
+	*ptr = src;
+	return;
+      }
+      src = skip_colonthing(src);
+				
+      if (*src  != ',') 
+      {
+	as_bad("expected @(exp, reg16)");
+	return;
+					    
+      }
+      src++;
+      len = parse_reg(src, &mode, &op->reg, dst);
+      if (len == 0 || mode != r16_sord[dst])
+      {
+	as_bad("expected @(exp, reg16)");
+	return;
+      }
+      op->mode = disp_sord[dst];
+      src += len;
+      src = skip_colonthing(src);
+				
+      if (*src != ')' && '(') 
+      {
+	as_bad("expected @(exp, reg16)");
+	return;					    
+      }
+      *ptr = src +1;
+				
+      return;
+    }
+    len = parse_reg(src, &mode, &num, dst);
+		    
+    if(len) {
+	src += len;
+	if (*src == '+') 
+	{
+	  src++;
+	  if (mode != RS16) 
+	  {
+	    as_bad("@Rn+ needs src word register");
+	    return;
+	  }
+	  op->mode = RSINC;
+	  op->reg = num;
+	  *ptr = src;
+	  return;
 	}
+	if (mode != r16_sord[dst]) 
+	{
+	  as_bad("@Rn needs word register");
+	  return;
+					
+	}
+	op->mode =rind_sord[dst];
+	op->reg = num;
+	*ptr = src;
 	
-	if (*src == '@') 
-	    {
-		    src++;
-		    if (*src == '@') 
-			{
-				src++;
-				src = parse_exp(src,&op->exp);
-				src = skip_colonthing(src);
+	 return;
+      }
+    else 
+    {
+      /* must be a symbol */
+      op->mode = abs_sord[dst];
+      *ptr = skip_colonthing(parse_exp(src, &op->exp));
 				
-				*ptr = src;
-				
-				op->mode = MEMIND;
-				return;
-				
-			}
-		    
-		    
-		    if (*src == '-') 
-			{	
-				src++;
-				len = parse_reg(src, &mode, &num, dst);
-				if (len == 0) 
-				    {
-					    /* Oops, not a reg after all, must be ordinary exp */
-					    src--;
-					    /* must be a symbol */
-					    op->mode = abs_sord[dst];
-					    *ptr = skip_colonthing(parse_exp(src, &op->exp));
-					    
-					    return;
-					    
-					    
-				    }
-				
-				if (mode != r16_sord[dst]) 
-				    {
-					    as_bad("@- needs word register");
-				    }
-				op->mode = RDDEC;
-				op->reg = num;
-				*ptr = src + len;
-				return;
-			}
-		    if (*src == '(' && ')') 
-			{
-				/* Disp */
-				src++;
-				src =      parse_exp(src, &op->exp);
-				
-				if (*src == ')') 
-				    {
-					    src++;
-					    op->mode = abs_sord[dst];
-					    *ptr = src;
-					    return;
-				    }
-				src = skip_colonthing(src);
-				
-				if (*src  != ',') 
-				    {
-					    as_bad("expected @(exp, reg16)");
-				    }
-				src++;
-				len = parse_reg(src, &mode, &op->reg, dst);
-				if (len == 0 || mode != r16_sord[dst])
-				    {
-					    as_bad("expected @(exp, reg16)");
-				    }
-				op->mode = disp_sord[dst];
-				src += len;
-				src = skip_colonthing(src);
-				
-				if (*src != ')' && '(') 
-				    {
-					    as_bad("expected @(exp, reg16)");
-					    
-				    }
-				*ptr = src +1;
-				
-				return;
-			}
-		    len = parse_reg(src, &mode, &num, dst);
-		    
-		    if(len) {
-			    src += len;
-			    if (*src == '+') 
-				{
-					src++;
-					if (mode != RS16) 
-					    {
-						    as_bad("@Rn+ needs src word register");
-					    }
-					op->mode = RSINC;
-					op->reg = num;
-					*ptr = src;
-					return;
-				}
-			    if (mode != r16_sord[dst]) 
-				{
-					as_bad("@Rn needs word register");
-				}
-			    op->mode =rind_sord[dst];
-			    op->reg = num;
-			    *ptr = src;
-			    return;
-		    }
-		    else 
-			{
-				/* must be a symbol */
-				op->mode = abs_sord[dst];
-				*ptr = skip_colonthing(parse_exp(src, &op->exp));
-				
-				return;
-			}
-	    }
+      return;
+    }
+  }
 	
 	
-	if (*src == '#') {
-		src++;
-		op->mode = IMM16;
-		src = parse_exp(src, &op->exp);
-		*ptr= skip_colonthing(src);
+  if (*src == '#') {
+      src++;
+      op->mode = IMM16;
+      src = parse_exp(src, &op->exp);
+      *ptr= skip_colonthing(src);
 		
-		return;
-	}
-	else {
-		*ptr = parse_exp(src, &op->exp);
-		op->mode = DISP8;
-	}
+      return;
+    }
+  else {
+      *ptr = parse_exp(src, &op->exp);
+      op->mode = DISP8;
+    }
 }
 
 
@@ -596,19 +612,19 @@ static void
 	  unsigned int width AND
 	  char *string)
 {
-	if (operand->exp.X_add_symbol == 0 
-	    && operand->exp.X_subtract_symbol == 0)
-	    {
+  if (operand->exp.X_add_symbol == 0 
+      && operand->exp.X_subtract_symbol == 0)
+  {
 		    
-		    /* No symbol involved, let's look at offset, it's dangerous if any of
-		       the high bits are not 0 or ff's, find out by oring or anding with
-		       the width and seeing if the answer is 0 or all fs*/
-		    if ((operand->exp.X_add_number | width) != ~0 &&
-			(operand->exp.X_add_number & ~width)!= 0)
-			{
-				as_warn("operand %s0x%x out of range.", string, operand->exp.X_add_number);
-			}
-	    }
+    /* No symbol involved, let's look at offset, it's dangerous if any of
+       the high bits are not 0 or ff's, find out by oring or anding with
+       the width and seeing if the answer is 0 or all fs*/
+    if ((operand->exp.X_add_number & ~width) != 0 &&
+	(operand->exp.X_add_number | width)!= (~0))
+    {
+      as_warn("operand %s0x%x out of range.", string, operand->exp.X_add_number);
+    }
+  }
 	
 }
 
@@ -774,6 +790,11 @@ static void
 			    
 		    case DISP8:
 			    check_operand(operand+i, 0x7f,"@");
+
+			    if (operand[i].exp.X_add_number & 1) {
+			      as_warn("branch operand has odd offset (%x)\n",
+				      operand->exp.X_add_number);
+			    }
 			    
 			    fix_new(frag_now,
 				    output - frag_now->fr_literal + 1, 
@@ -845,7 +866,10 @@ static void
 			    
 		    case ABS16ORREL8SRC:		
 			    check_operand(operand+i, 0xffff,"@");
-			    
+			    if (operand[i].exp.X_add_number & 1) {
+			      as_warn("branch operand has odd offset (%x)\n",
+				      operand->exp.X_add_number);
+			    }
 			    fix_new(frag_now,
 				    output - frag_now->fr_literal + 2, 
 				    2,
@@ -912,57 +936,66 @@ static void
 	  struct h8_opcode *opcode AND
 	  struct h8_op *operand)
 {
-	struct h8_opcode *scan = opcode;
+  struct h8_opcode *scan = opcode;
 	
-	/* Find out if there was more than one possible opccode */  
+  /* Find out if there was more than one possible opccode */  
 	
-	if ((opcode+1)->idx != opcode->idx) 
-	    {
-		    unsigned int argn;
+  if ((opcode+1)->idx != opcode->idx) 
+  {
+    unsigned int argn;
 		    
-		    /* Only one opcode of this flavour, try and guess which operand
-		       didn't match */
-		    for (argn = 0; argn < opcode->noperands; argn++) 
-			{
-				switch (opcode->args.nib[argn]) 
-				    {
-				    case RD16:
-					    if (operand[argn].mode != RD16)        
-						{
-							as_bad("destination operand must be 16 bit register");	  
-						}
-					    return;
-				    case RS8:
+    /* Only one opcode of this flavour, try and guess which operand
+       didn't match */
+    for (argn = 0; argn < opcode->noperands; argn++) 
+    {
+      switch (opcode->args.nib[argn]) 
+      {
+      case RD16:
+	if (operand[argn].mode != RD16)        
+	{
+	  as_bad("destination operand must be 16 bit register");	  
+	  return;
+							
+	}
+	break;
 					    
-					    if (operand[argn].mode != RS8) 
-						{
-							as_bad("source operand must be 8 bit register");
-						}
-					    return;
-				    case ABS16DST:
-					    if (operand[argn].mode != ABS16DST) 
-						{
-							as_bad("destination operand must be 16bit absolute address");
-							return;
-						}
+      case RS8:
 					    
-				    case RD8:
-					    if (operand[argn].mode != RD8) 
-						{
-							as_bad("destination operand must be 8 bit register");  
-						}
-					    return;
+	if (operand[argn].mode != RS8) 
+	{
+	  as_bad("source operand must be 8 bit register");
+	  return;
+	}
+	break;
 					    
-				    case ABS16SRC:
-					    if (operand[argn].mode != ABS16SRC) 
-						{
-							as_bad("source operand must be 16bit absolute address");
-							return;
-						}
-				    }
-			}
-	    }
-	as_bad("invalid operands");
+      case ABS16DST:
+	if (operand[argn].mode != ABS16DST) 
+	{
+	  as_bad("destination operand must be 16bit absolute address");
+	  return;
+	}
+break;					    
+      case RD8:
+	if (operand[argn].mode != RD8) 
+	{
+	  as_bad("destination operand must be 8 bit register");  
+	return;
+	}
+	break;
+	
+					    
+      case ABS16SRC:
+	if (operand[argn].mode != ABS16SRC) 
+	{
+	  as_bad("source operand must be 16bit absolute address");
+	  return;
+	}
+	break;
+	
+      }
+    }
+  }
+  as_bad("invalid operands");
 }
 
 /* This is the guts of the machine-dependent assembler.  STR points to a

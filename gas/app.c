@@ -75,7 +75,10 @@ void do_scrub_begin() {
 	lex['"'] = LEX_IS_STRINGQUOTE;
 	lex['\''] = LEX_IS_ONECHAR_QUOTE;
 	lex[':'] = LEX_IS_COLON;
-	
+
+#ifdef MRI
+	lex['\''] = LEX_IS_STRINGQUOTE;
+#endif
 	/* Note that these override the previous defaults, e.g. if ';'
 	   is a comment char, then it isn't a line separator.  */
 	for (p = symbol_chars; *p; ++p) {
@@ -155,20 +158,20 @@ struct app_save {
 };
 
 char *app_push() {
-	register struct app_save *saved;
-	
-	saved = (struct app_save *) xmalloc(sizeof (*saved));
-	saved->state		= state;
-	saved->old_state	= old_state;
-	saved->out_string	= out_string;
-	bcopy(saved->out_buf, out_buf, sizeof(out_buf));
-	saved->add_newlines	= add_newlines;
-	saved->scrub_string	= scrub_string;
-	saved->scrub_last_string = scrub_last_string;
-	saved->scrub_file	= scrub_file;
-	
-	/* do_scrub_begin() is not useful, just wastes time. */
-	return (char *)saved;
+  register struct app_save *saved;
+
+  saved = (struct app_save *) xmalloc(sizeof (*saved));
+  saved->state		= state;
+  saved->old_state	= old_state;
+  saved->out_string	= out_string;
+  bcopy(saved->out_buf, out_buf, sizeof(out_buf));
+  saved->add_newlines	= add_newlines;
+  saved->scrub_string	= scrub_string;
+  saved->scrub_last_string = scrub_last_string;
+  saved->scrub_file	= scrub_file;
+
+  /* do_scrub_begin() is not useful, just wastes time. */
+  return (char *)saved;
 }
 
 void app_pop(arg)
@@ -180,7 +183,7 @@ char *arg;
 	state		= saved->state;
 	old_state	= saved->old_state;
 	out_string	= saved->out_string;
-	bcopy (out_buf,  saved->out_buf, sizeof (out_buf));
+	memcpy(saved->out_buf, out_buf, sizeof (out_buf));
 	add_newlines	= saved->add_newlines;
 	scrub_string	= saved->scrub_string;
 	scrub_last_string = saved->scrub_last_string;
@@ -189,6 +192,29 @@ char *arg;
 	free (arg);
 } /* app_pop() */
 
+int process_escape(ch)
+char ch;
+{
+  switch (ch) 
+{
+   case 'b':
+    return '\b';
+   case 'f':
+    return '\f';
+   case 'n':
+    return '\n';
+   case 'r':
+    return '\r';
+   case 't':
+    return '\t';
+   case '\'':
+    return '\'';
+   case '"':
+    return '\'';
+   default:
+    return ch;
+  }
+}
 int do_scrub_next_char(get,unget)
 int (*get)();
 void (*unget)();
@@ -258,9 +284,9 @@ void (*unget)();
 		
 	case 5:
 		ch=(*get)();
-		if(ch=='"') {
+		if(lex[ch]==LEX_IS_STRINGQUOTE) {
 			state=old_state;
-			return '"';
+			return ch;
 		} else if(ch=='\\') {
 			state=6;
 			return ch;
@@ -304,8 +330,7 @@ void (*unget)();
 		case '6':
 		case '7':
 			break;
-			
-#ifdef ONLY_STANDARD_ESCAPES
+#if defined(IGNORE_NONSTANDARD_ESCAPES) | defined(ONLY_STANDARD_ESCAPES)
 		default:
 			as_warn("Unknown escape '\\%c' in string: Ignored",ch);
 			break;
@@ -333,27 +358,32 @@ void (*unget)();
 		state=0;
 		return ch;
 	}
-	
+
 	/* OK, we are somewhere in states 0 through 4 */
-	
-	/* flushchar: */
+
+/* flushchar: */
 	ch=(*get)();
  recycle:
 	if (ch == EOF) {
 		if (state != 0)
-		    as_warn("End of file not at end of a line: Newline inserted.");
+			as_warn("End of file not at end of a line: Newline inserted.");
 		return ch;
 	}
-	
+
 	switch (lex[ch]) {
 	case LEX_IS_WHITESPACE:
 		do ch=(*get)();
 		while(ch!=EOF && IS_WHITESPACE(ch));
 		if(ch==EOF)
-		    return ch;
+			return ch;
+
 		if(IS_COMMENT(ch) || (state==0 && IS_LINE_COMMENT(ch)) || ch=='/' || IS_LINE_SEPARATOR(ch)) {
 			goto recycle;
 		}
+#ifdef MRI
+		(*unget)(ch); /* Put back */
+		return ' '; /* Always return one space at start of line */
+#endif
 		switch (state) {
 		case 0:	state++; goto recycle;	/* Punted leading sp */
 		case 1:          BAD_CASE(state); /* We can't get here */
@@ -370,7 +400,7 @@ void (*unget)();
 				do {
 					ch2=(*get)();
 					if(ch2 != EOF && IS_NEWLINE(ch2))
-					    add_newlines++;
+						add_newlines++;
 				} while(ch2!=EOF &&
 					(lex[ch2] != LEX_IS_TWOCHAR_COMMENT_2ND));
 				
@@ -380,13 +410,13 @@ void (*unget)();
 				}
 				
 				if(ch2==EOF 
-				   || lex[ch2] == LEX_IS_TWOCHAR_COMMENT_1ST)
-				    break;
+				  || lex[ch2] == LEX_IS_TWOCHAR_COMMENT_1ST)
+					break;
 				(*unget)(ch);
 			}
 			if(ch2==EOF)
-			    as_warn("End of file in multiline comment");
-			
+				as_warn("End of file in multiline comment");
+
 			ch = ' ';
 			goto recycle;
 		} else {
@@ -400,7 +430,7 @@ void (*unget)();
 		old_state=state;
 		state=5;
 		return ch;
-		
+#ifndef MRI		
 #ifndef IEEE_STYLE
 	case LEX_IS_ONECHAR_QUOTE:
 		ch=(*get)();
@@ -408,8 +438,12 @@ void (*unget)();
 			as_warn("End-of-file after a one-character quote; \000 inserted");
 			ch=0;
 		}
+		if (ch == '\\') {
+		  ch = (*get)();
+		  ch = process_escape(ch);
+		}
 		sprintf(out_buf,"%d", (int)(unsigned char)ch);
-		
+
 		/* None of these 'x constants for us.  We want 'x'.
 		 */
 		if ( (ch=(*get)()) != '\'' ) {
@@ -425,11 +459,12 @@ void (*unget)();
 		out_string=out_buf;
 		return *out_string++;
 #endif
+#endif
 	case LEX_IS_COLON:
 		if(state!=3)
-		    state=0;
+			state=0;
 		return ch;
-		
+
 	case LEX_IS_NEWLINE:
 		/* Roll out a bunch of newlines from inside comments, etc.  */
 		if(add_newlines) {
@@ -444,13 +479,13 @@ void (*unget)();
 		
 	case LEX_IS_LINE_COMMENT_START:
 		if (state != 0)		/* Not at start of line, act normal */
-		    goto de_fault;
-		
-		/* FIXME-someday: The two character comment stuff was badly
-		   thought out.  On i386, we want '/' as line comment start
-		   AND we want C style comments.  hence this hack.  The
-		   whole lexical process should be reworked.  xoxorich.  */
-		
+			goto de_fault;
+
+ /* FIXME-someday: The two character comment stuff was badly
+    thought out.  On i386, we want '/' as line comment start
+    AND we want C style comments.  hence this hack.  The
+    whole lexical process should be reworked.  xoxorich.  */
+
 		if (ch == '/' && (ch2 = (*get)()) == '*') {
 			state = -2;
 			return(do_scrub_next_char(get, unget));

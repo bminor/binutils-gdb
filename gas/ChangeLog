@@ -1,3 +1,12 @@
+Wed Jun 24 10:57:54 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* app.c (process_escape): new function to handle escapes the right
+	way, (do_scrub_next_char): use new function
+	* cond.c (s_ifdef): do ifdef/ifndef right
+	* read.c (s_fill): make the , expressions optional like the doc
+	says
+	* config/tc-h8300.[ch]: better warnings
+
 Tue Jun  9 07:54:54 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* subsegs.c (subsegs_begin): create bss0_frchainP in the same was

@@ -783,22 +783,22 @@ void s_app_file() {
 } /* s_app_file() */
 
 void s_fill() {
-	long temp_repeat;
-	long temp_size;
-	register long temp_fill;
+	long temp_repeat = 0;
+	long temp_size = 1 ;
+	register long temp_fill = 0;
 	char *p;
 
-	if (get_absolute_expression_and_terminator(& temp_repeat) != ',') {
-		input_line_pointer --; /* Backup over what was not a ','. */
-		as_bad("Expect comma after rep-size in .fill:");
-		ignore_rest_of_line();
-		return;
-	}
-	if (get_absolute_expression_and_terminator(& temp_size) != ',') {
-		  input_line_pointer --; /* Backup over what was not a ','. */
-		  as_bad("Expected comma after size in .fill");
-		  ignore_rest_of_line();
-		  return;
+
+	temp_repeat = get_absolute_expression();
+	if (*input_line_pointer == ',') 
+	{
+	  input_line_pointer++;
+	  temp_size = get_absolute_expression();
+	  if (*input_line_pointer == ',') 
+	  {
+	    input_line_pointer++;
+	    temp_fill  = get_absolute_expression();
+	  }
 	}
 	/*
 	 * This is to be compatible with BSD 4.2 AS, not for any rational reason.
