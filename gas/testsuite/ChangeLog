@@ -1,3 +1,13 @@
+Mon Jan 23 21:44:26 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/basic/basic.exp (do_system): Update.
+
+Wed Jan 11 17:20:25 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* gas/mips/mips.exp: Don't run the memory-access tests if the
+	format is a.out, because the generated code is different from what
+	is used with other formats.
+
 Tue Jan 10 11:42:13 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/unsorted/unsorted.exp (align4.s): Fix glitch in
