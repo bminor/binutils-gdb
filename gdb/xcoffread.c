@@ -200,6 +200,18 @@ static struct complaint eb_complaint =
   {"Mismatched .eb symbol ignored starting at symnum %d", 0, 0};
 
 static void
+xcoff_initial_scan PARAMS ((struct objfile *, struct section_offsets *, int));
+
+static void
+scan_xcoff_symtab PARAMS ((struct section_offsets *, struct objfile *));
+
+static char *
+xcoff_next_symbol_text PARAMS ((struct objfile *));
+
+static void
+record_include_begin PARAMS ((struct coff_symbol *));
+
+static void
 enter_line_range PARAMS ((struct subfile *, unsigned, unsigned,
 			  CORE_ADDR, CORE_ADDR, unsigned *));
 
@@ -239,8 +251,22 @@ process_xcoff_symbol PARAMS ((struct coff_symbol *, struct objfile *));
 static void
 read_xcoff_symtab PARAMS ((struct partial_symtab *));
 
+#if 0
 static void
 add_stab_to_list PARAMS ((char *, struct pending_stabs **));
+#endif
+
+static int
+compare_lte PARAMS ((const void *, const void *));
+
+static struct linetable *
+arrange_linetable PARAMS ((struct linetable *));
+
+static void
+record_include_end PARAMS ((struct coff_symbol *));
+
+static void
+process_linenos PARAMS ((CORE_ADDR, CORE_ADDR));
 
 
 /* Translate from a COFF section number (target_index) to a SECT_OFF_*
@@ -288,6 +314,8 @@ secnum_to_section (secnum, objfile)
 
 /* add a given stab string into given stab vector. */
 
+#if 0
+
 static void
 add_stab_to_list (stabname, stabvector)
 char *stabname;
@@ -308,6 +336,9 @@ struct pending_stabs **stabvector;
   }
   (*stabvector)->stab [(*stabvector)->count++] = stabname;
 }
+
+#endif
+
 
 /* Linenos are processed on a file-by-file basis.
 
@@ -364,9 +395,12 @@ struct pending_stabs **stabvector;
 /* compare line table entry addresses. */
 
 static int
-compare_lte (lte1, lte2)
-     struct linetable_entry *lte1, *lte2;
+compare_lte (lte1p, lte2p)
+     const void *lte1p;
+     const void *lte2p;
 {
+  struct linetable_entry *lte1 = (struct linetable_entry *) lte1p;
+  struct linetable_entry *lte2 = (struct linetable_entry *) lte2p;
   return lte1->pc - lte2->pc;
 }
 
@@ -852,6 +886,7 @@ static char *raw_symbol;
 
 /* This is the function which stabsread.c calls to get symbol
    continuations.  */
+
 static char *
 xcoff_next_symbol_text (objfile)
      struct objfile *objfile;

@@ -1,5 +1,17 @@
 Mon Jul 29 21:13:20 1996  Fred Fish  <fnf@cygnus.com>
 
+	* xcoffread.c (compare_lte): Change prototype and function to
+	be correct type for passing to qsort.
+	(add_stab_to_list): Ifdef out unused function and prototype.
+	(compare_lte): Add prototype
+	(arrange_linetable): Ditto.
+	(record_include_begin): Ditto.
+	(record_include_end): Ditto.
+	(process_linenos): Ditto.
+	(xcoff_next_symbol_text): Ditto.
+	(scan_xcoff_symtab): Ditto.
+	(xcoff_initial_scan): Ditto.
+
 	* mips-tdep.c (mips_read_processor_type): Add parens around
 	bitwise-and operands in comparison; previous expression always
 	evaluated to 0 because of equality comparison of two constants.
