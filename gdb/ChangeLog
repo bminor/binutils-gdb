@@ -1,3 +1,11 @@
+Tue Aug 22 02:00:47 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* tm-hppa.h (PROLOGUE_FIRSTLINE_OVERLAP): Delete.  Causes more
+	problems than it fixes.
+	* hppa-tdep.c (skip_prologue): If we exit the main loop without
+	finding all the register saves, retry again without looking for
+	the registers we could not find the first time.
+
 Mon Aug 21 23:39:56 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (frame_chain_valid): Handle systems where "$START$"

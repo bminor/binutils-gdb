@@ -620,10 +620,3 @@ extern CORE_ADDR skip_trampoline_code PARAMS ((CORE_ADDR, char *));
 #define HPREAD_ADJUST_STACK_ADDRESS(ADDR) hpread_adjust_stack_address(ADDR)
 
 extern int hpread_adjust_stack_address PARAMS ((CORE_ADDR));
-
-/* When prologues are scheduled, the first line of the function may
-   overlap with prologue instructions.  We want to avoid "skipping"
-   to the start of the next source line in such situations (might
-   skip over a conditional branch when trying to set a breakpoint at
-   the start of a function.  */
-#define PROLOGUE_FIRSTLINE_OVERLAP

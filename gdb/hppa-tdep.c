@@ -2288,10 +2288,15 @@ skip_prologue (pc)
      CORE_ADDR pc;
 {
   char buf[4];
+  CORE_ADDR orig_pc = pc;
   unsigned long inst, stack_remaining, save_gr, save_fr, save_rp, save_sp;
-  unsigned long args_stored, status, i;
+  unsigned long args_stored, status, i, restart_gr, restart_fr;
   struct unwind_table_entry *u;
 
+  restart_gr = 0;
+  restart_fr = 0;
+
+restart:
   u = find_unwind_entry (pc);
   if (!u)
     return pc;
@@ -2322,11 +2327,13 @@ skip_prologue (pc)
 
       save_gr |= (1 << i);
     }
+  save_gr &= ~restart_gr;
 
   /* Turn the Entry_FR field into a bitmask too.  */
   save_fr = 0;
   for (i = 12; i < u->Entry_FR + 12; i++)
     save_fr |= (1 << i);
+  save_fr &= ~restart_fr;
 
   /* Loop until we find everything of interest or hit a branch.
 
@@ -2474,6 +2481,22 @@ skip_prologue (pc)
       
       /* Bump the PC.  */
       pc += 4;
+    }
+
+  /* We've got a tenative location for the end of the prologue.  However
+     because of limitations in the unwind descriptor mechanism we may
+     have went too far into user code looking for the save of a register
+     that does not exist.  So, if there registers we expected to be saved
+     but never were, mask them out and restart.
+
+     This should only happen in optimized code, and should be very rare.  */
+  if (save_gr || save_fr
+      && ! (restart_fr || restart_gr))
+    {
+      pc = orig_pc;
+      restart_gr = save_gr;
+      restart_fr = save_fr;
+      goto restart;
     }
 
   return pc;
