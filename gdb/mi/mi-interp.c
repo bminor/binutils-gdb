@@ -194,25 +194,21 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 
   if (argc < 2)
     {
-      xasprintf (&mi_error_message,
-		 "mi_cmd_interpreter_exec: Usage: -interpreter-exec interp command");
+      mi_error_message = xstrprintf ("mi_cmd_interpreter_exec: Usage: -interpreter-exec interp command");
       return MI_CMD_ERROR;
     }
 
   interp_to_use = interp_lookup (argv[0]);
   if (interp_to_use == NULL)
     {
-      xasprintf (&mi_error_message,
-		 "mi_cmd_interpreter_exec: could not find interpreter \"%s\"",
-		 argv[0]);
+      mi_error_message = xstrprintf ("mi_cmd_interpreter_exec: could not find interpreter \"%s\"", argv[0]);
       return MI_CMD_ERROR;
     }
 
   if (!interp_exec_p (interp_to_use))
     {
-      xasprintf (&mi_error_message,
-		 "mi_cmd_interpreter_exec: interpreter \"%s\" does not support command execution",
-		 argv[0]);
+      mi_error_message = xstrprintf ("mi_cmd_interpreter_exec: interpreter \"%s\" does not support command execution",
+				     argv[0]);
       return MI_CMD_ERROR;
     }
 

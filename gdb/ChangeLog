@@ -1,5 +1,22 @@
 2004-06-01  Andrew Cagney  <cagney@gnu.org>
 
+	* mi/mi-cmd-env.c (env_execute_cli_command): Use xstrprintf
+	instead of xasprintf.
+	* mi/mi-main.c (mi_error_last_message, mi_cmd_exec_interrupt) 
+	(mi_cmd_thread_select, mi_cmd_thread_list_ids) 
+	(mi_cmd_data_list_register_names) 
+	(mi_cmd_data_list_changed_registers) 
+	(mi_cmd_data_list_register_values) 
+	(get_register, mi_cmd_data_write_register_values) 
+	(mi_cmd_data_write_register_values) 
+	(mi_cmd_data_assign, mi_cmd_data_evaluate_expression) 
+	(mi_cmd_target_download, mi_cmd_target_select) 
+	(mi_cmd_data_read_memory, mi_cmd_data_write_memory) 
+	(mi_execute_cli_command, mi_execute_async_cli_command) 
+	(mi_execute_async_cli_command): Ditto.
+	* mi/mi-interp.c (mi_cmd_interpreter_exec) Ditto.
+	* mi/mi-cmd-var.c (mi_cmd_var_create): Ditto.
+
 	* mi/mi-cmds.h (mi_error_last_message): Delete declaration.
 	* mi/mi-interp.c (mi_cmd_interpreter_exec): Call
 	error_last_message instead of mi_error_last_message.
