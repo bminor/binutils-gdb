@@ -1,5 +1,11 @@
 2004-03-22  Daniel Jacobowitz  <drow@mvista.com>
 
+	* mips-tdep.c (non_heuristic_proc_desc): Search using the specified
+	PC rather than the partial function start address.  Use the start
+	address to sanity check the found PDR.
+
+2004-03-22  Daniel Jacobowitz  <drow@mvista.com>
+
 	* lin-lwp.c (lin_lwp_wait): Pass the LWP ID to
 	linux_handle_extended_wait.
 
