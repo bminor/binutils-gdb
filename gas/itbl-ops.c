@@ -154,23 +154,21 @@ static struct itbl_entry *entries[e_nprocs][e_ntypes] = {
 };
 
 /* local prototypes */
-static unsigned long build_opcode PARAMS ((struct itbl_entry *e));
-static e_type get_type PARAMS ((int yytype));
-static e_processor get_processor PARAMS ((int yyproc));
-static struct itbl_entry **get_entries PARAMS ((e_processor processor,
-						e_type type));
-static struct itbl_entry *find_entry_byname PARAMS ((e_processor processor,
-					e_type type, char *name));
-static struct itbl_entry *find_entry_byval PARAMS ((e_processor processor,
-			e_type type, unsigned long val, struct itbl_range *r));
-static struct itbl_entry *alloc_entry PARAMS ((e_processor processor,
-		e_type type, char *name, unsigned long value));
-static unsigned long apply_range PARAMS ((unsigned long value,
-						struct itbl_range r));
-static unsigned long extract_range PARAMS ((unsigned long value,
-						struct itbl_range r));
-static struct itbl_field *alloc_field PARAMS ((e_type type, int sbit,
-					int ebit, unsigned long flags));
+static unsigned long build_opcode (struct itbl_entry *e);
+static e_type get_type (int yytype);
+static e_processor get_processor (int yyproc);
+static struct itbl_entry **get_entries (e_processor processor,
+					e_type type);
+static struct itbl_entry *find_entry_byname (e_processor processor,
+					e_type type, char *name);
+static struct itbl_entry *find_entry_byval (e_processor processor,
+			e_type type, unsigned long val, struct itbl_range *r);
+static struct itbl_entry *alloc_entry (e_processor processor,
+		e_type type, char *name, unsigned long value);
+static unsigned long apply_range (unsigned long value, struct itbl_range r);
+static unsigned long extract_range (unsigned long value, struct itbl_range r);
+static struct itbl_field *alloc_field (e_type type, int sbit,
+					int ebit, unsigned long flags);
 
 /*======================================================================*/
 /* Interfaces to the parser */

@@ -31,7 +31,7 @@
 #include "input-file.h"
 #include "safe-ctype.h"
 
-static int input_file_get PARAMS ((char *, int));
+static int input_file_get (char *, int);
 
 /* This variable is non-zero if the file currently being read should be
    preprocessed by app.  It is zero if the file can be read straight in.  */
@@ -62,25 +62,25 @@ struct saved_file
 /* These hooks accommodate most operating systems.  */
 
 void
-input_file_begin ()
+input_file_begin (void)
 {
   f_in = (FILE *) 0;
 }
 
 void
-input_file_end ()
+input_file_end (void)
 {
 }
 
 /* Return BUFFER_SIZE.  */
 unsigned int
-input_file_buffer_size ()
+input_file_buffer_size (void)
 {
   return (BUFFER_SIZE);
 }
 
 int
-input_file_is_open ()
+input_file_is_open (void)
 {
   return f_in != (FILE *) 0;
 }
@@ -89,7 +89,7 @@ input_file_is_open ()
    can be restored with input_file_pop ().  */
 
 char *
-input_file_push ()
+input_file_push (void)
 {
   register struct saved_file *saved;
 
@@ -108,8 +108,7 @@ input_file_push ()
 }
 
 void
-input_file_pop (arg)
-     char *arg;
+input_file_pop (char *arg)
 {
   register struct saved_file *saved = (struct saved_file *) arg;
 
@@ -125,9 +124,8 @@ input_file_pop (arg)
 }
 
 void
-input_file_open (filename, pre)
-     char *filename;		/* "" means use stdin. Must not be 0.  */
-     int pre;
+input_file_open (char *filename, /* "" means use stdin. Must not be 0.  */
+		 int pre)
 {
   int c;
   char buf[80];
@@ -205,7 +203,7 @@ input_file_open (filename, pre)
 /* Close input file.  */
 
 void
-input_file_close ()
+input_file_close (void)
 {
   /* Don't close a null file pointer.  */
   if (f_in != NULL)
@@ -217,9 +215,7 @@ input_file_close ()
 /* This function is passed to do_scrub_chars.  */
 
 static int
-input_file_get (buf, buflen)
-     char *buf;
-     int buflen;
+input_file_get (char *buf, int buflen)
 {
   int size;
 
@@ -235,8 +231,7 @@ input_file_get (buf, buflen)
 /* Read a buffer from the input file.  */
 
 char *
-input_file_give_next_buffer (where)
-     char *where;		/* Where to place 1st character of new buffer.  */
+input_file_give_next_buffer (char *where /* Where to place 1st character of new buffer.  */)
 {
   char *return_value;		/* -> Last char of what we read, + 1.  */
   register int size;
