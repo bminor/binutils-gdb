@@ -1,4 +1,4 @@
-#as: -m32rx --no-warn-explicit-parallel-conflicts
+#as: -m32rx --no-warn-explicit-parallel-conflicts --enable-special
 #objdump: -dr
 #name: m32rx
 
@@ -34,7 +34,7 @@ Disassembly of section .text:
   20:	50 e4 f0 00 	sadd || nop
 
 00000024 <satb>:
-  24:	8d 6d 01 00 	satb fp,fp
+  24:	8d 6d 03 00 	satb fp,fp
 
 00000028 <mulhi>:
   28:	3d 8d f0 00 	mulhi fp, fp, a1 || nop
@@ -261,7 +261,7 @@ Disassembly of section .text:
  1bc:	03 7d f0 00 	pcmpbz fp || nop
 
 000001c0 <sat>:
- 1c0:	8d 0d 00 00 	sat fp,fp
+ 1c0:	8d 6d 00 00 	sat fp,fp
 
 000001c4 <sath>:
  1c4:	8d 6d 02 00 	sath fp,fp
