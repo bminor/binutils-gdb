@@ -48,6 +48,8 @@ static boolean gld${EMULATION_NAME}_open_dynamic_archive
 static void gld${EMULATION_NAME}_after_open PARAMS ((void));
 static void gld${EMULATION_NAME}_check_needed
   PARAMS ((lang_input_statement_type *));
+static void gld${EMULATION_NAME}_stat_needed
+  PARAMS ((lang_input_statement_type *));
 static boolean gld${EMULATION_NAME}_search_needed
   PARAMS ((const char *, const char *));
 static boolean gld${EMULATION_NAME}_try_needed PARAMS ((const char *));
@@ -130,9 +132,10 @@ gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
 }
 
 /* These variables are required to pass information back and forth
-   between after_open and check_needed.  */
+   between after_open and check_needed and stat_needed.  */
 
 static struct bfd_elf_link_needed_list *global_needed;
+static struct stat global_stat;
 static boolean global_found;
 
 /* This is called after all the input files have been opened.  */
@@ -275,6 +278,25 @@ gld${EMULATION_NAME}_try_needed (name)
 
   /* We've found a dynamic object matching the DT_NEEDED entry.  */
 
+  /* We have already checked that there is no other input file of the
+     same name.  We must now check again that we are not including the
+     same file twice.  We need to do this because on many systems
+     libc.so is a symlink to, e.g., libc.so.1.  The SONAME entry will
+     reference libc.so.1.  If we have already included libc.so, we
+     don't want to include libc.so.1 if they are the same file, and we
+     can only check that using stat.  */
+
+  if (bfd_stat (abfd, &global_stat) != 0)
+    einfo ("%F%P:%B: bfd_stat failed: %E\n", abfd);
+  global_found = false;
+  lang_for_each_input_file (gld${EMULATION_NAME}_stat_needed);
+  if (global_found)
+    {
+      /* Return true to indicate that we found the file, even though
+         we aren't going to do anything with it.  */
+      return true;
+    }
+
   /* Tell the ELF backend that don't want the output file to have a
      DT_NEEDED entry for this file.  */
   bfd_elf_set_dt_needed_name (abfd, "");
@@ -286,7 +308,7 @@ gld${EMULATION_NAME}_try_needed (name)
   return true;
 }
 
-/* See if an input file matches a DT_NEEDED entry.  */
+/* See if an input file matches a DT_NEEDED entry by name.  */
 
 static void
 gld${EMULATION_NAME}_check_needed (s)
@@ -305,6 +327,30 @@ gld${EMULATION_NAME}_check_needed (s)
       if (f != NULL
 	  && strcmp (f + 1, global_needed->name) == 0)
 	global_found = true;
+    }
+}
+
+/* See if an input file matches a DT_NEEDED entry by running stat on
+   the file.  */
+
+static void
+gld${EMULATION_NAME}_stat_needed (s)
+     lang_input_statement_type *s;
+{
+  if (global_found)
+    return;
+  if (s->the_bfd != NULL)
+    {
+      struct stat st;
+
+      if (bfd_stat (s->the_bfd, &st) != 0)
+	einfo ("%P:%B: bfd_stat failed: %E\n", s->the_bfd);
+      else
+	{
+	  if (st.st_dev == global_stat.st_dev
+	      && st.st_ino == global_stat.st_ino)
+	    global_found = true;
+	}
     }
 }
 
@@ -365,8 +411,10 @@ gld${EMULATION_NAME}_before_allocation ()
 	  einfo ("%F%B: Can't read contents of section .gnu.warning: %E\n",
 		 is->the_bfd);
 	msg[sz] = '\0';
-	ret = link_info.callbacks->warning (&link_info, msg, is->the_bfd,
-					    (asection *) NULL, (bfd_vma) 0);
+	ret = link_info.callbacks->warning (&link_info, msg,
+					    (const char *) NULL,
+					    is->the_bfd, (asection *) NULL,
+					    (bfd_vma) 0);
 	ASSERT (ret);
 	free (msg);
 
