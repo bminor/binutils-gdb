@@ -1,3 +1,7 @@
+Tue Jan 25 11:30:06 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* rldefs.h: Accept __hpux as well as hpux for HP compiler in ANSI mode.
+
 Fri Jan 21 17:31:26 1994  Jim Kingdon  (kingdon@lisa.cygnus.com)
 
 	* chardefs.h, tilde.c: Just declare strrchr rather than trying to
