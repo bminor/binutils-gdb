@@ -1,3 +1,17 @@
+2004-04-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c (struct dwarf2_cu): Add has_form_ref_addr and
+	has_namespace_info.
+	(dwarf2_read_abbrevs): Set the new flags.  Change return type back
+	to void.  Update comments.
+	(dwarf2_build_psymtabs_hard): Update call to dwarf2_read_abbrevs.
+	Use new has_form_ref_addr flag.  Update call to
+	scan_partial_symbols.
+	(scan_partial_symbols, add_partial_symbol, add_partial_structure)
+	(add_partial_enumeration, add_partial_namespace): Remove
+	have_namespace_info argument.  Use new has_namespace_info CU flag.
+	Update calls to changed functions.
+
 2004-03-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (read_structure_type): Renamed from

@@ -360,6 +360,16 @@ struct dwarf2_cu
 
   /* Mark used when releasing cached dies.  */
   unsigned int mark : 1;
+
+  /* This flag will be set if this compilation unit might include
+     inter-compilation-unit references.  */
+  unsigned int has_form_ref_addr : 1;
+
+  /* This flag will be set if this compilation unit includes any
+     DW_TAG_namespace DIEs.  If we know that there are explicit
+     DIEs for namespaces, we don't need to try to infer them
+     from mangled names.  */
+  unsigned int has_namespace_info : 1;
 };
 
 struct dwarf2_per_cu_data
@@ -684,10 +694,10 @@ static void dwarf2_build_psymtabs_hard (struct objfile *, int);
 
 static void scan_partial_symbols (struct partial_die_info *,
 				  CORE_ADDR *, CORE_ADDR *,
-				  struct dwarf2_cu *, int);
+				  struct dwarf2_cu *);
 
-static void add_partial_symbol (struct partial_die_info *, struct dwarf2_cu *,
-				int have_namespace_info);
+static void add_partial_symbol (struct partial_die_info *,
+				struct dwarf2_cu *);
 
 static int pdi_needs_namespace (enum dwarf_tag tag);
 
@@ -696,12 +706,10 @@ static void add_partial_namespace (struct partial_die_info *pdi,
 				   struct dwarf2_cu *cu);
 
 static void add_partial_structure (struct partial_die_info *struct_pdi,
-				   struct dwarf2_cu *cu,
-				   int have_namespace_info);
+				   struct dwarf2_cu *cu);
 
 static void add_partial_enumeration (struct partial_die_info *enum_pdi,
-				     struct dwarf2_cu *cu,
-				     int have_namespace_info);
+				     struct dwarf2_cu *cu);
 
 static char *locate_pdi_sibling (struct partial_die_info *orig_pdi,
 				 char *info_ptr,
@@ -714,7 +722,7 @@ static void psymtab_to_symtab_1 (struct partial_symtab *);
 
 char *dwarf2_read_section (struct objfile *, asection *);
 
-static int dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu);
+static void dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu);
 
 static void dwarf2_free_abbrev_table (void *);
 
@@ -1394,7 +1402,6 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       struct abbrev_info *abbrev;
       unsigned int bytes_read;
       struct dwarf2_per_cu_data *this_cu;
-      int saw_ref_addr;
 
       beg_of_comp_unit = info_ptr;
 
@@ -1415,10 +1422,10 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       cu.read_in_chain = NULL;
 
       /* Read the abbrevs for this compilation unit into a table */
-      saw_ref_addr = dwarf2_read_abbrevs (abfd, &cu);
+      dwarf2_read_abbrevs (abfd, &cu);
       back_to_inner = make_cleanup (dwarf2_free_abbrev_table, &cu);
 
-      if (saw_ref_addr && cu_tree == NULL)
+      if (cu.has_form_ref_addr && cu_tree == NULL)
 	cu_tree = create_comp_unit_tree (objfile);
 
       /* Read the compilation unit die */
@@ -1497,7 +1504,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
 	  first_die = load_partial_dies (abfd, info_ptr, 1, &cu);
 
-	  scan_partial_symbols (first_die, &lowpc, &highpc, &cu, 0);
+	  scan_partial_symbols (first_die, &lowpc, &highpc, &cu);
 
 	  /* If we didn't find a lowpc, set it to highpc to avoid
 	     complaints from `maint check'.  */
@@ -1659,8 +1666,7 @@ create_comp_unit_tree (struct objfile *objfile)
 
 static void
 scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
-		      CORE_ADDR *highpc, struct dwarf2_cu *cu,
-		      int have_namespace_info)
+		      CORE_ADDR *highpc, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
   bfd *abfd = objfile->obfd;
@@ -1698,7 +1704,7 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 		    }
 		  if (!pdi_p->is_declaration)
 		    {
-		      add_partial_symbol (pdi_p, cu, have_namespace_info);
+		      add_partial_symbol (pdi_p, cu);
 		    }
 		}
 	      break;
@@ -1707,31 +1713,27 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 	    case DW_TAG_union_type:
 	      if (!pdi_p->is_declaration)
 		{
-		  add_partial_symbol (pdi_p, cu, have_namespace_info);
+		  add_partial_symbol (pdi_p, cu);
 		}
 	      break;
 	    case DW_TAG_class_type:
 	    case DW_TAG_structure_type:
 	      if (!pdi_p->is_declaration)
 		{
-		  add_partial_structure (pdi_p, cu, have_namespace_info);
+		  add_partial_structure (pdi_p, cu);
 		}
 	      break;
 	    case DW_TAG_enumeration_type:
 	      if (!pdi_p->is_declaration)
-		add_partial_enumeration (pdi_p, cu, have_namespace_info);
+		add_partial_enumeration (pdi_p, cu);
 	      break;
 	    case DW_TAG_base_type:
             case DW_TAG_subrange_type:
 	      /* File scope base type definitions are added to the partial
 	         symbol table.  */
-	      add_partial_symbol (pdi_p, cu, have_namespace_info);
+	      add_partial_symbol (pdi_p, cu);
 	      break;
 	    case DW_TAG_namespace:
-	      /* We've hit a DW_TAG_namespace entry, so we know this
-		 file has been compiled using a compiler that
-		 generates them; update NAMESPACE to reflect that.  */
-	      have_namespace_info = 1;
 	      add_partial_namespace (pdi_p, lowpc, highpc, cu);
 	      break;
 	    default:
@@ -1806,8 +1808,7 @@ partial_die_full_name (struct partial_die_info *pdi,
 }
 
 static void
-add_partial_symbol (struct partial_die_info *pdi,
-		    struct dwarf2_cu *cu, int have_namespace_info)
+add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
   CORE_ADDR addr = 0;
@@ -1964,7 +1965,7 @@ add_partial_symbol (struct partial_die_info *pdi,
   /* FIXME drow/2004-02-22: Why don't we do this for classes?  */
 
   if (cu->language == language_cplus
-      && have_namespace_info == 0
+      && cu->has_namespace_info == 0
       && psym != NULL
       && SYMBOL_CPLUS_DEMANGLED_NAME (psym) != NULL)
     cp_check_possible_namespace_symbols (SYMBOL_CPLUS_DEMANGLED_NAME (psym),
@@ -2019,21 +2020,19 @@ add_partial_namespace (struct partial_die_info *pdi,
   if (pdi->name == NULL)
     pdi->name = "(anonymous namespace)";
 
-  add_partial_symbol (pdi, cu, 1);
+  add_partial_symbol (pdi, cu);
 
   /* Now scan partial symbols in that namespace.  */
 
   if (pdi->has_children)
-    scan_partial_symbols (pdi->die_child,
-			  lowpc, highpc, cu, 1);
+    scan_partial_symbols (pdi->die_child, lowpc, highpc, cu);
 }
 
 /* Read a partial die corresponding to a class or structure.  */
 
 static void
 add_partial_structure (struct partial_die_info *struct_pdi,
-		       struct dwarf2_cu *cu,
-		       int have_namespace_info)
+		       struct dwarf2_cu *cu)
 {
   bfd *abfd = cu->objfile->obfd;
   char *full_name;
@@ -2042,7 +2041,7 @@ add_partial_structure (struct partial_die_info *struct_pdi,
     struct_pdi->name = "(anonymous class)";
 
   if (cu->language == language_cplus
-      && have_namespace_info == 0
+      && cu->has_namespace_info == 0
       && struct_pdi->has_children)
     {
       /* See if we can figure out if the class lives in a namespace
@@ -2079,21 +2078,21 @@ add_partial_structure (struct partial_die_info *struct_pdi,
 	}
     }
 
-  add_partial_symbol (struct_pdi, cu, have_namespace_info);
+  add_partial_symbol (struct_pdi, cu);
 }
 
 /* Read a partial die corresponding to an enumeration type.  */
 
 static void
 add_partial_enumeration (struct partial_die_info *enum_pdi,
-			 struct dwarf2_cu *cu, int have_namespace_info)
+			 struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
   bfd *abfd = objfile->obfd;
   struct partial_die_info *pdi_p;
 
   if (enum_pdi->name != NULL)
-    add_partial_symbol (enum_pdi, cu, have_namespace_info);
+    add_partial_symbol (enum_pdi, cu);
   
   pdi_p = enum_pdi->die_child;
   while (pdi_p)
@@ -2101,7 +2100,7 @@ add_partial_enumeration (struct partial_die_info *enum_pdi,
       if (pdi_p->tag != DW_TAG_enumerator || pdi_p->name == NULL)
 	complaint (&symfile_complaints, "malformed enumerator DIE ignored");
       else
-	add_partial_symbol (pdi_p, cu, have_namespace_info);
+	add_partial_symbol (pdi_p, cu);
       pdi_p = pdi_p->die_sibling;
     }
 }
@@ -4868,9 +4867,10 @@ dwarf2_read_section (struct objfile *objfile, asection *sectp)
 /* In DWARF version 2, the description of the debugging information is
    stored in a separate .debug_abbrev section.  Before we read any
    dies from a section we read in all abbreviations and install them
-   in a hash table.  */
+   in a hash table.  This function also sets flags in CU describing
+   the data found in the abbrev table.  */
 
-static int
+static void
 dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
 {
   struct comp_unit_head *cu_header = &cu->header;
@@ -4880,7 +4880,6 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
   unsigned int abbrev_form, hash_number;
   struct attr_abbrev *cur_attrs;
   unsigned int allocated_attrs;
-  int saw_ref_addr = 0;
 
   /* Initialize dwarf2 abbrevs */
   obstack_init (&cu->abbrev_obstack);
@@ -4909,6 +4908,9 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
       cur_abbrev->has_children = read_1_byte (abfd, abbrev_ptr);
       abbrev_ptr += 1;
 
+      if (cur_abbrev->tag == DW_TAG_namespace)
+	cu->has_namespace_info = 1;
+
       /* now read in declarations */
       abbrev_name = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
       abbrev_ptr += bytes_read;
@@ -4924,13 +4926,15 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
 					* sizeof (struct attr_abbrev)));
 	    }
 
-	  if (abbrev_form == DW_FORM_ref_addr)
-	    saw_ref_addr = 1;
+	  /* Record whether this compilation unit might have
+	     inter-compilation-unit references.  If we don't know what form
+	     this attribute will have, then it might potentially be a
+	     DW_FORM_ref_addr, so we conservatively expect inter-CU
+	     references.  */
 
-	  /* If we don't know what form this attribute will have, then it
-	     might potentially be a DW_FORM_ref_addr.  */
-	  if (abbrev_form == DW_FORM_indirect)
-	    saw_ref_addr = 1;
+	  if (abbrev_form == DW_FORM_ref_addr
+	      || abbrev_form == DW_FORM_indirect)
+	    cu->has_form_ref_addr = 1;
 
 	  cur_attrs[cur_abbrev->num_attrs].name = abbrev_name;
 	  cur_attrs[cur_abbrev->num_attrs++].form = abbrev_form;
@@ -4967,8 +4971,6 @@ dwarf2_read_abbrevs (bfd *abfd, struct dwarf2_cu *cu)
     }
 
   xfree (cur_attrs);
-
-  return saw_ref_addr;
 }
 
 /* Release the memory used by the abbrev table for a compilation unit.  */
