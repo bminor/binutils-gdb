@@ -18,7 +18,6 @@ License along with GAS; see the file COPYING.  If not, write
 to the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
 
 #include "as.h"
-#include "aout/stab_gnu.h"
 #ifdef BFD_ASSEMBLER
 #include "aout/aout64.h"
 #endif
@@ -61,19 +60,12 @@ const segT N_TYPE_seg[N_TYPE + 2] =
 };
 #endif
 
-static void obj_aout_stab PARAMS ((int what));
 static void obj_aout_line PARAMS ((int));
-static void obj_aout_desc PARAMS ((int));
 
 const pseudo_typeS obj_pseudo_table[] =
 {
-  /* stabs debug info */
   {"line", obj_aout_line, 0},	/* source code line number */
   {"ln", obj_aout_line, 0},	/* coff line number that we use anyway */
-  {"desc", obj_aout_desc, 0},	/* desc */
-  {"stabd", obj_aout_stab, 'd'},/* stabs */
-  {"stabn", obj_aout_stab, 'n'},/* stabs */
-  {"stabs", obj_aout_stab, 's'},/* stabs */
 
   /* coff debug pseudos (ignored) */
   {"def", s_ignore, 0},
@@ -89,7 +81,6 @@ const pseudo_typeS obj_pseudo_table[] =
   {"val", s_ignore, 0},
   {"version", s_ignore, 0},
 
-  /* stabs-in-coff (?) debug pseudos (ignored) */
   {"optim", s_ignore, 0},	/* For sun386i cc (?) */
 
   /* other stuff */
@@ -119,21 +110,31 @@ obj_aout_frob_symbol (sym, punt)
   /* Only frob simple symbols this way right now.  */
   if (! (type & ~ (N_TYPE | N_EXT)))
     {
-      if (sec == &bfd_abs_section
-	  || sec == &bfd_und_section)
+      if (type == (N_UNDF | N_EXT)
+	  && sec == &bfd_abs_section)
+	sym->bsym->section = sec = &bfd_und_section;
+
+      if ((type & N_TYPE) != N_INDR
+	  && (sec == &bfd_abs_section
+	      || sec == &bfd_und_section))
 	return;
       if (flags & BSF_EXPORT)
 	type |= N_EXT;
 
-      /* Set the debugging flag for constructor symbols so that BFD
-	 leaves them alone.  */
       switch (type & N_TYPE)
 	{
 	case N_SETA:
 	case N_SETT:
 	case N_SETD:
 	case N_SETB:
+	  /* Set the debugging flag for constructor symbols so that
+	     BFD leaves them alone.  */
 	  sym->bsym->flags |= BSF_DEBUGGING;
+	  break;
+	case N_INDR:
+	  /* Put indirect symbols in the indirect section.  */
+	  sym->bsym->section = &bfd_ind_section;
+	  sym->bsym->flags |= BSF_INDIRECT;
 	  break;
 	}
     }
@@ -254,194 +255,10 @@ obj_aout_line (ignore)
   demand_empty_rest_of_line ();
 }				/* obj_aout_line() */
 
-/*
- *			stab()
- *
- * Handle .stabX directives, which used to be open-coded.
- * So much creeping featurism overloaded the semantics that we decided
- * to put all .stabX thinking in one place. Here.
- *
- * We try to make any .stabX directive legal. Other people's AS will often
- * do assembly-time consistency checks: eg assigning meaning to n_type bits
- * and "protecting" you from setting them to certain values. (They also zero
- * certain bits before emitting symbols. Tut tut.)
- *
- * If an expression is not absolute we either gripe or use the relocation
- * information. Other people's assemblers silently forget information they
- * don't need and invent information they need that you didn't supply.
- *
- * .stabX directives always make a symbol table entry. It may be junk if
- * the rest of your .stabX directive is malformed.
- */
-static void
-obj_aout_stab (what)
-     int what;
-{
-  extern int listing;
-
-  register symbolS *symbolP = 0;
-  register char *string;
-  int saved_type = 0;
-  int length;
-  int goof;			/* TRUE if we have aborted. */
-  long longint;
-
-  /*
-   * Enter with input_line_pointer pointing past .stabX and any following
-   * whitespace.
-   */
-  goof = 0;			/* JF who forgot this?? */
-  if (what == 's')
-    {
-      string = demand_copy_C_string (&length);
-      SKIP_WHITESPACE ();
-      if (*input_line_pointer == ',')
-	input_line_pointer++;
-      else
-	{
-	  as_bad ("I need a comma after symbol's name");
-	  goof = 1;
-	}
-    }
-  else
-    string = "";
-
-  /*
-   * Input_line_pointer->after ','.  String->symbol name.
-   */
-  if (!goof)
-    {
-      symbolP = symbol_new (string, undefined_section, 0, (struct frag *) 0);
-      switch (what)
-	{
-	case 'd':
-	  S_SET_NAME (symbolP, NULL);	/* .stabd feature. */
-	  S_SET_VALUE (symbolP, (valueT) frag_now_fix ());
-	  symbolP->sy_frag = frag_now;
-	  break;
-
-	case 'n':
-	  symbolP->sy_frag = &zero_address_frag;
-	  break;
-
-	case 's':
-	  symbolP->sy_frag = &zero_address_frag;
-	  break;
-
-	default:
-	  BAD_CASE (what);
-	  break;
-	}
-
-      if (get_absolute_expression_and_terminator (&longint) == ',')
-	{
-	  saved_type = longint;
-	  S_SET_TYPE (symbolP, saved_type);
-	}
-      else
-	{
-	  as_bad ("I want a comma after the n_type expression");
-	  goof = 1;
-	  input_line_pointer--;	/* Backup over a non-',' char. */
-	}
-    }
-
-  if (!goof)
-    {
-      if (get_absolute_expression_and_terminator (&longint) == ',')
-	S_SET_OTHER (symbolP, longint);
-      else
-	{
-	  as_bad ("I want a comma after the n_other expression");
-	  goof = 1;
-	  input_line_pointer--;	/* Backup over a non-',' char. */
-	}
-    }
-
-  if (!goof)
-    {
-      S_SET_DESC (symbolP, get_absolute_expression ());
-      if (what == 's' || what == 'n')
-	{
-	  if (*input_line_pointer != ',')
-	    {
-	      as_bad ("I want a comma after the n_desc expression");
-	      goof = 1;
-	    }
-	  else
-	    {
-	      input_line_pointer++;
-	    }
-	}
-    }
-
-  if ((!goof) && (what == 's' || what == 'n'))
-    {
-      pseudo_set (symbolP);
-      S_SET_TYPE (symbolP, saved_type);
-    }
-#ifndef NO_LISTING
-  if (listing && !goof)
-    {
-      if (S_GET_TYPE (symbolP) == N_SLINE)
-	{
-	  listing_source_line ((unsigned int) S_GET_DESC (symbolP));
-	}
-      else if (S_GET_TYPE (symbolP) == N_SO || S_GET_TYPE (symbolP) == N_SOL)
-	{
-	  listing_source_file (string);
-	}
-    }
-#endif
-
-  if (goof)
-    ignore_rest_of_line ();
-  else
-    demand_empty_rest_of_line ();
-}				/* obj_aout_stab() */
-
-static void
-obj_aout_desc (ignore)
-     int ignore;
-{
-  register char *name;
-  register char c;
-  register char *p;
-  register symbolS *symbolP;
-  register int temp;
-
-  /*
-	 * Frob invented at RMS' request. Set the n_desc of a symbol.
- */
-  name = input_line_pointer;
-  c = get_symbol_end ();
-  p = input_line_pointer;
-  *p = c;
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer != ',')
-    {
-      *p = 0;
-      as_bad ("Expected comma after name \"%s\"", name);
-      *p = c;
-      ignore_rest_of_line ();
-    }
-  else
-    {
-      input_line_pointer++;
-      temp = get_absolute_expression ();
-      *p = 0;
-      symbolP = symbol_find_or_make (name);
-      *p = c;
-      S_SET_DESC (symbolP, temp);
-    }
-  demand_empty_rest_of_line ();
-}				/* obj_aout_desc() */
-
 void
 obj_read_begin_hook ()
 {
-  return;
-}				/* obj_read_begin_hook() */
+}
 
 #ifndef BFD_ASSEMBLER
 
@@ -518,9 +335,7 @@ obj_crawl_symbol_chain (headers)
     }				/* for each symbol */
 
   H_SET_SYMBOL_TABLE_SIZE (headers, symbol_number);
-
-  return;
-}				/* obj_crawl_symbol_chain() */
+}
 
 /*
  * Find strings by crawling along symbol table chain.
@@ -546,9 +361,7 @@ obj_emit_strings (where)
 	append (&next_object_file_charP, S_GET_NAME (symbolP),
 		(unsigned long) (strlen (S_GET_NAME (symbolP)) + 1));
     }				/* walk symbol chain */
-
-  return;
-}				/* obj_emit_strings() */
+}
 
 #ifndef AOUT_VERSION
 #define AOUT_VERSION 0
@@ -562,8 +375,7 @@ obj_pre_write_hook (headers)
   H_SET_VERSION (headers, AOUT_VERSION);
   H_SET_MACHTYPE (headers, AOUT_MACHTYPE);
   tc_aout_pre_write_hook (headers);
-  return;
-}				/* obj_pre_write_hook() */
+}
 
 void
 DEFUN_VOID (s_sect)

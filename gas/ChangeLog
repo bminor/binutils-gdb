@@ -1,3 +1,11 @@
+Tue Jan 18 17:23:52 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/obj-aout.c (obj_aout_frob_symbol): Try to get symbols
+	with explicitly marked stabs through BFD: if a symbol marked
+	N_UNDF | N_EXT is in the absolute section, move it to the
+	undefined section; move a symbol marked N_INDR into
+	bfd_ind_section and set the BSF_INDIRECT flag.
+
 Mon Jan 17 15:40:23 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff.h (ecoff_set_gp_prolog_size): Declare.
