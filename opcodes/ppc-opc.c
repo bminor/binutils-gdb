@@ -544,11 +544,11 @@ const struct powerpc_operand powerpc_operands[] =
 
   /* The other UIMM field in a half word EVX form instruction. */
 #define EVUIMM_2 EVUIMM + 1
-  { 5, 11, insert_ev2, extract_ev2, PPC_OPERAND_PARENS },
+  { 32, 11, insert_ev2, extract_ev2, PPC_OPERAND_PARENS },
 
   /* The other UIMM field in a word EVX form instruction. */
 #define EVUIMM_4 EVUIMM_2 + 1
-  { 5, 11, insert_ev4, extract_ev4, PPC_OPERAND_PARENS },
+  { 32, 11, insert_ev4, extract_ev4, PPC_OPERAND_PARENS },
 
   /* The other UIMM field in a double EVX form instruction. */
 #define EVUIMM_8 EVUIMM_4 + 1

@@ -1,3 +1,8 @@
+2002-11-07  Aldy Hernandez  <aldyh@redhat.com>
+
+	* ppc-opc.c (EVUIMM_4): Change bit size to 32.
+	(EVUIMM_2): Same.
+
 2002-11-07  Klee Dienes  <kdienes@apple.com>
 
          * Makefile.am (ia64-asmtab.c): Update to use the new '--srcdir'
