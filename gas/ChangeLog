@@ -1,3 +1,11 @@
+2001-06-06  Hans-Peter Nilsson  <hp@axis.com>
+
+	* config/tc-cris.c (cris_insn_first_word_frag): New.
+	(md_assemble): Call cris_insn_first_word_frag to get the first
+	frag in an insn, not frag_more.  Don't call dwarf2_emit_insn at
+	end.  Drop variable insn_size.
+	(gen_bdap): Call cris_insn_first_word_frag, not frag_more.
+
 2001-06-06  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* as.c (show_usage): Remove L from listing options.  It is not a
