@@ -1,10 +1,19 @@
+2000-11-01  Nick Clifton  <nickc@redhat.com>
+
+	* read.c (original_case_string): New global variable.
+	(read_a_source_file): Copy opcode string into
+	original_case_string if clobbering the case of the opcode.
+	* read.h: Export the definition of original_case_string.
+	* config/tc-arm.c (md_assembler): When parsing a .req
+	directive use the original opcode string, not the case
+	clobbered version.
+
 2000-11-02  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-mn10300.c (debug_line): Remove this static
-	varaible.
+	variable.
 	(md_assemble): Call dwarf2_generate_asm_lineno instead of
 	dwarf2_where and dwarf2_gen_line_info.
-
 
 2000-11-02  Theo Honohan  <th@futuretv.com>
 

@@ -165,6 +165,10 @@ char is_end_of_line[256] =
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0	/* */
 };
 
+#ifdef  IGNORE_OPCODE_CASE
+char original_case_string[128];
+#endif
+
 /* Functions private to this file.  */
 
 static char *buffer;	/* 1st char of each buffer of lines is here.  */
@@ -735,10 +739,13 @@ read_a_source_file (name)
 		  /* Expect pseudo-op or machine instruction.  */
 		  pop = NULL;
 
-#define IGNORE_OPCODE_CASE
 #ifdef IGNORE_OPCODE_CASE
 		  {
 		    char *s2 = s;
+
+		    strncpy (original_case_string, s2, sizeof (original_case_string));
+		    original_case_string[sizeof (original_case_string) - 1] = 0;
+		    
 		    while (*s2)
 		      {
 			if (isupper ((unsigned char) *s2))

@@ -6613,9 +6613,14 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
   if (*q && !strncmp (q, ".req ", 4))
     {
       int    reg;
-      char * copy_of_str = str;
+      char * copy_of_str;
       char * r;
 
+#ifdef IGNORE_OPCODE_CASE
+      str = original_case_string;
+#endif
+      copy_of_str = str;
+      
       q += 4;
       skip_whitespace (q);
 

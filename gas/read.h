@@ -85,6 +85,11 @@ enum linkonce_type
   LINKONCE_SAME_CONTENTS
 };
 
+#define IGNORE_OPCODE_CASE
+#ifdef  IGNORE_OPCODE_CASE
+extern char original_case_string[];
+#endif
+
 extern void pop_insert PARAMS ((const pseudo_typeS *));
 extern unsigned int get_stab_string_offset
   PARAMS ((const char *string, const char *stabstr_secname));
