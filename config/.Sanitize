@@ -32,6 +32,7 @@ mh-dgux
 mh-hp300
 mh-hpux
 mh-irix4
+mh-irix5
 mh-linux
 mh-lynxos
 mh-ncr3000
