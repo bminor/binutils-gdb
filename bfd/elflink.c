@@ -2733,24 +2733,26 @@ elf_add_dt_needed_tag (struct bfd_link_info *info,
 }
 
 /* Sort symbol by value and section.  */
+
 static int
 elf_sort_symbol (const void *arg1, const void *arg2)
 {
   const struct elf_link_hash_entry *h1;
   const struct elf_link_hash_entry *h2;
-  bfd_signed_vma vdiff;
 
   h1 = *(const struct elf_link_hash_entry **) arg1;
   h2 = *(const struct elf_link_hash_entry **) arg2;
-  vdiff = h1->root.u.def.value - h2->root.u.def.value;
-  if (vdiff != 0)
-    return vdiff > 0 ? 1 : -1;
-  else
-    {
-      long sdiff = h1->root.u.def.section->id - h2->root.u.def.section->id;
-      if (sdiff != 0)
-	return sdiff > 0 ? 1 : -1;
-    }
+
+  /* Coded this way to avoid bugs in various versions of gcc.  */
+  if (h1->root.u.def.value < h2->root.u.def.value)
+     return -1;
+  if (h1->root.u.def.value > h2->root.u.def.value)
+     return 1;
+  if (h1->root.u.def.section < h2->root.u.def.section)
+     return -1;
+  if (h1->root.u.def.section > h2->root.u.def.section)
+     return 1;
+
   return 0;
 }
 

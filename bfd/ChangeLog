@@ -1,3 +1,8 @@
+2004-07-13  Kelvin Lee  <Kelvin.Lee@lansa.com.au>
+
+	* elflink.c (elf_sort_symbol): Restructure code to avoid bug in
+	Solairs hosted versions of gcc.
+
 2004-07-10  James E Wilson  <wilson@specifixinc.com>
 
 	* elfxx-ia64.c (elfNN_ia64_relax_ldxmov): Remove abfd parameter.
