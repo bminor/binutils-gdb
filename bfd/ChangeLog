@@ -1,3 +1,7 @@
+Fri Dec 15 07:32:09 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* pe[i]-i386.c (TARGET_UNDERSCORE): Define to '_'.
+
 Thu Dec 14 13:45:37 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c: Lots of minor cleanups.  Make many functions return
