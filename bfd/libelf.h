@@ -529,6 +529,10 @@ extern boolean bfd_elf32_bfd_link_add_symbols
 extern boolean bfd_elf32_bfd_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
 
+extern void bfd_elf32_swap_symbol_in
+  PARAMS ((bfd *, Elf32_External_Sym *, Elf_Internal_Sym *));
+extern void bfd_elf32_swap_symbol_out
+  PARAMS ((bfd *, Elf_Internal_Sym *, Elf32_External_Sym *));
 extern void bfd_elf32_swap_reloc_in
   PARAMS ((bfd *, Elf32_External_Rel *, Elf_Internal_Rel *));
 extern void bfd_elf32_swap_reloc_out
@@ -586,6 +590,10 @@ extern boolean bfd_elf64_bfd_link_add_symbols
 extern boolean bfd_elf64_bfd_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
 
+extern void bfd_elf64_swap_symbol_in
+  PARAMS ((bfd *, Elf64_External_Sym *, Elf_Internal_Sym *));
+extern void bfd_elf64_swap_symbol_out
+  PARAMS ((bfd *, Elf_Internal_Sym *, Elf64_External_Sym *));
 extern void bfd_elf64_swap_reloc_in
   PARAMS ((bfd *, Elf64_External_Rel *, Elf_Internal_Rel *));
 extern void bfd_elf64_swap_reloc_out

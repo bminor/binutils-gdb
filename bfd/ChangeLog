@@ -1,5 +1,10 @@
 Tue Jul 12 11:41:22 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* libelf.h (bfd_elf32_swap_symbol_in): Declare.
+	(bfd_elf32_swap_symbol_out): Declare.
+	(bfd_elf64_swap_symbol_in, bfd_elf64_swap_symbol_out): Declare.
+	* elf32-hppa.c (elf32_hppa_args_hash_table_init): Correct cast.
+
 	* aout-encap.c (ARCH): Don't define.  Obsolete.
 	* aout0.c, aoutx.h, gen-aout.c, hp300bsd.c, hp300hpux.c: Likewise.
 	* i386aout.c, i386bsd.c, i386dynix.c, i386linux.c: Likewise.
