@@ -1,5 +1,13 @@
 2000-11-24  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* hw-base.c (hw_delete): Don't free base_of_hw since it's freed.
+	(set_hw_delete): Moved the macro as a function.
+	* hw-base.h (set_hw_delete): Declare as external function.
+	* hw-alloc.c (delete_hw_alloc_data): Allow to free the memory
+	allocated using hw_malloc.
+	
+2000-11-24  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* sim-options.c (sim_parse_args): Free the memory used for
 	long_options, short_options, handlers, opt_cpu, orig_val.
 

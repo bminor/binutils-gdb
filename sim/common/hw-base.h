@@ -54,8 +54,7 @@ void hw_delete
 typedef void (hw_delete_callback)
      (struct hw *me);
 
-#define set_hw_delete(hw, method) \
-((hw)->base_of_hw->to_delete = (method))
+extern void set_hw_delete(struct hw* hw, hw_delete_callback method);
 
 
 /* ALLOC */

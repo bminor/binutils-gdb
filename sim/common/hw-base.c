@@ -510,8 +510,13 @@ hw_delete (struct hw *me)
   delete_hw_alloc_data (me);
 
   /* finally */
-  zfree (me->base_of_hw);
   zfree (me);
+}
+
+void
+set_hw_delete (struct hw *hw, hw_delete_callback method)
+{
+  hw->base_of_hw->to_delete = method;
 }
 
 
