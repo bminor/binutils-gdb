@@ -1162,6 +1162,19 @@ do_align (n, fill, len, max)
      int len;
      int max;
 {
+  if (now_seg == absolute_section)
+    {
+      if (fill != NULL)
+	while (len-- > 0)
+	  if (*fill++ != '\0')
+	    {
+	      as_warn (_("ignoring fill value in absolute section"));
+	      break;
+	    }
+      fill = NULL;
+      len = 0;
+    }
+
 #ifdef md_do_align
   md_do_align (n, fill, len, max, just_record_alignment);
 #endif

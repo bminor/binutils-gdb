@@ -587,7 +587,7 @@ subseg_text_p (sec)
 #else /* ! BFD_ASSEMBLER */
   const char * const *p;
 
-  if (sec == data_section || sec == bss_section)
+  if (sec == data_section || sec == bss_section || sec == absolute_section)
     return 0;
 
   for (p = nontext_section_names; *p != NULL; ++p)
