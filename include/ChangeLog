@@ -701,3 +701,7 @@ Wed Aug 21 20:32:13 1991  John Gilmore  (gnu at cygint.cygnus.com)
 	* stab.def:  Update allocation table in comments at end,
 	to reflect reality as I know it.
 
+
+Local Variables:
+version-control: never
+End:

@@ -1611,4 +1611,7 @@ Fri May  3 22:21:44 1991  John Gilmore  (gnu at cygint.cygnus.com)
 	* copy.c:  Change =& constructs to = &, since they confuse older
 	C compilers.
 
-
+
+Local Variables:
+version-control: never
+End:
