@@ -728,6 +728,19 @@ static const char *mips_isa_to_str PARAMS ((int));
 static const char *mips_cpu_to_str PARAMS ((int));
 static int validate_mips_insn PARAMS ((const struct mips_opcode *));
 
+/* Return values of my_getSmallExpression() */
+
+enum
+{
+  S_EX_NONE = 0,
+  S_EX_LO,
+  S_EX_HI,
+  S_EX_HIGHER,
+  S_EX_HIGHEST,
+  S_EX_GPREL,
+  S_EX_NEG
+};
+
 /* Table and functions used to map between CPU/ISA names, and
    ISA levels, and CPU numbers.  */
 
@@ -7655,14 +7668,18 @@ mips_ip (str, ip)
 	    case 'j':		/* 16 bit signed immediate */
 	      imm_reloc = BFD_RELOC_LO16;
 	      c = my_getSmallExpression (&imm_expr, s);
-	      if (c != '\0')
+	      if (c != S_EX_NONE)
 		{
-		  if (c != 'l')
+		  if (c != S_EX_LO)
 		    {
 		      if (imm_expr.X_op == O_constant)
 			imm_expr.X_add_number =
 			  (imm_expr.X_add_number >> 16) & 0xffff;
-		      else if (c == 'h')
+		      else if (c == S_EX_HIGHEST)
+			  imm_reloc = BFD_RELOC_MIPS_HIGHEST;
+		      else if (c == S_EX_HIGHER)
+			  imm_reloc = BFD_RELOC_MIPS_HIGHER;
+		      else if (c == S_EX_HI)
 			{
 			  imm_reloc = BFD_RELOC_HI16_S;
 			  imm_unmatched_hi = true;
@@ -7675,7 +7692,7 @@ mips_ip (str, ip)
 		}
 	      if (*args == 'i')
 		{
-		  if ((c == '\0' && imm_expr.X_op != O_constant)
+		  if ((c == S_EX_NONE && imm_expr.X_op != O_constant)
 		      || ((imm_expr.X_add_number < 0
 			   || imm_expr.X_add_number >= 0x10000)
 			  && imm_expr.X_op == O_constant))
@@ -7708,7 +7725,7 @@ mips_ip (str, ip)
 		    max = 0x8000;
 		  else
 		    max = 0x10000;
-		  if ((c == '\0' && imm_expr.X_op != O_constant)
+		  if ((c == S_EX_NONE && imm_expr.X_op != O_constant)
 		      || ((imm_expr.X_add_number < -0x8000
 			   || imm_expr.X_add_number >= max)
 			  && imm_expr.X_op == O_constant)
@@ -7742,7 +7759,7 @@ mips_ip (str, ip)
 		 fashion is that the macro function doesn't expect to
 		 see anything which can be handled in a single
 		 constant instruction.  */
-	      if (c == 0
+	      if (c == S_EX_NONE
 		  && (offset_expr.X_op != O_constant
 		      || offset_expr.X_add_number >= 0x8000
 		      || offset_expr.X_add_number < -0x8000)
@@ -7752,7 +7769,7 @@ mips_ip (str, ip)
 			  != S_GET_SEGMENT (offset_expr.X_op_symbol))))
 		break;
 
-	      if (c == 'h' || c == 'H')
+	      if (c == S_EX_HI)
 		{
 		  if (offset_expr.X_op != O_constant)
 		    break;
@@ -7774,12 +7791,14 @@ mips_ip (str, ip)
 	      imm_reloc = BFD_RELOC_LO16;
 	      if (c)
 		{
-		  if (c != 'l')
+		  if (c != S_EX_LO)
 		    {
 		      if (imm_expr.X_op == O_constant)
 			imm_expr.X_add_number =
 			  (imm_expr.X_add_number >> 16) & 0xffff;
-		      else if (c == 'h')
+		      else if (c == S_EX_HIGHEST)
+			  imm_reloc = BFD_RELOC_MIPS_HIGHEST;
+		      else if (c == S_EX_HI)
 			{
 			  imm_reloc = BFD_RELOC_HI16_S;
 			  imm_unmatched_hi = true;
@@ -8581,8 +8600,6 @@ mips16_immed (file, line, type, val, warn, small, ext, insn, use_extend,
     }
 }
 
-#define LP '('
-#define RP ')'
 
 static int
 my_getSmallExpression (ep, str)
@@ -8590,85 +8607,144 @@ my_getSmallExpression (ep, str)
      char *str;
 {
   char *sp;
-  int c = 0;
+  char *oldstr = str;
+  int c = S_EX_NONE;
 
   if (*str == ' ')
     str++;
-  if (*str == LP
-      || (*str == '%' &&
-	  ((str[1] == 'h' && str[2] == 'i')
-	   || (str[1] == 'H' && str[2] == 'I')
-	   || (str[1] == 'l' && str[2] == 'o'))
-	  && str[3] == LP))
+  if (*str == '(')
+    c = S_EX_NONE;
+  else if (str[0] == '%'
+	   && tolower(str[1]) == 'l'
+	   && tolower(str[2]) == 'o'
+	   && str[3] == '(')
     {
-      if (*str == LP)
-	c = 0;
-      else
-	{
-	  c = str[1];
-	  str += 3;
-	}
+      c = S_EX_LO;
+      str += sizeof ("%lo(") - 2;
+    }
+  else if (str[0] == '%'
+	   && tolower(str[1]) == 'h'
+	   && tolower(str[2]) == 'i'
+	   && str[3] == '(')
+    {
+      c = S_EX_HI;
+      str += sizeof ("%hi(") - 2;
+    }
+  else if (str[0] == '%'
+	   && tolower(str[1]) == 'h'
+	   && tolower(str[2]) == 'i'
+	   && tolower(str[3]) == 'g'
+	   && tolower(str[4]) == 'h'
+	   && tolower(str[5]) == 'e'
+	   && tolower(str[6]) == 'r'
+	   && str[7] == '(')
+    {
+      c = S_EX_HIGHER;
+      str += sizeof ("%higher(") - 2;
+    }
+  else if (str[0] == '%'
+	   && tolower(str[1]) == 'h'
+	   && tolower(str[2]) == 'i'
+	   && tolower(str[3]) == 'g'
+	   && tolower(str[4]) == 'h'
+	   && tolower(str[5]) == 'e'
+	   && tolower(str[6]) == 's'
+	   && tolower(str[7]) == 't'
+	   && str[8] == '(')
+    {
+      c = S_EX_HIGHEST;
+      str += sizeof ("%highest(") - 2;
+    }
+/* currently unsupported */
+#if 0
+  else if (str[0] == '%'
+	   && tolower(str[1]) == 'g'
+	   && tolower(str[2]) == 'p'
+	   && tolower(str[3]) == 'r'
+	   && tolower(str[4]) == 'e'
+	   && tolower(str[5]) == 'l'
+	   && str[6] == '(')
+    {
+      c = S_EX_GPREL;
+      str += sizeof ("%gprel(") - 2;
+    }
+  else if (str[0] == '%'
+	   && tolower(str[1]) == 'n'
+	   && tolower(str[2]) == 'e'
+	   && tolower(str[3]) == 'g'
+	   && str[4] == '(')
+    {
+      c = S_EX_NEG;
+      str += sizeof ("%neg(") - 2;
+    }
+#endif
+  else
+    {
+      my_getExpression (ep, str);
+      return c;
+    }
 
-      /*
-       * A small expression may be followed by a base register.
-       * Scan to the end of this operand, and then back over a possible
-       * base register.  Then scan the small expression up to that
-       * point.  (Based on code in sparc.c...)
-       */
-      for (sp = str; *sp && *sp != ','; sp++)
-	;
-      if (sp - 4 >= str && sp[-1] == RP)
+  /*
+   * A small expression may be followed by a base register.
+   * Scan to the end of this operand, and then back over a possible
+   * base register.  Then scan the small expression up to that
+   * point.  (Based on code in sparc.c...)
+   */
+  for (sp = str; *sp && *sp != ','; sp++)
+    ;
+  if (sp - 4 >= str && sp[-1] == ')')
+    {
+      if (isdigit ((unsigned char) sp[-2]))
 	{
-	  if (isdigit ((unsigned char) sp[-2]))
+	  for (sp -= 3; sp >= str && isdigit ((unsigned char) *sp); sp--)
+	    ;
+	  if (*sp == '$' && sp > str && sp[-1] == '(')
 	    {
-	      for (sp -= 3; sp >= str && isdigit ((unsigned char) *sp); sp--)
-		;
-	      if (*sp == '$' && sp > str && sp[-1] == LP)
-		{
-		  sp--;
-		  goto do_it;
-		}
+	      sp--;
+	      goto do_it;
 	    }
-	  else if (sp - 5 >= str
-		   && sp[-5] == LP
-		   && sp[-4] == '$'
-		   && ((sp[-3] == 'f' && sp[-2] == 'p')
-		       || (sp[-3] == 's' && sp[-2] == 'p')
-		       || (sp[-3] == 'g' && sp[-2] == 'p')
-		       || (sp[-3] == 'a' && sp[-2] == 't')))
+	}
+      else if (sp - 5 >= str
+	       && sp[-5] == '('
+	       && sp[-4] == '$'
+	       && ((sp[-3] == 'f' && sp[-2] == 'p')
+		   || (sp[-3] == 's' && sp[-2] == 'p')
+		   || (sp[-3] == 'g' && sp[-2] == 'p')
+		   || (sp[-3] == 'a' && sp[-2] == 't')))
+	{
+	  sp -= 5;
+	do_it:
+	  if (sp == str)
 	    {
-	      sp -= 5;
-	    do_it:
-	      if (sp == str)
+	      /* no expression means zero offset */
+	      if (c != S_EX_NONE)
 		{
-		  /* no expression means zero offset */
-		  if (c)
-		    {
-		      /* %xx(reg) is an error */
-		      ep->X_op = O_absent;
-		      expr_end = str - 3;
-		    }
-		  else
-		    {
-		      ep->X_op = O_constant;
-		      expr_end = sp;
-		    }
-		  ep->X_add_symbol = NULL;
-		  ep->X_op_symbol = NULL;
-		  ep->X_add_number = 0;
+		  /* %xx(reg) is an error */
+		  ep->X_op = O_absent;
+		  expr_end = oldstr;
 		}
 	      else
 		{
-		  *sp = '\0';
-		  my_getExpression (ep, str);
-		  *sp = LP;
+		  ep->X_op = O_constant;
+		  expr_end = sp;
 		}
-	      return c;
+	      ep->X_add_symbol = NULL;
+	      ep->X_op_symbol = NULL;
+	      ep->X_add_number = 0;
 	    }
+	  else
+	    {
+	      *sp = '\0';
+	      my_getExpression (ep, str);
+	      *sp = '(';
+	    }
+	  return c;
 	}
     }
   my_getExpression (ep, str);
-  return c;			/* => %hi or %lo encountered */
+
+  /* => %highest, %higher, %hi, %lo, %gprel, %neg encountered */
+  return c;
 }
 
 static void
