@@ -86,6 +86,7 @@ boolean	_bfd_generic_mkarchive PARAMS ((bfd *abfd));
 struct areltdata *	snarf_ar_hdr PARAMS ((bfd *abfd));
 bfd_target *		bfd_generic_archive_p PARAMS ((bfd *abfd));
 boolean	bfd_slurp_armap PARAMS ((bfd *abfd));
+boolean bfd_slurp_bsd_armap_f2 PARAMS ((bfd *abfd));
 #define bfd_slurp_bsd_armap bfd_slurp_armap
 #define bfd_slurp_coff_armap bfd_slurp_armap
 boolean	_bfd_slurp_extended_name_table PARAMS ((bfd *abfd));
@@ -96,24 +97,27 @@ bfd *	new_bfd PARAMS (());
 boolean	bfd_add_to_string_table PARAMS ((char **table, char *new_string,
 					 unsigned int *table_length,
 					 char **free_ptr));
-bfd_vma _do_getb64 PARAMS ((unsigned char *addr));     
-bfd_vma _do_getl64 PARAMS ((unsigned char *addr));     
-bfd_signed_vma _do_getb_signed_64 PARAMS ((unsigned char *addr));     
-bfd_signed_vma _do_getl_signed_64 PARAMS ((unsigned char *addr));     
-bfd_vma _do_getb32 PARAMS ((unsigned char *addr));
-bfd_vma _do_getl32 PARAMS ((unsigned char *addr));
-bfd_signed_vma _do_getb_signed_32 PARAMS ((unsigned char *addr));
-bfd_signed_vma _do_getl_signed_32 PARAMS ((unsigned char *addr));
-bfd_vma _do_getb16 PARAMS ((unsigned char *addr));
-bfd_vma _do_getl16 PARAMS ((unsigned char *addr));
-bfd_signed_vma _do_getb_signed_16 PARAMS ((unsigned char *addr));
-bfd_signed_vma _do_getl_signed_16 PARAMS ((unsigned char *addr));
-void    _do_putb64 PARAMS ((bfd_vma data, unsigned char *addr));
-void    _do_putl64 PARAMS ((bfd_vma data, unsigned char *addr));
-void    _do_putb32 PARAMS ((bfd_vma data, unsigned char *addr));
-void    _do_putl32 PARAMS ((bfd_vma data, unsigned char *addr));
-void    _do_putb16 PARAMS ((bfd_vma data, unsigned char *addr));
-void    _do_putl16 PARAMS ((bfd_vma data, unsigned char *addr));
+
+/* Byte swapping routines from libbfd.c */
+
+bfd_vma		_do_getb64	   PARAMS ((unsigned char *addr));     
+bfd_vma 	_do_getl64	   PARAMS ((unsigned char *addr));     
+bfd_signed_vma	_do_getb_signed_64 PARAMS ((unsigned char *addr));     
+bfd_signed_vma	_do_getl_signed_64 PARAMS ((unsigned char *addr));     
+bfd_vma		_do_getb32	   PARAMS ((unsigned char *addr));
+bfd_vma		_do_getl32	   PARAMS ((unsigned char *addr));
+bfd_signed_vma	_do_getb_signed_32 PARAMS ((unsigned char *addr));
+bfd_signed_vma	_do_getl_signed_32 PARAMS ((unsigned char *addr));
+bfd_vma		_do_getb16	   PARAMS ((unsigned char *addr));
+bfd_vma		_do_getl16	   PARAMS ((unsigned char *addr));
+bfd_signed_vma	_do_getb_signed_16 PARAMS ((unsigned char *addr));
+bfd_signed_vma	_do_getl_signed_16 PARAMS ((unsigned char *addr));
+void		_do_putb64	   PARAMS ((bfd_vma data, unsigned char *addr));
+void		_do_putl64	   PARAMS ((bfd_vma data, unsigned char *addr));
+void		_do_putb32	   PARAMS ((bfd_vma data, unsigned char *addr));
+void		_do_putl32	   PARAMS ((bfd_vma data, unsigned char *addr));
+void		_do_putb16	   PARAMS ((bfd_vma data, unsigned char *addr));
+void		_do_putl16	   PARAMS ((bfd_vma data, unsigned char *addr));
 
 boolean	bfd_false PARAMS ((bfd *ignore));
 boolean	bfd_true PARAMS ((bfd *ignore));
@@ -213,9 +217,6 @@ extern bfd *bfd_last_cache;
     ((x)==bfd_last_cache? \
       (FILE*)(bfd_last_cache->iostream): \
        bfd_cache_lookup_worker(x))
-void  
-bfd_cache_init  PARAMS ((bfd *));
-
 boolean 
 bfd_cache_close  PARAMS ((bfd *));
 
@@ -274,6 +275,6 @@ bfd_default_compatible
 boolean 
 bfd_default_scan PARAMS ((CONST struct bfd_arch_info *, CONST char *));
 
-struct elf_internal_shdr *
-bfd_elf_find_section  PARAMS ((bfd *abfd, char *name));
+struct elf32_internal_shdr *
+bfd_elf32_find_section  PARAMS ((bfd *abfd, char *name));
 
