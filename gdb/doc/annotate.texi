@@ -38,6 +38,7 @@ into another language, under the above conditions for modified versions.
 @title GDB Annotations
 @subtitle Edition @value{EDITION}
 @subtitle @value{DATE}
+@author Cygnus Support
 @page
 @vskip 0pt plus 1filll
 Permission is granted to make and distribute verbatim copies of
@@ -262,7 +263,7 @@ When GDB is prompting for a command (the main GDB prompt).
 
 @item commands
 When GDB prompts for a set of commands, like in the @code{commands}
-command.
+command.  The annotations are repeated for each command which is input.
 
 @item overload-choice
 When GDB wants the user to select between various overloaded functions.
@@ -271,7 +272,10 @@ When GDB wants the user to select between various overloaded functions.
 When GDB wants the user to confirm a potentially dangerous operation.
 
 @item prompt-for-continue
-When GDB is asking the user to press return to continue.
+When GDB is asking the user to press return to continue.  Note: Don't
+expect this to work well; instead use @code{set height 0} to disable
+prompting.  This is because the counting of lines is buggy in the
+presence of annotations.
 @end table
 
 @node Breakpoint Info
