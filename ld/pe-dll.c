@@ -384,13 +384,22 @@ process_def_file (abfd, info)
 				   name,
 				   false, false, true);
 
-      if (blhe && (blhe->type == bfd_link_hash_defined))
+      if (blhe
+          && (blhe->type == bfd_link_hash_defined
+	      || (blhe->type == bfd_link_hash_common)))
 	{
 	  count_exported++;
 	  if (!pe_def_file->exports[i].flag_noname)
 	    count_exported_byname++;
-	  exported_symbol_offsets[i] = blhe->u.def.value;
-	  exported_symbol_sections[i] = blhe->u.def.section;
+
+	  /* Only fill in the sections. The actual offsets are computed
+	     in fill_exported_offsets() after common symbols are laid
+	     out.  */
+          if (blhe->type == bfd_link_hash_defined)
+	    exported_symbol_sections[i] = blhe->u.def.section;
+	  else
+	    exported_symbol_sections[i] = blhe->u.c.p->section;
+
 	  if (pe_def_file->exports[i].ordinal != -1)
 	    {
 	      if (max_ordinal < pe_def_file->exports[i].ordinal)
@@ -572,6 +581,43 @@ generate_edata (abfd, info)
 	      + name_table_size + strlen (dll_name) + 1);
 }
 
+/* Fill the exported symbol offsets. The preliminary work has already
+   been done in process_def_file().  */
+
+static void
+fill_exported_offsets (abfd, info)
+     bfd *abfd;
+     struct bfd_link_info *info;
+{
+  int i, j;
+  struct bfd_link_hash_entry *blhe;
+  bfd *b;
+  struct sec *s;
+  def_file_export *e=0;
+
+  for (i = 0; i < pe_def_file->num_exports; i++)
+    {
+      char *name = (char *) xmalloc (strlen (pe_def_file->exports[i].internal_name) + 2);
+      if (pe_details->underscored)
+	{
+	  *name = '_';
+	  strcpy (name + 1, pe_def_file->exports[i].internal_name);
+	}
+      else
+	strcpy (name, pe_def_file->exports[i].internal_name);
+
+      blhe = bfd_link_hash_lookup (info->hash,
+				   name,
+				   false, false, true);
+
+      if (blhe && (blhe->type == bfd_link_hash_defined))
+	{
+	  exported_symbol_offsets[i] = blhe->u.def.value;
+        }
+      free (name);
+    }
+}
+
 static void
 fill_edata (abfd, info)
      bfd *abfd;
@@ -614,6 +660,8 @@ fill_edata (abfd, info)
   bfd_put_32 (abfd, ERVA (eaddresses), edata_d + 28);
   bfd_put_32 (abfd, ERVA (enameptrs), edata_d + 32);
   bfd_put_32 (abfd, ERVA (eordinals), edata_d + 36);
+
+  fill_exported_offsets (abfd, info);
 
   /* Ok, now for the filling in part */
   hint = 0;

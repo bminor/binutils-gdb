@@ -1,5 +1,11 @@
 1999-09-28  Mumit Khan  <khan@xraylith.wisc.edu>
 
+	* pe-dll.c (process_def_file): Move the offset lookup from here to
+	(fill_exported_offsets): here. New static function.
+	(fill_edata): Use.
+	
+1999-09-28  Mumit Khan  <khan@xraylith.wisc.edu>
+
 	* deffilep.y (tokens): Add upper and lower case versions of DATA,
 	CONSTANT, NONAME and PRIVATE tokens.
 	(command): Use DATAU.
