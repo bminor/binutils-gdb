@@ -2700,29 +2700,10 @@ tic54x_macro_start ()
 }
 
 void
-tic54x_macro_info (info)
-     void *info;
+tic54x_macro_info (macro)
+     const macro_entry *macro;
 {
-  struct formal_struct
-  {
-    struct formal_struct *next;	/* Next formal in list  */
-    sb name;			/* Name of the formal  */
-    sb def;			/* The default value  */
-    sb actual;			/* The actual argument (changed on
-                                   each expansion) */
-    int index;			/* The index of the formal
-                                   0 .. formal_count - 1 */
-  } *entry;
-  struct macro_struct
-  {
-    sb sub;			/* Substitution text.  */
-    int formal_count;		/* Number of formal args.  */
-    struct formal_struct *formals;	/* Pointer to list of
-                                           formal_structs.  */
-    struct hash_control *formal_hash; /* Hash table of formals.  */
-  } *macro;
-
-  macro = (struct macro_struct *) info;
+  const formal_entry *entry;
 
   /* Put the formal args into the substitution symbol table.  */
   for (entry = macro->formals; entry; entry = entry->next)

@@ -97,7 +97,8 @@ extern void tic54x_macro_start (void);
 #define md_macro_end() tic54x_macro_end()
 extern void tic54x_macro_end (void);
 #define md_macro_info(args) tic54x_macro_info(args)
-extern void tic54x_macro_info PARAMS((void *macro));
+struct macro_struct;
+extern void tic54x_macro_info PARAMS((const struct macro_struct *));
 #define tc_frob_label(sym) tic54x_define_label (sym)
 extern void tic54x_define_label PARAMS((symbolS *));
 
