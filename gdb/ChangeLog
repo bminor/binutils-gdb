@@ -1,3 +1,8 @@
+Fri Jan  1 18:22:02 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: pass prefix and exec_prefix via FLAGS_TO_PASS,
+	POSIXize the recursive makes (make [variable assignments] target{s})
+
 Fri Jan  1 11:56:23 1993  Fred Fish  (fnf@cygnus.com)
 
 	* tm-sun4sol2.h (CPLUS_MARKER):  Remove, now set in tm-sysv4.h.
