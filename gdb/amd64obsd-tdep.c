@@ -84,7 +84,7 @@ amd64obsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
   {
     0x48, 0xc7, 0xc0,
     0x67, 0x00, 0x00, 0x00,	/* movq $SYS_sigreturn, %rax */
-    0x0f, 0x05			/* syscall */
+    0xcd, 0x80			/* int $0x80 */
   };
   char *buf;
 

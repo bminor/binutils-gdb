@@ -1,5 +1,8 @@
 2004-02-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64obsd-tdep.c (amd64obsd_pc_in_sigtramp): Adjust for signal
+	trampoline change in OpenBSD kernel.
+
 	* amd64-nat.c: Update copyright year.
 	(amd64_supply_native_gregset, amd64_collect_native_gregset): Use
 	architecture from REGCACHE.
