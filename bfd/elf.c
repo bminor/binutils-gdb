@@ -97,6 +97,12 @@ static bfd_boolean elfcore_grok_netbsd_procinfo
   PARAMS ((bfd *, Elf_Internal_Note *));
 static bfd_boolean elfcore_grok_netbsd_note
   PARAMS ((bfd *, Elf_Internal_Note *));
+static bfd_boolean elfcore_grok_nto_gregs
+  PARAMS ((bfd *, Elf_Internal_Note *, pid_t));
+static bfd_boolean elfcore_grok_nto_status
+  PARAMS ((bfd *, Elf_Internal_Note *, pid_t *));
+static bfd_boolean elfcore_grok_nto_note
+  PARAMS ((bfd *, Elf_Internal_Note *));
 
 /* Swap version information in and out.  The version information is
    currently size independent.  If that ever changes, this code will
@@ -3542,7 +3548,7 @@ elf_sort_sections (arg1, arg2)
 
   /* Put !SEC_LOAD sections after SEC_LOAD ones.  */
 
-#define TOEND(x) (((x)->flags & (SEC_LOAD|SEC_THREAD_LOCAL)) == 0)
+#define TOEND(x) (((x)->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) == 0)
 
   if (TOEND (sec1))
     {
@@ -6967,6 +6973,104 @@ elfcore_grok_netbsd_note (abfd, note)
     /* NOTREACHED */
 }
 
+static bfd_boolean
+elfcore_grok_nto_status (abfd, note, tid)
+     bfd *abfd;
+     Elf_Internal_Note *note;
+     pid_t *tid;
+{
+  void *ddata = note->descdata;
+  char buf[100];
+  char *name;
+  asection *sect;
+
+  /* nto_procfs_status 'pid' field is at offset 0.  */
+  elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, (bfd_byte *) ddata);
+
+  /* nto_procfs_status 'tid' field is at offset 4.  */
+  elf_tdata (abfd)->core_lwpid = bfd_get_32 (abfd, (bfd_byte *) ddata + 4);
+
+  /* nto_procfs_status 'what' field is at offset 14.  */
+  elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, (bfd_byte *) ddata + 14);
+
+  /* Pass tid back.  */
+  *tid = elf_tdata (abfd)->core_lwpid;
+
+  /* Make a ".qnx_core_status/%d" section.  */
+  sprintf (buf, ".qnx_core_status/%d", *tid);
+
+  name = bfd_alloc (abfd, (bfd_size_type) strlen (buf) + 1);
+  if (name == NULL)
+    return FALSE;
+  strcpy (name, buf);
+
+  sect = bfd_make_section (abfd, name);
+  if (sect == NULL)
+    return FALSE;
+
+  sect->_raw_size       = note->descsz;
+  sect->filepos         = note->descpos;
+  sect->flags           = SEC_HAS_CONTENTS;
+  sect->alignment_power = 2;
+
+  return (elfcore_maybe_make_sect (abfd, ".qnx_core_status", sect));
+}
+
+static bfd_boolean
+elfcore_grok_nto_gregs (abfd, note, tid)
+     bfd *abfd;
+     Elf_Internal_Note *note;
+     pid_t tid;
+{
+  char buf[100];
+  char *name;
+  asection *sect;
+
+  /* Make a ".reg/%d" section.  */
+  sprintf (buf, ".reg/%d", tid);
+
+  name = bfd_alloc (abfd, (bfd_size_type) strlen (buf) + 1);
+  if (name == NULL)
+    return FALSE;
+  strcpy (name, buf);
+
+  sect = bfd_make_section (abfd, name);
+  if (sect == NULL)
+    return FALSE;
+
+  sect->_raw_size       = note->descsz;
+  sect->filepos         = note->descpos;
+  sect->flags           = SEC_HAS_CONTENTS;
+  sect->alignment_power = 2;
+
+  return elfcore_maybe_make_sect (abfd, ".reg", sect);
+}
+
+#define BFD_QNT_CORE_INFO	7
+#define BFD_QNT_CORE_STATUS	8
+#define BFD_QNT_CORE_GREG	9
+#define BFD_QNT_CORE_FPREG	10
+
+static bfd_boolean
+elfcore_grok_nto_note (abfd, note)
+     bfd *abfd;
+     Elf_Internal_Note *note;
+{
+  /* Every GREG section has a STATUS section before it.  Store the
+     tid from the previous call to pass down to the next gregs 
+     function.  */
+  static pid_t tid = 1;
+
+  switch (note->type)
+    {
+    case BFD_QNT_CORE_INFO:   return elfcore_make_note_pseudosection (abfd, ".qnx_core_info", note);
+    case BFD_QNT_CORE_STATUS: return elfcore_grok_nto_status (abfd, note, &tid);
+    case BFD_QNT_CORE_GREG:   return elfcore_grok_nto_gregs (abfd, note, tid);
+    case BFD_QNT_CORE_FPREG:  return elfcore_grok_prfpreg (abfd, note);
+    default:                  return TRUE;
+    }
+}
+
 /* Function: elfcore_write_note
 
    Inputs:
@@ -7206,6 +7310,11 @@ elfcore_read_notes (abfd, offset, size)
           if (! elfcore_grok_netbsd_note (abfd, &in))
             goto error;
         }
+      else if (strncmp (in.namedata, "QNX", 3) == 0)
+	{
+	  if (! elfcore_grok_nto_note (abfd, &in))
+	    goto error;
+	}
       else
         {
           if (! elfcore_grok_note (abfd, &in))

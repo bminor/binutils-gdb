@@ -1,3 +1,10 @@
+2003-02-24  Kris Warkentin  <kewarken@qnx.com>
+
+	* elf.c (elfcore_read_notes): Add check for QNX style core file.
+	(elfcore_grog_nto_note): New function.
+	(elfcore_grog_nto_gregs): New function.
+	(elfcore_grog_nto_status): New function.
+
 2003-02-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (_bfd_elf_create_got_section): Check existing .got
