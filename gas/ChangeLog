@@ -1,6 +1,18 @@
+Mon Oct 21 09:25:33 1991  Steve Chamberlain  (steve at rtl.cygnus.com)
+
+	* configure.in: added ebmon entry.
+	* output-file.c (output_file_create, output_file_close) added
+	stuff to use bfd.
+	* write.c: more bfd support
+	* config/obj-coff.c  config/obj-coff.h use bfd for swapping
+	header info.
+	* tc-a29k: added the reloc types we support now
+	
+
 Mon Oct 14 11:44:03 1991  Roland H. Pesch  (pesch at cygnus.com)
 
 	* doc/Makefile (as.ms): one more sed workaround for texi2roff
+	(as.mm, as.me): new targets
 
 Fri Oct 11 18:18:37 1991  Roland H. Pesch  (pesch at cygnus.com)
 
