@@ -1,3 +1,8 @@
+Thu Feb 24 18:49:37 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* gdb.t00/help.exp: Comment out "help set print" tests just like
+	(and for same reason as) "help set" test.
+
 Mon Feb 14 09:58:23 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gdb.disasm/hppa.s (fmemLRbug_tests): New tests.
