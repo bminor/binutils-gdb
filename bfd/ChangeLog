@@ -1,3 +1,10 @@
+Sat Jun  1 21:49:58 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf64-mips.c (bfd_mips_elf64_swap_reginfo_in)
+	(bfd_mips_elf64_swap_reginfo_out): Move from here...
+	* elf32-mips.c (bfd_mips_elf64_swap_reginfo_in)
+	(bfd_mips_elf64_swap_reginfo_out): ...to here.
+
 Fri May 31 13:51:28 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf64-mips.c: Improve reloc special_functions and handling of

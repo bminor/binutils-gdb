@@ -1333,6 +1333,49 @@ bfd_mips_elf32_swap_reginfo_out (abfd, in, ex)
 		(bfd_byte *) ex->ri_gp_value);
 }
 
+/* In the 64 bit ABI, the .MIPS.options section holds register
+   information in an Elf64_Reginfo structure.  These routines swap
+   them in and out.  They are globally visible because they are used
+   outside of BFD.  These routines are here so that gas can call them
+   without worrying about whether the 64 bit ABI has been included.  */
+
+void
+bfd_mips_elf64_swap_reginfo_in (abfd, ex, in)
+     bfd *abfd;
+     const Elf64_External_RegInfo *ex;
+     Elf64_Internal_RegInfo *in;
+{
+  in->ri_gprmask = bfd_h_get_32 (abfd, (bfd_byte *) ex->ri_gprmask);
+  in->ri_pad = bfd_h_get_32 (abfd, (bfd_byte *) ex->ri_pad);
+  in->ri_cprmask[0] = bfd_h_get_32 (abfd, (bfd_byte *) ex->ri_cprmask[0]);
+  in->ri_cprmask[1] = bfd_h_get_32 (abfd, (bfd_byte *) ex->ri_cprmask[1]);
+  in->ri_cprmask[2] = bfd_h_get_32 (abfd, (bfd_byte *) ex->ri_cprmask[2]);
+  in->ri_cprmask[3] = bfd_h_get_32 (abfd, (bfd_byte *) ex->ri_cprmask[3]);
+  in->ri_gp_value = bfd_h_get_64 (abfd, (bfd_byte *) ex->ri_gp_value);
+}
+
+void
+bfd_mips_elf64_swap_reginfo_out (abfd, in, ex)
+     bfd *abfd;
+     const Elf64_Internal_RegInfo *in;
+     Elf64_External_RegInfo *ex;
+{
+  bfd_h_put_32 (abfd, (bfd_vma) in->ri_gprmask,
+		(bfd_byte *) ex->ri_gprmask);
+  bfd_h_put_32 (abfd, (bfd_vma) in->ri_pad,
+		(bfd_byte *) ex->ri_pad);
+  bfd_h_put_32 (abfd, (bfd_vma) in->ri_cprmask[0],
+		(bfd_byte *) ex->ri_cprmask[0]);
+  bfd_h_put_32 (abfd, (bfd_vma) in->ri_cprmask[1],
+		(bfd_byte *) ex->ri_cprmask[1]);
+  bfd_h_put_32 (abfd, (bfd_vma) in->ri_cprmask[2],
+		(bfd_byte *) ex->ri_cprmask[2]);
+  bfd_h_put_32 (abfd, (bfd_vma) in->ri_cprmask[3],
+		(bfd_byte *) ex->ri_cprmask[3]);
+  bfd_h_put_64 (abfd, (bfd_vma) in->ri_gp_value,
+		(bfd_byte *) ex->ri_gp_value);
+}
+
 /* Swap an entry in a .gptab section.  Note that these routines rely
    on the equivalence of the two elements of the union.  */
 
