@@ -144,7 +144,7 @@ gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
       filename = strrchr (entry->filename, '/');
       filename++;
 
-      needed_name = (char *) xmalloc (strlen (filename)) + 1;
+      needed_name = (char *) xmalloc (strlen (filename) + 1);
       strcpy (needed_name, filename);
       bfd_elf_set_dt_needed_name (entry->the_bfd, needed_name);
     }
