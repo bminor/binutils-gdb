@@ -28,7 +28,13 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "symfile.h"
 
+#if defined (TDESC)
+/* Need to get C_VERSION and friends.  */
+#include <a.out.h>
+#else /* not TDESC */
 #include <intel-coff.h>
+#endif /* not TDESC */
+
 #include <obstack.h>
 #include <string.h>
 
@@ -129,13 +135,17 @@ static int prev_line_number;
 static int line_vector_length;
 
 #ifdef TDESC
+#include "tdesc.h"
 #define SEM
 int int_sem_val = 's' << 24 | 'e' << 16 | 'm' << 8 | '.';
 int temp_sem_val;
 int last_coffsem = 2;
+#if 0
+  /* This isn't used currently.  */
 int last_coffsyn = 0;
+#endif
 int debug_info = 0;	/*used by tdesc */
-extern int tdesc_handle;
+extern dc_dcontext_t tdesc_handle;
 extern int safe_to_init_tdesc_context;
 #endif
 
@@ -429,7 +439,10 @@ start_symtab ()
   last_source_file = 0;
 #ifdef TDESC
   last_coffsem = 2;
+#if 0
+  /* This isn't used currently.  */
   last_coffsyn = 0;
+#endif
 #endif
 
   /* Initialize the source file information for this file.  */
@@ -530,7 +543,11 @@ end_symtab ()
 
 #ifdef TDESC
   symtab->coffsem = last_coffsem;
+#if 0
+  /* This isn't used currently.  Besides, if this is really about "syntax",
+     it shouldn't need to stick around past symbol read-in time.  */
   symtab->coffsyn = last_coffsyn;
+#endif
 #endif
 
   free_named_symtabs (symtab->filename);
@@ -651,6 +668,21 @@ find_linenos (abfd, asect, vpinfo)
   maxoff = offset + size;
   if (maxoff > info->max_lineno_offset)
     info->max_lineno_offset = maxoff;
+#ifdef TDESC
+  /* While we're at it, find the debug_info.  It's in the s_relptr
+     (or, in BFD-speak, rel_filepos) of the text segment section header.  */
+  if (strcmp (bfd_section_name (abfd, asect), ".text") == 0)
+    {
+      /* WARNING WILL ROBINSON!  ACCESSING BFD-PRIVATE DATA HERE!  FIXME!  */
+      debug_info = asect->rel_filepos;
+      /* End of warning */
+      if (tdesc_handle)
+	{
+	  dc_terminate (tdesc_handle);
+	  tdesc_handle = 0;
+	}
+    }
+#endif /* TDESC */
 }
 
 
@@ -686,15 +718,6 @@ coff_symfile_read (sf, addr, mainline)
    symtab_offset = obj_sym_filepos (abfd);	/* Symbol table file offset */
    stringtab_offset = symtab_offset + num_symbols * SYMESZ;  /* String tab */
 /* End of warning */
-
-#ifdef TDESC
-  debug_info = text_hdr.s_relptr;
-  if (tdesc_handle)
-    {
-       dc_terminate (tdesc_handle);
-       tdesc_handle = 0;
-    }
-#endif
 
   /* Read the line number table, all at once.  */
   info->min_lineno_offset = 0;
@@ -1047,13 +1070,17 @@ read_coff_symtab (desc, nsyms)
 	    break;
 #ifdef TDESC
           case C_VERSION:
+#if 0
+	    /* This isn't used currently.  */
             if (strcmp (cs->c_name, ".coffsyn") == 0)
 		last_coffsyn = cs->c_value;
-	    else if ((strcmp (cs->c_name, ".coffsem") == 0) &&
+	    else
+#endif /* 0 */
+	      if ((strcmp (cs->c_name, ".coffsem") == 0) &&
                      (cs->c_value != 0))
 		last_coffsem = cs->c_value;
             break;
-#endif
+#endif /* TDESC */
 
 	  default:
 #ifdef TDESC
@@ -1255,8 +1282,14 @@ getfilename (aux_entry)
   extern char *rindex ();
 
 #ifndef COFF_NO_LONG_FILE_NAMES
+#if defined (x_zeroes)
+  /* Data General.  */
+  if (aux_entry->x_zeroes == 0)
+    strcpy (buffer, stringtab + aux_entry->x_offset);
+#else /* no x_zeroes */
   if (aux_entry->x_file.x_n.x_zeroes == 0)
     strcpy (buffer, stringtab + aux_entry->x_file.x_n.x_offset);
+#endif /* no x_zeroes */
   else
 #endif /* COFF_NO_LONG_FILE_NAMES */
     {
@@ -1711,11 +1744,14 @@ decode_base_type (cs, c_type, aux)
         /* shows up with "void (*foo)();" structure members */
 	return builtin_type_void;
 
+#if 0
+/* DGUX actually defines both T_ARG and T_VOID to the same value.  */
 #ifdef T_ARG
       case T_ARG:
 	/* Shows up in DGUX, I think.  Not sure where.  */
 	return builtin_type_void;	/* shouldn't show up here */
 #endif
+#endif /* 0 */
 
 #ifdef T_VOID
       case T_VOID:
@@ -1994,7 +2030,15 @@ read_enum_type (index, length, lastsym)
 
 static struct sym_fns coff_sym_fns =
 {
+    /* This assumes that 88kbcs implies TDESC and TDESC implies 88kbcs.
+       If that's not true, this can be relaxed, but if it is true,
+       it will just cause users grief if we try to read the wrong kind
+       of symbol file.  */
+#if defined (TDESC)
+    "m88kbcs", 8,
+#else /* not TDESC */
     "coff", 4,
+#endif /* not TDESC */
     coff_new_init, coff_symfile_init,
     coff_symfile_read, coff_symfile_discard
 };

@@ -22,14 +22,20 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "tdesc.h"
 
+#if !defined (DGUX)
+#define DGUX 1
+#endif
+
 #define TARGET_BYTE_ORDER BIG_ENDIAN
+
+#define EXTRA_SYMTAB_INFO int coffsem;
 
 /* This is not a CREATE_INFERIOR_HOOK because it also applies to
    remote debugging.  */
-#define START_INFERIOR_HOOK () \
+#define START_INFERIOR_HOOK() \
   { \
     extern int safe_to_init_tdesc_context; \
-    extern int tdesc_handle; \
+    extern dc_handle_t tdesc_handle; \
  \
     safe_to_init_tdesc_context = 0; \
     if (tdesc_handle) \
@@ -39,18 +45,22 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
       } \
   }
 
+dc_dcontext_t get_prev_context ();
+extern int stack_error;
+
 #define EXTRA_FRAME_INFO dc_dcontext_t frame_context;
 #define INIT_EXTRA_FRAME_INFO(fci) \
   {									 \
     if (fci->next_frame != NULL)					 \
       {								 \
+        extern jmp_buf stack_jmp;					 \
+        struct frame_info *next_frame = fci->next;                       \
         /* The call to get_prev_context */				 \
         /* will update current_context for us. */			 \
-        int stack_error = 1;						 \
-        jmp_buf stack_jmp;						 \
+        stack_error = 1;						 \
         if (!setjmp (stack_jmp))					 \
           {								 \
-            prev->frame_context					 \
+            fci->frame_context					 \
               = get_prev_context (next_frame->frame_context);		 \
             stack_error = 0;						 \
           }								 \
@@ -60,7 +70,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
             next_frame->prev = 0;					 \
             return 0;							 \
           }  								 \
-        if (!prev->frame_context)					 \
+        if (!fci->frame_context)					 \
           {								 \
             next_frame->prev = 0;					 \
             return 0;							 \
@@ -357,7 +367,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    into consecutive registers starting from r2.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  bcopy (&(((void *)REGBUF)[REGISTER_BYTE(RV_REGNUM)]), (VALBUF), TYPE_LENGTH (TYPE))
+  bcopy (&(((char *)REGBUF)[REGISTER_BYTE(RV_REGNUM)]), (VALBUF), TYPE_LENGTH (TYPE))
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF))
 
@@ -371,6 +381,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    change it to int (it seems the convention is to change it). */
 
 #define BELIEVE_PCC_PROMOTION 1
+
+/* We provide our own get_saved_register in m88k-tdep.c.  */
+#define GET_SAVED_REGISTER
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */
@@ -448,6 +461,12 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
         frame_find_saved_regs (frame_info, &frame_saved_regs)
 
 
+/* There is not currently a functioning way to call functions in the
+   inferior.  */
+
+/* But if there was this is where we'd put the call dummy.  */
+/* #define CALL_DUMMY_LOCATION AFTER_TEXT_END */
+
 /* When popping a frame on the 88k (say when doing a return command), the
    calling function only expects to have the "preserved" registers restored.
    Thus, those are the only ones that we even try to restore here.   */
@@ -457,4 +476,6 @@ extern void pop_frame ();
 #define POP_FRAME pop_frame ()
 
 /* BCS is a standard for binary compatibility.  This machine uses it.  */
-#define BCS
+#if !defined (BCS)
+#define BCS 1
+#endif

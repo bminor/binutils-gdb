@@ -22,7 +22,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define HOST_BYTE_ORDER BIG_ENDIAN
 
-#define USG
+#if !defined (USG)
+#define USG 1
+#endif
 /* DGUX has bcopy(), etc.  */
 #define USG_UTILS 0
 
@@ -37,7 +39,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define bcmp(left,right,count) (memcmp((right),(left),(count)))
 #ifdef __GNUC__
 #define memcpy __builtin_memcpy
-#define memset __builtin_memset
+/* gcc doesn't have this, at least not gcc 1.92.  */
+/* #define memset __builtin_memset */
 #define strcmp __builtin_strcmp
 #endif
 

@@ -448,9 +448,12 @@ savestring (ptr, size)
   return p;
 }
 
+/* The "const" is so it compiles under DGUX (which prototypes strsave
+   in <string.h>.  FIXME: This should be named "xstrsave", shouldn't it?
+   Doesn't real strsave return NULL if out of memory?  */
 char *
 strsave (ptr)
-     char *ptr;
+     const char *ptr;
 {
   return savestring (ptr, strlen (ptr));
 }

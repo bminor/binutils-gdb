@@ -555,6 +555,13 @@ struct symtab
     /* Full name of file as found by searching the source path.
        0 if not yet known.  */
     char *fullname;
+
+    /* Anything extra for this symtab.  This is for target machines
+       with special debugging info of some sort (which cannot just
+       be represented in a normal symtab).  */
+#if defined (EXTRA_SYMTAB_INFO)
+    EXTRA_SYMTAB_INFO
+#endif
   };
 
 /* Each source file that has not been fully read in is represented by
