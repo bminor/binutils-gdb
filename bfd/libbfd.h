@@ -213,6 +213,11 @@ void EXFUN(bfd_constructor_entry, (bfd *abfd,
 CONST struct reloc_howto_struct *EXFUN(bfd_default_reloc_type_lookup
     , (CONST struct bfd_arch_info *,
     bfd_reloc_code_type  code));
+boolean EXFUN(bfd_generic_relax_section
+    , (bfd *abfd,
+    asection *section,
+    asymbol **symbols,
+    struct bfd_seclet_struct *seclet));
 bfd_byte *
 EXFUN(bfd_generic_get_relocated_section_contents, (bfd *abfd,
     struct bfd_seclet_struct  *seclet)

@@ -737,7 +737,35 @@ return (struct reloc_howto_struct *)NULL;
 }
 
 
+/*
+INTERNAL_FUNCTION
+	bfd_generic_relax_section
 
+SYNOPSIS
+	boolean bfd_generic_relax_section
+	 (bfd *abfd,
+	  asection *section,
+	  asymbol **symbols,
+	  struct bfd_seclet_struct *seclet);
+
+DESCRIPTION
+	Provides default handling for relaxing for back ends which
+	don't do relaxing - ie does nothing 
+*/
+
+boolean
+DEFUN(bfd_generic_relax_section,(abfd, section, symbols, seclet),
+      bfd *abfd AND
+      asection *section AND
+      asymbol **symbols AND
+      struct bfd_seclet_struct *seclet)
+{
+  
+  return false;
+  
+}
+
+		
 /*
 INTERNAL_FUNCTION
 	bfd_generic_get_relocated_section_contents

@@ -255,6 +255,8 @@ CODE_FRAGMENT
 .   {* A pointer to the linenumber information for this symbol *}
 .struct lineno_cache_entry *lineno;
 .
+.   {* Have the line numbers been relocated yet ? *}
+.boolean done_lineno;
 .} coff_symbol_type;
 
 
