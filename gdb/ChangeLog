@@ -1,3 +1,9 @@
+Mon Jun 20 23:54:37 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* c-lang.c (asm_language_defn):  New definitions for language_asm,
+	mostly copied from c_language_defn, to avoid warnings when
+	switching between c and asm stack frames.
+
 Mon Jun 20 13:51:55 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* mdebugread.c (parse_symbol): Don't call ecoff_swap_tir_in or

@@ -437,9 +437,33 @@ const struct language_defn cplus_language_defn = {
   LANG_MAGIC
 };
 
+const struct language_defn asm_language_defn = {
+  "asm",			/* Language name */
+  language_asm,
+  c_builtin_types,
+  range_check_off,
+  type_check_off,
+  c_parse,
+  c_error,
+  c_printchar,			/* Print a character constant */
+  c_printstr,			/* Function to print string constant */
+  c_create_fundamental_type,	/* Create fundamental type in this language */
+  c_print_type,			/* Print a type using appropriate syntax */
+  c_val_print,			/* Print a value using appropriate syntax */
+  c_value_print,		/* Print a top-level value */
+  &builtin_type_double,		/* longest floating point type */ /*FIXME*/
+  {"",     "",    "",  ""},	/* Binary format info */
+  {"0%lo",  "0",   "o", ""},	/* Octal format info */
+  {"%ld",   "",    "d", ""},	/* Decimal format info */
+  {"0x%lx", "0x",  "x", ""},	/* Hex format info */
+  c_op_print_tab,		/* expression operators for printing */
+  LANG_MAGIC
+};
+
 void
 _initialize_c_language ()
 {
   add_language (&c_language_defn);
   add_language (&cplus_language_defn);
+  add_language (&asm_language_defn);
 }
