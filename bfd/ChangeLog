@@ -8,8 +8,8 @@ Wed Oct 25 11:32:54 1995  Ian Lance Taylor  <ian@cygnus.com>
 	* xcofflink.c: Extensive changes to support linking shared objects
 	and generating a .loader section.
 	* libcoff-in.h (struct xcoff_tdata): Add import_file_id field.
-	(struct xcoff_section_tdata): Add first_symndx, last_symndx,
-	and ldrel_count fields.
+	(struct xcoff_section_tdata): Add lineno_count, first_symndx,
+	last_symndx, and ldrel_count fields.
 	* libcoff.h: Rebuild.
 	* coff-rs6000.c (xcoff_howto_table): Correct reloc names.
 	* coffcode.h (styp_to_sec_flags): Don't set any flags if STYP_PAD

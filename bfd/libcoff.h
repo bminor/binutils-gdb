@@ -171,6 +171,9 @@ struct xcoff_section_tdata
   /* Used for XCOFF csects created by the linker; points to the real
      XCOFF section which contains this csect.  */
   asection *enclosing;
+  /* The lineno_count field for the enclosing section, because we are
+     going to clobber it there.  */
+  unsigned int lineno_count;
   /* The first and one past the last symbol indices for symbols used
      by this csect.  */
   unsigned long first_symndx;

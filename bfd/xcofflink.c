@@ -1032,6 +1032,14 @@ xcoff_link_add_symbols (abfd, info)
 	      bfd_size_type linoff;
 
 	      enclosing = xcoff_section_data (abfd, csect)->enclosing;
+	      if (enclosing == NULL)
+		{
+		  (*_bfd_error_handler)
+		    ("%s: `%s' has line numbers but no enclosing section",
+		     bfd_get_filename (abfd), name);
+		  bfd_set_error (bfd_error_bad_value);
+		  goto error_return;
+		}
 	      linoff = (auxlin.x_sym.x_fcnary.x_fcn.x_lnnoptr
 			- enclosing->line_filepos);
 	      if (linoff < enclosing->lineno_count * linesz)
@@ -1310,6 +1318,8 @@ xcoff_link_add_symbols (abfd, info)
 		goto error_return;
 	      }
 	    xcoff_section_data (abfd, csect)->enclosing = enclosing;
+	    xcoff_section_data (abfd, csect)->lineno_count =
+	      enclosing->lineno_count;
 
 	    /* XCOFF requires that relocs be sorted by address, so we
                could do a binary search here.  FIXME.  (XCOFF
@@ -2783,6 +2793,12 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 		max_contents_size = sec->_raw_size;
 	      if (sec->lineno_count > max_lineno_count)
 		max_lineno_count = sec->lineno_count;
+	      if (coff_section_data (sec->owner, sec) != NULL
+		  && xcoff_section_data (sec->owner, sec) != NULL
+		  && (xcoff_section_data (sec->owner, sec)->lineno_count
+		      > max_lineno_count))
+		max_lineno_count =
+		  xcoff_section_data (sec->owner, sec)->lineno_count;
 	      if (sec->reloc_count > max_reloc_count)
 		max_reloc_count = sec->reloc_count;
 	    }
@@ -3201,13 +3217,14 @@ xcoff_link_input_bfd (finfo, input_bfd)
   bfd_size_type linesz;
   bfd_byte *esym;
   bfd_byte *esym_end;
+  struct xcoff_link_hash_entry **sym_hash;
   struct internal_syment *isymp;
   asection **csectpp;
   unsigned long *debug_index;
   long *indexp;
   unsigned long output_index;
   bfd_byte *outsym;
-  struct xcoff_link_hash_entry **sym_hash;
+  asection *oline;
   boolean keep_syms;
   asection *o;
 
@@ -3252,6 +3269,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
   indexp = finfo->sym_indices;
   output_index = syment_base;
   outsym = finfo->outsyms;
+  oline = NULL;
 
   while (esym < esym_end)
     {
@@ -3761,24 +3779,30 @@ xcoff_link_input_bfd (finfo, input_bfd)
 		  else
 		    {
 		      asection *enclosing;
+		      unsigned int enc_count;
 		      bfd_size_type linoff;
 		      struct internal_lineno lin;
 
 		      o = *csectpp;
 		      enclosing = xcoff_section_data (abfd, o)->enclosing;
+		      enc_count = xcoff_section_data (abfd, o)->lineno_count;
+		      if (oline != enclosing)
+			{
+			  if (bfd_seek (input_bfd,
+					enclosing->line_filepos,
+					SEEK_SET) != 0
+			      || (bfd_read (finfo->linenos, linesz,
+					    enc_count, input_bfd)
+				  != linesz * enc_count))
+			    return false;
+			  oline = enclosing;
+			}
+
 		      linoff = (aux.x_sym.x_fcnary.x_fcn.x_lnnoptr
 				- enclosing->line_filepos);
 
-		      if (bfd_seek (input_bfd,
-				    enclosing->line_filepos + linoff,
-				    SEEK_SET != 0)
-			  || (bfd_read (finfo->linenos, linesz,
-					o->lineno_count, input_bfd)
-			      != linesz * o->lineno_count))
-			return false;
-
 		      bfd_coff_swap_lineno_in (input_bfd,
-					       (PTR) finfo->linenos,
+					       (PTR) (finfo->linenos + linoff),
 					       (PTR) &lin);
 		      if (lin.l_lnno != 0
 			  || ((bfd_size_type) lin.l_addr.l_symndx
@@ -3796,14 +3820,15 @@ xcoff_link_input_bfd (finfo, input_bfd)
 
 			  lin.l_addr.l_symndx = *indexp;
 			  bfd_coff_swap_lineno_out (output_bfd, (PTR) &lin,
-						    (PTR) finfo->linenos);
+						    (PTR) (finfo->linenos
+							   + linoff));
 
 			  linpend = (finfo->linenos
-				     + o->lineno_count * linesz);
+				     + enc_count * linesz);
 			  offset = (o->output_section->vma
 				    + o->output_offset
 				    - o->vma);
-			  for (linp = finfo->linenos + linesz;
+			  for (linp = finfo->linenos + linoff + linesz;
 			       linp < linpend;
 			       linp += linesz)
 			    {
@@ -3817,7 +3842,7 @@ xcoff_link_input_bfd (finfo, input_bfd)
 							(PTR) linp);
 			    }
 
-			  count = (linp - finfo->linenos) / linesz;
+			  count = (linp - (finfo->linenos + linoff)) / linesz;
 
 			  aux.x_sym.x_fcnary.x_fcn.x_lnnoptr =
 			    (o->output_section->line_filepos
@@ -3826,8 +3851,8 @@ xcoff_link_input_bfd (finfo, input_bfd)
 			  if (bfd_seek (output_bfd,
 					aux.x_sym.x_fcnary.x_fcn.x_lnnoptr,
 					SEEK_SET) != 0
-			      || (bfd_write (finfo->linenos, linesz, count,
-					     output_bfd)
+			      || (bfd_write (finfo->linenos + linoff,
+					     linesz, count, output_bfd)
 				  != linesz * count))
 			    return false;
 
