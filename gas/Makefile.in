@@ -59,7 +59,7 @@ CCLIBFLAGS = -O
 # Version of ar to use when compiling gnulib. 
 OLDAR = ar
 
-version=`$(srcdir)/../gcc$(subdir)/gcc -dumpversion`
+version=`awk '{print substr ($$4, 2, length ($$4) - 3); }' $(srcdir)/version.c`
 
 # Directory where sources are, from where we are.
 srcdir = .

@@ -8,7 +8,7 @@ srcdir = .
 
 destdir = /usr/local
 
-version=`$(srcdir)/../gcc$(subdir)/gcc -dumpversion`
+version=`awk '{print substr ($$4, 2, length ($$4) - 3); }' $(srcdir)/../gcc/version.c`
 prefix = $(destdir)
 bindir = $(prefix)/bin
 libdir = $(prefix)/lib
