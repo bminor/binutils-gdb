@@ -838,8 +838,9 @@ objdump [ -a | --archive-headers ]
         [ -h | --section-headers | --headers ]  [ -i | --info ]
         [ -j @var{section} | --section=@var{section} ]
         [ -l | --line-numbers ]
-        [ -m @var{machine} | --architecture=@var{machine} ]  [ -r | --reloc ]
-        [ -R | --dynamic-reloc ] [ -s | --full-contents ]  [ --stabs ]
+        [ -m @var{machine} | --architecture=@var{machine} ]
+        [ -r | --reloc ] [ -R | --dynamic-reloc ]
+        [ -s | --full-contents ]  [ --stabs ]
         [ -t | --syms ] [ -T | --dynamic-syms ] [ -x | --all-headers ]
         [ --version ]  [ --help ] @var{objfile}@dots{}
 @end smallexample
