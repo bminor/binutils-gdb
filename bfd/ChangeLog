@@ -1,5 +1,11 @@
 Wed Oct 20 12:22:37 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* libnlm.h (nlm_backend_data): Added signature field.
+	(nlm_signature): New macro.
+	* nlmcode.h (nlm_object_p, nlm_write_object_contents): Use the NLM
+	signature from the backend rather than the constant NLM_SIGNATURE.
+	* nlm32-i386.c (nlm32_i386_backend): Initialize signature field.
+
 	* aoutf1.h (MACHTYPE_OK): Accept M_UNKNOWN.
 	(NAME(sunos,set_arch_mach)): Treat M_UNKNOWN as 68000, not 68020.
 
