@@ -5962,12 +5962,8 @@ elf_link_input_bfd (finfo, input_bfd)
 	    }
 	}
 
-      name = NULL;
       if (isym->st_shndx == SHN_UNDEF)
-        {
-	  isec = bfd_und_section_ptr;
-	  name = isec->name;
-	}
+	isec = bfd_und_section_ptr;
       else if (isym->st_shndx > 0 && isym->st_shndx < SHN_LORESERVE)
 	{
 	  isec = section_from_elf_index (input_bfd, isym->st_shndx);
@@ -5979,15 +5975,9 @@ elf_link_input_bfd (finfo, input_bfd)
 					  isym->st_value, (bfd_vma) 0);
 	}
       else if (isym->st_shndx == SHN_ABS)
-	{
-	  isec = bfd_abs_section_ptr;
-	  name = isec->name;
-	}
+	isec = bfd_abs_section_ptr;
       else if (isym->st_shndx == SHN_COMMON)
-	{
-	  isec = bfd_com_section_ptr;
-	  name = isec->name;
-	}
+	isec = bfd_com_section_ptr;
       else
 	{
 	  /* Who knows?  */
@@ -6002,39 +5992,18 @@ elf_link_input_bfd (finfo, input_bfd)
 
       if (ELF_ST_TYPE (isym->st_info) == STT_SECTION)
 	{
-	  asection *ksec;
-
-	  /* Save away all section symbol values.  */
-	  if (isec != NULL)
-	    {
-	      if (name)
-		{
-		  if (isec->symbol->value != isym->st_value)
-		    (*_bfd_error_handler)
-		      (_("%s: invalid section symbol index 0x%x (%s) ignored"),
-		       bfd_archive_filename (input_bfd), isym->st_shndx,
-		       name);
-		  continue;
-		}
-	      isec->symbol->value = isym->st_value;
-	    }
-
-	  /* If this is a discarded link-once section symbol, update
-	     it's value to that of the kept section symbol.  The
-	     linker will keep the first of any matching link-once
-	     sections, so we should have already seen it's section
-	     symbol.  I trust no-one will have the bright idea of
-	     re-ordering the bfd list...  */
+	  /* If this is a discarded link-once section symbol, set its
+	     value to 0.  We should really undefine it, and complain
+	     if anything in the final link tries to use it, but
+	     DWARF-based exception handling might have an entry in
+	     .eh_frame to describe a routine in the linkonce section,
+	     and it turns out to be hard to remove the .eh_frame entry
+	     too.  FIXME.  */
 	  if (isec != NULL
 	      && (bfd_get_section_flags (input_bfd, isec) & SEC_LINK_ONCE) != 0
-	      && (ksec = isec->kept_section) != NULL)
+	      && bfd_is_abs_section (isec->output_section))
 	    {
-	      isym->st_value = ksec->symbol->value;
-
-	      /* That put the value right, but the section info is all
-		 wrong.  I hope this works.  */
-	      isec->output_offset = ksec->output_offset;
-	      isec->output_section = ksec->output_section;
+	      isym->st_value = 0;
 	    }
 
 	  /* We never output section symbols.  Instead, we use the

@@ -1319,10 +1319,6 @@ typedef struct sec
 
   struct bfd_comdat_info *comdat;
 
-  /* Points to the kept section if this section is a link-once section,
-     and is discarded.  */
-  struct sec *kept_section;
-
   /* When a section is being output, this value changes as more
      linenumbers are written out.  */
 

@@ -1,5 +1,19 @@
 2001-09-29  Alan Modra  <amodra@bigpond.net.au>
 
+	* section.c (struct sec): Remove kept_section.
+	(STD_SECTION): Remove kept_section initialisation.
+	(bfd_make_section_anyway): Here too.
+	* ecoff.c (bfd_debug_section): Remove kept_section initialisation.
+	* cofflink.c (_bfd_coff_link_input_bfd): Don't test kept_section.
+	* elflink.h (elf_link_input_bfd): Set discarded link-once section
+	symbols to zero, and remove all code involved with kept_section
+	and tracking section symbol values.
+	* bfd-in2.h: Regenerate.
+	* configure.in: Bump version number.
+	* configure: Regenerate.
+
+2001-09-29  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (struct ppc_dyn_relocs): New.
 	(IS_ABSOLUTE_RELOC): Define.
 	(struct ppc_link_hash_entry): New.

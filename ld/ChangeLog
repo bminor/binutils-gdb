@@ -1,3 +1,7 @@
+2001-09-29  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (section_already_linked): Remove assignment to kept_section.
+
 2001-09-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldmisc.c (USE_STDARG): Remove.

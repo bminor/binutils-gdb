@@ -485,10 +485,6 @@ CODE_FRAGMENT
 .
 .  struct bfd_comdat_info *comdat;
 .
-.  {* Points to the kept section if this section is a link-once section,
-.     and is discarded.  *}
-.  struct sec *kept_section;
-.
 .  {* When a section is being output, this value changes as more
 .     linenumbers are written out.  *}
 .
@@ -599,8 +595,8 @@ static const asymbol global_syms[] =
     /* line_filepos, userdata, contents, lineno, lineno_count,       */	\
        0,            NULL,     NULL,     NULL,   0,			\
 									\
-    /* entsize, comdat, kept_section, moving_line_filepos,           */	\
-       0,       NULL,   NULL,         0,				\
+    /* entsize, comdat, moving_line_filepos,                         */	\
+       0,       NULL,   0,						\
 									\
     /* target_index, used_by_bfd, constructor_chain, owner,          */	\
        0,            NULL,        NULL,              NULL,		\
@@ -807,7 +803,6 @@ bfd_make_section_anyway (abfd, name)
   newsect->line_filepos = 0;
   newsect->owner = abfd;
   newsect->comdat = NULL;
-  newsect->kept_section = NULL;
 
   /* Create a symbol whos only job is to point to this section. This is
      useful for things like relocs which are relative to the base of a

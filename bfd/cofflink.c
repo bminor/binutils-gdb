@@ -1516,15 +1516,13 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 
 #ifndef COFF_WITH_PE
       /* Skip section symbols for sections which are not going to be
-	 emitted, or which belong to linkonce sections that are going
-	 to be discarded.  */
+	 emitted.  */
       if (!skip
 	  && isym.n_sclass == C_STAT
 	  && isym.n_type == T_NULL
           && isym.n_numaux > 0)
         {
-          if ((*secpp)->output_section == bfd_abs_section_ptr
-              || (*secpp)->kept_section)
+          if ((*secpp)->output_section == bfd_abs_section_ptr)
             skip = true;
         }
 #endif
