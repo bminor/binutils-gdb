@@ -446,22 +446,33 @@ arm_skip_prologue (CORE_ADDR pc)
      by disassembling the instructions. */
   skip_pc = pc;
   inst = read_memory_integer (skip_pc, 4);
-  if (inst != 0xe1a0c00d)	/* mov ip, sp */
-    return pc;
-
-  skip_pc += 4;
-  inst = read_memory_integer (skip_pc, 4);
-  if ((inst & 0xfffffff0) == 0xe92d0000)	/* stmfd sp!,{a1,a2,a3,a4}  */
+  /* "mov ip, sp" is no longer a required part of the prologue.  */
+  if (inst == 0xe1a0c00d)       /* mov ip, sp */
     {
       skip_pc += 4;
       inst = read_memory_integer (skip_pc, 4);
     }
 
-  if ((inst & 0xfffff800) != 0xe92dd800)	/* stmfd sp!,{...,fp,ip,lr,pc} */
-    return pc;
+  /* Some prologues begin with "str lr, [sp, #-4]!".  */
+  if (inst == 0xe52de004)                       /* str lr, [sp, #-4]! */
+    {
+      skip_pc += 4;
+      inst = read_memory_integer (skip_pc, 4);
+    }
 
   skip_pc += 4;
   inst = read_memory_integer (skip_pc, 4);
+  if ((inst & 0xfffffff0) == 0xe92d0000)	/* stmfd sp!,{a1,a2,a3,a4} */
+    {
+      skip_pc += 4;
+      inst = read_memory_integer (skip_pc, 4);
+    }
+
+  if ((inst & 0xfffff800) == 0xe92dd800)	/* stmfd sp!,{fp,ip,lr,pc} */
+    {
+      skip_pc += 4;
+      inst = read_memory_integer (skip_pc, 4);
+    }
 
   /* Any insns after this point may float into the code, if it makes
      for better instruction scheduling, so we skip them only if we
@@ -477,7 +488,7 @@ arm_skip_prologue (CORE_ADDR pc)
     }
   else
     {
-      while ((inst & 0xffff8fff) == 0xed6d0103)		/* stfe fn, [sp, #-12]! */
+      while ((inst & 0xffff8fff) == 0xed6d0103)	/* stfe fn, [sp, #-12]! */
 	{
 	  skip_pc += 4;
 	  inst = read_memory_integer (skip_pc, 4);
@@ -490,8 +501,17 @@ arm_skip_prologue (CORE_ADDR pc)
       inst = read_memory_integer (skip_pc, 4);
     }
 
-  if ((inst & 0xfffff000) == 0xe24dd000)                /* sub sp, sp, #nn */
-    skip_pc += 4;
+  if ((inst & 0xfffff000) == 0xe24dd000)	/* sub sp, sp, #nn */
+    {
+      skip_pc += 4;
+      inst = read_memory_integer (skip_pc, 4);
+    }
+
+  while ((inst & 0xffffcfc0) == 0xe50b0000)     /* str r(0123), [r11, #-nn] */
+    {
+      skip_pc += 4;
+      inst = read_memory_integer (skip_pc, 4);
+    }
 
   return skip_pc;
 }
@@ -843,23 +863,34 @@ arm_scan_prologue (struct frame_info *fi)
      traceback.
 
      In the APCS, the prologue should start with  "mov ip, sp" so
-     if we don't see this as the first insn, we will stop.  [Note:
-     This doesn't seem to be true any longer, so it's now an optional
-     part of the prologue.  - Kevin Buettner, 2001-11-20]  */
+     if we don't see this as the first insn, we will stop.  
+
+     [Note: This doesn't seem to be true any longer, so it's now an
+     optional part of the prologue.  - Kevin Buettner, 2001-11-20]
+
+     [Note further: The "mov ip,sp" only seems to be missing in
+     frameless functions at optimization level "-O2" or above,
+     in which case it is often (but not always) replaced by
+     "str lr, [sp, #-4]!".  - Michael Snyder, 2002-04-23]   */
 
   sp_offset = fp_offset = 0;
 
-  if (read_memory_unsigned_integer (prologue_start, 4)
-      == 0xe1a0c00d)		/* mov ip, sp */
-    current_pc = prologue_start + 4;
-  else
-    current_pc = prologue_start;
-
-  for (; current_pc < prologue_end; current_pc += 4)
+  for (current_pc = prologue_start; 
+       current_pc < prologue_end; 
+       current_pc += 4)
     {
       unsigned int insn = read_memory_unsigned_integer (current_pc, 4);
 
-      if ((insn & 0xffff0000) == 0xe92d0000)
+      if (insn == 0xe1a0c00d)           /* mov ip, sp */
+	{
+	  continue;
+	}
+      else if (insn == 0xe52de004)      /* str lr, [sp, #-4]! */
+	{
+	  /* Function is frameless: extra_info defaults OK?  */
+	  continue;
+	}
+      else if ((insn & 0xffff0000) == 0xe92d0000)
 	/* stmfd sp!, {..., fp, ip, lr, pc}
 	   or
 	   stmfd sp!, {a1, a2, a3, a4}  */
@@ -873,6 +904,11 @@ arm_scan_prologue (struct frame_info *fi)
 		sp_offset -= 4;
 		fi->saved_regs[regno] = sp_offset;
 	      }
+	}
+      else if ((insn & 0xffffcfc0) == 0xe50b0000)       /* str rx, [r11, -n] */
+	{
+	  /* No need to add this to saved_regs -- it's just an arg reg.  */
+	  continue;
 	}
       else if ((insn & 0xfffff000) == 0xe24cb000)	/* sub fp, ip #n */
 	{

@@ -1,3 +1,12 @@
+2002-04-24  Michael Snyder  <msnyder@redhat.com>
+
+	* arm-tdep.c (arm_scan_prologue): Move "mov ip, sp" into the 
+	loop.  Add handling for "str lr, [sp, #-4]!" and for saves
+	of argument regs ("str r(0123), [r11, #-nn"]).
+	(arm_skip_prologue): Better handling for frameless functions.  
+	Treat "mov ip, sp" as optional.  Recognize "str lr, [sp, #-4]".
+	(arm_skip_prologue): Recognize str r(0123), [r11, #-nn].
+
 Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
 
 	* arm-tdep.c (arm_gdbarch_init): Add comment that NUM_REGS nor
@@ -58,6 +67,7 @@ Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
 	REGISTER_RAW_SIZE of SP_REGNUM not CORE_ADDR.
 	(vx_write_register): Likewise.
 
+>>>>>>> 1.2500
 2002-04-23  J. Brobecker  <brobecker@gnat.com>
 
 	* source.c (is_regular_file): New function.
