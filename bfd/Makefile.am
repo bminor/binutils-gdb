@@ -216,6 +216,7 @@ BFD32_BACKENDS = \
 	pei-mcore.lo \
 	pe-ppc.lo \
 	pei-ppc.lo \
+	peigen.lo \
 	ppcboot.lo \
 	reloc16.lo \
 	riscix.lo \
@@ -340,6 +341,7 @@ BFD32_BACKENDS_CFILES = \
 	pei-mcore.c \
 	pe-ppc.c \
 	pei-ppc.c \
+	peigen.c \
 	ppcboot.c \
 	reloc16.c \
 	riscix.c \
@@ -426,8 +428,8 @@ SOURCE_HFILES = \
 	ecoffswap.h elf32-arm.h elf32-hppa.h elfcode.h elfcore.h \
 	elflink.h freebsd.h genlink.h go32stub.h hppa_stubs.h libaout.h \
 	libbfd.h libcoff.h libecoff.h elf-bfd.h libhppa.h libieee.h \
-	libnlm.h liboasys.h netbsd.h nlm-target.h nlmcode.h nlmswap.h \
-	ns32k.h peicode.h som.h vms.h
+	libnlm.h liboasys.h libpei.h netbsd.h nlm-target.h nlmcode.h \
+	nlmswap.h ns32k.h peicode.h som.h vms.h
 
 HFILES = \
 	elf32-target.h elf64-target.h targmatch.h \
@@ -912,10 +914,11 @@ elflink.lo: elflink.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h
 epoc-pe-arm.lo: epoc-pe-arm.c pe-arm.c coff-arm.c $(INCDIR)/coff/arm.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 epoc-pei-arm.lo: epoc-pei-arm.c pei-arm.c coff-arm.c \
   $(INCDIR)/coff/arm.h $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h \
-  libcoff.h $(INCDIR)/bfdlink.h coffcode.h peicode.h
+  libcoff.h $(INCDIR)/bfdlink.h coffcode.h peicode.h \
+  libpei.h
 hp300bsd.lo: hp300bsd.c libaout.h $(INCDIR)/bfdlink.h \
   aout-target.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
@@ -996,28 +999,30 @@ pc532-mach.lo: pc532-mach.c libaout.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h
 pe-arm.lo: pe-arm.c coff-arm.c $(INCDIR)/coff/arm.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 pei-arm.lo: pei-arm.c coff-arm.c $(INCDIR)/coff/arm.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 pe-i386.lo: pe-i386.c coff-i386.c $(INCDIR)/coff/i386.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 pei-i386.lo: pei-i386.c coff-i386.c $(INCDIR)/coff/i386.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 pe-mcore.lo: pe-mcore.c coff-mcore.c $(INCDIR)/coff/mcore.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 pei-mcore.lo: pei-mcore.c coff-mcore.c $(INCDIR)/coff/mcore.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 pe-ppc.lo: pe-ppc.c coff-ppc.c $(INCDIR)/coff/powerpc.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
 pei-ppc.lo: pei-ppc.c coff-ppc.c $(INCDIR)/coff/powerpc.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
+peigen.lo: peigen.c $(INCDIR)/coff/internal.h $(INCDIR)/coff/i386.h \
+  $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h libpei.h
 ppcboot.lo: ppcboot.c
 reloc16.lo: reloc16.c $(INCDIR)/bfdlink.h genlink.h \
   $(INCDIR)/coff/internal.h libcoff.h

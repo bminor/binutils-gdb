@@ -7,6 +7,17 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* libpei.h: New file, broken out of peicode.h.
+	* peigen.c: New file, broken out of peicode.h.
+	* peicode.h: A bunch of code moved out to libpei.h and peigen.c.
+	* configure.in: Add peigen.lo to list of files required for each
+	PE target.
+	* Makefile.am: Rebuild dependencies.
+	(BFD32_BACKENDS): Add peigen.lo.
+	(BFD32_BACKENDS_CFILES): Add peigen.c.
+	(SOURCE_HFILES): Add libpei.h.
+	* configure, Makefile.in: Rebuild.
+
 	* peicode.h (coff_swap_scnhdr_in): Don't check for a special
 	section name of _BSS; check IMAGE_SCN_CNT_UNINITIALIZED_DATA
 	instead.  Don't clear the s_paddr field for an uninitialized data
