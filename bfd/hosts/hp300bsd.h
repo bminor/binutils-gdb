@@ -6,16 +6,26 @@
 #include <ctype.h>
 #include <string.h>
 #include <sys/file.h>
-#include <stdlib.h>		/* for malloc() */
 
-/* fdopen() won't let you open read-only files for update */
-#define	FASCIST_FDOPEN
+void *malloc();
+void free();
 
 #ifndef O_ACCMODE
 #define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
 #endif
+
 #define SEEK_SET 0
 #define SEEK_CUR 1
+
+#include <machine/machparam.h>
+
+#define	HOST_PAGE_SIZE		NBPG
+#define	HOST_SEGMENT_SIZE	NBPG	/* Data seg start addr rounds to NBPG */
+#define	HOST_MACHINE_ARCH	bfd_arch_m68k
+/* #define	HOST_MACHINE_MACHINE	 */
+
+#define	HOST_TEXT_START_ADDR		0
+#define	HOST_STACK_END_ADDR		0xfff00000
 
 /* EXACT TYPES */
 typedef char int8e_type;
@@ -32,7 +42,6 @@ typedef short int16_type;
 typedef unsigned short uint16_type;
 typedef int int32_type;
 typedef unsigned int uint32_type;
-
 /* Macros for the 'type' part of an fopen, freopen or fdopen. 
 	<Read|Write>[Update]<Binary file><text file>
  */

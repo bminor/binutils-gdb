@@ -30,6 +30,7 @@ h-decstation.h
 h-dgux.h
 h-delta88.h
 h-dose.h
+h-go32.h
 h-harris.h
 h-hp300bsd.h
 h-hp9000.h
