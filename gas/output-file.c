@@ -41,8 +41,7 @@
 bfd *stdoutput;
 
 void
-output_file_create (name)
-     char *name;
+output_file_create (char *name)
 {
   if (name[0] == '-' && name[1] == '\0')
     as_fatal (_("can't open a bfd on stdout %s"), name);
@@ -62,8 +61,7 @@ output_file_create (name)
 }
 
 void
-output_file_close (filename)
-     char *filename;
+output_file_close (char *filename)
 {
 #ifdef BFD_ASSEMBLER
   /* Close the bfd.  */

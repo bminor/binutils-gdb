@@ -1,5 +1,18 @@
 2003-12-02  Kazu Hirata  <kazu@cs.umass.edu>
 
+	* messages.c: Convert to ISO-C.
+	* obj.h: Likewise.
+	* output-file.c: Likewise.
+	* output-file.h: Likewise.
+	* sb.c: Likewise.
+	* sb.h: Likewise.
+	* stabs.c: Likewise.
+	* subsegs.c: Likewise.
+	* subsegs.h: Likewise.
+	* tc.h: Likewise.
+
+2003-12-02  Kazu Hirata  <kazu@cs.umass.edu>
+
 	* config/obj-elf.c: Remove ARGSUSED.
 
 2003-12-02  Alan Modra  <amodra@bigpond.net.au>
