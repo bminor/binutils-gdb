@@ -1,5 +1,5 @@
 /* Print Motorola 68k instructions for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -21,6 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "opcode/m68k.h"
 #include "gdbcore.h"
+#include "ieee-float.h"
 
 /* Local function prototypes */
 
@@ -47,30 +48,30 @@ extern char *reg_names[];
 char *fpcr_names[] = { "", "fpiar", "fpsr", "fpiar/fpsr", "fpcr",
 		     "fpiar/fpcr", "fpsr/fpcr", "fpiar-fpcr"};
 
+/* Define accessors for 68K's 1, 2, and 4-byte signed quantities.
+   The _SHIFT values move the quantity to the high order end of an
+   `int' value, so it will sign-extend.  Probably a few more casts
+   are needed to make it compile without warnings on finicky systems.  */
+#define	BITS_PER_BYTE	8
+#define	BYTE_SHIFT (BITS_PER_BYTE * ((sizeof (int)) - 1))
+#define	WORD_SHIFT (BITS_PER_BYTE * ((sizeof (int)) - 2))
+#define	LONG_SHIFT (BITS_PER_BYTE * ((sizeof (int)) - 4))
 
-#define NEXTBYTE(p)  (p += 2, ((char *)p)[-1])
+#define NEXTBYTE(p)  (p += 2, ((int)(p[-1]) << BYTE_SHIFT) >> BYTE_SHIFT)
 
 #define NEXTWORD(p)  \
-  (p += 2, ((((char *)p)[-2]) << 8) + p[-1])
+  (p += 2, (((int)((p[-2] << 8) + p[-1])) << WORD_SHIFT) >> WORD_SHIFT)
 
 #define NEXTLONG(p)  \
-  (p += 4, (((((p[-4] << 8) + p[-3]) << 8) + p[-2]) << 8) + p[-1])
+  (p += 4, (((int)((((((p[-4] << 8) + p[-3]) << 8) + p[-2]) << 8) + p[-1])) \
+				   << LONG_SHIFT) >> LONG_SHIFT)
 
+/* Ecch -- assumes host == target float formats.  FIXME.  */
 #define NEXTSINGLE(p) \
   (p += 4, *((float *)(p - 4)))
 
 #define NEXTDOUBLE(p) \
   (p += 8, *((double *)(p - 8)))
-
-#define NEXTEXTEND(p) \
-  (p += 12, 0.0)	/* Need a function to convert from extended to double
-			   precision... */
-
-#define NEXTPACKED(p) \
-  (p += 12, 0.0)	/* Need a function to convert from packed to double
-			   precision.   Actually, it's easier to print a
-			   packed number than a double anyway, so maybe
-			   there should be a special case to handle this... */
 
 /* Print the m68k instruction at address MEMADDR in debugged memory,
    on STREAM.  Returns length of the instruction, in bytes.  */
@@ -182,7 +183,7 @@ print_insn_arg (d, buffer, p, addr, stream)
   int regno;
   register char *regname;
   register unsigned char *p1;
-  register double flval;
+  double flval;
   int flt_p;
 
   switch (*d)
@@ -315,14 +316,14 @@ print_insn_arg (d, buffer, p, addr, stream)
       if (place == 'b')
 	val = NEXTBYTE (p);
       else if (place == 'B')
-	val = ((char *)buffer)[1];
+	val = NEXTBYTE (buffer);	/* from the opcode word */
       else if (place == 'w' || place == 'W')
 	val = NEXTWORD (p);
       else if (place == 'l' || place == 'L')
 	val = NEXTLONG (p);
       else if (place == 'g')
 	{
-	  val = ((char *)buffer)[1];
+	  val = NEXTBYTE (buffer);
 	  if (val == 0)
 	    val = NEXTWORD (p);
 	  else if (val == -1)
@@ -466,11 +467,13 @@ print_insn_arg (d, buffer, p, addr, stream)
 		  break;
 
 		case 'x':
-		  flval = NEXTEXTEND(p);
+		  ieee_extended_to_double (ext_format_68881, p, &flval);
+		  p += 12;
 		  break;
 
 		case 'p':
-		  flval = NEXTPACKED(p);
+		  p += 12;
+		  flval = 0;	/* FIXME, handle packed decimal someday.  */
 		  break;
 
 		default:
@@ -565,10 +568,10 @@ print_insn_arg (d, buffer, p, addr, stream)
 		}
 	  }
 	else
-	  abort ();
+	  goto de_fault;
       break;
 
-    default:
+    default:  de_fault:
       error ("Invalid arg format in opcode table: \"%c\".", *d);
     }
 

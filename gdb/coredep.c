@@ -67,8 +67,6 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      NOP.  */
   if (reg_ptr > core_reg_size)
     reg_ptr -= KERNEL_U_ADDR;
-  if (reg_ptr > core_reg_size)
-    fprintf (stderr, "Can't find registers in core file\n");
 
   for (regno = 0; regno < NUM_REGS; regno++)
     {
