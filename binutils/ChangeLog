@@ -6,6 +6,21 @@ Thu Nov 17 15:00:13 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 	* objcopy.c (main): Fix is_strip test.  From
 	pirker@eiunix.tuwien.ac.at (Martin Pirker).
 
+Thu Nov 17 15:37:19 1994  Mark W. Eichin  <eichin@cygnus.com>
+
+	* objcopy.c (add_strip_symbol): New function, adds a name to an
+	explicit list of symbols to strip.
+	(is_strip_symbol): New function, reports whether the name argument
+	is in the explicit list.
+	(filter_symbols): Check against is_strip_symbol above all.
+	(strip_main): Recognize -N option. If used, don't default to
+	strip_all.
+	(copy_main): Recognize -N option.
+	(strip_usage): Document -N and --strip-symbol options.
+	(copy_usage): Ditto.
+	* objcopy.1, strip.1, binutils.texi: Document -N and
+	--strip-symbol options.
+
 Tue Nov  8 13:12:54 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* objdump.c (display_target_list, display_info_table): Pass an

@@ -21,6 +21,7 @@ objcopy \- copy and translate object files
 .RB "[\|" \-R\ \fIsectionname\fB\ |\ \-\-remove\-section=\fIsectionname\fR "\|]"
 .RB "[\|" \-S\ |\ \-\-strip\-all\fR "\|]" 
 .RB "[\|" \-g\ |\ \-\-strip\-debug\fR "\|]" 
+.RB "[\|" \-N\ \fIsymbolname\fR\ |\ \-\-strip\-symbol=\fIsymbolname\fR "\|]" 
 .RB "[\|" \-x\ |\ \-\-discard\-all\fR "\|]" 
 .RB "[\|" \-X\ |\ \-\-discard\-locals\fR "\|]" 
 .RB "[\|" \-b\ \fIbyte\fR\ |\ \fB\-\-byte=\fIbyte\fR "\|]" 
@@ -119,6 +120,11 @@ Do not copy relocation and symbol information from the source file.
 .TP
 .B \-g\fR, \fB\-\-strip\-debug
 Do not copy debugging symbols from the source file.
+.TP
+.B \-N \fIsymbolname\fR, \fB\-\-strip\-symbol=\fIsymbolname
+Do not copy symbol \fIsymbolname\fP from the source file. This option
+may be given more than once, and may be combined with other strip
+options.
 .TP
 .B \-x\fR, \fB \-\-discard\-all
 Do not copy non-global symbols from the source file.

@@ -743,6 +743,7 @@ objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
         [ -I @var{bfdname} | --input-target=@var{bfdname} ]
         [ -O @var{bfdname} | --output-target=@var{bfdname} ]
         [ -S | --strip-all ]  [ -g | --strip-debug ]
+        [ -N @var{symbolname} | --strip-symbol=@var{symbolname} ]
         [ -x | --discard-all ]  [ -X | --discard-locals ]
         [ -b @var{byte} | --byte=@var{byte} ]
         [ -i @var{interleave} | --interleave=@var{interleave} ]
@@ -820,6 +821,12 @@ Do not copy relocation and symbol information from the source file.
 @item -g
 @itemx --strip-debug
 Do not copy debugging symbols from the source file.
+
+@item -N @var{symbolname}
+@itemx --strip-symbol=@var{symbolname}
+Do not copy symbol @var{symbolname} from the source file. This option
+may be given more than once, and may be combined with other strip
+options.
 
 @item -x
 @itemx --discard-all
@@ -1290,6 +1297,7 @@ strip [ -F @var{bfdname} | --target=@var{bfdname} | --target=@var{bfdname} ]
       [ -I @var{bfdname} | --input-target=@var{bfdname} ]
       [ -O @var{bfdname} | --output-target=@var{bfdname} ]
       [ -s | --strip-all ] [ -S | -g | --strip-debug ]
+      [ -N @var{symbolname} | --strip-symbol=@var{symbolname} ]
       [ -x | --discard-all ] [ -X | --discard-locals ]
       [ -R @var{sectionname} | --remove-section=@var{sectionname} ]
       [ -v | --verbose ]  [ -V | --version ]  [ --help ]
@@ -1338,6 +1346,12 @@ Remove all symbols.
 @itemx -S
 @itemx --strip-debug
 Remove debugging symbols only.
+
+@item -N @var{symbolname}
+@itemx --strip-symbol=@var{symbolname}
+Remove symbol @var{symbolname} from the source file. This option
+may be given more than once, and may be combined with other strip
+options.
 
 @item -x
 @itemx --discard-all
