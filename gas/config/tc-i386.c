@@ -2826,6 +2826,11 @@ md_assemble (line)
 	/* Output normal instructions here.  */
 	unsigned char *q;
 
+	/* All opcodes on i386 have eighter 1 or 2 bytes.  We may use third
+	   byte for the SSE instructions to specify prefix they require.  */
+	if (i.tm.base_opcode & 0xff0000)
+	  add_prefix ((i.tm.base_opcode >> 16) & 0xff);
+
 	/* The prefix bytes.  */
 	for (q = i.prefix;
 	     q < i.prefix + sizeof (i.prefix) / sizeof (i.prefix[0]);
@@ -2845,30 +2850,13 @@ md_assemble (line)
 	    insn_size += 1;
 	    FRAG_APPEND_1_CHAR (i.tm.base_opcode);
 	  }
-	else if (fits_in_unsigned_word (i.tm.base_opcode))
+	else
 	  {
 	    insn_size += 2;
 	    p = frag_more (2);
 	    /* Put out high byte first: can't use md_number_to_chars!  */
 	    *p++ = (i.tm.base_opcode >> 8) & 0xff;
 	    *p = i.tm.base_opcode & 0xff;
-	  }
-	else
-	  {			/* Opcode is either 3 or 4 bytes.  */
-	    if (i.tm.base_opcode & 0xff000000)
-	      {
-		insn_size += 4;
-		p = frag_more (4);
-		*p++ = (i.tm.base_opcode >> 24) & 0xff;
-	      }
-	    else
-	      {
-		insn_size += 3;
-		p = frag_more (3);
-	      }
-	    *p++ = (i.tm.base_opcode >> 16) & 0xff;
-	    *p++ = (i.tm.base_opcode >> 8) & 0xff;
-	    *p = (i.tm.base_opcode) & 0xff;
 	  }
 
 	/* Now the modrm byte and sib byte (if present).  */
