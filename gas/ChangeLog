@@ -30,6 +30,17 @@
 	* configure: Rebuilt.
 	* config/tc-i386.c: Add support for old FreeBSD a.out hosts.
 
+2001-02-14  Philip Blundell  <pb@futuretv.com>
+
+	From 2001-02-06  H.J. Lu  <hjl@gnu.org>
+	* config/tc-ia64.h (TC_RELOC_RTSYM_LOC_FIXUP): Do fixup if
+	there is no relocation.
+	
+	From 2001-02-06  H.J. Lu  <hjl@gnu.org>
+	* config/tc-ia64.h (TC_RELOC_RTSYM_LOC_FIXUP): New. Defined.
+	* config/tc-ia64.c (md_parse_option): Only accept the valid
+	ia64 options on "-axxx".
+
 2001-02-13  Alan Modra  <alan@linuxcare.com.au>
 
 	* expr.c (operator): Don't bump input_line_pointer for two char
