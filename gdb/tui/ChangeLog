@@ -1,3 +1,11 @@
+2001-07-24  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* tui-hooks.c: New file, gdb hooks for tui.
+	* tui-out.c: New file, image copied from cli-out.c.
+	(tui_field_int): Identify "line" fields and keep track of them.
+	(tui_field_string): Likewise for "file".
+	(tui_out_new): Use flags = 0 to avoid printing the sources.
+
 2001-07-23  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* tuiIO.c (tui_cont_sig): Update cursor position on the screen to
