@@ -2294,9 +2294,10 @@ som_prep_for_fixups (abfd, syms, num_syms)
 	  som_symbol_data (*reloc->sym_ptr_ptr)->reloc_count += scale;
 	}
     }
-
+#if 0
   /* Now sort the symbols.  */
   qsort (syms, num_syms, sizeof (asymbol *), compare_syms);
+#endif
 
   /* Compute the symbol indexes, they will be needed by the relocation
      code.  */
@@ -3422,7 +3423,8 @@ som_bfd_derive_misc_symbol_info (abfd, sym, info)
 	 locally.  If BSF_FUNCTION is set for this symbol, then
 	 assign it type ST_CODE (the HP linker requires undefined
 	 external functions to have type ST_CODE rather than ST_ENTRY).  */
-      else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_UNKNOWN
+      else if ((som_symbol_data (sym)->som_type == SYMBOL_TYPE_UNKNOWN
+		|| som_symbol_data (sym)->som_type == SYMBOL_TYPE_CODE)
 	       && bfd_is_und_section (sym->section)
 	       && sym->flags & BSF_FUNCTION)
 	info->symbol_type = ST_CODE;
@@ -3440,10 +3442,16 @@ som_bfd_derive_misc_symbol_info (abfd, sym, info)
 	  info->arg_reloc = som_symbol_data (sym)->tc_data.hppa_arg_reloc;
 	}
 
-      /* If the type is unknown at this point, it should be
-	 ST_DATA (functions were handled as special cases above).  */
+      /* If the type is unknown at this point, it should be ST_DATA or
+	 ST_CODE (function/ST_ENTRY symbols were handled  as special
+	 cases above). */
       else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_UNKNOWN)
-	info->symbol_type = ST_DATA;
+	{
+	  if (sym->section->flags & SEC_CODE)
+	    info->symbol_type = ST_CODE;
+	  else
+	    info->symbol_type = ST_DATA;
+	}
 
       /* From now on it's a very simple mapping.  */
       else if (som_symbol_data (sym)->som_type == SYMBOL_TYPE_ABSOLUTE)
@@ -3777,6 +3785,11 @@ som_slurp_symbol_table (abfd)
 	case ST_STUB:
 	case ST_CODE:
 	  sym->symbol.value &= ~0x3;
+	  /* If the symbol's scope is ST_UNSAT, then these are
+	     undefined function symbols.  */
+	  if (bufp->symbol_scope == SS_UNSAT)
+	    sym->symbol.flags |= BSF_FUNCTION;
+	     
 
 	default:
 	  break;
@@ -3962,7 +3975,7 @@ som_set_reloc_info (fixup, end, internal_relocs, section, symbols, just_count)
   int variables[26], stack[20], c, v, count, prev_fixup, *sp;
   const int *subop;
   arelent *rptr= internal_relocs;
-  unsigned int offset = just_count ? 0 : section->vma;
+  unsigned int offset = 0;
 
 #define	var(c)		variables[(c) - 'A']
 #define	push(v)		(*sp++ = (v))

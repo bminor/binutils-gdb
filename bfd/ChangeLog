@@ -1,3 +1,8 @@
+Sun Sep 11 21:58:59 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/hppaosf.mh (RANLIB): Do not set.
+	* config/hppabsd.mh (RANLIB): Likewise.
+
 Sun Sep 11 22:50:49 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* cf-i386lynx.c: Remove #if 0 code.
