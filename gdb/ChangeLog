@@ -1,3 +1,8 @@
+2002-10-04  Michael Snyder  <msnyder@redhat.com>
+
+	* m32r-stub.c (handle_exception): Make sure exception is "trap"
+	before treating it as a single-step event.
+
 2002-10-03  Adam Fedor  <fedor@gnu.org>
 
 	* objc-lang.c: ARI fixes.  Change string.h to gdb_string.h.
@@ -308,7 +313,7 @@
 
 2002-09-22  Fernando Nasser  <fnasser@redhat.com>
 
-	* source.c (get_current__or_default_source_symtab_and_line): Initialize
+	* source.c (get_current_or_default_source_symtab_and_line): Initialize
 	sal.pc and sal.end fields.
 	(get_current_or_default_source_symtab_and_line): Ditto.
 	* breakpoint.c (parse_breakpoint_sals): Use correct accessor function
@@ -10397,9 +10402,9 @@ Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
 	* breakpoint.c (break_at_finish_command): Export.
 	(break_at_finish_at_depth_command): Export.
 	(tbreak_at_finish_command): Export.
-	(_initialize_breakpoint): Delete "xbreak" and "tbreak" commands.
+	(_initialize_breakpoint): Delete "xbreak" and "txbreak" commands.
 	* hppa-tdep.c (_initialize_hppa_tdep): Add "xbreak" and
-	"tbreak" commands, which are HPPA specific.
+	"txbreak" commands, which are HPPA specific.
 
 	* printcmd.c (disassemble_command): Remove an ancient
 	artifact of an old merge.
