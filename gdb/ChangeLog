@@ -1,5 +1,11 @@
 2003-03-18  J. Brobecker  <brobecker@gnat.com>
 
+	* infrun.c (observer.h): Add #include.
+	(normal_stop): Add call to observer_notify_normal_stop.
+	* Makefile.in (infrun.o): Add dependency on observer.h.
+
+2003-03-18  J. Brobecker  <brobecker@gnat.com>
+
 	Continuing work to convert the hppa targets to multiarch partial.
 	* hppa-tdep.c (hppa_push_dummy_frame): Remove unused function
 	parameter. Reformat comment.

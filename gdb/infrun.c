@@ -42,6 +42,7 @@
 #include "inf-loop.h"
 #include "regcache.h"
 #include "value.h"
+#include "observer.h"
 
 /* Prototypes for local functions */
 
@@ -3113,6 +3114,7 @@ normal_stop (void)
 
 done:
   annotate_stopped ();
+  observer_notify_normal_stop ();
 }
 
 static int
