@@ -1,5 +1,7 @@
 2004-08-21  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/alpha/alpha-linux.mh (LOADLIBES): New variable.
+
 	* configure.in: Check for ttrace function.
 	* configure, config.in: Regenerate.	
 
