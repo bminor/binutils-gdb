@@ -1,3 +1,10 @@
+start-sanitize-d10v
+Mon Aug 26 13:39:27 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c (parallel_ok): Fix bug in parallel 
+	checking code.
+
+end-sanitize-d10v
 Mon Aug 26 14:38:22 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ecoff.c (init_file): Initialize fMerge to 1.
