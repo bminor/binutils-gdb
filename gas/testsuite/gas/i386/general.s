@@ -148,5 +148,4 @@
 	andb	$~0x80,foo
 
 	# Force a good alignment.
-	.word	0
-	.byte	0
+	.p2align	4,0

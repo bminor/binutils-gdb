@@ -167,11 +167,6 @@ Disassembly of section .text:
  248:	65 [ 	]*gs
  249:	0f [ 	]*sfence.*\(bad\).*
  24a:	ae [ 	]*scas   %es:\(%edi\),%al
- 24b:	ff 90 90 90 90 90 [ 	]*call   \*0x90909090\(%eax\)
- 251:	90 [ 	]*nop    
- 252:	90 [ 	]*nop    
- 253:	90 [ 	]*nop    
- 254:	90 [ 	]*nop    
- 255:	90 [ 	]*nop    
- 256:	90 [ 	]*nop    
- 257:	90 [ 	]*nop    
+ 24b:	ff 00 [ 	]*incl   \(%eax\)
+ 24d:	00 00 [ 	]*add    %al,\(%eax\)
+	...

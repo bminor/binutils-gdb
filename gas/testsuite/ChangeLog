@@ -1,3 +1,12 @@
+1999-08-09  Ian Lance Taylor  <ian@zembu.com>
+
+	* gas/i386/float.s, gas/i386/float.l: Modify to work correctly
+	when gas uses 2**4 alignment for .text.
+	* gas/i386/general.s, gas/i386/general.l: Likewise.
+	* gas/i386/katmai.s, gas/i386/katmai.d: Likewise.
+	* gas/i386/modrm.s, gas/i386/modrm.l: Likewise.
+	* gas/i386/prefix.s, gas/i386/prefix.d: Likewise.
+
 1999-07-27  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* gas/i386/reloc.d: Fix so that test passes when enable-targets

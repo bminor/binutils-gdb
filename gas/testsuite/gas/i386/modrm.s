@@ -1668,4 +1668,4 @@
 	mov	%ds,%ds:0x12(,8)
 
 	# Force a good alignment.
-	.byte	0
+	.p2align	4,0

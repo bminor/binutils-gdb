@@ -1981,4 +1981,4 @@
 .*Warning:.*
  1669 [ 	]*
  1670 [ 	]*     		# Force a good alignment.
- 1671 217b 00 [ 	]*	.byte	0
+ 1671 217b 00000000 00[ 	]*.p2align	4,0

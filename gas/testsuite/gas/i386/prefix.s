@@ -8,4 +8,4 @@ foo:
  addr16 rep cmpsw %es:(%di),%ss:(%si)
 
 # Get a good alignment.
- nop
+ .p2align	4,0
