@@ -1171,14 +1171,7 @@ frame_type_from_pc (CORE_ADDR pc)
       && deprecated_pc_in_call_dummy (pc, 0, 0))
     return DUMMY_FRAME;
   else
-    {
-      char *name;
-      find_pc_partial_function (pc, &name, NULL, NULL);
-      if (DEPRECATED_PC_IN_SIGTRAMP (pc, name))
-	return SIGTRAMP_FRAME;
-      else
-	return NORMAL_FRAME;
-    }
+    return NORMAL_FRAME;
 }
 
 /* Create an arbitrary (i.e. address specified by user) or innermost frame.
@@ -1697,25 +1690,6 @@ legacy_get_prev_frame (struct frame_info *this_frame)
   if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
       && deprecated_pc_in_call_dummy (get_frame_pc (prev), 0, 0))
     prev->type = DUMMY_FRAME;
-  else
-    {
-      /* FIXME: cagney/2002-11-10: This should be moved to before the
-	 INIT code above so that the INIT code knows what the frame's
-	 type is (in fact, for a [generic] dummy-frame, the type can
-	 be set and then the entire initialization can be skipped).
-	 Unfortunately, it's the INIT code that sets the PC (Hmm, catch
-	 22).  */
-      char *name;
-      find_pc_partial_function (get_frame_pc (prev), &name, NULL, NULL);
-      if (DEPRECATED_PC_IN_SIGTRAMP (get_frame_pc (prev), name))
-	prev->type = SIGTRAMP_FRAME;
-      /* FIXME: cagney/2002-11-11: Leave prev->type alone.  Some
-         architectures are forcing the frame's type in INIT so we
-         don't want to override it here.  Remember, NORMAL_FRAME == 0,
-         so it all works (just :-/).  Once this initialization is
-         moved to the start of this function, all this nastness will
-         go away.  */
-    }
 
   if (prev->type == NORMAL_FRAME)
     prev->this_id.value.code_addr

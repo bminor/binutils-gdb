@@ -1,5 +1,8 @@
 2004-04-30  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (frame_type_from_pc): Delete call to PC_IN_SIGTRAMP.
+	(legacy_get_prev_frame): Ditto.
+
 	* mips-tdep.c (mips_pc_in_sigtramp): Delete.
 	(mips_gdbarch_init): Do not set pc_in_sigtramp.
 	* mipsread.c (sigtramp_address): Delete extern variable.
