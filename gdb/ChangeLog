@@ -1,3 +1,12 @@
+2001-11-26 Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* config/i386/tm-cygwin.h: Define HAVE_SSE_REGS if
+	HAVE_CONTEXT_EXTENDED_REGISTERS is defined.
+	* win32-nat.c: Define CONTEXT_DEBUGGER_DR that will also include
+	extended registers if HAVE_SSE_REGS is defined.
+	(mappings array): Add offset of extended registers.
+	(thread_rec): Use new CONTEXT_DEBUGGER_DR macro.
+
 2001-11-26  Tom Tromey  <tromey@redhat.com>
 
 	* NEWS: Updated.

@@ -19,8 +19,12 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-
-#undef HAVE_SSE_REGS	/* FIXME! win32-nat.c needs to support XMMi registers */
+/* Use SSE registers if winnt.h contains information about them.  */
+#ifdef HAVE_CONTEXT_EXTENDED_REGISTERS
+#define HAVE_SSE_REGS
+#else
+#undef HAVE_SSE_REGS
+#endif /* CONTEXT_EXTENDED_REGISTERS */
 #define HAVE_I387_REGS
 
 #include "i386/tm-i386.h"

@@ -25,6 +25,7 @@
 /* We assume we're being built with and will be used for cygwin.  */
 
 #include "defs.h"
+#include "tm.h"			/* required for SSE registers */
 #include "frame.h"		/* required by inferior.h */
 #include "inferior.h"
 #include "target.h"
@@ -65,6 +66,13 @@ enum
 #endif
 #include <sys/procfs.h>
 #include <psapi.h>
+
+#ifdef HAVE_SSE_REGS
+#define CONTEXT_DEBUGGER_DR CONTEXT_DEBUGGER | CONTEXT_EXTENDED_REGISTERS 
+#else
+#define CONTEXT_DEBUGGER_DR CONTEXT_DEBUGGER
+#endif
+
 
 /* The string sent by cygwin when it processes a signal.
    FIXME: This should be in a cygwin include file. */
@@ -169,6 +177,19 @@ static const int mappings[] =
   context_offset (FloatSave.DataSelector),
   context_offset (FloatSave.DataOffset),
   context_offset (FloatSave.ErrorSelector)
+#ifdef HAVE_SSE_REGS
+  /* XMM0-7 */ ,
+  context_offset (ExtendedRegisters[0*16]),
+  context_offset (ExtendedRegisters[1*16]),
+  context_offset (ExtendedRegisters[2*16]),
+  context_offset (ExtendedRegisters[3*16]),
+  context_offset (ExtendedRegisters[4*16]),
+  context_offset (ExtendedRegisters[5*16]),
+  context_offset (ExtendedRegisters[6*16]),
+  context_offset (ExtendedRegisters[7*16]),
+  /* MXCSR untested */
+  context_offset (ExtendedRegisters[8*16])
+#endif
 };
 
 #undef context_offset
@@ -210,7 +231,7 @@ thread_rec (DWORD id, int get_context)
 	    else if (get_context < 0)
 	      th->suspend_count = -1;
 
-	    th->context.ContextFlags = CONTEXT_DEBUGGER;
+	    th->context.ContextFlags = CONTEXT_DEBUGGER_DR;
 	    GetThreadContext (th->h, &th->context);
 	  }
 	return th;
