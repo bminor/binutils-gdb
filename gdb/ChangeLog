@@ -1,4 +1,8 @@
 2003-07-22  Elena Zannoni  <ezannoni@redhat.com>
+	
+	dwarf2loc.c (locexpr_describe_location): Fix typo.
+
+2003-07-22  Elena Zannoni  <ezannoni@redhat.com>
 
 	* findvar.c (read_var_value): Remove case for thread local storage
 	variables.  It is now entirely handled by the dwarf2 location
