@@ -1,3 +1,13 @@
+Sat May 22 10:03:09 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabsread.c: Remove most uses of lookup_fundamental_type.
+	(define_symbol): Use read_type for type of enum constant,
+	not just read_type_number.  Also don't call error().
+	(define_symbol): For unrecognized constant type, one complaint (the
+	one from error_type) is	enough.  Don't make our own in addition.
+	(define_symbol): Don't treat an N_FUN 'R' as a prototype.
+	* gdbtypes.h: Doc fixes.
+
 Sat May 22 03:33:07 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	Fix stack unwinding through _sigtramp on Irix. These patches are from

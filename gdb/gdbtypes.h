@@ -77,13 +77,24 @@ enum type_code
   TYPE_CODE_ENUM,		/* Enumeration type */
   TYPE_CODE_FUNC,		/* Function type */
   TYPE_CODE_INT,		/* Integer type */
-  TYPE_CODE_FLT,		/* Floating type */
-  TYPE_CODE_VOID,		/* Void type (values zero length) */
+
+  /* Floating type.  This is *NOT* a complex type.  Complex types, when
+     we have them, will have their own type code (or TYPE_CODE_ERROR if
+     we can parse a complex type but not manipulate it).  There are parts
+     of GDB which bogusly assume that TYPE_CODE_FLT can mean complex.  */
+  TYPE_CODE_FLT,
+
+  /* Void type (values zero length; the length field is ignored).  */
+  TYPE_CODE_VOID,
+
   TYPE_CODE_SET,		/* Pascal sets */
   TYPE_CODE_RANGE,		/* Range (integers within spec'd bounds) */
   TYPE_CODE_STRING,		/* String types, distinct from array of char */
   TYPE_CODE_BITSTRING,		/* String of bits, distinct from bool array */
-  TYPE_CODE_ERROR,              /* Unknown type */
+
+  /* Unknown type.  The length field is valid if we were able to
+     deduce that much about the type, or 0 if we don't even know that.  */
+  TYPE_CODE_ERROR,
 
   /* C++ */
   TYPE_CODE_MEMBER,		/* Member type */
@@ -131,7 +142,8 @@ struct type
 
   char *name;
 
-  /* Length in bytes of storage for a value of this type */
+  /* Length, in units of TARGET_CHAR_BIT bits,
+     of storage for a value of this type */
 
   unsigned length;
 
