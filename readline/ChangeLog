@@ -1,3 +1,8 @@
+Thu Apr  9 11:59:38 1998  Ian Dall (<Ian.Dall@dsto.defence.gov.au>
+
+	* configure.in (host==netbsd): Include config/mh-bsd44.
+	* config/mh-bsd44: New file.
+
 Wed Dec  3 16:48:20 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
 
 	* rltty.c: fix typos.
