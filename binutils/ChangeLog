@@ -1,3 +1,7 @@
+Thu Oct 11 21:45:17 2001  J"orn Rennecke <amylaar@onetel.net.uk>
+
+	* MAINTAINERS: Update my email address.
+
 2001-10-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* doc/Makefile.in: Regenerate.
