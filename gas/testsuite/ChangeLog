@@ -1,3 +1,8 @@
+2000-12-01  Chris Demetriou  <cgd@sibyte.com>
+
+        * gas/mips/mips16.d: Expect mips16 nops to be used for padding
+        when mips16 code generation is enabled.
+
 2000-11-30  Diego Novillo  <dnovillo@redhat.com>
 
 	* intel.s, intel.d: New test for @GOT references.
