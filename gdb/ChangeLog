@@ -1,3 +1,7 @@
+2003-08-02  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in: Update all dependencies and definitions.
+
 2003-08-02  Adam Fedor  <fedor@gnu.org>
 
 	* linespec.c (is_objc_method_format): New function
