@@ -1,3 +1,7 @@
+2002-09-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* objc-exp.y, objc-lang.h, objc-lang.c: Fix copyright notice.
+
 2002-09-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* breakpoint.c, c-exp.y, defs.h, elfread.c, expression.h,
