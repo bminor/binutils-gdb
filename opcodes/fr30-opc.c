@@ -2095,7 +2095,7 @@ static const CGEN_INSN macro_insn_table_entries[] =
     { { MNEM, ' ', OP (I32), ',', OP (RI), 0 } },
     { 16, 48, 0xfff0 }, 0x9f80,
     (PTR) 0,
-    { 0, 0|A(ALIAS), { 0 } }
+    { 0, 0|A(NO_DIS)|A(ALIAS), { 0 } }
   },
 };
 
