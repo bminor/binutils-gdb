@@ -1,3 +1,8 @@
+Fri Apr  9 10:43:20 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c: Renamed PAGE_SIZE to ROUND_SIZE, to avoid confusion
+	on systems which define PAGE_SIZE in <limits.h>.
+
 Thu Apr  8 10:28:00 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* trad-core.c (trad_unix_core_file_failing_signal): Use new macro
