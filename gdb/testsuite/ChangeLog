@@ -1,3 +1,8 @@
+2004-01-07  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.stabs/weird.exp: Use hp_cc_compiler and hp_aCC_compiler
+	to test for hp-ux assembler.  Fix copyright years.
+
 2004-01-07  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.base/fileio.c (strerrno): Add "EBUSY".
