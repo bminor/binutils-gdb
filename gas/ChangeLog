@@ -1,3 +1,47 @@
+2001-08-27  Torbjorn Granlund  <tege@swox.com>
+	    Staffan Ulfberg  <staffanu@swox.se>
+	    Linus Nordberg  <linus@swox.se>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in: Recognise powerpc*le*, not just powerpcle*.
+	* configure: Regenerate.
+	* config/tc-ppc.c (PPC_LO, PPC_HI, PPC_HA, PPC_HIGHER,
+	PPC_HIGHERA, PPC_HIGHEST, PPC_HIGHESTA, SEX16): New macros.
+	(md_assemble): Use them.
+	(ppc_machine): Support stub for ELF64 as well as XCOFF.
+	(md_pseudo_table): Add "llong", "quad".
+	(md_parse_option): Match default_cpu of powerpc*.
+	(ppc_arch): Likewise.
+	(ppc_subseg_align): Only for OBJ_XCOFF.
+	(ppc_target_format): Return elf64-powerpc strings for 64 bit ELF.
+	(md_begin): Select PPC_OPCODE_64 for 64 bit.
+	(ppc_insert_operand): Don't bother testing 'file' before calling
+	as_bad_where.  Use as_bad_where for operand->insert errors.
+	(mapping): Add ELF64 relocation modifiers.
+	(ppc_elf_suffix): Replace symbol on BFD_RELOC_PPC64_TOC reloc
+	expressions with abs_symbol.
+	(ppc_elf_cons): Correct offset for little endian targets.
+	(ppc_elf_frob_symbol): New.
+	(md_assemble): Add support for 64 bit ELF relocs.
+	(ppc_tc): Ensure 8 byte alignment when 64 bit.
+	(ppc_is_toc_sym): Only define for OBJ_XCOFF and OBJ_ELF.  Match
+	".toc" section for 64 bit ELF.
+	(ppc_fix_adjustable): New.  Macro body moved from tc-ppc.h.
+	(md_apply_fix3): Silence warning with ATTRIBUTE_UNUSED.  Only do
+	the ppc_is_toc_sym check for OBJ_XCOFF and OBJ_ELF.  For 64 bit,
+	use BFD_RELOC_PPC64_TOC16_DS instead of BFD_RELOC_PPC_TOC16.
+	Expand on comments, error message.  Add support for 64 bit relocs,
+	and use PPC_HI etc. macros.
+	* config/tc-ppc.h (MAX_MEM_FOR_RS_ALIGN_CODE): Define.
+	(HANDLE_ALIGN): Define to generate nops in code sections rather
+	than zeros.
+	(TC_FORCE_RELOCATION): Force for BFD_RELOC_PPC64_TOC.
+	(ELF_TC_SPECIAL_SECTIONS): Add 64 bit ELF sections.
+	(tc_fix_adjustable): Move body of macro to tc-ppc.c.
+	(ppc_fix_adjustable): Declare.
+	(tc_frob_symbol): Define.
+	(ppc_elf_frob_symbol): Declare.
+
 2001-08-26  Andreas Jaeger  <aj@suse.de>
 
 	* config/tc-s390.c: Add missing prototypes

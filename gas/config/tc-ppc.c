@@ -53,6 +53,41 @@ static int set_target_endian = 0;
 #endif
 #endif
 
+/* Macros for calculating LO, HI, HA, HIGHER, HIGHERA, HIGHEST,
+   HIGHESTA.  */
+
+/* #lo(value) denotes the least significant 16 bits of the indicated.  */
+#define PPC_LO(v) ((v) & 0xffff)
+
+/* #hi(value) denotes bits 16 through 31 of the indicated value.  */
+#define PPC_HI(v) (((v) >> 16) & 0xffff)
+
+/* #ha(value) denotes the high adjusted value: bits 16 through 31 of
+  the indicated value, compensating for #lo() being treated as a
+  signed number.  */
+#define PPC_HA(v) ((((v) >> 16) + (((v) >> 15) & 1)) & 0xffff)
+
+/* #higher(value) denotes bits 32 through 47 of the indicated value.  */
+#define PPC_HIGHER(v) (((v) >> 32) & 0xffff)
+
+/* #highera(value) denotes bits 32 through 47 of the indicated value,
+   compensating for #lo() being treated as a signed number.  */
+#define PPC_HIGHERA(v) \
+  ((((v) >> 32) + (((v) & 0xffff8000) == 0xffff8000)) & 0xffff)
+
+/* #highest(value) denotes bits 48 through 63 of the indicated value.  */
+#define PPC_HIGHEST(v) (((v) >> 48) & 0xffff)
+
+/* #highesta(value) denotes bits 48 through 63 of the indicated value,
+   compensating for #lo being treated as a signed number.
+   Generate 0xffffffff8000 with arithmetic here, for portability.  */
+#define PPC_HIGHESTA(v) \
+  ((((v) >> 48)								      \
+    + (((v) & (((valueT) 1 << 48) - 0x8000)) == ((valueT) 1 << 48) - 0x8000)) \
+   & 0xffff)
+
+#define SEX16(val) ((((val) & 0xffff) ^ 0x8000) - 0x8000)
+
 static boolean reg_names_p = TARGET_REG_NAMES_P;
 
 static boolean register_name PARAMS ((expressionS *));
@@ -62,8 +97,12 @@ static unsigned long ppc_insert_operand
 	   offsetT val, char *file, unsigned int line));
 static void ppc_macro PARAMS ((char *str, const struct powerpc_macro *macro));
 static void ppc_byte PARAMS ((int));
+
+#if defined (OBJ_XCOFF) || defined (OBJ_ELF)
 static int ppc_is_toc_sym PARAMS ((symbolS *sym));
 static void ppc_tc PARAMS ((int));
+static void ppc_machine PARAMS ((int));
+#endif
 
 #ifdef OBJ_XCOFF
 static void ppc_comm PARAMS ((int));
@@ -87,7 +126,6 @@ static void ppc_stabx PARAMS ((int));
 static void ppc_rename PARAMS ((int));
 static void ppc_toc PARAMS ((int));
 static void ppc_xcoff_cons PARAMS ((int));
-static void ppc_machine PARAMS ((int));
 static void ppc_vbyte PARAMS ((int));
 #endif
 
@@ -188,10 +226,11 @@ const pseudo_typeS md_pseudo_table[] =
   { "word",	ppc_xcoff_cons,	1 },
   { "short",	ppc_xcoff_cons,	1 },
   { "vbyte",    ppc_vbyte,	0 },
-  { "machine",  ppc_machine,    0 },
 #endif
 
 #ifdef OBJ_ELF
+  { "llong",	ppc_elf_cons,	8 },
+  { "quad",	ppc_elf_cons,	8 },
   { "long",	ppc_elf_cons,	4 },
   { "word",	ppc_elf_cons,	2 },
   { "short",	ppc_elf_cons,	2 },
@@ -218,8 +257,10 @@ const pseudo_typeS md_pseudo_table[] =
   { "tocd",     ppc_pe_tocd,    0 },
 #endif
 
-  /* This pseudo-op is used even when not generating XCOFF output.  */
+#if defined (OBJ_XCOFF) || defined (OBJ_ELF)
   { "tc",	ppc_tc,		0 },
+  { "machine",  ppc_machine,    0 },
+#endif
 
   { NULL,	NULL,		0 }
 };
@@ -828,6 +869,9 @@ md_parse_option (c, arg)
       break;
 
     case 'm':
+      /* Most CPU's are 32 bit.  Exceptions are listed below.  */
+      ppc_size = PPC_OPCODE_32;
+
       /* -mpwrx and -mpwr2 mean to assemble for the IBM POWER/2
 	 (RIOS2).  */
       if (strcmp (arg, "pwrx") == 0 || strcmp (arg, "pwr2") == 0)
@@ -1007,8 +1051,7 @@ ppc_set_cpu ()
 	ppc_cpu = PPC_OPCODE_POWER;
       else if (strcmp (default_cpu, "rs6000") == 0)
 	ppc_cpu = PPC_OPCODE_POWER;
-      else if (strcmp (default_cpu, "powerpc") == 0
-	       || strcmp (default_cpu, "powerpcle") == 0)
+      else if (strncmp (default_cpu, "powerpc", 7) == 0)
 	ppc_cpu = PPC_OPCODE_PPC;
       else
 	as_fatal (_("Unknown default cpu = %s, os = %s"),
@@ -1032,8 +1075,7 @@ ppc_arch ()
     {
       if (strcmp (default_cpu, "rs6000") == 0)
 	return bfd_arch_rs6000;
-      else if (strcmp (default_cpu, "powerpc") == 0
-	       || strcmp (default_cpu, "powerpcle") == 0)
+      else if (strncmp (default_cpu, "powerpc", 7) == 0)
 	return bfd_arch_powerpc;
     }
 
@@ -1047,11 +1089,13 @@ ppc_mach ()
   return ppc_size == PPC_OPCODE_64 ? 620 : 0;
 }
 
+#ifdef OBJ_XCOFF
 int
 ppc_subseg_align ()
 {
   return ppc_xcoff64 ? 3 : 2;
 }
+#endif
 
 extern char*
 ppc_target_format ()
@@ -1060,15 +1104,15 @@ ppc_target_format ()
 #ifdef TE_PE
   return target_big_endian ? "pe-powerpc" : "pe-powerpcle";
 #elif TE_POWERMAC
+  return "xcoff-powermac";
 #else
   return ppc_xcoff64 ? "aixcoff64-rs6000" : "aixcoff-rs6000";
 #endif
-#ifdef TE_POWERMAC
-  return "xcoff-powermac";
-#endif
 #endif
 #ifdef OBJ_ELF
-  return target_big_endian ? "elf32-powerpc" : "elf32-powerpcle";
+  return (target_big_endian
+	  ? (BFD_DEFAULT_TARGET_SIZE == 64 ? "elf64-powerpc" : "elf32-powerpc")
+	  : (BFD_DEFAULT_TARGET_SIZE == 64 ? "elf64-powerpcle" : "elf32-powerpcle"));
 #endif
 }
 
@@ -1088,6 +1132,11 @@ md_begin ()
   ppc_set_cpu ();
 
 #ifdef OBJ_ELF
+  /* If we're going to generate a 64-bit ABI file, then we need
+     the 64-bit capable instructions.  */
+  if (BFD_DEFAULT_TARGET_SIZE == 64)
+    ppc_size = PPC_OPCODE_64;
+
   /* Set the ELF flags if desired.  */
   if (ppc_flags && !msolaris)
     bfd_set_private_flags (stdoutput, ppc_flags);
@@ -1229,10 +1278,7 @@ ppc_insert_operand (insn, operand, val, file, line)
 	  char buf[100];
 
 	  sprint_value (buf, test);
-	  if (file == (char *) NULL)
-	    as_bad (err, buf, min, max);
-	  else
-	    as_bad_where (file, line, err, buf, min, max);
+	  as_bad_where (file, line, err, buf, min, max);
 	}
     }
 
@@ -1243,7 +1289,7 @@ ppc_insert_operand (insn, operand, val, file, line)
       errmsg = NULL;
       insn = (*operand->insert) (insn, (long) val, &errmsg);
       if (errmsg != (const char *) NULL)
-	as_bad (errmsg);
+	as_bad_where (file, line, errmsg);
     }
   else
     insn |= (((long) val & ((1 << operand->bits) - 1))
@@ -1318,7 +1364,17 @@ ppc_elf_suffix (str_p, exp_p)
     MAP ("bitfld",	BFD_RELOC_PPC_EMB_BIT_FLD),
     MAP ("relsda",	BFD_RELOC_PPC_EMB_RELSDA),
     MAP ("xgot",	BFD_RELOC_PPC_TOC16),
-
+#if BFD_DEFAULT_TARGET_SIZE == 64
+    MAP ("higher",	BFD_RELOC_PPC64_HIGHER),
+    MAP ("highera",	BFD_RELOC_PPC64_HIGHER_S),
+    MAP ("highest",	BFD_RELOC_PPC64_HIGHEST),
+    MAP ("highesta",	BFD_RELOC_PPC64_HIGHEST_S),
+    MAP ("tocbase",	BFD_RELOC_PPC64_TOC),
+    MAP ("toc",		BFD_RELOC_PPC_TOC16),
+    MAP ("toc@l",       BFD_RELOC_PPC64_TOC16_LO),
+    MAP ("toc@h",       BFD_RELOC_PPC64_TOC16_HI),
+    MAP ("toc@ha",      BFD_RELOC_PPC64_TOC16_HA),
+#endif
     { (char *) 0,	0,	BFD_RELOC_UNUSED }
   };
 
@@ -1366,8 +1422,18 @@ ppc_elf_suffix (str_p, exp_p)
 	    if (&input_line_pointer != str_p)
 	      input_line_pointer = orig_line;
 	  }
-
 	*str_p = str;
+
+	if (BFD_DEFAULT_TARGET_SIZE == 64
+	    && ptr->reloc == BFD_RELOC_PPC64_TOC
+	    && exp_p->X_op == O_symbol)
+	  {
+	    /* This reloc type ignores the symbol.  Change the symbol
+	       so that the dummy .TOC. symbol can be omitted from the
+	       object file.  */
+	    exp_p->X_add_symbol = &abs_symbol;
+	  }
+
 	return ptr->reloc;
       }
 
@@ -1378,7 +1444,7 @@ ppc_elf_suffix (str_p, exp_p)
    Clobbers input_line_pointer, checks end-of-line.  */
 static void
 ppc_elf_cons (nbytes)
-     register int nbytes;	/* 1=.byte, 2=.word, 4=.long */
+     register int nbytes;	/* 1=.byte, 2=.word, 4=.long, 8=.llong.  */
 {
   expressionS exp;
   bfd_reloc_code_real_type reloc;
@@ -1404,14 +1470,19 @@ ppc_elf_cons (nbytes)
 	  size = bfd_get_reloc_size (reloc_howto);
 
 	  if (size > nbytes)
-	    as_bad (_("%s relocations do not fit in %d bytes\n"),
-		    reloc_howto->name, nbytes);
-
+	    {
+	      as_bad (_("%s relocations do not fit in %d bytes\n"),
+		      reloc_howto->name, nbytes);
+	    }
 	  else
 	    {
-	      register char *p = frag_more ((int) nbytes);
-	      int offset = nbytes - size;
+	      char *p;
+	      int offset;
 
+	      p = frag_more (nbytes);
+	      offset = 0;
+	      if (target_big_endian)
+		offset = nbytes - size;
 	      fix_new_exp (frag_now, p - frag_now->fr_literal + offset, size,
 			   &exp, 0, reloc);
 	    }
@@ -1595,6 +1666,25 @@ ppc_elf_validate_fix (fixp, seg)
       return;
     }
 }
+
+#if BFD_DEFAULT_TARGET_SIZE == 64
+/* Don't emit .TOC. symbol.  */
+int
+ppc_elf_frob_symbol (sym)
+     symbolS *sym;
+{
+  const char *name;
+
+  name = S_GET_NAME (sym);
+  if (name != NULL && strcmp (name, ".TOC.") == 0)
+    {
+      S_CLEAR_EXTERNAL (sym);
+      return 1;
+    }
+
+  return 0;
+}
+#endif
 #endif /* OBJ_ELF */
 
 #ifdef TE_PE
@@ -2003,28 +2093,59 @@ md_assemble (str)
 
 	      case BFD_RELOC_LO16:
 		/* X_unsigned is the default, so if the user has done
-                   something which cleared it, we always produce a
-                   signed value.  */
-		if (ex.X_unsigned
-		    && (operand->flags & PPC_OPERAND_SIGNED) == 0)
+		   something which cleared it, we always produce a
+		   signed value.  */
+		if (ex.X_unsigned && ! (operand->flags & PPC_OPERAND_SIGNED))
 		  ex.X_add_number &= 0xffff;
 		else
-		  ex.X_add_number = (((ex.X_add_number & 0xffff)
-				      ^ 0x8000)
-				     - 0x8000);
+		  ex.X_add_number = SEX16 (ex.X_add_number);
 		break;
 
 	      case BFD_RELOC_HI16:
-		ex.X_add_number = (ex.X_add_number >> 16) & 0xffff;
+		if (ex.X_unsigned && ! (operand->flags & PPC_OPERAND_SIGNED))
+		  ex.X_add_number = PPC_HI (ex.X_add_number);
+		else
+		  ex.X_add_number = SEX16 (PPC_HI (ex.X_add_number));
 		break;
 
 	      case BFD_RELOC_HI16_S:
-		ex.X_add_number = ((((ex.X_add_number >> 16) & 0xffff)
-				    + ((ex.X_add_number >> 15) & 1))
-				   & 0xffff);
+		if (ex.X_unsigned && ! (operand->flags & PPC_OPERAND_SIGNED))
+		  ex.X_add_number = PPC_HA (ex.X_add_number);
+		else
+		  ex.X_add_number = SEX16 (PPC_HA (ex.X_add_number));
 		break;
+
+#if BFD_DEFAULT_TARGET_SIZE == 64
+	      case BFD_RELOC_PPC64_HIGHER:
+		if (ex.X_unsigned && ! (operand->flags & PPC_OPERAND_SIGNED))
+		  ex.X_add_number = PPC_HIGHER (ex.X_add_number);
+		else
+		  ex.X_add_number = SEX16 (PPC_HIGHER (ex.X_add_number));
+		break;
+
+	      case BFD_RELOC_PPC64_HIGHER_S:
+		if (ex.X_unsigned && ! (operand->flags & PPC_OPERAND_SIGNED))
+		  ex.X_add_number = PPC_HIGHERA (ex.X_add_number);
+		else
+		  ex.X_add_number = SEX16 (PPC_HIGHERA (ex.X_add_number));
+		break;
+
+	      case BFD_RELOC_PPC64_HIGHEST:
+		if (ex.X_unsigned && ! (operand->flags & PPC_OPERAND_SIGNED))
+		  ex.X_add_number = PPC_HIGHEST (ex.X_add_number);
+		else
+		  ex.X_add_number = SEX16 (PPC_HIGHEST (ex.X_add_number));
+		break;
+
+	      case BFD_RELOC_PPC64_HIGHEST_S:
+		if (ex.X_unsigned && ! (operand->flags & PPC_OPERAND_SIGNED))
+		  ex.X_add_number = PPC_HIGHESTA (ex.X_add_number);
+		else
+		  ex.X_add_number = SEX16 (PPC_HIGHESTA (ex.X_add_number));
+		break;
+#endif /* BFD_DEFAULT_TARGET_SIZE == 64 */
 	      }
-#endif
+#endif /* OBJ_ELF */
 	  insn = ppc_insert_operand (insn, operand, ex.X_add_number,
 				     (char *) NULL, 0);
 	}
@@ -2050,6 +2171,50 @@ md_assemble (str)
 		  reloc = BFD_RELOC_PPC_BA16_BRNTAKEN;
 		  break;
 		default:
+		  break;
+		}
+	    }
+
+	  if (BFD_DEFAULT_TARGET_SIZE == 64
+	      && (operand->flags & PPC_OPERAND_DS) != 0)
+	    {
+	      switch (reloc)
+		{
+		case BFD_RELOC_16:
+		  reloc = BFD_RELOC_PPC64_ADDR16_DS;
+		  break;
+		case BFD_RELOC_LO16:
+		  reloc = BFD_RELOC_PPC64_ADDR16_LO_DS;
+		  break;
+		case BFD_RELOC_16_GOTOFF:
+		  reloc = BFD_RELOC_PPC64_GOT16_DS;
+		  break;
+		case BFD_RELOC_LO16_GOTOFF:
+		  reloc = BFD_RELOC_PPC64_GOT16_LO_DS;
+		  break;
+		case BFD_RELOC_LO16_PLTOFF:
+		  reloc = BFD_RELOC_PPC64_PLT16_LO_DS;
+		  break;
+		case BFD_RELOC_32_BASEREL:
+		  reloc = BFD_RELOC_PPC64_SECTOFF_DS;
+		  break;
+		case BFD_RELOC_LO16_BASEREL:
+		  reloc = BFD_RELOC_PPC64_SECTOFF_LO_DS;
+		  break;
+		case BFD_RELOC_PPC_TOC16:
+		  reloc = BFD_RELOC_PPC64_TOC16_DS;
+		  break;
+		case BFD_RELOC_PPC64_TOC16_LO:
+		  reloc = BFD_RELOC_PPC64_TOC16_LO_DS;
+		  break;
+		case BFD_RELOC_PPC64_PLTGOT16:
+		  reloc = BFD_RELOC_PPC64_PLTGOT16_DS;
+		  break;
+		case BFD_RELOC_PPC64_PLTGOT16_LO:
+		  reloc = BFD_RELOC_PPC64_PLTGOT16_LO_DS;
+		  break;
+		default:
+		  as_bad (_("unsupported relocation for DS offset field"));
 		  break;
 		}
 	    }
@@ -2159,6 +2324,14 @@ md_assemble (str)
 	    case BFD_RELOC_LO16:
 	    case BFD_RELOC_HI16:
 	    case BFD_RELOC_HI16_S:
+#ifdef OBJ_ELF
+#if BFD_DEFAULT_TARGET_SIZE == 64
+	    case BFD_RELOC_PPC64_HIGHER:
+	    case BFD_RELOC_PPC64_HIGHER_S:
+	    case BFD_RELOC_PPC64_HIGHEST:
+	    case BFD_RELOC_PPC64_HIGHEST_S:
+#endif
+#endif
 	      fixP->fx_no_overflow = 1;
 	      break;
 	    default:
@@ -2874,7 +3047,7 @@ ppc_stabx (ignore)
        resolve_symbol_value will copy the exp's "within" into sym's when the
        offset is 0.  Since this seems to be corner case problem,
        only do the correction for storage class C_STSYM.  A better solution
-       would be to have the tc	field updated in ppc_symbol_new_hook.  */
+       would be to have the tc field updated in ppc_symbol_new_hook.  */
 
     if (exp.X_op == O_symbol)
       {
@@ -3310,14 +3483,6 @@ ppc_xcoff_cons (log_size)
 }
 
 static void
-ppc_machine(dummy)
-    int dummy ATTRIBUTE_UNUSED;
-{
-    discard_rest_of_line();
-   /* What does aix use this for?  */
-}
-
-static void
 ppc_vbyte (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
@@ -3345,15 +3510,18 @@ ppc_vbyte (dummy)
 }
 
 #endif /* OBJ_XCOFF */
+#if defined (OBJ_XCOFF) || defined (OBJ_ELF)
 
 /* The .tc pseudo-op.  This is used when generating either XCOFF or
    ELF.  This takes two or more arguments.
 
    When generating XCOFF output, the first argument is the name to
    give to this location in the toc; this will be a symbol with class
-   TC.  The rest of the arguments are 4 byte values to actually put at
+   TC.  The rest of the arguments are N-byte values to actually put at
    this location in the TOC; often there is just one more argument, a
-   relocateable symbol reference.
+   relocateable symbol reference.  The size of the value to store
+   depends on target word size.  A 32-bit target uses 4-byte values, a
+   64-bit target uses 8-byte values.
 
    When not generating XCOFF output, the arguments are the same, but
    the first argument is simply ignored.  */
@@ -3416,7 +3584,8 @@ ppc_tc (ignore)
     ppc_frob_label (sym);
   }
 
-#else /* ! defined (OBJ_XCOFF) */
+#endif /* OBJ_XCOFF */
+#ifdef OBJ_ELF
 
   /* Skip the TOC symbol name.  */
   while (is_part_of_name (*input_line_pointer)
@@ -3426,11 +3595,10 @@ ppc_tc (ignore)
 	 || *input_line_pointer == '}')
     ++input_line_pointer;
 
-  /* Align to a four byte boundary.  */
-  frag_align (2, 0, 0);
-  record_alignment (now_seg, 2);
-
-#endif /* ! defined (OBJ_XCOFF) */
+  /* Align to a four/eight byte boundary.  */
+  frag_align (BFD_DEFAULT_TARGET_SIZE == 64 ? 3 : 2, 0, 0);
+  record_alignment (now_seg, BFD_DEFAULT_TARGET_SIZE == 64 ? 3 : 2);
+#endif /* OBJ_ELF */
 
   if (*input_line_pointer != ',')
     demand_empty_rest_of_line ();
@@ -3440,6 +3608,35 @@ ppc_tc (ignore)
       cons ((ppc_size == PPC_OPCODE_64) ? 8 : 4);
     }
 }
+
+/* Pseudo-op .machine.  */
+/* FIXME: `.machine' is a nop for the moment.  */
+
+static void
+ppc_machine (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  discard_rest_of_line ();
+}
+
+/* See whether a symbol is in the TOC section.  */
+
+static int
+ppc_is_toc_sym (sym)
+     symbolS *sym;
+{
+#ifdef OBJ_XCOFF
+  return symbol_get_tc (sym)->class == XMC_TC;
+#endif
+#ifdef OBJ_ELF
+  const char *sname = segment_name (S_GET_SEGMENT (sym));
+  if (BFD_DEFAULT_TARGET_SIZE == 64)
+    return strcmp (sname, ".toc") == 0;
+  else
+    return strcmp (sname, ".got") == 0;
+#endif
+}
+#endif /* defined (OBJ_XCOFF) || defined (OBJ_ELF) */
 
 #ifdef TE_PE
 
@@ -4801,18 +4998,27 @@ ppc_force_relocation (fix)
 
 #endif /* OBJ_XCOFF */
 
-/* See whether a symbol is in the TOC section.  */
-
-static int
-ppc_is_toc_sym (sym)
-     symbolS *sym;
+#ifdef OBJ_ELF
+int
+ppc_fix_adjustable (fix)
+     fixS *fix;
 {
-#ifdef OBJ_XCOFF
-  return symbol_get_tc (sym)->class == XMC_TC;
-#else
-  return strcmp (segment_name (S_GET_SEGMENT (sym)), ".got") == 0;
-#endif
+  return (fix->fx_r_type != BFD_RELOC_16_GOTOFF
+	  && fix->fx_r_type != BFD_RELOC_LO16_GOTOFF
+	  && fix->fx_r_type != BFD_RELOC_HI16_GOTOFF
+	  && fix->fx_r_type != BFD_RELOC_HI16_S_GOTOFF
+	  && fix->fx_r_type != BFD_RELOC_GPREL16
+	  && fix->fx_r_type != BFD_RELOC_VTABLE_INHERIT
+	  && fix->fx_r_type != BFD_RELOC_VTABLE_ENTRY
+	  && ! S_IS_EXTERNAL (fix->fx_addsy)
+	  && ! S_IS_WEAK (fix->fx_addsy)
+	  && (fix->fx_pcrel
+	      || (fix->fx_subsy != NULL
+		  && (S_GET_SEGMENT (fix->fx_subsy)
+		      == S_GET_SEGMENT (fix->fx_addsy)))
+	      || S_IS_LOCAL (fix->fx_addsy)));
 }
+#endif
 
 /* Apply a fixup to the object code.  This is called for all the
    fixups we generated by the call to fix_new_exp, above.  In the call
@@ -4827,7 +5033,7 @@ int
 md_apply_fix3 (fixp, valuep, seg)
      fixS *fixp;
      valueT *valuep;
-     segT seg;
+     segT seg ATTRIBUTE_UNUSED;
 {
   valueT value;
 
@@ -4900,13 +5106,10 @@ md_apply_fix3 (fixp, valuep, seg)
       operand = &powerpc_operands[opindex];
 
 #ifdef OBJ_XCOFF
-      /* It appears that an instruction like
-	     l 9,LC..1(30)
-	 when LC..1 is not a TOC symbol does not generate a reloc.  It
-	 uses the offset of LC..1 within its csect.  However, .long
-	 LC..1 will generate a reloc.  I can't find any documentation
-	 on how these cases are to be distinguished, so this is a wild
-	 guess.  These cases are generated by gcc -mminimal-toc.  */
+      /* An instruction like `lwz 9,sym(30)' when `sym' is not a TOC symbol
+	 does not generate a reloc.  It uses the offset of `sym' within its
+	 csect.  Other usages, such as `.long sym', generate relocs.  This
+	 is the documented behaviour of non-TOC symbols.  */
       if ((operand->flags & PPC_OPERAND_PARENS) != 0
 	  && operand->bits == 16
 	  && operand->shift == 0
@@ -4942,12 +5145,11 @@ md_apply_fix3 (fixp, valuep, seg)
 	  return 1;
 	}
 
+      assert (fixp->fx_addsy != NULL);
+
       /* Determine a BFD reloc value based on the operand information.
 	 We are only prepared to turn a few of the operands into
-	 relocs.
-	 FIXME: We need to handle the DS field at the very least.
-	 FIXME: Selecting the reloc type is a bit haphazard; perhaps
-	 there should be a new field in the operand table.  */
+	 relocs.  */
       if ((operand->flags & PPC_OPERAND_RELATIVE) != 0
 	  && operand->bits == 26
 	  && operand->shift == 0)
@@ -4964,30 +5166,37 @@ md_apply_fix3 (fixp, valuep, seg)
 	       && operand->bits == 16
 	       && operand->shift == 0)
 	fixp->fx_r_type = BFD_RELOC_PPC_BA16;
+#if defined (OBJ_XCOFF) || defined (OBJ_ELF)
       else if ((operand->flags & PPC_OPERAND_PARENS) != 0
 	       && operand->bits == 16
 	       && operand->shift == 0
-	       && fixp->fx_addsy != NULL
 	       && ppc_is_toc_sym (fixp->fx_addsy))
 	{
+	  fixp->fx_r_type = BFD_RELOC_PPC_TOC16;
+#ifdef OBJ_ELF
+	  if (BFD_DEFAULT_TARGET_SIZE == 64
+	      && (operand->flags & PPC_OPERAND_DS) != 0)
+	    fixp->fx_r_type = BFD_RELOC_PPC64_TOC16_DS;
+#endif
 	  fixp->fx_size = 2;
 	  if (target_big_endian)
 	    fixp->fx_where += 2;
-	  fixp->fx_r_type = BFD_RELOC_PPC_TOC16;
 	}
+#endif /* defined (OBJ_XCOFF) || defined (OBJ_ELF) */
       else
 	{
 	  char *sfile;
 	  unsigned int sline;
 
 	  /* Use expr_symbol_where to see if this is an expression
-             symbol.  */
+	     symbol.  */
 	  if (expr_symbol_where (fixp->fx_addsy, &sfile, &sline))
 	    as_bad_where (fixp->fx_file, fixp->fx_line,
 			  _("unresolved expression that must be resolved"));
 	  else
 	    as_bad_where (fixp->fx_file, fixp->fx_line,
-			  _("unsupported relocation type"));
+			  _("unsupported relocation against %s"),
+			  S_GET_NAME (fixp->fx_addsy));
 	  fixp->fx_done = 1;
 	  return 1;
 	}
@@ -4999,8 +5208,9 @@ md_apply_fix3 (fixp, valuep, seg)
 #endif
       switch (fixp->fx_r_type)
 	{
-	case BFD_RELOC_32:
 	case BFD_RELOC_CTOR:
+	  /* FIXME: 32 bits even for 64-bit targets?  */
+	case BFD_RELOC_32:
 	  if (fixp->fx_pcrel)
 	    fixp->fx_r_type = BFD_RELOC_32_PCREL;
 	  /* fall through */
@@ -5017,10 +5227,12 @@ md_apply_fix3 (fixp, valuep, seg)
 	  if (fixp->fx_pcrel)
 	    fixp->fx_r_type = BFD_RELOC_64_PCREL;
 	  /* fall through */
+
 	case BFD_RELOC_64_PCREL:
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
 			      value, 8);
 	  break;
+
 	case BFD_RELOC_LO16:
 	case BFD_RELOC_16:
 	case BFD_RELOC_GPREL16:
@@ -5045,6 +5257,13 @@ md_apply_fix3 (fixp, valuep, seg)
 	case BFD_RELOC_PPC_EMB_RELST_HA:
 	case BFD_RELOC_PPC_EMB_RELSDA:
 	case BFD_RELOC_PPC_TOC16:
+#ifdef OBJ_ELF
+#if BFD_DEFAULT_TARGET_SIZE == 64
+	case BFD_RELOC_PPC64_TOC16_LO:
+	case BFD_RELOC_PPC64_TOC16_HI:
+	case BFD_RELOC_PPC64_TOC16_HA:
+#endif
+#endif
 	  if (fixp->fx_pcrel)
 	    {
 	      if (fixp->fx_addsy != NULL)
@@ -5069,15 +5288,76 @@ md_apply_fix3 (fixp, valuep, seg)
 	  if (fixp->fx_pcrel)
 	    abort ();
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
-			      value >> 16, 2);
+			      PPC_HI (value), 2);
 	  break;
+
 	case BFD_RELOC_HI16_S:
 	  if (fixp->fx_pcrel)
 	    abort ();
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
-			      (value + 0x8000) >> 16, 2);
+			      PPC_HA (value), 2);
 	  break;
 
+#ifdef OBJ_ELF
+#if BFD_DEFAULT_TARGET_SIZE == 64
+	case BFD_RELOC_PPC64_HIGHER:
+	  if (fixp->fx_pcrel)
+	    abort ();
+	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+			      PPC_HIGHER (value), 2);
+	  break;
+
+	case BFD_RELOC_PPC64_HIGHER_S:
+	  if (fixp->fx_pcrel)
+	    abort ();
+	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+			      PPC_HIGHERA (value), 2);
+	  break;
+
+	case BFD_RELOC_PPC64_HIGHEST:
+	  if (fixp->fx_pcrel)
+	    abort ();
+	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+			      PPC_HIGHEST (value), 2);
+	  break;
+
+	case BFD_RELOC_PPC64_HIGHEST_S:
+	  if (fixp->fx_pcrel)
+	    abort ();
+	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
+			      PPC_HIGHESTA (value), 2);
+	  break;
+
+	case BFD_RELOC_PPC64_ADDR16_DS:
+	case BFD_RELOC_PPC64_ADDR16_LO_DS:
+	case BFD_RELOC_PPC64_GOT16_DS:
+	case BFD_RELOC_PPC64_GOT16_LO_DS:
+	case BFD_RELOC_PPC64_PLT16_LO_DS:
+	case BFD_RELOC_PPC64_SECTOFF_DS:
+	case BFD_RELOC_PPC64_SECTOFF_LO_DS:
+	case BFD_RELOC_PPC64_TOC16_DS:
+	case BFD_RELOC_PPC64_TOC16_LO_DS:
+	case BFD_RELOC_PPC64_PLTGOT16_DS:
+	case BFD_RELOC_PPC64_PLTGOT16_LO_DS:
+	  if (fixp->fx_pcrel)
+	    abort ();
+	  {
+	    unsigned char *where = fixp->fx_frag->fr_literal + fixp->fx_where;
+	    unsigned long val;
+
+	    if (target_big_endian)
+	      val = bfd_getb16 (where);
+	    else
+	      val = bfd_getl16 (where);
+	    val |= (value & 0xfffc);
+	    if (target_big_endian)
+	      bfd_putb16 ((bfd_vma) val, where);
+	    else
+	      bfd_putl16 ((bfd_vma) val, where);
+	  }
+	  break;
+#endif
+#endif
 	  /* Because SDA21 modifies the register field, the size is set to 4
 	     bytes, rather than 2, so offset it here appropriately.  */
 	case BFD_RELOC_PPC_EMB_SDA21:
@@ -5142,6 +5422,15 @@ md_apply_fix3 (fixp, valuep, seg)
 	  fixp->fx_done = 0;
 	  break;
 
+#ifdef OBJ_ELF
+#if BFD_DEFAULT_TARGET_SIZE == 64
+	  /* Generated by reference to `sym@tocbase'.  The sym is
+	     ignored by the linker.  */
+	case BFD_RELOC_PPC64_TOC:
+	  fixp->fx_done = 0;
+	  break;
+#endif
+#endif
 	default:
 	  fprintf (stderr,
 		   _("Gas failure, reloc value %d\n"), fixp->fx_r_type);
