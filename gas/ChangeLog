@@ -1,3 +1,16 @@
+Fri Jul 31 21:53:28 1992  Ken Raeburn  (raeburn@cygnus.com)
+
+	* configure.in (mips host): Accept "ultrix" with version number.
+
+	* expr.c (floating_constant): Separate "=-" to avoid confusing
+	ancient or broken compilers.
+
+	* config/tc-m68k.c (m68k_ip): Mismatch error could also indicate
+	processor/opcode mismatch, so reword the error message.
+	(md_assemble): If no CPU has been set (even if FPU/PMMU
+	characteristics have been), default to 68020.  Don't need extra
+	quotes around error string.
+
 Fri Jul 31 12:26:34 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
 	* read.c (potable): Revert sac's incorrect change made Jul 13.
