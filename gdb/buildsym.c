@@ -123,8 +123,11 @@ static int undef_types_allocated, undef_types_length;
 struct complaint innerblock_complaint =
   {"inner block not inside outer block in %s", 0, 0};
 
+struct complaint innerblock_anon_complaint =
+  {"inner block not inside outer block", 0, 0};
+
 struct complaint blockvector_complaint = 
-  {"block at %x out of order", 0, 0};
+  {"block at 0x%x out of order", 0, 0};
 
 #if 0
 struct complaint dbx_class_complaint =
@@ -447,8 +450,8 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 	   amount of time.  */
 	if (BLOCK_START (pblock->block) < BLOCK_START (block)
 	 || BLOCK_END   (pblock->block) > BLOCK_END   (block)) {
-	  complain(&innerblock_complaint, symbol? SYMBOL_NAME (symbol):
-						 "(don't know)");
+	  complain(symbol? &innerblock_complaint : &innerblock_anon_complaint,
+	           SYMBOL_NAME (symbol));
 	  BLOCK_START (pblock->block) = BLOCK_START (block);
 	  BLOCK_END   (pblock->block) = BLOCK_END   (block);
 	}
