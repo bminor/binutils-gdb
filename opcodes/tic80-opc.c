@@ -371,7 +371,7 @@ const struct tic80_operand tic80_operands[] =
   /* Even register in bits 31-27 */
 
 #define REG_DEST_E (REG_DEST + 1)
-  { 5, 27, NULL, NULL, TIC80_OPERAND_GPR + TIC80_OPERAND_EVEN },
+  { 5, 27, NULL, NULL, TIC80_OPERAND_GPR | TIC80_OPERAND_EVEN },
 
   /* Floating point accumulator register (a0-a3) specified by bit 16 (MSB)
      and bit 11 (LSB) */
@@ -548,7 +548,8 @@ const int tic80_num_operands = sizeof (tic80_operands)/sizeof(*tic80_operands);
 /* The opcode table.  Formatted for better readability on a wide screen.  Also, all
  entries with the same mnemonic are sorted so that they are adjacent in the table,
  allowing the use of a hash table to locate the first of a sequence of opcodes that have
- a particular name. */
+ a particular name.  The short immediate forms also come before the long immediate forms
+ so that the assembler will pick the "best fit" for the size of the operand. */
 
 const struct tic80_opcode tic80_opcodes[] = {
 
@@ -561,129 +562,129 @@ const struct tic80_opcode tic80_opcodes[] = {
   /* The "br" instruction is really "bbz target,r0,31".  We put it first so that
      this specific bit pattern will get disassembled as a br rather than bbz. */
 
+  {"br",	OP_SI(0x48),	0xFFFF8000,	0,	{OFF_SS_PC}	},
   {"br",	OP_LI(0x391),	0xFFFFF000,	0,	{OFF_SL_PC}	},
   {"br",	OP_REG(0x390),	0xFFFFF000,	0,	{REG_0}		},
-  {"br",	OP_SI(0x48),	0xFFFF8000,	0,	{OFF_SS_PC}	},
+  {"br.a",	OP_SI(0x49),	0xFFFF8000,	0,	{OFF_SS_PC}	},
   {"br.a",	OP_LI(0x393),	0xFFFFF000,	0,	{OFF_SL_PC}	},
   {"br.a",	OP_REG(0x392),	0xFFFFF000,	0,	{REG_0}		},
-  {"br.a",	OP_SI(0x49),	0xFFFF8000,	0,	{OFF_SS_PC}	},
 
   /* Signed integer ADD */
 
+  {"add",	OP_SI(0x58),	MASK_SI,	0,	{SSI, REG_22, REG_DEST}		},
   {"add",	OP_LI(0x3B1),	MASK_LI,	0,	{LSI, REG_22, REG_DEST}		},
   {"add",	OP_REG(0x3B0),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
-  {"add",	OP_SI(0x58),	MASK_SI,	0,	{SSI, REG_22, REG_DEST}		},
 
   /* Unsigned integer ADD */
 
+  {"addu",	OP_SI(0x59),	MASK_SI,	0,	{SSI, REG_22, REG_DEST}		},
   {"addu",	OP_LI(0x3B3),	MASK_LI,	0,	{LSI, REG_22, REG_DEST}		},
   {"addu",	OP_REG(0x3B2),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
-  {"addu",	OP_SI(0x59),	MASK_SI,	0,	{SSI, REG_22, REG_DEST}		},
 
   /* Bitwise AND */
 
+  {"and",	OP_SI(0x11),	MASK_SI,	0,	{SUBF, REG_22, REG_DEST}	},
   {"and",	OP_LI(0x323),	MASK_LI,	0,	{LUBF, REG_22, REG_DEST}	},
   {"and",	OP_REG(0x322),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
-  {"and",	OP_SI(0x11),	MASK_SI,	0,	{SUBF, REG_22, REG_DEST}	},
+  {"and.tt",	OP_SI(0x11),	MASK_SI,	0,	{SUBF, REG_22, REG_DEST}	},
   {"and.tt",	OP_LI(0x323),	MASK_LI,	0,	{LUBF, REG_22, REG_DEST}	},
   {"and.tt",	OP_REG(0x322),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
-  {"and.tt",	OP_SI(0x11),	MASK_SI,	0,	{SUBF, REG_22, REG_DEST}	},
 
   /* Bitwise AND with ones complement of both sources */
 
+  {"and.ff",	OP_SI(0x18),	MASK_SI,	0,	{SUBF, REG_22, REG_DEST}	},
   {"and.ff",	OP_LI(0x331),	MASK_LI,	0,	{LUBF, REG_22, REG_DEST}	},
   {"and.ff",	OP_REG(0x330),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
-  {"and.ff",	OP_SI(0x18),	MASK_SI,	0,	{SUBF, REG_22, REG_DEST}	},
 
   /* Bitwise AND with ones complement of source 1 */
 
+  {"and.ft",	OP_SI(0x14),	MASK_SI,	0,	{SUBF, REG_22, REG_DEST}	},
   {"and.ft",	OP_LI(0x329),	MASK_LI,	0,	{LUBF, REG_22, REG_DEST}	},
   {"and.ft",	OP_REG(0x328),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
-  {"and.ft",	OP_SI(0x14),	MASK_SI,	0,	{SUBF, REG_22, REG_DEST}	},
 
   /* Bitwise AND with ones complement of source 2 */
 
+  {"and.tf",	OP_SI(0x12),	MASK_SI,	0,	{SUBF, REG_22, REG_DEST}	},
   {"and.tf",	OP_LI(0x325),	MASK_LI,	0,	{LUBF, REG_22, REG_DEST}	},
   {"and.tf",	OP_REG(0x324),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
-  {"and.tf",	OP_SI(0x12),	MASK_SI,	0,	{SUBF, REG_22, REG_DEST}	},
 
   /* Branch Bit One - nonannulled */
 
+  {"bbo",	OP_SI(0x4A),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, BITNUM}	},
   {"bbo",	OP_LI(0x395),	MASK_LI,	0, 	{OFF_SL_PC, REG_22, BITNUM}	},
   {"bbo",	OP_REG(0x394),	MASK_REG,	0,	{REG_0, REG_22, BITNUM}		},
-  {"bbo",	OP_SI(0x4A),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, BITNUM}	},
 
   /* Branch Bit One - annulled */
 
+  {"bbo.a",	OP_SI(0x4B),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, BITNUM}	},
   {"bbo.a",	OP_LI(0x397),	MASK_LI,	0, 	{OFF_SL_PC, REG_22, BITNUM}	},
   {"bbo.a",	OP_REG(0x396),	MASK_REG,	0,	{REG_0, REG_22, BITNUM}		},
-  {"bbo.a",	OP_SI(0x4B),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, BITNUM}	},
 
   /* Branch Bit Zero - nonannulled */
 
+  {"bbz",	OP_SI(0x48),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, BITNUM}	},
   {"bbz",	OP_LI(0x391),	MASK_LI,	0, 	{OFF_SL_PC, REG_22, BITNUM}	},
   {"bbz",	OP_REG(0x390),	MASK_REG,	0,	{REG_0, REG_22, BITNUM}		},
-  {"bbz",	OP_SI(0x48),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, BITNUM}	},
 
   /* Branch Bit Zero - annulled */
 
+  {"bbz.a",	OP_SI(0x49),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, BITNUM}	},
   {"bbz.a",	OP_LI(0x393),	MASK_LI,	0, 	{OFF_SL_PC, REG_22, BITNUM}	},
   {"bbz.a",	OP_REG(0x392),	MASK_REG,	0,	{REG_0, REG_22, BITNUM}		},
-  {"bbz.a",	OP_SI(0x49),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, BITNUM}	},
 
   /* Branch Conditional - nonannulled */
 
+  {"bcnd",	OP_SI(0x4C),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, CC}	},
   {"bcnd",	OP_LI(0x399),	MASK_LI,	0, 	{OFF_SL_PC, REG_22, CC}	},
   {"bcnd",	OP_REG(0x398),	MASK_REG,	0,	{REG_0, REG_22, CC}	},
-  {"bcnd",	OP_SI(0x4C),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, CC}	},
 
   /* Branch Conditional - annulled */
 
+  {"bcnd.a",	OP_SI(0x4D),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, CC}	},
   {"bcnd.a",	OP_LI(0x39B),	MASK_LI,	0, 	{OFF_SL_PC, REG_22, CC}	},
   {"bcnd.a",	OP_REG(0x39A),	MASK_REG,	0,	{REG_0, REG_22, CC}	},
-  {"bcnd.a",	OP_SI(0x4D),	MASK_SI,	0, 	{OFF_SS_PC, REG_22, CC}	},
 
   /* Branch Control Register */
 
+  {"brcr",	OP_SI(0x6),	MASK_SI,	0,	{CR_SI}	},
   {"brcr",	OP_LI(0x30D),	MASK_LI,	0,	{CR_LI}	},
   {"brcr",	OP_REG(0x30C),	MASK_REG,	0,	{REG_0}	},
-  {"brcr",	OP_SI(0x6),	MASK_SI,	0,	{CR_SI}	},
 
   /* Branch and save return - nonannulled */
 
+  {"bsr",	OP_SI(0x40),	MASK_SI,	0,	{OFF_SS_PC, REG_DEST}	},
   {"bsr",	OP_LI(0x381),	MASK_LI,	0, 	{OFF_SL_PC, REG_DEST}	},
   {"bsr",	OP_REG(0x380),	MASK_REG,	0,	{REG_0, REG_DEST}	},
-  {"bsr",	OP_SI(0x40),	MASK_SI,	0,	{OFF_SS_PC, REG_DEST}	},
 
   /* Branch and save return - annulled */
 
+  {"bsr.a",	OP_SI(0x41),	MASK_SI,	0, 	{OFF_SS_PC, REG_DEST}	},
   {"bsr.a",	OP_LI(0x383),	MASK_LI,	0, 	{OFF_SL_PC, REG_DEST}	},
   {"bsr.a",	OP_REG(0x382),	MASK_REG,	0,	{REG_0, REG_DEST}	},
-  {"bsr.a",	OP_SI(0x41),	MASK_SI,	0, 	{OFF_SS_PC, REG_DEST}	},
 
   /* Send command */
 
+  {"cmnd",	OP_SI(0x2),	MASK_SI,	0, 	{SUI}	},
   {"cmnd",	OP_LI(0x305),	MASK_LI,	0, 	{LUI}	},
   {"cmnd",	OP_REG(0x304),	MASK_REG,	0,	{REG_0}	},
-  {"cmnd",	OP_SI(0x2),	MASK_SI,	0, 	{SUI}	},
 
   /* Integer compare */
 
+  {"cmp",	OP_SI(0x50),	MASK_SI,	0, 	{SSI, REG_22, REG_DEST}		},
   {"cmp",	OP_LI(0x3A1),	MASK_LI,	0, 	{LSI, REG_22, REG_DEST}		},
   {"cmp",	OP_REG(0x3A0),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
-  {"cmp",	OP_SI(0x50),	MASK_SI,	0, 	{SSI, REG_22, REG_DEST}		},
 
   /* Flush data cache subblock - don't clear subblock preset flag */
 
+  {"dcachec",	OP_SI(0x38),	F(1) | (MASK_SI  & ~M_SI(1)),			0, {SSI, REG_BASE_M_SI}		},
   {"dcachec",	OP_LI(0x371),	F(1) | (MASK_LI  & ~M_LI(1))  | S(1) | D(1),	0, {LSI, REG_BASE_M_LI}		},
   {"dcachec",	OP_REG(0x370),	F(1) | (MASK_REG & ~M_REG(1)) | S(1) | D(1),	0, {REG_0, REG_BASE_M_LI}	},
-  {"dcachec",	OP_SI(0x38),	F(1) | (MASK_SI  & ~M_SI(1)),			0, {SSI, REG_BASE_M_SI}		},
 
   /* Flush data cache subblock - clear subblock preset flag */
 
+  {"dcachef",	OP_SI(0x38)   | F(1),	F(1) | (MASK_SI  & ~M_SI(1)),			0, {SSI, REG_BASE_M_SI}		},
   {"dcachef",	OP_LI(0x371)  | F(1),	F(1) | (MASK_LI  & ~M_LI(1))   | S(1) | D(1),	0, {LSI, REG_BASE_M_LI}		},
   {"dcachef",	OP_REG(0x370) | F(1),	F(1) | (MASK_REG & ~M_REG(1)) | S(1) | D(1),	0, {REG_0, REG_BASE_M_LI}	},
-  {"dcachef",	OP_SI(0x38)   | F(1),	F(1) | (MASK_SI  & ~M_SI(1)),			0, {SSI, REG_BASE_M_SI}		},
 
   /* Direct load signed data into register */
 
@@ -720,9 +721,9 @@ const struct tic80_opcode tic80_opcodes[] = {
 
   /* Emulation trap */
 
+  {"etrap",	OP_SI(0x1)    | E(1),	MASK_SI  | E(1),	0,	{SUI}	},
   {"etrap",	OP_LI(0x303)  | E(1),	MASK_LI  | E(1),	0,	{LUI}	},
   {"etrap",	OP_REG(0x302) | E(1),	MASK_REG | E(1),	0,	{REG_0}	},
-  {"etrap",	OP_SI(0x1)    | E(1),	MASK_SI  | E(1),	0,	{SUI}	},
 
   /* Floating-point addition */
 
@@ -888,36 +889,36 @@ const struct tic80_opcode tic80_opcodes[] = {
 
   /* Jump and save return */
 
+  {"jsr",	OP_SI(0x44),	MASK_SI,	0,	{OFF_SS_BR, REG_BASE, REG_DEST}	},
   {"jsr",	OP_LI(0x389),	MASK_LI,	0,	{OFF_SL_BR, REG_BASE, REG_DEST}	},
   {"jsr",	OP_REG(0x388),	MASK_REG,	0,	{REG_0, REG_BASE, REG_DEST}	},
-  {"jsr",	OP_SI(0x44),	MASK_SI,	0,	{OFF_SS_BR, REG_BASE, REG_DEST}	},
+  {"jsr.a",	OP_SI(0x45),	MASK_SI,	0,	{OFF_SS_BR, REG_BASE, REG_DEST}	},
   {"jsr.a",	OP_LI(0x38B),	MASK_LI,	0,	{OFF_SL_BR, REG_BASE, REG_DEST}	},
   {"jsr.a",	OP_REG(0x38A),	MASK_REG,	0,	{REG_0, REG_BASE, REG_DEST}	},
-  {"jsr.a",	OP_SI(0x45),	MASK_SI,	0,	{OFF_SS_BR, REG_BASE, REG_DEST}	},
 
   /* Load Signed Data Into Register */
 
+  {"ld",	OP_SI(0x22),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
   {"ld",	OP_LI(0x345)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"ld",	OP_REG(0x344) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"ld",	OP_SI(0x22),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
+  {"ld.b",	OP_SI(0x20),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
   {"ld.b",	OP_LI(0x341)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"ld.b",	OP_REG(0x340) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"ld.b",	OP_SI(0x20),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
+  {"ld.d",	OP_SI(0x23),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST_E}		},
   {"ld.d",	OP_LI(0x347)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
   {"ld.d",	OP_REG(0x346) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
-  {"ld.d",	OP_SI(0x23),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST_E}		},
+  {"ld.h",	OP_SI(0x21),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
   {"ld.h",	OP_LI(0x343)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"ld.h",	OP_REG(0x342) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"ld.h",	OP_SI(0x21),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
 
   /* Load Unsigned Data Into Register */
 
+  {"ld.ub",	OP_SI(0x28),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
   {"ld.ub",	OP_LI(0x351)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"ld.ub",	OP_REG(0x350) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"ld.ub",	OP_SI(0x28),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
+  {"ld.uh",	OP_SI(0x29),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
   {"ld.uh",	OP_LI(0x353)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"ld.uh",	OP_REG(0x352) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"ld.uh",	OP_SI(0x29),		(MASK_SI  & ~M_SI(1)),		0,	{SSI, REG_BASE_M_SI, REG_DEST}		},
 
   /* Leftmost one */
 
@@ -925,27 +926,27 @@ const struct tic80_opcode tic80_opcodes[] = {
 
   /* Bitwise logical OR.  Note that "or.tt" and "or" are the same instructions. */
 
+  {"or.ff",	OP_SI(0x1E),	MASK_SI,	0,	{SUI, REG_22, REG_DEST}		},
   {"or.ff",	OP_LI(0x33D),	MASK_LI,	0,	{LUI, REG_22, REG_DEST}		},
   {"or.ff",	OP_REG(0x33C),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
-  {"or.ff",	OP_SI(0x1E),	MASK_SI,	0,	{SUI, REG_22, REG_DEST}		},
+  {"or.ft",	OP_SI(0x1D),	MASK_SI,	0,	{SUI, REG_22, REG_DEST}		},
   {"or.ft",	OP_LI(0x33B),	MASK_LI,	0,	{LUI, REG_22, REG_DEST}		},
   {"or.ft",	OP_REG(0x33A),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
-  {"or.ft",	OP_SI(0x1D),	MASK_SI,	0,	{SUI, REG_22, REG_DEST}		},
+  {"or.tf",	OP_SI(0x1B),	MASK_SI,	0,	{SUI, REG_22, REG_DEST}		},
   {"or.tf",	OP_LI(0x337),	MASK_LI,	0,	{LUI, REG_22, REG_DEST}		},
   {"or.tf",	OP_REG(0x336),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
-  {"or.tf",	OP_SI(0x1B),	MASK_SI,	0,	{SUI, REG_22, REG_DEST}		},
+  {"or.tt",	OP_SI(0x17),	MASK_SI,	0,	{SUI, REG_22, REG_DEST}		},
   {"or.tt",	OP_LI(0x32F),	MASK_LI,	0,	{LUI, REG_22, REG_DEST}		},
   {"or.tt",	OP_REG(0x32E),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
-  {"or.tt",	OP_SI(0x17),	MASK_SI,	0,	{SUI, REG_22, REG_DEST}		},
+  {"or",	OP_SI(0x17),	MASK_SI,	0,	{SUI, REG_22, REG_DEST}		},
   {"or",	OP_LI(0x32F),	MASK_LI,	0,	{LUI, REG_22, REG_DEST}		},
   {"or",	OP_REG(0x32E),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
-  {"or",	OP_SI(0x17),	MASK_SI,	0,	{SUI, REG_22, REG_DEST}		},
 
   /* Read Control Register */
 
+  {"rdcr",	OP_SI(0x4),	MASK_SI  | (0x1F << 22),	0,	{CR_SI, REG_DEST}	},
   {"rdcr",	OP_LI(0x309),	MASK_LI  | (0x1F << 22),	0,	{CR_LI, REG_DEST}	},
   {"rdcr",	OP_REG(0x308),	MASK_REG | (0x1F << 22),	0,	{REG_0, REG_DEST}	},
-  {"rdcr",	OP_SI(0x4),	MASK_SI  | (0x1F << 22),	0,	{CR_SI, REG_DEST}	},
 
   /* Rightmost one */
 
@@ -1048,49 +1049,49 @@ const struct tic80_opcode tic80_opcodes[] = {
 
   /* Store Data into Memory */
 
+  {"st",	OP_SI(0x32),		(MASK_SI  & ~M_SI(1)),		0, 	{SSI, REG_BASE_M_SI, REG_DEST}},
   {"st",	OP_LI(0x365)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"st",	OP_REG(0x364) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"st",	OP_SI(0x32),		(MASK_SI  & ~M_SI(1)),		0, 	{SSI, REG_BASE_M_SI, REG_DEST}},
+  {"st.b",	OP_SI(0x30),		(MASK_SI  & ~M_SI(1)),		0, 	{SSI, REG_BASE_M_SI, REG_DEST}},
   {"st.b",	OP_LI(0x361)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"st.b",	OP_REG(0x360) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"st.b",	OP_SI(0x30),		(MASK_SI  & ~M_SI(1)),		0, 	{SSI, REG_BASE_M_SI, REG_DEST}},
+  {"st.d",	OP_SI(0x33),		(MASK_SI  & ~M_SI(1)),		0, 	{SSI, REG_BASE_M_SI, REG_DEST_E}},
   {"st.d",	OP_LI(0x367)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
   {"st.d",	OP_REG(0x366) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST_E}	},
-  {"st.d",	OP_SI(0x33),		(MASK_SI  & ~M_SI(1)),		0, 	{SSI, REG_BASE_M_SI, REG_DEST_E}},
+  {"st.h",	OP_SI(0x31),		(MASK_SI  & ~M_SI(1)),		0, 	{SSI, REG_BASE_M_SI, REG_DEST}},
   {"st.h",	OP_LI(0x363)  | D(0),	(MASK_LI  & ~M_REG(1)) | D(1),	0,	{LSI_SCALED, REG_BASE_M_LI, REG_DEST}	},
   {"st.h",	OP_REG(0x362) | D(0),	(MASK_REG & ~M_REG(1)) | D(1),	0,	{REG_SCALED, REG_BASE_M_LI, REG_DEST}	},
-  {"st.h",	OP_SI(0x31),		(MASK_SI  & ~M_SI(1)),		0, 	{SSI, REG_BASE_M_SI, REG_DEST}},
 
   /* Signed Integer Subtract */
 
+  {"sub",	OP_SI(0x5A),	MASK_SI,	0, 	{SSI, REG_22, REG_DEST}		},
   {"sub",	OP_LI(0x3B5),	MASK_LI,	0,	{LSI, REG_22, REG_DEST}		},
   {"sub",	OP_REG(0x3B4),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
-  {"sub",	OP_SI(0x5A),	MASK_SI,	0, 	{SSI, REG_22, REG_DEST}		},
 
   /* Unsigned Integer Subtract */
 
+  {"subu",	OP_SI(0x5B),	MASK_SI,	0, 	{SSI, REG_22, REG_DEST}		},
   {"subu",	OP_LI(0x3B7),	MASK_LI,	0,	{LSI, REG_22, REG_DEST}		},
   {"subu",	OP_REG(0x3B6),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
-  {"subu",	OP_SI(0x5B),	MASK_SI,	0, 	{SSI, REG_22, REG_DEST}		},
 
   /* Write Control Register
      Is a special form of the "swcr" instruction so comes before it in the table. */
 
+  {"wrcr",	OP_SI(0x5),	MASK_SI | (0x1F << 27),		0,	{CR_SI, REG_22}	},
   {"wrcr",	OP_LI(0x30B),	MASK_LI | (0x1F << 27),		0,	{CR_LI, REG_22}	},
   {"wrcr",	OP_REG(0x30A),	MASK_REG | (0x1F << 27),	0,	{REG_0, REG_22}	},
-  {"wrcr",	OP_SI(0x5),	MASK_SI | (0x1F << 27),		0,	{CR_SI, REG_22}	},
 
   /* Swap Control Register */
 
+  {"swcr",	OP_SI(0x5),	MASK_SI,	0,	{CR_SI, REG_22, REG_DEST}	},
   {"swcr",	OP_LI(0x30B),	MASK_LI,	0,	{CR_LI, REG_22, REG_DEST}	},
   {"swcr",	OP_REG(0x30A),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST}	},
-  {"swcr",	OP_SI(0x5),	MASK_SI,	0,	{CR_SI, REG_22, REG_DEST}	},
 
   /* Trap */
 
+  {"trap",	OP_SI(0x1)    | E(0),	MASK_SI  | E(1),	0,	{SUI}	},
   {"trap",	OP_LI(0x303)  | E(0),	MASK_LI  | E(1),	0,	{LUI}	},
   {"trap",	OP_REG(0x302) | E(0),	MASK_REG | E(1),	0,	{REG_0}	},
-  {"trap",	OP_SI(0x1)    | E(0),	MASK_SI  | E(1),	0,	{SUI}	},
 
   /* Vector Floating-Point Add */
 
@@ -1159,13 +1160,13 @@ const struct tic80_opcode tic80_opcodes[] = {
   {"vst.d",	OP_V(0x1E) | V_m(0) | V_S(1) | V_p(1),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST_E} },
   {"vst.s",	OP_V(0x1E) | V_m(0) | V_S(0) | V_p(1),	MASK_V | V_m(1) | V_S(1) | V_p(1),	TIC80_VECTOR, {REG_DEST} },
 
+  {"xnor",	OP_SI(0x19),	MASK_SI,	0,	{SUBF, REG_22, REG_DEST} },
   {"xnor",	OP_LI(0x333),	MASK_LI,	0,	{LUBF, REG_22, REG_DEST} },
   {"xnor",	OP_REG(0x332),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST} },
-  {"xnor",	OP_SI(0x19),	MASK_SI,	0,	{SUBF, REG_22, REG_DEST} },
 
+  {"xor",	OP_SI(0x16),	MASK_SI,	0,	{SUBF, REG_22, REG_DEST} },
   {"xor",	OP_LI(0x32D),	MASK_LI,	0,	{LUBF, REG_22, REG_DEST} },
   {"xor",	OP_REG(0x32C),	MASK_REG,	0,	{REG_0, REG_22, REG_DEST} },
-  {"xor",	OP_SI(0x16),	MASK_SI,	0,	{SUBF, REG_22, REG_DEST} },
 
 };
 
