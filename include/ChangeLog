@@ -1,3 +1,21 @@
+Mon Sep 30 12:52:35 1991  Per Bothner  (bothner at cygnus.com)
+
+	* sysdep.h: Define NEWSOS3_SYS, and use it.
+
+Fri Sep 20 13:38:21 1991  John Gilmore  (gnu at cygnus.com)
+
+	* a.out.gnu.h (N_FN):  Its value *really is* 0x1F.
+	Fix it, and add comments warning about or-ing N_EXT with it
+	and/or N_WARNING.
+	* aout64.h (N_FN):  Fix value, add comments about N_EXT.
+	* stab.def (table at end):  Update to show all the type
+	values <0x20, including low order bits.  Move N_FN to
+	its rightful place.
+
+Tue Sep 17 17:41:37 1991  Stu Grossman  (grossman at cygnus.com)
+
+	* sys/h-irix3.h:  sgi/irix support.
+
 Tue Sep 17 07:52:59 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
 	* stab.def (N_DEFD):  Add GNU Modula-2 debug stab, from Andrew

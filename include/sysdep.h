@@ -54,6 +54,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define IRIX4_SYS 18		/* SGI Iris running cypress */
 #define HP300BSD_SYS 19
 #define	ULTRA3_SYS 20		/* NYU Ultracomputer */
+#define	NEWSOS3_SYS 21		/* Sony NewsOS 3.x (bsd-4.3 based) */
 
 #include <ansidecl.h>
 
@@ -100,6 +101,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #if HOST_SYS==SUN3_SYS
 #define HOST_IS_SUN3 1
 #include <sys/h-sun3.h>
+#endif
+
+#if HOST_SYS==NEWSOS3_SYS
+#define HOST_IS_SUN3 1 /* Lie - should be close enough */
+#include <sys/h-sun3.h> /* Probably good enough */
+#define MISSING_VFPRINTF
 #endif
 
 #if HOST_SYS==DEC3100_SYS
