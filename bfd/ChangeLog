@@ -1,5 +1,8 @@
 2002-10-07  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.h (elf_link_input_bfd): Remove BFD_VERSION_DATE dependent
+	code.
+
 	* elf64-ppc.c (ppc64_elf_build_stubs): Increment .glink indx.
 
 2002-10-06  Alan Modra  <amodra@bigpond.net.au>
