@@ -7,8 +7,8 @@ Fri Jun 12 12:46:57 1998  Doug Evans  <devans@canuck.cygnus.com>
 end-sanitize-sky
 1998-06-12  Vladimir N. Makarov  <vmakarov@cygnus.com>
 
-	* config/tc-d10v.c (md_apply_fix3): Checking displacement in
-	instructions REP & REPI.
+	* config/tc-d10v.c (md_apply_fix3): Checking displacement
+	constraint in instructions REP & REPI.
 
 Thu Jun 11 08:56:46 1998  Nick Clifton  <nickc@cygnus.com>
 
