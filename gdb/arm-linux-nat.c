@@ -575,7 +575,7 @@ store_inferior_registers (int regno)
    If regno is -1, do this for all registers.  */
 
 void
-fill_gregset (gregset_t *gregsetp, int regno)
+fill_gregset (gdb_gregset_t *gregsetp, int regno)
 {
   if (-1 == regno)
     {
@@ -607,7 +607,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
    in *gregsetp.  */
 
 void
-supply_gregset (gregset_t *gregsetp)
+supply_gregset (gdb_gregset_t *gregsetp)
 {
   int regno, reg_pc;
 
@@ -628,7 +628,7 @@ supply_gregset (gregset_t *gregsetp)
    If regno is -1, do this for all registers.  */
 
 void
-fill_fpregset (fpregset_t *fpregsetp, int regno)
+fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
 {
   FPA11 *fp = (FPA11 *) fpregsetp;
   
@@ -654,7 +654,7 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
    in *fpregsetp.  */
 
 void
-supply_fpregset (fpregset_t *fpregsetp)
+supply_fpregset (gdb_fpregset_t *fpregsetp)
 {
   int regno;
   FPA11 *fp = (FPA11 *) fpregsetp;

@@ -1,3 +1,14 @@
+2001-02-04  Philip Blundell  <philb@gnu.org>
+
+	* config/arm/linux.mh (NATDEPFILES): Add proc-service.o,
+	thread-db.o, lin-lwp.o; remove lin-thread.o, linux-thread.o.
+	* config/arm/nm-linux.h (PREPARE_TO_PROCEED, ATTACH_LWP,
+	GET_THREAD_SIGNALS): Define.
+	* arm-linux-nat.c (fill_gregset): Correct type of argument.
+	(supply_gregset): Likewise.
+	(fill_fpregset): Likewise.
+	(supply_fpregset): Likewise.
+
 Tue Feb  6 11:58:57 2001  David Taylor  <taylor@redhat.com>
 
 	* valops.c (value_cast): If casting a scalar to a pointer, do not

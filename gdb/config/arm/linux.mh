@@ -4,8 +4,9 @@ XM_FILE= xm-linux.h
 XDEPFILES=
 
 NAT_FILE= nm-linux.h
-NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o \
-	     core-regset.o arm-linux-nat.o linux-thread.o lin-thread.o
+NATDEPFILES= infptrace.o inftarg.o fork-child.o corelow.o	\
+	core-regset.o arm-linux-nat.o				\
+	proc-service.o thread-db.o lin-lwp.o
 
 LOADLIBES= -ldl -rdynamic
 
