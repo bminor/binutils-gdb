@@ -150,7 +150,19 @@ udi_create_inferior (execfile, args, env)
 
   args1 = alloca (strlen(execfile) + strlen(args) + 2);
 
-  strcpy (args1, execfile);
+  if (execfile[0] == '\0')
+
+    /* It is empty.  We need to quote it somehow, or else the target
+       will think there is no argument being passed here.  According
+       to the UDI spec it is quoted "according to TIP OS rules" which
+       I guess means quoting it like the Unix shell should work
+       (sounds pretty bogus to me...).  In fact it doesn't work (with
+       isstip anyway), but passing in two quotes as the argument seems
+       like a reasonable enough behavior anyway (I guess).  */
+
+    strcpy (args1, "''");
+  else
+    strcpy (args1, execfile);
   strcat (args1, " ");
   strcat (args1, args);
 
