@@ -62,3 +62,5 @@ get_longjmp_target PARAMS ((CORE_ADDR *));
 
 /* The SunPRO compiler puts out 0 instead of the address in an N_SO symbol.  */
 #define N_SO_ADDRESS_MAYBE_MISSING
+
+#define FAULTED_USE_SIGINFO

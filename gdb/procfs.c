@@ -2325,6 +2325,29 @@ wait_again:
 	      statval = (SIGTRAP << 8) | 0177;
 	      break;
 #endif
+#ifndef FAULTED_USE_SIGINFO
+	      /* Irix, contrary to the documentation, fills in 0 for si_signo.
+		 Solaris fills in si_signo.  I'm not sure about others.  */
+	    case FLTPRIV:
+	    case FLTILL:
+	      statval = (SIGILL << 8) | 0177;
+	      break;
+	    case FLTBPT:
+	    case FLTTRACE:
+	      statval = (SIGTRAP << 8) | 0177;
+	      break;	      
+	    case FLTSTACK:
+	    case FLTACCESS:
+	    case FLTBOUNDS:
+	      statval = (SIGSEGV << 8) | 0177;
+	      break;
+	    case FLTIOVF:
+	    case FLTIZDIV:
+	    case FLTFPE:
+	      statval = (SIGFPE << 8) | 0177;
+	      break;
+	    case FLTPAGE:		/* Recoverable page fault */
+#endif /* not FAULTED_USE_SIGINFO */
 	    default:
 	      /* Use the signal which the kernel assigns.  This is better than
 		 trying to second-guess it from the fault.  In fact, I suspect

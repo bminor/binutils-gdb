@@ -1,3 +1,9 @@
+Tue May  3 07:41:33 1994  Jim Kingdon  (kingdon@cygnus.com)
+
+	* procfs.c (procfs_wait): Reinstate code which deduces the signal
+	from the fault, #ifndef FAULTED_USE_SIGINFO.
+	* config/sparc/tm-sun4sol2.h: Define FAULTED_USE_SIGINFO.
+
 Fri Apr 29 18:15:04 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* breakpoint.c (breakpoint_1): Annotate each field of the headers.
