@@ -135,6 +135,7 @@ i386lynx.c
 i386mach3.c
 ieee.c
 init.c
+irix-core.c
 libaout.h
 libbfd-in.h
 libbfd.c
