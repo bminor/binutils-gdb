@@ -1,3 +1,7 @@
+2000-09-11  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* Makefile.in: Was missing from initial patch.
+
 2000-09-10  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* interp.c (sim_store_register): Remove soft register hack.
