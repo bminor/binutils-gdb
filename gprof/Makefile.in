@@ -48,14 +48,14 @@ OBJS=	$(MY_TARGET).o basic_blocks.o bsd_callg_bl.o call_graph.o \
 	sym_ids.o utils.o
 
 # Files that can be generated, but should be included in distribution.
-DISTSTUFF = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
+GEN_FILES = flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
 
 CFLAGS=-g -DDEBUG
 LDFLAGS=
 .c.o:
 	$(CC) -c $(CFLAGS) -I. -I$(srcdir) -I../bfd -I$(srcdir)/../include -I$(srcdir)/../bfd -DMACHINE_H=\"$(MY_TARGET).h\" $(TCFLAGS) $(HCFLAGS) $<
 
-all:	diststuff $(PROG)
+all:	$(GEN_FILES) $(PROG)
 
 .PHONY: check installcheck info install-info
 .SUFFIXES: .m
@@ -65,7 +65,7 @@ all:	diststuff $(PROG)
 	    FUNCTION=`(echo $*|sed -e 's/_bl//')`_blurb \
 	    FILE=$*.m $(srcdir)/$*.m
 
-diststuff: $(DISTSTUFF) info
+diststuff: $(GEN_FILES) info
 
 gprof.info: gprof.texi
 	$(MAKEINFO) -o gprof.info $(srcdir)/gprof.texi
@@ -109,7 +109,7 @@ clean: mostlyclean
 distclean: clean
 	-rm -f config.cache config.log config.status Makefile
 maintainer-clean realclean: distclean
-	-rm -f $(DISTSTUFF) *.info*
+	-rm -f $(GEN_FILES) *.info*
 
 Makefile: Makefile.in config.status
 	$(SHELL) config.status

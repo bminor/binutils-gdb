@@ -1,3 +1,9 @@
+Wed Nov  1 12:51:21 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* Makefile.in (DISTSTUFF):  Rename to GEN_FILES, to avoid confusion.
+	(all):  Depend on $(GEN_FILES), not diststuff (which also depends
+	on info).
+
 Wed Nov  1 15:23:15 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
 
 	* sym_ids.c: Include <ctype.h>.
