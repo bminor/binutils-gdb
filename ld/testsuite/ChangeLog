@@ -1,3 +1,10 @@
+2003-02-10  Kaz kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ld-sh/tlstpoff-1.d: New.
+	* ld-sh/tlstpoff-2.d: New.
+	* ld-sh/tlstpoff1.s: New.
+	* ld-sh/tlstpoff2.s: New.
+
 2003-02-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tlslib.s: Give .__tls_get_addr function type.
