@@ -1,3 +1,19 @@
+Mon Jul  4 17:06:26 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* breakpoint.c (mention): Always show breakpoint address if no
+	source file.
+
+Sat Jul  2 01:51:33 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* solib.c (bfd_lookup_symbol, look_for_base):  Reinstate to reenable
+	handling of shared libraries for non-ELF executables, but only if
+	HANDLE_SVR4_EXEC_EMULATORS is defined.
+	(locate_base):  Try to find debug_base in the dynamic linker
+	for non-ELF executables if HANDLE_SVR4_EXEC_EMULATORS is defined.
+	* config/sparc/tm-sun4sol2.h (HANDLE_SVR4_EXEC_EMULATORS):
+	Define to enable handling of shared libraries for a.out executables,
+	run under Solaris BCP.
+
 Thu Jun 30 13:59:23 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* infrun.c (wait_for_inferior): Print "Program exited normally"
