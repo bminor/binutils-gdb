@@ -1898,6 +1898,84 @@ hppa_frame_base_sniffer (struct frame_info *next_frame)
   return &hppa_frame_base;
 }
 
+/* Stub frames, used for all kinds of call stubs.  */
+struct hppa_stub_unwind_cache
+{
+  CORE_ADDR base;
+  struct trad_frame_saved_reg *saved_regs;
+};
+
+static struct hppa_stub_unwind_cache *
+hppa_stub_frame_unwind_cache (struct frame_info *next_frame,
+			      void **this_cache)
+{
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct hppa_stub_unwind_cache *info;
+
+  if (*this_cache)
+    return *this_cache;
+
+  info = FRAME_OBSTACK_ZALLOC (struct hppa_stub_unwind_cache);
+  *this_cache = info;
+  info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+
+  info->saved_regs[PCOQ_HEAD_REGNUM].realreg = RP_REGNUM;
+  info->base = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
+
+  return info;
+}
+
+static void
+hppa_stub_frame_this_id (struct frame_info *next_frame,
+			 void **this_prologue_cache,
+			 struct frame_id *this_id)
+{
+  struct hppa_stub_unwind_cache *info
+    = hppa_stub_frame_unwind_cache (next_frame, this_prologue_cache);
+  *this_id = frame_id_build (info->base, frame_pc_unwind (next_frame));
+}
+
+static void
+hppa_stub_frame_prev_register (struct frame_info *next_frame,
+			       void **this_prologue_cache,
+			       int regnum, int *optimizedp,
+			       enum lval_type *lvalp, CORE_ADDR *addrp,
+			       int *realnump, void *bufferp)
+{
+  struct hppa_stub_unwind_cache *info
+    = hppa_stub_frame_unwind_cache (next_frame, this_prologue_cache);
+  int pcoqt = (regnum == PCOQ_TAIL_REGNUM);
+  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  int regsize = register_size (gdbarch, PCOQ_HEAD_REGNUM);
+
+  if (pcoqt)
+    regnum = PCOQ_HEAD_REGNUM;
+
+  trad_frame_prev_register (next_frame, info->saved_regs, regnum,
+                            optimizedp, lvalp, addrp, realnump, bufferp);
+
+  if (pcoqt)
+    store_unsigned_integer (bufferp, regsize, 
+		      	    extract_unsigned_integer (bufferp, regsize) + 4);
+}
+
+static const struct frame_unwind hppa_stub_frame_unwind = {
+  NORMAL_FRAME,
+  hppa_stub_frame_this_id,
+  hppa_stub_frame_prev_register
+};
+
+static const struct frame_unwind *
+hppa_stub_unwind_sniffer (struct frame_info *next_frame)
+{
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+
+  if (IN_SOLIB_CALL_TRAMPOLINE (pc, NULL)
+      || IN_SOLIB_RETURN_TRAMPOLINE (pc, NULL))
+    return &hppa_stub_frame_unwind;
+  return NULL;
+}
+
 static struct frame_id
 hppa_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
@@ -2267,16 +2345,18 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
     }
-
+      
   set_gdbarch_breakpoint_from_pc (gdbarch, hppa_breakpoint_from_pc);
+  set_gdbarch_pseudo_register_read (gdbarch, hppa_pseudo_register_read);
 
   /* Frame unwind methods.  */
   set_gdbarch_unwind_dummy_id (gdbarch, hppa_unwind_dummy_id);
   set_gdbarch_unwind_pc (gdbarch, hppa_unwind_pc);
+
+  /* Hook in the default unwinders.  */
+  frame_unwind_append_sniffer (gdbarch, hppa_stub_unwind_sniffer);
   frame_unwind_append_sniffer (gdbarch, hppa_frame_unwind_sniffer);
   frame_base_append_sniffer (gdbarch, hppa_frame_base_sniffer);
-
-  set_gdbarch_pseudo_register_read (gdbarch, hppa_pseudo_register_read);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

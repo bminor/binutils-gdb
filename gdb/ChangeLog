@@ -1,5 +1,13 @@
 2004-04-23  Randolph Chung  <tausq@debian.org>
 
+	* hppa-tdep.c (hppa_stub_unwind_cache, hppa_stub_frame_unwind_cache)
+	(hppa_stub_frame_this_id, hppa_stub_frame_prev_register)
+	(hppa_stub_frame_unwind, hppa_stub_unwind_sniffer): New stub unwinder
+	for handling stackless frames.
+	(hppa_gdbarch_init): Link in hppa_stub_unwind_sniffer. 
+
+2004-04-23  Randolph Chung  <tausq@debian.org>
+
 	* hppa-tdep.c (hppa_frame_cache): Handle the case when frame unwind
 	starts at a pc before the frame is created.
 
