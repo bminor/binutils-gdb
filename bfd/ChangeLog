@@ -1,5 +1,10 @@
 2004-12-11  Alan Modra  <amodra@bigpond.net.au>
 
+	* elfcode.h (elf_slurp_symbol_table): Use bfd_elf_sym_name so that
+	canonical sections syms have a name.
+
+2004-12-11  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (opd_entry_value): Don't use cached relocs if they
 	have been adjusted for output.
 	(ppc64_elf_relocate_section): Mark sections with reloc_done.

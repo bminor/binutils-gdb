@@ -1,3 +1,48 @@
+2004-12-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-mmix/bpo-1.d: Update for changed section syms.
+	* ld-mmix/bpo-10.d: Likewise.
+	* ld-mmix/bpo-11.d: Likewise.
+	* ld-mmix/bpo-14.d: Likewise.
+	* ld-mmix/bpo-16.d: Likewise.
+	* ld-mmix/bpo-17.d: Likewise.
+	* ld-mmix/bpo-18.d: Likewise.
+	* ld-mmix/bpo-19.d: Likewise.
+	* ld-mmix/bpo-2.d: Likewise.
+	* ld-mmix/bpo-22.d: Likewise.
+	* ld-mmix/bpo-3.d: Likewise.
+	* ld-mmix/bpo-4.d: Likewise.
+	* ld-mmix/bpo-5.d: Likewise.
+	* ld-mmix/bpo-6.d: Likewise.
+	* ld-mmix/bpo-9.d: Likewise.
+	* ld-mmix/greg-1.d: Likewise.
+	* ld-mmix/greg-19.d: Likewise.
+	* ld-mmix/greg-2.d: Likewise.
+	* ld-mmix/greg-3.d: Likewise.
+	* ld-mmix/greg-4.d: Likewise.
+	* ld-mmix/greg-5.d: Likewise.
+	* ld-mmix/greg-5s.d: Likewise.
+	* ld-mmix/greg-6.d: Likewise.
+	* ld-mmix/greg-7.d: Likewise.
+	* ld-mmix/loc1.d: Likewise.
+	* ld-mmix/loc2.d: Likewise.
+	* ld-mmix/loc3.d: Likewise.
+	* ld-mmix/loc4.d: Likewise.
+	* ld-mmix/loc6.d: Likewise.
+	* ld-mmix/locdo-1.d: Likewise.
+	* ld-mmix/loct-1.d: Likewise.
+	* ld-mmix/locto-1.d: Likewise.
+	* ld-mmix/start-1.d: Likewise.
+	* ld-sh/sh64/abi32.xd: Likewise.
+	* ld-sh/sh64/abi64.xd: Likewise.
+	* ld-sh/sh64/cmpct1.xd: Likewise.
+	* ld-sh/sh64/mix1.xd: Likewise.
+	* ld-sh/sh64/mix2.xd: Likewise.
+	* ld-sh/sh64/rel32.xd: Likewise.
+	* ld-sh/sh64/rel64.xd: Likewise.
+	* ld-sh/sh64/shdl32.xd: Likewise.
+	* ld-sh/sh64/shdl64.xd: Likewise.
+
 2004-12-09  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* ld-mips-elf/jalbal.d: New test.

@@ -1086,9 +1086,7 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	  memcpy (&sym->internal_elf_sym, isym, sizeof (Elf_Internal_Sym));
 	  sym->symbol.the_bfd = abfd;
 
-	  sym->symbol.name = bfd_elf_string_from_elf_section (abfd,
-							      hdr->sh_link,
-							      isym->st_name);
+	  sym->symbol.name = bfd_elf_sym_name (abfd, hdr, isym);
 
 	  sym->symbol.value = isym->st_value;
 
@@ -1217,7 +1215,7 @@ error_return:
   return -1;
 }
 
-/* Read  relocations for ASECT from REL_HDR.  There are RELOC_COUNT of
+/* Read relocations for ASECT from REL_HDR.  There are RELOC_COUNT of
    them.  */
 
 static bfd_boolean

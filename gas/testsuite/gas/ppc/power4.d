@@ -19,12 +19,12 @@ Idx Name +Size +VMA +LMA +File off +Algn
  +3 \.toc +0+30 +0+ +0+ +.*
  +CONTENTS, ALLOC, LOAD, RELOC, DATA
 SYMBOL TABLE:
-0+ l +d +\.text	0+ 
-0+ l +d +\.data	0+ 
-0+ l +d +\.bss	0+ 
+0+ l +d +\.text	0+ (|\.text)
+0+ l +d +\.data	0+ (|\.data)
+0+ l +d +\.bss	0+ (|\.bss)
 0+ l +\.data	0+ dsym0
 0+8 l +\.data	0+ dsym1
-0+ l +d +\.toc	0+ 
+0+ l +d +\.toc	0+ (|\.toc)
 0+8 l +\.data	0+ usym0
 0+10 l +\.data	0+ usym1
 0+ +\*UND\*	0+ esym0

@@ -16,9 +16,9 @@ Idx Name +Size +VMA +LMA +File off +Algn
   2 \.bss  +00000000  0+0000  0+0000  .*
  +ALLOC
 SYMBOL TABLE:
-0+0000 l    d  \.text	0+0000 
-0+0000 l    d  \.data	0+0000 
-0+0000 l    d  \.bss	0+0000 
+0+0000 l    d  \.text	0+0000 (|\.text)
+0+0000 l    d  \.data	0+0000 (|\.data)
+0+0000 l    d  \.bss	0+0000 (|\.bss)
 0+0000 l       \.data	0+0000 dsym0
 0+0004 l       \.data	0+0000 dsym1
 0+0004 l       \.data	0+0000 usym0

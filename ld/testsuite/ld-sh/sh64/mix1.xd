@@ -31,17 +31,17 @@ Idx Name          Size      VMA       LMA       File off  Algn
   7 \.cranges      00000014  0+  0+  00000184  2\*\*0
                   CONTENTS, DEBUGGING, SORT_ENTRIES
 SYMBOL TABLE:
-0+1000 l    d  \.text	0+ 
-0+10c8 l    d  \.ctors	0+ 
-0+10c8 l    d  \.dtors	0+ 
-0+10c8 l    d  \.data	0+ 
-0+10d8 l    d  \.sbss	0+ 
-0+10d8 l    d  \.bss	0+ 
-0+80000 l    d  \.stack	0+ 
-0+ l    d  \.cranges	0+ 
-0+ l    d  \*ABS\*	0+ 
-0+ l    d  \*ABS\*	0+ 
-0+ l    d  \*ABS\*	0+ 
+0+1000 l    d  \.text	0+ (|\.text)
+0+10c8 l    d  \.ctors	0+ (|\.ctors)
+0+10c8 l    d  \.dtors	0+ (|\.dtors)
+0+10c8 l    d  \.data	0+ (|\.data)
+0+10d8 l    d  \.sbss	0+ (|\.sbss)
+0+10d8 l    d  \.bss	0+ (|\.bss)
+0+80000 l    d  \.stack	0+ (|\.stack)
+0+ l    d  \.cranges	0+ (|\.cranges)
+0+ l    d  \*ABS\*	0+ (|\.shstrtab)
+0+ l    d  \*ABS\*	0+ (|\.symtab)
+0+ l    d  \*ABS\*	0+ (|\.strtab)
 0+1008 l       \.text	0+ forw
 0+1004 l       \.text	0+ start2
 0+1030 l       \.text	0+ 0x04 mediacode2
