@@ -107,40 +107,18 @@ tuiShowLocatorContent (void)
 }				/* tuiShowLocatorContent */
 
 
-/*
-   ** tuiSetLocatorInfo().
-   **        Function to update the locator, with the provided arguments.
- */
+/* Update the locator, with the provided arguments.  */
 void
 tuiSetLocatorInfo (char *fname, char *procname, int lineNo,
                    CORE_ADDR addr, TuiLocatorElementPtr element)
 {
-#ifdef COMMENT
-  /* first free the old info */
-  if (element->fileName)
-    tuiFree (element->fileName);
-  if (element->procName)
-    tuiFree (element->procName);
-
-  if (fname == (char *) NULL)
-    element->fileName = fname;
-  else
-    element->fileName = tuiStrDup (fname);
-  if (procname == (char *) NULL)
-    element->procName = procname;
-  else
-    element->procName = tuiStrDup (procname);
-#else
   element->fileName[0] = (char) 0;
   element->procName[0] = (char) 0;
   strcat_to_buf (element->fileName, MAX_LOCATOR_ELEMENT_LEN, fname);
   strcat_to_buf (element->procName, MAX_LOCATOR_ELEMENT_LEN, procname);
-#endif
   element->lineNo = lineNo;
   element->addr = addr;
-
-  return;
-}				/* tuiSetLocatorInfo */
+}
 
 
 /*

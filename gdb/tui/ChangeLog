@@ -1,5 +1,12 @@
 2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* tuiStack.c (tuiSetLocatorInfo): Cleanup.
+	* tuiStack.h (tuiGetLocatorFilename): Declare.
+	* tuiRegs.h (tuiFirstRegElementNoInLine): Declare.
+	* tuiData.h (addToSourceWindows): Declare.
+
+2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* tui.c (tui_change_windows): New function.
 	(tui_delete_other_windows): New function.
 	(tui_initialize_readline): Bind them to C-X 1 and C-X 2.

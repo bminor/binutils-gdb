@@ -41,7 +41,7 @@ extern int tuiLastRegElementInLine (int);
 extern int tuiLineFromRegElementNo (int);
 extern void tuiToggleFloatRegs (void);
 extern int tuiCalculateRegsColumnCount (TuiRegisterDisplayType);
-
+extern int tuiFirstRegElementNoInLine (int lineno);
 
 #endif
 /*_TUI_REGS_H*/

@@ -367,4 +367,6 @@ extern void tuiSetWinResizedTo (int);
 extern TuiWinInfoPtr tuiNextWin (TuiWinInfoPtr);
 extern TuiWinInfoPtr tuiPrevWin (TuiWinInfoPtr);
 
+extern void addToSourceWindows (TuiWinInfoPtr winInfo);
+
 #endif /* TUI_DATA_H */
