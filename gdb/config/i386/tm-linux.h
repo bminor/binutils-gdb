@@ -46,41 +46,9 @@ extern struct link_map_offsets *i386_linux_svr4_fetch_link_map_offsets (void);
 #define IN_SIGTRAMP(pc, name) i386_linux_in_sigtramp (pc, name)
 extern int i386_linux_in_sigtramp (CORE_ADDR, char *);
 
-/* Signal trampolines don't have a meaningful frame.  As in tm-i386.h,
-   the frame pointer value we use is actually the frame pointer of the
-   calling frame--that is, the frame which was in progress when the
-   signal trampoline was entered.  gdb mostly treats this frame
-   pointer value as a magic cookie.  We detect the case of a signal
-   trampoline by looking at the SIGNAL_HANDLER_CALLER field, which is
-   set based on IN_SIGTRAMP.
-
-   When a signal trampoline is invoked from a frameless function, we
-   essentially have two frameless functions in a row.  In this case,
-   we use the same magic cookie for three frames in a row.  We detect
-   this case by seeing whether the next frame has
-   SIGNAL_HANDLER_CALLER set, and, if it does, checking whether the
-   current frame is actually frameless.  In this case, we need to get
-   the PC by looking at the SP register value stored in the signal
-   context.
-
-   This should work in most cases except in horrible situations where
-   a signal occurs just as we enter a function but before the frame
-   has been set up.  */
-
-#define FRAMELESS_SIGNAL(FRAME)					\
-  ((FRAME)->next != NULL					\
-   && (FRAME)->next->signal_handler_caller			\
-   && frameless_look_for_prologue (FRAME))
-
 #undef FRAME_CHAIN
-#define FRAME_CHAIN(FRAME)					\
-  ((FRAME)->signal_handler_caller				\
-   ? (FRAME)->frame						\
-    : (FRAMELESS_SIGNAL (FRAME)					\
-       ? (FRAME)->frame						\
-       : (!inside_entry_file ((FRAME)->pc)			\
-	  ? read_memory_integer ((FRAME)->frame, 4)		\
-	  : 0)))
+#define FRAME_CHAIN(frame) i386_linux_frame_chain (frame)
+extern CORE_ADDR i386_linux_frame_chain (struct frame_info *frame);
 
 #undef FRAME_SAVED_PC
 #define FRAME_SAVED_PC(frame) i386_linux_frame_saved_pc (frame)

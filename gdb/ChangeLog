@@ -1,5 +1,18 @@
 2001-03-28  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-linux-tdep.c (FRAMELESS_SIGNAL): Moved here from
+	config/i386/nm-linux.h (including comment).
+	(i386_linux_frame_chain): New function implementing guts of the
+	former FRAME_CHAIN macro, but using read_memory_unsigned_integer
+	instead of read_memory_integer.
+	(i386_linux_frame_saved_pc): Removed doc pointing to
+	i386/tm-linux.h for an explanation of FRAMELESS_SIGNAL since that
+	now lives in this file.
+	* config/i386/tm-linux.h (FRAMELESS_SIGNAL): Moved to
+	i386-linux-tdep.c (including comment).
+	(FRAME_CHAIN): Redefined in terms of i386_linux_frame_chain.
+	(i386_linux_frame_chain): New prototype.
+
 	* gdbserver/low-linux.c [I386_GNULINUX_TARGET]: Cleanup code and
 	make it work again.
 	(NUM_FREGS): Redefine to 0.

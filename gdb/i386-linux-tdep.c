@@ -277,6 +277,44 @@ i386_linux_sigtramp_saved_sp (struct frame_info *frame)
   return read_memory_integer (addr + LINUX_SIGCONTEXT_SP_OFFSET, 4);
 }
 
+/* Signal trampolines don't have a meaningful frame.  As in
+   "i386/tm-i386.h", the frame pointer value we use is actually the
+   frame pointer of the calling frame -- that is, the frame which was
+   in progress when the signal trampoline was entered.  GDB mostly
+   treats this frame pointer value as a magic cookie.  We detect the
+   case of a signal trampoline by looking at the SIGNAL_HANDLER_CALLER
+   field, which is set based on IN_SIGTRAMP.
+
+   When a signal trampoline is invoked from a frameless function, we
+   essentially have two frameless functions in a row.  In this case,
+   we use the same magic cookie for three frames in a row.  We detect
+   this case by seeing whether the next frame has
+   SIGNAL_HANDLER_CALLER set, and, if it does, checking whether the
+   current frame is actually frameless.  In this case, we need to get
+   the PC by looking at the SP register value stored in the signal
+   context.
+
+   This should work in most cases except in horrible situations where
+   a signal occurs just as we enter a function but before the frame
+   has been set up.  */
+
+#define FRAMELESS_SIGNAL(frame)					\
+  ((frame)->next != NULL					\
+   && (frame)->next->signal_handler_caller			\
+   && frameless_look_for_prologue (frame))
+
+CORE_ADDR
+i386_linux_frame_chain (struct frame_info *frame)
+{
+  if (frame->signal_handler_caller || FRAMELESS_SIGNAL (frame))
+    return frame->frame;
+
+  if (! inside_entry_file (frame->pc))
+    return read_memory_unsigned_integer (frame->frame, 4);
+
+  return 0;
+}
+
 /* Return the saved program counter for FRAME.  */
 
 CORE_ADDR
@@ -285,11 +323,6 @@ i386_linux_frame_saved_pc (struct frame_info *frame)
   if (frame->signal_handler_caller)
     return i386_linux_sigtramp_saved_pc (frame);
 
-  /* See comment in "i386/tm-linux.h" for an explanation what this
-     "FRAMELESS_SIGNAL" stuff is supposed to do.
-
-     FIXME: kettenis/2001-03-26: That comment should eventually be
-     moved to this file.  */
   if (FRAMELESS_SIGNAL (frame))
     {
       CORE_ADDR sp = i386_linux_sigtramp_saved_sp (frame->next);
@@ -309,7 +342,6 @@ i386_linux_saved_pc_after_call (struct frame_info *frame)
 
   return read_memory_integer (read_register (SP_REGNUM), 4);
 }
-
 
 
 /* Calling functions in shared libraries.  */
