@@ -1,5 +1,27 @@
 2003-06-04  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
+	* coffcode.h: Added extra arguments to CREATE_BIG_COFF_TARGET_VEC
+	and CREATE_LITTLE_COFF_TARGET_VEC. Created the macro
+	CREATE_BIGHDR_COFF_TARGET_VEC.
+	* coff-tic4x.c: Adopted new CREATE_xxx_COFF_TARGET_VEC macros.
+	* coff-a29k.c: Append COFF_SWAP_TABLE argument
+	* coff-apollo.c: Ditto
+	* coff-arm.c: Ditto
+	* coff-h8300.c: Ditto
+	* coff-h8500.c: Ditto
+	* coff-i960.c: Ditto
+	* coff-m68k.c: Ditto
+	* coff-m88k.c: Ditto
+	* coff-mcore.c: Ditto
+	* coff-sh.c: Ditto
+	* coff-sparc.c: Ditto
+	* coff-tic80.c: Ditto
+	* coff-we32k.c: Ditto
+	* coff-z8k.c: Ditto
+	* coff-w65.c: Ditto
+
+2003-06-04  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
 	* coff-tic4x.c (ticoff0_swap_table, ticoff1_swap_table): Fixed
 	initialization bug
 
