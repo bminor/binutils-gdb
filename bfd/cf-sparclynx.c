@@ -1,4 +1,4 @@
-/* BFD back-end for Intel 386 COFF LynxOS files.
+/* BFD back-end for Sparc COFF LynxOS files.
    Copyright 1993 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -18,7 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define TARGET_SYM	i386lynx_coff_vec
-#define TARGET_NAME	"coff-i386-lynx"
+#define TARGET_SYM	sparclynx_coff_vec
+#define TARGET_NAME	"coff-sparc-lynx"
 
-#include "coff-i386.c"
+#include "coff-sparc.c"

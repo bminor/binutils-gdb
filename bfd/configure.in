@@ -177,7 +177,7 @@ do
     i386coff_vec)		tb="$tb coff-i386.o" ;;
     i386linux_vec)		tb="$tb i386linux.o aout32.o stab-syms.o" ;;
     i386lynx_aout_vec)		tb="$tb i386lynx.o lynx-core.o aout32.o stab-syms.o" ;;
-    i386lynx_coff_vec)		tb="$tb i386lynx-cf.o lynx-core.o stab-syms.o" ;;
+    i386lynx_coff_vec)		tb="$tb cf-i386lynx.o lynx-core.o stab-syms.o" ;;
     i386mach3_vec)		tb="$tb i386mach3.o" ;;
     icoff_big_vec)		tb="$tb coff-i960.o" ;;
     icoff_little_vec)		tb="$tb coff-i960.o" ;;
@@ -185,7 +185,7 @@ do
     m68kcoff_vec)		tb="$tb coff-m68k.o" ;;
     m68kcoffun_vec)		tb="$tb coff-u68k.o coff-m68k.o" ;;
     m68klynx_aout_vec)		tb="$tb m68klynx.o lynx-core.o aout32.o stab-syms.o" ;;
-    m68klynx_coff_vec)		tb="$tb m68klynx-cf.o coff-m68k.o lynx-core.o stab-syms.o" ;;
+    m68klynx_coff_vec)		tb="$tb cf-m68klynx.o coff-m68k.o lynx-core.o stab-syms.o" ;;
     m88kbcs_vec)		tb="$tb coff-m88k.o" ;;
     newsos3_vec)		tb="$tb newsos3.o aout32.o stab-syms.o" ;;
     nlm32_big_generic_vec)	tb="$tb nlm32-gen.o nlm32.o nlm.o" ;;
@@ -197,6 +197,8 @@ do
 				target64=true ;;
     rs6000coff_vec)		tb="$tb coff-rs6000.o" ;;
     shcoff_vec)			tb="$tb coff-sh.o reloc16.o" ;;
+    sparclynx_aout_vec)		tb="$tb sparclynx.o lynx-core.o aout32.o stab-syms.o" ;;
+    sparclynx_coff_vec)		tb="$tb cf-sparclynx.o lynx-core.o stab-syms.o" ;;
     sunos_big_vec)		tb="$tb sunos.o aout32.o stab-syms.o" ;;
     tekhex_vec)			tb="$tb tekhex.o" ;;
     we32kcoff_vec)		tb="$tb coff-we32k.o" ;;

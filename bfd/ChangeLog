@@ -1,3 +1,28 @@
+Thu Oct 28 16:33:26 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	LynxOS and Sparc LynxOS changes:
+	* config.bfd: Recognize sparc-*-lynxos*.
+	* configure.host: Recognize sparc-*-lynxos*.
+	* configure.in: Recognize Sparc Lynx vectors.
+	* targets.c (sparclynx_aout_vec): Declare.
+	(sparclynx_coff_vec): Declare.
+	(target_vector): Add them.
+	* cf-i386lynx.c: New file, renamed from i386lynx-cf.c.
+	* cf-m68klynx.c: New file, renamed from m68klynx-cf.c.
+	* cf-sparclynx.c: New file, support for coff in Sparc LynxOS.
+	* coff-sparc.c: New file, basic Sparc coff support.
+	* sparclynx.c: New file, support for a.out in Sparc LynxOS.
+	* Makefile.in: Change filenames appropriately, add Sparc rules.
+	* coffcode.h (coff_set_arch_mach_hook): Recognize Sparc magic
+	number.
+	(coff_set_flags): Use LynxOS magic number for i386, m68k, and
+	Sparc LynxOS, set Sparc magic number for Sparcs.
+	* config/m68k-lynx.mt (SELECT_VECS): Remove redundant vector.
+	* config/sparc-lynx.mt: New file.
+	* hosts/i386lynx.h: Cosmetic improvements.
+	* hosts/m68klynx.h: Add ifdefs, #define of cfree.
+	* hosts/sparclynx.h: New file.
+
 Thu Oct 28 16:23:40 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	gcc -Wall lint:
