@@ -68,7 +68,7 @@ static int bug_write_inferior_memory ();
 /* To be silent, or to loudly echo all input and output to and from
    the target.  */
 
-static int quiet = 1;
+static int bug88k_snoop = 0;
 
 /* This is the serial descriptor to our target.  */
 
@@ -326,7 +326,7 @@ readchar ()
   if (buf == SERIAL_TIMEOUT)
     error ("Timeout reading from remote system.");
 
-  if (!quiet)
+  if (bug88k_snoop)
     printf ("%c", buf);
 
   return buf & 0x7f;
@@ -340,7 +340,7 @@ readchar_nofail ()
   buf = SERIAL_READCHAR (desc, timeout);
   if (buf == SERIAL_TIMEOUT)
     buf = 0;
-  if (!quiet)
+  if (bug88k_snoop)
     if (buf)
       printf ("%c", buf);
     else
@@ -358,7 +358,7 @@ pollchar()
   buf = SERIAL_READCHAR (desc, 0);
   if (buf == SERIAL_TIMEOUT)
     buf = 0;
-  if (!quiet)
+  if (bug88k_snoop)
     if (buf)
       printf ("%c", buf);
     else
@@ -688,83 +688,106 @@ bug_resume (pid, step, sig)
   return;
 }
 
+/* Given a null terminated list of strings LIST, read the input until we find one of
+   them.  Return the index of the string found or -1 on error.  '?' means match
+   any single character. Note that with the algorithm we use, the initial
+   character of the string cannot recur in the string, or we will not find some
+   cases of the string in the input.  If PASSTHROUGH is non-zero, then
+   pass non-matching data on.  */
+
 static int
-double_scan (a, b)
-     char *a, *b;
+multi_scan (list, passthrough)
+     char *list[];
+     int passthrough;
 {
-  /* Strings to look for.  '?' means match any single character.
-     Note that with the algorithm we use, the initial character
-     of the string cannot recur in the string, or we will not
-     find some cases of the string in the input.  */
-
-  char *pa = a;
-  char *pb = b;
-
-  /* Large enough for either sizeof (bpt) or sizeof (exitmsg) chars.  */
-  char swallowed[50];
-
-  /* Current position in swallowed.  */
-  char *swallowed_p = swallowed;
-
-  int ch = readchar();
+  char *swallowed = NULL; /* holding area */
+  char *swallowed_p = swallowed; /* Current position in swallowed.  */
+  int ch;
   int ch_handled;
-  int swallowed_cr = 0;
+  int i;
+  int string_count;
+  int max_length;
+  char **plist;
 
-  for (;;)
+  /* Look through the strings.  Count them.  Find the largest one so we can
+     allocate a holding area.  */
+
+  for (max_length = string_count = i = 0;
+       list[i] != NULL;
+       ++i, ++string_count)
+    {
+      int length = strlen(list[i]);
+
+      if (length > max_length)
+	max_length = length;
+    }
+
+  /* if we have no strings, then something is wrong. */
+  if (string_count == 0)
+    return(-1);
+
+  /* otherwise, we will need a holding area big enough to hold almost two
+     copies of our largest string.  */
+  swallowed_p = swallowed = alloca(max_length << 1);
+
+  /* and a list of pointers to current scan points. */
+  plist = alloca(string_count * sizeof(*plist));
+
+  /* and initialize */
+  for (i = 0; i < string_count; ++i)
+    plist[i] = list[i];
+
+  for (ch = readchar(); /* loop forever */ ; ch = readchar())
     {
       QUIT; /* Let user quit and leave process running */
       ch_handled = 0;
-      if (ch == *pa)
+
+      for (i = 0; i < string_count; ++i)
 	{
-	  pa++;
-	  if (*pa == '\0')
-	    break;
-	  ch_handled = 1;
+	  if (ch == *plist[i] || *plist[i] == '?')
+	    {
+	      ++plist[i];
+	      if (*plist[i] == '\0')
+		return(i);
 
-	  *swallowed_p++ = ch;
+	      if (!ch_handled)
+		*swallowed_p++ = ch;
+
+	      ch_handled = 1;
+	    }
+	  else
+	    plist[i] = list[i];
 	}
-      else
-	pa = a;
-
-      if (ch == *pb || *pb == '?')
-	{
-	  pb++;
-	  if (*pb == '\0')
-	    break;
-
-	  if (!ch_handled)
-	    *swallowed_p++ = ch;
-	  ch_handled = 1;
-	}
-      else
-	pb = b;
 
       if (!ch_handled)
 	{
 	  char *p;
 
 	  /* Print out any characters which have been swallowed.  */
-	  for (p = swallowed; p < swallowed_p; ++p)
-	    putc (*p, stdout);
-	  swallowed_p = swallowed;
-
-	  if ((ch != '\r' && ch != '\n') || swallowed_cr > 10)
+	  if (passthrough)
 	    {
+	      for (p = swallowed; p < swallowed_p; ++p)
+		putc (*p, stdout);
+
 	      putc (ch, stdout);
-	      swallowed_cr = 10;
 	    }
-	  swallowed_cr++;
 
+	  swallowed_p = swallowed;
 	}
-
-      ch = readchar ();
     }
 
-  return(*pa == '\0');
+  return(-1);
 }
 
 /* Wait until the remote machine stops, then return,
    storing status in STATUS just as `wait' would.  */
+
+static char *wait_strings[] = {
+  "At Breakpoint",
+  "Exception: Data Access Fault (Local Bus Timeout)",
+  "\r8???-Bug>",
+  NULL,
+};
 
 int
 bug_wait (status)
@@ -775,32 +798,53 @@ bug_wait (status)
 
   WSETEXIT ((*status), 0);
 
-  if (need_artificial_trap != 0)
+  /* read off leftovers from resume so that the rest can be passed
+     back out as stdout.  */
+  if (need_artificial_trap == 0)
     {
-      WSETSTOP ((*status), SIGTRAP);
-      need_artificial_trap--;
-      /* user output from the target can be discarded here. (?) */
-      expect_prompt();
-      return 0;
+      expect("Effective address: ");
+      (void) get_hex_word();
+      expect ("\r\n");
     }
-
-  /* read off leftovers from resume */
-  expect("Effective address: ");
-  (void) get_hex_word();
-  expect ("\r\n");
 
   timeout = -1;	/* Don't time out -- user program is running. */
   immediate_quit = 1; /* Helps ability to QUIT */
 
-  if (double_scan("At Breakpoint", "8???-Bug>"))
+  switch (multi_scan(wait_strings, need_artificial_trap == 0))
     {
-      /* breakpoint case */
+    case 0: /* breakpoint case */
       WSETSTOP ((*status), SIGTRAP);
-      expect_prompt ();
-    }
-  else /* exit case */
-    WSETEXIT ((*status), 0);
+      /* user output from the target can be discarded here. (?) */
+      expect_prompt();
+      break;
 
+    case 1: /* bus error */
+      WSETSTOP ((*status), SIGBUS);
+      /* user output from the target can be discarded here. (?) */
+      expect_prompt();
+      break;
+
+    case 2: /* normal case */
+      if (need_artificial_trap != 0)
+	{
+	  /* stepping */
+	  WSETSTOP ((*status), SIGTRAP);
+	  need_artificial_trap--;
+	  break;
+	}
+      else
+	{
+	  /* exit case */
+	  WSETEXIT ((*status), 0);
+	  break;
+	}
+
+    case -1: /* trouble */
+    default:
+      fprintf_filtered (stderr,
+			"Trouble reading target during wait\n");
+      break;
+    }
 
   timeout = old_timeout;
   immediate_quit = old_immediate_quit;
@@ -844,7 +888,7 @@ bug_write (a, l)
 
   SERIAL_WRITE (desc, a, l);
 
-  if (!quiet)
+  if (bug88k_snoop)
     for (i = 0; i < l; i++)
       {
 	printf ("%c", a[i]);
@@ -862,6 +906,7 @@ bug_write_cr (s)
   return;
 }
 
+#if 0 /* not currently used */
 /* Read from remote while the input matches STRING.  Return zero on
    success, -1 on failure.  */
 
@@ -884,6 +929,7 @@ bug_scan (s)
 
   return(0);
 }
+#endif /* never */
 
 static int
 bug_srec_write_cr (s)
@@ -894,7 +940,7 @@ bug_srec_write_cr (s)
   if (srec_echo_pace)
     for (p = s; *p; ++p)
       {
-	if (!quiet)
+	if (bug88k_snoop)
 	  printf ("%c", *p);
 
 	do
@@ -1119,6 +1165,12 @@ start_load()
    data records each containing srec_bytes, and an S7 termination
    record.  */
 
+static char *srecord_strings[] = {
+  "S-RECORD",
+  "8???-Bug>",
+  NULL,
+};
+
 static int
 bug_write_inferior_memory (memaddr, myaddr, len)
      CORE_ADDR memaddr;
@@ -1142,7 +1194,7 @@ bug_write_inferior_memory (memaddr, myaddr, len)
 
       if (retries > 0)
 	{
-	  if (!quiet)
+	  if (bug88k_snoop)
 	    printf("\n<retrying...>\n");
 
 	  /* This expect_prompt call is extremely important.  Without
@@ -1203,7 +1255,7 @@ bug_write_inferior_memory (memaddr, myaddr, len)
 	  if (srec_sleep != 0)
 	    sleep(srec_sleep);
 
-	  /* This pollchar is probably redundant to the double_scan
+	  /* This pollchar is probably redundant to the multi_scan
 	     below.  Trouble is, we can't be sure when or where an
 	     error message will appear.  Apparently, when running at
 	     full speed from a typical sun4, error messages tend to
@@ -1211,7 +1263,7 @@ bug_write_inferior_memory (memaddr, myaddr, len)
 
 	  if ((x = pollchar()) != 0)
 	    {
-	      if (!quiet)
+	      if (bug88k_snoop)
 		printf("\n<retrying...>\n");
 
 	      ++retries;
@@ -1233,7 +1285,7 @@ bug_write_inferior_memory (memaddr, myaddr, len)
 
       /* Having finished the load, we need to figure out whether we
 	 had any errors.  */
-    } while (double_scan("S-RECORD", "8???-Bug>"));;
+    } while (multi_scan(srecord_strings, 0) == 0);;
 
   return(0);
 }
@@ -1452,20 +1504,6 @@ bug_com (args, fromtty)
 }
 
 static void
-bug_quiet (args, fromtty)
-     char *args;
-     int fromtty;
-{
-  quiet = !quiet;
-  if (quiet)
-    printf_filtered ("Snoop disabled\n");
-  else
-    printf_filtered ("Snoop enabled\n");
-
-  return;
-}
-
-static void
 bug_device (args, fromtty)
      char *args;
      int fromtty;
@@ -1537,8 +1575,6 @@ _initialize_remote_bug ()
 
   add_com ("bug <command>", class_obscure, bug_com,
 	   "Send a command to the BUG monitor.");
-  add_com ("snoop", class_obscure, bug_quiet,
-	   "Show what commands are going to the monitor");
 
   add_com ("device", class_obscure, bug_device,
 	   "Set the terminal line for BUG communications");
@@ -1601,6 +1637,15 @@ This affects the communication protocol with the remote target.",
 Set echo-verification.\n\
 When on, use verification by echo when downloading S-records.  This is\n\
 much slower, but generally more reliable.", 
+		  &setlist),
+     &showlist);
+
+  add_show_from_set
+    (add_set_cmd ("bug88k-snoop", class_support, var_boolean,
+		  (char *) &bug88k_snoop,
+		  "\
+Set echoing of what's going to and from the monitor.\n\
+When on, echo data going out on and coming back from the serial line.", 
 		  &setlist),
      &showlist);
 

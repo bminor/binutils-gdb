@@ -1,5 +1,13 @@
 Mon Aug 23 17:16:23 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	* remote-bug.c: rename quiet to bug88k_snoop.
+	  (double_scan, multi_scan): generalize double_scan into a scan
+	  for multiple patterns.  Rename to multi_scan.
+	  (bug_wait, bug_write_inferior_memory): adapt to use the new
+	  multi_scan in order to catch and represent target bus errors.
+	  (bug_scan): currently unused, so comment out.
+	  (bug_quiet): removed.  Replaced with a standard user settable boolean.
+
 	* m88k-tdep.c: remove include of sys/dir.h.  Appears unnecessary
 	  and isn't available on solaris.
 
