@@ -1,3 +1,7 @@
+Wed Mar  1 11:52:55 1995  Jason Molenda  <crash@phydeaux.cygnus.com>
+
+	* configure.host: Recognize powerpc-*-aix*.
+
 Wed Mar  1 11:57:39 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-i960.c (COFF_PAGE_SIZE): Define.
