@@ -1,3 +1,11 @@
+Wed Oct 25 15:18:24 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* Makefile.in (taz):  Grep for '^diststuff:' or '^info:' in
+	sub-directory Makefiles, instead of using DISTSTUFFDIRS and
+	DISTDOCDIRS.
+	(DISTSTUFFDIRS, DISTDOCDIRS):  Removed - no longer used.
+	(newlib.tar.gz):  Don't pass DISTDOCDIRS to recursive make.
+
 Wed Oct 25 14:43:55 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* Makefile.in (DISTDOCDIRS):  Remove ld gprof bnutils gas libg++ gdb

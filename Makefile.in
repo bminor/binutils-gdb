@@ -1129,12 +1129,8 @@ ETC_SUPPORT_PFX=configure.info standards.info cfg-paper.info
 # When you use `make setup-dirs' or `make taz' you should always redefine
 # this macro.
 SUPPORT_FILES = list-of-support-files-for-tool-in-question
-# Directories that might want `make diststuff' run.
-DISTSTUFFDIRS= ld gprof gdb libg++ binutils gnats gas bfd
 # Files where "byacc" (Cygnus version) should be changed to "bison -y" (FSF).
 DISTBISONFILES= binutils/Makefile.in gas/Makefile.in gdb/Makefile.in
-# Directories where "info" should be built.
-DISTDOCDIRS=libio send-pr etc
 
 .PHONY: taz
 
@@ -1159,25 +1155,16 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) \
 	@if [ -f .Sanitize ] ; then echo "RUN Sanitize FIRST!" ; false ; fi ;
 	$(end-sanitize-Sanitize)
 	./configure sun4
-	# Doc files don't change; include them in distribution.
-	for f in $(DISTDOCDIRS) ; do \
-	  if [ -r $$f/Makefile ]; then \
-	    (cd $$f ; $(MAKE) info) || exit 1 ; \
-	  else true ; fi ; \
-	done
-	# Make links, and run "make diststuff" when needed.
-	# The `echo' for setting `p' is to convert all whitespace to spaces.
-	# Then the `case' further below should tell whether $$d is in
-	# DISTSTUFFDIRS.
+	# Make links, and run "make diststuff" or "make info" when needed.
 	rm -rf proto-toplev ; mkdir proto-toplev
 	set -e ; dirs="$(TOOL) $(DEVO_SUPPORT) $(SUPPORT_FILES)" ; \
-	p=" `echo $(DISTSTUFFDIRS)` " ; \
 	for d in $$dirs ; do \
 	  if [ -d $$d ]; then \
-	    case " $$p " in \
-	    *" $$d "*)	\
+	    if grep '^diststuff:' $$d/Makefile >/dev/null ; then \
 		(cd $$d ; $(MAKE) diststuff ) || exit 1  ;; \
-	    esac ; \
+	    elif grep '^info:' $$d/Makefile >/dev/null ; then \
+	        (cd $$d ; $(MAKE) info ) || exit 1  ;; \
+	    fi ; \
 	    if [ -d $$d/proto-$$d.dir ]; then \
 	      ln -s ../$$d/proto-$$d.dir proto-toplev/$$d ; \
 	    else \
@@ -1272,8 +1259,7 @@ newlib.tar.gz: $(DIST_SUPPORT) $(NEWLIB_SUPPORT_DIRS) newlib
 	cd newlib ; make distclean
 	$(MAKE) -f Makefile.in taz TOOL=newlib \
 		SUPPORT_FILES="$(NEWLIB_SUPPORT_DIRS)" \
-		DEVO_SUPPORT="$(DEVO_SUPPORT) COPYING.NEWLIB" \
-		DISTDOCDIRS="$(DISTDOCDIRS) newlib"
+		DEVO_SUPPORT="$(DEVO_SUPPORT) COPYING.NEWLIB" newlib
 
 .NOEXPORT:
 MAKEOVERRIDES=
