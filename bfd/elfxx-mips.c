@@ -2954,7 +2954,9 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
       outrel[0].r_info = ELF_R_INFO (output_bfd, (unsigned long) indx,
 				     R_MIPS_REL32);
       outrel[1].r_info = ELF_R_INFO (output_bfd, (unsigned long) 0,
-				     R_MIPS_NONE);
+				     ABI_64_P (output_bfd)
+				     ? R_MIPS_64
+				     : R_MIPS_NONE);
       outrel[2].r_info = ELF_R_INFO (output_bfd, (unsigned long) 0,
 				     R_MIPS_NONE);
 

@@ -1,3 +1,13 @@
+2002-10-22  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elflink.h (struct elf_link_sort_rela): Turn rel and rela
+	into arrays.
+	(elf_link_sort_cmp1, elf_link_sort_cmp2): Adjust.
+	(elf_link_sort_relocs): Likewise.  Take int_rels_per_ext_rel
+	into account.
+	* elfxx-mips.c (mips_elf_create_dynamic_relocation): Compose
+	R_MIPS_REL32 with R_MIPS64 if ABI_64_P.
+
 2002-10-21  Graeme Peterson  <gp@qnx.com>
 
 	* targets.c (_bfd_target_vector): Add missing qnx vectors.
