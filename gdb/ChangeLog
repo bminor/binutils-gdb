@@ -1,3 +1,26 @@
+Wed Aug 14 02:03:42 1996  Fred Fish  <fnf@rtl.cygnus.com>
+
+	* Makefile.in (init.c):  Generate with prototypes.
+
+	* config/pa/tm-hppa.h (frame_saved_pc): Add prototype.
+	* config/rs6000/xm-rs6000.h (aix_resizewindow): Ditto.
+	* config/rs6000/tm-rs6000.h (frame_initial_stack_address): Ditto.
+	(pc_load_segment_name): Ditto.
+	(pop_frame): Ditto.
+	(extract_return_value): Ditto.
+	(is_magic_function_pointer): Ditto.
+	(push_dummy_frame): Ditto.
+	(fix_call_dummy): Ditto.
+	(push_arguments): Ditto.
+	(skip_trampoline_code): Ditto.
+	(aix_process_linenos): Ditto.
+
+	* config/m68k/tm-cisco.h (get_longjmp_target): Add prototype.
+	* config/m68k/tm-es1800.h: Ditto.
+	* config/m68k/tm-vx68.h: Ditto.
+	* config/m68k/tm-sun3.h: Ditto.
+	* config/m68k/tm-m68kv4.h: Ditto.
+
 Tue Aug 13 23:04:36 1996  Fred Fish  <fnf@cygnus.com>
 
 	* config/mips/nm-mips.h (get_longjmp_target): Add prototype.
