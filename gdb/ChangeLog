@@ -1,3 +1,14 @@
+2003-06-05  J. Brobecker  <brobecker@gnat.com>
+
+	* hppa-hpux-tdep.c (hppa_hpux_init_abi): New function, setting
+	pc_in_sigtramp multiarch method.
+	(hppa_hpux_som_init_abi): Use it.
+	(hppa_hpux_elf_init_abi): Likewise.
+	* config/pa/tm-hppah.h (PC_IN_SIGTRAMP): Remove, now that this
+	macro has been multiarched.
+	* config/pa/tm-hppa64.h (PC_IN_SIGTRAMP): Temporarily set this
+	macro here, as hppa64 isn't multiarched yet.
+
 2003-06-05  Andrew Cagney  <cagney@redhat.com>
 
 	* Makefile.in (value_h): Add $(frame_h).
