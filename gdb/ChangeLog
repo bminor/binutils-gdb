@@ -1,5 +1,13 @@
 2004-05-23  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64obsd-nat.c: Include "gdbcore.h", "regcache.h",
+	<sys/types.h>, <machine/frame.h>, <machine/pcb.h> and "bsd-kvm.h".
+	(amd64obsd_supply_pcb): New function.
+	(_initialize_amd64obsd_nat): Enable libkvm interface.
+	* Makefile.in (amd64obsd-nat.o): Update dependencies.
+	* config/i386/obsd64.mh (NATDEPFILES): Add bsd-kvm.o
+	(LOADLIBES): New variable.
+
 	* sparcnbsd-nat.c: Include "gdbcore.h", "regcache.h",
 	<sys/types.h>, <machine/pcb.h> and "bsd-kvm.h".
 	(sparc32nbsd_supply_pcb): New function.
