@@ -1,3 +1,10 @@
+2004-02-18  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
+
+	Committed by Mark Kettenis  <kettenis@gnu.org>.
+
+	* config/s390/nm-linux.h (TARGET_REGION_OK_FOR_HW_WATCHPOINT):
+	Define.
+
 2004-02-18  Andrew Cagney  <cagney@redhat.com>
 
 	* configure.in: Add a TUI target to CONFIG_ALL, CONFIG_CLEAN,
