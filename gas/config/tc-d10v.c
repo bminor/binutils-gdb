@@ -1468,6 +1468,9 @@ find_opcode (opcode, myops)
       if ((d10v_operands[opcode->operands[i]].flags & OPERAND_EVEN) &&
 	  (myops[i].X_add_number & 1))
 	as_fatal (_("Register number must be EVEN"));
+      if ((d10v_operands[opcode->operands[i]].flags & OPERAND_NOSP)
+	  && (myops[i].X_add_number & OPERAND_SP))
+	as_bad (_("Unsupported use of sp"));
       if (myops[i].X_op == O_register)
 	{
 	  if (!(d10v_operands[opcode->operands[i]].flags & OPERAND_REG))

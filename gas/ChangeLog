@@ -1,3 +1,8 @@
+2001-12-04  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-d10v.c (find_opcode): Reject SP operand if
+	OPERAND_NOSP flag is present.
+
 2001-12-03  Eric Christopher  <echristo@redhat.com>
 
 	* config/tc-mips.c (tc_gen_reloc): One missed BFD_RELOC_MIPS_GPREL.
