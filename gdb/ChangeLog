@@ -1,3 +1,11 @@
+2002-11-30  Andrew Cagney  <cagney@redhat.com>
+
+	* exec.c (xfer_memory): Replace boolean with int.
+	* p-exp.y: Use 0 instead of false.
+	* corelow.c (gdb_check_format): Change return type to int from
+	boolean.
+	* utils.c: Don't include <curses.h> or <term.h> first.
+
 2002-11-29  Stephane Carrez  <stcarrez@nerim.fr>
 
 	* m68hc11-tdep.c (m68hc11_register_raw_size): Remove.

@@ -481,10 +481,10 @@ xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	     struct mem_attrib *attrib,
 	     struct target_ops *target)
 {
-  boolean res;
+  int res;
   struct section_table *p;
   CORE_ADDR nextsectaddr, memend;
-  boolean (*xfer_fn) (bfd *, sec_ptr, PTR, file_ptr, bfd_size_type);
+  int (*xfer_fn) (bfd *, sec_ptr, PTR, file_ptr, bfd_size_type);
   asection *section = NULL;
 
   if (len <= 0)

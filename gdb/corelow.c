@@ -62,7 +62,7 @@ static int solib_add_stub (PTR);
 
 static struct core_fns *sniff_core_bfd (bfd *);
 
-static boolean gdb_check_format (bfd *);
+static int gdb_check_format (bfd *);
 
 static void core_open (char *, int);
 
@@ -160,7 +160,7 @@ default_check_format (bfd *abfd)
 
 /* Attempt to recognize core file formats that BFD rejects. */
 
-static boolean 
+static int
 gdb_check_format (bfd *abfd)
 {
   struct core_fns *cf;

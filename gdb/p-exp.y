@@ -293,7 +293,7 @@ exp	:	exp '.' { search_field = 1; }
 			    { while (TYPE_CODE (current_type) == TYPE_CODE_PTR)
 				current_type = TYPE_TARGET_TYPE (current_type);
 			      current_type = lookup_struct_elt_type (
-				current_type, $4.ptr, false); };
+				current_type, $4.ptr, 0); };
 			 } ; 
 exp	:	exp '['
 			/* We need to save the current_type value */
@@ -677,7 +677,7 @@ variable:	name_not_typename
 			      if (this_type)
 				current_type = lookup_struct_elt_type (
 				  this_type,
-				  copy_name($1.stoken), false);
+				  copy_name ($1.stoken), 0);
 			      else
 				current_type = NULL; 
 			    }
