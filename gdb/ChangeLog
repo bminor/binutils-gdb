@@ -1,5 +1,10 @@
 2003-09-25  David Carlton  <carlton@kealia.com>
 
+	* c-exp.y: Remove 'register' declarations.
+	* f-exp.y, jv-exp.y, m2-exp.y, objc-exp.y, p-exp.y: Ditto.
+
+2003-09-25  David Carlton  <carlton@kealia.com>
+
 	* c-exp.y: Include cp-support.h.  Add qualified_type.
 	(yylex): Delete nested type hack; add comments.
 	* cp-namespace.c (cp_lookup_nested_type): New function.

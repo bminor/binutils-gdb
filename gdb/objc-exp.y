@@ -769,7 +769,7 @@ variable:	name_not_typename
 			  else
 			    {
 			      struct minimal_symbol *msymbol;
-			      register char *arg = copy_name ($1.stoken);
+			      char *arg = copy_name ($1.stoken);
 
 			      msymbol =
 				lookup_minimal_symbol (arg, NULL, NULL);
@@ -992,21 +992,21 @@ name_not_typename :	NAME
 
 static int
 parse_number (p, len, parsed_float, putithere)
-     register char *p;
-     register int len;
+     char *p;
+     int len;
      int parsed_float;
      YYSTYPE *putithere;
 {
   /* FIXME: Shouldn't these be unsigned?  We don't deal with negative
      values here, and we do kind of silly things like cast to
      unsigned.  */
-  register LONGEST n = 0;
-  register LONGEST prevn = 0;
+  LONGEST n = 0;
+  LONGEST prevn = 0;
   unsigned LONGEST un;
 
-  register int i = 0;
-  register int c;
-  register int base = input_radix;
+  int i = 0;
+  int c;
+  int base = input_radix;
   int unsigned_p = 0;
 
   /* Number of "L" suffixes encountered.  */
@@ -1362,7 +1362,7 @@ yylex ()
 	/* It's a number.  */
 	int got_dot = 0, got_e = 0, toktype = FLOAT;
 	/* Initialize toktype to anything other than ERROR.  */
-	register char *p = tokstart;
+	char *p = tokstart;
 	int hex = input_radix > 10;
 	int local_radix = input_radix;
 	if (tokchr == '0' && (p[1] == 'x' || p[1] == 'X'))

@@ -682,16 +682,16 @@ Expression:
 
 static int
 parse_number (p, len, parsed_float, putithere)
-     register char *p;
-     register int len;
+     char *p;
+     int len;
      int parsed_float;
      YYSTYPE *putithere;
 {
-  register ULONGEST n = 0;
+  ULONGEST n = 0;
   ULONGEST limit, limit_div_base;
 
-  register int c;
-  register int base = input_radix;
+  int c;
+  int base = input_radix;
 
   struct type *type;
 
@@ -967,7 +967,7 @@ yylex ()
       {
 	/* It's a number.  */
 	int got_dot = 0, got_e = 0, toktype;
-	register char *p = tokstart;
+	char *p = tokstart;
 	int hex = input_radix > 10;
 
 	if (c == '0' && (p[1] == 'x' || p[1] == 'X'))
