@@ -195,25 +195,28 @@ DEFUN (elf_symtab_read, (abfd, addr, mainline),
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = *symbol_table++;
-	  /* Select global symbols that are defined in a specific section
-	     or are absolute. */
-	  if (sym -> flags & BSF_GLOBAL
-	      && (sym -> section == &bfd_abs_section))
+	  /* Select global/weak symbols that are defined in a specific section.
+	     Note that bfd now puts abs symbols in their own section, so
+	     all symbols we are interested in will have a section. */
+	  if ((sym -> flags & (BSF_GLOBAL | BSF_WEAK))
+	      && (sym -> section != NULL))
 	    {
 	      symaddr = sym -> value;
-	      if (!mainline)
+	      /* Relocate all non-absolute symbols by base address.
+	         FIXME:  Can we eliminate the check for mainline now,
+		 since shouldn't addr be 0 in this case? */
+	      if (!mainline && (sym -> section != &bfd_abs_section))
 		{
-		  /* Relocate all symbols by base address */
 		  symaddr += addr;
 		}
 	      /* For non-absolute symbols, use the type of the section
 		 they are relative to, to intuit text/data.  Bfd provides
 		 no way of figuring this out for absolute symbols. */
-	      if (sym -> section && (sym -> section -> flags & SEC_CODE))
+	      if (sym -> section -> flags & SEC_CODE)
 		{
 		  mf_type = mf_text;
 		}
-	      else if (sym -> section && (sym -> section -> flags & SEC_DATA))
+	      else if (sym -> section -> flags & SEC_DATA)
 		{
 		  mf_type = mf_data;
 		}
