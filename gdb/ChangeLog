@@ -1,3 +1,8 @@
+2002-02-23  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* maint.c (print_section_info): Do not prepend `0x' to filepos
+	output, it will be handled by local_hex_string_custom.
+
 2002-02-23  Richard Earnshaw  <rearnsha"arm.com>
 
 	* arm-linux-nat.c (store_newfpe_single): Use regcache_collect.

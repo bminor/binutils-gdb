@@ -1,5 +1,5 @@
 /* Support for GDB maintenance commands.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1999, 2000, 2001
+   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
@@ -296,7 +296,7 @@ print_section_info (const char *name, flagword flags,
   /* FIXME-32x64: Need print_address_numeric with field width.  */
   printf_filtered ("    0x%s", paddr (addr));
   printf_filtered ("->0x%s", paddr (endaddr));
-  printf_filtered (" at 0x%s",
+  printf_filtered (" at %s",
 		   local_hex_string_custom ((unsigned long) filepos, "08l"));
   printf_filtered (": %s", name);
   print_bfd_flags (flags);
