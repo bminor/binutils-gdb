@@ -33,9 +33,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* these are the addresses the D10V-EVA board maps data */
 /* and instruction memory to. */
 
-#define DMEM_START	0x2000000
+#define DMEM_START	0x0000000
 #define IMEM_START	0x1000000
-#define STACK_START	0x2007ffe
+#define STACK_START	0x0007ffe
 
 #ifdef __STDC__		/* Forward decls for prototypes */
 struct frame_info;
@@ -140,14 +140,14 @@ extern CORE_ADDR d10v_skip_prologue ();
     store_unsigned_integer ((TO), 2, x); \
 }
 
-#define D10V_MAKE_DADDR(x) ( (x) & 0x3000000 ? (x) : ((x) | DMEM_START))
-#define D10V_MAKE_IADDR(x) ( (x) & 0x3000000 ? (x) : (((x) << 2) | IMEM_START))
+#define D10V_MAKE_DADDR(x) ((x) | DMEM_START)
+#define D10V_MAKE_IADDR(x) (((x) << 2) | IMEM_START)
 
 #define D10V_DADDR_P(X) (((X) & 0x3000000) == DMEM_START)
 #define D10V_IADDR_P(X) (((X) & 0x3000000) == IMEM_START)
 
-#define D10V_CONVERT_IADDR_TO_RAW(X) (((X) & ~0x3000000) >> 2)
-#define D10V_CONVERT_DADDR_TO_RAW(X) (((X) & ~0x3000000))
+#define D10V_CONVERT_IADDR_TO_RAW(X) (((X) >> 2) & 0xffff)
+#define D10V_CONVERT_DADDR_TO_RAW(X) ((X) & 0xffff)
 
 #define ARG1_REGNUM R0_REGNUM
 #define ARGN_REGNUM 3

@@ -1,3 +1,15 @@
+Mon Feb  9 11:10:06 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v-tdep.c: Replace references to IMEM_ADDR and DMEM_ADDR with
+ 	D10V_MAKE_[DI]ADDR and D10V_CONVERT_[ID]ADDR_TO_RAW macros.
+
+	* config/d10v/tm-d10v.h (IMEM_START): Move to 0x01......
+	(DMEM_START): Move to 0x00......
+	(STACK_START): Move to 0x00..7ffe.
+	(D10V_MAKE_IADDR, D10V_MAKE_DADDR): Translate unconditionally.
+
+	* d10v-tdep.c (d10v_xlate_addr): Delete function.
+
 Mon Feb  9 15:10:21 1998  Fred Fish  <fnf@cygnus.com>
 
 	* symtab.c (fixup_psymbol_section): Move forward declaration to

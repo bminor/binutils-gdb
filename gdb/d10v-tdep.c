@@ -206,7 +206,7 @@ d10v_frame_chain (frame)
   if (!read_memory_unsigned_integer(fsr.regs[FP_REGNUM], REGISTER_RAW_SIZE(FP_REGNUM)))
     return (CORE_ADDR)0;
 
-  return read_memory_unsigned_integer(fsr.regs[FP_REGNUM], REGISTER_RAW_SIZE(FP_REGNUM))| DMEM_START;
+  return D10V_MAKE_DADDR (read_memory_unsigned_integer (fsr.regs[FP_REGNUM], REGISTER_RAW_SIZE (FP_REGNUM)));
 }  
 
 static int next_addr, uses_frame;
@@ -353,7 +353,7 @@ d10v_frame_find_saved_regs (fi, fsr)
   fi->size = -next_addr;
 
   if (!(fp & 0xffff))
-    fp = read_register(SP_REGNUM) | DMEM_START;
+    fp = D10V_MAKE_DADDR (read_register(SP_REGNUM));
 
   for (i=0; i<NUM_REGS-1; i++)
     if (fsr->regs[i])
@@ -362,9 +362,14 @@ d10v_frame_find_saved_regs (fi, fsr)
       }
 
   if (fsr->regs[LR_REGNUM])
-    fi->return_pc = (read_memory_unsigned_integer(fsr->regs[LR_REGNUM], REGISTER_RAW_SIZE(LR_REGNUM)) << 2) | IMEM_START;
+    {
+      CORE_ADDR return_pc = read_memory_unsigned_integer (fsr->regs[LR_REGNUM], REGISTER_RAW_SIZE (LR_REGNUM));
+      fi->return_pc = D10V_MAKE_IADDR (return_pc);
+    }
   else
-    fi->return_pc = (read_register(LR_REGNUM) << 2) | IMEM_START;
+    {
+      fi->return_pc = D10V_MAKE_IADDR (read_register(LR_REGNUM));
+    }
   
   /* th SP is not normally (ever?) saved, but check anyway */
   if (!fsr->regs[SP_REGNUM])
@@ -411,7 +416,7 @@ show_regs (args, from_tty)
 {
   LONGEST num1, num2;
   printf_filtered ("PC=%04x (0x%x) PSW=%04x RPT_S=%04x RPT_E=%04x RPT_C=%04x\n",
-                   read_register (PC_REGNUM), (read_register (PC_REGNUM) << 2) + IMEM_START,
+                   read_register (PC_REGNUM), D10V_MAKE_IADDR (read_register (PC_REGNUM)),
                    read_register (PSW_REGNUM),
                    read_register (24),
                    read_register (25),
@@ -443,35 +448,19 @@ show_regs (args, from_tty)
   printf_filtered ("A0-A1  %010llx %010llx\n",num1, num2);
 }
 
-static CORE_ADDR
-d10v_xlate_addr (addr)
-     int addr;
-{
-  int imap;
-
-  if (addr < 0x20000)
-    imap = (int)read_register(IMAP0_REGNUM);
-  else
-    imap = (int)read_register(IMAP1_REGNUM);
-
-  if (imap & 0x1000)
-    return (CORE_ADDR)(addr + 0x1000000);
-  return (CORE_ADDR)(addr + (imap & 0xff)*0x20000);
-}
-
-
 CORE_ADDR
 d10v_read_pc (pid)
      int pid;
 {
   int save_pid;
+  CORE_ADDR pc;
   CORE_ADDR retval;
 
   save_pid = inferior_pid;
   inferior_pid = pid;
-  retval = (int)read_register (PC_REGNUM);
+  pc = (int) read_register (PC_REGNUM);
   inferior_pid = save_pid;
-  retval = d10v_xlate_addr(retval << 2);
+  retval = D10V_MAKE_IADDR (pc);
   return retval;
 }
 
@@ -484,34 +473,34 @@ d10v_write_pc (val, pid)
 
   save_pid = inferior_pid;
   inferior_pid = pid;
-  write_register (PC_REGNUM, (val & 0x3ffff) >> 2);
+  write_register (PC_REGNUM, D10V_CONVERT_IADDR_TO_RAW (val));
   inferior_pid = save_pid;
 }
 
 CORE_ADDR
 d10v_read_sp ()
 {
-  return (read_register(SP_REGNUM) | DMEM_START);
+  return (D10V_MAKE_DADDR (read_register (SP_REGNUM)));
 }
 
 void
 d10v_write_sp (val)
      CORE_ADDR val;
 {
-  write_register (SP_REGNUM, (LONGEST)(val & 0xffff));
+  write_register (SP_REGNUM, D10V_CONVERT_DADDR_TO_RAW (val));
 }
 
 void
 d10v_write_fp (val)
      CORE_ADDR val;
 {
-  write_register (FP_REGNUM, (LONGEST)(val & 0xffff));
+  write_register (FP_REGNUM, D10V_CONVERT_DADDR_TO_RAW (val));
 }
 
 CORE_ADDR
 d10v_read_fp ()
 {
-  return (read_register(FP_REGNUM) | DMEM_START);
+  return (D10V_MAKE_DADDR (read_register(FP_REGNUM)));
 }
 
 /* Function: push_return_address (pc)
@@ -523,7 +512,7 @@ d10v_push_return_address (pc, sp)
      CORE_ADDR pc;
      CORE_ADDR sp;
 {
-  write_register (LR_REGNUM, (CALL_DUMMY_ADDRESS () & 0xffff) >> 2);
+  write_register (LR_REGNUM, D10V_CONVERT_IADDR_TO_RAW (CALL_DUMMY_ADDRESS ()));
   return sp;
 }
  
