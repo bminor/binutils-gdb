@@ -1,7 +1,8 @@
-/* Remote debugging interface for Hitachi HMS Monitor Version 1.0
-   Copyright 1992 Free Software Foundation, Inc.
-   Contributed by Cygnus Support.  Written by Steve Chamberlain
-   (sac@cygnus.com).
+/* Remote debugging interface for Motorola's MVME187BUG monitor, an embedded
+   monitor for the m88k.
+
+   Copyright 1992, 1993 Free Software Foundation, Inc.
+   Contributed by Cygnus Support.  Written by K. Richard Pixley.
 
 This file is part of GDB.
 
@@ -38,15 +39,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 extern int stop_soon_quietly;	/* for wait_for_inferior */
 
 /* Forward data declarations */
-extern struct target_ops hms_ops;	/* Forward declaration */
+static struct target_ops bug_ops;	/* Forward declaration */
 
 /* Forward function declarations */
-static void hms_fetch_registers ();
-static int hms_store_registers ();
-static void hms_close ();
-static int hms_clear_breakpoints ();
-
-extern struct target_ops hms_ops;
+static void bug_fetch_registers ();
+static int bug_store_registers ();
+static void bug_close ();
+static int bug_clear_breakpoints ();
 
 static int quiet = 1;
 
@@ -167,7 +166,7 @@ dcache_fetch (addr)
     {
       db = dcache_alloc ();
       immediate_quit++;
-      hms_read_inferior_memory (addr & ~LINE_SIZE_MASK, (unsigned char *) db->data, LINE_SIZE);
+      bug_read_inferior_memory (addr & ~LINE_SIZE_MASK, (unsigned char *) db->data, LINE_SIZE);
       immediate_quit--;
       db->addr = addr & ~LINE_SIZE_MASK;
       remque (db);		/* Off the free list */
@@ -190,7 +189,7 @@ dcache_poke (addr, data)
     {
       db = dcache_alloc ();
       immediate_quit++;
-      hms_write_inferior_memory (addr & ~LINE_SIZE_MASK, (unsigned char *) db->data, LINE_SIZE);
+      bug_write_inferior_memory (addr & ~LINE_SIZE_MASK, (unsigned char *) db->data, LINE_SIZE);
       immediate_quit--;
       db->addr = addr & ~LINE_SIZE_MASK;
       remque (db);		/* Off the free list */
@@ -202,7 +201,7 @@ dcache_poke (addr, data)
 
   /* Send the changed word.  */
   immediate_quit++;
-  hms_write_inferior_memory (addr, (unsigned char *) &data, 4);
+  bug_write_inferior_memory (addr, (unsigned char *) &data, 4);
   immediate_quit--;
 }
 
@@ -232,7 +231,7 @@ static int timeout = 2;
 static const char *dev_name;
 
 /* Descriptor for I/O to remote machine.  Initialize it to -1 so that
-   hms_open knows that we don't have a file open when the program
+   bug_open knows that we don't have a file open when the program
    starts.  */
 
 int is_open = 0;
@@ -306,24 +305,24 @@ expect (string)
     }
 }
 
-/* Keep discarding input until we see the hms prompt.
+/* Keep discarding input until we see the bug prompt.
 
    The convention for dealing with the prompt is that you
    o give your command
    o *then* wait for the prompt.
 
    Thus the last thing that a procedure does with the serial line
-   will be an expect_prompt().  Exception:  hms_resume does not
+   will be an expect_prompt().  Exception:  bug_resume does not
    wait for the prompt, because the terminal is being handed over
    to the inferior.  However, the next thing which happens after that
-   is a hms_wait which does wait for the prompt.
+   is a bug_wait which does wait for the prompt.
    Note that this includes abnormal exit, e.g. error().  This is
    necessary to prevent getting into states from which we can't
    recover.  */
 static void
 expect_prompt ()
 {
-  expect ("HMS>");
+  expect ("Bug>");
 }
 
 /* Get a hex digit from the remote system & return its value.
@@ -353,7 +352,7 @@ get_hex_digit (ignore_space)
     }
 }
 
-/* Get a byte from hms_desc and put it in *BYT.  Accept any number
+/* Get a byte from bug_desc and put it in *BYT.  Accept any number
    leading spaces.  */
 static void
 get_hex_byte (byt)
@@ -366,7 +365,7 @@ get_hex_byte (byt)
   *byt = val;
 }
 
-/* Read a 32-bit hex word from the hms, preceded by a space  */
+/* Read a 32-bit hex word from the bug, preceded by a space  */
 static long
 get_hex_word ()
 {
@@ -382,13 +381,13 @@ get_hex_word ()
 /* Called when SIGALRM signal sent due to alarm() timeout.  */
 
 /* Number of SIGTRAPs we need to simulate.  That is, the next
-   NEED_ARTIFICIAL_TRAP calls to hms_wait should just return
+   NEED_ARTIFICIAL_TRAP calls to bug_wait should just return
    SIGTRAP without actually waiting for anything.  */
 
 static int need_artificial_trap = 0;
 
 void
-hms_kill (arg, from_tty)
+bug_kill (arg, from_tty)
      char *arg;
      int from_tty;
 {
@@ -396,10 +395,10 @@ hms_kill (arg, from_tty)
 }
 
 /*
- * Download a file specified in 'args', to the hms.
+ * Download a file specified in 'args', to the bug.
  */
 static void
-hms_load (args, fromtty)
+bug_load (args, fromtty)
      char *args;
      int fromtty;
 {
@@ -432,7 +431,7 @@ hms_load (args, fromtty)
 	{
 	  int i;
 
-#define DELTA 1024
+#define DELTA (1024)
 	  char *buffer = xmalloc (DELTA);
 
 	  printf_filtered ("%s\t: 0x%4x .. 0x%4x  ", s->name, s->vma, s->vma + s->_raw_size);
@@ -444,7 +443,7 @@ hms_load (args, fromtty)
 		delta = s->_raw_size - i;
 
 	      bfd_get_section_contents (abfd, s, buffer, i, delta);
-	      hms_write_inferior_memory (s->vma + i, buffer, delta);
+	      bug_write_inferior_memory (s->vma + i, buffer, delta);
 	      printf_filtered ("*");
 	      fflush (stdout);
 	    }
@@ -453,15 +452,15 @@ hms_load (args, fromtty)
 	}
       s = s->next;
     }
-  sprintf (buffer, "r PC=%x", abfd->start_address);
-  hms_write_cr (buffer);
+  sprintf (buffer, "rs ip %x", abfd->start_address);
+  bug_write_cr (buffer);
   expect_prompt ();
 }
 
 /* This is called not only when we first attach, but also when the
    user types "run" after having attached.  */
 void
-hms_create_inferior (execfile, args, env)
+bug_create_inferior (execfile, args, env)
      char *execfile;
      char *args;
      char **env;
@@ -470,7 +469,7 @@ hms_create_inferior (execfile, args, env)
   char buffer[100];
 
   if (args && *args)
-    error ("Can't pass arguments to remote hms process.");
+    error ("Can't pass arguments to remote bug process.");
 
   if (execfile == 0 || exec_bfd == 0)
     error ("No exec file specified");
@@ -478,10 +477,10 @@ hms_create_inferior (execfile, args, env)
   entry_pt = (int) bfd_get_start_address (exec_bfd);
   check_open ();
 
-  hms_kill (NULL, NULL);
-  hms_clear_breakpoints ();
+  bug_kill (NULL, NULL);
+  bug_clear_breakpoints ();
   init_wait_for_inferior ();
-  hms_write_cr ("");
+  bug_write_cr ("");
   expect_prompt ();
 
   insert_breakpoints ();	/* Needed to get correct instruction in cache */
@@ -533,6 +532,7 @@ get_word (p)
 
 static int baudrate = 9600;
 
+#if 0
 static int
 is_baudrate_right ()
 {
@@ -540,8 +540,8 @@ is_baudrate_right ()
 
   /* Put this port into NORMAL mode, send the 'normal' character */
 
-  hms_write ("\001", 1);	/* Control A */
-  hms_write ("\r", 1);		/* Cr */
+  bug_write ("\001", 1);	/* Control A */
+  bug_write ("\r", 1);		/* Cr */
 
   while (1)
     {
@@ -550,7 +550,7 @@ is_baudrate_right ()
 	break;
     }
 
-  hms_write ("r", 1);
+  bug_write ("r", 1);
 
   if (readchar_nofail () == 'r')
     return 1;
@@ -558,6 +558,8 @@ is_baudrate_right ()
   /* Not the right baudrate, or the board's not on */
   return 0;
 }
+#endif /* not */
+
 static void
 set_rate ()
 {
@@ -567,19 +569,21 @@ set_rate ()
 
 
 static void
-hms_open (name, from_tty)
+bug_open (name, from_tty)
      char *name;
      int from_tty;
 {
   unsigned int prl;
   char *p;
 
+  push_target (&bug_ops);
+
   if (name == 0)
     {
       name = "";
     }
   if (is_open)
-    hms_close (0);
+    bug_close (0);
   dev_name = strdup (name);
 
   if (!(desc = SERIAL_OPEN (dev_name)))
@@ -595,25 +599,23 @@ hms_open (name, from_tty)
   expect_prompt ();
 
   /* Clear any break points */
-  hms_clear_breakpoints ();
+  bug_clear_breakpoints ();
 
-  printf_filtered ("Connected to remote H8/300 HMS system.\n");
+  printf_filtered ("Connected to remote 187bug system.\n");
 }
 
 /* Close out all files and local state before this target loses control. */
 
 static void
-hms_close (quitting)
+bug_close (quitting)
      int quitting;
 {
   /* Clear any break points */
-  hms_clear_breakpoints ();
-  sleep (1);			/* Let any output make it all the way back */
+  bug_clear_breakpoints ();
+
   if (is_open)
-    {
-      SERIAL_WRITE (desc, "R\r", 2);
-      SERIAL_CLOSE (desc);
-    }
+    SERIAL_CLOSE (desc);
+
   is_open = 0;
 }
 
@@ -621,16 +623,15 @@ hms_close (quitting)
    Use this when you want to detach and do something else
    with your gdb.  */
 void
-hms_detach (args, from_tty)
+bug_detach (args, from_tty)
      char *args;
      int from_tty;
 {
   if (is_open)
-    {
-      hms_clear_breakpoints ();
-    }
+    bug_clear_breakpoints ();
 
-  pop_target ();		/* calls hms_close to do the real work */
+  pop_target ();		/* calls bug_close to do the real work */
+
   if (from_tty)
     printf_filtered ("Ending remote %s debugging\n", target_shortname);
 }
@@ -638,33 +639,71 @@ hms_detach (args, from_tty)
 /* Tell the remote machine to resume.  */
 
 void
-hms_resume (pid, step, sig)
-     int pid, step, sig;
+bug_resume (step, sig)
+     int step, sig;
 {
   dcache_flush ();
 
   if (step)
     {
-      hms_write_cr ("s");
-      expect ("Step>");
+      bug_write_cr("t");
 
-      /* Force the next hms_wait to return a trap.  Not doing anything
+      /* Force the next bug_wait to return a trap.  Not doing anything
        about I/O from the target means that the user has to type
        "continue" to see any.  FIXME, this should be fixed.  */
       need_artificial_trap = 1;
     }
   else
-    {
-      hms_write_cr ("g");
-      expect ("g");
-    }
+      bug_write_cr ("g");
+
+  return;
 }
 
 /* Wait until the remote machine stops, then return,
    storing status in STATUS just as `wait' would.  */
 
 int
-hms_wait (status)
+not_bug_wait (status)
+     WAITTYPE *status;
+{
+  int old_timeout;
+  int old_quit;
+  int i;
+
+  expect("Effective address: ");
+  i = get_hex_word();
+  expect("\r");
+
+  WSETEXIT ((*status), 0);
+
+  old_timeout = timeout;
+  timeout = 99999;		/* while user program runs. */
+  old_quit = immediate_quit;
+  immediate_quit = 1; /* helps ability to quit. */
+
+  while (strchr("\n\r", i = readchar()) != NULL) ;;
+
+  immediate_quit = old_quit;
+  timeout = old_timeout;
+
+  if (i == 'A')
+    {
+/* At Breakpoint */
+      expect("t Breakpoint");
+      WSETSTOP ((*status), SIGTRAP);
+
+    }
+  else
+    {
+/* finished cleanly */
+      ;
+    }
+
+  expect_prompt();
+}
+
+int
+bug_wait (status)
      WAITTYPE *status;
 {
   /* Strings to look for.  '?' means match any single character.
@@ -672,12 +711,8 @@ hms_wait (status)
      of the string cannot recur in the string, or we will not
      find some cases of the string in the input.  */
 
-  static char bpt[] = "At breakpoint:";
-
-  /* It would be tempting to look for "\n[__exit + 0x8]\n"
-     but that requires loading symbols with "yc i" and even if
-     we did do that we don't know that the file has symbols.  */
-  static char exitmsg[] = "HMS>";
+  static char bpt[] = "At Breakpoint";
+  static char exitmsg[] = "????-Bug>";
   char *bp = bpt;
   char *ep = exitmsg;
 
@@ -699,8 +734,15 @@ hms_wait (status)
     {
       WSETSTOP ((*status), SIGTRAP);
       need_artificial_trap--;
+      /* user output from the target can be discarded here. (?) */
+      expect_prompt();
       return 0;
     }
+
+  /* read off leftovers from resume */
+  expect("Effective address: ");
+  (void) get_hex_word();
+  while (strchr("\r\n", ch = readchar()) != NULL) ;;
 
   timeout = 99999;		/* Don't time out -- user program is running. */
   immediate_quit = 1;		/* Helps ability to QUIT */
@@ -708,7 +750,6 @@ hms_wait (status)
     {
       QUIT;			/* Let user quit and leave process running */
       ch_handled = 0;
-      ch = readchar ();
       if (ch == *bp)
 	{
 	  bp++;
@@ -754,6 +795,8 @@ hms_wait (status)
 	  swallowed_cr++;
 
 	}
+
+      ch = readchar ();
     }
   if (*bp == '\0')
     {
@@ -771,19 +814,32 @@ hms_wait (status)
 }
 
 /* Return the name of register number REGNO
-   in the form input and output by hms.
+   in the form input and output by bug.
 
    Returns a pointer to a static buffer containing the answer.  */
 static char *
 get_reg_name (regno)
      int regno;
 {
-  static char *rn[] = REGISTER_NAMES;
+  static char *rn[] = {
+    "r00", "r01", "r02", "r03", "r04", "r05", "r06", "r07",
+    "r08", "r09", "r10", "r11", "r12", "r13", "r14", "r15",
+    "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",
+    "r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31",
+
+    /* these get confusing because we omit a few and switch some ordering around. */
+
+    "cr01",  /* 32 = psr */
+    "fcr62", /* 33 = fpsr*/
+    "fcr63", /* 34 = fpcr */
+    "cr04",  /* 35 = sxip */
+    "cr05", /* 36 = snip */
+    "cr06", /* 37 = sfip */
+  };
 
   return rn[regno];
 }
 
-/* Read the remote registers.  */
 static int
 gethex (length, start, ok)
      unsigned int length;
@@ -836,7 +892,7 @@ timed_read (buf, n, timeout)
   return i;
 }
 
-hms_write (a, l)
+bug_write (a, l)
      char *a;
 {
   int i;
@@ -850,93 +906,87 @@ hms_write (a, l)
       }
 }
 
-hms_write_cr (s)
+bug_write_cr (s)
      char *s;
 {
-  hms_write (s, strlen (s));
-  hms_write ("\r", 1);
+  bug_write (s, strlen (s));
+  bug_write ("\r", 1);
 }
 
+/* Store register REGNO, or all if REGNO == -1. */
+
 static void
-hms_fetch_register (dummy)
-     int dummy;
-{
-#define REGREPLY_SIZE 79
-  char linebuf[REGREPLY_SIZE + 1];
-  int i;
-  int s;
-  int gottok;
-
-  REGISTER_TYPE reg[NUM_REGS];
-  int foo[8];
-
-  check_open ();
-
-  do
-    {
-
-      hms_write_cr ("r");
-      s = timed_read (linebuf, REGREPLY_SIZE, 1);
-
-      linebuf[REGREPLY_SIZE] = 0;
-      gottok = 0;
-      if (linebuf[0] == 'r' &&
-	  linebuf[3] == 'P' &&
-	  linebuf[4] == 'C' &&
-	  linebuf[5] == '=' &&
-	  linebuf[75] == 'H' &&
-	  linebuf[76] == 'M' &&
-	  linebuf[77] == 'S')
-	{
-	  /*
-	PC=XXXX CCR=XX:XXXXXXXX R0-R7= XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX
-	5436789012345678901234567890123456789012345678901234567890123456789012
-	0      1         2         3         4         5         6
-	*/
-	  gottok = 1;
-
-	  reg[PC_REGNUM] = gethex (4, linebuf + 6, &gottok);
-	  reg[CCR_REGNUM] = gethex (2, linebuf + 15, &gottok);
-	  for (i = 0; i < 8; i++)
-	    {
-	      reg[i] = gethex (4, linebuf + 34 + 5 * i, &gottok);
-	    }
-	}
-    }
-  while (!gottok);
-  for (i = 0; i < NUM_REGS; i++)
-    {
-      char swapped[2];
-
-      swapped[1] = reg[i];
-      swapped[0] = (reg[i]) >> 8;
-
-      supply_register (i, swapped);
-    }
-}
-
-/* Store register REGNO, or all if REGNO == -1.
-   Return errno value.  */
-static void
-hms_store_register (regno)
+bug_fetch_register(regno)
      int regno;
 {
+  REGISTER_TYPE regval;
+  check_open();
+
   if (regno == -1)
     {
-      for (regno = 0; regno < NUM_REGS; regno++)
-	{
-	  hms_store_register (regno);
-	}
+      int i;
+
+      for (i = 0; i < NUM_REGS; ++i)
+	bug_fetch_register(i);
     }
   else
     {
-      char *name = get_reg_name (regno);
-      char buffer[100];
+      bug_write("rs ", 3);
+      bug_write_cr(get_reg_name(regno));
+      expect("=");
+      regval = get_hex_word();
+      expect_prompt();
 
-      sprintf (buffer, "r %s=%x", name, read_register (regno));
-      hms_write_cr (buffer);
-      expect_prompt ();
+      /* the following registers contain flag bits in the lower to bit slots.
+	 Mask them off */
+      if (regno == PC_REGNUM	/* aka sxip */
+	  || regno == NPC_REGNUM /* aka snip */
+	  || regno == SFIP_REGNUM)	/* aka sfip */
+	regval &= ~0x3;
+
+      supply_register(regno, (char *) &regval);
     }
+
+  return;
+}
+
+/* Store register REGNO, or all if REGNO == -1. */
+
+static void
+bug_store_register (regno)
+     int regno;
+{
+  REGISTER_TYPE regval;
+  char buffer[1024];
+  check_open();
+
+  if (regno == -1)
+    {
+      int i;
+
+      for (i = 0; i < NUM_REGS; ++i)
+	bug_store_register(i);
+    }
+  else
+    {
+      char *regname;
+
+      /* get_reg_name thinks that the pc is in sxip.  This is only partially
+	 true.  When *assigning* it, we must assign to ip on m88k-bug. */
+
+      regname = ((regno == PC_REGNUM)
+		 ? "ip"
+		 : get_reg_name(regno));
+
+      sprintf(buffer, "rs %s %08x",
+	      regname,
+	      read_register(regno));
+
+      bug_write_cr(buffer);
+      expect_prompt();
+    }
+
+  return;
 }
 
 /* Get ready to modify the registers array.  On machines which store
@@ -946,7 +996,7 @@ hms_store_register (regno)
    debugged.  */
 
 void
-hms_prepare_to_store ()
+bug_prepare_to_store ()
 {
   /* Do nothing, since we can store individual regs */
 }
@@ -964,7 +1014,7 @@ translate_addr (addr)
  * This goes through the data cache.
  */
 int
-hms_fetch_word (addr)
+bug_fetch_word (addr)
      CORE_ADDR addr;
 {
   return dcache_fetch (addr);
@@ -974,7 +1024,7 @@ hms_fetch_word (addr)
    This goes through the data cache.  */
 
 void
-hms_store_word (addr, word)
+bug_store_word (addr, word)
      CORE_ADDR addr;
      int word;
 {
@@ -982,7 +1032,7 @@ hms_store_word (addr, word)
 }
 
 int
-hms_xfer_inferior_memory (memaddr, myaddr, len, write, target)
+bug_xfer_inferior_memory (memaddr, myaddr, len, write, target)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
@@ -1000,7 +1050,6 @@ hms_xfer_inferior_memory (memaddr, myaddr, len, write, target)
   /* Allocate buffer of that many longwords.  */
   register int *buffer;
 
-  memaddr &= 0xffff;
   addr = memaddr & -sizeof (int);
   count = (((memaddr + len) - addr) + sizeof (int) - 1) / sizeof (int);
 
@@ -1013,13 +1062,13 @@ hms_xfer_inferior_memory (memaddr, myaddr, len, write, target)
       if (addr != memaddr || len < (int) sizeof (int))
 	{
 	  /* Need part of initial word -- fetch it.  */
-	  buffer[0] = hms_fetch_word (addr);
+	  buffer[0] = bug_fetch_word (addr);
 	}
 
       if (count > 1)		/* FIXME, avoid if even boundary */
 	{
 	  buffer[count - 1]
-	    = hms_fetch_word (addr + (count - 1) * sizeof (int));
+	    = bug_fetch_word (addr + (count - 1) * sizeof (int));
 	}
 
       /* Copy data to be written over corresponding part of buffer */
@@ -1031,7 +1080,7 @@ hms_xfer_inferior_memory (memaddr, myaddr, len, write, target)
       for (i = 0; i < count; i++, addr += sizeof (int))
 	{
 	  errno = 0;
-	  hms_store_word (addr, buffer[i]);
+	  bug_store_word (addr, buffer[i]);
 	  if (errno)
 	    {
 
@@ -1046,7 +1095,7 @@ hms_xfer_inferior_memory (memaddr, myaddr, len, write, target)
       for (i = 0; i < count; i++, addr += sizeof (int))
 	{
 	  errno = 0;
-	  buffer[i] = hms_fetch_word (addr);
+	  buffer[i] = bug_fetch_word (addr);
 	  if (errno)
 	    {
 	      return 0;
@@ -1061,45 +1110,64 @@ hms_xfer_inferior_memory (memaddr, myaddr, len, write, target)
   return len;
 }
 
+/* fixme: make this user settable */
+#define CHUNK_SIZE (30)
+
 int
-hms_write_inferior_memory (memaddr, myaddr, len)
+bug_write_inferior_memory (memaddr, myaddr, len)
      CORE_ADDR memaddr;
      unsigned char *myaddr;
      int len;
 {
-  bfd_vma addr;
   int done;
   int todo;
+  int checksum;
+  char buffer[(CHUNK_SIZE + 8) << 1];
 
   done = 0;
+
+#define LOAD_COMMAND "lo 0"
+  bug_write_cr (LOAD_COMMAND);
+
   while (done < len)
     {
-      char buffer[20];
       int thisgo;
       int idx;
+      char *buf = buffer;
+      CORE_ADDR address;
 
+      checksum = 0;
       thisgo = len - done;
-      if (thisgo > 20)
-	thisgo = 20;
+      if (thisgo > CHUNK_SIZE)
+	thisgo = CHUNK_SIZE;
 
-      sprintf (buffer, "M.B %4x =", memaddr + done);
-      hms_write (buffer, 10);
+      address = memaddr + done;
+      sprintf (buf, "S3%02X%08X", thisgo + 4 + 1, address);
+      buf += 12;
+
+      checksum += (thisgo + 4 + 1
+		   + (address & 0xff)
+		   + ((address >>  8) & 0xff)
+		   + ((address >> 16) & 0xff)
+		   + ((address >> 24) & 0xff));
+
       for (idx = 0; idx < thisgo; idx++)
 	{
-	  char buf[20];
-
-	  sprintf (buf, "%2x ", myaddr[idx + done]);
-	  hms_write (buf, 3);
+	  sprintf (buf, "%02X", myaddr[idx + done]);
+	  checksum += myaddr[idx + done];
+	  buf += 2;
 	}
-      hms_write_cr ("");
-      expect_prompt ();
+      sprintf(buf, "%02X", ~checksum & 0xff);
+      bug_write_cr (buffer);
       done += thisgo;
     }
 
+  bug_write_cr("S7060000000000F9");
+  expect_prompt();
 }
 
 void
-hms_files_info ()
+bug_files_info ()
 {
   char *file = "nothing";
 
@@ -1112,7 +1180,7 @@ hms_files_info ()
 #else
     printf_filtered ("\tAttached to %s at %d baud and running program %s\n", dev_name, baudrate, file);
 #endif
-  printf_filtered ("\ton an H8/300 processor.\n");
+  printf_filtered ("\ton an m88k processor.\n");
 }
 
 /* Copy LEN bytes of data from debugger memory at MYADDR
@@ -1123,86 +1191,102 @@ hms_files_info ()
 /* Read LEN bytes from inferior memory at MEMADDR.  Put the result
    at debugger address MYADDR.  Returns errno value.  */
 int
-hms_read_inferior_memory (memaddr, myaddr, len)
+bug_read_inferior_memory (memaddr, myaddr, len)
      CORE_ADDR memaddr;
      char *myaddr;
      int len;
 {
-  /* Align to nearest low 16 bits */
-  int i;
+  char request[100];
+  char *buffer;
+  char *p;
+  char type;
+  char size;
+  unsigned char c;
+  unsigned int inaddr;
+  unsigned int checksum;
 
-#if 0
-  CORE_ADDR start = memaddr & ~0xf;
-  CORE_ADDR end = ((memaddr + len + 16) & ~0xf) - 1;
+  sprintf(request, "du 0 %x:&%d", memaddr, len);
+  bug_write_cr(request);
 
-#endif
-  CORE_ADDR start = memaddr;
-  CORE_ADDR end = memaddr + len - 1;
+  p = buffer = alloca(len);
 
-  int ok = 1;
+  /* scan up through the header */
+  expect("S0030000FC");
 
-  /*
-    AAAA: XXXX XXXX XXXX XXXX XXXX XXXX XXXX XXXX '................'
-    012345678901234567890123456789012345678901234567890123456789012345
-    0         1         2         3         4         5         6
-    */
-  char buffer[66];
-
-  if (memaddr & 0xf)
-    abort ();
-  if (len != 16)
-    abort ();
-
-  sprintf (buffer, "m %4x %4x", start & 0xffff, end & 0xffff);
-  hms_write_cr (buffer);
-  /* drop the echo and newline*/
-  for (i = 0; i < 13; i++)
-    readchar ();
-
-  /* Grab the lines as they come out and fill the area */
-  /* Skip over cr */
-  while (1)
+  while (p < buffer + len)
     {
-      int p;
-      int i;
-      int addr;
-      size_t idx;
+      /* scan off any white space. */
+      while (readchar() != 'S') ;;
 
-      char byte[16];
+      /* what kind of s-rec? */
+      type = readchar();
 
-      buffer[0] = readchar ();
-      if (buffer[0] == 'M')
-	break;
-      for (i = 1; i < 66; i++)
-	buffer[i] = readchar ();
+      /* scan record size */
+      get_hex_byte(&size);
+      checksum = size;
+      --size;
+      inaddr = 0;
 
-      /* Now parse the line */
-
-      addr = gethex (4, buffer, &ok);
-      idx = 6;
-      for (p = 0; p < 16; p += 2)
+      switch (type)
 	{
-	  byte[p] = gethex (2, buffer + idx, &ok);
-	  byte[p + 1] = gethex (2, buffer + idx + 2, &ok);
-	  idx += 5;
+	case '7':
+	case '8':
+	case '9':
+	  goto done;
 
+	case '3':
+	  get_hex_byte(&c);
+	  inaddr = (inaddr << 8) + c;
+	  checksum += c;
+	  --size;
+	  /* intentional fall through */
+	case '2':
+	  get_hex_byte(&c);
+	  inaddr = (inaddr << 8) + c;
+	  checksum += c;
+	  --size;
+	  /* intentional fall through */
+	case '1':
+	  get_hex_byte(&c);
+	  inaddr = (inaddr << 8) + c;
+	  checksum += c;
+	  --size;
+	  get_hex_byte(&c);
+	  inaddr = (inaddr << 8) + c;
+	  checksum += c;
+	  --size;
+	  break;
+
+	default:
+	  /* bonk */
+	  error("reading s-records.");
 	}
 
-      for (p = 0; p < 16; p++)
+      if (inaddr < memaddr
+	  || (memaddr + len) < (inaddr + size))
+	error("srec out of memory range.");
+
+      if (p != buffer + inaddr - memaddr)
+	error("srec out of sequence.");
+
+      for (; size; --size, ++p)
 	{
-	  if (addr + p >= memaddr &&
-	      addr + p < memaddr + len)
-	    {
-	      myaddr[(addr + p) - memaddr] = byte[p];
-
-	    }
-
+	  get_hex_byte(p);
+	  checksum += *p;
 	}
+
+      get_hex_byte(&c);
+      if (c != (~checksum & 0xff))
+	error("bad s-rec checksum");
     }
-  expect ("emory>");
-  hms_write_cr (" ");
-  expect_prompt ();
-  return len;
+
+ done:
+  expect_prompt();
+  if (p != buffer + len)
+    return(1);
+
+  memcpy(myaddr, buffer, len);
+  return(0);
 }
 
 /* This routine is run as a hook, just before the main command loop is
@@ -1210,21 +1294,21 @@ hms_read_inferior_memory (memaddr, myaddr, len)
    target specified yet, this will loop prompting the user to do so.
 */
 
-hms_before_main_loop ()
+bug_before_main_loop ()
 {
   char ttyname[100];
   char *p, *p2;
   extern FILE *instream;
 
-  push_target (&hms_ops);
+  push_target (&bug_ops);
 }
 
 #define MAX_BREAKS	16
 static int num_brkpts = 0;
 static int
-hms_insert_breakpoint (addr, save)
+bug_insert_breakpoint (addr, save)
      CORE_ADDR addr;
-     char *save;		/* Throw away, let hms save instructions */
+     char *save;		/* Throw away, let bug save instructions */
 {
   check_open ();
 
@@ -1233,65 +1317,64 @@ hms_insert_breakpoint (addr, save)
       char buffer[100];
 
       num_brkpts++;
-      sprintf (buffer, "b %x", addr & 0xffff);
-      hms_write_cr (buffer);
+      sprintf (buffer, "br %x", addr);
+      bug_write_cr (buffer);
       expect_prompt ();
-      return (0);
+      return(0);
     }
   else
     {
       fprintf_filtered (stderr,
 		      "Too many break points, break point not installed\n");
-      return (1);
+      return(1);
     }
 
 }
 static int
-hms_remove_breakpoint (addr, save)
+bug_remove_breakpoint (addr, save)
      CORE_ADDR addr;
-     char *save;		/* Throw away, let hms save instructions */
+     char *save;		/* Throw away, let bug save instructions */
 {
   if (num_brkpts > 0)
     {
       char buffer[100];
 
       num_brkpts--;
-      sprintf (buffer, "b - %x", addr & 0xffff);
-      hms_write_cr (buffer);
+      sprintf (buffer, "nobr %x", addr);
+      bug_write_cr (buffer);
       expect_prompt ();
 
     }
   return (0);
 }
 
-/* Clear the hmss notion of what the break points are */
+/* Clear the bugs notion of what the break points are */
 static int
-hms_clear_breakpoints ()
+bug_clear_breakpoints ()
 {
 
   if (is_open)
     {
-      hms_write_cr ("b -");
+      bug_write_cr ("nobr");
       expect_prompt ();
     }
   num_brkpts = 0;
 }
 static void
-hms_mourn ()
+bug_mourn ()
 {
-  hms_clear_breakpoints ();
-  unpush_target (&hms_ops);
+  bug_clear_breakpoints ();
   generic_mourn_inferior ();
 }
 
-/* Put a command string, in args, out to the hms.  The hms is assumed to
+/* Put a command string, in args, out to the bug.  The bug is assumed to
    be in raw mode, all writing/reading done through desc.
-   Ouput from the hms is placed on the users terminal until the
-   prompt from the hms is seen.
+   Ouput from the bug is placed on the users terminal until the
+   prompt from the bug is seen.
    FIXME: Can't handle commands that take input.  */
 
 void
-hms_com (args, fromtty)
+bug_com (args, fromtty)
      char *args;
      int fromtty;
 {
@@ -1302,41 +1385,12 @@ hms_com (args, fromtty)
 
   /* Clear all input so only command relative output is displayed */
 
-  hms_write_cr (args);
-  hms_write ("\030", 1);
+  bug_write_cr (args);
+  bug_write ("\030", 1);
   expect_prompt ();
 }
 
-/* Define the target subroutine names */
-
-struct target_ops hms_ops =
-{
-  "hms", "Remote HMS monitor",
-  "Use the H8 evaluation board running the HMS monitor connected\n\
-by a serial line.",
-
-  hms_open, hms_close,
-  0, hms_detach, hms_resume, hms_wait,	/* attach */
-  hms_fetch_register, hms_store_register,
-  hms_prepare_to_store,
-  hms_xfer_inferior_memory,
-  hms_files_info,
-  hms_insert_breakpoint, hms_remove_breakpoint,	/* Breakpoints */
-  0, 0, 0, 0, 0,		/* Terminal handling */
-  hms_kill,			/* FIXME, kill */
-  hms_load,
-  0,				/* lookup_symbol */
-  hms_create_inferior,		/* create_inferior */
-  hms_mourn,			/* mourn_inferior FIXME */
-  0,				/* can_run */
-  0,				/* notice_signals */
-  process_stratum, 0,		/* next */
-  1, 1, 1, 1, 1,		/* all mem, mem, stack, regs, exec */
-  0, 0,				/* Section pointers */
-  OPS_MAGIC,			/* Always the last thing */
-};
-
-hms_quiet ()
+bug_quiet ()
 {
   quiet = !quiet;
   if (quiet)
@@ -1346,7 +1400,7 @@ hms_quiet ()
 
 }
 
-hms_device (s)
+bug_device (s)
      char *s;
 {
   if (s)
@@ -1355,8 +1409,9 @@ hms_device (s)
     }
 }
 
+#if 0
 static
-hms_speed (s)
+bug_speed (s)
      char *s;
 {
   check_open ();
@@ -1376,27 +1431,55 @@ hms_speed (s)
 		       baudrate);
 
       sprintf (buffer, "tm %d. N 8 1", baudrate);
-      hms_write_cr (buffer);
+      bug_write_cr (buffer);
     }
 }
+#endif /* 0 */
 
-/***********************************************************************/
+static struct target_ops bug_ops =
+{
+  "bug", "Remote BUG monitor",
+  "Use the mvme187 board running the BUG monitor connected\n\
+by a serial line.",
+
+  bug_open, bug_close,
+  0, bug_detach, bug_resume, bug_wait,	/* attach */
+  bug_fetch_register, bug_store_register,
+  bug_prepare_to_store,
+  bug_xfer_inferior_memory,
+  bug_files_info,
+  bug_insert_breakpoint, bug_remove_breakpoint,	/* Breakpoints */
+  0, 0, 0, 0, 0,		/* Terminal handling */
+  bug_kill,			/* FIXME, kill */
+  bug_load,
+  0,				/* lookup_symbol */
+  bug_create_inferior,		/* create_inferior */
+  bug_mourn,			/* mourn_inferior FIXME */
+  0,				/* can_run */
+  0,				/* notice_signals */
+  process_stratum, 0,		/* next */
+  1, 1, 1, 1, 1,		/* all mem, mem, stack, regs, exec */
+  0, 0,				/* Section pointers */
+  OPS_MAGIC,			/* Always the last thing */
+};
 
 void
-_initialize_remote_hms ()
+_initialize_remote_bug ()
 {
-  add_target (&hms_ops);
+  add_target (&bug_ops);
 
-  add_com ("hms <command>", class_obscure, hms_com,
-	   "Send a command to the HMS monitor.");
-  add_com ("snoop", class_obscure, hms_quiet,
+  add_com ("bug <command>", class_obscure, bug_com,
+	   "Send a command to the BUG monitor.");
+  add_com ("snoop", class_obscure, bug_quiet,
 	   "Show what commands are going to the monitor");
 
-  add_com ("device", class_obscure, hms_device,
-	   "Set the terminal line for HMS communications");
+  add_com ("device", class_obscure, bug_device,
+	   "Set the terminal line for BUG communications");
 
-  add_com ("speed", class_obscure, hms_speed,
-	   "Set the terminal line speed for HMS communications");
+#if 0
+  add_com ("speed", class_obscure, bug_speed,
+	   "Set the terminal line speed for BUG communications");
+#endif /* 0 */
 
   dev_name = NULL;
 }

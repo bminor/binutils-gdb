@@ -1,5 +1,5 @@
 /* Remote debugging interface for MONITOR boot monitor, for GDB.
-   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
    Contributed by Cygnus Support. Written by Rob Savoye for Cygnus.
 
 This file is part of GDB.
@@ -59,7 +59,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 struct monitor_ops *current_monitor;
 extern struct target_ops rom68k_ops;		/* Forward declaration */
 extern struct target_ops mon68_ops;		/* Forward declaration */
-extern struct target_ops bug_ops;		/* Forward declaration */
+static struct target_ops bug_ops;		/* Forward declaration */
 extern struct monitor_ops rom68k_cmds;		/* Forward declaration */
 extern struct monitor_ops mon68_cmds;		/* Forward declaration */
 extern struct monitor_ops bug_cmds;		/* Forward declaration */
@@ -80,10 +80,10 @@ FILE *log_file;
 
 static int timeout = 24;
 
-/* Descriptor for I/O to remote machine.  Initialize it to -1 so that
-   monitor_open knows that we don't have a file open when the program
-   starts.  */
-static serial_t monitor_desc;
+/* Descriptor for I/O to remote machine.  Initialize it to NULL so that
+   monitor_open knows that we don't have a file open when the program starts.
+   */
+static serial_t monitor_desc = NULL;
 
 /* Send data to monitor.  Works just like printf. */
 
@@ -333,7 +333,7 @@ general_open(args, name, from_tty)
 
   monitor_desc = SERIAL_OPEN(dev_name);
 
-  if (!monitor_desc)
+  if (monitor_desc == NULL)
     perror_with_name(dev_name);
 
   /* The baud rate was specified when GDB was started.  */
@@ -409,6 +409,7 @@ monitor_close (quitting)
      int quitting;
 {
   SERIAL_CLOSE(monitor_desc);
+  monitor_desc = NULL;
 
 #if defined (LOG_FILE)
   if (log_file) {
@@ -886,7 +887,7 @@ monitor_command (args, fromtty)
 #ifdef LOG_FILE
   fprintf (log_file, "\nIn command (args=%s)\n", args);
 #endif
-  if (monitor_desc < 0)
+  if (monitor_desc == NULL)
     error("monitor target not open.");
   
   if (!args)
@@ -921,7 +922,7 @@ connect_command (args, fromtty)
 
   dont_repeat();
 
-  if (monitor_desc < 0)
+  if (monitor_desc == NULL)
     error("monitor target not open.");
   
   if (args)
@@ -1091,7 +1092,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   OPS_MAGIC,			/* Always the last thing */
 };
 
-struct target_ops bug_ops = {
+static struct target_ops bug_ops = {
   "bug",
   "Motorola's BUG remote serial debug monitor",
   "Use a remote computer running Motorola's BUG debug monitor.\n\
