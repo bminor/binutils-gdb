@@ -197,5 +197,8 @@ if [istarget hppa*-*-*] then {
     # Make sure GAS understands a reasonable set of standard predefined
     # registers.  eg %rp, %dp, %sp, etc.
     gas_test "stdreg.s" "" "" "Test standard predefined registers"
+
+    # Make sure GAS will accept a label without a colon.
+    gas_test "labelbug.s" "" "" "Test label without colon"
 }
 

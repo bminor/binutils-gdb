@@ -37,6 +37,7 @@ exportbug.s
 exprbug.s
 fixup7bug.s
 global.s
+labelbug.s
 linesepbug.s
 lselbug.s
 nosubspace.s
