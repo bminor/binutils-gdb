@@ -1,3 +1,8 @@
+2000-03-28  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* procfs.c (proc_set_watchpoint):  Declare addr parameter as
+	CORE_ADDR, to match call from procfs_set_watchpoint.
+
 2000-03-28  Christopher Faylor  <cgf@cygnus.com>
 
         * partial-stab.h: Add one more check against corrupted or irregular

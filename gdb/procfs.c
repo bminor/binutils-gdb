@@ -2579,8 +2579,8 @@ proc_parent_pid (pi)
 
 int
 proc_set_watchpoint (pi, addr, len, wflags)
-     procinfo *pi;
-     void     *addr;
+     procinfo  *pi;
+     CORE_ADDR addr;
      int       len;
      int       wflags;
 {
