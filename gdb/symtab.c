@@ -83,7 +83,7 @@ lookup_symtab_1 (name)
     if (!strcmp (name, ps->filename))
       {
 	if (ps->readin)
-	  fatal ("Internal: readin pst found when no symtab found.");
+	  error ("Internal: readin pst for `%s' found when no symtab found.", name);
 	return PSYMTAB_TO_SYMTAB (ps);
       }
 
@@ -106,7 +106,7 @@ lookup_symtab_1 (name)
 	      && !strcmp (ps->filename + l - len, name))
 	    {
 	      if (ps->readin)
-		fatal ("Internal: readin pst found when no symtab found.");
+		error ("Internal: readin pst for `%s' found when no symtab found.", name);
 	      return PSYMTAB_TO_SYMTAB (ps);
 	    }
 	}
@@ -1039,7 +1039,7 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
 	block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	sym = lookup_block_symbol (block, name, namespace);
 	if (!sym)
-	  fatal ("Internal: global symbol found in psymtab but not in symtab");
+	  error ("Internal: global symbol `%s' found in psymtab but not in symtab", name);
 	if (symtab != NULL)
 	  *symtab = s;
 	return sym;
@@ -1071,7 +1071,7 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
 	block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 	sym = lookup_block_symbol (block, name, namespace);
 	if (!sym)
-	  fatal ("Internal: static symbol found in psymtab but not in symtab");
+	  error ("Internal: static symbol `%s' found in psymtab but not in symtab", name);
 	if (symtab != NULL)
 	  *symtab = s;
 	return sym;
@@ -1104,7 +1104,7 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
 	    block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 	    sym = lookup_demangled_block_symbol (block, name);
 	    if (!sym)
-	      fatal ("Internal: static symbol found in psymtab but not in symtab");
+	      error ("Internal: mangled static symbol `%s' found in psymtab but not in symtab", name);
 	    if (symtab != NULL)
 	      *symtab = s;
 	    return sym;
@@ -1383,7 +1383,7 @@ find_pc_symtab (pc)
       ps = find_pc_psymtab (pc);
       if (ps && ps->readin)
 	printf_filtered (
-	  "(Internal error: pc in read in psymtab, but not in symtab.)\n");
+	  "(Internal error: pc 0x%x in read in psymtab, but not in symtab.)\n", pc);
 
       if (ps)
 	s = PSYMTAB_TO_SYMTAB (ps);

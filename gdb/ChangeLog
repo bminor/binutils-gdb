@@ -1,5 +1,7 @@
 Thu Oct 24 01:32:51 1991  Fred Fish  (fnf at cygnus.com)
 
+	* symtab.c: Make internal errors produce more useful messages.
+
 	* tm-68k.h: Move code that is duplicated in almost every single
 	m68k based machine's configuration files to this common file.
 	Duplications in the configuration files still need to be removed
