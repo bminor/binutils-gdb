@@ -530,7 +530,7 @@ DEFUN(oasys_slurp_section_data,(abfd),
 				oasys_reloc_type *r =
 				  (oasys_reloc_type *)
 				    bfd_alloc(abfd,
-						 sizeof(oasys_reloc_type));
+					      sizeof(oasys_reloc_type));
 				*(per->reloc_tail_ptr) = r;
 				per->reloc_tail_ptr = &r->next;
 				r->next= (oasys_reloc_type *)NULL;
@@ -546,6 +546,16 @@ DEFUN(oasys_slurp_section_data,(abfd),
 				r->relent.howto = &howto_table[reloc>>6];
 				r->relent.sym_ptr_ptr = (asymbol **)NULL;
 				section->reloc_count++;
+
+				/* Fake up the data to look like it's got the -ve pc in it, this makes
+				   it much easier to convert into other formats. This is done by
+				   hitting the addend.
+				   */
+				if (r->relent.howto->pc_relative == true) {
+				  r->relent.addend -= dst_ptr - dst_base_ptr;
+				}
+
+
 			      }
 			    break;
 
@@ -555,7 +565,7 @@ DEFUN(oasys_slurp_section_data,(abfd),
 				oasys_reloc_type *r =
 				  (oasys_reloc_type *)
 				    bfd_alloc(abfd,
-						 sizeof(oasys_reloc_type));
+					      sizeof(oasys_reloc_type));
 				*(per->reloc_tail_ptr) = r;
 				per->reloc_tail_ptr = &r->next;
 				r->next= (oasys_reloc_type *)NULL;
@@ -572,6 +582,16 @@ DEFUN(oasys_slurp_section_data,(abfd),
 				section->reloc_count++;
 
 				src+=2;
+				/* Fake up the data to look like it's got the -ve pc in it, this makes
+				   it much easier to convert into other formats. This is done by
+				   hitting the addend.
+				   */
+				if (r->relent.howto->pc_relative == true) {
+				  r->relent.addend -= dst_ptr - dst_base_ptr;
+				}
+
+				
+
 			      }
 			    break;
 			  case RELOCATION_TYPE_COM:
@@ -914,6 +934,20 @@ DEFUN(oasys_write_data, (abfd),
 		  *mod |= (1<<i);
 		  if(how->pc_relative) {
 		    rel_byte = 0x80;
+
+		    /* Also patch the raw data so that it doesn't have
+		       the -ve stuff any more */
+		    if (how->size != 2) {
+		      bfd_putshort(abfd, 
+				   bfd_getshort(abfd,raw_data) +
+				   current_byte_index, raw_data);
+		    }
+
+		    else {
+		      bfd_putlong(abfd, 
+				  bfd_getlong(abfd,raw_data) +
+				  current_byte_index, raw_data);
+		    }
 		  }
 		  else {
 		    rel_byte = 0;
@@ -921,7 +955,7 @@ DEFUN(oasys_write_data, (abfd),
 		  if (how->size ==2) {
 		    rel_byte |= 0x40;
 		  }
-
+		  
 		  /* Is this a section relative relocation, or a symbol
 		     relative relocation ? */
 		  if (r->section != (asection*)NULL) 
@@ -1134,9 +1168,9 @@ unsigned int *line_ptr;
 }
 
 static int
-oasys_generic_stat_arch_elt(abfd, buf)
-bfd *abfd;
-struct stat *buf;
+DEFUN(oasys_generic_stat_arch_elt,(abfd, buf),
+      bfd *abfd AND
+      struct stat *buf)
 {
   oasys_module_info_type *mod = (oasys_module_info_type *) abfd->arelt_data;
   if (mod == (oasys_module_info_type *)NULL) {
@@ -1146,7 +1180,7 @@ struct stat *buf;
   else {
     buf->st_size = mod->size;
     buf->st_mode = 0666;
-  return 0;
+    return 0;
   }
 }
 
