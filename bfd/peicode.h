@@ -902,10 +902,40 @@ pe_ILF_build_a_bfd (bfd *           abfd,
       symbol = symbol_name;
 
       if (import_name_type != IMPORT_NAME)
-	/* Skip any prefix in symbol_name.  */
-	while (*symbol == '@' || * symbol == '?' || * symbol == '_')
-	  ++ symbol;
+	{
+	  bfd_boolean skipped_leading_underscore = FALSE;
+	  bfd_boolean skipped_leading_at = FALSE;
+	  bfd_boolean skipped_leading_question_mark = FALSE;
+	  bfd_boolean check_again;
+	  
+	  /* Skip any prefix in symbol_name.  */
+	  -- symbol;
+	  do
+	    {
+	      check_again = FALSE;
+	      ++ symbol;
 
+	      switch (*symbol)
+		{
+		case '@':
+		  if (! skipped_leading_at)
+		    check_again = skipped_leading_at = TRUE;
+		  break;
+		case '?':
+		  if (! skipped_leading_question_mark)
+		    check_again = skipped_leading_question_mark = TRUE;
+		  break;
+		case '_':
+		  if (! skipped_leading_underscore)
+		    check_again = skipped_leading_underscore = TRUE;
+		  break;
+		default:
+		  break;
+		}
+	    }
+	  while (check_again);
+	}
+      
       if (import_name_type == IMPORT_NAME_UNDECORATE)
 	{
 	  /* Truncate at the first '@'  */
