@@ -1,3 +1,7 @@
+Mon Sep 15 17:36:15 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Fri Sep 12 12:01:39 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (mips_options): Fix samples option short form, should

@@ -1,3 +1,8 @@
+Thu Sep 11 13:04:40 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* common/Make-common.in: New file, provide generic rules for
+ 	running checks.
+
 Mon Sep  1 16:43:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (configdirs): Test for the target directory instead

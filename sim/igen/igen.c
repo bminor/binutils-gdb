@@ -438,7 +438,7 @@ print_itrace_format (lf *file,
 		    {
 		      lf_printf (file, "%sstr_", options.prefix.global.name);
 		      lf_write (file, func, strlen_func);
-		      lf_printf (file, " (_SD, ");
+		      lf_printf (file, " (SD_, ");
 		      lf_write (file, param, strlen_param);
 		      lf_printf (file, ")");
 		    }

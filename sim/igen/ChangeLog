@@ -1,3 +1,8 @@
+Mon Sep 15 15:47:21 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gen-support.c (gen_support_h): Define SD_ - to replace _SD.
+  	Define CIA from cia.
+
 Thu Sep 11 10:27:39 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gen-semantics.c (print_semantic_body): Trace the instruction
