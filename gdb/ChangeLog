@@ -1,3 +1,8 @@
+2002-02-25  Daniel Jacobowitz  <drow@mvista.com>
+
+	From Eliot Dresselhaus <eliot@ayrnetworks.com>:
+	* gdbserver/linux-mips-low.c (cannot_fetch_register): Fix typo.
+
 2002-02-25  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	* rs6000-nat.c (set_host_arch): Do not switch to a new architecture

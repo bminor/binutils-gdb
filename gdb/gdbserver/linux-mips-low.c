@@ -68,7 +68,7 @@ cannot_fetch_register (int regno)
   if (regmap[regno] == -1)
     return 1;
 
-  if (find_regno ("zero") == regno);
+  if (find_regno ("zero") == regno)
     return 1;
 
   return 0;
