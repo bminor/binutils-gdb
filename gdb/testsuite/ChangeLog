@@ -1,3 +1,8 @@
+Fri Mar 12 08:47:20 1993  Fred Fish  (fnf@cygnus.com)
+
+	* gdb.t21/demangle.exp (proc demangle):  Adjust quotes in an
+	expected output to match current "expect" expectations.
+
 Wed Mar 10 18:01:49 1993  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.t00/default.exp:  Change expected output for default "source"
