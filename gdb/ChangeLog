@@ -1,3 +1,21 @@
+2002-02-06  Richard Earnshaw  <rearnsha@arm.com>
+
+	* arm-tdep.c (arm_software_single_step): ANSIfy function declaration.
+
+2002-02-06  Richard Earnshaw  <rearnsha@arm.com>
+
+	* gdbarch.sh (PRINT_FLOAT_INFO): Add rule.
+	* gdbarch.c gdbarch.h: Regenerate.
+	* arch-utils.c (default_print_float_info): New function.
+	* arch-utils.h (default_print_float_info): Prototype it.
+	* infcmd.c (float_info): Call PRINT_FLOAT_INFO.
+	* doc/gdbint.texinfo (FLOAT_INFO): Mark as deprecated.
+	(PRINT_FLOAT_INFO): Document it.
+
+	* arm-tdep.c (arm_print_float_info): Renamed from arm_float_info.
+	* config/arm/tm-arm.h (FLOAT_INFO): Delete.
+	(PRINT_FLOAT_INFO): Define.
+
 2002-02-06  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* win32-nat.c (_initialize_check_for_gdb_ini): 

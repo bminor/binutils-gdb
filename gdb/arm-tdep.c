@@ -2006,9 +2006,7 @@ arm_get_next_pc (CORE_ADDR pc)
    set up a simulated single-step, we undo our damage.  */
 
 void
-arm_software_single_step (ignore, insert_bpt)
-     int ignore; /* Signal, not needed */
-     int insert_bpt;
+arm_software_single_step (int ignore, int insert_bpt)
 {
   static int next_pc; /* State between setting and unsetting. */
   static char break_mem[BREAKPOINT_MAX]; /* Temporary storage for mem@bpt */
