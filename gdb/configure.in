@@ -156,7 +156,7 @@ arm | merlin | none | np1 | pn | pyramid | tahoe)
 	gdb_host=${host_cpu}
 	;;
 
-hppa)
+hppa*)
 	case "${host_vendor}" in
 	hp)
 		case "${host_os}" in
@@ -340,7 +340,7 @@ rs6000)
 	gdb_target=rs6000
 	;;
 
-hppa)
+hppa*)
 	case "${target_vendor}" in
 	hp)
 		case "${target_os}" in
