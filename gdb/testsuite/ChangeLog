@@ -5,6 +5,9 @@ Thu Feb 16 15:56:56 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 Thu Feb 16 10:30:24 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
+	* config/mt-vxworks (CFLAGS): Set to -g -Dvxworks.
+	  (LDFLAGS): Set to -Xlinker -Ur.
+
 	* Makefile.in, gdb.{base,c++,chill}/Makefile.in (GDB, GDBFLAGS):
 	  Removed, these values are set by lib/gdb.exp.
 
