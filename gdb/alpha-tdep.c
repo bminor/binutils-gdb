@@ -359,6 +359,7 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
     int frame_size;
     int has_frame_reg = 0;
     unsigned long reg_mask = 0;
+    int pcreg = -1;
 
     if (start_pc == 0)
       return NULL;
@@ -388,17 +389,68 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 	    int reg = (word & 0x03e00000) >> 21;
 	    reg_mask |= 1 << reg;
 	    temp_saved_regs.regs[reg] = sp + (short)word;
+
+	    /* Starting with OSF/1-3.2C, the system libraries are shipped
+	       without local symbols, but they still contain procedure
+	       descriptors without a symbol reference. GDB is currently
+	       unable to find these procedure descriptors and uses
+	       heuristic_proc_desc instead.
+	       As some low level compiler support routines (__div*, __add*)
+	       use a non-standard return address register, we have to
+	       add some heuristics to determine the return address register,
+	       or stepping over these routines will fail.
+	       Usually the return address register is the first register
+	       saved on the stack, but assembler optimization might
+	       rearrange the register saves.
+	       So we recognize only a few registers (t7, t9, ra) within
+	       the procedure prologue as valid return address registers.
+
+	       FIXME: Rewriting GDB to access the procedure descriptors,
+	       e.g. via the minimal symbol table, might obviate this hack.  */
+	    if (pcreg == -1
+		&& cur_pc < (start_pc + 20)
+		&& (reg == T7_REGNUM || reg == T9_REGNUM || reg == RA_REGNUM))
+	      pcreg = reg;
 	  }
 	else if (word == 0x47de040f)			/* bis sp,sp fp */
 	  has_frame_reg = 1;
       }
+    if (pcreg == -1)
+      {
+	/* If we haven't found a valid return address register yet,
+	   keep searching in the procedure prologue.  */
+	while (cur_pc < (limit_pc + 20) && cur_pc < (start_pc + 20))
+	  {
+	    char buf[4];
+	    unsigned long word;
+	    int status;
+
+	    status = read_memory_nobpt (cur_pc, buf, 4); 
+	    if (status)
+	      memory_error (status, cur_pc);
+	    cur_pc += 4;
+	    word = extract_unsigned_integer (buf, 4);
+
+	    if ((word & 0xfc1f0000) == 0xb41e0000	/* stq reg,n($sp) */
+		&& (word & 0xffff0000) != 0xb7fe0000)	/* reg != $zero */
+	      {
+		int reg = (word & 0x03e00000) >> 21;
+		if (reg == T7_REGNUM || reg == T9_REGNUM || reg == RA_REGNUM)
+		  {
+		    pcreg = reg;
+		    break;
+		  }
+	      }
+	  }
+      }
+
     if (has_frame_reg)
       PROC_FRAME_REG(&temp_proc_desc) = GCC_FP_REGNUM;
     else
       PROC_FRAME_REG(&temp_proc_desc) = SP_REGNUM;
     PROC_FRAME_OFFSET(&temp_proc_desc) = frame_size;
     PROC_REG_MASK(&temp_proc_desc) = reg_mask;
-    PROC_PC_REG(&temp_proc_desc) = RA_REGNUM;
+    PROC_PC_REG(&temp_proc_desc) = (pcreg == -1) ? RA_REGNUM : pcreg;
     PROC_LOCALOFF(&temp_proc_desc) = 0;	/* XXX - bogus */
     return &temp_proc_desc;
 }
