@@ -1,5 +1,11 @@
 2002-06-07  Chris Demetriou  <cgd@broadcom.com>
 
+	* cp1.c (convert): Remove unusable debugging code, and move MIPS
+	rounding mode to sim FP rounding mode flag conversion code into...
+	(rounding_mode): New function.
+
+2002-06-07  Chris Demetriou  <cgd@broadcom.com>
+
 	* cp1.c: Clean up formatting of a few comments.
 	(value_fpr): Reformat switch statement.
 

@@ -426,6 +426,42 @@ update_fcsr (sim_cpu *cpu,
   return;
 }
 
+static sim_fpu_round
+rounding_mode(int rm)
+{
+  sim_fpu_round round;
+
+  switch (rm)
+    {
+    case FP_RM_NEAREST:
+      /* Round result to nearest representable value. When two
+	 representable values are equally near, round to the value
+	 that has a least significant bit of zero (i.e. is even). */
+      round = sim_fpu_round_near;
+      break;
+    case FP_RM_TOZERO:
+      /* Round result to the value closest to, and not greater in
+	 magnitude than, the result. */
+      round = sim_fpu_round_zero;
+      break;
+    case FP_RM_TOPINF:
+      /* Round result to the value closest to, and not less than,
+	 the result. */
+      round = sim_fpu_round_up;
+      break;
+    case FP_RM_TOMINF:
+      /* Round result to the value closest to, and not greater than,
+	 the result. */
+      round = sim_fpu_round_down;
+      break;
+    default:
+      round = 0;
+      fprintf (stderr, "Bad switch\n");
+      abort ();
+    }
+  return round;
+}
+
 
 /* Comparison operations.  */
 
@@ -694,47 +730,9 @@ convert (sim_cpu *cpu,
 	 FP_formats to)
 {
   sim_fpu wop;
-  sim_fpu_round round;
+  sim_fpu_round round = rounding_mode (rm);
   unsigned32 result32;
   unsigned64 result64;
-
-#ifdef DEBUG
-#if 0 /* FIXME: doesn't compile */
-  printf ("DBG: Convert: mode %s : op 0x%s : from %s : to %s : (PC = 0x%s)\n",
-	  fpu_rounding_mode_name (rm), pr_addr (op), fpu_format_name (from),
-	  fpu_format_name (to), pr_addr (IPC));
-#endif
-#endif /* DEBUG */
-
-  switch (rm)
-    {
-    case FP_RM_NEAREST:
-      /* Round result to nearest representable value. When two
-	 representable values are equally near, round to the value
-	 that has a least significant bit of zero (i.e. is even).  */
-      round = sim_fpu_round_near;
-      break;
-    case FP_RM_TOZERO:
-      /* Round result to the value closest to, and not greater in
-	 magnitude than, the result.  */
-      round = sim_fpu_round_zero;
-      break;
-    case FP_RM_TOPINF:
-      /* Round result to the value closest to, and not less than,
-	 the result.  */
-      round = sim_fpu_round_up;
-      break;
-
-    case FP_RM_TOMINF:
-      /* Round result to the value closest to, and not greater than,
-	 the result.  */
-      round = sim_fpu_round_down;
-      break;
-    default:
-      round = 0;
-      fprintf (stderr, "Bad switch\n");
-      abort ();
-    }
 
   /* Convert the input to sim_fpu internal format */
   switch (from)
