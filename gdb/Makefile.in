@@ -187,7 +187,7 @@ SFILES_MAINDIR = \
 	 signame.c cplus-dem.c mem-break.c target.c inftarg.c \
 	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
 	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
-	 minsyms.c
+	 minsyms.c mipsread.c
 
 # Source files in subdirectories (which will be handled separately by
 #  'make gdb.tar.Z').
