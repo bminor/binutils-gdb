@@ -69,17 +69,20 @@ do_scrub_begin ()
   lex['\t'] = LEX_IS_WHITESPACE;
   lex['\n'] = LEX_IS_NEWLINE;
   lex[';'] = LEX_IS_LINE_SEPARATOR;
-  lex['"'] = LEX_IS_STRINGQUOTE;
-#ifndef TC_HPPA
-  lex['\''] = LEX_IS_ONECHAR_QUOTE;
-#endif
   lex[':'] = LEX_IS_COLON;
 
+  if (! flag_mri)
+    {
+      lex['"'] = LEX_IS_STRINGQUOTE;
 
+#ifndef TC_HPPA
+      lex['\''] = LEX_IS_ONECHAR_QUOTE;
+#endif
 
 #ifdef SINGLE_QUOTE_STRINGS
-  lex['\''] = LEX_IS_STRINGQUOTE;
+      lex['\''] = LEX_IS_STRINGQUOTE;
 #endif
+    }
 
   /* Note that these override the previous defaults, e.g. if ';' is a
      comment char, then it isn't a line separator.  */
@@ -113,6 +116,16 @@ do_scrub_begin ()
   if (lex['*'] == 0)
     {
       lex['*'] = LEX_IS_TWOCHAR_COMMENT_2ND;
+    }
+
+  if (flag_mri)
+    {
+      lex['\''] = LEX_IS_STRINGQUOTE;
+      lex[';'] = LEX_IS_COMMENT_START;
+      lex['*'] = LEX_IS_LINE_COMMENT_START;
+      /* The MRI documentation says '!' is LEX_IS_COMMENT_START, but
+         then it can't be used in an expression.  */
+      lex['!'] = LEX_IS_LINE_COMMENT_START;
     }
 }				/* do_scrub_begin() */
 
@@ -381,9 +394,7 @@ do_scrub_next_char (get, unget)
 	case 'n':
 	case 'r':
 	case 't':
-#ifdef BACKSLASH_V
 	case 'v':
-#endif /* BACKSLASH_V */
 	case 'x':
 	case 'X':
 	case '0':
@@ -468,15 +479,15 @@ recycle:
 	  not_cpp_line = 1;
 	  goto recycle;
 	}
-#ifdef MRI
-      (*unget) (ch);		/* Put back */
-      return ' ';		/* Always return one space at start of line */
-#endif
 
       /* If we're in state 2 or 11, we've seen a non-white character
 	 followed by whitespace.  If the next character is ':', this
-	 is whitespace after a label name which we *must* ignore.  */
-      if ((state == 2 || state == 11) && lex[ch] == LEX_IS_COLON)
+	 is whitespace after a label name which we normally must
+	 ignore.  In MRI mode, though, spaces are not permitted
+	 between the label and the colon.  */
+      if ((state == 2 || state == 11)
+	  && lex[ch] == LEX_IS_COLON
+	  && ! flag_mri)
 	{
 	  state = 1;
 	  return ch;
@@ -559,7 +570,6 @@ recycle:
 	old_state = state;
       state = 5;
       return ch;
-#ifndef MRI
 #ifndef IEEE_STYLE
     case LEX_IS_ONECHAR_QUOTE:
       ch = GET ();
@@ -596,7 +606,6 @@ recycle:
       state = -1;
       out_string = out_buf;
       return *out_string++;
-#endif
 #endif
     case LEX_IS_COLON:
       if (state == 9 || state == 10)
@@ -671,7 +680,8 @@ recycle:
       /* We have a line comment character which is not at the start of
 	 a line.  If this is also a normal comment character, fall
 	 through.  Otherwise treat it as a default character.  */
-      if (strchr (comment_chars, ch) == NULL)
+      if ((flag_mri && (ch == '!' || ch == '*'))
+	  || strchr (comment_chars, ch) == NULL)
 	goto de_fault;
       /* Fall through.  */
     case LEX_IS_COMMENT_START:
