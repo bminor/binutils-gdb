@@ -6066,6 +6066,38 @@ mips_abi_update (char *ignore_args, int from_tty,
   gdbarch_update_p (info);
 }
 
+/* Print out which MIPS ABI is in use.  */
+
+static void
+show_mips_abi (char *ignore_args, int from_tty)
+{
+  if (gdbarch_bfd_arch_info (current_gdbarch)->arch != bfd_arch_mips)
+    printf_filtered (
+      "The MIPS ABI is unknown because the current architecture is not MIPS.\n");
+  else
+    {
+      enum mips_abi global_abi = global_mips_abi ();
+      enum mips_abi actual_abi = mips_abi (current_gdbarch);
+      const char *actual_abi_str = mips_abi_strings[actual_abi];
+
+      if (global_abi == MIPS_ABI_UNKNOWN)
+	printf_filtered ("The MIPS ABI is set automatically (currently \"%s\").\n",
+	                 actual_abi_str);
+      else if (global_abi == actual_abi)
+	printf_filtered (
+	  "The MIPS ABI is assumed to be \"%s\" (due to user setting).\n",
+	  actual_abi_str);
+      else
+	{
+	  /* Probably shouldn't happen...  */
+	  printf_filtered (
+	    "The (auto detected) MIPS ABI \"%s\" is in use even though the user setting was \"%s\".\n",
+	    actual_abi_str,
+	    mips_abi_strings[global_abi]);
+	}
+    }
+}
+
 static void
 mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 {
@@ -6513,8 +6545,9 @@ This option can be set to one of:\n\
      "  eabi32\n"
      "  eabi64",
      &setmipscmdlist);
-  add_show_from_set (c, &showmipscmdlist);
   set_cmd_sfunc (c, mips_abi_update);
+  add_cmd ("abi", class_obscure, show_mips_abi,
+           "Show ABI in use by MIPS target", &showmipscmdlist);
 
   /* Let the user turn off floating point and set the fence post for
      heuristic_proc_start.  */

@@ -1,3 +1,9 @@
+2003-02-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (show_mips_abi): New function.
+	(_initialize_mips_tdep): Use show_mips_abi() to implement the
+	command ``show mips abi''.
+
 2003-02-26  Jeff Johnston  <jjohnstn@redhat.com>
  
 	From Elena Zannoni  <ezannoni@redhat.com>
