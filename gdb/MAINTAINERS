@@ -298,6 +298,7 @@ testsuite		Fernando Nasser		fnasser@redhat.com
   lib                   Mark Salter             msalter@redhat.com
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
   c++ (gdb.c++)		Michael Chastain	mec@shout.net
+			David Carlton		carlton@math.stanford.edu
   mi tests (gdb.mi)     Elena Zannoni           ezannoni@redhat.com
                         Andrew Cagney           cagney@redhat.com
   stabs (gdb.stabs)     Elena Zannoni           ezannoni@redhat.com
