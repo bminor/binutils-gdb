@@ -210,7 +210,7 @@ static char *             get_FORM_name               PARAMS ((unsigned long));
 static void               free_abbrevs                PARAMS ((void));
 static void               add_abbrev                  PARAMS ((unsigned long, unsigned long, int));
 static void               add_abbrev_attr             PARAMS ((unsigned long, unsigned long));
-static unsigned char *    read_and_display_attr       PARAMS ((unsigned long, unsigned long, unsigned char *, unsigned long));
+static unsigned char *    read_and_display_attr       PARAMS ((unsigned long, unsigned long, unsigned char *, unsigned long, unsigned long));
 static unsigned char *    display_block               PARAMS ((unsigned char *, unsigned long));
 static void               decode_location_expression  PARAMS ((unsigned char *, unsigned int));
 static void		  request_dump                PARAMS ((unsigned int, char));
@@ -6060,36 +6060,24 @@ decode_location_expression (data, pointer_size)
 
 
 static unsigned char *
-read_and_display_attr (attribute, form, data, pointer_size)
+read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
      unsigned long   attribute;
      unsigned long   form;
      unsigned char * data;
+     unsigned long   cu_offset;
      unsigned long   pointer_size;
 {
   unsigned long   uvalue = 0;
   unsigned char * block_start = NULL;
   int             bytes_read;
-  int		  is_ref = 0;
 
   printf ("     %-18s:", get_AT_name (attribute));
 
   switch (form)
     {
     case DW_FORM_ref_addr:
-    case DW_FORM_ref1:
-    case DW_FORM_ref2:
-    case DW_FORM_ref4:
-    case DW_FORM_ref8:
-    case DW_FORM_ref_udata:
-      is_ref = 1;
-    }
-
-  switch (form)
-    {
-    case DW_FORM_ref_addr:
     case DW_FORM_addr:
       uvalue = byte_get (data, pointer_size);
-      printf (is_ref ? " <%lx>" : " %#lx", uvalue);
       data += pointer_size;
       break;
 
@@ -6097,21 +6085,55 @@ read_and_display_attr (attribute, form, data, pointer_size)
     case DW_FORM_flag:
     case DW_FORM_data1:
       uvalue = byte_get (data ++, 1);
-      printf (is_ref ? " <%lx>" : " %ld", uvalue);
       break;
 
     case DW_FORM_ref2:
     case DW_FORM_data2:
       uvalue = byte_get (data, 2);
       data += 2;
-      printf (is_ref ? " <%lx>" : " %ld", uvalue);
       break;
 
     case DW_FORM_ref4:
     case DW_FORM_data4:
       uvalue = byte_get (data, 4);
       data += 4;
-      printf (is_ref ? " <%lx>" : " %ld", uvalue);
+      break;
+
+    case DW_FORM_sdata:
+      uvalue = read_leb128 (data, & bytes_read, 1);
+      data += bytes_read;
+      break;
+
+    case DW_FORM_ref_udata:
+    case DW_FORM_udata:
+      uvalue = read_leb128 (data, & bytes_read, 0);
+      data += bytes_read;
+      break;
+    }
+
+  switch (form)
+    {
+    case DW_FORM_ref_addr:
+      printf (" <#%lx>", uvalue);
+      break;
+      
+    case DW_FORM_ref1:
+    case DW_FORM_ref2:
+    case DW_FORM_ref4:
+    case DW_FORM_ref_udata:
+      printf (" <%lx>", uvalue + cu_offset);
+      break;
+
+    case DW_FORM_addr:
+      printf (" %#lx", uvalue);
+
+    case DW_FORM_flag:
+    case DW_FORM_data1:
+    case DW_FORM_data2:
+    case DW_FORM_data4:
+    case DW_FORM_sdata:
+    case DW_FORM_udata:
+      printf (" %ld", uvalue);
       break;
 
     case DW_FORM_ref8:
@@ -6125,19 +6147,6 @@ read_and_display_attr (attribute, form, data, pointer_size)
     case DW_FORM_string:
       printf (" %s", data);
       data += strlen (data) + 1;
-      break;
-
-    case DW_FORM_sdata:
-      uvalue = read_leb128 (data, & bytes_read, 1);
-      data += bytes_read;
-      printf (" %ld", (long) uvalue);
-      break;
-
-    case DW_FORM_ref_udata:
-    case DW_FORM_udata:
-      uvalue = read_leb128 (data, & bytes_read, 0);
-      data += bytes_read;
-      printf (is_ref ? " <%lx>" : " %ld", uvalue);
       break;
 
     case DW_FORM_block:
@@ -6330,6 +6339,7 @@ display_debug_info (section, start, file)
       unsigned char *            tags;
       int                        i;
       int			 level;
+      unsigned long		 cu_offset;
 
       external = (DWARF2_External_CompUnit *) start;
 
@@ -6339,6 +6349,7 @@ display_debug_info (section, start, file)
       compunit.cu_pointer_size  = BYTE_GET (external->cu_pointer_size);
 
       tags = start + sizeof (* external);
+      cu_offset = start - section_begin;
       start += compunit.cu_length + sizeof (external->cu_length);
 
       if (compunit.cu_version != 2)
@@ -6424,7 +6435,7 @@ display_debug_info (section, start, file)
 	  for (attr = entry->first_attr; attr; attr = attr->next)
 	    tags = read_and_display_attr (attr->attribute,
 					  attr->form,
-					  tags,
+					  tags, cu_offset,
 					  compunit.cu_pointer_size);
 
 	  if (entry->children)
