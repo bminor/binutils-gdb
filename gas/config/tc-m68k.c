@@ -81,6 +81,11 @@ CONST char FLT_CHARS[] = "rRsSfFdDxXeEpP";
 
 const int md_reloc_size = 8;	/* Size of relocation record */
 
+/* Are we trying to generate PIC code?  If so, absolute references
+   ought to be made PC-relative.  They aren't yet, but we can parse
+   the option now so the user doesn't get an error...  */
+int flag_want_pic;
+
 /* Its an arbitrary name:  This means I don't approve of it */
 /* See flames below */
 static struct obstack robyn;
@@ -2273,9 +2278,15 @@ m68k_ip (instring)
 		    {
 		      if (opP->reg == PC)
 			{
+#if 0
 			  add_frag (adds (opP->con1),
 				    offs (opP->con1) + 2,
 				    TAB (PCLEA, SZ_UNDEF));
+#else
+			  addword (0x0170);
+			  add_fix ('l', opP->con1, 0);
+			  addword (0), addword (0);
+#endif
 			  break;
 			}
 		      else
@@ -4863,6 +4874,8 @@ s_proc (ignore)
  *		so don't use or document it, but that's the way the parsing
  *		works).
  *
+ *	-k	Ignored for now.  (Sun 3 only.  Indicates PIC.)
+ *
  * MAYBE_FLOAT_TOO is defined below so that specifying a processor type
  * (e.g. m68020) also requests that float instructions be included.  This
  * is the default setup, mostly to avoid hassling users.  A better
@@ -4889,6 +4902,12 @@ md_parse_option (argP, cntP, vecP)
     case 'S':			/* -S means that jbsr's always turn into
 				   jsr's.  */
       break;
+
+#ifdef TE_SUN3
+    case 'k':
+      flag_want_pic = 1;
+      break;
+#endif
 
     case 'A':
       (*argP)++;
