@@ -3263,7 +3263,7 @@ som_write_headers (abfd)
 	  
 	  /* Skip any section which does not correspond to a space or
 	     subspace, or which SEC_ALLOC set (and therefore handled
-	     in the loadable spaces/subspaces code above.  */
+	     in the loadable spaces/subspaces code above).  */
 
 	  if (!som_is_subspace (subsection)
 	      || !som_is_container (section, subsection)
@@ -3622,9 +3622,14 @@ bfd_section_from_som_symbol (abfd, symbol)
 {
   asection *section;
 
-  /* The meaning of the symbol_info field changes for executables.  So
-     only use the quick symbol_info mapping for incomplete objects.  */
-  if ((abfd->flags & EXEC_P) == 0)
+  /* The meaning of the symbol_info field changes for functions
+     within executables.  So only use the quick symbol_info mapping for
+     incomplete objects and non-function symbols in executables.  */
+  if ((abfd->flags & EXEC_P) == 0
+      || (symbol->symbol_type != ST_ENTRY
+	  && symbol->symbol_type != ST_PRI_PROG
+	  && symbol->symbol_type != ST_SEC_PROG
+	  && symbol->symbol_type != ST_MILLICODE))
     {
       unsigned int index = symbol->symbol_info;
       for (section = abfd->sections; section != NULL; section = section->next)

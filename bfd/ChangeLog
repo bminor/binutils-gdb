@@ -1,5 +1,8 @@
 Sun Mar 20 09:24:36 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (bfd_section_from_som_symbol): Only to do the value
+	comparison for function symbols within executables.
+
 	* som.c (bfd_section_from_som_symbol): Renamed from
 	som_section_from_subspace_index.  Pass in a native SOM symbol.
 	For executables, iterate through the sections to find out
