@@ -1,3 +1,8 @@
+2003-12-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-alpha.c (s_alpha_end): Don't crash if there is no
+	matching .ent.
+
 2003-12-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* tc.h (md_pcrel_from): Don't declare if defined as a macro.

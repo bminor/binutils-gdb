@@ -4494,7 +4494,7 @@ s_alpha_end (dummy)
 	    as_warn (_(".end directive names different symbol than .ent"));
 
 	  /* Create an expression to calculate the size of the function.  */
-	  if (sym)
+	  if (sym && cur_frame_data)
 	    {
 	      OBJ_SYMFIELD_TYPE *obj = symbol_get_obj (sym);
 	      expressionS *exp = xmalloc (sizeof (expressionS));
