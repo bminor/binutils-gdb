@@ -1,3 +1,8 @@
+2003-10-17  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* elf32-hppa.c (elf32_hppa_relocate_section): Skip relocation if
+	output section has been discarded.
+
 2003-10-17  Shrinivas Atre  <shrinivasa@KPITCummins.com>
 	
 	* coff-h8300.c (funcvec_hash_newfunc): Handle normal mode.

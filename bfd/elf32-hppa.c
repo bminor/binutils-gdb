@@ -3739,6 +3739,11 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 		      && sym_sec->output_section != NULL
 		      && ! bfd_is_abs_section (sym_sec))
 		    {
+		      /* Skip this relocation if the output section has
+			 been discarded.  */
+		      if (bfd_is_abs_section (sym_sec->output_section))
+			break;
+
 		      indx = elf_section_data (sym_sec->output_section)->dynindx;
 		      /* We are turning this relocation into one
 			 against a section symbol, so subtract out the
