@@ -1,3 +1,8 @@
+Wed Apr  1 13:13:20 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* doc/as.texinfo: Use @itemx for a secondary item in a table.
+	* doc/c-hppa.texi: Likewise.
+
 Tue Mar 31 17:52:40 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am: Rebuild dependencies.
