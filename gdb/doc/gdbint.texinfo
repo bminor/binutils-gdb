@@ -79,9 +79,11 @@ GDB as you discover it (or as you design changes to GDB).
 * Symbol Reading::		Defining New Symbol Readers
 * Cleanups::			Cleanups
 * Wrapping::			Wrapping Output Lines
-* Frames::                      Keeping track of function calls
-* Host Conditionals::           Controlling what features exist in the host
-* Target Conditionals::         Controlling what features exist in the target
+* Frames::			Keeping track of function calls
+* Coding Style::		Strunk and White for GDB maintainers
+* Host Conditionals::		Controlling what features exist in the host
+* Target Conditionals::		Controlling what features exist in the target
+* Native Conditionals::		Native Conditionals
 
 @end menu
 
@@ -865,7 +867,7 @@ unfiltered (``@code{printf}'') output.  Symbol reading routines that print
 warnings are a good example.
 
 
-@node Frames,  , Wrapping, Top
+@node Frames, Coding Style, Wrapping, Top
 @chapter Frames
 
 A frame is a construct that GDB uses to keep track of calling and called
@@ -894,7 +896,49 @@ frame.  This will be used to create a new GDB frame struct, and then
 the new frame.
 @end table
 
-@node Host Conditionals,  , , Top
+@node Coding Style, Host Conditionals, Frames, Top
+@chapter Coding Style
+
+GDB is generally written using the GNU coding standards, as described in
+@file{standards.texi}, which you can get from the Free Software
+Foundation.  There are some additional considerations for GDB maintainers
+that reflect the unique environment and style of GDB maintenance.
+If you follow these guidelines, GDB will be more consistent and easier
+to maintain.
+
+GDB's policy on the use of prototypes is that prototypes are used
+to @emph{declare} functions but never to @emph{define} them.  Simple
+macros are used in the declarations, so that a non-ANSI compiler can
+compile GDB without trouble.  The simple macro calls are used like
+this:
+
+@example @code
+extern int
+memory_remove_breakpoint PARAMS ((CORE_ADDR, char *));
+@end example
+
+Note the double parentheses around the parameter types.  This allows
+an arbitrary number of parameters to be described, without freaking
+out the C preprocessor.  When the function has no parameters, it
+should be described like:
+
+@example @code
+void
+noprocess PARAMS ((void));
+@end example
+
+The @code{PARAMS} macro expands to its argument in ANSI C, or to a simple
+@code{()} in traditional C.
+
+All external functions should have a @code{PARAMS} declaration in a
+header file that callers include.  All static functions should have such
+a declaration near the top of their source file.
+
+We don't have a gcc option that will properly check that these rules
+have been followed, but it's GDB policy, and we periodically check it
+using the tools available (plus manual labor), and clean up any remnants.
+
+@node Host Conditionals, Target Conditionals, Coding Style, Top
 @chapter Host Conditionals
 
 When GDB is configured and compiled, various macros are defined or left
@@ -917,8 +961,6 @@ tm-hppa.h
 defs.h
 @item NO_SYS_FILE
 dbxread.c
-@item USE_PROC_FS
-sparc-tdep.c
 @item PYRAMID_CONTROL_FRAME_DEBUGGING
 pyr-xdep.c
 @item SIGWINCH_HANDLER_BODY
@@ -959,8 +1001,6 @@ altos-xdep.c
 xm-altos.h
 @item ASCII_COFF
 remote-adapt.c
-@item ATTACH_DETACH
-hppabsd-xdep.c
 @item BADMAG
 coffread.c
 @item BCS
@@ -986,7 +1026,11 @@ tm-68k.h
 @item BREAKPOINT_DEBUG
 breakpoint.c
 @item BROKEN_LARGE_ALLOCA
-source.c
+Avoid large @code{alloca}'s.  For example, on sun's, Large alloca's fail
+because the attempt to increase the stack limit in main() fails because
+shared libraries are allocated just below the initial stack limit.  The
+SunOS kernel will not allow the stack to grow into the area occupied by
+the shared libraries.
 @item BSTRING
 regex.c
 @item CALL_DUMMY
@@ -1065,12 +1109,6 @@ values.c
 frame.h
 @item EXTRA_SYMTAB_INFO
 symtab.h
-@item FETCH_INFERIOR_REGISTERS
-Define this if the native-dependent code will provide its
-own routines
-@code{fetch_inferior_registers} and @code{store_inferior_registers}.
-If this symbol is @emph{not} defined, the default routines in
-@file{infptrace.c} are used for these functions.
 @item FILES_INFO_HOOK
 target.c
 @item FIXME
@@ -1115,12 +1153,6 @@ dbxread.c
 symtab.c
 @item GCC_PRODUCER
 dwarfread.c
-@item GDB_TARGET_IS_MACH386
-mach386-xdep.c
-@item GDB_TARGET_IS_SUN3
-a68v-xdep.c
-@item GDB_TARGET_IS_SUN386
-sun386-xdep.c
 @item GET_LONGJMP_TARGET
 i386-tdep.c
 @item GET_SAVED_REGISTER
@@ -1136,7 +1168,8 @@ partial-stab.h
 @item HAVE_68881
 m68k-tdep.c
 @item HAVE_MMAP
-state.c
+In some cases, use the system call @code{mmap} for reading symbol
+tables.  For some machines this allows for sharing and quick updates.
 @item HAVE_REGISTER_WINDOWS
 findvar.c
 @item HAVE_SIGSETMASK
@@ -1238,11 +1271,14 @@ breakpoint.c
 @item MAINTENANCE_CMDS
 maint.c
 @item MALLOC_INCOMPATIBLE
-defs.h
+Define this if the system's prototype for @code{malloc} differs from the
+@sc{ANSI} definition.
 @item MIPSEL
 mips-tdep.c
 @item MMAP_BASE_ADDRESS
-objfiles.c
+When using HAVE_MMAP, the first mapping should go at this address.
+@item MMAP_INCREMENT
+when using HAVE_MMAP, this is the increment between mappings.
 @item MONO
 ser-go32.c
 @item MOTOROLA
@@ -1355,8 +1391,6 @@ pyr-xdep.c
 remote.c
 @item REGISTER_NAMES
 tm-29k.h
-@item REGISTER_U_ADDR
-Defines the offset of the registers in the ``u area''; @pxref{Host}.
 @item REG_STACK_SEGMENT
 exec.c
 @item REG_STRUCT_HAS_ADDR
@@ -1376,7 +1410,12 @@ state.c
 @item SEM
 coffread.c
 @item SET_STACK_LIMIT_HUGE
-infrun.c
+When defined, stack limits will be raised to their maximum.  Use this
+if your host supports @code{setrlimit} and you have trouble with
+@code{stringtab} in @file{dbxread.c}.
+
+Also used in @file{fork-child.c} to return stack limits before child
+processes are forked.
 @item SHELL_COMMAND_CONCAT
 infrun.c
 @item SHELL_FILE
@@ -1459,8 +1498,6 @@ m88k-tdep.c
 xm-news.h
 @item USE_O_NOCTTY
 inflow.c
-@item USE_PROC_FS
-inferior.h
 @item USE_STRUCT_CONVENTION
 values.c
 @item USG
@@ -1471,16 +1508,6 @@ Means that System V (prior to SVR4) include files are in use.
 xm-m88k.h
 @item U_FPSTATE
 i386-xdep.c
-@item U_REGS_OFFSET
-This is the offset of the registers in the upage.  It need only be defined
-if the generic ptrace register access routines in @file{infptrace.c}
-are being used
-(that is, @code{FETCH_INFERIOR_REGISTERS} is not defined).  If the default
-value from @file{infptrace.c} is good enough, leave it undefined.
-
-The default value means that u.u_ar0 @emph{points to} the location of the
-registers.  I'm guessing that @code{#define U_REGS_OFFSET 0} means that
-u.u_ar0 @emph{is} the location of the registers.
 @item VARIABLES_INSIDE_BLOCK
 dbxread.c
 @item WRS_ORIG
@@ -1511,8 +1538,6 @@ gould-pinsn.c
 alloca.c
 @item hp800
 xm-hppabsd.h
-@item hp9000s800
-dbxread.c
 @item hpux
 hppabsd-core.c
 @item lint
@@ -1547,7 +1572,7 @@ coffread.c
 coffread.c
 @end table
 
-@node Target Conditionals,  , , Top
+@node Target Conditionals, Native Conditionals, Host Conditionals, Top
 @chapter Target Conditionals
 
 When GDB is configured and compiled, various macros are defined or left
@@ -1570,8 +1595,6 @@ tm-hppa.h
 defs.h
 @item NO_SYS_FILE
 dbxread.c
-@item USE_PROC_FS
-sparc-tdep.c
 @item PYRAMID_CONTROL_FRAME_DEBUGGING
 pyr-xdep.c
 @item SIGWINCH_HANDLER_BODY
@@ -1594,8 +1617,6 @@ altos-xdep.c
 xm-altos.h
 @item ASCII_COFF
 remote-adapt.c
-@item ATTACH_DETACH
-hppabsd-xdep.c
 @item BADMAG
 coffread.c
 @item BCS
@@ -1620,8 +1641,6 @@ tm-68k.h
 tm-68k.h
 @item BREAKPOINT_DEBUG
 breakpoint.c
-@item BROKEN_LARGE_ALLOCA
-source.c
 @item BSTRING
 regex.c
 @item CALL_DUMMY
@@ -1714,6 +1733,8 @@ a68v-xdep.c
 mach386-xdep.c
 @item FP_REGNUM
 parse.c
+@item FPU
+Unused?  6-oct-92 rich@cygnus.com.  FIXME.
 @item FRAMELESS_FUNCTION_INVOCATION
 blockframe.c
 @item FRAME_ARGS_ADDRESS_CORRECT
@@ -1744,6 +1765,10 @@ dbxread.c
 symtab.c
 @item GCC_PRODUCER
 dwarfread.c
+@item GDB_TARGET_IS_HPPA
+This determines whether horrible kludge code in dbxread.c and partial-stab.h
+is used to mangle multiple-symbol-table files from HPPA's.  This should all
+be ripped out, and a scheme like elfread.c used.
 @item GDB_TARGET_IS_MACH386
 mach386-xdep.c
 @item GDB_TARGET_IS_SUN3
@@ -1764,8 +1789,6 @@ remote-mm.c
 partial-stab.h
 @item HAVE_68881
 m68k-tdep.c
-@item HAVE_MMAP
-state.c
 @item HAVE_REGISTER_WINDOWS
 findvar.c
 @item HAVE_SIGSETMASK
@@ -1854,8 +1877,6 @@ breakpoint.c
 maint.c
 @item MIPSEL
 mips-tdep.c
-@item MMAP_BASE_ADDRESS
-objfiles.c
 @item MOTOROLA
 xm-altos.h
 @item NAMES_HAVE_UNDERSCORE
@@ -2090,8 +2111,6 @@ gould-pinsn.c
 alloca.c
 @item hp800
 xm-hppabsd.h
-@item hp9000s800
-dbxread.c
 @item hpux
 hppabsd-core.c
 @item longest_to_int
@@ -2116,6 +2135,44 @@ regex.c
 coffread.c
 @item x_zeroes
 coffread.c
+@end table
+
+@node Native Conditionals,  , Target Conditionals, Top
+@chapter Native Conditionals
+
+
+
+@item ATTACH_DETACH
+If defined, then gdb will include support for the @code{attach} and
+@code{detach} commands.
+commands.
+@item FETCH_INFERIOR_REGISTERS
+Define this if the native-dependent code will provide its
+own routines
+@code{fetch_inferior_registers} and @code{store_inferior_registers} in
+@file{@var{HOST}-nat.c}.
+If this symbol is @emph{not} defined, the default routines in
+@file{infptrace.c} are used for these functions.
+@item PROC_NAME_FMT
+Defines the format for the name of a @file{/proc} device.  Should be
+defined in @file{nm.h} @emph{only} in order to override the default
+definition in @file{procfs.c}.
+@item REGISTER_U_ADDR
+Defines the offset of the registers in the ``u area''; @pxref{Host}.
+@item USE_PROC_FS
+This determines whether small routines that translate register values
+to GDB's internal representation (from the /proc representation), and vice
+verse, are compiled.
+@item U_REGS_OFFSET
+This is the offset of the registers in the upage.  It need only be
+defined if the generic ptrace register access routines in
+@file{infptrace.c} are being used (that is,
+@code{FETCH_INFERIOR_REGISTERS} is not defined).  If the default value
+from @file{infptrace.c} is good enough, leave it undefined.
+
+The default value means that u.u_ar0 @emph{points to} the location of the
+registers.  I'm guessing that @code{#define U_REGS_OFFSET 0} means that
+u.u_ar0 @emph{is} the location of the registers.
 @end table
 
 @contents
