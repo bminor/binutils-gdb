@@ -1,3 +1,16 @@
+Sat Mar 15 18:10:38 1997  H.J. Lu  <hjl@lucon.org>
+
+	* ldemul.h (ldemul_list_emulations): Use full prototype.
+	* ldlang.c (print_one_symbol): Add declaration.
+	* ldlang.h (dprint_statements): Declare.
+	* ldmain.c (remove_output): Declare.
+	* ldmisc.c (vfinfo): Declare.
+	* ldwrite.c (clone_section): Declare.
+	(split_sections): Make static.  Declare.
+	* mri.c: Include libiberty.h.
+	(strdup): Don't declare.
+	(mri_alias): Use xstrdup rather than strdup.
+
 Fri Mar 14 21:30:06 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* scripttempl/elfmips.sc: Change handling of data area when

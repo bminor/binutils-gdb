@@ -1,5 +1,5 @@
 /* Linker command language support.
-   Copyright (C) 1991, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
 
 This file is part of GLD, the Gnu Linker.
 
@@ -101,6 +101,7 @@ static void print_assignment
   PARAMS ((lang_assignment_statement_type *assignment,
 	   lang_output_section_statement_type *output_section));
 static void print_input_statement PARAMS ((lang_input_statement_type *statm));
+static boolean print_one_symbol PARAMS ((struct bfd_link_hash_entry *, PTR));
 static void print_input_section PARAMS ((lang_input_section_type *in));
 static void print_fill_statement PARAMS ((lang_fill_statement_type *fill));
 static void print_data_statement PARAMS ((lang_data_statement_type *data));
@@ -647,11 +648,12 @@ exp_init_os (exp)
 
 /*ARGSUSED*/
 static void
-section_already_linked (abfd, sec, ignore)
+section_already_linked (abfd, sec, data)
      bfd *abfd;
      asection *sec;
-     PTR ignore;
+     PTR data;
 {
+  lang_input_statement_type *entry = (lang_input_statement_type *) data;
   struct sec_link_once
     {
       struct sec_link_once *next;
@@ -661,6 +663,15 @@ section_already_linked (abfd, sec, ignore)
   flagword flags;
   const char *name;
   struct sec_link_once *l;
+
+  /* If we are only reading symbols from this object, then we want to
+     discard all sections.  */
+  if (entry->just_syms_flag)
+    {
+      sec->output_section = bfd_abs_section_ptr;
+      sec->output_offset = sec->vma;
+      return;
+    }
 
   flags = bfd_get_section_flags (abfd, sec);
 
@@ -2064,7 +2075,15 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	   }
 	   dot = os->region->current;
 	   if (os->section_alignment == -1)
-	     dot = align_power (dot, os->bfd_section->alignment_power);
+	     {
+	       bfd_vma olddot;
+
+	       olddot = dot;
+	       dot = align_power (dot, os->bfd_section->alignment_power);
+	       if (dot != olddot && config.warn_section_align)
+		 einfo ("%P: warning: changing start of section %s by %u bytes\n",
+			os->name, (unsigned int) (dot - olddot));
+	     }
 	 }
 	 else
 	 {
@@ -2669,8 +2688,10 @@ lang_one_common (h, info)
   /* Increase the size of the section.  */
   section->_raw_size += size;
 
-  /* Make sure the section is allocated in memory.  */
+  /* Make sure the section is allocated in memory, and make sure that
+     it is no longer a common section.  */
   section->flags |= SEC_ALLOC;
+  section->flags &= ~ SEC_IS_COMMON;
 
   if (config.map_file != NULL)
     {
@@ -2928,7 +2949,7 @@ ldlang_add_file (entry)
      each backend which might set the SEC_LINK_ONCE flag.  If we do
      this, we should probably handle SEC_EXCLUDE in the same way.  */
 
-  bfd_map_over_sections (entry->the_bfd, section_already_linked, (PTR) NULL);
+  bfd_map_over_sections (entry->the_bfd, section_already_linked, (PTR) entry);
 }
 
 void
@@ -3519,7 +3540,7 @@ lang_record_phdrs ()
   lang_statement_union_type *u;
 
   alc = 10;
-  secs = xmalloc (alc * sizeof (asection *));
+  secs = (asection **) xmalloc (alc * sizeof (asection *));
   last = NULL;
   for (l = lang_phdr_list; l != NULL; l = l->next)
     {
@@ -3559,7 +3580,8 @@ lang_record_phdrs ()
 		  if (c >= alc)
 		    {
 		      alc *= 2;
-		      secs = xrealloc (secs, alc * sizeof (asection *));
+		      secs = ((asection **)
+			      xrealloc (secs, alc * sizeof (asection *)));
 		    }
 		  secs[c] = os->bfd_section;
 		  ++c;
@@ -3634,6 +3656,9 @@ static etree_type *overlay_vma;
 /* The overlay load address.  */
 static etree_type *overlay_lma;
 
+/* Whether nocrossrefs is set for this overlay.  */
+static int overlay_nocrossrefs;
+
 /* An expression for the maximum section size seen so far.  */
 static etree_type *overlay_max;
 
@@ -3650,9 +3675,10 @@ static struct overlay_list *overlay_list;
 /* Start handling an overlay.  */
 
 void
-lang_enter_overlay (vma_expr, lma_expr)
+lang_enter_overlay (vma_expr, lma_expr, nocrossrefs)
      etree_type *vma_expr;
      etree_type *lma_expr;
+     int nocrossrefs;
 {
   /* The grammar should prevent nested overlays from occurring.  */
   ASSERT (overlay_vma == NULL
@@ -3662,6 +3688,7 @@ lang_enter_overlay (vma_expr, lma_expr)
 
   overlay_vma = vma_expr;
   overlay_lma = lma_expr;
+  overlay_nocrossrefs = nocrossrefs;
 }
 
 /* Start a section in an overlay.  We handle this by calling
@@ -3768,7 +3795,6 @@ lang_leave_overlay (fill, memspec, phdrs)
   l = overlay_list;
   while (l != NULL)
     {
-      struct lang_nocrossref *nc;
       struct overlay_list *next;
 
       if (fill != 0 && l->os->fill == 0)
@@ -3778,10 +3804,15 @@ lang_leave_overlay (fill, memspec, phdrs)
       if (phdrs != NULL && l->os->phdrs == NULL)
 	l->os->phdrs = phdrs;
 
-      nc = (struct lang_nocrossref *) xmalloc (sizeof *nc);
-      nc->name = l->os->name;
-      nc->next = nocrossref;
-      nocrossref = nc;
+      if (overlay_nocrossrefs)
+	{
+	  struct lang_nocrossref *nc;
+
+	  nc = (struct lang_nocrossref *) xmalloc (sizeof *nc);
+	  nc->name = l->os->name;
+	  nc->next = nocrossref;
+	  nocrossref = nc;
+	}
 
       next = l->next;
       free (l);
@@ -3797,6 +3828,147 @@ lang_leave_overlay (fill, memspec, phdrs)
 
   overlay_vma = NULL;
   overlay_lma = NULL;
+  overlay_nocrossrefs = 0;
   overlay_list = NULL;
   overlay_max = NULL;
+}
+
+/* Version handling.  This is only useful for ELF.  */
+
+/* This global variable holds the version tree that we build.  */
+
+struct bfd_elf_version_tree *lang_elf_version_info;
+
+/* This is called for each variable name or match expression.  */
+
+struct bfd_elf_version_expr *
+lang_new_vers_regex (orig, new)
+     struct bfd_elf_version_expr *orig;
+     const char *new;
+{
+  struct bfd_elf_version_expr *ret;
+
+  ret = (struct bfd_elf_version_expr *) xmalloc (sizeof *ret);
+  ret->next = orig;
+  ret->match = new;
+  return ret;
+}
+
+/* This is called for each set of variable names and match
+   expressions.  */
+
+struct bfd_elf_version_tree *
+lang_new_vers_node (globals, locals)
+     struct bfd_elf_version_expr *globals;
+     struct bfd_elf_version_expr *locals;
+{
+  struct bfd_elf_version_tree *ret;
+
+  ret = (struct bfd_elf_version_tree *) xmalloc (sizeof *ret);
+  ret->next = NULL;
+  ret->name = NULL;
+  ret->vernum = 0;
+  ret->globals = globals;
+  ret->locals = locals;
+  ret->deps = NULL;
+  ret->name_indx = (unsigned int) -1;
+  ret->used = 0;
+  return ret;
+}
+
+/* This static variable keeps track of version indices.  */
+
+static int version_index;
+
+/* This is called when we know the name and dependencies of the
+   version.  */
+
+void
+lang_register_vers_node (name, version, deps)
+     const char *name;
+     struct bfd_elf_version_tree *version;
+     struct bfd_elf_version_deps *deps;
+{
+  struct bfd_elf_version_tree *t, **pp;
+  struct bfd_elf_version_expr *e1;
+
+  /* Make sure this node has a unique name.  */
+  for (t = lang_elf_version_info; t != NULL; t = t->next)
+    if (strcmp (t->name, name) == 0)
+      einfo ("%X%P: duplicate version tag `%s'\n", name);
+
+  /* Check the global and local match names, and make sure there
+     aren't any duplicates.  */
+
+  for (e1 = version->globals; e1 != NULL; e1 = e1->next)
+    {
+      for (t = lang_elf_version_info; t != NULL; t = t->next)
+	{
+	  struct bfd_elf_version_expr *e2;
+
+	  for (e2 = t->globals; e2 != NULL; e2 = e2->next)
+	    if (strcmp (e1->match, e2->match) == 0)
+	      einfo ("%X%P: duplicate expression `%s' in version information\n",
+		     e1->match);
+
+	  for (e2 = t->locals; e2 != NULL; e2 = e2->next)
+	    if (strcmp (e1->match, e2->match) == 0)
+	      einfo ("%X%P: duplicate expression `%s' in version information\n",
+		     e1->match);
+	}
+    }
+
+  for (e1 = version->locals; e1 != NULL; e1 = e1->next)
+    {
+      for (t = lang_elf_version_info; t != NULL; t = t->next)
+	{
+	  struct bfd_elf_version_expr *e2;
+
+	  for (e2 = t->globals; e2 != NULL; e2 = e2->next)
+	    if (strcmp (e1->match, e2->match) == 0)
+	      einfo ("%X%P: duplicate expression `%s' in version information\n",
+		     e1->match);
+
+	  for (e2 = t->locals; e2 != NULL; e2 = e2->next)
+	    if (strcmp (e1->match, e2->match) == 0)
+	      einfo ("%X%P: duplicate expression `%s' in version information\n",
+		     e1->match);
+	}
+    }
+
+  version->deps = deps;
+  version->name = name;
+  ++version_index;
+  version->vernum = version_index;
+
+  for (pp = &lang_elf_version_info; *pp != NULL; pp = &(*pp)->next)
+    ;
+  *pp = version;
+}
+
+/* This is called when we see a version dependency.  */
+
+struct bfd_elf_version_deps *
+lang_add_vers_depend (list, name)
+     struct bfd_elf_version_deps *list;
+     const char *name;
+{
+  struct bfd_elf_version_deps *ret;
+  struct bfd_elf_version_tree *t;
+
+  ret = (struct bfd_elf_version_deps *) xmalloc (sizeof *ret);
+  ret->next = list;
+
+  for (t = lang_elf_version_info; t != NULL; t = t->next)
+    {
+      if (strcmp (t->name, name) == 0)
+	{
+	  ret->version_needed = t;
+	  return ret;
+	}
+    }
+
+  einfo ("%X%P: unable to find version dependency `%s'\n", name);
+
+  return ret;
 }
