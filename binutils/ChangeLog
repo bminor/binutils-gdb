@@ -1,3 +1,18 @@
+Tue Dec 20 19:13:44 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ar.c (main): Ignore 'f' modifier used on HP/UX 9.
+
+Thu Dec 15 17:34:12 1994  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* ar.c, nm.c, objcopy.c, objdump.c: Include progress.h.
+	* ar.c, nm.c, objcopy.c, objdump.c (main): Add START_PROGRESS
+	and END_PROGRESS.
+	* ar.c (map_over_members, open_inarch): Call PROGRESS.
+	* nm.c (main, display_archive, filter_symbols, print_symbols):
+	Call PROGRESS.
+
+	* objcopy.c (copy_usage): Break up long usage string.
+
 Wed Dec 14 15:51:56 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* objcopy.c (copy_object): Don't bother setting status after
