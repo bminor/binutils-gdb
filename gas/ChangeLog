@@ -1,3 +1,8 @@
+Tue May 13 14:44:39 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (set_at): Check for bignum.
+	(check_absolute_expr, macro, mips16_macro): Likewise.
+
 start-sanitize-tic80
 Tue May 13 10:45:56 1997  Fred Fish  <fnf@cygnus.com>
 
