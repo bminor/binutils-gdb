@@ -2324,7 +2324,7 @@ gendefines ()
 
 static int ppi_index;
 
-/* Take an ppi code, expand all varying fields in it and fill all the
+/* Take a ppi code, expand all varying fields in it and fill all the
    right entries in 'table' with the opcode index.  */
 
 static void

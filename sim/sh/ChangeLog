@@ -1,3 +1,7 @@
+2003-08-07  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c (expand_ppi_code): Comment spelling fix.
+
 2003-07-25  Michael Snyder  <msnyder@redhat.com>
 
 	* gencode.c (pshl): Change < to <= (shift by 16 is allowed).
