@@ -1,5 +1,13 @@
 Fri Oct  8 14:56:21 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* inflow.c: Remove unused includes of sys/param.h, etc.
+
+	* inflow.c, ser-unix.c, ser-go32.c, ser-tcp.c, serial.h,
+	terminal.h: Move all the process group stuff back to inflow.c;
+	that's a better place for it and fixes problems with trying to get/set
+	the process group of a tty we're doing remote debugging on.
+	* terminal.h: Skip the redefine crap if HAVE_TERMIOS.
+
 	* findvar.c, value.h (symbol_read_needs_frame): New function.
 	* c-exp.y, m2-exp.y: Call it instead of having our own switch on
 	the symbol's class.

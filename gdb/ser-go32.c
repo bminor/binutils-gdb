@@ -344,15 +344,6 @@ go32_setbaudrate (scb, rate)
 }
 
 static int
-go32_set_process_group (scb, ttystate, group)
-     serial_t scb;
-     serial_ttystate ttystate;
-     int group;
-{
-  return 0;
-}
-
-static int
 go32_write (scb, str, len)
      serial_t scb;
      const char *str;
@@ -386,17 +377,7 @@ static struct serial_ops go32_ops =
   go32_print_tty_state,
   go32_noflush_set_tty_state,
   go32_setbaudrate,
-  go32_set_process_group
 };
-
-/* There is never job control on go32.  */
-int
-gdb_setpgid ()
-{
-  return 0;
-}
-
-int job_control = 0;
 
 _initialize_ser_go32 ()
 {

@@ -54,7 +54,6 @@ struct serial_ops {
   int (*noflush_set_tty_state)
     PARAMS ((serial_t, serial_ttystate, serial_ttystate));
   int (*setbaudrate) PARAMS ((serial_t, int rate));
-  int (*set_process_group) PARAMS ((serial_t, serial_ttystate, int));
 };
 
 /* Add a new serial interface to the interface list */
@@ -150,19 +149,5 @@ void serial_close PARAMS ((serial_t));
    does.  */
 
 #define SERIAL_UN_FDOPEN(SERIAL_T) (free (SERIAL_T))
-
-/* Set the process group saved in TTYSTATE to GROUP.  This just modifies
-   the ttystate setting; need to call SERIAL_SET_TTY_STATE for this to
-   actually have any effect.  If no job control, then don't do anything.  */
-#define SERIAL_SET_PROCESS_GROUP(SERIAL_T, TTYSTATE, GROUP) \
-  ((*((SERIAL_T)->ops->set_process_group)) (SERIAL_T, TTYSTATE, GROUP))
-
-/* Do we have job control?  Can be assumed to always be the same within
-   a given run of GDB.  In ser-unix.c, ser-go32.c, etc.  */
-extern int job_control;
-
-/* Set the process group of the caller to its own pid, or do nothing if
-   we lack job control.  */
-extern int gdb_setpgid PARAMS ((void));
 
 #endif /* SERIAL_H */

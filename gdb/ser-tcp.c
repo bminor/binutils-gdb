@@ -260,15 +260,6 @@ tcp_setbaudrate(scb, rate)
 }
 
 static int
-tcp_set_process_group (scb, ttystate, group)
-     serial_t scb;
-     serial_ttystate ttystate;
-     int group;
-{
-  return 0;
-}
-
-static int
 tcp_write(scb, str, len)
      serial_t scb;
      const char *str;
@@ -316,7 +307,6 @@ static struct serial_ops tcp_ops =
   tcp_print_tty_state,
   tcp_noflush_set_tty_state,
   tcp_setbaudrate,
-  tcp_set_process_group
 };
 
 void
