@@ -1,3 +1,12 @@
+Tue Sep 23 00:08:18 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mips-tdep.c (mips_push_arguments):  Tweak alignment of register
+	value if the remaining length of a non-integral argument is smaller
+	than the register size for big-endian non-EABI mode.
+
+	* rs6000-tdep.c (branch_dest):  Handle return from signal
+	handler function via sigreturn kernel call.
+
 Mon Sep 22 15:32:06 1997  Dawn Perchik  <dawn@cygnus.com>
 
 	* stabsread.h, symtab.h, dbxread.c, symtab.c, stabsread.c:

@@ -97,7 +97,23 @@ branch_dest (opcode, instr, pc, safety)
 	ext_op = (instr>>1) & 0x3ff;
 
 	if (ext_op == 16)			/* br conditional register */
-	  dest = read_register (LR_REGNUM) & ~3;
+	  {
+	    dest = read_register (LR_REGNUM) & ~3;
+
+	    /* If we are about to return from a signal handler, dest is
+	       something like 0x3c90.  The current frame is a signal handler
+	       caller frame, upon completion of the sigreturn system call
+	       execution will return to the saved PC in the frame.  */
+	    if (dest < TEXT_SEGMENT_BASE)
+	      {
+		struct frame_info *fi;
+
+		fi = get_current_frame ();
+		if (fi != NULL)
+		  dest = read_memory_integer (fi->frame + SIG_FRAME_PC_OFFSET,
+					      4);
+	      }
+	  }
 
 	else if (ext_op == 528)			/* br cond to count reg */
 	  {
