@@ -1,3 +1,10 @@
+Thu May 13 09:45:23 1999  Joel Sherrill (joel@OARcorp.com)
+
+	* config.bfd (i[3456]86*-*-rtems*, m68k*-*-rtems*): Added to
+	list of target formats (targ_selvecs).
+	(i[3456]86*-*-rtemself*, mips*el-*-rtems*): New targets.
+	(powerpcle*-*rtems*, sh-*-rtemself*): New targets.
+
 1999-05-10  DJ Delorie  <dj@cygnus.com>
 
 	* ecoff.c (_bfd_ecoff_write_armap): give the symtab element a
