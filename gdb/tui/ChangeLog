@@ -1,3 +1,12 @@
+2001-07-14  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* tuiWin.c, tuiWin.h, tui.c, tui.h, tuiCommand.c: Add FSF copyright.
+	tuiCommand.h, tuiIO.c, tuiIO.h, tuiData.h, tuiData.c: Likewise.
+	tuiDataWin.c, tuiDataWin.h, tuiDisassem.c, tuiDisassem.h: Likewise.
+	tuiGeneralWin.c, tuiGeneralWin.h, tuiLayout.c, tuiLayout.h: Likewise.
+	tuiRegs.c, tuiRegs.h, tuiSource.c, tuiSource.h: Likewise.
+	tuiSouceWin.c, tuiSourceWin.h, tuiStack.c, tuiStack.h: Likewise.
+
 2001-03-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* tuiRegs.c: Use NUM_REGS, not ARCH_NUM_REGS.
