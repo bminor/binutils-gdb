@@ -1,3 +1,7 @@
+Fri Nov 20 10:13:03 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* buildsym.c (end_symtab): Cleanup PROCESS_LINENUMBER_HOOK.
+
 Thu Nov 19 15:21:04 1998  Geoffrey Noer  <noer@cygnus.com>
 
 	* rdi-share/host.h: if compiling under Cygwin, make sure new
