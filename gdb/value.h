@@ -208,17 +208,26 @@ extern const bfd_byte *value_contents_all (struct value *);
 
 extern int value_fetch_lazy (struct value *val);
 
-#define VALUE_LVAL(val) (val)->lval
-#define VALUE_ADDRESS(val) (val)->location.address
-#define VALUE_INTERNALVAR(val) (val)->location.internalvar
-#define VALUE_FRAME_ID(val) ((val)->frame_id)
-#define VALUE_REGNUM(val) (val)->regnum
 extern int value_optimized_out (struct value *value);
 extern void set_value_optimized_out (struct value *value, int val);
 extern int value_embedded_offset (struct value *value);
 extern void set_value_embedded_offset (struct value *value, int val);
 extern int value_pointed_to_offset (struct value *value);
 extern void set_value_pointed_to_offset (struct value *value, int val);
+
+/* While the following fields are per- VALUE .CONTENT .PIECE (i.e., a
+   single value might have multiple LVALs), this hacked interface is
+   limited to just the first PIECE.  Expect further change.  */
+extern enum lval_type *deprecated_value_lval_hack (struct value *);
+#define VALUE_LVAL(val) (*deprecated_value_lval_hack (val))
+extern CORE_ADDR *deprecated_value_address_hack (struct value *);
+#define VALUE_ADDRESS(val) (*deprecated_value_address_hack (val))
+extern struct internalvar **deprecated_value_internalvar_hack (struct value *);
+#define VALUE_INTERNALVAR(val) (*deprecated_value_internalvar_hack (val))
+extern struct frame_id *deprecated_value_frame_id_hack (struct value *);
+#define VALUE_FRAME_ID(val) (*deprecated_value_frame_id_hack (val))
+extern short *deprecated_value_regnum_hack (struct value *);
+#define VALUE_REGNUM(val) (*deprecated_value_regnum_hack (val))
 
 /* Convert a REF to the object referenced.  */
 

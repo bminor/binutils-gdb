@@ -1,5 +1,16 @@
 2005-02-07  Andrew Cagney  <cagney@gnu.org>
 
+	* value.h (deprecated_value_lval_hack)
+	(deprecated_value_address_hack) 
+	(deprecated_value_internalvar_hack_hack) 
+	(deprecated_value_regnum_hack): Declare.
+	(VALUE_LVAL, VALUE_ADDRESS, VALUE_INTERNALVAR) 
+	(VALUE_FRAME_ID, VALUE_REGNUM): Use.
+	* value.c (deprecated_value_lval_hack)
+	(deprecated_value_address_hack) 
+	(deprecated_value_internalvar_hack_hack) 
+	(deprecated_value_regnum_hack): Define.
+
 	* value.h (VALUE_POINTED_TO_OFFSET): Delete.
 	(set_value_pointed_to_offset, value_pointed_to_offset): Declare.
 	* value.c (set_value_pointed_to_offset): Define

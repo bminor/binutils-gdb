@@ -234,6 +234,36 @@ set_value_pointed_to_offset (struct value *value, int val)
 {
   value->pointed_to_offset = val;
 }
+
+enum lval_type *
+deprecated_value_lval_hack (struct value *value)
+{
+  return &value->lval;
+}
+
+CORE_ADDR *
+deprecated_value_address_hack (struct value *value)
+{
+  return &value->location.address;
+}
+
+struct internalvar **
+deprecated_value_internalvar_hack (struct value *value)
+{
+  return &value->location.internalvar;
+}
+
+struct frame_id *
+deprecated_value_frame_id_hack (struct value *value)
+{
+  return &value->frame_id;
+}
+
+short *
+deprecated_value_regnum_hack (struct value *value)
+{
+  return &value->regnum;
+}
 
 /* Return a mark in the value chain.  All values allocated after the
    mark is obtained (except for those released) are subject to being freed
