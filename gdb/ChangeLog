@@ -1,3 +1,20 @@
+2004-05-03  J. Brobecker  <brobecker@gnat.com>
+
+	* dwarf2read.c (line_header): Add new included_p field in
+	field file_names.
+	(partial_die_info): New field has_stmt_list. New field line_offset.
+	(dwarf2_create_include_psymtab): New function.
+	(dwarf2_build_include_psymtabs): New function.
+	(add_file_name): Add forward declaration. Initialize new field.
+	(dwarf_decode_lines): Add new parameter. Enhance this procedure
+	to be able to determine the list of files included by the
+	given unit, and build their associated psymtabs.
+	(dwarf2_build_psymtabs_hard): Build the psymtabs for the included
+	files as well.
+	(psymtab_to_symtab_1): Build the symtabs of all dependencies as well.
+	(read_file_scope): Update call to dwarf_decode_lines.
+	(read_partial_die): Handle DW_AT_stmt_list attributes.
+
 2004-05-02  Michael Chastain  <mec.gnu@mindspring.com>
 
 	Unfix PR gdb/1626.

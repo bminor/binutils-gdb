@@ -341,6 +341,7 @@ struct line_header
     unsigned int dir_index;
     unsigned int mod_time;
     unsigned int length;
+    int included_p; /* Non-zero if referenced by the Line Number Program.  */
   } *file_names;
 
   /* The start and end of the statement program following this
@@ -368,6 +369,7 @@ struct partial_die_info
     unsigned int is_declaration : 1;
     unsigned int has_type : 1;
     unsigned int has_specification : 1;
+    unsigned int has_stmt_list : 1;
     unsigned int has_pc_info : 1;
 
     /* Flag set if the SCOPE field of this structure has been
@@ -399,6 +401,9 @@ struct partial_die_info
        DW_AT_specification (or DW_AT_abstract_origin or
        DW_AT_extension).  */
     unsigned int spec_offset;
+
+    /* If HAS_STMT_LIST, the offset of the Line Number Information data.  */
+    unsigned int line_offset;
 
     /* Pointers to this DIE's parent, first child, and next sibling,
        if any.  */
@@ -631,6 +636,13 @@ static void dwarf2_locate_sections (bfd *, asection *, void *);
 static void dwarf2_build_psymtabs_easy (struct objfile *, int);
 #endif
 
+static void dwarf2_create_include_psymtab (char *, struct partial_symtab *,
+                                           struct objfile *);
+
+static void dwarf2_build_include_psymtabs (struct dwarf2_cu *,
+                                           struct partial_die_info *,
+                                           struct partial_symtab *);
+
 static void dwarf2_build_psymtabs_hard (struct objfile *, int);
 
 static void scan_partial_symbols (struct partial_die_info *,
@@ -739,12 +751,15 @@ static struct die_info *die_specification (struct die_info *die,
 
 static void free_line_header (struct line_header *lh);
 
+static void add_file_name (struct line_header *, char *, unsigned int,
+                           unsigned int, unsigned int);
+
 static struct line_header *(dwarf_decode_line_header
                             (unsigned int offset,
                              bfd *abfd, struct dwarf2_cu *cu));
 
 static void dwarf_decode_lines (struct line_header *, char *, bfd *,
-				struct dwarf2_cu *);
+				struct dwarf2_cu *, struct partial_symtab *);
 
 static void dwarf2_start_subfile (char *, char *);
 
@@ -1194,6 +1209,68 @@ partial_read_comp_unit_head (struct comp_unit_head *header, char *info_ptr,
   return info_ptr;
 }
 
+/* Allocate a new partial symtab for file named NAME and mark this new
+   partial symtab as being an include of PST.  */
+
+static void
+dwarf2_create_include_psymtab (char *name, struct partial_symtab *pst,
+                               struct objfile *objfile)
+{
+  struct partial_symtab *subpst = allocate_psymtab (name, objfile);
+
+  subpst->section_offsets = pst->section_offsets;
+  subpst->textlow = 0;
+  subpst->texthigh = 0;
+
+  subpst->dependencies = (struct partial_symtab **)
+    obstack_alloc (&objfile->objfile_obstack,
+                   sizeof (struct partial_symtab *));
+  subpst->dependencies[0] = pst;
+  subpst->number_of_dependencies = 1;
+
+  subpst->globals_offset = 0;
+  subpst->n_global_syms = 0;
+  subpst->statics_offset = 0;
+  subpst->n_static_syms = 0;
+  subpst->symtab = NULL;
+  subpst->read_symtab = pst->read_symtab;
+  subpst->readin = 0;
+
+  /* No private part is necessary for include psymtabs.  This property
+     can be used to differentiate between such include psymtabs and
+     the regular ones.  If it ever happens that a regular psymtab can
+     legitimally have a NULL PST_PRIVATE part, then we'll have to add a
+     dedicated field for that in the dwarf2_pinfo structure.  */
+  PST_PRIVATE (subpst) = NULL;
+}
+
+/* Read the Line Number Program data and extract the list of files
+   included by the source file represented by PST.  Build an include
+   partial symtab for each of these included files.
+   
+   This procedure assumes that there *is* a Line Number Program in
+   the given CU.  Callers should check that PDI->HAS_STMT_LIST is set
+   before calling this procedure.  */
+
+static void
+dwarf2_build_include_psymtabs (struct dwarf2_cu *cu,
+                               struct partial_die_info *pdi,
+                               struct partial_symtab *pst)
+{
+  struct objfile *objfile = cu->objfile;
+  bfd *abfd = objfile->obfd;
+  struct line_header *lh;
+
+  lh = dwarf_decode_line_header (pdi->line_offset, abfd, cu);
+  if (lh == NULL)
+    return;  /* No linetable, so no includes.  */
+
+  dwarf_decode_lines (lh, NULL, abfd, cu, pst);
+
+  free_line_header (lh);
+}
+
+
 /* Build the partial symbol table by doing a quick pass through the
    .debug_info and .debug_abbrev sections.  */
 
@@ -1320,6 +1397,13 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
          name, remove it. (If there is a symtab, more drastic things
          also happen.) This happens in VxWorks.  */
       free_named_symtabs (pst->filename);
+
+      if (comp_unit_die.has_stmt_list)
+        {
+          /* Get the list of files included in the current compilation unit,
+             and build a psymtab for each of them.  */
+          dwarf2_build_include_psymtabs (&cu, &comp_unit_die, pst);
+        }
 
       info_ptr = beg_of_comp_unit + cu.header.length
                                   + cu.header.initial_length_size;
@@ -2006,6 +2090,32 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   struct cleanup *back_to;
   struct attribute *attr;
   CORE_ADDR baseaddr;
+  int i;
+
+  for (i = 0; i < pst->number_of_dependencies; i++)
+    if (!pst->dependencies[i]->readin)
+      {
+        /* Inform about additional files that need to be read in.  */
+        if (info_verbose)
+          {
+            fputs_filtered (" ", gdb_stdout);
+            wrap_here ("");
+            fputs_filtered ("and ", gdb_stdout);
+            wrap_here ("");
+            printf_filtered ("%s...", pst->dependencies[i]->filename);
+            wrap_here ("");     /* Flush output */
+            gdb_flush (gdb_stdout);
+          }
+        psymtab_to_symtab_1 (pst->dependencies[i]);
+      }
+
+  if (PST_PRIVATE (pst) == NULL)
+    {
+      /* It's an include file, no symbols to read for it.
+         Everything is in the parent symtab.  */
+      pst->readin = 1;
+      return;
+    }
 
   dwarf2_per_objfile = objfile_data (pst->objfile, dwarf2_objfile_data_key);
 
@@ -2294,7 +2404,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
         {
           make_cleanup ((make_cleanup_ftype *) free_line_header,
                         (void *) line_header);
-          dwarf_decode_lines (line_header, comp_dir, abfd, cu);
+          dwarf_decode_lines (line_header, comp_dir, abfd, cu, NULL);
         }
     }
 
@@ -4826,6 +4936,10 @@ read_partial_die (struct partial_die_info *part_die,
 	    part_die->sibling = dwarf2_per_objfile->info_buffer
 	      + dwarf2_get_ref_die_offset (&attr, cu);
 	  break;
+        case DW_AT_stmt_list:
+          part_die->has_stmt_list = 1;
+          part_die->line_offset = DW_UNSND (&attr);
+          break;
 	default:
 	  break;
 	}
@@ -5628,6 +5742,7 @@ add_file_name (struct line_header *lh,
   fe->dir_index = dir_index;
   fe->mod_time = mod_time;
   fe->length = length;
+  fe->included_p = 0;
 }
  
 
@@ -5785,13 +5900,27 @@ check_cu_functions (CORE_ADDR address, struct dwarf2_cu *cu)
   return fn->lowpc;
 }
 
-/* Decode the line number information for the compilation unit whose
-   line number info is at OFFSET in the .debug_line section.
-   The compilation directory of the file is passed in COMP_DIR.  */
+/* Decode the Line Number Program (LNP) for the given line_header
+   structure and CU.  The actual information extracted and the type
+   of structures created from the LNP depends on the value of PST.
+
+   1. If PST is NULL, then this procedure uses the data from the program
+      to create all necessary symbol tables, and their linetables.
+      The compilation directory of the file is passed in COMP_DIR,
+      and must not be NULL.
+   
+   2. If PST is not NULL, this procedure reads the program to determine
+      the list of files included by the unit represented by PST, and
+      builds all the associated partial symbol tables.  In this case,
+      the value of COMP_DIR is ignored, and can thus be NULL (the COMP_DIR
+      is not used to compute the full name of the symtab, and therefore
+      omitting it when building the partial symtab does not introduce
+      the potential for inconsistency - a partial symtab and its associated
+      symbtab having a different fullname -).  */
 
 static void
 dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
-		    struct dwarf2_cu *cu)
+		    struct dwarf2_cu *cu, struct partial_symtab *pst)
 {
   char *line_ptr;
   char *line_end;
@@ -5799,6 +5928,7 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
   unsigned char op_code, extended_op, adj_opcode;
   CORE_ADDR baseaddr;
   struct objfile *objfile = cu->objfile;
+  const int decode_for_pst_p = (pst != NULL);
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
@@ -5817,9 +5947,9 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
       int basic_block = 0;
       int end_sequence = 0;
 
-      /* Start a subfile for the current file of the state machine.  */
-      if (lh->num_file_names >= file)
+      if (!decode_for_pst_p && lh->num_file_names >= file)
 	{
+          /* Start a subfile for the current file of the state machine.  */
 	  /* lh->include_dirs and lh->file_names are 0-based, but the
 	     directory and file name numbers in the statement program
 	     are 1-based.  */
@@ -5844,9 +5974,12 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	      address += (adj_opcode / lh->line_range)
 		* lh->minimum_instruction_length;
 	      line += lh->line_base + (adj_opcode % lh->line_range);
-	      /* append row to matrix using current values */
-	      record_line (current_subfile, line, 
-	                   check_cu_functions (address, cu));
+              if (!decode_for_pst_p)
+                {
+	          /* append row to matrix using current values */
+	          record_line (current_subfile, line, 
+	                       check_cu_functions (address, cu));
+                }
 	      basic_block = 1;
 	    }
 	  else switch (op_code)
@@ -5859,7 +5992,8 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 		{
 		case DW_LNE_end_sequence:
 		  end_sequence = 1;
-		  record_line (current_subfile, 0, address);
+                  if (!decode_for_pst_p)
+		    record_line (current_subfile, 0, address);
 		  break;
 		case DW_LNE_set_address:
 		  address = read_address (abfd, line_ptr, cu, &bytes_read);
@@ -5892,8 +6026,9 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 		}
 	      break;
 	    case DW_LNS_copy:
-	      record_line (current_subfile, line, 
-	                   check_cu_functions (address, cu));
+              if (!decode_for_pst_p)
+	        record_line (current_subfile, line, 
+	                     check_cu_functions (address, cu));
 	      basic_block = 0;
 	      break;
 	    case DW_LNS_advance_pc:
@@ -5915,11 +6050,13 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
                 file = read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
                 line_ptr += bytes_read;
                 fe = &lh->file_names[file - 1];
+                fe->included_p = 1;
                 if (fe->dir_index)
                   dir = lh->include_dirs[fe->dir_index - 1];
                 else
                   dir = comp_dir;
-                dwarf2_start_subfile (fe->name, dir);
+                if (!decode_for_pst_p)
+                  dwarf2_start_subfile (fe->name, dir);
               }
 	      break;
 	    case DW_LNS_set_column:
@@ -5956,6 +6093,22 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	      }
 	    }
 	}
+    }
+
+  if (decode_for_pst_p)
+    {
+      int file_index;
+
+      /* Now that we're done scanning the Line Header Program, we can
+         create the psymtab of each included file.  */
+      for (file_index = 0; file_index < lh->num_file_names; file_index++)
+        if (lh->file_names[file_index].included_p == 1)
+          {
+            char *include_name = lh->file_names [file_index].name;
+    
+            if (strcmp (include_name, pst->filename) != 0)
+              dwarf2_create_include_psymtab (include_name, pst, objfile);
+          }
     }
 }
 
