@@ -1,3 +1,28 @@
+Sun Dec  5 01:31:01 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* objdump.c (dump_relocs): Avoid dereferencing a NULL sym_ptr_ptr
+	in a relocation.
+
+Thu Dec  2 16:00:06 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlmconv.c (main): Change various types from bfd_size_type to
+	size_t, since they have to be arguments to fread and fwrite.
+	Change set from char * to unsigned char *.
+	(select_output_format): Make mach argument unsigned.  Handle
+	bfd_arch_alpha.
+	(setup_sections): Don't copy the .reginfo section of an ECOFF
+	file.  Call bfd_set_reloc to initialize the relocation fields.
+	(copy_sections): Don't copy the .reginfo section of an ECOFF file.
+	Combine all relocs for a section.
+	(mangle_relocs): Change type of relocs to permit specific
+	functions to change it.  Call alpha_mangle_relocs for alpha,
+	default_mangle_relocs for other architectures.
+	(default_mangle_relocs): New function.  Adjust the address of all
+	relocs by the output_offset.
+	(i386_mangle_relocs): Change type of relocs argument.  Cast length
+	argument to memmove to size_t.
+	(alpha_mangle_relocs): New function.	
+
 Wed Nov 17 17:38:58 1993  Sean Eric Fagan  (sef@cygnus.com)
 
 	* nlmconv.c (select_output_format): Use nlm32-sparc for
