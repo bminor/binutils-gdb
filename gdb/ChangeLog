@@ -1,3 +1,10 @@
+2004-02-03  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* breakpoint.c (struct captured_parse_breakpoint_args):  Move
+	outside of #ifdef SOLIB_ADD region.
+	(do_restore_lang_radix_cleanup): Ditto.
+	(resolve_pending_breakpoint): Ditto.
+
 2004-02-03  Andrew Cagney  <cagney@redhat.com>
 
 	* ia64-tdep.c (read_sigcontext_register): Delete unused function.
@@ -16,6 +23,10 @@
 	* dwarf2-frame.c (dwarf2_frame_cache): Deal with a return address
 	column that's "empty" or "same value" when eliminating REG_RA
 	rules.
+
+2004-02-02  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* NEWS: Add information about new pending breakpoint support.
 
 2004-02-02  Jeff Johnston  <jjohnstn@redhat.com>
 

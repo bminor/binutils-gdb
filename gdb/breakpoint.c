@@ -4269,61 +4269,6 @@ remove_thread_event_breakpoints (void)
       delete_breakpoint (b);
 }
 
-#ifdef SOLIB_ADD
-void
-remove_solib_event_breakpoints (void)
-{
-  struct breakpoint *b, *temp;
-
-  ALL_BREAKPOINTS_SAFE (b, temp)
-    if (b->type == bp_shlib_event)
-      delete_breakpoint (b);
-}
-
-struct breakpoint *
-create_solib_event_breakpoint (CORE_ADDR address)
-{
-  struct breakpoint *b;
-
-  b = create_internal_breakpoint (address, bp_shlib_event);
-  return b;
-}
-
-/* Disable any breakpoints that are on code in shared libraries.  Only
-   apply to enabled breakpoints, disabled ones can just stay disabled.  */
-
-void
-disable_breakpoints_in_shlibs (int silent)
-{
-  struct breakpoint *b;
-  int disabled_shlib_breaks = 0;
-
-  /* See also: insert_breakpoints, under DISABLE_UNSETTABLE_BREAK. */
-  ALL_BREAKPOINTS (b)
-  {
-#if defined (PC_SOLIB)
-    if (((b->type == bp_breakpoint) ||
-	 (b->type == bp_hardware_breakpoint)) &&
-	breakpoint_enabled (b) &&
-	!b->loc->duplicate &&
-	PC_SOLIB (b->loc->address))
-      {
-	b->enable_state = bp_shlib_disabled;
-	if (!silent)
-	  {
-	    if (!disabled_shlib_breaks)
-	      {
-		target_terminal_ours_for_output ();
-		warning ("Temporarily disabling shared library breakpoints:");
-	      }
-	    disabled_shlib_breaks = 1;
-	    warning ("breakpoint #%d ", b->number);
-	  }
-      }
-#endif
-  }
-}
-
 struct captured_parse_breakpoint_args
   {
     char **arg_p;
@@ -4382,6 +4327,61 @@ resolve_pending_breakpoint (struct breakpoint *b)
 
   do_cleanups (old_chain);
   return rc;
+}
+
+#ifdef SOLIB_ADD
+void
+remove_solib_event_breakpoints (void)
+{
+  struct breakpoint *b, *temp;
+
+  ALL_BREAKPOINTS_SAFE (b, temp)
+    if (b->type == bp_shlib_event)
+      delete_breakpoint (b);
+}
+
+struct breakpoint *
+create_solib_event_breakpoint (CORE_ADDR address)
+{
+  struct breakpoint *b;
+
+  b = create_internal_breakpoint (address, bp_shlib_event);
+  return b;
+}
+
+/* Disable any breakpoints that are on code in shared libraries.  Only
+   apply to enabled breakpoints, disabled ones can just stay disabled.  */
+
+void
+disable_breakpoints_in_shlibs (int silent)
+{
+  struct breakpoint *b;
+  int disabled_shlib_breaks = 0;
+
+  /* See also: insert_breakpoints, under DISABLE_UNSETTABLE_BREAK. */
+  ALL_BREAKPOINTS (b)
+  {
+#if defined (PC_SOLIB)
+    if (((b->type == bp_breakpoint) ||
+	 (b->type == bp_hardware_breakpoint)) &&
+	breakpoint_enabled (b) &&
+	!b->loc->duplicate &&
+	PC_SOLIB (b->loc->address))
+      {
+	b->enable_state = bp_shlib_disabled;
+	if (!silent)
+	  {
+	    if (!disabled_shlib_breaks)
+	      {
+		target_terminal_ours_for_output ();
+		warning ("Temporarily disabling shared library breakpoints:");
+	      }
+	    disabled_shlib_breaks = 1;
+	    warning ("breakpoint #%d ", b->number);
+	  }
+      }
+#endif
+  }
 }
 
 /* Try to reenable any breakpoints in shared libraries.  */
