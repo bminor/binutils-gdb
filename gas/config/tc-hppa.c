@@ -83,6 +83,11 @@ typedef int reloc_type;
 
 /* Object file formats specify BFD symbol types.  */
 typedef som_symbol_type obj_symbol_type;
+
+/* This apparently isn't in older versions of hpux reloc.h.  */
+#ifndef R_DLT_REL
+#define R_DLT_REL 0x78
+#endif
 #endif
 
 /* Various structures and types used internally in tc-hppa.c.  */
@@ -2586,7 +2591,7 @@ tc_gen_reloc (section, fixp)
   assert (reloc != 0);
 
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
-  codes = hppa_gen_reloc_type (stdoutput,
+  codes = (bfd_reloc_code_real_type **) hppa_gen_reloc_type (stdoutput,
 			       fixp->fx_r_type,
 			       hppa_fixp->fx_r_format,
 			       hppa_fixp->fx_r_field);
