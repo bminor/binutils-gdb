@@ -1,3 +1,7 @@
+Fri Jan 30 11:47:02 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/vms-conf.h: Don't undef VERSION.
+
 start-sanitize-m32rx
 Thu Jan 29 13:36:29 1998  Doug Evans  <devans@canuck.cygnus.com>
 
@@ -5,7 +9,7 @@ Thu Jan 29 13:36:29 1998  Doug Evans  <devans@canuck.cygnus.com>
 	(m32rx support): only include #ifdef HAVE_CPU_M32RX.
 
 end-sanitize-m32rx
-Thu Jan 29 14:42:44 1998  Ian Lance Taylor  <ian@cygnus.com>
+Thu Jan 29 14:42:44 1998  Pat Rankin  <rankin@eql.caltech.edu>
 
 	* Makefile.am (CONFIG_OBJS): New variable, containing part of old
 	OBJS variable.

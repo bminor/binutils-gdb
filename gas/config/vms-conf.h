@@ -41,7 +41,8 @@
 #undef PACKAGE
 
 /* Version of package.  */
-#undef VERSION
+/* Define in by config-gas.com */
+/* #undef VERSION */
 
 /* Should gas use high-level BFD interfaces?  */
 #undef BFD_ASSEMBLER
