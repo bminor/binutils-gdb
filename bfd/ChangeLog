@@ -1,5 +1,8 @@
 Mon Aug  1 12:04:40 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* elfcode.h (elf_slurp_reloc_table): Don't try to read the relocs
+	if there aren't any.
+
 	* configure.host (sparc-*-solaris2*): Use sysv4, not solaris2.
 	* hosts/solaris2.h: Remove.
 	* config/solaris2.mh: Remove.

@@ -2928,7 +2928,9 @@ elf_slurp_reloc_table (abfd, asect, symbols)
   unsigned int i;
   int entsize;
 
-  if (asect->relocation != NULL)
+  if (asect->relocation != NULL
+      || (asect->flags & SEC_RELOC) == 0
+      || asect->reloc_count == 0)
     return true;
 
   BFD_ASSERT (asect->rel_filepos == d->rel_hdr.sh_offset
@@ -5034,7 +5036,7 @@ elf_adjust_dynamic_symbol (h, data)
       BFD_ASSERT (weakdef->root.type == bfd_link_hash_defined);
       BFD_ASSERT (weakdef->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC);
       if ((weakdef->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
-	  || (weakdef->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0)
+	  || (weakdef->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) != 0)
 	{
 	  /* This symbol is defined or referenced by a regular object
 	     file, so we will not do anything special.  Clear weakdef
