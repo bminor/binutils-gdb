@@ -1,5 +1,6 @@
 /* Print i386 instructions for GDB, the GNU debugger.
-   Copyright (C) 1988, 89, 91, 93, 94, 95, 96, 97, 98, 1999
+   Copyright 1988, 1989, 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+   2001
    Free Software Foundation, Inc.
 
 This file is part of GDB.

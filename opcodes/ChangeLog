@@ -257,7 +257,7 @@ Sat Jan 13 01:48:24 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* ia64-dis.c (print_insn_ia64): Cast away const on ia64_free_opcode
 	argument.
-	* ia64_gen.c (insert_deplist): Cast sizeof result to int.
+	* ia64-gen.c (insert_deplist): Cast sizeof result to int.
 	(print_dependency_table): Print NULL if semantics field not set.
 	(insert_opcode_dependencies): Mark cmp parameter as unused.
 	(print_main_table): Use fprintf_vma to print long long fields.
@@ -386,7 +386,7 @@ Sat Jan 13 01:48:24 MET 2001  Jan Hubicka  <jh@suse.cz>
 	* sparc-dis.c (v9a_asr_reg_names): Add v9b ASRs.
 	(compute_arch_mask): Add v8plusb and v9b machines.
 	(print_insn_sparc): siam mode decoding, accept ASRs up to 25.
-	* opcodes/sparc-opc.c: Support for Cheetah instruction set.
+	* sparc-opc.c: Support for Cheetah instruction set.
 	(prefetch_table): Add #invalidate.
 
 2000-10-16  Nick Clifton  <nickc@redhat.com>
@@ -510,14 +510,14 @@ Sat Jan 13 01:48:24 MET 2001  Jan Hubicka  <jh@suse.cz>
 	in the buffer.
 	* fr30-asm.c: Regenerated.
 	* fr30-desc.c: Regenerated.
-	* fr30-desc.h Regenerated.
+	* fr30-desc.h: Regenerated.
 	* fr30-dis.c: Regenerated.
 	* fr30-ibld.c: Regenerated.
 	* fr30-opc.c: Regenerated.
-	* fr30-opc.h Regenerated.
+	* fr30-opc.h: Regenerated.
 	* m32r-asm.c: Regenerated.
 	* m32r-desc.c: Regenerated.
-	* m32r-desc.h Regenerated.
+	* m32r-desc.h: Regenerated.
 	* m32r-dis.c: Regenerated.
 	* m32r-ibld.c: Regenerated.
 	* m32r-opc.c: Regenerated.
@@ -800,7 +800,7 @@ Sat Jan 13 01:48:24 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 2000-05-11  Thomas de Lellis  <tdel@windriver.com>
 
-	* arm-opc.c: Disassembly of thumb ldsb/ldsh
+	* arm-opc.h: Disassembly of thumb ldsb/ldsh
 	instructions changed to ldrsb/ldrsh.
 
 2000-05-11  Ulf Carlsson  <ulfc@engr.sgi.com>
@@ -909,7 +909,7 @@ Sat Jan 13 01:48:24 MET 2001  Jan Hubicka  <jh@suse.cz>
 	* ia64-asmtab.c, ia64-asmtab.h, ia64-dis.c, ia64-gen.c ia64-ic.tbl,
 	ia64-opc-a.c, ia64-opc-b.c, ia64-opc-d.c ia64-opc-f.c, ia64-opc-i.c,
 	ia64-opc-m.c, ia64-opc-x.c, ia64-opc.c, ia64-opc.h, ia64-raw.tbl,
-	ia64-war.tbl, ia64-waw.tbl): New files.
+	ia64-war.tbl, ia64-waw.tbl: New files.
 
 2000-04-20  Alexandre Oliva  <aoliva@redhat.com>
 
@@ -944,7 +944,7 @@ Sat Jan 13 01:48:24 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 2000-04-05  J"orn Rennecke <amylaar@redhat.com>
 
-	* sh-opc.c (sh_table): Use A_DISP_PC / PCRELIMM_8BY2 for ldre & ldrs.
+	* sh-opc.h (sh_table): Use A_DISP_PC / PCRELIMM_8BY2 for ldre & ldrs.
 	stc GBR,@-<REG_N> is available for arch_sh1_up.
 	Group parallel processing insn with identical mnemonics together.
 	Make three-operand psha / pshl come first.
@@ -1063,7 +1063,7 @@ Sat Jan 13 01:48:24 MET 2001  Jan Hubicka  <jh@suse.cz>
 2000-02-23  Andrew Haley  <aph@redhat.com>
 
 	* m32r-asm.c, m32r-desc.c, m32r-desc.h, m32r-dis.c,
-	m32r-ibld.c,m32r-opc.h: Rebuild.
+	m32r-ibld.c, m32r-opc.h: Rebuild.
 
 2000-02-23  Linas Vepstas <linas@linas.org>
 

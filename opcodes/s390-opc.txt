@@ -1,5 +1,5 @@
 #  S/390 opcodes list. Use s390-mkopc to convert it into the opcode table.
-#  Copyright (C) 2000, 2001 Free Software Foundation, Inc.
+#  Copyright 2000, 2001 Free Software Foundation, Inc.
 #  Contributed by Martin Schwidefsky (schwidefsky@de.ibm.com).
 5a a RX "add" esa
 6a ad RX_D "add normalized (long)" esa

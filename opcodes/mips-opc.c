@@ -1,5 +1,6 @@
 /* mips-opc.c -- MIPS opcode list.
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+   Free Software Foundation, Inc.
    Contributed by Ralph Campbell and OSF
    Commented and modified by Ian Lance Taylor, Cygnus Support
    Extended for MIPS32 support by Anders Norlander, and by SiByte, Inc.
