@@ -1,3 +1,8 @@
+Tue Nov 12 19:30:22 1991  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in:  Add tdesc library support.  Fixups to lint,
+	copying.c rules.
+
 Tue Nov 12 13:43:26 1991  Per Bothner  (bothner at cygnus.com)
 
 	* symtab.c (decode_line_1):  Remove spurious call to operator_chars.
