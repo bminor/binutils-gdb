@@ -1,3 +1,14 @@
+Mon Aug 25 11:04:24 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gas/m32r/relax-1.[ds]: New testcase.
+	* gas/m32r/m32r.exp: Run it.
+
+Thu Aug 14 23:49:49 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gas/arc: New directory
+	* gas/arc/{arc.exp,alias.[sd],branch.[sd],flag.[sd],insn3.[sd],j.[sd],
+	ld.[sd],math.[sd],sshift.[sd],st.[sd],warn.{exp,s}}: New files.
+
 Wed Aug  6 00:33:30 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/default.exp: Set AS and GASP to as-new, not as.new.
@@ -766,9 +777,6 @@ Wed Feb 14 13:49:59 1996  Ian Lance Taylor  <ian@cygnus.com>
 Sat Jan 27 13:27:45 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* lib/gas-dg.exp (gas-dg-test): Delete default_flags and libs args.
-start-sanitize-arc
-	* gas/arc/warn.exp: Delete libs arg in call to dg-runtest.
-end-sanitize-arc
 
 Fri Jan 26 14:24:01 1996  Jeffrey A Law  (law@cygnus.com)
 
@@ -1067,9 +1075,6 @@ Tue May  2 16:37:48 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 Sat Apr 29 23:35:18 1995  Doug Evans  <dje@chestnut.cygnus.com>
 
 	* lib/gas-dg.exp: New file.
-start-sanitize-arc
-	* gas/arc/warn.{exp,s}: New testcase.
-end-sanitize-arc
 
 Tue Apr 11 13:57:52 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
@@ -1084,13 +1089,6 @@ Mon Apr 10 15:36:39 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	Ensure test file name is in reported message.
 
 Sat Apr  8 12:46:33 1995  Doug Evans  <dje@chestnut.cygnus.com>
-
-start-sanitize-arc
-	* gas/arc: Testsuite for ARC.
-	* gas/arc/{arc.exp,math.[sd],flag.[sd],j.[sd]}: New files.
-	* gas/arc/{branch.[sd],alias.[sd],sshift.[sd]}: New files.
-	* gas/arc/{insn3.[sd],mul64.[sd],ld.[sd],st.[sd]}: New files.
-end-sanitize-arc
 
 	* lib/gas-defs.exp (run_dump_test): Handle arguments with paths.
 	Always resolve testcase status before returning.

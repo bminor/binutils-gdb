@@ -27,6 +27,8 @@ allinsn.exp
 allinsn.d
 allinsn.s
 m32r.exp
+relax-1.d
+relax-1.s
 uppercase.d
 uppercase.s
 
