@@ -1,3 +1,23 @@
+Fri Jul 14 19:54:28 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	Add support for SPARC SunOS PIC:
+	* config/tc-sparc.h (sparc_pic_code): Always declare, not just
+	when OBJ_ELF.
+	(TC_RELOC_RTSYM_LOC_FIXUP): Define when OBJ_AOUT.
+	(tc_fix_adjustable): New definition for OBJ_AOUT.
+	* config/tc-sparc.c (sparc_pic_code): Always define, not just when
+	OBJ_ELF.
+	(md_apply_fix): Adjust reloc addend for OBJ_AOUT and PIC.  In
+	BFD_RELOC_32_PCREL_S2 case, don't increment val for an external
+	symbol when PIC.
+	(tc_gen_reloc): Generate different PIC relocs when OBJ_AOUT, as
+	well as when OBJ_ELF.
+	(md_shortopts): If OBJ_AOUT, include `k'.
+	(md_parse_option): If OBJ_AOUT, handle 'k'.
+	(md_show_usage): Mention -k if OBJ_AOUT, and -KPIC if OBJ_ELF.
+	(md_pcrel_from): Don't add in size for an external symbol when
+	PIC.
+
 start-sanitize-arc
 Fri Jul 14 10:26:43 1995  Doug Evans  <dje@canuck.cygnus.com>
 
