@@ -1,3 +1,8 @@
+Fri Aug 26 14:46:15 1994  Ken Raeburn  (raeburn@kr-laptop.cygnus.com)
+
+	* subsegs.c (section_symbol): Reverse still-wrong test of
+	EMIT_SECTION_SYMBOLS.
+
 Wed Aug 24 12:46:08 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/tc-mips.h (LOCAL_LABEL): Define as 0, for compatibility
