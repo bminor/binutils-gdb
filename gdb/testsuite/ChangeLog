@@ -1,5 +1,11 @@
 2002-03-26  Fred Fish  <fnf@redhat.com>
 
+	* gdb.base/step-test.exp: Accept stopping in memcpy/bcopy when we
+	have debugging info for those functions and the compiler uses them
+	internally to copy structs around.
+
+2002-03-26  Fred Fish  <fnf@redhat.com>
+
 	* gdb.base/list.exp: Revert the change made yesterday and add note
 	about why we don't list the default lines for remote targets.
 
