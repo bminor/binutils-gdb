@@ -1,5 +1,7 @@
 Mon Dec 16 10:03:52 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* simops.c: Handle "break" instruction.
+
 	* simops.c: Fix restoring the PC for "ret" and "retf" instructions.
 
 Wed Dec 11 09:53:10 1996  Jeffrey A Law  (law@cygnus.com)

@@ -3071,3 +3071,13 @@ void OP_F670 (insn, extension)
 {
   abort ();
 }
+
+/* breakpoint */
+void
+OP_FF (insn, extension)
+     unsigned long insn, extension;
+{
+  State.exception = SIGTRAP;
+  PC -= 1;
+}
+
