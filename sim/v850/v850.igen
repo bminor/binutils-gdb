@@ -631,8 +631,11 @@ regID,111111,RRRRR + 0000000000100000:IX:::ldsr
 rrrrr!0,000000,RRRRR:I:::mov
 "mov r<reg1>, r<reg2>"
 {
-  COMPAT_1 (OP_0 ());
+  TRACE_ALU_INPUT0 ();
+  GR[reg2] = GR[reg1];
+  TRACE_ALU_RESULT (GR[reg2]);
 }
+
 
 rrrrr!0,010000,iiiii:II:::mov
 "mov <imm5>, r<reg2>"
@@ -757,7 +760,7 @@ rrrrr,111111,iiiii + wwwww,01001,IIII,10:XII:::mulu
 0000000000000000:I:::nop
 "nop"
 {
-  COMPAT_1 (OP_0 ());
+  /* do nothing, trace nothing */
 }
 
 
@@ -886,7 +889,22 @@ rrrrr,110100,RRRRR + iiiiiiiiiiiiiiii:VI:::ori
 0000011111100000 + 0000000101000000:X:::reti
 "reti"
 {
-  COMPAT_2 (OP_14007E0 ());
+  if ((PSW & PSW_EP))
+    {
+      nia = (EIPC & ~1);
+      PSW = EIPSW;
+    }
+  else if ((PSW & PSW_NP))
+    {
+      nia = (FEPC & ~1);
+      PSW = FEPSW;
+    }
+  else
+    {
+      nia = (EIPC & ~1);
+      PSW = EIPSW;
+    }
+  TRACE_BRANCH1 (PSW);
 }
 
 

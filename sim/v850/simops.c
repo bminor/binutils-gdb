@@ -1330,19 +1330,6 @@ OP_160 ()
   return 2;
 }
 
-/* mov reg, reg */
-int
-OP_0 ()
-{
-  trace_input ("mov", OP_REG_REG_MOVE, 0);
-  
-  State.regs[ OP[1] ] = State.regs[ OP[0] ];
-  
-  trace_output (OP_REG_REG_MOVE);
-
-  return 2;
-}
-
 /* mov sign_extend(imm5), reg */
 int
 OP_200 ()
@@ -1823,28 +1810,6 @@ OP_12007E0 ()
   trace_output (OP_NONE);
   sim_engine_halt (simulator, STATE_CPU (simulator, 0), NULL, PC,
 		   sim_stopped, SIGTRAP);
-  return 0;
-}
-
-/* reti */
-int
-OP_14007E0 ()
-{
-  trace_input ("reti", OP_NONE, 0);
-  trace_output (OP_NONE);
-
-  /* Restore for NMI if only NP on, otherwise is interrupt or exception.  */
-  if ((PSW & (PSW_NP | PSW_EP)) == PSW_NP)
-    {
-      PC = FEPC - 4;
-      PSW = FEPSW;
-    }
-  else
-    {
-      PC = EIPC - 4;
-      PSW = EIPSW;
-    }
-
   return 0;
 }
 

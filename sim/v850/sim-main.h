@@ -41,7 +41,6 @@ typedef struct _v850_regs {
   reg_t sregs[32];		/* system registers, including psw */
   reg_t pc;
   int dummy_mem;		/* where invalid accesses go */
-  int pending_nmi;
 } v850_regs;
 
 struct _sim_cpu
@@ -49,6 +48,7 @@ struct _sim_cpu
   /* ... simulator specific members ... */
   v850_regs reg;
   reg_t psw_mask;               /* only allow non-reserved bits to be set */
+  sim_event *pending_nmi;
   /* ... base type ... */
   sim_cpu_base base;
 };

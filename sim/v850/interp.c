@@ -66,151 +66,117 @@ do_interrupt (sd, data)
   char **interrupt_name = (char**)data;
   enum interrupt_type inttype;
   inttype = (interrupt_name - STATE_WATCHPOINTS (sd)->interrupt_names);
-  /* Disable further interrupts.  */
-  PSW |= PSW_ID;
-  /* Indicate that we're doing interrupt not exception processing.  */
-  PSW &= ~PSW_EP;
+
+  /* For a hardware reset, drop everything and jump to the start
+     address */
   if (inttype == int_reset)
     {
       PC = 0;
       PSW = 0x20;
       ECR = 0;
-      /* (Might be useful to init other regs with random values.) */
+      sim_engine_restart (sd, NULL, NULL, NULL_CIA);
     }
-  else if (inttype == int_nmi)
+
+  /* Deliver an NMI when allowed */
+  if (inttype == int_nmi)
     {
       if (PSW & PSW_NP)
 	{
 	  /* We're already working on an NMI, so this one must wait
 	     around until the previous one is done.  The processor
-	     ignores subsequent NMIs, so we don't need to count them.  */
-	  State.pending_nmi = 1;
+	     ignores subsequent NMIs, so we don't need to count them.
+	     Just keep re-scheduling a single NMI until it manages to
+	     be delivered */
+	  if (STATE_CPU (sd, 0)->pending_nmi != NULL)
+	    sim_events_deschedule (sd, STATE_CPU (sd, 0)->pending_nmi);
+	  STATE_CPU (sd, 0)->pending_nmi =
+	    sim_events_schedule (sd, 1, do_interrupt, data);
+	  return;
 	}
       else
 	{
+	  /* NMI can be delivered.  Do not deschedule pending_nmi as
+             that, if still in the event queue, is a second NMI that
+             needs to be delivered later. */
 	  FEPC = PC;
 	  FEPSW = PSW;
 	  /* Set the FECC part of the ECR. */
 	  ECR &= 0x0000ffff;
 	  ECR |= 0x10;
 	  PSW |= PSW_NP;
+	  PSW &= ~PSW_EP;
+	  PSW |= PSW_ID;
 	  PC = 0x10;
+	  sim_engine_restart (sd, NULL, NULL, NULL_CIA);
 	}
     }
-  else
+
+  /* deliver maskable interrupt when allowed */
+  if (inttype > int_nmi && inttype < num_int_types)
     {
-      EIPC = PC;
-      EIPSW = PSW;
-      /* Clear the EICC part of the ECR, will set below. */
-      ECR &= 0xffff0000;
-      switch (inttype)
+      if ((PSW & PSW_NP) || (PSW & PSW_ID))
 	{
-	case int_intov1:
-	  PC = 0x80;
-	  ECR |= 0x80;
-	  break;
-	case int_intp10:
-	  PC = 0x90;
-	  ECR |= 0x90;
-	  break;
-	case int_intp11:
-	  PC = 0xa0;
-	  ECR |= 0xa0;
-	  break;
-	case int_intp12:
-	  PC = 0xb0;
-	  ECR |= 0xb0;
-	  break;
-	case int_intp13:
-	  PC = 0xc0;
-	  ECR |= 0xc0;
-	  break;
-	case int_intcm4:
-	  PC = 0xd0;
-	  ECR |= 0xd0;
-	  break;
-	default:
-	  /* Should never be possible.  */
-	  abort ();
-	  break;
+	  /* Can't deliver this interrupt, reschedule it for later */
+	  sim_events_schedule (sd, 1, do_interrupt, data);
+	  return;
 	}
+      else
+	{
+	  /* save context */
+	  EIPC = PC;
+	  EIPSW = PSW;
+	  /* Disable further interrupts.  */
+	  PSW |= PSW_ID;
+	  /* Indicate that we're doing interrupt not exception processing.  */
+	  PSW &= ~PSW_EP;
+	  /* Clear the EICC part of the ECR, will set below. */
+	  ECR &= 0xffff0000;
+	  switch (inttype)
+	    {
+	    case int_intov1:
+	      PC = 0x80;
+	      ECR |= 0x80;
+	      break;
+	    case int_intp10:
+	      PC = 0x90;
+	      ECR |= 0x90;
+	      break;
+	    case int_intp11:
+	      PC = 0xa0;
+	      ECR |= 0xa0;
+	      break;
+	    case int_intp12:
+	      PC = 0xb0;
+	      ECR |= 0xb0;
+	      break;
+	    case int_intp13:
+	      PC = 0xc0;
+	      ECR |= 0xc0;
+	      break;
+	    case int_intcm4:
+	      PC = 0xd0;
+	      ECR |= 0xd0;
+	      break;
+	    default:
+	      /* Should never be possible.  */
+	      sim_engine_abort (sd, NULL, NULL_CIA,
+				"do_interrupt - internal error - bad switch");
+	      break;
+	    }
+	}
+      sim_engine_restart (sd, NULL, NULL, NULL_CIA);
     }
+  
+  /* some other interrupt? */
+  sim_engine_abort (sd, NULL, NULL_CIA,
+		    "do_interrupt - internal error - interrupt %d unknown",
+		    inttype);
 }
 
 /* These default values correspond to expected usage for the chip.  */
 
-int v850_debug;
-
 uint32 OP[4];
 
-static long hash PARAMS ((long));
-#if 0
-static void do_format_1_2 PARAMS ((uint32));
-static void do_format_3 PARAMS ((uint32));
-static void do_format_4 PARAMS ((uint32));
-static void do_format_5 PARAMS ((uint32));
-static void do_format_6 PARAMS ((uint32));
-static void do_format_7 PARAMS ((uint32));
-static void do_format_8 PARAMS ((uint32));
-static void do_format_9_10 PARAMS ((uint32));
-#endif
-
-#define MAX_HASH  63
-
-struct hash_entry
-{
-  struct hash_entry *next;
-  unsigned long opcode;
-  unsigned long mask;
-  struct simops *ops;
-};
-
-struct hash_entry hash_table[MAX_HASH+1];
-
-
-static INLINE long 
-hash(insn)
-     long insn;
-{
-  if (   (insn & 0x0600) == 0
-      || (insn & 0x0700) == 0x0200
-      || (insn & 0x0700) == 0x0600
-      || (insn & 0x0780) == 0x0700)
-    return (insn & 0x07e0) >> 5;
-
-  if ((insn & 0x0700) == 0x0300
-      || (insn & 0x0700) == 0x0400
-      || (insn & 0x0700) == 0x0500)
-    return (insn & 0x0780) >> 7;
-
-  if ((insn & 0x07c0) == 0x0780)
-    return (insn & 0x07c0) >> 6;
-
-  return (insn & 0x07e0) >> 5;
-}
-
-#if 0
-static struct hash_entry *
-lookup_hash (sd, ins)
-     SIM_DESC sd;
-     uint32 ins;
-{
-  struct hash_entry *h;
-
-  h = &hash_table[hash(ins)];
-
-  while ((ins & h->mask) != h->opcode)
-    {
-      if (h->next == NULL)
-	{
-	  sim_io_error (sd, "ERROR looking up hash for 0x%lx, PC=0x%lx",
-			(long) ins, (long) PC);
-	}
-      h = h->next;
-    }
-  return (h);
-}
-#endif
 
 SIM_DESC
 sim_open (kind, cb, abfd, argv)
@@ -328,66 +294,6 @@ sim_stop (sd)
 {
   return 0;
 }
-
-#if 0
-void
-sim_engine_run (sd, next_cpu_nr, siggnal)
-     SIM_DESC sd;
-     int next_cpu_nr;
-     int siggnal;
-{
-  uint32 inst;
-  SIM_ADDR oldpc;
-
-  while (1)
-    {
-      struct hash_entry * h;
-      /* Fetch the current instruction.  */
-      inst  = RLW (PC);
-      oldpc = PC;
-
-      h     = lookup_hash (sd, inst);
-      OP[0] = inst & 0x1f;
-      OP[1] = (inst >> 11) & 0x1f;
-      OP[2] = (inst >> 16) & 0xffff;
-      OP[3] = inst;
-
-      /* fprintf (stderr, "PC = %x, SP = %x\n", PC, SP ); */
-
-      if (inst == 0)
-	{
-	  fprintf (stderr, "NOP encountered!\n");
-	  break;
-	}
-      
-      PC += h->ops->func ();
-
-      if (oldpc == PC)
-	{
-	  sim_io_eprintf (sd, "simulator loop at %lx\n", (long) PC );
-	  break;
-	}
-      
-      if (sim_events_tick (sd))
-	{
-	  sim_events_process (sd);
-	}
-    }
-}
-#endif
-
-#if 0
-int
-sim_trace (sd)
-     SIM_DESC sd;
-{
-#ifdef DEBUG
-  v850_debug = DEBUG;
-#endif
-  sim_resume (sd, 0, 0);
-  return 1;
-}
-#endif
 
 void
 sim_info (sd, verbose)

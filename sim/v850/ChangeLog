@@ -1,3 +1,15 @@
+Wed Sep 17 16:21:08 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c: Move "mov", "reti", to v850.igen, fix tracing.
+	
+	* interp.c (hash): Delete.
+
+	* v850.igen (nop): Really do nothing.
+
+	* interp.c (do_interrupt): Mask interrupts after PSW is saved, not
+ 	before.
+	* v850.igen (reti): Return to current PC not previous.
+
 start-sanitize-v850e
 Wed Sep 17 14:02:10 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
