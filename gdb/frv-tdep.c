@@ -37,6 +37,7 @@ static gdbarch_init_ftype frv_gdbarch_init;
 
 static gdbarch_register_name_ftype frv_register_name;
 static gdbarch_breakpoint_from_pc_ftype frv_breakpoint_from_pc;
+static gdbarch_adjust_breakpoint_address_ftype frv_gdbarch_adjust_breakpoint_address;
 static gdbarch_skip_prologue_ftype frv_skip_prologue;
 static gdbarch_deprecated_extract_return_value_ftype frv_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype frv_extract_struct_value_address;
@@ -269,6 +270,51 @@ frv_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenp)
   static unsigned char breakpoint[] = {0xc0, 0x70, 0x00, 0x01};
   *lenp = sizeof (breakpoint);
   return breakpoint;
+}
+
+/* Define the maximum number of instructions which may be packed into a
+   bundle (VLIW instruction).  */
+static const int max_instrs_per_bundle = 8;
+
+/* Define the size (in bytes) of an FR-V instruction.  */
+static const int frv_instr_size = 4;
+
+/* Adjust a breakpoint's address to account for the FR-V architecture's
+   constraint that a break instruction must not appear as any but the
+   first instruction in the bundle.  */
+static CORE_ADDR
+frv_gdbarch_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
+{
+  int count = max_instrs_per_bundle;
+  CORE_ADDR addr = bpaddr - frv_instr_size;
+  CORE_ADDR func_start = get_pc_function_start (bpaddr);
+
+  /* Find the end of the previous packing sequence.  This will be indicated
+     by either attempting to access some inaccessible memory or by finding
+     an instruction word whose packing bit is set to one. */
+  while (count-- > 0 && addr >= func_start)
+    {
+      char instr[frv_instr_size];
+      int status;
+
+      status = read_memory_nobpt (addr, instr, sizeof instr);
+
+      if (status != 0)
+	break;
+
+      /* This is a big endian architecture, so byte zero will have most
+         significant byte.  The most significant bit of this byte is the
+         packing bit.  */
+      if (instr[0] & 0x80)
+	break;
+
+      addr -= frv_instr_size;
+    }
+
+  if (count > 0)
+    bpaddr = addr + frv_instr_size;
+
+  return bpaddr;
 }
 
 
@@ -1114,6 +1160,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_prologue (gdbarch, frv_skip_prologue);
   set_gdbarch_breakpoint_from_pc (gdbarch, frv_breakpoint_from_pc);
+  set_gdbarch_adjust_breakpoint_address (gdbarch, frv_gdbarch_adjust_breakpoint_address);
 
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frv_frameless_function_invocation);

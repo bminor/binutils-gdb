@@ -1,5 +1,12 @@
 2003-10-13  Kevin Buettner  <kevinb@redhat.com>
 
+	* frv-tdep.c (max_instrs_per_bundle, frv_instr_size): New constants.
+	(frv_gdbarch_adjust_breakpoint_address): New function.
+	(frv_gdbarch_init): Initialize ``gdbarch_adjust_breakpoint_address''
+	method.
+
+2003-10-13  Kevin Buettner  <kevinb@redhat.com>
+
 	* breakpoint.h (struct breakpoint): Add new member
 	``requested_address''.
 	* breakpoint.c (breakpoint_adjustment_warning)
