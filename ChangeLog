@@ -1,5 +1,7 @@
 Mon Apr 13 15:37:24 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ltconfig: Add cygwin32 support.
+
 	* Makefile.in, configure.in: Add libtool as a native only directory
  	to configure and build.
 
