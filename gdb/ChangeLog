@@ -1,3 +1,21 @@
+Tue May  4 19:33:12 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (VERSION):  Bump to 4.8.5
+	* Makefile.in (INCLUDE_CFLAGS):  Add BFD_DIR and READLINE_DIR
+	directories to include search path.
+	* Makefile.in (CLIBS, CDEPS, ADD_FILES, ADD_DEPS):  Clean up
+	whitespace.
+	* Makefile.in (depend):  For gcc -MM line, use INTERNAL_CFLAGS
+	* Makefile.in (main.o, dbxread.o, coffread.o, mipsread.o,
+	elfread.o, dwarfread.o, stabsread.o, xcoffread.o, xcoffexec.o,
+	xdr_ld.o, xdr_rdb.o, nindy.o, Onindy.o, ttybreak.o, ttyflush.o,
+	udr.o, udip2soc.o):  Remove explicit rules, use the ones that
+	are automatically generated in "depend".
+	* Makefile.in (paread.o):  Document why a dependency doesn't get
+	automatically generated in "depend" and leave this explicit rule
+	in for now (FIXME).
+	* depend:  Update to latest automatically generated version.
+
 Tue May  4 12:11:38 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* xcoffread.c: Doc fix.

@@ -125,7 +125,7 @@ RL_LIB = ./../readline${subdir}/libreadline.a
 # -I. for config files.
 # -I${srcdir} possibly for regex.h also.
 # -I${srcdir}/config for more generic config files.
-INCLUDE_CFLAGS = -I. -I${srcdir} -I${srcdir}/config -I$(INCLUDE_DIR)
+INCLUDE_CFLAGS = -I. -I${srcdir} -I${srcdir}/config -I$(INCLUDE_DIR) -I$(BFD_DIR) -I$(READLINE_DIR)
 
 # M{H,T}_CFLAGS, if defined, has host- and target-dependent CFLAGS
 # from the config/ directory.
@@ -156,15 +156,17 @@ OPCODES = ./../opcodes${subdir}/libopcodes.a
 # Libraries and corresponding dependencies for compiling gdb.
 # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
 # TERMCAP comes after readline, since readline depends on it.
-CLIBS = ${BFD_LIB} ${RL_LIB} ${TERMCAP} ${OPCODES} ${MMALLOC_LIB} ${LIBIBERTY} \
-	${XM_CLIBS} ${TM_CLIBS} ${NAT_CLIBS}
+CLIBS = ${BFD_LIB} ${RL_LIB} ${TERMCAP} ${OPCODES} ${MMALLOC_LIB} \
+	${LIBIBERTY} ${XM_CLIBS} ${TM_CLIBS} ${NAT_CLIBS}
 CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${NAT_CDEPS} \
-	${BFD_LIB} ${RL_LIB}            ${OPCODES} ${MMALLOC_LIB} ${LIBIBERTY}
+	${BFD_LIB} ${RL_LIB} ${OPCODES} ${MMALLOC_LIB} ${LIBIBERTY}
 
-ADD_FILES = ${REGEX} ${ALLOCA}  ${XM_ADD_FILES} ${TM_ADD_FILES} ${NAT_ADD_FILES}
-ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} ${NAT_ADD_FILES}
+ADD_FILES = ${REGEX} ${ALLOCA}  ${XM_ADD_FILES} ${TM_ADD_FILES} \
+	${NAT_ADD_FILES}
+ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} \
+	${NAT_ADD_FILES}
 
-VERSION = 4.8.4
+VERSION = 4.8.5
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -535,8 +537,7 @@ depend: $(SOURCES) Makefile.in
 	@echo Ignore errors about non-existent system-supplied include files
 	@echo for systems other than the one you are using.
 	@echo Also ignore any errors in arm-convert.s.
-	-$(GCC) -MM -nostdinc -I/usr/include $(CFLAGS) -I$(BFD_DIR) \
-	  -I${READLINE_DIR} $(INCLUDE_CFLAGS) \
+	-$(GCC) -MM -nostdinc -I/usr/include $(INTERNAL_CFLAGS) \
 	  `ls $(SOURCES) | grep -v '\.[hy]$$' | \
 	  sort -u` >depend.tmp
 # If running in srcdir, translate "./foo.c" into "$srcdir/foo.c" except
@@ -831,69 +832,13 @@ m2-exp.tab.c: $(srcdir)/m2-exp.y $(srcdir)/Makefile.in
 	  < y.tab.c > ././m2-exp.tab.c
 	-rm y.tab.c
 
-
-main.o:	${srcdir}/main.c
-	${CC} -c ${INTERNAL_CFLAGS} -I${READLINE_DIR} $<
-
-# The symbol-file readers have dependencies on BFD header files.
-dbxread.o: ${srcdir}/dbxread.c
-	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/dbxread.c
-
-coffread.o: ${srcdir}/coffread.c
-	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/coffread.c
-
-mipsread.o: ${srcdir}/mipsread.c
-	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/mipsread.c
-
-elfread.o: ${srcdir}/elfread.c
-	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/elfread.c
-
-dwarfread.o: ${srcdir}/dwarfread.c
-	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/dwarfread.c
-
-stabsread.o: ${srcdir}/stabsread.c
-	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/stabsread.c
-
-# Used on RS/6000 native
-xcoffread.o: ${srcdir}/xcoffread.c
-	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/xcoffread.c
-
-xcoffexec.o: ${srcdir}/xcoffexec.c
-	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/xcoffexec.c
-
-# Used on HP-PA native
+# Used on HP-PA native.
+# This rule fails to get automatically generated in depend because gcc -MM
+# ends up trying to include ../bfd/sysdep.h, which does not exist in an
+# unconfigured BFD directory, and the resulting error suppresses the
+# output of dependency information.  For now, just punt.  (FIXME)
 paread.o: ${srcdir}/paread.c
 	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/paread.c
-
-# Drag in the files that are in another directory.
-
-xdr_ld.o: ${srcdir}/vx-share/xdr_ld.c
-	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/vx-share/xdr_ld.c
-
-xdr_ptrace.o: ${srcdir}/vx-share/xdr_ptrace.c
-	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/vx-share/xdr_ptrace.c
-
-xdr_rdb.o: ${srcdir}/vx-share/xdr_rdb.c
-	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/vx-share/xdr_rdb.c
-
-nindy.o: ${srcdir}/nindy-share/nindy.c
-	${CC} -c ${INTERNAL_CFLAGS} -DSTRIP='"$(tooldir)/bin/strip"' \
-		${srcdir}/nindy-share/nindy.c
-
-Onindy.o: ${srcdir}/nindy-share/Onindy.c
-	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/nindy-share/Onindy.c
-
-ttybreak.o: ${srcdir}/nindy-share/ttybreak.c
-	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/nindy-share/ttybreak.c
-
-ttyflush.o: ${srcdir}/nindy-share/ttyflush.c
-	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/nindy-share/ttyflush.c
-
-udr.o: ${srcdir}/29k-share/udi/udr.c
-	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/29k-share/udi/udr.c
-
-udip2soc.o: ${srcdir}/29k-share/udi/udip2soc.c
-	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/29k-share/udi/udip2soc.c
 
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \
