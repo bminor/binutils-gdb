@@ -1,5 +1,8 @@
 Mon Oct  4 11:02:11 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* Rename i386lynx-tdep.c to i386ly-tdep.c for 14 character file names.
+	* Makefile.in, config/i386/i386lynx.mt: Change accordingly.
+
 	* values.c (record_latest_value): Fetch lazy values and set VALUE_LVAL
 	to not_lval.
 

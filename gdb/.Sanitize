@@ -124,8 +124,8 @@ i386-stub.c
 i386-tdep.c
 i386aix-nat.c
 i386b-nat.c
+i386ly-tdep.c
 i386lynx-nat.c
-i386lynx-tdep.c
 i386mach-nat.c
 i386v-nat.c
 i386v4-nat.c
