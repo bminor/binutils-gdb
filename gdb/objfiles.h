@@ -424,14 +424,15 @@ struct objfile
     struct obj_section
      *sections, *sections_end;
 
-    /* two auxiliary fields, used to hold the fp of separate symbol files */
-    FILE *auxf1, *auxf2;
-
     /* Imported symbols */
+    /* FIXME: ezannoni 2004-02-10: This is just SOM (HP) specific (see
+       somread.c). It should not pollute generic objfiles.  */
     ImportEntry *import_list;
     int import_list_size;
 
     /* Exported symbols */
+    /* FIXME: ezannoni 2004-02-10: This is just SOM (HP) specific (see
+       somread.c). It should not pollute generic objfiles.  */
     ExportEntry *export_list;
     int export_list_size;
 

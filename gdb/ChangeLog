@@ -1,3 +1,8 @@
+2004-02-10  Elena Zannoni  <ezannoni@redhat.com>
+
+	* objfiles.h (struct objfile): Remove unused fields auxf1 and
+	auxf2. Add comments about some other rarely used fields.
+
 2004-02-10  Andrew Cagney  <cagney@redhat.com>
 
 	* Makefile.in (init.c): Fix script removing duplicates. Problem
