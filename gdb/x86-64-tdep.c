@@ -1220,6 +1220,31 @@ x86_64_supply_fpregset (const struct regset *regset, struct regcache *regcache,
   x86_64_supply_fxsave (regcache, regnum, fpregs);
 }
 
+/* Return the appropriate register set for the core section identified
+   by SECT_NAME and SECT_SIZE.  */
+
+static const struct regset *
+x86_64_regset_from_core_section (struct gdbarch *gdbarch,
+				 const char *sect_name, size_t sect_size)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (strcmp (sect_name, ".reg2") == 0 && sect_size == tdep->sizeof_fpregset)
+    {
+      if (tdep->fpregset == NULL)
+	{
+	  tdep->fpregset = XMALLOC (struct regset);
+	  tdep->fpregset->descr = tdep;
+	  tdep->fpregset->supply_regset = x86_64_supply_fpregset;
+	}
+
+      return tdep->fpregset;
+    }
+
+  return i386_regset_from_core_section (gdbarch, sect_name, sect_size);
+}
+
+
 void
 x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1297,6 +1322,11 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   frame_unwind_append_sniffer (gdbarch, x86_64_sigtramp_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, x86_64_frame_sniffer);
   frame_base_set_default (gdbarch, &x86_64_frame_base);
+
+  /* If we have a register mapping, enable the generic core file support.  */
+  if (tdep->gregset_reg_offset)
+    set_gdbarch_regset_from_core_section (gdbarch,
+					  x86_64_regset_from_core_section);
 }
 
 

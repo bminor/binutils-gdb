@@ -1,5 +1,9 @@
 2003-10-11  Mark Kettenis  <kettenis@gnu.org>
 
+	* x86-64-tdep.c (x86_64_regset_from_core_section): New function.
+	(x86_64_init_abi): Initialize regset_from_core_section if
+	appropriate.
+
 	* i386-tdep.c (i386_regset_from_core_section): New function.
 	(i386_gdbarch_init): Initialize regset_from_core_section if
 	appropriate.
