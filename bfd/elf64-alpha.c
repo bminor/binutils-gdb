@@ -4579,8 +4579,20 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	  value -= gp;
 	  goto default_reloc;
 
-	case R_ALPHA_GPREL16:
 	case R_ALPHA_GPREL32:
+	  /* If the target section was a removed linkonce section,
+	     r_symndx will be zero.  In this case, assume that the
+	     switch will not be used, so don't fill it in.  If we
+	     do nothing here, we'll get relocation truncated messages,
+	     due to the placement of the application above 4GB.  */
+	  if (r_symndx == 0)
+	    {
+	      r = bfd_reloc_ok;
+	      break;
+	    }
+	  /* FALLTHRU */
+
+	case R_ALPHA_GPREL16:
 	case R_ALPHA_GPRELLOW:
 	  if (dynamic_symbol_p)
             {
