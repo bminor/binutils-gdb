@@ -590,9 +590,11 @@ demangle_h =    $(INCLUDE_DIR)/demangle.h
 obstack_h =     $(INCLUDE_DIR)/obstack.h
 opcode_m68hc11_h = $(INCLUDE_DIR)/opcode/m68hc11.h
 readline_h = 	$(READLINE_SRC)/readline.h
+frv_desc_h =	$(OPCODES_SRC)/frv-desc.h
 sh_opc_h = 	$(OPCODES_SRC)/sh-opc.h
 gdb_sim_arm_h =	$(INCLUDE_DIR)/gdb/sim-arm.h
 gdb_sim_d10v_h = $(INCLUDE_DIR)/gdb/sim-d10v.h
+gdb_sim_frv_h = $(INCLUDE_DIR)/gdb/sim-frv.h
 gdb_sim_sh_h =	$(INCLUDE_DIR)/gdb/sim-sh.h
 splay_tree_h =  $(INCLUDE_DIR)/splay-tree.h
 
@@ -1780,7 +1782,8 @@ frame-unwind.o: frame-unwind.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(gdb_assert_h) $(dummy_frame_h)
 frv-tdep.o: frv-tdep.c $(defs_h) $(gdb_string_h) $(inferior_h) $(symfile_h) \
 	$(gdbcore_h) $(arch_utils_h) $(regcache_h) $(frame_h) \
-	$(frame_unwind_h) $(frame_base_h) $(trad_frame_h) $(dis_asm_h)
+	$(frame_unwind_h) $(frame_base_h) $(trad_frame_h) $(dis_asm_h) \
+	$(gdb_assert_h) $(sim_regno_h) $(gdb_sim_frv_h) $(frv_desc_h)
 f-typeprint.o: f-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) $(target_h) \
 	$(f_lang_h) $(gdb_string_h)

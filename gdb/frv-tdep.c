@@ -30,6 +30,10 @@
 #include "frame-base.h"
 #include "trad-frame.h"
 #include "dis-asm.h"
+#include "gdb_assert.h"
+#include "sim-regno.h"
+#include "gdb/sim-frv.h"
+#include "opcodes/frv-desc.h"	/* for the H_SPR_... enums */
 
 extern void _initialize_frv_tdep (void);
 
@@ -45,12 +49,9 @@ static gdbarch_frameless_function_invocation_ftype frv_frameless_function_invoca
 static gdbarch_deprecated_push_arguments_ftype frv_push_arguments;
 static gdbarch_deprecated_saved_pc_after_call_ftype frv_saved_pc_after_call;
 
-/* Register numbers.  You can change these as needed, but don't forget
-   to update the simulator accordingly.  */
+/* Register numbers.  The order in which these appear define the
+   remote protocol, so take care in changing them.  */
 enum {
-  /* The total number of registers we know exist.  */
-  frv_num_regs = 147,
-
   /* Register numbers 0 -- 63 are always reserved for general-purpose
      registers.  The chip at hand may have less.  */
   first_gpr_regnum = 0,
@@ -64,10 +65,12 @@ enum {
   first_fpr_regnum = 64,
   last_fpr_regnum = 127,
 
-  /* Register numbers 128 on up are always reserved for special-purpose
-     registers.  */
-  first_spr_regnum = 128,
+  /* The PC register.  */
   pc_regnum = 128,
+
+  /* Register numbers 129 on up are always reserved for special-purpose
+     registers.  */
+  first_spr_regnum = 129,
   psr_regnum = 129,
   ccr_regnum = 130,
   cccr_regnum = 131,
@@ -79,7 +82,12 @@ enum {
   dbar3_regnum = 140,
   lr_regnum = 145,
   lcr_regnum = 146,
-  last_spr_regnum = 146
+  iacc0h_regnum = 147,
+  iacc0l_regnum = 148,
+  last_spr_regnum = 148,
+
+  /* The total number of registers we know exist.  */
+  frv_num_regs = last_spr_regnum + 1
 };
 
 static LONGEST frv_call_dummy_words[] =
@@ -159,13 +167,8 @@ new_variant (void)
   for (r = 0; r < frv_num_regs; r++)
     var->register_names[r] = "";
 
-  /* Do, however, supply default names for the special-purpose
+  /* Do, however, supply default names for the known special-purpose
      registers.  */
-  for (r = first_spr_regnum; r <= last_spr_regnum; ++r)
-    {
-      sprintf (buf, "x%d", r);
-      var->register_names[r] = xstrdup (buf);
-    }
 
   var->register_names[pc_regnum] = "pc";
   var->register_names[lr_regnum] = "lr";
@@ -182,6 +185,10 @@ new_variant (void)
   var->register_names[dbar1_regnum] = "dbar1";
   var->register_names[dbar2_regnum] = "dbar2";
   var->register_names[dbar3_regnum] = "dbar3";
+
+  /* iacc0 (Only found on MB93405.)  */
+  var->register_names[iacc0h_regnum] = "iacc0h";
+  var->register_names[iacc0l_regnum] = "iacc0l";
 
   return var;
 }
@@ -236,19 +243,69 @@ frv_register_name (int reg)
   return CURRENT_VARIANT->register_names[reg];
 }
 
+
 static struct type *
 frv_register_type (struct gdbarch *gdbarch, int reg)
 {
-  if (reg >= 64 && reg <= 127)
+  if (reg >= first_fpr_regnum && reg <= last_fpr_regnum)
     return builtin_type_float;
   else
-    return builtin_type_int;
+    return builtin_type_int32;
 }
 
 static int
 frv_register_byte (int reg)
 {
   return (reg * 4);
+}
+
+static int
+frv_register_sim_regno (int reg)
+{
+  static const int spr_map[] =
+    {
+      H_SPR_PSR,		/* psr_regnum */
+      H_SPR_CCR,		/* ccr_regnum */
+      H_SPR_CCCR,		/* cccr_regnum */
+      -1,			/* 132 */
+      -1,			/* 133 */
+      -1,			/* 134 */
+      H_SPR_TBR,		/* tbr_regnum */
+      H_SPR_BRR,		/* brr_regnum */
+      H_SPR_DBAR0,		/* dbar0_regnum */
+      H_SPR_DBAR1,		/* dbar1_regnum */
+      H_SPR_DBAR2,		/* dbar2_regnum */
+      H_SPR_DBAR3,		/* dbar3_regnum */
+      -1,			/* 141 */
+      -1,			/* 142 */
+      -1,			/* 143 */
+      -1,			/* 144 */
+      H_SPR_LR,			/* lr_regnum */
+      H_SPR_LCR,		/* lcr_regnum */
+      H_SPR_IACC0H,		/* iacc0h_regnum */
+      H_SPR_IACC0L		/* iacc0l_regnum */
+    };
+
+  gdb_assert (reg >= 0 && reg < NUM_REGS);
+
+  if (first_gpr_regnum <= reg && reg <= last_gpr_regnum)
+    return reg - first_gpr_regnum + SIM_FRV_GR0_REGNUM;
+  else if (first_fpr_regnum <= reg && reg <= last_fpr_regnum)
+    return reg - first_fpr_regnum + SIM_FRV_FR0_REGNUM;
+  else if (pc_regnum == reg)
+    return SIM_FRV_PC_REGNUM;
+  else if (reg >= first_spr_regnum
+           && reg < first_spr_regnum + sizeof (spr_map) / sizeof (spr_map[0]))
+    {
+      int spr_reg_offset = spr_map[reg - first_spr_regnum];
+
+      if (spr_reg_offset < 0)
+	return SIM_REGNO_DOES_NOT_EXIST;
+      else
+	return SIM_FRV_SPR0_REGNUM + spr_reg_offset;
+    }
+
+  internal_error (__FILE__, __LINE__, "Bad register number %d", reg);
 }
 
 static const unsigned char *
@@ -1138,6 +1195,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, frv_register_name);
   set_gdbarch_deprecated_register_byte (gdbarch, frv_register_byte);
   set_gdbarch_register_type (gdbarch, frv_register_type);
+  set_gdbarch_register_sim_regno (gdbarch, frv_register_sim_regno);
 
   set_gdbarch_skip_prologue (gdbarch, frv_skip_prologue);
   set_gdbarch_breakpoint_from_pc (gdbarch, frv_breakpoint_from_pc);

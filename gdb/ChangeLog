@@ -1,3 +1,19 @@
+2003-10-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-tdep.c (gdb_assert.h, sim-regno.h, gdb/sim-frv.h)
+	(opcodes/frv-desc.h): Include.
+	(iacc0h_regnum, iacc0l_regnum): Define.
+	(last_spr_regnum, frv_num_regs): Update.
+	(new_variant): Don't supply default names for holes in the SPRs.
+	Supply names for iacc0h_regnum and iacc0l_regnum.
+	(frv_register_type): Use symbolic constants first_fpr_regnum and
+	last_fpr_regnum instead of hardcoded constants 64 and 127.  Use
+	builtin_type_int instead of builtin_type_int32.
+	(frv_register_sim_regno): New function.
+	(frv_gdbarch_init): Call set_gdbarch_register_sim_regno().
+	* Makefile.in (gdb_sim_frv_h): Define.
+	(frv-tdep.o): Update dependencies.
+
 2003-10-31  Andrew Cagney  <cagney@redhat.com>
 
 	* avr-tdep.c (avr_frame_this_id): Do not call
