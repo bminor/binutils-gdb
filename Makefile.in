@@ -76,6 +76,10 @@ MAKEINFO = `if [ -f $${rootme}/texinfo/C/makeinfo ] ; \
 	then echo $${rootme}/texinfo/C/makeinfo ; \
 	else echo makeinfo ; fi`
 
+
+# libraries that may need to be augmented on a system-by-system basis
+X11_LIB = -lX11
+
 # compilers to use to create programs which must be run in the build
 # environment.
 CC_FOR_BUILD = $(CC)
@@ -227,9 +231,11 @@ $(end-sanitize-chill)\
 
 # Flags that are concerned with the location of the X11 include files
 # and library files
+
 X11_FLAGS_TO_PASS = \
 	"X11_INCLUDE_FLAGS=$(X11_INCLUDE_FLAGS)" \
-	"X11_LIB_FLAGS=$(X11_LIB_FLAGS)"
+	"X11_LIB_FLAGS=$(X11_LIB_FLAGS)" \
+	"X11_LIB=$(X11_LIB)"
 
 # Flags to pass down to makes which are built with the target
 # environment (e.g. libg++, xiberty, newlib).  -- keep these in alpha order please
@@ -1464,7 +1470,7 @@ gdb.tar.Z: setup-dirs
 	(cd gdb; $(MAKE) -f Makefile.in make-proto-gdb.dir)
 	$(MAKE) $(MFLAGS) -f Makefile.in make-gdb.tar.Z
 
-make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/fsf/texinfo.tex
+make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/texinfo.tex
 	rm -rf proto-toplev; mkdir proto-toplev
 	ln -s ../gdb/proto-gdb.dir proto-toplev/gdb
 	(cd proto-toplev; for i in $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS); do \
@@ -1490,8 +1496,7 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/fsf/texinfo.tex
 	<Makefile.in >proto-toplev/Makefile.in
 
 	mkdir proto-toplev/texinfo
-	mkdir proto-toplev/texinfo/fsf
-	ln -s ../../../texinfo/fsf/texinfo.tex proto-toplev/texinfo/fsf/
+	ln -s ../../../texinfo/texinfo.tex proto-toplev/texinfo/
 	chmod og=u `find proto-toplev -print`
 	(VER=`sed <gdb/Makefile.in -n 's/VERSION = //p'`; \
 		echo "==> Making gdb-$$VER.tar.Z"; \
