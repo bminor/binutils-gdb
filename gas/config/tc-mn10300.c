@@ -1517,6 +1517,13 @@ keep_going:
     {
       int type;
 
+      /* We want to anchor the line info to the previous frag (if
+	 there isn't one, create it), so that, when the insn is
+	 resized, we still get the right address for the beginning of
+	 the region.  */
+      f = frag_more (0);
+      dwarf2_emit_insn (0);
+
       /* bCC  */
       if (size == 2)
 	{
@@ -1770,9 +1777,9 @@ keep_going:
 		fixP->fx_offset += offset;
 	    }
 	}
-    }
 
-  dwarf2_emit_insn (size);
+      dwarf2_emit_insn (size);
+    }
 }
 
 /* If while processing a fixup, a reloc really needs to be created

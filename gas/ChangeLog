@@ -1,3 +1,8 @@
+2001-05-14  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-mn10300.c (md_assemble): Anchor dwarf2 line info
+	before a relaxable insns.
+
 2001-05-13  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-mn10300.c (tc_gen_reloc): Don't reject differences
