@@ -1,3 +1,7 @@
+2000-10-07  Alan Modra  <alan@linuxcare.com.au>
+
+	* ld-scripts/phdrs.exp: hppa*64*-*-* is 64-bit ELF too.
+
 2000-10-02  Alan Modra  <alan@linuxcare.com.au>
 
 	* ld-scripts/weak.exp: Don't set $global$ for hppa-elf any more.
