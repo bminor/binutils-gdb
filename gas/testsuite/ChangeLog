@@ -1,10 +1,15 @@
+Mon Nov  1 23:37:58 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/reloc.exp (reloc_reduce): Correct offsets at
+	which specific relocations are expected to be found.
+	
 Sat Oct 30 14:12:31 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/unsorted/unsorted.exp (ss_align): Remove OSF xfail.
 
 	* gas/hppa/more.parse/parse.exp: Add new test.
 	* gas/hppa/more.parse/ssbug.s: New test to make sure non-default
-	* sections are handled correctly.
+	sections are handled correctly.
 
 	* gas/all/gas.exp: Disable (and fail) p1480.s for all PA targets.
 
