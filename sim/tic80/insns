@@ -396,13 +396,10 @@ sim_fpu::function::get_fp_reg:int reg, unsigned32 val, int precision
 	switch (precision)
 	  {
 	  case 0: /* single */
-	    if (reg == 0)
-	      return sim_fpu_32to (0);
-	    else
-	      return sim_fpu_32to (val);
+	    return sim_fpu_32to (val);
 	  case 1: /* double */
 	    if (reg < 0)
-	      return sim_fpu_32to (val);
+	      engine_error (SD, CPU, cia, "DP immediate invalid");
 	    if (reg & 1)
 	      engine_error (SD, CPU, cia, "DP FP register must be even");
 	    if (reg <= 1)
@@ -410,19 +407,13 @@ sim_fpu::function::get_fp_reg:int reg, unsigned32 val, int precision
 	    return sim_fpu_64to (INSERTED64 (GPR(reg + 1), 63, 32)
 	                         | INSERTED64 (GPR(reg), 31, 0));
 	  case 2: /* 32 bit signed integer */
-	    if (reg == 0)
-	      return sim_fpu_32to (0);
-	    else	    
-	      return sim_fpu_d2 ((signed32) val);
+	    return sim_fpu_i32to (val);
 	  case 3: /* 32 bit unsigned integer */
-	    if (reg == 0)
-	      return sim_fpu_32to (0);
-	    else	    
-	      return sim_fpu_d2 ((unsigned32) val);
+	    return sim_fpu_u32to (val);
 	  default:
 	    engine_error (SD, CPU, cia, "Unsupported FP precision");
 	  }
-	return sim_fpu_32to (0);
+	return sim_fpu_i32to (0);
 void::function::set_fp_reg:int Dest, sim_fpu val, int PD
 	switch (PD)
 	  {
@@ -433,13 +424,13 @@ void::function::set_fp_reg:int Dest, sim_fpu val, int PD
 	    }
 	  case 1: /* double */
 	    {
-	      unsigned64 v = *(unsigned64*) &val;
+	      unsigned64 v = sim_fpu_to64 (val);
 	      if (Dest & 1)
 	        engine_error (SD, CPU, cia, "DP FP Dest register must be even");
 	      if (Dest <= 1)
 	        engine_error (SD, CPU, cia, "DP FP Dest register must be >= 2");
-	      GPR (Dest) = EXTRACTED64 (v, 21, 0);
-	      GPR (Dest + 1) = EXTRACTED64 (v, 63, 32);
+	      GPR (Dest + 0) = VL4_8 (v);
+	      GPR (Dest + 1) = VH4_8 (v);
 	      break;
 	    }
 	  case 2: /* signed */
@@ -471,36 +462,37 @@ void::function::do_fadd:int Dest, int PD, sim_fpu s1, sim_fpu s2
 
 
 // fcmp.{s|d}{s|d}{s|d}
-void::function::do_fcmp:unsigned32 *rDest, sim_fpu s1, sim_fpu s2
-	*rDest = 0;
+void::function::do_fcmp:int Dest, sim_fpu s1, sim_fpu s2
+	unsigned32 result = 0;
 	if (sim_fpu_is_nan (s1) || sim_fpu_is_nan (s2))
-	  *rDest |= BIT32 (30);
+	  result |= BIT32 (30);
 	else
 	  {
-	    *rDest |= BIT32 (31);
-	    if (sim_fpu_cmp (s1, s2) == 0) *rDest |= BIT32(20);
-	    if (sim_fpu_cmp (s1, s2) != 0) *rDest |= BIT32(21);
-	    if (sim_fpu_cmp (s1, s2) >  0) *rDest |= BIT32(22);
-	    if (sim_fpu_cmp (s1, s2) <= 0) *rDest |= BIT32(23);
-	    if (sim_fpu_cmp (s1, s2) <  0) *rDest |= BIT32(24);
-	    if (sim_fpu_cmp (s1, s2) >= 0) *rDest |= BIT32(25);
-	    if (sim_fpu_cmp (s1, sim_fpu_32to (0)) < 0
-	        || sim_fpu_cmp (s1, s2) > 0) *rDest |= BIT32(26);
-	    if (sim_fpu_cmp (sim_fpu_32to (0), s1) < 0
-	        && sim_fpu_cmp (s1, s2) < 0) *rDest |= BIT32(27);
-	    if (sim_fpu_cmp (sim_fpu_32to (0), s1) <= 0
-	        && sim_fpu_cmp (s1, s2) <= 0) *rDest |= BIT32(28);
-	    if (sim_fpu_cmp (s1, sim_fpu_32to (0)) <= 0
-	        || sim_fpu_cmp (s1, s2) >= 0) *rDest |= BIT32(29);
+	    result |= BIT32 (31);
+	    if (sim_fpu_is_eq (s1, s2)) result |= BIT32(20);
+	    if (sim_fpu_is_ne (s1, s2)) result |= BIT32(21);
+	    if (sim_fpu_is_gt (s1, s2)) result |= BIT32(22);
+	    if (sim_fpu_is_le (s1, s2)) result |= BIT32(23);
+	    if (sim_fpu_is_lt (s1, s2)) result |= BIT32(24);
+	    if (sim_fpu_is_ge (s1, s2)) result |= BIT32(25);
+	    if (sim_fpu_is_lt (s1, sim_fpu_i32to (0))
+	        || sim_fpu_is_gt (s1, s2)) result |= BIT32(26);
+	    if (sim_fpu_is_lt (sim_fpu_i32to (0), s1)
+	        && sim_fpu_is_lt (s1, s2)) result |= BIT32(27);
+	    if (sim_fpu_is_le (sim_fpu_i32to (0), s1)
+	        && sim_fpu_is_le (s1, s2)) result |= BIT32(28);
+	    if (sim_fpu_is_le (s1, sim_fpu_i32to (0))
+	        || sim_fpu_is_ge (s1, s2)) result |= BIT32(29);
 	  }
-	TRACE_FPU2I (MY_INDEX, *rDest, s1, s2);
+	GPR (Dest) = result;
+	TRACE_FPU2I (MY_INDEX, result, s1, s2);
 31.Dest,26.Source2,21.0b111110101,12.0,11./,10.0,8.P2,6.P1,4.Source1::f::fcmp r
-	do_fcmp (_SD, rDest,
+	do_fcmp (_SD, Dest,
 	         get_fp_reg (_SD, Source1, rSource1, P1),
 	         get_fp_reg (_SD, Source2, rSource2, P2));
 31.Dest,26.Source2,21.0b111110101,12.1,11./,10.0,8.P2,6.P1,4./::f::fcmp l
 	long_immediate (SinglePrecisionFloatingPoint);
-	do_fcmp (_SD, rDest,
+	do_fcmp (_SD, Dest,
 	         get_fp_reg (_SD, -1, SinglePrecisionFloatingPoint, P1),
 	         get_fp_reg (_SD, Source2, rSource2, P2));
 
@@ -541,6 +533,7 @@ void::function::do_fmpy:int Dest, int PD, sim_fpu s1, sim_fpu s2
 // frndm.{s|d|i|u}{s|d|i|u}{s|d|i|u}
 void::function::do_frnd:int Dest, int PD, sim_fpu s1
 	set_fp_reg (_SD, Dest, s1, PD);
+	TRACE_FPU1 (MY_INDEX, s1);
 31.Dest,26.Source2,21.0b111110100,12.0,11.r,10.PD,8.0b11,6.P1,4.Source::f::frndm r
 	do_frnd (_SD, Dest, PD,
 	         get_fp_reg (_SD, Source, rSource, P1));

@@ -267,6 +267,26 @@ tic80_trace_fpu2 (SIM_DESC sd,
 		  SIZE_HEX + SIZE_DECIMAL, sim_fpu_2d (result));
 }
 
+/* Trace the result of an FPU operation with 1 floating point input and a floating point output */
+void
+tic80_trace_fpu1 (SIM_DESC sd,
+		  sim_cpu *cpu,
+		  sim_cia cia,
+		  int indx,
+		  sim_fpu result)
+{
+  if (!tic80_size_name)
+    tic80_init_trace ();
+
+  trace_one_insn (sd, cpu, cia.ip, 1,
+		  itable[indx].file, itable[indx].line_nr, "fpu",
+		  "%-*s %-*s %-*s => %*g",
+		  tic80_size_name, itable[indx].name,
+		  SIZE_HEX + SIZE_DECIMAL + 3, "",
+		  SIZE_HEX + SIZE_DECIMAL + 3, "",
+		  SIZE_HEX + SIZE_DECIMAL, sim_fpu_2d (result));
+}
+
 /* Trace the result of an FPU operation with 1 integer input and an integer output */
 void
 tic80_trace_fpu2i (SIM_DESC sd,

@@ -1,4 +1,17 @@
-Thu May 15 10:14:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+Thu May 15 11:45:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* insns (get_fp_reg): Use sim_fpu_u32to to perform unsigned
+ 	conversion.
+	(do_fcmp): Update to use new fp compare functions. Make reg nr arg
+ 	instead of reg.  Stops fp overflow.
+	(get_fp_reg): Assume val is valid when reg == 0.
+	(set_fp_reg): Fix double conversion.
+
+	* misc.c (tic80_trace_fpu1): New function, trace simple fp op.
+	
+	* insns (do_frnd): Add tracing.
+
+	* cpu.h (TRACE_FPU1): Ditto.
 
 	* insns (do_trap): Printf formatting.
 
