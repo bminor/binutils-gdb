@@ -1,7 +1,7 @@
 \input texinfo      @c -*-texinfo-*-
-@c Copyright 1988 1989 1990 1991 1992 1993 1994 Free Software Foundation, Inc.
+@c Copyright 1994, 1995, 2001 Free Software Foundation, Inc.
 @c
-@c %**start of header 
+@c %**start of header
 @c makeinfo ignores cmds prev to setfilename, so its arg cannot make use
 @c of @set vars.  However, you can override filename with makeinfo -o.
 @setfilename gdb.info
@@ -32,52 +32,41 @@
 @syncodeindex vr cp
 
 @c !!set GDB manual's edition---not the same as GDB version!
-@set EDITION 4.13
+@set EDITION 4.14
 
 @c !!set GDB manual's revision date
-@set DATE January 1995
+@set DATE April 2001
 
 @c THIS MANUAL REQUIRES TEXINFO-2 macros and info-makers to format properly.
 
-@ifinfo
-@c This is a dir.info fragment to support semi-automated addition of
-@c manuals to an info tree.  zoo@cygnus.com is developing this facility.
-@format
+@dircategory Programming & development tools
+@direntry
 START-INFO-DIR-ENTRY
 * Gdb: (gdb).                     The GNU debugger.
 END-INFO-DIR-ENTRY
-@end format
-@end ifinfo
+@end direntry
 @c
 @c
 @ifinfo
 This file documents the graphical interface to the GNU debugger @value{GDBN}.
 
 
-This is Edition @value{EDITION}, @value{DATE}, 
+This is Edition @value{EDITION}, @value{DATE},
 of @cite{Using the Graphical Interface to @value{GDBN}}
 for GDB Version @value{GDBVN}.
 
-Copyright (C) 1994, 1995 Free Software Foundation, Inc.
+Copyright (C) 1994, 1995, 2001 Free Software Foundation, Inc.
 
-Permission is granted to make and distribute verbatim copies of
-this manual provided the copyright notice and this permission notice
-are preserved on all copies.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with the
+Invariant Sections being ``Using the Graphical Interface to ``GDB'' and
+``Starting up GUI GDB'', with the Front-Cover texts being ``A GNU
+Manual,'' and with the Back-Cover Texts as in (a) below.
 
-@ignore
-Permission is granted to process this file through TeX and print the
-results, provided the printed document carries copying permission
-notice identical to this one except for the removal of this paragraph
-(this paragraph not being relevant to the printed manual).
-
-@end ignore
-Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided also that the
-entire resulting derived work is distributed under the terms of a
-permission notice identical to this one.
-
-Permission is granted to copy and distribute translations of this manual
-into another language, under the above conditions for modified versions.
+(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
+this GNU Manual, like GNU software.  Copies published by the Free
+Software Foundation raise funds for GNU development.''
 @end ifinfo
 
 @titlepage
@@ -89,11 +78,11 @@ into another language, under the above conditions for modified versions.
 @sp 1
 @subtitle Edition @value{EDITION}, for @value{GDBN} version @value{GDBVN}
 @subtitle @value{DATE}
-@author Stanley T. Shebs
+@author Stanley T.@: Shebs
 @page
 @tex
 {\parskip=0pt
-\hfill (Send bugs and comments on @value{GDBN} to bug-gdb\@prep.ai.mit.edu.)\par
+\hfill (Send bugs and comments on @value{GDBN} to bug-gdb\@gnu.org.)\par
 \hfill {\it Debugging with @value{GDBN}}\par
 \hfill \TeX{}info \texinfoversion\par
 \hfill doc\@cygnus.com\par
@@ -101,20 +90,19 @@ into another language, under the above conditions for modified versions.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1994, 1995 Free Software Foundation, Inc. 
+Copyright @copyright{} 1994, 1995, 2001 Free Software Foundation, Inc.
 @sp 2
 
-Permission is granted to make and distribute verbatim copies of
-this manual provided the copyright notice and this permission notice
-are preserved on all copies.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with the
+Invariant Sections being ``Using the Graphical Interface to ``GDB'' and
+``Starting up GUI GDB'', with the Front-Cover texts being ``A GNU
+Manual,'' and with the Back-Cover Texts as in (a) below.
 
-Permission is granted to copy and distribute modified versions of this
-manual under the conditions for verbatim copying, provided also that the
-entire resulting derived work is distributed under the terms of a
-permission notice identical to this one.
-
-Permission is granted to copy and distribute translations of this manual
-into another language, under the above conditions for modified versions.
+(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
+this GNU Manual, like GNU software.  Copies published by the Free
+Software Foundation raise funds for GNU development.''
 @end titlepage
 @page
 
@@ -136,79 +124,73 @@ When running as a Unix program and using the X11-based interface,
 you must of course be using an X server and/or workstation,
 and your @code{DISPLAY} environment variable must be set correctly.
 If either of these is not true, then @value{GDBN} will still start up,
-but will use only the traditional command interface.
+zbut will use only the traditional command interface.
 
 The exact layout and appearance of the windows will depend on the host
-system type.  For instance, GDB under Windows will display its windows
-inside a larger window, while under Unix/X, each window is a separate
-toplevel window.  However, general behavior and layout is consistent
-across all platforms; omissions or restrictions on particular platforms,
-if not documented as unavoidable, should be considered bugs and
-reported.
+system type.  For instance, @value{GDBN} on MS-Windows will display
+its windows inside a larger window, while on X on a GNU/Linux or a
+Unix machine, each window is a separate toplevel window.  However,
+general behavior and layout is consistent across all platforms;
+omissions or restrictions on particular platforms, if not documented
+as unavoidable, should be considered bugs and reported.
 
-All GDB windows have a common structure.  Each window has an associated
-menu bar, which may be at the top of the window or perhaps elsewhere.
-Some of the menus and menu items in the menu bar are common to all GDB
-windows, while others are specific to particular types of windows.
-Below the menu bar is the working data area of the window.  If the data
-is too large to display all at once, the data area will have scroll bars
-on its right and bottom sides.  Below the data area are two optional
-features; a status/data line, and a button box.
+All @value{GDBN} windows have a common structure.  Each window has an
+associated menu bar, which may be at the top of the window or perhaps
+elsewhere.  Some of the menus and menu items in the menu bar are
+common to all @value{GDBN} windows, while others are specific to
+particular types of windows.  Below the menu bar is the working data
+area of the window.  If the data is too large to display all at once,
+the data area will have scroll bars on its right and bottom sides.
+Below the data area are two optional features; a status/data line, and
+a button box.
 
 @section Menus
 
 @subsection File Menu
 
 The standard file menu provides operations that affect the overall state
-of GDB, mainly file operations, but other things as well.
+of @value{GDBN}, mainly file operations, but other things as well.
 
-About GDB...
+@table @code
+@item About @value{GDBN}...
+Displays the startup window for @value{GDBN}.
 
-Displays the startup window for GDB.
+@item File...
+Lets you set the combined executable and symbol file that @value{GDBN}
+will use.  (Like the @samp{file} command in the command-line version
+of @value{GDBN}.)
 
-File...
+@item Target...
+Brings up a dialog that you can use to connect @value{GDBN} to a
+target program.  The dialog is described in more depth later.  (Like
+the @samp{target} command.)
 
-Lets you set the combined executable and symbol file that GDB will use.
-(Like "file".)
-
-Target...
-
-Brings up a dialog that you can use to connect GDB to a target program.
-The dialog is described in more depth later.
-(Like "target".)
-
-Edit...
-
+@item Edit...
 Starts up an editor to modify the source file being displayed.
 
-Exec File...
+@item Exec File...
+Lets you set the executable file that @value{GDBN} will use.
+(Like the @samp{exec-file} command.)
 
-Lets you set the executable file that GDB will use.
-(Like "exec-file".)
+@item Symbol File...
+Lets you set the symbol file that @value{GDBN} will use.
+(Like the @samp{symbol-file} command.)
 
-Symbol File...
-
-Lets you set the symbol file that GDB will use.
-(Like "symbol-file".)
-
-Add Symbol File...
-
+@item Add Symbol File...
 Lets you add additional symbol files.
-(Like "add-symbol-file".)
+(Like the @samp{add-symbol-file} command.)
 
-Core File...
+@item Core File...
+Lets you set the core file that @value{GDBN} will use.
+(Like the @samp{core-file} command.)
 
-Lets you set the core file that GDB will use.
-(Like "core-file".)
+@item Shared Libraries...
+(Like the @samp{sharedlibrary} command.)
 
-Shared Libraries...
-
-(Like "sharedlibrary".)
-
-Quit
-
-quits GDB.
-(Like @samp{quit}.)
+@item Quit
+Quits @value{GDBN}.
+(Like the @samp{quit} command.)
+@end table
 
 
 @c @subsection Commands Menu
@@ -216,29 +198,32 @@ quits GDB.
 @c The commands menu consists of items that let you run and control the program being
 @c debugged.
 @c 
-@c Run
+@c @table @code
+@c @item Run
 @c 
-@c Step
+@c @item Step
 @c 
-@c Next
+@c @item Next
 @c 
-@c Finish
+@c @item Finish
 @c 
-@c Stepi
+@c @item Stepi
 @c 
-@c Nexti
+@c @item Nexti
 
 @subsection Windows Menu
 
-The windows menu allows access to all the windows available in GDB.
-The first part of the menu lists all of the predefined individual windows.
-If the window exists already, its item will be marked as such;
-selecting the item will cause the window to be put in front if it is
-obscured.  If it does not exist, then it will be created.
+The @samp{Windows} menu allows access to all the windows available in
+@value{GDBN}.  The first part of the menu lists all of the predefined
+individual windows.  If the window exists already, its item will be
+marked as such; selecting the item will cause the window to be put in
+front if it is obscured.  If it does not exist, then it will be
+created.
 
 The second part of the menu lists additional windows that you may have
 created, such as source windows or variable displays.
 
+@display
 Command
 ---
 Source
@@ -250,68 +235,77 @@ Variables
 Files
 @c ---
 @c <extra windows>
+@end display
 
 @subsection View Menu
 
-All windows have a view menu, but its contents are highly specific to
-window type.  For instance, a source window will have a view menu item
-to control the display of line numbers, but a register window will instead
-have an option to choose the radix in which to display register contents.
-You can find the full description of view options with each window type.
+All windows have a @samp{view} menu, but its contents are highly
+specific to window type.  For instance, a source window will have a
+view menu item to control the display of line numbers, but a register
+window will instead have an option to choose the radix in which to
+display register contents.  You can find the full description of view
+options with each window type.
 
 @subsection Help Menu
 
-The help menu includes access to GDB's online help.
+The @samp{Help} menu includes access to @value{GDBN}'s online help.
 
 @section Windows
 
 @subsection Command Window
 
-The command window provides access to the standard GDB command
-interpreter.  In nearly all cases, commands typed into this window
-will behave exactly as for a non-windowing GDB. 
+The @samp{Command} window provides access to the standard @value{GDBN}
+command interpreter.  In nearly all cases, commands typed into this
+window will behave exactly as for a non-windowing @value{GDBN}.
 
-Note that not all changes to GDB will be reflected in this window.  For instance,
-if you were to type a "step" command, then click on the "step" menu item in
-the source window, then go back, and type another "step" command, the command
-buffer will only show two steps, when you have actually done three.  GDB will
-put a "..." into the command buffer when operations in other windows are done,
-as a reminder that the command buffer is incomplete.
+Note that not all changes to @value{GDBN} will be reflected in this
+window.  For instance, if you were to type a @samp{step} command, then
+click on the @samp{step} menu item in the source window, then go back,
+and type another @samp{step} command, the command buffer will only
+show two steps, when you have actually done three.  @value{GDBN} will
+put a ``@dots'' into the command buffer when operations in other
+windows are done, as a reminder that the command buffer is incomplete.
 
 @c Also note that as a side effect of having the interface and possibly an
 @c associated scripting language built in, additional commands may be
-@c available.  For instance, if tcl is in GDB, the command ``tcl <tcl code>''
-@c will be available.
+@c available.  For instance, if tcl is in @value{GDBN}, the command 
+@c ``tcl <tcl code>'' will be available.
 
 The command window has no status line or button box.
 
 @subsection Files Window
 
-The files window lists all of the files that were used to build the
+The @samp{Files} window lists all of the files that were used to build the
 executable.
 
-Clicking on the xxx in the left margin expands/contracts the display of
-included files and symbols defined by the file.
+Clicking on the @samp{xxx} in the left margin expands/contracts the
+display of included files and symbols defined by the file.
 
-The View menu for this window includes the following items:
-Name/Full Pathname
-@c Sort by Name
-@c Sort by Section&Offset
-@c Show All Included Files
-@c Included File Indentation...
+The @samp{View} menu for this window includes the following items:
+
+@table @code
+@item Name/Full Pathname
+@c @item Sort by Name
+@c @item Sort by Section&Offset
+@c @item Show All Included Files
+@c @item Included File Indentation...
+@end table
 
 @subsection Source Window
 
-A source window displays a single file of source code.
+A @samp{Source} window displays a single file of source code.
 
-The left margin includes an indicator for the current PC, breakpoints and potential breakpoints,
-and (optionally) line numbers.
+The left margin includes an indicator for the current PC, breakpoints
+and potential breakpoints, and (optionally) line numbers.
 
-The View menu for this window includes the following items:
-Show Line Numbers
-Show Breakdots
-@c Jump to PC (if pc changes, scroll back so PC is centered)
-@c Tab... (set tabbing)
+The @samp{View} menu for this window includes the following items:
+
+@table @code
+@item Show Line Numbers
+@item Show Breakdots
+@c @item Jump to PC (if pc changes, scroll back so PC is centered)
+@c @item Tab... (set tabbing)
+@end table
 
 @section Extensions
 
@@ -342,7 +336,7 @@ Show Breakdots
 @c 
 @c Is an *optional* window.
 @c 
-@c Behavior mimics command-line GDB running in an Emacs buffer as much
+@c Behavior mimics command-line @value{GDBN} running in an Emacs buffer as much
 @c as possible.
 @c 
 @c Assembly Window
@@ -399,8 +393,8 @@ Show Breakdots
 
 @section How to Build
 
-If GDB is configured with --enable-gdbtk, then upon startup, it will
-open windows.
+If @value{GDBN} is configured with @samp{--enable-gdbtk}, then upon
+startup, it will open windows.
 
 @node Index
 @unnumbered Index

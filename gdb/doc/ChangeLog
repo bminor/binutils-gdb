@@ -1,5 +1,14 @@
 2001-03-26  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* gdb.texinfo: Change Permissions to GFDL.  Update Copyright.
+
+	* gdbint.texinfo: Change Permissions to GFDL.  Update Copyright.
+
+	* gdbgui.texinfo: Change Permissions to GFDL.  Update Copyright.
+	Replace "GDB" with "@value{GDBN}".  Fix markup.
+
+	* annotate.texi: Change Permissions to GFDL.  Update Copyright.
+
 	* gdb.texinfo (Output Formats): Mention "info symbol" and provide
 	a cross-reference to its description.
 	(Symbols): Document "info symbol".

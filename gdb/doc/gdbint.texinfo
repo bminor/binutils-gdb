@@ -1,36 +1,30 @@
 \input texinfo   @c -*- texinfo -*-
 @setfilename gdbint.info
 @include gdb-cfg.texi
-@ifinfo
-@format
+@dircategory Programming & development tools.
+@direntry
 START-INFO-DIR-ENTRY
 * Gdb-Internals: (gdbint).	The GNU debugger's internals.
 END-INFO-DIR-ENTRY
-@end format
-@end ifinfo
+@end direntry
 
 @ifinfo
 This file documents the internals of the GNU debugger @value{GDBN}.
-
-Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-2001 Free Software Foundation, Inc.
+Copyright 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001
+   Free Software Foundation, Inc.
 Contributed by Cygnus Solutions.  Written by John Gilmore.
 Second Edition by Stan Shebs.
 
-Permission is granted to make and distribute verbatim copies of this
-manual provided the copyright notice and this permission notice are
-preserved on all copies.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with the
+Invariant Sections being ``Algorithms'' and ``Porting GDB'', with the
+Front-Cover texts being ``A GNU Manual,'' and with the Back-Cover
+Texts as in (a) below.
 
-@ignore
-Permission is granted to process this file through Tex and print the
-results, provided the printed document carries copying permission notice
-identical to this one except for the removal of this paragraph (this
-paragraph not being relevant to the printed manual).
-
-@end ignore
-Permission is granted to copy or distribute modified versions of this
-manual under the terms of the GPL (for which purpose this text may be
-regarded as a program in the language TeX).
+(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
+this GNU Manual, like GNU software.  Copies published by the Free
+Software Foundation raise funds for GNU development.''
 @end ifinfo
 
 @setchapternewpage off
@@ -59,12 +53,19 @@ regarded as a program in the language TeX).
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1990-1999 Free Software Foundation, Inc.
+Copyright @copyright{} 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001
+   Free Software Foundation, Inc.
 
-Permission is granted to make and distribute verbatim copies of
-this manual provided the copyright notice and this permission notice
-are preserved on all copies.
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with the
+Invariant Sections being ``Algorithms'' and ``Porting GDB'', with the
+Front-Cover texts being ``A GNU Manual,'' and with the Back-Cover
+Texts as in (a) below.
 
+(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
+this GNU Manual, like GNU software.  Copies published by the Free
+Software Foundation raise funds for GNU development.''
 @end titlepage
 
 @c TeX can handle the contents at the start but makeinfo 3.12 can not
