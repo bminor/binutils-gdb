@@ -66,7 +66,7 @@ static char *gld${EMULATION_NAME}_script_option_n  =  /* Used with -n flag. */
 #include "${EMULATION_NAME}.xn"
 ;
 static char *gld${EMULATION_NAME}_script_option_N  =  /* Used with -N flag. */
-#include "${EMULATION_NAME}.xN"
+#include "${EMULATION_NAME}.xbn"
 ;
 
 static char *gld${EMULATION_NAME}_get_script()
