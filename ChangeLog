@@ -1,3 +1,7 @@
+Mon Dec 15 16:12:28 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* config-ml.in (multidirs): Add m32r to multilib list.
+
 Fri Dec 12 10:43:31 1997  Brendan Kehoe  <brendan@canuck.cygnus.com>
 
 	* Makefile.in (all-target-gperf): Change dependency to

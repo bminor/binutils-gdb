@@ -201,26 +201,78 @@ for i in `${CC-gcc} --print-multi-lib 2>/dev/null`; do
 done
 
 case "${target}" in
-# start-sanitize-arc
-arc-sbp-elf*)
+arc-*-elf*)
 	if [ x$enable_biendian != xyes ]
 	then
 	  old_multidirs=${multidirs}
-	  multidirs=
+	  multidirs=""
 	  for x in ${old_multidirs}; do
 	    case "${x}" in
-	      *be*) ;;
-	      *) if [ x"$multidirs" = x ]; then
-		   multidirs="$x";
-		 else
-		   multidirs="${multidirs} ${x}"; 
-		 fi
-		 ;;
+	      *be*) : ;;
+	      *) multidirs="${multidirs} ${x}" ;;
 	    esac
 	  done
 	fi
 	;;
-# end-sanitize-arc
+m32r-*-*)
+	if [ x$enable_m32rx = xno ]
+	then
+	  old_multidirs=${multidirs}
+	  multidirs=""
+	  for x in ${old_multidirs}; do
+	    case "${x}" in
+	      *m32rx*) : ;;
+	      *) multidirs="${multidirs} ${x}" ;;
+	    esac
+	  done
+	fi
+	;;
+m68*-*-*)
+	if [ x$enable_softfloat = xno ]
+	then
+	  old_multidirs="${multidirs}"
+	  multidirs=""
+	  for x in ${old_multidirs}; do
+	    case "$x" in
+	      *soft-float* ) : ;;
+	      *) multidirs="${multidirs} ${x}" ;;
+	    esac
+	  done
+	fi
+	if [ x$enable_m68881 = xno ]
+	then
+	  old_multidirs="${multidirs}"
+	  multidirs=""
+	  for x in ${old_multidirs}; do
+	    case "$x" in
+	      *m68881* ) : ;;
+	      *) multidirs="${multidirs} ${x}" ;;
+	    esac
+	  done
+	fi
+	if [ x$enable_m68000 = xno ]
+	then
+	  old_multidirs="${multidirs}"
+	  multidirs=""
+	  for x in ${old_multidirs}; do
+	    case "$x" in
+	      *m68000* ) : ;;
+	      *) multidirs="${multidirs} ${x}" ;;
+	    esac
+	  done
+	fi
+	if [ x$enable_m68020 = xno ]
+	then
+	  old_multidirs="${multidirs}"
+	  multidirs=""
+	  for x in ${old_multidirs}; do
+	    case "$x" in
+	      *m68020* ) : ;;
+	      *) multidirs="${multidirs} ${x}" ;;
+	    esac
+	  done
+	fi
+	;;
 mips*-*-*)
 	if [ x$enable_single_float = xno ]
 	then
@@ -229,7 +281,7 @@ mips*-*-*)
 	  for x in ${old_multidirs}; do
 	    case "$x" in
 	      *single* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	      *) multidirs="${multidirs} ${x}" ;;
 	    esac
 	  done
 	fi
@@ -241,7 +293,7 @@ mips*-*-*)
 	    case "$x" in
 	      *el* ) : ;;
 	      *eb* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	      *) multidirs="${multidirs} ${x}" ;;
 	    esac
 	  done
 	fi
@@ -252,7 +304,7 @@ mips*-*-*)
 	  for x in ${old_multidirs}; do
 	    case "$x" in
 	      *soft-float* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	      *) multidirs="${multidirs} ${x}" ;;
 	    esac
 	  done
 	fi
@@ -265,18 +317,7 @@ powerpc*-*-* | rs6000*-*-*)
 	  for x in ${old_multidirs}; do
 	    case "$x" in
 	      *soft-float* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
-	    esac
-	  done
-	fi
-	if [ x$enable_commoncpu = xno ]
-	then
-	  old_multidirs="${multidirs}"
-	  multidirs=""
-	  for x in ${old_multidirs}; do
-	    case "$x" in
-	      *common* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	      *) multidirs="${multidirs} ${x}" ;;
 	    esac
 	  done
 	fi
@@ -287,18 +328,7 @@ powerpc*-*-* | rs6000*-*-*)
 	  for x in ${old_multidirs}; do
 	    case "$x" in
 	      power | */power | */power/* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
-	    esac
-	  done
-	fi
-	if [ x$enable_power2cpu = xno ]
-	then
-	  old_multidirs="${multidirs}"
-	  multidirs=""
-	  for x in ${old_multidirs}; do
-	    case "$x" in
-	      *power2* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	      *) multidirs="${multidirs} ${x}" ;;
 	    esac
 	  done
 	fi
@@ -309,18 +339,18 @@ powerpc*-*-* | rs6000*-*-*)
 	  for x in ${old_multidirs}; do
 	    case "$x" in
 	      *powerpc* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	      *) multidirs="${multidirs} ${x}" ;;
 	    esac
 	  done
 	fi
-	if [ x$enable_601cpu = xno ]
+	if [ x$enable_powerpcos = xno ]
 	then
 	  old_multidirs="${multidirs}"
 	  multidirs=""
 	  for x in ${old_multidirs}; do
 	    case "$x" in
-	      *601* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	      *mcall-linux* | *mcall-solaris* ) : ;;
+	      *) multidirs="${multidirs} ${x}" ;;
 	    esac
 	  done
 	fi
@@ -330,19 +360,8 @@ powerpc*-*-* | rs6000*-*-*)
 	  multidirs=""
 	  for x in ${old_multidirs}; do
 	    case "$x" in
-	      *endian* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
-	    esac
-	  done
-	fi
-	if [ x$enable_relocatable = xno ]
-	then
-	  old_multidirs="${multidirs}"
-	  multidirs=""
-	  for x in ${old_multidirs}; do
-	    case "$x" in
-	      *relocatable* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	      *mlittle* | *mbig* ) : ;;
+	      *) multidirs="${multidirs} ${x}" ;;
 	    esac
 	  done
 	fi
@@ -352,8 +371,8 @@ powerpc*-*-* | rs6000*-*-*)
 	  multidirs=""
 	  for x in ${old_multidirs}; do
 	    case "$x" in
-	      *sysv* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	      *mcall-sysv* ) : ;;
+	      *) multidirs="${multidirs} ${x}" ;;
 	    esac
 	  done
 	fi
@@ -363,13 +382,17 @@ powerpc*-*-* | rs6000*-*-*)
 	  multidirs=""
 	  for x in ${old_multidirs}; do
 	    case "$x" in
-	      *aix* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	      *mcall-aix* ) : ;;
+	      *) multidirs="${multidirs} ${x}" ;;
 	    esac
 	  done
 	fi
 	;;
 esac
+
+# Remove extraneous blanks from multidirs.
+# Tests like `if [ -n "$multidirs" ]' require it.
+multidirs=`echo "$multidirs" | sed -e 's/^[ ][ ]*//' -e 's/[ ][ ]*$//' -e 's/[ ][ ]*/ /g'`
 
 # Add code to library's top level makefile to handle building the multilib
 # subdirs.
