@@ -1,3 +1,9 @@
+Thu Nov  4 18:58:23 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in: Change RUNTEST_FLAGS back to RUNTESTFLAGS per
+	etc/make-stds.texi.  The underscore came from gcc, and dje now
+	agrees that RUNTESTFLAGS is the correct name.
+
 Thu Nov  4 10:49:01 1993  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* install.sh:  Remove 'set -e'.  It makes any conditionals
