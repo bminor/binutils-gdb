@@ -1,7 +1,36 @@
+Wed Aug 30 22:05:17 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gencode.c (gensim): abort if an unknown opcode is encountered.
+
+Tue Aug 22 14:16:46 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* interp.c (trap): Use trap vector 34 for host system interface.
+	* gencode.c: Add 34 to conditional which determines which traps
+	will be handled by simulator.
+
+Fri Aug 11 17:59:15 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* run.c: Include <signal.h>.  Define SIGQUIT if not defined.
+	(main): New variables reason and sigrc.  After simulator exits,
+	check to see if it exited because of a signal, and if so, then
+	use the signal number as the return value.
+
+Thu Aug  3 10:45:37 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Update all FSF addresses except those in COPYING* files.
+
+Tue Jul 18 23:33:10 1995  Fred Fish  <fnf@fishbowl>
+
+	* interp.c (trap): Only use SYS_execv if defined.  Might be
+	implemented as execve(arg1,arg2,0), as with Unixware 2.0.
+	(sim_resume): In sbit initializer, cast shifted arg to unsigned
+	to avoid signed integer overflow.
+
 Wed Jul  5 14:32:54 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
-	* Makefile.in (distclean, mostlyclean, realclean): Remove autoconf
-	  files.
+	* Makefile.in (clean): Remove run, libsim.a.
+	  (distclean, mostlyclean, realclean): Remove Makefile and 
+	  autoconf files.
 
 	* sh.mt: Removed.
 

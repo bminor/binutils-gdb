@@ -151,14 +151,10 @@ op tab[] =
     "{ int tmp = PC; PC=RLAT(R[15])+2;R[15]+=4;SET_SR(RLAT(R[15]) & 0x3f3);R[15]+=4;SL(tmp+2);}"},
   {"","","rts", "0000000000001011", "ult=PC;PC=PR+2;SL(ult+2);"},
   {"","","sett", "0000000000011000", "T=1;"},
-
-/* start-sanitize-sh3 */
   {"n","mn","shad <REG_M>,<REG_N>", "0100nnnnmmmm1100",
      "R[n] = (R[m] < 0) ? (((int)R[n]) >> -(R[m]&0x1f) ): (R[n] << ((R[m]) & 0x1f)) ;"},
-
   {"n","mn","shld <REG_M>,<REG_N>", "0100nnnnmmmm1101",
      "R[n] = (R[m] < 0) ? (((unsigned int)R[n]) >> -(R[m]&0x1f) ): (R[n] << ((R[m]) & 0x1f)) ;"},
-/* end-sanitize-sh3 */
   {"n","n","shal <REG_N>", "0100nnnn00100000", "T=R[n]<0; R[n]<<=1;"},
   {"n","n","shar <REG_N>", "0100nnnn00100001", "T=R[n]&1; R[n] = R[n] >> 1;"},
   {"n","n","shll <REG_N>", "0100nnnn00000000", "T=R[n]<0; R[n]<<=1;"},
@@ -190,7 +186,7 @@ op tab[] =
   {"n","nm","swap.w <REG_M>,<REG_N>", "0110nnnnmmmm1001", "R[n]=((R[m]<<16)&0xffff0000)|((R[m]>>16)&0x00ffff);"},
   {"","n","tas.b @<REG_N>", "0100nnnn00011011", "ult=RBAT(R[n]);T=ult==0;WBAT(R[n],ult|0x80);"},
   {"0","","trapa #<imm>", "11000011i8*1....", 
-     "{ long imm = 0xff & i; if (i<20||i==0xc3) trap(i,R,memory,maskl,maskw,little_endian); else { R[15]-=4; WLAT(R[15],GET_SR()); R[15]-=4;WLAT(R[15],PC+2); PC=RLAT(VBR+(imm<<2))-2;}}"},
+     "{ long imm = 0xff & i; if (i<20||i==34||i==0xc3) trap(i,R,memory,maskl,maskw,little_endian); else { R[15]-=4; WLAT(R[15],GET_SR()); R[15]-=4;WLAT(R[15],PC+2); PC=RLAT(VBR+(imm<<2))-2;}}"},
   {"","0","tst #<imm>,R0", "11001000i8*1....", "T=(R0&i)==0;"},
   {"","mn","tst <REG_M>,<REG_N>", "0010nnnnmmmm1000", "T=(R[n]&R[m])==0;"},
   {"","0","tst.b #<imm>,@(R0,GBR)", "11001100i8*1....", "T=(RBAT(GBR+R0)&i)==0;"},
@@ -466,7 +462,7 @@ genopc ()
   printf ("sh_opcode_info sh_table[]={\n");
   for (p = tab; p->name; p++)
     {
-      printf ("\n\/\* %s %-20s*/", p->code, p->name);
+      printf ("\n/* %s %-20s*/", p->code, p->name);
       think (p);
     }
   printf ("0};\n");
@@ -619,7 +615,7 @@ gensim ()
       
       char *s = p->code;
 
-      printf ("\/\* %s %s *\/\n", p->name, p->code);
+      printf ("/* %s %s */\n", p->name, p->code);
       printf ("case %d:      \n", p->index);
 
       printf ("{\n");
@@ -718,6 +714,7 @@ gensim ()
       printf ("break;\n");
       printf ("}\n");
     }
+  printf("default:\n{\nabort();;\n}\n");
   printf ("}\n}\n");
 }
 
