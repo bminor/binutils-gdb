@@ -3,7 +3,7 @@ Fri Jun 26 21:27:17 1992  John Gilmore  (gnu at cygnus.com)
 	* i386.h:  Add setc, setnc, addr16, data16, repz, repnz aliases.
 	Fix opcodes on various sizes of fild/fist instructions
 	(16bit=no suffix, 32bit="l" suffix, 64bit="ll" suffix).
-	Fixes suggested by Minh Tran-Le.
+	Use tabs to indent for comments.  Fixes suggested by Minh Tran-Le.
 
 Thu Jun 25 16:13:26 1992  Stu Grossman  (grossman at cygnus.com)
 
