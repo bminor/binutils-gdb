@@ -78,6 +78,8 @@ extern struct monitor_ops        *current_monitor;
 
 #define push_monitor(x)		current_monitor = x;
 
+#define SREC_SIZE 160
+
 extern void debuglogs();
 extern void monitor_open();
 extern void monitor_close();
@@ -96,3 +98,13 @@ extern void monitor_kill();
 extern void monitor_load();
 extern void monitor_create_inferior();
 extern void monitor_mourn_inferior();
+
+/*
+ * FIXME: These are to temporarily maintain compatability with the
+ *	old monitor structure till remote-mon.c is fixed to work
+ *	like the *-rom.c files.
+ */
+#define MEM_PROMPT		(current_monitor->loadtypes)
+#define MEM_SET_CMD		(current_monitor->setmem)
+#define MEM_DIS_CMD		(current_monitor->getmem)
+#define REG_DELIM               (current_monitor->regset.delim)

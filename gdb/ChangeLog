@@ -1,3 +1,9 @@
+Fri Oct 14 19:39:47 1994  Rob Savoye  <rob@darkstar.cygnus.com>
+
+	* monitor.h, remote-mon.c: Hack up to so the old ROM monitor
+	interface code still works with the new ROM monitor
+	structures. Fake out a couple of fields.
+
 Fri Oct 14 14:54:37 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* h8500-tdep.c (target_read_sp, target_write_sp, target_read_pc,

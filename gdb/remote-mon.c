@@ -62,7 +62,9 @@ extern struct target_ops rom68k_ops;		/* Forward declaration */
 extern struct target_ops mon68_ops;		/* Forward declaration */
 extern struct target_ops monitor_bug_ops;	/* Forward declaration */
 extern struct monitor_ops rom68k_cmds;		/* Forward declaration */
+#if 0
 extern struct monitor_ops mon68_cmds;		/* Forward declaration */
+#endif
 extern struct monitor_ops bug_cmds;		/* Forward declaration */
 extern struct cmd_list_element *setlist;
 extern struct cmd_list_element *unsetlist;
@@ -385,7 +387,9 @@ mon68_open(args, from_tty)
      int from_tty;
 {
   push_target(&mon68_ops);
+#if 0
   push_monitor (&mon68_cmds);
+#endif
 
   general_open (args, "mon68", from_tty);
 }
@@ -944,6 +948,8 @@ connect_command (args, fromtty)
   while (1)
     {
       do
+
+
 	{
 	  FD_SET(0, &readfds);
 	  FD_SET(monitor_desc, &readfds);
@@ -995,65 +1001,6 @@ connect_command (args, fromtty)
     }
 }
 #endif
-
-/*
- * Define the monitor command strings. Since these are passed directly
- * through to a printf style function, we need can include formatting
- * strings. We also need a CR or LF on the end.
- */
-struct monitor_ops rom68k_cmds = {
-  "go \r",				/* execute or usually GO command */
-  "go \r",				/* continue command */
-  "st \r",				/* single step */
-  "db %x\r",				/* set a breakpoint */
-  "cb %x\r",				/* clear a breakpoint */
-  "pm %x\r",				/* set memory to a value */
-  "pm %x\r",				/* display memory */
-  "-%08X  ",				/* prompt memory commands use */
-  "pr %s %x\r",				/* set a register */
-  ":  ",				/* delimiter between registers */
-  "pr %s\r",				/* read a register */
-  "dc \r",				/* download command */
-  "ROM68K :->",				/* monitor command prompt */
-  "=",					/* end-of-command delimitor */
-  ".\r"					/* optional command terminator */
-};
-
-struct monitor_ops bug_cmds = {
-  "go \r",				/* execute or usually GO command */
-  "go \r",				/* continue command */
-  "gn \r",				/* single step */
-  "br %x\r",				/* set a breakpoint */
-  "nobr %x\r",				/* clear a breakpoint */
-  "mm %x\r",				/* set memory to a value */
-  "mm %x\r",				/* display memory */
-  "%08X",				/* prompt memory commands use */
-  "rs %s %x\r",				/* set a register */
-  "=",					/* delimiter between registers */
-  "rm %s\r",				/* read a register */
-  "lo 0\r",				/* download command */
-  "Bug>",				/* monitor command prompt */
-  "? ",					/* end-of-command delimitor */
-  ".\r"					/* optional command terminator */
-};
-
-/* Define the target subroutine names */
-struct monitor_ops mon68_cmds = {
-  "",				/* execute or usually GO command */
-  "",				/* continue command */
-  "",				/* single step */
-  "",				/* set a breakpoint */
-  "",				/* clear a breakpoint */
-  "",				/* set memory to a value */
-  "",				/* display memory */
-  "",				/* set a register */
-  "",				/* delimiter between registers */	
-  "",				/* read a register */
-  "",				/* download command */
-  ">",				/* monitor command prompt */
-  "",					/* end-of-command delimitor */
-  ""					/* optional command terminator */
-};
 
 struct target_ops rom68k_ops = {
   "rom68k",
@@ -1180,6 +1127,108 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
   0,				/* Section pointers */
   OPS_MAGIC,			/* Always the last thing */
 };
+
+
+/*
+ * Define the monitor command strings. Since these are passed directly
+ * through to a printf style function, we need can include formatting
+ * strings. We also need a CR or LF on the end.
+ */
+struct monitor_ops rom68k_cmds = {
+  1,					/* 1 is ascii, 0 is binary */
+  "\n",					/* monitor init string */
+  "go \r",				/* execute or usually GO command */
+  "go \r",				/* continue command */
+  "st \r",				/* single step */
+  "db %x\r",				/* set a breakpoint */
+  "cb %x\r",				/* clear a breakpoint */
+  0,					/* 0 for number, 1 for address */
+  {
+  "pm %x\r",				/* set memory to a value */
+  "",
+  "",
+  },
+  {
+  "pm %x\r",				/* display memory */
+  "",
+  "",
+  },
+  {
+  "pr %s %x\r",				/* set a register */
+  ":  ",				/* delimiter between registers */
+  "",
+  },
+  {
+  "pr %s\r",				/* read a register */
+  ":  ",				/* delimiter between registers */
+  "",
+  },
+  "dc \r",				/* download command */
+  "ROM68K :->",				/* monitor command prompt */
+  "=",					/* end-of-command delimitor */
+  ".\r",				/* optional command terminator */
+  &rom68k_ops,				/* target operations */
+  "-%08X  ",				/* prompt memory commands use */
+};
+
+struct monitor_ops bug_cmds = {
+  1,					/* 1 is ascii, 0 is binary */
+  "\n",					/* monitor init string */
+  "go \r",				/* execute or usually GO command */
+  "go \r",				/* continue command */
+  "gn \r",				/* single step */
+  "br %x\r",				/* set a breakpoint */
+  "nobr %x\r",				/* clear a breakpoint */
+  0,					/* 0 for number, 1 for address */
+  {
+  "mm %x\r",				/* set memory to a value */
+  "",
+  "",
+},
+  {
+  "mm %x\r",				/* display memory */
+  "",
+  "",
+},
+  {
+  "rs %s %x\r",				/* set a register */
+  "=",					/* delimiter between registers */
+  "",
+},
+  {
+  "rm %s\r",				/* read a register */
+  "=",					/* delimiter between registers */
+  "",
+},
+  "lo 0\r",				/* download command */
+  "Bug>",				/* monitor command prompt */
+  "? ",					/* end-of-command delimitor */
+  ".\r",				/* optional command terminator */
+  &monitor_bug_ops,
+  "%08X",				/* prompt memory commands use */
+};
+
+#if 0
+/* Define the target subroutine names */
+struct monitor_ops mon68_cmds = {
+  1,					/* 1 is ascii, 0 is binary */
+  "",				/* execute or usually GO command */
+  "",				/* continue command */
+  "",				/* single step */
+  "",				/* set a breakpoint */
+  "",				/* clear a breakpoint */
+  "",				/* set memory to a value */
+  "",				/* display memory */
+  "",				/* set a register */
+  "",				/* delimiter between registers */	
+  "",				/* read a register */
+  "",				/* download command */
+  ">",				/* monitor command prompt */
+  "",					/* end-of-command delimitor */
+  ""					/* optional command terminator */
+  ""					/* load types */
+};
+#endif
 
 void
 _initialize_remote_monitors ()
