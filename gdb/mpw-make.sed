@@ -32,6 +32,9 @@
 
 /^TERMCAP =/s/ =.*$/ =/
 
+# Whack out autoconf hook for thread debugging.
+/@CONFIG_LDFLAGS@/s/@CONFIG_LDFLAGS@//g
+
 /@DEFS@/s/@DEFS@//g
 
 /@YACC@/s/@YACC@/byacc/g

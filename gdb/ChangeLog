@@ -1,25 +1,31 @@
+Mon Jul  1 13:00:43 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From Raymond Jou  <rjou@mexican.cygnus.com>:
+        * mpw-make.sed: Add lines to whack out autoconf hook
+        @CONFIG_LDFLAGS@.
+
 Mon Jul 01 11:07:15 1996  Mark Alexander  <marka@cygnus.com>
 
 	* remote-e7000.c (e7000_stop): New function.
 
 Fri Jun 28 06:34:19 1996  Dawn Perchik  <dawn@cygnus.com>
 
-	* configure,configure.in: Add target sparclet.
-	* monitor.h,monitor.c:
-	Added monitor flags MO_NO_ECHO_ON_SETMEM (don't expect echo on 
-	setmem command), MO_RUN_FIRST_TIME (if command to start process 
-	running on target is different from one to continue execution), 
-	MO_HEX_PREFIX (if addresses from monitor have a "0x" prefix).
-	* monitor.c,parse.c,sparc-tdep.c:
-	Don't require strings in the registers array.  This is to allow 
-	NULLs to be place holders in the tm-*.h file so that only minor 
-	changes are needed when a new processor is introduced (eg, one 
-	without floating point).
-	* sparc-tdep.c: Conditionally remove dependancies on floating point.
-	* sparclet-rom.c,config/sparc/sparclet.mt,config/sparc/tm-sparclet.h:
-	New files for target sparclet.
-	* symfile.c: Add option for 2nd parameter on load command : a load 
-	offset added to the vma of each section.
+	* configure, configure.in: Add target sparclet.
+	* monitor.h, monitor.c: Added monitor flags MO_NO_ECHO_ON_SETMEM
+ 	(don't expect echo on setmem command), MO_RUN_FIRST_TIME (if
+ 	command to start process running on target is different from one
+ 	to continue execution), MO_HEX_PREFIX (if addresses from monitor
+ 	have a "0x" prefix).
+	* monitor.c, parse.c, sparc-tdep.c: Don't require strings in the
+ 	registers array.  This is to allow NULLs to be place holders in
+ 	the tm-*.h file so that only minor changes are needed when a new
+ 	processor is introduced (eg, one without floating point).
+	* sparc-tdep.c: Conditionally remove dependancies on floating
+ 	point.
+  	* sparclet-rom.c, config/sparc/sparclet.mt,
+ 	config/sparc/tm-sparclet.h: New files for target sparclet.
+	* symfile.c (load_command): Add option for 2nd parameter; a load
+ 	offset added to the vma of each section.
 
 Fri Jun 28 05:39:19 1996  Dawn Perchik  <dawn@cygnus.com>
 
@@ -27,10 +33,10 @@ Fri Jun 28 05:39:19 1996  Dawn Perchik  <dawn@cygnus.com>
 
 Fri Jun 28 05:25:18 1996  Dawn Perchik  <dawn@cygnus.com>
 
-        * remote-e7000.c,remote.c,target.h,top.c:
-	Add set option "remote_timeout" for setting remote_timeout.
-	Add set option "use_hard_breakpoints" for setting hardware 
-	.vs. memory breakpoints.
+        * remote-e7000.c, remote.c, target.h, top.c: Add set option
+ 	"remote_timeout" for setting remote_timeout.  Add set option
+ 	"use_hard_breakpoints" for setting hardware .vs. memory
+ 	breakpoints.
 
 Fri Jun 28 04:32:18 1996  Dawn Perchik  <dawn@cygnus.com>
 
