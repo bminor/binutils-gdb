@@ -1,7 +1,16 @@
+Fri May  3 22:01:56 1991  John Gilmore  (gnu at cygint.cygnus.com)
+
+	* remote.c:  Remove decls of memory_insert_breakpoint
+	and memory_remove_breakpoint, no longer used.  (Suggestion of
+	Jan Norden).
+
+	* Makefile.dist:  use ${subdir} in paths of BFD and LIBIBERTY,
+	to make it easier to interface to "configure"'d libraries.
+
 Fri May  3 13:10:01 PDT 1991  Roland Pesch (pesch at fowanton.cygnus.com)
 
-    * valprint.c introduce "set p", "set pr", "show p" and "show pr" as
-    aliases for set/show print.
+        * valprint.c:  introduce "set p", "set pr", "show p" and "show pr" as
+	aliases for set/show print.
 
 Thu May  2 11:22:02 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 

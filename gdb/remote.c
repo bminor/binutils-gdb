@@ -83,8 +83,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <signal.h>
 
-extern int memory_insert_breakpoint ();
-extern int memory_remove_breakpoint ();
 extern void add_syms_addr_command ();
 extern struct value *call_function_by_hand();
 extern void start_remote ();

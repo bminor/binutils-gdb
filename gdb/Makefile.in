@@ -61,7 +61,8 @@ MALLOC_CFLAGS =
 INCLUDE_DIR =  ${srcdir}/../include
 INCLUDE_DEP = $$(INCLUDE_DIR)
 
-# Where is the BFD library?  Traditionally ../bfd or ./bfd
+# Where is the source dir for the BFD library?  Traditionally ../bfd or ./bfd
+# (When we want the binary library built from it, we use ${BFD_DIR}${subdir}.)
 BFD_DIR =  ${srcdir}/../bfd
 BFD_DEP = $$(BFD_DIR)
 
@@ -81,7 +82,7 @@ CFLAGS = ${GLOBAL_CFLAGS} ${PROFILE_CFLAGS} ${MALLOC_CFLAGS} ${INCLUDE_CFLAGS}
 LDFLAGS = $(CFLAGS)
 
 # Where is the "-liberty" library, containing getopt and obstack?
-LIBIBERTY =  ${srcdir}/../libiberty/libiberty.a
+LIBIBERTY =  ${srcdir}/../libiberty${subdir}/libiberty.a
 
 # Flags that describe where you can find the termcap library.
 # You may need to make other arrangements for USG.
@@ -94,7 +95,7 @@ TERMCAP = -ltermcap
 # {X,T}M_CLIBS, if defined, has system-dependent libs
 # For example, -lPW for System V to get alloca().
 # FIXME STOPGAP FOR BFD LIBRARY: BFD stuff
-CLIBS = ${TERMCAP} $(XM_CLIBS) ${TM_CLIBS} ${BFD_DIR}/libbfd.a \
+CLIBS = ${TERMCAP} $(XM_CLIBS) ${TM_CLIBS} ${BFD_DIR}${subdir}/libbfd.a \
 	${LIBIBERTY}
 CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_DIR}/libbfd.a \
 	${LIBIBERTY}
