@@ -30,6 +30,7 @@ SECTIONS
 	*(.vectors)
 	} ${RELOCATING+ > vectors}
 .text :	{ 					
+	*(.rodata) 				
 	*(.text) 				
 	*(.strings)
    	${RELOCATING+ _etext = . ; }
