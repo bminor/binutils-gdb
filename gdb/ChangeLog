@@ -1,3 +1,19 @@
+Mon Oct 18 10:28:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* buildsym.c (finish_block): If we pop the context stack and it is
+	not empty, complain () instead of abort ().
+
+Sun Oct 17 19:42:31 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* parse.c, parser-defs.h (follow_types): New function.
+	* c-exp.y (ptype : typebase abs_decl): Use it.
+	* c-exp.y (ptype): Add support for type qualifiers after the
+	typebase.  The typebase rule already has support for them before
+	the typebase.
+	* Makefile.in: Change the expected number of shift/reduce
+	conflicts to 6.  This is OK--the 2 new conflicts are basically the
+	same as one of the old ones.
+
 Sun Oct 17 13:04:49 1993  Fred Fish  (fnf@cygnus.com)
 
 	* Makefile.in (VERSION):  Bump to 4.10.3.

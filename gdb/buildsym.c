@@ -667,11 +667,16 @@ end_symtab (end_addr, sort_pending, sort_linevec, objfile, section)
       finish_block (cstk->name, &local_symbols, cstk->old_blocks,
 		    cstk->start_addr, end_addr, objfile);
 
-      /* Debug: if context stack still has something in it,
-	 we are in trouble.  */
       if (context_stack_depth > 0)
 	{
-	  abort ();
+	  /* This is said to happen with SCO.  The old coffread.c code
+	     simply emptied the context stack, so we do the same.  FIXME:
+	     Find out why it is happening.  This is not believed to happen
+	     in most cases (even for coffread.c); it used to be an abort().  */
+	  static struct complaint msg =
+	    {"Context stack not empty in end_symtab", 0, 0};
+	  complain (&msg);
+	  context_stack_depth = 0;
 	}
     }
 
