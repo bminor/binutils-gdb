@@ -1,8 +1,15 @@
-/* HPPA linker stub instructions */
+/* HPPA linker stub instructions  */
 
-#define STUB_MAX_SIZE	(sizeof(int) * 20)	 /* maximum size of a single stub routine */
-#define STUB_BUFFER_INCR	(STUB_MAX_SIZE * 20)	 /* when realloc'ing, use this size */
-#define STUB_RELOC_INCR	20	 /* when realloc'ing, use this size */
+/* Maximum size of a single stub routine in bytes.  */
+#define STUB_MAX_SIZE	(sizeof(int) * 20)
+
+/* When realloc'ing, use this size ?!? FIXME, what are these?  */
+#define STUB_BUFFER_INCR	(STUB_MAX_SIZE * 20)
+#define STUB_RELOC_INCR	20
+
+/* These are the instructions which the linker may insert into the
+   code stream when building final executables to handle out-of-range
+   calls and argument relocations.  */
 
 #define ADDI_8_SP          	0xb7de0010	/* addi        8,sp,sp */
 #define STW_RP_M8SP        	0x6bc23ff1	/* stw         rp,-8(sp) */
@@ -20,9 +27,7 @@
 #define FSTDS_FARG3_M8SP   	0x2fd11207	/* fstds       farg3,-8(sp) */
 #define STWS_RET0_M8SP     	0x0fda1291	/* stws        arg0,-8(sp) */
 #define FSTWS_FRET0_M8SP   	0x27d11204	/* fstws       fret0,-8(sp) */
-#define LDWS_M8SP_ARG0     	0x0fd1109a	/* ldws        -8(sp),arg0 */
 #define LDWS_M8SP_ARG1     	0x0fd11099	/* ldws        -8(sp),arg1 */
-#define LDWS_M8SP_ARG2     	0x0fd11098	/* ldws        -8(sp),arg2 */
 #define LDWS_M8SP_ARG3     	0x0fd11097	/* ldws        -8(sp),arg3 */
 #define LDWS_M4SP_ARG0     	0x0fd9109a	/* ldws        -4(sp),arg0 */
 #define LDWS_M4SP_ARG1     	0x0fd91099	/* ldws        -4(sp),arg1 */
@@ -32,61 +37,23 @@
 #define FLDWS_M8SP_FARG1   	0x27d11005	/* fldws       -8(sp),farg1 */
 #define FLDWS_M8SP_FARG2   	0x27d11006	/* fldws       -8(sp),farg2 */
 #define FLDWS_M8SP_FARG3   	0x27d11007	/* fldws       -8(sp),farg3 */
-#define FLDDS_M8SP_FARG0   	0x2fd11004	/* fldds       -8(sp),farg0 */
 #define FLDDS_M8SP_FARG1   	0x2fd11005	/* fldds       -8(sp),farg1 */
-#define FLDDS_M8SP_FARG2   	0x2fd11006	/* fldds       -8(sp),farg2 */
 #define FLDDS_M8SP_FARG3   	0x2fd11007	/* fldds       -8(sp),farg3 */
 #define LDWS_M4SP_RET0     	0x0fd9109c	/* ldws        -4(sp),ret0 */
-#define LDWS_M8SP_RET0     	0x0fd1109c	/* ldws        -8(sp),ret0 */
 #define FLDWS_M8SP_FRET0   	0x27d11004	/* fldws       -8(sp),fret0 */
-#define STWS_MA_ARG0_8SP   	0x0fda12b0	/* stws,ma     arg0,8(sp) */
-#define STWS_MA_ARG1_8SP   	0x0fd912b0	/* stws,ma     arg1,8(sp) */
-#define STWS_MA_ARG2_8SP   	0x0fd812b0	/* stws,ma     arg2,8(sp) */
-#define STWS_MA_ARG3_8SP   	0x0fd712b0	/* stws,ma     arg3,8(sp) */
-#define FSTWS_MA_FARG0_8SP 	0x27d01224	/* fstws,ma    farg0,8(sp) */
-#define FSTWS_MA_FARG1_8SP 	0x27d01225	/* fstws,ma    farg1,8(sp) */
-#define FSTWS_MA_FARG2_8SP 	0x27d01226	/* fstws,ma    farg2,8(sp) */
-#define FSTWS_MA_FARG3_8SP 	0x27d01227	/* fstws,ma    farg3,8(sp) */
-#define LDWS_MB_M8SP_ARG0  	0x0fd130ba	/* ldws,mb     -8(sp),arg0 */
-#define LDWS_MB_M8SP_ARG1  	0x0fd130b9	/* ldws,mb     -8(sp),arg1 */
-#define LDWS_MB_M8SP_ARG2  	0x0fd130b8	/* ldws,mb     -8(sp),arg2 */
-#define LDWS_MB_M8SP_ARG3  	0x0fd130b7	/* ldws,mb     -8(sp),arg3 */
-#define FLDWS_MB_M8SP_FARG0	0x27d13024	/* fldws,mb    -8(sp),farg0 */
-#define FLDWS_MB_M8SP_FARG1	0x27d13025	/* fldws,mb    -8(sp),farg1 */
-#define FLDWS_MB_M8SP_FARG2	0x27d13026	/* fldws,mb    -8(sp),farg2 */
-#define FLDWS_MB_M8SP_FARG3	0x27d13027	/* fldws,mb    -8(sp),farg3 */
-#define BL_XXX_RP          	0xe8400000	/* bl          0,rp */
-#define NOP                	0x08000240	/* nop */
-#define STW_RP_M24SP        	0x6bc23fd1	/* stw         rp,-24(sr0,sp) */
-#define STW_31_M24SP       	0x6bdf3fd1	/* stw         r31,-24(sr0,sp) */
-#define LDW_M24SP_RP       	0x4bc23fd1	/* ldw         -24(sr0,sp),rp */
-#define LDW_M24SP_31       	0x4bdf3fd1	/* ldw         -24(sr0,sp),r31 */
-#define BE_XXX_0_0         	0xe0000000	/* be          0(sr0,0) */
-#define BE_N_XXX_0_0       	0xe0000002	/* be,n        0(sr0,0) */
 #define BLE_XXX_0_0        	0xe4000000	/* ble         0(sr0,0) */
 #define BLE_N_XXX_0_0      	0xe4000002	/* ble,n       0(sr0,0) */
-#define BLE_N_XXX_0_31     	0xe7e00002	/* ble,n       0(sr0,r31) */
 #define BLE_XXX_0_31       	0xe7e00000	/* ble         0(sr0,r31) */
 #define BE_N_XXX_0_31      	0xe3e00002	/* be,n        0(sr0,r31) */
 #define BE_XXX_0_31        	0xe3e00000	/* be          0(sr0,r31) */
-#define BE_N_XXX_0_RP      	0xe0400002	/* be,n        0(sr0,rp) */
-#define BE_XXX_0_RP        	0xe0400000	/* be          0(sr0,rp) */
-#define BLE_XXX_0_RP       	0xe4400000	/* ble         0(sr0,rp) */
 #define COPY_31_2          	0x081f0242	/* copy        r31,r2 */
 #define COPY_31_1          	0x081f0241	/* copy        r31,r1 */
 #define COPY_1_31          	0x0801025f	/* copy        r1,r31 */
 #define LDIL_XXX_31        	0x23e00000	/* ldil        0,r31 */
-#define LDIL_XXX_RP        	0x20400000	/* ldil        0,rp */
-#define LDO_0_26_26        	0x375a0000	/* ldo         0(r26),r26 */
 #define LDSID_31_1         	0x03e010a1	/* ldsid       (r31),r1 */
-#define LDSID_31_RP        	0x03e010a2	/* ldsid       (r31),rp */
-#define LDSID_31_31        	0x03e010bf	/* ldsid       (r31),r31 */
-#define MTSP_RP_SR0        	0x00021820	/* mtsp        rp,sr0 */
 #define MTSP_1_SR0         	0x00011820	/* mtsp        r1,sr0 */
-#define MTSP_31_SR0        	0x001f1820	/* mtsp        r31,sr0 */
-#define LDO_0_26_26        	0x375a0000	/* ldo         0(r26),r26 */
-#define ADDI_M8_SP         	0xb7de07f1	/* addi        -8,sp,sp */
+#define ADDI_M4_31_RP      	0xb7e207f9	/* addi        -4,r31,rp */
+#define ADDI_M4_31_1       	0xb7e107f9	/* addi        -4,r31,r1 */
+#define ADDI_M8_SP_SP      	0xb7de07f1	/* addi        -8,sp,sp */
 #define LDW_M8SP_RP        	0x4bc23ff1	/* ldw         -8(sp),rp */
 #define BV_N_0_RP          	0xe840c002	/* bv,n        0(rp) */
-#define BV_N_0_26          	0xeb40c002	/* bv,n        0(r26) */
-#define BV_N_0_31          	0xebe0c002	/* bv,n        0(r31) */

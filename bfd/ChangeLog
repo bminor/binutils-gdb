@@ -1,3 +1,21 @@
+Thu Nov 11 15:16:28 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* elf32-hppa.c (hppa_elf_reloc): Remove DEFUN crud.  Remove code
+	which is either commented out or ifdef'd out.  Add, update and
+	clean comments.  Fix various indention and spacing problems.  Handle
+	problems related to using "ble" to jump to a stub rather than "bl"
+	(%r31 is trashed by "ble", but not by "bl").
+	(NEW_INSTRUCTION): Put inside curly braces.
+	(CURRENT_STUB_OFFSET): Fix indention problems.
+	(hppa_elf_build_arg_reloc_stub): Fix indention and spacing problems.
+	Add, update and clean comments.  Handle "ble" %r31 lossage problems.
+	(hppa_elf_build_long_branch_stub): Likewise.
+	(hppa_look_for_stubs_in_section): Likewise.
+	(hppa_elf_stub_check): Remove obsolete function.
+
+	* hppa_stubs.h: Add new instructions to deal with %r31 lossage
+	problems.  Delete unused instructions.
+	
 Tue Nov  9 11:40:27 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
 	* m68klynx.c (TARGET_IS_BIG_ENDIAN_P): Define.
