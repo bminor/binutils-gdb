@@ -1,3 +1,8 @@
+2005-03-07  Manoj Iyer <manjo@austin.ibm.com>
+	
+	* gdb.base/command.exp: Change hardcoded value to regular expression.
+	* gdb.base/float.exp: Add powerpc to the list of targets checked.
+
 2005-03-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.asm/alpha.inc, gdb.asm/frv.inc, gdb.asm/i386.inc,
