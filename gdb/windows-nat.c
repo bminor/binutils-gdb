@@ -1656,6 +1656,36 @@ child_detach (char *args, int from_tty)
   unpush_target (&child_ops);
 }
 
+char *
+child_pid_to_exec_file (int pid)
+{
+  /* Try to find the process path using the Cygwin internal process list
+     pid isn't a valid pid, unfortunately.  Use current_event.dwProcessId
+     instead.  */
+  /* TODO: Also find native Windows processes using CW_GETPINFO_FULL.  */
+
+  static char path[MAX_PATH + 1];
+  char *path_ptr = NULL;
+  int cpid;
+  struct external_pinfo *pinfo;
+
+  cygwin_internal (CW_LOCK_PINFO, 1000);
+  for (cpid = 0;
+       (pinfo = (struct external_pinfo *)
+                       cygwin_internal (CW_GETPINFO, cpid | CW_NEXTPID));
+       cpid = pinfo->pid)
+    {
+      if (pinfo->dwProcessId == current_event.dwProcessId) /* Got it */
+       {
+         cygwin_conv_to_full_posix_path (pinfo->progname, path);
+         path_ptr = path; 
+         break;
+       }
+    }
+  cygwin_internal (CW_UNLOCK_PINFO);
+  return path_ptr; 
+}
+
 /* Print status information about what we're accessing.  */
 
 static void
@@ -2078,6 +2108,7 @@ init_child_ops (void)
   child_ops.to_has_registers = 1;
   child_ops.to_has_execution = 1;
   child_ops.to_magic = OPS_MAGIC;
+  child_ops.to_pid_to_exec_file = child_pid_to_exec_file;
 }
 
 void
