@@ -1,3 +1,18 @@
+Mon Mar 21 18:45:26 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* bfdlink.h (struct bfd_link_callbacks): Change bitsize argument
+	to add_to_set to reloc.  Remove bitsize argument from constructor.
+	Comment that reloc_overflow, reloc_dangerous and unattached_reloc
+	must handle NULL pointers for reloc location.
+	(enum bfd_link_order_type): Add bfd_section_reloc_link_order and
+	bfd_symbol_reloc_link_order.
+	(struct bfd_link_order): Add reloc field to union.
+	(struct bfd_link_order_reloc): Define.
+
+Mon Mar 14 12:27:50 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ieee-float.h: Removed; no longer used.
+
 Tue Mar  1 18:10:49 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* os9k.h: os9000 target specific header file, the header of the
