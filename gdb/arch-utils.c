@@ -130,12 +130,6 @@ generic_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 }
 
 int
-generic_in_solib_call_trampoline (CORE_ADDR pc, char *name)
-{
-  return 0;
-}
-
-int
 generic_in_solib_return_trampoline (CORE_ADDR pc, char *name)
 {
   return 0;

@@ -1,5 +1,8 @@
 2004-10-31  Andrew Cagney  <cagney@gnu.org>
 
+	* arch-utils.c (generic_in_solib_call_trampoline): Delete.
+	* arch-utils.h (generic_in_solib_call_trampoline): Delete.
+
 	* gdbarch.sh (in_solib_call_trampoline): Delete.
 	* gdbarch.h, gdbarch.c: Re-generate.
 
