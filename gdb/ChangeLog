@@ -1,3 +1,8 @@
+2002-11-25  David Carlton  <carlton@math.stanford.edu>
+
+	* dwarf2read.c (scan_partial_symbols): Descend into namespace
+	pdi's with no name.
+
 2002-11-21  Daniel Jacobowitz  <drow@mvista.com>
 
 	* maint.c (_initialize_maint_cmds): Fix typo.  From

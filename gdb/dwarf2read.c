@@ -1322,7 +1322,9 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
     {
       info_ptr = read_partial_die (&pdi, abfd, info_ptr, cu_header);
 
-      if (pdi.name)
+      /* Anonymous namespaces have no name but are interesting.  */
+
+      if (pdi.name != NULL || pdi.tag == DW_TAG_namespace)
 	{
 	  switch (pdi.tag)
 	    {
