@@ -1,11 +1,29 @@
+Tue Oct  1 12:31:39 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_link_add_object_symbols): Only put a symbol from
+	a dynamic object in the dynamic symbol table if it is referenced
+	or defined by a regular object.
+
+start-sanitize-v850
+Fri Sep 27 18:41:07 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* elf32-v850.c (bfd_elf32_v850_is_local_label):  New function to
+	remove dwarf local labels.  Shrinks binaries by a factor of 3!
+
+end-sanitize-v850
+Mon Sep 23 13:33:00 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_add_symbol_hook): Create the .sbss section
+	by hand, rather than by calling bfd_make_section.
+
 start-sanitize-m32r
 Mon Sep 23 09:23:41 1996  Doug Evans  <dje@seba.cygnus.com>
 
 	* reloc.c: Rename m32r relocs.
 	* bfd-in2.h, libbfd.h: Rebuilt.
 	* elf32-m32r.c: Update.
-end-sanitize-m32r
 
+end-sanitize-m32r
 Fri Sep 20 11:43:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aoutx.h (aout_link_input_section_ext): When doing a relocateable
