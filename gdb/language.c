@@ -545,6 +545,11 @@ local_hex_format_custom (pre)
   return form;
 }
 
+#if 0
+/* FIXME: cagney/2000-03-04: This function does not appear to be used.
+   It can be deleted once 5.0 has been released. */
+/* FIXME: cagney/2000-03-04: This code assumes that the compiler
+   supports ``long long''. */
 /* Converts a number to hexadecimal (without leading "0x") and stores it in a
    static string.  Returns a pointer to this string. */
 
@@ -562,6 +567,7 @@ longest_raw_hex_string (num)
   sprintf (res_longest_raw_hex_string, "%llx", ll);
   return res_longest_raw_hex_string;
 }
+#endif
 
 /* Converts a number to hexadecimal and stores it in a static
    string.  Returns a pointer to this string. */
