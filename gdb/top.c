@@ -2249,9 +2249,7 @@ recurse_read_control_structure (current_cmd)
   enum misc_command_type val;
   enum command_control_type ret;
   struct command_line **body_ptr, *child_tail, *next;
-  struct cleanup *old_chains, *tmp_chains;
 
-  old_chains = NULL;
   child_tail = NULL;
   current_body = 1;
 
@@ -2320,19 +2318,12 @@ recurse_read_control_structure (current_cmd)
 	}
       else
 	{
-	  /* We have just read the first line of the child's control
-	     structure.  From now on, arrange to throw away the line
-	     we have if we quit or get an error.  */
 	  body_ptr = current_cmd->body_list;
 	  for (i = 1; i < current_body; i++)
 	    body_ptr++;
 
 	  *body_ptr = next;
 
-	  tmp_chains = make_cleanup (free_command_lines, body_ptr);
-
-	  if (!old_chains)
-	    old_chains = tmp_chains;
 	}
 
       child_tail = next;
@@ -2352,10 +2343,6 @@ recurse_read_control_structure (current_cmd)
     }
 
   dont_repeat ();
-  if (ret == invalid_control && old_chains)
-    do_cleanups (old_chains);
-  else if (old_chains)
-    discard_cleanups (old_chains);
 
   return ret;
 }
