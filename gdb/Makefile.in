@@ -721,8 +721,6 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	nlmread.o serial.o mdebugread.o os9kread.o top.o utils.o \
 	ui-file.o \
 	frame.o doublest.o \
-	ui-file.o \
-	frame.o doublest.o \
 	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o
 
 OBS = $(COMMON_OBS) $(ANNOTATE_OBS)
@@ -1540,7 +1538,8 @@ hpacc-abi.o: hpacc-abi.c $(defs_h) $(cp_abi_h) $(gdb_string_h) $(gdbtypes_h) \
 	$(value_h) $(gdbcore_h)
 
 hppa-tdep.o: hppa-tdep.c gdb_wait.h $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) $(objfiles_h) $(symfile_h) $(target_h) $(regcache_h)
+	$(inferior_h) $(objfiles_h) $(symfile_h) $(target_h) $(regcache_h) \
+	$(completer_h)
 
 hppab-nat.o: hppab-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(target_h) \
 	$(regcache_h)

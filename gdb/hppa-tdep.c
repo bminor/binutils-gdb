@@ -28,6 +28,7 @@
 #include "inferior.h"
 #include "value.h"
 #include "regcache.h"
+#include "completer.h"
 
 /* For argument passing to the inferior */
 #include "symtab.h"

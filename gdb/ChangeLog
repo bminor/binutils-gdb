@@ -1,3 +1,12 @@
+2002-02-03  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* breakpoint.c (break_at_finish_command): Really export.
+	(break_at_finish_at_depth_command): Ditto.
+	(tbreak_at_finish_command): Ditto.
+	* hppa-tdep.c: Include completer.h.
+	* Makefile.in (hppa-tdep.o): Add dependency on $(completer_h).
+	(COMMON_OBS): Remove duplicate ui-file.o, frame.o, doublest.o.
+
 2002-02-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* utils.c (do_write): New function.

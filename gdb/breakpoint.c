@@ -84,10 +84,10 @@ static void watch_command (char *, int);
 
 static int can_use_hardware_watchpoint (struct value *);
 
-static void break_at_finish_command (char *, int);
-static void break_at_finish_at_depth_command (char *, int);
+extern void break_at_finish_command (char *, int);
+extern void break_at_finish_at_depth_command (char *, int);
 
-static void tbreak_at_finish_command (char *, int);
+extern void tbreak_at_finish_command (char *, int);
 
 static void break_command_1 (char *, int, int);
 
