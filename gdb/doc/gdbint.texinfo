@@ -2117,11 +2117,6 @@ they are used is indicated) are:
 The default name of @value{GDBN}'s initialization file (normally
 @file{.gdbinit}).
 
-@item MEM_FNS_DECLARED
-Your host config file defines this if it includes declarations of
-@code{memcpy} and @code{memset}.  Define this to avoid conflicts between
-the native include files and the declarations in @file{defs.h}.
-
 @item NO_STD_REGS
 This macro is deprecated.
 

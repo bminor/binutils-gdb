@@ -1,5 +1,8 @@
 2001-09-08  Mark Kettenis  <kettenis@gnu.org>
 
+	* gdbint.texinfo (Host Definition): Remove description of
+	MEM_FNS_DECLARED.
+
 	* gdbint.texinfo (Host Definition): Remove description of R_OK.
 
 	* gdbint.texinfo (Host Definition): Remove description of
