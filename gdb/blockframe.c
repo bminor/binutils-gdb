@@ -219,10 +219,9 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
     obstack_alloc (&frame_cache_obstack,
 		   sizeof (struct frame_info));
 
-  /* Arbitrary frame */
-  fi->saved_regs = NULL;
-  fi->next = NULL;
-  fi->prev = NULL;
+  /* Zero all fields by default.  */
+  memset (fi, 0, sizeof (struct frame_info));
+
   fi->frame = addr;
   fi->pc = pc;
   find_pc_partial_function (pc, &name, (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);

@@ -1,3 +1,8 @@
+2001-05-17  Michael Snyder  <msnyder@redhat.com>
+
+	* blockframe.c (create_new_frame): Zero all the fields via memset,
+	rather than zeroing them one by one.
+
 2001-05-17  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* top.c (user_args): Remove unused declaration.
