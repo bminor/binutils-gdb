@@ -1,3 +1,10 @@
+Tue Jul 22 15:09:12 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Check for fdopen.
+	* configure, config.in: Rebuild.
+	* opncls.c (bfd_fdopenr): Check HAVE_FDOPEN rather than VMS or
+	__GO32__.  Reindent a bit.
+
 Sun Jul 20 20:05:20 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sunos.c (sunos_create_dynamic_sections): Set SEC_LINKER_CREATED

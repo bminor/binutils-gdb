@@ -136,7 +136,7 @@ BFD_CC_FOR_BUILD
 AC_CHECK_HEADERS(stddef.h string.h strings.h stdlib.h time.h unistd.h)
 AC_CHECK_HEADERS(fcntl.h sys/file.h sys/time.h)
 AC_HEADER_TIME
-AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf)
+AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf fdopen)
 
 BFD_BINARY_FOPEN
 
@@ -352,7 +352,7 @@ AC_SUBST(COREFLAG)
 if test -n "$enable_targets" ; then
     for targ in `echo $enable_targets | sed 's/,/ /g'`
     do
-	result=`$ac_config_sub $targ 2>/dev/null`
+	result=`${CONFIG_SHELL-/bin/sh} $ac_config_sub $targ 2>/dev/null`
 	if test -n "$result" ; then
 	    canon_targets="$canon_targets $result"
 	else
