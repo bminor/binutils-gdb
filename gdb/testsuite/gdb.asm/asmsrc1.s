@@ -11,9 +11,9 @@ comment	"Provide very simplistic equivalent."
 	
 	.global _start
 _start:
-	startup
-	call main
-	exit0
+	gdbasm_startup
+	gdbasm_call main
+	gdbasm_exit0
 
 
 comment "main routine for assembly source debugging test"
@@ -22,27 +22,27 @@ comment "machine independence."
 
 	.global main
 main:
-	enter
+	gdbasm_enter
 
 comment "Call a macro that consists of several lines of assembler code."
 
-	several_nops
+	gdbasm_several_nops
 
 comment "Call a subroutine in another file."
 
-	call foo2
+	gdbasm_call foo2
 
 comment "All done."
 
-	exit0
+	gdbasm_exit0
 
 comment "A routine for foo2 to call."
 
 	.global foo3
 foo3:
-	enter
-	leave
+	gdbasm_enter
+	gdbasm_leave
 
 	.global exit
 exit:
-	exit0
+	gdbasm_exit0

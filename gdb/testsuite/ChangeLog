@@ -1,3 +1,8 @@
+2001-11-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.asm/asmsrc1.s: Add ``gdbasm_'' prefix to all macros.
+	* gdb.asm/asmsrc2.s, gdb.asm/d10v.inc: Update.
+
 2001-11-09  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.base/restore.exp: Include $expected value in restored test
