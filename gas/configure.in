@@ -233,9 +233,9 @@ changequote([,])dnl
       i386-*-linux*coff*)   fmt=coff em=linux ;;
       i386-*-linux-gnu*)    fmt=elf em=linux bfd_gas=yes ;;
       i386-*-lynxos*)       fmt=coff em=lynx ;;
-      i386-*-sysv4* | i386-*-solaris* | i386-*-elf)
-			    fmt=elf bfd_gas=yes ;;
 changequote(,)dnl
+      i386-*-sysv[45]* | i386-*-solaris* | i386-*-elf)
+			    fmt=elf bfd_gas=yes ;;
       i386-*-freebsdaout* | i386-*-freebsd[12].* | i386-*-freebsd[12])
                             fmt=aout em=386bsd ;;
 changequote([,])dnl
