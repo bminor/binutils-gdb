@@ -1871,6 +1871,7 @@ coff_write_object_contents (abfd)
      field does not belong here.  We fill it with a 0 so it compares the
      same but is not a reasonable time. -- gnu@cygnus.com
      */
+  internal_f.f_timdat = 0;
 
   internal_f.f_flags = 0;
 
