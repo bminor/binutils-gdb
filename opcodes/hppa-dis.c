@@ -454,6 +454,7 @@ print_insn_hppa (memaddr, info)
 			break;
 		      }
 		    }
+		  break;
 
 		case '5':
 		  fput_const (extract_5_load (insn), info);
