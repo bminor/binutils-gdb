@@ -1,7 +1,7 @@
 /* GDB CLI command scripting.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -727,9 +727,21 @@ read_next_line (struct command_line **command)
   /* Check for while, if, break, continue, etc and build a new command
      line structure for them.  */
   if (p1 - p > 5 && !strncmp (p, "while", 5))
-    *command = build_command_line (while_control, p + 6);
+    {
+      char *first_arg;
+      first_arg = p + 5;
+      while (first_arg < p1 && isspace (*first_arg))
+        first_arg++;
+      *command = build_command_line (while_control, first_arg);
+    }
   else if (p1 - p > 2 && !strncmp (p, "if", 2))
-    *command = build_command_line (if_control, p + 3);
+    {
+      char *first_arg;
+      first_arg = p + 2;
+      while (first_arg < p1 && isspace (*first_arg))
+        first_arg++;
+      *command = build_command_line (if_control, first_arg);
+    }
   else if (p1 - p == 10 && !strncmp (p, "loop_break", 10))
     {
       *command = (struct command_line *)

@@ -1,3 +1,8 @@
+2004-09-10  Jason Molenda  (jmolenda@apple.com)
+
+        * cli/cli-script.c (read_next_line): Accept zero or more whitespace
+        chars after 'if' or 'while' commands in user-defined commands.
+
 2004-09-08  Jim Blandy  <jimb@redhat.com>
 
         Fix bug reported and analyzed by Olivier Crete:
