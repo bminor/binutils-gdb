@@ -1,3 +1,8 @@
+Wed May  6 16:29:19 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (md_apply_fix): Slightly rework some code
+	to avoid compiler warning.
+
 Wed May  6 15:26:34 1998  Klaus Kaempf  <kkaempf@progis.de>
 
 	* makefile.vms: Run dec c with /nodebug.  Pass CC value when
