@@ -85,6 +85,9 @@ TESTS= \
 	\
 	t-bsh.ok \
 	t-bsw.ok \
+	t-callt.ok \
+	t-ctret.ok \
+	t-hsw.ok \
 	t-ldsr.ok \
 	t-sxb.ok \
 	t-sxh.ok \
