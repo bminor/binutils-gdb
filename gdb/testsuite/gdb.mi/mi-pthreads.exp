@@ -191,8 +191,11 @@ proc check_mi_thread_command_set {} {
     "check_mi_thread_command_set: -thread-select 123456789"
 
   foreach thread $thread_list {
+    # line and file are optional.
+    # many of the threads are blocked in libc calls,
+    # and many people have libc's with no symbols.
     mi_gdb_test "-thread-select $thread" \
-      "\\^done,new-thread-id=\"$thread\",frame={.*},line=\"(-)?\[0-9\]+\",file=\".*\"" \
+      "\\^done,new-thread-id=\"$thread\",frame={.*}(,line=\"(-)?\[0-9\]+\",file=\".*\")?" \
       "check_mi_thread_command_set: -thread-select $thread"
   }
 }
