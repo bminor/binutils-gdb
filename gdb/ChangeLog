@@ -1,3 +1,7 @@
+2004-12-17  Jim Blandy  <jimb@redhat.com>
+
+	* remote.c (fetch_register_using_p): Indentation cleanup.
+
 2004-12-17  Randolph Chung  <tausq@debian.org>
 
 	* hppa-hpux-tdep.c (setup_d_pid_in_inferior): Make static.
