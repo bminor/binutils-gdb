@@ -108,9 +108,13 @@ bfd *abfd;
 (unsigned)     section->size);
       printf(" vma ");
 printf_vma(section->vma);
-printf(" align 2**%2u\n ",
+printf(" align 2**%u\n ",
 	     section->alignment_power);
       PF(SEC_ALLOC,"ALLOC");
+      PF(SEC_CONSTRUCTOR,"CONSTRUCTOR");
+      PF(SEC_CONSTRUCTOR_TEXT,"CONSTRUCTOR TEXT");
+      PF(SEC_CONSTRUCTOR_DATA,"CONSTRUCTOR DATA");
+      PF(SEC_CONSTRUCTOR_BSS,"CONSTRUCTOR BSS");
       PF(SEC_LOAD,"LOAD");
       PF(SEC_RELOC,"RELOC");
       PF(SEC_BALIGN,"BALIGN");
@@ -205,7 +209,7 @@ FILE *stream;
       }
       else {
   	/* Totally awesome! the exact right symbol */
- 	char *match_name = syms[thisplace]->name;
+ 	CONST char *match_name = syms[thisplace]->name;
  	int sym_len = strlen(match_name);
  	/* Avoid "filename.o" as a match */
  	if (sym_len > 2
@@ -255,6 +259,7 @@ bfd *abfd;
   bfd_size_type i;
   int (*print)() ;
   int print_insn_m68k();
+  int print_insn_a29k();
   int print_insn_i960();
   int print_insn_sparc();
   enum bfd_architecture a;
@@ -298,12 +303,14 @@ bfd *abfd;
     a =   bfd_get_architecture(abfd);
   }
   switch (a) {
-
   case bfd_arch_sparc:
     print = print_insn_sparc;
     break;
   case bfd_arch_m68k:
     print = print_insn_m68k;
+    break;
+  case bfd_arch_a29k:
+    print = print_insn_a29k;
     break;
   case bfd_arch_i960:
     print = print_insn_i960;
@@ -626,13 +633,11 @@ bfd *abfd;
 static void
 DEFUN_VOID(display_info)
 {
-  unsigned int i;
+  unsigned int i, j;
   extern bfd_target *target_vector[];
 
-  enum	    bfd_architecture j;
-  i = 0;
   printf("BFD header file version %s\n", BFD_VERSION);
-  while (target_vector[i] != (bfd_target *)NULL) 
+  for (i = 0; target_vector[i] != (bfd_target *)NULL; i++) 
       {
 	bfd_target *p = target_vector[i];
 	bfd *abfd = bfd_openw("##dummy",p->name);
@@ -640,17 +645,14 @@ DEFUN_VOID(display_info)
 	       p->header_byteorder_big_p ? "big endian" : "little endian",
 	       p->byteorder_big_p ? "big endian" : "little endian" );
 	  {
-	    enum	    bfd_architecture j;
-	    for (j = (int)bfd_arch_obscure +1; j <(int) bfd_arch_last; j++) 
+	    for (j = (int)bfd_arch_obscure +1; j < (int)bfd_arch_last; j++) 
 		{
-		  if (bfd_set_arch_mach(abfd, j, 0)) 
-		      {
-			printf("  %s\n", bfd_printable_arch_mach(j,0));
-		      }
+		  if (bfd_set_arch_mach(abfd, (enum bfd_architecture)j, 0)) 
+		    printf("  %s\n",
+			  bfd_printable_arch_mach((enum bfd_architecture)j,0));
 		}
 
 	  }
-	i++;
       }
   /* Again as a table */
   printf("%12s"," ");
@@ -658,14 +660,14 @@ DEFUN_VOID(display_info)
     printf("%s ",target_vector[i]->name);
   }
   printf("\n");
-  for (j = (int)bfd_arch_obscure +1; (int)j <(int) bfd_arch_last; j++) {
-    printf("%11s ", bfd_printable_arch_mach(j,0));
+  for (j = (int)bfd_arch_obscure +1; j <(int) bfd_arch_last; j++) {
+    printf("%11s ", bfd_printable_arch_mach((enum bfd_architecture)j,0));
     for (i = 0; target_vector[i]; i++) {
 	{
 	  bfd_target *p = target_vector[i];
 	  bfd *abfd = bfd_openw("##dummy",p->name);
 	  int l = strlen(p->name);
-	  int ok = bfd_set_arch_mach(abfd, j, 0);
+	  int ok = bfd_set_arch_mach(abfd, (enum bfd_architecture)j, 0);
 	  if (ok) {
 	    printf("%s ", p->name);
 	  }
@@ -697,7 +699,7 @@ main (argc, argv)
 
   program_name = *argv;
 
-  while ((c = getopt_long (argc, argv, "Aib:m:dlfahrtxsj:", long_options, &ind))
+  while ((c = getopt_long (argc, argv, "ib:m:dlfahrtxsj:", long_options, &ind))
 	 != EOF) {
     seenflag = true;
     switch (c) {
@@ -726,15 +728,6 @@ main (argc, argv)
       dump_ar_hdrs = 1;
       dump_section_headers = 1;
       break;
- case 'A':
-      disassemble = true;
-      dump_ar_hdrs = 1;
-      dump_file_header = true;
-      dump_reloc_info = 1;
-      dump_section_headers = 1;
-      dump_symtab = 1; 
-      break;
-      
     case  0 : break;		/* we've been given a long option */
     case 't': dump_symtab = 1; break;
     case 'd': disassemble = true ; break;
