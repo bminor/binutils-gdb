@@ -14,7 +14,8 @@
 ## For more information on these two systems, check out the documentation
 ## for 'Autoconf' (autoconf.texi) and 'Configure' (configure.texi).  
 
-#   Copyright (C) 1992, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+#   Copyright (C) 1992, 93, 94, 95, 96, 97, 98, 1999
+#   Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -751,10 +752,7 @@ case "${target}" in
     noconfigdirs="$noconfigdirs gprof target-libgloss"
     ;;
   i[3456]86-*-solaris2*)
-    # The linker does static linking correctly, but the Solaris C library
-    # has bugs such that some important functions won't work when statically
-    # linked.  (See man pages for getpwuid, for example.)
-    noconfigdirs="$noconfigdirs ld target-libgloss"
+    noconfigdirs="$noconfigdirs target-libgloss"
     ;;
   i[3456]86-*-sysv4*)
     # The SYSV4 C compiler doesn't handle Emacs correctly
