@@ -1,3 +1,8 @@
+2003-09-04  Corinna Vinschen  <vinschen@redhat.com>
+
+	* breakpoint.c (watchpoint_check): Check for pc being in an
+	epilogue if watchpoint frame couldn't be found.
+
 2003-09-04  Andrew Cagney  <cagney@redhat.com>
 
 	* Makefile.in: Re-generate all dependencies.

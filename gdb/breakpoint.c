@@ -2393,6 +2393,9 @@ watchpoint_check (void *p)
   struct breakpoint *b;
   struct frame_info *fr;
   int within_current_scope;
+#if 0
+  struct frame_id current_frame_id;
+#endif
 
   b = bs->breakpoint_at;
 
@@ -2405,16 +2408,27 @@ watchpoint_check (void *p)
          the frame chain (so we can determine if we're in scope).  */
       reinit_frame_cache ();
       fr = frame_find_by_id (b->watchpoint_frame);
+#if 0
+      current_frame_id = get_frame_id (get_current_frame ());
+      within_current_scope = frame_id_eq (current_frame_id, b->watchpoint_frame)
+			     || frame_id_inner (current_frame_id,
+			     			b->watchpoint_frame);
+#else
       within_current_scope = (fr != NULL);
+#endif
       /* in_function_epilogue_p() returns a non-zero value if we're still
 	 in the function but the stack frame has already been invalidated.
 	 Since we can't rely on the values of local variables after the
 	 stack has been destroyed, we are treating the watchpoint in that
 	 state as `not changed' without further checking. */
-      if (within_current_scope && fr == get_current_frame ()
+#if 0
+      if (within_current_scope && (!fr || fr == get_current_frame ())
+#else
+      if ((!within_current_scope || fr == get_current_frame ())
+#endif
           && gdbarch_in_function_epilogue_p (current_gdbarch, read_pc ()))
 	return WP_VALUE_NOT_CHANGED;
-      if (within_current_scope)
+      if (fr && within_current_scope)
 	/* If we end up stopping, the current frame will get selected
 	   in normal_stop.  So this call to select_frame won't affect
 	   the user.  */
