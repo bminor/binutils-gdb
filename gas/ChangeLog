@@ -1,5 +1,14 @@
 1999-08-08  Ian Lance Taylor  <ian@zembu.com>
 
+	* doc/as.texinfo (Section): Document 's' flag for COFF version.
+
+1999-08-08  Mumit Khan  <khan@xraylith.wisc.edu>
+
+	* config/obj-coff.c (obj_coff_section): Handle 's' (shared)
+	section flag.
+
+1999-08-08  Ian Lance Taylor  <ian@zembu.com>
+
 	* configure.in: Define and substitute GDBINIT.  Change AC_OUTPUT
 	line to crate ${GDBINIT} rather than .gdbinit.
 	* configure, Makefile.in, doc/Makefile.in: Rebuild.

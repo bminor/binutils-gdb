@@ -1197,6 +1197,7 @@ coff_frob_file_after_relocs ()
  *						 'd' (apparently m88k for data)
  *                                               'x' for text
  *						 'r' for read-only data
+ *						 's' for shared data (PE)
  * But if the argument is not a quoted string, treat it as a
  * subsegment number.
  */
@@ -1254,6 +1255,7 @@ obj_coff_section (ignore)
 		case 'w': flags |= SEC_DATA; flags &=~ SEC_READONLY; break;
 		case 'x': flags |= SEC_CODE; break;
 		case 'r': flags |= SEC_READONLY; break;
+		case 's': flags |= SEC_SHARED; break;
 
 		case 'i': /* STYP_INFO */
 		case 'l': /* STYP_LIB */

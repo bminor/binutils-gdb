@@ -4291,6 +4291,8 @@ data section
 read-only section
 @item x
 executable section
+@item s
+shared section (meaningful for PE targets)
 @end table
 
 If no flags are specified, the default flags depend upon the section name.  If
