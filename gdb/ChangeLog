@@ -1,3 +1,7 @@
+Fri Dec 31 06:55:38 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* symtab.c (find_methods): Call fprintf_symbol_filtered with DMGL_ANSI.
+
 Thu Dec 30 10:16:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* values.c (unpack_long): Fix garbled error message.

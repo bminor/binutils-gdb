@@ -1511,8 +1511,18 @@ find_methods (t, name, sym_arr)
 	{
 	  int field_counter;
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, method_counter);
-
 	  char *method_name = TYPE_FN_FIELDLIST_NAME (t, method_counter);
+	  char dem_opname[64];
+
+          if (strncmp(method_name, "__", 2)==0 ||
+	    strncmp(method_name, "op", 2)==0 ||
+	    strncmp(method_name, "type", 4)==0 )
+	    {
+	      if (cplus_demangle_opname(method_name, dem_opname, DMGL_ANSI))
+	        method_name = dem_opname;
+	      else if (cplus_demangle_opname(method_name, dem_opname, 0))
+	        method_name = dem_opname; 
+	    }
 	  if (STREQ (name, method_name))
 	    /* Find all the fields with that name.  */
 	    for (field_counter = TYPE_FN_FIELDLIST_LENGTH (t, method_counter) - 1;
@@ -1544,7 +1554,8 @@ find_methods (t, name, sym_arr)
 		  {
 		    fputs_filtered("(Cannot find method ", gdb_stdout);
 		    fprintf_symbol_filtered (gdb_stdout, phys_name,
-					     language_cplus, DMGL_PARAMS);
+					     language_cplus,
+					     DMGL_PARAMS | DMGL_ANSI);
 		    fputs_filtered(" - possibly inlined.)\n", gdb_stdout);
 		  }
 	      }
@@ -1785,11 +1796,19 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	       || TYPE_CODE (SYMBOL_TYPE (sym_class)) == TYPE_CODE_UNION))
 	    {
 	      /* Arg token is not digits => try it as a function name
-		 Find the next token (everything up to end or next whitespace). */
-	      p = *argptr;
-	      while (*p && *p != ' ' && *p != '\t' && *p != ',' && *p !=':') p++;
+		 Find the next token(everything up to end or next blank). */
+	      if (strchr(gdb_completer_quote_characters, **argptr) != NULL)
+		{
+		  p = skip_quoted(*argptr);
+		  *argptr = *argptr + 1;
+		}
+	      else
+		{
+	          p = *argptr;
+	          while (*p && *p!=' ' && *p!='\t' && *p!=',' && *p!=':') p++;
+		}
+/*
 	      q = operator_chars (*argptr, &q1);
-
 	      if (q1 - q)
 		{
 		  char *opname;
@@ -1808,10 +1827,13 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 		  p = q1;
 		}
 	      else
+*/
 		{
-		  copy = (char *) alloca (p - *argptr + 1 + (q1 - q));
+		  copy = (char *) alloca (p - *argptr + 1 );
 		  memcpy (copy, *argptr, p - *argptr);
 		  copy[p - *argptr] = '\0';
+		  if (strchr(gdb_completer_quote_characters, copy[p-*argptr-1]) != NULL)
+		    copy[p - *argptr -1] = '\0';
 		}
 
 	      /* no line number may be specified */
@@ -1937,12 +1959,12 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 
   /* Check whether arg is all digits (and sign) */
 
-  p = *argptr;
-  if (*p == '-' || *p == '+') p++;
-  while (*p >= '0' && *p <= '9')
-    p++;
+  q = *argptr;
+  if (*q == '-' || *q == '+') q++;
+  while (*q >= '0' && *q <= '9')
+    q++;
 
-  if (p != *argptr && (*p == 0 || *p == ' ' || *p == '\t' || *p == ','))
+  if (q != *argptr && (*q == 0 || *q == ' ' || *q == '\t' || *q == ','))
     {
       /* We found a token consisting of all digits -- at least one digit.  */
       enum sign {none, plus, minus} sign = none;
@@ -1970,13 +1992,13 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
       switch (sign)
 	{
 	case plus:
-	  if (p == *argptr)
+	  if (q == *argptr)
 	    val.line = 5;
 	  if (s == 0)
 	    val.line = default_line + val.line;
 	  break;
 	case minus:
-	  if (p == *argptr)
+	  if (q == *argptr)
 	    val.line = 15;
 	  if (s == 0)
 	    val.line = default_line - val.line;
@@ -1987,8 +2009,8 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	  break;	/* No need to adjust val.line.  */
 	}
 
-      while (*p == ' ' || *p == '\t') p++;
-      *argptr = p;
+      while (*q == ' ' || *q == '\t') q++;
+      *argptr = q;
       if (s == 0)
 	s = default_symtab;
       val.symtab = s;
@@ -2014,6 +2036,11 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
     {
       p = pp+1;
     }
+  else 
+    {
+      p = skip_quoted(*argptr);
+    }
+
   copy = (char *) alloca (p - *argptr + 1);
   memcpy (copy, *argptr, p - *argptr);
   copy[p - *argptr] = '\0';
