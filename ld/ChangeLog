@@ -1,6 +1,17 @@
+Thu Feb 10 11:52:38 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldmain.c (main): Use %ld when printing long values.
+
+	* scripttempl/elf.sc: Move _edata after the .sdata section.
+	Permit OTHER_BSS_SYMBOLS to be defined.
+	* emulparams/elf32mipb.s (OTHER_BSS_SYMBOLS): Define _fbss.
+
 Mon Feb  7 16:31:15 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* Rename all "hppaosf" files to "hppaelf".
+	* Change all "osf" references to "elf" in hppaelf files.
+	* Makefile.in: Likewise.
+	* configure.in: Likewise.
 
 Sun Feb  6 20:31:56 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
