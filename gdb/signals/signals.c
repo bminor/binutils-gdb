@@ -180,7 +180,11 @@ static struct {
   {"SIG126", "Real-time event 126"},
   {"SIG127", "Real-time event 127"},
 
-#if defined(MACH) || defined(__MACH__)
+  {"SIGINFO", "Information request"},
+
+  {NULL, "Unknown signal"},
+  {NULL, "Internal error: printing TARGET_SIGNAL_DEFAULT"},
+
   /* Mach exceptions */
   {"EXC_BAD_ACCESS", "Could not access memory"},
   {"EXC_BAD_INSTRUCTION", "Illegal instruction/operand"},
@@ -188,11 +192,6 @@ static struct {
   {"EXC_EMULATION", "Emulation instruction"},
   {"EXC_SOFTWARE", "Software generated exception"},
   {"EXC_BREAKPOINT", "Breakpoint"},
-#endif
-  {"SIGINFO", "Information request"},
-
-  {NULL, "Unknown signal"},
-  {NULL, "Internal error: printing TARGET_SIGNAL_DEFAULT"},
 
   /* Last entry, used to check whether the table is the right size.  */
   {NULL, "TARGET_SIGNAL_MAGIC"}
@@ -237,9 +236,10 @@ target_signal_from_name (char *name)
 
   /* This ugly cast brought to you by the native VAX compiler.  */
   for (sig = TARGET_SIGNAL_HUP;
-       signals[sig].name != NULL;
+       sig < TARGET_SIGNAL_LAST;
        sig = (enum target_signal) ((int) sig + 1))
-    if (strcmp (name, signals[sig].name) == 0)
+    if (signals[sig].name != NULL
+	&& strcmp (name, signals[sig].name) == 0)
       return sig;
   return TARGET_SIGNAL_UNKNOWN;
 }
