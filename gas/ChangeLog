@@ -1,3 +1,8 @@
+Mon Sep 23 12:13:18 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c (add_fix): Treat a width of '3' like 'B'.
+	(md_assemble): A fixup width of '3' means a 1 byte reloc.
+
 Thu Sep 19 12:21:24 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c (fixup_segment): Don't adjust PC relative
