@@ -171,7 +171,7 @@ Mon Jul 28 22:07:14 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips-opc.c: Fix coding of mtsa.
 
-start-sanitize-r5900
+end-sanitize-r5900
 Thu Jul 24 13:03:26 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-opc.c (sparc_opcodes): Fix spelling on fpaddX, fpsubX insns.
