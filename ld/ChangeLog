@@ -1,3 +1,23 @@
+Tue Feb 15 20:14:53 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* ldwrite.c (build_link_order): If the cooked size of the section
+	has been set, use it, for determining link_order size.
+	(ldwrite): In the error message displayed if bfd_final_link fails,
+	indicate that it was in fact the final link step that failed.
+
+	* ldlang.c (lang_size_sections): Clear bfd_error before calling
+	bfd_relax_section, in case it returns false but doesn't flag an
+	error.  If an error is returned, indicate which one it is in the
+	error message.
+
+	* Makefile.in (install-info): Depend on ld.info, and use "$<*" so
+	it'll get picked up from $(srcdir) if appropriate.
+
+Tue Feb 15 16:32:04 1994  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* scripttempl/aout.sc: Only pad .text if PAD_TEXT is set.
+	* emulparams/i386mach.sh (PAD_TEXT): Set PAD_TEXT.
+
 Fri Feb 11 17:02:49 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ldlex.l (comment): Increment line number when newline is read.
