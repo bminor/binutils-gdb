@@ -59,6 +59,8 @@ extern int   memcmp();
 # endif
 #endif
 
-extern char *strdup ();
+#ifndef strdup
+extern char *strdup PARAMS ((const char *));
+#endif
 
 #endif	/* !defined(GDB_STRING_H) */

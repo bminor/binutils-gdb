@@ -1,3 +1,8 @@
+Mon Apr 20 15:32:21 1998   Mark Kettenis  <kettenis@phys.uva.nl>
+
+        * gdb/gdb_string.h (strdup): Declare only if not defined as a
+        macro.
+
 Mon Apr 20 14:18:45 1998  J. Kean Johnston  <jkj@sco.com>
 
         * procfs.c: Added replacement macros for LWP stuff.  Fixed support 
