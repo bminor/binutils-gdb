@@ -84,4 +84,7 @@
 #undef HAVE_STRUCT_MEMBER_SS_WIDE
 
 /* Define if <sys/ptrace.h> defines the PTRACE_GETXFPREGS request.  */
+#undef HAVE_PTRACE_GETREGS
+
+/* Define if <sys/ptrace.h> defines the PTRACE_GETXFPREGS request.  */
 #undef HAVE_PTRACE_GETXFPREGS
