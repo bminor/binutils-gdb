@@ -286,13 +286,7 @@ CAT(NAME,_bfd_debug_info_accumulate),\
 CAT(NAME,_bfd_get_relocated_section_contents),\
 CAT(NAME,_bfd_relax_section)
 
-#define COFF_SWAP_TABLE \
- coff_swap_aux_in, coff_swap_sym_in, coff_swap_lineno_in, \
- coff_swap_aux_out, coff_swap_sym_out, \
- coff_swap_lineno_out, coff_swap_reloc_out, \
- coff_swap_filehdr_out, coff_swap_aouthdr_out, \
- coff_swap_scnhdr_out
-
+#define COFF_SWAP_TABLE (PTR) &bfd_coff_std_swap_table
 
 
 /* User program access to BFD facilities */
@@ -707,6 +701,11 @@ typedef struct bfd_arch_info
 	         CONST struct bfd_arch_info *b));
 
   boolean (*scan) PARAMS ((CONST struct bfd_arch_info *, CONST char *));
+   /* How to disassemble an instruction, producing a printable
+     representation on a specified stdio stream.  This isn't
+     defined for most processors at present, because of the size
+     of the additional tables it would drag in, and because gdb
+     wants to use a different interface.  */
   unsigned int (*disassemble) PARAMS ((bfd_vma addr, CONST char *data,
 				        PTR stream));
 
@@ -817,7 +816,7 @@ typedef CONST struct reloc_howto_struct
 	    result is to be subtracted from the data*/
   int size;
 
-        /*  Now obsolete */
+        /*  Now obsolete.  But m68k-coff still uses it. */
   unsigned int bitsize;
 
         /*  Notes that the relocation is relative to the location in the
@@ -826,11 +825,13 @@ typedef CONST struct reloc_howto_struct
            being relocated. */
   boolean pc_relative;
 
-        /*  Now obsolete */
+        /*  Now obsolete.  Still used by bfd_perform_relocation though. */
   unsigned int bitpos;
 
+#if 1
         /*  Now obsolete */
   boolean absolute;
+#endif
 
         /* Causes the relocation routine to return an error if overflow
           is detected when relocating. */
@@ -981,7 +982,7 @@ typedef struct symbol_cache_entry
 {
 	 /* A pointer to the BFD which owns the symbol. This information
 	   is necessary so that a back end can work out what additional
-   	   (invisible to the application writer) information is carried
+   	   information (invisible to the application writer) is carried
 	   with the symbol.  */
 
   struct _bfd *the_bfd;
@@ -1005,7 +1006,7 @@ typedef struct symbol_cache_entry
 	   value is the offset into the section of the data. */
 #define BSF_GLOBAL	0x02
 
-	 /* Obsolete */
+	 /* Obsolete; should be deleted? */
 #define BSF_IMPORT	0x04
 
 	 /* The symbol has global scope, and is exported. The value is
@@ -1013,7 +1014,7 @@ typedef struct symbol_cache_entry
 #define BSF_EXPORT	0x08
 
 	 /* The symbol is undefined. <<extern>> in <<C>>. The value has
-	   no meaning. */
+	   no meaning.  Obsolete; should be deleted? */
 #define BSF_UNDEFINED_OBS 0x10	
 
 	 /* The symbol is common, initialized to zero; default in
@@ -1028,11 +1029,11 @@ typedef struct symbol_cache_entry
 	   meaning. */
 #define BSF_DEBUGGING	0x40
 
-	 /* Used by the linker */
+	 /* Used by the linker.  Should be part of app_data now. */
 #define BSF_KEEP        0x10000
 #define BSF_KEEP_G      0x80000
 
-	 /* Unused */
+	 /* Unused; should be deleted? */
 #define BSF_WEAK        0x100000
 #define BSF_CTOR        0x200000 
 
@@ -1082,7 +1083,10 @@ typedef struct symbol_cache_entry
 
 	 /* Back end special data. This is being phased out in favour
 	   of making this a union. */
-  PTR udata;	
+  PTR udata;
+
+        /* Application data. */
+  union { unsigned long aflags; PTR aptr; } app_data;
 
 } asymbol;
 #define get_symtab_upper_bound(abfd) \
@@ -1283,38 +1287,8 @@ bfd_get_mtime PARAMS ((bfd *));
 #define bfd_stat_arch_elt(abfd, stat) \
         BFD_SEND (abfd, _bfd_stat_arch_elt,(abfd, stat))
 
-#define bfd_coff_swap_aux_in(a,e,t,c,i) \
-        BFD_SEND (a, _bfd_coff_swap_aux_in, (a,e,t,c,i))
-
-#define bfd_coff_swap_sym_in(a,e,i) \
-        BFD_SEND (a, _bfd_coff_swap_sym_in, (a,e,i))
-
-#define bfd_coff_swap_lineno_in(a,e,i) \
-        BFD_SEND ( a, _bfd_coff_swap_lineno_in, (a,e,i))
-
 #define bfd_set_arch_mach(abfd, arch, mach)\
         BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
-
-#define bfd_coff_swap_reloc_out(abfd, i, o) \
-        BFD_SEND (abfd, _bfd_coff_swap_reloc_out, (abfd, i, o))
-
-#define bfd_coff_swap_lineno_out(abfd, i, o) \
-        BFD_SEND (abfd, _bfd_coff_swap_lineno_out, (abfd, i, o))
-
-#define bfd_coff_swap_aux_out(abfd, i, t,c,o) \
-        BFD_SEND (abfd, _bfd_coff_swap_aux_out, (abfd, i,t,c, o))
-
-#define bfd_coff_swap_sym_out(abfd, i,o) \
-        BFD_SEND (abfd, _bfd_coff_swap_sym_out, (abfd, i, o))
-
-#define bfd_coff_swap_scnhdr_out(abfd, i,o) \
-        BFD_SEND (abfd, _bfd_coff_swap_scnhdr_out, (abfd, i, o))
-
-#define bfd_coff_swap_filehdr_out(abfd, i,o) \
-        BFD_SEND (abfd, _bfd_coff_swap_filehdr_out, (abfd, i, o))
-
-#define bfd_coff_swap_aouthdr_out(abfd, i,o) \
-        BFD_SEND (abfd, _bfd_coff_swap_aouthdr_out, (abfd, i, o))
 
 #define bfd_get_relocated_section_contents(abfd, seclet, data) \
 	BFD_SEND (abfd, _bfd_get_relocated_section_contents, (abfd, seclet, data))
@@ -1437,60 +1411,6 @@ typedef struct bfd_target
 
   boolean    (*_bfd_relax_section) PARAMS ((bfd *, struct sec *,
                     struct symbol_cache_entry **));
-  void (*_bfd_coff_swap_aux_in) PARAMS ((
-       bfd            *abfd ,
-       PTR             ext,
-       int             type,
-       int             class ,
-       PTR             in));
-
-  void (*_bfd_coff_swap_sym_in) PARAMS ((
-       bfd            *abfd ,
-       PTR             ext,
-       PTR             in));
-
-  void (*_bfd_coff_swap_lineno_in) PARAMS ((
-       bfd            *abfd,
-       PTR            ext,
-       PTR             in));
-
- unsigned int (*_bfd_coff_swap_aux_out) PARAMS ((
-       bfd   	*abfd,
-       PTR	in,
-       int    	type,
-       int    	class,
-       PTR    	ext));
-
- unsigned int (*_bfd_coff_swap_sym_out) PARAMS ((
-      bfd      *abfd,
-      PTR	in,
-      PTR	ext));
-
- unsigned int (*_bfd_coff_swap_lineno_out) PARAMS ((
-      	bfd   	*abfd,
-      	PTR	in,
-	PTR	ext));
-
- unsigned int (*_bfd_coff_swap_reloc_out) PARAMS ((
-      	bfd     *abfd,
-     	PTR	src,
-	PTR	dst));
-
- unsigned int (*_bfd_coff_swap_filehdr_out) PARAMS ((
-      	bfd  	*abfd,
-	PTR 	in,
-	PTR 	out));
-
- unsigned int (*_bfd_coff_swap_aouthdr_out) PARAMS ((
-      	bfd 	*abfd,
-	PTR 	in,
-	PTR	out));
-
- unsigned int (*_bfd_coff_swap_scnhdr_out) PARAMS ((
-      	bfd  	*abfd,
-      	PTR	in,
-	PTR	out));
-
   /* See documentation on reloc types.  */
  CONST struct reloc_howto_struct *
        (*reloc_type_lookup) PARAMS ((bfd *abfd,
