@@ -1,3 +1,9 @@
+Fri Jan 30 17:18:32 1998  Geoffrey Noer  <noer@cygnus.com>
+
+        * configure.in: Remove expect from noconfigdirs when target
+        is cygwin32.  OK to build expect and dejagnu with Canadian
+        Cross.
+
 start-sanitize-sky
 Wed Jan 28 11:59:32 1998  Doug Evans  <devans@canuck.cygnus.com>
 
@@ -6,6 +12,9 @@ Wed Jan 28 11:59:32 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 end-sanitize-sky
 Wed Jan 28 12:58:49 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Do build expect, dejagnu, and cvssrc for a cygwin32
+	host.
 
 	* config.guess: Use ${UNAME_MACHINE} rather than i386 for cygwin32
 	and mingw32.

@@ -611,7 +611,7 @@ case "${target}" in
     ;;    
   *-*-cygwin32)
     target_configdirs="$target_configdirs target-winsup"
-    noconfigdirs="$noconfigdirs expect target-libgloss"
+    noconfigdirs="$noconfigdirs target-libgloss"
     # always build newlib.
     skipdirs=`echo " ${skipdirs} " | sed -e 's/ target-newlib / /'`
 
@@ -798,12 +798,6 @@ case "${noconfigdirs}" in
   *target-libgloss*) ;;
   *target-newlib*) noconfigdirs="$noconfigdirs target-libgloss" ;;
 esac
-
-# If we are building a Canadian Cross, discard tools that can not be built
-# using a cross compiler.  FIXME: These tools should be fixed.
-if [ "${build}" != "${host}" ]; then
-  noconfigdirs="$noconfigdirs expect dejagnu"
-fi
 
 # Make sure we don't let GNU ld be added if we didn't want it.
 if [ x$with_gnu_ld = xno ]; then
