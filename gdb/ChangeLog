@@ -1,3 +1,10 @@
+2000-11-16  Christopher Faylor  <cgf@redhat.com>
+
+	* thread.c (thread_apply_all_command): Save the command before
+	executing it because it may be modified.  Restore the saved command so
+	that the same command is executed on next thread.
+	(thread_apply_command): Same correction.
+
 2000-11-16  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* regcache.c (read_register_bytes): Failing to set register_valid

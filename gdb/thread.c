@@ -517,6 +517,8 @@ thread_apply_all_command (char *cmd, int from_tty)
 {
   struct thread_info *tp;
   struct cleanup *old_chain;
+  struct cleanup *saved_cmd_cleanup_chain;
+  char *saved_cmd;
 
   if (cmd == NULL || *cmd == '\000')
     error ("Please specify a command following the thread ID list");
@@ -527,6 +529,10 @@ thread_apply_all_command (char *cmd, int from_tty)
      traversing it for "thread apply all".  MVS */
   target_find_new_threads ();
 
+  /* Save a copy of the command in case it is clobbered by
+     execute_command */
+  saved_cmd = strdup (cmd);
+  saved_cmd_cleanup_chain = make_cleanup (free, (void *) saved_cmd);
   for (tp = thread_list; tp; tp = tp->next)
     if (thread_alive (tp))
       {
@@ -540,8 +546,10 @@ thread_apply_all_command (char *cmd, int from_tty)
 			 target_pid_to_str (inferior_pid));
 #endif
 	execute_command (cmd, from_tty);
+	strcpy (cmd, saved_cmd); /* Restore exact command used previously */
       }
 
+  do_cleanups (saved_cmd_cleanup_chain);
   do_cleanups (old_chain);
 }
 
@@ -551,6 +559,8 @@ thread_apply_command (char *tidlist, int from_tty)
   char *cmd;
   char *p;
   struct cleanup *old_chain;
+  struct cleanup *saved_cmd_cleanup_chain;
+  char *saved_cmd;
 
   if (tidlist == NULL || *tidlist == '\000')
     error ("Please specify a thread ID list");
@@ -562,6 +572,10 @@ thread_apply_command (char *tidlist, int from_tty)
 
   old_chain = make_cleanup_restore_current_thread (inferior_pid);
 
+  /* Save a copy of the command in case it is clobbered by
+     execute_command */
+  saved_cmd = strdup (cmd);
+  saved_cmd_cleanup_chain = make_cleanup (free, (void *) saved_cmd);
   while (tidlist < cmd)
     {
       struct thread_info *tp;
@@ -608,10 +622,12 @@ thread_apply_command (char *tidlist, int from_tty)
 			       target_pid_to_str (inferior_pid));
 #endif
 	      execute_command (cmd, from_tty);
+	      strcpy (cmd, saved_cmd);	/* Restore exact command used previously */
 	    }
 	}
     }
 
+  do_cleanups (saved_cmd_cleanup_chain);
   do_cleanups (old_chain);
 }
 
