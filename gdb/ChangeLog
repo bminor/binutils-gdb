@@ -1,5 +1,8 @@
 2003-11-15  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c: Replace DEPRECATED_REGISTER_VIRTUAL_SIZE with
+	register_size.
+
 	Replace MIPS_REGSIZE with mips_regsize.
 	* mips-tdep.c (mips_regsize): New function.
 	* mips-tdep.h (mips_regsize): Declare.

@@ -639,9 +639,10 @@ mips_register_raw_size (int regnum)
 	 NOTE: cagney/2003-06-15: This is so bogus.  The register's
 	 raw size is changing according to the ABI
 	 (FP_REGISTER_DOUBLE).  Also, GDB's protocol is defined by a
-	 combination of DEPRECATED_REGISTER_RAW_SIZE and DEPRECATED_REGISTER_BYTE.  */
+	 combination of DEPRECATED_REGISTER_RAW_SIZE and
+	 DEPRECATED_REGISTER_BYTE.  */
       if (mips64_transfers_32bit_regs_p)
-	return DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum);
+	return register_size (current_gdbarch, regnum);
       else if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM + 32
 	       && FP_REGISTER_DOUBLE)
 	/* For MIPS_ABI_N32 (for example) we need 8 byte floating point
@@ -702,7 +703,7 @@ mips_register_convertible (int reg_nr)
   if (mips64_transfers_32bit_regs_p)
     return 0;
   else
-    return (DEPRECATED_REGISTER_RAW_SIZE (reg_nr) > DEPRECATED_REGISTER_VIRTUAL_SIZE (reg_nr));
+    return (DEPRECATED_REGISTER_RAW_SIZE (reg_nr) > register_size (current_gdbarch, reg_nr));
 }
 
 static void
@@ -4218,7 +4219,7 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
     fprintf_filtered (file, ": ");
 
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    offset = DEPRECATED_REGISTER_RAW_SIZE (regnum) - DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum);
+    offset = DEPRECATED_REGISTER_RAW_SIZE (regnum) - register_size (current_gdbarch, regnum);
   else
     offset = 0;
 
@@ -4288,17 +4289,17 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
       /* pad small registers */
       for (byte = 0;
 	   byte < (mips_regsize (current_gdbarch)
-		   - DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
+		   - register_size (current_gdbarch, regnum));
 	   byte++)
 	printf_filtered ("  ");
       /* Now print the register value in hex, endian order. */
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	for (byte = DEPRECATED_REGISTER_RAW_SIZE (regnum) - DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum);
+	for (byte = DEPRECATED_REGISTER_RAW_SIZE (regnum) - register_size (current_gdbarch, regnum);
 	     byte < DEPRECATED_REGISTER_RAW_SIZE (regnum);
 	     byte++)
 	  fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[byte]);
       else
-	for (byte = DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum) - 1;
+	for (byte = register_size (current_gdbarch, regnum) - 1;
 	     byte >= 0;
 	     byte--)
 	  fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[byte]);
