@@ -1,3 +1,10 @@
+2001-11-13  Elena Zannoni  <ezannoni@redhat.com>
+
+	From Andrew Cagney <cagney@redhat.com>:
+	* gdbtypes.h (builtin_type_int128, builtin_type_uint128): Declare.
+	* gdbtypes.c (_initialize_gdbtypes, build_gdbtypes): Initialize
+	new builtin types.  
+
 2001-11-13  Jim Blandy  <jimb@redhat.com>
 
 	* s390-tdep.c: Rewrite inferior function call code.  This may

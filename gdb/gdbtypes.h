@@ -897,6 +897,8 @@ extern struct type *builtin_type_int32;
 extern struct type *builtin_type_uint32;
 extern struct type *builtin_type_int64;
 extern struct type *builtin_type_uint64;
+extern struct type *builtin_type_int128;
+extern struct type *builtin_type_uint128;
 
 /* SIMD types.  We inherit these names from GCC.  */
 extern struct type *builtin_type_v4sf;

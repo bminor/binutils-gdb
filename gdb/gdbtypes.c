@@ -67,6 +67,8 @@ struct type *builtin_type_int32;
 struct type *builtin_type_uint32;
 struct type *builtin_type_int64;
 struct type *builtin_type_uint64;
+struct type *builtin_type_int128;
+struct type *builtin_type_uint128;
 struct type *builtin_type_bool;
 struct type *builtin_type_v4sf;
 struct type *builtin_type_v4si;
@@ -2931,6 +2933,14 @@ build_gdbtypes (void)
     init_type (TYPE_CODE_INT, 64 / 8,
 	       TYPE_FLAG_UNSIGNED,
 	       "uint64_t", (struct objfile *) NULL);
+  builtin_type_int128 =
+    init_type (TYPE_CODE_INT, 128 / 8,
+	       0,
+	       "int128_t", (struct objfile *) NULL);
+  builtin_type_uint128 =
+    init_type (TYPE_CODE_INT, 128 / 8,
+	       TYPE_FLAG_UNSIGNED,
+	       "uint128_t", (struct objfile *) NULL);
   builtin_type_bool =
     init_type (TYPE_CODE_BOOL, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,
@@ -2943,7 +2953,6 @@ build_gdbtypes (void)
 		  &setlist),
      &showlist);
   opaque_type_resolution = 1;
-
 
   /* Build SIMD types.  */
   builtin_type_v4sf
@@ -3035,6 +3044,8 @@ _initialize_gdbtypes (void)
   register_gdbarch_swap (&builtin_type_uint32, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_int64, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_uint64, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_int128, sizeof (struct type *), NULL);
+  register_gdbarch_swap (&builtin_type_uint128, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v4sf, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v4si, sizeof (struct type *), NULL);
   register_gdbarch_swap (&builtin_type_v8qi, sizeof (struct type *), NULL);
