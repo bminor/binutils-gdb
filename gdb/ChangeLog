@@ -38,7 +38,9 @@ Sun Aug  1 22:58:18 1993  Stu Grossman  (grossman at cygnus.com)
 	* remote-nindy.c (nindy_resume):  Pass in pid as argument.
 	* remote-sa.sparc.c (remote_resume):  Pass in pid as argument.
 	* remote-sim.c (rem_resume):  Pass in pid as argument.
+	start-sanitize-v9
 	* remote-sp64sim.c (simif_resume):  Pass in pid as argument.
+	end-sanitize-v9
 	* remote-st.c (st2000_resume):  Pass in pid as argument.
 	* remote-udi.c (udi_resume):  Pass in pid as argument.
 	* remote-vx.c (vx_resume):  Pass in pid as argument.
@@ -51,7 +53,7 @@ Sun Aug  1 22:58:18 1993  Stu Grossman  (grossman at cygnus.com)
 	* target.h (struct target_ops):  Add pid to prototype at
 	to_resume().  (target_resume):  Add pid argument.
 	* (target_pid_to_str):  Default definition for normal type pids.
-	* thread.c, thread.c:  New modules for multi thread/process control.
+	* thread.h, thread.c:  New modules for multi thread/process control.
 
 Sun Aug  1 13:02:42 1993  John Gilmore  (gnu@cygnus.com)
 
