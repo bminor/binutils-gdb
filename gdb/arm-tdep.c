@@ -1353,12 +1353,7 @@ arm_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       arg_type = check_typedef (VALUE_TYPE (args[argnum]));
       len = TYPE_LENGTH (arg_type);
 
-      /* ANSI C code passes float arguments as integers, K&R code
-         passes float arguments as doubles.  Correct for this here.  */
-      if (TYPE_CODE_FLT == TYPE_CODE (arg_type) && REGISTER_SIZE == len)
-	nstack_size += FP_REGISTER_VIRTUAL_SIZE;
-      else
-	nstack_size += len;
+      nstack_size += len;
     }
 
   /* Allocate room on the stack, and initialize our stack frame
@@ -1395,21 +1390,6 @@ arm_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       typecode = TYPE_CODE (arg_type);
       val = (char *) VALUE_CONTENTS (args[argnum]);
 
-      /* ANSI C code passes float arguments as integers, K&R code
-         passes float arguments as doubles.  The .stabs record for 
-         for ANSI prototype floating point arguments records the
-         type as FP_INTEGER, while a K&R style (no prototype)
-         .stabs records the type as FP_FLOAT.  In this latter case
-         the compiler converts the float arguments to double before
-         calling the function.  */
-      if (TYPE_CODE_FLT == typecode && REGISTER_SIZE == len)
-	{
-	  DOUBLEST dblval;
-	  dblval = extract_floating (val, len);
-	  len = TARGET_DOUBLE_BIT / TARGET_CHAR_BIT;
-	  val = alloca (len);
-	  store_floating (val, len, dblval);
-	}
 #if 1
       /* I don't know why this code was disable. The only logical use
          for a function pointer is to call that function, so setting

@@ -1,3 +1,10 @@
+2002-02-14  Corinna Vinschen  <vinschen@redhat.com>
+
+	* arm-tdep.c (arm_push_arguments): Eliminate special float type
+	handling.
+	* config/arm/tm-arm.h (COERCE_FLOAT_TO_DOUBLE): Define to call
+	standard_coerce_float_to_double().
+
 2002-02-14  Christopher Faylor  <cgf@redhat.com>
 
 	* config/i386/xm-cygwin.h: Revert inadvertent reinclusion of
