@@ -1,3 +1,7 @@
+Fri Jan 26 14:24:01 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/unsorted/unsorted.exp: Update for objdump changes.
+
 Wed Jan 10 12:40:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mips/*.d: Update for changes to disassembler.
@@ -66,12 +70,10 @@ Mon Sep 25 12:31:46 1995  Ian Lance Taylor  <ian@cygnus.com>
 	* gas/mri/mri.exp: Add setup_xfail for arm*-*-* for constants
 	test.
 
-start-sanitize-sh3e
 Thu Sep 21 01:26:08 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gas/sh/fp.s (fmac): Update for new assembly syntax.
 
-end-sanitize-sh3e
 Mon Sep 18 14:04:34 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* lib/gas-defs.exp (gas_run): Call prune_system_crud.
