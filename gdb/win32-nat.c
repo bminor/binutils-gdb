@@ -106,88 +106,7 @@ struct regmappings
 
 static const struct regmappings  mappings[] =
 {
-#ifdef __PPC__
-  {(char *) &context.Gpr0, CONTEXT_INTEGER},
-  {(char *) &context.Gpr1, CONTEXT_INTEGER},
-  {(char *) &context.Gpr2, CONTEXT_INTEGER},
-  {(char *) &context.Gpr3, CONTEXT_INTEGER},
-  {(char *) &context.Gpr4, CONTEXT_INTEGER},
-  {(char *) &context.Gpr5, CONTEXT_INTEGER},
-  {(char *) &context.Gpr6, CONTEXT_INTEGER},
-  {(char *) &context.Gpr7, CONTEXT_INTEGER},
-
-  {(char *) &context.Gpr8, CONTEXT_INTEGER},
-  {(char *) &context.Gpr9, CONTEXT_INTEGER},
-  {(char *) &context.Gpr10, CONTEXT_INTEGER},
-  {(char *) &context.Gpr11, CONTEXT_INTEGER},
-  {(char *) &context.Gpr12, CONTEXT_INTEGER},
-  {(char *) &context.Gpr13, CONTEXT_INTEGER},
-  {(char *) &context.Gpr14, CONTEXT_INTEGER},
-  {(char *) &context.Gpr15, CONTEXT_INTEGER},
-
-  {(char *) &context.Gpr16, CONTEXT_INTEGER},
-  {(char *) &context.Gpr17, CONTEXT_INTEGER},
-  {(char *) &context.Gpr18, CONTEXT_INTEGER},
-  {(char *) &context.Gpr19, CONTEXT_INTEGER},
-  {(char *) &context.Gpr20, CONTEXT_INTEGER},
-  {(char *) &context.Gpr21, CONTEXT_INTEGER},
-  {(char *) &context.Gpr22, CONTEXT_INTEGER},
-  {(char *) &context.Gpr23, CONTEXT_INTEGER},
-
-  {(char *) &context.Gpr24, CONTEXT_INTEGER},
-  {(char *) &context.Gpr25, CONTEXT_INTEGER},
-  {(char *) &context.Gpr26, CONTEXT_INTEGER},
-  {(char *) &context.Gpr27, CONTEXT_INTEGER},
-  {(char *) &context.Gpr28, CONTEXT_INTEGER},
-  {(char *) &context.Gpr29, CONTEXT_INTEGER},
-  {(char *) &context.Gpr30, CONTEXT_INTEGER},
-  {(char *) &context.Gpr31, CONTEXT_INTEGER},
-
-  {(char *) &context.Fpr0, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr1, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr2, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr3, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr4, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr5, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr6, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr7, CONTEXT_FLOATING_POINT},
-
-  {(char *) &context.Fpr8, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr9, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr10, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr11, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr12, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr13, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr14, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr15, CONTEXT_FLOATING_POINT},
-
-  {(char *) &context.Fpr16, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr17, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr18, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr19, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr20, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr21, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr22, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr23, CONTEXT_FLOATING_POINT},
-
-  {(char *) &context.Fpr24, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr25, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr26, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr27, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr28, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr29, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr30, CONTEXT_FLOATING_POINT},
-  {(char *) &context.Fpr31, CONTEXT_FLOATING_POINT},
-
-  {(char *) &context.Iar, CONTEXT_CONTROL},
-  {(char *) &context.Msr, CONTEXT_CONTROL},
-  {(char *) &context.Cr,  CONTEXT_INTEGER},
-  {(char *) &context.Lr,  CONTEXT_CONTROL},
-  {(char *) &context.Ctr, CONTEXT_CONTROL},
-
-  {(char *) &context.Xer, CONTEXT_INTEGER},
-  {0,0}, /* MQ, but there isn't one */
-#else
+#ifdef i386
   {(char *) &context.Eax, CONTEXT_INTEGER},
   {(char *) &context.Ecx, CONTEXT_INTEGER},
   {(char *) &context.Edx, CONTEXT_INTEGER},
@@ -840,9 +759,6 @@ child_resume (int pid, int step, enum target_signal signal)
 
   if (step)
     {
-#ifdef __PPC__
-      warning ("Single stepping not done.\n");
-#endif
 #ifdef i386
       /* Single step by setting t bit */
       child_fetch_inferior_registers (PS_REGNUM);
