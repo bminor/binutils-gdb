@@ -1,3 +1,43 @@
+2003-11-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd-in.h (_bfd_elf_tls_setup): Declare.
+	* bfd-in2.h: Regenerate.
+	* elf-bfd.h (struct elf_link_tls_segment): Delete.
+	(struct elf_link_hash_table): Add tls_sec and tls_size.
+	* elf.c (_bfd_elf_link_hash_table_init): Init tls_sec and tls_size.
+	* elflink.c (_bfd_elf_tls_setup): New function.
+	* elflink.h (struct elf_final_link_info): Remove first_tls_sec.
+	(elf_bfd_final_link): Don't set first_tls_sec here.  Update code
+	saving tls segment info, round segment size up.
+	(elf_link_output_extsym): Adjust code using tls segment info.
+	(elf_link_input_bfd): Likewise.
+	* elf32-i386.c (dtpoff_base, tpoff): Likewise.
+	* elf32-s390.c (dtpoff_base, tpoff): Likewise.
+	* elf32-sh.c (dtpoff_base, tpoff): Likewise.
+	* elf32-sparc.c (dtpoff_base, tpoff): Likewise.
+	* elf64-s390.c (dtpoff_base, tpoff): Likewise.
+	* elf64-x86-64.c (dtpoff_base, tpoff): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_tprel_base): Likewise.
+	(elfNN_ia64_dtprel_base): Likewise.
+	* elf64-alpha.c (alpha_get_dtprel_base): Likewise.
+	(alpha_get_tprel_base): Likewise.
+	(struct alpha_relax_info): Remove tls_segment.
+	(elf64_alpha_relax_got_load): Adjust invocation of
+	alpha_get_dtprel_base and alpha_get_tprel_base.
+	(elf64_alpha_relax_tls_get_addr): Likewise.
+	(elf64_alpha_relax_section): Likewise.
+	(elf64_alpha_relocate_section): Likewise.
+	(elf64_alpha_relax_find_tls_segment): Delete.
+	* elf32-ppc.c (struct ppc_elf_link_hash_table): Remove tls_sec.
+	(ppc_elf_tls_setup): Call _bfd_elf_tls_setup.  Return section.
+	(ppc_elf_relocate_section): Adjust to use elf.tls_sec.
+	* elf32-ppc.h (ppc_elf_tls_setup): Update.
+	* elf64-ppc.c (struct ppc_link_hash_table): Remove tls_sec.
+	(ppc64_elf_tls_setup): Call _bfd_elf_tls_setup.  Return section.
+	(ppc64_elf_tls_optimize): Adjust to use elf.tls_sec.
+	(ppc64_elf_relocate_section): Likewise.
+	* elf64-ppc.h (ppc64_elf_tls_setup): Update.
+
 2003-11-03  Daniel Jacobowitz  <drow@mvista.com>
 
 	* elf-bfd.h (struct elf_backend_data): Remove plt_header_size.

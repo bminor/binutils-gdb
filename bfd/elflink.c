@@ -2519,3 +2519,31 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
      dynamic linker will resolve them locally.  */
   return local_protected;
 }
+
+/* Caches some TLS segment info, and ensures that the TLS segment vma is
+   aligned.  Returns the first TLS output section.  */
+
+struct bfd_section *
+_bfd_elf_tls_setup (bfd *obfd, struct bfd_link_info *info)
+{
+  struct bfd_section *sec, *tls;
+  unsigned int align = 0;
+
+  for (sec = obfd->sections; sec != NULL; sec = sec->next)
+    if ((sec->flags & SEC_THREAD_LOCAL) != 0)
+      break;
+  tls = sec;
+
+  for (; sec != NULL && (sec->flags & SEC_THREAD_LOCAL) != 0; sec = sec->next)
+    if (sec->alignment_power > align)
+      align = sec->alignment_power;
+
+  elf_hash_table (info)->tls_sec = tls;
+
+  /* Ensure the alignment of the first section is the largest alignment,
+     so that the tls segment starts aligned.  */
+  if (tls != NULL)
+    tls->alignment_power = align;
+
+  return tls;
+}

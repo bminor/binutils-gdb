@@ -677,6 +677,9 @@ extern int bfd_get_arch_size
 extern int bfd_get_sign_extend_vma
   (bfd *);
 
+extern struct bfd_section *_bfd_elf_tls_setup
+  (bfd *, struct bfd_link_info *);
+
 extern bfd_boolean bfd_m68k_elf32_create_embedded_relocs
   (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
 extern bfd_boolean bfd_mips_elf32_create_embedded_relocs

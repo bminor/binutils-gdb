@@ -6021,10 +6021,10 @@ sh_elf_get_relocated_section_contents (bfd *output_bfd,
 static bfd_vma
 dtpoff_base (struct bfd_link_info *info)
 {
-  /* If tls_segment is NULL, we should have signalled an error already.  */
-  if (elf_hash_table (info)->tls_segment == NULL)
+  /* If tls_sec is NULL, we should have signalled an error already.  */
+  if (elf_hash_table (info)->tls_sec == NULL)
     return 0;
-  return elf_hash_table (info)->tls_segment->start;
+  return elf_hash_table (info)->tls_sec->vma;
 }
 
 /* Return the relocation value for R_SH_TLS_TPOFF32..  */
@@ -6032,12 +6032,12 @@ dtpoff_base (struct bfd_link_info *info)
 static bfd_vma
 tpoff (struct bfd_link_info *info, bfd_vma address)
 {
-  /* If tls_segment is NULL, we should have signalled an error already.  */
-  if (elf_hash_table (info)->tls_segment == NULL)
+  /* If tls_sec is NULL, we should have signalled an error already.  */
+  if (elf_hash_table (info)->tls_sec == NULL)
     return 0;
   /* SH TLS ABI is variant I and static TLS block start just after tcbhead
      structure which has 2 pointer fields.  */
-  return (address - dtpoff_base (info) + 8);
+  return address - elf_hash_table (info)->tls_sec->vma + 8;
 }
 
 static asection *

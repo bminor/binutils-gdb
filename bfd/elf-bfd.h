@@ -309,14 +309,6 @@ struct eh_frame_hdr_info
   bfd_boolean table;
 };
 
-/* Cached start, size and alignment of PT_TLS segment.  */
-struct elf_link_tls_segment
-{
-  bfd_vma start;
-  bfd_size_type size;
-  unsigned int align;
-};
-
 /* ELF linker hash table.  */
 
 struct elf_link_hash_table
@@ -377,8 +369,9 @@ struct elf_link_hash_table
      objects included in the link.  */
   struct bfd_link_needed_list *runpath;
 
-  /* Cached start, size and alignment of PT_TLS segment.  */
-  struct elf_link_tls_segment *tls_segment;
+  /* Cached first output tls section and size of PT_TLS segment.  */
+  asection *tls_sec;
+  bfd_size_type tls_size;
 
   /* A linked list of BFD's loaded in the link.  */
   struct elf_link_loaded_list *loaded;

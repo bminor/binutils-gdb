@@ -1444,7 +1444,8 @@ _bfd_elf_link_hash_table_init
   memset (&table->eh_info, 0, sizeof (table->eh_info));
   table->dynlocal = NULL;
   table->runpath = NULL;
-  table->tls_segment = NULL;
+  table->tls_sec = NULL;
+  table->tls_size = 0;
   table->loaded = NULL;
 
   ret = _bfd_link_hash_table_init (&table->root, abfd, newfunc);

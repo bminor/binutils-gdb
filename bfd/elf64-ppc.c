@@ -2837,9 +2837,6 @@ struct ppc_link_hash_table
   asection *brlt;
   asection *relbrlt;
 
-  /* Short-cut to first output tls section.  */
-  asection *tls_sec;
-
   /* Shortcut to .__tls_get_addr.  */
   struct elf_link_hash_entry *tls_get_addr;
 
@@ -5172,22 +5169,14 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info)
   return TRUE;
 }
 
-/* Set htab->tls_sec.  */
+/* Set htab->tls_get_addr and call the generic ELF tls_setup function.  */
 
-bfd_boolean
+asection *
 ppc64_elf_tls_setup (bfd *obfd, struct bfd_link_info *info)
 {
-  asection *tls;
   struct ppc_link_hash_table *htab;
 
-  for (tls = obfd->sections; tls != NULL; tls = tls->next)
-    if ((tls->flags & (SEC_THREAD_LOCAL | SEC_LOAD))
-	== (SEC_THREAD_LOCAL | SEC_LOAD))
-      break;
-
   htab = ppc_hash_table (info);
-  htab->tls_sec = tls;
-
   if (htab->tls_get_addr != NULL)
     {
       struct elf_link_hash_entry *h = htab->tls_get_addr;
@@ -5199,7 +5188,7 @@ ppc64_elf_tls_setup (bfd *obfd, struct bfd_link_info *info)
       htab->tls_get_addr = h;
     }
 
-  return tls != NULL;
+  return _bfd_elf_tls_setup (obfd, info);
 }
 
 /* Run through all the TLS relocs looking for optimization
@@ -5282,7 +5271,7 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 		    is_local = TRUE;
 		    value += sym_sec->output_offset;
 		    value += sym_sec->output_section->vma;
-		    value -= htab->tls_sec->vma;
+		    value -= htab->elf.tls_sec->vma;
 		    ok_tprel = (value + TP_OFFSET + ((bfd_vma) 1 << 31)
 				< (bfd_vma) 1 << 32);
 		  }
@@ -7690,8 +7679,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			{
 			  /* Was an LD reloc.  */
 			  r_symndx = 0;
-			  rel->r_addend = htab->tls_sec->vma + DTP_OFFSET;
-			  rel[1].r_addend = htab->tls_sec->vma + DTP_OFFSET;
+			  rel->r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
+			  rel[1].r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
 			}
 		      else if (toc_symndx != 0)
 			r_symndx = toc_symndx;
@@ -8096,7 +8085,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      {
 			outrel.r_addend += relocation;
 			if (tls_type & (TLS_GD | TLS_DTPREL | TLS_TPREL))
-			  outrel.r_addend -= htab->tls_sec->vma;
+			  outrel.r_addend -= htab->elf.tls_sec->vma;
 		      }
 		    loc = relgot->contents;
 		    loc += (relgot->reloc_count++
@@ -8113,7 +8102,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      relocation = 1;
 		    else if (tls_type != 0)
 		      {
-			relocation -= htab->tls_sec->vma + DTP_OFFSET;
+			relocation -= htab->elf.tls_sec->vma + DTP_OFFSET;
 			if (tls_type == (TLS_TLS | TLS_TPREL))
 			  relocation += DTP_OFFSET - TP_OFFSET;
 
@@ -8223,7 +8212,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_TPREL16_HIGHERA:
 	case R_PPC64_TPREL16_HIGHEST:
 	case R_PPC64_TPREL16_HIGHESTA:
-	  addend -= htab->tls_sec->vma + TP_OFFSET;
+	  addend -= htab->elf.tls_sec->vma + TP_OFFSET;
 	  if (info->shared)
 	    /* The TPREL16 relocs shouldn't really be used in shared
 	       libs as they will result in DT_TEXTREL being set, but
@@ -8241,7 +8230,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_DTPREL16_HIGHERA:
 	case R_PPC64_DTPREL16_HIGHEST:
 	case R_PPC64_DTPREL16_HIGHESTA:
-	  addend -= htab->tls_sec->vma + DTP_OFFSET;
+	  addend -= htab->elf.tls_sec->vma + DTP_OFFSET;
 	  break;
 
 	case R_PPC64_DTPMOD64:
@@ -8250,11 +8239,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  goto dodyn;
 
 	case R_PPC64_TPREL64:
-	  addend -= htab->tls_sec->vma + TP_OFFSET;
+	  addend -= htab->elf.tls_sec->vma + TP_OFFSET;
 	  goto dodyn;
 
 	case R_PPC64_DTPREL64:
-	  addend -= htab->tls_sec->vma + DTP_OFFSET;
+	  addend -= htab->elf.tls_sec->vma + DTP_OFFSET;
 	  /* Fall thru */
 
 	  /* Relocations that may need to be propagated if this is a

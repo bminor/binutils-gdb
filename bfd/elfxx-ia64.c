@@ -3544,12 +3544,10 @@ static bfd_vma
 elfNN_ia64_tprel_base (info)
      struct bfd_link_info *info;
 {
-  struct elf_link_tls_segment *tls_segment
-    = elf_hash_table (info)->tls_segment;
+  asection *tls_sec = elf_hash_table (info)->tls_sec;
 
-  BFD_ASSERT (tls_segment != NULL);
-  return (tls_segment->start
-	  - align_power ((bfd_vma) 16, tls_segment->align));
+  BFD_ASSERT (tls_sec != NULL);
+  return tls_sec->vma - align_power ((bfd_vma) 16, tls_sec->alignment_power);
 }
 
 /* Return the base VMA address which should be subtracted from real addresses
@@ -3560,8 +3558,8 @@ static bfd_vma
 elfNN_ia64_dtprel_base (info)
      struct bfd_link_info *info;
 {
-  BFD_ASSERT (elf_hash_table (info)->tls_segment != NULL);
-  return elf_hash_table (info)->tls_segment->start;
+  BFD_ASSERT (elf_hash_table (info)->tls_sec != NULL);
+  return elf_hash_table (info)->tls_sec->vma;
 }
 
 /* Called through qsort to sort the .IA_64.unwind section during a

@@ -2186,10 +2186,10 @@ static bfd_vma
 dtpoff_base (info)
      struct bfd_link_info *info;
 {
-  /* If tls_segment is NULL, we should have signalled an error already.  */
-  if (elf_hash_table (info)->tls_segment == NULL)
+  /* If tls_sec is NULL, we should have signalled an error already.  */
+  if (elf_hash_table (info)->tls_sec == NULL)
     return 0;
-  return elf_hash_table (info)->tls_segment->start;
+  return elf_hash_table (info)->tls_sec->vma;
 }
 
 /* Return the relocation value for @tpoff relocation
@@ -2200,14 +2200,12 @@ tpoff (info, address)
      struct bfd_link_info *info;
      bfd_vma address;
 {
-  struct elf_link_tls_segment *tls_segment
-    = elf_hash_table (info)->tls_segment;
+  struct elf_link_hash_table *htab = elf_hash_table (info);
 
-  /* If tls_segment is NULL, we should have signalled an error already.  */
-  if (tls_segment == NULL)
+  /* If tls_sec is NULL, we should have signalled an error already.  */
+  if (htab->tls_sec == NULL)
     return 0;
-  return (align_power (tls_segment->size, tls_segment->align)
-	  + tls_segment->start - address);
+  return htab->tls_size + htab->tls_sec->vma - address;
 }
 
 /* Complain if TLS instruction relocation is against an invalid

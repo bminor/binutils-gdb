@@ -1,3 +1,8 @@
+2003-11-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): Call
+	_bfd_elf_tls_setup.
+
 2003-10-31  Nick Clifton  <nickc@redhat.com>
 
         * ldlang.c (lookup_name): When looking for a previously loaded

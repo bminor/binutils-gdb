@@ -845,6 +845,9 @@ gld${EMULATION_NAME}_before_allocation (void)
   const char *rpath;
   asection *sinterp;
 
+  if (link_info.hash->creator->flavour == bfd_target_elf_flavour)
+    _bfd_elf_tls_setup (output_bfd, &link_info);
+
   /* If we are going to make any variable assignments, we need to let
      the ELF backend know about them in case the variables are
      referred to by dynamic objects.  */
