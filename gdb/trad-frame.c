@@ -98,6 +98,14 @@ trad_frame_set_value (struct trad_frame_saved_reg this_saved_regs[],
 }
 
 void
+trad_frame_set_reg_realreg (struct trad_frame_cache *this_trad_cache,
+			    int regnum, int realreg)
+{
+  this_trad_cache->prev_regs[regnum].realreg = realreg;
+  this_trad_cache->prev_regs[regnum].addr = -1;
+}
+
+void
 trad_frame_set_reg_addr (struct trad_frame_cache *this_trad_cache,
 			 int regnum, CORE_ADDR addr)
 {
@@ -183,4 +191,17 @@ trad_frame_get_id (struct trad_frame_cache *this_trad_cache,
 		   struct frame_id *this_id)
 {
   (*this_id) = this_trad_cache->this_id;
+}
+
+void
+trad_frame_set_this_base (struct trad_frame_cache *this_trad_cache,
+			  CORE_ADDR this_base)
+{
+  this_trad_cache->this_base = this_base;
+}
+
+CORE_ADDR
+trad_frame_get_this_base (struct trad_frame_cache *this_trad_cache)
+{
+  return this_trad_cache->this_base;
 }

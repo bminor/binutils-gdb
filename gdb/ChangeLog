@@ -1,3 +1,11 @@
+2004-08-01  Andrew Cagney  <cagney@gnu.org>
+
+	* trad-frame.c (trad_frame_get_this_base)
+	(trad_frame_set_this_base, trad_frame_set_reg_realreg): New
+	functions.
+	* trad-frame.h (trad_frame_set_this_base)
+	(trad_frame_get_this_base, trad_frame_set_reg_realreg): Declare.
+
 2004-07-31  Andrew Cagney  <cagney@gnu.org>
 
 	* trad-frame.c (trad_frame_get_prev_register): Rename
