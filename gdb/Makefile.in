@@ -617,10 +617,6 @@ gdbcmd_h =	gdbcmd.h $(command_h) $(ui_out_h)
 gdbcore_h =	gdbcore.h $(bfd_h)
 gdbthread_h =	gdbthread.h $(breakpoint_h)
 gdbtypes_h =	gdbtypes.h
-hpread_h =	hpread.h $(defs_h) $(bfd_h) $(gdb_string_h) $(hp_symtab_h) \
-		$(syms_h) $(symtab_h) $(symfile_h) $(objfiles_h) \
-		$(buildsym_h) $(complaints_h) $(gdb_stabs_h) $(gdbtypes_h) \
-		$(demangle_h)
 inf_loop_h =  	inf-loop.h
 inferior_h =	inferior.h $(breakpoint_h)
 language_h =	language.h
@@ -660,7 +656,7 @@ xcoffsolib_h =	xcoffsolib.h
 
 HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	dst.h environ.h $(gdbcmd_h) gdb.h gdbcore.h \
-	gdb-stabs.h hpread.h $(inferior_h) language.h minimon.h monitor.h \
+	gdb-stabs.h $(inferior_h) language.h minimon.h monitor.h \
 	objfiles.h parser-defs.h serial.h solib.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
 	c-lang.h ch-lang.h f-lang.h \
@@ -1177,8 +1173,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	core-sol2.c core-regset.c core-aout.c corelow.c \
 	dcache.c delta68-nat.c dpx2-nat.c dstread.c exec.c fork-child.c \
 	go32-nat.c h8300-tdep.c h8500-tdep.c \
-	hp300ux-nat.c hppa-tdep.c hppab-nat.c hppah-nat.c \
-        hp-psymtab-read.c hp-symtab-read.c \
+	hp300ux-nat.c hppa-tdep.c hppab-nat.c hppah-nat.c hpread.c \
 	i386-tdep.c i386b-nat.c i386mach-nat.c i386v-nat.c i386-linux-nat.c \
 	i386aix-nat.c i386m3-nat.c i386v4-nat.c i386ly-tdep.c \
 	i386bsd-nat.c i386bsd-tdep.c i386fbsd-nat.c \
@@ -1800,18 +1795,10 @@ hpux-thread.o: hpux-thread.c $(defs_h) $(gdbthread_h) $(target_h) inferior.h \
 	$(CC) -c $(INTERNAL_CFLAGS) -I$(srcdir)/osf-share \
 	  -I$(srcdir)/osf-share/HP800 -I/usr/include/dce $(srcdir)/hpux-thread.c
 
-# FIXME!!!
 hpread.o: hpread.c $(bfd_h) $(buildsym_h) $(complaints_h) $(defs_h) \
-	$(gdb_stabs_h) $(objfiles_h) $(symfile_h) $(symtab_h) $(gdb_string_h)
-
-hp-psymtab-read.o: hp-psymtab-read.c $(hpread_h) $(bfd_h) $(buildsym_h) \
-	$(complaints_h) $(defs_h) $(gdb_stabs_h) $(objfiles_h) $(symfile_h) \
-	$(symtab_h) $(gdb_string_h)
- 
-hp-symtab-read.o: hp-symtab-read.c $(hpread_h) $(bfd_h) $(buildsym_h) \
-	$(complaints_h) $(defs_h) $(gdb_stabs_h) $(objfiles_h) $(symfile_h) \
-	$(symtab_h) $(gdb_string_h)
-# END FIXME!!!  
+	$(demangle_h) $(gdb_stabs_h) $(gdbtypes_h) $(objfiles_h) \
+	$(symfile_h) $(syms_h) $(symtab_h) $(gdb_string_h) \
+	$(INCLUDE_DIR)/hp-symtab.h
 
 parse.o: parse.c $(command_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbtypes_h) $(language_h) $(parser_defs_h) $(symtab_h) $(value_h) \

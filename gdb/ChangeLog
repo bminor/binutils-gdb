@@ -1,5 +1,26 @@
 2002-01-23  Elena Zannoni  <ezannoni@redhat.com>
 
+        * Makefile.in (hpread_h): Delete. 
+        (HFILES_NO_SRCDIR): Remove hpread.h.
+        (ALLDEPFILES): Remove hp-psymtab-read.c and hp-symtab-read.c.
+        (hpread.o): Update dependencies.
+        (hp-psymtab-read.o, hp-symtab-read.o): Remove.
+
+        * hp-psymtab-read.c: Remove file.
+        * hp-symtab-read.c: Remove file.
+        * hpread.h: Remove file.
+
+        * hpread.c: Merge all contents of hp-psymtab-read.c,
+        hp-symtab-read.c and hpread.h into this file, as it was prior to
+        January 1999.
+
+        * config/pa/hpux11w.mh, config/pa/hpux11.mh,
+        config/pa/hpux1020.mh, config/pa/hppaosf.mh, 
+        config/pa/hppahpux.mh, config/pa/hppabsd.mh (NATDEPFILES):
+        Remove hp-psymtab-read.o and hp-symtab-read.o, add hpread.o.
+
+2002-01-23  Elena Zannoni  <ezannoni@redhat.com>
+
 	* ppc-linux-nat.c (ppc_register_u_addr, supply_gregset,
 	fill_gregset): Call gdbarch_tdep() just once, assign result to
 	variable and use that, instead of calling the function several
