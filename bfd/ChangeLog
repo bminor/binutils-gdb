@@ -1,5 +1,40 @@
 2004-05-05  Alexandre Oliva  <aoliva@redhat.com>
 
+	* configure.in (bfd_elf32_frvfdpic_vec): New.
+	* configure: Rebuilt.
+	* targets.c (bfd_elf32_frvfdpic_vec): New.
+	* config.bfd: Enable it on frv-*-elf and frv-*-*linux*, as default
+	on the latter.
+	* elf32-frv.c: Prefix all identifiers added for FDPIC support with
+	frvfdpic instead of frv.  Rearrange elf-target macros such that
+	the FDPIC-specific ones are only defined for this new target
+	vector.
+	(bfd_elf32_frvfdpic_vec): Declare.
+	(IS_FDPIC): New.
+	(elf32_frv_relocate_section): Use it to enable segment checking
+	and to control rofixup emission.  Add output section vma to
+	applied relocation in non-LOAD non-ALLOC sections.  Use
+	_bfd_error_handler for errors.
+	(_frv_create_got_section): Create .rel.got and .rofixup only in
+	FDPIC.  Create non-dynamic _gp at .got+2048 in non-FDPIC, like the
+	linker script.
+	(elf32_frvfdpic_size_dynamic_sections): Assume FDPIC.
+	(elf32_frvfdpic_modify_segment_map): Likewise.
+	(elf32_frv_finish_dynamic_sections): New, do-nothing.
+	(elf32_frvfdpic_finish_dynamic_sections): Assume FDPIC.  Improve
+	error message if we miscompute the rofixup size.
+	(frvfdpic_elf_use_relative_eh_frame): Assume FDPIC.
+	(frvfdpic_elf_encode_eh_address): Likewise.
+	(elf32_frv_check_relocs): Reject FDPIC-only relocs in non-FDPIC.
+	Record relocs only in FDPIC.  Make sure _gp is defined for GPREL
+	relocs.  Reject unknown relocation types.
+	(elf32_frv_object_p): Make sure target vector matches FDPIC bits.
+	(frv_elf_merge_private_bfd_data): Likewise.
+	(ELF_MAXPAGESIZE): Revert to 0x1000 for elf32-frv; keep it as
+	0x4000 for newly-added elf32-frvfdpic.
+
+2004-05-05  Alexandre Oliva  <aoliva@redhat.com>
+
 	Merge from mainline:
 	2004-02-27  Alexandre Oliva  <aoliva@redhat.com>
 	* elf-bfd.h (struct elf_backend_data): Added
