@@ -236,7 +236,9 @@ bfd_get_next_mapent (abfd, prev, entry)
 
   if (prev == BFD_NO_MORE_SYMBOLS)
     prev = 0;
-  else if (++prev >= bfd_ardata (abfd)->symdef_count)
+  else
+    ++prev;
+  if (prev >= bfd_ardata (abfd)->symdef_count)
     return BFD_NO_MORE_SYMBOLS;
 
   *entry = (bfd_ardata (abfd)->symdefs + prev);

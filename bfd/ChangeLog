@@ -1,3 +1,18 @@
+Fri Oct  6 16:18:35 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	Mon Sep 25 22:49:32 1995  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* archive.c (bfd_get_next_mapent): Return BFD_NO_MORE_SYMBOLS
+	when the symbol table is empty.
+
+	* elf32-m68k.c (elf_m68k_size_dynamic_sections): Don't reserve
+	space for section symbols, since we don't output them either.
+	(elf_m68k_adjust_dynindx): Removed.
+
+	* ptrace-core.c (rawptr): Make it a local variable of
+ 	ptrace_unix_core_file_p.
+	* trad-core.c (rawptr): Likewise, for trad_unix_core_file_p.
+
 Fri Oct  6 12:24:47 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* coff-rs6000.c (xcoff_write_archive_contents): Return false, not
