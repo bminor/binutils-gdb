@@ -61,7 +61,7 @@ global ld
 global link_output
 
 if { [ld_simple_link $ld tmpdir/common1.o "-r tmpdir/common1a.o tmpdir/common1b.o"] } {
-    unresolved $test1
+    unresolved "$test1 (warning 1)"
     return
 }
 
@@ -77,14 +77,14 @@ if { [dump_common1 "$test1 (change 1)"] } {
 }
 
 if { [ld_simple_link $ld tmpdir/common1.o "-r tmpdir/common1b.o tmpdir/common1a.o"] } {
-    unresolved $test1
+    unresolved "$test1 (warning 2)"
     return
 }
 
 if { ![regexp "Warning: alignment 1 of symbol \`foo1\' in tmpdir/common1b.o is smaller than 64 in tmpdir/common1a.o" $link_output] } {
     fail "$test1 (warning 2)"
 } else {
-    pass "$test1 (warningi 2)"
+    pass "$test1 (warning 2)"
 }
 
 if { [dump_common1 "$test1 (change 2)"] } {
