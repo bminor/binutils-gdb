@@ -1,3 +1,10 @@
+2004-05-03  Joel Brobecker  <brobecker@gnat.com>
+
+	* dwarf2read.c (dwarf2_create_include_psymtab): Fix build
+	failure detected by recent versions of GCC.
+	(psymtab_to_symtab_1): No longer use the PST_PRIVATE macro
+	to be consistent with the usage in dwarf2_create_include_psymtab.
+
 2004-05-03  Michael Snyder  <msnyder@redhat.com>
 
 	* mips-tdep.c (mips_gdbarch_init): Fix typo in comment.

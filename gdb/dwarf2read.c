@@ -1239,9 +1239,9 @@ dwarf2_create_include_psymtab (char *name, struct partial_symtab *pst,
   /* No private part is necessary for include psymtabs.  This property
      can be used to differentiate between such include psymtabs and
      the regular ones.  If it ever happens that a regular psymtab can
-     legitimally have a NULL PST_PRIVATE part, then we'll have to add a
+     legitimally have a NULL private part, then we'll have to add a
      dedicated field for that in the dwarf2_pinfo structure.  */
-  PST_PRIVATE (subpst) = NULL;
+  subpst->read_symtab_private = NULL;
 }
 
 /* Read the Line Number Program data and extract the list of files
@@ -2109,7 +2109,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
         psymtab_to_symtab_1 (pst->dependencies[i]);
       }
 
-  if (PST_PRIVATE (pst) == NULL)
+  if (pst->read_symtab_private == NULL)
     {
       /* It's an include file, no symbols to read for it.
          Everything is in the parent symtab.  */
