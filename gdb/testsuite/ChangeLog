@@ -1,3 +1,7 @@
+2004-11-16  Randolph Chung  <tausq@debian.org>
+
+	* gdb.base/unload.exp: Pass relative path to gdb_get_line_number.
+
 2004-11-14  Daniel Jacobowitz  <dan@debian.org>
 
 	* gdb.threads/threadapply.exp: Correct "macro details" test.

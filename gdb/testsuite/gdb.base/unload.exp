@@ -117,7 +117,7 @@ gdb_test "info break" \
 \[0-9\]+\[\t \]+breakpoint     keep y.*PENDING.*shrfunc1.*" \
 "single pending breakpoint info"
 
-set unloadshr_line [gdb_get_line_number "unloadshr break" ${srcdir}/${subdir}/${libsrcfile}]
+set unloadshr_line [gdb_get_line_number "unloadshr break" ${libsrcfile}]
 
 gdb_test "run" \
 "Starting program.*unload.*
