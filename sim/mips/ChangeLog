@@ -1,3 +1,7 @@
+Sat Feb  7 17:16:20 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (itable.h itable.c): Depend on SIM_@sim_gen@_ALL.
+
 Tue Feb  3 11:36:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (ifetch16): New function.
