@@ -1,3 +1,8 @@
+Fri May 27 01:08:14 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldlang.c (lang_add_entry): Only set the entry symbol if it has
+	not been set already.
+
 Tue May 24 16:13:43 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* emulparams/elf32mipb.sh (OTHER_READONLY_SECTIONS): Don't give

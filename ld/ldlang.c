@@ -2625,7 +2625,8 @@ void
 lang_add_entry (name)
      CONST char *name;
 {
-  entry_symbol = name;
+  if (entry_symbol == NULL)
+    entry_symbol = name;
 }
 
 void
