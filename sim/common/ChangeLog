@@ -1,5 +1,7 @@
 Mon Feb 23 13:08:35 1998  Doug Evans  <devans@canuck.cygnus.com>
 
+	* cgen-sim.h (SEM_NEXT_PC): New arg `len'.
+
 	* sim-xcat.h: Delete.
 	* cgen-mem.h: Delete inclusion of sim-xcat.h.
 	* cgen-sim.h: Ditto.
