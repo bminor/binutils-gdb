@@ -74,8 +74,6 @@
    on the command line, or in the def file, or taken from the first 
    supplied argument.
 
-   The output files are <prefix>-exp.s and <prefix>-lib.s
-
    The .exp.s file contains the information necessary to export
    the routines in the DLL.  The .lib.s file contains the information
    necessary to use the DLL's routines from a referencing program.
@@ -147,21 +145,16 @@
    ranlib thedll.in
 
    # run this tool over the library and the def file
-   ./dlltool -o thedll -d thedll.def thedll.in
+   ./dlltool --def thedll.def --output-exp thedll.o --output-lib thedll.a
 
-   # build the export table for the dll
-   as -o thedll.exp thedll-exp.s
    # build the dll with the library with file1.o, file2.o and the export table
-   ld -o thedll.dll thedll.exp thedll.in
-
-   # build the import table for the executable
-   as -o thedll.lib thedll-lib.s
+   ld -o thedll.dll thedll.o thedll.in
 
    # build the mainline
    gcc -c themain.c 
 
    # link the executable with the import library
-   ld -e main -Tthemain.ld -o themain.exe themain.o thedll.lib
+   ld -e main -Tthemain.ld -o themain.exe themain.o thedll.a
 
  */
 
@@ -172,14 +165,25 @@
 #include <string.h>
 #include "getopt.h"
 #include "bfd.h"
+#include <wait.h>
 
+char *ar_name = "ar";
+char *as_name = "as";
+char *ranlib_name = "ranlib";
 
+long rva = 0x400000;
+
+char *exp_name;
+char *imp_name;
+char *dll_name;
+
+int deltemps = 1;
 
 int yydebug;
 char *def_file;
+
 char *program_name;
 char *strrchr ();
-char *outfile_prefix;
 char *xmalloc ();
 char *strdup ();
 
@@ -210,24 +214,36 @@ struct mac
     char *how_global;
     char *how_space;
     char *how_align_short;
-    char *how_rva_before;
-    char *how_rva_after;
   }
 mtable[]
 =
 {
   {
-    "arm", ".byte", ".short", ".long", ".asciz", "@", "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long", ".global", ".space",".align\t2","(",")-0x400000"
+    "arm", ".byte", ".short", ".long", ".asciz", "@", "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long", ".global", ".space", ".align\t2", 
   }
   ,
   {
-    "i386", ".byte", ".short", ".long", ".asciz", "#", "jmp *", ".global", ".space",".align\t2",
-"(",")-0x400000"
+    "i386", ".byte", ".short", ".long", ".asciz", "#", "jmp *", ".global", ".space", ".align\t2",
+      
   }
   ,
     0
 };
 
+
+char *rvaafter (machine)
+int machine;
+{
+  char b[20];
+  sprintf(b,")-0x%x", rva);
+  return strdup (b);
+}
+
+char *rvabefore (machine)
+int machine;
+{
+  return "(";
+}
 #define ASM_BYTE 	mtable[machine].how_byte
 #define ASM_SHORT 	mtable[machine].how_short
 #define ASM_LONG	mtable[machine].how_long
@@ -237,8 +253,8 @@ mtable[]
 #define ASM_GLOBAL	mtable[machine].how_global
 #define ASM_SPACE	mtable[machine].how_space
 #define ASM_ALIGN_SHORT mtable[machine].how_align_short
-#define ASM_RVA_BEFORE 	mtable[machine].how_rva_before
-#define ASM_RVA_AFTER  	mtable[machine].how_rva_after
+#define ASM_RVA_BEFORE 	rvabefore(machine)
+#define ASM_RVA_AFTER  	rvaafter(machine)
 
 static char **oav;
 
@@ -289,7 +305,6 @@ static char *d_name;		/* Arg to NAME or LIBRARY */
 static int d_nfuncs;		/* Number of functions exported */
 static int d_ord;		/* Base ordinal index */
 static export_type *d_exports;	/*list of exported functions */
-static char *d_suffix = "dll";
 static dlist_type *d_list;	/* Descriptions */
 static dlist_type *a_list;	/* Stuff to go in directives */
 
@@ -335,8 +350,6 @@ def_name (name, base)
       fprintf (stderr, "Can't have LIBRARY and NAME\n");
     }
   d_name = name;
-  if (strchr (d_name, '.'))
-    d_suffix = strdup (strchr (d_name, '.') + 1);
   d_is_exe = 1;
 }
 
@@ -352,8 +365,6 @@ def_library (name, base)
       fprintf (stderr, "%s: Can't have LIBRARY and NAME\n", program_name);
     }
   d_name = name;
-  if (strchr (d_name, '.'))
-    d_suffix = strdup (strchr (d_name, '.') + 1);
   d_is_dll = 1;
 }
 
@@ -367,7 +378,7 @@ def_description (desc)
   d_list = d;
 }
 
-void 
+void
 new_directive (dir)
      char *dir;
 {
@@ -460,8 +471,78 @@ def_data (attr)
 
 /**********************************************************************/
 
+void 
+run (what, args)
+     char *what;
+     char *args;
+{
+  char *s;
+  int pid;
+  int i;
+  char **argv;
+  extern char **environ;
+  if (verbose)
+    fprintf (stderr, "%s %s\n", what, args);
+
+  /* Count the args */
+  i = 0;
+  for (s = args; *s ; s++)
+    if (*s == ' ')
+      i++;
+  i++;
+  argv = alloca (sizeof (char *) * (i + 3)); 
+  i = 0;
+  argv[i++] = what;
+  s = args;
+  while (1) {
+    argv[i++] = s;
+    while (*s != ' ' && *s != 0)
+      s++;
+    if (*s == 0)
+      break;
+    *s++ = 0;
+  }
+  argv[i++] = 0;
+
+
+  pid = vfork ();
+  if (pid == 0)
+    {
+      execvp (what, argv);
+      fprintf (stderr, "%s: can't exec %s\n", program_name, what);
+      exit (1);
+    }
+  else if (pid == -1) 
+    {
+      extern int errno;
+      fprintf (stderr, "%s: vfork failed, %d\n", program_name, errno);
+      exit (1);
+    }
+  else 
+    {
+      int status;
+      waitpid (pid, &status);
+      if (status) 
+	{
+	  if (WIFSIGNALED (status)) 
+	    {
+	      fprintf (stderr, "%s: %s %s terminated with signal %d\n",
+		       program_name, what, args,  WTERMSIG (status));
+	      exit (1);
+	    }
+
+	  if (WIFEXITED (status)) 
+	    {
+	      fprintf (stderr, "%s: %s %s terminated with exit status %d\n",
+		       program_name, what, args, WEXITSTATUS (status));
+	      exit (1);
+	    }
+	}
+    }
+}
+
 /* read in and block out the base relocations */
-static void 
+static void
 basenames (abfd)
      bfd *abfd;
 {
@@ -531,8 +612,8 @@ scan_obj_file (filename)
 
   if (!f)
     {
-      fprintf (stderr, "%s: Unable to open object file %s\n", 
-	       program_name, 
+      fprintf (stderr, "%s: Unable to open object file %s\n",
+	       program_name,
 	       filename);
       exit (1);
     }
@@ -607,7 +688,7 @@ sfunc (a, b)
 
 
 
-static void 
+static void
 flush_page (f, need, page_addr, on_page)
      FILE *f;
      long *need;
@@ -646,11 +727,11 @@ gen_exp_file ()
   dlist_type *dl;
   int had_noname = 0;
 
-  sprintf (outfile, "%s-exp.s", outfile_prefix);
+  sprintf (outfile, "t%s", exp_name);
 
   if (verbose)
     fprintf (stderr, "%s: Generate exp file %s\n",
-	     program_name, outfile_prefix);
+	     program_name, exp_name);
 
   f = fopen (outfile, "w");
   if (!f)
@@ -670,7 +751,7 @@ gen_exp_file ()
   fprintf (f, "\t%s	%d	%s Time and date\n", ASM_LONG, time (0), ASM_C);
   fprintf (f, "\t%s	0	%s Major and Minor version\n", ASM_LONG, ASM_C);
   fprintf (f, "\t%s	%sname%s%s Ptr to name of dll\n", ASM_LONG, ASM_RVA_BEFORE,
-	   ASM_RVA_AFTER,ASM_C);
+	   ASM_RVA_AFTER, ASM_C);
   fprintf (f, "\t%s	%d	%s Starting ordinal of exports\n", ASM_LONG, d_ord, ASM_C);
   fprintf (f, "\t%s The next field is documented as being the number of functions\n", ASM_C);
   fprintf (f, "\t%s yet it doesn't look like that in real PE dlls\n", ASM_C);
@@ -678,14 +759,14 @@ gen_exp_file ()
   fprintf (f, "\t%s always the number of names field\n", ASM_C);
   fprintf (f, "\t%s	%d	%s Number of functions\n", ASM_LONG, d_nfuncs, ASM_C);
   fprintf (f, "\t%s	%d	%s Number of names\n", ASM_LONG, d_nfuncs, ASM_C);
-  fprintf (f, "\t%s	%safuncs%s  %s Address of functions\n", ASM_LONG, 
-	   ASM_RVA_BEFORE, ASM_RVA_AFTER,ASM_C);
-  fprintf (f, "\t%s	%sanames%s	%s Address of names\n", ASM_LONG, 
-	   	   ASM_RVA_BEFORE, ASM_RVA_AFTER,ASM_C);
-  fprintf (f, "\t%s	%sanords%s	%s Address of ordinals\n", ASM_LONG, 
-	   ASM_RVA_BEFORE, ASM_RVA_AFTER,ASM_C);
+  fprintf (f, "\t%s	%safuncs%s  %s Address of functions\n", ASM_LONG,
+	   ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
+  fprintf (f, "\t%s	%sanames%s	%s Address of names\n", ASM_LONG,
+	   ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
+  fprintf (f, "\t%s	%sanords%s	%s Address of ordinals\n", ASM_LONG,
+	   ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
 
-  fprintf (f, "name:	%s	\"%s.%s\"\n", ASM_TEXT, outfile_prefix, d_suffix);
+  fprintf (f, "name:	%s	\"%s\"\n", ASM_TEXT, dll_name);
 
   fprintf (f, "afuncs:\n");
   i = d_ord;
@@ -703,7 +784,7 @@ gen_exp_file ()
 	}
 #endif
       fprintf (f, "\t%s\t%s%s%s%s %d\n", ASM_LONG, ASM_RVA_BEFORE,
-	       exp->internal_name,ASM_RVA_AFTER, ASM_C, exp->ordinal);
+	       exp->internal_name, ASM_RVA_AFTER, ASM_C, exp->ordinal);
       i++;
     }
 
@@ -718,7 +799,7 @@ gen_exp_file ()
 	}
       else
 	{
-	  fprintf (f, "\t%s	%sn%d%s\n", ASM_LONG, ASM_RVA_BEFORE,i,ASM_RVA_AFTER);
+	  fprintf (f, "\t%s	%sn%d%s\n", ASM_LONG, ASM_RVA_BEFORE, i, ASM_RVA_AFTER);
 	}
     }
 
@@ -797,7 +878,7 @@ gen_exp_file ()
       qsort (copy, num_entries, sizeof (long), sfunc);
 
       addr = copy[0];
-      page_addr = addr & PAGE_MASK;	/* work out the page addr */
+      page_addr = addr & PAGE_MASK; /* work out the page addr */
       on_page = 0;
       for (j = 0; j < num_entries; j++)
 	{
@@ -812,10 +893,19 @@ gen_exp_file ()
 	}
       flush_page (f, need, page_addr, on_page);
 
-      fprintf (f, "\t%s\t0,0\t%s End\n",ASM_LONG, ASM_C);
+      fprintf (f, "\t%s\t0,0\t%s End\n", ASM_LONG, ASM_C);
     }
 
   fclose (f);
+
+  /* assemble the file */
+  sprintf (outfile,"-o %s t%s", exp_name, exp_name);
+  run (as_name, outfile);
+  if (deltemps) 
+    {
+      sprintf (outfile,"t%s", exp_name);
+      unlink (outfile);
+    }
 }
 
 static char *
@@ -827,55 +917,50 @@ xlate (char *name)
 
   if (name[0] == '_')
     name++;
-  if (killat) {
-    char *p;
-    p = strchr (name, '@');
-    if (p)
-      *p = 0;
-  }
+  if (killat)
+    {
+      char *p;
+      p = strchr (name, '@');
+      if (p)
+	*p = 0;
+    }
   return name;
 }
+
 
 /**********************************************************************/
 gen_lib_file ()
 {
   int i;
+  int sol;
   FILE *f;
   export_type *exp;
+  char *output_filename;
+  char prefix[PATHMAX];
 
-  sprintf (outfile, "%s-lib.s", outfile_prefix);
+  sprintf (outfile, "%s", imp_name);
+  output_filename = strdup (outfile);
+
+  unlink (output_filename);
+
+  strcpy (prefix, "d");
+  sprintf (outfile, "%sh.s", prefix);
 
   f = fopen (outfile, "w");
-  if (!f)
-    {
-      fprintf (stderr, "Unable to open output file %s\n", outfile);
-      exit (1);
-    }
-
-
-  dump_def_info (f);
-  fprintf (f, "\t.text\n");
-  fprintf (f, "%s Thunk table\n", ASM_C);
-  for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
-    {
-      fprintf (f, "\t%s\t%s\n", ASM_GLOBAL, exp->name);
-      fprintf (f, "\t%s\t__imp_%s\n", ASM_GLOBAL, exp->name);
-    }
-
-  for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
-    {
-      fprintf (f, "%s:\t%s\t__imp_%s\n", exp->name, ASM_JUMP, exp->name);
-    }
-
 
   fprintf (f, "%s IMAGE_IMPORT_DESCRIPTOR\n", ASM_C);
   fprintf (f, "\t.section	.idata$2\n");
-  fprintf (f, "\t%s\t%shname%s\t%sPtr to image import by name list\n", ASM_LONG, 
+
+  fprintf (f, "\t%s\t__%s_head\n", ASM_GLOBAL, imp_name);
+  fprintf (f, "__%s_head:\n", imp_name);
+
+  fprintf (f, "\t%s\t%shname%s\t%sPtr to image import by name list\n", ASM_LONG,
 	   ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
   fprintf (f, "\t%s\t%d\t%s time\n", ASM_LONG, time (0), ASM_C);
   fprintf (f, "\t%s\t0\t%s Forwarder chain\n", ASM_LONG, ASM_C);
-  fprintf (f, "\t%s\t%siname%s\t%s imported dll's name\n", ASM_LONG, 
+  fprintf (f, "\t%s\t%s__%s_iname%s\t%s imported dll's name\n", ASM_LONG,
 	   ASM_RVA_BEFORE,
+	   imp_name,
 	   ASM_RVA_AFTER,
 	   ASM_C);
   fprintf (f, "\t%s\t%sfthunk%s\t%s pointer to firstthunk\n", ASM_LONG,
@@ -883,57 +968,131 @@ gen_lib_file ()
 	   ASM_RVA_AFTER, ASM_C);
 
   fprintf (f, "%sStuff for compatibility\n", ASM_C);
-#if 0
-  fprintf (f, "\t.section\t.idata$3\n");
-  fprintf (f, "\t%s\t0\n", ASM_LONG);
-  fprintf (f, "\t%s\t0\n", ASM_LONG);
-  fprintf (f, "\t%s\t0\n", ASM_LONG);
-  fprintf (f, "\t%s\t0\n", ASM_LONG);
-  fprintf (f, "\t%s\t0\n", ASM_LONG);
-#endif
-
   fprintf (f, "\t.section\t.idata$5\n");
   fprintf (f, "\t%s\t0\n", ASM_LONG);
-
+  fprintf (f, "fthunk:\n");
   fprintf (f, "\t.section\t.idata$4\n");
   fprintf (f, "\t%s\t0\n", ASM_LONG);
+  fprintf (f, "\t.section	.idata$4\n");
+  fprintf (f, "hname:\n");
 
-  fprintf (f, "\n%s Loader modifies this\n", ASM_C);
-  fprintf (f, "\t.section	.idata$5\n");
-  fprintf (f, "fthunk:\n");
+  fclose (f);
+
+  sprintf (outfile, "-o %sh.o %sh.s", prefix, prefix);
+  run (as_name, outfile);
+
   for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
     {
+      sprintf (outfile, "%ss%d.s", prefix, i);
+      f = fopen (outfile, "w");
+      fprintf (f, "\n\n\n%s ********************* \n", ASM_C);
+      fprintf (f, "\t.text\n");
+      fprintf (f, "\t%s\t%s\n", ASM_GLOBAL, exp->name);
+      fprintf (f, "%s:\n\t%s\t__imp_%s\n", exp->name, ASM_JUMP, exp->name);
+
+      fprintf (f, "\t.section\t.idata$7\t%s To force loading of head and tail\n", ASM_C);
+      fprintf (f, "\t%s\t__%s_head\n", ASM_LONG, imp_name);
+      fprintf (f, "\t%s\t__%s_tail\n", ASM_LONG, imp_name);
+
+      fprintf (f, "\t.section	.idata$5\n");
+
+
       fprintf (f, "__imp_%s:\n", exp->name);
       fprintf (f, "\t%s\t%sID%d%s\n", ASM_LONG,
 	       ASM_RVA_BEFORE,
 	       i,
 	       ASM_RVA_AFTER);
-    }
-  fprintf (f, "\t%s\t0\n", ASM_LONG);
 
-  fprintf (f, "\n%s Hint name array\n", ASM_C);
-  fprintf (f, "\t.section	.idata$4\n");
-  fprintf (f, "hname:\n");
-  for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
-    {
+      fprintf (f, "\n%s Hint name array\n", ASM_C);
+      fprintf (f, "\t.section	.idata$4\n");
       fprintf (f, "\t%s\t%sID%d%s\n", ASM_LONG, ASM_RVA_BEFORE,
 	       i,
 	       ASM_RVA_AFTER);
-    }
 
-  fprintf (f, "\t%s\t0\n", ASM_LONG);
-  fprintf (f, "%s Hint/name array storage and import dll name\n", ASM_C);
-  fprintf (f, "\t.section	.idata$6\n");
+      fprintf (f, "%s Hint/name array storage and import dll name\n", ASM_C);
+      fprintf (f, "\t.section	.idata$6\n");
 
-  for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
-    {
-      fprintf (f,"\t%s\n", ASM_ALIGN_SHORT);
+      fprintf (f, "\t%s\n", ASM_ALIGN_SHORT);
       fprintf (f, "ID%d:\t%s\t%d\n", i, ASM_SHORT, exp->ordinal);
       fprintf (f, "\t%s\t\"%s\"\n", ASM_TEXT, xlate (exp->name));
+      fclose (f);
+
+
+      sprintf (outfile, "-o %ss%d.o %ss%d.s",    prefix, i, prefix, i);
+      run (as_name, outfile);
     }
+
+  sprintf (outfile, "%st.s", prefix);
+  f = fopen (outfile, "w");
+
+  fprintf (f, "\t%s\t__%s_tail\n", ASM_GLOBAL, imp_name);
+  fprintf (f, "\t%s\t__%s_iname\n", ASM_GLOBAL, imp_name);
+  fprintf (f, "__%s_tail:\n", imp_name);
+
   fprintf (f, "\t%s\t0\n", ASM_LONG);
-  fprintf (f, "iname:\t%s\t\"%s.%s\"\n", ASM_TEXT, outfile_prefix, d_suffix);
+  fprintf (f, "__%s_iname:\t%s\t\"%s\"\n",
+	   imp_name, ASM_TEXT, dll_name);
+
+
+  fprintf (f, "\t.section	.idata$4\n");
+  fprintf (f, "\t%s\t0\n", ASM_LONG);
+
+  fprintf (f, "\t.section	.idata$5\n");
+  fprintf (f, "\t%s\t0\n", ASM_LONG);
   fclose (f);
+
+  sprintf (outfile, "-o %st.o %st.s", prefix, prefix);
+  run (as_name, outfile);
+
+  /* Now stick them all into the archive */
+
+
+  sprintf (outfile, "crs %s %sh.o %st.o", output_filename, prefix, prefix);
+  run (ar_name, outfile);
+
+  /* Do the rest in groups of however many fit into a command line */
+  sol = 0;
+  for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
+    {
+      if (sol == 0)
+	{
+	  sol = sprintf (outfile, "crs %s", output_filename);
+	}
+
+      sol += sprintf (outfile + sol, " %ss%d.o", prefix, i);
+
+      if (sol >100)
+	{
+	  run (ar_name, outfile);
+	  sol = 0;
+	}
+
+    }
+  if (sol)
+    run (ar_name, outfile);
+
+  /* Delete all the temp files */
+
+  if (deltemps) 
+    {
+      sprintf (outfile, "%sh.o", prefix);
+      unlink (outfile);
+      sprintf (outfile, "%sh.s", prefix);
+      unlink (outfile);
+      sprintf (outfile, "%st.o", prefix);
+      unlink (outfile);
+      sprintf (outfile, "%st.s", prefix);
+      unlink (outfile);
+    }
+  /* Always delete these */
+  for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
+    {
+      sprintf (outfile, "%ss%d.o", prefix, i);
+      unlink (outfile);
+      sprintf (outfile, "%ss%d.s", prefix, i);
+      unlink (outfile);
+    }
+
 }
 /**********************************************************************/
 
@@ -1148,6 +1307,66 @@ mangle_defs ()
 }
 
 
+
+  /* Work out exec prefix from the name of this file */
+void 
+workout_prefix ()
+{
+  char *ps = 0;
+  char *s = 0;
+  char *p;
+  /* See if we're running in a devo tree */
+  for (p = program_name; *p; p++)
+    {
+      if (*p == '/' || *p == '\\')
+	{
+	  ps = s;
+	  s = p;
+	}
+    }
+
+  if (ps && strncmp (ps, "/binutils", 9) == 0)
+    {
+      /* running in the binutils directory, the other
+         executables will be surrounding it in the usual places. */
+      int len = ps - program_name;
+      ar_name = xmalloc (len + strlen ("/binutils/ar") + 1);
+      ranlib_name = xmalloc (len + strlen ("/binutils/ranlib") + 1);
+      as_name = xmalloc (len + strlen ("/gas/as.new") + 1);
+
+      strncpy (ar_name, program_name, len);
+      strcat (ar_name, "/binutils/ar");
+      strncpy (ranlib_name, program_name, len);
+      strcat (ranlib_name, "/binutils/ranlib");
+      strncpy (as_name, program_name, len);
+      strcat (as_name, "/gas/as.new");
+    }
+  else
+    {
+      /* Otherwise chop off any prefix and use it for the rest of the progs,
+         so i386-win32-dll generates i386-win32-ranlib etc etc */
+
+      for (p = program_name; *p; p++)
+	{
+	  if (strncmp (p, "dlltool", 7) == 0)
+	    {
+	      int len = p - program_name;
+	      ar_name = xmalloc (len + strlen ("ar") +1);
+	      ranlib_name = xmalloc (len + strlen ("ranlib")+1);
+	      as_name = xmalloc (len + strlen ("as")+1);
+
+	      strncpy (ar_name, program_name, len);
+	      strcat (ar_name, "ar");
+	      strncpy (ranlib_name, program_name, len);
+	      strcat (ranlib_name, "ranlib");
+	      strncpy (as_name, program_name, len);
+	      strcat (as_name, "as");
+	    }
+	}
+    }
+}
+
+
 /**********************************************************************/
 
 void
@@ -1158,7 +1377,11 @@ usage (file, status)
   fprintf (file, "Usage %s <options> <object-files>\n", program_name);
   fprintf (file, "\t -m <machine>           Generate code for <machine>\n");
   fprintf (file, "\t --machine <machine>\n");
-  fprintf (file, "\t -o <outprefix>         Set output prefix\n");
+  fprintf (file, "\t --output-exp <outname> Generate export file.\n");
+  fprintf (file, "\t -e <outname>\n");
+  fprintf (file, "\t --output-lib <outname> Generate input library.\n");
+  fprintf (file, "\t -l <outname>");
+  fprintf (file, "\t --dllname <name>       Name of input dll to put into output lib.\n");
   fprintf (file, "\t -d <deffile>           Name input .def file\n");
   fprintf (file, "\t --def <deffile> \n");
   fprintf (file, "\t --base-file <basefile> Read linker generated base file\n");
@@ -1166,19 +1389,30 @@ usage (file, status)
   fprintf (file, "\t -v                     Verbose\n");
   fprintf (file, "\t -u                     Remove leading underscore from .lib\n");
   fprintf (file, "\t -k                     Kill @<n> from exported names\n");
+  fprintf (file, "\t --rva <value>          Set the RVA from the default of 0x400000\n");
+  fprintf (file, "\t -r <value>\n");
+  fprintf (file, "\t --nodelete             Keep temp files.\n");
+  fprintf (file, "\t -n	\n");
   exit (status);
 }
 
 static struct option long_options[] =
 {
+  {"nodelete", no_argument, NULL,'n'},
+  {"dllname", required_argument, NULL,'D'},
+  {"output-exp", required_argument, NULL, 'e'},
+  {"output-lib", required_argument, NULL, 'l'},
   {"def", required_argument, NULL, 'd'},
   {"underscore", no_argument, NULL, 'u'},
   {"killat", no_argument, NULL, 'k'},
   {"help", no_argument, NULL, 'h'},
   {"machine", required_argument, NULL, 'm'},
+  {"rva", required_argument, NULL, 'r'},
   {"base-file", required_argument, NULL, 'b'},
   0
 };
+
+
 
 int
 main (ac, av)
@@ -1190,10 +1424,19 @@ main (ac, av)
   program_name = av[0];
   oav = av;
 
-  while ((c = getopt_long (ac, av, "kvbuh?m:o:Dd:", long_options, 0)) != EOF)
+  while ((c = getopt_long (ac, av, "D:l:e:nr:kvbuh?m:yd:", long_options, 0)) != EOF)
     {
       switch (c)
 	{
+	case 'D':
+	  dll_name = optarg;
+	  break;
+	case 'l':
+	  imp_name = optarg;
+	  break;
+	case 'e':
+	  exp_name = optarg;
+	  break;
 	case 'h':
 	case '?':
 	  usage (stderr, 0);
@@ -1201,13 +1444,13 @@ main (ac, av)
 	case 'm':
 	  mname = optarg;
 	  break;
-	case 'o':
-	  outfile_prefix = optarg;
+	case 'r':
+	  rva = strtoul (optarg, 0,0);
 	  break;
 	case 'v':
 	  verbose = 1;
 	  break;
-	case 'D':
+	case 'y':
 	  yydebug = 1;
 	  break;
 	case 'u':
@@ -1218,6 +1461,9 @@ main (ac, av)
 	  break;
 	case 'd':
 	  def_file = optarg;
+	  break;
+	case 'n':
+	  deltemps = 0;
 	  break;
 	case 'b':
 	  base_file = fopen (optarg, "r");
@@ -1249,6 +1495,16 @@ main (ac, av)
   machine = i;
 
 
+  if (!dll_name && exp_name)
+    {
+      char len = strlen (exp_name) + 5;
+      dll_name = xmalloc (len);
+      strcpy (dll_name, exp_name);
+      strcat (dll_name, ".dll");
+    }
+  workout_prefix ();
+
+
   if (def_file)
     {
       process_def_file (def_file);
@@ -1261,31 +1517,15 @@ main (ac, av)
       optind++;
     }
 
-  if (!outfile_prefix)
-    {
-      if (d_name)
-	outfile_prefix = d_name;
-      else if (def_file)
-	outfile_prefix = def_file;
-      else if (firstarg)
-	outfile_prefix = firstarg;
-      else
-	{
-	  fprintf (stderr, "No way to create an output filename\n");
-	  exit (1);
-	}
-    }
-  outfile_prefix = prefix (outfile_prefix);
 
-  if (verbose)
-    fprintf (stderr, "%s: Outfile prefix is %s\n",
-	     program_name, outfile_prefix);
   mangle_defs ();
 
-  gen_exp_file ();
-
-
-  gen_lib_file ();
+  if (exp_name)
+    gen_exp_file ();
+  if (imp_name)
+    gen_lib_file ();
 
   return 0;
 }
+
+

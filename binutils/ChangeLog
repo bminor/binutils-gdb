@@ -1,3 +1,12 @@
+Sun Aug 20 09:59:00 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	Modified to generate archives and objects rather than .s files.
+	* dlltool.c (run) New function.
+ 	(gen_exp_file, gen_lib_file): Use run.
+	(workout_prefix): New.
+	(usage): Document new options.
+	(main): Parse new options.
+
 Wed Aug 16 16:26:52 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* dlltool.c (gen_exp_file): Fix RVA handling.
