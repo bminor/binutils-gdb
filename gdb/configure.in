@@ -96,20 +96,23 @@ AC_MSG_RESULT($gdb_cv_printf_has_long_double)
 
 AC_FUNC_MMAP
 
-dnl See if thread_db is around for Solaris thread debugging.  Note that we must
-dnl explicitly test for version 1 of the library because version 0 (present on
-dnl Solaris 2.4 or earlier) doesn't have the same API.
+dnl See if thread_db library is around for Solaris thread debugging.  Note that
+dnl we must explicitly test for version 1 of the library because version 0
+dnl (present on Solaris 2.4 or earlier) doesn't have the same API.
 
-AC_MSG_CHECKING(for Solaris thread debugging library)
-if test -f /usr/lib/libthread_db.so.1 ; then
-	AC_MSG_RESULT(yes)
-	LIBS="$LIBS /usr/lib/libthread_db.so.1"
-	THREAD_DB_OBS=sol-thread.o
-	AC_DEFINE(HAVE_THREAD_DB_LIB)
-else
-	AC_MSG_RESULT(no)
+if test ${host} = ${target} ; then
+	AC_MSG_CHECKING(for Solaris thread debugging library)
+	if test -f /usr/lib/libthread_db.so.1 ; then
+		AC_MSG_RESULT(yes)
+		THREAD_DB_OBS=sol-thread.o
+		AC_DEFINE(HAVE_THREAD_DB_LIB)
+		CONFIG_LDFLAGS="${CONFIG_LDFLAGS} -Xlinker -export-dynamic"
+	else
+		AC_MSG_RESULT(no)
+	fi
+	AC_SUBST(THREAD_DB_OBS)
+	AC_SUBST(CONFIG_LDFLAGS)
 fi
-AC_SUBST(THREAD_DB_OBS)
 
 dnl Handle optional features that can be enabled.
 ENABLE_CFLAGS=

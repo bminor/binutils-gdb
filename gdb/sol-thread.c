@@ -66,6 +66,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <dlfcn.h>
 
 extern struct target_ops sol_thread_ops; /* Forward declaration */
 
@@ -121,6 +122,56 @@ static int lwp_to_thread PARAMS ((int lwp));
 #define GET_THREAD(THREAD_ID) (((THREAD_ID) >> 16) & 0x7fff)
 #define BUILD_LWP(LWP_ID, PID) ((LWP_ID) << 16 | (PID))
 #define BUILD_THREAD(THREAD_ID, PID) (THREAD_FLAG | BUILD_LWP (THREAD_ID, PID))
+
+/* Pointers to routines from lithread_db resolved by dlopen() */
+
+static void
+  (*p_td_log) (const int on_off);
+static td_err_e
+  (*p_td_ta_new) (const struct ps_prochandle *ph_p, td_thragent_t **ta_pp);
+static td_err_e
+  (*p_td_ta_delete) (td_thragent_t *ta_p);
+static td_err_e
+  (*p_td_init) (void);
+static td_err_e
+  (*p_td_ta_get_ph) (const td_thragent_t *ta_p, struct ps_prochandle **ph_pp);
+static td_err_e
+  (*p_td_ta_get_nthreads) (const td_thragent_t *ta_p, int *nthread_p);
+static td_err_e
+  (*p_td_ta_tsd_iter) (const td_thragent_t *ta_p, td_key_iter_f *cb, void *cbdata_p);
+static td_err_e
+  (*p_td_ta_thr_iter) (const td_thragent_t *ta_p, td_thr_iter_f *cb, void *cbdata_p, td_thr_state_e state,
+		       int ti_pri, sigset_t *ti_sigmask_p, unsigned ti_user_flags);
+static td_err_e
+  (*p_td_thr_validate) (const td_thrhandle_t *th_p);
+static td_err_e
+  (*p_td_thr_tsd) (const td_thrhandle_t *th_p, const thread_key_t key, void **data_pp);
+static td_err_e
+  (*p_td_thr_get_info) (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p);
+static td_err_e
+  (*p_td_thr_getfpregs) (const td_thrhandle_t *th_p, prfpregset_t *fpregset);
+static td_err_e
+  (*p_td_thr_getxregsize) (const td_thrhandle_t *th_p, int *xregsize);
+static td_err_e
+  (*p_td_thr_getxregs) (const td_thrhandle_t *th_p, const caddr_t xregset);
+static td_err_e
+  (*p_td_thr_sigsetmask) (const td_thrhandle_t *th_p, const sigset_t ti_sigmask);
+static td_err_e
+  (*p_td_thr_setprio) (const td_thrhandle_t *th_p, const int ti_pri);
+static td_err_e
+  (*p_td_thr_setsigpending) (const td_thrhandle_t *th_p, const uchar_t ti_pending_flag, const sigset_t ti_pending);
+static td_err_e
+  (*p_td_thr_setfpregs) (const td_thrhandle_t *th_p, const prfpregset_t *fpregset);
+static td_err_e
+  (*p_td_thr_setxregs) (const td_thrhandle_t *th_p, const caddr_t xregset);
+static td_err_e
+  (*p_td_ta_map_id2thr) (const td_thragent_t *ta_p, thread_t tid, td_thrhandle_t *th_p);
+static td_err_e
+  (*p_td_ta_map_lwp2thr) (const td_thragent_t *ta_p, lwpid_t lwpid, td_thrhandle_t *th_p);
+static td_err_e
+  (*p_td_thr_getgregs) (const td_thrhandle_t *th_p, prgregset_t regset);
+static td_err_e
+  (*p_td_thr_setgregs) (const td_thrhandle_t *th_p, const prgregset_t regset);
 
 /*
 
@@ -266,11 +317,11 @@ thread_to_lwp (thread_id, default_lwp)
   pid = PIDGET (thread_id);
   thread_id = GET_THREAD(thread_id);
 
-  val = td_ta_map_id2thr (main_ta, thread_id, &th);
+  val = p_td_ta_map_id2thr (main_ta, thread_id, &th);
   if (val != TD_OK)
     error ("thread_to_lwp: td_ta_map_id2thr %s", td_err_string (val));
 
-  val = td_thr_get_info (&th, &ti);
+  val = p_td_thr_get_info (&th, &ti);
 
   if (val != TD_OK)
     error ("thread_to_lwp: td_thr_get_info: %s", td_err_string (val));
@@ -327,11 +378,11 @@ lwp_to_thread (lwp)
   pid = PIDGET (lwp);
   lwp = GET_LWP (lwp);
 
-  val = td_ta_map_lwp2thr (main_ta, lwp, &th);
+  val = p_td_ta_map_lwp2thr (main_ta, lwp, &th);
   if (val != TD_OK)
     error ("lwp_to_thread: td_thr_get_info: %s.", td_err_string (val));
 
-  val = td_thr_get_info (&th, &ti);
+  val = p_td_thr_get_info (&th, &ti);
 
   if (val != TD_OK)
     error ("lwp_to_thread: td_thr_get_info: %s.", td_err_string (val));
@@ -518,14 +569,14 @@ sol_thread_fetch_registers (regno)
   if (thread == 0)
     error ("sol_thread_fetch_registers:  thread == 0");
 
-  val = td_ta_map_id2thr (main_ta, thread, &thandle);
+  val = p_td_ta_map_id2thr (main_ta, thread, &thandle);
   if (val != TD_OK)
     error ("sol_thread_fetch_registers: td_ta_map_id2thr: %s",
 	   td_err_string (val));
 
   /* Get the integer regs */
 
-  val = td_thr_getgregs (&thandle, gregset);
+  val = p_td_thr_getgregs (&thandle, gregset);
   if (val != TD_OK
       && val != TD_PARTIALREG)
     error ("sol_thread_fetch_registers: td_thr_getgregs %s",
@@ -536,7 +587,7 @@ sol_thread_fetch_registers (regno)
 
   /* And, now the fp regs */
 
-  val = td_thr_getfpregs (&thandle, &fpregset);
+  val = p_td_thr_getfpregs (&thandle, &fpregset);
   if (val != TD_OK
       && val != TD_NOFPREGS)
     error ("sol_thread_fetch_registers: td_thr_getfpregs %s",
@@ -585,18 +636,18 @@ sol_thread_store_registers (regno)
 
   thread = GET_THREAD (inferior_pid);
 
-  val = td_ta_map_id2thr (main_ta, thread, &thandle);
+  val = p_td_ta_map_id2thr (main_ta, thread, &thandle);
   if (val != TD_OK)
     error ("sol_thread_store_registers: td_ta_map_id2thr %s",
 	   td_err_string (val));
 
   if (regno != -1)
     {				/* Not writing all the regs */
-      val = td_thr_getgregs (&thandle, regset);
+      val = p_td_thr_getgregs (&thandle, regset);
       if (val != TD_OK)
 	error ("sol_thread_store_registers: td_thr_getgregs %s",
 	       td_err_string (val));
-      val = td_thr_getfpregs (&thandle, &fpregset);
+      val = p_td_thr_getfpregs (&thandle, &fpregset);
       if (val != TD_OK)
 	error ("sol_thread_store_registers: td_thr_getfpregs %s",
 	       td_err_string (val));
@@ -622,11 +673,11 @@ sol_thread_store_registers (regno)
   fill_gregset (regset, regno);
   fill_fpregset (fpregset, regno);
 
-  val = td_thr_setgregs (&thandle, regset);
+  val = p_td_thr_setgregs (&thandle, regset);
   if (val != TD_OK)
     error ("sol_thread_store_registers: td_thr_setgregs %s",
 	   td_err_string (val));
-  val = td_thr_setfpregs (&thandle, &fpregset);
+  val = p_td_thr_setfpregs (&thandle, &fpregset);
   if (val != TD_OK)
     error ("sol_thread_store_registers: td_thr_setfpregs %s",
 	   td_err_string (val));
@@ -747,11 +798,11 @@ sol_thread_new_objfile (objfile)
      the shared libraries are located because it needs information from the
      user's thread library.  */
 
-  val = td_init ();
+  val = p_td_init ();
   if (val != TD_OK)
     error ("target_new_objfile: td_init: %s", td_err_string (val));
 
-  val = td_ta_new (&main_ph, &main_ta);
+  val = p_td_ta_new (&main_ph, &main_ta);
   if (val == TD_NOLIBTHREAD)
     return;
   else if (val != TD_OK)
@@ -1095,15 +1146,15 @@ struct target_ops sol_thread_ops = {
   "Solaris threads and pthread support.", /* to_doc */
   sol_thread_open,		/* to_open */
   0,				/* to_close */
-  sol_thread_attach,			/* to_attach */
+  sol_thread_attach,		/* to_attach */
   sol_thread_detach, 		/* to_detach */
-  sol_thread_resume,			/* to_resume */
-  sol_thread_wait,			/* to_wait */
+  sol_thread_resume,		/* to_resume */
+  sol_thread_wait,		/* to_wait */
   sol_thread_fetch_registers,	/* to_fetch_registers */
   sol_thread_store_registers,	/* to_store_registers */
   sol_thread_prepare_to_store,	/* to_prepare_to_store */
-  sol_thread_xfer_memory,		/* to_xfer_memory */
-  sol_thread_files_info,		/* to_files_info */
+  sol_thread_xfer_memory,	/* to_xfer_memory */
+  sol_thread_files_info,	/* to_files_info */
   memory_insert_breakpoint,	/* to_insert_breakpoint */
   memory_remove_breakpoint,	/* to_remove_breakpoint */
   terminal_init_inferior,	/* to_terminal_init */
@@ -1135,7 +1186,52 @@ struct target_ops sol_thread_ops = {
 void
 _initialize_sol_thread ()
 {
+  void *dlhandle;
+
+  dlhandle = dlopen ("libthread_db.so.1", RTLD_NOW);
+  if (!dlhandle)
+    goto die;
+
+#define resolve(X) \
+  if (!(p_##X = dlsym (dlhandle, #X))) \
+    goto die;
+
+  resolve (td_log);
+  resolve (td_ta_new);
+  resolve (td_ta_delete);
+  resolve (td_init);
+  resolve (td_ta_get_ph);
+  resolve (td_ta_get_nthreads);
+  resolve (td_ta_tsd_iter);
+  resolve (td_ta_thr_iter);
+  resolve (td_thr_validate);
+  resolve (td_thr_tsd);
+  resolve (td_thr_get_info);
+  resolve (td_thr_getfpregs);
+  resolve (td_thr_getxregsize);
+  resolve (td_thr_getxregs);
+  resolve (td_thr_sigsetmask);
+  resolve (td_thr_setprio);
+  resolve (td_thr_setsigpending);
+  resolve (td_thr_setfpregs);
+  resolve (td_thr_setxregs);
+  resolve (td_ta_map_id2thr);
+  resolve (td_ta_map_lwp2thr);
+  resolve (td_thr_getgregs);
+  resolve (td_thr_setgregs);
+
   add_target (&sol_thread_ops);
 
   procfs_suppress_run = 1;
+
+  return;
+
+ die:
+
+  fprintf_unfiltered (gdb_stderr, "[GDB will not be able to debug user-mode threads: %s]\n", dlerror ());
+
+  if (dlhandle)
+    dlclose (dlhandle);
+
+  return;
 }
