@@ -357,8 +357,16 @@ hw_pal_io_read_buffer (struct hw *me,
       break;
 
     case hw_pal_nr_cpu_register:
-      *byte = hw_tree_find_integer_property (me, "/openprom/options/smp");
-      HW_TRACE ((me, "read - nr-cpu %d\n", *byte));
+      if (hw_tree_find_property (me, "/openprom/options/smp") == NULL)
+	{
+	  *byte = 1;
+	  HW_TRACE ((me, "read - nr-cpu %d (not defined)\n", *byte));
+	}
+      else
+	{
+	  *byte = hw_tree_find_integer_property (me, "/openprom/options/smp");
+	  HW_TRACE ((me, "read - nr-cpu %d\n", *byte));
+	}
       break;
 
     case hw_pal_read_fifo:
