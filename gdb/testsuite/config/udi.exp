@@ -30,8 +30,10 @@ proc gdb_target_udi { } {
     global gdb_prompt
     global verbose
     global exit_status
+    global env;
 
     set targetname [target_info mondfe,name];
+    set env(UDICONF) [target_info mondfe,udi_soc];
     # set targets hostname
     send_gdb "target udi $targetname\n"
     set timeout 60
@@ -96,7 +98,6 @@ proc gdb_start { } {
 # gdb_exit -- exit gdb
 #
 proc gdb_exit { } {
-    slay isstip
     catch default_gdb_exit
     set in [open [concat "|ls -F"] r]
     while {[gets $in line]>-1} {

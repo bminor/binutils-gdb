@@ -1,4 +1,16 @@
+Sat Mar 22 19:50:25 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/udi.exp(gdb_target_udi): Make sure UDICONF is set
+	properly before starting gdb.
+
 Tue Mar 11 11:42:58 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/vx.exp: Use remote_ld, not vxworks_ld. Don't use
+ 	specialized code to reboot the board, use remote_reboot instead.
+
+	* config/vxworks29k.exp: Use vx.exp, not vx-gdb.exp.
+
+	* lib/gdb.exp: Add GDB_TESTCASE_OPTIONS.
 
 	* config/monitor.exp: Make sure we disconnect from the target.
 	Also, try a reboot/reload cycle instead of failing if the
