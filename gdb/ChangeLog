@@ -1,3 +1,7 @@
+2003-03-17  Fernando Nasser  <fnasser@redhat.com>
+
+	* MAINTAINERS: Remove my name from several maintainership roles.
+
 2003-03-17  Andrew Cagney  <cagney@redhat.com>
 
 	Fix frame off-by-one bug.

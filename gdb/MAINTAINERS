@@ -63,7 +63,6 @@ maintainer works with the native maintainer when resolving API issues.
 	arc		Deleted.
 
 	arm		--target=arm-elf ,-Werror
-			Fernando Nasser		fnasser@redhat.com
 			Scott Bambrough		scottb@netwinder.org
 			Richard Earnshaw	rearnsha@arm.com
 
@@ -225,7 +224,6 @@ generic symtabs		Jim Blandy		jimb@redhat.com
   xcoff reader		Any maintainer can modify this; please send tricky
 			ones to Kevin Buettner <kevinb@redhat.com>
   linespec		Elena Zannoni		ezannoni@redhat.com
-			Fernando Nasser		fnasser@redhat.com
   HP/UX readers		Any [past] maintainer can modify this.
 			Please send tricky ones to the symtabs maintainers.
 
@@ -245,12 +243,13 @@ shared libs (devolved)	Kevin Buettner		kevinb@redhat.com
 remote.c		Andrew Cagney		cagney@redhat.com
 include/remote-sim.h, remote-sim.c
 			Andrew Cagney		cagney@redhat.com
-sds protocol		Fernando Nasser		fnasser@redhat.com
-rdi/adp protocol	Fernando Nasser		fnasser@redhat.com
+sds protocol		(vacant)
+rdi/adp protocol	(vacant)
 documentation		Eli Zaretskii		eliz@gnu.org
-testsuite		Fernando Nasser		fnasser@redhat.com
+testsuite		(Global Maintainers)
   config                Mark Salter             msalter@redhat.com
-  lib                   Mark Salter             msalter@redhat.com
+  lib                   Fernando Nasser         fnasser@redhat.com
+                        Mark Salter             msalter@redhat.com
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
   c++ (gdb.c++)		Michael Chastain	mec@shout.net
 			David Carlton		carlton@math.stanford.edu
@@ -266,7 +265,7 @@ Kernel Object Display	Fernando Nasser		fnasser@redhat.com
 
 UI: External (user) interfaces.
 
-command interpreter	Fernando Nasser		fnasser@redhat.com
+command interpreter	(Global Maintainers)
 gdbtk (c & tcl)		Jim Ingham		jingham@apple.com
 			Fernando Nasser         fnasser@redhat.com
 			Keith Seitz		keiths@redhat.com
