@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "target.h"
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/param.h>
@@ -1619,11 +1620,7 @@ energize_wait(status)
   static sigset_t nullsigmask = {0};
 
   if (!energize)
-#ifdef USE_PROC_FS
-    return proc_wait (status);
-#else
-    return wait(status);
-#endif
+    return target_wait(status);
 
 #ifdef NCR486
   action.sa_handler = iosig;
@@ -1634,11 +1631,7 @@ energize_wait(status)
   signal(SIGIO, iosig);
 #endif
 
-#ifdef USE_PROC_FS
-  pid = proc_wait (status);
-#else
-  pid = wait(status);
-#endif
+  pid = target_wait(status);
 
   signal(SIGIO, SIG_IGN);
   return pid;
