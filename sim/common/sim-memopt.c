@@ -33,7 +33,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdlib.h>
 #endif
 
-/* "core" command line options. */
+/* Memory command line options. */
 
 enum {
   OPTION_MEMORY_DELETE = OPTION_START,
@@ -342,7 +342,7 @@ memory_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
       }
 
     default:
-      sim_io_eprintf (sd, "Unknown watch option %d\n", opt);
+      sim_io_eprintf (sd, "Unknown memory option %d\n", opt);
       return SIM_RC_FAIL;
 
     }
