@@ -158,6 +158,8 @@
 @V@/gdb/ppc-linux-nat.c @V@/gdb/ppc-lx-nat.c
 @V@/gdb/ppcnbsd-nat.c @V@/gdb/ppcnb-nat.c
 @V@/gdb/ppcnbsd-tdep.c @V@/gdb/ppcnb-tdep.c
+@V@/gdb/ppcobsd-nat.c @V@/gdb/ppcob-nat.c
+@V@/gdb/ppcobsd-tdep.c @V@/gdb/ppcob-tdep.c
 @V@/gdb/regformats/reg-i386-linux.dat @V@/gdb/regformats/r-i386-lnx.dat
 @V@/gdb/regformats/reg-s390x.dat @V@/gdb/regformats/r-s390x.dat
 @V@/gdb/remote-e7000.c @V@/gdb/rmt-e7000.c

@@ -1,5 +1,8 @@
 2004-05-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/djgpp/fnchange.lst: Add entries for ppcobsd-nat.c and
+	ppcobsd-tdep.c.
+
 	* config/sparc/tm-nbsd64.h: Remove file.
 	* config/tm-sunos.h: Remove file.
 
