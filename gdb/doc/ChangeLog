@@ -1,3 +1,7 @@
+Fri Sep  3 17:06:08 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* gdb.texinfo: @up/@down -> @raisesections/@lowersections
+
 Fri Sep  3 12:04:15 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo: Make info author notice match the TeX author notice.

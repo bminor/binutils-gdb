@@ -5041,7 +5041,7 @@ together.
 @end ifset
 @ifclear MOD2
 @c Cancel this below, under same condition, at end of this chapter!
-@up 
+@raisesections
 @end ifclear
 
 @cindex C++
@@ -5525,8 +5525,8 @@ available choices, or to finish the type list for you.
 @xref{Completion,, Command completion}, for details on how to do this.
 @end table
 @ifclear MOD2
-@c cancels "up" under same conditions near bgn of chapter
-@down
+@c cancels "raisesections" under same conditions near bgn of chapter
+@lowersections
 @end ifclear
 
 @ifset MOD2
