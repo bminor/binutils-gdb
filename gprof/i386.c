@@ -86,7 +86,7 @@ i386_find_call (parent, p_lowpc, p_highpc)
 		   */
 		  DBG (CALLDEBUG,
 		       printf ("\tdestpc 0x%lx (%s)\n", destpc, child->name));
-		  arc_add (parent, child, (long) 0);
+		  arc_add (parent, child, (unsigned long) 0);
 		  instructp += 4;	/* call is a 5 byte instruction */
 		  continue;
 		}

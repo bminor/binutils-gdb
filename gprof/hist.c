@@ -427,9 +427,9 @@ DEFUN (print_line, (sym, scale), Sym * sym AND double scale)
 	      total_time > 0.0 ? 100 * sym->hist.time / total_time : 0.0,
 	      accum_time / hz, sym->hist.time / hz);
     }
-  if (sym->ncalls)
+  if (sym->ncalls != 0)
     {
-      printf (" %8d %8.2f %8.2f  ",
+      printf (" %8lu %8.2f %8.2f  ",
 	      sym->ncalls, scale * sym->hist.time / hz / sym->ncalls,
 	  scale * (sym->hist.time + sym->cg.child_time) / hz / sym->ncalls);
     }
@@ -460,7 +460,6 @@ DEFUN (cmp_time, (lp, rp), const PTR lp AND const PTR rp)
   const Sym *left = *(const Sym **) lp;
   const Sym *right = *(const Sym **) rp;
   double time_diff;
-  long call_diff;
 
   time_diff = right->hist.time - left->hist.time;
   if (time_diff > 0.0)
@@ -472,12 +471,11 @@ DEFUN (cmp_time, (lp, rp), const PTR lp AND const PTR rp)
       return -1;
     }
 
-  call_diff = right->ncalls - left->ncalls;
-  if (call_diff > 0)
+  if (right->ncalls > left->ncalls)
     {
       return 1;
     }
-  if (call_diff < 0)
+  if (right->ncalls < left->ncalls)
     {
       return -1;
     }
@@ -547,7 +545,7 @@ DEFUN_VOID (hist_print)
       for (index = 0; index < symtab.len; ++index)
 	{
 	  sym = time_sorted_syms[index];
-	  if (sym->ncalls)
+	  if (sym->ncalls != 0)
 	    {
 	      time = (sym->hist.time + sym->cg.child_time) / sym->ncalls;
 	      if (time > top_time)
@@ -557,7 +555,7 @@ DEFUN_VOID (hist_print)
 		}
 	    }
 	}
-      if (top_dog && top_dog->ncalls && top_time > 0.0)
+      if (top_dog && top_dog->ncalls != 0 && top_time > 0.0)
 	{
 	  top_time /= hz;
 	  while (SItab[log_scale].scale * top_time < 1000.0

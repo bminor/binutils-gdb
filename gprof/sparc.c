@@ -75,7 +75,7 @@ sparc_find_call (parent, p_lowpc, p_highpc)
 	      if (child->addr == dest_pc)
 		{
 		  /* a hit:  */
-		  arc_add (parent, child, 0);
+		  arc_add (parent, child, (unsigned long) 0);
 		  continue;
 		}
 	    }

@@ -149,7 +149,8 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 	bfd_vma high_pc;
 	int ncnt;
       };
-      int i, samp_bytes, count;
+      int i, samp_bytes;
+      unsigned long count;
       bfd_vma from_pc, self_pc;
       struct raw_arc raw_arc;
       struct raw_phdr raw;
@@ -260,7 +261,7 @@ DEFUN (gmon_out_read, (filename), const char *filename)
 	  self_pc = get_vma (core_bfd, (bfd_byte *) raw_arc.self_pc);
 	  count = bfd_get_32 (core_bfd, (bfd_byte *) raw_arc.count);
 	  DBG (SAMPLEDEBUG,
-	     printf ("[gmon_out_read] frompc 0x%lx selfpc 0x%lx count %d\n",
+	     printf ("[gmon_out_read] frompc 0x%lx selfpc 0x%lx count %lu\n",
 		     from_pc, self_pc, count));
 	  /* add this arc: */
 	  cg_tally (from_pc, self_pc, count);
@@ -399,7 +400,7 @@ DEFUN (gmon_out_write, (filename), const char *filename)
 		  done (1);
 		}
 	      DBG (SAMPLEDEBUG,
-		   printf ("[dumpsum] frompc 0x%lx selfpc 0x%lx count %d\n",
+		   printf ("[dumpsum] frompc 0x%lx selfpc 0x%lx count %lu\n",
 			   arc->parent->addr, arc->child->addr, arc->count));
 	    }
 	}

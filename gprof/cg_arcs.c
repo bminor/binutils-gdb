@@ -65,12 +65,12 @@ DEFUN (arc_lookup, (parent, child), Sym * parent AND Sym * child)
  */
 void
 DEFUN (arc_add, (parent, child, count),
-       Sym * parent AND Sym * child AND int count)
+       Sym * parent AND Sym * child AND unsigned long count)
 {
   static unsigned int maxarcs = 0;
   Arc *arc, **newarcs;
 
-  DBG (TALLYDEBUG, printf ("[arc_add] %d arcs from %s to %s\n",
+  DBG (TALLYDEBUG, printf ("[arc_add] %lu arcs from %s to %s\n",
 			   count, parent->name, child->name));
   arc = arc_lookup (parent, child);
   if (arc)
@@ -78,7 +78,7 @@ DEFUN (arc_add, (parent, child, count),
       /*
        * A hit: just increment the count.
        */
-      DBG (TALLYDEBUG, printf ("[tally] hit %d += %d\n",
+      DBG (TALLYDEBUG, printf ("[tally] hit %lu += %lu\n",
 			       arc->count, count));
       arc->count += count;
       return;
@@ -211,7 +211,7 @@ DEFUN (propagate_time, (parent), Sym * parent)
       DBG (PROPDEBUG,
 	   printf ("[prop_time] child \t");
 	   print_name (child);
-	   printf (" with %f %f %d/%d\n", child->hist.time,
+	   printf (" with %f %f %lu/%lu\n", child->hist.time,
 		   child->cg.child_time, arc->count, child->ncalls);
 	   printf ("[prop_time] parent\t");
 	   print_name (parent);
@@ -361,7 +361,7 @@ DEFUN (inherit_flags, (child), Sym * child)
 	   * is static (and all others are, too)) no time propagates
 	   * along this arc.
 	   */
-	  if (child->ncalls)
+	  if (child->ncalls != 0)
 	    {
 	      child->cg.prop.fract += parent->cg.prop.fract
 		* (((double) arc->count) / ((double) child->ncalls));
@@ -391,7 +391,7 @@ DEFUN (inherit_flags, (child), Sym * child)
 	       * arc is static (and all others are, too)) no time
 	       * propagates along this arc.
 	       */
-	      if (head->ncalls)
+	      if (head->ncalls != 0)
 		{
 		  head->cg.prop.fract += parent->cg.prop.fract
 		    * (((double) arc->count) / ((double) head->ncalls));

@@ -127,7 +127,7 @@ alpha_find_call (parent, p_lowpc, p_highpc)
 		   printf (_("[find_call] 0x%lx: jsr%s <indirect_child>\n"),
 			   (bfd_vma) pc - delta,
 			   pc->j.func == Jxx_FUNC_JSR ? "" : "_coroutine"));
-	      arc_add (parent, &indirect_child, 0);
+	      arc_add (parent, &indirect_child, (unsigned long) 0);
 	    }
 	  break;
 
@@ -151,7 +151,7 @@ alpha_find_call (parent, p_lowpc, p_highpc)
 		{
 		  DBG (CALLDEBUG, printf ("\n"));
 		  /* a hit:  */
-		  arc_add (parent, child, 0);
+		  arc_add (parent, child, (unsigned long) 0);
 		  continue;
 		}
 	    }

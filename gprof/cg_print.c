@@ -86,13 +86,13 @@ DEFUN (print_cycle, (cyc), Sym * cyc)
 
   sprintf (buf, "[%d]", cyc->cg.index);
   printf (bsd_style_output
-	  ? "%-6.6s %5.1f %7.2f %11.2f %7d"
-	  : "%-6.6s %5.1f %7.2f %7.2f %7d", buf,
+	  ? "%-6.6s %5.1f %7.2f %11.2f %7lu"
+	  : "%-6.6s %5.1f %7.2f %7.2f %7lu", buf,
 	  100 * (cyc->cg.prop.self + cyc->cg.prop.child) / print_time,
 	  cyc->cg.prop.self / hz, cyc->cg.prop.child / hz, cyc->ncalls);
   if (cyc->cg.self_calls != 0)
     {
-      printf ("+%-7d", cyc->cg.self_calls);
+      printf ("+%-7lu", cyc->cg.self_calls);
     }
   else
     {
@@ -111,8 +111,8 @@ DEFUN (cmp_member, (left, right), Sym * left AND Sym * right)
 {
   double left_time = left->cg.prop.self + left->cg.prop.child;
   double right_time = right->cg.prop.self + right->cg.prop.child;
-  long left_calls = left->ncalls + left->cg.self_calls;
-  long right_calls = right->ncalls + right->cg.self_calls;
+  unsigned long left_calls = left->ncalls + left->cg.self_calls;
+  unsigned long right_calls = right->ncalls + right->cg.self_calls;
 
   if (left_time > right_time)
     {
@@ -176,13 +176,13 @@ DEFUN (print_members, (cyc), Sym * cyc)
   for (member = cyc->cg.cyc.next; member; member = member->cg.cyc.next)
     {
       printf (bsd_style_output
-	      ? "%6.6s %5.5s %7.2f %11.2f %7d"
-	      : "%6.6s %5.5s %7.2f %7.2f %7d",
+	      ? "%6.6s %5.5s %7.2f %11.2f %7lu"
+	      : "%6.6s %5.5s %7.2f %7.2f %7lu",
 	      "", "", member->cg.prop.self / hz, member->cg.prop.child / hz,
 	      member->ncalls);
       if (member->cg.self_calls != 0)
 	{
-	  printf ("+%-7d", member->cg.self_calls);
+	  printf ("+%-7lu", member->cg.self_calls);
 	}
       else
 	{
@@ -218,13 +218,13 @@ DEFUN (cmp_arc, (left, right), Arc * left AND Arc * right)
        print_name (left_parent);
        printf (" calls ");
        print_name (left_child);
-       printf (" %f + %f %d/%d\n", left->time, left->child_time,
+       printf (" %f + %f %lu/%lu\n", left->time, left->child_time,
 	       left->count, left_child->ncalls);
        printf ("[cmp_arc] ");
        print_name (right_parent);
        printf (" calls ");
        print_name (right_child);
-       printf (" %f + %f %d/%d\n", right->time, right->child_time,
+       printf (" %f + %f %lu/%lu\n", right->time, right->child_time,
 	       right->count, right_child->ncalls);
        printf ("\n");
     );
@@ -364,8 +364,8 @@ DEFUN (print_parents, (child), Sym * child)
 	{
 	  /* selfcall or call among siblings: */
 	  printf (bsd_style_output
-		  ? "%6.6s %5.5s %7.7s %11.11s %7d %7.7s     "
-		  : "%6.6s %5.5s %7.7s %7.7s %7d %7.7s     ",
+		  ? "%6.6s %5.5s %7.7s %11.11s %7lu %7.7s     "
+		  : "%6.6s %5.5s %7.7s %7.7s %7lu %7.7s     ",
 		  "", "", "", "",
 		  arc->count, "");
 	  print_name (parent);
@@ -375,8 +375,8 @@ DEFUN (print_parents, (child), Sym * child)
 	{
 	  /* regular parent of child: */
 	  printf (bsd_style_output
-		  ? "%6.6s %5.5s %7.2f %11.2f %7d/%-7d     "
-		  : "%6.6s %5.5s %7.2f %7.2f %7d/%-7d     ",
+		  ? "%6.6s %5.5s %7.2f %11.2f %7lu/%-7lu     "
+		  : "%6.6s %5.5s %7.2f %7.2f %7lu/%-7lu     ",
 		  "", "",
 		  arc->time / hz, arc->child_time / hz,
 		  arc->count, cycle_head->ncalls);
@@ -437,8 +437,8 @@ DEFUN (print_children, (parent), Sym * parent)
 	{
 	  /* self call or call to sibling: */
 	  printf (bsd_style_output
-		  ? "%6.6s %5.5s %7.7s %11.11s %7d %7.7s     "
-		  : "%6.6s %5.5s %7.7s %7.7s %7d %7.7s     ",
+		  ? "%6.6s %5.5s %7.7s %11.11s %7lu %7.7s     "
+		  : "%6.6s %5.5s %7.7s %7.7s %7lu %7.7s     ",
 		  "", "", "", "", arc->count, "");
 	  print_name (child);
 	  printf ("\n");
@@ -447,8 +447,8 @@ DEFUN (print_children, (parent), Sym * parent)
 	{
 	  /* regular child of parent: */
 	  printf (bsd_style_output
-		  ? "%6.6s %5.5s %7.2f %11.2f %7d/%-7d     "
-		  : "%6.6s %5.5s %7.2f %7.2f %7d/%-7d     ",
+		  ? "%6.6s %5.5s %7.2f %11.2f %7lu/%-7lu     "
+		  : "%6.6s %5.5s %7.2f %7.2f %7lu/%-7lu     ",
 		  "", "",
 		  arc->time / hz, arc->child_time / hz,
 		  arc->count, child->cg.cyc.head->ncalls);
@@ -472,10 +472,10 @@ DEFUN (print_line, (np), Sym * np)
 	  np->cg.prop.self / hz, np->cg.prop.child / hz);
   if ((np->ncalls + np->cg.self_calls) != 0)
     {
-      printf (" %7d", np->ncalls);
+      printf (" %7lu", np->ncalls);
       if (np->cg.self_calls != 0)
 	{
-	  printf ("+%-7d ", np->cg.self_calls);
+	  printf ("+%-7lu ", np->cg.self_calls);
 	}
       else
 	{

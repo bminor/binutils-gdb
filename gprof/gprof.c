@@ -279,7 +279,7 @@ DEFUN (main, (argc, argv), int argc AND char **argv)
 	  print_path = TRUE;
 	  break;
 	case 'm':
-	  bb_min_calls = atoi (optarg);
+	  bb_min_calls = (unsigned long) strtoul (optarg, (char **) NULL, 10);
 	  break;
 	case 'n':
 	  sym_id_add (optarg, INCL_TIME);

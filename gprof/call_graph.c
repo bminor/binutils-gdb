@@ -8,7 +8,7 @@
 
 extern void
 DEFUN (cg_tally, (from_pc, self_pc, count),
-       bfd_vma from_pc AND bfd_vma self_pc AND int count)
+       bfd_vma from_pc AND bfd_vma self_pc AND unsigned long count)
 {
   Sym *parent;
   Sym *child;
@@ -45,7 +45,7 @@ DEFUN (cg_tally, (from_pc, self_pc, count),
     {
       child->ncalls += count;
       DBG (TALLYDEBUG,
-	   printf (_("[cg_tally] arc from %s to %s traversed %d times\n"),
+	   printf (_("[cg_tally] arc from %s to %s traversed %lu times\n"),
 		   parent->name, child->name, count));
       arc_add (parent, child, count);
     }
@@ -63,7 +63,7 @@ DEFUN (cg_read_rec, (ifp, filename), FILE * ifp AND CONST char *filename)
 {
   bfd_vma from_pc, self_pc;
   struct gmon_cg_arc_record arc;
-  int count;
+  unsigned long count;
 
   if (fread (&arc, sizeof (arc), 1, ifp) != 1)
     {
@@ -75,7 +75,7 @@ DEFUN (cg_read_rec, (ifp, filename), FILE * ifp AND CONST char *filename)
   self_pc = get_vma (core_bfd, (bfd_byte *) arc.self_pc);
   count = bfd_get_32 (core_bfd, (bfd_byte *) arc.count);
   DBG (SAMPLEDEBUG,
-       printf ("[cg_read_rec] frompc 0x%lx selfpc 0x%lx count %d\n",
+       printf ("[cg_read_rec] frompc 0x%lx selfpc 0x%lx count %lu\n",
 	       from_pc, self_pc, count));
   /* add this arc: */
   cg_tally (from_pc, self_pc, count);
@@ -109,7 +109,7 @@ DEFUN (cg_write_arcs, (ofp, filename), FILE * ofp AND const char *filename)
 	      done (1);
 	    }
 	  DBG (SAMPLEDEBUG,
-	     printf ("[cg_write_arcs] frompc 0x%lx selfpc 0x%lx count %d\n",
+	     printf ("[cg_write_arcs] frompc 0x%lx selfpc 0x%lx count %lu\n",
 		     arc->parent->addr, arc->child->addr, arc->count));
 	}
     }

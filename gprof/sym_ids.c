@@ -329,7 +329,7 @@ DEFUN_VOID (sym_id_parse)
 				right->name ? right->name : "*", right->addr,
 				right->end_addr,
 				table_name[id->which_table]));
-		  arc_add (left, right, 0);
+		  arc_add (left, right, (unsigned long) 0);
 		}
 	    }
 	}

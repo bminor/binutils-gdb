@@ -1,3 +1,18 @@
+Wed Aug 12 14:59:06 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	Avoid some overflow cases:
+	* basic_blocks.h (bb_min_calls): Change to unsigned long.
+	* call_graph.h (cg_tally): Change count parameter to unsigned
+	long.
+	* cg_arcs.h (Arc): Change count field to unsigned long.
+	(arc_add): Change count parameter to unsigned long.
+	* source.h (Source_File): Change ncalls field to unsigned long.
+	* symtab.h (Sym): Change fields ncalls, bb_calls, and
+	cg.self_calls to unsigned long.
+	* Many files: Update accordingly.
+
+	* configure, Makefile.in, aclocal.m4: Rebuild with current tools.
+
 Fri Jul 10 17:29:49 1998  Stan Cox  <scox@equinox.cygnus.com>
 
 	* configure.in (BSD44_FORMAT): Define for cygwin32, win32, mingw32

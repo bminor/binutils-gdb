@@ -293,7 +293,7 @@ tahoe_find_call (parent, p_lowpc, p_highpc)
 	       *      [are there others that we miss?,
 	       *       e.g. arrays of pointers to functions???]
 	       */
-	      arc_add (parent, &indirectchild, (long) 0);
+	      arc_add (parent, &indirectchild, (unsigned long) 0);
 	      length += tahoe_operandlength (instructp + length);
 	      continue;
 	    case byterel:
@@ -319,7 +319,7 @@ tahoe_find_call (parent, p_lowpc, p_highpc)
 		      /*
 		       *    a hit
 		       */
-		      arc_add (parent, child, (long) 0);
+		      arc_add (parent, child, (unsigned long) 0);
 		      length += tahoe_operandlength (instructp + length);
 		      continue;
 		    }
