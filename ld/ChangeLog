@@ -1,3 +1,8 @@
+2003-07-29  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* scripttempl/elfm68hc12.sc: Add gcc_except_table.
+	* scripttempl/elfm68hc11.sc: Likewise.
+
 2003-07-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/elf64ppc.sh (GOT): Fix for shell brace matching.
