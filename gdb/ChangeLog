@@ -1,5 +1,7 @@
 2004-11-07  Mark Kettenis  <kettenis@gnu.org>
 
+	* Makefile.in (mips64obsd-tdep.o): Fix typo.
+
 	* mipsnbsd-tdep.c (mipsnbsd_ilp32_fetch_link_map_offsets): Renamed
 	from mipsnbsd_ilp32_solib_svr4_fetch_link_map_offsets.  Trim sizes
 	to only include the structure members we actually need.
