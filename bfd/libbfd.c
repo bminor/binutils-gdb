@@ -293,7 +293,7 @@ bfd_read (ptr, size, nitems, abfd)
 
      A BFD backend may wish to override bfd_error_file_truncated to
      provide something more useful (eg. no_symbols or wrong_format).  */
-  if (nread < (int)(size * nitems))
+  if (nread != (int) (size * nitems))
     {
       if (ferror (bfd_cache_lookup (abfd)))
 	bfd_set_error (bfd_error_system_call);
@@ -1166,13 +1166,20 @@ _bfd_generic_get_section_contents (abfd, section, location, offset, count)
      file_ptr offset;
      bfd_size_type count;
 {
-    if (count == 0)
-        return true;
-    if ((bfd_size_type)(offset+count) > section->_raw_size
-        || bfd_seek(abfd, (file_ptr)(section->filepos + offset), SEEK_SET) == -1
-        || bfd_read(location, (bfd_size_type)1, count, abfd) != count)
-        return (false); /* on error */
-    return (true);
+  if (count == 0)
+    return true;
+
+  if ((bfd_size_type) (offset + count) > section->_raw_size)
+    {
+      bfd_set_error (bfd_error_invalid_operation);
+      return false;
+    }
+
+  if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0
+      || bfd_read (location, (bfd_size_type) 1, count, abfd) != count)
+    return false;
+
+  return true;
 }
 
 boolean

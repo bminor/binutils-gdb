@@ -1,3 +1,13 @@
+1999-11-09  Ian Lance Taylor  <ian@zembu.com>
+
+	* libbfd.c (bfd_read): Check result of read against desired result
+	using !=, not <.
+	(_bfd_generic_get_section_contents): Set bfd_error if the seek is
+	invalid compared to the section size.
+
+	* ieee.c (ieee_slurp_debug): Get the length of the debug
+	information right if there is no data part.
+
 Tue Nov  2 01:44:41 1999  Jeffrey A Law  (law@cygnus.com)
 
 	* som.c (som_fixup_formats): Improve handling of R_AUX_UNWIND,
