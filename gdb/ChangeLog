@@ -385,6 +385,24 @@ Sat Oct 26 00:16:32 1991  John Gilmore  (gnu at cygus.com)
 	* symtab.h, symfile.c, coffread.c, mipsread.c, dwarfread.c:
 	Avoid declaring or setting entry_point (symfile.h & symfile.c cope).
 
+Fri Oct 25 10:58:16 1991  Mark Eichin  (eichin at cygnus.com)
+
+	* cplus-dem.c (cplus-demangle): added support for templates, static
+	data, and the new (correct) mangling for destructors.
+
+	* dwarfread.c: (dwarfwarn): created a varargs version of
+	dwarfwarn, for non __STDC__ compilers.
+
+	* c-exp.y: (yylex): added match for "template" token.
+	(typebase): added TEMPLATE name '<' type '>' clause, for explicit
+	specification of template types.
+
+	* symtab.c: (lookup_template_type): new function for finding
+	templates in symbol table.
+	(type_name_no_tag): changed to explicitly check for s/u/e at the
+	beginning of the symbol - if it is a template, none of these will
+	be there (but the name will still contain spaces.)
+
 Fri Oct 25 18:59:32 1991  Per Bothner  (bothner at cygnus.com)
 
 	Various fixes to improve g++ debugging.

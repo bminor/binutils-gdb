@@ -135,6 +135,7 @@ int yyparse ();
 %token <ssym> NAME_OR_INT NAME_OR_UINT
 
 %token STRUCT UNION ENUM SIZEOF UNSIGNED COLONCOLON
+%token TEMPLATE
 %token ERROR
 
 /* Special type cases, put in to allow the parser to distinguish different
@@ -831,6 +832,10 @@ typebase
 			{ $$ = $2.type; }
 	|	SIGNED
 			{ $$ = builtin_type_int; }
+	|	TEMPLATE name '<' type '>'
+			{ $$ = lookup_template_type(copy_name($2), $4,
+						    expression_context_block);
+			}
 	;
 
 typename:	TYPENAME
@@ -1289,6 +1294,8 @@ yylex ()
     case 8:
       if (!strncmp (tokstart, "unsigned", 8))
 	return UNSIGNED;
+      if (!strncmp (tokstart, "template", 8))
+	return TEMPLATE;
       break;
     case 6:
       if (!strncmp (tokstart, "struct", 6))
@@ -1403,7 +1410,7 @@ void
 yyerror (msg)
      char *msg;
 {
-  error (msg ? msg : "Invalid syntax in expression.");
+  error (error (msg ? msg : "Invalid syntax in expression.");
 }
 
 /* Table mapping opcodes into strings for printing operators

@@ -225,6 +225,8 @@ cplus_demangle (type, arg_mode)
   int n;
   int success = 0;
   int constructor = 0;
+  int destructor = 0;
+  int static_type = 0;
   int const_flag = 0;
   int i;
   const char *p;
@@ -249,21 +251,14 @@ cplus_demangle (type, arg_mode)
       /* destructor */
       if (type[0] == '_' && type[1] == CPLUS_MARKER && type[2] == '_')
 	{
-	  char *tem = (char *) xmalloc ((strlen (type) - 3)*2 + 3 + 2 + 1);
-	  strcpy (tem, type + 3);
-	  strcat (tem, "::~");
-	  strcat (tem, type + 3);
-	  strcat (tem, "()");
-	  return tem;
+	  destructor = 1;
+	  p = type;
 	}
       /* static data member */
-      if (*type != '_' && (p = strchr (type, CPLUS_MARKER)) != NULL)
+      if (*type != '_' && (strchr (type, CPLUS_MARKER) != NULL))
 	{
-	  char *tem = (char *) xmalloc (strlen (type) + 2);
-	  memcpy (tem, type, p - type);
-	  strcpy (tem + (p - type), "::");
-	  strcpy (tem + (p - type) + 2, p + 1);
-	  return tem;
+	  static_type = 1;
+	  p = type;
 	}
       /* virtual table "_vt$" */
       if (type[0] == '_' && type[1] == 'v' && type[2] == 't' && type[3] == CPLUS_MARKER)
@@ -278,7 +273,15 @@ cplus_demangle (type, arg_mode)
 
   string_init (&decl);
 
-  if (p == type)
+  if (static_type)
+    {
+      if (!isdigit (p[0]) && ('t' != p[0]))
+	{
+	  string_delete (&decl);
+	  return NULL;
+	}
+    }
+  else if (p == type)
     {
       if (!isdigit (p[2]))
 	{
@@ -286,13 +289,14 @@ cplus_demangle (type, arg_mode)
 	  return NULL;
 	}
       constructor = 1;
+      p += 2;
     }
   else
     {
       string_appendn (&decl, type, p - type);
       munge_function_name (&decl, arg_mode);
+      p += 2;
     }
-  p += 2;
 
 #ifndef LONGERNAMES
   premangle = p;
@@ -332,10 +336,12 @@ cplus_demangle (type, arg_mode)
 	  string_delete (&decl);
 	  return NULL;
 	}
-      if (constructor)
+      if (constructor || destructor)
 	{
 	  string_appendn (&decl, p, n);
 	  string_append (&decl, "::");
+	  if (destructor)
+	    string_append(&decl, "~");
 	  string_appendn (&decl, p, n);
 	}
       else
@@ -347,7 +353,14 @@ cplus_demangle (type, arg_mode)
 #ifndef LONGERNAMES
       remember_type (premangle, p - premangle);
 #endif
-      success = do_args (&p, &decl, arg_mode);
+      if (static_type)
+	{
+	  string_append(&decl, p+1);
+	  p += strlen(p);
+	  success = 1;
+	}
+      else
+	success = do_args (&p, &decl, arg_mode);
       if (const_flag && print_arg_types)
 	string_append (&decl, " const");
       break;
@@ -355,6 +368,191 @@ cplus_demangle (type, arg_mode)
       p += 1;
       success = do_args (&p, &decl, arg_mode);
       break;
+    /* template additions */
+    case 't':
+      p += 1;
+      {
+	int r, i;
+	int non_empty = 0;
+	string tname;
+	string trawname;
+	
+	string temp;
+	int need_comma = 0;
+	
+	string_init(&tname);
+	string_init(&trawname);
+	
+	/* get template name */
+	if (!get_count (&p, &r))
+	  return 0;
+	string_appendn (&tname, p, r);
+	string_appendn (&trawname, p, r);
+	string_appendn (&trawname, "", 1);
+	p += r;
+	string_append (&tname, "<");
+	/* get size of template parameter list */
+	if (!get_count (&p, &r))
+	  return 0;
+	for (i = 0; i < r; i++)
+	  {
+	    if (need_comma)
+	      string_append (&tname, ", ");
+	    /* Z for type parameters */
+	    if (*p == 'Z')
+	      {
+		p += 1;
+		
+		success = do_type (&p, &temp, arg_mode);
+		string_appendn (&temp, "", 1);
+		if (success)
+		  string_append (&tname, temp.b);
+		string_delete(&temp);
+		if (!success)
+		  break;
+	      }
+	    /* otherwise, value parameter */
+	    else
+	      {
+		const char *old_p  = p;
+		int is_pointer = 0;
+		int is_real = 0;
+		int is_integral = 0;
+		int done = 0;
+
+		success = do_type (&p, &temp, arg_mode);
+		string_appendn (&temp, "", 1);
+		if (success)
+		  string_append (&tname, temp.b);
+		string_delete(&temp);
+		if (!success)
+		  break;
+		string_append (&tname, "=");
+		while (*old_p && !done)
+		  {	
+		    switch (*old_p)
+		      {
+		      case 'P':
+		      case 'R':
+			done = is_pointer = 1;
+			break;
+		      case 'C':	/* const */
+		      case 'U':	/* unsigned */
+		      case 'V':	/* volatile */
+		      case 'F':	/* function */
+		      case 'M':	/* member function */
+		      case 'O':	/* ??? */
+			old_p++;
+			continue;
+		      case 'Q':	/* repetition of following */
+		      case 'T':	/* remembered type */
+			abort();
+			break;
+		      case 'v':	/* void */
+			abort();
+			break;
+		      case 'x':	/* long long */
+		      case 'l':	/* long */
+		      case 'i':	/* int */
+		      case 's':	/* short */
+		      case 'c':	/* char */
+			done = is_integral = 1;
+			break;
+		      case 'r':	/* long double */
+		      case 'd':	/* double */
+		      case 'f':	/* float */
+			done = is_real = 1;
+			break;
+		      default:
+			abort();
+		      }
+		  }
+		if (is_integral)
+		  {
+		    if (*p == 'm')
+		      {
+			string_appendn (&tname, "-", 1);
+			p++;
+		      }
+		    while (isdigit (*p))	
+		      {
+			string_appendn (&tname, p, 1);
+			p++;
+		      }
+		  }
+		else if (is_real)
+		  {
+		    if (*p == 'm')
+		      {
+			string_appendn (&tname, "-", 1);
+			p++;
+		      }
+		    while (isdigit (*p))	
+		      {
+			string_appendn (&tname, p, 1);
+			p++;
+		      }
+		    if (*p == '.') /* fraction */
+		      {
+			string_appendn (&tname, ".", 1);
+			p++;
+			while (isdigit (*p))	
+			  {
+			    string_appendn (&tname, p, 1);
+			    p++;
+			  }
+		      }
+		    if (*p == 'e') /* exponent */
+		      {
+			string_appendn (&tname, "e", 1);
+			p++;
+			while (isdigit (*p))	
+			  {
+			    string_appendn (&tname, p, 1);
+			    p++;
+			  }
+		      }
+		  }
+		else if (is_pointer)
+		  {
+		    int symbol_len;
+		    
+		    if (!get_count (&p, &symbol_len))
+		      {
+			success = 0;
+			break;
+		      }
+		    string_appendn (&tname, p, symbol_len);
+		    p += symbol_len;
+		  }
+	      }
+	    need_comma = 1;
+	  }
+	string_append (&tname, ">::");
+	if (destructor)
+	  string_append(&tname, "~");
+	if (constructor || destructor) {
+	  string_append (&tname, trawname.b);
+	}
+	string_delete(&trawname);
+	
+	if (!success) {
+	  string_delete(&tname);
+	  return 0;
+	}
+	string_prepend (&decl, tname.b);
+	string_delete(&tname);
+
+	if (static_type)
+	  {
+	    string_append(&decl, p+1);
+	    p += strlen(p);
+	    success = 1;
+	  }
+	else
+	  success = do_args (&p, &decl, arg_mode);
+	break;
+      }
     }
 
   for (i = 0; i < ntypes; i++)
