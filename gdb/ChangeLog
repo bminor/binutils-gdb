@@ -1,5 +1,8 @@
 2004-08-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64obsd-tdep.c (amd64obsd_sigtramp_p): Use
+	safe_frame_unwind_memory instead of target_read_memory.
+
 	* infptrace.c: Remove #ifdef'ed out inclusion of gdb_stat.h.
 	Reorder includes.
 	(fetch_register, store_register): Remove prototypes.
