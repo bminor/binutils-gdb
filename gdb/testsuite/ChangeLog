@@ -1,3 +1,8 @@
+2004-06-04  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* gdb.threads/pthreads.exp: Update copyright years.
+	(check_control_c): Change asynchronous 'after' to synchronous.
+
 2004-06-04  Roland McGrath  <roland@redhat.com>
 
 	* gdb.base/auxv.exp (fetch_auxv): Consume output fully through
