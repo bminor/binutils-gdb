@@ -28,10 +28,6 @@ static bfd_reloc_status_type fr30_elf_i20_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_reloc_status_type fr30_elf_i32_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static bfd_reloc_status_type fr30_elf_pc9_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static bfd_reloc_status_type fr30_elf_pc12_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static reloc_howto_type * fr30_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void fr30_info_to_howto_rela 
@@ -90,6 +86,21 @@ static reloc_howto_type fr30_elf_howto_table [] =
 
   /* A 32 bit absolute relocation.  */
   HOWTO (R_FR30_32,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_FR30_32",		/* name */
+	 true,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* A 32 bit into 48 bits absolute relocation.  */
+  HOWTO (R_FR30_48,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
@@ -171,7 +182,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 fr30_elf_pc9_reloc,	/* special_function */
+	 bfd_elf_generic_reloc, /* special_function */
 	 "R_FR30_9_PCREL",	/* name */
 	 false,			/* partial_inplace */
 	 0x00ff,		/* src_mask */
@@ -186,7 +197,7 @@ static reloc_howto_type fr30_elf_howto_table [] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
-	 fr30_elf_pc12_reloc,	/* special_function */
+	 bfd_elf_generic_reloc, /* special_function */
 	 "R_FR30_12_PCREL",	/* name */
 	 false,			/* partial_inplace */
 	 0x07ff,		/* src_mask */
@@ -280,113 +291,6 @@ fr30_elf_i32_reloc (abfd, reloc_entry, symbol, data,
 
   return bfd_reloc_ok;
 }
-
-
-/* Utility to actually perform a R_FR30_9_PCREL reloc.  */
-
-static bfd_reloc_status_type
-fr30_elf_pc9_reloc (abfd, reloc_entry, symbol, data,
-		    input_section, output_bfd, error_message)
-     bfd *      abfd;
-     arelent *  reloc_entry;
-     asymbol *  symbol;
-     PTR        data;
-     asection * input_section;
-     bfd *      output_bfd;
-     char **    error_message;
-{
-  bfd_signed_vma       relocation;
-
-  /* This part is from bfd_elf_generic_reloc.  */
-  if (output_bfd != (bfd *) NULL
-      && (symbol->flags & BSF_SECTION_SYM) == 0
-      && (! reloc_entry->howto->partial_inplace
-	  || reloc_entry->addend == 0))
-    {
-      reloc_entry->address += input_section->output_offset;
-      return bfd_reloc_ok;
-    }
-
-  if (output_bfd != NULL)
-    /* FIXME: See bfd_perform_relocation.  Is this right?  */
-    return bfd_reloc_ok;
-
-  relocation =
-    symbol->value
-    + symbol->section->output_section->vma
-    + symbol->section->output_offset
-    + reloc_entry->addend
-    - input_section->output_section->vma
-    - input_section->output_offset
-    - 2;
-
-  if (relocation & 1)
-    return bfd_reloc_outofrange;
-
-  if (relocation > ((1 << 8) - 1) || (relocation < - (1 << 8)))
-    return bfd_reloc_overflow;
-
-  bfd_put_8 (abfd, relocation >> 1, data + reloc_entry->address + 1);
-
-  return bfd_reloc_ok;
-}
-
-
-/* Utility to actually perform a R_FR30_12_PCREL reloc.  */
-
-static bfd_reloc_status_type
-fr30_elf_pc12_reloc (abfd, reloc_entry, symbol, data,
-		    input_section, output_bfd, error_message)
-     bfd *      abfd;
-     arelent *  reloc_entry;
-     asymbol *  symbol;
-     PTR        data;
-     asection * input_section;
-     bfd *      output_bfd;
-     char **    error_message;
-{
-  bfd_signed_vma        relocation;
-  bfd_vma		x;
-
-  
-  /* This part is from bfd_elf_generic_reloc.  */
-  if (output_bfd != (bfd *) NULL
-      && (symbol->flags & BSF_SECTION_SYM) == 0
-      && (! reloc_entry->howto->partial_inplace
-	  || reloc_entry->addend == 0))
-    {
-      reloc_entry->address += input_section->output_offset;
-      return bfd_reloc_ok;
-    }
-
-  if (output_bfd != NULL)
-    /* FIXME: See bfd_perform_relocation.  Is this right?  */
-    return bfd_reloc_ok;
-
-  relocation =
-    symbol->value
-    + symbol->section->output_section->vma
-    + symbol->section->output_offset
-    + reloc_entry->addend
-    - input_section->output_section->vma
-    - input_section->output_offset
-    - 2;
-
-  if (relocation & 1)
-    return bfd_reloc_outofrange;
-
-  if (relocation > ((1 << 11) - 1) || (relocation < - (1 << 11)))
-    return bfd_reloc_overflow;
-
-  data += reloc_entry->address;
-  
-  x = bfd_get_16 (abfd, data);
-  x = (x & 0xf800) | ((relocation >> 1) & 0x7ff);
-  bfd_put_16 (abfd, x, data);
-
-  return bfd_reloc_ok;
-}
-
 
 /* Map BFD reloc types to FR30 ELF reloc types.  */
 
@@ -402,6 +306,7 @@ static const struct fr30_reloc_map fr30_reloc_map [] =
   { BFD_RELOC_8,              R_FR30_8 },
   { BFD_RELOC_FR30_20,        R_FR30_20 },
   { BFD_RELOC_32,             R_FR30_32 },
+  { BFD_RELOC_FR30_48,        R_FR30_48 },
   { BFD_RELOC_FR30_6_IN_4,    R_FR30_6_IN_4 },
   { BFD_RELOC_FR30_8_IN_8,    R_FR30_8_IN_8 },
   { BFD_RELOC_FR30_9_IN_8,    R_FR30_9_IN_8 },
@@ -469,7 +374,7 @@ fr30_final_link_relocate (howto, input_bfd, input_section, contents, rel, reloca
       bfd_put_32 (input_bfd, relocation, contents);
       break;
       
-    case R_FR30_32:
+    case R_FR30_48:
       contents   += rel->r_offset + 2;
       relocation += rel->r_addend;
       bfd_put_32 (input_bfd, relocation, contents);
@@ -506,6 +411,9 @@ fr30_final_link_relocate (howto, input_bfd, input_section, contents, rel, reloca
       break;
 
     default:
+fprintf (stderr, " type: %d offset: %x, before: %x\n",
+	 howto->type, rel->r_offset, bfd_get_32 (input_bfd, contents + rel->r_offset));
+ 
       r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 				    contents, rel->r_offset,
 				    relocation, rel->r_addend);
@@ -569,6 +477,8 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   sym_hashes = elf_sym_hashes (input_bfd);
   relend     = relocs + input_section->reloc_count;
 
+fprintf (stderr, "Relocate section: %s\n", bfd_section_name (input_bfd, input_section));
+  
   for (rel = relocs; rel < relend; rel ++)
     {
       reloc_howto_type *           howto;
@@ -619,7 +529,7 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  name = bfd_elf_string_from_elf_section
 	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
 	  name = (name == NULL) ? bfd_section_name (input_bfd, sec) : name;
-#if 0
+#if 1
 	  fprintf (stderr, "local: sec: %s, sym: %s (%d), value: %x + %x + %x addend %x\n",
 		   sec->name, name, sym->st_name,
 		   sec->output_section->vma, sec->output_offset,
@@ -643,7 +553,7 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      relocation = (h->root.u.def.value
 			    + sec->output_section->vma
 			    + sec->output_offset);
-#if 0
+#if 1
 	      fprintf (stderr,
 		       "defined: sec: %s, name: %s, value: %x + %x + %x gives: %x\n",
 		       sec->name, name, h->root.u.def.value,
@@ -652,7 +562,7 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    {
-#if 0
+#if 1
 	      fprintf (stderr, "undefined: sec: %s, name: %s\n",
 		       sec->name, name);
 #endif
@@ -664,7 +574,7 @@ fr30_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		     (info, h->root.root.string, input_bfd,
 		      input_section, rel->r_offset)))
 		return false;
-#if 0
+#if 1
 	      fprintf (stderr, "unknown: name: %s\n", name);
 #endif
 	      relocation = 0;
