@@ -29,9 +29,9 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 
 #include "ld.h"
 #include "ldmain.h"
-#include "ldgram.h"
 #include "ldexp.h"
 #include "ldlang.h"
+#include "ldgram.h"
 #include "ldlex.h"
 #include "ldmisc.h"
 #include "ldctor.h"
@@ -119,11 +119,11 @@ static void print_statement_list
   PARAMS ((lang_statement_union_type *, lang_output_section_statement_type *));
 static void print_statements PARAMS ((void));
 static void insert_pad
-  PARAMS ((lang_statement_union_type **, fill_type,
+  PARAMS ((lang_statement_union_type **, fill_type *,
 	   unsigned int, asection *, bfd_vma));
 static bfd_vma size_input_section
   PARAMS ((lang_statement_union_type **, lang_output_section_statement_type *,
-	   fill_type, bfd_vma));
+	   fill_type *, bfd_vma));
 static void lang_finish PARAMS ((void));
 static void ignore_bfd_errors PARAMS ((const char *, ...));
 static void lang_check PARAMS ((void));
@@ -152,7 +152,7 @@ static void os_region_check
 	   struct memory_region_struct *, etree_type *, bfd_vma));
 static bfd_vma lang_size_sections_1
   PARAMS ((lang_statement_union_type *, lang_output_section_statement_type *,
-	   lang_statement_union_type **, fill_type, bfd_vma, boolean *));
+	   lang_statement_union_type **, fill_type *, bfd_vma, boolean *));
 
 typedef void (*callback_t) PARAMS ((lang_wild_statement_type *,
 				    struct wildcard_list *,
@@ -721,7 +721,7 @@ lang_output_section_statement_lookup (name)
 	new_stat (lang_output_section_statement, stat_ptr);
       lookup->region = (lang_memory_region_type *) NULL;
       lookup->lma_region = (lang_memory_region_type *) NULL;
-      lookup->fill = 0;
+      lookup->fill = (fill_type *) 0;
       lookup->block_value = 1;
       lookup->name = name;
 
@@ -2313,7 +2313,12 @@ static void
 print_fill_statement (fill)
      lang_fill_statement_type *fill;
 {
-  fprintf (config.map_file, " FILL mask 0x%x\n", fill->fill);
+  size_t size;
+  unsigned char *p;
+  fputs (" FILL mask 0x", config.map_file);
+  for (p = fill->fill->data, size = fill->fill->size; size != 0; p++, size--)
+    fprintf (config.map_file, "%02x", *p);
+  fputs ("\n", config.map_file);
 }
 
 static void
@@ -2442,10 +2447,15 @@ print_padding_statement (s)
   addr = s->output_offset;
   if (s->output_section != NULL)
     addr += s->output_section->vma;
-  minfo ("0x%V %W", addr, s->size);
+  minfo ("0x%V %W ", addr, s->size);
 
-  if (s->fill != 0)
-    minfo (" %u", s->fill);
+  if (s->fill->size != 0)
+    {
+      size_t size;
+      unsigned char *p;
+      for (p = s->fill->data, size = s->fill->size; size != 0; p++, size--)
+	fprintf (config.map_file, "%02x", *p);
+    }
 
   print_nl ();
 
@@ -2636,11 +2646,12 @@ dprint_statement (s, n)
 static void
 insert_pad (ptr, fill, alignment_needed, output_section, dot)
      lang_statement_union_type **ptr;
-     fill_type fill;
+     fill_type *fill;
      unsigned int alignment_needed;
      asection *output_section;
      bfd_vma dot;
 {
+  static fill_type zero_fill = { 1, { 0 } };
   lang_statement_union_type *pad;
 
   pad = ((lang_statement_union_type *)
@@ -2661,6 +2672,8 @@ insert_pad (ptr, fill, alignment_needed, output_section, dot)
       *ptr = pad;
       pad->header.type = lang_padding_statement_enum;
       pad->padding_statement.output_section = output_section;
+      if (fill == (fill_type *) 0)
+	fill = &zero_fill;
       pad->padding_statement.fill = fill;
     }
   pad->padding_statement.output_offset = dot - output_section->vma;
@@ -2674,7 +2687,7 @@ static bfd_vma
 size_input_section (this_ptr, output_section_statement, fill, dot)
      lang_statement_union_type **this_ptr;
      lang_output_section_statement_type *output_section_statement;
-     fill_type fill;
+     fill_type *fill;
      bfd_vma dot;
 {
   lang_input_section_type *is = &((*this_ptr)->input_section);
@@ -2831,7 +2844,7 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
      lang_statement_union_type *s;
      lang_output_section_statement_type *output_section_statement;
      lang_statement_union_type **prev;
-     fill_type fill;
+     fill_type *fill;
      bfd_vma dot;
      boolean *relax;
 {
@@ -3207,7 +3220,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
      lang_statement_union_type *s;
      lang_output_section_statement_type *output_section_statement;
      lang_statement_union_type **prev;
-     fill_type fill;
+     fill_type *fill;
      bfd_vma dot;
      boolean *relax;
 {
@@ -3242,7 +3255,7 @@ bfd_vma
 lang_do_assignments (s, output_section_statement, fill, dot)
      lang_statement_union_type *s;
      lang_output_section_statement_type *output_section_statement;
-     fill_type fill;
+     fill_type *fill;
      bfd_vma dot;
 {
   unsigned opb = bfd_arch_mach_octets_per_byte (ldfile_output_architecture,
@@ -4211,7 +4224,7 @@ lang_process ()
 	     section sizes.  */
 	  lang_do_assignments (statement_list.head,
 			       abs_output_section,
-			       (fill_type) 0, (bfd_vma) 0);
+			       (fill_type *) 0, (bfd_vma) 0);
 
 	  /* Perform another relax pass - this time we know where the
 	     globals are, so can make better guess.  */
@@ -4235,7 +4248,7 @@ lang_process ()
 
   lang_do_assignments (statement_list.head,
 		       abs_output_section,
-		       (fill_type) 0, (bfd_vma) 0);
+		       (fill_type *) 0, (bfd_vma) 0);
 
   /* Make sure that the section addresses make sense.  */
   if (! link_info.relocateable
@@ -4351,13 +4364,13 @@ lang_add_map (name)
 }
 
 void
-lang_add_fill (exp)
-     int exp;
+lang_add_fill (fill)
+     fill_type *fill;
 {
   lang_fill_statement_type *new = new_stat (lang_fill_statement,
 					    stat_ptr);
 
-  new->fill = exp;
+  new->fill = fill;
 }
 
 void
@@ -4444,7 +4457,7 @@ lang_float (maybe)
 
 void
 lang_leave_output_section_statement (fill, memspec, phdrs, lma_memspec)
-     bfd_vma fill;
+     fill_type *fill;
      const char *memspec;
      struct lang_output_section_phdr_list *phdrs;
      const char *lma_memspec;
@@ -4822,7 +4835,7 @@ lang_enter_overlay_section (name)
 
 void
 lang_leave_overlay_section (fill, phdrs)
-     bfd_vma fill;
+     fill_type *fill;
      struct lang_output_section_phdr_list *phdrs;
 {
   const char *name;
@@ -4864,7 +4877,7 @@ lang_leave_overlay_section (fill, phdrs)
 
 void
 lang_leave_overlay (fill, memspec, phdrs, lma_memspec)
-     bfd_vma fill;
+     fill_type *fill;
      const char *memspec;
      struct lang_output_section_phdr_list *phdrs;
      const char *lma_memspec;
@@ -4894,7 +4907,7 @@ lang_leave_overlay (fill, memspec, phdrs, lma_memspec)
     {
       struct overlay_list *next;
 
-      if (fill != 0 && l->os->fill == 0)
+      if (fill != (fill_type *) 0 && l->os->fill == (fill_type *) 0)
 	l->os->fill = fill;
 
       /* Assign a region to the sections, if one has been specified.

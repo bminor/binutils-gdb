@@ -7,7 +7,7 @@ else
 fi
 cat >e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
-   Copyright 1995, 1996, 1997, 1998, 2000, 2001
+   Copyright 1995, 1996, 1997, 1998, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
@@ -38,11 +38,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libiberty.h"
 #include "ld.h"
 #include "ldmain.h"
-#include "ldgram.h"
 #include "ldexp.h"
 #include "ldlang.h"
 #include "ldfile.h"
 #include "ldemul.h"
+#include "ldgram.h"
 #include "ldlex.h"
 #include "ldmisc.h"
 #include "ldctor.h"
@@ -416,7 +416,7 @@ gld_${EMULATION_NAME}_set_symbols()
   for (j = 0; init[j].ptr; j++)
     {
       long val = init[j].value;
-      lang_add_assignment (exp_assop ('=' ,init[j].symbol, exp_intop (val)));
+      lang_add_assignment (exp_assop ('=', init[j].symbol, exp_intop (val)));
       if (init[j].size == sizeof(short))
 	*(short *)init[j].ptr = val;
       else if (init[j].size == sizeof(int))

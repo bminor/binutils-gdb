@@ -38,10 +38,10 @@ This was written by steve chamberlain
 #include "sysdep.h"
 #include "safe-ctype.h"
 #include "ld.h"
-#include "ldgram.h"
 #include "ldmisc.h"
 #include "ldexp.h"
 #include "ldlang.h"
+#include "ldgram.h"
 #include "ldfile.h"
 #include "ldlex.h"
 #include "ldmain.h"
@@ -153,6 +153,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^]([*?.$_a-zA-Z0-9\[\]\-\!\^]|::)*
 
 <MRI,EXPRESSION>"$"([0-9A-Fa-f])+ {
   				yylval.integer = bfd_scan_vma (yytext+1, 0,16);
+				yylval.bigint.str = (char *) 0;
 				return INT;
 			}
 
@@ -178,20 +179,36 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^]([*?.$_a-zA-Z0-9\[\]\-\!\^]|::)*
 				   }
 				   yylval.integer = bfd_scan_vma (yytext, 0,
 								  ibase);
+				   yylval.bigint.str = (char *) 0;
 				   return INT;
 				 }
-<SCRIPT,DEFSYMEXP,MRI,BOTH,EXPRESSION>((("$"|"0x")([0-9A-Fa-f])+)|(([0-9])+))(M|K|m|k)? {
+<SCRIPT,DEFSYMEXP,MRI,BOTH,EXPRESSION>((("$"|0[xX])([0-9A-Fa-f])+)|(([0-9])+))(M|K|m|k)? {
 				  char *s = yytext;
+				  int ibase = 0;
 
 				  if (*s == '$')
-				    ++s;
-				  yylval.integer = bfd_scan_vma (s, 0, 0);
+				    {
+				      ++s;
+				      ibase = 16;
+				    }
+				  yylval.integer = bfd_scan_vma (s, 0, ibase);
+				  yylval.bigint.str = (char *) 0;
 				  if (yytext[yyleng-1] == 'M'
 				      || yytext[yyleng-1] == 'm')
-				    yylval.integer *= 1024 * 1024;
-				  if (yytext[yyleng-1] == 'K' 
+				    {
+				      yylval.integer *= 1024 * 1024;
+				    }
+				  else if (yytext[yyleng-1] == 'K' 
 				      || yytext[yyleng-1]=='k')
-				    yylval.integer *= 1024;
+				    {
+				      yylval.integer *= 1024;
+				    }
+				  else if (yytext[0] == '0'
+					   && (yytext[1] == 'x'
+					       || yytext[1] == 'X'))
+				    {
+				      yylval.bigint.str = xstrdup (yytext + 2);
+				    }
 				  return INT;
 				}
 <BOTH,SCRIPT,EXPRESSION,MRI>"]"		{ RTOKEN(']');}

@@ -1,6 +1,6 @@
 /* This module handles expression trees.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001
+   2001, 2002
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -39,6 +39,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "ldgram.h"
 #include "ldlang.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
 
 static void exp_print_token PARAMS ((token_code_type code));
 static void make_abs PARAMS ((etree_value_type *ptr));
@@ -46,7 +47,7 @@ static etree_value_type new_abs PARAMS ((bfd_vma value));
 static void check PARAMS ((lang_output_section_statement_type *os,
 			   const char *name, const char *op));
 static etree_value_type new_rel
-  PARAMS ((bfd_vma value, lang_output_section_statement_type *section));
+  PARAMS ((bfd_vma, char *, lang_output_section_statement_type *section));
 static etree_value_type new_rel_from_section
   PARAMS ((bfd_vma value, lang_output_section_statement_type *section));
 static etree_value_type fold_binary
@@ -176,9 +177,22 @@ exp_intop (value)
   etree_type *new = (etree_type *) stat_alloc (sizeof (new->value));
   new->type.node_code = INT;
   new->value.value = value;
+  new->value.str = NULL;
   new->type.node_class = etree_value;
   return new;
+}
 
+etree_type *
+exp_bigintop (value, str)
+     bfd_vma value;
+     char *str;
+{
+  etree_type *new = (etree_type *) stat_alloc (sizeof (new->value));
+  new->type.node_code = INT;
+  new->value.value = value;
+  new->value.str = str;
+  new->type.node_class = etree_value;
+  return new;
 }
 
 /* Build an expression representing an unnamed relocateable value.  */
@@ -197,13 +211,15 @@ exp_relop (section, value)
 }
 
 static etree_value_type
-new_rel (value, section)
+new_rel (value, str, section)
      bfd_vma value;
+     char *str;
      lang_output_section_statement_type *section;
 {
   etree_value_type new;
   new.valid_p = true;
   new.value = value;
+  new.str = str;
   new.section = section;
   return new;
 }
@@ -216,6 +232,7 @@ new_rel_from_section (value, section)
   etree_value_type new;
   new.valid_p = true;
   new.value = value;
+  new.str = NULL;
   new.section = section;
 
   new.value -= section->bfd_section->vma;
@@ -450,6 +467,7 @@ fold_name (tree, current_section, allocation_done, dot)
 			 being linked with -R?  */
 		      result = new_rel ((h->u.def.value
 					 + h->u.def.section->output_offset),
+					NULL,
 					os);
 		    }
 		}
@@ -467,7 +485,7 @@ fold_name (tree, current_section, allocation_done, dot)
 
 	  os = lang_output_section_find (tree->name.name);
 	  check (os, tree->name.name, "ADDR");
-	  result = new_rel (0, os);
+	  result = new_rel (0, NULL, os);
 	}
       else
 	result = invalid ();
@@ -481,7 +499,7 @@ fold_name (tree, current_section, allocation_done, dot)
 	  os = lang_output_section_find (tree->name.name);
 	  check (os, tree->name.name, "LOADADDR");
 	  if (os->load_base == NULL)
-	    result = new_rel (0, os);
+	    result = new_rel (0, NULL, os);
 	  else
 	    result = exp_fold_tree_no_dot (os->load_base,
 					   abs_output_section,
@@ -532,7 +550,7 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
   switch (tree->type.node_class)
     {
     case etree_value:
-      result = new_rel (tree->value.value, current_section);
+      result = new_rel (tree->value.value, tree->value.str, current_section);
       break;
 
     case etree_rel:
@@ -542,6 +560,7 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 	result = new_rel ((tree->rel.value
 			   + tree->rel.section->output_section->vma
 			   + tree->rel.section->output_offset),
+			  NULL,
 			  current_section);
       break;
 
@@ -1023,6 +1042,65 @@ exp_get_value_int (tree, def, name, allocation_done)
      lang_phase_type allocation_done;
 {
   return (int) exp_get_vma (tree, (bfd_vma) def, name, allocation_done);
+}
+
+fill_type *
+exp_get_fill (tree, def, name, allocation_done)
+     etree_type *tree;
+     fill_type *def;
+     char *name;
+     lang_phase_type allocation_done;
+{
+  fill_type *fill;
+  etree_value_type r;
+  size_t len;
+  unsigned int val;
+
+  if (tree == NULL)
+    return def;
+
+  r = exp_fold_tree_no_dot (tree, abs_output_section, allocation_done);
+  if (! r.valid_p && name != NULL)
+    einfo (_("%F%S nonconstant expression for %s\n"), name);
+
+  if (r.str != NULL && (len = strlen (r.str)) != 0)
+    {
+      unsigned char *dst;
+      unsigned char *s;
+      fill = (fill_type *) xmalloc ((len + 1) / 2 + sizeof (*fill) - 1);
+      fill->size = (len + 1) / 2;
+      dst = fill->data;
+      s = r.str;
+      val = 0;
+      do
+	{
+	  unsigned int digit;
+
+	  digit = *s++ - '0';
+	  if (digit > 9)
+	    digit = (digit - 'A' + '0' + 10) & 0xf;
+	  val <<= 4;
+	  val += digit;
+	  --len;
+	  if ((len & 1) == 0)
+	    {
+	      *dst++ = val;
+	      val = 0;
+	    }
+	}
+      while (len != 0);
+    }
+  else
+    {
+      fill = (fill_type *) xmalloc (4 + sizeof (*fill) - 1);
+      val = r.value;
+      fill->data[0] = (val >> 24) & 0xff;
+      fill->data[1] = (val >> 16) & 0xff;
+      fill->data[2] = (val >>  8) & 0xff;
+      fill->data[3] = (val >>  0) & 0xff;
+      fill->size = 4;
+    }
+  return fill;
 }
 
 bfd_vma

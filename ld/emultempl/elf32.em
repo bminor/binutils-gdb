@@ -1341,7 +1341,7 @@ gld${EMULATION_NAME}_finish ()
 
       /* Do the assignments again.  */
       lang_do_assignments (stat_ptr->head, abs_output_section,
-			   (fill_type) 0, (bfd_vma) 0);
+			   (fill_type *) 0, (bfd_vma) 0);
     }
 }
 EOF

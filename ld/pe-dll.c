@@ -1,5 +1,5 @@
 /* Routines to help build PEI-format DLLs (Win32 etc)
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by DJ Delorie <dj@cygnus.com>
 
    This file is part of GLD, the Gnu Linker.
@@ -2437,7 +2437,7 @@ pe_dll_fill_sections (abfd, info)
       /* Do the assignments again.  */
       lang_do_assignments (stat_ptr->head,
 			   abs_output_section,
-			   (fill_type) 0, (bfd_vma) 0);
+			   (fill_type *) 0, (bfd_vma) 0);
     }
 
   fill_edata (abfd, info);
@@ -2471,7 +2471,7 @@ pe_exe_fill_sections (abfd, info)
       /* Do the assignments again.  */
       lang_do_assignments (stat_ptr->head,
 			   abs_output_section,
-			   (fill_type) 0, (bfd_vma) 0);
+			   (fill_type *) 0, (bfd_vma) 0);
     }
   reloc_s->contents = reloc_d;
 }

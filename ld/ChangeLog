@@ -1,3 +1,62 @@
+2002-02-15  Alan Modra  <amodra@bigpond.net.au>
+
+	Support arbitrary length fill patterns.
+	* ldexp.h (etree_value_type): Add "str" field.
+	(union etree_union): Add "str" to "value" struct.
+	(exp_bigintop): Declare.
+	(exp_get_fill): Declare.
+	* ldexp.c: Include "safe-ctype.h".
+	(exp_intop): Set value.str to NULL.
+	(exp_bigintop): New function.
+	(new_rel): Pass in "str", and set new.str from it.
+	(new_rel_from_section): Set new.str to NULL.
+	(fold_name): Adjust calls to new_rel.
+	(exp_fold_tree): Likewise.
+	(exp_get_fill): New function.
+	* ldgram.y (struct big_int bigint, fill_type *fill): New.
+	(INT): Returns a "bigint".  Adjust all code handling INTs.
+	(fill_opt): Returns a "fill".
+	(fill_exp): Split out of fill_opt, use for FILL.
+	* ldlang.h (struct _fill_type): New.
+	(fill_type): Move typedef to ldexp.h.
+	(lang_output_section_statement_type): "fill" is now a pointer.
+	(lang_fill_statement_type): Likewise.
+	(lang_padding_statement_type): Likewise.
+	(lang_add_fill): Now takes a "fill_type *" param.
+	(lang_leave_output_section_statement): Likewise.
+	(lang_do_assignments): Likewise.
+	(lang_size_sections): Likewise.
+	(lang_leave_overlay_section): Likewise.
+	(lang_leave_overlay): Likewise.
+	* ldlang.c: Include ldgram.h after ldexp.h.
+	(lang_output_section_statement_lookup): Adjust for fill_type change.
+	(print_fill_statement): Likewise.
+	(print_padding_statement): Likewise.
+	(insert_pad): Now takes a "fill_type *" arg.
+	(size_input_section): Likewise.
+	(lang_size_sections_1): Likewise.
+	(lang_size_sections): Likewise.
+	(lang_do_assignments): Likewise.
+	(lang_add_fill): Likewise.
+	(lang_leave_output_section_statement): Likewise.
+	(lang_leave_overlay_section): Likewise.
+	(lang_leave_overlay): Likewise.
+	Adjust all callers of the above function.
+	* ldlex.l: Include ldgram.h after ldexp.h.  Allow hex numbers
+	starting with "0X" as well as "0x".  Return bigint.str for hex
+	numbers starting with "0x" or "0X", zero bigint.str otherwise.
+	Always use base 16 for numbers starting with "$".
+	* ldmain.c: Include ldgram.h after ldexp.h.
+	* ldwrite.c (build_link_order): Use bfd_data_link_order in place
+	of bfd_fill_link_order.
+	* pe-dll.c: Adjust lang_do_assignments calls.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/beos.em: Include ldgram.h after ldexp.h, adjust
+	lang_add_assignment call.
+	* emultempl/pe.em: Likewise.
+
 2002-02-14  Phil Edwards  <pme@gcc.gnu.org>
 
 	* ld.texinfo (VERSION scripts):  Symbol names are globbing patterns.   
