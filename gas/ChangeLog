@@ -1,3 +1,9 @@
+Wed Apr 28 13:40:29 1993  Ian Lance Taylor  (ian@rtl.cygnus.com)
+
+	* config/obj-ecoff.c (obj_symbol_new_hook): Make up a .file if one
+	hasn't been seen yet.
+	(add_ecoff_symbol): Don't refer to cur_file_ptr if it is NULL.
+
 Mon Apr 26 18:29:05 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* config/tc-sh.ch, config/tc-sh.h: New files supporting Hitachi
