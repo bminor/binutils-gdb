@@ -43,7 +43,8 @@
 	current_nto_target.
 	(i386nto_init_abi): Initialize signals.  Call nto_set_target.  Set
 	TARGET_SO_IN_DYNSYM_RESOLVE_CODE.
-	(_initialize_i386nto_tdep): Call init_i386nto_ops.  Register osabi sniffer.
+	(_initialize_i386nto_tdep): Call init_i386nto_ops.  Register osabi
+	sniffer.
 
 2004-12-10  Mark Kettenis  <kettenis@gnu.org>
 
