@@ -1,5 +1,10 @@
 2002-12-15  Daniel Jacobowitz  <drow@mvista.com>
 
+	* infrun.c (handle_inferior_event): Assume that catchpoints
+	are not affected by DECR_PC_AFTER_BREAK.
+
+2002-12-15  Daniel Jacobowitz  <drow@mvista.com>
+
 	* target.c (update_current_target): Don't inherit DONT_USE.
 	* target.h (struct target_ops): Remove DONT_USE.
 	(target_next): Remove macro.

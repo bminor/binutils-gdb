@@ -1335,17 +1335,15 @@ handle_inferior_event (struct execution_control_state *ecs)
       stop_pc = read_pc_pid (ecs->ptid);
       ecs->saved_inferior_ptid = inferior_ptid;
       inferior_ptid = ecs->ptid;
-      /* The second argument of bpstat_stop_status is meant to help
-         distinguish between a breakpoint trap and a singlestep trap.
-         This is only important on targets where DECR_PC_AFTER_BREAK
-         is non-zero.  The prev_pc test is meant to distinguish between
-         singlestepping a trap instruction, and singlestepping thru a
-         jump to the instruction following a trap instruction. */
 
-      stop_bpstat = bpstat_stop_status (&stop_pc,
-					currently_stepping (ecs) &&
-					prev_pc !=
-					stop_pc - DECR_PC_AFTER_BREAK);
+      /* Assume that catchpoints are not really software breakpoints.  If
+	 some future target implements them using software breakpoints then
+	 that target is responsible for fudging DECR_PC_AFTER_BREAK.  Thus
+	 we pass 1 for the NOT_A_SW_BREAKPOINT argument, so that
+	 bpstat_stop_status will not decrement the PC.  */
+
+      stop_bpstat = bpstat_stop_status (&stop_pc, 1);
+
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
       inferior_ptid = ecs->saved_inferior_ptid;
       goto process_event_stop_test;
@@ -1386,17 +1384,15 @@ handle_inferior_event (struct execution_control_state *ecs)
 	}
 
       stop_pc = read_pc ();
-      /* The second argument of bpstat_stop_status is meant to help
-         distinguish between a breakpoint trap and a singlestep trap.
-         This is only important on targets where DECR_PC_AFTER_BREAK
-         is non-zero.  The prev_pc test is meant to distinguish between
-         singlestepping a trap instruction, and singlestepping thru a
-         jump to the instruction following a trap instruction. */
 
-      stop_bpstat = bpstat_stop_status (&stop_pc,
-					currently_stepping (ecs) &&
-					prev_pc !=
-					stop_pc - DECR_PC_AFTER_BREAK);
+      /* Assume that catchpoints are not really software breakpoints.  If
+	 some future target implements them using software breakpoints then
+	 that target is responsible for fudging DECR_PC_AFTER_BREAK.  Thus
+	 we pass 1 for the NOT_A_SW_BREAKPOINT argument, so that
+	 bpstat_stop_status will not decrement the PC.  */
+
+      stop_bpstat = bpstat_stop_status (&stop_pc, 1);
+
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
       goto process_event_stop_test;
 
@@ -1435,17 +1431,15 @@ handle_inferior_event (struct execution_control_state *ecs)
       stop_pc = read_pc_pid (ecs->ptid);
       ecs->saved_inferior_ptid = inferior_ptid;
       inferior_ptid = ecs->ptid;
-      /* The second argument of bpstat_stop_status is meant to help
-         distinguish between a breakpoint trap and a singlestep trap.
-         This is only important on targets where DECR_PC_AFTER_BREAK
-         is non-zero.  The prev_pc test is meant to distinguish between
-         singlestepping a trap instruction, and singlestepping thru a
-         jump to the instruction following a trap instruction. */
 
-      stop_bpstat = bpstat_stop_status (&stop_pc,
-					currently_stepping (ecs) &&
-					prev_pc !=
-					stop_pc - DECR_PC_AFTER_BREAK);
+      /* Assume that catchpoints are not really software breakpoints.  If
+	 some future target implements them using software breakpoints then
+	 that target is responsible for fudging DECR_PC_AFTER_BREAK.  Thus
+	 we pass 1 for the NOT_A_SW_BREAKPOINT argument, so that
+	 bpstat_stop_status will not decrement the PC.  */
+
+      stop_bpstat = bpstat_stop_status (&stop_pc, 1);
+
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
       inferior_ptid = ecs->saved_inferior_ptid;
       goto process_event_stop_test;
