@@ -180,6 +180,16 @@ if test $bu_cv_decl_time_t_types_h = yes; then
 	    [Is the type time_t defined in <sys/types.h>?])
 fi
 
+AC_MSG_CHECKING(for a known getopt prototype in unistd.h)
+AC_CACHE_VAL(bu_cv_decl_getopt_unistd_h,
+[AC_TRY_COMPILE([#include <unistd.h>], [extern int getopt (int, char *const*, const char *);],
+bu_cv_decl_getopt_unistd_h=yes, bu_cv_decl_getopt_unistd_h=no)])
+AC_MSG_RESULT($bu_cv_decl_getopt_unistd_h)
+if test $bu_cv_decl_getopt_unistd_h = yes; then
+  AC_DEFINE([HAVE_DECL_GETOPT], 1,
+	    [Is the prototype for getopt in <unistd.h> in the expected format?])
+fi
+
 # Under Next 3.2 <utime.h> apparently does not define struct utimbuf
 # by default.
 AC_MSG_CHECKING([for utime.h])

@@ -29,6 +29,7 @@
    both forms write results to stdout, the second form reads addresses
    to be converted from stdin.  */
 
+#include "config.h"
 #include <string.h>
 
 #include "bfd.h"

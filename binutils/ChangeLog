@@ -1,3 +1,14 @@
+2005-03-31  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: Add a check for <unistd.h> providing a prototype
+	for getopt() which is compatible with the one in
+	include/getopt.h.  If so then define HAVE_DECL_GETOPT.
+	* configure: Regenerate.
+	* config.in (HAVE_DECL_GETOPT): Add.
+	* aclocal.m4: Regenerate.
+	* addr2line.c: Include "config.h" before "bfd.h" so that
+	HAVE_DECL_GETOPT is defined before getopt.h is included.
+
 2005-03-21  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* doc/binutils.texi: Document new VAX disassembler-specific option
