@@ -1,5 +1,21 @@
 Fri Jul  3 14:19:06 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* scripttempl/pe.sc: Use SORT to sort sections appropriately.
+	* emultempl/pe.em (sort_by_file_name): Remove.
+	(sort_by_section_name): Remove.
+	(sort_sections_1, sort_sections): Remove.
+	(gld_${EMULATION_NAME}_before_allocation): Don't call
+	sort_sections.
+	(hold_section, hold_section_name): New static variables.
+	(hold_use, hold_text, hold_rdata, hold_data, hold_bss): Likewise.
+	(gld_${EMULATION_NAME}_place_orphan): Rewrite.  Look for a good
+	place to put the section.  Align the section.  Sort the input
+	sections by name.
+	(gld_${EMULATION_NAME}_place_section): New static function.
+
+	* ldlang.c (wild_sort): When sorting by file name, sort by archive
+	name first.
+
 	* emultempl/pe.em (set_pe_subsystem): Don't call
 	ldlang_add_undef.
 	(gld_${EMULATION_NAME}_after_parse): New static function.
