@@ -1,3 +1,16 @@
+2004-02-02  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* lib/gdb.exp (gdb_breakpoint): Add pending breakpoint
+	support.
+	* gdb.base/langs.exp: Fix test which attempts to create
+	breakpoint on non-existent function to handle new pending
+	support.
+	* gdb.base/shlib-call.exp: Use gdb_breakpoint to set
+	a breakpoint.
+	* gdb.base/pending.exp: New test.
+	* gdb.base/pending.c: New file.
+	* gdb.base/pendshr.c: Ditto.
+
 2004-02-02  David Carlton  <carlton@kealia.com>
 
 	* gdb.cp/overload.exp: Add overloadNamespace tests.
