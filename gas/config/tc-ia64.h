@@ -246,3 +246,15 @@ typedef struct unwind_record
     unw_x_record x;
   } record;
 } unwind_record;
+
+/* This expression evaluates to false if the relocation is for a local 
+   object for which we still want to do the relocation at runtime.
+   True if we are willing to perform this relocation while building
+   the .o file.  This is only used for pcrel relocations.  */
+
+#define TC_RELOC_RTSYM_LOC_FIXUP(FIX)				\
+  ((FIX)->fx_addsy == NULL					\
+   || (! S_IS_EXTERNAL ((FIX)->fx_addsy)			\
+       && ! S_IS_WEAK ((FIX)->fx_addsy)				\
+       && S_IS_DEFINED ((FIX)->fx_addsy)                        \
+       && ! S_IS_COMMON ((FIX)->fx_addsy)))
