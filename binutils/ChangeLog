@@ -1,3 +1,15 @@
+2002-02-18  Timothy Daly  <remote_bob@yahoo.com>
+
+	* readelf.c (dump_relocations): Display 2nd and 3rd reloc 
+	types for 64-bit MIPS.  Narrow some fields for 80-char 
+	output.
+	(dump_relocations): Change spelling from 'unrecognised' 
+	to 'unrecognized'.
+	(decode_ARM_machine_flags): Likewise.
+	(parse_args): Likewise.
+	(read_and_display_attr_value): Likewise.
+	(display_debug_section): Likewise.
+
 2002-02-15  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* NEWS: Mention support for MMIX.

@@ -845,29 +845,49 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
   if (is_32bit_elf)
     {
       if (is_rela)
-	printf
-	  (_(" Offset     Info    Type            Symbol's Value  Symbol's Name          Addend\n"));
+	{
+	  if (do_wide)
+	    printf (_(" Offset     Info    Type                Sym. Value  Symbol's Name + Addend\n"));
+	  else
+	    printf (_(" Offset     Info    Type            Sym.Value  Sym. Name + Addend\n"));
+	}
       else
-	printf
-	  (_(" Offset     Info    Type            Symbol's Value  Symbol's Name\n"));
+	{
+	  if (do_wide)
+	    printf (_(" Offset     Info    Type                Sym. Value  Symbol's Name\n"));
+	  else
+	    printf (_(" Offset     Info    Type            Sym.Value  Sym. Name\n"));
+	}
     }
   else
     {
       if (is_rela)
-	printf
-	  (_("    Offset             Info            Type               Symbol's Value   Symbol's Name           Addend\n"));
+	{
+	  if (do_wide)
+	    printf (_("    Offset             Info            Type               Symbol's Value  Symbol's Name + Addend\n"));
+	  else
+	    printf (_("  Offset          Info           Type           Sym. Value    Sym. Name + Addend\n"));
+	}
       else
-	printf
-	  (_("    Offset             Info            Type               Symbol's Value   Symbol's Name\n"));
+	{
+	  if (do_wide)
+	    printf (_("    Offset             Info            Type               Symbol's Value  Symbol's Name\n"));
+	  else
+	    printf (_("  Offset          Info           Type           Sym. Value    Sym. Name\n"));
+	}
     }
 
   for (i = 0; i < rel_size; i++)
     {
       const char * rtype;
+      const char * rtype2 = NULL;
+      const char * rtype3 = NULL;
       bfd_vma      offset;
       bfd_vma      info;
       bfd_vma      symtab_index;
       bfd_vma      type;
+      bfd_vma      type2 = (bfd_vma) NULL;
+      bfd_vma      type3 = (bfd_vma) NULL;
 
       if (is_rela)
 	{
@@ -887,10 +907,16 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	}
       else
 	{
-	  if (elf_header.e_machine == EM_SPARCV9)
-	    type       = ELF64_R_TYPE_ID (info);
+	  if (elf_header.e_machine == EM_MIPS) 
+	    {
+	      type  = ELF64_MIPS_R_TYPE (info);
+	      type2 = ELF64_MIPS_R_TYPE2 (info);
+	      type3 = ELF64_MIPS_R_TYPE3 (info);
+	    }
+	  else if (elf_header.e_machine == EM_SPARCV9)
+	    type = ELF64_R_TYPE_ID (info);
 	  else
-	    type       = ELF64_R_TYPE (info);
+	    type = ELF64_R_TYPE (info);
 	  /* The #ifdef BFD64 below is to prevent a compile time warning.
 	     We know that if we do not have a 64 bit data type that we
 	     will never execute this code anyway.  */
@@ -910,13 +936,18 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
       else
 	{
 #ifdef _bfd_int64_low
-	  printf ("%8.8lx%8.8lx  %8.8lx%8.8lx ",
+	  printf (do_wide
+		  ? "%8.8lx%8.8lx  %8.8lx%8.8lx "
+		  : "%4.4lx%8.8lx  %4.4lx%8.8lx ",
 		  _bfd_int64_high (offset),
 		  _bfd_int64_low (offset),
 		  _bfd_int64_high (info),
 		  _bfd_int64_low (info));
 #else
-	  printf ("%16.16lx  %16.16lx ", offset, info);
+	  printf (do_wide
+		  ? "%16.16lx  %16.16lx ",
+		  : "%12.12lx  %12.12lx ",
+		  offset, info);
 #endif
 	}
 
@@ -1006,6 +1037,11 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	case EM_MIPS:
 	case EM_MIPS_RS3_LE:
 	  rtype = elf_mips_reloc_type (type);
+	  if (!is_32bit_elf) 
+	    {
+	      rtype2 = elf_mips_reloc_type (type2);
+	      rtype3 = elf_mips_reloc_type (type3);
+	    }
 	  break;
 
 	case EM_ALPHA:
@@ -1067,12 +1103,12 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 
       if (rtype == NULL)
 #ifdef _bfd_int64_low
-	printf (_("unrecognised: %-7lx"), _bfd_int64_low (type));
+	printf (_("unrecognized: %-7lx"), _bfd_int64_low (type));
 #else
-	printf (_("unrecognised: %-7lx"), type);
+	printf (_("unrecognized: %-7lx"), type);
 #endif
       else
-	printf ("%-21.21s", rtype);
+	printf (do_wide ? "%-21.21s" : "%-17.17s", rtype);
 
       if (symtab_index)
 	{
@@ -1086,14 +1122,14 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 
 	      printf (" ");
 	      print_vma (psym->st_value, LONG_HEX);
-	      printf ("  ");
+	      printf (is_32bit_elf ? "   " : " ");
 
 	      if (psym->st_name == 0)
-		print_symbol (-25, SECTION_NAME (section_headers + psym->st_shndx));
+		print_symbol (22, SECTION_NAME (section_headers + psym->st_shndx));
 	      else if (strtab == NULL)
 		printf (_("<string table index %3ld>"), psym->st_name);
 	      else
-		print_symbol (-25, strtab + psym->st_name);
+		print_symbol (22, strtab + psym->st_name);
 
 	      if (is_rela)
 		printf (" + %lx", (unsigned long) relas [i].r_addend);
@@ -1101,7 +1137,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	}
       else if (is_rela)
 	{
-	  printf ("%*c", is_32bit_elf ? 34 : 26, ' ');
+	  printf ("%*c", is_32bit_elf ? (do_wide ? 34 : 28) : (do_wide ? 26 : 20), ' ');
 	  print_vma (relas[i].r_addend, LONG_HEX);
 	}
 
@@ -1110,6 +1146,33 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	printf (" + %lx", (unsigned long) ELF64_R_TYPE_DATA (info));
 
       putchar ('\n');
+
+      if (! is_32bit_elf && elf_header.e_machine == EM_MIPS) 
+	{
+	  printf ("                    Type2: ");
+
+	  if (rtype2 == NULL)
+#ifdef _bfd_int64_low
+	    printf (_("unrecognized: %-7lx"), _bfd_int64_low (type2));
+#else
+	    printf (_("unrecognized: %-7lx"), type2);
+#endif
+	  else
+	    printf ("%-17.17s", rtype2);
+
+	  printf("\n                    Type3: ");
+
+	  if (rtype3 == NULL)
+#ifdef _bfd_int64_low
+	    printf (_("unrecognized: %-7lx"), _bfd_int64_low (type3));
+#else
+	    printf (_("unrecognized: %-7lx"), type3);
+#endif
+	  else
+	    printf ("%-17.17s", rtype3);
+
+          putchar ('\n');
+	}
     }
 
   if (is_rela)
@@ -1504,7 +1567,7 @@ decode_ARM_machine_flags (e_flags, buf)
   switch (eabi)
     {
     default:
-      strcat (buf, ", <unrecognised EABI>");
+      strcat (buf, ", <unrecognized EABI>");
       if (e_flags)
 	unknown = 1;
       break;
@@ -2373,7 +2436,7 @@ parse_args (argc, argv)
 		    break;
 
 		  default:
-		    warn (_("Unrecognised debug option '%s'\n"), optarg);
+		    warn (_("Unrecognized debug option '%s'\n"), optarg);
 		    break;
 		  }
 	    }
@@ -7379,7 +7442,7 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
       break;
 
     default:
-      warn (_("Unrecognised form: %d\n"), form);
+      warn (_("Unrecognized form: %d\n"), form);
       break;
     }
 
@@ -8602,7 +8665,7 @@ display_debug_section (section, file)
       }
 
   if (i == -1)
-    printf (_("Unrecognised debug section: %s\n"), name);
+    printf (_("Unrecognized debug section: %s\n"), name);
 
   free (start);
 
