@@ -1,3 +1,9 @@
+Sun Jan 28 15:50:42 1996  Fred Fish  <fnf@cygnus.com>
+
+	* config/xm-linux.h: Move include of solib.h and #define of
+	SVR4_SHARED_LIBS from here ...
+	* config/nm-linux.h: ...to here.
+
 Sat Jan 27 10:34:05 1996  Fred Fish  <fnf@cygnus.com>
 
 	* configure.in (AC_CHECK_HEADERS): Check for sys/procfs.h.
