@@ -1,5 +1,9 @@
 2003-06-07  Andrew Cagney  <cagney@redhat.com>
 
+	* symfile.h: Re-indent, clean up comments.
+
+2003-06-07  Andrew Cagney  <cagney@redhat.com>
+
 	* inferior.h (deprecated_write_sp): Replace
 	generic_target_write_sp.
 	* regcache.c (deprecated_write_sp): Replace
