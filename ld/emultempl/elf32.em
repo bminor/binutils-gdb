@@ -674,7 +674,7 @@ cat >>e${EMULATION_NAME}.c <<EOF
       if (force < 2)
 	continue;
 
-      einfo ("%P: warning: %s, needed by %B, not found (try using --rpath)\n",
+      einfo ("%P: warning: %s, needed by %B, not found (try using -rpath or -rpath-link)\n",
 	     l->name, l->by);
     }
 }
@@ -975,10 +975,10 @@ gld${EMULATION_NAME}_place_orphan (file, s)
   static struct orphan_save hold_rel;
   static struct orphan_save hold_interp;
   struct orphan_save *place;
-  lang_statement_list_type *old;
+  lang_statement_list_type *old = NULL;
   lang_statement_list_type add;
   etree_type *address;
-  const char *secname, *ps;
+  const char *secname, *ps = NULL;
   const char *outsecname;
   lang_output_section_statement_type *os;
 
