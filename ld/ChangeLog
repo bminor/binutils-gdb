@@ -1,3 +1,11 @@
+Thu Mar 30 14:32:26 1995  H.J. Lu (hjl@nynexst.com)
+
+	* configure.in: Change linux to default to elf.  Using
+	i[345]86-*-linuxaout will build a linker which defaults to a.out.
+	* config/i386-laout.mt: Rename from old config/i386-linux.mt.
+	* config/i386-linux.mt: Rename from old config/i386-lelf.mt.
+	* config/i386-lelf.mt: Remove.
+
 Thu Mar 30 13:09:46 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.texinfo, ld.1: Document the -no-keep-memory option.
