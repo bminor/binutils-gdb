@@ -1,3 +1,7 @@
+2001-12-11  Christopher Faylor  <cgf@redhat.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_list_options): Fix typo.
+
 2001-12-07  Geoffrey Keating  <geoffk@redhat.com>
 	    Richard Henderson  <rth@redhat.com>
 
@@ -6,6 +10,15 @@
 	* Makefile.in: Regenerate.
 	* emulparams/elf32xstormy16.sh: New file.
 	* scripttempl/xstormy16.sc: New file.
+
+2001-10-01  Christopher Faylor <cgf@cygnus.com>
+
+        * Makefile.in (LIB_PATH): Make configurable.
+        (GENSCRIPTS): Set LIB_PATH in environment.
+        * configure.in: Substitute LIB_PATH.
+        * configure: Regenerate.
+        * configure.tgt (*cygwin): Set LIB_PATH for cross build.
+        * configure.host (*cygwin): Add /usr/lib/w32api to NATIVE_LIB_DIRS.
 
 2001-12-07  Nick Clifton  <nickc@cambridge.redhat.com>
 

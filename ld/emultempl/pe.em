@@ -343,7 +343,7 @@ gld_${EMULATION_NAME}_list_options (file)
   fprintf (file, _("  --enable-auto-image-base           Automatically choose image base for DLLs\n\
                                        unless user specifies one\n"));
   fprintf (file, _("  --disable-auto-image-base          Do not auto-choose image base. (default)\n"));
-  fprintf (file, _("  --dll-search-prefix=<string>       When linking dynamically to a dll witout an\n\
+  fprintf (file, _("  --dll-search-prefix=<string>       When linking dynamically to a dll without an\n\
                                        importlib, use <string><basename>.dll \n\
                                        in preference to lib<basename>.dll \n"));
   fprintf (file, _("  --enable-auto-import               Do sophistcated linking of _sym to \n\
