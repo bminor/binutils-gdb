@@ -1,3 +1,7 @@
+Mon Jun  2 12:03:32 1997  Gavin Koch  <gavin@.cygnus.com>
+
+	* gas/mips/mul.{d,s}: End the tests with no-ops. 
+
 Mon Jun  2 11:48:58 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* lib/gas-defs.exp (regexp_diff): Improve messages when one
