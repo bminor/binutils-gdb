@@ -1,3 +1,7 @@
+2001-08-22  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* readelf.c (get_machine_flags): Add detection of EF_MIPS_UCODE.
+
 2001-08-21  H.J. Lu  <hjl@gnu.org>
 
 	* readelf.c (dump_relocations): Support ELF64 on 32bit hosts.

@@ -1601,6 +1601,9 @@ get_machine_flags (e_flags, e_machine)
 	  if (e_flags & EF_MIPS_CPIC)
 	    strcat (buf, ", cpic");
 
+	  if (e_flags & EF_MIPS_UCODE)
+	    strcat (buf, ", ugen_reserved");
+
 	  if (e_flags & EF_MIPS_ABI2)
 	    strcat (buf, ", abi2");
 
