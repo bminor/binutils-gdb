@@ -15,11 +15,11 @@ SECTIONS
   { 					
     *(.data) 				
     ___DTOR_LIST__ = . ;               	
-    LONG((___CTOR_LIST__ - .)/4 -2)  	
+    LONG((___CTOR_LIST__ - .) / 4 -2)  	
     *(___DTOR_LIST__)                   
     LONG(0)                             
     ___CTOR_LIST__ = . ;               	
-    LONG((_edata  - .)/4 -2)            
+    LONG((_edata  - .) / 4 -2)            
     *(___CTOR_LIST__)                   
     LONG(0)                             
       _edata  =  .; 			
