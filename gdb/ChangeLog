@@ -1,3 +1,17 @@
+2004-03-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in (elf_frv_h, frv_tdep_h): Define.
+	(frv-tdep.o): Update dependencies.
+	* frv-tdep.h: New file.
+	* frv-tdep.c (elf-bfd.h, elf/frv.h, osabi.h, frv-tdep.h): Include.
+	(fdpic_loadmap_exec_regnum, fdpic_loadmap_interp_regnum): New
+	constants.
+	(struct gdbarch_tdep): Add new member ``frv_abi''.
+	(frv_abi, frv_fdpic_loadmap_addresses, set_variant_abi_fdpic): New
+	functions.
+	(new_variant): Set ``frv_abi'' field.
+	(gdb_arch_init): Detect FDPIC executables.
+
 2004-03-12  Mark Kettenis  <kettenis@gnu.org>
 
 	* solib-svr4.h: Change SOLIB_SVR4 wrapper into SOLIB_SVR4_H
