@@ -134,7 +134,6 @@ m68*-*-vxworks*)	gdb_target=vxworks68 ;;
 mcore*-*-*)		gdb_target=mcore ;;
 
 mips*-*-pe)		gdb_target=wince ;;
-mips*tx39*-elf*)	gdb_target=tx39 ;;
 mips*-sgi-irix5*)	gdb_target=irix5 ;;
 mips*-sgi-irix6*)	gdb_target=irix6 ;;
 mips*-*-linux*)		gdb_target=linux

@@ -1,5 +1,10 @@
 2003-11-16  Andrew Cagney  <cagney@redhat.com>
 
+	* configure.tgt: Delete mips*tx39*-elf*.
+	* config/mips/tm-tx39.h: Delete file.
+	* config/mips/tx39.mt: Delete file.
+	* config/mips/tx39.mt: Delete file.
+
 	* mips-tdep.h (deprecated_mips_set_processor_regs_hack): Declare.
 	* remote-mips.c (common_open): Instead of
 	"mips_read_register_type" and "mips_set_processor_type_command"
