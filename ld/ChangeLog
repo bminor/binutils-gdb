@@ -1,3 +1,8 @@
+Tue Jul 26 11:02:35 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* scripttempl/elf.sc: Copy several more relocation sections into
+	the output.  Put .got.plt sections into .got.
+
 Fri Jul 22 12:15:36 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* scripttempl/elf.sc: Use PROVIDE to define etext, edata, and end.
