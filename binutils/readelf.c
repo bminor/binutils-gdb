@@ -1,5 +1,5 @@
 /* readelf.c -- display contents of an ELF format file
-   Copyright (C) 1998, 99, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1998, 99, 2000, 2001 Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
    Modifications by Nick Clifton <nickc@cygnus.com>
@@ -85,6 +85,7 @@ unsigned int    	rela_addr;
 unsigned int    	rela_size;
 char *          	dynamic_strings;
 char *			string_table;
+unsigned long		string_table_length;
 unsigned long           num_dynamic_syms;
 Elf_Internal_Sym * 	dynamic_symbols;
 Elf_Internal_Syminfo *	dynamic_syminfo;
@@ -232,7 +233,9 @@ typedef int Elf32_Word;
 #endif
 #define UNKNOWN -1
 
-#define SECTION_NAME(X) 	(string_table + (X)->sh_name)
+#define SECTION_NAME(X) 	((X) == NULL ? "<none>" : \
+				 ((X)->sh_name >= string_table_length \
+				  ? "<corrupt>" : string_table + (X)->sh_name))
 
 #define DT_VERSIONTAGIDX(tag)	(DT_VERNEEDNUM - (tag))	/* Reverse order! */
 
@@ -2712,12 +2715,10 @@ process_section_headers (file)
 
   if (section->sh_size != 0)
     {
-      unsigned long string_table_offset;
-
-      string_table_offset = section->sh_offset;
-
       GET_DATA_ALLOC (section->sh_offset, section->sh_size,
 		      string_table, char *, "string table");
+
+      string_table_length = section->sh_size;
     }
 
   /* Scan the sections for the dynamic symbol table
@@ -7445,7 +7446,7 @@ process_mips_specific (file)
 	}
 
       printf (_("\nSection '%s' contains %d entries:\n"),
-	      string_table + sect->sh_name, cnt);
+	      SECTION_NAME (sect), cnt);
 
       option = iopt;
 
@@ -8004,6 +8005,7 @@ process_file (file_name)
     {
       free (string_table);
       string_table = NULL;
+      string_table_length = 0;
     }
 
   if (dynamic_strings)
