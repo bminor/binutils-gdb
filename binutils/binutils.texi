@@ -126,6 +126,7 @@ Discard symbols
 * strings::                     List printable strings from files
 * strip::                       Discard symbols
 * c++filt::			Filter to demangle encoded C++ symbols
+* nlmconv::                     Converts object code into an NLM
 * Index::                       
 @end menu
 
@@ -1186,7 +1187,7 @@ Verbose output: list all object files modified.  In the case of
 archives, @samp{strip -v} lists all members of the archive.
 @end table
 
-@node c++filt, Index, strip, Top
+@node c++filt, nlmconv, strip, Top
 @chapter c++filt
 
 @kindex c++filt
@@ -1223,7 +1224,7 @@ standard output.  All results are printed on the standard output.
 
 @table @code
 @item -_
-@item --strip-underscores
+@itemx --strip-underscores
 On some systems, both the C and C++ compilers put an underscore in front
 of every name.  For example, the C name @code{foo} gets the low-level
 name @code{_foo}.  This option removes the initial underscore.
@@ -1268,7 +1269,62 @@ c++filt @var{option} @var{symbol}
 @end example
 @end quotation
 
-@node Index,  , c++filt, Top
+@node nlmconv, Index, c++filt, Top
+@chapter nlmconv
+
+@code{nlmconv} converts a relocatable object file into a NetWare
+Loadable Module.  @code{nlmconv} currently only works with @samp{i386}
+object files in @code{coff}, @sc{elf}, or @code{a.out} format.
+
+@smallexample
+nlmconv [ -I @var{format} | --input-format=@var{format} ]
+        [ -O @var{format} | --output-format=@var{format} ]
+        [ -T @var{headerfile} | --header-file=@var{headerfile} ]
+        [ -h | --help ]  [ -V | --version ]
+        @var{infile} @var{outfile}
+@end smallexample
+
+@code{nlmconv} converts the relocatable @samp{i386} object file
+@var{infile} into the NetWare Loadable Module @var{outfile}, optionally
+reading @var{headerfile} for NLM header information.  For instructions
+on writing the NLM command file language used in header files, see
+@cite{The NetWare Tool Maker Specification Manual}, available from
+Novell, Inc.  @code{nlmconv} uses the @sc{gnu} Binary File Descriptor
+library to read @var{infile}; see @ref{BFD,,BFD,ld.info,Using LD, the
+GNU linker}, for more information.
+
+@table @code
+@item -I @var{format}
+@itemx --input-format=@var{format}
+Object format of the input file.  @code{nlmconv} can usually determine
+the format of a given file (so no default is necessary).  @var{format}
+arguments are normal BFD names; for a list of these, run
+@w{@samp{objdump -i}}.
+
+@item -O @var{format}
+@itemx --output-format=@var{format}
+Object format of the output file.  @code{nlmconv} infers the output
+format based on the input format, e.g. for a @samp{i386} input file the
+output format is @samp{nlm32-i386}.  @var{format} arguments are normal
+BFD names; for a list of these, run @w{@samp{objdump -i}}.
+
+@item -T @var{headerfile}
+@itemx --header-file=@var{headerfile}
+Reads @var{headerfile} for NLM header information.  For instructions on
+writing the NLM command file language used in header files, see
+@cite{The NetWare Tool Maker Specification Manual}, available from
+Novell, Inc.
+
+@item -h
+@itemx --help
+Prints a usage summary.
+
+@item -V
+@itemx --version
+Prints the version number for @code{nlmconv}.
+@end table
+
+@node Index,  , nlmconv, Top
 @unnumbered Index
 
 @printindex cp
