@@ -1,3 +1,8 @@
+2001-02-12  Philip Blundell  <pb@futuretv.com>
+
+	* config/tc-arm.c (do_ldst): Improve warnings for unpredictable
+	ldrt/strt instructions.
+
 2001-02-11  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* config/tc-mips.c (macro): For M_LA_AB emit a

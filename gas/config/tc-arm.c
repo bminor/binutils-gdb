@@ -4323,9 +4323,16 @@ do_ldst (str, flags)
 	      if (ldst_extend (&str, halfword) == FAIL)
 		return;
 	      if (conflict_reg)
-		as_warn (_("%s register same as write-back base"),
-			 ((inst.instruction & LOAD_BIT)
-			  ? _("destination") : _("source")));
+		{
+		  if (flags & TRANS_BIT)
+		    as_warn (_("Rn and Rd must be different in %s"),
+			     ((inst.instruction & LOAD_BIT)
+			      ? "LDRT" : "STRT"));
+		  else
+		    as_warn (_("%s register same as write-back base"),
+			     ((inst.instruction & LOAD_BIT)
+			      ? _("destination") : _("source")));
+		}
 	    }
 	  else
 	    {
@@ -4346,8 +4353,15 @@ do_ldst (str, flags)
 		}
 
 	      flags |= INDEX_UP;
-	      if (! (flags & TRANS_BIT))
-		pre_inc = 1;
+	      if (flags & TRANS_BIT)
+		{
+		  if (conflict_reg)
+		    as_warn (_("Rn and Rd must be different in %s"),
+			     ((inst.instruction & LOAD_BIT)
+			      ? "LDRT" : "STRT"));
+		}
+		else
+		  pre_inc = 1;
 	    }
 	}
       else
