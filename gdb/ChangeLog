@@ -1,3 +1,8 @@
+2005-01-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/powerpc/obsd.mt (DEPRECATED_TM_FILE): Set to
+	tm-ppc-eabi.h instead of the removed tm-nbsd.h.
+
 2005-01-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/ia64/tm-linux.h: Tweak comment.  Update copyright year.
