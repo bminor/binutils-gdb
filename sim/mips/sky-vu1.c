@@ -14,17 +14,17 @@ VectorUnitState vu1_state;
 static char vu1_umem_buffer[VU1_MEM0_SIZE];
 static char vu1_mem_buffer[VU1_MEM1_SIZE];
 
-void init_vu1();
+void init_vu1(void);
 void init_vu(VectorUnitState *state, char* umem_buffer, char* mem_buffer);
 
 void 
-vu1_issue() 
+vu1_issue(void) 
 {
       if (vu1_state.runState == VU_RUN)
           vpecallms_cycle(&vu1_state);
 }
 
-int
+static int
 vu1_io_read_register_window(device *me,
                    void *dest,
                    int space,
@@ -54,8 +54,8 @@ vu1_io_read_register_window(device *me,
 	*(u_long*)&source_buffer[VU1_MTPC - VU1_REGISTER_WINDOW_START] = vu1_state.regs.MTPC;
 	*(VpeStat*)&source_buffer[VPE1_STAT - VU1_REGISTER_WINDOW_START] = vu1_state.regs.VPE_STAT;
 
-	printf("%s: Read: %x, %d, dest: %x, space: %d, %x!\n", me->name, addr, nr_bytes, dest, space, vu1_state.regs.VPE_STAT);
-	printf("	vu1_state.regs.VPE_STAT = %x\n", vu1_state.regs.VPE_STAT);
+	printf("%s: Read: %x, %d, dest: %x, space: %d, %x!\n", me->name, (int)addr, nr_bytes, (int)dest, space, *(int*)&(vu1_state.regs.VPE_STAT));
+	printf("	vu1_state.regs.VPE_STAT = %x\n", *(int*)&(vu1_state.regs.VPE_STAT));
 
 	if (addr + nr_bytes > VU1_REGISTER_WINDOW_END) {
 	    fprintf(stderr, "Error: Read past end of vu1 register window!!!\n");
@@ -67,7 +67,7 @@ vu1_io_read_register_window(device *me,
 	return nr_bytes;
 }
 
-int
+static int
 vu1_io_write_register_window(device *me,
                     const void *source,
                     int space,
@@ -83,6 +83,7 @@ vu1_io_write_register_window(device *me,
 	    vu1_state.runState = VU_RUN;
 	    vu1_state.regs.VPE_STAT.vbs = 1;
 printf("Magic start run...\n");
+#if 0
 printf("%x,%x,%x,%x\n", &vu1_state.regs.VF[0][0], &vu1_state.regs.VPE_STAT,
 			((char*)&vu1_state.regs.VPE_STAT) - ((char*)&vu1_state.regs.VF[0][0]),
 			((char*)&vu1_state.regs.VPE_STAT) - ((char*)&vu1_state.regs.VF[0][0]) + VU1_REGISTER_WINDOW_START
@@ -96,10 +97,11 @@ printf("%x,%x,%x,%x\n", &vu1_state.regs.VF[0][0], &vu1_state.regs.MST,
 			((char*)&vu1_state.regs.MST) - ((char*)&vu1_state.regs.VF[0][0]),
 			((char*)&vu1_state.regs.MST) - ((char*)&vu1_state.regs.VF[0][0]) + VU1_REGISTER_WINDOW_START
      );
+#endif
 	    return nr_bytes;
 	}
 
-	printf("%s: Write: %x, %d, source: %x, space: %d!\n", me->name, addr, nr_bytes, source, space);
+	printf("%s: Write: %x, %d, source: %x, space: %d!\n", me->name, (int)addr, nr_bytes, (int)source, space);
 
 	if (addr + nr_bytes > VU1_REGISTER_WINDOW_END) {
 	    fprintf(stderr, "Error: Read past end of vu1 register window!!!\n");
@@ -180,14 +182,14 @@ char	ifilename[64] = "vu.bin";
 char	ofilename[64] = "";
 char	pfilename[64] = "";
 
-void abend2(char *fmt, char* p) {
+static void abend2(char *fmt, char* p) {
     fprintf(stderr, fmt, p);
     exit(1);
 }
 
-void getoption();
+void getoption(void);
 
-void init_vu1() {
+void init_vu1(void) {
     init_vu(&vu1_state, &vu1_umem_buffer[0], &vu1_mem_buffer[0]);
 }
 
@@ -238,7 +240,7 @@ void init_vu(VectorUnitState *state, char* umem_buffer, char* mem_buffer)
 			abend2("%s: can not open\n", ofilename);
 
 		for(i = 0; i < 2048; i++){
-			StoreVUMem(i, data, 1);
+			StoreVUMem(state, i, data, 1);
 			for(j = 0; j < 4; j++)
 				fwrite(&data[j], 4, 1, fp);
 		}
@@ -246,6 +248,7 @@ void init_vu(VectorUnitState *state, char* umem_buffer, char* mem_buffer)
 	}
 }
 
+#if 0
 static void Usage(void)
 {
 	fprintf(stderr, "Usage: simvpe [options]\n");
@@ -257,11 +260,14 @@ static void Usage(void)
 	fprintf(stderr, "\t\t-v [statistics mode enable: default desable]\n");
 	fprintf(stderr, "\t\t-p [debug print mode enable: default desable]\n");
 }
+#endif
 
-void getoption()
+void getoption(void)
 {
+#if 0
 	int startline = 0;
 	int count = 1;
+#endif
 
 	_is_dbg = 1;
 	_vpepc = 0;

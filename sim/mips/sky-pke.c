@@ -8,7 +8,6 @@
 #include "sky-vu1.h"
 #include "sky-gpuif.h"
 
-
 /* Imported functions */
 
 void device_error (device *me, char* message);  /* device.c */
@@ -75,13 +74,13 @@ pke1_attach(SIM_DESC sd)
 /* Issue a PKE instruction if possible */
 
 void 
-pke0_issue() 
+pke0_issue(void) 
 {
   pke_issue(& pke0_device);
 }
 
 void 
-pke1_issue() 
+pke1_issue(void) 
 {
   pke_issue(& pke0_device);
 }
@@ -1313,7 +1312,8 @@ pke_pc_advance(struct pke_device* me, int num_words)
 unsigned_4*
 pke_pc_operand(struct pke_device* me, int word_num)
 {
-  int new_qw_pc, new_fifo_pc;
+  int new_qw_pc = 0;	
+  int new_fifo_pc;
   unsigned_4* operand;
 
   ASSERT(word_num > 0);
@@ -1345,7 +1345,8 @@ pke_pc_operand(struct pke_device* me, int word_num)
 struct fifo_quadword*
 pke_pc_fifo(struct pke_device* me, int word_num)
 {
-  int new_qw_pc, new_fifo_pc;
+  int new_qw_pc = 0;
+  int new_fifo_pc;
   struct fifo_quadword* operand;
 
   ASSERT(word_num > 0);

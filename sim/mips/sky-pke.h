@@ -15,10 +15,9 @@
 /* External functions */
 
 void pke0_attach(SIM_DESC sd);
-void pke0_issue();
+void pke0_issue(void);
 void pke1_attach(SIM_DESC sd);
-void pke1_issue();
-
+void pke1_issue(void);
 
 /* Quadword data type */
 
@@ -295,8 +294,8 @@ typedef unsigned_4 quadword[4];
 
 /* operations  */
 /* unsigned 32-bit mask of given width */
-#define BIT_MASK(width) ((((unsigned_4)1) << (width+1)) - 1)
-/* e.g.: BIT_MASK(5) = 00011111 */
+#define BIT_MASK(width) (width == 31 ? 0xffffffff : (((unsigned_4)1) << (width+1)) - 1)
+/* e.g.: BIT_MASK(4) = 00011111 */
 
 /* mask between given given bits numbers (MSB) */
 #define BIT_MASK_BTW(begin,end) (BIT_MASK(end) & ~BIT_MASK(begin)) 

@@ -11,11 +11,11 @@ static char vu0_mem0_buffer[VU0_MEM0_SIZE];
 static char vu0_mem1_buffer[VU0_MEM1_SIZE];
 
 void 
-vu0_issue() 
+vu0_issue(void) 
 {
 }
 
-int
+static int
 vu0_io_read_buffer(device *me,
                       void *dest,
                       int space,
@@ -28,7 +28,7 @@ vu0_io_read_buffer(device *me,
 	return nr_bytes;
 }
 
-int
+static int
 vu0_io_write_buffer(device *me,
                     const void *source,
                     int space,
