@@ -1,5 +1,10 @@
 Thu Feb 15 12:44:45 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Substitute RPATH_ENVVAR.
+	* configure: Rebuild.
+	* Makefile.in (RPATH_ENVVAR): New variable.
+	(check): Use $(RPATH_ENVVAR) rather than LD_LIBRARY_PATH.
+
 	* objcopy.c (smart_rename): Rather than doing chmod then chown, do
 	chmod without setuid, then chown, then chmod with setuid.
 
