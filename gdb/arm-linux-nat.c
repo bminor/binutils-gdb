@@ -577,26 +577,18 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
     {
       int regnum;
       for (regnum = A1_REGNUM; regnum <= PC_REGNUM; regnum++) 
-        if (register_valid[regnum])
-	  read_register_gen (regnum, (char *) &(*gregsetp)[regnum]);
+	read_register_gen (regnum, (char *) &(*gregsetp)[regnum]);
     }
   else if (regno >= A1_REGNUM && regno <= PC_REGNUM)
-    {
-      if (register_valid[regno])
-	read_register_gen (regno, (char *) &(*gregsetp)[regno]);
-    }
+    read_register_gen (regno, (char *) &(*gregsetp)[regno]);
 
   if (PS_REGNUM == regno || -1 == regno)
     {
-      if (register_valid[regno] || -1 == regno)
-        {
-          if (arm_apcs_32)
-	    read_register_gen (PS_REGNUM, (char *) &(*gregsetp)[CPSR_REGNUM]);
-	  else
-	    read_register_gen (PC_REGNUM, (char *) &(*gregsetp)[PC_REGNUM]);
-	}
+      if (arm_apcs_32)
+	read_register_gen (PS_REGNUM, (char *) &(*gregsetp)[CPSR_REGNUM]);
+      else
+	read_register_gen (PC_REGNUM, (char *) &(*gregsetp)[PC_REGNUM]);
     }
-        
 }
 
 /* Fill GDB's register array with the general-purpose register values
@@ -641,9 +633,8 @@ fill_fpregset (gdb_fpregset_t *fpregsetp, int regno)
     }
 
   /* Store fpsr.  */
-  if (register_valid[FPS_REGNUM])
-    if (FPS_REGNUM == regno || -1 == regno)
-      read_register_gen (FPS_REGNUM, (char *) &fp->fpsr);
+  if (FPS_REGNUM == regno || -1 == regno)
+    read_register_gen (FPS_REGNUM, (char *) &fp->fpsr);
 }
 
 /* Fill GDB's register array with the floating-point register values

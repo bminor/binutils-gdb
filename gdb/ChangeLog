@@ -1,3 +1,8 @@
+2001-10-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	* arm-linux-nat.c (fill_gregset): Do not check register_valid[].
+	(fill_fpregset): Likewise.
+
 2001-10-26  Orjan Friberg  <orjanf@axis.com>
 
 	* cris-tdep.c (constraint): Loop through the whole cris_spec_regs
