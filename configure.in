@@ -631,14 +631,18 @@ case "${target}" in
   arm-*-coff*)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
-# CYGNUS LOCAL clm/arm-elf
   arm-*-elf*)
     noconfigdirs="$noconfigdirs target-libgloss"
     if [ x${is_cross_compiler} != xno ] ; then
 	   target_configdirs="${target_configdirs} target-bsp target-libstub target-cygmon"
     fi
     ;;
-# END CYGNUS LOCAL 
+  arm-*-oabi*)
+    noconfigdirs="$noconfigdirs target-libgloss"
+    if [ x${is_cross_compiler} != xno ] ; then
+	   target_configdirs="${target_configdirs} target-bsp target-libstub target-cygmon"
+    fi
+    ;;
   c4x-*-*)
     noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx target-libgloss"
     ;;
@@ -647,6 +651,9 @@ case "${target}" in
     ;;
 # CYGNUS LOCAL clm/arm-elf
   thumb-*-elf)
+    noconfigdirs="$noconfigdirs target-libgloss"
+    ;;
+  thumb-*-oabi)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
 # END CYGNUS LOCAL
