@@ -681,6 +681,7 @@ ALL_TARGET_MODULES = \
 	all-target-winsup \
 	all-target-libgloss \
 	all-target-libiberty \
+	all-target-gperf \
 	all-target-examples
 
 # This is a list of the configure targets for all of the modules which
@@ -694,6 +695,7 @@ CONFIGURE_TARGET_MODULES = \
 	configure-target-winsup \
 	configure-target-libgloss \
 	configure-target-libiberty \
+	configure-target-gperf \
 	configure-target-examples
 
 # This is a list of the check targets for all of the modules which are
@@ -704,7 +706,8 @@ CHECK_TARGET_MODULES = \
 	check-target-libg++ \
 	check-target-newlib \
 	check-target-winsup \
-	check-target-libiberty
+	check-target-libiberty \
+	check-target-gperf
 
 # This is a list of the install targets for all of the modules which are
 # compiled using $(TARGET_FLAGS_TO_PASS).
@@ -715,7 +718,8 @@ INSTALL_TARGET_MODULES = \
 	install-target-newlib \
 	install-target-winsup \
 	install-target-libgloss \
-	install-target-libiberty
+	install-target-libiberty \
+	install-target-gperf
 
 # This is a list of the targets for which we can do a clean-{target}.
 CLEAN_MODULES = \
@@ -794,6 +798,7 @@ CLEAN_TARGET_MODULES = \
 	clean-target-winsup \
 	clean-target-libgloss \
 	clean-target-libiberty \
+	clean-target-gperf \
 	clean-target-examples
 
 # All of the x11 modules that can be cleaned
@@ -1370,6 +1375,8 @@ all-bootstrap: all-libiberty all-byacc all-binutils all-gas all-ld
 GDB_TK = all-tk all-tcl
 all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-byacc all-sim $(gdbnlmrequirements) $(GDB_TK)
 all-gnuserv:
+configure-target-gperf: $(ALL_GCC)
+all-target-gperf: configure-target-gperf all-target-libiberty all-target-libg++
 all-gprof: all-libiberty all-bfd all-opcodes
 all-grep: all-libiberty
 all-grez: all-libiberty all-bfd all-opcodes

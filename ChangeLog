@@ -1,3 +1,17 @@
+Wed Jun 25 12:18:54 1997  Brendan Kehoe  <brendan@lisa.cygnus.com>
+
+	Move gperf into the toplevel, from libg++.
+	* configure.in (target_tools): Add target-gperf.
+	(native_only): Add target-gperf.
+	* Makefile.in (all-target-gperf): New target, depend on
+	all-target-libg++.
+	(configure-target-gperf): Empty rule.
+	(ALL_TARGET_MODULES): Add all-target-gperf.
+	(CONFIGURE_TARGET_MODULES): Add configure-target-gperf.
+	(CHECK_TARGET_MODULES): Add check-target-gperf.
+	(INSTALL_TARGET_MODULES): Add install-target-gperf.
+	(CLEAN_TARGET_MODULES): Add clean-target-gperf.
+
 Mon Jun 23 10:51:53 1997  Jeffrey A Law  (law@cygnus.com)
  
 	* config.sub (mn10200): Recognize new basic machine.

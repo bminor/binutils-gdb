@@ -71,7 +71,7 @@ target_libs="target-libiberty target-libgloss target-newlib target-libio target-
 # list belongs in this list.  those programs are also very likely
 # candidates for the "native_only" list which follows
 #
-target_tools="target-examples target-groff"
+target_tools="target-examples target-groff target-gperf"
 
 ################################################################################
 
@@ -85,7 +85,7 @@ target_tools="target-examples target-groff"
 #
 # This must be a single line because of the way it is searched by grep in
 # the code below.
-native_only="autoconf automake cvs emacs emacs19 fileutils find gawk grep gzip hello indent ispell m4 rcs recode sed shellutils tar textutils gash uudecode wdiff gprof target-groff guile perl apache inet time bash prms sn gnuserv"
+native_only="autoconf automake cvs emacs emacs19 fileutils find gawk grep gzip hello indent ispell m4 rcs recode sed shellutils tar textutils gash uudecode wdiff gprof target-groff guile perl apache inet time bash prms sn gnuserv target-gperf"
 
 # directories to be built in a cross environment only
 #
