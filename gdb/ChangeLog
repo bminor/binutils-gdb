@@ -1,6 +1,6 @@
 Sun Jul 17 15:38:36 1994  Fred Fish  (fnf@cygnus.com)
 
-	* Makefile.in (VERSION):  Bump to 4.12.85.
+	* Makefile.in (VERSION):  Bump to 4.12.4.
 
 Sun Jul 17 12:20:35 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
