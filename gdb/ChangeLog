@@ -1,3 +1,9 @@
+start-sanitize-vr4111
+Thu Jan 15 09:28:52 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* configure.tgt: Create the vr4111 as a copy of the vr4100.
+
+end-sanitize-vr4111
 Wed Jan 14 19:27:02 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* config/mips/{r3900.mt,r3900l.mt,tm-r3900.h,tm-r3900l.h}:
