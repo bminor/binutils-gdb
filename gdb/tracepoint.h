@@ -21,12 +21,6 @@
 #if !defined (TRACEPOINT_H)
 #define TRACEPOINT_H 1
 
-#if !defined (BREAKPOINT_H)
-enum enable
-  {
-    disabled, enabled
-  };
-#endif
 /* The data structure for an action: */
 struct action_line
   {
@@ -40,7 +34,7 @@ struct tracepoint
   {
     struct tracepoint *next;
 
-    enum enable enabled;
+    int enabled_p;
 
 #if 0
     /* Type of tracepoint (MVS FIXME: needed?). */

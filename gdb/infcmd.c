@@ -894,7 +894,7 @@ run_stack_dummy (CORE_ADDR addr, char *buffer)
       bpt = set_momentary_breakpoint (sal,
 				      get_current_frame (),
 				      bp_call_dummy);
-      bpt->disposition = del;
+      bpt->disposition = disp_del;
 
       /* If all error()s out of proceed ended up calling normal_stop (and
          perhaps they should; it already does in the special case of error

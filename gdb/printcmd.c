@@ -112,7 +112,7 @@ struct display
     /* Innermost block required by this expression when evaluated */
     struct block *block;
     /* Status of this display (enabled or disabled) */
-    enum enable status;
+    int enabled_p;
   };
 
 /* Chain of expressions whose values should be displayed
@@ -1433,7 +1433,7 @@ display_command (char *exp, int from_tty)
       new->next = display_chain;
       new->number = ++display_number;
       new->format = fmt;
-      new->status = enabled;
+      new->enabled_p = 1;
       display_chain = new;
 
       if (from_tty && target_has_execution)
@@ -1544,7 +1544,7 @@ do_one_display (struct display *d)
 {
   int within_current_scope;
 
-  if (d->status == disabled)
+  if (d->enabled_p == 0)
     return;
 
   if (d->block)
@@ -1644,7 +1644,7 @@ disable_display (int num)
   for (d = display_chain; d; d = d->next)
     if (d->number == num)
       {
-	d->status = disabled;
+	d->enabled_p = 0;
 	return;
       }
   printf_unfiltered ("No display number %d.\n", num);
@@ -1675,7 +1675,7 @@ Num Enb Expression\n");
 
   for (d = display_chain; d; d = d->next)
     {
-      printf_filtered ("%d:   %c  ", d->number, "ny"[(int) d->status]);
+      printf_filtered ("%d:   %c  ", d->number, "ny"[(int) d->enabled_p]);
       if (d->format.size)
 	printf_filtered ("/%d%c%c ", d->format.count, d->format.size,
 			 d->format.format);
@@ -1700,7 +1700,7 @@ enable_display (char *args, int from_tty)
   if (p == 0)
     {
       for (d = display_chain; d; d = d->next)
-	d->status = enabled;
+	d->enabled_p = 1;
     }
   else
     while (*p)
@@ -1716,7 +1716,7 @@ enable_display (char *args, int from_tty)
 	for (d = display_chain; d; d = d->next)
 	  if (d->number == num)
 	    {
-	      d->status = enabled;
+	      d->enabled_p = 1;
 	      goto win;
 	    }
 	printf_unfiltered ("No display number %d.\n", num);
@@ -1738,7 +1738,7 @@ disable_display_command (char *args, int from_tty)
   if (p == 0)
     {
       for (d = display_chain; d; d = d->next)
-	d->status = disabled;
+	d->enabled_p = 0;
     }
   else
     while (*p)

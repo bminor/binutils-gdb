@@ -1,3 +1,11 @@
+2001-08-02  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* tuiSourceWin.c: Use disp_del instead of del.
+
+	* tuiSource.c: Use disp_del instead of del.
+
+	* tuiDisassem.c: Use disp_del instead of del.
+
 2001-07-31  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* tui.c (tui_enable): Remove call to terminal_save_ours().

@@ -27,16 +27,6 @@
 #include "language.h"
 #include "gdb_string.h"
 
-/* FIXME: While this conflicts with the enum defined in breakpoint.h,
-   I used them to be consistant with how breakpoints, tracepoints, and
-   displays are implemented.  It doesn't lose now because breakpoint.h
-   is not included.  */
-enum enable
-{
-  disabled,
-  enabled
-};
-
 const struct mem_attrib default_mem_attrib =
 {
   MEM_RW,			/* mode */
@@ -78,7 +68,7 @@ create_mem_region (CORE_ADDR lo, CORE_ADDR hi,
   new->lo = lo;
   new->hi = hi;
   new->number = ++mem_number;
-  new->status = enabled;
+  new->enabled_p = 1;
   new->attrib = *attrib;
 
   /* link in new node */
@@ -117,7 +107,7 @@ lookup_mem_region (CORE_ADDR addr)
 
   for (m = mem_region_chain; m; m = m->next)
     {
-      if (m->status == enabled)
+      if (m->enabled_p == 1)
 	{
 	  if (addr >= m->lo && addr < m->hi)
 	    return m;
@@ -245,7 +235,7 @@ mem_info_command (char *args, int from_tty)
       char *tmp;
       printf_filtered ("%-3d %-3c\t",
 		       m->number,
-		       m->status ? 'y' : 'n');
+		       m->enabled_p ? 'y' : 'n');
       if (TARGET_ADDR_BIT <= 32)
 	tmp = longest_local_hex_string_custom ((unsigned long) m->lo, "08l");
       else
@@ -340,7 +330,7 @@ mem_enable (int num)
   for (m = mem_region_chain; m; m = m->next)
     if (m->number == num)
       {
-	m->status = enabled;
+	m->enabled_p = 1;
 	return;
       }
   printf_unfiltered ("No memory region number %d.\n", num);
@@ -359,7 +349,7 @@ mem_enable_command (char *args, int from_tty)
   if (p == 0)
     {
       for (m = mem_region_chain; m; m = m->next)
-	m->status = enabled;
+	m->enabled_p = 1;
     }
   else
     while (*p)
@@ -390,7 +380,7 @@ mem_disable (int num)
   for (m = mem_region_chain; m; m = m->next)
     if (m->number == num)
       {
-	m->status = disabled;
+	m->enabled_p = 0;
 	return;
       }
   printf_unfiltered ("No memory region number %d.\n", num);
@@ -409,7 +399,7 @@ mem_disable_command (char *args, int from_tty)
   if (p == 0)
     {
       for (m = mem_region_chain; m; m = m->next)
-	m->status = disabled;
+	m->enabled_p = 0;
     }
   else
     while (*p)

@@ -137,7 +137,7 @@ static enum print_stop_action print_bp_stop_message (bpstat bs);
 typedef struct
   {
     enum exception_event_kind kind;
-    int enable;
+    int enable_p;
   }
 args_for_catchpoint_enable;
 
@@ -723,7 +723,7 @@ insert_breakpoints (void)
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
-    if (b->enable == permanent)
+    if (b->enable_state == bp_permanent)
       /* Permanent breakpoints cannot be inserted or removed.  */
       continue;
     else if (b->type != bp_watchpoint
@@ -735,9 +735,9 @@ insert_breakpoints (void)
 	&& b->type != bp_catch_exec
 	&& b->type != bp_catch_throw
 	&& b->type != bp_catch_catch
-	&& b->enable != disabled
-	&& b->enable != shlib_disabled
-	&& b->enable != call_disabled
+	&& b->enable_state != bp_disabled
+	&& b->enable_state != bp_shlib_disabled
+	&& b->enable_state != bp_call_disabled
 	&& !b->inserted
 	&& !b->duplicate)
       {
@@ -776,7 +776,7 @@ insert_breakpoints (void)
 	      {
 		/* See also: disable_breakpoints_in_shlibs. */
 		val = 0;
-		b->enable = shlib_disabled;
+		b->enable_state = bp_shlib_disabled;
 		if (!disabled_breaks)
 		  {
 		    target_terminal_ours_for_output ();
@@ -804,9 +804,9 @@ insert_breakpoints (void)
 	  return_val = val;	/* remember failure */
       }
     else if (ep_is_exception_catchpoint (b)
-	     && b->enable != disabled
-	     && b->enable != shlib_disabled
-	     && b->enable != call_disabled
+	     && b->enable_state != bp_disabled
+	     && b->enable_state != bp_shlib_disabled
+	     && b->enable_state != bp_call_disabled
 	     && !b->inserted
 	     && !b->duplicate)
 
@@ -824,7 +824,7 @@ insert_breakpoints (void)
 	    target_terminal_ours_for_output ();
 	    warning ("Cannot insert catchpoint %d; disabling it.",
 		     b->number);
-	    b->enable = disabled;
+	    b->enable_state = bp_disabled;
 	  }
 	else
 	  {
@@ -833,7 +833,7 @@ insert_breakpoints (void)
 	    args_for_catchpoint_enable args;
 	    args.kind = b->type == bp_catch_catch ? 
 	      EX_EVENT_CATCH : EX_EVENT_THROW;
-	    args.enable = 1;
+	    args.enable_p = 1;
 	    val = catch_errors (cover_target_enable_exception_callback,
 				&args,
 				message, RETURN_MASK_ALL);
@@ -848,7 +848,7 @@ insert_breakpoints (void)
 		target_terminal_ours_for_output ();
 		warning ("Cannot insert catchpoint %d; disabling it.",
 			 b->number);
-		b->enable = disabled;
+		b->enable_state = bp_disabled;
 	      }
 	  }
 
@@ -859,8 +859,8 @@ insert_breakpoints (void)
     else if ((b->type == bp_hardware_watchpoint ||
 	      b->type == bp_read_watchpoint ||
 	      b->type == bp_access_watchpoint)
-	     && b->enable == enabled
-	     && b->disposition != del_at_next_stop
+	     && b->enable_state == bp_enabled
+	     && b->disposition != disp_del_at_next_stop
 	     && !b->inserted
 	     && !b->duplicate)
       {
@@ -967,8 +967,8 @@ insert_breakpoints (void)
 	    printf_filtered ("because the program has left the block \n");
 	    printf_filtered ("in which its expression is valid.\n");
 	    if (b->related_breakpoint)
-	      b->related_breakpoint->disposition = del_at_next_stop;
-	    b->disposition = del_at_next_stop;
+	      b->related_breakpoint->disposition = disp_del_at_next_stop;
+	    b->disposition = disp_del_at_next_stop;
 	  }
 
 	/* Restore the frame and level.  */
@@ -982,7 +982,7 @@ insert_breakpoints (void)
     else if ((b->type == bp_catch_fork
 	      || b->type == bp_catch_vfork
 	      || b->type == bp_catch_exec)
-	     && b->enable == enabled
+	     && b->enable_state == bp_enabled
 	     && !b->inserted
 	     && !b->duplicate)
       {
@@ -1251,7 +1251,7 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
 {
   int val;
 
-  if (b->enable == permanent)
+  if (b->enable_state == bp_permanent)
     /* Permanent breakpoints cannot be inserted or removed.  */
     return 0;
 
@@ -1303,7 +1303,7 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
   else if ((b->type == bp_hardware_watchpoint ||
 	    b->type == bp_read_watchpoint ||
 	    b->type == bp_access_watchpoint)
-	   && b->enable == enabled
+	   && b->enable_state == bp_enabled
 	   && !b->duplicate)
     {
       value_ptr v, n;
@@ -1358,7 +1358,7 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
   else if ((b->type == bp_catch_fork ||
 	    b->type == bp_catch_vfork ||
 	    b->type == bp_catch_exec)
-	   && b->enable == enabled
+	   && b->enable_state == bp_enabled
 	   && !b->duplicate)
     {
       val = -1;
@@ -1383,7 +1383,7 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
     }
   else if ((b->type == bp_catch_catch ||
 	    b->type == bp_catch_throw)
-	   && b->enable == enabled
+	   && b->enable_state == bp_enabled
 	   && !b->duplicate)
     {
 
@@ -1394,7 +1394,7 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
     }
   else if (ep_is_exception_catchpoint (b)
 	   && b->inserted	/* sometimes previous insert doesn't happen */
-	   && b->enable == enabled
+	   && b->enable_state == bp_enabled
 	   && !b->duplicate)
     {
 
@@ -1505,15 +1505,15 @@ breakpoint_here_p (CORE_ADDR pc)
   int any_breakpoint_here = 0;
 
   ALL_BREAKPOINTS (b)
-    if ((b->enable == enabled
-	 || b->enable == permanent)
+    if ((b->enable_state == bp_enabled
+	 || b->enable_state == bp_permanent)
 	&& b->address == pc)	/* bp is enabled and matches pc */
       {
 	if (overlay_debugging &&
 	    section_is_overlay (b->section) &&
 	    !section_is_mapped (b->section))
 	  continue;		/* unmapped overlay -- can't be a match */
-	else if (b->enable == permanent)
+	else if (b->enable_state == bp_permanent)
 	  return permanent_breakpoint_here;
 	else
 	  any_breakpoint_here = 1;
@@ -1591,9 +1591,9 @@ breakpoint_thread_match (CORE_ADDR pc, ptid_t ptid)
   thread = pid_to_thread_id (ptid);
 
   ALL_BREAKPOINTS (b)
-    if (b->enable != disabled
-	&& b->enable != shlib_disabled
-	&& b->enable != call_disabled
+    if (b->enable_state != bp_disabled
+	&& b->enable_state != bp_shlib_disabled
+	&& b->enable_state != bp_call_disabled
 	&& b->address == pc
 	&& (b->thread == -1 || b->thread == thread))
     {
@@ -2368,8 +2368,8 @@ which its expression is valid.\n", bs->breakpoint_at->number);
 #endif 
 
       if (b->related_breakpoint)
-	b->related_breakpoint->disposition = del_at_next_stop;
-      b->disposition = del_at_next_stop;
+	b->related_breakpoint->disposition = disp_del_at_next_stop;
+      b->disposition = disp_del_at_next_stop;
 
       return WP_DELETED;
     }
@@ -2421,9 +2421,9 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
-    if (b->enable == disabled
-	|| b->enable == shlib_disabled
-	|| b->enable == call_disabled)
+    if (b->enable_state == bp_disabled
+	|| b->enable_state == bp_shlib_disabled
+	|| b->enable_state == bp_call_disabled)
       continue;
 
     if (b->type != bp_watchpoint
@@ -2530,8 +2530,8 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
 	    /* Error from catch_errors.  */
 	    printf_filtered ("Watchpoint %d deleted.\n", b->number);
 	    if (b->related_breakpoint)
-	      b->related_breakpoint->disposition = del_at_next_stop;
-	    b->disposition = del_at_next_stop;
+	      b->related_breakpoint->disposition = disp_del_at_next_stop;
+	    b->disposition = disp_del_at_next_stop;
 	    /* We've already printed what needs to be printed.  */
 	    bs->print_it = print_it_done;
 
@@ -2602,8 +2602,8 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
 	      /* Error from catch_errors.  */
 	      printf_filtered ("Watchpoint %d deleted.\n", b->number);
 	      if (b->related_breakpoint)
-		b->related_breakpoint->disposition = del_at_next_stop;
-	      b->disposition = del_at_next_stop;
+		b->related_breakpoint->disposition = disp_del_at_next_stop;
+	      b->disposition = disp_del_at_next_stop;
 	      /* We've already printed what needs to be printed.  */
 	      bs->print_it = print_it_done;
 	      break;
@@ -2662,8 +2662,8 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
 	else
 	  {
 	    /* We will stop here */
-	    if (b->disposition == disable)
-	      b->enable = disabled;
+	    if (b->disposition == disp_disable)
+	      b->enable_state = bp_disabled;
 	    bs->commands = b->commands;
 	    if (b->silent)
 	      bs->print = 0;
@@ -3004,7 +3004,7 @@ bpstat_should_step (void)
 {
   struct breakpoint *b;
   ALL_BREAKPOINTS (b)
-    if (b->enable == enabled && b->type == bp_watchpoint)
+    if (b->enable_state == bp_enabled && b->type == bp_watchpoint)
       return 1;
   return 0;
 }
@@ -3015,7 +3015,7 @@ bpstat_have_active_hw_watchpoints (void)
 {
   struct breakpoint *b;
   ALL_BREAKPOINTS (b)
-    if ((b->enable == enabled) &&
+    if ((b->enable_state == bp_enabled) &&
 	(b->inserted) &&
 	((b->type == bp_hardware_watchpoint) ||
 	 (b->type == bp_read_watchpoint) ||
@@ -3174,10 +3174,10 @@ print_one_breakpoint (struct breakpoint *b,
   /* 4 */
   annotate_field (3);
 #ifdef UI_OUT
-  ui_out_field_fmt (uiout, "enabled", "%c", bpenables[(int) b->enable]);
+  ui_out_field_fmt (uiout, "enabled", "%c", bpenables[(int) b->enable_state]);
   ui_out_spaces (uiout, 2);
 #else
-  printf_filtered ("%-3c ", bpenables[(int) b->enable]);
+  printf_filtered ("%-3c ", bpenables[(int) b->enable_state]);
 #endif
   
   /* 5 and 6 */
@@ -3749,10 +3749,10 @@ describe_other_breakpoints (CORE_ADDR pc, asection *section)
 	    others--;
 	    printf_filtered ("%d%s%s ",
 			     b->number,
-			     ((b->enable == disabled || 
-			       b->enable == shlib_disabled || 
-			       b->enable == call_disabled) ? " (disabled)" 
-			      : b->enable == permanent ? " (permanent)"
+			     ((b->enable_state == bp_disabled || 
+			       b->enable_state == bp_shlib_disabled || 
+			       b->enable_state == bp_call_disabled) ? " (disabled)" 
+			      : b->enable_state == bp_permanent ? " (permanent)"
 			      : ""),
 			     (others > 1) ? "," 
 			     : ((others == 1) ? " and" : ""));
@@ -3829,15 +3829,15 @@ check_duplicates (struct breakpoint *bpt)
     return;
 
   ALL_BREAKPOINTS (b)
-    if (b->enable != disabled
-	&& b->enable != shlib_disabled
-	&& b->enable != call_disabled
+    if (b->enable_state != bp_disabled
+	&& b->enable_state != bp_shlib_disabled
+	&& b->enable_state != bp_call_disabled
 	&& b->address == address
 	&& (overlay_debugging == 0 || b->section == section)
 	&& breakpoint_address_is_meaningful (b))
     {
       /* Have we found a permanent breakpoint?  */
-      if (b->enable == permanent)
+      if (b->enable_state == bp_permanent)
 	{
 	  perm_bp = b;
 	  break;
@@ -3868,9 +3868,9 @@ check_duplicates (struct breakpoint *bpt)
 			      "another breakpoint was inserted on top of "
 			      "a permanent breakpoint");
 
-	    if (b->enable != disabled
-		&& b->enable != shlib_disabled
-		&& b->enable != call_disabled
+	    if (b->enable_state != bp_disabled
+		&& b->enable_state != bp_shlib_disabled
+		&& b->enable_state != bp_call_disabled
 		&& b->address == address
 		&& (overlay_debugging == 0 || b->section == section)
 		&& breakpoint_address_is_meaningful (b))
@@ -3913,7 +3913,7 @@ set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
   b->input_radix = input_radix;
   b->thread = -1;
   b->line_number = sal.line;
-  b->enable = enabled;
+  b->enable_state = bp_enabled;
   b->next = 0;
   b->silent = 0;
   b->ignore_count = 0;
@@ -3950,7 +3950,7 @@ set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
 void
 make_breakpoint_permanent (struct breakpoint *b)
 {
-  b->enable = permanent;
+  b->enable_state = bp_permanent;
 
   /* By definition, permanent breakpoints are already present in the code.  */
   b->inserted = 1;
@@ -3980,8 +3980,8 @@ create_longjmp_breakpoint (char *func_name)
   b = set_raw_breakpoint (sal,
                           func_name != NULL ? bp_longjmp : bp_longjmp_resume);
 
-  b->disposition = donttouch;
-  b->enable = disabled;
+  b->disposition = disp_donttouch;
+  b->enable_state = bp_disabled;
   b->silent = 1;
   if (func_name)
     b->addr_string = xstrdup (func_name);
@@ -4002,7 +4002,7 @@ enable_longjmp_breakpoint (void)
   ALL_BREAKPOINTS (b)
     if (b->type == bp_longjmp)
     {
-      b->enable = enabled;
+      b->enable_state = bp_enabled;
       check_duplicates (b);
     }
 }
@@ -4016,7 +4016,7 @@ disable_longjmp_breakpoint (void)
     if (b->type == bp_longjmp
 	|| b->type == bp_longjmp_resume)
     {
-      b->enable = disabled;
+      b->enable_state = bp_disabled;
       check_duplicates (b);
     }
 }
@@ -4034,8 +4034,8 @@ create_thread_event_breakpoint (CORE_ADDR address)
   b = set_raw_breakpoint (sal, bp_thread_event);
   
   b->number = internal_breakpoint_number--;
-  b->disposition = donttouch;
-  b->enable = enabled;
+  b->disposition = disp_donttouch;
+  b->enable_state = bp_enabled;
   /* addr_string has to be used or breakpoint_re_set will delete me.  */
   sprintf (addr_string, "*0x%s", paddr (b->address));
   b->addr_string = xstrdup (addr_string);
@@ -4075,7 +4075,7 @@ create_solib_event_breakpoint (CORE_ADDR address)
   sal.section = find_pc_overlay (sal.pc);
   b = set_raw_breakpoint (sal, bp_shlib_event);
   b->number = internal_breakpoint_number--;
-  b->disposition = donttouch;
+  b->disposition = disp_donttouch;
 
   return b;
 }
@@ -4095,11 +4095,11 @@ disable_breakpoints_in_shlibs (int silent)
 #if defined (PC_SOLIB)
     if (((b->type == bp_breakpoint) ||
 	 (b->type == bp_hardware_breakpoint)) &&
-	b->enable == enabled &&
+	b->enable_state == bp_enabled &&
 	!b->duplicate &&
 	PC_SOLIB (b->address))
       {
-	b->enable = shlib_disabled;
+	b->enable_state = bp_shlib_disabled;
 	if (!silent)
 	  {
 	    if (!disabled_shlib_breaks)
@@ -4122,14 +4122,14 @@ re_enable_breakpoints_in_shlibs (void)
   struct breakpoint *b;
 
   ALL_BREAKPOINTS (b)
-    if (b->enable == shlib_disabled)
+    if (b->enable_state == bp_shlib_disabled)
     {
       char buf[1];
 
       /* Do not reenable the breakpoint if the shared library
          is still not mapped in.  */
       if (target_read_memory (b->address, buf, 1) == 0)
-	b->enable = enabled;
+	b->enable_state = bp_enabled;
     }
 }
 
@@ -4196,8 +4196,8 @@ solib_load_unload_1 (char *hookname, int tempflag, char *dll_pathname,
   else if (addr_start)
     b->addr_string = savestring (addr_start, addr_end - addr_start);
 
-  b->enable = enabled;
-  b->disposition = tempflag ? del : donttouch;
+  b->enable_state = bp_enabled;
+  b->disposition = tempflag ? disp_del : disp_donttouch;
 
   if (dll_pathname == NULL)
     b->dll_pathname = NULL;
@@ -4248,8 +4248,8 @@ create_fork_vfork_event_catchpoint (int tempflag, char *cond_string,
     NULL : savestring (cond_string, strlen (cond_string));
   b->thread = thread;
   b->addr_string = NULL;
-  b->enable = enabled;
-  b->disposition = tempflag ? del : donttouch;
+  b->enable_state = bp_enabled;
+  b->disposition = tempflag ? disp_del : disp_donttouch;
   b->forked_inferior_pid = 0;
 
   mention (b);
@@ -4287,8 +4287,8 @@ create_exec_event_catchpoint (int tempflag, char *cond_string)
     NULL : savestring (cond_string, strlen (cond_string));
   b->thread = thread;
   b->addr_string = NULL;
-  b->enable = enabled;
-  b->disposition = tempflag ? del : donttouch;
+  b->enable_state = bp_enabled;
+  b->disposition = tempflag ? disp_del : disp_donttouch;
 
   mention (b);
 }
@@ -4301,7 +4301,7 @@ hw_breakpoint_used_count (void)
 
   ALL_BREAKPOINTS (b)
   {
-    if (b->type == bp_hardware_breakpoint && b->enable == enabled)
+    if (b->type == bp_hardware_breakpoint && b->enable_state == bp_enabled)
       i++;
   }
 
@@ -4317,14 +4317,14 @@ hw_watchpoint_used_count (enum bptype type, int *other_type_used)
   *other_type_used = 0;
   ALL_BREAKPOINTS (b)
   {
-    if (b->enable == enabled)
+    if (b->enable_state == bp_enabled)
       {
 	if (b->type == type)
 	  i++;
 	else if ((b->type == bp_hardware_watchpoint ||
 		  b->type == bp_read_watchpoint ||
 		  b->type == bp_access_watchpoint)
-		 && b->enable == enabled)
+		 && b->enable_state == bp_enabled)
 	  *other_type_used = 1;
       }
   }
@@ -4346,7 +4346,7 @@ set_longjmp_resume_breakpoint (CORE_ADDR pc, struct frame_info *frame)
     if (b->type == bp_longjmp_resume)
     {
       b->address = pc;
-      b->enable = enabled;
+      b->enable_state = bp_enabled;
       if (frame != NULL)
 	b->frame = frame->frame;
       else
@@ -4368,9 +4368,9 @@ disable_watchpoints_before_interactive_call_start (void)
 	 || (b->type == bp_read_watchpoint)
 	 || (b->type == bp_access_watchpoint)
 	 || ep_is_exception_catchpoint (b))
-	&& (b->enable == enabled))
+	&& (b->enable_state == bp_enabled))
       {
-	b->enable = call_disabled;
+	b->enable_state = bp_call_disabled;
 	check_duplicates (b);
       }
   }
@@ -4388,9 +4388,9 @@ enable_watchpoints_after_interactive_call_stop (void)
 	 || (b->type == bp_read_watchpoint)
 	 || (b->type == bp_access_watchpoint)
 	 || ep_is_exception_catchpoint (b))
-	&& (b->enable == call_disabled))
+	&& (b->enable_state == bp_call_disabled))
       {
-	b->enable = enabled;
+	b->enable_state = bp_enabled;
 	check_duplicates (b);
       }
   }
@@ -4407,8 +4407,8 @@ set_momentary_breakpoint (struct symtab_and_line sal, struct frame_info *frame,
 {
   register struct breakpoint *b;
   b = set_raw_breakpoint (sal, type);
-  b->enable = enabled;
-  b->disposition = donttouch;
+  b->enable_state = bp_enabled;
+  b->disposition = disp_donttouch;
   b->frame = (frame ? frame->frame : 0);
 
   /* If we're debugging a multi-threaded program, then we
@@ -4636,7 +4636,7 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 	b->addr_string = addr_string[i];
 	b->cond_string = cond_string[i];
 	b->ignore_count = ignore_count;
-	b->enable = enabled;
+	b->enable_state = bp_enabled;
 	b->disposition = disposition;
 	mention (b);
       }
@@ -4861,7 +4861,7 @@ break_command_1 (char *arg, int flag, int from_tty)
 
   create_breakpoints (sals, addr_string, cond, cond_string,
 		      hardwareflag ? bp_hardware_breakpoint : bp_breakpoint,
-		      tempflag ? del : donttouch,
+		      tempflag ? disp_del : disp_donttouch,
 		      thread, ignore_count, from_tty);
 
   if (sals.nelts > 1)
@@ -4973,7 +4973,7 @@ do_captured_breakpoint (void *data)
 
   create_breakpoints (sals, addr_string, cond, cond_string,
 		      args->hardwareflag ? bp_hardware_breakpoint : bp_breakpoint,
-		      args->tempflag ? del : donttouch,
+		      args->tempflag ? disp_del : disp_donttouch,
 		      args->thread, args->ignore_count, 0/*from-tty*/);
 
   /* That's it. Discard the cleanups for data inserted into the
@@ -5439,7 +5439,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   b = set_raw_breakpoint (sal, bp_type);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
-  b->disposition = donttouch;
+  b->disposition = disp_donttouch;
   b->exp = exp;
   b->exp_valid_block = exp_valid_block;
   b->exp_string = savestring (exp_start, exp_end - exp_start);
@@ -5478,10 +5478,10 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
 	  set_breakpoint_count (breakpoint_count + 1);
 	  scope_breakpoint->number = breakpoint_count;
 
-	  scope_breakpoint->enable = enabled;
+	  scope_breakpoint->enable_state = bp_enabled;
 
 	  /* Automatically delete the breakpoint when it hits.  */
-	  scope_breakpoint->disposition = del;
+	  scope_breakpoint->disposition = disp_del;
 
 	  /* Only break in the proper frame (help with recursion).  */
 	  scope_breakpoint->frame = prev_frame->frame;
@@ -6232,8 +6232,8 @@ create_exception_catchpoint (int tempflag, char *cond_string,
     NULL : savestring (cond_string, strlen (cond_string));
   b->thread = thread;
   b->addr_string = NULL;
-  b->enable = enabled;
-  b->disposition = tempflag ? del : donttouch;
+  b->enable_state = bp_enabled;
+  b->disposition = tempflag ? disp_del : disp_donttouch;
   mention (b);
 }
 
@@ -6296,7 +6296,7 @@ cover_target_enable_exception_callback (PTR arg)
 {
   args_for_catchpoint_enable *args = arg;
   struct symtab_and_line *sal;
-  sal = target_enable_exception_callback (args->kind, args->enable);
+  sal = target_enable_exception_callback (args->kind, args->enable_p);
   if (sal == NULL)
     return 0;
   else if (sal == (struct symtab_and_line *) -1)
@@ -6396,8 +6396,8 @@ handle_gnu_4_16_catch_command (char *arg, int tempflag, int from_tty)
       b->number = breakpoint_count;
 
       b->cond = cond;
-      b->enable = enabled;
-      b->disposition = tempflag ? del : donttouch;
+      b->enable_state = bp_enabled;
+      b->disposition = tempflag ? disp_del : disp_donttouch;
 
       mention (b);
     }
@@ -6426,8 +6426,8 @@ create_temp_exception_breakpoint (CORE_ADDR pc)
 
   b = set_raw_breakpoint (sal, bp_breakpoint);
 
-  b->disposition = del;
-  b->enable = enabled;
+  b->disposition = disp_del;
+  b->enable_state = bp_enabled;
   b->silent = 1;
   b->number = internal_breakpoint_number--;
   return b;
@@ -6751,13 +6751,13 @@ breakpoint_auto_delete (bpstat bs)
   struct breakpoint *b, *temp;
 
   for (; bs; bs = bs->next)
-    if (bs->breakpoint_at && bs->breakpoint_at->disposition == del
+    if (bs->breakpoint_at && bs->breakpoint_at->disposition == disp_del
 	&& bs->stop)
       delete_breakpoint (bs->breakpoint_at);
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
-    if (b->disposition == del_at_next_stop)
+    if (b->disposition == disp_del_at_next_stop)
       delete_breakpoint (b);
   }
 }
@@ -6817,7 +6817,7 @@ delete_breakpoint (struct breakpoint *bpt)
       sprintf (message, message1, bpt->number);
       args.kind = bpt->type == bp_catch_catch ? 
 	EX_EVENT_CATCH : EX_EVENT_THROW;
-      args.enable = 0;
+      args.enable_p = 0;
       catch_errors (cover_target_enable_exception_callback, &args,
 		    message, RETURN_MASK_ALL);
     }
@@ -6845,9 +6845,9 @@ delete_breakpoint (struct breakpoint *bpt)
 	if (b->address == bpt->address
 	    && b->section == bpt->section
 	    && !b->duplicate
-	    && b->enable != disabled
-	    && b->enable != shlib_disabled
-	    && b->enable != call_disabled)
+	    && b->enable_state != bp_disabled
+	    && b->enable_state != bp_shlib_disabled
+	    && b->enable_state != bp_call_disabled)
 	{
 	  int val;
 
@@ -6855,7 +6855,7 @@ delete_breakpoint (struct breakpoint *bpt)
 	     breakpoint at the same address as the one being deleted.
 	     If there is a permanent breakpoint somewhere, it should
 	     always be the only one inserted.  */
-	  if (b->enable == permanent)
+	  if (b->enable_state == bp_permanent)
 	    internal_error (__FILE__, __LINE__,
 			    "another breakpoint was inserted on top of "
 			    "a permanent breakpoint");
@@ -6991,7 +6991,7 @@ breakpoint_re_set_one (PTR bint)
   int i;
   struct symtabs_and_lines sals;
   char *s;
-  enum enable save_enable;
+  enum enable_state save_enable;
 
   switch (b->type)
     {
@@ -7011,8 +7011,8 @@ breakpoint_re_set_one (PTR bint)
 	}
       /* In case we have a problem, disable this breakpoint.  We'll restore
          its status if we succeed.  */
-      save_enable = b->enable;
-      b->enable = disabled;
+      save_enable = b->enable_state;
+      b->enable_state = bp_disabled;
 
       set_language (b->language);
       input_radix = b->input_radix;
@@ -7068,7 +7068,7 @@ breakpoint_re_set_one (PTR bint)
 	      breakpoints_changed ();
 	    }
 	  b->section = sals.sals[i].section;
-	  b->enable = save_enable;	/* Restore it, this worked. */
+	  b->enable_state = save_enable;	/* Restore it, this worked. */
 
 
 	  /* Now that this is re-enabled, check_duplicates
@@ -7112,7 +7112,7 @@ breakpoint_re_set_one (PTR bint)
 	    xfree (b->cond);
 	  b->cond = parse_exp_1 (&s, (struct block *) 0, 0);
 	}
-      if (b->enable == enabled)
+      if (b->enable_state == bp_enabled)
 	mention (b);
       value_free_to_mark (mark);
       break;
@@ -7333,10 +7333,10 @@ disable_breakpoint (struct breakpoint *bpt)
     return;
 
   /* You can't disable permanent breakpoints.  */
-  if (bpt->enable == permanent)
+  if (bpt->enable_state == bp_permanent)
     return;
 
-  bpt->enable = disabled;
+  bpt->enable_state = bp_disabled;
 
   check_duplicates (bpt);
 
@@ -7400,8 +7400,8 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
 	error ("Hardware breakpoints used exceeds limit.");
     }
 
-  if (bpt->enable != permanent)
-    bpt->enable = enabled;
+  if (bpt->enable_state != bp_permanent)
+    bpt->enable_state = bp_enabled;
   bpt->disposition = disposition;
   check_duplicates (bpt);
   breakpoints_changed ();
@@ -7425,7 +7425,7 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
 	      printf_filtered ("\
 Cannot enable watchpoint %d because the block in which its expression\n\
 is valid is not currently in scope.\n", bpt->number);
-	      bpt->enable = disabled;
+	      bpt->enable_state = bp_disabled;
 	      return;
 	    }
 
@@ -7459,7 +7459,7 @@ is valid is not currently in scope.\n", bpt->number);
 	      printf_filtered ("\
 Cannot enable watchpoint %d because target watch resources\n\
 have been allocated for other watchpoints.\n", bpt->number);
-	      bpt->enable = disabled;
+	      bpt->enable_state = bp_disabled;
 	      value_free_to_mark (mark);
 	      return;
 	    }
@@ -7521,7 +7521,7 @@ enable_command (char *args, int from_tty)
 static void
 enable_once_breakpoint (struct breakpoint *bpt)
 {
-  do_enable_breakpoint (bpt, disable);
+  do_enable_breakpoint (bpt, disp_disable);
 }
 
 /* ARGSUSED */
@@ -7534,7 +7534,7 @@ enable_once_command (char *args, int from_tty)
 static void
 enable_delete_breakpoint (struct breakpoint *bpt)
 {
-  do_enable_breakpoint (bpt, del);
+  do_enable_breakpoint (bpt, disp_del);
 }
 
 /* ARGSUSED */

@@ -79,8 +79,8 @@ struct mem_region
   /* Item number of this memory region. */
   int number;
 
-  /* Status of this memory region (enabled or disabled) */
-  int status;
+  /* Status of this memory region (enabled if non-zero, otherwise disabled) */
+  int enabled_p;
 
   /* Attributes for this region */
   struct mem_attrib attrib;

@@ -583,7 +583,7 @@ tuiSetExecInfoContent (TuiWinInfoPtr winInfo)
 			 srcElement->whichElement.source.lineOrAddr.addr);
 		      if (found)
 			srcElement->whichElement.source.hasBreak =
-			  (bp->disposition != del || bp->hit_count <= 0);
+			  (bp->disposition != disp_del || bp->hit_count <= 0);
 		    }
 		  if (!found)
 		    srcElement->whichElement.source.hasBreak = FALSE;

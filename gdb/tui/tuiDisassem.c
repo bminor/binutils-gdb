@@ -120,7 +120,7 @@ extern void strcat_address_numeric (CORE_ADDR, int, char *, int);
 	      element->whichElement.source.hasBreak =
 		(bp != (struct breakpoint *) NULL &&
 		 (!element->whichElement.source.isExecPoint ||
-		  (bp->disposition != del || bp->hit_count <= 0)));
+		  (bp->disposition != disp_del || bp->hit_count <= 0)));
 	      curLine++;
 	      pc = newpc;
 	      /* reset the buffer to empty */

@@ -1,3 +1,39 @@
+2001-08-02  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	The following changes avoid polluting global namespace with the
+	`enable' and `disable' identifiers, because some platforms define
+	in their system headers symbols with global scope that go by those
+	names.
+
+	* breakpoint.h (enum enable_state): Rename from `enum enable'.
+	Also rename all the enum members to have the "bp_" prefix.
+	(struct breakpoint): Rename the `enable' member to `enable_state'.
+	(enum bpdisp): Rename all members to have the "disp_" prefix.
+
+	* breakpoint.c: All users of `enum enable' and `enum bpdisp'
+	changed.
+	(args_for_catchpoint_enable): Rename the `enable' member to
+	`enable_p'.  All users changed.
+
+	* tracepoint.h (enum enable): Remove.
+	(struct tracepoint): The member `enabled' is now `int enabled_p'.
+
+	* tracepoint.c: All users of the `enabled' member changed.
+
+	* printcmd.c (struct display): The `status' member is now an int.
+
+	* memattr.h (struct mem_region): Rename the `status' member to
+	`enabled_p'.
+	(enum enable): Remove.
+
+	* memattr.c: Change all users of the `status' member of struct
+	mem_region to use `enabled_p' instead.
+
+	* infcmd.c (run_stack_dummy): Use disp_del instead of del.
+
+	* go32-nat.c: Remove the kludgey work-around for conflicts between
+	<dos.h> and "breakpoint.h".
+
 2001-07-30  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-i386sol2.h (STAB_REG_TO_REGNUM): Redefine to call

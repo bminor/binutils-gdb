@@ -357,7 +357,7 @@ set_raw_tracepoint (struct symtab_and_line sal)
   t->language = current_language->la_language;
   t->input_radix = input_radix;
   t->line_number = sal.line;
-  t->enabled = enabled;
+  t->enabled_p = 1;
   t->next = 0;
   t->step_count = 0;
   t->pass_count = 0;
@@ -494,7 +494,7 @@ tracepoints_info (char *tpnum_exp, int from_tty)
 	}
 
       printf_filtered ("%-3d %-3s ", t->number,
-		       t->enabled == enabled ? "y" : "n");
+		       t->enabled_p ? "y" : "n");
       if (addressprint)
 	{
 	  char *tmp;
@@ -569,11 +569,11 @@ tracepoint_operation (struct tracepoint *t, int from_tty,
   switch (opcode)
     {
     case enable_op:
-      t->enabled = enabled;
+      t->enabled_p = 1;
       tracepoint_modify_event (t->number);
       break;
     case disable_op:
-      t->enabled = disabled;
+      t->enabled_p = 0;
       tracepoint_modify_event (t->number);
       break;
     case delete_op:
@@ -1735,7 +1735,7 @@ trace_start_command (char *args, int from_tty)
 
 	sprintf_vma (tmp, t->address);
 	sprintf (buf, "QTDP:%x:%s:%c:%lx:%x", t->number, tmp, /* address */
-		 t->enabled == enabled ? 'E' : 'D',
+		 t->enabled_p ? 'E' : 'D',
 		 t->step_count, t->pass_count);
 
 	if (t->actions)
