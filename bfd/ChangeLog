@@ -1,3 +1,15 @@
+Fri Jul  2 18:27:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (clean): Remove bfd.h and stmp-bfd.h.
+	(realclean): Remove generated headers.
+
+Fri Jul  2 14:51:51 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* section.c (bfd_set_section_content):  Deny if file is not opened with
+	the proper mode, set output_has_begun if file is openened for update.
+	* aoutx.h (aout_*_set_section_content):  Remove checks that are now
+	done in bfd_set_section_content.
+
 Fri Jul  2 09:25:20 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* hosts/std-host.h: Removed declarations of printf, fprintf,

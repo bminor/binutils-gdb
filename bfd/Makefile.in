@@ -58,7 +58,7 @@ RANLIB = ranlib
 CC_FOR_BUILD = $(CC)
 
 INCDIR = $(srcdir)/../include
-CSEARCH = -I. -I$(srcdir) -I../include -I$(INCDIR)
+CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 DEP = mkdep
 
 SUBDIRS = doc
@@ -77,21 +77,22 @@ BFD_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
 	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o cpu-hppa.o \
 	cpu-z8k.o cpu-we32k.o cpu-h8500.o cpu-alpha.o cpu-sh.o
 
-BFD32_BACKENDS = aout32.o sunos.o newsos3.o mipsbsd.o aout-adobe.o \
-	i386aout.o i386bsd.o i386linux.o i386lynx.o \
-	coff-i960.o coff-a29k.o coff-m68k.o coff-i386.o coff-m88k.o \
-	coff-rs6000.o coff-h8300.o coff-h8500.o coff-z8k.o coff-we32k.o \
-	coff-mips.o coff-msym.o \
+BFD32_BACKENDS = \
 	elf.o \
 	elf32.o elf32-sparc.o elf32-i386.o elf32-i860.o elf32-m68k.o \
 	elf32-hppa.o elf32-mips.o elf32-m88k.o elf32-generic.o \
-	bout.o \
-	hppa.o oasys.o ieee.o srec.o stab-syms.o coff-alpha.o coff-sh.o \
-	hp300hpux.o
+	aout32.o sunos.o newsos3.o mipsbsd.o aout-adobe.o \
+	i386aout.o i386bsd.o i386linux.o i386lynx.o \
+	hp300hpux.o bout.o \
+	coff-i960.o coff-a29k.o coff-m68k.o coff-i386.o coff-m88k.o \
+	coff-rs6000.o coff-h8300.o coff-h8500.o coff-z8k.o coff-we32k.o \
+	coff-mips.o coff-msym.o coff-alpha.o coff-sh.o \
+	hppa.o oasys.o ieee.o srec.o \
+	stab-syms.o
 
 BFD64_BACKENDS = \
-	aout64.o demo64.o \
-	elf64.o
+	elf64.o elf64-generic.o \
+	aout64.o demo64.o
 
 OPTIONAL_BACKENDS = trad-core.o
 
@@ -101,6 +102,8 @@ OPTIONAL_BACKENDS = trad-core.o
 # Change this (to MINIMIZE=1) to save space in executables.
 # Currently, all this does is control the target_vector in targets.c.
 # MINIMIZE=0
+
+all:
 
 #### host and target dependent Makefile fragments come in here.
 ###
@@ -197,10 +200,11 @@ TAGS: force
 do_mostlyclean:
 	rm -f *.o *~ core *.E *.p *.ip aout-params.h gen-aout
 do_clean: do_mostlyclean
-	rm -f libbfd.a TAGS
+	rm -f libbfd.a TAGS bfd.h stmp-bfd.h
 do_distclean: do_clean
 	rm -f Makefile config.status sysdep.h
 do_realclean: do_distclean
+	rm -f $(srcdir)/libcoff.h $(srcdir)/libbfd.h $(BFDIN_H)
 
 mostlyclean: do_mostlyclean
 	$(MAKE) subdir_do DO=mostlyclean "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS)
@@ -444,7 +448,7 @@ bout.o : bout.c $(BFD_H) $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/bout.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def libaout.h
 mipsbsd.o : mipsbsd.c $(BFD_H) $(INCDIR)/obstack.h \
   libbfd.h libaout.h
-elf.o : $(BFD_H) $(INCDIR)/obstack.h
+elf.o : elf.c libelf.h libbfd.h $(BFD_H) $(INCDIR)/obstack.h
 elf32.o : elf32.c elfcode.h libelf.h libbfd.h $(BFD_H) \
   $(INCDIR)/obstack.h
 elf32-sparc.o : elf32-sparc.c libelf.h libbfd.h $(BFD_H) \
@@ -465,6 +469,8 @@ elf32-generic.o : elf32-generic.c libelf.h libbfd.h \
   $(BFD_H) $(INCDIR)/obstack.h
 elf64.o : elf64.c elfcode.h libelf.h libbfd.h $(BFD_H) \
   $(INCDIR)/obstack.h
+elf64-generic.o : elf64-generic.c libelf.h libbfd.h \
+  $(BFD_H) $(INCDIR)/obstack.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
 
