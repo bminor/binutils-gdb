@@ -1295,7 +1295,7 @@ $(CHECK_X11_MODULES):
 # This rule is used to install the modules which use X11_FLAGS_TO_PASS.
 # To build a target install-X means to cd to X and make install.
 .PHONY: $(INSTALL_X11_MODULES)
-$(INSTALL_X11_MODULES):
+$(INSTALL_X11_MODULES): installdirs
 	@dir=`echo $@ | sed -e 's/install-//'`; \
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
