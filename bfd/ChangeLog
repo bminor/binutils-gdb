@@ -1,3 +1,8 @@
+Tue Sep  8 21:37:58 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* sparc-opc.c: Moved to opcodes library, now that we have one.
+	* Makefile: Don't compile it.
+
 Tue Sep  8 10:10:34 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* aoutx.h: adjust_sizes_and_vmas did not return anything.
