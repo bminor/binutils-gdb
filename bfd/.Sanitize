@@ -17,8 +17,6 @@
 
 Do-first:
 
-echo Sanitizing `pwd`.
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -117,7 +115,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.29  1991/11/17 21:38:05  bothner
+# Revision 1.30  1991/11/21 01:56:17  gnu
+# Avoid duplicate echo.
+#
+# Revision 1.29  1991/11/17  21:38:05  bothner
 # 	* targets.c:  Make the default target_vector contain
 # 	just &DEFAULT_VECTOR.  This makes executables a lot smaller.
 # 	Old behavior can be gotten by defining ALL_TARGETS.
