@@ -1323,9 +1323,7 @@ som_reloc_call (abfd, p, subspace_reloc_sizep, bfd_reloc, sym_num, queue)
 
 
 /* Return the logarithm of X, base 2, considering X unsigned. 
-   Abort if X is not a power of two -- this should never happen (FIXME:
-   It will happen on corrupt executables.  GDB should give an error, not
-   a coredump, in that case).  */
+   Abort -1 if X is not a power or two or is zero.  */
 
 static int
 log2 (x)
@@ -1335,7 +1333,7 @@ log2 (x)
 
   /* Test for 0 or a power of 2.  */
   if (x == 0 || x != (x & -x))
-    abort();
+    return -1;
 
   while ((x >>= 1) != 0)
     log++;
@@ -1677,6 +1675,8 @@ setup_sections (abfd, file_hdr)
       space_asect->vma = subspace.subspace_start;
       space_asect->filepos = subspace.file_loc_init_value;
       space_asect->alignment_power = log2 (subspace.alignment);
+      if (space_asect->alignment_power == -1)
+	return false;
 
       /* Initialize save_subspace so we can reliably determine if this
 	 loop placed any useful values into it.  */
@@ -1775,15 +1775,17 @@ setup_sections (abfd, file_hdr)
 	  subspace_asect->vma = subspace.subspace_start;
 	  subspace_asect->_cooked_size = subspace.subspace_length;
 	  subspace_asect->_raw_size = subspace.subspace_length;
-	  subspace_asect->alignment_power = log2 (subspace.alignment);
 	  subspace_asect->filepos = subspace.file_loc_init_value;
+	  subspace_asect->alignment_power = log2 (subspace.alignment);
+	  if (subspace_asect->alignment_power == -1)
+	    return false;
 	}
 
       /* Yow! there is no subspace within the space which actually 
          has initialized information in it; this should never happen
          as far as I know.  */
       if (!save_subspace.file_loc_init_value)
-	abort ();
+	return false;
 
       /* Setup the sizes for the space section based upon the info in the
          last subspace of the space.  */

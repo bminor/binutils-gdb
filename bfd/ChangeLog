@@ -1,5 +1,8 @@
 Wed Mar  2 11:57:03 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (log2): Return -1 on error rather than aborting.
+	(setup_sections): Bubble up an error from log2.
+
 	* Changes to make HP C compiler happy in both traditional
 	and ANSI mode.
 	* som.c (hppa_som_gen_reloc_type): Use correct enum type for
