@@ -422,10 +422,12 @@ bfd_target *target_vector[] = {
 	&ecoff_little_vec,
 	&ecoff_big_vec,
 	&ieee_vec,
-#if 1
+#if 0
 	/* We have no oasys tools anymore, so we can't test any of this
 	   anymore. If you want to test the stuff yourself, go ahead...
-	   steve@cygnus.com */
+	   steve@cygnus.com
+	   Worse, since there is no magic number for archives, there
+	   can annoying target mis-matches.  */
 	&oasys_vec,
 #endif
 	&sunos_big_vec,
