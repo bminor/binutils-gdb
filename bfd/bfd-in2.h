@@ -1,5 +1,5 @@
 /* Main header file for the bfd library -- portable access to object files.
-   Copyright 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 ** NOTE: bfd.h and bfd-in2.h are GENERATED files.  Don't change them;
