@@ -5069,7 +5069,7 @@ mips_elf_sign_extend (value, bits)
      bfd_vma value;
      int bits;
 {
-  if (value & (1 << (bits - 1)))
+  if (value & ((bfd_vma)1 << (bits - 1)))
     /* VALUE is negative.  */
     value |= ((bfd_vma) - 1) << bits;      
   
@@ -5128,7 +5128,7 @@ mips_elf_highest (value)
      bfd_vma value ATTRIBUTE_UNUSED;
 {
 #ifdef BFD64
-  return ((value + (bfd_vma) 0x800080008000) > 48) & 0xffff;
+  return ((value + (bfd_vma) 0x800080008000) >> 48) & 0xffff;
 #else
   abort ();
   return (bfd_vma) -1;
@@ -5946,6 +5946,7 @@ mips_elf_calculate_relocation (abfd,
     case R_MIPS_LO16:
     case R_MIPS_GPREL16:
     case R_MIPS_GPREL32:
+    case R_MIPS_LITERAL:
       gp0 = _bfd_get_gp_value (input_bfd);
       gp = _bfd_get_gp_value (abfd);
       break;
@@ -6412,9 +6413,7 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *relend;
   bfd_vma addend;
-  bfd_vma last_hi16_addend;
   boolean use_saved_addend_p = false;
-  boolean last_hi16_addend_valid_p = false;
   struct elf_backend_data *bed;
 
   bed = get_elf_backend_data (output_bfd);
@@ -6432,13 +6431,20 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
       /* Find the relocation howto for this relocation.  */
       if (r_type == R_MIPS_64 && !ABI_64_P (output_bfd))
-	/* Some 32-bit code uses R_MIPS_64.  In particular, people use
-	   64-bit code, but make sure all their addresses are in the 
-	   lowermost or uppermost 32-bit section of the 64-bit address
-	   space.  Thus, when they use an R_MIPS_64 they mean what is
-	   usually meant by R_MIPS_32, with the exception that the
-	   stored value is sign-extended to 64 bits.  */
-	howto = elf_mips_howto_table + R_MIPS_32;
+	{
+	  /* Some 32-bit code uses R_MIPS_64.  In particular, people use
+	     64-bit code, but make sure all their addresses are in the 
+	     lowermost or uppermost 32-bit section of the 64-bit address
+	     space.  Thus, when they use an R_MIPS_64 they mean what is
+	     usually meant by R_MIPS_32, with the exception that the
+	     stored value is sign-extended to 64 bits.  */
+	  howto = elf_mips_howto_table + R_MIPS_32;
+
+	  /* On big-endian systems, we need to lie about the position
+	     of the reloc.  */
+	  if (bfd_big_endian (input_bfd))
+	      rel->r_offset += 4;
+	}
       else
 	howto = mips_rtype_to_howto (r_type);
 
@@ -6502,25 +6508,10 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  l &= lo16_howto->src_mask;
 		  l = mips_elf_sign_extend (l, 16);
 
-		  /* Save the high-order bit for later.  When we
-		     encounter the R_MIPS_LO16 relocation we will need
-		     them again.  */
 		  addend <<= 16;
-		  last_hi16_addend = addend;
-		  last_hi16_addend_valid_p = true;
 
 		  /* Compute the combined addend.  */
 		  addend += l;
-		}
-	      else if (r_type == R_MIPS_LO16) 
-		{
-		  /* Used the saved HI16 addend.  */
-		  if (!last_hi16_addend_valid_p)
-		    {
-		      bfd_set_error (bfd_error_bad_value);
-		      return false;
-		    }
-		  addend |= last_hi16_addend;
 		}
 	      else if (r_type == R_MIPS16_GPREL)
 		{
@@ -6554,7 +6545,8 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  if (r_type == R_MIPS16_GPREL 
 	      || r_type == R_MIPS_GPREL16
-	      || r_type == R_MIPS_GPREL32)
+	      || r_type == R_MIPS_GPREL32
+	      || r_type == R_MIPS_LITERAL)
 	    addend -= (_bfd_get_gp_value (output_bfd)
 		       - _bfd_get_gp_value (input_bfd));
 	  else if (r_type == R_MIPS_26 || r_type == R_MIPS16_26)
@@ -6683,15 +6675,6 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	   go to extreme lengths to support this usage on systems with
 	   only a 32-bit VMA.  */
 	{
-#ifdef BFD64
-	  /* Just sign-extend the value, and then fall through to the
-	     normal case, using the R_MIPS_64 howto.  That will store
-	     the 64-bit value into a 64-bit area.  */
-	  value = mips_elf_sign_extend (value, 64);
-	  howto = elf_mips_howto_table + R_MIPS_64;
-#else /* !BFD64 */
-	  /* In the 32-bit VMA case, we must handle sign-extension and
-	     endianness manually.  */
 	  bfd_vma sign_bits;
 	  bfd_vma low_bits;
 	  bfd_vma high_bits;
@@ -6705,6 +6688,8 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	     stores.  */
 	  if (bfd_big_endian (input_bfd))
 	    {
+	      /* Undo what we did above.  */
+	      rel->r_offset -= 4;
 	      /* Store the sign-bits (which are most significant)
 		 first.  */
 	      low_bits = sign_bits;
@@ -6720,7 +6705,6 @@ _bfd_mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  bfd_put_32 (input_bfd, high_bits, 
 		      contents + rel->r_offset + 4);
 	  continue;
-#endif /* !BFD64 */
 	}
 
       /* Actually perform the relocation.  */

@@ -1,3 +1,14 @@
+Fri Oct  8 13:03:45 1999  Geoffrey Keating  <geoffk@cygnus.com>
+
+	* elf32-mips.c (mips_elf_calculate_relocation): R_MIPS_LITERAL
+	relocs also need the GP value.
+	(_bfd_mips_elf_relocate_section): Handle unpaired LO16 relocs
+ 	properly.  Handle sign-extension for R_MIPS_64 correctly.  Correct
+ 	the GP value for R_MIPS_LITERAL relocs too.  Handle
+	R_MIPS_64 relocs properly on big-endian MIPS.
+	(mips_elf_sign_extend): Behave properly with 'long long'.
+	(mips_elf_highest): Correct typo.
+
 Mon Oct  4 17:49:45 1999  Nick Clifton  <nickc@cygnus.com>
 
 	* cpu-m32r.c (arch_info_struct): New static global.
