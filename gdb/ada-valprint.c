@@ -1,7 +1,7 @@
 /* Support for printing Ada values for GDB, the GNU debugger.
+
    Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994, 1997, 2001,
-   2002, 2003, 2004.
-             Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -278,7 +278,7 @@ ada_emit_char (int c, struct ui_file *stream, int quoter, int type_len)
    or 2) of a character.  */
 
 static int
-char_at (char *string, int i, int type_len)
+char_at (const bfd_byte *string, int i, int type_len)
 {
   if (type_len == 1)
     return string[i];
@@ -439,8 +439,8 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
  */
 
 static void
-printstr (struct ui_file *stream, char *string, unsigned int length,
-	  int force_ellipses, int type_len)
+printstr (struct ui_file *stream, const bfd_byte *string,
+	  unsigned int length, int force_ellipses, int type_len)
 {
   unsigned int i;
   unsigned int things_printed = 0;

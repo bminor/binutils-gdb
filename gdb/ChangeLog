@@ -1,7 +1,9 @@
 2005-01-28  Andrew Cagney  <cagney@gnu.org>
 
-	* printcmd.c (print_scalar_formatted): Update.
+	* ada-valprint.c (char_at, printstr): Make buffer a const bfd_byte.
+
 	* gdbtypes.h (print_scalar_formatted): Make buffer a const bfd_byte.
+	* printcmd.c (print_scalar_formatted): Update.
 
 	* value.h (value_bit_index, print_floating)
 	(find_rt_vbase_offset): Make buffer a const bfd_byte.
