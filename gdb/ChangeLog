@@ -1,5 +1,7 @@
 Fri Mar  5 17:16:26 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
 
+	* tm-mips.h (GDB_TARGET_IS_MIPS): no longer used, now removed.
+
 	* configure.in: accept mips-sgi-irix4* for irix4.
 
 Fri Mar  5 07:49:48 1993  Steve Chamberlain  (sac@lisa.cygnus.com)
