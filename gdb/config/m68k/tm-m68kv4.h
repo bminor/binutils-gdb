@@ -1,6 +1,6 @@
 /* Target definitions for GDB on a Motorola 680x0 running SVR4.
    (Commodore Amiga with amix or Atari TT with ASV)
-   Copyright (C) 1991, Free Software Foundation, Inc.
+   Copyright (C) 1991, 1995 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support (fnf@cygint)
 
 This file is part of GDB.
@@ -64,3 +64,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    This routine returns true on success */
 
 #define GET_LONGJMP_TARGET(ADDR) get_longjmp_target(ADDR)
+
+/* Convert a DWARF register number to a gdb REGNUM.  */
+#define DWARF_REG_TO_REGNUM(num) ((num) < 16 ? (num) : (num)+FP0_REGNUM-16)
