@@ -1,3 +1,11 @@
+Mon Jun 21 15:23:22 1993  Fred Fish  (fnf@cygnus.com)
+
+	* {gdb.t01, gdb.t02, gdb.t03, gdb.t04, gdb.t05, gdb.t06, gdb.t07,
+	gdb.t08, gdb.t09, gdb.t10, gdb.t11, gdb.t12, gdb.t13, gdb.t15,
+	gdb.t16, gdb.t17, gdb.t20, gdb.t21, gdb.t22, gdb.t23, gdb.t30}/
+	Makefile.in (distclean, realclean):  Remove gdbme.c from list of
+	things to remove.
+
 Sat Jun 19 07:49:10 1993  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.t24/demangle.exp (test_gnu_style_demangling):  Add some new
