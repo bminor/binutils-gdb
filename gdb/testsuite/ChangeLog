@@ -1,3 +1,7 @@
+Thu Oct 14 16:27:08 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* gdb.t24/demangle.exp: clean up XFAILS, more than 100
+
 Thu Oct 14 11:40:30 1993  Jeffrey Law  (law@cs.uah.edu)
 
 	* configure.in (configdirs): Add gdb.disasm
