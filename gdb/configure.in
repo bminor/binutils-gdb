@@ -1,6 +1,8 @@
 configdirs="doc"
 srcname="GDB"
 srctrigger=main.c
+target_dependent=true
+
 # per-host:
 
 # map host info into gdb names.
@@ -134,13 +136,13 @@ arm | vax | merlin | none | np1 | pn | pyramid | tahoe)
 esac
 
 
-if [ ! -f config/mh-${gdb_host} ]; then
+if [ ! -f ${srcdir}/config/mh-${gdb_host} ]; then
 	echo '***' "Gdb does not support host ${host}" 1>&2
 	exit 1
 fi
 
 #  We really shouldn't depend on there being a space after XM_FILE= ...
-hostfile=`awk '$1 == "XM_FILE=" { print $2 }' <config/mh-${gdb_host}`
+hostfile=`awk '$1 == "XM_FILE=" { print $2 }' <${srcdir}/config/mh-${gdb_host}`
 
 # per-target:
 
@@ -275,7 +277,7 @@ rs6000)
 
 esac
 
-if [ ! -f config/mt-${gdb_target} ]; then
+if [ ! -f ${srcdir}/config/mt-${gdb_target} ]; then
 	echo '***' "Gdb does not support target ${target}" 1>&2
 	exit 1
 fi
@@ -286,7 +288,7 @@ if [ -z "${removing}" ] ; then
 fi
 
 #  We really shouldn't depend on there being a space after TM_FILE= ...
-targetfile=`awk '$1 == "TM_FILE=" { print $2 }' <config/mt-${gdb_target}`
+targetfile=`awk '$1 == "TM_FILE=" { print $2 }' <${srcdir}/config/mt-${gdb_target}`
 
 host_makefile_frag=config/mh-${gdb_host}
 target_makefile_frag=config/mt-${gdb_target}
