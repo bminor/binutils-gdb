@@ -1,3 +1,7 @@
+Thu Jan 27 17:04:01 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* chardefs.h: Only declare strrchr if it is not #define'd.
+
 Tue Jan 25 11:30:06 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* rldefs.h: Accept __hpux as well as hpux for HP compiler in ANSI mode.
