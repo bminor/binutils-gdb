@@ -1,5 +1,10 @@
 2003-03-03  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbint.texinfo (Target Architecture Definition): Document
+	register_type.
+
+2003-03-03  Andrew Cagney  <cagney@redhat.com>
+
 	* stabs.texinfo (Structures): Use @samp and separate @var's
 	instead of a single @var containing a comma separated list.
 	(Unions): Ditto.

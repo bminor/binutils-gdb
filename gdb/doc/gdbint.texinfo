@@ -3506,6 +3506,12 @@ Return the virtual size of @var{reg}.
 Return the virtual type of @var{reg}.
 @xref{Target Architecture Definition, , Raw and Virtual Register Representations}.
 
+@item struct type *register_type (@var{gdbarch}, @var{reg})
+@findex register_type
+If defined, return the type of register @var{reg}.  This function
+superseeds @code{REGISTER_VIRTUAL_TYPE}.  @xref{Target Architecture
+Definition, , Raw and Virtual Register Representations}.
+
 @item REGISTER_CONVERT_TO_VIRTUAL(@var{reg}, @var{type}, @var{from}, @var{to})
 @findex REGISTER_CONVERT_TO_VIRTUAL
 Convert the value of register @var{reg} from its raw form to its virtual
