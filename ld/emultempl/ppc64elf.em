@@ -405,46 +405,17 @@ gld${EMULATION_NAME}_new_vers_pattern (struct bfd_elf_version_expr *entry)
   unsigned int len;
   char *dot_pat;
 
-  if (!dotsyms || entry->pattern[0] == '*')
+  if (!dotsyms || entry->pattern[0] == '*' || entry->pattern[0] == '.')
     return entry;
 
-  /* Is the script adding ".foo" explicitly?  */
-  if (entry->pattern[0] == '.')
-    {
-      /* We may have added this pattern automatically.  Don't add it
-	 again.  Quadratic behaviour here is acceptable as the list
-	 may be traversed for each input bfd symbol.  */
-      for (next = entry->next; next != NULL; next = next->next)
-	{
-	  if (strcmp (next->pattern, entry->pattern) == 0
-	      && next->match == entry->match)
-	    {
-	      next = entry->next;
-	      free ((char *) entry->pattern);
-	      free (entry);
-	      return next;
-	    }
-	}
-      return entry;
-    }
-
-  /* Don't add ".foo" if the script has already done so.  */
-  for (next = entry->next; next != NULL; next = next->next)
-    {
-      if (next->pattern[0] == '.'
-	  && strcmp (next->pattern + 1, entry->pattern) == 0
-	  && next->match == entry->match)
-	return entry;
-    }
-
   dot_entry = xmalloc (sizeof *dot_entry);
+  *dot_entry = *entry;
   dot_entry->next = entry;
   len = strlen (entry->pattern) + 2;
   dot_pat = xmalloc (len);
   dot_pat[0] = '.';
   memcpy (dot_pat + 1, entry->pattern, len - 1);
   dot_entry->pattern = dot_pat;
-  dot_entry->match = entry->match;
   return dot_entry;
 }
 

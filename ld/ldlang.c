@@ -39,6 +39,7 @@
 #include "ldemul.h"
 #include "fnmatch.h"
 #include "demangle.h"
+#include "hashtab.h"
 
 #ifndef offsetof
 #define offsetof(TYPE, MEMBER) ((size_t) & (((TYPE*) 0)->MEMBER))
@@ -4973,65 +4974,108 @@ lang_leave_overlay (etree_type *lma_expr,
 
 struct bfd_elf_version_tree *lang_elf_version_info;
 
-static int
-lang_vers_match_lang_c (struct bfd_elf_version_expr *expr,
-			const char *sym)
+/* If PREV is NULL, return first version pattern matching particular symbol.
+   If PREV is non-NULL, return first version pattern matching particular
+   symbol after PREV (previously returned by lang_vers_match).  */
+
+static struct bfd_elf_version_expr *
+lang_vers_match (struct bfd_elf_version_expr_head *head,
+		 struct bfd_elf_version_expr *prev,
+		 const char *sym)
 {
-  if (expr->pattern[0] == '*' && expr->pattern[1] == '\0')
-    return 1;
-  return fnmatch (expr->pattern, sym, 0) == 0;
-}
+  const char *cxx_sym = sym;
+  const char *java_sym = sym;
+  struct bfd_elf_version_expr *expr = NULL;
 
-static int
-lang_vers_match_lang_cplusplus (struct bfd_elf_version_expr *expr,
-				const char *sym)
-{
-  char *alt_sym;
-  int result;
-
-  if (expr->pattern[0] == '*' && expr->pattern[1] == '\0')
-    return 1;
-
-  alt_sym = cplus_demangle (sym, /* DMGL_NO_TPARAMS */ 0);
-  if (!alt_sym)
+  if (head->mask & BFD_ELF_VERSION_CXX_TYPE)
     {
-      /* cplus_demangle (also) returns NULL when it is not a C++ symbol.
-	 Should we early out FALSE in this case?  */
-      result = fnmatch (expr->pattern, sym, 0) == 0;
+      cxx_sym = cplus_demangle (sym, /* DMGL_NO_TPARAMS */ 0);
+      if (!cxx_sym)
+	cxx_sym = sym;
     }
+  if (head->mask & BFD_ELF_VERSION_JAVA_TYPE)
+    {
+      java_sym = cplus_demangle (sym, DMGL_JAVA);
+      if (!java_sym)
+	java_sym = sym;
+    }
+
+  if (head->htab && (prev == NULL || prev->wildcard == 0))
+    {
+      struct bfd_elf_version_expr e;
+
+      switch (prev ? prev->mask : 0)
+	{
+	  case 0:
+	    if (head->mask & BFD_ELF_VERSION_C_TYPE)
+	      {
+		e.pattern = sym;
+		expr = htab_find (head->htab, &e);
+		while (expr && strcmp (expr->pattern, sym) == 0)
+		  if (expr->mask == BFD_ELF_VERSION_C_TYPE)
+		    goto out_ret;
+		else
+		  expr = expr->next;
+	      }
+	    /* Fallthrough */
+	  case BFD_ELF_VERSION_C_TYPE:
+	    if (head->mask & BFD_ELF_VERSION_CXX_TYPE)
+	      {
+		e.pattern = cxx_sym;
+		expr = htab_find (head->htab, &e);
+		while (expr && strcmp (expr->pattern, sym) == 0)
+		  if (expr->mask == BFD_ELF_VERSION_CXX_TYPE)
+		    goto out_ret;
+		else
+		  expr = expr->next;
+	      }
+	    /* Fallthrough */
+	  case BFD_ELF_VERSION_CXX_TYPE:
+	    if (head->mask & BFD_ELF_VERSION_JAVA_TYPE)
+	      {
+		e.pattern = java_sym;
+		expr = htab_find (head->htab, &e);
+		while (expr && strcmp (expr->pattern, sym) == 0)
+		  if (expr->mask == BFD_ELF_VERSION_JAVA_TYPE)
+		    goto out_ret;
+		else
+		  expr = expr->next;
+	      }
+	    /* Fallthrough */
+	  default:
+	    break;
+	}
+    }
+
+  /* Finally, try the wildcards.  */
+  if (prev == NULL || prev->wildcard == 0)
+    expr = head->remaining;
   else
+    expr = prev->next;
+  while (expr)
     {
-      result = fnmatch (expr->pattern, alt_sym, 0) == 0;
-      free (alt_sym);
+      const char *s;
+
+      if (expr->pattern[0] == '*' && expr->pattern[1] == '\0')
+	break;
+
+      if (expr->mask == BFD_ELF_VERSION_JAVA_TYPE)
+	s = java_sym;
+      else if (expr->mask == BFD_ELF_VERSION_CXX_TYPE)
+	s = cxx_sym;
+      else
+	s = sym;
+      if (fnmatch (expr->pattern, sym, 0) == 0)
+	break;
+      expr = expr->next;
     }
 
-  return result;
-}
-
-static int
-lang_vers_match_lang_java (struct bfd_elf_version_expr *expr,
-			   const char *sym)
-{
-  char *alt_sym;
-  int result;
-
-  if (expr->pattern[0] == '*' && expr->pattern[1] == '\0')
-    return 1;
-
-  alt_sym = cplus_demangle (sym, DMGL_JAVA);
-  if (!alt_sym)
-    {
-      /* cplus_demangle (also) returns NULL when it is not a Java symbol.
-	 Should we early out FALSE in this case?  */
-      result = fnmatch (expr->pattern, sym, 0) == 0;
-    }
-  else
-    {
-      result = fnmatch (expr->pattern, alt_sym, 0) == 0;
-      free (alt_sym);
-    }
-
-  return result;
+out_ret:
+  if (cxx_sym != sym)
+    free ((char *) cxx_sym);
+  if (java_sym != sym)
+    free ((char *) java_sym);
+  return expr;
 }
 
 /* This is called for each variable name or match expression.  */
@@ -5048,18 +5092,19 @@ lang_new_vers_pattern (struct bfd_elf_version_expr *orig,
   ret->pattern = new;
   ret->symver = 0;
   ret->script = 0;
+  ret->wildcard = wildcardp (new);
 
   if (lang == NULL || strcasecmp (lang, "C") == 0)
-    ret->match = lang_vers_match_lang_c;
+    ret->mask = BFD_ELF_VERSION_C_TYPE;
   else if (strcasecmp (lang, "C++") == 0)
-    ret->match = lang_vers_match_lang_cplusplus;
+    ret->mask = BFD_ELF_VERSION_CXX_TYPE;
   else if (strcasecmp (lang, "Java") == 0)
-    ret->match = lang_vers_match_lang_java;
+    ret->mask = BFD_ELF_VERSION_JAVA_TYPE;
   else
     {
       einfo (_("%X%P: unknown language `%s' in version information\n"),
 	     lang);
-      ret->match = lang_vers_match_lang_c;
+      ret->mask = BFD_ELF_VERSION_C_TYPE;
     }
 
   return ldemul_new_vers_pattern (ret);
@@ -5074,21 +5119,113 @@ lang_new_vers_node (struct bfd_elf_version_expr *globals,
 {
   struct bfd_elf_version_tree *ret;
 
-  ret = xmalloc (sizeof *ret);
-  ret->next = NULL;
-  ret->name = NULL;
-  ret->vernum = 0;
-  ret->globals = globals;
-  ret->locals = locals;
-  ret->deps = NULL;
+  ret = xcalloc (1, sizeof *ret);
+  ret->globals.list = globals;
+  ret->locals.list = locals;
+  ret->match = lang_vers_match;
   ret->name_indx = (unsigned int) -1;
-  ret->used = 0;
   return ret;
 }
 
 /* This static variable keeps track of version indices.  */
 
 static int version_index;
+
+static hashval_t
+version_expr_head_hash (const void *p)
+{
+  const struct bfd_elf_version_expr *e = p;
+
+  return htab_hash_string (e->pattern);
+}
+
+static int
+version_expr_head_eq (const void *p1, const void *p2)
+{
+  const struct bfd_elf_version_expr *e1 = p1;
+  const struct bfd_elf_version_expr *e2 = p2;
+
+  return strcmp (e1->pattern, e2->pattern) == 0;
+}
+
+static void
+lang_finalize_version_expr_head (struct bfd_elf_version_expr_head *head)
+{
+  size_t count = 0;
+  struct bfd_elf_version_expr *e, *next;
+  struct bfd_elf_version_expr **list_loc, **remaining_loc;
+
+  for (e = head->list; e; e = e->next)
+    {
+      if (!e->wildcard)
+	count++;
+      head->mask |= e->mask;
+    }
+
+  if (count)
+    {
+      head->htab = htab_create (count * 2, version_expr_head_hash,
+				version_expr_head_eq, NULL);
+      list_loc = &head->list;
+      remaining_loc = &head->remaining;
+      for (e = head->list; e; e = next)
+	{
+	  next = e->next;
+	  if (e->wildcard)
+	    {
+	      *remaining_loc = e;
+	      remaining_loc = &e->next;
+	    }
+	  else
+	    {
+	      void **loc = htab_find_slot (head->htab, e, INSERT);
+
+	      if (*loc)
+		{
+		  struct bfd_elf_version_expr *e1, *last;
+
+		  e1 = *loc;
+		  last = NULL;
+		  do
+		    {
+		      if (e1->mask == e->mask)
+			{
+			  last = NULL;
+			  break;
+			}
+		      last = e1;
+		      e1 = e1->next;
+		    }
+		  while (e1 && strcmp (e1->pattern, e->pattern) == 0);
+
+		  if (last == NULL)
+		    {
+		      /* This is a duplicate.  */
+		      /* FIXME: Memory leak.  Sometimes pattern is not
+			 xmalloced alone, but in larger chunk of memory.  */
+		      /* free (e->pattern); */
+		      free (e);
+		    }
+		  else
+		    {
+		      e->next = last->next;
+		      last->next = e;
+		    }
+		}
+	      else
+		{
+		  *loc = e;
+		  *list_loc = e;
+		  list_loc = &e->next;
+		}
+	    }
+	}
+      *remaining_loc = NULL;
+      *list_loc = head->remaining;
+    }
+  else
+    head->remaining = head->list;
+}
 
 /* This is called when we know the name and dependencies of the
    version.  */
@@ -5117,32 +5254,59 @@ lang_register_vers_node (const char *name,
     if (strcmp (t->name, name) == 0)
       einfo (_("%X%P: duplicate version tag `%s'\n"), name);
 
+  lang_finalize_version_expr_head (&version->globals);
+  lang_finalize_version_expr_head (&version->locals);
+
   /* Check the global and local match names, and make sure there
      aren't any duplicates.  */
 
-  for (e1 = version->globals; e1 != NULL; e1 = e1->next)
+  for (e1 = version->globals.list; e1 != NULL; e1 = e1->next)
     {
       for (t = lang_elf_version_info; t != NULL; t = t->next)
 	{
 	  struct bfd_elf_version_expr *e2;
 
-	  for (e2 = t->locals; e2 != NULL; e2 = e2->next)
-	    if (strcmp (e1->pattern, e2->pattern) == 0)
-	      einfo (_("%X%P: duplicate expression `%s' in version information\n"),
-		     e1->pattern);
+	  if (t->locals.htab && e1->wildcard == 0)
+	    {
+	      e2 = htab_find (t->locals.htab, e1);
+	      while (e2 && strcmp (e1->pattern, e2->pattern) == 0)
+		{
+		  if (e1->mask == e2->mask)
+		    einfo (_("%X%P: duplicate expression `%s' in version information\n"),
+			   e1->pattern);
+		  e2 = e2->next;
+		}
+	    }
+	  else if (e1->wildcard)
+	    for (e2 = t->locals.remaining; e2 != NULL; e2 = e2->next)
+	      if (strcmp (e1->pattern, e2->pattern) == 0 && e1->mask == e2->mask)
+		einfo (_("%X%P: duplicate expression `%s' in version information\n"),
+		       e1->pattern);
 	}
     }
 
-  for (e1 = version->locals; e1 != NULL; e1 = e1->next)
+  for (e1 = version->locals.list; e1 != NULL; e1 = e1->next)
     {
       for (t = lang_elf_version_info; t != NULL; t = t->next)
 	{
 	  struct bfd_elf_version_expr *e2;
 
-	  for (e2 = t->globals; e2 != NULL; e2 = e2->next)
-	    if (strcmp (e1->pattern, e2->pattern) == 0)
-	      einfo (_("%X%P: duplicate expression `%s' in version information\n"),
-		     e1->pattern);
+	  if (t->globals.htab && e1->wildcard == 0)
+	    {
+	      e2 = htab_find (t->globals.htab, e1);
+	      while (e2 && strcmp (e1->pattern, e2->pattern) == 0)
+		{
+		  if (e1->mask == e2->mask)
+		    einfo (_("%X%P: duplicate expression `%s' in version information\n"),
+			   e1->pattern);
+		  e2 = e2->next;
+		}
+	    }
+	  else if (e1->wildcard)
+	    for (e2 = t->globals.remaining; e2 != NULL; e2 = e2->next)
+	      if (strcmp (e1->pattern, e2->pattern) == 0 && e1->mask == e2->mask)
+		einfo (_("%X%P: duplicate expression `%s' in version information\n"),
+		       e1->pattern);
 	}
     }
 

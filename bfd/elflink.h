@@ -2058,7 +2058,9 @@ NAME(bfd_elf,size_dynamic_sections) (bfd *output_bfd,
 
       /* Make all global versions with definiton.  */
       for (t = verdefs; t != NULL; t = t->next)
-	for (d = t->globals; d != NULL; d = d->next)
+	for (d = t->globals.list; d != NULL; d = d->next)
+	  /* FIXME: Shouldn't this be !d->symver && d->wildcard == 0
+	     instead?  */
 	  if (!d->symver && strchr (d->pattern, '*') == NULL)
 	    {
 	      const char *verstr, *name;
@@ -2124,7 +2126,7 @@ NAME(bfd_elf,size_dynamic_sections) (bfd *output_bfd,
 	  /* Check if all global versions have a definiton.  */
 	  all_defined = TRUE;
 	  for (t = verdefs; t != NULL; t = t->next)
-	    for (d = t->globals; d != NULL; d = d->next)
+	    for (d = t->globals.list; d != NULL; d = d->next)
 	      if (!d->symver && !d->script)
 		{
 		  (*_bfd_error_handler)
@@ -2372,7 +2374,7 @@ NAME(bfd_elf,size_dynamic_sections) (bfd *output_bfd,
 
 	      def.vd_version = VER_DEF_CURRENT;
 	      def.vd_flags = 0;
-	      if (t->globals == NULL && t->locals == NULL && ! t->used)
+	      if (t->globals.list == NULL && t->locals.list == NULL && ! t->used)
 		def.vd_flags |= VER_FLG_WEAK;
 	      def.vd_ndx = t->vernum + 1;
 	      def.vd_cnt = cdeps + 1;

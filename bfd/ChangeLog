@@ -1,3 +1,10 @@
+2003-10-22  Jakub Jelinek  <jakub@redhat.com>
+
+	* elflink.c (_bfd_elf_export_symbol): Adjust for globals and locals
+	field changes.
+	(_bfd_elf_link_assign_sym_version): Likewise.
+	* elflink.h (size_dynamic_sections): Likewise.
+
 2003-10-21  Alexandre Oliva  <aoliva@redhat.com>,
 	    Michael Snyder  <msnyder@redhat.com>
 

@@ -1505,22 +1505,18 @@ _bfd_elf_export_symbol (struct elf_link_hash_entry *h, void *data)
 
       for (t = eif->verdefs; t != NULL; t = t->next)
 	{
-	  if (t->globals != NULL)
+	  if (t->globals.list != NULL)
 	    {
-	      for (d = t->globals; d != NULL; d = d->next)
-		{
-		  if ((*d->match) (d, h->root.root.string))
-		    goto doit;
-		}
+	      d = (*t->match) (&t->globals, NULL, h->root.root.string);
+	      if (d != NULL)
+		goto doit;
 	    }
 
-	  if (t->locals != NULL)
+	  if (t->locals.list != NULL)
 	    {
-	      for (d = t->locals ; d != NULL; d = d->next)
-		{
-		  if ((*d->match) (d, h->root.root.string))
-		    return TRUE;
-		}
+	      d = (*t->match) (&t->locals, NULL, h->root.root.string);
+	      if (d != NULL)
+		return TRUE;
 	    }
 	}
 
@@ -1699,31 +1695,19 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 	      t->used = TRUE;
 	      d = NULL;
 
-	      if (t->globals != NULL)
-		{
-		  for (d = t->globals; d != NULL; d = d->next)
-		    if ((*d->match) (d, alc))
-		      break;
-		}
+	      if (t->globals.list != NULL)
+		d = (*t->match) (&t->globals, NULL, alc);
 
 	      /* See if there is anything to force this symbol to
 		 local scope.  */
-	      if (d == NULL && t->locals != NULL)
+	      if (d == NULL && t->locals.list != NULL)
 		{
-		  for (d = t->locals; d != NULL; d = d->next)
-		    {
-		      if ((*d->match) (d, alc))
-			{
-			  if (h->dynindx != -1
-			      && info->shared
-			      && ! info->export_dynamic)
-			    {
-			      (*bed->elf_backend_hide_symbol) (info, h, TRUE);
-			    }
-
-			  break;
-			}
-		    }
+		  d = (*t->match) (&t->locals, NULL, alc);
+		  if (d != NULL
+		      && h->dynindx != -1
+		      && info->shared
+		      && ! info->export_dynamic)
+		    (*bed->elf_backend_hide_symbol) (info, h, TRUE);
 		}
 
 	      free (alc);
@@ -1744,18 +1728,14 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 	    return TRUE;
 
 	  amt = sizeof *t;
-	  t = bfd_alloc (sinfo->output_bfd, amt);
+	  t = bfd_zalloc (sinfo->output_bfd, amt);
 	  if (t == NULL)
 	    {
 	      sinfo->failed = TRUE;
 	      return FALSE;
 	    }
 
-	  t->next = NULL;
 	  t->name = p;
-	  t->globals = NULL;
-	  t->locals = NULL;
-	  t->deps = NULL;
 	  t->name_indx = (unsigned int) -1;
 	  t->used = TRUE;
 
@@ -1801,30 +1781,26 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
       local_ver = NULL;
       for (t = sinfo->verdefs; t != NULL; t = t->next)
 	{
-	  if (t->globals != NULL)
+	  if (t->globals.list != NULL)
 	    {
 	      bfd_boolean matched;
 
 	      matched = FALSE;
-	      for (d = t->globals; d != NULL; d = d->next)
-		{
-		  if ((*d->match) (d, h->root.root.string))
-		    {
-		      if (d->symver)
-			matched = TRUE;
-		      else
-			{
-			  /* There is a version without definition.  Make
-			     the symbol the default definition for this
-			     version.  */
-			  h->verinfo.vertree = t;
-			  local_ver = NULL;
-			  d->script = 1;
-			  break;
-			}
-		    }
-		}
-
+	      d = NULL;
+	      while ((d = (*t->match) (&t->globals, d,
+				       h->root.root.string)) != NULL)
+		if (d->symver)
+		  matched = TRUE;
+		else
+		  {
+		    /* There is a version without definition.  Make
+		       the symbol the default definition for this
+		       version.  */
+		    h->verinfo.vertree = t;
+		    local_ver = NULL;
+		    d->script = 1;
+		    break;
+		  }
 	      if (d != NULL)
 		break;
 	      else if (matched)
@@ -1833,19 +1809,18 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 		(*bed->elf_backend_hide_symbol) (info, h, TRUE);
 	    }
 
-	  if (t->locals != NULL)
+	  if (t->locals.list != NULL)
 	    {
-	      for (d = t->locals; d != NULL; d = d->next)
+	      d = NULL;
+	      while ((d = (*t->match) (&t->locals, d,
+				       h->root.root.string)) != NULL)
 		{
+		  local_ver = t;
 		  /* If the match is "*", keep looking for a more
-		     explicit, perhaps even global, match.  */
-		  if (d->pattern[0] == '*' && d->pattern[1] == '\0')
-		    local_ver = t;
-		  else if ((*d->match) (d, h->root.root.string))
-		    {
-		      local_ver = t;
-		      break;
-		    }
+		     explicit, perhaps even global, match.
+		     XXX: Shouldn't this be !d->wildcard instead?  */
+		  if (d->pattern[0] != '*' || d->pattern[1] != '\0')
+		    break;
 		}
 
 	      if (d != NULL)
