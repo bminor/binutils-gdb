@@ -1105,6 +1105,10 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 	/* Clobber the section size, so that we don't waste copying the
 	   warning into the output file.  */
 	s->size = 0;
+
+	/* Also set SEC_EXCLUDE, so that symbols defined in the warning
+	   section don't get copied to the output.  */
+	s->flags |= SEC_EXCLUDE;
       }
   }
 }
