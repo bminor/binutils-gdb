@@ -25,6 +25,7 @@
 #include "frame.h"
 #include "inferior.h"
 #include "gdbcore.h"
+#include "objfiles.h"
 #include "target.h"
 #include "floatformat.h"
 #include "symfile.h"
@@ -1369,6 +1370,10 @@ i386_svr4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* System V Release 4 uses ELF.  */
   i386_elf_init_abi (info, gdbarch);
+
+  /* System V Release 4 has shared libraries.  */
+  set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
+  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
   /* FIXME: kettenis/20020511: Why do we override this function here?  */
   set_gdbarch_frame_chain_valid (gdbarch, generic_func_frame_chain_valid);
