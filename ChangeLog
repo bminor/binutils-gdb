@@ -1,3 +1,13 @@
+Thu Aug 17 16:03:41 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
+
+	* configure: Add Makefile.tem to list of files to remove in trap
+	handler.
+
+Mon Aug 14 19:27:56 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* config.guess (*Linux*):  Add missing "exit"s.
+	Also, need specific check for alpha-unknown-linux (uses COFF).
+
 Fri Aug 11 15:38:20 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* config.guess:  Merge with FSF:
