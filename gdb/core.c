@@ -25,6 +25,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "symtab.h"
 #include "command.h"
+#include "gdbcmd.h"
 #include "bfd.h"
 #include "target.h"
 #include "gdbcore.h"
@@ -286,10 +287,10 @@ read_memory_unsigned_integer (memaddr, len)
 void
 _initialize_core()
 {
-
-  add_com ("core-file", class_files, core_file_command,
-	   "Use FILE as core dump for examining memory and registers.\n\
+  struct cmd_list_element *c;
+  c = add_cmd ("core-file", class_files, core_file_command,
+	       "Use FILE as core dump for examining memory and registers.\n\
 No arg means have no core file.  This command has been superseded by the\n\
-`target core' and `detach' commands.");
-
+`target core' and `detach' commands.", &cmdlist);
+  c->completer = filename_completer;
 }

@@ -1,8 +1,10 @@
 Mon Jun 14 09:23:51 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* main.c, gdbcmd.h: Add function filename_completer.
-	source.c: Use it for "directory" command.
-	(This will be more useful if the word break stuff is fixed).
+	* main.c, symfile.c, source.c, exec.c, core.c: Use it for
+	"directory", "source", "cd", "symbol-file" "add-symbol-file",
+	"load", "file", "exec-file", "core-file" commands.
+	(But '/' is a word break, limiting usefulness; see comments).
 
 	* source.c (mod_path): Warning not error if can't find directory.
 

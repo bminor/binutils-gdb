@@ -2478,10 +2478,11 @@ The commands below can be used to select other frames by number or address.",
 
   add_com ("pwd", class_files, pwd_command,
 	   "Print working directory.  This is used for your program as well.");
-  add_com ("cd", class_files, cd_command,
+  c = add_cmd ("cd", class_files, cd_command,
 	   "Set working directory to DIR for debugger and program being debugged.\n\
 The change does not take effect for the program being debugged\n\
-until the next time it is started.");
+until the next time it is started.", &cmdlist);
+  c->completer = filename_completer;
 
   add_show_from_set
     (add_set_cmd ("prompt", class_support, var_string, (char *)&prompt,
@@ -2509,17 +2510,18 @@ Use the \"document\" command to give documentation for the new command.\n\
 Commands defined in this way do not take arguments.");
 
 #ifdef __STDC__
-  add_com ("source", class_support, source_command,
+  c = add_cmd ("source", class_support, source_command,
 	   "Read commands from a file named FILE.\n\
 Note that the file \"" GDBINIT_FILENAME "\" is read automatically in this way\n\
-when gdb is started.");
+when gdb is started.", &cmdlist);
 #else
   /* Punt file name, we can't help it easily.  */
-  add_com ("source", class_support, source_command,
+  c = add_cmd ("source", class_support, source_command,
 	   "Read commands from a file named FILE.\n\
 Note that the file \".gdbinit\" is read automatically in this way\n\
-when gdb is started.");
+when gdb is started.", &cmdlist);
 #endif
+  c->completer = filename_completer;
 
   add_com ("quit", class_support, quit_command, "Exit gdb.");
   add_com ("help", class_support, help_command, "Print list of commands.");
