@@ -1,5 +1,7 @@
 Fri Jul  2 09:08:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.t06/signals.exp: Add test for sparc bug with do_save_insn.
+
 	* gdb.t20/{classes,inherit}.exp: If a class which doesn't use any
 	C++ features prints as "struct", make it a pass, not an xfail.
 
