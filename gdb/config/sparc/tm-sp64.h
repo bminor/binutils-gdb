@@ -327,14 +327,6 @@ struct value;
 #undef  FRAME_ARGS_SKIP
 #define FRAME_ARGS_SKIP 136
 
-/* We need two arguments (in general) to the "info frame" command.
-   Note that the definition of this macro implies that there exists a
-   function "setup_arbitrary_frame" in sparc-tdep.c */
-
-#undef  SETUP_ARBITRARY_FRAME		/*FIXME*/
-#undef  FRAME_SPECIFICATION_DYADIC
-#define FRAME_SPECIFICATION_DYADIC
-
 /* Offsets into jmp_buf.
    FIXME: This was borrowed from the v8 stuff and will probably have to change
    for v9.  */

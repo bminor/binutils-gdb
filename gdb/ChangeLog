@@ -1,3 +1,8 @@
+Thu Oct 15 19:50:48 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* tm-sp64.h (SETUP_ARBITRARY_FRAME, RAME_SPECIFICATION_DYADIC):
+	Remove, nevermore used.
+
 Thu Oct 15 16:55:00 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* command.c: Include "wait.h" after, rather than before, <wait.h>.
@@ -6,13 +11,15 @@ Thu Oct 15 16:55:00 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 1998-10-14  Jason Molenda  (jsm@bugshack.cygnus.com)
 
-	* defs.h: Move _initialize_printcmd, _initialize_stack, 
-        _initialize_blockframe out of here and in to their respective .c files.
+	* defs.h: Move _initialize_printcmd, _initialize_stack,
+ 	_initialize_blockframe out of here and in to their respective .c
+ 	files.
 	* blockframe.c: Move _initialize_blockframe prototype to here.
 	* printcmd.c: Move _initialize_printcmd prototype to here.
 	* stack.c: Move _initialize_stack prototype to here.
 
-	* source.c, symtab.h: Move _initialize_source prototype to the .c file.
+	* source.c, symtab.h: Move _initialize_source prototype to the .c
+	file.
 	* values.c, value.h: Move _initialize_values prototype to the .c file.
 	* gdbthread.h, thread.c: Move _initialize_thread prototype to the .c 
 	file.
@@ -1589,7 +1596,8 @@ Tue Apr 28 19:41:33 1998  Tom Tromey  <tromey@cygnus.com>
 
 Tue Apr 28 17:41:20 1998  Philippe De Muyter  <phdm@macqel.be>
 
-        * symfile.c (overlay_auto_command): Add forgotten parameter definitions.
+        * symfile.c (overlay_auto_command): Add forgotten parameter
+ 	definitions.
         (overlay_manual_command, overlay_off_command): Likewise.
         (overlay_load_command): Likewise.
         * tracepoint.c (memrange_cmp): Parameters have type void *, not
