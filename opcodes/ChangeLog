@@ -1,3 +1,35 @@
+2001-06-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* i386-dis.c: Group function prototypes in one place.
+	(FLOATCODE): Redefine as 1.
+	(USE_GROUPS): Redefine as 2.
+	(USE_PREFIX_USER_TABLE): Redefine as 3.
+	(X86_64_SPECIAL): Define as 4.
+	(GRP1b..GRPAMD): Move USE_GROUPS to bytecode1, index to bytecode2.
+	(PREGRP0..PREGRP26): Similarly with USE_PREFIX_USER_TABLE.
+	(dis386_att, dis386_intel, disx86_64_att, disx86_64_intel): Delete.
+	(dis386): New table combining above four tables.
+	(dis386_twobyte_att, dis386_twobyte_intel): Delete.
+	(dis386_twobyte): New table combining above two tables.
+	(x86_64_table): New table to handle x86_64.
+	(X86_64_0): Define.
+	(float_mem_att, float_mem_intel): Delet.
+	(float_mem): New table combining above two tables.
+	(print_insn_i386): Modify for above.
+	(dofloat): Likewise.
+	(putop): Handle '{', '|' and '}' to select alternative mnemonics.
+	Return 0 on success, 1 if no valid alternative.
+	(putop <case 'F'>, <case 'H'>): Print nothing for intel_syntax.
+	(putop <case 'T'>): Move to case 'U', and share case 'Q' code.
+	(putop <case 'I'>): Move to case 'T', and share case 'P' code.
+	(OP_REG <case rAX_reg .. rDI_reg>): Handle as for eAX_reg .. eDI_reg
+	if not 64-bit mode.
+	(OP_I <case q_mode>): Handle as for v_mode if not 64-bit mode.
+	(OP_I64): If not 64-bit mode, call OP_I.
+	OP_OFF64): If not 64-bit mode, call OP_OFF.
+	(OP_ST, OP_STi, OP_SEG, OP_DIR, OP_OFF, OP_OFF64, OP_MMX): Rename
+	'ignore'/'ignored' to 'bytemode'.
+
 2001-06-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.in: Sort 'ta' case statement.
