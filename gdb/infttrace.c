@@ -4539,98 +4539,41 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
 
   else
     {
-      /* TT_LWP_CONTINUE can pass signals to threads,
-       * TT_PROC_CONTINUE can't.  So if there are any
-       * signals to pass, we have to use the (slower)
-       * loop over the stopped threads.
-       *
-       * Equally, if we have to not continue some threads,
-       * due to saved events, we have to use the loop.
-       */
-      if ((signal != 0) || saved_signals_exist ())
+      /* TT_LWP_CONTINUE can pass signals to threads, TT_PROC_CONTINUE can't.
+	 Therefore, we really can't use TT_PROC_CONTINUE here.
+
+	 Consider a process which stopped due to signal which gdb decides
+	 to handle and not pass on to the inferior.  In that case we must
+	 clear the pending signal by restarting the inferior using
+	 TT_LWP_CONTINUE and pass zero as the signal number.  Else the
+	 pending signal will be passed to the inferior.  interrupt.exp
+	 in the testsuite does this precise thing and fails due to the
+	 unwanted signal delivery to the inferior.  */
+      if (resume_all_threads)
 	{
-	  if (resume_all_threads)
-	    {
-
 #ifdef THREAD_DEBUG
-	      if (debug_on)
-		printf ("Doing a continue by loop of all threads\n");
+	  if (debug_on)
+	    printf ("Doing a continue by loop of all threads\n");
 #endif
 
-	      threads_continue_all_with_signals (tid, signal);
+	  threads_continue_all_with_signals (tid, signal);
 
-	      clear_all_handled ();
-	      clear_all_stepping_mode ();
-	    }
-
-	  else
-	    {
-#ifdef THREAD_DEBUG
-	      printf ("Doing a continue w/signal of just thread %d\n", tid);
-#endif
-
-	      threads_continue_one_with_signal (tid, signal);
-
-	      /* Clear the "handled" state of this thread, because
-	       * we'll soon get a new event for it.  Other events
-	       * can stay as they were.
-	       */
-	      clear_handled (tid);
-	      clear_stepping_mode (tid);
-	    }
+	  clear_all_handled ();
+	  clear_all_stepping_mode ();
 	}
-
       else
 	{
-	  /* No signals to send.
-	   */
-	  if (resume_all_threads)
-	    {
 #ifdef THREAD_DEBUG
-	      if (debug_on)
-		printf ("Doing a continue by process of process %d\n", tid);
+	  printf ("Doing a continue w/signal of just thread %d\n", tid);
 #endif
 
-	      if (more_events_left > 0)
-		{
-		  warning ("Losing buffered events on continue.");
-		  more_events_left = 0;
-		}
+	  threads_continue_one_with_signal (tid, signal);
 
-	      call_ttrace (TT_PROC_CONTINUE,
-			   tid,
-			   TT_NIL,
-			   TT_NIL,
-			   TT_NIL);
-
-	      clear_all_handled ();
-	      clear_all_stepping_mode ();
-	    }
-
-	  else
-	    {
-#ifdef THREAD_DEBUG
-	      if (debug_on)
-		{
-		  printf ("Doing a continue of just thread %d\n", tid);
-		  if (is_terminated (tid))
-		    printf ("Why are we continuing a dead thread? (5)\n");
-		}
-#endif
-
-	      call_ttrace (TT_LWP_CONTINUE,
-			   tid,
-			   TT_NIL,
-			   TT_NIL,
-			   TT_NIL);
-
-	      /* Clear the "handled" state of this thread, because
-	       * we'll soon get a new event for it.  Other events
-	       * can stay as they were.
-	       */
-	      clear_handled (tid);
-	      clear_stepping_mode (tid);
-	    }
+	  /* Clear the "handled" state of this thread, because we
+	     will soon get a new event for it.  Other events can
+	     stay as they were.  */
+	  clear_handled (tid);
+	  clear_stepping_mode (tid);
 	}
     }
 
