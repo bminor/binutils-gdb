@@ -1,3 +1,9 @@
+1999-11-07  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-alpha.c (alpha_align): Check, don't assert, that
+	the previous label was in the current section before playing
+	with auto-alignment.
+
 1999-11-06  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (v850_force_relocation): Force relocation

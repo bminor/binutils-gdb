@@ -4756,14 +4756,13 @@ alpha_align (n, pfill, label, force)
 
   alpha_current_align = n;
 
-  if (label != NULL)
+  if (label != NULL && S_GET_SEGMENT (label) == now_seg)
     {
-      assert (S_GET_SEGMENT (label) == now_seg);
       symbol_set_frag (label, frag_now);
       S_SET_VALUE (label, (valueT) frag_now_fix ());
     }
 
-  record_alignment(now_seg, n);
+  record_alignment (now_seg, n);
 
   /* ??? if alpha_flag_relax && force && elf, record the requested alignment
      in a reloc for the linker to see.  */
