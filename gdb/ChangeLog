@@ -1,3 +1,8 @@
+2002-03-27  Andreas Jaeger  <aj@suse.de>
+
+	* dwarf2cfi.c: Give credit to Daniel Berlin, reformat copyright
+	comment.
+
 2002-03-25  Alexandre Oliva  <aoliva@redhat.com>
 
 	* coffread.c: Remove redundant static declarations.  Replace
@@ -24,7 +29,7 @@
 	* MAINTAINERS: Add Jim Ingham and Klee Dienes to ``write after
 	approval''.
 
-2002-03-07  Daniel Jacobowitz  <drow@mvista.com>   
+2002-03-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/linux-low.c (PTRACE_XFER_TYPE): Change to long.
 	(num_regs, regmap): Move inside HAVE_LINUX_USRREGS.
@@ -183,7 +188,7 @@
 	* symfile.c (symfile_bfd_open): Ditto.
 	* solib.c (solib_map_sections): Ditto.
 	Fix PR gdb/354.
-	
+
 2002-02-26  Andrew Cagney  <ac131313@redhat.com>
 
 	* remote.c (_initialize_remote): By default, disable ``e'' and
@@ -273,7 +278,7 @@
 	* config/sparc/nm-linux.h, config/sparc/tm-linux.h: Ditto.
 	* config/sparc/tm-sp64linux.h, config/sparc/xm-linux.h: Ditto.
 	Fix PR gdb/378.
-	
+
 2002-02-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* lin-thread.c: Delete file.
@@ -310,7 +315,7 @@
         * config.in, configure: Regenerated.
         * utils.c: (gdb_realpath) If HAVE_CANONICALIZE_FILE_NAME is
 	defined use canonicalize_file_name.
-        
+
 2002-02-23  Michael Chastain  <mec@shout.net>
 
 	* MAINTAINERS: Remove Michael Chastain from "paper trail" list.
