@@ -1793,6 +1793,7 @@ m32r_elf_object_p (abfd)
     {
     default:
     case E_M32R_ARCH:   (void) bfd_default_set_arch_mach (abfd, bfd_arch_m32r, bfd_mach_m32r);  break;
+    case E_M32RX_ARCH:  (void) bfd_default_set_arch_mach (abfd, bfd_arch_m32r, bfd_mach_m32rx); break;
     }
   return true;
 }
@@ -1809,6 +1810,7 @@ m32r_elf_final_write_processing (abfd, linker)
     {
     default:
     case bfd_mach_m32r:  val = E_M32R_ARCH; break;
+    case bfd_mach_m32rx: val = E_M32RX_ARCH; break;
     }
 
   elf_elfheader (abfd)->e_flags &=~ EF_M32R_ARCH;
@@ -1926,6 +1928,7 @@ m32r_elf_print_private_bfd_data (abfd, ptr)
     {
     default:
     case E_M32R_ARCH:  fprintf (file, _(": m32r instructions"));  break;
+    case E_M32RX_ARCH: fprintf (file, _(": m32rx instructions")); break;
     }
   
   fputc ('\n', file);
@@ -2052,7 +2055,7 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
 
 #define ELF_ARCH		bfd_arch_m32r
 #define ELF_MACHINE_CODE	EM_CYGNUS_M32R
-#define ELF_MAXPAGESIZE		0x1   /* Explicitly requested by Mitsubishi */
+#define ELF_MAXPAGESIZE		0x1 /* Explicitly requested by Mitsubishi.  */
 
 #define TARGET_BIG_SYM          bfd_elf32_m32r_vec
 #define TARGET_BIG_NAME		"elf32-m32r"
