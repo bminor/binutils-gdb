@@ -150,6 +150,10 @@ extern struct type *follow_types (struct type *);
 
 extern char *lexptr;
 
+/* After a token has been recognized, this variable points to it.  
+   Currently used only for error reporting.  */
+extern char *prev_lexptr;
+
 /* Tokens that refer to names do so with explicit pointer and length,
    so they can share the storage that lexptr is parsing.
 

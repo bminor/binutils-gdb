@@ -1,3 +1,11 @@
+2002-04-24  Michael Snyder  <msnyder@redhat.com>
+
+	* parser-defs.h (prev_lexptr): New external variable.
+	* parse.c (parse_exp_1): Set prev_lexptr to null before
+	calling the language-specific parser.
+	* c-exp.y (yylex): Set prev_lexptr to start of current token.
+	(yyerror): Use prev_lexptr in error reporting.
+
 2002-04-24  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/i386/tm-linux.h: Define FILL_FPXREGSET.

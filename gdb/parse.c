@@ -76,6 +76,7 @@ int arglist_len;
 union type_stack_elt *type_stack;
 int type_stack_depth, type_stack_size;
 char *lexptr;
+char *prev_lexptr;
 char *namecopy;
 int paren_depth;
 int comma_terminates;
@@ -1126,6 +1127,7 @@ parse_exp_1 (char **stringptr, struct block *block, int comma)
   struct cleanup *old_chain;
 
   lexptr = *stringptr;
+  prev_lexptr = NULL;
 
   paren_depth = 0;
   type_stack_depth = 0;
