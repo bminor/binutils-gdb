@@ -539,6 +539,7 @@ proc regexp_diff { file_1 file_2 } {
             if ![regexp "^$line_b$" "$line_a"] {
 		send_log "regexp_diff match failure\n"
 		send_log "regexp \"^$line_b$\"\nline   \"$line_a\"\n"
+		verbose "regexp_diff match failure\n" 3
 		set differences 1
             }
         }

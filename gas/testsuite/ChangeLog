@@ -1,3 +1,8 @@
+Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
+
+	* lib/gas-defs.exp: (regexp_diff) At verbosity 3, also show
+	where mismatch occurs due to regexp mismatch.
+
 2001-08-27  Staffan Ulfberg  <staffanu@swox.se>
 	    Alan Modra  <amodra@bigpond.net.au>
 
