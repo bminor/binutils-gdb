@@ -163,81 +163,56 @@ fi
 
 # If this is the library's top level directory, set multidirs to the
 # multilib subdirs to support.  This lives at the top because we need
-# `multidirs' set right away, and this section is subject to frequent
-# editing (addition of new targets, etc.).
+# `multidirs' set right away.
 
 if [ "${ml_toplevel_p}" = yes ]; then
+
+multidirs=
+for i in `${CC-gcc} --print-multi-lib 2>/dev/null`; do
+  dir=`echo $i | sed -e 's/;.*$//'`
+  if [ "${dir}" = "." ]; then
+    true
+  else
+    if [ -z "${multidirs}" ]; then
+      multidirs="${dir}"
+    else
+      multidirs="${multidirs} ${dir}"
+    fi
+  fi
+done
 
 case "${target}" in
 # start-sanitize-arc
 arc-sbp-elf*)
-	if [ x$enable_biendian = xyes ]
+	if [ x$enable_biendian != xyes ]
 	then
-		multidirs="be host graphics audio be/host be/graphics be/audio"
-	else
-		multidirs="host graphics audio"
+	  old_multidirs=${multidirs}
+	  multidirs=
+	  for x in ${old_multidirs}; do
+	    case "${x}" in
+	      *be*) ;;
+	      *) if [ x"$multidirs" = x ]; then
+		   multidirs="$x";
+		 else
+		   multidirs="${multidirs} ${x}"; 
+		 fi
+		 ;;
+	    esac
+	  done
 	fi
-	;;
-arc-*-*)
-	multidirs="be"
 	;;
 # end-sanitize-arc
-hppa*-*-*)
-	multidirs="soft-float"
-	;;
-m68*-*-aout* | m68*-*-coff* | m68*-*-elf* | m68*-*-vxworks*)
-	multidirs="m68000 m68020 m68881 msoft-float m68000/m68881 m68000/msoft-float m68020/m68881 m68020/msoft-float"
-	;;
-i960-*-*)
-	multidirs=float
-	;;
-sparclite-*-* | sparclitefrw*-*-*)
-	multidirs="mfpu msoft-float mflat mno-flat mfpu/mflat mfpu/mno-flat msoft-float/mflat msoft-float/mno-flat"
-	;;
-sparc-*-* | sparcfrw*-*-*)
-	multidirs="soft v8 soft/v8"
-	;;
-z8k-*-coff)
-	multidirs="z8001 std z8001/std"
-	;;
-h8300-*-*)
-	multidirs=h8300h
-	;;
-h8500-*-*)
-	multidirs="mbig msmall mcompact mmedium"
-	;;
-# start-sanitize-jaguar
-jaguar-*-*)
-	multidirs="be"
-	;;
-# end-sanitize-jaguar
-sh-*-*)
-	multidirs="ml m2 ml/m2"
-# start-sanitize-sh3e
-	multidirs="ml m2 ml/m2 m3e ml/m3e"
-# end-sanitize-sh3e
-	;;
 mips*-*-*)
-	# Note that not all of these will be built for a particular
-	# target; what is build depends upon the output gcc
-	# --print-multi-lib.  We configure them all, to make our life
-	# simpler here.  If somebody cares about configuration
-	# efficiency, they will need to switch off on the various
-	# targets to configure just the directories needed for that
-	# target.
-	# 
-	# In the long run, it would be better to configure based on
-	# the output of gcc --print-multi-lib, but, to do that, we
-	# would have to build gcc before configuring newlib.
-	#
-	# Default to including the single-float directories.
-	if [ x$enable_single_float = x ]; then
-	  enable_single_float=yes
-	fi
-	if [ x$enable_single_float = xyes ]; then
-	  multidirs="soft-float single el eb mips1 mips3 soft-float/el soft-float/eb soft-float/mips1 soft-float/mips3 soft-float/el/mips1 soft-float/el/mips3 soft-float/eb/mips1 soft-float/eb/mips3 single/el single/eb single/mips1 single/mips3 single/el/mips1 single/el/mips3 single/eb/mips1 single/eb/mips3 el/mips1 el/mips3 eb/mips1 eb/mips3"
-	else
-	  multidirs="soft-float el eb mips1 mips3 soft-float/el soft-float/eb soft-float/mips1 soft-float/mips3 soft-float/el/mips1 soft-float/el/mips3 soft-float/eb/mips1 soft-float/eb/mips3 el/mips1 el/mips3 eb/mips1 eb/mips3"
+	if [ x$enable_single_float = xno ]
+	then
+	  old_multidirs="${multidirs}"
+	  multidirs=""
+	  for x in ${old_multidirs}; do
+	    case "$x" in
+	      *single* ) : ;;
+	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	    esac
+	  done
 	fi
 	if [ x$enable_biendian = xno ]
 	then
@@ -245,7 +220,8 @@ mips*-*-*)
 	  multidirs=""
 	  for x in ${old_multidirs}; do
 	    case "$x" in
-	      *endian* ) : ;;
+	      *el* ) : ;;
+	      *eb* ) : ;;
 	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
 	    esac
 	  done
@@ -261,31 +237,8 @@ mips*-*-*)
 	    esac
 	  done
 	fi
-	if [ x$enable_relocatable = xno ]
-	then
-	  old_multidirs="${multidirs}"
-	  multidirs=""
-	  for x in ${old_multidirs}; do
-	    case "$x" in
-	      *relocatable* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
-	    esac
-	  done
-	fi
-	if [ x$enable_sysv = xno ]
-	then
-	  old_multidirs="${multidirs}"
-	  multidirs=""
-	  for x in ${old_multidirs}; do
-	    case "$x" in
-	      *sysv* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
-	    esac
-	  done
-	fi
 	;;
-powerpc-ibm-aix* | rs6000-ibm-aix*)
-	multidirs="soft-float common soft-float/common"
+powerpc*-*-* | rs6000*-*-*)
 	if [ x$enable_softfloat = xno ]
 	then
 	  old_multidirs="${multidirs}"
@@ -308,9 +261,50 @@ powerpc-ibm-aix* | rs6000-ibm-aix*)
 	    esac
 	  done
 	fi
-	;;
-powerpc-*-eabiaix*)
-	multidirs="soft-float relocatable little sysv little/sysv relocatable/little relocatable/sysv relocatable/little/sysv soft-float/relocatable soft-float/little soft-float/sysv soft-float/little/sysv soft-float/relocatable/little soft-float/relocatable/sysv soft-float/relocatable/little/sysv"
+	if [ x$enable_powercpu = xno ]
+	then
+	  old_multidirs="${multidirs}"
+	  multidirs=""
+	  for x in ${old_multidirs}; do
+	    case "$x" in
+	      power | */power | */power/* ) : ;;
+	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	    esac
+	  done
+	fi
+	if [ x$enable_power2cpu = xno ]
+	then
+	  old_multidirs="${multidirs}"
+	  multidirs=""
+	  for x in ${old_multidirs}; do
+	    case "$x" in
+	      *power2* ) : ;;
+	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	    esac
+	  done
+	fi
+	if [ x$enable_powerpccpu = xno ]
+	then
+	  old_multidirs="${multidirs}"
+	  multidirs=""
+	  for x in ${old_multidirs}; do
+	    case "$x" in
+	      *powerpc* ) : ;;
+	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	    esac
+	  done
+	fi
+	if [ x$enable_601cpu = xno ]
+	then
+	  old_multidirs="${multidirs}"
+	  multidirs=""
+	  for x in ${old_multidirs}; do
+	    case "$x" in
+	      *601* ) : ;;
+	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
+	    esac
+	  done
+	fi
 	if [ x$enable_biendian = xno ]
 	then
 	  old_multidirs="${multidirs}"
@@ -318,17 +312,6 @@ powerpc-*-eabiaix*)
 	  for x in ${old_multidirs}; do
 	    case "$x" in
 	      *endian* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
-	    esac
-	  done
-	fi
-	if [ x$enable_softfloat = xno ]
-	then
-	  old_multidirs="${multidirs}"
-	  multidirs=""
-	  for x in ${old_multidirs}; do
-	    case "$x" in
-	      *soft-float* ) : ;;
 	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
 	    esac
 	  done
@@ -355,42 +338,6 @@ powerpc-*-eabiaix*)
 	    esac
 	  done
 	fi
-	;;
-powerpc-*-eabi* | powerpc-*-elf* | powerpc-*-sysv4*)
-	multidirs="soft-float relocatable little aix little/aix relocatable/little relocatable/aix relocatable/little/aix soft-float/relocatable soft-float/little soft-float/aix soft-float/little/aix soft-float/relocatable/little soft-float/relocatable/aix soft-float/relocatable/little/aix aixdesc soft-float/aixdesc"
-	if [ x$enable_biendian = xno ]
-	then
-	  old_multidirs="${multidirs}"
-	  multidirs=""
-	  for x in ${old_multidirs}; do
-	    case "$x" in
-	      *endian* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
-	    esac
-	  done
-	fi
-	if [ x$enable_softfloat = xno ]
-	then
-	  old_multidirs="${multidirs}"
-	  multidirs=""
-	  for x in ${old_multidirs}; do
-	    case "$x" in
-	      *soft-float* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
-	    esac
-	  done
-	fi
-	if [ x$enable_relocatable = xno ]
-	then
-	  old_multidirs="${multidirs}"
-	  multidirs=""
-	  for x in ${old_multidirs}; do
-	    case "$x" in
-	      *relocatable* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
-	    esac
-	  done
-	fi
 	if [ x$enable_aix = xno ]
 	then
 	  old_multidirs="${multidirs}"
@@ -402,56 +349,6 @@ powerpc-*-eabi* | powerpc-*-elf* | powerpc-*-sysv4*)
 	    esac
 	  done
 	fi
-	;;
-powerpcle-*-eabi* | powerpcle-*-elf* | powerpcle-*-sysv4*)
-	multidirs="soft-float relocatable big aix big/aix relocatable/big relocatable/aix relocatable/big/aix soft-float/relocatable soft-float/big soft-float/aix soft-float/big/aix soft-float/relocatable/big soft-float/relocatable/aix soft-float/relocatable/big/aix"
-	if [ x$enable_biendian = xno ]
-	then
-	  old_multidirs="${multidirs}"
-	  multidirs=""
-	  for x in ${old_multidirs}; do
-	    case "$x" in
-	      *endian* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
-	    esac
-	  done
-	fi
-	if [ x$enable_softfloat = xno ]
-	then
-	  old_multidirs="${multidirs}"
-	  multidirs=""
-	  for x in ${old_multidirs}; do
-	    case "$x" in
-	      *soft-float* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
-	    esac
-	  done
-	fi
-	if [ x$enable_relocatable = xno ]
-	then
-	  old_multidirs="${multidirs}"
-	  multidirs=""
-	  for x in ${old_multidirs}; do
-	    case "$x" in
-	      *relocatable* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
-	    esac
-	  done
-	fi
-	if [ x$enable_aix = xno ]
-	then
-	  old_multidirs="${multidirs}"
-	  multidirs=""
-	  for x in ${old_multidirs}; do
-	    case "$x" in
-	      *aix* ) : ;;
-	      *) if [ x"$multidirs" = x ]; then multidirs="$x"; else multidirs="${multidirs} ${x}"; fi ;;
-	    esac
-	  done
-	fi
-	;;
-*)
-	multidirs=
 	;;
 esac
 
@@ -499,7 +396,7 @@ multi-clean:
 	if [ -z "$(MULTIDIRS)" ]; then \
 	  true; \
 	else \
-	  lib=`pwd | sed -e 's,^.*/\([^/][^/]*\)/$$,\1,'`; \
+	  lib=`pwd | sed -e 's,^.*/\([^/][^/]*\)$$,\1,'`; \
 	  for dir in Makefile $(MULTIDIRS); do \
 	    if [ -f ../$${dir}/$${lib}/Makefile ]; then \
 	      if (cd ../$${dir}/$${lib}; $(MAKE) $(FLAGS_TO_PASS) $(DO)); \

@@ -1,3 +1,13 @@
+Wed Dec 20 15:15:35 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config-ml.in (rs6000*, powerpc*): Add switches to control which
+	AIX multilibs get built.
+
+Mon Dec 18 17:55:46 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* configure.in (i386-win32): Don't build expect if we're not
+	building the tcl subdir.
+
 Mon Dec 18 11:47:19 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* Makefile.in: (configure-target-examples, all-target-examples):
