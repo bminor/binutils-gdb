@@ -88,7 +88,7 @@ set threads [get_thread_list]
 
 gdb_test_multiple "break $line thread [lindex $threads 0]" \
   "breakpoint $line main thread" {
-    -re "Breakpoint (\[0-9\]*) at.* file .*$srcfile, line.*" {
+    -re "Breakpoint (\[0-9\]*) at.* file .*$srcfile, line.*$gdb_prompt $" {
       set main_breakpoint $expect_out(1,string)
       pass "breakpoint $line main thread"
     }
