@@ -1,4 +1,10 @@
 start-sanitize-tic80
+Wed Feb 26 20:36:46 1997  Fred Fish  <fnf@cygnus.com>
+
+	* gas/tic80/{float.d, float.lst, float.s}: New tests for
+	simple floating point operands.
+	* gas/tic80/tic80.exp: Run the float test.
+
 Wed Feb 26 15:16:04 1997  Fred Fish  <fnf@cygnus.com>
 
 	* gas/tic80/{regops2.d, regops2.lst, regops2.s, regops3.d,
