@@ -544,7 +544,7 @@ bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
 	  || !bfd_set_section_flags (abfd, sec, flags)
 	  || !bfd_set_section_alignment (abfd, sec, 2))
 	return false;
-      
+
       /* Set the gc mark to prevent the section from being removed by garbage
 	 collection, despite the fact that no relocs refer to this section.  */
       sec->gc_mark = 1;
@@ -562,7 +562,7 @@ bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
 	  || !bfd_set_section_flags (abfd, sec, flags)
 	  || !bfd_set_section_alignment (abfd, sec, 2))
 	return false;
-      
+
       sec->gc_mark = 1;
     }
 
@@ -724,7 +724,7 @@ bfd_elf32_arm_process_before_allocation (abfd, link_info, no_pipeline_knowledge)
     }
 
   return true;
-  
+
 error_return:
   if (free_relocs != NULL)
     free (free_relocs);
@@ -732,7 +732,7 @@ error_return:
     free (free_contents);
   if (free_extsyms != NULL)
     free (free_extsyms);
-  
+
   return false;
 }
 
@@ -979,7 +979,7 @@ elf32_arm_to_thumb_stub (info, name, input_bfd, output_bfd, input_section,
        + input_section->output_section->vma
        + offset + addend)
     - 8;
-  
+
   tmp = tmp | ((ret_offset >> 2) & 0x00FFFFFF);
 
   bfd_put_32 (output_bfd, tmp, hit_data
@@ -1154,13 +1154,13 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 				      sreloc->contents)
 				     + sreloc->reloc_count));
 	  ++sreloc->reloc_count;
-	  
+
 	  /* If this reloc is against an external symbol, we do not want to
 	     fiddle with the addend.  Otherwise, we need to include the symbol
 	     value so that it becomes an addend for the dynamic reloc.  */
 	  if (! relocate)
 	    return bfd_reloc_ok;
-	  
+
 	  return _bfd_final_link_relocate (howto, input_bfd, input_section,
 					   contents, rel->r_offset, value,
 					   (bfd_vma) 0);
@@ -1252,11 +1252,11 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 
 	  signed_addend = value;
 	  signed_addend >>= howto->rightshift;
-	  
+
 	  /* It is not an error for an undefined weak reference to be
 	     out of range.  Any program that branches to such a symbol
-	     is going to crash anyway, so there is no point worrying 
-	     about getting the destination exactly right.  */	     
+	     is going to crash anyway, so there is no point worrying
+	     about getting the destination exactly right.  */
 	  if (! h || h->root.type != bfd_link_hash_undefweak)
 	    {
 	      /* Perform a signed range check.  */
@@ -1264,7 +1264,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 		  || signed_addend < - ((bfd_signed_vma) ((howto->dst_mask + 1) >> 1)))
 		return bfd_reloc_overflow;
 	    }
-	      
+
 #ifndef OLD_ARM_ABI
 	  /* If necessary set the H bit in the BLX instruction.  */
 	  if (r_type == R_ARM_XPC25 && ((value & 2) == 2))
@@ -1401,11 +1401,11 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	relocation -= (input_section->output_section->vma
 		       + input_section->output_offset
 		       + rel->r_offset);
-	
+
 	if (! globals->no_pipeline_knowledge)
 	  {
 	    Elf_Internal_Ehdr * i_ehdrp; /* Elf file header, internal form.  */
-	    
+
 	    i_ehdrp = elf_elfheader (input_bfd);
 
 	    /* Previous versions of this code also used to add in the pipline
@@ -1467,7 +1467,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       BFD_ASSERT (sgot != NULL);
       if (sgot == NULL)
         return bfd_reloc_notsupported;
-      
+
       /* Note that sgot->output_offset is not involved in this
          calculation.  We always want the start of .got.  If we
          define _GLOBAL_OFFSET_TABLE in a different way, as is
@@ -1569,7 +1569,7 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 
 	  value = sgot->output_offset + off;
 	}
-      
+
       return _bfd_final_link_relocate (howto, input_bfd, input_section,
       				       contents, rel->r_offset, value,
       				       (bfd_vma) 0);
@@ -1642,44 +1642,67 @@ arm_add_to_rel (abfd, address, howto, increment)
      reloc_howto_type * howto;
      bfd_signed_vma     increment;
 {
-  bfd_vma        contents;
   bfd_signed_vma addend;
 
-  contents = bfd_get_32 (abfd, address);
-
-  /* Get the (signed) value from the instruction.  */
-  addend = contents & howto->src_mask;
-  if (addend & ((howto->src_mask + 1) >> 1))
+  if (howto->type == R_ARM_THM_PC22)
     {
-      bfd_signed_vma mask;
-      
-      mask = -1;
-      mask &= ~ howto->src_mask;
-      addend |= mask;
-    }
+      int upper_insn, lower_insn;
+      int upper, lower;
 
-  /* Add in the increment, (which is a byte value).  */
-  switch (howto->type)
-    {
-    case R_ARM_THM_PC22:
-    default:
+      upper_insn = bfd_get_16 (abfd, address);
+      lower_insn = bfd_get_16 (abfd, address + 2);
+      upper = upper_insn & 0x7ff;
+      lower = lower_insn & 0x7ff;
+
+      addend = (upper << 12) | (lower << 1);
       addend += increment;
-      break;
-      
-    case R_ARM_PC24:
-      addend <<= howto->size;
-      addend +=  increment;
-      
-      /* Should we check for overflow here ?  */
+      addend >>= 1;
 
-      /* Drop any undesired bits.  */
-      addend >>= howto->rightshift;
-      break;
+      upper_insn = (upper_insn & 0xf800) | ((addend >> 11) & 0x7ff);
+      lower_insn = (lower_insn & 0xf800) | (addend & 0x7ff);
+
+      bfd_put_16 (abfd, upper_insn, address);
+      bfd_put_16 (abfd, lower_insn, address + 2);
     }
-  
-  contents = (contents & ~ howto->dst_mask) | (addend & howto->dst_mask);
-  
-  bfd_put_32 (abfd, contents, address);
+  else
+    {
+      bfd_vma        contents;
+
+      contents = bfd_get_32 (abfd, address);
+
+      /* Get the (signed) value from the instruction.  */
+      addend = contents & howto->src_mask;
+      if (addend & ((howto->src_mask + 1) >> 1))
+	{
+	  bfd_signed_vma mask;
+
+	  mask = -1;
+	  mask &= ~ howto->src_mask;
+	  addend |= mask;
+	}
+
+      /* Add in the increment, (which is a byte value).  */
+      switch (howto->type)
+	{
+	default:
+	  addend += increment;
+	  break;
+
+	case R_ARM_PC24:
+	  addend <<= howto->size;
+	  addend +=  increment;
+
+	  /* Should we check for overflow here ?  */
+
+	  /* Drop any undesired bits.  */
+	  addend >>= howto->rightshift;
+	  break;
+	}
+
+      contents = (contents & ~ howto->dst_mask) | (addend & howto->dst_mask);
+
+      bfd_put_32 (abfd, contents, address);
+    }
 }
 #endif /* USE_REL */
 
@@ -2144,42 +2167,42 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
 	 the EABI version is not set.  */
       if (flags & EF_INTERWORK)
 	fprintf (file, _(" [interworking enabled]"));
-      
+
       if (flags & EF_APCS_26)
 	fprintf (file, _(" [APCS-26]"));
       else
 	fprintf (file, _(" [APCS-32]"));
-      
+
       if (flags & EF_APCS_FLOAT)
 	fprintf (file, _(" [floats passed in float registers]"));
-      
+
       if (flags & EF_PIC)
 	fprintf (file, _(" [position independent]"));
 
       if (flags & EF_NEW_ABI)
 	fprintf (file, _(" [new ABI]"));
-		 
+
       if (flags & EF_OLD_ABI)
 	fprintf (file, _(" [old ABI]"));
-		 
+
       if (flags & EF_SOFT_FLOAT)
 	fprintf (file, _(" [software FP]"));
-		 
+
       flags &= ~(EF_INTERWORK | EF_APCS_26 | EF_APCS_FLOAT | EF_PIC
 		 | EF_NEW_ABI | EF_OLD_ABI | EF_SOFT_FLOAT);
       break;
-      
+
     case EF_ARM_EABI_VER1:
       fprintf (file, _(" [Version1 EABI]"));
-      
+
       if (flags & EF_ARM_SYMSARESORTED)
 	fprintf (file, _(" [sorted symbol table]"));
       else
 	fprintf (file, _(" [unsorted symbol table]"));
-      
+
       flags &= ~ EF_ARM_SYMSARESORTED;
       break;
-      
+
     default:
       fprintf (file, _(" <EABI version unrecognised>"));
       break;
@@ -2197,7 +2220,7 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
 
   if (flags)
     fprintf (file, _("<Unrecognised flag bits set>"));
-  
+
   fputc ('\n', file);
 
   return true;
@@ -2221,7 +2244,7 @@ elf32_arm_get_symbol_type (elf_sym, type)
       if (type != STT_OBJECT)
 	return ELF_ST_TYPE (elf_sym->st_info);
       break;
-      
+
     default:
       break;
     }
@@ -2303,12 +2326,12 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
   bfd *                         dynobj;
   asection * sgot, *srelgot, *sreloc;
   bfd_vma * local_got_offsets;
-  
+
   if (info->relocateable)
     return true;
-  
+
   sgot = srelgot = sreloc = NULL;
-  
+
   dynobj = elf_hash_table (info)->dynobj;
   local_got_offsets = elf_local_got_offsets (abfd);
 
@@ -2325,13 +2348,13 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
     {
       struct elf_link_hash_entry *h;
       unsigned long r_symndx;
-      
+
       r_symndx = ELF32_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
         h = NULL;
       else
         h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-      
+
       /* Some relocs require a global offset table.  */
       if (dynobj == NULL)
 	{
@@ -2365,7 +2388,7 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 	        && (h != NULL || info->shared))
 	      {
 	        srelgot = bfd_get_section_by_name (dynobj, ".rel.got");
-		
+
 	        /* If no got relocation section, make one and initialize.  */
 	        if (srelgot == NULL)
 		  {
@@ -2550,7 +2573,7 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
           if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
             return false;
           break;
-	  
+
         /* This relocation describes which C++ vtable entries are actually
            used.  Record for later use during GC.  */
         case R_ARM_GNU_VTENTRY:
@@ -2930,7 +2953,7 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
 		  outname = bfd_get_section_name (output_bfd,
 						  s->output_section);
 		  target = bfd_get_section_by_name (output_bfd, outname + 4);
-		  
+
 		  if (target != NULL
 		      && (target->flags & SEC_READONLY) != 0
 		      && (target->flags & SEC_ALLOC) != 0)
