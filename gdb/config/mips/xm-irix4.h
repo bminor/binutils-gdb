@@ -32,3 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Irix 4.0.1 and later have termios.  Not sure about earlier versions.  */
 #undef HAVE_TERMIO
 #define HAVE_TERMIOS
+
+/* This enables reliable signals (and the associated setjmp/longjmp), and gives
+   bsdish prototypes for getpgrp/setpgrg/setgroups and initgroups.  */
+#define _BSD_COMPAT

@@ -29,3 +29,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
       addr = regno;					\
   else							\
       addr = regno + NSIG_HNDLRS; /* Skip over signal handlers */
+
+/* This enables reliable signals (and the associated setjmp/longjmp), and gives
+   bsdish prototypes for getpgrp/setpgrg/setgroups and initgroups.  */
+#define _BSD_COMPAT
