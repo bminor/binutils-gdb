@@ -5005,7 +5005,7 @@ display_debug_lines (section, start, file)
 
       /* Check the length of the block.  */
       info.li_length = BYTE_GET (external->li_length);
-      if (info.li_length + 4 > section->sh_size)
+      if (info.li_length + sizeof (external->li_length) > section->sh_size)
 	{
 	  warn
 	    (_("The line info appears to be corrupt - the section is too small\n"));
@@ -5040,7 +5040,7 @@ display_debug_lines (section, start, file)
       printf (_("  Line Range:                  %d\n"), info.li_line_range);
       printf (_("  Opcode Base:                 %d\n"), info.li_opcode_base);
 
-      end_of_sequence = data + info.li_length + 4;
+      end_of_sequence = data + info.li_length + sizeof (external->li_length);
 
       reset_state_machine (info.li_default_is_stmt);
 
