@@ -126,12 +126,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* start-sanitize-v850 */
 /* V850 backend magic number.  Written in the absense of an ABI.  */
 #define EM_CYGNUS_V850	0x9080
-/* start-sanitize-v850e */
-#define EM_CYGNUS_V850E	0x908e
-/* end-sanitize-v850e */
-/* start-sanitize-v850eq */
-#define EM_CYGNUS_V850EQ	0x908f
-/* end-sanitize-v850eq */
 /* end-sanitize-v850 */
 
 /* mn10200 and mn10300 backend magic numbers.
