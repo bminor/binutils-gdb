@@ -55,10 +55,12 @@ delta68.sh
 ebmon29k.sh
 elf32_sparc.sh
 elf32bmip.sh
+elf32bsmip.sh
 elf32ebmip.sh
 elf32elmip.sh
 elf32lmip.sh
 elf32lppc.sh
+elf32lsmip.sh
 elf32ppc.sh
 elf32b4300.sh
 elf32l4300.sh

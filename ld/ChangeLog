@@ -1,3 +1,17 @@
+Thu Oct  2 18:40:28 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.tgt (mips*-sgi-irix[56]*): Use elf32bsmip rather than
+	elf32bmip.
+	(mips*el-*-linux*): Change elf32lmip to elf32lsmip and elf32bmip
+	to elf32bsmip.
+	(mips*-*-linux*): Likewise.
+	* emulparams/elf32bsmip.sh: New file; just like elf32bmip.sh, but
+	setting ENTRY to __start.
+	* emulparams/elf32lsmip.sh: New file; just like elf32lmip.sh, but
+	setting ENTRY to __start.
+	* scripttempl/elf.sc: Always set ENTRY to _start if it was not
+	already set.
+
 Wed Oct  1 16:41:00 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* emulparams/v850.sh (ROZDATA_START_ADDR, ROSDATA_START_ADDR): New
