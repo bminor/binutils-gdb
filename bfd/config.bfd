@@ -25,6 +25,9 @@ strip_underscore=no
 case "${canon}" in
   alpha-*-netware*)	bfd_name=alpha-nlm ;;
   alpha-*-*)		bfd_name=alphaosf ;;
+# start-sanitize-arc
+  arc-*-elf*)		bfd_name=arc-elf ;;
+# end-sanitize-arc
   arm-*-riscix*)	bfd_name=riscix ;;
   a29k-*-ebmon*)	bfd_name=a29k-coff strip_underscore=yes ;;
   a29k-*-udi*)		bfd_name=a29k-coff strip_underscore=yes ;;
@@ -58,7 +61,7 @@ case "${canon}" in
   i[345]86-*-netware*)	bfd_name=i386-nlm ;;
   i[345]86-*-linux*)	bfd_name=i386-linux strip_underscore=yes ;;
   i[345]86-*-lynxos*)	bfd_name=i386-lynx ;;
-  i[345]86-*-gnu*)	bfd_name=i386-mach3 strip_underscore=yes ;;
+  i[345]86-*-gnu*)	bfd_name=i386-gnu strip_underscore=yes ;;
   i[345]86-*-mach*)	bfd_name=i386-mach3 strip_underscore=yes ;;
   i[345]86-*-osf1mk*)	bfd_name=i386-mach3 strip_underscore=yes ;;
   i[345]86-*-os9k)	bfd_name=i386-os9k ;;
@@ -129,6 +132,7 @@ case "${canon}" in
   vax-*-vms*)		bfd_name=vax-vms ;;
   vax-*-*)		bfd_name=vax strip_underscore=yes ;;
   we32k-*-*)		bfd_name=we32k ;;
+  w65-*-*)		bfd_name=w65 ;;
   z8k*-*-*)		bfd_name=z8k-coff strip_underscore=yes ;;
 
   *-*-aout*)		bfd_name=${cpu}-aout strip_underscore=yes ;;
