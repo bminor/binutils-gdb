@@ -2828,7 +2828,7 @@ _("%X%P: section %s [%V -> %V] overlaps section %s [%V -> %V]\n"),
 
 static void
 os_region_check (lang_output_section_statement_type *os,
-		 struct memory_region_struct *region,
+		 lang_memory_region_type *region,
 		 etree_type *tree,
 		 bfd_vma base)
 {
@@ -4503,34 +4503,38 @@ lang_float (bfd_boolean maybe)
    It is an error to specify both a load region and a load address.  */
 
 static void
-lang_get_regions (struct memory_region_struct **region,
-		  struct memory_region_struct **lma_region,
+lang_get_regions (lang_memory_region_type **region,
+		  lang_memory_region_type **lma_region,
 		  const char *memspec,
 		  const char *lma_memspec,
-		  int have_lma_p)
+		  bfd_boolean have_lma,
+		  bfd_boolean have_vma)
 {
   *lma_region = lang_memory_region_lookup (lma_memspec, FALSE);
 
-  /* If no runtime region has been given, but the load region has
-     been, use the load region.  */
-  if (lma_memspec != 0 && strcmp (memspec, DEFAULT_MEMORY_REGION) == 0)
+  /* If no runtime region or VMA has been specified, but the load region has
+     been specified, then use the load region for the runtime region as well.  */
+  if (lma_memspec != NULL
+      && ! have_vma
+      && strcmp (memspec, DEFAULT_MEMORY_REGION) == 0)
     *region = *lma_region;
   else
     *region = lang_memory_region_lookup (memspec, FALSE);
 
-  if (have_lma_p && lma_memspec != 0)
+  if (have_lma && lma_memspec != 0)
     einfo (_("%X%P:%S: section has both a load address and a load region\n"));
 }
 
 void
-lang_leave_output_section_statement
-  (fill_type *fill, const char *memspec,
-   struct lang_output_section_phdr_list *phdrs, const char *lma_memspec)
+lang_leave_output_section_statement (fill_type *fill, const char *memspec,
+				     lang_output_section_phdr_list *phdrs,
+				     const char *lma_memspec)
 {
   lang_get_regions (&current_section->region,
 		    &current_section->lma_region,
 		    memspec, lma_memspec,
-		    current_section->load_base != 0);
+		    current_section->load_base != NULL,
+		    current_section->addr_tree != NULL);
   current_section->fill = fill;
   current_section->phdrs = phdrs;
   stat_ptr = &statement_list;
@@ -4689,7 +4693,7 @@ lang_record_phdrs (void)
 {
   unsigned int alc;
   asection **secs;
-  struct lang_output_section_phdr_list *last;
+  lang_output_section_phdr_list *last;
   struct lang_phdr *l;
   lang_statement_union_type *u;
 
@@ -4708,7 +4712,7 @@ lang_record_phdrs (void)
 	   u = u->output_section_statement.next)
 	{
 	  lang_output_section_statement_type *os;
-	  struct lang_output_section_phdr_list *pl;
+	  lang_output_section_phdr_list *pl;
 
 	  os = &u->output_section_statement;
 
@@ -4768,7 +4772,7 @@ lang_record_phdrs (void)
        u != NULL;
        u = u->output_section_statement.next)
     {
-      struct lang_output_section_phdr_list *pl;
+      lang_output_section_phdr_list *pl;
 
       if (u->output_section_statement.bfd_section == NULL)
 	continue;
@@ -4785,7 +4789,7 @@ lang_record_phdrs (void)
 /* Record a list of sections which may not be cross referenced.  */
 
 void
-lang_add_nocrossref (struct lang_nocrossref *l)
+lang_add_nocrossref (lang_nocrossref_type *l)
 {
   struct lang_nocrossrefs *n;
 
@@ -4870,7 +4874,7 @@ lang_enter_overlay_section (const char *name)
 
 void
 lang_leave_overlay_section (fill_type *fill,
-			    struct lang_output_section_phdr_list *phdrs)
+			    lang_output_section_phdr_list *phdrs)
 {
   const char *name;
   char *clean, *s2;
@@ -4917,17 +4921,17 @@ lang_leave_overlay (etree_type *lma_expr,
 		    int nocrossrefs,
 		    fill_type *fill,
 		    const char *memspec,
-		    struct lang_output_section_phdr_list *phdrs,
+		    lang_output_section_phdr_list *phdrs,
 		    const char *lma_memspec)
 {
   lang_memory_region_type *region;
   lang_memory_region_type *lma_region;
   struct overlay_list *l;
-  struct lang_nocrossref *nocrossref;
+  lang_nocrossref_type *nocrossref;
 
   lang_get_regions (&region, &lma_region,
 		    memspec, lma_memspec,
-		    lma_expr != 0);
+		    lma_expr != NULL, FALSE);
 
   nocrossref = NULL;
 
@@ -4964,7 +4968,7 @@ lang_leave_overlay (etree_type *lma_expr,
 
       if (nocrossrefs)
 	{
-	  struct lang_nocrossref *nc;
+	  lang_nocrossref_type *nc;
 
 	  nc = xmalloc (sizeof *nc);
 	  nc->name = l->os->name;

@@ -1,5 +1,17 @@
 2004-01-13  Nick Clifton  <nickc@redhat.com>
 
+	* ldlang.c (lang_get_regions): Add extra parameter 'have_vma'
+	which if true will prevent the LMA region being used as a
+	replacement for a default VMA region.
+        (lang_leave_output_section_statement): Pass extra parameter.
+        (lang_leave_overlay): Likewise.
+        * ld.texinfo (Output Section LMA): Document that the LMA
+	region can be set to the VMA region if no VMA has been set.
+	* ldlang.h (struct lang_output_section_phdr_list): Create a
+	typedef for this type.  Minor formatting fixes.
+	
+2004-01-13  Nick Clifton  <nickc@redhat.com>
+
 	* ldlang.c (lang_size_sections_1): If dot is advanced, then
 	assume that the section should be allocated.
 
