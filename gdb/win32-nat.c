@@ -602,8 +602,8 @@ register_loaded_dll (const char *name, DWORD load_addr)
   so = (struct so_stuff *) xmalloc (sizeof (struct so_stuff) + strlen (ppath) + 8 + 1);
   so->loaded = 0;
   so->load_addr = load_addr;
-  if (!VirtualQueryEx (current_process_handle, (void *) load_addr, &m,
-		       sizeof (m)))
+  if (VirtualQueryEx (current_process_handle, (void *) load_addr, &m,
+		      sizeof (m)))
     so->end_addr = (DWORD) m.AllocationBase + m.RegionSize;
   else
     so->end_addr = load_addr + 0x2000;	/* completely arbitrary */
