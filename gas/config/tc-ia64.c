@@ -2747,7 +2747,13 @@ fixup_unw_records (list, before_relax)
 	    break;
 	  }
 	case epilogue:
-	  ptr->r.record.b.t = rlen - 1 - t;
+	  if (t < rlen)
+	    ptr->r.record.b.t = rlen - 1 - t;
+	  else
+	    /* This happens when a memory-stack-less procedure uses a
+	       ".restore sp" directive at the end of a region to pop
+	       the frame state.  */
+	    ptr->r.record.b.t = 0;
 	  break;
 
 	case mem_stack_f:
