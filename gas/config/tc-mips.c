@@ -14426,10 +14426,6 @@ mips_dwarf2_addr_size (void)
 {
   if (mips_abi == N64_ABI)
     return 8;
-  /* GCC for 64-bit targets turns on mlong64 giving
-     us 64-bit addresses.  */
-  else if (mips_abi == EABI_ABI && !file_mips_gp32)
-    return 8;
   else
     return 4;
 }

@@ -1,3 +1,8 @@
+2004-04-19  Eric Christopher  <echristo@redhat.com>
+
+	* config/tc-mips.c (mips_dwarf2_addr_size): Revert part
+	of previous patch for fix in gcc.
+
 2004-04-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* expr.c (operand): Correct checks for ++ and --.
