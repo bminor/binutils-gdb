@@ -1,3 +1,9 @@
+2001-04-27  Michal Svec <rebel@atrey.karlin.mff.cuni.cz>
+
+	* strings.c (isgraphic): Do not use isascii() unless it is needed
+	for isprint() to work.
+	(main): Set the locale domain to LC_ALL not just LC_MESSAGES.
+
 2001-04-27  Johan Rydberg  <jrydberg@opencores.org>
 
         * NEWS: Announce support for OpenRISC.
