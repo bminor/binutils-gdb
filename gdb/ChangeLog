@@ -1,6 +1,6 @@
 2002-07-26  Kevin Buettner  <kevinb@redhat.com>
 
-	* aix-thread.c: (coff/internal.h, bfd/libcoff.h, pthread.h): Remove
+	* aix-thread.c (coff/internal.h, bfd/libcoff.h, pthread.h): Remove
 	disabled (via ``#if 0'') includes.
 
 2002-07-26  Kevin Buettner  <kevinb@redhat.com>
