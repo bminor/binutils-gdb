@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "i386/xm-cygwin32.h"
 
-#undef CC_HAS_LONG_LONG
+#undef PRINTF_HAS_LONG_LONG
 #undef HAVE_UNISTD_H
 #undef HAVE_TERMIO_H
 #undef HAVE_TERMIOS_H

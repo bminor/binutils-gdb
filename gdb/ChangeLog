@@ -1,3 +1,11 @@
+Thu Dec 26 19:56:55 1996  Mark Alexander  <marka@cygnus.com>
+
+	* valprint.c (print_longest): Don't lose upper bits
+	of 64-bit values on Windows.
+	* config/i386/xm-windows.h: Leave CC_HAS_LONG_LONG defined,
+	undefine PRINTF_HAS_LONG_LONG, so that 64-bit values will
+	be printed without loss of upper bits.
+
 Thu Dec 26 15:15:21 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* config/sparc/tm-sparclet.h: make registers ASR15, ASR19 invisible
