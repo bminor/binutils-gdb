@@ -1,3 +1,7 @@
+2000-10-31  Kaz Kojima <kkojima@rr.iij4u.or.jp>
+
+	* config/tc-sh.c (md_apply_fix [BFD_RELOC_SH_PCDISP12BY2]): Allow 4094.
+
 2000-10-31  Bernd Schmidt  <bernds@redhat.co.uk>
 
 	* tc-ia64.c (extra_goodness): Only prefer F in slot 1 and B in slot 2.
