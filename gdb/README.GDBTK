@@ -8,14 +8,15 @@ GUI for GDB, the GNU debugger.
 Introduction
 ============
 
-GDBtk is a version of GDB that uses Tcl/Tk to implement a graphical user inter-
-face.  It is a fully integrated GUI, not a seperate front-end program.  The
-interface consists of several seperate X windows, which use standard elements
-like buttons, scrollbars, entry boxes and such to create a fairly easy to use
-interface.  Each window has a distinct content and purpose, and can be enabled
-or disabled individually.  The windows contain things like the current source
-file, a disassembly of the current function, text commands (for things that
-aren't accessible via a button), etc...
+GDBtk is a version of GDB that uses Tcl/Tk to implement a graphical
+user inter- face.  It is a fully integrated GUI, not a separate
+front-end program.  The interface consists of several seperate X
+windows, which use standard elements like buttons, scrollbars, entry
+boxes and such to create a fairly easy to use interface.  Each window
+has a distinct content and purpose, and can be enabled or disabled
+individually.  The windows contain things like the current source
+file, a disassembly of the current function, text commands (for things
+that aren't accessible via a button), and so forth.
 
 Building and installing
 =======================

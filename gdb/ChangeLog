@@ -1,3 +1,9 @@
+start-sanitize-gdbtk
+Thu Dec 28 15:10:49 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* README.GDBTK: Polish introductory paragraph.
+end-sanitize-gdbtk
+
 Fri Dec 22 11:05:59 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (gdb_host): Add support for DG/UX running on x86 as
@@ -39,8 +45,9 @@ Wed Dec 20 10:54:41 1995  Fred Fish  <fnf@cygnus.com>
 
 	* defs.h: Delete extraneous whitespace at end of file.
 	* symfile.h: Move #include of demangle.h outside conditional.
-	* objfiles.h (struct objstats, OBJSTAT, OBJSTATS): New struct
-	and macros to hold per-objfile statistics for internal instrumentation.
+	* objfiles.h (struct objstats, OBJSTAT, OBJSTATS): New struct and
+ 	macros to hold per-objfile statistics for internal
+ 	instrumentation.
 	(struct objfile): Add OBJSTATS member, which is optional.
 	* buildsym.h (next_symbol_text_func): Now takes objfile argument.
 	Also update copyright to 1995.
@@ -53,13 +60,15 @@ Wed Dec 20 10:54:41 1995  Fred Fish  <fnf@cygnus.com>
 	Accumulate number of full symbols created.
 	* gdbtypes.c (alloc_type): Accumulate number of types.
 	* maint.c (maintenance_print_statistics): New function.
-	* mdebugread.c (mdebug_next_symbol_text): Now takes objfile argument.
+	* mdebugread.c (mdebug_next_symbol_text): Now takes objfile
+ 	argument.
 	* minsyms.c (prim_record_minimal_symbol_and_info): Accumulate
 	number of minimal symbols read.
-	* os9kread.c (read_os9k_psymtab): next_symbol_text takes objfile arg.
+	* os9kread.c (read_os9k_psymtab): next_symbol_text takes objfile
+ 	arg.
 	* partial-stab.h: next_symbol_text takes objfile arg.
-	* stabsread.c (error_type, STABS_CONTINUE): Now takes objfile arg and
- 	uses it to call next_symbol_text.
+	* stabsread.c (error_type, STABS_CONTINUE): Now takes objfile arg
+	and uses it to call next_symbol_text.
 	* symfile.c (add_psymbol_to_list, add_psymbol_addr_to_list):
 	Accumulate number of partial symbols created.
 	* symfile.h (ADD_PSYMBOL_VT_TO_LIST): Accumulate number of partial
@@ -1045,8 +1054,10 @@ Mon Oct 16 11:27:06 1995  Stu Grossman  (grossman@cygnus.com)
 	* config/mips/idt.mt (TDEPFILES):  Remove remote-array.o.  This
 	has *nothing* to do with IDT!!!
 
+start-sanitize-gdbtk
 	* gdbtk.c (gdb_disassemble):  Use fprintf_unfiltered instead of
 	fprintf_filtered.
+end-sanitize-gdbtk
 
 	* Makefile.in sh3-rom.c config/sh/sh.mt config/sh/tm-sh.h:  Add
 	sh3 monitor support.
@@ -1108,7 +1119,9 @@ Tue Oct 10 15:26:39 1995  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (VERSION): Version 4.15 released.
 	* README: Updated for version 4.15.
+start-sanitize-gdbtk
 	* README.GDBTK: Updated for version 4.15
+end-sanitize-gdbtk
 	* NEWS: Updated for 4.15 release.
 	
 Tue Oct 10 13:18:50 1995  Fred Fish  <fnf@cygnus.com>
@@ -1644,12 +1657,14 @@ Mon Aug 21 00:45:17 1995  Jeff Law  (law@snake.cs.utah.edu)
 	that we're using autoconf.
 	(uninstall): Likewise.
 
+start-sanitize-gdbtk
 Sat Aug 19 17:20:22 1995  Michael Tiemann  <tiemann@axon.cygnus.com>
 
 	* gdbtk.tcl: ENABLE comes back as "1" or "0", not "enable" or
 	"disable".
 	Also, wire up the breakpoint window so that it can be demo'd.
-	
+end-sanitize-gdbtk
+
 Sat Aug 19 01:19:34 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdbtypes.c (recursive_dump_type):  Add dont_print_type_obstack
