@@ -1,3 +1,9 @@
+Tue May  5 18:29:24 1998  Tom Tromey  <tromey@cygnus.com>
+
+	* libbfd.h: Rebuilt.
+	* libbfd-in.h: Removed gettext includes and defines.
+	* sysdep.h: Moved gettext-related includes and defines here.
+
 Tue May  5 16:47:54 1998  Richard Henderson  <rth@cygnus.com>
 
 	* srec.c (srec_write_symbols): Use bfd_is_local_label rather than
