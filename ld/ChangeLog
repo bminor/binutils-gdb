@@ -1,3 +1,7 @@
+Thu May  7 17:01:12 1992  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* ld.texinfo: references to linker now say "ld" not "gld".
+
 Wed May  6 13:26:19 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	changed calling convention for Q_enter_global_ref
