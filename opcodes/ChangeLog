@@ -1,3 +1,8 @@
+2001-08-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* dis-buf.c (generic_strcat_address): Add missing prototype.
+	#if 0 the functions as it is unused.
+
 2001-08-08  Alan Modra  <amodra@bigpond.net.au>
 
 	1999-10-25  Torbjorn Granlund  <tege@swox.com>
