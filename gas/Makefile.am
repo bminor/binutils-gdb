@@ -196,6 +196,7 @@ TARGET_CPU_CFILES = \
 	config/tc-arm.c \
 	config/tc-d10v.c \
 	config/tc-d30v.c \
+	config/tc-fr30.c \
 	config/tc-h8300.c \
 	config/tc-h8500.c \
 	config/tc-hppa.c \
@@ -228,6 +229,7 @@ TARGET_CPU_HFILES = \
 	config/tc-arm.h \
 	config/tc-d10v.h \
 	config/tc-d30v.h \
+	config/tc-fr30.h \
 	config/tc-h8300.h \
 	config/tc-h8500.h \
 	config/tc-hppa.h \
@@ -288,6 +290,7 @@ TARG_ENV_HFILES = \
 	config/te-delt88.h \
 	config/te-dpx2.h \
 	config/te-dynix.h \
+	config/te-epoc-pe.h \
 	config/te-generic.h \
 	config/te-go32.h \
 	config/te-hp300.h \

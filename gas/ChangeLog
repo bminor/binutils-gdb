@@ -1,5 +1,10 @@
 Mon Jun  7 11:25:16 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
+	* Makefile.am (TARGET_CPU_CFILES): Add config/tc-fr30.c.
+	(TARGET_CPU_HFILES): Add config/tc-fr30.h.
+	(TARG_ENV_HFILES): Add config/te-epoc-pe.h.
+	* Makefile.in: Regenerated.
+
 	* config/obj-elf.c (obj_elf_common): In MRI mode if called as
 	`common' pass on to s_mri_common.
 	(elf_pseudo_table): Pass 1 to obj_elf_common for `common'. 
