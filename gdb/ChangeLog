@@ -1,3 +1,10 @@
+2002-01-11  Michael Snyder  <msnyder@redhat.com>
+
+	* symfile.c (generic_load): Whitespace and long line cleanups.
+	Remove duplicate variable, change several local variables to
+	more appropriate data types.
+	(print_transfer_performance): Use %lu instead of %ld for ulongs.
+
 2002-01-12  Andrew Cagney  <ac131313@redhat.com>
 
 	From Peter Schauer:

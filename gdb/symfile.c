@@ -1182,8 +1182,7 @@ generic_load (char *args, int from_tty)
   char *filename;
   struct cleanup *old_cleanups;
   char *offptr;
-  CORE_ADDR total_size = 0;
-  CORE_ADDR total_sent = 0;
+  bfd_size_type total_size = 0;
 
   /* Parse the input argument - the user can specify a load offset as
      a second argument. */
@@ -1194,6 +1193,7 @@ generic_load (char *args, int from_tty)
   if (offptr != NULL)
     {
       char *endptr;
+
       load_offset = strtoul (offptr, &endptr, 0);
       if (offptr == endptr)
 	error ("Invalid download offset:%s\n", offptr);
@@ -1231,16 +1231,17 @@ generic_load (char *args, int from_tty)
     {
       if (s->flags & SEC_LOAD)
 	{
-	  CORE_ADDR size = bfd_get_section_size_before_reloc (s);
+	  bfd_size_type size = bfd_get_section_size_before_reloc (s);
+
 	  if (size > 0)
 	    {
 	      char *buffer;
 	      struct cleanup *old_chain;
-	      CORE_ADDR lma = s->lma + load_offset;
-	      CORE_ADDR block_size;
+	      CORE_ADDR lma = bfd_section_lma (loadfile_bfd, s) + load_offset;
+	      bfd_size_type block_size;
 	      int err;
 	      const char *sect_name = bfd_get_section_name (loadfile_bfd, s);
-	      CORE_ADDR sent;
+	      bfd_size_type sent;
 
 	      if (download_write_size > 0 && size > download_write_size)
 		block_size = download_write_size;
@@ -1253,8 +1254,9 @@ generic_load (char *args, int from_tty)
 	      /* Is this really necessary?  I guess it gives the user something
 	         to look at during a long download.  */
 #ifdef UI_OUT
-	      ui_out_message (uiout, 0, "Loading section %s, size 0x%s lma 0x%s\n",
-			   sect_name, paddr_nz (size), paddr_nz (lma));
+	      ui_out_message (uiout, 0, 
+			      "Loading section %s, size 0x%s lma 0x%s\n",
+			      sect_name, paddr_nz (size), paddr_nz (lma));
 #else
 	      fprintf_unfiltered (gdb_stdout,
 				  "Loading section %s, size 0x%s lma 0x%s\n",
@@ -1266,8 +1268,9 @@ generic_load (char *args, int from_tty)
 	      sent = 0;
 	      do
 		{
-		  CORE_ADDR len;
-		  CORE_ADDR this_transfer = size - sent;
+		  int len;
+		  bfd_size_type this_transfer = size - sent;
+
 		  if (this_transfer >= block_size)
 		    this_transfer = block_size;
 		  len = target_write_memory_partial (lma, buffer,
@@ -1285,7 +1288,9 @@ generic_load (char *args, int from_tty)
                          that.  remote.c could implement that method
                          using the ``qCRC'' packet.  */
 		      char *check = xmalloc (len);
-		      struct cleanup *verify_cleanups = make_cleanup (xfree, check);
+		      struct cleanup *verify_cleanups = make_cleanup (xfree, 
+								      check);
+
 		      if (target_read_memory (lma, check, len) != 0)
 			error ("Download verify read failed at 0x%s",
 			       paddr (lma));
@@ -1299,19 +1304,20 @@ generic_load (char *args, int from_tty)
 		  buffer += len;
 		  write_count += 1;
 		  sent += len;
-		  total_sent += len;
 		  if (quit_flag
 		      || (ui_load_progress_hook != NULL
 			  && ui_load_progress_hook (sect_name, sent)))
 		    error ("Canceled the download");
 
 		  if (show_load_progress != NULL)
-		    show_load_progress (sect_name, sent, size, total_sent, total_size);
+		    show_load_progress (sect_name, sent, size, 
+					data_count, total_size);
 		}
 	      while (sent < size);
 
 	      if (err != 0)
-		error ("Memory access error while loading section %s.", sect_name);
+		error ("Memory access error while loading section %s.", 
+		       sect_name);
 
 	      do_cleanups (old_chain);
 	    }
@@ -1320,18 +1326,18 @@ generic_load (char *args, int from_tty)
 
   end_time = time (NULL);
   {
-    CORE_ADDR entry;
-    entry = bfd_get_start_address (loadfile_bfd);
+    CORE_ADDR entry = bfd_get_start_address (loadfile_bfd);
+
 #ifdef UI_OUT
-   ui_out_text (uiout, "Start address ");
-   ui_out_field_fmt (uiout, "address", "0x%s" , paddr_nz (entry));
-   ui_out_text (uiout, ", load size ");
-   ui_out_field_fmt (uiout, "load-size", "%ld" , data_count);
-   ui_out_text (uiout, "\n");
+    ui_out_text (uiout, "Start address ");
+    ui_out_field_fmt (uiout, "address", "0x%s", paddr_nz (entry));
+    ui_out_text (uiout, ", load size ");
+    ui_out_field_fmt (uiout, "load-size", "%lu", data_count);
+    ui_out_text (uiout, "\n");
 
 #else
     fprintf_unfiltered (gdb_stdout,
-			"Start address 0x%s , load size %ld\n",
+			"Start address 0x%s, load size %lu\n",
 			paddr_nz (entry), data_count);
 #endif
     /* We were doing this in remote-mips.c, I suspect it is right
@@ -1361,7 +1367,8 @@ void
 report_transfer_performance (unsigned long data_count, time_t start_time,
 			     time_t end_time)
 {
-  print_transfer_performance (gdb_stdout, data_count, end_time - start_time, 0);
+  print_transfer_performance (gdb_stdout, data_count, 
+			      end_time - start_time, 0);
 }
 
 void
@@ -1374,30 +1381,30 @@ print_transfer_performance (struct ui_file *stream,
   ui_out_text (uiout, "Transfer rate: ");
   if (time_count > 0)
     {
-      ui_out_field_fmt (uiout, "transfer-rate", "%ld", 
+      ui_out_field_fmt (uiout, "transfer-rate", "%lu", 
 			(data_count * 8) / time_count);
       ui_out_text (uiout, " bits/sec");
     }
   else
     {
-      ui_out_field_fmt (uiout, "transferred-bits", "%ld", (data_count * 8));
+      ui_out_field_fmt (uiout, "transferred-bits", "%lu", (data_count * 8));
       ui_out_text (uiout, " bits in <1 sec");    
     }
   if (write_count > 0)
     {
       ui_out_text (uiout, ", ");
-      ui_out_field_fmt (uiout, "write-rate", "%ld", data_count / write_count);
+      ui_out_field_fmt (uiout, "write-rate", "%lu", data_count / write_count);
       ui_out_text (uiout, " bytes/write");
     }
   ui_out_text (uiout, ".\n");
 #else
   fprintf_unfiltered (stream, "Transfer rate: ");
   if (time_count > 0)
-    fprintf_unfiltered (stream, "%ld bits/sec", (data_count * 8) / time_count);
+    fprintf_unfiltered (stream, "%lu bits/sec", (data_count * 8) / time_count);
   else
-    fprintf_unfiltered (stream, "%ld bits in <1 sec", (data_count * 8));
+    fprintf_unfiltered (stream, "%lu bits in <1 sec", (data_count * 8));
   if (write_count > 0)
-    fprintf_unfiltered (stream, ", %ld bytes/write", data_count / write_count);
+    fprintf_unfiltered (stream, ", %lu bytes/write", data_count / write_count);
   fprintf_unfiltered (stream, ".\n");
 #endif
 }
