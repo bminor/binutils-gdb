@@ -133,6 +133,7 @@ ALL_EMULATIONS = \
 	edelta68.o \
 	eebmon29k.o \
 	eelf32_i960.o \
+	eelf32_i860.o \
 	eelf32_sparc.o \
 	eelf32b4300.o \
 	eelf32bmip.o \
@@ -420,6 +421,9 @@ em32relf.c: $(srcdir)/emulparams/m32relf.sh \
 eelf32_sparc.c: $(srcdir)/emulparams/elf32_sparc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_sparc "$(tdir_elf32_sparc)"
+eelf32_i860.c: $(srcdir)/emulparams/elf32_i860.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32_i860 "$(tdir_elf32_i860)"
 eelf32_i960.c: $(srcdir)/emulparams/elf32_i960.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_i960 "$(tdir_elf32_i960)"

@@ -1,3 +1,11 @@
+2000-08-10  Jason Eckhardt  <jle@cygnus.com>
+
+	* emulparams/elf32_i860.sh: New file.
+	* configure.tgt: Recognize new target i860-stardent-{sysv4*|elf*}.
+	* Makefile.am (ALL_EMULATIONS): Add eelf32_i860.o.
+	(eelf32_i860.c): New rule.
+	* Makefile.in: Regenerate.
+
 2000-08-10  Nick Clifton  <nickc@cygnus.com>
 
 	* emulparams/mipspe.sh (ENTRY): Add definition.
