@@ -1,3 +1,22 @@
+start-sanitize-am33
+Fri Jul 24 15:51:34 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.disasm/am33.s: Add tests for autoincrement instructions.
+	* gdb.disasm/am33.exp: Run time.  Update tests which use r8-r15
+	to use a0-a3/d0-d3 as needed.
+
+Thu Jul 16 18:20:46 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.disasm/am33.s: Add 4 operand mul and mulu tests.
+	* gdb.disasm/am33.exp: Corresponding changes.
+
+end-sanitize-am33
+start-sanitize-gdbtk
+Tue Jul 14 16:11:11 1998  Keith Seitz  <keiths@cygnus.com>
+
+	* configure.in: Fix sanitization start/end error.
+	* configure: Regenerate.
+end-sanitize-gdbtk
 1998-07-11  Felix Lee  <flee@cygnus.com>
 
 	* gdb.base/callfuncs.exp: add cmp10 test.
