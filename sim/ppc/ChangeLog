@@ -1,3 +1,10 @@
+Tue Nov 14 04:47:25 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in (devices.o): Update dependency.
+
+	* igen.c (gen_model_h): Use correct variable in loop.
+	(lf_print_c_semantic_function_header): Delete unused function.
+
 Mon Nov 13 09:14:13 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* igen.c ({insn,model}_table_fields): Spell mnemonic correctly.

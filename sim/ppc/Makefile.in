@@ -319,7 +319,7 @@ spreg.o: spreg.h spreg.c words.h
 
 main.o: main.c $(PSIM_H) function_unit.h itable.h options.h
 
-devices.o: devices.c devices.h $(BASICS_H) \
+devices.o: devices.c devices.h $(CPU_H) \
 	device_tree.h events.h
 
 device_tree.o: device_tree.c device_tree.h devices.h $(BASICS_H)

@@ -2268,21 +2268,6 @@ lf_print_c_semantic(lf *file,
 }
 
 static void
-lf_print_c_semantic_function_header(lf *file,
-				    char *basename,
-				    insn_bits *expanded_bits)
-{
-  lf_printf(file, "\n");
-  lf_printf(file, "STATIC_SEMANTICS unsigned_word\n");
-  lf_print_function_name(file,
-			 basename,
-			 expanded_bits,
-			 function_name_prefix_semantics);
-  lf_printf(file, "\n(%s)\n",
-	    (idecode_cache ? cache_semantic_formal : semantic_formal));
-}
-
-static void
 lf_print_c_semantic_function(lf *file,
 			     insn *instruction,
 			     insn_bits *expanded_bits,
@@ -3084,7 +3069,7 @@ gen_model_h(insn_table *table, lf *file)
   lf_printf(file, "\n");
 
   for(macro = model_macros; macro; macro = macro->next) {
-    model_c_or_h_data(table, file, insn_ptr->file_entry);
+    model_c_or_h_data(table, file, macro->file_entry);
   }
 
   lf_printf(file, "#ifndef INLINE_MODEL\n");
