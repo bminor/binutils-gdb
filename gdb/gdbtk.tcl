@@ -1981,21 +1981,8 @@ proc files_command {} {
   button .files_window.close -text Close -command {destroy .files_window}
   .files_window.list configure -selectmode single
 
-  # Get the file list from GDB, sort it, and format it as one entry per line.
-  set lastSeen {};			# Value that won't appear in
-					# list.
-  set fileList {}
-  foreach file [lsort [gdb_listfiles]] {
-    if {$file != $lastSeen} then {
-      lappend fileList $file
-      set lastSeen $file
-    }
-  }
-  set filelist [join [lsort [gdb_listfiles]] "\n"]
-
-  # Insert the file list into the widget
-
-  eval .files_window.list insert 0 $filelist
+  # Get the file list from GDB, sort it, and insert into the widget.
+  eval .files_window.list insert 0 [lsort [gdb_listfiles]]
 
   pack .files_window.close -side bottom -fill x -expand no -anchor s
   pack .files_window.scroll -side right -fill both
