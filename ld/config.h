@@ -27,12 +27,13 @@
 #define GLD960_EMULATION_NAME "gld960"
 #define LNK960_EMULATION_NAME "lnk960"
 /* Otherwise default to this emulation */
+#ifndef DEFAULT_EMULATION
 #ifdef GNU960
 #define DEFAULT_EMULATION GLD960_EMULATION_NAME
 #else
 #define DEFAULT_EMULATION GLD68K_EMULATION_NAME
 #endif
-
+#endif /* DEFAULT_EMULATION */
 
 /* Look in this variable for a target format */
 #define TARGET_ENVIRON "GNUTARGET"

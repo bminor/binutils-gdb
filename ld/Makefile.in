@@ -19,20 +19,21 @@ INSTALL_PROGRAM = $(INSTALL)
 INSTALL_FILE = $(INSTALL)
 
 BASEDIR	= ../..
-HOSTDIR = ../$(HOST)/
 INCLUDE	= $(srcdir)/../include-cygnus
 INCLUDES = -I. -I$(srcdir)  -I$(INCLUDE) 
 DEBUG	= -g
 
+SCRIPTS = ld-gld68k.script ld-gld68k-Ur.script ld-gld68k-r.script \
+	ld-gld.script ld-gld-Ur.script ld-gld-r.script ld-lnk960.script \
+	ld-lnk960-r.script ld-gld960.script
 
-#__sun3__#EXTRA_DEF=-DHOST_SYS=SUN3_SYS
-#__sun4__#EXTRA_DEF=-DHOST_SYS=SUN4_SYS
-#__dgux__#EXTRA_DEF=-DHOST_SYS=DGUX_SYS
+PROCESSED_SCRIPTS = ld-gld68k.x ld-gld68k-Ur.x ld-gld68k-r.x ld-gld.x \
+	ld-gld-Ur.x ld-gld-r.x ld-lnk960.x ld-lnk960-r.x ld-gld960.x
 
 #### target and host dependent Makefile fragments come in here.
 ###
 
-CFLAGS	= $(INCLUDES) $(EXTRA_DEF) $(DEBUG) $(CDEFINES)
+CFLAGS	= $(INCLUDES) $(DEBUG) $(HDEFINES) $(TDEFINES)
 LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF) 
 
 .SUFFIXES: .y .x .script $(SUFFIXES)
@@ -43,14 +44,10 @@ LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF)
 	$(CC) -c $(CFLAGS) ldgram.tab.c
 	mv ldgram.tab.o ldgram.o
 
-
-
-
 # go directly to ld.new in case this ld isn't capable of
 # linking native object on this host.  It can be renamed on
 # install.
-PROGS	=  $(HOSTDIR)/ld.new 
-MKSCRIPT = $(HOSTDIR)/mkscript
+LD_PROG	= ld.new
 
 .script.x:
 	mkscript < $< >$*.x
@@ -60,7 +57,7 @@ GNUTARGET=a.out-generic-big
 LDEMULATION=gld
 BFDLIB=$(srcdir)/../bfd$(subdir)/libbfd.a
 
-OBJS= ldgram.o ldlex.o ldlang.o ldmain.o ldwrite.o ldexp.o ld-lnk960.o ld-gld68k.o \
+OFILES= ldgram.o ldlex.o ldlang.o ldmain.o ldwrite.o ldexp.o ld-lnk960.o ld-gld68k.o \
 	ld-gld.o ld-gld960.o ld-emul.o ldversion.o ldmisc.o ldsym.o ld-vanilla.o ldfile.o
 
 HEADERS=config.h ldmain.h ldmain.h ldmisc.h ldsym.h ldlang.h ldexp.h \
@@ -81,50 +78,45 @@ BFDSOURCES=../../bfd/common/*.c
 SOURCES= $(LDSOURCES) $(BFDSOURCES)
 LINTSOURCES=   $(LDCSOURCES) $(BFDSOURCES) $(GENERATED_SOURCES)
 
-all: Makefile mkscript $(PROGS)
+STAGESTUFF = $(GENERATED_SOURCES) $(GENERATED_HEADERS) $(PROCESSED_SCRIPTS) $(OFILES) $(LD_PROG) mkscript
 
+all: Makefile $(PROCESSED_SCRIPTS) $(LD_PROG)
 
-
+$(PROCESSED_SCRIPTS): mkscript $(SCRIPTS)
 
 
 #$(BFDLIB): $(BFDSOURCES)
 #	(cd ../bfd; make)
 
-$(PROGS): $(OBJS) $(BFDLIB)
+$(LD_PROG): $(OFILES) $(BFDLIB)
+	$(CC) $(CFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB)
+
 #	(cd ../bfd; make)
-#	LDEMULATION=gld; export LDEMULATION;  GNUTARGET=a.out-generic-big;./ldok -format a.out-generic-big  -o ld /lib/crt0.o   $(OBJS) $(BFDLIB) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
-#	gld -o ld /lib/crt0.o   $(OBJS) $(BFDLIB) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
-	$(CC) -Bstatic -o ld.new $(OBJS) $(BFDLIB)
+#	LDEMULATION=gld; export LDEMULATION;  GNUTARGET=a.out-generic-big;./ldok -format a.out-generic-big  -o ld /lib/crt0.o   $(OFILES) $(BFDLIB) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
+#	gld -o ld /lib/crt0.o   $(OFILES) $(BFDLIB) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
+#	$(CC) -Bstatic -o ld.new $(OFILES) $(BFDLIB)
 
 
 ld1: ld.new
-	$(HOSTING_EMU); ./ld.new -o ld1 $(HOSTING_CRT0) $(OBJS) $(BFDLIB) $(HOSTING_LIBS)
+	$(HOSTING_EMU); ./ld.new -o ld1 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(HOSTING_LIBS)
 
 ld2: ld1
-	$(HOSTING_EMU); ./ld1 -o ld2 $(HOSTING_CRT0) $(OBJS) $(BFDLIB) $(HOSTING_LIBS)
+	$(HOSTING_EMU); ./ld1 -o ld2 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(HOSTING_LIBS)
 
 ld3: ld2
-	$(HOSTING_EMU); ./ld2 -o ld3 $(HOSTING_CRT0) $(OBJS) $(BFDLIB) $(HOSTING_LIBS)
+	$(HOSTING_EMU); ./ld2 -o ld3 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(HOSTING_LIBS)
 
 ld.dvi:ld.tex
 	tex ld.tex
 
-
-SCRIPTS=ld-gld68k.script ld-gld68k-Ur.script ld-gld68k-r.script ld-gld.script ld-gld-Ur.script ld-gld-r.script  ld-lnk960.script ld-lnk960-r.script ld-gld960.script 
-PROCESSED_SCRIPTS=ld-gld68k.x ld-gld68k-Ur.x ld-gld68k-r.x ld-gld.x ld-gld-Ur.x ld-gld-r.x ld-lnk960.x ld-lnk960-r.x ld-gld960.x
-
-
-$(MKSCRIPT):mkscript.c $(SCRIPTS)
-
-
+mkscript: mkscript.c
 
 ldgram.o: ldgram.y
 ldgram.tab.h:ldgram.y
 	cp y.tab.h ldgram.tab.h
 
 ld-gld.o: $(PROCESSED_SCRIPTS) ld-gld.c 
-	
-	
+
 ldlex.c: ldlex.l ldgram.tab.h
 ldlex.o: ldlex.c ldgram.tab.h
 
@@ -143,12 +135,39 @@ ldexp.o: ldexp.c ldgram.tab.h
 ldmisc.o: ldmisc.c 
 ldsym.o: ldsym.c 
 
+stage1:	force
+	- mkdir stage1
+	- mv -f $(STAGESTUFF) stage1
+	- (cd stage1 ; ln -s $(LD_PROG) ld)
 
+stage2:	force
+	- mkdir stage2
+	- mv -f $(STAGESTUFF) stage2
+	- (cd stage2 ; ln -s $(LD_PROG) ld)
+
+stage3:	force
+	- mkdir stage3
+	- mv -f $(STAGESTUFF) stage3
+	- (cd stage3 ; ln -s $(LD_PROG) ld)
+
+de-stage1: force
+	- (cd stage1 ; mv -f * ..)
+	- rm ld
+	- rmdir stage1
+
+de-stage2: force
+	- (cd stage2 ; mv -f * ..)
+	- rm ld
+	- rmdir stage2
+
+de-stage3: force
+	- (cd stage3 ; mv -f * ..)
+	- rm ld
+	- rmdir stage3
 
 clean:
-	- rm -f TAGS $(OBJS) $(GENERATED_SOURCES) $(GENERATED_HEADERS)
-	- rm -f ld ld1 ld2 ld3 ld.new
-
+	- rm -f TAGS $(OFILES) $(GENERATED_SOURCES) $(GENERATED_HEADERS)
+	- rm -f ld ld1 ld2 ld3 ld.new mkscript *.o y.output
 
 lintlog:$(SOURCES) Makefile
 	$(LINT) -abhxzn  $(LINTFLAGS)  $(LINTSOURCES) \
@@ -170,7 +189,7 @@ release:
 
 objdump:objdump.c 
 
-install: $(PROGS)
+install: $(LD_PROG)
 	$(INSTALL_PROGRAM) ld.new $(libsubdir)/ld
 
 #-----------------------------------------------------------------------------
@@ -198,8 +217,7 @@ roll:
 
 # Dummy target to force execution of dependent targets.
 #
-.force:
-FORCE:
+force:
 
 # Target to uncomment host-specific lines in this makefile.  Such lines must
 # have the following string beginning in column 1: #__<hostname>__#
