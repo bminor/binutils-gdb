@@ -350,7 +350,7 @@ tuiRefreshAll (void)
   refreshAll (winList);
   for (type = SRC_WIN; type < MAX_MAJOR_WINDOWS; type++)
     {
-      if (winList[type]->generic.isVisible)
+      if (winList[type] && winList[type]->generic.isVisible)
 	{
 	  switch (type)
 	    {
@@ -680,7 +680,7 @@ The window name specified must be valid and visible.\n");
 	  keypad (cmdWin->generic.handle, (winInfo != cmdWin));
 	}
 
-      if (dataWin->generic.isVisible)
+      if (dataWin && dataWin->generic.isVisible)
 	tuiRefreshDataWin ();
       tuiFree (bufPtr);
       printf_filtered ("Focus set to %s window.\n",

@@ -417,8 +417,9 @@ _hasBreak (char *sourceFileName, int lineNo)
        (bp != (struct breakpoint *) NULL &&
 	bpWithBreak == (struct breakpoint *) NULL);
        bp = bp->next)
-    if ((strcmp (sourceFileName, bp->source_file) == 0) &&
-	(lineNo == bp->line_number))
+    if (bp->source_file
+	&& (strcmp (sourceFileName, bp->source_file) == 0)
+	&& (lineNo == bp->line_number))
       bpWithBreak = bp;
 
   return bpWithBreak;

@@ -370,7 +370,7 @@ refreshAll (TuiWinInfoPtr * list)
 
   for (type = SRC_WIN; (type < MAX_MAJOR_WINDOWS); type++)
     {
-      if (list[type]->generic.isVisible)
+      if (list[type] && list[type]->generic.isVisible)
 	{
 	  if (type == SRC_WIN || type == DISASSEM_WIN)
 	    {

@@ -1,5 +1,15 @@
 2001-07-16  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
+	* tuiStack.c: Add missing includes.
+	(tuiShowFrameInfo): Don't crash when there is no symbol table 
+	associated with the pc.
+	* tuiSource.c (_hasBreak): Check for null source file.
+	* tuiWin.c (tuiRefreshAll): Check for null winList[type].
+	(_tuiSetFocus): Check for null dataWin.
+	* tuiGeneralWin.c (refreshAll): Check for null list[type].
+
+2001-07-16  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
 	* tuiDisassem.c (tuiSetDisassemContent): Use tm_print_insn_info
 	to disassemble in the curses window.
 	

@@ -23,10 +23,13 @@
 #include "symtab.h"
 #include "breakpoint.h"
 #include "frame.h"
+#include "command.h"
 
 #include "tui.h"
 #include "tuiData.h"
 #include "tuiStack.h"
+#include "tuiGeneralWin.h"
+#include "tuiSource.h"
 #include "tuiSourceWin.h"
 
 
@@ -330,6 +333,9 @@ tuiShowFrameInfo (struct frame_info *fi)
 
 
       s = find_pc_symtab (fi->pc);
+      if (s == 0)
+        return;
+
       sourceAlreadyDisplayed = tuiSourceIsDisplayed (s->filename);
       tuiUpdateLocatorDisplay (fi);
       for (i = 0; i < (sourceWindows ())->count; i++)
