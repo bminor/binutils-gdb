@@ -1,5 +1,5 @@
 /* ELF core file support for BFD.
-   Copyright  1995 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -21,27 +21,51 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifdef HAVE_SYS_PROCFS_H		/* Some core file support requires host /proc files */
 #include <signal.h>
 #include <sys/procfs.h>
+
+/* Solaris includes the field pr_who that indicates the thread number within
+   the process.  */
+
+#ifdef PIOCOPENLWP
+#define get_thread(STATUS) ((((prstatus_t *)(STATUS))->pr_who << 16) \
+			    | ((prstatus_t *)(STATUS))->pr_pid)
+#else
+#define get_thread(STATUS) (((prstatus_t *)(STATUS))->pr_pid)
+#endif
 #else
 #define bfd_prstatus(abfd, descdata, descsz, filepos) true
 #define bfd_fpregset(abfd, descdata, descsz, filepos) true
 #define bfd_prpsinfo(abfd, descdata, descsz, filepos) true
+#define get_thread(STATUS) (1)
 #endif
 
 #ifdef HAVE_SYS_PROCFS_H
 
+static int did_reg;
+static int did_reg2;
+
 static boolean
-bfd_prstatus (abfd, descdata, descsz, filepos)
+bfd_prstatus (abfd, descdata, descsz, filepos, thread)
      bfd *abfd;
      char *descdata;
      int descsz;
      long filepos;
+     int thread;
 {
   asection *newsect;
   prstatus_t *status = (prstatus_t *) 0;
 
   if (descsz == sizeof (prstatus_t))
     {
-      newsect = bfd_make_section (abfd, ".reg");
+      char secname[100];
+      char *p;
+
+      sprintf (secname, ".reg/%d", thread);
+      p = bfd_alloc (abfd, strlen (secname) + 1);
+      if (!p)
+	return false;
+      strcpy (p, secname);
+      
+      newsect = bfd_make_section (abfd, p);
       if (newsect == NULL)
 	return false;
       newsect->_raw_size = sizeof (status->pr_reg);
@@ -51,6 +75,19 @@ bfd_prstatus (abfd, descdata, descsz, filepos)
       if ((core_prstatus (abfd) = bfd_alloc (abfd, descsz)) != NULL)
 	{
 	  memcpy (core_prstatus (abfd), descdata, descsz);
+	}
+
+      if (!did_reg++)
+	{
+	  asection *regsect;
+
+	  regsect = bfd_make_section (abfd, ".reg");
+	  if (regsect == NULL)
+	    return false;
+	  regsect->_raw_size = newsect->_raw_size;
+	  regsect->filepos = newsect->filepos;
+	  regsect->flags = newsect->flags;
+	  regsect->alignment_power = newsect->alignment_power;
 	}
     }
   return true;
@@ -75,21 +112,44 @@ bfd_prpsinfo (abfd, descdata, descsz, filepos)
 }
 
 static boolean
-bfd_fpregset (abfd, descdata, descsz, filepos)
+bfd_fpregset (abfd, descdata, descsz, filepos, thread)
      bfd *abfd;
      char *descdata;
      int descsz;
      long filepos;
+     int thread;
 {
   asection *newsect;
+  char secname[100];
+  char *p;
 
-  newsect = bfd_make_section (abfd, ".reg2");
+  sprintf (secname, ".reg2/%d", thread);
+  p = bfd_alloc (abfd, strlen (secname) + 1);
+  if (!p)
+    return false;
+  strcpy (p, secname);
+
+  newsect = bfd_make_section (abfd, p);
   if (newsect == NULL)
     return false;
   newsect->_raw_size = descsz;
   newsect->filepos = filepos;
   newsect->flags = SEC_HAS_CONTENTS;
   newsect->alignment_power = 2;
+
+  if (!did_reg2++)
+    {
+      asection *regsect;
+
+      regsect = bfd_make_section (abfd, ".reg2");
+      if (regsect == NULL)
+	return false;
+      regsect->_raw_size = newsect->_raw_size;
+      regsect->filepos = newsect->filepos;
+      regsect->flags = newsect->flags;
+      regsect->alignment_power = newsect->alignment_power;
+    }
+
   return true;
 }
 
@@ -237,6 +297,10 @@ elf_corefile_note (abfd, hdr)
   char *sectname;		/* Name to use for new section */
   long filepos;			/* File offset to descriptor data */
   asection *newsect;
+  int thread = 1;		/* Current thread number */
+
+  did_reg = 0;			/* Non-zero if we made .reg section */
+  did_reg2 = 0;			/* Ditto for .reg2 */
 
   if (hdr->p_filesz > 0
       && (buf = (char *) bfd_malloc ((size_t) hdr->p_filesz)) != NULL
@@ -256,15 +320,18 @@ elf_corefile_note (abfd, hdr)
 	    {
 	    case NT_PRSTATUS:
 	      /* process descdata as prstatus info */
-	      if (! bfd_prstatus (abfd, descdata, i_note.descsz, filepos))
+	      thread = get_thread (descdata);
+	      if (! bfd_prstatus (abfd, descdata, i_note.descsz, filepos,
+				  thread))
 		return false;
-	      sectname = ".prstatus";
+	      sectname = NULL;
 	      break;
 	    case NT_FPREGSET:
 	      /* process descdata as fpregset info */
-	      if (! bfd_fpregset (abfd, descdata, i_note.descsz, filepos))
+	      if (! bfd_fpregset (abfd, descdata, i_note.descsz, filepos,
+				  thread))
 		return false;
-	      sectname = ".fpregset";
+	      sectname = NULL;
 	      break;
 	    case NT_PRPSINFO:
 	      /* process descdata as prpsinfo */
