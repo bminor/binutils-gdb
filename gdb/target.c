@@ -3063,9 +3063,11 @@ static void
 do_monitor_command (char *cmd,
 		 int from_tty)
 {
-  if ((current_target.to_rcmd == (void*) tcomplain)
+  if ((current_target.to_rcmd
+       == (void (*) (char *, struct ui_file *)) tcomplain)
       || (current_target.to_rcmd == debug_to_rcmd
-	  && (debug_target.to_rcmd == (void*) tcomplain)))
+	  && (debug_target.to_rcmd
+	      == (void (*) (char *, struct ui_file *)) tcomplain)))
     {
       error ("\"monitor\" command not supported by this target.\n");
     }
