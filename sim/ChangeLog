@@ -1,3 +1,14 @@
+Fri Oct 11 21:13:43 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* configure.in: Only build the V850 simulator if
+	we are using gcc.
+	* configure: Rebuild.
+
+Sun Sep  8 17:22:50 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Do build erc32 for DOS and Windows hosts.
+	* configure: Rebuild.
+
 Wed Sep  4 18:11:27 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* Makefile.in erc32/Makefile.in:  Don't set srcroot.  This should

@@ -63,7 +63,15 @@ case "${target}" in
   powerpc*-*-eabi* | powerpc*-*-solaris* | powerpc*-*-sysv4* | powerpc*-*-elf* )
 			if test x"$powerpc_sim" = x"yes"; then sim_target=ppc; fi ;;
 # start-sanitize-v850
-  v850-*-*)		sim_target=v850 ;;
+  v850-*-*)
+				# The V850 simulator can only be compiled
+				# by gcc.
+				if test "${GCC}" = "yes"; then
+				  sim_target=v850
+				else
+				  sim_target=none
+				fi
+				;;
 # end-sanitize-v850
   w65-*-*)		sim_target=w65 ;;
   z8k*-*-*)		sim_target=z8k ;;
