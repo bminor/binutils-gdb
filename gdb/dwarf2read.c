@@ -687,6 +687,8 @@ static void free_die_list PARAMS ((struct die_info *));
 
 static void process_die PARAMS ((struct die_info *, struct objfile *));
 
+static char *dwarf2_linkage_name PARAMS ((struct die_info *));
+
 static char *dwarf_tag_name PARAMS ((unsigned int));
 
 static char *dwarf_attr_name PARAMS ((unsigned int));
@@ -1511,13 +1513,9 @@ read_func_scope (die, objfile)
   CORE_ADDR highpc;
   struct die_info *child_die;
   struct attribute *attr;
-  char *name = NULL;
+  char *name;
 
-  attr = dwarf_attr (die, DW_AT_name);
-  if (attr)
-    {
-      name = DW_STRING (attr);
-    }
+  name = dwarf2_linkage_name (die);
 
   /* Ignore functions with missing or empty names and functions with
      missing or invalid low and high pc attributes.  */
@@ -1788,24 +1786,21 @@ dwarf2_add_field (fip, die, objfile)
     }
   else if (die->tag == DW_TAG_variable)
     {
-      char *physname = "";
+      char *physname;
+      char *cp;
 
       /* C++ static member.
 	 Get physical name, extract field name from physical name.  */
-      attr = dwarf_attr (die, DW_AT_name);
-      if (attr && DW_STRING (attr))
-	{
-	  char *cp;
+      physname = dwarf2_linkage_name (die);
+      if (physname == NULL)
+	return;
 
-	  physname = DW_STRING (attr);
-
-	  cp = physname;
-	  while (*cp && !is_cplus_marker (*cp))
-	    cp++;
-	  if (*cp)
-	    fieldname = cp + 1;
-	}
-      if (*physname == '\0' || *fieldname == '\0')
+      cp = physname;
+      while (*cp && !is_cplus_marker (*cp))
+	cp++;
+      if (*cp)
+	fieldname = cp + 1;
+      if (*fieldname == '\0')
 	{
 	  complain (&dwarf2_bad_static_member_name, physname);
 	}
@@ -1964,15 +1959,13 @@ dwarf2_add_member_fn (fip, die, type, objfile)
   int i;
   struct fn_field *fnp;
   char *fieldname;
-  char *physname = "";
+  char *physname;
   struct nextfnfield *new_fnfield;
 
   /* Extract member function name from mangled name.  */
-  attr = dwarf_attr (die, DW_AT_name);
-  if (attr && DW_STRING (attr))
-    {
-      physname = DW_STRING (attr);
-    }
+  physname = dwarf2_linkage_name (die);
+  if (physname == NULL)
+    return;
   if ((physname[0] == '_' && physname[1] == '_'
         && strchr ("0123456789Qt", physname[2]))
       || DESTRUCTOR_PREFIX_P (physname))
@@ -2049,7 +2042,8 @@ dwarf2_add_member_fn (fip, die, type, objfile)
 
   /* Fill in the member function field info.  */
   fnp = &new_fnfield->fnfield;
-  fnp->physname = physname;
+  fnp->physname = obsavestring (physname, strlen (physname),
+				&objfile->type_obstack);
   fnp->type = alloc_type (objfile);
   if (die->type && TYPE_CODE (die->type) == TYPE_CODE_FUNC)
     {
@@ -3176,6 +3170,12 @@ read_partial_die (part_die, abfd, info_ptr, has_pc_info)
       switch (attr.name)
 	{
 	case DW_AT_name:
+
+	  /* Prefer DW_AT_MIPS_linkage_name over DW_AT_name.  */
+	  if (part_die->name == NULL)
+	    part_die->name = DW_STRING (&attr);
+	  break;
+	case DW_AT_MIPS_linkage_name:
 	  part_die->name = DW_STRING (&attr);
 	  break;
 	case DW_AT_low_pc:
@@ -4005,19 +4005,19 @@ new_symbol (die, type, objfile)
      struct objfile *objfile;
 {
   struct symbol *sym = NULL;
+  char *name;
   struct attribute *attr = NULL;
   struct attribute *attr2 = NULL;
   CORE_ADDR addr;
 
-  attr = dwarf_attr (die, DW_AT_name);
-  if (attr && DW_STRING (attr))
+  name = dwarf2_linkage_name (die);
+  if (name)
     {
       sym = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
 					     sizeof (struct symbol));
       OBJSTAT (objfile, n_syms++);
       memset (sym, 0, sizeof (struct symbol));
-      SYMBOL_NAME (sym) = obsavestring (DW_STRING (attr),
-					strlen (DW_STRING (attr)),
+      SYMBOL_NAME (sym) = obsavestring (name, strlen (name),
 					&objfile->symbol_obstack);
 
       /* Default assumptions.
@@ -4612,6 +4612,23 @@ sibling_die (die)
 	  return die;
 	}
     }
+}
+
+/* Get linkage name of a die, return NULL if not found.  */
+
+static char *
+dwarf2_linkage_name (die)
+     struct die_info *die;
+{
+  struct attribute *attr;
+
+  attr = dwarf_attr (die, DW_AT_MIPS_linkage_name);
+  if (attr && DW_STRING (attr))
+    return DW_STRING (attr);
+  attr = dwarf_attr (die, DW_AT_name);
+  if (attr && DW_STRING (attr))
+    return DW_STRING (attr);
+  return NULL;
 }
 
 /* Convert a DIE tag into its string name.  */
