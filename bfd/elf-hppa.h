@@ -1012,10 +1012,6 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
    The list will be deleted eventually.
 
    27210 R_PARISC_SEGREL32
-   6675 R_PARISC_FPTR64
-   3974 R_PARISC_DIR64
-   1584 R_PARISC_LTOFF_FPTR14DR
-   1565 R_PARISC_LTOFF_FPTR21L
    1120 R_PARISC_PCREL64
    1096 R_PARISC_LTOFF_TP14DR
    982 R_PARISC_LTOFF_TP21L
@@ -1067,6 +1063,14 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
     case R_PARISC_DLTIND14DR:
     case R_PARISC_DLTIND14WR:
     case R_PARISC_DLTIND21L:
+    case R_PARISC_LTOFF_FPTR14R:
+    case R_PARISC_LTOFF_FPTR14DR:
+    case R_PARISC_LTOFF_FPTR14WR:
+    case R_PARISC_LTOFF_FPTR21L:
+    case R_PARISC_LTOFF_FPTR16F:
+    case R_PARISC_LTOFF_FPTR16WF:
+    case R_PARISC_LTOFF_FPTR16DF:
+
       {
 	/* We want the value of the DLT offset for this symbol, not
 	   the symbol's actual address.  */
@@ -1075,8 +1079,12 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	/* All DLTIND relocations are basically the same at this point,
 	   except that we need different field selectors for the 21bit
 	   version vs the 14bit versions.  */
-	if (r_type == R_PARISC_DLTIND21L)
+	if (r_type == R_PARISC_DLTIND21L
+	    || r_type == R_PARISC_LTOFF_FPTR21L)
 	  value = hppa_field_adjust (value, addend, e_lrsel);
+	else if (r_type == R_PARISC_LTOFF_FPTR16F
+		 || R_PARISC_LTOFF_FPTR16WF)
+	  value = hppa_field_adjust (value, addend, e_fsel);
 	else
 	  value = hppa_field_adjust (value, addend, e_rrsel);
 
@@ -1104,6 +1112,38 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 	insn = elf_hppa_relocate_insn (insn, value, r_type);
 	break;
       }
+
+    case R_PARISC_LTOFF_FPTR32:
+      {
+	/* We want the value of the DLT offset for this symbol, not
+	   the symbol's actual address.  */
+	value = dyn_h->dlt_offset + hppa_info->dlt_sec->output_offset;
+	bfd_put_32 (input_bfd, value, hit_data);
+	return bfd_reloc_ok;
+      }
+
+
+    case R_PARISC_LTOFF_FPTR64:
+      {
+	/* We want the value of the DLT offset for this symbol, not
+	   the symbol's actual address.  */
+	value = dyn_h->dlt_offset + hppa_info->dlt_sec->output_offset;
+	bfd_put_64 (input_bfd, value, hit_data);
+	return bfd_reloc_ok;
+      }
+
+    case R_PARISC_DIR32:
+      bfd_put_32 (input_bfd, value, hit_data);
+      return bfd_reloc_ok;
+
+    case R_PARISC_DIR64:
+      bfd_put_64 (input_bfd, value, hit_data);
+      return bfd_reloc_ok;
+
+    /* These do not require any work here.  They are simply passed
+       through as dynamic relocations.  */
+    case R_PARISC_FPTR64:
+      return bfd_reloc_ok;
 
     /* Something we don't know how to handle.  */
     default:
@@ -1186,6 +1226,7 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     /* ADDIL or LDIL instructions.  */
     case R_PARISC_DLTREL21L:
     case R_PARISC_DLTIND21L:
+    case R_PARISC_LTOFF_FPTR21L:
       {
         int w;
 
@@ -1204,6 +1245,8 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DLTREL14F:
     case R_PARISC_DLTIND14R:
     case R_PARISC_DLTIND14F:
+    case R_PARISC_LTOFF_FPTR14R:
+    case R_PARISC_LTOFF_FPTR16F:
       {
         int w;
 
@@ -1220,6 +1263,8 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     /* Doubleword loads and stores with a 14bit displacement.  */
     case R_PARISC_DLTREL14DR:
     case R_PARISC_DLTIND14DR:
+    case R_PARISC_LTOFF_FPTR14DR:
+    case R_PARISC_LTOFF_FPTR16DF:
       {
         int w;
 
@@ -1242,6 +1287,8 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     /* Floating point single word load/store instructions.  */
     case R_PARISC_DLTREL14WR:
     case R_PARISC_DLTIND14WR:
+    case R_PARISC_LTOFF_FPTR14WR:
+    case R_PARISC_LTOFF_FPTR16WF:
       {
         int w;
 
