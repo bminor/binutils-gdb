@@ -1,3 +1,12 @@
+2001-02-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/sparc/sp64linux.mt: New file.
+	* configure.tgt: Recognize sparc64-*-linux* as a sp64linux target.
+	* configure.host: Recognize sparc64-*-linux* as a linux host.
+
+	From 2000-03-17 Jakub Jelinek <jakub@redhat.com>:
+	* config/sparc/tm-sp64linux.h: New file.
+	
 2001-02-24  Kevin Buettner  <kevinb@redhat.com>
 
 	* buildsym.c (push_subfile, pop_subfile): Replace call to abort()

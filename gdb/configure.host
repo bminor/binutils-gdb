@@ -150,6 +150,7 @@ sparc-*-solaris2*)	gdb_host=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_host=sun4os4 ;;
 sparc-*-sunos5*)	gdb_host=sun4sol2 ;;
 sparc-*-*)		gdb_host=sun4os4 ;;
+sparc64-*-linux*)	gdb_host=linux ;;
 sparc64-*-*)		gdb_host=sun4sol2 ;;
 
 strongarm-*-*)		gdb_host=arm ;;
