@@ -327,7 +327,7 @@ struct elf_backend_data
     PARAMS ((bfd *output_bfd, struct bfd_link_info *info,
 	     bfd *input_bfd, asection *input_section, bfd_byte *contents,
 	     Elf_Internal_Rela *relocs, Elf_Internal_Sym *local_syms,
-	     asection **local_sections));
+	     asection **local_sections, char *output_names));
 
   /* The FINISH_DYNAMIC_SYMBOL function is called by the ELF backend
      linker just before it writes a symbol out to the .dynsym section.
