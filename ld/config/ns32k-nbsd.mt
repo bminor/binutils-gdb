@@ -1,0 +1,1 @@
+EMUL=ns32knbsd

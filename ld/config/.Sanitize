@@ -50,6 +50,7 @@ i386-go32.mt
 i386-linux.mt
 i386-lynx.mt
 i386-mach.mt
+i386-nbsd.mt
 i386-nw.mt
 i386bsd.mh
 i386sco.mh
@@ -75,6 +76,7 @@ mipsl-elf32.mt
 mipsl-idt.mt
 mips-lit.mt
 news.mt
+ns32k-nbsd.mt
 ose68.mt
 ppc-elf32.mt
 ppc-nw.mt
@@ -84,6 +86,7 @@ solaris2.mh
 sparc64-elf.mt
 sparc-ll.mh
 sparc-lynx.mt
+sparc-nbsd.mt
 st2000.mt
 sun3.mh
 sun3.mt

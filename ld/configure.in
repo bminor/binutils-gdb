@@ -49,6 +49,7 @@ case "${targ}" in
   sparc64*)		ld_target=sun4 ;;
   sparc*-*-elf)		ld_target=sun4sol2 ;;
   sparc*-*-lynxos*)	ld_target=sparc-lynx ;;
+  sparc*-*-netbsd*)	ld_target=sparc-nbsd ;;
   sparc*-*-solaris2*)	ld_target=sun4sol2 ;;
   sparc*-wrs-vxworks*)  ld_target=sun4 ;;
   i960-wrs-vxworks5.0*) ld_target=i960 ;;
@@ -73,6 +74,7 @@ case "${targ}" in
   i[345]86-*-linux*)	ld_target=i386-linux ;;
   i[345]86-*-sysv4*)	ld_target=i386-elf ;;
   i[345]86-*-unixware)	ld_target=i386-elf ;;
+  i[345]86-*-netbsd*)	ld_target=i386-nbsd ;;
   i[345]86-*-netware)	ld_target=i386-nw ;;
   i[345]86-*-elf*)	ld_target=i386-elf ;;
   i[345]86-*-sysv*)	ld_target=i386-coff ;;
@@ -110,7 +112,7 @@ case "${targ}" in
   alpha-*-netware*)	ld_target=alpha ;;
   z8k-*-sim | z8k-*-coff) ld_target=z8ksim ;;
   ns32k-pc532-mach)	ld_target=pc532mach ;;
-  ns32k-pc532-netbsd*)  ld_target=netbsd532 ;;
+  ns32k-pc532-netbsd*)  ld_target=ns32k-nbsd ;;
   powerpc-*-elf*)	ld_target=ppc-elf32 ;;
   powerpc-*-netware*)	ld_target=ppc-nw ;;
   *-*-aout)		ld_target=${target_cpu}-${target_vendor} ;;

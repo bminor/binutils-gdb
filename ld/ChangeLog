@@ -1,3 +1,17 @@
+Wed Oct 26 13:59:12 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* Makefile.in (ALL_EMULATIONS): Added ei386nbsd.o, ens32knbsd.o 
+	  and esparcnbsd.o; sorted entries.
+          (ei386nbsd.c,ens32knbsd.c,esparcnbsd.c): New targets.
+
+	* config/netbsd532.mt: Removed.
+	* emulparams/netbsd532.sh: Removed.
+
+	* config/{i386-nbsd.mt,ns32k-nbsd.mt,sparc-nbsd.mt}: New files.
+	* emulparams/{i386nbsd.sh,ns32knbsd.sh,sparcnbsd.sh}: New files.
+	* configure.in (i[345]86-*-netbsd*, ns32k-pc532-netbsd*, 
+	  sparc*-*-netbsd*): Use above configs.
+
 Tue Oct 25 11:47:10 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* ldmain.c (multiple_common): One of the types may now be

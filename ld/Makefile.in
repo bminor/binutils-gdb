@@ -57,6 +57,7 @@ INSTALL_XFORM1 = $(INSTALL_XFORM) -b=.1
 
 AR = ar
 AR_FLAGS = qv
+CC = cc
 CFLAGS = -g
 MAKEINFO = makeinfo
 TEXI2DVI = texi2dvi
@@ -107,36 +108,58 @@ HOSTING_CRT0 = /lib/crt0.o
 HOSTING_LIBS = `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else gcc -print-libgcc-file-name; fi`  -lc
 HOSTING_EMU = -m $(EMUL)
 
-CXX = `if [ -f ../gcc/xgcc ] ; then \
-	        echo ../gcc/xgcc -B../gcc/; \
-	    else echo gcc; \
-	    fi`
-CXXFLAGS = -fgnu-linker
-
+# These were used by `make check-cdtest'
+#
+#CXX = `if [ -f ../gcc/xgcc ] ; then \
+#	        echo ../gcc/xgcc -B../gcc/; \
+#	    else echo gcc; \
+#	    fi`
+#CXXFLAGS = -fgnu-linker
+#
 # FIX_ME: using ../gcc/xgcc breaks the cdtest. 
-CXX = g++
+#CXX = g++
 
 # Setup the testing framework, if you have one
-EXPECT = `if [ -f $${rootme}/../../expect/expect ] ; then \
-          echo $${rootme}/../../expect/expect ; \
-          else echo expect ; fi`
+EXPECT = `if [ -f $$r/../expect/expect ] ; \
+	then echo $$r/../expect/expect ; \
+	else echo expect ; fi`
 
-RUNTEST = `if [ -f $${srcdir}/../../dejagnu/runtest ] ; then \
-           echo $${srcdir}/../../dejagnu/runtest ; \
-           else echo runtest ;  fi`
+RUNTEST = `if [ -f $${srcroot}/../dejagnu/runtest ] ; \
+	then echo $${srcroot}/../dejagnu/runtest ; \
+	else echo runtest ; fi`
+
 RUNTESTFLAGS =
-RUNTEST_CC = `if [ -f ../gcc/xgcc ] ; then \
-	       echo ../gcc/xgcc -B../gcc/; \
-	    else echo gcc; \
-	    fi`
-RUNTEST_CFLAGS = $(CFLAGS)
-RUNTEST_CXX = `if [ -f ../gcc/xgcc ] ; then \
-	        echo ../gcc/xgcc -B../gcc/; \
-	    else echo gcc; \
-	    fi`
-# FIX_ME: using ../gcc/xgcc breaks the cdtest. 
-RUNTEST_CXX = $(CXX)
-RUNTEST_CXXFLAGS = $(CXXFLAGS)
+
+CC_FOR_TARGET = ` \
+  if [ -f $$r/../gcc/Makefile ] ; then \
+    if [ -f $$r/../newlib/Makefile ] ; then \
+      echo $$r/../gcc/xgcc -B$$r/../gcc/ -idirafter $$r/../newlib/targ-include -idirafter $${srcroot}/../newlib/libc/include -nostdinc; \
+    else \
+      echo $$r/../gcc/xgcc -B$$r/../gcc/; \
+    fi; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(CC); \
+    else \
+      t='$(program_transform_name)'; echo gcc | sed -e 's/brokensed/brokensed/' $$t; \
+    fi; \
+  fi`
+
+CXX = gcc
+CXX_FOR_TARGET = ` \
+  if [ -f $$r/../gcc/Makefile ] ; then \
+    if [ -f $$r/../newlib/Makefile ] ; then \
+      echo $$r/../gcc/xgcc -B$$r/../gcc/ -idirafter $$r/../newlib/targ-include -idirafter $${srcroot}/../newlib/libc/include -nostdinc; \
+    else \
+      echo $$r/../gcc/xgcc -B$$r/../gcc/; \
+    fi; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(CXX); \
+    else \
+      t='$(program_transform_name)'; echo gcc | sed -e 's/brokensed/brokensed/' $$t; \
+    fi; \
+  fi`
 
 # go directly to ld.new in case this ld isn't capable of
 # linking native object on this host.  It can be renamed on
@@ -151,16 +174,16 @@ all: $(LD_PROG)
 
 LINTFLAGS = $(INCLUDES) $(EXTRA_DEF) 
 
-# The .cc suffix is used by `make check'.
+# The .cc suffix was used by `make check-cdtest'.
 
 .SUFFIXES: .y $(SUFFIXES) .cc
 
 # Suppress smart makes who think they know how to automake Yacc files
 .y.c:
 
-# This rule is used for the check-cdtest target.
-.cc.o:
-	$(CXX) -c -I$(srcdir) $(CXXFLAGS) $(CFLAGS) $<
+# This rule was used for the check-cdtest target.
+#.cc.o:
+#	$(CXX) -c -I$(srcdir) $(CXXFLAGS) $(CFLAGS) $<
 
 ALL_CFLAGS = $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(CFLAGS)
 .c.o:
@@ -170,17 +193,18 @@ ALL_CFLAGS = $(INCLUDES) $(HDEFINES) $(TDEFINES) $(CDEFINES) $(CFLAGS)
 BFDLIB = ../bfd/libbfd.a
 LIBIBERTY = ../libiberty/libiberty.a
 
-ALL_EMULATIONS = elnk960.o esun3.o ei386aout.o ego32.o evsta.o \
-	em88kbcs.o ea29k.o enews.o ehp300bsd.o ehp3hpux.o \
-	eh8300.o eh8300h.o eebmon29k.o esun4.o egld960.o \
-	em68kcoff.o est2000.o esa29200.o ei386mach.o \
-	evanilla.o ei386coff.o ez8ksim.o emipslit.o ei386bsd.o \
-	emipsbig.o emipsbsd.o emipsidt.o evax.o eh8500.o \
-	eh8500b.o eh8500s.o eh8500c.o eh8500m.o \
-	ehppaelf.o emipsidtl.o esh.o eelf_i386.o ealpha.o \
-	ei386lynx.o em68klynx.o esparclynx.o ecoff_sparc.o \
-	eelf32ppc.o ei386go32.o em68kaout.o ei386linux.o \
-	eelf32_sparc.o eelf64_sparc.o eriscix.o eelf32mipb.o eelf32mipl.o
+ALL_EMULATIONS = ea29k.o ealpha.o ecoff_sparc.o eebmon29k.o \
+	eelf32_sparc.o eelf32bmip.o eelf32lmip.o eelf32ppc.o \
+	eelf64_sparc.o eelf_i386.o egld960.o ego32.o eh8300.o \
+	eh8300h.o eh8500.o eh8500b.o eh8500c.o eh8500m.o eh8500s.o \
+	ehp300bsd.o ehp3hpux.o ehppaelf.o ei386aout.o ei386bsd.o \
+	ei386coff.o ei386go32.o ei386linux.o ei386lynx.o ei386mach.o \
+	ei386nbsd.c ei386nw.o elnk960.o em68kaout.o em68kcoff.o \
+	em68klynx.o em88kbcs.o emipsbig.o emipsbsd.o emipsidt.o \
+	emipsidtl.o emipslit.o enews.o ens32knbsd.c eppcnw.o \
+	eriscix.o esa29200.o esh.o esparclynx.o esparcnbsd.c \
+	est2000.o esun3.o esun4.o evanilla.o evax.o evsta.o \
+	ez8ksim.o
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
@@ -204,10 +228,14 @@ STAGESTUFF = *.o ldscripts/* e*.c
 info: ld.info
 .PHONY: info
 
-ldgram.h ldgram.c: ldgram.y
+ldgram.c: ldgram.y
 	$(BISON) $(BISONFLAGS) -d $(srcdir)/ldgram.y
 	mv -f y.tab.c ldgram.c
 	mv -f y.tab.h ldgram.h
+
+# Separate from ldgram.c so that a parallel make doesn't try to build
+# both ldgram.c and ldgram.h simultaneously.
+ldgram.h: ldgram.c
 
 # EMUL is the name of a file in the emulparams subdir, without the .sh.
 ldmain.o: ldmain.c config.status
@@ -370,12 +398,12 @@ emipsidtl.c: $(srcdir)/emulparams/mipsidtl.sh \
 eelf_i386.c: $(srcdir)/emulparams/elf_i386.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386
-eelf32mipb.c: $(srcdir)/emulparams/elf32mipb.sh \
+eelf32bmip.c: $(srcdir)/emulparams/elf32bmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} elf32mipb
-eelf32mipl.c: $(srcdir)/emulparams/elf32mipl.sh \
+	${GENSCRIPTS} elf32bmip
+eelf32lmip.c: $(srcdir)/emulparams/elf32lmip.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} elf32mipl
+	${GENSCRIPTS} elf32lmip
 ealpha.c: $(srcdir)/emulparams/alpha.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/alpha.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} alpha
@@ -408,9 +436,22 @@ epc532machaout.c: $(srcdir)/emulparams/pc532machaout.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} pc532machaout
 
-enetbsd532.c: $(srcdir)/emulparams/netbsd532.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} netbsd532
+ei386nw.c:	$(srcdir)/emulparams/i386nw.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/nw.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} i386nw
+eppcnw.c:	$(srcdir)/emulparams/ppcnw.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/nw.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} ppcnw
+
+ei386nbsd.c:	$(srcdir)/emulparams/i386nbsd.sh \
+  $(srcdir)/emultmpl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} i386nbsd
+ens32knbsd.c:	$(srcdir)/emulparams/ns32knbsd.sh \
+  $(srcdir)/emultmpl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} ns32knbsd
+esparcnbsd.c:	$(srcdir)/emulparams/sparcnbsd.sh \
+  $(srcdir)/emultmpl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} sparcnbsd
 
 $(LD_PROG): $(OFILES) $(BFDLIB) $(LIBIBERTY)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $(LD_PROG) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(EXTRALIBS)
@@ -422,19 +463,8 @@ $(EMULATION_OFILES): ../bfd/bfd.h ../bfd/sysdep.h $(INCDIR)/bfdlink.h \
 
 # These targets are for the dejagnu testsuites. The file site.exp 
 # contains global variables that all the testsuites will use.
-# There is a current debate as to how and where to generate test
-# outputs. Rob feels each test should be built in $(objdir) with
-# a unique name. Cassidy feels that we should create a directory
-# called $(objdir)/tmpdir and do the work there. This way, there
-# is no potential conflict with existing objects, ie: as there
-# was in the past with loop.o and flow.o, and, there is no chance
-# of filling /tmp, which would cause other problems. Lastly, this 
-# allow retention of the testcase name making debugging easier.
-#
-testdir = $(objdir)/tmpdir
 
 site.exp: ./config.status Makefile
-	@if [ -d $(testdir) ]; then true; else mkdir $(testdir); fi
 	@echo "Making a new config file..."
 	@rm -f ./tmp?
 	@touch site.exp
@@ -455,9 +485,8 @@ site.exp: ./config.status Makefile
 	@echo "set target_triplet $(target_canonical)" >> ./tmp0
 	@echo "# DIRECTORY INFO" >> ./tmp0
 	@echo "set objdir `pwd`" >> ./tmp0
-	@echo "set tmpdir `cd $(testdir); pwd`" >> ./tmp0
 	@echo "" >> ./tmp0	
-	@echo "# LD DEPENDANCIES" >> ./tmp0	
+	@echo "# LD DEPENDENCIES" >> ./tmp0	
 	@echo "set OFILES \"$(OFILES)\"" >> ./tmp0
 	@echo "set BFDLIB \"$(BFDLIB)\"" >> ./tmp0
 	@echo "set LIBIBERTY \"$(LIBIBERTY)\"" >> ./tmp0
@@ -472,26 +501,22 @@ site.exp: ./config.status Makefile
 	-@rm -f ./tmp?
 
 check: site.exp
-	@if [ $(host_canonical) = $(target_canonical) ]; then \
-	        rootme=`pwd`; export rootme; \
-	        srcdir=${srcdir} ; export srcdir ; \
-	        EXPECT=${EXPECT} ; export EXPECT ; \
-	        if [ -f $${rootme}/../expect/expect ] ; then  \
-	           TCL_LIBRARY=$${srcdir}/../tcl/library ; \
-	           export TCL_LIBRARY ; fi ; \
-		$(RUNTEST) --tool ld \
-		--srcdir $(srcdir)/testsuite $(RUNTESTFLAGS) \
-		CC="$(RUNTEST_CC)" CFLAGS="$(RUNTEST_CFLAGS)" \
-		CXX="$(RUNTEST_CXX)" CXXFLAGS="$(RUNTEST_CXXFLAGS)" ;\
-		if [ $$? != 0 ]; then exit 1; else true; fi ;\
-	else \
-		echo No cross-linker tests yet. ;\
-	fi
+	r=`pwd`; export r; \
+	srcroot=`cd ${srcdir}; pwd` ; export srcroot ; \
+	EXPECT=${EXPECT} ; export EXPECT ; \
+	if [ -f $$r/../expect/expect ] ; then  \
+	   TCL_LIBRARY=$${srcroot}/../tcl/library ; \
+	   export TCL_LIBRARY ; fi ; \
+	$(RUNTEST) --tool ld --srcdir $(srcdir)/testsuite $(RUNTESTFLAGS) \
+	  CC="$(CC_FOR_TARGET)" CFLAGS="$(CFLAGS)" \
+	  CXX="$(CXX_FOR_TARGET)" CXXFLAGS="$(CXXFLAGS)"
 
 installcheck:
 .PHONY: check installcheck
 
 # Rules for testing by relinking ld itself.
+# A similar test is in the testsuite.  This target is for ease of use
+# when porting ld.
 
 ld-partial.o: ld.new
 	./ld.new $(HOSTING_EMU) -o ld-partial.o -r $(OFILES)
@@ -513,32 +538,33 @@ bootstrap: ld3
 .PHONY: bootstrap
 
 # A test program for C++ constructors and destructors.
-
-cdtest: cdtest-main.o cdtest-bar.o cdtest-foo.o ld.new
-	./ld.new $(HOSTING_EMU) -o cdtest $(HOSTING_CRT0) \
-	  cdtest-main.o cdtest-bar.o cdtest-foo.o $(HOSTING_LIBS)
-
-cdtest.out: cdtest
-	./cdtest > cdtest.tmp
-	mv cdtest.tmp cdtest.out
-
-cdtest-ur.o: cdtest-main.o cdtest-bar.o cdtest-foo.o ld.new
-	./ld.new $(HOSTING_EMU) -o cdtest-ur.o -Ur cdtest-main.o \
-	  cdtest-bar.o cdtest-foo.o
-
-cdtest-ur: cdtest-ur.o
-	./ld.new $(HOSTING_EMU) -o cdtest-ur $(HOSTING_CRT0) cdtest-ur.o \
-	  $(HOSTING_LIBS)
-
-cdtest-ur.out: cdtest-ur
-	./cdtest-ur > cdtest-ur.tmp
-	mv cdtest-ur.tmp cdtest-ur.out
-
-check-cdtest: cdtest.out cdtest-ur.out $(srcdir)/cdtest.exp
-	diff $(srcdir)/cdtest.exp cdtest.out
-	diff $(srcdir)/cdtest.exp cdtest-ur.out
-
-.PHONY: check-cdtest
+# This test is now in the testsuite.
+#
+#cdtest: cdtest-main.o cdtest-bar.o cdtest-foo.o ld.new
+#	./ld.new $(HOSTING_EMU) -o cdtest $(HOSTING_CRT0) \
+#	  cdtest-main.o cdtest-bar.o cdtest-foo.o $(HOSTING_LIBS)
+#
+#cdtest.out: cdtest
+#	./cdtest > cdtest.tmp
+#	mv cdtest.tmp cdtest.out
+#
+#cdtest-ur.o: cdtest-main.o cdtest-bar.o cdtest-foo.o ld.new
+#	./ld.new $(HOSTING_EMU) -o cdtest-ur.o -Ur cdtest-main.o \
+#	  cdtest-bar.o cdtest-foo.o
+#
+#cdtest-ur: cdtest-ur.o
+#	./ld.new $(HOSTING_EMU) -o cdtest-ur $(HOSTING_CRT0) cdtest-ur.o \
+#	  $(HOSTING_LIBS)
+#
+#cdtest-ur.out: cdtest-ur
+#	./cdtest-ur > cdtest-ur.tmp
+#	mv cdtest-ur.tmp cdtest-ur.out
+#
+#check-cdtest: cdtest.out cdtest-ur.out $(srcdir)/cdtest.exp
+#	diff $(srcdir)/cdtest.exp cdtest.out
+#	diff $(srcdir)/cdtest.exp cdtest-ur.out
+#
+#.PHONY: check-cdtest
 
 # END OF CHECK TARGETS
 
