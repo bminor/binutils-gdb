@@ -106,18 +106,37 @@ print_operand (buf, oper, insn, op)
 
   num = (insn >> shift) & (0x7FFFFFFF >> (31 - oper->bits));
 
-  if (oper->flags & OPERAND_ACC)
-    *buf++ = 'a';
-  else if (oper->flags & OPERAND_CONTROL)
-    {
-      *buf++ ='c';
-      *buf++ ='r';
-    }
-  else if(oper->flags & OPERAND_REG)
-    *buf++ = 'r';
-
   if (oper->flags & OPERAND_REG)
-    sprintf (buf, "%d", num);
+    {
+      int i;
+      int match=0;
+      num += oper->flags & (OPERAND_ACC|OPERAND_FLAG|OPERAND_CONTROL);
+      for (i=0;i<reg_name_cnt();i++)
+	{
+	  if (num == pre_defined_registers[i].value)
+	    {
+	      if (pre_defined_registers[i].pname)
+		strcpy(buf,pre_defined_registers[i].pname);
+	      else
+		strcpy(buf,pre_defined_registers[i].name);
+	      match=1;
+	      break;
+	    }
+	}
+      if (match==0)
+	{
+	  if (oper->flags & OPERAND_ACC)
+	    *buf++ = 'a';
+	  else if (oper->flags & OPERAND_CONTROL)
+	    {
+	      *buf++ ='c';
+	      *buf++ ='r';
+	    }
+	  else if(oper->flags & OPERAND_REG)
+	    *buf++ = 'r';
+	  sprintf (buf, "%d", num);
+	}
+    }
   else
     sprintf (buf, "0x%x", num);
 }

@@ -22,6 +22,51 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #include "ansidecl.h"
 #include "opcode/d10v.h"
 
+
+/*   The table is sorted. Suitable for searching by a binary search. */
+const struct pd_reg pre_defined_registers[] =
+{
+  { "a0", NULL, OPERAND_ACC+0 },
+  { "a1", NULL, OPERAND_ACC+1 },
+  { "bpc", NULL, OPERAND_CONTROL+3 },
+  { "bpsw", NULL, OPERAND_CONTROL+1 },
+  { "c", NULL, OPERAND_FLAG+3 },
+  { "f0", NULL, OPERAND_FLAG+0 },
+  { "f1", NULL, OPERAND_FLAG+1 },
+  { "iba", NULL, OPERAND_CONTROL+14 },
+  { "mod_e", NULL, OPERAND_CONTROL+11 },
+  { "mod_s", NULL, OPERAND_CONTROL+10 },
+  { "pc", NULL, OPERAND_CONTROL+2 },
+  { "psw", NULL, OPERAND_CONTROL+0 },
+  { "r0", NULL, 0 },
+  { "r1", NULL, 1 },
+  { "r10", NULL, 10 },
+  { "r11", NULL, 11 },
+  { "r12", NULL, 12 },
+  { "r13", NULL, 13 },
+  { "r14", NULL, 14 },
+  { "r15", "sp", 15 },
+  { "r2", NULL, 2 },
+  { "r3", NULL, 3 },
+  { "r4", NULL, 4 },
+  { "r5", NULL, 5 },
+  { "r6", NULL, 6 },
+  { "r7", NULL, 7 },
+  { "r8", NULL, 8 },
+  { "r9", NULL, 9 },
+  { "rpt_c", NULL, OPERAND_CONTROL+7 },
+  { "rpt_e", NULL, OPERAND_CONTROL+9 },
+  { "rpt_s", NULL, OPERAND_CONTROL+8 },
+  { "sp", NULL, 15 },
+};
+
+int 
+reg_name_cnt()
+{
+  return (sizeof(pre_defined_registers) / sizeof(struct pd_reg));
+}
+
+
 const struct d10v_operand d10v_operands[] =
 {
 #define UNUSED	(0)
