@@ -1,3 +1,11 @@
+Tue Sep  7 11:59:39 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* config.sub: Remove h8300hhms alias.
+
+Tue Aug 31 11:00:09 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in: Match *-*-solaris2* not *-sun-solaris2*.
+
 Mon Aug 30 18:29:10 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* Makefile.in (gcc-no-fixedincludes): touch stmp-fixproto as well
