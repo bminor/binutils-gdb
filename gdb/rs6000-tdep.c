@@ -700,6 +700,14 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 
 	  /* store parameters in stack */
 	}
+      /* Move parameters from argument registers to temporary register.  */
+      else if ((op & 0xfc0007fe) == 0x7c000378 &&	/* mr(.)  Rx,Ry */
+               (((op >> 21) & 31) >= 3) &&              /* R3 >= Ry >= R10 */
+               (((op >> 21) & 31) <= 10) &&
+               (((op >> 16) & 31) == 0)) /* Rx: scratch register r0 */
+        {
+          continue;
+        }
       else if ((op & 0xfc1f0003) == 0xf8010000 ||	/* std rx,NUM(r1) */
 	       (op & 0xfc1f0000) == 0xd8010000 ||	/* stfd Rx,NUM(r1) */
 	       (op & 0xfc1f0000) == 0xfc010000)		/* frsp, fp?,NUM(r1) */
@@ -709,10 +717,11 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	  /* store parameters in stack via frame pointer */
 	}
       else if (framep &&
-	       ((op & 0xfc1f0000) == 0x901f0000 ||	/* st rx,NUM(r1) */
-		(op & 0xfc1f0000) == 0xd81f0000 ||	/* stfd Rx,NUM(r1) */
-		(op & 0xfc1f0000) == 0xfc1f0000))
-	{			/* frsp, fp?,NUM(r1) */
+	       ((op & 0xfc1f0000) == 0x901f0000 ||     /* st rx,NUM(r31) */
+                (op & 0xfc1f0000) == 0x981f0000 ||     /* stb Rx,NUM(r31) */
+		(op & 0xfc1f0000) == 0xd81f0000 ||     /* stfd Rx,NUM(r31) */
+		(op & 0xfc1f0000) == 0xfc1f0000))      /* frsp, fp?,NUM(r31) */
+        {
 	  continue;
 
 	  /* Set up frame pointer */
