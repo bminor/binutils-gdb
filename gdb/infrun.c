@@ -2,7 +2,7 @@
    process.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -340,12 +340,10 @@ static struct
 }
 pending_follow;
 
-static const char follow_fork_mode_ask[] = "ask";
 static const char follow_fork_mode_child[] = "child";
 static const char follow_fork_mode_parent[] = "parent";
 
 static const char *follow_fork_mode_kind_names[] = {
-  follow_fork_mode_ask,
   follow_fork_mode_child,
   follow_fork_mode_parent,
   NULL
@@ -357,16 +355,7 @@ static const char *follow_fork_mode_string = follow_fork_mode_parent;
 static int
 follow_fork (void)
 {
-  const char *follow_mode = follow_fork_mode_string;
-  int follow_child = (follow_mode == follow_fork_mode_child);
-
-  /* Or, did the user not know, and want us to ask? */
-  if (follow_fork_mode_string == follow_fork_mode_ask)
-    {
-      internal_error (__FILE__, __LINE__,
-		      "follow_inferior_fork: \"ask\" mode not implemented");
-      /* follow_mode = follow_fork_mode_...; */
-    }
+  int follow_child = (follow_fork_mode_string == follow_fork_mode_child);
 
   return target_follow_fork (follow_child);
 }
@@ -4075,31 +4064,12 @@ to the user would be loading/unloading of a new library.\n", &setlist), &showlis
   c = add_set_enum_cmd ("follow-fork-mode",
 			class_run,
 			follow_fork_mode_kind_names, &follow_fork_mode_string,
-/* ??rehrauer:  The "both" option is broken, by what may be a 10.20
-   kernel problem.  It's also not terribly useful without a GUI to
-   help the user drive two debuggers.  So for now, I'm disabling
-   the "both" option.  */
-/*                      "Set debugger response to a program call of fork \
-   or vfork.\n\
-   A fork or vfork creates a new process.  follow-fork-mode can be:\n\
-   parent  - the original process is debugged after a fork\n\
-   child   - the new process is debugged after a fork\n\
-   both    - both the parent and child are debugged after a fork\n\
-   ask     - the debugger will ask for one of the above choices\n\
-   For \"both\", another copy of the debugger will be started to follow\n\
-   the new child process.  The original debugger will continue to follow\n\
-   the original parent process.  To distinguish their prompts, the\n\
-   debugger copy's prompt will be changed.\n\
-   For \"parent\" or \"child\", the unfollowed process will run free.\n\
-   By default, the debugger will follow the parent process.",
- */
 			"Set debugger response to a program call of fork \
 or vfork.\n\
 A fork or vfork creates a new process.  follow-fork-mode can be:\n\
   parent  - the original process is debugged after a fork\n\
   child   - the new process is debugged after a fork\n\
-  ask     - the debugger will ask for one of the above choices\n\
-For \"parent\" or \"child\", the unfollowed process will run free.\n\
+The unfollowed process will continue to run.\n\
 By default, the debugger will follow the parent process.", &setlist);
   add_show_from_set (c, &showlist);
 

@@ -1,3 +1,11 @@
+2004-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* infrun.c (follow_fork_mode_ask): Remove.
+	(follow_fork_mode_kind_names): Remove follow_fork_mode_ask.
+	(follow_fork): Simplify and remove internal error for
+	follow_fork_mode_ask.
+	(_initialize_infrun): Update "set follow-fork-mode" help text.
+
 2004-01-13  Andrew Cagney  <cagney@redhat.com>
 
 	* configure.in: Update copyright year.
