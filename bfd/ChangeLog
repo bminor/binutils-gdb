@@ -1,3 +1,8 @@
+Thu Aug 19 09:45:51 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* configure.in, targets.c: Add missing vectors to the tables.
+	* targets.c (target_vector) [!SELECT_VECS]: Add DEFAULT_VECTOR.
+
 Tue Aug 17 18:12:32 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* hosts/i386{mach3,osf1mk}.h: New files, for Mach hosting.

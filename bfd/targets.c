@@ -318,64 +318,75 @@ in this structure.
 
 */
 
-/* All known xvecs.  They are listed a second time below, since
+/* All known xvecs (even those that don't compile on all systems).
+   Alphabetized for easy reference.
+   They are listed a second time below, since
    we can't intermix extern's and initializers.  */
-extern bfd_target i386lynx_vec;
-extern bfd_target ecoff_little_vec;
-extern bfd_target ecoff_big_vec;
-extern bfd_target aout_mips_little_vec;
-extern bfd_target aout_mips_big_vec;
-extern bfd_target sunos_big_vec;
-extern bfd_target demo_64_vec;
-extern bfd_target srec_vec;
-extern bfd_target symbolsrec_vec;
-extern bfd_target tekhex_vec;
+extern bfd_target a29kcoff_big_vec;
 extern bfd_target a_out_adobe_vec;
-extern bfd_target b_out_vec_little_host;
+extern bfd_target aout_mips_big_vec;
+extern bfd_target aout_mips_little_vec;
 extern bfd_target b_out_vec_big_host;
-extern bfd_target icoff_little_vec;
-extern bfd_target icoff_big_vec;
-extern bfd_target bfd_elf32_sparc_vec;
-extern bfd_target bfd_elf32_i386_vec;
-extern bfd_target bfd_elf32_m68k_vec;
-extern bfd_target bfd_elf32_i860_vec;
-extern bfd_target bfd_elf32_m88k_vec;
-extern bfd_target bfd_elf32_bigmips_vec;
-extern bfd_target bfd_elf32_littlemips_vec;
+extern bfd_target b_out_vec_little_host;
 extern bfd_target bfd_elf32_big_generic_vec;
+extern bfd_target bfd_elf32_bigmips_vec;
+extern bfd_target bfd_elf32_hppa_vec;
+extern bfd_target bfd_elf32_i386_vec;
+extern bfd_target bfd_elf32_i860_vec;
 extern bfd_target bfd_elf32_little_generic_vec;
+extern bfd_target bfd_elf32_littlemips_vec;
+extern bfd_target bfd_elf32_m68k_vec;
+extern bfd_target bfd_elf32_m88k_vec;
+extern bfd_target bfd_elf32_sparc_vec;
 extern bfd_target bfd_elf64_big_generic_vec;
 extern bfd_target bfd_elf64_little_generic_vec;
-extern bfd_target nlm32_i386_vec;
-extern bfd_target nlm32_big_generic_vec;
-extern bfd_target nlm32_little_generic_vec;
-extern bfd_target nlm64_big_generic_vec;
-extern bfd_target nlm64_little_generic_vec;
-extern bfd_target ieee_vec;
-extern bfd_target oasys_vec;
-extern bfd_target m88kbcs_vec;
-extern bfd_target m68kcoff_vec;
-extern bfd_target m68kcoffun_vec;
-extern bfd_target i386coff_vec;
-extern bfd_target i386aout_vec;
-extern bfd_target i386linux_vec;
-extern bfd_target a29kcoff_big_vec;
-extern bfd_target trad_core_vec;
-extern bfd_target sco_core_vec;
-extern bfd_target aix386_core_vec;
-extern bfd_target hpux_core_vec;
-extern bfd_target rs6000coff_vec;
-extern bfd_target h8300coff_vec;
-extern bfd_target h8500coff_vec;
-extern bfd_target z8kcoff_vec;
-extern bfd_target we32kcoff_vec;
-extern bfd_target shcoff_vec;
-extern bfd_target hp300hpux_vec;
-extern bfd_target hp300bsd_vec;
-extern bfd_target hppa_vec;
 /* start-sanitize-v9 */
 extern bfd_target bfd_elf64_sparc_vec;
 /* end-sanitize-v9 */
+extern bfd_target demo_64_vec;
+extern bfd_target ecoff_big_vec;
+extern bfd_target ecoff_little_vec;
+extern bfd_target ecoffalpha_little_vec;
+extern bfd_target h8300coff_vec;
+extern bfd_target h8500coff_vec;
+extern bfd_target host_aout_vec;
+extern bfd_target hp300bsd_vec;
+extern bfd_target hp300hpux_vec;
+extern bfd_target hppa_vec;
+extern bfd_target i386aout_vec;
+extern bfd_target i386bsd_vec;
+extern bfd_target i386coff_vec;
+extern bfd_target i386linux_vec;
+extern bfd_target i386lynx_vec;
+extern bfd_target icoff_big_vec;
+extern bfd_target icoff_little_vec;
+extern bfd_target ieee_vec;
+extern bfd_target m68kcoff_vec;
+extern bfd_target m68kcoffun_vec;
+extern bfd_target m88kbcs_vec;
+extern bfd_target newsos3_vec;
+extern bfd_target nlm32_big_generic_vec;
+extern bfd_target nlm32_i386_vec;
+extern bfd_target nlm32_little_generic_vec;
+extern bfd_target nlm64_big_generic_vec;
+extern bfd_target nlm64_little_generic_vec;
+extern bfd_target oasys_vec;
+extern bfd_target rs6000coff_vec;
+extern bfd_target shcoff_vec;
+extern bfd_target sunos_big_vec;
+extern bfd_target tekhex_vec;
+extern bfd_target we32kcoff_vec;
+extern bfd_target z8kcoff_vec;
+
+/* srec is always included.  */
+extern bfd_target srec_vec;
+extern bfd_target symbolsrec_vec;
+
+/* All of the xvecs for core files.  */
+extern bfd_target aix386_core_vec;
+extern bfd_target hpux_core_vec;
+extern bfd_target sco_core_vec;
+extern bfd_target trad_core_vec;
 
 bfd_target *target_vector[] = {
 
@@ -385,14 +396,91 @@ bfd_target *target_vector[] = {
 
 #else /* not SELECT_VECS */
 
-	&i386coff_vec,
-	&i386aout_vec,
-	&i386lynx_vec,
-	&ecoff_little_vec,
-	&ecoff_big_vec,
-	&aout_mips_little_vec,
+#ifdef DEFAULT_VECTOR
+	&DEFAULT_VECTOR,
+#endif
+	/* This list is alphabetized to make it easy to compare
+	   with other vector lists -- the decls above and
+	   the case statement in configure.in.
+	   Vectors that don't compile on all systems, or aren't finished,
+	   should have an entry here with #if 0 around it, to show that
+	   it wasn't omitted by mistake.  */
+	&a29kcoff_big_vec,
+	&a_out_adobe_vec,
+#if 0				/* No one seems to use this.  */
 	&aout_mips_big_vec,
+#endif
+	&aout_mips_little_vec,
+	&b_out_vec_big_host,
+	&b_out_vec_little_host,
+#if 0				/* No one seems to use this.  */
+	&bfd_elf32_big_generic_vec,
+	&bfd_elf32_bigmips_vec,
+#endif
+#if 0
+	&bfd_elf32_hppa_vec,
+#endif
+	&bfd_elf32_i386_vec,
+	&bfd_elf32_i860_vec,
+#if 0				/* No one seems to use this.  */
+	&bfd_elf32_little_generic_vec,
+	&bfd_elf32_littlemips_vec,
+#endif
+	&bfd_elf32_m68k_vec,
+	&bfd_elf32_m88k_vec,
+	&bfd_elf32_sparc_vec,
+#ifdef BFD64			/* No one seems to use this.  */
+	&bfd_elf64_big_generic_vec,
+	&bfd_elf64_little_generic_vec,
+#endif
+/* start-sanitize-v9 */
+#if 0
+	&bfd_elf64_sparc_vec,
+#endif
+/* end-sanitize-v9 */
+#ifdef BFD64
+	&demo_64_vec,	/* Only compiled if host has long-long support */
+#endif
+	&ecoff_big_vec,
+	&ecoff_little_vec,
+#if 0
+	&ecoffalpha_little_vec,
+#endif
+	&h8300coff_vec,
+	&h8500coff_vec,
+#if 0
+	&host_aout_vec,
+#endif
+	&hp300bsd_vec,
+	&hp300hpux_vec,
+#if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD)
+        &hppa_vec,
+#endif
+	&i386aout_vec,
+	&i386bsd_vec,
+	&i386coff_vec,
+#if 0
+	&i386linux_vec,
+#endif
+	&i386lynx_vec,
+	&icoff_big_vec,
+	&icoff_little_vec,
 	&ieee_vec,
+	&m68kcoff_vec,
+	&m68kcoffun_vec,
+	&m88kbcs_vec,
+	&newsos3_vec,
+#if 0				/* No one seems to use this.  */
+	&nlm32_big_generic_vec,
+#endif
+	&nlm32_i386_vec,
+#if 0				/* No one seems to use this.  */
+	&nlm32_little_generic_vec,
+#endif
+#ifdef BFD64
+	&nlm64_big_generic_vec,
+	&nlm64_little_generic_vec,
+#endif
 #if 0
 	/* We have no oasys tools anymore, so we can't test any of this
 	   anymore. If you want to test the stuff yourself, go ahead...
@@ -401,49 +489,14 @@ bfd_target *target_vector[] = {
 	   can be annoying target mis-matches.  */
 	&oasys_vec,
 #endif
+	&rs6000coff_vec,
+	&shcoff_vec,
 	&sunos_big_vec,
-#ifdef BFD64
-	&demo_64_vec,	/* Only compiled if host has long-long support */
-#endif
-	&h8300coff_vec,
-	&z8kcoff_vec,
-	&m88kbcs_vec,
 #if 0
 	&tekhex_vec,
 #endif
-	&icoff_little_vec,
-	&icoff_big_vec,
-	&bfd_elf32_sparc_vec,
-	&bfd_elf32_i386_vec,
-	&bfd_elf32_m68k_vec,
-	&bfd_elf32_i860_vec,
-	&bfd_elf32_m88k_vec,
-	&bfd_elf32_littlemips_vec,
-	&bfd_elf32_bigmips_vec,
-	&bfd_elf32_little_generic_vec,
-	&bfd_elf32_big_generic_vec,
-	&nlm32_i386_vec,
-	&nlm32_little_generic_vec,
-	&nlm32_big_generic_vec,
-#ifdef BFD64
-	&bfd_elf64_little_generic_vec,
-	&bfd_elf64_big_generic_vec,
-	&nlm64_little_generic_vec,
-	&nlm64_big_generic_vec,
-#endif
-	&a_out_adobe_vec,
-	&b_out_vec_little_host,
-	&b_out_vec_big_host,
-	&m68kcoff_vec,
-	&m68kcoffun_vec,
-	&a29kcoff_big_vec,
-	&rs6000coff_vec,
-#if defined (HOST_HPPAHPUX) || defined (HOST_HPPABSD)
-        &hppa_vec,
-#endif
-	&hp300hpux_vec,
-	&hp300bsd_vec,
 	&we32kcoff_vec,
+	&z8kcoff_vec,
 
 #endif /* not SELECT_VECS */
 
@@ -453,17 +506,17 @@ bfd_target *target_vector[] = {
 
 /* Add any required traditional-core-file-handler.  */
 
-#ifdef	TRAD_CORE
-	&trad_core_vec,
-#endif
-#ifdef	SCO_CORE
-	&sco_core_vec,
-#endif
 #ifdef AIX386_CORE
 	&aix386_core_vec,
 #endif
 #ifdef HPUX_CORE
 	&hpux_core_vec,
+#endif
+#ifdef	SCO_CORE
+	&sco_core_vec,
+#endif
+#ifdef	TRAD_CORE
+	&trad_core_vec,
 #endif
 
 	NULL /* end of list marker */
