@@ -1,3 +1,8 @@
+2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cli/cli-cmds.c (shell_escape): Silence warnings from old
+	compilers.
+
 2003-06-21  Daniel Jacobowitz  <drow@mvista.com>
 
 	* c-valprint.c (c_value_print): Add VALUE_OFFSET to the address
