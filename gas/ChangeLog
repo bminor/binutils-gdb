@@ -1,3 +1,9 @@
+2004-04-22  Atsushi Nemoto  <anemo@mba.ocn.ne.jp>
+
+	* config/tc-mips.c (load_delay_nop): New function.
+	(load_address, macro): Use load_delay_nop() to build a nop
+	which can be omitted with gpr_interlocks.
+
 2004-04-22  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (hilo_interlocks, gpr_interlocks,

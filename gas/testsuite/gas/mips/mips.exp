@@ -458,7 +458,8 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test_arches "lb"	[mips_arch_list_matching !mips2]
     }
     if $elf {
-	run_dump_test_arches "lb-svr4pic" [mips_arch_list_matching mips1]
+	run_dump_test_arches "lb-svr4pic" [mips_arch_list_matching !gpr_ilocks]
+	run_dump_test_arches "lb-svr4pic-ilocks" [mips_arch_list_matching gpr_ilocks]
     }
     if $elf {
 	# Both versions specify the cpu, so we can run both regardless of

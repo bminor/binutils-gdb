@@ -3783,6 +3783,13 @@ load_register (int reg, expressionS *ep, int dbl)
     macro_build (&lo32, "ori", "t,r,i", reg, freg, BFD_RELOC_LO16);
 }
 
+static inline void
+load_delay_nop (void)
+{
+  if (!gpr_interlocks)
+    macro_build (NULL, "nop", "");
+}
+
 /* Load an address into a register.  */
 
 static void
@@ -3916,7 +3923,7 @@ load_address (int reg, expressionS *ep, int *used_at)
 	  ep->X_add_number = 0;
 	  macro_build (ep, ADDRESS_LOAD_INSN, "t,o(b)", reg,
 		       BFD_RELOC_MIPS_GOT16, mips_gp_register);
-	  macro_build (NULL, "nop", "");
+	  load_delay_nop ();
 	  relax_start (ep->X_add_symbol);
 	  relax_switch ();
 	  macro_build (ep, ADDRESS_ADDI_INSN, "t,r,j", reg, reg,
@@ -4001,7 +4008,7 @@ load_address (int reg, expressionS *ep, int *used_at)
 	    }
 	  macro_build (ep, ADDRESS_LOAD_INSN, "t,o(b)", reg,
 		       BFD_RELOC_MIPS_GOT16, mips_gp_register);
-	  macro_build (NULL, "nop", "");
+	  load_delay_nop ();
 	  macro_build (ep, ADDRESS_ADDI_INSN, "t,r,j", reg, reg,
 		       BFD_RELOC_LO16);
 	  relax_end ();
@@ -5063,12 +5070,12 @@ macro (struct mips_cl_insn *ip)
 		  /* We're going to put in an addu instruction using
 		     tempreg, so we may as well insert the nop right
 		     now.  */
-		  macro_build (NULL, "nop", "");
+		  load_delay_nop ();
 		}
 	      relax_switch ();
 	      macro_build (&offset_expr, ADDRESS_LOAD_INSN, "t,o(b)",
 			   tempreg, BFD_RELOC_MIPS_GOT16, mips_gp_register);
-	      macro_build (NULL, "nop", "");
+	      load_delay_nop ();
 	      macro_build (&offset_expr, ADDRESS_ADDI_INSN, "t,r,j",
 			   tempreg, tempreg, BFD_RELOC_LO16);
 	      relax_end ();
@@ -5080,7 +5087,7 @@ macro (struct mips_cl_insn *ip)
 		   && offset_expr.X_add_number < 0x8000)
 	    {
 	      load_got_offset (tempreg, &offset_expr);
-	      macro_build (NULL, "nop", "");
+	      load_delay_nop ();
 	      add_got_offset (tempreg, &offset_expr);
 	    }
 	  else
@@ -5099,7 +5106,7 @@ macro (struct mips_cl_insn *ip)
 		 not using a base register.  */
 	      if (breg == treg)
 		{
-		  macro_build (NULL, "nop", "");
+		  load_delay_nop ();
 		  macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t",
 			       treg, AT, breg);
 		  breg = 0;
@@ -5282,13 +5289,13 @@ macro (struct mips_cl_insn *ip)
 		  /* We're going to put in an addu instruction using
 		     tempreg, so we may as well insert the nop right
 		     now.  */
-		  macro_build (NULL, "nop", "");
+		  load_delay_nop ();
 		}
 	    }
 	  else if (expr1.X_add_number >= -0x8000
 		   && expr1.X_add_number < 0x8000)
 	    {
-	      macro_build (NULL, "nop", "");
+	      load_delay_nop ();
 	      macro_build (&expr1, ADDRESS_ADDI_INSN, "t,r,j",
 			   tempreg, tempreg, BFD_RELOC_LO16);
 	    }
@@ -5308,7 +5315,7 @@ macro (struct mips_cl_insn *ip)
 	      else
 		{
 		  assert (tempreg == AT);
-		  macro_build (NULL, "nop", "");
+		  load_delay_nop ();
 		  macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t",
 			       treg, AT, breg);
 		  dreg = treg;
@@ -5335,7 +5342,7 @@ macro (struct mips_cl_insn *ip)
 	  if (expr1.X_add_number >= -0x8000
 	      && expr1.X_add_number < 0x8000)
 	    {
-	      macro_build (NULL, "nop", "");
+	      load_delay_nop ();
 	      macro_build (&offset_expr, ADDRESS_ADDI_INSN, "t,r,j",
 			   tempreg, tempreg, BFD_RELOC_LO16);
 	      /* FIXME: If add_number is 0, and there was no base
@@ -5351,7 +5358,7 @@ macro (struct mips_cl_insn *ip)
 		  /* We must add in the base register now, as in the
 		     external symbol case.  */
 		  assert (tempreg == AT);
-		  macro_build (NULL, "nop", "");
+		  load_delay_nop ();
 		  macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t",
 			       treg, AT, breg);
 		  tempreg = treg;
@@ -5637,7 +5644,7 @@ macro (struct mips_cl_insn *ip)
 		  macro_build (&offset_expr, ADDRESS_LOAD_INSN, "t,o(b)",
 			       PIC_CALL_REG, BFD_RELOC_MIPS_CALL16,
 			       mips_gp_register);
-		  macro_build (NULL, "nop", "");
+		  load_delay_nop ();
 		  relax_switch ();
 		}
 	      else
@@ -5652,7 +5659,7 @@ macro (struct mips_cl_insn *ip)
 		  macro_build (&offset_expr, ADDRESS_LOAD_INSN, "t,o(b)",
 			       PIC_CALL_REG, BFD_RELOC_MIPS_CALL_LO16,
 			       PIC_CALL_REG);
-		  macro_build (NULL, "nop", "");
+		  load_delay_nop ();
 		  relax_switch ();
 		  if (gpdelay)
 		    macro_build (NULL, "nop", "");
@@ -5660,7 +5667,7 @@ macro (struct mips_cl_insn *ip)
 	      macro_build (&offset_expr, ADDRESS_LOAD_INSN, "t,o(b)",
 			   PIC_CALL_REG, BFD_RELOC_MIPS_GOT16,
 			   mips_gp_register);
-	      macro_build (NULL, "nop", "");
+	      load_delay_nop ();
 	      macro_build (&offset_expr, ADDRESS_ADDI_INSN, "t,r,j",
 			   PIC_CALL_REG, PIC_CALL_REG, BFD_RELOC_LO16);
 	      relax_end ();
@@ -6160,7 +6167,7 @@ macro (struct mips_cl_insn *ip)
 	    as_bad (_("PIC code offset overflow (max 16 signed bits)"));
 	  macro_build (&offset_expr, ADDRESS_LOAD_INSN, "t,o(b)", tempreg,
 		       lw_reloc_type, mips_gp_register);
-	  macro_build (NULL, "nop", "");
+	  load_delay_nop ();
 	  relax_start (offset_expr.X_add_symbol);
 	  relax_switch ();
 	  macro_build (&offset_expr, ADDRESS_ADDI_INSN, "t,r,j", tempreg,
@@ -6210,7 +6217,7 @@ macro (struct mips_cl_insn *ip)
 	    macro_build (NULL, "nop", "");
 	  macro_build (&offset_expr, ADDRESS_LOAD_INSN, "t,o(b)", tempreg,
 		       BFD_RELOC_MIPS_GOT16, mips_gp_register);
-	  macro_build (NULL, "nop", "");
+	  load_delay_nop ();
 	  macro_build (&offset_expr, ADDRESS_ADDI_INSN, "t,r,j", tempreg,
 		       tempreg, BFD_RELOC_LO16);
 	  relax_end ();
@@ -6685,7 +6692,7 @@ macro (struct mips_cl_insn *ip)
 	      || expr1.X_add_number >= 0x8000 - 4)
 	    as_bad (_("PIC code offset overflow (max 16 signed bits)"));
 	  load_got_offset (AT, &offset_expr);
-	  macro_build (NULL, "nop", "");
+	  load_delay_nop ();
 	  if (breg != 0)
 	    macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t", AT, breg, AT);
 
@@ -6744,7 +6751,7 @@ macro (struct mips_cl_insn *ip)
 		       AT, AT, mips_gp_register);
 	  macro_build (&offset_expr, ADDRESS_LOAD_INSN, "t,o(b)",
 		       AT, BFD_RELOC_MIPS_GOT_LO16, AT);
-	  macro_build (NULL, "nop", "");
+	  load_delay_nop ();
 	  if (breg != 0)
 	    macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t", AT, breg, AT);
 	  /* Itbl support may require additional care here.  */
@@ -6768,7 +6775,7 @@ macro (struct mips_cl_insn *ip)
 	    macro_build (NULL, "nop", "");
 	  macro_build (&offset_expr, ADDRESS_LOAD_INSN, "t,o(b)", AT,
 		       BFD_RELOC_MIPS_GOT16, mips_gp_register);
-	  macro_build (NULL, "nop", "");
+	  load_delay_nop ();
 	  if (breg != 0)
 	    macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t", AT, breg, AT);
 	  /* Itbl support may require additional care here.  */

@@ -1,3 +1,16 @@
+2004-04-22  Atsushi Nemoto  <anemo@mba.ocn.ne.jp>
+
+	* gas/mips/lb-xgot-ilocks.d: Remove nops in load delay slot.
+	* gas/mips/mips-abi32-pic.d: Likewise.
+	* gas/mips/mips-abi32-pic2.d: Likewise.
+	* gas/mips/mips-gp32-fp32-pic.d: Likewise.
+	* gas/mips/mips-gp32-fp64-pic.d: Likewise.
+	* gas/mips/mips-gp64-fp32-pic.d: Likewise.
+	* gas/mips/mips-gp64-fp64-pic.d: Likewise.
+	* gas/mips/relax-swap1-mips2.d: Likewise.
+	* gas/mips/lb-svr4pic-ilocks.d: New test.
+	* gas/mips/mips.exp: Run it.
+
 2004-04-22  Paul Brook  <paul@codesourcery.com>
 
 	* maverick.c (off8s): Test full shifted operand range.
