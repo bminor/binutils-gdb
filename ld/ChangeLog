@@ -1,4 +1,8 @@
-Mon Apr  1 11:49:52 1996  Ian Lance Taylor  <ian@cygnus.com>
+Mon Apr  1 17:35:40 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (lang_size_sections): Change region check to handle
+	regions which end at the highest possible address correctly.
+	From Roland Weber <roweber@ira.uka.de>.
 
 	* ldlang.c (section_already_linked): New static function.
 	(wild_doit): Discard sections with SEC_EXCLUDE set if not doing a

@@ -2024,9 +2024,9 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	 {
 	   os->region->current = dot;
 	   /* Make sure this isn't silly.  */
-	   if ((os->region->current < os->region->origin)
-	       || (os->region->current
-		   > os->region->origin + os->region->length))
+	   if (os->region->current < os->region->origin
+	       || (os->region->current - os->region->origin
+		   > os->region->length))
 	     {
 	       if (os->addr_tree != (etree_type *) NULL)
 		 {
