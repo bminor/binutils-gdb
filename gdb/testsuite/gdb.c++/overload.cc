@@ -80,8 +80,8 @@ int main ()
     // Verify that intToChar should work:
     intToChar(1);
 
-    marker1();
-    return 0; 
+    marker1(); // marker1-returns-here
+    return 0; // marker1-returns-here
 }
 
 foo::foo  (int i)                  { ifoo = i; ccpfoo = NULL; }

@@ -273,8 +273,8 @@ int main (void)
  A1 three(0,0);
  int val;
  
- marker1();
- cout << one;
+ marker1(); // marker1-returns-here
+ cout << one; // marker1-returns-here
  cout << two;
  three = one + two;
  cout << "+ " <<  three;

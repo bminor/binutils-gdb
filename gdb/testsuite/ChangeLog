@@ -1,3 +1,12 @@
+2003-04-11  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.c++/derivation.exp, gdb.c++/overload.exp,
+	gdb.c++/userdef.cc: Place comments on the lines to which the
+	marker function might return.
+	* gdb.c++/derivation.exp, gdb.c++/overload.exp,
+	gdb.c++/userdef.exp: Look for those comments to check that we've
+	returned to the right place, instead of checking line numbers.
+
 2003-04-11  Elena Zannoni  <ezannoni@redhat.com>
 
         * gdb.threads/pthreads.exp (test_startup): When setting a breakpoint
