@@ -425,12 +425,9 @@ fold_binary (etree_type *tree,
 		    {
 		      /* Attempt to align DATA_SEGMENT_RELRO_END at
 			 a common page boundary.  */
-		      bfd_vma relro;
-
-		      result.value += dot & (maxpage - 1);
-		      relro = exp_data_seg.relro_end - exp_data_seg.base;
-		      result.value += -relro & (other.value - 1);
-		      exp_data_seg.base = result.value;
+		      exp_data_seg.base += (-exp_data_seg.relro_end
+					    & (other.value - 1));
+		      result.value = exp_data_seg.base;
 		    }
 		  else if (exp_data_seg.phase != exp_dataseg_adjust)
 		    {

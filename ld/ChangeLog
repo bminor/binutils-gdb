@@ -1,3 +1,8 @@
+2004-09-19  Andreas Schwab  <schwab@suse.de>
+
+	* ldexp.c (fold_binary) [DATA_SEGMENT_ALIGN]: Adjust data segment
+	base so that relro end is suitably aligned.
+
 2004-09-17  Paul Brook  <paul@codesourcery.com>
 
 	* ld.texinfo: Rename arm-specific section.  Document --target*
