@@ -1,3 +1,20 @@
+Mon Apr 18 21:08:01 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* doc/Makefile.in, doc/as.texinfo: Renamed asdoc-config.texi to
+	asconfig.texi.
+
+	* doc/Makefile.in (install-info-as, install-info-gasp): Get file
+	names from source directory without pathname.
+
+	* config/obj-vms.c (VMS_write_object_file): While looking for
+	register mask, skip empty fill frags caused by enabling listing
+	output.
+
+	* config/ho-sysv.h: Include string.h.
+
+	* doc/internals.texi: New (well, recently added) file.  Just added
+	info on as_warn and friends.
+
 Mon Apr 18 14:28:22 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_parse_space_stmt): Use the built-in
