@@ -219,13 +219,20 @@ whitespace, or be given as separate arguments immediately following the
 option that requires them.
 
 For options whose names are multiple letters, either one dash or two can
-precede the option name; for example, @samp{-oformat} and
-@samp{--oformat} are equivalent.  Arguments to multiple-letter options
-must either be separated from the option name by an equals sign, or be
-given as separate arguments immediately following the option that
-requires them.  For example, @samp{--oformat srec} and
-@samp{--oformat=srec} are equivalent.  Unique abbreviations of the names
-of multiple-letter options are accepted.
+precede the option name; for example, @samp{-trace-symbol} and
+@samp{--trace-symbol} are equivalent.  Note - there is one exception to
+this rule.  Multiple letter options that start with a lower case 'o' can
+only be preceeded by two dashes.  This is to reduce confusion with the
+@samp{-o} option.  So for example @samp{-omagic} sets the output file
+name to @samp{magic} whereas @samp{--omagic} sets the NMAGIC flag on the
+output.
+
+Arguments to multiple-letter options must either be separated from the
+option name by an equals sign, or be given as separate arguments
+immediately following the option that requires them.  For example,
+@samp{--trace-symbol foo} and @samp{--trace-symbol=foo} are equivalent.
+Unique abbreviations of the names of multiple-letter options are
+accepted.
 
 Note - if the linker is being invoked indirectly, via a compiler driver
 (eg @samp{gcc}) then all the linker command line options should be

@@ -148,6 +148,16 @@ struct ld_option
     ONE_DASH,
     /* Use two dashes before long option name.  */
     TWO_DASHES,
+    /* Only accept two dashes before the long option name.
+       This is an overloading of the use of this enum, since originally it
+       was only intended to tell the --help display function how to display
+       the long option name.  This feature was added in order to resolve
+       the confusion about the -omagic command line switch.  Is it setting
+       the output file name to "magic" or is it setting the NMAGIC flag on
+       the output ?  It has been decided that it is setting the output file
+       name, and that if you want to set the NMAGIC flag you should use -N
+       or --omagic.  */
+    EXACTLY_TWO_DASHES,
     /* Don't mention this option in --help output.  */
     NO_HELP
   } control;
@@ -200,9 +210,9 @@ static const struct ld_option ld_options[] =
       'n', NULL, N_("Do not page align data"), TWO_DASHES },
   { {"omagic", no_argument, NULL, 'N'},
       'N', NULL, N_("Do not page align data, do not make text readonly"),
-      TWO_DASHES },
+      EXACTLY_TWO_DASHES },
   { {"output", required_argument, NULL, 'o'},
-      'o', N_("FILE"), N_("Set output file name"), TWO_DASHES },
+      'o', N_("FILE"), N_("Set output file name"), EXACTLY_TWO_DASHES },
   { {NULL, required_argument, NULL, '\0'},
       'O', NULL, N_("Optimize output file"), ONE_DASH },
   { {"Qy", no_argument, NULL, OPTION_IGNORE},
@@ -312,7 +322,7 @@ static const struct ld_option ld_options[] =
   { {"noinhibit_exec", no_argument, NULL, OPTION_NOINHIBIT_EXEC},
       '\0', NULL, NULL, NO_HELP },
   { {"oformat", required_argument, NULL, OPTION_OFORMAT},
-      '\0', N_("TARGET"), N_("Specify target of output file"), TWO_DASHES },
+      '\0', N_("TARGET"), N_("Specify target of output file"), EXACTLY_TWO_DASHES },
   { {"qmagic", no_argument, NULL, OPTION_IGNORE},
       '\0', NULL, N_("Ignored for Linux compatibility"), ONE_DASH },
   { {"relax", no_argument, NULL, OPTION_RELAX},
@@ -382,7 +392,7 @@ static const struct ld_option ld_options[] =
       '\0', N_("[=WORDS]"), N_("Modify problematic branches in last WORDS (1-10,\n\t\t\t\tdefault 5) words of a page"), TWO_DASHES }
 };
 
-#define OPTION_COUNT ((int) (sizeof ld_options / sizeof ld_options[0]))
+#define OPTION_COUNT ARRAY_SIZE (ld_options)
 
 /* Test STRING for containing a string of digits that form a number
    between MIN and MAX.  The return value is the number or ERR.  */
@@ -413,14 +423,16 @@ is_num (string, min, max, err)
 
 void
 parse_args (argc, argv)
-     int argc;
+     unsigned argc;
      char **argv;
 {
-  int i, is, il;
+  unsigned i;
+  int is, il, irl;
   int ingroup = 0;
   char *default_dirlist = NULL;
   char shortopts[OPTION_COUNT * 3 + 2];
   struct option longopts[OPTION_COUNT + 1];
+  struct option really_longopts[OPTION_COUNT + 1];
   int last_optind;
 
   /* Starting the short option string with '-' is for programs that
@@ -430,6 +442,7 @@ parse_args (argc, argv)
   shortopts[0] = '-';
   is = 1;
   il = 0;
+  irl = 0;
   for (i = 0; i < OPTION_COUNT; i++)
     {
       if (ld_options[i].shortopt != '\0')
@@ -450,12 +463,21 @@ parse_args (argc, argv)
 	}
       if (ld_options[i].opt.name != NULL)
 	{
-	  longopts[il] = ld_options[i].opt;
-	  ++il;
+	  if (ld_options[i].control == EXACTLY_TWO_DASHES)
+	    {
+	      really_longopts[irl] = ld_options[i].opt;
+	      ++irl;
+	    }
+	  else
+	    {
+	      longopts[il] = ld_options[i].opt;
+	      ++il;
+	    }
 	}
     }
   shortopts[is] = '\0';
   longopts[il].name = NULL;
+  really_longopts[irl].name = NULL;
 
   /* The -G option is ambiguous on different platforms.  Sometimes it
      specifies the largest data size to put into the small data
@@ -522,6 +544,8 @@ parse_args (argc, argv)
       /* getopt_long_only is like getopt_long, but '-' as well as '--'
 	 can indicate a long option.  */
       optc = getopt_long_only (argc, argv, shortopts, longopts, &longind);
+      if (optc == -1)
+	optc = getopt_long (argc, argv, shortopts, really_longopts, &longind);
 
       if (optc == -1)
 	break;
@@ -1137,7 +1161,7 @@ set_section_start (sect, valstr)
 static void
 help ()
 {
-  int i;
+  unsigned i;
   const char **targets, **pp;
 
   printf (_("Usage: %s [options] file...\n"), program_name);
@@ -1149,7 +1173,7 @@ help ()
 	{
 	  boolean comma;
 	  int len;
-	  int j;
+	  unsigned j;
 
 	  printf ("  ");
 
@@ -1186,13 +1210,17 @@ help ()
 	      if (ld_options[j].opt.name != NULL
 		  && ld_options[j].control != NO_HELP)
 		{
+		  int two_dashes =
+		    (ld_options[j].control == TWO_DASHES
+		     || ld_options[j].control == EXACTLY_TWO_DASHES);
+		  
 		  printf ("%s-%s%s",
 			  comma ? ", " : "",
-			  ld_options[j].control == TWO_DASHES ? "-" : "",
+			  two_dashes ? "-" : "",
 			  ld_options[j].opt.name);
 		  len += ((comma ? 2 : 0)
 			  + 1
-			  + (ld_options[j].control == TWO_DASHES ? 1 : 0)
+			  + (two_dashes ? 1 : 0)
 			  + strlen (ld_options[j].opt.name));
 		  if (ld_options[j].arg != NULL)
 		    {

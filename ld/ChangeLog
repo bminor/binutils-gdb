@@ -1,3 +1,24 @@
+2000-12-28  Nick Clifton  <nickc@redhat.com>
+
+	* lexsup.c (struct ld_option): Add new enum value:
+	EXACTLY_TWO_DASHES.
+	(ld_options[]): Change -omagic, -output and -oformat options
+	to be EXACTLY_TWO_DASHES.
+	(OUTPUT_COUNT): Use ARRAY_SIZE.
+	(parse_args): Change parameter 'argc' to unsigned.
+	Place EXACTLY_TWO_DASHES options into new really_longopts
+	array.
+	If getopt_long_only fails, try calling getopt_long using the
+	really_longopts array.
+	(help): Print a double dash for both EXACTLY_TWO_DASHES and
+	TWO_DASHES options.
+
+	* ldlex.h: Fix prototype of parse_args.
+
+	* ld.texinfo: Document that long options starting with 'o'
+	must be preceeded by two dashes.  Change example of a single
+	dashed long option from -oformat to -trace-symbol.
+
 2000-12-26  Danny Smith  <danny_r_smith_2001@yahoo.co.nz>
 
 	* emultempl/pe.em (OPTION_NO_DEFAULT_EXCLUDES): Define.
