@@ -1,3 +1,7 @@
+2004-06-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* i387-tdep.c: Remove excessive whitespace.
+
 2004-06-26  Andrew Cagney  <cagney@gnu.org>
 
 	* gdb-events.sh (deprecated_set_gdb_event_hooks): Deprecated.

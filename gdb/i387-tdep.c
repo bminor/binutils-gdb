@@ -340,7 +340,6 @@ i387_value_to_register (struct frame_info *frame, int regnum,
   put_frame_register (frame, regnum, to);
 }
 
-
 
 /* Handle FSAVE and FXSAVE formats.  */
 
