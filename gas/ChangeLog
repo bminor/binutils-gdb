@@ -1,3 +1,21 @@
+Tue Sep 13 21:15:36 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	VMS- and Vax-related changes from Pat Rankin:
+	* Makefile.in (VMS_OTHER_OBJS): add concat, getopt, and getopt1.
+	* vmsconf.sh: no longer have make-gas.com echo text about needing
+	to modify the gcc-vms driver when intending to use with gcc 1.x.
+	* as.c (parse_options): suppress 'v' from std_short_options and
+	eliminate VMS-specific conditional initialization;
+	[default case]: check for '-v' if md_parse_options doesn't recognize
+	an option;
+	[default case, #if VMS]: check for filename argument when '-v' seen;
+	[case 'v']: delete.
+	* config/tc-vax.c (md_assemble): don't rely on `this_add_number'
+	for O_big literal operands (double floats and long long ints);
+	[VMS, md_shortopts]: add second colon after 'v';
+	(md_parse_options) [VMS, case 'v']:  check for argument, so
+	caller can handle `-v' w/o arg.
+
 Tue Sep 13 16:45:08 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* config/obj-coff.c (do_relocs_for):  If TC_KEEP_FX_OFFSET

@@ -21,12 +21,14 @@ $!
 $!	Note: The version of gas shipped on the GCC VMS tapes has been patched
 $!	to fix the above mentioned bug.
 $!
-$ write sys$output "If this assembler is going to be used with GCC 1.n, you"
-$ write sys$Output "need to modify the driver to supply the -1 switch to gas."
-$ write sys$output "This is required because of a small change in how global"
-$ write sys$Output "constant variables are handled.  Failure to include this"
-$ write sys$output "will result in linker warning messages about mismatched
-$ write sys$output "psect attributes."
+$	!The gcc-vms driver was modified to use `-1' quite some time ago,
+$	!so don't echo this text any more...
+$ !write sys$output "If this assembler is going to be used with GCC 1.n, you"
+$ !write sys$output "need to modify the driver to supply the -1 switch to gas."
+$ !write sys$output "This is required because of a small change in how global"
+$ !write sys$output "constant variables are handled.  Failure to include this"
+$ !write sys$output "will result in linker warning messages about mismatched
+$ !write sys$output "psect attributes."
 $!
 $ C_DEFS :="""VMS"""
 $! C_DEFS :="""VMS""","""const="""
