@@ -469,7 +469,7 @@ deliver_hardware_interrupt(void *data)
       unsigned_word cia = cpu_get_program_counter(processor);
       unsigned_word nia = perform_oea_interrupt(processor,
 						cia, 0x00900, 0, 0, 0, 0);
-      TRACE(trace_interrupts, ("decrementer interrupt - cia=0x%lx time=0x%lx\n",
+      TRACE(trace_interrupts, ("decrementer interrupt - cia 0x%lx, time %ld\n",
 			       (unsigned long)cia,
 			       (unsigned long)event_queue_time(psim_event_queue(cpu_system(processor)))
 			       ));
