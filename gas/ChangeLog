@@ -41,6 +41,9 @@ Tue Feb 15 20:23:20 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	* configure.in: Support i960-vxworks versions > 5.0 as coff.
 	Default is still bout if no version is specified.
 
+	* atof-generic.c (atof_generic): Use switch and strcasecmp instead
+	of large number of compares when looking for inf/nan values.
+
 Fri Feb 11 13:13:27 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (macro): Do unaligned loads and stores
