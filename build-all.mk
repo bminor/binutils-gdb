@@ -9,11 +9,11 @@ TREE	= devo
 
 NATIVE  = native
 
-DATE	= 930408
+DATE	= 930426
 
 TAG	= latest-$(DATE)
 
-INSTALLDIR = /build/ian/devo-test/$(TAG)
+INSTALLDIR = /rtl/justice/devo-test/$(TAG)
 
 ifndef host
 host := $(shell $(TREE)/config.guess)
