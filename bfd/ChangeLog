@@ -1,3 +1,13 @@
+Tue Nov 17 20:23:35 1998  Richard Henderson  <rth@cygnus.com>
+
+	* elf-bfd.h (struct elf_link_hash_entry): Add vtable_entries_size.
+	* elf.c (_bfd_elf_link_hash_newfunc): Clear it.
+	* elflink.h (elf_gc_propagate_vtable_entries_used): Copy it, and
+	respect it as an upper bound on what memory to reference.
+	(elf_gc_smash_unused_vtentry_relocs): Likewise.
+	(elf_gc_record_vtentry): Handle as-yet undefined vtables.  Set and
+	update vtable_entries_size appropriately.
+
 Tue Nov 17 15:28:31 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-fr30.c (fr30_reloc_type_lookup): Used integers to hold

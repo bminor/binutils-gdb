@@ -5724,6 +5724,7 @@ elf_gc_propagate_vtable_entries_used (h, okp)
       /* None of this table's entries were referenced.  Re-use the
 	 parent's table.  */
       h->vtable_entries_used = h->vtable_parent->vtable_entries_used;
+      h->vtable_entries_size = h->vtable_parent->vtable_entries_size;
     }
   else
     {
@@ -5736,7 +5737,7 @@ elf_gc_propagate_vtable_entries_used (h, okp)
       pu = h->vtable_parent->vtable_entries_used;
       if (pu != NULL)
 	{
-	  n = h->vtable_parent->size / FILE_ALIGN;
+	  n = h->vtable_parent->vtable_entries_size / FILE_ALIGN;
 	  while (--n != 0)
 	    {
 	      if (*pu) *cu = true;
@@ -5779,7 +5780,8 @@ elf_gc_smash_unused_vtentry_relocs (h, okp)
     if (rel->r_offset >= hstart && rel->r_offset < hend)
       {
 	/* If the entry is in use, do nothing.  */
-	if (h->vtable_entries_used)
+	if (h->vtable_entries_used
+	    && (rel->r_offset - hstart) < h->vtable_entries_size)
 	  {
 	    bfd_vma entry = (rel->r_offset - hstart) / FILE_ALIGN;
 	    if (h->vtable_entries_used[entry])
@@ -5911,17 +5913,51 @@ elf_gc_record_vtentry (abfd, sec, h, addend)
      struct elf_link_hash_entry *h;
      bfd_vma addend;
 {
-  if (h->vtable_entries_used == NULL)
+  if (addend >= h->vtable_entries_size)
     {
+      size_t size, bytes;
+      boolean *ptr = h->vtable_entries_used;
+
+      /* While the symbol is undefined, we have to be prepared to handle
+	 a zero size.  */
+      if (h->root.type == bfd_link_hash_undefined)
+	size = addend;
+      else
+	{
+	  size = h->size;
+	  if (size < addend)
+	    {
+	      /* Oops!  We've got a reference past the defined end of
+		 the table.  This is probably a bug -- shall we warn?  */
+	      size = addend;
+	    }
+	}
+
       /* Allocate one extra entry for use as a "done" flag for the
 	 consolidation pass.  */
-      size_t size = (h->size / FILE_ALIGN + 1) * sizeof(boolean);
-      h->vtable_entries_used = (boolean *) bfd_alloc (abfd, size);
-      if (h->vtable_entries_used == NULL)
-	return false;
+      bytes = (size / FILE_ALIGN + 1) * sizeof(boolean);
+
+      if (ptr)
+	{
+	  size_t oldbytes;
+
+	  ptr = realloc (ptr-1, bytes);
+	  if (ptr == NULL)
+	    return false;
+
+	  oldbytes = (h->vtable_entries_size/FILE_ALIGN + 1) * sizeof(boolean);
+	  memset (ptr + oldbytes, 0, bytes - oldbytes);
+	}
+      else
+	{
+	  ptr = calloc (1, bytes);
+	  if (ptr == NULL)
+	    return false;
+	}
 
       /* And arrange for that done flag to be at index -1.  */
-      memset (h->vtable_entries_used++, 0, size);
+      h->vtable_entries_used = ptr+1;
+      h->vtable_entries_size = size;
     }
   h->vtable_entries_used[addend / FILE_ALIGN] = true;
 
