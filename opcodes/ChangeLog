@@ -1,3 +1,9 @@
+Tue Dec  5 13:42:44 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From David Mosberger-Tang  <davidm@azstarnet.com>:
+	* alpha-dis.c (print_insn_alpha): fixed decoding of cpys
+ 	instruction.
+
 Mon Dec  4 12:29:05 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* sh-opc.h (sh_arg_type): Added A_SSR and A_SPC.
