@@ -95,8 +95,8 @@
  * external low-level support routines
  */
 
-extern putDebugChar();   /* write a single character      */
-extern getDebugChar();   /* read and return a single char */
+extern void putDebugChar (int c); /* write a single character      */
+extern int getDebugChar (void);	/* read and return a single char */
 
 /************************************************************************/
 /* BUFMAX defines the maximum number of characters in inbound/outbound buffers*/
@@ -105,10 +105,9 @@ extern getDebugChar();   /* read and return a single char */
 
 static int initialized = 0;	/* !0 means we've been initialized */
 
-extern void breakinst();
-static void hw_breakpoint();
-static void set_mem_fault_trap();
-static void get_in_break_mode();
+extern void breakinst ();
+static void set_mem_fault_trap (int enable);
+static void get_in_break_mode (void);
 
 static const char hexchars[]="0123456789abcdef";
 
@@ -133,6 +132,43 @@ enum regnames {G0, G1, G2, G3, G4, G5, G6, G7,
 
 extern void trap_low();
 
+/* Create private copies of common functions used by the stub.  This prevents
+   nasty interactions between app code and the stub (for instance if user steps
+   into strlen, etc..) */
+
+static int
+strlen (const char *s)
+{
+  const char *s1 = s;
+
+  while (*s1++ != '\000');
+
+  return s1 - s;
+}
+
+static char *
+strcpy (char *dst, const char *src)
+{
+  char *retval = dst;
+
+  while ((*dst++ = *src++) != '\000');
+
+  return retval;
+}
+
+static void *
+memcpy (void *vdst, const void *vsrc, int n)
+{
+  char *dst = vdst;
+  const char *src = vsrc;
+  char *retval = dst;
+
+  while (n-- > 0)
+    *dst++ = *src++;
+
+  return retval;
+}
+
 asm("
 	.reserve trapstack, 1000 * 4, \"bss\", 8
 
@@ -149,6 +185,18 @@ in_trap_handler:
 ! underflow) occurs.  It makes sure that the invalid register window is still
 ! available before jumping into C code.  It will also restore the world if you
 ! return from handle_exception.
+!
+! On entry, trap_low expects l1 and l2 to contain pc and npc respectivly.
+! Register usage throughout the routine is as follows:
+!
+!	l0 - psr
+!	l1 - pc
+!	l2 - npc
+!	l3 - wim
+!	l4 - scratch and y reg
+!	l5 - scratch and tbr
+!	l6 - unused
+!	l7 - unused
 
 	.globl _trap_low
 _trap_low:
@@ -239,9 +287,6 @@ recursive_trap:
 
 	or	%l0, 0xf20, %l4
 	mov	%l4, %psr		! Turn on traps, disable interrupts
-	nop
-	nop
-	nop
 
 	set	0x1000, %l1
 	btst	%l1, %l0		! FP enabled?
@@ -271,26 +316,6 @@ recursive_trap:
 	std	%f30, [%sp + (24 + 62) * 4]
 no_fpstore:
 
- 	call 	_get_in_break_mode
- 	nop
-
-	set	0xff00, %l3
-	ldda	[%l3]0x1, %l4
-	std 	%l4, [%sp + (24 + 72) * 4] ! DIA1, debug instr addr 1
-					   ! DIA2, debug instr addr 2
-	inc	8, %l3
-	ldda	[%l3]0x1, %l4
-	std 	%l4, [%sp + (24 + 74) * 4] ! DDA1, debug data addr 1
-					   ! DDA2, debug data addr 2
-	inc	8, %l3
-	ldda	[%l3]0x1, %l4
-	std 	%l4, [%sp + (24 + 76) * 4] ! DDV1, debug data val 1
-					   ! DDV2, debug data val 2
-	inc	8, %l3
-	ldda	[%l3]0x1, %l4
-	std 	%l4, [%sp + (24 + 78) * 4] ! DCR, debug control reg 
-					   ! DSR, debug status reg
-
 	call	_handle_exception
 	add	%sp, 24 * 4, %o0	! Pass address of registers
 
@@ -305,24 +330,6 @@ no_fpstore:
 	ldd	[%sp + (24 + 10) * 4], %i2
 	ldd	[%sp + (24 + 12) * 4], %i4
 	ldd	[%sp + (24 + 14) * 4], %i6
-
-        set	0xff00, %l2
-	ldd 	[%sp + (24 + 72) * 4], %l4
-	stda	%l4, [%l2]0x1		   ! DIA1, debug instr addr 1
-					   ! DIA2, debug instr addr 2
-	inc	8, %l2
-	ldd	[%sp + (24 + 74) * 4], %l4
-        stda	%l4, [%l2]0x1		   ! DDA1, debug data addr 1
-					   ! DDA2, debug data addr 2
-	inc	8, %l2
-	ldd	[%sp + (24 + 76) * 4], %l4
-	stda	%l4, [%l2]0x1		   ! DDV1, debug data value 1
-					   ! DDV2, debug data val 2
-	inc	8, %l2
-	ldd	[%sp + (24 + 78) * 4], %l4
-	bset	0x200, %l4
-	stda	%l4, [%l2]0x1		   ! DCR, debug control reg 
-					   ! DSR, debug control reg 
 
 
 	ldd	[%sp + (24 + 64) * 4], %l0 ! Y & PSR
@@ -470,8 +477,7 @@ putpacket(buffer)
 
       while (ch = buffer[count])
 	{
-	  if (! putDebugChar(ch))
-	    return;
+	  putDebugChar (ch);
 	  checksum += ch;
 	  count += 1;
 	}
@@ -651,7 +657,7 @@ get_in_break_mode()
 
   exceptionHandler (255, dummy_hw_breakpoint);
 
-  write_asi (1, 0xff10, 0);
+  asm ("ta 255");
 
   exceptionHandler (255, trap_low);
 }
@@ -705,7 +711,6 @@ hexToInt(char **ptr, int *intValue)
  * otherwise.
  */
 
-
 static void
 handle_exception (registers)
      unsigned long *registers;
@@ -737,6 +742,17 @@ handle_exception (registers)
 	restore
 	restore
 ");
+
+  get_in_break_mode ();		/* Enable DSU register writes */
+
+  registers[DIA1] = read_asi (1, 0xff00);
+  registers[DIA2] = read_asi (1, 0xff04);
+  registers[DDA1] = read_asi (1, 0xff08);
+  registers[DDA2] = read_asi (1, 0xff0c);
+  registers[DDV1] = read_asi (1, 0xff10);
+  registers[DDV2] = read_asi (1, 0xff14);
+  registers[DCR] = read_asi (1, 0xff18);
+  registers[DSR] = read_asi (1, 0xff1c);
 
   if (registers[PC] == (unsigned long)breakinst)
     {
@@ -916,7 +932,21 @@ handle_exception (registers)
    some location may have changed something that is in the instruction cache.
  */
 
-	  flush_i_cache();
+	  flush_i_cache ();
+
+	  if (!(registers[DSR] & 0x1) /* DSU enabled? */
+	      && !(registers[DCR] & 0x200)) /* Are we in break state? */
+	    {			/* Yes, set the DSU regs */
+	      write_asi (1, 0xff00, registers[DIA1]);
+	      write_asi (1, 0xff04, registers[DIA2]);
+	      write_asi (1, 0xff08, registers[DDA1]);
+	      write_asi (1, 0xff0c, registers[DDA2]);
+	      write_asi (1, 0xff10, registers[DDV1]);
+	      write_asi (1, 0xff14, registers[DDV2]);
+	      write_asi (1, 0xff1c, registers[DSR]);
+	      write_asi (1, 0xff18, registers[DCR] | 0x200); /* Clear break */
+	    }
+
 	  return;
 
 	  /* kill the program */

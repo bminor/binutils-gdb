@@ -2,6 +2,21 @@ Sun Oct 15 16:19:27 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* rs6000-tdep.c: Don't include a.out.h, improve some formatting.
 
+Fri Oct 13 15:27:49 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* dcache.c:  Change default value of remotecache to off.  It just
+	screws up too many targets.
+	* sparcl-stub.c:  Add prototypes to many forward decls.
+	* Create private copies of strlen, strcpy, and memcpy to prevent
+	chaos when user steps into them.
+	* (trap_low handle_exception):  Clean up DSU support code
+	(hardware breakpoints).  Move lots of stuff from asm-land to
+	C-land (make it much easier to #ifdef if necessary).  Also, use
+	trap 255 to get into break mode instead of doing a DSU register
+	write, which may trash the register.
+	* (putpacket):  Don't check return value of putDebugChar.  It
+	returns void...
+
 Fri Oct 13 14:16:17 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* remote-sim.h: Always include callback.h.

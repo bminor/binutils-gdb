@@ -148,7 +148,7 @@ struct dcache_struct
   int cache_has_stuff;
 } ;
 
-int remote_dcache = 1;
+int remote_dcache = 0;
 
 DCACHE *last_cache; /* Used by info dcache */
 
