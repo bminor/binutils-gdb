@@ -3,6 +3,8 @@
 	* config/tc-w65.c: Fix formatting.
 	* config/tc-mn10200.c: Fix formatting.
 	* config/tc-mn10300.c: Likewise.
+	* config/tc-pj.c: Fix formatting.=0A=
+	* config/tc-tic80.c: Fix formatting.=0A=
 
 2000-07-17  Frank Ch. Eigler  <fche@redhat.com>
 
