@@ -163,7 +163,10 @@ static file_ptr assign_file_position_for_section
 static boolean assign_file_positions_except_relocs PARAMS ((bfd *, boolean));
 static int elf_sort_hdrs PARAMS ((const PTR, const PTR));
 static void assign_file_positions_for_relocs PARAMS ((bfd *));
-static bfd_size_type get_program_header_size PARAMS ((bfd *));
+static bfd_size_type get_program_header_size PARAMS ((bfd *,
+						      Elf_Internal_Shdr **,
+						      unsigned int,
+						      bfd_vma));
 static file_ptr map_program_segments
   PARAMS ((bfd *, file_ptr, Elf_Internal_Shdr *, Elf_Internal_Shdr **,
 	   bfd_size_type));
@@ -1719,20 +1722,121 @@ assign_file_position_for_section (i_shdrp, offset, align)
   return offset;
 }
 
-/* Get the size of the program header.  This is called by the linker
-   before any of the section VMA's are set, so it can't calculate the
-   correct value for a strange memory layout.  */
+/* Get the size of the program header.
+
+   SORTED_HDRS, if non-NULL, is an array of COUNT pointers to headers sorted
+   by VMA.  Non-allocated sections (!SHF_ALLOC) must appear last.  All
+   section VMAs and sizes are known so we can compute the correct value.
+   (??? This may not be perfectly true.  What cases do we miss?)
+
+   If SORTED_HDRS is NULL we assume there are two segments: text and data
+   (exclusive of .interp and .dynamic).
+
+   If this is called by the linker before any of the section VMA's are set, it
+   can't calculate the correct value for a strange memory layout.  This only
+   happens when SIZEOF_HEADERS is used in a linker script.  In this case,
+   SORTED_HDRS is NULL and we assume the normal scenario of one text and one
+   data segment (exclusive of .interp and .dynamic).
+
+   ??? User written scripts must either not use SIZEOF_HEADERS, or assume there
+   will be two segments.  */
 
 static bfd_size_type
-get_program_header_size (abfd)
+get_program_header_size (abfd, sorted_hdrs, count, maxpagesize)
      bfd *abfd;
+     Elf_Internal_Shdr **sorted_hdrs;
+     unsigned int count;
+     bfd_vma maxpagesize;
 {
   size_t segs;
   asection *s;
 
-  /* Assume we will need exactly two PT_LOAD segments: one for text
-     and one for data.  */
-  segs = 2;
+  /* We can't return a different result each time we're called.  */
+  if (elf_tdata (abfd)->program_header_size != 0)
+    return elf_tdata (abfd)->program_header_size;
+
+  if (sorted_hdrs != NULL)
+    {
+      unsigned int i;
+      unsigned int last_type;
+      Elf_Internal_Shdr **hdrpp;
+      /* What we think the current segment's offset is.  */
+      bfd_vma p_offset;
+      /* What we think the current segment's address is.  */
+      bfd_vma p_vaddr;
+      /* How big we think the current segment is.  */
+      bfd_vma p_memsz;
+      /* What we think the current file offset is.  */
+      bfd_vma file_offset;
+      bfd_vma next_offset;
+
+      /* Scan the headers and compute the number of segments required.  This
+	 code is intentionally similar to the code in map_program_segments.
+
+	 The `sh_offset' field isn't valid at this point, so we keep our own
+	 running total in `file_offset'.
+
+	 This works because section VMAs are already known.  */
+
+      segs = 1;
+      /* Make sure the first section goes in the first segment.  */
+      file_offset = p_offset = sorted_hdrs[0]->sh_addr % maxpagesize;
+      p_vaddr = sorted_hdrs[0]->sh_addr;
+      p_memsz = 0;
+      last_type = SHT_PROGBITS;
+
+      for (i = 0, hdrpp = sorted_hdrs; i < count; i++, hdrpp++)
+	{
+	  Elf_Internal_Shdr *hdr;
+
+	  hdr = *hdrpp;
+
+	  /* Ignore any section which will not be part of the process
+	     image.  */
+	  if ((hdr->sh_flags & SHF_ALLOC) == 0)
+	    continue;
+
+	  /* Keep track of where this and the next sections go.
+	     The section VMA must equal the file position modulo
+	     the page size.  */
+	  file_offset += (hdr->sh_addr - file_offset) % maxpagesize;
+	  next_offset = file_offset;
+	  if (hdr->sh_type != SHT_NOBITS)
+	    next_offset = file_offset + hdr->sh_size;
+
+	  /* If this section fits in the segment we are constructing, add
+	     it in.  */
+	  if ((file_offset - (p_offset + p_memsz)
+	       == hdr->sh_addr - (p_vaddr + p_memsz))
+	      && (last_type != SHT_NOBITS || hdr->sh_type == SHT_NOBITS))
+	    {
+	      bfd_size_type adjust;
+
+	      adjust = hdr->sh_addr - (p_vaddr + p_memsz);
+	      p_memsz += hdr->sh_size + adjust;
+	      file_offset = next_offset;
+	      last_type = hdr->sh_type;
+	      continue;
+	    }
+
+	  /* The section won't fit, start a new segment.  */
+	  ++segs;
+
+	  /* Initialize the segment.  */
+	  p_vaddr = hdr->sh_addr;
+	  p_memsz = hdr->sh_size;
+	  p_offset = file_offset;
+	  file_offset = next_offset;
+
+	  last_type = hdr->sh_type;
+	}
+    }
+  else
+    {
+      /* Assume we will need exactly two PT_LOAD segments: one for text
+	 and one for data.  */
+      segs = 2;
+    }
 
   s = bfd_get_section_by_name (abfd, ".interp");
   if (s != NULL && (s->flags & SEC_LOAD) != 0)
@@ -1750,7 +1854,8 @@ get_program_header_size (abfd)
       ++segs;
     }
 
-  return segs * sizeof (Elf_External_Phdr);
+  elf_tdata (abfd)->program_header_size = segs * sizeof (Elf_External_Phdr);
+  return elf_tdata (abfd)->program_header_size;
 }
 
 /* Create the program header.  OFF is the file offset where the
@@ -1877,14 +1982,15 @@ map_program_segments (abfd, off, first, sorted_hdrs, phdr_size)
 	  continue;
 	}
 
-      /* If we have a segment, move to the next one.  */
+      /* The section won't fit, start a new segment.  If we're already in one,
+	 move to the next one.  */
       if (phdr->p_type != PT_NULL)
 	{
 	  ++phdr;
 	  ++phdr_count;
 	}
 
-      /* Start a new segment.  */
+      /* Initialize the segment.  */
       phdr->p_type = PT_LOAD;
       phdr->p_offset = hdr->sh_offset;
       phdr->p_vaddr = hdr->sh_addr;
@@ -2050,16 +2156,7 @@ assign_file_positions_except_relocs (abfd, dosyms)
       Elf_Internal_Shdr *first;
       file_ptr phdr_map;
 
-      /* We are creating an executable.  We must create a program
-	 header.  We can't actually create the program header until we
-	 have set the file positions for the sections, but we can
-	 figure out how big it is going to be.  */
-      off = align_file_position (off);
-      phdr_size = get_program_header_size (abfd);
-      if (phdr_size == (file_ptr) -1)
-	return false;
-      phdr_off = off;
-      off += phdr_size;
+      /* We are creating an executable.  */
 
       maxpagesize = get_elf_backend_data (abfd)->maxpagesize;
       if (maxpagesize == 0)
@@ -2081,6 +2178,19 @@ assign_file_positions_except_relocs (abfd, dosyms)
       qsort (sorted_hdrs, i_ehdrp->e_shnum - 1, sizeof (Elf_Internal_Shdr *),
 	     elf_sort_hdrs);
 
+      /* We can't actually create the program header until we have set the
+	 file positions for the sections, and we can't do that until we know
+	 how big the header is going to be.  */
+      off = align_file_position (off);
+      phdr_size = get_program_header_size (abfd,
+					   sorted_hdrs, i_ehdrp->e_shnum - 1,
+					   maxpagesize);
+      if (phdr_size == (file_ptr) -1)
+	return false;
+
+      /* Compute the file offsets of each section.  */
+      phdr_off = off;
+      off += phdr_size;
       first = NULL;
       for (i = 1, hdrpp = sorted_hdrs; i < i_ehdrp->e_shnum; i++, hdrpp++)
 	{
@@ -2116,6 +2226,7 @@ assign_file_positions_except_relocs (abfd, dosyms)
 	  off = assign_file_position_for_section (hdr, off, false);
 	}
 
+      /* Create the program header.  */
       phdr_map = map_program_segments (abfd, phdr_off, first, sorted_hdrs,
 				       phdr_size);
       if (phdr_map == (file_ptr) -1)
@@ -3209,7 +3320,8 @@ elf_sizeof_headers (abfd, reloc)
 
   ret = sizeof (Elf_External_Ehdr);
   if (! reloc)
-    ret += get_program_header_size (abfd);
+    ret += get_program_header_size (abfd, (Elf_Internal_Shdr **) NULL, 0,
+				    (bfd_vma) 0);
   return ret;
 }
 
@@ -4297,7 +4409,8 @@ elf_link_add_object_symbols (abfd, info)
 	     clobbering sec to be bfd_und_section_ptr.  */
 	  if (dynamic && definition)
 	    {
-	      if (h->root.type == bfd_link_hash_defined)
+	      if (h->root.type == bfd_link_hash_defined
+		  || h->root.type == bfd_link_hash_defweak)
 		sec = bfd_und_section_ptr;
 	    }
 
@@ -4309,7 +4422,8 @@ elf_link_add_object_symbols (abfd, info)
 	     object in the link.  */
 	  if (! dynamic
 	      && definition
-	      && h->root.type == bfd_link_hash_defined
+	      && (h->root.type == bfd_link_hash_defined
+		  || h->root.type == bfd_link_hash_defweak)
 	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
 	      && (bfd_get_flavour (h->root.u.def.section->owner)
 		  == bfd_target_elf_flavour)
@@ -4332,7 +4446,7 @@ elf_link_add_object_symbols (abfd, info)
 	      && ! bfd_is_und_section (sec)
 	      && (h->root.type == bfd_link_hash_new
 		  || h->root.type == bfd_link_hash_undefined
-		  || h->root.type == bfd_link_hash_weak))
+		  || h->root.type == bfd_link_hash_undefweak))
 	    h->elf_link_hash_flags |= ELF_LINK_HASH_DEFINED_WEAK;
 	}
 
@@ -4454,7 +4568,8 @@ elf_link_add_object_symbols (abfd, info)
       weaks = hlook->weakdef;
       hlook->weakdef = NULL;
 
-      BFD_ASSERT (hlook->root.type == bfd_link_hash_defined);
+      BFD_ASSERT (hlook->root.type == bfd_link_hash_defined
+		  || hlook->root.type == bfd_link_hash_defweak);
       slook = hlook->root.u.def.section;
       vlook = hlook->root.u.def.value;
 
@@ -4466,7 +4581,8 @@ elf_link_add_object_symbols (abfd, info)
 
 	  h = *hpp;
 	  if (h != hlook
-	      && h->root.type == bfd_link_hash_defined
+	      && (h->root.type == bfd_link_hash_defined
+		  || h->root.type == bfd_link_hash_defweak)
 	      && h->root.u.def.section == slook
 	      && h->root.u.def.value == vlook)
 	    {
@@ -5136,9 +5252,11 @@ elf_adjust_dynamic_symbol (h, data)
     {
       struct elf_link_hash_entry *weakdef;
 
-      BFD_ASSERT (h->root.type == bfd_link_hash_defined);
+      BFD_ASSERT (h->root.type == bfd_link_hash_defined
+		  || h->root.type == bfd_link_hash_defweak);
       weakdef = h->weakdef;
-      BFD_ASSERT (weakdef->root.type == bfd_link_hash_defined);
+      BFD_ASSERT (weakdef->root.type == bfd_link_hash_defined
+		  || weakdef->root.type == bfd_link_hash_defweak);
       BFD_ASSERT (weakdef->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC);
       if ((weakdef->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
 	{
@@ -5703,7 +5821,8 @@ elf_bfd_final_link (abfd, info)
 		h = elf_link_hash_lookup (elf_hash_table (info), name,
 					  false, false, true);
 		BFD_ASSERT (h != NULL);
-		if (h->root.type == bfd_link_hash_defined)
+		if (h->root.type == bfd_link_hash_defined
+		    || h->root.type == bfd_link_hash_defweak)
 		  {
 		    dyn.d_un.d_val = h->root.u.def.value;
 		    o = h->root.u.def.section;
@@ -5980,7 +6099,8 @@ elf_link_output_extsym (h, data)
   sym.st_value = 0;
   sym.st_size = h->size;
   sym.st_other = 0;
-  if (h->root.type == bfd_link_hash_weak
+  if (h->root.type == bfd_link_hash_undefweak
+      || h->root.type == bfd_link_hash_defweak
       || (h->elf_link_hash_flags & ELF_LINK_HASH_DEFINED_WEAK) != 0)
     sym.st_info = ELF_ST_INFO (STB_WEAK, h->type);
   else
@@ -5998,12 +6118,13 @@ elf_link_output_extsym (h, data)
       sym.st_shndx = SHN_UNDEF;
       break;
 
-    case bfd_link_hash_weak:
+    case bfd_link_hash_undefweak:
       input_sec = bfd_und_section_ptr;
       sym.st_shndx = SHN_UNDEF;
       break;
 
     case bfd_link_hash_defined:
+    case bfd_link_hash_defweak:
       {
 	input_sec = h->root.u.def.section;
 	if (input_sec->output_section != NULL)

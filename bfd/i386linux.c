@@ -342,7 +342,8 @@ linux_add_one_symbol (info, abfd, name, flags, section, value, string,
   if (! info->relocateable
       && linux_hash_table (info)->dynobj == NULL
       && strcmp (name, SHARABLE_CONFLICTS) == 0
-      && (flags & BSF_CONSTRUCTOR) != 0)
+      && (flags & BSF_CONSTRUCTOR) != 0
+      && abfd->xvec == info->hash->creator)
     {
       if (! linux_link_create_dynamic_sections (abfd, info))
 	return false;
@@ -351,12 +352,13 @@ linux_add_one_symbol (info, abfd, name, flags, section, value, string,
     }
 
   if (bfd_is_abs_section (section)
-      && (IS_GOT_SYM (name) || IS_PLT_SYM (name)))
+      && abfd->xvec == info->hash->creator)
     {
       h = linux_link_hash_lookup (linux_hash_table (info), name, false,
 				  false, false);
       if (h != NULL
-	  && h->root.root.type == bfd_link_hash_defined)
+	  && (h->root.root.type == bfd_link_hash_defined
+	      || h->root.root.type == bfd_link_hash_defweak))
 	{
 	  struct fixup *f;
 
@@ -445,7 +447,8 @@ linux_tally_symbols (h, data)
 	 fixup anyway, since there are cases where these symbols come
 	 from different shared libraries */
       if (h1 != NULL
-	  && ((h1->root.root.type == bfd_link_hash_defined
+	  && (((h1->root.root.type == bfd_link_hash_defined
+		|| h1->root.root.type == bfd_link_hash_defweak)
 	       && ! bfd_is_abs_section (h1->root.root.u.def.section))
 	      || h2->root.root.type == bfd_link_hash_indirect))
 	{
@@ -458,9 +461,11 @@ linux_tally_symbols (h, data)
 	       f1 != NULL;
 	       f1 = f1->next)
 	    {
-	      if (f1->h != h
+	      if ((f1->h != h && f1->h != h1)
 		  || (! f1->builtin && ! f1->jump))
 		continue;
+	      if (f1->h == h1)
+		exists = true;
 	      if (! exists
 		  && bfd_is_abs_section (h->root.root.u.def.section))
 		{
@@ -593,7 +598,8 @@ linux_finish_dynamic_link (output_bfd, info)
       if (f->builtin)
 	continue;
 
-      if (f->h->root.root.type != bfd_link_hash_defined)
+      if (f->h->root.root.type != bfd_link_hash_defined
+	  && f->h->root.root.type != bfd_link_hash_defweak)
 	{
 	  /* FIXME!  */
 	  fprintf (stderr,
@@ -643,7 +649,8 @@ linux_finish_dynamic_link (output_bfd, info)
 	  if (! f->builtin)
 	    continue;
 
-	  if (f->h->root.root.type != bfd_link_hash_defined)
+	  if (f->h->root.root.type != bfd_link_hash_defined
+	      && f->h->root.root.type != bfd_link_hash_defweak)
 	    {
 	      /* FIXME!  */
 	      fprintf (stderr,
@@ -687,7 +694,9 @@ linux_finish_dynamic_link (output_bfd, info)
 			      "__BUILTIN_FIXUPS__",
 			      false, false, false);
 
-  if (h != NULL && h->root.root.type == bfd_link_hash_defined)
+  if (h != NULL
+      && (h->root.root.type == bfd_link_hash_defined
+	  || h->root.root.type == bfd_link_hash_defweak))
     {
       is = h->root.root.u.def.section;
       section_offset = is->output_section->vma + is->output_offset;

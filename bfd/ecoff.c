@@ -1,5 +1,5 @@
 /* Generic ECOFF (Extended-COFF) routines.
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
 
@@ -1358,7 +1358,7 @@ ecoff_type_to_string (abfd, fdr, indx)
   } qualifiers[7];
   unsigned int basic_type;
   int i;
-  static char buffer1[1024];
+  char buffer1[1024];
   static char buffer2[1024];
   char *p1 = buffer1;
   char *p2 = buffer2;
@@ -2027,6 +2027,8 @@ _bfd_ecoff_find_nearest_line (abfd, section, ignore_symbols, offset,
   FDR *fdr_hold;
   boolean stabs;
 
+  offset += section->vma;
+
   /* If we're not in the .text section, we don't have any line
      numbers.  */
   if (strcmp (section->name, _TEXT) != 0
@@ -2091,14 +2093,14 @@ _bfd_ecoff_find_nearest_line (abfd, section, ignore_symbols, offset,
 	 list of procedure descriptors (PDR).  PDR's also have an
 	 address, which is relative to the FDR address, and are also
 	 stored in increasing memory order.  */
+      if (offset < fdr_ptr->adr)
+	return false;
       offset -= fdr_ptr->adr;
       external_pdr_size = debug_swap->external_pdr_size;
       pdr_ptr = ((char *) debug_info->external_pdr
 		 + fdr_ptr->ipdFirst * external_pdr_size);
       pdr_end = pdr_ptr + fdr_ptr->cpd * external_pdr_size;
       (*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr);
-      if (offset < pdr.adr)
-	return false;
 
       /* The address of the first PDR is an offset which applies to
 	 the addresses of all the PDR's.  */
@@ -2109,7 +2111,7 @@ _bfd_ecoff_find_nearest_line (abfd, section, ignore_symbols, offset,
 	   pdr_ptr += external_pdr_size)
 	{
 	  (*debug_swap->swap_pdr_in) (abfd, (PTR) pdr_ptr, &pdr);
-	  if (offset < pdr.adr)
+	  if (offset < pdr.adr - first_off)
 	    break;
 	}
 
@@ -3860,6 +3862,9 @@ ecoff_link_add_archive_symbols (abfd, info)
 
   if (! bfd_has_map (abfd))
     {
+      /* An empty archive is a special case.  */
+      if (bfd_openr_next_archived_file (abfd, (bfd *) NULL) == NULL)
+	return true;
       bfd_set_error (bfd_error_no_symbols);
       return false;
     }
@@ -4360,7 +4365,8 @@ ecoff_link_add_externals (abfd, info, external_ext, ssext)
 	  if (h->abfd == (bfd *) NULL
 	      || (! bfd_is_und_section (section)
 		  && (! bfd_is_com_section (section)
-		      || h->root.type != bfd_link_hash_defined)))
+		      || (h->root.type != bfd_link_hash_defined
+			  && h->root.type != bfd_link_hash_defweak))))
 	    {
 	      h->abfd = abfd;
 	      h->esym = esym;
@@ -4732,7 +4738,8 @@ ecoff_link_write_external (h, data)
       h->esym.asym.value = 0;
       h->esym.asym.st = stGlobal;
 
-      if (h->root.type != bfd_link_hash_defined)
+      if (h->root.type != bfd_link_hash_defined
+	  && h->root.type != bfd_link_hash_defweak)
 	h->esym.asym.sc = scAbs;
       else
 	{
@@ -4787,12 +4794,13 @@ ecoff_link_write_external (h, data)
     case bfd_link_hash_new:
       abort ();
     case bfd_link_hash_undefined:
-    case bfd_link_hash_weak:
+    case bfd_link_hash_undefweak:
       if (h->esym.asym.sc != scUndefined
 	  && h->esym.asym.sc != scSUndefined)
 	h->esym.asym.sc = scUndefined;
       break;
     case bfd_link_hash_defined:
+    case bfd_link_hash_defweak:
       if (h->esym.asym.sc == scUndefined
 	  || h->esym.asym.sc == scSUndefined)
 	h->esym.asym.sc = scAbs;
@@ -4979,7 +4987,7 @@ ecoff_reloc_link_order (output_bfd, info, output_section, link_order)
   rel.address = link_order->offset;
 
   rel.howto = bfd_reloc_type_lookup (output_bfd, link_order->u.reloc.p->reloc);
-  if (rel.howto == (const reloc_howto_type *) NULL)
+  if (rel.howto == 0)
     {
       bfd_set_error (bfd_error_bad_value);
       return false;

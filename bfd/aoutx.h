@@ -562,35 +562,33 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
 
   result = (*callback_to_real_object_p)(abfd);
 
-#ifdef STAT_FOR_EXEC
-  /* The original heuristic doesn't work in some important cases. The
-   * a.out file has no information about the text start address. For
-   * files (like kernels) linked to non-standard addresses (ld -Ttext
-   * nnn) the entry point may not be between the default text start
-   * (obj_textsec(abfd)->vma) and (obj_textsec(abfd)->vma) + text size
-   * This is not just a mach issue. Many kernels are loaded at non
-   * standard addresses.
-   */
-  {
-    struct stat stat_buf;
-    if (abfd->iostream
-	&& (fstat(fileno((FILE *) (abfd->iostream)), &stat_buf) == 0)
-	&& ((stat_buf.st_mode & 0111) != 0))
-      abfd->flags |= EXEC_P;
-  }
-#else /* ! defined (STAT_FOR_EXEC) */
   /* Now that the segment addresses have been worked out, take a better
      guess at whether the file is executable.  If the entry point
      is within the text segment, assume it is.  (This makes files
      executable even if their entry point address is 0, as long as
-     their text starts at zero.)
-
-     At some point we should probably break down and stat the file and
-     declare it executable if (one of) its 'x' bits are on...  */
+     their text starts at zero.).  */
   if ((execp->a_entry >= obj_textsec(abfd)->vma) &&
       (execp->a_entry < obj_textsec(abfd)->vma + obj_textsec(abfd)->_raw_size))
     abfd->flags |= EXEC_P;
-#endif /* ! defined (STAT_FOR_EXEC) */
+#ifdef STAT_FOR_EXEC
+  else
+    {
+      struct stat stat_buf;
+
+      /* The original heuristic doesn't work in some important cases.
+        The a.out file has no information about the text start
+        address.  For files (like kernels) linked to non-standard
+        addresses (ld -Ttext nnn) the entry point may not be between
+        the default text start (obj_textsec(abfd)->vma) and
+        (obj_textsec(abfd)->vma) + text size.  This is not just a mach
+        issue.  Many kernels are loaded at non standard addresses.  */
+      if (abfd->iostream
+	  && (fstat(fileno((FILE *) (abfd->iostream)), &stat_buf) == 0)
+	  && ((stat_buf.st_mode & 0111) != 0))
+	abfd->flags |= EXEC_P;
+    }
+#endif /* STAT_FOR_EXEC */
+
   if (result)
     {
 #if 0 /* These should be set correctly anyways.  */
@@ -3789,6 +3787,7 @@ aout_link_write_symbols (finfo, input_bfd)
 	  else if (((type & N_TYPE) == N_INDR
 		    && (hresolve == (struct aout_link_hash_entry *) NULL
 			|| (hresolve->root.type != bfd_link_hash_defined
+			    && hresolve->root.type != bfd_link_hash_defweak
 			    && hresolve->root.type != bfd_link_hash_common)))
 		   || type == N_WARNING)
 	    {
@@ -3841,13 +3840,14 @@ aout_link_write_symbols (finfo, input_bfd)
 		      break;
 		    }
 		}
-	      else if (hresolve->root.type == bfd_link_hash_defined)
+	      else if (hresolve->root.type == bfd_link_hash_defined
+		       || hresolve->root.type == bfd_link_hash_defweak)
 		{
 		  asection *input_section;
 		  asection *output_section;
 
-		  /* This case means a common symbol which was turned
-		     into a defined symbol.  */
+		  /* This case usually means a common symbol which was
+		     turned into a defined symbol.  */
 		  input_section = hresolve->root.u.def.section;
 		  output_section = input_section->output_section;
 		  BFD_ASSERT (bfd_is_abs_section (output_section)
@@ -3868,17 +3868,25 @@ aout_link_write_symbols (finfo, input_bfd)
 		  type &=~ N_TYPE;
 
 		  if (output_section == obj_textsec (output_bfd))
-		    type |= N_TEXT;
+		    type |= (hresolve->root.type == bfd_link_hash_defined
+			     ? N_TEXT
+			     : N_WEAKT);
 		  else if (output_section == obj_datasec (output_bfd))
-		    type |= N_DATA;
+		    type |= (hresolve->root.type == bfd_link_hash_defined
+			     ? N_DATA
+			     : N_WEAKD);
 		  else if (output_section == obj_bsssec (output_bfd))
-		    type |= N_BSS;
+		    type |= (hresolve->root.type == bfd_link_hash_defined
+			     ? N_BSS
+			     : N_WEAKB);
 		  else
-		    type |= N_ABS;
+		    type |= (hresolve->root.type == bfd_link_hash_defined
+			     ? N_ABS
+			     : N_WEAKA);
 		}
 	      else if (hresolve->root.type == bfd_link_hash_common)
 		val = hresolve->root.u.c.size;
-	      else if (hresolve->root.type == bfd_link_hash_weak)
+	      else if (hresolve->root.type == bfd_link_hash_undefweak)
 		{
 		  val = 0;
 		  type = N_WEAKU;
@@ -4030,6 +4038,7 @@ aout_link_write_other_symbol (h, data)
       val = 0;
       break;
     case bfd_link_hash_defined:
+    case bfd_link_hash_defweak:
       {
 	asection *sec;
 
@@ -4037,13 +4046,14 @@ aout_link_write_other_symbol (h, data)
 	BFD_ASSERT (bfd_is_abs_section (sec)
 		    || sec->owner == output_bfd);
 	if (sec == obj_textsec (output_bfd))
-	  type = N_TEXT | N_EXT;
+	  type = h->root.type == bfd_link_hash_defined ? N_TEXT : N_WEAKT;
 	else if (sec == obj_datasec (output_bfd))
-	  type = N_DATA | N_EXT;
+	  type = h->root.type == bfd_link_hash_defined ? N_DATA : N_WEAKD;
 	else if (sec == obj_bsssec (output_bfd))
-	  type = N_BSS | N_EXT;
+	  type = h->root.type == bfd_link_hash_defined ? N_BSS : N_WEAKB;
 	else
-	  type = N_ABS | N_EXT;
+	  type = h->root.type == bfd_link_hash_defined ? N_ABS : N_WEAKA;
+	type |= N_EXT;
 	val = (h->root.u.def.value
 	       + sec->vma
 	       + h->root.u.def.section->output_offset);
@@ -4053,7 +4063,7 @@ aout_link_write_other_symbol (h, data)
       type = N_UNDF | N_EXT;
       val = h->root.u.c.size;
       break;
-    case bfd_link_hash_weak:
+    case bfd_link_hash_undefweak:
       type = N_WEAKU;
       val = 0;
     case bfd_link_hash_indirect:
@@ -4305,7 +4315,8 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 		 is what the native linker does.  */
 	      h = sym_hashes[r_index];
 	      if (h != (struct aout_link_hash_entry *) NULL
-		  && h->root.type == bfd_link_hash_defined)
+		  && (h->root.type == bfd_link_hash_defined
+		      || h->root.type == bfd_link_hash_defweak))
 		{
 		  asection *output_section;
 
@@ -4443,14 +4454,15 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 		}
 
 	      if (h != (struct aout_link_hash_entry *) NULL
-		  && h->root.type == bfd_link_hash_defined)
+		  && (h->root.type == bfd_link_hash_defined
+		      || h->root.type == bfd_link_hash_defweak))
 		{
 		  relocation = (h->root.u.def.value
 				+ h->root.u.def.section->output_section->vma
 				+ h->root.u.def.section->output_offset);
 		}
 	      else if (h != (struct aout_link_hash_entry *) NULL
-		       && h->root.type == bfd_link_hash_weak)
+		       && h->root.type == bfd_link_hash_undefweak)
 		relocation = 0;
 	      else
 		{
@@ -4606,7 +4618,8 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 		 is what the native linker does.  */
 	      h = sym_hashes[r_index];
 	      if (h != (struct aout_link_hash_entry *) NULL
-		  && h->root.type == bfd_link_hash_defined)
+		  && (h->root.type == bfd_link_hash_defined
+		      || h->root.type == bfd_link_hash_defweak))
 		{
 		  asection *output_section;
 
@@ -4761,14 +4774,15 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 		}
 
 	      if (h != (struct aout_link_hash_entry *) NULL
-		  && h->root.type == bfd_link_hash_defined)
+		  && (h->root.type == bfd_link_hash_defined
+		      || h->root.type == bfd_link_hash_defweak))
 		{
 		  relocation = (h->root.u.def.value
 				+ h->root.u.def.section->output_section->vma
 				+ h->root.u.def.section->output_offset);
 		}
 	      else if (h != (struct aout_link_hash_entry *) NULL
-		       && h->root.type == bfd_link_hash_weak)
+		       && h->root.type == bfd_link_hash_undefweak)
 		relocation = 0;
 	      else
 		{

@@ -385,7 +385,8 @@ coff_a29k_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  else
 	    {
-	      if (h->root.type == bfd_link_hash_defined)
+	      if (h->root.type == bfd_link_hash_defined
+		  || h->root.type == bfd_link_hash_defweak)
 		{
 		  sec = h->root.u.def.section;
 		  val = (h->root.u.def.value

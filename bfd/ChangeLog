@@ -1,3 +1,53 @@
+Mon Feb  6 14:25:24 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	Distinguish a weak defined symbol from a regular defined symbol.
+	* linker.c (enum link_action): Add DEFW.
+	(link_action): Add bfd_link_hash_defweak column.
+	(_bfd_generic_link_add_one_symbol): Add DEFW case.  Handle
+	bfd_link_hash_defweak in a few other cases.
+	* Many files (bfd_link_hash_undefweak): Renamed from
+	bfd_link_hash_weak.
+	* aoutx.h (aout_link_write_symbols): Handle bfd_link_hash_defweak.
+	(aout_link_write_other_symbol): Likewise.
+	(aout_link_input_section_std): Likewise.
+	(aout_link_input_section_ext): Likewise.
+	* bout.c (get_value): Likewise.
+	* coff-a29k.c (coff_a29k_relocate_section): Likewise.
+	* coff-alpha.c (alpha_convert_external_reloc): Likewise.
+	(alpha_relocate_section): Likewise.
+	* coff-mips.c (mips_relocate_section): Likewise.
+	(mips_relax_section): Likewise.
+	(bfd_mips_ecoff_create_embedded_relocs): Likewise.
+	* cofflink.c (coff_write_global_sym): Likewise.
+	(_bfd_coff_generic_relocate_section): Likewise.
+	* ecoff.c (ecoff_link_add_externals): Likewise.
+	(ecoff_link_write_external): LIkewise.
+	* elf32-hppa.c (elf32_hppa_relocate_section): Likewise.
+	(elf32_hppa_size_stubs): Likewise.
+	* elf32-i386.c (elf_i386_adjust_dynamic_symbol): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_finish_dynamic_symbol): Likewise.
+	* elf32-mips.c (mips_elf_output_extsym): Likewise.
+	(mips_elf_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_adjust_dynamic_symbol): Likewise.
+	(elf32_sparc_relocate_section): Likewise.
+	* elfcode.h (elf_link_add_object_symbols): Likewise.
+	(elf_adjust_dynamic_symbol): Likewise.
+	(elf_bfd_final_link): Likewise.
+	(elf_link_output_extsym): Likewise.
+	* i386linux.c (linux_add_one_symbol): Likewise.
+	(linux_tally_symbols): Likewise.
+	(linux_finish_dynamic_link): Likewise.
+	* linker.c (_bfd_generic_link_output_symbols): Likewise.
+	(set_symbol_from_hash): Likewise.
+	* reloc16.c (bfd_coff_reloc16_get_value): Likewise.
+	(bfd_perform_slip): Likewise.
+	* sunos.c (sunos_add_one_symbol): Likewise.
+	(sunos_scan_std_relocs): Likewise.
+	(sunos_scan_ext_relocs): Likewise.
+	(sunos_scan_dynamic_symbol): Likewise.
+	(sunos_write_dynamic_symbol): Likewise.
+
 Mon Feb  6 03:20:17 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	Changes from Bryan Ford, baford@schirf.cs.utah.edu:

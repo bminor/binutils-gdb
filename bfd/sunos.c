@@ -1,5 +1,5 @@
 /* BFD backend for SunOS binaries.
-   Copyright (C) 1990, 91, 92, 93, 94 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -859,7 +859,8 @@ sunos_add_one_symbol (info, abfd, name, flags, section, value, string,
 
   if (! bfd_is_und_section (section)
       && h->root.root.type != bfd_link_hash_new
-      && h->root.root.type != bfd_link_hash_undefined)
+      && h->root.root.type != bfd_link_hash_undefined
+      && h->root.root.type != bfd_link_hash_defweak)
     {
       /* We are defining the symbol, and it is already defined.  This
 	 is a potential multiple definition error.  */
@@ -1297,9 +1298,10 @@ sunos_scan_std_relocs (info, abfd, sec, relocs, rel_size)
       /* At this point common symbols have already been allocated, so
 	 we don't have to worry about them.  We need to consider that
 	 we may have already seen this symbol and marked it undefined;
-	 if the symbols is really undefined, then SUNOS_DEF_DYNAMIC
+	 if the symbol is really undefined, then SUNOS_DEF_DYNAMIC
 	 will be zero.  */
       if (h->root.root.type != bfd_link_hash_defined
+	  && h->root.root.type != bfd_link_hash_defweak
 	  && h->root.root.type != bfd_link_hash_undefined)
 	continue;
 
@@ -1308,7 +1310,8 @@ sunos_scan_std_relocs (info, abfd, sec, relocs, rel_size)
 	continue;
 
       BFD_ASSERT ((h->flags & SUNOS_REF_REGULAR) != 0);
-      BFD_ASSERT (h->root.root.type == bfd_link_hash_defined
+      BFD_ASSERT ((h->root.root.type == bfd_link_hash_defined
+		   || h->root.root.type == bfd_link_hash_defweak)
 		  ? (h->root.root.u.def.section->owner->flags & DYNAMIC) != 0
 		  : (h->root.root.u.undef.abfd->flags & DYNAMIC) != 0);
 
@@ -1444,6 +1447,7 @@ sunos_scan_ext_relocs (info, abfd, sec, relocs, rel_size)
 	 if the symbols is really undefined, then SUNOS_DEF_DYNAMIC
 	 will be zero.  */
       if (h->root.root.type != bfd_link_hash_defined
+	  && h->root.root.type != bfd_link_hash_defweak
 	  && h->root.root.type != bfd_link_hash_undefined)
 	continue;
 
@@ -1452,7 +1456,8 @@ sunos_scan_ext_relocs (info, abfd, sec, relocs, rel_size)
 	continue;
 
       BFD_ASSERT ((h->flags & SUNOS_REF_REGULAR) != 0);
-      BFD_ASSERT (h->root.root.type == bfd_link_hash_defined
+      BFD_ASSERT ((h->root.root.type == bfd_link_hash_defined
+		   || h->root.root.type == bfd_link_hash_defweak)
 		  ? (h->root.root.u.def.section->owner->flags & DYNAMIC) != 0
 		  : (h->root.root.u.undef.abfd->flags & DYNAMIC) != 0);
 
@@ -1527,7 +1532,8 @@ sunos_scan_dynamic_symbol (h, data)
       && (h->flags & SUNOS_DEF_DYNAMIC) != 0
       && (h->flags & SUNOS_REF_REGULAR) != 0)
     {
-      if (h->root.root.type == bfd_link_hash_defined
+      if ((h->root.root.type == bfd_link_hash_defined
+	   || h->root.root.type == bfd_link_hash_defweak)
 	  && ((h->root.root.u.def.section->owner->flags & DYNAMIC) != 0)
 	  && h->root.root.u.def.section->output_section == NULL)
 	{
@@ -1665,6 +1671,7 @@ sunos_write_dynamic_symbol (output_bfd, info, harg)
       val = 0;
       break;
     case bfd_link_hash_defined:
+    case bfd_link_hash_defweak:
       {
 	asection *sec;
 	asection *output_section;
@@ -1682,13 +1689,22 @@ sunos_write_dynamic_symbol (output_bfd, info, harg)
 	else
 	  {
 	    if (output_section == obj_textsec (output_bfd))
-	      type = N_TEXT | N_EXT;
+	      type = (h->root.root.type == bfd_link_hash_defined
+		      ? N_TEXT
+		      : N_WEAKT);
 	    else if (output_section == obj_datasec (output_bfd))
-	      type = N_DATA | N_EXT;
+	      type = (h->root.root.type == bfd_link_hash_defined
+		      ? N_DATA
+		      : N_WEAKD);
 	    else if (output_section == obj_bsssec (output_bfd))
-	      type = N_BSS | N_EXT;
+	      type = (h->root.root.type == bfd_link_hash_defined
+		      ? N_BSS
+		      : N_WEAKB);
 	    else
-	      type = N_ABS | N_EXT;
+	      type = (h->root.root.type == bfd_link_hash_defined
+		      ? N_ABS
+		      : N_WEAKA);
+	    type |= N_EXT;
 	    val = (h->root.root.u.def.value
 		   + output_section->vma
 		   + sec->output_offset);
@@ -1699,7 +1715,7 @@ sunos_write_dynamic_symbol (output_bfd, info, harg)
       type = N_UNDF | N_EXT;
       val = h->root.root.u.c.size;
       break;
-    case bfd_link_hash_weak:
+    case bfd_link_hash_undefweak:
       type = N_WEAKU;
       val = 0;
       break;

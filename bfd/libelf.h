@@ -308,12 +308,13 @@ struct elf_backend_data
      referenced by a regular object.  This is called after all the
      input files have been seen, but before the SIZE_DYNAMIC_SECTIONS
      function has been called.  The hash table entry should be
-     bfd_link_hash_defined, and it should be defined in a section from
-     a dynamic object.  Dynamic object sections are not included in
-     the final link, and this function is responsible for changing the
-     value to something which the rest of the link can deal with.
-     This will normally involve adding an entry to the .plt or .got or
-     some such section, and setting the symbol to point to that.  */
+     bfd_link_hash_defined ore bfd_link_hash_defweak, and it should be
+     defined in a section from a dynamic object.  Dynamic object
+     sections are not included in the final link, and this function is
+     responsible for changing the value to something which the rest of
+     the link can deal with.  This will normally involve adding an
+     entry to the .plt or .got or some such section, and setting the
+     symbol to point to that.  */
   boolean (*elf_backend_adjust_dynamic_symbol)
     PARAMS ((struct bfd_link_info *info, struct elf_link_hash_entry *h));
 

@@ -1,5 +1,5 @@
 /* linker.c -- BFD linker routines
-   Copyright (C) 1993, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1995 Free Software Foundation, Inc.
    Written by Steve Chamberlain and Ian Lance Taylor, Cygnus Support
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -380,10 +380,7 @@ SUBSUBSECTION
 	written out when considering the symbols of each input file,
 	but it is still necessary to traverse the hash table since the
 	linker script may have defined some symbols that are not in
-	any of the input files.  The <<written>> field in the
-	<<bfd_link_hash_entry>> structure may be used to determine
-	which entries in the hash table have not already been written
-	out.
+	any of the input files.
 
 	The <<strip>> field of the <<bfd_link_info>> structure
 	controls which symbols are written out.  The possible values
@@ -1065,9 +1062,9 @@ generic_link_check_archive_element (abfd, info, pneeded, collect)
 
       /* We are only interested if we know something about this
 	 symbol, and it is undefined or common.  An undefined weak
-	 symbol (type bfd_link_hash_weak) is not considered to be a
-	 reference when pulling files out of an archive.  See the SVR4
-	 ABI, p. 4-27.  */
+	 symbol (type bfd_link_hash_undefweak) is not considered to be
+	 a reference when pulling files out of an archive.  See the
+	 SVR4 ABI, p. 4-27.  */
       h = bfd_link_hash_lookup (info->hash, bfd_asymbol_name (p), false,
 				false, true);
       if (h == (struct bfd_link_hash_entry *) NULL
@@ -1287,6 +1284,7 @@ enum link_action
   UND,		/* Mark symbol undefined.  */
   WEAK,		/* Mark symbol weak undefined.  */
   DEF,		/* Mark symbol defined.  */
+  DEFW,		/* Mark symbol weak defined.  */
   COM,		/* Mark symbol common.  */
   REF,		/* Mark defined symbol referenced.  */
   CREF,		/* Possibly warn about common reference to defined symbol.  */
@@ -1309,17 +1307,17 @@ enum link_action
 /* The state table itself.  The first index is a link_row and the
    second index is a bfd_link_hash_type.  */
 
-static const enum link_action link_action[8][7] =
+static const enum link_action link_action[8][8] =
 {
-  /* current\prev    new    undef  weak   def    com    indr   warn  */
-  /* UNDEF_ROW 	*/  {UND,   NOACT, NOACT, REF,   NOACT, REFC,  WARNC },
-  /* UNDEFW_ROW	*/  {WEAK,  WEAK,  NOACT, REF,   NOACT, REFC,  WARNC },
-  /* DEF_ROW 	*/  {DEF,   DEF,   DEF,   MDEF,  CDEF,  MDEF,  CYCLE },
-  /* DEFW_ROW 	*/  {DEF,   DEF,   DEF,   NOACT, NOACT, NOACT, CYCLE },
-  /* COMMON_ROW	*/  {COM,   COM,   COM,   CREF,  BIG,   CREF,  WARNC },
-  /* INDR_ROW	*/  {IND,   IND,   IND,   MDEF,  CIND,  MIND,  CYCLE },
-  /* WARN_ROW   */  {MWARN, WARN,  WARN,  CWARN, WARN,  CWARN, CYCLE },
-  /* SET_ROW	*/  {SET,   SET,   SET,   SET,   SET,   CYCLE, CYCLE }
+  /* current\prev    new    undef  undefw def    defw   com    indr   warn  */
+  /* UNDEF_ROW 	*/  {UND,   NOACT, NOACT, REF,   REF,   NOACT, REFC,  WARNC },
+  /* UNDEFW_ROW	*/  {WEAK,  WEAK,  NOACT, REF,   REF,   NOACT, REFC,  WARNC },
+  /* DEF_ROW 	*/  {DEF,   DEF,   DEF,   MDEF,  DEF,   CDEF,  MDEF,  CYCLE },
+  /* DEFW_ROW 	*/  {DEFW,  DEFW,  DEFW,  NOACT, NOACT, NOACT, NOACT, CYCLE },
+  /* COMMON_ROW	*/  {COM,   COM,   COM,   CREF,  CREF,  BIG,   CREF,  WARNC },
+  /* INDR_ROW	*/  {IND,   IND,   IND,   MDEF,  IND,   CIND,  MIND,  CYCLE },
+  /* WARN_ROW   */  {MWARN, WARN,  WARN,  CWARN, CWARN, WARN,  CWARN, CYCLE },
+  /* SET_ROW	*/  {SET,   SET,   SET,   SET,   SET,   SET,   CYCLE, CYCLE }
 };
 
 /* Most of the entries in the LINK_ACTION table are straightforward,
@@ -1453,7 +1451,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 
 	case WEAK:
 	  /* Make a new weak undefined symbol.  */
-	  h->type = bfd_link_hash_weak;
+	  h->type = bfd_link_hash_undefweak;
 	  h->u.undef.abfd = abfd;
 	  break;
 
@@ -1468,50 +1466,69 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	    return false;
 	  /* Fall through.  */
 	case DEF:
-	  /* Define a symbol.  */
-	  h->type = bfd_link_hash_defined;
-	  h->u.def.section = section;
-	  h->u.def.value = value;
+	case DEFW:
+	  {
+	    enum bfd_link_order_type oldtype;
 
-	  /* If we have been asked to, we act like collect2 and
-	     identify all functions that might be global constructors
-	     and destructors and pass them up in a callback.  We only
-	     do this for certain object file types, since many object
-	     file types can handle this automatically.  */
-	  if (collect && name[0] == '_')
-	    {
-	      const char *s;
+	    /* Define a symbol.  */
+	    oldtype = h->type;
+	    if (action == DEFW)
+	      h->type = bfd_link_hash_defweak;
+	    else
+	      h->type = bfd_link_hash_defined;
+	    h->u.def.section = section;
+	    h->u.def.value = value;
 
-	      /* A constructor or destructor name starts like this:
-		   _+GLOBAL_[_.$][ID][_.$]
-		 where the first [_.$] and the second are the same
-		 character (we accept any character there, in case a
-		 new object file format comes along with even worse
-		 naming restrictions).  */
+	    /* If we have been asked to, we act like collect2 and
+	       identify all functions that might be global
+	       constructors and destructors and pass them up in a
+	       callback.  We only do this for certain object file
+	       types, since many object file types can handle this
+	       automatically.  */
+	    if (collect && name[0] == '_')
+	      {
+		const char *s;
+
+		/* A constructor or destructor name starts like this:
+		   _+GLOBAL_[_.$][ID][_.$] where the first [_.$] and
+		   the second are the same character (we accept any
+		   character there, in case a new object file format
+		   comes along with even worse naming restrictions).  */
 
 #define CONS_PREFIX "GLOBAL_"
 #define CONS_PREFIX_LEN (sizeof CONS_PREFIX - 1)
 
-	      s = name + 1;
-	      while (*s == '_')
-		++s;
-	      if (s[0] == 'G'
-		  && strncmp (s, CONS_PREFIX, CONS_PREFIX_LEN - 1) == 0)
-		{
-		  char c;
+		s = name + 1;
+		while (*s == '_')
+		  ++s;
+		if (s[0] == 'G'
+		    && strncmp (s, CONS_PREFIX, CONS_PREFIX_LEN - 1) == 0)
+		  {
+		    char c;
 
-		  c = s[CONS_PREFIX_LEN + 1];
-		  if ((c == 'I' || c == 'D')
-		      && s[CONS_PREFIX_LEN] == s[CONS_PREFIX_LEN + 2])
-		    {
-		      if (! ((*info->callbacks->constructor)
-			     (info,
-			      c == 'I' ? true : false,
-			      name, abfd, section, value)))
-			return false;
-		    }
-		}
-	    }
+		    c = s[CONS_PREFIX_LEN + 1];
+		    if ((c == 'I' || c == 'D')
+			&& s[CONS_PREFIX_LEN] == s[CONS_PREFIX_LEN + 2])
+		      {
+			/* If this is a definition of a symbol which
+                           was previously weakly defined, we are in
+                           trouble.  We have already added a
+                           constructor entry for the weak defined
+                           symbol, and now we are trying to add one
+                           for the new symbol.  Fortunately, this case
+                           should never arise in practice.  */
+			if (oldtype == bfd_link_hash_defweak)
+			  abort ();
+
+			if (! ((*info->callbacks->constructor)
+			       (info,
+				c == 'I' ? true : false,
+				name, abfd, section, value)))
+			  return false;
+		      }
+		  }
+	      }
+	  }
 
 	  break;
 
@@ -1602,7 +1619,8 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	       was already defined.  FIXME: It would nice if we could
 	       report the BFD which defined an indirect symbol, but we
 	       don't have anywhere to store the information.  */
-	    if (h->type == bfd_link_hash_defined)
+	    if (h->type == bfd_link_hash_defined
+		|| h->type == bfd_link_hash_defweak)
 	      obfd = h->u.def.section->owner;
 	    else
 	      obfd = NULL;
@@ -1630,10 +1648,6 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	      case bfd_link_hash_defined:
 		msec = h->u.def.section;
 		mval = h->u.def.value;
-		break;
-	      case bfd_link_hash_common:
-		msec = bfd_com_section_ptr;
-		mval = h->u.c.size;
 		break;
 	      case bfd_link_hash_indirect:
 		msec = bfd_ind_section_ptr;
@@ -1738,10 +1752,10 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 
 	case CWARN:
 	  /* Warn if this symbol has been referenced already,
-	     otherwise either add a warning or cycle.  A symbol has
-	     been referenced if the next field is not NULL, or it is
-	     the tail of the undefined symbol list.  The REF case
-	     above helps to ensure this.  */
+	     otherwise add a warning.  A symbol has been referenced if
+	     the next field is not NULL, or it is the tail of the
+	     undefined symbol list.  The REF case above helps to
+	     ensure this.  */
 	  if (h->next != NULL || info->hash->undefs_tail == h)
 	    {
 	      if (! (*info->callbacks->warning) (info, string))
@@ -2037,12 +2051,19 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
 		case bfd_link_hash_new:
 		  abort ();
 		case bfd_link_hash_undefined:
-		case bfd_link_hash_weak:
+		  break;
+		case bfd_link_hash_undefweak:
+		  sym->flags |= BSF_WEAK;
 		  break;
 		case bfd_link_hash_defined:
+		  sym->flags |= BSF_GLOBAL;
 		  sym->value = h->root.u.def.value;
 		  sym->section = h->root.u.def.section;
-		  sym->flags |= BSF_GLOBAL;
+		  break;
+		case bfd_link_hash_defweak:
+		  sym->flags |= BSF_WEAK;
+		  sym->value = h->root.u.def.value;
+		  sym->section = h->root.u.def.section;
 		  break;
 		case bfd_link_hash_common:
 		  sym->value = h->root.u.c.size;
@@ -2160,12 +2181,17 @@ set_symbol_from_hash (sym, h)
       sym->section = bfd_und_section_ptr;
       sym->value = 0;
       break;
-    case bfd_link_hash_weak:
+    case bfd_link_hash_undefweak:
       sym->section = bfd_und_section_ptr;
       sym->value = 0;
       sym->flags |= BSF_WEAK;
       break;
     case bfd_link_hash_defined:
+      sym->section = h->u.def.section;
+      sym->value = h->u.def.value;
+      break;
+    case bfd_link_hash_defweak:
+      sym->flags |= BSF_WEAK;
       sym->section = h->u.def.section;
       sym->value = h->u.def.value;
       break;
@@ -2263,7 +2289,7 @@ _bfd_generic_reloc_link_order (abfd, info, sec, link_order)
       
   r->address = link_order->offset;
   r->howto = bfd_reloc_type_lookup (abfd, link_order->u.reloc.p->reloc);
-  if (r->howto == (const reloc_howto_type *) NULL)
+  if (r->howto == 0)
     {
       bfd_set_error (bfd_error_bad_value);
       return false;
