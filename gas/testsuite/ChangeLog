@@ -1,3 +1,16 @@
+Mon May 16 13:19:16 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/reloc/reloc.exp: Tweak expected output to match new
+	ELF code.
+	* gas/hppa/reloc/roundmode.s: Avoid "S" and "D" modes, ELF does
+	not support them.
+	* gas/hppa/unsorted/unsorted.exp: Tweak expected output to match
+	new ELF code.
+
+Thu May  5 17:27:54 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/default.exp: Renamed from unix-gas.exp.
+
 Mon Apr 11 10:31:00 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* Makefile.in (check): Set TCL_LIBRARY for runtest.

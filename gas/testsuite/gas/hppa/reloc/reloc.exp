@@ -27,15 +27,29 @@ proc do_ble_relocation_test {} {
     if [gas_test_old "blebug.s" "" "Proper relocation for BLE (part 1)"] then {
 	objdump_start_no_subdir "a.out" "-r"
 
-	# At one time both versions of the assembler would incorrectly use 
-	# a PC-relative relocation for a BLE instruction.
-	while 1 {
-	    expect {
-		-re "^00000004\[^\n\]*ABS_CALL\[^\n\]*\n"	{ set x 1 }
-		-re "\[^\n\]*\n"				{ }
-		timeout				{ error "timeout\n"; break }
-		eof				{ break }
+        if ![istarget hppa*-*-*elf*] then {
+	    # At one time both versions of the assembler would incorrectly use 
+	    # a PC-relative relocation for a BLE instruction.
+	    while 1 {
+		expect {
+		    -re "^00000004\[^\n\]*ABS_CALL\[^\n\]*\n"	{ set x 1 }
+		    -re "\[^\n\]*\n"				{ }
+		    timeout			{ perror "timeout\n"; break }
+		    eof				{ break }
 		}
+	    }
+	} else {
+	    # At one time both versions of the assembler would incorrectly use 
+	    # a PC-relative relocation for a BLE instruction.
+	    while 1 {
+		expect {
+		    -re "^00000000\[^\n\]*DIR21L\[^\n\]*\n"	{ set x 1 }
+		    -re "^00000004\[^\n\]*DIR17R\[^\n\]*\n"	{ set x 1 }
+		    -re "\[^\n\]*\n"				{ }
+		    timeout			{ perror "timeout\n"; break }
+		    eof				{ break }
+		}
+	    }
 	}
     }
 
@@ -61,10 +75,10 @@ proc do_relocation_reduction_tests {} {
 	    expect {
 		-re "^00000004\[^\n\]*PLABEL\[^\n\]*foo\[^\n\]*\n"
 		    { set x [expr $x+1] }
-		-re "^00000014\[^\n\]*PCREL_CALL\[^\n\]*foo\[^\n\]*\n"
+		-re "^00000014\[^\n\]*PCREL\[^\n\]*foo\[^\n\]*\n"
 		    { set x [expr $x+1] }
 		-re "\[^\n\]*\n"		{ }
-		timeout				{ error "timeout\n"; break }
+		timeout				{ perror "timeout\n"; break }
 		eof				{ break }
             }
 	}
@@ -90,7 +104,7 @@ proc do_ble_mode_selector_test {} {
 	    -re "^ +\[0-9\]+ 0000 20202801\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 0004 E420E008\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
-	    timeout				{ error "timeout\n"; break }
+	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
 	}
     }
@@ -118,7 +132,7 @@ proc do_plabel_relocation_test {} {
 		-re "^\[04\]0000004\[^\n\]*PLABEL\[^\n\]*\n"
 		    { set x [expr $x+1] }
 		-re "\[^\n\]*\n"			{ }
-		timeout				{ error "timeout\n"; break }
+		timeout				{ perror "timeout\n"; break }
 		eof				{ break }
     	    }
 	}
@@ -142,15 +156,15 @@ proc do_selector_scope_test {} {
 	# Check to make sure the relocation entry after the plabel is correct.
 	# If an old field selector was incorrectly "carried" over, then 
 	# this test will fail.
-        if [istarget hppa*-*-osf] then {
+        if [istarget hppa*-*-*elf*] then {
 	    while 1 {
 		expect {
-	            -re "^00000014\[^\n\]*HPPA_32\[^\n\]*\n"
+	            -re "^00000014\[^\n\]*DIR32\[^\n\]*\n"
 			{ set x 1 }
 		    -re "^00000014\[^\n\]*PLABEL\[^\n\]*foo\[^\n\]*\n"
 			{ set x 0 }
 	            -re "\[^\n\]*\n"		{ }
-	            timeout			{ error "timeout\n"; break }
+	            timeout			{ perror "timeout\n"; break }
 	            eof				{ break }
 		}
             }
@@ -162,7 +176,7 @@ proc do_selector_scope_test {} {
 		    -re "^00000014\[^\n\]*PLABEL\[^\n\]*foo\[^\n\]*\n"
 			{ set x 0 }
 	            -re "\[^\n\]*\n"		{ }
-	            timeout			{ error "timeout\n"; break }
+	            timeout			{ perror "timeout\n"; break }
 	            eof				{ break }
 		}
             }
@@ -193,7 +207,7 @@ proc do_local_label_as_operand_test {} {
 	        -re "^00000030\[^\n\]*0x00000024\[^\n\]*\n" 
 		    { set x [expr $x+1] }
 	        -re "\[^\n\]*\n"		{ }
-	        timeout				{ error "timeout\n"; break }
+	        timeout				{ perror "timeout\n"; break }
 	        eof				{ break }
             }
 	}
@@ -214,7 +228,7 @@ proc do_exit_relocation_test {} {
     # Elf (osf) does not use ENTRY/EXIT relocations.
     # I guess we could look at the unwind subspaces it builds...
     # Until then, make sure it still assembles.
-    if [istarget hppa*-*-osf*] then {
+    if [istarget hppa*-*-*elf*] then {
 	gas_test_old "exitbug.s" "" "Test for bogus R_EXIT relocation (part 1)"
 	return;
     }
@@ -228,7 +242,7 @@ proc do_exit_relocation_test {} {
 	        -re "^00000000\[^\n\]*R_EXIT\[^\n\]*\n" 
 		    { set x [expr $x+1] }
 	        -re "\[^\n\]*\n"		{ }
-	        timeout				{ error "timeout\n"; break }
+	        timeout				{ perror "timeout\n"; break }
 	        eof				{ break }
             }
 	}
@@ -247,7 +261,7 @@ proc do_cross_space_fixup_test_1 {} {
     set x 0
 
     # ELF (osf) doesn't really handle extra sections too well...
-    if [istarget hppa*-*-osf*] then {
+    if [istarget hppa*-*-*elf*] then {
 	return;
     }
 
@@ -261,7 +275,7 @@ proc do_cross_space_fixup_test_1 {} {
 	        -re "^00000000\[^\n\]*PCREL_CALL\[^\n\]*\n" 
 		    { set x [expr $x+1] }
 	        -re "\[^\n\]*\n"		{ }
-	        timeout				{ error "timeout\n"; break }
+	        timeout				{ perror "timeout\n"; break }
 	        eof				{ break }
             }
 	}
@@ -280,18 +294,17 @@ proc do_cross_space_fixup_test_2 {} {
     set x 0
 
     # ELF (osf) doesn't really handle extra sections too well...
-    if [istarget hppa*-*-osf*] then {
+    if [istarget hppa*-*-*elf*] then {
 	return;
     }
 
-    setup_xfail "hppa*-*-*"
-    gas_start "fixupbug2.s" "-al"
+    gas_start "fixupbug.s" "-al"
 
     while 1 {
 	expect {
 	    -re "^ +\[0-9\]+ 0000 E8000002\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
-	    timeout				{ error "timeout\n"; break }
+	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
 	}
     }
@@ -314,27 +327,27 @@ proc do_round_mode_test {} {
 	# Make sure GAS generated correct relocations to switch rounding modes.
 	# Also make sure (for SOM) that redundant rounding mode relocations
 	# were eliminated.
-	if [istarget hppa*-*-osf*] then {
+	if [istarget hppa*-*-*elf*] then {
 	    while 1 {
 		expect {
-	            -re "^00000000\[^\n\]*LR21\[^\n\]*\n"
+	            -re "^00000000\[^\n\]*DIR21L\[^\n\]*\n"
 			{ set x [expr $x+1] }
-	            -re "^00000004\[^\n\]*RR14\[^\n\]*\n" 
+	            -re "^00000004\[^\n\]*DIR14R\[^\n\]*\n" 
 			{ set x [expr $x+1] }
-	            -re "^00000008\[^\n\]*L21\[^\n\]*\n"
+	            -re "^00000008\[^\n\]*DIR21L\[^\n\]*\n"
 			{ set x [expr $x+1] }
-	            -re "^0000000c\[^\n\]*R14\[^\n\]*\n" 
+	            -re "^0000000c\[^\n\]*DIR14R\[^\n\]*\n" 
 			{ set x [expr $x+1] }
-	            -re "^00000010\[^\n\]*LS21\[^\n\]*\n"
+	            -re "^00000010\[^\n\]*DIR21L\[^\n\]*\n"
 			{ set x [expr $x+1] }
-	            -re "^00000014\[^\n\]*RS14\[^\n\]*\n" 
+	            -re "^00000014\[^\n\]*DIR14R\[^\n\]*\n" 
 			{ set x [expr $x+1] }
-	            -re "^00000018\[^\n\]*LD21\[^\n\]*\n"
+	            -re "^00000018\[^\n\]*DIR21L\[^\n\]*\n"
 			{ set x [expr $x+1] }
-	            -re "^0000001c\[^\n\]*RD14\[^\n\]*\n" 
+	            -re "^0000001c\[^\n\]*DIR14R\[^\n\]*\n" 
 			{ set x [expr $x+1] }
 	            -re "\[^\n\]*\n"		{ }
-	        timeout				{ error "timeout\n"; break }
+	        timeout				{ perror "timeout\n"; break }
 	        eof				{ break }
 		}
             }
@@ -349,16 +362,16 @@ proc do_round_mode_test {} {
 			{ set x [expr $x+1] }
 	            -re "^0000000c\[^\n\]*R_N_MODE\[^\n\]*\n" 
 			{ fail $testname }
-	            -re "^00000010\[^\n\]*R_S_MODE\[^\n\]*\n"
+	            -re "^00000010\[^\n\]*R_R_MODE\[^\n\]*\n"
 			{ set x [expr $x+1] }
-	            -re "^00000014\[^\n\]*R_S_MODE\[^\n\]*\n" 
+	            -re "^00000014\[^\n\]*R_R_MODE\[^\n\]*\n" 
 			{ fail $testname }
-	            -re "^00000018\[^\n\]*R_D_MODE\[^\n\]*\n"
+	            -re "^00000018\[^\n\]*R_R_MODE\[^\n\]*\n"
 			{ set x [expr $x+1] }
-	            -re "^0000001c\[^\n\]*R_D_MODE\[^\n\]*\n" 
+	            -re "^0000001c\[^\n\]*R_R_MODE\[^\n\]*\n" 
 			{ fail $testname }
 	            -re "\[^\n\]*\n"		{ }
-	        timeout				{ error "timeout\n"; break }
+	        timeout				{ perror "timeout\n"; break }
 	        eof				{ break }
 		}
 	    }
@@ -369,12 +382,67 @@ proc do_round_mode_test {} {
 	objdump_finish
 
 	# Did we find what we were looking for?  If not, flunk it.
-	if [istarget hppa*-*-osf*] then {
+	if [istarget hppa*-*-*elf*] then {
 	    if [expr $x==8] then { pass $testname } else { fail $testname }
 	} else {
 	    if [expr $x==4] then { pass $testname } else { fail $testname }
 	}
     }
+}
+
+proc do_function_reloc_bug {} {
+    set testname "funcrelocbug.s: Test for reloc bug in non-plabel function reference (part 2)"
+    set x 0
+
+    if [gas_test_old "funcrelocbug.s" "" "Test for reloc bug in non-plabel function reference (part 1)"] {
+	objdump_start_no_subdir "a.out" "-r"
+
+	# Make sure GAS generated a correct relocation for the reference.
+	# branch/call
+	while 1 {
+	    expect {
+	        -re "^000000cc\[^\n\]*f2___4\[^\n+\]*\n" 
+		    { set x [expr $x+1] }
+	        -re "^000000d0\[^\n\]*f2___4\[^\n+\]*\n"  
+		    { set x [expr $x+1] }
+	        -re "\[^\n\]*\n"		{ }
+	        timeout				{ perror "timeout\n"; break }
+	        eof				{ break }
+            }
+	}
+
+	# This was intended to do any cleanup necessary.  It kinda looks like it
+	# isn't needed, but just in case, please keep it in for now.
+	objdump_finish
+
+	# Did we find what we were looking for?  If not, flunk it.
+	if [expr $x==2] then { pass $testname } else { fail $testname }
+
+	set testname "funcrelocbug.s: Test for reloc bug in non-plabel function reference (part3)"
+	set x 0
+
+	objdump_start_no_subdir "a.out" "-d"
+	# Make sure we didn't put anything in the instruction itself!
+	while 1 {
+	    expect {
+	        -re "^000000cc\[^\n\]*ldil 0,r20\[^\n\]*\n" 
+		    { set x [expr $x+1] }
+	        -re "^000000d0\[^\n\]*ldo 0\[\(\]+r20\[\)\]+,r19\[^\n\]*\n" 
+		    { set x [expr $x+1] }
+	        -re "\[^\n\]*\n"		{ }
+	        timeout				{ perror "timeout\n"; break }
+	        eof				{ break }
+	    }
+	}
+
+	# This was intended to do any cleanup necessary.  It kinda looks like it
+	# isn't needed, but just in case, please keep it in for now.
+	objdump_finish
+
+	# Did we find what we were looking for?  If not, flunk it.
+	if [expr $x==2] then { pass $testname } else { fail $testname }
+    }
+
 }
 
 if [istarget hppa*-*-*] then {
@@ -413,4 +481,8 @@ if [istarget hppa*-*-*] then {
 
     # Make sure we switch rounding modes correctly
     do_round_mode_test
+
+    # Test for a bug found when a function was used in a non-branching
+    # instruction *without* a plabel (for portable runtime model)
+    do_function_reloc_bug
 }
