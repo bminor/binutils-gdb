@@ -1,3 +1,8 @@
+2002-03-01  Dmitry Timoshkov <dmitry@baikal.ru>
+
+	* dlltool.c (gen_exp_file): Take into account --kill-at (-k) while
+	generating .exp file.
+
 2002-02-21  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* readelf.c (dump_relocations): Fix typo.
