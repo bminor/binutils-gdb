@@ -1,5 +1,11 @@
 Mon Dec 15 15:20:32 1997  Nick Clifton  <nickc@cygnus.com>
 
+	* doc/all.texi: Add M32R cpu.
+
+	* doc/as.texinfo: Add documentation of m32r processor.
+
+	* doc/c-m32r.texi: New file, documenting m32r specific features.  
+
 	* config/tc-m32r.c (allow_m32rx): New function.
 	(enable_m32rx): New variable.
 	(md_pseudo_table): Added .m32r and .m32rx pseudo ops
