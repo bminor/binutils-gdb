@@ -241,6 +241,7 @@ static autofilter_entry_type autofilter_objlist[] =
   { "crt2.o", 6 },
   { "dllcrt1.o", 9 },
   { "dllcrt2.o", 9 },
+  { "gcrt0.o", 7 },
   { "gcrt1.o", 7 },
   { "gcrt2.o", 7 },  
   { NULL, 0 }
@@ -443,14 +444,14 @@ auto_export (abfd, d, n)
 
       /* Next, exclude symbols from certain startup objects.  */
 
-      if (abfd && (p = lbasename (abfd->filename)) )
+      if (abfd && (p = lbasename (abfd->filename)))
 	{
           afptr = autofilter_objlist;
-      while (afptr->name)
-	{
+          while (afptr->name)
+	    {
 	      if ( strcmp (p, afptr->name) == 0 )
-	    return 0;
-	  afptr ++;
+	        return 0;
+	      afptr++;
 	    }
 	}
 

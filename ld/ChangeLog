@@ -1,3 +1,8 @@
+2001-10-19  Danny Smith  <danny_r_smith_2001@yahoo.co.nz>
+
+	* pe-dll.c (autofilter_objectlist): Add gcrt0.o.
+	(auto-export): Fix indentation.
+
 2001-10-18  Danny Smith  <danny_r_smith_2001@yahoo.co.nz>
 
 	* pe-dll.c (autofilter_objectlist):  Add startup objects
