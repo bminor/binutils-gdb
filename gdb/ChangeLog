@@ -1,3 +1,8 @@
+Tue Oct 10 12:25:11 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* win32-nat.c (child_create_inferior): Pass argv correctly.
+	* Makefile.in (win32-nat.o): Add dependencies.
+
 Mon Oct  9 14:36:29 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* NEWS:  Add information about win32 and arm code.

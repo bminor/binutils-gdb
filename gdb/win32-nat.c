@@ -1,5 +1,5 @@
 /* Target-vector operations for controlling win32 child processes, for GDB.
-   Copyright 1996
+   Copyright 1995
    Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
@@ -415,11 +415,8 @@ child_open (arg, from_tty)
   error ("Use the \"run\" command to start a Unix child process.");
 }
 
-/* Stub function which causes the inferior that runs it, to be ptrace-able
-   by its parent process.  */
 
-
-/* Start an inferior Unix child process and sets inferior_pid to its pid.
+/* Start an inferior win32 child process and sets inferior_pid to its pid.
    EXEC_FILE is the file to run.
    ALLARGS is a string containing the arguments to the program.
    ENV is the environment vector to pass.  Errors reported with error().  */
@@ -437,6 +434,7 @@ child_create_inferior (exec_file, allargs, env)
   struct target_waitstatus dummy;
   BOOL ret;
   DWORD flags;
+  char *args;
 
   if (!exec_file)
     {
@@ -458,8 +456,14 @@ child_create_inferior (exec_file, allargs, env)
   if (new_console)
     flags |= CREATE_NEW_CONSOLE;
 
+  args = alloca (strlen (exec_file) + strlen (allargs) + 2);
+
+  strcpy (args, exec_file);
+  strcat (args, " ");
+  strcat (args, allargs);
+
   ret = CreateProcess (real_path,
-		       allargs,
+		       args,
 		       NULL,	/* Security */
 		       NULL,	/* thread */
 		       TRUE,	/* inherit handles */
@@ -510,7 +514,8 @@ child_stop ()
 }
 
 int
-child_xfer_memory (CORE_ADDR memaddr, char *our, int len, int write, struct target_ops *target)
+child_xfer_memory (CORE_ADDR memaddr, char *our, int len,
+		   int write, struct target_ops *target)
 {
   DWORD done;
   if (write)
