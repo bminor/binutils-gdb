@@ -1093,7 +1093,6 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_SPARC_WDISP22,
   BFD_RELOC_SPARC22,
   BFD_RELOC_SPARC13,
-  BFD_RELOC_SPARC_BASE13,
   BFD_RELOC_SPARC_GOT10,
   BFD_RELOC_SPARC_GOT13,
   BFD_RELOC_SPARC_GOT22,
@@ -1107,10 +1106,10 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_SPARC_UA32,
 
    /* this one is a.out specific? */
+  BFD_RELOC_SPARC_BASE13,
   BFD_RELOC_SPARC_BASE22,
 
    /* start-sanitize-v9 */
-  BFD_RELOC_SPARC_WDISP19,
   BFD_RELOC_SPARC_10,
   BFD_RELOC_SPARC_11,
 #define  BFD_RELOC_SPARC_64 BFD_RELOC_64
@@ -1122,9 +1121,11 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_SPARC_PC_HM10,
   BFD_RELOC_SPARC_PC_LM22,
   BFD_RELOC_SPARC_WDISP16,
+  BFD_RELOC_SPARC_WDISP19,
   BFD_RELOC_SPARC_GLOB_JMP,
   BFD_RELOC_SPARC_LO7,
    /* end-sanitize-v9 */
+
         /* Bits 27..2 of the relocation address shifted right 2 bits;
          simple reloc otherwise.  */
   BFD_RELOC_MIPS_JMP,
