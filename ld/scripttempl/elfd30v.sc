@@ -4,9 +4,10 @@ OUTPUT_ARCH(${ARCH})
 
 MEMORY
 {
-  text : ORIGIN = ${TEXT_START_ADDR}, LENGTH = ${TEXT_SIZE}
-  data : ORIGIN = ${DATA_START_ADDR}, LENGTH = ${DATA_SIZE}
-  emem : ORIGIN = ${EMEM_START_ADDR}, LENGTH = ${EMEM_SIZE}
+  text ${TEXT_DEF_SECTION} : ORIGIN = ${TEXT_START_ADDR}, LENGTH = ${TEXT_SIZE}
+  data ${DATA_DEF_SECTION} : ORIGIN = ${DATA_START_ADDR}, LENGTH = ${DATA_SIZE}
+  emem ${EMEM_DEF_SECTION} : ORIGIN = ${EMEM_START_ADDR}, LENGTH = ${EMEM_SIZE}
+  eit			   : ORIGIN = ${EIT_START_ADDR},  LENGTH = ${EIT_SIZE}
 }
 
 SECTIONS
@@ -27,6 +28,7 @@ SECTIONS
   .rela.etext		${RELOCATING-0} : { *(.rela.etest) }
   .rela.sdata		${RELOCATING-0} : { *(.rela.sdata) }
   .rela.edata		${RELOCATING-0} : { *(.rela.edata) }
+  .rela.eit_v		${RELOCATING-0} : { *(.rela.eit_v) }
   .rela.sbss		${RELOCATING-0} : { *(.rela.sbss) }
   .rela.ebss		${RELOCATING-0} : { *(.rela.ebss) }
   .rela.srodata		${RELOCATING-0} : { *(.rela.srodata) }
@@ -47,6 +49,7 @@ SECTIONS
   .rel.edata		${RELOCATING-0} : { *(.rel.edata) }
   .rel.sbss		${RELOCATING-0} : { *(.rel.sbss) }
   .rel.ebss		${RELOCATING-0} : { *(.rel.ebss) }
+  .rel.eit_v		${RELOCATING-0} : { *(.rel.eit_v) }
   .rel.srodata		${RELOCATING-0} : { *(.rel.srodata) }
   .rel.erodata		${RELOCATING-0} : { *(.rel.erodata) }
   .rel.got		${RELOCATING-0} : { *(.rel.got) }
@@ -86,6 +89,7 @@ SECTIONS
   .ctors	${RELOCATING-0} :
   {
     ${CONSTRUCTING+ __CTOR_LIST__ = .; }
+    *(SORT(.ctors.*))
     *(.ctors)
     ${CONSTRUCTING+ __CTOR_END__ = .; }
   } ${RELOCATING+ > ${DATA_MEMORY}}
@@ -93,6 +97,7 @@ SECTIONS
   .dtors	${RELOCATING-0} :
   {
     ${CONSTRUCTING+ __DTOR_LIST__ = .; }
+    *(SORT(.dtors.*))
     *(.dtors)
     ${CONSTRUCTING+ __DTOR_END__ = .; }
   } ${RELOCATING+ > ${DATA_MEMORY}}
@@ -138,6 +143,13 @@ SECTIONS
     ${RELOCATING+ PROVIDE (__bss_end = .) ; }
     ${RELOCATING+ _end = . ;  }
   } ${RELOCATING+ > ${DATA_MEMORY}}
+
+  .eit_v	${RELOCATING-0} :
+  {
+    ${RELOCATING+ PROVIDE (__eit_start = .) ; }
+    *(.eit_v)
+    ${RELOCATING+ PROVIDE (__eit_end = .) ; }
+  } ${RELOCATING+ > eit}
 
   /* Stabs debugging sections.  */
   .stab		 0 : { *(.stab) }

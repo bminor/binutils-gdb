@@ -6,7 +6,7 @@ This file is part of GLD, the Gnu Linker.
 
 GLD is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GLD is distributed in the hope that it will be useful,
@@ -73,6 +73,9 @@ static void init_os PARAMS ((lang_output_section_statement_type *s));
 static void exp_init_os PARAMS ((etree_type *));
 static void section_already_linked PARAMS ((bfd *, asection *, PTR));
 static boolean wildcardp PARAMS ((const char *));
+static lang_statement_union_type *wild_sort
+  PARAMS ((lang_wild_statement_type *, lang_input_statement_type *,
+	   asection *));
 static void wild_section PARAMS ((lang_wild_statement_type *ptr,
 				  const char *section,
 				  lang_input_statement_type *file,
@@ -571,9 +574,9 @@ lang_map ()
 {
   lang_memory_region_type *m;
 
-  minfo ("\nMemory Configuration\n\n");
+  minfo (_("\nMemory Configuration\n\n"));
   fprintf (config.map_file, "%-16s %-18s %-18s %s\n",
-	   "Name", "Origin", "Length", "Attributes");
+	   _("Name"), _("Origin"), _("Length"), _("Attributes"));
 
   for (m = lang_memory_region_list;
        m != (lang_memory_region_type *) NULL;
@@ -615,7 +618,7 @@ lang_map ()
       print_nl ();
     }
 
-  fprintf (config.map_file, "\nLinker script and memory map\n\n");
+  fprintf (config.map_file, _("\nLinker script and memory map\n\n"));
 
   print_statements ();
 }
@@ -632,7 +635,7 @@ init_os (s)
     return;
 
   if (strcmp (s->name, DISCARD_SECTION_NAME) == 0)
-    einfo ("%P%F: Illegal use of `%s' section", DISCARD_SECTION_NAME);
+    einfo (_("%P%F: Illegal use of `%s' section"), DISCARD_SECTION_NAME);
 
   new = ((section_userdata_type *)
 	 stat_alloc (sizeof (section_userdata_type)));
@@ -642,7 +645,7 @@ init_os (s)
     s->bfd_section = bfd_make_section (output_bfd, s->name);
   if (s->bfd_section == (asection *) NULL)
     {
-      einfo ("%P%F: output format %s cannot represent section called %s\n",
+      einfo (_("%P%F: output format %s cannot represent section called %s\n"),
 	     output_bfd->xvec->name, s->name);
     }
   s->bfd_section->output_section = s->bfd_section;
@@ -763,7 +766,7 @@ section_already_linked (abfd, sec, data)
 	      break;
 
 	    case SEC_LINK_DUPLICATES_ONE_ONLY:
-	      einfo ("%P: %B: warning: ignoring duplicate section `%s'\n",
+	      einfo (_("%P: %B: warning: ignoring duplicate section `%s'\n"),
 		     abfd, name);
 	      break;
 
@@ -777,7 +780,7 @@ section_already_linked (abfd, sec, data)
 	    case SEC_LINK_DUPLICATES_SAME_SIZE:
 	      if (bfd_section_size (abfd, sec)
 		  != bfd_section_size (l->sec->owner, l->sec))
-		einfo ("%P: %B: warning: duplicate section `%s' has different size\n",
+		einfo (_("%P: %B: warning: duplicate section `%s' has different size\n"),
 		       abfd, name);
 	      break;
 	    }
@@ -948,6 +951,62 @@ wild_doit (ptr, section, output, file)
     }
 }
 
+/* Handle wildcard sorting.  This returns the lang_input_section which
+   should follow the one we are going to create for SECTION and FILE,
+   based on the sorting requirements of WILD.  It returns NULL if the
+   new section should just go at the end of the current list.  */
+
+static lang_statement_union_type *
+wild_sort (wild, file, section)
+     lang_wild_statement_type *wild;
+     lang_input_statement_type *file;
+     asection *section;
+{
+  const char *section_name;
+  lang_statement_union_type *l;
+
+  if (! wild->filenames_sorted && ! wild->sections_sorted)
+    return NULL;
+
+  section_name = bfd_get_section_name (file->the_bfd, section);
+  for (l = wild->children.head; l != NULL; l = l->next)
+    {
+      lang_input_section_type *ls;
+
+      if (l->header.type != lang_input_section_enum)
+	continue;
+      ls = &l->input_section;
+
+      /* Sorting by filename takes precedence over sorting by section
+         name.  */
+
+      if (wild->filenames_sorted)
+	{
+	  int i;
+
+	  i = strcmp (file->filename, ls->ifile->filename);
+	  if (i < 0)
+	    continue;
+	  else if (i > 0)
+	    break;
+	}
+
+      /* Here either the files are not sorted by name, or we are
+         looking at the sections for this file.  */
+
+      if (wild->sections_sorted)
+	{
+	  if (strcmp (section_name,
+		      bfd_get_section_name (ls->ifile->the_bfd,
+					    ls->section))
+	      > 0)
+	    break;
+	}
+    }
+
+  return l;
+}
+
 /* Expand a wild statement for a particular FILE.  SECTION may be
    NULL, in which case it is a wild card.  */
 
@@ -992,8 +1051,38 @@ wild_section (ptr, section, file, output)
 	      else
 		match = strcmp (section, name) == 0 ? true : false;
 	    }
+
 	  if (match)
-	    wild_doit (&ptr->children, s, output, file);
+	    {
+	      lang_statement_union_type *before;
+
+	      before = wild_sort (ptr, file, s);
+
+	      /* Here BEFORE points to the lang_input_section which
+		 should follow the one we are about to add.  If BEFORE
+		 is NULL, then the section should just go at the end
+		 of the current list.  */
+
+	      if (before == NULL)
+		wild_doit (&ptr->children, s, output, file);
+	      else
+		{
+		  lang_statement_list_type list;
+		  lang_statement_union_type **pp;
+
+		  lang_list_init (&list);
+		  wild_doit (&list, s, output, file);
+		  ASSERT (list.head != NULL && list.head->next == NULL);
+
+		  for (pp = &ptr->children.head;
+		       *pp != before;
+		       pp = &(*pp)->next)
+		    ASSERT (*pp != NULL);
+
+		  list.head->next = *pp;
+		  *pp = list.head;
+		}
+	    }
 	}
     }
 }
@@ -1062,15 +1151,15 @@ load_symbols (entry, place)
 	{
 	  char **p;
 
-	  einfo ("%B: file not recognized: %E\n", entry->the_bfd);
-	  einfo ("%B: matching formats:", entry->the_bfd);
+	  einfo (_("%B: file not recognized: %E\n"), entry->the_bfd);
+	  einfo (_("%B: matching formats:"), entry->the_bfd);
 	  for (p = matching; *p != NULL; p++)
 	    einfo (" %s", *p);
 	  einfo ("%F\n");
 	}
       else if (err != bfd_error_file_not_recognized
 	       || place == NULL)
-	einfo ("%F%B: file not recognized: %E\n", entry->the_bfd);
+	einfo (_("%F%B: file not recognized: %E\n"), entry->the_bfd);
 
       bfd_close (entry->the_bfd);
       entry->the_bfd = NULL;
@@ -1120,13 +1209,13 @@ load_symbols (entry, place)
 	  while (member != NULL)
 	    {
 	      if (! bfd_check_format (member, bfd_object))
-		einfo ("%F%B: object %B in archive is not object\n",
+		einfo (_("%F%B: object %B in archive is not object\n"),
 		       entry->the_bfd, member);
 	      if (! ((*link_info.callbacks->add_archive_element)
 		     (&link_info, member, "--whole-archive")))
 		abort ();
 	      if (! bfd_link_add_symbols (member, &link_info))
-		einfo ("%F%B: could not read symbols: %E\n", member);
+		einfo (_("%F%B: could not read symbols: %E\n"), member);
 	      member = bfd_openr_next_archived_file (entry->the_bfd,
 						     member);
 	    }
@@ -1138,7 +1227,7 @@ load_symbols (entry, place)
     }
 
   if (! bfd_link_add_symbols (entry->the_bfd, &link_info))
-    einfo ("%F%B: could not read symbols: %E\n", entry->the_bfd);
+    einfo (_("%F%B: could not read symbols: %E\n"), entry->the_bfd);
 
   entry->loaded = true;
 }
@@ -1254,9 +1343,9 @@ open_output (name)
     {
       if (bfd_get_error () == bfd_error_invalid_target)
 	{
-	  einfo ("%P%F: target %s not found\n", output_target);
+	  einfo (_("%P%F: target %s not found\n"), output_target);
 	}
-      einfo ("%P%F: cannot open output file %s: %E\n", name);
+      einfo (_("%P%F: cannot open output file %s: %E\n"), name);
     }
 
   delete_output_file_on_failure = true;
@@ -1264,15 +1353,15 @@ open_output (name)
   /*  output->flags |= D_PAGED;*/
 
   if (! bfd_set_format (output, bfd_object))
-    einfo ("%P%F:%s: can not make object file: %E\n", name);
+    einfo (_("%P%F:%s: can not make object file: %E\n"), name);
   if (! bfd_set_arch_mach (output,
 			   ldfile_output_architecture,
 			   ldfile_output_machine))
-    einfo ("%P%F:%s: can not set architecture: %E\n", name);
+    einfo (_("%P%F:%s: can not set architecture: %E\n"), name);
 
   link_info.hash = bfd_link_hash_table_create (output);
   if (link_info.hash == (struct bfd_link_hash_table *) NULL)
-    einfo ("%P%F: can not create link hash table: %E\n");
+    einfo (_("%P%F: can not create link hash table: %E\n"));
 
   bfd_set_gp_size (output, g_switch_value);
   return output;
@@ -1459,7 +1548,7 @@ lang_place_undefineds ()
 
       h = bfd_link_hash_lookup (link_info.hash, ptr->name, true, false, true);
       if (h == (struct bfd_link_hash_entry *) NULL)
-	einfo ("%P%F: bfd_link_hash_lookup failed: %E\n");
+	einfo (_("%P%F: bfd_link_hash_lookup failed: %E\n"));
       if (h->type == bfd_link_hash_new)
 	{
 	  h->type = bfd_link_hash_undefined;
@@ -1582,7 +1671,7 @@ print_output_section_statement (output_section_statement)
 
 	      addr = exp_get_abs_int (output_section_statement->load_base, 0,
 				      "load base", lang_final_phase_enum);
-	      minfo (" load address 0x%V", addr);
+	      minfo (_(" load address 0x%V"), addr);
 	    }
 	}
 
@@ -1711,7 +1800,7 @@ print_input_section (in)
 		  --len;
 		}
 
-	      minfo ("%W (size before relaxing)\n", i->_raw_size);
+	      minfo (_("%W (size before relaxing)\n"), i->_raw_size);
 	    }
 
 	  bfd_link_hash_traverse (link_info.hash, print_one_symbol, (PTR) i);
@@ -1790,7 +1879,7 @@ static void
 print_address_statement (address)
      lang_address_statement_type *address;
 {
-  minfo ("Address of section %s set to ", address->section_name);
+  minfo (_("Address of section %s set to "), address->section_name);
   exp_print_tree (address->address);
   print_nl ();
 }
@@ -1864,15 +1953,25 @@ print_wild_statement (w, os)
 {
   print_space ();
 
+  if (w->filenames_sorted)
+    minfo ("SORT(");
   if (w->filename != NULL)
     minfo ("%s", w->filename);
   else
     minfo ("*");
+  if (w->filenames_sorted)
+    minfo (")");
 
+  minfo ("(");
+  if (w->sections_sorted)
+    minfo ("SORT(");
   if (w->section_name != NULL)
-    minfo ("(%s)", w->section_name);
+    minfo ("%s", w->section_name);
   else
-    minfo ("(*)");
+    minfo ("*");
+  if (w->sections_sorted)
+    minfo (")");
+  minfo (")");
 
   print_nl ();
 
@@ -1917,7 +2016,7 @@ print_statement (s, os)
   switch (s->header.type)
     {
     default:
-      fprintf (config.map_file, "Fail with %d\n", s->header.type);
+      fprintf (config.map_file, _("Fail with %d\n"), s->header.type);
       FAIL ();
       break;
     case lang_constructors_statement_enum:
@@ -2143,7 +2242,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	   if (os->children.head == NULL
 	       || os->children.head->next != NULL
 	       || os->children.head->header.type != lang_input_section_enum)
-	     einfo ("%P%X: Internal error on COFF shared library section %s\n",
+	     einfo (_("%P%X: Internal error on COFF shared library section %s\n"),
 		    os->name);
 
 	   input = os->children.head->input_section.section;
@@ -2185,7 +2284,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	       && lang_memory_region_list != NULL
 	       && (strcmp (lang_memory_region_list->name, "*default*") != 0
 		   || lang_memory_region_list->next != NULL))
-	     einfo ("%P: warning: no memory region specified for section `%s'\n",
+	     einfo (_("%P: warning: no memory region specified for section `%s'\n"),
 		    bfd_get_section_name (output_bfd, os->bfd_section));
 
 	   dot = os->region->current;
@@ -2196,7 +2295,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	       olddot = dot;
 	       dot = align_power (dot, os->bfd_section->alignment_power);
 	       if (dot != olddot && config.warn_section_align)
-		 einfo ("%P: warning: changing start of section %s by %u bytes\n",
+		 einfo (_("%P: warning: changing start of section %s by %u bytes\n"),
 			os->name, (unsigned int) (dot - olddot));
 	     }
 	 }
@@ -2210,7 +2309,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 			      dot, &dot);
 	   if (r.valid == false)
 	   {
-	     einfo ("%F%S: non constant address expression for section %s\n",
+	     einfo (_("%F%S: non constant address expression for section %s\n"),
 		    os->name);
 	   }
 	   dot = r.value + r.section->bfd_section->vma;
@@ -2254,7 +2353,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	     {
 	       if (os->addr_tree != (etree_type *) NULL)
 		 {
-		   einfo ("%X%P: address 0x%v of %B section %s is not within region %s\n",
+		   einfo (_("%X%P: address 0x%v of %B section %s is not within region %s\n"),
 			  os->region->current,
 			  os->bfd_section->owner,
 			  os->bfd_section->name,
@@ -2262,7 +2361,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 		 }
 	       else
 		 {
-		   einfo ("%X%P: region %s is full (%B section %s)\n",
+		   einfo (_("%X%P: region %s is full (%B section %s)\n"),
 			  os->region->name,
 			  os->bfd_section->owner,
 			  os->bfd_section->name);
@@ -2364,7 +2463,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	    boolean again;
 
 	    if (! bfd_relax_section (i->owner, i, &link_info, &again))
-	      einfo ("%P%F: can't relax section: %E\n");
+	      einfo (_("%P%F: can't relax section: %E\n"));
 	    if (again)
 	      relax_again = true;
 	  }
@@ -2391,7 +2490,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 		      dot,
 		      &newdot);
 
-       if (newdot != dot && !relax)
+       if (newdot != dot)
 	 {
 	   /* The assignment changed dot.  Insert a pad.  */
 	   if (output_section_statement == abs_output_section)
@@ -2400,7 +2499,7 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 		  the default memory address.  */
 	       lang_memory_region_lookup ("*default*")->current = newdot;
 	     }
-	   else
+	   else if (!relax)
 	     {
 	       lang_statement_union_type *new =
 		 ((lang_statement_union_type *)
@@ -2525,7 +2624,7 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 				   lang_final_phase_enum, dot, &dot);
 	    s->data_statement.value = value.value;
 	    if (value.valid == false)
-	      einfo ("%F%P: invalid data statement\n");
+	      einfo (_("%F%P: invalid data statement\n"));
 	  }
 	  switch (s->data_statement.type)
 	    {
@@ -2554,7 +2653,7 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 				   lang_final_phase_enum, dot, &dot);
 	    s->reloc_statement.addend_value = value.value;
 	    if (value.valid == false)
-	      einfo ("%F%P: invalid reloc statement\n");
+	      einfo (_("%F%P: invalid reloc statement\n"));
 	  }
 	  dot += bfd_get_reloc_size (s->reloc_statement.howto);
 	  break;
@@ -2688,7 +2787,7 @@ lang_finish ()
 				    h->u.def.section->output_section)
 	     + h->u.def.section->output_offset);
       if (! bfd_set_start_address (output_bfd, val))
-	einfo ("%P%F:%s: can't set start address\n", entry_symbol);
+	einfo (_("%P%F:%s: can't set start address\n"), entry_symbol);
     }
   else
     {
@@ -2700,16 +2799,16 @@ lang_finish ()
       if (ts != (asection *) NULL)
 	{
 	  if (warn)
-	    einfo ("%P: warning: cannot find entry symbol %s; defaulting to %V\n",
+	    einfo (_("%P: warning: cannot find entry symbol %s; defaulting to %V\n"),
 		   entry_symbol, bfd_get_section_vma (output_bfd, ts));
 	  if (! bfd_set_start_address (output_bfd,
 				       bfd_get_section_vma (output_bfd, ts)))
-	    einfo ("%P%F: can't set start address\n");
+	    einfo (_("%P%F: can't set start address\n"));
 	}
       else
 	{
 	  if (warn)
-	    einfo ("%P: warning: cannot find entry symbol %s; not setting start address\n",
+	    einfo (_("%P: warning: cannot find entry symbol %s; not setting start address\n"),
 		   entry_symbol);
 	}
     }
@@ -2750,7 +2849,7 @@ lang_check ()
       if (compatible == NULL)
 	{
 	  if (command_line.warn_mismatch)
-	    einfo ("%P: warning: %s architecture of input file `%B' is incompatible with %s output\n",
+	    einfo (_("%P: warning: %s architecture of input file `%B' is incompatible with %s output\n"),
 		   bfd_printable_name (input_bfd), input_bfd,
 		   bfd_printable_name (output_bfd));
 	}
@@ -2768,7 +2867,7 @@ lang_check ()
 	  if (! bfd_merge_private_bfd_data (input_bfd, output_bfd))
 	    {
 	      if (command_line.warn_mismatch)
-		einfo ("%E%X: failed to merge target specific data of file %B\n",
+		einfo (_("%E%X: failed to merge target specific data of file %B\n"),
 		       input_bfd);
 	    }
 	  if (! command_line.warn_mismatch)
@@ -2853,8 +2952,8 @@ lang_one_common (h, info)
 
       if (! header_printed)
 	{
-	  minfo ("\nAllocating common symbols\n");
-	  minfo ("Common symbol       size              file\n\n");
+	  minfo (_("\nAllocating common symbols\n"));
+	  minfo (_("Common symbol       size              file\n\n"));
 	  header_printed = true;
 	}
 
@@ -2943,7 +3042,7 @@ lang_place_orphans ()
 			  /* This message happens when using the
                              svr3.ifile linker script, so I have
                              disabled it.  */
-			  info_msg ("%P: no [COMMON] command, defaulting to .bss\n");
+			  info_msg (_("%P: no [COMMON] command, defaulting to .bss\n"));
 #endif
 			  default_common_section =
 			    lang_output_section_statement_lookup (".bss");
@@ -3006,7 +3105,7 @@ lang_set_flags (ptr, flags)
 	  break;
 
 	default:
-	  einfo ("%P%F: invalid syntax in flags\n");
+	  einfo (_("%P%F: invalid syntax in flags\n"));
 	  break;
 	}
       flags++;
@@ -3329,9 +3428,11 @@ lang_process ()
 /* EXPORTED TO YACC */
 
 void
-lang_add_wild (section_name, filename)
-     CONST char *CONST section_name;
-     CONST char *CONST filename;
+lang_add_wild (section_name, sections_sorted, filename, filenames_sorted)
+     const char *const section_name;
+     boolean sections_sorted;
+     const char *const filename;
+     boolean filenames_sorted;
 {
   lang_wild_statement_type *new = new_stat (lang_wild_statement,
 					    stat_ptr);
@@ -3345,7 +3446,9 @@ lang_add_wild (section_name, filename)
       lang_has_input_file = true;
     }
   new->section_name = section_name;
+  new->sections_sorted = sections_sorted;
   new->filename = filename;
+  new->filenames_sorted = filenames_sorted;
   lang_list_init (&new->children);
 }
 
@@ -3504,7 +3607,7 @@ lang_startup (name)
 {
   if (startup_file != (char *) NULL)
     {
-      einfo ("%P%Fmultiple STARTUP files\n");
+      einfo (_("%P%Fmultiple STARTUP files\n"));
     }
   first_file->filename = name;
   first_file->local_sym_name = name;
@@ -3547,7 +3650,7 @@ lang_abs_symbol_at_beginning_of (secname, name)
 
   h = bfd_link_hash_lookup (link_info.hash, name, true, true, true);
   if (h == (struct bfd_link_hash_entry *) NULL)
-    einfo ("%P%F: bfd_link_hash_lookup failed: %E\n");
+    einfo (_("%P%F: bfd_link_hash_lookup failed: %E\n"));
 
   if (h->type == bfd_link_hash_new
       || h->type == bfd_link_hash_undefined)
@@ -3581,7 +3684,7 @@ lang_abs_symbol_at_end_of (secname, name)
 
   h = bfd_link_hash_lookup (link_info.hash, name, true, true, true);
   if (h == (struct bfd_link_hash_entry *) NULL)
-    einfo ("%P%F: bfd_link_hash_lookup failed: %E\n");
+    einfo (_("%P%F: bfd_link_hash_lookup failed: %E\n"));
 
   if (h->type == bfd_link_hash_new
       || h->type == bfd_link_hash_undefined)
@@ -3766,7 +3869,7 @@ lang_record_phdrs ()
 			     flags,
 			     l->at == NULL ? false : true,
 			     at, l->filehdr, l->phdrs, c, secs))
-	einfo ("%F%P: bfd_record_phdr failed: %E\n");
+	einfo (_("%F%P: bfd_record_phdr failed: %E\n"));
     }
 
   free (secs);
@@ -3785,7 +3888,7 @@ lang_record_phdrs ()
 	   pl != NULL;
 	   pl = pl->next)
 	if (! pl->used && strcmp (pl->name, "NONE") != 0)
-	  einfo ("%X%P: section `%s' assigned to non-existent phdr `%s'\n",
+	  einfo (_("%X%P: section `%s' assigned to non-existent phdr `%s'\n"),
 		 u->output_section_statement.name, pl->name);
     }
 }
@@ -4054,7 +4157,7 @@ lang_register_vers_node (name, version, deps)
   /* Make sure this node has a unique name.  */
   for (t = lang_elf_version_info; t != NULL; t = t->next)
     if (strcmp (t->name, name) == 0)
-      einfo ("%X%P: duplicate version tag `%s'\n", name);
+      einfo (_("%X%P: duplicate version tag `%s'\n"), name);
 
   /* Check the global and local match names, and make sure there
      aren't any duplicates.  */
@@ -4067,7 +4170,7 @@ lang_register_vers_node (name, version, deps)
 
 	  for (e2 = t->locals; e2 != NULL; e2 = e2->next)
 	    if (strcmp (e1->match, e2->match) == 0)
-	      einfo ("%X%P: duplicate expression `%s' in version information\n",
+	      einfo (_("%X%P: duplicate expression `%s' in version information\n"),
 		     e1->match);
 	}
     }
@@ -4080,7 +4183,7 @@ lang_register_vers_node (name, version, deps)
 
 	  for (e2 = t->globals; e2 != NULL; e2 = e2->next)
 	    if (strcmp (e1->match, e2->match) == 0)
-	      einfo ("%X%P: duplicate expression `%s' in version information\n",
+	      einfo (_("%X%P: duplicate expression `%s' in version information\n"),
 		     e1->match);
 	}
     }
@@ -4117,7 +4220,7 @@ lang_add_vers_depend (list, name)
 	}
     }
 
-  einfo ("%X%P: unable to find version dependency `%s'\n", name);
+  einfo (_("%X%P: unable to find version dependency `%s'\n"), name);
 
   return ret;
 }

@@ -2,10 +2,8 @@
 # Unusual variables checked by this code:
 #	NOP - two byte opcode for no-op (defaults to 0)
 #	DATA_ADDR - if end-of-text-plus-one-page isn't right for data start
-#	INITIAL_READONLY_SECTIONS - at start of text segment
 #	OTHER_READONLY_SECTIONS - other than .text .init .rodata ...
 #		(e.g., .PARISC.milli)
-#	OTHER_TEXT_SECTIONS - these get put in .text when relocating
 #	OTHER_READWRITE_SECTIONS - other than .data .bss .ctors .sdata ...
 #		(e.g., .PARISC.global)
 #	OTHER_SECTIONS - at the end
@@ -15,35 +13,27 @@
 #		.text section.
 #	DATA_START_SYMBOLS - symbols that appear at the start of the
 #		.data section.
-#	OTHER_GOT_SYMBOLS - symbols defined just before .got.
-#	OTHER_GOT_SECTIONS - sections just after .got and .sdata.
 #	OTHER_BSS_SYMBOLS - symbols that appear at the start of the
 #		.bss section besides __bss_start.
 #	DATA_PLT - .plt should be in data segment, not text segment.
-#	TEXT_DYNAMIC - .dynamic in text segment, not data segment.
 #	EMBEDDED - whether this is for an embedded system. 
-#	SHLIB_TEXT_START_ADDR - if set, add to SIZEOF_HEADERS to set
-#		start address of shared library.
 #
 # When adding sections, do note that the names of some sections are used
 # when specifying the start address of the next.
 #
-
 test -z "$ENTRY" && ENTRY=_start
 test -z "${BIG_OUTPUT_FORMAT}" && BIG_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 if [ -z "$MACHINE" ]; then OUTPUT_ARCH=${ARCH}; else OUTPUT_ARCH=${ARCH}:${MACHINE}; fi
-test -z "${ELFSIZE}" && ELFSIZE=32
 test "$LD_FLAG" = "N" && DATA_ADDR=.
 INTERP=".interp   ${RELOCATING-0} : { *(.interp) 	}"
 PLT=".plt    ${RELOCATING-0} : { *(.plt)	}"
-DYNAMIC=".dynamic     ${RELOCATING-0} : { *(.dynamic) }"
 
 # if this is for an embedded system, don't add SIZEOF_HEADERS.
 if [ -z "$EMBEDDED" ]; then
-   test -z "${TEXT_BASE_ADDRESS}" && TEXT_BASE_ADDRESS="${TEXT_START_ADDR} + SIZEOF_HEADERS"
+   test -z "${READONLY_BASE_ADDRESS}" && READONLY_BASE_ADDRESS="${READONLY_START_ADDR} + SIZEOF_HEADERS"
 else
-   test -z "${TEXT_BASE_ADDRESS}" && TEXT_BASE_ADDRESS="${TEXT_START_ADDR}"
+   test -z "${READONLY_BASE_ADDRESS}" && READONLY_BASE_ADDRESS="${READONLY_START_ADDR}"
 fi
 
 cat <<EOF
@@ -63,29 +53,18 @@ ${RELOCATING- /* For some reason, the Solaris linker makes bad executables
 SECTIONS
 {
   /* Read-only sections, merged into text segment: */
-  ${CREATE_SHLIB-${RELOCATING+. = ${TEXT_BASE_ADDRESS};}}
-  ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_TEXT_START_ADDR:-0} + SIZEOF_HEADERS;}}
+  ${CREATE_SHLIB-${RELOCATING+. = ${READONLY_BASE_ADDRESS};}}
+  ${CREATE_SHLIB+${RELOCATING+. = SIZEOF_HEADERS;}}
   ${CREATE_SHLIB-${INTERP}}
-  ${INITIAL_READONLY_SECTIONS}
-  ${TEXT_DYNAMIC+${DYNAMIC}}
   .hash        ${RELOCATING-0} : { *(.hash)		}
   .dynsym      ${RELOCATING-0} : { *(.dynsym)		}
   .dynstr      ${RELOCATING-0} : { *(.dynstr)		}
-  .gnu.version ${RELOCATING-0} : { *(.gnu.version)	}
-  .gnu.version_d ${RELOCATING-0} : { *(.gnu.version_d)	}
-  .gnu.version_r ${RELOCATING-0} : { *(.gnu.version_r)	}
-  .rel.text    ${RELOCATING-0} :
-    { *(.rel.text) ${RELOCATING+*(.rel.gnu.linkonce.t*)} }
-  .rela.text   ${RELOCATING-0} :
-    { *(.rela.text) ${RELOCATING+*(.rela.gnu.linkonce.t*)} }
-  .rel.data    ${RELOCATING-0} :
-    { *(.rel.data) ${RELOCATING+*(.rel.gnu.linkonce.d*)} }
-  .rela.data   ${RELOCATING-0} :
-    { *(.rela.data) ${RELOCATING+*(.rela.gnu.linkonce.d*)} }
-  .rel.rodata  ${RELOCATING-0} :
-    { *(.rel.rodata) ${RELOCATING+*(.rel.gnu.linkonce.r*)} }
-  .rela.rodata ${RELOCATING-0} :
-    { *(.rela.rodata) ${RELOCATING+*(.rela.gnu.linkonce.r*)} }
+  .rel.text    ${RELOCATING-0} : { *(.rel.text)		}
+  .rela.text   ${RELOCATING-0} : { *(.rela.text) 	}
+  .rel.data    ${RELOCATING-0} : { *(.rel.data)		}
+  .rela.data   ${RELOCATING-0} : { *(.rela.data) 	}
+  .rel.rodata  ${RELOCATING-0} : { *(.rel.rodata) 	}
+  .rela.rodata ${RELOCATING-0} : { *(.rela.rodata) 	}
   .rel.got     ${RELOCATING-0} : { *(.rel.got)		}
   .rela.got    ${RELOCATING-0} : { *(.rela.got)		}
   .rel.ctors   ${RELOCATING-0} : { *(.rel.ctors)	}
@@ -100,35 +79,19 @@ SECTIONS
   .rela.bss    ${RELOCATING-0} : { *(.rela.bss)		}
   .rel.plt     ${RELOCATING-0} : { *(.rel.plt)		}
   .rela.plt    ${RELOCATING-0} : { *(.rela.plt)		}
-  .init        ${RELOCATING-0} : { *(.init)	} =${NOP-0}
   ${DATA_PLT-${PLT}}
-  .text    ${RELOCATING-0} :
-  {
-    ${RELOCATING+${TEXT_START_SYMBOLS}}
-    *(.text)
-    *(.stub)
-    /* .gnu.warning sections are handled specially by elf32.em.  */
-    *(.gnu.warning)
-    ${RELOCATING+*(.gnu.linkonce.t*)}
-    ${RELOCATING+${OTHER_TEXT_SECTIONS}}
-  } =${NOP-0}
-  ${RELOCATING+_etext = .;}
-  ${RELOCATING+PROVIDE (etext = .);}
-  .fini    ${RELOCATING-0} : { *(.fini)    } =${NOP-0}
-  .rodata  ${RELOCATING-0} : { *(.rodata) ${RELOCATING+*(.gnu.linkonce.r*)} }
+  .rodata  ${RELOCATING-0} : { *(.rodata) *(.gnu.linkonce.r*) }
   .rodata1 ${RELOCATING-0} : { *(.rodata1) }
   ${RELOCATING+${OTHER_READONLY_SECTIONS}}
 
-  /* Adjust the address for the data segment.  We want to adjust up to
-     the same address within the page on the next page up.  */
-  ${CREATE_SHLIB-${RELOCATING+. = ${DATA_ADDR-ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))};}}
-  ${CREATE_SHLIB+${RELOCATING+. = ${SHLIB_DATA_ADDR-ALIGN(${MAXPAGESIZE}) + (. & (${MAXPAGESIZE} - 1))};}}
+  /* Adjust the address for the data segment.  */
+  ${RELOCATING+. = ${DATA_ADDR-ALIGN(4);}}
 
   .data  ${RELOCATING-0} :
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}
     *(.data)
-    ${RELOCATING+*(.gnu.linkonce.d*)}
+    *(.gnu.linkonce.d*)
     ${CONSTRUCTING+CONSTRUCTORS}
   }
   .data1 ${RELOCATING-0} : { *(.data1) }
@@ -147,15 +110,13 @@ SECTIONS
     *(.dtors)
     ${CONSTRUCTING+${DTOR_END}}
   }
-  ${DATA_PLT+${PLT}}
-  ${RELOCATING+${OTHER_GOT_SYMBOLS}}
   .got         ${RELOCATING-0} : { *(.got.plt) *(.got) }
-  ${TEXT_DYNAMIC-${DYNAMIC}}
+  .dynamic     ${RELOCATING-0} : { *(.dynamic) }
+  ${DATA_PLT+${PLT}}
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
   .sdata   ${RELOCATING-0} : { *(.sdata) }
-  ${RELOCATING+${OTHER_GOT_SECTIONS}}
   ${RELOCATING+_edata  =  .;}
   ${RELOCATING+PROVIDE (edata = .);}
   ${RELOCATING+__bss_start = .;}
@@ -167,7 +128,6 @@ SECTIONS
    *(.bss)
    *(COMMON)
   }
-  ${RELOCATING+. = ALIGN(${ELFSIZE} / 8);}
   ${RELOCATING+_end = . ;}
   ${RELOCATING+PROVIDE (end = .);}
 
@@ -216,5 +176,23 @@ SECTIONS
 
   /* These must appear regardless of ${RELOCATING}.  */
   ${OTHER_SECTIONS}
+
+
+  /* Hmmm, there's got to be a better way.  This sets the stack to the
+     top of the simulator memory (i.e. top of 64K data space). */
+  .stack 0x00007FFE : { _stack = .; *(.stack) }
+
+  .text    ${RELOCATING+${TEXT_START_ADDR}} :
+  {
+    ${RELOCATING+${TEXT_START_SYMBOLS}}
+    *(.init)
+    *(.fini)
+    *(.text)
+    /* .gnu.warning sections are handled specially by elf32.em.  */
+    *(.gnu.warning)
+    *(.gnu.linkonce.t*)
+  } =${NOP-0}
+  ${RELOCATING+_etext = .;}
+  ${RELOCATING+PROVIDE (etext = .);}
 }
 EOF

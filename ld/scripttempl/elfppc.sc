@@ -129,11 +129,11 @@ SECTIONS
   .got2		${RELOCATING-0} :  { *(.got2) }
 
 		${RELOCATING+PROVIDE (__CTOR_LIST__ = .);}
-  .ctors	${RELOCATING-0} : { *(.ctors) }
+  .ctors	${RELOCATING-0} : { *(SORT(.ctors.*)) *(.ctors) }
 		${RELOCATING+PROVIDE (__CTOR_END__ = .);}
 
 		${RELOCATING+PROVIDE (__DTOR_LIST__ = .);}
-  .dtors	${RELOCATING-0} : { *(.dtors) }
+  .dtors	${RELOCATING-0} : { *(SORT(.dtors.*)) *(.dtors) }
 		${RELOCATING+PROVIDE (__DTOR_END__ = .);}
 
 		${RELOCATING+PROVIDE (_FIXUP_START_ = .);}

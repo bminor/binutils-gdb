@@ -1,5 +1,5 @@
 /* ld.h -- general linker header file
-   Copyright (C) 1991, 93, 94, 95, 96, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1991, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
@@ -21,27 +21,31 @@
 #ifndef LD_H
 #define LD_H
 
-#ifdef ENABLE_NLS
-#include <libintl.h>
-#define _(String) gettext (String)
-#ifdef gettext_noop
-#define N_(String) gettext_noop (String)
-#else
-#define N_(String) (String)
+#ifdef HAVE_LOCALE_H
+# include <locale.h>
 #endif
+
+#ifdef ENABLE_NLS
+# include <libintl.h>
+# define _(String) gettext (String)
+# ifdef gettext_noop
+#  define N_(String) gettext_noop (String)
+# else
+#  define N_(String) (String)
+# endif
 #else
 /* Stubs that do something close enough.  */
-#define textdomain(String) (String)
-#define gettext(String) (String)
-#define dgettext(Domain,Message) (Message)
-#define dcgettext(Domain,Message,Type) (Message)
-#define bindtextdomain(Domain,Directory) (Domain)
-#define _(String) (String)
-#define N_(String) (String)
-/* In this case we don't care about the value.  */
-#ifndef LC_MESSAGES
-#define LC_MESSAGES 0
+# define textdomain(String) (String)
+# define gettext(String) (String)
+# define dgettext(Domain,Message) (Message)
+# define dcgettext(Domain,Message,Type) (Message)
+# define bindtextdomain(Domain,Directory) (Domain)
+# define _(String) (String)
+# define N_(String) (String)
 #endif
+
+#ifndef LC_MESSAGES
+# define LC_MESSAGES 0
 #endif
 
 /* Look in this environment name for the linker to pretend to be */
@@ -54,6 +58,15 @@
 /* Input sections which are put in a section of this name are actually
    discarded.  */
 #define DISCARD_SECTION_NAME "/DISCARD/"
+
+/* A wildcard specification.  This is only used in ldgram.y, but it
+   winds up in ldgram.h, so we need to define it outside.  */
+
+struct wildcard_spec
+{
+  const char *name;
+  boolean sorted;
+};
 
 /* Extra information we hold on sections */
 typedef struct  user_section_struct

@@ -1,3 +1,26 @@
+Fri May 15 00:22:35 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlex.l: Recognize keyword SORT.
+	* ldgram.y (current_file): Change to struct wildcard_spec.
+	(%union): Add new fields cname and wildcard.
+	(wildcard_name, wildcard_spec): New nonterminals.
+	(file_NAME_list): Use wildcard_spec.
+	(input_section_spec): Change current_file usage.
+	* ld.h (struct wildcard_spec): Define.
+	* ldlang.h (lang_wild_statement_struct): Add new fields
+	sections_sorted and filenames_sorted.
+	(lang_add_wild): Update declaration.
+	* ldlang.c (wild_sort): New static function.
+	(wild_section): Use wild_sort.
+	(print_wild_statement): Print sorting information.
+	(lang_add_wild): Add new parameters sections_sorted and
+	filenames_sorted.  Change all callers.
+	* mri.c (mri_draw_tree): Update calls to lang_add_wild.
+	* scripttempl/elf.sc: Sort .ctors.* and .dtors.* by section name.
+	* scripttempl/elfd10v.sc: Likewise.
+	* scripttempl/elfd30v.sc: Likewise.
+	* scripttempl/elfppc.sc: Likewise.
+
 Thu May 14 18:39:16 1998  Richard Henderson  <rth@cygnus.com>
 
 	* emulparams/m32relf.sh (TEMPLATE_NAME): Define.
