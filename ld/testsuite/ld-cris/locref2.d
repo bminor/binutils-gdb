@@ -1,4 +1,4 @@
-#as: --no-underscore --pic
+#as: --no-underscore --pic --em=criself
 #source: gotrel1.s
 #source: locref2.s
 #ld: -m crislinux

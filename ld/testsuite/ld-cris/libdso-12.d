@@ -1,7 +1,7 @@
 #source: expdyn1.s
 #source: dsov32-1.s
 #source: dsov32-2.s
-#as: --pic --no-underscore --march=v32
+#as: --pic --no-underscore --march=v32 --em=criself
 #ld: --shared -m crislinux -z nocombreloc
 #objdump: -s -T
 

@@ -1,5 +1,5 @@
-# as: --march=v32
-# ld:
+# as: --march=v32 --em=criself
+# ld: -m criself
 # objdump: -d
 
 # Check that 32-bit branches (PCREL:s) are relocated right.

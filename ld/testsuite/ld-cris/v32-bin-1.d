@@ -1,5 +1,5 @@
 #as: --em=criself --march=v32
-#ld: --oformat binary --defsym ext1=0x4000 --defsym ext2=0x6000
+#ld: -m criself --oformat binary --defsym ext1=0x4000 --defsym ext2=0x6000
 #objdump: -s -b binary
 
 # Test that pcrel relocs work with --oformat binary.

@@ -1,5 +1,5 @@
 #source: pv32.s
-#as: --march=v32 --no-underscore
+#as: --march=v32 --no-underscore --em=criself
 #ld: -e here -m crislinux tmpdir/libdso-12.so
 #objdump: -s -T
 

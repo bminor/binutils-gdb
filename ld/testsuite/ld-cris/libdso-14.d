@@ -1,6 +1,6 @@
 #source: dso-1.s
 #source: dsov32-4.s
-#as: --pic --no-underscore --march=v32
+#as: --pic --no-underscore --march=v32 --em=criself
 #ld: --shared -m crislinux
 #readelf: -d -r
 

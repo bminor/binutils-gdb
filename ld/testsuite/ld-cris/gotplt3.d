@@ -2,7 +2,7 @@
 #source: dsofnf.s
 #source: gotrel1.s
 #source: dso-1.s
-#as: --pic --no-underscore
+#as: --pic --no-underscore --em=criself
 #ld: -shared -m crislinux -z nocombreloc
 #objdump: -sR
 

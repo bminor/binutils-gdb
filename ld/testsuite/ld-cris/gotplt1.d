@@ -1,7 +1,7 @@
 #source: dso-2.s
 #source: dsofnf2.s
 #source: gotrel1.s
-#as: --pic --no-underscore
+#as: --pic --no-underscore --em=criself
 #ld: -m crislinux tmpdir/libdso-1.so
 #objdump: -sR
 

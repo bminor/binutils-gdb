@@ -1,7 +1,7 @@
 #source: dso-2.s
 #source: dsofnf.s
 #source: gotrel1.s
-#as: --pic --no-underscore
+#as: --pic --no-underscore --em=criself
 #ld: -shared -m crislinux -z nocombreloc
 #objdump: -sR
 

@@ -1,6 +1,7 @@
 # source: start1.s --march=common_v10_v32
 # source: move-1.s --march=v32
-# ld:
+# as: --em=criself
+# ld: -m criself
 # objdump: -p
 
 # Test that linking a v32 object to a v10+v32 object

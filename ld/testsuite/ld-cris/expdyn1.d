@@ -1,5 +1,5 @@
 #source: expdyn1.s
-#as: --no-underscore
+#as: --no-underscore --em=criself
 #ld: -m crislinux -export-dynamic tmpdir/libdso-1.so
 #objdump: -T
 

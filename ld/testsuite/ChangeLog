@@ -1,3 +1,22 @@
+2005-03-08  Hans-Peter Nilsson  <hp@axis.com>
+
+	Adjust testsuite for cris-axis-aout.
+	* ld-cris/noglob1.d: Adjust regexp for a.out output.
+	* ld-cris/badgotr1.d, ld-cris/expdyn1.d, ld-cris/expdyn2.d,
+	ld-cris/expdyn3.d, ld-cris/expdyn4.d, ld-cris/expdyn5.d,
+	ld-cris/expdyn6.d, ld-cris/expdyn7.d, ld-cris/gotplt1.d,
+	ld-cris/gotplt2.d, ld-cris/gotplt3.d, ld-cris/hiddef1.d,
+	ld-cris/libdso-1.d, ld-cris/libdso-10.d, ld-cris/libdso-11.d,
+	ld-cris/libdso-12.d, ld-cris/libdso-13.d, ld-cris/libdso-14.d,
+	ld-cris/libdso-2.d, ld-cris/libdso-3.d, ld-cris/libdso-4.d,
+	ld-cris/locref1.d, ld-cris/locref2.d, ld-cris/nodyn4.d,
+	ld-cris/nodyn5.d, ld-cris/pv32-1.d, ld-cris/undef1.d,
+	ld-cris/weakref1.d: ld-cris/weakref2.d: Pass --em=criself to gas.
+	* ld-cris/v10-v32.d, ld-cris/v10-va.d, ld-cris/v32-ba-1.d,
+	ld-cris/v32-v10.d, ld-cris/v32-va.d, ld-cris/va-v10.d,
+	ld-cris/va-v32.d: Ditto.  Pass -m criself to gld.
+	* ld-cris/v32-bin-1.d: Pass -m criself to gld.
+
 2005-03-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-alpha/tlsbin.dd: Update to suit changed section layout and
