@@ -501,6 +501,10 @@ som_solib_create_inferior_hook()
   struct objfile *objfile;
   CORE_ADDR anaddr;
 
+  /* First, remove all the solib event breakpoints.  Their addresses
+     may have changed since the last time we ran the program.  */
+  remove_solib_event_breakpoints ();
+
   if (symfile_objfile == NULL)
     return; 
 
@@ -518,9 +522,9 @@ som_solib_create_inferior_hook()
   msymbol = lookup_minimal_symbol ("__d_pid", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning ("Unable to find __d_pid symbol in object file.\n");
-      warning ("Suggest linking with /usr/lib/end.o.\n");
-      warning ("GDB will be unable to track shl_load/shl_unload calls\n");
+      warning ("Unable to find __d_pid symbol in object file.");
+      warning ("Suggest linking with /usr/lib/end.o.");
+      warning ("GDB will be unable to track shl_load/shl_unload calls");
       goto keep_going;
     }
 
@@ -529,9 +533,9 @@ som_solib_create_inferior_hook()
   status = target_write_memory (anaddr, buf, 4);
   if (status != 0)
     {
-      warning ("Unable to write __d_pid\n");
-      warning ("Suggest linking with /usr/lib/end.o.\n");
-      warning ("GDB will be unable to track shl_load/shl_unload calls\n");
+      warning ("Unable to write __d_pid");
+      warning ("Suggest linking with /usr/lib/end.o.");
+      warning ("GDB will be unable to track shl_load/shl_unload calls");
       goto keep_going;
     }
 
@@ -541,9 +545,9 @@ som_solib_create_inferior_hook()
   msymbol = lookup_minimal_symbol ("_DLD_HOOK", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning ("Unable to find _DLD_HOOK symbol in object file.\n");
-      warning ("Suggest linking with /usr/lib/end.o.\n");
-      warning ("GDB will be unable to track shl_load/shl_unload calls\n");
+      warning ("Unable to find _DLD_HOOK symbol in object file.");
+      warning ("Suggest linking with /usr/lib/end.o.");
+      warning ("GDB will be unable to track shl_load/shl_unload calls");
       goto keep_going;
     }
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
@@ -580,9 +584,9 @@ som_solib_create_inferior_hook()
   msymbol = lookup_minimal_symbol ("__dld_hook", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning ("Unable to find __dld_hook symbol in object file.\n");
-      warning ("Suggest linking with /usr/lib/end.o.\n");
-      warning ("GDB will be unable to track shl_load/shl_unload calls\n");
+      warning ("Unable to find __dld_hook symbol in object file.");
+      warning ("Suggest linking with /usr/lib/end.o.");
+      warning ("GDB will be unable to track shl_load/shl_unload calls");
       goto keep_going;
     }
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
@@ -593,9 +597,9 @@ som_solib_create_inferior_hook()
   msymbol = lookup_minimal_symbol ("__d_trap", NULL, symfile_objfile);
   if (msymbol == NULL)
     {
-      warning ("Unable to find __dld_d_trap symbol in object file.\n");
-      warning ("Suggest linking with /usr/lib/end.o.\n");
-      warning ("GDB will be unable to track shl_load/shl_unload calls\n");
+      warning ("Unable to find __dld_d_trap symbol in object file.");
+      warning ("Suggest linking with /usr/lib/end.o.");
+      warning ("GDB will be unable to track shl_load/shl_unload calls");
       goto keep_going;
     }
   create_solib_event_breakpoint (SYMBOL_VALUE_ADDRESS (msymbol));
@@ -653,11 +657,9 @@ keep_going:
     }
 
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
-  if (target_insert_breakpoint (anaddr, shadow_contents))
-    {
-      error ("Unable to set breakpoint at _start.\n");
-      return;
-    }
+
+  /* Make the breakpoint at "_start" a shared library event breakpoint.  */
+  create_solib_event_breakpoint (anaddr);
 
   /* Wipe out all knowledge of old shared libraries since their
      mapping can change from one exec to another!  */
@@ -670,29 +672,6 @@ keep_going:
       free (so_list_head);
       so_list_head = temp->next;
     }
-
-  /* Start the process again and wait for it to hit our breakpoint.  */
-  clear_proceed_status ();
-  stop_soon_quietly = 1;
-  stop_signal = TARGET_SIGNAL_0;
-  do
-    {
-      target_resume (-1, 0, stop_signal);
-      wait_for_inferior ();
-    }
-  while (stop_signal != TARGET_SIGNAL_TRAP);
-  stop_soon_quietly = 0;
-
-  /* All the libraries should be mapped in now.  Remove our breakpoint and
-     read in the symbol tables from the shared libraries.  */
-  if (target_remove_breakpoint (anaddr, shadow_contents))
-    {
-      error ("Unable to remove breakpoint at _start.\n");
-      return;
-    }
-
-  if (auto_solib_add)
-    som_solib_add ((char *) 0, 0, (struct target_ops *) 0);
 }
 
 /* Return the GOT value for the shared library in which ADDR belongs.  If
