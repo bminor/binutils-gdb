@@ -4491,87 +4491,105 @@ scan_file_globals (objfile)
   int hash;
   struct minimal_symbol *msymbol;
   struct symbol *sym, *prev;
+  struct objfile *resolve_objfile;
 
-  /* Avoid expensive loop through all minimal symbols if there are
-     no unresolved symbols.  */
-  for (hash = 0; hash < HASHSIZE; hash++)
+  /* SVR4 based linkers copy referenced global symbols from shared
+     libraries to the main executable.
+     If we are scanning the symbols for a shared library, try to resolve
+     them from the minimal symbols of the main executable first.  */
+
+  if (symfile_objfile && objfile != symfile_objfile)
+    resolve_objfile = symfile_objfile;
+  else
+    resolve_objfile = objfile;
+
+  while (1)
     {
-      if (global_sym_chain[hash])
+      /* Avoid expensive loop through all minimal symbols if there are
+	 no unresolved symbols.  */
+      for (hash = 0; hash < HASHSIZE; hash++)
+	{
+	  if (global_sym_chain[hash])
+	    break;
+	}
+      if (hash >= HASHSIZE)
+	return;
+
+      for (msymbol = resolve_objfile -> msymbols;
+	   msymbol && SYMBOL_NAME (msymbol) != NULL;
+	   msymbol++)
+	{
+	  QUIT;
+
+	  /* Skip static symbols.  */
+	  switch (MSYMBOL_TYPE (msymbol))
+	    {
+	    case mst_file_text:
+	    case mst_file_data:
+	    case mst_file_bss:
+	      continue;
+	    default:
+	      break;
+	    }
+
+	  prev = NULL;
+
+	  /* Get the hash index and check all the symbols
+	     under that hash index. */
+
+	  hash = hashname (SYMBOL_NAME (msymbol));
+
+	  for (sym = global_sym_chain[hash]; sym;)
+	    {
+	      if (SYMBOL_NAME (msymbol)[0] == SYMBOL_NAME (sym)[0] &&
+		  STREQ(SYMBOL_NAME (msymbol) + 1, SYMBOL_NAME (sym) + 1))
+		{
+		  /* Splice this symbol out of the hash chain and
+		     assign the value we have to it. */
+		  if (prev)
+		    {
+		      SYMBOL_VALUE_CHAIN (prev) = SYMBOL_VALUE_CHAIN (sym);
+		    }
+		  else
+		    {
+		      global_sym_chain[hash] = SYMBOL_VALUE_CHAIN (sym);
+		    }
+		  
+		  /* Check to see whether we need to fix up a common block.  */
+		  /* Note: this code might be executed several times for
+		     the same symbol if there are multiple references.  */
+
+		  if (SYMBOL_CLASS (sym) == LOC_BLOCK)
+		    {
+		      fix_common_block (sym, SYMBOL_VALUE_ADDRESS (msymbol));
+		    }
+		  else
+		    {
+		      SYMBOL_VALUE_ADDRESS (sym)
+			= SYMBOL_VALUE_ADDRESS (msymbol);
+		    }
+
+		  SYMBOL_SECTION (sym) = SYMBOL_SECTION (msymbol);
+		  
+		  if (prev)
+		    {
+		      sym = SYMBOL_VALUE_CHAIN (prev);
+		    }
+		  else
+		    {
+		      sym = global_sym_chain[hash];
+		    }
+		}
+	      else
+		{
+		  prev = sym;
+		  sym = SYMBOL_VALUE_CHAIN (sym);
+		}
+	    }
+	}
+      if (resolve_objfile == objfile)
 	break;
-    }
-  if (hash >= HASHSIZE)
-    return;
-
-  for (msymbol = objfile -> msymbols;
-       msymbol && SYMBOL_NAME (msymbol) != NULL;
-       msymbol++)
-    {
-      QUIT;
-
-      /* Skip static symbols.  */
-      switch (MSYMBOL_TYPE (msymbol))
-	{
-	case mst_file_text:
-	case mst_file_data:
-	case mst_file_bss:
-	  continue;
-	default:
-	  break;
-	}
-
-      prev = NULL;
-
-      /* Get the hash index and check all the symbols
-	 under that hash index. */
-
-      hash = hashname (SYMBOL_NAME (msymbol));
-
-      for (sym = global_sym_chain[hash]; sym;)
-	{
-	  if (SYMBOL_NAME (msymbol)[0] == SYMBOL_NAME (sym)[0] &&
-	      STREQ(SYMBOL_NAME (msymbol) + 1, SYMBOL_NAME (sym) + 1))
-	    {
-	      /* Splice this symbol out of the hash chain and
-		 assign the value we have to it. */
-	      if (prev)
-		{
-		  SYMBOL_VALUE_CHAIN (prev) = SYMBOL_VALUE_CHAIN (sym);
-		}
-	      else
-		{
-		  global_sym_chain[hash] = SYMBOL_VALUE_CHAIN (sym);
-		}
-	      
-	      /* Check to see whether we need to fix up a common block.  */
-	      /* Note: this code might be executed several times for
-		 the same symbol if there are multiple references.  */
-
-	      if (SYMBOL_CLASS (sym) == LOC_BLOCK)
-		{
-		  fix_common_block (sym, SYMBOL_VALUE_ADDRESS (msymbol));
-		}
-	      else
-		{
-		  SYMBOL_VALUE_ADDRESS (sym) = SYMBOL_VALUE_ADDRESS (msymbol);
-		}
-
-	      SYMBOL_SECTION (sym) = SYMBOL_SECTION (msymbol);
-	      
-	      if (prev)
-		{
-		  sym = SYMBOL_VALUE_CHAIN (prev);
-		}
-	      else
-		{
-		  sym = global_sym_chain[hash];
-		}
-	    }
-	  else
-	    {
-	      prev = sym;
-	      sym = SYMBOL_VALUE_CHAIN (sym);
-	    }
-	}
+      resolve_objfile = objfile;
     }
 
   /* Change the storage class of any remaining unresolved globals to
@@ -4593,7 +4611,7 @@ scan_file_globals (objfile)
 	    SYMBOL_CLASS (prev) = LOC_UNRESOLVED;
 	  else
 	    complain (&unresolved_sym_chain_complaint,
-		      objfile->name, SYMBOL_NAME (prev));
+		      objfile -> name, SYMBOL_NAME (prev));
 	}
     }
   memset (global_sym_chain, 0, sizeof (global_sym_chain));

@@ -721,6 +721,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
   switch (sh->sc)
     {
     case scText:
+    case scRConst:
       /* Do not relocate relative values.
 	 The value of a stEnd symbol is the displacement from the
 	 corresponding start symbol value.
@@ -790,7 +791,8 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       add_symbol (s, b);
 
       /* Type could be missing if file is compiled without debugging info.  */
-      if (sh->sc == scUndefined || sh->sc == scNil || sh->index == indexNil)
+      if (sh->sc == scUndefined || sh->sc == scSUndefined
+	  || sh->sc == scNil || sh->index == indexNil)
 	SYMBOL_TYPE (s) = nodebug_var_symbol_type;
       else
 	SYMBOL_TYPE (s) = parse_type (cur_fd, ax, sh->index, 0, bigend, name);
@@ -849,7 +851,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       SYMBOL_NAMESPACE (s) = VAR_NAMESPACE;
       SYMBOL_CLASS (s) = LOC_BLOCK;
       /* Type of the return value */
-      if (sh->sc == scUndefined || sh->sc == scNil)
+      if (sh->sc == scUndefined || sh->sc == scSUndefined || sh->sc == scNil)
 	t = mdebug_type_int;
       else
 	{
@@ -898,7 +900,7 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
       add_block (b, top_stack->cur_st);
 
       /* Not if we only have partial info */
-      if (sh->sc == scUndefined || sh->sc == scNil)
+      if (sh->sc == scUndefined || sh->sc == scSUndefined || sh->sc == scNil)
 	break;
 
       push_parse_stack ();
@@ -2081,7 +2083,8 @@ parse_external (es, bigend, section_offsets)
     }
 
   /* Reading .o files */
-  if (es->asym.sc == scUndefined || es->asym.sc == scNil)
+  if (es->asym.sc == scUndefined || es->asym.sc == scSUndefined
+      || es->asym.sc == scNil)
     {
       char *what;
       switch (es->asym.st)
@@ -2387,7 +2390,8 @@ parse_partial_symbols (objfile, section_offsets)
       extern_tab[fdr_to_pst[ext_in->ifd].globals_offset
 		 + fdr_to_pst[ext_in->ifd].n_globals++] = *ext_in;
 
-      if (ext_in->asym.sc == scUndefined || ext_in->asym.sc == scNil)
+      if (ext_in->asym.sc == scUndefined || ext_in->asym.sc == scSUndefined
+	  || ext_in->asym.sc == scNil)
 	continue;
 
       name = debug_info->ssext + ext_in->asym.iss;
@@ -2612,6 +2616,7 @@ parse_partial_symbols (objfile, section_offsets)
 		      switch (sh.sc)
 			{
 			case scUndefined:
+			case scSUndefined:
 			case scNil:
 			case scAbs:
 			  break;
@@ -2677,7 +2682,8 @@ parse_partial_symbols (objfile, section_offsets)
 		}
 
 	      /* Non absolute static symbols go into the minimal table.  */
-	      if (sh.sc == scUndefined || sh.sc == scNil
+	      if (sh.sc == scUndefined || sh.sc == scSUndefined
+		  || sh.sc == scNil
 		  || (sh.index == indexNil
 		      && (sh.st != stStatic || sh.sc == scAbs)))
 		{
@@ -2691,6 +2697,7 @@ parse_partial_symbols (objfile, section_offsets)
 	      switch (sh.sc)
 		{
 		case scText:
+		case scRConst:
 		  /* The value of a stEnd symbol is the displacement from the
 		     corresponding start symbol value, do not relocate it.  */
 		  if (sh.st != stEnd)
@@ -2895,13 +2902,15 @@ parse_partial_symbols (objfile, section_offsets)
 	      psh = &ext_ptr->asym;
 
 	      /* Do not add undefined symbols to the partial symbol table.  */
-	      if (psh->sc == scUndefined || psh->sc == scNil)
+	      if (psh->sc == scUndefined || psh->sc == scSUndefined
+		  || psh->sc == scNil)
 		continue;
 
 	      svalue = psh->value;
 	      switch (psh->sc)
 		{
 		case scText:
+		case scRConst:
 		  svalue += ANOFFSET (section_offsets, SECT_OFF_TEXT);
 		  break;
 		case scData:

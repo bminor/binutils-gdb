@@ -1,3 +1,12 @@
+Sat Nov  2 03:54:13 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* irix5-nat.c, osfsolib.c, solib.c (symbol_add_stub):  Handle
+	missing or zero-sized .text sections properly.
+	* mdebugread.c:  Handle scRConst and scSUndefined storage classes.
+	* stabsread.c (scan_file_globals):  Try to resolve symbols
+	for shared libraries from the minimal symbol table of the main
+	executable first.
+
 start-sanitize-d10v
 Fri Nov  1 13:59:28 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
