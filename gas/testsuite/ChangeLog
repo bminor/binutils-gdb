@@ -1,3 +1,9 @@
+Wed Jul  1 17:31:39 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/ppc/simpshft.s: Add alignment so that it works on AIX.
+	* gas/ppc/simpshft.d: Change accordingly.  Only dump the .text
+	section.
+
 start-sanitize-am33
 Fri Jun 26 11:17:46 1998  Jeffrey A Law  (law@cygnus.com)
 
