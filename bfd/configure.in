@@ -23,7 +23,9 @@ mips)
 m88k)
 	case "${host_vendor}" in
 	motorola)
-			my_host=delta88 ;;
+		my_host=delta88 ;;
+	harris)
+		my_host=harris ;;
 	*)
 		case "${host_os}" in
 		dgux)	my_host=dgux ;;
@@ -55,9 +57,9 @@ i386)
 	case "${host_vendor}" in
 	*)
 		case "${host_os}" in
-		sysv)	my_host=i386v ;;
-		mach)	my_host=i386mach ;;
-		msdos)	my_host=dose ;;
+		sysv*)	my_host=i386v ;;
+		mach*)	my_host=i386mach ;;
+		msdos*)	my_host=dose ;;
 		esac
 		;;
 	esac
@@ -180,6 +182,12 @@ none|nyu|sco)
 	tahoe | vax) bfd_target=${target_cpu} ;;
 	esac
 	;;
+harris)
+	case "${target_cpu}" in
+		m88k) bfd_target=m88kbcs ;;
+		esac
+	;;
+
 motorola)
 	case "${target_cpu}" in
 		m88k) bfd_target=m88kbcs ;;
