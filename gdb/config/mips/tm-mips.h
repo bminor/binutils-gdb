@@ -35,10 +35,6 @@ struct value;
 #include "coff/sym.h"		/* Needed for PDR below.  */
 #include "coff/symconst.h"
 
-#if !defined (GDB_TARGET_IS_MIPS64)
-#define GDB_TARGET_IS_MIPS64 0
-#endif
-
 #if !defined (MIPS_EABI)
 #define MIPS_EABI 0
 #endif

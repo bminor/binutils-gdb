@@ -122,6 +122,7 @@ struct gdbarch_tdep
     int mips_fp_register_double;
     int mips_regs_have_home_p;
     int mips_default_stack_argsize;
+    int gdb_target_is_mips64;
   };
 
 #if GDB_MULTI_ARCH
@@ -215,7 +216,10 @@ mips_stack_argsize (void)
     return 4;
 }
 
-
+#if GDB_MULTI_ARCH
+#undef GDB_TARGET_IS_MIPS64
+#define GDB_TARGET_IS_MIPS64 (gdbarch_tdep (current_gdbarch)->gdb_target_is_mips64 + 0)
+#endif
 
 #define VM_MIN_ADDRESS (CORE_ADDR)0x400000
 
@@ -1308,31 +1312,34 @@ CORE_ADDR
 mips_addr_bits_remove (addr)
      CORE_ADDR addr;
 {
-#if GDB_TARGET_IS_MIPS64
-  if (mask_address_p && (addr >> 32 == (CORE_ADDR) 0xffffffff))
+  if (GDB_TARGET_IS_MIPS64)
     {
-      /* This hack is a work-around for existing boards using PMON,
-         the simulator, and any other 64-bit targets that doesn't have
-         true 64-bit addressing.  On these targets, the upper 32 bits
-         of addresses are ignored by the hardware.  Thus, the PC or SP
-         are likely to have been sign extended to all 1s by instruction
-         sequences that load 32-bit addresses.  For example, a typical
-         piece of code that loads an address is this:
-         lui $r2, <upper 16 bits>
-         ori $r2, <lower 16 bits>
-         But the lui sign-extends the value such that the upper 32 bits
-         may be all 1s.  The workaround is simply to mask off these bits.
-         In the future, gcc may be changed to support true 64-bit
-         addressing, and this masking will have to be disabled.  */
+      if (mask_address_p && (addr >> 32 == (CORE_ADDR) 0xffffffff))
+	{
+	  /* This hack is a work-around for existing boards using
+	     PMON, the simulator, and any other 64-bit targets that
+	     doesn't have true 64-bit addressing.  On these targets,
+	     the upper 32 bits of addresses are ignored by the
+	     hardware.  Thus, the PC or SP are likely to have been
+	     sign extended to all 1s by instruction sequences that
+	     load 32-bit addresses.  For example, a typical piece of
+	     code that loads an address is this: lui $r2, <upper 16
+	     bits> ori $r2, <lower 16 bits> But the lui sign-extends
+	     the value such that the upper 32 bits may be all 1s.  The
+	     workaround is simply to mask off these bits.  In the
+	     future, gcc may be changed to support true 64-bit
+	     addressing, and this masking will have to be disabled.  */
+	  addr &= (CORE_ADDR) 0xffffffff;
+	}
+    }
+  else
+    {
+      /* Even when GDB is configured for some 32-bit targets
+	 (e.g. mips-elf), BFD is configured to handle 64-bit targets,
+	 so CORE_ADDR is 64 bits.  So we still have to mask off
+	 useless bits from addresses.  */
       addr &= (CORE_ADDR) 0xffffffff;
     }
-#else
-  /* Even when GDB is configured for some 32-bit targets (e.g. mips-elf),
-     BFD is configured to handle 64-bit targets, so CORE_ADDR is 64 bits.
-     So we still have to mask off useless bits from addresses.  */
-  addr &= (CORE_ADDR) 0xffffffff;
-#endif
-
   return addr;
 }
 
@@ -3942,6 +3949,7 @@ mips_gdbarch_init (info, arches)
       tdep->mips_last_arg_regnum = ZERO_REGNUM + 7;
       tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 15;
       tdep->mips_regs_have_home_p = 1;
+      tdep->gdb_target_is_mips64 = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
@@ -3953,6 +3961,7 @@ mips_gdbarch_init (info, arches)
       tdep->mips_last_arg_regnum = ZERO_REGNUM + 7;
       tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 15;
       tdep->mips_regs_have_home_p = 1;
+      tdep->gdb_target_is_mips64 = 1;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
@@ -3964,6 +3973,7 @@ mips_gdbarch_init (info, arches)
       tdep->mips_last_arg_regnum = ZERO_REGNUM + 11;
       tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 19;
       tdep->mips_regs_have_home_p = 0;
+      tdep->gdb_target_is_mips64 = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
@@ -3975,6 +3985,7 @@ mips_gdbarch_init (info, arches)
       tdep->mips_last_arg_regnum = ZERO_REGNUM + 11;
       tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 19;
       tdep->mips_regs_have_home_p = 0;
+      tdep->gdb_target_is_mips64 = 1;
       set_gdbarch_long_bit (gdbarch, 64);
       set_gdbarch_ptr_bit (gdbarch, 64);
       set_gdbarch_long_long_bit (gdbarch, 64);
@@ -3986,6 +3997,7 @@ mips_gdbarch_init (info, arches)
       tdep->mips_last_arg_regnum = ZERO_REGNUM + 11;
       tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 19;
       tdep->mips_regs_have_home_p = 0;
+      tdep->gdb_target_is_mips64 = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);
@@ -3997,6 +4009,7 @@ mips_gdbarch_init (info, arches)
       tdep->mips_last_arg_regnum = ZERO_REGNUM + 11;
       tdep->mips_last_fp_arg_regnum = FP0_REGNUM + 19;
       tdep->mips_regs_have_home_p = 1;
+      tdep->gdb_target_is_mips64 = 0;
       set_gdbarch_long_bit (gdbarch, 32);
       set_gdbarch_ptr_bit (gdbarch, 32);
       set_gdbarch_long_long_bit (gdbarch, 64);

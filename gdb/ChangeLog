@@ -1,3 +1,13 @@
+Mon Jun 12 14:26:02 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (GDB_TARGET_IS_MIPS64): Define.
+	(struct gdbarch_tdep): Add gdb_target_is_mips64.
+	(mips_addr_bits_remove): Update.
+	(mips_gdbarch_init): Initialize.
+
+	* config/mips/tm-mips64.h (GDB_TARGET_IS_MIPS64,
+ 	GDB_TARGET_IS_MIPS64): Delete.
+
 Mon Jun 12 12:17:20 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips-tdep.c: Include "symcat.h".
