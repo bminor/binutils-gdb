@@ -1038,7 +1038,7 @@ static int backtrace_limit;
 static void
 set_backtrace_limit_command (char *count_exp, int from_tty)
 {
-  int count = parse_and_eval_address (count_exp);
+  int count = parse_and_eval_long (count_exp);
 
   if (count < 0)
     error ("Negative argument not meaningful as backtrace limit.");
@@ -1086,7 +1086,7 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
   trailing_level = 0;
   if (count_exp)
     {
-      count = parse_and_eval_address (count_exp);
+      count = parse_and_eval_long (count_exp);
       if (count < 0)
 	{
 	  struct frame_info *current;
@@ -1740,7 +1740,7 @@ up_silently_base (char *count_exp)
   register struct frame_info *fi;
   int count = 1, count1;
   if (count_exp)
-    count = parse_and_eval_address (count_exp);
+    count = parse_and_eval_long (count_exp);
   count1 = count;
 
   if (target_has_stack == 0 || selected_frame == 0)
@@ -1777,7 +1777,7 @@ down_silently_base (char *count_exp)
   register struct frame_info *frame;
   int count = -1, count1;
   if (count_exp)
-    count = -parse_and_eval_address (count_exp);
+    count = -parse_and_eval_long (count_exp);
   count1 = count;
 
   if (target_has_stack == 0 || selected_frame == 0)

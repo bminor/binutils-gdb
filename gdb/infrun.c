@@ -3899,7 +3899,7 @@ signals_info (char *signum_exp, int from_tty)
 	{
 	  /* No, try numeric.  */
 	  oursig =
-	    target_signal_from_command (parse_and_eval_address (signum_exp));
+	    target_signal_from_command (parse_and_eval_long (signum_exp));
 	}
       sig_print_info (oursig);
       return;

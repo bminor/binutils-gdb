@@ -103,6 +103,21 @@ parse_and_eval_address_1 (char **expptr)
   return addr;
 }
 
+/* Like parse_and_eval_address, but treats the value of the expression
+   as an integer, not an address, returns a LONGEST, not a CORE_ADDR */
+LONGEST
+parse_and_eval_long (char *exp)
+{
+  struct expression *expr = parse_expression (exp);
+  register LONGEST retval;
+  register struct cleanup *old_chain =
+    make_cleanup (free_current_contents, &expr);
+
+  retval = value_as_long (evaluate_expression (expr));
+  do_cleanups (old_chain);
+  return (retval);
+}
+
 value_ptr
 parse_and_eval (char *exp)
 {

@@ -1416,7 +1416,7 @@ set_radix (char *arg, int from_tty)
 {
   unsigned radix;
 
-  radix = (arg == NULL) ? 10 : parse_and_eval_address (arg);
+  radix = (arg == NULL) ? 10 : parse_and_eval_long (arg);
   set_output_radix_1 (0, radix);
   set_input_radix_1 (0, radix);
   if (from_tty)

@@ -3638,7 +3638,7 @@ breakpoints_info (char *bnum_exp, int from_tty)
   int bnum = -1;
 
   if (bnum_exp)
-    bnum = parse_and_eval_address (bnum_exp);
+    bnum = parse_and_eval_long (bnum_exp);
 
   breakpoint_1 (bnum, 0);
 }
@@ -3650,7 +3650,7 @@ maintenance_info_breakpoints (char *bnum_exp, int from_tty)
   int bnum = -1;
 
   if (bnum_exp)
-    bnum = parse_and_eval_address (bnum_exp);
+    bnum = parse_and_eval_long (bnum_exp);
 
   breakpoint_1 (bnum, 1);
 }

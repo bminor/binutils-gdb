@@ -410,6 +410,8 @@ extern CORE_ADDR parse_and_eval_address (char *exp);
 
 extern CORE_ADDR parse_and_eval_address_1 (char **expptr);
 
+extern LONGEST parse_and_eval_long (char *exp);
+
 extern value_ptr access_value_history (int num);
 
 extern value_ptr value_of_internalvar (struct internalvar *var);

@@ -351,7 +351,7 @@ show_values (char *num_exp, int from_tty)
       /* "info history +" should print from the stored position.
          "info history <exp>" should print around value number <exp>.  */
       if (num_exp[0] != '+' || num_exp[1] != '\0')
-	num = parse_and_eval_address (num_exp) - 5;
+	num = parse_and_eval_long (num_exp) - 5;
     }
   else
     {

@@ -381,7 +381,7 @@ continue_command (char *proc_count_exp, int from_tty)
       while (num != 0)
 	{
 	  set_ignore_count (num,
-			    parse_and_eval_address (proc_count_exp) - 1,
+			    parse_and_eval_long (proc_count_exp) - 1,
 			    from_tty);
 	  /* set_ignore_count prints a message ending with a period.
 	     So print two spaces before "Continuing.".  */
@@ -465,7 +465,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
       async_disable_stdin ();
     }
 
-  count = count_string ? parse_and_eval_address (count_string) : 1;
+  count = count_string ? parse_and_eval_long (count_string) : 1;
 
   if (!single_inst || skip_subroutines)		/* leave si command alone */
     {
@@ -777,7 +777,7 @@ signal_command (char *signum_exp, int from_tty)
   if (oursig == TARGET_SIGNAL_UNKNOWN)
     {
       /* No, try numeric.  */
-      int num = parse_and_eval_address (signum_exp);
+      int num = parse_and_eval_long (signum_exp);
 
       if (num == 0)
 	oursig = TARGET_SIGNAL_0;

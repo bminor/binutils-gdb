@@ -1,3 +1,20 @@
+Mon Oct 30 10:19:01 2000  David Taylor  <taylor@redhat.com>
+
+	* eval.c (parse_and_eval_long): New function.
+	* value.h: Declare it.
+	
+	* breakpoint.c (breakpoints_info, maintenance_info_breakpoints):
+	Call parse_and_eval_long, not parse_and_eval_address.
+	* command.c (do_setshow_command): Ditto.
+	* infcmd.c (step_1, signal_command, continue_command): Ditto.
+	* infrun.c (signals_info): Ditto.
+	* stack.c (set_backtrace_limit_command, backtrace_command_1,
+	up_silently_base, down_silently_base): Ditto.
+	* tracepoints.c (tracepoints_info, trace_find_command,
+ 	trace_find_tracepoint_command): Ditto.
+	* valprint.c (set_radix): Ditto.
+	* values.c (show_values): Ditto.
+
 2000-10-28  Kevin Buettner  <kevinb@redhat.com>
 
 	* symtab.c (decode_line_2, file_matches, search_symbols): Protoize.

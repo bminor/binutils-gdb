@@ -1622,7 +1622,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	case var_uinteger:
 	  if (arg == NULL)
 	    error_no_arg ("integer to set it to.");
-	  *(unsigned int *) c->var = parse_and_eval_address (arg);
+	  *(unsigned int *) c->var = parse_and_eval_long (arg);
 	  if (*(unsigned int *) c->var == 0)
 	    *(unsigned int *) c->var = UINT_MAX;
 	  break;
@@ -1631,7 +1631,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	    unsigned int val;
 	    if (arg == NULL)
 	      error_no_arg ("integer to set it to.");
-	    val = parse_and_eval_address (arg);
+	    val = parse_and_eval_long (arg);
 	    if (val == 0)
 	      *(int *) c->var = INT_MAX;
 	    else if (val >= INT_MAX)
@@ -1643,7 +1643,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 	case var_zinteger:
 	  if (arg == NULL)
 	    error_no_arg ("integer to set it to.");
-	  *(int *) c->var = parse_and_eval_address (arg);
+	  *(int *) c->var = parse_and_eval_long (arg);
 	  break;
 	case var_enum:
 	  {

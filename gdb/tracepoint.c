@@ -465,7 +465,7 @@ tracepoints_info (char *tpnum_exp, int from_tty)
   int tpnum = -1;
 
   if (tpnum_exp)
-    tpnum = parse_and_eval_address (tpnum_exp);
+    tpnum = parse_and_eval_long (tpnum_exp);
 
   ALL_TRACEPOINTS (t)
     if (tpnum == -1 || tpnum == t->number)
@@ -1986,7 +1986,7 @@ trace_find_command (char *args, int from_tty)
 	  frameno = traceframe_number - 1;
 	}
       else
-	frameno = parse_and_eval_address (args);
+	frameno = parse_and_eval_long (args);
 
       if (frameno < -1)
 	error ("invalid input (%d is less than zero)", frameno);
