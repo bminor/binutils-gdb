@@ -355,7 +355,10 @@ cplus_print_value (type, valaddr, stream, format, recurse, pretty, dont_print)
     {
       char *baddr;
       int err;
-      char *basename = TYPE_NAME (TYPE_BASECLASS (type, i));
+      char *basename;
+
+      check_stub_type (TYPE_BASECLASS (type, i));
+      basename = TYPE_NAME (TYPE_BASECLASS (type, i));
 
       if (BASETYPE_VIA_VIRTUAL (type, i))
 	{

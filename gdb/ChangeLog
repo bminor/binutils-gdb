@@ -1,5 +1,8 @@
 Mon Dec 27 11:07:05 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* cp-valprint.c (cplus_print_value): Call check_stub_type on
+	TYPE_BASECLASS (type, i) before we look at its name.
+
 	* dbxread.c: Move default definition of GCC_COMPILED_FLAG_SYMBOL
 	from here . . .
 	* symtab.h: . . . to here.
