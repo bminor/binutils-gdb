@@ -1,3 +1,8 @@
+Wed Oct 25 11:59:24 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* Makefile.in (diststuff):  Also make info.
+	(maintainer-clean realclean):  Also make clean-info.
+
 Tue Oct 24 15:21:33 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (md_pseudo_table): Add new ".nsubspa" opcode.
