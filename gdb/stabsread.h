@@ -30,12 +30,6 @@
 #define	EXTERN extern
 #endif
 
-/* Convert stab register number (from `r' declaration) to a gdb REGNUM.  */
-
-#ifndef STAB_REG_TO_REGNUM
-#define STAB_REG_TO_REGNUM(VALUE) (VALUE)
-#endif
-
 /* Hash table of global symbols whose values are not known yet.
    They are chained thru the SYMBOL_VALUE_CHAIN, since we don't
    have the correct data for that slot yet.

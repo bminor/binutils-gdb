@@ -1,3 +1,23 @@
+Mon Dec  4 14:36:39 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh (STAB_REG_TO_REGNUM, ECOFF_REG_TO_REGNUM,
+ 	DWARF_REG_TO_REGNUM, SDB_REG_TO_REGNUM, DWARF2_REG_TO_REGNUM):
+ 	Add.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* arch-utils.c (no_op_reg_to_regnum): New function.
+	* arch-utils.h (no_op_reg_to_regnum): Declare.
+
+	* dwarfread.c (DWARF_REG_TO_REGNUM), coffread.c
+ 	(SDB_REG_TO_REGNUM), stabsread.h (STAB_REG_TO_REGNUM),
+ 	mdebugread.c (ECOFF_REG_TO_REGNUM): Delete macro.
+
+	* config/mips/tm-mips.h (ECOFF_REG_TO_REGNUM, STAB_REG_TO_REGNUM):
+ 	Delete.  Moved to mips-tdep.c.
+	* mips-tdep.c (mips_ecoff_reg_to_regnum, mips_stab_reg_to_regnum):
+ 	New functions.
+	(mips_gdbarch_init): Add ``mips_ecoff_reg_to_regnum'' and
+ 	``mips_stab_reg_to_regnum'' to multi-arch vector.
+
 2000-12-03  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* m68hc11-tdep.c (m68hc11_gdbarch_init): Remove elf_flags, cleanup.

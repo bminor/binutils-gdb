@@ -428,6 +428,86 @@ extern void set_gdbarch_nnpc_regnum (struct gdbarch *gdbarch, int nnpc_regnum);
 #endif
 #endif
 
+/* Convert stab register number (from `r' declaration) to a gdb REGNUM. */
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (STAB_REG_TO_REGNUM)
+#define STAB_REG_TO_REGNUM(stab_regnr) (no_op_reg_to_regnum (stab_regnr))
+#endif
+
+typedef int (gdbarch_stab_reg_to_regnum_ftype) (int stab_regnr);
+extern int gdbarch_stab_reg_to_regnum (struct gdbarch *gdbarch, int stab_regnr);
+extern void set_gdbarch_stab_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_stab_reg_to_regnum_ftype *stab_reg_to_regnum);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (STAB_REG_TO_REGNUM)
+#define STAB_REG_TO_REGNUM(stab_regnr) (gdbarch_stab_reg_to_regnum (current_gdbarch, stab_regnr))
+#endif
+#endif
+
+/* Provide a default mapping from a ecoff register number to a gdb REGNUM. */
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (ECOFF_REG_TO_REGNUM)
+#define ECOFF_REG_TO_REGNUM(ecoff_regnr) (no_op_reg_to_regnum (ecoff_regnr))
+#endif
+
+typedef int (gdbarch_ecoff_reg_to_regnum_ftype) (int ecoff_regnr);
+extern int gdbarch_ecoff_reg_to_regnum (struct gdbarch *gdbarch, int ecoff_regnr);
+extern void set_gdbarch_ecoff_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_ecoff_reg_to_regnum_ftype *ecoff_reg_to_regnum);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (ECOFF_REG_TO_REGNUM)
+#define ECOFF_REG_TO_REGNUM(ecoff_regnr) (gdbarch_ecoff_reg_to_regnum (current_gdbarch, ecoff_regnr))
+#endif
+#endif
+
+/* Provide a default mapping from a DWARF register number to a gdb REGNUM. */
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DWARF_REG_TO_REGNUM)
+#define DWARF_REG_TO_REGNUM(dwarf_regnr) (no_op_reg_to_regnum (dwarf_regnr))
+#endif
+
+typedef int (gdbarch_dwarf_reg_to_regnum_ftype) (int dwarf_regnr);
+extern int gdbarch_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int dwarf_regnr);
+extern void set_gdbarch_dwarf_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_dwarf_reg_to_regnum_ftype *dwarf_reg_to_regnum);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DWARF_REG_TO_REGNUM)
+#define DWARF_REG_TO_REGNUM(dwarf_regnr) (gdbarch_dwarf_reg_to_regnum (current_gdbarch, dwarf_regnr))
+#endif
+#endif
+
+/* Convert from an sdb register number to an internal gdb register number.
+   This should be defined in tm.h, if REGISTER_NAMES is not set up
+   to map one to one onto the sdb register numbers. */
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (SDB_REG_TO_REGNUM)
+#define SDB_REG_TO_REGNUM(sdb_regnr) (no_op_reg_to_regnum (sdb_regnr))
+#endif
+
+typedef int (gdbarch_sdb_reg_to_regnum_ftype) (int sdb_regnr);
+extern int gdbarch_sdb_reg_to_regnum (struct gdbarch *gdbarch, int sdb_regnr);
+extern void set_gdbarch_sdb_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_sdb_reg_to_regnum_ftype *sdb_reg_to_regnum);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SDB_REG_TO_REGNUM)
+#define SDB_REG_TO_REGNUM(sdb_regnr) (gdbarch_sdb_reg_to_regnum (current_gdbarch, sdb_regnr))
+#endif
+#endif
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DWARF2_REG_TO_REGNUM)
+#define DWARF2_REG_TO_REGNUM(dwarf2_regnr) (no_op_reg_to_regnum (dwarf2_regnr))
+#endif
+
+typedef int (gdbarch_dwarf2_reg_to_regnum_ftype) (int dwarf2_regnr);
+extern int gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int dwarf2_regnr);
+extern void set_gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_dwarf2_reg_to_regnum_ftype *dwarf2_reg_to_regnum);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DWARF2_REG_TO_REGNUM)
+#define DWARF2_REG_TO_REGNUM(dwarf2_regnr) (gdbarch_dwarf2_reg_to_regnum (current_gdbarch, dwarf2_regnr))
+#endif
+#endif
+
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_NAME)
 #define REGISTER_NAME(regnr) (legacy_register_name (regnr))

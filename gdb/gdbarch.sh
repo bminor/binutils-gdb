@@ -371,6 +371,17 @@ v:2:PC_REGNUM:int:pc_regnum::::0:-1
 v:2:FP0_REGNUM:int:fp0_regnum::::0:-1::0
 v:2:NPC_REGNUM:int:npc_regnum::::0:-1::0
 v:2:NNPC_REGNUM:int:nnpc_regnum::::0:-1::0
+# Convert stab register number (from \`r\' declaration) to a gdb REGNUM.
+f:2:STAB_REG_TO_REGNUM:int:stab_reg_to_regnum:int stab_regnr:stab_regnr:::no_op_reg_to_regnum::0
+# Provide a default mapping from a ecoff register number to a gdb REGNUM.
+f:2:ECOFF_REG_TO_REGNUM:int:ecoff_reg_to_regnum:int ecoff_regnr:ecoff_regnr:::no_op_reg_to_regnum::0
+# Provide a default mapping from a DWARF register number to a gdb REGNUM.
+f:2:DWARF_REG_TO_REGNUM:int:dwarf_reg_to_regnum:int dwarf_regnr:dwarf_regnr:::no_op_reg_to_regnum::0
+# Convert from an sdb register number to an internal gdb register number.
+# This should be defined in tm.h, if REGISTER_NAMES is not set up
+# to map one to one onto the sdb register numbers.
+f:2:SDB_REG_TO_REGNUM:int:sdb_reg_to_regnum:int sdb_regnr:sdb_regnr:::no_op_reg_to_regnum::0
+f:2:DWARF2_REG_TO_REGNUM:int:dwarf2_reg_to_regnum:int dwarf2_regnr:dwarf2_regnr:::no_op_reg_to_regnum::0
 f:2:REGISTER_NAME:char *:register_name:int regnr:regnr:::legacy_register_name::0
 v:2:REGISTER_SIZE:int:register_size::::0:-1
 v:2:REGISTER_BYTES:int:register_bytes::::0:-1

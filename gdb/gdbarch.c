@@ -153,6 +153,11 @@ struct gdbarch
   int fp0_regnum;
   int npc_regnum;
   int nnpc_regnum;
+  gdbarch_stab_reg_to_regnum_ftype *stab_reg_to_regnum;
+  gdbarch_ecoff_reg_to_regnum_ftype *ecoff_reg_to_regnum;
+  gdbarch_dwarf_reg_to_regnum_ftype *dwarf_reg_to_regnum;
+  gdbarch_sdb_reg_to_regnum_ftype *sdb_reg_to_regnum;
+  gdbarch_dwarf2_reg_to_regnum_ftype *dwarf2_reg_to_regnum;
   gdbarch_register_name_ftype *register_name;
   int register_size;
   int register_bytes;
@@ -304,6 +309,11 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  0,
+  0,
+  0,
+  0,
+  0,
   generic_get_saved_register,
   0,
   0,
@@ -400,6 +410,11 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->fp0_regnum = -1;
   gdbarch->npc_regnum = -1;
   gdbarch->nnpc_regnum = -1;
+  gdbarch->stab_reg_to_regnum = no_op_reg_to_regnum;
+  gdbarch->ecoff_reg_to_regnum = no_op_reg_to_regnum;
+  gdbarch->dwarf_reg_to_regnum = no_op_reg_to_regnum;
+  gdbarch->sdb_reg_to_regnum = no_op_reg_to_regnum;
+  gdbarch->dwarf2_reg_to_regnum = no_op_reg_to_regnum;
   gdbarch->register_name = legacy_register_name;
   gdbarch->register_size = -1;
   gdbarch->register_bytes = -1;
@@ -500,6 +515,11 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of fp0_regnum, invalid_p == 0 */
   /* Skip verify of npc_regnum, invalid_p == 0 */
   /* Skip verify of nnpc_regnum, invalid_p == 0 */
+  /* Skip verify of stab_reg_to_regnum, invalid_p == 0 */
+  /* Skip verify of ecoff_reg_to_regnum, invalid_p == 0 */
+  /* Skip verify of dwarf_reg_to_regnum, invalid_p == 0 */
+  /* Skip verify of sdb_reg_to_regnum, invalid_p == 0 */
+  /* Skip verify of dwarf2_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of register_name, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->register_size == -1))
@@ -829,6 +849,36 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: NNPC_REGNUM # %s\n",
                       XSTRING (NNPC_REGNUM));
+#endif
+#ifdef STAB_REG_TO_REGNUM
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "STAB_REG_TO_REGNUM(stab_regnr)",
+                      XSTRING (STAB_REG_TO_REGNUM (stab_regnr)));
+#endif
+#ifdef ECOFF_REG_TO_REGNUM
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "ECOFF_REG_TO_REGNUM(ecoff_regnr)",
+                      XSTRING (ECOFF_REG_TO_REGNUM (ecoff_regnr)));
+#endif
+#ifdef DWARF_REG_TO_REGNUM
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DWARF_REG_TO_REGNUM(dwarf_regnr)",
+                      XSTRING (DWARF_REG_TO_REGNUM (dwarf_regnr)));
+#endif
+#ifdef SDB_REG_TO_REGNUM
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "SDB_REG_TO_REGNUM(sdb_regnr)",
+                      XSTRING (SDB_REG_TO_REGNUM (sdb_regnr)));
+#endif
+#ifdef DWARF2_REG_TO_REGNUM
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DWARF2_REG_TO_REGNUM(dwarf2_regnr)",
+                      XSTRING (DWARF2_REG_TO_REGNUM (dwarf2_regnr)));
 #endif
 #ifdef REGISTER_NAME
   fprintf_unfiltered (file,
@@ -1450,6 +1500,41 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: NNPC_REGNUM = %ld\n",
                       (long) NNPC_REGNUM);
+#endif
+#ifdef STAB_REG_TO_REGNUM
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: STAB_REG_TO_REGNUM = 0x%08lx\n",
+                        (long) current_gdbarch->stab_reg_to_regnum
+                        /*STAB_REG_TO_REGNUM ()*/);
+#endif
+#ifdef ECOFF_REG_TO_REGNUM
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: ECOFF_REG_TO_REGNUM = 0x%08lx\n",
+                        (long) current_gdbarch->ecoff_reg_to_regnum
+                        /*ECOFF_REG_TO_REGNUM ()*/);
+#endif
+#ifdef DWARF_REG_TO_REGNUM
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DWARF_REG_TO_REGNUM = 0x%08lx\n",
+                        (long) current_gdbarch->dwarf_reg_to_regnum
+                        /*DWARF_REG_TO_REGNUM ()*/);
+#endif
+#ifdef SDB_REG_TO_REGNUM
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: SDB_REG_TO_REGNUM = 0x%08lx\n",
+                        (long) current_gdbarch->sdb_reg_to_regnum
+                        /*SDB_REG_TO_REGNUM ()*/);
+#endif
+#ifdef DWARF2_REG_TO_REGNUM
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DWARF2_REG_TO_REGNUM = 0x%08lx\n",
+                        (long) current_gdbarch->dwarf2_reg_to_regnum
+                        /*DWARF2_REG_TO_REGNUM ()*/);
 #endif
 #ifdef REGISTER_NAME
   if (GDB_MULTI_ARCH)
@@ -2404,6 +2489,91 @@ set_gdbarch_nnpc_regnum (struct gdbarch *gdbarch,
                          int nnpc_regnum)
 {
   gdbarch->nnpc_regnum = nnpc_regnum;
+}
+
+int
+gdbarch_stab_reg_to_regnum (struct gdbarch *gdbarch, int stab_regnr)
+{
+  if (gdbarch->stab_reg_to_regnum == 0)
+    internal_error ("gdbarch: gdbarch_stab_reg_to_regnum invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_stab_reg_to_regnum called\n");
+  return gdbarch->stab_reg_to_regnum (stab_regnr);
+}
+
+void
+set_gdbarch_stab_reg_to_regnum (struct gdbarch *gdbarch,
+                                gdbarch_stab_reg_to_regnum_ftype stab_reg_to_regnum)
+{
+  gdbarch->stab_reg_to_regnum = stab_reg_to_regnum;
+}
+
+int
+gdbarch_ecoff_reg_to_regnum (struct gdbarch *gdbarch, int ecoff_regnr)
+{
+  if (gdbarch->ecoff_reg_to_regnum == 0)
+    internal_error ("gdbarch: gdbarch_ecoff_reg_to_regnum invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_ecoff_reg_to_regnum called\n");
+  return gdbarch->ecoff_reg_to_regnum (ecoff_regnr);
+}
+
+void
+set_gdbarch_ecoff_reg_to_regnum (struct gdbarch *gdbarch,
+                                 gdbarch_ecoff_reg_to_regnum_ftype ecoff_reg_to_regnum)
+{
+  gdbarch->ecoff_reg_to_regnum = ecoff_reg_to_regnum;
+}
+
+int
+gdbarch_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int dwarf_regnr)
+{
+  if (gdbarch->dwarf_reg_to_regnum == 0)
+    internal_error ("gdbarch: gdbarch_dwarf_reg_to_regnum invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_dwarf_reg_to_regnum called\n");
+  return gdbarch->dwarf_reg_to_regnum (dwarf_regnr);
+}
+
+void
+set_gdbarch_dwarf_reg_to_regnum (struct gdbarch *gdbarch,
+                                 gdbarch_dwarf_reg_to_regnum_ftype dwarf_reg_to_regnum)
+{
+  gdbarch->dwarf_reg_to_regnum = dwarf_reg_to_regnum;
+}
+
+int
+gdbarch_sdb_reg_to_regnum (struct gdbarch *gdbarch, int sdb_regnr)
+{
+  if (gdbarch->sdb_reg_to_regnum == 0)
+    internal_error ("gdbarch: gdbarch_sdb_reg_to_regnum invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_sdb_reg_to_regnum called\n");
+  return gdbarch->sdb_reg_to_regnum (sdb_regnr);
+}
+
+void
+set_gdbarch_sdb_reg_to_regnum (struct gdbarch *gdbarch,
+                               gdbarch_sdb_reg_to_regnum_ftype sdb_reg_to_regnum)
+{
+  gdbarch->sdb_reg_to_regnum = sdb_reg_to_regnum;
+}
+
+int
+gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int dwarf2_regnr)
+{
+  if (gdbarch->dwarf2_reg_to_regnum == 0)
+    internal_error ("gdbarch: gdbarch_dwarf2_reg_to_regnum invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_dwarf2_reg_to_regnum called\n");
+  return gdbarch->dwarf2_reg_to_regnum (dwarf2_regnr);
+}
+
+void
+set_gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch,
+                                  gdbarch_dwarf2_reg_to_regnum_ftype dwarf2_reg_to_regnum)
+{
+  gdbarch->dwarf2_reg_to_regnum = dwarf2_reg_to_regnum;
 }
 
 char *

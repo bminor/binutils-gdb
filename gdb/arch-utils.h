@@ -97,4 +97,8 @@ extern int default_register_sim_regno (int reg_nr);
 
 extern CORE_ADDR default_convert_from_func_ptr_addr (CORE_ADDR addr);
 
+/* No-op conversion of reg to regnum. */
+
+extern int no_op_reg_to_regnum (int reg);
+
 #endif

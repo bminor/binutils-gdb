@@ -3801,6 +3801,29 @@ mips_saved_pc_after_call (struct frame_info *frame)
 }
 
 
+/* Convert a dbx stab register number (from `r' declaration) to a gdb
+   REGNUM */
+
+static int
+mips_stab_reg_to_regnum (int num)
+{
+  if (num < 32)
+    return num;
+  else 
+    return num + FP0_REGNUM - 38;
+}
+
+/* Convert a ecoff register number to a gdb REGNUM */
+
+static int
+mips_ecoff_reg_to_regnum (int num)
+{
+  if (num < 32)
+    return num;
+  else
+    return num + FP0_REGNUM - 32;
+}
+
 static struct gdbarch *
 mips_gdbarch_init (struct gdbarch_info info,
 		   struct gdbarch_list *arches)
@@ -4041,6 +4064,10 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_write_fp (gdbarch, generic_target_write_fp);
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
   set_gdbarch_write_sp (gdbarch, generic_target_write_sp);
+
+  /* Map debug register numbers onto internal register numbers. */
+  set_gdbarch_stab_reg_to_regnum (gdbarch, mips_stab_reg_to_regnum);
+  set_gdbarch_ecoff_reg_to_regnum (gdbarch, mips_ecoff_reg_to_regnum);
 
   /* Initialize a frame */
   set_gdbarch_init_extra_frame_info (gdbarch, mips_init_extra_frame_info);

@@ -68,14 +68,6 @@ struct coff_symfile_info
 
 #define SDB_TYPE(type) (BTYPE(type) | (type & N_TMASK))
 
-/* Convert from an sdb register number to an internal gdb register number.
-   This should be defined in tm.h, if REGISTER_NAMES is not set up
-   to map one to one onto the sdb register numbers.  */
-
-#ifndef SDB_REG_TO_REGNUM
-#define SDB_REG_TO_REGNUM(value)     (value)
-#endif
-
 /* Core address of start and end of text of current source file.
    This comes from a ".text" symbol where x_nlinno > 0.  */
 
