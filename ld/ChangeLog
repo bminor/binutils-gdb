@@ -1,3 +1,7 @@
+Mon Sep 18 14:39:38 1995  Arne H. Juul  <arnej@pvv.unit.no>
+
+	* configure.tgt (mips*-dec-netbsd*): New target.
+
 Fri Sep 15 20:01:52 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* configure.host (m88*-*-dgux*): Fix another shell syntax error.
