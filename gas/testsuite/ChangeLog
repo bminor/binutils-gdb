@@ -1,3 +1,7 @@
+2002-06-18  Dave Brolley  <brolley@redhat.com>
+
+	* gas/frv: New testsuite.
+
 Mon Jun 17 16:23:59 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* gas/sh/dsp.s: Add three more instructions.
