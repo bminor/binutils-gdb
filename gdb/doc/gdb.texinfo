@@ -45,7 +45,7 @@
 @c manuals to an info tree.  zoo@cygnus.com is developing this facility.
 @format
 START-INFO-DIR-ENTRY
-* Gdb::                         The GNU debugger.
+* Gdb: (gdb).                     The GNU debugger.
 END-INFO-DIR-ENTRY
 @end format
 @end ifinfo
