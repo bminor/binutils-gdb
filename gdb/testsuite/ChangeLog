@@ -1,3 +1,10 @@
+2001-12-13  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.asm/asm-source.exp: Add support for xstormy16.
+	* gdb.asm/configure.in: Ditto.
+	* gdb.asm/configure: Rebuild.
+	* gdb.asm/xstormy16.inc: New file.
+
 2001-12-10  Fred Fish  <fnf@redhat.com>
 
 	* gdb.base/maint.exp: Update to match changes in type dumping code.

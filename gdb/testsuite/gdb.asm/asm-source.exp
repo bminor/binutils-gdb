@@ -50,6 +50,11 @@ if [istarget "m32r*-*"] then {
 if [istarget "sparc-*-*"] then {
     set asm-arch sparc
 }
+if [istarget "xstormy16-*-*"] then {
+    set asm-arch xstormy16
+    set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+    set link-flags "-L${objdir}/../../gcc"
+}
 if { "${asm-arch}" == "" } {
     gdb_suppress_entire_file "Assembly source test -- not implemented for this target."
 }
