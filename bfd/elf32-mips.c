@@ -269,10 +269,17 @@ typedef enum {
    : bfd_put_32 (abfd, val, ptr))
 
 /* Add a dynamic symbol table-entry.  */
+#ifdef BFD64
 #define MIPS_ELF_ADD_DYNAMIC_ENTRY(info, tag, val) \
   (ABI_64_P (elf_hash_table (info)->dynobj)	   \
    ? bfd_elf64_add_dynamic_entry (info, tag, val)  \
    : bfd_elf32_add_dynamic_entry (info, tag, val))
+#else
+#define MIPS_ELF_ADD_DYNAMIC_ENTRY(info, tag, val) \
+  (ABI_64_P (elf_hash_table (info)->dynobj)	   \
+   ? bfd_elf64_add_dynamic_entry (info, tag, val)  \
+   : (abort (), false))
+#endif
 
 /* The number of local .got entries we reserve.  */
 #define MIPS_RESERVED_GOTNO (2)
@@ -4891,10 +4898,18 @@ _bfd_mips_elf_final_link (abfd, info)
     }
 
   /* Invoke the regular ELF backend linker to do all the work.  */
-  if (!(ABI_64_P (abfd) 
-	? bfd_elf64_bfd_final_link (abfd, info)
-	: bfd_elf32_bfd_final_link (abfd, info)))
+  if (ABI_64_P (abfd))
+    {
+#ifdef BFD64
+      if (!bfd_elf64_bfd_final_link (abfd, info))
+	return false;
+#else
+      abort ();
       return false;
+#endif /* BFD64 */
+    }
+  else if (!bfd_elf32_bfd_final_link (abfd, info))
+    return false;
 
   /* Now write out the computed sections.  */
 

@@ -1,5 +1,11 @@
 1999-07-11  Mark Mitchell  <mark@codesourcery.com>
 
+	* libbfd.c (bfd_put_8): Make it of type `void'.
+	* bfd-in2.h: Regenerated.
+	* elf32-mips.c (MIPS_ELF_ADD_DYNAMIC_ENTRY): Conditionalize
+	for 32-bit hosts.
+	(_bfd_mips_elf_final_link): Likewise.
+
 	* elflink.h (elf_link_read_relocs_from_section): Be type-correct.
 
 Thu Jul  8 12:32:23 1999  John David Anglin <dave@hiauly1.hia.nrc.ca>
