@@ -552,22 +552,17 @@ add_archive_element (info, abfd, name)
   input->local_sym_name = abfd->filename;
   input->the_bfd = abfd;
   input->asymbols = NULL;
-  input->subfiles = NULL;
   input->next = NULL;
   input->just_syms_flag = false;
   input->loaded = false;
-  input->chain = NULL;
-
-  /* FIXME: This is wrong.  It should point to an entry for the
-     archive itself.  However, it doesn't seem to matter.  */
-  input->superfile = NULL;
+  input->search_dirs_flag = false;
 
   /* FIXME: The following fields are not set: header.next,
-     header.type, closed, passive_position, symbol_count, total_size,
-     next_real_file, is_archive, search_dirs_flag, target, real,
-     common_section, common_output_section, complained.  This bit of
-     code is from the old decode_library_subfile function.  I don't
-     know whether any of those fields matters.  */
+     header.type, closed, passive_position, symbol_count,
+     next_real_file, is_archive, target, real, common_section,
+     common_output_section, complained.  This bit of code is from the
+     old decode_library_subfile function.  I don't know whether any of
+     those fields matters.  */
 
   ldlang_add_file (input);
 

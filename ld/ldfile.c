@@ -145,7 +145,6 @@ open_a(arch, entry, lib, suffix)
       if (desc)
 	{
 	  entry->filename = string;
-	  entry->search_dirs_flag = false;
 	  entry->the_bfd =  desc;
 	  return desc;
 	}
@@ -162,8 +161,7 @@ void
 ldfile_open_file (entry)
      lang_input_statement_type *entry;
 {
-  if (entry->superfile != NULL)
-    ldfile_open_file (entry->superfile);
+  ASSERT (entry->the_bfd == NULL);
 
   if (! entry->search_dirs_flag)
     entry->the_bfd = cached_bfd_openr (entry->filename, entry);

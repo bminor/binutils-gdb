@@ -1,3 +1,14 @@
+Wed Jun  1 14:24:08 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldlang.h (lang_input_statement_type): Remove fields subfiles,
+	total_size, superfile and chain.
+	* ldfile.c (open_a): Don't clear search_dirs_flag.
+	(ldfile_open_file): Don't try to open superfile.  Assert that file
+	has not already been opened.
+	* ldlang.c (new_afile): Don't initialize superfile.
+	* ldmain.c (add_archive_element): Don't initialize subfiles or
+	chain or superfile.  Initialize search_dirs_flag to false.
+
 Fri May 27 12:25:33 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* ldver.c (ldversion): Changed version to "cygnus-2.4.1".

@@ -372,7 +372,6 @@ new_afile (name, file_type, target, add_to_list)
     }
   p->the_bfd = (bfd *) NULL;
   p->asymbols = (asymbol **) NULL;
-  p->superfile = (lang_input_statement_type *) NULL;
   p->next_real_file = (lang_statement_union_type *) NULL;
   p->next = (lang_statement_union_type *) NULL;
   p->symbol_count = 0;

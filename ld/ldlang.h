@@ -201,20 +201,6 @@ typedef struct lang_input_statement_struct
   asymbol **asymbols;
   unsigned int symbol_count;
     
-  /* For library members only */
-    
-  /* For a library, points to chain of entries for the library members.  */
-  struct lang_input_statement_struct *subfiles;
-
-  /* Size of contents of this file, if library member.  */
-  bfd_size_type total_size;
-
-  /* For library member, points to the library's own entry.  */
-  struct lang_input_statement_struct *superfile;
-
-  /* For library member, points to next entry for next member.  */
-  struct lang_input_statement_struct *chain;
-
   /* Point to the next file - whatever it is, wanders up and down
      archives */
     
