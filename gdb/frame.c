@@ -2451,7 +2451,7 @@ of the stack trace.",
   add_setshow_uinteger_cmd ("limit", class_obscure,
 			    &backtrace_limit, "\
 Set an upper bound on the number of backtrace levels.\n\
-No more than the specified number of frames can be displayed or examined.\n
+No more than the specified number of frames can be displayed or examined.\n\
 Zero is unlimited.", "\
 Show the upper bound on the number of backtrace levels.",
 			    NULL, NULL, &set_backtrace_cmdlist,

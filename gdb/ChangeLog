@@ -1,5 +1,9 @@
 2003-08-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* frame.c (_initialize_frame): Add missing backslash.
+
+2003-08-10  Mark Kettenis  <kettenis@gnu.org>
+
 	* sol-thread.c (sol_thread_store_registers): Use regcache_collect
 	and supply_register instead of manipulating the register buffer
 	directly.
