@@ -1459,7 +1459,7 @@ mips_find_saved_regs (struct frame_info *fci)
   /* Don't bother unless we are inside a function prologue.  Outside the
      prologue, we know where everything is. */
 
-       && in_prologue (fci->pc, PROC_LOW_ADDR (proc_desc))
+       && in_prologue (get_frame_pc (fci), PROC_LOW_ADDR (proc_desc))
 
   /* Not sure exactly what kernel_trap means, but if it means
      the kernel saves the registers without a prologue doing it,
@@ -1483,7 +1483,7 @@ mips_find_saved_regs (struct frame_info *fci)
 
       /* Scan through this function's instructions preceding the current
          PC, and look for those that save registers.  */
-      while (addr < fci->pc)
+      while (addr < get_frame_pc (fci))
 	{
 	  inst = mips_fetch_instruction (addr);
 	  if (pc_is_mips16 (addr))
@@ -1699,7 +1699,7 @@ mips_frame_saved_pc (struct frame_info *frame)
   int pcreg = (get_frame_type (frame) == SIGTRAMP_FRAME) ? PC_REGNUM
   : (proc_desc ? PROC_PC_REG (proc_desc) : RA_REGNUM);
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), 0, 0))
     {
       LONGEST tmp;
       frame_unwind_signed_register (frame, PC_REGNUM, &tmp);
@@ -2455,7 +2455,7 @@ mips_frame_chain (struct frame_info *frame)
       && !(get_frame_type (frame) == SIGTRAMP_FRAME)
       /* For a generic dummy frame, let get_frame_pointer() unwind a
          register value saved as part of the dummy frame call.  */
-      && !(DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, 0, 0)))
+      && !(DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), 0, 0)))
     return 0;
   else
     return get_frame_pointer (frame, proc_desc);
@@ -2468,7 +2468,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 
   /* Use proc_desc calculated in frame_chain */
   mips_extra_func_info_t proc_desc =
-    fci->next ? cached_proc_desc : find_proc_desc (fci->pc, fci->next, 1);
+    fci->next ? cached_proc_desc : find_proc_desc (get_frame_pc (fci), fci->next, 1);
 
   fci->extra_info = (struct frame_extra_info *)
     frame_obstack_alloc (sizeof (struct frame_extra_info));
@@ -2482,10 +2482,10 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
       /* This may not be quite right, if proc has a real frame register.
          Get the value of the frame relative sp, procedure might have been
          interrupted by a signal at it's very start.  */
-      if (fci->pc == PROC_LOW_ADDR (proc_desc)
+      if (get_frame_pc (fci) == PROC_LOW_ADDR (proc_desc)
 	  && !PROC_DESC_IS_DUMMY (proc_desc))
 	fci->frame = read_next_frame_reg (fci->next, SP_REGNUM);
-      else if (DEPRECATED_PC_IN_CALL_DUMMY (fci->pc, 0, 0))
+      else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fci), 0, 0))
 	/* Do not ``fix'' fci->frame.  It will have the value of the
            generic dummy frame's top-of-stack (since the draft
            fci->frame is obtained by returning the unwound stack
@@ -2507,9 +2507,9 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 	  /* FIXME: cagney/2002-11-18: This problem will go away once
              frame.c:get_prev_frame() is modified to set the frame's
              type before calling functions like this.  */
-	  find_pc_partial_function (fci->pc, &name,
+	  find_pc_partial_function (get_frame_pc (fci), &name,
 				    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-	  if (!PC_IN_SIGTRAMP (fci->pc, name))
+	  if (!PC_IN_SIGTRAMP (get_frame_pc (fci), name))
 	    {
 	      frame_saved_regs_zalloc (fci);
 	      memcpy (fci->saved_regs, temp_saved_regs, SIZEOF_FRAME_SAVED_REGS);
@@ -3815,7 +3815,7 @@ mips_pop_frame (void)
   CORE_ADDR new_sp = get_frame_base (frame);
   mips_extra_func_info_t proc_desc = frame->extra_info->proc_desc;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), 0, 0))
     {
       generic_pop_dummy_frame ();
       flush_cached_frames ();

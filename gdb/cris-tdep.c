@@ -1158,7 +1158,7 @@ cris_frame_init_saved_regs (struct frame_info *fi)
   CORE_ADDR ip;
   struct symtab_and_line sal;
   int best_limit;
-  char *dummy_regs = deprecated_generic_find_dummy_frame (fi->pc, fi->frame);
+  char *dummy_regs = deprecated_generic_find_dummy_frame (get_frame_pc (fi), fi->frame);
   
   /* Examine the entire prologue.  */
   register int frameless_p = 0; 
@@ -1178,7 +1178,7 @@ cris_frame_init_saved_regs (struct frame_info *fi)
     }
   else
     {    
-      ip = get_pc_function_start (fi->pc);
+      ip = get_pc_function_start (get_frame_pc (fi));
       sal = find_pc_line (ip, 0);
 
       /* If there is no symbol information then sal.end == 0, and we end up
@@ -1204,7 +1204,7 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   if (fi->next)
     {
       /* Called from get_prev_frame.  */
-      fi->pc = FRAME_SAVED_PC (fi->next);
+      deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
     }
  
   fi->extra_info = (struct frame_extra_info *)
@@ -1213,14 +1213,14 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   fi->extra_info->return_pc = 0;
   fi->extra_info->leaf_function = 0;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
     {    
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      fi->frame = deprecated_read_register_dummy (fi->pc, fi->frame,
+      fi->frame = deprecated_read_register_dummy (get_frame_pc (fi), fi->frame,
 						  SP_REGNUM);
       fi->extra_info->return_pc = 
-        deprecated_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
+        deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, PC_REGNUM);
 
       /* FIXME: Is this necessarily true?  */
       fi->extra_info->leaf_function = 0;
@@ -1254,11 +1254,11 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 CORE_ADDR
 cris_frame_chain (struct frame_info *fi)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
     {
       return fi->frame;
     }
-  else if (!inside_entry_file (fi->pc))
+  else if (!inside_entry_file (get_frame_pc (fi)))
     {
       return read_memory_unsigned_integer (get_frame_base (fi), 4);
     }
@@ -1512,7 +1512,7 @@ cris_pop_frame (void)
   register int regno;
   register int stack_offset = 0;
   
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
     {
       /* This happens when we hit a breakpoint set at the entry point,
          when returning from a dummy frame.  */

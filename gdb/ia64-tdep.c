@@ -705,7 +705,7 @@ ia64_frame_chain (struct frame_info *frame)
 {
   if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return read_sigcontext_register (frame, sp_regnum);
-  else if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
     return frame->frame;
   else
     {
@@ -722,8 +722,8 @@ ia64_frame_saved_pc (struct frame_info *frame)
 {
   if ((get_frame_type (frame) == SIGTRAMP_FRAME))
     return read_sigcontext_register (frame, pc_regnum);
-  else if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
-    return deprecated_read_register_dummy (frame->pc, frame->frame, pc_regnum);
+  else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
+    return deprecated_read_register_dummy (get_frame_pc (frame), frame->frame, pc_regnum);
   else
     {
       FRAME_INIT_SAVED_REGS (frame);
@@ -1206,8 +1206,8 @@ ia64_frame_init_saved_regs (struct frame_info *frame)
     {
       CORE_ADDR func_start;
 
-      func_start = get_pc_function_start (frame->pc);
-      examine_prologue (func_start, frame->pc, frame);
+      func_start = get_pc_function_start (get_frame_pc (frame));
+      examine_prologue (func_start, get_frame_pc (frame), frame);
     }
 }
 
@@ -1233,7 +1233,7 @@ ia64_get_saved_register (char *raw_buffer,
   if (lval != NULL)
     *lval = not_lval;
 
-  is_dummy_frame = DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame);
+  is_dummy_frame = DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame);
 
   if (regnum == SP_REGNUM && frame->next)
     {
@@ -1481,7 +1481,7 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
   CORE_ADDR bsp, cfm;
   int next_frame_is_call_dummy = ((frame->next != NULL)
-    && DEPRECATED_PC_IN_CALL_DUMMY (frame->next->pc, frame->next->frame,
+    && DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame->next), frame->next->frame,
                                           frame->next->frame));
 
   frame->extra_info = (struct frame_extra_info *)
@@ -1500,10 +1500,10 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
     }
   else if (next_frame_is_call_dummy)
     {
-      bsp = deprecated_read_register_dummy (frame->next->pc,
+      bsp = deprecated_read_register_dummy (get_frame_pc (frame->next),
 					    frame->next->frame,
 					    IA64_BSP_REGNUM);
-      cfm = deprecated_read_register_dummy (frame->next->pc,
+      cfm = deprecated_read_register_dummy (get_frame_pc (frame->next),
 					    frame->next->frame,
 					    IA64_CFM_REGNUM);
     }
@@ -1518,9 +1518,9 @@ ia64_init_extra_frame_info (int fromleaf, struct frame_info *frame)
       else if (frn->next && (get_frame_type (frn->next) == SIGTRAMP_FRAME))
 	cfm = read_sigcontext_register (frn->next, IA64_PFS_REGNUM);
       else if (frn->next
-               && DEPRECATED_PC_IN_CALL_DUMMY (frn->next->pc, frn->next->frame,
+               && DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frn->next), frn->next->frame,
 	                                           frn->next->frame))
-	cfm = deprecated_read_register_dummy (frn->next->pc, frn->next->frame,
+	cfm = deprecated_read_register_dummy (get_frame_pc (frn->next), frn->next->frame,
 					      IA64_PFS_REGNUM);
       else
 	cfm = read_register (IA64_PFS_REGNUM);

@@ -502,7 +502,7 @@ alpha_frame_saved_pc (struct frame_info *frame)
 static CORE_ADDR
 alpha_saved_pc_after_call (struct frame_info *frame)
 {
-  CORE_ADDR pc = frame->pc;
+  CORE_ADDR pc = get_frame_pc (frame);
   CORE_ADDR tmp;
   alpha_extra_func_info_t proc_desc;
   int pcreg;
@@ -979,7 +979,7 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
   /* Use proc_desc calculated in frame_chain */
   alpha_extra_func_info_t proc_desc =
-  frame->next ? cached_proc_desc : find_proc_desc (frame->pc, frame->next);
+  frame->next ? cached_proc_desc : find_proc_desc (get_frame_pc (frame), frame->next);
 
   frame->extra_info = (struct frame_extra_info *)
     frame_obstack_alloc (sizeof (struct frame_extra_info));
@@ -1006,7 +1006,7 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
       /* This may not be quite right, if proc has a real frame register.
          Get the value of the frame relative sp, procedure might have been
          interrupted by a signal at it's very start.  */
-      else if (frame->pc == PROC_LOW_ADDR (proc_desc)
+      else if (get_frame_pc (frame) == PROC_LOW_ADDR (proc_desc)
 	       && !alpha_proc_desc_is_dyn_sigtramp (proc_desc))
 	frame->frame = read_next_frame_reg (frame->next, SP_REGNUM);
       else
@@ -1024,9 +1024,9 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 	  /* FIXME: cagney/2002-11-18: This problem will go away once
              frame.c:get_prev_frame() is modified to set the frame's
              type before calling functions like this.  */
-	  find_pc_partial_function (frame->pc, &name,
+	  find_pc_partial_function (get_frame_pc (frame), &name,
 				    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-	  if (!PC_IN_SIGTRAMP (frame->pc, name))
+	  if (!PC_IN_SIGTRAMP (get_frame_pc (frame), name))
 	    {
 	      frame->saved_regs = (CORE_ADDR *)
 		frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);
@@ -1295,7 +1295,7 @@ alpha_pop_frame (void)
   /* we need proc_desc to know how to restore the registers;
      if it is NULL, construct (a temporary) one */
   if (proc_desc == NULL)
-    proc_desc = find_proc_desc (frame->pc, frame->next);
+    proc_desc = find_proc_desc (get_frame_pc (frame), frame->next);
 
   /* Question: should we copy this proc_desc and save it in
      frame->proc_desc?  If we do, who will free it?

@@ -333,7 +333,7 @@ xstormy16_pop_frame (void)
   if (fi == NULL)
     return;			/* paranoia */
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
     {
       generic_pop_dummy_frame ();
     }
@@ -466,7 +466,7 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
   if (fi)
     {
       /* In a call dummy, don't touch the frame. */
-      if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
 	return start_addr;
 
       /* Grab the frame-relative values of SP and FP, needed below. 
@@ -738,8 +738,8 @@ xstormy16_frame_init_saved_regs (struct frame_info *fi)
 
       /* Find the beginning of this function, so we can analyze its
          prologue. */
-      if (find_pc_partial_function (fi->pc, NULL, &func_addr, &func_end))
-	xstormy16_scan_prologue (func_addr, fi->pc, fi, NULL);
+      if (find_pc_partial_function (get_frame_pc (fi), NULL, &func_addr, &func_end))
+	xstormy16_scan_prologue (func_addr, get_frame_pc (fi), fi, NULL);
       /* Else we're out of luck (can't debug completely stripped code). 
          FIXME. */
     }
@@ -756,9 +756,9 @@ xstormy16_frame_saved_pc (struct frame_info *fi)
 {
   CORE_ADDR saved_pc;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
     {
-      saved_pc = deprecated_read_register_dummy (fi->pc, fi->frame,
+      saved_pc = deprecated_read_register_dummy (get_frame_pc (fi), fi->frame,
 						 E_PC_REGNUM);
     }
   else
@@ -791,9 +791,9 @@ xstormy16_init_extra_frame_info (int fromleaf, struct frame_info *fi)
          or we may be in the prologue, before the FP has been set up.
          Unfortunately, we can't make this determination without first
          calling scan_prologue, and we can't do that unles we know the
-         fi->pc.  */
+         get_frame_pc (fi).  */
 
-      if (!fi->pc)
+      if (!get_frame_pc (fi))
 	{
 	  /* Sometimes we are called from get_prev_frame without
 	     the PC being set up first.  Long history, don't ask.
@@ -801,7 +801,7 @@ xstormy16_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 	     frame, so we should be able to get the saved pc from
 	     the next frame. */
 	  if (fi->next)
-	    fi->pc = xstormy16_frame_saved_pc (fi->next);
+	    deprecated_update_frame_pc_hack (fi, xstormy16_frame_saved_pc (fi->next));
 	}
 
       /* Take care of the saved_regs right here (non-lazy). */
@@ -817,7 +817,7 @@ xstormy16_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 static CORE_ADDR
 xstormy16_frame_chain (struct frame_info *fi)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
     {
       /* Call dummy's frame is the same as caller's.  */
       return fi->frame;

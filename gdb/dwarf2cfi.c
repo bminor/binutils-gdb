@@ -1784,7 +1784,7 @@ cfi_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     }
   else
     {
-      UNWIND_CONTEXT (fi)->ra = fi->pc + 1;
+      UNWIND_CONTEXT (fi)->ra = get_frame_pc (fi) + 1;
       frame_state_for (UNWIND_CONTEXT (fi), fs);
       update_context (UNWIND_CONTEXT (fi), fs, 0);
     }

@@ -800,8 +800,8 @@ CORE_ADDR
 v850_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi; fi = fi->next)
-    if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-      return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
+    if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
+      return deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, regnum);
     else if (fi->saved_regs[regnum] != 0)
       return read_memory_unsigned_integer (fi->saved_regs[regnum],
 					   v850_register_raw_size (regnum));
@@ -883,7 +883,7 @@ v850_pop_frame (void)
   struct frame_info *frame = get_current_frame ();
   int regnum;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
     generic_pop_dummy_frame ();
   else
     {
@@ -1009,8 +1009,8 @@ v850_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 CORE_ADDR
 v850_frame_saved_pc (struct frame_info *fi)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-    return deprecated_read_register_dummy (fi->pc, fi->frame, E_PC_REGNUM);
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
+    return deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, E_PC_REGNUM);
   else
     return v850_find_callers_reg (fi, E_RP_REGNUM);
 }
@@ -1111,16 +1111,16 @@ v850_frame_init_saved_regs (struct frame_info *fi)
 
       /* The call dummy doesn't save any registers on the stack, so we
          can return now.  */
-      if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
 	return;
 
       /* Find the beginning of this function, so we can analyze its
          prologue. */
-      if (find_pc_partial_function (fi->pc, NULL, &func_addr, &func_end))
+      if (find_pc_partial_function (get_frame_pc (fi), NULL, &func_addr, &func_end))
 	{
 	  pi.pifsrs = pifsrs;
 
-	  v850_scan_prologue (fi->pc, &pi);
+	  v850_scan_prologue (get_frame_pc (fi), &pi);
 
 	  if (!fi->next && pi.framereg == E_SP_REGNUM)
 	    fi->frame = read_register (pi.framereg) - pi.frameoffset;
@@ -1143,7 +1143,7 @@ v850_frame_init_saved_regs (struct frame_info *fi)
    registers.  Most of the work is done in scan_prologue().
 
    Note that when we are called for the last frame (currently active frame),
-   that fi->pc and fi->frame will already be setup.  However, fi->frame will
+   that get_frame_pc (fi) and fi->frame will already be setup.  However, fi->frame will
    be valid only if this routine uses FP.  For previous frames, fi-frame will
    always be correct (since that is derived from v850_frame_chain ()).
 
@@ -1157,7 +1157,7 @@ v850_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   struct prologue_info pi;
 
   if (fi->next)
-    fi->pc = FRAME_SAVED_PC (fi->next);
+    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
 
   v850_frame_init_saved_regs (fi);
 }

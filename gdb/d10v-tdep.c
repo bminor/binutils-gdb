@@ -114,10 +114,10 @@ d10v_frame_chain_valid (CORE_ADDR chain, struct frame_info *frame)
 {
   if (chain != 0 && frame != NULL)
     {
-      if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
 	return 1;	/* Path back from a call dummy must be valid. */
-      return ((frame)->pc > IMEM_START
-	      && !inside_main_func (frame->pc));
+      return (get_frame_pc (frame) > IMEM_START
+	      && !inside_main_func (get_frame_pc (frame)));
     }
   else return 0;
 }
@@ -512,8 +512,8 @@ d10v_extract_struct_value_address (char *regbuf)
 static CORE_ADDR
 d10v_frame_saved_pc (struct frame_info *frame)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
-    return d10v_make_iaddr (deprecated_read_register_dummy (frame->pc, 
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
+    return d10v_make_iaddr (deprecated_read_register_dummy (get_frame_pc (frame), 
 							    frame->frame, 
 							    PC_REGNUM));
   else
@@ -688,7 +688,7 @@ d10v_frame_chain (struct frame_info *fi)
   CORE_ADDR addr;
 
   /* A generic call dummy's frame is the same as caller's.  */
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
     return fi->frame;
 
   d10v_frame_init_saved_regs (fi);
@@ -805,7 +805,7 @@ d10v_frame_init_saved_regs (struct frame_info *fi)
   memset (fi->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
   next_addr = 0;
 
-  pc = get_pc_function_start (fi->pc);
+  pc = get_pc_function_start (get_frame_pc (fi));
 
   uses_frame = 0;
   while (1)
@@ -909,15 +909,15 @@ d10v_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   fi->extra_info->size = 0;
   fi->extra_info->return_pc = 0;
 
-  /* If fi->pc is zero, but this is not the outermost frame, 
+  /* If get_frame_pc (fi) is zero, but this is not the outermost frame, 
      then let's snatch the return_pc from the callee, so that
      DEPRECATED_PC_IN_CALL_DUMMY will work.  */
-  if (fi->pc == 0 && fi->level != 0 && fi->next != NULL)
-    fi->pc = d10v_frame_saved_pc (fi->next);
+  if (get_frame_pc (fi) == 0 && fi->level != 0 && fi->next != NULL)
+    deprecated_update_frame_pc_hack (fi, d10v_frame_saved_pc (fi->next));
 
   /* The call dummy doesn't save any registers on the stack, so we can
      return now.  */
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
     {
       return;
     }

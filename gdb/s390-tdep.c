@@ -773,8 +773,8 @@ s390_function_start (struct frame_info *fi)
 
   if (fi->extra_info && fi->extra_info->initialised)
     function_start = fi->extra_info->function_start;
-  else if (fi->pc)
-    function_start = get_pc_function_start (fi->pc);
+  else if (get_frame_pc (fi))
+    function_start = get_pc_function_start (get_frame_pc (fi));
   return function_start;
 }
 
@@ -794,7 +794,7 @@ s390_frameless_function_invocation (struct frame_info *fi)
       else
 	{
 	  fextra_info_ptr = &fextra_info;
-	  s390_get_frame_info (s390_sniff_pc_function_start (fi->pc, fi),
+	  s390_get_frame_info (s390_sniff_pc_function_start (get_frame_pc (fi), fi),
 			       fextra_info_ptr, fi, 1);
 	}
       frameless = ((fextra_info_ptr->stack_bought == 0));
@@ -905,8 +905,8 @@ void
 s390_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   fi->extra_info = frame_obstack_alloc (sizeof (struct frame_extra_info));
-  if (fi->pc)
-    s390_get_frame_info (s390_sniff_pc_function_start (fi->pc, fi),
+  if (get_frame_pc (fi))
+    s390_get_frame_info (s390_sniff_pc_function_start (get_frame_pc (fi), fi),
 			 fi->extra_info, fi, 1);
   else
     s390_memset_extra_info (fi->extra_info);
@@ -926,12 +926,12 @@ s390_frame_init_saved_regs (struct frame_info *fi)
     {
       /* zalloc memsets the saved regs */
       frame_saved_regs_zalloc (fi);
-      if (fi->pc)
+      if (get_frame_pc (fi))
 	{
 	  quick = (fi->extra_info && fi->extra_info->initialised
 		   && fi->extra_info->good_prologue);
 	  s390_get_frame_info (quick ? fi->extra_info->function_start :
-			       s390_sniff_pc_function_start (fi->pc, fi),
+			       s390_sniff_pc_function_start (get_frame_pc (fi), fi),
 			       fi->extra_info, fi, !quick);
 	}
     }
@@ -954,8 +954,8 @@ s390_frame_saved_pc_nofix (struct frame_info *fi)
   if (fi->extra_info && fi->extra_info->saved_pc_valid)
     return fi->extra_info->saved_pc;
 
-  if (deprecated_generic_find_dummy_frame (fi->pc, fi->frame))
-    return deprecated_read_register_dummy (fi->pc, fi->frame, S390_PC_REGNUM);
+  if (deprecated_generic_find_dummy_frame (get_frame_pc (fi), fi->frame))
+    return deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, S390_PC_REGNUM);
 
   s390_frame_init_saved_regs (fi);
   if (fi->extra_info)
@@ -1008,8 +1008,8 @@ s390_frame_chain (struct frame_info *thisframe)
 {
   CORE_ADDR prev_fp = 0;
 
-  if (deprecated_generic_find_dummy_frame (thisframe->pc, thisframe->frame))
-    return deprecated_read_register_dummy (thisframe->pc, thisframe->frame,
+  if (deprecated_generic_find_dummy_frame (get_frame_pc (thisframe), thisframe->frame))
+    return deprecated_read_register_dummy (get_frame_pc (thisframe), thisframe->frame,
 					   S390_SP_REGNUM);
   else
     {
@@ -1018,7 +1018,7 @@ s390_frame_chain (struct frame_info *thisframe)
       struct frame_extra_info prev_fextra_info;
 
       memset (&prev_fextra_info, 0, sizeof (prev_fextra_info));
-      if (thisframe->pc)
+      if (get_frame_pc (thisframe))
 	{
 	  CORE_ADDR saved_pc, sig_pc;
 

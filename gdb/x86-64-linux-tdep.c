@@ -87,7 +87,7 @@ x86_64_linux_sigcontext_addr (struct frame_info *frame)
   CORE_ADDR pc;
   ULONGEST rsp;
 
-  pc = x86_64_linux_sigtramp_start (frame->pc);
+  pc = x86_64_linux_sigtramp_start (get_frame_pc (frame));
   if (pc)
     {
       if (frame->next)

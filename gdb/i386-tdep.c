@@ -500,7 +500,7 @@ i386_frameless_signal_p (struct frame_info *frame)
 {
   return (frame->next && get_frame_type (frame->next) == SIGTRAMP_FRAME
 	  && (frameless_look_for_prologue (frame)
-	      || frame->pc == get_pc_function_start (frame->pc)));
+	      || get_frame_pc (frame) == get_pc_function_start (get_frame_pc (frame))));
 }
 
 /* Return the chain-pointer for FRAME.  In the case of the i386, the
@@ -510,14 +510,14 @@ i386_frameless_signal_p (struct frame_info *frame)
 static CORE_ADDR
 i386_frame_chain (struct frame_info *frame)
 {
-  if (pc_in_dummy_frame (frame->pc))
+  if (pc_in_dummy_frame (get_frame_pc (frame)))
     return frame->frame;
 
   if (get_frame_type (frame) == SIGTRAMP_FRAME
       || i386_frameless_signal_p (frame))
     return frame->frame;
 
-  if (! inside_entry_file (frame->pc))
+  if (! inside_entry_file (get_frame_pc (frame)))
     return read_memory_unsigned_integer (frame->frame, 4);
 
   return 0;
@@ -567,7 +567,7 @@ i386_sigtramp_saved_sp (struct frame_info *frame)
 static CORE_ADDR
 i386_frame_saved_pc (struct frame_info *frame)
 {
-  if (pc_in_dummy_frame (frame->pc))
+  if (pc_in_dummy_frame (get_frame_pc (frame)))
     {
       ULONGEST pc;
 
@@ -712,7 +712,7 @@ i386_frame_init_saved_regs (struct frame_info *fip)
 
   frame_saved_regs_zalloc (fip);
 
-  pc = get_pc_function_start (fip->pc);
+  pc = get_pc_function_start (get_frame_pc (fip));
   if (pc != 0)
     locals = i386_get_frame_setup (pc);
 
@@ -1355,7 +1355,7 @@ i386_svr4_sigcontext_addr (struct frame_info *frame)
   int sigcontext_offset = -1;
   char *name = NULL;
 
-  find_pc_partial_function (frame->pc, &name, NULL, NULL);
+  find_pc_partial_function (get_frame_pc (frame), &name, NULL, NULL);
   if (name)
     {
       if (strcmp (name, "_sigreturn") == 0)

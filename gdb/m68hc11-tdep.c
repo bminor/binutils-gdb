@@ -434,7 +434,7 @@ m68hc11_pop_frame (void)
   register CORE_ADDR fp, sp;
   register int regnum;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
     generic_pop_dummy_frame ();
   else
     {
@@ -812,7 +812,7 @@ m68hc11_frame_chain (struct frame_info *frame)
 {
   CORE_ADDR addr;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
     return frame->frame;	/* dummy frame same as caller's frame */
 
   if (frame->extra_info->return_pc == 0
@@ -845,7 +845,7 @@ m68hc11_frame_init_saved_regs (struct frame_info *fi)
   else
     memset (fi->saved_regs, 0, sizeof (fi->saved_regs));
 
-  pc = fi->pc;
+  pc = get_frame_pc (fi);
   fi->extra_info->return_kind = m68hc11_get_return_insn (pc);
   m68hc11_guess_from_prologue (pc, fi->frame, &pc, &fi->extra_info->size,
                                fi->saved_regs);
@@ -881,13 +881,13 @@ m68hc11_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     frame_obstack_alloc (sizeof (struct frame_extra_info));
   
   if (fi->next)
-    fi->pc = FRAME_SAVED_PC (fi->next);
+    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
   
   m68hc11_frame_init_saved_regs (fi);
 
   if (fromleaf)
     {
-      fi->extra_info->return_kind = m68hc11_get_return_insn (fi->pc);
+      fi->extra_info->return_kind = m68hc11_get_return_insn (get_frame_pc (fi));
       fi->extra_info->return_pc = m68hc11_saved_pc_after_call (fi);
     }
   else

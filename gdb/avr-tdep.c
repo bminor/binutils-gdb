@@ -472,12 +472,12 @@ avr_scan_prologue (struct frame_info *fi)
   fi->extra_info->framereg = AVR_SP_REGNUM;
 
   if (find_pc_partial_function
-      (fi->pc, &name, &prologue_start, &prologue_end))
+      (get_frame_pc (fi), &name, &prologue_start, &prologue_end))
     {
       struct symtab_and_line sal = find_pc_line (prologue_start, 0);
 
       if (sal.line == 0)	/* no line info, use current PC */
-	prologue_end = fi->pc;
+	prologue_end = get_frame_pc (fi);
       else if (sal.end < prologue_end)	/* next line begins after fn end */
 	prologue_end = sal.end;	/* (probably means no prologue)  */
     }
@@ -486,7 +486,7 @@ avr_scan_prologue (struct frame_info *fi)
     /* 19 pushes, an add, and "mv fp,sp" */
     prologue_end = prologue_start + AVR_MAX_PROLOGUE_SIZE;
 
-  prologue_end = min (prologue_end, fi->pc);
+  prologue_end = min (prologue_end, get_frame_pc (fi));
 
   /* Search the prologue looking for instructions that set up the
      frame pointer, adjust the stack pointer, and save registers.  */
@@ -735,7 +735,7 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   int reg;
 
   if (fi->next)
-    fi->pc = FRAME_SAVED_PC (fi->next);
+    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
 
   fi->extra_info = (struct frame_extra_info *)
     frame_obstack_alloc (sizeof (struct frame_extra_info));
@@ -750,11 +750,11 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
   avr_scan_prologue (fi);
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      fi->frame = deprecated_read_register_dummy (fi->pc, fi->frame,
+      fi->frame = deprecated_read_register_dummy (get_frame_pc (fi), fi->frame,
 						  AVR_PC_REGNUM);
     }
   else if (!fi->next)		/* this is the innermost frame? */
@@ -795,7 +795,7 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   /* TRoth: Do we want to do this if we are in main? I don't think we should
      since return_pc makes no sense when we are in main. */
 
-  if ((fi->pc) && (fi->extra_info->is_main == 0))	/* We are not in CALL_DUMMY */
+  if ((get_frame_pc (fi)) && (fi->extra_info->is_main == 0))	/* We are not in CALL_DUMMY */
     {
       CORE_ADDR addr;
       int i;
@@ -833,7 +833,7 @@ avr_pop_frame (void)
   CORE_ADDR saddr;
   struct frame_info *frame = get_current_frame ();
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
     {
       generic_pop_dummy_frame ();
     }
@@ -866,8 +866,8 @@ avr_pop_frame (void)
 static CORE_ADDR
 avr_frame_saved_pc (struct frame_info *frame)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
-    return deprecated_read_register_dummy (frame->pc, frame->frame,
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
+    return deprecated_read_register_dummy (get_frame_pc (frame), frame->frame,
 					   AVR_PC_REGNUM);
   else
     return frame->extra_info->return_pc;
@@ -1031,11 +1031,11 @@ avr_frame_address (struct frame_info *fi)
 static CORE_ADDR
 avr_frame_chain (struct frame_info *frame)
 {
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
     {
       /* initialize the return_pc now */
       frame->extra_info->return_pc
-	= deprecated_read_register_dummy (frame->pc, frame->frame,
+	= deprecated_read_register_dummy (get_frame_pc (frame), frame->frame,
 					  AVR_PC_REGNUM);
       return frame->frame;
     }

@@ -297,7 +297,7 @@ analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
 
   dummy->next = NULL;
   dummy->prev = NULL;
-  dummy->pc = pc;
+  deprecated_update_frame_pc_hack (dummy, pc);
   dummy->frame = frame;
   dummy->extra_info->status = 0;
   dummy->extra_info->framesize = 0;
@@ -345,7 +345,7 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
 
   /* If provided, use the PC in the frame to look up the
      start of this function. */
-  pc = (fi == NULL ? pc : fi->pc);
+  pc = (fi == NULL ? pc : get_frame_pc (fi));
 
   /* Find the start of this function. */
   status = find_pc_partial_function (pc, &name, &func_addr, &func_end);
@@ -386,19 +386,19 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
       mcore_insn_debug (("MCORE: got jmp r15"));
       if (fi->next == NULL)
 	fi->frame = read_sp ();
-      return fi->pc;
+      return get_frame_pc (fi);
     }
 
   /* Check for first insn of prologue */
-  if (fi != NULL && fi->pc == func_addr)
+  if (fi != NULL && get_frame_pc (fi) == func_addr)
     {
       if (fi->next == NULL)
 	fi->frame = read_sp ();
-      return fi->pc;
+      return get_frame_pc (fi);
     }
 
   /* Figure out where to stop scanning */
-  stop = (fi ? fi->pc : func_end);
+  stop = (fi ? get_frame_pc (fi) : func_end);
 
   /* Don't walk off the end of the function */
   stop = (stop > func_end ? func_end : stop);
@@ -757,8 +757,8 @@ mcore_find_callers_reg (struct frame_info *fi, int regnum)
 {
   for (; fi != NULL; fi = fi->next)
     {
-      if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-	return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
+      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
+	return deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, regnum);
       else if (fi->saved_regs[regnum] != 0)
 	return read_memory_integer (fi->saved_regs[regnum],
 				    REGISTER_SIZE);
@@ -773,8 +773,8 @@ CORE_ADDR
 mcore_frame_saved_pc (struct frame_info * fi)
 {
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
-    return deprecated_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
+    return deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, PC_REGNUM);
   else
     return mcore_find_callers_reg (fi, PR_REGNUM);
 }
@@ -790,7 +790,7 @@ mcore_pop_frame (void)
   int rn;
   struct frame_info *fi = get_current_frame ();
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
     generic_pop_dummy_frame ();
   else
     {
@@ -1039,7 +1039,7 @@ void
 mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   if (fi && fi->next)
-    fi->pc = FRAME_SAVED_PC (fi->next);
+    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
 
   frame_saved_regs_zalloc (fi);
 
@@ -1048,11 +1048,11 @@ mcore_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   fi->extra_info->status = 0;
   fi->extra_info->framesize = 0;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame, fi->frame))
     {
       /* We need to setup fi->frame here because run_stack_dummy gets it wrong
          by assuming it's always FP.  */
-      fi->frame = deprecated_read_register_dummy (fi->pc, fi->frame, SP_REGNUM);
+      fi->frame = deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, SP_REGNUM);
     }
   else
     mcore_analyze_prologue (fi, 0, 0);

@@ -258,7 +258,7 @@ m68k_frame_chain (struct frame_info *thisframe)
 {
   if (get_frame_type (thisframe) == SIGTRAMP_FRAME)
     return thisframe->frame;
-  else if (!inside_entry_file (thisframe->pc))
+  else if (!inside_entry_file (get_frame_pc (thisframe)))
     return read_memory_unsigned_integer (thisframe->frame, 4);
   else
     return 0;
@@ -599,8 +599,8 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
 
   memset (frame_info->saved_regs, 0, SIZEOF_FRAME_SAVED_REGS);
 
-  if (frame_info->pc >= possible_call_dummy_start
-      && frame_info->pc <= frame_info->frame)
+  if (get_frame_pc (frame_info) >= possible_call_dummy_start
+      && get_frame_pc (frame_info) <= frame_info->frame)
     {
 
       /* It is a call dummy.  We could just stop now, since we know
@@ -613,7 +613,7 @@ m68k_frame_init_saved_regs (struct frame_info *frame_info)
     }
   else
     {
-      pc = get_pc_function_start (frame_info->pc);
+      pc = get_pc_function_start (get_frame_pc (frame_info));
 
       nextinsn = read_memory_unsigned_integer (pc, 2);
       if (P_PEA_FP == nextinsn

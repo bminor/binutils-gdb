@@ -186,7 +186,7 @@ umax_frame_num_args (struct frame_info *fi)
   int width;
 
   numargs = -1;
-  enter_addr = ns32k_get_enter_addr ((fi)->pc);
+  enter_addr = ns32k_get_enter_addr (get_frame_pc (fi));
   if (enter_addr > 0)
     {
       pc = ((enter_addr == 1)
@@ -308,7 +308,7 @@ ns32k_frame_chain (struct frame_info *frame)
      FP value, and that address is saved at the previous FP value as a
      4-byte word.  */
 
-  if (inside_entry_file (frame->pc))
+  if (inside_entry_file (get_frame_pc (frame)))
     return 0;
 
   return (read_memory_integer (frame->frame, 4));
@@ -351,7 +351,7 @@ ns32k_frame_saved_pc (struct frame_info *frame)
 static CORE_ADDR
 ns32k_frame_args_address (struct frame_info *frame)
 {
-  if (ns32k_get_enter_addr (frame->pc) > 1)
+  if (ns32k_get_enter_addr (get_frame_pc (frame)) > 1)
     return (frame->frame);
 
   return (read_register (SP_REGNUM) - 4);
@@ -380,7 +380,7 @@ ns32k_frame_init_saved_regs (struct frame_info *frame)
 
   frame_saved_regs_zalloc (frame);
 
-  enter_addr = ns32k_get_enter_addr (frame->pc);
+  enter_addr = ns32k_get_enter_addr (get_frame_pc (frame));
   if (enter_addr > 1)
     {
       regmask = read_memory_integer (enter_addr + 1, 1) & 0xff;

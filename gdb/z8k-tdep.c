@@ -159,7 +159,7 @@ read_memory_pointer (CORE_ADDR x)
 CORE_ADDR
 z8k_frame_chain (struct frame_info *thisframe)
 {
-  if (!inside_entry_file (thisframe->pc))
+  if (!inside_entry_file (get_frame_pc (thisframe)))
     {
       return read_memory_pointer (thisframe->frame);
     }
@@ -179,7 +179,7 @@ z8k_frame_init_saved_regs (struct frame_info *frame_info)
   int w;
 
   frame_saved_regs_zalloc (frame_info);
-  pc = get_pc_function_start (frame_info->pc);
+  pc = get_pc_function_start (get_frame_pc (frame_info));
 
   /* wander down the instruction stream */
   examine_frame (pc, frame_info->saved_regs, frame_info->frame);
@@ -240,7 +240,7 @@ frame_find_saved_regs (struct frame_info *fip, struct frame_saved_regs *fsrp)
 
   memset (fsrp, 0, sizeof *fsrp);
 
-  pc = skip_adjust (get_pc_function_start (fip->pc), &locals);
+  pc = skip_adjust (get_pc_function_start (get_frame_pc (fip)), &locals);
 
   {
     adr = get_frame_base (fip) - locals;

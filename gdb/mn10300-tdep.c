@@ -159,7 +159,7 @@ analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
     }
   dummy->next = NULL;
   dummy->prev = NULL;
-  dummy->pc = pc;
+  deprecated_update_frame_pc_hack (dummy, pc);
   dummy->frame = frame;
   dummy->extra_info->status = 0;
   dummy->extra_info->stack_size = 0;
@@ -397,7 +397,7 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
 
   /* Use the PC in the frame if it's provided to look up the
      start of this function.  */
-  pc = (fi ? fi->pc : pc);
+  pc = (fi ? get_frame_pc (fi) : pc);
 
   /* Find the start of this function.  */
   status = find_pc_partial_function (pc, &name, &func_addr, &func_end);
@@ -436,20 +436,20 @@ mn10300_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
     {
       if (fi->next == NULL)
 	fi->frame = read_sp ();
-      return fi->pc;
+      return get_frame_pc (fi);
     }
 
   /* Similarly if we're stopped on the first insn of a prologue as our
      frame hasn't been allocated yet.  */
-  if (fi && fi->pc == func_addr)
+  if (fi && get_frame_pc (fi) == func_addr)
     {
       if (fi->next == NULL)
 	fi->frame = read_sp ();
-      return fi->pc;
+      return get_frame_pc (fi);
     }
 
   /* Figure out where to stop scanning.  */
-  stop = fi ? fi->pc : func_end;
+  stop = fi ? get_frame_pc (fi) : func_end;
 
   /* Don't walk off the end of the function.  */
   stop = stop > func_end ? func_end : stop;
@@ -883,7 +883,7 @@ mn10300_frame_saved_pc (struct frame_info *fi)
    registers.  Most of the work is done in mn10300_analyze_prologue().
 
    Note that when we are called for the last frame (currently active frame),
-   that fi->pc and fi->frame will already be setup.  However, fi->frame will
+   that get_frame_pc (fi) and fi->frame will already be setup.  However, fi->frame will
    be valid only if this routine uses FP.  For previous frames, fi-frame will
    always be correct.  mn10300_analyze_prologue will fix fi->frame if
    it's not valid.
@@ -896,7 +896,7 @@ static void
 mn10300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 {
   if (fi->next)
-    fi->pc = FRAME_SAVED_PC (fi->next);
+    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
 
   frame_saved_regs_zalloc (fi);
   fi->extra_info = (struct frame_extra_info *)

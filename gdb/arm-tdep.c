@@ -275,7 +275,7 @@ arm_frameless_function_invocation (struct frame_info *fi)
 	stmdb sp!, {}
 	sub sp, ip, #4.  */
 
-  func_start = (get_pc_function_start ((fi)->pc) + FUNCTION_START_OFFSET);
+  func_start = (get_pc_function_start (get_frame_pc (fi)) + FUNCTION_START_OFFSET);
   after_prologue = SKIP_PROLOGUE (func_start);
 
   /* There are some frameless functions whose first two instructions
@@ -539,15 +539,15 @@ thumb_scan_prologue (struct frame_info *fi)
 
   /* Don't try to scan dummy frames.  */
   if (fi != NULL
-      && DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+      && DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
     return;
 
-  if (find_pc_partial_function (fi->pc, NULL, &prologue_start, &prologue_end))
+  if (find_pc_partial_function (get_frame_pc (fi), NULL, &prologue_start, &prologue_end))
     {
       struct symtab_and_line sal = find_pc_line (prologue_start, 0);
 
       if (sal.line == 0)		/* no line info, use current PC  */
-	prologue_end = fi->pc;
+	prologue_end = get_frame_pc (fi);
       else if (sal.end < prologue_end)	/* next line begins after fn end */
 	prologue_end = sal.end;		/* (probably means no prologue)  */
     }
@@ -556,7 +556,7 @@ thumb_scan_prologue (struct frame_info *fi)
        16 pushes, an add, and "mv fp,sp".  */
     prologue_end = prologue_start + 40;
 
-  prologue_end = min (prologue_end, fi->pc);
+  prologue_end = min (prologue_end, get_frame_pc (fi));
 
   /* Initialize the saved register map.  When register H is copied to
      register L, we will put H in saved_reg[L].  */
@@ -664,7 +664,7 @@ check_prologue_cache (struct frame_info *fi)
 {
   int i;
 
-  if (fi->pc == prologue_cache.pc)
+  if (get_frame_pc (fi) == get_frame_pc (&prologue_cache))
     {
       fi->extra_info->framereg = prologue_cache.extra_info->framereg;
       fi->extra_info->framesize = prologue_cache.extra_info->framesize;
@@ -685,7 +685,7 @@ save_prologue_cache (struct frame_info *fi)
 {
   int i;
 
-  prologue_cache.pc = fi->pc;
+  deprecated_update_frame_pc_hack (&prologue_cache, get_frame_pc (fi));
   prologue_cache.extra_info->framereg = fi->extra_info->framereg;
   prologue_cache.extra_info->framesize = fi->extra_info->framesize;
   prologue_cache.extra_info->frameoffset = fi->extra_info->frameoffset;
@@ -779,7 +779,7 @@ arm_scan_prologue (struct frame_info *fi)
   fi->extra_info->frameoffset = 0;
 
   /* Check for Thumb prologue.  */
-  if (arm_pc_is_thumb (fi->pc))
+  if (arm_pc_is_thumb (get_frame_pc (fi)))
     {
       thumb_scan_prologue (fi);
       save_prologue_cache (fi);
@@ -788,7 +788,7 @@ arm_scan_prologue (struct frame_info *fi)
 
   /* Find the function prologue.  If we can't find the function in
      the symbol table, peek in the stack frame to find the PC.  */
-  if (find_pc_partial_function (fi->pc, NULL, &prologue_start, &prologue_end))
+  if (find_pc_partial_function (get_frame_pc (fi), NULL, &prologue_start, &prologue_end))
     {
       /* One way to find the end of the prologue (which works well
          for unoptimized code) is to do the following:
@@ -796,7 +796,7 @@ arm_scan_prologue (struct frame_info *fi)
 	    struct symtab_and_line sal = find_pc_line (prologue_start, 0);
 
 	    if (sal.line == 0)
-	      prologue_end = fi->pc;
+	      prologue_end = get_frame_pc (fi);
 	    else if (sal.end < prologue_end)
 	      prologue_end = sal.end;
 
@@ -993,9 +993,9 @@ arm_find_callers_reg (struct frame_info *fi, int regnum)
      function could be called directly.  */
   for (; fi; fi = fi->next)
     {
-      if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+      if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
 	{
-	  return deprecated_read_register_dummy (fi->pc, fi->frame, regnum);
+	  return deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, regnum);
 	}
       else if (fi->saved_regs[regnum] != 0)
 	{
@@ -1022,11 +1022,11 @@ arm_frame_chain (struct frame_info *fi)
   CORE_ADDR caller_pc;
   int framereg = fi->extra_info->framereg;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, 0, 0))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
     /* A generic call dummy's frame is the same as caller's.  */
     return fi->frame;
 
-  if (fi->pc < LOWEST_PC)
+  if (get_frame_pc (fi) < LOWEST_PC)
     return 0;
 
   /* If the caller is the startup code, we're at the end of the chain.  */
@@ -1038,7 +1038,7 @@ arm_frame_chain (struct frame_info *fi)
      frame register number.  */
   /* XXX Fixme, we should try to do this without creating a temporary
      caller_fi.  */
-  if (arm_pc_is_thumb (caller_pc) != arm_pc_is_thumb (fi->pc))
+  if (arm_pc_is_thumb (caller_pc) != arm_pc_is_thumb (get_frame_pc (fi)))
     {
       struct frame_info caller_fi;
       struct cleanup *old_chain;
@@ -1054,7 +1054,7 @@ arm_frame_chain (struct frame_info *fi)
       make_cleanup (xfree, caller_fi.saved_regs);
 
       /* Now, scan the prologue and obtain the frame register.  */
-      caller_fi.pc = caller_pc;
+      deprecated_update_frame_pc_hack (&caller_fi, caller_pc);
       arm_scan_prologue (&caller_fi);
       framereg = caller_fi.extra_info->framereg;
 
@@ -1097,7 +1097,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   fi->extra_info->framereg = 0;
 
   if (fi->next)
-    fi->pc = FRAME_SAVED_PC (fi->next);
+    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
 
   memset (fi->saved_regs, '\000', sizeof fi->saved_regs);
 
@@ -1105,10 +1105,10 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
      the sigtramp and call dummy cases.  */
   if (!fi->next)
     sp = read_sp();
-  else if (DEPRECATED_PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
+  else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi->next), 0, 0))
     /* For generic dummy frames, pull the value direct from the frame.
        Having an unwind function to do this would be nice.  */
-    sp = deprecated_read_register_dummy (fi->next->pc, fi->next->frame,
+    sp = deprecated_read_register_dummy (get_frame_pc (fi->next), fi->next->frame,
 					 ARM_SP_REGNUM);
   else
     sp = (fi->next->frame - fi->next->extra_info->frameoffset
@@ -1132,10 +1132,10 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
      before calling functions like this.  */
 
   if (SIGCONTEXT_REGISTER_ADDRESS_P () 
-      && ((get_frame_type (fi) == SIGTRAMP_FRAME) || PC_IN_SIGTRAMP (fi->pc, (char *)0)))
+      && ((get_frame_type (fi) == SIGTRAMP_FRAME) || PC_IN_SIGTRAMP (get_frame_pc (fi), (char *)0)))
     {
       for (reg = 0; reg < NUM_REGS; reg++)
-	fi->saved_regs[reg] = SIGCONTEXT_REGISTER_ADDRESS (sp, fi->pc, reg);
+	fi->saved_regs[reg] = SIGCONTEXT_REGISTER_ADDRESS (sp, get_frame_pc (fi), reg);
 
       /* FIXME: What about thumb mode?  */
       fi->extra_info->framereg = ARM_SP_REGNUM;
@@ -1153,7 +1153,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       if (!fi->next)
 	/* This is the innermost frame?  */
 	fi->frame = read_register (fi->extra_info->framereg);
-      else if (DEPRECATED_PC_IN_CALL_DUMMY (fi->next->pc, 0, 0))
+      else if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi->next), 0, 0))
 	/* Next inner most frame is a dummy, just grab its frame.
            Dummy frames always have the same FP as their caller.  */
 	fi->frame = fi->next->frame;
@@ -1194,10 +1194,10 @@ static CORE_ADDR
 arm_frame_saved_pc (struct frame_info *fi)
 {
   /* If a dummy frame, pull the PC out of the frame's register buffer.  */
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, 0, 0))
-    return deprecated_read_register_dummy (fi->pc, fi->frame, ARM_PC_REGNUM);
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), 0, 0))
+    return deprecated_read_register_dummy (get_frame_pc (fi), fi->frame, ARM_PC_REGNUM);
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (fi->pc, fi->frame - fi->extra_info->frameoffset,
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (fi), fi->frame - fi->extra_info->frameoffset,
 			fi->frame))
     {
       return read_memory_integer (fi->saved_regs[ARM_PC_REGNUM],
@@ -1523,7 +1523,7 @@ arm_pop_frame (void)
   CORE_ADDR old_SP = (frame->frame - frame->extra_info->frameoffset
 		      + frame->extra_info->framesize);
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
     {
       generic_pop_dummy_frame ();
       flush_cached_frames ();

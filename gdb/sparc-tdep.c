@@ -338,7 +338,7 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
      frame.  For such functions, the frame pointer is actually in %i7.  */
   fi->extra_info->flat = 0;
   fi->extra_info->in_prologue = 0;
-  if (find_pc_partial_function (fi->pc, &name, &prologue_start, &prologue_end))
+  if (find_pc_partial_function (get_frame_pc (fi), &name, &prologue_start, &prologue_end))
     {
       /* See if the function starts with an add (which will be of a
          negative number if a flat frame) to the sp.  FIXME: Does not
@@ -399,18 +399,18 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
 	  sal = find_pc_line (prologue_start, 0);
 	  if (sal.line == 0)	/* no line info, use PC */
-	    prologue_end = fi->pc;
+	    prologue_end = get_frame_pc (fi);
 	  else if (sal.end < prologue_end)
 	    prologue_end = sal.end;
-	  if (fi->pc < prologue_end)
+	  if (get_frame_pc (fi) < prologue_end)
 	    {
-	      for (addr = prologue_start; addr < fi->pc; addr += 4)
+	      for (addr = prologue_start; addr < get_frame_pc (fi); addr += 4)
 		{
 		  insn = read_memory_integer (addr, 4);
 		  if (X_OP (insn) == 2 && X_OP3 (insn) == 0x3c)
 		    break;	/* SAVE seen, stop searching */
 		}
-	      if (addr >= fi->pc)
+	      if (addr >= get_frame_pc (fi))
 		{
 		  fi->extra_info->in_prologue = 1;
 		  fi->frame = read_register (SP_REGNUM);
@@ -422,7 +422,7 @@ sparc_init_extra_frame_info (int fromleaf, struct frame_info *fi)
     {
       /* Kludge to cause init_prev_frame_info to destroy the new frame.  */
       fi->frame = fi->next->frame;
-      fi->pc = fi->next->pc;
+      deprecated_update_frame_pc_hack (fi, get_frame_pc (fi->next));
     }
 }
 
@@ -469,7 +469,7 @@ sparc_frame_saved_pc (struct frame_info *frame)
 
       /* Solaris2 ucbsigvechandler passes a pointer to a sigcontext
          as the third parameter.  The offset to the saved pc is 12.  */
-      find_pc_partial_function (frame->pc, &name,
+      find_pc_partial_function (get_frame_pc (frame), &name,
 				(CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
       if (name && STREQ (name, "ucbsigvechandler"))
 	saved_pc_offset = 12;
@@ -535,7 +535,7 @@ setup_arbitrary_frame (int argc, CORE_ADDR *argv)
 		    "create_new_frame returned invalid frame");
 
   frame->extra_info->bottom = argv[1];
-  frame->pc = FRAME_SAVED_PC (frame);
+  deprecated_update_frame_pc_hack (frame, FRAME_SAVED_PC (frame));
   return frame;
 }
 
@@ -835,7 +835,7 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
       if (raw_buffer != NULL)
 	{
 	  /* Put it back in target format.  */
-	  store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), frame->pc);
+	  store_address (raw_buffer, REGISTER_RAW_SIZE (regnum), get_frame_pc (frame));
 	}
       if (addrp != NULL)
 	*addrp = 0;
@@ -846,9 +846,9 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
     {
       /* FIXME MVS: wrong test for dummy frame at entry.  */
 
-      if (frame1->pc >= (frame1->extra_info->bottom ? 
+      if (get_frame_pc (frame1) >= (frame1->extra_info->bottom ? 
 			 frame1->extra_info->bottom : read_sp ())
-	  && frame1->pc <= get_frame_base (frame1))
+	  && get_frame_pc (frame1) <= get_frame_base (frame1))
 	{
 	  /* Dummy frame.  All but the window regs are in there somewhere.
 	     The window registers are saved on the stack, just like in a
@@ -904,7 +904,7 @@ sparc_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	      regs = alloca (NUM_REGS * sizeof (CORE_ADDR)); 
 	      memset (regs, 0, NUM_REGS * sizeof (CORE_ADDR));
 
-	      find_pc_partial_function (frame1->pc, NULL, &func_start, NULL);
+	      find_pc_partial_function (get_frame_pc (frame1), NULL, &func_start, NULL);
 	      examine_prologue (func_start, 0, frame1, regs);
 	      addr = regs[regnum];
 	    }
@@ -1120,9 +1120,9 @@ sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
 
   memset (saved_regs_addr, 0, NUM_REGS * sizeof (CORE_ADDR));
 
-  if (fi->pc >= (fi->extra_info->bottom ? 
+  if (get_frame_pc (fi) >= (fi->extra_info->bottom ? 
 		 fi->extra_info->bottom : read_sp ())
-      && fi->pc <= get_frame_base (fi))
+      && get_frame_pc (fi) <= get_frame_base (fi))
     {
       /* Dummy frame.  All but the window regs are in there somewhere. */
       for (regnum = G1_REGNUM; regnum < G1_REGNUM + 7; regnum++)
@@ -1163,7 +1163,7 @@ sparc_frame_find_saved_regs (struct frame_info *fi, CORE_ADDR *saved_regs_addr)
   else if (fi->extra_info->flat)
     {
       CORE_ADDR func_start;
-      find_pc_partial_function (fi->pc, NULL, &func_start, NULL);
+      find_pc_partial_function (get_frame_pc (fi), NULL, &func_start, NULL);
       examine_prologue (func_start, 0, fi, saved_regs_addr);
 
       /* Flat register window frame.  */

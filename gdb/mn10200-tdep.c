@@ -121,7 +121,7 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
 
   /* Use the PC in the frame if it's provided to look up the
      start of this function.  */
-  pc = (fi ? fi->pc : pc);
+  pc = (fi ? get_frame_pc (fi) : pc);
 
   /* Find the start of this function.  */
   status = find_pc_partial_function (pc, &name, &func_addr, &func_end);
@@ -147,35 +147,35 @@ mn10200_analyze_prologue (struct frame_info *fi, CORE_ADDR pc)
      been deallocated.
 
      fi->frame is bogus, we need to fix it.  */
-  if (fi && fi->pc + 1 == func_end)
+  if (fi && get_frame_pc (fi) + 1 == func_end)
     {
-      status = target_read_memory (fi->pc, buf, 1);
+      status = target_read_memory (get_frame_pc (fi), buf, 1);
       if (status != 0)
 	{
 	  if (fi->next == NULL)
 	    fi->frame = read_sp ();
-	  return fi->pc;
+	  return get_frame_pc (fi);
 	}
 
       if (buf[0] == 0xfe)
 	{
 	  if (fi->next == NULL)
 	    fi->frame = read_sp ();
-	  return fi->pc;
+	  return get_frame_pc (fi);
 	}
     }
 
   /* Similarly if we're stopped on the first insn of a prologue as our
      frame hasn't been allocated yet.  */
-  if (fi && fi->pc == func_addr)
+  if (fi && get_frame_pc (fi) == func_addr)
     {
       if (fi->next == NULL)
 	fi->frame = read_sp ();
-      return fi->pc;
+      return get_frame_pc (fi);
     }
 
   /* Figure out where to stop scanning.  */
-  stop = fi ? fi->pc : func_end;
+  stop = fi ? get_frame_pc (fi) : func_end;
 
   /* Don't walk off the end of the function.  */
   stop = stop > func_end ? func_end : stop;
@@ -638,7 +638,7 @@ mn10200_frame_chain (struct frame_info *fi)
 
      So we set up a dummy frame and call mn10200_analyze_prologue to
      find stuff for us.  */
-  dummy_frame.pc = FRAME_SAVED_PC (fi);
+  deprecated_update_frame_pc_hack (&dummy_frame, FRAME_SAVED_PC (fi));
   dummy_frame.frame = fi->frame;
   memset (dummy_frame.fsr.regs, '\000', sizeof dummy_frame.fsr.regs);
   dummy_frame.status = 0;
@@ -685,7 +685,7 @@ mn10200_pop_frame (struct frame_info *frame)
 {
   int regnum;
 
-  if (DEPRECATED_PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
+  if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), frame->frame, frame->frame))
     generic_pop_dummy_frame ();
   else
     {
@@ -862,7 +862,7 @@ mn10200_frame_saved_pc (struct frame_info *fi)
    registers.  Most of the work is done in mn10200_analyze_prologue().
 
    Note that when we are called for the last frame (currently active frame),
-   that fi->pc and fi->frame will already be setup.  However, fi->frame will
+   that get_frame_pc (fi) and fi->frame will already be setup.  However, fi->frame will
    be valid only if this routine uses FP.  For previous frames, fi-frame will
    always be correct.  mn10200_analyze_prologue will fix fi->frame if
    it's not valid.
@@ -875,7 +875,7 @@ void
 mn10200_init_extra_frame_info (struct frame_info *fi)
 {
   if (fi->next)
-    fi->pc = FRAME_SAVED_PC (fi->next);
+    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (fi->next));
 
   memset (fi->fsr.regs, '\000', sizeof fi->fsr.regs);
   fi->status = 0;
