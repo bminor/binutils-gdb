@@ -48,7 +48,6 @@
 	* x86-64-tdep.c (x86_64_skip_prologue): Print note when debugging
 	code without frame pointers.
 
->>>>>>> 1.2298.2.45
 2002-04-25  Andrew Cagney  <ac131313@redhat.com>
 
 	* README: Update to GDB 5.2.
