@@ -1,5 +1,7 @@
 Thu May 27 18:19:51 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
+	* dis-asm.h (print_insn_hppa): Declare it.
+
 	* bfd.h: Moved to bfd directory.  Small stub here includes it
 	without requiring "-I../bfd".
 
