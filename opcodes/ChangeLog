@@ -1,3 +1,8 @@
+2001-03-19  John David Anglin  <dave@hiauly1.hia.nrc.ca>
+
+	* vax-dis.c (print_insn_vax): Only fetch two bytes if the info buffer
+	has more than one byte left to read.
+
 2001-02-23  David Mosberger  <davidm@hpl.hp.com>
 
 	* ia64-opc-a.c: Add missing pseudo-ops for "cmp" and "cmp4".
