@@ -164,6 +164,54 @@ cfi_set_return_column (unsigned regno)
   cur_fde_data->return_column = regno;
 }
 
+/* Universal functions to store new instructions.  */
+
+static void
+cfi_add_CFA_insn(int insn)
+{
+  struct cfi_insn_data *insn_ptr = alloc_cfi_insn_data ();
+
+  insn_ptr->insn = insn;
+}
+
+static void
+cfi_add_CFA_insn_reg (int insn, unsigned regno)
+{
+  struct cfi_insn_data *insn_ptr = alloc_cfi_insn_data ();
+
+  insn_ptr->insn = insn;
+  insn_ptr->u.r = regno;
+}
+
+static void
+cfi_add_CFA_insn_offset (int insn, offsetT offset)
+{
+  struct cfi_insn_data *insn_ptr = alloc_cfi_insn_data ();
+
+  insn_ptr->insn = insn;
+  insn_ptr->u.i = offset;
+}
+
+static void
+cfi_add_CFA_insn_reg_reg (int insn, unsigned reg1, unsigned reg2)
+{
+  struct cfi_insn_data *insn_ptr = alloc_cfi_insn_data ();
+
+  insn_ptr->insn = insn;
+  insn_ptr->u.rr.reg1 = reg1;
+  insn_ptr->u.rr.reg2 = reg2;
+}
+
+static void
+cfi_add_CFA_insn_reg_offset (int insn, unsigned regno, offsetT offset)
+{
+  struct cfi_insn_data *insn_ptr = alloc_cfi_insn_data ();
+
+  insn_ptr->insn = insn;
+  insn_ptr->u.ri.reg = regno;
+  insn_ptr->u.ri.offset = offset;
+}
+
 /* Add a CFI insn to advance the PC from the last address to LABEL.  */
 
 void
@@ -183,11 +231,7 @@ cfi_add_advance_loc (symbolS *label)
 void
 cfi_add_CFA_offset (unsigned regno, offsetT offset)
 {
-  struct cfi_insn_data *insn = alloc_cfi_insn_data ();
-  
-  insn->insn = DW_CFA_offset;
-  insn->u.ri.reg = regno;
-  insn->u.ri.offset = offset;
+  cfi_add_CFA_insn_reg_offset (DW_CFA_offset, regno, offset);
 }
 
 /* Add a DW_CFA_def_cfa record to the CFI data.  */
@@ -195,12 +239,7 @@ cfi_add_CFA_offset (unsigned regno, offsetT offset)
 void
 cfi_add_CFA_def_cfa (unsigned regno, offsetT offset)
 {
-  struct cfi_insn_data *insn = alloc_cfi_insn_data ();
-  
-  insn->insn = DW_CFA_def_cfa;
-  insn->u.ri.reg = regno;
-  insn->u.ri.offset = offset;
-
+  cfi_add_CFA_insn_reg_offset (DW_CFA_def_cfa, regno, offset);
   cur_cfa_offset = offset;
 }
 
@@ -209,11 +248,7 @@ cfi_add_CFA_def_cfa (unsigned regno, offsetT offset)
 void
 cfi_add_CFA_register (unsigned reg1, unsigned reg2)
 {
-  struct cfi_insn_data *insn = alloc_cfi_insn_data ();
-  
-  insn->insn = DW_CFA_register;
-  insn->u.rr.reg1 = reg1;
-  insn->u.rr.reg2 = reg2;
+  cfi_add_CFA_insn_reg_reg (DW_CFA_register, reg1, reg2);
 }
 
 /* Add a DW_CFA_def_cfa_register record to the CFI data.  */
@@ -221,10 +256,7 @@ cfi_add_CFA_register (unsigned reg1, unsigned reg2)
 void
 cfi_add_CFA_def_cfa_register (unsigned regno)
 {
-  struct cfi_insn_data *insn = alloc_cfi_insn_data ();
-  
-  insn->insn = DW_CFA_def_cfa_register;
-  insn->u.r = regno;
+  cfi_add_CFA_insn_reg (DW_CFA_def_cfa_register, regno);
 }
 
 /* Add a DW_CFA_def_cfa_offset record to the CFI data.  */
@@ -232,12 +264,44 @@ cfi_add_CFA_def_cfa_register (unsigned regno)
 void
 cfi_add_CFA_def_cfa_offset (offsetT offset)
 {
-  struct cfi_insn_data *insn = alloc_cfi_insn_data ();
-  
-  insn->insn = DW_CFA_def_cfa_offset;
-  insn->u.i = offset;
-
+  cfi_add_CFA_insn_offset (DW_CFA_def_cfa_offset, offset);
   cur_cfa_offset = offset;
+}
+
+void
+cfi_add_CFA_restore (unsigned regno)
+{
+  cfi_add_CFA_insn_reg (DW_CFA_restore, regno);
+}
+
+void
+cfi_add_CFA_undefined (unsigned regno)
+{
+  cfi_add_CFA_insn_reg (DW_CFA_undefined, regno);
+}
+
+void
+cfi_add_CFA_same_value (unsigned regno)
+{
+  cfi_add_CFA_insn_reg (DW_CFA_same_value, regno);
+}
+
+void
+cfi_add_CFA_remember_state (void)
+{
+  cfi_add_CFA_insn (DW_CFA_remember_state);
+}
+
+void
+cfi_add_CFA_restore_state (void)
+{
+  cfi_add_CFA_insn (DW_CFA_restore_state);
+}
+
+void
+cfi_add_CFA_nop (void)
+{
+  cfi_add_CFA_insn (DW_CFA_nop);
 }
 
 
@@ -248,7 +312,8 @@ static void dot_cfi_startproc (int);
 static void dot_cfi_endproc (int);
 
 /* Fake CFI type; outside the byte range of any real CFI insn.  */
-#define CFI_adjust_cfa_offset 0x100
+#define CFI_adjust_cfa_offset	0x100
+#define CFI_return_column	0x101
 
 const pseudo_typeS cfi_pseudo_table[] =
   {
@@ -260,6 +325,13 @@ const pseudo_typeS cfi_pseudo_table[] =
     { "cfi_adjust_cfa_offset", dot_cfi, CFI_adjust_cfa_offset },
     { "cfi_offset", dot_cfi, DW_CFA_offset },
     { "cfi_register", dot_cfi, DW_CFA_register },
+    { "cfi_return_column", dot_cfi, CFI_return_column },
+    { "cfi_restore", dot_cfi, DW_CFA_restore },
+    { "cfi_undefined", dot_cfi, DW_CFA_undefined },
+    { "cfi_same_value", dot_cfi, DW_CFA_same_value },
+    { "cfi_remember_state", dot_cfi, DW_CFA_remember_state },
+    { "cfi_restore_state", dot_cfi, DW_CFA_restore_state },
+    { "cfi_nop", dot_cfi, DW_CFA_nop },
     { NULL, NULL, 0 }
   };
 
@@ -343,44 +415,72 @@ dot_cfi (int arg)
 
   switch (arg)
     {
-      /* Instructions that take two arguments (register, integer). */
     case DW_CFA_offset:
+      reg1 = cfi_parse_reg ();
+      cfi_parse_separator ();
+      offset = cfi_parse_const ();
+      cfi_add_CFA_offset (reg1, offset);
+      break;
+
     case DW_CFA_def_cfa:
       reg1 = cfi_parse_reg ();
       cfi_parse_separator ();
       offset = cfi_parse_const ();
-
-      if (arg == DW_CFA_def_cfa)
-	cfi_add_CFA_def_cfa (reg1, offset);
-      else
-	cfi_add_CFA_offset (reg1, offset);
+      cfi_add_CFA_def_cfa (reg1, offset);
       break;
 
-      /* Instructions that take two arguments (register, register). */
     case DW_CFA_register:
       reg1 = cfi_parse_reg ();
       cfi_parse_separator ();
       reg2 = cfi_parse_reg ();
-
       cfi_add_CFA_register (reg1, reg2);
       break;
 
-      /* Instructions that take one register argument.  */
     case DW_CFA_def_cfa_register:
       reg1 = cfi_parse_reg ();
       cfi_add_CFA_def_cfa_register (reg1);
       break;
 
-      /* Instructions that take one integer argument.  */
     case DW_CFA_def_cfa_offset:
       offset = cfi_parse_const ();
       cfi_add_CFA_def_cfa_offset (offset);
       break;
 
-      /* Special handling for pseudo-instruction.  */
     case CFI_adjust_cfa_offset:
       offset = cfi_parse_const ();
       cfi_add_CFA_def_cfa_offset (cur_cfa_offset + offset);
+      break;
+
+    case DW_CFA_restore:
+      reg1 = cfi_parse_reg ();
+      cfi_add_CFA_restore (reg1);
+      break;
+
+    case DW_CFA_undefined:
+      reg1 = cfi_parse_reg ();
+      cfi_add_CFA_undefined (reg1);
+      break;
+
+    case DW_CFA_same_value:
+      reg1 = cfi_parse_reg ();
+      cfi_add_CFA_same_value (reg1);
+      break;
+
+    case CFI_return_column:
+      reg1 = cfi_parse_reg ();
+      cfi_set_return_column (reg1);
+      break;
+
+    case DW_CFA_remember_state:
+      cfi_add_CFA_remember_state ();
+      break;
+
+    case DW_CFA_restore_state:
+      cfi_add_CFA_restore_state ();
+      break;
+
+    case DW_CFA_nop:
+      cfi_add_CFA_nop ();
       break;
 
     default:
@@ -553,8 +653,10 @@ output_cfi_insn (struct cfi_insn_data *insn)
       break;
 
     case DW_CFA_def_cfa_register:
-      out_one (DW_CFA_def_cfa_register);
-      out_uleb128 (insn->u.i);
+    case DW_CFA_undefined:
+    case DW_CFA_same_value:
+      out_one (insn->insn);
+      out_uleb128 (insn->u.r);
       break;
 
     case DW_CFA_def_cfa_offset:
@@ -568,6 +670,19 @@ output_cfi_insn (struct cfi_insn_data *insn)
 	{
 	  out_one (DW_CFA_def_cfa_offset);
 	  out_uleb128 (offset);
+	}
+      break;
+
+    case DW_CFA_restore:
+      regno = insn->u.r;
+      if (regno <= 0x3F)
+	{
+	  out_one (DW_CFA_restore + regno);
+	}
+      else
+	{
+	  out_one (DW_CFA_restore_extended);
+	  out_uleb128 (regno);
 	}
       break;
 
@@ -599,8 +714,10 @@ output_cfi_insn (struct cfi_insn_data *insn)
       out_uleb128 (insn->u.rr.reg2);
       break;
 
+    case DW_CFA_remember_state:
+    case DW_CFA_restore_state:
     case DW_CFA_nop:
-      out_one (DW_CFA_nop);
+      out_one (insn->insn);
       break;
 
     default:
@@ -722,6 +839,9 @@ select_cie_for_fde (struct fde_entry *fde, struct cfi_insn_data **pfirst)
 	      break;
 
 	    case DW_CFA_def_cfa_register:
+	    case DW_CFA_restore:
+	    case DW_CFA_undefined:
+	    case DW_CFA_same_value:
 	      if (i->u.r != j->u.r)
 		goto fail;
 	      break;

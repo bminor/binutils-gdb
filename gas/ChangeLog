@@ -1,3 +1,21 @@
+2003-06-05  Michal Ludvig  <mludvig@suse.cz>
+
+	* dw2gencfi.c (cfi_add_CFA_insn, cfi_add_CFA_insn_reg)
+	(cfi_add_CFA_insn_reg_reg, cfi_add_CFA_insn_reg_offset): New.
+	(cfi_add_CFA_offset, cfi_add_CFA_def_cfa)
+	(cfi_add_CFA_register, cfi_add_CFA_def_cfa_register)
+	(cfi_add_CFA_def_cfa_offset): Use cfi_add_CFA_insn_*().
+	(cfi_add_CFA_restore, cfi_add_CFA_undefined)
+	(cfi_add_CFA_same_value, cfi_add_CFA_remember_state)
+	(cfi_add_CFA_restore_state, cfi_add_CFA_nop): New.
+	(cfi_pseudo_table): New directives .cfi_return_column,
+	.cfi_restore, .cfi_undefined, .cfi_same_value,
+	.cfi_remember_state, .cfi_restore_state, .cfi_nop.
+	(dot_cfi, output_cfi_insn): Handle new directives.
+	* dw2gencfi.h (cfi_add_CFA_restore, cfi_add_CFA_undefined)
+	(cfi_add_CFA_same_value, cfi_add_CFA_remember_state)
+	(cfi_add_CFA_restore_state, cfi_add_CFA_nop): New prototypes.
+
 2003-06-04  Richard Henderson  <rth@redhat.com>
 
 	* dw2gencfi.c (output_cfi_insn): Fix typo for negative offsets.

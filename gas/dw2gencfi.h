@@ -37,10 +37,17 @@ extern void cfi_new_fde (struct symbol *);
 extern void cfi_end_fde (struct symbol *);
 extern void cfi_set_return_column (unsigned);
 extern void cfi_add_advance_loc (struct symbol *);
+
 extern void cfi_add_CFA_offset (unsigned, offsetT);
 extern void cfi_add_CFA_def_cfa (unsigned, offsetT);
 extern void cfi_add_CFA_register (unsigned, unsigned);
 extern void cfi_add_CFA_def_cfa_register (unsigned);
 extern void cfi_add_CFA_def_cfa_offset (offsetT);
+extern void cfi_add_CFA_restore (unsigned);
+extern void cfi_add_CFA_undefined (unsigned);
+extern void cfi_add_CFA_same_value (unsigned);
+extern void cfi_add_CFA_remember_state (void);
+extern void cfi_add_CFA_restore_state (void);
+extern void cfi_add_CFA_nop (void);
 
 #endif /* DW2GENCFI_H */
