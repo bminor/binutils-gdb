@@ -1,3 +1,17 @@
+Tue Dec  3 22:54:50 1991  John Gilmore  (gnu at cygnus.com)
+
+	* targets.c:  Revise comments about how to configure the target
+	vector, to match reality.  Remove mention of obsolete methods.
+	Remove long lists of capitalized macros that turn into the same
+	thing in lowercase.  Normal vector simply lists all known
+	lowercase xvec names; all other cases are handled by SELECT_VECS.
+
+	* config/mt-i386-coff:  Set DEFAULT_VECTOR to real identifier,
+	not macro name.
+
+	* config/mt-i960-{coff,bout}:  Use SELECT_VECS to make a short
+	list of supported targets.
+
 Tue Dec  3 14:06:15 1991  Per Bothner  (bothner at cygnus.com)
 
 	* archive.c (bsd_write_armap):  The pad byte sometimes added to
