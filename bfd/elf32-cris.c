@@ -982,7 +982,8 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		 input_bfd,
 		 input_section,
 		 cris_elf_howto_table[r_type].name,
-		 symname[0] != '\0' ? symname : _("[whose name is lost]"));
+		 (symname != NULL && symname[0] != '\0'
+		  ? symname : _("[whose name is lost]")));
 
 	      /* FIXME: Perhaps blaming input is not the right thing to
 		 do; this is probably an internal error.  But it is true
@@ -2468,9 +2469,13 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
              don't need to generate a procedure linkage table entry
              after all.  */
 
-	  /* If this is a local symbol, we resolve it directly without
-	     creating a procedure linkage table entry.  */
-	  if (h == NULL || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	  /* Beware: if we'd check for visibility of the symbol here
+	     (and not marking the need for a PLT when non-visible), we'd
+	     get into trouble with keeping handling consistent with
+	     regards to relocs found before definition and GOTPLT
+	     handling.  Eliminable PLT entries will be dealt with later
+	     anyway.  */
+	  if (h == NULL)
 	    continue;
 
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;

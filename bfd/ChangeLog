@@ -1,3 +1,11 @@
+2004-09-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_elf_relocate_section) <case R_CRIS_16_GOTPLT,
+	case R_CRIS_32_GOTPLT>: For internal error message, handle NULL
+	symname.
+	(cris_elf_check_relocs) <case R_CRIS_32_PLT_PCREL>: Don't try to
+	handle symbol visibility here.
+
 2004-09-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (struct ppc_link_hash_table): Add stub_globals.
