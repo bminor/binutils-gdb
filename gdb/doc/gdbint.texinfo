@@ -291,7 +291,7 @@ for something to happen.
 Since they depend on hardware resources, hardware breakpoints may be
 limited in number; when the user asks for more, @value{GDBN} will
 start trying to set software breakpoints.  (On some architectures,
-notably the 32-bit x86 platforms, @value{GDBN} cannot alsways know
+notably the 32-bit x86 platforms, @value{GDBN} cannot always know
 whether there's enough hardware resources to insert all the hardware
 breakpoints and watchpoints.  On those platforms, @value{GDBN} prints
 an error message only when the program being debugged is continued.)
@@ -628,8 +628,8 @@ looks for a debug register which is already set to watch the same
 region for the same access types; if found, it just increments the
 reference count of that debug register, thus implementing debug
 register sharing between watchpoints.  If no such register is found,
-the function looks for a vacant debug register, sets its mirrorred
-value to @var{addr}, sets the mirrorred value of DR7 Debug Control
+the function looks for a vacant debug register, sets its mirrored
+value to @var{addr}, sets the mirrored value of DR7 Debug Control
 register as appropriate for the @var{len} and @var{type} parameters,
 and then passes the new values of the debug register and DR7 to the
 inferior by calling @code{I386_DR_LOW_SET_ADDR} and
@@ -638,8 +638,8 @@ required to cover the given region, the above process is repeated for
 each debug register.
 
 @code{i386_remove_watchpoint} does the opposite: it resets the address
-in the mirrorred value of the debug register and its read/write and
-length bits in the mirrorred value of DR7, then passes these new
+in the mirrored value of the debug register and its read/write and
+length bits in the mirrored value of DR7, then passes these new
 values to the inferior via @code{I386_DR_LOW_RESET_ADDR} and
 @code{I386_DR_LOW_SET_CONTROL}.  If a register is shared by several
 watchpoints, each time a @code{i386_remove_watchpoint} is called, it
@@ -2730,7 +2730,7 @@ reason.
 
 @item CALL_DUMMY_P
 @findex CALL_DUMMY_P
-A C expresson that is non-zero when the target suports inferior function
+A C expression that is non-zero when the target supports inferior function
 calls.
 
 @item CALL_DUMMY_WORDS
@@ -3018,12 +3018,12 @@ respectively.  (Currently only defined for the Delta 68.)
 
 @item @value{GDBN}_MULTI_ARCH
 @findex @value{GDBN}_MULTI_ARCH
-If defined and non-zero, enables suport for multiple architectures
+If defined and non-zero, enables support for multiple architectures
 within @value{GDBN}.
 
 This support can be enabled at two levels.  At level one, only
 definitions for previously undefined macros are provided; at level two,
-a multi-arch definition of all architecture dependant macros will be
+a multi-arch definition of all architecture dependent macros will be
 defined.
 
 @item @value{GDBN}_TARGET_IS_HPPA
@@ -3037,7 +3037,7 @@ used instead.
 @findex GET_LONGJMP_TARGET
 For most machines, this is a target-dependent parameter.  On the
 DECstation and the Iris, this is a native-dependent parameter, since
-trhe header file @file{setjmp.h} is needed to define it.
+the header file @file{setjmp.h} is needed to define it.
 
 This macro determines the target PC address that @code{longjmp} will jump to,
 assuming that we have just stopped at a @code{longjmp} breakpoint.  It takes a
@@ -3770,7 +3770,7 @@ define @samp{NAT_CFLAGS}, @samp{NAT_ADD_FILES}, @samp{NAT_CLIBS},
 @emph{Maintainer's note: The @file{.mh} suffix is because this file
 originally contained @file{Makefile} fragments for hosting @value{GDBN}
 on machine @var{xyz}.  While the file is no longer used for this
-purpose, the @file{.mh} suffix remains.  Perhaphs someone will
+purpose, the @file{.mh} suffix remains.  Perhaps someone will
 eventually rename these fragments so that they have a @file{.mn}
 suffix.}
 
@@ -4503,8 +4503,8 @@ During its execution, @value{GDBN} can encounter two types of errors.
 User errors and internal errors.  User errors include not only a user
 entering an incorrect command but also problems arising from corrupt
 object files and system errors when interacting with the target.
-Internal errors include situtations where @value{GDBN} has detected, at
-run time, a corrupt or erroneous situtation.
+Internal errors include situations where @value{GDBN} has detected, at
+run time, a corrupt or erroneous situation.
 
 When reporting an internal error, @value{GDBN} uses
 @code{internal_error} and @code{gdb_assert}.
@@ -4551,7 +4551,7 @@ declarations they refer to.  They should not rely on files being
 included indirectly.
 
 With the exception of the global definitions supplied by @file{defs.h},
-a header file should explictily include the header declaring any
+a header file should explicitly include the header declaring any
 @code{typedefs} et.al.@: it refers to.
 
 @code{extern} declarations should never appear in @code{.c} files.
@@ -4946,7 +4946,7 @@ $
 @item
 the @kbd{-D YYYY-MM-DD-gmt} forces the branch to an exact date/time.
 @item
-the trunk is first taged so that the branch point can easily be found
+the trunk is first tagged so that the branch point can easily be found
 @item
 Insight (which includes GDB) and dejagnu are tagged at the same time
 @end itemize
@@ -5135,13 +5135,13 @@ If it is a final release, also make it available under a bogus name so
 that others can download and check it.
 
 @emph{Maintainer note: This adds an extra day to the release process but
-is very much worth it.  Other developers are given the oportunity to
+is very much worth it.  Other developers are given the opportunity to
 check that things like your @file{NEWS} entries are correct or that
 other changes actually work.}
 
 @section Release the tar ball
 
-This is where, unfortunatly, the notes just get vague.
+This is where, unfortunately, the notes just get vague.
 
 @subheading Install on sware
 

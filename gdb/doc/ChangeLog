@@ -1,3 +1,9 @@
+2002-03-04  Fred Fish  <fnf@redhat.com>
+
+	* gdbint.texinfo: Fix a bunch of typos (alsways, mirrorred,
+	expresson, suports, dependant, trhe, perhaphs, situtations,
+	explictily, taged, oportunity, unfortunatly).
+
 2002-02-24  Andrew Cagney  <ac131313@redhat.com>
 
 	* Makefile.in (gdb.info): Add explicit path to gdb.texinfo.
