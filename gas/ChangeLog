@@ -1,3 +1,11 @@
+Thu Jun  6 17:42:12 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* config/tc-sh.c (parse_at): @(symbol,pc) is A_DISP_PC again,
+	but warn about it.
+	* testsuite/gas/sh/pcrel.s: Also test @(symbol,pc).
+	* testsuite/gas/sh/pcrel.d: Update.
+	* testsuite/gas/sh/pcrel.l: New file.
+
 2002-06-06  Daniel Jacobowitz  <drow@mvista.com>
 
 	* tc-mips.c (mips_after_parse_args): Always set mips_opts.ase_mips3d

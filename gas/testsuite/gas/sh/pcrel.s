@@ -2,6 +2,8 @@
 
 	.p2align 2
 code:
+	mov.l	@(litpool,pc), r0
+	mov.l	@(litpool+4,pc), r1
 	mov.l	litpool, r1
 	mov.l	@(14,pc), r1
 	mova	@(litpool-.,pc), r0

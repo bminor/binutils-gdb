@@ -1383,10 +1383,18 @@ parse_at (src, op)
 		}
 	      else if (mode == A_PC)
 		{
-		  op->type = A_DISP_PC_ABS;
-		  /* Such operands don't get corrected for PC==.+4, so
-		     make the correction here.  */
-		  op->immediate.X_add_number -= 4;
+		  if (op->immediate.X_op == O_symbol)
+		    {
+		      op->type = A_DISP_PC;
+		      as_warn (_("Deprecated syntax."));
+		    }
+		  else
+		    {
+		      op->type = A_DISP_PC_ABS;
+		      /* Such operands don't get corrected for PC==.+4, so
+			 make the correction here.  */
+		      op->immediate.X_add_number -= 4;
+		    }
 		}
 	      else
 		{
