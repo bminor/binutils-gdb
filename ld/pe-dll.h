@@ -1,5 +1,5 @@
 /* pe-dll.h: Header file for routines used to build Windows DLLs.
-   Copyright (C) 1999 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
 
    This file is part of GLD, the Gnu Linker.
 
@@ -31,6 +31,8 @@ extern int pe_dll_export_everything;
 extern int pe_dll_do_default_excludes;
 extern int pe_dll_kill_ats;
 extern int pe_dll_stdcall_aliases;
+extern int pe_dll_warn_dup_exports;
+extern int pe_dll_compat_implib;
 
 extern void pe_dll_id_target PARAMS ((const char *));
 extern void pe_dll_add_excludes PARAMS ((const char *));

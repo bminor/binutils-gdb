@@ -60,6 +60,8 @@ int pe_dll_export_everything = 0;
 int pe_dll_do_default_excludes = 1;
 int pe_dll_kill_ats = 0;
 int pe_dll_stdcall_aliases = 0;
+int pe_dll_warn_dup_exports = 0;
+int pe_dll_compat_implib = 0;
 
 /************************************************************************
 
@@ -338,20 +340,22 @@ process_def_file (abfd, info)
     {
       if (i > 0 && strcmp (e[i].name, e[i - 1].name) == 0)
 	{
-	  /* This is a duplicate */
+	  /* This is a duplicate.  */
 	  if (e[j - 1].ordinal != -1
 	      && e[i].ordinal != -1
 	      && e[j - 1].ordinal != e[i].ordinal)
 	    {
-	      /* xgettext:c-format */
-	      einfo (_("%XError, duplicate EXPORT with oridinals: %s (%d vs %d)\n"),
-		     e[j - 1].name, e[j - 1].ordinal, e[i].ordinal);
+	      if (pe_dll_warn_dup_exports)
+		/* xgettext:c-format */
+		einfo (_("%XError, duplicate EXPORT with oridinals: %s (%d vs %d)\n"),
+		       e[j - 1].name, e[j - 1].ordinal, e[i].ordinal);
 	    }
 	  else
 	    {
-	      /* xgettext:c-format */
-	      einfo (_("Warning, duplicate EXPORT: %s\n"),
-		     e[j - 1].name);
+	      if (pe_dll_warn_dup_exports)
+		/* xgettext:c-format */
+		einfo (_("Warning, duplicate EXPORT: %s\n"),
+		       e[j - 1].name);
 	    }
 	  if (e[i].ordinal)
 	    e[j - 1].ordinal = e[i].ordinal;
@@ -1359,7 +1363,9 @@ make_one (exp, parent)
     quick_symbol (abfd, U(""), exp->internal_name, "", tx, BSF_GLOBAL, 0);
   quick_symbol (abfd, U("_head_"), dll_symname, "", UNDSEC, BSF_GLOBAL, 0);
   quick_symbol (abfd, U("__imp_"), exp->internal_name, "", id5, BSF_GLOBAL, 0);
-  quick_symbol (abfd, U("_imp__"), exp->internal_name, "", id5, BSF_GLOBAL, 0);
+  if (pe_dll_compat_implib)
+    quick_symbol (abfd, U("__imp_"), exp->internal_name, "", 
+                  id5, BSF_GLOBAL, 0);
 
   bfd_set_section_size (abfd, tx, jmp_byte_count);
   td = (unsigned char *) xmalloc (jmp_byte_count);

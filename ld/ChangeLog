@@ -1,7 +1,21 @@
 2000-01-04  Mumit Khan  <khan@xraylith.wisc.edu>
 
+	* pe-dll.c (pe_dll_warn_dup_exports): New variable.
+	(process_def_file): Use.
+	(pe_dll_compat_implib): New variable.
+	(make_one): Use.
+	
+	* pe-dll.h: Add exports of pe_dll_warn_dup_exports and
+	pe_dll_compat_implib.
+	
+	* emultempl/pe.em (longopts): Add warn-duplicate-exports and 
+	compat-implib options.
+	(gld_${EMULATION_NAME}_list_options): List new options.
+	(gld_${EMULATION_NAME}_parse_args): Handle.
+
 	* pe-dll.c (pe_dll_generate_implib): Use the correct name for output 
 	dll.
+	
         * deffilep.y (opt_name): Allow "." in name.
 
 1999-12-02  Nick Clifton  <nickc@cygnus.com>

@@ -4,7 +4,7 @@ rm -f e${EMULATION_NAME}.c
 (echo;echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 cat >>e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
-   Copyright 1995, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright 1995, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -139,6 +139,8 @@ gld_${EMULATION_NAME}_before_parse()
 #define OPTION_DISABLE_STDCALL_FIXUP	(OPTION_ENABLE_STDCALL_FIXUP + 1)
 #define OPTION_IMPLIB_FILENAME		(OPTION_DISABLE_STDCALL_FIXUP + 1)
 #define OPTION_THUMB_ENTRY		(OPTION_IMPLIB_FILENAME + 1)
+#define OPTION_WARN_DUPLICATE_EXPORTS	(OPTION_THUMB_ENTRY + 1)
+#define OPTION_IMP_COMPAT		(OPTION_WARN_DUPLICATE_EXPORTS + 1)
 
 static struct option longopts[] =
 {
@@ -171,6 +173,8 @@ static struct option longopts[] =
   {"enable-stdcall-fixup", no_argument, NULL, OPTION_ENABLE_STDCALL_FIXUP},
   {"disable-stdcall-fixup", no_argument, NULL, OPTION_DISABLE_STDCALL_FIXUP},
   {"out-implib", required_argument, NULL, OPTION_IMPLIB_FILENAME},
+  {"warn-duplicate-exports", no_argument, NULL, OPTION_WARN_DUPLICATE_EXPORTS},
+  {"compat-implib", no_argument, NULL, OPTION_IMP_COMPAT},
 #endif
   {NULL, no_argument, NULL, 0}
 };
@@ -489,6 +493,12 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
       break;
     case OPTION_IMPLIB_FILENAME:
       pe_implib_filename = xstrdup (optarg);
+      break;
+    case OPTION_WARN_DUPLICATE_EXPORTS:
+      pe_dll_warn_dup_exports = 1;
+      break;
+    case OPTION_IMP_COMPAT:
+      pe_dll_compat_implib = 1;
       break;
 #endif
     }
