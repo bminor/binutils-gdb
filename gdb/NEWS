@@ -31,6 +31,14 @@ The GNU Source-Level Debugger''.
 
 *** Changes in GDB 5.3:
 
+* GNU/Linux shared library multi-threaded performance improved.
+
+When debugging a multi-threaded application on GNU/Linux, GDB now uses
+`/proc', in preference to `ptrace' for memory reads.  This may result
+in an improvement in the start-up time of multi-threaded, shared
+library applications when run under GDB.  One GDB user writes: ``loads
+shared libs like mad''.
+
 * ``gdbserver'' now supports multi-threaded applications on some targets
 
 Support for debugging multi-threaded applications which use  

@@ -1,5 +1,8 @@
 2002-12-03  Andrew Cagney  <cagney@redhat.com>
 
+	* NEWS: Mention Daniel Jacobowitz's multi-threaded shared library
+	patch.
+
 	* PROBLEMS: Mention PR gdb/725.
 
 2002-12-03  Andreas Schwab  <schwab@suse.de>
