@@ -1,5 +1,9 @@
 2004-01-03  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64-tdep.c (sparc64_store_floating_fields): If TYPE is a
+	structure that has a single `float' member, store it in %f1 in
+	addition to %f0.
+
 	* sparc-sol2-nat.c: Add missing '\'.
 
 	* sparc-tdep.c (sparc32_return_value): New function.

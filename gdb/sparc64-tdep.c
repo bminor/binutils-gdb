@@ -668,6 +668,21 @@ sparc64_store_floating_fields (struct regcache *regcache, struct type *type,
 	  sparc64_store_floating_fields (regcache, subtype, valbuf,
 					 element, subpos);
 	}
+
+      /* GCC has an interesting bug.  If TYPE is a structure that has
+         a single `float' member, GCC doesn't treat it as a structure
+         at all, but rather as an ordinary `float' argument.  This
+         argument will be stored in %f1, as required by the psABI.
+         However, as a member of a structure the psABI requires it to
+         be stored in.  To appease GCC, if a structure has only a
+         single `float' member, we store its value in %f1 too.  */
+      if (TYPE_NFIELDS (type) == 1)
+	{
+	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, 0));
+
+	  if (sparc64_floating_p (subtype) && TYPE_LENGTH (subtype) == 4)
+	    regcache_cooked_write (regcache, SPARC_F1_REGNUM, valbuf);
+	}
     }
 }
 
