@@ -71,7 +71,7 @@ arclookup( parentp , childp )
     arctype	*arcp;
 
     if ( parentp == 0 || childp == 0 ) {
-	fprintf( "[arclookup] parentp == 0 || childp == 0\n" );
+	printf( "[arclookup] parentp == 0 || childp == 0\n" );
 	return 0;
     }
 #   ifdef DEBUG

@@ -12,6 +12,8 @@ OBJS=	gprof.o arcs.o dfn.o lookup.o ${MACHINE}.o hertz.o \
 	printgprof.o printlist.o
 
 CFLAGS=	-I. -I../include -DMACHINE_H=\"${MACHINE}.h\" ${TCFLAGS} ${HCFLAGS}
+.c.o:
+	$(CC) -c $(CFLAGS) $<
 
 all:	${PROG}
 
