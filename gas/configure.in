@@ -128,6 +128,7 @@ changequote([,])dnl
     case ${generic_target} in
       a29k-amd-udi)         fmt=coff targ=ebmon29k ;;
       a29k-amd-ebmon)       fmt=coff targ=ebmon29k ;;
+      a29k-nyu-sym1)        fmt=coff targ=ebmon29k ;;
       a29k-*-vxworks*)      fmt=coff ;;
 
       alpha-*-netware*)     fmt=ecoff ;;
@@ -193,7 +194,7 @@ changequote([,])dnl
 
       m68k-*-vxworks* | m68k-ericsson-ose | m68k-*-sunos*)
 			    fmt=aout em=sun3 ;;
-      m68k-motorola-sysv)   fmt=coff targ=m68kcoff em=delta ;;
+      m68k-motorola-sysv*)  fmt=coff targ=m68kcoff em=delta ;;
       m68k-bull-sysv3*)     fmt=coff targ=m68kcoff em=dpx2 ;;
       m68k-apollo-*)        fmt=coff targ=apollo em=apollo ;;
       m68k-*-coff | m68k-*-sysv*)
@@ -204,7 +205,7 @@ changequote([,])dnl
 			     em=lynx ;;
       m68k-*-netbsd*)       fmt=aout em=nbsd bfd_gas=yes ;;
 
-      m88k-motorola-sysv3*) fmt=coff targ=m88kcoff em=delta88 ;;
+      m88k-motorola-sysv3*) fmt=coff targ=m88kcoff em=delt88 ;;
       m88k-*-coff*)         fmt=coff targ=m88kcoff ;;
 
       # don't change em like *-*-bsd does
@@ -256,6 +257,8 @@ changequote([,])dnl
 			    *)    targ=ppc-lit ;;
 			    esac
 			    ;;
+      ppc-*-macos* | ppc-*-mpw*)
+			    fmt=coff em=macos ;;
       ppc-*-netware*)       fmt=elf em=ppcnw ;;
 
       sh-*-coff)            fmt=coff ;;

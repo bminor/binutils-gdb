@@ -1,4 +1,12 @@
+Mon Nov 20 13:37:05 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* config/te-delt88.h: Renamed from te-delta88.h, to avoid conflict
+	with te-delta.h in 8.3 file systems.
+	* configure.in: Adjusted.
+
 Thu Nov 16 12:49:38 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (s_err): Remove; just use the one in read.c.
 
 	* config/m68k-parse.y (yylex): In MRI mode, '@' can start an octal
 	number.
