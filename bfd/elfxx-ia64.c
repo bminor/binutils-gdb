@@ -3157,6 +3157,13 @@ elfNN_ia64_final_link (abfd, info)
 	}
 
       _bfd_set_gp_value (abfd, gp_val);
+
+      if (gp)
+	{
+	  gp->root.type = bfd_link_hash_defined;
+	  gp->root.u.def.value = gp_val;
+	  gp->root.u.def.section = bfd_abs_section_ptr;
+	}
     }
 
   /* If we're producing a final executable, we need to sort the contents
