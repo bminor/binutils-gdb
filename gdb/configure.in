@@ -1319,8 +1319,10 @@ dnl Autoconf doesn't provide a mechanism for modifying definitions
 dnl provided by makefile fragments.
 dnl
 if test "${nativefile}" = ""; then
-sed -e '/^NATDEPFILES[[ 	]]*=[[ 	]]*/s//# NATDEPFILES=/' \
-	< Makefile > Makefile.tem
+        < Makefile \
+        sed -e '/^NATDEPFILES[[ 	]]*=[[ 	]]*/s//# NATDEPFILES=/' \
+        | sed -e '/^\(NATDEPFILES[[ 	]]*[[+]]=[[ 	]]*\)/s//# \1/' \
+	> Makefile.tem
 mv -f Makefile.tem Makefile
 fi
 
