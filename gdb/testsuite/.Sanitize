@@ -71,8 +71,7 @@ for i in $never_files ; do
                         echo Removing traces of \"cygnus-never\" from $i...
                 fi
                 cp $i new
-                sed '/start\-sanitize\-cygnus-never/,/end\-sanitize\-cygnus-never/
-d' < $i > new
+                sed '/start\-sanitize\-cygnus-never/,/end\-sanitize\-cygnus-never/d' < $i > new
                 if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
                         if [ -n "${verbose}" ] ; then
                                 echo Caching $i in .Recover...
