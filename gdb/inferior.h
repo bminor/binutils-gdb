@@ -432,14 +432,6 @@ extern int attach_flag;
 #define AT_ENTRY_POINT 4
 #define AT_SYMBOL 5
 
-/* FIXME: cagney/2000-04-17: gdbarch should manage this.  The default
-   shouldn't be necessary. */
-
-#if !defined STORE_STRUCT_RETURN
-#define STORE_STRUCT_RETURN(a1,a2) (internal_error (__FILE__, __LINE__, "STORE_STRUCT_RETURN"), 0)
-#endif
-
-
 /* If STARTUP_WITH_SHELL is set, GDB's "run"
    will attempts to start up the debugee under a shell.
    This is in order for argument-expansion to occur. E.g.,
