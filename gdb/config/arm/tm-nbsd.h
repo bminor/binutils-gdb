@@ -21,9 +21,6 @@
 #ifndef TM_NBSD_H
 #define TM_NBSD_H
 
-/* NetBSD doesn't have single stepping support in ptrace().  */
-#define SOFTWARE_SINGLE_STEP_P 1
-
 #include "arm/tm-arm.h"
 #include "tm-nbsd.h"
 

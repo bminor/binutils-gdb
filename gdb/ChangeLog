@@ -1,5 +1,60 @@
 2002-02-11  Richard Earnshaw  <rearnsha@arm.com>
 
+	* arm-tdep.h: New file.
+	* arm-tdep.c: Include arm-tdep.h.
+	(arm_addr_bits_remove, arm_smash_text_address, arm_saved_pc_after_call)
+	(arm_skip_prologue, arm_call_dummy_words, arm_fix_call_dummy)
+	(arm_print_float_info, arm_register_type, convert_to_extended)
+	(arm_elf_make_msymbols_special, arm_coff_make_msymbol_special)
+	(arm_extract_return_value, arm_register_name): Make static.
+	(arm_software_single_step): Similarly.  Fix types in declaration.
+	(arm_register_byte, arm_register_raw_size, arm_register_virtual_size)
+	(arm_store_return_value, arm_store_struct_return): New functions.
+	(arm_gdbarch_init): Register the above functions.  Also register
+	call_dummy_start_offset, sizeof_call_dummy_words,
+	function_start_offset, inner_than, decr_pc_after_break, fp_regnum,
+	sp_regnum, pc_regnum, register_bytes, num_regs, max_register_raw_size,
+	max_register_virtual_size, register_size.  Set up 
+	prologue_cache.saved_regs here, rather than ...
+	(_initialize_arm_tdep): ... here.
+	* config/arm/tm-arm.h (struct type, struct value): Delete forward
+	declarations.
+	(arm_addr_bits_remove, arm_smash_text_address, arm_saved_pc_after_call)
+	(arm_skip_prologue, arm_call_dummy_words, arm_fix_call_dummy)
+	(arm_print_float_info, arm_register_type, convert_to_extended)
+	(arm_elf_make_msymbols_special, arm_coff_make_msymbol_special)
+	(arm_extract_return_value, arm_register_name): Delete declarations.
+	(SMASH_TEXT_ADDRESS, ADDR_BITS_REMOVE, FUNCTION_START_OFFSET)
+	(SKIP_PROLOGUE, SAVED_PC_AFTER_CALL, INNER_THAN, BREAKPOINT_FROM_PC)
+	(DECR_PC_AFTER_BREAK, PRINT_FLOAT_INFO, REGISTER_SIZE, NUM_REGS)
+	(REGISTER_NAME, REGISTER_BYTES, REGISTER_BYTE, REGISTER_RAW_SIZE)
+	(REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE)
+	(MAX_REGISTER_VIRTUAL_SIZE, REGISTER_VIRTUAL_TYPE, STORE_STRUCT_RETURN)
+	(EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE, CALL_DUMMY_WORDS)
+	(SIZEOF_CALL_DUMMY_WORDS, CALL_DUMMY_START_OFFSET, FIX_CALL_DUMMY)
+	(SOFTWARE_SINGLE_STEP_P, SOFTWARE_SINGLE_STEP)
+	(ELF_MAKE_MSYMBOL_SPECIAL, COFF_MAKE_MSYMBOL_SPECIAL) Delete.
+	(arm_pc_is_thumb, arm_pc_is_thumb_dummy, thumb_get_next_pc)
+	(arm_get_next_pc): No-longer static -- these are needed by the RDI
+	interface.
+	* arm-linux-nat.c arm-linux-tdep.c armnbsd-nat.c: Include arm-tdep.h.
+	* remote-rdi.c remote-rdp.c: Likewise.
+	* Makefile.in (arm-linux-nat.o, arm-linux-tdep.o arm-tdep.o)
+	(armnbsd-nat.o, remote-rdi.o, remote_rdp.o): Update dependencies.
+	* config/arm/tm-nbsd.h (SOFTWARE_SINGLE_STEP_P): Delete bogus
+	definition.
+
+	* arm-tdep.h (ARM_A1_REGNUM, ARM_A4_REGNUM, ARM_AP_REGNUM)
+	(ARM_SP_REGNUM, ARM_LR_REGNUM, ARM_PC_REGNUM, ARM_F0_REGNUM)
+	(ARM_F3_REGNUM, ARM_F7_REGNUM, ARM_FPS_REGNUM, ARM_PS_REGNUM): Renamed
+	from non-ARM_ prefixed definitions.
+	* arm-tdep.c armnbsd-nat.c arm-linux-nat.c arm-linux-tdep.c: Update
+	all uses of above.
+	* remote-rdi.c remote-rdp.c: Likewise.
+	* arm-linux-nat.c (ARM_CPSR_REGNUM): Renamed from CPSR_REGNUM.
+
+2002-02-11  Richard Earnshaw  <rearnsha@arm.com>
+
 	* arm-tdep.c (arm_frameless_function_invocation)
 	(arm_frame_args_address, arm_frame_locals_address, arm_frame_num_args)
 	(arm_frame_chain, arm_init_extra_frame_info, arm_frame_saved_pc)

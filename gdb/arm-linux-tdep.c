@@ -1,5 +1,5 @@
 /* GNU/Linux on ARM target support.
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,6 +28,8 @@
 #include "regcache.h"
 #include "doublest.h"
 
+#include "arm-tdep.h"
+
 /* For arm_linux_skip_solib_resolver.  */
 #include "symtab.h"
 #include "symfile.h"
@@ -51,10 +53,10 @@ LONGEST arm_linux_call_dummy_words[] =
 
 /* Figure out where the longjmp will land.  We expect that we have
    just entered longjmp and haven't yet altered r0, r1, so the
-   arguments are still in the registers.  (A1_REGNUM) points at the
-   jmp_buf structure from which we extract the pc (JB_PC) that we will
-   land at.  The pc is copied into ADDR.  This routine returns true on
-   success. */
+   arguments are still in the registers.  (ARM_A1_REGNUM) points at
+   the jmp_buf structure from which we extract the pc (JB_PC) that we
+   will land at.  The pc is copied into ADDR.  This routine returns
+   true on success. */
 
 #define LONGJMP_TARGET_SIZE 	sizeof(int)
 #define JB_ELEMENT_SIZE		sizeof(int)
@@ -69,7 +71,7 @@ arm_get_longjmp_target (CORE_ADDR * pc)
   CORE_ADDR jb_addr;
   char buf[LONGJMP_TARGET_SIZE];
 
-  jb_addr = read_register (A1_REGNUM);
+  jb_addr = read_register (ARM_A1_REGNUM);
 
   if (target_read_memory (jb_addr + JB_PC * JB_ELEMENT_SIZE, buf,
 			  LONGJMP_TARGET_SIZE))
@@ -96,7 +98,8 @@ arm_linux_extract_return_value (struct type *type,
      GDB.  I suspect this won't handle NWFPE registers correctly, nor
      will the default ARM version (arm_extract_return_value()).  */
 
-  int regnum = (TYPE_CODE_FLT == TYPE_CODE (type)) ? F0_REGNUM : A1_REGNUM;
+  int regnum = ((TYPE_CODE_FLT == TYPE_CODE (type))
+		? ARM_F0_REGNUM : ARM_A1_REGNUM);
   memcpy (valbuf, &regbuf[REGISTER_BYTE (regnum)], TYPE_LENGTH (type));
 }
 
@@ -160,7 +163,7 @@ arm_linux_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
     }
 
   /* Initialize the integer argument register pointer.  */
-  argreg = A1_REGNUM;
+  argreg = ARM_A1_REGNUM;
 
   /* The struct_return pointer occupies the first parameter passing
      register.  */
@@ -518,9 +521,9 @@ arm_linux_sigcontext_register_address (CORE_ADDR sp, CORE_ADDR pc, int regno)
 	 PSR value follows the sixteen registers which accounts for
 	 the constant 19 below. */
 
-      if (0 <= regno && regno <= PC_REGNUM)
+      if (0 <= regno && regno <= ARM_PC_REGNUM)
 	reg_addr = sigcontext_addr + 12 + (4 * regno);
-      else if (regno == PS_REGNUM)
+      else if (regno == ARM_PS_REGNUM)
 	reg_addr = sigcontext_addr + 19 * 4;
     }
 

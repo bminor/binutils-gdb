@@ -1,5 +1,6 @@
 /* Native-dependent code for BSD Unix running on ARM's, for GDB.
-   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 1999 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1994, 1996, 1999, 2002
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +21,8 @@
 
 #include "defs.h"
 
+#include "arm-tdep.h"
+
 #ifdef FETCH_INFERIOR_REGISTERS
 #include <sys/types.h>
 #include <sys/ptrace.h>
@@ -38,13 +41,15 @@ fetch_inferior_registers (regno)
 	  (PTRACE_ARG3_TYPE) &inferior_registers, 0);
   memcpy (&registers[REGISTER_BYTE (0)], &inferior_registers,
 	  16 * sizeof (unsigned int));
-  memcpy (&registers[REGISTER_BYTE (PS_REGNUM)], &inferior_registers.r_cpsr,
+  memcpy (&registers[REGISTER_BYTE (ARM_PS_REGNUM)],
+	  &inferior_registers.r_cpsr,
 	  sizeof (unsigned int));
   ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) &inferior_fpregisters, 0);
-  memcpy (&registers[REGISTER_BYTE (F0_REGNUM)], &inferior_fpregisters.fpr[0],
+  memcpy (&registers[REGISTER_BYTE (ARM_F0_REGNUM)],
+	  &inferior_fpregisters.fpr[0],
 	  8 * sizeof (fp_reg_t));
-  memcpy (&registers[REGISTER_BYTE (FPS_REGNUM)],
+  memcpy (&registers[REGISTER_BYTE (ARM_FPS_REGNUM)],
 	  &inferior_fpregisters.fpr_fpsr, sizeof (unsigned int));
   registers_fetched ();
 }
@@ -57,7 +62,8 @@ store_inferior_registers (regno)
 
   memcpy (&inferior_registers, &registers[REGISTER_BYTE (0)],
 	  16 * sizeof (unsigned int));
-  memcpy (&inferior_registers.r_cpsr, &registers[REGISTER_BYTE (PS_REGNUM)],
+  memcpy (&inferior_registers.r_cpsr,
+	  &registers[REGISTER_BYTE (ARM_PS_REGNUM)],
 	  sizeof (unsigned int));
   ptrace (PT_SETREGS, PIDGET (inferior_ptid),
 	  (PTRACE_ARG3_TYPE) &inferior_registers, 0);
