@@ -1,3 +1,23 @@
+Thu Feb  6 16:55:43 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (FN_STUB, CALL_STUB, CALL_FP_STUB): Define.
+	(struct mips_elf_link_hash_entry): Add new fields fn_stub,
+	need_fn_sub, call_stub, and call_fp_stub.
+	(struct mips_elf_link_hash_table): Add field mips16_stubs_seen.
+	(mips_elf_link_hash_newfunc): Initialize new fields.
+	(mips_elf_link_hash_table_create): Likewise.
+	(mips_elf_relocate_section): Redirect relocations to use mips16
+	stubs when appropriate.
+	(mips_elf_check_relocs): Attach stub sections to the appropriate
+	symbol.  Set need_fn_stub when appropriate.
+	(mips_elf_always_size_sections): New static function.
+	(mips_elf_check_mips16_stubs): New static function.
+	(elf_backend_always_size_sections): Define.
+	* elf-bfd.h (struct elf_obj_tdata): Add local_stubs field.
+
+	* elflink.h (elf_link_input_bfd): Discard local symbols that are
+	attached to sections which are not being included in the link.
+
 Wed Feb  5 13:20:17 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* cofflink.c (_bfd_coff_generic_relocate_section): Ignore the
