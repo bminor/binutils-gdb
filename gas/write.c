@@ -1460,6 +1460,13 @@ write_object_file ()
 
   for (fragP = text_frag_root; fragP; fragP = fragP->fr_next)
     {
+      /* At this point we have linked all the frags into a single
+         chain.  However, cvt_frag_to_fill may call md_convert_frag
+         which may call fix_new.  We need to ensure that fix_new adds
+         the fixup to the right section.  */
+      if (fragP == data_frag_root)
+	subseg_change (SEG_DATA, 0);
+
       cvt_frag_to_fill (&headers, SEG_TEXT, fragP);
 
       /* Some assert macros don't work with # directives mixed in.  */
@@ -1886,7 +1893,6 @@ write_object_file ()
 #ifdef TC_GENERIC_RELAX_TABLE
 
 static int is_dnrange PARAMS ((fragS *, fragS *));
-static long relax_frag PARAMS ((fragS *, long));
 
 /* Subroutines of relax_segment.  */
 static int
@@ -1902,7 +1908,7 @@ is_dnrange (f1, f2)
 
 /* Relax a fragment by scanning TC_GENERIC_RELAX_TABLE.  */
 
-static long
+long
 relax_frag (fragP, stretch)
      fragS *fragP;
      long stretch;
