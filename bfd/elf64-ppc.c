@@ -33,9 +33,9 @@
 static void ppc_howto_init
   PARAMS ((void));
 static reloc_howto_type *ppc64_elf_reloc_type_lookup
-  PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
+  PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void ppc64_elf_info_to_howto
-  PARAMS ((bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst));
+  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
 static bfd_reloc_status_type ppc64_elf_ha_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_reloc_status_type ppc64_elf_brtaken_reloc
@@ -7114,9 +7114,10 @@ ppc64_elf_toc (obfd)
    hash table.  This function is called via gldelf64ppc_finish.  */
 
 bfd_boolean
-ppc64_elf_build_stubs (emit_stub_syms, info)
+ppc64_elf_build_stubs (emit_stub_syms, info, stats)
      bfd_boolean emit_stub_syms;
      struct bfd_link_info *info;
+     char **stats;
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
   asection *stub_sec;
@@ -7242,7 +7243,29 @@ ppc64_elf_build_stubs (emit_stub_syms, info)
       (*_bfd_error_handler) (_("stubs don't match calculated size"));
     }
 
-  return !htab->stub_error;
+  if (htab->stub_error)
+    return FALSE;
+
+  if (stats != NULL)
+    {
+      *stats = bfd_malloc (500);
+      if (*stats == NULL)
+	return FALSE;
+
+      sprintf (*stats, _("linker stubs in %u groups\n"
+			 "  branch       %lu\n"
+			 "  toc adjust   %lu\n"
+			 "  long branch  %lu\n"
+			 "  long toc adj %lu\n"
+			 "  plt call     %lu"),
+	       htab->stub_bfd->section_count,
+	       htab->stub_count[(int) ppc_stub_long_branch - 1],
+	       htab->stub_count[(int) ppc_stub_long_branch_r2off - 1],
+	       htab->stub_count[(int) ppc_stub_plt_branch - 1],
+	       htab->stub_count[(int) ppc_stub_plt_branch_r2off - 1],
+	       htab->stub_count[(int) ppc_stub_plt_call - 1]);
+    }
+  return TRUE;
 }
 
 /* The RELOCATE_SECTION function is called by the ELF backend linker

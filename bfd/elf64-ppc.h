@@ -39,4 +39,4 @@ bfd_boolean ppc64_elf_size_stubs
   PARAMS ((bfd *, bfd *, struct bfd_link_info *, bfd_signed_vma,
 	   asection *(*) (const char *, asection *), void (*) (void)));
 bfd_boolean ppc64_elf_build_stubs
-  PARAMS ((bfd_boolean, struct bfd_link_info *));
+  PARAMS ((bfd_boolean, struct bfd_link_info *, char **));
