@@ -165,6 +165,47 @@ __define_stab (N_NBLCS,  0xF8, "NBLCS")
 /* Second symbol entry containing a length-value for the preceding entry.
    The value is the length.  */
 __define_stab (N_LENG, 0xfe, "LENG")
+
+#ifdef GNU_EXTRA_STABS
+/* These are defined in a.out.gnu.h, so they are usually left out here. */
+
+/* The following symbols refer to set elements.
+   All the N_SET[ATDB] symbols with the same name form one set.
+   Space is allocated for the set in the text section, and each set
+   element's value is stored into one word of the space.
+   The first word of the space is the length of the set (number of elements).
+
+   The address of the set is made into an N_SETV symbol
+   whose name is the same as the name of the set.
+   This symbol acts like a N_DATA global symbol
+   in that it can satisfy undefined external references.  */
+
+/* These appear as input to LD, in a .o file.  */
+__define_stab (N_SETA, 0x14, "SETA")	/* Absolute set element symbol */
+__define_stab (N_SETT, 0x16, "SETT")	/* Text set element symbol */
+__define_stab (N_SETD, 0x18, "SETD")	/* Data set element symbol */
+__define_stab (N_SETB, 0x1A, "SETB")	/* Bss set element symbol */
+
+/* This is output from LD.  */
+__define_stab (N_SETV, 0x1C, "SETV") /* Pointer to set vector in data area. */
+
+/* The following type indicates the definition of a symbol as being
+   an indirect reference to another symbol.  The other symbol
+   appears as an undefined reference, immediately following this symbol.
+
+   Indirection is asymmetrical.  The other symbol's value will be used
+   to satisfy requests for the indirect symbol, but not vice versa.
+   If the other symbol does not have a definition, libraries will
+   be searched to find a definition.  */
+
+__define_stab (N_INDR, 0xa, "INDR")
+
+/* Warning symbol. The text gives a warning message, the next symbol
+   in the table will be undefined. When the symbol is referenced, the
+   message is printed.  */
+
+__define_stab (N_WARNING, 0x1e, "WARNING")
+#endif
 
 /* The above information, in matrix format.
 
