@@ -1,5 +1,5 @@
 /* Target machine description for SGI Iris under Irix, for GDB.
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -33,6 +33,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #undef PS_REGNUM
 #undef HI_REGNUM
 #undef LO_REGNUM
+#undef CAUSE_REGNUM
+#undef BADVADDR_REGNUM
 #undef FCRCS_REGNUM
 #undef FCRIR_REGNUM
 
@@ -64,7 +66,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define FP0_REGNUM 32		/* Floating point register 0 (single float) */
 #define PC_REGNUM 64		/* Contains program counter */
-#define PS_REGNUM 65		/* Contains processor status */
+#define CAUSE_REGNUM 65		/* describes last exception */
+#define BADVADDR_REGNUM 66	/* bad vaddr for addressing exception */
 #define HI_REGNUM 67		/* Multiple/divide temp */
 #define LO_REGNUM 68		/* ... */
 #define FCRCS_REGNUM 69		/* FP control/status */
