@@ -135,29 +135,29 @@ static struct core_fns alphanbsd_elfcore_fns =
    sequence and can then check whether we really are executing in the
    signal trampoline.  If not, -1 is returned, otherwise the offset from the
    start of the return sequence is returned.  */
-static const unsigned int sigtramp_retcode[] =
+static const unsigned char sigtramp_retcode[] =
 {
-  0xa61e0000,		/* ldq a0, 0(sp) */
-  0x23de0010,		/* lda sp, 16(sp) */
-  0x201f0127,		/* lda v0, 295(zero) */
-  0x00000083,		/* call_pal callsys */
+  0x00, 0x00, 0x1e, 0xa6,	/* ldq a0, 0(sp) */
+  0x10, 0x00, 0xde, 0x23,	/* lda sp, 16(sp) */
+  0x27, 0x01, 0x1f, 0x20,	/* lda v0, 295(zero) */
+  0x83, 0x00, 0x00, 0x00,	/* call_pal callsys */
 };
-#define	RETCODE_NWORDS \
-  (sizeof (sigtramp_retcode) / sizeof (sigtramp_retcode[0]))
+#define RETCODE_NWORDS		4
+#define RETCODE_SIZE		(RETCODE_NWORDS * 4)
 
 LONGEST
 alphanbsd_sigtramp_offset (CORE_ADDR pc)
 {
-  unsigned int ret[4], w;
+  unsigned char ret[RETCODE_SIZE], w[4];
   LONGEST off;
   int i;
 
-  if (read_memory_nobpt (pc, (char *) &w, 4) != 0)
+  if (read_memory_nobpt (pc, (char *) w, 4) != 0)
     return -1;
 
   for (i = 0; i < RETCODE_NWORDS; i++)
     {
-      if (w == sigtramp_retcode[i])
+      if (memcmp (w, sigtramp_retcode + (i * 4), 4) == 0)
 	break;
     }
   if (i == RETCODE_NWORDS)
@@ -169,7 +169,7 @@ alphanbsd_sigtramp_offset (CORE_ADDR pc)
   if (read_memory_nobpt (pc, (char *) ret, sizeof (ret)) != 0)
     return -1;
 
-  if (memcmp (ret, sigtramp_retcode, sizeof (sigtramp_retcode)) == 0)
+  if (memcmp (ret, sigtramp_retcode, RETCODE_SIZE) == 0)
     return off;
 
   return -1;

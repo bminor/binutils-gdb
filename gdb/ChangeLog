@@ -1,5 +1,10 @@
 2002-05-22  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* alphanbsd-tdep.c (alphanbsd_sigtramp_offset): Don't make
+	assumptions about the host's byte order.
+
+2002-05-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (alphanbsd-tdep.o, shnbsd-tdep.o): Add solib-svr4.h
 	to dependency list.
 	* alphanbsd-tdep.c: Include solib-svr4.h.
