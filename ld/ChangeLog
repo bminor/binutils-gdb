@@ -1,3 +1,12 @@
+Thu Nov  5 05:43:01 1992  John Gilmore  (gnu@cygnus.com)
+
+	* ldemul.h:  Remove uses of SDEF and PROTO macros (use PARAMS).
+
+Tue Oct 20 10:56:06 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* m68kcoff.sc-sh: don't use initial underscores for etext, edata
+	and end.
+
 Mon Oct 19 09:45:38 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Support for i386-sysv.
