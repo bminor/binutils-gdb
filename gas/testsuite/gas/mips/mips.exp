@@ -626,6 +626,14 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "elf-rel12"
 	run_dump_test "elf-rel13"
 	run_dump_test "elf-rel14"
+
+	if $has_newabi {
+	    run_dump_test "elf-rel-got-n32"
+	    run_dump_test "elf-rel-xgot-n32"
+	    run_dump_test "elf-rel-got-n64"
+	    run_dump_test "elf-rel-xgot-n64"
+	}
+
 	run_dump_test "${tmips}${el}empic"
 	run_dump_test "empic2"
 	run_dump_test "empic3_e"

@@ -1,3 +1,10 @@
+2003-04-10  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gas/mips/elf-rel-got-n32.d, gas/mips/elf-rel-got-n32.s,
+	gas/mips/elf-rel-got-n64.d, gas/mips/elf-rel-got-n64.s,
+	gas/mips/elf-rel-xgot-n32.d, gas/mips/elf-rel-xgot-n64.d: New.
+	* gas/mips/mips.exp: Test them.
+
 2003-04-08  Nick Clifton  <nickc@redhat.com>
 
 	* gas/m32r/m32r.exp: Run signed-relocs test.
