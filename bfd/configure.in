@@ -771,6 +771,6 @@ case ${want_mmap}+${ac_cv_func_mmap_fixed_mapped} in
 esac
 
 rm -f doc/config.status
-AC_OUTPUT(Makefile doc/Makefile bfd-in3.h:bfd-in2.h:version.h po/Makefile.in:po/Make-in,
+AC_OUTPUT(Makefile doc/Makefile bfd-in3.h:bfd-in2.h po/Makefile.in:po/Make-in,
 [sed -e '/SRC-POTFILES =/r po/SRC-POTFILES' -e '/BLD-POTFILES =/r po/BLD-POTFILES' po/Makefile.in > po/Makefile])
 

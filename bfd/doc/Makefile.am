@@ -183,7 +183,8 @@ s-linker: $(MKDOC) $(srcdir)/../linker.c $(srcdir)/doc.str
 	touch s-linker
 linker.texi: s-linker
 
-LIBBFD_H_DEP = $(srcdir)/../libbfd-in.h	\
+LIBBFD_H_DEP = \
+	$(srcdir)/../libbfd-in.h	\
 	$(srcdir)/../init.c		\
 	$(srcdir)/../libbfd.c		\
 	$(srcdir)/../cache.c		\
@@ -204,7 +205,8 @@ libbfd.h: $(LIBBFD_H_DEP)
 	  esac; \
 	done
 
-LIBCOFF_H_DEP = $(srcdir)/../libcoff-in.h	\
+LIBCOFF_H_DEP = \
+	$(srcdir)/../libcoff-in.h	\
 	$(srcdir)/../coffcode.h		\
 	$(srcdir)/header.sed		\
 	$(srcdir)/proto.str		\
@@ -220,7 +222,8 @@ libcoff.h: $(LIBCOFF_H_DEP)
 	  esac; \
 	done
 
-BFD_H_DEP = $(srcdir)/../bfd-in.h 	\
+BFD_H_DEP = \
+	$(srcdir)/../bfd-in.h 		\
 	$(srcdir)/../init.c 		\
 	$(srcdir)/../opncls.c 		\
 	$(srcdir)/../libbfd.c 		\
@@ -235,6 +238,7 @@ BFD_H_DEP = $(srcdir)/../bfd-in.h 	\
 	$(srcdir)/../format.c		\
 	$(srcdir)/header.sed		\
 	$(srcdir)/proto.str		\
+	$(srcdir)/../version.h		\
 	$(MKDOC)
 
 bfd.h: $(BFD_H_DEP)

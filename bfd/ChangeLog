@@ -1,5 +1,11 @@
 2001-10-03  Alan Modra  <amodra@bigpond.net.au>
 
+	* configure.in (AC_OUTPUT <bfd-in3.h>): Remove version.h.
+	* configure: Regenerate.
+	* Makefile.am (BFD_H_FILES): Add version.h.
+	* Makefile.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 	* elflink.h (elf_fix_symbol_flags): Copy flags to weakdef using
 	elf_backend_copy_indirect_symbol so that backend has a chance to
 	copy other necessary fields.

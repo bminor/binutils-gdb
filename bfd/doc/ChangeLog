@@ -1,3 +1,8 @@
+2001-10-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (BFD_H_DEP): Add ../version.h.
+	* Makefile.in: Regenerate.
+
 2001-10-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.

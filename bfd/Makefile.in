@@ -638,7 +638,7 @@ SOURCE_HFILES = \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h \
 	libieee.h libnlm.h liboasys.h libpei.h netbsd.h nlm-target.h \
 	nlmcode.h nlmswap.h ns32k.h peicode.h som.h vms.h libxcoff.h \
-	xcoff-target.h
+	xcoff-target.h version.h
 
 
 BUILD_HFILES = \
@@ -673,7 +673,7 @@ BFD_H_DEPS = $(INCDIR)/ansidecl.h
 LOCAL_H_DEPS = libbfd.h sysdep.h config.h
 
 BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c section.c archures.c \
-	reloc.c syms.c bfd.c archive.c corefile.c targets.c format.c
+	reloc.c syms.c bfd.c archive.c corefile.c targets.c format.c version.h
 
 LIBBFD_H_FILES = libbfd-in.h init.c libbfd.c cache.c reloc.c archures.c elf.c
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
@@ -711,7 +711,7 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  README ./stamp-h.in COPYING ChangeLog Makefile.am \
 Makefile.in TODO acinclude.m4 aclocal.m4 bfd-in2.h config.in configure \
-configure.in version.h
+configure.in
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
@@ -763,8 +763,8 @@ distclean-hdr:
 	-rm -f config.h
 
 maintainer-clean-hdr:
-bfd-in3.h: $(top_builddir)/config.status bfd-in2.h version.h
-	cd $(top_builddir) && CONFIG_FILES=$@:bfd-in2.h:version.h CONFIG_HEADERS= $(SHELL) ./config.status
+bfd-in3.h: $(top_builddir)/config.status bfd-in2.h
+	cd $(top_builddir) && CONFIG_FILES=$@:bfd-in2.h CONFIG_HEADERS= $(SHELL) ./config.status
 
 mostlyclean-noinstLIBRARIES:
 

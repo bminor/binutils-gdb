@@ -504,7 +504,7 @@ SOURCE_HFILES = \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h \
 	libieee.h libnlm.h liboasys.h libpei.h netbsd.h nlm-target.h \
 	nlmcode.h nlmswap.h ns32k.h peicode.h som.h vms.h libxcoff.h \
-	xcoff-target.h
+	xcoff-target.h version.h
 
 ## ... and all .h files which are in the build tree.
 BUILD_HFILES = \
@@ -702,7 +702,7 @@ stmp-bfd-h: bfd-in3.h
 	touch stmp-bfd-h
 
 BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c section.c archures.c \
-	reloc.c syms.c bfd.c archive.c corefile.c targets.c format.c
+	reloc.c syms.c bfd.c archive.c corefile.c targets.c format.c version.h
 LIBBFD_H_FILES = libbfd-in.h init.c libbfd.c cache.c reloc.c archures.c elf.c
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
 
