@@ -305,6 +305,18 @@ bfd_elf_string_from_elf_section (abfd, shindex, strindex)
       && bfd_elf_get_str_section (abfd, shindex) == NULL)
     return NULL;
 
+  if (strindex >= hdr->sh_size)
+    {
+      (*_bfd_error_handler)
+	("%s: invalid string offset %u >= %lu for section `%s'",
+	 bfd_get_filename (abfd), strindex, (unsigned long) hdr->sh_size,
+	 ((shindex == elf_elfheader(abfd)->e_shstrndx
+	   && strindex == hdr->sh_name)
+	  ? ".shstrtab"
+	  : elf_string_from_elf_strtab (abfd, hdr->sh_name)));
+      return "";
+    }
+
   return ((char *) hdr->contents) + strindex;
 }
 
@@ -749,7 +761,7 @@ bfd_elf_print_symbol (abfd, filep, symbol, how)
 	      version_string = "";
 	    else if (vernum == 1)
 	      version_string = "Base";
-	    else if (vernum < elf_tdata (abfd)->cverdefs)
+	    else if (vernum <= elf_tdata (abfd)->cverdefs)
 	      version_string =
 		elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
 	    else
@@ -775,13 +787,13 @@ bfd_elf_print_symbol (abfd, filep, symbol, how)
 	      }
 
 	    if ((((elf_symbol_type *) symbol)->version & VERSYM_HIDDEN) == 0)
-	      fprintf (file, " %-12s", version_string);
+	      fprintf (file, "  %-11s", version_string);
 	    else
 	      {
 		int i;
 
 		fprintf (file, " (%s)", version_string);
-		for (i = strlen (version_string) - 10; i > 0; --i)
+		for (i = 10 - strlen (version_string); i > 0; --i)
 		  putc (' ', file);
 	      }
 	  }
@@ -2868,11 +2880,9 @@ prep_headers (abfd)
       i_ehdrp->e_machine = EM_CYGNUS_ARC;
       break;
 /* end-sanitize-arc */
-/* start-sanitize-m32r */
     case bfd_arch_m32r:
       i_ehdrp->e_machine = EM_CYGNUS_M32R;
       break;
-/* end-sanitize-m32r */
     case bfd_arch_mn10200:
       i_ehdrp->e_machine = EM_CYGNUS_MN10200;
       break;
@@ -3164,7 +3174,7 @@ copy_private_bfd_data (ibfd, obfd)
       m = ((struct elf_segment_map *)
 	   bfd_alloc (obfd,
 		      (sizeof (struct elf_segment_map)
-		       + (csecs - 1) * sizeof (asection *))));
+		       + ((size_t) csecs - 1) * sizeof (asection *))));
       if (m == NULL)
 	return false;
 

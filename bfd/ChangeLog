@@ -1,5 +1,8 @@
 Thu Jun 26 01:26:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf.c (bfd_elf_string_from_elf_section): Check for an invalid
+	string index.
+
 	* elflink.h (elf_link_output_extsym): Use the right section for a
 	common symbol.
 	* elf32-mips.c (mips_elf_link_output_symbol_hook): If a common
