@@ -52,7 +52,7 @@ LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF)
 LD_PROG	= ld.new
 
 .script.x:
-	mkscript < $< >$*.x
+	./mkscript < $< >$*.x
 
 # for self hosting
 GNUTARGET=a.out-sunos-big
@@ -60,16 +60,16 @@ LDEMULATION=gld
 BFDLIB=$(srcdir)/../bfd$(subdir)/libbfd.a
 LIBIBERTY=$(srcdir)/../libiberty$(subdir)/libiberty.a
 
-OFILES= ldgram.o ldlex.o ldlang.o ldmain.o ldwrite.o ldexp.o ldlnk960.o ldgld68k.o \
+OFILES= ldgram.o ldlex.o ldlang.o ldmain.o ldwarn.o ldwrite.o ldexp.o ldlnk960.o ldgld68k.o ldindr.o \
 	ldgldm88kbcs.o ldglda29k.o \
 	ldgld.o ldgld960.o ldemul.o ldver.o ldmisc.o ldsym.o ldvanilla.o ldfile.o
 
-HEADERS=config.h ldmain.h ldmain.h ldmisc.h ldsym.h ldlang.h ldexp.h \
+HEADERS=config.h ldmain.h ldmain.h ldwarn.h ldmisc.h ldindr.h ldsym.h ldlang.h ldexp.h \
 	ldlex.h ldwrite.h ldver.h ldemul.h ldfile.h ldgram.h ld.h
 
 MANSOURCES=ld.tex
 
-LDCSOURCES=ldlang.c ldmain.c ldwrite.c ldlnk960.c ldgld.c ldgld68k.c \
+LDCSOURCES=ldlang.c ldindr.c ldmain.c ldwrite.c ldwarn.c ldlnk960.c ldgld.c ldgld68k.c \
 	ldgldm88kbcs.c ldgld29k.c \
 	ldgld960.c ldemul.c ldver.c ldmisc.c ldexp.c ldsym.c ldfile.c ldvanilla.c
 
@@ -269,7 +269,7 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 	(cd $(srcdir) ; \
 		./configure +destdir=$(destdir) \
 		+norecurse \
-		`if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
+		`if [ "$(srcdir)" != "." ] ; then echo +subdirs; fi` \
 		$(host) +target=$(target))
 
 ### Local Variables: ***
