@@ -1,6 +1,7 @@
 # Start of "alldeps.mak" definitions
 ALLDEPFILES = $(ALLDEPFILES_MAINDIR) $(ALLDEPFILES_SUBDIR)
 ALLDEPFILES_MAINDIR=\
+a68v-xdep.c\
 altos-xdep.c\
 am29k-pinsn.c\
 am29k-tdep.c\
@@ -15,6 +16,7 @@ coredep.c\
 exec.c\
 gould-pinsn.c\
 gould-xdep.c\
+h8300-tdep.c\
 hp300ux-xdep.c\
 i386-pinsn.c\
 i386-tdep.c\
@@ -42,6 +44,7 @@ pyr-tdep.c\
 pyr-xdep.c\
 remote-adapt.c\
 remote-eb.c\
+remote-hms.c\
 remote-mm.c\
 remote-nindy.c\
 remote-vx.c\
@@ -82,10 +85,12 @@ tm-arm.h\
 tm-bigmips.h\
 tm-convex.h\
 tm-delta88.h\
+tm-h8300.h\
 tm-hp300bsd.h\
 tm-hp300hpux.h\
 tm-i386v-g.h\
 tm-i386v.h\
+tm-i386v4.h\
 tm-irix3.h\
 tm-isi.h\
 tm-m88k.h\
@@ -94,10 +99,12 @@ tm-mips.h\
 tm-news.h\
 tm-nindy960.h\
 tm-np1.h\
+tm-os68k.h\
 tm-pn.h\
 tm-pyr.h\
 tm-rs6000.h\
 tm-sparc.h\
+tm-stratus.h\
 tm-sun2.h\
 tm-sun2os4.h\
 tm-sun3.h\
@@ -114,6 +121,7 @@ tm-vx960.h\
 xm-3b1.h\
 xm-altos.h\
 xm-amix.h\
+xm-apollo68v.h\
 xm-arm.h\
 xm-bigmips.h\
 xm-convex.h\
@@ -124,6 +132,7 @@ xm-i386mach.h\
 xm-i386sco.h\
 xm-i386v.h\
 xm-i386v32.h\
+xm-i386v4.h\
 xm-irix3.h\
 xm-isi.h\
 xm-m88k.h\
@@ -137,6 +146,7 @@ xm-pyr.h\
 xm-rs6000.h\
 xm-rtbsd.h\
 xm-sparc.h\
+xm-stratus.h\
 xm-sun2.h\
 xm-sun3.h\
 xm-sun386.h\
@@ -146,13 +156,15 @@ xm-symmetry.h\
 xm-tahoe.h\
 xm-ultra3.h\
 xm-umax.h\
-xm-vax.h
+xm-vaxbsd.h\
+xm-vaxult.h
 
 ALLCONFIG=\
 ./config/mh-3b1\
 ./config/mh-altos\
 ./config/mh-altosgas\
 ./config/mh-amix\
+./config/mh-apollo68v\
 ./config/mh-arm\
 ./config/mh-bigmips\
 ./config/mh-convex\
@@ -166,6 +178,7 @@ ALLCONFIG=\
 ./config/mh-i386v-g\
 ./config/mh-i386v32\
 ./config/mh-i386v32-g\
+./config/mh-i386v4\
 ./config/mh-irix3\
 ./config/mh-isi\
 ./config/mh-littlemips\
@@ -179,6 +192,7 @@ ALLCONFIG=\
 ./config/mh-pyramid\
 ./config/mh-rs6000\
 ./config/mh-rtbsd\
+./config/mh-stratus\
 ./config/mh-sun2os3\
 ./config/mh-sun2os4\
 ./config/mh-sun3\
@@ -192,7 +206,8 @@ ALLCONFIG=\
 ./config/mh-tahoe\
 ./config/mh-ultra3\
 ./config/mh-umax\
-./config/mh-vax\
+./config/mh-vaxbsd\
+./config/mh-vaxult\
 ./config/mt-3b1\
 ./config/mt-a29k\
 ./config/mt-a29k-kern\
@@ -204,6 +219,7 @@ ALLCONFIG=\
 ./config/mt-convex\
 ./config/mt-decstation\
 ./config/mt-delta88\
+./config/mt-h8300hms\
 ./config/mt-hp300bsd\
 ./config/mt-hp300hpux\
 ./config/mt-i386aout\
@@ -212,6 +228,7 @@ ALLCONFIG=\
 ./config/mt-i386v-g\
 ./config/mt-i386v32\
 ./config/mt-i386v32-g\
+./config/mt-i386v4\
 ./config/mt-i960\
 ./config/mt-irix3\
 ./config/mt-isi\
@@ -223,9 +240,11 @@ ALLCONFIG=\
 ./config/mt-nindy960\
 ./config/mt-none\
 ./config/mt-np1\
+./config/mt-os68k\
 ./config/mt-pn\
 ./config/mt-pyramid\
 ./config/mt-rs6000\
+./config/mt-stratus\
 ./config/mt-sun2os3\
 ./config/mt-sun2os4\
 ./config/mt-sun3\
