@@ -5320,10 +5320,11 @@ elf_bfd_final_link (abfd, info)
       for (p = o->link_order_head; p != NULL; p = p->next)
 	{
 	  if (p->type == bfd_indirect_link_order
-	      && (bfd_get_flavour (p->u.indirect.section->owner)
-		  == bfd_target_elf_flavour))
+	      && (bfd_get_flavour ((sub = p->u.indirect.section->owner))
+		  == bfd_target_elf_flavour)
+	      && (sub->arch_info->bits_per_word
+		  == abfd->arch_info->bits_per_word))
 	    {
-	      sub = p->u.indirect.section->owner;
 	      if (! sub->output_has_begun)
 		{
 		  if (! elf_link_input_bfd (&finfo, sub))
