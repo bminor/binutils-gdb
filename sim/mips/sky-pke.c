@@ -1036,9 +1036,10 @@ pke_pcrel_operand(struct pke_device* me, int operand_num)
 
 
 /* Return a bit-field extract of given operand# in FIFO, and its
-   source-addr.  `bit_offset' starts at 0, referring to LSB after PKE
-   instruction word.  Width must be >0, <=32.  Assume FIFO is full
-   enough.  Skip over DMA tags, but mark them as an error (ER0). */
+   word-accurate source-addr.  `bit_offset' starts at 0, referring to
+   LSB after PKE instruction word.  Width must be >0, <=32.  Assume
+   FIFO is full enough.  Skip over DMA tags, but mark them as an error
+   (ER0).  */
 
 unsigned_4
 pke_pcrel_operand_bits(struct pke_device* me, int bit_offset, int bit_width, unsigned_4* source_addr)
@@ -1047,6 +1048,7 @@ pke_pcrel_operand_bits(struct pke_device* me, int bit_offset, int bit_width, uns
   unsigned_4 value;
   struct fifo_quadword* fifo_operand;
   int wordnumber, bitnumber;
+  int i;
 
   wordnumber = bit_offset/32;
   bitnumber = bit_offset%32;
@@ -1060,6 +1062,11 @@ pke_pcrel_operand_bits(struct pke_device* me, int bit_offset, int bit_width, uns
 
   /* extract source addr from fifo word */
   *source_addr = fifo_operand->source_address;
+
+  /* add word offset */
+  for(i=0; i<3; i++)
+    if(word == & fifo_operand->data[i])
+      *source_addr += sizeof(unsigned_4) * i;
 
   return value;
 }
@@ -1676,6 +1683,7 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 	      address_word vu_addr_max_size;
 	      unsigned_4 vu_lower_opcode, vu_upper_opcode;
 	      unsigned_4* operand;
+	      unsigned_4 source_addr;
 	      struct fifo_quadword* fq;
 	      int next_num;
 
@@ -1704,7 +1712,15 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 	      /* Fetch operand words; assume they are already little-endian for VU imem */
 	      fq = pke_pcrel_fifo(me, i*2 + 1, & operand);
 	      vu_lower_opcode = *operand;
-	      vu_upper_opcode = *pke_pcrel_operand(me, i*2 + 2);
+
+	      source_addr = fq->source_address;
+	      /* add word offset */
+	      for(i=0; i<3; i++)
+		if(operand == & fq->data[i])
+		  source_addr += sizeof(unsigned_4) * i;
+
+	      fq = pke_pcrel_fifo(me, i*2 + 2, & operand);
+	      vu_upper_opcode = *operand;
 	      
 	      /* write data into VU memory */
 	      /* lower (scalar) opcode comes in first word ; macro performs H2T! */
@@ -1720,7 +1736,7 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
 	      /* write tracking address in target byte-order */
 	      ASSERT(sizeof(unsigned_4) == 4);
 	      PKE_MEM_WRITE(me, vutrack_addr,
-			    & fq->source_address,
+			    & source_addr,
 			    4);
 	    } /* VU xfer loop */
 
