@@ -1,3 +1,9 @@
+Thu Sep 23 11:06:34 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* gen-aout.c (main): Output newline after end of comment, not
+	before.  (Reported by Jonathan Stone,
+	jonathan@oscar.stanford.edu).
+
 Thu Sep 23 10:48:27 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* section.c (SEC_DEBUGGING): New section flag.
