@@ -1241,6 +1241,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	sh-tdep.c shnbsd-tdep.c shnbsd-nat.c \
 	solib.c solib-svr4.c solib-sunos.c sparc-linux-nat.c \
 	sparc-nat.c \
+	sparc64nbsd-nat.c sparcnbsd-nat.c sparcnbsd-tdep.c \
 	sparc-tdep.c sparcl-tdep.c sun3-nat.c \
 	symm-tdep.c symm-nat.c \
 	vax-tdep.c \
@@ -2127,6 +2128,16 @@ sparc-tdep.o: sparc-tdep.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 	$(arch_utils_h) $(regcache_h) osabi.h
 
 sparcl-tdep.o: sparcl-tdep.c $(defs_h) $(gdbcore_h) $(target_h) $(regcache_h)
+
+sparc64nbsd-nat.o: sparc64nbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
+	sparcnbsd-tdep.h
+
+sparcnbsd-nat.o: sparcnbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
+	sparcnbsd-tdep.h 
+
+sparcnbsd-tdep.o: sparcnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
+	$(target_h) $(value_h) osabi.h sparcnbsd-tdep.h nbsd-tdep.h \
+	solib-svr4.h
 
 xstormy16-tdep.o: xstormy16-tdep.c $(defs_h) $(value_h) $(inferior_h) \
 	$(symfile_h) $(arch_utils_h) $(regcache_h) $(gdbcore_h)

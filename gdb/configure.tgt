@@ -259,8 +259,7 @@ sparc-*-coff*)		gdb_target=sparc-em ;;
 sparc-*-elf*)		gdb_target=sparc-em ;;
 sparc-*-linux*)		gdb_target=linux ;;
 sparc-*-lynxos*)	gdb_target=sparclynx ;;
-sparc-*-netbsdelf*)	gdb_target=nbsdelf ;;
-sparc-*-netbsd*)	gdb_target=nbsdaout ;;
+sparc-*-netbsd*)	gdb_target=nbsd ;;
 sparc-*-solaris2*)	gdb_target=sun4sol2 ;;
 sparc-*-sunos4*)	gdb_target=sun4os4 ;;
 sparc-*-sunos5*)	gdb_target=sun4sol2 ;;
@@ -278,6 +277,7 @@ sparc86x-*-*)		gdb_target=sparclite ;;
 sparc64-*-freebsd*|ultrasparc-*-freebsd*|sparcv9-*-freebsd*)
 			gdb_target=fbsd ;;
 sparc64-*-linux*)	gdb_target=sp64linux ;;
+sparc64-*-netbsd*)	gdb_target=nbsd64 ;;
 sparcv9-*-* | sparc64-*-*) gdb_target=sp64 ;;
 
 xstormy16-*-*)          gdb_target=xstormy16 ;;

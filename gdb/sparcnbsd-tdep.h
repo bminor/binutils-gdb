@@ -1,5 +1,5 @@
-/* Macro definitions for Sparc running under NetBSD.
-   Copyright 1994, 2002 Free Software Foundation, Inc.
+/* Common target dependent code for GDB on SPARC systems running NetBSD.
+   Copyright 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,13 +18,17 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef TM_NBSDAOUT_H
-#define TM_NBSDAOUT_H
+#ifndef SPARCNBSD_TDEP_H
+#define SPARCNBSD_TDEP_H
 
-#include "sparc/tm-nbsd.h"
+void sparcnbsd_supply_reg32 (char *, int);
+void sparcnbsd_supply_reg64 (char *, int);
+void sparcnbsd_fill_reg32 (char *, int);
+void sparcnbsd_fill_reg64 (char *, int);
 
-/* Return non-zero if we are in a shared library trampoline code stub. */
-#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) \
-  (name && !strcmp(name, "_DYNAMIC"))
+void sparcnbsd_supply_fpreg32 (char *, int);
+void sparcnbsd_supply_fpreg64 (char *, int);
+void sparcnbsd_fill_fpreg32 (char *, int);
+void sparcnbsd_fill_fpreg64 (char *, int);
 
-#endif /* TM_NBSDAOUT_H */
+#endif /* SPARCNBSD_TDEP_H */

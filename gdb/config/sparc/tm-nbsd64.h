@@ -1,5 +1,5 @@
-/* Parameters for execution on a Sparc running NetBSD, for GDB.
-   Copyright 1994 Free Software Foundation, Inc.
+/* Macro definitions for UltraSPARC running under NetBSD.
+   Copyright 1994, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,5 +18,10 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* Get generic NetBSD host definitions. */
-#include "xm-nbsd.h"
+#ifndef TM_NBSD64_H
+#define TM_NBSD64_H
+
+#include "sparc/tm-sp64.h" /* sets GDB_MULTI_ARCH */
+#include "solib.h"
+
+#endif /* TM_NBSD64_H */

@@ -1,5 +1,40 @@
 2002-05-30  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* Makefile.in (ALLDEPFILES): Add sparc64nbsd-nat.c,
+	sparcnbsd-nat.c, and sparcnbsd-tdep.c.
+	(sparc64nbsd-nat.o)
+	(sparcnbsd-nat.o)
+	(sparcnbsd-tdep.o): New dependency lists.
+	* NEWS: Note new UltraSPARC NetBSD native configuration.
+	* configure.host (sparc64-*-netbsd*): New host.
+	* configure.tgt (sparc-*-netbsdelf*)
+	(sparc-*-netbsd*): Set gdb_target to nbsd.
+	(sparc64-*-netbsd*): New target.
+	* sparc64nbsd-nat.c: New file.
+	* sparcnbsd-nat.c: New file.
+	* sparcnbsd-tdep.c: New file.
+	* sparcnbsd-tdep.h: New file.
+	* config/sparc/nbsd.mt: New file.
+	* config/sparc/nbsd64.mh: New file.
+	* config/sparc/nbsd64.mt: New file.
+	* config/sparc/nbsdaout.mh (NATDEPFILES): Remove corelow.o,
+	sparc-nat.o, and solib.o.  Add sparcnbsd-nat.o.
+	(HOST_IPC): Remove.
+	* config/sparc/nbsdaout.mt: Remove.
+	* config/sparc/nbsdelf.mh (NATDEPFILES): Remove corelow.o,
+	sparc-nat.o, and solib.o.  Add sparcnbsd-nat.o.
+	(HOST_IPC): Remove.
+	* config/sparc/nbsdelf.mt: Remove.
+	* config/sparc/nm-nbsd.h: Update copyright years.  Remove all
+	sparc-nat.c compatiblity defines.
+	* config/sparc/tm-nbsd.h: Update copyright years.  Include solib.h.
+	(GDB_MULTI_ARCH): Set to GDB_MULTI_ARCH_PARTIAL.
+	* config/sparc/tm-nbsd64.h: New file.
+	* config/sparc/tm-nbsdaout.h: Remove.
+	* config/sparc/xm-nbsd.h: Remove.
+
+2002-05-30  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* Makefile.in (sparc-tdep.o): Add osabi.h to dependency list.
 	* sparc-tdep.c: Include osabi.h.
 	(gdbarch_tdep): Add osabi member.
