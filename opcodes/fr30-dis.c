@@ -108,6 +108,19 @@ print_low_register_list (od, dis_info, value, attrs, pc, length)
   print_register_list (dis_info, value, 0);
 }
 
+static void
+print_label9 (od, dis_info, value, attrs, pc, length)
+     CGEN_OPCODE_DESC od;
+     PTR dis_info;
+     long value;
+     unsigned int attrs;
+     bfd_vma pc;
+     int length;
+{
+  disassemble_info *info = (disassemble_info *) dis_info;
+  (*info->fprintf_func) (info->stream, "0x%lx", value);
+}
+
 /* -- */
 
 /* Main entry point for operand extraction.
@@ -405,7 +418,7 @@ fr30_cgen_print_operand (od, opindex, info, fields, attrs, pc, length)
       print_normal (od, info, fields->f_dir10, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
     case FR30_OPERAND_LABEL9 :
-      print_normal (od, info, fields->f_rel9, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      print_label9 (od, info, fields->f_rel9, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), pc, length);
       break;
     case FR30_OPERAND_LABEL12 :
       print_normal (od, info, fields->f_rel12, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), pc, length);
