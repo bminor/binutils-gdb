@@ -5035,12 +5035,11 @@ elf_adjust_dynamic_symbol (h, data)
       weakdef = h->weakdef;
       BFD_ASSERT (weakdef->root.type == bfd_link_hash_defined);
       BFD_ASSERT (weakdef->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC);
-      if ((weakdef->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
-	  || (weakdef->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) != 0)
+      if ((weakdef->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
 	{
-	  /* This symbol is defined or referenced by a regular object
-	     file, so we will not do anything special.  Clear weakdef
-	     for the convenience of the processor backend.  */
+	  /* This symbol is defined by a regular object file, so we
+	     will not do anything special.  Clear weakdef for the
+	     convenience of the processor backend.  */
 	  h->weakdef = NULL;
 	}
       else
