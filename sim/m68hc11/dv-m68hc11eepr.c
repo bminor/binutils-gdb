@@ -218,7 +218,7 @@ attach_m68hc11eepr_regs (struct hw *me,
   
   controller->attach_space = attach_space;
   controller->base_address = attach_address;
-  controller->eeprom = (char*) malloc (attach_size + 1);
+  controller->eeprom = (char*) hw_malloc (me, attach_size + 1);
   controller->eeprom_min_cycles = 10000;
   controller->size = attach_size + 1;
   controller->mapped = 0;

@@ -1,3 +1,9 @@
+2000-11-24  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* dv-m68hc11eepr.c (attach_m68hc11eepr_regs): Use hw_malloc.
+	* dv-nvram.c (attach_nvram_regs): Use hw_free and hw_malloc
+	instead of free and malloc.
+
 2000-09-11  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* Makefile.in: Was missing from initial patch.

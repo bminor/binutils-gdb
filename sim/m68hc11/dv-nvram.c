@@ -187,7 +187,7 @@ attach_nvram_regs (struct hw *me, struct nvram *controller)
 
     case NVRAM_SAVE_MODIFIED:
     case NVRAM_SAVE_ALL:
-      controller->data = (char*) malloc (attach_size);
+      controller->data = (char*) hw_malloc (me, attach_size);
       if (controller->data == 0)
         hw_abort (me, "Not enough memory, try to use the mode 'map'");
 
@@ -204,7 +204,7 @@ attach_nvram_regs (struct hw *me, struct nvram *controller)
           if (result != attach_size)
             {
               oerrno = errno;
-              free (controller->data);
+              hw_free (me, controller->data);
               close (controller->fd);
               errno = oerrno;
               hw_abort (me, "Failed to save the ram content");
@@ -216,7 +216,7 @@ attach_nvram_regs (struct hw *me, struct nvram *controller)
           if (result != attach_size)
             {
               oerrno = errno;
-              free (controller->data);
+              hw_free (me, controller->data);
               close (controller->fd);
               errno = oerrno;
               hw_abort (me, "Failed to load the ram content");
