@@ -56,6 +56,7 @@ do { \
 
 #define long_immediate(VARIABLE) \
      unsigned_word VARIABLE = MEM (unsigned, nia.ip, 4); \
+     cia.dp += sizeof (instruction_word); \
      nia.ip += sizeof (instruction_word); \
      nia.dp += sizeof (instruction_word);
 
