@@ -74,10 +74,10 @@ fi
 # the library path with the suffix applied.
 
 if [ "x${LIB_PATH}" = "x" ] && [ "x${USE_LIBPATH}" = xyes ] ; then
+  LIB_PATH2=
   if [ x"$use_sysroot" != xyes ] ; then
-    LIB_PATH=${libdir}
+    LIB_PATH2=${libdir}
   fi
-  LIB_PATH2=""
   for lib in ${NATIVE_LIB_DIRS}; do
     # The "=" is harmless if we aren't using a sysroot, but also needless.
     if [ "x${use_sysroot}" = "xyes" ] ; then
@@ -95,26 +95,34 @@ if [ "x${LIB_PATH}" = "x" ] && [ "x${USE_LIBPATH}" = xyes ] ; then
 	::) LIB_PATH=${lib}${LIBPATH_SUFFIX} ;;
 	*) LIB_PATH=${LIB_PATH}:${lib}${LIBPATH_SUFFIX} ;;
       esac
-      case :${LIB_PATH}${LIB_PATH2}: in
+      case :${LIB_PATH}:${LIB_PATH2}: in
 	*:${lib}:*) ;;
-        *) LIB_PATH2=${LIB_PATH2}:${lib} ;;
+	*::) LIB_PATH2=${lib} ;;
+	*) LIB_PATH2=${LIB_PATH2}:${lib} ;;
       esac
     else
-      case :${LIB_PATH}: in
-        *:${lib}:*) ;;
-        ::) LIB_PATH=${lib} ;;
-        *) LIB_PATH=${LIB_PATH}:${lib} ;;
+      case :${LIB_PATH2}: in
+	*:${lib}:*) ;;
+	::) LIB_PATH2=${lib} ;;
+	*) LIB_PATH2=${LIB_PATH2}:${lib} ;;
       esac
     fi
   done
-  LIB_PATH=${LIB_PATH}${LIB_PATH2}
+  case :${LIB_PATH}:${LIB_PATH2}: in
+    *:: | ::*) LIB_PATH=${LIB_PATH}${LIB_PATH2} ;;
+    *) LIB_PATH=${LIB_PATH}:${LIB_PATH2} ;;
+  esac
 fi
 
 
 # Always search $(tooldir)/lib, aka /usr/local/TARGET/lib, except for
-# sysrooted configurations.
+# sysrooted configurations and when LIBPATH=":".
 if [ "x${use_sysroot}" != "xyes" ] ; then
-  LIB_PATH=${tool_lib}:${LIB_PATH}
+  case :${LIB_PATH}: in
+  ::: | *:${tool_lib}:*) ;;
+  ::) LIB_PATH=${tool_lib} ;;
+  *) LIB_PATH=${tool_lib}:${LIB_PATH} ;;
+  esac
 fi
 
 LIB_SEARCH_DIRS=`echo ${LIB_PATH} | sed -e 's/:/ /g' -e 's/\([^ ][^ ]*\)/SEARCH_DIR(\\"\1\\");/g'`
@@ -123,7 +131,7 @@ LIB_SEARCH_DIRS=`echo ${LIB_PATH} | sed -e 's/:/ /g' -e 's/\([^ ][^ ]*\)/SEARCH_
 case " $EMULATION_LIBPATH " in
   *" ${EMULATION_NAME} "*)
     test -d tmpdir || mkdir tmpdir
-    rm -f tmpdir/libpath
+    test -f tmpdir/libpath.exp || \
     echo "set libpath \"${LIB_PATH}\"" | sed -e 's/:/ /g' > tmpdir/libpath.exp
     ;;
 esac

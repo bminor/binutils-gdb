@@ -1,3 +1,9 @@
+2003-08-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* genscripts.sh (libpath.exp): Only generate for first emulation.
+	(LIB_PATH): Correct order of paths.  Don't add $tool_lib when
+	already present or when LIB_PATH is set to ":".
+
 2003-08-12  Ian Lance Taylor  <ian@airs.com>
 
 	* ldmain.c (undefined_symbol): Change parameter name from `fatal'
