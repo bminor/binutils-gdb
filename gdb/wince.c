@@ -1587,7 +1587,8 @@ upload_to_device (const char *to, const char *from)
     return remotefile;		/* Don't bother uploading. */
 
   /* Open the source. */
-  if ((fd = openp (getenv ("PATH"), TRUE, (char *) from, O_RDONLY, 0, NULL)) < 0)
+  if ((fd = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST, (char *) from, O_RDONLY,
+		   0, NULL)) < 0)
     error ("couldn't open %s", from);
 
   /* Get the time for later comparison. */

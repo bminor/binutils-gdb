@@ -1,3 +1,17 @@
+2004-07-30  Baurjan Ismagulov  <ibr@ata.cs.hun.edu.tr>
+
+	* defs.h (OPF_TRY_CWD_FIRST, OPF_SEARCH_IN_PATH): New macros.
+
+	* exec.c (exec_file_attach):
+	* nto-tdep.c (nto_find_and_open_solib):
+	* pa64solib.c (pa64_solib_sizeof_symbol_table):
+	* solib.c (solib_open):
+	* somsolib.c (som_solib_sizeof_symbol_table):
+	* source.c (is_regular_file, openp, open_source_file):
+	* symfile.c (symfile_bfd_open):
+	* wince.c (upload_to_device): Differentiate between the search for
+	binary and source files.
+
 2004-07-30  Andrew Cagney  <cagney@gnu.org>
 
 	* complaints.c (_initialize_complaints): Pass NULL to

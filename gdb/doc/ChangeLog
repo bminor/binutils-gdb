@@ -1,3 +1,8 @@
+2004-07-30  Baurjan Ismagulov  <ibr@ata.cs.hun.edu.tr>
+
+	* gdb.texinfo (Source Path): Document the new behavior of
+	searching for the source files.
+
 2004-07-17  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Edit): Fix markup of EDITOR and improve wording.

@@ -4519,16 +4519,30 @@ the directories could be moved between the compilation and your debugging
 session.  @value{GDBN} has a list of directories to search for source files;
 this is called the @dfn{source path}.  Each time @value{GDBN} wants a source file,
 it tries all the directories in the list, in the order they are present
-in the list, until it finds a file with the desired name.  Note that
-the executable search path is @emph{not} used for this purpose.  Neither is
-the current working directory, unless it happens to be in the source
-path.
+in the list, until it finds a file with the desired name.
 
-If @value{GDBN} cannot find a source file in the source path, and the
-object program records a directory, @value{GDBN} tries that directory
-too.  If the source path is empty, and there is no record of the
-compilation directory, @value{GDBN} looks in the current directory as a
-last resort.
+For example, suppose an executable references the file
+@file{/usr/src/foo-1.0/lib/foo.c}, and our source path is
+@file{/mnt/cross}.  The file is first looked up literally; if this
+fails, @file{/mnt/cross/usr/src/foo-1.0/lib/foo.c} is tried; if this
+fails, @file{/mnt/cross/foo.c} is opened; if this fails, an error
+message is printed.  @value{GDBN} does not look up the parts of the
+source file name, such as @file{/mnt/cross/src/foo-1.0/lib/foo.c}.
+Likewise, the subdirectories of the source path are not searched: if
+the source path is @file{/mnt/cross}, and the binary refers to
+@file{foo.c}, @value{GDBN} would not find it under
+@file{/mnt/cross/usr/src/foo-1.0/lib}.
+
+Plain file names, relative file names with leading directories, file
+names containing dots, etc.@: are all treated as described above; for
+instance, if the source path is @file{/mnt/cross}, and the source file
+is recorded as @file{../lib/foo.c}, @value{GDBN} would first try
+@file{../lib/foo.c}, then @file{/mnt/cross/../lib/foo.c}, and after
+that---@file{/mnt/cross/foo.c}.
+
+Note that the executable search path is @emph{not} used to locate the
+source files.  Neither is the current working directory, unless it
+happens to be in the source path.
 
 Whenever you reset or rearrange the source path, @value{GDBN} clears out
 any information it has cached about where source files are found and where
