@@ -938,10 +938,6 @@ Mon Aug 18 17:29:54 1997  Ian Lance Taylor  <ian@cygnus.com>
 	(child_wait): Check the return value of handle_exception.  Set the
 	continue_status argument to ContinueDebugEvent accordingly.
 
-Mon Aug 18 11:14:15 1997  Nick Clifton  <nickc@cygnus.com>
-
-	* configure.tgt: Add support for v850e target.
-
 start-sanitize-v850e
 Mon Aug 18 11:14:15 1997  Nick Clifton  <nickc@cygnus.com>
 
