@@ -1,8 +1,46 @@
 2002-12-26  J. Brobecker  <brobecker@gnat.com>
 
+	Continuing work to convert the hppa targets to multiarch partil.
+
+	* hppa-tdep.c: Add some missing forward declarations.
+	(frameless_function_invocation): Prefix the function name
+	by "hppa_" to avoid polluting the namespace.  Update all calls
+	to use the new function name.
+	(saved_pc_after_call): Ditto.
+	(init_extra_frame_info): Ditto.
+	(frame_chain): Ditto.
+	(push_dummy_frame): Ditto.
+	(target_read_pc): Ditto.
+	(target_write_pc): Ditto.
+	(in_solib_call_trampoline): Ditto.
+	(in_solib_return_trampoline): Ditto.
+	(skip_trampoline_code): Ditto.
+	(hppa_read_fp): New function, renamed from target_read_fp.
+	(hppa_target_read_fp): New function, using hppa_read_fp.
+	This function conforms to the function profile for the
+	READ_FP gdbarch method.
+	(hppa_extract_struct_value_address): New function, extracted
+	from the definition of the DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS
+	macro.
+	(hppa_frame_num_args): New function.
+	(hppa_gdbarch_init): Setup the gdbarch vector for the hppa target.
+
+	* config/pa/tm-hppa.h: Wrap around all gdbarch-eligible macros
+	inside "#if !GDB_MULTI_ARCH ... #endif" conditional, in preparation
+	for the switch to multiarch partial.
+	Update some of the macros definitions to match some changes
+	described above in the name of the function they are calling.
+	(PUSH_DUMMY_FRAME): Add a FIXME explaining why this macro will
+	not be straightforward to convert. Do now wrap it inside
+	"#if !... #endif" to remember that this macro has still not
+	been taken care of.
+	(FIX_CALL_DUMMY): Likewise.
+
+2002-12-26  J. Brobecker  <brobecker@gnat.com>
+
 	Continuing work to convert the hppa targets to multiarch partial.
 
-	* hppa-tdep.c: (hppa_register_raw_size): New function replacing
+	* hppa-tdep.c (hppa_register_raw_size): New function replacing
 	the body of macro REGISTER_RAW_SIZE.
 	* hppa-hpux-tdep.c: Add new functions replacing macro bodies from
 	config/pa/tm-hppah.h. These functions will be used to initialize

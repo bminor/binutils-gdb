@@ -63,6 +63,9 @@
 #include "symfile.h"
 #include "objfiles.h"
 
+/* Some local constants.  */
+static const int hppa_num_regs = 128;
+
 /* To support detection of the pseudo-initial frame
    that threads have. */
 #define THREAD_INITIAL_FRAME_SYMBOL  "__pthread_exit"
@@ -135,6 +138,11 @@ static void record_text_segment_lowaddr (bfd *, asection *, void *);
 /* FIXME: brobecker 2002-11-07: We will likely be able to make the
    following functions static, once we hppa is partially multiarched.  */
 int hppa_reg_struct_has_addr (int gcc_p, struct type *type);
+CORE_ADDR hppa_skip_prologue (CORE_ADDR pc);
+CORE_ADDR hppa_skip_trampoline_code (CORE_ADDR pc);
+int hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name);
+int hppa_in_solib_return_trampoline (CORE_ADDR pc, char *name);
+CORE_ADDR hppa_saved_pc_after_call (struct frame_info *frame);
 int hppa_inner_than (CORE_ADDR lhs, CORE_ADDR rhs);
 CORE_ADDR hppa_stack_align (CORE_ADDR sp);
 int hppa_pc_requires_run_before_use (CORE_ADDR pc);
@@ -143,10 +151,30 @@ int hppa_register_raw_size (int reg_nr);
 int hppa_register_byte (int reg_nr);
 struct type * hppa_register_virtual_type (int reg_nr);
 void hppa_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
+void hppa_extract_return_value (struct type *type, char *regbuf, char *valbuf);
+int hppa_use_struct_convention (int gcc_p, struct type *type);
+void hppa_store_return_value (struct type *type, char *valbuf);
+CORE_ADDR hppa_extract_struct_value_address (char *regbuf);
 int hppa_cannot_store_register (int regnum);
+void hppa_init_extra_frame_info (int fromleaf, struct frame_info *frame);
+CORE_ADDR hppa_frame_chain (struct frame_info *frame);
+int hppa_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe);
+int hppa_frameless_function_invocation (struct frame_info *frame);
+CORE_ADDR hppa_frame_saved_pc (struct frame_info *frame);
 CORE_ADDR hppa_frame_args_address (struct frame_info *fi);
 CORE_ADDR hppa_frame_locals_address (struct frame_info *fi);
+int hppa_frame_num_args (struct frame_info *frame);
+void hppa_push_dummy_frame (struct inferior_status *inf_status);
+void hppa_pop_frame (void);
+CORE_ADDR hppa_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
+                               int nargs, struct value **args,
+                               struct type *type, int gcc_p);
+CORE_ADDR hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
+		               int struct_return, CORE_ADDR struct_addr);
 CORE_ADDR hppa_smash_text_address (CORE_ADDR addr);
+CORE_ADDR hppa_target_read_pc (ptid_t ptid);
+void hppa_target_write_pc (CORE_ADDR v, ptid_t ptid);
+CORE_ADDR hppa_target_read_fp (void);
 int hppa_coerce_float_to_double (struct type *formal, struct type *actual);
 
 typedef struct
@@ -817,7 +845,7 @@ rp_saved (CORE_ADDR pc)
 }
 
 int
-frameless_function_invocation (struct frame_info *frame)
+hppa_frameless_function_invocation (struct frame_info *frame)
 {
   struct unwind_table_entry *u;
 
@@ -835,7 +863,7 @@ frameless_function_invocation (struct frame_info *frame)
    some instructions.  */
 
 CORE_ADDR
-saved_pc_after_call (struct frame_info *frame)
+hppa_saved_pc_after_call (struct frame_info *frame)
 {
   int ret_regnum;
   CORE_ADDR pc;
@@ -901,7 +929,7 @@ hppa_frame_saved_pc (struct frame_info *frame)
     }
 #endif
 
-  if (frameless_function_invocation (frame))
+  if (hppa_frameless_function_invocation (frame))
     {
       int ret_regnum;
 
@@ -1033,7 +1061,7 @@ hppa_frame_saved_pc (struct frame_info *frame)
    in a system call.  */
 
 void
-init_extra_frame_info (int fromleaf, struct frame_info *frame)
+hppa_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 {
   int flags;
   int framesize;
@@ -1091,7 +1119,7 @@ init_extra_frame_info (int fromleaf, struct frame_info *frame)
    a frame pointer calls code without a frame pointer.  */
 
 CORE_ADDR
-frame_chain (struct frame_info *frame)
+hppa_frame_chain (struct frame_info *frame)
 {
   int my_framesize, caller_framesize;
   struct unwind_table_entry *u;
@@ -1408,7 +1436,7 @@ hppa_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
    to be aligned to a 64-byte boundary. */
 
 void
-push_dummy_frame (struct inferior_status *inf_status)
+hppa_push_dummy_frame (struct inferior_status *inf_status)
 {
   CORE_ADDR sp, pc, pcspace;
   register int regnum;
@@ -1424,7 +1452,7 @@ push_dummy_frame (struct inferior_status *inf_status)
      We also need a number of horrid hacks to deal with lossage in the
      PC queue registers (apparently they're not valid when the in syscall
      bit is set).  */
-  pc = target_read_pc (inferior_ptid);
+  pc = hppa_target_read_pc (inferior_ptid);
   int_buffer = read_register (FLAGS_REGNUM);
   if (int_buffer & 0x2)
     {
@@ -2401,7 +2429,7 @@ hppa_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
   if (flags & 2)
     return pc;
 #ifndef GDB_TARGET_IS_PA_ELF
-  else if (som_solib_get_got_by_pc (target_read_pc (inferior_ptid)))
+  else if (som_solib_get_got_by_pc (hppa_target_read_pc (inferior_ptid)))
     return pc;
 #endif
   else
@@ -2409,14 +2437,12 @@ hppa_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 #endif
 }
 
-
-
-
 /* If the pid is in a syscall, then the FP register is not readable.
    We'll return zero in that case, rather than attempting to read it
    and cause a warning. */
+
 CORE_ADDR
-target_read_fp (int pid)
+hppa_read_fp (int pid)
 {
   int flags = read_register (FLAGS_REGNUM);
 
@@ -2430,12 +2456,17 @@ target_read_fp (int pid)
   return read_register (FP_REGNUM);
 }
 
+CORE_ADDR
+hppa_target_read_fp (void)
+{
+  return hppa_read_fp (PIDGET (inferior_ptid));
+}
 
 /* Get the PC from %r31 if currently in a syscall.  Also mask out privilege
    bits.  */
 
 CORE_ADDR
-target_read_pc (ptid_t ptid)
+hppa_target_read_pc (ptid_t ptid)
 {
   int flags = read_register_pid (FLAGS_REGNUM, ptid);
 
@@ -2452,7 +2483,7 @@ target_read_pc (ptid_t ptid)
    PC value into %r31.  */
 
 void
-target_write_pc (CORE_ADDR v, ptid_t ptid)
+hppa_target_write_pc (CORE_ADDR v, ptid_t ptid)
 {
   int flags = read_register_pid (FLAGS_REGNUM, ptid);
 
@@ -2890,7 +2921,7 @@ pa_strcat_fp_reg (int i, struct ui_file *stream, enum precision_type precision)
    just shared library trampolines (import, export).  */
 
 int
-in_solib_call_trampoline (CORE_ADDR pc, char *name)
+hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 {
   struct minimal_symbol *minsym;
   struct unwind_table_entry *u;
@@ -3050,7 +3081,7 @@ in_solib_call_trampoline (CORE_ADDR pc, char *name)
    just shared library trampolines (import, export).  */
 
 int
-in_solib_return_trampoline (CORE_ADDR pc, char *name)
+hppa_in_solib_return_trampoline (CORE_ADDR pc, char *name)
 {
   struct unwind_table_entry *u;
 
@@ -3123,7 +3154,7 @@ in_solib_return_trampoline (CORE_ADDR pc, char *name)
    used in dynamic executables.  */
 
 CORE_ADDR
-skip_trampoline_code (CORE_ADDR pc, char *name)
+hppa_skip_trampoline_code (CORE_ADDR pc)
 {
   long orig_pc = pc;
   long prev_inst, curr_inst, loc;
@@ -4850,6 +4881,21 @@ hppa_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
   write_register (28, addr);
 }
 
+CORE_ADDR
+hppa_extract_struct_value_address (char *regbuf)
+{
+  /* Extract from an array REGBUF containing the (raw) register state
+     the address in which a function should return its structure value,
+     as a CORE_ADDR (or an expression that can be used as one).  */
+  /* FIXME: brobecker 2002-12-26.
+     The current implementation is historical, but we should eventually
+     implement it in a more robust manner as it relies on the fact that
+     the address size is equal to the size of an int* _on the host_...
+     One possible implementation that crossed my mind is to use
+     extract_address.  */
+  return (*(int *)(regbuf + REGISTER_BYTE (28)));
+}
+
 /* Return True if REGNUM is not a register available to the user
    through ptrace().  */
 
@@ -4873,6 +4919,14 @@ CORE_ADDR
 hppa_frame_locals_address (struct frame_info *fi)
 {
   return fi->frame;
+}
+
+int
+hppa_frame_num_args (struct frame_info *frame)
+{
+  /* We can't tell how many args there are now that the C compiler delays
+     popping them.  */
+  return -1;
 }
 
 CORE_ADDR
@@ -4930,6 +4984,63 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch, osabi);
+
+  set_gdbarch_reg_struct_has_addr (gdbarch, hppa_reg_struct_has_addr);
+  set_gdbarch_function_start_offset (gdbarch, 0);
+  set_gdbarch_skip_prologue (gdbarch, hppa_skip_prologue);
+  set_gdbarch_skip_trampoline_code (gdbarch, hppa_skip_trampoline_code);
+  set_gdbarch_in_solib_call_trampoline (gdbarch, hppa_in_solib_call_trampoline);
+  set_gdbarch_in_solib_return_trampoline (gdbarch,
+                                          hppa_in_solib_return_trampoline);
+  set_gdbarch_saved_pc_after_call (gdbarch, hppa_saved_pc_after_call);
+  set_gdbarch_inner_than (gdbarch, hppa_inner_than);
+  set_gdbarch_stack_align (gdbarch, hppa_stack_align);
+  set_gdbarch_extra_stack_alignment_needed (gdbarch, 0);
+  set_gdbarch_decr_pc_after_break (gdbarch, 0);
+  set_gdbarch_register_size (gdbarch, 4);
+  set_gdbarch_num_regs (gdbarch, hppa_num_regs);
+  set_gdbarch_fp_regnum (gdbarch, 3);
+  set_gdbarch_sp_regnum (gdbarch, 30);
+  set_gdbarch_fp0_regnum (gdbarch, 64);
+  set_gdbarch_pc_regnum (gdbarch, PCOQ_HEAD_REGNUM);
+  set_gdbarch_npc_regnum (gdbarch, PCOQ_TAIL_REGNUM);
+  set_gdbarch_register_raw_size (gdbarch, hppa_register_raw_size);
+  set_gdbarch_register_bytes (gdbarch, hppa_num_regs * 4);
+  set_gdbarch_register_byte (gdbarch, hppa_register_byte);
+  set_gdbarch_register_virtual_size (gdbarch, hppa_register_raw_size);
+  set_gdbarch_max_register_raw_size (gdbarch, 4);
+  set_gdbarch_max_register_virtual_size (gdbarch, 8);
+  set_gdbarch_register_virtual_type (gdbarch, hppa_register_virtual_type);
+  set_gdbarch_store_struct_return (gdbarch, hppa_store_struct_return);
+  set_gdbarch_deprecated_extract_return_value (gdbarch,
+                                               hppa_extract_return_value);
+  set_gdbarch_use_struct_convention (gdbarch, hppa_use_struct_convention);
+  set_gdbarch_deprecated_store_return_value (gdbarch, hppa_store_return_value);
+  set_gdbarch_deprecated_extract_struct_value_address
+    (gdbarch, hppa_extract_struct_value_address);
+  set_gdbarch_cannot_store_register (gdbarch, hppa_cannot_store_register);
+  set_gdbarch_init_extra_frame_info (gdbarch, hppa_init_extra_frame_info);
+  set_gdbarch_frame_chain (gdbarch, hppa_frame_chain);
+  set_gdbarch_frame_chain_valid (gdbarch, hppa_frame_chain_valid);
+  set_gdbarch_frameless_function_invocation
+    (gdbarch, hppa_frameless_function_invocation);
+  set_gdbarch_frame_saved_pc (gdbarch, hppa_frame_saved_pc);
+  set_gdbarch_frame_args_address (gdbarch, hppa_frame_args_address);
+  set_gdbarch_frame_locals_address (gdbarch, hppa_frame_locals_address);
+  set_gdbarch_frame_num_args (gdbarch, hppa_frame_num_args);
+  set_gdbarch_frame_args_skip (gdbarch, 0);
+  /* set_gdbarch_push_dummy_frame (gdbarch, hppa_push_dummy_frame);  */
+  set_gdbarch_pop_frame (gdbarch, hppa_pop_frame);
+  set_gdbarch_call_dummy_length (gdbarch, INSTRUCTION_SIZE * 28);
+  set_gdbarch_call_dummy_start_offset (gdbarch, 0);
+  /* set_gdbarch_fix_call_dummy (gdbarch, hppa_fix_call_dummy); */
+  set_gdbarch_push_arguments (gdbarch, hppa_push_arguments);
+  set_gdbarch_smash_text_address (gdbarch, hppa_smash_text_address);
+  set_gdbarch_believe_pcc_promotion (gdbarch, 1);
+  set_gdbarch_read_pc (gdbarch, hppa_target_read_pc);
+  set_gdbarch_write_pc (gdbarch, hppa_target_write_pc);
+  set_gdbarch_read_fp (gdbarch, hppa_target_read_fp);
+  set_gdbarch_coerce_float_to_double (gdbarch, hppa_coerce_float_to_double);
 
   return gdbarch;
 }
