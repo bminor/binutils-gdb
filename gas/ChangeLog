@@ -1,5 +1,14 @@
 Fri Oct  8 14:09:35 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/tc-mips.c (mips_gprmask, mips_cprmask): New variables to
+	hold register masks.
+	(md_begin): Initialize them to zero.
+	(append_insn): Update mips_gprmask and mips_cprmask.  Also add
+	register variables pinfo and prev_pinfo.
+	* config/tc-mips.h (mips_gprmask, mips_cprmask): Declare.
+	* config/obj-ecoff.c (ecoff_frob_file): If TC_MIPS, set gprmask
+	and cprmask from mips_gprmask and mips_cprmask.
+
 	* config/tc-mips.h: Define TARGET_FORMAT if OBJ_ELF.
 	* config/tc-mips.c (GPOPT): Define if OBJ_ECOFF or OBJ_ELF.
 	(various): Change all references to GP references to apply if

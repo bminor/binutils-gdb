@@ -56,6 +56,12 @@
 #define GPOPT
 #endif
 
+/* These variables are filled in with the masks of registers used.
+   The object format code reads them and puts them in the appropriate
+   place.  */
+unsigned long mips_gprmask;
+unsigned long mips_cprmask[4];
+
 /* MIPS ISA (Instruction Set Architecture) level.  */
 static int mips_isa = -1;
 
@@ -367,6 +373,12 @@ md_begin ()
 
   mips_no_prev_insn ();
 
+  mips_gprmask = 0;
+  mips_cprmask[0] = 0;
+  mips_cprmask[1] = 0;
+  mips_cprmask[2] = 0;
+  mips_cprmask[3] = 0;
+
   /* set the default alignment for the text section (2**2) */
   record_alignment (text_section, 2);
 
@@ -477,9 +489,13 @@ append_insn (ip, address_expr, reloc_type)
      expressionS *address_expr;
      bfd_reloc_code_real_type reloc_type;
 {
+  register unsigned long prev_pinfo, pinfo;
   char *f;
   fixS *fixp;
   int nops = 0;
+
+  prev_pinfo = prev_insn.insn_mo->pinfo;
+  pinfo = ip->insn_mo->pinfo;
 
   if (! mips_noreorder)
     {
@@ -508,15 +524,15 @@ append_insn (ip, address_expr, reloc_type)
 
       /* The previous insn might require a delay slot, depending upon
 	 the contents of the current insn.  */
-      if ((prev_insn.insn_mo->pinfo & INSN_LOAD_COPROC_DELAY)
+      if ((prev_pinfo & INSN_LOAD_COPROC_DELAY)
 	  || (mips_isa < 2
-	      && (prev_insn.insn_mo->pinfo & INSN_LOAD_MEMORY_DELAY)))
+	      && (prev_pinfo & INSN_LOAD_MEMORY_DELAY)))
 	{
 	  /* A load from a coprocessor or from memory.  All load
 	     delays delay the use of general register rt for one
 	     instruction on the r3000.  The r6000 and r4000 use
 	     interlocks.  */
-	  know (prev_insn.insn_mo->pinfo & INSN_WRITE_GPR_T);
+	  know (prev_pinfo & INSN_WRITE_GPR_T);
 	  if (mips_optimize == 0
 	      || insn_uses_reg (ip,
 				((prev_insn.insn_opcode >> OP_SH_RT)
@@ -524,9 +540,9 @@ append_insn (ip, address_expr, reloc_type)
 				0))
 	    ++nops;
 	}
-      else if ((prev_insn.insn_mo->pinfo & INSN_COPROC_MOVE_DELAY)
+      else if ((prev_pinfo & INSN_COPROC_MOVE_DELAY)
 	       || (mips_isa < 2
-		   && (prev_insn.insn_mo->pinfo & INSN_COPROC_MEMORY_DELAY)))
+		   && (prev_pinfo & INSN_COPROC_MEMORY_DELAY)))
 	{
 	  /* A generic coprocessor delay.  The previous instruction
 	     modified a coprocessor general or control register.  If
@@ -542,7 +558,7 @@ append_insn (ip, address_expr, reloc_type)
 	     knowledge of CP0 handling, and the coprocessors other
 	     than the floating point unit are not distinguished at
 	     all.  */
-	  if (prev_insn.insn_mo->pinfo & INSN_WRITE_FPR_T)
+	  if (prev_pinfo & INSN_WRITE_FPR_T)
 	    {
 	      if (mips_optimize == 0
 		  || insn_uses_reg (ip,
@@ -551,7 +567,7 @@ append_insn (ip, address_expr, reloc_type)
 				    1))
 		++nops;
 	    }
-	  else if (prev_insn.insn_mo->pinfo & INSN_WRITE_FPR_S)
+	  else if (prev_pinfo & INSN_WRITE_FPR_S)
 	    {
 	      if (mips_optimize == 0
 		  || insn_uses_reg (ip,
@@ -569,14 +585,14 @@ append_insn (ip, address_expr, reloc_type)
 		 current instruction uses them, we must insert two
 		 NOPS.  */
 	      if (mips_optimize == 0
-		  || ((prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
-		      && (ip->insn_mo->pinfo & INSN_READ_COND_CODE)))
+		  || ((prev_pinfo & INSN_WRITE_COND_CODE)
+		      && (pinfo & INSN_READ_COND_CODE)))
 		nops += 2;
-	      else if (ip->insn_mo->pinfo & INSN_COP)
+	      else if (pinfo & INSN_COP)
 		++nops;
 	    }
 	}
-      else if (prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
+      else if (prev_pinfo & INSN_WRITE_COND_CODE)
 	{
 	  /* The previous instruction sets the coprocessor condition
 	     codes, but does not require a general coprocessor delay
@@ -584,16 +600,16 @@ append_insn (ip, address_expr, reloc_type)
 	     instruction).  If this instruction uses the condition
 	     codes, we need to insert a single NOP.  */
 	  if (mips_optimize == 0
-	      || ip->insn_mo->pinfo & INSN_READ_COND_CODE)
+	      || (pinfo & INSN_READ_COND_CODE))
 	    ++nops;
 	}
-      else if (prev_insn.insn_mo->pinfo & INSN_READ_LO)
+      else if (prev_pinfo & INSN_READ_LO)
 	{
 	  /* The previous instruction reads the LO register; if the
 	     current instruction writes to the LO register, we must
 	     insert two NOPS.  */
 	  if (mips_optimize == 0
-	      || ip->insn_mo->pinfo & INSN_WRITE_LO)
+	      || (pinfo & INSN_WRITE_LO))
 	    nops += 2;
 	}
       else if (prev_insn.insn_mo->pinfo & INSN_READ_HI)
@@ -602,7 +618,7 @@ append_insn (ip, address_expr, reloc_type)
 	     current instruction writes to the HI register, we must
 	     insert a NOP.  */
 	  if (mips_optimize == 0
-	      || ip->insn_mo->pinfo & INSN_WRITE_HI)
+	      || (pinfo & INSN_WRITE_HI))
 	    nops += 2;
 	}
 
@@ -617,11 +633,11 @@ append_insn (ip, address_expr, reloc_type)
       if (nops == 0
 	  && (((prev_prev_insn.insn_mo->pinfo & INSN_COPROC_MOVE_DELAY)
 	       && (prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
-	       && (ip->insn_mo->pinfo & INSN_READ_COND_CODE))
+	       && (pinfo & INSN_READ_COND_CODE))
 	      || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_LO)
-		  && (ip->insn_mo->pinfo & INSN_WRITE_LO))
+		  && (pinfo & INSN_WRITE_LO))
 	      || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
-		  && (ip->insn_mo->pinfo & INSN_WRITE_HI))))
+		  && (pinfo & INSN_WRITE_HI))))
 	++nops;
 
       /* Now emit the right number of NOP instructions.  */
@@ -685,6 +701,28 @@ append_insn (ip, address_expr, reloc_type)
 
   md_number_to_chars (f, ip->insn_opcode, 4);
 
+  /* Update the register mask information.  */
+  if (pinfo & INSN_WRITE_GPR_D)
+    mips_gprmask |= 1 << ((ip->insn_opcode >> OP_SH_RD) & OP_MASK_RD);
+  if ((pinfo & (INSN_WRITE_GPR_T | INSN_READ_GPR_T)) != 0)
+    mips_gprmask |= 1 << ((ip->insn_opcode >> OP_SH_RT) & OP_MASK_RT);
+  if (pinfo & INSN_READ_GPR_S)
+    mips_gprmask |= 1 << ((ip->insn_opcode >> OP_SH_RS) & OP_MASK_RS);
+  if (pinfo & INSN_WRITE_GPR_31)
+    mips_gprmask |= 1 << 31;
+  if (pinfo & INSN_WRITE_FPR_D)
+    mips_cprmask[1] |= 1 << ((ip->insn_opcode >> OP_SH_FD) & OP_MASK_FD);
+  if ((pinfo & (INSN_WRITE_FPR_S | INSN_READ_FPR_S)) != 0)
+    mips_cprmask[1] |= 1 << ((ip->insn_opcode >> OP_SH_FS) & OP_MASK_FS);
+  if ((pinfo & (INSN_WRITE_FPR_T | INSN_READ_FPR_T)) != 0)
+    mips_cprmask[1] |= 1 << ((ip->insn_opcode >> OP_SH_FT) & OP_MASK_FT);
+  if (pinfo & INSN_COP)
+    {
+      /* We don't keep enough information to sort these cases out.  */
+    }
+  /* Never set the bit for $0, which is always zero.  */
+  mips_gprmask &=~ 1 << 0;
+
   if (! mips_noreorder)
     {
       /* Filling the branch delay slot is more complex.  We try to
@@ -692,8 +730,8 @@ append_insn (ip, address_expr, reloc_type)
 	 do if the previous instruction does not set up a condition
 	 that the branch tests and if the branch is not itself the
 	 target of any branch.  */
-      if ((ip->insn_mo->pinfo & INSN_UNCOND_BRANCH_DELAY)
-	  || (ip->insn_mo->pinfo & INSN_COND_BRANCH_DELAY))
+      if ((pinfo & INSN_UNCOND_BRANCH_DELAY)
+	  || (pinfo & INSN_COND_BRANCH_DELAY))
 	{
 	  if (mips_optimize < 2
 	      /* If we have seen .set nobopt, don't optimize.  */
@@ -741,37 +779,37 @@ append_insn (ip, address_expr, reloc_type)
 		   bc1t LABEL
 		 we can not swap, and I don't feel like handling that
 		 case.  */
-	      || (ip->insn_mo->pinfo & INSN_READ_COND_CODE)
+	      || (pinfo & INSN_READ_COND_CODE)
 	      /* We can not swap with an instruction that requires a
 		 delay slot, becase the target of the branch might
 		 interfere with that instruction.  */
-	      || (prev_insn.insn_mo->pinfo
+	      || (prev_pinfo
 		  & (INSN_LOAD_COPROC_DELAY
 		     | INSN_COPROC_MOVE_DELAY
 		     | INSN_WRITE_COND_CODE
 		     | INSN_READ_LO
 		     | INSN_READ_HI))
 	      || (mips_isa < 2
-		  && (prev_insn.insn_mo->pinfo
+		  && (prev_pinfo
 		      & (INSN_LOAD_MEMORY_DELAY
 			 | INSN_COPROC_MEMORY_DELAY)))
 	      /* We can not swap with a branch instruction.  */
-	      || (prev_insn.insn_mo->pinfo
+	      || (prev_pinfo
 		  & (INSN_UNCOND_BRANCH_DELAY
 		     | INSN_COND_BRANCH_DELAY
 		     | INSN_COND_BRANCH_LIKELY))
 	      /* We do not swap with a trap instruction, since it
 		 complicates trap handlers to have the trap
 		 instruction be in a delay slot.  */
-	      || (prev_insn.insn_mo->pinfo & INSN_TRAP)
+	      || (prev_pinfo & INSN_TRAP)
 	      /* If the branch reads a register that the previous
 		 instruction sets, we can not swap.  */
-	      || ((prev_insn.insn_mo->pinfo & INSN_WRITE_GPR_T)
+	      || ((prev_pinfo & INSN_WRITE_GPR_T)
 		  && insn_uses_reg (ip,
 				    ((prev_insn.insn_opcode >> OP_SH_RT)
 				     & OP_MASK_RT),
 				    0))
-	      || ((prev_insn.insn_mo->pinfo & INSN_WRITE_GPR_D)
+	      || ((prev_pinfo & INSN_WRITE_GPR_D)
 		  && insn_uses_reg (ip,
 				    ((prev_insn.insn_opcode >> OP_SH_RD)
 				     & OP_MASK_RD),
@@ -779,31 +817,31 @@ append_insn (ip, address_expr, reloc_type)
 	      /* If the branch writes a register that the previous
 		 instruction sets, we can not swap (we know that
 		 branches write only to RD or to $31).  */
-	      || ((prev_insn.insn_mo->pinfo & INSN_WRITE_GPR_T)
-		  && (((ip->insn_mo->pinfo & INSN_WRITE_GPR_D)
+	      || ((prev_pinfo & INSN_WRITE_GPR_T)
+		  && (((pinfo & INSN_WRITE_GPR_D)
 		       && (((prev_insn.insn_opcode >> OP_SH_RT) & OP_MASK_RT)
 			   == ((ip->insn_opcode >> OP_SH_RD) & OP_MASK_RD)))
-		      || ((ip->insn_mo->pinfo & INSN_WRITE_GPR_31)
+		      || ((pinfo & INSN_WRITE_GPR_31)
 			  && (((prev_insn.insn_opcode >> OP_SH_RT)
 			       & OP_MASK_RT)
 			      == 31))))
-	      || ((prev_insn.insn_mo->pinfo & INSN_WRITE_GPR_D)
-		  && (((ip->insn_mo->pinfo & INSN_WRITE_GPR_D)
+	      || ((prev_pinfo & INSN_WRITE_GPR_D)
+		  && (((pinfo & INSN_WRITE_GPR_D)
 		       && (((prev_insn.insn_opcode >> OP_SH_RD) & OP_MASK_RD)
 			   == ((ip->insn_opcode >> OP_SH_RD) & OP_MASK_RD)))
-		      || ((ip->insn_mo->pinfo & INSN_WRITE_GPR_31)
+		      || ((pinfo & INSN_WRITE_GPR_31)
 			  && (((prev_insn.insn_opcode >> OP_SH_RD)
 			       & OP_MASK_RD)
 			      == 31))))
 	      /* If the branch writes a register that the previous
 		 instruction reads, we can not swap (we know that
 		 branches only write to RD or to $31).  */
-	      || ((ip->insn_mo->pinfo & INSN_WRITE_GPR_D)
+	      || ((pinfo & INSN_WRITE_GPR_D)
 		  && insn_uses_reg (&prev_insn,
 				    ((ip->insn_opcode >> OP_SH_RD)
 				     & OP_MASK_RD),
 				    0))
-	      || ((ip->insn_mo->pinfo & INSN_WRITE_GPR_31)
+	      || ((pinfo & INSN_WRITE_GPR_31)
 		  && insn_uses_reg (&prev_insn, 31, 0))
 	      /* If the previous previous instruction has a load
 		 delay, and sets a register that the branch reads, we
@@ -854,13 +892,13 @@ append_insn (ip, address_expr, reloc_type)
 
 	  /* If that was an unconditional branch, forget the previous
 	     insn information.  */
-	  if (ip->insn_mo->pinfo & INSN_UNCOND_BRANCH_DELAY)
+	  if (pinfo & INSN_UNCOND_BRANCH_DELAY)
 	    {
 	      prev_prev_insn.insn_mo = &dummy_opcode;
 	      prev_insn.insn_mo = &dummy_opcode;
 	    }
 	}
-      else if (ip->insn_mo->pinfo & INSN_COND_BRANCH_LIKELY)
+      else if (pinfo & INSN_COND_BRANCH_LIKELY)
 	{
 	  /* We don't yet optimize a branch likely.  What we should do
 	     is look at the target, copy the instruction found there

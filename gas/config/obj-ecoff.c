@@ -1449,7 +1449,6 @@ static void obj_ecoff_size PARAMS ((int));
 static void obj_ecoff_tag PARAMS ((int));
 static void obj_ecoff_type PARAMS ((int));
 static void obj_ecoff_val PARAMS ((int));
-static void obj_ecoff_stab PARAMS ((int));
 static void obj_ecoff_ent PARAMS ((int));
 static void obj_ecoff_begin PARAMS ((int));
 static void obj_ecoff_bend PARAMS ((int));
@@ -1460,28 +1459,32 @@ static void obj_ecoff_loc PARAMS ((int));
 static void obj_ecoff_mask PARAMS ((int));
 static void mark_stabs PARAMS ((int));
 static char *ecoff_add_bytes PARAMS ((char **buf, char **bufend,
-				      char *bufptr, long need));
-static long ecoff_padding_adjust PARAMS ((char **buf, char **bufend,
-					   long offset, char **bufptrptr));
-static long ecoff_build_lineno PARAMS ((char **buf, char **bufend,
-					long offset, long *linecntptr));
-static long ecoff_build_symbols PARAMS ((char **buf, char **bufend,
-					 long offset,
-					 char **extbuf, char **extbufend,
-					 long *extoffset,
-					 varray_t *ext_strings,
-					 struct hash_control *ext_str_hash));
-static long ecoff_build_procs PARAMS ((char **buf, char **bufend,
-				       long offset));
-static long ecoff_build_aux PARAMS ((char **buf, char **bufend,
-				     long offset));
-static long ecoff_build_strings PARAMS ((char **buf, char **bufend,
-					 long offset,
-					 varray_t *vp));
-static long ecoff_build_ss PARAMS ((char **buf, char **bufend,
-				     long offset));
-static long ecoff_build_fdr PARAMS ((char **buf, char **bufend,
-				     long offset));
+				      char *bufptr, unsigned long need));
+static unsigned long ecoff_padding_adjust PARAMS ((char **buf,
+						   char **bufend,
+						   unsigned long offset,
+						   char **bufptrptr));
+static unsigned long ecoff_build_lineno PARAMS ((char **buf, char **bufend,
+						 unsigned long offset,
+						 long *linecntptr));
+static unsigned long ecoff_build_symbols PARAMS ((char **buf, char **bufend,
+						  unsigned long offset,
+						  char **extbuf,
+						  char **extbufend,
+						  unsigned long *extoffset,
+						  varray_t *ext_strings,
+						  struct hash_control *));
+static unsigned long ecoff_build_procs PARAMS ((char **buf, char **bufend,
+						unsigned long offset));
+static unsigned long ecoff_build_aux PARAMS ((char **buf, char **bufend,
+					      unsigned long offset));
+static unsigned long ecoff_build_strings PARAMS ((char **buf, char **bufend,
+						  unsigned long offset,
+						  varray_t *vp));
+static unsigned long ecoff_build_ss PARAMS ((char **buf, char **bufend,
+					     unsigned long offset));
+static unsigned long ecoff_build_fdr PARAMS ((char **buf, char **bufend,
+					      unsigned long offset));
 static page_t *allocate_cluster PARAMS ((unsigned long npages));
 static page_t *allocate_page PARAMS ((void));
 static scope_t *allocate_scope PARAMS ((void));
@@ -1539,11 +1542,6 @@ const pseudo_typeS obj_pseudo_table[] =
   { "tag",	obj_ecoff_tag,		0 },
   { "type",	obj_ecoff_type,		0 },
   { "val",	obj_ecoff_val,		0 },
-
-  /* stabs debugging information.  */
-  { "stabd",	obj_ecoff_stab,		'd' },
-  { "stabn",	obj_ecoff_stab,		'n' },
-  { "stabs",	obj_ecoff_stab,		's' },
 
   /* ECOFF specific debugging information.  */
   { "begin",	obj_ecoff_begin,	0 },
@@ -1634,7 +1632,7 @@ add_string (vp, hash_tbl, str, ret_hash)
   hash_ptr = (shash_t *) hash_find (hash_tbl, str);
   if (hash_ptr == (shash_t *) NULL)
     {
-      register char *err;
+      register const char *err;
 
       if (vp->objects_last_page + len >= PAGE_USIZE)
         {
@@ -1654,7 +1652,7 @@ add_string (vp, hash_tbl, str, ret_hash)
       strcpy (hash_ptr->string, str);
 
       err = hash_insert (hash_tbl, str, (char *) hash_ptr);
-      if (*err != '\0')
+      if (err)
 	as_fatal ("Inserting \"%s\" into string hash table: %s",
 		  str, err);
     }
@@ -2085,7 +2083,7 @@ get_tag (tag, sym, basic_type)
      bt_t basic_type;			/* bt_Struct, bt_Union, or bt_Enum */
 {
   shash_t *hash_ptr;
-  char *err;
+  const char *err;
   tag_t *tag_ptr;
 
   if (cur_file_ptr == (efdr_t *) NULL)
@@ -2110,11 +2108,11 @@ get_tag (tag, sym, basic_type)
     {
       char *perm;
 
-      perm = xmalloc (strlen (tag) + 1);
+      perm = xmalloc ((unsigned long) (strlen (tag) + 1));
       strcpy (perm, tag);
       hash_ptr = allocate_shash ();
       err = hash_insert (tag_hash, perm, (char *) hash_ptr);
-      if (*err != '\0')
+      if (err)
 	as_fatal ("Inserting \"%s\" into tag hash table: %s",
 		  tag, err);
       hash_ptr->string = perm;
@@ -2127,7 +2125,7 @@ get_tag (tag, sym, basic_type)
   tag_ptr->basic_type	= basic_type;
   tag_ptr->sym		= sym;
   tag_ptr->ifd		= ((sym == (localsym_t *) NULL)
-			   ? -1
+			   ? (symint_t) -1
 			   : cur_file_ptr->file_index);
   tag_ptr->same_block	= cur_tag_head->first_tag;
 
@@ -2284,7 +2282,8 @@ add_file (file_name, indx)
     {
       (void) add_ecoff_symbol (file_name, st_Nil, sc_Nil,
 			       symbol_new ("L0\001", now_seg,
-					   frag_now_fix (), frag_now),
+					   (valueT) frag_now_fix (),
+					   frag_now),
 			       0, ECOFF_MARK_STAB (N_SOL));
       return;
     }
@@ -2525,7 +2524,7 @@ static sc_t coff_storage_class;
 static st_t coff_symbol_typ;
 static int coff_is_function;
 static char *coff_tag;
-static long coff_value;	/* FIXME: Might be 64 bits.  */
+static valueT coff_value;
 symbolS *coff_sym_value;
 static int coff_inside_enumeration;
 
@@ -2553,7 +2552,7 @@ obj_ecoff_def (ignore)
 	free (coff_sym_name);
       if (coff_tag != (char *) NULL)
 	free (coff_tag);
-      coff_sym_name = (char *) xmalloc (strlen (name) + 1);
+      coff_sym_name = (char *) xmalloc ((unsigned long) (strlen (name) + 1));
       strcpy (coff_sym_name, name);
       coff_type = type_info_init;
       coff_storage_class = sc_Nil;
@@ -2781,7 +2780,7 @@ obj_ecoff_tag (ignore)
   name = input_line_pointer;
   name_end = get_symbol_end ();
 
-  coff_tag = (char *) xmalloc (strlen (name) + 1);
+  coff_tag = (char *) xmalloc ((unsigned long) (strlen (name) + 1));
   strcpy (coff_tag, name);
 
   *input_line_pointer = name_end;
@@ -2984,7 +2983,7 @@ obj_ecoff_endef (ignore)
 			  coff_symbol_typ,
 			  coff_storage_class,
 			  coff_sym_value,
-			  coff_value,
+			  (symint_t) coff_value,
 			  indx);
 
   /* deal with struct, union, and enum tags.  */
@@ -3053,7 +3052,8 @@ obj_ecoff_end (ignore)
   else
     (void) add_ecoff_symbol ((const char *) NULL, st_End, sc_Text,
 			     symbol_new ("L0\001", now_seg,
-					 frag_now_fix (), frag_now),
+					 (valueT) frag_now_fix (),
+					 frag_now),
 			     (symint_t) 0, (symint_t) 0);
 
   cur_proc_ptr = (proc_t *) NULL;
@@ -3226,7 +3226,7 @@ obj_ecoff_loc (ignore)
      int ignore;
 {
   lineno_list_t *list;
-  int lineno;
+  symint_t lineno;
 
   if (cur_file_ptr == (efdr_t *) NULL)
     {
@@ -3260,7 +3260,8 @@ obj_ecoff_loc (ignore)
     {
       (void) add_ecoff_symbol ((char *) NULL, st_Label, sc_Text,
 			       symbol_new ("L0\001", now_seg,
-					   frag_now_fix (), frag_now),
+					   (valueT) frag_now_fix (),
+					   frag_now),
 			       0, lineno);
       return;
     }
@@ -3309,13 +3310,16 @@ mark_stabs (ignore)
     }
 }
 
-/* Parse .stabs directives.
+/* Handle .stabs directives.  The actual parsing routine is done by a
+   generic routine.  This routine is called via OBJ_PROCESS_STAB.
+   When this is called, input_line_pointer will be pointing at the
+   value field of the stab.
 
    .stabs directives have five fields:
 	"string"	a string, encoding the type information.
 	code		a numeric code, defined in <stab.h>
 	0		a zero
-	0		a zero or line number
+	desc		a zero or line number
 	value		a numeric value or an address.
 
     If the value is relocatable, we transform this into:
@@ -3335,111 +3339,76 @@ mark_stabs (ignore)
     .stabn directives have four fields (string is null):
 	code		a numeric code, defined in <stab.h>
 	0		a zero
-	0		a zero or a line number
+	desc		a zero or a line number
 	value		a numeric value or an address.  */
 
-static void
-obj_ecoff_stab (type)
+void
+ecoff_stab (what, string, type, other, desc)
+     int what;
+     const char *string;
      int type;
+     int other;
+     int desc;
 {
-  char *string;
   efdr_t *save_file_ptr = cur_file_ptr;
-  symint_t code;
-  symint_t value;
   symbolS *sym;
+  symint_t value;
   st_t st;
   sc_t sc;
+  symint_t indx;
 
+  /* We don't handle .stabd.  */
+  if (what != 's' && what != 'n')
+    {
+      as_bad (".stab%c is not supported", what);
+      return;
+    }
+
+  /* A .stabn uses a null name, not an empty string.  */
+  if (what == 'n')
+    string = NULL;
+
+  /* We ignore the other field.  */
+  if (other != 0)
+    as_warn (".stab%c: ignoring non-zero other field", what);
+
+  /* Make sure we have a current file.  */
   if (cur_file_ptr == (efdr_t *) NULL)
     {
       add_file ((const char *) NULL, 0);
       save_file_ptr = cur_file_ptr;
     }
 
+  /* For stabs in ECOFF, the first symbol must be @stabs.  This is a
+     signal to gdb.  */
   if (stabs_seen == 0)
     mark_stabs (0);
 
-  if (type != 's')
-    string = (char *) NULL;
-  else
-    {
-      int len;
-
-      string = demand_copy_C_string (&len);
-      SKIP_WHITESPACE ();
-      if (*input_line_pointer == ',')
-	input_line_pointer++;
-      else
-	{
-	  as_warn ("Bad .stab%c directive", type);
-	  demand_empty_rest_of_line ();
-	  return;
-	}
-    }
-
-  code = (symint_t) get_absolute_expression ();
-
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer++ != ',')
-    {
-      as_warn ("Bad .stab%c directive", type);
-      --input_line_pointer;
-      demand_empty_rest_of_line ();
-      return;
-    }
-
-  if (get_absolute_expression () != 0)
-    {
-      as_warn ("Bad .stab%c directive (expected 0)", type);
-      demand_empty_rest_of_line ();
-      return;
-    }
-      
-  SKIP_WHITESPACE ();
-  if (*input_line_pointer++ != ',')
-    {
-      as_warn ("Bad .stab%c directive", type);
-      --input_line_pointer;
-      demand_empty_rest_of_line ();
-      return;
-    }
-
-  /* Line number stabs are handled differently, since they have two values,
-     the line number and the address of the label.  We use the index field
-     (aka code) to hold the line number, and the value field to hold the
-     address.  The symbol type is st_Label, which should be different from
-     the other stabs, so that gdb can recognize it.  */
-  if (code == N_SLINE)
+  /* Line number stabs are handled differently, since they have two
+     values, the line number and the address of the label.  We use the
+     index field (aka desc) to hold the line number, and the value
+     field to hold the address.  The symbol type is st_Label, which
+     should be different from the other stabs, so that gdb can
+     recognize it.  */
+  if (type == N_SLINE)
     {
       SYMR dummy_symr;
       char *name;
       char name_end;
 
-      code = (symint_t) get_absolute_expression ();
-
 #ifndef NO_LISTING
       if (listing)
-	listing_source_line (code);
+	listing_source_line ((unsigned int) desc);
 #endif
 
-      if (*input_line_pointer++ != ',')
+      dummy_symr.index = desc;
+      if (dummy_symr.index != desc)
 	{
-	  as_warn ("Bad .stab%c directive", type);
-	  --input_line_pointer;
-	  demand_empty_rest_of_line ();
+	  as_warn ("Line number (%d) for .stab%c directive cannot fit in index field (20 bits)",
+		   desc, what);
 	  return;
 	}
 
-      dummy_symr.index = code;
-      if (dummy_symr.index != code)
-	{
-	  as_warn ("Line number (%lu) for .stab%c directive cannot fit in index field (20 bits)",
-		   code, type);
-	  demand_empty_rest_of_line ();
-	  return;
-	}
-
-      SKIP_WHITESPACE ();
       name = input_line_pointer;
       name_end = get_symbol_end ();
 
@@ -3449,29 +3418,15 @@ obj_ecoff_stab (type)
       value = 0;
       st = st_Label;
       sc = sc_Text;
+      indx = desc;
     }
   else
     {
 #ifndef NO_LISTING
-      if (listing && (code == N_SO || code == N_SOL))
+      if (listing && (type == N_SO || type == N_SOL))
 	listing_source_file (string);
 #endif
       
-      /* The next number is sometimes the line number of the
-	 declaration.  We have nowhere to put it, so we just ignore
-	 it.  */
-      (void) get_absolute_expression ();
-      
-      SKIP_WHITESPACE ();
-      if (*input_line_pointer++ != ',')
-	{
-	  as_warn ("Bad .stab%c directive", type);
-	  --input_line_pointer;
-	  demand_empty_rest_of_line ();
-	  return;
-	}
-
-      SKIP_WHITESPACE ();
       if (isdigit (*input_line_pointer)
 	  || *input_line_pointer == '-'
 	  || *input_line_pointer == '+')
@@ -3483,8 +3438,7 @@ obj_ecoff_stab (type)
 	}
       else if (! is_name_beginner ((unsigned char) *input_line_pointer))
 	{
-	  as_warn ("Illegal .stab%c directive, bad character", type);
-	  demand_empty_rest_of_line ();
+	  as_warn ("Illegal .stab%c directive, bad character", what);
 	  return;
 	}
       else
@@ -3511,10 +3465,10 @@ obj_ecoff_stab (type)
 	    }
 	}
 
-      code = ECOFF_MARK_STAB (code);
+      indx = ECOFF_MARK_STAB (type);
     }
 
-  (void) add_ecoff_symbol (string, st, sc, sym, value, code);
+  (void) add_ecoff_symbol (string, st, sc, sym, value, indx);
 
   /* Restore normal file type.  */
   cur_file_ptr = save_file_ptr;
@@ -3527,7 +3481,7 @@ ecoff_add_bytes (buf, bufend, bufptr, need)
      char **buf;
      char **bufend;
      char *bufptr;
-     long need;
+     unsigned long need;
 {
   unsigned long at;
   unsigned long want;
@@ -3545,11 +3499,11 @@ ecoff_add_bytes (buf, bufend, bufptr, need)
 /* Adjust the symbolic information buffer to the alignment required
    for the ECOFF target debugging information.  */
 
-static long
+static unsigned long
 ecoff_padding_adjust (buf, bufend, offset, bufptrptr)
      char **buf;
      char **bufend;
-     long offset;
+     unsigned long offset;
      char **bufptrptr;
 {
   bfd_size_type align;
@@ -3557,7 +3511,7 @@ ecoff_padding_adjust (buf, bufend, offset, bufptrptr)
   align = ecoff_backend (stdoutput)->debug_align;
   if ((offset & (align - 1)) != 0)
     {
-      long add;
+      unsigned long add;
 
       add = align - (offset & (align - 1));
       if (*bufend - (*buf + offset) < add)
@@ -3573,11 +3527,11 @@ ecoff_padding_adjust (buf, bufend, offset, bufptrptr)
 
 /* Build the line number information.  */
 
-static long
+static unsigned long
 ecoff_build_lineno (buf, bufend, offset, linecntptr)
      char **buf;
      char **bufend;
-     long offset;
+     unsigned long offset;
      long *linecntptr;
 {
   char *bufptr;
@@ -3585,7 +3539,7 @@ ecoff_build_lineno (buf, bufend, offset, linecntptr)
   lineno_list_t *last;
   efdr_t *file;
   proc_t *proc;
-  long c;
+  unsigned long c;
   long iline;
   long totcount;
 
@@ -3764,7 +3718,7 @@ ecoff_build_lineno (buf, bufend, offset, linecntptr)
 
 /* Build and swap out the symbols.  */
 
-static long
+static unsigned long
 ecoff_build_symbols (buf,
 		     bufend,
 		     offset,
@@ -3775,10 +3729,10 @@ ecoff_build_symbols (buf,
 		     ext_str_hash)
      char **buf;
      char **bufend;
-     long offset;
+     unsigned long offset;
      char **extbuf;
      char **extbufend;
-     long *extoffset;
+     unsigned long *extoffset;
      varray_t *ext_strings;
      struct hash_control *ext_str_hash;
 {
@@ -4120,11 +4074,11 @@ ecoff_build_symbols (buf,
 
 /* Swap out the procedure information.  */
 
-static long
+static unsigned long
 ecoff_build_procs (buf, bufend, offset)
      char **buf;
      char **bufend;
-     long offset;
+     unsigned long offset;
 {
   const bfd_size_type external_pdr_size
     = ecoff_backend (stdoutput)->external_pdr_size;
@@ -4212,11 +4166,11 @@ ecoff_build_procs (buf, bufend, offset)
 
 /* Swap out the aux information.  */
 
-static long
+static unsigned long
 ecoff_build_aux (buf, bufend, offset)
      char **buf;
      char **bufend;
-     long offset;
+     unsigned long offset;
 {
   int bigendian;
   union aux_ext *aux_out;
@@ -4321,14 +4275,14 @@ ecoff_build_aux (buf, bufend, offset)
 /* Copy out the strings from a varray_t.  This returns the number of
    bytes copied, rather than the new offset.  */
 
-static long
+static unsigned long
 ecoff_build_strings (buf, bufend, offset, vp)
      char **buf;
      char **bufend;
-     long offset;
+     unsigned long offset;
      varray_t *vp;
 {
-  long istr;
+  unsigned long istr;
   char *str_out;
   vlinks_t *str_link;
 
@@ -4340,7 +4294,7 @@ ecoff_build_strings (buf, bufend, offset, vp)
        str_link != (vlinks_t *) NULL;
        str_link = str_link->next)
     {
-      long str_cnt;
+      unsigned long str_cnt;
 
       if (str_link->next == (vlinks_t *) NULL)
 	str_cnt = vp->objects_last_page;
@@ -4360,11 +4314,11 @@ ecoff_build_strings (buf, bufend, offset, vp)
 
 /* Dump out the local strings.  */
 
-static long
+static unsigned long
 ecoff_build_ss (buf, bufend, offset)
      char **buf;
      char **bufend;
-     long offset;
+     unsigned long offset;
 {
   long iss;
   vlinks_t *file_link;
@@ -4402,11 +4356,11 @@ ecoff_build_ss (buf, bufend, offset)
 
 /* Swap out the file descriptors.  */
 
-static long
+static unsigned long
 ecoff_build_fdr (buf, bufend, offset)
      char **buf;
      char **bufend;
-     long offset;
+     unsigned long offset;
 {
   const bfd_size_type external_fdr_size
     = ecoff_backend (stdoutput)->external_fdr_size;
@@ -4467,10 +4421,10 @@ ecoff_frob_file ()
   HDRR *hdr;
   char *buf;
   char *bufend;
-  long offset;
+  unsigned long offset;
   char *extbuf;
   char *extbufend;
-  long extoffset;
+  unsigned long extoffset;
   varray_t ext_strings;
   static varray_t init_ext_strings = INIT_VARRAY (char);
   struct hash_control *ext_str_hash;
@@ -4651,7 +4605,15 @@ ecoff_frob_file ()
 
 #undef SET
 
-  /* FIXME: set the register masks.  */
+#ifdef TC_MIPS
+  /* Get the MIPS register masks.  It's probably not worth setting up
+     a generic interface for this.  */
+  ecoff_data (stdoutput)->gprmask = mips_gprmask;
+  ecoff_data (stdoutput)->cprmask[0] = mips_cprmask[0];
+  ecoff_data (stdoutput)->cprmask[1] = mips_cprmask[1];
+  ecoff_data (stdoutput)->cprmask[2] = mips_cprmask[2];
+  ecoff_data (stdoutput)->cprmask[3] = mips_cprmask[3];
+#endif
 
   ecoff_data (stdoutput)->raw_size = offset;
   ecoff_data (stdoutput)->raw_syments = buf;
@@ -4660,7 +4622,7 @@ ecoff_frob_file ()
   /* FIXME: what should hdr->vstamp be?  */
 
   bfd_set_symtab (stdoutput, bfd_get_outsymbols (stdoutput),
-		  hdr->isymMax + hdr->iextMax);
+		  (unsigned int) (hdr->isymMax + hdr->iextMax));
 }
 
 /* Allocate a cluster of pages.  */

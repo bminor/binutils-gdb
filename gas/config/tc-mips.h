@@ -95,3 +95,8 @@ extern void mips_define_label PARAMS ((struct symbol *));
 
 #define TC_CONS_FIX_NEW cons_fix_new_mips
 extern void cons_fix_new_mips ();
+
+/* Register mask variables.  These are set by the MIPS assembly code
+   and used by ECOFF and possibly other object file formats.  */
+extern unsigned long mips_gprmask;
+extern unsigned long mips_cprmask[4];
