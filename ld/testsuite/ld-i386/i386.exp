@@ -52,6 +52,9 @@ set i386tests {
      "--32" {tlsnopic1.s tlsnopic2.s}
      {{readelf -Ssrl tlsnopic.rd} {objdump -drj.text tlsnopic.dd}
       {objdump -sj.got tlsnopic.sd}} "libtlsnopic.so"}
+    {"TLS in debug sections" "-melf_i386"
+     "--32" {tlsg.s}
+     {{objdump -sj.debug_foobar tlsg.sd}} "tlsg"}
     {"Reloc section order" "-shared -melf_i386" "--32" {reloc.s}
      {{objdump -hw reloc.d}} "reloc.so"}
 }

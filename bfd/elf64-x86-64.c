@@ -2496,7 +2496,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 
 	case R_X86_64_DTPOFF32:
-	  if (info->shared)
+	  if (info->shared || (input_section->flags & SEC_CODE) == 0)
 	    relocation -= dtpoff_base (info);
 	  else
 	    relocation = tpoff (info, relocation);

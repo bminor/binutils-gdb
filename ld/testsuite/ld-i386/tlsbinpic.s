@@ -83,7 +83,7 @@ fn2:
 	call	___tls_get_addr@plt
 	nop;nop;nop;nop
 
-	/* LD */
+	/* LD -> LE */
 	leal	sl1@tlsldm(%ebx), %eax
 	call	___tls_get_addr@PLT
 	nop;nop
@@ -92,7 +92,7 @@ fn2:
 	leal	sl2@dtpoff(%eax), %ecx
 	nop;nop;nop;nop
 
-	/* LD against hidden variables */
+	/* LD -> LE against hidden variables */
 	leal	sh1@tlsldm(%ebx), %eax
 	call	___tls_get_addr@PLT
 	nop;nop

@@ -89,7 +89,7 @@ Disassembly of section .text:
  8049082:	90[ 	]+nop *
  8049083:	90[ 	]+nop *
  8049084:	90[ 	]+nop *
-#  LD
+#  LD -> LE
  8049085:	65 a1 00 00 00 00[ 	]+mov    %gs:0x0,%eax
  804908b:	90[ 	]+nop *
  804908c:	8d 74 26 00[ 	]+lea    0x0\(%esi,1\),%esi
@@ -105,7 +105,7 @@ Disassembly of section .text:
  80490a1:	90[ 	]+nop *
  80490a2:	90[ 	]+nop *
  80490a3:	90[ 	]+nop *
-#  LD against hidden variables
+#  LD -> LE against hidden variables
  80490a4:	65 a1 00 00 00 00[ 	]+mov    %gs:0x0,%eax
  80490aa:	90[ 	]+nop *
  80490ab:	8d 74 26 00[ 	]+lea    0x0\(%esi,1\),%esi

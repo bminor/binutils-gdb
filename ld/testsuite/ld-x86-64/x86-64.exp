@@ -46,6 +46,9 @@ set x86_64tests {
      {{readelf -WSsrl tlsbin.rd} {objdump -drj.text tlsbin.dd}
       {objdump -sj.got tlsbin.sd} {objdump -sj.tdata tlsbin.td}}
       "tlsbin"}
+    {"TLS in debug sections" "-melf_x86_64"
+     "--64" {tlsg.s}
+     {{objdump -sj.debug_foobar tlsg.sd}} "tlsg"}
 }
 
 run_ld_link_tests $x86_64tests

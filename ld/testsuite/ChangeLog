@@ -1,3 +1,16 @@
+2002-10-01  Jakub Jelinek  <jakub@redhat.com>
+
+	* ld-i386/i386.exp: Add tlsg test.
+	* ld-i386/tlsg.s: New test.
+	* ld-i386/tlsg.sd: New test.
+	* ld-i386/tlsbin.dd: Change LD into LD -> LE in comments.
+	* ld-i386/tlsbinpic.s: Likewise.
+	* ld-x86-64/x86-64.exp: Add tlsg test.
+	* ld-x86-64/tlsg.s: New test.
+	* ld-x86-64/tlsg.sd: New test.
+	* ld-x86-64/tlsbin.dd: Change LD into LD -> LE in comments.
+	* ld-x86-64/tlsbinpic.s: Likewise.
+
 2002-09-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/powerpc.exp: Restrict to 32 bit ELF.

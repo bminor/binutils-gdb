@@ -2926,7 +2926,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 
 	case R_386_TLS_LDO_32:
-	  if (info->shared)
+	  if (info->shared || (input_section->flags & SEC_CODE) == 0)
 	    relocation -= dtpoff_base (info);
 	  else
 	    /* When converting LDO to LE, we must negate.  */

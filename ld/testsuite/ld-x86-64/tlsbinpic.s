@@ -70,7 +70,7 @@ fn2:
 	call	__tls_get_addr@plt
 	nop;nop;nop;nop
 
-	/* LD */
+	/* LD -> LE */
 	leaq	sl1@tlsld(%rip), %rdi
 	call	__tls_get_addr@plt
 	nop;nop
@@ -79,7 +79,7 @@ fn2:
 	leaq	sl2@dtpoff+2(%rax), %r9
 	nop;nop;nop;nop
 
-	/* LD against hidden variables */
+	/* LD -> LE against hidden variables */
 	leaq	sh1@tlsld(%rip), %rdi
 	call	__tls_get_addr@plt
 	nop;nop
