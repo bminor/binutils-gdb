@@ -1,3 +1,16 @@
+Wed Apr 29 15:35:03 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.bfd: If we include any ELF targets in targ_defvec and/or
+	targ_selvecs, then add the generic ELF targets to targ_selvecs.
+	* elf32-gen.c (dummy): New static const variable.
+	(elf_generic_info_to_howto): New static function.
+	(elf_generic_info_to_howto_rel): New static function.
+	(elf_info_to_howto): Define as elf_generic_info_to_howto.
+	(elf_info_to_howto_rel): Define as elf_generic_info_to_howto_rel.
+	* elf64-gen.c: Same changes as elf32-gen.c.
+	* elfcode.h (elf_object_p): For the generic target, ignore a
+	failure of bfd_default_set_arch_mach.  Fix indentation a bit.
+
 Tue Apr 28 20:05:52 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in (WIN32LIBADD): Add -lintl on cygwin32.
