@@ -443,11 +443,13 @@ extern void vms_write_object_file PARAMS ((unsigned,unsigned,unsigned,
 #define DST_S_C_SET_LINUM_L	20	/* Set Line #	*/
 #define	DST_S_C_TERM_L		21	/* End of lines	*/
 /* these are used with DST_S_C_SOURCE */
-#define	DST_S_C_SRC_FORMFEED	16	/* ^L counts	*/
-#define	DST_S_C_SRC_DECLFILE	1	/* Declare file	*/
-#define	DST_S_C_SRC_SETFILE	2	/* Set file	*/
-#define	DST_S_C_SRC_SETREC_L	3	/* Set record	*/
-#define	DST_S_C_SRC_DEFLINES_W	10	/* # of line	*/
+#define DST_S_C_SRC_DECLFILE	 1	/* Declare source file */
+#define DST_S_C_SRC_SETFILE	 2	/* Set source file */
+#define DST_S_C_SRC_SETREC_L	 3	/* Set record, longword value */
+#define DST_S_C_SRC_SETREC_W	 4	/* Set record, word value */
+#define DST_S_C_SRC_DEFLINES_W	10	/* # of line, word counter */
+#define DST_S_C_SRC_DEFLINES_B	11	/* # of line, byte counter */
+#define DST_S_C_SRC_FORMFEED	16	/* ^L counts as a record */
 /* the following are the codes for the various data types.  Anything not on
  * the list is included under 'advanced_type'
  */

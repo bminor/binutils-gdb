@@ -1,3 +1,26 @@
+Tue Aug 22 03:00:33 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
+
+	Sat Aug 19 18:08:16 1995  Pat Rankin  <rankin@eql.caltech.edu>
+
+	* config/obj-vms.h (DST_S_C_SRC_SETREC_W, DST_S_C_SRC_DEFLINES_B):
+	New macros.
+	* config/obj-vms.c (VMS_TBT_Line_PC_Correlation,
+	VMS_TBT_Source_Lines): Make traceback info be robust enough to
+	handle huge source files.
+	(VMS_TBT_Source_File): Reorganize the native- vs cross-assembly
+	support so that actual object file output is clearer.
+	(VMS_TBT_Source_File: Fab, Nam, Date_Xab, File_Header_Xab):
+	Replace static variables with automatic ones.
+
+	Sat Aug 12 20:18:15 1995  Pat Rankin  <rankin@eql.caltech.edu>
+
+	* config/obj-vms.c (Module_Name): new file scope variable.
+	(VMS_TBT_Module_Begin): use it instead of local variable.
+	(Write_VMS_MHD_Records): ditto; assign its value here.
+	(Write_VMS_EOM_Record): second argument has type valueT.
+	(VMS_Initialized_Data_Size):  simplify search loop; return
+	type is offsetT; second argument is unsigned.
+
 Mon Aug 21 13:57:20 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* as.c (parse_args): Accept --defsym SYM=VALUE.
@@ -10041,7 +10064,7 @@ Wed Apr 21 00:20:11 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* symbols.c (DEBUG): Enabled.
 	(symbol_new): Make sure bfd_make_empty_symbol works.
-	(verify_symbol_chain_2): New funcion; takes one symbol as
+	(verify_symbol_chain_2): New function; takes one symbol as
 	argument, anywhere in the chain.
 	(dollar_label*): Use default initializers.
 
@@ -10074,7 +10097,7 @@ Wed Apr 21 00:20:11 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 	(_doprnt): Deleted.
 	(VMS_Store_Struct, VMS_Def_Struct, VMS_Set_Struct,
 	VMS_TBT_Block_End, get_VMS_time_on_unix, generate_suffix,
-	VMS_Psect_Spec): Fixed to compiler under traditional C.
+	VMS_Psect_Spec): Fixed to compile under traditional C.
 	* config/obj-vms.h: Use PARAMS macro.
 	(vms_resolve_symbol_redef): Declare.
 	(RESOLVE_SYMBOL_REDEFINITION): New macro.

@@ -219,6 +219,10 @@ static int vax_g_doubles = 0;
 
 static int Current_Environment = -1;
 
+/* Every object file must specify an module name, which is also used by
+   traceback records.  Set in Write_VMS_MHD_Records().  */
+
+static char Module_Name[255+1];
 
 /*
  * Variable descriptors are used tell the debugger the data types of certain
@@ -345,6 +349,8 @@ static char *cvt_integer PARAMS ((char *,int *));
 static char *fix_name PARAMS ((char *));
 static char *get_struct_name PARAMS ((char *));
 
+static offsetT VMS_Initialized_Data_Size PARAMS ((symbolS *,unsigned));
+
 static int VMS_TBT_Source_File PARAMS ((char *,int));
 static int gen1 PARAMS ((struct VMS_DBG_Symbol *,int));
 static int forward_reference PARAMS ((char *));
@@ -353,7 +359,6 @@ static int VMS_typedef_parse PARAMS ((char *));
 static int hash_string PARAMS ((const char *));
 static int VMS_Psect_Spec PARAMS ((const char *,int,enum ps_type,
 				   struct VMS_Symbol *));
-static int VMS_Initialized_Data_Size PARAMS ((symbolS *,int));
 
 /* Local support routines which don't directly return any value.  */
 
@@ -393,7 +398,7 @@ static void VMS_RSYM_Parse PARAMS ((symbolS *,symbolS *,int));
 static void VMS_LSYM_Parse PARAMS ((void));
 static void Define_Local_Symbols PARAMS ((symbolS *,symbolS *,symbolS *,int));
 static void Write_VMS_MHD_Records PARAMS ((void));
-static void Write_VMS_EOM_Record PARAMS ((int,int));
+static void Write_VMS_EOM_Record PARAMS ((int,valueT));
 static void VMS_Case_Hack_Symbol PARAMS ((const char *,char *));
 static void VMS_Modify_Psect_Attributes PARAMS ((const char *,int *));
 static void VMS_Global_Symbol_Spec PARAMS ((const char *,int,int,int));
@@ -841,105 +846,61 @@ VMS_Set_Struct (Struct_Index)
     Flush_VMS_Object_Record_Buffer ();
 }
 
-/*
- *	Write the Traceback Module Begin record
- */
+
+ /****** Traceback Information routines ******/
+
+
+/* Write the Traceback Module Begin record.  */
+
 static void
 VMS_TBT_Module_Begin ()
 {
   register char *cp, *cp1;
   int Size;
-  char Module_Name[256];
   char Local[256];
 
-  /*
-   *	Get module name (the FILENAME part of the object file)
-   */
-  cp = out_file_name;
-  cp1 = Module_Name;
-  while (*cp)
-    {
-      if ((*cp == ']') || (*cp == '>') ||
-	  (*cp == ':') || (*cp == '/'))
-	{
-	  cp1 = Module_Name;
-	  cp++;
-	  continue;
-	}
-      *cp1++ = islower (*cp) ? toupper (*cp++) : *cp++;
-    }
-  *cp1 = 0;
-  /*
-   *	Limit it to 31 characters
-   */
-  while (--cp1 >= Module_Name)
-    if (*cp1 == '.')
-      *cp1 = 0;
-  if (strlen (Module_Name) > 31)
-    {
-      if (flag_hash_long_names)
-	as_tsktsk ("Module name truncated: %s", Module_Name);
-      Module_Name[31] = 0;
-    }
-  /*
-   *	Arrange to store the data locally (leave room for size byte)
-   */
-  cp = Local + 1;
-  /*
-   *	Begin module
-   */
+  /* Arrange to store the data locally (leave room for size byte).  */
+  cp = &Local[1];
+  /* Begin module.  */
   *cp++ = DST_S_C_MODBEG;
-  /*
-   *	Unused
-   */
-  *cp++ = 0;
+  *cp++ = 0;		/* flags; not used */
   /*
    *	Language type == "C"
+   *
+   * (FIXME:  this should be based on the input...)
    */
   COPY_LONG (cp, DST_S_C_C);
   cp += 4;
-  /*
-   *	Store the module name
-   */
-  *cp++ = strlen (Module_Name);
+  /* Store the module name.  */
+  *cp++ = (char) strlen (Module_Name);
   cp1 = Module_Name;
   while (*cp1)
     *cp++ = *cp1++;
-  /*
-   *	Now we can store the record size
-   */
+  /* Now we can store the record size.  */
   Size = (cp - Local);
   Local[0] = Size - 1;
-  /*
-   *	Put it into the object record
-   */
+  /* Put it into the object record.  */
   VMS_Store_Immediate_Data (Local, Size, OBJ_S_C_TBT);
 }
-
 
-/*
- *	Write the Traceback Module End record
-*/
+
+/* Write the Traceback Module End record.  */
+
 static void
 VMS_TBT_Module_End ()
 {
   char Local[2];
 
-  /*
-   *	End module
-   */
+  /* End module.  */
   Local[0] = 1;
   Local[1] = DST_S_C_MODEND;
-  /*
-   *	Put it into the object record
-   */
+  /* Put it into the object record.  */
   VMS_Store_Immediate_Data (Local, 2, OBJ_S_C_TBT);
 }
-
 
-/*
- *	Write the Traceback Routine Begin record
- */
+
+/* Write a Traceback Routine Begin record.  */
+
 static void
 VMS_TBT_Routine_Begin (symbolP, Psect)
      symbolS *symbolP;
@@ -951,52 +912,29 @@ VMS_TBT_Routine_Begin (symbolP, Psect)
   int Size;
   char Local[512];
 
-  /*
-   *	Strip the leading "_" from the name
-   */
+  /* Strip the leading "_" from the name.  */
   Name = S_GET_NAME (symbolP);
   if (*Name == '_')
     Name++;
-  /*
-   *	Get the text psect offset
-   */
+  /* Get the text psect offset.  */
   Offset = S_GET_VALUE (symbolP);
-  /*
-   *	Calculate the record size
-   */
+  /* Set the record size.  */
   Size = 1 + 1 + 4 + 1 + strlen (Name);
-  /*
-   *	Record Size
-   */
   Local[0] = Size;
-  /*
-   *	Begin Routine
-   */
+  /* DST type "routine begin".  */
   Local[1] = DST_S_C_RTNBEG;
-  /*
-   *	Uses CallS/CallG
-   */
+  /* Uses CallS/CallG.  */
   Local[2] = 0;
-  /*
-   *	Store the data so far
-   */
+  /* Store the data so far.  */
   VMS_Store_Immediate_Data (Local, 3, OBJ_S_C_TBT);
-  /*
-   *	Make sure we are still generating a OBJ_S_C_TBT record
-   */
+  /* Make sure we are still generating a OBJ_S_C_TBT record.  */
   if (Object_Record_Offset == 0)
     PUT_CHAR (OBJ_S_C_TBT);
-  /*
-   *	Stack the address
-   */
+  /* Stack the address.  */
   vms_tir_stack_psect (Psect, Offset, 0);
-  /*
-   *	Store the data reference
-   */
+  /* Store the data reference.  */
   PUT_CHAR (TIR_S_C_STO_PIDR);
-  /*
-   *	Store the counted string as data
-   */
+  /* Store the counted string as data.  */
   cp = Local;
   cp1 = Name;
   Size = strlen (cp1) + 1;
@@ -1005,16 +943,16 @@ VMS_TBT_Routine_Begin (symbolP, Psect)
     *cp++ = *cp1++;
   VMS_Store_Immediate_Data (Local, Size, OBJ_S_C_TBT);
 }
-
 
-/*
- *	Write the Traceback Routine End record
- * 	We *must* search the symbol table to find the next routine, since
- * 	the assember has a way of reassembling the symbol table OUT OF ORDER
- * 	Thus the next routine in the symbol list is not necessarily the
- *	next one in memory.  For debugging to work correctly we must know the
- *	size of the routine.
- */
+
+/* Write a Traceback Routine End record.
+
+   We *must* search the symbol table to find the next routine, since the
+   assember has a way of reassembling the symbol table OUT OF ORDER Thus
+   the next routine in the symbol list is not necessarily the next one in
+   memory.  For debugging to work correctly we must know the size of the
+   routine.  */
+
 static void
 VMS_TBT_Routine_End (Max_Size, sp)
      int Max_Size;
@@ -1052,31 +990,20 @@ VMS_TBT_Routine_End (Max_Size, sp)
   if (Size == 0x7fffffff)
     Size = Max_Size;
   Size -= sp_value;		/* and get the size of the routine */
-  /*
-   *	Record Size
-   */
+  /* Record Size.  */
   Local[0] = 6;
-  /*
-   *	End of Routine
-   */
+  /* DST type is "routine end".  */
   Local[1] = DST_S_C_RTNEND;
-  /*
-   *	Unused
-   */
-  Local[2] = 0;
-  /*
-   *	Size of routine
-   */
+  Local[2] = 0;		/* unused */
+  /* Size of routine.  */
   COPY_LONG (&Local[3], Size);
-  /*
-   *	Store the record
-   */
+  /* Store the record.  */
   VMS_Store_Immediate_Data (Local, 7, OBJ_S_C_TBT);
 }
 
-/*
- *	Write the Traceback Block End record
- */
+
+/* Write a Traceback Block Begin record.  */
+
 static void
 VMS_TBT_Block_Begin (symbolP, Psect, Name)
      symbolS *symbolP;
@@ -1087,48 +1014,28 @@ VMS_TBT_Block_Begin (symbolP, Psect, Name)
   int Offset;
   int Size;
   char Local[512];
-  /*
-   *	Begin block
-   */
+
+  /* Set the record size.  */
   Size = 1 + 1 + 4 + 1 + strlen (Name);
-  /*
-   *	Record Size
-   */
   Local[0] = Size;
-  /*
-   *	Begin Block - We simulate with a phony routine
-   */
+  /* DST type is "begin block"; we simulate with a phony routine.  */
   Local[1] = DST_S_C_BLKBEG;
-  /*
-   *	Uses CallS/CallG
-   */
+  /* Uses CallS/CallG.  */
   Local[2] = 0;
-  /*
-   *	Store the data so far
-   */
+  /* Store the data so far.  */
   VMS_Store_Immediate_Data (Local, 3, OBJ_S_C_DBG);
-  /*
-   *	Make sure we are still generating a OBJ_S_C_DBG record
-   */
+  /* Make sure we are still generating a debug record.  */
   if (Object_Record_Offset == 0)
     PUT_CHAR (OBJ_S_C_DBG);
-  /*
-   *	Now get the symbol address
-   */
+  /* Now get the symbol address.  */
   PUT_CHAR (TIR_S_C_STA_WPL);
   PUT_SHORT (Psect);
-  /*
-   *	Get the text psect offset
-   */
+  /* Get the text psect offset.  */
   Offset = S_GET_VALUE (symbolP);
   PUT_LONG (Offset);
-  /*
-   *	Store the data reference
-   */
+  /* Store the data reference.  */
   PUT_CHAR (TIR_S_C_STO_PIDR);
-  /*
-   *	Store the counted string as data
-   */
+  /* Store the counted string as data.  */
   cp = Local;
   cp1 = Name;
   Size = strlen (cp1) + 1;
@@ -1137,21 +1044,18 @@ VMS_TBT_Block_Begin (symbolP, Psect, Name)
     *cp++ = *cp1++;
   VMS_Store_Immediate_Data (Local, Size, OBJ_S_C_DBG);
 }
-
 
-/*
- *	Write the Traceback Block End record
- */
+
+/* Write a Traceback Block End record.  */
+
 static void
 VMS_TBT_Block_End (Size)
      valueT Size;
 {
   char Local[16];
 
-  /*
-   *	End block - simulate with a phony end routine
-   */
-  Local[0] = 6;
+  Local[0] = 6;		/* record length */
+  /* DST type is "block end"; simulate with a phony end routine.  */
   Local[1] = DST_S_C_BLKEND;
   Local[2] = 0;		/* unused, must be zero */
   COPY_LONG (&Local[3], Size);
@@ -1159,10 +1063,8 @@ VMS_TBT_Block_End (Size)
 }
 
 
+/* Write a Line number <-> Program Counter correlation record.  */
 
-/*
- *	Write a Line number / PC correlation record
- */
 static void
 VMS_TBT_Line_PC_Correlation (Line_Number, Offset, Psect, Do_Delta)
      int Line_Number;
@@ -1173,39 +1075,43 @@ VMS_TBT_Line_PC_Correlation (Line_Number, Offset, Psect, Do_Delta)
   register char *cp;
   char Local[64];
 
-  /*
-*	If not delta, set our PC/Line number correlation
-*/
   if (Do_Delta == 0)
     {
       /*
-       *	Size
+       *  If not delta, set our PC/Line number correlation.
        */
-      Local[0] = 1 + 1 + 2 + 1 + 4;
-      /*
-       *	Line Number/PC correlation
-       */
-      Local[1] = DST_S_C_LINE_NUM;
-      /*
-       *	Set Line number
-       */
-      Local[2] = DST_S_C_SET_LINE_NUM;
-      COPY_SHORT (&Local[3], Line_Number - 1);
-      /*
-       *	Set PC
-       */
-      Local[5] = DST_S_C_SET_ABS_PC;
-      VMS_Store_Immediate_Data (Local, 6, OBJ_S_C_TBT);
-      /*
-       *	Make sure we are still generating a OBJ_S_C_TBT record
-       */
+      cp = &Local[1];	/* Put size in Local[0] later.  */
+      /* DST type is "Line Number/PC correlation".  */
+      *cp++ = DST_S_C_LINE_NUM;
+      /* Set Line number.  */
+      if (Line_Number - 1 <= 255)
+	{
+	  *cp++ = DST_S_C_SET_LINUM_B;
+	  *cp++ = (char) (Line_Number - 1);
+	}
+      else if (Line_Number - 1 <= 65535)
+	{
+	  *cp++ = DST_S_C_SET_LINE_NUM;
+	  COPY_SHORT (cp, Line_Number - 1),  cp += 2;
+	}
+      else
+	{
+	  *cp++ = DST_S_C_SET_LINUM_L;
+	  COPY_LONG (cp, Line_Number - 1),  cp += 4;
+	}
+      /* Set PC.  */
+      *cp++ = DST_S_C_SET_ABS_PC;
+      /* Store size now that we know it, then output the data.  */
+      Local[0] = cp - &Local[1];
+	/* Account for the space that TIR_S_C_STO_PIDR will use for the PC.  */
+	Local[0] += 4;		/* size includes length of another longword */
+      VMS_Store_Immediate_Data (Local, cp - Local, OBJ_S_C_TBT);
+      /* Make sure we are still generating a OBJ_S_C_TBT record.  */
       if (Object_Record_Offset == 0)
 	PUT_CHAR (OBJ_S_C_TBT);
       vms_tir_stack_psect (Psect, Offset, 0);
       PUT_CHAR (TIR_S_C_STO_PIDR);
-      /*
-       *	Do a PC offset of 0 to register the line number
-       */
+      /* Do a PC offset of 0 to register the line number.  */
       Local[0] = 2;
       Local[1] = DST_S_C_LINE_NUM;
       Local[2] = 0;		/* Increment PC by 0 and register line # */
@@ -1213,41 +1119,40 @@ VMS_TBT_Line_PC_Correlation (Line_Number, Offset, Psect, Do_Delta)
     }
   else
     {
-      /*
-       *	If Delta is negative, terminate the line numbers
-       */
       if (Do_Delta < 0)
 	{
+	  /*
+	   *  When delta is negative, terminate the line numbers.
+	   */
 	  Local[0] = 1 + 1 + 4;
 	  Local[1] = DST_S_C_LINE_NUM;
 	  Local[2] = DST_S_C_TERM_L;
 	  COPY_LONG (&Local[3], Offset);
 	  VMS_Store_Immediate_Data (Local, 7, OBJ_S_C_TBT);
-	  /*
-	   *	Done
-	   */
 	  return;
 	}
       /*
-       *	Do a PC/Line delta
+       *  Do a PC/Line delta.
        */
-      cp = Local + 1;
+      cp = &Local[1];
       *cp++ = DST_S_C_LINE_NUM;
       if (Line_Number > 1)
 	{
-	  /*
-	   *	We need to increment the line number
-	   */
+	  /* We need to increment the line number.  */
 	  if (Line_Number - 1 <= 255)
 	    {
 	      *cp++ = DST_S_C_INCR_LINUM;
 	      *cp++ = Line_Number - 1;
 	    }
-	  else
+	  else if (Line_Number - 1 <= 65535)
 	    {
 	      *cp++ = DST_S_C_INCR_LINUM_W;
-	      COPY_SHORT (cp, Line_Number - 1);
-	      cp += 2;
+	      COPY_SHORT (cp, Line_Number - 1),  cp += 2;
+	    }
+	  else
+	    {
+	      *cp++ = DST_S_C_INCR_LINUM_L;
+	      COPY_LONG (cp, Line_Number - 1),  cp += 4;
 	    }
 	}
       /*
@@ -1255,189 +1160,135 @@ VMS_TBT_Line_PC_Correlation (Line_Number, Offset, Psect, Do_Delta)
        */
       if (Offset <= 128)
 	{
-	  *cp++ = -Offset;
+	  /* Small offsets are encoded as negative numbers, rather than the
+	     usual non-negative type code followed by another data field.  */
+	  *cp++ = (char) -Offset;
+	}
+      else if (Offset <= 65535)
+	{
+	  *cp++ = DST_S_C_DELTA_PC_W;
+	  COPY_SHORT (cp, Offset),  cp += 2;
 	}
       else
 	{
-	  if (Offset < 0x10000)
-	    {
-	      *cp++ = DST_S_C_DELTA_PC_W;
-	      COPY_SHORT (cp, Offset);
-	      cp += 2;
-	    }
-	  else
-	    {
-	      *cp++ = DST_S_C_DELTA_PC_L;
-	      COPY_LONG (cp, Offset);
-	      cp += 4;
-	    }
+	  *cp++ = DST_S_C_DELTA_PC_L;
+	  COPY_LONG (cp, Offset),  cp += 4;
 	}
-      Local[0] = cp - (Local + 1);
+      /* Set size now that be know it, then output the data.  */
+      Local[0] = cp - &Local[1];
       VMS_Store_Immediate_Data (Local, cp - Local, OBJ_S_C_TBT);
     }
 }
 
 
-/*
- *	Describe a source file to the debugger
- */
+/* Describe a source file to the debugger.  */
+
 static int
 VMS_TBT_Source_File (Filename, ID_Number)
      char *Filename;
      int ID_Number;
 {
-  register char *cp, *cp1;
-  int Status, i;
+  register char *cp;
+  int len, rfo, ffb, ebk;
+  char cdt[8];
   char Local[512];
-#ifndef VMS			/* Used for cross-assembly */
-  i = strlen (Filename);
-#else /* VMS */
-  static struct FAB Fab;
-  static struct NAM Nam;
-  static struct XABDAT Date_Xab;
-  static struct XABFHC File_Header_Xab;
-  char Es_String[255], Rs_String[255];
+#ifdef VMS			/* Used for native assembly */
+  unsigned Status;
+  struct FAB fab;			/* RMS file access block */
+  struct NAM nam;			/* file name information */
+  struct XABDAT xabdat;			/* date+time fields */
+  struct XABFHC xabfhc;			/* file header characteristics */
+  char resultant_string_buffer[255 + 1];
 
   /*
-   *	Setup the Fab
+   *	Set up RMS structures:
    */
-  Fab.fab$b_bid = FAB$C_BID;
-  Fab.fab$b_bln = sizeof (Fab);
-  Fab.fab$l_nam = (&Nam);
-  Fab.fab$l_xab = (char *) &Date_Xab;
-  /*
-   *	Setup the Nam block so we can find out the FULL name
-   *	of the source file.
-   */
-  Nam.nam$b_bid = NAM$C_BID;
-  Nam.nam$b_bln = sizeof (Nam);
-  Nam.nam$l_rsa = Rs_String;
-  Nam.nam$b_rss = sizeof (Rs_String);
-  Nam.nam$l_esa = Es_String;
-  Nam.nam$b_ess = sizeof (Es_String);
-  /*
-   *	Setup the Date and File Header Xabs
-   */
-  Date_Xab.xab$b_cod = XAB$C_DAT;
-  Date_Xab.xab$b_bln = sizeof (Date_Xab);
-  Date_Xab.xab$l_nxt = (char *) &File_Header_Xab;
-  File_Header_Xab.xab$b_cod = XAB$C_FHC;
-  File_Header_Xab.xab$b_bln = sizeof (File_Header_Xab);
+  /* FAB -- file access block */
+  memset ((char *) &fab, 0, sizeof fab);
+  fab.fab$b_bid = FAB$C_BID;
+  fab.fab$b_bln = (unsigned char) sizeof fab;
+  fab.fab$l_fna = Filename;
+  fab.fab$b_fns = (unsigned char) strlen (Filename);
+  fab.fab$l_nam = (char *) &nam;
+  fab.fab$l_xab = (char *) &xabdat;
+  /* NAM -- file name block */
+  memset ((char *) &nam, 0, sizeof nam);
+  nam.nam$b_bid = NAM$C_BID;
+  nam.nam$b_bln = (unsigned char) sizeof nam;
+  nam.nam$l_rsa = resultant_string_buffer;
+  nam.nam$b_rss = (unsigned char) (sizeof resultant_string_buffer - 1);
+  /* XABs -- extended attributes blocks */
+  memset ((char *) &xabdat, 0, sizeof xabdat);
+  xabdat.xab$b_cod = XAB$C_DAT;
+  xabdat.xab$b_bln = (unsigned char) sizeof xabdat;
+  xabdat.xab$l_nxt = (char *) &xabfhc;
+  memset ((char *) &xabfhc, 0, sizeof xabfhc);
+  xabfhc.xab$b_cod = XAB$C_FHC;
+  xabfhc.xab$b_bln = (unsigned char) sizeof xabfhc;
+  xabfhc.xab$l_nxt = 0;
   /*
    *	Get the file information
    */
-  Fab.fab$l_fna = Filename;
-  Fab.fab$b_fns = strlen (Filename);
-  Status = sys$open (&Fab);
+  Status = sys$open (&fab);
   if (!(Status & 1))
     {
       as_tsktsk ("Couldn't find source file \"%s\", status=%%X%x",
 		 Filename, Status);
-      return (0);
+      return 0;
     }
-  sys$close (&Fab);
-  /*
-   *	Calculate the size of the resultant string
-   */
-  i = Nam.nam$b_rsl;
+  sys$close (&fab);
+  /* Now extract fields of interest.  */
+  memcpy (cdt, (char *) &xabdat.xab$q_cdt, 8);	/* creation date */
+  ebk = xabfhc.xab$l_ebk;		/* end-of-file block */
+  ffb = xabfhc.xab$w_ffb;		/* first free byte of last block */
+  rfo = xabfhc.xab$b_rfo;		/* record format */
+  len = nam.nam$b_rsl;			/* length of Filename */
+  resultant_string_buffer[len] = '\0';
+  Filename = resultant_string_buffer;	/* full filename */
+#else				/* Cross-assembly */
+  /* [Perhaps we ought to use actual values derived from stat() here?]  */
+  memset (cdt, 0, 8);			/* null VMS quadword binary time */
+  ebk = ffb = rfo = 0;
+  len = strlen (Filename);
+  if (len > 255)	/* a single byte is used as count prefix */
+    {
+      Filename += (len - 255);		/* tail end is more significant */
+      len = 255;
+    }
 #endif /* VMS */
-  /*
-   *	Size of record
-   */
-  Local[0] = 1 + 1 + 1 + 1 + 1 + 2 + 8 + 4 + 2 + 1 + 1 + i + 1;
-  /*
-   *	Source declaration
-   */
-  Local[1] = DST_S_C_SOURCE;
-  /*
-   *	Make formfeeds count as source records
-   */
-  Local[2] = DST_S_C_SRC_FORMFEED;
-  /*
-   *	Declare source file
-   */
-  Local[3] = DST_S_C_SRC_DECLFILE;
-  Local[4] = 1 + 2 + 8 + 4 + 2 + 1 + 1 + i + 1;
-  cp = Local + 5;
-  /*
-   *	Flags
-   */
+
+  cp = &Local[1];			/* fill in record length later */
+  *cp++ = DST_S_C_SOURCE;		/* DST type is "source file" */
+  *cp++ = DST_S_C_SRC_FORMFEED;		/* formfeeds count as source records */
+  *cp++ = DST_S_C_SRC_DECLFILE;		/* declare source file */
+  know (cp == &Local[4]);
+  *cp++ = 0;				/* fill in this length below */
+  *cp++ = 0;				/* flags; must be zero */
+  COPY_SHORT (cp, ID_Number),  cp += 2;	/* file ID number */
+  memcpy (cp, cdt, 8),  cp += 8;	/* creation date+time */
+  COPY_LONG (cp, ebk),  cp += 4;	/* end-of-file block */
+  COPY_SHORT (cp, ffb),  cp += 2;	/* first free byte of last block */
+  *cp++ = (char) rfo;			/* RMS record format */
+  /* Filename.  */
+  *cp++ = (char) len;
+  while (--len >= 0)
+    *cp++ = *Filename++;
+  /* Library module name (none).  */
   *cp++ = 0;
-  /*
-   *	File ID
-   */
-  COPY_SHORT (cp, ID_Number);
-  cp += 2;
-#ifndef VMS
-  /*
-   *	Creation Date.  Unknown, so we fill with zeroes.
-   */
-  COPY_LONG (cp, 0);
-  cp += 4;
-  COPY_LONG (cp, 0);
-  cp += 4;
-  /*
-   *	End of file block
-   */
-  COPY_LONG (cp, 0);
-  cp += 4;
-  /*
-   *	First free byte
-   */
-  COPY_SHORT (cp, 0);
-  cp += 2;
-  /*
-   *	Record format
-   */
-  *cp++ = 0;
-  /*
-   *	Filename
-   */
-  *cp++ = i;
-  cp1 = Filename;
-#else /* Use this code when assembling for VMS on a VMS system */
-  /*
-   *	Creation Date
-   */
-  memcpy (cp, (char *) &Date_Xab.xab$q_cdt, 8);
-  cp += 8;
-  /*
-   *	End of file block
-   */
-  COPY_LONG (cp, File_Header_Xab.xab$l_ebk);
-  cp += 4;
-  /*
-   *	First free byte
-   */
-  COPY_SHORT (cp, File_Header_Xab.xab$w_ffb);
-  cp += 2;
-  /*
-   *	Record format
-   */
-  *cp++ = File_Header_Xab.xab$b_rfo;
-  /*
-   *	Filename
-   */
-  *cp++ = i;
-  cp1 = Rs_String;
-#endif /* VMS */
-  while (--i >= 0)
-    *cp++ = *cp1++;
-  /*
-   *	Library module name (none)
-   */
-  *cp++ = 0;
-  /*
-   *	Done
-   */
+  /* Now that size is known, fill it in and write out the record.  */
+  Local[4] = cp - &Local[5];		/* source file declaration size */ 
+  Local[0] = cp - &Local[1];		/* TBT record size */
   VMS_Store_Immediate_Data (Local, cp - Local, OBJ_S_C_TBT);
   return 1;
 }
-
 
-/*
- *	Give the number of source lines to the debugger
- */
+
+/* Traceback information is described in terms of lines from compiler
+   listing files, not lines from source files.  We need to set up the
+   correlation between listing line numbers and source line numbers.
+   Since gcc's .stabn directives refer to the source lines, we just
+   need to describe a one-to-one correspondence.  */
+
 static void
 VMS_TBT_Source_Lines (ID_Number, Starting_Line_Number, Number_Of_Lines)
      int ID_Number;
@@ -1445,41 +1296,46 @@ VMS_TBT_Source_Lines (ID_Number, Starting_Line_Number, Number_Of_Lines)
      int Number_Of_Lines;
 {
   char *cp;
-  char Local[16];
+  int chunk_limit;
+  char Local[128];	/* room enough to describe 1310700 lines... */
 
-  /*
-   *	Size of record
-   */
-  Local[0] = 1 + 1 + 2 + 1 + 4 + 1 + 2;
-  /*
-   *	Source declaration
-   */
-  Local[1] = DST_S_C_SOURCE;
-  /*
-   *	Set Source File
-   */
-  cp = Local + 2;
-  *cp++ = DST_S_C_SRC_SETFILE;
-  /*
-   *	File ID Number
-   */
-  COPY_SHORT (cp, ID_Number);
-  cp += 2;
-  /*
-   *	Set record number
-   */
-  *cp++ = DST_S_C_SRC_SETREC_L;
-  COPY_LONG (cp, Starting_Line_Number);
-  cp += 4;
-  /*
-   *	Define lines
-   */
+  cp = &Local[1];	/* Put size in Local[0] later.  */
+  *cp++ = DST_S_C_SOURCE;		/* DST type is "source file".  */
+  *cp++ = DST_S_C_SRC_SETFILE;		/* Set Source File.  */
+  COPY_SHORT (cp, ID_Number),  cp += 2;	/* File ID Number.  */
+  /* Set record number and define lines.  Since no longword form of
+     SRC_DEFLINES is available, we need to be able to cope with any huge
+     files a chunk at a time.  It doesn't matter for tracebacks, since
+     unspecified lines are mapped one-to-one and work out right, but it
+     does matter within the debugger.  Without this explicit mapping,
+     it will complain about lines not existing in the module.  */
+  chunk_limit = (sizeof Local - 5) / 6;
+  if (Number_Of_Lines > 65535 * chunk_limit)	/* avoid buffer overflow */
+    Number_Of_Lines = 65535 * chunk_limit;
+  while (Number_Of_Lines > 65535)
+    {
+      *cp++ = DST_S_C_SRC_SETREC_L;
+      COPY_LONG (cp, Starting_Line_Number),  cp += 4;
+      *cp++ = DST_S_C_SRC_DEFLINES_W;
+      COPY_SHORT (cp, 65535),  cp += 2;
+      Starting_Line_Number += 65535;
+      Number_Of_Lines -= 65535;
+    }
+  /* Set record number and define lines, normal case.  */
+  if (Starting_Line_Number <= 65535)
+    {
+      *cp++ = DST_S_C_SRC_SETREC_W;
+      COPY_SHORT (cp, Starting_Line_Number),  cp += 2;
+    }
+  else
+    {
+      *cp++ = DST_S_C_SRC_SETREC_L;
+      COPY_LONG (cp, Starting_Line_Number),  cp += 4;
+    }
   *cp++ = DST_S_C_SRC_DEFLINES_W;
-  COPY_SHORT (cp, Number_Of_Lines);
-  cp += 2;
-  /*
-   *	Done
-   */
+  COPY_SHORT (cp, Number_Of_Lines),  cp += 2;
+  /* Set size now that be know it, then output the data.  */
+  Local[0] = cp - &Local[1];
   VMS_Store_Immediate_Data (Local, cp - Local, OBJ_S_C_TBT);
 }
 
@@ -3200,9 +3056,9 @@ get_VMS_time_on_unix (Now)
 }
 #endif /* not VMS */
 
-/*
- *	Write the MHD (Module Header) records
- */
+
+/* Write the MHD (Module Header) records.  */
+
 static void
 Write_VMS_MHD_Records ()
 {
@@ -3212,29 +3068,21 @@ Write_VMS_MHD_Records ()
 #ifdef VMS
   struct { unsigned short len, mbz; char *ptr; } Descriptor;
 #endif
-  char Module_Name[255+1];
   char Now[17+1];
 
-  /*
-   *	We are writing a module header record
-   */
+  /* We are writing a module header record.  */
   Set_VMS_Object_File_Record (OBJ_S_C_HDR);
   /*
    *	***************************
    *	*MAIN MODULE HEADER RECORD*
    *	***************************
-   *
-   *	Store record type and header type
    */
+  /* Store record type and header type.  */
   PUT_CHAR (OBJ_S_C_HDR);
   PUT_CHAR (MHD_S_C_MHD);
-  /*
-   *	Structure level is 0
-   */
+  /* Structure level is 0.  */
   PUT_CHAR (OBJ_S_C_STRLVL);
-  /*
-   *	Maximum record size is size of the object record buffer
-   */
+  /* Maximum record size is size of the object record buffer.  */
   PUT_SHORT (sizeof (Object_Record_Buffer));
 
 	/*
@@ -3242,15 +3090,12 @@ Write_VMS_MHD_Records ()
 	 *		specifiable via `.ident' and/or `#pragma ident'.
 	 */
 
-  /*
-   *	Get module name (the FILENAME part of the object file)
-   */
+  /* Get module name (the FILENAME part of the object file).  */
   cp = out_file_name;
   cp1 = Module_Name;
   while (*cp)
     {
-      if ((*cp == ']') || (*cp == '>') ||
-	  (*cp == ':') || (*cp == '/'))
+      if (*cp == ']' || *cp == '>' || *cp == ':' || *cp == '/')
 	{
 	  cp1 = Module_Name;
 	  cp++;
@@ -3258,27 +3103,22 @@ Write_VMS_MHD_Records ()
 	}
       *cp1++ = islower (*cp) ? toupper (*cp++) : *cp++;
     }
-  *cp1 = 0;
-  /*
-   *	Limit it to 31 characters and store in the object record
-   */
+  *cp1 = '\0';
+
+  /* Limit it to 31 characters and store in the object record.  */
   while (--cp1 >= Module_Name)
     if (*cp1 == '.')
-      *cp1 = 0;
+      *cp1 = '\0';
   if (strlen (Module_Name) > 31)
     {
       if (flag_hash_long_names)
 	as_tsktsk ("Module name truncated: %s\n", Module_Name);
-      Module_Name[31] = 0;
+      Module_Name[31] = '\0';
     }
   PUT_COUNTED_STRING (Module_Name);
-  /*
-   *	Module Version is "V1.0"
-   */
+  /* Module Version is "V1.0".  */
   PUT_COUNTED_STRING ("V1.0");
-  /*
-   *	Creation time is "now" (17 chars of time string): "dd-MMM-yyyy hh:mm".
-   */
+  /* Creation time is "now" (17 chars of time string): "dd-MMM-yyyy hh:mm".  */
 #ifndef VMS
   get_VMS_time_on_unix (Now);
 #else /* VMS */
@@ -3289,30 +3129,25 @@ Write_VMS_MHD_Records ()
 #endif /* VMS */
   for (i = 0; i < 17; i++)
     PUT_CHAR (Now[i]);
-  /*
-   *	Patch time is "never" (17 zeros)
-   */
+  /* Patch time is "never" (17 zeros).  */
   for (i = 0; i < 17; i++)
     PUT_CHAR (0);
-  /*
-   *	Flush the record
-   */
+  /* Force this to be a separate output record.  */
   Flush_VMS_Object_Record_Buffer ();
+
   /*
    *	*************************
    *	*LANGUAGE PROCESSOR NAME*
    *	*************************
-   *
-   *	Store record type and header type
    */
+  /* Store record type and header type.  */
   PUT_CHAR (OBJ_S_C_HDR);
   PUT_CHAR (MHD_S_C_LNM);
   /*
-   *	Store language processor name and version
-   *	(not a counted string!)
+   * Store language processor name and version (not a counted string!).
    *
-   *	This is normally supplied by the gcc driver for the command line
-   *	which invokes gas.  If absent, we fall back to gas's version.
+   * This is normally supplied by the gcc driver for the command line
+   * which invokes gas.  If absent, we fall back to gas's version.
    */
   cp = compiler_version_string;
   if (cp == 0)
@@ -3324,20 +3159,17 @@ Write_VMS_MHD_Records ()
     }
   while (*cp >= ' ')
     PUT_CHAR (*cp++);
-  /*
-   *	Flush the record
-   */
+  /* Force this to be a separate output record.  */
   Flush_VMS_Object_Record_Buffer ();
 }
-
 
-/*
- *	Write the EOM (End Of Module) record
- */
+
+/* Write the EOM (End Of Module) record.  */
+
 static void
 Write_VMS_EOM_Record (Psect, Offset)
      int Psect;
-     int Offset;
+     valueT Offset;
 {
   /*
    *	We are writing an end-of-module record
@@ -3356,9 +3188,7 @@ Write_VMS_EOM_Record (Psect, Offset)
       PUT_CHAR (Psect);
       PUT_LONG (Offset);
     }
-  /*
-   *	Flush the record
-   */
+  /* Flush the record; this will be our final output.  */
   Flush_VMS_Object_Record_Buffer ();
 }
 
@@ -3917,75 +3747,37 @@ VMS_Psect_Spec (Name, Size, Type, vsp)
 }
 
 
-/*
- *	Given the pointer to a symbol we calculate how big the data at the
- *	symbol is.  We do this by looking for the next symbol (local or
- *	global) which will indicate the start of another datum.
- */
-static int
-VMS_Initialized_Data_Size (sp, End_Of_Data)
-     register symbolS *sp;
-     int End_Of_Data;
+/* Given the pointer to a symbol we calculate how big the data at the
+   symbol is.  We do this by looking for the next symbol (local or global)
+   which will indicate the start of another datum.  */
+
+static offsetT
+VMS_Initialized_Data_Size (s0P, End_Of_Data)
+     register symbolS *s0P;
+     unsigned End_Of_Data;
 {
-  symbolS *sp1, *Next_Symbol;
-  /* Cache values to avoid extra lookups.  */
-  valueT sp_val = S_GET_VALUE (sp), sp1_val, next_val = 0;
+  symbolS *s1P;
+  valueT s0P_val = S_GET_VALUE (s0P), s1P_val,
+	 nearest_val = (valueT) End_Of_Data;
 
-  /*
-   *	Find the next symbol
-   *	it delimits this datum
-   */
-  Next_Symbol = 0;
-  for (sp1 = symbol_rootP; sp1; sp1 = symbol_next (sp1))
+  /* Find the nearest symbol what follows this one.  */
+  for (s1P = symbol_rootP; s1P; s1P = symbol_next (s1P))
     {
-      /*
-       *	The data type must match
-       */
-      if (S_GET_TYPE (sp1) != N_DATA)
+      /* The data type must match.  */
+      if (S_GET_TYPE (s1P) != N_DATA)
 	continue;
-
-      sp1_val = S_GET_VALUE (sp1);
-
-      /*
-       *	The symbol must be AFTER this symbol
-       */
-      if (sp1_val <= sp_val)
-	continue;
-      /*
-       *	We ignore THIS symbol
-       */
-      if (sp1 == sp)
-	continue;
-      /*
-       *	If there is already a candidate selected for the
-       *	next symbol, see if we are a better candidate
-       */
-      if (Next_Symbol)
-	{
-	  /*
-	   *	We are a better candidate if we are "closer"
-	   *	to the symbol
-	   */
-	  if (sp1_val > next_val)
-	    continue;
-	}
-      /*
-       * Make this the candidate
-       */
-      Next_Symbol = sp1;
-      next_val = sp1_val;
+      s1P_val = S_GET_VALUE (s1P);
+      if (s1P_val > s0P_val && s1P_val < nearest_val)
+	nearest_val = s1P_val;
     }
-  /*
-   *	Calculate its size
-   */
-  return Next_Symbol ? (next_val - sp_val) : (End_Of_Data - sp_val);
+  /* Calculate its size.  */
+  return (offsetT) (nearest_val - s0P_val);
 }
-
 
-/*
- *	Check symbol names for the Psect hack with a globalvalue, and then
- *	generate globalvalues for those that have it.
- */
+
+/* Check symbol names for the Psect hack with a globalvalue, and then
+   generate globalvalues for those that have it.  */
+
 static void
 VMS_Emit_Globalvalues (text_siz, data_siz, Data_Segment)
      unsigned text_siz;
@@ -4706,9 +4498,8 @@ struct vms_obj_state {
 #define IS_GXX_VTABLE(symP) (strncmp (S_GET_NAME (symP), "__vt.", 5) == 0)
 
 
-/*
- *	Perform text segment fixups.
- */
+/* Perform text segment fixups.  */
+
 static void
 vms_fixup_text_section (text_siz, text_frag_root, data_frag_root)
      unsigned text_siz;
@@ -4804,9 +4595,8 @@ vms_fixup_text_section (text_siz, text_frag_root, data_frag_root)
 }
 
 
-/*
- *	Create a buffer holding the data segment.
- */
+/* Create a buffer holding the data segment.  */
+
 static void
 synthesize_data_segment (data_siz, text_siz, data_frag_root)
      unsigned data_siz, text_siz;
@@ -4840,9 +4630,9 @@ synthesize_data_segment (data_siz, text_siz, data_frag_root)
   return;
 }
 
-/*
- *	Perform data segment fixups.
- */
+
+/* Perform data segment fixups.  */
+
 static void
 vms_fixup_data_section (data_siz, text_siz)
      unsigned data_siz, text_siz;
@@ -4946,9 +4736,8 @@ vms_fixup_data_section (data_siz, text_siz)
 }
 
 
-/*
- *	Define symbols for the linker.
- */
+/* Define symbols for the linker.  */
+
 static void
 global_symbol_directory (text_siz, data_siz)
      unsigned text_siz, data_siz;
@@ -4982,6 +4771,7 @@ global_symbol_directory (text_siz, data_siz)
   for (sp = symbol_rootP; sp; sp = symbol_next (sp))
     {
       define_as_global_symbol = 0;
+      vsp = 0;
       /* Dispatch on symbol type.  */
       switch (S_GET_RAW_TYPE (sp))
 	{
@@ -5061,19 +4851,19 @@ global_symbol_directory (text_siz, data_siz)
 	    char *sym_name = S_GET_NAME (sp);
 
 	    /* Always suppress local numeric labels.  */
-	    if (!sym_name || strcmp (sym_name, FAKE_LABEL_NAME) != 0)
-	      {
-		/* Make a VMS data symbol entry.  */
-		vsp = (struct VMS_Symbol *) xmalloc (sizeof *vsp);
-		vsp->Symbol = sp;
-		vsp->Size = VMS_Initialized_Data_Size (sp, text_siz + data_siz);
-		vsp->Psect_Index = Data_Psect;
-		vsp->Psect_Offset = Local_Initd_Data_Size;
-		Local_Initd_Data_Size += vsp->Size;
-		vsp->Next = VMS_Symbols;
-		VMS_Symbols = vsp;
-		sp->sy_obj = vsp;
-	      }
+	    if (sym_name && strcmp (sym_name, FAKE_LABEL_NAME) == 0)
+	      break;
+
+	    /* Make a VMS data symbol entry.  */
+	    vsp = (struct VMS_Symbol *) xmalloc (sizeof *vsp);
+	    vsp->Symbol = sp;
+	    vsp->Size = VMS_Initialized_Data_Size (sp, text_siz + data_siz);
+	    vsp->Psect_Index = Data_Psect;
+	    vsp->Psect_Offset = Local_Initd_Data_Size;
+	    Local_Initd_Data_Size += vsp->Size;
+	    vsp->Next = VMS_Symbols;
+	    VMS_Symbols = vsp;
+	    sp->sy_obj = vsp;
 	  }
 	  break;
 
@@ -5174,10 +4964,9 @@ global_symbol_directory (text_siz, data_siz)
 }
 
 
-/*
- *	Output debugger symbol table information for symbols which
- *	are local to a specific routine.
- */
+/* Output debugger symbol table information for symbols which
+   are local to a specific routine.  */
+
 static void
 local_symbols_DST (s0P, Current_Routine)
      symbolS *s0P, *Current_Routine;
@@ -5213,9 +5002,9 @@ local_symbols_DST (s0P, Current_Routine)
     }
 }
 
-/*
- *	Construct and output the debug symbol table.
- */
+
+/* Construct and output the debug symbol table.  */
+
 static void
 vms_build_DST (text_siz)
      unsigned text_siz;
@@ -5231,9 +5020,7 @@ vms_build_DST (text_siz)
   int dsc;
   offsetT val;
 
-  /*
-   *	Write the Traceback Begin Module record
-   */
+  /* Write the Traceback Begin Module record.  */
   VMS_TBT_Module_Begin ();
 
   /*
@@ -5489,16 +5276,13 @@ vms_build_DST (text_siz)
 	VMS_TBT_Routine_End (text_siz, Current_Routine);
       }
 
-  /*
-   *	Write the Traceback End Module TBT record
-   */
+  /* Write the Traceback End Module TBT record.  */
   VMS_TBT_Module_End ();
 }
 
 
-/*
- *	Write a VAX/VMS object file (everything else has been done!)
- */
+/* Write a VAX/VMS object file (everything else has been done!).  */
+
 void
 vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
 		       data_frag_root)
@@ -5607,14 +5391,15 @@ vms_write_object_file (text_siz, data_siz, bss_siz, text_frag_root,
   vms_build_DST (text_siz);
 
 
+  /*******  Wrap things up  *******/
+
   /*
    *	Write the End Of Module record
    */
-  if (Entry_Point_Symbol == 0)
-    Write_VMS_EOM_Record (-1, 0);
+  if (Entry_Point_Symbol)
+    Write_VMS_EOM_Record (Text_Psect, S_GET_VALUE (Entry_Point_Symbol));
   else
-    Write_VMS_EOM_Record (Text_Psect,
-			  S_GET_VALUE (Entry_Point_Symbol));
+    Write_VMS_EOM_Record (-1, (valueT) 0);
 
   /*
    *	All done, close the object file
