@@ -172,6 +172,19 @@ evaluate_subexp (expect_type, exp, pos, noside)
   int code;
   struct internalvar *var; 
 
+  /* This expect_type crap should not be used for C.  C does not have
+     any notion of expected types, never has and (goddess willing)
+     never will.  The C++ code uses it for some twisted purpose (I
+     haven't investigated but I suspect it just the usual combination
+     of Stroustrup figuring out some crazy language feature and
+     Tiemann figuring out some crazier way to try to implement it).
+     CHILL has the tuple stuff; I don't know enough about CHILL to
+     know whether expected types is the way to do it.  FORTRAN I don't
+     know.  */
+  if (current_language->la_language != language_cplus
+      && current_language->la_language != language_chill)
+    expect_type = NULL_TYPE;
+
   pc = (*pos)++;
   op = exp->elts[pc].opcode;
 
