@@ -1,3 +1,7 @@
+Mon Nov 30 16:04:03 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/fr30/tm-fr30.h (INNER_THAN): Add parameters.
+
 Mon Nov 30 11:18:48 1998  Andrew Cagney  <cagney@chook>
 
 	* frame.h (FRAME_CHAIN_VALID): Default to
