@@ -1,3 +1,8 @@
+Wed Oct  9 14:36:18 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/pe.em (set_pe_subsystem): Record entry symbol for each
+	subsystem type.  Ifdef out os2 type.  Recognize a version number.
+
 Tue Oct  8 12:07:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/pe.em (set_pe_subsystem): When setting the subsystem
