@@ -1762,7 +1762,8 @@ coff_bfd_make_debug_symbol (abfd, ptr, sz)
   coff_symbol_type *new = (coff_symbol_type *) bfd_alloc (abfd, sizeof (coff_symbol_type));
   if (new == NULL)
     return (NULL);
-  /* @@ This shouldn't be using a constant multiplier.  */
+  /* @@ The 10 is a guess at a plausible maximum number of aux entries
+     (but shouldn't be a constant).  */
   new->native = (combined_entry_type *) bfd_zalloc (abfd, sizeof (combined_entry_type) * 10);
   if (!new->native)
     return (NULL);

@@ -903,7 +903,8 @@ coff_new_section_hook (abfd, section)
   /* Allocate aux records for section symbols, to store size and
      related info.
 
-     @@ Shouldn't use constant multiplier here!  */
+     @@ The 10 is a guess at a plausible maximum number of aux entries
+     (but shouldn't be a constant).  */
   coffsymbol (section->symbol)->native =
     (combined_entry_type *) bfd_zalloc (abfd,
 					sizeof (combined_entry_type) * 10);
