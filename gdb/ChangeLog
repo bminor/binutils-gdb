@@ -1,5 +1,10 @@
 2004-09-30  Joel Brobecker  <brobecker@gnat.com>
 
+	* mips-tdep.c (mips32_decode_reg_save): Remove, unused.
+	(mips32_fetch_instruction): Remove, unused.
+
+2004-09-30  Joel Brobecker  <brobecker@gnat.com>
+
 	* mips-tdep.c (mips_insn16_frame_cache): Remove dead code or
 	conditions that will always be true.
 
