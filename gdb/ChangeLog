@@ -1,3 +1,17 @@
+2002-04-05  J. Brobecker  <brobecker@gnat.com>
+
+	* utils.c (xfullpath): New function.
+	* defs.h (xfullpath): Add declaration.
+	* source.c (openp): Use xfullpath in place of gdb_realpath to
+	avoid resolving the basename part of filenames when the
+	associated file is a symbolic link. This fixes a potential
+	inconsistency between the filenames known to GDB and the
+	filenames it prints in the annotations.
+	* symtab.c (lookup_symtab): Use the new xfullpath function, in order
+	to be able to match a filename with either the real filename, or
+	the name of any symbolic link to this file.
+	(lookup_partial_symtab): Ditto.
+
 2002-04-04  Michael Snyder  <msnyder@redhat.com>
 
 	* breakpoint.c: Add support for hardware breakpoints in overlays.
