@@ -1,3 +1,8 @@
+2002-04-22  H.J. Lu  (hjl@gnu.org)
+
+	* Makefile.in (FLAGS_TO_PASS): Add libdir, mandir, datadir and
+	includedir.
+
 2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* vax-tdep.c (vax_frame_init_saved_regs): New function.
