@@ -47,7 +47,7 @@ static void sig_print_header PARAMS ((void));
 
 static void resume_cleanups PARAMS ((int));
 
-static int hook_stop_stub PARAMS ((char *));
+static int hook_stop_stub PARAMS ((PTR));
 
 static void delete_breakpoint_current_contents PARAMS ((PTR));
 
@@ -2982,7 +2982,7 @@ The same program may be running in another process.\n");
 
   if (stop_command && stop_command->hook)
     {
-      catch_errors (hook_stop_stub, (char *)stop_command->hook,
+      catch_errors (hook_stop_stub, stop_command->hook,
 		    "Error while running hook_stop:\n", RETURN_MASK_ALL);
     }
 
@@ -3070,7 +3070,7 @@ The same program may be running in another process.\n");
 
 static int
 hook_stop_stub (cmd)
-     char *cmd;
+     PTR cmd;
 {
   execute_user_command ((struct cmd_list_element *)cmd, 0);
   return (0);
@@ -3460,7 +3460,7 @@ struct restore_selected_frame_args {
   int level;
 };
 
-static int restore_selected_frame PARAMS ((char *));
+static int restore_selected_frame PARAMS ((PTR));
 
 /* Restore the selected frame.  args is really a struct
    restore_selected_frame_args * (declared as char * for catch_errors)
@@ -3469,7 +3469,7 @@ static int restore_selected_frame PARAMS ((char *));
 
 static int
 restore_selected_frame (args)
-     char *args;
+     PTR args;
 {
   struct restore_selected_frame_args *fr =
     (struct restore_selected_frame_args *) args;
@@ -3668,6 +3668,8 @@ of the program stops.", &cmdlist);
   signal_print[TARGET_SIGNAL_POLL] = 0;
   signal_stop[TARGET_SIGNAL_URG] = 0;
   signal_print[TARGET_SIGNAL_URG] = 0;
+  signal_stop[TARGET_SIGNAL_WINCH] = 0;
+  signal_print[TARGET_SIGNAL_WINCH] = 0;
 
 #ifdef SOLIB_ADD
   add_show_from_set

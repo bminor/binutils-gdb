@@ -1,5 +1,8 @@
 Fri Jan 29 12:57:34 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
+	* infrun.c (_initialize_infrun): do not stop or print anything
+	when a SIGWINCH is received.
+
 	* Makefile.in (m2-exp.tab.c): use YACC not BISON.
 	(f-exp.tab.c): ditto
 	(jv-exp.tab.c): ditto
