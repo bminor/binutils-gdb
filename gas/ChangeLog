@@ -1,3 +1,12 @@
+Tue Nov 30 22:59:00 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10300.c (md_pseudo_table): Add ".am33" pseudo-op.
+	(r_registers, xr_registers): Define.
+	(r_register_name, xr_register_name): New functions.
+	(md_assemble): Handle new am33 operand types and instruction
+	formats.
+	(mn10300_insert_operand, check_operand): Likewise.
+
 1999-11-29  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (thumb_mode): Turn into a tristate variable.

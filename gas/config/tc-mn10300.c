@@ -119,6 +119,7 @@ size_t md_longopts_size = sizeof(md_longopts);
 const pseudo_typeS md_pseudo_table[] =
 {
   { "am30",	set_arch_mach,		300 },
+  { "am33",	set_arch_mach,		330 },
   { "mn10300",	set_arch_mach,		300 },
   {NULL, 0, 0}
 };
@@ -144,6 +145,77 @@ static const struct reg_name address_registers[] =
   { "a3", 3 },
 };
 #define ADDRESS_REG_NAME_CNT	(sizeof(address_registers) / sizeof(struct reg_name))
+
+static const struct reg_name r_registers[] =
+{
+  { "a0", 8 },
+  { "a1", 9 },
+  { "a2", 10 },
+  { "a3", 11 },
+  { "d0", 12 },
+  { "d1", 13 },
+  { "d2", 14 },
+  { "d3", 15 },
+  { "e0", 0 },
+  { "e1", 1 },
+  { "e10", 10 },
+  { "e11", 11 },
+  { "e12", 12 },
+  { "e13", 13 },
+  { "e14", 14 },
+  { "e15", 15 },
+  { "e2", 2 },
+  { "e3", 3 },
+  { "e4", 4 },
+  { "e5", 5 },
+  { "e6", 6 },
+  { "e7", 7 },
+  { "e8", 8 },
+  { "e9", 9 },
+  { "r0", 0 },
+  { "r1", 1 },
+  { "r10", 10 },
+  { "r11", 11 },
+  { "r12", 12 },
+  { "r13", 13 },
+  { "r14", 14 },
+  { "r15", 15 },
+  { "r2", 2 },
+  { "r3", 3 },
+  { "r4", 4 },
+  { "r5", 5 },
+  { "r6", 6 },
+  { "r7", 7 },
+  { "r8", 8 },
+  { "r9", 9 },
+};
+#define R_REG_NAME_CNT	(sizeof(r_registers) / sizeof(struct reg_name))
+
+static const struct reg_name xr_registers[] =
+{
+  { "mcrh", 2 },
+  { "mcrl", 3 },
+  { "mcvf", 4 },
+  { "mdrq", 1 },
+  { "sp", 0 },
+  { "xr0", 0 },
+  { "xr1", 1 },
+  { "xr10", 10 },
+  { "xr11", 11 },
+  { "xr12", 12 },
+  { "xr13", 13 },
+  { "xr14", 14 },
+  { "xr15", 15 },
+  { "xr2", 2 },
+  { "xr3", 3 },
+  { "xr4", 4 },
+  { "xr5", 5 },
+  { "xr6", 6 },
+  { "xr7", 7 },
+  { "xr8", 8 },
+  { "xr9", 9 },
+};
+#define XR_REG_NAME_CNT	(sizeof(xr_registers) / sizeof(struct reg_name))
 
 
 static const struct reg_name other_registers[] =
@@ -186,6 +258,97 @@ reg_name_search (regs, regcount, name)
 }
 
 
+/* Summary of register_name().
+ *
+ * in: Input_line_pointer points to 1st char of operand.
+ *
+ * out: A expressionS.
+ *	The operand may have been a register: in this case, X_op == O_register,
+ *	X_add_number is set to the register number, and truth is returned.
+ *	Input_line_pointer->(next non-blank) char after operand, or is in
+ *	its original state.
+ */
+static boolean
+r_register_name (expressionP)
+     expressionS *expressionP;
+{
+  int reg_number;
+  char *name;
+  char *start;
+  char c;
+
+  /* Find the spelling of the operand */
+  start = name = input_line_pointer;
+
+  c = get_symbol_end ();
+  reg_number = reg_name_search (r_registers, R_REG_NAME_CNT, name);
+
+  /* look to see if it's in the register table */
+  if (reg_number >= 0) 
+    {
+      expressionP->X_op = O_register;
+      expressionP->X_add_number = reg_number;
+
+      /* make the rest nice */
+      expressionP->X_add_symbol = NULL;
+      expressionP->X_op_symbol = NULL;
+      *input_line_pointer = c;	/* put back the delimiting char */
+      return true;
+    }
+  else
+    {
+      /* reset the line as if we had not done anything */
+      *input_line_pointer = c;   /* put back the delimiting char */
+      input_line_pointer = start; /* reset input_line pointer */
+      return false;
+    }
+}
+
+/* Summary of register_name().
+ *
+ * in: Input_line_pointer points to 1st char of operand.
+ *
+ * out: A expressionS.
+ *	The operand may have been a register: in this case, X_op == O_register,
+ *	X_add_number is set to the register number, and truth is returned.
+ *	Input_line_pointer->(next non-blank) char after operand, or is in
+ *	its original state.
+ */
+static boolean
+xr_register_name (expressionP)
+     expressionS *expressionP;
+{
+  int reg_number;
+  char *name;
+  char *start;
+  char c;
+
+  /* Find the spelling of the operand */
+  start = name = input_line_pointer;
+
+  c = get_symbol_end ();
+  reg_number = reg_name_search (xr_registers, XR_REG_NAME_CNT, name);
+
+  /* look to see if it's in the register table */
+  if (reg_number >= 0) 
+    {
+      expressionP->X_op = O_register;
+      expressionP->X_add_number = reg_number;
+
+      /* make the rest nice */
+      expressionP->X_add_symbol = NULL;
+      expressionP->X_op_symbol = NULL;
+      *input_line_pointer = c;	/* put back the delimiting char */
+      return true;
+    }
+  else
+    {
+      /* reset the line as if we had not done anything */
+      *input_line_pointer = c;   /* put back the delimiting char */
+      input_line_pointer = start; /* reset input_line pointer */
+      return false;
+    }
+}
 
 /* Summary of register_name().
  *
@@ -854,6 +1017,110 @@ md_assemble (str)
 	      *input_line_pointer = c;
 	      goto keep_going;
 	    }
+	  else if (operand->flags & MN10300_OPERAND_RREG)
+	    {
+	      if (!r_register_name (&ex))
+		{
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	    }
+	  else if (operand->flags & MN10300_OPERAND_XRREG)
+	    {
+	      if (!xr_register_name (&ex))
+		{
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	    }
+	  else if (operand->flags & MN10300_OPERAND_USP)
+	    {
+	      char *start = input_line_pointer;
+	      char c = get_symbol_end ();
+
+	      if (strcasecmp (start, "usp") != 0)
+		{
+		  *input_line_pointer = c;
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	      *input_line_pointer = c;
+	      goto keep_going;
+	    }
+	  else if (operand->flags & MN10300_OPERAND_SSP)
+	    {
+	      char *start = input_line_pointer;
+	      char c = get_symbol_end ();
+
+	      if (strcasecmp (start, "ssp") != 0)
+		{
+		  *input_line_pointer = c;
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	      *input_line_pointer = c;
+	      goto keep_going;
+	    }
+	  else if (operand->flags & MN10300_OPERAND_MSP)
+	    {
+	      char *start = input_line_pointer;
+	      char c = get_symbol_end ();
+
+	      if (strcasecmp (start, "msp") != 0)
+		{
+		  *input_line_pointer = c;
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	      *input_line_pointer = c;
+	      goto keep_going;
+	    }
+	  else if (operand->flags & MN10300_OPERAND_PC)
+	    {
+	      char *start = input_line_pointer;
+	      char c = get_symbol_end ();
+
+	      if (strcasecmp (start, "pc") != 0)
+		{
+		  *input_line_pointer = c;
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	      *input_line_pointer = c;
+	      goto keep_going;
+	    }
+	  else if (operand->flags & MN10300_OPERAND_EPSW)
+	    {
+	      char *start = input_line_pointer;
+	      char c = get_symbol_end ();
+
+	      if (strcasecmp (start, "epsw") != 0)
+		{
+		  *input_line_pointer = c;
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	      *input_line_pointer = c;
+	      goto keep_going;
+	    }
+	  else if (operand->flags & MN10300_OPERAND_PLUS)
+	    {
+	      if (*input_line_pointer != '+')
+		{
+		  input_line_pointer = hold;
+		  str = hold;
+		  goto error;
+		}
+	      input_line_pointer++;
+	      goto keep_going;
+	    }
 	  else if (operand->flags & MN10300_OPERAND_PSW)
 	    {
 	      char *start = input_line_pointer;
@@ -940,6 +1207,30 @@ md_assemble (str)
 		      value |= 0x08;
 		      *input_line_pointer = c;
 		    }
+		  else if (current_machine == 330
+			   && strcasecmp (start, "exreg0") == 0)
+		    {
+		      value |= 0x04;
+		      *input_line_pointer = c;
+		    }
+		  else if (current_machine == 330
+			   && strcasecmp (start, "exreg1") == 0)
+		    {
+		      value |= 0x02;
+		      *input_line_pointer = c;
+		    }
+		  else if (current_machine == 330
+			   && strcasecmp (start, "exother") == 0)
+		    {
+		      value |= 0x01;
+		      *input_line_pointer = c;
+		    }
+		  else if (current_machine == 330
+			   && strcasecmp (start, "all") == 0)
+		    {
+		      value |= 0xff;
+		      *input_line_pointer = c;
+		    }
 		  else
 		    {
 		      input_line_pointer = hold;
@@ -971,6 +1262,18 @@ md_assemble (str)
 	      str = hold;
 	      goto error;
 	    }
+	  else if (r_register_name (&ex))
+	    {
+	      input_line_pointer = hold;
+	      str = hold;
+	      goto error;
+	    }
+	  else if (xr_register_name (&ex))
+	    {
+	      input_line_pointer = hold;
+	      str = hold;
+	      goto error;
+	    }
 	  else if (*str == ')' || *str == '(')
 	    {
 	      input_line_pointer = hold;
@@ -995,6 +1298,7 @@ md_assemble (str)
 		int mask;
 
 		mask = MN10300_OPERAND_DREG | MN10300_OPERAND_AREG;
+		mask |= MN10300_OPERAND_RREG | MN10300_OPERAND_XRREG;
 		if ((operand->flags & mask) == 0)
 		  {
 		    input_line_pointer = hold;
@@ -1011,6 +1315,10 @@ md_assemble (str)
 			 || opcode->format == FMT_S6
 			 || opcode->format == FMT_D5)
 		  extra_shift = 16;
+		else if (opcode->format == FMT_D7)
+		  extra_shift = 8;
+		else if (opcode->format == FMT_D8 || opcode->format == FMT_D9)
+		  extra_shift = 8;
 		else
 		  extra_shift = 0;
 	      
@@ -1138,6 +1446,17 @@ keep_going:
   if (opcode->format == FMT_S2 || opcode->format == FMT_D1)
     size = 3;
 
+  if (opcode->format == FMT_D6)
+    size = 3;
+
+  if (opcode->format == FMT_D7 || opcode->format == FMT_D10)
+    size = 4;
+
+  if (opcode->format == FMT_D8)
+    size = 6;
+
+  if (opcode->format == FMT_D9)
+    size = 7;
 
   if (opcode->format == FMT_S4)
     size = 5;
@@ -1222,6 +1541,9 @@ keep_going:
       if (opcode->format == FMT_S0
 	  || opcode->format == FMT_S1
 	  || opcode->format == FMT_D0
+	  || opcode->format == FMT_D6
+	  || opcode->format == FMT_D7
+	  || opcode->format == FMT_D10
 	  || opcode->format == FMT_D1)
 	{
 	  number_to_chars_bigendian (f, insn, size);
@@ -1296,6 +1618,19 @@ keep_going:
 	  number_to_chars_littleendian (f + 2, temp, 4);
 	  number_to_chars_bigendian (f + 6, extension & 0xff, 1);
 	}
+      else if (opcode->format == FMT_D8)
+	{
+          unsigned long temp = ((insn & 0xff) << 16) | (extension & 0xffff);
+          number_to_chars_bigendian (f, (insn >> 8) & 0xffffff, 3);
+          number_to_chars_bigendian (f + 3, (temp & 0xff), 1);
+          number_to_chars_littleendian (f + 4, temp >> 8, 2);
+	}
+      else if (opcode->format == FMT_D9)
+	{
+          unsigned long temp = ((insn & 0xff) << 24) | (extension & 0xffffff);
+          number_to_chars_bigendian (f, (insn >> 8) & 0xffffff, 3);
+          number_to_chars_littleendian (f + 3, temp, 4);
+	}
 
       /* Create any fixups.  */
       for (i = 0; i < fc; i++)
@@ -1336,6 +1671,8 @@ keep_going:
 		 implicitly 32bits.  */
 	      if ((operand->flags & MN10300_OPERAND_SPLIT) != 0)
 		reloc_size = 32;
+	      else if ((operand->flags & MN10300_OPERAND_24BIT) != 0)
+		reloc_size = 24;
 	      else
 		reloc_size = operand->bits;
 
@@ -1544,6 +1881,8 @@ mn10300_insert_operand (insnp, extensionp, operand, val, file, line, shift)
       int bits;
 
       bits = operand->bits;
+      if (operand->flags & MN10300_OPERAND_24BIT)
+	bits = 24;
 
       if ((operand->flags & MN10300_OPERAND_SIGNED) != 0)
 	{
@@ -1577,6 +1916,12 @@ mn10300_insert_operand (insnp, extensionp, operand, val, file, line, shift)
     {
       *insnp |= (val >> (32 - operand->bits)) & ((1 << operand->bits) - 1);
       *extensionp |= ((val & ((1 << (32 - operand->bits)) - 1))
+		      << operand->shift);
+    }
+  else if ((operand->flags & MN10300_OPERAND_24BIT) != 0)
+    {
+      *insnp |= (val >> (24 - operand->bits)) & ((1 << operand->bits) - 1);
+      *extensionp |= ((val & ((1 << (24 - operand->bits)) - 1))
 		      << operand->shift);
     }
   else if ((operand->flags & MN10300_OPERAND_EXTENDED) == 0)
@@ -1615,6 +1960,8 @@ check_operand (insn, operand, val)
       int bits;
 
       bits = operand->bits;
+      if (operand->flags & MN10300_OPERAND_24BIT)
+	bits = 24;
 
       if ((operand->flags & MN10300_OPERAND_SIGNED) != 0)
 	{
