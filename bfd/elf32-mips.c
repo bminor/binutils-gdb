@@ -1018,27 +1018,8 @@ mips_elf_object_p (abfd)
 
   /* Irix 5 is broken.  Object file symbol tables are not always
      sorted correctly such that local symbols precede global symbols,
-     and the sh_info field in the symbol table is not always right.
-     We try to quickly check whether the symbol table is broken for
-     this BFD, and, if it is, we set elf_bad_symtab in tdata.  */
-  if (elf_onesymtab (abfd) != 0)
-    {
-      Elf_Internal_Shdr *symtab_hdr;
-      Elf32_External_Sym esym;
-
-      symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-      if (bfd_seek (abfd,
-		    (symtab_hdr->sh_offset
-		     + symtab_hdr->sh_size
-		     - sizeof (Elf32_External_Sym)),
-		    SEEK_SET) != 0
-	  || (bfd_read ((PTR) &esym, 1, sizeof (Elf32_External_Sym), abfd)
-	      != sizeof (Elf32_External_Sym)))
-	return false;
-      if (ELF_ST_BIND (bfd_h_get_8 (abfd, (bfd_byte *) esym.st_info))
-	  == STB_LOCAL)
-	elf_bad_symtab (abfd) = true;
-    }
+     and the sh_info field in the symbol table is not always right.  */
+  elf_bad_symtab (abfd) = true;
 
   return true;
 }

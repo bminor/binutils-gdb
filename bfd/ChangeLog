@@ -1,5 +1,9 @@
 Wed Jul  5 10:31:47 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-mips.c (mips_elf_object_p): Unconditionally set
+	elf_bad_symtab, since sometimes the symbol table is messed up and
+	the last symbol is global.
+
 	* ecoff.c (_bfd_ecoff_bfd_is_local_label): New function.
 	* libecoff.h (_bfd_ecoff_bfd_is_local_label): Declare.
 	* elf32-mips.c (mips_elf_is_local_label): New static function.
