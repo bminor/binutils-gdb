@@ -85,7 +85,6 @@ findvar.c
 frame.h
 gdbcmd.h
 gdbcore.h
-getpagesize.h
 gmalloc.c
 gmalloc.h
 gould-pinsn.c
@@ -137,8 +136,6 @@ nindy-tdep.c
 np1-opcode.h
 ns32k-opcode.h
 ns32k-pinsn.c
-param-no-tm.h
-param.h
 parse.c
 parser-defs.h
 pn-opcode.h

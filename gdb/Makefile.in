@@ -193,8 +193,8 @@ SFILES_KGDB  = $(SFILES) stuff.c kdb-start.c
 
 # Header files that are not named in config/* Makefile fragments go here.
 HFILES=	breakpoint.h command.h defs.h environ.h \
-	expression.h frame.h gdbcmd.h gdbcore.h getpagesize.h \
-	ieee-float.h inferior.h minimon.h param-no-tm.h param.h \
+	expression.h frame.h gdbcmd.h gdbcore.h \
+	ieee-float.h inferior.h minimon.h \
 	signals.h signame.h symfile.h symtab.h \
 	target.h terminal.h tm-68k.h tm-i960.h tm-sunos.h \
 	language.h parser-defs.h value.h
