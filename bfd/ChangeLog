@@ -1,3 +1,28 @@
+Wed Oct  2 15:46:45 1996  Klaus Kaempf  <kkaempf@progis.de>
+
+	openVMS/Alpha: Provide filename and case_hack flags via
+	symbol table from gas.
+	Add case_hack code for symbol output from vax/vms.
+	* evax-alpha.c (evax_initialize): Remove filename handling,
+	filename is provided via symbol table.
+	(evax_get_symtab): Use local symbol count when setting up table.
+	* evax-egsd.c (_bfd_evax_slurp_egsd): Print correct name when
+	debugging.
+	(_bfd_evax_write_egsd): Skip file name symbol.
+	* evax-emh.c (get_vms_time_string): Local function now.
+	(_bfd_evax_write_emh): Extract source filename and case_hack flags
+	from symbol table.
+	* evax_write_etir (_bfd_evax_write_etir): Pass all symbol names
+	through _bfd_evax_case_hack_symbol.
+	* evax-misc.c (hash_string, _bfd_evax_case_hack_symbol): New
+	functions.
+	(_bfd_evax_basename): Removed.
+	(_bfd_get_vms_time_string): Moved to evax-emh.c.
+	* evax.h (evax_private_data_struct): Remove filename.
+	(flag_hash_long_names, flag_show_after_trunc,
+	flag_no_hash_mixed_case, vms_name_mapping): New flags for
+	vms_case_hack.
+
 Wed Oct  2 12:02:02 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* cofflink.c (_bfd_coff_link_input_bfd): Don't crash if there is
