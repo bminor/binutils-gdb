@@ -1,3 +1,45 @@
+Mon Jul 26 14:40:10 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* elfcode.h: Reimplement segment writing.
+	(elf_write_phdrs): Use precomputed e_phoff rather than making
+	assumptions.
+	(elf_build_phdrs): Disabled, for now.
+	(assign_file_position_for_section): Don't change file offset for
+	SHT_NOBITS.
+	(assign_file_positions_for_symtab_and_strtabs): New function.
+	(struct seg_info): New type.
+	(map_program_segments): New function.
+	(assign_file_positions_except_relocs): For executables, leave
+	section headers &c for last, and properly align all sections with
+	flag SHF_ALLOC set.
+	(prep_headers): No longer abort when EXEC_P is set.
+	(write_shdrs_and_ehdr): Deleted all code relating to program
+	segments.
+
+	* elfcode.h (various): Deleted some unused code, and debugging
+	"malloc(0)" calls.
+	(write_relocs): Cache value of last symbol looked up, to save
+	time if the symbol is referred to repeatedly.
+	(elf_fake_sections): Check only SEC_RELOC flag, not number of
+	relocs.
+	(assign_section_numbers): Likewise.
+
+	* Makefile.in (ofiles): Stars in wildcards belong outside quotes.
+
+	* libelf.h (struct elf_backend_data): New field, maxpagesize.
+	(struct elf_obj_tdata): New field, phdr.
+	* elf32-target.h (elf32_bed): Initialize maxpagesize from
+	ELF_MAXPAGESIZE.
+	(ELF_MAXPAGESIZE): Default to 1.
+	* elf64-target.h (elf64_bed, ELF_MAXPAGESIZE): Likewise.
+	* elf32-sparc.c (ELF_MAXPAGESIZE): Define.
+	(elf_sparc_howto_table): All relocs should have pcrel_offset=true.
+	Most should have length field of `2'.
+
+	* reloc.c (bfd_perform_relocation): Handle 64-bit relocs.
+
+	* config/sparc-aout.mt (TARGET_BACKENDS): Define.
+
 Mon Jul 26 08:56:16 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure.in: Don't look in ${srcdir} for ${target_makefile_frag};
