@@ -36,7 +36,6 @@ gdbarch_saved_pc_after_call_ftype x86_64_linux_saved_pc_after_call;
 gdbarch_pc_in_sigtramp_ftype x86_64_linux_in_sigtramp;
 CORE_ADDR x86_64_linux_frame_chain (struct frame_info *fi);
 void x86_64_init_frame_pc (int fromleaf, struct frame_info *fi);
-void x86_64_init_extra_frame_info (int fromleaf, struct frame_info *fi);
 
 
 #endif

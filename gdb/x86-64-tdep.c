@@ -1019,7 +1019,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
 
   /* Initialization of per-frame CFI.  */
-  set_gdbarch_init_extra_frame_info (gdbarch, x86_64_init_extra_frame_info);
+  set_gdbarch_init_extra_frame_info (gdbarch, cfi_init_extra_frame_info);
 
   /* Frame PC initialization is handled by using CFI.  */
   set_gdbarch_init_frame_pc (gdbarch, x86_64_init_frame_pc);

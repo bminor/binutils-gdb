@@ -1,5 +1,10 @@
 2002-10-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* x86-64-tdep.c (x86_64_init_abi): Set init_extra_frame_info to
+	cfi_init_extra_frame_info.
+	* x86-64-tdep.h (x86_64_init_extra_frame_info): Remove prototype.
+	* x86-64-linux-tdep.c (x86_64_init_extra_frame_info): Remove function.
+
 	* x86-64-tdep.c (x86_64_init_abi): Add calls to override the i386
 	target where necessary.  Add more comments and remove the ones
 	that don't provide any useful information.
