@@ -958,9 +958,15 @@ subfile_wanted_p (entry)
 	      if (sp->srefs_chain != (asymbol **) NULL
 		  || sp->scoms_chain != (asymbol **) NULL)
 		{
-		  /* This is a symbol we are looking for.  It is either
-		     not yet defined or common.  */
-
+		  /* This is a symbol we are looking for.  It is
+		     either not yet defined or common.  If this is a
+		     common symbol, then if the symbol in the object
+		     file is common, we need to combine sizes.  But if
+		     we already have a common symbol, and the symbol
+		     in the object file is not common, we don't want
+		     the object file: it is providing a definition for
+		     a symbol that we already have a definition for
+		     (this is the else condition below).  */
 		  if (bfd_is_com_section (p->section))
 		    {
 
@@ -1017,8 +1023,7 @@ subfile_wanted_p (entry)
 			}
 		      ASSERT (p->udata == 0);
 		    }
-
-		  else
+		  else if (sp->scoms_chain == (asymbol **) NULL)
 		    {
 		      if (write_map)
 			{

@@ -1,5 +1,9 @@
 Fri Jan 29 09:57:58 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* ldmain.c (subfile_wanted_p): If we already have a common
+	definition of a symbol, don't necessarily pull in an object file
+	that provides a non-common definition.
+
 	* ldlex.l (COMMAND): Accept -EB and -EL command line arguments,
 	returning OPTION_EB and OPTION_EL.  gcc passes these to a MIPS
 	linker.
