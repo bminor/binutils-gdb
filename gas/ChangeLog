@@ -98,6 +98,14 @@ Thu Aug 21 00:59:53 1997  Doug Evans  <dje@canuck.cygnus.com>
 	* config/tc-m32r.c (md_estimate_size_before_relax): Update recorded
 	insn when changing to a different instruction.
 
+start-sanitize-sh4
+Wed Aug 20 00:45:20 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* tc-sh.c (parse_reg, get_specific, build_Mytes): Add SH4
+	floating point extensions.
+	(parse_reg): parse sgr and dbr.
+
+end-sanitize-sh4
 Tue Aug 19 17:07:34 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (system_register_name): Support numbers for

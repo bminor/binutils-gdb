@@ -22,6 +22,16 @@ Thu Aug 21 11:09:09 1997  Nick Clifton  <nickc@cygnus.com>
 	* v850-opc.c (v850_opcodes[]): Move divh opcodes next to each other.
 end-sanitize-v850e
 
+start-sanitize-sh4
+Wed Aug 20 00:43:11 1997  J"orn Rennecke <amylaar@cygnus.co.uk>
+
+	* sh-opc.h (sh_arg_type): Add A_SGR and A_DBR.
+	(sh_nibble_type, sh_arg_type): Add SH4 floating point extensions.
+	(sh_table): Likewise.  Add movca.l, ocbi, ocbp, ocbwb.
+	Add insns to access SGR and DBR.
+	* sh-dis.c (print_insn_shx): Add SH4 floating point extensions.
+
+end-sanitize-sh4
 Tue Aug 19 10:59:59 1997  Richard Henderson  <rth@cygnus.com>
 
 	* alpha-opc.c (alpha_opcodes): Fix hw_rei_stall mungage.
