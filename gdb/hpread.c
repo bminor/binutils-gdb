@@ -5244,8 +5244,8 @@ hpread_process_one_debug_symbol (union dnttentry *dn_bufp, char *name,
 
       /* All functions in C++ have prototypes.  For C we don't have enough
          information in the debug info.  */
-      if (SYMBOL_LANGUAGE (s) == language_cplus)
-	TYPE_FLAGS (SYMBOL_TYPE (s)) |= TYPE_FLAG_PROTOTYPED;
+      if (SYMBOL_LANGUAGE (sym) == language_cplus)
+	TYPE_FLAGS (SYMBOL_TYPE (sym)) |= TYPE_FLAG_PROTOTYPED;
 
       /* The "SYMBOL_NAME" field is expected to be the mangled name
        * (if any), which we get from the "alias" field of the SOM record
