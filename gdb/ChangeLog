@@ -1,3 +1,8 @@
+2003-10-29  Andrew Cagney  <cagney@redhat.com>
+
+	* ppc-linux-tdep.c (_initialize_ppc_linux_tdep): Instead of the
+	default PPC machine, register 32-bit and 64-bit PPC, and rs6k.
+
 2003-10-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* objfiles.h (clear_objfile_data): New prototype.

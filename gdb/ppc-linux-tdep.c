@@ -1083,7 +1083,13 @@ ppc_linux_init_abi (struct gdbarch_info info,
 void
 _initialize_ppc_linux_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_powerpc, 0, GDB_OSABI_LINUX,
-			  ppc_linux_init_abi);
+  /* Register for all sub-familes of the POWER/PowerPC: 32-bit and
+     64-bit PowerPC, and the older rs6k.  */
+  gdbarch_register_osabi (bfd_arch_powerpc, bfd_mach_ppc, GDB_OSABI_LINUX,
+                         ppc_linux_init_abi);
+  gdbarch_register_osabi (bfd_arch_powerpc, bfd_mach_ppc64, GDB_OSABI_LINUX,
+                         ppc_linux_init_abi);
+  gdbarch_register_osabi (bfd_arch_rs6000, bfd_mach_rs6k, GDB_OSABI_LINUX,
+                         ppc_linux_init_abi);
   add_core_fns (&ppc_linux_regset_core_fns);
 }
