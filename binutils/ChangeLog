@@ -1,3 +1,8 @@
+2004-04-07  Benjamin Monate  <benjamin.monate@cea.fr>
+
+	PR 86
+	* arsup.c (ar_save): Use smart_rename.
+
 2004-04-01  Dean Luick <luick@cray.com>
 
 	* readelf.c (display_debug_pubnames): Align offset and data

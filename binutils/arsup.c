@@ -1,5 +1,5 @@
 /* arsup.c - Archive support for MRI compatibility
-   Copyright 1992, 1994, 1995, 1996, 1997, 2000, 2002, 2003
+   Copyright 1992, 1994, 1995, 1996, 1997, 2000, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -333,7 +333,7 @@ ar_save (void)
 
       bfd_close (obfd);
 
-      rename (ofilename, real_name);
+      smart_rename (ofilename, real_name, 0);
       obfd = 0;
       free (ofilename);
     }
