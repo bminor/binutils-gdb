@@ -1,3 +1,12 @@
+2003-06-07  Adam Fedor  <fedor@gnu.org>
+
+	* gdb/objc-lang.c (FETCH_ARGUMENT): Remove macro.
+	(OBJC_FETCH_POINTER_ARGUMENT): Shorthand macro for
+	using FETCH_POINTER_ARGUMENT with Objective-C method arguments.
+	(find_implementation, resolve_msgsend, resolve_msgsend_stret,
+	resolve_msgsend_super, resolve_msgsend_super_stret): 
+	Use it.
+
 2003-06-07  Andrew Cagney  <cagney@redhat.com>
 
 	* symfile.h: Re-indent, clean up comments.
