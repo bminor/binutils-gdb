@@ -4,7 +4,7 @@ Thu Feb  9 19:19:23 1995  Doug Evans  <dje@canuck.cygnus.com>
 	* arc-dis.c (print_insn_arc): Rename to print_insn and make static.
 	New argument `cpu', pass it to arc_opcode_init_tables.
 	Document byte order dependencies.  Ignore unsupported insns.
-	(arc_disassembler): New function.
+	(arc_get_disassembler): New function.
 	(print_insn_arc_base, print_insn_arc_host, print_insn_arc_graphics,
 	print_insn_arc_audio): New functions.
 	* arc-opc.c (MULTSHIFT operand): Delete.
@@ -17,7 +17,7 @@ Thu Feb  9 19:19:23 1995  Doug Evans  <dje@canuck.cygnus.com>
 	(arc_opcode_supported, arc_opval_supported): New functions.
 	(insert_multshift, extract_multshift): Deleted.
 	* disassemble.c (disassembler, case bfd_arch_arc): Call
-	arc_disassembler to get disassembler routine.
+	arc_get_disassembler to get disassembler routine.
 end-sanitize-arc
 
 Thu Feb  9 12:28:13 1995  Stan Shebs  <shebs@andros.cygnus.com>

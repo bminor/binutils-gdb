@@ -225,7 +225,7 @@ print_insn (pc, info, cpu)
    variants, hiding all this crud here seems cleaner.  */
 
 disassembler_ftype
-arc_disassembler (bfd *abfd)
+arc_get_disassembler (bfd *abfd)
 {
   int mach = bfd_get_mach (abfd);
 
