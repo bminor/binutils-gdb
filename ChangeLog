@@ -1,3 +1,8 @@
+Wed Oct  4 22:05:36 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
+
+	* configure.in (CC): Get ^CC, not just any old CC, from
+	${host_makefile_frag}.
+
 Wed Oct  4 21:55:00 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* configure.in (CC): Try to get CC from 
