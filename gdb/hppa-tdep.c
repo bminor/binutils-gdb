@@ -790,7 +790,7 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	         the higher-ordered word is stored in the lower-ordered
 		 argument, and even though it is a 8-byte quantity the
 		 registers need not be 8-byte aligned.  */
-	      if (param_len > 4)
+	      if (param_len > 4 && param_len < 8)
 		small_struct = 1;
 	    }
 
