@@ -1,6 +1,6 @@
 2002-07-23  Nick Clifton  <nickc@redhat.com>
 
-	* po/ld.po: New French translation.
+	* po/fr.po: New French translation.
 	* po/id.po: New Indonesian translation.
 	* configure.in (LINGUAS): Add id.
 	* configure: Regenerate.
