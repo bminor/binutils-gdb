@@ -1,5 +1,5 @@
 /* Print VAX instructions for GDB, the GNU debugger.
-   Copyright 1986, 1989, 1991, 1992, 1995, 1996, 1998, 1999, 2000
+   Copyright 1986, 1989, 1991, 1992, 1995, 1996, 1998, 1999, 2000, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -51,6 +51,47 @@
 #define NOPCODES (sizeof votstrs / sizeof votstrs[0])
 
 static unsigned char *print_insn_arg ();
+
+char *
+vax_register_name (int regno)
+{
+  static char *register_names[] =
+  {
+    "r0",  "r1",  "r2",  "r3", "r4", "r5", "r6", "r7",
+    "r8",  "r9", "r10", "r11", "ap", "fp", "sp", "pc",
+    "ps",
+  };
+
+  if (regno < 0)
+    return (NULL);
+  if (regno >= (sizeof(register_names) / sizeof(*register_names)))
+    return (NULL);
+  return (register_names[regno]);
+}
+
+int
+vax_register_byte (int regno)
+{
+  return (regno * 4);
+}
+
+int
+vax_register_raw_size (int regno)
+{
+  return (4);
+}
+
+int
+vax_register_virtual_size (int regno)
+{
+  return (4);
+}
+
+struct type *
+vax_register_virtual_type (int regno)
+{
+  return (builtin_type_int);
+}
 
 /* Advance PC across any function entry prologue instructions
    to reach some "real" code.  */

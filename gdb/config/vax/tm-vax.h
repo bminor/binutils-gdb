@@ -1,5 +1,5 @@
 /* Definitions to make GDB run on a vax under 4.2bsd.
-   Copyright 1986, 1987, 1989, 1991, 1993, 1994, 1996, 1998, 1999, 2000
+   Copyright 1986, 1987, 1989, 1991, 1993, 1994, 1996, 1998, 1999, 2000, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -73,10 +73,9 @@ extern CORE_ADDR vax_skip_prologue (CORE_ADDR);
 
 #define NUM_REGS 17
 
-/* Initializer for an array of names of registers.
-   There should be NUM_REGS strings in this initializer.  */
-
-#define REGISTER_NAMES {"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "ap", "fp", "sp", "pc", "ps"}
+/* Return the name of the register specified by N.  */
+#define REGISTER_NAME(N) vax_register_name ((N))
+extern char *vax_register_name (int);
 
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
@@ -97,18 +96,18 @@ extern CORE_ADDR vax_skip_prologue (CORE_ADDR);
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
-
-#define REGISTER_BYTE(N) ((N) * 4)
+#define REGISTER_BYTE(N) vax_register_byte ((N))
+extern int vax_register_byte (int);
 
 /* Number of bytes of storage in the actual machine representation
    for register N.  On the vax, all regs are 4 bytes.  */
-
-#define REGISTER_RAW_SIZE(N) 4
+#define REGISTER_RAW_SIZE(N) vax_register_raw_size ((N))
+extern int vax_register_raw_size (int);
 
 /* Number of bytes of storage in the program's representation
    for register N.  On the vax, all regs are 4 bytes.  */
-
-#define REGISTER_VIRTUAL_SIZE(N) 4
+#define REGISTER_VIRTUAL_SIZE(N) vax_register_virtual_size ((N))
+extern int vax_register_virtual_size (int);
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
@@ -120,8 +119,8 @@ extern CORE_ADDR vax_skip_prologue (CORE_ADDR);
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
-
-#define REGISTER_VIRTUAL_TYPE(N) builtin_type_int
+#define REGISTER_VIRTUAL_TYPE(N) vax_register_virtual_type ((N))
+extern struct type *vax_register_virtual_type (int);
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. */

@@ -1,3 +1,19 @@
+2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* vax-tdep.c: Update copyright years.
+	(vax_register_name): New function.
+	(vax_register_byte): Ditto.
+	(vax_register_raw_size): Ditto.
+	(vax_register_virtual_size): Ditto.
+	(vax_register_virtual_type): Ditto.
+	* config/vax/tm-vax.h: Update copyright years.
+	(REGISTER_NAMES): Remove.
+	(REGISTER_NAME): Define.
+	(REGISTER_BYTE): Use vax_register_byte.
+	(REGISTER_RAW_SIZE): Use vax_register_raw_size.
+	(REGISTER_VIRTUAL_SIZE): Use vax_register_virtual_size.
+	(REGISTER_VIRTUAL_TYPE): Use vax_register_virtual_type.
+
 2002-04-21  Andrew Cagney  <ac131313@redhat.com>
 
 	* config/sparc/tm-sparc.h (sparc_skip_prologue): Restore
