@@ -26,10 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "symfile.h"
 #include "objfiles.h"
-
 #include "xcoffsolib.h"
-
-#include <a.out.h>
 
 extern struct obstack frame_cache_obstack;
 
@@ -49,19 +46,16 @@ static struct sstep_breaks {
 
 /* Static function prototypes */
 
-static CORE_ADDR
-find_toc_address PARAMS ((CORE_ADDR pc));
+static CORE_ADDR find_toc_address PARAMS ((CORE_ADDR pc));
 
-static CORE_ADDR
-branch_dest PARAMS ((int opcode, int instr, CORE_ADDR pc, CORE_ADDR safety));
+static CORE_ADDR branch_dest PARAMS ((int opcode, int instr, CORE_ADDR pc,
+				      CORE_ADDR safety));
 
-static void
-frame_get_cache_fsr PARAMS ((struct frame_info *fi,
-			     struct rs6000_framedata *fdatap));
+static void frame_get_cache_fsr PARAMS ((struct frame_info *fi,
+					 struct rs6000_framedata *fdatap));
 
-/*
- * Calculate the destination of a branch/jump.  Return -1 if not a branch.
- */
+/* Calculate the destination of a branch/jump.  Return -1 if not a branch.  */
+
 static CORE_ADDR
 branch_dest (opcode, instr, pc, safety)
      int opcode;
@@ -641,12 +635,12 @@ pop_frame ()
    its argumets will be passed by gdb. */
 
 void
-fix_call_dummy(dummyname, pc, fun, nargs, type)
-  char *dummyname;
-  CORE_ADDR pc;
-  CORE_ADDR fun;
-  int nargs;					/* not used */
-  int type;					/* not used */
+fix_call_dummy (dummyname, pc, fun, nargs, type)
+     char *dummyname;
+     CORE_ADDR pc;
+     CORE_ADDR fun;
+     int nargs;					/* not used */
+     int type;					/* not used */
 {
 #define	TOC_ADDR_OFFSET		20
 #define	TARGET_ADDR_OFFSET	28
@@ -675,12 +669,13 @@ fix_call_dummy(dummyname, pc, fun, nargs, type)
   *(int*)((char*)dummyname + TARGET_ADDR_OFFSET+4) = ii;
 }
 
-/* Pass the arguments in either registers, or in the stack. In RS6000, the first
-   eight words of the argument list (that might be less than eight parameters if
-   some parameters occupy more than one word) are passed in r3..r11 registers.
-   float and double parameters are passed in fpr's, in addition to that. Rest of
-   the parameters if any are passed in user stack. There might be cases in which
-   half of the parameter is copied into registers, the other half is pushed into
+/* Pass the arguments in either registers, or in the stack. In RS6000,
+   the first eight words of the argument list (that might be less than
+   eight parameters if some parameters occupy more than one word) are
+   passed in r3..r11 registers.  float and double parameters are
+   passed in fpr's, in addition to that. Rest of the parameters if any
+   are passed in user stack. There might be cases in which half of the
+   parameter is copied into registers, the other half is pushed into
    stack.
 
    If the function is returning a structure, then the return address is passed
@@ -689,11 +684,11 @@ fix_call_dummy(dummyname, pc, fun, nargs, type)
 
 CORE_ADDR
 push_arguments (nargs, args, sp, struct_return, struct_addr)
-  int nargs;
-  value_ptr *args;
-  CORE_ADDR sp;
-  int struct_return;
-  CORE_ADDR struct_addr;
+     int nargs;
+     value_ptr *args;
+     CORE_ADDR sp;
+     int struct_return;
+     CORE_ADDR struct_addr;
 {
   int ii, len;
   int argno;					/* current argument number */
@@ -853,9 +848,9 @@ ran_out_of_registers_for_arguments:
 
 void
 extract_return_value (valtype, regbuf, valbuf)
-  struct type *valtype;
-  char regbuf[REGISTER_BYTES];
-  char *valbuf;
+     struct type *valtype;
+     char regbuf[REGISTER_BYTES];
+     char *valbuf;
 {
   int offset = 0;
 
@@ -905,7 +900,7 @@ CORE_ADDR rs6000_struct_return_address;
 
 CORE_ADDR
 skip_trampoline_code (pc)
-CORE_ADDR pc;
+     CORE_ADDR pc;
 {
   register unsigned int ii, op;
   CORE_ADDR solib_target_pc;
@@ -936,8 +931,8 @@ CORE_ADDR pc;
   return pc;
 }
 
-
 /* Determines whether the function FI has a frame on the stack or not.  */
+
 int
 frameless_function_invocation (fi)
      struct frame_info *fi;
@@ -964,6 +959,7 @@ frameless_function_invocation (fi)
 }
 
 /* Return the PC saved in a frame */
+
 unsigned long
 frame_saved_pc (fi)
      struct frame_info *fi;
@@ -1212,12 +1208,13 @@ add_text_to_loadinfo (textaddr, dataaddr)
 }
 
 
-/* Note that this assumes that the "textorg" and "dataorg" elements
-   of a member of this array are correlated with the "toc_offset"
-   element of the same member.  This is taken care of because the loops
-   which assign the former (in xcoff_relocate_symtab or xcoff_relocate_core)
-   and the latter (in scan_xcoff_symtab, via vmap_symtab, in vmap_ldinfo
-   or xcoff_relocate_core) traverse the same objfiles in the same order.  */
+/* Note that this assumes that the "textorg" and "dataorg" elements of
+   a member of this array are correlated with the "toc_offset" element
+   of the same member.  This is taken care of because the loops which
+   assign the former (in xcoff_relocate_symtab or xcoff_relocate_core)
+   and the latter (in scan_xcoff_symtab, via vmap_symtab, in
+   vmap_ldinfo or xcoff_relocate_core) traverse the same objfiles in
+   the same order.  */
 
 static CORE_ADDR
 find_toc_address (pc)
