@@ -30,6 +30,7 @@ fi
 Things-to-keep:
 
 aout_gnu.h
+alpha-opcode.h
 atof-ieee.c
 atof-ns32k.c
 atof-tahoe.c
@@ -93,6 +94,8 @@ sh.mt
 sparc.mt
 tc-a29k.c
 tc-a29k.h
+tc-alpha.c
+tc-alpha.h
 tc-generic.c
 tc-generic.h
 tc-h8300.c
