@@ -180,7 +180,7 @@ esac
 
 case "${target}" in
   alpha-dec-osf1)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas //'`
+    configdirs=`echo ${configdirs} | sed -e 's/gas //'`
     configdirs=`echo ${configdirs} | sed -e 's/gdb//;s/emacs//;s/fileutils//'`
     configdirs=`echo ${configdirs} | sed -e 's/grep//;s/libg++//;s/libio//'`
     ;;	
