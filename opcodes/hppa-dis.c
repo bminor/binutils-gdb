@@ -905,6 +905,9 @@ print_insn_hppa (memaddr, info)
 		case 'g':
 		  fputs_filtered (",gate", info);
 		  break;
+		case 'l':
+		  fputs_filtered (",l", info);
+		  break;
 		default:
 		  (*info->fprintf_func) (info->stream, "%c", *s);
 		  break;
