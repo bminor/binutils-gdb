@@ -1,3 +1,12 @@
+2003-09-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64fbsd-tdep.c: Fix sigtramp recognition.
+	(amd64fbsd_sigcontext_addr): Rewrite.
+	(amd64fbsd_sigtramp_start, amd64fbsd_sigtramp_end): Initialize
+	with correct values.
+	(amd64fbsd_sc_reg_offset): Initialize with correct values.
+	(amd64fbsd_init_abi): Fix typo.
+
 2003-09-12  Andrew Cagney  <cagney@redhat.com>
 
 	* ppc-sysv-tdep.c (align_up, align_down): Replace "round2" macro.
