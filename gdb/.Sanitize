@@ -398,6 +398,8 @@ testsuite
 thread.c
 top.c
 top.h
+tracepoint.c
+tracepoint.h
 typeprint.c
 typeprint.h
 ultra3-nat.c
@@ -429,8 +431,6 @@ z8k-tdep.c
 Things-to-lose:
 
 HOW_TO_RELEASE
-tracepoint.c
-tracepoint.h
 
 Do-last:
 
