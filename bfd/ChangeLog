@@ -1,3 +1,8 @@
+2004-02-21  Danny Smith  <daanysmith@users.sourceforge.net>
+
+	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Clear
+	IMAGE_SCN_MEM_WRITE on known sections only.
+
 2004-02-20  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-ppc.c (allocate_dynrelocs): Create dynsym for undef weak
