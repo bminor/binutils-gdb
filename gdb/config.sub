@@ -70,7 +70,7 @@ merlin)
 iris | iris4d)
 	cpu=mips
 	vendor=sgi
-	os=sysv # maybe?
+	os=irix # maybe?
 	;;
 news1000)
 	cpu=m68030
@@ -334,7 +334,7 @@ esac
 # verify that the os is known, if it exists.
 
 case "${os}" in
-aix* | aout | bout | bsd* | coff | ctix* | dynix* | esix* | hpux* \
+aix* | aout | bout | bsd* | coff | ctix* | dynix* | esix* | hpux* | irix* \
 	| isc* | mach* | newsos* | nindy* | none | osf* | osf* | sco* \
 	| sunos* | sysv* | ultrix* | unos* | v88r* | vms* | vxworks*)
 	;;
