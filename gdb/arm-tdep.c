@@ -27,18 +27,9 @@
 #include "symfile.h"
 #include "gdb_string.h"
 #include "coff/internal.h"	/* Internal format of COFF symbols in BFD */
+#include "dis-asm.h"		/* For register flavors. */
 
 extern void _initialize_arm_tdep (void);
-
-/* From opcodes/arm-dis.c */
-
-extern int get_arm_regname_num_options (void);
-
-extern int set_arm_regname_option (int option);
-
-extern int get_arm_regnames (int option, const char **setname,
-			     const char **setdescription,
-			     const char ***regnames);
 
 /* Number of different reg name sets (options). */
 static int num_flavor_options;
