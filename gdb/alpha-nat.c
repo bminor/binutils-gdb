@@ -63,7 +63,7 @@ int
 get_longjmp_target (CORE_ADDR *pc)
 {
   CORE_ADDR jb_addr;
-  char raw_buffer[MAX_REGISTER_RAW_SIZE];
+  char raw_buffer[ALPHA_MAX_REGISTER_RAW_SIZE];
 
   jb_addr = read_register (ALPHA_A0_REGNUM);
 
@@ -101,7 +101,7 @@ fetch_osf_core_registers (char *core_reg_sect, unsigned core_reg_size,
      OSF/1.2 core files.  OSF5 uses different names for the register
      enum list, need to handle two cases.  The actual values are the
      same.  */
-  static int core_reg_mapping[NUM_REGS] =
+  static int core_reg_mapping[ALPHA_NUM_REGS] =
   {
 #ifdef NCF_REGS
 #define EFL NCF_REGS
@@ -127,7 +127,7 @@ fetch_osf_core_registers (char *core_reg_sect, unsigned core_reg_size,
     EF_PC, -1
 #endif
   };
-  static char zerobuf[MAX_REGISTER_RAW_SIZE] =
+  static char zerobuf[ALPHA_MAX_REGISTER_RAW_SIZE] =
   {0};
 
   for (regno = 0; regno < NUM_REGS; regno++)
@@ -222,7 +222,7 @@ supply_gregset (gdb_gregset_t *gregsetp)
 {
   register int regi;
   register long *regp = ALPHA_REGSET_BASE (gregsetp);
-  static char zerobuf[MAX_REGISTER_RAW_SIZE] =
+  static char zerobuf[ALPHA_MAX_REGISTER_RAW_SIZE] =
   {0};
 
   for (regi = 0; regi < 31; regi++)

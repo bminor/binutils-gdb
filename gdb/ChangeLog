@@ -1,3 +1,10 @@
+2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* alpha-nat.c (get_longjmp_target): Use ALPHA_* constants
+	where needed.
+	(fetch_osf_core_registers): Likewise.
+	(supply_gregset): Likewise.
+
 2002-04-22  J. Brobecker  <brobecker@gnat.com>
   
 	* symfile.h (get_section_index): Define.
