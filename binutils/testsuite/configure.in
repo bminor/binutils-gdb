@@ -3,10 +3,10 @@
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-srctrigger="nm.all"
+srctrigger="binutils.all"
 srcname="DejaGnu"
 
-configdirs="nm.all"
+configdirs="binutils.all"
 
 # per-host:
 
@@ -42,23 +42,6 @@ a29k-isstip-*)		target_abbrev=itip ;
 				target_makefile_frag=config/mt-a29k-isstip ;;
 esac
 
-	# link in the lib directory if needed
-if [ ! -d lib ] ; then
-    files="lib"
-    links="lib"
-fi
-
-	# make list of files and links based on tool name
-tool_list="${tool_list} nm"
-for i in ${tool_list};
-do
-    if [ -f ${srcdir}/config/${target_abbrev}-$i.exp ] ; then
-    files="$files config/${target_abbrev}-$i.exp"
-    links="$links $i-init.exp"
-    fi
-done
-
 # post-target:
 
 	# make local configuration file, using MAKE if one is specified.
-if [ ! -n "$MAKE" ]; then MAKE=make; fi
