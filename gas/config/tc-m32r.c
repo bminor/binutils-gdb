@@ -396,22 +396,28 @@ first_writes_to_seconds_operands (a, b, check_outputs)
      m32r_insn * b;
      const int   check_outputs;
 {
-  const CGEN_OPERAND_INSTANCE * a_operands;
+  const CGEN_OPERAND_INSTANCE * a_operands = CGEN_INSN_OPERANDS (a->insn);
+  const CGEN_OPERAND_INSTANCE * b_operands = CGEN_INSN_OPERANDS (b->insn);
   int                           a_index;
 
+  /* If at least one of the instructions take sno opeands, then there is
+     nothing to check.  There really are instructions without operands,
+     eg 'nop'.  */
+  if (a_operands == NULL || b_operands == NULL)
+    return 0;
+      
   /* Scan the operand list of 'a' looking for an output operand.  */
-  for (a_index = 0, a_operands = CGEN_INSN_OPERANDS (a->insn);
+  for (a_index = 0;
        CGEN_OPERAND_INSTANCE_TYPE (a_operands) != CGEN_OPERAND_INSTANCE_END;
        a_index ++, a_operands ++)
     {
       if (CGEN_OPERAND_INSTANCE_TYPE (a_operands) == CGEN_OPERAND_INSTANCE_OUTPUT)
 	{
-	  const CGEN_OPERAND_INSTANCE * b_operands;
-	  int                           b_index;
+	  int b_index;
 	    
 	  /* Scan operand list of 'b' looking for an operand that references
 	     the same hardware element, and which goes in the right direction.  */
-	  for (b_index = 0, b_operands = CGEN_INSN_OPERANDS (b->insn);
+	  for (b_index = 0;
 	       CGEN_OPERAND_INSTANCE_TYPE (b_operands) != CGEN_OPERAND_INSTANCE_END;
 	       b_index ++, b_operands ++)
 	    {
@@ -433,15 +439,18 @@ writes_to_pc (a)
      m32r_insn * a;
 {
 #if 0
-  const CGEN_OPERAND_INSTANCE * a_operands;
+  const CGEN_OPERAND_INSTANCE * a_operands == CGEN_INSN_OPERANDS (a->insn);
 
-  for (a_operands = CGEN_INSN_OPERANDS (a->insn);
-       CGEN_OPERAND_INSTANCE_TYPE (a_operands) != CGEN_OPERAND_INSTANCE_END;
-       a_operands ++)
+  if (a_operands == NULL)
+    return 0;
+
+  while (CGEN_OPERAND_INSTANCE_TYPE (a_operands) != CGEN_OPERAND_INSTANCE_END)
     {
       if (CGEN_OPERAND_INSTANCE_OPERAND (a_operands) != NULL
 	  && CGEN_OPERAND_INDEX (CGEN_OPERAND_INSTANCE_OPERAND (a_operands)) == M32R_OPERAND_PC)
 	return 1;
+      
+      a_operands ++;
     }
 #else
   if (CGEN_INSN_ATTR (a->insn, CGEN_INSN_UNCOND_CTI)
@@ -571,8 +580,12 @@ assemble_parallel_insn (str, str2)
   /* Get the indicies of the operands of the instruction.  */
   /* FIXME: CGEN_FIELDS is already recorded, but relying on that fact
      doesn't seem right.  Perhaps allow passing fields like we do insn.  */
-  if (m32r_cgen_get_insn_operands (first.insn, bfd_getb16 ((char *) first.buffer), 16,
-				   first.indices) == NULL)
+  /* FIXME: ALIAS insns do not have operands, so we use this function
+     to find the equivalent insn and overwrite the value stored in our
+     structure.  When aliases behave differently this may have to change.  */
+  first.insn = m32r_cgen_get_insn_operands (first.insn, bfd_getb16 ((char *) first.buffer), 16,
+					    first.indices);
+  if (first.insn == NULL)
     as_fatal ("internal error: m32r_cgen_get_insn_operands failed for first insn");
 
   /* Parse the second instruction.  */
@@ -602,8 +615,9 @@ assemble_parallel_insn (str, str2)
     }
 
   /* Get the indicies of the operands of the instruction.  */
-  if (m32r_cgen_get_insn_operands (second.insn, bfd_getb16 ((char *) second.buffer), 16,
-				   second.indices) == NULL)
+  second.insn = m32r_cgen_get_insn_operands (second.insn, bfd_getb16 ((char *) second.buffer), 16,
+					     second.indices);
+  if (second.insn == NULL)
     as_fatal ("internal error: m32r_cgen_get_insn_operands failed for second insn");
 
   /* We assume that if the first instruction writes to a register that is
@@ -741,10 +755,11 @@ md_assemble (str)
 	abort();
       
       /* Get the indicies of the operands of the instruction.  */
-      /* FIXME: CGEN_FIELDS is already recorded, but relying on that fact
-	 doesn't seem right.  Perhaps allow passing fields like we do insn.  */
-      if (m32r_cgen_get_insn_operands (insn.insn, bfd_getb16 ((char *) insn.buffer), 16,
-				       insn.indices) == NULL)
+      insn.insn = m32r_cgen_get_insn_operands (insn.insn,
+					       bfd_getb16 ((char *) insn.buffer),
+					       16,
+					       insn.indices);
+      if (insn.insn == NULL)
 	as_fatal ("internal error: m32r_cgen_get_insn_operands failed");
 
       /* Keep track of whether we've seen a pair of 16 bit insns.

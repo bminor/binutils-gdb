@@ -1,3 +1,10 @@
+start-sanitize-m32rx
+Fri Feb 13 14:42:16 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c (first_writes_to_seconds_operands): Do not
+	bother checking insn which have no operands.
+
+end-sanitize-m32rx
 Fri Feb 13 16:41:42 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (AUTOMAKE_OPTIONS): Add cygnus.
