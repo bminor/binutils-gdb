@@ -1471,22 +1471,19 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	if (signed_check > reloc_signed_max || signed_check < reloc_signed_min)
 	  overflow = true;
 
+#ifndef OLD_ARM_ABI
+	if (r_type == R_ARM_THM_XPC22
+	    && ((lower_insn & 0x1800) == 0x0800))
+	  /* For a BLX instruction, make sure that the relocation is rounded up
+	     to a word boundary.  This follows the semantics of the instruction
+	     which specifies that bit 1 of the target address will come from bit
+	     1 of the base address.  */
+	  relocation = (relocation + 2) & ~ 3;
+#endif
 	/* Put RELOCATION back into the insn.  */
 	upper_insn = (upper_insn & ~(bfd_vma) 0x7ff) | ((relocation >> 12) & 0x7ff);
 	lower_insn = (lower_insn & ~(bfd_vma) 0x7ff) | ((relocation >> 1) & 0x7ff);
 
-#ifndef OLD_ARM_ABI
-	if (r_type == R_ARM_THM_XPC22
-	    && ((lower_insn & 0x1800) == 0x0800))
-	  /* Remove bit zero of the adjusted offset.  Bit zero can only be
-	     set if the upper insn is at a half-word boundary, since the
-	     destination address, an ARM instruction, must always be on a
-	     word boundary.  The semantics of the BLX (1) instruction, however,
-	     are that bit zero in the offset must always be zero, and the
-	     corresponding bit one in the target address will be set from bit
-	     one of the source address.  */
-	  lower_insn &= ~1;
-#endif
 	/* Put the relocated value back in the object file:  */
 	bfd_put_16 (input_bfd, upper_insn, hit_data);
 	bfd_put_16 (input_bfd, lower_insn, hit_data + 2);

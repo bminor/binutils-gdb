@@ -1,3 +1,9 @@
+2002-05-23  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* elf32-arm.h (elf32_arm_final_link_relocate): For the Thumb
+	BLX reloc round the relocation up rather than down.
+	* coff-arm.c (coff_arm_relocate_section): Likewise.
+
 2002-05-21  H.J. Lu  (hjl@gnu.org)
 
 	* linker.c (_bfd_generic_link_add_one_symbol): Allow multiple

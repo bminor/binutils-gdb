@@ -2227,7 +2227,7 @@ symbol_locate (symbolP, name, segment, valu, frag)
 
   S_SET_SEGMENT (symbolP, segment);
   S_SET_VALUE (symbolP, valu);
-  symbol_clear_list_pointers(symbolP);
+  symbol_clear_list_pointers (symbolP);
 
   symbol_set_frag (symbolP, frag);
 
@@ -6963,7 +6963,7 @@ vfp_sp_reg_list (str, pos)
 
   /* Sanity check -- should have raised a parse error above.  */
   if (count == 0 || count > 32)
-    abort();
+    abort ();
 
   /* Final test -- the registers must be consecutive.  */
   while (count--)
@@ -7076,7 +7076,7 @@ vfp_dp_reg_list (str)
 
   /* Sanity check -- should have raised a parse error above.  */
   if (count == 0 || count > 16)
-    abort();
+    abort ();
 
   /* Final test -- the registers must be consecutive.  */
   while (count--)
@@ -7093,7 +7093,7 @@ vfp_dp_reg_list (str)
 }
 
 static void
-vfp_sp_ldstm(str, ldstm_type)
+vfp_sp_ldstm (str, ldstm_type)
      char *str;
      enum vfp_ldstm_type ldstm_type;
 {
@@ -7130,7 +7130,7 @@ vfp_sp_ldstm(str, ldstm_type)
 }
 
 static void
-vfp_dp_ldstm(str, ldstm_type)
+vfp_dp_ldstm (str, ldstm_type)
      char *str;
      enum vfp_ldstm_type ldstm_type;
 {
@@ -9939,6 +9939,7 @@ md_apply_fix3 (fixP, valP, seg)
 	value = fixP->fx_offset;
 #endif
 	value += diff;
+
 	if ((value & ~0x3fffff) && ((value & ~0x3fffff) != ~0x3fffff))
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			_("branch with link out of range"));
@@ -9946,14 +9947,11 @@ md_apply_fix3 (fixP, valP, seg)
 	newval  = (newval  & 0xf800) | ((value & 0x7fffff) >> 12);
 	newval2 = (newval2 & 0xf800) | ((value & 0xfff) >> 1);
 	if (fixP->fx_r_type == BFD_RELOC_THUMB_PCREL_BLX)
-	  /* Remove bit zero of the adjusted offset.  Bit zero can only be
-	     set if the upper insn is at a half-word boundary, since the
-	     destination address, an ARM instruction, must always be on a
-	     word boundary.  The semantics of the BLX (1) instruction, however,
-	     are that bit zero in the offset must always be zero, and the
-	     corresponding bit one in the target address will be set from bit
-	     one of the source address.  */
-	  newval2 &= ~1;
+	  /* For a BLX instruction, make sure that the relocation is rounded up
+	     to a word boundary.  This follows the semantics of the instruction
+	     which specifies that bit 1 of the target address will come from bit
+	     1 of the base address.  */
+	  newval2 = (newval2 + 1) & ~ 1;
 	md_number_to_chars (buf, newval, THUMB_SIZE);
 	md_number_to_chars (buf + THUMB_SIZE, newval2, THUMB_SIZE);
       }

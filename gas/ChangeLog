@@ -1,5 +1,10 @@
 2002-05-23  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* config/tc-arm.c (md_apply_fix3): For the Thumb BLX reloc
+	round the relocation up rather than down.
+
+2002-05-23  Nick Clifton  <nickc@cambridge.redhat.com>
+
 	* config/obj-coff.c (obj_coff_section): Silently ignore an 'a'
 	flag.
         * doc/as.texinfo: Document that the COFF version of .section
