@@ -32,6 +32,8 @@
 
 #include <assert.h>
 
+#define YY_NO_UNPUT
+
 /* Whether we are in rcdata mode, in which we returns the lengths of
    strings.  */
 

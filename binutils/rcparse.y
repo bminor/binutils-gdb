@@ -54,10 +54,11 @@ static unsigned long base_style;
 static unsigned long default_style;
 static unsigned long class;
 static struct res_id res_text_field;
+static unichar null_unichar;
 
 /* This is used for COMBOBOX, LISTBOX and EDITTEXT which
    do not allow resource 'text' field in control definition. */
-static const struct res_id res_null_text = { 1, {{0, L""}}};
+static const struct res_id res_null_text = { 1, {{0, &null_unichar}}};
 
 %}
 

@@ -1,3 +1,12 @@
+2005-02-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* deflex.l (YY_NO_UNPUT): Define.
+	* rclex.l (YY_NO_UNPUT): Define.
+	* rcparse.y (null_unichar): New static var.
+	(res_null_text): Use it rather than attempting to init from wchar_t.
+	* windres.c: Include assert.h and time.h before getopt.h.
+	Include config.h and unistd.h too.
+
 2005-02-15  Nick Clifton  <nickc@redhat.com>
 
 	* nlmconv.c: Provide a full prototype for the localtime() function

@@ -27,6 +27,8 @@
 #include "defparse.h"
 #include "dlltool.h"
 
+#define YY_NO_UNPUT
+
 int linenumber;
 
 %}
