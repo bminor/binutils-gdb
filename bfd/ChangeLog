@@ -1,3 +1,25 @@
+2000-04-07  Nick Clifton  <nickc@cygnus.com>
+
+	* reloc.c: Add BFD_RELOC_ARM_PCREL_BLX and
+	BFD_RELOC_THUMB_PCREL_BLX.
+
+	* elf32-arm.h (elf32_arm_final_link_relocate): Handle
+	R_ARM_XPC25 and R_ARM_THM_PC22.
+
+	* elfarm-nabi.c (elf32_arm_howto_): Fix definitions of
+	R_ARM_XPC25 and R_ARM_THM_XPC22.
+	(elf32_arm_reloc_map): Make BFD_RELOC_{ARM|THUMB}_PCREL_BLX to
+	R_ARM_[XPC25|THM_XPC22].
+
+	* elfarm-oabi.c: Define OLD_ARM_ABI and change include from
+	elf/arm-oabi.h to elf/arm.h
+
+	* Makefile.am: Fix dependency for elfarm-oabi.c
+	* Makefile.in: Regenerate.
+	
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2000-04-06  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* elfcore.h (elf_core_file_p): preserve value of tdata at entry,

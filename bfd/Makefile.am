@@ -848,7 +848,7 @@ elf.lo: elf.c $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
 elf32-arc.lo: elf32-arc.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
-elfarm-oabi.lo: elfarm-oabi.c $(INCDIR)/elf/arm-oabi.h \
+elfarm-oabi.lo: elfarm-oabi.c $(INCDIR)/elf/arm.h \
   $(INCDIR)/elf/reloc-macros.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-arm.h elf32-target.h
