@@ -1,3 +1,9 @@
+Fri Apr  5 18:39:28 1996  James G. Smith  <jsmith@cygnus.co.uk>
+
+	* config/tc-mips.c: Allow non-zero offsets from .sdata symbols to
+ 	be accessed using the $gp register.
+	* config/tc-mips.h (MAX_GPREL_OFFSET): Added.
+
 Wed Apr  3 10:56:14 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config/tc-sparc.c (sparc_md_end): Set bfd machine number to
