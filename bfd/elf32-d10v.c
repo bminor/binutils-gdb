@@ -65,7 +65,7 @@ static reloc_howto_type elf_d10v_howto_table[] =
   /* right container */
   HOWTO (R_D10V_10_PCREL_R,	/* type */
 	 2,	                /* rightshift */
-	 0,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 10,	                /* bitsize */
 	 true,	                /* pc_relative */
 	 0,	                /* bitpos */
@@ -81,7 +81,7 @@ static reloc_howto_type elf_d10v_howto_table[] =
   /* left container */
   HOWTO (R_D10V_10_PCREL_L,	/* type */
 	 2,	                /* rightshift */
-	 0,	                /* size (0 = byte, 1 = short, 2 = long) */
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */
 	 10,	                /* bitsize */
 	 true,	                /* pc_relative */
 	 15,	                /* bitpos */
@@ -89,14 +89,14 @@ static reloc_howto_type elf_d10v_howto_table[] =
 	 bfd_elf_generic_reloc, /* special_function */
 	 "R_D10V_10_PCREL_L",	/* name */
 	 false,	                /* partial_inplace */
-	 0xff,		        /* src_mask */
-	 0xff,   		/* dst_mask */
+	 0x07f8000,		        /* src_mask */
+	 0x07f8000,   		/* dst_mask */
 	 true),			/* pcrel_offset */
 
   /* A 16 bit absolute relocation */
   HOWTO (R_D10V_16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -111,7 +111,7 @@ static reloc_howto_type elf_d10v_howto_table[] =
   /* An 18 bit absolute relocation, right shifted 2 */
   HOWTO (R_D10V_18,		/* type */
 	 2,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 18,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -126,7 +126,7 @@ static reloc_howto_type elf_d10v_howto_table[] =
   /* A relative 18 bit relocation, right shifted by 2  */
   HOWTO (R_D10V_18_PCREL,	/* type */
 	 2,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 18,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */

@@ -1,3 +1,10 @@
+start-sanitize-d10v
+Tue Jul 23 10:43:31 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* elf32-d10v.c (elf_d10v_howto_table): Changed all relocs to "long"
+ 	and fixed mask on R_D10V_10_PCREL_L.
+
+end-sanitize-d10v	
 Mon Jul 22 15:30:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf64-mips.c: Include "aout/ar.h".
