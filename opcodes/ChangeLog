@@ -1,3 +1,7 @@
+Mon Nov 27 13:09:52 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Rebuild with autoconf 2.7.
+
 Tue Nov 21 18:28:06 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Rebuild with autoconf 2.6.
