@@ -2,6 +2,8 @@
 #include "v850_sim.h"
 #include "simops.h"
 
+#include <sys/types.h>
+
 #ifdef HAVE_UTIME_H
 #include <utime.h>
 #endif
