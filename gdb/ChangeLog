@@ -1,3 +1,10 @@
+2002-08-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* mips-tdep.c (mips_xfer_register): New function.
+	(mips_n32n64_extract_return_value): Rewrite.
+	(mips_gdbarch_init): For N32 and N64, set extract_return_value
+	instead of deprecated_extract_return_value.
+
 2002-08-19  Elena Zannoni  <ezannoni@redhat.com>
 
 	* rs6000-tdep.c (TDEP): Delete macro.
