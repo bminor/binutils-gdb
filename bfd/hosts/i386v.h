@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/utime.h>
+#include <utime.h>
 #include <ctype.h>
 #include <string.h>
 #include <sys/file.h>
