@@ -136,6 +136,7 @@ case "${host}" in
   i[3456]86-*-solaris2*)  host_makefile_frag=config/mh-sysv4 ;;
   i[3456]86-*-aix*)	  host_makefile_frag=config/mh-aix386 ;;
   i[3456]86-*-go32*)	  host_makefile_frag=config/mh-go32 ;;
+  i[3456]86-*-msdosdjgpp*) host_makefile_frag=config/mh-go32 ;;
   *-cygwin32*)	  	  host_makefile_frag=config/mh-cygwin32 ;;
   *-windows*)	  	  host_makefile_frag=config/mh-windows ;;
   vax-*-ultrix2*)         host_makefile_frag=config/mh-vaxult2 ;;
@@ -391,8 +392,8 @@ case "${host}" in
     noconfigdirs="$noconfigdirs libide vmake"
 # end-sanitize-ide
     ;;
-  i[3456]86-*-go32)
-    noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff guile perl apache inet itcl tix db sn gnuserv"
+  i[3456]86-*-go32* | i[3456]86-*-msdosdjgpp*)
+    noconfigdirs="tcl tk expect dejagnu make texinfo bison patch flex byacc send-pr uudecode dejagnu diff guile perl apache inet itcl tix db sn gnuserv"
 # start-sanitize-ide
     noconfigdirs="$noconfigdirs libide vmake"
 # end-sanitize-ide
@@ -479,7 +480,7 @@ case "${target}" in
     esac
     noconfigdirs="$noconfigdirs ld shellutils"
     ;;
-  i[3456]86-*-go32)
+  i[3456]86-*-go32* | i[3456]-*-msdosdjgpp*)
     # but don't build gdb
     noconfigdirs="$noconfigdirs gdb target-libg++ target-libstdc++ target-libio target-librx"
     ;;
@@ -594,7 +595,8 @@ case "${target}" in
   sh-*-*)
     case "${host}" in
       i[3456]86-*-vsta) ;; # don't add gprof back in
-      i[3456]86-*-go32) ;; # don't add gprof back in
+      i[3456]86-*-go32*) ;; # don't add gprof back in
+      i[3456]86-*-msdosdjgpp*) ;; # don't add gprof back in
       *) skipdirs=`echo " ${skipdirs} " | sed -e 's/ gprof / /'` ;;
     esac
     noconfigdirs="$noconfigdirs target-libgloss"

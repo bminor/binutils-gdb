@@ -1,6 +1,7 @@
 Tue Jul 22 14:50:42 1997  Robert Hoehne <robert.hoehne@Mathematik.TU-Chemnitz.DE>
 
 	* configure: Treat msdosdjgpp like go32.
+	* configure.in: Likewise.  Don't remove gprof for go32.
 
 	* configure: Change Makefile.tem2 to Makefile.tm2.
 
