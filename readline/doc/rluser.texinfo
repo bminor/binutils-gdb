@@ -34,7 +34,7 @@ into another language, under the above conditions for modified versions.
 @end ignore
 
 @node Command Line Editing
-@chapter Command Line Editing
+@appendix Command Line Editing
 
 This text describes GNU's command line editing interface.
 
