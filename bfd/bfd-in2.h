@@ -1675,7 +1675,7 @@ enum bfd_architecture
 #define bfd_mach_z8001         1
 #define bfd_mach_z8002         2
   bfd_arch_h8500,     /* Renesas H8/500 (formerly Hitachi H8/500) */
-  bfd_arch_sh,        /* Renesas SH (formerly Hitachi SH) */
+  bfd_arch_sh,        /* Renesas / SuperH SH (formerly Hitachi SH) */
 #define bfd_mach_sh            1
 #define bfd_mach_sh2        0x20
 #define bfd_mach_sh_dsp     0x2d
@@ -2598,7 +2598,7 @@ field in the instruction.  */
   BFD_RELOC_ARM_GOTOFF,
   BFD_RELOC_ARM_GOTPC,
 
-/* Renesas SH relocs.  Not all of these appear in object files.  */
+/* Renesas / SuperH SH relocs.  Not all of these appear in object files.  */
   BFD_RELOC_SH_PCDISP8BY2,
   BFD_RELOC_SH_PCDISP12BY2,
   BFD_RELOC_SH_IMM4,

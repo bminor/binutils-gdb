@@ -37,8 +37,8 @@ extern int sh64_max_mem_for_rs_align_code PARAMS ((void));
 #undef  LISTING_HEADER
 #define LISTING_HEADER					\
   (target_big_endian ?					\
-     "Renesas SHcompact/SHmedia Big Endian GAS"		\
-   : "Renesas SHcompact/SHmedia Little Endian GAS")
+     "SuperH SHcompact/SHmedia Big Endian GAS"		\
+   : "SuperH SHcompact/SHmedia Little Endian GAS")
 
 /* We need to record the new frag position after an .align.  */
 extern void sh64_do_align PARAMS ((int, const char *, int, int));

@@ -1770,7 +1770,7 @@ get_machine_name (e_machine)
     case EM_MCORE:		return "MCORE";
     case EM_ARM:		return "ARM";
     case EM_OLD_ALPHA:		return "Digital Alpha (old)";
-    case EM_SH:			return "Renesas SH";
+    case EM_SH:			return "Renesas / SuperH SH";
     case EM_SPARCV9:		return "Sparc v9";
     case EM_TRICORE:		return "Siemens Tricore";
     case EM_ARC:		return "ARC";

@@ -3,7 +3,7 @@
 @c For copying conditions, see the file as.texinfo.
 @page
 @node SH64-Dependent
-@chapter Renesas SH64 Dependent Features
+@chapter SuperH SH64 Dependent Features
 
 @cindex SH64 support
 @menu

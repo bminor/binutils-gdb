@@ -4,7 +4,7 @@
 @c For copying conditions, see the file as.texinfo.
 @page
 @node SH-Dependent
-@chapter Renesas SH Dependent Features
+@chapter Renesas / SuperH SH Dependent Features
 
 @cindex SH support
 @menu
@@ -21,7 +21,7 @@
 @cindex SH options
 @cindex options, SH
 @code{@value{AS}} has following command-line options for the Renesas
-(formerly Hitachi) SH family.
+(formerly Hitachi) / SuperH SH family.
 
 @table @code
 @kindex -little
@@ -183,7 +183,9 @@ with other development tools.
 @cindex mnemonics, SH
 @cindex instruction summary, SH
 For detailed information on the SH machine instruction set, see
-@cite{SH-Microcomputer User's Manual} (Renesas).
+@cite{SH-Microcomputer User's Manual} (Renesas) or
+@cite{SH-4 32-bit CPU Core Architecture} (SuperH) and
+@cite{SuperH (SH) 64-Bit RISC Series} (SuperH).
 
 @code{@value{AS}} implements all the standard SH opcodes.  No additional
 pseudo-instructions are needed on this family.  Note, however, that

@@ -209,7 +209,7 @@ DESCRIPTION
 .#define bfd_mach_z8001		1
 .#define bfd_mach_z8002		2
 .  bfd_arch_h8500,     {* Renesas H8/500 (formerly Hitachi H8/500) *}
-.  bfd_arch_sh,        {* Renesas SH (formerly Hitachi SH) *}
+.  bfd_arch_sh,        {* Renesas / SuperH SH (formerly Hitachi SH) *}
 .#define bfd_mach_sh            1
 .#define bfd_mach_sh2        0x20
 .#define bfd_mach_sh_dsp     0x2d

@@ -2727,7 +2727,7 @@ ENUMX
 ENUMX
   BFD_RELOC_SH_TLS_TPOFF32
 ENUMDOC
-  Renesas SH relocs.  Not all of these appear in object files.
+  Renesas / SuperH SH relocs.  Not all of these appear in object files.
 
 ENUM
   BFD_RELOC_THUMB_PCREL_BRANCH9

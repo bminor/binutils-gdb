@@ -1,4 +1,4 @@
-/* Renesas SH64-specific support for 64-bit ELF
+/* SuperH SH64-specific support for 64-bit ELF
    Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.

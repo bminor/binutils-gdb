@@ -1,4 +1,4 @@
-/* Renesas SH specific support for 32-bit ELF
+/* Renesas / SuperH SH specific support for 32-bit ELF
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Contributed by Ian Lance Taylor, Cygnus Support.

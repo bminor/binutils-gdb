@@ -1,3 +1,15 @@
+2003-04-23  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* config/tc-sh.c: Amend comment to refer to SuperH.
+	* config/tc-sh.h: Likewise.
+	(LISTING_HEADER): Amend to refer to SuperH.
+	* config/tc-sh64.c: Change comment to refer to SuperH.
+	* config/tc-sh64.h (LISTING_HEADER): Change to refer to SuperH.
+	* doc/as.texinfo [SH, GENERIC]: Amend / Change to refer to SuperH.
+	* doc/c-sh.texi: Amend to refer to SuperH.
+	Add SuperH architecture documentation references.
+	* doc/c-sh64.texi: Change to refer to SuperH.
+
 2003-04-23  H.J. Lu <hjl@gnu.org>
 
 	* app.c (do_scrub_chars): More checks for valid labels.

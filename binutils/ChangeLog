@@ -1,5 +1,8 @@
 2003-04-23  J"orn Rennecke <joern.rennecke@superh.com>
 
+	* readelf.c (get_machine_name) <EM_SH>: Amend return value
+	to refer to SuperH.
+
 	* readelf.c (decode_location_expression): Don't add a trailing ';'.
 
 2003-04-23  Dimitrie O. Paun <dpaun@rogers.com>

@@ -101,7 +101,8 @@ extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 
 #define LISTING_HEADER \
   (!target_big_endian \
-   ? "Renesas Super-H GAS Little Endian" : "Renesas Super-H GAS Big Endian")
+   ? "Renesas / SuperH SH GAS Little Endian" \
+   : "Renesas / SuperH SH GAS Big Endian")
 
 #define md_operand(x)
 

@@ -1156,8 +1156,10 @@ For information on the H8/500 machine instruction set, see @cite{H8/500
 Series Programming Manual} (Renesas M21T001).
 @end ifset
 @ifset SH
-For information on the Renesas (formerly Hitachi) SH machine instruction set,
-see @cite{SH-Microcomputer User's Manual} (Renesas).
+For information on the Renesas (formerly Hitachi) / SuperH SH machine instruction set,
+see @cite{SH-Microcomputer User's Manual} (Renesas) or
+@cite{SH-4 32-bit CPU Core Architecture} (SuperH) and
+@cite{SuperH (SH) 64-Bit RISC Series} (SuperH).
 @end ifset
 @ifset Z8000
 For information on the Z8000 machine instruction set, see @cite{Z8000 CPU Technical Manual}
@@ -2086,7 +2088,7 @@ is considered a comment and is ignored.  The line comment character is
 @samp{;} for Motorola PowerPC;
 @end ifset
 @ifset SH
-@samp{!} for the Renesas SH;
+@samp{!} for the Renesas / SuperH SH;
 @end ifset
 @ifset SPARC
 @samp{!} on the SPARC;
@@ -2542,7 +2544,7 @@ A letter, to tell @command{@value{AS}} the rest of the number is a flonum.
 @end ignore
 
 On the H8/300, H8/500,
-Renesas SH,
+Renesas / SuperH SH,
 and AMD 29K architectures, the letter must be
 one of the letters @samp{DFPRSX} (in upper or lower case).
 
@@ -2679,7 +2681,7 @@ the task of adjusting mentions of object-file addresses so they refer to
 the proper run-time addresses.
 @ifset H8
 For the H8/300 and H8/500,
-and for the Renesas SH,
+and for the Renesas / SuperH SH,
 @command{@value{AS}} pads sections if needed to
 ensure they end on a word (sixteen bit) boundary.
 @end ifset
@@ -3882,8 +3884,8 @@ required alignment; this can be useful if you want the alignment to be filled
 with no-op instructions when appropriate.
 
 The way the required alignment is specified varies from system to system.
-For the a29k, hppa, m68k, m88k, w65, sparc, Xtensa, and Renesas SH, and i386 using ELF
-format,
+For the a29k, hppa, m68k, m88k, w65, sparc, Xtensa, and Renesas / SuperH SH,
+and i386 using ELF format,
 the first expression is the
 alignment request in bytes.  For example @samp{.align 8} advances
 the location counter until it is a multiple of 8.  If the location counter
@@ -5892,8 +5894,8 @@ subject, see the hardware manufacturer's manual.
 * MSP430-Dependent::		MSP430 Dependent Features
 @end ifset
 @ifset SH
-* SH-Dependent::                Renesas SH Dependent Features
-* SH64-Dependent::              Renesas SH64 Dependent Features
+* SH-Dependent::                Renesas / SuperH SH Dependent Features
+* SH64-Dependent::              SuperH SH64 Dependent Features
 @end ifset
 @ifset PDP11
 * PDP-11-Dependent::            PDP-11 Dependent Features

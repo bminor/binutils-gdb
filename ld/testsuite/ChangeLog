@@ -1,3 +1,8 @@
+2003-04-23  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* ld-sh/sh64/crange3-cmpct.rd (Machine): Change to refer to SuperH.
+	* ld-sh/sh64/crange3-media.rd (Machine): Likewise.
+
 2003-04-23  H.J. Lu <hjl@gnu.org>
 
 	* ld-elfvers/vers.exp (objdump_dynsymstuff): Support empty

@@ -1,3 +1,14 @@
+2003-04-23  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* archures.c (enum bfd_architecture): Amend comment to refer to SuperH.
+	* cpu-sh.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* reloc.c (bfd_reloc_code_real): Likewise.
+	* elf32-sh64-com.c: Change comment to refer to SuperH.
+	* elf32-sh64.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* bfd-in2.h (enum bfd_architecture): Regenerate.
+
 2003-04-23  Alan Modra  <amodra@bigpond.net.au>
 
 	From Julien LEMOINE <speedblue@debian.org>
