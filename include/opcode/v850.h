@@ -61,6 +61,45 @@ struct v850_operand
   /* How far the operand is left shifted in the instruction.  */
   int shift;
 
+  /* Insertion function.  This is used by the assembler.  To insert an
+     operand value into an instruction, check this field.
+
+     If it is NULL, execute
+         i |= (op & ((1 << o->bits) - 1)) << o->shift;
+     (i is the instruction which we are filling in, o is a pointer to
+     this structure, and op is the opcode value; this assumes twos
+     complement arithmetic).
+
+     If this field is not NULL, then simply call it with the
+     instruction and the operand value.  It will return the new value
+     of the instruction.  If the ERRMSG argument is not NULL, then if
+     the operand value is illegal, *ERRMSG will be set to a warning
+     string (the operand will be inserted in any case).  If the
+     operand value is legal, *ERRMSG will be unchanged (most operands
+     can accept any value).  */
+  unsigned long (*insert) PARAMS ((unsigned long instruction, long op,
+				   const char **errmsg));
+
+  /* Extraction function.  This is used by the disassembler.  To
+     extract this operand type from an instruction, check this field.
+
+     If it is NULL, compute
+         op = ((i) >> o->shift) & ((1 << o->bits) - 1);
+	 if ((o->flags & PPC_OPERAND_SIGNED) != 0
+	     && (op & (1 << (o->bits - 1))) != 0)
+	   op -= 1 << o->bits;
+     (i is the instruction, o is a pointer to this structure, and op
+     is the result; this assumes twos complement arithmetic).
+
+     If this field is not NULL, then simply call it with the
+     instruction value.  It will return the value of the operand.  If
+     the INVALID argument is not NULL, *INVALID will be set to
+     non-zero if this operand type can not actually be extracted from
+     this operand (i.e., the instruction does not match).  If the
+     operand is valid, *INVALID will not be changed.  */
+  long (*extract) PARAMS ((unsigned long instruction, int *invalid));
+
+  /* One bit syntax flags.  */
   int flags;
 };
 
@@ -70,9 +109,17 @@ struct v850_operand
 extern const struct v850_operand v850_operands[];
 
 /* Values defined for the flags field of a struct v850_operand.  */
-#define OPERAND_NUM	1	/* number or symbol */
-#define OPERAND_REG	2	/* register */
 
+/* This operand names a general purpose register */
+#define V850_OPERAND_REG	0x01
 
+/* This operand names a system register */
+#define V850_OPERAND_SRG	0x02
+
+/* This operand names a condition code used in the setf instruction */
+#define V850_OPERAND_CC		0x04
+
+/* This operand takes signed values */
+#define V850_OPERAND_SIGNED	0x08
 
 #endif /* V850_H */
