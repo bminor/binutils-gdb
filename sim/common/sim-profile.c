@@ -1017,7 +1017,6 @@ profile_print_speed (sim_cpu *cpu)
 		       COMMAS ((unsigned long) ((double) total / secs)));
     }
 
-#if WITH_PROFILE_MODEL_P
   /* Print simulated execution time if the cpu frequency has been specified.  */
   clock = PROFILE_CPU_FREQ (data);
   if (clock != 0)
@@ -1028,6 +1027,7 @@ profile_print_speed (sim_cpu *cpu)
       else
 	sim_io_printf (sd, "  Simulated cpu frequency: %.2f Hz\n", clock);
 
+#if WITH_PROFILE_MODEL_P
       if (PROFILE_FLAGS (data) [PROFILE_MODEL_IDX])
 	{
 	  /* The printing of the time rounded to 2 decimal places makes the
@@ -1040,8 +1040,8 @@ profile_print_speed (sim_cpu *cpu)
 	  sim_io_printf (sd, "  Simulated execution time: %.2f seconds\n",
 			 secs);
 	}
-    }
 #endif /* WITH_PROFILE_MODEL_P */
+    }
 }
 
 /* Print selected address ranges.  */
