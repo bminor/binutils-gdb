@@ -1,7 +1,13 @@
 # Host: Intel 386 running SVR4.
 XDEPFILES= procfs.o i386-xdep.o
 XM_FILE= xm-i386v4.h
-XM_CLIBS=
 SYSV_DEFINE=-DSYSV
 REGEX=regex.o
 REGEX1=regex.o
+
+# We need to find alloca() somewhere.  Gcc has one built in, but most other
+# compilers don't.  We can find one in /usr/ucblib/libucb.a, but we don't
+# want to link against the ucb libraries until after we have linked against
+# the standard libc, or we will pick up broken versions of lots of other things
+# that should come from libc.  So we explicitly specify a link with libc first.
+XM_CLIBS=-lc /usr/ucblib/libucb.a
