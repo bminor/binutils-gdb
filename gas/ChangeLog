@@ -1,3 +1,19 @@
+Fri Jun  6 17:15:55 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-sh.h (md_cons_align): Define.
+	(sh_cons_align): Declare.
+	* config/tc-sh.c (md_pseudo_table): Add .uaword and .ualong.
+	(sh_no_align_cons): New static variable.
+	(s_uacons): New static function.
+	(sh_cons_align): New function.
+	(sh_handle_align): Warn about misaligned data.
+	* doc/c-sh.texi: Document .uaword and .ualong.
+
+Thu Jun  5 15:38:17 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* macro.c (macro_expand): In MRI mode, treat single quote as a
+	separator character when checking for a positional argument.
+
 Tue Jun  3 16:15:13 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-arm.c (md_parse_option): Merge in changes from
