@@ -1086,7 +1086,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
                                             ppc_linux_memory_remove_breakpoint);
 
       /* Shared library handling.  */
-      set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
       set_gdbarch_skip_trampoline_code (gdbarch,
                                         ppc_linux_skip_trampoline_code);
       set_solib_svr4_fetch_link_map_offsets

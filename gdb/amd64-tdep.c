@@ -1169,11 +1169,6 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_unwind_dummy_id (gdbarch, amd64_unwind_dummy_id);
 
-  /* FIXME: kettenis/20021026: This is ELF-specific.  Fine for now,
-     since all supported AMD64 targets are ELF, but that might change
-     in the future.  */
-  set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
-
   frame_unwind_append_sniffer (gdbarch, amd64_sigtramp_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, amd64_frame_sniffer);
   frame_base_set_default (gdbarch, &amd64_frame_base);

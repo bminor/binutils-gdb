@@ -2953,7 +2953,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_return_value (gdbarch, s390_return_value);
 
   /* Frame handling.  */
-  set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
   dwarf2_frame_set_init_reg (gdbarch, s390_dwarf2_frame_init_reg);
   frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
   frame_base_append_sniffer (gdbarch, dwarf2_frame_base_sniffer);

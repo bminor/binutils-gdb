@@ -295,7 +295,6 @@ m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   frame_unwind_append_sniffer (gdbarch, m68k_linux_sigtramp_frame_sniffer);
 
   /* Shared library handling.  */
-  set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 }
 

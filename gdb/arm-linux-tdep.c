@@ -481,7 +481,6 @@ arm_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_deprecated_push_arguments (gdbarch, arm_linux_push_arguments);
 
   /* Shared library handling.  */
-  set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
 }

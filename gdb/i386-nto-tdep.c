@@ -282,7 +282,6 @@ i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
 
   /* NTO has shared libraries.  */
-  set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
 
   tdep->sigtramp_p = i386nto_sigtramp_p;

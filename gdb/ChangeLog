@@ -1,5 +1,19 @@
 2004-10-31  Andrew Cagney  <cagney@gnu.org>
 
+	* sparc-sol2-tdep.c (sparc32_sol2_init_abi): Do not set
+	in_solib_call_trampoline to in_plt_entry, IN_SOLIB_CALL_TRAMPOLINE
+	isn't used by this architecture.
+	* sparc64-sol2-tdep.c (sparc64_sol2_init_abi): Ditto.
+	* sparc64obsd-tdep.c (sparc64obsd_init_abi): Ditto.
+	* sparc64nbsd-tdep.c (sparc64nbsd_init_abi): Ditto.
+	* s390-tdep.c (s390_gdbarch_init): Ditto.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Ditto.
+	* m68klinux-tdep.c (m68k_linux_init_abi): Ditto.
+	* i386-tdep.c (i386_svr4_init_abi): Ditto.
+	* i386-nto-tdep.c (i386nto_init_abi): Ditto.
+	* arm-linux-tdep.c (arm_linux_init_abi): Ditto.
+	* amd64-tdep.c (amd64_init_abi): Ditto.
+
 	* vaxnbsd-tdep.c (vaxnbsd_elf_init_abi): Do not set
 	in_solib_call_trampoline to its default value of
 	generic_in_solib_call_trampoline.

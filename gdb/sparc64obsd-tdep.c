@@ -202,7 +202,6 @@ sparc64obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   sparc64_init_abi (info, gdbarch);
 
   /* OpenBSD/sparc64 has SVR4-style shared libraries...  */
-  set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_lp64_fetch_link_map_offsets);
