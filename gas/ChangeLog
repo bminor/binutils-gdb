@@ -1,4 +1,4 @@
-2002-03-14  Hans-Peter Nilsson  <hp@bitrange.com>
+2002-03-17  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* config/tc-mmix.c (md_estimate_size_before_relax): Don't consider
 	a weak symbol in same section to be within reach.
