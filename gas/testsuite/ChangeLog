@@ -1,3 +1,9 @@
+2002-09-27  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* gas/sh/pcrel2.s: New.
+	* gas/sh/pcrel2.d: New.
+	* gas/sh/basic.exp: Add pcrel2 test.
+
 2002-09-27  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* gas/vax/elf-rel.[ds]: New test.

@@ -129,6 +129,8 @@ if [istarget sh*-*-*] then {
 	run_dump_test "dsp"
 
 	run_dump_test "pcrel"
+
+	run_dump_test "pcrel2"
     }
 
     if {[istarget sh*-*elf] || [istarget sh*-linux*]} then {

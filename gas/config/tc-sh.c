@@ -3219,6 +3219,18 @@ int
 sh_force_relocation (fix)
      fixS *fix;
 {
+  /* These relocations can't make it into a DSO, so no use forcing
+     them for global symbols.  */
+  if (! sh_relax
+      && (fix->fx_r_type == BFD_RELOC_SH_PCDISP8BY2
+	  || fix->fx_r_type == BFD_RELOC_SH_PCDISP12BY2
+	  || fix->fx_r_type == BFD_RELOC_SH_PCRELIMM8BY2
+	  || fix->fx_r_type == BFD_RELOC_SH_PCRELIMM8BY4
+	  || fix->fx_r_type == BFD_RELOC_8_PCREL
+	  || fix->fx_r_type == BFD_RELOC_SH_SWITCH16
+	  || fix->fx_r_type == BFD_RELOC_SH_SWITCH32))
+    return 0;
+
   if (fix->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fix->fx_r_type == BFD_RELOC_VTABLE_ENTRY
       || fix->fx_r_type == BFD_RELOC_SH_LOOP_START
