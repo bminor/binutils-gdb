@@ -1,3 +1,10 @@
+2002-07-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (x86-64-tdep.o): Add $(objfiles_h).
+	* x86-64-tdep.c: Include "objfiles.h".
+	(x86_64_gdbarch_init): Set in_solib_call_trampoline to
+	in_plt_section.  From 2002-07-18 Michal Ludvig <mludvig@suse.cz>.
+
 2002-07-17  Michal Ludvig  <michal@suse.cz>
 
 	* dwarf2cfi.c (execute_stack_op): Complain on unknown DW_OP_ value.
