@@ -1,3 +1,7 @@
+Fri Sep  8 14:38:08 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (install): Don't install in $(tooldir).
+
 Fri Aug 25 15:30:05 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	NS32K changes from Ian Dall:
