@@ -38,6 +38,12 @@ print_insn (memaddr, stream)
 /****************************************/
 /* MEM format				*/
 /****************************************/
+
+struct tabent {
+	char	*name;
+	char	numops;
+};
+
 static int				/* returns instruction length: 4 or 8 */
 mem( memaddr, word1, word2, noprint )
     unsigned long memaddr;
