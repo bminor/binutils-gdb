@@ -27,6 +27,7 @@
 
 #include "libbfd.h"
 #include "som.h"
+#include "libhppa.h"
 
 #include <stdio.h>
 #include <sys/types.h>
