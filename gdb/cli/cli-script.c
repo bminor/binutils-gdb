@@ -1169,6 +1169,7 @@ define_command (char *comname, int from_tty)
           break;
         default:
           /* Should never come here as hookc would be 0. */
+	  internal_error ("%s:%d: bad switch", __FILE__, __LINE__);
         }
     }
 }

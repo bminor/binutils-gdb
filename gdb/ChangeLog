@@ -1,3 +1,8 @@
+Tue Jan 30 15:14:26 2001  Andrew Cagney  <cagney@skil>
+
+	* cli/cli-script.c (define_command): Check for a bad hook value in
+ 	switch statement.
+
 2001-01-30  J.T. Conklin  <jtc@redback.com>
 
 	* configure/sh/embed.mt: New file.
