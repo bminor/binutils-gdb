@@ -119,8 +119,12 @@ arm-*-aout | armel-*-aout) targ_emul=armaoutl ;;
 armeb-*-aout)		targ_emul=armaoutb ;;
 arm-*-coff)		targ_emul=armcoff ;;
 arm-*-elf)		targ_emul=armelf ;;
+arm-*-oabi)             targ_emul=armelf_oabi ;;
+strongarm-*-coff)	targ_emul=armcoff ;;
+strongarm-*-elf)	targ_emul=armelf ;;
 thumb-*-coff)		targ_emul=armcoff ;;
 thumb-*-elf)		targ_emul=armelf ;;
+thumb-*-oabi)           targ_emul=armelf_oabi ;;
 thumb-*-pe)		targ_emul=armpe ;;
 h8300-*-hms* | h8300-*-coff*)
 			targ_emul=h8300; targ_extra_emuls="h8300h h8300s"
