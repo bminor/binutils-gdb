@@ -1,3 +1,8 @@
+2005-02-08  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elflink.c (elf_link_add_object_symbols): Don't add "warning: "
+	prefix here.
+
 2005-02-07  Maciej W. Rozycki  <macro@mips.com>
 
 	* elf64-mips.c: Fix formatting throughout.

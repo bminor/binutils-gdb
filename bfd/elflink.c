@@ -3142,8 +3142,6 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      char *msg;
 	      bfd_size_type sz;
-	      bfd_size_type prefix_len;
-	      const char * gnu_warning_prefix = _("warning: ");
 
 	      name += sizeof ".gnu.warning." - 1;
 
@@ -3177,16 +3175,14 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		}
 
 	      sz = s->size;
-	      prefix_len = strlen (gnu_warning_prefix);
-	      msg = bfd_alloc (abfd, prefix_len + sz + 1);
+	      msg = bfd_alloc (abfd, sz + 1);
 	      if (msg == NULL)
 		goto error_return;
 
-	      strcpy (msg, gnu_warning_prefix);
-	      if (! bfd_get_section_contents (abfd, s, msg + prefix_len, 0, sz))
+	      if (! bfd_get_section_contents (abfd, s, msg, 0, sz))
 		goto error_return;
 
-	      msg[prefix_len + sz] = '\0';
+	      msg[sz] = '\0';
 
 	      if (! (_bfd_generic_link_add_one_symbol
 		     (info, abfd, name, BSF_WARNING, s, 0, msg,
