@@ -1,3 +1,8 @@
+Fri Oct 16 15:31:38 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* m32r-tdep.c (decode_prologue): Return failure if we reach 
+	the end of the function without finding the end of the prologue.
+
 1998-10-16  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* command.c copying.c copying.awk core-aout.c core-regset.c
