@@ -1,3 +1,10 @@
+2000-05-27  Alan Modra  <alan@linuxcare.com.au>
+
+	* Makefile.am (DEP, DEP1, dep, dep-in, dep-am): Use a better sed
+	line-matching scheme to cope with automake moving variables around.
+	($(TARG_CPU_O)): Remove dependency on TARG_CPU_DEP_@target_cpu_type@
+	* Makefile.in: Regenerate.
+
 2000-05-26  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-sparc.c (sparc_relax): New.

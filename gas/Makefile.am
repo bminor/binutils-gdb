@@ -490,7 +490,7 @@ check-DEJAGNU: site.exp
 
 # The implicit .c.o rule doesn't work for these, perhaps because of
 # the variables, or perhaps because the sources are not on vpath.
-$(TARG_CPU_O): $(TARG_CPU_C) $(TARG_CPU_DEP_@target_cpu_type@)
+$(TARG_CPU_O): $(TARG_CPU_C)
 	$(COMPILE) -c $(TARG_CPU_C)
 $(ATOF_TARG_O): $(ATOF_TARG_C)
 	$(COMPILE) -c $(ATOF_TARG_C)
@@ -609,7 +609,7 @@ MOSTLYCLEANFILES = $(STAGESTUFF) core stamp-mk.com \
 	testsuite/*.o testsuite/*.out testsuite/gas.log testsuite/gas.sum \
 	testsuite/site.exp site.bak site.exp stage stage1 stage2
 
-CLEANFILES = dep.sed DEPTC DEPTCA DEPOBJ DEPOBJA DEP2 DEP2a DEP1 DEPA DEP DEPDIR
+CLEANFILES = dep.sed DEPTC DEPTCA DEPOBJ DEPOBJA DEP2 DEP2A DEP1 DEPA DEP DEPDIR
 
 .PHONY: install-exec-local install-data-local
 .PHONY: install-exec-bindir install-exec-tooldir
@@ -713,26 +713,31 @@ de-stage3:
 	- (cd stage3 ; rm -f as$(EXEEXT) ; mv -f * ..)
 	- rmdir stage3
 
-# Automatic dependency computation.  This is a real pain, because the
-# dependencies change based on target_cpu_type and obj_format.  We
-# currently ignore any dependencies caused by emulation files.
-
 DEP_FILE_DEPS =  $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	$(TARGET_CPU_HFILES) $(OBJ_FORMAT_CFILES) $(OBJ_FORMAT_HFILES)
 
+# Automatic dependency computation.  This is a real pain, because the
+# dependencies change based on target_cpu_type and obj_format.
+# Just to make things even more complicated, automake separates the
+# dependency variable assignments from the dependency rules, and tacks
+# on a .NOEXPORT at the end of Makefile.in.
+
 DEP: dep.sed $(DEP_FILE_DEPS) DEPTC DEPOBJ DEP2
-	rm -f DEP1
+	rm -f DEP1 # delete because we use $? in DEP1 rule
 	srcdir=`cd $(srcdir); pwd`; \
 	$(MAKE) MKDEP="$(MKDEP)" srcdir="$${srcdir}" VPATH="$${srcdir}" DEP1
 	rm -rf DEPDIR
-	sed -f dep.sed < DEP1 > DEPA
+	echo 'AMKDEP = #DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING BELOW.' > DEPA
 	sed -f dep.sed < DEPTC >> DEPA
 	sed -f dep.sed < DEPOBJ >> DEPA
 	sed -f dep.sed < DEP2 >> DEPA
+	echo 'BMKDEP = #DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING ABOVE.' >> DEPA
+	echo '#MKDEP    DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING BELOW.' >> DEPA
+	sed -f dep.sed < DEP1 >> DEPA
 	echo '$$(OBJS): $$(DEP_@target''_cpu_type@_@obj''_format@)' >> DEPA
 	echo '$$(TARG_CPU_O): $$(DEPTC_@target''_cpu_type@_@obj''_format@)' >> DEPA
 	echo '$$(OBJ_FORMAT_O): $$(DEPOBJ_@target''_cpu_type@_@obj''_format@)' >> DEPA
-	echo '# IF YOU PUT ANYTHING HERE IT WILL GO AWAY' >> DEPA
+	echo '#MKDEP    DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING ABOVE.' >> DEPA
 	mv -f DEPA $@
 
 DEP1: $(CFILES) $(MULTI_CFILES)
@@ -744,9 +749,7 @@ DEP1: $(CFILES) $(MULTI_CFILES)
 	echo '' > targ-env.h; \
 	echo '' > itbl-cpu.h; \
 	echo '' > itbl-parse.h; \
-	echo '# DO NOT DELETE THIS LINE -- mkdep uses it.' > DEP; \
-	echo '# DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.' >> DEP; \
-	$(MKDEP) -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) $? >> DEP
+	$(MKDEP) -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) $? > DEP
 	mv -f DEPDIR/DEP $@
 
 # Work out the special dependencies for the tc-*.c files.
@@ -777,7 +780,7 @@ DEPTC: $(TARGET_CPU_CFILES)
 	echo '  $$(INCDIR)/obstack.h $$(BFDDIR)/libhppa.h \' >> DEPTCA
 	echo '  $$(INCDIR)/opcode/hppa.h $$(BFDDIR)/som.h' >> DEPTCA
 	for c in $(MULTI_CPU_TYPES); do \
-	  echo 'DEPTC_'"$${c}"'_multi = \' >> DEPTCA; \
+	  echo "DEPTC_$${c}"'_multi = \' >> DEPTCA; \
 	  for o in $(OBJ_FORMATS); do \
 	    $(MULTI_CPU_OBJ_VALID) \
 	    if [ x$${valid} = xyes ]; then \
@@ -816,7 +819,7 @@ DEPOBJ: $(OBJ_FORMAT_CFILES)
 	echo '  $$(BFDDIR)/som.h  $$(INCDIR)/aout/stab_gnu.h \' >> DEPOBJA
 	echo '  $$(INCDIR)/aout/stab.def' >> DEPOBJA
 	for c in $(MULTI_CPU_TYPES); do \
-	  echo 'DEPOBJ_'"$${c}"'_multi = \' >> DEPOBJA; \
+	  echo "DEPOBJ_$${c}"'_multi = \' >> DEPOBJA; \
 	  for o in $(OBJ_FORMATS); do \
 	    $(MULTI_CPU_OBJ_VALID) \
 	    if [ x$${valid} = xyes ]; then \
@@ -830,7 +833,7 @@ DEPOBJ: $(OBJ_FORMAT_CFILES)
 # Work out the dependencies for each CPU/OBJ combination.
 # Note that SOM is a special case, because it only works native.
 DEP2: $(TARGET_CPU_HFILES) $(OBJ_FORMAT_HFILES)
-	rm -f DEP2a
+	rm -f DEP2A
 	if [ -d DEPDIR ]; then true; else mkdir DEPDIR; fi
 	srcdir=`cd $(srcdir); pwd`; \
 	cd DEPDIR; \
@@ -841,22 +844,22 @@ DEP2: $(TARGET_CPU_HFILES) $(OBJ_FORMAT_HFILES)
 	      echo '#include "tc-'"$${c}"'.h"' > targ-cpu.h; \
 	      echo '#include "obj-'"$${o}"'.h"' > dummy.c; \
 	      $(MKDEP) -DBFD_ASSEMBLER -I. -I.. -I$${srcdir} -I../../bfd $(DEP_INCLUDES) dummy.c | \
-	        sed -e "s/dummy.o: dummy.c/DEP_$${c}_$${o} =/" >> ../DEP2a; \
+	        sed -e "s/dummy.o: dummy.c/DEP_$${c}_$${o} =/" >> ../DEP2A; \
 	    else true; fi; \
 	  done; \
 	done
-	echo 'DEP_hppa_som = $$(BFDDIR)/som.h' >> DEP2a
+	echo 'DEP_hppa_som = $$(BFDDIR)/som.h' >> DEP2A
 	for c in $(MULTI_CPU_TYPES); do \
-	  echo 'DEP_'"$${c}"'_multi = \' >> DEP2a; \
+	  echo "DEP_$${c}"'_multi = \' >> DEP2A; \
 	  for o in $(OBJ_FORMATS); do \
 	    $(MULTI_CPU_OBJ_VALID) \
 	    if [ x$${valid} = xyes ]; then \
-	      echo '$$(DEP_'"$${c}_$${o}"') \' >> DEP2a; \
+	      echo '$$(DEP_'"$${c}_$${o}"') \' >> DEP2A; \
 	    else true; fi; \
 	  done; \
-	  echo '' >> DEP2a; \
+	  echo '' >> DEP2A; \
 	done
-	mv -f DEP2a DEP2
+	mv -f DEP2A DEP2
 
 dep.sed: dep-in.sed config.status
 	srcdir=`cd $(srcdir); pwd`; \
@@ -866,91 +869,28 @@ dep.sed: dep-in.sed config.status
 		-e "s!@SRCDIR@!$${srcdir}!"
 
 dep: DEP
-	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < Makefile > tmp-Makefile
+	sed -e '/^.MKDEP.*WARNING BELOW./,/^.MKDEP.*WARNING ABOVE./d' \
+	  < Makefile > tmp-Makefile
 	cat DEP >> tmp-Makefile
 	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile Makefile
 
 dep-in: DEP
-	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.in > tmp-Makefile.in
+	sed -e '/^.MKDEP.*WARNING BELOW./,/^.MKDEP.*WARNING ABOVE./d' \
+	  < $(srcdir)/Makefile.in > tmp-Makefile.in
 	cat DEP >> tmp-Makefile.in
 	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.in $(srcdir)/Makefile.in
 
 dep-am: DEP
-	sed -e '/^..DO NOT DELETE THIS LINE/,$$d' < $(srcdir)/Makefile.am > tmp-Makefile.am
+	sed -e '/^.MKDEP.*WARNING BELOW./,/^.MKDEP.*WARNING ABOVE./d' \
+	  < $(srcdir)/Makefile.am > tmp-Makefile.am
 	cat DEP >> tmp-Makefile.am
 	$(SHELL) $(srcdir)/../move-if-change tmp-Makefile.am $(srcdir)/Makefile.am
 
+# HEED THE MKDEP WARNINGS.
+# ANYTHING CHANGED OR ADDED BETWEEN THE WARNING LINES MAY GO AWAY.
 .PHONY: dep dep-in dep-am
 
-# DO NOT DELETE THIS LINE -- mkdep uses it.
-# DO NOT PUT ANYTHING AFTER THIS LINE, IT WILL GO AWAY.
-app.o: app.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h
-as.o: as.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h subsegs.h $(INCDIR)/obstack.h output-file.h \
-  sb.h macro.h
-atof-generic.o: atof-generic.c $(INCDIR)/bin-bugs.h \
-  $(INCDIR)/progress.h emul.h
-bignum-copy.o: bignum-copy.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h
-cond.o: cond.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h macro.h sb.h $(INCDIR)/obstack.h
-depend.o: depend.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h
-dwarf2dbg.o: dwarf2dbg.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h dwarf2dbg.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/dwarf2.h
-ecoff.o: ecoff.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h ecoff.h
-ehopt.o: ehopt.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/dwarf2.h
-expr.o: expr.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h $(INCDIR)/obstack.h
-flonum-copy.o: flonum-copy.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h
-flonum-konst.o: flonum-konst.c
-flonum-mult.o: flonum-mult.c
-frags.o: frags.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h subsegs.h $(INCDIR)/obstack.h
-hash.o: hash.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h $(INCDIR)/obstack.h
-input-file.o: input-file.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h input-file.h
-input-scrub.o: input-scrub.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h input-file.h sb.h
-listing.o: listing.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h input-file.h subsegs.h
-literal.o: literal.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h subsegs.h $(INCDIR)/obstack.h
-macro.o: macro.c sb.h macro.h
-messages.o: messages.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h
-output-file.o: output-file.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h output-file.h
-read.o: read.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h subsegs.h $(INCDIR)/obstack.h sb.h macro.h ecoff.h
-sb.o: sb.c sb.h
-stabs.o: stabs.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h $(INCDIR)/obstack.h subsegs.h ecoff.h $(INCDIR)/aout/stab_gnu.h \
-  $(INCDIR)/aout/stab.def
-subsegs.o: subsegs.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h subsegs.h $(INCDIR)/obstack.h
-symbols.o: symbols.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h $(INCDIR)/obstack.h subsegs.h struc-symbol.h
-write.o: write.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
-  emul.h subsegs.h $(INCDIR)/obstack.h output-file.h
-gasp.o: gasp.c $(INCDIR)/bin-bugs.h sb.h macro.h
-itbl-ops.o: itbl-ops.c itbl-ops.h $(INCDIR)/bin-bugs.h \
-  $(INCDIR)/progress.h emul.h itbl-parse.h
-e-i386aout.o: $(srcdir)/config/e-i386aout.c $(INCDIR)/bin-bugs.h \
-  $(INCDIR)/progress.h emul.h emul-target.h
-e-i386coff.o: $(srcdir)/config/e-i386coff.c $(INCDIR)/bin-bugs.h \
-  $(INCDIR)/progress.h emul.h emul-target.h
-e-i386elf.o: $(srcdir)/config/e-i386elf.c $(INCDIR)/bin-bugs.h \
-  $(INCDIR)/progress.h emul.h emul-target.h
-e-mipsecoff.o: $(srcdir)/config/e-mipsecoff.c $(INCDIR)/bin-bugs.h \
-  $(INCDIR)/progress.h emul.h emul-target.h
-e-mipself.o: $(srcdir)/config/e-mipself.c $(INCDIR)/bin-bugs.h \
-  $(INCDIR)/progress.h emul.h emul-target.h
+AMKDEP = #DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING BELOW.
 DEPTC_a29k_aout = $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
   $(srcdir)/config/obj-aout.h $(srcdir)/config/tc-a29k.h \
   $(BFDDIR)/libaout.h $(INCDIR)/bfdlink.h emul.h $(INCDIR)/opcode/a29k.h
@@ -2000,7 +1940,76 @@ DEP_i386_multi = $(DEP_i386_aout) $(DEP_i386_coff) \
   $(DEP_i386_elf)
 DEP_mips_multi = $(DEP_mips_coff) $(DEP_mips_ecoff) \
   $(DEP_mips_elf)
+BMKDEP = #DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING ABOVE.
+#MKDEP    DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING BELOW.
+app.o: app.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h
+as.o: as.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h output-file.h \
+  sb.h macro.h
+atof-generic.o: atof-generic.c $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/progress.h emul.h
+bignum-copy.o: bignum-copy.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h
+cond.o: cond.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h macro.h sb.h $(INCDIR)/obstack.h
+depend.o: depend.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h
+dwarf2dbg.o: dwarf2dbg.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h dwarf2dbg.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/dwarf2.h
+ecoff.o: ecoff.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h ecoff.h
+ehopt.o: ehopt.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h $(INCDIR)/elf/dwarf2.h
+expr.o: expr.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h $(INCDIR)/obstack.h
+flonum-copy.o: flonum-copy.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h
+flonum-konst.o: flonum-konst.c
+flonum-mult.o: flonum-mult.c
+frags.o: frags.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h
+hash.o: hash.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h $(INCDIR)/obstack.h
+input-file.o: input-file.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h input-file.h
+input-scrub.o: input-scrub.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h input-file.h sb.h
+listing.o: listing.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h input-file.h subsegs.h
+literal.o: literal.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h
+macro.o: macro.c sb.h macro.h
+messages.o: messages.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h
+output-file.o: output-file.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h output-file.h
+read.o: read.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h sb.h macro.h ecoff.h
+sb.o: sb.c sb.h
+stabs.o: stabs.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h ecoff.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def
+subsegs.o: subsegs.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h
+symbols.o: symbols.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h $(INCDIR)/obstack.h subsegs.h struc-symbol.h
+write.o: write.c $(INCDIR)/bin-bugs.h $(INCDIR)/progress.h \
+  emul.h subsegs.h $(INCDIR)/obstack.h output-file.h
+gasp.o: gasp.c $(INCDIR)/bin-bugs.h sb.h macro.h
+itbl-ops.o: itbl-ops.c itbl-ops.h $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/progress.h emul.h itbl-parse.h
+e-i386aout.o: $(srcdir)/config/e-i386aout.c $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/progress.h emul.h emul-target.h
+e-i386coff.o: $(srcdir)/config/e-i386coff.c $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/progress.h emul.h emul-target.h
+e-i386elf.o: $(srcdir)/config/e-i386elf.c $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/progress.h emul.h emul-target.h
+e-mipsecoff.o: $(srcdir)/config/e-mipsecoff.c $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/progress.h emul.h emul-target.h
+e-mipself.o: $(srcdir)/config/e-mipself.c $(INCDIR)/bin-bugs.h \
+  $(INCDIR)/progress.h emul.h emul-target.h
 $(OBJS): $(DEP_@target_cpu_type@_@obj_format@)
 $(TARG_CPU_O): $(DEPTC_@target_cpu_type@_@obj_format@)
 $(OBJ_FORMAT_O): $(DEPOBJ_@target_cpu_type@_@obj_format@)
-# IF YOU PUT ANYTHING HERE IT WILL GO AWAY
+#MKDEP    DO NOT PUT ANYTHING BETWEEN THIS LINE AND THE MATCHING WARNING ABOVE.
