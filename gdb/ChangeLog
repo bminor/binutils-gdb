@@ -1,3 +1,8 @@
+Mon Jan 29 19:05:58 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (diststuff): Make all-doc; diststuff target does not
+	exist in doc/Makefile.in.
+
 Mon Jan 29 18:44:57 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* config/m88k/xm-cxux.h (BP_HIT_COUNT): Remove, never used.
