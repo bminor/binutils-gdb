@@ -1,5 +1,9 @@
 2003-11-05  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open): Only do
+	pe_dll_extra_pe_debug stuff when DLL_SUPPORT defined.
+	(pr_sym): Move inside #ifdef DLL_SUPPORT.
+
 	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_new_vers_pattern): Zap
 	unused variable.
 

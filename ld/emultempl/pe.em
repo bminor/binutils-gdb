@@ -916,7 +916,6 @@ pe_find_data_imports (void)
         }
     }
 }
-#endif /* DLL_SUPPORT */
 
 static bfd_boolean
 pr_sym (struct bfd_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
@@ -926,11 +925,13 @@ pr_sym (struct bfd_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
 
   return TRUE;
 }
+#endif /* DLL_SUPPORT */
 
 
 static void
 gld_${EMULATION_NAME}_after_open (void)
 {
+#ifdef DLL_SUPPORT
   if (pe_dll_extra_pe_debug)
     {
       bfd *a;
@@ -945,6 +946,7 @@ gld_${EMULATION_NAME}_after_open (void)
       for (a = link_info.input_bfds; a; a = a->link_next)
 	printf ("*%s\n",a->filename);
     }
+#endif
 
   /* Pass the wacky PE command line options into the output bfd.
      FIXME: This should be done via a function, rather than by
