@@ -331,9 +331,12 @@ md_cgen_lookup_reloc (insn, operand, fixP)
     case XSTORMY16_OPERAND_IMM3:
     case XSTORMY16_OPERAND_IMM3B:
     case XSTORMY16_OPERAND_IMM4:
-    case XSTORMY16_OPERAND_IMM12:
     case XSTORMY16_OPERAND_HMEM8:
       return BFD_RELOC_NONE;
+
+    case XSTORMY16_OPERAND_IMM12:
+      fixP->fx_where += 2;
+      return BFD_RELOC_XSTORMY16_12;
 
     case XSTORMY16_OPERAND_IMM8:
     case XSTORMY16_OPERAND_LMEM8:

@@ -1,3 +1,8 @@
+2002-12-20  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-xstormy16.c (md_cgen_lookup_reloc): Support
+	BFD_RELOC_XSTORMY16_12.
+
 2002-12-19  Alan Modra  <amodra@bigpond.net.au>
 
 	* doc/as.texinfo (Invoking): Typo fix.
