@@ -947,12 +947,14 @@ static void
 dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 			     struct dwarf2_cu *cu);
 
+#if 0
 /* Allocation function for the libiberty splay tree which uses an obstack.  */
 static void *
 splay_tree_obstack_allocate (int size, void *data)
 {
   return obstack_alloc ((struct obstack *) data, size);
 }
+#endif
 
 /* Trivial deallocation function for the libiberty splay tree.  */
 static void
@@ -1547,7 +1549,7 @@ add_partial_symbol (struct partial_die_info *pdi,
     }
 
   if (my_prefix)
-    free (my_prefix);
+    free ((char *) my_prefix);
 
   switch (pdi->tag)
     {
@@ -4774,6 +4776,8 @@ fixup_partial_die (struct partial_die_info *part_die,
       struct partial_die_info *spec_die;
 
       spec_die = find_partial_die (part_die->spec_offset, cu);
+
+      fixup_partial_die (spec_die, cu);
 
       if (spec_die->name)
 	{
