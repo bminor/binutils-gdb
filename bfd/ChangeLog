@@ -11,6 +11,7 @@ Fri Jan 21 14:11:16 1994  Sean Fagan (sef@cygnus.com)
 
 Fri Jan 21 09:29:01 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
+	* bfd.c: Remove error strings for errors removed below.
 	* aoutx.h (translate_to_native_sym_flags), bfd-in.h (bfd_ec),
 	oasys.c (oasys_write_sections): Rename
 	bfd_error_nonrepresentable_section to nonrepresentable_section.
