@@ -1,3 +1,8 @@
+Fri May  6 15:15:35 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* configure.in: Use "e" rather than "em_" as prefix for
+	emulations.
+
 Fri May  6 01:08:14 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* emultempl/generic.em: Use "e" rather than "em_" as prefix for
