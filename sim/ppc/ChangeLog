@@ -1,3 +1,13 @@
+Fri Oct 13 09:58:43 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* debug.h (ppc_trace): Rename from trace, to avoid a conflict with
+	TCL when gdb is linked with the simulator.
+	* debug.c (ppc_trace): Ditto.
+	* sim_calls.c (sim_open): Change trace -> ppc_trace.
+	* main.c (main): Ditto.
+
+	* cpu.c (cpu_add_commas): Remove extra static.
+
 Thu Oct 12 11:35:53 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* Makefile.in (psim.o): Now that inlines are turned on, make
