@@ -1579,6 +1579,15 @@ som_object_setup (abfd, file_hdrp, aux_hdrp)
     case RELOC_MAGIC:
       abfd->flags |= HAS_RELOC;
       break;
+#ifdef SHL_MAGIC
+    case SHL_MAGIC:
+#endif
+#ifdef DL_MAGIC
+    case DL_MAGIC:
+#endif
+      abfd->flags |= DYNAMIC;
+      break;
+
     default:
       break;
     }
@@ -1955,17 +1964,21 @@ som_prep_headers (abfd)
 
   /* FIXME.  This should really be conditional based on whether or not
      PA1.1 instructions/registers have been used.  */
-  if (abfd->flags & EXEC_P)
+  if (abfd->flags & (EXEC_P | DYNAMIC))
     file_hdr->system_id = obj_som_exec_data (abfd)->system_id;
   else
     file_hdr->system_id = CPU_PA_RISC1_0;
 
-  if (abfd->flags & EXEC_P)
+  if (abfd->flags & (EXEC_P | DYNAMIC))
     {
       if (abfd->flags & D_PAGED)
 	file_hdr->a_magic = DEMAND_MAGIC;
       else if (abfd->flags & WP_TEXT)
 	file_hdr->a_magic = SHARE_MAGIC;
+#ifdef SHL_MAGIC
+      else if (abfd->flags & DYNAMIC)
+	file_hdr->a_magic = SHL_MAGIC;
+#endif
       else
 	file_hdr->a_magic = EXEC_MAGIC;
     }
@@ -2754,7 +2767,7 @@ som_begin_writing (abfd)
      we support only the copyright and version headers.  */
   obj_som_file_hdr (abfd)->aux_header_location = current_offset;
   obj_som_file_hdr (abfd)->aux_header_size = 0;
-  if (abfd->flags & EXEC_P)
+  if (abfd->flags & (EXEC_P | DYNAMIC))
     {
       /* Parts of the exec header will be filled in later, so
 	 delay writing the header itself.  Fill in the defaults,
@@ -2945,7 +2958,7 @@ som_begin_writing (abfd)
 	     building an executable, then take care to make sure all
 	     the alignments are correct and update the exec header.  */
 	  if (first_subspace
-	      && (abfd->flags & EXEC_P))
+	      && (abfd->flags & (EXEC_P | DYNAMIC)))
 	    {
 	      /* Demand paged executables have each space aligned to a
 		 page boundary.  Sharable executables (write-protected
@@ -2954,7 +2967,7 @@ som_begin_writing (abfd)
 
 		 The HPUX kernel requires the text to always be page aligned
 		 within the file regardless of the executable's type.  */
-	      if (abfd->flags & D_PAGED
+	      if (abfd->flags & (D_PAGED | DYNAMIC)
 		  || (subsection->flags & SEC_CODE)
 		  || ((abfd->flags & WP_TEXT)
 		      && (subsection->flags & SEC_DATA)))
@@ -2981,7 +2994,7 @@ som_begin_writing (abfd)
 	      /* Only do this for the first subspace within each space.  */
 	      first_subspace = 0;
 	    }
-	  else if (abfd->flags & EXEC_P)
+	  else if (abfd->flags & (EXEC_P | DYNAMIC))
 	    {
 	      /* The braindamaged HPUX loader may have created a hole
 		 between two subspaces.  It is *not* sufficient to use
@@ -3009,10 +3022,10 @@ som_begin_writing (abfd)
 	  if (subsection->flags & SEC_LOAD)
 	    {
 	      /* Update the size of the code & data.  */
-	      if (abfd->flags & EXEC_P
+	      if (abfd->flags & (EXEC_P | DYNAMIC)
 		  && subsection->flags & SEC_CODE)
 		exec_header.exec_tsize += subsection->_cooked_size;
-	      else if (abfd->flags & EXEC_P
+	      else if (abfd->flags & (EXEC_P | DYNAMIC)
 		       && subsection->flags & SEC_DATA)
 		exec_header.exec_dsize += subsection->_cooked_size;
 	      som_section_data (subsection)->subspace_dict->file_loc_init_value
@@ -3025,7 +3038,7 @@ som_begin_writing (abfd)
 	  else
 	    {
 	      /* Update the size of the bss section.  */
-	      if (abfd->flags & EXEC_P)
+	      if (abfd->flags & (EXEC_P | DYNAMIC))
 		exec_header.exec_bsize += subsection->_cooked_size;
 
 	      som_section_data (subsection)->subspace_dict->file_loc_init_value
@@ -3042,7 +3055,7 @@ som_begin_writing (abfd)
      If building an executable, start the unloadable stuff on its
      own page.  */
 
-  if (abfd->flags & EXEC_P)
+  if (abfd->flags & (EXEC_P | DYNAMIC))
     current_offset = SOM_ALIGN (current_offset, PA_PAGESIZE);
 
   obj_som_file_hdr (abfd)->unloadable_sp_location = current_offset;
@@ -3055,7 +3068,7 @@ som_begin_writing (abfd)
       while (!som_is_space (section))
 	section = section->next;
 
-      if (abfd->flags & EXEC_P)
+      if (abfd->flags & (EXEC_P | DYNAMIC))
 	current_offset = SOM_ALIGN (current_offset, PA_PAGESIZE);
 
       /* Now look for all its subspaces.  */
@@ -3094,7 +3107,7 @@ som_begin_writing (abfd)
   /* If building an executable, then make sure to seek to and write
      one byte at the end of the file to make sure any necessary
      zeros are filled in.  Ugh.  */
-  if (abfd->flags & EXEC_P)
+  if (abfd->flags & (EXEC_P | DYNAMIC))
     current_offset = SOM_ALIGN (current_offset, PA_PAGESIZE);
   if (bfd_seek (abfd, current_offset - 1, SEEK_SET) < 0)
     return false;
@@ -3112,7 +3125,7 @@ som_begin_writing (abfd)
   obj_som_file_hdr (abfd)->som_length = current_offset;
 
   /* Now write the exec header.  */
-  if (abfd->flags & EXEC_P)
+  if (abfd->flags & (EXEC_P | DYNAMIC))
     {
       long tmp;
 
@@ -3585,7 +3598,7 @@ bfd_section_from_som_symbol (abfd, symbol)
   /* The meaning of the symbol_info field changes for functions
      within executables.  So only use the quick symbol_info mapping for
      incomplete objects and non-function symbols in executables.  */
-  if ((abfd->flags & EXEC_P) == 0
+  if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0
       || (symbol->symbol_type != ST_ENTRY
 	  && symbol->symbol_type != ST_PRI_PROG
 	  && symbol->symbol_type != ST_SEC_PROG
@@ -5514,7 +5527,7 @@ bfd_target som_vec =
   true,				/* target headers byte order */
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED | DYNAMIC),
   (SEC_CODE | SEC_DATA | SEC_ROM | SEC_HAS_CONTENTS
    | SEC_ALLOC | SEC_LOAD | SEC_RELOC),		/* section flags */
 
