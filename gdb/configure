@@ -4989,7 +4989,7 @@ EOF
 EOF
 
       ;;
-  *-*-unixware* | *-*-sysv4.2* | *-*-sysv5*)
+  *-*-unixware* | *-*-sysv4.2* | *-*-sysv5* | *-*-interix* )
       cat >> confdefs.h <<\EOF
 #define NEW_PROC_API 1
 EOF

@@ -1,4 +1,9 @@
-2002-10-20  Joel Brobecker  <brobecker@gnat.com>
+2002-10-22  Joel Brobecker  <brobecker@gnat.com>
+
+	* configure.in: Define NEW_PROC_API on Interix too.
+	* configure: Regenerate.
+
+2002-10-21  Joel Brobecker  <brobecker@gnat.com>
 
 	* configure: Regenerate using the proper version of autoconf.
 
