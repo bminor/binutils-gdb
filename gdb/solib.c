@@ -445,7 +445,7 @@ solib_add_common_symbols (rtc_symp)
     }
 
   init_minimal_symbol_collection ();
-  make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
+  make_cleanup_discard_minimal_symbols ();
 
   while (rtc_symp)
     {

@@ -743,10 +743,8 @@ compare_minimal_symbols (fn1p, fn2p)
    obstack and then simply blow the obstack away when we are done with
    it.  Is it worth the extra trouble though? */
 
-/* ARGSUSED */
-void
-discard_minimal_symbols (foo)
-     int foo;
+static void
+do_discard_minimal_symbols_cleanup (void *arg)
 {
   register struct msym_bunch *next;
 
@@ -757,6 +755,13 @@ discard_minimal_symbols (foo)
       msym_bunch = next;
     }
 }
+
+struct cleanup *
+make_cleanup_discard_minimal_symbols (void)
+{
+  return make_cleanup (do_discard_minimal_symbols_cleanup, 0);
+}
+
 
 
 /* Compact duplicate entries out of a minimal symbol table by walking

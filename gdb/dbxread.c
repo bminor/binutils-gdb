@@ -624,7 +624,7 @@ dbx_symfile_read (objfile, mainline)
   back_to = make_cleanup (really_free_pendings, 0);
 
   init_minimal_symbol_collection ();
-  make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
+  make_cleanup_discard_minimal_symbols ();
 
   /* Read stabs data from executable file and define symbols. */
 

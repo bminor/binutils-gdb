@@ -342,7 +342,7 @@ os9k_symfile_read (objfile, mainline)
   free_pending_blocks ();
   back_to = make_cleanup (really_free_pendings, 0);
 
-  make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
+  make_cleanup_discard_minimal_symbols ();
   read_minimal_symbols (objfile);
 
   /* Now that the symbol table data of the executable file are all in core,

@@ -94,7 +94,7 @@ mipscoff_symfile_read (objfile, mainline)
   struct cleanup *back_to;
 
   init_minimal_symbol_collection ();
-  back_to = make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
+  back_to = make_cleanup_discard_minimal_symbols ();
 
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */

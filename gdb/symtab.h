@@ -1267,8 +1267,7 @@ extern CORE_ADDR
 extern void
 init_minimal_symbol_collection PARAMS ((void));
 
-extern void
-discard_minimal_symbols PARAMS ((int));
+extern struct cleanup *make_cleanup_discard_minimal_symbols (void);
 
 extern void
 install_minimal_symbols PARAMS ((struct objfile *));

@@ -670,7 +670,7 @@ coff_symfile_read (objfile, mainline)
     error ("\"%s\": can't get string table", name);
 
   init_minimal_symbol_collection ();
-  make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
+  make_cleanup_discard_minimal_symbols ();
 
   /* Now that the executable file is positioned at symbol table,
      process it and define symbols accordingly.  */

@@ -591,7 +591,7 @@ elf_symfile_read (objfile, mainline)
   CORE_ADDR offset;
 
   init_minimal_symbol_collection ();
-  back_to = make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
+  back_to = make_cleanup_discard_minimal_symbols ();
 
   memset ((char *) &ei, 0, sizeof (ei));
 

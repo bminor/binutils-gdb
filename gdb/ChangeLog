@@ -1,3 +1,17 @@
+Tue May 16 13:30:08 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* symtab.h (make_cleanup_discard_minimal_symbols): Replace
+ 	discard_minimal_symbols.
+	* minsyms.c (make_cleanup_discard_minimal_symbols):
+	(do_discard_minimal_symbols_cleanup): New functions.
+
+	* xcoffread.c (xcoff_initial_scan), somread.c (som_symfile_read),
+ 	solib.c (solib_add_common_symbols), os9kread.c
+ 	(os9k_symfile_read), nlmread.c (nlm_symfile_read), mipsread.c
+ 	(mipscoff_symfile_read), elfread.c (elf_symfile_read), dstread.c
+ 	(dst_symfile_read), dbxread.c (dbx_symfile_read), coffread.c
+ 	(coff_symfile_read): Replace make_cleanup.
+
 Mon May 15 09:32:31 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* command.h (add_set_cmd): Change VAR parameter to void pointer.

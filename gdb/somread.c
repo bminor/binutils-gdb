@@ -366,7 +366,7 @@ som_symfile_read (objfile, mainline)
   do_pxdb (symfile_bfd_open (objfile->name));
 
   init_minimal_symbol_collection ();
-  back_to = make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
+  back_to = make_cleanup_discard_minimal_symbols ();
 
   /* Read in the import list and the export list.  Currently
      the export list isn't used; the import list is used in

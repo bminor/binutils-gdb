@@ -2746,7 +2746,7 @@ xcoff_initial_scan (objfile, mainline)
   back_to = make_cleanup (really_free_pendings, 0);
 
   init_minimal_symbol_collection ();
-  make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
+  make_cleanup_discard_minimal_symbols ();
 
   /* Now that the symbol table data of the executable file are all in core,
      process them and define symbols accordingly.  */
