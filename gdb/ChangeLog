@@ -1,5 +1,8 @@
 Wed Jun 17 13:08:33 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* xm-rs6000.h:  Remove #include of inferior.h.  Fixes many
+	compilation errors.
+
 	* breakpoint.c (enable_command, disable_command):  Without args,
 	should only affect normal breakpoints and watchpoints.
 
