@@ -3979,23 +3979,93 @@ accepts this directive but ignores it.
 @end ifset
 @end ifset
 
-@ifset COFF
 @node Section
-@section @code{.section @var{name}, @var{subsection}}
+@section @code{.section @var{name}}
 
 @cindex @code{section} directive
-@cindex named section (COFF)
-@cindex COFF named section
-Assemble the following code into end of subsection numbered
-@var{subsection} in the COFF named section @var{name}.  If you omit
-@var{subsection}, @code{@value{AS}} uses subsection number zero.
-@samp{.section .text} is equivalent to the @code{.text} directive;
-@samp{.section .data} is equivalent to the @code{.data} directive.
-@ifset GENERIC
+@cindex named section
+Use the @code{.section} directive to assemble the following code into a section
+named @var{name}.
+
 This directive is only supported for targets that actually support arbitrarily
 named sections; on @code{a.out} targets, for example, it is not accepted, even
-with a standard @code{a.out} section name as its parameter.
+with a standard @code{a.out} section name.
+
+@ifset COFF
+For COFF targets, the @code{.section} directive is used in one of the following
+ways:
+@smallexample
+.section @var{name}[, "@var{flags}"]
+.section @var{name}[, @var{subsegment}]
+@end smallexample
+
+If the optional argument is quoted, it is taken as flags to use for the
+section.  Each flag is a single character.  The following flags are recognized:
+@table @code
+@item b
+bss section (uninitialized data)
+@item n
+section is not loaded
+@item w
+writable section
+@item d
+data section
+@item x
+executable section
+@end table
+
+If no flags are specified, the default flags depend upon the section name.  If
+the section name is not recognized, the default will be for the section to be
+loaded and writable.
+
+If the optional argument to the @code{.section} directive is not quoted, it is
+taken as a subsegment number (@pxref{Sub-Sections}).
 @end ifset
+
+@ifset ELF
+For ELF targets, the @code{.section} directive is used like this:
+@smallexample
+.section @var{name}[, "@var{flags}"[, @@@var{type}]]
+@end smallexample
+The optional @var{flags} argument is a quoted string which may contain any
+combintion of the following characters:
+@table @code
+@item a
+section is allocatable
+@item w
+section is writable
+@item x
+section is executable
+@end table
+
+The optional @var{type} argument may contain one of the following constants:
+@table @code
+@item @@progbits
+section contains data
+@item @@nobits
+section does not contain data (i.e., section only occupies space)
+@end table
+
+If no flags are specified, the default flags depend upon the section name.  If
+the section name is not recognized, the default will be for the section to have
+none of the above flags: it will not be allocated in memory, nor writable, nor
+executable.  The section will contain data.
+
+For ELF targets, the assembler supports another type of @code{.section}
+directive for compatibility with the Solaris assembler:
+@smallexample
+.section "@var{name}"[, @var{flags}...]
+@end smallexample
+Note that the section name is quoted.  There may be a sequence of comma
+separated flags:
+@table @code
+@item #alloc
+section is allocatable
+@item #write
+section is writable
+@item #execinstr
+section is executable
+@end table
 @end ifset
 
 @node Set
@@ -4678,7 +4748,7 @@ To enable us to fix the bug, you should include all these things:
 @itemize @bullet
 @item
 The version of @code{@value{AS}}.  @code{@value{AS}} announces it if you start
-with the @samp{--version} argument.
+it with the @samp{--version} argument.
 
 Without this, we will not know whether there is any point in looking for
 the bug in the current version of @code{@value{AS}}.

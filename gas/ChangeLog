@@ -1,3 +1,8 @@
+Mon Dec 16 11:50:40 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* doc/as.texinfo (Section): Document how to use the .section
+	pseudo-op for COFF and ELF.
+
 Sun Dec 15 15:26:37 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* write.c (adjust_reloc_syms): Fix linkonce check for ELF.
