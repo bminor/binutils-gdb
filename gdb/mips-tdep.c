@@ -2254,9 +2254,10 @@ mips16_get_imm (unsigned short prev_inst,	/* previous instruction */
 
 
 /* Analyze the function prologue from START_PC to LIMIT_PC. Builds
-   the associated FRAME_CACHE if not null.  */
+   the associated FRAME_CACHE if not null.
+   Return the address of the first instruction past the prologue.  */
 
-static void
+static CORE_ADDR
 mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc, CORE_ADDR sp,
                       struct frame_info *next_frame,
                       struct mips_frame_cache *this_cache)
@@ -2271,6 +2272,10 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc, CORE_ADDR sp,
   unsigned entry_inst = 0;	/* the entry instruction */
   int reg, offset;
 
+  int extend_bytes = 0;
+  int prev_extend_bytes;
+  CORE_ADDR end_prologue_addr = 0;
+
   for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS16_INSTLEN)
     {
       /* Save the previous instruction.  If it's an EXTEND, we'll extract
@@ -2279,6 +2284,21 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc, CORE_ADDR sp,
 
       /* Fetch and decode the instruction.   */
       inst = (unsigned short) mips_fetch_instruction (cur_pc);
+
+      /* Normally we ignore extend instructions.  However, if it is
+         not followed by a valid prologue instruction, then this
+         instruction is not part of the prologue either.  We must
+         remember in this case to adjust the end_prologue_addr back
+         over the extend.  */
+      if ((inst & 0xf800) == 0xf000)    /* extend */
+        {
+          extend_bytes = MIPS16_INSTLEN;
+          continue;
+        }
+
+      prev_extend_bytes = extend_bytes;
+      extend_bytes = 0;
+
       if ((inst & 0xff00) == 0x6300	/* addiu sp */
 	  || (inst & 0xff00) == 0xfb00)	/* daddiu sp */
 	{
@@ -2342,6 +2362,19 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc, CORE_ADDR sp,
 	entry_inst = inst;	/* save for later processing */
       else if ((inst & 0xf800) == 0x1800)	/* jal(x) */
 	cur_pc += MIPS16_INSTLEN;	/* 32-bit instruction */
+      else if ((inst & 0xff1c) == 0x6704)	/* move reg,$a0-$a3 */
+        {
+          /* This instruction is part of the prologue, but we don't
+             need to do anything special to handle it.  */
+        }
+      else
+        {
+          /* This instruction is not an instruction typically found
+             in a prologue, so we must have reached the end of the
+             prologue.  */
+          if (end_prologue_addr == 0)
+            end_prologue_addr = cur_pc - prev_extend_bytes;
+        }
     }
 
   /* The entry instruction is typically the first instruction in a function,
@@ -2396,6 +2429,14 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc, CORE_ADDR sp,
       this_cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->pc]
         = this_cache->saved_regs[NUM_REGS + RA_REGNUM];
     }
+
+  /* If we didn't reach the end of the prologue when scanning the function
+     instructions, then set end_prologue_addr to the address of the
+     instruction immediately after the last one we scanned.  */
+  if (end_prologue_addr == 0)
+    end_prologue_addr = cur_pc;
+
+  return end_prologue_addr;
 }
 
 /* Mark all the registers as unset in the saved_regs array
@@ -4921,99 +4962,6 @@ mips_step_skips_delay (CORE_ADDR pc)
 		     extract_unsigned_integer (buf, MIPS_INSTLEN));
 }
 
-/* Skip the PC past function prologue instructions (16-bit version).
-   This is a helper function for mips_skip_prologue.  */
-
-static CORE_ADDR
-mips16_skip_prologue (CORE_ADDR pc, CORE_ADDR end_pc)
-{
-  int extend_bytes = 0;
-  int prev_extend_bytes;
-
-  /* Table of instructions likely to be found in a function prologue.  */
-  static struct
-  {
-    unsigned short inst;
-    unsigned short mask;
-  }
-  table[] =
-  {
-    {
-    0x6300, 0xff00}
-    ,				/* addiu $sp,offset */
-    {
-    0xfb00, 0xff00}
-    ,				/* daddiu $sp,offset */
-    {
-    0xd000, 0xf800}
-    ,				/* sw reg,n($sp) */
-    {
-    0xf900, 0xff00}
-    ,				/* sd reg,n($sp) */
-    {
-    0x6200, 0xff00}
-    ,				/* sw $ra,n($sp) */
-    {
-    0xfa00, 0xff00}
-    ,				/* sd $ra,n($sp) */
-    {
-    0x673d, 0xffff}
-    ,				/* move $s1,sp */
-    {
-    0xd980, 0xff80}
-    ,				/* sw $a0-$a3,n($s1) */
-    {
-    0x6704, 0xff1c}
-    ,				/* move reg,$a0-$a3 */
-    {
-    0xe809, 0xf81f}
-    ,				/* entry pseudo-op */
-    {
-    0x0100, 0xff00}
-    ,				/* addiu $s1,$sp,n */
-    {
-    0, 0}			/* end of table marker */
-  };
-
-  /* Skip the typical prologue instructions. These are the stack adjustment
-     instruction and the instructions that save registers on the stack
-     or in the gcc frame.  */
-  for (; pc < end_pc; pc += MIPS16_INSTLEN)
-    {
-      unsigned short inst;
-      int i;
-
-      inst = mips_fetch_instruction (pc);
-
-      /* Normally we ignore an extend instruction.  However, if it is
-         not followed by a valid prologue instruction, we must adjust
-         the pc back over the extend so that it won't be considered
-         part of the prologue.  */
-      if ((inst & 0xf800) == 0xf000)	/* extend */
-	{
-	  extend_bytes = MIPS16_INSTLEN;
-	  continue;
-	}
-      prev_extend_bytes = extend_bytes;
-      extend_bytes = 0;
-
-      /* Check for other valid prologue instructions besides extend.  */
-      for (i = 0; table[i].mask != 0; i++)
-	if ((inst & table[i].mask) == table[i].inst)	/* found, get out */
-	  break;
-      if (table[i].mask != 0)	/* it was in table? */
-	continue;		/* ignore it */
-      else
-	/* non-prologue */
-	{
-	  /* Return the current pc, adjusted backwards by 2 if
-	     the previous instruction was an extend.  */
-	  return pc - prev_extend_bytes;
-	}
-    }
-  return pc;
-}
-
 /* To skip prologues, I use this predicate.  Returns either PC itself
    if the code at PC does not look like a function prologue; otherwise
    returns an address that (if we're lucky) follows the prologue.  If
@@ -5047,7 +4995,7 @@ mips_skip_prologue (CORE_ADDR pc)
     limit_pc = pc + 100;          /* Magic.  */
 
   if (pc_is_mips16 (pc))
-    return mips16_skip_prologue (pc, limit_pc);
+    return mips16_scan_prologue (pc, limit_pc, 0, NULL, NULL);
   else
     return mips32_scan_prologue (pc, limit_pc, 0, NULL, NULL);
 }

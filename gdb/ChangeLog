@@ -1,5 +1,14 @@
 2004-10-14  Joel Brobecker  <brobecker@gnat.com>
 
+	* mips-tdep.c (mips16_scan_prologue): Merge code from
+	mips16_skip_prologue.  Now return the address of the first
+	instruction past the function prologue.
+	(mips16_skip_prologue): Remove, no longer necessary.
+	(mips_skip_prologue): Replace call to mips16_skip_prologue
+	by call to mips16_scan_prologue.
+
+2004-10-14  Joel Brobecker  <brobecker@gnat.com>
+
 	* mips-tdep.c (mips32_scan_prologue): Merge code from
 	mips32_skip_prologue.  Now return the address of the first
 	instruction past the function prologue.
