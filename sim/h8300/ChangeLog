@@ -1,3 +1,14 @@
+Fri Apr  5 17:20:59 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* compile.c (decode): Use "bit" to hold L_3 immediates instead
+	of holding them in "abs".  Handle ABS8MEM memory references aka
+	8-bit area.  Replace ABSMOV references with ABS8MEM.
+
+Wed Mar 13 17:43:56 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* compile.c (fetch): Handle accesses to the exception/function
+	vectors.
+
 Mon Mar 11 09:53:25 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* compile.c: #include "wait.h".

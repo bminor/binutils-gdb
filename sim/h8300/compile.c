@@ -153,6 +153,7 @@ decode (addr, data, dst)
   int rdisp = 0;
   int abs = 0;
   int plen = 0;
+  int bit = 0;
 
   struct h8_opcode *q = h8_opcodes;
   int size = 0;
@@ -286,7 +287,13 @@ decode (addr, data, dst)
 		    {
 		      abs = SEXTCHAR (data[len >> 1]);
 		    }
-		  else
+		  else if (looking_for & ABS8MEM)
+		    {
+		      plen = 8;
+		      abs = h8300hmode ? ~0xff0000ff : ~0xffff00ff;
+		      abs |= data[len >> 1] & 0xff ;
+		    }
+		   else
 		    {
 		      abs = data[len >> 1] & 0xff;
 		    }
@@ -295,7 +302,7 @@ decode (addr, data, dst)
 		{
 		  plen = 3;
 
-		  abs = thisnib;
+		  bit = thisnib;
 		}
 	      else if (looking_for == E)
 		{
@@ -321,7 +328,12 @@ decode (addr, data, dst)
 			    p = &(dst->src);
 			  }
 
-			if (x & (IMM | KBIT | DBIT))
+			if (x & (L_3))
+			  {
+			    p->type = X (OP_IMM, size);
+			    p->literal = bit;
+			  }
+			else if (x & (IMM | KBIT | DBIT))
 			  {
 			    p->type = X (OP_IMM, size);
 			    p->literal = abs;
@@ -351,7 +363,7 @@ decode (addr, data, dst)
 			    p->reg = rn & 0x7;
 			    p->literal = 0;
 			  }
-			else if (x & (ABS | ABSJMP | ABSMOV))
+			else if (x & (ABS | ABSJMP | ABS8MEM))
 			  {
 			    p->type = X (OP_DISP, size);
 			    p->literal = abs;
@@ -571,6 +583,11 @@ fetch (arg, n)
 
     case X (OP_MEM, SL):
       t = GET_MEMORY_L (abs);
+      t &= cpu.mask;
+      return t;
+
+    case X (OP_MEM, SW):
+      t = GET_MEMORY_W (abs);
       t &= cpu.mask;
       return t;
 
