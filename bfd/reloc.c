@@ -2591,6 +2591,91 @@ ENUMDOC
   Motorola Mcore relocations.
 
 ENUM
+  BFD_RELOC_AVR_7_PCREL
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 8 bit pc relative
+  short offset into 7 bits.
+ENUM
+  BFD_RELOC_AVR_13_PCREL
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 13 bit pc relative
+  short offset into 12 bits.
+ENUM
+  BFD_RELOC_AVR_16_PM
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 17 bit value (usually
+  program memory address) into 16 bits.  
+ENUM
+  BFD_RELOC_AVR_LO8_LDI
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 8 bit value (usually
+  data memory address) into 8 bit immediate value of LDI insn.
+ENUM
+  BFD_RELOC_AVR_HI8_LDI
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 8 bit value (high 8 bit
+  of data memory address) into 8 bit immediate value of LDI insn.
+ENUM
+  BFD_RELOC_AVR_HH8_LDI
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 8 bit value (most high 8 bit
+  of program memory address) into 8 bit immediate value of LDI insn.
+ENUM
+  BFD_RELOC_AVR_LO8_LDI_NEG
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores negated 8 bit value
+  (usually data memory address) into 8 bit immediate value of SUBI insn.
+ENUM
+  BFD_RELOC_AVR_HI8_LDI_NEG
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores negated 8 bit value
+  (high 8 bit of data memory address) into 8 bit immediate value of
+  SUBI insn.
+ENUM
+  BFD_RELOC_AVR_HH8_LDI_NEG
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores negated 8 bit value
+  (most high 8 bit of program memory address) into 8 bit immediate value
+  of LDI or SUBI insn.
+ENUM
+  BFD_RELOC_AVR_LO8_LDI_PM
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 8 bit value (usually
+  command address) into 8 bit immediate value of LDI insn.
+ENUM
+  BFD_RELOC_AVR_HI8_LDI_PM
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 8 bit value (high 8 bit
+  of command address) into 8 bit immediate value of LDI insn.
+ENUM
+  BFD_RELOC_AVR_HH8_LDI_PM
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores 8 bit value (most high 8 bit
+  of command address) into 8 bit immediate value of LDI insn.
+ENUM
+  BFD_RELOC_AVR_LO8_LDI_PM_NEG
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores negated 8 bit value
+  (usually command address) into 8 bit immediate value of SUBI insn.
+ENUM
+  BFD_RELOC_AVR_HI8_LDI_PM_NEG
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores negated 8 bit value
+  (high 8 bit of 16 bit command address) into 8 bit immediate value
+  of SUBI insn.
+ENUM
+  BFD_RELOC_AVR_HH8_LDI_PM_NEG
+ENUMDOC
+  This is a 16 bit reloc for the AVR that stores negated 8 bit value
+  (high 6 bit of 22 bit command address) into 8 bit immediate
+  value of SUBI insn.
+ENUM
+  BFD_RELOC_AVR_CALL
+ENUMDOC
+  This is a 32 bit reloc for the AVR that stores 23 bit value
+  into 22 bits.
+
+ENUM
   BFD_RELOC_VTABLE_INHERIT
 ENUMX
   BFD_RELOC_VTABLE_ENTRY

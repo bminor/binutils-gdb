@@ -41,6 +41,7 @@ ALL_MACHINES = \
 	cpu-alpha.lo \
 	cpu-arc.lo \
 	cpu-arm.lo \
+	cpu-avr.lo \
 	cpu-d10v.lo \
 	cpu-d30v.lo \
 	cpu-fr30.lo \
@@ -77,6 +78,7 @@ ALL_MACHINES_CFILES = \
 	cpu-alpha.c \
 	cpu-arc.c \
 	cpu-arm.c \
+	cpu-avr.c \
 	cpu-d10v.c \
 	cpu-d30v.c \
 	cpu-fr30.c \
@@ -157,6 +159,7 @@ BFD32_BACKENDS = \
 	elf32-arc.lo \
 	elfarm-oabi.lo \
 	elfarm-nabi.lo \
+	elf32-avr.lo \
 	elf32-d10v.lo \
 	elf32-d30v.lo \
 	elf32-fr30.lo \
@@ -286,6 +289,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-arc.c \
 	elfarm-oabi.c \
 	elfarm-nabi.c \
+	elf32-avr.c \
 	elf32-d10v.c \
 	elf32-d30v.c \
 	elf32-fr30.c \
@@ -693,6 +697,7 @@ cpu-a29k.lo: cpu-a29k.c
 cpu-alpha.lo: cpu-alpha.c
 cpu-arc.lo: cpu-arc.c
 cpu-arm.lo: cpu-arm.c
+cpu-avr.lo: cpu-avr.c
 cpu-d10v.lo: cpu-d10v.c
 cpu-d30v.lo: cpu-d30v.c
 cpu-fr30.lo: cpu-fr30.c
@@ -851,6 +856,9 @@ elfarm-nabi.lo: elfarm-nabi.c $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h elf32-arm.h \
   elf32-target.h
+elf32-avr.lo: elf32-avr.c elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/avr.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
 elf32-d10v.lo: elf32-d10v.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h

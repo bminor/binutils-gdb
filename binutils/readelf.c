@@ -68,6 +68,7 @@
 #include "elf/mcore.h"
 #include "elf/i960.h"
 #include "elf/pj.h"
+#include "elf/avr.h"
 
 #include "bucomm.h"
 #include "getopt.h"
@@ -803,6 +804,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 
 	case EM_960:
 	  rtype = elf_i960_reloc_type (type);
+	  break;
+
+	case EM_AVR:
+	  rtype = elf_avr_reloc_type (type);
 	  break;
 
 	case EM_OLD_SPARCV9:

@@ -2,6 +2,8 @@
 
 Changes in 2.10:
 
+Support for ATMEL AVR.
+
 Support for IBM 370 ELF.  Somewhat experimental.
 
 Support for numbers with suffixes.

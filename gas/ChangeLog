@@ -1,3 +1,19 @@
+2000-03-27  Alan Modra  <alan@linuxcare.com>
+
+	* config/tc-avr.h (TC_HANDLES_FX_DONE): Define.
+
+	* config/tc-avr.c (mcu_types): Add missing initialiser.
+	(md_pcrel_from_section): Add prototype.
+	(avr_operand): Remove redundant test of unsigned < 0.
+	(avr_cons_fix_new): Ensure exp_mod_pm zero on function exit.
+
+2000-03-27  Denis Chertykov  <denisc@overta.ru>
+
+	* config/tc-avr.c: New file for AVR support.
+	* config/tc-avr.h: Likewise.
+	* configure.in: Add AVR support.
+	* configure: Regenerate.
+
 2000-03-26  Timothy Wall <twall@cygnus.com>
 
 	* gasp.c (macro_op): Add new argument to check_macro call.

@@ -1415,6 +1415,11 @@ enum bfd_architecture
 #define bfd_mach_fr30          0x46523330
   bfd_arch_mcore,
   bfd_arch_pj,
+  bfd_arch_avr,        /* Atmel AVR microcontrollers */
+#define bfd_mach_avr1          1
+#define bfd_mach_avr2          2
+#define bfd_mach_avr3          3
+#define bfd_mach_avr4          4
   bfd_arch_last
   };
 
@@ -1624,7 +1629,7 @@ struct reloc_howto_struct
 
         /* The src_mask selects which parts of the read in data
           are to be used in the relocation sum.  E.g., if this was an 8 bit
-          bit of data which we read and relocated, this would be
+          byte of data which we read and relocated, this would be
           0x000000ff. When we have relocs which have an addend, such as
           sun4 extended relocs, the value in the offset part of a
           relocating field is garbage so we never use it. In this case
@@ -2123,39 +2128,39 @@ assumed to be 0. */
 This is a 6-bit absolute reloc. */
   BFD_RELOC_D30V_6,
 
-/* This is a 6-bit pc-relative reloc with 
+/* This is a 6-bit pc-relative reloc with
 the right 3 bits assumed to be 0. */
   BFD_RELOC_D30V_9_PCREL,
 
-/* This is a 6-bit pc-relative reloc with 
+/* This is a 6-bit pc-relative reloc with
 the right 3 bits assumed to be 0. Same
 as the previous reloc but on the right side
 of the container. */
   BFD_RELOC_D30V_9_PCREL_R,
 
-/* This is a 12-bit absolute reloc with the 
+/* This is a 12-bit absolute reloc with the
 right 3 bitsassumed to be 0. */
   BFD_RELOC_D30V_15,
 
-/* This is a 12-bit pc-relative reloc with 
+/* This is a 12-bit pc-relative reloc with
 the right 3 bits assumed to be 0. */
   BFD_RELOC_D30V_15_PCREL,
 
-/* This is a 12-bit pc-relative reloc with 
+/* This is a 12-bit pc-relative reloc with
 the right 3 bits assumed to be 0. Same
 as the previous reloc but on the right side
 of the container. */
   BFD_RELOC_D30V_15_PCREL_R,
 
-/* This is an 18-bit absolute reloc with 
+/* This is an 18-bit absolute reloc with
 the right 3 bits assumed to be 0. */
   BFD_RELOC_D30V_21,
 
-/* This is an 18-bit pc-relative reloc with 
+/* This is an 18-bit pc-relative reloc with
 the right 3 bits assumed to be 0. */
   BFD_RELOC_D30V_21_PCREL,
 
-/* This is an 18-bit pc-relative reloc with 
+/* This is an 18-bit pc-relative reloc with
 the right 3 bits assumed to be 0. Same
 as the previous reloc but on the right side
 of the container. */
@@ -2303,7 +2308,75 @@ short offset into 11 bits. */
   BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2,
   BFD_RELOC_MCORE_RVA,
 
-/* These two relocations are used by the linker to determine which of 
+/* This is a 16 bit reloc for the AVR that stores 8 bit pc relative
+short offset into 7 bits. */
+  BFD_RELOC_AVR_7_PCREL,
+
+/* This is a 16 bit reloc for the AVR that stores 13 bit pc relative
+short offset into 12 bits. */
+  BFD_RELOC_AVR_13_PCREL,
+
+/* This is a 16 bit reloc for the AVR that stores 17 bit value (usually
+program memory address) into 16 bits. */
+  BFD_RELOC_AVR_16_PM,
+
+/* This is a 16 bit reloc for the AVR that stores 8 bit value (usually
+data memory address) into 8 bit immediate value of LDI insn. */
+  BFD_RELOC_AVR_LO8_LDI,
+
+/* This is a 16 bit reloc for the AVR that stores 8 bit value (high 8 bit
+of data memory address) into 8 bit immediate value of LDI insn. */
+  BFD_RELOC_AVR_HI8_LDI,
+
+/* This is a 16 bit reloc for the AVR that stores 8 bit value (most high 8 bit
+of program memory address) into 8 bit immediate value of LDI insn. */
+  BFD_RELOC_AVR_HH8_LDI,
+
+/* This is a 16 bit reloc for the AVR that stores negated 8 bit value
+(usually data memory address) into 8 bit immediate value of SUBI insn. */
+  BFD_RELOC_AVR_LO8_LDI_NEG,
+
+/* This is a 16 bit reloc for the AVR that stores negated 8 bit value
+(high 8 bit of data memory address) into 8 bit immediate value of
+SUBI insn. */
+  BFD_RELOC_AVR_HI8_LDI_NEG,
+
+/* This is a 16 bit reloc for the AVR that stores negated 8 bit value
+(most high 8 bit of program memory address) into 8 bit immediate value
+of LDI or SUBI insn. */
+  BFD_RELOC_AVR_HH8_LDI_NEG,
+
+/* This is a 16 bit reloc for the AVR that stores 8 bit value (usually
+command address) into 8 bit immediate value of LDI insn. */
+  BFD_RELOC_AVR_LO8_LDI_PM,
+
+/* This is a 16 bit reloc for the AVR that stores 8 bit value (high 8 bit
+of command address) into 8 bit immediate value of LDI insn. */
+  BFD_RELOC_AVR_HI8_LDI_PM,
+
+/* This is a 16 bit reloc for the AVR that stores 8 bit value (most high 8 bit
+of command address) into 8 bit immediate value of LDI insn. */
+  BFD_RELOC_AVR_HH8_LDI_PM,
+
+/* This is a 16 bit reloc for the AVR that stores negated 8 bit value
+(usually command address) into 8 bit immediate value of SUBI insn. */
+  BFD_RELOC_AVR_LO8_LDI_PM_NEG,
+
+/* This is a 16 bit reloc for the AVR that stores negated 8 bit value
+(high 8 bit of 16 bit command address) into 8 bit immediate value
+of SUBI insn. */
+  BFD_RELOC_AVR_HI8_LDI_PM_NEG,
+
+/* This is a 16 bit reloc for the AVR that stores negated 8 bit value
+(high 6 bit of 22 bit command address) into 8 bit immediate
+value of SUBI insn. */
+  BFD_RELOC_AVR_HH8_LDI_PM_NEG,
+
+/* This is a 32 bit reloc for the AVR that stores 23 bit value
+into 22 bits. */
+  BFD_RELOC_AVR_CALL,
+
+/* These two relocations are used by the linker to determine which of
 the entries in a C++ virtual function table are actually used.  When
 the --gc-sections option is given, the linker will zero out the entries
 that are not used, so that the code for those functions need not be
@@ -2317,7 +2390,7 @@ relocation should be located at the child vtable.
 VTABLE_ENTRY is a zero-space relocation that describes the use of a
 virtual function table entry.  The reloc's symbol should refer to the
 table of the class mentioned in the code.  Off of that base, an offset
-describes the entry that is being used.  For Rela hosts, this offset 
+describes the entry that is being used.  For Rela hosts, this offset
 is stored in the reloc's addend.  For Rel hosts, we are forced to put
 this offset in the reloc's section offset. */
   BFD_RELOC_VTABLE_INHERIT,

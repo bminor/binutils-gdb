@@ -1,3 +1,20 @@
+2000-03-27  Alan Modra  <alan@linuxcare.com>
+
+	* avr-dis.c (add0fff, add03f8): Don't use structure bitfields to
+	truncate integers.
+	(print_insn_avr): Call function via pointer in K&R compatible way.
+	(dispLDD, regPP, reg50, reg104, reg40, reg20w, lit404, lit204,
+	add0fff, add03f8): Convert to old style function declaration and
+	add prototype.
+	(avrdis_opcode): Add prototype.
+
+2000-03-27  Denis Chertykov  <denisc@overta.ru>
+
+	* avr-dis.c: New file.  AVR disassembler.
+	* configure.in (bfd_avr_arch): New architecture support.
+	* disassemble.c: Likewise.
+	* configure: Regenerate.
+
 Mon Mar  6 19:52:05 2000  J"orn Rennecke <amylaar@cygnus.co.uk>
 
 	* sh-opc.h (sh_table): ldre and ldrs have a *signed* displacement.

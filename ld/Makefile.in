@@ -214,6 +214,14 @@ ALL_EMULATIONS = \
 	earmnbsd.o \
 	earmpe.o \
 	earm_epoc_pe.o \
+	eavr1200.o \
+	eavr23xx.o \
+	eavr44x4.o \
+	eavr4433.o \
+	eavr85xx.o \
+	eavrmega603.o \
+	eavrmega103.o \
+	eavrmega161.o \
 	ecoff_sparc.o \
 	ed10velf.o \
 	ed30velf.o \
@@ -1019,6 +1027,38 @@ earm_epoc_pe.c: $(srcdir)/emulparams/arm_epoc_pe.sh \
 earmpe.c: $(srcdir)/emulparams/armpe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armpe "$(tdir_armpe)"
+eavr85xx.c: $(srcdir)/emulparams/avr85xx.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avr85xx "$(tdir_avr85xx)"
+eavr1200.c: $(srcdir)/emulparams/avr1200.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avr1200 "$(tdir_avr85xx)"
+eavr23xx.c: $(srcdir)/emulparams/avr23xx.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avr23xx "$(tdir_avr85xx)"
+eavr44x4.c: $(srcdir)/emulparams/avr44x4.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avr44x4 "$(tdir_avr85xx)"
+eavr4433.c: $(srcdir)/emulparams/avr4433.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avr4433 "$(tdir_avr85xx)"
+eavrmega603.c: $(srcdir)/emulparams/avrmega603.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avrmega603 "$(tdir_avr85xx)"
+eavrmega103.c: $(srcdir)/emulparams/avrmega103.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avrmega103 "$(tdir_avr85xx)"
+eavrmega161.c: $(srcdir)/emulparams/avrmega161.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf32avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avrmega161 "$(tdir_avr85xx)"
 ecoff_sparc.c: $(srcdir)/emulparams/coff_sparc.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/sparccoff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} coff_sparc "$(tdir_coff_sparc)"

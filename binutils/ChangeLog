@@ -1,3 +1,8 @@
+2000-03-27  Alan Modra  <alan@linuxcare.com>
+
+	* readelf.c: Include elf/avr.h
+	(dump_relocations): Add EM_AVR case.
+
 2000-03-09  Tim Waugh  <twaugh@redhat.com>
 
 	* strings.1: Correct '-bytes' to '--bytes'.

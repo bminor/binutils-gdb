@@ -1,3 +1,29 @@
+2000-03-27  Alan Modra  <alan@linuxcare.com>
+
+	* elf32-avr.c (elf32_avr_gc_mark_hook, elf32_avr_gc_sweep_hook,
+	elf32_avr_check_relocs, avr_final_link_relocate,
+	elf32_avr_relocate_section, bfd_elf_avr_final_write_processing,
+	elf32_avr_object_p): Add prototypes.
+	(elf32_avr_gc_mark_hook): Add default for h->root.type.
+	(bfd_elf_avr_final_write_processing): Make static.
+
+2000-03-27  Denis Chertykov  <denisc@overta.ru>
+
+	* cpu-avr.c: New file.  BFD support routines for AVR architecture.
+	* archures.c (bfd_architecture): Add AVR architecture.
+	(bfd_archures_list): Add reference to AVR architecture info.
+	* elf.c (prep_headers): Handle bfd_arch_avr.
+	* reloc.c: Add various AVR relocation enums.
+	* targets.c (bfd_elf32_avr_vec): Declare and add to target vector
+	list.
+	* Makefile.am: Add support for AVR elf.
+	* configure.in: Likewise.
+	* config.bfd: Likewise.
+	* Makefile.in: Regenerate.
+	* configure: This too.
+	* bfd-in2.h: And this.
+	* libbfd.h: And this.
+
 2000-03-24  H.J. Lu  <hjl@gnu.org>
 
 	* elf64-alpha.c (elf64_alpha_merge_ind_symbols): Add prototype.

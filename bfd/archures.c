@@ -199,6 +199,11 @@ DESCRIPTION
 .#define bfd_mach_fr30		0x46523330
 .  bfd_arch_mcore,
 .  bfd_arch_pj,
+.  bfd_arch_avr,       {* Atmel AVR microcontrollers *}
+.#define bfd_mach_avr1		1
+.#define bfd_mach_avr2		2
+.#define bfd_mach_avr3		3
+.#define bfd_mach_avr4		4
 .  bfd_arch_last
 .  };
 
@@ -271,6 +276,7 @@ extern const bfd_arch_info_type bfd_w65_arch;
 extern const bfd_arch_info_type bfd_v850_arch;
 extern const bfd_arch_info_type bfd_fr30_arch;
 extern const bfd_arch_info_type bfd_mcore_arch;
+extern const bfd_arch_info_type bfd_avr_arch;
 
 static const bfd_arch_info_type * const bfd_archures_list[] =
 {
@@ -309,7 +315,8 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
   &bfd_w65_arch,
   &bfd_v850_arch,
   &bfd_fr30_arch,
-  & bfd_mcore_arch,
+  &bfd_mcore_arch,
+  &bfd_avr_arch,
 #endif
   0
 };

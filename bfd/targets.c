@@ -506,6 +506,7 @@ extern const bfd_target arm_epoc_pei_big_vec;
 extern const bfd_target b_out_vec_big_host;
 extern const bfd_target b_out_vec_little_host;
 extern const bfd_target bfd_elf64_alpha_vec;
+extern const bfd_target bfd_elf32_avr_vec;
 extern const bfd_target bfd_elf32_bigarc_vec;
 extern const bfd_target bfd_elf32_bigarm_vec;
 extern const bfd_target bfd_elf32_bigarm_oabi_vec;
@@ -690,6 +691,7 @@ const bfd_target * const bfd_target_vector[] = {
 #ifdef BFD64
 	&bfd_elf64_alpha_vec,
 #endif
+	&bfd_elf32_avr_vec,
 	&bfd_elf32_bigarc_vec,
         &bfd_elf32_bigarm_vec,
         &bfd_elf32_bigarm_oabi_vec,

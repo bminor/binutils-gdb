@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_alpha
 #define ARCH_arc
 #define ARCH_arm
+#define ARCH_avr
 #define ARCH_d10v
 #define ARCH_d30v
 #define ARCH_h8300
@@ -91,6 +92,11 @@ disassembler (abfd)
 	disassemble = print_insn_big_arm;
       else
 	disassemble = print_insn_little_arm;
+      break;
+#endif
+#ifdef ARCH_avr
+    case bfd_arch_avr:
+      disassemble = print_insn_avr;
       break;
 #endif
 #ifdef ARCH_d10v

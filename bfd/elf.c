@@ -3276,6 +3276,9 @@ prep_headers (abfd)
     case bfd_arch_mcore:
       i_ehdrp->e_machine = EM_MCORE;
       break;
+    case bfd_arch_avr:
+      i_ehdrp->e_machine = EM_AVR;
+      break;
     case bfd_arch_v850:
       switch (bfd_get_mach (abfd))
 	{

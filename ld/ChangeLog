@@ -1,3 +1,18 @@
+2000-03-27  Denis Chertykov  <denisc@overta.ru>
+
+	* configure.tgt (avr-*-*): New target support.
+	* Makefile.am: Likewise.
+	* scripttempl/elf32avr.sc: New script file.
+	* emulparams/avr1200.sh: New file.
+	* emulparams/avr23xx.sh: New file.
+	* emulparams/avr4433.sh New file.
+	* emulparams/avr44x4.sh New file.
+	* emulparams/avr85xx.sh New file.
+	* emulparams/avrmega103.sh New file.
+	* emulparams/avrmega161.sh New file.
+	* emulparams/avrmega603.sh New file.
+	* Makefile.in: Regenerate.
+
 2000-03-09  Andreas Jaeger  <aj@suse.de>
 
 	* Makefile.am (check-DEJAGNU): Also unset LANG.
