@@ -1,3 +1,9 @@
+Wed Mar 30 15:51:15 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldmisc.c (vfinfo): Change symbol reading slightly for recent BFD
+	changes: get_symtab_upper_bound renamed and returns long,
+	bfd_canonicalize_symtab returns long, check for error indications.
+
 Fri Mar 25 17:20:01 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldlang.c (print_input_section): For section size, use
