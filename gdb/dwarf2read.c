@@ -980,8 +980,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
   obstack_init (&dwarf2_tmp_obstack);
   back_to = make_cleanup (dwarf2_free_tmp_obstack, NULL);
 
-  while ((unsigned int) (info_ptr - dwarf_info_buffer)
-	 + ((info_ptr - dwarf_info_buffer) % 4) < dwarf_info_size)
+  while (info_ptr < dwarf_info_buffer + dwarf_info_size)
     {
       struct comp_unit_head cu_header;
       beg_of_comp_unit = info_ptr;
