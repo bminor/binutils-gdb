@@ -1,3 +1,33 @@
+Thu May 23 17:34:24 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* stabs.c (s_stab_generic): For PowerPC ELF, allow .stabd to take
+	4 arguments, providing the 4th argument is 0, to allow
+	compatibility with the Solaris assembler.
+
+Thu May 16 15:51:48 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-sh.h (struct sh_segment_info_type): Define.
+	(TC_SEGMENT_INFO_TYPE): Define.
+	(sh_frob_label): Declare.
+	(tc_frob_label): Define.
+	(sh_flush_pending_output): Declare.
+	(md_flush_pending_output): Define.
+	* config/tc-sh.c (md_assemble): If relaxing, emit a R_SH_CODE
+ 	reloc before the instruction if necessary.
+	(sh_frob_label): New function.
+	(sh_flush_pending_output): New function.
+	(sh_coff_frob_file): Ignore ALIGN, CODE, DATA, and LABEL relocs
+	when looking for the reloc for the target of .uses.
+	(md_convert_frag): Fix printf format (%0xlx to 0x%lx).
+	(sh_force_relocation): Force CODE, DATA, and LABEL relocs to be
+	emitted.
+	(md_apply_fix): Ignore CODE, DATA, and LABEL relocs.
+	(sh_coff_reloc_mangle): Force CODE, DATA, and LABEL relocs to use
+	the absolute symbol.
+
+	* subsegs.h (segment_info_type): Add tc_segment_info_data field if
+	TC_SEGMENT_INFO_TYPE is defined.
+
 Wed May 15 12:23:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-i386.c (md_assemble): Make sure the opcode suffix

@@ -224,6 +224,52 @@ s_stab_generic (what, stab_secname, stabstr_secname)
       SKIP_WHITESPACE ();
     }
 
+#ifdef TC_PPC
+#ifdef OBJ_ELF
+  /* Solaris on PowerPC has decided that .stabd takes 4 arguments, so emulate it.  */
+  else if (what == 'd')
+    {
+      char *save_location = input_line_pointer;
+
+      SKIP_WHITESPACE ();
+      if (*input_line_pointer == ',')
+	{
+	  int dummy;
+
+	  input_line_pointer++;
+	  SKIP_WHITESPACE ();
+
+	  dummy = get_absolute_expression ();
+	  if (dummy != 0)
+	    {
+	      as_warn (".stabd: Fourth field must be 0");
+	      ignore_rest_of_line ();
+	      return;
+	    }
+	  SKIP_WHITESPACE ();
+	}
+      else
+	input_line_pointer = save_location;
+    }
+#endif /* OBJ_ELF */
+#endif /* TC_PPC */
+
+#ifndef NO_LISTING
+  if (listing)
+    {
+      switch (type)
+	{
+	case N_SLINE:
+	  listing_source_line ((unsigned int) desc);
+	  break;
+	case N_SO:
+	case N_SOL:
+	  listing_source_file (string);
+	  break;
+	}
+    }
+#endif /* ! NO_LISTING */
+
   /* We have now gathered the type, other, and desc information.  For
      .stabs or .stabn, input_line_pointer is now pointing at the
      value.  */
@@ -310,7 +356,7 @@ s_stab_generic (what, stab_secname, stabstr_secname)
 	}
 
 #ifdef OBJ_PROCESS_STAB
-      OBJ_PROCESS_STAB (seg, what, string + stroff, type, other, desc);
+      OBJ_PROCESS_STAB (seg, what, string, type, other, desc);
 #endif
 
       subseg_set (saved_seg, saved_subseg);
@@ -323,22 +369,6 @@ s_stab_generic (what, stab_secname, stabstr_secname)
       abort ();
 #endif
     }
-
-#ifndef NO_LISTING
-  if (listing)
-    {
-      switch (type)
-	{
-	case N_SLINE:
-	  listing_source_line ((unsigned int) desc);
-	  break;
-	case N_SO:
-	case N_SOL:
-	  listing_source_file (string);
-	  break;
-	}
-    }
-#endif /* ! NO_LISTING */
 
   demand_empty_rest_of_line ();
 }
