@@ -4822,6 +4822,37 @@ or so included files.
 @chapter Releasing @value{GDBN}
 @cindex making a new release of gdb
 
+@section Branch Commit Policy
+
+The branch commit policy is pretty slack.  @value{GDBN} releases 5.0,
+5.1 and 5.2 all used the below:
+
+@itemize @bullet
+@item
+The @file{gdb/MAINTAINERS} file still holds.
+@item
+Don't fix something on the branch unless/until it is also fixed in the
+trunk.  If this isn't possible, mentioning it in the @file{gdb/PROBLEMS}
+file is better than committing a hack
+@item
+When considering a patch for the branch, suggested criteria include:
+Does it fix a build?  Does it fix the sequence @kbd{break main; run}
+when debugging a static binary?
+@item
+The further a change is from the core of @value{GDBN}, the less likely
+the change will worry anyone (e.g., target specific code).
+@item
+Only post a proposal to change the core of @value{GDBN} after you've
+sent individual bribes to all the people listed in the
+@file{MAINTAINERS} file @t{;-)}
+@end itemize
+
+@emph{Pragmatics: Provided updates are restricted to non-core
+functionality there is little chance that a broken change will be fatal.
+This means that changes such as adding a new architectures or (within
+reason) support for a new host are considered acceptable.}
+
+
 @section Obsolete any code
 
 Before anything else, poke the other developers (and around the source

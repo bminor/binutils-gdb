@@ -1,3 +1,8 @@
+2002-03-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Releasing GDB): Add the section``Branch Commit
+	Policy''.
+
 2002-03-04  Fred Fish  <fnf@redhat.com>
 
 	* gdbint.texinfo: Fix a bunch of typos (alsways, mirrorred,
