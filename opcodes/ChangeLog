@@ -1,3 +1,8 @@
+2003-01-29  Henric Jungheim <henric@attbi.com>
+
+	* sparc-dis.c (print_insn_sparc): When examining values added in
+	to rs1, make sure that there are previous instructions.
+
 2003-01-23  Nick Clifton  <nickc@redhat.com>
 
 	* Add sh2e support:
