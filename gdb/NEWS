@@ -5,6 +5,12 @@
 
  * User visible changes:
 
+Filename completion now works.
+
+When run under emacs mode, the "info line" command now causes the
+arrow to point to the line specified.  Also, "info line" prints
+addresses in symbolic form.
+
 All vxworks based targets now support a user settable option, called
 vxworks-timeout.  This option represents the number of seconds gdb
 should wait for responses to rpc's.  You might want to use this if

@@ -504,7 +504,10 @@ help_cmd_list (list, class, prefix, recurse, stream)
    "info" matches without ambiguity, but "a" could be "args" or "address", so
    *RESULT_LIST is set to the cmd_list_element for "info".  So in this case
    RESULT_LIST should not be interpeted as a pointer to the beginning of a
-   list; it simply points to a specific command.
+   list; it simply points to a specific command.  In the case of an ambiguous
+   return *TEXT is advanced past the last non-ambiguous prefix (e.g.
+   "info t" can be "info types" or "info target"; upon return *TEXT has been
+   advanced past "info ").
 
    If RESULT_LIST is NULL, don't set *RESULT_LIST (but don't otherwise
    affect the operation).
@@ -906,12 +909,18 @@ lookup_cmd (line, list, cmdtype, allow_unknown)
 /* Helper function for SYMBOL_COMPLETION_FUNCTION.  */
 
 /* Return a vector of char pointers which point to the different
-   possible completions in LIST of TEXT.  */
+   possible completions in LIST of TEXT.  
+
+   WORD points in the same buffer as TEXT, and completions should be
+   returned relative to this position.  For example, suppose TEXT is "foo"
+   and we want to complete to "foobar".  If WORD is "oo", return
+   "oobar"; if WORD is "baz/foo", return "baz/foobar".  */
 
 char **
-complete_on_cmdlist (list, text)
+complete_on_cmdlist (list, text, word)
      struct cmd_list_element *list;
      char *text;
+     char *word;
 {
   struct cmd_list_element *ptr;
   char **matchlist;
@@ -938,8 +947,22 @@ complete_on_cmdlist (list, text)
 	  }
 
 	matchlist[matches] = (char *) 
-	  xmalloc (strlen (ptr->name) + 1);
-	strcpy (matchlist[matches++], ptr->name);
+	  xmalloc (strlen (word) + strlen (ptr->name) + 1);
+	if (word == text)
+	  strcpy (matchlist[matches], ptr->name);
+	else if (word > text)
+	  {
+	    /* Return some portion of ptr->name.  */
+	    strcpy (matchlist[matches], ptr->name + (word - text));
+	  }
+	else
+	  {
+	    /* Return some of text plus ptr->name.  */
+	    strncpy (matchlist[matches], word, text - word);
+	    matchlist[matches][text - word] = '\0';
+	    strcat (matchlist[matches], ptr->name);
+	  }
+	++matches;
       }
 
   if (matches == 0)

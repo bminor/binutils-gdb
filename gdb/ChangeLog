@@ -1,3 +1,24 @@
+Thu Jun 24 14:52:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* main.c (filename_completer): Don't complete to files ending in ~.
+
+	* NEWS: Mention filename completion and "info line" enhancements.
+
+	* main.c (symbol_completion_function): On "info t foo", return NULL,
+	don't error().
+
+	* main.c (symbol_completion_function): Don't use readline word
+	breaking.  Use new calling convention for c->completer and
+	complete_on_cmdlist.
+	* command.h (struct command): Change arguments; now the text passed
+	to completer does not have any word breaking done.  New arg word.
+	* symtab.{c,h} (make_symbol_completion_list): Do word breaking.  Take
+	word argument.
+	* {main.c,gdbcmd.h} ({filename,noop}_completer): Take word argument.
+	* command.{c,h} (complete_on_cmdlist): Take word argument.
+
+	* command.c (lookup_cmd_1): Doc fix.
+
 Thu Jun 24 13:26:04 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* Makefile.in (OP_INCLUDE): define.
