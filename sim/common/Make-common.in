@@ -298,44 +298,77 @@ stamp-tvals: gentmap
 
 sim_main_headers = \
 	sim-main.h \
-	$(srccom)/sim-assert.h \
-	$(srccom)/sim-base.h \
-	$(srccom)/sim-basics.h \
-	$(srccom)/sim-config.h \
-	$(srccom)/sim-cpu.h \
-	$(srccom)/sim-engine.h \
-	$(srccom)/sim-events.h \
-	$(srccom)/sim-inline.h \
-	$(srccom)/sim-memopt.h \
-	$(srccom)/sim-model.h \
-	$(srccom)/sim-module.h \
-	$(srccom)/sim-profile.h \
-	$(srccom)/sim-signal.h \
-	$(srccom)/sim-trace.h \
-	$(srccom)/sim-utils.h \
-	$(srccom)/sim-watch.h \
-	tconfig.h \
+	$(sim-assert_h) \
+	$(sim-base_h) \
+	$(sim-cpu_h) \
+	$(sim-engine_h) \
+	$(sim-events_h) \
+	$(sim-memopt_h) \
+	$(sim-model_h) \
+	$(sim-module_h) \
+	$(sim-profile_h) \
+	$(sim-trace_h) \
+	$(sim-watch_h) \
+	$(sim-basics_h) \
 	$(SIM_EXTRA_DEPS)
 
 # Exported version of sim_main_headers.
 SIM_MAIN_DEPS = \
 	$(sim_main_headers)
 
+sim-alu_h = $(srccom)/sim-alu.h
+sim-arange_h = $(srccom)/sim-arange.h \
+		$(srccom)/sim-arange.c
 sim-assert_h = $(srccom)/sim-assert.h
-sim-endian_h = $(srccom)/sim-endian.h
-sim-n-endian_h = $(srccom)/sim-n-endian.h
-sim-arange_h = $(srccom)/sim-arange.h
-sim-bits_h = $(srccom)/sim-bits.h
+sim-base_h = $(srccom)/sim-base.h \
+		$(sim-module_h) \
+		$(sim-trace_h) \
+		$(sim-core_h) \
+		$(sim-events_h) \
+		$(sim-profile_h) \
+		$(sim-model_h) \
+		$(sim-io_h) \
+		$(sim-engine_h) \
+		$(sim-watch_h) \
+		$(sim-memopt_h) \
+		$(sim-cpu_h)
+sim-basics_h = $(srccom)/sim-basics.h \
+		cconfig_h \
+		tconfig_h \
+		$(sim-config_h) \
+		$(sim-inline_h) \
+		$(sim-types_h) \
+		$(sim-bits_h) \
+		$(sim-endian_h) \
+		$(sim-signal_h) \
+		$(sim-arange_h) \
+		$(sim-utils_h)
+sim-bits_h = $(srccom)/sim-bits.h \
+		$(srccom)/sim-bits.c
 sim-config_h = $(srccom)/sim-config.h
-sim-n-bits_h = $(srccom)/sim-n-bits.h
 sim-core_h = $(srccom)/sim-core.h
-sim-n-core_h = $(srccom)/sim-n-core.h
+sim-cpu_h = $(srccom)/sim-cpu.h
+sim-endian_h = $(srccom)/sim-endian.h \
+		$(srccom)/sim-endian.c
 sim-engine_h = $(srccom)/sim-engine.h
 sim-events_h = $(srccom)/sim-events.h
 sim-fpu_h = $(srccom)/sim-fpu.h
+sim-hw_h = $(srccom)/sim-hw.h
+sim-inline_h = $(srccom)/sim-inline.h
 sim-io_h = $(srccom)/sim-io.h
+sim-memopt_h = $(srccom)/sim-memopt.h
+sim-model_h = $(srccom)/sim-model.h
+sim-module_h = $(srccom)/sim-module.h
+sim-n-bits_h = $(srccom)/sim-n-bits.h
+sim-n-core_h = $(srccom)/sim-n-core.h
+sim-n-endian_h = $(srccom)/sim-n-endian.h
 sim-options_h = $(srccom)/sim-options.h
+sim-profile_h = $(srccom)/sim-profile.h
 sim-signal_h = $(srccom)/sim-signal.h
+sim-trace_h = $(srccom)/sim-trace.h
+sim-types_h = $(srccom)/sim-types.h
+sim-utils_h = $(srccom)/sim-utils.h
+sim-watch_h = $(srccom)/sim-watch.h
 
 hw-alloc_h = $(srccom)/hw-alloc.h
 hw-base_h = $(srccom)/hw-base.h
@@ -473,7 +506,7 @@ sim-utils.o: $(srccom)/sim-utils.c $(sim_main_headers)
 sim-watch.o: $(srccom)/sim-watch.c $(sim_main_headers)
 	$(CC) -c $(srccom)/sim-watch.c $(ALL_CFLAGS)
 
-sim-load.o: $(srccom)/sim-load.c $(callback_h) $(sim_main_headers) $(remote_sim_h)
+sim-load.o: $(srccom)/sim-load.c $(callback_h) $(sim_basics_h) $(remote_sim_h)
 	$(CC) -c $(srccom)/sim-load.c $(ALL_CFLAGS)
 
 

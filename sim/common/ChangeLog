@@ -1,3 +1,10 @@
+2004-11-18  Richard Earnshaw  <rearnsha@arm.com>
+
+	* Make-common.in (sim-*_h): Add rules for all sim headers.  Also
+	add sub-dependencies for other sim files that they include.
+	(sim_main_headers): Use sim-*_h rules.
+	(sim-load.o): Depend on sim-basics_h, not sim_main_headers.
+
 2004-11-16  Hans-Peter Nilsson  <hp@axis.com>
 
 	* sim-config.c (sim_config): Recognize when a bfd has unspecified
