@@ -1,3 +1,8 @@
+2003-08-18  Michael Chastain  <mec@shout.net>
+
+	* PROBLEMS: Document pr gdb/1322, the Java anonymous
+	objfile bug.
+
 2003-08-24  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-tdep.h: Update copyright date.
