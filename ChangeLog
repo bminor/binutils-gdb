@@ -1,3 +1,19 @@
+Thu Mar 28 14:11:11 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* Makefile.in (ALL_MODULES): Include all-perl.
+	(CROSS_CHECK_MODULES): Include check-perl.
+	(INSTALL_MODULES): Include install-perl.
+	(ALL_X11_MODULES): Include all-guile.
+	(CHECK_X11_MODULES): Include check-guile.
+	(INSTALL_X11_MODULES): Include install-guile.
+	(all-perl): New target.
+	(all-guile): New target.
+
+	* configure.in (host_tools): Include perl and guile.
+	(native_only): Include perl and guile.
+	(noconfigdirs): Don't build guile and perl; no ports have been
+	done.
+
 Tue Mar 26 21:18:50 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
 
         * configure (--enable-*): Handle quoted option lists such as

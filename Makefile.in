@@ -437,6 +437,7 @@ ALL_MODULES = \
 	all-mmalloc \
 	all-opcodes \
 	all-patch \
+	all-perl \
 	all-prms \
 	all-rcs \
 	all-readline \
@@ -492,6 +493,7 @@ CROSS_CHECK_MODULES = \
 	check-mmcheckoc \
 	check-opcodes \
 	check-patch \
+	check-perl \
 	check-prms \
 	check-rcs \
 	check-readline \
@@ -542,6 +544,7 @@ INSTALL_MODULES = \
 	install-mmalloc \
 	install-opcodes \
 	install-patch \
+	install-perl \
 	install-prms \
 	install-rcs \
 	install-readline \
@@ -567,6 +570,7 @@ ALL_X11_MODULES = \
 	all-gdb \
 	all-expect \
 	all-gash \
+	all-guile \
 	all-tclX \
 	all-tk
 
@@ -575,6 +579,7 @@ ALL_X11_MODULES = \
 CHECK_X11_MODULES = \
 	check-emacs \
 	check-gdb \
+	check-guile \
 	check-expect \
 	check-gash \
 	check-tclX \
@@ -586,6 +591,7 @@ INSTALL_X11_MODULES = \
 	install-emacs \
 	install-emacs19 \
 	install-gdb \
+	install-guile \
 	install-expect \
 	install-gash \
 	install-tclX \
@@ -678,12 +684,12 @@ $(DO_X):
 	    case $$i in \
 	    gcc) \
 	      for flag in $(EXTRA_GCC_FLAGS); do \
-		eval `echo "$$flag" | sed -e "s|^\(.*\)=\(.*\)|\1='\2'|"`; \
+		eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'|"`; \
 	      done; \
 	      ;; \
 	    *) \
 	      for flag in $(EXTRA_HOST_FLAGS); do \
-		eval `echo "$$flag" | sed -e "s|^\(.*\)=\(.*\)|\1='\2'|"`; \
+		eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'|"`; \
 	      done; \
 	      ;; \
 	    esac ; \
@@ -704,7 +710,7 @@ $(DO_X):
 	for i in $(TARGET_CONFIGDIRS) -dummy-; do \
 	  if [ -f $(TARGET_SUBDIR)/$$i/Makefile ]; then \
 	    for flag in $(EXTRA_TARGET_FLAGS); do \
-		eval `echo "$$flag" | sed -e "s|^\(.*\)=\(.*\)|\1='\2'|"`; \
+		eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'|"`; \
 	    done; \
 	    export AR AS CC CXX NM RANLIB DLLTOOL; \
 	    if (cd $(TARGET_SUBDIR)/$$i; \
@@ -922,8 +928,16 @@ $(CONFIGURE_TARGET_MODULES):
 	    esac; \
 	    if [ "$(srcdir)" = "." ] ; then \
 	      if [ "$(TARGET_SUBDIR)" != "." ] ; then \
-		if $(SHELL) $${srcroot}/symlink-tree $${topdir}/$${dir} "Makefile" ; then \
-		  true; \
+		if $(SHELL) $${srcroot}/symlink-tree $${topdir}/$${dir} "no-such-file" ; then \
+		  if [ -f Makefile ]; then \
+		    if $(MAKE) distclean; then \
+		      true; \
+		    else \
+		      exit 1; \
+		    fi; \
+		  else \
+		    true; \
+		  fi; \
 		else \
 		  exit 1; \
 		fi; \
@@ -1134,6 +1148,7 @@ all-gprof: all-libiberty all-bfd all-opcodes
 all-grep: all-libiberty
 all-grez: all-libiberty all-bfd all-opcodes
 all-gui: all-gdb all-libproc all-target-librx
+all-guile:
 all-gzip: all-libiberty
 all-hello: all-libiberty
 all-indent:
@@ -1157,6 +1172,7 @@ configure-target-newlib: $(ALL_GCC)
 all-target-newlib: configure-target-newlib all-binutils all-gas all-gcc
 all-opcodes: all-bfd all-libiberty
 all-patch: all-libiberty
+all-perl:
 all-prms: all-libiberty
 all-rcs:
 all-readline:
@@ -1179,6 +1195,8 @@ configure-target-winsup: configure-target-newlib
 all-uudecode: all-libiberty
 configure-target-libiberty: $(ALL_GCC)
 all-target-libiberty: configure-target-libiberty all-gcc all-ld all-target-newlib
+all-target: $(ALL_TARGET_MODULES)
+install-target: $(INSTALL_TARGET_MODULES)
 
 ### other supporting targets
 
