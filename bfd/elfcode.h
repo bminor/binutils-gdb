@@ -2641,8 +2641,6 @@ DEFUN (section_from_elf_index, (abfd, index),
       case SHT_NOBITS:
 	if (!hdr->rawdata)
 	  bfd_section_from_shdr (abfd, index);
-	if (!hdr->rawdata)
-	  abort ();
 	return (struct sec *) hdr->rawdata;
 
       default:
