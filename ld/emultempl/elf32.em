@@ -1458,6 +1458,10 @@ sed $sc ldscripts/${EMULATION_NAME}.xn                 >> e${EMULATION_NAME}.c
 fi
 if test -n "$GENERATE_PIE_SCRIPT" ; then
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
+echo '  ; else if (link_info.pie && link_info.combreloc' >> e${EMULATION_NAME}.c
+echo '             && link_info.relro' >> e${EMULATION_NAME}.c
+echo '             && (link_info.flags & DT_BIND_NOW)) return' >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xdw                >> e${EMULATION_NAME}.c
 echo '  ; else if (link_info.pie && link_info.combreloc) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xdc                >> e${EMULATION_NAME}.c
 fi
@@ -1466,6 +1470,10 @@ sed $sc ldscripts/${EMULATION_NAME}.xd                 >> e${EMULATION_NAME}.c
 fi
 if test -n "$GENERATE_SHLIB_SCRIPT" ; then
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
+echo '  ; else if (link_info.shared && link_info.combreloc' >> e${EMULATION_NAME}.c
+echo '             && link_info.relro' >> e${EMULATION_NAME}.c
+echo '             && (link_info.flags & DT_BIND_NOW)) return' >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xsw                >> e${EMULATION_NAME}.c
 echo '  ; else if (link_info.shared && link_info.combreloc) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xsc                >> e${EMULATION_NAME}.c
 fi
@@ -1473,6 +1481,9 @@ echo '  ; else if (link_info.shared) return'	       >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xs                 >> e${EMULATION_NAME}.c
 fi
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
+echo '  ; else if (link_info.combreloc && link_info.relro' >> e${EMULATION_NAME}.c
+echo '             && (link_info.flags & DT_BIND_NOW)) return' >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xw                 >> e${EMULATION_NAME}.c
 echo '  ; else if (link_info.combreloc) return'        >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xc                 >> e${EMULATION_NAME}.c
 fi
@@ -1504,6 +1515,9 @@ fi
 if test -n "$GENERATE_PIE_SCRIPT" ; then
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
 cat >>e${EMULATION_NAME}.c <<EOF
+  else if (link_info.pie && link_info.combreloc
+	   && link_info.relro && (link_info.flags & DT_BIND_NOW))
+    return "ldscripts/${EMULATION_NAME}.xdw";
   else if (link_info.pie && link_info.combreloc)
     return "ldscripts/${EMULATION_NAME}.xdc";
 EOF
@@ -1516,6 +1530,9 @@ fi
 if test -n "$GENERATE_SHLIB_SCRIPT" ; then
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
 cat >>e${EMULATION_NAME}.c <<EOF
+  else if (link_info.shared && link_info.combreloc
+	   && link_info.relro && (link_info.flags & DT_BIND_NOW))
+    return "ldscripts/${EMULATION_NAME}.xsw";
   else if (link_info.shared && link_info.combreloc)
     return "ldscripts/${EMULATION_NAME}.xsc";
 EOF
@@ -1527,6 +1544,9 @@ EOF
 fi
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
 cat >>e${EMULATION_NAME}.c <<EOF
+  else if (link_info.combreloc && link_info.relro
+	   && (link_info.flags & DT_BIND_NOW))
+    return "ldscripts/${EMULATION_NAME}.xw";
   else if (link_info.combreloc)
     return "ldscripts/${EMULATION_NAME}.xc";
 EOF
@@ -1666,6 +1686,10 @@ cat >>e${EMULATION_NAME}.c <<EOF
 	  link_info.noexecstack = TRUE;
 	  link_info.execstack = FALSE;
 	}
+      else if (strcmp (optarg, "relro") == 0)
+	link_info.relro = TRUE;
+      else if (strcmp (optarg, "norelro") == 0)
+	link_info.relro = FALSE;
       /* What about the other Solaris -z options? FIXME.  */
       break;
 EOF
@@ -1713,8 +1737,10 @@ cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  -z nodlopen\t\tMark DSO not available to dlopen\n"));
   fprintf (file, _("  -z nodump\t\tMark DSO not available to dldump\n"));
   fprintf (file, _("  -z noexecstack\tMark executable as not requiring executable stack\n"));
+  fprintf (file, _("  -z norelro\t\tDon't create RELRO program header\n"));
   fprintf (file, _("  -z now\t\tMark object non-lazy runtime binding\n"));
   fprintf (file, _("  -z origin\t\tMark object requiring immediate \$ORIGIN processing\n\t\t\t  at runtime\n"));
+  fprintf (file, _("  -z relro\t\tCreate RELRO program header\n"));
   fprintf (file, _("  -z KEYWORD\t\tIgnored for Solaris compatibility\n"));
 EOF
 fi

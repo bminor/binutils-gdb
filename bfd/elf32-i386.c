@@ -2261,24 +2261,29 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  if (off >= (bfd_vma) -2)
 	    abort ();
 
-	  relocation = htab->sgot->output_offset + off;
+	  relocation = htab->sgot->output_section->vma
+		       + htab->sgot->output_offset + off
+		       - htab->sgotplt->output_section->vma
+		       - htab->sgotplt->output_offset;
 	  break;
 
 	case R_386_GOTOFF:
 	  /* Relocation is relative to the start of the global offset
 	     table.  */
 
-	  /* Note that sgot->output_offset is not involved in this
-	     calculation.  We always want the start of .got.  If we
-	     defined _GLOBAL_OFFSET_TABLE in a different way, as is
+	  /* Note that sgot is not involved in this
+	     calculation.  We always want the start of .got.plt.  If we
+	     defined _GLOBAL_OFFSET_TABLE_ in a different way, as is
 	     permitted by the ABI, we might have to change this
 	     calculation.  */
-	  relocation -= htab->sgot->output_section->vma;
+	  relocation -= htab->sgotplt->output_section->vma
+			+ htab->sgotplt->output_offset;
 	  break;
 
 	case R_386_GOTPC:
 	  /* Use global offset table as symbol value.  */
-	  relocation = htab->sgot->output_section->vma;
+	  relocation = htab->sgotplt->output_section->vma
+		       + htab->sgotplt->output_offset;
 	  unresolved_reloc = FALSE;
 	  break;
 
@@ -2699,12 +2704,15 @@ elf_i386_relocate_section (bfd *output_bfd,
 	    abort ();
 	  if (r_type == ELF32_R_TYPE (rel->r_info))
 	    {
-	      relocation = htab->sgot->output_offset + off;
+	      bfd_vma g_o_t = htab->sgotplt->output_section->vma
+			      + htab->sgotplt->output_offset;
+	      relocation = htab->sgot->output_section->vma
+			   + htab->sgot->output_offset + off - g_o_t;
 	      if ((r_type == R_386_TLS_IE || r_type == R_386_TLS_GOTIE)
 		  && tls_type == GOT_TLS_IE_BOTH)
 		relocation += 4;
 	      if (r_type == R_386_TLS_IE)
-		relocation += htab->sgot->output_section->vma;
+		relocation += g_o_t;
 	      unresolved_reloc = FALSE;
 	    }
 	  else
@@ -2761,7 +2769,11 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  if (tls_type == GOT_TLS_IE_BOTH)
 		    off += 4;
 		}
-	      bfd_put_32 (output_bfd, htab->sgot->output_offset + off,
+	      bfd_put_32 (output_bfd,
+			  htab->sgot->output_section->vma
+			  + htab->sgot->output_offset + off
+			  - htab->sgotplt->output_section->vma
+			  - htab->sgotplt->output_offset,
 			  contents + roff + 8);
 	      /* Skip R_386_PLT32.  */
 	      rel++;
@@ -2823,7 +2835,10 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      bfd_elf32_swap_reloc_out (output_bfd, &outrel, loc);
 	      htab->tls_ldm_got.offset |= 1;
 	    }
-	  relocation = htab->sgot->output_offset + off;
+	  relocation = htab->sgot->output_section->vma
+		       + htab->sgot->output_offset + off
+		       - htab->sgotplt->output_section->vma
+		       - htab->sgotplt->output_offset;
 	  unresolved_reloc = FALSE;
 	  break;
 
@@ -3159,7 +3174,8 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 	      continue;
 
 	    case DT_PLTGOT:
-	      dyn.d_un.d_ptr = htab->sgot->output_section->vma;
+	      s = htab->sgotplt;
+	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      break;
 
 	    case DT_JMPREL:
@@ -3245,6 +3261,10 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 
       elf_section_data (htab->sgotplt->output_section)->this_hdr.sh_entsize = 4;
     }
+
+  if (htab->sgot && htab->sgot->_raw_size > 0)
+    elf_section_data (htab->sgot->output_section)->this_hdr.sh_entsize = 4;
+
   return TRUE;
 }
 

@@ -101,6 +101,7 @@ exp_print_token (token_code_type code, int infix_p)
     { MAX_K, "MAX_K" },
     { REL, "relocatable" },
     { DATA_SEGMENT_ALIGN, "DATA_SEGMENT_ALIGN" },
+    { DATA_SEGMENT_RELRO_END, "DATA_SEGMENT_RELRO_END" },
     { DATA_SEGMENT_END, "DATA_SEGMENT_END" }
   };
   unsigned int idx;
@@ -264,14 +265,36 @@ fold_unary (etree_type *tree,
 	    result.valid_p = FALSE;
 	  break;
 
+	case DATA_SEGMENT_RELRO_END:
+	  if (allocation_done != lang_first_phase_enum
+	      && (exp_data_seg.phase == exp_dataseg_align_seen
+		  || exp_data_seg.phase == exp_dataseg_adjust
+		  || exp_data_seg.phase == exp_dataseg_relro_adjust
+		  || allocation_done != lang_allocating_phase_enum))
+	    {
+	      if (exp_data_seg.phase == exp_dataseg_align_seen
+		  || exp_data_seg.phase == exp_dataseg_relro_adjust)
+		exp_data_seg.relro_end
+		  = result.value + current_section->bfd_section->vma;
+	      if (exp_data_seg.phase == exp_dataseg_align_seen)
+		exp_data_seg.phase = exp_dataseg_relro_seen;
+	      result.value = dot - current_section->bfd_section->vma;
+	    }
+	  else
+	    result.valid_p = FALSE;
+	  break;
+
 	case DATA_SEGMENT_END:
 	  if (allocation_done != lang_first_phase_enum
 	      && current_section == abs_output_section
 	      && (exp_data_seg.phase == exp_dataseg_align_seen
+		  || exp_data_seg.phase == exp_dataseg_relro_seen
 		  || exp_data_seg.phase == exp_dataseg_adjust
+		  || exp_data_seg.phase == exp_dataseg_relro_adjust
 		  || allocation_done != lang_allocating_phase_enum))
 	    {
-	      if (exp_data_seg.phase == exp_dataseg_align_seen)
+	      if (exp_data_seg.phase == exp_dataseg_align_seen
+		  || exp_data_seg.phase == exp_dataseg_relro_seen)
 		{
 		  exp_data_seg.phase = exp_dataseg_end_seen;
 		  exp_data_seg.end = result.value;
@@ -392,12 +415,23 @@ fold_binary (etree_type *tree,
 		  && current_section == abs_output_section
 		  && (exp_data_seg.phase == exp_dataseg_none
 		      || exp_data_seg.phase == exp_dataseg_adjust
+		      || exp_data_seg.phase == exp_dataseg_relro_adjust
 		      || allocation_done != lang_allocating_phase_enum))
 		{
 		  bfd_vma maxpage = result.value;
 
 		  result.value = align_n (dot, maxpage);
-		  if (exp_data_seg.phase != exp_dataseg_adjust)
+		  if (exp_data_seg.phase == exp_dataseg_relro_adjust)
+		    {
+		      /* Attempt to align DATA_SEGMENT_RELRO_END at
+			 a common page boundary.  */
+		      bfd_vma relro;
+
+		      relro = exp_data_seg.relro_end - exp_data_seg.base;
+		      result.value += -relro & (other.value - 1);
+		      exp_data_seg.base = result.value;
+		    }
+		  else if (exp_data_seg.phase != exp_dataseg_adjust)
 		    {
 		      result.value += dot & (maxpage - 1);
 		      if (allocation_done == lang_allocating_phase_enum)
@@ -405,6 +439,7 @@ fold_binary (etree_type *tree,
 			  exp_data_seg.phase = exp_dataseg_align_seen;
 			  exp_data_seg.base = result.value;
 			  exp_data_seg.pagesize = other.value;
+			  exp_data_seg.relro_end = 0;
 			}
 		    }
 		  else if (other.value < maxpage)

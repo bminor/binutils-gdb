@@ -3297,7 +3297,19 @@ lang_size_sections
   exp_data_seg.phase = exp_dataseg_none;
   result = lang_size_sections_1 (s, output_section_statement, prev, fill,
 				 dot, relax, check_regions);
-  if (exp_data_seg.phase == exp_dataseg_end_seen)
+  if (exp_data_seg.phase == exp_dataseg_end_seen
+      && link_info.relro && exp_data_seg.relro_end)
+    {
+      /* If DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END pair was seen, try
+	 to put exp_data_seg.relro on a (common) page boundary.  */
+
+      exp_data_seg.phase = exp_dataseg_relro_adjust;
+      result = lang_size_sections_1 (s, output_section_statement, prev, fill,
+				     dot, relax, check_regions);
+      link_info.relro_start = exp_data_seg.base;
+      link_info.relro_end = exp_data_seg.relro_end;
+    }
+  else if (exp_data_seg.phase == exp_dataseg_end_seen)
     {
       /* If DATA_SEGMENT_ALIGN DATA_SEGMENT_END pair was seen, check whether
 	 a page could be saved in the data segment.  */

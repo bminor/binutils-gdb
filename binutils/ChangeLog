@@ -1,3 +1,7 @@
+2004-05-11  Jakub Jelinek  <jakub@redhat.com>
+
+	* readelf.c (get_segment_type): Handle PT_GNU_RELRO.
+
 2004-05-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (section_groups): New.

@@ -303,6 +303,7 @@ main (int argc, char **argv)
   link_info.new_dtags = FALSE;
   link_info.combreloc = TRUE;
   link_info.eh_frame_hdr = FALSE;
+  link_info.relro = FALSE;
   link_info.strip_discarded = TRUE;
   link_info.strip = strip_none;
   link_info.discard = discard_sec_merge;

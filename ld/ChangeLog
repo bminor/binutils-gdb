@@ -1,3 +1,32 @@
+2004-05-11  Jakub Jelinek  <jakub@redhat.com>
+
+	* genscripts.sh: Generate -z combreloc -z now -z relro scripts
+	for binaries, -shared and -pie.
+	* emulparams/elf_i386.sh (SEPARATE_GOTPLT): Set.
+	* emulparams/elf_x86_64.sh (SEPARATE_GOTPLT): Set.
+	* emulparams/elf32ppc.sh (OTHER_READWRITE_SECTIONS): Rename to...
+	(OTHER_RELRO_SECTIONS): ... this.
+	* ldlex.l (DATA_SEGMENT_RELRO_END): Add.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_handle_option): Handle
+	-z relro and -z norelro.
+	(gld${EMULATION_NAME}_list_options): Add it to usage.
+	(gld${EMULATION_NAME}_get_script): Return -z combreloc -z now
+	-z relro scripts when appropriate.
+	* scripttempl/elf.sc: Unset SEPARATE_GOTPLT if RELRO_NOW is set.
+	Create separate .got.plt section if SEPARATE_GOTPLT.
+	Move sections which are only written during relocation handling
+	to the beginning of RW segment.  If NO_SMALL_DATA, move .got
+	before .data.  Add DATA_SEGMENT_RELRO_END directive.
+	Include OTHER_RELRO_SECTIONS.
+	* ldgram.y (DATA_SEGMENT_RELRO_END): Add.
+	* ldexp.c (exp_print_token): Handle DATA_SEGMENT_RELRO_END.
+	(fold_unary): Likewise.
+	(fold_binary): Handle -z relro.
+	* ldexp.h (struct exp_data_seg): Add exp_dataseg_relro_seen and
+	exp_dataseg_relro_adjust phases.  Add relro_end field.
+	* ldmain.c (main): Initialize link_info.relro to FALSE.
+	* ldlang.c (lang_size_sections): Handle -z relro.
+
 2004-05-08  Marek Michalkiewicz  <marekm@amelek.gda.pl>
 
 	* scripttempl/avr.sc: Do not set LMA for "eeprom" section.

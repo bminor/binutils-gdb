@@ -622,8 +622,36 @@ _bfd_elf_link_renumber_dynsyms (bfd *output_bfd, struct bfd_link_info *info)
     {
       asection *p;
       for (p = output_bfd->sections; p ; p = p->next)
-	if ((p->flags & SEC_EXCLUDE) == 0)
-	  elf_section_data (p)->dynindx = ++dynsymcount;
+	if ((p->flags & SEC_EXCLUDE) == 0
+	    && (p->flags & SEC_ALLOC) != 0)
+	  switch (elf_section_data (p)->this_hdr.sh_type)
+	    {
+	    case SHT_PROGBITS:
+	    case SHT_NOBITS:
+	      /* If sh_type is yet undecided, assume it could be
+		 SHT_PROGBITS/SHT_NOBITS.  */
+	    case SHT_NULL:
+	      if (strcmp (p->name, ".got") == 0
+		  || strcmp (p->name, ".got.plt") == 0
+		  || strcmp (p->name, ".plt") == 0)
+		{
+		  asection *ip;
+		  bfd *dynobj = elf_hash_table (info)->dynobj;
+
+		  if (dynobj != NULL
+		      && (ip = bfd_get_section_by_name (dynobj, p->name))
+			 != NULL
+		      && (ip->flags & SEC_LINKER_CREATED)
+		      && ip->output_section == p)
+		    continue;
+		}
+	      elf_section_data (p)->dynindx = ++dynsymcount;
+	      break;
+	      /* There shouldn't be section relative relocations
+		 against any other section.  */
+	    default:
+	      break;
+	    }
     }
 
   if (elf_hash_table (info)->dynlocal)
@@ -4621,6 +4649,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
   if (!is_elf_hash_table (info->hash))
     return TRUE;
 
+  elf_tdata (output_bfd)->relro = info->relro;
   if (info->execstack)
     elf_tdata (output_bfd)->stack_flags = PF_R | PF_W | PF_X;
   else if (info->noexecstack)
@@ -7654,16 +7683,18 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      bfd_byte *dest;
 	      long dynindx;
 
-	      indx = elf_section_data (s)->this_idx;
 	      dynindx = elf_section_data (s)->dynindx;
+	      if (dynindx <= 0)
+		continue;
+	      indx = elf_section_data (s)->this_idx;
 	      BFD_ASSERT (indx > 0);
 	      sym.st_shndx = indx;
 	      sym.st_value = s->vma;
 	      dest = dynsym + dynindx * bed->s->sizeof_sym;
+	      if (last_local < dynindx)
+		last_local = dynindx;
 	      bed->s->swap_symbol_out (abfd, &sym, dest, 0);
 	    }
-
-	  last_local = bfd_count_sections (abfd);
 	}
 
       /* Write out the local dynsyms.  */

@@ -1911,9 +1911,11 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  if (off >= (bfd_vma) -2)
 	    abort ();
 
-	  relocation = htab->sgot->output_offset + off;
-	  if (r_type == R_X86_64_GOTPCREL)
-	    relocation += htab->sgot->output_section->vma;
+	  relocation = htab->sgot->output_section->vma
+		       + htab->sgot->output_offset + off;
+	  if (r_type != R_X86_64_GOTPCREL)
+	    relocation -= htab->sgotplt->output_section->vma
+			  - htab->sgotplt->output_offset;
 
 	  break;
 
@@ -2664,7 +2666,8 @@ elf64_x86_64_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *inf
 	      continue;
 
 	    case DT_PLTGOT:
-	      dyn.d_un.d_ptr = htab->sgot->output_section->vma;
+	      s = htab->sgotplt;
+	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      break;
 
 	    case DT_JMPREL:
@@ -2754,6 +2757,10 @@ elf64_x86_64_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *inf
       elf_section_data (htab->sgotplt->output_section)->this_hdr.sh_entsize =
 	GOT_ENTRY_SIZE;
     }
+
+  if (htab->sgot && htab->sgot->_raw_size > 0)
+    elf_section_data (htab->sgot->output_section)->this_hdr.sh_entsize
+      = GOT_ENTRY_SIZE;
 
   return TRUE;
 }

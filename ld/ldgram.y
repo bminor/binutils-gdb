@@ -128,7 +128,7 @@ static int error_index;
 %token END
 %left <token> '('
 %token <token> ALIGN_K BLOCK BIND QUAD SQUAD LONG SHORT BYTE
-%token SECTIONS PHDRS SORT DATA_SEGMENT_ALIGN DATA_SEGMENT_END
+%token SECTIONS PHDRS SORT DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END DATA_SEGMENT_END
 %token '{' '}'
 %token SIZEOF_HEADERS OUTPUT_FORMAT FORCE_COMMON_ALLOCATION OUTPUT_ARCH
 %token INHIBIT_COMMON_ALLOCATION
@@ -808,6 +808,8 @@ exp	:
 			{ $$ = exp_binop(ALIGN_K,$3,$5); }
 	|	DATA_SEGMENT_ALIGN '(' exp ',' exp ')'
 			{ $$ = exp_binop (DATA_SEGMENT_ALIGN, $3, $5); }
+	|	DATA_SEGMENT_RELRO_END '(' exp ')'
+			{ $$ = exp_unop(DATA_SEGMENT_RELRO_END, $3); }
 	|	DATA_SEGMENT_END '(' exp ')'
 			{ $$ = exp_unop(DATA_SEGMENT_END, $3); }
 	|	BLOCK '(' exp ')'

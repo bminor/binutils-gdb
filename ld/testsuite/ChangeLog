@@ -1,3 +1,67 @@
+2004-05-11  Jakub Jelinek  <jakub@redhat.com>
+
+	* ld-i386/tlspic.rd: Adjust for section reordering changes
+	and removal of unneeded STT_SECTION symbols from .dynsym.
+	* ld-i386/tlspic.dd: Likewise.
+	* ld-i386/tlspic.sd: Likewise.
+	* ld-i386/tlsbin.rd: Likewise.
+	* ld-i386/tlsbinpic.s: Likewise.
+	* ld-i386/tlsbin.dd: Likewise.
+	* ld-i386/tlsbin.sd: Likewise.
+	* ld-i386/tlsnopic.rd: Likewise.
+	* ld-i386/tlsnopic1.s: Likewise.
+	* ld-i386/combreloc.d: Likewise.
+	* ld-i386/tlsnopic.dd: Likewise.
+	* ld-i386/tlsnopic.sd: Likewise.
+	* ld-x86-64/tlspic.rd: Likewise.
+	* ld-x86-64/tlspic.dd: Likewise.
+	* ld-x86-64/tlsbin.dd: Likewise.
+	* ld-x86-64/tlspic.sd: Likewise.
+	* ld-x86-64/tlsbin.sd: Likewise.
+	* ld-x86-64/tlspic.td: Likewise.
+	* ld-x86-64/tlsbin.td: Likewise.
+	* ld-x86-64/tlsbin.rd: Likewise.
+	* ld-s390/tlspic1.s: Likewise.
+	* ld-s390/tlsbinpic.s: Likewise.
+	* ld-s390/tlspic.rd: Likewise.
+	* ld-s390/tlsbin.rd: Likewise.
+	* ld-s390/tlspic.dd: Likewise.
+	* ld-s390/tlsbin.dd: Likewise.
+	* ld-s390/tlsbin.sd: Likewise.
+	* ld-s390/tlsbin.td: Likewise.
+	* ld-s390/tlspic.sd: Likewise.
+	* ld-s390/tlspic.td: Likewise.
+	* ld-s390/tlspic1_64.s: Likewise.
+	* ld-s390/tlsbinpic_64.s: Likewise.
+	* ld-s390/tlspic_64.rd: Likewise.
+	* ld-s390/tlsbin_64.rd: Likewise.
+	* ld-s390/tlspic_64.dd: Likewise.
+	* ld-s390/tlsbin_64.dd: Likewise.
+	* ld-s390/tlspic_64.sd: Likewise.
+	* ld-s390/tlspic_64.td: Likewise.
+	* ld-s390/tlsbin_64.td: Likewise.
+	* ld-s390/tlsbin_64.sd: Likewise.
+	* ld-powerpc/tlsexe32.r: Likewise.
+	* ld-powerpc/tlsso32.r: Likewise.
+	* ld-powerpc/tlsso32.d: Likewise.
+	* ld-powerpc/tlsso32.g: Likewise.
+	* ld-powerpc/tlsso32.t: Likewise.
+	* ld-powerpc/tlsexe.r: Likewise.
+	* ld-powerpc/tlsso.r: Likewise.
+	* ld-powerpc/tlsso.g: Likewise.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+	* ld-powerpc/tlstocso.r: Likewise.
+	* ld-powerpc/tlstocso.g: Likewise.
+	* ld-ia64/tlspic.rd: Likewise.
+	* ld-ia64/tlspic.dd: Likewise.
+	* ld-ia64/tlspic.sd: Likewise.
+	* ld-ia64/tlspic.td: Likewise.
+	* ld-ia64/tlsbin.rd: Likewise.
+	* ld-ia64/tlsbin.sd: Likewise.
+	* ld-ia64/tlsbin.td: Likewise.
+	* ld-elfvsb/elfvsb.exp: XFAIL non-PIC load offset tests on s390x.
+	* ld-shared/shared.exp: Likewise.
+
 2004-05-10  John Paul Wallington  <jpw@gnu.org>
 
 	* ld-mmix/bspec2.d: Update sh_info to decimal.

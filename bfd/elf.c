@@ -974,6 +974,7 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
 	    case PT_TLS: pt = "TLS"; break;
 	    case PT_GNU_EH_FRAME: pt = "EH_FRAME"; break;
 	    case PT_GNU_STACK: pt = "STACK"; break;
+	    case PT_GNU_RELRO: pt = "RELRO"; break;
 	    default: sprintf (buf, "0x%lx", p->p_type); pt = buf; break;
 	    }
 	  fprintf (f, "%8s off    0x", pt);
@@ -2300,6 +2301,9 @@ bfd_section_from_phdr (bfd *abfd, Elf_Internal_Phdr *hdr, int index)
     case PT_GNU_STACK:
       return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "stack");
 
+    case PT_GNU_RELRO:
+      return _bfd_elf_make_section_from_phdr (abfd, hdr, index, "relro");
+
     default:
       /* Check for any processor-specific program segment types.
          If no handler for them, default to making "segment" sections.  */
@@ -3547,6 +3551,21 @@ map_sections_to_segments (bfd *abfd)
       pm = &m->next;
     }
 
+  if (elf_tdata (abfd)->relro)
+    {
+      amt = sizeof (struct elf_segment_map);
+      m = bfd_zalloc (abfd, amt);
+      if (m == NULL)
+	goto error_return;
+      m->next = NULL;
+      m->p_type = PT_GNU_RELRO;
+      m->p_flags = PF_R;
+      m->p_flags_valid = 1;
+
+      *pm = m;
+      pm = &m->next;
+    }
+
   free (sections);
   sections = NULL;
 
@@ -4081,6 +4100,37 @@ Error: First section in segment (%s) starts at 0x%x whereas the segment starts a
 	      if (! m->p_paddr_valid)
 		p->p_paddr = phdrs_paddr;
 	    }
+	  else if (p->p_type == PT_GNU_RELRO)
+	    {
+	      Elf_Internal_Phdr *lp;
+
+	      for (lp = phdrs; lp < phdrs + count; ++lp)
+		{
+		  if (lp->p_type == PT_LOAD
+		      && lp->p_vaddr <= link_info->relro_end
+		      && lp->p_vaddr >= link_info->relro_start
+		      && lp->p_vaddr + lp->p_filesz
+			 >= link_info->relro_end)
+		    break;
+		}
+
+	      if (lp < phdrs + count
+		  && link_info->relro_end > lp->p_vaddr)
+		{
+		  p->p_vaddr = lp->p_vaddr;
+		  p->p_paddr = lp->p_paddr;
+		  p->p_offset = lp->p_offset;
+		  p->p_filesz = link_info->relro_end - lp->p_vaddr;
+		  p->p_memsz = p->p_filesz;
+		  p->p_align = 1;
+		  p->p_flags = (lp->p_flags & ~PF_W);
+		}
+	      else
+		{
+		  memset (p, 0, sizeof *p);
+		  p->p_type = PT_NULL;
+		}
+	    }
 	}
     }
 
@@ -4165,6 +4215,12 @@ get_program_header_size (bfd *abfd)
   if (elf_tdata (abfd)->stack_flags)
     {
       /* We need a PT_GNU_STACK segment.  */
+      ++segs;
+    }
+
+  if (elf_tdata (abfd)->relro)
+    {
+      /* We need a PT_GNU_RELRO segment.  */
       ++segs;
     }
 

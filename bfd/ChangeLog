@@ -1,3 +1,33 @@
+2004-05-11  Jakub Jelinek  <jakub@redhat.com>
+
+	* elflink.c (elf_bfd_final_link): Don't output STT_SECTION symbol
+	into .dynsym if elf_section_data (sec)->dynindx <= 0.
+	Adjust counting of last_local.
+	(_bfd_elf_link_renumber_dynsyms): Don't assign dynindx to sections
+	other than SHT_PROGBITS/SHT_NOBITS and neither for .got/.got.plt/.plt
+	created by the linker nor !SHF_ALLOC.
+
+	* elf32-i386.c (elf_i386_finish_dynamic_sections): Point
+	DT_PLTGOT to the start of the .got.plt section instead of the
+	.got output section.  Set sh_entsize for .got section in addition
+	to .got.plt.
+	(elf_i386_relocate_section): Don't assume _GLOBAL_OFFSET_TABLE_
+	is at sgot->output_section->vma.
+	* elf64-x86-64.c (elf64_x86_64_finish_dynamic_sections): Point
+	DT_PLTGOT to the start of the .got.plt section instead of the
+	.got output section.
+	(elf64_x86_64_relocate_section): Don't assume _GLOBAL_OFFSET_TABLE_
+	is at sgot->output_section->vma.  Set sh_entsize for .got section
+	in addition to .got.plt.
+	* elf.c (_bfd_elf_print_private_bfd_data): Handle PT_GNU_RELRO.
+	(bfd_section_from_phdr): Likewise.
+	(map_sections_to_segments): Likewise.
+	(assign_file_positions_for_segments): Likewise.
+	(get_program_header_size): Likewise.
+	* elflink.c (bfd_elf_size_dynamic_sections): Set
+	elf_tdata (output_bfd)->relro from info->relro.
+	* elf-bfd.h (struct elf_obj_tdata): Add relro field.
+
 2004-05-08  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-frv.c (_frvfdpic_add_dyn_reloc): Don't warn when we get

@@ -227,6 +227,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	    setup_xfail "sparc*-*-linux*"
 	}
 	setup_xfail "x86_64-*-linux*"
+	setup_xfail "s390x-*-linux*"
 	shared_test shnp "shared (non PIC, load offset)" \
 		mainnp.o sh1np.o sh2np.o shared \
 		"-T $srcdir/$subdir/elf-offset.ld"

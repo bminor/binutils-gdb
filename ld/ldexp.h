@@ -95,10 +95,12 @@ extern struct exp_data_seg {
   enum {
     exp_dataseg_none,
     exp_dataseg_align_seen,
+    exp_dataseg_relro_seen,
     exp_dataseg_end_seen,
+    exp_dataseg_relro_adjust,
     exp_dataseg_adjust
   } phase;
-  bfd_vma base, end, pagesize;
+  bfd_vma base, relro_end, end, pagesize;
 } exp_data_seg;
 
 typedef struct _fill_type fill_type;
