@@ -4259,7 +4259,7 @@ EOF
 EOF
 
       ;;
-  *-*-solaris2.678)
+  *-*-solaris2.[678])
       cat >> confdefs.h <<\EOF
 #define NEW_PROC_API 1
 EOF

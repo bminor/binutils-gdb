@@ -1,3 +1,9 @@
+2000-04-08  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
+
+	* configure.in (NEW_PROC_API):  Escape square brackets when testing
+	for solaris2.[678].
+	* configure:  Regenerate.
+
 2000-04-07  Scott Bambrough <scottb@netwinder.org>
 
 	* ChangeLog: Correct date on last entry.

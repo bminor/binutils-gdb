@@ -184,7 +184,7 @@ if test "${target}" = "${host}"; then
   *-*-unixware* | *-*-sysv4.2* | *-*-sysv5*)
       AC_DEFINE(NEW_PROC_API)
       ;;
-  *-*-solaris2.[678])
+  *-*-solaris2.[[678]])
       AC_DEFINE(NEW_PROC_API)
       ;;
   esac
