@@ -1,3 +1,8 @@
+2002-06-27  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (User Interface): ISO C rather than ISO-C.
+	(Coding): Clarify ISO C version that GDB assumes.
+
 2002-06-26  Tom Tromey  <tromey@redhat.com>
 
 	* gdbint.texinfo (User Interface): Mention add_setshow_cmd and

@@ -954,7 +954,7 @@ be signaled.
 This function first opens the tuple and then establishes a cleanup
 (@pxref{Coding, Cleanups}) to close the tuple.  It provides a convenient
 and correct implementation of the non-portable@footnote{The function
-cast is not portable ISO-C.} code sequence:
+cast is not portable ISO C.} code sequence:
 @smallexample
 struct cleanup *old_cleanup;
 ui_out_tuple_begin (uiout, "...");
@@ -4801,11 +4801,12 @@ but does not require it, @value{GDBN} requires it.
 @value{GDBN}, as described in the following sections.
 
 
-@subsection ISO-C
+@subsection ISO C
 
-@value{GDBN} assumes an ISO-C compliant compiler.
+@value{GDBN} assumes an ISO/IEC 9899:1990 (a.k.a.@: ISO C90) compliant
+compiler.
 
-@value{GDBN} does not assume an ISO-C or POSIX compliant C library.
+@value{GDBN} does not assume an ISO C or POSIX compliant C library.
 
 
 @subsection Memory Management
