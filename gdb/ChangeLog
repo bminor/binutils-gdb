@@ -1,3 +1,25 @@
+Mon Dec 30 10:57:02 1991  Per Bothner  (bothner at cygnus.com)
+
+	Mainly stuff to improve handling of TYPE_CODE_REF values.
+	* valops.c (value_addr):  If taking the addres of a
+	TYPE_CODE_REF, just cast the object to the corresponding
+	TYPE_CODE_PTR.  This yields correct C++ semantics, and
+	preserves the location information, which has the nice effect
+	that &(&R) given the location containing R.
+	* values.c (value_copy):  Make non-static (used by value_addr).
+	* eval.c (evaluate_subexp_for_address):  Use the default
+	scheme (with value_addr) for a variable if it has TYPE_CODE_REF.
+	* valops.c (value_addr), eval.c (evaluate_subexp_for_address,
+	evaluate_subexp_with_coercion):  Factor out some common
+	expressions into variables, for easier reading.
+	* findvar.c (locate_var_value):  Remove code to handle
+	TYPE_CODE_REF - it should no longer be needed.
+	* valops.c (value_assign):  Do a COERCE_REF on the
+	destination operand, for correct C++ semantics.
+	* valarith.c (value_x_binop):  Ditto:  De-reference C++
+	references in the arguments.
+	* valops.c:  ANSI-fy: bcopy->memcpy, bzero->memset.
+
 Sat Dec 28 11:30:26 1991  Per Bothner  (bothner at cygnus.com)
 
 	* dwarfread.c, coffread.c:  Use INIT_CPLUS_SPECIFIC.

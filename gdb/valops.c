@@ -111,7 +111,7 @@ value_zero (type, lv)
 {
   register value val = allocate_value (type);
 
-  bzero (VALUE_CONTENTS (val), TYPE_LENGTH (type));
+  memset (VALUE_CONTENTS (val), 0, TYPE_LENGTH (type));
   VALUE_LVAL (val) = lv;
 
   return val;
@@ -197,6 +197,7 @@ value_assign (toval, fromval)
   int use_buffer = 0;
 
   COERCE_ARRAY (fromval);
+  COERCE_REF (toval);
 
   if (VALUE_LVAL (toval) != lval_internalvar)
     fromval = value_cast (type, fromval);
@@ -212,7 +213,7 @@ value_assign (toval, fromval)
       int regno = VALUE_REGNO (toval);
       if (VALUE_TYPE (fromval) != REGISTER_VIRTUAL_TYPE (regno))
 	fromval = value_cast (REGISTER_VIRTUAL_TYPE (regno), fromval);
-      bcopy (VALUE_CONTENTS (fromval), virtual_buffer,
+      memcpy (virtual_buffer, VALUE_CONTENTS (fromval),
 	     REGISTER_VIRTUAL_SIZE (regno));
       target_convert_from_virtual (regno, virtual_buffer, raw_buffer);
       use_buffer = REGISTER_RAW_SIZE (regno);
@@ -449,18 +450,26 @@ value
 value_addr (arg1)
      value arg1;
 {
-
-  COERCE_REF(arg1);
+  struct type *type = VALUE_TYPE (arg1);
+  if (TYPE_CODE (type) == TYPE_CODE_REF)
+    {
+      /* Copy the value, but change the type from (T&) to (T*).
+	 We keep the same location information, which is efficient,
+	 and allows &(&X) to get the location containing the reference. */
+      value arg2 = value_copy (arg1);
+      VALUE_TYPE (arg2) = lookup_pointer_type (TYPE_TARGET_TYPE (type));
+      return arg2;
+    }
   if (VALUE_REPEATED (arg1)
-      || TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_ARRAY)
+      || TYPE_CODE (type) == TYPE_CODE_ARRAY)
     return value_coerce_array (arg1);
-  if (TYPE_CODE (VALUE_TYPE (arg1)) == TYPE_CODE_FUNC)
+  if (TYPE_CODE (type) == TYPE_CODE_FUNC)
     return value_coerce_function (arg1);
 
   if (VALUE_LVAL (arg1) != lval_memory)
     error ("Attempt to take address of value not located in memory.");
 
-  return value_from_longest (lookup_pointer_type (VALUE_TYPE (arg1)),
+  return value_from_longest (lookup_pointer_type (type),
 		(LONGEST) (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)));
 }
 
@@ -1045,7 +1054,7 @@ search_struct_method (name, arg1, args, offset, static_memfuncp, type)
 	    error ("cannot resolve overloaded method `%s'", name);
 	  while (j >= 0)
 	    {
-	      if (TYPE_FLAGS (TYPE_FN_FIELD_TYPE (f, j)) & TYPE_FLAG_STUB)
+	      if (TYPE_FN_FIELD_STUB (f, j))
 		check_stub_method (type, i, j);
 	      if (!typecmp (TYPE_FN_FIELD_STATIC_P (f, j),
 			    TYPE_FN_FIELD_ARGS (f, j), args))
@@ -1380,7 +1389,7 @@ value_struct_elt_for_address (domain, intype, name)
 	      else
 		j = 0;
 
-	      if (TYPE_FLAGS (TYPE_FN_FIELD_TYPE (f, j)) & TYPE_FLAG_STUB)
+	      if (TYPE_FN_FIELD_STUB (f, j))
 	        check_stub_method (t, i, j);
 	      if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
 		{

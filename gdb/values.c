@@ -182,7 +182,7 @@ release_value (val)
    It contains the same contents, for same memory address,
    but it's a different block of storage.  */
 
-static value
+value
 value_copy (arg)
      value arg;
 {
