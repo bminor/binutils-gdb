@@ -42,6 +42,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/wait.h>
 #include <signal.h>
 #include <ctype.h>
+#include "gdb_assert.h"
 
 /* 
  * PROCFS.C

@@ -1,5 +1,7 @@
 2003-02-06  Andrew Cagney  <ac131313@redhat.com>
 
+	* procfs.c: Include "gdb_assert.h".
+
 	* linux-proc.c: Include "gdb_stat.h" instead of <sys/stat.h>.
 	* cp-valprint.c (cp_print_value_fields): Eliminate STREQN.
 	* jv-typeprint.c (java_type_print_base): Ditto.
