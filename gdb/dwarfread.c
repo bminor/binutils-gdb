@@ -2404,7 +2404,6 @@ static void
 DEFUN(dwarf_psymtab_to_symtab, (pst), struct partial_symtab *pst)
 {
   int desc;
-  struct cleanup *old_chain;
   bfd *sym_bfd;
   
   if (!pst)
@@ -2437,8 +2436,6 @@ DEFUN(dwarf_psymtab_to_symtab, (pst), struct partial_symtab *pst)
          after all of the symtabs and dependencies have been read in.   */
       scan_file_globals ();
 #endif
-      
-      do_cleanups (old_chain);
       
       /* Finish up the debug error message.  */
       if (info_verbose)

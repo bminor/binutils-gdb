@@ -1,5 +1,8 @@
 Sat Nov  9 13:37:57 1991  Fred Fish  (fnf at cygnus.com)
 
+	* dwarfread.c (dwarf_psymtab_to_symtab):  Remove leftover call
+	to do_cleanups() which resulted from a previous change.
+
 	* elfread.c:  Re-enable compilation of register_addr() stub
 	whenever it is not supplied by coredep.c
 
