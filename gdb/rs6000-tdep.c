@@ -2026,7 +2026,21 @@ rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
 
    Most of these register groups aren't anything formal.  I arrived at
    them by looking at the registers that occurred in more than one
-   processor. */
+   processor.
+   
+   Note: kevinb/2002-04-30: Support for the fpscr register was added
+   during April, 2002.  Slot 70 is being used for PowerPC and slot 71
+   for Power.  For PowerPC, slot 70 was unused and was already in the
+   PPC_UISA_SPRS which is ideally where fpscr should go.  For Power,
+   slot 70 was being used for "mq", so the next available slot (71)
+   was chosen.  It would have been nice to be able to make the
+   register numbers the same across processor cores, but this wasn't
+   possible without either 1) renumbering some registers for some
+   processors or 2) assigning fpscr to a really high slot that's
+   larger than any current register number.  Doing (1) is bad because
+   existing stubs would break.  Doing (2) is undesirable because it
+   would introduce a really large gap between fpscr and the rest of
+   the registers for most processors.  */
 
 /* Convenience macros for populating register arrays. */
 
