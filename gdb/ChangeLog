@@ -1,6 +1,10 @@
+Wed Jun 10 11:27:39 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* gnu-regex.c, gnu-regex.h: Update to current FSF (glibc) versions.
+
 Wed Jun 10 10:58:18 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
-	*printcmd.c (disassemble_command): move overlay mapping code
+	* printcmd.c (disassemble_command): move overlay mapping code
 	"up" into find_pc_partial_function.
 	* blockframe.c (find_pc_partial_function): adjust start address
 	and end address for overlays (mapped vs. unmapped addresses),
