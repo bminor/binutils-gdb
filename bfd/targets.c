@@ -166,6 +166,11 @@ the set <<SEC_NO_FLAGS>>, <<SEC_ALLOC>>, ...<<SET_NEVER_LOAD>>.
 
 .  flagword section_flags;
 
+The character normally found at the front of a symbol 
+(if any), perhaps _.
+
+.  char symbol_leading_char;
+
 The pad character for filenames within an archive header.
 
 .  char ar_pad_char;            
@@ -273,7 +278,7 @@ Symbols and relocations
 .  SDEF (void, _bfd_debug_info_start, (bfd *));
 .  SDEF (void, _bfd_debug_info_end, (bfd *));
 .  SDEF (void, _bfd_debug_info_accumulate, (bfd *, struct sec  *));
-.  SDEF (bfd_byte *, _bfd_get_relocated_section_contents, (bfd*,struct bfd_seclet_struct *, bfd_byte *data));
+.  SDEF (bfd_byte *, _bfd_get_relocated_section_contents, (bfd*,struct bfd_seclet *, bfd_byte *data));
 .  SDEF (boolean,_bfd_relax_section,(bfd *, struct sec *, struct symbol_cache_entry **));
 Special entry points for gdb to swap in coff symbol table parts
 
@@ -545,7 +550,12 @@ CONST char **
 DEFUN_VOID(bfd_target_list)
 {
   int vec_length= 0;
-  bfd_target **target;
+#ifdef NATIVE_HPPAHPUX_COMPILER
+  /* The native compiler on the HP9000/700 has a bug which causes it
+     to loop endlessly when compiling this file.  This avoids it.  */
+  volatile
+#endif
+    bfd_target **target;
   CONST  char **name_list, **name_ptr;
 
   for (target = &target_vector[0]; *target != NULL; target++)

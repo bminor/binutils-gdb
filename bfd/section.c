@@ -340,8 +340,8 @@ CODE_FRAGMENT
 .	 {* A symbol which points at this section only *}
 .   struct symbol_cache_entry *symbol;  
 .   struct symbol_cache_entry **symbol_ptr_ptr;
-.   struct bfd_seclet_struct *seclets_head;
-.   struct bfd_seclet_struct *seclets_tail;
+.   struct bfd_seclet *seclets_head;
+.   struct bfd_seclet *seclets_tail;
 .} asection ;
 .
 .

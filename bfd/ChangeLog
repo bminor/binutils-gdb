@@ -1,3 +1,8 @@
+Thu Nov  5 04:43:09 1992  John Gilmore  (gnu@cygnus.com)
+
+	* bfd-in.h, bfd.c, libbfd.h, reloc.c, seclet.h, section.c,
+	targets.c: Rename struct bfd_seclet_struct to struct bfd_seclet.
+
 Thu Nov  5 02:59:09 1992  John Gilmore  (gnu@cygnus.com)
 
 	Cleanup:  Replace all uses of EXFUN in the BFD sources, with PARAMS.

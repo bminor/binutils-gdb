@@ -21,17 +21,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifndef _SECLET_H
 #define _SECLET_H
 
-typedef enum bfd_seclet_enum
+enum bfd_seclet_enum
 {
   bfd_indirect_seclet,
   bfd_fill_seclet
-} bfd_seclet_enum_type;
+};
 
-
-struct bfd_seclet_struct 
+struct bfd_seclet 
 {
-  struct bfd_seclet_struct *next;
-  bfd_seclet_enum_type type;
+  struct bfd_seclet *next;
+  enum bfd_seclet_enum type;
   unsigned int offset;  
   unsigned int size;
   union 
@@ -48,9 +47,9 @@ struct bfd_seclet_struct
   u;
 };
 
-typedef struct bfd_seclet_struct bfd_seclet_type;
+typedef struct bfd_seclet bfd_seclet_type;
 
 bfd_seclet_type *
-bfd_new_seclet PARAMS ((bfd*, asection*));
+bfd_new_seclet PARAMS ((bfd *, asection *));
 
 #endif
