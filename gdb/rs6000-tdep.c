@@ -1829,10 +1829,9 @@ e500_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     }
 }
 
-/* Convert a dbx stab or Dwarf 2 register number (from `r'
-   declaration) to a gdb REGNUM.  */
+/* Convert a DBX STABS register number to a GDB register number.  */
 static int
-rs6000_dwarf2_stab_reg_to_regnum (int num)
+rs6000_stab_reg_to_regnum (int num)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
@@ -1843,6 +1842,8 @@ rs6000_dwarf2_stab_reg_to_regnum (int num)
        specifies registers the architecture doesn't have?  Our
        callers don't check the value we return.  */
     return tdep->ppc_fp0_regnum + (num - 32);
+  else if (77 <= num && num <= 108)
+    return tdep->ppc_vr0_regnum + (num - 77);
   else if (1200 <= num && num < 1200 + 32)
     return tdep->ppc_ev0_regnum + (num - 1200);
   else
@@ -1858,26 +1859,59 @@ rs6000_dwarf2_stab_reg_to_regnum (int num)
         return tdep->ppc_xer_regnum;
       case 109:
         return tdep->ppc_vrsave_regnum;
+      case 110:
+        return tdep->ppc_vrsave_regnum - 1; /* vscr */
       case 111:
-        return gdbarch_tdep (current_gdbarch)->ppc_acc_regnum;
+        return tdep->ppc_acc_regnum;
       case 112:
-        return gdbarch_tdep (current_gdbarch)->ppc_spefscr_regnum;
+        return tdep->ppc_spefscr_regnum;
       default: 
         return num;
       }
-
-  /* FIXME: jimb/2004-03-28: Doesn't something need to be done here
-     for the Altivec registers, too?
-
-     Looking at GCC, the headers in config/rs6000 never define a
-     DBX_REGISTER_NUMBER macro, so the debug info uses the same
-     numbers GCC does internally.  Then, looking at the REGISTER_NAMES
-     macro defined in config/rs6000/rs6000.h, it seems that GCC gives
-     v0 -- v31 the numbers 77 -- 108.  But we number them 119 -- 150.
-
-     I don't have a way to test this ready to hand, but I noticed it
-     and thought I should include a note.  */
 }
+
+
+/* Convert a Dwarf 2 register number to a GDB register number.  */
+static int
+rs6000_dwarf2_reg_to_regnum (int num)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (0 <= num && num <= 31)
+    return tdep->ppc_gp0_regnum + num;
+  else if (32 <= num && num <= 63)
+    /* FIXME: jimb/2004-05-05: What should we do when the debug info
+       specifies registers the architecture doesn't have?  Our
+       callers don't check the value we return.  */
+    return tdep->ppc_fp0_regnum + (num - 32);
+  else if (1124 <= num && num < 1124 + 32)
+    return tdep->ppc_vr0_regnum + (num - 1124);
+  else if (1200 <= num && num < 1200 + 32)
+    return tdep->ppc_ev0_regnum + (num - 1200);
+  else
+    switch (num)
+      {
+      case 67:
+        return tdep->ppc_vrsave_regnum - 1; /* vscr */
+      case 99:
+        return tdep->ppc_acc_regnum;
+      case 100:
+        return tdep->ppc_mq_regnum;
+      case 101:
+        return tdep->ppc_xer_regnum;
+      case 108:
+        return tdep->ppc_lr_regnum;
+      case 109:
+        return tdep->ppc_ctr_regnum;
+      case 356:
+        return tdep->ppc_vrsave_regnum;
+      case 612:
+        return tdep->ppc_spefscr_regnum;
+      default:
+        return num;
+      }
+}
+
 
 static void
 rs6000_store_return_value (struct type *type, char *valbuf)
@@ -2970,8 +3004,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_register_convertible (gdbarch, rs6000_register_convertible);
   set_gdbarch_deprecated_register_convert_to_virtual (gdbarch, rs6000_register_convert_to_virtual);
   set_gdbarch_deprecated_register_convert_to_raw (gdbarch, rs6000_register_convert_to_raw);
-  set_gdbarch_stab_reg_to_regnum (gdbarch, rs6000_dwarf2_stab_reg_to_regnum);
-  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, rs6000_dwarf2_stab_reg_to_regnum);
+  set_gdbarch_stab_reg_to_regnum (gdbarch, rs6000_stab_reg_to_regnum);
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, rs6000_dwarf2_reg_to_regnum);
   /* Note: kevinb/2002-04-12: I'm not convinced that rs6000_push_arguments()
      is correct for the SysV ABI when the wordsize is 8, but I'm also
      fairly certain that ppc_sysv_abi_push_arguments() will give even

@@ -1,3 +1,12 @@
+2004-05-26  Jim Blandy  <jimb@redhat.com>
+
+	* rs6000-tdep.c (rs6000_dwarf2_stab_reg_to_regnum): Deleted.
+        (rs6000_stab_reg_to_regnum, rs6000_dwarf2_reg_to_regnum): New
+	functions, updated to match the register numberings used in GCC.
+	(rs6000_gdbarch_init): Register rs6000_stab_reg_to_regnum and
+	rs6000_dwarf2_reg_to_regnum as register number conversions
+	functions for STABS and Dwarf2.
+
 2004-05-26  Randolph Chung  <tausq@debian.org>
 
 	* infttrace.h (target_waitkind): Forward declare type instead of pulling
