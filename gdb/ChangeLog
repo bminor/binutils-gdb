@@ -1,3 +1,7 @@
+2001-01-24  Fernando Nasser  <fnasser@redhat.com>
+
+	* top.c (print_gdb_version): Update Copyright year.
+
 2001-01-24  J.T. Conklin  <jtc@redback.com>
 
 	* dcache.c (dcache_write_line): Fix typo.
