@@ -1,5 +1,10 @@
 2002-04-10  Andrew Cagney  <ac131313@redhat.com>
 
+	* stack.c (select_frame): Cleanup internal error message, do not
+	use %p.
+
+2002-04-10  Andrew Cagney  <ac131313@redhat.com>
+
 	* stack.c (select_frame): Check that selected_frame and the
 	specified level are as expected.
 	* blockframe.c (get_prev_frame): Set the `level' from next_frame.

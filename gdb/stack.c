@@ -1488,8 +1488,9 @@ select_frame (struct frame_info *fi, int level)
     ;
   else
     internal_error (__FILE__, __LINE__,
-		    "oops! fi=0x%p, fi->level=%d, level=%d",
-		    fi, fi ? fi->level : -1, level);
+		    "Conflicting frame levels fi->level=%d, level=%d",
+		    (fi ? fi->level : -1),
+		    level);
   if (selected_frame_level_changed_hook)
     selected_frame_level_changed_hook (level);
 
