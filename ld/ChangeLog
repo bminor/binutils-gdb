@@ -1,3 +1,16 @@
+start-sanitize-tic80
+Fri May  2 15:54:28 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* scripttempl/tic80coff.sc (.text): Add a leading underscore to
+	__{D,C}TOR_{LIST,END}__ definations.  Rearrange the order of items
+	in the .text section.
+
+end-sanitize-tic80
+Wed Apr 30 12:23:21 1997  Manfred Hollstein  <manfred@s-direktnet.de>
+
+	* scripttempl/m88kbcs.sc (__.initp.end, _etext): Added whitespace
+	around assignment of current location pointer.
+
 Thu Apr 17 13:07:18 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldctor.c (ldctor_build_sets): Make sure the set is aligned
