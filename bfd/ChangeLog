@@ -1,3 +1,11 @@
+2004-12-22  Klaus Rudolph  <lts-rudolph@gmx.de>
+
+	* reloc.c: Add new relocs R_AVR_LDI, R_AVR_6, R_AVR_6_ADIW.
+	* bfd-in2.h: Regenerate.
+	* elf32-avr.c (elf_avr_nowto_table): Add the new relocs.
+	(avr_reloc_map): Likewise.
+	(avr_final_link_relocate): Likewise.
+
 2004-12-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (_bfd_elf_merge_symbol): Treat old definitions from

@@ -1686,10 +1686,10 @@ enum bfd_architecture
 #define bfd_mach_sh_dsp     0x2d
 #define bfd_mach_sh2a       0x2a
 #define bfd_mach_sh2a_nofpu 0x2b
-#define bfd_mach_sh2a_fake1 0x2a1
-#define bfd_mach_sh2a_fake2 0x2a2
-#define bfd_mach_sh2a_fake3 0x2a3
-#define bfd_mach_sh2a_fake4 0x2a4
+#define bfd_mach_sh2a_nofpu_or_sh4_nommu_nofpu 0x2a1
+#define bfd_mach_sh2a_nofpu_or_sh3_nommu 0x2a2
+#define bfd_mach_sh2a_or_sh4 0x2a3
+#define bfd_mach_sh2a_or_sh3e 0x2a4
 #define bfd_mach_sh2e       0x2e
 #define bfd_mach_sh3        0x30
 #define bfd_mach_sh3_nommu  0x31
@@ -3162,6 +3162,18 @@ value of SUBI insn.  */
 /* This is a 32 bit reloc for the AVR that stores 23 bit value
 into 22 bits.  */
   BFD_RELOC_AVR_CALL,
+
+/* This is a 16 bit reloc for the AVR that stores all needed bits
+for absolute addressing with ldi with overflow check to linktime  */
+  BFD_RELOC_AVR_LDI,
+
+/* This is a 6 bit reloc for the AVR that stores offset for ldd/std
+instructions  */
+  BFD_RELOC_AVR_6,
+
+/* This is a 6 bit reloc for the AVR that stores offset for adiw/sbiw
+instructions  */
+  BFD_RELOC_AVR_6_ADIW,
 
 /* Direct 12 bit.  */
   BFD_RELOC_390_12,

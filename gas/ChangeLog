@@ -1,3 +1,13 @@
+2004-12-22  Klaus Rudolph  <lts-rudolph@gmx.de>
+    
+	* config/tc-avr.c: Add support for the new R_AVR_LDI, R_AVR_6 and
+	R_AVR_6_ADIW relocs for the LDI, ADIW/SBIW and LDD/STD
+	instructions.
+	(avr_offset_expression): New function to parse offsets for LDI
+	instructions.
+	(avr_operand): Use it.
+	(md_apply_fix3): Generate the relocs.
+
 2004-12-16  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* config/tc-sh64.c (shmedia_md_apply_fix3): Add missing

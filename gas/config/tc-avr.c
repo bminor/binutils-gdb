@@ -1,6 +1,6 @@
 /* tc-avr.c -- Assembler code for the ATMEL AVR
 
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
    This file is part of GAS, the GNU Assembler.
@@ -557,6 +557,31 @@ avr_operands (opcode, line)
   return bin;
 }
 
+/* Parse for ldd/std offset */
+
+static void
+avr_offset_expression (expressionS *exp)
+{
+  char *str = input_line_pointer;
+  char *tmp;
+  char op[8];
+
+  tmp = str;
+  str = extract_word (str, op, sizeof (op));
+
+  input_line_pointer = tmp;
+  expression (exp);
+
+  /* Warn about expressions that fail to use lo8 ().  */
+  if (exp->X_op == O_constant)
+    {
+      int x = exp->X_add_number;
+      
+      if (x < -255 || x > 255)
+	as_warn (_("constant out of 8-bit range: %d"), x);
+    }
+}
+
 /* Parse one instruction operand.
    Return operand bitmask.  Also fixups can be generated.  */
 
@@ -695,10 +720,11 @@ avr_operand (opcode, where, op, line)
 	str = skip_space (str);
 	if (*str++ == '+')
 	  {
-	    unsigned int x;
-	    x = avr_get_constant (str, 63);
+	    input_line_pointer = str;
+	    avr_offset_expression (& op_expr);
 	    str = input_line_pointer;
-	    op_mask |= (x & 7) | ((x & (3 << 3)) << 7) | ((x & (1 << 5)) << 8);
+	    fix_new_exp (frag_now, where, 3,
+			 &op_expr, FALSE, BFD_RELOC_AVR_6);
 	  }
       }
       break;
@@ -750,13 +776,11 @@ avr_operand (opcode, where, op, line)
       break;
 
     case 'K':
-      {
-	unsigned int x;
-
-	x = avr_get_constant (str, 63);
-	str = input_line_pointer;
-	op_mask |= (x & 0xf) | ((x & 0x30) << 2);
-      }
+      input_line_pointer = str;
+      avr_offset_expression (& op_expr);
+      str = input_line_pointer;
+      fix_new_exp (frag_now, where, 3,
+		   & op_expr, FALSE, BFD_RELOC_AVR_6_ADIW);
       break;
 
     case 'S':
@@ -934,6 +958,27 @@ md_apply_fix3 (fixP, valP, seg)
 
 	case BFD_RELOC_AVR_16_PM:
 	  bfd_putl16 ((bfd_vma) (value >> 1), where);
+	  break;
+
+	case BFD_RELOC_AVR_LDI:
+	  if (value > 255)
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("operand out of range: %ld"), value);
+	  bfd_putl16 ((bfd_vma) insn | LDI_IMMEDIATE (value), where);
+	  break;
+
+	case BFD_RELOC_AVR_6:
+	  if ((value > 63) || (value < 0))
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("operand out of range: %ld"), value);
+	  bfd_putl16 ((bfd_vma) insn | ((value & 7) | ((value & (3 << 3)) << 7) | ((value & (1 << 5)) << 8)), where);
+	  break;
+
+	case BFD_RELOC_AVR_6_ADIW:
+	  if ((value > 63) || (value < 0))
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("operand out of range: %ld"), value);
+	  bfd_putl16 ((bfd_vma) insn | (value & 0xf) | ((value & 0x30) << 2), where);
 	  break;
 
 	case BFD_RELOC_AVR_LO8_LDI:
@@ -1227,10 +1272,8 @@ avr_ldi_expression (exp)
       if (x < -255 || x > 255)
 	as_warn (_("constant out of 8-bit range: %d"), x);
     }
-  else
-    as_warn (_("expression possibly out of 8-bit range"));
 
-  return BFD_RELOC_AVR_LO8_LDI;
+  return BFD_RELOC_AVR_LDI;
 }
 
 /* Flag to pass `pm' mode between `avr_parse_cons_expression' and
