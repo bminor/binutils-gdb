@@ -1,3 +1,18 @@
+Mon Sep 30 13:56:11 1996  Fred Fish  <fnf@cygnus.com>
+
+	* libiberty.h: Remove #ifndef PRIVATE_XMALLOC.
+
+start-sanitize-v850
+Sat Aug 31 13:27:06 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* dis-asm.h (print_insn_v850): Declare.
+
+end-sanitize-v850
+Tue Aug 13 16:10:30 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* obstack.h:  Change bcopy to memcpy.  Works better on Posix
+	systems, which generally lack bcopy.
+
 Mon Aug 12 17:03:18 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* ansidecl.h:  Change WIN32 to _WIN32.

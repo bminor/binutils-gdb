@@ -21,9 +21,12 @@ extern char **buildargv PARAMS ((char *));
 
 extern void freeargv PARAMS ((char **));
 
-/* Return the last component of a path name.  */
+/* Return the last component of a path name.  Note that we can't use a
+   prototype here because the parameter is declared inconsistently
+   across different systems, sometimes as "char *" and sometimes as
+   "const char *" */
 
-extern char *basename PARAMS ((const char *));
+extern char *basename ();
 
 /* Concatenate an arbitrary number of strings, up to (char *) NULL.
    Allocates memory using xmalloc.  */
@@ -37,6 +40,10 @@ extern int fdmatch PARAMS ((int fd1, int fd2));
 /* Get the amount of time the process has run, in microseconds.  */
 
 extern long get_run_time PARAMS ((void));
+
+/* Choose a temporary directory to use for scratch files.  */
+
+extern char *choose_temp_base PARAMS ((void));
 
 /* Allocate memory filled with spaces.  Allocates using malloc.  */
 
@@ -55,6 +62,10 @@ extern const char *strerrno PARAMS ((int));
 /* Given the name of an errno value, return the value.  */
 
 extern int strtoerrno PARAMS ((const char *));
+
+/* ANSI's strerror(), but more robust.  */
+
+extern char *xstrerror PARAMS ((int));
 
 /* Return the maximum signal number for which strsignal will return a
    string.  */
@@ -110,6 +121,10 @@ extern PTR xmalloc ();
    xmalloc.  */
 
 extern PTR xrealloc ();
+
+/* Copy a string into a memory buffer without fail.  */
+
+extern char *xstrdup PARAMS ((const char *));
 
 /* hex character manipulation routines */
 
