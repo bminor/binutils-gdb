@@ -2228,8 +2228,10 @@ process_suffix ()
 	 size prefix, except for instructions that will ignore this
 	 prefix anyway.  */
       if (i.suffix != QWORD_MNEM_SUFFIX
-	  && (i.suffix == LONG_MNEM_SUFFIX) == (flag_code == CODE_16BIT)
-	  && !(i.tm.opcode_modifier & IgnoreSize))
+	  && !(i.tm.opcode_modifier & IgnoreSize)
+	  && ((i.suffix == LONG_MNEM_SUFFIX) == (flag_code == CODE_16BIT)
+	      || (flag_code == CODE_64BIT
+		  && (i.tm.opcode_modifier & JumpByte))))
 	{
 	  unsigned int prefix = DATA_PREFIX_OPCODE;
 	  if (i.tm.opcode_modifier & JumpByte) /* jcxz, loop */
@@ -2239,25 +2241,11 @@ process_suffix ()
 	    return 0;
 	}
 
-      if (i.suffix != QWORD_MNEM_SUFFIX && (flag_code == CODE_64BIT)
-	  && !(i.tm.opcode_modifier & IgnoreSize)
-	  && (i.tm.opcode_modifier & JumpByte))
-	{
-	  if (!add_prefix (ADDR_PREFIX_OPCODE))
-	    return 0;
-	}
-
       /* Set mode64 for an operand.  */
       if (i.suffix == QWORD_MNEM_SUFFIX
+	  && flag_code == CODE_64BIT
 	  && (i.tm.opcode_modifier & NoRex64) == 0)
-	{
-	  i.rex |= REX_MODE64;
-	  if (flag_code < CODE_64BIT)
-	    {
-	      as_bad (_("64bit operations available only in 64bit modes."));
-	      return 0;
-	    }
-	}
+	i.rex |= REX_MODE64;
 
       /* Size floating point instruction.  */
       if (i.suffix == LONG_MNEM_SUFFIX)
