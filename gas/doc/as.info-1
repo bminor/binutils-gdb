@@ -1,4 +1,4 @@
-This is as.info, produced by makeinfo version 4.2 from as.texinfo.
+This is as.info, produced by makeinfo version 4.3 from as.texinfo.
 
 START-INFO-DIR-ENTRY
 * As: (as).                     The GNU assembler.
@@ -23,7 +23,7 @@ File: as.info,  Node: Top,  Next: Overview,  Up: (dir)
 Using as
 ********
 
-   This file is a user guide to the GNU assembler `as' version 2.13.
+   This file is a user guide to the GNU assembler `as' version 2.13.2.
 
    This document is distributed under the terms of the GNU Free
 Documentation License.  A copy of the license is included in the
@@ -863,8 +863,8 @@ by commas.  For example:
      gcc -c -g -O -Wa,-alh,-L file.c
 
 This passes two options to the assembler: `-alh' (emit a listing to
-standard output with with high-level and assembly source) and `-L'
-(retain local symbols in the symbol table).
+standard output with high-level and assembly source) and `-L' (retain
+local symbols in the symbol table).
 
    Usually you do not need to use this `-Wa' mechanism, since many
 compiler command-line options are automatically passed to the assembler

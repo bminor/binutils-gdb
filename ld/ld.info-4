@@ -1,10 +1,10 @@
-This is ld.info, produced by makeinfo version 4.2 from ./ld.texinfo.
+This is ld.info, produced by makeinfo version 4.3 from ./ld.texinfo.
 
 START-INFO-DIR-ENTRY
 * Ld: (ld).                       The GNU linker.
 END-INFO-DIR-ENTRY
 
-   This file documents the GNU linker LD version 2.13.
+   This file documents the GNU linker LD version 2.13.2.
 
    Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001, 2002
 Free Software Foundation, Inc.
@@ -412,7 +412,7 @@ depends upon `VERS_1.2'.  The scripts binds the symbols `bar1' and
    When the linker finds a symbol defined in a library which is not
 specifically bound to a version node, it will effectively bind it to an
 unspecified base version of the library.  You can bind all otherwise
-unspecified symbols to a given version node by using `global: *'
+unspecified symbols to a given version node by using `global: *;'
 somewhere in the version script.
 
    The names of the version nodes have no specific meaning other than
@@ -425,7 +425,7 @@ version script.  Such version script doesn't assign any versions to
 symbols, only selects which symbols will be globally visible out and
 which won't.
 
-     { global: foo; bar; local: *; }
+     { global: foo; bar; local: *; };
 
    When you link an application against a shared library that has
 versioned symbols, the application itself knows which version of each

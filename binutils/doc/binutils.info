@@ -1,4 +1,4 @@
-This is binutils.info, produced by makeinfo version 4.2 from
+This is binutils.info, produced by makeinfo version 4.3 from
 binutils.texi.
 
 START-INFO-DIR-ENTRY
@@ -33,37 +33,37 @@ Free Documentation License".
 
 Indirect:
 binutils.info-1: 1669
-binutils.info-2: 44263
-binutils.info-3: 92355
+binutils.info-2: 44265
+binutils.info-3: 92357
 
 Tag Table:
 (Indirect)
 Node: Top1669
-Node: ar3166
-Node: ar cmdline5340
-Node: ar scripts13472
-Node: nm19151
-Node: objcopy26675
-Node: objdump44263
-Node: ranlib55864
-Node: size56615
-Node: strings59478
-Node: strip61777
-Node: c++filt64767
-Ref: c++filt-Footnote-167709
-Node: addr2line67815
-Node: nlmconv70409
-Node: windres73012
-Node: dlltool78064
-Node: readelf87512
-Node: Selecting The Target System91338
-Node: Target Selection92355
-Node: Architecture Selection95056
-Node: Linker Emulation Selection96301
-Node: Reporting Bugs97179
-Node: Bug Criteria97955
-Node: Bug Reporting98501
-Node: GNU Free Documentation License105528
-Node: Index123956
+Node: ar3168
+Node: ar cmdline5342
+Node: ar scripts13474
+Node: nm19153
+Node: objcopy26677
+Node: objdump44265
+Node: ranlib55866
+Node: size56617
+Node: strings59480
+Node: strip61779
+Node: c++filt64769
+Ref: c++filt-Footnote-167711
+Node: addr2line67817
+Node: nlmconv70411
+Node: windres73014
+Node: dlltool78066
+Node: readelf87514
+Node: Selecting The Target System91340
+Node: Target Selection92357
+Node: Architecture Selection95058
+Node: Linker Emulation Selection96303
+Node: Reporting Bugs97181
+Node: Bug Criteria97957
+Node: Bug Reporting98503
+Node: GNU Free Documentation License105530
+Node: Index123958
 
 End Tag Table

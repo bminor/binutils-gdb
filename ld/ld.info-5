@@ -1,10 +1,10 @@
-This is ld.info, produced by makeinfo version 4.2 from ./ld.texinfo.
+This is ld.info, produced by makeinfo version 4.3 from ./ld.texinfo.
 
 START-INFO-DIR-ENTRY
 * Ld: (ld).                       The GNU linker.
 END-INFO-DIR-ENTRY
 
-   This file documents the GNU linker LD version 2.13.
+   This file documents the GNU linker LD version 2.13.2.
 
    Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000, 2001, 2002
 Free Software Foundation, Inc.

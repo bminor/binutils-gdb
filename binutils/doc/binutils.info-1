@@ -1,4 +1,4 @@
-This is binutils.info, produced by makeinfo version 4.2 from
+This is binutils.info, produced by makeinfo version 4.3 from
 binutils.texi.
 
 START-INFO-DIR-ENTRY
@@ -37,7 +37,7 @@ Introduction
 ************
 
    This brief manual contains preliminary documentation for the GNU
-binary utilities (collectively version 2.13):
+binary utilities (collectively version 2.13.2):
 
    This document is distributed under the terms of the GNU Free
 Documentation License.  A copy of the license is included in the
