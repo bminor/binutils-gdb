@@ -1,5 +1,25 @@
 2001-02-13  Alan Modra  <alan@linuxcare.com.au>
 
+	* doc/c-i386.texi (i386-Arch): Add "jumps"/"nojumps" blurb.
+	Mention effect of < 386 architectures on jump promotion.
+	(i386-Jumps): xref above.  Don't assume long disp is 32 bits.
+
+	* config/tc-i386.c (no_cond_jump_promotion): New.
+	(set_cpu_arch): Parse "jumps" arch modifier.
+	(insn_size): Modify usage comment.
+	(ENCODE_RELAX_STATE): Reformat and protect macro arg.
+	(SIZE_FROM_RELAX_STATE): Rename to DISP_SIZE_FROM_RELAX_STATE.
+	(TYPE_FROM_RELAX_STATE): New define.
+	(UNCOND_JUMP, COND_JUMP): Renumber.
+	(md_relax_table): Reorder to suit.
+	(COND_JUMP86): New define.
+	(md_relax_table): Handle COND_JUMP86 cases. Add a few comments.
+	(md_assemble): Create frag var for jumps of max size, encode relax
+	state for COND_JUMP86.
+	(md_estimate_size_before_relax): Handle COND_JUMP86 cases, and
+	leave conditional jumps small if no_cond_jump_promotion.
+	(md_convert_frag): Likewise.
+
 	* expr.c (operator): Don't bump input_line_pointer for two char
 	operators.  Instead return operator size via new param num_chars.
 	(expr): Use above to parse multi-char operators correctly.

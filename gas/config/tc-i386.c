@@ -273,15 +273,20 @@ static const char *cpu_arch_name = NULL;
 /* CPU feature flags.  */
 static unsigned int cpu_arch_flags = CpuUnknownFlags|CpuNo64;
 
+/* If set, conditional jumps are not automatically promoted to handle
+   larger than a byte offset.  */
+static unsigned int no_cond_jump_promotion = 0;
+
 /* Interface to relax_segment.
-   There are 2 relax states for 386 jump insns: one for conditional &
-   one for unconditional jumps.  This is because these two types of
-   jumps add different sizes to frags when we're figuring out what
-   sort of jump to choose to reach a given label.  */
+   There are 3 major relax states for 386 jump insns because the
+   different types of jumps add different sizes to frags when we're
+   figuring out what sort of jump to choose to reach a given label.  */
 
 /* Types.  */
-#define COND_JUMP 1
-#define UNCOND_JUMP 2
+#define UNCOND_JUMP 1
+#define COND_JUMP 2
+#define COND_JUMP86 3
+
 /* Sizes.  */
 #define CODE16	1
 #define SMALL	0
@@ -297,10 +302,12 @@ static unsigned int cpu_arch_flags = CpuUnknownFlags|CpuNo64;
 #endif
 #endif
 
-#define ENCODE_RELAX_STATE(type,size) \
-  ((relax_substateT) ((type<<2) | (size)))
-#define SIZE_FROM_RELAX_STATE(s) \
-    ( (((s) & 0x3) == BIG ? 4 : (((s) & 0x3) == BIG16 ? 2 : 1)) )
+#define ENCODE_RELAX_STATE(type, size) \
+  ((relax_substateT) (((type) << 2) | (size)))
+#define TYPE_FROM_RELAX_STATE(s) \
+  ((s) >> 2)
+#define DISP_SIZE_FROM_RELAX_STATE(s) \
+    ((((s) & 3) == BIG ? 4 : (((s) & 3) == BIG16 ? 2 : 1)))
 
 /* This table is used by relax_frag to promote short jumps to long
    ones where necessary.  SMALL (short) jumps may be promoted to BIG
@@ -322,6 +329,17 @@ const relax_typeS md_relax_table[] =
   {1, 1, 0, 0},
   {1, 1, 0, 0},
 
+  /* UNCOND_JUMP states.  */
+  {127 + 1, -128 + 1, 0, ENCODE_RELAX_STATE (UNCOND_JUMP, BIG)},
+  {127 + 1, -128 + 1, 0, ENCODE_RELAX_STATE (UNCOND_JUMP, BIG16)},
+  /* dword jmp adds 3 bytes to frag:
+     0 extra opcode bytes, 3 extra displacement bytes.  */
+  {0, 0, 3, 0},
+  /* word jmp adds 1 byte to frag:
+     0 extra opcode bytes, 1 extra displacement byte.  */
+  {0, 0, 1, 0},
+
+  /* COND_JUMP states.  */
   {127 + 1, -128 + 1, 0, ENCODE_RELAX_STATE (COND_JUMP, BIG)},
   {127 + 1, -128 + 1, 0, ENCODE_RELAX_STATE (COND_JUMP, BIG16)},
   /* dword conditionals adds 4 bytes to frag:
@@ -331,15 +349,15 @@ const relax_typeS md_relax_table[] =
      1 extra opcode byte, 1 extra displacement byte.  */
   {0, 0, 2, 0},
 
-  {127 + 1, -128 + 1, 0, ENCODE_RELAX_STATE (UNCOND_JUMP, BIG)},
-  {127 + 1, -128 + 1, 0, ENCODE_RELAX_STATE (UNCOND_JUMP, BIG16)},
-  /* dword jmp adds 3 bytes to frag:
-     0 extra opcode bytes, 3 extra displacement bytes.  */
-  {0, 0, 3, 0},
-  /* word jmp adds 1 byte to frag:
-     0 extra opcode bytes, 1 extra displacement byte.  */
-  {0, 0, 1, 0}
-
+  /* COND_JUMP86 states.  */
+  {127 + 1, -128 + 1, 0, ENCODE_RELAX_STATE (COND_JUMP86, BIG)},
+  {127 + 1, -128 + 1, 0, ENCODE_RELAX_STATE (COND_JUMP86, BIG16)},
+  /* dword conditionals adds 4 bytes to frag:
+     1 extra opcode byte, 3 extra displacement bytes.  */
+  {0, 0, 4, 0},
+  /* word conditionals add 3 bytes to frag:
+     1 extra opcode byte, 2 extra displacement bytes.  */
+  {0, 0, 3, 0}
 };
 
 static const arch_entry cpu_arch[] = {
@@ -726,7 +744,8 @@ set_cpu_arch (dummy)
 	  if (strcmp (string, cpu_arch[i].name) == 0)
 	    {
 	      cpu_arch_name = cpu_arch[i].name;
-	      cpu_arch_flags = cpu_arch[i].flags | (flag_code == CODE_64BIT ? Cpu64 : CpuNo64);
+	      cpu_arch_flags = (cpu_arch[i].flags
+				| (flag_code == CODE_64BIT ? Cpu64 : CpuNo64));
 	      break;
 	    }
 	}
@@ -737,6 +756,23 @@ set_cpu_arch (dummy)
     }
   else
     as_bad (_("missing cpu architecture"));
+
+  no_cond_jump_promotion = 0;
+  if (*input_line_pointer == ','
+      && ! is_end_of_line[(unsigned char) input_line_pointer[1]])
+    {
+      char *string = ++input_line_pointer;
+      int e = get_symbol_end ();
+
+      if (strcmp (string, "nojumps") == 0)
+	no_cond_jump_promotion = 1;
+      else if (strcmp (string, "jumps") == 0)
+	;
+      else
+	as_bad (_("no such architecture modifier: `%s'"), string);
+
+      *input_line_pointer = e;
+    }
 
   demand_empty_rest_of_line ();
 }
@@ -1197,7 +1233,8 @@ md_assemble (line)
   /* Points to template once we've found it.  */
   const template *t;
 
-  /* Count the size of the instruction generated.  */
+  /* Count the size of the instruction generated.  Does not include
+     variable part of jump insns before relax.  */
   int insn_size = 0;
 
   int j;
@@ -2671,7 +2708,6 @@ md_assemble (line)
     /* Output jumps.  */
     if (i.tm.opcode_modifier & Jump)
       {
-	int size;
 	int code16;
 	int prefix;
 
@@ -2692,10 +2728,6 @@ md_assemble (line)
 	    i.prefixes--;
 	  }
 
-	size = 4;
-	if (code16)
-	  size = 2;
-
 	if (i.prefixes != 0 && !intel_syntax)
 	  as_warn (_("skipping prefixes on this instruction"));
 
@@ -2704,7 +2736,7 @@ md_assemble (line)
 	   instruction we may generate in md_convert_frag.  This is 2
 	   bytes for the opcode and room for the prefix and largest
 	   displacement.  */
-	frag_grow (prefix + 2 + size);
+	frag_grow (prefix + 2 + 4);
 	insn_size += prefix + 1;
 	/* Prefix and 1 opcode byte go in fr_fix.  */
 	p = frag_more (prefix + 1);
@@ -2716,11 +2748,13 @@ md_assemble (line)
 	/* 1 possible extra opcode + displacement go in var part.
 	   Pass reloc in fr_var.  */
 	frag_var (rs_machine_dependent,
-		  1 + size,
+		  1 + 4,
 		  i.disp_reloc[0],
 		  ((unsigned char) *p == JUMP_PC_RELATIVE
 		   ? ENCODE_RELAX_STATE (UNCOND_JUMP, SMALL) | code16
-		   : ENCODE_RELAX_STATE (COND_JUMP, SMALL) | code16),
+		   : ((cpu_arch_flags & Cpu386) != 0
+		      ? ENCODE_RELAX_STATE (COND_JUMP, SMALL) | code16
+		      : ENCODE_RELAX_STATE (COND_JUMP86, SMALL) | code16)),
 		  i.op[0].disps->X_add_symbol,
 		  i.op[0].disps->X_add_number,
 		  p);
@@ -3909,10 +3943,10 @@ md_estimate_size_before_relax (fragP, segment)
       old_fr_fix = fragP->fr_fix;
       opcode = (unsigned char *) fragP->fr_opcode;
 
-      switch (opcode[0])
+      switch (TYPE_FROM_RELAX_STATE (fragP->fr_subtype))
 	{
-	case JUMP_PC_RELATIVE:
-	  /* Make jmp (0xeb) a dword displacement jump.  */
+	case UNCOND_JUMP:
+	  /* Make jmp (0xeb) a (d)word displacement jump.  */
 	  opcode[0] = 0xe9;
 	  fragP->fr_fix += size;
 	  fix_new (fragP, old_fr_fix, size,
@@ -3921,9 +3955,33 @@ md_estimate_size_before_relax (fragP, segment)
 		   reloc_type);
 	  break;
 
-	default:
+	case COND_JUMP86:
+	  if (no_cond_jump_promotion)
+	    return 1;
+	  if (size == 2)
+	    {
+	      /* Negate the condition, and branch past an
+		 unconditional jump.  */
+	      opcode[0] ^= 1;
+	      opcode[1] = 3;
+	      /* Insert an unconditional jump.  */
+	      opcode[2] = 0xe9;
+	      /* We added two extra opcode bytes, and have a two byte
+		 offset.  */
+	      fragP->fr_fix += 2 + 2;
+	      fix_new (fragP, old_fr_fix + 2, 2,
+		       fragP->fr_symbol,
+		       fragP->fr_offset, 1,
+		       reloc_type);
+	      break;
+	    }
+	  /* Fall through.  */
+
+	case COND_JUMP:
+	  if (no_cond_jump_promotion)
+	    return 1;
 	  /* This changes the byte-displacement jump 0x7N
-	     to the dword-displacement jump 0x0f,0x8N.  */
+	     to the (d)word-displacement jump 0x0f,0x8N.  */
 	  opcode[1] = opcode[0] + 0x10;
 	  opcode[0] = TWO_BYTE_OPCODE_ESCAPE;
 	  /* We've added an opcode byte.  */
@@ -3932,6 +3990,10 @@ md_estimate_size_before_relax (fragP, segment)
 		   fragP->fr_symbol,
 		   fragP->fr_offset, 1,
 		   reloc_type);
+	  break;
+
+	default:
+	  BAD_CASE (fragP->fr_subtype);
 	  break;
 	}
       frag_wane (fragP);
@@ -3986,51 +4048,65 @@ md_convert_frag (abfd, sec, fragP)
   /* Displacement from opcode start to fill into instruction.  */
   displacement_from_opcode_start = target_address - opcode_address;
 
-  switch (fragP->fr_subtype)
+  if ((fragP->fr_subtype & BIG) == 0)
     {
-    case ENCODE_RELAX_STATE (COND_JUMP, SMALL):
-    case ENCODE_RELAX_STATE (COND_JUMP, SMALL16):
-    case ENCODE_RELAX_STATE (UNCOND_JUMP, SMALL):
-    case ENCODE_RELAX_STATE (UNCOND_JUMP, SMALL16):
       /* Don't have to change opcode.  */
       extension = 1;		/* 1 opcode + 1 displacement  */
       where_to_put_displacement = &opcode[1];
-      break;
-
-    case ENCODE_RELAX_STATE (COND_JUMP, BIG):
-      extension = 5;		/* 2 opcode + 4 displacement  */
-      opcode[1] = opcode[0] + 0x10;
-      opcode[0] = TWO_BYTE_OPCODE_ESCAPE;
-      where_to_put_displacement = &opcode[2];
-      break;
-
-    case ENCODE_RELAX_STATE (UNCOND_JUMP, BIG):
-      extension = 4;		/* 1 opcode + 4 displacement  */
-      opcode[0] = 0xe9;
-      where_to_put_displacement = &opcode[1];
-      break;
-
-    case ENCODE_RELAX_STATE (COND_JUMP, BIG16):
-      extension = 3;		/* 2 opcode + 2 displacement  */
-      opcode[1] = opcode[0] + 0x10;
-      opcode[0] = TWO_BYTE_OPCODE_ESCAPE;
-      where_to_put_displacement = &opcode[2];
-      break;
-
-    case ENCODE_RELAX_STATE (UNCOND_JUMP, BIG16):
-      extension = 2;		/* 1 opcode + 2 displacement  */
-      opcode[0] = 0xe9;
-      where_to_put_displacement = &opcode[1];
-      break;
-
-    default:
-      BAD_CASE (fragP->fr_subtype);
-      break;
     }
+  else
+    {
+      if (no_cond_jump_promotion
+	  && TYPE_FROM_RELAX_STATE (fragP->fr_subtype) != UNCOND_JUMP)
+	as_warn_where (fragP->fr_file, fragP->fr_line, _("long jump required"));
+
+      switch (fragP->fr_subtype)
+	{
+	case ENCODE_RELAX_STATE (UNCOND_JUMP, BIG):
+	  extension = 4;		/* 1 opcode + 4 displacement  */
+	  opcode[0] = 0xe9;
+	  where_to_put_displacement = &opcode[1];
+	  break;
+
+	case ENCODE_RELAX_STATE (UNCOND_JUMP, BIG16):
+	  extension = 2;		/* 1 opcode + 2 displacement  */
+	  opcode[0] = 0xe9;
+	  where_to_put_displacement = &opcode[1];
+	  break;
+
+	case ENCODE_RELAX_STATE (COND_JUMP, BIG):
+	case ENCODE_RELAX_STATE (COND_JUMP86, BIG):
+	  extension = 5;		/* 2 opcode + 4 displacement  */
+	  opcode[1] = opcode[0] + 0x10;
+	  opcode[0] = TWO_BYTE_OPCODE_ESCAPE;
+	  where_to_put_displacement = &opcode[2];
+	  break;
+
+	case ENCODE_RELAX_STATE (COND_JUMP, BIG16):
+	  extension = 3;		/* 2 opcode + 2 displacement  */
+	  opcode[1] = opcode[0] + 0x10;
+	  opcode[0] = TWO_BYTE_OPCODE_ESCAPE;
+	  where_to_put_displacement = &opcode[2];
+	  break;
+
+	case ENCODE_RELAX_STATE (COND_JUMP86, BIG16):
+	  extension = 4;
+	  opcode[0] ^= 1;
+	  opcode[1] = 3;
+	  opcode[2] = 0xe9;
+	  where_to_put_displacement = &opcode[3];
+	  break;
+
+	default:
+	  BAD_CASE (fragP->fr_subtype);
+	  break;
+	}
+    }
+
   /* Now put displacement after opcode.  */
   md_number_to_chars ((char *) where_to_put_displacement,
 		      (valueT) (displacement_from_opcode_start - extension),
-		      SIZE_FROM_RELAX_STATE (fragP->fr_subtype));
+		      DISP_SIZE_FROM_RELAX_STATE (fragP->fr_subtype));
   fragP->fr_fix += extension;
 }
 
