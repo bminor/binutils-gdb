@@ -31,22 +31,30 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "ldexp.h"
 #include "ldlang.h"
 #include "ldfile.h"
-#include "ldsym.h"
 #include "ldmain.h"
 #include "ldlex.h"
 
 #include <ctype.h>
 
 char *ldfile_input_filename;
-CONST char * ldfile_output_machine_name ="";
+const char *ldfile_output_machine_name = "";
 unsigned long ldfile_output_machine;
 enum bfd_architecture ldfile_output_architecture;
 
+/* start-sanitize-mpw */
+#ifndef MPW
+/* end-sanitize-mpw */
 #ifdef VMS
 char *slash = "";
 #else
 char *slash = "/";
 #endif
+/* start-sanitize-mpw */
+#else /* MPW */
+/* The MPW path char is a colon. */
+char *slash = ":";
+#endif /* MPW */
+/* end-sanitize-mpw */
 
 
 
@@ -70,7 +78,11 @@ typedef struct search_arch
 static search_arch_type *search_arch_head;
 static search_arch_type **search_arch_tail_ptr = &search_arch_head;
  
-
+static bfd *cached_bfd_openr PARAMS ((const char *attempt,
+				      lang_input_statement_type *entry));
+static bfd *open_a PARAMS ((char *arch, lang_input_statement_type *entry,
+			    char *lib, char *suffix));
+static FILE *try_open PARAMS ((char *name, char *exten));
 
 void
 ldfile_add_library_path(name)
@@ -85,10 +97,10 @@ char *name;
 }
 
 
-static bfd*
+static bfd *
 cached_bfd_openr(attempt,entry)
-char *attempt;
-lang_input_statement_type  *entry;
+     const char *attempt;
+     lang_input_statement_type  *entry;
 {
   entry->the_bfd = bfd_openr(attempt, entry->target);
   if (trace_file_tries == true ) {
@@ -100,10 +112,10 @@ lang_input_statement_type  *entry;
 
 static bfd *
 open_a(arch, entry, lib, suffix)
-char *arch;
-lang_input_statement_type *entry;
-char *lib;
-char *suffix;
+     char *arch;
+     lang_input_statement_type *entry;
+     char *lib;
+     char *suffix;
 {
   bfd*desc;
   search_dirs_type *search ;
@@ -187,8 +199,8 @@ lang_input_statement_type *entry;
 
 static FILE *
 try_open(name, exten)
-char *name;
-char *exten;
+     char *name;
+     char *exten;
 {
   FILE *result;
   char buff[1000];

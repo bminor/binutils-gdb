@@ -26,6 +26,12 @@ This was written by steve chamberlain
 
 #include <ansidecl.h>
 #include <stdio.h>
+/* start-sanitize-mpw */
+#ifdef MPW
+/* Prevent enum redefinition problems. */
+#define TRUE_FALSE_ALREADY_DEFINED
+#endif /* MPW */
+/* end-sanitize-mpw */
 #include "bfd.h"
 #include "sysdep.h"
 #include "ld.h"
@@ -121,6 +127,10 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <COMMAND>"-o"			{ return OPTION_o; }
 <COMMAND>"-g"			{ return OPTION_g; }
 <COMMAND>"-e"			{ return OPTION_e; }
+<COMMAND>"-e"{FILENAME}		{
+ 					yylval.name = buystring(yytext+2);
+					return OPTION_esymbol;
+				}
 <COMMAND>"-b"			{ return OPTION_b; }
 <COMMAND>"-dc"			{ return OPTION_dc; }
 <COMMAND>"-dp"			{ return OPTION_dp; }
@@ -137,6 +147,10 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <COMMAND>"-c"			{ return OPTION_c; }
 <COMMAND>"-R"			{ return OPTION_R; }
 <COMMAND>"-u"			{ return OPTION_u; }
+<COMMAND>"-u"{FILENAME}		{
+ 					yylval.name = buystring(yytext+2);
+  					return OPTION_usymbol;
+				}
 <COMMAND>"-s"	           	{ return OPTION_s; }
 <COMMAND>"-S"	           	{ return OPTION_S; }
 <COMMAND>"-Bstat"	 	{ return OPTION_Bstatic; }
@@ -187,9 +201,13 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 				 return OPTION_F;
 			       }
 
+<COMMAND>"-y"		       {
+					return OPTION_y;
+				}
+				
 <COMMAND>"-y"{FILENAME}         {
 					yylval.name = buystring(yytext+2);
-					return OPTION_y;
+					return OPTION_ysymbol;
 				}
 				
 <COMMAND>"-A"{FILENAME} 	{
