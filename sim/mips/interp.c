@@ -456,17 +456,18 @@ sim_open (kind, cb, abfd, argv)
 			   0xA8000000 + (i * size));
 	}
 
-      /* Dummy memory regions for unsimulated devices */
+      /* Dummy memory regions for unsimulated devices - sorted by address */
 
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFFE000, 0x01c); /* EBIF */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFF9000, 0x200); /* EBIF */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFFF500, 0x300); /* PIO */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFF8000, 0x804); /* DRAMC */
       sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB1000000, 0x400); /* ISA I/O */
       sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB2100000, 0x004); /* ISA ctl */
       sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB2500000, 0x004); /* LED/switch */
       sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB2700000, 0x004); /* RTC */
       sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB3C00000, 0x004); /* RTC */
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFF8000, 0x900); /* DRAMC */
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFF9000, 0x200); /* EBIF */
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFFE000, 0x01c); /* EBIF */
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFFF500, 0x300); /* PIO */
+
 
       /* --- simulated devices --- */
       sim_hw_parse (sd, "/tx3904irc@0xffffc000/reg 0xffffc000 0x20");
