@@ -2,6 +2,8 @@
 
 	Committed by Jim Blandy  <jimb@redhat.com>.
 
+	* gdb.objc/basicclass.exp: Adapt to fixed return type of printHi.
+
 	* gdb.base/dump.exp: Handle negative offsets in decimal, not hex.
 
 	* gdb.base/float.exp: Support s390*-*-* targets.
