@@ -1,5 +1,8 @@
 Sun Jan 16 14:20:16 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* i386-dis.c (print_insn_i386): Add FIXME comment regarding reading
+	farther than we should.
+
 	* i386-dis.c (dis386): Use Yb and Yv for scasb and scasS.
 
 Thu Jan  6 12:38:05 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
