@@ -85,6 +85,7 @@ ia64-*-linux*)		gdb_host=linux ;;
 
 m68*-*-linux*)		gdb_host=linux ;;
 m68*-*-netbsd*)		gdb_host=nbsdaout ;;
+m68*-*-openbsd*)	gdb_host=obsd ;;
 
 mips-sgi-irix5*)	gdb_host=irix5 ;;
 mips-sgi-irix6*)	gdb_host=irix6 ;;

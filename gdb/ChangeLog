@@ -1,3 +1,19 @@
+2004-05-01  Mark Kettenis  <kettenis@gnu.org>
+
+	Add OpenBSD/m68k support.
+	* NEWS (New native configurations): Mention OpenBSD/m68k.
+	* m68kbsd-tdep.c: New file.
+	* m68kbsd-nat.c: New file.
+	* Makefile.in (ALLDEPFILES): Add m68kbsd-nat.c and m68kbsd-tdep.c.
+	(m68kbsd-nat.o, m68kbsd-tdep.o): New dependencies.
+	* configure.host: Add m68k-*-openbsd.
+	* configure.tgt: Add m68k-*-openbsd.
+	* config/m68k/tm-obsd.h: New file.
+	* config/m68k/obsd.mt: New file.
+	* config/m68k/obsd.mh: New file.
+	* config/djgpp/fnchange.lst: Add entries for m68kbsd-nat.c and
+	m68kbsd-tdep.c.
+
 2004-04-30  Andrew Cagney  <cagney@redhat.com>
 
 	* mipsnbsd-tdep.c (mipsnbsd_pc_in_sigtramp): Delete function.

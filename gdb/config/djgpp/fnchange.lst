@@ -141,6 +141,8 @@
 @V@/gdb/m2-exp.tab.c @V@/gdb/m2-exp_tab.c
 @V@/gdb/m68klinux-nat.c @V@/gdb/m68kl-nat.c
 @V@/gdb/m68klinux-tdep.c @V@/gdb/m68kl-tdep.c
+@V@/gdb/m68kbsd-nat.c @V@/gdb/m68bsd-nat.c
+@V@/gdb/m68kbsd-tdep.c @V@/gdb/m68bsd-tdep.c
 @V@/gdb/m68knbsd-nat.c @V@/gdb/m6nbsd-nat.c
 @V@/gdb/m68knbsd-tdep.c @V@/gdb/m6nbsd-tdep.c
 @V@/gdb/mips-linux-nat.c @V@/gdb/mipslnxnat.c

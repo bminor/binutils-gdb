@@ -1,0 +1,4 @@
+# Host: OpenBSD/m68k
+NATDEPFILES= m68kbsd-nat.o fork-child.o infptrace.o inftarg.o \
+	solib.o solib-sunos.o
+NAT_FILE= nm-nbsdaout.h
