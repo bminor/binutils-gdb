@@ -7507,11 +7507,14 @@ it would from the terminal.
 @cindex init file
 @cindex @file{@value{GDBINIT}}
 When you start @value{GDBN}, it automatically executes commands from its
-@dfn{init files}.  These are files named @file{@value{GDBINIT}}.  @value{GDBN} reads
-the init file (if any) in your home directory and then the init file
-(if any) in the current working directory.  (The init files are not
-executed if you use the @samp{-nx} option; @pxref{Mode Options,
-,Choosing modes}.)
+@dfn{init files}.  These are files named @file{@value{GDBINIT}}.
+@value{GDBN} reads the init file (if any) in your home directory, then
+processes command line options and operands, and then reads the init
+file (if any) in the current working directory.  This is so the init
+file in your home directory can set options (such as @code{set
+complaints} which affect the processing of the command line options and
+operands.  The init files are not executed if you use the @samp{-nx}
+option; @pxref{Mode Options, ,Choosing modes}.
 
 @ifset GENERIC
 @cindex init file name
