@@ -244,13 +244,25 @@ bfd	*abfd;
 {
     register long	i;
     int			askfor;
-    int			nosyms;
+    long		nosyms;
     asymbol		**syms;
-    i = get_symtab_upper_bound (abfd);	/* This will probably give us more
-					 * than we need, but that's ok.
-					 */
+    i = bfd_get_symtab_upper_bound (abfd);/* This will probably give us more
+					   * than we need, but that's ok.
+					   */
+    if (i < 0)
+      {
+	fprintf (stderr, "%s: %s: %s\n", whoami, a_outname,
+		 bfd_errmsg (bfd_get_error ()));
+	exit (1);
+      }
     syms = (asymbol**)xmalloc (i);
     nosyms = bfd_canonicalize_symtab (abfd, syms);
+    if (nosyms < 0)
+      {
+	fprintf (stderr, "%s: %s: %s\n", whoami, a_outname,
+		 bfd_errmsg (bfd_get_error ()));
+	exit (1);
+      }
 
     nname = 0;
     for (i = 0; i < nosyms; i++) {
