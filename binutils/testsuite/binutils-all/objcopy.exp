@@ -371,7 +371,7 @@ proc strip_test { } {
     }
 
     set exec_output [binutils_run $NM "-a $NMFLAGS $objfile"]
-    if ![string match "" $exec_output] {
+    if ![string match "*: no symbols*" $exec_output] {
 	fail $test
 	return
     }
@@ -558,7 +558,7 @@ proc strip_executable { prog flags test } {
     }
 
     set exec_output [binutils_run $NM "$NMFLAGS ${copyfile}"]
-    if ![string match "" $exec_output] {
+    if ![string match "*: no symbols*" $exec_output] {
 	fail $test
 	return
     }
