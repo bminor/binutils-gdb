@@ -1,5 +1,11 @@
 2004-10-11  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 233
+	* elflink.c (elf_link_input_bfd): Try harder to support
+	relocations against symbols in removed linkonce sections.
+
+2004-10-11  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c (elf_link_input_bfd): Revert PR 354 change.
 
 	PR 354

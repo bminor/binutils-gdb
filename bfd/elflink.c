@@ -6733,49 +6733,41 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
 		     discarded section.  */
 		  if ((sec = *ps) != NULL && elf_discarded_section (sec))
 		    {
-		      if ((o->flags & SEC_DEBUGGING) != 0)
-			{
-			  BFD_ASSERT (r_symndx != 0);
+		      asection *kept;
 
-			  /* Try to preserve debug information.
-			     FIXME: This is quite broken.  Modifying
-			     the symbol here means we will be changing
-			     all uses of the symbol, not just those in
-			     debug sections.  The only thing that makes
-			     this half reasonable is that debug sections
-			     tend to come after other sections.  Of
-			     course, that doesn't help with globals.
-			     ??? All link-once sections of the same name
-			     ought to define the same set of symbols, so
-			     it would seem that globals ought to always
-			     be defined in the kept section.  */
-			  if (sec->kept_section != NULL)
-			    {
-			      asection *member;
-
-			      /* Check if it is a linkonce section or
-				 member of a comdat group.  */
-			      if (elf_sec_group (sec) == NULL
-				  && sec->size == sec->kept_section->size)
-				{
-				  *ps = sec->kept_section;
-				  continue;
-				}
-			      else if (elf_sec_group (sec) != NULL
-				       && (member = match_group_member (sec, sec->kept_section))
-				       && sec->size == member->size)
-				{
-				  *ps = member;
-				  continue;
-				}
-			    }
-			}
-		      else if (complain)
+		      BFD_ASSERT (r_symndx != 0);
+		      if (complain && (o->flags & SEC_DEBUGGING) == 0)
 			{
 			  (*_bfd_error_handler)
 			    (_("`%s' referenced in section `%A' of %B: "
 			       "defined in discarded section `%A' of %B\n"),
 			     o, input_bfd, sec, sec->owner, sym_name);
+			}
+
+		      /* Try to do the best we can to support buggy old
+			 versions of gcc.  If we've warned, or this is
+			 debugging info, pretend that the symbol is
+			 really defined in the kept linkonce section.
+			 FIXME: This is quite broken.  Modifying the
+			 symbol here means we will be changing all later
+			 uses of the symbol, not just in this section.
+			 The only thing that makes this half reasonable
+			 is that we warn in non-debug sections, and
+			 debug sections tend to come after other
+			 sections.  */
+		      kept = sec->kept_section;
+		      if (kept != NULL
+			  && (complain
+			      || (o->flags & SEC_DEBUGGING) != 0))
+			{
+			  if (elf_sec_group (sec) != NULL)
+			    kept = match_group_member (sec, kept);
+			  if (kept != NULL
+			      && sec->size == kept->size)
+			    {
+			      *ps = kept;
+			      continue;
+			    }
 			}
 
 		      /* Remove the symbol reference from the reloc, but
