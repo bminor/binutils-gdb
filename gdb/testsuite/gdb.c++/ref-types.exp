@@ -61,7 +61,9 @@ send_gdb "break marker1\n" ; gdb_expect -re ".*$gdb_prompt $"
         -re "Break.* marker1 \\(\\) at .*:$decimal.*$gdb_prompt $" {
             send_gdb "up\n"
             gdb_expect {
-                -re ".*main.*$gdb_prompt $" {}
+                -re ".*main.*$gdb_prompt $" {
+		    pass "up from marker1"
+		}
                 -re ".*$gdb_prompt $" {
 		    fail "up from marker1"
 		}
@@ -101,8 +103,13 @@ send_gdb "break marker1\n" ; gdb_expect -re ".*$gdb_prompt $"
         -re "Break.* marker1 \\(\\) at .*:$decimal.*$gdb_prompt $" {
             send_gdb "up\n"
             gdb_expect {
-                -re ".*$gdb_prompt $" {}
-                timeout { fail "up from marker1" }
+                -re ".*main.*$gdb_prompt $" {
+		    pass "up from marker1"
+		}
+                -re ".*$gdb_prompt $" {
+		    fail "up from marker1"
+		}
+                timeout { fail "up from marker1 (timeout)" }
             }
         }
         -re "$gdb_prompt $" { fail "continue to marker1"  }
@@ -290,8 +297,13 @@ send_gdb "break f\n" ; gdb_expect -re ".*$gdb_prompt $"
         -re "Break.* f \\(\\) at .*:$decimal.*$gdb_prompt $" {
             send_gdb "up\n"
             gdb_expect {
-                -re ".*$gdb_prompt $" {}
-                timeout { fail "up from f" }
+                -re ".*main2.*$gdb_prompt $" {
+		    pass "up from f" 
+		}
+                -re ".*$gdb_prompt $" {
+		    fail "up from f" 
+		}
+                timeout { fail "up from f (timeout)" }
             }
         }
         -re "$gdb_prompt $" { fail "continue to f"  }
