@@ -1,4 +1,8 @@
 divert(-1)				-*-Text-*-
+` Copyright (c) 1991 Free Software Foundation, Inc.'
+` This file defines and documents the M4 macros used '
+`      to preprocess some GNU manuals'
+` $Id$'
 
 I. INTRODUCTION
 
@@ -115,10 +119,13 @@ _ppf__(`decr')
 _ppf__(`define')
 _ppf__(`defn')
 _ppf__(`divert')
+_ppf__(`divnum')
 _ppf__(`dnl')
 _ppf__(`dumpdef')
 _ppf__(`errprint')
+_ppf__(`esyscmd')
 _ppf__(`eval')
+_ppf__(`format')
 _ppf__(`ifdef')
 _ppf__(`ifelse')
 _ppf__(`include')
@@ -128,6 +135,7 @@ _ppf__(`len')
 _ppf__(`m4exit')
 _ppf__(`m4wrap')
 _ppf__(`maketemp')
+_ppf__(`patsubst')
 _ppf__(`popdef')
 _ppf__(`pushdef')
 _ppf__(`regexp')
@@ -141,6 +149,7 @@ _ppf__(`traceon')
 _ppf__(`translit')
 _ppf__(`undefine')
 _ppf__(`undivert')
+_ppf__(`unix')
 
 B. QUOTE HANDLING.
 
@@ -199,15 +208,21 @@ all conditionals within it.  The counter _IF_FS__ is used to
 implement this; kindly avoid redefining it directly.
 
 _define__(<_IF_FS__>,<0>)
+
+NOTE: The definitions for our "pushf" and "popf" macros use eval
+rather than incr and decr, because GNU m4 (0.75) tries to call eval
+for us when we say "incr" or "decr"---but doesn't notice we've changed
+eval's name.
+
 _define__(
 	<_pushf__>,
 	<_define__(<_IF_FS__>,
-		_incr__(_IF_FS__))>)
+		_eval__((_IF_FS__)+1))>)
 _define__(
 	<_popf__>,
 	<_ifelse__(0,_IF_FS__,
 			<<>_dnl__<>>,
-			<_define__(<_IF_FS__>,_decr__(_IF_FS__))>)>)
+			<_define__(<_IF_FS__>,_eval__((_IF_FS__)-1))>)>)
 
 _define__(
 	<_if__>,
