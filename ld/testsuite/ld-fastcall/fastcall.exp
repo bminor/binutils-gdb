@@ -24,9 +24,7 @@ if {![istarget "i*86-*-*"]} {
 if {![istarget "i*86-*-*pe*"] \
     && ![istarget "i*86-*-cygwin*"] \
     && ![istarget "i*86-*-mingw32*"] } {
-    set target_xfail "yes"
-} else {
-    set target_xfail "no"
+    return
 }
 
 set ldflags ""
