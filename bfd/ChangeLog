@@ -1,3 +1,11 @@
+2001-11-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-hppa.c (hppa_handle_PIC_calls): Rename to mark_PIC_calls.
+	(allocate_PIC_calls): New function.
+	(allocate_dynrelocs): Don't allocate pic_call plt entries here.
+	(elf32_hppa_size_dynamic_sections): Call allocate_PIC_calls.
+	(elf32_hppa_finish_dynamic_symbol): Remove dead code.
+
 2001-11-02  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_grok_prstatus): New function.

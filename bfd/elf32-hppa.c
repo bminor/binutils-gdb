@@ -338,7 +338,10 @@ static void elf32_hppa_hide_symbol
 static boolean elf32_hppa_adjust_dynamic_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
 
-static boolean hppa_handle_PIC_calls
+static boolean mark_PIC_calls
+  PARAMS ((struct elf_link_hash_entry *, PTR));
+
+static boolean allocate_PIC_calls
   PARAMS ((struct elf_link_hash_entry *, PTR));
 
 static boolean allocate_dynrelocs
@@ -1967,7 +1970,7 @@ elf32_hppa_adjust_dynamic_symbol (info, h)
    the first part of elf32_hppa_adjust_dynamic_symbol.  */
 
 static boolean
-hppa_handle_PIC_calls (h, inf)
+mark_PIC_calls (h, inf)
      struct elf_link_hash_entry *h;
      PTR inf ATTRIBUTE_UNUSED;
 {
@@ -1984,6 +1987,42 @@ hppa_handle_PIC_calls (h, inf)
   h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
   ((struct elf32_hppa_link_hash_entry *) h)->maybe_pic_call = 1;
   ((struct elf32_hppa_link_hash_entry *) h)->pic_call = 1;
+
+  return true;
+}
+
+/* Allocate space in the .plt for pic_call entries.  */
+
+static boolean
+allocate_PIC_calls (h, inf)
+     struct elf_link_hash_entry *h;
+     PTR inf;
+{
+  struct bfd_link_info *info;
+  struct elf32_hppa_link_hash_table *htab;
+  asection *s;
+
+  if (h->root.type == bfd_link_hash_indirect
+      || h->root.type == bfd_link_hash_warning)
+    return true;
+
+  info = (struct bfd_link_info *) inf;
+  htab = hppa_link_hash_table (info);
+  if (((struct elf32_hppa_link_hash_entry *) h)->pic_call)
+    {
+      /* Make an entry in the .plt section.  */
+      s = htab->splt;
+      h->plt.offset = s->_raw_size;
+      if (PLABEL_PLT_ENTRY_SIZE != PLT_ENTRY_SIZE
+	  && ((struct elf32_hppa_link_hash_entry *) h)->plabel
+	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+	{
+	  /* Add some extra space for the dynamic linker to use.  */
+	  s->_raw_size += PLABEL_PLT_ENTRY_SIZE;
+	}
+      else
+	s->_raw_size += PLT_ENTRY_SIZE;
+    }
 
   return true;
 }
@@ -2023,8 +2062,11 @@ allocate_dynrelocs (h, inf)
 	    return false;
 	}
 
-      if (((struct elf32_hppa_link_hash_entry *) h)->pic_call
-	  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
+      if (((struct elf32_hppa_link_hash_entry *) h)->pic_call)
+	{
+	  /* Already handled by allocate_PIC_calls.  */
+	}
+      else if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
 	{
 	  /* Make an entry in the .plt section.  */
 	  s = htab->splt;
@@ -2039,12 +2081,9 @@ allocate_dynrelocs (h, inf)
 	  else
 	    s->_raw_size += PLT_ENTRY_SIZE;
 
-	  if (! ((struct elf32_hppa_link_hash_entry *) h)->pic_call)
-	    {
-	      /* We also need to make an entry in the .rela.plt section.  */
-	      htab->srelplt->_raw_size += sizeof (Elf32_External_Rela);
-	      htab->need_plt_stub = 1;
-	    }
+	  /* We also need to make an entry in the .rela.plt section.  */
+	  htab->srelplt->_raw_size += sizeof (Elf32_External_Rela);
+	  htab->need_plt_stub = 1;
 	}
       else
 	{
@@ -2249,12 +2288,10 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
   else
     {
       /* Run through the function symbols, looking for any that are
-	 PIC, and allocate space for the necessary .plt entries so
-	 that %r19 will be set up.  */
+	 PIC, and mark them as needing .plt entries so that %r19 will
+	 be set up.  */
       if (! info->shared)
-	elf_link_hash_traverse (&htab->elf,
-				hppa_handle_PIC_calls,
-				info);
+	elf_link_hash_traverse (&htab->elf, mark_PIC_calls, (PTR) info);
     }
 
   /* Set up .got and .plt offsets for local syms, and space for local
@@ -2331,6 +2368,9 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 	    }
 	}
     }
+
+  if (! info->shared)
+    elf_link_hash_traverse (&htab->elf, allocate_PIC_calls, (PTR) info);
 
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */
@@ -4082,15 +4122,6 @@ elf32_hppa_finish_dynamic_symbol (output_bfd, info, h, sym)
 			  + htab->splt->output_section->vma);
 	  if (h->dynindx != -1)
 	    {
-	      /* To support lazy linking, the function pointer is
-		 initialised to point to a special stub stored at the
-		 end of the .plt.  This is not done for plt entries
-		 with a base-relative dynamic relocation.  */
-	      value = (htab->splt->output_offset
-		       + htab->splt->output_section->vma
-		       + htab->splt->_raw_size
-		       - sizeof (plt_stub)
-		       + PLT_STUB_ENTRY);
 	      rel.r_info = ELF32_R_INFO (h->dynindx, R_PARISC_IPLT);
 	      rel.r_addend = 0;
 	    }
