@@ -99,7 +99,7 @@ make_a_section_from_file (abfd, hdr, target_index)
   return_section->lineno_count = hdr->s_nlnno;
   return_section->userdata = NULL;
   return_section->next = (asection *) NULL;
-  return_section->flags = bfd_coff_styp_to_sec_flags_hook (abfd, hdr);
+  return_section->flags = bfd_coff_styp_to_sec_flags_hook (abfd, hdr, name);
 
   return_section->target_index = target_index;
 
@@ -254,7 +254,7 @@ coff_object_p (abfd)
 
 /* Get the BFD section from a COFF symbol section number.  */
 
-struct sec *
+asection *
 coff_section_from_bfd_index (abfd, index)
      bfd            *abfd;
      int             index;
@@ -263,11 +263,11 @@ coff_section_from_bfd_index (abfd, index)
 
   if (index == N_ABS) 
   {
-    return &bfd_abs_section;
+    return bfd_abs_section_ptr;
   }
   if (index == N_UNDEF)
   {
-    return &bfd_und_section;
+    return bfd_und_section_ptr;
   }
   if(index == N_DEBUG)
   {
@@ -283,7 +283,7 @@ coff_section_from_bfd_index (abfd, index)
 
   /* We should not reach this point, but the SCO 3.2v4 /lib/libc_s.a
      has a bad symbol table in biglitpow.o.  */
-  return &bfd_und_section;
+  return bfd_und_section_ptr;
 }
 
 /* Get the upper bound of a COFF symbol table.  */
@@ -410,7 +410,7 @@ fixup_symbol_value (coff_symbol_ptr, syment)
   else if (coff_symbol_ptr->symbol.flags & BSF_DEBUGGING) {
     syment->n_value = coff_symbol_ptr->symbol.value;
   }
-  else if (coff_symbol_ptr->symbol.section == & bfd_und_section) {
+  else if (bfd_is_und_section (coff_symbol_ptr->symbol.section)) {
     syment->n_scnum = N_UNDEF;
     syment->n_value = 0;
   }
@@ -472,10 +472,10 @@ coff_renumber_symbols (bfd_ptr)
       }
     bfd_ptr->outsymbols = newsyms;
     for (i = 0; i < symbol_count; i++)
-      if (symbol_ptr_ptr[i]->section != &bfd_und_section)
+      if (! bfd_is_und_section (symbol_ptr_ptr[i]->section))
 	*newsyms++ = symbol_ptr_ptr[i];
     for (i = 0; i < symbol_count; i++)
-      if (symbol_ptr_ptr[i]->section == &bfd_und_section)
+      if (bfd_is_und_section (symbol_ptr_ptr[i]->section))
 	*newsyms++ = symbol_ptr_ptr[i];
     *newsyms = (asymbol *) NULL;
     symbol_ptr_ptr = bfd_ptr->outsymbols;
@@ -685,7 +685,7 @@ coff_write_symbol (abfd, symbol, native, written)
   if (native->u.syment.n_sclass == C_FILE)
     symbol->section = &bfd_debug_section;
 
-  if (symbol->section == &bfd_abs_section) 
+  if (bfd_is_abs_section (symbol->section))
     {
       native->u.syment.n_scnum = N_ABS;
     }
@@ -693,7 +693,7 @@ coff_write_symbol (abfd, symbol, native, written)
     {
       native->u.syment.n_scnum = N_DEBUG;
     }
-  else if (symbol->section == &bfd_und_section)   
+  else if (bfd_is_und_section (symbol->section))
     {
       native->u.syment.n_scnum = N_UNDEF;
     }
@@ -767,7 +767,7 @@ coff_write_alien_symbol (abfd, symbol, written)
   native = &dummy;
   native->u.syment.n_type =  T_NULL;
   native->u.syment.n_flags =  0;
-  if (symbol->section == &bfd_und_section) 
+  if (bfd_is_und_section (symbol->section))
     {
       native->u.syment.n_scnum = N_UNDEF;
       native->u.syment.n_value = symbol->value;

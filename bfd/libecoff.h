@@ -229,7 +229,7 @@ extern boolean _bfd_ecoff_slurp_symbolic_info
 /* Generic ECOFF BFD backend vectors.  */
 
 extern boolean _bfd_ecoff_write_object_contents PARAMS ((bfd *abfd));
-extern bfd_target *_bfd_ecoff_archive_p PARAMS ((bfd *abfd));
+extern const bfd_target *_bfd_ecoff_archive_p PARAMS ((bfd *abfd));
 
 #define	_bfd_ecoff_close_and_cleanup _bfd_generic_close_and_cleanup
 #define _bfd_ecoff_bfd_free_cached_info _bfd_generic_bfd_free_cached_info
@@ -293,5 +293,6 @@ extern asection *_bfd_ecoff_make_section_hook PARAMS ((bfd *abfd, char *name));
 #define _bfd_ecoff_set_alignment_hook \
   ((void (*) PARAMS ((bfd *, asection *, PTR))) bfd_void)
 extern boolean _bfd_ecoff_set_arch_mach_hook PARAMS ((bfd *abfd, PTR filehdr));
-extern flagword _bfd_ecoff_styp_to_sec_flags PARAMS ((bfd *abfd, PTR hdr));
+extern flagword _bfd_ecoff_styp_to_sec_flags
+  PARAMS ((bfd *abfd, PTR hdr, const char *name));
 extern boolean _bfd_ecoff_slurp_symbol_table PARAMS ((bfd *abfd));

@@ -75,7 +75,7 @@ typedef struct coff_tdata
 #define coffsymbol(asymbol) ((coff_symbol_type *)(&((asymbol)->the_bfd)))
 
 /* Functions in coffgen.c.  */
-extern bfd_target *coff_object_p PARAMS ((bfd *));
+extern const bfd_target *coff_object_p PARAMS ((bfd *));
 extern struct sec *coff_section_from_bfd_index PARAMS ((bfd *, int));
 extern long coff_get_symtab_upper_bound PARAMS ((bfd *));
 extern long coff_get_symtab PARAMS ((bfd *, asymbol **));
@@ -83,7 +83,7 @@ extern int coff_count_linenumbers PARAMS ((bfd *));
 extern struct coff_symbol_struct *coff_symbol_from PARAMS ((bfd *, asymbol *));
 extern boolean coff_renumber_symbols PARAMS ((bfd *));
 extern void coff_mangle_symbols PARAMS ((bfd *));
-extern void coff_write_symbols PARAMS ((bfd *));
+extern boolean coff_write_symbols PARAMS ((bfd *));
 extern boolean coff_write_linenumbers PARAMS ((bfd *));
 extern alent *coff_get_lineno PARAMS ((bfd *, asymbol *));
 extern asymbol *coff_section_symbol PARAMS ((bfd *, char *));
@@ -258,7 +258,8 @@ typedef struct
        PTR     internal_aouthdr));
  flagword (*_bfd_styp_to_sec_flags_hook) PARAMS ((
        bfd     *abfd,
-       PTR     internal_scnhdr));
+       PTR     internal_scnhdr,
+       const char *name));
  asection *(*_bfd_make_section_hook) PARAMS ((
        bfd     *abfd,
        char    *name));
@@ -344,8 +345,8 @@ typedef struct
 #define bfd_coff_mkobject_hook(abfd, filehdr, aouthdr)\
         ((coff_backend_info (abfd)->_bfd_coff_mkobject_hook) (abfd, filehdr, aouthdr))
 
-#define bfd_coff_styp_to_sec_flags_hook(abfd, scnhdr)\
-        ((coff_backend_info (abfd)->_bfd_styp_to_sec_flags_hook) (abfd, scnhdr))
+#define bfd_coff_styp_to_sec_flags_hook(abfd, scnhdr, name)\
+        ((coff_backend_info (abfd)->_bfd_styp_to_sec_flags_hook) (abfd, scnhdr, name))
 
 #define bfd_coff_make_section_hook(abfd, name)\
         ((coff_backend_info (abfd)->_bfd_make_section_hook) (abfd, name))

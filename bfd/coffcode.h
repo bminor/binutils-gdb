@@ -405,9 +405,10 @@ sec_to_styp_flags (sec_name, sec_flags)
  *      in sec_to_styp_flags().
  */
 static flagword
-styp_to_sec_flags (abfd, hdr)
-     bfd * abfd;
+styp_to_sec_flags (abfd, hdr, name)
+     bfd *abfd;
      PTR hdr;
+     const char *name;
 {
   struct internal_scnhdr *internal_s = (struct internal_scnhdr *) hdr;
   long styp_flags = internal_s->s_flags;
@@ -457,6 +458,54 @@ styp_to_sec_flags (abfd, hdr)
       sec_flags |= SEC_DEBUGGING;
 #endif
     }
+  else if (strcmp (name, _TEXT) == 0)
+    {
+      if (sec_flags & SEC_NEVER_LOAD)
+	sec_flags |= SEC_CODE | SEC_COFF_SHARED_LIBRARY;
+      else
+	sec_flags |= SEC_CODE | SEC_LOAD | SEC_ALLOC;
+    }
+  else if (strcmp (name, _DATA) == 0
+#ifdef TWO_DATA_SECS
+	   || strcmp (name, ".data2") == 0
+#endif
+	   )
+    {
+      if (sec_flags & SEC_NEVER_LOAD)
+	sec_flags |= SEC_DATA | SEC_COFF_SHARED_LIBRARY;
+      else
+	sec_flags |= SEC_DATA | SEC_LOAD | SEC_ALLOC;
+    }
+  else if (strcmp (name, _BSS) == 0)
+    {
+#ifdef BSS_NOLOAD_IS_SHARED_LIBRARY
+      if (sec_flags & SEC_NEVER_LOAD)
+	sec_flags |= SEC_ALLOC | SEC_COFF_SHARED_LIBRARY;
+      else
+#endif
+	sec_flags |= SEC_ALLOC;
+    }
+  else if (strcmp (name, ".debug") == 0
+#ifdef _COMMENT
+	   || strcmp (name, _COMMENT) == 0
+#endif
+	   || strcmp (name, ".stab") == 0
+	   || strcmp (name, ".stabstr") == 0)
+    {
+#ifdef COFF_PAGE_SIZE
+      sec_flags |= SEC_DEBUGGING;
+#endif
+    }
+#ifdef _LIB
+  else if (strcmp (name, _LIB) == 0)
+    ;
+#endif
+#ifdef _LIT
+  else if (strcmp (name, _LIT) == 0)
+    {
+      sec_flags = SEC_LOAD | SEC_ALLOC | SEC_READONLY;
+    }
+#endif
   else
     {
       sec_flags |= SEC_ALLOC | SEC_LOAD;
@@ -585,7 +634,8 @@ dependent COFF routines:
 .       PTR     internal_aouthdr));
 . flagword (*_bfd_styp_to_sec_flags_hook) PARAMS ((
 .       bfd     *abfd,
-.       PTR     internal_scnhdr));
+.       PTR     internal_scnhdr,
+.       const char *name));
 . asection *(*_bfd_make_section_hook) PARAMS ((
 .       bfd     *abfd,
 .       char    *name));
@@ -671,8 +721,8 @@ dependent COFF routines:
 .#define bfd_coff_mkobject_hook(abfd, filehdr, aouthdr)\
 .        ((coff_backend_info (abfd)->_bfd_coff_mkobject_hook) (abfd, filehdr, aouthdr))
 .
-.#define bfd_coff_styp_to_sec_flags_hook(abfd, scnhdr)\
-.        ((coff_backend_info (abfd)->_bfd_styp_to_sec_flags_hook) (abfd, scnhdr))
+.#define bfd_coff_styp_to_sec_flags_hook(abfd, scnhdr, name)\
+.        ((coff_backend_info (abfd)->_bfd_styp_to_sec_flags_hook) (abfd, scnhdr, name))
 .
 .#define bfd_coff_make_section_hook(abfd, name)\
 .        ((coff_backend_info (abfd)->_bfd_make_section_hook) (abfd, name))
@@ -1378,7 +1428,8 @@ coff_compute_section_file_positions (abfd)
 #ifdef COFF_PAGE_SIZE
       /* In demand paged files the low order bits of the file offset
 	 must match the low order bits of the virtual address.  */
-      if ((abfd->flags & D_PAGED) != 0)
+      if ((abfd->flags & D_PAGED) != 0
+	  && (current->flags & SEC_ALLOC) != 0)
 	sofar += (current->vma - sofar) % COFF_PAGE_SIZE;
 #endif
 
@@ -1771,15 +1822,28 @@ coff_write_object_contents (abfd)
     internal_a.magic = APOLLO_COFF_VERSION_NUMBER;
 #endif
 
-#if M68 || WE32K
+#if defined(M68) || defined(WE32K) || defined(M68K)
 #define __A_MAGIC_SET__
-    /* Never was anything here for the 68k */
-#endif /* M68 || WE32K */
+#if defined(LYNXOS)
+    internal_a.magic = LYNXCOFFMAGIC;
+#endif				/* LYNXOS */
+#endif				/* M68 || WE32K || M68K */
 
-#if I386
+#if defined(I386)
 #define __A_MAGIC_SET__
+#if defined(LYNXOS)
+    internal_a.magic = LYNXCOFFMAGIC;
+#else				/* LYNXOS */
     internal_a.magic = ZMAGIC;
+#endif /* LYNXOS */
 #endif /* I386 */
+
+#if defined(SPARC)
+#define __A_MAGIC_SET__
+#if defined(LYNXOS)
+  internal_a.magic = LYNXCOFFMAGIC;
+#endif				/* LYNXOS */
+#endif				/* SPARC */
 
 #if RS6000COFF_C
 #define __A_MAGIC_SET__
