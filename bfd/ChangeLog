@@ -1,3 +1,8 @@
+Thu Apr 25 13:25:12 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elflink.c (_bfd_elf_create_dynamic_sections): If the section
+	being created is .sdata or .sdata2, don't make the symbol dynamic.
+
 Wed Apr 24 14:04:07 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (_bfd_xcoff_bfd_link_add_symbols): Look through the
