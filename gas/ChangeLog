@@ -1,3 +1,8 @@
+2001-10-11  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* input-file.c: Include safe-ctype.h.
+	(input_file_open): Use ISSPACE instead of isspace.
+
 2001-10-10  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (mips_cpreturn_offset): New variable.
