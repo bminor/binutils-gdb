@@ -1018,7 +1018,12 @@ lookup_block_symbol (block, name, namespace)
 	  if (SYMBOL_NAMESPACE (sym) == namespace &&
 	      SYMBOL_MATCHES_NAME (sym, name))
 	    {
-	      /* Given pc, search thu alias list to find the active symbol. */
+	      /* If SYM has aliases, then use any alias that is active
+		 at the current PC.  If no alias is active at the current
+		 PC, then use the main symbol.
+
+		 ?!? Is checking the current pc correct?  Is this routine
+		 ever called to look up a symbol from another context?  */
               if (SYMBOL_ALIASES (sym))
                 sym = ref_search_val (sym, read_pc ());
 
