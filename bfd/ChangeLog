@@ -1,3 +1,11 @@
+start-sanitize-v850
+Mon Sep  9 11:48:41 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-v850.c (bfd_elf32_v850_reloc, case R_V850_HI16): Don't forget
+	to add in the constant part found in the instruction itself.
+	(case R_V850_HI16_S): Likewise.
+
+end-sanitize-v850 
 start-sanitize-d10v
 Fri Sep  6 17:04:39 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
