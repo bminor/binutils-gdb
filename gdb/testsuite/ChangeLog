@@ -1,7 +1,28 @@
+2001-10-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.mi/mi-hack-cli.exp: Remove excess newlines from test strings.
+	* gdm.mi/mi0-hack-cli.exp: Likewise.
+
 2001-10-21  Andrew Cagney  <ac131313@redhat.com>
 
 	* lib/mi-support.exp (mi_gdb_start): Don't require MI_OUT when
 	checking MI enabled.
+
+2001-10-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/pthreads.exp: Wait for output and delay
+	before sending ^C.
+
+2001-10-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.mi/mi-var-display.exp (continue to incr_a):  Recognize
+	some incorrect output instead of timing out.
+	* gdb.mi/mi-var-display.exp (continue to incr_a):  Likewise.
+
+2001-09-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/completion.exp: Remove incorrect 'p "a' test.
+	Add tests for 'p "break' (pass) and 'p "break.' (xfail).
 
 2001-07-25  Michael Snyder  <msnyder@redhat.com>
 

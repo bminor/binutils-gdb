@@ -248,6 +248,15 @@ proc check_control_c {} {
 
     # Send a continue followed by ^C to the process to stop it.
     send_gdb "continue\n"
+    gdb_expect {
+	-re "Continuing." {
+	    pass "Continue with all threads running"
+	}
+	timeout {
+	    fail "Continue with all threads running (timeout)"
+	}
+    }
+    sleep 1
     set description "Stopped with a ^C"
     after 1000 [send_gdb "\003"]
     gdb_expect {

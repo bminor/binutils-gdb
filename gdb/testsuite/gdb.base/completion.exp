@@ -38,7 +38,9 @@
 #   "info ajksdlfk " no completions
 #   "info" " "
 #   "info " ambiguous (all info commands)
-#   "p \"a" no completions (string constant)
+#   "p \"break" unambiguous (completes to filename "break.c")
+#   "p \"break." unambiguous (should complete to "break.c" but does not,
+#	due to readline limitations)
 #   "p 'a" ambiguous (all symbols starting with a)
 #   "p b-a" ambiguous (all symbols starting with a)
 #   "p b-" ambiguous (all symbols)
@@ -349,20 +351,61 @@ gdb_expect  {
         }
 
 
-send_gdb "p \"a\t"
+send_gdb "p \"break\t"
 sleep 1
 gdb_expect  {
-        -re "^p \"a\\\x07$"\
+        -re "^p \"break\\\x07$"\
             { send_gdb "\n"
               gdb_expect {
-                      -re "Unterminated string in expression\\..*$gdb_prompt $"\
-                                        { pass "complete 'p a'"}
-                      -re ".*$gdb_prompt $" { fail "complete 'p a'"}
-                      timeout           {fail "(timeout) complete 'p a'"}
+                      -re ".*$gdb_prompt $" { fail "complete 'p \"break'"}
+                      timeout           {fail "(timeout) complete 'p \"break'"}
                      }
             }
-        -re ".*$gdb_prompt $"       { fail "complete 'p \"a'" }
-        timeout         { fail "(timeout) complete 'p \"a'" }
+	-re "^p \"break\\.c\"$"\
+	    {	send_gdb "\n"
+		gdb_expect {
+		    -re ".*$gdb_prompt $" { pass "complete 'p \"break'"}
+		    timeout           {fail "(timeout) complete 'p \"break'"}
+		}
+	    }
+	-re "^p \"break.*$"
+	    {	send_gdb "\n"
+		gdb_expect {
+		    -re ".*$gdb_prompt $" { fail "complete 'p \"break'"}
+		    timeout           {fail "(timeout) complete 'p \"break'"}
+		}
+	    }
+        -re ".*$gdb_prompt $"       { fail "complete 'p \"break'" }
+        timeout         { fail "(timeout) complete 'p \"break'" }
+        }
+
+setup_xfail "*-*-*"
+send_gdb "p \"break.\t"
+sleep 1
+gdb_expect  {
+        -re "^p \"break\\.\\\x07$"\
+            { send_gdb "\n"
+              gdb_expect {
+                      -re ".*$gdb_prompt $" { fail "complete 'p \"break.'"}
+                      timeout           {fail "(timeout) complete 'p \"break.'"}
+                     }
+            }
+	-re "^p \"break\\.c\"$"\
+	    {	send_gdb "\n"
+		gdb_expect {
+		    -re ".*$gdb_prompt $" { pass "complete 'p \"break.'"}
+		    timeout           {fail "(timeout) complete 'p \"break.'"}
+		}
+	    }
+	-re "^p \"break\\..*$"
+	    {	send_gdb "\n"
+		gdb_expect {
+		    -re ".*$gdb_prompt $" { fail "complete 'p \"break.'"}
+		    timeout           {fail "(timeout) complete 'p \"break.'"}
+		}
+	    }
+        -re ".*$gdb_prompt $"       { fail "complete 'p \"break.'" }
+        timeout         { fail "(timeout) complete 'p \"break.'" }
         }
 
 send_gdb "p 'a\t"
