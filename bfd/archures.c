@@ -149,7 +149,6 @@ DESCRIPTION
 . {* start-sanitize-tic80 *}
 .  bfd_arch_tic80,     {* TI TMS320c80 (MVP) *}
 . {* end-sanitize-tic80 *}
-. {* start-sanitize-v850 *}
 .  bfd_arch_v850,      {* NEC V850 *}
 .#define bfd_mach_v850          0
 . {* start-sanitize-v850e *}
@@ -158,7 +157,6 @@ DESCRIPTION
 . {* start-sanitize-v850eq *}
 .#define bfd_mach_v850eq	'Q'
 . {* end-sanitize-v850eq *}
-. {* end-sanitize-v850 *}
 .  bfd_arch_arc,       {* Argonaut RISC Core *}
 .#define bfd_mach_arc_base 0
 .  bfd_arch_m32r,      {* Mitsubishi M32R/D *}
@@ -234,9 +232,7 @@ extern const bfd_arch_info_type bfd_we32k_arch;
 extern const bfd_arch_info_type bfd_z8k_arch;
 extern const bfd_arch_info_type bfd_ns32k_arch;
 extern const bfd_arch_info_type bfd_w65_arch;
-/* start-sanitize-v850 */
 extern const bfd_arch_info_type bfd_v850_arch;
-/* end-sanitize-v850 */
 
 static const bfd_arch_info_type * const bfd_archures_list[] =
 {
@@ -275,9 +271,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
   &bfd_z8k_arch,
   &bfd_ns32k_arch,
   &bfd_w65_arch,
-/* start-sanitize-v850*/
   &bfd_v850_arch,
-/* end-sanitize-v850 */
 #endif
   0
 };

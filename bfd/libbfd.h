@@ -768,7 +768,6 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_M32R_HI16_SLO",
   "BFD_RELOC_M32R_LO16",
   "BFD_RELOC_M32R_SDA16",
-/* start-sanitize-v850 */
   "BFD_RELOC_V850_9_PCREL",
   "BFD_RELOC_V850_22_PCREL",
   "BFD_RELOC_V850_SDA_16_16_OFFSET",
@@ -783,8 +782,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_V850_TDA_4_4_OFFSET",
   "BFD_RELOC_V850_SDA_16_16_SPLIT_OFFSET",
   "BFD_RELOC_V850_ZDA_16_16_SPLIT_OFFSET",
-/* end-santize-v850e */
-/* end-sanitize-v850 */
+/* end-sanitize-v850e */
 
   "BFD_RELOC_MN10300_32_PCREL",
   "BFD_RELOC_MN10300_16_PCREL",

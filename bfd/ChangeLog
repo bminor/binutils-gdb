@@ -86,7 +86,6 @@ Mon Aug 25 16:11:04 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* cpu-arm.c (compatible): If B is a default type, return A.
 
-start-sanitize-v850
 Mon Aug 25 15:35:46 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* cpu-v850.c (scan): New function.
@@ -120,7 +119,7 @@ start-sanitize-v850eq
 	* elf.c (prep_headers): Add support for v850eq machine number. 
 
 end-sanitize-v850eq
-end-sanitize-v850
+
 Mon Aug 25 14:07:33 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* syms.c (_bfd_stab_section_find_nearest_line): Clear the
@@ -167,7 +166,6 @@ start-sanitize-tic80
  	section header for TIC80COFF files.
 end-sanitize-tic80
 
-start-sanitize-v850
 Mon Aug 18 11:36:19 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-v850.c (v850_elf_howto_table, v850_elf_reloc_map,
@@ -181,7 +179,6 @@ Mon Aug 18 11:36:19 1997  Nick Clifton  <nickc@cygnus.com>
 	* libbfd.h: Add support for BFD_RELOC_V850_16_PCREL relocation.
 
 	* bfd-in2.h: Add support for BFD_RELOC_V850_16_PCREL relocation.
-end-sanitize-v850
 
 start-sanitize-v850e
 Mon Aug 18 11:33:56 1997  Nick Clifton  <nickc@cygnus.com>
@@ -1872,13 +1869,11 @@ Tue Feb 18 11:41:00 1996  Dawn Perchik  <dawn@cygnus.com>
 
 	* sysdep.h: Don't define errno in MSVC if error.h is included.
 
-start-sanitize-v850
 Tue Feb 18 10:04:13 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-v850.c (v850_elf_relocate_section): Make sure r_symndx
 	is initialized before it is used.
 
-end-sanitize-v850
 Mon Feb 17 11:28:40 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* hp300hpux.c (convert_sym_type): Don't convert a secondary common
@@ -2021,10 +2016,8 @@ Mon Jan 27 12:25:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aout-arm.c (MY_swap_std_reloc_in): Remove unused r_length.
 	* elf32-ppc.c (ppc_elf_check_relocs): Remove unused plt.
-start-sanitize-v850
 	* elf32-v850.c (v850_elf_final_link_relocate): Remove used
 	r_format and r_pcrel.  Always return a value.
-end-sanitize-v850
 	* riscix.c (MY_final_link_callback): Define to dummy value.
 
 	* elf32-i386.c (elf_i386_size_dynamic_sections): When checking for
@@ -2077,7 +2070,6 @@ Mon Jan 13 22:39:08 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 	* config.bfd (tic80-*-*): Don't require 'coff'.
 
 end-sanitize-tic80
-start-sanitize-v850
 Mon Jan 13 19:36:25 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-v850.c (v850_elf_howto_table): Set the special_function
@@ -2088,7 +2080,6 @@ Mon Jan 13 19:36:25 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 	(v850_elf_relocate_section): Fix up error message, don't just call
 	abort.
 
-end-sanitize-v850
 Mon Jan  6 13:28:35 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-mn10200.c (elf_mn10200_howto): Don't ever set partial-inplace.
@@ -2154,7 +2145,6 @@ Fri Jan  3 16:58:31 1997  Richard Henderson  <rth@tamu.edu>
 
 	* elf64-alpha.c: Rewrite everything touching relocations.
 
-start-sanitize-v850
 Fri Jan  3 11:42:53 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-v850.c (all functions and static variables): Go through
@@ -2170,7 +2160,6 @@ Tue Dec 31 15:15:28 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-v850.c (elf_v850_howto_table): Fix some spacing.
 
-end-sanitize-v850
 Tue Dec 31 14:44:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.bfd (mips*el-*-linux*): New target.
@@ -2514,19 +2503,16 @@ Fri Oct 25 16:56:40 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* ieee.c (ieee_write_external_part): Correctly record whether
 	there is an external part.
 
-start-sanitize-v850
 Thu Oct 24 14:32:52 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-v850.c (elf32_v850_bfd_final_link_relocate): Correctly
 	handle tda offsets for sld.w and sst.w instructions.
 	Fix alignment check in sld.w and sst.w tda reloc handling.
 
-end-sanitize-v850
 Thu Oct 24 09:08:47 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* aclocal.m4, configure:  Set USE_BINARY_FOPEN for *-*-windows.
 
-start-sanitize-v850
 Wed Oct 23 00:53:16 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-v850.c: Add comments about assumptions about
@@ -2537,7 +2523,6 @@ Wed Oct 23 00:53:16 1996  Jeffrey A Law  (law@cygnus.com)
 	* elf32-v850.c (elf32_v850_howto_table): Fix typo in
 	R_V850_SDA_OFFSET entry.
 
-end-sanitize-v850
 Wed Oct 23 00:20:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (bfd_xcoff_import_symbol): Don't allocate ldsym.
@@ -2545,7 +2530,6 @@ Wed Oct 23 00:20:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 	(xcoff_build_ldsyms): Assume that ldsym was not previously
 	allocated.  For an imported symbol, copy ldindx into l_ifile.
 
-start-sanitize-v850
 Tue Oct 22 19:20:38 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-v850.c (elf_v850_howto_table): Fix ordering of
@@ -2562,7 +2546,6 @@ Tue Oct 22 19:20:38 1996  Jeffrey A Law  (law@cygnus.com)
 	(v850_elf_relocation_section): Likewise.
 	(elf_backend_relocate_section): Define.
 
-end-sanitize-v850
 Tue Oct 22 17:22:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* binary.c (binary_set_section_contents): Ignore sections which
@@ -2599,9 +2582,6 @@ Wed Oct 16 11:24:35 1996  Jeffrey A Law  (law@cygnus.com)
 	all sections that will be included in the output file.
 	(_bfd_generic_link_output_symbols): Discard symbols in sections
 	which are being discarded.
-
-start-sanitize-v850
-
 	* elf32-v850.c (enum reloc_type): Add R_V850_SDA_OFFSET,
 	R_V850_TDA_OFFSET and R_V850_ZDA_OFFSET.
 	(elf_v850_howto_table): Corresponding changes.
@@ -2621,7 +2601,6 @@ Tue Oct 15 16:17:28 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* elf32-v850.c:  Define elf_symbol_leading_char to be '_'.
 
-end-sanitize-v850
 Tue Oct 15 12:40:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* VERSION: Bump for new relocation.
@@ -2827,13 +2806,11 @@ Tue Oct  1 12:31:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 	a dynamic object in the dynamic symbol table if it is referenced
 	or defined by a regular object.
 
-start-sanitize-v850
 Fri Sep 27 18:41:07 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* elf32-v850.c (bfd_elf32_v850_is_local_label):  New function to
 	remove dwarf local labels.  Shrinks binaries by a factor of 3!
 
-end-sanitize-v850
 Mon Sep 23 13:33:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_add_symbol_hook): Create the .sbss section
@@ -3026,14 +3003,12 @@ Mon Sep  9 12:31:22 1996  Doug Evans  <dje@canuck.cygnus.com>
 	* Makefile.in,archures.c,elf.c,targets.c: Likewise.
 	* config.bfd: Keep target list alphabetically sorted.
 
-start-sanitize-v850
 Mon Sep  9 11:48:41 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-v850.c (bfd_elf32_v850_reloc, case R_V850_HI16): Don't forget
 	to add in the constant part found in the instruction itself.
 	(case R_V850_HI16_S): Likewise.
 
-end-sanitize-v850
 Fri Sep  6 17:04:39 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* elf32-d10v.c (elf_d10v_howto_table): Modify the size of R_D10V_16
@@ -3056,7 +3031,6 @@ Tue Sep  3 12:16:20 1996  Doug Evans  <dje@canuck.cygnus.com>
 	(bfd_target_vector): Add sparcle_aout_vec.
 	* aout-sparcle.c: New file.
 
-start-sanitize-v850
 Tue Sep  3 00:57:02 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-v850.c (bfd_elf32_v850_reloc): Fix handling of
@@ -3068,7 +3042,6 @@ Tue Sep  3 00:57:02 1996  Jeffrey A Law  (law@cygnus.com)
 	relocations.  Twiddle masks & shifts for some relocs.
 	Set partial_inplace where needed.
 
-end-sanitize-v850
 Mon Sep  2 12:12:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* cpu-mips.c: Add an explicit mips:3000 entry, and change the
@@ -3078,7 +3051,6 @@ Mon Sep  2 12:12:34 1996  Ian Lance Taylor  <ian@cygnus.com>
 	(_bfd_mips_elf_merge_private_bfd_data): If the machine number of
 	the output BFD is the default, set it from the first input BFD.
 
-start-sanitize-v850
 Sun Sep  1 18:38:01 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-v850.c (elf_v850_howto_table): All the 16bit relocs
@@ -3089,14 +3061,12 @@ Sun Sep  1 18:38:01 1996  Jeffrey A Law  (law@cygnus.com)
 	(TARGET_BIG_SYM, TARGET_BIG_NAME): Remove.  The V850 is little
 	endian!
 
-end-sanitize-v850
 Sun Sep  1 15:41:08 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* rs6000-core.c (rs6000coff_core_file_matches_executable_p):
 	Rewrite to use BFD file read routines and to avoid using a fixed
 	length for the file name.
 
-start-sanitize-v850
 Sat Aug 31 10:22:25 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-v850.c (enum reloc_type): Add R_V850_{32,16,8}.
@@ -3111,7 +3081,6 @@ Fri Aug 30 18:06:04 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 	(v850_reloc_map): Add HI_16_S reloc.
 	* reloc.c: Define BFD_RELOC_V850_* relocs.
 
-end-sanitize-v850
 Fri Aug 30 11:49:19 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	Add SH ELF support.
@@ -3200,7 +3169,6 @@ Thu Aug 22 10:54:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 	undefined symbol merely because we are generating a shared
 	library.
 
-start-sanitize-v850
 Tue Aug 20 15:06:05 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 
 	* Makefile.in (ALL_MACHINES): Add cpu-v850.o.
@@ -3215,7 +3183,6 @@ Tue Aug 20 15:06:05 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 	* elf32-v850.c: New file.
 	* targets.c (bfd_elf32_v850_vec): New vector.
 
-end-sanitize-v850
 Fri Aug 16 16:25:35 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (xcoff_link_add_dynamic_symbols): Create and define

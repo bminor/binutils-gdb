@@ -516,7 +516,7 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
 /* start-sanitize-v850e */
 	case R_V850_TDA_4_5_OFFSET:
 	case R_V850_TDA_4_4_OFFSET:
-/* end-sanitize-v850 */	  
+/* end-sanitize-v850e */	  
 	case R_V850_TDA_6_8_OFFSET:
 	case R_V850_TDA_7_8_OFFSET:
 	case R_V850_TDA_7_7_OFFSET:

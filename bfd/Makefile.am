@@ -69,9 +69,7 @@ ALL_MACHINES = \
 	$(start-sanitize-tic80) \
 	cpu-tic80.lo \
 	$(end-sanitize-tic80) \
-	$(start-sanitize-v850) \
 	cpu-v850.lo \
-	$(end-sanitize-v850) \
 	cpu-vax.lo \
 	cpu-we32k.lo \
 	cpu-w65.lo \
@@ -164,9 +162,7 @@ BFD32_BACKENDS = \
 	elf32-ppc.lo \
 	elf32-sh.lo \
 	elf32-sparc.lo \
-	$(start-sanitize-v850) \
 	elf32-v850.lo \
-	$(end-sanitize-v850) \
 	elf32.lo \
 	elflink.lo \
 	hp300bsd.lo \
@@ -569,12 +565,10 @@ elf32-d30v.lo: elf32-d30v.c elf-bfd.h $(INCDIR)/elf/common.h \
   elf32-target.h
 end-sanitize-d30v:
 
-start-sanitize-v850:
 cpu-v850.lo: cpu-v850.c
 elf32-v850.lo: elf32-v850.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   elf32-target.h
-end-sanitize-v850:
 
 start-sanitize-tic80:
 cpu-tic80.lo: cpu-tic80.c

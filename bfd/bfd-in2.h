@@ -1241,7 +1241,6 @@ enum bfd_architecture
   /* start-sanitize-tic80 */
   bfd_arch_tic80,      /* TI TMS320c80 (MVP) */
   /* end-sanitize-tic80 */
-  /* start-sanitize-v850 */
   bfd_arch_v850,       /* NEC V850 */
 #define bfd_mach_v850          0
   /* start-sanitize-v850e */
@@ -1250,7 +1249,6 @@ enum bfd_architecture
   /* start-sanitize-v850eq */
 #define bfd_mach_v850eq	'Q'
   /* end-sanitize-v850eq */
-  /* end-sanitize-v850 */
   bfd_arch_arc,        /* Argonaut RISC Core */
 #define bfd_mach_arc_base 0
   bfd_arch_m32r,       /* Mitsubishi M32R/D */
@@ -1937,7 +1935,6 @@ used when the lower 16 bits are treated as signed. */
 /* This is a 16-bit reloc containing the small data area offset for use in
 add3, load, and store instructions. */
   BFD_RELOC_M32R_SDA16,
-/* start-sanitize-v850 */
 
 /* This is a 9-bit reloc */
   BFD_RELOC_V850_9_PCREL,
@@ -1957,9 +1954,7 @@ add3, load, and store instructions. */
   BFD_RELOC_V850_TDA_4_4_OFFSET, 		/* A  4 bit reloc in the tiny data area.  */
   BFD_RELOC_V850_SDA_16_16_SPLIT_OFFSET, 	/* A 16 bit reloc (but the bits are not contiguous) in the small data area.  */
   BFD_RELOC_V850_ZDA_16_16_SPLIT_OFFSET, 	/* A 16 bit reloc (but the bits are not contiguous) in the zero data area.  */
-/* end-santize-v850e */
-/* end-sanitize-v850 */
-
+/* end-sanitize-v850e */
 
 /* This is a 32bit pcrel reloc for the mn10300, offset by two bytes in the
 instruction. */

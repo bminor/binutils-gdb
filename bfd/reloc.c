@@ -2349,8 +2349,6 @@ ENUMDOC
   This is a 16-bit reloc containing the small data area offset for use in
   add3, load, and store instructions.
 
-COMMENT
-{* start-sanitize-v850 *}
 ENUM
   BFD_RELOC_V850_9_PCREL
 ENUMDOC
@@ -2411,9 +2409,7 @@ ENUM
 ENUMDOC
   This is a 16 bit offset from the zero data area pointer, with the bits placed non-contigously in the instruction..
 COMMENT
-{* end-santize-v850e *}
-COMMENT
-{* end-sanitize-v850 *}
+{* end-sanitize-v850e *}
 
 ENUM
   BFD_RELOC_MN10300_32_PCREL
