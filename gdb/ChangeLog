@@ -1,5 +1,17 @@
 2002-02-01  Andrew Cagney  <ac131313@redhat.com>
 
+	* utils.c (error_begin): Make static.
+	* defs.h (error_begin): Delete declaration.
+
+	* linespec.c (cplusplus_error): Replace cplusplus_hint.
+	(decode_line_1): Use cplusplus_error instead of error_begin,
+	cplusplus_hint and return_to_top_level.
+	* coffread.c (coff_symfile_read): Use error instead of error_begin
+	and return_to_top_level.
+	* infrun.c (default_skip_permanent_breakpoint): Ditto.
+
+2002-02-01  Andrew Cagney  <ac131313@redhat.com>
+
 	* language.h (type_error, range_error): Make string parameter
 	constant.
 	* language.c (warning_pre_print): Delete extern declaration.

@@ -232,12 +232,10 @@ static int may_follow_exec = MAY_FOLLOW_EXEC;
 static void
 default_skip_permanent_breakpoint (void)
 {
-  error_begin ();
-  fprintf_filtered (gdb_stderr, "\
+  error ("\
 The program is stopped at a permanent breakpoint, but GDB does not know\n\
 how to step past a permanent breakpoint on this architecture.  Try using\n\
-a command like `return' or `jump' to continue execution.\n");
-  return_to_top_level (RETURN_ERROR);
+a command like `return' or `jump' to continue execution.");
 }
 #endif
    

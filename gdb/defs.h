@@ -1068,9 +1068,6 @@ extern NORETURN void verror (const char *fmt, va_list ap) ATTR_NORETURN;
 
 extern NORETURN void error (const char *fmt, ...) ATTR_NORETURN;
 
-/* DEPRECATED: Use error(), verror() or error_stream(). */
-extern NORETURN void error_begin (void);
-
 extern NORETURN void error_stream (struct ui_file *) ATTR_NORETURN;
 
 /* Returns a freshly allocate buffer containing the last error

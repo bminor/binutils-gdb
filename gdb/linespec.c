@@ -42,7 +42,7 @@ extern char *operator_chars (char *, char **);
 
 /* Prototypes for local functions */
 
-static void cplusplus_hint (char *name);
+static void cplusplus_error (const char *name, const char *fmt, ...) ATTR_FORMAT (printf, 2, 3);
 
 static int total_number_of_methods (struct type *type);
 
@@ -58,17 +58,31 @@ static struct symtabs_and_lines decode_line_2 (struct symbol *[],
 
 /* Helper functions. */
 
-/* While the C++ support is still in flux, issue a possibly helpful hint on
-   using the new command completion feature on single quoted demangled C++
-   symbols.  Remove when loose ends are cleaned up.   FIXME -fnf */
+/* Issue a helpful hint on using the command completion feature on
+   single quoted demangled C++ symbols as part of the completion
+   error.  */
 
 static void
-cplusplus_hint (char *name)
+cplusplus_error (const char *name, const char *fmt, ...)
 {
+  struct ui_file *tmp_stream;
+  tmp_stream = mem_fileopen ();
+  make_cleanup_ui_file_delete (tmp_stream);
+
+  {
+    va_list args;
+    va_start (args, fmt);
+    vfprintf_unfiltered (tmp_stream, fmt, args);
+    va_end (args);
+  }
+
   while (*name == '\'')
     name++;
-  printf_filtered ("Hint: try '%s<TAB> or '%s<ESC-?>\n", name, name);
-  printf_filtered ("(Note leading single quote.)\n");
+  fprintf_unfiltered (tmp_stream,
+		      ("Hint: try '%s<TAB> or '%s<ESC-?>\n"
+		       "(Note leading single quote.)"),
+		      name, name);
+  error_stream (tmp_stream);
 }
 
 /* Return the number of methods described for TYPE, including the
@@ -722,10 +736,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
    opname = cplus_mangle_opname (tmp, DMGL_ANSI);
    if (opname == NULL)
    {
-   error_begin ();
-   printf_filtered ("no mangling for \"%s\"\n", tmp);
-   cplusplus_hint (saved_arg);
-   return_to_top_level (RETURN_ERROR);
+   cplusplus_error (saved_arg, "no mangling for \"%s\"\n", tmp);
    }
    copy = (char*) alloca (3 + strlen(opname));
    sprintf (copy, "__%s", opname);
@@ -810,17 +821,14 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 			}
 		      else
 			tmp = copy;
-		      error_begin ();
 		      if (tmp[0] == '~')
-			printf_filtered
-			  ("the class `%s' does not have destructor defined\n",
-			   SYMBOL_SOURCE_NAME (sym_class));
+			cplusplus_error (saved_arg,
+					 "the class `%s' does not have destructor defined\n",
+					 SYMBOL_SOURCE_NAME (sym_class));
 		      else
-			printf_filtered
-			  ("the class %s does not have any method named %s\n",
-			   SYMBOL_SOURCE_NAME (sym_class), tmp);
-		      cplusplus_hint (saved_arg);
-		      return_to_top_level (RETURN_ERROR);
+			cplusplus_error (saved_arg,
+					 "the class %s does not have any method named %s\n",
+					 SYMBOL_SOURCE_NAME (sym_class), tmp);
 		    }
 		}
 
@@ -873,12 +881,10 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	    goto symbol_found;
 
 	  /* Couldn't find any interpretation as classes/namespaces, so give up */
-	  error_begin ();
 	  /* The quotes are important if copy is empty.  */
-	  printf_filtered
-	    ("Can't find member of namespace, class, struct, or union named \"%s\"\n", copy);
-	  cplusplus_hint (saved_arg);
-	  return_to_top_level (RETURN_ERROR);
+	  cplusplus_error (saved_arg,
+			   "Can't find member of namespace, class, struct, or union named \"%s\"\n",
+			   copy);
 	}
       /*  end of C++  */
 

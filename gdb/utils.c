@@ -600,7 +600,7 @@ warning (const char *string,...)
    error() provides a convenient way to do this for the special case
    that the error message can be formatted with a single printf call,
    but this is more general.  */
-void
+static void
 error_begin (void)
 {
   if (error_begin_hook)
