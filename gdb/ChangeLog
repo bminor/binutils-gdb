@@ -1,3 +1,7 @@
+Fri Dec 20 10:55:36 1991  John Gilmore  (gnu at cygnus.com)
+
+	* rs6k-opcode.h:  Bugfix sfe and stbrx.  By Al Kossow.
+
 Wed Dec 18 17:09:06 1991  Stu Grossman  (grossman at cygnus.com)
 
 	* command.h, defs.h, eval.h, expression.h, remote-sa.sparc.c,
@@ -50,7 +54,7 @@ Fri Dec 13 20:11:26 1991  John Gilmore  (gnu at cygnus.com)
 	(eb_create_inferior):  New fn, from eb_start and
 	nindy_create_inferior.
 	(eb_close):  Only use log_file if nonzero.
-	(eb_xfer_memory):  If not writing, then read!
+	(eb_xfer_inferior_memory):  If not writing, then read!
 	(eb_read_inferior_memory, eb_write_inferior_memory):  Return length.
 	(eb_kill):  A new no-op.
 	(eb_mourn_inferior):  Remove breakpoints, then generically weep.
