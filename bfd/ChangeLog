@@ -1,3 +1,8 @@
+2000-03-24  H.J. Lu  <hjl@gnu.org>
+
+	* elf64-alpha.c (elf64_alpha_merge_ind_symbols): Add prototype.
+	(elf64_alpha_find_reloc_at_ofs): Likewise.
+
 2000-03-17  Alan Modra  <alan@linuxcare.com.au>
 
 	* reloc.c (bfd_check_overflow): In case complain_overflow_bitfield,
