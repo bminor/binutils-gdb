@@ -446,12 +446,13 @@ get_frame_block (frame)
   fi = get_frame_info (frame);
 
   pc = fi->pc;
-  if (fi->next != 0)
-    /* We are not in the innermost frame.  We need to subtract one to
-       get the correct block, in case the call instruction was the
-       last instruction of the block.  If there are any machines on
-       which the saved pc does not point to after the call insn, we
-       probably want to make fi->pc point after the call insn anyway.  */
+  if (fi->next != 0 && fi->next->signal_handler_caller == 0)
+    /* We are not in the innermost frame and we were not interrupted
+       by a signal.  We need to subtract one to get the correct block,
+       in case the call instruction was the last instruction of the block.
+       If there are any machines on which the saved pc does not point to
+       after the call insn, we probably want to make fi->pc point after
+       the call insn anyway.  */
     --pc;
   return block_for_pc (pc);
 }

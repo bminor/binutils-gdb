@@ -1,3 +1,8 @@
+Fri Oct  8 02:34:21 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* blockframe.c (get_frame_block):  Do not adjust pc if the frame
+	function was interrupted by a signal.
+
 Thu Oct  7 19:20:11 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/h8300/tm-h8300.h: Don't define sr_get_debug.
@@ -50,7 +55,7 @@ Thu Oct  7 06:22:43 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* config/sparc/sun4os4.mh: Add comment saying why we don't use
 	-lresolv.
 
-Thu Oct 07 09:29:11 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+Thu Oct  7 09:29:11 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* breakpoint.c, breakpoint.h (breakpoint_init_inferior):  New function
 	that clears the `inserted' flag for all breakpoints and deletes
@@ -62,7 +67,7 @@ Thu Oct 07 09:29:11 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	uses it in a completely different context.
 	* breakpoint.c (breakpoint_re_set_one):  Add bp_call_dummy case.
 
-Thu Oct 07 09:29:11 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+Thu Oct  7 09:29:11 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* Makefile.in (REGEX, REGEX1):  Always use our own version of
 	regex.c to be consistent across hosts.
