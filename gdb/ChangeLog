@@ -1,3 +1,8 @@
+2003-04-10  Jim Blandy  <jimb@redhat.com>
+
+	* s390-tdep.c (s390_gdbarch_init): Put back accidentally deleted
+	call to set_gdbarch_deprecated_push_arguments.
+
 2003-04-10  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (fprint_frame_id): New function.
