@@ -1,3 +1,12 @@
+Fri Sep 25 11:08:01 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	Added initial support for the z8k
+	* z8ksim.em, z8ksim.sc-sh, z8ksim.sh: new files
+	* configure.in, Makefile.in: modified to reflect above
+
+	* ldlang.c (lang_check): when linking conflicting architectures,
+	make the output file reflect at least one of the bad inputs.
+
 Tue Sep 15 15:35:38 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (install): if $(tooldir) exists, install ld in

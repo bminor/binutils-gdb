@@ -119,6 +119,9 @@ sun4.sh
 vanilla.em
 vanilla.sc-sh
 vanilla.sh
+z8ksim.em
+z8ksim.sc-sh
+z8ksim.sh
 
 Do-last:
 
@@ -127,7 +130,17 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.46  1992/09/11 20:43:30  sac
+# Revision 1.47  1992/09/25 18:10:41  sac
+# Fri Sep 25 11:08:01 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+#
+# 	Added initial support for the z8k
+# 	* z8ksim.em, z8ksim.sc-sh, z8ksim.sh: new files
+# 	* configure.in, Makefile.in: modified to reflect above
+#
+# 	* ldlang.c (lang_check): when linking conflicting architectures,
+# 	make the output file reflect at least one of the bad inputs.
+#
+# Revision 1.46  1992/09/11  20:43:30  sac
 # Sanitize slip
 #
 # Revision 1.45  1992/09/11  17:47:22  sac

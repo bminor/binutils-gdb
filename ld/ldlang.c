@@ -1846,34 +1846,44 @@ static void
 DEFUN_VOID (lang_finish)
 {
   ldsym_type *lgs;
-
+  int warn = 1;
   if (entry_symbol == (char *) NULL)
-    {
-      /* No entry has been specified, look for start */
-      entry_symbol = "start";
-    }
+  {
+    /* No entry has been specified, look for start, but don't warn */
+    entry_symbol = "start";
+    warn =0;
+  }
   lgs = ldsym_get_soft (entry_symbol);
   if (lgs && lgs->sdefs_chain)
-    {
-      asymbol *sy = *(lgs->sdefs_chain);
+  {
+    asymbol *sy = *(lgs->sdefs_chain);
 
-      /* We can set the entry address*/
-      bfd_set_start_address (output_bfd,
-			     outside_symbol_address (sy));
+    /* We can set the entry address*/
+    bfd_set_start_address (output_bfd,
+			   outside_symbol_address (sy));
 
-    }
+  }
   else
+  {
+    /* Can't find anything reasonable,
+       use the first address in the text section
+       */
+    asection *ts = bfd_get_section_by_name (output_bfd, ".text");
+    if (ts)
     {
-      /* Can't find anything reasonable,
-         use the first address in the text section
-         */
-      asection *ts = bfd_get_section_by_name (output_bfd, ".text");
+      if (warn)
+       einfo ("%P: Warning, can't find entry symbol %s, defaulting to %V\n",
+	      entry_symbol, ts->vma);
 
-      if (ts)
-	{
-	  bfd_set_start_address (output_bfd, ts->vma);
-	}
+      bfd_set_start_address (output_bfd, ts->vma);
     }
+    else 
+    {
+      if (warn)
+       einfo ("%P: Warning, can't find entry symbol %s, not setting start address\n",
+	      entry_symbol);
+    }
+  }
 }
 
 /* By now we know the target architecture, and we may have an */
@@ -1905,7 +1915,7 @@ DEFUN_VOID (lang_check)
 
       compatible = bfd_arch_get_compatible (input_bfd,
 					    output_bfd);
-
+ 
       if (compatible)
 	{
 	  ldfile_output_machine = compatible->mach;
@@ -1919,8 +1929,8 @@ DEFUN_VOID (lang_check)
 		bfd_printable_name (output_bfd));
 
 	  bfd_set_arch_mach (output_bfd,
-			     ldfile_new_output_architecture,
-			     ldfile_new_output_machine);
+			     input_architecture,
+			     input_machine);
 	}
 
     }
