@@ -1,3 +1,8 @@
+2002-04-12  Michael Snyder  <msnyder@redhat.com>
+
+	* bfd-in.h (bfd_get_section_lma): New access macro.
+	Minor white-space fix-up.
+
 2002-04-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (prep_headers): Don't zero EI_OSABI, EI_ABIVERSION or
