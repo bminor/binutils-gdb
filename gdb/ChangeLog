@@ -1,3 +1,12 @@
+2002-07-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* NEWS: Mention that the FR30 has been made obsolete.
+	* fr30-tdep.c: Make file obsolete.
+	* config/fr30/tm-fr30.h: Ditto.
+	* config/fr30/fr30.mt: Ditto.
+	* configure.tgt: Make fr30-*-elf obsolete.
+	* MAINTAINERS: Make fr30-elf obsolete.
+
 2002-07-16  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* blockframe.c (get_pc_function_start): return 0 if the minimal symbol

@@ -1,3 +1,14 @@
+2002-07-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in: Make file obsolete.
+	* cpu.c, arch.h, arch.c, cpu.h, decode.h: Ditto.
+	* decode.c, fr30-sim.h, devices.c, fr30.c: Ditto.
+	* model.c, sem-switch.c, sim-if.c: Ditto.
+	* sim-main.h, traps.c, sem.c: Ditto.
+	* TODO, README: Ditto.
+	* configure.in: Ditto.
+	* configure: Regenerate.
+
 2002-06-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

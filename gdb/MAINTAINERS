@@ -83,9 +83,7 @@ maintainer works with the native maintainer when resolving API issues.
 	djgpp		--target=i586-pc-msdosdjgpp ,-Werror
 			(See native and host)
 
-	fr30		--target=fr30-elf -Werror
-			Maintenance only
-			OBSOLETE candidate, not multi-arch
+	fr30		(--target=fr30-elf OBSOLETE)
 
 	h8300		--target=h8300hms -Werror
 			Maintenance only

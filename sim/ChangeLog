@@ -1,3 +1,8 @@
+2002-07-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* configure.in (extra_subdirs): Mark fr30-*-* as obsolete.
+	* configure: Re-generate.
+
 2002-07-13  Andrew Cagney  <ac131313@redhat.com>
 
 	* configure.in (extra_subdirs): Mark d30v-*-* as obsolete.

@@ -1425,7 +1425,7 @@ case "${target}" in
 # OBSOLETE 	only_if_gcc=yes
 # OBSOLETE 	extra_subdirs="${extra_subdirs} igen"
 # OBSOLETE 	;;
-  fr30-*-*)		sim_target=fr30 ;;
+# OBSOLETE   fr30-*-*)		sim_target=fr30 ;;
   h8300*-*-*)		sim_target=h8300 ;;
   h8500-*-*)		sim_target=h8500 ;;
   i960-*-*)		sim_target=i960 ;;

@@ -1,5 +1,5 @@
-# Target: Fujitsu FR30 processor
-TDEPFILES= fr30-tdep.o
-TM_FILE= tm-fr30.h
-SIM_OBS = remote-sim.o
-SIM = ../sim/fr30/libsim.a
+# OBSOLETE # Target: Fujitsu FR30 processor
+# OBSOLETE TDEPFILES= fr30-tdep.o
+# OBSOLETE TM_FILE= tm-fr30.h
+# OBSOLETE SIM_OBS = remote-sim.o
+# OBSOLETE SIM = ../sim/fr30/libsim.a

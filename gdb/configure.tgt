@@ -72,7 +72,7 @@ h8300-*-*)		gdb_target=h8300 ;;
 h8500-*-*)		gdb_target=h8500 ;;
 
 
-fr30-*-elf*)		gdb_target=fr30 ;;
+# OBSOLETE fr30-*-elf*)		gdb_target=fr30 ;;
 
 frv-*-*)		gdb_target=frv ;;
 
@@ -285,8 +285,8 @@ xstormy16-*-*)          gdb_target=xstormy16 ;;
 
 vax-*-*)		gdb_target=vax ;;
 
-fr30-*-*)		gdb_target=fr30
-			;;
+# OBSOLETE fr30-*-*)		gdb_target=fr30
+# OBSOLETE 			;;
 
 v850*-*-*)		gdb_target=v850
 			case ${gdb_host} in
