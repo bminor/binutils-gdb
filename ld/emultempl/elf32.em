@@ -78,7 +78,8 @@ gld${EMULATION_NAME}_before_parse()
 }
 
 /* Try to open a dynamic archive.  This is where we know that ELF
-   dynamic libraries have an extension of .so.  */
+   dynamic libraries have an extension of .so (or .sl on oddball systems
+   like hpux).  */
 
 static boolean
 gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
@@ -103,8 +104,15 @@ gld${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
 
   if (! ldfile_try_open_bfd (string, entry))
     {
-      free (string);
-      return false;
+      /* It failed using .so, try again with .sl for oddball systems
+	 that use a different naming scheme (ie hpux).  */
+      sprintf (string, "%s/lib%s%s.sl", search->name, filename, arch);
+
+      if (! ldfile_try_open_bfd (string, entry))
+	{
+	  free (string);
+	  return false;
+	}
     }
 
   entry->filename = string;

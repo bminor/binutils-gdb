@@ -5,6 +5,10 @@
 
 Mon Sep 13 00:17:18 1999  Jeffrey A Law  (law@cygnus.com)
 
+	* emultempl/elf32.em (gld${EMULATION_NAME}_open_dynamic_archive):
+	Search for file with .sl extension if no file with a .so extension
+	is found.
+
 	* emulparms/elf64hppa.sh (OTHER_READWRITE_SECTIONS): Put .plt
 	at the start of the .dlt output section.
 
