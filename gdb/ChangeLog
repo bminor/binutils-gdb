@@ -1,3 +1,8 @@
+2002-09-10  Andrew Cagney  <cagney@redhat.com>
+
+	* infcmd.c (default_print_registers_info): Send all output to
+	``file'' instead of ``gdb_stdout''.
+
 2002-09-10  Michael Snyder  <msnyder@redhat.com>
 
 	* mips-tdep.c (mips_extract_struct_value_address): Make val a
