@@ -1,5 +1,7 @@
 Thu Nov 11 19:58:05 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/i386/i386sol2.mh: Comment out corelow.o.
+
 	* printcmd.c (address_info): Use filtered, not unfiltered functions.
 	We should be able to deal with a QUIT here.
 
