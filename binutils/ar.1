@@ -1,6 +1,6 @@
-.\" Copyright (c) 1991 Free Software Foundation
+.\" Copyright (c) 1991, 1992, 1993, 1995, 1998, 1999 Free Software Foundation
 .\" See section COPYING for conditions for redistribution
-.TH ar 1 "5 November 1991" "cygnus support" "GNU Development Tools"
+.TH ar 1 "1999" "Cygnus Solutions" "GNU Development Tools"
 .de BP
 .sp
 .ti \-.2i
@@ -385,6 +385,18 @@ modifier may be used to truncate file names when putting them in the
 archive.
 
 .TP
+.B P
+Use the full path name when matching names in the archive.
+.B ar
+can not create an archive with a full path name (such archives are not
+POSIX complaint), but other archive creators can.  This option will
+cause
+.B ar
+to match file names using a complete path name, which can be
+convenient when extracting a single file from an archive created by
+another tool.
+
+.TP
 .B i
 Insert new files \c
 .I before\c
@@ -491,7 +503,7 @@ The GNU Binary Utilities\c
 \&.
 
 .SH COPYING
-Copyright (c) 1991 Free Software Foundation, Inc.
+Copyright (c) 1991, 1992, 1993, 1995, 1998, 1999 Free Software Foundation, Inc.
 .PP
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice

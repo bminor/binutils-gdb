@@ -150,6 +150,11 @@ get_pos_bfd PARAMS ((bfd **, enum pos, const char *));
 /* Whether to truncate names of files stored in the archive.  */
 static boolean ar_truncate = false;
 
+/* Whether to use a full file name match when searching an archive.
+   This is convenient for archives created by the Microsoft lib
+   program.  */
+static boolean full_pathname = false;
+
 int interactive = 0;
 
 static void
@@ -202,7 +207,7 @@ map_over_members (arch, function, files, count)
 	      bfd_stat_arch_elt (head, &buf);
 	    }
 	  if ((head->filename != NULL) &&
-	      (!strcmp (*files, head->filename)))
+	      (!strcmp (normalize (*files, arch), head->filename)))
 	    {
 	      found = true;
 	      function (head);
@@ -242,6 +247,7 @@ usage (help)
       fprintf (s, _("  [a]          - put file(s) after [member-name]\n"));
       fprintf (s, _("  [b]          - put file(s) before [member-name] (same as [i])\n"));
       fprintf (s, _("  [f]          - truncate inserted file names\n"));
+      fprintf (s, _("  [P]          - use full path names when matching\n"));
       fprintf (s, _("  [o]          - preserve original dates\n"));
       fprintf (s, _("  [u]          - only replace files that are newer than current archive contents\n"));
       fprintf (s, _(" generic modifiers:\n"));
@@ -272,6 +278,9 @@ normalize (file, abfd)
      bfd *abfd;
 {
   const char *filename;
+
+  if (full_pathname)
+    return filename;
 
   filename = strrchr (file, '/');
   if (filename != (char *) NULL)
@@ -500,6 +509,9 @@ main (argc, argv)
 	  break;
 	case 'f':
 	  ar_truncate = true;
+	  break;
+	case 'P':
+	  full_pathname = true;
 	  break;
 	default:
 	  /* xgettext:c-format */

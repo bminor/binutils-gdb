@@ -1,3 +1,12 @@
+1999-09-12  Ian Lance Taylor  <ian@zembu.com>
+
+	* ar.c (full_pathname): New static variable.
+	(map_over_members): Call normalize on command line parameter.
+	(usage): Mention P modifier.
+	(normalize): If full_pathname is true, don't do anything.
+	(main): Accept P modifier.
+	* binutils.texi, ar.1: Document P modifier.
+
 1999-09-09  Andreas Schwab  <schwab@suse.de>
 
 	* binutils.texi: Add info dir entries for all programs described

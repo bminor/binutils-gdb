@@ -387,6 +387,14 @@ not compatible with the native @code{ar} program on some systems.  If
 this is a concern, the @samp{f} modifier may be used to truncate file
 names when putting them in the archive.
 
+@item P
+Use the full path name when matching names in the archive.  @sc{gnu}
+@code{ar} can not create an archive with a full path name (such archives
+are not POSIX complaint), but other archive creators can.  This option
+will cause @sc{gnu} @code{ar} to match file names using a complete path
+name, which can be convenient when extracting a single file from an
+archive created by another tool.
+
 @item i
 Insert new files @emph{before} an existing member of the
 archive.  If you use the modifier @samp{i}, the name of an existing archive
