@@ -3089,7 +3089,7 @@ elf32_hppa_set_gp (abfd, info)
 	}
     }
 
-  if (sec != NULL)
+  if (sec != NULL && sec->output_section != NULL)
     gp_val += sec->output_section->vma + sec->output_offset;
 
   elf_gp (abfd) = gp_val;
