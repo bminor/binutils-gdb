@@ -1,3 +1,22 @@
+Wed Sep 27 10:29:13 1995  Kim Knuttila  <krk@nellie>
+
+	* configure (emulations): Added support for ppcle-*-[pe|winnt]
+	* configure.in (emulations): Same
+	* config/tc-ppc.h:
+	* config/tc-ppc.c (md_pseudo_table): Base support for new or altered
+	pseudo ops - <previous, pdata, ydata, reldata, rdata, ualong, znop,
+	section, comm, function> There will be more.
+	(pre_defined_registers): Predefined reg table to name registers, etc
+	(md_begin): Setup reg table initialization
+	(md_assemble): Initial [toc]x(rtoc) support
+	(ppc_frob_label): Removed some xcoff specific processing from TE_PE
+	(ppc_frob_symbol): Removed some xcoff specific processing from TE_PE
+                           Added support for more predefined sections
+        (ppc_frob_section): Removed some xcoff specific processing from TE_PE
+	(ppc_fix_adjustable): Removed from TE_PE mainline
+	(md_apply_fix3): For TE_PE toc entries, we don't need to mess 
+        with fx_addnumber. Removed for the time being.
+
 Tue Sep 26 14:57:59 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (ppc_elf_suffix): Support all of the V.4
