@@ -1,3 +1,8 @@
+2001-10-03  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* binutils-all/readelf.exp: Exclude mips*-*-elf* from 'readelf -wi'
+	test.
+
 Tue Sep  4 20:25:41 2001  Jeffrey A Law  (law@cygnus.com)
 
 	* binutils/all/readelf.exp: Expect readelf -wi to
