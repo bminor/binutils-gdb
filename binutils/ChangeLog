@@ -1,3 +1,29 @@
+Tue Mar 24 19:33:08 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* rclex.l: Accept { and } as synonyms for BEGIN and END.
+
+Fri Mar 20 19:18:08 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aclocal.m4, configure: Rebuild with libtool 1.2.
+
+Tue Feb 24 13:07:50 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* objdump.c (disassemble_data): Delete "++place" after call to
+	find_symbol_for_address.  Set disasm_info.symbols to array of
+	symbols at the current address.
+
+Wed Feb 18 23:39:46 1998  Richard Henderson  <rth@cygnus.com>
+
+	* Makefile.am (install-exec-local): Install properly when ln
+	fails or tooldir == prefix.
+
+Tue Feb 17 18:40:55 1998  Richard Henderson  <rth@cygnus.com>
+
+	* objcopy.c (compare_section_lma): Rename from _vma.
+        (copy_object): Gap fill based on LMA not VMA.
+	* binutils.texi: Update and clarify.
+	* objcopy.1: Likewise.
+
 Tue Feb 17 20:34:11 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* dlltool.c (make_one_lib_file): Don't add 1 to hint.

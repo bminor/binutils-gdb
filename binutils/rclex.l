@@ -1,5 +1,5 @@
 %{ /* rclex.l -- lexer for Windows rc files parser  */
-/* Copyright 1997 Free Software Foundation, Inc.
+/* Copyright 1997, 1998 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.
@@ -58,7 +58,9 @@ static char *get_string PARAMS ((int));
 %%
 
 "BEGIN"			{ return BEG; }
+"{"			{ return BEG; }
 "END"			{ return END; }
+"}"			{ return END; }
 "ACCELERATORS"		{ return ACCELERATORS; }
 "VIRTKEY"		{ return VIRTKEY; }
 "ASCII"			{ return ASCII; }
