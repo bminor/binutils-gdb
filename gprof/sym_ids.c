@@ -1,6 +1,6 @@
 /* sym_ids.c
 
-   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
