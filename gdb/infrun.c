@@ -2446,9 +2446,9 @@ process_event_stop_test:
       return;
     }
 
-  if (stop_pc == ecs->stop_func_start	/* Quick test */
-      || (in_prologue (stop_pc, ecs->stop_func_start) &&
-	  !IN_SOLIB_RETURN_TRAMPOLINE (stop_pc, ecs->stop_func_name))
+  if (((stop_pc == ecs->stop_func_start	/* Quick test */
+	|| in_prologue (stop_pc, ecs->stop_func_start))
+       && !IN_SOLIB_RETURN_TRAMPOLINE (stop_pc, ecs->stop_func_name))
       || IN_SOLIB_CALL_TRAMPOLINE (stop_pc, ecs->stop_func_name)
       || ecs->stop_func_name == 0)
     {

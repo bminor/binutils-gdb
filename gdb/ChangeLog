@@ -1,3 +1,9 @@
+2003-09-07  Daniel Jacobowitz  <drow@mvista.com>
+
+	From Nick Kelsey <nickk@ubicom.com>:
+	* infrun.c (handle_inferior_event): Check IN_SOLIB_RETURN_TRAMPOLINE
+	when the stop PC is at the beginning of a function also.
+
 2003-09-06  Daniel Jacobowitz  <drow@mvista.com>
 
 	* arm-linux-tdep.c (arm_linux_arm_be_breakpoint): New.
