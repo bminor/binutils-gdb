@@ -604,6 +604,7 @@ typedef struct sec
 #define BFD_ABS_SECTION_NAME "*ABS*"
 #define BFD_UND_SECTION_NAME "*UND*"
 #define BFD_COM_SECTION_NAME "*COM*"
+#define BFD_IND_SECTION_NAME "*IND*"
 
      /* the absolute section */
  extern   asection bfd_abs_section;
@@ -611,10 +612,13 @@ typedef struct sec
  extern   asection bfd_und_section;
      /* Pointer to the common section */
  extern asection bfd_com_section;
+     /* Pointer to the indirect section */
+ extern asection bfd_ind_section;
 
  extern struct symbol_cache_entry *bfd_abs_symbol;
  extern struct symbol_cache_entry *bfd_com_symbol;
  extern struct symbol_cache_entry *bfd_und_symbol;
+ extern struct symbol_cache_entry *bfd_ind_symbol;
 #define bfd_get_section_size_before_reloc(section) \
      (section->reloc_done ? (abort(),1): (section)->_raw_size)
 #define bfd_get_section_size_after_reloc(section) \
