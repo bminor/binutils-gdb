@@ -2076,16 +2076,22 @@ typedef struct
 
 #define NSECS 7
 
-#define INIT_SEC_DATA(id, name, flags, align) { id, name, flags, align, NULL, NULL, NULL, 0, NULL }
+#define TEXT_SEC_FLAGS   \
+        (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_READONLY | SEC_HAS_CONTENTS)
+#define DATA_SEC_FLAGS   (SEC_ALLOC | SEC_LOAD | SEC_DATA)
+#define BSS_SEC_FLAGS     SEC_ALLOC
+
+#define INIT_SEC_DATA(id, name, flags, align) \
+        { id, name, flags, align, NULL, NULL, NULL, 0, NULL }
 static sinfo secdata[NSECS] =
 {
-  INIT_SEC_DATA (TEXT,   ".text",    SEC_CODE | SEC_HAS_CONTENTS, 2),
-  INIT_SEC_DATA (DATA,   ".data",    SEC_DATA,                    2),
-  INIT_SEC_DATA (BSS,    ".bss",     0,                           2),
-  INIT_SEC_DATA (IDATA7, ".idata$7", SEC_HAS_CONTENTS,            2),
-  INIT_SEC_DATA (IDATA5, ".idata$5", SEC_HAS_CONTENTS,            2),
-  INIT_SEC_DATA (IDATA4, ".idata$4", SEC_HAS_CONTENTS,            2),
-  INIT_SEC_DATA (IDATA6, ".idata$6", SEC_HAS_CONTENTS,            1)
+  INIT_SEC_DATA (TEXT,   ".text",    TEXT_SEC_FLAGS,   2),
+  INIT_SEC_DATA (DATA,   ".data",    DATA_SEC_FLAGS,   2),
+  INIT_SEC_DATA (BSS,    ".bss",     BSS_SEC_FLAGS,    2),
+  INIT_SEC_DATA (IDATA7, ".idata$7", SEC_HAS_CONTENTS, 2),
+  INIT_SEC_DATA (IDATA5, ".idata$5", SEC_HAS_CONTENTS, 2),
+  INIT_SEC_DATA (IDATA4, ".idata$4", SEC_HAS_CONTENTS, 2),
+  INIT_SEC_DATA (IDATA6, ".idata$6", SEC_HAS_CONTENTS, 1)
 };
 
 #else
@@ -2231,7 +2237,7 @@ make_one_lib_file (exp, i)
     {
       bfd *      abfd;
       asymbol *  exp_label;
-      asymbol *  iname;
+      asymbol *  iname = 0;
       asymbol *  iname2;
       asymbol *  iname_lab;
       asymbol ** iname_lab_pp;
@@ -2245,6 +2251,7 @@ make_one_lib_file (exp, i)
 #define EXTRA    0
 #endif
       asymbol *  ptrs[NSECS + 4 + EXTRA + 1];
+      flagword   applicable;
 
       char *     outname = xmalloc (10);
       int        oidx = 0;
@@ -2269,6 +2276,8 @@ make_one_lib_file (exp, i)
 	bfd_set_private_flags (abfd, F_INTERWORK);
 #endif
       
+      applicable = bfd_applicable_section_flags (abfd);
+ 
       /* First make symbols for the sections */
       for (i = 0; i < NSECS; i++)
 	{
@@ -2278,7 +2287,7 @@ make_one_lib_file (exp, i)
 	  si->sec = bfd_make_section_old_way (abfd, si->name);
 	  bfd_set_section_flags (abfd,
 				 si->sec,
-				 si->flags);
+				 si->flags & applicable);
 
 	  bfd_set_section_alignment(abfd, si->sec, si->align);
 	  si->sec->output_section = si->sec;
