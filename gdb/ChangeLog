@@ -1,3 +1,21 @@
+Fri Jul  2 13:33:12 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
+
+	New target macros for getting at the pc, sp and fp.
+	* infcmd.c (read_pc, write_pc):  Modify to use new macros.
+	(read_sp, write_sp, read_fp, write_fp): New functions.
+	* blockframe.c (reinit_frame_cache, get_prev_frame_info):  Use new functions.
+	* breakpoint.c (bpstat_alloc): ditto.
+	* infrun.c (wait_for_inferior): ditto.
+	* stack.c (print_frame_info): ditto.
+	* valops (call_function_by_hand): ditto.
+	* corelow.c (core_open): ditto.
+	* h8500-tdep.c: (target_read_sp, target_write_sp, target_read_pc,
+	target_write_pc, target_read_fp, target_write_fp): New functions.
+	* inferior.h (read_sp, write_sp, read_fp, write_fp): Prototypes.
+
+	* config/alpha/xm-alpha.h: Add MAKEVA_END.
+	* config/h8500/tm-h8500.h: Define new macros.
+
 Fri Jul  2 13:51:04 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure.in (mipos-*-riscos*): New host and target; use riscos.

@@ -35,7 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define UNSIGNED_SHORT(X) ((X) & 0xffff)
 
-/* Shape of an H8/500 frame : 
+/* Shape of an H8/500 frame :
 
 
    arg-n
@@ -78,9 +78,10 @@ CORE_ADDR examine_prologue ();
 
 void frame_find_saved_regs ();
 
-int regoff[NUM_REGS] = {0,  2,  4,  6,  8,  10,  12, 14, /* r0->r7 */
-		  16, 18, /* ccr, pc */
-		  20, 21, 22, 23}; /* cp, dp, ep, tp */
+int regoff[NUM_REGS] =
+{0, 2, 4, 6, 8, 10, 12, 14,	/* r0->r7 */
+ 16, 18,			/* ccr, pc */
+ 20, 21, 22, 23};		/* cp, dp, ep, tp */
 
 CORE_ADDR
 h8500_skip_prologue (start_pc)
@@ -93,13 +94,13 @@ h8500_skip_prologue (start_pc)
   if (w == LINK_8)
     {
       start_pc += 2;
-      w = read_memory_integer (start_pc,1);
+      w = read_memory_integer (start_pc, 1);
     }
 
   if (w == LINK_16)
     {
       start_pc += 3;
-      w = read_memory_integer (start_pc,2);
+      w = read_memory_integer (start_pc, 2);
     }
 
   return start_pc;
@@ -111,7 +112,7 @@ print_insn (memaddr, stream)
      FILE *stream;
 {
   disassemble_info info;
-  GDB_INIT_DISASSEMBLE_INFO(info, stream);
+  GDB_INIT_DISASSEMBLE_INFO (info, stream);
   return print_insn_h8500 (memaddr, &info);
 }
 
@@ -128,8 +129,8 @@ h8500_frame_chain (thisframe)
 {
 
   if (!inside_entry_file (thisframe->pc))
-      return (read_memory_integer(thisframe->frame, 2) & 0xffff)
-	| (read_register(SEG_T_REGNUM) << 16);
+    return (read_memory_integer (thisframe->frame, 2) & 0xffff)
+      | (read_register (SEG_T_REGNUM) << 16);
   else
     return 0;
 }
@@ -326,6 +327,7 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
 
   return (ip);
 }
+
 #endif
 
 /* Return the saved PC from this frame. */
@@ -460,7 +462,7 @@ h8500_register_virtual_type (regno)
     case CCR_REGNUM:
       return builtin_type_unsigned_short;
     default:
-      abort();
+      abort ();
     }
 }
 
@@ -498,7 +500,7 @@ frame_find_saved_regs (frame_info, frame_saved_regs)
 	 regs using the amount of storage from the link instruction.
 	 */
 
-      thebyte  = read_memory_integer(pc, 1);
+      thebyte = read_memory_integer (pc, 1);
       if (0x1f == thebyte)
 	next_addr = (frame_info)->frame + read_memory_integer (pc += 1, 2), pc += 2;
       else if (0x17 == thebyte)
@@ -507,38 +509,40 @@ frame_find_saved_regs (frame_info, frame_saved_regs)
 	goto lose;
 #if 0
       fixme steve
-	/* If have an add:g.waddal #-n, sp next, adjust next_addr.  */
-	if ((0x0c0177777 & read_memory_integer (pc, 2)) == 0157774)
-	  next_addr += read_memory_integer (pc += 2, 4), pc += 4;
+      /* If have an add:g.waddal #-n, sp next, adjust next_addr.  */
+      if ((0x0c0177777 & read_memory_integer (pc, 2)) == 0157774)
+	next_addr += read_memory_integer (pc += 2, 4), pc += 4;
 #endif
     }
 
-  thebyte = read_memory_integer(pc, 1);
-  if (thebyte == 0x12) {
-    /* Got stm */
-    pc++;
-    regmask = read_memory_integer(pc,1);
-    pc++;
-    for (regnum = 0; regnum < 8; regnum ++, regmask >>=1) 
-      {
-	if (regmask & 1) 
-	  {
-	    (frame_saved_regs)->regs[regnum] = (next_addr += 2) - 2;
-	  }
-      }
-    thebyte = read_memory_integer(pc, 1);
-  }
+  thebyte = read_memory_integer (pc, 1);
+  if (thebyte == 0x12)
+    {
+      /* Got stm */
+      pc++;
+      regmask = read_memory_integer (pc, 1);
+      pc++;
+      for (regnum = 0; regnum < 8; regnum++, regmask >>= 1)
+	{
+	  if (regmask & 1)
+	    {
+	      (frame_saved_regs)->regs[regnum] = (next_addr += 2) - 2;
+	    }
+	}
+      thebyte = read_memory_integer (pc, 1);
+    }
   /* Maybe got a load of pushes */
-  while (thebyte == 0xbf) {
-    pc++;
-    regnum = read_memory_integer(pc,1) & 0x7;
-    pc++;
-    (frame_saved_regs)->regs[regnum] = (next_addr += 2) - 2;    
-    thebyte = read_memory_integer(pc, 1);
-  }
+  while (thebyte == 0xbf)
+    {
+      pc++;
+      regnum = read_memory_integer (pc, 1) & 0x7;
+      pc++;
+      (frame_saved_regs)->regs[regnum] = (next_addr += 2) - 2;
+      thebyte = read_memory_integer (pc, 1);
+    }
 
- lose:;
-  
+lose:;
+
   /* Remember the address of the frame pointer */
   (frame_saved_regs)->regs[FP_REGNUM] = (frame_info)->frame;
 
@@ -549,10 +553,10 @@ frame_find_saved_regs (frame_info, frame_saved_regs)
   (frame_saved_regs)->regs[PC_REGNUM] = (frame_info)->frame + 2;
 }
 
-saved_pc_after_call(frame)
+saved_pc_after_call (frame)
 {
   int x;
-  int a = read_register(SP_REGNUM);
+  int a = read_register (SP_REGNUM);
   x = read_memory_integer (a, PTR_SIZE);
   return x;
 }
@@ -560,11 +564,11 @@ saved_pc_after_call(frame)
 
 /* Nonzero if instruction at PC is a return instruction.  */
 
-about_to_return(pc)
+about_to_return (pc)
 {
-  int b1 = read_memory_integer(pc,1);
+  int b1 = read_memory_integer (pc, 1);
 
-  switch (b1) 
+  switch (b1)
     {
     case 0x14:			/* rtd #8 */
     case 0x1c:			/* rtd #16 */
@@ -573,8 +577,8 @@ about_to_return(pc)
       return 1;
     case 0x11:
       {
-	int b2 = read_memory_integer(pc+1,1);
-	switch (b2) 
+	int b2 = read_memory_integer (pc + 1, 1);
+	switch (b2)
 	  {
 	  case 0x18:		/* prts */
 	  case 0x14:		/* prtd #8 */
@@ -647,7 +651,7 @@ h8500_is_trapped_internalvar (name)
   if (name[0] != 'p')
     return 0;
 
-  if (strcmp(name+1, "pc") == 0)
+  if (strcmp (name + 1, "pc") == 0)
     return 1;
 
   if (name[1] == 'r'
@@ -674,13 +678,18 @@ h8500_value_of_trapped_internalvar (var)
     case 'c':
       page_regnum = SEG_C_REGNUM;
       break;
-    case '0': case '1': case '2': case '3':
+    case '0':
+    case '1':
+    case '2':
+    case '3':
       page_regnum = SEG_D_REGNUM;
       break;
-    case '4': case '5':
+    case '4':
+    case '5':
       page_regnum = SEG_E_REGNUM;
       break;
-    case '6': case '7':
+    case '6':
+    case '7':
       page_regnum = SEG_T_REGNUM;
       break;
     }
@@ -718,11 +727,11 @@ h8500_set_trapped_internalvar (var, newval, bitpos, bitsize, offset)
 
   if ((newval_type_code != TYPE_CODE_INT
        && newval_type_code != TYPE_CODE_PTR)
-      || TYPE_LENGTH (type) != sizeof(new_regval))
-    error("Illegal type (%s) for assignment to $%s\n",
-	  TYPE_NAME (type), var->name);
+      || TYPE_LENGTH (type) != sizeof (new_regval))
+    error ("Illegal type (%s) for assignment to $%s\n",
+	   TYPE_NAME (type), var->name);
 
-  new_regval = *(long *)VALUE_CONTENTS_RAW(newval);
+  new_regval = *(long *) VALUE_CONTENTS_RAW (newval);
 
   regnum = var->name + 1;
 
@@ -731,22 +740,27 @@ h8500_set_trapped_internalvar (var, newval, bitpos, bitsize, offset)
     case 'c':
       page_regnum = "cp";
       break;
-    case '0': case '1': case '2': case '3':
+    case '0':
+    case '1':
+    case '2':
+    case '3':
       page_regnum = "dp";
       break;
-    case '4': case '5':
+    case '4':
+    case '5':
       page_regnum = "ep";
       break;
-    case '6': case '7':
+    case '6':
+    case '7':
       page_regnum = "tp";
       break;
     }
 
   sprintf (expression, "$%s=%d", page_regnum, new_regval >> 16);
-  parse_and_eval(expression);
+  parse_and_eval (expression);
 
   sprintf (expression, "$%s=%d", regnum, new_regval & 0xffff);
-  parse_and_eval(expression);
+  parse_and_eval (expression);
 }
 
 _initialize_h8500_tdep ()
@@ -759,4 +773,46 @@ _initialize_h8500_tdep ()
   add_cmd ("unsegmented", class_support, unsegmented_command,
 	   "Set unsegmented memory model.", &setmemorylist);
 
+}
+
+CORE_ADDR
+target_read_sp ()
+{
+  return (read_register (SEG_T_REGNUM) << 16) | (read_register (SP_REGNUM));
+}
+
+void
+target_write_sp (v)
+     CORE_ADDR v;
+{
+  write_register (SEG_T_REGNUM, v >> 16);
+  write_register (SP_REGNUM, v & 0xffff);
+}
+
+CORE_ADDR
+target_read_pc ()
+{
+  return (read_register (SEG_C_REGNUM) << 16) | (read_register (PC_REGNUM));
+}
+
+void
+target_write_pc (v)
+     CORE_ADDR v;
+{
+  write_register (SEG_C_REGNUM, v >> 16);
+  write_register (PC_REGNUM, v & 0xffff);
+}
+
+CORE_ADDR
+target_read_fp ()
+{
+  return (read_register (SEG_T_REGNUM) << 16) | (read_register (FP_REGNUM));
+}
+
+void
+target_write_fp (v)
+     CORE_ADDR v;
+{
+  write_register (SEG_T_REGNUM, v >> 16);
+  write_register (FP_REGNUM, v & 0xffff);
 }

@@ -165,7 +165,7 @@ core_open (filename, from_tty)
 #endif
 
     /* Now, set up the frame cache, and print the top of stack */
-    set_current_frame (create_new_frame (read_register (FP_REGNUM),
+    set_current_frame (create_new_frame (read_fp (),
 					 read_pc ()));
     select_frame (get_current_frame (), 0);
     print_stack_frame (selected_frame, selected_frame_level, 1);
