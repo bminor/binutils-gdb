@@ -83,6 +83,7 @@ case "${canon}" in
   mips*-*-ecoff*)	bfd_name=bigmips ;;
   mips*-*-irix5*)	bfd_name=mipsbelf ;;
   mips*-sgi-*)		bfd_name=bigmips ;;
+  mips*-*-sysv4*)	bfd_name=mipsbelf ;;
   mips*-*-sysv*)	bfd_name=riscos ;;
   mips*-*-riscos*)	bfd_name=riscos ;;
   mips*-*-bsd*)		bfd_name=bigmips ;; # Sony News
@@ -118,7 +119,7 @@ case "${canon}" in
   *-*-sysv4*)		bfd_name=${cpu}-elf ;;
   *-*-solaris2*)	bfd_name=${cpu}-elf ;;
   *-*-vsta*)		bfd_name=${cpu}-aout ;;
-  *-*-go32*)		bfd_name=${cpu}-aout ;;
+  *-*-go32*)		bfd_name=${cpu}-coff ;;
   *-*-sysv*)		bfd_name=${cpu}-coff ;;
 
   *-*-aout64*)		bfd_name=${cpu}-aout64 ;;

@@ -1,6 +1,9 @@
 Fri Apr 29 09:42:39 1994  Steve Chamberlain  (sac@cygnus.com)
 
+        * config.bfd (*-go32): Changed to coff.
 	* coff-h8300.c (JMPL1): Get HOWTO right for 24bit branches.
+	* srec.c (srec_write_symbols): Write out the correct number of
+	symbols and don't stick in extra nulls.
 
 Tue Apr 26 15:07:24 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
