@@ -1,3 +1,8 @@
+2004-03-01  Andrew Cagney  <cagney@redhat.com>
+
+	* rs6000-tdep.c (rs6000_init_frame_pc_first): Fix compiler error,
+	use frame_relative_level and get_next_frame.
+
 2004-02-29  Andrew Cagney  <cagney@redhat.com>
 
 	* rs6000-tdep.c (rs6000_init_frame_pc_first): New function.

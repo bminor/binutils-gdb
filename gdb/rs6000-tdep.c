@@ -213,8 +213,11 @@ rs6000_frame_init_saved_regs (struct frame_info *fi)
 static CORE_ADDR
 rs6000_init_frame_pc_first (int fromleaf, struct frame_info *prev)
 {
-  return (fromleaf ? DEPRECATED_SAVED_PC_AFTER_CALL (prev->next)
-	  : prev->next ? DEPRECATED_FRAME_SAVED_PC (prev->next) : read_pc ());
+  return (fromleaf
+	  ? DEPRECATED_SAVED_PC_AFTER_CALL (get_next_frame (prev))
+	  : frame_relative_level (prev) > 0
+	  ? DEPRECATED_FRAME_SAVED_PC (get_next_frame (prev))
+	  : read_pc ());
 }
 
 static CORE_ADDR
