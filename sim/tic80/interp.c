@@ -40,6 +40,7 @@ engine_init (SIM_DESC sd)
 
 void
 engine_error (SIM_DESC sd,
+	      sim_cpu *cpu,
 	      instruction_address cia,
 	      const char *fmt,
 	      ...)
@@ -52,7 +53,7 @@ engine_error (SIM_DESC sd,
   if (sd->halt_ok)
     {
       sim_io_printf (sd, "\n");
-      engine_halt (sd, cia, sim_signalled, SIGABRT);
+      engine_halt (sd, cpu, cia, sim_signalled, SIGABRT);
     }
   else
     sim_io_error (sd, " - aborting simulation");
@@ -60,6 +61,7 @@ engine_error (SIM_DESC sd,
 
 void
 engine_halt (SIM_DESC sd,
+	     sim_cpu *cpu,
 	     instruction_address cia,
 	     enum sim_stop reason,
 	     int siggnal)
@@ -70,18 +72,20 @@ engine_halt (SIM_DESC sd,
   sd->siggnal = siggnal;
   sd->halt_ok = 0;
   sd->restart_ok = 0;
-  sd->cpu.cia = cia;
+  if (cpu != NULL)
+    cpu->cia = cia;
   longjmp (sd->path_to_halt, 1);
 }
 
 void
 engine_restart (SIM_DESC sd,
+		sim_cpu *cpu,
 		instruction_address cia)
 {
   if (!sd->restart_ok)
     sim_io_error (sd, "engine_restart - bad longjmp");
   sd->restart_ok = 0;
-  sd->cpu.cia = cia;
+  cpu->cia = cia;
   longjmp(sd->path_to_restart, 1);
 }
 
@@ -93,10 +97,11 @@ engine_run_until_stop (SIM_DESC sd,
   if (!setjmp (sd->path_to_halt))
     {
       instruction_address cia;
+      sim_cpu *cpu = STATE_CPU (sd, 0);
       sd->halt_ok = 1;
       setjmp (sd->path_to_restart);
       sd->restart_ok = 1;
-      cia = STATE_CPU (sd, 0)->cia;
+      cia = cpu->cia;
       do
 	{
 	  if (cia.ip == -1)
@@ -112,6 +117,6 @@ engine_run_until_stop (SIM_DESC sd,
 	    }
 	}
       while (*keep_running);
-      engine_halt (sd, cia, sim_stopped, SIGINT);
+      engine_halt (sd, cpu, cia, sim_stopped, SIGINT);
     }
 }

@@ -1,7 +1,7 @@
 // The following is called when ever an illegal instruction is
 // encountered
 ::internal::illegal
-	engine_error (sd, cia, "illegal instruction at 0x%lx", cia.ip);
+	engine_error (SD, CPU, cia, "illegal instruction at 0x%lx", cia.ip);
 
 // Signed Integer Add - add source1, source2, dest
 void::function::do_add:signed32 *rDest, signed32 Source1, signed32 Source2
@@ -14,8 +14,8 @@ void::function::do_add:signed32 *rDest, signed32 Source1, signed32 Source2
 31.Dest,26.Source2,21.0b11101100,13.0,12.0,11./,4.Source1::::add r
 	do_add (_SD, rDest, rSource1, rSource2);
 31.Dest,26.Source2,21.0b11101100,13.0,12.1,11./::::add l
-	long_immediate (LongSignedImmediateOffset);
-	do_add (_SD, rDest, LongSignedImmediateOffset, rSource2);
+	long_immediate (LongSignedImmediate);
+	do_add (_SD, rDest, LongSignedImmediate, rSource2);
 
 
 // Unsigned Integer Add - addu source1, source2, dest
@@ -121,7 +121,7 @@ instruction_address::function::do_bcnd:instruction_address cia, instruction_addr
 	  case 0: val = SEXT32 (source, 7); break;
 	  case 1: val = SEXT32 (source, 15); break;
 	  case 2: val = source; break;
-	  default: engine_error (sd, cia, "bcnd - reserved size");
+	  default: engine_error (SD, CPU, cia, "bcnd - reserved size");
 	  }
 	switch (code)
 	  {
@@ -156,11 +156,11 @@ instruction_address::function::do_bcnd:instruction_address cia, instruction_addr
 // brcr
 #void::function::do_brcr:unsigned32 offset
 #	sim_io_error ("brcr");
-#31.//,27.0,26.//,21.0b0000110,14.CRN::::brcr i
+31.//,27.0,26.//,21.0b0000110,14.CRN::::brcr i
 #	nia = do_brcr (_SD, rCRN_val);
-#31.//,27.0,26.//,21.0b110000110,12.0,11./,4.Source1::::brcr r
+31.//,27.0,26.//,21.0b110000110,12.0,11./,4.Source1::::brcr r
 #	nia = do_brcr (_SD, CRN[rSource1]);
-#31.//,27.0,26.//,21.0b110000110,12.1,11./::::brcr l
+31.//,27.0,26.//,21.0b110000110,12.1,11./::::brcr l
 #	nia = do_brcr (_SD, CRN[SL]);
 
 
@@ -185,9 +185,9 @@ instruction_address::function::do_bsr:instruction_address cia, instruction_addre
 
 
 // cmnd
-#31./,21.0b0000010,14.UI::::cmnd i
-#31./,21.0b110000010,12.0,11./,4.Source1::::cmnd r
-#31./,21.0b110000010,12.1,11./::::cmnd l
+31./,21.0b0000010,14.UI::::cmnd i
+31./,21.0b110000010,12.0,11./,4.Source1::::cmnd r
+31./,21.0b110000010,12.1,11./::::cmnd l
 
 
 // cmp
@@ -237,38 +237,40 @@ void::function::do_cmp:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 // dld[{.b|.h|.d}]
 #void::function::do_dld:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 #	sim_io_error ("dld");
-#31.Dest,26.Source2,21.0b110100,m,sz,0,S,1,9./,4.Source1::::dld r
+31.Dest,26.Base,21.0b110100,15.m,14.sz,12.0,11.S,10.1,9./,4.IndOff::::dld r
 #	do_dld (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source2,21.0b11110100,m,sz,1,S,1,9./::::dld l
+31.Dest,26.Base,21.0b110100,15.m,14.sz,12.1,11.S,10.1,9./::::dld l
+#	long_immediate (LongSignedImmediateOffset);
 #	do_dld (_SD, rDest, LongSignedImmediate, rSource2);
 
 
 // dld.u[{.b|.h|.d}]
 #void::function::do_dld_u:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 #	sim_io_error ("dld.u");
-#31.Dest,26.Source2,21.0b110101,m,sz,0,S,1,9./,4.Source1::::dld.u r
+31.Dest,26.Base,21.0b110101,15.m,14.sz,12.0,11.S,10.1,9./,4.IndOff::::dld.u r
 #	do_dld_u (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source2,21.0b11110101,m,sz,1,S,1,9./::::dld.u l
+31.Dest,26.Base,21.0b110101,15.m,14.sz,12.1,11.S,10.1,9./::::dld.u l
+#	long_immediate (LongSignedImmediateOffset);
 #	do_dld_u (_SD, rDest, LongSignedImmediate, rSource2);
 
 
 // dst[{.b|.h|.d}]
 #void::function::do_dst:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 #	sim_io_error ("dst");
-#31.Dest,26.Source2,21.0b110110,m,sz,0,S,1,9./,4.Source1::::dst r
+31.Dest,26.Base,21.0b110110,15.m,14.sz,12.0,11.S,10.1,9./,4.IndOff::::dst r
 #	do_dst (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source2,21.0b11110110,m,sz,1,S,1,9./::::dst l
+31.Dest,26.Base,21.0b110110,15.m,14.sz,12.1,11.S,10.1,9./::::dst l
 #	do_dst (_SD, rDest, LongSignedImmediate, rSource2);
 
 
 // estop
-#31./,21.0b1111111,1,0,0,11./::::estop
+31./,21.0b1111111,14.1,13.0,12.0,11./::::estop
 
 
 // etrap
-#31./,27.1,26./,21.0b0000001,14.UTN::::etrap i
-#31./,27.1,26./,21.0b110000001,12.0,11./,4.iUTN::::etrap r
-#31./,27.1,26./,21.0b110000001,12.1,11./::::etrap l
+31./,27.1,26./,21.0b0000001,14.UTN::::etrap i
+31./,27.1,26./,21.0b110000001,12.0,11./,4.iUTN::::etrap r
+31./,27.1,26./,21.0b110000001,12.1,11./::::etrap l
 
 
 // exts - see shift.ds
@@ -280,99 +282,99 @@ void::function::do_cmp:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 // fadd.{s|d}{s|d}{s|d}
 #void::function::do_fadd:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 #	sim_io_error ("fadd");
-#31.Dest,26.Source2,21.0b111110000,0,r,PD,P2,P1,4.Source1::::fadd r
+31.Dest,26.Source2,21.0b111110000,12.0,11.r,10.PD,8.P2,6.P1,4.Source1::::fadd r
 #	do_fadd (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source2,21.0b11111110000,1,r,PD,P2,P1,4./::::fadd l
+31.Dest,26.Source2,21.0b111110000,12.1,11.r,10.PD,8.P2,6.P1,4./::::fadd l
 #	do_fadd (_SD, rDest, LongSignedImmediate, rSource2);
 
 
 // fcmp.{s|d}{s|d}{s|d}
 #void::function::do_fcmp:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 #	sim_io_error ("fcmp");
-#31.Dest,26.Source2,21.0b111110101,0,/,00,P2,P1,4.Source1::::fcmp r
+31.Dest,26.Source2,21.0b111110101,12.0,11./,10.0,8.P2,6.P1,4.Source1::::fcmp r
 #	do_fcmp (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source2,21.0b11111110101,1,/,00,P2,P1,4./::::fcmp l
+31.Dest,26.Source2,21.0b111110101,12.1,11./,10.0,8.P2,6.P1,4./::::fcmp l
 #	do_fcmp (_SD, rDest, LongSignedImmediate, rSource2);
 
 
 // fdiv.{s|d}{s|d}{s|d}
 #void::function::do_fdiv:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 #	sim_io_error ("fdiv");
-#31.Dest,26.Source2,21.0b111110011,0,/,PD,P2,P1,4.Source1::::fdiv r
+31.Dest,26.Source2,21.0b111110011,12.0,11./,10.PD,8.P2,6.P1,4.Source1::::fdiv r
 #	do_fdiv (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source2,21.0b11111110011,1,/,PD,P2,P1,4./::::fdiv l
+31.Dest,26.Source2,21.0b111110011,12.1,11./,10.PD,8.P2,6.P1,4./::::fdiv l
 #	do_fdiv (_SD, rDest, LongSignedImmediate, rSource2);
 
 
 // fmpy.{s|d|i|u}{s|d|i|u}{s|d|i|u}
 #void::function::do_fmpy:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 #	sim_io_error ("fmpy");
-#31.Dest,26.Source2,21.0b111110010,0,/,PD,P2,P1,4.Source1::::fmpy r
+31.Dest,26.Source2,21.0b111110010,12.0,11./,10.PD,8.P2,6.P1,4.Source1::::fmpy r
 #	do_fmpy (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source2,21.0b11111110010,1,/,PD,P2,P1,4./::::fmpy l
+31.Dest,26.Source2,21.0b111110010,12.1,11./,10.PD,8.P2,6.P1,4./::::fmpy l
 #	do_fmpy (_SD, rDest, LongSignedImmediate, rSource2);
 
 
 // frndm.{s|d|i|u}{s|d|i|u}{s|d|i|u}
 #void::function::do_frndm:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 #	sim_io_error ("frndm");
-#31.Dest,26.Source2,21.0b111110100,0,r,PD,11,P1,4.Source1::::frndm r
+31.Dest,26.Source2,21.0b111110100,12.0,11.r,10.PD,8.0b11,6.P1,4.Source1::::frndm r
 #	do_frndm (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source2,21.0b11111110100,1,r,PD,11,P1,4./::::frndm l
+31.Dest,26.Source2,21.0b111110100,12.1,11.r,10.PD,8.0b11,6.P1,4./::::frndm l
 #	do_frndm (_SD, rDest, LongSignedImmediate, rSource2);
 
 
 // frndn.{s|d|i|u}{s|d|i|u}{s|d|i|u}
 #void::function::do_frndn:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 #	sim_io_error ("frndn");
-#31.Dest,26.Source2,21.0b111110100,0,r,PD,00,P1,4.Source1::::frndn r
+31.Dest,26.Source2,21.0b111110100,12.0,11.r,10.PD,8.0b00,6.P1,4.Source1::::frndn r
 #	do_frndn (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source2,21.0b11111110100,1,r,PD,00,P1,4./::::frndn l
+31.Dest,26.Source2,21.0b111110100,12.1,11.r,10.PD,8.0b00,6.P1,4./::::frndn l
 #	do_frndn (_SD, rDest, LongSignedImmediate, rSource2);
 
 
 // frndp.{s|d|i|u}{s|d|i|u}{s|d|i|u}
 #void::function::do_frndp:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 #	sim_io_error ("frndp");
-#31.Dest,26.Source2,21.0b111110100,0,r,PD,10,P1,4.Source1::::frndp r
+#31.Dest,26.Source2,21.0b111110100,12.0,11.r,10.PD,8.0b10,6.P1,4.Source1::::frndp r
 #	do_frndp (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source2,21.0b11111110100,1,r,PD,10,P1,4./::::frndp l
+#31.Dest,26.Source2,21.0b111110100,12.1,11.r,10.PD,8.0b10,6.P1,4./::::frndp l
 #	do_frndp (_SD, rDest, LongSignedImmediate, rSource2);
 
 
 // frndz.{s|d|i|u}{s|d|i|u}{s|d|i|u}
 #void::function::do_frndz:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 #	sim_io_error ("frndz");
-#31.Dest,26.Source2,21.0b111110100,0,r,PD,01,P1,4.Source1::::frndz r
+31.Dest,26.Source2,21.0b111110100,12.0,11.r,10.PD,8.0b01,6.P1,4.Source1::::frndz r
 #	do_frndz (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source2,21.0b11111110100,1,r,PD,01,P1,4./::::frndz l
+31.Dest,26.Source2,21.0b111110100,12.1,11.r,10.PD,8.0b01,6.P1,4./::::frndz l
 #	do_frndz (_SD, rDest, LongSignedImmediate, rSource2);
 
 
 // fsqrt.{s|d}{s|d}{s|d}
 #void::function::do_fsqrt:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 #	sim_io_error ("fsqrt");
-#31.Dest,26.Source2,21.0b111110111,0,/,PD,//,P1,4.Source1::::fsqrt r
+31.Dest,26.Source2,21.0b111110111,12.0,11./,10.PD,8.//,6.P1,4.Source1::::fsqrt r
 #	do_fsqrt (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source2,21.0b11111110111,1,/,PD,//,P1,4./::::fsqrt l
+31.Dest,26.Source2,21.0b111110111,12.1,11./,10.PD,8.//,6.P1,4./::::fsqrt l
 #	do_fsqrt (_SD, rDest, LongSignedImmediate, rSource2);
 
 
 // fsub.{s|d}{s|d}{s|d}
 #void::function::do_fsub:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 #	sim_io_error ("fsub");
-#31.Dest,26.Source2,21.0b111110001,0,r,PD,P2,P1,4.Source1::::fsub r
+31.Dest,26.Source2,21.0b111110001,12.0,11.r,10.PD,8.P2,6.P1,4.Source1::::fsub r
 #	do_fsub (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source2,21.0b11111110001,1,r,PD,P2,P1,4./::::fsub l
+31.Dest,26.Source2,21.0b111110001,12.1,11.r,10.PD,8.P2,6.P1,4./::::fsub l
 #	do_fsub (_SD, rDest, LongSignedImmediate, rSource2);
 
 
 // illop
-#31./,21.0b0000000,14./::::illop
-#31./,21.0b111111111,12./::::illop l
+31./,21.0b0000000,14./::::illop
+31./,21.0b111111111,12./::::illop l
 
 
-// ins - see shift.im
+// ins - see sl.im
 
 
 // jsr[.a]
@@ -396,36 +398,75 @@ instruction_address::function::do_jsr:instruction_address cia, instruction_addre
 
 
 // ld[{.b.h.d}]
-#void::function::do_ld:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
-#	sim_io_error ("dld.u");
-#31.Dest,26.Base,21.0b0100,17.m,16.sz,14.SignedOffset::::ld i
-#	do_ld (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Base,21.0b110100,15.m,14.sz,12.0,11.S,10.0,9./,4.IndOff::::ld r
-#	do_ld (_SD, rDest, , rSource2);
-#31.Dest,26.Base,21.0b110100,15.m,14.sz,12.1,11.S,10.0,9./::::ld l
-#	long_immediate (LongSignedImmediate);
-#	do_ld (_SD, rDest, LongSignedImmediate, rSource2);
+void::function::do_ld:instruction_address cia, unsigned32 *rDest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
+	unsigned32 addr;
+	switch (sz)
+	  {
+	  case 0:
+	    addr = Base + (S ? (Offset << 0) : Offset);
+	    *rDest = MEM (signed, addr, 1);
+	    break;
+	  case 1:
+	    addr = Base + (S ? (Offset << 1) : Offset);
+	    *rDest = MEM (signed, addr, 2);
+	    break;
+	  case 2:
+	    addr = Base + (S ? (Offset << 2) : Offset);
+	    *rDest = MEM (signed, addr, 4);
+	    break;
+	  case 3:
+	    engine_error (SD, CPU, cia, "ld.d broken");
+	    addr = Base + (S ? (Offset << 3) : Offset);
+	    *rDest = MEM (signed, addr, 8);
+	    break;
+	  default:
+	    addr = -1;
+	    engine_error (SD, CPU, cia, "ld - invalid sz %d", sz);
+	  }
+	if (m)
+	  *rBase = addr;
+31.Dest,26.Base,21.0b0100,17.m,16.sz,14.SignedOffset::::ld i
+	do_ld (_SD, cia, rDest, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
+31.Dest,26.Base,21.0b110100,15.m,14.sz,12.0,11.S,10.0,9./,4.IndOff::::ld r
+	do_ld (_SD, cia, rDest, rBase, &GPR(Base), m, sz, S, rIndOff);
+31.Dest,26.Base,21.0b110100,15.m,14.sz,12.1,11.S,10.0,9./::::ld l
+	long_immediate (LongSignedImmediateOffset);
+	do_ld (_SD, cia, rDest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
 
 
 // ld.u[{.b.h.d}]
-#void::function::do_ld_u:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
-#	sim_io_error ("dld.u");
-#31.Dest,26.Base,21.0b0101,17.m,16.sz,14.SignedOffset::::ld.u i
-#	do_ld_u (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Base,21.0b110101,15.m,14.sz,12.0,11.S,10.0,9./,4.IndOff::::ld.u r
-#	do_ld_u (_SD, rDest, LongSignedImmediate, rSource2);
-#31.Dest,26.Base,21.0b110101,15.m,14.sz,12.1,11.S,10.0,9./::::ld.u l
-#	long_immediate (LongSignedImmediateOffset);
-#	do_ld_u (_SD, rDest, LongSignedImmediateOffset, rSource2);
+void::function::do_ld_u:instruction_address cia, unsigned32 *rDest, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
+	unsigned32 addr;
+	switch (sz)
+	  {
+	  case 0:
+	    addr = Base + (S ? (Offset << 0) : Offset);
+	    *rDest = MEM (unsigned, addr, 1);
+	    break;
+	  case 1:
+	    addr = Base + (S ? (Offset << 1) : Offset);
+	    *rDest = MEM (unsigned, addr, 2);
+	    break;
+	  default:
+	    addr = -1;
+	    engine_error (SD, CPU, cia, "ld.u - invalid sz %d", sz);
+	  }
+	if (m)
+	  *rBase = addr;
+31.Dest,26.Base,21.0b0101,17.m,16.sz,14.SignedOffset::::ld.u i
+	do_ld_u (_SD, cia, rDest, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
+31.Dest,26.Base,21.0b110101,15.m,14.sz,12.0,11.S,10.0,9./,4.IndOff::::ld.u r
+	do_ld_u (_SD, cia, rDest, rBase, &GPR(Base), m, sz, S, rIndOff);
+31.Dest,26.Base,21.0b110101,15.m,14.sz,12.1,11.S,10.0,9./::::ld.u l
+	long_immediate (LongSignedImmediateOffset);
+	do_ld_u (_SD, cia, rDest, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
 
 
 // lmo
-#31.Dest,26.Source,21.111111000,12.0,11./::::lmo
+31.Dest,26.Source,21.111111000,12.0,11./::::lmo
 
 
-// nop
-31./,26./,21.0b0000100,14.0,11.0::::nop
-	/* NOP */
+// nop - see rdcr 0, r0
 
 
 void::function::do_or:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
@@ -473,89 +514,121 @@ void::function::do_or:unsigned32 *rDest, unsigned32 Source1, unsigned32 Source2
 
 
 // rdcr
-#31.Dest,26.0,21.0b0000100,14.UCRN::::rdcr i
-#31.Dest,26.0,21.0b110000100,0,11./,4.INDCR::::rdcr r
-#31.Dest,26.0,21.0b110000100,1,11./::::rdcr l
+31.Dest,26.0,21.0b0000100,14.UCRN::::rdcr i
+31.Dest,26.0,21.0b110000100,12.0,11./,4.INDCR::::rdcr r
+31.Dest,26.0,21.0b110000100,12.1,11./::::rdcr l
 
 
 // rmo
-#31.Dest,26.Source,21.0b111111001,0,11./::::rmo
+31.Dest,26.Source,21.0b111111001,12.0,11./::::rmo
 
 
-// rotl - see shift.dz
+// rotl - see sl.dz
 
 
-//rotr - see shift.dz
+//rotr - see sl.dz
 
 
-// shl - see shift.iz
+// shl - see sl.iz
 
 
 // sl.{d|e|i}{m|s|z}
-#31.Dest,26.Source,21.0b0001,17.Merge,14./,11.0,0,9.EndMask::::4.Rotate:sl i
-#31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.0,0,9.EndMask::::4.RotReg:sl r
+31.Dest,26.Source,21.0b0001,17.Merge,14./,11.0,10.0,9.EndMask,4.Rotate::::sl i
+31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.0,10.0,9.EndMask,4.RotReg::::sl r
 
 
 // sli.{d|e|i}{m|s|z}
-#31.Dest,26.Source,21.0b0001,17.Merge,14./,11.1,0,9.EndMask::::4.Rotate:sli i
-#31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.1,0,9.EndMask::::4.RotReg:sli r
+31.Dest,26.Source,21.0b0001,17.Merge,14./,11.1,10.0,9.EndMask,4.Rotate::::sli i
+31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.1,10.0,9.EndMask,4.RotReg::::sli r
 
 
 // sr.{d|e|i}{m|s|z}
-#31.Dest,26.Source,21.0b0001,17.Merge,14./,11.0,1,9.EndMask::::4.Rotate:sr i
-#31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.0,1,9.EndMask::::4.RotReg:sr r
+31.Dest,26.Source,21.0b0001,17.Merge,14./,11.0,10.1,9.EndMask,4.Rotate::::sr i
+31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.0,10.1,9.EndMask,4.RotReg::::sr r
 
 
 // sra - see sr.es
 
 
 // sri.{d|e|i}{m|s|z}
-#31.Dest,26.Source,21.0b0001,17.Merge,14./,11.1,1,9.EndMask::::4.Rotate:sri i
-#31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.1,1,9.EndMask::::4.RotReg:sri r
+31.Dest,26.Source,21.0b0001,17.Merge,14./,11.1,10.1,9.EndMask,4.Rotate::::sri i
+31.Dest,26.Source,21.0b110001,15.Merge,12.0,11.1,10.1,9.EndMask,4.RotReg::::sri r
 
 
 // srl - see sr.ez
 
 
 // st[{.b|.h|.d}]
-#31.Dest,26.Base,21.0b0110,m,sz,14.SO::::st i
-#31.Dest,26.Base,21.0b110110,m,sz,0,S,0,14./,4.IO::::st i
-#31.Dest,26.Base,21.0b110110,m,sz,1,S,0,14./::::st i
+void::function::do_st:instruction_address cia, unsigned32 rSource, unsigned32 Base, unsigned32 *rBase, int m , int sz, int S, unsigned32 Offset
+	unsigned32 addr;
+	switch (sz)
+	  {
+	  case 0:
+	    addr = Base + (S ? (Offset << 0) : Offset);
+	    STORE (addr, 1, rSource);
+	    break;
+	  case 1:
+	    addr = Base + (S ? (Offset << 1) : Offset);
+	    STORE (addr, 2, rSource);
+	    break;
+	  case 2:
+	    addr = Base + (S ? (Offset << 2) : Offset);
+	    STORE (addr, 4, rSource);
+	    break;
+	  case 3:
+	    engine_error (SD, CPU, cia, "st.d broken");
+	    addr = Base + (S ? (Offset << 3) : Offset);
+	    STORE (addr, 8, rSource);
+	    break;
+	  default:
+	    addr = -1;
+	    engine_error (SD, CPU, cia, "ld - invalid sz %d", sz);
+	  }
+	if (m)
+	  *rBase = addr;
+31.Source,26.Base,21.0b0110,17.m,16.sz,14.SignedOffset::::st i
+	do_st (_SD, cia, rSource, rBase, &GPR(Base), m, sz, 0, vSignedOffset);
+31.Source,26.Base,21.0b110110,15.m,14.sz,12.0,11.S,10.0,9./,4.IndOff::::st r
+	do_st (_SD, cia, rSource, rBase, &GPR(Base), m, sz, S, rIndOff);
+31.Source,26.Base,21.0b110110,15.m,14.sz,12.1,11.S,10.0,9./::::st l
+	long_immediate (LongSignedImmediateOffset);
+	do_st (_SD, cia, rSource, rBase, &GPR(Base), m, sz, S, LongSignedImmediateOffset);
 
 
 // sub
-#void::function::do_sub:signed32 *rDest, signed32 Source1, signed32 Source2
-#	ALU_BEGIN (Source1);
-#	ALU_SUB (Source2);
-#	ALU_END (*rD);	
-#31.Dest,26.Source2,21.0b101100,0,14.SignedImmediate::::sub i
-#	do_sub (_SD, rDest, SI, rSource2);
-#31.Dest,26.Source2,21.0b11101100,0,0,11./,4.Source1::::sub r
-#	do_sub (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source2,21.0b11101100,0,1,11./::::sub l
-#	do_sub (_SD, rDest, LongSignedImmediate, rSource2);
+void::function::do_sub:signed32 *rDest, signed32 Source1, signed32 Source2
+	ALU_BEGIN (Source1);
+	ALU_SUB (Source2);
+	ALU_END (*rDest);	
+// FIXME - the book has 15.1 which conflicts with subu.
+31.Dest,26.Source2,21.0b101101,15.0,14.SignedImmediate::::sub i
+	do_sub (_SD, rDest, vSource1, rSource2);
+31.Dest,26.Source2,21.0b11101101,13.0,12.0,11./,4.Source1::::sub r
+	do_sub (_SD, rDest, rSource1, rSource2);
+31.Dest,26.Source2,21.0b11101101,13.0,12.1,11./::::sub l
+	long_immediate (LongSignedImmediate);
+	do_sub (_SD, rDest, LongSignedImmediate, rSource2);
 
 
 // subu
-#void::function::do_subu:signed32 *rDest, signed32 Source1, signed32 Source2
-#	ALU_BEGIN (Source1);
-#	ALU_SUBU (Source2);
-#	ALU_END (*rD);	
-#31.Dest,26.Source,21.0b101100,0,14.SignedImmediate::::subu i
-#	do_subu (_SD, rDest, SI, rSource2);
-#31.Dest,26.Source,21.0b11101100,0,0,11./,4.Source1::::subu r
-#	do_subu (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source,21.0b11101100,0,1,11./::::subu l
-#	do_subu (_SD, rDest, LongSignedImmediate, rSource2);
+void::function::do_subu:signed32 *rDest, signed32 Source1, signed32 Source2
+	*rDest = Source1 - Source2;
+31.Dest,26.Source2,21.0b101101,15.1,14.SignedImmediate::::subu i
+	do_subu (_SD, rDest, vSource1, rSource2);
+31.Dest,26.Source2,21.0b11101101,13.1,12.0,11./,4.Source1::::subu r
+	do_subu (_SD, rDest, rSource1, rSource2);
+31.Dest,26.Source2,21.0b11101101,13.1,12.1,11./::::subu l
+	long_immediate (LongSignedImmediate);
+	do_subu (_SD, rDest, LongSignedImmediate, rSource2);
 
 
 // swcr
 #void::function::do_swcr:signed32 *rDest, signed32 Source1, signed32 Source2
-#31.Dest,26.Source,21.0b000010,1,14.SignedImmediate::::swcr i
+31.Dest,26.Source,21.0b000010,15.1,14.SignedImmediate::::swcr i
 #	do_swcr (_SD, rDest, SI, rSource2);
-#31.Dest,26.Source,21.0b11000010,1,0,11./,4.INDCR::::swcr r
+31.Dest,26.Source,21.0b11000010,13.1,12.0,11./,4.INDCR::::swcr r
 #	do_swcr (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source,21.0b11000010,1,1,11./::::swcr l
+31.Dest,26.Source,21.0b11000010,13.1,12.1,11./::::swcr l
 #	do_swcr (_SD, rDest, LongSignedImmediate, rSource2);
 
 
@@ -567,14 +640,14 @@ void::function::do_trap:instruction_address cia, unsigned32 trap_number
 	      {
 	      case 1: /* EXIT */
 	        {
-	          engine_halt (SD, cia, sim_exited, GPR(3));
+	          engine_halt (SD, CPU, cia, sim_exited, GPR(3));
 	          break;
 	        }
 	      case 4: /* WRITE */
 	        {
 	          int i;
 	          if (GPR(3) != 1)
-	            engine_error (SD, cia, "write to invalid fid %d", GPR(3));
+	            engine_error (SD, CPU, cia, "write to invalid fid %d", GPR(3));
 		  for (i = 0; i < GPR(5); i++)
 	            {
 		      char c;
@@ -585,7 +658,7 @@ void::function::do_trap:instruction_address cia, unsigned32 trap_number
 	          break;
 	        }
 	      default:
-	        engine_error (SD, cia, "unknown trap %d", GPR(2));
+	        engine_error (SD, CPU, cia, "unknown trap %d", GPR(2));
 	      }
 	  }
 31./,27.0,26./,21.0b0000001,14.UTN::::trap i
@@ -598,93 +671,68 @@ void::function::do_trap:instruction_address cia, unsigned32 trap_number
 
 
 // vadd.{s|d}{s|d}
-#void::function::do_vadd:signed32 *rDest, signed32 Source1, signed32 Source2
-#31.*,26.Dest,21.0b11110,r,000,r,*,**,7.PD,6.*,5.P1,4.Source::::vadd r
-#	do_vadd (_SD, rDest, SI, rSource2);
-#31.*,26.Dest,21.0b1111110,r,000,r,*,**,7.PD,6.*,5.P1,4./::::vadd l
-#	do_vadd (_SD, rDest, LongSignedImmediate, rSource2);
+31.*,26.Dest,21.0b11110,16./,15.0b000,12.0,11./,10.*,9.*,7.PD,6.*,5.P1,4.Source::::vadd r
+31.*,26.Dest,21.0b11110,16./,15.0b000,12.1,11./,10.*,9.*,7.PD,6.*,5.P1,4.Source::::vadd l
 
 
-// vld{0|1}.{s|d}
-#31.Dest,26.*,21.0b11110,18.*,10.1,S,**,p,******::::vld r
+// vld{0|1}.{s|d} - see above - same instruction
+#31.Dest,26.*,21.0b11110,18.*,10.1,9.S,8.*,6.p,7.******::::vld
 
 
 // vmac.ss{s|d}
-#31.*,26.Source2,21.0b11110,a,110,0,a,**,Z,r,*,r,4.Source1::::vmac.ss ra
-#31.Dest,26.Source2,21.0b11110,a,110,0,a,**,Z,r,*,r,4.Source1::::vmac.ss rr
-#31.*,26.Source2,21.0b11110,a,110,0,a,**,Z,r,*,r,4.Source1::::vmac.ss ia
-#31.Dest,26.Source2,21.0b11110,a,110,0,a,**,Z,r,*,r,4.Source1::::vmac.ss ir
+#31.*,   26.Source2,21.0b11110,16.a0,15.0b110,12.0,11.a1,10.*,9.*, 8.Z,7./,6.*,5./,4.Source1::::vmac.ss ra
+31.Dest,26.Source2,21.0b11110,16.a0,15.0b110,12.0,11.a1,10.0,9.PD,8.Z,7./,6.0,5./,4.Source1::::vmac.ss rr
+#31.*,   26.Source2,21.0b11110,16.a0,15.0b110,12.1,11.a1,10.*,9.*, 8.Z,7./,6.*,5./,4./::::vmac.ss ia
+31.Dest,26.Source2,21.0b11110,16.a0,15.0b110,12.1,11.a1,10.0,9.PD,8.Z,7./,6.0,5./,4./::::vmac.ss ir
 
 
 // vmpy.{s|d}{s|d}
-#void::function::do_vmpy:signed32 *rDest, signed32 Source1, signed32 Source2
-#31.*,26.Dest,21.0b11110,r,000,r,*,**,7.PD,6.*,5.P1,4.Source::::vmpy r
-#	do_vmpy (_SD, rDest, SI, rSource2);
-#31.*,26.Dest,21.0b1111110,r,000,r,*,**,7.PD,6.*,5.P1,4./::::vmpy l
-#	do_vmpy (_SD, rDest, LongSignedImmediate, rSource2);
+31.*,26.Dest,21.0b11110,16./,15.0b010,12.0,11./,10.*,8.*,7.PD,6.*,5.P1,4.Source::::vmpy r
+31.*,26.Dest,21.0b11110,16./,15.0b010,12.1,11./,10.*,8.*,7.PD,6.*,5.P1,4./::::vmpy l
 
 
 // vmsc.ss{s|d}
-#31.*,26.Source2,21.0b11110,a,110,0,a,**,Z,r,*,r,4.Source1::::vmsc.ss ra
-#31.Dest,26.Source2,21.0b11110,a,110,0,a,**,Z,r,*,r,4.Source1::::vmsc.ss rr
-#31.*,26.Source2,21.0b11110,a,110,0,a,**,Z,r,*,r,4.Source1::::vmsc.ss ia
-#31.Dest,26.Source2,21.0b11110,a,110,0,a,**,Z,r,*,r,4.Source1::::vmsc.ss ir
+#31.*,   26.Source2,21.0b11110,16.a0,15.0b111,12.0,11.a1,10.*,9.*, 8.Z,7./,6.*,5./,4.Source1::::vmsc.ss ra
+31.Dest,26.Source2,21.0b11110,16.a0,15.0b111,12.0,11.a1,10.0,9.PD,8.Z,7./,6.0,5./,4.Source1::::vmsc.ss rr
+#31.*,   26.Source2,21.0b11110,16.a0,15.0b111,12.1,11.a1,10.*,9.*, 8.Z,7./,6.*,5./,4./::::vmsc.ss ia
+31.Dest,26.Source2,21.0b11110,16.a0,15.0b111,12.1,11.a1,10.0,9.PD,8.Z,7./,6.0,5./,4./::::vmsc.ss ir
 
 
 // vmsub.{s|d}{s|d}
-#void::function::do_vmsub:signed32 *rDest, signed32 Source1, signed32 Source2
-#31.*,26.Dest,21.0b11110,r,000,r,*,**,7.PD,6.*,5.P1,4.Source::::vmsub r
-#	do_vmsub (_SD, rDest, SI, rSource2);
-#31.*,26.Dest,21.0b1111110,r,000,r,*,**,7.PD,6.*,5.P1,4./::::vmsub l
-#	do_vmsub (_SD, rDest, LongSignedImmediate, rSource2);
+31.*,26.Dest,21.0b11110,16.a0,15.0b011,12.0,11.a1,10.*,8.Z,7.PD,6.*,5./,4.Source::::vmsub r
+31.*,26.Dest,21.0b11110,16.a0,15.0b011,12.1,11.a1,10.*,8.Z,7.PD,6.*,5./,4./::::vmsub l
 
 
 // vrnd.{s|d}{s|d}
-#void::function::do_vrnd:signed32 *rDest, signed32 Source1, signed32 Source2
-#31.*,26.Dest,21.0b11110,r,000,r,*,**,7.PD,6.*,5.P1,4.Source::::vrnd r
-#	do_vrnd (_SD, rDest, SI, rSource2);
-#31.*,26.Dest,21.0b1111110,r,000,r,*,**,7.PD,6.*,5.P1,4./::::vrnd l
-#	do_vrnd (_SD, rDest, LongSignedImmediate, rSource2);
+31.*,26.Dest,21.0b11110,16.a0,15.0b100,12.0,11.a1,10.*,8.PD,6.*,5.P1,4.Source::::vrnd f r
+31.*,26.Dest,21.0b11110,16.a0,15.0b100,12.1,11.a1,10.*,8.PD,6.*,5.P1,4./::::vrnd f l
 
 
 // vrnd.{i|u}{s|d}
-#void::function::do_vrnd:signed32 *rDest, signed32 Source1, signed32 Source2
-#31.*,26.Dest,21.0b11110,r,000,r,*,**,7.PD,6.*,5.P1,4.Source::::vrnd r
-#	do_vrnd (_SD, rDest, SI, rSource2);
-#31.*,26.Dest,21.0b1111110,r,000,r,*,**,7.PD,6.*,5.P1,4./::::vrnd l
-#	do_vrnd (_SD, rDest, LongSignedImmediate, rSource2);
+31.*,26.Dest,21.0b11110,16./,15.0b101,12.0,11./,10.*,8./,7.PD,6.*,5.P1,4.Source::::vrnd i r
+31.*,26.Dest,21.0b11110,16./,15.0b101,12.1,11./,10.*,8./,7.PD,6.*,5.P1,4./::::vrnd i l
 
 
-// vst.{s|d}
-#31.Source,26.*,21.0b1110,16.*,10.0,9.S,**,1,******::::vst
+// vst.{s|d} - see above - same instruction
+#31.Source,26.*,21.0b11110,16.*,10.0,9.S,8.*,6.1,5.*::::vst
 
 
 // vsub.{i|u}{s|d}
-#void::function::do_vsub:signed32 *rDest, signed32 Source1, signed32 Source2
-#31.*,26.Dest,21.0b11110,r,000,r,*,**,7.PD,6.*,5.P1,4.Source::::vsub r
-#	do_vsub (_SD, rDest, SI, rSource2);
-#31.*,26.Dest,21.0b1111110,r,000,r,*,**,7.PD,6.*,5.P1,4./::::vsub l
-#	do_vsub (_SD, rDest, LongSignedImmediate, rSource2);
+31.*,26.Dest,21.0b11110,16./,15.0b001,12.0,11./,10.*,8./,7.PD,6.*,5.P1,4.Source::::vsub r
+31.*,26.Dest,21.0b11110,16./,15.0b001,12.1,11./,10.*,8./,7.PD,6.*,5.P1,4./::::vsub l
 
 
-// wrcr
-#void::function::do_wrcr:signed32 *rDest, signed32 Source1, signed32 Source2
-#31.Dest,26.Source,21.0b000010,1,14.SignedImmediate::::wrcr i
-#	do_wrcr (_SD, rDest, SI, rSource2);
-#31.Dest,26.Source,21.0b11000010,1,0,11./,4.INDCR::::wrcr r
-#	do_wrcr (_SD, rDest, rSource1, rSource2);
-#31.Dest,26.Source,21.0b11000010,1,1,11./::::wrcr l
-#	do_wrcr (_SD, rDest, LongSignedImmediate, rSource2);
+// wrcr - see swcr, creg, source, r0
 
 
 // xnor
 void::function::do_xnor:signed32 *rDest, signed32 Source1, signed32 Source2
 	*rDest = ~ (Source1 ^ Source2);
-31.Dest,26.Source2,21.0b0011001,15.0,14.UnsignedImmediate::::xnor i
+31.Dest,26.Source2,21.0b0011001,14.UnsignedImmediate::::xnor i
 	do_xnor (_SD, rDest, vSource1, rSource2);
-31.Dest,26.Source2,21.0b110011001,13.0,12.0,11./,4.Source1::::xnor r
+31.Dest,26.Source2,21.0b110011001,12.0,11./,4.Source1::::xnor r
 	do_xnor (_SD, rDest, rSource1, rSource2);
-31.Dest,26.Source2,21.0b110011001,13.0,12.1,11./::::xnor l
+31.Dest,26.Source2,21.0b110011001,12.1,11./::::xnor l
 	long_immediate (LongUnsignedImmediate);
 	do_xnor (_SD, rDest, LongUnsignedImmediate, rSource2);
 

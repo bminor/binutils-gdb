@@ -1,3 +1,24 @@
+Thu Apr 24 11:43:45 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ld-insn.c (insn_table_expand_opcode): Allow reserved fields to
+ 	be broken up.
+	(insn_table_expand_insns): Allow special rules to apply to groups
+ 	of instructions when all members of the group match the special
+ 	mask/value.
+
+	* gen-semantics.c (print_c_semantic): Ditto.
+	* igen.c (print_semantic_function_formal): Ditto.
+	(print_semantic_function_type): Ditto.
+	* igen.c (print_icache_function_formal): Ditto.
+	* gen-idecode.c (print_idecode_issue_function_body): Ditto.
+
+	* gen-idecode.c (gen_idecode_h): Prepend the global_prefix to the
+ 	instruction_address type.
+
+	* gen-semantics.c (print_semantic_body): Call cpu_error when an
+ 	unimplemented instruction is encountered - gives the interpreter
+ 	the chance to stop correctly.
+
 Wed Apr 23 20:06:36 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* igen.c (print_function_name): Allow dot's in instruction names.

@@ -175,9 +175,11 @@ parse_insn_format(table_entry *entry,
 	new_field->is_int = 1;
       }
     }
-    else if (new_field->val_string[0] == '/'
-	     || new_field->val_string[0] == '*') {
-      new_field->is_slash = 1;
+    else if (new_field->val_string[0] == '/') {
+      new_field->is_reserved = 1;
+    }
+    else if (new_field->val_string[0] == '*') {
+      new_field->is_wild = 1;
     }
     else {
       new_field->is_string = 1;
@@ -504,7 +506,7 @@ insn_table_traverse_insn(insn_table *table,
 
 typedef enum {
   field_constant_int = 1,
-  field_constant_slash = 2,
+  field_constant_reserved = 2,
   field_constant_string = 3
 } constant_field_types;
 
@@ -517,8 +519,8 @@ insn_field_is_constant(insn_field *field,
   if (field->is_int)
     return field_constant_int;
   /* field is `/' and treating that as a constant */
-  if (field->is_slash && rule->force_slash)
-    return field_constant_slash;
+  if (field->is_reserved && rule->force_reserved)
+    return field_constant_reserved;
   /* field, though variable is on the list */
   if (field->is_string && rule->force_expansion != NULL) {
     char *forced_fields = rule->force_expansion;
@@ -694,7 +696,7 @@ insn_table_expand_opcode(insn_table *table,
   }
   else {
     insn_field *field = instruction->fields->bits[field_nr];
-    if (field->is_int || field->is_slash) {
+    if (field->is_int) {
       if (!(field->first >= table->opcode->first
 	    && field->last <= table->opcode->last))
 	error("%s:%d: Instruction field %s.%s [%d..%d] overlaps sub-field [%d..%d] boundary",
@@ -703,7 +705,7 @@ insn_table_expand_opcode(insn_table *table,
 	      field->pos_string, field->val_string,
 	      field->first, field->last,
 	      table->opcode->first, table->opcode->last);
-      insn_table_expand_opcode(table, instruction, field->last+1,
+      insn_table_expand_opcode(table, instruction, field->last + 1,
 			       ((opcode_nr << field->width) + field->val_int),
 			       bits);
     }
@@ -712,19 +714,25 @@ insn_table_expand_opcode(insn_table *table,
       int last_pos = ((field->last < table->opcode->last)
 			? field->last : table->opcode->last);
       int first_pos = ((field->first > table->opcode->first)
-			 ? field->first : table->opcode->first);
+		       ? field->first : table->opcode->first);
       int width = last_pos - first_pos + 1;
-      int last_val = (table->opcode->is_boolean
-		      ? 2 : (1 << width));
-      for (val = 0; val < last_val; val++) {
-	insn_bits *new_bits = ZALLOC(insn_bits);
-	new_bits->field = field;
-	new_bits->value = val;
-	new_bits->last = bits;
-	new_bits->opcode = table->opcode;
-	insn_table_expand_opcode(table, instruction, last_pos+1,
-				 ((opcode_nr << width) | val),
-				 new_bits);
+      if (field->is_reserved)
+	insn_table_expand_opcode(table, instruction, last_pos + 1,
+				 ((opcode_nr << width)),
+				 bits);
+      else {
+	int last_val = (table->opcode->is_boolean
+			? 2 : (1 << width));
+	for (val = 0; val < last_val; val++) {
+	  insn_bits *new_bits = ZALLOC(insn_bits);
+	  new_bits->field = field;
+	  new_bits->value = val;
+	  new_bits->last = bits;
+	  new_bits->opcode = table->opcode;
+	  insn_table_expand_opcode(table, instruction, last_pos+1,
+				   ((opcode_nr << width) | val),
+				   new_bits);
+	}
       }
     }
   }
@@ -742,7 +750,18 @@ insn_table_insert_expanding(insn_table *table,
 }
 
 
-extern void
+static int
+special_matches_all_insns (unsigned mask, unsigned value, insn *insns)
+{
+  insn *i;
+  for (i = insns; i != NULL; i = i->next)
+    if ((i->fields->value & mask) != value)
+      return 0;
+  return 1;
+}
+
+
+void
 insn_table_expand_insns(insn_table *table)
 {
 
@@ -750,10 +769,17 @@ insn_table_expand_insns(insn_table *table)
 
   /* determine a valid opcode */
   while (table->opcode_rule) {
-    /* specials only for single instructions */
+    /* specials only for single instructions or normal rules when
+       matches all */
     if ((table->nr_insn > 1
 	 && table->opcode_rule->special_mask == 0
 	 && table->opcode_rule->type == normal_decode_rule)
+	|| (table->nr_insn > 1
+	    && table->opcode_rule->special_mask != 0
+	    && table->opcode_rule->type == normal_decode_rule
+	    && special_matches_all_insns (table->opcode_rule->special_mask,
+					  table->opcode_rule->special_value,
+					  table->insns))
 	|| (table->nr_insn == 1
 	    && table->opcode_rule->special_mask != 0
 	    && ((table->insns->fields->value
@@ -822,8 +848,11 @@ dump_insn_field(insn_field *field,
   if (field->is_int)
     dumpf(indent, "(is_int %d)\n", field->val_int);
 
-  if (field->is_slash)
-    dumpf(indent, "(is_slash)\n");
+  if (field->is_reserved)
+    dumpf(indent, "(is_wild)\n");
+
+  if (field->is_wild)
+    dumpf(indent, "(is_wild)\n");
 
   if (field->is_string)
     dumpf(indent, "(is_string `%s')\n", field->val_string);

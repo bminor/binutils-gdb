@@ -75,26 +75,30 @@ extern void engine_init
 (SIM_DESC sd);
 
 
-/* Mechanisms for stopping/restarting the simulation */
+/* Mechanisms for stopping/restarting the simulation.
+
+   A non NULL CPU argument designates the processor that is initiating
+   the halt.  After the simulation has stopped that processor should
+   be marked as the last one active */
 
 extern void engine_error
 (SIM_DESC sd,
+ sim_cpu *cpu,
  instruction_address cia,
  const char *fmt,
  ...);
 
 extern void engine_halt
 (SIM_DESC sd,
+ sim_cpu *cpu,
  instruction_address cia,
  enum sim_stop reason,
  int siggnal);
 
 extern void engine_restart
 (SIM_DESC sd,
+ sim_cpu *cpu,
  instruction_address cia);
-
-
-
 
 /* SIMULATE INSTRUCTIONS, various different ways of achieving the same
    thing (others later) */

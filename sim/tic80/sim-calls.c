@@ -142,8 +142,8 @@ sim_kill (SIM_DESC sd)
 int
 sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 {
-  sim_io_error (sd, "sim_read");
-  return 0;
+  return sim_core_read_buffer (sd, sim_core_write_map,
+			       buf, mem, length);
 }
 
 
@@ -155,17 +155,50 @@ sim_write (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 }
 
 
+/* FIXME - these magic numbers need to be moved elsewhere */
+
+#define SP_REGNUM 1		/* Contains address of top of stack */
+#define FP_REGNUM 31		/* Contains address of executing stack frame */
+#define PC_REGNUM 32		/* Contains program counter (FIXME?) */
+#define NPC_REGNUM 33		/* Contains the next program counter (FIXME?) */
+#define A0_REGNUM 34		/* Accumulator register 0 */
+#define A3_REGNUM 37		/* Accumulator register 1 */
+
+#define R0_REGNUM 0             /* General Purpose Register 0 - for sim */
+#define Rn_REGNUM 31            /* Last General Purpose Register - for sim */
+#define An_REGNUM A3_REGNUM     /* Last Accumulator register - for sim */
+
 void
-sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf)
+sim_fetch_register (SIM_DESC sd, int regnr, unsigned char *buf)
 {
-  sim_io_error (sd, "sim_fetch_register");
+  if (regnr >= R0_REGNUM && regnr <= Rn_REGNUM)
+    *(unsigned32*)buf = H2T_4 (STATE_CPU (sd, 0)->reg[regnr - A0_REGNUM]);
+  else if (regnr == PC_REGNUM)
+    *(unsigned32*)buf = H2T_4 (STATE_CPU (sd, 0)->cia.ip);
+  else if (regnr == NPC_REGNUM)
+    *(unsigned32*)buf = H2T_4 (STATE_CPU (sd, 0)->cia.dp);
+  else if (regnr >= A0_REGNUM && regnr <= An_REGNUM)
+    *(unsigned64*)buf = H2T_8 (STATE_CPU (sd, 0)->acc[regnr - A0_REGNUM]);
+  else
+    sim_io_error (sd, "sim_fetch_register - unknown register nr %d", regnr);
+  return;
 }
 
 
 void
-sim_store_register (SIM_DESC sd, int regno, unsigned char *buf)
+sim_store_register (SIM_DESC sd, int regnr, unsigned char *buf)
 {
-  sim_io_error (sd, "sim_info");
+  if (regnr >= R0_REGNUM && regnr <= Rn_REGNUM)
+    STATE_CPU (sd, 0)->reg[regnr - A0_REGNUM] = T2H_4 (*(unsigned32*)buf);
+  else if (regnr == PC_REGNUM)
+    STATE_CPU (sd, 0)->cia.ip = T2H_4 (*(unsigned32*)buf);
+  else if (regnr == NPC_REGNUM)
+    STATE_CPU (sd, 0)->cia.dp = T2H_4 (*(unsigned32*)buf);
+  else if (regnr == A0_REGNUM && regnr <= An_REGNUM)
+    STATE_CPU (sd, 0)->acc[regnr - A0_REGNUM] = H2T_8 (*(unsigned64*)buf);
+  else
+    sim_io_error (sd, "sim_fetch_register - unknown register nr %d", regnr);
+  return;
 }
 
 
