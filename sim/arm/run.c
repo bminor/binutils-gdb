@@ -101,7 +101,7 @@ main (ac, av)
 	  start_address = bfd_get_start_address (abfd);
 	  sim_create_inferior (start_address, NULL, NULL);
 
-	  target_byte_order = abfd->xvec->byteorder_big_p ? 4321 : 1234;
+	  target_byte_order = bfd_big_endian (abfd) ? 4321 : 1234;
 
 	  if (trace)
 	    {
