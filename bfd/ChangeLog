@@ -1,3 +1,9 @@
+Sun May  2 11:39:44 1993  Fred Fish  (fnf@cygnus.com)
+
+	* configure.in (i[34]86-*-linux*):  Add; bfd_target = i386-linux.
+	* configure.in (*-*-linux*):  Remove until linux port for a
+	non-i386/i486 system is actually available.
+
 Fri Apr 30 20:04:10 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* libhppa.h:  #undef e_* symbols which come from <machine/som.h>
