@@ -20,48 +20,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* 
    $Id$
-   $Log$
-   Revision 1.1  1991/03/21 21:26:48  gumby
-   Initial revision
-
- * Revision 1.2  1991/03/15  18:34:14  rich
- * foo
- *
- * Revision 1.1  1991/03/13  00:34:19  chrisb
- * Initial revision
- *
- * Revision 1.9  1991/03/09  04:36:33  rich
- *  Modified Files:
- *  	sparc-pinsn.c ostrip.c objdump.c m68k-pinsn.c i960-pinsn.c
- *  	binutils.h
- *
- * Pulled sysdep.h out of bfd.h.
- *
- * Revision 1.8  1991/03/09  03:42:01  rich
- *  Modified Files:
- *  	Makefile alloca.c ar.c i960-pinsn.c nm.c objdump.c ostrip.c
- *  	strip.c
- *
- * Ports for intel960 group Portland.
- *
- * Revision 1.7  1991/03/08  21:54:47  rich
- *  Modified Files:
- *  	Makefile ar.c binutils.h bucomm.c copy.c cplus-dem.c getopt.c
- *  	i960-pinsn.c m68k-pinsn.c nm.c objdump.c sparc-opcode.h
- *  	sparc-pinsn.c strip.c
- *
- * Verifying Portland tree with steve's last changes.  Also, some partial
- * porting.
- *
- * Revision 1.6  1991/03/08  07:46:26  sac
- * Added -l option to disassembly - prints line numbers too.
- *
- * Revision 1.5  1991/03/07  21:50:24  sac
- * More intelligent reloc printing
- *
- * Revision 1.4  1991/03/05  16:36:54  sac
- * Fixed bug where empty symbols would print (null) on suns and crash elsewhere.
- *
 */
 /*
  * Until there is other documentation, refer to the manual page dump(1) in
@@ -74,8 +32,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include <ctype.h>
 
-char *malloc();
-char *realloc();
+
+
 char *xmalloc();
 
 char *default_target = NULL;	/* default at runtime */
@@ -261,16 +219,7 @@ FILE *stream;
       }
     }
     
-    {
-      char *section_name;
-      asection *sec = syms[thisplace]->section;
-      if (sec) {
-	section_name = sec->name;
-      }
-      else {
-	section_name = "abs";
-      }
-    }
+
     if (syms[thisplace]->value > vma) {
       fprintf(stream,"%08lx (%s-%lx)", vma, syms[thisplace]->name,
 	      syms[thisplace]->value - vma);
@@ -614,8 +563,8 @@ bfd *abfd;
 
 	for (p =relpp; *p != (arelent *)NULL; p++) {
 	  arelent *q = *p;
-	  char *sym_name;
-	  char *section_name =	    q->section == (asection *)NULL ? "*abs" :
+	  CONST char *sym_name;
+	  CONST char *section_name =	    q->section == (asection *)NULL ? "*abs" :
 	  q->section->name;
 	  if (q->sym_ptr_ptr && *q->sym_ptr_ptr) {
 	    sym_name =  (*(q->sym_ptr_ptr))->name ;
