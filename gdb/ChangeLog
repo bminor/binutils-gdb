@@ -1,5 +1,9 @@
 Wed Apr 28 06:11:38 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* inflow.c (kill_command), infcmd.c (attach_command),
+	remote.c (remote_interrupt_twice): In messages for the user, call it
+	"the program" or "the program being debugged" not "the inferior".
+
 	* hp300ux-nat.c: Cast second arg to supply_register calls.
 	(_initialize_kernel_u_addr, getpagesize): New functions.
 	(store_inferior_register_1): Change arg name from value to val.
