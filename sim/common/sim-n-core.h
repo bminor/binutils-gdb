@@ -39,7 +39,7 @@
 
 /* TAGS: sim_core_trace_1 sim_core_trace_2 */
 /* TAGS: sim_core_trace_4 sim_core_trace_8 */
-/* TAGS: sim_core_trace_6 sim_core_trace_word */
+/* TAGS: sim_core_trace_16 sim_core_trace_word */
 
 STATIC_SIM_CORE(void)
 sim_core_trace_N (sim_cpu *cpu,
