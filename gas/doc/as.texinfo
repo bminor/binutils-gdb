@@ -2983,9 +2983,9 @@ data subsections as a data section.
 To specify which subsection you want subsequent statements assembled
 into, use a numeric argument to specify it, in a @samp{.text
 @var{expression}} or a @samp{.data @var{expression}} statement.
-@ifset COFF-ELF
+@ifset COFF
 @ifset GENERIC
-When generating COFF or ELF output, you
+When generating COFF output, you
 @end ifset
 @ifclear GENERIC
 You
@@ -2993,6 +2993,16 @@ You
 can also use an extra subsection
 argument with arbitrary named sections: @samp{.section @var{name},
 @var{expression}}.
+@end ifset
+@ifset ELF
+@ifset GENERIC
+When generating ELF output, you
+@end ifset
+@ifclear GENERIC
+You
+@end ifclear
+can also use the @code{.subsection} directive (@pxref{SubSection})
+to specify a subsection: @samp{.subsection @var{expression}}.
 @end ifset
 @var{Expression} should be an absolute expression.
 (@xref{Expressions}.)  If you just say @samp{.text} then @samp{.text 0}
@@ -4334,7 +4344,7 @@ partial programs.  You may need the HPPA-only @code{.EXPORT} directive as well.
 
 @cindex @code{hidden} directive
 @cindex visibility
-This one of the ELF visibility directives.  The other two are
+This is one of the ELF visibility directives.  The other two are
 @code{.internal} (@pxref{Internal,,@code{.internal}}) and 
 @code{.protected} (@pxref{Protected,,@code{.protected}}).
 
@@ -4510,7 +4520,7 @@ integers.  On the H8/300H and the Renesas SH, however, @code{.int} emits
 
 @cindex @code{internal} directive
 @cindex visibility
-This one of the ELF visibility directives.  The other two are
+This is one of the ELF visibility directives.  The other two are
 @code{.hidden} (@pxref{Hidden,,@code{.hidden}}) and 
 @code{.protected} (@pxref{Protected,,@code{.protected}}).
 
@@ -4997,7 +5007,7 @@ assembly.  You must put @var{string} in double quotes.
 
 @cindex @code{protected} directive
 @cindex visibility
-This one of the ELF visibility directives.  The other two are
+This is one of the ELF visibility directives.  The other two are
 @code{.hidden} (@pxref{Hidden}) and @code{.internal} (@pxref{Internal}).
 
 This directive overrides the named symbols default visibility (which is set by
