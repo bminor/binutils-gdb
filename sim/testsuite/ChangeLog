@@ -1,5 +1,11 @@
 Thu May 14 11:48:35 1998  Doug Evans  <devans@canuck.cygnus.com>
 
+start-sanitize-sky
+	* sim/sky/sky.exp: Add runtest_file_p support.  Don't print
+	unsupported message if not sky.
+	* sim/sky/sky_sce.exp: Likewise.
+
+end-sanitize-sky
 	* lib/sim-defs.exp (sim_run): Fix handling of output redirection.
 	New arg prog_opts.  All callers updated.
 
