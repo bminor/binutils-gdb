@@ -14,7 +14,7 @@ Sat Apr 27 00:12:05 1996  Dawn Perchik  (dawn@cygnus.com)
 Fri Apr 26 23:58:26 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* infrun.c (wait_for_inferior): Call registers_changed when
-	restarting the inferior to get over a nullified instructions.
+	restarting the inferior to get over a nullified instruction.
 	
 Tue Apr 24 12:12:55 1996  Dawn Perchik (dawn@cygnus.com)
 
