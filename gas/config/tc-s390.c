@@ -1702,7 +1702,10 @@ md_apply_fix3 (fixP, valP, seg)
   where = fixP->fx_frag->fr_literal + fixP->fx_where;
 
   if (fixP->fx_subsy != NULL)
-    abort ();
+    as_bad_where (fixP->fx_file, fixP->fx_line,
+		  "cannot emit relocation %s against subsy symbol %s",
+		  bfd_get_reloc_code_name (fixP->fx_r_type),
+		  S_GET_NAME (fixP->fx_subsy));
 
   if (fixP->fx_addsy != NULL)
     {
