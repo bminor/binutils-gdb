@@ -1,3 +1,7 @@
+2000-02-23  H.J. Lu  <hjl@gnu.org>
+
+	* readelf.c (get_osabi_name): Handle ELFOSABI_LINUX.
+
 2000-02-22  Nick Clifton  <nickc@cygnus.com>
 
 	* readelf.c (process_symbol_table): Remove use of ELF_ST_OTHER.
