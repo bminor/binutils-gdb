@@ -1,3 +1,9 @@
+Wed Nov  4 15:32:31 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* readline.c:  Cast many uses of alloca to (char *) to make brain-
+	damaged compilers happy.
+	* sysdep-norm.h:  Remove some crud, install dire warning.
+
 Thu Oct 22 01:08:13 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* configure.in:  Make SCO work again...

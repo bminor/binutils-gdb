@@ -2101,7 +2101,7 @@ init_terminal_io (terminal_name)
   if (!term)
     term = "dumb";
 
-  if (tgetent (term_buffer, term) < 0)
+  if (tgetent (term_buffer, term) <= 0)
     {
       dumb_term = 1;
       screenwidth = 79;
@@ -3081,7 +3081,7 @@ rl_insert (count, c)
      readline because of extra large arguments. */
   if (count > 1 && count < 1024)
     {
-      string = (char *)alloca (1 + count);
+      string = alloca (1 + count);
 
       for (i = 0; i < count; i++)
 	string[i] = c;
@@ -3095,7 +3095,7 @@ rl_insert (count, c)
     {
       int decreaser;
 
-      string = (char *)alloca (1024 + 1);
+      string = alloca (1024 + 1);
 
       for (i = 0; i < 1024; i++)
 	string[i] = c;
@@ -3119,7 +3119,7 @@ rl_insert (count, c)
       int key = 0, t;
 
       i = 0;
-      string = (char *)alloca (ibuffer_len + 1);
+      string = alloca (ibuffer_len + 1);
       string[i++] = c;
 
       while ((t = rl_get_char (&key)) &&
@@ -3137,7 +3137,7 @@ rl_insert (count, c)
   else
     {
       /* Inserting a single character. */
-      string = (char *)alloca (2);
+      string = alloca (2);
 
       string[1] = '\0';
       string[0] = c;
@@ -4591,8 +4591,7 @@ rl_display_search (search_string, reverse_p, where)
 {
   char *message = (char *)NULL;
 
-  message =
-    (char *)alloca (1 + (search_string ? strlen (search_string) : 0) + 30);
+  message = alloca (1 + (search_string ? strlen (search_string) : 0) + 30);
 
   *message = '\0';
 
@@ -4625,7 +4624,7 @@ rl_search_history (direction, invoking_key)
      int invoking_key;
 {
   /* The string that the user types in to search for. */
-  char *search_string = (char *)alloca (128);
+  char *search_string = alloca (128);
 
   /* The current length of SEARCH_STRING. */
   int search_string_index;
@@ -4661,7 +4660,7 @@ rl_search_history (direction, invoking_key)
 
   /* Allocate space for this many lines, +1 for the current input line,
      and remember those lines. */
-  lines = (char **)alloca ((1 + (hlen = i)) * sizeof (char *));
+  lines = alloca ((1 + (hlen = i)) * sizeof (char *));
   for (i = 0; i < hlen; i++)
     lines[i] = hlist[i]->line;
 
@@ -4673,7 +4672,7 @@ rl_search_history (direction, invoking_key)
       char *alloced_line;
 
       /* Keep that mips alloca happy. */
-      alloced_line = (char *)alloca (1 + strlen (the_line));
+      alloced_line = alloca (1 + strlen (the_line));
       lines[i] = alloced_line;
       strcpy (lines[i], &the_line[0]);
     }
@@ -5542,7 +5541,7 @@ rl_generic_bind (type, keyseq, data, map)
       return;
     }
 
-  keys = (char *)alloca (1 + (2 * strlen (keyseq)));
+  keys = alloca (1 + (2 * strlen (keyseq)));
 
   /* Translate the ASCII representation of KEYSEQ into an array
      of characters.  Stuff the characters into ARRAY, and the
@@ -6007,7 +6006,7 @@ rl_parse_and_bind (string)
      rl_set_key ().  Otherwise, let the older code deal with it. */
   if (*string == '"')
     {
-      char *seq = (char *)alloca (1 + strlen (string));
+      char *seq = alloca (1 + strlen (string));
       register int j, k = 0;
 
       for (j = 1; string[j]; j++)
