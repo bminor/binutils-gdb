@@ -1,6 +1,10 @@
+Tue Mar 31 17:05:04 1992  John Gilmore  (gnu at cygnus.com)
+
+	* breakpoint.c (breakpoint_1):  Fix prototype, this time for sure!
+
 Tue Mar 31 11:01:06 1992  Stu Grossman  (grossman at cygnus.com)
 
-	* Makefile.in: version->4.4.8
+	* Makefile.in (VERSION):  4.4.8
 
 	* procfs.c (open_proc_file):  Disable inherit-on-fork flag so that
 	commands in .cshrc/.profile won't get traced.
