@@ -1085,7 +1085,8 @@ md_estimate_size_before_relax (fragP, segment_type)
       relax_cobr (fragP);
       return 4;
     }
-  return 0;
+
+  return md_relax_table[fragP->fr_subtype].rlx_length;
 }				/* md_estimate_size_before_relax() */
 
 #if defined(OBJ_AOUT) | defined(OBJ_BOUT)
