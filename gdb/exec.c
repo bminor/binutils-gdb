@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "frame.h"
@@ -183,13 +183,30 @@ exec_file_command (args, from_tty)
       scratch_chan = openp (getenv ("PATH"), 1, filename, 
 			    write_files? O_RDWR|O_BINARY: O_RDONLY|O_BINARY, 0,
 			    &scratch_pathname);
+#if defined(__GO32__) || defined(__WIN32__)
+      if (scratch_chan < 0)
+      {
+	char *exename = alloca (strlen (filename) + 5);
+	strcat (strcpy (exename, filename), ".exe");
+	scratch_chan = openp (getenv ("PATH"), 1, exename, write_files ?
+		O_RDWR|O_BINARY : O_RDONLY|O_BINARY, 0, &scratch_pathname);
+      }
+#endif
       if (scratch_chan < 0)
 	perror_with_name (filename);
-
       exec_bfd = bfd_fdopenr (scratch_pathname, gnutarget, scratch_chan);
+
       if (!exec_bfd)
 	error ("\"%s\": could not open as an executable file: %s",
 	       scratch_pathname, bfd_errmsg (bfd_get_error ()));
+
+      /* At this point, scratch_pathname and exec_bfd->name both point to the
+	 same malloc'd string.  However exec_close() will attempt to free it
+	 via the exec_bfd->name pointer, so we need to make another copy and
+	 leave exec_bfd as the new owner of the original copy. */
+      scratch_pathname = strdup (scratch_pathname);
+      make_cleanup (free, scratch_pathname);
+      
       if (!bfd_check_format (exec_bfd, bfd_object))
 	{
 	  /* Make sure to close exec_bfd, or else "run" might try to use

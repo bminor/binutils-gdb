@@ -838,6 +838,15 @@ symfile_bfd_open (name)
 
   /* Look down path for it, allocate 2nd new malloc'd copy.  */
   desc = openp (getenv ("PATH"), 1, name, O_RDONLY | O_BINARY, 0, &absolute_name);
+#if defined(__GO32__) || defined(__WIN32__)
+  if (desc < 0)
+    {
+      char *exename = alloca (strlen (name) + 5);
+      strcat (strcpy (exename, name), ".exe");
+      desc = openp (getenv ("PATH"), 1, exename, O_RDONLY | O_BINARY,
+                    0, &absolute_name);
+    }
+#endif
   if (desc < 0)
     {
       make_cleanup (free, name);

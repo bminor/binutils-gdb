@@ -1,3 +1,9 @@
+Thu Jul 18 01:22:01 1996  Geoffrey Noer  <noer@cygnus.com>
+
+	* symfile.c (symfile_bfd_open): 
+	* exec.c (exec_file_command): for __GO32__ and __WIN32__ systems,
+	free the user from having to type the .exe extension.
+
 Wed Jul 17 06:54:50 1996  Mark Alexander  <marka@cygnus.com>
 
 	* mon960-rom.c: Shorten the mon960_inits string to a single
