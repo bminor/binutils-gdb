@@ -2761,7 +2761,7 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
   for (; rel < relend; rel++)
     {
-      enum elf_ppc_reloc_type r_type	= (enum ppc_reloc_type)ELF32_R_TYPE (rel->r_info);
+      enum elf_ppc_reloc_type r_type	= (enum elf_ppc_reloc_type)ELF32_R_TYPE (rel->r_info);
       bfd_vma offset			= rel->r_offset;
       bfd_vma addend			= rel->r_addend;
       bfd_reloc_status_type r		= bfd_reloc_other;
@@ -3286,7 +3286,6 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    BFD_ASSERT (sec != (asection *)0);
 	    name = bfd_get_section_name (abfd, sec->output_section);
 	    if (strcmp (name, ".sdata") != 0
-		&& strcmp (name, ".dynsbss") != 0
 		&& strcmp (name, ".sbss") != 0)
 	      {
 		(*_bfd_error_handler) (_("%s: The target (%s) of a %s relocation is in the wrong output section (%s)"),
@@ -3294,13 +3293,10 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 				       sym_name,
 				       ppc_elf_howto_table[ (int)r_type ]->name,
 				       name);
-		
-		bfd_set_error (bfd_error_bad_value);
-		ret = false;
-		continue;
 	      }
 	    addend -= (sdata->sym_hash->root.u.def.value
-		       + sec->output_section->vma);
+		       + sdata->sym_hash->root.u.def.section->output_section->vma
+		       + sdata->sym_hash->root.u.def.section->output_offset);
 	  }
 	  break;
 
@@ -3325,7 +3321,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		continue;
 	      }
 	    addend -= (sdata2->sym_hash->root.u.def.value
-		       + sec->output_section->vma);
+		       + sdata2->sym_hash->root.u.def.section->output_section->vma
+		       + sdata2->sym_hash->root.u.def.section->output_offset);
 	  }
 	  break;
 
@@ -3343,14 +3340,16 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      {
 		reg = 13;
 		addend -= (sdata->sym_hash->root.u.def.value
-			   + sec->output_section->vma);
+			   + sdata->sym_hash->root.u.def.section->output_section->vma
+			   + sdata->sym_hash->root.u.def.section->output_offset);
 	      }
 
 	    else if (strcmp (name, ".sdata2") == 0 || strcmp (name, ".sbss2") == 0)
 	      {
 		reg = 2;
 		addend -= (sdata2->sym_hash->root.u.def.value
-			   + sec->output_section->vma);
+			   + sdata2->sym_hash->root.u.def.section->output_section->vma
+			   + sdata2->sym_hash->root.u.def.section->output_offset);
 	      }
 
 	    else if (strcmp (name, ".PPC.EMB.sdata0") == 0 || strcmp (name, ".PPC.EMB.sbss0") == 0)
