@@ -3361,6 +3361,14 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                0, "builtin_type_ia64_ext", NULL);
   TYPE_FLOATFORMAT (builtin_type_ia64_ext) = &floatformat_ia64_ext;
 
+  /* According to the ia64 specs, instructions that store long double floats 
+     in memory use a long-double format different than that used in the floating
+     registers.  The memory format matches the x86 extended float format which is
+     80 bits.  An OS may choose to use this format (e.g. Linux) or choose to use
+     a different format for storing long doubles (e.g. HPUX).  In the latter case,
+     the setting of the format may be moved/overridden in an OS-specific tdep file.  */
+  set_gdbarch_long_double_format (gdbarch, &floatformat_i387_ext);
+
   set_gdbarch_short_bit (gdbarch, 16);
   set_gdbarch_int_bit (gdbarch, 32);
   set_gdbarch_long_bit (gdbarch, 64);

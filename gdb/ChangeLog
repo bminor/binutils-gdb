@@ -1,3 +1,9 @@
+2003-12-05  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* ia64-tdep.c (ia64_gdbarch_init): Set up the gdbarch long double
+	format to be the i387 extended float format which is used for
+	long doubles stored in memory. 
+
 2003-12-05  Mark Kettenis  <kettenis@gnu.org>
 
 	From Ulrich Weigand  <weigand@informatik.uni-erlangen.de>:
