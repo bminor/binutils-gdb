@@ -1,3 +1,7 @@
+2000-03-09  Tim Waugh  <twaugh@redhat.com>
+
+	* strings.1: Correct '-bytes' to '--bytes'.
+
 2000-03-08  H.J. Lu  <hjl@gnu.org>
 
 	* Makefile.am (install-exec-local): Depend on
