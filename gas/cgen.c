@@ -61,6 +61,9 @@ struct fixup
 static struct fixup fixups[MAX_FIXUPS];
 static int num_fixups;
 
+/* Prepare to parse an instruction.
+   ??? May wish to make this static and delete calls in md_assemble.  */
+
 void
 cgen_asm_init_parse ()
 {
@@ -161,21 +164,32 @@ cgen_record_fixup_exp (frag, where, insn, length, operand, opinfo, exp)
 /* Callback for cgen interface.  Parse the expression at *STRP.
    The result is an error message or NULL for success (in which case
    *STRP is advanced past the parsed text).
-   An enum cgen_asm_result is stored in RESULTP.
+   WANT is an indication of what the caller is looking for.
+   If WANT == CGEN_ASM_PARSE_INIT the caller is beginning to try to match
+   a table entry with the insn, reset the queued fixups counter.
+   An enum cgen_parse_operand_result is stored in RESULTP.
+   OPINDEX is the operand's table entry index.
    OPINFO is something the caller chooses to help in reloc determination.
    The resulting value is stored in VALUEP.  */
 
 const char *
-cgen_asm_parse_operand (strP, opindex, opinfo, resultP, valueP)
+cgen_parse_operand (want, strP, opindex, opinfo, resultP, valueP)
+     enum cgen_parse_operand_type want;
      const char **strP;
      int opindex;
      int opinfo;
-     enum cgen_asm_result *resultP;
+     enum cgen_parse_operand_result *resultP;
      bfd_vma *valueP;
 {
   char *hold;
   const char *errmsg = NULL;
   expressionS exp;
+
+  if (want == CGEN_PARSE_OPERAND_INIT)
+    {
+      cgen_asm_init_parse ();
+      return NULL;
+    }
 
   hold = input_line_pointer;
   input_line_pointer = (char *) *strP;
@@ -183,28 +197,30 @@ cgen_asm_parse_operand (strP, opindex, opinfo, resultP, valueP)
   *strP = input_line_pointer;
   input_line_pointer = hold;
 
+  /* FIXME: Need to check `want'.  */
+
   switch (exp.X_op)
     {
     case O_illegal :
       errmsg = "illegal operand";
-      *resultP = CGEN_ASM_ERROR;
+      *resultP = CGEN_PARSE_OPERAND_RESULT_ERROR;
       break;
     case O_absent :
       errmsg = "missing operand";
-      *resultP = CGEN_ASM_ERROR;
+      *resultP = CGEN_PARSE_OPERAND_RESULT_ERROR;
       break;
     case O_constant :
       *valueP = exp.X_add_number;
-      *resultP = CGEN_ASM_NUMBER;
+      *resultP = CGEN_PARSE_OPERAND_RESULT_NUMBER;
       break;
     case O_register :
       *valueP = exp.X_add_number;
-      *resultP = CGEN_ASM_REGISTER;
+      *resultP = CGEN_PARSE_OPERAND_RESULT_REGISTER;
       break;
     default :
       cgen_queue_fixup (opindex, opinfo, &exp);
       *valueP = 0;
-      *resultP = CGEN_ASM_QUEUED;
+      *resultP = CGEN_PARSE_OPERAND_RESULT_QUEUED;
       break;
     }
 

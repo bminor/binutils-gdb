@@ -1,6 +1,9 @@
 Thu Apr 10 14:40:00 1997  Doug Evans  <dje@canuck.cygnus.com>
 
-	* config/tc-m32r.c (md_begin): Set cgen_asm_parse_operand_fn.
+	* cgen.c (cgen_parse_operand): Renamed from cgen_asm_parse_operand.
+	New argument `want'.  Update enum cgen_parse_operand_result values.
+	Initialize if CGEN_PARSE_OPERAND_INIT.
+	* config/tc-m32r.c (md_begin): Set cgen_parse_operand_fn.
 	(md_assemble): Call cgen_asm_init_parse.
 	Update call to m32r_cgen_assemble_insn, call as_bad if assembly failed.
 
