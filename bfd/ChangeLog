@@ -1,3 +1,20 @@
+Thu Mar 28 23:48:49 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* libbfd-in.h (generic_link_hash_newfunc): Add declaration.
+	* libbfd.h: Rebuilt.
+	* linker.c (generic_link_hash_newfunc): No longer static.
+	* coffcode.h (coff_bfd_link_hash_create): Allow specific targets
+	to override.
+	* coff-h8300.c: Add two derived hash tables and their associated
+	funtions and #defines for use by the h8300 linker.
+	(h8300_reloc16_extra_cases, case R_MEM_INDIRECT): Create entries in
+	the function vector as needed.  Place the address of the function
+	vector entry in the location specified by the R_MEM_INDIRECT reloc.
+	Rewrite the vectors section contents as necessary.
+	(h8300_bfd_link_add_symbols): New function for the h8300 linker. 
+	(coff_bfd_link_add_symbols): Define to use h8300 specific version.
+	(coff_bfd_link_hash_table_create): Likewise.
+
 Thu Mar 28 17:44:08 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libhppa.h: If gcc 2.7 or higher, declare all the functions with
