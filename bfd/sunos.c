@@ -1426,10 +1426,12 @@ sunos_scan_std_relocs (info, abfd, sec, relocs, rel_size)
 	}
 
       BFD_ASSERT ((h->flags & SUNOS_REF_REGULAR) != 0);
-      BFD_ASSERT ((h->root.root.type == bfd_link_hash_defined
-		   || h->root.root.type == bfd_link_hash_defweak)
-		  ? (h->root.root.u.def.section->owner->flags & DYNAMIC) != 0
-		  : (h->root.root.u.undef.abfd->flags & DYNAMIC) != 0);
+      BFD_ASSERT (h->plt_offset != 0
+		  || ((h->root.root.type == bfd_link_hash_defined
+		       || h->root.root.type == bfd_link_hash_defweak)
+		      ? (h->root.root.u.def.section->owner->flags
+			 & DYNAMIC) != 0
+		      : (h->root.root.u.undef.abfd->flags & DYNAMIC) != 0));
 
       /* This reloc is against a symbol defined only by a dynamic
 	 object.  */
