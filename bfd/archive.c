@@ -142,12 +142,6 @@ extern int errno;
 #define BFD_GNU960_ARMAG(abfd)	(BFD_COFF_FILE_P((abfd)) ? ARMAG : ARMAGB)
 #endif
 
-/* Define offsetof for those systems which lack it */
-
-#ifndef offsetof
-#define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
-#endif
-
 /* We keep a cache of archive filepointers to archive elements to
    speed up searching the archive by filepos.  We only add an entry to
    the cache when we actually read one.  We also don't sort the cache;

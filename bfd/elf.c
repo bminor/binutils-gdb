@@ -5343,12 +5343,6 @@ _bfd_elf_rel_vtable_reloc_fn (abfd, re, symbol, data, is, obfd, errmsg)
 # include <sys/procfs.h>
 #endif
 
-/* Define offsetof for those systems which lack it.  */
-
-#ifndef offsetof
-# define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
-#endif
-
 /* FIXME: this is kinda wrong, but it's what gdb wants.  */
 
 static int

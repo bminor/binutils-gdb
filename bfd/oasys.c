@@ -27,14 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "oasys.h"
 #include "liboasys.h"
 
-/* XXX - FIXME.  offsetof belongs in the system-specific files in
-   ../include/sys. */
-/* Define offsetof for those systems which lack it */
-
-#ifndef offsetof
-#define offsetof(type, identifier) (size_t) &(((type *) 0)->identifier)
-#endif
-
 static boolean oasys_read_record PARAMS ((bfd *,
 					  oasys_record_union_type *));
 static boolean oasys_write_sections PARAMS ((bfd *));
