@@ -1644,9 +1644,9 @@ elf_s390_adjust_dynamic_symbol (info, h)
    will be called from elflink.h.  If elflink.h doesn't call our
    finish_dynamic_symbol routine, we'll need to do something about
    initializing any .plt and .got entries in elf_s390_relocate_section.  */
-#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, INFO, H) \
+#define WILL_CALL_FINISH_DYNAMIC_SYMBOL(DYN, SHARED, H) \
   ((DYN)								\
-   && ((INFO)->shared							\
+   && ((SHARED)								\
        || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)	\
    && ((H)->dynindx != -1						\
        || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0))
@@ -1691,7 +1691,7 @@ allocate_dynrelocs (h, inf)
 	}
 
       if (info->shared
-	  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
+	  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, 0, h))
 	{
 	  asection *s = htab->splt;
 
@@ -2339,7 +2339,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	      off = h->got.offset;
 	      dyn = htab->elf.dynamic_sections_created;
-	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h)
+	      if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
 		  || (info->shared
 		      && (info->symbolic
 			  || h->dynindx == -1
