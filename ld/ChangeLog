@@ -1,3 +1,9 @@
+Thu Oct 23 14:38:18 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* scripttempl/v850.sc: Rename linker symbol '_stack' to '__stack'
+	to avoid conflicts with C code which is defining a variable called
+	'stack'.
+
 Thu Oct 23 00:57:45 1997  Richard Henderson  <rth@dot.cygnus.com>
 
 	* Makefile.in (ALL_EMULATIONS): Move eelf64_sparc.o ...
