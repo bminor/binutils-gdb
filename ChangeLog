@@ -1,3 +1,9 @@
+Fri Nov  3 08:17:54 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* Makefile.in ($(CONFIGURE_TARGET_MODULES)):  If subdir has
+	configure script, run that instead of this directory's configure.
+	In either case, print a message that we're configuring the sub-dir.
+
 Thu Nov  2 23:23:36 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* configure.in: Before checking for the existence of various files,
