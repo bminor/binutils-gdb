@@ -1,5 +1,7 @@
 Wed Jul 21 18:03:38 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* gdb.t00/teststrategy.exp: Remove extra quote.
+
 	* gdb.t07/watchpoint.exp: Change xfail for calling function with
 	watchpoint enabled to "*-*-*".
 
