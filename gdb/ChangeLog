@@ -1,3 +1,9 @@
+Tue Oct 19 10:43:16 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/rs6000/rs6000.mh (TERMCAP): Define to -lcurses.
+
+	* Makefile.in: Define CXXFLAGS.
+
 Tue Oct 19 09:28:52 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* sparclite/Makefile.in:  Fixup so that this works with Sun make
