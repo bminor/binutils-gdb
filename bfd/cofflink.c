@@ -81,6 +81,7 @@ _bfd_coff_link_hash_table_init (table, abfd, newfunc)
 						struct bfd_hash_table *,
 						const char *));
 {
+  table->stab_info = NULL;
   return _bfd_link_hash_table_init (&table->root, abfd, newfunc);
 }
 
@@ -410,6 +411,46 @@ coff_link_add_symbols (abfd, info)
 
       esym += (sym.n_numaux + 1) * symesz;
       sym_hash += sym.n_numaux + 1;
+    }
+
+  /* If this is a non-traditional, non-relocateable link, try to
+     optimize the handling of any .stab/.stabstr sections.  */
+  if (! info->relocateable
+      && ! info->traditional_format
+      && info->hash->creator->flavour == bfd_get_flavour (abfd)
+      && (info->strip != strip_all && info->strip != strip_debugger))
+    {
+      asection *stab, *stabstr;
+
+      stab = bfd_get_section_by_name (abfd, ".stab");
+      if (stab != NULL)
+	{
+	  stabstr = bfd_get_section_by_name (abfd, ".stabstr");
+
+	  if (stabstr != NULL)
+	    {
+	      struct coff_link_hash_table *table;
+	      struct coff_section_tdata *secdata;
+
+	      secdata = coff_section_data (abfd, stab);
+	      if (secdata == NULL)
+		{
+		  stab->used_by_bfd =
+		    (PTR) bfd_zalloc (abfd,
+				      sizeof (struct coff_section_tdata));
+		  if (stab->used_by_bfd == NULL)
+		    return false;
+		  secdata = coff_section_data (abfd, stab);
+		}
+
+	      table = coff_hash_table (info);
+
+	      if (! _bfd_link_section_stabs (abfd, &table->stab_info,
+					     stab, stabstr,
+					     &secdata->stab_info))
+		return false;
+	    }
+	}
     }
 
   return true;
@@ -818,6 +859,13 @@ _bfd_coff_final_link (abfd, info)
 	}
       free (finfo.section_info);
       finfo.section_info = NULL;
+    }
+
+  /* If we have optimized stabs strings, output them.  */
+  if (coff_hash_table (info)->stab_info != NULL)
+    {
+      if (! _bfd_write_stab_strings (abfd, &coff_hash_table (info)->stab_info))
+	return false;
     }
 
   /* Write out the string table.  */
@@ -1652,8 +1700,9 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
                              be updated with the symbol number of the
                              next .bf symbol.  */
 			  finfo->last_bf = *auxp;
-			  finfo->last_bf_index = ((outsym - finfo->outsyms)
-						  / osymesz);
+			  finfo->last_bf_index = (((outsym - finfo->outsyms)
+						   / osymesz)
+						  + syment_base);
 			}
 		    }
 		}
@@ -1825,6 +1874,7 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
   for (o = input_bfd->sections; o != NULL; o = o->next)
     {
       bfd_byte *contents;
+      struct coff_section_tdata *secdata;
 
       if (! o->linker_mark)
 	{
@@ -1832,7 +1882,8 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 	  continue;
 	}
 
-      if ((o->flags & SEC_HAS_CONTENTS) == 0)
+      if ((o->flags & SEC_HAS_CONTENTS) == 0
+	  || (o->_raw_size == 0 && (o->flags & SEC_RELOC) == 0))
 	{
 	  if ((o->flags & SEC_RELOC) != 0
 	      && o->reloc_count != 0)
@@ -1848,9 +1899,9 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 	  continue;
 	}
 
-      if (coff_section_data (input_bfd, o) != NULL
-	  && coff_section_data (input_bfd, o)->contents != NULL)
-	contents = coff_section_data (input_bfd, o)->contents;
+      secdata = coff_section_data (input_bfd, o);
+      if (secdata != NULL && secdata->contents != NULL)
+	contents = secdata->contents;
       else
 	{
 	  if (! bfd_get_section_contents (input_bfd, o, finfo->contents,
@@ -1977,12 +2028,21 @@ _bfd_coff_link_input_bfd (finfo, input_bfd)
 	}
 
       /* Write out the modified section contents.  */
-      if (! bfd_set_section_contents (output_bfd, o->output_section,
-				      contents, o->output_offset,
-				      (o->_cooked_size != 0
-				       ? o->_cooked_size
-				       : o->_raw_size)))
-	return false;
+      if (secdata == NULL || secdata->stab_info == NULL)
+	{
+	  if (! bfd_set_section_contents (output_bfd, o->output_section,
+					  contents, o->output_offset,
+					  (o->_cooked_size != 0
+					   ? o->_cooked_size
+					   : o->_raw_size)))
+	    return false;
+	}
+      else
+	{
+	  if (! _bfd_write_section_stabs (output_bfd, o, &secdata->stab_info,
+					  contents))
+	    return false;
+	}
     }
 
   if (! finfo->info->keep_memory)
