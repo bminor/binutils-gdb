@@ -1,3 +1,9 @@
+Fri Feb  6 11:50:22 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-mips.c (bfd_elf32_bfd_reloc_type_lookup): For BFD_RELOC_CTOR
+	get the size from bfd_arch_bits_per_address instead of directly
+	from the isa.
+
 Thu Feb  5 14:21:34 1998  Michael Meissner  <meissner@cygnus.com>
 
 	* libbfd-in.h (BFD_ALIGN): If rounding up would cause the address
