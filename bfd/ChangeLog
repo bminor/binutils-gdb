@@ -1,3 +1,11 @@
+2002-12-16  Andrew MacLeod  <amacleod@redhat.com>
+
+	* elf32-xstormy16.c (xstormy16_elf_howto): Add R_XSTORMY16_LO16
+	and R_XSTORMY16_HI16) howto entries.
+	(xstormy16_reloc_map): Map R_XSTORMY16_{LO,HI}16 to BFD_RELOC_{LO,HI}16.
+	(xstormy16_info_to_howto_rela): Use R_XSTORMY16_GNU_VTINHERIT to 
+	determine the start of the second reloc table.
+
 2002-12-16  Nathan Tallent  <eraxxon@alumni.rice.edu>
 
 	* ecofflink.c: Fix the reading of the debugging information

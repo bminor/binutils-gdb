@@ -208,6 +208,36 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
+
+  /* Low order 16 bit value of a high memory address.  */
+  HOWTO (R_XSTORMY16_LO16,	/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_XSTORMY16_LO16",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* High order 16 bit value of a high memory address.  */
+  HOWTO (R_XSTORMY16_HI16,	/* type */
+	 16,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_XSTORMY16_HI16",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 };
 
 static reloc_howto_type xstormy16_elf_howto_table2 [] =
@@ -265,6 +295,8 @@ static const reloc_map xstormy16_reloc_map [] =
   { BFD_RELOC_XSTORMY16_REL_12,     R_XSTORMY16_REL_12,        xstormy16_elf_howto_table },
   { BFD_RELOC_XSTORMY16_24,	    R_XSTORMY16_24,            xstormy16_elf_howto_table },
   { BFD_RELOC_XSTORMY16_FPTR16,	    R_XSTORMY16_FPTR16,        xstormy16_elf_howto_table },
+  { BFD_RELOC_LO16,                 R_XSTORMY16_LO16,          xstormy16_elf_howto_table },
+  { BFD_RELOC_HI16,                 R_XSTORMY16_HI16,          xstormy16_elf_howto_table },
   { BFD_RELOC_VTABLE_INHERIT,       R_XSTORMY16_GNU_VTINHERIT, xstormy16_elf_howto_table2 },
   { BFD_RELOC_VTABLE_ENTRY,         R_XSTORMY16_GNU_VTENTRY,   xstormy16_elf_howto_table2 },
 };
@@ -300,7 +332,7 @@ xstormy16_info_to_howto_rela (abfd, cache_ptr, dst)
 {
   unsigned int r_type = ELF32_R_TYPE (dst->r_info);
 
-  if (r_type <= (unsigned int) R_XSTORMY16_FPTR16)
+  if (r_type <= (unsigned int) R_XSTORMY16_HI16)
     cache_ptr->howto = &xstormy16_elf_howto_table [r_type];
   else if (r_type - R_XSTORMY16_GNU_VTINHERIT
 	   <= (unsigned int) R_XSTORMY16_GNU_VTENTRY)
