@@ -137,6 +137,7 @@ Copyright (C) 1988-2001 Free Software Foundation, Inc.
 * Configurations::              Configuration-specific information
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
+* TUI::                         @value{GDBN} Text User Interface
 * Emacs::                       Using @value{GDBN} under @sc{gnu} Emacs
 * Annotations::                 @value{GDBN}'s annotation interface.
 * GDB/MI::                      @value{GDBN}'s Machine Interface.
@@ -1026,13 +1027,14 @@ Run using @var{device} for your program's standard input and output.
 @c FIXME: kingdon thinks there is more to -tty.  Investigate.
 
 @c resolve the situation of these eventually
-@c @item -tui
-@c @cindex @code{--tui}
-@c Use a Terminal User Interface.  For information, use your Web browser to
-@c read the file @file{TUI.html}, which is usually installed in the
-@c directory @code{/opt/langtools/wdb/doc} on HP-UX systems.  Do not use
-@c this option if you run @value{GDBN} from Emacs (see @pxref{Emacs, ,Using
-@c @value{GDBN} under @sc{gnu} Emacs}).
+@item -tui
+@cindex @code{--tui}
+Activate the Terminal User Interface when starting. 
+The Terminal User Interface manages several text windows on the terminal,
+showing source, assembly, registers and @value{GDBN} command outputs
+(@pxref{TUI, ,@value{GDBN} Text User Interface}).
+Do not use this option if you run @value{GDBN} from Emacs
+(@pxref{Emacs, ,Using @value{GDBN} under @sc{gnu} Emacs}).
 
 @c @item -xdb
 @c @cindex @code{--xdb}
@@ -13113,6 +13115,290 @@ printf "foo, bar-foo = 0x%x, 0x%x\n", foo, bar-foo
 The only backslash-escape sequences that you can use in the format
 string are the simple ones that consist of backslash followed by a
 letter.
+@end table
+
+@node TUI
+@chapter @value{GDBN} Text User Interface
+@cindex TUI
+
+@menu
+* TUI Overview::                TUI overview
+* TUI Keys::                    TUI key bindings
+* TUI Commands::                TUI specific commands
+* TUI Configuration::           TUI configuration variables
+@end menu
+
+The @value{GDBN} Text User Interface, TUI in short,
+is a terminal interface which uses the @code{curses} library
+to show the source file, the assembly output, the program registers
+and @value{GDBN} commands in separate text windows.
+The TUI is available only when @value{GDBN} is configured
+with the @code{--enable-tui} configure option (@pxref{Configure Options}).
+
+@node TUI Overview
+@section TUI overview
+
+The TUI has two display modes that can be switched while
+@value{GDBN} runs:
+
+@itemize @bullet
+@item
+A curses (or TUI) mode in which it displays several text
+windows on the terminal.
+
+@item
+A standard mode which corresponds to the @value{GDBN} configured without
+the TUI.
+@end itemize
+
+In the TUI mode, @value{GDBN} can display several text window
+on the terminal:
+
+@table @emph
+@item command
+This window is the @value{GDBN} command window with the @value{GDBN}
+prompt and the @value{GDBN} outputs.  The @value{GDBN} input is still
+managed using readline but through the TUI.  The @emph{command}
+window is always visible.
+
+@item source
+The source window shows the source file of the program.  The current
+line as well as active breakpoints are displayed in this window.
+The current program position is shown with the @samp{>} marker and
+active breakpoints are shown with @samp{*} markers.
+
+@item assembly
+The assembly window shows the disassembly output of the program.
+
+@item register
+This window shows the processor registers.  It detects when
+a register is changed and when this is the case, registers that have
+changed are highlighted.
+
+@end table
+
+The source, assembly and register windows are attached to the thread
+and the frame position.  They are updated when the current thread
+changes, when the frame changes or when the program counter changes.
+These three windows are arranged by the TUI according to several
+layouts.  The layout defines which of these three windows are visible.
+The following layouts are available:
+
+@itemize @bullet
+@item
+source
+
+@item
+assembly
+
+@item
+source and assembly
+
+@item
+source and registers
+
+@item
+assembly and registers
+
+@end itemize
+
+@node TUI Keys
+@section TUI Key Bindings
+@cindex TUI key bindings
+
+The TUI installs several key bindings in the readline keymaps
+(@pxref{Command Line Editing}).
+They allow to leave or enter in the TUI mode or they operate
+directly on the TUI layout and windows.  The following key bindings
+are installed for both TUI mode and the @value{GDBN} standard mode.
+
+@table @kbd
+@kindex C-x C-a
+@item C-x C-a
+@kindex C-x a
+@itemx C-x a
+@kindex C-x A
+@itemx C-x A
+Enter or leave the TUI mode.  When the TUI mode is left,
+the curses window management is left and @value{GDBN} operates using
+its standard mode writing on the terminal directly.  When the TUI
+mode is entered, the control is given back to the curses windows.
+The screen is then refreshed.
+
+@kindex C-x 1
+@item C-x 1
+Use a TUI layout with only one window.  The layout will
+either be @samp{source} or @samp{assembly}.  When the TUI mode
+is not active, it will switch to the TUI mode.
+
+Think of this key binding as the Emacs @kbd{C-x 1} binding.
+
+@kindex C-x 2
+@item C-x 2
+Use a TUI layout with at least two windows.  When the current
+layout shows already two windows, a next layout with two windows is used.
+When a new layout is chosen, one window will always be common to the
+previous layout and the new one.
+
+Think of it as the Emacs @kbd{C-x 2} binding.
+
+@end table
+
+The following key bindings are handled only by the TUI mode:
+
+@table @key
+@kindex PgUp
+@item PgUp
+Scroll the active window one page up.
+
+@kindex PgDn
+@item PgDn
+Scroll the active window one page down.
+
+@kindex Up
+@item Up
+Scroll the active window one line up.
+
+@kindex Down
+@item Down
+Scroll the active window one line down.
+
+@kindex Left
+@item Left
+Scroll the active window one column left.
+
+@kindex Right
+@item Right
+Scroll the active window one column right.
+
+@kindex C-L
+@item C-L
+Refresh the screen.
+
+@end table
+
+In the TUI mode, the arrow keys are used by the active window
+for scrolling.  This means they are not available for readline.  It is
+necessary to use other readline key bindings such as @key{C-p}, @key{C-n},
+@key{C-b} and @key{C-f}.
+
+@node TUI Commands
+@section TUI specific commands
+@cindex TUI commands
+
+The TUI has specific commands to control the text windows.
+These commands are always available, that is they do not depend on
+the current terminal mode in which @value{GDBN} runs.  When @value{GDBN}
+is in the standard mode, using these commands will automatically switch
+in the TUI mode.
+
+@table @code
+@item layout next
+@kindex layout next
+Display the next layout.
+
+@item layout prev
+@kindex layout prev
+Display the previous layout.
+
+@item layout src
+@kindex layout src
+Display the source window only.
+
+@item layout asm
+@kindex layout asm
+Display the assembly window only.
+
+@item layout split
+@kindex layout split
+Display the source and assembly window.
+
+@item layout regs
+@kindex layout regs
+Display the register window together with the source or assembly window.
+
+@item focus next | prev | src | asm | regs | split
+@kindex focus
+Set the focus to the named window.
+This command allows to change the active window so that scrolling keys
+can be affected to another window.
+
+@item refresh
+@kindex refresh
+Refresh the screen.  This is similar to using @key{C-L} key.
+
+@item update
+@kindex update
+Update the source window and the current execution point.
+
+@item winheight @var{name} +@var{count}
+@itemx winheight @var{name} -@var{count}
+@kindex winheight
+Change the height of the window @var{name} by @var{count}
+lines.  Positive counts increase the height, while negative counts
+decrease it.
+
+@end table
+
+@node TUI Configuration
+@section TUI configuration variables
+@cindex TUI configuration variables
+
+The TUI has several configuration variables that control the
+appearance of windows on the terminal.
+
+@table @code
+@item set tui-border-kind @var{kind}
+@kindex set tui-border-kind
+Select the border appearance for the source, assembly and register windows.
+The possible values are the following:
+@table @code
+@item space
+Use a space character to draw the border.
+
+@item ascii
+Use ascii characters + - and | to draw the border.
+
+@item acs
+Use the Alternate Character Set to draw the border.  The border is
+drawn using character line graphics if the terminal supports them.
+
+@end table
+
+@item set tui-active-border-mode @var{mode}
+@kindex set tui-active-border-mode
+Select the attributes to display the border of the active window.
+The possible values are @code{normal}, @code{standout}, @code{reverse},
+@code{half}, @code{half-standout}, @code{bold} and @code{bold-standout}.
+
+@item set tui-border-mode @var{mode}
+@kindex set tui-border-mode
+Select the attributes to display the border of other windows.
+The @var{mode} can be one of the following:
+@table @code
+@item normal
+Use normal attributes to display the border.
+
+@item standout
+Use standout mode.
+
+@item reverse
+Use reverse video mode.
+
+@item half
+Use half bright mode.
+
+@item half-standout
+Use half bright and standout mode.
+
+@item bold
+Use extra bright or bold mode.
+
+@item bold-standout
+Use extra bright or bold and standout mode.
+
+@end table
+
 @end table
 
 @node Emacs
