@@ -1708,7 +1708,7 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
              though the tx39's divide insns still do require the
 	     delay.  */
 	  if (! (hilo_interlocks
-		 || (mips_tune == CPU_R3900 && (pinfo & INSN_MULT)))
+		 || (mips_opts.arch == CPU_R3900 && (pinfo & INSN_MULT)))
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_LO)))
 	    nops += 2;
@@ -1730,7 +1730,7 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 	     insert a NOP.  Some newer processors have interlocks.
 	     Also the note tx39's multiply above.  */
 	  if (! (hilo_interlocks
-		 || (mips_tune == CPU_R3900 && (pinfo & INSN_MULT)))
+		 || (mips_opts.arch == CPU_R3900 && (pinfo & INSN_MULT)))
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_HI)))
 	    nops += 2;
@@ -1768,11 +1768,11 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 	  || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_LO)
 	      && (pinfo & INSN_WRITE_LO)
 	      && ! (hilo_interlocks
-		    || (mips_tune == CPU_R3900 && (pinfo & INSN_MULT))))
+		    || (mips_opts.arch == CPU_R3900 && (pinfo & INSN_MULT))))
 	  || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
 	      && (pinfo & INSN_WRITE_HI)
 	      && ! (hilo_interlocks
-		    || (mips_tune == CPU_R3900 && (pinfo & INSN_MULT)))))
+		    || (mips_opts.arch == CPU_R3900 && (pinfo & INSN_MULT)))))
 	prev_prev_nop = 1;
       else
 	prev_prev_nop = 0;
@@ -2297,7 +2297,7 @@ append_insn (char *place, struct mips_cl_insn *ip, expressionS *address_expr,
 			 | INSN_WRITE_COND_CODE))
 		  && ! cop_interlocks)
 	      || (! (hilo_interlocks
-		     || (mips_tune == CPU_R3900 && (pinfo & INSN_MULT)))
+		     || (mips_opts.arch == CPU_R3900 && (pinfo & INSN_MULT)))
 		  && (prev_pinfo
 		      & (INSN_READ_LO
 			 | INSN_READ_HI)))

@@ -1,3 +1,8 @@
+2004-01-22  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (append_insn): Don't do r3900 interlock
+	optimization for -mtune=r3900, as this will break on other CPUs.
+
 2004-01-11  Tom Rix   <tcrix@worldnet.att.net>
 
 	* config/tc-m68hc11.c (build_indexed_byte): movb and movw cannot
