@@ -1,3 +1,8 @@
+Sat Feb 21 22:36:52 1998  Richard Henderson  <rth@cygnus.com>
+
+	* read.c (s_set): Record file and line info for symbols when -as.
+	(pseudo_set): Don't overwrite that dummy fragment.
+
 start-sanitize-sky
 Fri Feb 20 12:43:02 1998  Doug Evans  <devans@canuck.cygnus.com>
 
