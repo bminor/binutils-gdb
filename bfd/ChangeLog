@@ -1,3 +1,11 @@
+Fri Aug  1 12:58:32 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Set enable_shared before AM_PROG_LIBTOOL.
+	* acinclude.m4: Move acmacros.m4 in here.  Remove AM_PROG_LIBTOOL
+	copy; use a patches libtool instead.
+	* acmacros.m4: Remove.
+	* Makefile.in, aclocal.m4, configure: Rebuild.
+
 Thu Jul 31 19:55:36 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am: New file, based on old Makefile.in.
