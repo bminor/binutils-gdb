@@ -12,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -23,14 +23,45 @@
 # need to be modified for any target, it can be done with a variable
 # or by passing arguments.
 
+load_lib libgloss.exp
+
 global GDB
-if ![info exists GDB] then {
-    if [file exists $base_dir/../gdb] then {
-	set GDB $base_dir/../gdb
-    } else {
-	set GDB [transform gdb]
-    }
+global CC
+global CXX
+global CFLAGS
+global CXXFLAGS
+global CHILL_LIB
+global CHILL_RT0
+
+if ![info exists CC] {
+    set CC [findfile $base_dir/../../gcc/xgcc "$base_dir/../../gcc/xgcc -B$base_dir/../../gcc/" [transform gcc]]
+    verbose "CC defaulting to $CC" 2
 }
+if ![info exists CXX] {
+    set CXX [findfile $base_dir/../../gcc/xgcc "$base_dir/../../gcc/xgcc -B$base_dir/../../gcc/" [transform g++]]
+    verbose "CXX defaulting to $CC" 2
+}
+if ![info exists CHILL_LIB] {
+    set CHILL_LIB [findfile $base_dir/../../gcc/ch/runtime/libchill.a "$base_dir/../../gcc/ch/runtime/libchill.a" [transform -lchill]]
+    verbose "CHILL_LIB defaulting to $CHILL_LIB" 2
+}
+if ![info exists CHILL_RT0] {
+    set CHILL_RT0 [findfile $base_dir/../../gcc/ch/runtime/chillrt0.o "$base_dir/../../gcc/ch/runtime/chillrt0.o" ""]
+    verbose "CHILL_RT0 defaulting to $CHILL_RT0" 2
+}
+
+if ![info exists LDFLAGS] {
+    if [is3way] {
+	append LDFLAGS " [libgloss_flags] [newlib_flags]"
+    }
+    set LDFLAGS ""
+    verbose "LDFLAGS defaulting to $LDFLAGS" 2
+}
+
+if ![info exists GDB] then {
+    set GDB [findfile $base_dir/../../gdb/gdb "$base_dir/../../gdb/gdb" [transform gdb]]
+}
+
 
 global GDBFLAGS
 if ![info exists GDBFLAGS] then {
@@ -53,6 +84,14 @@ if [istarget "sparclite-*-*"] then {
 
 if ![info exists noargs] then {
     set noargs 0
+}
+
+if ![info exists nosignals] then {
+    set nosignals 0
+}
+
+if ![info exists noinferiorio] then {
+    set noinferiorio 0
 }
 
 #
@@ -275,6 +314,7 @@ proc gdb_test { args } {
     global prompt
     global GDB
     global spawn_id
+    upvar timeout timeout
 
     if [llength $args]==3 then {
 	set message [lindex $args 2]
@@ -427,6 +467,8 @@ proc string_to_regexp {str} {
 # but a string that must match exactly.
 
 proc gdb_test_exact { args } {
+    upvar timeout timeout
+
     set command [lindex $args 0]
     set pattern [string_to_regexp [lindex $args 1]]
     if [llength $args]==3 then {
@@ -442,7 +484,7 @@ proc gdb_reinitialize_dir { subdir } {
 
    send "dir\n"
     expect {
-	-re "Reinitialize source path to empty.*" {
+	-re "Reinitialize source path to empty.*y or n. " {
 	    send "y\n"
 	    expect {
 		-re "Source directories searched.*$prompt $" {
@@ -490,8 +532,8 @@ proc default_gdb_exit {} {
 }
 
 #
-# gdb_load -- load a file into the debugger.
-#             return a -1 if anything goes wrong.
+# load a file into the debugger.
+# return a -1 if anything goes wrong.
 #
 proc gdb_file_cmd { arg } {
     global verbose
@@ -500,6 +542,7 @@ proc gdb_file_cmd { arg } {
     global GDB
     global prompt
     global spawn_id
+    upvar timeout timeout
 
     send "file $arg\n"
     expect {
@@ -600,7 +643,7 @@ proc default_gdb_start { } {
     send "set width 0\n"
     expect {
 	-re ".*$prompt $" {
-	    verbose "Seting width to 0." 2
+	    verbose "Setting width to 0." 2
 	}
 	timeout {
 	    warning "Couldn't set the width to 0."
@@ -620,12 +663,19 @@ if ![info exists argv0] then {
     }
 }
 
+# * For crosses, the CHILL runtime doesn't build because it can't find
+# setjmp.h, stdio.h, etc.
+# * For AIX (as of 16 Mar 95), (a) there is no language code for
+# CHILL in output_epilog in gcc/config/rs6000/rs6000.c, (b) collect2
+# does not get along with AIX's too-clever linker.
+# * On Irix5, there is a bug whereby set of bool, etc., don't get
+# TYPE_LOW_BOUND for the bool right because force_to_range_type doesn't
+# work with stub types.
+# Lots of things seem to fail on the PA, and since it's not a supported
+# chill target at the moment, don't run the chill tests.
+
 proc skip_chill_tests {} {
-    # For crosses, the CHILL runtime doesn't build because it can't find
-    # setjmp.h, stdio.h, etc.
-    # For AIX (as of 16 Mar 95), (a) there is no language code for
-    # CHILL in output_epilog in gcc/config/rs6000/rs6000.c, (b) collect2
-    # does not get along with AIX's too-clever linker.
-    # On Solaris, static constructors are broken.
-    return {![isnative] || [istarget "*-*-aix*"] || [istarget "*-*-solaris2*"]}
+    eval set skip_chill [expr ![isnative] || [istarget "*-*-aix*"] || [istarget "*-*-irix5*"] || [istarget "alpha-*-osf*"] || [istarget "hppa*-*-*"]]
+    verbose "Skip chill tests is $skip_chill"
+    return $skip_chill
 }

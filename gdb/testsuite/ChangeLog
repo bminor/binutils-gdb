@@ -1,3 +1,8 @@
+Fri Feb  2 10:19:40 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* lib/gdb.exp: Fix typos (LDLAGS -> LDFLAGS).
+	Load libgloss.exp.
+
 Thu Feb  1 20:20:14 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gdb.disasm/hppa.exp: Compile directly into an executable, use
