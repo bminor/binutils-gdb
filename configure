@@ -261,6 +261,11 @@ do
                         eval $withopt="$withval"
                         withoptions="$withoptions $arg"
                         ;;
+                -without* | --without*)
+                        withopt=`echo ${arg} | sed 's:^-*without:with:;s/-/_/g'`		
+                        eval $withopt=no
+                        withoutoptions="$withoutoptions $arg"
+                        ;;
                 -with* | --with*)
                         withopt=`echo ${arg} | sed 's:^-*with:with:;s/-/_/g'`
                         eval $withopt=yes
@@ -318,6 +323,7 @@ case "${fatal}" in
                         echo "- Looks like this is a ${tmp_alias}" 1>&2
                         host_alias=${tmp_alias}
                         target_alias=${tmp_alias}
+			arguments="--host=${host_alias} ${arguments}"
                 else
                         echo '- Failed to guess the system type.  You need to tell me.' 1>&2
                         fatal=yes
@@ -346,13 +352,10 @@ if [ -n "${fatal}" -o "${host_alias}" = "help" ] ; then
         (echo "Usage: configure HOST" ;
         echo ;
         echo "Options: [defaults in brackets]" ;
-        echo " -exec-prefix=MYDIR       configure for installation of host dependent files into MYDIR. [\"/usr/local\"]" ;
-        echo " -gas                     configure the compilers for use with gas. [native as]" ;
-        echo " -help                    print this message. [normal config]" ;
-        echo " -lang=LANG               configure to build LANG. [gcc]" ;
-        echo " -nfp                     configure the compilers default to soft floating point. [hard float]" ;
-        echo " -norecursion             configure this directory only. [recurse]" ;
         echo " -prefix=MYDIR            configure for installation of host dependent files into MYDIR. [\"/usr/local\"]" ;
+        echo " -exec-prefix=MYDIR       configure for installation of host dependent files into MYDIR. [\"/usr/local\"]" ;
+        echo " -help                    print this message. [normal config]" ;
+        echo " -norecursion             configure this directory only. [recurse]" ;
         echo " -program-prefix=FOO      install programs with FOO prepended to their names. [ \"\" ]" ;
         echo " -program-suffix=FOO      install programs with FOO appended to their names. [ \"\" ]" ;
         echo " -program-transform-name=FOO      install programs with names transformed by sed pattern FOO. [ \"\" ]" ;
@@ -360,10 +363,13 @@ if [ -n "${fatal}" -o "${host_alias}" = "help" ] ; then
         echo " -srcdir=DIR              find the sources in DIR. [\".\" or \"..\"]" ;
         echo " -target=TARGET           configure for TARGET.  [TARGET = HOST]" ;
         echo " -tmpdir=TMPDIR           create temporary files in TMPDIR.  [ TMPDIR = \"/tmp\" ]" ;
+        echo " -nfp                     configure the compilers default to soft floating point. [hard float]" ;
+        echo " -with-FOO, -with-FOO=BAR specify that FOO is available"
+        echo " -without-FOO             specify that FOO is NOT available"
         echo ;
         echo "Where HOST and TARGET are something like \"vax\", \"sun3\", \"encore\", etc." ;
+        echo ;
         ) 1>&2
-
         if [ -r config.status ] ; then
                 cat config.status
         fi
@@ -639,85 +645,85 @@ EOF
 
         if [ -f ${srcdir}/${subdir}/${Makefile_in} ] ; then
 
-	    # Conditionalize for this site from "Makefile.in" (or whatever it's called) into Makefile.tem
-	    rm -f ${subdir}/Makefile.tem
-	      case "${site}" in
-	      "") cp ${srcdir}/${subdir}/${Makefile_in} ${subdir}/Makefile.tem ;;
-	      *)
-		      site_makefile_frag=${srcdir}/config/ms-${site}
+            # Conditionalize for this site from "Makefile.in" (or whatever it's called) into Makefile.tem
+            rm -f ${subdir}/Makefile.tem
+              case "${site}" in
+              "") cp ${srcdir}/${subdir}/${Makefile_in} ${subdir}/Makefile.tem ;;
+              *)
+                      site_makefile_frag=${srcdir}/config/ms-${site}
 
-		      if [ -f ${site_makefile_frag} ] ; then
-			      sed -e "/^####/  r ${site_makefile_frag}" ${srcdir}/${subdir}/${Makefile_in} \
-				      > ${subdir}/Makefile.tem
-		      else
-			      cp ${srcdir}/${subdir}/${Makefile_in} ${subdir}/Makefile.tem
-			      site_makefile_frag=
-		      fi
-		      ;;
-	    esac
-	    # working copy now in ${subdir}/Makefile.tem
+                      if [ -f ${site_makefile_frag} ] ; then
+                              sed -e "/^####/  r ${site_makefile_frag}" ${srcdir}/${subdir}/${Makefile_in} \
+                                      > ${subdir}/Makefile.tem
+                      else
+                              cp ${srcdir}/${subdir}/${Makefile_in} ${subdir}/Makefile.tem
+                              site_makefile_frag=
+                      fi
+                      ;;
+            esac
+            # working copy now in ${subdir}/Makefile.tem
 
-	    # Conditionalize the makefile for this host.
-	    rm -f ${Makefile}
-	    case "${host_makefile_frag}" in
-	      "") mv ${subdir}/Makefile.tem ${Makefile} ;;
-	      *)
-		      if [ ! -f ${host_makefile_frag} ] ; then
-			      host_makefile_frag=${srcdir}/${host_makefile_frag}
-		      fi
-		      if [ -f ${host_makefile_frag} ] ; then
-			      sed -e "/^####/  r ${host_makefile_frag}" ${subdir}/Makefile.tem > ${Makefile}
-		      else
-			      echo '***' Expected host makefile fragment \"${host_makefile_frag}\" 1>&2
-			      echo '***' is missing in ${PWD=`pwd`}. 1>&2
-			      mv ${subdir}/Makefile.tem ${Makefile}
-		      fi
-	    esac
-	    # working copy now in ${Makefile}
+            # Conditionalize the makefile for this host.
+            rm -f ${Makefile}
+            case "${host_makefile_frag}" in
+              "") mv ${subdir}/Makefile.tem ${Makefile} ;;
+              *)
+                      if [ ! -f ${host_makefile_frag} ] ; then
+                              host_makefile_frag=${srcdir}/${host_makefile_frag}
+                      fi
+                      if [ -f ${host_makefile_frag} ] ; then
+                              sed -e "/^####/  r ${host_makefile_frag}" ${subdir}/Makefile.tem > ${Makefile}
+                      else
+                              echo '***' Expected host makefile fragment \"${host_makefile_frag}\" 1>&2
+                              echo '***' is missing in ${PWD=`pwd`}. 1>&2
+                              mv ${subdir}/Makefile.tem ${Makefile}
+                      fi
+            esac
+            # working copy now in ${Makefile}
 
-	    # Conditionalize the makefile for this target.
-	    rm -f ${subdir}/Makefile.tem
-	    case "${target_makefile_frag}" in
-	      "") mv ${Makefile} ${subdir}/Makefile.tem ;;
-	      *)
-		      if [ ! -f ${target_makefile_frag} ] ; then
-			      target_makefile_frag=${srcdir}/${target_makefile_frag}
-		      fi
-		      if [ -f ${target_makefile_frag} ] ; then
-			      sed -e "/^####/  r ${target_makefile_frag}" ${Makefile} > ${subdir}/Makefile.tem
-		      else
-			      mv ${Makefile} ${subdir}/Makefile.tem
-			      target_makefile_frag=
-		      fi
-		      ;;
-	    esac
-	    # real copy now in ${subdir}/Makefile.tem
+            # Conditionalize the makefile for this target.
+            rm -f ${subdir}/Makefile.tem
+            case "${target_makefile_frag}" in
+              "") mv ${Makefile} ${subdir}/Makefile.tem ;;
+              *)
+                      if [ ! -f ${target_makefile_frag} ] ; then
+                              target_makefile_frag=${srcdir}/${target_makefile_frag}
+                      fi
+                      if [ -f ${target_makefile_frag} ] ; then
+                              sed -e "/^####/  r ${target_makefile_frag}" ${Makefile} > ${subdir}/Makefile.tem
+                      else
+                              mv ${Makefile} ${subdir}/Makefile.tem
+                              target_makefile_frag=
+                      fi
+                      ;;
+            esac
+            # real copy now in ${subdir}/Makefile.tem
 
-	    # Conditionalize the makefile for this package.
-	    rm -f ${Makefile}
-	    case "${package_makefile_frag}" in
-	      "") mv ${subdir}/Makefile.tem ${Makefile} ;;
-	      *)
-		      if [ ! -f ${package_makefile_frag} ] ; then
-			      package_makefile_frag=${srcdir}/${package_makefile_frag}
-		      fi
-		      if [ -f ${package_makefile_frag} ] ; then
-			      sed -e "/^####/  r ${package_makefile_frag}" ${subdir}/Makefile.tem > ${Makefile}
-		      else
-			      echo '***' Expected package makefile fragment \"${package_makefile_frag}\" 1>&2
-			      echo '***' is missing in ${PWD=`pwd`}. 1>&2
-			      mv ${subdir}/Makefile.tem ${Makefile}
-		      fi
-	    esac
-	    # working copy now in ${Makefile}
+            # Conditionalize the makefile for this package.
+            rm -f ${Makefile}
+            case "${package_makefile_frag}" in
+              "") mv ${subdir}/Makefile.tem ${Makefile} ;;
+              *)
+                      if [ ! -f ${package_makefile_frag} ] ; then
+                              package_makefile_frag=${srcdir}/${package_makefile_frag}
+                      fi
+                      if [ -f ${package_makefile_frag} ] ; then
+                              sed -e "/^####/  r ${package_makefile_frag}" ${subdir}/Makefile.tem > ${Makefile}
+                      else
+                              echo '***' Expected package makefile fragment \"${package_makefile_frag}\" 1>&2
+                              echo '***' is missing in ${PWD=`pwd`}. 1>&2
+                              mv ${subdir}/Makefile.tem ${Makefile}
+                      fi
+            esac
+            # working copy now in ${Makefile}
 
-	    mv ${Makefile} ${subdir}/Makefile.tem
+            mv ${Makefile} ${subdir}/Makefile.tem
 
-	    # real copy now in ${subdir}/Makefile.tem
+            # real copy now in ${subdir}/Makefile.tem
 
-	    # prepend warning about editting, and a bunch of variables.
-	    rm -f ${Makefile}
-	    cat > ${Makefile} <<EOF
+            # prepend warning about editting, and a bunch of variables.
+            rm -f ${Makefile}
+            cat > ${Makefile} <<EOF
 # ${NO_EDIT}
 VPATH = ${makesrcdir}
 links = ${configlinks}
@@ -732,64 +738,64 @@ target_vendor = ${target_vendor}
 target_os = ${target_os}
 target_canonical = ${target_cpu}-${target_vendor}-${target_os}
 EOF
-	    case "${package_makefile_frag}" in
-	      "") ;;
-	      /*) echo package_makefile_frag = ${package_makefile_frag} >>${Makefile} ;;
-	      *)  echo package_makefile_frag = ${invsubdir}${package_makefile_frag} >>${Makefile} ;;
-	    esac
+            case "${package_makefile_frag}" in
+              "") ;;
+              /*) echo package_makefile_frag = ${package_makefile_frag} >>${Makefile} ;;
+              *)  echo package_makefile_frag = ${invsubdir}${package_makefile_frag} >>${Makefile} ;;
+            esac
 
-	    case "${target_makefile_frag}" in
-	      "") ;;
-	      /*) echo target_makefile_frag = ${target_makefile_frag} >>${Makefile} ;;
-	      *)  echo target_makefile_frag = ${invsubdir}${target_makefile_frag} >>${Makefile} ;;
-	    esac
+            case "${target_makefile_frag}" in
+              "") ;;
+              /*) echo target_makefile_frag = ${target_makefile_frag} >>${Makefile} ;;
+              *)  echo target_makefile_frag = ${invsubdir}${target_makefile_frag} >>${Makefile} ;;
+            esac
 
-	    case "${host_makefile_frag}" in
-	      "") ;;
-	      /*) echo host_makefile_frag = ${host_makefile_frag} >>${Makefile} ;;
-	      *)  echo host_makefile_frag = ${invsubdir}${host_makefile_frag} >>${Makefile} ;;
-	    esac
+            case "${host_makefile_frag}" in
+              "") ;;
+              /*) echo host_makefile_frag = ${host_makefile_frag} >>${Makefile} ;;
+              *)  echo host_makefile_frag = ${invsubdir}${host_makefile_frag} >>${Makefile} ;;
+            esac
 
-	    if [ "${site_makefile_frag}" != "" ] ; then
-		echo site_makefile_frag = ${invsubdir}${site_makefile_frag} >>${Makefile}
-	    fi 
+            if [ "${site_makefile_frag}" != "" ] ; then
+                echo site_makefile_frag = ${invsubdir}${site_makefile_frag} >>${Makefile}
+            fi 
 
-	    # fixme: this shouldn't be in configure.
-	    # Define macro CROSS_COMPILE in compilation if this is a cross-compiler.
-	    case "${host_alias}" in
-	      "${target_alias}")
-		      echo "ALL=all.internal" >> ${Makefile}
-		      ;;
-	      *)
-		      echo "CROSS=-DCROSS_COMPILE" >> ${Makefile}
-		      echo "ALL=all.cross" >> ${Makefile}
-		      ;;
-	    esac
+            # fixme: this shouldn't be in configure.
+            # Define macro CROSS_COMPILE in compilation if this is a cross-compiler.
+            case "${host_alias}" in
+              "${target_alias}")
+                      echo "ALL=all.internal" >> ${Makefile}
+                      ;;
+              *)
+                      echo "CROSS=-DCROSS_COMPILE" >> ${Makefile}
+                      echo "ALL=all.cross" >> ${Makefile}
+                      ;;
+            esac
 
-	    # reset prefix, exec_prefix, srcdir, SUBDIRS, NONSUBDIRS,
-	    # remove any form feeds.
-	    if [ -z "${subdirs}" ]; then
-		rm -f ${subdir}/Makefile.tem2
-		sed -e "s:^SUBDIRS[         ]*=.*$:SUBDIRS = ${configdirs}:" \
-		    -e "s:^NONSUBDIRS[      ]*=.*$:NONSUBDIRS = ${noconfigdirs}:" \
-		    ${subdir}/Makefile.tem > ${subdir}/Makefile.tem2
-		rm -f ${subdir}/Makefile.tem
-		mv ${subdir}/Makefile.tem2 ${subdir}/Makefile.tem
-	    fi
-	    sed -e "s:^prefix[      ]*=.*$:prefix = ${prefix}:" \
-		    -e "s:^exec_prefix[     ]*=.*$:exec_prefix = ${exec_prefix}:" \
-		    -e "s:^srcdir[  ]*=.*$:srcdir = ${makesrcdir}:" \
-		    -e "s///" \
-		    -e "s:^program_prefix[  ]*=.*$:program_prefix = ${program_prefix}:" \
-		    -e "s:^program_suffix[  ]*=.*$:program_suffix = ${program_suffix}:" \
-		    -e "s:^program_transform_name[  ]*=.*$:program_transform_name = ${program_transform_name}:" \
-		    -e "s:^tooldir[         ]*=.*$:tooldir = ${tooldir}:" \
-		    ${subdir}/Makefile.tem >> ${Makefile}
-	    # final copy now in ${Makefile}
+            # reset prefix, exec_prefix, srcdir, SUBDIRS, NONSUBDIRS,
+            # remove any form feeds.
+            if [ -z "${subdirs}" ]; then
+                rm -f ${subdir}/Makefile.tem2
+                sed -e "s:^SUBDIRS[         ]*=.*$:SUBDIRS = ${configdirs}:" \
+                    -e "s:^NONSUBDIRS[      ]*=.*$:NONSUBDIRS = ${noconfigdirs}:" \
+                    ${subdir}/Makefile.tem > ${subdir}/Makefile.tem2
+                rm -f ${subdir}/Makefile.tem
+                mv ${subdir}/Makefile.tem2 ${subdir}/Makefile.tem
+            fi
+            sed -e "s:^prefix[      ]*=.*$:prefix = ${prefix}:" \
+                    -e "s:^exec_prefix[     ]*=.*$:exec_prefix = ${exec_prefix}:" \
+                    -e "s:^srcdir[  ]*=.*$:srcdir = ${makesrcdir}:" \
+                    -e "s///" \
+                    -e "s:^program_prefix[  ]*=.*$:program_prefix = ${program_prefix}:" \
+                    -e "s:^program_suffix[  ]*=.*$:program_suffix = ${program_suffix}:" \
+                    -e "s:^program_transform_name[  ]*=.*$:program_transform_name = ${program_transform_name}:" \
+                    -e "s:^tooldir[         ]*=.*$:tooldir = ${tooldir}:" \
+                    ${subdir}/Makefile.tem >> ${Makefile}
+            # final copy now in ${Makefile}
 
-	else
-	   echo "No Makefile.in found in ${srcdir}, unable to configure" 1>&2
-	fi
+        else
+           echo "No Makefile.in found in ${srcdir}, unable to configure" 1>&2
+        fi
 
         rm -f ${subdir}/Makefile.tem
 
@@ -898,7 +904,7 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
 ### The recursion line is here.
                         if eval ${recprog} ${verbose} --host=${host_alias} --target=${target_alias} \
                                 ${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
-                                ${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${removing} ${redirect} ; then
+                                ${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${withoutoptions} ${removing} ${redirect} ; then
                                 true
                         else
                                 exit 1

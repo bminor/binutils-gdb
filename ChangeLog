@@ -2,7 +2,10 @@ Sun Mar 21 16:46:12 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* configure: add support for package_makefile_fragment, handle the
 	case where a directory has a configure.in file but no Makefile.in
-	more gracefully (with an actual understandable error message, even)
+	more gracefully (with an actual understandable error message, even);
+	add support for --without (and add this to the usage message); also	
+	explicitly add a --host=${host_alias} to the command line when
+	config.guess is used
 
 Sun Mar 21 12:11:58 1993  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
