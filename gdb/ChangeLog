@@ -1,5 +1,8 @@
 Thu Nov  4 08:27:24 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* stabsread.c (read_struct_fields): Accept either '$' or '.' as
+	the character which introduces a cpp_abbrev or anonymous type.
+
 	* c-lang.c (c_printstr): Print "" to stream (like all the other
 	output from this function), not gdb_stdout.
 

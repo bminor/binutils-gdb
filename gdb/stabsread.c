@@ -2322,11 +2322,16 @@ read_struct_fields (fip, pp, type, objfile)
 
       /* Get the field name.  */
       p = *pp;
-      /* If is starts with CPLUS_MARKER it is a special abbreviation, unless
-	 the CPLUS_MARKER is followed by an underscore, in which case it is
-	 just the name of an anonymous type, which we should handle like any
-	 other type name.  */
-      if (*p == CPLUS_MARKER && p[1] != '_')
+
+      /* If is starts with CPLUS_MARKER it is a special abbreviation,
+	 unless the CPLUS_MARKER is followed by an underscore, in
+	 which case it is just the name of an anonymous type, which we
+	 should handle like any other type name.  We accept either '$'
+	 or '.', because a field name can never contain one of these
+	 characters except as a CPLUS_MARKER (we probably should be
+	 doing that in most parts of GDB).  */
+
+      if ((*p == '$' || *p == '.') && p[1] != '_')
 	{
 	  if (!read_cpp_abbrev (fip, pp, type, objfile))
 	    return 0;
