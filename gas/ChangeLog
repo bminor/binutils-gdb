@@ -1,3 +1,9 @@
+start-sanitize-sh4
+Thu Jan 15 14:19:01 1998  Richard Henderson  <rth@cygnus.com>
+
+	* tc-sh.c (get_specific): Handle SGR & DBR.
+
+end-sanitize-sh4
 Thu Jan 15 13:46:48 1998  Richard Henderson  <rth@cygnus.com>
 
 	* tc-h8300.c (parse_reg): Take the length of the symbol into
