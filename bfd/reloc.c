@@ -579,7 +579,9 @@ DEFUN(bfd_perform_relocation,(abfd,
      might have overflowed before we get here.  For a correct check we
      need to compute the value in a size larger than bitsize, but we
      can't reasonably do that for a reloc the same size as a host
-     machine word.  */
+     machine word.
+     FIXME: We should also do overflow checking on the result after
+     adding in the value contained in the object file.  */
   if (howto->complain_on_overflow != complain_overflow_dont)
     {
       bfd_vma check;
@@ -631,7 +633,22 @@ DEFUN(bfd_perform_relocation,(abfd,
 
 	    if (((bfd_vma) check &~ reloc_bits) != 0
 		&& ((bfd_vma) check &~ reloc_bits) != (-1 &~ reloc_bits))
-	      flag = bfd_reloc_overflow;
+	      {
+		/* The above right shift is incorrect for a signed
+		   value.  See if turning on the upper bits fixes the
+		   overflow.  */
+		if (howto->rightshift > howto->bitpos
+		    && (bfd_signed_vma) relocation < 0)
+		  {
+		    check |= ((bfd_vma) -1
+			      &~ ((bfd_vma) -1
+				  >> (howto->rightshift - howto->bitpos)));
+		    if (((bfd_vma) check &~ reloc_bits) != (-1 &~ reloc_bits))
+		      flag = bfd_reloc_overflow;
+		  }
+		else
+		  flag = bfd_reloc_overflow;
+	      }
 	  }
 	  break;
 	default:
@@ -961,6 +978,16 @@ CODE_FRAGMENT
 .  BFD_RELOC_HPPA_PLABEL_R14,
 .  BFD_RELOC_HPPA_UNWIND_ENTRY,
 .  BFD_RELOC_HPPA_UNWIND_ENTRIES,
+.
+.  {* i386/elf relocations *}
+.  BFD_RELOC_386_GOT32,
+.  BFD_RELOC_386_PLT32,
+.  BFD_RELOC_386_COPY,
+.  BFD_RELOC_386_GLOB_DAT,
+.  BFD_RELOC_386_JUMP_SLOT,
+.  BFD_RELOC_386_RELATIVE,
+.  BFD_RELOC_386_GOTOFF,
+.  BFD_RELOC_386_GOTPC,
 .
 .  {* this must be the highest numeric value *}
 .  BFD_RELOC_UNUSED
