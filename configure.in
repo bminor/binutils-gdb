@@ -503,7 +503,7 @@ case "${target}" in
     fi
     ;;
   v810-*-*)
-    noconfigdirs="$noconfigdirs bfd binutils gas gcc gdb ld target-libg++ target-libstdc++ opcodes"
+    noconfigdirs="$noconfigdirs bfd binutils gas gcc gdb ld target-libio target-libg++ target-libstdc++ opcodes"
     ;;
   vax-*-vms)
     noconfigdirs="$noconfigdirs bfd binutils gdb ld target-newlib opcodes"

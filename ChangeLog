@@ -1,3 +1,9 @@
+Wed Nov 29 13:49:08 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* configure.in (noconfigdirs): Disable target-libio on v810-*-*.
+	* config/mt-v810 (CC_FOR_TARGET, AS_FOR_TARGET, AR_FOR_TARGET,
+	RANLIB_FOR_TARGET): Set as appropriate for NEC v810 toolchain.
+
 Wed Nov 29 12:12:01 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Don't configure gas for alpha-dec-osf*.
