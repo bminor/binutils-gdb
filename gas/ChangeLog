@@ -3,7 +3,7 @@ Mon Jun 12 22:25:39 1995  Jeff Law  (law@snake.cs.utah.edu)
 	* config/tc-hppa.c (pa_ip): Check for invalid register in single
 	precision fmpyadd and fmpysub instructions.
 
-Thu  8 Jun 19:33:02 1995  Pat Rankin  (rankin@eql.caltech.edu)
+Thu Jun  8 19:33:02 1995  Pat Rankin  (rankin@eql.caltech.edu)
 
 	* config/obj-vms.c (myname): Delete all references.
 	(VMS_stab_parse, Write_VMS_MHD_Records, VMS_Case_Hack_Symbol):
@@ -32,7 +32,7 @@ Tue Jun  6 13:53:06 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 	strcmp against FAKE_LABEL_NAME instead of checking third
 	character.  (Suggested by Pat Rankin.)
 
-Mon  5 Jun 20:10:46 1995  Pat Rankin  (rankin@eql.caltech.edu)
+Mon Jun  5 20:10:46 1995  Pat Rankin  (rankin@eql.caltech.edu)
 
 	Add support for N_ABS and N_ABS|N_EXT type symbols.
 
@@ -55,7 +55,7 @@ Mon Jun  5 02:17:58 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
 	* configure.in (i386-*-gnu*): Always use GNU ELF config.
 
-Wed 31 May 17:49:18 1995  Pat Rankin  (rankin@eql.caltech.edu)
+Wed May 31 17:49:18 1995  Pat Rankin  (rankin@eql.caltech.edu)
 
 	* config/obj-vms.c (obj_crawl_symbol_chain): Update *symbolPP
 	in `else' clause when removing a symbol.  Also, revise comments
@@ -158,13 +158,13 @@ Thu May 18 04:25:11 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
 	Wed May 10 14:28:16 1995 Richard Earnshaw (rearnsha@armltd.co.uk)
 
-	* config/tc-arm.c (CP_T_{Pre,UD,WB}): Define, bits in co-processor 
+	* config/tc-arm.c (CP_T_{Pre,UD,WB}): Define, bits in co-processor
 	instructions.
 	([ls]fm_flags): Correct error in bitmasks.
-	(cp_address_required_here): Delete second parameter, FLAGS.  All 
-	callers changed.  Remove all dead code referring to FLAGS.  If 
+	(cp_address_required_here): Delete second parameter, FLAGS.  All
+	callers changed.  Remove all dead code referring to FLAGS.  If
 	address is just "[Reg]" then convert into a PRE-INCREMENT UP format.
-	(do_fp_ldmstm): Handle full-descending and empty-ascending stack 
+	(do_fp_ldmstm): Handle full-descending and empty-ascending stack
 	formats explicitly.
 
 	* config/tc-arm.c (internalError): Define.
@@ -202,13 +202,13 @@ Thu May 18 04:25:11 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 	md_after_pass_hook.
 	* config/arm-{big,lit}.mt: New files
 	* config/tc-arm.h ({LITTLE,BIG}_ENDIAN, BYTE_ORDER): Define.
-	(TARGET_FORMAT): Select depending on endianness and emulation and 
+	(TARGET_FORMAT): Select depending on endianness and emulation and
 	object format.
 	(md_after_pass_hook, md_start_line_hook): Define.
 	* config/tc-arm.c: Include subsegs.h, symbols.h and listing.h.
 	(shift[]): Add uppper case equivalents.
 	(CP_T_[XY], TRANS_BIT): Define.
-	(conds[]): Delete initial NULL entry, add "lo" entry as synonym for 
+	(conds[]): Delete initial NULL entry, add "lo" entry as synonym for
 	"cc".
 	(LONGEST_FLAG, flags[]): Delete.
 	(arm_psr): New structure.
@@ -222,7 +222,7 @@ Thu May 18 04:25:11 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 	instructions.  Add nop and adr pseudo ops.
 	(reg_table): Add APCS register name variants.
 	(arm_psr_hsh): New hash table.
-	(md_pseudo_table): Add "ltorg", "pool", "extend", "ldouble" and 
+	(md_pseudo_table): Add "ltorg", "pool", "extend", "ldouble" and
 	"packed".
 	(MAX_LITERAL_POOL_SIZE): Define.
 	(struct literalS): New structure.
@@ -248,7 +248,7 @@ Thu May 18 04:25:11 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 	(output_inst): Use INSN_SIZE in call to md_number_to_chars.
 	(md_assemble): Add hack so that "Label instruction" causes alignment of
 	the label.
-	(arm_after_pass_hook, arm_start_line_hook, arm_frob_symbol): New 
+	(arm_after_pass_hook, arm_start_line_hook, arm_frob_symbol): New
 	functions.
 
 Wed May 17 05:25:16 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
@@ -266,7 +266,7 @@ Wed May 17 00:59:12 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
 
 	* config/tc-ppc.c (md_begin): Was assuming that an instruction was
 	bigendian and hence 16bit relocs withing instructions would
-        ALWAYS be at addresses i+2-i+3.  In LE mode it is i+0-i+1.
+	ALWAYS be at addresses i+2-i+3.  In LE mode it is i+0-i+1.
 
 Tue May 16 16:29:58 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
@@ -503,7 +503,7 @@ Wed May  3 21:38:20 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 Wed May  3 13:08:53 1995  Jeff Law  (law@snake.cs.utah.edu)
 
- 	* config/tc-hppa.c (md_apply_fix): Do nothing for an out of range
+	* config/tc-hppa.c (md_apply_fix): Do nothing for an out of range
 	PC relative call since those only occur in cases where the linker
 	can fix them up.
 	(hppa_force_relocation): Force relocations for out of range PC
@@ -856,7 +856,7 @@ Thu Apr  6 20:00:11 1995  Doug Evans  <dje@chestnut.cygnus.com>
 	(get_arc_exp_reloc_type): New argument `data_p'.  Callers updated.
 	(md_assemble): All limm operands must be output by gas, the opcode
 	insertion routines cannot be used (they don't do anything and we're
-	using implicit addends now so we need to output something). 
+	using implicit addends now so we need to output something).
 	* config/tc-arc.h (FAKE_LABEL_NAME): Define.
 end-sanitize-arc
 
@@ -923,7 +923,7 @@ Mon Mar 13 17:03:46 1995  Pat Rankin  (rankin@eql.caltech.edu)
 
 Fri Mar 10 19:21:19 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
-	* config/obj-coff.c: Redo my 10 Jan change, but	get it right this
+	* config/obj-coff.c: Redo my 10 Jan change, but get it right this
 	time. :-)
 	(fixup_segment): If linkrelax is set, just return.
 	(write_object_file): Don't treat h8300 and z8k specially with
@@ -1683,7 +1683,7 @@ Mon Dec 19 14:15:07 1994  Jeff Law  (law@snake.cs.utah.edu)
 	(pa_build_unwind_subspace): For the 2nd unwind relocation, use
 	the function symbol + function size instead of a special symbol
 	for the end of the function.
-	(process_exit): Compute the function size here.  Don't call 
+	(process_exit): Compute the function size here.  Don't call
 	hppa_elf_mark_end_of_function anymore.
 	(pa_procend): Likewise.
 	(hppa_fix_adjustable): Only reject 32bit relocations for SOM.
@@ -1879,7 +1879,7 @@ Wed Nov 23 19:36:09 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 	* config/tc-sh.c  (little): New function.
 	(md_parse_option): Notice new option.
 	(build_relax, build_Mytes, md_atof, md_convert_frag, md_apply_fix):
-        Cope with little endian data.
+	Cope with little endian data.
 	* config/tc-sh.h (COFF_MAGIC, LISTING_HEADER): Endian dependent.
 
 Wed Nov 23 10:54:38 1994  Jeff Law  (law@snake.cs.utah.edu)
@@ -1967,7 +1967,7 @@ Thu Nov  3 16:09:59 1994  J.T. Conklin  (jtc@rtl.cygnus.com)
 
 	* config/te-nbsd.h: New file, NetBSD target emulation
 	* config/te-netbsd.h: Removed.
-	* configure.in (i[345]86-*-netbsd*,m68*-*-netbsd*,sparc*-*-netbsd*): 
+	* configure.in (i[345]86-*-netbsd*,m68*-*-netbsd*,sparc*-*-netbsd*):
 	  Set bfd_gas.  Use nbsd emulation.
 
 Thu Nov  3 17:44:47 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
@@ -2523,7 +2523,7 @@ Tue Sep 13 20:05:47 1994  Jeff Law  (law@snake.cs.utah.edu)
 	field of the fixup.
 	(md_assemble, pa_entry, process_exit, pa_procend): For SOM R_ENTRY
 	and R_EXIT fixups, pass a NULL pointer to fix_new_hppa, and a
-	pointer to 32 bits of unwind info. 
+	pointer to 32 bits of unwind info.
 	(tc_gen_reloc): For SOM R_ENTRY and R_EXIT fixups, set the symbol
 	pointer to the dummy symbol; set the addend field to fx_addnumber.
 	(pa_comm, pa_equ, pa_type_args, pa_import): Use bfd_XXX_section_ptr
@@ -2713,7 +2713,7 @@ Thu Sep  8 17:18:24 1994  Kung Hsu  (kung@mexican.cygnus.com)
 	* ecoff.h : change name to generate_asm_lineno and add function
 	ecoff_no_current_file.
 	* ecoff.c : change name to generate_asm_lineno.
-	* ecoff.c (ecoff_generate_asm_lineno) : new function, to generate 
+	* ecoff.c (ecoff_generate_asm_lineno) : new function, to generate
 	ecoff style line for asm file.
 
 Thu Sep  8 19:43:49 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
@@ -2991,7 +2991,7 @@ Tue Aug 16 01:48:20 1994  Jeff Law  (law@snake.cs.utah.edu)
 	the common symbol to the zero address frag (the correct fix).
 
 	* config/tc-hppa.c (pa_comm): Set sy_resolved for the common
-        symbol.
+	symbol.
 
 Fri Aug 12 17:51:48 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
@@ -3558,14 +3558,14 @@ Fri Jun  3 12:50:13 1994  David J. MacKenzie  (djm@rtl.cygnus.com)
 	* as.h: Replace flagseen with separate variables.
 	* as.c (parse_args): Set them.  Don't accept -1 option, or -v
 	explicitly (it's a synonym for --version).
-	* as.c, input-scrub.c, messages.c, read.c, symbols.c, write.c, 
+	* as.c, input-scrub.c, messages.c, read.c, symbols.c, write.c,
 	config/obj-aout.c, config/obj-aout.h, config/obj-bout.c,
 	config/obj-bout.h, config/obj-coff.c, config/obj-coff.h,
 	config/obj-vms.c, config/tc-hppa.c, config/tc-i386.c,
 	config/tc-i960.c, config/tc-m68k.c, config/tc-mips.c,
 	config/tc-vax.c: Use the new flag variables instead of flagseen.
 	* config/tc-vax.c [OBJ_VMS]: Recognize -+, -1, -v, and document in
-	usage. 
+	usage.
 
 	* as.c (show_usage): Remove target specific messages;
 	instead, call md_show_usage.
@@ -3742,7 +3742,7 @@ Mon May 16 12:03:49 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 Fri May  6 14:13:15 1994  Steve Chamberlain  (sac@cygnus.com)
 
-        * config/go32.mh: New makefile fragment for go32 crossing.
+	* config/go32.mh: New makefile fragment for go32 crossing.
 	* configure.in (host==go32): Use new fragment.
 
 Fri May  6 14:35:58 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
@@ -3888,7 +3888,7 @@ Thu Apr 28 01:39:15 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 Wed Apr 27 11:06:32 1994  Steve Chamberlain  (sac@cygnus.com)
 
 	* configure.in (i386-*-go32): Uses coff now.
-	* gasp.c (main): Now takes -D on command line.	
+	* gasp.c (main): Now takes -D on command line.
 	(show_usage): Describe new options.
 
 Tue Apr 26 17:10:30 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
@@ -4187,7 +4187,7 @@ Mon Mar 28 12:35:00 1994  David Edelsohn  (edelsohn@npac.syr.edu)
 
 Sun Mar 27 14:04:19 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
-        * config/tc-hppa.c (tc_gen_reloc): Set addend for relocation
+	* config/tc-hppa.c (tc_gen_reloc): Set addend for relocation
 	involving a function symbol which is not a plabel to zero.
 	(md_apply_fix): Never pass a function symbol to field_adjust.
 
@@ -4383,13 +4383,13 @@ Wed Mar 16 17:11:37 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 Wed Mar 16 11:54:12 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
-        * config/tc-hppa.c (pa_equ): Handle both .reg and .equ correctly.
+	* config/tc-hppa.c (pa_equ): Handle both .reg and .equ correctly.
 
 	* config/tc-hppa.c (pa_callinfo): Accept "millicode" as an
 	argument to a .callinfo directive.  Don't loop forever on errors.
 
-        * config/tc-hppa.c (pa_equ): Use pa_parse_number so that we can
-        use pre-defined registers as arguments.
+	* config/tc-hppa.c (pa_equ): Use pa_parse_number so that we can
+	use pre-defined registers as arguments.
 
 Mon Mar 14 14:29:45 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
@@ -4533,11 +4533,11 @@ Thu Mar  3 11:37:55 1994  Doug Evans  (dje@canuck.cygnus.com)
 
 Wed Mar  2 10:31:01 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
-        * config/tc-hppa.c: Add a few casts to make HP C compiler happy.
+	* config/tc-hppa.c: Add a few casts to make HP C compiler happy.
 
-        * config/obj-som.c (obj_som_version, obj_som_copyright): Be
+	* config/obj-som.c (obj_som_version, obj_som_copyright): Be
 	prepared
-        to handle an error from bfd_som_attach_aux_hdr.
+	to handle an error from bfd_som_attach_aux_hdr.
 
 	* config/tc-hppa.h: Wrap ELF specific decls inside an ifdef.
 
@@ -4687,7 +4687,7 @@ Thu Feb 17 16:25:18 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 Thu Feb 17 09:29:37 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* messages.c (as_perror) [BFD_ASSEMBLER]: Use bfd_get_error and
-	bfd_set_error and new error names. 
+	bfd_set_error and new error names.
 
 Tue Feb 15 20:23:20 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
@@ -4975,7 +4975,7 @@ Mon Jan 31 07:19:30 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 	* Makefile.in: Support for Gnu ASsembler Preprocessor.
 	* gasp.c: New file.
 	* read.c (s_lcomm): Align lcomm data.
-	* config/tc-z8k.c (tc_reloc_mangle): Don't allow subtraction 
+	* config/tc-z8k.c (tc_reloc_mangle): Don't allow subtraction
 	from different sections.
 
 Sun Jan 30 14:58:26 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
@@ -5392,8 +5392,8 @@ Tue Jan  4 15:12:43 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 Tue Jan  4 22:11:34 1994  Rob Savoye  (rob@darkstar.cygnus.com)
 
-        * config/ho-vsta.h, configure.in, .Sanitize: Add support for VSTa
-        micro-kernel.
+	* config/ho-vsta.h, configure.in, .Sanitize: Add support for VSTa
+	micro-kernel.
 
 Thu Dec 30 15:27:16 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
@@ -5562,7 +5562,7 @@ Mon Dec  6 11:20:02 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	(struct space_dictionary_chain): Likewise.
 	(pa_desc): Delete useless function.  Delete all references.
 	(hppa_tc_make_sections): No need to count the number of symbols for
-	the symbol extension section. 
+	the symbol extension section.
 
 Sun Dec  5 17:05:29 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
@@ -5571,7 +5571,7 @@ Sun Dec  5 17:05:29 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	(obj_som_copyright): New function.  Much like obj_som_version.
 
 	* config/tc-hppa.c (obj_copyright): Define as appropriate for
-	SOM and ELF.  
+	SOM and ELF.
 	(pa_copyright): Just a stub now.
 
 	* config/obj-som.c (obj_read_begin_hook): Delete unused function.
@@ -5724,7 +5724,7 @@ Wed Dec  1 12:10:41 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 Tue Nov 30 13:40:30 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* write.c (TC_FORCE_RELOCATION): Provide a default definition.
-	(fixup_segment): Allow the target machine to specify that a 
+	(fixup_segment): Allow the target machine to specify that a
 	relocation must be generated for a particular fixup.  Remove
 	#ifndef TC_HPPA hack.
 
@@ -6004,7 +6004,7 @@ Fri Nov 12 14:52:17 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	Thu Nov 11 15:49:08 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_type_args): For .import statements,
-	silently ignore attempt	to change the symbol type for a function
+	silently ignore attempt to change the symbol type for a function
 	from ST_ENTRY to ST_CODE on .import.
 
 Wed Nov 10 16:19:13 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
@@ -6063,7 +6063,7 @@ Sun Nov  7 01:02:08 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	byte of the fixed instrution into the buffer ourselves.
 
 	* write.c (fixup_segment): Delete {SEG,GLOBAL}_DIFF_ALLOWED code,
-	it was PA specific and is no longer needed (it's now handled 
+	it was PA specific and is no longer needed (it's now handled
 	within the PA backend).
 	* config/tc-hppa.h (SEG_DIFF_ALLOWED): Delete definition.
 	* config/tc-hppa.c (fix_new_hppa): If the subtract symbol for
@@ -6137,7 +6137,7 @@ Tue Nov  2 15:07:07 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	messages and only print them when "print_errors" is true.  Handle
 	empty string case like the HP assembler -- assume a value of
 	zero.
- 
+
 	* config/ho-hpux.h: Do not include ho-sysv.h.  Instead include
 	standard hpux include files to pick up various function decls.
 
@@ -6168,7 +6168,7 @@ Mon Nov  1 21:37:04 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	correct prefixes so they can be eliminated later.
 
 	* config/tc-hppa.c (call_info struct): Delete unused "frame" field.
-	(pa_callinfo): Insert framesize into the unwind information as 
+	(pa_callinfo): Insert framesize into the unwind information as
 	soon as it's available.
 	(pa_build_unwind_subspace): Do not insert framesize into the unwind
 	information here.
@@ -6178,7 +6178,7 @@ Mon Nov  1 21:37:04 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	an example of marker relocations.
 	* write.c (write_relocs): Instead of assuming size of a relocation
 	is 4 bytes, pick up the size from relocation itself.
-	(fixup_segment): Do not complain that a value is too small for 
+	(fixup_segment): Do not complain that a value is too small for
 	marker relocations.
 
 	* struc-symbol.h: Add new "sy_used" field to the symbol structure.
@@ -6190,7 +6190,7 @@ Mon Nov  1 21:37:04 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	* config/obj-som.h (obj_frob_file): Define.
 	* config/obj-som.c (obj_som_init_stab_section): Set alignment
 	of stab sections.  Make space for the special stab entry.
-	(adjust_stab_sections): Adjust the special entry in the 
+	(adjust_stab_sections): Adjust the special entry in the
 	stabs section.
 	(som_frob_file): New function.  Simply calls adjust_stab_sections
 	for each section.
@@ -6241,13 +6241,13 @@ Sun Oct 31 00:36:40 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/obj-som.h (obj_set_symbol_type): Define a hook so GAS
 	can properly set all the SOM symbol types.
-	* config/tc-hppa.c (pa_symbol_type): New enum to represent the 
+	* config/tc-hppa.c (pa_symbol_type): New enum to represent the
 	symbol types which can be set from an IMPORT/EXPORT statement.
 	(pa_export_args): Set the pa_symbol_type type based on arguments.
 	If defined, call obj_set_symbol_type to pass this information on
 	to the BFD backend.
 
-	* read.c (get_stab_string_offset): Set SEC_DEBUGGING for any 
+	* read.c (get_stab_string_offset): Set SEC_DEBUGGING for any
 	stab section we make.
 	(s_stab_generic): Likewise.
 
@@ -6284,23 +6284,23 @@ Sat Oct 30 14:26:20 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	(md_begin): Change into the (possibly modified) text_section.
 	(pa_parse_space_stmt): Create a new segment/space if create_flag
 	is true, and the space name is not one of the two predefined spaces.
-	(pa_subspace): Use current_space rather than a lookup via 
-	pa_segment_to_space.  Reset BFD section flags as required by 
+	(pa_subspace): Use current_space rather than a lookup via
+	pa_segment_to_space.  Reset BFD section flags as required by
 	the .subspace directive.  Likewise for the section alignment.
 	Pass the current space to update_subspace and create_new_subspace.
 	(pa_spaces_begin): Only use space/subspace aliases if USE_ALIASES
 	is true.  When not using aliases, create a BFD section for each
 	subspace encountered.  When not using aliases replace the default
 	text, data, and bss segments with new ones.
-	(create_new_subspace): When not using aliases each subspace has a 
+	(create_new_subspace): When not using aliases each subspace has a
 	section/segment and subsegments are not needed, so set the subsegment
-	to zero. 
+	to zero.
 
 	* config/tc-hppa.c (pa_parse_space_stmt): If needed, call
-	obj_set_section_attributes to pass space attributes to the 
+	obj_set_section_attributes to pass space attributes to the
 	BFD backend.
 	(create_new_space): Likewise.
-	(create_new_subspace): Likewise for subspace attributes using 
+	(create_new_subspace): Likewise for subspace attributes using
 	obj_set_subsection_attributes.
 	(update_subspace): Likewise for subspace attributes using
 	obj_set_subsection_attributes.
@@ -6320,7 +6320,7 @@ Sat Oct 30 14:26:20 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	* config/obj-som.[ch]: New files for SOM support.  Note SOM
 	support is not yet complete in GAS or BFD.
 
-	* config/ho-hppabsd.h:  Delete IO* macros, they are defined in 
+	* config/ho-hppabsd.h:  Delete IO* macros, they are defined in
 	stdio.h.  Delete declaration of free.  Include stdlib.h, unistd.h,
 	and string.h.
 
@@ -6329,7 +6329,7 @@ Fri Oct 29 13:26:12 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	* Allow backends to override the section names used for embedded
 	stabs support.  Needed for SOM.
 	* read.c (STAB_SECTION_NAME): Default the name of the stab section
-	to ".stab".  
+	to ".stab".
 	(STAB_STRING_SECTION_NAME): Likewise for the stab strings section.
 	(get_stab_string_offset): Is now passed the full name for the
 	stab string section rather than a name prefix.  All references
@@ -6342,7 +6342,7 @@ Fri Oct 29 13:26:12 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	to stab section name to get the stab string section name.  Pass
 	the full name of the stab string section to get_stab_string_offset.
 	* config/obj-elf.c (obj_elf_init_stab_section): Likewise.
-	
+
 	* config/tc-hppa.c (md_begin): Disable "-R" option to fold
 	textand data segments.  Warn user "-R" is unsupported on the
 	PA.
@@ -6355,7 +6355,7 @@ Thu Oct 28 12:36:13 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	* config/tc-hppa.c (pa_space): Do not report an error for a .space
 	directive which does not define a "well-known" space and does
 	not include a space number as an argument.
-	
+
 	* config/tc-hppa.c (pa_def_subspaces): Correct initialization of the
 	"defined", "loadable", "code_only" and "space_index" fields.
 	(pa_def_spaces): Correct initialization of the "spnum", "defined",
@@ -6367,7 +6367,7 @@ Thu Oct 28 12:36:13 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	* config/tc-hppa.c (hppa_fix_struct): Delete unnecessary fix_fixP and
 	fx_next fields.
 	(hppa_find_hppa_fix): Delete unnecessary function.  Fix all
-	callers	to get HPPA fixup information from the tc_fix_data field
+	callers to get HPPA fixup information from the tc_fix_data field
 	in the GAS fixup.
 	(hppa_fix_root): Delete unnecessary variable.
 	(fix_new_hppa): Attach HPPA fixup data to the GAS fixup.
@@ -6389,7 +6389,7 @@ Thu Oct 28 12:36:13 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 	callers. Now returns log2 (N) for positive N which are an exact
 	power of two or -1 for an error.
 
-	* config/tc-hppa.c (pa_callinfo): Range check values provided for 
+	* config/tc-hppa.c (pa_callinfo): Range check values provided for
 	ENTRY_GR, ENTRY_FR and ENTRY_SR.  Properly adjust vaues before
 	inserting them into the unwind table.
 
@@ -6585,7 +6585,7 @@ Thu Oct 21 12:52:01 1993  Ken Raeburn  (raeburn@cygnus.com)
 	functions, variables, and structures.  Fix formatting problems
 	not found by GNU-indent.  Add FIXME notices for things which
 	should be worked on the near future.  Delete lots of old
-	useless (1.36 PA-SOM) code.  
+	useless (1.36 PA-SOM) code.
 
 	* config/tc-hppa.c: (fix_new_hppa): Initialize the fx_r_type
 	field of the fixS structure.  Needed to build unwind
@@ -7070,7 +7070,7 @@ Mon Sep 13 16:48:38 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	Wrote non-BFD_ASSEMBLER subseg_new.  Now subseg_new always takes a
 	section name, and subseg_set always takes a segT.  Changed all
 	callers as appropriate.
-	* config/obj-coffbfd.c 	(change_to_section): Renamed to
+	* config/obj-coffbfd.c  (change_to_section): Renamed to
 	obj_coff_add_segment.  Corrected.  Made callers use subseg_new.
 	* config/obj-coffbfd.h (obj_segment_name, obj_add_segment):
 	Define.
@@ -8907,7 +8907,7 @@ Thu Apr  8 15:51:28 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 Thu Apr  8 15:15:02 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
 
 	* doc/Makefile.in: update dvi, clean targets for new source
-                           file structure
+			   file structure
 
 Thu Apr  8 12:52:46 1993  Ian Lance Taylor  (ian@cygnus.com)
 
@@ -9410,7 +9410,7 @@ Wed Feb 24 04:14:07 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* symbols.c (symbol_new): Argument NAME is now pointer to const.
 	Simplified STRIP_UNDERSCORE code.  Remove assumptions about null
-	pointers in freshly allocated storage. 	[BFD_ASSEMBLER]: Get new
+	pointers in freshly allocated storage.  [BFD_ASSEMBLER]: Get new
 	BFD symbol.
 	(colon): Display other/desc fields of redefined symbol only if
 	S_GET_OTHER and S_GET_DESC are defined.
@@ -9984,7 +9984,7 @@ Mon Nov 23 11:00:16 1992  Ken Raeburn  (raeburn@cygnus.com)
 
 Thu Nov 19 11:47:19 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
-    	z8000 documentation
+	z8000 documentation
 	* doc/Makefile.in, doc/all.m4, doc/as-all.texinfo, doc/as.texinfo:
 	all modified.
 
@@ -10085,7 +10085,7 @@ Mon Oct  5 09:28:57 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 Mon Oct  5 03:30:36 1992  Mark Eichin  (eichin at tweedledumber.cygnus.com)
 
-	* configure.in:	recognize i386-*-bsd emulation.
+	* configure.in: recognize i386-*-bsd emulation.
 
 Thu Oct  1 23:05:12 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
@@ -10497,7 +10497,7 @@ Mon Jun  1 16:20:22 1992  Michael Tiemann  (tiemann@cygnus.com)
 
 Sun May 31 05:33:00 1992  david d `zoo' zuhn (zoo@cygnus.com)
 
- 	* configure.in: recognize m680x0 as an m68k
+	* configure.in: recognize m680x0 as an m68k
 
 Thu May 28 11:22:02 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
