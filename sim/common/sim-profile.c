@@ -1,5 +1,5 @@
 /* Default profiling support.
-   Copyright (C) 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -424,6 +424,9 @@ profile_print_pc (sim_cpu *cpu, int verbose)
   unsigned max_val;
   unsigned total;
   unsigned i;
+
+  if (PROFILE_PC_COUNT (profile) == 0)
+    return;
 
   sim_io_printf (sd, "Program Counter Statistics:\n\n");
 
@@ -869,8 +872,30 @@ profile_print (SIM_DESC sd, int verbose,
       sim_cpu *cpu = STATE_CPU (sd, c);
       PROFILE_DATA *data = CPU_PROFILE_DATA (cpu);
 
-      if (MAX_NR_PROCESSORS > 1)
-	sim_io_printf (sd, "CPU %d\n\n", c);
+      if (MAX_NR_PROCESSORS > 1
+	  && (0
+#if WITH_PROFILE_INSN_P
+	      || PROFILE_FLAGS (data) [PROFILE_INSN_IDX]
+#endif
+#if WITH_PROFILE_MEMORY_P
+	      || PROFILE_FLAGS (data) [PROFILE_MEMORY_IDX]
+#endif
+#if WITH_PROFILE_CORE_P
+	      || PROFILE_FLAGS (data) [PROFILE_CORE_IDX]
+#endif
+#if WITH_PROFILE_MODEL_P
+	      || PROFILE_FLAGS (data) [PROFILE_MODEL_IDX]
+#endif
+#if WITH_PROFILE_SCACHE_P && WITH_SCACHE
+	      || PROFILE_FLAGS (data) [PROFILE_SCACHE_IDX]
+#endif
+#if WITH_PROFILE_PC_P
+	      || PROFILE_FLAGS (data) [PROFILE_PC_IDX]
+#endif
+	      ))
+	{
+	  sim_io_printf (sd, "CPU %d\n\n", c);
+	}
 
 #if WITH_PROFILE_INSN_P
       if (PROFILE_FLAGS (data) [PROFILE_INSN_IDX])

@@ -1,3 +1,9 @@
+Tue Feb 24 22:45:39 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* sim-profile.c (profile_print): Delete duplicate test of
+	PROFILE_INSN_IDX.
+	(profile_print_pc): Exit early if data collection not set up.
+
 Mon Feb 23 20:45:57 1998  Mark Alexander  <marka@cygnus.com>
 
 	* nltvals.def: Regenerate with MN10300 additions.
