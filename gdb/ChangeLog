@@ -1,5 +1,9 @@
 2003-12-11  Dhananjay Deshpande  <dhananjayd@kpitcummins.com>
 
+	* MAINTAINERS (write after approval): Add myself.
+
+2003-12-11  Dhananjay Deshpande  <dhananjayd@kpitcummins.com>
+
         * config/h8300/tm-h8300.h (h8300hmode): Remove.
         (h8300hmode): Likewise.
         (h8300smode): Likewise.
