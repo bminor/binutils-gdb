@@ -77,7 +77,7 @@ BFD_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
 	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o cpu-hppa.o \
 	cpu-z8k.o cpu-we32k.o cpu-h8500.o
 
-BFD_BACKENDS = aout32.o sunos.o newsos3.o aout-mipsbsd.o aout-adobe.o \
+BFD_BACKENDS = aout32.o sunos.o newsos3.o mipsbsd.o aout-adobe.o \
 	i386aout.o i386bsd.o i386linux.o \
 	aout64.o demo64.o \
 	coff-i960.o coff-a29k.o coff-m68k.o coff-i386.o coff-m88k.o \
@@ -123,7 +123,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c \
 	 i386bsd.c cpu-h8300.c cpu-i960.c cpu-sparc.c cpu-m68k.c \
 	 cpu-m88k.c cpu-vax.c cpu-mips.c cpu-a29k.c cpu-i386.c \
 	 cpu-rs6000.c coff-h8300.c hppa.c cpu-hppa.c cpu-we32k.c reloc16.c \
-	 aout-mipsbsd.c \
+	 mipsbsd.c \
 	 elf32.c elf32-sparc.c elf32-i386.c elf32-i860.c elf32-m68k.c
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
@@ -414,7 +414,7 @@ i386bsd.o : i386bsd.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/aout/ar.h libaout.h 
 bout.o : bout.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h libbfd.h \
   $(INCDIR)/bout.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def libaout.h
-aout-mipsbsd.o : aout-mipsbsd.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h \
+mipsbsd.o : mipsbsd.c $(INCDIR)/bfd.h $(INCDIR)/obstack.h \
   libbfd.h libaout.h
 elf32.o : elf32.c libelf.h libbfd.h $(INCDIR)/bfd.h $(INCDIR)/obstack.h
 elf32-sparc.o : elf32-sparc.c libelf.h libbfd.h $(INCDIR)/bfd.h \
