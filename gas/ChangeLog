@@ -1,3 +1,13 @@
+Sat May 20 12:31:36 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
+
+	* Added improved VMS support from Pat Rankin:
+
+	Fri Mar 17 18:40:36 1995  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* Makefile.in (VMS_OTHER_OBJS):  delete this.
+	* vmsconf.sh (make-gas.com):  build ../libiberty/liberty.olb
+	first if necessary; link gas against it.
+
 Fri May 19 16:37:39 1995  Richard Earnshaw (rearnsha@armltd.co.uk)
 
 	* gasp.c (istrue): Correctly test for string inequality.

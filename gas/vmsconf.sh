@@ -38,6 +38,10 @@ $ C_FLAGS	= "/noVerbose/Debug" + c_includes
 $!
 $!
 $ on error then  goto bail
+$ if f$search("[-.libiberty]liberty.olb").eqs.""
+$ then	@[-.libiberty]vmsbuild.com
+$	write sys$output "Now building gas."
+$ endif
 $ if "''p1'" .eqs. "LINK" then goto Link
 $!
 $!  This helps gcc 1.nn find the aout/* files.
@@ -86,6 +90,7 @@ for obj in $* ; do
 done
 
 cat << 'EOF'
+[-.libiberty]liberty.olb/Lib
 gnu_cc:[000000]gcclib.olb/Lib,sys$library:vaxcrtl.olb/Lib
 ! Tell linker exactly what psect attributes we want -- match VAXCRTL.
 psect_attr=ENVIRON,long,pic,ovr,rel,gbl,noshr,noexe,rd,wrt
