@@ -130,3 +130,7 @@ readline_headers =\
 	{MAKEPEF} gdb{PROG_EXT} -o gdb {MAKEPEF_TOOL_FLAGS} {MAKEPEF_FLAGS}\
 	{REZ} "{s}"mac-gdb.r -o gdb -append -d PROG_NAME='"'gdb'"' -d VERSION_STRING='"'{version}'"'\
 
+# Don't do any recursive subdir stuff.
+/ subdir_do/s/{MAKE}/null-command/
+
+/^config.status \\Option-f/,/^$/d

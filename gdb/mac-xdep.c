@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "readline.h"
 #include "history.h"
 
-#include <Values.h>
 #include <Types.h>
 #include <Resources.h>
 #include <QuickDraw.h>
@@ -45,7 +44,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <Packages.h>
 #include <Traps.h>
 #include <Lists.h>
-#include <GestaltEqu.h>
+#include <Gestalt.h>
 #include <PPCToolbox.h>
 #include <AppleEvents.h>
 #include <StandardFile.h>
@@ -542,7 +541,13 @@ do_mouse_down (WindowPtr win, EventRecord *event)
 		}
 	      break;
 	    default:
+#if 0 /* don't deal with right now */
+#if 1 /* universal headers */
+	      value = TrackControl (control, mouse, (ControlActionUPP) v_scroll_proc);
+#else
 	      value = TrackControl (control, mouse, (ProcPtr) v_scroll_proc);
+#endif
+#endif
 	      break;
 	    }
 	}

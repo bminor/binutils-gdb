@@ -1,3 +1,13 @@
+Thu Oct 26 22:02:27 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in: Add support for PowerMac host, add beginnings
+	of native support.
+	* mpw-make.sed: Disable subdir recursion, edit out useless rule.
+	* mac-xdep.c (Values.h): Don't include.
+	(GestaltEqu.h): Include Gestalt.h instead.
+	(do_mouse_down): Comment out control tracking, needs to be
+	updated to use UPP before will work on PowerMac.
+
 Thu Oct 26 15:21:32 1995  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
 	* regex.h: Renamed to gnu-regex.h.
@@ -20,12 +30,14 @@ Tue Oct 24 18:30:18 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 Tue Oct 24 12:26:14 1995  Stu Grossman  (grossman@cygnus.com)
 
-	* monitor.c (monitor_expect_regexp):  Same as monitor_expect, but
-	with the obvious extension.  (monitor_read_memory_single):  Use
-	regexp for getmem.resp_delim because of parsing ambiguities caused
-	by certain monitors.  (monitor_read_memory):  Use new regexp stuff
-	to parse getmem.resp_delim.
-	* monitor.h (struct memrw_cmd->resp_delim):  Document this as a regexp.
+	* monitor.c (monitor_expect_regexp): Same as monitor_expect, but
+ 	with the obvious extension.
+	(monitor_read_memory_single): Use regexp for getmem.resp_delim
+ 	because of parsing ambiguities caused by certain monitors.
+	(monitor_read_memory): Use new regexp stuff to parse
+ 	getmem.resp_delim.
+	* monitor.h (struct memrw_cmd->resp_delim): Document this as a
+ 	regexp.
 	* sh3-rom.c:  Finish off table.  Use new regexp capability for
 	getmem commands.
 

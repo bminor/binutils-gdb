@@ -1,10 +1,14 @@
 # Configuration fragment for GDB.
 
-forward-include "{srcdir}"config:m68k:xm-mpw.h xm.h
+If "{host_canonical}" =~ /m68k-apple-mpw/
+	forward-include "{srcdir}"config:m68k:xm-mpw.h xm.h
 
-forward-include "{srcdir}"config:m68k:xm-m68k.h 'm68k/xm-m68k.h'
+Else If "{host_canonical}" =~ /powerpc-apple-mpw/
+	forward-include "{srcdir}"config:powerpc:xm-mpw.h xm.h
 
-Set xdepfiles   '"{o}"mac-xdep.c.o'
+End If
+
+Set xdepfiles '"{o}"mac-xdep.c.o'
 
 # Make a copy of this file and give it a different name, so it
 # won't be confused with GDB's serial.h.
@@ -36,17 +40,27 @@ Else If "{target_canonical}" =~ /mips-idt-ecoff/
 Else If "{target_canonical}" =~ /sh-hitachi-hms/
 	forward-include "{srcdir}"config:sh:tm-sh.h tm.h
 	Set tdepfiles '"{o}"sh-tdep.c.o'
+
 End If
 
-If "{target_canonical}" != "{host_canonical}"
+If "{target_canonical}" =~ /m68k-apple-macos/
+	forward-include "{srcdir}"config:m68k:nm-macos.h nm.h
+	Set natdepfiles '"{o}"mac-nat.c'
+
+Else If "{target_canonical}" =~ /powerpc-apple-macos/
+	forward-include "{srcdir}"config:powerpc:nm-macos.h nm.h
+	Set natdepfiles '"{o}"mac-nat.c'
+
+Else
 	forward-include "{srcdir}"config:nm-empty.h nm.h
-	Set natdepfiles " "
+	Set natdepfiles ' '
+
 End If
 
 Echo '# From mpw-config.in'				 > "{o}"mk.tmp
 Echo "TDEPFILES = " {tdepfiles}				>> "{o}"mk.tmp
 Echo "XDEPFILES = " {xdepfiles}				>> "{o}"mk.tmp
-Echo "NATDEPFILES = " {nat_file}			>> "{o}"mk.tmp
+Echo "NATDEPFILES = " {natdepfiles}			>> "{o}"mk.tmp
 Echo "XM_ADD_FILES = "					>> "{o}"mk.tmp
 Echo "TM_ADD_FILES = "					>> "{o}"mk.tmp
 Echo "NAT_ADD_FILES = "					>> "{o}"mk.tmp
