@@ -1,3 +1,8 @@
+1999-08-26  Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-mips.c (_bfd_mips_elf_check_relocs): Don't allocate local
+	GOT entries for GOT16 relocations; they're not required.
+
 1999-08-24  Nick Clifton  <nickc@cygnus.com>
 
 	From a patch submitted by Roland McGrath  <roland@baalperazim.frob.com>

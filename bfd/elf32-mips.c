@@ -7456,15 +7456,15 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 
       if (!h && (r_type == R_MIPS_CALL_LO16
 		 || r_type == R_MIPS_GOT_LO16
-		 || r_type == R_MIPS_GOT_DISP
-		 || r_type == R_MIPS_GOT16))
+		 || r_type == R_MIPS_GOT_DISP))
 	{
 	  /* We may need a local GOT entry for this relocation.  We
 	     don't count R_MIPS_GOT_PAGE because we can estimate the
 	     maximum number of pages needed by looking at the size of
-	     the segment.  We don't count R_MIPS_GOT_HI16, or
-	     R_MIPS_CALL_HI16 because these are always followed by an
-	     R_MIPS_GOT_LO16 or R_MIPS_CALL_LO16.
+	     the segment.  Similar comments apply to R_MIPS_GOT16.  We
+	     don't count R_MIPS_GOT_HI16, or R_MIPS_CALL_HI16 because
+	     these are always followed by an R_MIPS_GOT_LO16 or
+	     R_MIPS_CALL_LO16.
 
 	     This estimation is very conservative since we can merge
 	     duplicate entries in the GOT.  In order to be less
@@ -8003,8 +8003,14 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
  	  loadable_size += MIPS_FUNCTION_STUB_SIZE;
 
  	  /* Assume there are two loadable segments consisting of
- 	     contiguous sections.  Is 5 enough? */
+ 	     contiguous sections.  Is 5 enough?  */
  	  local_gotno = (loadable_size >> 16) + 5;
+	  if (IRIX_COMPAT (output_bfd) == ict_irix6)
+	    /* It's possible we will need GOT_PAGE entries as well as
+	       GOT16 entries.  Often, these will be able to share GOT
+	       entries, but not always.  */
+	    local_gotno *= 2;
+
  	  g->local_gotno += local_gotno;
  	  s->_raw_size += local_gotno * MIPS_ELF_GOT_SIZE (dynobj);
 
