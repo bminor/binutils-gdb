@@ -151,6 +151,7 @@ m68*-cbm-sysv4*)	gdb_target=amix ;;
 m68*-hp-bsd)		gdb_target=hp300bsd ;;
 m68*-hp-hpux)		gdb_target=hp300hpux ;;
 
+m68*-adobe-*)		gdb_target=m68k-nofp ;;
 m68*-altos-*)		gdb_target=altos ;;
 m68*-att-*)		gdb_target=3b1 ;;
 m68*-ericsson-*)	gdb_target=es1800 ;;

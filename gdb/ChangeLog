@@ -1,3 +1,9 @@
+Sun Mar 14 02:54:15 1993  John Gilmore  (gnu@cygnus.com)
+
+	* configure.in (m68k-adobe-*):  New config.
+	* tm-68k-nofp.h:  New file, lacks 68881 support.
+	* config/m68k-nofp.mt:  New file.
+
 Sun Mar 14 02:30:08 1993  John Gilmore  (gnu@cygnus.com)
 
 	Remove a few remaining underscore/no-underscore remnants from
