@@ -1,3 +1,7 @@
+2004-07-11  Andreas Schwab  <schwab@suse.de>
+
+	* m68k-dis.c (m68k_valid_ea): Fix typos in last change.
+
 2004-07-09  Andreas Schwab  <schwab@suse.de>
 
 	* m68k-dis.c (m68k_valid_ea): Check validity of all codes.
