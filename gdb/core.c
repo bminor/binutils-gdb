@@ -47,12 +47,17 @@ core_file_command (filename, from_tty)
      char *filename;
      int from_tty;
 {
+  struct target_ops *t;
   dont_repeat ();			/* Either way, seems bogus. */
 
-  if (!filename)
-    core_detach (filename, from_tty);
+  t = find_core_target ();
+  if (t != NULL)
+    if (!filename)
+      (t->to_detach) (filename, from_tty);
+    else
+      (t->to_open) (filename, from_tty);
   else
-    core_open (filename, from_tty);
+    error ("unimplemented: core files");
 }
 
 

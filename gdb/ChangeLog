@@ -1,3 +1,14 @@
+Tue Sep 29 14:35:00 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	Break the direct connection from core_file_command to any
+	particular type of core file support.
+
+	* target.h (find_core_target): new prototype.
+	* target.c (find_core_target): new function.  Walks the target
+	  list looking for the core target.
+	* core.c (core_file_command): replace calls to core_detach and
+	  core_open with find_core_target and direct calls.
+
 Tue Sep 29 10:19:00 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* xm-hp300hpux.h: define MEM_FNS_DECLARED; include <sys/ptrace.h>
