@@ -20,6 +20,7 @@
 
 2005-01-13  Michael Snyder  <msnyder@redhat.com>
 
+	* remote.c: Whitespace tweaks.
 	* remote-st.c: Whitespace tweaks.
 	* remote-sim.c: Whitespace tweaks.
 	* remote-mips.c: Whitespace tweaks.
