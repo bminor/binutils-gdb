@@ -1,3 +1,8 @@
+Mon Nov 30 18:46:58 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* remote-udi.c (udi_wait):  Don't stop if TIP says that remote is
+	still running.
+
 Mon Nov 30 12:00:25 1992  Fred Fish  (fnf@cygnus.com)
 
 	* tm-sun4sol2.h:  Add CPLUS_MARKER.  Solaris 2.0 requires '.'

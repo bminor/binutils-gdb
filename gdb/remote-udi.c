@@ -507,6 +507,9 @@ udi_wait (status)
 	  printf("DEBUG: stdin requested ... continue\n");
 	  /*	UDIPutStdin(sbuf, (UDISizeT)i, &CountDone); */
 	  continue;
+	case UDIRunning:
+	  /* In spite of the fact that we told UDIWait to wait forever, it will
+	     return spuriously sometimes.  */
 	case UDIStdinModeX:
 	  continue;
 	default:
@@ -574,9 +577,6 @@ udi_wait (status)
       break;
     case UDINotExecuting:
       WSETSTOP ((*status), SIGTERM);
-      break;
-    case UDIRunning:
-      WSETSTOP ((*status), SIGILL);
       break;
     case UDIStopped:
       WSETSTOP ((*status), SIGTSTP);
