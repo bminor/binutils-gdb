@@ -717,8 +717,7 @@ debug_start_source (handle, name)
    The bfd_vma is the address of the start of the function.  Currently
    the parameter types are specified by calls to
    debug_record_parameter.  FIXME: There is no way to specify nested
-   functions.  FIXME: I don't think there is any way to record where a
-   function ends.  */
+   functions.  */
 
 boolean
 debug_record_function (handle, name, return_type, global, addr)
