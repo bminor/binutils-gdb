@@ -1,6 +1,6 @@
 /* Target-dependent code for Motorola 68HC11 & 68HC12
    Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
-   Contributed by Stephane Carrez, stcarrez@worldnet.fr
+   Contributed by Stephane Carrez, stcarrez@nerim.fr
 
 This file is part of GDB.
 
@@ -364,6 +364,8 @@ m68hc11_pop_frame (void)
 #define M6812_PB_PSHW  (0xae)
 #define M6812_OP_STS   (0x7f)
 #define M6812_OP_LEAS  (0x1b)
+#define M6812_OP_PSHX  (0x34)
+#define M6812_OP_PSHY  (0x35)
 
 /* Operand extraction.  */
 #define OP_DIRECT      (0x100) /* 8-byte direct addressing.  */
@@ -423,6 +425,8 @@ static struct insn_sequence m6812_prologue[] = {
                       OP_IMM_HIGH, OP_IMM_LOW } },
   { P_SET_FRAME, 3, { M6812_OP_STS, OP_IMM_HIGH, OP_IMM_LOW } },
   { P_LOCAL_N,   2, { M6812_OP_LEAS, OP_PBYTE } },
+  { P_LOCAL_2,   1, { M6812_OP_PSHX } },
+  { P_LOCAL_2,   1, { M6812_OP_PSHY } },
   { P_LAST, 0 }
 };
 
@@ -686,11 +690,6 @@ m68hc11_frame_chain (struct frame_info *frame)
 
   addr = frame->frame + frame->extra_info->size + STACK_CORRECTION - 2;
   addr = read_memory_unsigned_integer (addr, 2) & 0x0FFFF;
-  if (addr == 0)
-    {
-      return (CORE_ADDR) 0;
-    }
-    
   return addr;
 }  
 
