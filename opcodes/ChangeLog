@@ -1,3 +1,8 @@
+2004-09-30  Paul Brook  <paul@codesourcery.com>
+
+	* arm-dis.c (print_insn_arm): Handle 'e' for SMI instruction.
+	* arm-opc.h: Document %e.  Add ARMv6ZK instructions.
+
 2004-09-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (AUTOMAKE_OPTIONS): Require 1.9.

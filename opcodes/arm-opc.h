@@ -1,6 +1,6 @@
 /* Opcode table for the ARM.
 
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2003
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2003, 2004
    Free Software Foundation, Inc.
    
    This program is free software; you can redistribute it and/or modify
@@ -18,18 +18,19 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 
-struct arm_opcode {
-    unsigned long value, mask;	/* recognise instruction if (op&mask)==value */
-    char *assembler;		/* how to disassemble this instruction */
+struct arm_opcode
+{
+  unsigned long value, mask;	/* Recognise instruction if (op&mask)==value.  */
+  char *assembler;		/* How to disassemble this instruction.  */
 };
 
 struct thumb_opcode
 {
-    unsigned short value, mask;	/* recognise instruction if (op&mask)==value */
-    char * assembler;		/* how to disassemble this instruction */
+  unsigned short value, mask;	/* Recognise instruction if (op&mask)==value.  */
+  char * assembler;		/* How to disassemble this instruction.  */
 };
 
-/* format of the assembler string :
+/* Format of the assembler string :
    
    %%			%
    %<bitfield>d		print the bitfield in decimal
@@ -82,10 +83,10 @@ Thumb specific format options:
    %<bitfield>W         print (bitfield * 4) as a decimal
    %<bitfield>H         print (bitfield * 2) as a decimal
    %<bitfield>a         print (bitfield * 4) as a pc-rel offset + decoded symbol
-*/
+   %e                   print arm SMI operand (bits 0..7,8..19).  */
 
 /* Note: There is a partial ordering in this table - it must be searched from
-   the top to obtain a correct match. */
+   the top to obtain a correct match.  */
 
 static const struct arm_opcode arm_opcodes[] =
 {
@@ -98,7 +99,26 @@ static const struct arm_opcode arm_opcodes[] =
     {0x00800090, 0x0fa000f0, "%22?sumull%c%20's\t%12-15r, %16-19r, %0-3r, %8-11r"},
     {0x00a00090, 0x0fa000f0, "%22?sumlal%c%20's\t%12-15r, %16-19r, %0-3r, %8-11r"},
 
-    /* ARM V6 instructions. */
+    /* ARM V6Z instructions.  */
+    {0x01600070, 0x0ff000f0, "smi%c\t%e"},
+    
+    /* ARM V6K instructions.  */
+    {0xf57ff01f, 0xffffffff, "clrex"},
+    {0x01d00f9f, 0x0ff00fff, "ldrexb%c\t%12-15r, [%16-19r]"},
+    {0x01b00f9f, 0x0ff00fff, "ldrexd%c\t%12-15r, [%16-19r]"},
+    {0x01f00f9f, 0x0ff00fff, "ldrexh%c\t%12-15r, [%16-19r]"},
+    {0x01c00f90, 0x0ff00ff0, "strexb%c\t%12-15r, %0-3r, [%16-19r]"},
+    {0x01a00f90, 0x0ff00ff0, "strexd%c\t%12-15r, %0-3r, [%16-19r]"},
+    {0x01e00f90, 0x0ff00ff0, "strexh%c\t%12-15r, %0-3r, [%16-19r]"},
+
+    /* ARM V6K NOP hints.  */
+    {0x0320f001, 0x0fffffff, "yield"},
+    {0x0320f002, 0x0fffffff, "wfe"},
+    {0x0320f003, 0x0fffffff, "wfi"},
+    {0x0320f004, 0x0fffffff, "sev"},
+    {0x0320f000, 0x0fffff00, "nop%c\t{%0-7d}"},
+
+    /* ARM V6 instructions.  */
     {0xfc500000, 0xfff00000, "mrrc2\t%8-11d, %4-7d, %12-15r, %16-19r, cr%0-3d"},
     {0xfc400000, 0xfff00000, "mcrr2\t%8-11d, %4-7d, %12-15r, %16-19r, cr%0-3d"},
     {0xf1080000, 0xfffdfe3f, "cpsie\t%8'a%7'i%6'f"},

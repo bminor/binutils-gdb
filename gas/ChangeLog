@@ -1,3 +1,13 @@
+2004-09-30  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (do_smi, do_nop): New functions.
+	(insns): Add ARMv6ZK instructions.
+	(md_apply_fix3): Handle BFD_RELOC_ARM_SMI.
+	(tc_gen_reloc): Ditto.
+	(arm_cpus): Add mpcore and arm1176.
+	(arm_archs): Add armv6{k,z,zk}.
+	* doc/c-arm.texi: Document new cores and architectures.
+
 2004-09-30  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c: Use ISO C90 formatting.

@@ -2500,6 +2500,41 @@ cp_byte_address_required_here (char ** str)
 }
 
 static void
+do_nop (char * str)
+{
+  skip_whitespace (str);
+  if (*str == '{')
+    {
+      str++;
+
+      if (my_get_expression (&inst.reloc.exp, &str))
+	inst.reloc.exp.X_op = O_illegal;
+      else
+	{
+	  skip_whitespace (str);
+	  if (*str == '}')
+	    str++;
+	  else
+	    inst.reloc.exp.X_op = O_illegal;
+	}
+
+      if (inst.reloc.exp.X_op != O_constant
+	  || inst.reloc.exp.X_add_number > 255
+	  || inst.reloc.exp.X_add_number < 0)
+	{
+	  inst.error = _("Invalid NOP hint");
+	  return;
+	}
+
+      /* Arcitectural NOP hints are CPSR sets with no bits selected.  */
+      inst.instruction &= 0xf0000000;
+      inst.instruction |= 0x0320f000 + inst.reloc.exp.X_add_number;
+    }
+
+  end_of_line (str);
+}
+
+static void
 do_empty (char * str)
 {
   /* Do nothing really.  */
@@ -4316,7 +4351,7 @@ do_pkhtb (char * str)
 }
 
 /* ARM V6 Load Register Exclusive instruction (argument parse).
-   LDREX{<cond>} <Rd, [<Rn>]
+   LDREX{,B,D,H}{<cond>} <Rd, [<Rn>]
    Condition defaults to COND_ALWAYS.
    Error if Rd or Rn are R15.
    See ARMARMv6 A4.1.27: LDREX.  */
@@ -6631,6 +6666,23 @@ do_ldmstm (char * str)
     }
 
   inst.instruction |= range;
+  end_of_line (str);
+}
+
+static void
+do_smi (char * str)
+{
+  skip_whitespace (str);
+
+  /* Allow optional leading '#'.  */
+  if (is_immediate_prefix (*str))
+    str++;
+
+  if (my_get_expression (& inst.reloc.exp, & str))
+    return;
+
+  inst.reloc.type = BFD_RELOC_ARM_SMI;
+  inst.reloc.pc_rel = 0;
   end_of_line (str);
 }
 
@@ -9791,7 +9843,7 @@ static const struct asm_opcode insns[] =
   /* Pseudo ops.  */
   {"adr",        0xe28f0000, 3,  ARM_EXT_V1,       do_adr},
   {"adrl",       0xe28f0000, 3,  ARM_EXT_V1,       do_adrl},
-  {"nop",        0xe1a00000, 3,  ARM_EXT_V1,       do_empty},
+  {"nop",        0xe1a00000, 3,  ARM_EXT_V1,       do_nop},
 
   /* ARM 2 multiplies.  */
   {"mul",        0xe0000090, 3,  ARM_EXT_V2,       do_mul},
@@ -9992,6 +10044,22 @@ static const struct asm_opcode insns[] =
   { "usada8",    0xe7800010, 6,  ARM_EXT_V6,       do_smlad},
   { "usat",      0xe6e00010, 4,  ARM_EXT_V6,       do_usat},
   { "usat16",    0xe6e00f30, 6,  ARM_EXT_V6,       do_usat16},
+
+  /*  ARM V6K.  */
+  { "clrex",     0xf57ff01f, 0,  ARM_EXT_V6K,      do_empty},
+  { "ldrexb",    0xe1d00f9f, 6,  ARM_EXT_V6K,      do_ldrex},
+  { "ldrexd",    0xe1b00f9f, 6,  ARM_EXT_V6K,      do_ldrex},
+  { "ldrexh",    0xe1f00f9f, 6,  ARM_EXT_V6K,      do_ldrex},
+  { "sev",       0xe320f004, 3,  ARM_EXT_V6K,      do_empty},
+  { "strexb",    0xe1c00f90, 6,  ARM_EXT_V6K,      do_strex},
+  { "strexd",    0xe1a00f90, 6,  ARM_EXT_V6K,      do_strex},
+  { "strexh",    0xe1e00f90, 6,  ARM_EXT_V6K,      do_strex},
+  { "wfe",       0xe320f002, 3,  ARM_EXT_V6K,      do_empty},
+  { "wfi",       0xe320f003, 3,  ARM_EXT_V6K,      do_empty},
+  { "yield",     0xe320f001, 5,  ARM_EXT_V6K,      do_empty},
+  
+  /*  ARM V6Z.  */
+  { "smi",       0xe1600070, 3,  ARM_EXT_V6Z,      do_smi},
 
   /* Core FPA instruction set (V1).  */
   {"wfs",        0xee200110, 3,  FPU_FPA_EXT_V1,   do_fpa_ctrl},
@@ -11650,6 +11718,15 @@ md_apply_fix3 (fixS *   fixP,
       md_number_to_chars (buf, newval, INSN_SIZE);
       break;
 
+    case BFD_RELOC_ARM_SMI:
+      if (((unsigned long) value) > 0xffff)
+	as_bad_where (fixP->fx_file, fixP->fx_line,
+		      _("invalid smi expression"));
+      newval = md_chars_to_number (buf, INSN_SIZE) & 0xfff000f0;
+      newval |= (value & 0xf) | ((value & 0xfff0) << 4);
+      md_number_to_chars (buf, newval, INSN_SIZE);
+      break;
+
     case BFD_RELOC_ARM_SWI:
       if (arm_data->thumb_mode)
 	{
@@ -12204,6 +12281,7 @@ tc_gen_reloc (asection * section ATTRIBUTE_UNUSED,
 	  {
 	  case BFD_RELOC_ARM_OFFSET_IMM8:  type = "OFFSET_IMM8";  break;
 	  case BFD_RELOC_ARM_SHIFT_IMM:    type = "SHIFT_IMM";    break;
+	  case BFD_RELOC_ARM_SMI:          type = "SMI";          break;
 	  case BFD_RELOC_ARM_SWI:          type = "SWI";          break;
 	  case BFD_RELOC_ARM_MULTI:        type = "MULTI";        break;
 	  case BFD_RELOC_ARM_CP_OFF_IMM:   type = "CP_OFF_IMM";   break;
@@ -12740,6 +12818,10 @@ static struct arm_cpu_option_table arm_cpus[] =
   {"arm1136j-s",	ARM_ARCH_V6,     FPU_NONE},
   {"arm1136jfs",	ARM_ARCH_V6,     FPU_ARCH_VFP_V2},
   {"arm1136jf-s",	ARM_ARCH_V6,     FPU_ARCH_VFP_V2},
+  {"mpcore",		ARM_ARCH_V6K,    FPU_ARCH_VFP_V2},
+  {"mpcorenovfp",	ARM_ARCH_V6K,    FPU_NONE},
+  {"arm1176jz-s",	ARM_ARCH_V6ZK,   FPU_NONE},
+  {"arm1176jzf-s",	ARM_ARCH_V6ZK,   FPU_ARCH_VFP_V2},
   /* ??? XSCALE is really an architecture.  */
   {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2},
   /* ??? iwmmxt is not a processor.  */
@@ -12780,6 +12862,9 @@ static struct arm_arch_option_table arm_archs[] =
   {"armv5tej",		ARM_ARCH_V5TEJ,  FPU_ARCH_VFP},
   {"armv6",             ARM_ARCH_V6,     FPU_ARCH_VFP},
   {"armv6j",            ARM_ARCH_V6,     FPU_ARCH_VFP},
+  {"armv6k",            ARM_ARCH_V6K,    FPU_ARCH_VFP},
+  {"armv6z",            ARM_ARCH_V6Z,    FPU_ARCH_VFP},
+  {"armv6zk",           ARM_ARCH_V6ZK,   FPU_ARCH_VFP},
   {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP},
   {"iwmmxt",		ARM_ARCH_IWMMXT, FPU_ARCH_VFP},
   {NULL, 0, 0}
