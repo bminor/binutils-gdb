@@ -1,3 +1,14 @@
+start-sanitize-d10v
+Thu Nov 14 11:17:49 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c (write_2_short): Fix bug that wouldn't
+	allow a branch and link in parallel with an exe instruction.
+
+Fri Nov  8 13:55:03 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* doc/c-d10v.texi: Add info on @word modifier.
+
+end-sanitize-d10v	
 Wed Nov  6 13:46:07 1996  Jeffrey A Law  (law@cygnus.com)
 	
 	* config/tc-mn10300.c (mn10300_insert_operand): MN10300_OPERAND_SPLIT

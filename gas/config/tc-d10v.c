@@ -75,7 +75,7 @@ static unsigned long do_assemble PARAMS ((char *str, struct d10v_opcode **opcode
 static unsigned long d10v_insert_operand PARAMS (( unsigned long insn, int op_type,
 						   offsetT value, int left, fixS *fix));
 static int parallel_ok PARAMS ((struct d10v_opcode *opcode1, unsigned long insn1, 
-				  struct d10v_opcode *opcode2, unsigned long insn2));
+				struct d10v_opcode *opcode2, unsigned long insn2));
 
 
 struct option md_longopts[] = {
@@ -694,7 +694,7 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
   if ( (opcode1->format & LONG_OPCODE) || (opcode2->format & LONG_OPCODE))
     as_fatal ("Long instructions may not be combined.");
 
-  if(opcode1->exec_type & BRANCH_LINK)
+  if(opcode1->exec_type & BRANCH_LINK && opcode2->exec_type != PARONLY)
     {
       /* subroutines must be called from 32-bit boundaries */
       /* so the return address will be correct */
@@ -822,7 +822,11 @@ parallel_ok (op1, insn1, op2, insn2)
   unsigned long ins, mod[2], used[2];
   struct d10v_opcode *op;
 
-  if (op1->exec_type & SEQ || op2->exec_type & SEQ)
+  if ((op1->exec_type & SEQ) != 0 || (op2->exec_type & SEQ) != 0
+      || (op1->exec_type & PAR) == 0 || (op2->exec_type & PAR) == 0
+      || (op1->unit == BOTH) || (op2->unit == BOTH)
+      || (op1->unit == IU && op2->unit == IU)
+      || (op1->unit == MU && op2->unit == MU))
     return 0;
 
   /* The idea here is to create two sets of bitmasks (mod and used) */
