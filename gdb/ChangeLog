@@ -1,3 +1,9 @@
+2004-06-16  Daniel Jacobowitz  <dan@debian.org>
+
+	PR gdb/1658
+	* dwarf2read.c (dwarf_decode_lines): Read the length of the extended
+	operation as a uleb128.  Found by Michael Coulter.
+
 2004-06-16  Paul N. Hilfinger  <Hilfinger@gnat.com>
 	
 	* ada-tasks.c: Rename build_task_list to ada_build_task_list, and

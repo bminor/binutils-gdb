@@ -5986,7 +5986,8 @@ dwarf_decode_lines (struct line_header *lh, char *comp_dir, bfd *abfd,
 	  else switch (op_code)
 	    {
 	    case DW_LNS_extended_op:
-	      line_ptr += 1;	/* ignore length */
+	      read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+	      line_ptr += bytes_read;
 	      extended_op = read_1_byte (abfd, line_ptr);
 	      line_ptr += 1;
 	      switch (extended_op)
