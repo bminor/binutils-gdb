@@ -185,7 +185,7 @@ proc signal_tests_1 {} {
 	expect {
 	    -re "Breakpoint.*func2.*$prompt $" { pass "continue to func2" }
 	    -re "Breakpoint.*func1.*$prompt $" {
-	    	fail "continue func2"
+	    	fail "continue to func2"
 		gdb_test "continue" "Breakpoint.*func2.*" \
 		    "extra continue to func2"
 	    }
@@ -243,6 +243,14 @@ if {[ istarget "m68*-motorola-*" ] || [ istarget "hppa*-*-bsd*" ] ||
   fail "ptrace loses on signals on this target"
   return 0
 }
+
+gdb_exit
+gdb_start
+
+# This will need to be updated as the exact list of signals changes,
+# but I want to test that TARGET_SIGNAL_0, TARGET_SIGNAL_DEFAULT, and
+# TARGET_SIGNAL_UNKNOWN are skipped.
+gdb_test "handle all print" "Signal        Stop	Print	Pass to program	Description\r\nSIGHUP        Yes	Yes	Yes		Hangup.*SIG63         Yes	Yes	Yes		Real-time event 63"
 
 gdb_exit
 gdb_start
