@@ -115,6 +115,10 @@ chill_type_print_base (type, stream, show, level)
 	break;
 
       case TYPE_CODE_BOOL:
+	/* FIXME: we should probably just print the TYPE_NAME, in case
+	   anyone ever fixes the compiler to give us the real names
+	   in the presence of the chill equivalent of typedef (assuming
+	   there is one).  */
 	fprintf_filtered (stream, "BOOL");
 	break;
 

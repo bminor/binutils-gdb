@@ -1,3 +1,16 @@
+Wed Feb  2 11:16:45 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdbtypes.h, ch-typeprint.c, ch-valprint.c:
+	Change comments regarding TYPE_CODE_BOOL.
+	* language.c (boolean_type): Always return 1 for TYPE_CODE_BOOL,
+	regardless of the language.
+	(value_true): Just call value_logical_not regardless of language.
+	* coffread.c (coff_read_enum_type), stabsread.c (read_enum_type):
+	Remove #if 0'd code which makes some enums TYPE_CODE_BOOL.
+	* language.h: Improve comment for la_builtin_type_vector.
+	* m2-lang.c (_initialize_m2_language): Don't add any fields to
+	builtin_type_m2_bool.
+
 Tue Feb  1 17:13:32 1994  Kevin Buettner (kev@cujo.geg.mot.com)
 
 	* config/m88k/{tm-delta88.h,tm-delta88v4.h}, m88k-tdep.c:

@@ -106,7 +106,10 @@ struct language_defn
 
   enum language la_language;
 
-  /* Its builtin types */
+  /* Its builtin types.  This is a vector ended by a NULL pointer.  These
+     types can be specified by name in parsing types in expressions,
+     regardless of whether the program being debugged actually defines
+     such a type.  */
 
   struct type ** const *la_builtin_type_vector;
 

@@ -698,18 +698,20 @@ int
 boolean_type (type)
    struct type *type;
 {
-   switch(current_language->la_language)
-   {
-   case language_chill:
-   case language_m2:
-      return TYPE_CODE(type) != TYPE_CODE_BOOL ? 0 : 1;
-
-   case language_c:
-   case language_cplus:
-      return TYPE_CODE(type) != TYPE_CODE_INT ? 0 : 1;
+  if (TYPE_CODE (type) == TYPE_CODE_BOOL)
+    return 1;
+  switch(current_language->la_language)
+    {
+    case language_c:
+    case language_cplus:
+      /* Might be more cleanly handled by having a TYPE_CODE_INT_NOT_BOOL
+	 for CHILL and such languages, or a TYPE_CODE_INT_OR_BOOL for C.  */
+      if (TYPE_CODE (type) == TYPE_CODE_INT)
+	return 1;
    default:
-      return (0);
+      break;
    }
+  return 0;
 }
 
 /* Returns non-zero if the value is a floating-point type */
@@ -757,46 +759,16 @@ structured_type(type)
 
 /* Returns non-zero if the value VAL represents a true value. */
 int
-value_true(val)
+value_true (val)
      value val;
 {
-  int len, i;
-  struct type *type;
-  LONGEST v;
-
-  switch (current_language->la_language) {
-
-  case language_c:
-  case language_cplus:
-    return !value_logical_not (val);
-
-  case language_m2:
-    type = VALUE_TYPE(val);
-    if (TYPE_CODE (type) != TYPE_CODE_BOOL)
-      return 0;		/* Not a BOOLEAN at all */
-    /* Search the fields for one that matches the current value. */
-    len = TYPE_NFIELDS (type);
-    v = value_as_long (val);
-    for (i = 0; i < len; i++)
-      {
-	QUIT;
-	if (v == TYPE_FIELD_BITPOS (type, i))
-	  break;
-      }
-    if (i >= len)
-      return 0;		/* Not a valid BOOLEAN value */
-    if (STREQ ("TRUE", TYPE_FIELD_NAME(VALUE_TYPE(val), i)))
-      return 1;		/* BOOLEAN with value TRUE */
-    else
-      return 0;		/* BOOLEAN with value FALSE */
-    break;
-
-  case language_chill:
-    error ("Missing Chill support in function value_type.");  /*FIXME*/
-
-  default:
-    error ("Language not supported.");
-  }
+  /* It is possible that we should have some sort of error if a non-boolean
+     value is used in this context.  Possibly dependent on some kind of
+     "boolean-checking" option like range checking.  But it should probably
+     not depend on the language except insofar as is necessary to identify
+     a "boolean" value (i.e. in C using a float, pointer, etc., as a boolean
+     should be an error, probably).  */
+  return !value_logical_not (val);
 }
 
 /* Returns non-zero if the operator OP is defined on

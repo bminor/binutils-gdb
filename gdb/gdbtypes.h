@@ -111,14 +111,18 @@ enum type_code
   TYPE_CODE_METHOD,		/* Method type */
   TYPE_CODE_REF,		/* C++ Reference types */
 
-  /* Modula-2 */
   TYPE_CODE_CHAR,		/* *real* character type */
-  TYPE_CODE_BOOL		/* BOOLEAN type */
+
+  /* Boolean type.  0 is false, 1 is true, and other values are non-boolean
+     (e.g. FORTRAN "logical" used as unsigned int).  */
+  TYPE_CODE_BOOL
 };
 
 /* For now allow source to use TYPE_CODE_CLASS for C++ classes, as an
-   alias for TYPE_CODE_STRUCT.  Eventually these should probably be
-   officially distinct types within gdb. */
+   alias for TYPE_CODE_STRUCT.  This is for DWARF, which has a distinct
+   "class" attribute.  Perhaps we should actually have a separate TYPE_CODE
+   so that we can print "class" or "struct" depending on what the debug
+   info said.  It's not clear we should bother.  */
 
 #define TYPE_CODE_CLASS TYPE_CODE_STRUCT
 

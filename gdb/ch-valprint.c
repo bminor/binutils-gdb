@@ -128,6 +128,7 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	}
       else
 	{
+	  /* FIXME: Why is this using builtin_type_chill_bool not type?  */
 	  val = unpack_long (builtin_type_chill_bool, valaddr);
 	  fprintf_filtered (stream, val ? "TRUE" : "FALSE");
 	}

@@ -443,15 +443,5 @@ _initialize_m2_language ()
 	       TYPE_FLAG_UNSIGNED,
 	       "BOOLEAN", (struct objfile *) NULL);
 
-  TYPE_NFIELDS(builtin_type_m2_bool) = 2;
-  TYPE_FIELDS(builtin_type_m2_bool) = 
-     (struct field *) xmalloc (sizeof (struct field) * 2);
-  TYPE_FIELD_BITPOS(builtin_type_m2_bool,0) = 0;
-  TYPE_FIELD_NAME(builtin_type_m2_bool,0) = (char *)xmalloc(6);
-  strcpy(TYPE_FIELD_NAME(builtin_type_m2_bool,0),"FALSE");
-  TYPE_FIELD_BITPOS(builtin_type_m2_bool,1) = 1;
-  TYPE_FIELD_NAME(builtin_type_m2_bool,1) = (char *)xmalloc(5);
-  strcpy(TYPE_FIELD_NAME(builtin_type_m2_bool,1),"TRUE");
-
   add_language (&m2_language_defn);
 }

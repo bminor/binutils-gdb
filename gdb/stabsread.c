@@ -2980,17 +2980,6 @@ read_enum_type (pp, type, objfile)
 	break;
     }
 
-#if 0
-  /* This screws up perfectly good C programs with enums.  FIXME.  */
-  /* Is this Modula-2's BOOLEAN type?  Flag it as such if so. */
-  if(TYPE_NFIELDS(type) == 2 &&
-     ((STREQ(TYPE_FIELD_NAME(type,0),"TRUE") &&
-       STREQ(TYPE_FIELD_NAME(type,1),"FALSE")) ||
-      (STREQ(TYPE_FIELD_NAME(type,1),"TRUE") &&
-       STREQ(TYPE_FIELD_NAME(type,0),"FALSE"))))
-     TYPE_CODE(type) = TYPE_CODE_BOOL;
-#endif
-
   return type;
 }
 
