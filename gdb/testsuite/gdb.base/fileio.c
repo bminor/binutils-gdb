@@ -479,6 +479,9 @@ strerrno (int err)
 #ifdef ENOTEMPTY
     case ENOTEMPTY: return "ENOTEMPTY";
 #endif
+#ifdef EBUSY
+    case EBUSY: return "EBUSY";
+#endif
     default: return "E??";
     }
 }

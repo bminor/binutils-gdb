@@ -1,5 +1,9 @@
 2004-01-07  Andrew Cagney  <cagney@redhat.com>
 
+	* gdb.base/fileio.c (strerrno): Add "EBUSY".
+
+2004-01-07  Andrew Cagney  <cagney@redhat.com>
+
 	* gdb.base/fileio.c (test_open): Do not pass S_IWUSR to "open"
 	when creating the read-only file.  From analysis by Roland McGrath
 	and Elena Zannoni.
