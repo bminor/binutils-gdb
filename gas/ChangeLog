@@ -1,5 +1,9 @@
 Wed Aug  9 10:51:48 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* read.c (mri_pending_align): New static variable.
+	(read_a_source_file): Handle mri_pending_align.
+	(cons): Set mri_pending_align if appropriate.
+
 	* configure.in: Move random special target handling before
 	possible break.
 	* configure: Rebuild.
