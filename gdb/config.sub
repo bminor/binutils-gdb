@@ -11,7 +11,7 @@
 # Each package is responsible for reporting which valid configurations
 # it does not support.  The user should be able to distinguish
 # a failure to support a valid configuration from a meaningless
-# configuration.
+# configuration (e.g. a typo).
 
 # Please email any bugs, comments, and/or additions to this file to:
 # configure@cygnus.com
@@ -27,65 +27,65 @@ vax | tahoe | i386 | i860 | m68k | m68000 | m88k | sparc | ns32k \
 	vendor=none
 	os=none
 	;;
-nindy960)
-	cpu=i960
-	vendor=intel
-	os=nindy
-	;;
-vxworks68)
+altos | altos3068)
 	cpu=m68k
-	vendor=wrs
-	os=vxworks
+	vendor=altos
+	os=sysv # maybe?
 	;;
-vxworks960)
-	cpu=i960
-	vendor=wrs
-	os=vxworks
+altosgas)
+	cpu=m68k
+	vendor=altos
+	os=gas
 	;;
-am29k)
-	cpu=a29k
-	vendor=none
-	os=bsd
+amdahl)
+	cpu=580
+	vendor=amdahl
+	os=uts
 	;;
-umax)
+amigados)
+	cpu=m68k
+	vendor=cbm
+	os=amigados # Native AmigaDOS
+	;;
+amigaunix | amix)
+	cpu=m68k
+	vendor=cbm
+	os=svr4 # System V Release 4 (svr4 is an industry recognized acronym)
+	;;
+apollo68)
+	cpu=m68k
+	vendor=apollo
+	os=sysv # maybe?
+	;;
+balance)
 	cpu=ns32k
-	vendor=encore
+	vendor=sequent
+	os=dynix
+	;;
+convex-c1)
+	cpu=c1
+	vendor=convex
 	os=sysv # maybe?
 	;;
-pn)
-	cpu=pn
-	vendor=gould
+convex-c2)
+	cpu=c2
+	vendor=convex
 	os=sysv # maybe?
 	;;
-np1)
-	cpu=np1
-	vendor=gould
-	os=sysv # maybe?
+cray | ymp)
+	cpu=ymp
+	vendor=cray
+	os=unicos
 	;;
-merlin)
-	cpu=merlin
-	vendor=utek
-	os=sysv # maybe?
+cray2)
+	cpu=cray2
+	vendor=cray
+	os=unicos
 	;;
-iris | iris4d)
+dec3100 | decstatn | decstation | decstation-3100 | pmax | pmin)
 	cpu=mips
-	vendor=sgi
-	os=irix # maybe?
-	;;
-news1000)
-	cpu=m68030
-	vendor=sony
-	os=sysv # maybe?
-	;;
-news | news700 | news800 | news900)
-	cpu=m68k
-	vendor=sony
-	os=sysv # maybe?
-	;;
-unixpc | safari | pc7300 | 3b1 | 7300 | 7300-att | att-7300)
-	cpu=m68k
-	vendor=att
-	os=sysv # maybe?
+	vendor=dec
+	os=ultrix
 	;;
 delta | 3300 | motorola-3300 | motorola-delta \
       | 3300-motorola | delta-motorola)
@@ -93,25 +93,154 @@ delta | 3300 | motorola-3300 | motorola-delta \
 	vendor=motorola
 	os=sysv # maybe?
 	;;
-vax-dec)
-	cpu=vax
-	vendor=dec
-	os=ultrix # maybe?
+
+delta88)
+	cpu=m88k
+	vendor=motorola
+	os=m88kbcs
 	;;
-balance)
+
+gmicro)
+	cpu=tron
+	vendor=gmicro
+	os=sysv # maybe?
+	;;
+# start-sanitize-v9
+hal-32 | hal32)
+	cpu=sparc64
+	vendor=hal
+	os=hal32
+	;;
+hal-64 | hal64)
+	cpu=sparc64
+	vendor=hal
+	os=hal64
+	;;
+sparc64)
+	cpu=sparc64
+	vendor=sun
+	os=v9
+	;;
+sparc64-v7 | sparc64v7)
+	cpu=sparc64
+	vendor=sun
+	os=v7
+	;;
+# end-sanitize-v9
+hp300bsd)
+	cpu=m68k
+	vendor=hp
+	os=bsd
+	;;
+hp300hpux | hpux | hp9k3[2-9][0-9])
+	cpu=m68k
+	vendor=hp
+	os=hpux
+	;;
+hp9k31[0-9] | hp9k2[0-9][0-9])
+	cpu=m68000
+	vendor=hp
+	os=hpux
+	;;
+i386sco)
+	cpu=i386
+	vendor=sco
+	os=sysv # maybe?
+	;;
+i386v)
+	cpu=i386
+	vendor=none
+	os=sysv
+	;;
+i386v32)
+	cpu=i386
+	vendor=none
+	os=sysv32
+	;;
+iris | iris4d)
+	cpu=mips
+	vendor=sgi
+	os=irix # maybe?
+	;;
+isi | isi68)
+	cpu=m68k
+	vendor=isi
+	os=sysv # maybe?
+	;;
+littlemips)
+	cpu=mips
+	vendor=little
+	os=bsd
+	;;
+magnum | m3230)
+	cpu=mips
+	vendor=mips
+	os=sysv # maybe?
+	;;
+merlin)
 	cpu=ns32k
-	vendor=sequent
-	os=dynix
+	vendor=utek
+	os=sysv # maybe?
+	;;
+miniframe)
+	cpu=m68000
+	vendor=convergent
+	os=sysv # maybe?
 	;;
 mmax)
 	cpu=ns32k
 	vendor=encore
 	os=sysv # maybe?
 	;;
-symmetry)
+news | news700 | news800 | news900)
+	cpu=m68k
+	vendor=sony
+	os=sysv # maybe?
+	;;
+news1000)
+	cpu=m68030
+	vendor=sony
+	os=sysv # maybe?
+	;;
+news-3600 | bigmips | risc-news)
+	cpu=mips
+	vendor=sony
+	os=newsos # maybe?
+	;;
+next)
+	cpu=m68k
+	vendor=next
+	os=sysv # maybe?
+	;;
+nindy960)
+	cpu=i960
+	vendor=intel
+	os=nindy
+	;;
+none)
+	cpu=none
+	vendor=none
+	os=none
+	;;
+np1)
+	cpu=np1
+	vendor=gould
+	os=sysv # maybe?
+	;;
+pbd)
+	cpu=sparc
+	vendor=unicom
+	os=sysv
+	;;
+pn)
+	cpu=pn
+	vendor=gould
+	os=sysv # maybe?
+	;;
+ps2)
 	cpu=i386
-	vendor=sequent
-	os=dynix
+	vendor=ibm
+	os=sysv # maybe?
 	;;
 sun2)
 	cpu=m68000
@@ -143,6 +272,11 @@ sun3os4)
 	vendor=sun
 	os=sunos4
 	;;
+sun386 | roadrunner | sun386i)
+	cpu=i386
+	vendor=sun
+	os=sunos
+	;;
 sun4)
 	cpu=sparc
 	vendor=sun
@@ -158,127 +292,51 @@ sun4os4)
 	vendor=sun
 	os=sunos4
 	;;
-pbd)
-	cpu=sparc
-	vendor=unicom
-	os=sysv
-	;;
-roadrunner | sun386 | sun386i)
+symmetry)
 	cpu=i386
-	vendor=sun
-	os=sunos
-	;;
-ps2)
-	cpu=i386
-	vendor=ibm
-	os=sysv # maybe?
-	;;
-i386sco)
-	cpu=i386
-	vendor=sco
-	os=sysv # maybe?
-	;;
-i386v)
-	cpu=i386
-	vendor=none
-	os=sysv
-	;;
-i386v32)
-	cpu=i386
-	vendor=none
-	os=sysv32
-	;;
-next)
-	cpu=m68k
-	vendor=next
-	os=sysv # maybe?
-	;;
-hp300bsd)
-	cpu=m68k
-	vendor=hp
-	os=bsd
-	;;
-hp300hpux | hpux | hp9k3[2-9][0-9])
-	cpu=m68k
-	vendor=hp
-	os=hpux
-	;;
-hp9k31[0-9] | hp9k2[0-9][0-9])
-	cpu=m68000
-	vendor=hp
-	os=hpux
-	;;
-isi | isi68)
-	cpu=m68k
-	vendor=isi
-	os=sysv # maybe?
-	;;
-apollo68)
-	cpu=m68k
-	vendor=apollo
-	os=sysv # maybe?
-	;;
-altos | altos3068)
-	cpu=m68k
-	vendor=altos
-	os=sysv # maybe?
-	;;
-altosgas)
-	cpu=m68k
-	vendor=altos
-	os=gas
-	;;
-miniframe)
-	cpu=m68000
-	vendor=convergent
-	os=sysv # maybe?
+	vendor=sequent
+	os=dynix
 	;;
 tower | tower-32)
 	cpu=m68k
 	vendor=ncr
 	os=sysv # maybe?
 	;;
-bigmips | news-3600 | risc-news)
-	cpu=mips
-	vendor=sony
-	os=newsos # maybe?
+ultra3)
+	cpu=a29k
+	vendor=nyu
+	os=sym1
 	;;
-littlemips)
-	cpu=mips
-	vendor=little
-	os=bsd
+umax)
+	cpu=ns32k
+	vendor=encore
+	os=sysv # maybe?
 	;;
-dec3100 | decstatn | decstation | decstation-3100 | pmax)
-	cpu=mips
+unixpc | safari | pc7300 | 3b1 | 7300 | 7300-att | att-7300)
+	cpu=m68k
+	vendor=att
+	os=sysv # maybe?
+	;;
+vax-dec)
+	cpu=vax
 	vendor=dec
-	os=ultrix
+	os=ultrix # maybe?
 	;;
-magnum | m3230)
-	cpu=mips
-	vendor=mips
-	os=sysv # maybe?
+vxworks68)
+	cpu=m68k
+	vendor=wrs
+	os=vxworks
 	;;
-gmicro)
-	cpu=tron
-	vendor=none
-	os=sysv # maybe?
+vxworks960)
+	cpu=i960
+	vendor=wrs
+	os=vxworks
 	;;
-convex-c1)
-	cpu=c1
-	vendor=convex
-	os=sysv # maybe?
+xmp)
+	cpu=xmp
+	vendor=cray
+	os=unicos
 	;;
-convex-c2)
-	cpu=c2
-	vendor=convex
-	os=sysv # maybe?
-	;;
-none)
-	cpu=none
-	vendor=none
-	os=none
-	;;
-
 # not an alias.  parse what we expect to be a canonical name.
 *)
 	cpu=`echo $1 | sed 's/-.*$//'`
@@ -308,10 +366,15 @@ esac
 # verify that the cpu is known.
 
 case "${cpu}" in
-vax | tahoe | i386 | i860 | m68k | m68000 | m88k | sparc | ns32k \
-	| alliant | arm | c1 | c2 | mips | pyramid | tron | a29k \
-	| rtpc | rs6000 | i960 | none)
+none | vax | tahoe | i386 | i860 | m68k | m68000 | m88k | sparc \
+	| ns32k | alliant | arm | c1 | c2 | mips | pyramid | tron \
+	| a29k | rtpc | rs6000 | i960 | xmp | ymp | cray2 | 580)
 	;;
+
+# start-sanitize-v9
+sparc64) ;;
+# end-sanitize-v9
+
 *)
 	echo '***' Invalid cpu \`${cpu}\': configuration \`$1\' not recognized 1>&2
 	exit 1
@@ -321,10 +384,16 @@ esac
 # verify that the vendor is known.
 
 case "${vendor}" in
-none | convex | mips | dec | little | sony | ncr | convergent \
-	| altos | apollo | isi | hp | next | sco | ibm | sun \
-	| unicom | sequent | encore | motorola | att | sgi \
-	| utek | gould | wrs | intel | aout | bout | coff) ;;
+	altos | amdahl | aout | apollo | att | bcs | bout |\
+	cbm | convergent | convex | coff | cray | dec | encore |\
+	gould | intel | isi | hp | ibm | little | mips | motorola |\
+	ncr | next | none | nyu | sco | sequent | sgi | sony | sun |\
+	unicom | utek | wrs ) ;; 
+
+# start-sanitize-v9
+hal) ;;
+# end-sanitize-v9
+
 *)
 	echo '***' Invalid vendor \`${vendor}\': configuration \`$1\' not recognized 1>&2
 	exit 1
@@ -336,8 +405,14 @@ esac
 case "${os}" in
 aix* | aout | bout | bsd* | coff | ctix* | dynix* | esix* | hpux* | irix* \
 	| isc* | mach* | newsos* | nindy* | none | osf* | osf* | sco* \
-	| sunos* | sysv* | ultrix* | unos* | v88r* | vms* | vxworks*)
+	| sunos* | sysv* | ultrix* | unos* | v88r* | vms* | vxworks* \
+	| sym[1-9]* | unicos* | uts | svr4 | amigados)
 	;;
+
+# start-sanitize-v9
+hal32 | hal64 | v7 | v9) ;;
+# end-sanitize-v9
+
 *)
 	echo '***' Invalid os \`${os}\': configuration \`$1\' not recognized 1>&2
 	exit 1
