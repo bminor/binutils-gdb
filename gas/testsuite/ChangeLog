@@ -1,3 +1,8 @@
+1999-06-03  Philip Blundell  <philb@gnu.org>
+
+	* gas/arm/arm7t.d, gas/arm/inst.d: Update to match current gas,
+ 	bfd and opcodes.
+
 1999-05-28  Ian Lance Taylor  <ian@zembu.com>
 
 	* gas/vtable/vtable.exp: Don't run test for i960 yet.
