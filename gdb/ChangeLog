@@ -1,5 +1,14 @@
 Tue Mar 30 08:06:24 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* breakpoint.h (bpstat): New field print_it.
+	breakpoint.c (bpstat_print): Use it.
+	(print_it_normal): New function (from old bpstat_print code).
+	(bpstat_{alloc,stop_status}): Set print_it field.
+
+	* breakpoint.c (bpstat_stop_status): Use catch_errors when
+	evaluating watchpoint condition, via new function watchpoint_check.
+	Also stop if watchpoint disabled due to leaving its block.
+
 	* findvar.c [REG_STRUCT_HAS_ADDR]: Add comment.
 
 Tue Mar 30 00:14:38 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)

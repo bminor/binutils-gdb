@@ -691,18 +691,17 @@ top:
   discard_cleanups (old_chain);
 }
 
-/* Print a message indicating what happened.  Returns nonzero to
-   say that only the source line should be printed after this (zero
-   return means print the frame as well as the source line).  */
+/* This is the normal print_it function for a bpstat.  In the future,
+   much of this logic could (should?) be moved to bpstat_stop_status,
+   by having it set different print_it functions.  */
 
-int
-bpstat_print (bs)
+static int
+print_it_normal (bs)
      bpstat bs;
 {
   /* bs->breakpoint_at can be NULL if it was a momentary breakpoint
      which has since been deleted.  */
-  if (bs == NULL
-      || bs->breakpoint_at == NULL
+  if (bs->breakpoint_at == NULL
       || (bs->breakpoint_at->type != bp_breakpoint
 	  && bs->breakpoint_at->type != bp_watchpoint))
     return 0;
@@ -739,7 +738,27 @@ bpstat_print (bs)
       bs->old_val = NULL;
       return 1;
     }
+  /* We can't deal with it.  Maybe another member of the bpstat chain can.  */
+  return -1;
+}
 
+/* Print a message indicating what happened.  Returns nonzero to
+   say that only the source line should be printed after this (zero
+   return means print the frame as well as the source line).  */
+
+int
+bpstat_print (bs)
+     bpstat bs;
+{
+  int val;
+  
+  if (bs == NULL)
+    return 0;
+
+  val = (*bs->print_it) (bs);
+  if (val >= 0)
+    return val;
+  
   /* Maybe another breakpoint in the chain caused us to stop.
      (Currently all watchpoints go on the bpstat whether hit or
      not.  That probably could (should) be changed, provided care is taken
@@ -779,7 +798,84 @@ bpstat_alloc (b, cbs)
   bs->commands = NULL;
   bs->momentary = b->disposition == delete;
   bs->old_val = NULL;
+  bs->print_it = print_it_normal;
   return bs;
+}
+
+/* Possible return values for watchpoint_check (this can't be an enum
+   because of check_errors).  */
+/* The watchpoint has been disabled.  */
+#define WP_DISABLED 1
+/* The value has changed.  */
+#define WP_VALUE_CHANGED 2
+/* The value has not changed.  */
+#define WP_VALUE_NOT_CHANGED 3
+
+/* Check watchpoint condition.  */
+static int
+watchpoint_check (p)
+     PTR p;
+{
+  bpstat bs = (bpstat) p;
+
+  int within_current_scope;
+  if (bs->breakpoint_at->exp_valid_block != NULL)
+    within_current_scope =
+      contained_in (get_selected_block (), bs->breakpoint_at->exp_valid_block);
+  else
+    within_current_scope = 1;
+
+  if (within_current_scope)
+    {
+      /* We use value_{,free_to_}mark because it could be a
+         *long* time before we return to the command level and
+	 call free_all_values.  */
+      /* But couldn't we just call free_all_values instead?  */
+
+      value mark = value_mark ();
+      value new_val = evaluate_expression (bs->breakpoint_at->exp);
+      if (!value_equal (bs->breakpoint_at->val, new_val))
+	{
+	  release_value (new_val);
+	  value_free_to_mark (mark);
+	  bs->old_val = bs->breakpoint_at->val;
+	  bs->breakpoint_at->val = new_val;
+	  /* We will stop here */
+	  return WP_VALUE_CHANGED;
+	}
+      else
+	{
+	  /* Nothing changed, don't do anything.  */
+	  value_free_to_mark (mark);
+	  /* We won't stop here */
+	  return WP_VALUE_NOT_CHANGED;
+	}
+    }
+  else
+    {
+      /* This seems like the only logical thing to do because
+	 if we temporarily ignored the watchpoint, then when
+	 we reenter the block in which it is valid it contains
+	 garbage (in the case of a function, it may have two
+	 garbage values, one before and one after the prologue).
+	 So we can't even detect the first assignment to it and
+	 watch after that (since the garbage may or may not equal
+	 the first value assigned).  */
+      bs->breakpoint_at->enable = disabled;
+      printf_filtered ("\
+Watchpoint %d disabled because the program has left the block in\n\
+which its expression is valid.\n", bs->breakpoint_at->number);
+      return WP_DISABLED;
+    }
+}
+
+/* This is used when everything which needs to be printed has
+   already been printed.  But we still want to print the frame.  */
+static int
+print_it_noop (bs)
+     bpstat bs;
+{
+  return 0;
 }
 
 /* Determine whether we stopped at a breakpoint, etc, or whether we
@@ -842,54 +938,34 @@ bpstat_stop_status (pc, frame_address)
 
       if (b->type == bp_watchpoint)
 	{
-	  int within_current_scope;
-	  if (b->exp_valid_block != NULL)
-	    within_current_scope =
-	      contained_in (get_selected_block (), b->exp_valid_block);
-	  else
-	    within_current_scope = 1;
-
-	  if (within_current_scope)
+	  static char message1[] =
+	    "Error evaluating expression for watchpoint %d\n";
+	  char message[sizeof (message1) + 30 /* slop */];
+	  sprintf (message, message1, b->number);
+	  switch (catch_errors (watchpoint_check, bs, message))
 	    {
-	      /* We use value_{,free_to_}mark because it could be a
-		 *long* time before we return to the command level and
-		 call free_all_values.  */
-
-	      value mark = value_mark ();
-	      value new_val = evaluate_expression (b->exp);
-	      if (!value_equal (b->val, new_val))
-		{
-		  release_value (new_val);
-		  value_free_to_mark (mark);
-		  bs->old_val = b->val;
-		  b->val = new_val;
-		  /* We will stop here */
-		}
-	      else
-		{
-		  /* Nothing changed, don't do anything.  */
-		  value_free_to_mark (mark);
-		  continue;
-		  /* We won't stop here */
-		}
-	    }
-	  else
-	    {
-	      /* This seems like the only logical thing to do because
-		 if we temporarily ignored the watchpoint, then when
-		 we reenter the block in which it is valid it contains
-		 garbage (in the case of a function, it may have two
-		 garbage values, one before and one after the prologue).
-		 So we can't even detect the first assignment to it and
-		 watch after that (since the garbage may or may not equal
-		 the first value assigned).  */
-	      b->enable = disabled;
-	      printf_filtered ("\
-Watchpoint %d disabled because the program has left the block in\n\
-which its expression is valid.\n", b->number);
-	      /* We won't stop here */
-	      /* FIXME, maybe we should stop here!!! */
+	    case WP_DISABLED:
+	      /* We've already printed what needs to be printed.  */
+	      bs->print_it = print_it_noop;
+	      /* Stop.  */
+	      break;
+	    case WP_VALUE_CHANGED:
+	      /* Stop.  */
+	      break;
+	    case WP_VALUE_NOT_CHANGED:
+	      /* Don't stop.  */
 	      continue;
+	    default:
+	      /* Can't happen.  */
+	      /* FALLTHROUGH */
+	    case 0:
+	      /* Error from catch_errors.  */
+	      b->enable = disabled;
+	      printf_filtered ("Watchpoint %d disabled.\n", b->number);
+	      /* We've already printed what needs to be printed.  */
+	      bs->print_it = print_it_noop;
+	      /* Stop.  */
+	      break;
 	    }
 	}
 #if DECR_PC_AFTER_BREAK != 0 || defined (SHIFT_INST_REGS)
@@ -2251,7 +2327,6 @@ breakpoint_re_set_one (bint)
 	 particular level, but that's going to be less stable than filenames
 	 or functionnames.  */
       /* So for now, just use a global context.  */
-      /* FIXME, use catch_errors.  */
       b->exp = parse_expression (b->exp_string);
       b->exp_valid_block = innermost_block;
       b->val = evaluate_expression (b->exp);
