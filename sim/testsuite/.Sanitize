@@ -39,6 +39,7 @@ Things-to-lose:
 
 common
 tic80-coff
+mips64vr5900el-elf
 
 Do-last:
 
