@@ -329,16 +329,20 @@ add_set_or_show_cmd (char *name,
    CLASS is as in add_cmd.  VAR_TYPE is the kind of thing we are
    setting.  VAR is address of the variable being controlled by this
    command.  SET_FUNC and SHOW_FUNC are the callback functions (if
-   non-NULL).  SET_DOC and SHOW_DOC are the documentation strings.  */
+   non-NULL).  SET_DOC and SHOW_DOC are the documentation strings.
+   SET_RESULT and SHOW_RESULT, if not NULL, are set to the resulting
+   command structures.  */
 
-static struct cmd_list_element *
-add_setshow_cmd (char *name,
-		 enum command_class class,
-		 var_types var_type, void *var,
-		 char *set_doc, char *show_doc,
-		 cmd_sfunc_ftype *set_func, cmd_sfunc_ftype *show_func,
-		 struct cmd_list_element **set_list,
-		 struct cmd_list_element **show_list)
+void
+add_setshow_cmd_full (char *name,
+		      enum command_class class,
+		      var_types var_type, void *var,
+		      char *set_doc, char *show_doc,
+		      cmd_sfunc_ftype *set_func, cmd_sfunc_ftype *show_func,
+		      struct cmd_list_element **set_list,
+		      struct cmd_list_element **show_list,
+		      struct cmd_list_element **set_result,
+		      struct cmd_list_element **show_result)
 {
   struct cmd_list_element *set;
   struct cmd_list_element *show;
@@ -350,9 +354,31 @@ add_setshow_cmd (char *name,
 			      show_doc, show_list);
   if (show_func != NULL)
     set_cmd_sfunc (show, show_func);
-  /* The caller often wants to modify set to include info like an
-     enumeration.  */
-  return set;
+
+  if (set_result != NULL)
+    *set_result = set;
+  if (show_result != NULL)
+    *show_result = show;
+}
+
+/* Add element named NAME to both the command SET_LIST and SHOW_LIST.
+   CLASS is as in add_cmd.  VAR_TYPE is the kind of thing we are
+   setting.  VAR is address of the variable being controlled by this
+   command.  SET_FUNC and SHOW_FUNC are the callback functions (if
+   non-NULL).  SET_DOC and SHOW_DOC are the documentation strings.  */
+
+void
+add_setshow_cmd (char *name,
+		 enum command_class class,
+		 var_types var_type, void *var,
+		 char *set_doc, char *show_doc,
+		 cmd_sfunc_ftype *set_func, cmd_sfunc_ftype *show_func,
+		 struct cmd_list_element **set_list,
+		 struct cmd_list_element **show_list)
+{
+  add_setshow_cmd_full (name, class, var_type, var, set_doc, show_doc,
+			set_func, show_func, set_list, show_list,
+			NULL, NULL);
 }
 
 struct cmd_list_element *
@@ -405,9 +431,10 @@ add_setshow_auto_boolean_cmd (char *name,
 {
   static const char *auto_boolean_enums[] = { "on", "off", "auto", NULL };
   struct cmd_list_element *c;
-  c = add_setshow_cmd (name, class, var_auto_boolean, var,
-		       set_doc, show_doc, set_func, show_func,
-		       set_list, show_list);
+  add_setshow_cmd_full (name, class, var_auto_boolean, var,
+			set_doc, show_doc, set_func, show_func,
+			set_list, show_list,
+			&c, NULL);
   c->enums = auto_boolean_enums;
 }
 
@@ -426,10 +453,11 @@ add_setshow_boolean_cmd (char *name,
 {
   static const char *boolean_enums[] = { "on", "off", NULL };
   struct cmd_list_element *c;
-  c = add_setshow_cmd (name, class, var_boolean, var,
-		       set_doc, show_doc,
-		       set_func, show_func,
-		       set_list, show_list);
+  add_setshow_cmd_full (name, class, var_boolean, var,
+			set_doc, show_doc,
+			set_func, show_func,
+			set_list, show_list,
+			&c, NULL);
   c->enums = boolean_enums;
 }
 
