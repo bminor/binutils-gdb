@@ -140,7 +140,11 @@ mips_target_format ()
 
 /* This is the set of options which may be modified by the .set
    pseudo-op.  We use a struct so that .set push and .set pop are more
-   reliable.  */
+   reliable.
+
+   FIXME: The CPU specific variables (mips_4010, et. al.) should
+   probably be in here as well, and there should probably be some way
+   to set them.  */
 
 struct mips_set_options
 {
@@ -234,7 +238,17 @@ static int mips_4900 = -1;
 
 /* Whether the processor uses hardware interlocks to protect 
    reads from the HI and LO registers, and thus does not
-   require nops to be inserted.  */
+   require nops to be inserted.
+
+   FIXME: We really should not be checking mips_cpu here.  The -mcpu=
+   option is documented to not do anything special.  In gcc, the
+   -mcpu= option only affects scheduling, and does not affect code
+   generation.  Each test of -mcpu= here should actually be testing a
+   specific variable, such as mips_4010, and each such variable should
+   have a command line option to set it.  The -mcpu= option may be
+   used to set the default value of these options, as is the case for
+   mips_4010.  */
+
 #define hilo_interlocks (mips_4010 ||  mips_3900                    \
                          /* start-sanitize-tx49 */                  \
                          || mips_cpu == 4900 || mips_4900           \
@@ -9911,7 +9925,8 @@ md_apply_fix (fixP, valueP)
 #ifdef OBJ_ELF
   if (fixP->fx_addsy != NULL
       && OUTPUT_FLAVOR == bfd_target_elf_flavour
-      && S_GET_OTHER (fixP->fx_addsy) == STO_MIPS16)
+      && (S_GET_OTHER (fixP->fx_addsy) == STO_MIPS16
+	  || S_IS_WEAK (fixP->fx_addsy)))
     {
       value -= S_GET_VALUE (fixP->fx_addsy);
       if (value != 0 && ! fixP->fx_pcrel)

@@ -1,3 +1,9 @@
+Fri Jun 19 13:57:06 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* write.c (adjust_reloc_syms): Never adjust relocs against weak
+	symbols.
+	* config/tc-mips.c (md_apply_fix): Adjust accordingly.
+
 Fri Jun 19 09:50:17 1998  Jeffrey A Law  (law@cygnus.com)
 
 start-sanitize-am33
