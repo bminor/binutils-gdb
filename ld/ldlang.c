@@ -302,9 +302,9 @@ DEFUN(new_afile, (name, file_type, target),
 
 lang_input_statement_type *
 DEFUN(lang_add_input_file,(name, file_type, target),
-      char *name AND
+     CONST char *name AND
       lang_input_file_enum_type file_type AND
-      char *target)
+     CONST char *target)
 {
   /* Look it up or build a new one */
   lang_has_input_file = true;

@@ -43,6 +43,8 @@ typedef struct memory_region_struct {
   bfd_offset length;
   bfd_vma current;
   int flags;
+  boolean had_full_message;
+
 } lang_memory_region_type ;
 
 typedef struct lang_statement_header_struct 
@@ -256,7 +258,7 @@ PROTO(struct memory_region_struct ,
 				  char *CONST));
 
 
-PROTO(void ,lang_map,(FILE *));
+PROTO(void ,lang_map,(void));
 PROTO(void,lang_set_flags,(int  *, CONST char *));
 PROTO(void,lang_add_output,(CONST char *));
 
@@ -321,9 +323,9 @@ PROTO(lang_output_section_statement_type
       *,lang_output_section_find,(CONST char * CONST));
 
 PROTO(lang_input_statement_type *,
-      lang_add_input_file,(char *name,
+      lang_add_input_file,(CONST char *name,
 			   lang_input_file_enum_type file_type,
-			   char *target));
+			  CONST char *target));
 PROTO(lang_output_section_statement_type *,
       lang_output_section_statement_lookup,(CONST char * CONST name));
 
@@ -334,3 +336,6 @@ PROTO(void, lang_add_output_format,(CONST char *));
 void EXFUN(lang_list_init,( lang_statement_list_type*));
 
 void EXFUN(lang_add_data,(int type, union etree_union *));
+
+void EXFUN(lang_for_each_statement,(void (*func)()));
+

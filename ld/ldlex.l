@@ -288,6 +288,15 @@ WHITE		[ \t\n]+
 <MRI>"LIST".*                   { RTOKEN(LIST); /* LIST and ignore to end of line */ }
 <MRI>"SECT"			{ RTOKEN(SECT); }
 <MRI>"ABSOLUTE"			{ RTOKEN(ABSOLUTE); }
+<MRI>"end"                      { RTOKEN(ENDWORD); }
+<MRI>"chip"                     { RTOKEN(CHIP); }
+<MRI>"load"                     { RTOKEN(LOAD); }
+<MRI>"order"                    { RTOKEN(ORDER); }
+<MRI>"name"                     { RTOKEN(NAMEWORD); }
+<MRI>"format"                   { RTOKEN(FORMAT); }
+<MRI>"list".*                   { RTOKEN(LIST); /* LIST and ignore to end of line */ }
+<MRI>"sect"			{ RTOKEN(SECT); }
+<MRI>"absolute"			{ RTOKEN(ABSOLUTE); }
 
 <MRI,BOTH,EXPRESSION>{FILENAMECHAR1}{FILENAMECHAR}*	{
 				 yylval.name = buystring(yytext); 
