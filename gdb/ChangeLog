@@ -2,7 +2,7 @@
 
 	* amd64-tdep.h (amd64_regnum): Add AMD64_CS_REGNUM,
 	AMD64_SS_REGNUM, AMD64_DS_REGNUM, AMD64_ES_REGNUM,
-	AMD64_FS_REGNUM, AMD64_GS_REGNUM.
+	AMD64_FS_REGNUM and AMD64_GS_REGNUM.
 
 2004-04-10  Randolph Chung  <tausq@debian.org>
 	
