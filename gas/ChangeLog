@@ -1,3 +1,11 @@
+2000-11-14  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-v850.c: Support dwarf2.
+	* config/tc-v850.h: Ditto.
+
+	* config/tc-v850.c (cons_fix_new_v850): Don't rely on
+	parse_cons_expression_v850 to initialize hold_cons_reloc.
+	
 2000-11-15  Bernd Schmidt  <bernds@redhat.com>
 
 	* tc-ia64.c (struct md): New entries LAST_GROUPS, GROUP_IDX.

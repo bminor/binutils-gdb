@@ -89,3 +89,8 @@ extern const struct relax_type md_relax_table[];
 
 #define MD_PCREL_FROM_SECTION(fixP,section) v850_pcrel_from_section (fixP, section)
 extern long v850_pcrel_from_section ();
+
+#define md_end() v850_finalize ()
+extern void v850_finalize PARAMS ((void));
+
+#define DWARF2_LINE_MIN_INSN_LENGTH 2

@@ -1,5 +1,5 @@
 /* tc-v850.c -- Assembler code for the NEC V850
-   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -23,6 +23,7 @@
 #include "as.h"
 #include "subsegs.h"
 #include "opcode/v850.h"
+#include "dwarf2dbg.h"
 
 #define AREA_ZDA 0
 #define AREA_SDA 1
@@ -32,7 +33,7 @@
 #define SEXT16(x)	((((x) & 0xffff) ^ (~0x7fff)) + 0x8000)
 
 /* Temporarily holds the reloc in a cons expression.  */
-static bfd_reloc_code_real_type hold_cons_reloc;
+static bfd_reloc_code_real_type hold_cons_reloc = BFD_RELOC_UNUSED;
 
 /* Set to TRUE if we want to be pedantic about signed overflows.  */
 static boolean warn_signed_overflows   = FALSE;
@@ -607,6 +608,8 @@ const pseudo_typeS md_pseudo_table[] =
   {"call_table_text", v850_call_table_text, 0},
   {"v850e",           set_machine,          bfd_mach_v850e},
   {"v850ea",          set_machine,          bfd_mach_v850ea},
+  {"file",    dwarf2_directive_file },
+  {"loc",     dwarf2_directive_loc },
   { NULL,     NULL,         0}
 };
 
@@ -1708,6 +1711,7 @@ md_assemble (str)
   int relaxable = 0;
   unsigned long insn;
   unsigned long insn_size;
+  unsigned long total_insn_size = 0;
   char *f;
   int i;
   int match;
@@ -2183,6 +2187,7 @@ md_assemble (str)
 	  md_number_to_chars (f, insn, insn_size);
 	  md_number_to_chars (f + 2, 0, 4);
 	}
+      total_insn_size = insn_size;
     }
   else
     {
@@ -2197,12 +2202,14 @@ md_assemble (str)
 	insn_size = 2;
 
       f = frag_more (insn_size);
+      total_insn_size = insn_size;
 
       md_number_to_chars (f, insn, insn_size);
 
       if (extra_data_after_insn)
 	{
 	  f = frag_more (extra_data_len);
+	  total_insn_size += extra_data_len;
 
 	  md_number_to_chars (f, extra_data, extra_data_len);
 
@@ -2276,6 +2283,9 @@ md_assemble (str)
     }
 
   input_line_pointer = saved_input_line_pointer;
+
+  if (debug_type == DEBUG_DWARF2)
+    dwarf2_generate_asm_lineno (total_insn_size);
 }
 
 /* If while processing a fixup, a reloc really needs to be created
@@ -2489,6 +2499,8 @@ cons_fix_new_v850 (frag, where, size, exp)
     fix_new_exp (frag, where, size, exp, 0, hold_cons_reloc);
   else
     fix_new (frag, where, size, NULL, 0, 0, hold_cons_reloc);
+
+  hold_cons_reloc = BFD_RELOC_UNUSED;
 }
 
 boolean
@@ -2530,4 +2542,11 @@ v850_force_relocation (fixP)
     return 1;
 
   return 0;
+}
+
+void
+v850_finalize ()
+{
+  if (debug_type == DEBUG_DWARF2)
+    dwarf2_finish ();
 }
