@@ -44,7 +44,9 @@
 #include "sb.h"
 #include "macro.h"
 
-#ifndef HAVE_ITBL_CPU
+#ifdef HAVE_ITBL_CPU
+#include "itbl-ops.h"
+#else
 #define itbl_parse(itbl_file) 1
 #define itbl_init()
 #endif
