@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <stdio.h>
 #include "defs.h"
 #include "param.h"
 #include "frame.h"
@@ -29,7 +30,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "symfile.h"		/* for struct complaint */
 
-#include <stdio.h>
 #include <string.h>
 #include <errno.h>
 #include <signal.h>
@@ -654,9 +654,9 @@ vx_files_info ()
 void
 vx_run_files_info ()
 {
-  printf ("\tRunning %s VxWorks process 0x%x", 
+  printf ("\tRunning %s VxWorks process %s", 
 	  vx_running? "child": "attached",
-	  inferior_pid);
+	  local_hex_string(inferior_pid));
   if (vx_running)
     printf (", function `%s'", vx_running);
   printf(".\n");
@@ -984,7 +984,7 @@ vx_wait (status)
 	  sleep_ms (200);	/* FIXME Don't kill the network too badly */
 	}
       else if (pid != inferior_pid)
-	fatal ("Bad pid for debugged task: 0x%x\n", pid);
+	fatal ("Bad pid for debugged task: %s\n", local_hex_string(pid));
     } while (pid == 0);
 
   /* FIXME, eventually do more then SIGTRAP on everything...  */
@@ -1178,7 +1178,7 @@ vx_attach (args, from_tty)
     error ("Invalid process-id -- give a single number in decimal or 0xhex");
 
   if (from_tty)
-      printf ("Attaching pid 0x%x.\n", pid);
+      printf ("Attaching pid %s.\n", local_hex_string(pid));
 
   bzero ((char *)&ptrace_in,  sizeof (ptrace_in));
   bzero ((char *)&ptrace_out, sizeof (ptrace_out));
@@ -1244,7 +1244,7 @@ vx_detach (args, from_tty)
     error ("Argument given to VxWorks \"detach\".");
 
   if (from_tty)
-      printf ("Detaching pid 0x%x.\n", inferior_pid);
+      printf ("Detaching pid %s.\n", local_hex_string(inferior_pid));
 
   if (args)		/* FIXME, should be possible to leave suspended */
     signal = atoi (args);
@@ -1281,7 +1281,7 @@ vx_kill (args, from_tty)
     error ("Argument given to VxWorks \"kill\".");
 
   if (from_tty)
-      printf ("Killing pid 0x%x.\n", inferior_pid);
+      printf ("Killing pid %s.\n", local_hex_string(inferior_pid));
 
   bzero ((char *)&ptrace_in,  sizeof (ptrace_in));
   bzero ((char *)&ptrace_out, sizeof (ptrace_out));

@@ -21,6 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "symtab.h"
 #include "param.h"
+#include "language.h"
 #include "command.h"
 #include "gdbcmd.h"
 #include "frame.h"
@@ -36,7 +37,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "regex.h"
 
-extern char *strstr();
+/* If we use this declaration, it breaks because of fucking ANSI "const" stuff
+   on some systems.  We just have to not declare it at all, have it default
+   to int, and possibly botch on a few systems.  Thanks, ANSIholes... */
+/* extern char *strstr(); */
 
 extern void set_next_address ();
 
@@ -52,6 +56,14 @@ struct symtab *current_source_symtab;
 /* Default next line to list.  */
 
 int current_source_line;
+
+/* Default number of lines to print with commands like "list".
+   This is based on guessing how many long (i.e. more than chars_per_line
+   characters) lines there will be.  To be completely correct, "list"
+   and friends should be rewritten to count characters and see where
+   things are wrapping, but that would be a fair amount of work.  */
+
+unsigned lines_to_list = 10;
 
 /* Line number of last line printed.  Default for various commands.
    current_source_line is usually, but not always, the same as this.  */
@@ -95,7 +107,7 @@ select_source_symtab (s)
       sal = sals.sals[0];
       free (sals.sals);
       current_source_symtab = sal.symtab;
-      current_source_line = max (sal.line - (lines_to_list () - 1), 1);
+      current_source_line = max (sal.line - (lines_to_list - 1), 1);
       if (current_source_symtab)
         return;
     }
@@ -364,13 +376,7 @@ source_info ()
   if (s->nlines)
     printf ("Contains %d lines\n", s->nlines);
 
-  switch (s->language) {
-  case language_c:
-    printf("Written in the C language.\n");
-  /* Add more cases here when -Wswitch complains... */
-  case language_unknown:
-    break;
-  }
+  printf("Source language %s.\n", language_str (s->language));
 }
 
 
@@ -503,7 +509,9 @@ open_source_file (s)
     {
       /* Replace a path entry of  $cdir  with the compilation directory name */
 #define	cdir_len	5
-      p = strstr (source_path, "$cdir");
+      /* We cast strstr's result in case an ANSIhole has made it const,
+	 which produces a "required warning" when assigned to a nonconst. */
+      p = (char *)strstr (source_path, "$cdir");
       if (p && (p == path || p[-1] == ':')
 	    && (p[cdir_len] == ':' || p[cdir_len] == '\0')) {
 	int len;
@@ -788,7 +796,7 @@ list_command (arg, from_tty)
       if (current_source_symtab == 0)
 	error ("No default source file yet.  Do \"help list\".");
       print_source_lines (current_source_symtab, current_source_line,
-			  current_source_line + lines_to_list (), 0);
+			  current_source_line + lines_to_list, 0);
       return;
     }
 
@@ -798,7 +806,7 @@ list_command (arg, from_tty)
       if (current_source_symtab == 0)
 	error ("No default source file yet.  Do \"help list\".");
       print_source_lines (current_source_symtab,
-			  max (first_line_listed - lines_to_list (), 1),
+			  max (first_line_listed - lines_to_list, 1),
 			  first_line_listed, 0);
       return;
     }
@@ -878,14 +886,16 @@ list_command (arg, from_tty)
   if (*arg == '*')
     {
       if (sal.symtab == 0)
-	error ("No source file for address 0x%x.", sal.pc);
+	error ("No source file for address %s.", local_hex_string(sal.pc));
       sym = find_pc_function (sal.pc);
       if (sym)
-	printf ("0x%x is in %s (%s, line %d).\n",
-		sal.pc, SYMBOL_NAME (sym), sal.symtab->filename, sal.line);
+	printf ("%s is in %s (%s, line %d).\n",
+		local_hex_string(sal.pc), 
+		SYMBOL_NAME (sym), sal.symtab->filename, sal.line);
       else
-	printf ("0x%x is in %s, line %d.\n",
-		sal.pc, sal.symtab->filename, sal.line);
+	printf ("%s is in %s, line %d.\n",
+		local_hex_string(sal.pc), 
+		sal.symtab->filename, sal.line);
     }
 
   /* If line was not specified by just a line number,
@@ -905,18 +915,18 @@ list_command (arg, from_tty)
     error ("No default source file yet.  Do \"help list\".");
   if (dummy_beg)
     print_source_lines (sal_end.symtab,
-			max (sal_end.line - (lines_to_list () - 1), 1),
+			max (sal_end.line - (lines_to_list - 1), 1),
 			sal_end.line + 1, 0);
   else if (sal.symtab == 0)
     error ("No default source file yet.  Do \"help list\".");
   else if (no_end)
     print_source_lines (sal.symtab,
-			max (sal.line - (lines_to_list () / 2), 1),
-			sal.line + (lines_to_list() / 2), 0);
+			max (sal.line - (lines_to_list / 2), 1),
+			sal.line + (lines_to_list / 2), 0);
   else
     print_source_lines (sal.symtab, sal.line,
 			(dummy_end
-			 ? sal.line + lines_to_list ()
+			 ? sal.line + lines_to_list
 			 : sal_end.line + 1),
 			0);
 }
@@ -965,11 +975,14 @@ line_info (arg, from_tty)
 	  && find_line_pc_range (sal.symtab, sal.line, &start_pc, &end_pc))
 	{
 	  if (start_pc == end_pc)
-	    printf ("Line %d of \"%s\" is at pc 0x%x but contains no code.\n",
-		    sal.line, sal.symtab->filename, start_pc);
+	    printf ("Line %d of \"%s\" is at pc %s but contains no code.\n",
+		    sal.line, sal.symtab->filename, local_hex_string(start_pc));
 	  else
-	    printf ("Line %d of \"%s\" starts at pc 0x%x and ends at 0x%x.\n",
-		    sal.line, sal.symtab->filename, start_pc, end_pc);
+	    printf ("Line %d of \"%s\" starts at pc %s",
+		    sal.line, sal.symtab->filename, 
+		    local_hex_string(start_pc));
+	    printf (" and ends at %s.\n",
+		    local_hex_string(end_pc));
 	  /* x/i should display this line's code.  */
 	  set_next_address (start_pc);
 	  /* Repeating "info line" should do the following line.  */
@@ -1045,7 +1058,7 @@ forward_search_command (regex, from_tty)
 	fclose (stream);
 	print_source_lines (current_source_symtab,
 			   line, line+1, 0);
-	current_source_line = max (line - lines_to_list () / 2, 1);
+	current_source_line = max (line - lines_to_list / 2, 1);
 	return;
       }
     line++;
@@ -1118,7 +1131,7 @@ reverse_search_command (regex, from_tty)
 	  fclose (stream);
 	  print_source_lines (current_source_symtab,
 			      line, line+1, 0);
-	  current_source_line = max (line - lines_to_list () / 2, 1);
+	  current_source_line = max (line - lines_to_list / 2, 1);
 	  return;
 	}
       line--;
@@ -1189,5 +1202,11 @@ Lines can be specified in these ways:\n\
   *ADDRESS, to list around the line containing that address.\n\
 With two args if one is empty it stands for ten lines away from the other arg.");
   add_com_alias ("l", "list", class_files, 0);
-}
 
+  add_show_from_set
+    (add_set_cmd ("listsize", class_support, var_uinteger,
+		  (char *)&lines_to_list,
+	"Set number of source lines gdb will list by default.",
+		  &setlist),
+     &showlist);
+}

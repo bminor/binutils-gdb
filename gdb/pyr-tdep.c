@@ -1,5 +1,5 @@
-/* Low level interface to ptrace, for GDB when running under Unix.
-   Copyright (C) 1988, 1989 Free Software Foundation, Inc.
+/* Pyramid target-dependent code for GDB.
+   Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -16,6 +16,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+#include "param.h"
+#include "defs.h"
 
 /*** Prettier register printing. ***/
 
@@ -74,7 +77,7 @@ pyr_do_registers_info (regnum, fpregs)
 	if (val == 0)
 	  printf_filtered ("0");
 	else
-	  printf_filtered ("0x%08x  %d", val, val);
+	  printf_filtered ("%s  %d", local_hex_string_custom(val,"08"), val);
 	printf_filtered("\n");
       }
 }

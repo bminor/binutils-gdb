@@ -273,17 +273,17 @@ core_file_command (filename, from_tty)
 
 	    if (*(int *)buf >= 0)
 		    break;
-	    printf ("skipping frame %0x\n", last_frame_address);
+	    printf ("skipping frame %s\n", local_hex_string (last_frame_address));
 	    last_frame_offset -= CONTROL_STACK_FRAME_SIZE;
 	    last_frame_address -= CONTROL_STACK_FRAME_SIZE;
 	}
 	reg_offset = last_frame_offset;
 
 #if 1 || defined(PYRAMID_CONTROL_FRAME_DEBUGGING)
-	printf ("Control stack pointer = 0x%08x\n",
-		u.u_pcb.pcb_csp);
-	printf ("offset to control stack %d outermost frame %d (%0x)\n",
-	      reg_stack_offset, reg_offset, last_frame_address);
+	printf ("Control stack pointer = %s\n",
+		local_hex_string (u.u_pcb.pcb_csp));
+	printf ("offset to control stack %d outermost frame %d (%s)\n",
+	      reg_stack_offset, reg_offset, local_hex_string (last_frame_address));
 #endif /* PYRAMID_CONTROL_FRAME_DEBUGGING */
 
 #else /* not PYRAMID_CORE */
@@ -346,8 +346,8 @@ core_file_command (filename, from_tty)
 	}
 
 #if 1 || defined(PYRAMID_CONTROL_FRAME_DEBUGGING)
-      printf ("Providing CSP (%0x) as nominal address of current frame.\n",
-	      last_frame_address);
+      printf ("Providing CSP (%s) as nominal address of current frame.\n",
+	      local_hex_string(last_frame_address));
 #endif PYRAMID_CONTROL_FRAME_DEBUGGING
       /* FIXME: Which of the following is correct? */
 #if 0
