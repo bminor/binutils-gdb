@@ -12,6 +12,10 @@
 	* bfd.c: Likewise.
 	* binary.c: Likewise.
 	* bout.c: Likewise.
+	* coff-a29k.c: Likewise.
+	* coff-alpha.c: Likewise.
+	* coff-apollo.c: Likewise.
+	* coff-aux.c: Likewise.
 
 2000-11-07  Kazu Hirata  <kazu@hxi.com>
 
