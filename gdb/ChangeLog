@@ -1,3 +1,7 @@
+1999-01-28  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* utils.c (init_page_info): Force window size if running under emacs.
+
 1999-01-27  James Ingham  <jingham@cygnus.com>
 
 	* typeprint.c (whatis_exp): Remove static declaration.
