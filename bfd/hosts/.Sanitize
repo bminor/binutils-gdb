@@ -48,12 +48,12 @@ i386v4.h
 irix3.h
 irix4.h
 ncr3000.h
-news.h
 rs6000.h
 rtbsd.h
 solaris2.h
 sparc-ll.h
 sparc.h
+std-host.h
 stratus.h
 sun3.h
 sysv4.h
