@@ -1,3 +1,7 @@
+Tue Aug  6 10:23:04 1996  Tom Tromey  <tromey@rtl.cygnus.com>
+
+	* lib/gdb.exp (gdb_test_exact): Turn \n in pattern into \r\n.
+
 Mon Aug  5 18:11:53 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/signals.exp (test_handle_all_print): Test separately for

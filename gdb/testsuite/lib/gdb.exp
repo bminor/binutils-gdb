@@ -477,6 +477,13 @@ proc gdb_test_exact { args } {
 
     set command [lindex $args 0]
     set pattern [string_to_regexp [lindex $args 1]]
+    # It is most natural to write the pattern argument with only
+    # embedded \n's, especially if you are trying to avoid Tcl quoting
+    # problems.  But expect really wants to see \r\n in patterns.  So
+    # transform the pattern here.  First transform \r\n back to \n, in
+    # case some users of gdb_test_exact already do the right thing.
+    regsub -all "\r\n" $pattern "\n" pattern
+    regsub -all "\n" $pattern "\r\n" pattern
     if [llength $args]==3 then {
 	set message [lindex $args 2]
     } else {
