@@ -123,6 +123,7 @@ int                     do_debug_aranges;
 int                     do_debug_frames;
 int                     do_debug_frames_interp;
 int			do_debug_macinfo;
+int			do_debug_str;
 int                     do_arch;
 int                     do_notes;
 int			is_32bit_elf;
@@ -220,7 +221,11 @@ static int                display_debug_abbrev        PARAMS ((Elf32_Internal_Sh
 static int                display_debug_aranges       PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static int                display_debug_frames        PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static int                display_debug_macinfo       PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
+static int                display_debug_str           PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 static unsigned char *    process_abbrev_section      PARAMS ((unsigned char *, unsigned char *));
+static void               load_debug_str              PARAMS ((FILE *));
+static void               free_debug_str              PARAMS ((void));
+static const char *       fetch_indirect_string       PARAMS ((unsigned long));
 static unsigned long      read_leb128                 PARAMS ((unsigned char *, int *, int));
 static int                process_extended_line_op    PARAMS ((unsigned char *, int, int));
 static void               reset_state_machine         PARAMS ((int));
@@ -276,7 +281,7 @@ typedef int Elf32_Word;
 #define BYTE_GET8(field)	byte_get (field, 8)
 #endif
 
-#define NUM_ELEM(array)	(sizeof (array) / sizeof ((array)[0]))
+#define NUM_ELEM(array) 	(sizeof (array) / sizeof ((array)[0]))
 
 #define GET_ELF_SYMBOLS(file, offset, size)			\
   (is_32bit_elf ? get_32bit_elf_symbols (file, offset, size)	\
@@ -2072,7 +2077,7 @@ usage ()
   fprintf (stdout, _("  -D or --use-dynamic       Use the dynamic section info when displaying symbols\n"));
   fprintf (stdout, _("  -x <number> or --hex-dump=<number>\n"));
   fprintf (stdout, _("                            Dump the contents of section <number>\n"));
-  fprintf (stdout, _("  -w[liaprmf] or --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames]\n"));
+  fprintf (stdout, _("  -w[liaprmfs] or --debug-dump[=line,=info,=abbrev,=pubnames,=ranges,=macro,=frames,=str]\n"));
   fprintf (stdout, _("                            Display the contents of DWARF2 debug sections\n"));
 #ifdef SUPPORT_DISASSEMBLY
   fprintf (stdout, _("  -i <number> or --instruction-dump=<number>\n"));
@@ -2250,6 +2255,11 @@ parse_args (argc, argv)
 		  case 'm':
 		  case 'M':
 		    do_debug_macinfo = 1;
+		    break;
+
+		  case 's':
+		  case 'S':
+		    do_debug_str = 1;
 		    break;
 
 		  default:
@@ -3046,7 +3056,7 @@ process_section_headers (file)
 	}
       else if ((do_debugging || do_debug_info || do_debug_abbrevs
 		|| do_debug_lines || do_debug_pubnames || do_debug_aranges
-		|| do_debug_frames || do_debug_macinfo)
+		|| do_debug_frames || do_debug_macinfo || do_debug_str)
 	       && strncmp (name, ".debug_", 7) == 0)
 	{
 	  name += 7;
@@ -3059,6 +3069,7 @@ process_section_headers (file)
 	      || (do_debug_aranges  && (strcmp (name, "aranges") == 0))
 	      || (do_debug_frames   && (strcmp (name, "frame") == 0))
 	      || (do_debug_macinfo  && (strcmp (name, "macinfo") == 0))
+	      || (do_debug_str      && (strcmp (name, "str") == 0))
 	      )
 	    request_dump (i, DEBUG_DUMP);
 	}
@@ -4091,7 +4102,6 @@ process_dynamic_segment (file)
 
 	  dynamic_strings = (char *) get_data (NULL, file, offset, str_tab_len,
 					       _("dynamic string table"));
-
 	  break;
 	}
     }
@@ -4740,12 +4750,12 @@ process_version_sections (file)
 	case SHT_GNU_versym:
 	  {
 	    Elf32_Internal_Shdr *       link_section;
-	    int		total;
-	    int		cnt;
-	    unsigned char *		edata;
-	    unsigned short *		data;
-	    char *		strtab;
-	    Elf_Internal_Sym *		symbols;
+	    int              		total;
+	    int              		cnt;
+	    unsigned char * 		edata;
+	    unsigned short * 		data;
+	    char *           		strtab;
+	    Elf_Internal_Sym * 		symbols;
 	    Elf32_Internal_Shdr *       string_sec;
 
 	    link_section = section_headers + section->sh_link;
@@ -6307,9 +6317,6 @@ get_FORM_name (form)
     }
 }
 
-static const char *debug_str;
-static bfd_vma debug_str_size;
-
 /* FIXME:  There are better and more effiecint ways to handle
    these structures.  For now though, I just want something that
    is simple to implement.  */
@@ -6933,6 +6940,123 @@ decode_location_expression (data, pointer_size, length)
 }
 
 
+static const char * debug_str_contents;
+static bfd_vma      debug_str_size;
+
+static void
+load_debug_str (file)
+     FILE * file;
+{
+  Elf32_Internal_Shdr * sec;
+  int                   i;
+
+  /* If it is already loaded, do nothing.  */
+  if (debug_str_contents != NULL)
+    return;
+
+  /* Locate the .debug_str section.  */
+  for (i = 0, sec = section_headers;
+       i < elf_header.e_shnum;
+       i ++, sec ++)
+    if (strcmp (SECTION_NAME (sec), ".debug_str") == 0)
+      break;
+
+  if (i == elf_header.e_shnum || sec->sh_size == 0)
+    return;
+
+  debug_str_size = sec->sh_size;
+
+  debug_str_contents = ((char *)
+			get_data (NULL, file, sec->sh_offset, sec->sh_size,
+				  _("debug_str section data")));
+}
+
+static void
+free_debug_str ()
+{
+  if (debug_str_contents == NULL)
+    return;
+
+  free ((char *) debug_str_contents);
+  debug_str_contents = NULL;
+  debug_str_size = 0;
+}
+
+static const char *
+fetch_indirect_string (offset)
+     unsigned long offset;
+{
+  if (debug_str_contents == NULL)
+    return _("<no .debug_str section>");
+
+  if (offset > debug_str_size)
+    return _("<offset is too big>");
+
+  return debug_str_contents + offset;
+}
+
+
+static int
+display_debug_str (section, start, file)
+     Elf32_Internal_Shdr * section;
+     unsigned char *       start;
+     FILE *                file ATTRIBUTE_UNUSED;
+{
+  unsigned long   bytes;
+  bfd_vma         addr;
+
+  addr  = section->sh_addr;
+  bytes = section->sh_size;
+
+  if (bytes == 0)
+    {
+      printf (_("\nThe .debug_str section is empty.\n"));
+      return 0;
+    }
+
+  printf (_("Contents of the .debug_str section:\n\n"));
+
+  while (bytes)
+    {
+      int j;
+      int k;
+      int lbytes;
+
+      lbytes = (bytes > 16 ? 16 : bytes);
+
+      printf ("  0x%8.8lx ", (unsigned long) addr);
+
+      for (j = 0; j < 16; j++)
+	{
+	  if (j < lbytes)
+	    printf ("%2.2x", start [j]);
+	  else
+	    printf ("  ");
+
+	  if ((j & 3) == 3)
+	    printf (" ");
+	}
+
+      for (j = 0; j < lbytes; j++)
+	{
+	  k = start [j];
+	  if (k >= ' ' && k < 0x80)
+	    printf ("%c", k);
+	  else
+	    printf (".");
+	}
+
+      putchar ('\n');
+
+      start += lbytes;
+      addr  += lbytes;
+      bytes -= lbytes;
+    }
+
+  return 1;
+}
+
+
 static unsigned char *
 read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
      unsigned long   attribute;
@@ -7061,13 +7185,8 @@ read_and_display_attr_value (attribute, form, data, cu_offset, pointer_size)
       break;
 
     case DW_FORM_strp:
-      if (debug_str == NULL)
-	warn (_("DW_FORM_strp used but no .debug_str section\n"));
-      else if (uvalue >= debug_str_size)
-	warn (_("DW_FORM_strp %lx points outside of .debug_str section\n"),
-	      uvalue);
-      else
-        printf (" %s", debug_str + uvalue);
+      printf (_(" (indirect string, offset: 0x%lx): "), uvalue);
+      printf (fetch_indirect_string (uvalue));
       break;
 
     case DW_FORM_indirect:
@@ -7259,23 +7378,7 @@ display_debug_info (section, start, file)
 
   printf (_("The section %s contains:\n\n"), SECTION_NAME (section));
 
-  {
-    Elf32_Internal_Shdr * sec;
-    int i;
-
-    /* Locate the .debug_str section and read it.  */
-    for (i = 0, sec = section_headers;
-	 i < elf_header.e_shnum;
-	 i ++, sec ++)
-      if (strcmp (SECTION_NAME (sec), ".debug_str") == 0 && sec->sh_size != 0)
-	{
-	  debug_str = (const char *)
-		      get_data (NULL, file, sec->sh_offset, sec->sh_size,
-				_("debug_str section data"));
-	  debug_str_size = sec->sh_size;
-	  break;
-	}
-  }
+  load_debug_str (file);
 
   while (start < end)
     {
@@ -7378,8 +7481,7 @@ display_debug_info (section, start, file)
 	  continue;
 	}
 
-      if (first_abbrev != NULL)
-	free_abbrevs ();
+      free_abbrevs ();
 
       /* Read in the abbrevs used by this compilation unit.  */
 
@@ -7461,11 +7563,7 @@ display_debug_info (section, start, file)
 	}
     }
 
-  if (debug_str != NULL)
-    {
-      free ((char *) debug_str);
-      debug_str = NULL;
-    }
+  free_debug_str ();
 
   printf ("\n");
 
@@ -8262,22 +8360,24 @@ prescan_debug_info (section, start, file)
      sections.  */
 struct
 {
-  char * name;
+  const char * const name;
   int (* display) PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
   int (* prescan) PARAMS ((Elf32_Internal_Shdr *, unsigned char *, FILE *));
 }
 debug_displays[] =
 {
-  { ".debug_info",        display_debug_info, prescan_debug_info },
   { ".debug_abbrev",      display_debug_abbrev, NULL },
-  { ".debug_line",        display_debug_lines, NULL },
   { ".debug_aranges",     display_debug_aranges, NULL },
-  { ".debug_pubnames",    display_debug_pubnames, NULL },
   { ".debug_frame",       display_debug_frames, NULL },
+  { ".debug_info",        display_debug_info, prescan_debug_info },
+  { ".debug_line",        display_debug_lines, NULL },
+  { ".debug_pubnames",    display_debug_pubnames, NULL },
   { ".eh_frame",          display_debug_frames, NULL },
   { ".debug_macinfo",     display_debug_macinfo, NULL },
+  { ".debug_str",         display_debug_str, NULL },
+  
   { ".debug_pubtypes",    display_debug_not_supported, NULL },
-  { ".debug_str",         display_debug_not_supported, NULL },
+  { ".debug_ranges",      display_debug_not_supported, NULL },
   { ".debug_static_func", display_debug_not_supported, NULL },
   { ".debug_static_vars", display_debug_not_supported, NULL },
   { ".debug_types",       display_debug_not_supported, NULL },
@@ -8324,8 +8424,7 @@ display_debug_section (section, file)
 
   /* If we loaded in the abbrev section at some point,
      we must release it here.  */
-  if (first_abbrev != NULL)
-    free_abbrevs ();
+  free_abbrevs ();
 
   return 1;
 }

@@ -1,3 +1,24 @@
+2001-11-19  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* readelf.c (do_debug_str): New variable.
+	(display_debug_str): New function: Display the contents of a
+	.debug_str section.
+	(load_debug_str): New function: Load in the contents of a
+	.debug_str section.
+	(free_debug_str): New function: Free the memory used by
+	load_debug_str().
+	(fetch_indirect_string): Retrieve a string from the .debug_str
+	section.
+	(usage): Add -ws.
+	(parse_args): Accept -ws.
+	(process_section_headers): Allow the display of the .debug_str
+	section.
+	(read_and_display_attr_value): Use fetch_indirect_string.  Show
+	offset into .debug_str section.
+	(display_debug_info): Use load_debug_str and free_debug_str.
+	(debug_displays): Add .debug_str.
+	* doc/binutils.texi: Document -ws.
+
 2001-11-19  Andreas Jaeger  <aj@suse.de>
 
 	* testsuite/binutils-all/objdump.exp: Add x86-64.
