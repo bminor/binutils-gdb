@@ -1,3 +1,7 @@
+2001-01-16  Matthew Green  <mrg@redhat.com>
+
+	* binutils-all/readelf.s-64: Match readelf -S output.
+
 2000-12-09  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/objdump.exp (cpus_expected): Add tic54x and
