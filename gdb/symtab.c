@@ -1158,7 +1158,7 @@ find_main_psymtab (void)
 
   ALL_PSYMTABS (objfile, pst)
   {
-    if (lookup_partial_symbol (pst, "main", 1, VAR_NAMESPACE))
+    if (lookup_partial_symbol (pst, main_name (), 1, VAR_NAMESPACE))
       {
 	return (pst);
       }
@@ -3623,6 +3623,33 @@ decode_line_spec (char *string, int funfirstline)
     error ("Junk at end of line specification: %s", string);
   return sals;
 }
+
+/* Track MAIN */
+static char *name_of_main;
+
+void
+set_main_name (const char *name)
+{
+  if (name_of_main != NULL)
+    {
+      xfree (name_of_main);
+      name_of_main = NULL;
+    }
+  if (name != NULL)
+    {
+      name_of_main = xstrdup (name);
+    }
+}
+
+char *
+main_name (void)
+{
+  if (name_of_main != NULL)
+    return name_of_main;
+  else
+    return "main";
+}
+
 
 void
 _initialize_symtab (void)

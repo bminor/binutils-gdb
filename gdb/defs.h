@@ -1484,4 +1484,5 @@ enum gdb_rc gdb_list_thread_ids (/* output object */);
 
 /* Switch thread and print notification. */
 #endif
+
 #endif /* #ifndef DEFS_H */

@@ -153,9 +153,9 @@ select_source_symtab (register struct symtab *s)
 
   /* Make the default place to list be the function `main'
      if one exists.  */
-  if (lookup_symbol ("main", 0, VAR_NAMESPACE, 0, NULL))
+  if (lookup_symbol (main_name (), 0, VAR_NAMESPACE, 0, NULL))
     {
-      sals = decode_line_spec ("main", 1);
+      sals = decode_line_spec (main_name (), 1);
       sal = sals.sals[0];
       xfree (sals.sals);
       current_source_symtab = sal.symtab;

@@ -120,7 +120,7 @@ inside_main_func (CORE_ADDR pc)
     {
       struct symbol *mainsym;
 
-      mainsym = lookup_symbol ("main", NULL, VAR_NAMESPACE, NULL, NULL);
+      mainsym = lookup_symbol (main_name (), NULL, VAR_NAMESPACE, NULL, NULL);
       if (mainsym && SYMBOL_CLASS (mainsym) == LOC_BLOCK)
 	{
 	  symfile_objfile->ei.main_func_lowpc =

@@ -1427,4 +1427,11 @@ extern void search_symbols (char *, namespace_enum, int, char **,
 extern void free_search_symbols (struct symbol_search *);
 extern struct cleanup *make_cleanup_free_search_symbols (struct symbol_search *);
 
+/* The name of the ``main'' function.
+   FIXME: cagney/2001-03-20: Can't make main_name() const since some
+   of the calling code currently assumes that the string isn't
+   const. */
+extern void set_main_name (const char *name);
+extern /*const*/ char *main_name (void);
+
 #endif /* !defined(SYMTAB_H) */

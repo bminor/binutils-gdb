@@ -1,5 +1,22 @@
 2001-07-07  Andrew Cagney  <ac131313@redhat.com>
 
+	* symtab.c (main_name): New function.
+	(set_main_name): New function.
+	* symtab.h: Declare.
+	* TODO: Update
+
+	From 2000-03-05 Anthony Green <green@redhat.com>:
+	* dbxread.c (process_one_symbol): Handle the N_MAIN stab by
+	setting main_name.
+	* blockframe.c (inside_main_func): Use main_name instead of
+	"main".
+	* symtab.c (find_main_psymtab): Ditto.
+	* source.c (select_source_symtab): Ditto.
+	* nlmread.c (nlm_symfile_read): Ditto.
+	* rs6000-tdep.c (skip_prologue): Ditto.
+
+2001-07-07  Andrew Cagney  <ac131313@redhat.com>
+
 	* TODO: Convert most items into PRs.
 
 2001-07-07  Mark Kettenis  <kettenis@gnu.org>

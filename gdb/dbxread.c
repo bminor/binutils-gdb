@@ -2390,13 +2390,25 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	}
       break;
 
+    case N_MAIN:		/* Name of main routine.  */
+      /* FIXME: If one has a symbol file with N_MAIN and then replaces
+	 it with a symbol file with "main" and without N_MAIN.  I'm
+	 not sure exactly what rule to follow but probably something
+	 like: N_MAIN takes precedence over "main" no matter what
+	 objfile it is in; If there is more than one N_MAIN, choose
+	 the one in the symfile_objfile; If there is more than one
+	 N_MAIN within a given objfile, complain() and choose
+	 arbitrarily. (kingdon) */
+      if (name != NULL)
+	set_main_name (name);
+      break;
+
       /* The following symbol types can be ignored.  */
     case N_OBJ:		/* Solaris 2:  Object file dir and name */
       /*   N_UNDF:                   Solaris 2:  file separator mark */
       /*   N_UNDF: -- we will never encounter it, since we only process one
          file's symbols at once.  */
     case N_ENDM:		/* Solaris 2:  End of module */
-    case N_MAIN:		/* Name of main routine.  */
     case N_ALIAS:		/* SunPro F77: alias name, ignore for now.  */
       break;
     }
