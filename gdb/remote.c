@@ -5577,7 +5577,7 @@ terminating `#' character and checksum.",
   add_cmd ("remotewritesize", no_class, set_memory_write_packet_size,
 	   "Set the maximum number of bytes per memory write packet (deprecated).\n",
 	   &setlist);
-  add_cmd ("remotewritesize", no_class, set_memory_write_packet_size,
+  add_cmd ("remotewritesize", no_class, show_memory_write_packet_size,
 	   "Show the maximum number of bytes per memory write packet (deprecated).\n",
 	   &showlist);
   add_cmd ("memory-write-packet-size", no_class,
