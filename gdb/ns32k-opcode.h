@@ -281,7 +281,7 @@ notstrs[] =
   { "sbitiw",	14,24,	0x1d4e,	"1W2A" },
   { "sbitid",	14,24,	0x1f4e,	"1D2A" },
   { "setcfg",	15,24,	0x0b0e,	"5D1q" },
-  { "sfsr",	14,24,	0x673e,	"5D1D" },
+  { "sfsr",	14,24,	0x373e,	"5D1D" },
   { "skpsb",	16,16,	0x0c0e,	"1i" },
   { "skpsw",	16,16,	0x0d0e,	"1i" },
   { "skpsd",	16,16,	0x0f0e, "1i" },
