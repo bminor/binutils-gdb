@@ -745,8 +745,6 @@ ia64-gen.o: ia64-gen.c ia64-opc.c ia64-opc-a.c ia64-opc-b.c ia64-opc-f.c \
   ia64-opc-i.c ia64-opc-m.c ia64-opc-d.c ia64-opc.h
 
 ia64-asmtab.c: @MAINT@ ia64-gen ia64-ic.tbl ia64-raw.tbl ia64-waw.tbl ia64-war.tbl
-	for f in ia64-ic.tbl ia64-raw.tbl ia64-waw.tbl ia64-war.tbl; do \
-	  if test -e $$f; then true; else cp -p $(srcdir)/$$f .; fi; done
 	./ia64-gen > $(srcdir)/ia64-asmtab.c
 
 # This dependency stuff is copied from BFD.
