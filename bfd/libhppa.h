@@ -20,30 +20,19 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#include <sys/core.h>
+#include <sys/utsname.h>
+
 #define BYTES_IN_WORD 4
 
 struct header;
 struct som_exec_auxhdr;
 struct subspace_dictionary;
 
-
-
 #define FILE_HDR_SIZE sizeof(struct header)
 #define AUX_HDR_SIZE sizeof(struct som_exec_auxhdr)
 
 unsigned int millicode_start, millicode_end;
-
-struct nlist {
-  union {
-    char *n_name;
-    struct nlist *n_next;
-    long n_strx;
-  } n_un;
-  unsigned char n_type;
-  char n_other;
-  short n_desc;
-  unsigned long n_value;
-};
 
 typedef struct hppa_symbol
 {
@@ -87,7 +76,6 @@ struct hppa_data_struct {
   struct hppadata a;
 };
 
-
 #define padata(bfd)              ((bfd)->tdata.hppa_data->a)
 #define obj_file_hdr(bfd)           (padata(bfd).file_hdr)
 #define obj_aux_hdr(bfd)            (padata(bfd).aux_hdr)
@@ -112,16 +100,19 @@ struct hppa_data_struct {
 
 
 /* These are stored in the bfd's tdata */
+
 struct hppa_core_struct 
 {
-  struct hpuxuser *upage; 
+  int sig;
+  char cmd[MAXCOMLEN + 1];
   asection *data_section;
   asection *stack_section;
   asection *reg_section;
 };
 
-
-#define core_upage(bfd) ((bfd)->tdata.hppa_core_data->upage)
-#define core_datasec(bfd) ((bfd)->tdata.hppa_core_data->data_section)
-#define core_stacksec(bfd) ((bfd)->tdata.hppa_core_data->stack_section)
-#define core_regsec(bfd) ((bfd)->tdata.hppa_core_data->reg_section)
+#define core_hdr(bfd) ((bfd)->tdata.hppa_core_data)
+#define core_signal(bfd) (core_hdr(bfd)->sig)
+#define core_command(bfd) (core_hdr(bfd)->cmd)
+#define core_datasec(bfd) (core_hdr(bfd)->data_section)
+#define core_stacksec(bfd) (core_hdr(bfd)->stack_section)
+#define core_regsec(bfd) (core_hdr(bfd)->reg_section)

@@ -1,3 +1,25 @@
+Mon Dec 21 17:24:13 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* hppa.c:  Conditionalize on HOST_HPPAHPUX instead of hp9000s800.
+	Get rid of HPPA/BSD specific code.  That will go somewhere else
+	someday.
+	* (fill_spaces):  Don't spin forever and die if you don't find
+	$MILLICODE$ subspace.
+	* (hppa_object_p):  Make sure that we have a real honest-to-cthulu
+	exec file!
+	* (hppa_core_file_failing_signal, hppa_core_file_failing_command):
+	Make these work for HPUX.
+	* (make_bfd_asection):  New routine to make section creation a
+	little easier.
+	* (hppa_core_file_p):  Completely rewrite, leave out bugs.
+	* libhppa.h:  #include the right system files.  Redefine all of
+	the structs/macros for hacking core files to use more sensible
+	HPUX core file structures.
+	* targets.c (target_vector):  Conditionalize hppa_vec on
+	HOST_HPPAHPUX, not hp9000s800.
+	* hosts/hppahpux.h:  #include stdlib.h to get correct decls for
+	malloc and realloc.  #define HOST_HPPAHPUX.
+
 Mon Dec 21 12:40:10 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Patches from Minh Tran-le <mtranle@paris.intellicorp.com>.

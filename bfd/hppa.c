@@ -20,14 +20,13 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#ifdef hp9000s800
-
 #include "bfd.h"
 #include "sysdep.h"
+
+#ifdef HOST_HPPAHPUX
+
 #include "libbfd.h"
 #include "libhppa.h"
-
-/* #include "aout/hppa.h" */
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -35,15 +34,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/dir.h>
 #include <signal.h>
 #include <machine/reg.h>
-#ifndef hpux
-#include <aout/hppa.h> 
-#include <machine/pcb.h>
-#include <sys/time.h>
-#include <hpux/hpux.h>
-#define USRSTACK 0x68FF3000
-#else
 #include <sys/user.h>           /* After a.out.h  */
-#endif
 #include <sys/file.h>
 #include <errno.h>
  
@@ -95,15 +86,29 @@ fill_spaces(abfd, file_hdr, dbx_subspace, dbx_strings_subspace)
     }
   /* search out the beginning and end if millicode */
   bfd_seek (abfd, text_index, SEEK_SET);
-  for (;;)
+  for (i = 0; i < file_hdr->subspace_total; i++)
     {
       bfd_read ((PTR) &subspace, 1, sizeof(subspace), abfd);
       if (!strcmp (space_strings + subspace.name.n_strx, "$MILLICODE$"))
         {
           millicode_start = subspace.subspace_start;
           millicode_end = (millicode_start + subspace.subspace_length);
-          break;
         }
+      else if (!strncmp (space_strings + subspace.name.n_strx, "$UNWIND", 7))
+	{
+	  int *foo;
+	  long s;
+
+#if 0
+	  s = bfd_tell(abfd);
+	  printf("Found %s\n", space_strings + subspace.name.n_strx);
+	  foo = malloc (subspace.initialization_length);
+	  bfd_seek (abfd, subspace.file_loc_init_value, SEEK_SET);
+	  bfd_read (foo, 1, subspace.initialization_length, abfd);
+	  bfd_seek (abfd, s, SEEK_SET);
+	  free (foo);
+#endif
+	}
     }
   /* read symbols subspace and strings subspace in possibly arbitrary
      order. */
@@ -234,6 +239,23 @@ DEFUN(hppa_object_p,(abfd),
       bfd_error = wrong_format;
       return 0;
     }
+
+  if (!_PA_RISC_ID (file_hdr.system_id))
+    return 0;
+
+  switch (file_hdr.a_magic)
+    {
+    case RELOC_MAGIC:		/* I'm not really sure about all of these types... */
+    case EXEC_MAGIC:
+    case SHARE_MAGIC:
+    case DEMAND_MAGIC:
+    case DL_MAGIC:
+    case SHL_MAGIC:
+      break;
+    default:
+      return 0;
+    }
+
   if (bfd_read ((PTR) &aux_hdr, 1, AUX_HDR_SIZE, abfd) != AUX_HDR_SIZE)
     {
       bfd_error = wrong_format;
@@ -432,141 +454,127 @@ DEFUN (hppa_sizeof_headers, (abfd, reloc),
   return (0);
 }
 
-#ifdef hpux
-#define hppa_core_file_p _bfd_dummy_target
-#else
+static asection *
+make_bfd_asection (abfd, name, flags, _raw_size, vma, alignment_power)
+     bfd *abfd;
+     const char *name;
+     flagword flags;
+     bfd_size_type _raw_size;
+     bfd_vma vma;
+     unsigned int alignment_power;
+{
+  asection *asect;
+
+  asect = bfd_zalloc (abfd, sizeof (asection));
+  if (!asect)
+    {
+      bfd_error = no_memory;
+      return NULL;
+    }
+
+  asect->name = name;
+  asect->flags = flags;
+  asect->_raw_size = _raw_size;
+  asect->vma = vma;
+  asect->filepos = bfd_tell (abfd);
+  asect->alignment_power = alignment_power;
+
+  asect->next = abfd->sections;
+  abfd->sections = asect;
+  abfd->section_count++;
+
+  return asect;
+}
+
 bfd_target *
 hppa_core_file_p (abfd)
      bfd *abfd;
 {
-  int val;
-  struct hpuxuser u;
-  unsigned int reg_offset, fp_reg_offset;
-  /* This struct is just for allocating two things with one zalloc, so
-     they will be freed together, without violating alignment constraints. */
-  struct core_user {
-        struct hppa_core_struct        coredata;
-        struct hpuxuser         u;
-  } *rawptr;
+  core_hdr (abfd) = bfd_zalloc (abfd, sizeof (struct hppa_core_struct));
+  if (!core_hdr (abfd))
+    return NULL;
 
-  val = bfd_read ((void *)&u, 1, sizeof u, abfd);
-  if (val != sizeof u)
-    return 0;                   /* Too small to be a core file */
+  while (1)
+    {
+      int val;
+      struct corehead core_header;
 
-  /* Sanity check perhaps??? */
-  if (u.u_dsize > 0x1000000)    /* Remember, it's in pages... */
-    return 0;
-  if (u.u_ssize > 0x1000000)
-    return 0;
-  /* Check that the size claimed is no greater than the file size. FIXME. */
+      val = bfd_read ((void *)&core_header, 1, sizeof core_header, abfd);
+      if (val <= 0)
+	break;
+      switch (core_header.type)
+	{
+	case CORE_KERNEL:
+	case CORE_FORMAT:
+	  bfd_seek (abfd, core_header.len, SEEK_CUR); /* Just skip this */
+	  break;
+	case CORE_EXEC:
+	  {
+	    struct proc_exec proc_exec;
+	    bfd_read ((void *)&proc_exec, 1, core_header.len, abfd);
+	    strncpy (core_command (abfd), proc_exec.cmd, MAXCOMLEN + 1);
+	  }
+	  break;
+	case CORE_PROC:
+	  {
+	    struct proc_info proc_info;
+	    core_regsec (abfd) = make_bfd_asection (abfd, ".reg",
+						    SEC_ALLOC+SEC_HAS_CONTENTS,
+						    core_header.len,
+						    (int)&proc_info - (int)&proc_info.hw_regs,
+						    2);
+	    bfd_read (&proc_info, 1, core_header.len, abfd);
+	    core_signal (abfd) = proc_info.sig;
+	  }
+	  if (!core_regsec (abfd))
+	    return NULL;
+	  break;
+	case CORE_DATA:
+	  core_datasec (abfd) = make_bfd_asection (abfd, ".data",
+						   SEC_ALLOC+SEC_LOAD+SEC_HAS_CONTENTS,
+						   core_header.len,
+						   core_header.addr,
+						   2);
+	  if (!core_datasec (abfd))
+	    return NULL;
+	  bfd_seek (abfd, core_header.len, SEEK_CUR);
+	  break;
+	case CORE_STACK:
+	  core_stacksec (abfd) = make_bfd_asection (abfd, ".data",
+						    SEC_ALLOC+SEC_LOAD+SEC_HAS_CONTENTS,
+						    core_header.len,
+						    core_header.addr,
+						    2);
+	  if (!core_stacksec (abfd))
+	    return NULL;
+	  bfd_seek (abfd, core_header.len, SEEK_CUR);
+	  break;
+	default:
+	  fprintf (stderr, "Unknown HPPA/HPUX core file section type %d\n",
+		   core_header.type);
+	  bfd_seek (abfd, core_header.len, SEEK_CUR);
+	  break;
+	}
+    }
 
   /* OK, we believe you.  You're a core file (sure, sure).  */
 
-  /* Allocate both the upage and the struct core_data at once, so
-     a single free() will free them both.  */
-  rawptr = (struct core_user *)bfd_zalloc (abfd, sizeof (struct core_user));
-  if (rawptr == NULL) {
-    bfd_error = no_memory;
-    return 0;
-  }
-
-  abfd->tdata.hppa_core_data = &rawptr->coredata;
-  core_upage (abfd) = &rawptr->u;
-  *core_upage (abfd) = u;               /* Save that upage! */
-
-  /* Create the sections.  This is raunchy, but bfd_close wants to free
-     them separately.  */
-  core_stacksec (abfd) = (asection *) zalloc (sizeof (asection));
-  if (core_stacksec (abfd) == NULL) {
-loser:
-    bfd_error = no_memory;
-    free ((void *)rawptr);
-    return 0;
-  }
-  core_datasec (abfd) = (asection *) zalloc (sizeof (asection));
-  if (core_datasec (abfd) == NULL) {
-loser1:
-    free ((void *)core_stacksec (abfd));
-    goto loser;
-  }
-  core_regsec (abfd) = (asection *) zalloc (sizeof (asection));
-  if (core_regsec (abfd) == NULL) {
-loser2:
-    free ((void *)core_datasec (abfd));
-    goto loser1;
-  }
-
-
-  core_stacksec (abfd)->name = ".stack";
-  core_datasec (abfd)->name = ".data";
-  core_regsec (abfd)->name = ".reg";
-
-  core_stacksec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
-  core_datasec (abfd)->flags = SEC_ALLOC + SEC_LOAD + SEC_HAS_CONTENTS;
-  core_regsec (abfd)->flags = SEC_ALLOC + SEC_HAS_CONTENTS;
-
-  core_datasec (abfd)->_raw_size =  NBPG * u.u_dsize;
-  core_stacksec (abfd)->_raw_size = NBPG * u.u_ssize;
-  core_regsec (abfd)->_raw_size = NBPG * UPAGES;  /* Larger than sizeof struct u */
-
-  core_datasec (abfd)->vma = u.hpuxu_exdata.somexec.a_Dmem;
-  core_stacksec (abfd)->vma = USRSTACK; /* from sys/param */
-  /* This is tricky.  As the "register section", we give them the entire
-     upage and stack.  u.u_ar0 points to where "register 0" is stored.
-     There are two tricks with this, though.  One is that the rest of the
-     registers might be at positive or negative (or both) displacements
-     from *u_ar0.  The other is that u_ar0 is sometimes an absolute address
-     in kernel memory, and on other systems it is an offset from the beginning
-     of the `struct user'.
-
-     As a practical matter, we don't know where the registers actually are,
-     so we have to pass the whole area to GDB.  We encode the value of u_ar0
-     by setting the .regs section up so that its virtual memory address
-     0 is at the place pointed to by u_ar0 (by setting the vma of the start
-     of the section to -u_ar0).  GDB uses this info to locate the regs,
-     using minor trickery to get around the offset-or-absolute-addr problem. */
-  core_regsec (abfd)->vma = 0 - NBPG * USIZE;  /* -u_ar0  */
-
-  core_datasec (abfd)->filepos = NBPG * UPAGES;
-  core_stacksec (abfd)->filepos = (NBPG * UPAGES) + NBPG * u.u_dsize;
-  core_regsec (abfd)->filepos = 0;      /* Register segment is the upage */
-
-  /* Align to word at least */
-  core_stacksec (abfd)->alignment_power = 2;
-  core_datasec (abfd)->alignment_power = 2;
-  core_regsec (abfd)->alignment_power = 2;
-
-  abfd->sections = core_stacksec (abfd);
-  core_stacksec (abfd)->next = core_datasec (abfd);
-  core_datasec (abfd)->next = core_regsec (abfd);
-  abfd->section_count = 3;
-
   return abfd->xvec;
 }
-#endif
 
-#ifdef hpux
-#define hppa_core_file_failing_command (char *(*)())(bfd_nullvoidptr)
-#else
 char *
 hppa_core_file_failing_command (abfd)
      bfd *abfd;
 {
-#ifndef NO_CORE_COMMAND
-  if (*core_upage (abfd)->u_comm)
-    return core_upage (abfd)->u_comm;
-  else
-#endif
-    return 0;
+  return core_command (abfd);
 }
-#endif
 
 /* ARGSUSED */
 int
-hppa_core_file_failing_signal (ignore_abfd)
-     bfd *ignore_abfd;
+hppa_core_file_failing_signal (abfd)
+     bfd *abfd;
 {
-  return -1;            /* FIXME, where is it? */
+  return core_signal (abfd);
 }
 
 /* ARGSUSED */
@@ -598,7 +606,6 @@ hppa_core_file_matches_executable_p  (core_bfd, exec_bfd)
  bfd_generic_get_relocated_section_contents
 #define hppa_bfd_relax_section bfd_generic_relax_section
 
-/*SUPPRESS 460 */
 bfd_target hppa_vec =
 {
   "hppa",			/* name */
@@ -643,7 +650,4 @@ _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs
   JUMP_TABLE(hppa)
 };
 
-#else	/* notdef hp9000s800 */
-/* Prevent "empty translation unit" warnings from the idiots at X3J11. */
-static char ansi_c_idiots = 69;
-#endif	/* hp9000s800 */
+#endif /* HOST_HPPAHPUX */
