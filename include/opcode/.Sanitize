@@ -72,6 +72,7 @@ ppc.h
 pyr.h
 sparc.h
 tahoe.h
+tic30.h
 v850.h
 vax.h
 

@@ -55,6 +55,7 @@ sh.h
 sparc.h
 sym.h
 symconst.h
+tic30.h
 w65.h
 we32k.h
 z8k.h
