@@ -187,8 +187,8 @@ INSTALLED_LIBS=-lbfd -lreadline $(TERMCAP) -lopcodes -lmmalloc \
 CLIBS = $(BFD) $(READLINE) $(OPCODES) $(MMALLOC) \
 	$(LIBIBERTY) $(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) \
 	$(ENABLE_CLIBS)
-CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) \
-	$(BFD) $(READLINE) $(OPCODES) $(MMALLOC) $(LIBIBERTY)
+CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(BFD) $(READLINE) $(OPCODES) \
+	$(MMALLOC) $(LIBIBERTY)
 
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
@@ -537,6 +537,9 @@ install-only:
 	fi ; \
 	$(INSTALL_PROGRAM) gdb $(bindir)/$$transformed_name ; \
 	$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$transformed_name.1
+	if [ -n $(ENABLE_GDBTK) ] ; then \
+		$(INSTALL_DATA) $(srcdir)/gdbtk.tcl $(libdir)/gdbtk.tcl ; \
+	fi
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 uninstall: force

@@ -416,6 +416,7 @@ fi
 if [ "${enable_gdbtk}" = "yes" ] ; then
 	sed -e '/# End of host and/i\
 \
+ENABLE_GDBTK = 1\
 ENABLE_DEPFILES = gdbtk.o\
 ENABLE_CLIBS = $(TCL) $(TK) -lX11 -lm
 ' < Makefile > Makefile.tem

@@ -291,6 +291,87 @@ gdb_loc (clientData, interp, argc, argv)
   return TCL_OK;
 }
 
+/* This implements the TCL command `gdb_sourcelines', which returns a list of
+   all of the lines containing executable code for the specified source file
+   (ie: lines where you can put breakpoints). */
+
+static int
+gdb_sourcelines (clientData, interp, argc, argv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int argc;
+     char *argv[];
+{
+  struct symtab *symtab;
+  struct linetable_entry *le;
+  int nlines;
+  char buf[100];
+
+  if (argc != 2)
+    {
+      Tcl_SetResult (interp, "wrong # args", TCL_STATIC);
+      return TCL_ERROR;
+    }
+
+  symtab = lookup_symtab (argv[1]);
+
+  if (!symtab)
+    {
+      Tcl_SetResult (interp, "No such file", TCL_STATIC);
+      return TCL_ERROR;
+    }
+
+  /* If there's no linetable, or no entries, then we are done. */
+
+  if (!symtab->linetable
+      || symtab->linetable->nitems == 0)
+    {
+      Tcl_AppendElement (interp, "");
+      return TCL_OK;
+    }
+
+  le = symtab->linetable->item;
+  nlines = symtab->linetable->nitems;
+
+  for (;nlines > 0; nlines--, le++)
+    {
+      /* If the pc of this line is the same as the pc of the next line, then
+	 just skip it.  */
+      if (nlines > 1
+	  && le->pc == (le + 1)->pc)
+	continue;
+
+      sprintf (buf, "%d", le->line);
+      Tcl_AppendElement (interp, buf);
+    }
+
+  return TCL_OK;
+}
+
+/* This implements the TCL command `gdb_regnames', which returns a list of
+   all of the register names. */
+
+static int
+gdb_regnames (clientData, interp, argc, argv)
+     ClientData clientData;
+     Tcl_Interp *interp;
+     int argc;
+     char *argv[];
+{
+  int i;
+
+  if (argc != 1)
+    {
+      Tcl_SetResult (interp, "wrong # args", TCL_STATIC);
+      return TCL_ERROR;
+    }
+
+  for (i = 0; i < NUM_REGS; i++)
+    Tcl_AppendElement (interp, reg_names[i]);
+
+  return TCL_OK;
+}
+
 static int
 gdb_cmd_stub (cmd)
      char *cmd;
@@ -481,6 +562,8 @@ gdbtk_init ()
 
   Tcl_CreateCommand (interp, "gdb_cmd", gdb_cmd, NULL, NULL);
   Tcl_CreateCommand (interp, "gdb_loc", gdb_loc, NULL, NULL);
+  Tcl_CreateCommand (interp, "gdb_sourcelines", gdb_sourcelines, NULL, NULL);
+  Tcl_CreateCommand (interp, "gdb_regnames", gdb_regnames, NULL, NULL);
   Tcl_CreateCommand (interp, "gdb_listfiles", gdb_listfiles, NULL, NULL);
   Tcl_CreateCommand (interp, "gdb_stop", gdb_stop, NULL, NULL);
 

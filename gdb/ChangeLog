@@ -1,3 +1,10 @@
+Mon Nov 14 08:51:29 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* Makefile.in:  Install gdbtk.tcl.
+	* configure.in:  Add ENABLE_GDBTK flag.
+	* gdbtk.c (gdb_sourcelines):  Returns list of source lines
+	containing code.  (gdb_regnames):  Returns list of register names.
+
 Sat Nov 12 21:55:47 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* somsolib.c: Add TODO list.
