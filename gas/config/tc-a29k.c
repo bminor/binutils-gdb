@@ -292,8 +292,10 @@ md_begin ()
 
       if (!strcmp (name, machine_opcodes[i + 1].name))
 	{
-	  if ((machine_opcodes[i].opcode ^ machine_opcodes[i + 1].opcode)
-	      != 0x01000000)
+	  if ((machine_opcodes[i].opcode & 0x01000000) != 0
+	      || (machine_opcodes[i + 1].opcode & 0x01000000) == 0
+	      || ((machine_opcodes[i].opcode | 0x01000000)
+		  != machine_opcodes[i + 1].opcode))
 	    goto bad_table;
 	  strend = machine_opcodes[i].args + strlen (machine_opcodes[i].args) - 1;
 	  strend2 = machine_opcodes[i + 1].args + strlen (machine_opcodes[i + 1].args) - 1;
@@ -303,16 +305,8 @@ md_begin ()
 	      if (*strend2 != 'i')
 		goto bad_table;
 	      break;
-	    case 'i':
-	      if (*strend2 != 'b')
-		goto bad_table;
-	      break;
 	    case 'P':
 	      if (*strend2 != 'A')
-		goto bad_table;
-	      break;
-	    case 'A':
-	      if (*strend2 != 'P')
 		goto bad_table;
 	      break;
 	    default:
@@ -325,10 +319,7 @@ md_begin ()
 	  /* OK, this is an i/b or A/P pair.  We skip the
 	     higher-valued one, and let the code for operand checking
 	     handle OR-ing in the bit.  */
-	  if (machine_opcodes[i].opcode & 1)
-	    continue;
-	  else
-	    skipnext = 1;
+	  skipnext = 1;
 	}
 
       retval = hash_insert (op_hash, name, (PTR) &machine_opcodes[i]);
@@ -512,6 +503,10 @@ machine_ip (str)
 	  if (operand->X_op == O_register)
 	    goto general_reg;
 
+	  /* Make sure the 'i' case really exists.  */
+	  if ((insn->opcode | IMMEDIATE_BIT) != (insn + 1)->opcode)
+	    break;
+
 	  opcode |= IMMEDIATE_BIT;
 	  if (operand->X_op == O_constant)
 	    {
@@ -594,6 +589,9 @@ machine_ip (str)
 	     opcode table entries together.  */
 	  if (operand->X_op == O_constant)
 	    {
+	      /* Make sure the 'A' case really exists.  */
+	      if ((insn->opcode | ABSOLUTE_BIT) != (insn + 1)->opcode)
+		break;
 	      opcode |= ABSOLUTE_BIT |
 		(operand->X_add_number & 0x0003FC00) << 6 |
 		((operand->X_add_number & 0x000003FC) >> 2);

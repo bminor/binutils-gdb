@@ -1,3 +1,13 @@
+Thu Oct 28 13:09:26 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-a29k.c (md_begin): When opcodes are mashed together in
+	the table, require that the one without bit 0x1000000 set come
+	first.  Require further that it be case 'b' or 'P'.  The a29k
+	opcode table already meets these constraints.
+	(machine_ip): When handling case 'i' or 'A', make sure that the
+	appropriate opcode really exists by looking at the next entry in
+	the opcode table.
+
 Wed Oct 27 11:48:56 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-m68k.c (m68k_ip): Adjust offsets for PC relative
