@@ -1,3 +1,8 @@
+2004-12-14  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* avr-dis.c: Prettyprint. Added printing of symbol names in all
+	memory references. Convert avr_operand() to C90 formatting.
+
 2004-12-05  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* crx-dis.c (print_arg): Use 'info->print_address_func' for address printing.
