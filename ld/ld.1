@@ -682,7 +682,8 @@ Normally, when
 places the global common symbols in the appropriate output sections,
 it sorts them by size.  First come all the one byte symbols, then all
 the two bytes, then all the four bytes, and then everything else.
-This option disables that sorting.
+This is to prevent gaps between symbols due to
+alignment constraints.  This option disables that sorting.
 
 .TP
 .BI "\-Tbss " "org"\c
