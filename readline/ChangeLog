@@ -1,6 +1,7 @@
 Thu Oct 24 21:58:46 1991  John Gilmore  (gnu at cygnus.com)
 
 	* configure.in:  aix is a Sys V as far as we're concerned.
+	Switch to new config/hm-* scheme.
 
 Thu Oct 24 02:08:50 1991  Fred Fish  (fnf at cygnus.com)
 

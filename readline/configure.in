@@ -10,7 +10,7 @@ srcname="the readline library"
 # per-host:
 
 case "${host_os}" in
-sysv* | irix* | aix*) host_makefile_frag=config/hmake-sysv ;;
+sysv* | irix* | aix*) host_makefile_frag=config/hm-sysv ;;
 esac
 
 # per-target:
