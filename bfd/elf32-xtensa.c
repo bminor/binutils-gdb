@@ -2277,10 +2277,7 @@ elf_xtensa_combine_prop_entries (output_bfd, sxtlit, sgotloc)
 
   /* Clear the removed bytes.  */
   if ((bfd_size_type) (num * 8) < section_size)
-    {
-      memset (&contents[num * 8], 0, section_size - num * 8);
-      sxtlit->size = num * 8;
-    }
+    memset (&contents[num * 8], 0, section_size - num * 8);
 
   if (! bfd_set_section_contents (output_bfd, sxtlit, contents, 0,
 				  section_size))
