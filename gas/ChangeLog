@@ -1,3 +1,36 @@
+Thu Jan 13 12:14:21 1994  Jeffrey A. Law  (law@snake.cs.utah.edu
+
+	* subsegs.c (subseg_get): Accept new argument "force_new".  If
+	set then a new segment is always created.  All callers changed.
+	(subseg_force_new): New function.  Similar to subseg_new, but
+	always force a new segment to be created.
+
+	* config/obj-som.c (som_frob_file): Call adjust_code_sections
+	for each section.
+	(adjust_code_sections): New function.  Adjusts the VMA for all the
+	$CODE$ subspaces.
+
+	* config/tc-hppa.c (md_assemble): Also handle creating a fixup
+	for the unwind descriptors if a function's label follows the
+	.PROC and .ENTRY directives.
+	(pa_entry): Don't set BSF_FUNCTION for the label symbol here; it
+	is done elsewhere.  Don't create a fixup for the unwind
+	descriptors if the function's label has not been defined yet.
+	(pa_proc): For SOM, place each procedure within a new $CODE$
+	subspace.  Adjust the segment and frag for the associated
+	function label if it exists.
+
+Wed Jan 12 22:05:33 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (hppa_fix_struct): Add new "segment" field.
+	(hppa_fix_new): Initialize segment field.
+	(md_apply_fix): Do nothing for pc-relative fixup which involves
+	crossing a segment boundary.
+	(pa_procend): Undefine the current label after handling .PROC
+	and .PROCEND directives.
+	(dummy_symbol): Make type "symbolS *".  Change references as
+	appropriate.
+
 Wed Jan 12 13:29:31 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* read.c (read_a_source_file): Cast array argument to unsigned
