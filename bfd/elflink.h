@@ -6342,7 +6342,7 @@ elf_link_output_extsym (h, data)
 
   /* If we're stripping it, then it was just a dynamic symbol, and
      there's nothing else to do.  */
-  if (strip)
+  if (strip || (input_sec->flags & SEC_EXCLUDE) != 0)
     return true;
 
   h->indx = bfd_get_symcount (finfo->output_bfd);

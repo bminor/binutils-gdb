@@ -1,5 +1,8 @@
 2002-08-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.h (elf_link_output_extsym): Don't output symbols from
+	SEC_EXCLUDE sections.
+
 	* aoutx.h (aout_link_write_symbols): Correct handling of warning syms.
 
 2002-08-07  Alan Modra  <amodra@bigpond.net.au>
@@ -209,9 +212,9 @@
 	* elfarm-nabi.c: Do not include elf32-arm.h if
 	ELFARM_NABI_C_INCLUDED is defined.
 	* targets.c: Add bfd_elf32_{big|little}armqnx_vec.
-	
+
 2002-07-30  Nick Clifton  <nickc@redhat.com>
-	
+
 	* po/sv.po: Updated Swedish translation.
 
 2002-07-30  Jakub Jelinek  <jakub@redhat.com>
