@@ -168,7 +168,7 @@
 	* h8300-tdep.c (h8300_use_struct_convention): Delete.
 	(h8300_gdbarch_init): Register always_use_struct_convention,
 	instead of h8300_use_struct_convention.
-	* mips_o32-tdep.c (mips_o32_use_struct_convention): Delete.
+	* mips-tdep.c (mips_o32_use_struct_convention): Delete.
 	(mips_o32_gdbarch_init): Register always_use_struct_convention,
 	instead of mips_o32_use_struct_convention.
 
