@@ -1,3 +1,9 @@
+2002-07-12  Kevin Buettner  <kevinb@redhat.com>
+
+	From Nicholas Duffek (with minor changes by Martin Hunt, 
+	Louis Hamilton, and Kevin Buettner):
+	* aix-thread.c: New file.
+
 2002-07-12  Petr Sorfa <petrs@caldera.com>
 
         *  dwarf2read.c (dwarf2_invalid_attrib_class): New
