@@ -1,3 +1,22 @@
+Thu Aug  7 13:39:31 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	* ocd.h: add OCD_SET_CONNECTION
+
+Thu Aug  7 13:09:17 1997  Geoffrey Noer  <noer@cygnus.com>
+
+	Nomenclature change.  BDM is a specific type of OCD
+	(On chip debugging).  Wiggler is the parallel port box controlled
+	by Wigglers.dll.  The faster target box from Macraigor Systems
+	is not a wiggler.  
+	* ocd.c:
+	* ocd.h:
+	* ppc-bdm.c:
+	* ser-ocd.c:
+	Replace all instances of "wiggler_" with "ocd_" and change most other
+	instances of "wiggler" to "ocd" or "ocd device" depending on context.
+	* config/m68k/monitor.mt: remove remote-wiggler.o from TDEPFILES
+	until OCD with that target is supported again.
+
 Wed Aug  6 16:15:31 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	* Makefile.in: add DLLTOOL = @DLLTOOL@, pass on DLLTOOL to

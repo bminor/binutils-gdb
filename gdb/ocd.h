@@ -69,6 +69,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define OCD_ENTER_MON 0x94	/* Enter the flash programming monitor  */
 
 #define OCD_SET_STATUS 0x0a	/* Set status */
+#define OCD_SET_CONNECTION 0xf0	/* Set connection (init Wigglers.dll) */
 #define OCD_FLAG_STOP 0x0	/* Stop the target, enter BDM */
 #define OCD_FLAG_START 0x01	/* Start the target at PC */
 #define OCD_FLAG_RETURN_STATUS 0x04 /* Return async status */
