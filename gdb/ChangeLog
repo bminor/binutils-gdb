@@ -1,3 +1,60 @@
+2004-02-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* amd64-tdep.h: Renamed from x86-64-tdep.h.
+	* amd64-tdep.c: Renamed from x86-64-tdep.c.  Include
+	"amd64-tdep.h" instead of "x86-64-tdep.h".
+	* amd64-nat.c: Include "amd64-tdep.h" instead of "x86-64-tdep.h".
+	* amd64-linux-tdep.h: Renamed from x86-64-linux.h.
+	* amd64-linux-tdep.c: Renamed from x86-64-linux-tdep.c.  Include
+	"amd64-tdep.h" and "amd64-linux-tdep.h" instead of "x86-64-tdep.h"
+	and "x86-64-tdep.c".
+	* amd64-linux-nat.c: Renamed from x86-64-linux-nat.c.  Include
+	"amd64-tdep.h" and "amd64-linux-tdep.h" instead of "x86-64-tdep.h"
+	and "x86-64-tdep.c".
+	* amd64bsd-nat.c: Update copyright year.
+	Include "amd64-tdep.h" instead of "x86-64-tdep.h".
+	* amd64fbsd-tdep.c: Include "amd64-tdep.h" instead of
+	"x86-64-tdep.h".
+	* amd64fbsd-nat.c: Include "amd64-tdep.h" instead of
+	"x86-64-tdep.h".
+	* amd64nbsd-tdep.c: Include "amd64-tdep.h" instead of
+	"x86-64-tdep.h".
+	* amd64nbsd-nat.c: Include "amd64-tdep.h" instead of
+	"x86-64-tdep.h".
+	* amd64obsd-tdep.c: Include "amd64-tdep.h" instead of
+	"x86-64-tdep.h".
+	* amd64obsd-nat.c: Include "amd64-tdep.h" instead of
+	"x86-64-tdep.h".
+	* configure.host: (x86_64-*-linux*): Set gdb_target to linux64. 
+	* configure.tgt (x86_64-*-linux*): Set gdb_target to linux64.
+	* Makefile.in (amd64_linux_tdep_h): Renamed from
+	x86_64_linux_tdep_h.
+	(amd64_tdep_h): Renamed from x86_64_tdep_h.
+	(amd64bsd-nat.o, amd64fbsd-nat.o, amd64fbsd-tdep.o, amd64-nat.o)
+	(amd64nbsd-nat.o, amd64nbsd-tdep.o, amd64obsd-nat.o)
+	(amd64obsd-tdep.o): Update dependencies.
+	(amd64-tdep.o, amd64-linux-nat.o, amd64-linux-tdep.o): New
+	dependencies.
+	(x86-64-linux-nat.o, x86-64-linux-tdep.o, x86-64-tdep.o): Remove
+	dependencies.
+	(ALLDEPFILES): Add amd64-tdep.c, amd64obsd-nat.c, amd64obsd-nat.c,
+	amd64-linux-nat.c amd64-linux-tdep.c.
+	* config/i386/tm-linux64.h: Renamed from tm-x86-64linux.h
+	* config/i386/nm-linux64.h: Renamed from nm-x86-64linux.h.
+	* config/i386/linux64.mt: Renamed from x86-64linux.mt.
+	(TDEPFILES): Replace x86-64-tdep.o and x86-64-linux-tdep.o with
+	amd64-tdep.o and amd64-linux-tdep.o.
+	(TM_FILE): Set to tm-linux64.h.
+	* config/i386/linux64.mh: Renamed from x86-64linux.mh.
+	(NAT_FILE): Set to nm-linux64.h.
+	(NATDEPFILES): Replace x86-64-linux-nat.o with amd64-linux-nat.o.
+	* config/i386/fbsd64.mt (TDEPFILES): Replace x86-64-tdep.o with
+	amd64-tdep.o.
+	* config/i386/nbsd64.mt (TDEPFILES): Replace x86-64-tdep.o with
+	amd64-tdep.o.
+	* config/i386/obsd64.mt (TDEPFILES): Replace x86-64-tdep.o with
+	amd64-tdep.o.
+
 2004-02-25  Roland McGrath  <roland@redhat.com>
 
 	* remote.c (remote_protocol_qPart_auxv): New variable.

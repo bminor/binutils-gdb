@@ -37,7 +37,7 @@
 
 #include "gdb_assert.h"
 
-#include "x86-64-tdep.h"
+#include "amd64-tdep.h"
 #include "i387-tdep.h"
 
 /* Note that the AMD64 architecture was previously known as x86-64.

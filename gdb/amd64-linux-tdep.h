@@ -21,8 +21,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef X86_64_LINUX_TDEP_H
-#define X86_64_LINUX_TDEP_H
+#ifndef AMD64_LINUX_TDEP_H
+#define AMD64_LINUX_TDEP_H
 
 /* Fill GDB's register array with the general-purpose register values
    in *GREGSETP.  */
@@ -35,4 +35,4 @@ void amd64_linux_supply_gregset (char *regp);
 
 void amd64_linux_fill_gregset (char *regp, int regno);
 
-#endif /* x86-64-linux-tdep.h */
+#endif /* amd64-linux-tdep.h */

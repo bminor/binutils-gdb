@@ -28,8 +28,8 @@
 
 #include "gdb_string.h"
 
-#include "x86-64-tdep.h"
-#include "x86-64-linux-tdep.h"
+#include "amd64-tdep.h"
+#include "amd64-linux-tdep.h"
 
 /* Register indexes to 'struct user' come from <sys/reg.h>.  */
 

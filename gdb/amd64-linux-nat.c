@@ -47,8 +47,8 @@
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
 
-#include "x86-64-tdep.h"
-#include "x86-64-linux-tdep.h"
+#include "amd64-tdep.h"
+#include "amd64-linux-tdep.h"
 #include "i386-linux-tdep.h"
 #include "amd64-nat.h"
 

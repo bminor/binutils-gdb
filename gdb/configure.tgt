@@ -211,7 +211,7 @@ v850*-*-*)		gdb_target=v850
 			esac
 			;;
 
-x86_64-*-linux*)	gdb_target=x86-64linux
+x86_64-*-linux*)	gdb_target=linux64
 			build_gdbserver=yes
 			;;
 x86_64-*-netbsd*)	gdb_target=nbsd64 ;;

@@ -21,8 +21,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef NM_X86_64_LINUX_H
-#define NM_X86_64_LINUX_H
+#ifndef NM_LINUX64_H
+#define NM_LINUX64_H
 
 /* GNU/Linux supports the i386 hardware debugging registers.  */
 #define I386_USE_GENERIC_WATCHPOINTS
@@ -66,4 +66,4 @@ extern unsigned long amd64_linux_dr_get_status (void);
    `x86-86-linux-nat.c' instead, which calls both.  */
 #define LINUX_CHILD_POST_STARTUP_INFERIOR
 
-#endif /* NM_X86_64_LINUX_H */
+#endif /* nm-linux64.h */

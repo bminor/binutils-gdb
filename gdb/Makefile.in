@@ -770,8 +770,8 @@ vax_tdep_h = vax-tdep.h
 version_h = version.h
 wince_stub_h = wince-stub.h
 wrapper_h = wrapper.h $(gdb_h)
-x86_64_linux_tdep_h = x86-64-linux-tdep.h
-x86_64_tdep_h = x86-64-tdep.h $(i386_tdep_h)
+amd64_linux_tdep_h = amd64-linux-tdep.h
+amd64_tdep_h = amd64-tdep.h $(i386_tdep_h)
 xcoffsolib_h = xcoffsolib.h
 xmodem_h = xmodem.h
 
@@ -1307,8 +1307,11 @@ ALLDEPFILES = \
 	alpha-nat.c alphabsd-nat.c \
 	alpha-tdep.c alpha-linux-tdep.c alphabsd-tdep.c alphanbsd-tdep.c \
 	alpha-osf1-tdep.c alphafbsd-tdep.c alpha-mdebug-tdep.c \
-	amd64-nat.c amd64bsd-nat.c amdfbsd-nat.c amd64-fbsd-tdep.c \
+	amd64-nat.c amd64-tdep.c \
+	amd64bsd-nat.c amdfbsd-nat.c amd64fbsd-tdep.c \
 	amd64nbsd-nat.c amd64nbsd-tdep.c \
+	amd64obsd-nat.c amd64obsd-tdep.c \
+	amd64-linux-nat.c amd64-linux-tdep.c \
 	arm-linux-nat.c arm-linux-tdep.c arm-tdep.c \
 	armnbsd-nat.c armnbsd-tdep.c \
 	avr-tdep.c \
@@ -1519,24 +1522,36 @@ alpha-tdep.o: alpha-tdep.c $(defs_h) $(doublest_h) $(frame_h) \
 	$(regcache_h) $(reggroups_h) $(arch_utils_h) $(osabi_h) $(block_h) \
 	$(elf_bfd_h) $(alpha_tdep_h)
 amd64bsd-nat.o: amd64bsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(gdb_assert_h) $(x86_64_tdep_h) $(amd64_nat_h)
+	$(gdb_assert_h) $(amd64_tdep_h) $(amd64_nat_h)
 amd64fbsd-nat.o: amd64fbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(gdb_assert_h) $(gregset_h) $(x86_64_tdep_h) $(amd64_nat_h)
+	$(gdb_assert_h) $(gregset_h) $(amd64_tdep_h) $(amd64_nat_h)
 amd64fbsd-tdep.o: amd64fbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 	$(gdbcore_h) $(regcache_h) $(osabi_h) $(gdb_string_h) \
-	$(x86_64_tdep_h) $(solib_svr4_h)
+	$(amd64_tdep_h) $(solib_svr4_h)
+amd64-linux-nat.o: amd64-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
+	$(regcache_h) $(linux_nat_h) $(gdb_assert_h) $(gdb_string_h) \
+	$(gdb_proc_service_h) $(gregset_h) $(amd64_tdep_h) \
+	$(amd64_linux_tdep_h) $(i386_linux_tdep_h) $(amd64_nat_h)
+amd64-linux-tdep.o: amd64-linux-tdep.c $(defs_h) $(inferior_h) \
+	$(gdbcore_h) $(regcache_h) $(osabi_h) $(gdb_string_h) \
+	$(amd64_tdep_h) $(amd64_linux_tdep_h)
 amd64-nat.o: amd64-nat.c $(defs_h) $(gdbarch_h) $(regcache_h) \
-	$(gdb_assert_h) $(i386_tdep_h) $(x86_64_tdep_h)
-amd64nbsd-nat.o: amd64nbsd-nat.c $(defs_h) $(gdb_assert_h) $(x86_64_tdep_h) \
+	$(gdb_assert_h) $(i386_tdep_h) $(amd64_tdep_h)
+amd64nbsd-nat.o: amd64nbsd-nat.c $(defs_h) $(gdb_assert_h) $(amd64_tdep_h) \
 	$(amd64_nat_h)
 amd64nbsd-tdep.o: amd64nbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
-	$(gdbcore_h) $(osabi_h) $(gdb_assert_h) $(x86_64_tdep_h) \
+	$(gdbcore_h) $(osabi_h) $(gdb_assert_h) $(amd64_tdep_h) \
 	$(nbsd_tdep_h) $(solib_svr4_h)
-amd64obsd-nat.o: amd64obsd-nat.c $(defs_h) $(gdb_assert_h) $(x86_64_tdep_h) \
+amd64obsd-nat.o: amd64obsd-nat.c $(defs_h) $(gdb_assert_h) $(amd64_tdep_h) \
 	$(amd64_nat_h)
 amd64obsd-tdep.o: amd64obsd-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
 	$(osabi_h) $(regset_h) $(target_h) $(gdb_assert_h) $(gdb_string_h) \
-	$(x86_64_tdep_h) $(i387_tdep_h) $(solib_svr4_h)
+	$(amd64_tdep_h) $(i387_tdep_h) $(solib_svr4_h)
+amd64-tdep.o: amd64-tdep.c $(defs_h) $(arch_utils_h) $(block_h) \
+	$(dummy_frame_h) $(frame_h) $(frame_base_h) $(frame_unwind_h) \
+	$(inferior_h) $(gdbcmd_h) $(gdbcore_h) $(objfiles_h) $(regcache_h) \
+	$(regset_h) $(symfile_h) $(gdb_assert_h) $(amd64_tdep_h) \
+	$(i387_tdep_h)
 annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) \
 	$(gdbtypes_h) $(breakpoint_h)
 arch-utils.o: arch-utils.c $(defs_h) $(arch_utils_h) $(buildsym_h) \
@@ -2472,18 +2487,6 @@ wince.o: wince.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 	$(regcache_h) $(mips_tdep_h)
 wince-stub.o: wince-stub.c $(wince_stub_h)
 wrapper.o: wrapper.c $(defs_h) $(value_h) $(wrapper_h)
-x86-64-linux-nat.o: x86-64-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
-	$(regcache_h) $(linux_nat_h) $(gdb_assert_h) $(gdb_string_h) \
-	$(gdb_proc_service_h) $(gregset_h) $(x86_64_tdep_h) \
-	$(x86_64_linux_tdep_h) $(i386_linux_tdep_h) $(amd64_nat_h)
-x86-64-linux-tdep.o: x86-64-linux-tdep.c $(defs_h) $(inferior_h) \
-	$(gdbcore_h) $(regcache_h) $(osabi_h) $(gdb_string_h) \
-	$(x86_64_tdep_h) $(x86_64_linux_tdep_h)
-x86-64-tdep.o: x86-64-tdep.c $(defs_h) $(arch_utils_h) $(block_h) \
-	$(dummy_frame_h) $(frame_h) $(frame_base_h) $(frame_unwind_h) \
-	$(inferior_h) $(gdbcmd_h) $(gdbcore_h) $(objfiles_h) $(regcache_h) \
-	$(regset_h) $(symfile_h) $(gdb_assert_h) $(x86_64_tdep_h) \
-	$(i387_tdep_h)
 xcoffread.o: xcoffread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(gdb_stat_h) \
 	$(coff_internal_h) $(libcoff_h) $(coff_xcoff_h) $(libxcoff_h) \
 	$(coff_rs6000_h) $(symtab_h) $(gdbtypes_h) $(symfile_h) \

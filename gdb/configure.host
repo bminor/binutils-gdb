@@ -144,7 +144,7 @@ vax-*-bsd*)		gdb_host=vaxbsd ;;
 vax-*-ultrix2*)		gdb_host=vaxult2 ;;
 vax-*-ultrix*)		gdb_host=vaxult ;;
 
-x86_64-*-linux*)	gdb_host=x86-64linux ;;
+x86_64-*-linux*)	gdb_host=linux64 ;;
 x86_64-*-freebsd*)	gdb_host=fbsd64 ;;
 x86_64-*-netbsd*)	gdb_host=nbsd64 ;;
 x86_64-*-openbsd*)	gdb_host=obsd64 ;;

@@ -20,8 +20,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef X86_64_TDEP_H
-#define X86_64_TDEP_H
+#ifndef AMD64_TDEP_H
+#define AMD64_TDEP_H
 
 struct gdbarch;
 struct frame_info;
@@ -82,4 +82,4 @@ extern CORE_ADDR amd64fbsd_sigtramp_start_addr;
 extern CORE_ADDR amd64fbsd_sigtramp_end_addr;
 extern int amd64fbsd_sc_reg_offset[];
 
-#endif /* x86-64-tdep.h */
+#endif /* amd64-tdep.h */
