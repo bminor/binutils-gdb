@@ -3,6 +3,12 @@ Thu May  7 13:20:56 1998  Anders Blomdell  <anders.blomdell@control.lth.se>
 	* gasp.c (grab_label): Permit a label to be a preprocessor
 	variable by permitting a label to start with a backslash.
 
+Thu May  7 12:50:33 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* config/tc-mips.c (validate_mips_insn): Removed hack
+	for previously inaccessible bitfields in some INSN_TRAP
+	instructions.
+
 start-sanitize-d30v
 Thu May  7 11:13:00 1998  Frank Ch. Eigler  <fche@cygnus.com>
 

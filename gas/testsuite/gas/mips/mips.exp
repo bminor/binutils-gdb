@@ -14,6 +14,10 @@ if [istarget mips*-*-*] then {
     set gpr_ilocks [expr $gpr_ilocks || [istarget mipstx19*-*-*]]
 # end-sanitize-tx19
 
+# start-sanitize-vr4320
+    set ilocks [expr $ilocks || [istarget mips64vr4320*-*-*]]
+
+# end-sanitize-vr4320
 #start-sanitize-tx49
     set ilocks [expr $ilocks || [istarget mips64tx49*-*-*]]
     set no_mips16 [expr $no_mips16 || [istarget mips64tx49*-*-*]]
@@ -27,6 +31,8 @@ if [istarget mips*-*-*] then {
     run_dump_test "abs"
     run_dump_test "add"
     run_dump_test "and"
+    run_dump_test "break20"
+    run_dump_test "trap20"
     run_dump_test "beq"
     run_dump_test "bge"
     run_dump_test "bgeu"
@@ -44,7 +50,12 @@ if [istarget mips*-*-*] then {
     if $empic { run_dump_test "la-empic" }
     if !$aout { run_dump_test "lb" }
     if $svr4pic { run_dump_test "lb-svr4pic" }
-    if $svr4pic { run_dump_test "lb-xgot" }
+    if $svr4pic {
+	# Both versions specify the cpu, so we can run both regardless of
+	# the interlocking in the configured default cpu.
+	run_dump_test "lb-xgot"
+	run_dump_test "lb-xgot-ilocks"
+    }
     if $empic { run_dump_test "lb-empic" }
     if !$aout { if !$gpr_ilocks { run_dump_test "ld" } else { run_dump_test "ld-ilocks" } } 
     if $svr4pic { run_dump_test "ld-svr4pic" }
@@ -81,5 +92,10 @@ if [istarget mips*-*-*] then {
 # end-sanitize-vr5400
 # start-sanitize-r5900
     run_dump_test "r5900"
+    run_dump_test "vu0"
 # end-sanitize-r5900
+    run_dump_test "mips4010"
+    run_dump_test "mips4650"
+    run_dump_test "mips4100"
+    run_dump_test "lineno"
 }
