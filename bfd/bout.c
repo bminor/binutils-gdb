@@ -42,8 +42,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 PROTO (static boolean, b_out_squirt_out_relocs,(bfd *abfd, asection *section));
 PROTO (static bfd_target *, b_out_callback, (bfd *));
 
-PROTO (boolean, aout_slurp_symbol_table, (bfd *abfd));
-PROTO (void , aout_write_syms, ());
+PROTO (boolean, aout_32_slurp_symbol_table, (bfd *abfd));
+PROTO (void , aout_32_write_syms, ());
 
 PROTO (static void, swap_exec_header, (bfd *abfd, struct internal_exec *execp));
 
@@ -219,7 +219,7 @@ b_out_write_object_contents (abfd)
       bfd_seek (abfd,
 		(long)(N_SYMOFF(*exec_hdr(abfd))), SEEK_SET);
 
-      aout_write_syms (abfd);
+      aout_32_write_syms (abfd);
 
       bfd_seek (abfd,	(long)(N_TROFF(*exec_hdr(abfd))), SEEK_SET);
 
@@ -324,7 +324,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
   arelent *reloc_cache;
 
   if (asect->relocation) return true;
-  if (!aout_slurp_symbol_table (abfd)) return false;
+  if (!aout_32_slurp_symbol_table (abfd)) return false;
 
   if (asect == obj_datasec (abfd)) {
     reloc_size = exec_hdr(abfd)->a_drsize;
@@ -668,7 +668,7 @@ b_out_set_arch_mach (abfd, arch, machine)
 static int 
 DEFUN(b_out_sizeof_headers,(abfd, exec),
       bfd *abfd AND
-      boolean execable)
+      boolean exec)
 {
 return sizeof(struct internal_exec);
 }
