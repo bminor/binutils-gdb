@@ -1,3 +1,15 @@
+Fri Jan 12 14:35:58 1996  David Mosberger-Tang  <davidm@AZStarNet.com>
+
+	* alpha-opc.h (alpha_insn_set): VAX floating point opcode was
+ 	incorrectly defined as 0x16 when it should be 0x15.
+	(FLOAT_FORMAT_MASK): function code is 11 bits, not just 7 bits!
+	(alpha_insn_set): added cvtst and cvttq float ops.  Also added
+ 	excb (exception barrier) which is defined in the Alpha
+ 	Architecture Handbook version 2.
+	* alpha-dis.c (print_insn_alpha): Fixed special-case decoding for
+ 	OPERATE_FORMAT_CODE type instructions.  The bug caused mulq to be
+ 	disassembled as or, for example.
+
 Wed Jan 10 12:37:22 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips-dis.c (print_insn_arg): Print cases 'i' and 'u' in hex.
