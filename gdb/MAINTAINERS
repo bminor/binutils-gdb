@@ -30,28 +30,85 @@ variants.  *-tdep.c. The Target/Architecture maintainer works with the
 host maintainer when resolving build issues.  The Target/Architecture
 maintainer works with the native maintainer when resolving API issues.
 
-d10v target		Andrew Cagney		cagney@cygnus.com
-d30v target		David Taylor		taylor@cygnus.com
-mips target		Andrew Cagney		cagney@cygnus.com
-mn10300 target		Andrew Cagney		cagney@cygnus.com
-powerpc target		Kevin Buettner		kevinb@cygnus.com
-			Elena Zannoni		ezannoni@cygnus.com
-arm target		Fernando Nasser		fnasser@cygnus.com
+	a29k		maintenance only (a29k-amd-udi)
+	alpha		maintenance only (alpha-dec-osf4.0a)
+	arc		maintenance only (arc-elf)
+
+	arm		Fernando Nasser		fnasser@cygnus.com
 			Jim Ingham		jingham@apple.com
 			Scott Bambrough		scottb@netwinder.org
-m32r target		Michael Snyder		msnyder@cygnus.com
-IA-64 target		Kevin Buettner		kevinb@cygnus.com
-x86			Mark Kettenis           kettenis@gnu.org
-sparc target		David Taylor		taylor@cygnus.com
+
+	convex		OBSOLETE
+
+	d10v		Andrew Cagney		cagney@cygnus.com
+
+	d30v		David Taylor		taylor@cygnus.com
+
+	djgpp		(see native and host)
+
+	fr30		maintenance only (fr30-elf)
+	h8300		maintenance only (h8300hms)
+	h8500		maintenance only (h8500hms)
+
+	i386		Mark Kettenis           kettenis@gnu.org
+
+	i960		maintenance only (i960-coff)
+
+	ia64		Kevin Buettner		kevinb@cygnus.com
+	m32r		Michael Snyder		msnyder@cygnus.com
+
+	m68hc11		maintenance only (m68hc11-elf)
+
+	m68k		maintenance only (m68k-aout, m68k-coff, m68k-elf)
+	m88k		maintenance only (?)
+	mcore		maintenance only (?)
+
+	mips		Andrew Cagney		cagney@cygnus.com
+
+	mn10200		maintenance only (mn10200-elf)
+
+	mn10300		Andrew Cagney		cagney@cygnus.com
+
+	ns32k		maintenance only (?)
+
+	pa		Jeff Law		law@cygnus.com
+
+	powerpc		Kevin Buettner		kevinb@cygnus.com
+			Nick Duffek		nsd@cygnus.com
+
+	pyramid		OBSOLETE
+
+	romp		maintenance only (?)
+
+	rs6000		(see rs6000 native and ppc target)
+
+	sh		Elena Zannoni		ezannoni@cygnus.com
+
+	sparc		David Taylor		taylor@cygnus.com
+
+	tahoe		OBSOLETE
+
+	tic80		maintenance only (tic80-coff)
+	v850		maintenance only (v850-elf)
+	vax		maintenance only (?)
+	w65		maintenance only (?)
+	z8k		maintenance only (?)
+
+All maintainers can make arbitrary changes to OBSOLETE targets.
+
+All maintainers can make mechanical (params, spelling, indentation,
+multi-arch, -W..., ....) changes to ``maintenance only'' targets.
+Please sanity check the change by compiling with one of the listed
+targets.
 
 
 
 Host/Native:
 
-The Native maintainer is responsible for target specific
-native support - typically shared libraries and quirks to
-procfs/ptrace/...  The Native maintainer works with the Arch and Core
-maintainers when resolving more generic problems.
+The Native maintainer is responsible for target specific native
+support - typically shared libraries and quirks to procfs/ptrace/...
+The Native maintainer works with the Arch and Core maintainers when
+resolving more generic problems.
 
 The host maintainer ensures that gdb (including mmalloc) can be built
 as a cross debugger on their platform.
@@ -78,6 +135,8 @@ Solaris/SPARC native & host
 			David Taylor		taylor@cygnus.com
 Mac OS X		Klee Dienes		kdienes@apple.com
 			Jim Ingham		jingham@apple.com
+
+
 
 Core: Generic components used by all of GDB
 
