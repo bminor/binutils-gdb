@@ -1064,6 +1064,16 @@ read_xcoff_symtab (objfile, nsyms)
 	   pointed to by cs->c_name will persist throughout xcoffread.  If
 	   we use the new field, it gets overwritten for each symbol.  */
 	cs->c_name = ((struct external_syment *)raw_symbol)->e.e_name;
+	/* If it's exactly 8 characters long it isn't '\0'-terminated.  */
+	if (cs->c_name[7] != '\0')
+	  {
+	    char *p;
+	    p = obstack_alloc (&objfile->symbol_obstack, 9);
+	    strncpy (p, cs->c_name, 8);
+	    p[8] = '\0';
+	    cs->c_name = p;
+	    symname_alloced = 1;
+	  }
       } else if (symbol->n_sclass & 0x80) {
 	cs->c_name = debugsec + symbol->n_offset;
 	symname_alloced = 0;
