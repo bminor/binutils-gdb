@@ -1,3 +1,8 @@
+Thu Jul 15 02:45:30 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (md_pseudo_table): Add ".dword" pseudo-op.
+	(cons_fix_new_hppa): Derive size of fixup from size of the object.
+
 1999-07-14  Philip Blundell  <pb@nexus.co.uk>
 
 	* symbols.c (dollar_label_name): Prepend LOCAL_LABEL_PREFIX if it
