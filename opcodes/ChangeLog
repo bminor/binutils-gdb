@@ -1,3 +1,8 @@
+2004-03-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* i386-dis.c (grps): Use clflush by default for 0x0fae/7.
+	(OP_E): Twiddle clflush to sfence here.
+
 2004-03-08  Nick Clifton  <nickc@redhat.com>
 
 	* po/de.po: Updated German translation.

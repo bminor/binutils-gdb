@@ -1,3 +1,7 @@
+2004-03-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/i386/katmai.d: Adjust for clflush change.
+
 2004-03-08  Andreas Jaeger  <aj@suse.de>
 
 	* gas/cfi/cfi-s390x-1.d: Adjust offsets.

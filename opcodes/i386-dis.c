@@ -1426,8 +1426,7 @@ static const struct dis386 grps[][8] = {
     { "(bad)",	XX, XX, XX },
     { "lfence", None, XX, XX },
     { "mfence", None, XX, XX },
-    { "sfence", None, XX, XX },
-    /* FIXME: the sfence with memory operand is clflush!  */
+    { "clflush", None, XX, XX },
   },
   /* GRP14 */
   {
@@ -3034,9 +3033,16 @@ OP_E (int bytemode, int sizeflag)
 	  used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	case 0:
-	  if (!(codep[-2] == 0xAE && codep[-1] == 0xF8 /* sfence */)
-	      && !(codep[-2] == 0xAE && codep[-1] == 0xF0 /* mfence */)
-	      && !(codep[-2] == 0xAE && codep[-1] == 0xe8 /* lfence */))
+	  if (codep[-2] == 0xAE && codep[-1] == 0xF8)
+	    /* sfence */
+	    strcpy (obuf + strlen (obuf) - sizeof ("clflush") + 1, "sfence");
+	  else if (codep[-2] == 0xAE && codep[-1] == 0xF0)
+	    /* mfence */
+	    ;
+	  else if (codep[-2] == 0xAE && codep[-1] == 0xe8)
+	    /* lfence */
+	    ;
+	  else
 	    BadOp ();	/* bad sfence,lea,lds,les,lfs,lgs,lss modrm */
 	  break;
 	default:
