@@ -1,3 +1,11 @@
+Wed Aug  7 11:05:47 1996  Fred Fish  <fnf@cygnus.com>
+
+	* configure.in (configdirs): Add gdb.threads.
+	* configure: Regenerated with autoconf.
+	* gdb.threads/{config.in, pthreads.c, pthreads.exp}: New.
+	* gdb.threads/{Makefile.in, configure.in}: Complete rewrites.
+	* gdb.threads/configure: New, generated with autoconf.
+	
 Tue Aug  6 10:23:04 1996  Tom Tromey  <tromey@rtl.cygnus.com>
 
 	* lib/gdb.exp (gdb_test_exact): Turn \n in pattern into \r\n.

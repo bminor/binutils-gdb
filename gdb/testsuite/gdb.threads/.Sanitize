@@ -24,7 +24,11 @@ Do-first:
 Things-to-keep:
 
 Makefile.in
+config.in
+configure
 configure.in
+pthreads.c
+pthreads.exp
 step.c
 step.exp
 step2.exp
