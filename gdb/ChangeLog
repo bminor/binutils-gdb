@@ -1,3 +1,11 @@
+2000-07-03  Chris Faylor  <cfg@cygnus.com>
+
+        Committed by Elena Zannoni <ezannoni@cygnus.com>
+	* sh-tdep.c (sh_skip_prologue): Change prologue matching for modern
+	compilers.
+	(sh_frame_find_saved_regs): Ditto.
+	(sh_find_callers_reg): Stop if pc is zero.
+
 Sat Jul  1 17:47:08 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* ser-unix.c (do_unix_readchar): Revert Tue Mar 28 18:19:50 2000

@@ -191,20 +191,24 @@ CORE_ADDR
 sh_skip_prologue (start_pc)
      CORE_ADDR start_pc;
 {
-  int w;
+  CORE_ADDR here, end;
 
-  w = read_memory_integer (start_pc, 2);
-  while (IS_STS (w)
-	 || IS_FMOV (w)
-	 || IS_PUSH (w)
-	 || IS_MOV_SP_FP (w)
-	 || IS_MOV_R3 (w)
-	 || IS_ADD_R3SP (w)
-	 || IS_ADD_SP (w)
-	 || IS_SHLL_R3 (w))
+  if (!start_pc)
+    return 0;
+
+  for (here = start_pc, end = start_pc + (2 * 28); here < end;)
     {
-      start_pc += 2;
-      w = read_memory_integer (start_pc, 2);
+      int w = read_memory_integer (here, 2);
+      here += 2;
+      if (IS_FMOV (w) || IS_PUSH (w) || IS_STS (w) || IS_MOV_R3 (w)
+	  || IS_ADD_R3SP (w) || IS_ADD_SP (w) || IS_SHLL_R3 (w))
+	start_pc = here;
+
+      if (IS_MOV_SP_FP (w))
+	{
+	  start_pc = here;
+	  break;
+	}
     }
 
   return start_pc;
@@ -236,7 +240,7 @@ sh_frame_chain (frame)
 {
   if (PC_IN_CALL_DUMMY (frame->pc, frame->frame, frame->frame))
     return frame->frame;	/* dummy frame same as caller's frame */
-  if (!inside_entry_file (frame->pc))
+  if (frame->pc && !inside_entry_file (frame->pc))
     return read_memory_integer (FRAME_FP (frame) + frame->f_offset, 4);
   else
     return 0;
@@ -263,6 +267,8 @@ sh_find_callers_reg (fi, regnum)
     else
       {
 	FRAME_FIND_SAVED_REGS (fi, fsr);
+	if (!fi->pc)
+	  return 0;
 	if (fsr.regs[regnum] != 0)
 	  return read_memory_integer (fsr.regs[regnum],
 				      REGISTER_RAW_SIZE (regnum));
@@ -300,10 +306,6 @@ sh_frame_find_saved_regs (fi, fsr)
       return;
     }
 
-  opc = pc = get_pc_function_start (fi->pc);
-
-  insn = read_memory_integer (pc, 2);
-
   fi->leaf_function = 1;
   fi->f_offset = 0;
 
@@ -316,22 +318,26 @@ sh_frame_find_saved_regs (fi, fsr)
      that does not appear to be part of the prologue.  But give up
      after 20 of them, since we're getting silly then. */
 
-  while (pc < opc + 20 * 2)
+  pc = get_pc_function_start (fi->pc);
+  if (!pc)
     {
+      fi->pc = 0;
+      return;
+    }
+
+  for (opc = pc + (2 * 28); pc < opc; pc += 2)
+    {
+      insn = read_memory_integer (pc, 2);
       /* See where the registers will be saved to */
       if (IS_PUSH (insn))
 	{
-	  pc += 2;
 	  rn = GET_PUSHED_REG (insn);
 	  where[rn] = depth;
-	  insn = read_memory_integer (pc, 2);
 	  depth += 4;
 	}
       else if (IS_STS (insn))
 	{
-	  pc += 2;
 	  where[PR_REGNUM] = depth;
-	  insn = read_memory_integer (pc, 2);
 	  /* If we're storing the pr then this isn't a leaf */
 	  fi->leaf_function = 0;
 	  depth += 4;
@@ -339,31 +345,21 @@ sh_frame_find_saved_regs (fi, fsr)
       else if (IS_MOV_R3 (insn))
 	{
 	  r3_val = ((insn & 0xff) ^ 0x80) - 0x80;
-	  pc += 2;
-	  insn = read_memory_integer (pc, 2);
 	}
       else if (IS_SHLL_R3 (insn))
 	{
 	  r3_val <<= 1;
-	  pc += 2;
-	  insn = read_memory_integer (pc, 2);
 	}
       else if (IS_ADD_R3SP (insn))
 	{
 	  depth += -r3_val;
-	  pc += 2;
-	  insn = read_memory_integer (pc, 2);
 	}
       else if (IS_ADD_SP (insn))
 	{
-	  pc += 2;
 	  depth -= ((insn & 0xff) ^ 0x80) - 0x80;
-	  insn = read_memory_integer (pc, 2);
 	}
       else if (IS_FMOV (insn))
 	{
-	  pc += 2;
-	  insn = read_memory_integer (pc, 2);
 	  if (read_register (FPSCR_REGNUM) & FPSCR_SZ)
 	    {
 	      depth += 8;
@@ -373,8 +369,14 @@ sh_frame_find_saved_regs (fi, fsr)
 	      depth += 4;
 	    }
 	}
+      else if (IS_MOV_SP_FP (insn))
+	break;
+#if 0 /* This used to just stop when it found an instruction that
+	 was not considered part of the prologue.  Now, we just
+	 keep going looking for likely instructions. */
       else
 	break;
+#endif
     }
 
   /* Now we know how deep things are, we can work out their addresses */
