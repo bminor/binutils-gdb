@@ -1,3 +1,11 @@
+2002-09-17  Corinna Vinschen  <vinschen@redhat.com>
+
+	* MAINTAINERS: Remove "non multi-arched" text from h8300.
+	* h8300-tdep.c (h8300_next_prologue_insn) Renamed from
+	NEXT_PROLOGUE_INSN.
+	(h8300_examine_prologue): Call h8300_next_prologue_insn instead of
+	NEXT_PROLOGUE_INSN.
+
 2002-09-16  Joel Brobecker  <brobecker@gnat.com>
 
 	* osfsolib.c: Remove file, replaced by solib-osf.c.

@@ -269,7 +269,7 @@ gdb_print_insn_h8300 (bfd_vma memaddr, disassemble_info * info)
    of the instruction. */
 
 static CORE_ADDR
-NEXT_PROLOGUE_INSN (CORE_ADDR addr, CORE_ADDR lim, unsigned short* pword1)
+h8300_next_prologue_insn (CORE_ADDR addr, CORE_ADDR lim, unsigned short* pword1)
 {
   char buf[2];
   if (addr < lim + 8)
@@ -335,7 +335,7 @@ h8300_examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
   if (ip == 0 || ip & (h8300hmode ? ~0xffffff : ~0xffff))
     return 0;
 
-  next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
+  next_ip = h8300_next_prologue_insn (ip, limit, &insn_word);
 
   if (insn_word == 0x0100)
     {
@@ -350,7 +350,7 @@ h8300_examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
       ip = next_ip + adjust;
 
       in_frame[insn_word & 0x7] = reg_save_depth;
-      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
+      next_ip = h8300_next_prologue_insn (ip, limit, &insn_word);
       reg_save_depth += 2 + adjust;
     }
 
@@ -358,7 +358,7 @@ h8300_examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
   if (next_ip && IS_MOV_SP_FP (insn_word))
     {
       ip = next_ip;
-      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
+      next_ip = h8300_next_prologue_insn (ip, limit, &insn_word);
       have_fp = 1;
     }
 
@@ -371,7 +371,7 @@ h8300_examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
 	{
 	  auto_depth += IS_SUB2_SP (insn_word) ? 2 : 4;
 	  ip = next_ip;
-	  next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
+	  next_ip = h8300_next_prologue_insn (ip, limit, &insn_word);
 	}
     }
   else
@@ -379,10 +379,10 @@ h8300_examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
       if (next_ip && IS_MOVK_R5 (insn_word))
 	{
 	  ip = next_ip;
-	  next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
+	  next_ip = h8300_next_prologue_insn (ip, limit, &insn_word);
 	  auto_depth += insn_word;
 
-	  next_ip = NEXT_PROLOGUE_INSN (next_ip, limit, &insn_word);
+	  next_ip = h8300_next_prologue_insn (next_ip, limit, &insn_word);
 	  auto_depth += insn_word;
 	}
       if (next_ip && IS_SUBL_SP (insn_word))
@@ -391,7 +391,7 @@ h8300_examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
 	  auto_depth += read_memory_unsigned_integer (ip, 4);
 	  ip += 4;
 
-	  next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
+	  next_ip = h8300_next_prologue_insn (ip, limit, &insn_word);
 	}
     }
 
@@ -406,14 +406,14 @@ h8300_examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
       if (insn_word == 0x0100)
 	{
 	  ip = next_ip;
-	  next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
+	  next_ip = h8300_next_prologue_insn (ip, limit, &insn_word);
 	  adjust = 2;
 	}
 
       if (IS_PUSH (insn_word))
 	{
 	  ip = next_ip;
-	  next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
+	  next_ip = h8300_next_prologue_insn (ip, limit, &insn_word);
 	  fsr[r] = after_prolog_fp + auto_depth;
 	  auto_depth += 2 + adjust;
 	  continue;
@@ -426,7 +426,7 @@ h8300_examine_prologue (register CORE_ADDR ip, register CORE_ADDR limit,
 	  int start, i;
 
 	  ip = next_ip;
-	  next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
+	  next_ip = h8300_next_prologue_insn (ip, limit, &insn_word);
 	  start = insn_word & 0x7;
 
 	  for (i = start; i <= start + count; i++)

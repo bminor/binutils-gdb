@@ -82,7 +82,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	h8300		--target=h8300hms -Werror
 			Maintenance only
-			Not multi-arch, work in progress
 
 	h8500		--target=h8500hms -Werror
 			Maintenance only
