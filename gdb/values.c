@@ -1180,8 +1180,11 @@ unpack_field_as_long (type, valaddr, fieldno)
   int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
   int lsbcount;
+  struct type *field_type;
 
   val = extract_unsigned_integer (valaddr + bitpos / 8, sizeof (val));
+  field_type = TYPE_FIELD_TYPE (type, fieldno);
+  CHECK_TYPEDEF (field_type);
 
   /* Extract bits.  See comment above. */
 
@@ -1198,7 +1201,7 @@ unpack_field_as_long (type, valaddr, fieldno)
     {
       valmask = (((ULONGEST) 1) << bitsize) - 1;
       val &= valmask;
-      if (!TYPE_UNSIGNED (TYPE_FIELD_TYPE (type, fieldno)))
+      if (!TYPE_UNSIGNED (field_type))
 	{
 	  if (val & (valmask ^ (valmask >> 1)))
 	    {

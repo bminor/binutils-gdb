@@ -52,6 +52,14 @@ end-sanitize-java
 	* (decode_line_1):  Move local variable defs into the block they are
 	used in.  (Improves code readability.)
 	
+Wed Jun 10 18:04:35 1998  Frank Ch. Eigler  <fche@cygnus.com>
+ 
+	* gdbtypes.c (get_discrete_bounds): Assign unsigned type flag for
+	all-positive enum.
+	(create_set_type): Ditto for all-positive set values.
+	* values.c (unpack_field_as_long): Check for typedef in struct
+	field unpacking.
+
 Wed Jun 10 14:06:05 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* configure.in: Add some tests for gnu-regex.c's benefit.

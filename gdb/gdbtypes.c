@@ -395,6 +395,12 @@ get_discrete_bounds (type, lowp, highp)
 	      if (TYPE_FIELD_BITPOS (type, i) > *highp)
 		*highp = TYPE_FIELD_BITPOS (type, i);
 	    }
+
+	  /* Set unsigned indicator if warranted. */
+	  if(*lowp >= 0)
+	    {
+	      TYPE_FLAGS (type) |= TYPE_FLAG_UNSIGNED;
+	    }
 	}
       else
 	{
@@ -519,6 +525,10 @@ create_set_type (result_type, domain_type)
 	= (bit_length + TARGET_CHAR_BIT - 1) / TARGET_CHAR_BIT;
     }
   TYPE_FIELD_TYPE (result_type, 0) = domain_type;
+
+  if(low_bound >= 0)
+    TYPE_FLAGS (result_type) |= TYPE_FLAG_UNSIGNED;
+
   return (result_type);
 }
 
