@@ -1,3 +1,7 @@
+2000-11-11  Bernd Schmidt  <bernds@cygnus.co.uk>
+
+	* elf32-sh.c (sh_elf_relocate_section): Ignore R_SH_NONE relocs.
+
 2000-11-10  Kazu Hirata  <kazu@hxi.com>
 
 	* coff-h8300.c: Fix formatting.

@@ -2904,6 +2904,8 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       if (r_type > (int) R_SH_LAST_INVALID_RELOC
 	  && r_type < (int) R_SH_LOOP_START)
 	continue;
+      if (r_type == (int) R_SH_NONE)
+	continue;
 
       if (r_type < 0
 	  || r_type >= R_SH_max
