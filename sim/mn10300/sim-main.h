@@ -20,11 +20,16 @@
     */
 
 
-#ifndef _SIM_MAIN_H_
-#define _SIM_MAIN_H_
+#ifndef SIM_MAIN_H
+#define SIM_MAIN_H
 
 #define WITH_CORE
 #define WITH_WATCHPOINTS 1
+
+/* FIXME: Need to set up things so that the generated file semantics.c
+   includes the contents of the file op_utils.c */
+#define SIM_MAIN_INLINE 0
+
 
 #include "sim-basics.h"
 #include "sim-signal.h"
@@ -63,8 +68,11 @@ static const sim_cia null_cia = {0}; /* Dummy */
 (sim_core_read_aligned_1(STATE_CPU(sd, 0), EA, exec_map, (EA) + (N)))
 
 
-#define CIA_GET(CPU) ((CPU)->cia)
-#define CIA_SET(CPU,VAL) ((CPU)->cia = (VAL))
+/* FIXME: For moment, save/restore PC value found in struct State.
+   Struct State will one day go away, being placed in the sim_cpu
+   state. */
+#define CIA_GET(CPU) ((PC) + 0)
+#define CIA_SET(CPU,VAL) ((CPU)->cia = (VAL), PC = (VAL))
 
 
 struct _sim_cpu {
