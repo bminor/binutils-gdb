@@ -40,7 +40,8 @@ SUBDIRS = libiberty readline bfd gdb binutils ld gas gcc gnulib clib
 OTHERS = 
 
 ALL = all.normal
-
+INSTALL_HEADERS = install-headers
+INSTALL_FIXED_INCLUDES = install-fixed-includes
 #### host and target specific makefile fragments come in here.
 ###
 
@@ -140,13 +141,13 @@ clean:
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 	$(MAKE) subdir_do DO=clean "DODIRS=$(SUBDIRS) $(OTHERS)"
 
-install: install-dirs install-fixed-includes
+install: install-dirs $(INSTALL_FIXED_INCLUDES)
 	$(MAKE) subdir_do DO=install "DODIRS=$(SUBDIRS) $(OTHERS)"
 
 # The "else true" stuff is for Ultrix; the shell returns the exit code
 # of the "if" command, if no commands are run in the "then" or "else" part,
 # causing Make to quit.
-install-dirs: force
+install-dirs: force $(INSTALL_HEADERS)
 	- mkdir $(ddestdir)
 	- mkdir $(ddestdir)/include
 	- mkdir $(ddestdir)/lib
@@ -168,6 +169,8 @@ install-dirs: force
 	- mkdir $(idestdir)/man/man6
 	- mkdir $(idestdir)/man/man7
 	- mkdir $(idestdir)/man/man8
+
+install-headers:
 	if [ -d $(unsubdir)/gcc$(subdir) ] ; then \
 		(cd  $(unsubdir)/gcc$(subdir) ; \
 				$(MAKE) install-dir) ; \
@@ -246,5 +249,7 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/fsf/texinfo.tex
 		| compress -v >gdb-$$VER.tar.Z)
 
 force_update:
+
+nothing:
 
 # end of Makefile.in
