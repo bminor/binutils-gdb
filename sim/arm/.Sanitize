@@ -31,7 +31,6 @@ Makefile.in
 Makefile.orig
 README.Cygnus
 README.orig
-arm.mt
 armcopro.c
 armdefs.h
 armemu.c
