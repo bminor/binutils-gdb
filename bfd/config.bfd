@@ -39,7 +39,7 @@ m88*)	targ_archs=bfd_m88k_arch ;;
 mips*)	targ_archs=bfd_mips_arch ;;
 powerpc*) targ_archs="bfd_rs6000_arch bfd_powerpc_arch" ;;
 rs6000)	targ_archs="bfd_rs6000_arch bfd_powerpc_arch" ;;
-sparc*)	targ_archs=bfd_sparc_arch ;;
+sparc*) targ_archs=bfd_sparc_arch ;;
 v850*)	targ_archs=bfd_v850_arch ;;
 z8k*)	targ_archs=bfd_z8k_arch ;;
 *)	targ_archs=bfd_${targ_cpu}_arch ;;
@@ -183,10 +183,11 @@ case "${targ}" in
 
   i[3456]86-*-sco3.2v5*coff)
     targ_defvec=i386coff_vec
+    targ_selvecs=bfd_elf32_i386_vec
     ;;
   i[3456]86-*-sysv4* | i[3456]86-*-unixware | i[3456]86-*-solaris2* | \
   i[3456]86-*-elf | i[3456]86-*-sco3.2v5* | i[3456]86-*-freebsdelf* | \
-  i[3456]86-*-dgux*)
+  i[3456]86-*-dgux* | i[3456]86-*-sysv5*)
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs=i386coff_vec
     ;;
@@ -523,7 +524,7 @@ case "${targ}" in
     targ_selvecs=sparcle_aout_vec
     targ_underscore=yes
     ;;
-  sparclite-*-elf*)
+  sparclite-*-elf* | sparc86x-*-elf*)
     targ_defvec=bfd_elf32_sparc_vec
     ;;
   sparc-*-linux*aout*)

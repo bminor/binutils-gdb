@@ -1,3 +1,7 @@
+Tue Apr 28 12:16:57 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* config.bfd:  Update OSR5/Unixware patterns.
+
 Mon Apr 27 18:02:24 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf.c (assign_file_positions_for_segments): Allow for holes
