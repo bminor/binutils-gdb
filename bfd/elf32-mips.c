@@ -4988,8 +4988,10 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  bfd_vma relocation;
 	  boolean local;
+	  boolean undefined_error;
 
 	  /* This is a final link.  */
+	  undefined_error = false;
 	  sym = NULL;
 	  if (r_symndx < extsymoff
 	      || (elf_bad_symtab (input_bfd)
@@ -5084,6 +5086,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			 (info, h->root.root.string, input_bfd,
 			  input_section, rel->r_offset)))
 		    return false;
+		  undefined_error = true;
 		  relocation = 0;
 		}
 	    }
@@ -5571,6 +5574,12 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      && relocation + addend == 0
 	      && h != NULL
 	      && h->root.type == bfd_link_hash_undefweak)
+	    r = bfd_reloc_ok;
+
+	  /* If we've already issued an error for an undefined symbol,
+             don't issue another useless error.  */
+	  if (undefined_error
+	      && (r == bfd_reloc_undefined || r == bfd_reloc_overflow))
 	    r = bfd_reloc_ok;
 
 	  if (SGI_COMPAT (abfd)

@@ -1,3 +1,8 @@
+Tue Jun  2 15:29:35 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-mips.c (mips_elf_relocate_section): If we issue an
+	undefined symbol error, don't also issue an overflow error.
+
 Tue Jun  2 13:51:00 1998  Geoff Keating  <geoffk@ozemail.com.au>
 
 	* elf32-ppc.c (ppc_elf_relocate_section): The target of an
