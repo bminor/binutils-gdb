@@ -45,6 +45,7 @@ ld
 libiberty
 libg++
 readline
+texinfo
 
 Do-last:
 
@@ -53,7 +54,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.5  1991/07/25 16:11:27  tiemann
+# Revision 1.6  1991/07/31 05:15:37  gnu
+# Add texinfo
+#
+# Revision 1.5  1991/07/25  16:11:27  tiemann
 # Don't eliminate libg++.  Jimmy Hoffa disappeared before libg++ was
 # even conceived.
 #
