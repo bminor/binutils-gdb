@@ -1,7 +1,7 @@
 /* GDB routines for manipulating objfiles.
 
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002 Free Software Foundation, Inc.
+   2001, 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -39,6 +39,7 @@
 #include <fcntl.h>
 #include "gdb_obstack.h"
 #include "gdb_string.h"
+#include "hashtab.h"
 
 #include "breakpoint.h"
 
@@ -191,6 +192,11 @@ allocate_objfile (bfd *abfd, int flags)
 	      objfile->md = md;
 	      objfile->mmfd = fd;
 	      /* Update pointers to functions to *our* copies */
+	      if (objfile->demangled_names_hash)
+		htab_set_functions_ex
+		  (objfile->demangled_names_hash, htab_hash_string,
+		   (int (*) (const void *, const void *)) streq, NULL,
+		   objfile->md, xmcalloc, xmfree);
 	      obstack_chunkfun (&objfile->psymbol_cache.cache, xmmalloc);
 	      obstack_freefun (&objfile->psymbol_cache.cache, xmfree);
 	      obstack_chunkfun (&objfile->macro_cache.cache, xmmalloc);
@@ -551,6 +557,8 @@ free_objfile (struct objfile *objfile)
       /* Free the obstacks for non-reusable objfiles */
       bcache_xfree (objfile->psymbol_cache);
       bcache_xfree (objfile->macro_cache);
+      if (objfile->demangled_names_hash)
+	htab_delete (objfile->demangled_names_hash);
       obstack_free (&objfile->psymbol_obstack, 0);
       obstack_free (&objfile->symbol_obstack, 0);
       obstack_free (&objfile->type_obstack, 0);

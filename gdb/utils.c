@@ -2357,6 +2357,14 @@ strcmp_iw (const char *string1, const char *string2)
     }
   return (*string1 != '\0' && *string1 != '(') || (*string2 != '\0');
 }
+
+/* A simple comparison function with opposite semantics to strcmp.  */
+
+int
+streq (const char *lhs, const char *rhs)
+{
+  return !strcmp (lhs, rhs);
+}
 
 
 /*

@@ -4950,8 +4950,10 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 					     sizeof (struct symbol));
       OBJSTAT (objfile, n_syms++);
       memset (sym, 0, sizeof (struct symbol));
-      SYMBOL_NAME (sym) = obsavestring (name, strlen (name),
-					&objfile->symbol_obstack);
+
+      /* Cache this symbol's name and the name's demangled form (if any).  */
+      SYMBOL_LANGUAGE (sym) = cu_language;
+      SYMBOL_SET_NAMES (sym, name, strlen (name), objfile);
 
       /* Default assumptions.
          Use the passed type or decode it from the die.  */
@@ -4966,15 +4968,6 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	{
 	  SYMBOL_LINE (sym) = DW_UNSND (attr);
 	}
-
-      /* If this symbol is from a C++ compilation, then attempt to
-         cache the demangled form for future reference.  This is a
-         typical time versus space tradeoff, that was decided in favor
-         of time because it sped up C++ symbol lookups by a factor of
-         about 20. */
-
-      SYMBOL_LANGUAGE (sym) = cu_language;
-      SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
       switch (die->tag)
 	{
 	case DW_TAG_label:

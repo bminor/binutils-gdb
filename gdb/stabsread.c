@@ -1329,23 +1329,13 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       if (refnum >= 0)
 	{
 	  if (nlen > 0)
-	    {
-	      SYMBOL_NAME (sym) = (char *)
-		obstack_alloc (&objfile->symbol_obstack, nlen);
-	      strncpy (SYMBOL_NAME (sym), s, nlen);
-	      SYMBOL_NAME (sym)[nlen] = '\0';
-	      SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
-	    }
+	    SYMBOL_SET_NAMES (sym, s, nlen, objfile);
 	  else
 	    /* FIXME! Want SYMBOL_NAME (sym) = 0;
 	       Get error if leave name 0.  So give it something. */
 	    {
 	      nlen = p - string;
-	      SYMBOL_NAME (sym) = (char *)
-		obstack_alloc (&objfile->symbol_obstack, nlen);
-	      strncpy (SYMBOL_NAME (sym), string, nlen);
-	      SYMBOL_NAME (sym)[nlen] = '\0';
-	      SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
+	      SYMBOL_SET_NAMES (sym, string, nlen, objfile);
 	    }
 	}
       /* Advance STRING beyond the reference id.  */
@@ -1355,29 +1345,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
     {
     normal:
       SYMBOL_LANGUAGE (sym) = current_subfile->language;
-      SYMBOL_NAME (sym) = (char *)
-	obstack_alloc (&objfile->symbol_obstack, ((p - string) + 1));
-      /* Open-coded memcpy--saves function call time.  */
-      /* FIXME:  Does it really?  Try replacing with simple strcpy and
-         try it on an executable with a large symbol table. */
-      /* FIXME: considering that gcc can open code memcpy anyway, I
-         doubt it.  xoxorich. */
-      {
-	register char *p1 = string;
-	register char *p2 = SYMBOL_NAME (sym);
-	while (p1 != p)
-	  {
-	    *p2++ = *p1++;
-	  }
-	*p2++ = '\0';
-      }
-
-      /* If this symbol is from a C++ compilation, then attempt to cache the
-         demangled form for future reference.  This is a typical time versus
-         space tradeoff, that was decided in favor of time because it sped up
-         C++ symbol lookups by a factor of about 20. */
-
-      SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
+      SYMBOL_SET_NAMES (sym, string, p - string, objfile);
     }
   p++;
 

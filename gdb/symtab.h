@@ -149,9 +149,15 @@ extern void symbol_init_language_specific (struct general_symbol_info *symbol,
 					   enum language language);
 
 #define SYMBOL_INIT_DEMANGLED_NAME(symbol,obstack) \
-  (symbol_init_demangled_name (&symbol->ginfo, (obstack)))
+  (symbol_init_demangled_name (&(symbol)->ginfo, (obstack)))
 extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
 					struct obstack *obstack);
+
+#define SYMBOL_SET_NAMES(symbol,name,len,objfile) \
+  symbol_set_names (&(symbol)->ginfo, name, len, objfile)
+extern void symbol_set_names (struct general_symbol_info *symbol,
+			      const char *name, int len,
+			      struct objfile *objfile);
 
 /* Return the demangled name for a symbol based on the language for
    that symbol.  If no demangled name exists, return NULL. */

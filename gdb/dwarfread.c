@@ -2780,8 +2780,6 @@ new_symbol (struct dieinfo *dip, struct objfile *objfile)
 					     sizeof (struct symbol));
       OBJSTAT (objfile, n_syms++);
       memset (sym, 0, sizeof (struct symbol));
-      SYMBOL_NAME (sym) = create_name (dip->at_name,
-				       &objfile->symbol_obstack);
       /* default assumptions */
       SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
       SYMBOL_CLASS (sym) = LOC_STATIC;
@@ -2793,7 +2791,7 @@ new_symbol (struct dieinfo *dip, struct objfile *objfile)
          C++ symbol lookups by a factor of about 20. */
 
       SYMBOL_LANGUAGE (sym) = cu_language;
-      SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
+      SYMBOL_SET_NAMES (sym, dip->at_name, strlen (dip->at_name), objfile);
       switch (dip->die_tag)
 	{
 	case TAG_label:

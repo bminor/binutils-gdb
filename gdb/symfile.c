@@ -44,6 +44,7 @@
 #include "gdb_obstack.h"
 #include "completer.h"
 #include "bcache.h"
+#include "hashtab.h"
 #include <readline/readline.h>
 #include "gdb_assert.h"
 
@@ -1983,6 +1984,11 @@ reread_symbols (void)
 	      objfile->psymbol_cache = bcache_xmalloc ();
 	      bcache_xfree (objfile->macro_cache);
 	      objfile->macro_cache = bcache_xmalloc ();
+	      if (objfile->demangled_names_hash != NULL)
+		{
+		  htab_delete (objfile->demangled_names_hash);
+		  objfile->demangled_names_hash = NULL;
+		}
 	      obstack_free (&objfile->psymbol_obstack, 0);
 	      obstack_free (&objfile->symbol_obstack, 0);
 	      obstack_free (&objfile->type_obstack, 0);
@@ -2684,7 +2690,6 @@ add_psymbol_to_list (char *name, int namelength, namespace_enum namespace,
   /* Create local copy of the partial symbol */
   memcpy (buf, name, namelength);
   buf[namelength] = '\0';
-  SYMBOL_NAME (&psymbol) = bcache (buf, namelength + 1, objfile->psymbol_cache);
   /* val and coreaddr are mutually exclusive, one of them *will* be zero */
   if (val != 0)
     {
@@ -2698,7 +2703,8 @@ add_psymbol_to_list (char *name, int namelength, namespace_enum namespace,
   SYMBOL_LANGUAGE (&psymbol) = language;
   PSYMBOL_NAMESPACE (&psymbol) = namespace;
   PSYMBOL_CLASS (&psymbol) = class;
-  SYMBOL_INIT_LANGUAGE_SPECIFIC (&psymbol, language);
+
+  SYMBOL_SET_NAMES (&psymbol, buf, namelength, objfile);
 
   /* Stash the partial symbol away in the cache */
   psym = bcache (&psymbol, sizeof (struct partial_symbol), objfile->psymbol_cache);
@@ -3706,5 +3712,4 @@ Usage: set extension-language .foo bar",
         &setlist));
   add_show_from_set (c, &showlist);
   set_cmd_completer (c, filename_completer);
-
 }

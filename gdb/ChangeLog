@@ -1,3 +1,39 @@
+2003-02-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* defs.h (streq): Add prototype.
+	* utils.c (streq): New function.
+
+	* dwarf2read.c (new_symbol): Use SYMBOL_SET_NAMES instead of
+	SYMBOL_NAME and SYMBOL_INIT_DEMANGLED_NAME.
+	* mdebugread.c (new_symbol): Likewise.
+	* stabsread.c (define_symbol): Likewise.
+	* coffread.c (process_coff_symbol): Likewise.
+	* dwarfread.c (new_symbol): Likewise.
+
+	* minsyms.c (prim_record_minimal_symbol_and_info): Use
+	SYMBOL_SET_NAMES instead of setting SYMBOL_NAME.  Set the language
+	here.
+	(install_minimal_symbols): Don't set SYMBOL_LANGUAGE or call
+	SYMBOL_INIT_DEMANGLED_NAME.
+	* objfiles.c: Include "hashtab.h".
+	(allocate_objfile): Call htab_set_functions_ex for the
+	demangled_names_hash.
+	(free_objfile): Call htab_delete for the demangled_names_hash.
+	* objfiles.h (struct htab): Add declaration.
+	(struct objfile): Add demangled_names_hash.
+	* symfile.c: Include "hashtab.h".
+	(reread_symbols): Call htab_delete for the demangled_names_hash.
+	(add_psymbol_to_list): Use SYMBOL_SET_NAMES instead of putting
+	SYMBOL_NAME in the bcache.
+	* symtab.c: Include "hashtab.h".  Update comments.
+	(create_demangled_names_hash, symbol_set_names): New functions.
+	(symbol_find_demangled_name): New function, broken out from
+	symbol_init_demangled_names.
+	(symbol_init_demangled_names): Use it.
+	* symtab.h (SYMBOL_INIT_DEMANGLED_NAME): Add missing parentheses.
+	(SYMBOL_SET_NAMES): New macro.
+	(symbol_set_names): Add prototype.
+
 2003-02-03  Jim Blandy  <jimb@redhat.com>
 
 	Use a single, consistent representation for an empty minimal

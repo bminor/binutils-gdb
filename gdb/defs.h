@@ -308,6 +308,8 @@ extern void notice_quit (void);
 
 extern int strcmp_iw (const char *, const char *);
 
+extern int streq (const char *, const char *);
+
 extern int subset_compare (char *, char *);
 
 extern char *safe_strerror (int);
