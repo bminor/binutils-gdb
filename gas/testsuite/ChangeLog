@@ -1,5 +1,8 @@
 2002-01-15  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* gas/elf/section2.e-m32r: New file.
+	* gas/elf/elf.exp: Use section2.e-m32r for m32r targets.
+
 	* gas/sh/dsp.d: Fix expected results.
 
 2002-01-14  Nick Clifton  <nickc@cambridge.redhat.com>
