@@ -1,5 +1,10 @@
 2004-05-07  Daniel Jacobowitz  <dan@debian.org>
 
+	* configure.in: Bump version to 2.14.92.
+	* configure: Regenerate.
+
+2004-05-07  Daniel Jacobowitz  <dan@debian.org>
+
 	Merge from mainline:
 	2004-04-16  Alan Modra  <amodra@bigpond.net.au>
 	* simple.c (bfd_simple_get_relocated_section_contents): Don't
