@@ -1,3 +1,9 @@
+Thu Mar 28 12:53:19 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure.in (sparc64-*-solaris2*): Delete.
+	Stick with sparc-*-solaris2*.
+	* configure: Regenerated.
+
 Thu Mar 28 06:51:26 1996  Fred Fish  <fnf@cygnus.com>
 
 	* valops.c (value_assign): Make copy of internal variable value

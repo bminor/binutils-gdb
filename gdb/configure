@@ -1946,7 +1946,7 @@ else
   echo "$ac_t""no" 1>&6
 fi
 
-    if test $ac_cv_lib_dnet_dnet_ntoa = no; then
+    if test $ac_cv_lib_dnet = no; then
       echo $ac_n "checking for -ldnet_stub""... $ac_c" 1>&6
 ac_lib_var=`echo dnet_stub_dnet_ntoa | tr '.-/+' '___p'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
@@ -3275,7 +3275,12 @@ sparc-*-*)		gdb_target=sun4os4 ;;
 # Use sparc-em for sparclet for now.
 sparclet-*-*)		gdb_target=sparc-em ;;
 sparclite*-*-*)		gdb_target=sparclite ;;
-sparc64-*-solaris2*)	gdb_target=sp64sol2 ;;
+# It's not clear what the right solution for "v8plus" systems is yet.
+# For now, stick with sparc-sun-solaris2 since that's what config.guess
+# should return.  Work is still needed to get gdb to print the 64 bit
+# regs (some of which are usable in v8plus) so sp64sol.mt hasn't been
+# deleted though presumably it should be eventually.
+#sparc64-*-solaris2*)	gdb_target=sp64sol2 ;;
 sparc64-*-*)		gdb_target=sp64 ;;
 
 tahoe-*-*)		gdb_target=tahoe ;;
