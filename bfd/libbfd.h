@@ -242,7 +242,7 @@ extern boolean _bfd_archive_coff_construct_extended_name_table
 #define _bfd_norelocs_canonicalize_reloc \
   ((long (*) PARAMS ((bfd *, asection *, arelent **, asymbol **))) _bfd_n1)
 #define _bfd_norelocs_bfd_reloc_type_lookup \
-  ((const reloc_howto_type *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) \
+  ((reloc_howto_type *(*) PARAMS ((bfd *, bfd_reloc_code_real_type))) \
    bfd_nullvoidptr)
 
 /* Routines to use for BFD_JUMP_TABLE_WRITE for targets which may not
@@ -358,12 +358,12 @@ extern unsigned int _bfd_count_link_order_relocs
 
 /* Final link relocation routine.  */
 extern bfd_reloc_status_type _bfd_final_link_relocate
-  PARAMS ((const reloc_howto_type *, bfd *, asection *, bfd_byte *,
+  PARAMS ((reloc_howto_type *, bfd *, asection *, bfd_byte *,
 	   bfd_vma address, bfd_vma value, bfd_vma addend));
 
 /* Relocate a particular location by a howto and a value.  */
 extern bfd_reloc_status_type _bfd_relocate_contents
-  PARAMS ((const reloc_howto_type *, bfd *, bfd_vma, bfd_byte *));
+  PARAMS ((reloc_howto_type *, bfd *, bfd_vma, bfd_byte *));
 
 /* Create a string table.  */
 extern struct bfd_strtab_hash *_bfd_stringtab_init PARAMS ((void));
@@ -553,6 +553,10 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_ARM_SWI",
   "BFD_RELOC_ARM_MULTI",
   "BFD_RELOC_ARM_CP_OFF_IMM",
+/* start-sanitize-arc */
+  "BFD_RELOC_ARC_B22_PCREL",
+/* end-sanitize-arc */
+
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif

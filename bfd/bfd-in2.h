@@ -537,6 +537,9 @@ extern boolean bfd_ecoff_write_accumulated_debug
   PARAMS ((PTR handle, bfd *abfd, struct ecoff_debug_info *debug,
 	   const struct ecoff_debug_swap *swap,
 	   struct bfd_link_info *info, file_ptr where));
+extern boolean bfd_mips_ecoff_create_embedded_relocs
+  PARAMS ((bfd *, struct bfd_link_info *, struct sec *, struct sec *,
+	   char **));
 
 /* Externally visible ELF routines.  */
 
@@ -1168,7 +1171,7 @@ enum complain_overflow
 };
 
 typedef unsigned char bfd_byte;
-typedef struct reloc_howto_struct reloc_howto_type;
+typedef const struct reloc_howto_struct reloc_howto_type;
 
 struct reloc_howto_struct
 {
@@ -1267,7 +1270,7 @@ struct reloc_howto_struct
   }                                            \
 }
 int 
-bfd_get_reloc_size  PARAMS ((const reloc_howto_type *));
+bfd_get_reloc_size  PARAMS ((reloc_howto_type *));
 
 typedef struct relent_chain {
   arelent relent;

@@ -96,7 +96,7 @@ static void mips_elf_relocate_hi16
 	   bfd_vma));
 static boolean mips_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
-	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **, char *));
+	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static boolean mips_elf_add_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
@@ -1043,6 +1043,11 @@ mips_elf_section_from_bfd_section (abfd, hdr, sec, retval)
   if (strcmp (bfd_get_section_name (abfd, sec), ".scommon") == 0)
     {
       *retval = SHN_MIPS_SCOMMON;
+      return true;
+    }
+  if (strcmp (bfd_get_section_name (abfd, sec), ".acommon") == 0)
+    {
+      *retval = SHN_MIPS_ACOMMON;
       return true;
     }
   return false;
@@ -2151,8 +2156,7 @@ mips_elf_relocate_hi16 (input_bfd, relhi, rello, contents, addend)
 
 static boolean
 mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
-			   contents, relocs, local_syms, local_sections,
-			   output_names)
+			   contents, relocs, local_syms, local_sections)
      bfd *output_bfd;
      struct bfd_link_info *info;
      bfd *input_bfd;
@@ -2161,7 +2165,6 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
      Elf_Internal_Rela *relocs;
      Elf_Internal_Sym *local_syms;
      asection **local_sections;
-     char *output_names;
 {
   Elf_Internal_Shdr *symtab_hdr;
   size_t locsymcount;
@@ -2187,7 +2190,7 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   for (; rel < relend; rel++)
     {
       int r_type;
-      const reloc_howto_type *howto;
+      reloc_howto_type *howto;
       long r_symndx;
       bfd_vma addend;
       struct elf_link_hash_entry *h;
@@ -2375,7 +2378,9 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  name = h->root.root.string;
 		else
 		  {
-		    name = output_names + sym->st_name;
+		    name = elf_string_from_elf_section (input_bfd,
+							symtab_hdr->sh_link,
+							sym->st_name);
 		    if (name == NULL)
 		      return false;
 		    if (*name == '\0')

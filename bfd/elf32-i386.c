@@ -973,7 +973,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
   for (; rel < relend; rel++)
     {
       int r_type;
-      const reloc_howto_type *howto;
+      reloc_howto_type *howto;
       long r_symndx;
       struct elf_link_hash_entry *h;
       Elf_Internal_Sym *sym;

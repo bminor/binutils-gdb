@@ -287,7 +287,7 @@ CODE_FRAGMENT
 .struct symbol_cache_entry;		{* Forward declaration *}
 .
 .typedef unsigned char bfd_byte;
-.typedef struct reloc_howto_struct reloc_howto_type;
+.typedef const struct reloc_howto_struct reloc_howto_type;
 .
 .struct reloc_howto_struct
 .{
@@ -413,7 +413,7 @@ FUNCTION
 	bfd_get_reloc_size
 
 SYNOPSIS
-	int bfd_get_reloc_size (const reloc_howto_type *);
+	int bfd_get_reloc_size (reloc_howto_type *);
 
 DESCRIPTION
 	For a reloc_howto_type that operates on a fixed number of bytes,
@@ -422,7 +422,7 @@ DESCRIPTION
 
 int
 bfd_get_reloc_size (howto)
-     const reloc_howto_type *howto;
+     reloc_howto_type *howto;
 {
   switch (howto->size)
     {
@@ -500,7 +500,7 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
   bfd_reloc_status_type flag = bfd_reloc_ok;
   bfd_size_type addr = reloc_entry->address;
   bfd_vma output_base = 0;
-  const reloc_howto_type *howto = reloc_entry->howto;
+  reloc_howto_type *howto = reloc_entry->howto;
   asection *reloc_target_output_section;
   asymbol *symbol;
 
@@ -961,7 +961,7 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
   bfd_reloc_status_type flag = bfd_reloc_ok;
   bfd_size_type addr = reloc_entry->address;
   bfd_vma output_base = 0;
-  const reloc_howto_type *howto = reloc_entry->howto;
+  reloc_howto_type *howto = reloc_entry->howto;
   asection *reloc_target_output_section;
   asymbol *symbol;
   bfd_byte *data;
@@ -1395,7 +1395,7 @@ space consuming.  For each target:
 bfd_reloc_status_type
 _bfd_final_link_relocate (howto, input_bfd, input_section, contents, address,
 			  value, addend)
-     const reloc_howto_type *howto;
+     reloc_howto_type *howto;
      bfd *input_bfd;
      asection *input_section;
      bfd_byte *contents;
@@ -1441,7 +1441,7 @@ _bfd_final_link_relocate (howto, input_bfd, input_section, contents, address,
 
 bfd_reloc_status_type
 _bfd_relocate_contents (howto, input_bfd, relocation, location)
-     const reloc_howto_type *howto;
+     reloc_howto_type *howto;
      bfd *input_bfd;
      bfd_vma relocation;
      bfd_byte *location;
@@ -2005,6 +2005,18 @@ ENUMX
 ENUMDOC
   These relocs are only used within the ARM assembler.  They are not
   (at present) written to any object files.
+
+COMMENT
+{* start-sanitize-arc *}
+ENUM
+  BFD_RELOC_ARC_B22_PCREL
+ENUMDOC
+  Argonaut RISC Core (ARC) relocs.
+  ARC 22 bit pc-relative branch.  The lowest two bits must be zero and are
+  not stored in the instruction.  High 20 bits installed in bits 7 through 26
+  of instruction.
+COMMENT
+{* end-sanitize-arc *}
 
 ENDSENUM
   BFD_RELOC_UNUSED

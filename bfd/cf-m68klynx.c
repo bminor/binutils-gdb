@@ -104,7 +104,7 @@ _bfd_m68klynx_special_fn (abfd, reloc_entry, symbol, data, input_section,
 
   if (diff != 0)
     {
-      const reloc_howto_type *howto = reloc_entry->howto;
+      reloc_howto_type *howto = reloc_entry->howto;
       unsigned char *addr = (unsigned char *) data + reloc_entry->address;
 
       switch (howto->size)

@@ -26,13 +26,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/internal.h"
 #include "libcoff.h"
 
-static bfd_reloc_status_type coff_i386_reloc PARAMS ((bfd *abfd,
-						      arelent *reloc_entry,
-						      asymbol *symbol,
-						      PTR data,
-						      asection *input_section,
-						      bfd *output_bfd,
-						      char **error_message));
+static bfd_reloc_status_type coff_i386_reloc 
+  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
+static const struct reloc_howto_struct *coff_i386_rtype_to_howto
+  PARAMS ((bfd *, asection *, struct internal_reloc *,
+	   struct coff_link_hash_entry *, struct internal_syment *,
+	   bfd_vma *));
+
+#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
+
+/* The page size is a guess based on ELF.  */
+#define COFF_PAGE_SIZE 0x1000
 
 /* For some reason when using i386 COFF the value stored in the .text
    section for a reference to a common symbol is the value itself plus
@@ -88,7 +92,7 @@ coff_i386_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 
   if (diff != 0)
     {
-      const reloc_howto_type *howto = reloc_entry->howto;
+      reloc_howto_type *howto = reloc_entry->howto;
       unsigned char *addr = (unsigned char *) data + reloc_entry->address;
 
       switch (howto->size)
@@ -242,7 +246,7 @@ static reloc_howto_type howto_table[] =
 #define I386 1			/* Customize coffcode.h */
 
 #define RTYPE2HOWTO(cache_ptr, dst) \
-	    cache_ptr->howto = howto_table + (dst)->r_type;
+	    (cache_ptr)->howto = howto_table + (dst)->r_type;
 
 /* On SCO Unix 3.2.2 the native assembler generates two .data
    sections.  We handle that by renaming the second one to .data2.  It
@@ -287,16 +291,57 @@ static reloc_howto_type howto_table[] =
       cache_ptr->addend += asect->vma;				\
   }
 
+/* We use the special COFF backend linker.  */
+#define coff_relocate_section _bfd_coff_generic_relocate_section
+
+static const struct reloc_howto_struct *
+coff_i386_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
+     bfd *abfd;
+     asection *sec;
+     struct internal_reloc *rel;
+     struct coff_link_hash_entry *h;
+     struct internal_syment *sym;
+     bfd_vma *addendp;
+{
+  const struct reloc_howto_struct *howto;
+
+  howto = howto_table + rel->r_type;
+
+  if (howto->pc_relative)
+    *addendp += sec->vma;
+
+  if (sym != NULL && sym->n_scnum == 0 && sym->n_value != 0)
+    {
+      /* This is a common symbol.  The section contents include the
+	 size (sym->n_value) as an addend.  The relocate_section
+	 function will be adding in the final value of the symbol.  We
+	 need to subtract out the current size in order to get the
+	 correct result.  */
+      BFD_ASSERT (h != NULL);
+      *addendp -= sym->n_value;
+    }
+
+  /* If the output symbol is common (in which case this must be a
+     relocateable link), we need to add in the final size of the
+     common symbol.  */
+  if (h != NULL && h->root.type == bfd_link_hash_common)
+    *addendp += h->root.u.c.size;
+
+  return howto;
+}
+
+#define coff_rtype_to_howto coff_i386_rtype_to_howto
+
 #include "coffcode.h"
 
-static bfd_target *
+static const bfd_target *
 i3coff_object_p(a)
      bfd *a;
 {
   return coff_object_p(a);
 }
 
-bfd_target
+const bfd_target
 #ifdef TARGET_SYM
   TARGET_SYM =
 #else
@@ -314,10 +359,14 @@ bfd_target
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT | D_PAGED),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
+#ifdef TARGET_UNDERSCORE
+  TARGET_UNDERSCORE,		/* leading underscore */
+#else
   0,				/* leading underscore */
+#endif
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 
@@ -345,6 +394,7 @@ bfd_target
      BFD_JUMP_TABLE_RELOCS (coff),
      BFD_JUMP_TABLE_WRITE (coff),
      BFD_JUMP_TABLE_LINK (coff),
+     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
 
   COFF_SWAP_TABLE,
 };

@@ -1,3 +1,17 @@
+Wed Jan 11 21:31:41 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* reloc.c (reloc_howto_type): Make typedef include `const'.
+	* aout-ns32k.c, aoutx.h, bout.c, cf-m68klynx.c, coff-i386.c,
+	coff-i960.c, coff-m68k.c, cofflink.c, cpu-ns32k.c, ecoff.c,
+	elf32-hppa.c, elf32-i386.c, elf32-mips.c, elf32-sparc.c,
+	elfcode.h, libbfd-in.h, linker.c, mipsbsd.c, nlm32-ppc.c, oasys.c,
+	reloc.c, som.c: Don't use `const' in combination with
+	`reloc_howto_type'.
+start-sanitize-arc
+	* elf32-arc.c: Ditto.
+end-sanitize-arc
+	* bfd-in2.h, libbfd.h: Regenerated.
+
 Wed Jan 11 14:36:41 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* sunos.c (sunos_add_one_symbol): Don't core dump if a multiple

@@ -30,6 +30,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define LYNX_SPECIAL_FN 0
 #endif
 
+#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (1)
+
 /* The page size is a guess based on ELF.  */
 #define COFF_PAGE_SIZE 0x2000
 
@@ -37,6 +39,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define m68kcoff_howto_table	_bfd_m68kcoff_howto_table
 #define m68k_rtype2howto	_bfd_m68kcoff_rtype2howto
 #define m68k_howto2rtype	_bfd_m68kcoff_howto2rtype
+#define m68k_reloc_type_lookup	_bfd_m68kcoff_reloc_type_lookup
 
 #ifdef ONLY_DECLARE_RELOCS
 extern reloc_howto_type m68kcoff_howto_table[];
@@ -63,7 +66,7 @@ reloc_howto_type m68kcoff_howto_table[] =
 #ifdef ONLY_DECLARE_RELOCS
 extern void m68k_rtype2howto PARAMS ((arelent *internal, int relocentry));
 extern int m68k_howto2rtype PARAMS ((CONST struct reloc_howto_struct *));
-extern const reloc_howto_type *_bfd_coff_m68k_reloc_type_lookup
+extern reloc_howto_type *m68k_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 #else
 void
@@ -108,8 +111,8 @@ m68k_howto2rtype (internal)
   return R_RELLONG;    
 }
 
-const reloc_howto_type *
-_bfd_coff_m68k_reloc_type_lookup (abfd, code)
+reloc_howto_type *
+m68k_reloc_type_lookup (abfd, code)
      bfd *abfd;
      bfd_reloc_code_real_type code;
 {
@@ -136,7 +139,9 @@ _bfd_coff_m68k_reloc_type_lookup (abfd, code)
 #define SELECT_RELOC(external, internal) \
   external.r_type = m68k_howto2rtype(internal);
 
-#define coff_bfd_reloc_type_lookup _bfd_coff_m68k_reloc_type_lookup
+#define coff_bfd_reloc_type_lookup m68k_reloc_type_lookup
+
+#define coff_relocate_section _bfd_coff_generic_relocate_section
 
 #include "coffcode.h"
 

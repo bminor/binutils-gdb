@@ -723,6 +723,16 @@ NAME(aout,machine_type) (arch, machine, unknown)
     }
     break;
 
+  case bfd_arch_vax:
+    *unknown = false;
+    break;
+
+    /* start-sanitize-rce */
+  case bfd_arch_rce:
+    arch_flags = M_RCE;
+    break;
+    /* end-sanitize-rce */
+
   default:
     arch_flags = M_UNKNOWN;
   }
@@ -813,6 +823,8 @@ adjust_o_magic (abfd, execp)
       vma += pad;
       obj_datasec(abfd)->vma = vma;
     }
+  else
+    vma = obj_datasec(abfd)->vma;
   obj_datasec(abfd)->filepos = pos;
   pos += obj_datasec(abfd)->_raw_size;
   vma += obj_datasec(abfd)->_raw_size;
@@ -2729,11 +2741,26 @@ NAME(aout,link_add_symbols) (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
+  bfd *first;
+
   switch (bfd_get_format (abfd))
     {
     case bfd_object:
       return aout_link_add_object_symbols (abfd, info);
     case bfd_archive:
+      first = bfd_openr_next_archived_file (abfd, (bfd *) NULL);
+      if (first == NULL)
+	return false;
+      if (! bfd_check_format (first, bfd_object))
+	return false;
+      if (bfd_get_flavour (first) != bfd_target_aout_flavour)
+	{
+	  /* On Linux, we may have an ELF archive which got recognized
+             as an a.out archive.  Therefore, we treat all archives as
+             though they were actually of the flavour of their first
+             element.  */
+	  return (*first->xvec->_bfd_link_add_symbols) (abfd, info);
+	}
       return _bfd_generic_link_add_archive_symbols
 	(abfd, info, aout_link_check_archive_element);
     default:
@@ -4844,7 +4871,7 @@ aout_link_reloc_link_order (finfo, o, p)
   struct bfd_link_order_reloc *pr;
   int r_index;
   int r_extern;
-  const reloc_howto_type *howto;
+  reloc_howto_type *howto;
   file_ptr *reloff_ptr;
   struct reloc_std_external srel;
   struct reloc_ext_external erel;
@@ -4897,7 +4924,7 @@ aout_link_reloc_link_order (finfo, o, p)
     }
 
   howto = bfd_reloc_type_lookup (finfo->output_bfd, pr->reloc);
-  if (howto == (const reloc_howto_type *) NULL)
+  if (howto == 0)
     {
       bfd_set_error (bfd_error_bad_value);
       return false;
