@@ -704,6 +704,14 @@ proc test_print_svi_classes {} {
 	-re ".* = \{\<vA\> = \{va = 3, vx = 4\}, _vptr.vB = $hex, vb = 5, vx = 6\}$nl$gdb_prompt $" {
 	    pass "print g_vB (FIXME v3 vtbl ptr)"
 	}
+	-re ".* = \{\<vA\> = \{va = 3, vx = 4\}, _vptr.vB = $hex <VTT for vB>, vb = 5, vx = 6\}$nl$gdb_prompt $" {
+	    # Happens with gcc 3.3 -gstabs+
+	    # Does not happen with gcc 3.2.3 -gstabs+.
+	    # Does not happen gcc HEAD%20030624 (pre-3.4) -gstabs+.
+	    # -- chastain 2003-06-29
+	    pass "print g_vB"
+	}
+
 	-re ".*invalid address 0x0.*$gdb_prompt $" {
 	    # Does not happen with gcc cygnus-2.4.5-930828
 	    fail "print g_vB (known bug with gcc cygnus-2.4.5-930417)"
@@ -729,6 +737,13 @@ proc test_print_svi_classes {} {
 	}
 	-re ".* = \{\<vA\> = \{va = 7, vx = 8\}, _vptr.vC = $hex, vc = 9, vx = 10\}$nl$gdb_prompt $" {
 	    pass "print g_vC (FIXME v3 vtbl ptr)"
+	}
+	-re ".* = \{\<vA\> = \{va = 7, vx = 8\}, _vptr.vC = $hex <VTT for vC>, vc = 9, vx = 10\}$nl$gdb_prompt $" {
+	    # Happens with gcc 3.3 -gstabs+
+	    # Does not happen with gcc 3.2.3 -gstabs+.
+	    # Does not happen gcc HEAD%20030624 (pre-3.4) -gstabs+.
+	    # -- chastain 2003-06-29
+	    pass "print g_vC"
 	}
 	-re ".*$gdb_prompt $" { fail "print g_vC" }
 	timeout { fail "print g_vC (timeout)" }
@@ -905,6 +920,13 @@ proc test_print_mvi_classes {} {
 	}
 	-re ".* = \{\<vB\> = \{\<vA\> = \{va = 19, vx = 20\}, _vptr.vB = $hex, vb = 21, vx = 22\}, \<vC\> = \{_vptr.vC = $hex, vc = 23, vx = 24\}, _vptr.vD = $hex, vd = 25, vx = 26\}$nl$gdb_prompt $" {
 	    pass "print g_vD (FIXME v3 vtbl ptr)"
+	}
+	-re ".* = \{\<vB\> = \{\<vA\> = \{va = 19, vx = 20\}, _vptr.vB = $hex, vb = 21, vx = 22\}, \<vC\> = \{_vptr.vC = $hex <VTT for vD>, vc = 23, vx = 24\}, _vptr.vD = $hex, vd = 25, vx = 26\}$nl$gdb_prompt $" {
+	    # Happens with gcc 3.3 -gstabs+
+	    # Does not happen with gcc 3.2.3 -gstabs+.
+	    # Does not happen gcc HEAD%20030624 (pre-3.4) -gstabs+.
+	    # -- chastain 2003-06-29
+	    pass "print g_vD"
 	}
 	-re ".*invalid address 0x0.*$gdb_prompt $" {
 	    # Does not happen with gcc cygnus-2.4.5-930828

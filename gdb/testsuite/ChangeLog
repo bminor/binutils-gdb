@@ -1,3 +1,8 @@
+2003-06-29  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/inherit.exp (test_print_svi_classes): Accept gdb
+	output of '<VTT for class>' for virtual base classes.
+
 2003-06-29  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/completion.exp: Tab-complete "complet" instead of
