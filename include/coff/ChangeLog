@@ -1,3 +1,12 @@
+Wed May  1 19:21:03 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* internal.h (SCNNMLEN): Define.
+	(struct internal_scnhdr): Use SCNNMLEN for s_name field.
+
+Fri Mar 29 13:41:25 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* pe.h: Define IMAGE_COMDAT codes.
+
 Wed Mar 27 17:29:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* arm.h (union external_auxent): Add x_checksum, x_associated, and

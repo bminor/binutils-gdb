@@ -1,6 +1,9 @@
 /* Internal format of COFF object file data structures, for GNU BFD.
    This file is part of BFD, the Binary File Descriptor library.  */
 
+#ifndef GNU_COFF_INTERNAL_H
+#define GNU_COFF_INTERNAL_H 1
+
 /* First, make "signed char" work, even on old compilers. */
 #ifndef signed
 #ifndef __STDC__
@@ -158,6 +161,7 @@ struct internal_aouthdr
   short o_algntext;		/* max alignment for text	*/
   short o_algndata;		/* max alignment for data	*/
   short o_modtype;		/* Module type field, 1R,RE,RO	*/
+  short o_cputype;		/* Encoded CPU type		*/
   unsigned long o_maxstack;	/* max stack size allowed.	*/
   unsigned long o_maxdata;	/* max data size allowed.	*/
 
@@ -213,6 +217,7 @@ struct internal_aouthdr
 
 /* New storage classes for WINDOWS_NT   */
 #define C_SECTION       104     /* section name */
+#define C_NT_WEAK	105	/* weak external */
 
  /* New storage classes for 80960 */
 
@@ -254,9 +259,12 @@ struct internal_aouthdr
 #define C_ESTAT         (0x90)
 
 /********************** SECTION HEADER **********************/
+
+#define SCNNMLEN (8)
+
 struct internal_scnhdr
 {
-  char s_name[8];		/* section name			*/
+  char s_name[SCNNMLEN];	/* section name			*/
   bfd_vma s_paddr;		/* physical address, aliased s_nlib */
   bfd_vma s_vaddr;		/* virtual address		*/
   bfd_vma s_size;		/* section size			*/
@@ -452,6 +460,9 @@ union internal_auxent
     long x_scnlen;		/* section length */
     unsigned short x_nreloc;	/* # relocation entries */
     unsigned short x_nlinno;	/* # line numbers */
+    unsigned long x_checksum;	/* section COMDAT checksum for PE */
+    unsigned short x_associated; /* COMDAT associated section index for PE */
+    unsigned char x_comdat;	/* COMDAT selection number for PE */
   }      x_scn;
 
   struct
@@ -502,7 +513,7 @@ union internal_auxent
 #define	XMC_UA	4		/* Read-write unclassified */
 #define	XMC_RW	5		/* Read-write data */
 #define	XMC_GL	6		/* Read-only global linkage */
-#define	XMC_XO	7		/* Read-only extended operation (simulated insn) */
+#define	XMC_XO	7		/* Read-only extended operation */
 #define	XMC_SV	8		/* Read-only supervisor call */
 #define	XMC_BS	9		/* Read-write BSS */
 #define	XMC_DS	10		/* Read-write descriptor csect */
@@ -510,8 +521,8 @@ union internal_auxent
 #define	XMC_TI	12		/* Read-only traceback index csect */
 #define	XMC_TB	13		/* Read-only traceback table csect */
 /* 		14	??? */
-#define	XMC_TC0	15		/* Read-write TOC anchor for TOC addressability */
-
+#define	XMC_TC0	15		/* Read-write TOC anchor */
+#define XMC_TD	16		/* Read-write data in TOC */
 
   /******************************************
    *  I960-specific *2nd* aux. entry formats
@@ -592,6 +603,11 @@ struct internal_reloc
 #define R_MOVLB1    	0x48	/* Special h8 24bit or 8 bit reloc for mov.b 	*/
 #define R_MOVLB2 	0x49	/* Special h8 opcode for 8bit which could be 24 */
 
+/* An h8300 memory indirect jump/call.  Forces the address of the jump/call
+   target into the function vector (in page zero), and the address of the
+   vector entry to be placed in the jump/call instruction.  */
+#define R_MEM_INDIRECT	0x4a
+
 /* Z8k modes */
 #define R_IMM16   0x01		/* 16 bit abs */
 #define R_JR	  0x02		/* jr  8 bit disp */
@@ -635,3 +651,4 @@ struct internal_reloc
 
 #define R_W65_DP       10  /* direct page 8 bits only   */
 
+#endif /* GNU_COFF_INTERNAL_H */
