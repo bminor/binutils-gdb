@@ -1,3 +1,10 @@
+Tue Aug 13 17:39:24 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-ppc.h (TC_FORCE_RELOCTION): Define if OBJ_XCOFF.
+	(ppc_force_relocation): Declare if OBJ_XCOFF.
+	* config/tc-ppc.c (ppc_force_relocation): New function if
+	OBJ_XCOFF.
+
 Mon Aug 12 16:49:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.h (BYTE_ORDER): Don't define.  No longer used.
