@@ -1,3 +1,14 @@
+2002-06-21  Grace Sainsbury  <graces@redhat.com>
+
+	* m68k-tdep.c (m68k_frame_init_saved_regs): Replaced
+        m68k_find_saved_regs.
+        (m68k_pop_frame): Removed saved_regs structure, and replaced
+        references to it with frasme->saved_regs.
+        (m68k_gdbarch_init): Added function calls to initialize the
+        gdbarch structure.
+        * config/m68k/tm-m68k.h: Removed FRAME_FIND_SAVED_REGS and
+        macros associated with CALL_DUMMY
+
 2002-06-19  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* parse.c (parse_fprintf): New function used to avoid calls to
