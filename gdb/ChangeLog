@@ -1,3 +1,8 @@
+Tue Sep 14 18:37:17 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/i386/i386v4.mh (NATDEPFILES): Move exec.o from here...
+	* config/i386/i386v4.mt (TDEPFILES): ...to here.
+
 Tue Sep 14 12:21:49 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* Makefile.in (remote_utils_h): add serial.h and target.h.
