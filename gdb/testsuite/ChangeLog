@@ -1,3 +1,7 @@
+Fri Apr 21 15:44:02 1995  Stu Grossman  (grossman@rtl.cygnus.com)
+
+	* cpu32bug.exp est.exp rom68k.exp:  Delete.  Unify into monitor.exp.
+
 Wed Apr 19 17:41:21 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* config/est.exp:  Fix copyright and comments.  Remove dead code.
