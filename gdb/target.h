@@ -559,8 +559,10 @@ child_pid_to_exec_file PARAMS ((int));
 extern char *
 child_core_file_to_sym_file PARAMS ((char *));
 
+#if defined(CHILD_POST_ATTACH)
 extern void
 child_post_attach PARAMS ((int));
+#endif
 
 extern void
 child_post_wait PARAMS ((int, int));
