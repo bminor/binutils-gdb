@@ -1,5 +1,12 @@
 Tue Feb 25 13:17:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in ($(OBJS)): Don't depend upon $(IT_HDRS).
+	(TARG_CPU_DEP_mips): Depend upon $(srcdir)/itbl-ops.h.
+	(itbl-lex.o): Depend upon itbl-parse.h.
+
+	* itbl-parse.y (yyerror): Change return type to int.  Change to
+	use old style function declaration.
+
 	* Makefile.in (itbl-lex.o): Remove -Wall.
 	(itbl-parse.o): Likewise.
 
