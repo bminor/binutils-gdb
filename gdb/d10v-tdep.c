@@ -57,7 +57,7 @@ struct gdbarch_tdep
   };
 
 /* These are the addresses the D10V-EVA board maps data and
-   instruction memory to. */
+   instruction memory to.  */
 
 enum memspace {
   DMEM_START  = 0x2000000,
@@ -65,7 +65,7 @@ enum memspace {
   STACK_START = 0x200bffe
 };
 
-/* d10v register names. */
+/* d10v register names.  */
 
 enum
   {
@@ -80,7 +80,7 @@ enum
     NR_A_REGS = 2,
     TS2_NUM_REGS = 37,
     TS3_NUM_REGS = 42,
-    /* d10v calling convention. */
+    /* d10v calling convention.  */
     ARG1_REGNUM = R0_REGNUM,
     ARGN_REGNUM = R3_REGNUM,
     RET1_REGNUM = R0_REGNUM,
@@ -119,7 +119,7 @@ d10v_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
    and TYPE is the type (which is known to be struct, union or array).
 
    The d10v returns anything less than 8 bytes in size in
-   registers. */
+   registers.  */
 
 static int
 d10v_use_struct_convention (int gcc_p, struct type *type)
@@ -127,25 +127,25 @@ d10v_use_struct_convention (int gcc_p, struct type *type)
   long alignment;
   int i;
   /* The d10v only passes a struct in a register when that structure
-     has an alignment that matches the size of a register. */
+     has an alignment that matches the size of a register.  */
   /* If the structure doesn't fit in 4 registers, put it on the
-     stack. */
+     stack.  */
   if (TYPE_LENGTH (type) > 8)
     return 1;
   /* If the struct contains only one field, don't put it on the stack
-     - gcc can fit it in one or more registers. */
+     - gcc can fit it in one or more registers.  */
   if (TYPE_NFIELDS (type) == 1)
     return 0;
   alignment = TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0));
   for (i = 1; i < TYPE_NFIELDS (type); i++)
     {
       /* If the alignment changes, just assume it goes on the
-         stack. */
+         stack.  */
       if (TYPE_LENGTH (TYPE_FIELD_TYPE (type, i)) != alignment)
 	return 1;
     }
   /* If the alignment is suitable for the d10v's 16 bit registers,
-     don't put it on the stack. */
+     don't put it on the stack.  */
   if (alignment == 2 || alignment == 4)
     return 0;
   return 1;
@@ -162,7 +162,7 @@ d10v_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 }
 
 /* Map the REG_NR onto an ascii name.  Return NULL or an empty string
-   when the reg_nr isn't valid. */
+   when the reg_nr isn't valid.  */
 
 enum ts2_regnums
   {
@@ -279,7 +279,7 @@ d10v_ts3_imap_register (void *regcache, int reg_nr)
 
 /* MAP GDB's internal register numbering (determined by the layout
    from the DEPRECATED_REGISTER_BYTE array) onto the simulator's
-   register numbering. */
+   register numbering.  */
 
 static int
 d10v_ts2_register_sim_regno (int nr)
@@ -353,7 +353,7 @@ static CORE_ADDR
 d10v_make_iaddr (CORE_ADDR x)
 {
   if (d10v_iaddr_p (x))
-    return x;	/* Idempotency -- x is already in the IMEM space. */
+    return x;	/* Idempotency -- x is already in the IMEM space.  */
   else
     return (((x) << 2) | IMEM_START);
 }
@@ -505,8 +505,8 @@ d10v_skip_prologue (CORE_ADDR pc)
   CORE_ADDR func_addr, func_end;
   struct symtab_and_line sal;
 
-  /* If we have line debugging information, then the end of the */
-  /* prologue should the first assembly instruction of  the first source line */
+  /* If we have line debugging information, then the end of the prologue 
+     should the first assembly instruction of the first source line */
   if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
     {
       sal = find_pc_line (func_addr, 0);
@@ -515,7 +515,7 @@ d10v_skip_prologue (CORE_ADDR pc)
     }
 
   if (target_read_memory (pc, (char *) &op, 4))
-    return pc;			/* Can't access it -- assume no prologue. */
+    return pc;			/* Can't access it -- assume no prologue.  */
 
   while (1)
     {
@@ -545,8 +545,9 @@ d10v_skip_prologue (CORE_ADDR pc)
 	    {
 	      if (!check_prologue (op2))
 		{
-		  /* if the previous opcode was really part of the prologue */
-		  /* and not just a NOP, then we want to break after both instructions */
+		  /* If the previous opcode was really part of the
+		     prologue and not just a NOP, then we want to
+		     break after both instructions.  */
 		  if (op1 != 0x5E00)
 		    pc += 4;
 		  break;
@@ -657,7 +658,7 @@ prologue_find_regs (struct d10v_unwind_cache *info, unsigned short op,
    the saved registers of frame described by FRAME_INFO.  This
    includes special registers such as pc and fp saved in special ways
    in the stack frame.  sp is even more special: the address we return
-   for it IS the sp for the next frame. */
+   for it IS the sp for the next frame.  */
 
 static struct d10v_unwind_cache *
 d10v_frame_unwind_cache (struct frame_info *next_frame,
@@ -908,7 +909,7 @@ d10v_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 }
 
 /* When arguments must be pushed onto the stack, they go on in reverse
-   order.  The below implements a FILO (stack) to do this. */
+   order.  The below implements a FILO (stack) to do this.  */
 
 struct stack_item
 {
@@ -965,8 +966,8 @@ d10v_push_dummy_code (struct gdbarch *gdbarch,
 static CORE_ADDR
 d10v_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 		      struct regcache *regcache, CORE_ADDR bp_addr,
-		      int nargs, struct value **args, CORE_ADDR sp, int struct_return,
-		      CORE_ADDR struct_addr)
+		      int nargs, struct value **args, CORE_ADDR sp, 
+		      int struct_return, CORE_ADDR struct_addr)
 {
   int i;
   int regnum = ARG1_REGNUM;
@@ -1063,7 +1064,7 @@ d10v_extract_return_value (struct type *type, struct regcache *regcache,
 	 least significant part of the first register.  The
 	 remaining bytes in remaining registers. Interestingly, when
 	 such values are passed in, the last byte is in the most
-	 significant byte of that same register - wierd. */
+	 significant byte of that same register - wierd.  */
       int reg = RET1_REGNUM;
       int off = 0;
       if (TYPE_LENGTH (type) & 1)
@@ -1086,7 +1087,7 @@ d10v_extract_return_value (struct type *type, struct regcache *regcache,
    understands.  Returns number of bytes that can be transfered
    starting at TARG_ADDR.  Return ZERO if no bytes can be transfered
    (segmentation fault).  Since the simulator knows all about how the
-   VM system works, we just call that to do the translation. */
+   VM system works, we just call that to do the translation.  */
 
 static void
 remote_d10v_translate_xfer_address (struct gdbarch *gdbarch,
@@ -1313,7 +1314,8 @@ tdisassemble_command (char *arg, int from_tty)
 	}
     }
 
-  printf_filtered ("Dump of trace from %s to %s:\n", paddr_u (low), paddr_u (high));
+  printf_filtered ("Dump of trace from %s to %s:\n", 
+		   paddr_u (low), paddr_u (high));
 
   display_trace (low, high);
 
@@ -1404,7 +1406,7 @@ d10v_frame_this_id (struct frame_info *next_frame,
   func = frame_func_unwind (next_frame);
 
   /* This is meant to halt the backtrace at "_start".  Make sure we
-     don't halt it at a generic dummy frame. */
+     don't halt it at a generic dummy frame.  */
   if (func <= IMEM_START || deprecated_inside_entry_file (func))
     return;
 
@@ -1483,13 +1485,13 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch_register_name_ftype *d10v_register_name;
   gdbarch_register_sim_regno_ftype *d10v_register_sim_regno;
 
-  /* Find a candidate among the list of pre-declared architectures. */
+  /* Find a candidate among the list of pre-declared architectures.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
   if (arches != NULL)
     return arches->gdbarch;
 
   /* None found, create a new architecture from the information
-     provided. */
+     provided.  */
   tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
@@ -1535,7 +1537,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_long_long_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   /* NOTE: The d10v as a 32 bit ``float'' and ``double''. ``long
-     double'' is 64 bits. */
+     double'' is 64 bits.  */
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
@@ -1549,7 +1551,8 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case BFD_ENDIAN_LITTLE:
       set_gdbarch_float_format (gdbarch, &floatformat_ieee_single_little);
       set_gdbarch_double_format (gdbarch, &floatformat_ieee_single_little);
-      set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_little);
+      set_gdbarch_long_double_format (gdbarch, 
+				      &floatformat_ieee_double_little);
       break;
     default:
       internal_error (__FILE__, __LINE__,
@@ -1560,7 +1563,8 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_dummy_code (gdbarch, d10v_push_dummy_code);
   set_gdbarch_push_dummy_call (gdbarch, d10v_push_dummy_call);
   set_gdbarch_store_return_value (gdbarch, d10v_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch, d10v_extract_struct_value_address);
+  set_gdbarch_extract_struct_value_address (gdbarch, 
+					    d10v_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, d10v_use_struct_convention);
 
   set_gdbarch_skip_prologue (gdbarch, d10v_skip_prologue);
@@ -1569,10 +1573,12 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, d10v_breakpoint_from_pc);
 
-  set_gdbarch_remote_translate_xfer_address (gdbarch, remote_d10v_translate_xfer_address);
+  set_gdbarch_remote_translate_xfer_address (gdbarch, 
+					     remote_d10v_translate_xfer_address);
 
   set_gdbarch_frame_args_skip (gdbarch, 0);
-  set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);
+  set_gdbarch_frameless_function_invocation (gdbarch, 
+					     frameless_look_for_prologue);
 
   set_gdbarch_frame_align (gdbarch, d10v_frame_align);
 
@@ -1604,7 +1610,8 @@ _initialize_d10v_tdep (void)
   target_resume_hook = d10v_eva_prepare_to_trace;
   target_wait_loop_hook = d10v_eva_get_trace_data;
 
-  deprecate_cmd (add_com ("regs", class_vars, show_regs, "Print all registers"),
+  deprecate_cmd (add_com ("regs", class_vars, show_regs, 
+			  "Print all registers"),
 		 "info registers");
 
   add_com ("itrace", class_support, trace_command,

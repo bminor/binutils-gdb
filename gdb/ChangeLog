@@ -1,3 +1,7 @@
+2003-10-09  Michael Snyder  <msnyder@redhat.com>
+
+	* d10v-tdep.c: Random whitespace/comment tweaks.
+
 2003-10-09  Elena Zannoni  <ezannoni@redhat.com>
 
 	* sh-tdep.c (sh_gdbarch_init): Delete setting of push_dummy_code.
