@@ -1,3 +1,8 @@
+2000-04-10  Jim Blandy  <jimb@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Fix
+	cross-references.
+
 2000-04-08  Jim Blandy  <jimb@redhat.com>
 
 	* gdbint.texinfo (Using Different Register and Memory Data
