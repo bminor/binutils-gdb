@@ -27,12 +27,13 @@ echo Sanitizing `pwd`...
 
 Things-to-keep:
 COPYING
-bfd.texinfo
+CVS.adm
 ChangeLog
 Makefile
 Makefile.in
 TODO
 VERSION
+amdcoff.c
 aout32.c
 aout64.c
 aoutf1.h
@@ -41,9 +42,11 @@ archive.c
 archures.c
 archures.h
 bfd.c
+bfd.texinfo
 bout.c
 cache.c
 coffcode.h
+config
 config.status
 configure
 configure.in
@@ -65,10 +68,10 @@ liboasys.h
 m68kcoff.c
 m88k-bcs.c
 newsos3.c
-amdcoff.c
 oasys.c
 opncls.c
 reloc.c
+save
 section.c
 srec.c
 sunos.c
@@ -84,7 +87,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.6  1991/07/16 00:35:56  steve
+# Revision 1.7  1991/07/16 00:39:03  steve
+# *** empty log message ***
+#
+# Revision 1.6  1991/07/16  00:35:56  steve
 # *** empty log message ***
 #
 # Revision 1.5  1991/07/15  23:32:40  steve
