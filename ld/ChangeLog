@@ -1,5 +1,26 @@
 2000-09-05  Alan Modra  <alan@linuxcare.com.au>
 
+	* emultempl/hppaelf.em (hppaelf_add_stub_section): Add SEC_RELOC
+	to stub section flags.
+	(hppa_for_each_input_file_wrapper): New.
+	(hppa_lang_for_each_input_file): New.
+	(lang_for_each_input_file): Define to call above.
+	(multi_subspace): New.
+	(hppaelf_finish): Pass multi_subspace to elf32_hppa_size_stubs.
+	(PARSE_AND_LIST_PROLOGUE): Define.
+	(PARSE_AND_LIST_LONGOPTS): Define.
+	(PARSE_AND_LIST_OPTIONS): Define.
+	(PARSE_AND_LIST_ARGS_CASES): Define.
+	(hppaelf_finish): Call elf32_hppa_set_gp.
+	(hppaelf_set_output_arch): Remove.
+	(LDEMUL_SET_OUTPUT_ARCH): Remove.
+
+	* emulparams/hppalinux.sh (ELFSIZE): Define.
+	(MACHINE): Define.
+	(OTHER_READONLY_SECTIONS): Define.
+	(DATA_PLT): Define.
+	(GENERATE_SHLIB_SCRIPT): Define.
+
 	* ldlang.c: Add missing prototypes, and tidy others.  Change CONST
 	to const throughout.  Change `void *' to `PTR' throughout.
 	(lang_memory_default): Function is local to file, add `static'.

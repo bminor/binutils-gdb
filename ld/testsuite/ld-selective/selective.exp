@@ -46,8 +46,6 @@ if { [which $CXX] == 0 } {
     return
 }
 
-setup_xfail "hppa*-*-*"
-
 if { ![ld_compile "$CC $cflags" $srcdir/$subdir/1.c tmpdir/1.o]} {
     unresolved $test1
     return
@@ -74,8 +72,6 @@ if ![ld_simple_link $ld tmpdir/1.x "$ldflags tmpdir/1.o"] {
 	}
     }
 }
-
-setup_xfail "hppa*-*-*"
 
 if { ![ld_compile "$CC $cflags" $srcdir/$subdir/2.c tmpdir/2.o]} {
     unresolved $test2

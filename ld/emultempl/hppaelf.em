@@ -27,7 +27,6 @@ cat >>e${EMULATION_NAME}.c <<EOF
 #include "ldctor.h"
 #include "elf32-hppa.h"
 
-static void hppaelf_set_output_arch PARAMS ((void));
 static void hppaelf_create_output_section_statements PARAMS ((void));
 static void hppaelf_delete_padding_statements
   PARAMS ((lang_statement_list_type *));
@@ -40,16 +39,11 @@ static void hppaelf_finish PARAMS ((void));
 /* Fake input file for stubs.  */
 static lang_input_statement_type *stub_file;
 
+/* Type of import/export stubs to build.  For a single sub-space model,
+   we can build smaller import stubs and there is no need for export
+   stubs.  */
+static int multi_subspace = 0;
 
-/* Set the output architecture and machine.  */
-
-static void
-hppaelf_set_output_arch ()
-{
-  unsigned long machine = 0;
-
-  bfd_set_arch_mach (output_bfd, ldfile_output_architecture, machine);
-}
 
 /* This is called before the input files are opened.  We create a new
    fake input file to hold the stub sections.  */
@@ -233,7 +227,7 @@ hppaelf_add_stub_section (stub_name, input_section)
     goto err_ret;
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
-	   | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_KEEP);
+	   | SEC_HAS_CONTENTS | SEC_RELOC | SEC_IN_MEMORY | SEC_KEEP);
   if (!bfd_set_section_flags (stub_file->the_bfd, stub_sec, flags))
     goto err_ret;
 
@@ -295,6 +289,7 @@ hppaelf_finish ()
 
   /* Call into the BFD backend to do the real work.  */
   if (! elf32_hppa_size_stubs (stub_file->the_bfd,
+			       multi_subspace,
 			       &link_info,
 			       &hppaelf_add_stub_section,
 			       &hppaelf_layaout_sections_again))
@@ -303,18 +298,76 @@ hppaelf_finish ()
       return;
     }
 
+  /* Set the global data pointer.  */
+  if (! elf32_hppa_set_gp (output_bfd, &link_info))
+    {
+      einfo ("%X%P: can not set gp\n");
+      return;
+    }
+
   /* Now build the linker stubs.  */
   if (stub_file->the_bfd->sections != NULL)
     {
-      if (! elf32_hppa_build_stubs (stub_file->the_bfd, &link_info))
+      if (! elf32_hppa_build_stubs (&link_info))
 	einfo ("%X%P: can not build stubs: %E\n");
     }
 }
 
+
+/* Avoid processing the fake stub_file in vercheck, stat_needed and
+   check_needed routines.  */
+
+static void hppa_for_each_input_file_wrapper
+  PARAMS ((lang_input_statement_type *));
+static void hppa_lang_for_each_input_file
+  PARAMS ((void (*) (lang_input_statement_type *)));
+
+static void (*real_func) PARAMS ((lang_input_statement_type *));
+
+static void hppa_for_each_input_file_wrapper (l)
+     lang_input_statement_type *l;
+{
+  if (l != stub_file)
+    (*real_func) (l);
+}
+
+static void
+hppa_lang_for_each_input_file (func)
+     void (*func) PARAMS ((lang_input_statement_type *));
+{
+  real_func = func;
+  lang_for_each_input_file (&hppa_for_each_input_file_wrapper);
+}
+
+#define lang_for_each_input_file hppa_lang_for_each_input_file
+
 EOF
 
-# Put these routines in ld_${EMULATION_NAME}_emulation
+# Define some shell vars to insert bits of code into the standard elf
+# parse_args and list_options functions.
 #
-LDEMUL_SET_OUTPUT_ARCH=hppaelf_set_output_arch
+PARSE_AND_LIST_PROLOGUE='
+#define OPTION_MULTI_SUBSPACE		301
+'
+
+PARSE_AND_LIST_LONGOPTS='
+  { "multi-subspace", no_argument, NULL, OPTION_MULTI_SUBSPACE},
+'
+
+PARSE_AND_LIST_OPTIONS='
+  fprintf (file, _("\
+  --multi-subspace            Generate import and export stubs to support\n\
+                              multiple sub-space shared libraries\n"
+		   ));
+'
+
+PARSE_AND_LIST_ARGS_CASES='
+    case OPTION_MULTI_SUBSPACE:
+      multi_subspace = 1;
+      break;
+'
+
+# Put these extra hppaelf routines in ld_${EMULATION_NAME}_emulation
+#
 LDEMUL_FINISH=hppaelf_finish
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=hppaelf_create_output_section_statements

@@ -1,3 +1,7 @@
+2000-09-05  Alan Modra  <alan@linuxcare.com.au>
+
+	* ld-selective/selective.exp: Remove the xfails for hppa.
+
 2000-08-30  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ld-undefined/undefined.exp (hppa*64*-*-*, mn10300-*-elf,
