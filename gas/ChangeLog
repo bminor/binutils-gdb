@@ -1,3 +1,7 @@
+Tue Dec  8 15:00:50 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* read.c (output_leb128): Don't mark as inline.
+
 1998-12-08  Andrew MacLeod  <amacleod@cygnus.com>
 
 	* config/tc-ppc.c (ppc_vbyte): Prototype and new function for 
