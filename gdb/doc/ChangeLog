@@ -1,3 +1,9 @@
+2001-03-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Update
+	definition of SOFTWARE_SINGLE_STEP_P to include empty parameter
+	list.
+
 2001-03-06  Kevin Buettner  <kevinb@redhat.com>
 
 	* Makefile.in, all-cfg.texi, annotate.texi, gdb.texinfo,

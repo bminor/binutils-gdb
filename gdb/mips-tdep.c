@@ -4470,11 +4470,8 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: SOFTWARE_SINGLE_STEP # %s\n",
 		      XSTRING (SOFTWARE_SINGLE_STEP (SIG, BP_P)));
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: SOFTWARE_SINGLE_STEP_P = %d\n",
-		      SOFTWARE_SINGLE_STEP_P);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: SOFTWARE_SINGLE_STEP_P = %d\n",
-		      SOFTWARE_SINGLE_STEP_P);
+		      "mips_dump_tdep: SOFTWARE_SINGLE_STEP_P () = %d\n",
+		      SOFTWARE_SINGLE_STEP_P ());
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: STAB_REG_TO_REGNUM # %s\n",
 		      XSTRING (STAB_REG_TO_REGNUM (REGNUM)));

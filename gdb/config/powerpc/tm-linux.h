@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #undef  SOFTWARE_SINGLE_STEP
 #define SOFTWARE_SINGLE_STEP(p,q) internal_error (__FILE__, __LINE__, "Will never execute!")
 #undef  SOFTWARE_SINGLE_STEP_P
-#define SOFTWARE_SINGLE_STEP_P 0
+#define SOFTWARE_SINGLE_STEP_P() 0
 
 /* Make sure nexti gets the help it needs for debugging assembly code
    without symbols */

@@ -838,7 +838,7 @@ resume (int step, enum target_signal sig)
   if (breakpoint_here_p (read_pc ()) == permanent_breakpoint_here)
     SKIP_PERMANENT_BREAKPOINT ();
 
-  if (SOFTWARE_SINGLE_STEP_P && step)
+  if (SOFTWARE_SINGLE_STEP_P () && step)
     {
       /* Do it the hard way, w/temp breakpoints */
       SOFTWARE_SINGLE_STEP (sig, 1 /*insert-breakpoints */ );
@@ -1562,7 +1562,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 					  (LONGEST) ecs->ws.value.integer));
 	gdb_flush (gdb_stdout);
 	target_mourn_inferior ();
-	singlestep_breakpoints_inserted_p = 0;	/*SOFTWARE_SINGLE_STEP_P */
+	singlestep_breakpoints_inserted_p = 0;	/*SOFTWARE_SINGLE_STEP_P() */
 	stop_print_frame = 0;
 	stop_stepping (ecs);
 	return;
@@ -1580,7 +1580,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	target_mourn_inferior ();
 
 	print_stop_reason (SIGNAL_EXITED, stop_signal);
-	singlestep_breakpoints_inserted_p = 0;	/*SOFTWARE_SINGLE_STEP_P */
+	singlestep_breakpoints_inserted_p = 0;	/*SOFTWARE_SINGLE_STEP_P() */
 	stop_stepping (ecs);
 	return;
 
@@ -1821,7 +1821,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
     if (stop_signal == TARGET_SIGNAL_TRAP)
       {
-	if (SOFTWARE_SINGLE_STEP_P && singlestep_breakpoints_inserted_p)
+	if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
 	  ecs->random_signal = 0;
 	else if (breakpoints_inserted
 		 && breakpoint_here_p (stop_pc - DECR_PC_AFTER_BREAK))
@@ -1984,7 +1984,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	flush_cached_frames ();
       }
 
-    if (SOFTWARE_SINGLE_STEP_P && singlestep_breakpoints_inserted_p)
+    if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
       {
 	/* Pull the single step breakpoints out of the target. */
 	SOFTWARE_SINGLE_STEP (0, 0);

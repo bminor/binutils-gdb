@@ -1,5 +1,21 @@
 2001-03-20  Andrew Cagney  <ac131313@redhat.com>
 
+	* target.h (SOFTWARE_SINGLE_STEP_P): Add empty parameter list.
+	* breakpoint.c (bpstat_stop_status): Update.
+	* infrun.c (handle_inferior_event): Ditto.
+	* mips-tdep.c (mips_dump_tdep): Ditto.
+	* infrun.c (resume): Ditto.
+	* infptrace.c (child_resume): Ditto.
+	* config/mips/tm-wince.h (SOFTWARE_SINGLE_STEP_P): Ditto.
+	* config/sh/tm-wince.h (SOFTWARE_SINGLE_STEP_P): Ditto.
+	* config/sparc/tm-sparc.h (SOFTWARE_SINGLE_STEP_P): Ditto.
+	* config/powerpc/tm-linux.h (SOFTWARE_SINGLE_STEP_P): Ditto.
+	* config/arm/tm-wince.h (SOFTWARE_SINGLE_STEP_P): Ditto.
+	* config/arc/tm-arc.h (SOFTWARE_SINGLE_STEP_P): Ditto.
+	* config/powerpc/tm-ppc-eabi.h (SOFTWARE_SINGLE_STEP_P): Ditto.
+
+2001-03-20  Andrew Cagney  <ac131313@redhat.com>
+
 	* config/powerpc/tm-linux.h (SOFTWARE_SINGLE_STEP): Replace abort
 	with internal_error.
 

@@ -98,7 +98,7 @@ extern void aix_process_linenos (void);
 
 /* RS6000/AIX does not support PT_STEP.  Has to be simulated.  */
 
-#define SOFTWARE_SINGLE_STEP_P 1
+#define SOFTWARE_SINGLE_STEP_P() 1
 extern void rs6000_software_single_step (unsigned int, int);
 #define SOFTWARE_SINGLE_STEP(sig,bp_p) rs6000_software_single_step (sig, bp_p)
 

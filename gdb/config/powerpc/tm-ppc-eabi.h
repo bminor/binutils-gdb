@@ -26,7 +26,7 @@
 #include "rs6000/tm-rs6000.h"
 /* except we want to allow single stepping */
 #undef SOFTWARE_SINGLE_STEP_P
-#define SOFTWARE_SINGLE_STEP_P 0
+#define SOFTWARE_SINGLE_STEP_P() 0
 
 #undef	DEFAULT_LR_SAVE
 #define	DEFAULT_LR_SAVE 4	/* eabi saves LR at 4 off of SP */

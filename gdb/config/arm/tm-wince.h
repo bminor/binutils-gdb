@@ -24,7 +24,7 @@
 #include "arm/tm-arm.h"
 
 #undef SOFTWARE_SINGLE_STEP_P
-#define SOFTWARE_SINGLE_STEP_P 1
+#define SOFTWARE_SINGLE_STEP_P() 1
 
 #undef SOFTWARE_SINGLE_STEP
 #define SOFTWARE_SINGLE_STEP(sig, bp_p) wince_software_single_step (sig, bp_p)

@@ -739,7 +739,7 @@ extern void sparc32_extract_return_value (struct type *, char[], char *);
 
 /* Sparc has no reliable single step ptrace call */
 
-#define SOFTWARE_SINGLE_STEP_P 1
+#define SOFTWARE_SINGLE_STEP_P() 1
 extern void sparc_software_single_step (unsigned int, int);
 #define SOFTWARE_SINGLE_STEP(sig,bp_p) sparc_software_single_step (sig,bp_p)
 
