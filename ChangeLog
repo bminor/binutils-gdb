@@ -1,3 +1,8 @@
+Wed Dec 24 22:46:55 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config.guess: Sync with egcs.  Picks up new alpha support,
+	BeOS & some additional linux support.
+
 Tue Dec 23 12:45:50 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config.guess: HP 9000/803 is a PA1.1 machine.
