@@ -1636,7 +1636,7 @@ total_number_of_methods (type)
   int n;
   int count;
 
-  check_stub_type (type);
+  CHECK_TYPEDEF (type);
   count = TYPE_NFN_FIELDS_TOTAL (type);
 
   for (n = 0; n < TYPE_N_BASECLASSES (type); n++)
@@ -1673,7 +1673,7 @@ find_methods (t, name, sym_arr)
 				     (struct symtab **)NULL)))
     {
       int method_counter;
-      /* FIXME: Shouldn't this just be check_stub_type (t)?  */
+      /* FIXME: Shouldn't this just be CHECK_TYPEDEF (t)?  */
       t = SYMBOL_TYPE (sym_class);
       for (method_counter = TYPE_NFN_FIELDS (t) - 1;
 	   method_counter >= 0;
@@ -1960,8 +1960,9 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 				     (struct symtab **)NULL);
        
 	  if (sym_class &&
-	      (   TYPE_CODE (SYMBOL_TYPE (sym_class)) == TYPE_CODE_STRUCT
-	       || TYPE_CODE (SYMBOL_TYPE (sym_class)) == TYPE_CODE_UNION))
+	      (t = check_typedef (SYMBOL_TYPE (sym_class)),
+	       (TYPE_CODE (t) == TYPE_CODE_STRUCT
+		|| TYPE_CODE (t) == TYPE_CODE_UNION)))
 	    {
 	      /* Arg token is not digits => try it as a function name
 		 Find the next token(everything up to end or next blank). */
@@ -2015,7 +2016,6 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 
 	      sym = 0;
 	      i1 = 0;		/*  counter for the symbol array */
-	      t = SYMBOL_TYPE (sym_class);
 	      sym_arr = (struct symbol **) alloca(total_number_of_methods (t)
 						  * sizeof(struct symbol *));
 

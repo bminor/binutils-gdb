@@ -1729,27 +1729,28 @@ target_write_pc (v, pid)
    alignment required by their fields. */
 
 static int
-hppa_alignof (arg)
-     struct type *arg;
+hppa_alignof (type)
+     struct type *type;
 {
   int max_align, align, i;
-  switch (TYPE_CODE (arg))
+  CHECK_TYPEDEf (type);
+  switch (TYPE_CODE (type))
     {
     case TYPE_CODE_PTR:
     case TYPE_CODE_INT:
     case TYPE_CODE_FLT:
-      return TYPE_LENGTH (arg);
+      return TYPE_LENGTH (type);
     case TYPE_CODE_ARRAY:
-      return hppa_alignof (TYPE_FIELD_TYPE (arg, 0));
+      return hppa_alignof (TYPE_FIELD_TYPE (type, 0));
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
       max_align = 2;
-      for (i = 0; i < TYPE_NFIELDS (arg); i++)
+      for (i = 0; i < TYPE_NFIELDS (type); i++)
 	{
 	  /* Bit fields have no real alignment. */
-	  if (!TYPE_FIELD_BITPOS (arg, i))
+	  if (!TYPE_FIELD_BITPOS (type, i))
 	    {
-	      align = hppa_alignof (TYPE_FIELD_TYPE (arg, i));
+	      align = hppa_alignof (TYPE_FIELD_TYPE (type, i));
 	      max_align = max (max_align, align);
 	    }
 	}

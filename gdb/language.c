@@ -436,24 +436,26 @@ struct type *
 binop_result_type (v1, v2)
    value_ptr v1, v2;
 {
-   int l1,l2,size,uns;
+   int size,uns;
+   struct type *t1 = check_typedef (VALUE_TYPE (v1));
+   struct type *t2 = check_typedef (VALUE_TYPE (v2));
 
-   l1 = TYPE_LENGTH(VALUE_TYPE(v1));
-   l2 = TYPE_LENGTH(VALUE_TYPE(v2));
+   int l1 = TYPE_LENGTH (t1);
+   int l2 = TYPE_LENGTH (t2);
 
    switch(current_language->la_language)
    {
    case language_c:
    case language_cplus:
-      if (TYPE_CODE(VALUE_TYPE(v1))==TYPE_CODE_FLT)
-	 return TYPE_CODE(VALUE_TYPE(v2)) == TYPE_CODE_FLT && l2 > l1 ?
+      if (TYPE_CODE (t1)==TYPE_CODE_FLT)
+	 return TYPE_CODE(t2) == TYPE_CODE_FLT && l2 > l1 ?
 	    VALUE_TYPE(v2) : VALUE_TYPE(v1);
-      else if (TYPE_CODE(VALUE_TYPE(v2))==TYPE_CODE_FLT)
-	 return TYPE_CODE(VALUE_TYPE(v1)) == TYPE_CODE_FLT && l1 > l2 ?
+      else if (TYPE_CODE(t2)==TYPE_CODE_FLT)
+	 return TYPE_CODE(t1)) == TYPE_CODE_FLT && l1 > l2 ?
 	    VALUE_TYPE(v1) : VALUE_TYPE(v2);
-      else if (TYPE_UNSIGNED(VALUE_TYPE(v1)) && l1 > l2)
+      else if (TYPE_UNSIGNED(t1) && l1 > l2)
 	 return VALUE_TYPE(v1);
-      else if (TYPE_UNSIGNED(VALUE_TYPE(v2)) && l2 > l1)
+      else if (TYPE_UNSIGNED(t2) && l2 > l1)
 	 return VALUE_TYPE(v2);
       else  /* Both are signed.  Result is the longer type */
 	 return l1 > l2 ? VALUE_TYPE(v1) : VALUE_TYPE(v2);
@@ -548,6 +550,7 @@ local_decimal_format_custom(pre)
    return form;
 }
 
+#if 0
 /* This page contains functions that are used in type/range checking.
    They all return zero if the type/range check fails.
 
@@ -569,6 +572,7 @@ int
 simple_type(type)
     struct type *type;
 {
+  CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type)) {
   case TYPE_CODE_INT:
   case TYPE_CODE_CHAR:
@@ -591,6 +595,7 @@ int
 ordered_type (type)
    struct type *type;
 {
+  CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type)) {
   case TYPE_CODE_INT:
   case TYPE_CODE_CHAR:
@@ -609,6 +614,7 @@ int
 same_type (arg1, arg2)
    struct type *arg1, *arg2;
 {
+  CHECK_TYPEDEF (type);
    if (structured_type(arg1) ? !structured_type(arg2) : structured_type(arg2))
       /* One is structured and one isn't */
       return 0;
@@ -627,6 +633,7 @@ int
 integral_type (type)
    struct type *type;
 {
+  CHECK_TYPEDEF (type);
    switch(current_language->la_language)
    {
    case language_c:
@@ -647,6 +654,7 @@ int
 numeric_type (type)
    struct type *type;
 {
+  CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type)) {
   case TYPE_CODE_INT:
   case TYPE_CODE_FLT:
@@ -662,7 +670,8 @@ int
 character_type (type)
    struct type *type;
 {
-   switch(current_language->la_language)
+  CHECK_TYPEDEF (type);
+  switch(current_language->la_language)
    {
    case language_chill:
    case language_m2:
@@ -683,7 +692,8 @@ int
 string_type (type)
    struct type *type;
 {
-   switch(current_language->la_language)
+  CHECK_TYPEDEF (type);
+  switch(current_language->la_language)
    {
    case language_chill:
    case language_m2:
@@ -703,6 +713,7 @@ int
 boolean_type (type)
    struct type *type;
 {
+  CHECK_TYPEDEF (type);
   if (TYPE_CODE (type) == TYPE_CODE_BOOL)
     return 1;
   switch(current_language->la_language)
@@ -724,7 +735,8 @@ int
 float_type (type)
    struct type *type;
 {
-   return TYPE_CODE(type) == TYPE_CODE_FLT;
+  CHECK_TYPEDEF (type);
+  return TYPE_CODE(type) == TYPE_CODE_FLT;
 }
 
 /* Returns non-zero if the value is a pointer type */
@@ -741,6 +753,7 @@ int
 structured_type(type)
    struct type *type;
 {
+  CHECK_TYPEDEF (type);
    switch(current_language->la_language)
    {
    case language_c:
@@ -758,6 +771,7 @@ structured_type(type)
       return (0);
    }
 }
+#endif
 
 /* This page contains functions that return info about
    (struct value) values used in GDB. */

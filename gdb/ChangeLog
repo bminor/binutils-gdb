@@ -23,6 +23,11 @@ Wed Nov 29 13:35:18 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 	* gdbtypes.c, ch-lang.c, ch-typeprint.c (numerous places):
 	Add check_typedef/CHECK_TYPEDEF as needed.
 
+	* alpha-tdep.c, c-exp.y, h8500-tdep.c, f-exp.y, f-valprint.c,
+	findvar.c, hppa-tdep.c, infcmd.c, language.c, printcmd.c,
+ 	rs6000-tdep.c, symmisc.c, symtab.c:
+	Add check_typedef/CHECK_TYPEDEF as needed.
+	
 	* top.c (command_line_input):  Only strip out an initial #-comment.
 	Looking for internal comments is language-specific (breaks Scheme).
 	

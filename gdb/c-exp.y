@@ -497,6 +497,7 @@ exp	:	VARIABLE
 exp	:	SIZEOF '(' type ')'	%prec UNARY
 			{ write_exp_elt_opcode (OP_LONG);
 			  write_exp_elt_type (builtin_type_int);
+			  CHECK_TYPEDEF ($3);
 			  write_exp_elt_longcst ((LONGEST) TYPE_LENGTH ($3));
 			  write_exp_elt_opcode (OP_LONG); }
 	;

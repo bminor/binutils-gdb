@@ -694,8 +694,9 @@ push_arguments (nargs, args, sp, struct_return, struct_addr)
   int argno;					/* current argument number */
   int argbytes;					/* current argument byte */
   char tmp_buffer [50];
-  value_ptr arg;
   int f_argno = 0;				/* current floating point argno */
+  value_ptr arg;
+  struct type *type;
 
   CORE_ADDR saved_sp, pc;
 
@@ -715,9 +716,10 @@ push_arguments (nargs, args, sp, struct_return, struct_addr)
   for (argno=0, argbytes=0; argno < nargs && ii<8; ++ii) {
 
     arg = args[argno];
-    len = TYPE_LENGTH (VALUE_TYPE (arg));
+    type = check_typedef (VALUE_TYPE (arg);
+    len = TYPE_LENGTH (type);
 
-    if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_FLT) {
+    if (TYPE_CODE (type) == TYPE_CODE_FLT) {
 
       /* floating point arguments are passed in fpr's, as well as gpr's.
          There are 13 fpr's reserved for passing parameters. At this point
@@ -769,7 +771,6 @@ ran_out_of_registers_for_arguments:
 
   if ((argno < nargs) || argbytes) {
     int space = 0, jj;
-    value_ptr val;
 
     if (argbytes) {
       space += ((len - argbytes + 3) & -4);
@@ -779,7 +780,7 @@ ran_out_of_registers_for_arguments:
       jj = argno;
 
     for (; jj < nargs; ++jj) {
-      val = args[jj];
+      value_ptr val = args[jj];
       space += ((TYPE_LENGTH (VALUE_TYPE (val))) + 3) & -4;
     }
 
@@ -808,11 +809,12 @@ ran_out_of_registers_for_arguments:
     for (; argno < nargs; ++argno) {
 
       arg = args[argno];
-      len = TYPE_LENGTH (VALUE_TYPE (arg));
+      type = check_typedef (VALUE_TYPE (arg));
+      len = TYPE_LENGTH (type);
 
 
       /* float types should be passed in fpr's, as well as in the stack. */
-      if (TYPE_CODE (VALUE_TYPE (arg)) == TYPE_CODE_FLT && f_argno < 13) {
+      if (TYPE_CODE (type) == TYPE_CODE_FLT && f_argno < 13) {
 
         if (len > 8)
           printf_unfiltered (

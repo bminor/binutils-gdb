@@ -211,7 +211,7 @@ f77_get_dynamic_length_of_aggregate (type)
   /* Patch in a valid length value. */ 
   
   TYPE_LENGTH (type) =
-    (upper_bound - lower_bound + 1) * TYPE_LENGTH (TYPE_TARGET_TYPE (type));
+    (upper_bound - lower_bound + 1) * TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type)));
 }       
 
 /* Function that sets up the array offset,size table for the array 
@@ -376,6 +376,7 @@ f_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
   LONGEST val;
   CORE_ADDR addr;
   
+  CHECK_TYPEDEF (type);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_STRING: 
@@ -403,7 +404,7 @@ f_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
       else
 	{
 	  addr = unpack_pointer (type, valaddr);
-	  elttype = TYPE_TARGET_TYPE (type);
+	  elttype = check_typedef (TYPE_TARGET_TYPE (type));
 	  
 	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
 	    {

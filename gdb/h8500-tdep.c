@@ -572,14 +572,14 @@ h8500_set_trapped_internalvar (var, newval, bitpos, bitsize, offset)
   struct type *type;
   enum type_code newval_type_code;
 
-  type = VALUE_TYPE (newval);
+  type = check_typedef (VALUE_TYPE (newval));
   newval_type_code = TYPE_CODE (type);
 
   if ((newval_type_code != TYPE_CODE_INT
        && newval_type_code != TYPE_CODE_PTR)
       || TYPE_LENGTH (type) != sizeof (new_regval))
     error ("Illegal type (%s) for assignment to $%s\n",
-	   TYPE_NAME (type), var->name);
+	   TYPE_NAME (VALUE_TYPE (newval)), var->name);
 
   new_regval = *(long *) VALUE_CONTENTS_RAW (newval);
 
