@@ -1,5 +1,7 @@
 Mon Apr  7 11:45:44 1997  Doug Evans  <dje@canuck.cygnus.com>
 
+	* cgen-dis.c (build_dis_hash_table): Fix xmalloc size computation.
+
 	* cgen-opc.c (hash_keyword_name): Improve algorithm.
 
 	* disassemble.c (disassembler): Handle m32r.

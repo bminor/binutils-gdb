@@ -70,7 +70,7 @@ build_dis_hash_table ()
 
   dis_hash_table = (CGEN_INSN_LIST **)
     xmalloc (hash_size * sizeof (CGEN_INSN_LIST *)
-	     + count * sizeof (CGEN_INSN_LIST *));
+	     + count * sizeof (CGEN_INSN_LIST));
   memset (dis_hash_table, 0,
 	  hash_size * sizeof (CGEN_INSN_LIST *)
 	  + count * sizeof (CGEN_INSN_LIST));
