@@ -1,3 +1,8 @@
+Thu Oct  9 01:44:36 1997  J"orn Rennecke  <amylaar@cygnus.co.uk>
+
+	* tc-d10v.h (TC_START_LABEL): Don't define.
+	(tc_frob_label): Define.
+
 Wed Oct  8 16:28:53 1997  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-alpha.c (load_expression): Disable the sym+const .got
