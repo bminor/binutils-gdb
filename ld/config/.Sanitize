@@ -30,57 +30,22 @@ fi
 # with rm -rf.
 
 Things-to-keep:
-h-rtbsd
+h-decstation
 h-dgux
-h-sun3
-h-i386v
-h-m68kv
 h-news
-t-i386v
-t-m68kv
-h-sun4
-h-dec3100
-t-sun4
-t-m68k
-t-m88k-bcs
+h-rtbsd
+h-sparc
+h-sparc-64
+h-sun3
 t-coff-a29k
 t-ebmon29k
+t-i386v
+t-m68k
+t-m68kv
+t-m88k-bcs
 t-news
+t-sun4
 Do-last:
 
 echo Done in `pwd`.
-
-#
-#
-# $Log$
-# Revision 1.9  1991/10/11 19:32:25  steve
-# *** empty log message ***
-#
-# Revision 1.8  1991/10/10  11:59:20  rich
-# updating
-#
-# Revision 1.7  1991/09/27  20:20:01  bothner
-# Added {h,t}-news
-#
-# Revision 1.6  1991/09/19  21:03:09  steve
-# Support for 386 and 68k machines
-#
-# Revision 1.5  1991/09/03  21:04:24  steve
-# *** empty log message ***
-#
-# Revision 1.4  1991/07/15  23:41:06  steve
-# *** empty log message ***
-#
-# Revision 1.3  1991/06/14  22:11:24  steve
-# *** empty log message ***
-#
-# Revision 1.2  1991/05/31  01:01:51  steve
-# *** empty log message ***
-#
-# Revision 1.1  1991/05/23  21:43:26  rich
-# Initial revision
-#
-#
-#
-
 # End of file.
