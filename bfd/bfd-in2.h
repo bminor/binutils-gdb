@@ -1185,7 +1185,7 @@ typedef struct sec
   unsigned int linker_mark : 1;
 
   /* Another mark flag used by some of the linker backends.  Set for
-     output sections that have a input section.  */
+     output sections that have an input section.  */
   unsigned int linker_has_input : 1;
 
   /* A mark flag used by some linker backends for garbage collection.  */

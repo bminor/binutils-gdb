@@ -605,7 +605,7 @@ m32r_elf_generic_reloc (input_bfd, reloc_entry, symbol, data,
       return bfd_reloc_ok;
     }
 
-  /* Now do the the reloc in the usual way.
+  /* Now do the reloc in the usual way.
      ??? It would be nice to call bfd_elf_generic_reloc here,
      but we have partial_inplace == TRUE.  bfd_elf_generic_reloc will
      pass the handling back to bfd_install_relocation which will install

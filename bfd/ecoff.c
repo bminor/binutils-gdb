@@ -4758,7 +4758,7 @@ ecoff_reloc_link_order (output_bfd, info, output_section, link_order)
 
   rel.addend = 0;
 
-  /* Move the information into a internal_reloc structure.  */
+  /* Move the information into an internal_reloc structure.  */
   in.r_vaddr = (rel.address
 		+ bfd_get_section_vma (output_bfd, output_section));
   in.r_type = rel.howto->type;

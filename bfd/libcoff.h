@@ -177,7 +177,7 @@ struct xcoff_tdata
 
 #define xcoff_data(abfd) ((abfd)->tdata.xcoff_obj_data)
 
-/* We take the address of the first element of a asymbol to ensure that the
+/* We take the address of the first element of an asymbol to ensure that the
  * macro is only ever applied to an asymbol.  */
 #define coffsymbol(asymbol) ((coff_symbol_type *)(&((asymbol)->the_bfd)))
 

@@ -234,7 +234,7 @@ nlm_i386_write_import (abfd, sec, rel)
   return true;
 }
 
-/* I want to be able to use objcopy to turn a i386 a.out or COFF file
+/* I want to be able to use objcopy to turn an i386 a.out or COFF file
    into a NetWare i386 module.  That means that the relocs from the
    source file have to be mapped into relocs that apply to the target
    file.  This function is called by nlm_set_section_contents to give

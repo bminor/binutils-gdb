@@ -930,7 +930,7 @@ adjust_o_magic (abfd, execp)
     }
   else
     {
-      /* The VMA of the .bss section is set by the the VMA of the
+      /* The VMA of the .bss section is set by the VMA of the
          .data section plus the size of the .data section.  We may
          need to add padding bytes to make this true.  */
       pad = obj_bsssec (abfd)->vma - vma;

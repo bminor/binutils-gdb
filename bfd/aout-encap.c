@@ -79,7 +79,7 @@ encap_object_p (abfd)
   return aout_32_some_aout_object_p (abfd, &exec, encap_realcallback);
 }
 
-/* Finish up the reading of a encapsulated-coff a.out file header */
+/* Finish up the reading of an encapsulated-coff a.out file header.  */
 const bfd_target *
 encap_real_callback (abfd)
      bfd *abfd;

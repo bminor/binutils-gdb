@@ -166,7 +166,7 @@ typedef struct ecoff_symbol_struct
   PTR native;
 } ecoff_symbol_type;
 
-/* We take the address of the first element of a asymbol to ensure that the
+/* We take the address of the first element of an asymbol to ensure that the
    macro is only ever applied to an asymbol.  */
 #define ecoffsymbol(asymbol) ((ecoff_symbol_type *) (&((asymbol)->the_bfd)))
 

@@ -2145,7 +2145,7 @@ coff_write_armap (arch, elength, map, symbol_count, stridx)
      int stridx;
 {
   /* The size of the ranlib is the number of exported symbols in the
-     archive * the number of bytes in a int, + an int for the count.  */
+     archive * the number of bytes in an int, + an int for the count.  */
   unsigned int ranlibsize = (symbol_count * 4) + 4;
   unsigned int stringsize = stridx;
   unsigned int mapsize = stringsize + ranlibsize;

@@ -442,7 +442,7 @@ coff_link_add_symbols (abfd, info)
 
 	  /* The Microsoft Visual C compiler does string pooling by
 	     hashing the constants to an internal symbol name, and
-	     relying on the the linker comdat support to discard
+	     relying on the linker comdat support to discard
 	     duplicate names.  However, if one string is a literal and
 	     one is a data initializer, one will end up in the .data
 	     section and one will end up in the .rdata section.  The

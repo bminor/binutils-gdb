@@ -626,7 +626,7 @@ b_out_slurp_reloc_table (abfd, asect, symbols)
 
     if (raw[7] & extern_mask)
       {
-	/* If this is set then the r_index is a index into the symbol table;
+	/* If this is set then the r_index is an index into the symbol table;
 	   if the bit is not set then r_index contains a section map.
 	   We either fill in the sym entry with a pointer to the symbol,
 	   or point to the correct section.  */

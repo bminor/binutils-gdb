@@ -1054,7 +1054,7 @@ coff_write_alien_symbol (abfd, symbol, written, string_size_p,
       if (! obj_pe (abfd))
 	native->u.syment.n_value += symbol->section->output_section->vma;
 
-      /* Copy the any flags from the the file header into the symbol.
+      /* Copy the any flags from the file header into the symbol.
          FIXME: Why?  */
       {
 	coff_symbol_type *c = coff_symbol_from (abfd, symbol);
@@ -2468,7 +2468,7 @@ bfd_coff_set_symbol_class (abfd, symbol, class)
 	  if (! obj_pe (abfd))
 	    native->u.syment.n_value += symbol->section->output_section->vma;
 
-	  /* Copy the any flags from the the file header into the symbol.
+	  /* Copy the any flags from the file header into the symbol.
 	     FIXME: Why?  */
 	  native->u.syment.n_flags = bfd_asymbol_bfd (& csym->symbol)->flags;
 	}

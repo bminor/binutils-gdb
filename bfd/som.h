@@ -107,7 +107,7 @@ struct somdata
   {
     /* All the magic information about an executable which lives
        in the private BFD structure and needs to be copied from
-       the input bfd to the output bfd during a objcopy/strip.  */
+       the input bfd to the output bfd during an objcopy/strip.  */
     struct som_exec_data *exec_data;
 
     /* These three fields are only used when writing files and are

@@ -366,7 +366,7 @@ static reloc_howto_type mips_howto_table[] =
 #define MIPS_HOWTO_COUNT \
   (sizeof mips_howto_table / sizeof mips_howto_table[0])
 
-/* When the linker is doing relaxing, it may change a external PCREL16
+/* When the linker is doing relaxing, it may change an external PCREL16
    reloc.  This typically represents an instruction like
        bal foo
    We change it to

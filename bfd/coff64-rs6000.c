@@ -2012,7 +2012,7 @@ xcoff64_sizeof_headers (abfd, reloc)
 
   size = bfd_coff_filhsz (abfd);
 
-  /* Don't think the small aout header can be used since some of the the
+  /* Don't think the small aout header can be used since some of the
      old elements have been reordered past the end of the old coff
      small aout size.  */
 

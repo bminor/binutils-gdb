@@ -2960,7 +2960,7 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 		  break;
 
 		case R_END_TRY:
-		  /* The end of a exception handling region.  The reloc's
+		  /* The end of an exception handling region.  The reloc's
 		     addend contains the offset of the exception handling
 		     code.  */
 		  if (bfd_reloc->addend == 0)

@@ -49,7 +49,7 @@ struct xcoff_backend_data_rec
   void (* _xcoff_swap_ldrel_in)(bfd *, const PTR, struct internal_ldrel *);
   void (* _xcoff_swap_ldrel_out)(bfd *, const struct internal_ldrel *, PTR);
 
-  /* size of the the external struct */
+  /* size of the external struct */
   unsigned int _xcoff_ldhdrsz;
   unsigned int _xcoff_ldsymsz;
   unsigned int _xcoff_ldrelsz;

@@ -917,7 +917,7 @@ handle_COMDAT (abfd, sec_flags, hdr, name, section)
 		char *newname;
 		bfd_size_type amt;
 
-		/* This must the the second symbol with the
+		/* This must the second symbol with the
 		   section #.  It is the actual symbol name.
 		   Intel puts the two adjacent, but Alpha (at
 		   least) spreads them out.  */

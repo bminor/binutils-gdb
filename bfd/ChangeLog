@@ -1,3 +1,27 @@
+2001-10-10  Kazu Hirata  <kazu@hxi.com>
+
+	* aout-encap.c: Fix comment typos.
+	* aoutx.h: Likewise.
+	* archive.c: Likewise.
+	* bout.c: Likewise.
+	* coff64-rs6000.c: Likewise.
+	* coffcode.h: Likewise.
+	* coffgen.c: Likewise.
+	* cofflink.c: Likewise.
+	* coff-mips.c: Likewise.
+	* ecoff.c: Likewise.
+	* elf32-m32r.c: Likewise.
+	* libcoff-in.h: Likewise.
+	* libecoff.h: Likewise.
+	* libxcoff.h: Likewise.
+	* nlm32-i386.c: Likewise.
+	* pdp11.c: Likewise.
+	* section.c: Likewise.
+	* som.c: Likewise.
+	* som.h: Likewise.
+	* bfd-in2.h: Regenerate.
+	* libcoff.h: Likewise.
+
 2001-10-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (elf_map_symbols): Don't create new section symbols; Use
