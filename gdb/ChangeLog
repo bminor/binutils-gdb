@@ -1,3 +1,8 @@
+2004-05-26  Randolph Chung  <tausq@debian.org>
+
+	* infttrace.h (target_waitkind): Forward declare type instead of pulling
+	in header file.
+
 2004-05-25  Joel Brobecker  <brobecker@gnat.com>
 
 	* NEWS: Document new "start" command.
