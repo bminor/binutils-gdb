@@ -1,3 +1,8 @@
+Mon May 26 14:05:13 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-ppc.c (coff_ppc_relocate_section): If PE file, don't add
+	section VMA.
+
 Mon May 26 10:57:48 1997  Fred Fish  <fnf@cygnus.com>
 
 	* peicode.h (coff_bfd_print_private_bfd_data): #undef before #define.
