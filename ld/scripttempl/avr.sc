@@ -20,7 +20,7 @@ SECTIONS
   .gnu.version_d ${RELOCATING-0} : { *(.gnu.version_d)	}
   .gnu.version_r ${RELOCATING-0} : { *(.gnu.version_r)	}
 
-  .rel.init    ${RELOCATING-0} : { *(.rel.init)	}
+  .rel.init    ${RELOCATING-0} : { *(.rel.init)		}
   .rela.init   ${RELOCATING-0} : { *(.rela.init)	}
   .rel.text    ${RELOCATING-0} :
     {
@@ -34,7 +34,7 @@ SECTIONS
       ${RELOCATING+*(.rela.text.*)}
       ${RELOCATING+*(.rela.gnu.linkonce.t*)}
     }
-  .rel.fini    ${RELOCATING-0} : { *(.rel.fini)	}
+  .rel.fini    ${RELOCATING-0} : { *(.rel.fini)		}
   .rela.fini   ${RELOCATING-0} : { *(.rela.fini)	}
   .rel.rodata  ${RELOCATING-0} :
     {
@@ -74,15 +74,42 @@ SECTIONS
   /* Internal text space or external memory */
   .text :
   {
-    *(.init)
+    *(.vectors)
+
+    ${CONSTRUCTING+ __ctors_start = . ; }
+    ${CONSTRUCTING+ *(.ctors) }
+    ${CONSTRUCTING+ __ctors_end = . ; }
+    ${CONSTRUCTING+ __dtors_start = . ; }
+    ${CONSTRUCTING+ *(.dtors) }
+    ${CONSTRUCTING+ __dtors_end = . ; }
+
     *(.progmem.gcc*)
     *(.progmem*)
     ${RELOCATING+. = ALIGN(2);}
+    *(.init0)  /* Start here after reset.  */
+    *(.init1)
+    *(.init2)  /* Clear __zero_reg__, set up stack pointer.  */
+    *(.init3)
+    *(.init4)  /* Initialize data and BSS.  */
+    *(.init5)
+    *(.init6)  /* C++ constructors.  */
+    *(.init7)
+    *(.init8)
+    *(.init9)  /* Call main().  */
     *(.text)
     ${RELOCATING+. = ALIGN(2);}
     *(.text.*)
     ${RELOCATING+. = ALIGN(2);}
-    *(.fini)
+    *(.fini9)  /* _exit() starts here.  */
+    *(.fini8)
+    *(.fini7)
+    *(.fini6)  /* C++ destructors.  */
+    *(.fini5)
+    *(.fini4)
+    *(.fini3)
+    *(.fini2)
+    *(.fini1)
+    *(.fini0)  /* Infinite loop after program termination.  */
     ${RELOCATING+ _etext = . ; }
   } ${RELOCATING+ > text}
 
@@ -93,6 +120,7 @@ SECTIONS
     *(.gnu.linkonce.d*)
     ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ _edata = . ; }
+    ${RELOCATING+ PROVIDE (__data_end = .) ; }
   } ${RELOCATING+ > data}
 
   .bss ${RELOCATING+ SIZEOF(.data) + ADDR(.data)} :
@@ -101,7 +129,19 @@ SECTIONS
     *(.bss)
     *(COMMON)
     ${RELOCATING+ PROVIDE (__bss_end = .) ; }
+  } ${RELOCATING+ > data}
+
+  ${RELOCATING+ __data_load_start = LOADADDR(.data); }
+  ${RELOCATING+ __data_load_end = __data_load_start + SIZEOF(.data); }
+
+  /* Global data not cleared after reset.  */
+  .noinit ${RELOCATING+ SIZEOF(.bss) + ADDR(.bss)} :
+  {
+    ${RELOCATING+ PROVIDE (__noinit_start = .) ; }
+    *(.noinit*)
+    ${RELOCATING+ PROVIDE (__noinit_end = .) ; }
     ${RELOCATING+ _end = . ;  }
+    ${RELOCATING+ PROVIDE (__heap_start = .) ; }
   } ${RELOCATING+ > data}
 
   .eeprom ${RELOCATING-0}:

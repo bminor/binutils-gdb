@@ -1,3 +1,8 @@
+2002-06-02  Marek Michalkiewicz  <marekm@amelek.gda.pl>
+
+	* scripttempl/avr.sc: Changes to support current GCC and avr-libc,
+	C++ constructors/destructors, loosely based on the m68hc11 port.
+
 2002-05-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.
