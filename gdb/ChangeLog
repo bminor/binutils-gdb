@@ -1,5 +1,11 @@
 2003-11-15  Andrew Cagney  <cagney@redhat.com>
 
+	* config/sparc/tm-sparc.h (DEPRECATE_USE_REGISTER_NOT_ARG): Rename
+	USE_REGISTER_NOT_ARG.
+	* stabsread.c (define_symbol): Update.
+
+2003-11-15  Andrew Cagney  <cagney@redhat.com>
+
 	* bcache.h (deprecated_bcache): Declare.
 	(bcache): Make returned buffer constant.
 	* bcache.c (deprecated_bcache): New function.
