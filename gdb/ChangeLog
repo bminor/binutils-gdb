@@ -1,3 +1,8 @@
+2003-09-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2loc.c (dwarf2_loc_desc_needs_frame): Variables in a
+	register do need a frame.
+
 2003-09-11  Andrew Cagney  <cagney@redhat.com>
 
 	Since the IRIX 4 configuration was forcing K&R mode it hasn't been
