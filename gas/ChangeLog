@@ -1,3 +1,8 @@
+2003-10-05  Nick Clifton  <nickc@redhat.com>
+
+	* as.c (parse_args): Revert patch to change handling of -f
+	option.  Its behaviour is mandated by the POSIX 2 spec.
+
 2003-10-04  Christian Groessler  <chris@groessler.org>
 
 	* tc-z8k.c (newfix): Tell fix_new_exp about pc relativeness.
