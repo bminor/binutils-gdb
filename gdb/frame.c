@@ -58,53 +58,74 @@ get_frame_id (struct frame_info *fi)
     {
       return null_frame_id;
     }
-  if (!fi->id_p)
+  if (!fi->this_id.p)
     {
       gdb_assert (!legacy_frame_p (current_gdbarch));
       /* Find THIS frame's ID.  */
-      fi->unwind->this_id (fi->next, &fi->prologue_cache, &fi->id);
-      fi->id_p = 1;
+      fi->unwind->this_id (fi->next, &fi->prologue_cache, &fi->this_id.value);
+      fi->this_id.p = 1;
     }
-  return frame_id_build (fi->id.base, get_frame_pc (fi));
+  return frame_id_build (fi->this_id.value.stack_addr, get_frame_pc (fi));
 }
 
 const struct frame_id null_frame_id; /* All zeros.  */
 
 struct frame_id
-frame_id_build (CORE_ADDR base, CORE_ADDR func_or_pc)
+frame_id_build (CORE_ADDR stack_addr, CORE_ADDR code_addr)
 {
   struct frame_id id;
-  id.base = base;
-  id.pc = func_or_pc;
+  id.stack_addr = stack_addr;
+  id.code_addr = code_addr;
   return id;
 }
 
 int
 frame_id_p (struct frame_id l)
 {
-  /* The .func can be NULL but the .base cannot.  */
-  return (l.base != 0);
+  int p;
+  /* The .code can be NULL but the .stack cannot.  */
+  p = (l.stack_addr != 0);
+  return p;
 }
 
 int
 frame_id_eq (struct frame_id l, struct frame_id r)
 {
-  /* If .base is different, the frames are different.  */
-  if (l.base != r.base)
-    return 0;
-  /* Add a test to check that the frame ID's are for the same function
-     here.  */
-  return 1;
+  int eq;
+  if (l.stack_addr == 0 || r.stack_addr == 0)
+    /* Like a NaN, if either ID is invalid, the result is false.  */
+    eq = 0;
+  else if (l.stack_addr != r.stack_addr)
+    /* If .stack addresses are different, the frames are different.  */
+    eq = 0;
+  else if (l.code_addr == 0 || r.code_addr == 0)
+    /* A zero code addr is a wild card, always succeed.  */
+    eq = 1;
+  else if (l.code_addr == r.code_addr)
+    /* The .stack and .code are identical, the ID's are identical.  */
+    eq = 1;
+  else
+    /* FIXME: cagney/2003-04-06: This should be zero.  Can't yet do
+       this because most frame ID's are not being initialized
+       correctly.  */
+    eq = 1;
+  return eq;
 }
 
 int
 frame_id_inner (struct frame_id l, struct frame_id r)
 {
-  /* Only return non-zero when strictly inner than.  Note that, per
-     comment in "frame.h", there is some fuzz here.  Frameless
-     functions are not strictly inner than (same .base but different
-     .func).  */
-  return INNER_THAN (l.base, r.base);
+  int inner;
+  if (l.stack_addr == 0 || r.stack_addr == 0)
+    /* Like NaN, any operation involving an invalid ID always fails.  */
+    inner = 0;
+  else
+    /* Only return non-zero when strictly inner than.  Note that, per
+       comment in "frame.h", there is some fuzz here.  Frameless
+       functions are not strictly inner than (same .stack but
+       different .code).  */
+    inner = INNER_THAN (l.stack_addr, r.stack_addr);
+  return inner;
 }
 
 struct frame_info *
@@ -520,8 +541,8 @@ create_sentinel_frame (struct regcache *regcache)
   frame->next = frame;
   /* Make the sentinel frame's ID valid, but invalid.  That way all
      comparisons with it should fail.  */
-  frame->id_p = 1;
-  frame->id = null_frame_id;
+  frame->this_id.p = 1;
+  frame->this_id.value = null_frame_id;
   return frame;
 }
 
@@ -1069,7 +1090,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
   prev->type = UNKNOWN_FRAME;
 
   /* A legacy frame's ID is always computed here.  Mark it as valid.  */
-  prev->id_p = 1;
+  prev->this_id.p = 1;
 
   /* Handle sentinel frame unwind as a special case.  */
   if (this_frame->level < 0)
@@ -1132,7 +1153,8 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	     dummy ID from the next frame.  Note that this method uses
 	     frame_register_unwind to obtain the register values
 	     needed to determine the dummy frame's ID.  */
-	  prev->id = gdbarch_unwind_dummy_id (current_gdbarch, this_frame);
+	  prev->this_id.value = gdbarch_unwind_dummy_id (current_gdbarch,
+							 this_frame);
 	}
       else
 	{
@@ -1141,11 +1163,11 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	     using the same sequence as is found a traditional
 	     unwinder.  Once all architectures supply the
 	     unwind_dummy_id method, this code can go away.  */
-	  prev->id = frame_id_build (read_fp (), read_pc ());
+	  prev->this_id.value = frame_id_build (read_fp (), read_pc ());
 	}
 
       /* Check that the unwound ID is valid.  */
-      if (!frame_id_p (prev->id))
+      if (!frame_id_p (prev->this_id.value))
 	{
 	  if (frame_debug)
 	    fprintf_unfiltered (gdb_stdlog,
@@ -1664,7 +1686,7 @@ find_frame_sal (struct frame_info *frame, struct symtab_and_line *sal)
 CORE_ADDR
 get_frame_base (struct frame_info *fi)
 {
-  return get_frame_id (fi).base;
+  return get_frame_id (fi).stack_addr;
 }
 
 /* High-level offsets into the frame.  Used by the debug info.  */
@@ -1786,7 +1808,7 @@ void
 deprecated_update_frame_base_hack (struct frame_info *frame, CORE_ADDR base)
 {
   /* See comment in "frame.h".  */
-  frame->id.base = base;
+  frame->this_id.value.stack_addr = base;
 }
 
 void

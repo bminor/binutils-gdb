@@ -1,5 +1,20 @@
 2003-04-09  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.h (struct frame_id): Replace "pc" and "base" with
+	"stack_addr" and "code_addr".  Update comments.
+	(frame_id_build): Update parameter names and comment.
+	(struct frame_info): Replace "id_p" and "id" with "this_id".
+	* dummy-frame.c (dummy_frame_this_id): Update.
+	* breakpoint.c (print_one_breakpoint): Update.
+	* frame.c (get_frame_id): Update.
+	(get_frame_base, frame_id_build): Update.
+	(create_sentinel_frame, legacy_get_prev_frame): Update.
+	(deprecated_update_frame_base_hack): Update.
+	(frame_id_p, frame_id_eq): Rework, return 0 when an invalid ID.
+	(frame_id_inner): Ditto.
+
+2003-04-09  Andrew Cagney  <cagney@redhat.com>
+
 	* defs.h (gdb_print_host_address): Make "addr" parameter a
 	pointer constant.
 	* utils.c (gdb_print_host_address): Update.
