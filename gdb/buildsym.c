@@ -2461,7 +2461,7 @@ read_struct_type (pp, type)
 
   if (nfn_fields)
     {
-	TYPE_FN_FIELDLISTS (type) = (struct fn_fieldlist *)
+      TYPE_FN_FIELDLISTS (type) = (struct fn_fieldlist *)
 	    obstack_alloc (symbol_obstack,
 			   sizeof (struct fn_fieldlist) * nfn_fields);
       TYPE_NFN_FIELDS (type) = nfn_fields;

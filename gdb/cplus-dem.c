@@ -290,11 +290,20 @@ cplus_demangle (type, arg_mode)
       /* destructor */
       if (type[0] == '_' && type[1] == CPLUS_MARKER && type[2] == '_')
 	{
-	  int n = (strlen (type) - 3)*2 + 3 + 2 + 1;
-	  char *tem = (char *) xmalloc (n);
-	  strcpy (tem, type + 3);
+	  int n;
+	  char *tem;
+
+	  type += 3;		/* Get past _$_ at front.  */
+	  while (isdigit (*type))
+	    /* If there are digits at the front, it's because
+	       of new 2.0 name mangling.  Just skip them.  */
+	    type++;
+
+	  n = strlen (type)*2 + 3 + 2 + 1;
+	  tem = (char *) xmalloc (n);
+	  strcpy (tem, type);
 	  strcat (tem, "::~");
-	  strcat (tem, type + 3);
+	  strcat (tem, type);
 	  if (print_arg_types)
 	    strcat (tem, "()");
 	  return tem;

@@ -1,3 +1,7 @@
+Mon Jan 20 08:54:00 1992  Michael Tiemann  (tiemann at cygnus.com)
+
+	* cplus-dem.c (cplus_demangle): Correctly demangle destructors.
+
 Sat Jan 18 17:17:45 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in (HFILES):  Add partial-stab.h.
