@@ -575,7 +575,7 @@ elf_symfile_read (struct objfile *objfile, int mainline)
 				str_sect->filepos,
 				bfd_section_size (abfd, str_sect));
     }
-  if (dwarf2_has_info (abfd))
+  if (dwarf2_has_info (objfile))
     {
       /* DWARF 2 sections */
       dwarf2_build_psymtabs (objfile, mainline);
