@@ -25,7 +25,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "obstack.h"
 
  /* note that this file includes real declarations and thus can only be included by one source file per executable. */
-#include "m68k-opcode.h"
+#include "opcode/m68k.h"
 #ifdef TE_SUN
 /* This variable contains the value to write out at the beginning of
    the a.out file.  The 2<<16 means that this is a 68020 file instead
@@ -3206,6 +3206,67 @@ segT segment;
 	/* handle SZ_UNDEF first, it can be changed to BYTE or SHORT */
 	switch(fragP->fr_subtype) {
 
+	case TAB(BRANCH,SZ_UNDEF): {
+		if((fragP->fr_symbol != NULL) 	/* Not absolute */
+		   && S_GET_SEGMENT(fragP->fr_symbol) == segment) {
+                        fragP->fr_subtype=TAB(TABTYPE(fragP->fr_subtype),BYTE);
+                        break;
+		} else if((fragP->fr_symbol == 0) || (cpu_of_arch(current_architecture) < m68020)) {
+			/* On 68000, or for absolute value, switch to abs long */
+			/* FIXME, we should check abs val, pick short or long */
+			if(fragP->fr_opcode[0]==0x61) {
+				fragP->fr_opcode[0]= 0x4E;
+				fragP->fr_opcode[1]= 0xB9;	/* JBSR with ABSL LONG offset */
+				subseg_change(SEG_TEXT, 0);
+				fix_new(fragP, fragP->fr_fix, 4, 
+					fragP->fr_symbol, 0, fragP->fr_offset, 0, NO_RELOC);
+				fragP->fr_fix+=4;
+				frag_wane(fragP);
+			} else if(fragP->fr_opcode[0]==0x60) {
+				fragP->fr_opcode[0]= 0x4E;
+				fragP->fr_opcode[1]= 0xF9;  /* JMP  with ABSL LONG offset */
+				subseg_change(SEG_TEXT, 0);
+				fix_new(fragP, fragP->fr_fix, 4, 
+					fragP->fr_symbol, 0, fragP->fr_offset, 0, NO_RELOC);
+				fragP->fr_fix+=4;
+				frag_wane(fragP);
+			} else {
+				as_warn("Long branch offset to extern symbol not supported.");
+			}
+		} else {	/* Symbol is still undefined.  Make it simple */
+			fix_new(fragP, (int)(fragP->fr_fix), 4, fragP->fr_symbol,
+				(symbolS *)0, fragP->fr_offset+4, 1, NO_RELOC);
+			fragP->fr_fix+=4;
+			fragP->fr_opcode[1]=0xff;
+			frag_wane(fragP);
+			break;
+		}
+
+		break;
+	} /* case TAB(BRANCH,SZ_UNDEF) */
+
+	case TAB(FBRANCH,SZ_UNDEF): {
+		if(S_GET_SEGMENT(fragP->fr_symbol) == segment || flagseen['l']) {
+			fragP->fr_subtype = TAB(FBRANCH,SHORT);
+			fragP->fr_var += 2;
+		} else {
+			fragP->fr_subtype = TAB(FBRANCH,LONG);
+			fragP->fr_var += 4;
+		}
+		break;
+	} /* TAB(FBRANCH,SZ_UNDEF) */
+
+	case TAB(PCREL,SZ_UNDEF): {
+		if(S_GET_SEGMENT(fragP->fr_symbol) == segment || flagseen['l']) {
+			fragP->fr_subtype = TAB(PCREL,SHORT);
+			fragP->fr_var += 2;
+		} else {
+			fragP->fr_subtype = TAB(PCREL,LONG);
+			fragP->fr_var += 4;
+		}
+		break;
+	} /* TAB(PCREL,SZ_UNDEF) */
+
 	case TAB(BCC68000,SZ_UNDEF): {
 		if((fragP->fr_symbol != NULL)
 		   && S_GET_SEGMENT(fragP->fr_symbol) == segment) {
@@ -3279,45 +3340,6 @@ segT segment;
 		break;
 	} /* case TAB(DBCC,SZ_UNDEF) */
 
-	case TAB(BRANCH,SZ_UNDEF): {
-		if((fragP->fr_symbol != NULL) 	/* Not absolute */
-		   && S_GET_SEGMENT(fragP->fr_symbol) == segment) {
-                        fragP->fr_subtype=TAB(TABTYPE(fragP->fr_subtype),BYTE);
-                        break;
-		} else if((fragP->fr_symbol == 0) || (cpu_of_arch(current_architecture) < m68020)) {
-			/* On 68000, or for absolute value, switch to abs long */
-			/* FIXME, we should check abs val, pick short or long */
-			if(fragP->fr_opcode[0]==0x61) {
-				fragP->fr_opcode[0]= 0x4E;
-				fragP->fr_opcode[1]= 0xB9;	/* JBSR with ABSL LONG offset */
-				subseg_change(SEG_TEXT, 0);
-				fix_new(fragP, fragP->fr_fix, 4, 
-					fragP->fr_symbol, 0, fragP->fr_offset, 0, NO_RELOC);
-				fragP->fr_fix+=4;
-				frag_wane(fragP);
-			} else if(fragP->fr_opcode[0]==0x60) {
-				fragP->fr_opcode[0]= 0x4E;
-				fragP->fr_opcode[1]= 0xF9;  /* JMP  with ABSL LONG offset */
-				subseg_change(SEG_TEXT, 0);
-				fix_new(fragP, fragP->fr_fix, 4, 
-					fragP->fr_symbol, 0, fragP->fr_offset, 0, NO_RELOC);
-				fragP->fr_fix+=4;
-				frag_wane(fragP);
-			} else {
-				as_warn("Long branch offset to extern symbol not supported.");
-			}
-		} else {	/* Symbol is still undefined.  Make it simple */
-			fix_new(fragP, (int)(fragP->fr_fix), 4, fragP->fr_symbol,
-				(symbolS *)0, fragP->fr_offset+4, 1, NO_RELOC);
-			fragP->fr_fix+=4;
-			fragP->fr_opcode[1]=0xff;
-			frag_wane(fragP);
-			break;
-		}
-
-		break;
-	} /* case TAB(BRANCH,SZ_UNDEF) */
-
 	case TAB(PCLEA,SZ_UNDEF): {
 		if ((S_GET_SEGMENT(fragP->fr_symbol))==segment || flagseen['l']) {
 			fragP->fr_subtype=TAB(PCLEA,SHORT);
@@ -3328,17 +3350,6 @@ segT segment;
 		}
 		break;
 	} /* TAB(PCLEA,SZ_UNDEF) */
-
-	case TAB(PCREL,SZ_UNDEF): {
-		if(S_GET_SEGMENT(fragP->fr_symbol) == segment || flagseen['l']) {
-			fragP->fr_subtype = TAB(PCREL,SHORT);
-			fragP->fr_var += 2;
-		} else {
-			fragP->fr_subtype = TAB(PCREL,LONG);
-			fragP->fr_var += 4;
-		}
-		break;
-	} /* TAB(PCREL,SZ_UNDEF) */
 
 	default:
 		break;
