@@ -1121,13 +1121,13 @@ for example, @samp{asyncstr 2} below runs @code{asyncstr} on
 @code{COM2}.
 
 @example
-(eg-C:\H8300\TEST) mode com2:9600,n,8,1,p
+C:\H8300\TEST> asynctsr 2
+C:\H8300\TEST> mode com2:9600,n,8,1,p
 
 Resident portion of MODE loaded
 
 COM2: 9600, n, 8, 1, p
 
-(eg-C:\H8300\TEST) asynctsr 2
 @end example
 
 @quotation
