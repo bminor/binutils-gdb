@@ -913,7 +913,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	remote-st.c remote-utils.c dcache.c \
 	remote-udi.c remote-vx.c remote-z8k.c rs6000-nat.c rs6000-pinsn.c \
 	rs6000-tdep.c ser-go32.c ser-tcp.c sh-tdep.c solib.c sparc-nat.c \
-	sparc-pinsn.c sparc-tdep.c sun3-nat.c sun386-nat.c \
+	sparc-pinsn.c sparc-tdep.c sparcl-tdep.c sun3-nat.c sun386-nat.c \
 	symm-tdep.c symm-nat.c \
 	tahoe-pinsn.c ultra3-nat.c ultra3-xdep.c umax-xdep.c \
 	vax-pinsn.c \
@@ -1445,6 +1445,8 @@ sparc-pinsn.o: sparc-pinsn.c $(bfd_h) $(dis-asm_h) $(defs_h)
 
 sparc-tdep.o: sparc-tdep.c $(floatformat_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) objfiles.h symfile.h target.h
+
+sparcl-tdep.o: sparcl-tdep.c $(defs_h) $(gdbcore_h) target.h
 
 stabsread.o: stabsread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 	$(INCLUDE_DIR)/aout/stab_gnu.h buildsym.h complaints.h $(defs_h) \

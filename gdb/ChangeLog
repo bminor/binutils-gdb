@@ -1,5 +1,13 @@
 Fri Jun 10 14:52:56 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
+	* Makefile.in: change sparclite-tdep.c to sparcl-tdep.c.
+	* sparclite/Makefile.in: ditto.
+	* sparcl-tdpe.c: change file name because first 8 chars has to be 
+	unique.
+	* sparcl-stub.c: ditto.
+
+	* .Sanitize: add sparclite-stub.c sparclite-tdep.c to keep.
+
 	* sparclite/Makefile.in: fix INCLUDE_CFLAGS to have {srcdir}/../config.
 
 Fri Jun 10 10:38:15 1994  Jeff Law  (law@snake.cs.utah.edu)
