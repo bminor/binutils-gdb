@@ -1,3 +1,9 @@
+Wed Jan 31 13:34:52 1996  Fred Fish  <fnf@cygnus.com>
+
+	* config/i386/xm-linux.h (MMAP_BASE_ADDRESS, MMAP_INCREMENT): 
+	Define to what should be reasonable values.  However, apparently
+	a bug in linux mmap prevents mapped symbol tables from working.
+
 Tue Jan 30 18:26:19 1996  Fred Fish  <fnf@cygnus.com>
 
 	* defs.h (errno.h>:  Move #include closer to head of file to solve
