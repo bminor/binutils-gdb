@@ -59,6 +59,7 @@ i960-wrs-vxworks*)	targ_emul=gld960 ;;
 i960-*-coff)		targ_emul=gld960coff ;;
 i960-intel-nindy)	targ_emul=gld960 ;;
 i960-*-rtems*)		targ_emul=gld960coff ;;
+i960-*-elf*)		targ_emul=elf32_i960 ;;
 m32r-*-*)		targ_emul=m32relf ;;
 m68*-sun-sunos[34]*)	targ_emul=sun3 ;;
 m68*-wrs-vxworks*)	targ_emul=sun3 ;;

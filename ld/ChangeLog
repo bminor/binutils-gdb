@@ -1,3 +1,11 @@
+1999-05-28  Martin Dorey  <mdorey@madge.com>
+
+	* configure.tgt (i960-*-elf*): New target.
+	* emulparams/elf32_i960.sh: New file.
+	* Makefile.am (ALL_EMULATIONS): Add eelf32_i960.o.
+	(eelf32_i960.c): New target.
+	* Makefile.in: Rebuild.
+
 1999-05-26  Nick Clifton  <nickc@cygnus.com>
 
 	* emulparams/armelf_oabi.sh (TEMPLATE_NAME): Set to armelf_oabi. 
