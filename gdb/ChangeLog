@@ -1,5 +1,10 @@
 2004-11-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.h (sparc32nbsd_elf_init_abi): New prototype.
+	* sparcnbsd-tdep.c (sparc32nbsd_elf_init_abi): Make global.
+	* sparcobsd-tdep.c (sparc32obsd_init_abi): Call
+	sparc32nbsd_elf_init_abi.  Remove duplicate code.
+
 	* config/sparc/nbsdaout.mh (NAT_FILE): Set to solib.h.
 	* config/sparc/nbsdelf.mh (NAT_FILE): Remove variable.
 	* config/sparc/nm-nbsd.h: Remove file.

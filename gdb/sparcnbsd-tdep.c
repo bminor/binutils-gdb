@@ -281,7 +281,7 @@ sparc32nbsd_aout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   sparc32nbsd_init_abi (info, gdbarch);
 }
 
-static void
+void
 sparc32nbsd_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   sparc32nbsd_init_abi (info, gdbarch);
