@@ -43,13 +43,7 @@
 /* should be conditional on address size! */
 #define elf_symbol(asymbol) ((elf_symbol_type *)(&(asymbol)->the_bfd))
 
-#define S_SET_OTHER(S,V)                (elf_symbol((S)->bsym)->other = (V))
-#define S_SET_TYPE(S,T)                 (elf_symbol((S)->bsym)->type = (T))
-#define S_SET_DESC(S,D)                 (elf_symbol((S)->bsym)->desc = (D))
-#define S_GET_OTHER(S)                  (elf_symbol((S)->bsym)->other)
-#define S_GET_TYPE(S)                   (elf_symbol((S)->bsym)->type)
-#define S_GET_DESC(S)                   (elf_symbol((S)->bsym)->desc)
-
+#define S_GET_SIZE(S) (elf_symbol ((S)->bsym)->internal_elf_sym.st_size)
 #define S_SET_SIZE(S,V) \
   (elf_symbol((S)->bsym)->internal_elf_sym.st_size = (V))
 
@@ -60,6 +54,12 @@ extern asection *gdb_section;
 #define obj_frob_symbol(S,PUNT)	if ( obj_elf_frob_symbol (S, &PUNT) ) { i++; continue; }
 #endif
 
+/* Copy over the function bit and size of a forwarded symbol.  */
+#define obj_frob_forward_symbol(sym)					\
+  (((sym)->bsym->flags |=						\
+    ((sym)->sy_value.X_add_symbol->bsym->flags & BSF_FUNCTION)),	\
+   S_SET_SIZE ((sym), S_GET_SIZE ((sym)->sy_value.X_add_symbol)))
+
 #define obj_write_symbol(S)	obj_elf_write_symbol (S)
 
 #define obj_frob_file()	elf_frob_file()
@@ -68,7 +68,25 @@ extern int obj_elf_frob_symbol PARAMS ((struct symbol *, int *));
 extern void elf_frob_file PARAMS ((void));
 extern void elf_file_symbol PARAMS ((char *));
 
+extern int obj_elf_write_symbol PARAMS ((struct symbol *));
+
 extern void obj_elf_section PARAMS ((int));
-extern void obj_elf_previous PARAMS ((void));
+extern void obj_elf_previous PARAMS ((int));
+
+/* Stabs go in a separate section.  */
+#define SEPARATE_STAB_SECTIONS
+
+/* We need 12 bytes at the start of the section to hold some initial
+   information.  */
+#define INIT_STAB_SECTION(seg) (seg_info (seg)->stabu.p = frag_more (12))
+
+/* Set the filename offset.  */
+#define OBJ_PROCESS_STAB(seg, string, stroff, type, other, desc)	\
+  ((type) == N_SO							\
+   ? (md_number_to_chars (seg_info (seg)->stabu.p,			\
+			  (valueT) (stroff),				\
+			  4),						\
+      0)								\
+   : 0)
 
 #endif /* _OBJ_ELF_H */

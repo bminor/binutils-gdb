@@ -1,3 +1,9 @@
+Fri Sep 17 18:12:34 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/obj-elf.h (S_GET_SIZE): Define.
+	(obj_frob_forward_symbol): Define.
+	* config/tc-i386.c (line_comment_chars): Initialize in all cases.
+
 Thu Sep 16 14:23:08 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* tc.h: Declare tc_gen_reloc differently depending upong
