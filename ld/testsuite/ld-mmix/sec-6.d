@@ -23,6 +23,7 @@ Idx Name          Size      VMA               LMA               File off  Algn
   1 \.debug_frame  0+10  0+  0+  0+  2\*\*2
                   CONTENTS, READONLY, DEBUGGING
 SYMBOL TABLE:
+0+ g       \.text Main
 0+ g       \.text _start
 0+8 g       \.text debugb
 2000000000000000 g       \*ABS\* __bss_start

@@ -1,5 +1,10 @@
 2002-02-17  Hans-Peter Nilsson  <hp@bitrange.com>
 
+	* ld-mmix/b-nosym.d, ld-mmix/sec-6.d: Tweak for change in symbol
+	output.
+	* ld-mmix/sec-7m.d, ld-mmix/sec-7a.s, ld-mmix/sec-7b.s,
+	ld-mmix/sec-7c.s, ld-mmix/sec-7d.s, ld-mmix/sec-7e.s: New test.
+
 	* ld-mmix/bpo-22.d: New test.
 
 	* ld-mmix/local12.d (Sections): Match any LMA for .data, .sbss,
