@@ -1,15 +1,61 @@
 #!/bin/sh
 # genscripts.sh - generate the ld-emulation-target specific files
 #
-# Usage: genscripts.sh srcdir libdir exec_prefix \
-#        host target target_alias default_emulation \
-#        native_lib_dirs use_sysroot this_emulation tool_dir
+# Usage: genscripts_extra.sh \
+#          srcdir \
+#          libdir \
+#          exec_prefix \
+#          host \
+#          target \
+#          target_alias \
+#          default_emulation \
+#          native_lib_dirs \
+#          use_sysroot \
+#          this_emulation \
+# optional:
+#          tool_dir \
+#          customizer_script
 #
 # Sample usage:
-# genscripts.sh /djm/ld-devo/devo/ld /usr/local/lib /usr/local \
-#  sparc-sun-sunos4.1.3 sparc-sun-sunos4.1.3 sparc-sun-sunos4.1.3 sun4 \
-#  "" no sun3 sparc-sun-sunos4.1.3
-# produces sun3.x sun3.xbn sun3.xn sun3.xr sun3.xu em_sun3.c
+#
+#   genscripts_extra.sh \
+#    /sources/ld \
+#    /usr/local/lib \
+#    /usr/local \
+#    sparc-sun-sunos4.1.3 \
+#    sparc-sun-sunos4.1.3 \
+#    sparc-sun-sunos4.1.3 \
+#    sun4 \
+#    "" \
+#    no \
+#    sun3 \
+#    sparc-sun-sunos4.1.3 \
+#    sparc.sh
+#
+# produces the linker scripts:
+#
+#   sun3.x       [default linker script]
+#   sun3.xbn     [used when the linker is invoked with "-N"]
+#   sun3.xn      [used when the linker is invoked with "-n"]
+#   sun3.xr      [used when the linker is invoked with "-r"]
+#   sun3.xu      [used when the linker is invoked with "-Ur"]
+# and maybe:
+#   sun3.xc      [used when the linker is invoked with "-z combreloc"]
+#   sun3.xsc     [used when the linker is invoked with "--shared"]
+#   sun3.xdc     [used when the linker is invoked with "-pie"]
+#
+# It also produced the C source file:
+#
+#   em_sun3.c
+#
+# which is then compiled into the linker.
+#
+# The linker scripts are created by running the shell script
+# /sources/ld/emulparams/sparc.sh to set the value of ${SCRIPT_NAME}
+# (and any other variables it wants to).  ${SCRIPT_NAME} is then
+# invoked with a variable called ${LD_FLAG} to tell it which version
+# of the linker script to create.
+
 
 srcdir=$1
 libdir=$2
@@ -22,16 +68,23 @@ NATIVE_LIB_DIRS=$8
 use_sysroot=$9
 shift 9
 EMULATION_NAME=$1
-shift
-# Can't use ${1:-$target_alias} here due to an Ultrix shell bug.
-if [ "x$1" = "x" ] ; then
+TOOL_LIB=$2
+CUSTOMIZER_SCRIPT=$3
+
+# Can't use ${TOOL_LIB:-$target_alias} here due to an Ultrix shell bug.
+if [ "x${TOOL_LIB}" = "x" ] ; then
   tool_lib=${exec_prefix}/${target_alias}/lib
 else
-  tool_lib=${exec_prefix}/$1/lib
+  tool_lib=${exec_prefix}/${TOOL_LIB}/lib
 fi
 
+if [ "x${CUSTOMIZER_SCRIPT}" = "x" ] ; then
+  CUSTOMIZER_SCRIPT=${EMULATION_NAME}
+fi
+CUSTOMIZER_SCRIPT="${srcdir}/emulparams/${CUSTOMIZER_SCRIPT}.sh"
+
 # Include the emulation-specific parameters:
-. ${srcdir}/emulparams/${EMULATION_NAME}.sh
+. ${CUSTOMIZER_SCRIPT} ${EMULATION_NAME}
 
 if test -d ldscripts; then
   true
@@ -164,7 +217,7 @@ fi
 SEGMENT_SIZE=${SEGMENT_SIZE-${MAXPAGESIZE-${TARGET_PAGE_SIZE}}}
 
 # Determine DATA_ALIGNMENT for the 5 variants, using
-# values specified in the emulparams/<emulation>.sh file or default.
+# values specified in the emulparams/<script_to_run>.sh file or default.
 
 DATA_ALIGNMENT_="${DATA_ALIGNMENT_-${DATA_ALIGNMENT-ALIGN(${SEGMENT_SIZE})}}"
 DATA_ALIGNMENT_n="${DATA_ALIGNMENT_n-${DATA_ALIGNMENT_}}"
@@ -176,7 +229,7 @@ LD_FLAG=r
 DATA_ALIGNMENT=${DATA_ALIGNMENT_r}
 DEFAULT_DATA_ALIGNMENT="ALIGN(${SEGMENT_SIZE})"
 ( echo "/* Script for ld -r: link without relocation */"
-  . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+  . ${CUSTOMIZER_SCRIPT} ${EMULATION_NAME}
   . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
 ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xr
 
@@ -184,7 +237,7 @@ LD_FLAG=u
 DATA_ALIGNMENT=${DATA_ALIGNMENT_u}
 CONSTRUCTING=" "
 ( echo "/* Script for ld -Ur: link w/out relocation, do create constructors */"
-  . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+  . ${CUSTOMIZER_SCRIPT} ${EMULATION_NAME}
   . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
 ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xu
 
@@ -192,7 +245,7 @@ LD_FLAG=
 DATA_ALIGNMENT=${DATA_ALIGNMENT_}
 RELOCATING=" "
 ( echo "/* Default linker script, for normal executables */"
-  . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+  . ${CUSTOMIZER_SCRIPT} ${EMULATION_NAME}
   . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
 ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.x
 
@@ -200,14 +253,14 @@ LD_FLAG=n
 DATA_ALIGNMENT=${DATA_ALIGNMENT_n}
 TEXT_START_ADDR=${NONPAGED_TEXT_START_ADDR-${TEXT_START_ADDR}}
 ( echo "/* Script for -n: mix text and data on same page */"
-  . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+  . ${CUSTOMIZER_SCRIPT} ${EMULATION_NAME}
   . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
 ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xn
 
 LD_FLAG=N
 DATA_ALIGNMENT=${DATA_ALIGNMENT_N}
 ( echo "/* Script for -N: mix text and data on same page; don't align data */"
-  . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+  . ${CUSTOMIZER_SCRIPT} ${EMULATION_NAME}
   . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
 ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xbn
 
@@ -216,7 +269,7 @@ if test -n "$GENERATE_COMBRELOC_SCRIPT"; then
   LD_FLAG=c
   COMBRELOC=ldscripts/${EMULATION_NAME}.xc.tmp
   ( echo "/* Script for -z combreloc: combine and sort reloc sections */"
-    . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+    . ${CUSTOMIZER_SCRIPT} ${EMULATION_NAME}
     . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
   ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xc
   rm -f ${COMBRELOC}
@@ -230,7 +283,7 @@ if test -n "$GENERATE_SHLIB_SCRIPT"; then
   # Note that TEXT_START_ADDR is set to NONPAGED_TEXT_START_ADDR.
   (
     echo "/* Script for ld --shared: link shared library */"
-    . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+    . ${CUSTOMIZER_SCRIPT} ${EMULATION_NAME}
     . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
   ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xs
   if test -n "$GENERATE_COMBRELOC_SCRIPT"; then
@@ -238,7 +291,7 @@ if test -n "$GENERATE_SHLIB_SCRIPT"; then
     DATA_ALIGNMENT=${DATA_ALIGNMENT_sc-${DATA_ALIGNMENT}}
     COMBRELOC=ldscripts/${EMULATION_NAME}.xc.tmp
     ( echo "/* Script for --shared -z combreloc: shared library, combine & sort relocs */"
-      . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+      . ${CUSTOMIZER_SCRIPT} ${EMULATION_NAME}
       . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
     ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xsc
     rm -f ${COMBRELOC}
@@ -254,7 +307,7 @@ if test -n "$GENERATE_PIE_SCRIPT"; then
   # Note that TEXT_START_ADDR is set to NONPAGED_TEXT_START_ADDR.
   (
     echo "/* Script for ld -pie: link position independent executable */"
-    . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+    . ${CUSTOMIZER_SCRIPT} ${EMULATION_NAME}
     . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
   ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xd
   if test -n "$GENERATE_COMBRELOC_SCRIPT"; then
@@ -262,7 +315,7 @@ if test -n "$GENERATE_PIE_SCRIPT"; then
     DATA_ALIGNMENT=${DATA_ALIGNMENT_sc-${DATA_ALIGNMENT}}
     COMBRELOC=ldscripts/${EMULATION_NAME}.xc.tmp
     ( echo "/* Script for -pie -z combreloc: position independent executable, combine & sort relocs */"
-      . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+      . ${CUSTOMIZER_SCRIPT} ${EMULATION_NAME}
       . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
     ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xdc
     rm -f ${COMBRELOC}

@@ -1,5 +1,19 @@
 2003-10-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am (GENSCRIPTS_EXTRA, GEN_EXTRA_DEPENDS): Remove.  Use
+	GENSCRIPTS and GEN_DEPENDS in place of these.
+	* Makefile.in: Regenerate.
+	* genscripts_extra.sh: Delete.  Merge extra functionality to..
+	* genscripts.sh: ..here.
+
+	* emulparams/gld960.sh (TEXT_START_ADDR, TARGET_PAGE_SIZE): Define.
+	* emulparams/gld960coff.sh (TEXT_START_ADDR, TARGET_PAGE_SIZE): Ditto.
+	* emulparams/lnk960.sh (TEXT_START_ADDR, TARGET_PAGE_SIZE): Ditto.
+	* emulparams/m88kbcs.sh (TEXT_START_ADDR, TARGET_PAGE_SIZE): Ditto.
+	* emulparams/vanilla.sh (TEXT_START_ADDR, TARGET_PAGE_SIZE): Ditto.
+
+2003-10-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* emultempl/ia64elf.em (gld${EMULATION_NAME}_after_parse): Don't
 	use $EMULATION_NAME to call bfd function.
 
