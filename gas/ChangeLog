@@ -1,5 +1,9 @@
 1999-06-22  Ian Lance Taylor  <ian@zembu.com>
 
+	* subsegs.c (subseg_text_p): Rewrite non BFD_ASSEMBLER case to use
+	a list of names, to try obj_segment_name, and to try abbreviated
+	names when using COFF without long section names.
+
 	* config/tc-alpha.c: More use of symbol accessor functions.
 	* config/tc-arc.c: Likewise.
 	* config/tc-d30v.c: Likewise.

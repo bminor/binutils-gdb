@@ -566,17 +566,47 @@ section_symbol (sec)
 
 /* Return whether the specified segment is thought to hold text.  */
 
+#ifndef BFD_ASSEMBLER
+const char * const nontext_section_names[] =
+{
+  ".eh_frame",
+  ".gcc_except_table",
+#ifdef OBJ_COFF
+#ifndef COFF_LONG_SECTION_NAMES
+  ".eh_fram",
+  ".gcc_exc",
+#endif
+#endif
+  NULL
+};
+#endif /* ! BFD_ASSEMBLER */
+
 int
 subseg_text_p (sec)
      segT sec;
 {
 #ifdef BFD_ASSEMBLER
   return (bfd_get_section_flags (stdoutput, sec) & SEC_CODE) != 0;
-#else
-  return (sec != data_section
-	  && sec != bss_section
-	  && strcmp (segment_name (sec), ".eh_frame") != 0);
+#else /* ! BFD_ASSEMBLER */
+  const char * const *p;
+
+  if (sec == data_section || sec == bss_section)
+    return false;
+
+  for (p = nontext_section_names; *p != NULL; ++p)
+    {
+      if (strcmp (segment_name (sec), *p) == 0)
+	return false;
+
+#ifdef obj_segment_name
+      if (strcmp (obj_segment_name (sec), *p) == 0)
+	return false;
 #endif
+    }
+
+  return true;
+
+#endif /* ! BFD_ASSEMBLER */
 }
 
 void
