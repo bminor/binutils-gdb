@@ -270,6 +270,10 @@ IDE_CFLAGS=$(GUI_CFLAGS_X) $(IDE_CFLAGS_X)
 GDBTK_VERSION = 1.0
 GDBTK_LIBRARY = $(datadir)/insight$(GDBTK_VERSION)
 
+# Gdbtk requires an absolute path to the source directory or
+# the testsuite won't run properly.
+GDBTK_SRC_DIR = @GDBTK_SRC_DIR@
+
 SUBDIR_GDBTK_OBS = \
 	gdbtk.o gdbtk-bp.o gdbtk-cmds.o gdbtk-hooks.o \
 	gdbtk-register.o gdbtk-stack.o gdbtk-varobj.o gdbtk-wrapper.o
@@ -1395,7 +1399,7 @@ gdbtk.o: $(srcdir)/gdbtk/generic/gdbtk.c \
         $(ITK_CFLAGS) $(TIX_CFLAGS) \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/gdbtk/generic/gdbtk.c \
-		-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\" -DSRC_DIR=\"$(srcdir)\"
+		-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\" -DSRC_DIR=\"$(GDBTK_SRC_DIR)\"
 
 gdbtk-bp.o: $(srcdir)/gdbtk/generic/gdbtk-bp.c \
 	$(srcdir)/gdbtk/generic/gdbtk.h $(srcdir)/gdbtk/generic/gdbtk-cmds.h \

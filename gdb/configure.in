@@ -941,6 +941,13 @@ configdir="unix"
 GDBTKLIBS=
 if test "${enable_gdbtk}" = "yes"; then
 
+    # Gdbtk must have an absolute path to srcdir in order to run
+    # properly when not installed.
+    here=`pwd`
+    cd ${srcdir}
+    GDBTK_SRC_DIR=`pwd`
+    cd $here
+
     CY_AC_PATH_TCLCONFIG
     if test -z "${no_tcl}"; then
 	CY_AC_LOAD_TCLCONFIG
@@ -1080,6 +1087,7 @@ AC_SUBST(TIXLIB)
 AC_SUBST(TIX_DEPS)
 AC_SUBST(GDBTKLIBS)
 AC_SUBST(GDBTK_CFLAGS)
+AC_SUBST(GDBTK_SRC_DIR)
 
 AC_PATH_X
 

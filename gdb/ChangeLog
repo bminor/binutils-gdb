@@ -1,3 +1,13 @@
+2001-08-16  Keith Seitz  <keiths@redhat.com>
+
+	* configure.in (GDBTK_SRC_DIR): We must have autoconf
+	give us the absolute path to the source directory.
+	* configure: Regenerated.
+	* Makefile.in (GDBTK_SRC_DIR): Add variable so that
+	autoconf can substitue it in for us.
+	(gdbtk.o): Pass in GDBTK_SRC_DIR instead of srcdir. We
+	really do need an absolute pathname.
+
 2001-08-15  Keith Seitz  <keiths@redhat.com>
 
 	* Makefile.in (GDBTK_VERSION): Set a version number.
