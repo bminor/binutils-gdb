@@ -1,3 +1,8 @@
+2005-01-06  Eric Botcazou  <ebotcazou@libertysurf.fr>
+
+	* configure.host (sparc*-*-solaris2*): Rename into sparc-*-solaris2*.
+	(sparc64-sun-solaris2*): New host.
+
 2005-01-06  Paul Brook  <paul@codesourcery.com>
 
 	* Makefie.am: Add earmelf_vxworks.
