@@ -1,3 +1,12 @@
+2004-01-23  David Carlton  <carlton@kealia.com>
+
+	Patch for PR c++/1520:
+	* dwarf2read.c (read_func_scope): Set processing_current_prefix
+	properly if we have a specification die.
+	(determine_prefix_aux): Rename from determine_prefix.
+	(determine_prefix): Like the old determine_prefix, but never
+	returns NULL.
+
 2004-01-23  Theodore A. Roth  <troth@openavr.org>
 
 	* avr-tdep.c: Update copyright.
