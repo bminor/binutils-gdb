@@ -1,3 +1,10 @@
+Tue Jan 23 14:22:45 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coffcode.h (coff_set_section_contents): Fix the handling of the
+	.lib section to work even if the entire section contents are
+	written at once.  From Gvran Uddeborg <gvran@uddeborg.pp.se> and
+	Robert Lipe <robertl@arnet.com>.
+
 Mon Jan 22 18:45:51 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elflink.h (elf_finish_pointer_linker_section): Don't allocate

@@ -2682,12 +2682,44 @@ coff_set_section_contents (abfd, section, location, offset, count)
     coff_compute_section_file_positions (abfd);
 
 #ifdef _LIB
-  /* If this is a .lib section, bump the vma address so that it
-       winds up being the number of .lib sections output.  This is
-       right for SVR3.2.  Shared libraries should probably get more
-       generic support.  Ian Taylor <ian@cygnus.com>.  */
-  if (strcmp (section->name, _LIB) == 0)
-    ++section->lma;
+
+   /* The physical address field of a .lib section is used to hold the
+      number of shared libraries in the section.  This code counts the
+      number of sections being written, and increments the lma field
+      with the number.
+
+      I have found no documentation on the contents of this section.
+      Experimentation indicates that the section contains zero or more
+      records, each of which has the following structure:
+
+      - a (four byte) word holding the length of this record, in words,
+      - a word that always seems to be set to "2",
+      - the path to a shared library, null-terminated and then padded
+        to a whole word boundary.
+
+      bfd_assert calls have been added to alert if an attempt is made
+      to write a section which doesn't follow these assumptions.  The
+      code has been tested on ISC 4.1 by me, and on SCO by Robert Lipe
+      <robertl@arnet.com> (Thanks!).
+  
+      Gvran Uddeborg <gvran@uddeborg.pp.se> */
+
+    if (strcmp (section->name, _LIB) == 0)
+      {
+	bfd_byte *rec, *recend;
+
+	rec = (bfd_byte *) location;
+	recend = rec + count;
+	while (rec < recend)
+	  {
+	    BFD_ASSERT (bfd_get_32 (abfd, rec + 4) == 2);
+	    ++section->lma;
+	    rec += bfd_get_32 (abfd, rec) / 4;
+	  }
+
+	BFD_ASSERT (rec == recend);
+      }
+
 #endif
 
   /* Don't write out bss sections - one way to do this is to
