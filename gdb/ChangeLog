@@ -1,5 +1,8 @@
 Wed Jun 23 15:04:54 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	* inferior.h: remove redundant include of symtab.h which is
+	included in value.h via breakpoint.h.
+
 	* alloca.c: removed.  alloca is now in libiberty.
 
 	* config/m88k/delta88.mh, config/ns32k/merlin.mh (M_UNINSTALL):
