@@ -1,5 +1,16 @@
 2002-11-12  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.h (elf_link_add_object_symbols): Optimize stabs for
+	relocatable link too.
+	(elf_link_input_bfd): When emitting relocs, adjust offsets for
+	eh_frame and stab sections.  Zap deleted relocs.
+	(elf_reloc_symbol_deleted_p): Return true for zero r_symndx.
+	(elf_bfd_discard_info): Run for relocatable link too.
+	* elf64-ppc.c (ppc64_elf_edit_opd): Rename from edit_opd.  Make global.
+	Handle ld -r case.
+	(ppc64_elf_size_dynamic_sections): Don't call edit_opd from here.
+	* elf64-ppc.h (ppc64_elf_edit_opd): Declare.
+
 	* elf-bfd.h (struct cie_header): Move from elf_eh-frame.c.
 	(struct cie, struct eh_cie_fde, struct eh_frame_sec_info): Likewise.
 	(struct eh_frame_array_ent, struct eh_frame_hdr_info): Likewise.

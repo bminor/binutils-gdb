@@ -2208,10 +2208,9 @@ elf_link_add_object_symbols (abfd, info)
 	}
     }
 
-  /* If this is a non-traditional, non-relocateable link, try to
-     optimize the handling of the .stab/.stabstr sections.  */
+  /* If this is a non-traditional link, try to optimize the handling
+     of the .stab/.stabstr sections.  */
   if (! dynamic
-      && ! info->relocateable
       && ! info->traditional_format
       && info->hash->creator->flavour == bfd_target_elf_flavour
       && is_elf_hash_table (info)
@@ -6982,6 +6981,16 @@ elf_link_input_bfd (finfo, input_bfd)
 		      next_erel = 0;
 		    }
 
+		  irela->r_offset = _bfd_elf_section_offset (output_bfd,
+							     finfo->info, o,
+							     irela->r_offset);
+		  if (irela->r_offset >= (bfd_vma) -2)
+		    {
+		      /* This is a reloc for a deleted entry or somesuch.  */
+		      memset (irela, 0, sizeof (*irela));
+		      continue;
+		    }
+
 		  irela->r_offset += o->output_offset;
 
 		  /* Relocs in an executable have to be virtual addresses.  */
@@ -8334,13 +8343,17 @@ elf_reloc_symbol_deleted_p (offset, cookie)
 
   for (; rcookie->rel < rcookie->relend; rcookie->rel++)
     {
-      unsigned long r_symndx = ELF_R_SYM (rcookie->rel->r_info);
+      unsigned long r_symndx;
 
       if (! rcookie->bad_symtab)
 	if (rcookie->rel->r_offset > offset)
 	  return false;
       if (rcookie->rel->r_offset != offset)
 	continue;
+
+      r_symndx = ELF_R_SYM (rcookie->rel->r_info);
+      if (r_symndx == SHN_UNDEF)
+	return true;
 
       if (r_symndx >= rcookie->locsymcount
 	  || ELF_ST_BIND (rcookie->locsyms[r_symndx].st_info) != STB_LOCAL)
@@ -8400,8 +8413,7 @@ elf_bfd_discard_info (output_bfd, info)
   unsigned int count;
   boolean ret = false;
 
-  if (info->relocateable
-      || info->traditional_format
+  if (info->traditional_format
       || info->hash->creator->flavour != bfd_target_elf_flavour
       || ! is_elf_hash_table (info))
     return false;
