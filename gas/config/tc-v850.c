@@ -426,14 +426,14 @@ md_convert_frag (abfd, sec, fragP)
   if (fragP->fr_subtype == 0)
     {
       fragP->fr_var = 0;
-      fragP->fr_fix = 2;
+      fragP->fr_fix += 2;
       fix_new (fragP, 0, 2, fragP->fr_symbol,
 	       fragP->fr_offset, 1, BFD_RELOC_UNUSED + (int)fragP->fr_opcode);
     }
   else if (fragP->fr_subtype == 1)
     {
       fragP->fr_var = 0;
-      fragP->fr_fix = 6;
+      fragP->fr_fix += 6;
       /* Reverse the condition of the first branch.  */
       fragP->fr_literal[0] &= 0xf7;
       /* Mask off all the displacement bits.  */

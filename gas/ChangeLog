@@ -1,6 +1,9 @@
 start-sanitize-v850
 Tue Oct 29 12:28:16 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-v850.c (md_convert_frag): Don't set fragP->fr_fix
+	to an absolute value, instead increment it as needed.
+
 	* config/tc-v850.h (TC_GENERIC_RELAX_TABLE): Define.
 	* config/tc-v850.c: Fix some indention problems.
 	(md_relax_table): Define for D9->D99 branch displacement
