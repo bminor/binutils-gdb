@@ -1,3 +1,12 @@
+2002-01-20  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.c++/classes.exp: Update for improved v3 support and skipping
+	artificial methods/arguments.
+	* gdb.c++/derivation.exp: Likewise.
+	* gdb.c++/inherit.exp: Likewise.
+	* gdb.c++/method.exp: Likewise.
+	* gdb.c++/virtfunc.exp: Likewise.
+
 2002-01-18  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.hp/gdb.threads-hp/usrthfork.exp: Mark as obsolete.
