@@ -32,16 +32,18 @@ irix3.mt
 irix4.mh
 littlemips.mh
 littlemips.mt
+news-mips.mh
 nm-irix3.h
 nm-irix4.h
 nm-mips.h
+nm-news-mips.h
 tm-bigmips.h
 tm-irix3.h
 tm-mips.h
-xm-bigmips.h
 xm-irix3.h
 xm-irix4.h
 xm-mips.h
+xm-news-mips.h
 
 Things-to-lose:
 
