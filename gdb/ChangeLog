@@ -498,6 +498,24 @@ Sun May 26 14:14:49 1996  Fred Fish  <fnf@cygnus.com>
 	* alpha-nat.c: When compiling under Linux, include <asm/reg.h> and
  	<alpha/ptrace.h> instead of <machine/reg.h>
 
+Tue Jul  2 13:58:10 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c (inf_validate_task_sc):
+	Give terminal to gdb while asking question.
+	(inf_resume): Don't validate the task suspend-count while execing.
+
+Thu Jun 13 11:04:52 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c (inf_validate_task_sc): Query user before clearing any
+	additional suspend count.
+	(S_proc_wait_reply, gnu_attach): Don't call inf_validate_task_sc.
+	(inf_resume): Call inf_validate_task_sc here.
+	(gnu_resume): Call inf_update_procs to ensure noticing new threads.
+
+Fri Jun  7 17:00:43 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c (gnu_create_inferior: attach_to_child): Return PID.
+
 Thu May 23 15:13:56 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* h8300-tdep.c (IS_PUSH): Refine.
@@ -1678,6 +1696,163 @@ Wed Feb 28 22:32:18 1996  Stan Shebs  <shebs@andros.cygnus.com>
 	From Wilfried Moser <wilfried.moser@aut.alcatel.at>:
 	* remote.c (remote_detach): Send a command 'D' to the target
 	when detaching, update the function's comments.
+
+Thu Jun  6 16:11:38 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c (thread_cmd_list): New declaration.
+	(parse_int_arg): New function.
+
+Wed Jun  5 17:28:04 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.h (struct proc): Add DETACH_SC field.
+	* gnu-nat.c (make_proc): Set DETACH_SC.
+	(struct inf): Add DETACH_SC & DEFAULT_THREAD_DETACH_SC fields.
+	(make_inf): Set DETACH_SC & DEFAULT_THREAD_DETACH_SC fields.
+	(add_thread_commands): Add set/show for detach-suspend-count.
+	Add takeover-suspend-count cmd.
+	(inf_detach): Set suspend counts to the detach SC, not 0.
+	(set_thread_detach_sc_cmd, show_thread_detach_sc_cmd,
+	set_task_detach_sc_cmd, show_task_detach_sc_cmd,
+	set_thread_default_thread_detach_sc_cmd,
+	show_thread_default_thread_detach_sc_cmd): New functions.
+	(show_task_cmd): Also show detach-suspend-count values.
+	(thread_takeover_sc_cmd): New function.
+
+Fri May 31 16:49:24 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c (show_thread_run_cmd): Actually print state.
+
+Thu May 30 10:47:56 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c (inf_signal): Make unforwardable exceptions an error.
+
+Tue May 28 17:06:36 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c (inf_validate_stopped): proc_getprocinfo takes a
+	pointer to the flags now, not the flags themselves.
+
+Mon May 27 13:31:17 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c (gnu_wait): Print debugging msgs for pending execs.
+	(gnu_create_inferior): Check return from ptrace.
+
+Sun May 26 16:56:35 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.h (struct proc): Add DEAD field.
+	* gnu-nat.c (make_proc): Initialize DEAD.
+	(inf_set_traced, inf_validate_task_sc, inf_validate_procs: Frob it.
+	(gnu_wait): Only abort for 0 threads if the task isn't dead.
+
+Sat May 25 17:06:05 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c (inf_signal): Pass SIGCODE when posting a signal.
+
+Wed May 22 18:44:28 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c (S_proc_wait_reply): Add SIGCODE argument.
+	(inf_set_traced): Only give no-signal-thread error message if
+	turning *on* tracing.
+
+Wed May 15 13:03:16 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c (inf_validate_procs): If INF has no threads, always
+	set inf->threads_up_to_date to 0.
+	(inf_signal): Pass in new SIGCODE argument to msg_sig_post_untraced.
+	(gnu_wait): Pass in new TIMEOUT arg to interrupt_operation.
+	(proc_update_sc): Cast thread state arg to thread_set_state.
+	(proc_get_state): Cast thread state arg to thread_get_state.
+	(inf_validate_task_sc): Cast task_basic_info arg to task_info.
+	* i386gnu-nat.c (gnu_fetch_registers, gnu_store_registers): Call
+	inf_update_procs before we lookup the thread.
+	* config/i386/i386gnu.mh (MH_CFLAGS): New variable.
+
+Tue May  7 17:52:33 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c (gnu_kill_inferior): Use inf_set_task to clear the task.
+
+Mon May  6 19:06:49 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c (inf_set_traced): Use msg_set_init_int with
+	INIT_TRACEMASK instead of setting the exec flags.
+
+Fri May  3 19:10:57 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c (inf_validate_procs): Don't clear INF->task if we find
+	the task's died, so others have a chance at it.
+	(gnu_resume): When single-stepping a single thread, given an error
+	if there is no such thread.  When single-stepping one but running
+	the others, just given a warning and still run all the threads.
+	(gnu_wait): If there seem to be no threads, look harder, and
+	signal an error if there really aren't any.
+	(gnu_attach): Reset thread numbering to 0.
+
+	* i386gnu-nat.c (gnu_fetch_registers, gnu_store_registers): Give
+	thread name in warning messages.
+
+	* gnu-nat.c (active_inf): New function.
+	(show_sig_thread_cmd, show_stopped_cmd): Use it.
+	(info_port_rights, info_send_rights_cmd, info_port_sets_cmd,
+	info_recv_rights_cmd, info_port_rights_cmd, info_port_rights_cmd):
+	New functions.
+	(add_task_commands): Add new port-right info commands.
+
+Fri Apr 26 20:42:16 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c (gnu_wait): Instead of _hurd_intr_rpc_mach_msg, just
+	use mach_msg with MACH_RCV_INTERRUPT.
+	(set_noninvasive_cmd): New function.
+	(add_task_commands): Add command entry for `set noninvasive'.
+
+Mon Mar  4 14:12:02 1996  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c (gnu_read_inferior): Use hurd_safe_memmove, not safe_bcopy.
+	(safe_bcopy): Function removed.
+
+Mon Dec  4 14:18:26 1995  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c (proc_update_sc): Assert only threads can have state.
+	(make_proc): Initialize state_valid & state_changed fields.
+
+Tue Nov 28 17:51:21 1995  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* reply_mig_hack.awk: New file.
+
+Tue Nov 14 14:31:03 1995  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* breakpoint.c (breakpoint_1): Print breakpoint thread field.
+
+	* lynx-nat.c (child_wait): Return TARGET_WAITKIND_SPURIOUS for new
+	threads.
+
+Mon Nov 13 18:30:53 1995  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* target.c (debug_to_check_threads): New function.
+
+	* inflow.c (terminal_init_inferior_with_pgrp): New function.
+	(terminal_init_inferior): Call terminal_init_inferior_with_pgrp.
+	* inferior.h (terminal_init_inferior_with_pgrp): New declaration,
+	but only if PROCESS_GROUP_TYPE is defined.
+
+Mon Nov  6 16:42:09 1995  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* target.c (debug_to_thread_alive): Pass through the return value.
+
+Thu Nov  2 18:05:00 1995  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* target.c (signals, target_signal_from_host, target_signal_to_host): 
+	Add mach exceptions.
+	* target.h (enum target_signal): Add mach exceptions.
+
+Mon Oct 30 16:41:04 1995  Miles Bader  <miles@gnu.ai.mit.edu>
+
+	* gnu-nat.c: New file: gnu native backend.
+	* i386gnu-nat.c: New file: i386-specific part of gnu native backend.
+	* gnu-nat.h: New file.
+	* config/nm-gnu.h: New file.
+	* config/tm-i386gnu.h: New file.
+	* config/xm-i386gnu.h: New file.
+	* config/i386/i386gnu.mh: New file.
+	* config/i386/i386gnu.mt: New file.
 
 Wed Feb 28 15:50:12 1996  Fred Fish  <fnf@cygnus.com>
 

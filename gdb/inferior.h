@@ -1,6 +1,6 @@
 /* Variables that describe the inferior process running under GDB:
    Where it is, why it stopped, and how to step it.
-   Copyright 1986, 1989, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1992, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #if !defined (INFERIOR_H)
 #define INFERIOR_H 1
@@ -24,24 +24,19 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* For bpstat.  */
 #include "breakpoint.h"
 
-/* For FRAME_ADDR.  */
-#include "frame.h"
-
 /* For enum target_signal.  */
 #include "target.h"
 
-/*
- * Structure in which to save the status of the inferior.  Save
- * through "save_inferior_status", restore through
- * "restore_inferior_status".
- * This pair of routines should be called around any transfer of
- * control to the inferior which you don't want showing up in your
- * control variables.
- */
+/* Structure in which to save the status of the inferior.  Save
+   through "save_inferior_status", restore through
+   "restore_inferior_status".
+   This pair of routines should be called around any transfer of
+   control to the inferior which you don't want showing up in your
+   control variables.  */
+
 struct inferior_status {
   enum target_signal stop_signal;
   CORE_ADDR stop_pc;
-  FRAME_ADDR stop_frame_address;
   bpstat stop_bpstat;
   int stop_step;
   int stop_stack_dummy;
@@ -49,12 +44,12 @@ struct inferior_status {
   int trap_expected;
   CORE_ADDR step_range_start;
   CORE_ADDR step_range_end;
-  FRAME_ADDR step_frame_address;
+  CORE_ADDR step_frame_address;
   int step_over_calls;
   CORE_ADDR step_resume_break_address;
   int stop_after_trap;
   int stop_soon_quietly;
-  FRAME_ADDR selected_frame_address;
+  CORE_ADDR selected_frame_address;
   int selected_level;
   char stop_registers[REGISTER_BYTES];
 
@@ -68,16 +63,24 @@ struct inferior_status {
   int proceed_to_finish;
 };
 
-extern void
-save_inferior_status PARAMS ((struct inferior_status *, int));
+/* This macro gives the number of registers actually in use by the
+   inferior.  This may be less than the total number of registers,
+   perhaps depending on the actual CPU in use or program being run.  */
 
-extern void
-restore_inferior_status PARAMS ((struct inferior_status *));
+#ifndef ARCH_NUM_REGS
+#define ARCH_NUM_REGS NUM_REGS
+#endif
+
+extern void save_inferior_status PARAMS ((struct inferior_status *, int));
+
+extern void restore_inferior_status PARAMS ((struct inferior_status *));
 
 extern void set_sigint_trap PARAMS ((void));
+
 extern void clear_sigint_trap PARAMS ((void));
 
 extern void set_sigio_trap PARAMS ((void));
+
 extern void clear_sigio_trap PARAMS ((void));
 
 /* File name for default use for standard in/out in the inferior.  */
@@ -88,6 +91,10 @@ extern char *inferior_io_terminal;
 
 extern int inferior_pid;
 
+/* Inferior environment. */
+
+extern struct environ *inferior_environ;
+
 /* Character array containing an image of the inferior programs' registers.  */
 
 extern char registers[];
@@ -97,149 +104,116 @@ extern char registers[];
 
 extern char register_valid[NUM_REGS];
 
-extern void
-clear_proceed_status PARAMS ((void));
+extern void clear_proceed_status PARAMS ((void));
 
-extern void
-proceed PARAMS ((CORE_ADDR, enum target_signal, int));
+extern void proceed PARAMS ((CORE_ADDR, enum target_signal, int));
 
-extern void
-kill_inferior PARAMS ((void));
+extern void kill_inferior PARAMS ((void));
 
-extern void
-generic_mourn_inferior PARAMS ((void));
+extern void generic_mourn_inferior PARAMS ((void));
 
-extern void
-terminal_ours PARAMS ((void));
+extern void terminal_ours PARAMS ((void));
 
 extern int run_stack_dummy PARAMS ((CORE_ADDR, char [REGISTER_BYTES]));
 
-extern CORE_ADDR
-read_pc PARAMS ((void));
+extern CORE_ADDR read_pc PARAMS ((void));
 
-extern CORE_ADDR
-read_pc_pid PARAMS ((int));
+extern CORE_ADDR read_pc_pid PARAMS ((int));
 
-extern void
-write_pc PARAMS ((CORE_ADDR));
+extern void write_pc PARAMS ((CORE_ADDR));
 
-extern CORE_ADDR
-read_sp PARAMS ((void));
+extern CORE_ADDR read_sp PARAMS ((void));
 
-extern void
-write_sp PARAMS ((CORE_ADDR));
+extern void write_sp PARAMS ((CORE_ADDR));
 
-extern CORE_ADDR
-read_fp PARAMS ((void));
+extern CORE_ADDR read_fp PARAMS ((void));
 
-extern void
-write_fp PARAMS ((CORE_ADDR));
+extern void write_fp PARAMS ((CORE_ADDR));
 
-extern void
-wait_for_inferior PARAMS ((void));
+extern void wait_for_inferior PARAMS ((void));
 
-extern void
-init_wait_for_inferior PARAMS ((void));
+extern void init_wait_for_inferior PARAMS ((void));
 
-extern void
-close_exec_file PARAMS ((void));
+extern void close_exec_file PARAMS ((void));
 
-extern void
-reopen_exec_file PARAMS ((void));
+extern void reopen_exec_file PARAMS ((void));
 
 /* The `resume' routine should only be called in special circumstances.
    Normally, use `proceed', which handles a lot of bookkeeping.  */
-extern void
-resume PARAMS ((int, enum target_signal));
+
+extern void resume PARAMS ((int, enum target_signal));
 
 /* From misc files */
 
-extern void
-store_inferior_registers PARAMS ((int));
+extern void store_inferior_registers PARAMS ((int));
 
-extern void
-fetch_inferior_registers PARAMS ((int));
+extern void fetch_inferior_registers PARAMS ((int));
 
-extern void 
-solib_create_inferior_hook PARAMS ((void));
+extern void  solib_create_inferior_hook PARAMS ((void));
 
-extern void
-child_terminal_info PARAMS ((char *, int));
+extern void child_terminal_info PARAMS ((char *, int));
 
-extern void
-term_info PARAMS ((char *, int));
+extern void term_info PARAMS ((char *, int));
 
-extern void
-terminal_ours_for_output PARAMS ((void));
+extern void terminal_ours_for_output PARAMS ((void));
 
-extern void
-terminal_inferior PARAMS ((void));
+extern void terminal_inferior PARAMS ((void));
 
-extern void
-terminal_init_inferior PARAMS ((void));
+extern void terminal_init_inferior PARAMS ((void));
+
+#ifdef PROCESS_GROUP_TYPE
+extern void terminal_init_inferior_with_pgrp PARAMS ((PROCESS_GROUP_TYPE pgrp));
+#endif
 
 /* From infptrace.c */
 
-extern int
-attach PARAMS ((int));
+extern int attach PARAMS ((int));
 
-void
-detach PARAMS ((int));
+void detach PARAMS ((int));
 
-extern void
-child_resume PARAMS ((int, int, enum target_signal));
+extern void child_resume PARAMS ((int, int, enum target_signal));
 
 #ifndef PTRACE_ARG3_TYPE
 #define PTRACE_ARG3_TYPE int	/* Correct definition for most systems. */
 #endif
 
-extern int
-call_ptrace PARAMS ((int, int, PTRACE_ARG3_TYPE, int));
+extern int call_ptrace PARAMS ((int, int, PTRACE_ARG3_TYPE, int));
 
 /* From procfs.c */
 
-extern int
-proc_iterate_over_mappings PARAMS ((int (*) (int, CORE_ADDR)));
+extern int proc_iterate_over_mappings PARAMS ((int (*) (int, CORE_ADDR)));
 
 /* From fork-child.c */
 
 extern void fork_inferior PARAMS ((char *, char *, char **,
 				   void (*) (void),
-				   void (*) (int), char *));
+				   int (*) (int), char *));
 
 extern void startup_inferior PARAMS ((int));
 
 /* From inflow.c */
 
-extern void
-new_tty_prefork PARAMS ((char *));
+extern void new_tty_prefork PARAMS ((char *));
 
 extern int gdb_has_a_terminal PARAMS ((void));
 
 /* From infrun.c */
 
-extern void
-start_remote PARAMS ((void));
+extern void start_remote PARAMS ((void));
 
-extern void
-normal_stop PARAMS ((void));
+extern void normal_stop PARAMS ((void));
 
-extern int
-signal_stop_state PARAMS ((int));
+extern int signal_stop_state PARAMS ((int));
 
-extern int
-signal_print_state PARAMS ((int));
+extern int signal_print_state PARAMS ((int));
 
-extern int
-signal_pass_state PARAMS ((int));
+extern int signal_pass_state PARAMS ((int));
 
 /* From infcmd.c */
 
-extern void
-tty_command PARAMS ((char *, int));
+extern void tty_command PARAMS ((char *, int));
 
-extern void
-attach_command PARAMS ((char *, int));
+extern void attach_command PARAMS ((char *, int));
 
 /* Last signal that the inferior received (why it stopped).  */
 
@@ -248,10 +222,6 @@ extern enum target_signal stop_signal;
 /* Address at which inferior stopped.  */
 
 extern CORE_ADDR stop_pc;
-
-/* Stack frame when program stopped.  */
-
-extern FRAME_ADDR stop_frame_address;
 
 /* Chain containing status of breakpoint(s) that we have stopped at.  */
 
@@ -291,7 +261,11 @@ extern CORE_ADDR step_range_end; /* Exclusive */
    This is how we know when we step into a subroutine call,
    and how to set the frame for the breakpoint used to step out.  */
 
-extern FRAME_ADDR step_frame_address;
+extern CORE_ADDR step_frame_address;
+
+/* Our notion of the current stack pointer.  */
+
+extern CORE_ADDR step_sp;
 
 /* 1 means step over all subroutine calls.
    -1 means step over calls to undebuggable functions.  */

@@ -1028,6 +1028,14 @@ static struct {
   {"SIG62", "Real-time event 62"},
   {"SIG63", "Real-time event 63"},
 
+  /* Mach exceptions */
+  {"EXC_BAD_ACCESS", "Could not access memory"},
+  {"EXC_BAD_INSTRUCTION", "Illegal instruction/operand"},
+  {"EXC_ARITHMETIC", "Arithmetic exception"},
+  {"EXC_EMULATION", "Emulation instruction"},
+  {"EXC_SOFTWARE", "Software generated exception"},
+  {"EXC_BREAKPOINT", "Breakpoint"},
+
   {NULL, "Unknown signal"},
   {NULL, "Internal error: printing TARGET_SIGNAL_DEFAULT"},
 
@@ -1225,6 +1233,27 @@ target_signal_from_host (hostsig)
 #if defined (SIGPRIO)
   if (hostsig == SIGPRIO) return TARGET_SIGNAL_PRIO;
 #endif
+
+  /* Mach exceptions.  Assumes that the values for EXC_ are positive! */
+#if defined (EXC_BAD_ACCESS) && defined (_NSIG)
+  if (hostsig == _NSIG + EXC_BAD_ACCESS) return TARGET_EXC_BAD_ACCESS;
+#endif
+#if defined (EXC_BAD_INSTRUCTION) && defined (_NSIG)
+  if (hostsig == _NSIG + EXC_BAD_INSTRUCTION) return TARGET_EXC_BAD_INSTRUCTION;
+#endif
+#if defined (EXC_ARITHMETIC) && defined (_NSIG)
+  if (hostsig == _NSIG + EXC_ARITHMETIC) return TARGET_EXC_ARITHMETIC;
+#endif
+#if defined (EXC_EMULATION) && defined (_NSIG)
+  if (hostsig == _NSIG + EXC_EMULATION) return TARGET_EXC_EMULATION;
+#endif
+#if defined (EXC_SOFTWARE) && defined (_NSIG)
+  if (hostsig == _NSIG + EXC_SOFTWARE) return TARGET_EXC_SOFTWARE;
+#endif
+#if defined (EXC_BREAKPOINT) && defined (_NSIG)
+  if (hostsig == _NSIG + EXC_BREAKPOINT) return TARGET_EXC_BREAKPOINT;
+#endif
+
 #if defined (REALTIME_LO)
   if (hostsig >= REALTIME_LO && hostsig < REALTIME_HI)
     return (enum target_signal)
@@ -1378,6 +1407,27 @@ target_signal_to_host (oursig)
 #if defined (SIGPRIO)
     case TARGET_SIGNAL_PRIO: return SIGPRIO;
 #endif
+
+      /* Mach exceptions.  Assumes that the values for EXC_ are positive! */
+#if defined (EXC_BAD_ACCESS) && defined (_NSIG)
+    case TARGET_EXC_BAD_ACCESS: return _NSIG + EXC_BAD_ACCESS;
+#endif
+#if defined (EXC_BAD_INSTRUCTION) && defined (_NSIG)
+    case TARGET_EXC_BAD_INSTRUCTION: return _NSIG + EXC_BAD_INSTRUCTION;
+#endif
+#if defined (EXC_ARITHMETIC) && defined (_NSIG)
+    case TARGET_EXC_ARITHMETIC: return _NSIG + EXC_ARITHMETIC;
+#endif
+#if defined (EXC_EMULATION) && defined (_NSIG)
+    case TARGET_EXC_EMULATION: return _NSIG + EXC_EMULATION;
+#endif
+#if defined (EXC_SOFTWARE) && defined (_NSIG)
+    case TARGET_EXC_SOFTWARE: return _NSIG + EXC_SOFTWARE;
+#endif
+#if defined (EXC_BREAKPOINT) && defined (_NSIG)
+    case TARGET_EXC_BREAKPOINT: return _NSIG + EXC_BREAKPOINT;
+#endif
+
     default:
 #if defined (REALTIME_LO)
       if (oursig >= TARGET_SIGNAL_REALTIME_33
@@ -1609,7 +1659,8 @@ debug_to_xfer_memory (memaddr, myaddr, len, write, target)
 
   retval = debug_target.to_xfer_memory (memaddr, myaddr, len, write, target);
 
-  fprintf_unfiltered (stderr, "target_xfer_memory (0x%x, xxx, %d, %s, xxx) = %d",
+  fprintf_unfiltered (stderr,
+		      "target_xfer_memory (0x%x, xxx, %d, %s, xxx) = %d",
 		      memaddr, len, write ? "write" : "read", retval);
 
   if (retval > 0)
@@ -1618,7 +1669,11 @@ debug_to_xfer_memory (memaddr, myaddr, len, write, target)
 
       fputs_unfiltered (", bytes =", gdb_stderr);
       for (i = 0; i < retval; i++)
-	fprintf_unfiltered (stderr, " %02x", myaddr[i] & 0xff);
+	{
+	  if ((((long) &(myaddr[i])) & 0xf) == 0)
+	    fprintf_unfiltered (stderr, "\n");
+	  fprintf_unfiltered (stderr, " %02x", myaddr[i] & 0xff);
+	}
     }
 
   fputc_unfiltered ('\n', gdb_stderr);
@@ -1783,10 +1838,13 @@ static int
 debug_to_thread_alive (pid)
      int pid;
 {
-  debug_target.to_thread_alive (pid);
+  int retval;
 
-  fprintf_unfiltered (stderr, "target_thread_alive (%d)\n", pid);
-  return (0);
+  retval = debug_target.to_thread_alive (pid);
+
+  fprintf_unfiltered (stderr, "target_thread_alive (%d) = %d\n", pid, retval);
+
+  return retval;
 }
 
 static void

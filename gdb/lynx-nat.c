@@ -655,13 +655,11 @@ child_wait (pid, ourstatus)
 
 	  if (realsig == SIGNEWTHREAD)
 	    {
-	      /* It's a new thread notification.  Nothing to do here since
-		 the machine independent code in wait_for_inferior will
-		 add the thread to the thread list and restart the thread
-		 when pid != inferior_pid and pid is not in the thread
-		 list.   We don't even want to much with realsig -- the
-		 code in wait_for_inferior expects SIGTRAP.  */
-	      ;
+	      /* It's a new thread notification.  We don't want to much with
+		 realsig -- the code in wait_for_inferior expects SIGTRAP. */
+	      ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+	      ourstatus->value.sig = TARGET_SIGNAL_0;
+	      return pid;
 	    }
 	  else
 	    error ("Signal for unknown thread was not SIGNEWTHREAD");

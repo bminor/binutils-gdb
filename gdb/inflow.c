@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "frame.h"
@@ -25,18 +25,12 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "serial.h"
 #include "terminal.h"
 #include "target.h"
-#include "thread.h"
+#include "gdbthread.h"
 
 #include "gdb_string.h"
 #include <signal.h>
 #include <fcntl.h>
-
-#if !defined (HAVE_TERMIOS) && !defined (HAVE_TERMIO) && !defined (HAVE_SGTTY) && !defined (__GO32__) && !defined(WIN32)
-#define HAVE_SGTTY
-#endif
-
-#if defined (HAVE_TERMIOS)
-#include <termios.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -161,7 +155,8 @@ static void terminal_ours_1 PARAMS ((int));
    before we actually run the inferior.  */
 
 void
-terminal_init_inferior ()
+terminal_init_inferior_with_pgrp (pgrp)
+     int pgrp;
 {
   if (gdb_has_a_terminal ())
     {
@@ -170,18 +165,9 @@ terminal_init_inferior ()
       if (inferior_ttystate)
 	free (inferior_ttystate);
       inferior_ttystate = SERIAL_GET_TTY_STATE (stdin_serial);
+
 #ifdef PROCESS_GROUP_TYPE
-#ifdef PIDGET
-      /* This is for Lynx, and should be cleaned up by having Lynx be
-	 a separate debugging target with a version of
-	 target_terminal_init_inferior which passes in the process
-	 group to a generic routine which does all the work (and the
-	 non-threaded child_terminal_init_inferior can just pass in
-	 inferior_pid to the same routine).  */
-      inferior_process_group = PIDGET (inferior_pid);
-#else
-      inferior_process_group = inferior_pid;
-#endif
+      inferior_process_group = pgrp;
 #endif
 
       /* Make sure that next time we call terminal_inferior (which will be
@@ -189,6 +175,24 @@ terminal_init_inferior ()
 	 process group.  */
       terminal_is_ours = 1;
     }
+}
+
+void
+terminal_init_inferior ()
+{
+#ifdef PROCESS_GROUP_TYPE
+#ifdef PIDGET
+  /* This is for Lynx, and should be cleaned up by having Lynx be a separate
+     debugging target with a version of target_terminal_init_inferior which
+     passes in the process group to a generic routine which does all the work
+     (and the non-threaded child_terminal_init_inferior can just pass in
+     inferior_pid to the same routine).  */
+  terminal_init_inferior_with_pgrp (PIDGET (inferior_pid));
+#else
+  /* By default, we assume INFERIOR_PID is also the child's process group.  */
+  terminal_init_inferior_with_pgrp (inferior_pid);
+#endif
+#endif /* PROCESS_GROUP_TYPE */
 }
 
 /* Put the inferior's terminal settings into effect.
@@ -484,7 +488,7 @@ new_tty ()
 
   if (inferior_thisrun_terminal == 0)
     return;
-#if !defined(__GO32__) && !defined(WIN32)
+#if !defined(__GO32__) && !defined(__WIN32__)
 #ifdef TIOCNOTTY
   /* Disconnect the child process from our controlling terminal.  On some
      systems (SVR4 for example), this may cause a SIGTTOU, so temporarily
@@ -666,8 +670,7 @@ gdb_setpgid ()
 
   if (job_control)
     {
-#if defined (NEED_POSIX_SETPGID) || defined (HAVE_TERMIOS)
-      /* Do all systems with termios have setpgid?  I hope so.  */
+#if defined (NEED_POSIX_SETPGID) || (defined (HAVE_TERMIOS) && defined (HAVE_SETPGID))
       /* setpgid (0, 0) is supposed to work and mean the same thing as
 	 this, but on Ultrix 4.2A it fails with EPERM (and
 	 setpgid (getpid (), getpid ()) succeeds).  */
@@ -707,9 +710,13 @@ _initialize_inflow ()
 #ifdef _POSIX_JOB_CONTROL
   job_control = 1;
 #else
+#ifdef _SC_JOB_CONTROL
   job_control = sysconf (_SC_JOB_CONTROL);
-#endif
-#endif /* termios */
+#else
+  job_control = 0;	/* have to assume the worst */
+#endif	/* _SC_JOB_CONTROL */
+#endif	/* _POSIX_JOB_CONTROL */
+#endif	/* HAVE_TERMIOS */
 
 #ifdef HAVE_SGTTY
 #ifdef TIOCGPGRP

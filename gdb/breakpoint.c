@@ -932,6 +932,11 @@ bpstat_do_actions (bsp)
   struct cleanup *old_chain;
   struct command_line *cmd;
 
+  /* Avoid endless recursion if a `source' command is contained
+     in bs->commands.  */
+  if (executing_breakpoint_commands)
+    return;
+
   executing_breakpoint_commands = 1;
   old_chain = make_cleanup (cleanup_executing_breakpoints, 0);
 
@@ -1665,7 +1670,7 @@ breakpoint_1 (bnum, allflag)
 			      "watchpoint scope", "call dummy",
 			      "shlib events" };
   static char *bpdisps[] = {"del", "dstp", "dis", "keep"};
-  static char bpenables[] = "ny";
+  static char bpenables[] = "nyn";
   char wrap_indent[80];
 
   ALL_BREAKPOINTS (b)
@@ -1792,6 +1797,12 @@ breakpoint_1 (bnum, allflag)
 	    printf_filtered ("\tstop only if ");
 	    print_expression (b->cond, gdb_stdout);
 	    printf_filtered ("\n");
+	  }
+
+	if (b->thread != -1)
+	  {
+	    /* FIXME should make an annotation for this */
+	    printf_filtered ("\tstop only in thread %d\n", b->thread);
 	  }
 
         if (show_breakpoint_hit_counts && b->hit_count)
