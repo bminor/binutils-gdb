@@ -1,3 +1,17 @@
+Thu Jan 22 14:30:36 1998  Fred Fish  <fnf@cygnus.com>
+
+	* interp.c (UMEM_SEGMENTS): New define, set to 128.
+	(sim_size): Use UMEM_SEGMENTS rather than hardwired constant.
+	(sim_close): Reset prog_bfd to NULL after closing it.  Also
+	reset prog_bfd_was_opened_p after closing prog_bfd.
+	(sim_load): Reset prog_bfd_was_opened_p after closing prog_bfd.
+	(sim_create_inferior): Get start address from abfd not prog_bfd.
+	(xfer_mem): Do bounds checking on addresses and return zero length
+	read/write on bad addresses, rather than aborting.  Prepare to
+	be able to handle xfers that cross segment boundaries, but not
+	yet implemented.  Only emit debug message when d10v_debug is
+	set as well as DEBUG being defined.
+
 Mon Jan 19 22:26:29 1998  Doug Evans  <devans@seba>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

@@ -6,9 +6,10 @@
 
 #include "d10v_sim.h"
 
-#define IMEM_SIZE 18	/* D10V instruction memory size is 18 bits */
-#define DMEM_SIZE 16	/* Data memory is 64K (but only 32K internal RAM) */
-#define UMEM_SIZE 17	/* each unified memory region is 17 bits */
+#define IMEM_SIZE 18		/* D10V instruction memory size is 18 bits */
+#define DMEM_SIZE 16		/* Data memory is 64K (but only 32K internal RAM) */
+#define UMEM_SIZE 17		/* Each unified memory segment is 17 bits */
+#define UMEM_SEGMENTS 128	/* Number of segments in unified memory region */
 
 enum _leftright { LEFT_FIRST, RIGHT_FIRST };
 
@@ -288,7 +289,7 @@ sim_size (power)
 
   if (State.imem)
     {
-      for (i=0;i<128;i++)
+      for (i=0;i<UMEM_SEGMENTS;i++)
 	{
 	  if (State.umem[i])
 	    {
@@ -302,13 +303,13 @@ sim_size (power)
 
   State.imem = (uint8 *)calloc(1,1<<IMEM_SIZE);
   State.dmem = (uint8 *)calloc(1,1<<DMEM_SIZE);
-  for (i=1;i<127;i++)
+  for (i=1;i<(UMEM_SEGMENTS-1);i++)
     State.umem[i] = NULL;
   State.umem[0] = (uint8 *)calloc(1,1<<UMEM_SIZE);
   State.umem[1] = (uint8 *)calloc(1,1<<UMEM_SIZE);
   State.umem[2] = (uint8 *)calloc(1,1<<UMEM_SIZE);
-  State.umem[127] = (uint8 *)calloc(1,1<<UMEM_SIZE);
-  if (!State.imem || !State.dmem || !State.umem[0] || !State.umem[1] || !State.umem[2] || !State.umem[127] )
+  State.umem[UMEM_SEGMENTS-1] = (uint8 *)calloc(1,1<<UMEM_SIZE);
+  if (!State.imem || !State.dmem || !State.umem[0] || !State.umem[1] || !State.umem[2] || !State.umem[UMEM_SEGMENTS-1] )
     {
       (*d10v_callback->printf_filtered) (d10v_callback, "Memory allocation failed.\n");
       exit(1);
@@ -339,6 +340,13 @@ init_system ()
     sim_size(1);
 }
 
+/* Transfer data to/from simulated memory.  Since a bug in either the
+   simulated program or in gdb or the simulator itself may cause a
+   bogus address to be passed in, we need to do some sanity checking
+   on addresses to make sure they are within bounds.  When an address
+   fails the bounds check, treat it as a zero length read/write rather
+   than aborting the entire run. */
+
 static int
 xfer_mem (addr, buffer, size, write)
      SIM_ADDR addr;
@@ -353,80 +361,110 @@ xfer_mem (addr, buffer, size, write)
   if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
     {
       if (write)
-	(*d10v_callback->printf_filtered) (d10v_callback, "sim_write %d bytes to 0x%x\n", size, addr);
+	{
+	  (*d10v_callback->printf_filtered) (d10v_callback, "sim_write %d bytes to 0x%x\n", size, addr);
+	}
       else
-	(*d10v_callback->printf_filtered) (d10v_callback, "sim_read %d bytes from 0x%x\n", size, addr);
+	{
+	  (*d10v_callback->printf_filtered) (d10v_callback, "sim_read %d bytes from 0x%x\n", size, addr);
+	}
     }
 #endif
 
-  /* to access data, we use the following mapping */
-  /* 0x01000000 - 0x0103ffff : instruction memory */
-  /* 0x02000000 - 0x0200ffff : data memory        */
-  /* 0x00000000 - 0x00ffffff : unified memory     */
+  /* to access data, we use the following mapping
+     0x00000000 - 0x00ffffff : 16 Mb of external unified memory in segments of 128 Kb each
+     0x01000000 - 0x0103ffff : 256 Kb of external instruction memory
+     0x02000000 - 0x0200ffff : 32 Kb of on chip data memory + 16 Kb DMAP memory + 16 Kb I/O space */
 
-  if ( (addr & 0x03000000) == 0)
+  if ((addr | 0x00ffffff) == 0x00ffffff)
     {
-      /* UNIFIED MEMORY */
-      int segment;
-      segment = addr >> UMEM_SIZE;
-      addr &= 0x1ffff;
-      if (!State.umem[segment])
+      /* UNIFIED MEMORY (0x00000000 - 0x00ffffff) */
+      int startsegment, startoffset;	/* Segment and offset within segment where xfer starts */
+      int endsegment, endoffset;	/* Segment and offset within segment where xfer ends */
+
+      startsegment = addr >> UMEM_SIZE;
+      startoffset = addr & ((1 << UMEM_SIZE) - 1);
+      endsegment = (addr + size) >> UMEM_SIZE;
+      endoffset = (addr + size) & ((1 << UMEM_SIZE) - 1);
+
+      /* FIXME:  We do not currently implement xfers across segments, so detect this case and fail gracefully. */
+
+      if ((startsegment != endsegment) && !((endsegment == (startsegment + 1)) && endoffset == 0))
+	{
+	  (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: Unimplemented support for transfers across unified memory segment boundaries\n");
+	  return (0);
+	}
+      if (!State.umem[startsegment])
 	{
 #ifdef DEBUG
-	  (*d10v_callback->printf_filtered) (d10v_callback,"Allocating %s bytes unified memory to region %d\n",
-					     add_commas (buffer, sizeof (buffer), (1UL<<IMEM_SIZE)), segment);
+	  if ((d10v_debug & DEBUG_MEMSIZE) != 0)
+	    {
+	      (*d10v_callback->printf_filtered) (d10v_callback,"Allocating %s bytes unified memory to region %d\n",
+					     add_commas (buffer, sizeof (buffer), (1UL<<IMEM_SIZE)), startsegment);
+	    }
 #endif
-	  State.umem[segment] = (uint8 *)calloc(1,1<<UMEM_SIZE);
+	  State.umem[startsegment] = (uint8 *)calloc(1,1<<UMEM_SIZE);
 	}
-      if (!State.umem[segment])
+      if (!State.umem[startsegment])
 	{
-	  (*d10v_callback->printf_filtered) (d10v_callback, "Memory allocation failed.\n");
-	  exit(1);
-	}
-      /* FIXME:  need to check size and read/write multiple segments if necessary */
-      if (write)
-	memcpy (State.umem[segment]+addr, buffer, size) ; 
-      else
-	memcpy (buffer, State.umem[segment]+addr, size); 
-    }
-  else if ( (addr & 0x03000000) == 0x02000000)
-    {
-      /* DATA MEMORY */
-      addr &= ~0x02000000;
-      if (size > (1<<(DMEM_SIZE-1)))
-	{
-	  (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: data section is only %d bytes.\n",1<<(DMEM_SIZE-1));
-	  exit(1);
+	  (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: Memory allocation of 0x%x bytes failed.\n", 1<<UMEM_SIZE);
+	  return (0);
 	}
       if (write)
-	memcpy (State.dmem+addr, buffer, size); 
-      else
-	memcpy (buffer, State.dmem+addr, size); 
-    }
-  else if ( (addr & 0x03000000) == 0x01000000)
-    {
-      /* INSTRUCTION MEMORY */
-      addr &= ~0x01000000;
-      if (size > (1<<IMEM_SIZE))
 	{
-	  (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: inst section is only %d bytes.\n",1<<IMEM_SIZE);
-	  exit(1);
+	  memcpy (State.umem[startsegment]+startoffset, buffer, size);
+	}
+      else
+	{
+	  memcpy (buffer, State.umem[startsegment]+startoffset, size); 
+	}
+    }
+  else if ((addr | 0x0003ffff) == 0x0103ffff)
+    {
+      /* INSTRUCTION MEMORY (0x01000000 - 0x0103ffff) */
+      addr &= ((1 << IMEM_SIZE) - 1);
+      if ((addr + size) > (1 << IMEM_SIZE))
+	{
+	  (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: instruction address 0x%x is outside range 0-0x%x.\n",
+					     addr + size - 1, (1 << IMEM_SIZE) - 1);
+	  return (0);
 	}
       if (write)
-	memcpy (State.imem+addr, buffer, size); 
+	{
+	  memcpy (State.imem+addr, buffer, size); 
+	}
       else
-	memcpy (buffer, State.imem+addr, size); 
+	{
+	  memcpy (buffer, State.imem+addr, size); 
+	}
     }
-  else if (write)
+  else if ((addr | 0x0000ffff) == 0x0200ffff)
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: address 0x%x is not in valid range\n",addr);
-      (*d10v_callback->printf_filtered) (d10v_callback, "Instruction addresses start at 0x01000000\n");
-      (*d10v_callback->printf_filtered) (d10v_callback, "Data addresses start at 0x02000000\n");
-      (*d10v_callback->printf_filtered) (d10v_callback, "Unified addresses start at 0x00000000\n");
-      exit(1);
+      /* DATA MEMORY (0x02000000 - 0x0200ffff) */
+      addr &= ((1 << DMEM_SIZE) - 1);
+      if ((addr + size) > (1 << DMEM_SIZE))
+	{
+	  (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: data address 0x%x is outside range 0-0x%x.\n",
+					     addr + size - 1, (1 << DMEM_SIZE) - 1);
+	  return (0);
+	}
+      if (write)
+	{
+	  memcpy (State.dmem+addr, buffer, size);
+	}
+      else
+	{
+	  memcpy (buffer, State.dmem+addr, size);
+	}
     }
   else
-    return 0;
+    {
+      (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: address 0x%x is not in valid range\n",addr);
+      (*d10v_callback->printf_filtered) (d10v_callback, "Unified memory addresses are 0x00000000 - 0x00ffffff\n");
+      (*d10v_callback->printf_filtered) (d10v_callback, "Instruction addresses are 0x01000000 - 0x0103ffff\n");
+      (*d10v_callback->printf_filtered) (d10v_callback, "Data addresses are 0x02000000 - 0x0200ffff\n");
+      return (0);
+    }
 
   return size;
 }
@@ -528,7 +566,11 @@ sim_close (sd, quitting)
      int quitting;
 {
   if (prog_bfd != NULL && prog_bfd_was_opened_p)
-    bfd_close (prog_bfd);
+    {
+      bfd_close (prog_bfd);
+      prog_bfd = NULL;
+      prog_bfd_was_opened_p = 0;
+    }
 }
 
 void
@@ -637,6 +679,7 @@ sim_resume (sd, step, siggnal)
      int step, siggnal;
 {
   uint32 inst;
+  int do_iba;
 
 /*   (*d10v_callback->printf_filtered) (d10v_callback, "sim_resume (%d,%d)  PC=0x%x\n",step,siggnal,PC); */
   State.exception = 0;
@@ -648,6 +691,14 @@ sim_resume (sd, step, siggnal)
       inst = get_longword( pc_addr() ); 
       State.pc_changed = 0;
       ins_type_counters[ (int)INS_CYCLES ]++;
+      
+      /* check to see if IBA should be triggered after
+	 this instruction */
+      if (State.DB && (PC == IBA))
+	do_iba = 1;
+      else
+	do_iba = 0;
+
       switch (inst & 0xC0000000)
 	{
 	case 0xC0000000:
@@ -687,6 +738,14 @@ sim_resume (sd, step, siggnal)
 	    }
 	  else
 	    PC++;
+	}
+      
+      if (do_iba)
+	{
+	  BPC = PC;
+	  move_to_cr (BPSW_CR, PSW);
+	  move_to_cr (PSW_CR, PSW & PSW_SM_BIT);
+	  PC = SDBT_VECTOR_START;
 	}
     }
   while ( !State.exception && !stop_simulator);
@@ -825,7 +884,7 @@ sim_create_inferior (sd, abfd, argv, env)
 
   /* set PC */
   if (abfd != NULL)
-    start_address = bfd_get_start_address (prog_bfd);
+    start_address = bfd_get_start_address (abfd);
   else
     start_address = 0xffc0 << 2;
 #ifdef DEBUG
@@ -901,6 +960,8 @@ sim_fetch_register (sd, rn, memory)
     WRITE_16 (memory, IMAP1);
   else if (rn == 34)
     WRITE_16 (memory, DMAP);
+  else if (rn >= 16)
+    WRITE_16 (memory, move_from_cr (rn - 16));
   else
     WRITE_16 (memory, State.regs[rn]);
 }
@@ -922,6 +983,8 @@ sim_store_register (sd, rn, memory)
     SET_IMAP1( READ_16(memory) );
   else if (rn == 32)
     SET_IMAP0( READ_16(memory) );
+  else if (rn >= 16)
+    move_to_cr (rn - 16, READ_16 (memory));
   else
     State.regs[rn]= READ_16 (memory);
 }
@@ -945,7 +1008,10 @@ sim_load (sd, prog, abfd, from_tty)
   extern bfd *sim_load_file (); /* ??? Don't know where this should live.  */
 
   if (prog_bfd != NULL && prog_bfd_was_opened_p)
-    bfd_close (prog_bfd);
+    {
+      bfd_close (prog_bfd);
+      prog_bfd_was_opened_p = 0;
+    }
   prog_bfd = sim_load_file (sd, myname, d10v_callback, prog, abfd,
 			    sim_kind == SIM_OPEN_DEBUG,
 			    0, sim_write_phys);
