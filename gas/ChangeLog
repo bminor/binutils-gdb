@@ -1,3 +1,14 @@
+Mon Oct 23 16:20:04 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* input-scrub.c (as_where): Set name to null pointer if we don't
+	have a file name.
+	* messages.c (identify): Only print filename if non-null.
+	(as_show_where): Ditto, for line number too.
+	(as_warn_internal, as_bad_internal): Ditto.
+
+	* input-file.c (input_file_open): If the input file can't be
+	opened, consider it an error.
+
 Mon Oct 23 11:15:44 1995  James G. Smith  <jsmith@pasanda.cygnus.co.uk>
 
 	* config/tc-mips.c: Added mips_4100 control, and support for
