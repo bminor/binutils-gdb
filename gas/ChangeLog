@@ -1,3 +1,8 @@
+2002-07-31  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (mips_target_format): Fix formatting.
+	Add recognition of n32 ABI formats.
+
 2002-07-30  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* tc-mips.c (load_address): Don't clobber $at when loading a

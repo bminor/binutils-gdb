@@ -989,17 +989,26 @@ mips_target_format ()
       return "pe-mips";
     case bfd_target_elf_flavour:
 #ifdef TE_TMIPS
-      /* This is traditional mips */
+      /* This is traditional mips.  */
       return (target_big_endian
-	      ? (HAVE_64BIT_OBJECTS ? "elf64-tradbigmips"
-		 : "elf32-tradbigmips")
-	      : (HAVE_64BIT_OBJECTS ? "elf64-tradlittlemips"
-		 : "elf32-tradlittlemips"));
+	      ? (HAVE_64BIT_OBJECTS
+		 ? "elf64-tradbigmips"
+		 : (HAVE_NEWABI
+		    ? "elf32-ntradbigmips" : "elf32-tradbigmips"))
+	      : (HAVE_64BIT_OBJECTS
+		 ? "elf64-tradlittlemips"
+		 : (HAVE_NEWABI
+		    ? "elf32-ntradlittlemips" : "elf32-tradlittlemips")));
 #else
       return (target_big_endian
-	      ? (HAVE_64BIT_OBJECTS ? "elf64-bigmips" : "elf32-bigmips")
-	      : (HAVE_64BIT_OBJECTS ? "elf64-littlemips"
-		 : "elf32-littlemips"));
+	      ? (HAVE_64BIT_OBJECTS
+		 ? "elf64-bigmips"
+		 : (HAVE_NEWABI
+		    ? "elf32-nbigmips" : "elf32-bigmips"))
+	      : (HAVE_64BIT_OBJECTS
+		 ? "elf64-littlemips"
+		 : (HAVE_NEWABI
+		    ? "elf32-nlittlemips" : "elf32-littlemips")));
 #endif
     default:
       abort ();
