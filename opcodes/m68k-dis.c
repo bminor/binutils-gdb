@@ -1,5 +1,5 @@
 /* Print Motorola 68k instructions.
-   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
 
 This file is free software; you can redistribute it and/or modify
@@ -504,6 +504,18 @@ print_insn_arg (d, buffer, p0, addr, info)
       (*info->fprintf_func) (info->stream, "%%usp");
       break;
 
+    case 'E':
+      (*info->fprintf_func) (info->stream, "%%acc");
+      break;
+
+    case 'G':
+      (*info->fprintf_func) (info->stream, "%%macsr");
+      break;
+
+    case 'H':
+      (*info->fprintf_func) (info->stream, "%%mask");
+      break;
+
     case 'J':
       {
 	static const struct { char *name; int value; } names[]
@@ -539,10 +551,19 @@ print_insn_arg (d, buffer, p0, addr, info)
       break;
 
     case 'M':
-      val = fetch_arg (buffer, place, 8, info);
-      if (val & 0x80)
-	val = val - 0x100;
-      (*info->fprintf_func) (info->stream, "#%d", val);
+      if (place == 'h')
+	{
+	  static char *const scalefactor_name[] = { "<<", ">>" };
+	  val = fetch_arg (buffer, place, 1, info);
+	  (*info->fprintf_func) (info->stream, scalefactor_name[val]);
+	}
+      else
+	{
+	  val = fetch_arg (buffer, place, 8, info);
+	  if (val & 0x80)
+	    val = val - 0x100;
+	  (*info->fprintf_func) (info->stream, "#%d", val);
+	}
       break;
 
     case 'T':
@@ -979,6 +1000,22 @@ print_insn_arg (d, buffer, p0, addr, info)
       }
       break;
 
+    case 'u':
+      {
+	short is_upper = 0;
+	int reg = fetch_arg (buffer, place, 5, info);
+	
+	if (reg & 0x10)
+	  {
+	    is_upper = 1;
+	    reg &= 0xf;
+	  }
+	(*info->fprintf_func) (info->stream, "%s%s",
+			       reg_names[reg],
+			       is_upper ? "u" : "l");
+      }
+      break;
+	
     default:
       return -2;
     }
@@ -1082,12 +1119,40 @@ fetch_arg (buffer, code, bits, info)
       val = (buffer[1] >> 6);
       break;
 
+    case 'm': 
+      val = (buffer[1] & 0x40 ? 0x8 : 0)
+	| ((buffer[0] >> 1) & 0x7)
+	| (buffer[3] & 0x80 ? 0x10 : 0);
+      break;
+
+    case 'n': 
+      val = (buffer[1] & 0x40 ? 0x8 : 0) | ((buffer[0] >> 1) & 0x7);
+      break;
+
+    case 'o':
+      val = (buffer[2] >> 4) | (buffer[3] & 0x80 ? 0x10 : 0);
+      break;
+
+    case 'M':
+      val = buffer[1] | (buffer[3] & 0x40 ? 0x10 : 0);
+      break;
+
+    case 'N':
+      val = buffer[3] | (buffer[3] & 0x40 ? 0x10 : 0);
+      break;
+
+    case 'h':
+      val = buffer[2] >> 2;
+      break;
+
     default:
       abort ();
     }
 
   switch (bits)
     {
+    case 1:
+      return val & 1;
     case 2:
       return val & 3;
     case 3:

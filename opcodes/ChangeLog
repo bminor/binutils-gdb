@@ -1,3 +1,22 @@
+1999-05-28  Linus Nordberg  <linus.nordberg@canit.se>
+
+	* m68k-opc.c: Rename MACL/MSACL to MAC/MSAC.  Add MACM/MSACM.  Add
+	MOVE MACSR,CCR.
+
+	* m68k-dis.c (fetch_arg): Add places `n', `o'.
+
+	* m68k-opc.c: Add MSAC, MACL, MOVE to/from ACC, MACSR, MASK.
+	Add mcf5206e to appropriate instructions.
+	Add alias for MAC, MSAC.
+
+	* m68k-dis.c (print_insn_arg): Add formats `E', `G', `H' and place
+	`N'.
+
+	* m68k-opc.c (m68k_opcodes): Add divsw, divsl, divuw, divul, macl,
+	macw, remsl, remul for mcf5307.  Change mcf5200 --> mcf.
+
+	* m68k-dis.c: Add format `u' and places `h', `m', `M'.
+
 1999-05-18  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* i386-dis.c (Ed): Define.
