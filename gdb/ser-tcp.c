@@ -44,7 +44,6 @@
 
 static int net_open (struct serial *scb, const char *name);
 static void net_close (struct serial *scb);
-extern int (*ui_loop_hook) (int);
 void _initialize_ser_tcp (void);
 
 /* seconds to wait for connect */

@@ -48,8 +48,6 @@
 
 extern void _initialize_remote_sim (void);
 
-extern int (*ui_loop_hook) (int signo);
-
 static void dump_mem (char *buf, int len);
 
 static void init_callbacks (void);

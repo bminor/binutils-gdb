@@ -99,8 +99,6 @@ static void reschedule (struct serial *scb);
 
 void _initialize_ser_hardwire (void);
 
-extern int (*ui_loop_hook) (int);
-
 /* Open up a real live device for serial I/O */
 
 static int

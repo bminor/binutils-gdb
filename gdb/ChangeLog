@@ -1,5 +1,18 @@
 2004-06-24  Andrew Cagney  <cagney@gnu.org>
 
+	* defs.h (post_add_symbol_hook, pre_add_symbol_hook)
+	(ui_loop_hook, selected_frame_level_changed_hook): Declare.
+	* wince.c (ui_loop_hook): Delete extern declaration.
+	* win32-nat.c (ui_loop_hook): Delete extern declaration..
+	* v850ice.c (ui_loop_hook): Delete extern declaration..
+	* ser-unix.c (ui_loop_hook): Delete extern declaration..
+	* ser-tcp.c (ui_loop_hook): Delete extern declaration..
+	* remote-sim.c (ui_loop_hook): Delete extern declaration..
+	* rdi-share/ardi.c (angel_RDI_ExecuteOrStep): Delete extern.
+	ui_loop_hook declaration.
+
+2004-06-24  Andrew Cagney  <cagney@gnu.org>
+
 	* objfiles.h (struct entry_info): Delete entry_func_lowpc and
 	entry_func_highpc fields.
 	* objfiles.c (init_entry_point_info): Do not clear
