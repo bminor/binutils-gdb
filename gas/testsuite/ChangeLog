@@ -1,3 +1,12 @@
+Wed Oct  9 14:15:18 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mn10300/{add.s, bcc.s, bit.s, cmp.s, ext.s}: New tests.
+	* gas/mn10300/{extend.s logical.s, loop.s, mov1.s}: Likewise.
+	* gas/mn10300/{mov2.s, mov3.s, mov4.s, movbu.s}: Likewise.
+	* gas/mn10300/{movhu.s, movm.s, muldiv.s, other.s}: Likewise.
+	* gas/mn10300/{shift.s, sub.s}: Likewise.
+	* gas/mn10300/basic.exp: Run them.
+
 Thu Oct  3 09:57:03 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* gas/mn10200, gas/mn10300: New directorys for Matsushita

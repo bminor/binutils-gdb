@@ -24,6 +24,26 @@ Do-first:
 # with rm -rf.
 
 Things-to-keep:
+add.s
+basic.exp
+bcc.s
+bit.s
+cmp.s
+ext.s
+extend.s
+logical.s
+loop.s
+mov1.s
+mov2.s
+mov3.s
+mov4.s
+movbu.s
+movhu.s
+movm.s
+muldiv.s
+other.s
+shift.s
+sub.s
 
 Things-to-lose:
 
