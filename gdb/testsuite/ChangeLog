@@ -1,3 +1,7 @@
+2004-02-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/bigcore.exp: Bail out on *BSD instead of only NetBSD.
+
 2004-02-19  Fred Fish  <fnf@redhat.com>
 
 	New testcase for PR breakpoint/1558.
