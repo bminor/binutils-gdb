@@ -1,3 +1,31 @@
+Fri Mar 14 15:08:59 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	Based on patches from H.J. Lu <hjl@lucon.org>:
+	* i386-dis.c (fetch_data): Add prototype.
+	* m68k-dis.c (fetch_data): Add prototype.
+	(dummy_print_address): Add prototype.  Make static.
+	* ppc-opc.c (valid_bo): Add prototype.
+	* sparc-dis.c (build_hash_table): Add prototype.
+	(is_delayed_branch, compute_arch_mask): Add prototypes.
+	(print_insn_sparc): Make several local variables const.
+	(compare_opcodes): Change arguments to const PTR.  Add prototype.
+	* sparc-opc.c (arg): Change name field to be const.
+	(lookup_name, lookup_value): Add prototypes.  Change table and
+	name parameters to be const.
+	(sparc_encode_asi): Change name parameter to be const.
+	(sparc_encode_membar, sparc_encode_prefetch): Likewise.
+	(sparc_encode_sparclet_cpreg): Likewise.
+	(sparc_decode_asi): Change return type to be const.
+	(sparc_decode_membar, sparc_decode_prefetch): Likewise.
+	(sparc_decode_sparclet_cpreg): Likewise.
+
+Fri Mar  7 10:51:49 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in ($(SHLINK)): Just use ln -s, not ln -sf, since
+	Solaris doesn't like the combined options, and the -f is
+	unnecessary.
+	(stamp-tshlink, install): Likewise.
+
 Thu Mar  6 16:51:11 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300-opc.c (IMM16_PCREL, SD8N_PCREL, D16_SHIFT): Mark these
