@@ -2447,11 +2447,11 @@ Register variable, @xref{Register variables}.
 
 @item S
 Static file scope variable @xref{Initialized statics},
-@xref{Un-initialized static variables}.
+@xref{Un-initialized statics}.
 
 @item V
 Static procedure scope variable @xref{Initialized statics},
-@xref{Un-initialized static variables}.
+@xref{Un-initialized statics}.
 
 @item p
 Argument list parameter @xref{Parameters}.

@@ -1,3 +1,7 @@
+Wed Apr 21 13:27:50 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* stabs.texinfo: fixed bad xrefs (un-initialized statics)
+
 Tue Apr 20 08:55:11 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* xcoffexec.c (xcoff_relocate_core): If no exec file, error()
