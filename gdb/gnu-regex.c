@@ -57,7 +57,8 @@
 #endif
 
 /* This is for other GNU distributions with internationalized messages.  */
-#if HAVE_LIBINTL_H || defined _LIBC
+/* CYGNUS LOCAL: ../intl will handle this for us */
+#ifdef ENABLE_NLS
 # include <libintl.h>
 #else
 # define gettext(msgid) (msgid)

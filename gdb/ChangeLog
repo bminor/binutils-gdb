@@ -1,3 +1,9 @@
+1999-02-08  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* gnu-regex.c: Check ENABLE_NLS instead of HAVE_LIBINTL_H.
+	* configure.in: Don't check for libintl.h.
+	* configure, config.in: Regenerated.
+
 Mon Feb  8 18:10:50 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* NEWS: Mention new X packet and PowerPC variant support.
