@@ -1,3 +1,11 @@
+Tue Jun 30 16:44:41 1992  Fred Fish  (fnf@cygnus.com)
+
+	* mmalloc.h (struct mdesc):  Add FIXME comments to point out the
+	need to save some data on a per-process basis for mapped regions
+	that are shared.
+	* attach.c (reuse):  Update the morecore field for reused mapped
+	regions to be correct for the current process.
+
 Mon Jun 29 10:45:25 1992  Fred Fish  (fnf at cygnus.com)
 
 	* mmtrace.c:  Lint.

@@ -21,11 +21,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <string.h>
 #include "mmalloc.h"
 
 #ifndef SEEK_SET
 #define SEEK_SET 0
 #endif
+
+
+#if defined(HAVE_MMAP)
 
 /* Forward declarations/prototypes for local functions */
 
@@ -62,9 +66,6 @@ static struct mdesc *reuse PARAMS ((int));
 
    On failure returns NULL. */
 
-
-#if defined(HAVE_MMAP)
-
 PTR
 mmalloc_attach (fd, baseaddr)
   int fd;
@@ -100,8 +101,8 @@ mmalloc_attach (fd, baseaddr)
      then initialize the fields that we know values for. */
 
   mdp = &mtemp;
-  memset ((char *) mdp, 0, sizeof (mtemp));
-  strncpy (mdp -> magic, MMALLOC_MAGIC, MMALLOC_MAGIC_SIZE);
+  (void) memset ((char *) mdp, 0, sizeof (mtemp));
+  (void) strncpy (mdp -> magic, MMALLOC_MAGIC, MMALLOC_MAGIC_SIZE);
   mdp -> headersize = sizeof (mtemp);
   mdp -> version = MMALLOC_VERSION;
   mdp -> morecore = __mmalloc_mmap_morecore;
@@ -130,7 +131,7 @@ mmalloc_attach (fd, baseaddr)
 
   if ((mbase = mdp -> morecore (mdp, sizeof (mtemp))) != NULL)
     {
-      memcpy (mbase, mdp, sizeof (mtemp));
+      (void) memcpy (mbase, mdp, sizeof (mtemp));
       mdp = (struct mdesc *) mbase;
     }
   else
@@ -154,6 +155,11 @@ mmalloc_attach (fd, baseaddr)
    trying to map the file in, and again after a successful mapping and
    after we've switched over to using the mapped in malloc descriptor 
    rather than the temporary one on the stack.
+
+   Once we've switched over to using the mapped in malloc descriptor, we
+   have to update the pointer to the morecore function, since it almost
+   certainly will be at a different address if the process reusing the
+   mapped region is from a different executable.
 
    Also note that if the heap being remapped previously used the mmcheck()
    routines, we need to update the hooks since their target functions
@@ -181,6 +187,7 @@ reuse (fd)
 	{
 	  mdp = (struct mdesc *) mtemp.base;
 	  mdp -> fd = fd;
+	  mdp -> morecore = __mmalloc_mmap_morecore;
 	  if (mdp -> mfree_hook != NULL)
 	    {
 	      (void) mmcheck ((PTR) mdp, (void (*) PARAMS ((void))) NULL);
@@ -196,6 +203,7 @@ reuse (fd)
    to link to, but trying to initialize access to an mmap'd managed region
    always fails. */
 
+/* ARGSUSED */
 PTR
 mmalloc_attach (fd, baseaddr)
   int fd;
