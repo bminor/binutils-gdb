@@ -126,9 +126,7 @@ ALL_MACHINES = \
 	cpu-i386.o \
 	cpu-i860.o \
 	cpu-i960.o \
-	$(start-sanitize-m32r) \
 	cpu-m32r.o \
-	$(end-sanitize-m32r) \
 	cpu-m68k.o \
 	cpu-m88k.o \
 	cpu-mips.o \
@@ -227,9 +225,7 @@ BFD32_BACKENDS = \
 	elf32-hppa.o \
 	elf32-i386.o \
 	elf32-i860.o \
-	$(start-sanitize-m32r) \
 	elf32-m32r.o \
-	$(end-sanitize-m32r) \
 	elf32-m68k.o \
 	elf32-m88k.o \
 	elf32-mips.o \
@@ -863,11 +859,9 @@ elf32-d30v.o: elf32-d30v.c elf-bfd.h $(INCDIR)/elf/common.h \
   elf32-target.h
 end-sanitize-d30v:
 
-start-sanitize-m32r:
 elf32-m32r.o: elf32-m32r.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h
-end-sanitize-m32r:
 
 start-sanitize-v850:
 cpu-v850.o: cpu-v850.c

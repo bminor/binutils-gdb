@@ -87,12 +87,11 @@ extern PTR bfd_zmalloc PARAMS ((size_t));
 
 extern bfd_error_handler_type _bfd_error_handler;
 
-/* These routines allocate and free things on the BFD's obstack.  */
+/* These routines allocate and free things on the BFD's objalloc.  */
 
-PTR	bfd_alloc PARAMS ((bfd *abfd, size_t size));
-PTR	bfd_zalloc PARAMS ((bfd *abfd, size_t size));
-
-#define	bfd_release(x,y) (void) obstack_free(&(x->memory),y)
+extern PTR bfd_alloc PARAMS ((bfd *, size_t));
+extern PTR bfd_zalloc PARAMS ((bfd *, size_t));
+extern void bfd_release PARAMS ((bfd *, PTR));
 
 bfd *	_bfd_create_empty_archive_element_shell PARAMS ((bfd *obfd));
 bfd *	_bfd_look_for_bfd_in_cache PARAMS ((bfd *arch_bfd, file_ptr index));
@@ -755,7 +754,6 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_D30V_32_PCREL",
 /* end-sanitize-d30v */
 
-/* start-sanitize-m32r */
   "BFD_RELOC_M32R_24",
   "BFD_RELOC_M32R_10_PCREL",
   "BFD_RELOC_M32R_18_PCREL",
@@ -764,8 +762,6 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_M32R_HI16_SLO",
   "BFD_RELOC_M32R_LO16",
   "BFD_RELOC_M32R_SDA16",
-/* end-sanitize-m32r */
-
 /* start-sanitize-v850 */
   "BFD_RELOC_V850_9_PCREL",
   "BFD_RELOC_V850_22_PCREL",

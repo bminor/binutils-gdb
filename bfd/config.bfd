@@ -247,11 +247,9 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-# start-sanitize-m32r
   m32r-*-*)
     targ_defvec=bfd_elf32_m32r_vec
     ;;
-# end-sanitize-m32r
 
   m68*-apollo-*)
     targ_defvec=apollocoff_vec

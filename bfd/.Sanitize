@@ -31,14 +31,6 @@ else
 	lose_these_too="${d30v_files} ${lose_these_too}"
 fi
 
-m32r_files="cpu-m32r.c elf32-m32r.c"
-
-if ( echo $* | grep keep\-m32r > /dev/null ) ; then
-	keep_these_too="${m32r_files} ${keep_these_too}"
-else
-	lose_these_too="${m32r_files} ${lose_these_too}"
-fi
-
 v850_files="cpu-v850.c elf32-v850.c"
 
 if ( echo $* | grep keep\-v850 > /dev/null ) ; then
@@ -144,6 +136,7 @@ cpu-hppa.c
 cpu-i386.c
 cpu-i860.c
 cpu-i960.c
+cpu-m32r.c
 cpu-m68k.c
 cpu-m88k.c
 cpu-mips.c
@@ -172,6 +165,7 @@ elf32-hppa.c
 elf32-hppa.h
 elf32-i386.c
 elf32-i860.c
+elf32-m32r.c
 elf32-m68k.c
 elf32-m88k.c
 elf32-mips.c
@@ -347,34 +341,6 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-d30v/,/end-\sanitize\-d30v/d' < $i > new
-			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
-				if [ -n "${verbose}" ] ; then
-					echo Caching $i in .Recover...
-				fi
-				mv $i .Recover
-			fi
-			mv new $i
-		fi
-	done
-fi
-
-m32r_files="ChangeLog Makefile.in config.bfd configure.in configure elf.c archures.c reloc.c targets.c bfd-in2.h libbfd.h"
-if ( echo $* | grep keep\-m32r > /dev/null ) ; then
-	for i in $m32r_files ; do
-		if test ! -d $i && (grep sanitize-m32r $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Keeping m32r stuff in $i
-			fi
-		fi
-	done
-else
-	for i in $m32r_files ; do
-		if test ! -d $i && (grep sanitize-m32r $i > /dev/null) ; then
-			if [ -n "${verbose}" ] ; then
-				echo Removing traces of \"m32r\" from $i...
-			fi
-			cp $i new
-			sed '/start\-sanitize\-m32r/,/end-\sanitize\-m32r/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
