@@ -1,3 +1,10 @@
+2003-08-05  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-cmd-env.c (env_execute_cli_command): Use an explicit "%s %s"
+	when constructing the run command.
+	(mi_cmd_env_cd, mi_cmd_env_path, mi_cmd_env_dir): Simplify command
+	string removing the "%s".
+
 2003-08-04  Andrew Cagney  <cagney@redhat.com>
 
 	* mi-cmds.h (struct mi_cli): Define.
