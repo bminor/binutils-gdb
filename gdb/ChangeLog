@@ -1,5 +1,10 @@
 2002-01-18  Andrew Cagney  <ac131313@redhat.com>
 
+	* NEWS: Document that testsuite/gdb.hp/gdb.threads-hp/ is
+	obsolete.
+
+2002-01-18  Andrew Cagney  <ac131313@redhat.com>
+
 	* infptrace.c: Remove ATTRIBUTE_UNUSED.  Update copyright.
 	* monitor.c, remote-array.c, remote-bug.c: Ditto.
 	* remote-e7000.c, remote-es.c, remote-mips.c: Ditto.

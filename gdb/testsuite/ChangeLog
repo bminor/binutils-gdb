@@ -1,3 +1,12 @@
+2002-01-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.hp/gdb.threads-hp/usrthfork.exp: Mark as obsolete.
+	* gdb.hp/gdb.threads-hp/usrthcore.exp: Ditto.
+	* gdb.hp/gdb.threads-hp/usrthbasic.exp: Ditto.
+	* gdb.hp/gdb.threads-hp/usrthfork.c: Ditto.
+	* gdb.hp/gdb.threads-hp/usrthbasic.c: Ditto.
+	* gdb.hp/gdb.threads-hp/usrthcore.c: Ditto.
+
 2002-01-17  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.asm/asm-source.exp (info symbol): Take another shot at

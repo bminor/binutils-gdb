@@ -41,6 +41,7 @@ AMD 29000 embedded, using EBMON			a29k-none-none
 AMD 29000 embedded with COFF			a29k-none-coff
 AMD 29000 embedded with a.out			a29k-none-aout
 
+testsuite/gdb.hp/gdb.threads-hp/		directory
 
 * REMOVED configurations and files
 
