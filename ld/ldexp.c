@@ -1,5 +1,5 @@
 /* This module handles expression trees.
-Copyright (C) 1991, 1993 Free Software Foundation, Inc.
+Copyright (C) 1991, 1993, 1994, 1995 Free Software Foundation, Inc.
 Written by Steve Chamberlain of Cygnus Support (sac@cygnus.com).
 
 This file is part of GLD, the Gnu Linker.
@@ -215,72 +215,99 @@ static etree_value_type
 fold_binary (tree, current_section, allocation_done, dot, dotp)
      etree_type *tree;
      lang_output_section_statement_type *current_section;
-     lang_phase_type  allocation_done;
+     lang_phase_type allocation_done;
      bfd_vma dot;
      bfd_vma *dotp;
 {
   etree_value_type result;
 
-  result =  exp_fold_tree(tree->binary.lhs,  current_section,
+  result = exp_fold_tree (tree->binary.lhs, current_section,
 			  allocation_done, dot, dotp);
-  if (result.valid) {
-    etree_value_type other;
-    other = exp_fold_tree(tree->binary.rhs,
-			  current_section,
-			  allocation_done, dot,dotp) ;
-    if (other.valid) {
-	/* If values are from different sections, or this is an */
-	/* absolute expression, make both source args absolute */
-      if (result.section !=  other.section ||
-	  current_section == abs_output_section) 
-      {
-	make_abs(&result);
-	make_abs(&other);
-      }
-	  
-      switch (tree->type.node_code) 
-	{
-	case '%':
-	  /* Mod,  both absolule*/
+  if (result.valid)
+    {
+      etree_value_type other;
 
-	  if (other.value == 0) {
-	    einfo("%F%S %% by zero\n");
-	  }
-	  result.value = (int)result.value % (int)other.value;
-	  break;
-	case '/':
-	  if (other.value == 0) {
-	    einfo("%F%S / by zero\n");
-	  }
-	  result.value = (int)result.value / (int) other.value;
-	  break;
-#define BOP(x,y) case x : result.value = result.value y other.value;break;
-	  BOP('+',+);
-	  BOP('*',*);
-	  BOP('-',-);
-	  BOP(LSHIFT,<<);
-	  BOP(RSHIFT,>>);
-	  BOP(EQ,==);
-	  BOP(NE,!=);
-	  BOP('<',<);
-	  BOP('>',>);
-	  BOP(LE,<=);
-	  BOP(GE,>=);
-	  BOP('&',&);
-	  BOP('^',^);
-	  BOP('|',|);
-	  BOP(ANDAND,&&);
-	  BOP(OROR,||);
-	default:
-	  FAIL();
+      other = exp_fold_tree (tree->binary.rhs,
+			     current_section,
+			     allocation_done, dot,dotp) ;
+      if (other.valid)
+	{
+	  /* If the values are from different sections, or this is an
+	     absolute expression, make both the source arguments
+	     absolute.  However, adding or subtracting an absolute
+	     value from a relative value is meaningful, and is an
+	     exception.  */
+	  if (current_section != abs_output_section
+	      && (result.section == abs_output_section
+		  || other.section == abs_output_section)
+	      && (tree->type.node_code == '+'
+		  || tree->type.node_code == '-'))
+	    {
+	      etree_value_type hold;
+
+	      /* If there is only one absolute term, make sure it is the
+		 second one.  */
+	      if (result.section == abs_output_section)
+		{
+		  hold = result;
+		  result = other;
+		  other = hold;
+		}
+	    }
+	  else if (result.section != other.section
+		   || current_section == abs_output_section)
+	    {
+	      make_abs(&result);
+	      make_abs(&other);
+	    }
+
+	  switch (tree->type.node_code) 
+	    {
+	    case '%':
+	      if (other.value == 0)
+		einfo ("%F%S %% by zero\n");
+	      result.value = ((bfd_signed_vma) result.value
+			      % (bfd_signed_vma) other.value);
+	      break;
+
+	    case '/':
+	      if (other.value == 0)
+		einfo ("%F%S / by zero\n");
+	      result.value = ((bfd_signed_vma) result.value
+			      / (bfd_signed_vma) other.value);
+	      break;
+
+#define BOP(x,y) case x : result.value = result.value y other.value; break;
+	      BOP('+',+);
+	      BOP('*',*);
+	      BOP('-',-);
+	      BOP(LSHIFT,<<);
+	      BOP(RSHIFT,>>);
+	      BOP(EQ,==);
+	      BOP(NE,!=);
+	      BOP('<',<);
+	      BOP('>',>);
+	      BOP(LE,<=);
+	      BOP(GE,>=);
+	      BOP('&',&);
+	      BOP('^',^);
+	      BOP('|',|);
+	      BOP(ANDAND,&&);
+	      BOP(OROR,||);
+
+	    default:
+	      FAIL();
+	    }
+	}
+      else
+	{
+	  result.valid = false;
 	}
     }
-    else {
-      result.valid = false;
-    }
-  }
+
   return result;
 }
+
 etree_value_type 
 invalid ()
 {
@@ -312,17 +339,20 @@ fold_name (tree, current_section, allocation_done, dot)
 	  }
 	break;
       case DEFINED:
-	{
-	  struct bfd_link_hash_entry *h;
+	if (allocation_done == lang_first_phase_enum)
+	  result.valid = false;
+	else
+	  {
+	    struct bfd_link_hash_entry *h;
 
-	  h = bfd_link_hash_lookup (link_info.hash, tree->name.name,
-				    false, false, true);
-	  result.value = (h != (struct bfd_link_hash_entry *) NULL
-			  && (h->type == bfd_link_hash_defined
-			      || h->type == bfd_link_hash_common));
-	  result.section = 0;
-	  result.valid = true;
-	}
+	    h = bfd_link_hash_lookup (link_info.hash, tree->name.name,
+				      false, false, true);
+	    result.value = (h != (struct bfd_link_hash_entry *) NULL
+			    && (h->type == bfd_link_hash_defined
+				|| h->type == bfd_link_hash_common));
+	    result.section = 0;
+	    result.valid = true;
+	  }
 	break;
       case NAME:
 	result.valid = false;
@@ -333,29 +363,33 @@ fold_name (tree, current_section, allocation_done, dot)
 	    else
 	      result = invalid();
 	  }
-	else if (allocation_done == lang_final_phase_enum)
+	else if (allocation_done != lang_first_phase_enum)
 	  {
 	    struct bfd_link_hash_entry *h;
 
 	    h = bfd_link_hash_lookup (link_info.hash, tree->name.name,
 				      false, false, true);
-	    if (h != (struct bfd_link_hash_entry *) NULL
-		&& h->type == bfd_link_hash_defined)
+	    if (h != NULL && h->type == bfd_link_hash_defined)
 	      {
-		lang_output_section_statement_type *os;
+		if (bfd_is_abs_section (h->u.def.section))
+		  result = new_abs (h->u.def.value);
+		else if (allocation_done == lang_final_phase_enum)
+		  {
+		    lang_output_section_statement_type *os;
 		
-		os = (lang_output_section_statement_lookup
-		      (h->u.def.section->output_section->name));
+		    os = (lang_output_section_statement_lookup
+			  (h->u.def.section->output_section->name));
 
-		/* FIXME: Is this correct if this section is being
-		   linked with -R?  */
-		result = new_rel ((h->u.def.value
-				   + h->u.def.section->output_offset),
-				  os);
+		    /* FIXME: Is this correct if this section is being
+		       linked with -R?  */
+		    result = new_rel ((h->u.def.value
+				       + h->u.def.section->output_offset),
+				      os);
+		  }
 	      }
-	    if (result.valid == false)
-	      einfo("%F%S: undefined symbol `%s' referenced in expression\n",
-		    tree->name.name);
+	    else if (allocation_done == lang_final_phase_enum)
+	      einfo ("%F%S: undefined symbol `%s' referenced in expression\n",
+		     tree->name.name);
 	  }
 	break;
 
@@ -852,3 +886,23 @@ exp_get_value_int (tree,def,name, allocation_done)
   return (int)exp_get_vma(tree,(bfd_vma)def,name, allocation_done);
 }
 
+
+int
+exp_get_abs_int (tree, def, name, allocation_done)
+     etree_type *tree;
+     int def;
+     char *name;
+     lang_phase_type allocation_done;
+{
+  etree_value_type res;
+  res = exp_fold_tree_no_dot (tree, abs_output_section, allocation_done);
+
+  if (res.valid)
+    {
+      res.value += res.section->bfd_section->vma;
+    }
+  else {
+    einfo ("%F%S non constant expression for %s\n",name);
+  }
+  return res.value;
+}

@@ -1,3 +1,14 @@
+Tue Jan 31 12:37:09 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldexp.c (fold_name): In case NAME, permit an absolute symbol
+	in lang_allocating_phase_enum.
+
+Mon Jan 30 11:33:25 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (distclean): Depend upon clean.  Don't bother to
+	remove files which will be removed by clean.  From patch by
+	alan@SPRI.Levels.UniSA.Edu.Au (Alan Modra).
+
 Fri Jan 27 16:27:34 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation): For
