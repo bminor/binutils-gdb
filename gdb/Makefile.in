@@ -2162,7 +2162,7 @@ ppcnbsd-nat.o: ppcnbsd-nat.c $(defs_h) $(inferior_h) $(ppc_tdep_h) \
 	$(ppcnbsd_tdep_h) $(gdb_assert_h)
 ppcnbsd-tdep.o: ppcnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) \
 	$(target_h) $(breakpoint_h) $(value_h) $(osabi_h) $(ppc_tdep_h) \
-	$(ppcnbsd_tdep_h) $(nbsd_tdep_h) $(solib_svr4_h)
+	$(ppcnbsd_tdep_h) $(nbsd_tdep_h) $(solib_svr4_h) $(gdb_assert)
 ppcobsd-nat.o: ppcobsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(ppc_tdep_h) $(ppcobsd_tdep_h)
 ppcobsd-tdep.o: ppcobsd-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h) \

@@ -34,7 +34,7 @@
 #include "nbsd-tdep.h"
 #include "tramp-frame.h"
 #include "trad-frame.h"
-
+#include "gdb_assert.h"
 #include "solib-svr4.h"
 
 #define REG_FIXREG_OFFSET(x)	((x) * 4)
