@@ -2351,13 +2351,6 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
-  if (objfile->ei.entry_point >= lowpc &&
-      objfile->ei.entry_point < highpc)
-    {
-      objfile->ei.deprecated_entry_file_lowpc = lowpc;
-      objfile->ei.deprecated_entry_file_highpc = highpc;
-    }
-
   attr = dwarf2_attr (die, DW_AT_language, cu);
   if (attr)
     {

@@ -102,25 +102,6 @@ mipscoff_symfile_read (struct objfile *objfile, int mainline)
      minimal symbols for this objfile. */
 
   install_minimal_symbols (objfile);
-
-  /* If the entry_file bounds are still unknown after processing the
-     partial symbols, then try to set them from the minimal symbols
-     surrounding the entry_point.  */
-
-  if (mainline
-      && objfile->ei.entry_point != INVALID_ENTRY_POINT
-      && objfile->ei.deprecated_entry_file_lowpc == INVALID_ENTRY_LOWPC)
-    {
-      struct minimal_symbol *m;
-
-      m = lookup_minimal_symbol_by_pc (objfile->ei.entry_point);
-      if (m && DEPRECATED_SYMBOL_NAME (m + 1))
-	{
-	  objfile->ei.deprecated_entry_file_lowpc = SYMBOL_VALUE_ADDRESS (m);
-	  objfile->ei.deprecated_entry_file_highpc = SYMBOL_VALUE_ADDRESS (m + 1);
-	}
-    }
-
   do_cleanups (back_to);
 }
 

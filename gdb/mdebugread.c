@@ -3601,13 +3601,6 @@ parse_partial_symbols (struct objfile *objfile)
       includes_used = 0;
       dependencies_used = 0;
 
-      if (objfile->ei.entry_point >= save_pst->textlow &&
-	  objfile->ei.entry_point < save_pst->texthigh)
-	{
-	  objfile->ei.deprecated_entry_file_lowpc = save_pst->textlow;
-	  objfile->ei.deprecated_entry_file_highpc = save_pst->texthigh;
-	}
-
       /* The objfile has its functions reordered if this partial symbol
          table overlaps any other partial symbol table.
          We cannot assume a reordered objfile if a partial symbol table

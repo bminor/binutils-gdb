@@ -1358,12 +1358,6 @@ read_dbx_symtab (struct objfile *objfile)
 	      || (namestring[(nsl = strlen (namestring)) - 1] == 'o'
 		  && namestring[nsl - 2] == '.'))
 	  {
-	    if (objfile->ei.entry_point < nlist.n_value &&
-		objfile->ei.entry_point >= last_o_file_start)
-	      {
-		objfile->ei.deprecated_entry_file_lowpc = last_o_file_start;
-		objfile->ei.deprecated_entry_file_highpc = nlist.n_value;
-	      }
 	    if (past_first_source_file && pst
 		/* The gould NP1 uses low values for .o and -l symbols
 		   which are not the address.  */
@@ -2099,16 +2093,6 @@ read_dbx_symtab (struct objfile *objfile)
     }
 
   /* If there's stuff to be cleaned up, clean it up.  */
-  if (DBX_SYMCOUNT (objfile) > 0	/* We have some syms */
-      /*FIXME, does this have a bug at start address 0? */
-      && last_o_file_start
-      && objfile->ei.entry_point < nlist.n_value
-      && objfile->ei.entry_point >= last_o_file_start)
-    {
-      objfile->ei.deprecated_entry_file_lowpc = last_o_file_start;
-      objfile->ei.deprecated_entry_file_highpc = nlist.n_value;
-    }
-
   if (pst)
     {
       /* Don't set pst->texthigh lower than it already is.  */

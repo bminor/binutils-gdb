@@ -44,9 +44,8 @@ struct objfile_data;
    to the user executable's recorded entry point, as if the call had been made
    directly by the kernel.
 
-   The traditional gdb method of using this info is to use the
-   recorded entry point to set the variables
-   deprecated_entry_file_lowpc and deprecated_entry_file_highpc from
+   The traditional gdb method of using this info was to use the
+   recorded entry point to set the entry-file's lowpc and highpc from
    the debugging information, where these values are the starting
    address (inclusive) and ending address (exclusive) of the
    instruction space in the executable which correspond to the
@@ -116,12 +115,6 @@ struct entry_info
 
     CORE_ADDR entry_func_lowpc;
     CORE_ADDR entry_func_highpc;
-
-    /* Start (inclusive) and end (exclusive) of object file containing the
-       entry point. */
-
-    CORE_ADDR deprecated_entry_file_lowpc;
-    CORE_ADDR deprecated_entry_file_highpc;
 
     /* Start (inclusive) and end (exclusive) of the user code main() function. */
 

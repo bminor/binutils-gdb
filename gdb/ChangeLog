@@ -1,3 +1,15 @@
+2004-05-07  Andrew Cagney  <cagney@redhat.com>
+
+	* objfiles.h (struct entry_info): Delete unused fields
+	deprecated_entry_file_lowpc and deprecated_entry_file_highpc.
+	* objfiles.c (init_entry_point_info, objfile_relocate): Update.
+	* mipsread.c (mipscoff_symfile_read): Update.
+	* mdebugread.c (parse_partial_symbols): Update.
+	* dwarfread.c (read_file_scope): Update.
+	* dwarf2read.c (read_file_scope): Update.
+	* dbxread.c (read_dbx_symtab, read_dbx_symtab): Update.
+	* coffread.c (complete_symtab): Update.
+
 2004-05-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* infcall.c (_initialize_infcall): Fix typo.
