@@ -34,6 +34,7 @@ aout32.c
 aout64.c
 aoutf1.h
 aoutx.h
+aout-adobe.c
 aout-encap.c
 aout-target.h
 archive.c
