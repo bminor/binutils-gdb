@@ -42,6 +42,7 @@ alpha-opc.h
 a29k-dis.c
 configure.in
 dis-buf.c
+disassemble.c
 h8300-dis.c
 h8500-dis.c
 h8500-opc.h
