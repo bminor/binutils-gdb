@@ -2008,7 +2008,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
   struct type *type = value_type (toval);
   int bits = value_bitsize (toval);
 
-  if (!toval->modifiable)
+  if (!deprecated_value_modifiable (toval))
     error (_("Left operand of assignment is not a modifiable lvalue."));
 
   toval = coerce_ref (toval);

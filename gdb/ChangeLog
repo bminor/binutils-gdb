@@ -1,5 +1,11 @@
 2005-02-07  Andrew Cagney  <cagney@gnu.org>
 
+	* value.h (deprecated_set_value_modifiable)
+	(deprecated_value_modifiable): Declare.
+	* value.c (deprecated_set_value_modifiable): Define.
+	(deprecated_value_modifiable): Define.
+	* ada-lang.c, valops.c, breakpoint.c, tracepoint.c: Update.
+
 	* value.h (deprecated_set_value_type): Declare.
 	* value.c (deprecated_set_value_type): Define.
 	* hpacc-abi.c, gnu-v2-abi.c, cp-valprint.c: Update.

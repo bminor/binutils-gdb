@@ -21,10 +21,6 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* Hack so that value.h can detect when it's being included by
-   value.c.  */
-#define VALUE_C
-
 #include "defs.h"
 #include "gdb_string.h"
 #include "symtab.h"
@@ -272,6 +268,17 @@ short *
 deprecated_value_regnum_hack (struct value *value)
 {
   return &value->regnum;
+}
+
+int
+deprecated_value_modifiable (struct value *value)
+{
+  return value->modifiable;
+}
+void
+deprecated_set_value_modifiable (struct value *value, int modifiable)
+{
+  value->modifiable = modifiable;
 }
 
 /* Return a mark in the value chain.  All values allocated after the

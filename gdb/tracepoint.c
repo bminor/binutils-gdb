@@ -300,7 +300,7 @@ set_traceframe_context (CORE_ADDR trace_pc)
       memcpy (value_contents_raw (func_val),
 	      DEPRECATED_SYMBOL_NAME (traceframe_fun),
 	      len);
-      func_val->modifiable = 0;
+      deprecated_set_value_modifiable (func_val, 0);
       set_internalvar (lookup_internalvar ("trace_func"), func_val);
     }
 
@@ -322,7 +322,7 @@ set_traceframe_context (CORE_ADDR trace_pc)
       memcpy (value_contents_raw (file_val),
 	      traceframe_sal.symtab->filename,
 	      len);
-      file_val->modifiable = 0;
+      deprecated_set_value_modifiable (file_val, 0);
       set_internalvar (lookup_internalvar ("trace_file"), file_val);
     }
 }

@@ -80,11 +80,7 @@ struct value
   struct frame_id frame_id;
 
   /* Type of the value.  */
-#ifdef VALUE_C
   struct type *type;
-#else
-  struct type *xtype;
-#endif
 
   /* If a value represents a C++ object, then the `type' field gives
      the object's compile-time type.  If the object actually belongs
@@ -186,6 +182,13 @@ extern void deprecated_set_value_type (struct value *value,
 extern int value_bitsize (struct value *);
 extern int value_bitpos (struct value *);
 extern int value_offset (struct value *);
+
+/* The comment from "struct value" reads: ``Is it modifiable?  Only
+   relevant if lval != not_lval.''.  Shouldn't the value instead be
+   not_lval and be done with it?  */
+extern int deprecated_value_modifiable (struct value *value);
+extern void deprecated_set_value_modifiable (struct value *value,
+					     int modifiable);
 
 extern struct type *value_enclosing_type (struct value *);
 extern int value_lazy (struct value *);
