@@ -352,6 +352,14 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
 
   gdb_assert (is_lwp (ptid));
 
+  /* Make sure SIGCHLD is blocked.  We don't want SIGCHLD events
+     to interrupt either the ptrace() or waitpid() calls below.  */
+  if (! sigismember (&blocked_mask, SIGCHLD))
+    {
+      sigaddset (&blocked_mask, SIGCHLD);
+      sigprocmask (SIG_BLOCK, &blocked_mask, NULL);
+    }
+
   if (verbose)
     printf_filtered ("[New %s]\n", target_pid_to_str (ptid));
 
@@ -381,6 +389,16 @@ lin_lwp_attach_lwp (ptid_t ptid, int verbose)
       gdb_assert (pid == GET_LWP (ptid)
 		  && WIFSTOPPED (status) && WSTOPSIG (status));
 
+      lp->stopped = 1;
+    }
+  else
+    {
+      /* We assume that the LWP representing the original process
+	 is already stopped.  Mark it as stopped in the data structure
+	 that the lin-lwp layer uses to keep track of threads.  Note
+	 that this won't have already been done since the main thread
+	 will have, we assume, been stopped by an attach from a
+	 different layer.  */
       lp->stopped = 1;
     }
 }
