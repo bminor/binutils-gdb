@@ -57,9 +57,15 @@ struct linux_target_ops
 
   int decr_pc_after_break;
   int (*breakpoint_at) (CORE_ADDR pc);
+
+  char *(*available_registers) (void);
 };
 
 extern struct linux_target_ops the_low_target;
+
+#ifdef HAVE_LINUX_REGSETS
+extern int use_regsets_p;
+#endif
 
 #define get_process(inf) ((struct process_info *)(inf))
 #define get_thread_process(thr) (get_process (inferior_target_data (thr)))

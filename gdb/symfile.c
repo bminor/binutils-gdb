@@ -1500,7 +1500,7 @@ load_section_callback (bfd *abfd, asection *asec, void *data)
 	  while (sent < size);
 
 	  if (err != 0)
-	    error (_("Memory access error while loading section %s."), sect_name);
+	    error (_("Memory access error %d while loading section %s."), err, sect_name);
 
 	  do_cleanups (old_chain);
 	}

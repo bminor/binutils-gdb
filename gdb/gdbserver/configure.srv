@@ -21,6 +21,7 @@ case "${target}" in
   arm*-*-linux*)	srv_regobj=reg-arm.o
 			srv_tgtobj="linux-low.o linux-arm-low.o"
 			srv_linux_usrregs=yes
+			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;
   i[34567]86-*-linux*)	srv_regobj=reg-i386-linux.o

@@ -231,7 +231,7 @@ store_nwfpe_register (int regno, FPA11 * fpa11)
    state of the process and store it into regcache.  */
 
 static void
-fetch_fpregister (int regno)
+fetch_fpa_register (int regno)
 {
   int ret, tid;
   FPA11 fp;
@@ -280,7 +280,7 @@ fetch_fpregister (int regno)
    into regcache.  */
 
 static void
-fetch_fpregs (void)
+fetch_fpa_regs (void)
 {
   int ret, regno, tid;
   FPA11 fp;
@@ -328,7 +328,7 @@ fetch_fpregs (void)
    process using the contents from regcache.  */
 
 static void
-store_fpregister (int regno)
+store_fpa_register (int regno)
 {
   int ret, tid;
   FPA11 fp;
@@ -366,7 +366,7 @@ store_fpregister (int regno)
    the contents from regcache.  */
 
 static void
-store_fpregs (void)
+store_fpa_regs (void)
 {
   int ret, regno, tid;
   FPA11 fp;
@@ -560,7 +560,7 @@ fetch_inferior_registers (int regno)
   if (-1 == regno)
     {
       fetch_regs ();
-      fetch_fpregs ();
+      fetch_fpa_regs ();
     }
   else 
     {
@@ -568,7 +568,7 @@ fetch_inferior_registers (int regno)
         fetch_register (regno);
 
       if (regno >= ARM_F0_REGNUM && regno <= ARM_FPS_REGNUM)
-        fetch_fpregister (regno);
+        fetch_fpa_register (regno);
     }
 }
 
@@ -582,7 +582,7 @@ store_inferior_registers (int regno)
   if (-1 == regno)
     {
       store_regs ();
-      store_fpregs ();
+      store_fpa_regs ();
     }
   else
     {
@@ -590,7 +590,7 @@ store_inferior_registers (int regno)
         store_register (regno);
 
       if ((regno >= ARM_F0_REGNUM) && (regno <= ARM_FPS_REGNUM))
-        store_fpregister (regno);
+        store_fpa_register (regno);
     }
 }
 

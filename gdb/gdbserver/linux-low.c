@@ -68,7 +68,7 @@ struct pending_signals
 #define PTRACE_XFER_TYPE long
 
 #ifdef HAVE_LINUX_REGSETS
-static int use_regsets_p = 1;
+int use_regsets_p = 1;
 #endif
 
 int debug_threads = 0;
@@ -1467,6 +1467,15 @@ linux_read_auxv (CORE_ADDR offset, char *myaddr, unsigned int len)
   return n;
 }
 
+static char *
+linux_available_registers (void)
+{
+  if (the_low_target.available_registers == NULL)
+    return NULL;
+  else
+    return (*the_low_target.available_registers) ();
+}
+
 
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
@@ -1483,6 +1492,7 @@ static struct target_ops linux_target_ops = {
   linux_look_up_symbols,
   linux_send_signal,
   linux_read_auxv,
+  linux_available_registers,
 };
 
 static void

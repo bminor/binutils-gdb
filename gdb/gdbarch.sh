@@ -433,6 +433,8 @@ v:=:int:num_regs:::0:-1
 # combinations of other registers, or they may be computed by GDB.
 v:=:int:num_pseudo_regs:::0:0::0
 
+V::int:remote_num_g_packet_regs
+
 # GDB's standard (or well known) register numbers.  These can map onto
 # a real register or a pseudo (computed) register or not be defined at
 # all (-1).
@@ -488,6 +490,10 @@ f:=:int:register_sim_regno:int reg_nr:reg_nr::legacy_register_sim_regno::0
 F:=:int:register_bytes_ok:long nr_bytes:nr_bytes
 f:=:int:cannot_fetch_register:int regnum:regnum::cannot_register_not::0
 f:=:int:cannot_store_register:int regnum:regnum::cannot_register_not::0
+# Describe the optional registers provided by the simulator target.
+M::char *:sim_available_registers:const struct target_ops *target:target
+# Describe the register numbering used by the remote protocol.
+F::int:register_remote_regno:int reg_nr:reg_nr
 # setjmp/longjmp support.
 F:=:int:get_longjmp_target:CORE_ADDR *pc:pc
 #
@@ -2213,6 +2219,7 @@ deprecated_current_gdbarch_select_hack (struct gdbarch *new_gdbarch)
   current_gdbarch_swap_out_hack ();
   current_gdbarch_swap_in_hack (new_gdbarch);
   architecture_changed_event ();
+  flush_cached_frames (); /* FIXME should this be attached to an observer?  */
 }
 
 extern void _initialize_gdbarch (void);

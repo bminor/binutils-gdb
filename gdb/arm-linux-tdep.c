@@ -481,9 +481,21 @@ arm_linux_init_abi (struct gdbarch_info info,
   tdep->arm_breakpoint_size = sizeof (arm_linux_arm_le_breakpoint);
   tdep->thumb_breakpoint_size = sizeof (arm_linux_thumb_le_breakpoint);
 
-  tdep->fp_model = ARM_FLOAT_FPA;
+  if (tdep->abi == ARM_ABI_APCS_GNU)
+    {
+      /* The following two overrides shouldn't be needed.  */
+      set_gdbarch_deprecated_extract_return_value (gdbarch,
+	  arm_linux_extract_return_value);
+      set_gdbarch_deprecated_push_arguments (gdbarch,
+					     arm_linux_push_arguments);
 
-  tdep->jb_pc = ARM_LINUX_JB_PC;
+      tdep->fp_model = ARM_FLOAT_FPA;
+      tdep->jb_pc = ARM_LINUX_JB_PC;
+    }
+  else
+    {
+      tdep->jb_pc = ARM_LINUX_EABI_JB_PC;
+    }
   tdep->jb_elt_size = ARM_LINUX_JB_ELEMENT_SIZE;
 
   set_solib_svr4_fetch_link_map_offsets

@@ -42,6 +42,9 @@
 #define PTRACE_GET_THREAD_AREA 22
 #endif
 
+#define PTRACE_GETWMMXREGS 18
+#define PTRACE_SETWMMXREGS 19
+
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif
@@ -114,7 +117,96 @@ arm_reinsert_addr ()
   collect_register_by_name ("lr", &pc);
   return pc;
 }
+  
+static void
+arm_fill_gregset (void *buf)
+{
+  int i;
 
+  for (i = 0; i < arm_num_regs; i++)
+    if (arm_regmap[i] != -1)
+      collect_register (i, ((char *) buf) + arm_regmap[i]);
+}
+ 
+static void
+arm_store_gregset (const void *buf)
+{
+  int i;
+  char zerobuf[8];
+
+  memset (zerobuf, 0, 8); 
+  for (i = 0; i < arm_num_regs; i++)
+    if (arm_regmap[i] != -1)
+      supply_register (i, ((char *) buf) + arm_regmap[i]);
+    else
+      supply_register (i, zerobuf);
+}
+ 
+static void
+arm_fill_wmmxregset (void *buf)
+{
+  int i;
+
+  for (i = 0; i < 16; i++)
+    collect_register (arm_num_regs + i, ((char *) buf) + i * 8);
+ 
+  for (i = 0; i < 2; i++)
+    collect_register (arm_num_regs + i + 16 + 2, ((char *) buf) + 16 * 8 + i * 4);
+ 
+  for (i = 0; i < 4; i++)
+    collect_register (arm_num_regs + i + 16 + 8, ((char *) buf) + 16 * 8 + 8 + i * 4);
+
+        ((int*)buf)[0], 
+        ((int*)buf)[1], 
+        ((int*)buf)[2], 
+        ((int*)buf)[3]);
+}
+ 
+static void
+arm_store_wmmxregset (const void *buf)
+{
+  int i;
+
+        ((int*)buf)[0], 
+        ((int*)buf)[1], 
+        ((int*)buf)[2], 
+        ((int*)buf)[3]);
+  for (i = 0; i < 16; i++)
+    supply_register (arm_num_regs + i, ((char *) buf) + i * 8);
+  
+  for (i = 0; i < 2; i++)
+    supply_register (arm_num_regs + i + 16 + 2, ((char *) buf) + 16 * 8 + i * 4);
+ 
+  for (i = 0; i < 4; i++)
+    supply_register (arm_num_regs + i + 16 + 8, ((char *) buf) + 16 * 8 + 8 + i * 4);
+}
+
+char *
+arm_available_registers (void)
+{
+  char buf[64];
+
+  printf ("use_regsets %d target_regsets %d\n", use_regsets_p, target_regsets[1].size);
+  if (use_regsets_p && target_regsets[1].size > 0)
+    {
+      int wr0 = find_regno ("wr0");
+      sprintf (buf, "iwmmxt:%d", wr0);
+      return strdup (buf);
+    }
+
+  return NULL;
+}
+
+struct regset_info target_regsets[] = {
+  { PTRACE_GETREGS, PTRACE_SETREGS, sizeof (elf_gregset_t),
+    GENERAL_REGS,
+    arm_fill_gregset, arm_store_gregset },
+  { PTRACE_GETWMMXREGS, PTRACE_SETWMMXREGS, 16 * 8 + 6 * 4,
+    EXTENDED_REGS,
+    arm_fill_wmmxregset, arm_store_wmmxregset },
+  { 0, 0, -1, -1, NULL, NULL }
+};
+ 
 /* Fetch the thread-local storage pointer for libthread_db.  */
 
 ps_err_e
@@ -144,4 +236,5 @@ struct linux_target_ops the_low_target = {
   arm_reinsert_addr,
   0,
   arm_breakpoint_at,
+  arm_available_registers
 };

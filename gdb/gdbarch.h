@@ -355,6 +355,11 @@ extern void set_gdbarch_num_pseudo_regs (struct gdbarch *gdbarch, int num_pseudo
 #define NUM_PSEUDO_REGS (gdbarch_num_pseudo_regs (current_gdbarch))
 #endif
 
+extern int gdbarch_remote_num_g_packet_regs_p (struct gdbarch *gdbarch);
+
+extern int gdbarch_remote_num_g_packet_regs (struct gdbarch *gdbarch);
+extern void set_gdbarch_remote_num_g_packet_regs (struct gdbarch *gdbarch, int remote_num_g_packet_regs);
+
 /* GDB's standard (or well known) register numbers.  These can map onto
    a real register or a pseudo (computed) register or not be defined at
    all (-1).
@@ -660,6 +665,22 @@ extern void set_gdbarch_cannot_store_register (struct gdbarch *gdbarch, gdbarch_
 #if !defined (CANNOT_STORE_REGISTER)
 #define CANNOT_STORE_REGISTER(regnum) (gdbarch_cannot_store_register (current_gdbarch, regnum))
 #endif
+
+/* Describe the optional registers provided by the simulator target. */
+
+extern int gdbarch_sim_available_registers_p (struct gdbarch *gdbarch);
+
+typedef char * (gdbarch_sim_available_registers_ftype) (struct gdbarch *gdbarch, const struct target_ops *target);
+extern char * gdbarch_sim_available_registers (struct gdbarch *gdbarch, const struct target_ops *target);
+extern void set_gdbarch_sim_available_registers (struct gdbarch *gdbarch, gdbarch_sim_available_registers_ftype *sim_available_registers);
+
+/* Describe the register numbering used by the remote protocol. */
+
+extern int gdbarch_register_remote_regno_p (struct gdbarch *gdbarch);
+
+typedef int (gdbarch_register_remote_regno_ftype) (int reg_nr);
+extern int gdbarch_register_remote_regno (struct gdbarch *gdbarch, int reg_nr);
+extern void set_gdbarch_register_remote_regno (struct gdbarch *gdbarch, gdbarch_register_remote_regno_ftype *register_remote_regno);
 
 /* setjmp/longjmp support. */
 
