@@ -31,6 +31,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 
+/* Parameterize the a.out code based on whether it is being built
+   for a 32-bit architecture or a 64-bit architecture.  */
 #if ARCH_SIZE==64
 #define GET_WORD bfd_h_get_64
 #define GET_SWORD (int64_type)GET_WORD

@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include "libbfd.h"
 
-#include "liba.out.h"           /* BFD a.out internal data structures */
+#include "libaout.h"           /* BFD a.out internal data structures */
 
 #include <sys/types.h>
 #include <sys/param.h>

@@ -23,7 +23,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 struct external_exec;
 #include <a.out.sun4.h>
 #include "bfd.h"
-#include "liba.out.h"           
+#include "libaout.h"           
 #include "libbfd.h"
 
 

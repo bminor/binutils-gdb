@@ -33,7 +33,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "aout64.h"
 #include "stab.gnu.h"
 #include "ar.h"
-#include "liba.out.h"           /* BFD a.out internal data structures */
+#include "libaout.h"           /* BFD a.out internal data structures */
 
 int vfprintf(file, format, args) /* Temporary crock! */
      FILE *file; char *format; char *args;

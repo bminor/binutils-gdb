@@ -29,7 +29,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
 #include "stab.gnu.h"
-#include "liba.out.h"		/* BFD a.out internal data structures */
+#include "libaout.h"		/* BFD a.out internal data structures */
 #include "archures.h"
 
 /* Align an address by rounding it up to a power of two.  It leaves the
