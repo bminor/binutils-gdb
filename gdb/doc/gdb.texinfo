@@ -208,12 +208,21 @@ effects of one bug and go on to learn about another.
 @end itemize
 
 @ifclear CONLY
-@ifclear MOD2
-You can use @value{GDBN} to debug programs written in C or C++.
-@end ifclear
+You can use @value{GDBN} to debug programs written in C or C++.  For
+more information, @xref{C}.
+
 @ifset MOD2
-You can use @value{GDBN} to debug programs written in C, C++, and
-Modula-2.
+@c I use "MOD2" as a "miscellaneous languages" flag here.  According to
+@c a comment in all-cfg.texi, there should be separate flags for chill
+@c and Pascal, but that seems kind of silly since we only mention them
+@c in passing--IMHO the manual should be configurable as little as we
+@c can get away with -kingdon.
+Support for Modula-2 and Chill is partial.  For information on Modula-2,
+@xref{Modula-2}; there is no further documentation on Chill yet.
+
+Pascal programs which use sets, subranges, file variables, or nested
+functions will not currently work.  @value{GDBN} does not support
+entering expressions, printing values, etc. using Pascal syntax.
 @end ifset
 @ifset FORTRAN
 @cindex Fortran
@@ -5235,7 +5244,12 @@ together.
 The C++ debugging facilities are jointly implemented by the GNU C++
 compiler and @value{GDBN}.  Therefore, to debug your C++ code effectively,
 you must compile your C++ programs with the GNU C++ compiler,
-@code{g++}.
+@code{g++}.  Also, you must be using the stabs debugging format; see the
+documentation for the GNU C++ compiler for more information on how to
+select that format.
+
+In particular, cfront based compilers such as Sun's C++ are not fully
+supported.
 @end ifclear
 @ifset CONLY
 @node C

@@ -1,3 +1,12 @@
+Thu Nov 11 13:26:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.texinfo (C): In addition to saying people have to use g++ for
+	good results, say they have to use stabs.  Specifically say cfront
+	doesn't work well.
+	(Summary): Merge in information on Modula-2, Pascal, and Chill from
+	the gdb README.  Add xrefs to places where the support for the various
+	languages is described in detail.
+
 Mon Nov  8 11:47:34 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo: Clean up stuff about visibility and virtual
