@@ -49,6 +49,8 @@ start-sanitize-gm
 	* configure, configure.in:  Add mip*-*-magic* target.
 	* magic.c magic.h:  Special routines to handle GM stuff (like
 	stepping through dispatcher).
+	* config/mips/tm-magic.h config/mips/magic.mt:  New files for
+	magic target support.
 end-sanitize-gm
 
 Thu Oct 26 22:02:27 1995  Stan Shebs  <shebs@andros.cygnus.com>
