@@ -38,6 +38,7 @@ extern bfd_target icoff_big_vec;
 extern bfd_target ieee_vec;
 extern bfd_target oasys_vec;
 extern bfd_target m88k_bcs_vec;
+extern bfd_target m68kcoff_vec;
 
 #ifdef GNU960
 #define ICOFF_LITTLE_VEC	icoff_little_vec
@@ -59,6 +60,7 @@ extern bfd_target m88k_bcs_vec;
 #define IEEE_VEC		ieee_vec
 #define M88K_BCS_VEC		m88k_bcs_vec
 #define SREC_VEC		srec_vec
+#define M68KCOFF_VEC		m68kcoff_vec
 #endif
 bfd_target *target_vector[] = {
 
@@ -73,7 +75,9 @@ bfd_target *target_vector[] = {
 #ifdef ECOFF_BIG_VEC
 	&ECOFF_BIG_VEC,
 #endif
-
+#ifdef M68KCOFF_VEC
+	&M68KCOFF_VEC,
+#endif
 #ifdef IEEE_VEC
 	&IEEE_VEC,
 #endif /* IEEE_VEC */
