@@ -20,7 +20,7 @@
 @settitle GNU Binary Utilities
 @titlepage
 @title{The GNU Binary Utilities}
-@subtitle{Version 1.9}
+@subtitle{Version 1.90}
 @sp 1
 @subtitle October 1991
 @author{Roland H. Pesch}
@@ -54,7 +54,7 @@ into another language, under the above conditions for modified versions.
 @chapter Introduction
 
 This brief manual contains preliminary documentation for the GNU binary
-utilities (collectively version 1.9): @samp{ar}, @samp{objdump},
+utilities (collectively version 1.90): @samp{ar}, @samp{objdump},
 @samp{nm}, @samp{size}, @samp{strip}, and @samp{ranlib}. @refill
 
 @ifinfo
