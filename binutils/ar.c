@@ -1,5 +1,5 @@
 /* ar.c - Archive modify and extract.
-   Copyright 1991, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
@@ -538,7 +538,7 @@ main (argc, argv)
 	  break;
 	default:
 	  /* xgettext:c-format */
-	  fprintf (stderr, _("%s: illegal option -- %c\n"), program_name, c);
+	  non_fatal (_("illegal option -- %c"), c);
 	  usage (0);
 	}
     }
@@ -583,7 +583,7 @@ main (argc, argv)
       if (counted_name_mode) 
 	{
           if (operation != extract && operation != delete) 
-	     fatal (_("`N' is only meaningful with the `x' and 'd' options."));
+	     fatal (_("`N' is only meaningful with the `x' and `d' options."));
 	  counted_name_counter = atoi (argv[arg_index++]);
           if (counted_name_counter <= 0)
 	    fatal (_("Value for `N' must be positive."));
@@ -669,9 +669,7 @@ main (argc, argv)
 	  /* Shouldn't happen! */
 	default:
 	  /* xgettext:c-format */
-	  fprintf (stderr, _("%s: internal error -- this option not implemented\n"),
-		   program_name);
-	  xexit (1);
+	  fatal (_("internal error -- this option not implemented"));
 	}
     }
 
@@ -971,8 +969,7 @@ do_quick_append (archive_filename, files_to_append)
       fwrite (ARMAG, 1, SARMAG, ofile);
       if (!silent_create)
 	/* xgettext:c-format */
-	fprintf (stderr, _("%s: creating %s\n"),
-		 program_name, archive_filename);
+	non_fatal (_("creating %s"), archive_filename);
     }
 
   if (ar_truncate)
@@ -1230,9 +1227,8 @@ move_members (arch, files_to_move)
 	  current_ptr_ptr = &((*current_ptr_ptr)->next);
 	}
       /* xgettext:c-format */
-      fprintf (stderr, _("%s: no entry %s in archive %s!\n"),
-	       program_name, *files_to_move, arch->filename);
-      xexit (1);
+      fatal (_("no entry %s in archive %s!"), *files_to_move, arch->filename);
+
     next_file:;
     }
 

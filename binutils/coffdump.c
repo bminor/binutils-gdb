@@ -1,5 +1,5 @@
 /* Coff file dumper.
-   Copyright (C) 1994, 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1994, 95, 98, 99, 2000 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -513,9 +513,7 @@ main (ac, av)
 
   if (!input_file)
     {
-      fprintf (stderr,_("%s: no input file specified\n"),
-	       program_name);
-      exit(1);
+      fatal (_("no input file specified"));
     }
   abfd = bfd_openr (input_file, 0);
 

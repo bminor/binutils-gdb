@@ -1,5 +1,5 @@
 /* nm.c -- Describe symbol table of a rel file.
-   Copyright 1991, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -336,8 +336,7 @@ set_print_radix (radix)
       other_format[3] = desc_format[3] = *radix;
       break;
     default:
-      fprintf (stderr, _("%s: %s: invalid radix\n"), program_name, radix);
-      exit (1);
+      fatal (_("%s: invalid radix"), radix);
     }
 }
 
@@ -362,8 +361,7 @@ set_output_format (f)
       i = FORMAT_SYSV;
       break;
     default:
-      fprintf (stderr, _("%s: %s: invalid output format\n"), program_name, f);
-      exit (1);
+      fatal (_("%s: invalid output format"), f);
     }
   format = &formats[i];
 }
@@ -489,8 +487,7 @@ main (argc, argv)
     {
       char *lim = (char *) sbrk (0);
 
-      fprintf (stderr, _("%s: data size %ld\n"), program_name,
-	       (long) (lim - (char *) &environ));
+      non_fatal (_("data size %ld"), (long) (lim - (char *) &environ));
     }
 #endif
 
@@ -901,7 +898,7 @@ display_rel_file (abfd, archive_bfd)
     {
       if (!(bfd_get_file_flags (abfd) & HAS_SYMS))
 	{
-	  fprintf (stderr, _("%s: no symbols\n"), bfd_get_filename (abfd));
+	  non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
 	  return;
 	}
     }
@@ -912,7 +909,7 @@ display_rel_file (abfd, archive_bfd)
 
   if (symcount == 0)
     {
-      fprintf (stderr, _("%s: no symbols\n"), bfd_get_filename (abfd));
+      non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
       return;
     }
 

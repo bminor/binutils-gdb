@@ -683,23 +683,7 @@ static void fill_ordinals PARAMS ((export_type **));
 static int alphafunc PARAMS ((const void *, const void *));
 static void mangle_defs PARAMS ((void));
 static void usage PARAMS ((FILE *, int));
-static void display PARAMS ((const char *, va_list));
 static void inform PARAMS ((const char *, ...));
-static void warn PARAMS ((const char *, ...));
-
-static void
-display (message, args)
-     const char * message;
-     va_list      args;
-{
-  if (program_name != NULL)
-    fprintf (stderr, "%s: ", program_name);
-
-  vfprintf (stderr, message, args);
-
-  if (message [strlen (message) - 1] != '\n')
-    fputc ('\n', stderr);
-}  
 
 
 static void
@@ -722,30 +706,8 @@ inform (message, va_alist)
   va_start (args);
 #endif
 
-  display (message, args);
+  report (message, args);
   
-  va_end (args);
-}
-
-static void
-#ifdef __STDC__
-warn (const char * message, ...)
-#else
-warn (message, va_alist)
-     const char * message;
-     va_dcl
-#endif
-{
-  va_list args;
-  
-#ifdef __STDC__
-  va_start (args, message);
-#else
-  va_start (args);
-#endif
-  
-  display (message, args);
-
   va_end (args);
 }
 
@@ -767,7 +729,7 @@ rvaafter (machine)
       break;
     default:
       /* xgettext:c-format */
-      fatal (_("Internal error: Unknown machine type: %d\n"), machine);
+      fatal (_("Internal error: Unknown machine type: %d"), machine);
       break;
     }
   return "";
@@ -791,7 +753,7 @@ rvabefore (machine)
       return ".rva\t";
     default:
       /* xgettext:c-format */
-      fatal (_("Internal error: Unknown machine type: %d\n"), machine);
+      fatal (_("Internal error: Unknown machine type: %d"), machine);
       break;
     }
   return "";
@@ -816,7 +778,7 @@ asm_prefix (machine)
       return "_";
     default:
       /* xgettext:c-format */
-      fatal (_("Internal error: Unknown machine type: %d\n"), machine);
+      fatal (_("Internal error: Unknown machine type: %d"), machine);
       break;
     }
   return "";
@@ -887,7 +849,7 @@ yyerror (err)
      const char * err ATTRIBUTE_UNUSED;
 {
   /* xgettext:c-format */
-  warn (_("Syntax error in def file %s:%d\n"), def_file, linenumber);
+  non_fatal (_("Syntax error in def file %s:%d"), def_file, linenumber);
   
   return 0;
 }
@@ -923,7 +885,7 @@ def_name (name, base)
   inform (_("NAME: %s base: %x"), name, base);
   
   if (d_is_dll)
-    warn (_("Can't have LIBRARY and NAME\n"));
+    non_fatal (_("Can't have LIBRARY and NAME"));
   
   d_name = name;
   /* if --dllname not provided, use the one in the DEF file.
@@ -942,7 +904,7 @@ def_library (name, base)
   inform (_("LIBRARY: %s base: %x"), name, base);
   
   if (d_is_exe)
-    warn (_("%s: Can't have LIBRARY and NAME\n"), program_name);
+    non_fatal (_("Can't have LIBRARY and NAME"));
   
   d_name = name;
   /* if --dllname not provided, use the one in the DEF file. */
@@ -1157,7 +1119,7 @@ run (what, args)
   char *errmsg_fmt, *errmsg_arg;
   char *temp_base = choose_temp_base ();
 
-  inform ("run: %s %s\n", what, args);
+  inform ("run: %s %s", what, args);
 
   /* Count the args */
   i = 0;
@@ -1208,8 +1170,8 @@ run (what, args)
     {
       if (WEXITSTATUS (wait_status) != 0)
 	/* xgettext:c-format */
-	warn (_("%s exited with status %d\n"),
-	      what, WEXITSTATUS (wait_status));
+	non_fatal (_("%s exited with status %d"),
+		   what, WEXITSTATUS (wait_status));
     }
   else
     abort ();
@@ -1240,7 +1202,7 @@ scan_drectve_symbols (abfd)
   bfd_get_section_contents (abfd, s, buf, 0, size);
       
   /* xgettext:c-format */
-  inform (_("Sucking in info from %s section in %s\n"),
+  inform (_("Sucking in info from %s section in %s"),
 	  DRECTVE_SECTION_NAME, bfd_get_filename (abfd));
 
   /* Search for -export: strings. The exported symbols can optionally
@@ -1364,7 +1326,7 @@ add_excludes (new_excludes)
       excludes = new_exclude;
 
       /* xgettext:c-format */
-      inform (_("Excluding symbol: %s\n"), exclude_string);
+      inform (_("Excluding symbol: %s"), exclude_string);
     }
 
   free (local_copy);
@@ -1459,7 +1421,7 @@ scan_all_symbols (abfd)
   if (! (bfd_get_file_flags (abfd) & HAS_SYMS))
     {
       /* xgettext:c-format */
-      warn (_("%s: no symbols\n"), bfd_get_filename (abfd));
+      non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
       return;
     }
 
@@ -1470,7 +1432,7 @@ scan_all_symbols (abfd)
   if (symcount == 0)
     {
       /* xgettext:c-format */
-      warn (_("%s: no symbols\n"), bfd_get_filename (abfd));
+      non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
       return;
     }
 
@@ -1497,7 +1459,7 @@ scan_open_obj_file (abfd)
   /* FIXME: we ought to read in and block out the base relocations */
 
   /* xgettext:c-format */
-  inform (_("Done reading %s\n"), bfd_get_filename (abfd));
+  inform (_("Done reading %s"), bfd_get_filename (abfd));
 }
 
 static void
@@ -1787,7 +1749,7 @@ gen_exp_file ()
   dlist_type *dl;
 
   /* xgettext:c-format */
-  inform (_("Generating export file: %s\n"), exp_name);
+  inform (_("Generating export file: %s"), exp_name);
   
   f = fopen (TMP_ASM, FOPEN_WT);
   if (!f)
@@ -2784,7 +2746,7 @@ gen_lib_file ()
     fatal (_("Can't open .lib file: %s"), imp_name);
 
   /* xgettext:c-format */
-  inform (_("Creating library file: %s\n"), imp_name);
+  inform (_("Creating library file: %s"), imp_name);
   
   bfd_set_format (outarch, bfd_archive);
   outarch->has_armap = 1;
@@ -2843,7 +2805,7 @@ gen_lib_file ()
 	  sprintf (name, "%s%05d.o", TMP_STUB, i);
 	  if (unlink (name) < 0)
 	    /* xgettext:c-format */
-	    warn (_("cannot delete %s: %s\n"), name, strerror (errno));
+	    non_fatal (_("cannot delete %s: %s"), name, strerror (errno));
 	}
     }
   
@@ -2952,7 +2914,7 @@ process_duplicates (d_export_vec)
 	      more = 1;
 	      
 	      /* xgettext:c-format */
-	      inform (_("Warning, ignoring duplicate EXPORT %s %d,%d\n"),
+	      inform (_("Warning, ignoring duplicate EXPORT %s %d,%d"),
 		      a->name, a->ordinal, b->ordinal);
 	      
 	      if (a->ordinal != -1

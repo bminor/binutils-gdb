@@ -1,5 +1,5 @@
 /* objdump.c -- dump information about an object file.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
@@ -443,7 +443,7 @@ slurp_symtab (abfd)
 
   if (!(bfd_get_file_flags (abfd) & HAS_SYMS))
     {
-      fprintf (stderr, _("%s: no symbols\n"), bfd_get_filename (abfd));
+      non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
       symcount = 0;
       return NULL;
     }
@@ -460,7 +460,7 @@ slurp_symtab (abfd)
   if (symcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
   if (symcount == 0)
-    fprintf (stderr, _("%s: no symbols\n"), bfd_get_filename (abfd));
+    non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
   return sy;
 }
 
@@ -478,8 +478,7 @@ slurp_dynamic_symtab (abfd)
     {
       if (!(bfd_get_file_flags (abfd) & DYNAMIC))
 	{
-	  fprintf (stderr, _("%s: %s: not a dynamic object\n"),
-		   program_name, bfd_get_filename (abfd));
+	  non_fatal (_("%s: not a dynamic object"), bfd_get_filename (abfd));
 	  dynsymcount = 0;
 	  return NULL;
 	}
@@ -495,8 +494,7 @@ slurp_dynamic_symtab (abfd)
   if (dynsymcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
   if (dynsymcount == 0)
-    fprintf (stderr, _("%s: %s: No dynamic symbols\n"),
-	     program_name, bfd_get_filename (abfd));
+    non_fatal (_("%s: No dynamic symbols"), bfd_get_filename (abfd));
   return sy;
 }
 
@@ -1199,8 +1197,7 @@ objdump_sprintf (va_alist)
 
   if (buf == NULL)
     {
-      fprintf (stderr, _("Out of virtual memory\n"));
-      exit (1);
+      fatal (_("Out of virtual memory"));
     }
 
   n = strlen (buf);
@@ -1610,10 +1607,7 @@ disassemble_data (abfd)
       const bfd_arch_info_type *info = bfd_scan_arch (machine);
       if (info == NULL)
 	{
-	  fprintf (stderr, _("%s: Can't use supplied machine %s\n"),
-		   program_name,
-		   machine);
-	  exit (1);
+	  fatal (_("Can't use supplied machine %s"), machine);
 	}
       abfd->arch_info = info;
     }
@@ -1631,9 +1625,8 @@ disassemble_data (abfd)
   disassemble_fn = disassembler (abfd);
   if (!disassemble_fn)
     {
-      fprintf (stderr, _("%s: Can't disassemble for architecture %s\n"),
-	       program_name,
-	       bfd_printable_arch_mach (bfd_get_arch (abfd), 0));
+      non_fatal (_("Can't disassemble for architecture %s\n"),
+		 bfd_printable_arch_mach (bfd_get_arch (abfd), 0));
       exit_status = 1;
       return;
     }
@@ -1889,8 +1882,8 @@ read_section_stabs (abfd, stabsect_name, strsect_name)
   stabstrsect = bfd_get_section_by_name (abfd, strsect_name);
   if (0 == stabstrsect)
     {
-      fprintf (stderr, _("%s: %s has no %s section\n"), program_name,
-	       bfd_get_filename (abfd), strsect_name);
+      non_fatal (_("%s has no %s section"),
+		 bfd_get_filename (abfd), strsect_name);
       exit_status = 1;
       return false;
     }
@@ -1903,9 +1896,9 @@ read_section_stabs (abfd, stabsect_name, strsect_name)
   
   if (! bfd_get_section_contents (abfd, stabsect, (PTR) stabs, 0, stab_size))
     {
-      fprintf (stderr, _("%s: Reading %s section of %s failed: %s\n"),
-	       program_name, stabsect_name, bfd_get_filename (abfd),
-	       bfd_errmsg (bfd_get_error ()));
+      non_fatal (_("Reading %s section of %s failed: %s"),
+		 stabsect_name, bfd_get_filename (abfd),
+		 bfd_errmsg (bfd_get_error ()));
       free (stabs);
       free (strtab);
       exit_status = 1;
@@ -1915,9 +1908,9 @@ read_section_stabs (abfd, stabsect_name, strsect_name)
   if (! bfd_get_section_contents (abfd, stabstrsect, (PTR) strtab, 0,
 				  stabstr_size))
     {
-      fprintf (stderr, _("%s: Reading %s section of %s failed: %s\n"),
-	       program_name, strsect_name, bfd_get_filename (abfd),
-	       bfd_errmsg (bfd_get_error ()));
+      non_fatal (_("Reading %s section of %s failed: %s\n"),
+		 strsect_name, bfd_get_filename (abfd),
+		 bfd_errmsg (bfd_get_error ()));
       free (stabs);
       free (strtab);
       exit_status = 1;
@@ -2148,9 +2141,8 @@ dump_bfd (abfd)
 	{
 	  if (! print_debugging_info (stdout, dhandle))
 	    {
-	      fprintf (stderr,
-		       _("%s: printing debugging information failed\n"),
-		       bfd_get_filename (abfd));
+	      non_fatal (_("%s: printing debugging information failed"),
+			 bfd_get_filename (abfd));
 	      exit_status = 1;
 	    }
 	}
@@ -2860,8 +2852,7 @@ main (argc, argv)
 	    endian = BFD_ENDIAN_LITTLE;
 	  else
 	    {
-	      fprintf (stderr, _("%s: unrecognized -E option\n"),
-		       program_name);
+	      non_fatal (_("unrecognized -E option"));
 	      usage (stderr, 1);
 	    }
 	  break;
@@ -2872,8 +2863,7 @@ main (argc, argv)
 	    endian = BFD_ENDIAN_LITTLE;
 	  else
 	    {
-	      fprintf (stderr, _("%s: unrecognized --endian type `%s'\n"),
-		      program_name, optarg);
+	      non_fatal (_("unrecognized --endian type `%s'"), optarg);
 	      usage (stderr, 1);
 	    }
 	  break;

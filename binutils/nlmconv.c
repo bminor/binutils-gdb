@@ -1,5 +1,6 @@
 /* nlmconv.c -- NLM conversion program
-   Copyright (C) 1993, 94, 95, 96, 97, 98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 98, 99, 2000
+   Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -271,10 +272,7 @@ main (argc, argv)
 	    show_usage (stderr, 1);
 	  if (strcmp (input_file, output_file) == 0)
 	    {
-	      fprintf (stderr,
-		       _("%s: input and output files must be different\n"),
-		       program_name);
-	      exit (1);
+	      fatal (_("input and output files must be different"));
 	    }
 	}
     }
@@ -321,10 +319,7 @@ main (argc, argv)
     {
       if (input_file != NULL)
 	{
-	  fprintf (stderr,
-		   _("%s: input file named both on command line and with INPUT\n"),
-		   program_name);
-	  exit (1);
+	  fatal (_("input file named both on command line and with INPUT"));
 	}
       if (input_files->next == NULL)
 	input_file = input_files->string;
@@ -333,7 +328,7 @@ main (argc, argv)
     }
   else if (input_file == NULL)
     {
-      fprintf (stderr, _("%s: no input file\n"), program_name);
+      non_fatal (_("no input file"));
       show_usage (stderr, 1);
     }
 
@@ -363,8 +358,7 @@ main (argc, argv)
      Otherwise use the file named in the OUTPUT statement.  */
   if (output_file == NULL)
     {
-      fprintf (stderr, _("%s: no name for output file\n"),
-	       program_name);
+      non_fatal (_("no name for output file"));
       show_usage (stderr, 1);
     }
 
@@ -377,9 +371,7 @@ main (argc, argv)
   assert (bfd_get_flavour (outbfd) == bfd_target_nlm_flavour);
 
   if (bfd_arch_get_compatible (inbfd, outbfd) == NULL)
-    fprintf (stderr,
-	     _("%s: warning:input and output formats are not compatible\n"),
-	     program_name);
+    non_fatal (_("warning: input and output formats are not compatible"));
 
   /* Move the values read from the command file into outbfd.  */
   *nlm_fixed_header (outbfd) = fixed_hdr_struct;
@@ -634,9 +626,8 @@ main (argc, argv)
 		}
 	    }
 	  if (l == NULL)
-	    fprintf (stderr,
-		     _("%s: warning: symbol %s imported but not in import list\n"),
-		     program_name, bfd_asymbol_name (sym));
+	    non_fatal (_("warning: symbol %s imported but not in import list"),
+		       bfd_asymbol_name (sym));
 	}
 	
       /* See if it's one of the special named symbols.  */
@@ -704,15 +695,11 @@ main (argc, argv)
   bfd_set_symtab (outbfd, outsyms, symcount + newsymcount);
     
   if (! gotstart)
-    fprintf (stderr, _("%s: warning: START procedure %s not defined\n"),
-	     program_name, start_procedure);
+    non_fatal (_("warning: START procedure %s not defined"), start_procedure);
   if (! gotexit)
-    fprintf (stderr, _("%s: warning: EXIT procedure %s not defined\n"),
-	     program_name, exit_procedure);
-  if (check_procedure != NULL
-      && ! gotcheck)
-    fprintf (stderr, _("%s: warning: CHECK procedure %s not defined\n"),
-	     program_name, check_procedure);
+    non_fatal (_("warning: EXIT procedure %s not defined"), exit_procedure);
+  if (check_procedure != NULL && ! gotcheck)
+    non_fatal (_("warning: CHECK procedure %s not defined"), check_procedure);
 
   /* Add additional sections required for the header information.  */
   if (custom_file != NULL)
@@ -848,9 +835,8 @@ main (argc, argv)
 	      if (sharedhdr.uninitializedDataSize > 0)
 		{
 		  /* There is no place to record this information.  */
-		  fprintf (stderr,
-			   _("%s:%s: warning: shared libraries can not have uninitialized data\n"),
-			   program_name, sharelib_file);
+		  non_fatal (_("%s: warning: shared libraries can not have uninitialized data"),
+			     sharelib_file);
 		}
 	      shared_offset = st.st_size;
 	      if (shared_offset > (size_t) sharedhdr.codeImageOffset)
@@ -878,8 +864,7 @@ main (argc, argv)
 
   /* Check whether a version was given.  */
   if (strncmp (version_hdr->stamp, "VeRsIoN#", 8) != 0)
-    fprintf (stderr, _("%s: warning: No version number given\n"),
-	     program_name);
+    non_fatal (_("warning: No version number given"));
 
   /* At least for now, always create an extended header, because that
      is what NLMLINK does.  */
@@ -919,8 +904,7 @@ main (argc, argv)
 
       data = xmalloc (custom_size);
       if (fread (data, 1, custom_size, custom_data) != custom_size)
-	fprintf (stderr, _("%s:%s: read: %s\n"), program_name, custom_file,
-		 strerror (errno));
+	non_fatal (_("%s: read: %s"), custom_file, strerror (errno));
       else
 	{
 	  if (! bfd_set_section_contents (outbfd, custom_section, data,
@@ -942,17 +926,14 @@ main (argc, argv)
       nlm_fixed_header (outbfd)->debugInfoOffset = (file_ptr) -1;
     }
   if (map_file != NULL)
-    fprintf (stderr,
-	     _("%s: warning: MAP and FULLMAP are not supported; try ld -M\n"),
-	     program_name);
+    non_fatal (_("warning: MAP and FULLMAP are not supported; try ld -M"));
   if (help_file != NULL)
     {
       PTR data;
 
       data = xmalloc (help_size);
       if (fread (data, 1, help_size, help_data) != help_size)
-	fprintf (stderr, _("%s:%s: read: %s\n"), program_name, help_file,
-		 strerror (errno));
+	non_fatal (_("%s: read: %s"), help_file, strerror (errno));
       else
 	{
 	  if (! bfd_set_section_contents (outbfd, help_section, data,
@@ -970,8 +951,7 @@ main (argc, argv)
 
       data = xmalloc (message_size);
       if (fread (data, 1, message_size, message_data) != message_size)
-	fprintf (stderr, _("%s:%s: read: %s\n"), program_name, message_file,
-		 strerror (errno));
+	non_fatal (_("%s: read: %s"), message_file, strerror (errno));
       else
 	{
 	  if (! bfd_set_section_contents (outbfd, message_section, data,
@@ -1020,8 +1000,7 @@ main (argc, argv)
 
       data = xmalloc (rpc_size);
       if (fread (data, 1, rpc_size, rpc_data) != rpc_size)
-	fprintf (stderr, _("%s:%s: read: %s\n"), program_name, rpc_file,
-		 strerror (errno));
+	non_fatal (_("%s: read: %s"), rpc_file, strerror (errno));
       else
 	{
 	  if (! bfd_set_section_contents (outbfd, rpc_section, data,
@@ -1040,8 +1019,7 @@ main (argc, argv)
       data = xmalloc (shared_size);
       if (fseek (shared_data, shared_offset, SEEK_SET) != 0
 	  || fread (data, 1, shared_size, shared_data) != shared_size)
-	fprintf (stderr, _("%s:%s: read: %s\n"), program_name, sharelib_file,
-		 strerror (errno));
+	non_fatal (_("%s: read: %s"), sharelib_file, strerror (errno));
       else
 	{
 	  if (! bfd_set_section_contents (outbfd, shared_section, data,
@@ -1170,11 +1148,8 @@ select_output_format (arch, mach, bigendian)
       return "nlm32-powerpc";
 #endif
     default:
-      fprintf (stderr, _("%s: support not compiled in for %s\n"),
-	       program_name, bfd_printable_arch_mach (arch, mach));
-      exit (1);
-      /* Avoid warning.  */
-      return NULL;
+      fatal (_("support not compiled in for %s"),
+	     bfd_printable_arch_mach (arch, mach));
     }
   /*NOTREACHED*/
 }
@@ -2000,8 +1975,8 @@ powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 	     between two sections both of which were placed in the
 	     same output section.  This should not happen.  */
 	  if (bfd_get_section (sym) != insec->output_section)
-	    fprintf (stderr, _("%s: unresolved PC relative reloc against %s\n"),
-		     program_name, bfd_asymbol_name (sym));
+	    non_fatal (_("unresolved PC relative reloc against %s"),
+		       bfd_asymbol_name (sym));
 	  else
 	    {
 	      bfd_vma val;
@@ -2064,9 +2039,8 @@ powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 			& rel->howto->dst_mask));
 	      if ((bfd_signed_vma) val < - 0x8000
 		  || (bfd_signed_vma) val >= 0x8000)
-		fprintf (stderr,
-			 _("%s: overflow when adjusting relocation against %s\n"),
-			 program_name, bfd_asymbol_name (sym));
+		non_fatal (_("overflow when adjusting relocation against %s"),
+			   bfd_asymbol_name (sym));
 	      bfd_put_16 (outbfd, val, (bfd_byte *) contents + rel->address);
 	      break;
 
@@ -2203,7 +2177,7 @@ link_inputs (inputs, ld)
 
   if (status != 0)
     {
-      fprintf (stderr, _("%s: Execution of %s failed\n"), program_name, ld);
+      non_fatal (_("Execution of %s failed"), ld);
       unlink (unlink_on_exit);
       exit (1);
     }

@@ -1,5 +1,5 @@
 /* rddbg.c -- Read debugging information into a generic form.
-   Copyright (C) 1995, 96, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1995, 96, 97, 98, 2000 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -84,8 +84,8 @@ read_debugging_info (abfd, syms, symcount)
 
   if (! found)
     {
-      fprintf (stderr, _("%s: no recognized debugging information\n"),
-	       bfd_get_filename (abfd));
+      non_fatal (_("%s: no recognized debugging information"),
+		 bfd_get_filename (abfd));
       return NULL;
     }
 
@@ -159,7 +159,7 @@ read_section_stabs_debugging_info (abfd, syms, symcount, dhandle, pfound)
 	  next_stroff = 0;
 	  for (stab = stabs; stab < stabs + stabsize; stab += 12)
 	    {
-	      bfd_size_type strx;
+	      unsigned int strx;
 	      int type;
 	      int other;
 	      int desc;

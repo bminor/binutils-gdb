@@ -1,5 +1,5 @@
 /* Sysroff object format dumper.
-   Copyright (C) 1994, 95, 98, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1994, 95, 98, 99, 2000 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -772,17 +772,13 @@ main (ac, av)
 
   if (!input_file)
     {
-      fprintf (stderr, _("%s: no input file specified\n"),
-	       program_name);
-      exit (1);
+      fatal (_("no input file specified"));
     }
 
   file = fopen (input_file, FOPEN_RB);
   if (!file)
     {
-      fprintf (stderr, _("%s: cannot open input file %s\n"),
-	       program_name, input_file);
-      exit (1);
+      fatal (_("cannot open input file %s"), input_file);
     }
 
   module ();
