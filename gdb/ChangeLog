@@ -1,3 +1,7 @@
+Tue Jan 18 16:16:35 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* infcmd.c (signal_command): Accept 0 as legitimate signal number.
+
 Tue Jan 18 14:09:25 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* infrun.c (signals_info), target.c (target_signal_from_name):

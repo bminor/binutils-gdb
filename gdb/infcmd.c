@@ -295,7 +295,7 @@ continue_command (proc_count_exp, from_tty)
 
   clear_proceed_status ();
 
-  proceed ((CORE_ADDR) -1, -1, 0);
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 }
 
 /* Step until outside of current statement.  */
@@ -400,7 +400,7 @@ which has no line number information.\n", name);
 	step_over_calls = 1;
 
       step_multi = (count > 1);
-      proceed ((CORE_ADDR) -1, -1, 1);
+      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
       if (! stop_step)
 	break;
 
@@ -500,9 +500,10 @@ signal_command (signum_exp, from_tty)
 	 and the common ones like SIGHUP, SIGINT, SIGALRM, etc.  will
 	 work right anyway.  */
       int signum = parse_and_eval_address (signum_exp);
-      if (signum <= 0
+      if (signum < 0
 	  || signum >= (int)TARGET_SIGNAL_LAST
-	  || signum == (int)TARGET_SIGNAL_UNKNOWN)
+	  || signum == (int)TARGET_SIGNAL_UNKNOWN
+	  || signum == (int)TARGET_SIGNAL_DEFAULT)
 	error ("Invalid signal number %d.", signum);
       oursig = signum;
     }
@@ -620,8 +621,8 @@ run_stack_dummy (addr, buffer)
 
    Note that eventually this command should probably be changed so
    that only source lines are printed out when we hit the breakpoint
-   we set.  I'm going to postpone this until after a hopeful rewrite
-   of wait_for_inferior and the proceed status code. -- randy */
+   we set.  This may involve changes to wait_for_inferior and the
+   proceed status code.  */
 
 /* ARGSUSED */
 static void
@@ -667,7 +668,7 @@ until_next_command (from_tty)
   
   step_multi = 0;		/* Only one call to proceed */
   
-  proceed ((CORE_ADDR) -1, -1, 1);
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
 }
 
 static void 
@@ -733,7 +734,7 @@ finish_command (arg, from_tty)
     }
 
   proceed_to_finish = 1;		/* We want stop_registers, please... */
-  proceed ((CORE_ADDR) -1, -1, 0);
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 
   /* Did we stop at our breakpoint? */
   if (bpstat_find_breakpoint(stop_bpstat, breakpoint) != NULL
