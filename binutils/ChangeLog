@@ -1,3 +1,12 @@
+Thu Mar 27 16:03:02 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* version.c (print_version): Update copyright date.
+
+Mon Mar 24 10:52:45 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* objdump.c (disassemble_data): Don't exit if a file cannot be
+	disassembled, instead just return.
+
 Thu Mar 20 21:16:51 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* size.c (usage): Make definition match its prototype.
