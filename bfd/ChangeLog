@@ -1,3 +1,9 @@
+2005-02-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (move_plt_plist): New function, extracted from..
+	(ppc64_elf_copy_indirect_symbol): ..here.
+	(func_desc_adjust): Use move_plt_plist.
+
 2005-02-10  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Handle R_ARM_THM_PC9.

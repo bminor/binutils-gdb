@@ -3766,6 +3766,41 @@ ppc64_elf_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   return TRUE;
 }
 
+/* Merge PLT info on FROM with that on TO.  */
+
+static void
+move_plt_plist (struct ppc_link_hash_entry *from,
+		struct ppc_link_hash_entry *to)
+{
+  if (from->elf.plt.plist != NULL)
+    {
+      if (to->elf.plt.plist != NULL)
+	{
+	  struct plt_entry **entp;
+	  struct plt_entry *ent;
+
+	  for (entp = &from->elf.plt.plist; (ent = *entp) != NULL; )
+	    {
+	      struct plt_entry *dent;
+
+	      for (dent = to->elf.plt.plist; dent != NULL; dent = dent->next)
+		if (dent->addend == ent->addend)
+		  {
+		    dent->plt.refcount += ent->plt.refcount;
+		    *entp = ent->next;
+		    break;
+		  }
+	      if (dent == NULL)
+		entp = &ent->next;
+	    }
+	  *entp = to->elf.plt.plist;
+	}
+
+      to->elf.plt.plist = from->elf.plt.plist;
+      from->elf.plt.plist = NULL;
+    }
+}
+
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
@@ -3868,33 +3903,7 @@ ppc64_elf_copy_indirect_symbol
     }
 
   /* And plt entries.  */
-  if (eind->elf.plt.plist != NULL)
-    {
-      if (edir->elf.plt.plist != NULL)
-	{
-	  struct plt_entry **entp;
-	  struct plt_entry *ent;
-
-	  for (entp = &eind->elf.plt.plist; (ent = *entp) != NULL; )
-	    {
-	      struct plt_entry *dent;
-
-	      for (dent = edir->elf.plt.plist; dent != NULL; dent = dent->next)
-		if (dent->addend == ent->addend)
-		  {
-		    dent->plt.refcount += ent->plt.refcount;
-		    *entp = ent->next;
-		    break;
-		  }
-	      if (dent == NULL)
-		entp = &ent->next;
-	    }
-	  *entp = edir->elf.plt.plist;
-	}
-
-      edir->elf.plt.plist = eind->elf.plt.plist;
-      eind->elf.plt.plist = NULL;
-    }
+  move_plt_plist (eind, edir);
 
   if (edir->elf.dynindx == -1)
     {
@@ -5462,11 +5471,7 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
       fdh->elf.non_got_ref |= fh->elf.non_got_ref;
       if (ELF_ST_VISIBILITY (fh->elf.other) == STV_DEFAULT)
 	{
-	  struct plt_entry **ep = &fdh->elf.plt.plist;
-	  while (*ep != NULL)
-	    ep = &(*ep)->next;
-	  *ep = fh->elf.plt.plist;
-	  fh->elf.plt.plist = NULL;
+	  move_plt_plist (fh, fdh);
 	  fdh->elf.needs_plt = 1;
 	}
       fdh->is_func_descriptor = 1;
