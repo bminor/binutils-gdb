@@ -1,3 +1,13 @@
+1999-09-12  Donn Terry  <donn@interix.com>
+
+	* emultempl/pe.em (PE_DEF_SECTION_ALIGNMENT): If
+	OVERRIDE_SECTION_ALIGNMENT is defined, change to that.
+	(gld_${EMULATION_NAME}_before_parse): Use EXECUTABLE_NAME if it is
+	defined, rather than a.exe.
+	(init): Define __subsystem__ as ${SUBSYSTEM}.
+	(set_pe_subsystem): Add ${INITIAL_SYMBOL_CHAR} before entry symbol
+	name.
+
 1999-09-12  Ian Lance Taylor  <ian@zembu.com>
 
 	* ldlang.c (open_output): Change local variable desired_endian

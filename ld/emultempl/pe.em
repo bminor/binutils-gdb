@@ -48,6 +48,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define TARGET_IS_${EMULATION_NAME}
 
+/* Permit the emulation parameters to override the default section
+   alignment by setting OVERRIDE_SECTION_ALIGNMENT.  FIXME: This makes
+   it seem that include/coff/internal.h should not define
+   PE_DEF_SECTION_ALIGNMENT.  */
+#if PE_DEF_SECTION_ALIGNMENT != ${OVERRIDE_SECTION_ALIGNMENT:-PE_DEF_SECTION_ALIGNMENT}
+#undef PE_DEF_SECTION_ALIGNMENT
+#define PE_DEF_SECTION_ALIGNMENT ${OVERRIDE_SECTION_ALIGNMENT}
+#endif
+
 #if defined(TARGET_IS_i386pe)
 #define DLL_SUPPORT
 #endif
@@ -95,7 +104,7 @@ extern const char *output_filename;
 static void
 gld_${EMULATION_NAME}_before_parse()
 {
-  output_filename = "a.exe";
+  output_filename = "${EXECUTABLE_NAME:-a.exe}";
   ldfile_output_architecture = bfd_arch_${ARCH};
 #ifdef DLL_SUPPORT
   config.has_shared = 1;
@@ -195,7 +204,7 @@ static definfo init[] =
   D(MinorImageVersion,"__minor_image_version__", 0),
   D(MajorSubsystemVersion,"__major_subsystem_version__", 4),
   D(MinorSubsystemVersion,"__minor_subsystem_version__", 0),
-  D(Subsystem,"__subsystem__", PE_DEF_SUBSYSTEM),
+  D(Subsystem,"__subsystem__", ${SUBSYSTEM}),
   D(SizeOfStackReserve,"__size_of_stack_reserve__", 0x2000000),
   D(SizeOfStackCommit,"__size_of_stack_commit__", 0x1000),
   D(SizeOfHeapReserve,"__size_of_heap_reserve__", 0x100000),
@@ -270,14 +279,14 @@ set_pe_subsystem ()
     }
   v[] =
     {
-      { "native", 1, "_NtProcessStartup" },
-      { "windows", 2, "_WinMainCRTStartup" },
-      { "console", 3, "_mainCRTStartup" },
+      { "native", 1, "NtProcessStartup" },
+      { "windows", 2, "WinMainCRTStartup" },
+      { "console", 3, "mainCRTStartup" },
 #if 0
       /* The Microsoft linker does not recognize this.  */
       { "os2", 5, "" },
 #endif
-      { "posix", 7, "___PosixProcessStartup"},
+      { "posix", 7, "__PosixProcessStartup"},
       { 0, 0, 0 }
     };
 
@@ -303,9 +312,29 @@ set_pe_subsystem ()
       if (strncmp (optarg, v[i].name, len) == 0
 	  && v[i].name[len] == '\0')
 	{
+	  const char *initial_symbol_char;
+	  const char *entry;
+
 	  set_pe_name ("__subsystem__", v[i].value);
 
-	  lang_add_entry (v[i].entry, 1);
+	  initial_symbol_char = ${INITIAL_SYMBOL_CHAR};
+	  if (*initial_symbol_char == '\0')
+	    entry = v[i].entry;
+	  else
+	    {
+	      char *alc_entry;
+
+	      /* lang_add_entry expects its argument to be permanently
+		 allocated, so we don't free this string.  */
+	      alc_entry = xmalloc (strlen (initial_symbol_char)
+				   + strlen (v[i].entry)
+				   + 1);
+	      strcpy (alc_entry, initial_symbol_char);
+	      strcat (alc_entry, v[i].entry);
+	      entry = alc_entry;
+	    }
+
+	  lang_add_entry (entry, 1);
 
 	  return;
 	}
