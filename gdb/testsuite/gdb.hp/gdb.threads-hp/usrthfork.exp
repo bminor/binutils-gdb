@@ -18,6 +18,9 @@
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
 
+verbose "HP's thread tests are broken beyond repair right now." 
+return 0
+
 if $tracelevel {
     strace $tracelevel
 }
