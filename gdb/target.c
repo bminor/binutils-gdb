@@ -1,6 +1,7 @@
 /* Select target systems and architectures at runtime for GDB.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001 Free Software Foundation, Inc.
+   2000, 2001, 2002
+   Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    This file is part of GDB.
@@ -607,6 +608,8 @@ update_current_target (void)
       INHERIT (to_is_async_p, t);
       INHERIT (to_async, t);
       INHERIT (to_async_mask_value, t);
+      INHERIT (to_find_memory_regions, t);
+      INHERIT (to_make_corefile_notes, t);
       INHERIT (to_magic, t);
 
 #undef INHERIT
@@ -1461,6 +1464,22 @@ normal_target_post_startup_inferior (ptid_t ptid)
   /* This space intentionally left blank. */
 }
 
+/* Error-catcher for target_find_memory_regions */
+/* ARGSUSED */
+static int dummy_find_memory_regions (int (*ignore1) (), void *ignore2)
+{
+  error ("No target.");
+  return 0;
+}
+
+/* Error-catcher for target_make_corefile_notes */
+/* ARGSUSED */
+static char * dummy_make_corefile_notes (bfd *ignore1, int *ignore2)
+{
+  error ("No target.");
+  return NULL;
+}
+
 /* Set up the handful of non-empty slots needed by the dummy target
    vector.  */
 
@@ -1477,6 +1496,8 @@ init_dummy_target (void)
   dummy_target.to_clone_and_follow_inferior = find_default_clone_and_follow_inferior;
   dummy_target.to_pid_to_str = normal_pid_to_str;
   dummy_target.to_stratum = dummy_stratum;
+  dummy_target.to_find_memory_regions = dummy_find_memory_regions;
+  dummy_target.to_make_corefile_notes = dummy_make_corefile_notes;
   dummy_target.to_magic = OPS_MAGIC;
 }
 

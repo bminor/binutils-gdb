@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* ATTR_FORMAT confuses indent, avoid running it for now */
 /* Basic, host-specific, and target-specific definitions for GDB.
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001
+   1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -774,6 +774,13 @@ extern char *symtab_to_filename (struct symtab *);
 extern void exec_set_section_offsets (bfd_signed_vma text_off,
 				      bfd_signed_vma data_off,
 				      bfd_signed_vma bss_off);
+
+/* Take over the 'find_mapped_memory' vector from exec.c. */
+extern void exec_set_find_memory_regions (int (*) (int (*) (CORE_ADDR, 
+							    unsigned long, 
+							    int, int, int, 
+							    void *),
+						   void *));
 
 /* From findvar.c */
 

@@ -1,6 +1,6 @@
 /* Work with executable files, for GDB. 
    Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001
+   1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -685,10 +685,24 @@ ignore (CORE_ADDR addr, char *contents)
   return 0;
 }
 
+/* Find mapped memory. */
+
+extern void
+exec_set_find_memory_regions (int (*func) (int (*) (CORE_ADDR, 
+						    unsigned long, 
+						    int, int, int, 
+						    void *),
+					   void *))
+{
+  exec_ops.to_find_memory_regions = func;
+}
+
+static char *exec_make_note_section (bfd *, int *);
+
 /* Fill in the exec file target vector.  Very few entries need to be
    defined.  */
 
-void
+static void
 init_exec_ops (void)
 {
   exec_ops.to_shortname = "exec";
@@ -708,6 +722,7 @@ Specify the filename of the executable file.";
   exec_ops.to_clone_and_follow_inferior = find_default_clone_and_follow_inferior;
   exec_ops.to_stratum = file_stratum;
   exec_ops.to_has_memory = 1;
+  exec_ops.to_make_corefile_notes = exec_make_note_section;
   exec_ops.to_magic = OPS_MAGIC;
 }
 
@@ -751,4 +766,35 @@ file itself are wrong.  Each section must be changed separately.  The\n\
      &showlist);
 
   add_target (&exec_ops);
+}
+
+static char *
+exec_make_note_section (bfd *obfd, int *note_size)
+{
+  struct cleanup *old_chain;
+  char fname[16] = {'\0'};
+  char psargs[80] = {'\0'};
+  char *note_data = NULL;
+
+  if (get_exec_file (0))
+    {
+      strncpy (fname, strrchr (get_exec_file (0), '/') + 1, sizeof (fname));
+      strncpy (psargs, get_exec_file (0), 
+	       sizeof (psargs));
+      if (get_inferior_args ())
+	{
+	  strncat (psargs, " ", 
+		   sizeof (psargs) - strlen (psargs));
+	  strncat (psargs, get_inferior_args (), 
+		   sizeof (psargs) - strlen (psargs));
+	}
+
+      note_data = (char *) elfcore_write_prpsinfo (obfd, 
+						   note_data, 
+						   note_size, 
+						   fname, 
+						   psargs);
+      make_cleanup (xfree, note_data);
+    }
+  return note_data;
 }

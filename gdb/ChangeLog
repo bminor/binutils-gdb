@@ -1,3 +1,47 @@
+2002-01-03  Michael Snyder  <msnyder@redhat.com>
+
+	Implement a "generate-core-file" command in gdb, save target state.
+	* gcore.c: New file.  Implement new command 'generate-core-file'.
+	Save a corefile image of the current state of the inferior.
+	* linux-proc.c: Add linux-specific code for saving corefiles.
+	* target.h (struct target_ops): Add new target vectors for saving
+	corefiles; to_find_memory_regions and to_make_corefile_notes.
+	(target_find_memory_regions): New macro.
+	(target_make_corefile_notes): New macro.
+	* target.c (update_current_target): Inherit new target methods.
+	(dummy_find_memory_regions): New place-holder method.
+	(dummy_make_corefile_notes): New place-holder method.
+	(init_dummy_target): Initialize new dummy target vectors.
+	* exec.c (exec_set_find_memory_regions): New function.
+	Allow the exec_ops vector for memory regions to be taken over.
+	(exec_make_note_section): New function, target vector method.
+	* defs.h (exec_set_find_memory_regions): Export prototype.
+	* procfs.c (proc_find_memory_regions): New function, corefile method.
+	(procfs_make_note_section): New function, corefile method.
+	(init_procfs_ops): Set new target vector pointers.
+	(find_memory_regions_callback): New function.
+	(procfs_do_thread_registers): New function.
+	(procfs_corefile_thread_callback): New function.
+	* sol-thread.c (sol_find_memory_regions): New function.
+	(sol_make_note_section): New function.
+	(init_sol_thread_ops): Initialize new target vectors.
+	* inftarg.c (inftarg_set_find_memory_regions): New function.
+	Allow to_find_memory_regions vector to be taken over.
+	(inftarg_set_make_corefile_notes): New function.
+	Allow to_make_corefile_notes vector to be taken over.
+	* thread-db.c (thread_db_new_objfile): Don't activate thread-db
+	interface layer if not target_has_execution (may be a corefile).
+	* config/i386/linux.mh: Add gcore.o to NATDEPFILES.
+	* config/sparc/sun4sol2.mh: Ditto.
+	* config/alpha/alpha-linux.mh: Ditto.
+	* config/arm/linux.mh: Ditto.
+	* config/i386/x86-64linux.mh: Ditto.
+	* config/ia64/linux.mh: Ditto.
+	* config/m68k/linux.mh: Ditto.
+	* config/mips/linux.mh: Ditto.
+	* config/powerpc/linux.mh: Ditto.
+	* config/sparc/linux.mh: Ditto.
+
 2002-01-07  Michael Snyder  <msnyder@redhat.com>
 
 	* arm-linux-nat.c: Remove references to regcache.c internal data

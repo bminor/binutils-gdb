@@ -1,5 +1,6 @@
 /* Target-vector operations for controlling Unix child processes, for GDB.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 
+   2000, 2002
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
@@ -810,6 +811,24 @@ init_child_ops (void)
   child_ops.to_has_registers = 1;
   child_ops.to_has_execution = 1;
   child_ops.to_magic = OPS_MAGIC;
+}
+
+/* Take over the 'find_mapped_memory' vector from inftarg.c. */
+extern void 
+inftarg_set_find_memory_regions (int (*func) (int (*) (CORE_ADDR, 
+						       unsigned long, 
+						       int, int, int, 
+						       void *),
+					      void *))
+{
+  child_ops.to_find_memory_regions = func;
+}
+
+/* Take over the 'make_corefile_notes' vector from inftarg.c. */
+extern void 
+inftarg_set_make_corefile_notes (char * (*func) (bfd *, int *))
+{
+  child_ops.to_make_corefile_notes = func;
 }
 
 void

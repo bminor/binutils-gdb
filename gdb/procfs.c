@@ -1,5 +1,5 @@
 /* Machine independent support for SVR4 /proc (process file system) for GDB.
-   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Michael Snyder at Cygnus Solutions.
    Based on work by Fred Fish, Stu Grossman, Geoff Noer, and others.
 
@@ -127,52 +127,62 @@ static int procfs_thread_alive (ptid_t);
 void procfs_find_new_threads (void);
 char *procfs_pid_to_str (ptid_t);
 
+static int proc_find_memory_regions (int (*) (CORE_ADDR, 
+					      unsigned long, 
+					      int, int, int, 
+					      void *), 
+				     void *);
+
+static char * procfs_make_note_section (bfd *, int *);
+
 struct target_ops procfs_ops;		/* the target vector */
 
 static void
 init_procfs_ops (void)
 {
-  procfs_ops.to_shortname          = "procfs";
-  procfs_ops.to_longname           = "Unix /proc child process";
-  procfs_ops.to_doc                = 
+  procfs_ops.to_shortname           = "procfs";
+  procfs_ops.to_longname            = "Unix /proc child process";
+  procfs_ops.to_doc                 = 
     "Unix /proc child process (started by the \"run\" command).";
-  procfs_ops.to_open               = procfs_open;
-  procfs_ops.to_can_run            = procfs_can_run;
-  procfs_ops.to_create_inferior    = procfs_create_inferior;
-  procfs_ops.to_kill               = procfs_kill_inferior;
-  procfs_ops.to_mourn_inferior     = procfs_mourn_inferior;
-  procfs_ops.to_attach             = procfs_attach;
-  procfs_ops.to_detach             = procfs_detach;
-  procfs_ops.to_wait               = procfs_wait;
-  procfs_ops.to_resume             = procfs_resume;
-  procfs_ops.to_prepare_to_store   = procfs_prepare_to_store;
-  procfs_ops.to_fetch_registers    = procfs_fetch_registers;
-  procfs_ops.to_store_registers    = procfs_store_registers;
-  procfs_ops.to_xfer_memory        = procfs_xfer_memory;
-  procfs_ops.to_insert_breakpoint  =  memory_insert_breakpoint;
-  procfs_ops.to_remove_breakpoint  =  memory_remove_breakpoint;
-  procfs_ops.to_notice_signals     = procfs_notice_signals;
-  procfs_ops.to_files_info         = procfs_files_info;
-  procfs_ops.to_stop               = procfs_stop;
+  procfs_ops.to_open                = procfs_open;
+  procfs_ops.to_can_run             = procfs_can_run;
+  procfs_ops.to_create_inferior     = procfs_create_inferior;
+  procfs_ops.to_kill                = procfs_kill_inferior;
+  procfs_ops.to_mourn_inferior      = procfs_mourn_inferior;
+  procfs_ops.to_attach              = procfs_attach;
+  procfs_ops.to_detach              = procfs_detach;
+  procfs_ops.to_wait                = procfs_wait;
+  procfs_ops.to_resume              = procfs_resume;
+  procfs_ops.to_prepare_to_store    = procfs_prepare_to_store;
+  procfs_ops.to_fetch_registers     = procfs_fetch_registers;
+  procfs_ops.to_store_registers     = procfs_store_registers;
+  procfs_ops.to_xfer_memory         = procfs_xfer_memory;
+  procfs_ops.to_insert_breakpoint   =  memory_insert_breakpoint;
+  procfs_ops.to_remove_breakpoint   =  memory_remove_breakpoint;
+  procfs_ops.to_notice_signals      = procfs_notice_signals;
+  procfs_ops.to_files_info          = procfs_files_info;
+  procfs_ops.to_stop                = procfs_stop;
 
-  procfs_ops.to_terminal_init      = terminal_init_inferior;
-  procfs_ops.to_terminal_inferior  = terminal_inferior;
+  procfs_ops.to_terminal_init       = terminal_init_inferior;
+  procfs_ops.to_terminal_inferior   = terminal_inferior;
   procfs_ops.to_terminal_ours_for_output = terminal_ours_for_output;
-  procfs_ops.to_terminal_ours      = terminal_ours;
-  procfs_ops.to_terminal_info      = child_terminal_info;
+  procfs_ops.to_terminal_ours       = terminal_ours;
+  procfs_ops.to_terminal_info       = child_terminal_info;
 
-  procfs_ops.to_find_new_threads   = procfs_find_new_threads;
-  procfs_ops.to_thread_alive       = procfs_thread_alive;
-  procfs_ops.to_pid_to_str         = procfs_pid_to_str;
+  procfs_ops.to_find_new_threads    = procfs_find_new_threads;
+  procfs_ops.to_thread_alive        = procfs_thread_alive;
+  procfs_ops.to_pid_to_str          = procfs_pid_to_str;
 
-  procfs_ops.to_has_all_memory     = 1;
-  procfs_ops.to_has_memory         = 1;
-  procfs_ops.to_has_execution      = 1;
-  procfs_ops.to_has_stack          = 1;
-  procfs_ops.to_has_registers      = 1;
-  procfs_ops.to_stratum            = process_stratum;
-  procfs_ops.to_has_thread_control = tc_schedlock;
-  procfs_ops.to_magic              = OPS_MAGIC;
+  procfs_ops.to_has_all_memory      = 1;
+  procfs_ops.to_has_memory          = 1;
+  procfs_ops.to_has_execution       = 1;
+  procfs_ops.to_has_stack           = 1;
+  procfs_ops.to_has_registers       = 1;
+  procfs_ops.to_stratum             = process_stratum;
+  procfs_ops.to_has_thread_control  = tc_schedlock;
+  procfs_ops.to_find_memory_regions = proc_find_memory_regions;
+  procfs_ops.to_make_corefile_notes = procfs_make_note_section;
+  procfs_ops.to_magic               = OPS_MAGIC;
 }
 
 /* =================== END, TARGET_OPS "MODULE" =================== */
@@ -5355,6 +5365,65 @@ proc_iterate_over_mappings (int (*func) (int, CORE_ADDR))
 }
 
 /*
+ * Function: find_memory_regions_callback
+ *
+ * Implements the to_find_memory_regions method.
+ * Calls an external function for each memory region.
+ * External function will have the signiture:
+ *
+ *   int callback (CORE_ADDR vaddr, 
+ *                 unsigned long size, 
+ *                 int read, int write, int execute, 
+ *                 void *data);
+ *
+ * Returns the integer value returned by the callback.
+ */
+
+static int
+find_memory_regions_callback (struct prmap *map, 
+			      int (*func) (CORE_ADDR, 
+					   unsigned long, 
+					   int, int, int, 
+					   void *),
+			      void *data)
+{
+  return (*func) (host_pointer_to_address ((void *) map->pr_vaddr),
+		  map->pr_size, 
+		  (map->pr_mflags & MA_READ) != 0,
+		  (map->pr_mflags & MA_WRITE) != 0,
+		  (map->pr_mflags & MA_EXEC) != 0, 
+		  data);
+}
+
+/*
+ * Function: proc_find_memory_regions
+ *
+ * External interface.  Calls a callback function once for each
+ * mapped memory region in the child process, passing as arguments
+ *	CORE_ADDR virtual_address,
+ *	unsigned long size, 
+ *	int read, 	TRUE if region is readable by the child
+ *	int write, 	TRUE if region is writable by the child
+ *	int execute	TRUE if region is executable by the child.
+ * 
+ * Stops iterating and returns the first non-zero value
+ * returned by the callback.
+ */
+
+static int
+proc_find_memory_regions (int (*func) (CORE_ADDR, 
+				       unsigned long, 
+				       int, int, int, 
+				       void *), 
+			  void *data)
+{
+  procinfo *pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0);
+
+  return iterate_over_mappings (pi, func, data, 
+				find_memory_regions_callback);
+}
+
+/*
  * Function: mappingflags
  *
  * Returns an ascii representation of a memory mapping's flags.
@@ -5650,3 +5719,109 @@ procfs_first_available (void)
 {
   return pid_to_ptid (procinfo_list ? procinfo_list->pid : -1);
 }
+
+/* ===================  GCORE .NOTE "MODULE" =================== */
+
+static char *
+procfs_do_thread_registers (bfd *obfd, ptid_t ptid, 
+			    char *note_data, int *note_size)
+{
+  gdb_gregset_t gregs;
+  gdb_fpregset_t fpregs;
+  unsigned long merged_pid;
+
+  merged_pid = TIDGET (ptid) << 16 | PIDGET (ptid);
+
+  fill_gregset (&gregs, -1);
+  note_data = (char *) elfcore_write_prstatus (obfd,
+                                               note_data,
+                                               note_size,
+					       merged_pid, 
+					       stop_signal,
+                                               &gregs);
+  fill_fpregset (&fpregs, -1);
+  note_data = (char *) elfcore_write_prfpreg (obfd,
+					      note_data,
+					      note_size,
+					      &fpregs,
+					      sizeof (fpregs));
+  return note_data;
+}
+
+struct procfs_corefile_thread_data {
+  bfd *obfd;
+  char *note_data;
+  int *note_size;
+};
+
+static int
+procfs_corefile_thread_callback (struct thread_info *ti, void *data)
+{
+  struct procfs_corefile_thread_data *args = data;
+  procinfo *pi = find_procinfo (PIDGET (ti->ptid), TIDGET (ti->ptid));
+
+  if (pi != NULL && TIDGET (ti->ptid) != 0)
+    {
+      ptid_t saved_ptid = inferior_ptid;
+      inferior_ptid = ti->ptid;
+      args->note_data = procfs_do_thread_registers (args->obfd, ti->ptid, 
+						    args->note_data, 
+						    args->note_size);
+      inferior_ptid = saved_ptid;
+    }
+  return 0;
+}
+
+static char *
+procfs_make_note_section (bfd *obfd, int *note_size)
+{
+  struct cleanup *old_chain;
+  gdb_gregset_t gregs;
+  gdb_fpregset_t fpregs;
+  char fname[16] = {'\0'};
+  char psargs[80] = {'\0'};
+  procinfo *pi = find_procinfo_or_die (PIDGET (inferior_ptid), 0);
+  char *note_data = NULL;
+  struct procfs_corefile_thread_data thread_args;
+
+  if (get_exec_file (0))
+    {
+      strncpy (fname, strrchr (get_exec_file (0), '/') + 1, sizeof (fname));
+      strncpy (psargs, get_exec_file (0), 
+	       sizeof (psargs));
+      if (get_inferior_args ())
+	{
+	  strncat (psargs, " ", 
+		   sizeof (psargs) - strlen (psargs));
+	  strncat (psargs, get_inferior_args (), 
+		   sizeof (psargs) - strlen (psargs));
+	}
+    }
+
+  note_data = (char *) elfcore_write_prpsinfo (obfd, 
+					       note_data, 
+					       note_size, 
+					       fname, 
+					       psargs);
+
+  thread_args.obfd = obfd;
+  thread_args.note_data = note_data;
+  thread_args.note_size = note_size;
+  iterate_over_threads (procfs_corefile_thread_callback, &thread_args);
+  if (thread_args.note_data == note_data)
+    {
+      /* iterate_over_threads didn't come up with any threads;
+	 just use inferior_ptid. */
+      note_data = procfs_do_thread_registers (obfd, inferior_ptid, 
+					      note_data, note_size);
+    }
+  else
+    {
+      note_data = thread_args.note_data;
+    }
+
+  make_cleanup (xfree, note_data);
+  return note_data;
+}
+
+/* ===================  END GCORE .NOTE "MODULE" =================== */

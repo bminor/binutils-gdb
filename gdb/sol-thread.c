@@ -1,5 +1,5 @@
 /* Low level interface for debugging Solaris threads for GDB, the GNU debugger.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1511,6 +1511,22 @@ info_solthreads (char *args, int from_tty)
 }
 
 static int
+sol_find_memory_regions (int (*func) (CORE_ADDR, 
+				      unsigned long, 
+				      int, int, int, 
+				      void *), 
+			 void *data)
+{
+  return procfs_ops.to_find_memory_regions (func, data);
+}
+
+static char *
+sol_make_note_section (bfd *obfd, int *note_size)
+{
+  return procfs_ops.to_make_corefile_notes (obfd, note_size);
+}
+
+static int
 ignore (CORE_ADDR addr, char *contents)
 {
   return 0;
@@ -1561,6 +1577,8 @@ init_sol_thread_ops (void)
   sol_thread_ops.to_has_thread_control = tc_none;
   sol_thread_ops.to_sections = 0;
   sol_thread_ops.to_sections_end = 0;
+  sol_thread_ops.to_find_memory_regions = sol_find_memory_regions;
+  sol_thread_ops.to_make_corefile_notes = sol_make_note_section;
   sol_thread_ops.to_magic = OPS_MAGIC;
 }
 

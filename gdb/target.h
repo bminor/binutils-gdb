@@ -1,6 +1,6 @@
 /* Interface between GDB and target environments, including files and processes
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001 Free Software Foundation, Inc.
+   2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by John Gilmore.
 
    This file is part of GDB.
@@ -313,6 +313,12 @@ struct target_ops
     void (*to_async) (void (*cb) (enum inferior_event_type, void *context),
 		      void *context);
     int to_async_mask_value;
+    int (*to_find_memory_regions) (int (*) (CORE_ADDR, 
+					    unsigned long, 
+					    int, int, int, 
+					    void *), 
+				   void *);
+    char * (*to_make_corefile_notes) (bfd *, int *);
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -998,6 +1004,23 @@ extern void (*target_new_objfile_hook) (struct objfile *);
 
 #define target_pid_to_exec_file(pid) \
      (current_target.to_pid_to_exec_file) (pid)
+
+/*
+ * Iterator function for target memory regions.
+ * Calls a callback function once for each memory region 'mapped'
+ * in the child process.  Defined as a simple macro rather than
+ * as a function macro so that it can be tested for nullity.  
+ */
+
+#define target_find_memory_regions(FUNC, DATA) \
+     (current_target.to_find_memory_regions) (FUNC, DATA)
+
+/*
+ * Compose corefile .note section.
+ */
+
+#define target_make_corefile_notes(BFD, SIZE_P) \
+     (current_target.to_make_corefile_notes) (BFD, SIZE_P)
 
 /* Hook to call target-dependent code after reading in a new symbol table.  */
 
