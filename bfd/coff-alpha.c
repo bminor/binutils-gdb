@@ -112,13 +112,18 @@ static boolean alpha_relocate_section PARAMS ((bfd *, struct bfd_link_info *,
 /* How to process the various reloc types.  */
 
 static bfd_reloc_status_type
-reloc_nil (abfd, reloc, sym, data, sec, output_bfd)
+reloc_nil PARAMS ((bfd *, arelent *, asymbol *, PTR,
+		   asection *, bfd *, char **));
+
+static bfd_reloc_status_type
+reloc_nil (abfd, reloc, sym, data, sec, output_bfd, error_message)
      bfd *abfd;
      arelent *reloc;
      asymbol *sym;
      PTR data;
      asection *sec;
      bfd *output_bfd;
+     char **error_message;
 {
   return bfd_reloc_ok;
 }

@@ -1,3 +1,12 @@
+Sat Feb 19 03:17:32 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* coff-alpha.c (reloc_nil):  Add forward declaration, add missing
+	error_message argument.
+	* coff-sparc.c (bfd_coff_generic_reloc):  Add forward declaration,
+	add missing error_message argument.
+	* mipsbsd.c (mips_fix_hi16_s):  Add forward declaration, add missing
+	error_message argument.
+
 Fri Feb 18 11:41:58 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	start-sanitize-powerpc-netware
