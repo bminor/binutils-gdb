@@ -1,3 +1,8 @@
+2004-06-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c (BH, XLBH_MASK): Define.
+	(powerpc_opcodes): Allow BH field on bclr, bclrl, bcctr, bcctrl.
+
 2004-06-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* i386-dis.c (x_mode): Comment.
