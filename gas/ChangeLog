@@ -1,3 +1,45 @@
+2002-03-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-i386.h (REX_OPCODE): Define.
+	(REX_MODE64, REX_EXTX, REX_EXTY, REX_EXTZ): Define.
+	(rex_byte): typedef to int.
+	* config/tc-i386.c: Group prototypes and vars together.
+	Formatting fixes.  Remove occurrences of "register" keyword.
+	(true): Delete.
+	(false): Delete.
+	(mode_from_disp_size): Add INLINE keyword to prototype.
+	(fits_in_signed_byte): Likewise.
+	(fits_in_unsigned_byte): Likewise.
+	(fits_in_unsigned_word): Likewise.
+	(fits_in_signed_word): Likewise.
+	(fits_in_unsigned_long): Likewise.
+	(fits_in_signed_long): Likewise.
+	(type_names): Constify.
+	(intel_float_operand): Constify param.
+	(add_prefix): Use REX_OPCODE.
+	(md_assemble): Likewise.  Modify for changed rex_byte.
+	(parse_insn): Split out of md_assemble.
+	(parse_operands): Likewise.
+	(swap_operands): Likewise.
+	(optimize_imm): Likewise.
+	(optimize_disp): Likewise.
+	(match_template): Likewise.
+	(check_string): Likewise.
+	(process_suffix): Likewise.
+	(check_byte_reg): Likewise.
+	(check_long_reg): Likewise.
+	(check_qword_reg): Likewise.
+	(check_word_reg): Likewise.
+	(finalize_imm): Likewise.
+	(process_operands): Likewise.
+	(build_modrm_byte): Likewise.
+	(output_insn): Likewise.
+	(output_branch): Likewise.
+	(output_jump): Likewise.
+	(output_interseg_jump): Likewise.
+	(output_disp): Likewise.
+	(output_imm): Likewise.
+
 2002-03-07  Daniel Jacobowitz  <drow@mvista.com>
 
 	* doc/as.texinfo: Wrap @menu in @ifnottex, not @ifinfo.
