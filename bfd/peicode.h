@@ -592,13 +592,12 @@ pe_ILF_make_a_symbol (pe_ILF_vars *  vars,
   /* Copy the symbol's name into the string table.  */
   sprintf (vars->string_ptr, "%s%s", prefix, symbol_name);
 
+  if (section == NULL)
+    section = (asection_ptr) & bfd_und_section;
+  
   /* Initialise the external symbol.  */
   bfd_h_put_32 (vars->abfd, vars->string_ptr - vars->string_table, (bfd_byte *) esym->e.e.e_offset);
-  if (section)
-    bfd_h_put_16 (vars->abfd, section->target_index, (bfd_byte *) esym->e_scnum);
-  else
-    bfd_h_put_16 (vars->abfd, 0, (bfd_byte *) esym->e_scnum);
-    
+  bfd_h_put_16 (vars->abfd, section->target_index, (bfd_byte *) esym->e_scnum);
   esym->e_sclass[0] = sclass;
 
   /* The following initialisations are unnecessary - the memory is
@@ -612,8 +611,7 @@ pe_ILF_make_a_symbol (pe_ILF_vars *  vars,
   
   /* Initialise the internal symbol structure.  */
   ent->u.syment.n_sclass          = sclass;
-  if (section)
-    ent->u.syment.n_scnum         = section->target_index;
+  ent->u.syment.n_scnum           = section->target_index;
   ent->u.syment._n._n_n._n_offset = (long) sym;
   
 #if 0 /* See comment above.  */
