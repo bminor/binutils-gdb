@@ -310,12 +310,6 @@ bfd_generic_get_relocated_section_contents  PARAMS ((bfd *abfd,
     boolean relocateable,
     asymbol **symbols));
 
-boolean 
-bfd_generic_seclet_link
- PARAMS ((bfd *abfd,
-    PTR data,
-    boolean relocateable));
-
 extern bfd_arch_info_type bfd_default_arch_struct;
 boolean 
 bfd_default_set_arch_mach PARAMS ((bfd *abfd,
