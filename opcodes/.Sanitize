@@ -25,6 +25,7 @@ Things-to-keep:
 ChangeLog
 Makefile.in
 configure.in
+mips-dis.c
 sparc-opc.c
 z8k-dis.c
 z8k-opc.h
