@@ -35,6 +35,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 static CONST char undoc[] = "unknown signal";
 
+/* We'd like to make this const char*[], but whoever's using it might
+   want to assign from it to a char*.  */
 char *sys_siglist[NSIG];
 #endif /* SYS_SIGLIST_MISSING */
 
@@ -57,7 +59,7 @@ init_sig (number, abbrev, name)
      CONST char *name;
 {
 #if SYS_SIGLIST_MISSING
-  sys_siglist[number] = name;
+  sys_siglist[number] = (char *) name;
 #endif
   sig_table[sig_table_nelts].number = number;
   sig_table[sig_table_nelts++].abbrev = abbrev;
@@ -70,7 +72,7 @@ static void init_sigs ()
 
   /* Initialize signal names.  */
 	for (i = 0; i < NSIG; i++)
-		sys_siglist[i] = undoc;
+		sys_siglist[i] = (char *) undoc;
 #endif /* SYS_SIGLIST_MISSING */
 
   /* Initialize signal names.  */
