@@ -2492,8 +2492,10 @@ ecoff_write_object_contents (abfd)
   bfd_size_type reloc_size;
   bfd_size_type text_size;
   bfd_vma text_start;
+  boolean set_text_start;
   bfd_size_type data_size;
   bfd_vma data_start;
+  boolean set_data_start;
   bfd_size_type bss_size;
   PTR buff = NULL;
   PTR reloc_buff = NULL;
@@ -2521,8 +2523,10 @@ ecoff_write_object_contents (abfd)
   else
     text_size = 0;
   text_start = 0;
+  set_text_start = false;
   data_size = 0;
   data_start = 0;
+  set_data_start = false;
   bss_size = 0;
 
   /* Write section headers to the file.  */
@@ -2615,8 +2619,11 @@ ecoff_write_object_contents (abfd)
 	  || strcmp (current->name, _PDATA) == 0)
 	{
 	  text_size += bfd_get_section_size_before_reloc (current);
-	  if (text_start == 0 || text_start > vma)
-	    text_start = vma;
+	  if (! set_text_start || text_start > vma)
+	    {
+	      text_start = vma;
+	      set_text_start = true;
+	    }
 	}
       else if ((section.s_flags & STYP_RDATA) != 0
 	       || (section.s_flags & STYP_DATA) != 0
@@ -2627,8 +2634,11 @@ ecoff_write_object_contents (abfd)
 	       || strcmp (current->name, _XDATA) == 0)
 	{
 	  data_size += bfd_get_section_size_before_reloc (current);
-	  if (data_start == 0 || data_start > vma)
-	    data_start = vma;
+	  if (! set_data_start || data_start > vma)
+	    {
+	      data_start = vma;
+	      set_data_start = true;
+	    }
 	}
       else if ((section.s_flags & STYP_BSS) != 0
 	       || (section.s_flags & STYP_SBSS) != 0)

@@ -1,5 +1,9 @@
 Thu Mar 31 11:52:15 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* ecoff.c (ecoff_write_object_contents): Set the text_start and
+	data_start entries in the optional header correctly even if a text
+	or data section starts at location zero.
+
 	* reloc.c (bfd_reloc_code_real_type): Added BFD_RELOC_26 (from sef
 	and raeburn).
 	* bfd-in2.h: Rebuilt.
