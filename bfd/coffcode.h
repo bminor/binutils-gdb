@@ -458,9 +458,9 @@ INTERNAL_DEFINITION
 
 CODE_FRAGMENT
 
-.typedef struct {
 Special entry points for gdb to swap in coff symbol table parts
-
+.typedef struct 
+.{
 .  void (*_bfd_coff_swap_aux_in) PARAMS ((
 .       bfd            *abfd ,
 .       PTR             ext,
@@ -1188,6 +1188,9 @@ machine = 0;
   switch (internal_f->f_magic) {
 #ifdef I386MAGIC
   case I386MAGIC:
+#ifdef I386SVMAGIC
+  case I386SVMAGIC:		/* System V C Compiler aix ps2 */
+#endif
     arch = bfd_arch_i386;
     machine = 0;
     break;

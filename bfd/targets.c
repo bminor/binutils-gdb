@@ -90,15 +90,6 @@ DESCRIPTION
 	Every BFD points to a target structure with its <<xvec>>
 	member. 
 
-	Shortcut for declaring fields which are prototyped function
-	pointers, while avoiding anguish on compilers that don't
-	support protos.
-
-.#define SDEF(ret, name, arglist) \
-.                PROTO(ret,(*name),arglist)
-.#define SDEF_FMT(ret, name, arglist) \
-.                PROTO(ret,(*name[bfd_type_end]),arglist)
-
 	These macros are used to dispatch to functions through the
 	bfd_target vector. They are used in a number of macros further
 	down in @file{bfd.h}, and are also used when calling various
@@ -177,7 +168,7 @@ The pad character for filenames within an archive header.
 
 The maximum number of characters in an archive header.
 
-. unsigned short ar_max_namelen;
+.  unsigned short ar_max_namelen;
 
 The minimum alignment restriction for any section.
 
@@ -187,36 +178,36 @@ Entries for byte swapping for data. These are different to the other
 entry points, since they don't take BFD as first arg.  Certain other handlers
 could do the same.
 
-.  SDEF (bfd_vma,      bfd_getx64, (bfd_byte *));
-.  SDEF (void,         bfd_putx64, (bfd_vma, bfd_byte *));
-.  SDEF (bfd_vma, bfd_getx32, (bfd_byte *));
-.  SDEF (void,         bfd_putx32, (bfd_vma, bfd_byte *));
-.  SDEF (bfd_vma, bfd_getx16, (bfd_byte *));
-.  SDEF (void,         bfd_putx16, (bfd_vma, bfd_byte *));
+.  bfd_vma      (*bfd_getx64) PARAMS ((bfd_byte *));
+.  void         (*bfd_putx64) PARAMS ((bfd_vma, bfd_byte *));
+.  bfd_vma      (*bfd_getx32) PARAMS ((bfd_byte *));
+.  void         (*bfd_putx32) PARAMS ((bfd_vma, bfd_byte *));
+.  bfd_vma      (*bfd_getx16) PARAMS ((bfd_byte *));
+.  void         (*bfd_putx16) PARAMS ((bfd_vma, bfd_byte *));
 
 Byte swapping for the headers
 
-.  SDEF (bfd_vma,   bfd_h_getx64, (bfd_byte *));
-.  SDEF (void,          bfd_h_putx64, (bfd_vma, bfd_byte *));
-.  SDEF (bfd_vma,  bfd_h_getx32, (bfd_byte *));
-.  SDEF (void,          bfd_h_putx32, (bfd_vma, bfd_byte *));
-.  SDEF (bfd_vma,  bfd_h_getx16, (bfd_byte *));
-.  SDEF (void,          bfd_h_putx16, (bfd_vma, bfd_byte *));
+.  bfd_vma      (*bfd_h_getx64) PARAMS ((bfd_byte *));
+.  void         (*bfd_h_putx64) PARAMS ((bfd_vma, bfd_byte *));
+.  bfd_vma      (*bfd_h_getx32) PARAMS ((bfd_byte *));
+.  void         (*bfd_h_putx32) PARAMS ((bfd_vma, bfd_byte *));
+.  bfd_vma      (*bfd_h_getx16) PARAMS ((bfd_byte *));
+.  void         (*bfd_h_putx16) PARAMS ((bfd_vma, bfd_byte *));
 
-Format dependent routines, these turn into vectors of entry points
-within the target vector structure; one for each format to check.
+Format dependent routines: these are vectors of entry points
+within the target vector structure, one for each format to check.
 
 Check the format of a file being read.  Return bfd_target * or zero. 
 
-.  SDEF_FMT (struct bfd_target *, _bfd_check_format, (bfd *));
+.  struct bfd_target * (*_bfd_check_format[bfd_type_end]) PARAMS ((bfd *));
 
 Set the format of a file being written.  
 
-.  SDEF_FMT (boolean,            _bfd_set_format, (bfd *));
+.  boolean             (*_bfd_set_format[bfd_type_end]) PARAMS ((bfd *));
 
 Write cached information into a file being written, at bfd_close. 
 
-.  SDEF_FMT (boolean,            _bfd_write_contents, (bfd *));
+.  boolean             (*_bfd_write_contents[bfd_type_end]) PARAMS ((bfd *));
 
 The following functions are defined in <<JUMP_TABLE>>. The idea is
 that the back end writer of <<foo>> names all the routines
@@ -225,16 +216,16 @@ in this structure in the right order.
 
 Core file entry points
 
-.  SDEF (char *, _core_file_failing_command, (bfd *));
-.  SDEF (int,    _core_file_failing_signal, (bfd *));
-.  SDEF (boolean, _core_file_matches_executable_p, (bfd *, bfd *));
+.  char *   (*_core_file_failing_command) PARAMS ((bfd *));
+.  int      (*_core_file_failing_signal) PARAMS ((bfd *));
+.  boolean  (*_core_file_matches_executable_p) PARAMS ((bfd *, bfd *));
 
 Archive entry points
 
-. SDEF (boolean, _bfd_slurp_armap, (bfd *));
-. SDEF (boolean, _bfd_slurp_extended_name_table, (bfd *));
-. SDEF (void,   _bfd_truncate_arname, (bfd *, CONST char *, char *));
-. SDEF (boolean, write_armap, (bfd *arch, 
+.  boolean  (*_bfd_slurp_armap) PARAMS ((bfd *));
+.  boolean  (*_bfd_slurp_extended_name_table) PARAMS ((bfd *));
+.  void     (*_bfd_truncate_arname) PARAMS ((bfd *, CONST char *, char *));
+.  boolean  (*write_armap) PARAMS ((bfd *arch, 
 .                              unsigned int elength,
 .                              struct orl *map,
 .                              unsigned int orl_count, 
@@ -242,111 +233,63 @@ Archive entry points
 
 Standard stuff.
 
-.  SDEF (boolean, _close_and_cleanup, (bfd *));
-.  SDEF (boolean, _bfd_set_section_contents, (bfd *, sec_ptr, PTR,
+.  boolean       (*_close_and_cleanup) PARAMS ((bfd *));
+.  boolean       (*_bfd_set_section_contents) PARAMS ((bfd *, sec_ptr, PTR,
 .                                            file_ptr, bfd_size_type));
-.  SDEF (boolean, _bfd_get_section_contents, (bfd *, sec_ptr, PTR, 
+.  boolean       (*_bfd_get_section_contents) PARAMS ((bfd *, sec_ptr, PTR, 
 .                                            file_ptr, bfd_size_type));
-.  SDEF (boolean, _new_section_hook, (bfd *, sec_ptr));
+.  boolean       (*_new_section_hook) PARAMS ((bfd *, sec_ptr));
 
 Symbols and relocations
 
-.  SDEF (unsigned int, _get_symtab_upper_bound, (bfd *));
-.  SDEF (unsigned int, _bfd_canonicalize_symtab,
-.           (bfd *, struct symbol_cache_entry **));
-.  SDEF (unsigned int, _get_reloc_upper_bound, (bfd *, sec_ptr));
-.  SDEF (unsigned int, _bfd_canonicalize_reloc, (bfd *, sec_ptr, arelent **,
-.                                               struct symbol_cache_entry**));
-.  SDEF (struct symbol_cache_entry  *, _bfd_make_empty_symbol, (bfd *));
-.  SDEF (void,     _bfd_print_symbol, (bfd *, PTR, struct symbol_cache_entry  *,
+.  unsigned int  (*_get_symtab_upper_bound) PARAMS ((bfd *));
+.  unsigned int  (*_bfd_canonicalize_symtab) PARAMS ((bfd *,
+.                                              struct symbol_cache_entry **));
+.  unsigned int  (*_get_reloc_upper_bound) PARAMS ((bfd *, sec_ptr));
+.  unsigned int  (*_bfd_canonicalize_reloc) PARAMS ((bfd *, sec_ptr, arelent **,
+.                                              struct symbol_cache_entry **));
+.  struct symbol_cache_entry  *
+.                (*_bfd_make_empty_symbol) PARAMS ((bfd *));
+.  void          (*_bfd_print_symbol) PARAMS ((bfd *, PTR,
+.                                      struct symbol_cache_entry *,
 .                                      bfd_print_symbol_type));
 .#define bfd_print_symbol(b,p,s,e) BFD_SEND(b, _bfd_print_symbol, (b,p,s,e))
-.  SDEF (alent *,   _get_lineno, (bfd *, struct symbol_cache_entry  *));
-.
-.  SDEF (boolean,   _bfd_set_arch_mach, (bfd *, enum bfd_architecture,
-.                                       unsigned long));
-.
-.  SDEF (bfd *,  openr_next_archived_file, (bfd *arch, bfd *prev));
-.  SDEF (boolean, _bfd_find_nearest_line,
-.        (bfd *abfd, struct sec  *section,
-.         struct symbol_cache_entry  **symbols,bfd_vma offset,
-.        CONST char **file, CONST char **func, unsigned int *line));
-.  SDEF (int,    _bfd_stat_arch_elt, (bfd *, struct stat *));
-.
-.  SDEF (int,    _bfd_sizeof_headers, (bfd *, boolean));
-.
-.  SDEF (void, _bfd_debug_info_start, (bfd *));
-.  SDEF (void, _bfd_debug_info_end, (bfd *));
-.  SDEF (void, _bfd_debug_info_accumulate, (bfd *, struct sec  *));
-.  SDEF (bfd_byte *, _bfd_get_relocated_section_contents, (bfd*,struct bfd_seclet *, bfd_byte *data));
-.  SDEF (boolean,_bfd_relax_section,(bfd *, struct sec *, struct symbol_cache_entry **));
-Special entry points for gdb to swap in coff symbol table parts
 
-.  SDEF(void, _bfd_coff_swap_aux_in,(
-.       bfd            *abfd ,
-.       PTR             ext,
-.       int             type,
-.       int             class ,
-.       PTR             in));
+.  alent *    (*_get_lineno) PARAMS ((bfd *, struct symbol_cache_entry *));
 .
-.  SDEF(void, _bfd_coff_swap_sym_in,(
-.       bfd            *abfd ,
-.       PTR             ext,
-.       PTR             in));
+.  boolean    (*_bfd_set_arch_mach) PARAMS ((bfd *, enum bfd_architecture,
+.                    unsigned long));
 .
-.  SDEF(void, _bfd_coff_swap_lineno_in,  (
-.       bfd            *abfd,
-.       PTR            ext,
-.       PTR             in));
+.  bfd *      (*openr_next_archived_file) PARAMS ((bfd *arch, bfd *prev));
+. 
+.  boolean    (*_bfd_find_nearest_line) PARAMS ((bfd *abfd,
+.                    struct sec *section, struct symbol_cache_entry **symbols,
+.                    bfd_vma offset, CONST char **file, CONST char **func,
+.                    unsigned int *line));
+. 
+.  int        (*_bfd_stat_arch_elt) PARAMS ((bfd *, struct stat *));
 .
+.  int        (*_bfd_sizeof_headers) PARAMS ((bfd *, boolean));
+.
+.  void       (*_bfd_debug_info_start) PARAMS ((bfd *));
+.  void       (*_bfd_debug_info_end) PARAMS ((bfd *));
+.  void       (*_bfd_debug_info_accumulate) PARAMS ((bfd *, struct sec *));
+.
+.  bfd_byte * (*_bfd_get_relocated_section_contents) PARAMS ((bfd *,
+.                    struct bfd_seclet *, bfd_byte *data));
+.
+.  boolean    (*_bfd_relax_section) PARAMS ((bfd *, struct sec *,
+.                    struct symbol_cache_entry **));
 
-Special entry points for gas to swap coff parts
-
-. SDEF(unsigned int, _bfd_coff_swap_aux_out,(
-.       bfd   	*abfd,
-.       PTR	in,
-.       int    	type,
-.       int    	class,
-.       PTR    	ext));
-.
-. SDEF(unsigned int, _bfd_coff_swap_sym_out,(
-.      bfd      *abfd,
-.      PTR	in,
-.      PTR	ext));
-.
-. SDEF(unsigned int, _bfd_coff_swap_lineno_out,(
-.      	bfd   	*abfd,
-.      	PTR	in,
-.	PTR	ext));
-.
-. SDEF(unsigned int, _bfd_coff_swap_reloc_out,(
-.      	bfd     *abfd,
-.     	PTR	src,
-.	PTR	dst));
-.
-. SDEF(unsigned int, _bfd_coff_swap_filehdr_out,(
-.      	bfd  	*abfd,
-.	PTR 	in,
-.	PTR 	out));
-.
-. SDEF(unsigned int, _bfd_coff_swap_aouthdr_out,(
-.      	bfd 	*abfd,
-.	PTR 	in,
-.	PTR	out));
-.
-. SDEF(unsigned int, _bfd_coff_swap_scnhdr_out,(
-.      	bfd  	*abfd,
-.      	PTR	in,
-.	PTR	out));
-.
 . {* See documentation on reloc types.  *}
-. SDEF (CONST struct reloc_howto_struct *,
-.       reloc_type_lookup,
-.       (bfd *abfd, bfd_reloc_code_real_type code));
+. CONST struct reloc_howto_struct *
+.       (*reloc_type_lookup) PARAMS ((bfd *abfd,
+.                                     bfd_reloc_code_real_type code));
 .
-. {* Complete and utter crock, currently used for the assembler
+. {* Back-door to allow format-aware applications to create debug symbols
+.    while using BFD for everything else.  Currently used by the assembler
 .    when creating COFF files.  *}
-. SDEF (asymbol *, _bfd_make_debug_symbol, (
+. asymbol *  (*_bfd_make_debug_symbol) PARAMS ((
 .       bfd *abfd,
 .       void *ptr,
 .       unsigned long size));
@@ -372,7 +315,15 @@ above COFF-specific fields.
 #ifdef TRAD_CORE
 #define SELECT_VECS &DEFAULT_VECTOR,&trad_core_vec
 #else
+#ifdef SCO_CORE
+#define SELECT_VECS &DEFAULT_VECTOR,&sco_core_vec
+#else
+#ifdef AIX386_CORE
+#define SELECT_VECS &DEFAULT_VECTOR,&aix386_core_vec
+#else
 #define SELECT_VECS &DEFAULT_VECTOR
+#endif
+#endif
 #endif
 #endif
 
@@ -400,6 +351,8 @@ extern bfd_target i386aout_vec;
 extern bfd_target i386linux_vec;
 extern bfd_target a29kcoff_big_vec;
 extern bfd_target trad_core_vec;
+extern bfd_target sco_core_vec;
+extern bfd_target aix386_core_vec;
 extern bfd_target rs6000coff_vec;
 extern bfd_target h8300coff_vec;
 extern bfd_target z8kcoff_vec;
@@ -466,6 +419,12 @@ bfd_target *target_vector[] = {
 
 #ifdef	TRAD_CORE
 	&trad_core_vec,
+#endif
+#ifdef	SCO_CORE
+	&sco_core_vec,
+#endif
+#ifdef AIX386_CORE
+  &aix386_core_vec,
 #endif
 	NULL, /* end of list marker */
 };

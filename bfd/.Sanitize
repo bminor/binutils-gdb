@@ -30,6 +30,7 @@ Makefile.dos
 Makefile.in
 TODO
 VERSION
+aix386-core.c
 aout32.c
 aout64.c
 aoutf1.h

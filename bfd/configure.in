@@ -47,8 +47,10 @@ case "${target}" in
   hppa*-*-hpux)		bfd_target=hppahpux ;;
   i[34]86-*-sysv4*)	bfd_target=i386-elf ;;
   i[34]86-*-sysv*)	bfd_target=i386-coff ;;
-  i[34]86-*-sco*)	bfd_target=i386-coff ;;
+  i[34]86-*-isc*)	bfd_target=i386-coff ;;
+  i[34]86-*-sco*)	bfd_target=i386-sco ;;
   i[34]86-*-bsd*)	bfd_target=i386-bsd ;;
+  i[34]86-*-aix*)	bfd_target=i386-coff ;;
   i[34]86-none-*)	bfd_target=i386-coff ;;
   i960-*-vxworks)	bfd_target=i960-bout ;;
   i960-*-aout)		bfd_target=i960-bout ;;
@@ -69,8 +71,7 @@ case "${target}" in
   rs6000-*-*)		bfd_target=rs6000 ;;
   sparc-*-solaris2*)	bfd_target=sparc-elf ;;
   sparc-*-sysv4*)	bfd_target=sparc-elf ;;
-  sparc-*-*)		bfd_target=sparc-aout ;;
-  sparclite-*-*)	bfd_target=sparc-aout ;;
+  sparc*-*-*)		bfd_target=sparc-aout ;;
   tahoe-*-*)		bfd_target=tahoe ;;
   vax-*-*)		bfd_target=vax ;;
   we32k-*-*)		bfd_target=we32k ;;
@@ -83,7 +84,6 @@ case "${target}" in
   *-*-go32)		bfd_target=${target_cpu}-aout ;;
   *-*-linux*)		bfd_target=${target_cpu}-linux ;;
   *-*-sysv*)		bfd_target=${target_cpu}-coff ;;
-  *-*-scosysv*)		bfd_target=${target_cpu}-coff ;;
 
   *-adobe-*)		bfd_target=adobe ;;
   *-sony-*)		bfd_target=news ;;

@@ -1,8 +1,20 @@
+Mon Dec 21 12:40:10 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Patches from Minh Tran-le <mtranle@paris.intellicorp.com>.
+	* configure.in (i386-*-isc*, i386-*-aix*): New targets.
+	* configure.host (i386-*-isc*, i386-*-aix*): New hosts.
+	* hosts/i386isc.h, config/i386isc.mh: New files for Interactive
+	Unix.
+	* hosts/i386aix.h, config/i386aix.mh: New files for AIX on PS/2.
+	* aix386-core.c: New file for handling core files on AIX on PS/2.
+	* targets.c: if AIX386_CORE, use aix386_core_vec.
+	* coffcode.h (coff_real_object_p): check for I386SVMAGIC as well
+	as I386MAGIC.
+
 Fri Dec 18 10:20:27 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* aoutf1.h (sunos4_write_object_contents): set flags to 0, fixing
 	1927.
-
 	    
 Thu Dec 17 00:36:24 1992  John Gilmore  (gnu@cygnus.com)
 
