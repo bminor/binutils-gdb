@@ -1,3 +1,8 @@
+Thu Feb  6 14:14:59 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* objdump.c (disassemble_bytes): Added code to allow some control
+ 	over the way raw instructions are displayed.
+
 Thu Feb  6 12:36:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* stabs.c (struct bincl_file): Add next_stack field.

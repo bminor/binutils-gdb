@@ -1107,7 +1107,7 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	{
 	  char buf[1000];
 	  SFILE sfile;
-	  int pb = 0;
+	  int bpc, pb = 0;
 
 	  done_dot = false;
 
@@ -1139,6 +1139,7 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	      info->fprintf_func = (fprintf_ftype) objdump_sprintf;
 	      info->stream = (FILE *) &sfile;
 	      info->bytes_per_line = 0;
+	      info->bytes_per_chunk = 0;
 	      bytes = (*disassemble_fn) (section->vma + i, info);
 	      info->fprintf_func = (fprintf_ftype) fprintf;
 	      info->stream = stdout;
@@ -1170,15 +1171,31 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	      long j;
 
 	      /* If ! prefix_addresses and ! wide_output, we print
-                 four bytes per line.  */
+                 bytes_per_line bytes per line.  */
 	      pb = bytes;
 	      if (pb > bytes_per_line && ! prefix_addresses && ! wide_output)
 		pb = bytes_per_line;
 
-	      for (j = i; j < i + pb; ++j)
+	      if (info->bytes_per_chunk)
+		bpc = info->bytes_per_chunk;
+	      else
+		bpc = 1;
+
+	      for (j = i; j < i + pb; j += bpc)
 		{
-		  printf ("%02x", (unsigned) data[j]);
-		  putchar (' ');
+		  int k;
+		  if (bpc > 1 && info->display_endian == BFD_ENDIAN_LITTLE)
+		    {
+		      for (k=bpc-1; k >= 0; k--)
+			printf ("%02x", (unsigned) data[j+k]);
+		      putchar (' ');
+		    }
+		  else
+		    {
+		      for (k=0; k < bpc; k++)
+			printf ("%02x", (unsigned) data[j+k]);
+		      putchar (' ');
+		    }
 		}
 
 	      for (; pb < bytes_per_line; ++pb)
