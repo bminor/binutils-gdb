@@ -1,7 +1,7 @@
 Thu Mar 24 07:12:09 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
-	* stabsread.c (patch_block_stabs): Don't create LOC_OPTIMIZED_OUT
-	symbols.  Reverts change of 2 Apr 1993.
+	* stabsread.c (patch_block_stabs): Add comment about what happens
+	if the definition is in another compilation unit from the stab.
 
 	* dbxread.c (end_psymtab): Add comment about empty psymtabs.
 

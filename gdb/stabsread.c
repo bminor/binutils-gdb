@@ -399,13 +399,13 @@ patch_block_stabs (symbols, stabs, objfile)
 	  sym = find_symbol_in_list (symbols, name, pp-name);
 	  if (!sym)
 	    {
-#if 0
-	      /* The following code is disabled because AIX's xlc also
-		 puts out a stab but no C_EXT in the case where a
-		 symbol is referenced but not defined (in that
-		 compilation unit).  So we just don't create a symbol,
-		 and the user will get the symbol from the compilation
-		 unit in which the symbol is actually defined.  */
+	      /* FIXME-maybe: it would be nice if we noticed whether
+		 the variable was defined *anywhere*, not just whether
+		 it is defined in this compilation unit.  But neither
+		 xlc or GCC seem to need such a definition, and until
+		 we do psymtabs (so that the minimal symbols from all
+		 compilation units are available now), I'm not sure
+		 how to get the information.  */
 
 	      /* On xcoff, if a global is defined and never referenced,
 		 ld will remove it from the executable.  There is then
@@ -433,7 +433,6 @@ patch_block_stabs (symbols, stabs, objfile)
 		  SYMBOL_TYPE (sym) = read_type (&pp, objfile);
 		}
 	      add_symbol_to_list (sym, &global_symbols);
-#endif /* 0 */
 	    }
 	  else
 	    {
