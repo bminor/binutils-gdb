@@ -219,7 +219,7 @@ psim_options(device *root,
 	break;
       case 'm':
 	param = find_arg("Missing <model> option for -m\n", &argp, argv);
-	device_tree_add_parsed(root, "/openprom/options/model %s", param);
+	device_add_string_property(root, "/openprom/options/model", param);
 	break;
       case 'o':
 	param = find_arg("Missing <device> option for -o\n", &argp, argv);

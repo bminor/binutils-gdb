@@ -1,5 +1,9 @@
 Wed Feb 21 10:39:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* psim.c (psim_options): Call device_add_string_property, not
+	device_tree_add_parsed, since we want to add the model as a
+	string, and 603/604 look like integers.
+
 	* emul_bugapi.c (emul_bugapi_create): Make formats type
 	compatible.
 
