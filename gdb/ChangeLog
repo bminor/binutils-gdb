@@ -1,3 +1,7 @@
+Tue Jun  8 14:52:55 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* remote.c: symfile.h requires bfd.h so include it.
+
 Tue Jun  8 14:42:10 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
 
 	* config/m68k/xm-news.h: add "extern int errno".
