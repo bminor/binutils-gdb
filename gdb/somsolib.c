@@ -777,6 +777,7 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target, int re
       st_size = som_solib_sizeof_symbol_table (name);
       som_solib_st_size_threshold_exceeded =
 	!from_tty &&
+	auto_solib_limit > 0 &&
 	readsyms &&
 	((st_size + som_solib_total_st_size) > (auto_solib_limit * (LONGEST) (1024 * 1024)));
 
@@ -868,15 +869,15 @@ som_solib_create_inferior_hook (void)
     return;
 
   have_endo = 0;
-  /* Slam the pid of the process into __d_pid; failing is only a warning!  */
+  /* Slam the pid of the process into __d_pid.
+
+     We used to warn when this failed, but that warning is only useful
+     on very old HP systems (hpux9 and older).  The warnings are an
+     annoyance to users of modern systems and foul up the testsuite as
+     well.  As a result, the warnings have been disabled.  */
   msymbol = lookup_minimal_symbol ("__d_pid", NULL, symfile_objfile);
   if (msymbol == NULL)
-    {
-      warning ("Unable to find __d_pid symbol in object file.");
-      warning ("Suggest linking with /opt/langtools/lib/end.o.");
-      warning ("GDB will be unable to track shl_load/shl_unload calls");
-      goto keep_going;
-    }
+    goto keep_going;
 
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
   store_unsigned_integer (buf, 4, PIDGET (inferior_ptid));

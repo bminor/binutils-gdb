@@ -1,3 +1,11 @@
+Thu Dec 20 16:42:30 2001  Jeffrey A Law  (law@cygnus.com)
+
+	* somsolib.c (som_solib_add): Ignore the solib limit threshhold
+	if AUTO_SOLIB_LIMIT is not greater than zero.
+
+	* somsolib.c (som_solib_create_inferior_hook): No longer warn
+	about missing __d_pid symbol.
+
 2001-12-20  Elena Zannoni  <ezannoni@redhat.com>
 
 	* ppc-linux-nat.c (ppc_ptrace_cannot_fetch_store_register):
