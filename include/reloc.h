@@ -1,3 +1,22 @@
+/* reloc.h -- Header file for relocation information.
+   Copyright (C) 1989,1990 Free Software Foundation, Inc.
+
+This file is part of GAS, the GNU Assembler.
+
+GAS is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 1, or (at your option)
+any later version.
+
+GAS is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with GAS; see the file COPYING.  If not, write to
+the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
 /* Relocation types for a.out files using reloc_info_extended
    (SPARC and AMD 29000). */
 
@@ -21,6 +40,11 @@ enum reloc_type
 /* 29K relocation types */
     RELOC_JUMPTARG, RELOC_CONST,     RELOC_CONSTH,
 
+#ifndef NO_V9
+/* sparc v9 */
+    RELOC_WDISP14, RELOC_WDISP21,
+#endif /* NO_V9 */
+
     NO_RELOC
 };
 
@@ -36,3 +60,5 @@ enum reloc_type
 "XXX_28", "XXX_29", "XXX_30", "XXX_31"
 
 #endif /* _RELOC_H_READ_ */
+
+/* end of reloc.h */

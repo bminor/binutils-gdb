@@ -73,8 +73,10 @@ __define_stab (N_SOL, 0x84, "SOL")
    value is corresponding address.  */
 __define_stab (N_SLINE, 0x44, "SLINE")
 /* Similar, for data segment.  */
+/* FIXME-NOW: gas's copy had 0x46 here. */
 __define_stab (N_DSLINE, 0x66, "DSLINE")
 /* Similar, for bss segment.  */
+/* FIXME-NOW: gas's copy had 0x48 here. */
 __define_stab (N_BSLINE, 0x68, "BSLINE")
 
 /* Beginning of an include file.  Only Sun uses this.

@@ -289,6 +289,12 @@ struct relocation_info
      be undocumented.  */
   unsigned int r_baserel:1;	/* Linkage table relative */
   unsigned int r_jmptable:1;	/* pc-relative to jump table */
+
+#ifdef TC_NS32K
+#define r_bsr	r_baserel
+#define r_disp	r_jmptable
+#endif /* TC_NS32K */
+
   unsigned int r_relative:1;	/* "relative relocation" */
   /* unused */
   unsigned int r_pad:1;		/* Padding -- set to zero */
