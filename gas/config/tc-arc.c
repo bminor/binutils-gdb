@@ -16,7 +16,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -31,7 +31,6 @@ static arc_insn arc_insert_operand PARAMS ((arc_insn,
 					    const struct arc_operand *, int,
 					    const struct arc_operand_value *,
 					    offsetT, char *, unsigned int));
-static int delay_slot_type PARAMS ((arc_insn));
 static void arc_common PARAMS ((int));
 static void arc_cpu PARAMS ((int));
 /*static void arc_rename PARAMS ((int));*/
@@ -77,7 +76,7 @@ const char FLT_CHARS[] = "rRsSfFdD";
 /* Byte order.  */
 extern int target_big_endian;
 const char *arc_target_format = DEFAULT_TARGET_FORMAT;
-static int byte_order;
+static int byte_order = DEFAULT_BYTE_ORDER;
 
 /* One of bfd_mach_arc_xxx.  */
 static int arc_mach_type = bfd_mach_arc_base;
@@ -278,18 +277,6 @@ arc_insert_operand (insn, operand, mods, reg, val, file, line)
   return insn;
 }
 
-/* Return the delay slot type for INSN (or -1 if it isn't a branch).  */
-/* ??? This is a quick hack.  May wish to later generalize this concept
-   to record all suffixes the insn contains (for various warnings, etc.).  */
-
-static int
-delay_slot_type (arc_insn insn)
-{
-  if ((insn >> 27) >= 4 && (insn >> 27) <= 7)
-    return (insn & 0x60) >> 5;
-  return -1;
-}
-
 /* We need to keep a list of fixups.  We can't simply generate them as
    we go, because that would require us to first create the frag, and
    that would screw up references to ``.''.  */
@@ -301,7 +288,9 @@ struct arc_fixup
   expressionS exp;
 };
 
-#define MAX_INSN_FIXUPS 5
+#define MAX_FIXUPS 5
+
+#define MAX_SUFFIXES 5
 
 /* This routine is called for each instruction to be assembled.  */
 
@@ -329,17 +318,20 @@ md_assemble (str)
   /* The instructions are stored in lists hashed by the first letter (though
      we needn't care how they're hashed).  Get the first in the list.  */
 
-  opcode = arc_opcode_asm_list (str);
+  opcode = arc_opcode_lookup_asm (str);
 
   /* Keep looking until we find a match.  */
 
   start = str;
   for ( ; opcode != NULL; opcode = ARC_OPCODE_NEXT_ASM (opcode))
     {
-      int past_opcode_p;
+      int past_opcode_p, fc, num_suffixes;
       char *syn;
-      struct arc_fixup fixups[MAX_INSN_FIXUPS];
-      int fc,limm_reloc_p;
+      struct arc_fixup fixups[MAX_FIXUPS];
+      /* Used as a sanity check.  If we need a limm reloc, make sure we ask
+	 for an extra 4 bytes from frag_more.  */
+      int limm_reloc_p;
+      const struct arc_operand_value *insn_suffixes[MAX_SUFFIXES];
 
       /* Is this opcode supported by the selected cpu?  */
       if (! arc_opcode_supported (opcode))
@@ -351,9 +343,7 @@ md_assemble (str)
       insn = opcode->value;
       fc = 0;
       past_opcode_p = 0;
-
-      /* Used as a sanity check.  If we need a limm reloc, make sure we ask
-	 for an extra 4 bytes from frag_more.  */
+      num_suffixes = 0;
       limm_reloc_p = 0;
 
       /* We don't check for (*str != '\0') here because we want to parse
@@ -471,7 +461,7 @@ md_assemble (str)
 	      suffix_end = arc_suffixes + arc_suffixes_count;
 	      for (suffix = suf;
 		   suffix < suffix_end && strcmp (suffix->name, suf->name) == 0;
-		   suffix++)
+		   ++suffix)
 		{
 		  if (arc_operands[suffix->type].fmt == *syn)
 		    {
@@ -490,9 +480,14 @@ md_assemble (str)
 		}
 	      ++syn;
 	      if (!found)
-		/* There's nothing to do except go on to try the next one.
-		   ??? This test can be deleted when we're done.  */
-		;
+		; /* Wrong type.  Just go on to try next insn entry.  */
+	      else
+		{
+		  if (num_suffixes == MAX_SUFFIXES)
+		    as_bad ("too many suffixes");
+		  else
+		    insn_suffixes[num_suffixes++] = suffix;
+		}
 	    }
 	  else
 	    /* This is either a register or an expression of some kind.  */
@@ -548,7 +543,7 @@ md_assemble (str)
 	      else
 		{
 		  /* We need to generate a fixup for this expression.  */
-		  if (fc >= MAX_INSN_FIXUPS)
+		  if (fc >= MAX_FIXUPS)
 		    as_fatal ("too many fixups");
 		  fixups[fc].exp = exp;
 
@@ -605,6 +600,7 @@ md_assemble (str)
 	}
 
       /* If we're at the end of the syntax string, we're done.  */
+      /* FIXME: try to move this to a separate function.  */
       if (*syn == '\0')
 	{
 	  int i;
@@ -625,18 +621,53 @@ md_assemble (str)
 	  /* Is there a limm value?  */
 	  limm_p = arc_opcode_limm_p (&limm);
 
-	  /* Putting an insn with a limm value in a delay slot is supposed to
-	     be legal, but let's warn the user anyway.  Ditto for 8 byte jumps
-	     with delay slots.  */
+	  /* Perform various error and warning tests.  */
+
 	  {
 	    static int in_delay_slot_p = 0;
-	    int this_insn_delay_slot_type = delay_slot_type (insn);
+	    static int prev_insn_needs_cc_nop_p = 0;
+	    /* delay slot type seen */
+	    int delay_slot_type = ARC_DELAY_NONE;
+	    /* conditional execution flag seen */
+	    int conditional = 0;
+	    /* 1 if condition codes are being set */
+	    int cc_set_p = 0;
+	    /* 1 if conditional branch, including `b' "branch always" */
+	    int cond_branch_p = opcode->flags & ARC_OPCODE_COND_BRANCH;
+	    int need_cc_nop_p = 0;
 
+	    for (i = 0; i < num_suffixes; ++i)
+	      {
+		switch (arc_operands[insn_suffixes[i]->type].fmt)
+		  {
+		  case 'n' :
+		    delay_slot_type = insn_suffixes[i]->value;
+		    break;
+		  case 'q' :
+		    conditional = insn_suffixes[i]->value;
+		    break;
+		  case 'f' :
+		    cc_set_p = 1;
+		    break;
+		  }
+	      }
+
+	    /* Putting an insn with a limm value in a delay slot is supposed to
+	       be legal, but let's warn the user anyway.  Ditto for 8 byte
+	       jumps with delay slots.  */
 	    if (in_delay_slot_p && limm_p)
 	      as_warn ("8 byte instruction in delay slot");
-	    if (this_insn_delay_slot_type > 0 && limm_p)
+	    if (delay_slot_type != ARC_DELAY_NONE && limm_p)
 	      as_warn ("8 byte jump instruction with delay slot");
-	    in_delay_slot_p = (this_insn_delay_slot_type > 0) && !limm_p;
+	    in_delay_slot_p = (delay_slot_type != ARC_DELAY_NONE) && !limm_p;
+
+	    /* Warn when a conditional branch immediately follows a set of
+	       the condition codes.  Note that this needn't be done if the
+	       insn that sets the condition codes uses a limm.  */
+	    if (cond_branch_p && conditional != 0 /* 0 = "always" */
+		&& prev_insn_needs_cc_nop_p)
+	      as_warn ("conditional branch follows set of flags");
+	    prev_insn_needs_cc_nop_p = cc_set_p && !limm_p;
 	  }
 
 	  /* Write out the instruction.
@@ -1167,8 +1198,10 @@ md_pcrel_from (fixP)
 {
   if (fixP->fx_addsy != (symbolS *) NULL
       && ! S_IS_DEFINED (fixP->fx_addsy))
-    /* Return offset from PC to delay slot.  Offsets are from there.  */
-    return 4;
+    {
+      /* The symbol is undefined.  Let the linker figure it out.  */
+      return 0;
+    }
 
   /* Return the address of the delay slot.  */
   return fixP->fx_frag->fr_address + fixP->fx_where + fixP->fx_size;
@@ -1243,9 +1276,10 @@ get_arc_exp_reloc_type (data_p, default_type, exp, expnew)
    that, we determine the correct reloc code and put it back in the fixup.  */
 
 int
-md_apply_fix (fixP, valueP)
+md_apply_fix3 (fixP, valueP, seg)
      fixS *fixP;
      valueT *valueP;
+     segT seg;
 {
   /*char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;*/
   valueT value;
@@ -1267,7 +1301,16 @@ md_apply_fix (fixP, valueP)
       fixP->fx_done = 1;
     }
   else if (fixP->fx_pcrel)
-    value = *valueP;
+    {
+      value = *valueP;
+      /* ELF relocations are against symbols.
+	 If this symbol is in a different section then we need to leave it for
+	 the linker to deal with.  Unfortunately, md_pcrel_from can't tell,
+	 so we have to undo it's effects here.  */
+      if (S_IS_DEFINED (fixP->fx_addsy)
+	  && S_GET_SEGMENT (fixP->fx_addsy) != seg)
+	value += md_pcrel_from (fixP);
+    }
   else
     {
       value = fixP->fx_offset;
@@ -1413,9 +1456,10 @@ tc_gen_reloc (section, fixP)
 		    fixP->fx_r_type, bfd_get_reloc_code_name (fixP->fx_r_type));
       return NULL;
     }
-  reloc->addend = fixP->fx_addnumber;
 
   assert (!fixP->fx_pcrel == !reloc->howto->pc_relative);
+
+  reloc->addend = fixP->fx_addnumber;
 
   return reloc;
 }
