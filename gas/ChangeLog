@@ -11,11 +11,11 @@
 	operators as for subtraction.
 	(symbol_equated_reloc_p): New predicate function.
 	* symbols.h (symbol_equated_reloc_p): Declare.
-	* write.c (adjust_reloc_syms): Use symbol_equated_reloc_p.
+	* write.c (relax_segment <rs_machine_dependent>): Ensure segment
+	for expression syms is set correctly.
+	(adjust_reloc_syms): Use symbol_equated_reloc_p.
 	(write_relocs): Likewise.
 	(write_object_file): Likewise.
-	(relax_segment <rs_machine_dependent>): Ensure segment for
-	expression syms is set correctly.
 	* config/tc-mips.c (md_estimate_size_before_relax): Likewise.
 	* config/tc-i386.c (md_assemble <Output jumps>): Don't lose part
 	of a complex expression when setting up frag_var.
@@ -42,8 +42,8 @@
 	(macro_build): Use BFD_RELOC_16_PCREL_S2 only for embedded
 	PIC, BFD_RELOC_16_PCREL for the rest.
 	(mips_ip): Likewise.
-        (md_pcrel_from): return the right offset for the differently shifted
-        pcrel relocs.
+	(md_pcrel_from): return the right offset for the differently shifted
+	pcrel relocs.
 	(md_apply_fix): Handle BFD_RELOC_16_PCREL.
 
 2001-09-05  Richard Henderson  <rth@redhat.com>
@@ -270,8 +270,8 @@ Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 
 2001-08-14  Jeff Johnston  <jjohnstn@redhat.com>
 
-        * expr.c (operand)[LITERAL_PREFIXDOLLAR_HEX]: Treat $L as
-        a label, not a hex constant.
+	* expr.c (operand)[LITERAL_PREFIXDOLLAR_HEX]: Treat $L as
+	a label, not a hex constant.
 
 2001-08-13  Nick Clifton  <nickc@cambridge.redhat.com>
 
