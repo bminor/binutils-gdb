@@ -211,9 +211,25 @@ extern dc_dcontext_t current_context;
 
 /* Tables of how to react to signals; the user sets them.  */
 
-static char *signal_stop;
-static char *signal_print;
-static char *signal_program;
+static unsigned char *signal_stop;
+static unsigned char *signal_print;
+static unsigned char *signal_program;
+
+#define SET_SIGS(nsigs,sigs,flags) \
+  do { \
+    int signum = (nsigs); \
+    while (signum-- > 0) \
+      if ((sigs)[signum]) \
+	(flags)[signum] = 1; \
+  } while (0)
+
+#define UNSET_SIGS(nsigs,sigs,flags) \
+  do { \
+    int signum = (nsigs); \
+    while (signum-- > 0) \
+      if ((sigs)[signum]) \
+	(flags)[signum] = 0; \
+  } while (0)
 
 /* Nonzero if breakpoints are now inserted in the inferior.  */
 /* Nonstatic for initialization during xxx_create_inferior. FIXME. */
@@ -666,19 +682,8 @@ child_create_inferior (exec_file, allargs, env)
   SOLIB_CREATE_INFERIOR_HOOK (pid);
 #endif
 
-  /* Should this perhaps just be a "proceed" call?  FIXME */
-  insert_step_breakpoint ();
-  breakpoints_failed = insert_breakpoints ();
-  if (!breakpoints_failed)
-    {
-      breakpoints_inserted = 1;
-      target_terminal_inferior();
-      /* Start the child program going on its first instruction, single-
-	 stepping if we need to.  */
-      resume (bpstat_should_step (), 0);
-      wait_for_inferior ();
-      normal_stop ();
-    }
+  /* Pedal to the metal.  Away we go.  */
+  proceed ((CORE_ADDR) -1, 0, 0);
 }
 
 /* Start remote-debugging of a machine over a serial link.  */
@@ -867,8 +872,7 @@ wait_for_inferior ()
       stop_func_name = 0;
       /* Don't care about return value; stop_func_start and stop_func_name
 	 will both be 0 if it doesn't work.  */
-      (void) find_pc_partial_function (stop_pc, &stop_func_name,
-				       &stop_func_start);
+      find_pc_partial_function (stop_pc, &stop_func_name, &stop_func_start);
       stop_func_start += FUNCTION_START_OFFSET;
       another_trap = 0;
       bpstat_clear (&stop_bpstat);
@@ -1631,93 +1635,150 @@ handle_command (args, from_tty)
      char *args;
      int from_tty;
 {
-  register char *p = args;
-  int signum = 0;
-  register int digits, wordlen;
-  char *nextarg;
+  char **argv;
+  int digits, wordlen;
+  int sigfirst, signum, siglast;
+  int allsigs;
+  int nsigs;
+  unsigned char *sigs;
+  struct cleanup *old_chain;
 
-  if (!args)
-    error_no_arg ("signal to handle");
-
-  while (*p)
+  if (args == NULL)
     {
-      /* Find the end of the next word in the args.  */
-      for (wordlen = 0;
-	   p[wordlen] && p[wordlen] != ' ' && p[wordlen] != '\t';
-	   wordlen++);
-      /* Set nextarg to the start of the word after the one we just
-	 found, and null-terminate this one.  */
-      if (p[wordlen] == '\0')
-	nextarg = p + wordlen;
+      error_no_arg ("signal to handle");
+    }
+
+  /* Allocate and zero an array of flags for which signals to handle. */
+
+  nsigs = signo_max () + 1;
+  sigs = (unsigned char *) alloca (nsigs);
+  memset (sigs, 0, nsigs);
+
+  /* Break the command line up into args. */
+
+  argv = buildargv (args);
+  if (argv == NULL)
+    {
+      nomem (0);
+    }
+  old_chain = make_cleanup (freeargv, (char *) argv);
+
+  /* Walk through the args, looking for signal numbers, signal names, and
+     actions.  Signal numbers and signal names may be interspersed with
+     actions, with the actions being performed for all signals cumulatively
+     specified.  Signal ranges can be specified as <LOW>-<HIGH>. */
+
+  while (*argv != NULL)
+    {
+      wordlen = strlen (*argv);
+      for (digits = 0; isdigit ((*argv)[digits]); digits++) {;}
+      allsigs = 0;
+      sigfirst = siglast = -1;
+
+      if (wordlen >= 1 && !strncmp (*argv, "all", wordlen))
+	{
+	  /* Apply action to all signals except those used by the
+	     debugger.  Silently skip those. */
+	  allsigs = 1;
+	  sigfirst = 0;
+	  siglast = nsigs - 1;
+	}
+      else if (wordlen >= 1 && !strncmp (*argv, "stop", wordlen))
+	{
+	  SET_SIGS (nsigs, sigs, signal_stop);
+	  SET_SIGS (nsigs, sigs, signal_print);
+	}
+      else if (wordlen >= 1 && !strncmp (*argv, "ignore", wordlen))
+	{
+	  UNSET_SIGS (nsigs, sigs, signal_program);
+	}
+      else if (wordlen >= 2 && !strncmp (*argv, "print", wordlen))
+	{
+	  SET_SIGS (nsigs, sigs, signal_print);
+	}
+      else if (wordlen >= 2 && !strncmp (*argv, "pass", wordlen))
+	{
+	  SET_SIGS (nsigs, sigs, signal_program);
+	}
+      else if (wordlen >= 3 && !strncmp (*argv, "nostop", wordlen))
+	{
+	  UNSET_SIGS (nsigs, sigs, signal_stop);
+	}
+      else if (wordlen >= 3 && !strncmp (*argv, "noignore", wordlen))
+	{
+	  SET_SIGS (nsigs, sigs, signal_program);
+	}
+      else if (wordlen >= 4 && !strncmp (*argv, "noprint", wordlen))
+	{
+	  UNSET_SIGS (nsigs, sigs, signal_print);
+	  UNSET_SIGS (nsigs, sigs, signal_stop);
+	}
+      else if (wordlen >= 4 && !strncmp (*argv, "nopass", wordlen))
+	{
+	  UNSET_SIGS (nsigs, sigs, signal_program);
+	}
+      else if (digits > 0)
+	{
+	  sigfirst = siglast = atoi (*argv);
+	  if ((*argv)[digits] == '-')
+	    {
+	      siglast = atoi ((*argv) + digits + 1);
+	    }
+	  if (sigfirst > siglast)
+	    {
+	      /* Bet he didn't figure we'd think of this case... */
+	      signum = sigfirst;
+	      sigfirst = siglast;
+	      siglast = signum;
+	    }
+	  if (sigfirst < 0 || sigfirst >= nsigs)
+	    {
+	      error ("Signal %d not in range 0-%d", sigfirst, nsigs - 1);
+	    }
+	  if (siglast < 0 || siglast >= nsigs)
+	    {
+	      error ("Signal %d not in range 0-%d", siglast, nsigs - 1);
+	    }
+	}
+      else if ((signum = strtosigno (*argv)) != 0)
+	{
+	  sigfirst = siglast = signum;
+	}
       else
 	{
-	  p[wordlen] = '\0';
-	  nextarg = p + wordlen + 1;
+	  /* Not a number and not a recognized flag word => complain.  */
+	  error ("Unrecognized or ambiguous flag word: \"%s\".", *argv);
 	}
-      
 
-      for (digits = 0; p[digits] >= '0' && p[digits] <= '9'; digits++);
+      /* If any signal numbers or symbol names were found, set flags for
+	 which signals to apply actions to. */
 
-      if (signum == 0)
+      for (signum = sigfirst; signum >= 0 && signum <= siglast; signum++)
 	{
-	  /* It is the first argument--must be the signal to operate on.  */
-	  if (digits == wordlen)
+	  switch (signum)
 	    {
-	      /* Numeric.  */
-	      signum = atoi (p);
-	      if (signum <= 0 || signum > signo_max ())
-		{
-		  p[wordlen] = '\0';
-		  error ("Invalid signal %s given as argument to \"handle\".", p);
-		}
-	    }
-	  else
-	    {
-	      /* Symbolic.  */
-	      signum = strtosigno (p);
-	      if (signum == 0)
-		error ("No such signal \"%s\"", p);
-	    }
-
-	  if (signum == SIGTRAP || signum == SIGINT)
-	    {
-	      if (!query ("%s is used by the debugger.\nAre you sure you want to change it? ", strsigno (signum)))
-		error ("Not confirmed.");
+	      case SIGTRAP:
+	      case SIGINT:
+	        if (!allsigs && !sigs[signum])
+		  {
+		    if (query ("%s is used by the debugger.\nAre you sure you want to change it? ", strsigno (signum)))
+		      {
+			sigs[signum] = 1;
+		      }
+		    else
+		      {
+			printf ("Not confirmed, unchanged.\n");
+			fflush (stdout);
+		      }
+		  }
+		break;
+	      default:
+		sigs[signum] = 1;
+		break;
 	    }
 	}
-      /* Else, if already got a signal number, look for flag words
-	 saying what to do for it.  */
-      else if (!strncmp (p, "stop", wordlen))
-	{
-	  signal_stop[signum] = 1;
-	  signal_print[signum] = 1;
-	}
-      else if (wordlen >= 2 && !strncmp (p, "print", wordlen))
-	signal_print[signum] = 1;
-      else if (wordlen >= 2 && !strncmp (p, "pass", wordlen))
-	signal_program[signum] = 1;
-      else if (!strncmp (p, "ignore", wordlen))
-	signal_program[signum] = 0;
-      else if (wordlen >= 3 && !strncmp (p, "nostop", wordlen))
-	signal_stop[signum] = 0;
-      else if (wordlen >= 4 && !strncmp (p, "noprint", wordlen))
-	{
-	  signal_print[signum] = 0;
-	  signal_stop[signum] = 0;
-	}
-      else if (wordlen >= 4 && !strncmp (p, "nopass", wordlen))
-	signal_program[signum] = 0;
-      else if (wordlen >= 3 && !strncmp (p, "noignore", wordlen))
-	signal_program[signum] = 1;
-      /* Not a number and not a recognized flag word => complain.  */
-      else
-	{
-	  error ("Unrecognized or ambiguous flag word: \"%s\".", p);
-	}
 
-      /* Find start of next word.  */
-      p = nextarg;
-      while (*p == ' ' || *p == '\t') p++;
+      argv++;
     }
 
   NOTICE_SIGNAL_HANDLING_CHANGE;
@@ -1726,8 +1787,16 @@ handle_command (args, from_tty)
     {
       /* Show the results.  */
       sig_print_header ();
-      sig_print_info (signum);
+      for (signum = 0; signum < nsigs; signum++)
+	{
+	  if (sigs[signum])
+	    {
+	      sig_print_info (signum);
+	    }
+	}
     }
+
+  do_cleanups (old_chain);
 }
 
 /* Print current contents of the tables set by the handle command.  */
@@ -1800,7 +1869,7 @@ save_inferior_status (inf_status, restore_stack_info)
   inf_status->restore_stack_info = restore_stack_info;
   inf_status->proceed_to_finish = proceed_to_finish;
   
-  (void) memcpy (inf_status->stop_registers, stop_registers, REGISTER_BYTES);
+  memcpy (inf_status->stop_registers, stop_registers, REGISTER_BYTES);
   
   record_selected_frame (&(inf_status->selected_frame_address),
 			 &(inf_status->selected_level));
@@ -1834,7 +1903,7 @@ restore_inferior_status (inf_status)
   breakpoint_proceeded = inf_status->breakpoint_proceeded;
   proceed_to_finish = inf_status->proceed_to_finish;
 
-  (void) memcpy (stop_registers, inf_status->stop_registers, REGISTER_BYTES);
+  memcpy (stop_registers, inf_status->stop_registers, REGISTER_BYTES);
 
   /* The inferior can be gone if the user types "print exit(0)"
      (and perhaps other times).  */
@@ -1880,18 +1949,26 @@ Specify a signal number as argument to print info on that signal only.");
 
   add_com ("handle", class_run, handle_command,
 	   "Specify how to handle a signal.\n\
-Args are signal number followed by flags.\n\
-Flags allowed are \"stop\", \"print\", \"pass\",\n\
- \"nostop\", \"noprint\" or \"nopass\".\n\
-Print means print a message if this signal happens.\n\
+Args are signal numbers and actions to apply to those signals.\n\
+Signal numbers may be numeric (ex. 11) or symbolic (ex. SIGSEGV).\n\
+Numeric ranges may be specified with the form LOW-HIGH (ex. 14-21).\n\
+The special arg \"all\" is recognized to mean all signals except those\n\
+used by the debugger, typically SIGTRAP and SIGINT.\n\
+Recognized actions include \"stop\", \"nostop\", \"print\", \"noprint\",\n\
+\"pass\", \"nopass\", \"ignore\", or \"noignore\".\n\
 Stop means reenter debugger if this signal happens (implies print).\n\
+Print means print a message if this signal happens.\n\
 Pass means let program see this signal; otherwise program doesn't know.\n\
+Ignore is a synonym for nopass and noignore is a synonym for pass.\n\
 Pass and Stop may be combined.");
 
   numsigs = signo_max () + 1;
-  signal_stop = xmalloc (sizeof (signal_stop[0]) * numsigs);
-  signal_print = xmalloc (sizeof (signal_print[0]) * numsigs);
-  signal_program = xmalloc (sizeof (signal_program[0]) * numsigs);
+  signal_stop    = (unsigned char *)    
+		   xmalloc (sizeof (signal_stop[0]) * numsigs);
+  signal_print   = (unsigned char *)
+		   xmalloc (sizeof (signal_print[0]) * numsigs);
+  signal_program = (unsigned char *)
+		   xmalloc (sizeof (signal_program[0]) * numsigs);
   for (i = 0; i < numsigs; i++)
     {
       signal_stop[i] = 1;
