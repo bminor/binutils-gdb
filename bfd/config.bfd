@@ -282,6 +282,9 @@ case "${targ}" in
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs="i386coff_vec i386aout_vec"
     ;;
+  i[3456]86-*-chorus*)
+    targ_defvec=bfd_elf32_i386_vec
+    ;;
   i[3456]86-*-msdosdjgpp* | i[3456]*-*-go32* | i[3456]86-go32-rtems* )
     targ_defvec=go32coff_vec
     targ_selvecs="go32stubbedcoff_vec i386aout_vec"
@@ -606,7 +609,7 @@ case "${targ}" in
     targ_defvec=ecoff_big_vec
     targ_selvecs=ecoff_little_vec
     ;;
-  mips*el-*-elf* | mips*el-*-rtems* | mips*el-*-vxworks*)
+  mips*el-*-elf* | mips*el-*-rtems* | mips*el-*-vxworks* | mips*-*-chorus*)
     targ_defvec=bfd_elf32_littlemips_vec
     targ_selvecs="bfd_elf32_bigmips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec"
     ;;
@@ -660,7 +663,7 @@ case "${targ}" in
     ;;
   powerpc-*-*bsd* | powerpc-*-elf* | powerpc-*-sysv4* | powerpc-*-eabi* | \
   powerpc-*-solaris2* | powerpc-*-linux-gnu* | powerpc-*-rtems* | \
-  powerpc-*-vxworks*)
+  powerpc-*-chorus* | powerpc-*-vxworks*)
     targ_defvec=bfd_elf32_powerpc_vec
     targ_selvecs="rs6000coff_vec bfd_elf32_powerpcle_vec ppcboot_vec"
     ;;
@@ -718,6 +721,9 @@ case "${targ}" in
     targ_underscore=yes
     ;;
   sparclite-*-elf* | sparc86x-*-elf*)
+    targ_defvec=bfd_elf32_sparc_vec
+    ;;
+  sparc*-*-chorus*)
     targ_defvec=bfd_elf32_sparc_vec
     ;;
   sparc-*-linux*aout*)

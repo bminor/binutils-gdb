@@ -1,3 +1,7 @@
+Mon Nov  6 13:35:07 2000  Christopher Faylor <cgf@cygnus.com>
+
+	* config.bfd: Add support for Sun Chorus.
+
 2000-11-05  David O'Brien  <obrien@FreeBSD.org>
 
 	* configure.in: Recognize alpha-*-freebsd*.
