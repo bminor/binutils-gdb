@@ -66,7 +66,8 @@ struct memrw_cmd
 struct regrw_cmd
 {
   char *cmd;			/* Command to send for reg read/write */
-  char *resp_delim;		/* String just prior to the desired value */
+  char *resp_delim;		/* String (actually a regexp if getmem) just
+				   prior to the desired value */
   char *term;			/* Terminating string to search for */
   char *term_cmd;		/* String to get out of sub-mode (if necessary) */
 };
