@@ -1,3 +1,9 @@
+2000-06-07  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* emultempl/mipsecoff.em (gld{EMULATION_NAME}_after_open): Require all
+	input objects to be ECOFF.
+	(check_sections): einfo takes %B, not %P, to print a BFD name.
+
 2000-06-05  Michael Matz <matz@ifh.de>
 
 	* ldgram.y (vers_defns): Handle 'extern "C++" { ... }' in
