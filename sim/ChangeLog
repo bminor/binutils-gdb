@@ -1,3 +1,7 @@
+2002-03-01  Frank Ch. Eigler  <fche@redhat.com>
+
+	* MAINTAINERS: Record self as a co-maintainer of just common/.
+
 2002-02-07  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* MAINTAINERS: Point to GDB files describing overall maintaince
