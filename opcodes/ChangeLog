@@ -1,3 +1,10 @@
+start-sanitize-sky
+Tue Feb 10 14:56:24 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* dvp-opc.c (*): pke,gpuif renamed to vif,gif.
+	* dvp-dis.c (*): Likewise.
+
+end-sanitize-sky
 Sat Feb  7 15:30:27 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure, aclocal.m4: Rebuild with new libtool.
