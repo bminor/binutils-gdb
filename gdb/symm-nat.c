@@ -66,7 +66,7 @@ store_inferior_registers (int regno)
      might cause problems when calling functions in the inferior.
      At least fpu_control and fpa_pcr (probably more) should be added 
      to the registers array to solve this properly.  */
-  mptrace (XPT_RREGS, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) & regs, 0);
+  mptrace (XPT_RREGS, inferior_pid, (PTRACE_ARG3_TYPE) & regs, 0);
 
   regs.pr_eax = *(int *) &registers[REGISTER_BYTE (0)];
   regs.pr_ebx = *(int *) &registers[REGISTER_BYTE (5)];
@@ -91,7 +91,7 @@ store_inferior_registers (int regno)
   memcpy (regs.pr_fpu.fpu_stack[5], &registers[REGISTER_BYTE (ST5_REGNUM)], 10);
   memcpy (regs.pr_fpu.fpu_stack[6], &registers[REGISTER_BYTE (ST6_REGNUM)], 10);
   memcpy (regs.pr_fpu.fpu_stack[7], &registers[REGISTER_BYTE (ST7_REGNUM)], 10);
-  mptrace (XPT_WREGS, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) & regs, 0);
+  mptrace (XPT_WREGS, inferior_pid, (PTRACE_ARG3_TYPE) & regs, 0);
 }
 
 void
@@ -102,7 +102,7 @@ fetch_inferior_registers (int regno)
 
   registers_fetched ();
 
-  mptrace (XPT_RREGS, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) & regs, 0);
+  mptrace (XPT_RREGS, inferior_pid, (PTRACE_ARG3_TYPE) & regs, 0);
   *(int *) &registers[REGISTER_BYTE (EAX_REGNUM)] = regs.pr_eax;
   *(int *) &registers[REGISTER_BYTE (EBX_REGNUM)] = regs.pr_ebx;
   *(int *) &registers[REGISTER_BYTE (ECX_REGNUM)] = regs.pr_ecx;
@@ -375,7 +375,7 @@ i386_float_info (void)
 
   if (have_inferior_p ())
     {
-      PTRACE_READ_REGS (PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) & regset);
+      PTRACE_READ_REGS (inferior_pid, (PTRACE_ARG3_TYPE) & regset);
     }
   else
     {
@@ -424,8 +424,8 @@ sigchld_handler (int signo)
 /*
  * Thanks to XPT_MPDEBUGGER, we have to mange child_wait().
  */
-ptid_t
-child_wait (ptid_t ptid, struct target_waitstatus *status)
+int
+child_wait (int pid, struct target_waitstatus *status)
 {
   int save_errno, rv, xvaloff, saoff, sa_hand;
   struct pt_stop pt;
@@ -437,7 +437,6 @@ child_wait (ptid_t ptid, struct target_waitstatus *status)
 #ifdef SVR4_SHARED_LIBS		/* use this to distinguish ptx 2 vs ptx 4 */
   prstatus_t pstatus;
 #endif
-  int pid = PIDGET (ptid);
 
   do
     {
@@ -465,7 +464,7 @@ child_wait (ptid_t ptid, struct target_waitstatus *status)
 
       pid = pt.ps_pid;
 
-      if (pid != PIDGET (inferior_ptid))
+      if (pid != inferior_pid)
 	{
 	  /* NOTE: the mystery fork in csh/tcsh needs to be ignored.
 	   * We should not return new children for the initial run
@@ -578,9 +577,9 @@ child_wait (ptid_t ptid, struct target_waitstatus *status)
 	}
 
     }
-  while (pid != PIDGET (inferior_ptid));	/* Some other child died or stopped */
+  while (pid != inferior_pid);	/* Some other child died or stopped */
 
-  return pid_to_ptid (pid);
+  return pid;
 }
 #else /* !ATTACH_DETACH */
 /*
@@ -588,12 +587,10 @@ child_wait (ptid_t ptid, struct target_waitstatus *status)
  * the MPDEBUGGER child_wait() works properly.  This will go away when
  * that is fixed.
  */
-ptid_t
-child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+child_wait (int pid, struct target_waitstatus *ourstatus)
 {
   int save_errno;
   int status;
-  int pid = PIDGET (ptid);
 
   do
     {
@@ -608,12 +605,12 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 		   safe_strerror (save_errno));
 	  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
 	  ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
-	  return pid_to_ptid (-1);
+	  return -1;
 	}
     }
-  while (pid != PIDGET (inferior_ptid));	/* Some other child died or stopped */
+  while (pid != inferior_pid);	/* Some other child died or stopped */
   store_waitstatus (ourstatus, status);
-  return pid_to_ptid (pid);
+  return pid;
 }
 #endif /* ATTACH_DETACH */
 
@@ -644,18 +641,18 @@ call_mptrace (int request, int pid, PTRACE_ARG3_TYPE addr, int data)
 void
 kill_inferior (void)
 {
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (inferior_pid == 0)
     return;
 
   /* For MPDEBUGGER, don't use PT_KILL, since the child will stop
      again with a PTS_EXIT.  Just hit him with SIGKILL (so he stops)
      and detach. */
 
-  kill (PIDGET (inferior_ptid), SIGKILL);
+  kill (inferior_pid, SIGKILL);
 #ifdef ATTACH_DETACH
   detach (SIGKILL);
 #else /* ATTACH_DETACH */
-  ptrace (PT_KILL, PIDGET (inferior_ptid), 0, 0);
+  ptrace (PT_KILL, inferior_pid, 0, 0);
   wait ((int *) NULL);
 #endif /* ATTACH_DETACH */
   target_mourn_inferior ();
@@ -666,14 +663,12 @@ kill_inferior (void)
    If SIGNAL is nonzero, give it that signal.  */
 
 void
-child_resume (ptid_t ptid, int step, enum target_signal signal)
+child_resume (int pid, int step, enum target_signal signal)
 {
-  int pid = PIDGET (ptid);
-
   errno = 0;
 
   if (pid == -1)
-    pid = PIDGET (inferior_ptid);
+    pid = inferior_pid;
 
   /* An address of (PTRACE_ARG3_TYPE)1 tells ptrace to continue from where
      it was.  (If GDB wanted it to start some other way, we have already
@@ -720,7 +715,7 @@ detach (int signo)
 {
   int rv;
 
-  rv = mptrace (XPT_UNDEBUG, PIDGET (inferior_ptid), 1, signo);
+  rv = mptrace (XPT_UNDEBUG, inferior_pid, 1, signo);
   if (-1 == rv)
     {
       error ("mptrace(XPT_UNDEBUG): %s", safe_strerror (errno));
@@ -774,14 +769,14 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
       if (addr != memaddr || len < (int) sizeof (PTRACE_XFER_TYPE))
 	{
 	  /* Need part of initial word -- fetch it.  */
-	  buffer[0] = ptrace (PT_RTEXT, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) addr,
+	  buffer[0] = ptrace (PT_RTEXT, inferior_pid, (PTRACE_ARG3_TYPE) addr,
 			      0);
 	}
 
       if (count > 1)		/* FIXME, avoid if even boundary */
 	{
 	  buffer[count - 1]
-	    = ptrace (PT_RTEXT, PIDGET (inferior_ptid),
+	    = ptrace (PT_RTEXT, inferior_pid,
 		      ((PTRACE_ARG3_TYPE)
 		       (addr + (count - 1) * sizeof (PTRACE_XFER_TYPE))),
 		      0);
@@ -798,14 +793,14 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
       for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
 	{
 	  errno = 0;
-	  ptrace (PT_WDATA, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) addr,
+	  ptrace (PT_WDATA, inferior_pid, (PTRACE_ARG3_TYPE) addr,
 		  buffer[i]);
 	  if (errno)
 	    {
 	      /* Using the appropriate one (I or D) is necessary for
 	         Gould NP1, at least.  */
 	      errno = 0;
-	      ptrace (PT_WTEXT, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) addr,
+	      ptrace (PT_WTEXT, inferior_pid, (PTRACE_ARG3_TYPE) addr,
 		      buffer[i]);
 	    }
 	  if (errno)
@@ -818,7 +813,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
       for (i = 0; i < count; i++, addr += sizeof (PTRACE_XFER_TYPE))
 	{
 	  errno = 0;
-	  buffer[i] = ptrace (PT_RTEXT, PIDGET (inferior_ptid),
+	  buffer[i] = ptrace (PT_RTEXT, inferior_pid,
 			      (PTRACE_ARG3_TYPE) addr, 0);
 	  if (errno)
 	    return 0;

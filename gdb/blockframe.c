@@ -219,9 +219,10 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
     obstack_alloc (&frame_cache_obstack,
 		   sizeof (struct frame_info));
 
-  /* Zero all fields by default.  */
-  memset (fi, 0, sizeof (struct frame_info));
-
+  /* Arbitrary frame */
+  fi->saved_regs = NULL;
+  fi->next = NULL;
+  fi->prev = NULL;
   fi->frame = addr;
   fi->pc = pc;
   find_pc_partial_function (pc, &name, (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
@@ -264,8 +265,8 @@ reinit_frame_cache (void)
 {
   flush_cached_frames ();
 
-  /* FIXME: The inferior_ptid test is wrong if there is a corefile.  */
-  if (PIDGET (inferior_ptid) != 0)
+  /* FIXME: The inferior_pid test is wrong if there is a corefile.  */
+  if (inferior_pid != 0)
     {
       select_frame (get_current_frame (), 0);
     }
@@ -303,6 +304,12 @@ frameless_look_for_prologue (struct frame_info *frame)
 }
 
 /* Default a few macros that people seldom redefine.  */
+
+#if !defined (INIT_FRAME_PC)
+#define INIT_FRAME_PC(fromleaf, prev) \
+  prev->pc = (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) : \
+	      prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
+#endif
 
 #ifndef FRAME_CHAIN_COMBINE
 #define	FRAME_CHAIN_COMBINE(chain, thisframe) (chain)
@@ -436,7 +443,9 @@ get_prev_frame (struct frame_info *next_frame)
    Some machines won't use it.
    kingdon@cygnus.com, 13Apr93, 31Jan94, 14Dec94.  */
 
+#ifdef INIT_FRAME_PC_FIRST
   INIT_FRAME_PC_FIRST (fromleaf, prev);
+#endif
 
 #ifdef INIT_EXTRA_FRAME_INFO
   INIT_EXTRA_FRAME_INFO (fromleaf, prev);

@@ -193,17 +193,16 @@ struct breakpoint
     /* Number assigned to distinguish breakpoints.  */
     int number;
 
-    /* Address to break at.
-       Note that zero is a perfectly valid code address on some
-       platforms (for example, the mn10200 and mn10300 simulators).
-       NULL is not a special value for this field.  */
+    /* Address to break at, or NULL if not a breakpoint.  */
     CORE_ADDR address;
 
-    /* Line number of this address.  */
+    /* Line number of this address.  Only matters if address is
+       non-NULL.  */
 
     int line_number;
 
-    /* Source file name of this address.  */
+    /* Source file name of this address.  Only matters if address is
+       non-NULL.  */
 
     char *source_file;
 
@@ -218,10 +217,11 @@ struct breakpoint
        control of the target insert_breakpoint and remove_breakpoint routines.
        No other code should assume anything about the value(s) here.  */
     char shadow_contents[BREAKPOINT_MAX];
-    /* Nonzero if this breakpoint is now inserted.  */
+    /* Nonzero if this breakpoint is now inserted.  Only matters if address
+       is non-NULL.  */
     char inserted;
     /* Nonzero if this is not the first breakpoint in the list
-       for the given address.  */
+       for the given address.  Only matters if address is non-NULL.  */
     char duplicate;
     /* Chain of command lines to execute when this breakpoint is hit.  */
     struct command_line *commands;
@@ -231,7 +231,8 @@ struct breakpoint
     /* Conditional.  Break only if this expression's value is nonzero.  */
     struct expression *cond;
 
-    /* String we used to set the breakpoint (malloc'd).  */
+    /* String we used to set the breakpoint (malloc'd).  Only matters if
+       address is non-NULL.  */
     char *addr_string;
     /* Language we used to set the breakpoint.  */
     enum language language;
@@ -520,7 +521,7 @@ extern int breakpoint_inserted_here_p (CORE_ADDR);
 
 extern int frame_in_dummy (struct frame_info *);
 
-extern int breakpoint_thread_match (CORE_ADDR, ptid_t);
+extern int breakpoint_thread_match (CORE_ADDR, int);
 
 extern void until_break_command (char *, int);
 
@@ -597,7 +598,7 @@ extern void update_breakpoints_after_exec (void);
    be detached and allowed to run free.
 
    It is an error to use this function on the process whose id is
-   inferior_ptid.  */
+   inferior_pid.  */
 extern int detach_breakpoints (int);
 
 extern void enable_longjmp_breakpoint (void);

@@ -224,6 +224,21 @@ int target_executing = 0;
 /* Level of control structure.  */
 static int control_level;
 
+/* Structure for arguments to user defined functions.  */
+#define MAXUSERARGS 10
+struct user_args
+  {
+    struct user_args *next;
+    struct
+      {
+	char *arg;
+	int len;
+      }
+    a[MAXUSERARGS];
+    int count;
+  }
+ *user_args;
+
 /* Signal to catch ^Z typed while reading a command: SIGTSTP or SIGCONT.  */
 
 #ifndef STOP_SIGNAL
@@ -326,8 +341,7 @@ void (*memory_changed_hook) (CORE_ADDR addr, int len);
 /* Called when going to wait for the target.  Usually allows the GUI to run
    while waiting for target events.  */
 
-ptid_t (*target_wait_hook) (ptid_t ptid,
-                            struct target_waitstatus * status);
+int (*target_wait_hook) (int pid, struct target_waitstatus * status);
 
 /* Used by UI as a wrapper around command execution.  May do various things
    like enabling/disabling buttons, etc...  */
@@ -1695,7 +1709,7 @@ set_prompt (char *s)
 int
 quit_confirm (void)
 {
-  if (! ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
+  if (inferior_pid != 0 && target_has_execution)
     {
       char *s;
 
@@ -1732,7 +1746,7 @@ quit_force (char *args, int from_tty)
       exit_code = (int) value_as_long (val);
     }
 
-  if (! ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
+  if (inferior_pid != 0 && target_has_execution)
     {
       if (attach_flag)
 	target_detach (args, from_tty);

@@ -878,7 +878,7 @@ som_solib_create_inferior_hook (void)
     }
 
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
-  store_unsigned_integer (buf, 4, PIDGET (inferior_ptid));
+  store_unsigned_integer (buf, 4, inferior_pid);
   status = target_write_memory (anaddr, buf, 4);
   if (status != 0)
     {
@@ -1031,6 +1031,14 @@ keep_going:
   clear_symtab_users ();
 }
 
+
+static void
+reset_inferior_pid (int saved_inferior_pid)
+{
+  inferior_pid = saved_inferior_pid;
+}
+
+
 /* This operation removes the "hook" between GDB and the dynamic linker,
    which causes the dld to notify GDB of shared library events.
 
@@ -1049,10 +1057,11 @@ som_solib_remove_inferior_hook (int pid)
   int status;
   char dld_flags_buffer[TARGET_INT_BIT / TARGET_CHAR_BIT];
   unsigned int dld_flags_value;
-  struct cleanup *old_cleanups = save_inferior_ptid ();
+  int saved_inferior_pid = inferior_pid;
+  struct cleanup *old_cleanups = make_cleanup (reset_inferior_pid, saved_inferior_pid);
 
   /* Ensure that we're really operating on the specified process. */
-  inferior_ptid = pid_to_ptid (pid);
+  inferior_pid = pid;
 
   /* We won't bother to remove the solib breakpoints from this process.
 

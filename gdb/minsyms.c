@@ -47,8 +47,6 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "demangle.h"
-#include "value.h"
-#include "cp-abi.h"
 
 /* Accumulate the minimal symbols for each objfile in bunches of BUNCH_SIZE.
    At the end, copy them all into one newly allocated location on an objfile's
@@ -77,7 +75,7 @@ static int msym_count;
 
 /* Prototypes for local functions. */
 
-static int compare_minimal_symbols (const PTR, const PTR);
+static int compare_minimal_symbols (const void *, const void *);
 
 static int
 compact_minimal_symbols (struct minimal_symbol *, int, struct objfile *);
@@ -958,24 +956,9 @@ install_minimal_symbols (struct objfile *objfile)
       objfile->minimal_symbol_count = mcount;
       objfile->msymbols = msymbols;
 
-      /* Try to guess the appropriate C++ ABI by looking at the names 
-	 of the minimal symbols in the table.  */
-      {
-	int i;
-
-	for (i = 0; i < mcount; i++)
-	  {
-	    const char *name = SYMBOL_NAME (&objfile->msymbols[i]);
-	    if (name[0] == '_' && name[1] == 'Z')
-	      {
-		switch_to_cp_abi ("gnu-v3");
-		break;
-	      }
-	  }
-      }
-      
       /* Now walk through all the minimal symbols, selecting the newly added
          ones and attempting to cache their C++ demangled names. */
+
       for (; mcount-- > 0; msymbols++)
 	SYMBOL_INIT_DEMANGLED_NAME (msymbols, &objfile->symbol_obstack);
 

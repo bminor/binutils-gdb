@@ -86,9 +86,9 @@ static void gdbsim_close (int quitting);
 
 static void gdbsim_detach (char *args, int from_tty);
 
-static void gdbsim_resume (ptid_t ptid, int step, enum target_signal siggnal);
+static void gdbsim_resume (int pid, int step, enum target_signal siggnal);
 
-static ptid_t gdbsim_wait (ptid_t ptid, struct target_waitstatus *status);
+static int gdbsim_wait (int pid, struct target_waitstatus *status);
 
 static void gdbsim_prepare_to_store (void);
 
@@ -359,7 +359,7 @@ gdbsim_kill (void)
 
   /* There is no need to `kill' running simulator - the simulator is
      not running */
-  inferior_ptid = null_ptid;
+  inferior_pid = 0;
 }
 
 /* Load an executable file into the target process.  This is expected to
@@ -372,7 +372,7 @@ gdbsim_load (char *prog, int fromtty)
   if (sr_get_debug ())
     printf_filtered ("gdbsim_load: prog \"%s\"\n", prog);
 
-  inferior_ptid = null_ptid;
+  inferior_pid = 0;
 
   /* FIXME: We will print two messages on error.
      Need error to either not print anything if passed NULL or need
@@ -387,7 +387,7 @@ gdbsim_load (char *prog, int fromtty)
 }
 
 
-/* Start an inferior process and set inferior_ptid to its pid.
+/* Start an inferior process and set inferior_pid to its pid.
    EXEC_FILE is the file to run.
    ARGS is a string containing the arguments to the program.
    ENV is the environment vector to pass.  Errors reported with error().
@@ -430,7 +430,7 @@ gdbsim_create_inferior (char *exec_file, char *args, char **env)
     argv = NULL;
   sim_create_inferior (gdbsim_desc, exec_bfd, argv, env);
 
-  inferior_ptid = pid_to_ptid (42);
+  inferior_pid = 42;
   insert_breakpoints ();	/* Needed to get correct instruction in cache */
 
   clear_proceed_status ();
@@ -572,9 +572,9 @@ static enum target_signal resume_siggnal;
 static int resume_step;
 
 static void
-gdbsim_resume (ptid_t ptid, int step, enum target_signal siggnal)
+gdbsim_resume (int pid, int step, enum target_signal siggnal)
 {
-  if (PIDGET (inferior_ptid) != 42)
+  if (inferior_pid != 42)
     error ("The program is not being run.");
 
   if (sr_get_debug ())
@@ -611,6 +611,7 @@ gdb_os_poll_quit (host_callback *p)
   if (ui_loop_hook != NULL)
     ui_loop_hook (0);
 
+  notice_quit ();
   if (quit_flag)		/* gdb's idea of quit */
     {
       quit_flag = 0;		/* we've stolen it */
@@ -633,8 +634,8 @@ gdbsim_cntrl_c (int signo)
   gdbsim_stop ();
 }
 
-static ptid_t
-gdbsim_wait (ptid_t ptid, struct target_waitstatus *status)
+static int
+gdbsim_wait (int pid, struct target_waitstatus *status)
 {
   static RETSIGTYPE (*prev_sigint) ();
   int sigrc = 0;
@@ -696,7 +697,7 @@ gdbsim_wait (ptid_t ptid, struct target_waitstatus *status)
       break;
     }
 
-  return inferior_ptid;
+  return inferior_pid;
 }
 
 /* Get ready to modify the registers array.  On machines which store

@@ -378,23 +378,6 @@ i386_frameless_function_invocation (struct frame_info *frame)
   return frameless_look_for_prologue (frame);
 }
 
-/* Return the saved program counter for FRAME.  */
-
-CORE_ADDR
-i386_frame_saved_pc (struct frame_info *frame)
-{
-  /* FIXME: kettenis/2001-05-09: Conditionalizing the next bit of code
-     on SIGCONTEXT_PC_OFFSET and I386V4_SIGTRAMP_SAVED_PC should be
-     considered a temporary hack.  I plan to come up with something
-     better when we go multi-arch.  */
-#if defined (SIGCONTEXT_PC_OFFSET) || defined (I386V4_SIGTRAMP_SAVED_PC)
-  if (frame->signal_handler_caller)
-    return sigtramp_saved_pc (frame);
-#endif
-
-  return read_memory_unsigned_integer (frame->frame + 4, 4);
-}
-
 /* Immediately after a function call, return the saved pc.  */
 
 CORE_ADDR
@@ -921,37 +904,6 @@ i386_extract_struct_value_address (char *regbuf)
 			  REGISTER_RAW_SIZE (LOW_RETURN_REGNUM));
 }
 
-
-/* Return the GDB type object for the "standard" data type of data in
-   register REGNUM.  Perhaps %esi and %edi should go here, but
-   potentially they could be used for things other than address.  */
-
-struct type *
-i386_register_virtual_type (int regnum)
-{
-  if (regnum == PC_REGNUM || regnum == FP_REGNUM || regnum == SP_REGNUM)
-    return lookup_pointer_type (builtin_type_void);
-
-  if (IS_FP_REGNUM (regnum))
-    return builtin_type_long_double;
-
-  if (IS_SSE_REGNUM (regnum))
-    return builtin_type_v4sf;
-
-  return builtin_type_int;
-}
-
-/* Return true iff register REGNUM's virtual format is different from
-   its raw format.  Note that this definition assumes that the host
-   supports IEEE 32-bit floats, since it doesn't say that SSE
-   registers need conversion.  Even if we can't find a counterexample,
-   this is still sloppy.  */
-
-int
-i386_register_convertible (int regnum)
-{
-  return IS_FP_REGNUM (regnum);
-}
 
 /* Convert data from raw format for register REGNUM in buffer FROM to
    virtual format with type TYPE in buffer TO.  In principle both

@@ -27,7 +27,6 @@
 #
 
 load_lib mi-support.exp
-set MIFLAGS "-i=mi"
 
 gdb_exit
 if [mi_gdb_start] {
@@ -57,7 +56,7 @@ proc test_running_to_main {} {
     mi_run_cmd
 
     gdb_expect {
-	-re "000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",line=\"32\"\}\r\n$mi_gdb_prompt$" {
+	-re "000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\{\},file=\".*basics.c\",line=\"32\"\}\r\n$mi_gdb_prompt$" {
 	    pass "run to main"
 	}
 	timeout {
@@ -72,7 +71,7 @@ proc test_stepi_nexti {} {
 
     send_gdb "111-exec-step-instruction\n"
     gdb_expect {
-	-re "111\\^running\r\n${mi_gdb_prompt}111\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",line=\"3.\"\}\r\n$mi_gdb_prompt$" {
+	-re "111\\^running\r\n${mi_gdb_prompt}111\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\{\},file=\".*basics.c\",line=\"3.\"\}\r\n$mi_gdb_prompt$" {
 	    pass "step-instruction at main"
 	}
 	timeout {
@@ -81,7 +80,7 @@ proc test_stepi_nexti {} {
     }
     send_gdb "222-exec-next-instruction\n"
     gdb_expect {
-	-re "222\\^running\r\n${mi_gdb_prompt}222\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",line=\"3.\"\}\r\n$mi_gdb_prompt$" {
+	-re "222\\^running\r\n${mi_gdb_prompt}222\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\{\},file=\".*basics.c\",line=\"3.\"\}\r\n$mi_gdb_prompt$" {
 	    pass "next-instruction at main"
 	}
 	timeout {
@@ -90,7 +89,7 @@ proc test_stepi_nexti {} {
     }
     send_gdb "333-exec-next-instruction\n"
     gdb_expect {
-	-re "333\\^running\r\n${mi_gdb_prompt}333\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",line=\"3.\"\}\r\n$mi_gdb_prompt$" {
+	-re "333\\^running\r\n${mi_gdb_prompt}333\\*stopped,reason=\"end-stepping-range\",thread-id=\"0\",frame=\{addr=\"$hex\",func=\"main\",args=\{\},file=\".*basics.c\",line=\"3.\"\}\r\n$mi_gdb_prompt$" {
 	    pass "next-instruction at main"
 	}
 	timeout {
@@ -104,3 +103,8 @@ test_stepi_nexti
 
 mi_gdb_exit
 return 0
+
+# Local variables: 
+# change-log-default-name: "ChangeLog-mi"
+# End:
+

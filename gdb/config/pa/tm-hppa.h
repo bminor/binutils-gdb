@@ -568,7 +568,7 @@ extern void hppa_pop_frame (void);
 #else /* defined PA_LEVEL_0 */
 
 /* This is the call dummy for a level 0 PA.  Level 0's don't have space
-   registers (or floating point?), so we skip all that inter-space call stuff,
+   registers (or floating point??), so we skip all that inter-space call stuff,
    and avoid touching the fp regs.
 
    call_dummy
@@ -767,12 +767,12 @@ extern CORE_ADDR skip_trampoline_code (CORE_ADDR, char *);
 #endif
 
 #define TARGET_READ_PC(pid) target_read_pc (pid)
-extern CORE_ADDR target_read_pc (ptid_t);
+extern CORE_ADDR target_read_pc (int);
 
 #define TARGET_WRITE_PC(v,pid) target_write_pc (v,pid)
-extern void target_write_pc (CORE_ADDR, ptid_t);
+extern void target_write_pc (CORE_ADDR, int);
 
-#define TARGET_READ_FP() target_read_fp (PIDGET (inferior_ptid))
+#define TARGET_READ_FP() target_read_fp (inferior_pid)
 extern CORE_ADDR target_read_fp (int);
 
 /* For a number of horrible reasons we may have to adjust the location

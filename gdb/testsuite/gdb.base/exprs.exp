@@ -1,4 +1,4 @@
-#   Copyright 1988, 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1998, 2000, 2001
+#   Copyright 1988, 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1998, 2000
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -101,11 +101,11 @@ test_expr "set variable v_unsigned_char=127" "print v_unsigned_char > 0" "\\$\[0
 # FIXME:  gdb mishandles the cast (unsigned char) on the i960, so I've
 # set up an expected failure for this case.
 setup_xfail "i960-*-*" 1821
-test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char == 0" "\\$\[0-9\]* = $false"  "print v_unsigned_char == ~0" "\\$\[0-9\]* = $false"  "print v_unsigned_char == (unsigned char)~0" "\\$\[0-9\]* = $true" "print unsigned char == (~0)"
+test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char == 0" "\\$\[0-9\]* = $false"  "print v_unsigned_char == ~0" "\\$\[0-9\]* = $false"  "print v_unsigned_char == (unsigned char)~0" "\\$\[0-9\]* = $true"  "print unsigned char == (~0)"
 # FIXME:  gdb mishandles the cast (unsigned char) on the i960, so I've
 # set up an expected failure for this case.
 setup_xfail "i960-*-*" 1821
-test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char != 0" "\\$\[0-9\]* = $true"  "print v_unsigned_char != (unsigned char)~0" "\\$\[0-9\]* = $false"  "print v_unsigned_char != ~0" "\\$\[0-9\]* = $true" "print unsigned char != (~0)"
+test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char != 0" "\\$\[0-9\]* = $true"  "print v_unsigned_char != (unsigned char)~0" "\\$\[0-9\]* = $false"  "print unsigned char != (~0)"
 test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char < 0" "\\$\[0-9\]* = $false"  "print v_unsigned_char < 127" "\\$\[0-9\]* = $false"  "print unsigned char < (~0)"
 test_expr "set variable v_unsigned_char=~0" "print v_unsigned_char > 0" "\\$\[0-9\]* = $true"  "print v_unsigned_char > 127" "\\$\[0-9\]* = $true"  "print unsigned char > (~0)"
 #
@@ -140,7 +140,7 @@ test_expr "set variable v_unsigned_short=0x7FFF" "print v_unsigned_short != 0" "
 test_expr "set variable v_unsigned_short=0x7FFF" "print v_unsigned_short < 0" "\\$\[0-9\]* = $false"  "print v_unsigned_short < 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned short <"
 test_expr "set variable v_unsigned_short=0x7FFF" "print v_unsigned_short > 0" "\\$\[0-9\]* = $true"  "print v_unsigned_short > 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned short >"
 # make short a minus
-test_expr "set variable v_unsigned_short=~0" "print v_unsigned_short == 0" "\\$\[0-9\]* = $false"  "print sizeof (v_unsigned_short) < sizeof (~0) && v_unsigned_short == ~0" "\\$\[0-9\]* = $false"  "print v_unsigned_short == (unsigned short)~0" "\\$\[0-9\]* = $true"  "print unsigned short == (~0)"
+test_expr "set variable v_unsigned_short=~0" "print v_unsigned_short == 0" "\\$\[0-9\]* = $false"  "print v_unsigned_short == ~0" "\\$\[0-9\]* = $false"  "print v_unsigned_short == (unsigned short)~0" "\\$\[0-9\]* = $true"  "print unsigned short == (~0)"
 test_expr "set variable v_unsigned_short=~0" "print v_unsigned_short != 0" "\\$\[0-9\]* = $true"  "print v_unsigned_short != (unsigned short)~0" "\\$\[0-9\]* = $false"  "print unsigned short != (~0)"
 test_expr "set variable v_unsigned_short=~0" "print v_unsigned_short < 0" "\\$\[0-9\]* = $false"  "print v_unsigned_short < 0x7FFF" "\\$\[0-9\]* = $false"  "print unsigned short < (~0)"
 test_expr "set variable v_unsigned_short=~0" "print v_unsigned_short > 0" "\\$\[0-9\]* = $true"  "print v_unsigned_short > 0x7FFF" "\\$\[0-9\]* = $true"  "print unsigned short > (~0)"
@@ -238,11 +238,11 @@ test_expr "set variable v_unsigned_long = 0" "print (void*)v_unsigned_long" "\\$
 #
 send_gdb "print sizeof (long long) > sizeof (long)\n"
 gdb_expect {
-    -re "\\$\[0-9\]* = $true.*$gdb_prompt" {
+    -re "\\$\[0-9\]* = $true" {
 	set ok 1
 	pass "sizeof (long long) > sizeof (long) (true)"
     }
-    -re "\\$\[0-9\]* = $false.*$gdb_prompt" {
+    -re "\\$\[0-9\]* = $false" {
 	set ok 0
 	pass "sizeof (long long) > sizeof (long) (false)"
     }

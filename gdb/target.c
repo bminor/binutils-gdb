@@ -71,7 +71,7 @@ static void update_current_target (void);
 
 static void nosupport_runtime (void);
 
-static void normal_target_post_startup_inferior (ptid_t ptid);
+static void normal_target_post_startup_inferior (int pid);
 
 /* Transfer LEN bytes between target address MEMADDR and GDB address
    MYADDR.  Returns 0 for success, errno code for failure (which
@@ -92,9 +92,9 @@ static void debug_to_attach (char *, int);
 
 static void debug_to_detach (char *, int);
 
-static void debug_to_resume (ptid_t, int, enum target_signal);
+static void debug_to_resume (int, int, enum target_signal);
 
-static ptid_t debug_to_wait (ptid_t, struct target_waitstatus *);
+static int debug_to_wait (int, struct target_waitstatus *);
 
 static void debug_to_fetch_registers (int);
 
@@ -134,9 +134,9 @@ static void debug_to_mourn_inferior (void);
 
 static int debug_to_can_run (void);
 
-static void debug_to_notice_signals (ptid_t);
+static void debug_to_notice_signals (int);
 
-static int debug_to_thread_alive (ptid_t);
+static int debug_to_thread_alive (int);
 
 static void debug_to_stop (void);
 
@@ -271,7 +271,7 @@ nosymbol (char *name, CORE_ADDR *addrp)
 static void
 nosupport_runtime (void)
 {
-  if (ptid_equal (inferior_ptid, null_ptid))
+  if (!inferior_pid)
     noprocess ();
   else
     error ("No run-time support for this");
@@ -363,13 +363,13 @@ cleanup_target (struct target_ops *t)
 	    (void (*) (int, char *, int)) 
 	    target_ignore);
   de_fault (to_resume, 
-	    (void (*) (ptid_t, int, enum target_signal)) 
+	    (void (*) (int, int, enum target_signal)) 
 	    noprocess);
   de_fault (to_wait, 
-	    (ptid_t (*) (ptid_t, struct target_waitstatus *)) 
+	    (int (*) (int, struct target_waitstatus *)) 
 	    noprocess);
   de_fault (to_post_wait, 
-	    (void (*) (ptid_t, int)) 
+	    (void (*) (int, int)) 
 	    target_ignore);
   de_fault (to_fetch_registers, 
 	    (void (*) (int)) 
@@ -416,7 +416,7 @@ cleanup_target (struct target_ops *t)
   de_fault (to_create_inferior, 
 	    maybe_kill_then_create_inferior);
   de_fault (to_post_startup_inferior, 
-	    (void (*) (ptid_t)) 
+	    (void (*) (int)) 
 	    target_ignore);
   de_fault (to_acknowledge_created_inferior, 
 	    (void (*) (int)) 
@@ -474,10 +474,10 @@ cleanup_target (struct target_ops *t)
   de_fault (to_can_run, 
 	    return_zero);
   de_fault (to_notice_signals, 
-	    (void (*) (ptid_t)) 
+	    (void (*) (int)) 
 	    target_ignore);
   de_fault (to_thread_alive, 
-	    (int (*) (ptid_t)) 
+	    (int (*) (int)) 
 	    return_zero);
   de_fault (to_find_new_threads, 
 	    (void (*) (void)) 
@@ -1376,7 +1376,7 @@ generic_mourn_inferior (void)
 {
   extern int show_breakpoint_hit_counts;
 
-  inferior_ptid = null_ptid;
+  inferior_pid = 0;
   attach_flag = 0;
   breakpoint_init_inferior (inf_exited);
   registers_changed ();
@@ -1487,69 +1487,6 @@ static struct {
   {"SIGCANCEL", "LWP internal signal"},
   {"SIG32", "Real-time event 32"},
   {"SIG64", "Real-time event 64"},
-  {"SIG65", "Real-time event 65"},
-  {"SIG66", "Real-time event 66"},
-  {"SIG67", "Real-time event 67"},
-  {"SIG68", "Real-time event 68"},
-  {"SIG69", "Real-time event 69"},
-  {"SIG70", "Real-time event 70"},
-  {"SIG71", "Real-time event 71"},
-  {"SIG72", "Real-time event 72"},
-  {"SIG73", "Real-time event 73"},
-  {"SIG74", "Real-time event 74"},
-  {"SIG75", "Real-time event 75"},
-  {"SIG76", "Real-time event 76"},
-  {"SIG77", "Real-time event 77"},
-  {"SIG78", "Real-time event 78"},
-  {"SIG79", "Real-time event 79"},
-  {"SIG80", "Real-time event 80"},
-  {"SIG81", "Real-time event 81"},
-  {"SIG82", "Real-time event 82"},
-  {"SIG83", "Real-time event 83"},
-  {"SIG84", "Real-time event 84"},
-  {"SIG85", "Real-time event 85"},
-  {"SIG86", "Real-time event 86"},
-  {"SIG87", "Real-time event 87"},
-  {"SIG88", "Real-time event 88"},
-  {"SIG89", "Real-time event 89"},
-  {"SIG90", "Real-time event 90"},
-  {"SIG91", "Real-time event 91"},
-  {"SIG92", "Real-time event 92"},
-  {"SIG93", "Real-time event 93"},
-  {"SIG94", "Real-time event 94"},
-  {"SIG95", "Real-time event 95"},
-  {"SIG96", "Real-time event 96"},
-  {"SIG97", "Real-time event 97"},
-  {"SIG98", "Real-time event 98"},
-  {"SIG99", "Real-time event 99"},
-  {"SIG100", "Real-time event 100"},
-  {"SIG101", "Real-time event 101"},
-  {"SIG102", "Real-time event 102"},
-  {"SIG103", "Real-time event 103"},
-  {"SIG104", "Real-time event 104"},
-  {"SIG105", "Real-time event 105"},
-  {"SIG106", "Real-time event 106"},
-  {"SIG107", "Real-time event 107"},
-  {"SIG108", "Real-time event 108"},
-  {"SIG109", "Real-time event 109"},
-  {"SIG110", "Real-time event 110"},
-  {"SIG111", "Real-time event 111"},
-  {"SIG112", "Real-time event 112"},
-  {"SIG113", "Real-time event 113"},
-  {"SIG114", "Real-time event 114"},
-  {"SIG115", "Real-time event 115"},
-  {"SIG116", "Real-time event 116"},
-  {"SIG117", "Real-time event 117"},
-  {"SIG118", "Real-time event 118"},
-  {"SIG119", "Real-time event 119"},
-  {"SIG120", "Real-time event 120"},
-  {"SIG121", "Real-time event 121"},
-  {"SIG122", "Real-time event 122"},
-  {"SIG123", "Real-time event 123"},
-  {"SIG124", "Real-time event 124"},
-  {"SIG125", "Real-time event 125"},
-  {"SIG126", "Real-time event 126"},
-  {"SIG127", "Real-time event 127"},
 
 #if defined(MACH) || defined(__MACH__)
   /* Mach exceptions */
@@ -1852,9 +1789,6 @@ target_signal_from_host (int hostsig)
 	  (hostsig - 33 + (int) TARGET_SIGNAL_REALTIME_33);
       else if (hostsig == 32)
 	return TARGET_SIGNAL_REALTIME_32;
-      else if (64 <= hostsig && hostsig <= 127)
-	return (enum target_signal)
-	  (hostsig - 64 + (int) TARGET_SIGNAL_REALTIME_64);
       else
 	error ("GDB bug: target.c (target_signal_from_host): unrecognized real-time signal");
     }
@@ -2127,19 +2061,6 @@ do_target_signal_to_host (enum target_signal oursig,
 	  return 32;
 	}
 #endif
-#if (REALTIME_HI > 64)
-      if (oursig >= TARGET_SIGNAL_REALTIME_64
-	  && oursig <= TARGET_SIGNAL_REALTIME_127)
-	{
-	  /* This block of signals is continuous, and
-             TARGET_SIGNAL_REALTIME_64 is 64 by definition.  */
-	  int retsig =
-	    (int) oursig - (int) TARGET_SIGNAL_REALTIME_64 + 64;
-	  if (retsig >= REALTIME_LO && retsig < REALTIME_HI)
-	    return retsig;
-	}
-      
-#endif
 #endif
 
 #if defined (SIGRTMIN)
@@ -2241,11 +2162,11 @@ int target_activity_fd;
    buffer.  */
 
 char *
-normal_pid_to_str (ptid_t ptid)
+normal_pid_to_str (int pid)
 {
   static char buf[30];
 
-  sprintf (buf, "process %d", PIDGET (ptid));
+  sprintf (buf, "process %d", pid);
   return buf;
 }
 
@@ -2262,7 +2183,7 @@ normal_pid_to_str (ptid_t ptid)
    target_acknowledge_forked_child.
  */
 static void
-normal_target_post_startup_inferior (ptid_t ptid)
+normal_target_post_startup_inferior (int pid)
 {
   /* This space intentionally left blank. */
 }
@@ -2349,25 +2270,24 @@ debug_to_require_detach (int pid, char *args, int from_tty)
 }
 
 static void
-debug_to_resume (ptid_t ptid, int step, enum target_signal siggnal)
+debug_to_resume (int pid, int step, enum target_signal siggnal)
 {
-  debug_target.to_resume (ptid, step, siggnal);
+  debug_target.to_resume (pid, step, siggnal);
 
-  fprintf_unfiltered (gdb_stdlog, "target_resume (%d, %s, %s)\n", PIDGET (ptid),
+  fprintf_unfiltered (gdb_stdlog, "target_resume (%d, %s, %s)\n", pid,
 		      step ? "step" : "continue",
 		      target_signal_to_name (siggnal));
 }
 
-static ptid_t
-debug_to_wait (ptid_t ptid, struct target_waitstatus *status)
+static int
+debug_to_wait (int pid, struct target_waitstatus *status)
 {
-  ptid_t retval;
+  int retval;
 
-  retval = debug_target.to_wait (ptid, status);
+  retval = debug_target.to_wait (pid, status);
 
   fprintf_unfiltered (gdb_stdlog,
-		      "target_wait (%d, status) = %d,   ", PIDGET (ptid),
-		      PIDGET (retval));
+		      "target_wait (%d, status) = %d,   ", pid, retval);
   fprintf_unfiltered (gdb_stdlog, "status->kind = ");
   switch (status->kind)
     {
@@ -2407,12 +2327,12 @@ debug_to_wait (ptid_t ptid, struct target_waitstatus *status)
 }
 
 static void
-debug_to_post_wait (ptid_t ptid, int status)
+debug_to_post_wait (int pid, int status)
 {
-  debug_target.to_post_wait (ptid, status);
+  debug_target.to_post_wait (pid, status);
 
   fprintf_unfiltered (gdb_stdlog, "target_post_wait (%d, %d)\n",
-		      PIDGET (ptid), status);
+		      pid, status);
 }
 
 static void
@@ -2601,12 +2521,12 @@ debug_to_create_inferior (char *exec_file, char *args, char **env)
 }
 
 static void
-debug_to_post_startup_inferior (ptid_t ptid)
+debug_to_post_startup_inferior (int pid)
 {
-  debug_target.to_post_startup_inferior (ptid);
+  debug_target.to_post_startup_inferior (pid);
 
   fprintf_unfiltered (gdb_stdlog, "target_post_startup_inferior (%d)\n",
-		      PIDGET (ptid));
+		      pid);
 }
 
 static void
@@ -2856,23 +2776,22 @@ debug_to_can_run (void)
 }
 
 static void
-debug_to_notice_signals (ptid_t ptid)
+debug_to_notice_signals (int pid)
 {
-  debug_target.to_notice_signals (ptid);
+  debug_target.to_notice_signals (pid);
 
-  fprintf_unfiltered (gdb_stdlog, "target_notice_signals (%d)\n",
-                      PIDGET (ptid));
+  fprintf_unfiltered (gdb_stdlog, "target_notice_signals (%d)\n", pid);
 }
 
 static int
-debug_to_thread_alive (ptid_t ptid)
+debug_to_thread_alive (int pid)
 {
   int retval;
 
-  retval = debug_target.to_thread_alive (ptid);
+  retval = debug_target.to_thread_alive (pid);
 
   fprintf_unfiltered (gdb_stdlog, "target_thread_alive (%d) = %d\n",
-		      PIDGET (ptid), retval);
+		      pid, retval);
 
   return retval;
 }

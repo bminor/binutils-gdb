@@ -623,6 +623,7 @@ dos_readchar (serial_t scb, int timeout)
     {
       if (timeout >= 0 && (rawclock () - then) >= 0)
 	return SERIAL_TIMEOUT;
+      notice_quit ();
     }
 
   return c;

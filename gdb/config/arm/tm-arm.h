@@ -23,7 +23,6 @@
 #define TM_ARM_H
 
 #include "regcache.h"
-#include "floatformat.h"
 
 /* Forward declarations for prototypes.  */
 struct type;

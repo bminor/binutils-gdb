@@ -1,186 +1,3 @@
-2001-07-03  Michael Snyder  <msnyder@redhat.com>
-
-	* gdb.c++/classes.exp: Accept both "foo(void)" and "foo()" in
-	the output of the ptype command.
-
-2001-07-02  Michael Snyder  <msnyder@redhat.com>
-
-	* gdb.base/corefile.exp: Quote the curly braces in regexp.
-
-2001-06-28  Andrew Cagney  <ac131313@redhat.com>
-
-	* gdb.disasm/Makefile.in (clean mostlyclean): Add h8300s to list
-	of files to delete.
-
-	From 2000-06-15 Kazu Hirata <kazu@hxi.com>:
-	* gdb.disasm/h8300s.exp: New file.
-	gdb.disasm/h8300s.s: Likewise.
-
-2001-06-27  Andrew Cagney  <ac131313@redhat.com>
-
-	* lib/mi-support.exp (mi_delete_breakpoints): Accept mi1 format
-	empty breakpoint tables.
-
-2001-06-25  Andrew Cagney  <ac131313@redhat.com>
-
-	* lib/mi-support.exp: Update args=... part of stop-reason
-	patterns. Accept either a list or a tuple.
-
-2001-06-23  Andrew Cagney  <ac131313@redhat.com>
-
-	* lib/mi-support.exp: Remove local emacs variable defining
-	change-log-default-name.
-
-2001-06-22  Michael Chastain  <chastain@redhat.com>
-
-	* gdb.base/arithmet.exp: Use gdb_test instead of send_gdb/gdb_expect.
-	This is operationally compatible with the previous version.
-
-2001-06-13  Jim Blandy  <jimb@redhat.com>
-
-	* lib/gdb.exp (gdb_test): Doc fix.
-
-2001-06-10  Michael Chastain  <chastain@redhat.com>
-
-	* gdb.base/exprs.exp: Remove a duplicate test.
-
-2001-06-06  Jim Blandy  <jimb@redhat.com>
-
-	* gdb.base/return2.exp (main): Use values to test float and double
-	returns that are not NaN's, to avoid being confused by IEEE
-	comparison rules.
-
-2001-06-04  Michael Snyder  <msnyder@redhat.com>
-
-	* gdb.threads/pthreads.exp (check_control_c): Return 0 for success,
-	non-zero if control_c fails.  Terminate the test on failure, 
-	rather than wait for 12 more tests to time out.
-
-2001-06-06  Jim Blandy  <jimb@redhat.com>
-
-	* gdb.base/exprs.exp ("sizeof (long long) > sizeof (long) (true)"):
-	Don't forget to match the GDB prompt. 
-
-	* gdb.trace/gdb_c_test.c, actions.c: Fix misspellings.
-
-2001-06-04  Jim Blandy  <jimb@redhat.com>
-
-	* gdb.base/help.exp: Update pattern to exclude `print-load-map'
-	command.
-
-2001-05-31  Kevin Buettner  <kevinb@redhat.com>
-
-	* gdb.base/annota1.exp (info break): Match four or more spaces
-	after "Address".
-
-2001-05-31  Michael Chastain  <chastain@redhat.com>
-
-	* gdb.c++/cplusfuncs.cc (dm_type_char_star): Remove superfluous cast.
-	(dm_type_int_star): Likewise.
-	(dm_type_long_star): Likewise.
-	(dm_type_void_star): Likewise.
-
-2001-05-29  Kevin Buettner  <kevinb@redhat.com>
-
-	* gdb.base/completion.exp (INPUTRC): Set this environment variable
-	to a known value in order to get consistent results regardless
-	of the setting of INPUTRC or the presence or contents of .inputrc.
-
-2001-05-24  Michael Snyder  <msnyder@redhat.com>
-
-	* gdb.threads/linux-dp.exp: Remove assumptions about thread ordering.
-	Don't require that the main thread and the manager thread are the
-	first in the list.
-
-	* gdb.threads/pthreads.exp (test_startup): Relax test for thread
-	debugging.  If test fails, issue an "unsupported" not a "fail".
-
-2001-05-24  Jim Blandy  <jimb@redhat.com>
-
-	Don't assume that short is shorter than int.
-	* gdb.base/exprs.exp ("print unsigned short == (~0)"): Don't
-	assume that shorts are smaller than ints.  On a 16-bit machine,
-	this isn't true. 
-	("print unsigned char == (~0)"): Add test that verifies that ~0,
-	an int, is not equal to ~0 stored in an unsigned char.  This tests
-	the same thing that the previous test meant to, but works on
-	16-bit machines, too.
-	("print unsigned char != (~0)"): Same test, complemented.
-
-2001-05-24  Michael Snyder  <msnyder@redhat.com>
-
-	* gdb.threads/pthreads.exp (all_threads_running): Add an explicit
-	test for (full_coverage == 0).  This makes the test run faster, 
-	and prevents dejagnu getting out of step.
-
-2001-05-23  Kevin Buettner  <kevinb@redhat.com>
-
-	* gdb.base/finish.exp (finish_void): Revise pattern for
-	stopping on the call statement to not permit stopping at
-	the start of the instructions comprising the call sequence.
-
-2001-05-19  Michael Chastain  <chastain@redhat.com>
-
-	* gdb.base/callfuncs.exp: Make all test names unique.
-	* gdb.base/commands.exp: Make all test names unique.
-	* gdb.base/condbreak.exp: Make all test names unique.
-	* gdb.base/dbx.exp: Make all test names unique.
-	* gdb.base/default.exp: Make all test names unique.
-	* gdb.base/define.exp: Make all test names unique.  Conform some FAIL
-	and TIMEOUT messages to their corresponding PASS message.
-	* gdb.base/ending-run.exp: Make all test names unique.
-	* gdb.base/long_long.exp: Remove duplicate test.
-
-2001-05-21  Kevin Buettner  <kevinb@redhat.com>
-
-	* gdb.base/finish.exp (finish_void): Allow "finish" command to
-	stop on the call statement as well as the statement after the
-	call.
-
-2001-05-21  Michael Snyder  <msnyder@redhat.com>
-
-	* gdb.base/long_long.exp: Allow for targets with 4-byte short.
-
-2001-05-10  Elena Zannoni  <ezannoni@redhat.com>
-
-        * gdb.base/completion.exp: Revamp test. Make it execute on all
-        platforms.
-
-2001-05-10  Elena Zannoni  <ezannoni@redhat.com>
-
-        * config/gdbserver.exp (gdb_load): Handle the case
-        in which the arguments to gdbserver are given in the
-        baseboard configuration file.
-        Also handle the case in which the server needs to do a
-        load.
-
-2001-05-07  Keith Seitz <keiths@cygnus.com>
-
-        * lib/gdb.exp (gdbtk_initialize_display): New proc which will
-        set up the display for testing.
-        (gdbtk_start): Convert all paths to paths that tcl will like.
-        Export target information to environment.
-        (_gdbtk_xvfb_init): New proc to start Xvfb if available and
-        necessary.
-        (_gdbtk_xvfb_exit): New proc to kill Xvfb if necessary.
-        (to_tcl_path): New proc to convert a given pathname into
-        a path acceptible as an argument to a tcl command.
-        (_gdbtk_export_target_info): New proc to export target info
-        into the environment for gdbtk testing.
-        (gdbtk_done): New proc to signal end-of-test.
-
-2001-05-06  Jim Blandy  <jimb@redhat.com>
-
-	* restore.c: Make the code of caller0 correspond to its comment.
-
-2001-05-03  Michael Snyder  <msnyder@redhat.com>
-
-	* config/sid.exp (gdb_target_sid): Check for error messages.
-	On error or timeout, don't make expect exit (which will terminate
-	all subsequent tests); instead just make gdb exit.
-	(gdb_load): Check for error messages.  On error or timeout, 
-	return a negative value.
-
 2001-04-24  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.c++/templates.exp: If we see the prompt for the overload
@@ -410,48 +227,6 @@ Sun Feb  4 17:32:21 2001  Andrew Cagney  <cagney@redhat.com>
 2001-01-30  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.c++/templates.cc (printf): Remove unused function definition.
-
-2001-01-26  Felix Lee  <flee@redhat.com>
-
-	* sid.exp (sid_exit): Pass host, not target, to remote_close.
-
-2001-01-25  matthew green  <mrg@redhat.com>
-
-	* config/sid.exp (sid_start): Call `remote_push_conn' after firing
-	up sid.
-	(sid_exit): Call `remote_pop_conn' after GDB is gone.
-
-2001-01-25  matthew green  <mrg@redhat.com>
-
-	* config/sid.exp (sid_start): Use `remote_spawn' instead of `spawn.'
-	Deprecate $sid_spawn_id. 
-	(sid_exit): Remove code necessary only for `spawn.'
-
-2001-01-25  matthew green  <mrg@redhat.com>
-
-	* config/sid.exp (sid_start): Handle sim,protocol of `sid.'
-
-2001-01-28  Michael Chastain  <chastain@redhat.com>
-
-	* gdb.c++/ovldbreak.exp (take_gdb_out_of_choice_menu): New proc
-	to call when tests fail.  It takes gdb out of the overloaded
-	function choice menu back to the main prompt, so that the test
-	program stays synchronized.
-	(set_bp_overloaded): New proc to collect all the common
-	code for setting a breakpoint on an overloaded name.  Calls
-	take_gdb_out_of_choice_menu when needed.
-	(menu_overload1arg): New variable to collect the repeated
-	instances of the expected menu for an overloaded name.  Change
-	the regular expression to handle changes in g++ type encoding:
-	"void" can be either "void" or "", and "unsigned int" can be
-	either "unsigned int" or "unsigned".
-	(continue_to_bp_overloaded): Change regular expressions to handle
-	changes in g++ type encoding.
-	(no proc): Call take_gdb_out_of_choice_menu when needed.
-	Remove redundant calls to "info break".  Accept either "canceled"
-	or "cancelled".  Change regular expressions in "info break"
-	calls to handle changes in g++ type encoding.  Give all tests
-	unique strings.
 
 2001-01-17  Ben Elliston  <bje@redhat.com>
 
@@ -1877,18 +1652,79 @@ Fri Mar 12 18:06:21 1999  Stan Shebs  <shebs@andros.cygnus.com>
  	commands.  They're not germane to this test, and they don't work
  	that way on remote targets.
 
+1999-03-03  James Ingham  <jingham@cygnus.com>
+
+	* browser.test: Fixed up to match the new function browser.
+	This is not done yet...
+
+	* srcwin.test: Check for errors when the bbox is called for a text 
+	item that is not on screen (so bbox is "").  Return something more 
+	useful.
+
 1999-03-01  James Ingham  <jingham@cygnus.com>
 
 	* Changelog entries merged over from gdb development branch.
+
+       1999-01-12  Martin Hunt  <hunt@cygnus.com>
+
+	       * gdb.gdbtk/srcwin.test: Add a bunch of tests for the source
+	       window filename and function comboboxes.  Add in stack tests.
+
+       1999-01-11  Martin Hunt  <hunt@cygnus.com>
+
+	       * gdb.gdbtk/srcwin.test: New file. Source Window tests.
+	       * gdb.gdbtk/srcwin.exp: New file. Source Window tests.
+
+       Wed Jan  6 09:22:52 1999  Keith Seitz  <keiths@cygnus.com>
+
+	       * gdb.gdbtk/c_variable.test (c_variable-1.9): Add new
+	       test to check for creation of a variable that is really a type.
+	       (c_variable-7.81): Use "output" instead of "print" to get PC.
+	       Include missing bits of test.
+
+	       * gdb.gdbtk/cpp_variable.test (cpp_variable-1.6): Default format
+	       is now "natural", not "hexadecimal"
+	       (cpp_variable-2.22): Ditto.
+	       (cpp_variable-2.24): Force format to hex before getting value.
+
+	       * gdb.gdbtk/cpp_variable.exp: Supply missing arg to gdbtk_analyze_results.
+
+       Tue Jan  5 12:40:52 1999  Keith Seitz  <keiths@cygnus.com>
+
+	       * gdb.gdbtk/c_variable.c, c_variable.test, c_variable.exp: New C
+	       language tests for variable object interface.
+
+	       * gdb.gdbtk/cpp_variable.h, cpp_variable.cc, cpp_variable.test,
+	       cpp_variable.exp: New C++ language tests for variable object
+	       interface.
+
+	       * gdb.gdbtk/Makefile.in (EXECUTABLES): Add c_variable and cpp_variable.
 
        Tue Jan  5 12:33:47 1999  Keith Seitz  <keiths@cygnus.com>
 
 	       * lib/gdb.exp (gdbtk_analyze_results): Generic function
 	       for outputting results of test run.
 
-	1998-12-07  Martin M. Hunt  <hunt@cygnus.com>
+	       * gdb.gdbtk/defs (gdbtk_test): Handle xpass and xfail.
+	       (gdbtk_test_error): New proc which handles error aborts.
+
+	       * gdb.gdbtk/console.exp: Use gdbtk_analyze_results.
+	       Check if we have a valid DISPLAY before running.
+	       * gdb.gdbtk/browser.exp: Ditto.
+
+       1998-12-07  Martin M. Hunt  <hunt@cygnus.com>
 
 	       * lib/gdb.exp (gdbtk_start): Fix path for itcl library.
+	       * gdb.gdbtk/browser.test: Change "manage open" to ManagedWin::open.
+	       * gdb.gdbtk/console.test: Same.
+	       * gdb.gdbtk/*: Update from devo.
+
+       Fri Jul 24 14:57:19 1998  Keith Seitz  <keiths@cygnus.com>
+
+	       * gdb.gdbtk/Makefile.in: Add new example program "stack".
+	       * gdb.gdbtk/browser.test,browser.exp: Add browser window
+		 tests.
+	       * gdb.gdbtk/stack1.c,stack2.c: Test case for browser window.
 
 1999-02-25  Felix Lee  <flee@cygnus.com>
 
@@ -2418,6 +2254,11 @@ Thurs Jul 9 11:08:31 1998  Dawn Perchik  <dawn@cygnus.com>
 	* gdb.base/commands.exp: Break up infrun_breakpoint_command_test 
 	into two parts to get around a synchronization problem in expect.
 
+Sun Jun 28 22:34:34 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdb.gdbtk/simple.c (main): Make main return an
+	int so compiler will stop complaining.
+
 Fri Jun 26 14:27:13 1998  Keith Seitz  <keiths@cygnus.com>
 
 	* lib/gdb.exp (gdbtk_start): Add startup for gdbtk.
@@ -2427,6 +2268,9 @@ Fri Jun 26 14:27:13 1998  Keith Seitz  <keiths@cygnus.com>
 	* configure: Regenerate.
 
 	* gdb.gdbtk: New directory to hold gdbtk tests.
+
+	* gdb.gdbtk/console.{exp, test}: New console window tests.
+
 
 Fri Jun 26 14:52:47 1998  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 

@@ -47,11 +47,11 @@ extern void _initialize_inftarg (void);
 static void child_prepare_to_store (void);
 
 #ifndef CHILD_WAIT
-static ptid_t child_wait (ptid_t, struct target_waitstatus *);
+static int child_wait (int, struct target_waitstatus *);
 #endif /* CHILD_WAIT */
 
 #if !defined(CHILD_POST_WAIT)
-void child_post_wait (ptid_t, int);
+void child_post_wait (int, int);
 #endif
 
 static void child_open (char *, int);
@@ -87,7 +87,7 @@ static int child_can_run (void);
 static void child_stop (void);
 
 #ifndef CHILD_THREAD_ALIVE
-int child_thread_alive (ptid_t);
+int child_thread_alive (int);
 #endif
 
 static void init_child_ops (void);
@@ -116,8 +116,8 @@ int not_same_real_pid = 1;
 /* Wait for child to do something.  Return pid of child, or -1 in case
    of error; store status through argument pointer OURSTATUS.  */
 
-static ptid_t
-child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+static int
+child_wait (int pid, struct target_waitstatus *ourstatus)
 {
   int save_errno;
   int status;
@@ -126,7 +126,6 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   int related_pid;
   int syscall_id;
   enum target_waitkind kind;
-  int pid;
 
   do
     {
@@ -134,7 +133,7 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 				   attached process. */
       set_sigio_trap ();
 
-      pid = ptrace_wait (inferior_ptid, &status);
+      pid = ptrace_wait (inferior_pid, &status);
 
       save_errno = errno;
 
@@ -153,7 +152,7 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  /* Claim it exited with unknown signal.  */
 	  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
 	  ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
-	  return pid_to_ptid (-1);
+	  return -1;
 	}
 
       /* Did it exit?
@@ -164,28 +163,26 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  continue;
 	}
 
-      if (!target_thread_alive (pid_to_ptid (pid)))
+      if (!target_thread_alive (pid))
 	{
 	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
-	  return pid_to_ptid (pid);
+	  return pid;
 	}
 
       if (target_has_forked (pid, &related_pid)
-	  && ((pid == PIDGET (inferior_ptid)) 
-	      || (related_pid == PIDGET (inferior_ptid))))
+	  && ((pid == inferior_pid) || (related_pid == inferior_pid)))
 	{
 	  ourstatus->kind = TARGET_WAITKIND_FORKED;
 	  ourstatus->value.related_pid = related_pid;
-	  return pid_to_ptid (pid);
+	  return pid;
 	}
 
       if (target_has_vforked (pid, &related_pid)
-	  && ((pid == PIDGET (inferior_ptid))
-	      || (related_pid == PIDGET (inferior_ptid))))
+	  && ((pid == inferior_pid) || (related_pid == inferior_pid)))
 	{
 	  ourstatus->kind = TARGET_WAITKIND_VFORKED;
 	  ourstatus->value.related_pid = related_pid;
-	  return pid_to_ptid (pid);
+	  return pid;
 	}
 
       if (target_has_execd (pid, &execd_pathname))
@@ -203,7 +200,7 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	    {
 	      ourstatus->kind = TARGET_WAITKIND_EXECD;
 	      ourstatus->value.execd_pathname = execd_pathname;
-	      return pid_to_ptid (pid);
+	      return pid;
 	    }
 	}
 
@@ -214,23 +211,23 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	{
 	  ourstatus->kind = kind;
 	  ourstatus->value.syscall_id = syscall_id;
-	  return pid_to_ptid (pid);
+	  return pid;
 	}
 
-      /*##  } while (pid != PIDGET (inferior_ptid)); ## *//* Some other child died or stopped */
+      /*##  } while (pid != inferior_pid); ## *//* Some other child died or stopped */
 /* hack for thread testing */
     }
-  while ((pid != PIDGET (inferior_ptid)) && not_same_real_pid);
+  while ((pid != inferior_pid) && not_same_real_pid);
 /*## */
 
   store_waitstatus (ourstatus, status);
-  return pid_to_ptid (pid);
+  return pid;
 }
 #endif /* CHILD_WAIT */
 
 #if !defined(CHILD_POST_WAIT)
 void
-child_post_wait (ptid_t ptid, int wait_status)
+child_post_wait (int pid, int wait_status)
 {
   /* This version of Unix doesn't require a meaningful "post wait"
      operation.
@@ -247,10 +244,8 @@ child_post_wait (ptid_t ptid, int wait_status)
    for now we're going to try and be compatable with the old thread
    code.  */
 int
-child_thread_alive (ptid_t ptid)
+child_thread_alive (int pid)
 {
-  pid_t pid = PIDGET (ptid);
-
   return (kill (pid, 0) != -1);
 }
 
@@ -285,13 +280,12 @@ child_attach_to_process (char *args, int from_tty, int after_fork)
 
 	if (after_fork)
 	  printf_unfiltered ("Attaching after fork to %s\n",
-			     target_pid_to_str (pid_to_ptid (pid)));
+			     target_pid_to_str (pid));
 	else if (exec_file)
 	  printf_unfiltered ("Attaching to program: %s, %s\n", exec_file,
-			     target_pid_to_str (pid_to_ptid (pid)));
+			     target_pid_to_str (pid));
 	else
-	  printf_unfiltered ("Attaching to %s\n", 
-	                     target_pid_to_str (pid_to_ptid (pid)));
+	  printf_unfiltered ("Attaching to %s\n", target_pid_to_str (pid));
 
 	gdb_flush (gdb_stdout);
       }
@@ -301,7 +295,7 @@ child_attach_to_process (char *args, int from_tty, int after_fork)
     else
       REQUIRE_ATTACH (pid);
 
-    inferior_ptid = pid_to_ptid (pid);
+    inferior_pid = pid;
     push_target (&child_ops);
   }
 #endif /* ATTACH_DETACH */
@@ -345,10 +339,10 @@ child_detach_from_process (int pid, char *args, int from_tty, int after_fork)
 	  exec_file = "";
 	if (after_fork)
 	  printf_unfiltered ("Detaching after fork from %s\n",
-			     target_pid_to_str (pid_to_ptid (pid)));
+			     target_pid_to_str (pid));
 	else
 	  printf_unfiltered ("Detaching from program: %s, %s\n", exec_file,
-			     target_pid_to_str (pid_to_ptid (pid)));
+			     target_pid_to_str (pid));
 	gdb_flush (gdb_stdout);
       }
     if (args)
@@ -375,8 +369,8 @@ child_detach_from_process (int pid, char *args, int from_tty, int after_fork)
 static void
 child_detach (char *args, int from_tty)
 {
-  child_detach_from_process (PIDGET (inferior_ptid), args, from_tty, 0);
-  inferior_ptid = null_ptid;
+  child_detach_from_process (inferior_pid, args, from_tty, 0);
+  inferior_pid = 0;
   unpush_target (&child_ops);
 }
 
@@ -407,7 +401,7 @@ static void
 child_files_info (struct target_ops *ignore)
 {
   printf_unfiltered ("\tUsing the running image of %s %s.\n",
-      attach_flag ? "attached" : "child", target_pid_to_str (inferior_ptid));
+      attach_flag ? "attached" : "child", target_pid_to_str (inferior_pid));
 }
 
 /* ARGSUSED */
@@ -452,10 +446,10 @@ ptrace_him (int pid)
   /* On some targets, there must be some explicit actions taken after
      the inferior has been started up.
    */
-  target_post_startup_inferior (pid_to_ptid (pid));
+  target_post_startup_inferior (pid);
 }
 
-/* Start an inferior Unix child process and sets inferior_ptid to its pid.
+/* Start an inferior Unix child process and sets inferior_pid to its pid.
    EXEC_FILE is the file to run.
    ALLARGS is a string containing the arguments to the program.
    ENV is the environment vector to pass.  Errors reported with error().  */
@@ -475,7 +469,7 @@ child_create_inferior (char *exec_file, char *allargs, char **env)
 
 #if !defined(CHILD_POST_STARTUP_INFERIOR)
 void
-child_post_startup_inferior (ptid_t ptid)
+child_post_startup_inferior (int pid)
 {
   /* This version of Unix doesn't require a meaningful "post startup inferior"
      operation by a debugger.
@@ -742,9 +736,9 @@ child_core_file_to_sym_file (char *core)
 
 #if !defined(CHILD_PID_TO_STR)
 char *
-child_pid_to_str (ptid_t ptid)
+child_pid_to_str (int pid)
 {
-  return normal_pid_to_str (ptid);
+  return normal_pid_to_str (pid);
 }
 #endif
 

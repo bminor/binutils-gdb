@@ -90,6 +90,10 @@ static void print_gdb_help (struct ui_file *);
 extern int enable_external_editor;
 extern char *external_editor_command;
 
+#ifdef __CYGWIN__
+#include <sys/cygwin.h>		/* for cygwin32_conv_to_posix_path */
+#endif
+
 /* Call command_loop.  If it happens to return, pass that through as a
    non-zero return status. */
 
@@ -530,7 +534,21 @@ extern int gdbtk_test (char *);
      *before* all the command line arguments are processed; it sets
      global parameters, which are independent of what file you are
      debugging or what directory you are in.  */
+#ifdef __CYGWIN__
+  {
+    char *tmp = getenv ("HOME");
+
+    if (tmp != NULL)
+      {
+	homedir = (char *) alloca (PATH_MAX + 1);
+	cygwin32_conv_to_posix_path (tmp, homedir);
+      }
+    else
+      homedir = NULL;
+  }
+#else
   homedir = getenv ("HOME");
+#endif
   if (homedir)
     {
       homeinit = (char *) alloca (strlen (homedir) +
@@ -688,6 +706,13 @@ extern int gdbtk_test (char *);
 #endif
     }
 
+  /* The default command loop. 
+     The WIN32 Gui calls this main to set up gdb's state, and 
+     has its own command loop. */
+#if !defined _WIN32 || defined __GNUC__
+  /* GUIs generally have their own command loop, mainloop, or
+     whatever.  This is a good place to gain control because many
+     error conditions will end up here via longjmp(). */
 #if 0
   /* FIXME: cagney/1999-11-06: The original main loop was like: */
   while (1)
@@ -723,6 +748,7 @@ extern int gdbtk_test (char *);
     {
       catch_errors (captured_command_loop, 0, "", RETURN_MASK_ALL);
     }
+#endif
   /* No exit -- exit is through quit_command.  */
 }
 

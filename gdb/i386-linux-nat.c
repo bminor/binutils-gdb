@@ -61,6 +61,17 @@
 /* Prototypes for local functions.  */
 static void dummy_sse_values (void);
 
+/* On Linux, threads are implemented as pseudo-processes, in which
+   case we may be tracing more than one process at a time.  In that
+   case, inferior_pid will contain the main process ID and the
+   individual thread (process) ID mashed together.  These macros are
+   used to separate them out.  These definitions should be overridden
+   if thread support is included.  */
+
+#if !defined (PIDGET)	/* Default definition for PIDGET/TIDGET.  */
+#define PIDGET(PID)	PID
+#define TIDGET(PID)	0
+#endif
 
 
 /* The register sets used in Linux ELF core-dumps are identical to the
@@ -187,8 +198,8 @@ fetch_register (int regno)
     }
 
   /* Overload thread id onto process id */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
-    tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
+  if ((tid = TIDGET (inferior_pid)) == 0)
+    tid = inferior_pid;		/* no thread id, just use process id */
 
   offset = U_REGS_OFFSET;
 
@@ -250,8 +261,8 @@ store_register (int regno)
     }
 
   /* Overload thread id onto process id */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
-    tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
+  if ((tid = TIDGET (inferior_pid)) == 0)
+    tid = inferior_pid;		/* no thread id, just use process id */
 
   offset = U_REGS_OFFSET;
 
@@ -586,8 +597,8 @@ fetch_inferior_registers (int regno)
     }
 
   /* Linux LWP ID's are process ID's.  */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
-    tid = PIDGET (inferior_ptid);		/* Not a threaded program.  */
+  if ((tid = TIDGET (inferior_pid)) == 0)
+    tid = inferior_pid;		/* Not a threaded program.  */
 
   /* Use the PTRACE_GETFPXREGS request whenever possible, since it
      transfers more registers in one system call, and we'll cache the
@@ -652,8 +663,8 @@ store_inferior_registers (int regno)
     }
 
   /* Linux LWP ID's are process ID's.  */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
-    tid = PIDGET (inferior_ptid);	/* Not a threaded program.  */
+  if ((tid = TIDGET (inferior_pid)) == 0)
+    tid = inferior_pid;		/* Not a threaded program.  */
 
   /* Use the PTRACE_SETFPXREGS requests whenever possible, since it
      transfers more registers in one system call.  But remember that
@@ -699,7 +710,7 @@ i386_linux_dr_get (int regnum)
   /* FIXME: kettenis/2001-01-29: It's not clear what we should do with
      multi-threaded processes here.  For now, pretend there is just
      one thread.  */
-  tid = PIDGET (inferior_ptid);
+  tid = PIDGET (inferior_pid);
 
   /* FIXME: kettenis/2001-03-27: Calling perror_with_name if the
      ptrace call fails breaks debugging remote targets.  The correct
@@ -727,7 +738,7 @@ i386_linux_dr_set (int regnum, unsigned long value)
   /* FIXME: kettenis/2001-01-29: It's not clear what we should do with
      multi-threaded processes here.  For now, pretend there is just
      one thread.  */
-  tid = PIDGET (inferior_ptid);
+  tid = PIDGET (inferior_pid);
 
   errno = 0;
   ptrace (PT_WRITE_U, tid,
@@ -868,21 +879,19 @@ static const unsigned char linux_syscall[] = { 0xcd, 0x80 };
    If SIGNAL is nonzero, give it that signal.  */
 
 void
-child_resume (ptid_t ptid, int step, enum target_signal signal)
+child_resume (int pid, int step, enum target_signal signal)
 {
-  int pid = PIDGET (ptid);
-
   int request = PTRACE_CONT;
 
   if (pid == -1)
     /* Resume all threads.  */
     /* I think this only gets used in the non-threaded case, where "resume
-       all threads" and "resume inferior_ptid" are the same.  */
-    pid = PIDGET (inferior_ptid);
+       all threads" and "resume inferior_pid" are the same.  */
+    pid = inferior_pid;
 
   if (step)
     {
-      CORE_ADDR pc = read_pc_pid (pid_to_ptid (pid));
+      CORE_ADDR pc = read_pc_pid (pid);
       unsigned char buf[LINUX_SYSCALL_LEN];
 
       request = PTRACE_SINGLESTEP;
@@ -899,8 +908,7 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
       if (read_memory_nobpt (pc, (char *) buf, LINUX_SYSCALL_LEN) == 0
 	  && memcmp (buf, linux_syscall, LINUX_SYSCALL_LEN) == 0)
 	{
-	  int syscall = read_register_pid (LINUX_SYSCALL_REGNUM,
-	                                   pid_to_ptid (pid));
+	  int syscall = read_register_pid (LINUX_SYSCALL_REGNUM, pid);
 
 	  /* Then check the system call number.  */
 	  if (syscall == SYS_sigreturn || syscall == SYS_rt_sigreturn)

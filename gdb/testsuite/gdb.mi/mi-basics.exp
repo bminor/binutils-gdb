@@ -30,7 +30,6 @@
 #
 
 load_lib mi-support.exp
-set MIFLAGS "-i=mi"
 
 gdb_exit
 if [mi_gdb_start] {
@@ -139,7 +138,7 @@ proc test_breakpoints_deletion {} {
              "break-delete (all) operation"
 
     mi_gdb_test "201-break-list" \
-             ".*\\\^done,BreakpointTable=\\\{.*,body=\\\[\\\]\\\}" \
+             ".*\\\^done,BreakpointTable=\\\{\\\}" \
              "all breakpoints removed"
 }
 
@@ -172,3 +171,7 @@ if [test_mi_interpreter_selection] {
 
 mi_gdb_exit
 return 0
+
+# Local variables: 
+# change-log-default-name: "ChangeLog-mi"
+# End: 

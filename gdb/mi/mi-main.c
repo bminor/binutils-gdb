@@ -271,7 +271,7 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
      case, some entries of REGISTER_NAME will change depending upon
      the particular processor being debugged.  */
 
-  numregs = NUM_REGS + NUM_PSEUDO_REGS;
+  numregs = NUM_REGS;
 
   ui_out_list_begin (uiout, "register-names");
 
@@ -283,9 +283,9 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 	{
 	  if (REGISTER_NAME (regnum) == NULL
 	      || *(REGISTER_NAME (regnum)) == '\0')
-	    ui_out_field_string (uiout, NULL, "");
-	  else
-	    ui_out_field_string (uiout, NULL, REGISTER_NAME (regnum));
+	    continue;
+
+	  ui_out_field_string (uiout, NULL, REGISTER_NAME (regnum));
 	}
     }
 
@@ -293,16 +293,17 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
   for (i = 0; i < argc; i++)
     {
       regnum = atoi (argv[i]);
-      if (regnum < 0 || regnum >= numregs)
+
+      if (regnum >= 0
+	  && regnum < numregs
+	  && REGISTER_NAME (regnum) != NULL
+	  && *REGISTER_NAME (regnum) != '\000')
+	ui_out_field_string (uiout, NULL, REGISTER_NAME (regnum));
+      else
 	{
 	  xasprintf (&mi_error_message, "bad register number");
 	  return MI_CMD_ERROR;
 	}
-      if (REGISTER_NAME (regnum) == NULL
-	  || *(REGISTER_NAME (regnum)) == '\0')
-	ui_out_field_string (uiout, NULL, "");
-      else
-	ui_out_field_string (uiout, NULL, REGISTER_NAME (regnum));
     }
   ui_out_list_end (uiout);
   return MI_CMD_DONE;
@@ -443,12 +444,12 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 	  if (REGISTER_NAME (regnum) == NULL
 	      || *(REGISTER_NAME (regnum)) == '\0')
 	    continue;
-	  ui_out_tuple_begin (uiout, NULL);
+	  ui_out_list_begin (uiout, NULL);
 	  ui_out_field_int (uiout, "number", regnum);
 	  result = get_register (regnum, format);
 	  if (result == -1)
 	    return MI_CMD_ERROR;
-	  ui_out_tuple_end (uiout);
+	  ui_out_list_end (uiout);
 	}
     }
 
@@ -462,12 +463,12 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 	  && REGISTER_NAME (regnum) != NULL
 	  && *REGISTER_NAME (regnum) != '\000')
 	{
-	  ui_out_tuple_begin (uiout, NULL);
+	  ui_out_list_begin (uiout, NULL);
 	  ui_out_field_int (uiout, "number", regnum);
 	  result = get_register (regnum, format);
 	  if (result == -1)
 	    return MI_CMD_ERROR;
-	  ui_out_tuple_end (uiout);
+	  ui_out_list_end (uiout);
 	}
       else
 	{
@@ -899,7 +900,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
       {
 	int col;
 	int col_byte;
-	ui_out_tuple_begin (uiout, NULL);
+	ui_out_list_begin (uiout, NULL);
 	ui_out_field_core_addr (uiout, "addr", addr + row_byte);
 	/* ui_out_field_core_addr_symbolic (uiout, "saddr", addr + row_byte); */
 	ui_out_list_begin (uiout, "data");
@@ -939,7 +940,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 	      }
 	    ui_out_field_stream (uiout, "ascii", stream);
 	  }
-	ui_out_tuple_end (uiout);
+	ui_out_list_end (uiout);
       }
     ui_out_stream_delete (stream);
     ui_out_list_end (uiout);
@@ -1271,7 +1272,6 @@ mi_execute_async_cli_command (char *mi, char *args, int from_tty)
       xasprintf (&run, "%s %s", mi, async_args);
       make_exec_cleanup (free, run);
       add_continuation (mi_exec_async_cli_cmd_continuation, NULL);
-      old_cleanups = NULL;
     }
   else
     {
@@ -1350,7 +1350,7 @@ mi_load_progress (const char *section_name,
   static char *previous_sect_name = NULL;
   int new_section;
 
-  if (!interpreter_p || strncmp (interpreter_p, "mi", 2) != 0)
+  if (!interpreter_p || strcmp (interpreter_p, "mi") != 0)
     return;
 
   update_threshold.tv_sec = 0;
@@ -1376,11 +1376,11 @@ mi_load_progress (const char *section_name,
       if (last_async_command)
 	fputs_unfiltered (last_async_command, raw_stdout);
       fputs_unfiltered ("+download", raw_stdout);
-      ui_out_tuple_begin (uiout, NULL);
+      ui_out_list_begin (uiout, NULL);
       ui_out_field_string (uiout, "section", section_name);
       ui_out_field_int (uiout, "section-size", total_section);
       ui_out_field_int (uiout, "total-size", grand_total);
-      ui_out_tuple_end (uiout);
+      ui_out_list_end (uiout);
       mi_out_put (uiout, raw_stdout);
       fputs_unfiltered ("\n", raw_stdout);
       gdb_flush (raw_stdout);
@@ -1394,13 +1394,13 @@ mi_load_progress (const char *section_name,
       if (last_async_command)
 	fputs_unfiltered (last_async_command, raw_stdout);
       fputs_unfiltered ("+download", raw_stdout);
-      ui_out_tuple_begin (uiout, NULL);
+      ui_out_list_begin (uiout, NULL);
       ui_out_field_string (uiout, "section", section_name);
       ui_out_field_int (uiout, "section-sent", sent_so_far);
       ui_out_field_int (uiout, "section-size", total_section);
       ui_out_field_int (uiout, "total-sent", total_sent);
       ui_out_field_int (uiout, "total-size", grand_total);
-      ui_out_tuple_end (uiout);
+      ui_out_list_end (uiout);
       mi_out_put (uiout, raw_stdout);
       fputs_unfiltered ("\n", raw_stdout);
       gdb_flush (raw_stdout);
@@ -1408,7 +1408,7 @@ mi_load_progress (const char *section_name,
 }
 
 static void
-mi_command_loop (int mi_version)
+mi_command_loop (void)
 {
   /* HACK: Force stdout/stderr to point at the console.  This avoids
      any potential side effects caused by legacy code that is still
@@ -1424,7 +1424,7 @@ mi_command_loop (int mi_version)
 
   /* HACK: Poke the ui_out table directly.  Should we be creating a
      mi_out object wired up to the above gdb_stdout / gdb_stderr? */
-  uiout = mi_out_new (mi_version);
+  uiout = mi_out_new ();
 
   /* HACK: Override any other interpreter hooks.  We need to create a
      real event table and pass in that. */
@@ -1464,18 +1464,6 @@ mi_command_loop (int mi_version)
 }
 
 static void
-mi0_command_loop (void)
-{
-  mi_command_loop (0);
-}
-
-static void
-mi1_command_loop (void)
-{
-  mi_command_loop (1);
-}
-
-static void
 setup_architecture_data (void)
 {
   /* don't trust REGISTER_BYTES to be zero. */
@@ -1493,30 +1481,24 @@ mi_init_ui (char *arg0)
 void
 _initialize_mi_main (void)
 {
-  if (interpreter_p == NULL)
-    return;
-
   /* If we're _the_ interpreter, take control. */
-  if (strcmp (interpreter_p, "mi0") == 0)
-    command_loop_hook = mi0_command_loop;
-  else if (strcmp (interpreter_p, "mi") == 0
-	   || strcmp (interpreter_p, "mi1") == 0)
-    command_loop_hook = mi1_command_loop;
-  else
-    return;
-
-  init_ui_hook = mi_init_ui;
-  setup_architecture_data ();
-  register_gdbarch_swap (&old_regs, sizeof (old_regs), NULL);
-  register_gdbarch_swap (NULL, 0, setup_architecture_data);
-  if (event_loop_p)
+  if (interpreter_p
+      && strcmp (interpreter_p, "mi") == 0)
     {
-      /* These overwrite some of the initialization done in
-	 _intialize_event_loop. */
-      call_readline = gdb_readline2;
-      input_handler = mi_execute_command_wrapper;
-      add_file_handler (input_fd, stdin_event_handler, 0);
-      async_command_editing_p = 0;
+      init_ui_hook = mi_init_ui;
+      command_loop_hook = mi_command_loop;
+      setup_architecture_data ();
+      register_gdbarch_swap (&old_regs, sizeof (old_regs), NULL);
+      register_gdbarch_swap (NULL, 0, setup_architecture_data);
+      if (event_loop_p)
+	{
+	  /* These overwrite some of the initialization done in
+	     _intialize_event_loop. */
+	  call_readline = gdb_readline2;
+	  input_handler = mi_execute_command_wrapper;
+	  add_file_handler (input_fd, stdin_event_handler, 0);
+	  async_command_editing_p = 0;
+	}
     }
   /* FIXME: Should we notify main that we are here as a possible
      interpreter? */

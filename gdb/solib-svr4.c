@@ -37,7 +37,6 @@
 #else
 #include "elf/external.h"
 #include "elf/common.h"
-#include "elf/mips.h"
 #endif
 
 #include "symtab.h"
@@ -624,6 +623,7 @@ elf_locate_base (void)
 				      (bfd_byte *) x_dynp->d_un.d_ptr);
 	      return dyn_ptr;
 	    }
+#ifdef DT_MIPS_RLD_MAP
 	  else if (dyn_tag == DT_MIPS_RLD_MAP)
 	    {
 	      char *pbuf;
@@ -637,6 +637,7 @@ elf_locate_base (void)
 		return 0;
 	      return extract_unsigned_integer (pbuf, sizeof (pbuf));
 	    }
+#endif
 	}
     }
   else /* 64-bit elf */
@@ -743,7 +744,7 @@ locate_base (void)
 	debug_base = elf_locate_base ();
 #ifdef HANDLE_SVR4_EXEC_EMULATORS
       /* Try it the hard way for emulated executables.  */
-      else if (!ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
+      else if (inferior_pid != 0 && target_has_execution)
 	proc_iterate_over_mappings (look_for_base);
 #endif
     }
@@ -1570,7 +1571,7 @@ svr4_solib_create_inferior_hook (void)
   stop_signal = TARGET_SIGNAL_0;
   do
     {
-      target_resume (pid_to_ptid (-1), 0, stop_signal);
+      target_resume (-1, 0, stop_signal);
       wait_for_inferior ();
     }
   while (stop_signal != TARGET_SIGNAL_TRAP);

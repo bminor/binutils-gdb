@@ -57,17 +57,60 @@ struct string_map
 
 static int hpux_thread_active = 0;
 
-static ptid_t main_ptid;		/* Real process ID */
+static int main_pid;		/* Real process ID */
 
 static CORE_ADDR P_cma__g_known_threads;
 static CORE_ADDR P_cma__g_current_thread;
 
-static void hpux_thread_resume (ptid_t ptid, int step,
-                                enum target_signal signo);
+static struct cleanup *save_inferior_pid (void);
+
+static void restore_inferior_pid (int pid);
+
+static void hpux_thread_resume (int pid, int step, enum target_signal signo);
 
 static void init_hpux_thread_ops (void);
 
 static struct target_ops hpux_thread_ops;
+
+/*
+
+   LOCAL FUNCTION
+
+   save_inferior_pid - Save inferior_pid on the cleanup list
+   restore_inferior_pid - Restore inferior_pid from the cleanup list
+
+   SYNOPSIS
+
+   struct cleanup *save_inferior_pid ()
+   void restore_inferior_pid (int pid)
+
+   DESCRIPTION
+
+   These two functions act in unison to restore inferior_pid in
+   case of an error.
+
+   NOTES
+
+   inferior_pid is a global variable that needs to be changed by many of
+   these routines before calling functions in procfs.c.  In order to
+   guarantee that inferior_pid gets restored (in case of errors), you
+   need to call save_inferior_pid before changing it.  At the end of the
+   function, you should invoke do_cleanups to restore it.
+
+ */
+
+
+static struct cleanup *
+save_inferior_pid (void)
+{
+  return make_cleanup (restore_inferior_pid, inferior_pid);
+}
+
+static void
+restore_inferior_pid (int pid)
+{
+  inferior_pid = pid;
+}
 
 static int find_active_thread (void);
 
@@ -90,8 +133,7 @@ find_active_thread (void)
 
   read_memory (tcb_ptr, (char *) &tcb, sizeof tcb);
 
-  return (cma_thread_get_unique (&tcb.prolog.client_thread) << 16) 
-         | PIDGET (main_ptid);
+  return (cma_thread_get_unique (&tcb.prolog.client_thread) << 16) | main_pid;
 }
 
 static cma__t_int_tcb *find_tcb (int thread);
@@ -172,14 +214,13 @@ hpux_thread_detach (char *args, int from_tty)
    for procfs.  */
 
 static void
-hpux_thread_resume (ptid_t ptid, int step, enum target_signal signo)
+hpux_thread_resume (int pid, int step, enum target_signal signo)
 {
   struct cleanup *old_chain;
 
-  old_chain = save_inferior_ptid ();
+  old_chain = save_inferior_pid ();
 
-  ptid = main_ptid;
-  inferior_ptid = main_ptid;
+  pid = inferior_pid = main_pid;
 
 #if 0
   if (pid != -1)
@@ -190,7 +231,7 @@ hpux_thread_resume (ptid_t ptid, int step, enum target_signal signo)
     }
 #endif
 
-  child_ops.to_resume (ptid, step, signo);
+  child_ops.to_resume (pid, step, signo);
 
   cached_thread = 0;
   cached_active_thread = 0;
@@ -201,20 +242,20 @@ hpux_thread_resume (ptid_t ptid, int step, enum target_signal signo)
 /* Wait for any threads to stop.  We may have to convert PID from a thread id
    to a LWP id, and vice versa on the way out.  */
 
-static ptid_t
-hpux_thread_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+static int
+hpux_thread_wait (int pid, struct target_waitstatus *ourstatus)
 {
-  ptid_t rtnval;
+  int rtnval;
   struct cleanup *old_chain;
 
-  old_chain = save_inferior_ptid ();
+  old_chain = save_inferior_pid ();
 
-  inferior_ptid = main_ptid;
+  inferior_pid = main_pid;
 
-  if (!ptid_equal (ptid, minus_one_ptid))
-    ptid = main_ptid;
+  if (pid != -1)
+    pid = main_pid;
 
-  rtnval = child_ops.to_wait (ptid, ourstatus);
+  rtnval = child_ops.to_wait (pid, ourstatus);
 
   rtnval = find_active_thread ();
 
@@ -257,11 +298,11 @@ hpux_thread_fetch_registers (int regno)
   int i;
   int first_regno, last_regno;
 
-  tcb_ptr = find_tcb (PIDGET (inferior_ptid));
+  tcb_ptr = find_tcb (inferior_pid);
 
-  old_chain = save_inferior_ptid ();
+  old_chain = save_inferior_pid ();
 
-  inferior_ptid = main_ptid;
+  inferior_pid = main_pid;
 
   if (tcb_ptr->state == cma__c_state_running)
     {
@@ -319,11 +360,11 @@ hpux_thread_store_registers (int regno)
   int i;
   int first_regno, last_regno;
 
-  tcb_ptr = find_tcb (PIDGET (inferior_ptid));
+  tcb_ptr = find_tcb (inferior_pid);
 
-  old_chain = save_inferior_ptid ();
+  old_chain = save_inferior_pid ();
 
-  inferior_ptid = main_ptid;
+  inferior_pid = main_pid;
 
   if (tcb_ptr->state == cma__c_state_running)
     {
@@ -400,9 +441,9 @@ hpux_thread_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
   int retval;
   struct cleanup *old_chain;
 
-  old_chain = save_inferior_ptid ();
+  old_chain = save_inferior_pid ();
 
-  inferior_ptid = main_ptid;
+  inferior_pid = main_pid;
 
   retval = 
     child_ops.to_xfer_memory (memaddr, myaddr, len, dowrite, attribs, target);
@@ -427,9 +468,9 @@ hpux_thread_kill_inferior (void)
 }
 
 static void
-hpux_thread_notice_signals (ptid_t ptid)
+hpux_thread_notice_signals (int pid)
 {
-  child_ops.to_notice_signals (ptid);
+  child_ops.to_notice_signals (pid);
 }
 
 /* Fork an inferior process, and start debugging it with /proc.  */
@@ -441,13 +482,13 @@ hpux_thread_create_inferior (char *exec_file, char *allargs, char **env)
 
   if (hpux_thread_active)
     {
-      main_ptid = inferior_ptid;
+      main_pid = inferior_pid;
 
       push_target (&hpux_thread_ops);
 
-      inferior_ptid = find_active_thread ();
+      inferior_pid = find_active_thread ();
 
-      add_thread (inferior_ptid);
+      add_thread (inferior_pid);
     }
 }
 
@@ -513,7 +554,7 @@ hpux_thread_can_run (void)
 }
 
 static int
-hpux_thread_alive (ptid_t ptid)
+hpux_thread_alive (int pid)
 {
   return 1;
 }
@@ -527,10 +568,9 @@ hpux_thread_stop (void)
 /* Convert a pid to printable form. */
 
 char *
-hpux_pid_to_str (ptid_t ptid)
+hpux_pid_to_str (int pid)
 {
   static char buf[100];
-  int pid = PIDGET (ptid);
 
   sprintf (buf, "Thread %d", pid >> 16);
 

@@ -192,10 +192,10 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
        i++, fi = get_prev_frame (fi))
     {
       QUIT;
-      ui_out_tuple_begin (uiout, "frame");
+      ui_out_list_begin (uiout, "frame");
       ui_out_field_int (uiout, "level", i);
       list_args_or_locals (0, atoi (argv[0]), fi);
-      ui_out_tuple_end (uiout);
+      ui_out_list_end (uiout);
     }
 
   ui_out_list_end (uiout);
@@ -265,7 +265,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 	  if (print_me)
 	    {
 	      if (values)
-		ui_out_tuple_begin (uiout, NULL);
+		ui_out_list_begin (uiout, NULL);
 	      ui_out_field_string (uiout, "name", SYMBOL_NAME (sym));
 
 	      if (values)
@@ -280,7 +280,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 		    sym2 = sym;
 		  print_variable_value (sym2, fi, stb->stream);
 		  ui_out_field_stream (uiout, "value", stb);
-		  ui_out_tuple_end (uiout);
+		  ui_out_list_end (uiout);
 		}
 	    }
 	}

@@ -383,7 +383,7 @@ static thread_info_header thread_head =
 static thread_info_header deleted_threads =
 {0, NULL, NULL};
 
-static ptid_t saved_real_ptid;
+static saved_real_pid = 0;
 
 
 /*************************************************
@@ -623,7 +623,7 @@ create_thread_info (int pid, lwpid_t tid)
       if (debug_on)
 	printf ("First thread, pid %d tid %d!\n", pid, tid);
 #endif
-      saved_real_ptid = inferior_ptid;
+      saved_real_pid = inferior_pid;
     }
   else
     {
@@ -1238,7 +1238,7 @@ update_thread_list (void)
   for (p = thread_head.head; p; p = p->next)
     {
       /* Is this an "unseen" thread which really happens to be a process?
-         If so, is it inferior_ptid and is a vfork in flight?  If yes to
+         If so, is it inferior_pid and is a vfork in flight?  If yes to
          all, then DON'T REMOVE IT!  We're in the midst of moving a vfork
          operation, which is a multiple step thing, to the point where we
          can touch the parent again.  We've most likely stopped to examine
@@ -1625,15 +1625,14 @@ call_ttrace (ttreq_t request, int gdb_tid, TTRACE_ARG_TYPE addr,
 	       * in the multi-process future.  Use tid as thread,
 	       * probably dooming this to failure.  FIX!
 	       */
-	      if (! ptid_equal (saved_real_ptid, null_ptid))
+	      if (saved_real_pid != 0)
 		{
 #ifdef THREAD_DEBUG
 		  if (debug_on)
-		    printf ("...using saved pid %d\n",
-		            PIDGET (saved_real_ptid));
+		    printf ("...using saved pid %d\n", saved_real_pid);
 #endif
 
-		  real_pid = PIDGET (saved_real_ptid);
+		  real_pid = saved_real_pid;
 		  real_tid = gdb_tid;
 		}
 
@@ -1654,14 +1653,14 @@ call_ttrace (ttreq_t request, int gdb_tid, TTRACE_ARG_TYPE addr,
 	      if (debug_on)
 		{
 		  printf ("Translated thread request to process request\n");
-		  if (ptid_equal (saved_real_ptid, null_ptid))
+		  if (saved_real_pid == 0)
 		    printf ("...but there's no saved pid\n");
 
 		  else
 		    {
-		      if (gdb_tid != PIDGET (saved_real_ptid))
+		      if (gdb_tid != saved_real_pid)
 			printf ("...but have the wrong pid (%d rather than %d)\n",
-				gdb_tid, PIDGET (saved_real_ptid));
+				gdb_tid, saved_real_pid);
 		    }
 		}
 #endif
@@ -1748,11 +1747,11 @@ stop_all_threads_of_process (pid_t real_pid)
    have its threads examined.
  */
 #define CHILD_VFORKED(evt,pid) \
-  (((evt) == TTEVT_VFORK) && ((pid) != PIDGET (inferior_ptid)))
+  (((evt) == TTEVT_VFORK) && ((pid) != inferior_pid))
 #define CHILD_URPED(evt,pid) \
   ((((evt) == TTEVT_EXEC) || ((evt) == TTEVT_EXIT)) && ((pid) != vforking_child_pid))
 #define PARENT_VFORKED(evt,pid) \
-  (((evt) == TTEVT_VFORK) && ((pid) == PIDGET (inferior_ptid)))
+  (((evt) == TTEVT_VFORK) && ((pid) == inferior_pid))
 
 static int
 can_touch_threads_of_process (int pid, ttevents_t stopping_event)
@@ -2596,8 +2595,8 @@ count_unhandled_events (int real_pid, lwpid_t real_tid)
  *
  * Note: used by core gdb and so uses the pseudo-pid (really tid).
  */
-ptid_t
-ptrace_wait (ptid_t ptid, int *status)
+int
+ptrace_wait (int pid, int *status)
 {
   ttstate_t tsp;
   int ttwait_return;
@@ -2621,13 +2620,13 @@ ptrace_wait (ptid_t ptid, int *status)
       if (errno == ESRCH)
 	{
 	  *status = 0;		/* WIFEXITED */
-	  return inferior_ptid;
+	  return inferior_pid;
 	}
 
       warning ("Call of ttrace_wait returned with errno %d.",
 	       errno);
       *status = ttwait_return;
-      return inferior_ptid;
+      return inferior_pid;
     }
 
   real_pid = tsp.tts_pid;
@@ -2689,7 +2688,7 @@ ptrace_wait (ptid_t ptid, int *status)
 #ifdef THREAD_DEBUG
       if (debug_on)
 	printf ("Pid %d has zero'th thread %d; inferior pid is %d\n",
-		real_pid, real_tid, PIDGET (inferior_ptid));
+		real_pid, real_tid, inferior_pid);
 #endif
 
       add_tthread (real_pid, real_tid);
@@ -2852,7 +2851,7 @@ ptrace_wait (ptid_t ptid, int *status)
        * a new thread if for some reason it's never
        * seen the main thread before.
        */
-      inferior_ptid = pid_to_ptid (map_to_gdb_tid (real_tid));	/* HACK, FIX */
+      inferior_pid = map_to_gdb_tid (real_tid);		/* HACK, FIX */
 
       *status = 0 | (tsp.tts_u.tts_exit.tts_exitcode);
     }
@@ -2905,7 +2904,7 @@ ptrace_wait (ptid_t ptid, int *status)
 
   /* Remember this for later use in "hppa_prepare_to_proceed".
    */
-  old_gdb_pid = PIDGET (inferior_ptid);
+  old_gdb_pid = inferior_pid;
   reported_pid = return_pid;
   reported_bpt = ((tsp.tts_event & TTEVT_SIGNAL) && (5 == tsp.tts_u.tts_signal.tts_signo));
 
@@ -2914,7 +2913,7 @@ ptrace_wait (ptid_t ptid, int *status)
       warning ("Internal error: process-wait failed.");
     }
 
-  return pid_to_ptid (return_pid);
+  return return_pid;
 }
 
 
@@ -3151,9 +3150,9 @@ child_acknowledge_created_inferior (int pid)
  * calling require_notification_of_events.
  */
 void
-child_post_startup_inferior (ptid_t ptid)
+child_post_startup_inferior (int real_pid)
 {
-  require_notification_of_events (PIDGET (ptid));
+  require_notification_of_events (real_pid);
 }
 
 /* From here on, we should expect tids rather than pids.
@@ -3583,9 +3582,8 @@ child_has_syscall_event (int pid, enum target_waitkind *kind, int *syscall_id)
  * May need a FIXME for that reason.
  */
 int
-child_thread_alive (ptid_t ptid)
+child_thread_alive (lwpid_t gdb_tid)
 {
-  lwpid_t gdp_tid = PIDGET (ptid);
   lwpid_t tid;
 
   /* This spins down the lists twice.
@@ -3817,11 +3815,11 @@ kill_inferior (void)
   thread_info **paranoia;
   int para_count, i;
 
-  if (PIDGET (inferior_ptid) == 0)
+  if (inferior_pid == 0)
     return;
 
   /* Walk the list of "threads", some of which are "pseudo threads",
-     aka "processes".  For each that is NOT inferior_ptid, stop it,
+     aka "processes".  For each that is NOT inferior_pid, stop it,
      and detach it.
 
      You see, we may not have just a single process to kill.  If we're
@@ -3851,7 +3849,7 @@ kill_inferior (void)
 	}
       para_count++;
 
-      if (t->am_pseudo && (t->pid != PIDGET (inferior_ptid)))
+      if (t->am_pseudo && (t->pid != inferior_pid))
 	{
 	  /* TT_PROC_STOP doesn't require a subsequent ttrace_wait, as it
 	   * generates no event.
@@ -3874,7 +3872,7 @@ kill_inferior (void)
   xfree (paranoia);
 
   call_ttrace (TT_PROC_STOP,
-	       PIDGET (inferior_ptid),
+	       inferior_pid,
 	       TT_NIL,
 	       TT_NIL,
 	       TT_NIL);
@@ -4315,7 +4313,7 @@ threads_continue_one_with_signal (lwpid_t gdb_tid, int signal)
  *   -1  |   Step current            Continue all threads
  *       |   thread and              (but which gets any
  *       |   continue others         signal?--We look at
- *       |                           "inferior_ptid")
+ *       |                           "inferior_pid")
  *       |
  *    N  |   Step _this_ thread      Continue _this_ thread
  *       |   and leave others        and leave others 
@@ -4325,12 +4323,11 @@ threads_continue_one_with_signal (lwpid_t gdb_tid, int signal)
  *       |                           user command.
  */
 void
-child_resume (ptid_t ptid, int step, enum target_signal signal)
+child_resume (lwpid_t gdb_tid, int step, enum target_signal signal)
 {
   int resume_all_threads;
   lwpid_t tid;
   process_state_t new_process_state;
-  lwpid_t gdb_tid = PIDGET (ptid);
 
   resume_all_threads =
     (gdb_tid == INFTTRACE_ALL_THREADS) ||
@@ -4345,7 +4342,7 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
       if (vfork_in_flight)
 	tid = vforking_child_pid;
       else
-	tid = map_from_gdb_tid (PIDGET (inferior_ptid));
+	tid = map_from_gdb_tid (inferior_pid);
     }
   else
     tid = map_from_gdb_tid (gdb_tid);
@@ -4651,7 +4648,7 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
 /*
  * Like it says.
  *
- * One worry is that we may not be attaching to "inferior_ptid"
+ * One worry is that we may not be attaching to "inferior_pid"
  * and thus may not want to clear out our data.  FIXME?
  * 
  */
@@ -4705,7 +4702,7 @@ update_thread_state_after_attach (int pid, attach_continue_t kind_of_go)
        *
        * We don't need to do mapping here, as we know this
        * is the first thread and thus gets the real pid
-       * (and is "inferior_ptid").
+       * (and is "inferior_pid").
        *
        * NOTE: it probably isn't the originating thread,
        *       but that doesn't matter (we hope!).
@@ -4879,7 +4876,7 @@ detach (int signal)
 {
   errno = 0;
   call_ttrace (TT_PROC_DETACH,
-	       PIDGET (inferior_ptid),
+	       inferior_pid,
 	       TT_NIL,
 	       (TTRACE_ARG_TYPE) signal,
 	       TT_NIL);
@@ -4942,7 +4939,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	{
 	  /* Need part of initial word -- fetch it.  */
 	  buffer[0] = call_ttrace (TT_LWP_RDTEXT,
-				   PIDGET (inferior_ptid),
+				   inferior_pid,
 				   (TTRACE_ARG_TYPE) addr,
 				   TT_NIL,
 				   TT_NIL);
@@ -4951,7 +4948,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
       if (count > 1)		/* FIXME, avoid if even boundary */
 	{
 	  buffer[count - 1] = call_ttrace (TT_LWP_RDTEXT,
-					   PIDGET (inferior_ptid),
+					   inferior_pid,
 					   ((TTRACE_ARG_TYPE)
 			  (addr + (count - 1) * sizeof (TTRACE_XFER_TYPE))),
 					   TT_NIL,
@@ -4970,7 +4967,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	{
 	  errno = 0;
 	  call_ttrace (TT_LWP_WRDATA,
-		       PIDGET (inferior_ptid),
+		       inferior_pid,
 		       (TTRACE_ARG_TYPE) addr,
 		       (TTRACE_ARG_TYPE) buffer[i],
 		       TT_NIL);
@@ -4980,7 +4977,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	         Gould NP1, at least.  */
 	      errno = 0;
 	      call_ttrace (TT_LWP_WRTEXT,
-			   PIDGET (inferior_ptid),
+			   inferior_pid,
 			   (TTRACE_ARG_TYPE) addr,
 			   (TTRACE_ARG_TYPE) buffer[i],
 			   TT_NIL);
@@ -4996,7 +4993,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	{
 	  errno = 0;
 	  buffer[i] = call_ttrace (TT_LWP_RDTEXT,
-				   PIDGET (inferior_ptid),
+				   inferior_pid,
 				   (TTRACE_ARG_TYPE) addr,
 				   TT_NIL,
 				   TT_NIL);
@@ -5047,7 +5044,7 @@ udot_info (void)
 	  printf_filtered ("%04x:", udot_off);
 	}
       udot_val = call_ttrace (TT_LWP_RUREGS,
-			      PIDGET (inferior_ptid),
+			      inferior_pid,
 			      (TTRACE_ARG_TYPE) udot_off,
 			      TT_NIL,
 			      TT_NIL);
@@ -5077,7 +5074,7 @@ child_pid_to_exec_file (int tid)
   int name_index;
   int i;
   int done;
-  ptid_t saved_inferior_ptid;
+  int saved_inferior_pid;
 
   /* As of 10.x HP-UX, there's an explicit request to get the
    *pathname.
@@ -5103,19 +5100,19 @@ child_pid_to_exec_file (int tid)
   name_index = 0;
   done = 0;
 
-  /* On the chance that pid != inferior_ptid, set inferior_ptid
-     to pid, so that (grrrr!) implicit uses of inferior_ptid get
+  /* On the chance that pid != inferior_pid, set inferior_pid
+     to pid, so that (grrrr!) implicit uses of inferior_pid get
      the right id.
    */
-  saved_inferior_ptid = inferior_ptid;
-  inferior_ptid = pid_to_ptid (tid);
+  saved_inferior_pid = inferior_pid;
+  inferior_pid = tid;
 
   /* Try to grab a null-terminated string. */
   while (!done)
     {
       if (target_read_memory (top_of_stack, four_chars, 4) != 0)
 	{
-	  inferior_ptid = saved_inferior_ptid;
+	  inferior_pid = saved_inferior_pid;
 	  return NULL;
 	}
       for (i = 0; i < 4; i++)
@@ -5130,11 +5127,11 @@ child_pid_to_exec_file (int tid)
 
   if (exec_file_buffer[0] == '\0')
     {
-      inferior_ptid = saved_inferior_ptid;
+      inferior_pid = saved_inferior_pid;
       return NULL;
     }
 
-  inferior_ptid = saved_inferior_ptid;
+  inferior_pid = saved_inferior_pid;
   return exec_file_buffer;
 }
 
@@ -5629,18 +5626,17 @@ hppa_range_profitable_for_hw_watchpoint (int pid, CORE_ADDR start, LONGEST len)
 
 
 char *
-hppa_pid_or_tid_to_str (ptid_t ptid)
+hppa_pid_or_tid_to_str (pid_t id)
 {
   static char buf[100];		/* Static because address returned. */
-  pid_t id = PIDGET (ptid);
 
   /* Does this appear to be a process?  If so, print it that way. */
   if (is_process_id (id))
-    return child_pid_to_str (ptid);
+    return child_pid_to_str (id);
 
   /* Else, print both the GDB thread number and the system thread id. */
-  sprintf (buf, "thread %d (", pid_to_thread_id (ptid));
-  strcat (buf, hppa_tid_to_str (ptid));
+  sprintf (buf, "thread %d (", pid_to_thread_id (id));
+  strcat (buf, hppa_tid_to_str (id));
   strcat (buf, ")\0");
 
   return buf;

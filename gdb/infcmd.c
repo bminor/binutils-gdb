@@ -36,7 +36,6 @@
 #include "language.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "completer.h"
 #ifdef UI_OUT
 #include "ui-out.h"
 #endif
@@ -132,7 +131,7 @@ char *inferior_io_terminal;
    being debugged it should be nonzero (currently 3 is used) for remote
    debugging.  */
 
-ptid_t inferior_ptid;
+int inferior_pid;
 
 /* Last signal that the inferior received (why it stopped).  */
 
@@ -259,7 +258,7 @@ run_command (char *args, int from_tty)
 
   dont_repeat ();
 
-  if (! ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
+  if (inferior_pid != 0 && target_has_execution)
     {
       if (from_tty
 	  && !query ("The program being debugged has been started already.\n\
@@ -1468,11 +1467,12 @@ do_registers_info (int regnum, int fpregs)
 {
   register int i;
   int numregs = NUM_REGS + NUM_PSEUDO_REGS;
-  char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
-  char *virtual_buffer = (char*) alloca (MAX_REGISTER_VIRTUAL_SIZE);
 
   for (i = 0; i < numregs; i++)
     {
+      char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+      char *virtual_buffer = (char*) alloca (MAX_REGISTER_VIRTUAL_SIZE);
+
       /* Decide between printing all regs, nonfloat regs, or specific reg.  */
       if (regnum == -1)
 	{
@@ -1690,7 +1690,7 @@ attach_command (char *args, int from_tty)
   exec_file = (char *) get_exec_file (0);
   if (!exec_file)
     {
-      exec_file = target_pid_to_exec_file (PIDGET (inferior_ptid));
+      exec_file = target_pid_to_exec_file (inferior_pid);
       if (exec_file)
 	{
 	  /* It's possible we don't have a full path, but rather just a
@@ -1720,7 +1720,7 @@ attach_command (char *args, int from_tty)
 
   /* Take any necessary post-attaching actions for this platform.
    */
-  target_post_attach (PIDGET (inferior_ptid));
+  target_post_attach (inferior_pid);
 
   normal_stop ();
 
@@ -1795,8 +1795,8 @@ _initialize_infcmd (void)
 {
   struct cmd_list_element *c;
 
-  c = add_com ("tty", class_run, tty_command,
-	       "Set terminal for future runs of program being debugged.");
+  c= add_com ("tty", class_run, tty_command,
+	      "Set terminal for future runs of program being debugged.");
   c->completer = filename_completer;
 
   c = add_set_cmd ("args", class_run, var_string_noescape,
@@ -1900,30 +1900,25 @@ Argument N means do this N times (or till program stops for another reason).");
 Argument N means do this N times (or till program stops for another reason).");
   add_com_alias ("s", "step", class_run, 1);
 
-  c = add_com ("until", class_run, until_command,
-	       "Execute until the program reaches a source line greater than the current\n\
+  add_com ("until", class_run, until_command,
+	   "Execute until the program reaches a source line greater than the current\n\
 or a specified line or address or function (same args as break command).\n\
 Execution will also stop upon exit from the current stack frame.");
-  c->completer = location_completer;
   add_com_alias ("u", "until", class_run, 1);
 
-  c = add_com ("jump", class_run, jump_command,
-	       "Continue program being debugged at specified line or address.\n\
+  add_com ("jump", class_run, jump_command,
+	   "Continue program being debugged at specified line or address.\n\
 Give as argument either LINENUM or *ADDR, where ADDR is an expression\n\
 for an address to start at.");
-  c->completer = location_completer;
 
   if (xdb_commands)
-    {
-      c = add_com ("go", class_run, go_command,
-		   "Usage: go <location>\n\
+    add_com ("go", class_run, go_command,
+	     "Usage: go <location>\n\
 Continue program being debugged, stopping at specified line or \n\
 address.\n\
 Give as argument either LINENUM or *ADDR, where ADDR is an \n\
 expression for an address to start at.\n\
 This command is a combination of tbreak and jump.");
-      c->completer = location_completer;
-    }
 
   if (xdb_commands)
     add_com_alias ("g", "go", class_run, 1);

@@ -31,7 +31,7 @@
 struct thread_info
 {
   struct thread_info *next;
-  ptid_t ptid;			/* "Actual process id";
+  int pid;			/* "Actual process id";
 				    In fact, this may be overloaded with 
 				    kernel thread id, etc.  */
   int num;			/* Convenient handle (GDB thread id) */
@@ -44,9 +44,6 @@ struct thread_info
   CORE_ADDR step_range_start;
   CORE_ADDR step_range_end;
   CORE_ADDR step_frame_address;
-  CORE_ADDR step_sp;
-  int current_line;
-  struct symtab *current_symtab;
   int trap_expected;
   int handling_longjmp;
   int another_trap;
@@ -76,32 +73,29 @@ extern void init_thread_list (void);
 /* Add a thread to the thread list.
    Note that add_thread now returns the handle of the new thread,
    so that the caller may initialize the private thread data.  */
-extern struct thread_info *add_thread (ptid_t ptid);
+extern struct thread_info *add_thread (int pid);
 
 /* Delete an existing thread list entry.  */
-extern void delete_thread (ptid_t);
-
-/* Delete a step_resume_breakpoint from the thread database. */
-extern void delete_step_resume_breakpoint (void *);
+extern void delete_thread (int);
 
 /* Translate the integer thread id (GDB's homegrown id, not the system's)
    into a "pid" (which may be overloaded with extra thread information).  */
-extern ptid_t thread_id_to_pid (int);
+extern int thread_id_to_pid (int);
 
 /* Translate a 'pid' (which may be overloaded with extra thread information) 
    into the integer thread id (GDB's homegrown id, not the system's).  */
-extern int pid_to_thread_id (ptid_t ptid);
+extern int pid_to_thread_id (int pid);
 
 /* Boolean test for an already-known pid (which may be overloaded with
    extra thread information).  */
-extern int in_thread_list (ptid_t ptid);
+extern int in_thread_list (int pid);
 
 /* Boolean test for an already-known thread id (GDB's homegrown id, 
    not the system's).  */
 extern int valid_thread_id (int thread);
 
 /* Search function to lookup a thread by 'pid'.  */
-extern struct thread_info *find_thread_pid (ptid_t ptid);
+extern struct thread_info *find_thread_pid (int pid);
 
 /* Iterator function to call a user-provided callback function
    once for each known thread.  */
@@ -109,7 +103,7 @@ typedef int (*thread_callback_func) (struct thread_info *, void *);
 extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
 
 /* infrun context switch: save the debugger state for the given thread.  */
-extern void save_infrun_state (ptid_t ptid,
+extern void save_infrun_state (int       pid,
 			       CORE_ADDR prev_pc,
 			       CORE_ADDR prev_func_start,
 			       char     *prev_func_name,
@@ -123,14 +117,11 @@ extern void save_infrun_state (ptid_t ptid,
 			       int       another_trap,
 			       int       stepping_through_solib_after_catch,
 			       bpstat    stepping_through_solib_catchpoints,
-			       int       stepping_through_sigtramp,
-			       int       current_line,
-			       struct symtab *current_symtab,
-			       CORE_ADDR step_sp);
+			       int       stepping_through_sigtramp);
 
 /* infrun context switch: load the debugger state previously saved
    for the given thread.  */
-extern void load_infrun_state (ptid_t ptid,
+extern void load_infrun_state (int        pid,
 			       CORE_ADDR *prev_pc,
 			       CORE_ADDR *prev_func_start,
 			       char     **prev_func_name,
@@ -144,10 +135,7 @@ extern void load_infrun_state (ptid_t ptid,
 			       int       *another_trap,
 			       int       *stepping_through_solib_affter_catch,
 			       bpstat    *stepping_through_solib_catchpoints,
-			       int       *stepping_through_sigtramp,
-			       int       *current_line,
-			       struct symtab **current_symtab,
-			       CORE_ADDR *step_sp);
+			       int       *stepping_through_sigtramp);
 
 /* Commands with a prefix of `thread'.  */
 extern struct cmd_list_element *thread_cmd_list;

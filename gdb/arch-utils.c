@@ -222,7 +222,7 @@ default_register_sim_regno (int num)
 
 
 CORE_ADDR
-core_addr_identity (CORE_ADDR addr)
+default_convert_from_func_ptr_addr (CORE_ADDR addr)
 {
   return addr;
 }
@@ -252,33 +252,33 @@ default_prepare_to_proceed (int select_it)
 int
 generic_prepare_to_proceed (int select_it)
 {
-  ptid_t wait_ptid;
+  int wait_pid;
   struct target_waitstatus wait_status;
 
   /* Get the last target status returned by target_wait().  */
-  get_last_target_status (&wait_ptid, &wait_status);
+  get_last_target_status (&wait_pid, &wait_status);
 
-  /* Make sure we were stopped either at a breakpoint, or because
-     of a Ctrl-C.  */
+  /* Make sure we were stopped at a breakpoint.  */
   if (wait_status.kind != TARGET_WAITKIND_STOPPED
-      || (wait_status.value.sig != TARGET_SIGNAL_TRAP &&
-          wait_status.value.sig != TARGET_SIGNAL_INT))
+      || wait_status.value.sig != TARGET_SIGNAL_TRAP)
     {
       return 0;
     }
 
-  if (!ptid_equal (wait_ptid, minus_one_ptid)
-      && !ptid_equal (inferior_ptid, wait_ptid))
+  if (wait_pid != -1 && inferior_pid != wait_pid)
     {
       /* Switched over from WAIT_PID.  */
-      CORE_ADDR wait_pc = read_pc_pid (wait_ptid);
+      CORE_ADDR wait_pc = read_pc_pid (wait_pid);
 
-      if (wait_pc != read_pc ())
+      /* Avoid switching where it wouldn't do any good, i.e. if both
+         threads are at the same breakpoint.  */
+      if (wait_pc != read_pc () && breakpoint_here_p (wait_pc))
 	{
 	  if (select_it)
 	    {
-	      /* Switch back to WAIT_PID thread.  */
-	      inferior_ptid = wait_ptid;
+	      /* User hasn't deleted the breakpoint.  Switch back to
+		 WAIT_PID and return non-zero.  */
+	      inferior_pid = wait_pid;
 
 	      /* FIXME: This stuff came from switch_to_thread() in
 		 thread.c (which should probably be a public function).  */
@@ -287,42 +287,14 @@ generic_prepare_to_proceed (int select_it)
 	      stop_pc = wait_pc;
 	      select_frame (get_current_frame (), 0);
 	    }
-          /* We return 1 to indicate that there is a breakpoint here,
-             so we need to step over it before continuing to avoid
-             hitting it straight away. */
-          if (breakpoint_here_p (wait_pc))
-            {
-	      return 1;
-            }
+
+	  return 1;
 	}
     }
   return 0;
   
 }
 
-void
-init_frame_pc_noop (int fromleaf, struct frame_info *prev)
-{
-  return;
-}
-
-void
-init_frame_pc_default (int fromleaf, struct frame_info *prev)
-{
-  if (fromleaf)
-    prev->pc = SAVED_PC_AFTER_CALL (prev->next);
-  else if (prev->next != NULL)
-    prev->pc = FRAME_SAVED_PC (prev->next);
-  else
-    prev->pc = read_pc ();
-}
-
-int
-cannot_register_not (int regnum)
-{
-  return 0;
-}
-
 /* Functions to manipulate the endianness of the target.  */
 
 #ifdef TARGET_BYTE_ORDER_SELECTABLE
@@ -613,6 +585,40 @@ set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
   show_architecture (NULL, from_tty);
 }
 
+/* Called if the user enters ``info architecture'' without an argument. */
+
+static void
+info_architecture (char *args, int from_tty)
+{
+  printf_filtered ("Available architectures are:\n");
+  if (GDB_MULTI_ARCH)
+    {
+      const char **arches = gdbarch_printable_names ();
+      const char **arch;
+      for (arch = arches; *arch != NULL; arch++)
+	{
+	  printf_filtered (" %s", *arch);
+	}
+      xfree (arches);
+    }
+  else
+    {
+      enum bfd_architecture a;
+      for (a = bfd_arch_obscure + 1; a < bfd_arch_last; a++)
+	{
+	  const struct bfd_arch_info *ap;
+	  for (ap = bfd_lookup_arch (a, 0);
+	       ap != NULL;
+	       ap = ap->next)
+	    {
+	      printf_filtered (" %s", ap->printable_name);
+	      ap = ap->next;
+	    }
+	}
+    }
+  printf_filtered ("\n");
+}
+
 /* Set the dynamic target-system-dependent parameters (architecture,
    byte-order) using information found in the BFD */
 
@@ -728,8 +734,6 @@ initialize_current_architecture (void)
 			  "initialize_current_architecture: Selection of initial architecture failed");
 	}
     }
-  else
-    initialize_non_multiarch ();
 
   /* Create the ``set architecture'' command appending ``auto'' to the
      list of architectures. */
@@ -754,6 +758,9 @@ initialize_current_architecture (void)
        current setting. */
     add_cmd ("architecture", class_support, show_architecture,
 	     "Show the current target architecture", &showlist);
+    c = add_cmd ("architecture", class_support, info_architecture,
+		 "List supported target architectures", &infolist);
+    deprecate_cmd (c, "set architecture");
   }
 }
 

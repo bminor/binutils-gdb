@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # User Interface Events.
-# Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+# Copyright 1999, 2000 Free Software Foundation, Inc.
 #
 # Contributed by Cygnus Solutions.
 #
@@ -61,9 +61,6 @@ function_list ()
 f:void:breakpoint_create:int b:b
 f:void:breakpoint_delete:int b:b
 f:void:breakpoint_modify:int b:b
-f:void:tracepoint_create:int number:number
-f:void:tracepoint_delete:int number:number
-f:void:tracepoint_modify:int number:number
 #*:void:annotate_starting_hook:void
 #*:void:annotate_stopped_hook:void
 #*:void:annotate_signalled_hook:void
@@ -112,7 +109,7 @@ copyright ()
 {
   cat <<EOF
 /* User Interface Events.
-   Copyright 1999, 2001 Free Software Foundation, Inc.
+   Copyright 1999 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.
 
@@ -277,15 +274,12 @@ echo ""
 echo "#endif"
 exec 1>&2
 #../move-if-change new-gdb-events.h gdb-events.h
-if test -r gdb-events.h
+if ! test -r gdb-events.h
 then
-  diff -c gdb-events.h new-gdb-events.h
-  if [ $? = 1 ]
-  then
-    echo "gdb-events.h changed? cp new-gdb-events.h gdb-events.h" 1>&2
-  fi
-else
   echo "File missing? mv new-gdb-events.h gdb-events.h" 1>&2
+elif ! diff -c gdb-events.h new-gdb-events.h
+then
+  echo "gdb-events.h changed? cp new-gdb-events.h gdb-events.h" 1>&2
 fi
 
 
@@ -333,34 +327,30 @@ do
   case "${class}" in
     "*" ) continue ;;
     "?" )
-cat <<EOF
-
-int
-${function}_event_p (${formal})
-{
-  return current_event_hooks->${function};
-}
-
-${returntype}
-${function}_event (${formal})
-{
-  return current_events->${function} (${actual});
-}
-EOF
+	echo ""
+	echo "int"
+	echo "${function}_event_p (${formal})"
+	echo "{"
+	echo "  return current_event_hooks->${function};"
+	echo "}"
+	echo ""
+	echo "${returntype}"
+	echo "${function}_event (${formal})"
+	echo "{"
+	echo "  return current_events->${function} (${actual});"
+	echo "}"
 	;;
      "f" )
-cat <<EOF
-
-void
-${function}_event (${formal})
-{
-  if (gdb_events_debug)
-    fprintf_unfiltered (gdb_stdlog, "${function}_event\n");
-  if (!current_event_hooks->${function})
-    return;
-  current_event_hooks->${function} (${actual});
-}
-EOF
+	echo ""
+	echo "void"
+	echo "${function}_event (${formal})"
+	echo "{"
+	echo "  if (gdb_events_debug)"
+	echo "    fprintf_unfiltered (gdb_stdlog, \"${function}_event\\n\");"
+	echo "  if (!current_event_hooks->${function})"
+	echo "    return;"
+	echo "  current_event_hooks->${function} (${actual});"
+	echo "}"
 	;;
   esac
 done
@@ -478,7 +468,7 @@ do
       echo "{"
       echo "  struct event *event = XMALLOC (struct event);"
       echo "  event->type = ${function};"
-      for arg in `echo ${actual} | tr '[,]' '[:]' | tr -d '[ ]'`; do
+      for arg in `echo ${actual} | tr '[,]' '[ ]'`; do
         echo "  event->data.${function}.${arg} = ${arg};"
       done
       echo "  append (event);"
@@ -498,7 +488,7 @@ gdb_events_deliver (struct gdb_events *vector)
     {
       struct event *event = delivering_events;
       delivering_events = event->next;
-      xfree (event);
+      free (event);
     }
   /* Process any pending events.  Because one of the deliveries could
      bail out we move everything off of the pending queue onto an
@@ -520,7 +510,7 @@ do
       echo "          vector->${function}"
       sep="            ("
       ass=""
-      for arg in `echo ${actual} | tr '[,]' '[:]' | tr -d '[ ]'`; do
+      for arg in `echo ${actual} | tr '[,]' '[ ]'`; do
         ass="${ass}${sep}event->data.${function}.${arg}"
 	sep=",
              "
@@ -533,7 +523,7 @@ done
 cat <<EOF
         }
       delivering_events = event->next;
-      xfree (event);
+      free (event);
     }
 }
 EOF
@@ -583,13 +573,10 @@ sed < new-gdb-events.c > tmp-gdb-events.c \
     -e 's/\(	\)*        /\1	/g'
 mv tmp-gdb-events.c new-gdb-events.c
 # Move if changed?
-if test -r gdb-events.c
+if ! test -r gdb-events.c
 then
-  diff -c gdb-events.c new-gdb-events.c
-  if [ $? = 1 ]
-  then
-    echo "gdb-events.c changed? cp new-gdb-events.c gdb-events.c" 1>&2
-  fi
-else
   echo "File missing? mv new-gdb-events.c gdb-events.c" 1>&2
+elif ! diff -c gdb-events.c new-gdb-events.c
+then
+  echo "gdb-events.c changed? cp new-gdb-events.c gdb-events.c" 1>&2
 fi

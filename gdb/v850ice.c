@@ -73,8 +73,7 @@ static void v850ice_prepare_to_store (void);
 
 static void v850ice_fetch_registers (int regno);
 
-static void v850ice_resume (ptid_t ptid, int step,
-                            enum target_signal siggnal);
+static void v850ice_resume (int pid, int step, enum target_signal siggnal);
 
 static void v850ice_open (char *name, int from_tty);
 
@@ -86,8 +85,7 @@ static void v850ice_store_registers (int regno);
 
 static void v850ice_mourn (void);
 
-static ptid_t v850ice_wait (ptid_t ptid,
-                                  struct target_waitstatus *status);
+static int v850ice_wait (int pid, struct target_waitstatus *status);
 
 static void v850ice_kill (void);
 
@@ -369,7 +367,7 @@ v850ice_open (char *name, int from_tty)
      target is active.  These functions should be split out into seperate
      variables, especially since GDB will someday have a notion of debugging
      several processes.  */
-  inferior_ptid = pid_to_ptid (42000);
+  inferior_pid = 42000;
 
   start_remote ();
   return;
@@ -385,7 +383,7 @@ v850ice_close (int quitting)
     {
       UnregisterClient ();
       ice_open = 0;
-      inferior_ptid = null_ptid;
+      inferior_pid = 0;
     }
 }
 
@@ -411,7 +409,7 @@ v850ice_detach (char *args, int from_tty)
 /* Tell the remote machine to resume.  */
 
 static void
-v850ice_resume (ptid_t ptid, int step, enum target_signal siggnal)
+v850ice_resume (int pid, int step, enum target_signal siggnal)
 {
   long retval;
   char buf[256];
@@ -434,8 +432,8 @@ v850ice_resume (ptid_t ptid, int step, enum target_signal siggnal)
    Returns "pid" (though it's not clear what, if anything, that
    means in the case of this target).  */
 
-static ptid_t
-v850ice_wait (ptid_t ptid, struct target_waitstatus *status)
+static int
+v850ice_wait (int pid, struct target_waitstatus *status)
 {
   long v850_status;
   char buf[256];
@@ -487,7 +485,7 @@ v850ice_wait (ptid_t ptid, struct target_waitstatus *status)
     }
   while (!done);
 
-  return inferior_ptid;
+  return inferior_pid;
 }
 
 static int
@@ -754,7 +752,7 @@ static void
 v850ice_kill (void)
 {
   target_mourn_inferior ();
-  inferior_ptid = null_ptid;
+  inferior_pid = 0;
 }
 
 static void

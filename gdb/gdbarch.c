@@ -176,8 +176,6 @@ struct gdbarch
   gdbarch_do_registers_info_ftype *do_registers_info;
   gdbarch_register_sim_regno_ftype *register_sim_regno;
   gdbarch_register_bytes_ok_ftype *register_bytes_ok;
-  gdbarch_cannot_fetch_register_ftype *cannot_fetch_register;
-  gdbarch_cannot_store_register_ftype *cannot_store_register;
   int use_generic_dummy_frames;
   int call_dummy_location;
   gdbarch_call_dummy_address_ftype *call_dummy_address;
@@ -192,8 +190,6 @@ struct gdbarch
   int call_dummy_stack_adjust_p;
   int call_dummy_stack_adjust;
   gdbarch_fix_call_dummy_ftype *fix_call_dummy;
-  gdbarch_init_frame_pc_first_ftype *init_frame_pc_first;
-  gdbarch_init_frame_pc_ftype *init_frame_pc;
   int believe_pcc_promotion;
   int believe_pcc_promotion_type;
   gdbarch_coerce_float_to_double_ftype *coerce_float_to_double;
@@ -251,7 +247,6 @@ struct gdbarch
   const struct floatformat * double_format;
   const struct floatformat * long_double_format;
   gdbarch_convert_from_func_ptr_addr_ftype *convert_from_func_ptr_addr;
-  gdbarch_addr_bits_remove_ftype *addr_bits_remove;
   gdbarch_software_single_step_ftype *software_single_step;
 };
 
@@ -281,10 +276,6 @@ struct gdbarch startup_gdbarch =
   8 * sizeof (void*),
   8 * sizeof (void*),
   8 * sizeof (void*),
-  0,
-  0,
-  0,
-  0,
   0,
   0,
   0,
@@ -391,20 +382,10 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
-  0,
   /* startup_gdbarch() */
 };
 
 struct gdbarch *current_gdbarch = &startup_gdbarch;
-
-/* Do any initialization needed for a non-multiarch configuration
-   after the _initialize_MODULE functions have been run.  */
-void
-initialize_non_multiarch ()
-{
-  alloc_gdbarch_data (&startup_gdbarch);
-  init_gdbarch_data (&startup_gdbarch);
-}
 
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -459,8 +440,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->max_register_virtual_size = -1;
   gdbarch->do_registers_info = do_registers_info;
   gdbarch->register_sim_regno = default_register_sim_regno;
-  gdbarch->cannot_fetch_register = cannot_register_not;
-  gdbarch->cannot_store_register = cannot_register_not;
   gdbarch->use_generic_dummy_frames = -1;
   gdbarch->call_dummy_start_offset = -1;
   gdbarch->call_dummy_breakpoint_offset = -1;
@@ -470,8 +449,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->call_dummy_words = legacy_call_dummy_words;
   gdbarch->sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
   gdbarch->call_dummy_stack_adjust_p = -1;
-  gdbarch->init_frame_pc_first = init_frame_pc_noop;
-  gdbarch->init_frame_pc = init_frame_pc_default;
   gdbarch->coerce_float_to_double = default_coerce_float_to_double;
   gdbarch->register_convertible = generic_register_convertible_not;
   gdbarch->pointer_to_address = unsigned_pointer_to_address;
@@ -488,8 +465,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->frame_args_skip = -1;
   gdbarch->frameless_function_invocation = generic_frameless_function_invocation_not;
   gdbarch->extra_stack_alignment_needed = 1;
-  gdbarch->convert_from_func_ptr_addr = core_addr_identity;
-  gdbarch->addr_bits_remove = core_addr_identity;
+  gdbarch->convert_from_func_ptr_addr = default_convert_from_func_ptr_addr;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -608,8 +584,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of do_registers_info, invalid_p == 0 */
   /* Skip verify of register_sim_regno, invalid_p == 0 */
   /* Skip verify of register_bytes_ok, has predicate */
-  /* Skip verify of cannot_fetch_register, invalid_p == 0 */
-  /* Skip verify of cannot_store_register, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->use_generic_dummy_frames == -1))
     internal_error (__FILE__, __LINE__,
@@ -660,8 +634,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->fix_call_dummy == 0))
     internal_error (__FILE__, __LINE__,
                     "gdbarch: verify_gdbarch: fix_call_dummy invalid");
-  /* Skip verify of init_frame_pc_first, invalid_p == 0 */
-  /* Skip verify of init_frame_pc, invalid_p == 0 */
   /* Skip verify of coerce_float_to_double, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->get_saved_register == 0))
@@ -709,7 +681,10 @@ verify_gdbarch (struct gdbarch *gdbarch)
       && (gdbarch->store_return_value == 0))
     internal_error (__FILE__, __LINE__,
                     "gdbarch: verify_gdbarch: store_return_value invalid");
-  /* Skip verify of extract_struct_value_address, has predicate */
+  if ((GDB_MULTI_ARCH >= 2)
+      && (gdbarch->extract_struct_value_address == 0))
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: verify_gdbarch: extract_struct_value_address invalid");
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->use_struct_convention == 0))
     internal_error (__FILE__, __LINE__,
@@ -788,7 +763,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if (gdbarch->long_double_format == 0)
     gdbarch->long_double_format = &floatformat_unknown;
   /* Skip verify of convert_from_func_ptr_addr, invalid_p == 0 */
-  /* Skip verify of addr_bits_remove, invalid_p == 0 */
   /* Skip verify of software_single_step, has predicate */
 }
 
@@ -875,15 +849,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 #ifdef TARGET_READ_PC
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
-                      "TARGET_READ_PC(ptid)",
-                      XSTRING (TARGET_READ_PC (ptid)));
+                      "TARGET_READ_PC(pid)",
+                      XSTRING (TARGET_READ_PC (pid)));
 #endif
 #if defined (TARGET_WRITE_PC) && GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
-                      "TARGET_WRITE_PC(val, ptid)",
-                      XSTRING (TARGET_WRITE_PC (val, ptid)));
+                      "TARGET_WRITE_PC(val, pid)",
+                      XSTRING (TARGET_WRITE_PC (val, pid)));
 #endif
 #ifdef TARGET_READ_FP
   fprintf_unfiltered (file,
@@ -1050,18 +1024,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "REGISTER_BYTES_OK(nr_bytes)",
                       XSTRING (REGISTER_BYTES_OK (nr_bytes)));
 #endif
-#ifdef CANNOT_FETCH_REGISTER
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "CANNOT_FETCH_REGISTER(regnum)",
-                      XSTRING (CANNOT_FETCH_REGISTER (regnum)));
-#endif
-#ifdef CANNOT_STORE_REGISTER
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "CANNOT_STORE_REGISTER(regnum)",
-                      XSTRING (CANNOT_STORE_REGISTER (regnum)));
-#endif
 #ifdef USE_GENERIC_DUMMY_FRAMES
   fprintf_unfiltered (file,
                       "gdbarch_dump: USE_GENERIC_DUMMY_FRAMES # %s\n",
@@ -1135,20 +1097,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: %s # %s\n",
                       "FIX_CALL_DUMMY(dummy, pc, fun, nargs, args, type, gcc_p)",
                       XSTRING (FIX_CALL_DUMMY (dummy, pc, fun, nargs, args, type, gcc_p)));
-#endif
-#if defined (INIT_FRAME_PC_FIRST) && GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "INIT_FRAME_PC_FIRST(fromleaf, prev)",
-                      XSTRING (INIT_FRAME_PC_FIRST (fromleaf, prev)));
-#endif
-#if defined (INIT_FRAME_PC) && GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "INIT_FRAME_PC(fromleaf, prev)",
-                      XSTRING (INIT_FRAME_PC (fromleaf, prev)));
 #endif
 #ifdef BELIEVE_PCC_PROMOTION
   fprintf_unfiltered (file,
@@ -1497,12 +1445,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "CONVERT_FROM_FUNC_PTR_ADDR(addr)",
                       XSTRING (CONVERT_FROM_FUNC_PTR_ADDR (addr)));
 #endif
-#ifdef ADDR_BITS_REMOVE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "ADDR_BITS_REMOVE(addr)",
-                      XSTRING (ADDR_BITS_REMOVE (addr)));
-#endif
 #if defined (SOFTWARE_SINGLE_STEP) && GDB_MULTI_ARCH
   /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
@@ -1777,20 +1719,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->register_bytes_ok
                         /*REGISTER_BYTES_OK ()*/);
 #endif
-#ifdef CANNOT_FETCH_REGISTER
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: CANNOT_FETCH_REGISTER = 0x%08lx\n",
-                        (long) current_gdbarch->cannot_fetch_register
-                        /*CANNOT_FETCH_REGISTER ()*/);
-#endif
-#ifdef CANNOT_STORE_REGISTER
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: CANNOT_STORE_REGISTER = 0x%08lx\n",
-                        (long) current_gdbarch->cannot_store_register
-                        /*CANNOT_STORE_REGISTER ()*/);
-#endif
 #ifdef USE_GENERIC_DUMMY_FRAMES
   fprintf_unfiltered (file,
                       "gdbarch_dump: USE_GENERIC_DUMMY_FRAMES = %ld\n",
@@ -1869,20 +1797,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: FIX_CALL_DUMMY = 0x%08lx\n",
                         (long) current_gdbarch->fix_call_dummy
                         /*FIX_CALL_DUMMY ()*/);
-#endif
-#ifdef INIT_FRAME_PC_FIRST
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: INIT_FRAME_PC_FIRST = 0x%08lx\n",
-                        (long) current_gdbarch->init_frame_pc_first
-                        /*INIT_FRAME_PC_FIRST ()*/);
-#endif
-#ifdef INIT_FRAME_PC
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: INIT_FRAME_PC = 0x%08lx\n",
-                        (long) current_gdbarch->init_frame_pc
-                        /*INIT_FRAME_PC ()*/);
 #endif
 #ifdef BELIEVE_PCC_PROMOTION
   fprintf_unfiltered (file,
@@ -2263,13 +2177,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->convert_from_func_ptr_addr
                         /*CONVERT_FROM_FUNC_PTR_ADDR ()*/);
 #endif
-#ifdef ADDR_BITS_REMOVE
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: ADDR_BITS_REMOVE = 0x%08lx\n",
-                        (long) current_gdbarch->addr_bits_remove
-                        /*ADDR_BITS_REMOVE ()*/);
-#endif
 #ifdef SOFTWARE_SINGLE_STEP
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
@@ -2485,14 +2392,14 @@ set_gdbarch_ieee_float (struct gdbarch *gdbarch,
 }
 
 CORE_ADDR
-gdbarch_read_pc (struct gdbarch *gdbarch, ptid_t ptid)
+gdbarch_read_pc (struct gdbarch *gdbarch, int pid)
 {
   if (gdbarch->read_pc == 0)
     internal_error (__FILE__, __LINE__,
                     "gdbarch: gdbarch_read_pc invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_read_pc called\n");
-  return gdbarch->read_pc (ptid);
+  return gdbarch->read_pc (pid);
 }
 
 void
@@ -2503,14 +2410,14 @@ set_gdbarch_read_pc (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_write_pc (struct gdbarch *gdbarch, CORE_ADDR val, ptid_t ptid)
+gdbarch_write_pc (struct gdbarch *gdbarch, CORE_ADDR val, int pid)
 {
   if (gdbarch->write_pc == 0)
     internal_error (__FILE__, __LINE__,
                     "gdbarch: gdbarch_write_pc invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_write_pc called\n");
-  gdbarch->write_pc (val, ptid);
+  gdbarch->write_pc (val, pid);
 }
 
 void
@@ -3089,42 +2996,6 @@ set_gdbarch_register_bytes_ok (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_cannot_fetch_register (struct gdbarch *gdbarch, int regnum)
-{
-  if (gdbarch->cannot_fetch_register == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_cannot_fetch_register invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_cannot_fetch_register called\n");
-  return gdbarch->cannot_fetch_register (regnum);
-}
-
-void
-set_gdbarch_cannot_fetch_register (struct gdbarch *gdbarch,
-                                   gdbarch_cannot_fetch_register_ftype cannot_fetch_register)
-{
-  gdbarch->cannot_fetch_register = cannot_fetch_register;
-}
-
-int
-gdbarch_cannot_store_register (struct gdbarch *gdbarch, int regnum)
-{
-  if (gdbarch->cannot_store_register == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_cannot_store_register invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_cannot_store_register called\n");
-  return gdbarch->cannot_store_register (regnum);
-}
-
-void
-set_gdbarch_cannot_store_register (struct gdbarch *gdbarch,
-                                   gdbarch_cannot_store_register_ftype cannot_store_register)
-{
-  gdbarch->cannot_store_register = cannot_store_register;
-}
-
-int
 gdbarch_use_generic_dummy_frames (struct gdbarch *gdbarch)
 {
   if (gdbarch->use_generic_dummy_frames == -1)
@@ -3370,42 +3241,6 @@ set_gdbarch_fix_call_dummy (struct gdbarch *gdbarch,
                             gdbarch_fix_call_dummy_ftype fix_call_dummy)
 {
   gdbarch->fix_call_dummy = fix_call_dummy;
-}
-
-void
-gdbarch_init_frame_pc_first (struct gdbarch *gdbarch, int fromleaf, struct frame_info *prev)
-{
-  if (gdbarch->init_frame_pc_first == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_init_frame_pc_first invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_init_frame_pc_first called\n");
-  gdbarch->init_frame_pc_first (fromleaf, prev);
-}
-
-void
-set_gdbarch_init_frame_pc_first (struct gdbarch *gdbarch,
-                                 gdbarch_init_frame_pc_first_ftype init_frame_pc_first)
-{
-  gdbarch->init_frame_pc_first = init_frame_pc_first;
-}
-
-void
-gdbarch_init_frame_pc (struct gdbarch *gdbarch, int fromleaf, struct frame_info *prev)
-{
-  if (gdbarch->init_frame_pc == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_init_frame_pc invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_init_frame_pc called\n");
-  gdbarch->init_frame_pc (fromleaf, prev);
-}
-
-void
-set_gdbarch_init_frame_pc (struct gdbarch *gdbarch,
-                           gdbarch_init_frame_pc_ftype init_frame_pc)
-{
-  gdbarch->init_frame_pc = init_frame_pc;
 }
 
 int
@@ -3850,12 +3685,6 @@ set_gdbarch_store_return_value (struct gdbarch *gdbarch,
                                 gdbarch_store_return_value_ftype store_return_value)
 {
   gdbarch->store_return_value = store_return_value;
-}
-
-int
-gdbarch_extract_struct_value_address_p (struct gdbarch *gdbarch)
-{
-  return gdbarch->extract_struct_value_address != 0;
 }
 
 CORE_ADDR
@@ -4438,24 +4267,6 @@ set_gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
   gdbarch->convert_from_func_ptr_addr = convert_from_func_ptr_addr;
 }
 
-CORE_ADDR
-gdbarch_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
-{
-  if (gdbarch->addr_bits_remove == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_addr_bits_remove invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_addr_bits_remove called\n");
-  return gdbarch->addr_bits_remove (addr);
-}
-
-void
-set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch,
-                              gdbarch_addr_bits_remove_ftype addr_bits_remove)
-{
-  gdbarch->addr_bits_remove = addr_bits_remove;
-}
-
 int
 gdbarch_software_single_step_p (struct gdbarch *gdbarch)
 {
@@ -4833,40 +4644,56 @@ gdbarch_update_p (struct gdbarch_info info)
   struct gdbarch_list **list;
   struct gdbarch_registration *rego;
 
-  /* Fill in missing parts of the INFO struct using a number of
-     sources: ``set ...''; INFOabfd supplied; existing target.  */
-
-  /* ``(gdb) set architecture ...'' */
-  if (info.bfd_arch_info == NULL
-      && !TARGET_ARCHITECTURE_AUTO)
-    info.bfd_arch_info = TARGET_ARCHITECTURE;
-  if (info.bfd_arch_info == NULL
-      && info.abfd != NULL
-      && bfd_get_arch (info.abfd) != bfd_arch_unknown
-      && bfd_get_arch (info.abfd) != bfd_arch_obscure)
-    info.bfd_arch_info = bfd_get_arch_info (info.abfd);
+  /* Fill in any missing bits. Most important is the bfd_architecture
+     which is used to select the target architecture. */
+  if (info.bfd_architecture == bfd_arch_unknown)
+    {
+      if (info.bfd_arch_info != NULL)
+	info.bfd_architecture = info.bfd_arch_info->arch;
+      else if (info.abfd != NULL)
+	info.bfd_architecture = bfd_get_arch (info.abfd);
+      /* FIXME - should query BFD for its default architecture. */
+      else
+	info.bfd_architecture = current_gdbarch->bfd_arch_info->arch;
+    }
   if (info.bfd_arch_info == NULL)
-    info.bfd_arch_info = TARGET_ARCHITECTURE;
-
-  /* ``(gdb) set byte-order ...'' */
-  if (info.byte_order == 0
-      && !TARGET_BYTE_ORDER_AUTO)
-    info.byte_order = TARGET_BYTE_ORDER;
-  /* From the INFO struct. */
-  if (info.byte_order == 0
-      && info.abfd != NULL)
-    info.byte_order = (bfd_big_endian (info.abfd) ? BIG_ENDIAN
-		       : bfd_little_endian (info.abfd) ? LITTLE_ENDIAN
-		       : 0);
-  /* From the current target. */
+    {
+      if (target_architecture_auto && info.abfd != NULL)
+	info.bfd_arch_info = bfd_get_arch_info (info.abfd);
+      else
+	info.bfd_arch_info = current_gdbarch->bfd_arch_info;
+    }
   if (info.byte_order == 0)
-    info.byte_order = TARGET_BYTE_ORDER;
+    {
+      if (target_byte_order_auto && info.abfd != NULL)
+	info.byte_order = (bfd_big_endian (info.abfd) ? BIG_ENDIAN
+			   : bfd_little_endian (info.abfd) ? LITTLE_ENDIAN
+			   : 0);
+      else
+	info.byte_order = current_gdbarch->byte_order;
+      /* FIXME - should query BFD for its default byte-order. */
+    }
+  /* A default for abfd? */
 
-  /* Must have found some sort of architecture. */
-  gdb_assert (info.bfd_arch_info != NULL);
+  /* Find the target that knows about this architecture. */
+  for (rego = gdbarch_registry;
+       rego != NULL;
+       rego = rego->next)
+    if (rego->bfd_architecture == info.bfd_architecture)
+      break;
+  if (rego == NULL)
+    {
+      if (gdbarch_debug)
+	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: No matching architecture\n");
+      return 0;
+    }
 
   if (gdbarch_debug)
     {
+      fprintf_unfiltered (gdb_stdlog,
+			  "gdbarch_update: info.bfd_architecture %d (%s)\n",
+			  info.bfd_architecture,
+			  bfd_lookup_arch (info.bfd_architecture, 0)->printable_name);
       fprintf_unfiltered (gdb_stdlog,
 			  "gdbarch_update: info.bfd_arch_info %s\n",
 			  (info.bfd_arch_info != NULL
@@ -4884,19 +4711,6 @@ gdbarch_update_p (struct gdbarch_info info)
       fprintf_unfiltered (gdb_stdlog,
 			  "gdbarch_update: info.tdep_info 0x%lx\n",
 			  (long) info.tdep_info);
-    }
-
-  /* Find the target that knows about this architecture. */
-  for (rego = gdbarch_registry;
-       rego != NULL;
-       rego = rego->next)
-    if (rego->bfd_architecture == info.bfd_arch_info->arch)
-      break;
-  if (rego == NULL)
-    {
-      if (gdbarch_debug)
-	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: No matching architecture\n");
-      return 0;
     }
 
   /* Ask the target for a replacement architecture. */

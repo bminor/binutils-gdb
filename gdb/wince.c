@@ -129,7 +129,7 @@ static int remote_add_host = 0;
 /* Forward declaration */
 extern struct target_ops child_ops;
 
-static int win32_child_thread_alive (ptid_t);
+static int win32_child_thread_alive (int);
 void child_kill_inferior (void);
 
 static int last_sig = 0;	/* Set if a signal was received from the
@@ -1131,7 +1131,7 @@ do_child_fetch_inferior_registers (int r)
 static void
 child_fetch_inferior_registers (int r)
 {
-  current_thread = thread_rec (PIDGET (inferior_ptid), TRUE);
+  current_thread = thread_rec (inferior_pid, TRUE);
   do_child_fetch_inferior_registers (r);
 }
 
@@ -1151,7 +1151,7 @@ do_child_store_inferior_registers (int r)
 static void
 child_store_inferior_registers (int r)
 {
-  current_thread = thread_rec (PIDGET (inferior_ptid), TRUE);
+  current_thread = thread_rec (inferior_pid, TRUE);
   do_child_store_inferior_registers (r);
 }
 
@@ -1412,10 +1412,9 @@ get_child_debug_event (int pid, struct target_waitstatus *ourstatus,
 		     "CREATE_PROCESS_DEBUG_EVENT"));
       current_process_handle = current_event.u.CreateProcessInfo.hProcess;
 
-      main_thread_id = current_event.dwThreadId;
-      inferior_ptid = pid_to_ptid (main_thread_id);
+      main_thread_id = inferior_pid = current_event.dwThreadId;
       /* Add the main thread */
-      th = child_add_thread (PIDGET (inferior_ptid),
+      th = child_add_thread (inferior_pid,
 			     current_event.u.CreateProcessInfo.hThread);
       break;
 
@@ -1487,12 +1486,11 @@ out:
 }
 
 /* Wait for interesting events to occur in the target process. */
-static ptid_t
-child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+static int
+child_wait (int pid, struct target_waitstatus *ourstatus)
 {
   DWORD event_code;
   int retval;
-  int pid = PIDGET (ptid);
 
   /* We loop when we get a non-standard exception rather than return
      with a SPURIOUS because resume can try and step or modify things,
@@ -1502,7 +1500,7 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
   while (1)
     if (get_child_debug_event (pid, ourstatus, EXCEPTION_DEBUG_EVENT, &retval))
-      return pid_to_ptid (retval);
+      return retval;
     else
       {
 	int detach = 0;
@@ -1521,7 +1519,7 @@ static void
 child_files_info (struct target_ops *ignore)
 {
   printf_unfiltered ("\tUsing the running image of child %s.\n",
-		     target_pid_to_str (inferior_ptid));
+		     target_pid_to_str (inferior_pid));
 }
 
 /* ARGSUSED */
@@ -1713,7 +1711,7 @@ wince_initialize (void)
   close (s0);
 }
 
-/* Start an inferior win32 child process and sets inferior_ptid to its pid.
+/* Start an inferior win32 child process and sets inferior_pid to its pid.
    EXEC_FILE is the file to run.
    ALLARGS is a string containing the arguments to the program.
    ENV is the environment vector to pass.  Errors reported with error().  */
@@ -1761,8 +1759,7 @@ child_create_inferior (char *exec_file, char *args, char **env)
   current_process_handle = pi.hProcess;
   current_event.dwProcessId = pi.dwProcessId;
   memset (&current_event, 0, sizeof (current_event));
-  current_event.dwThreadId = pi.dwThreadId;
-  inferior_ptid = pid_to_ptid (current_event.dwThreadId);
+  inferior_pid = current_event.dwThreadId = pi.dwThreadId;
   push_target (&child_ops);
   child_init_thread_list ();
   child_add_thread (pi.dwThreadId, pi.hThread);
@@ -1772,7 +1769,7 @@ child_create_inferior (char *exec_file, char *args, char **env)
   target_terminal_inferior ();
 
   /* Run until process and threads are loaded */
-  while (!get_child_debug_event (PIDGET (inferior_ptid), &dummy,
+  while (!get_child_debug_event (inferior_pid, &dummy,
 				 CREATE_PROCESS_DEBUG_EVENT, &ret))
     continue;
 
@@ -1831,12 +1828,11 @@ child_kill_inferior (void)
 
 /* Resume the child after an exception. */
 void
-child_resume (ptid_t ptid, int step, enum target_signal sig)
+child_resume (int pid, int step, enum target_signal sig)
 {
   thread_info *th;
   DWORD continue_status = last_sig > 0 && last_sig < NSIG ?
   DBG_EXCEPTION_NOT_HANDLED : DBG_CONTINUE;
-  int pid = PIDGET (ptid);
 
   DEBUG_EXEC (("gdb: child_resume (pid=%d, step=%d, sig=%d);\n",
 	       pid, step, sig));
@@ -1874,8 +1870,7 @@ child_can_run (void)
 static void
 child_close (void)
 {
-  DEBUG_EVENTS (("gdb: child_close, inferior_ptid=%d\n",
-                PIDGET (inferior_ptid)));
+  DEBUG_EVENTS (("gdb: child_close, inferior_pid=%d\n", inferior_pid));
 }
 
 /* Explicitly upload file to remotedir */
@@ -2028,9 +2023,8 @@ debugging over a network.", &setlist),
    by "polling" it.  If WaitForSingleObject returns WAIT_OBJECT_0
    it means that the pid has died.  Otherwise it is assumed to be alive. */
 static int
-win32_child_thread_alive (ptid_t ptid)
+win32_child_thread_alive (int pid)
 {
-  int pid = PIDGET (ptid);
   return thread_alive (thread_rec (pid, FALSE)->h);
 }
 

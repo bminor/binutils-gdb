@@ -51,38 +51,6 @@ extern void write_inferior_status_register (struct inferior_status
 					    *inf_status, int regno,
 					    LONGEST val);
 
-/* The -1 ptid, often used to indicate either an error condition
-   or a "don't care" condition, i.e, "run all threads."  */
-extern ptid_t minus_one_ptid;
-
-/* The null or zero ptid, often used to indicate no process. */
-extern ptid_t null_ptid;
-
-/* Attempt to find and return an existing ptid with the given PID, LWP,
-   and TID components.  If none exists, create a new one and return
-   that.  */
-ptid_t ptid_build (int pid, long lwp, long tid);
-
-/* Find/Create a ptid from just a pid. */
-ptid_t pid_to_ptid (int pid);
-
-/* Fetch the pid (process id) component from a ptid. */
-int ptid_get_pid (ptid_t ptid);
-
-/* Fetch the lwp (lightweight process) component from a ptid. */
-long ptid_get_lwp (ptid_t ptid);
-
-/* Fetch the tid (thread id) component from a ptid. */
-long ptid_get_tid (ptid_t ptid);
-
-/* Compare two ptids to see if they are equal */
-extern int ptid_equal (ptid_t p1, ptid_t p2);
-
-/* Save value of inferior_ptid so that it may be restored by
-   a later call to do_cleanups().  Returns the struct cleanup
-   pointer needed for later doing the cleanup.  */
-extern struct cleanup * save_inferior_ptid (void);
-
 extern void set_sigint_trap (void);
 
 extern void clear_sigint_trap (void);
@@ -95,10 +63,9 @@ extern void clear_sigio_trap (void);
 
 extern char *inferior_io_terminal;
 
-/* Collected pid, tid, etc. of the debugged inferior.  When there's
-   no inferior, PIDGET (inferior_ptid) will be 0. */
+/* Pid of our debugged inferior, or 0 if no inferior now.  */
 
-extern ptid_t inferior_ptid;
+extern int inferior_pid;
 
 /* Is the inferior running right now, as a result of a 'run&',
    'continue&' etc command? This is used in asycn gdb to determine
@@ -111,7 +78,7 @@ extern int target_executing;
    redisplay the prompt until the execution is actually over. */
 extern int sync_execution;
 
-/* This is only valid when inferior_ptid is non-zero.
+/* This is only valid when inferior_pid is non-zero.
 
    If this is 0, then exec events should be noticed and responded to
    by the debugger (i.e., be reported to the user).
@@ -155,15 +122,15 @@ extern int run_stack_dummy (CORE_ADDR, char *);
 
 extern CORE_ADDR read_pc (void);
 
-extern CORE_ADDR read_pc_pid (ptid_t);
+extern CORE_ADDR read_pc_pid (int);
 
-extern CORE_ADDR generic_target_read_pc (ptid_t);
+extern CORE_ADDR generic_target_read_pc (int);
 
 extern void write_pc (CORE_ADDR);
 
-extern void write_pc_pid (CORE_ADDR, ptid_t);
+extern void write_pc_pid (CORE_ADDR, int);
 
-extern void generic_target_write_pc (CORE_ADDR, ptid_t);
+extern void generic_target_write_pc (CORE_ADDR, int);
 
 extern CORE_ADDR read_sp (void);
 
@@ -241,9 +208,9 @@ extern int attach (int);
 extern void detach (int);
 
 /* PTRACE method of waiting for inferior process.  */
-int ptrace_wait (ptid_t, int *);
+int ptrace_wait (int, int *);
 
-extern void child_resume (ptid_t, int, enum target_signal);
+extern void child_resume (int, int, enum target_signal);
 
 #ifndef PTRACE_ARG3_TYPE
 #define PTRACE_ARG3_TYPE int	/* Correct definition for most systems. */
@@ -257,7 +224,7 @@ extern void pre_fork_inferior (void);
 
 extern int proc_iterate_over_mappings (int (*)(int, CORE_ADDR));
 
-extern ptid_t procfs_first_available (void);
+extern int procfs_first_available (void);
 
 /* From fork-child.c */
 
@@ -294,8 +261,7 @@ extern int signal_print_update (int, int);
 
 extern int signal_pass_update (int, int);
 
-extern void get_last_target_status(ptid_t *ptid,
-                                   struct target_waitstatus *status);
+extern void get_last_target_status(int *pid, struct target_waitstatus *status);
 
 /* From infcmd.c */
 
@@ -396,7 +362,7 @@ extern int proceed_to_finish;
 
 extern char *stop_registers;
 
-/* Nonzero if the child process in inferior_ptid was attached rather
+/* Nonzero if the child process in inferior_pid was attached rather
    than forked.  */
 
 extern int attach_flag;

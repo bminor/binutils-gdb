@@ -39,7 +39,6 @@
 #include "language.h"
 #include "gdbcmd.h"
 #include "completer.h"
-#include "filenames.h"		/* for DOSish file names */
 
 #include "solist.h"
 
@@ -102,14 +101,10 @@ solib_open (char *in_pathname, char **found_pathname)
 {
   int found_file = -1;
   char *temp_pathname = NULL;
-  char *p = in_pathname;
 
-  while (*p && !IS_DIR_SEPARATOR (*p))
-    p++;
-
-  if (*p)
+  if (strchr (in_pathname, SLASH_CHAR))
     {
-      if (! IS_ABSOLUTE_PATH (in_pathname) || solib_absolute_prefix == NULL)
+      if (! ROOTED_P (in_pathname) || solib_absolute_prefix == NULL)
         temp_pathname = in_pathname;
       else
 	{
@@ -117,7 +112,7 @@ solib_open (char *in_pathname, char **found_pathname)
 
 	  /* Remove trailing slashes from absolute prefix.  */
 	  while (prefix_len > 0
-		 && IS_DIR_SEPARATOR (solib_absolute_prefix[prefix_len - 1]))
+		 && SLASH_P (solib_absolute_prefix[prefix_len - 1]))
 	    prefix_len--;
 
 	  /* Cat the prefixed pathname together.  */
@@ -466,20 +461,30 @@ update_solib_list (int from_tty, struct target_ops *target)
 	  catch_errors (solib_map_sections, i,
 			"Error while mapping shared library sections:\n",
 			RETURN_MASK_ALL);
+	}
 
-	  /* If requested, add the shared object's sections to the TARGET's
-	     section table.  Do this immediately after mapping the object so
-	     that later nodes in the list can query this object, as is needed
-	     in solib-osf.c.  */
-	  if (target)
+      /* If requested, add the shared objects' sections to the the
+	 TARGET's section table.  */
+      if (target)
+	{
+	  int new_sections;
+
+	  /* Figure out how many sections we'll need to add in total.  */
+	  new_sections = 0;
+	  for (i = inferior; i; i = i->next)
+	    new_sections += (i->sections_end - i->sections);
+
+	  if (new_sections > 0)
 	    {
-	      int count = (i->sections_end - i->sections);
-	      if (count > 0)
+	      int space = target_resize_to_sections (target, new_sections);
+
+	      for (i = inferior; i; i = i->next)
 		{
-		  int space = target_resize_to_sections (target, count);
+		  int count = (i->sections_end - i->sections);
 		  memcpy (target->to_sections + space,
 			  i->sections,
 			  count * sizeof (i->sections[0]));
+		  space += count;
 		}
 	    }
 	}
@@ -600,10 +605,7 @@ info_sharedlibrary_command (char *ignore, int from_tty)
     }
 
   arch_size = bfd_get_arch_size (exec_bfd);
-  if (arch_size == -1)
-    arch_size = bfd_arch_bits_per_address(exec_bfd);
-
-  /* Default to 32-bit in case of failure.  */
+  /* Default to 32-bit in case of failure (non-elf). */
   if (arch_size == 32 || arch_size == -1)
     {
       addr_width = 8 + 4;
@@ -806,18 +808,6 @@ sharedlibrary_command (char *args, int from_tty)
   dont_repeat ();
   solib_add (args, from_tty, (struct target_ops *) 0);
 }
-
-/* LOCAL FUNCTION
-
-   no_shared_libraries -- handle command to explicitly discard symbols
-   from shared libraries.
-
-   DESCRIPTION
-
-   Implements the command "nosharedlibrary", which discards symbols
-   that have been auto-loaded from shared libraries.  Symbols from
-   shared libraries that were added by explicit request of the user
-   are not discarded.  Also called from remote.c.  */
 
 void
 no_shared_libraries (char *ignored, int from_tty)

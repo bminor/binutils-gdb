@@ -37,7 +37,6 @@
 #include "demangle.h"
 #include "inferior.h"
 #include "linespec.h"
-#include "filenames.h"		/* for FILENAME_CMP */
 
 #include "obstack.h"
 
@@ -79,7 +78,7 @@ static struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
 						     const char *, int,
 						     namespace_enum);
 
-static struct symtab *lookup_symtab_1 (const char *);
+static struct symtab *lookup_symtab_1 (char *);
 
 static struct symbol *lookup_symbol_aux (const char *name, const
 					 struct block *block, const
@@ -138,10 +137,11 @@ cplusplus_hint (char *name)
    in the symtab filename will also work.  */
 
 static struct symtab *
-lookup_symtab_1 (const char *name)
+lookup_symtab_1 (char *name)
 {
   register struct symtab *s;
   register struct partial_symtab *ps;
+  register char *slash;
   register struct objfile *objfile;
 
 got_symtab:
@@ -149,15 +149,23 @@ got_symtab:
   /* First, search for an exact match */
 
   ALL_SYMTABS (objfile, s)
-    if (FILENAME_CMP (name, s->filename) == 0)
-      return s;
+    if (STREQ (name, s->filename))
+    return s;
+
+  slash = strchr (name, '/');
 
   /* Now, search for a matching tail (only if name doesn't have any dirs) */
 
-  if (lbasename (name) == name)
+  if (!slash)
     ALL_SYMTABS (objfile, s)
     {
-      if (FILENAME_CMP (lbasename (s->filename), name) == 0)
+      char *p = s->filename;
+      char *tail = strrchr (p, '/');
+
+      if (tail)
+	p = tail + 1;
+
+      if (STREQ (p, name))
 	return s;
     }
 
@@ -192,7 +200,7 @@ got_symtab:
    of variations if the first lookup doesn't work.  */
 
 struct symtab *
-lookup_symtab (const char *name)
+lookup_symtab (char *name)
 {
   register struct symtab *s;
 #if 0
@@ -229,14 +237,14 @@ lookup_symtab (const char *name)
    in the psymtab filename will also work.  */
 
 struct partial_symtab *
-lookup_partial_symtab (const char *name)
+lookup_partial_symtab (char *name)
 {
   register struct partial_symtab *pst;
   register struct objfile *objfile;
 
   ALL_PSYMTABS (objfile, pst)
   {
-    if (FILENAME_CMP (name, pst->filename) == 0)
+    if (STREQ (name, pst->filename))
       {
 	return (pst);
       }
@@ -244,10 +252,16 @@ lookup_partial_symtab (const char *name)
 
   /* Now, search for a matching tail (only if name doesn't have any dirs) */
 
-  if (lbasename (name) == name)
+  if (!strchr (name, '/'))
     ALL_PSYMTABS (objfile, pst)
     {
-      if (FILENAME_CMP (lbasename (pst->filename), name) == 0)
+      char *p = pst->filename;
+      char *tail = strrchr (p, '/');
+
+      if (tail)
+	p = tail + 1;
+
+      if (STREQ (p, name))
 	return (pst);
     }
 
@@ -2153,72 +2167,50 @@ operator_chars (char *p, char **end)
 }
 
 
-/* If FILE is not already in the table of files, return zero;
-   otherwise return non-zero.  Optionally add FILE to the table if ADD
-   is non-zero.  If *FIRST is non-zero, forget the old table
-   contents.  */
-static int
-filename_seen (const char *file, int add, int *first)
-{
-  /* Table of files seen so far.  */
-  static const char **tab = NULL;
-  /* Allocated size of tab in elements.
-     Start with one 256-byte block (when using GNU malloc.c).
-     24 is the malloc overhead when range checking is in effect.  */
-  static int tab_alloc_size = (256 - 24) / sizeof (char *);
-  /* Current size of tab in elements.  */
-  static int tab_cur_size;
-  const char **p;
-
-  if (*first)
-    {
-      if (tab == NULL)
-	tab = (const char **) xmalloc (tab_alloc_size * sizeof (*tab));
-      tab_cur_size = 0;
-    }
-
-  /* Is FILE in tab?  */
-  for (p = tab; p < tab + tab_cur_size; p++)
-    if (strcmp (*p, file) == 0)
-      return 1;
-
-  /* No; maybe add it to tab.  */
-  if (add)
-    {
-      if (tab_cur_size == tab_alloc_size)
-	{
-	  tab_alloc_size *= 2;
-	  tab = (const char **) xrealloc ((char *) tab,
-					  tab_alloc_size * sizeof (*tab));
-	}
-      tab[tab_cur_size++] = file;
-    }
-
-  return 0;
-}
-
 /* Slave routine for sources_info.  Force line breaks at ,'s.
    NAME is the name to print and *FIRST is nonzero if this is the first
    name printed.  Set *FIRST to zero.  */
 static void
 output_source_filename (char *name, int *first)
 {
-  /* Since a single source file can result in several partial symbol
-     tables, we need to avoid printing it more than once.  Note: if
-     some of the psymtabs are read in and some are not, it gets
-     printed both under "Source files for which symbols have been
-     read" and "Source files for which symbols will be read in on
-     demand".  I consider this a reasonable way to deal with the
-     situation.  I'm not sure whether this can also happen for
+  /* Table of files printed so far.  Since a single source file can
+     result in several partial symbol tables, we need to avoid printing
+     it more than once.  Note: if some of the psymtabs are read in and
+     some are not, it gets printed both under "Source files for which
+     symbols have been read" and "Source files for which symbols will
+     be read in on demand".  I consider this a reasonable way to deal
+     with the situation.  I'm not sure whether this can also happen for
      symtabs; it doesn't hurt to check.  */
+  static char **tab = NULL;
+  /* Allocated size of tab in elements.
+     Start with one 256-byte block (when using GNU malloc.c).
+     24 is the malloc overhead when range checking is in effect.  */
+  static int tab_alloc_size = (256 - 24) / sizeof (char *);
+  /* Current size of tab in elements.  */
+  static int tab_cur_size;
 
-  /* Was NAME already seen?  */
-  if (filename_seen (name, 1, first))
+  char **p;
+
+  if (*first)
     {
+      if (tab == NULL)
+	tab = (char **) xmalloc (tab_alloc_size * sizeof (*tab));
+      tab_cur_size = 0;
+    }
+
+  /* Is NAME in tab?  */
+  for (p = tab; p < tab + tab_cur_size; p++)
+    if (STREQ (*p, name))
       /* Yes; don't print it again.  */
       return;
+  /* No; add it to tab.  */
+  if (tab_cur_size == tab_alloc_size)
+    {
+      tab_alloc_size *= 2;
+      tab = (char **) xrealloc ((char *) tab, tab_alloc_size * sizeof (*tab));
     }
-  /* No; print it and reset *FIRST.  */
+  tab[tab_cur_size++] = name;
+
   if (*first)
     {
       *first = 0;
@@ -2276,7 +2268,7 @@ file_matches (char *file, char *files[], int nfiles)
     {
       for (i = 0; i < nfiles; i++)
 	{
-	  if (strcmp (files[i], lbasename (file)) == 0)
+	  if (strcmp (files[i], basename (file)) == 0)
 	    return 1;
 	}
     }
@@ -2666,17 +2658,9 @@ print_symbol_info (namespace_enum kind, struct symtab *s, struct symbol *sym,
 static void
 print_msymbol_info (struct minimal_symbol *msymbol)
 {
-  char *tmp;
-
-  if (TARGET_ADDR_BIT <= 32)
-    tmp = longest_local_hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol)
-					   & (CORE_ADDR) 0xffffffff,
-					   "08l");
-  else
-    tmp = longest_local_hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol),
-					   "016l");
-  printf_filtered ("%s  %s\n",
-		   tmp, SYMBOL_SOURCE_NAME (msymbol));
+  printf_filtered ("	%08lx  %s\n",
+		   (unsigned long) SYMBOL_VALUE_ADDRESS (msymbol),
+		   SYMBOL_SOURCE_NAME (msymbol));
 }
 
 /* This is the guts of the commands "info functions", "info types", and
@@ -2893,9 +2877,9 @@ completion_list_add_name (char *symname, char *sym_text, int sym_text_len,
   }
 }
 
-/* Return a NULL terminated array of all symbols (regardless of class)
-   which begin by matching TEXT.  If the answer is no symbols, then
-   the return value is an array which contains only a NULL pointer.
+/* Return a NULL terminated array of all symbols (regardless of class) which
+   begin by matching TEXT.  If the answer is no symbols, then the return value
+   is an array which contains only a NULL pointer.
 
    Problem: All of the symbols have to be copied because readline frees them.
    I'm not going to worry about this; hopefully there won't be that many.  */
@@ -2949,11 +2933,7 @@ make_symbol_completion_list (char *text, char *word)
     else if (quote_found == '"')
       /* A double-quoted string is never a symbol, nor does it make sense
          to complete it any other way.  */
-      {
-	return_val = (char **) xmalloc (sizeof (char *));
-	return_val[0] = NULL;
-	return return_val;
-      }
+      return NULL;
     else
       {
 	/* It is not a quoted string.  Break it based on the characters
@@ -3083,277 +3063,6 @@ make_symbol_completion_list (char *text, char *word)
   }
 
   return (return_val);
-}
-
-/* Like make_symbol_completion_list, but returns a list of symbols
-   defined in a source file FILE.  */
-
-char **
-make_file_symbol_completion_list (char *text, char *word, char *srcfile)
-{
-  register struct symbol *sym;
-  register struct symtab *s;
-  register struct block *b;
-  register int i;
-  /* The symbol we are completing on.  Points in same buffer as text.  */
-  char *sym_text;
-  /* Length of sym_text.  */
-  int sym_text_len;
-
-  /* Now look for the symbol we are supposed to complete on.
-     FIXME: This should be language-specific.  */
-  {
-    char *p;
-    char quote_found;
-    char *quote_pos = NULL;
-
-    /* First see if this is a quoted string.  */
-    quote_found = '\0';
-    for (p = text; *p != '\0'; ++p)
-      {
-	if (quote_found != '\0')
-	  {
-	    if (*p == quote_found)
-	      /* Found close quote.  */
-	      quote_found = '\0';
-	    else if (*p == '\\' && p[1] == quote_found)
-	      /* A backslash followed by the quote character
-	         doesn't end the string.  */
-	      ++p;
-	  }
-	else if (*p == '\'' || *p == '"')
-	  {
-	    quote_found = *p;
-	    quote_pos = p;
-	  }
-      }
-    if (quote_found == '\'')
-      /* A string within single quotes can be a symbol, so complete on it.  */
-      sym_text = quote_pos + 1;
-    else if (quote_found == '"')
-      /* A double-quoted string is never a symbol, nor does it make sense
-         to complete it any other way.  */
-      {
-	return_val = (char **) xmalloc (sizeof (char *));
-	return_val[0] = NULL;
-	return return_val;
-      }
-    else
-      {
-	/* It is not a quoted string.  Break it based on the characters
-	   which are in symbols.  */
-	while (p > text)
-	  {
-	    if (isalnum (p[-1]) || p[-1] == '_' || p[-1] == '\0')
-	      --p;
-	    else
-	      break;
-	  }
-	sym_text = p;
-      }
-  }
-
-  sym_text_len = strlen (sym_text);
-
-  return_val_size = 10;
-  return_val_index = 0;
-  return_val = (char **) xmalloc ((return_val_size + 1) * sizeof (char *));
-  return_val[0] = NULL;
-
-  /* Find the symtab for SRCFILE (this loads it if it was not yet read
-     in).  */
-  s = lookup_symtab (srcfile);
-  if (s == NULL)
-    {
-      /* Maybe they typed the file with leading directories, while the
-	 symbol tables record only its basename.  */
-      const char *tail = lbasename (srcfile);
-
-      if (tail > srcfile)
-	s = lookup_symtab (tail);
-    }
-
-  /* If we have no symtab for that file, return an empty list.  */
-  if (s == NULL)
-    return (return_val);
-
-  /* Go through this symtab and check the externs and statics for
-     symbols which match.  */
-
-  b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
-  for (i = 0; i < BLOCK_NSYMS (b); i++)
-    {
-      sym = BLOCK_SYM (b, i);
-      COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
-    }
-
-  b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
-  for (i = 0; i < BLOCK_NSYMS (b); i++)
-    {
-      sym = BLOCK_SYM (b, i);
-      COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
-    }
-
-  return (return_val);
-}
-
-/* A helper function for make_source_files_completion_list.  It adds
-   another file name to a list of possible completions, growing the
-   list as necessary.  */
-
-static void
-add_filename_to_list (const char *fname, char *text, char *word,
-		      char ***list, int *list_used, int *list_alloced)
-{
-  char *new;
-  size_t fnlen = strlen (fname);
-
-  if (*list_used + 1 >= *list_alloced)
-    {
-      *list_alloced *= 2;
-      *list = (char **) xrealloc ((char *) *list,
-				  *list_alloced * sizeof (char *));
-    }
-
-  if (word == text)
-    {
-      /* Return exactly fname.  */
-      new = xmalloc (fnlen + 5);
-      strcpy (new, fname);
-    }
-  else if (word > text)
-    {
-      /* Return some portion of fname.  */
-      new = xmalloc (fnlen + 5);
-      strcpy (new, fname + (word - text));
-    }
-  else
-    {
-      /* Return some of TEXT plus fname.  */
-      new = xmalloc (fnlen + (text - word) + 5);
-      strncpy (new, word, text - word);
-      new[text - word] = '\0';
-      strcat (new, fname);
-    }
-  (*list)[*list_used] = new;
-  (*list)[++*list_used] = NULL;
-}
-
-static int
-not_interesting_fname (const char *fname)
-{
-  static const char *illegal_aliens[] = {
-    "_globals_",	/* inserted by coff_symtab_read */
-    NULL
-  };
-  int i;
-
-  for (i = 0; illegal_aliens[i]; i++)
-    {
-      if (strcmp (fname, illegal_aliens[i]) == 0)
-	return 1;
-    }
-  return 0;
-}
-
-/* Return a NULL terminated array of all source files whose names
-   begin with matching TEXT.  The file names are looked up in the
-   symbol tables of this program.  If the answer is no matchess, then
-   the return value is an array which contains only a NULL pointer.  */
-
-char **
-make_source_files_completion_list (char *text, char *word)
-{
-  register struct symtab *s;
-  register struct partial_symtab *ps;
-  register struct objfile *objfile;
-  int first = 1;
-  int list_alloced = 1;
-  int list_used = 0;
-  size_t text_len = strlen (text);
-  char **list = (char **) xmalloc (list_alloced * sizeof (char *));
-  const char *base_name;
-
-  list[0] = NULL;
-
-  if (!have_full_symbols () && !have_partial_symbols ())
-    return list;
-
-  ALL_SYMTABS (objfile, s)
-    {
-      if (not_interesting_fname (s->filename))
-	continue;
-      if (!filename_seen (s->filename, 1, &first)
-#if HAVE_DOS_BASED_FILE_SYSTEM
-	  && strncasecmp (s->filename, text, text_len) == 0
-#else
-	  && strncmp (s->filename, text, text_len) == 0
-#endif
-	  )
-	{
-	  /* This file matches for a completion; add it to the current
-	     list of matches.  */
-	  add_filename_to_list (s->filename, text, word,
-				&list, &list_used, &list_alloced);
-	}
-      else
-	{
-	  /* NOTE: We allow the user to type a base name when the
-	     debug info records leading directories, but not the other
-	     way around.  This is what subroutines of breakpoint
-	     command do when they parse file names.  */
-	  base_name = lbasename (s->filename);
-	  if (base_name != s->filename
-	      && !filename_seen (base_name, 1, &first)
-#if HAVE_DOS_BASED_FILE_SYSTEM
-	      && strncasecmp (base_name, text, text_len) == 0
-#else
-	      && strncmp (base_name, text, text_len) == 0
-#endif
-	      )
-	    add_filename_to_list (base_name, text, word,
-				  &list, &list_used, &list_alloced);
-	}
-    }
-
-  ALL_PSYMTABS (objfile, ps)
-    {
-      if (not_interesting_fname (ps->filename))
-	continue;
-      if (!ps->readin)
-	{
-	  if (!filename_seen (ps->filename, 1, &first)
-#if HAVE_DOS_BASED_FILE_SYSTEM
-	      && strncasecmp (ps->filename, text, text_len) == 0
-#else
-	      && strncmp (ps->filename, text, text_len) == 0
-#endif
-	      )
-	    {
-	      /* This file matches for a completion; add it to the
-		 current list of matches.  */
-	      add_filename_to_list (ps->filename, text, word,
-				    &list, &list_used, &list_alloced);
-
-	    }
-	  else
-	    {
-	      base_name = lbasename (ps->filename);
-	      if (base_name != ps->filename
-		  && !filename_seen (base_name, 1, &first)
-#if HAVE_DOS_BASED_FILE_SYSTEM
-		  && strncasecmp (base_name, text, text_len) == 0
-#else
-		  && strncmp (base_name, text, text_len) == 0
-#endif
-		  )
-		add_filename_to_list (base_name, text, word,
-				      &list, &list_used, &list_alloced);
-	    }
-	}
-    }
-
-  return list;
 }
 
 /* Determine if PC is in the prologue of a function.  The prologue is the area

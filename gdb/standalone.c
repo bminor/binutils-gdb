@@ -336,7 +336,7 @@ have_core_file_p (void)
 
 kill_command (void)
 {
-  inferior_ptid = null_ptid;
+  inferior_pid = 0;
 }
 
 terminal_inferior (void)
@@ -531,7 +531,7 @@ int
 wait (WAITTYPE *w)
 {
   WSETSTOP (*w, fault_table[fault_code / FAULT_CODE_UNITS]);
-  return PIDGET (inferior_ptid);
+  return inferior_pid;
 }
 
 /* Allocate a big space in which files for kdb to read will be stored.

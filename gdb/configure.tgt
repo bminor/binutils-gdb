@@ -23,7 +23,6 @@ mips*)			gdb_target_cpu=mips ;;
 powerpc*)		gdb_target_cpu=powerpc ;;
 sparc*)			gdb_target_cpu=sparc ;;
 thumb*)			gdb_target_cpu=arm ;;
-s390*)			gdb_target_cpu=s390 ;;
 strongarm*)		gdb_target_cpu=arm ;;
 xscale*)		gdb_target_cpu=arm ;;
 v850*)			gdb_target_cpu=v850 ;;
@@ -208,7 +207,7 @@ mips*-*-elf*)		gdb_target=embed ;;
 mips*-little-*)		gdb_target=littlemips ;;
 mips*-*-lnews*)		gdb_target=embedl ;;
 mips*-sgi-irix5*)	gdb_target=irix5 ;;
-mips*-sgi-irix6*)	gdb_target=irix6 ;;
+mips*-sgi-irix6*)	gdb_target=irix5 ;;
 mips*-sgi-*)		gdb_target=irix3 ;;
 mips*-sony-*)		gdb_target=bigmips ;;
 mips*-*-mach3*)		gdb_target=mipsm3 ;;
@@ -256,9 +255,6 @@ rs6000-*-lynxos*)	gdb_target=rs6000lynx
 		configdirs="${configdirs} gdbserver" ;;
 rs6000-*-aix4*)		gdb_target=aix4 ;;
 rs6000-*-*)		gdb_target=rs6000 ;;
-
-s390-*-*)		gdb_target=s390 ;;
-s390x-*-*)		gdb_target=s390x ;;
 
 sh*-*-pe)		gdb_target=wince ;;
 sh-*-hms)		gdb_target=embed ;;

@@ -71,8 +71,7 @@
 
 #include "target.h"
 
-extern ptid_t child_wait (ptid_t ptid,
-                                struct target_waitstatus *status);
+extern int child_wait (int pid, struct target_waitstatus *status);
 
 /* Lynx needs a special definition of this so that we can
    print out the pid and thread number seperately.  */
@@ -80,6 +79,6 @@ extern ptid_t child_wait (ptid_t ptid,
 
 /* override child_pid_to_str in inftarg.c */
 #define CHILD_PID_TO_STR
-extern char *lynx_pid_to_str (ptid_t ptid);
+extern char *lynx_pid_to_str (int pid);
 
 #endif /* NM_LYNX_H */

@@ -79,9 +79,8 @@ static void remote_prepare_to_store (void);
 
 static void remote_fetch_registers (int regno);
 
-static void remote_resume (ptid_t ptid, int step,
-                           enum target_signal siggnal);
-static void remote_async_resume (ptid_t ptid, int step,
+static void remote_resume (int pid, int step, enum target_signal siggnal);
+static void remote_async_resume (int pid, int step,
 				 enum target_signal siggnal);
 static int remote_start_remote (PTR);
 
@@ -115,10 +114,8 @@ static void remote_send (char *buf, long sizeof_buf);
 
 static int readchar (int timeout);
 
-static ptid_t remote_wait (ptid_t ptid,
-                                 struct target_waitstatus *status);
-static ptid_t remote_async_wait (ptid_t ptid,
-                                       struct target_waitstatus *status);
+static int remote_wait (int pid, struct target_waitstatus *status);
+static int remote_async_wait (int pid, struct target_waitstatus *status);
 
 static void remote_kill (void);
 static void remote_async_kill (void);
@@ -136,7 +133,7 @@ static void interrupt_query (void);
 
 static void set_thread (int, int);
 
-static int remote_thread_alive (ptid_t);
+static int remote_thread_alive (int);
 
 static void get_offsets (void);
 
@@ -180,17 +177,15 @@ static void packet_command (char *, int);
 
 static int stub_unpack_int (char *buff, int fieldlength);
 
-static ptid_t remote_current_thread (ptid_t oldptid);
+static int remote_current_thread (int oldpid);
 
 static void remote_find_new_threads (void);
 
 static void record_currthread (int currthread);
 
-static int fromhex (int a);
+/* exported functions */
 
-static int hex2bin (const char *hex, char *bin, int count);
-
-static int bin2hex (const char *bin, char *hex, int count);
+extern int fromhex (int a);
 
 static int putpkt_binary (char *buf, int cnt);
 
@@ -670,22 +665,6 @@ packet_ok (const char *buf, struct packet_config *config)
     }
 }
 
-/* Should we try the 'qSymbol' (target symbol lookup service) request? */
-static struct packet_config remote_protocol_qSymbol;
-
-static void
-set_remote_protocol_qSymbol_packet_cmd (char *args, int from_tty,
-				  struct cmd_list_element *c)
-{
-  update_packet_config (&remote_protocol_qSymbol);
-}
-
-static void
-show_remote_protocol_qSymbol_packet_cmd (char *args, int from_tty)
-{
-  show_packet_config_cmd (&remote_protocol_qSymbol);
-}
-
 /* Should we try the 'e' (step over range) request? */
 static struct packet_config remote_protocol_e;
 
@@ -915,16 +894,15 @@ record_currthread (int currthread)
 
   /* If this is a new thread, add it to GDB's thread list.
      If we leave it up to WFI to do this, bad things will happen.  */
-  if (!in_thread_list (pid_to_ptid (currthread)))
+  if (!in_thread_list (currthread))
     {
-      add_thread (pid_to_ptid (currthread));
+      add_thread (currthread);
 #ifdef UI_OUT
       ui_out_text (uiout, "[New ");
-      ui_out_text (uiout, target_pid_to_str (pid_to_ptid (currthread)));
+      ui_out_text (uiout, target_pid_to_str (currthread));
       ui_out_text (uiout, "]\n");
 #else
-      printf_filtered ("[New %s]\n",
-                       target_pid_to_str (pid_to_ptid (currthread)));
+      printf_filtered ("[New %s]\n", target_pid_to_str (currthread));
 #endif
     }
 }
@@ -962,9 +940,8 @@ set_thread (int th, int gen)
 /*  Return nonzero if the thread TH is still alive on the remote system.  */
 
 static int
-remote_thread_alive (ptid_t ptid)
+remote_thread_alive (int tid)
 {
-  int tid = PIDGET (ptid);
   char buf[16];
 
   if (tid < 0)
@@ -1638,26 +1615,25 @@ remote_threadlist_iterator (rmt_thread_action stepfunction, void *context,
 static int
 remote_newthread_step (threadref *ref, void *context)
 {
-  ptid_t ptid;
+  int pid;
 
-  ptid = pid_to_ptid (threadref_to_int (ref));
-
-  if (!in_thread_list (ptid))
-    add_thread (ptid);
+  pid = threadref_to_int (ref);
+  if (!in_thread_list (pid))
+    add_thread (pid);
   return 1;			/* continue iterator */
 }
 
 #define CRAZY_MAX_THREADS 1000
 
-static ptid_t
-remote_current_thread (ptid_t oldpid)
+static int
+remote_current_thread (int oldpid)
 {
   char *buf = alloca (PBUFSIZ);
 
   putpkt ("qC");
   getpkt (buf, PBUFSIZ, 0);
   if (buf[0] == 'Q' && buf[1] == 'C')
-    return pid_to_ptid (strtol (&buf[2], NULL, 16));
+    return strtol (&buf[2], NULL, 16);
   else
     return oldpid;
 }
@@ -1671,8 +1647,8 @@ remote_find_new_threads (void)
 {
   remote_threadlist_iterator (remote_newthread_step, 0,
 			      CRAZY_MAX_THREADS);
-  if (PIDGET (inferior_ptid) == MAGIC_NULL_PID)	/* ack ack ack */
-    inferior_ptid = remote_current_thread (inferior_ptid);
+  if (inferior_pid == MAGIC_NULL_PID)	/* ack ack ack */
+    inferior_pid = remote_current_thread (inferior_pid);
 }
 
 /*
@@ -1704,8 +1680,8 @@ remote_threads_info (void)
 	      do
 		{
 		  tid = strtol (bufp, &bufp, 16);
-		  if (tid != 0 && !in_thread_list (pid_to_ptid (tid)))
-		    add_thread (pid_to_ptid (tid));
+		  if (tid != 0 && !in_thread_list (tid))
+		    add_thread (tid);
 		}
 	      while (*bufp++ == ',');	/* comma-separated list */
 	      putpkt ("qsThreadInfo");
@@ -1748,14 +1724,22 @@ remote_threads_extra_info (struct thread_info *tp)
 
   if (use_threadextra_query)
     {
-      sprintf (bufp, "qThreadExtraInfo,%x", PIDGET (tp->ptid));
+      sprintf (bufp, "qThreadExtraInfo,%x", tp->pid);
       putpkt (bufp);
       getpkt (bufp, PBUFSIZ, 0);
       if (bufp[0] != 0)
 	{
-	  n = min (strlen (bufp) / 2, sizeof (display_buf));
-	  result = hex2bin (bufp, display_buf, n);
-	  display_buf [result] = '\0';
+	  char *p;
+
+	  for (p = display_buf; 
+	       p < display_buf + sizeof(display_buf) - 1 &&
+		 bufp[0] != 0 &&
+		 bufp[1] != 0;
+	       p++, bufp+=2)
+	    {
+	      *p = fromhex (bufp[0]) * 16 + fromhex (bufp[1]);
+	    }
+	  *p = 0;
 	  return display_buf;
 	}
     }
@@ -1764,7 +1748,7 @@ remote_threads_extra_info (struct thread_info *tp)
   use_threadextra_query = 0;
   set = TAG_THREADID | TAG_EXISTS | TAG_THREADNAME
     | TAG_MOREDISPLAY | TAG_DISPLAY;
-  int_to_threadref (&id, PIDGET (tp->ptid));
+  int_to_threadref (&id, tp->pid);
   if (remote_get_threadinfo (&id, set, &threadinfo))
     if (threadinfo.active)
       {
@@ -2035,7 +2019,7 @@ remote_start_remote (PTR dummy)
   /* Let the stub know that we want it to return the thread.  */
   set_thread (-1, 0);
 
-  inferior_ptid = remote_current_thread (inferior_ptid);
+  inferior_pid = remote_current_thread (inferior_pid);
 
   get_offsets ();		/* Get text, data & bss offsets */
 
@@ -2086,50 +2070,11 @@ init_all_packet_configs (void)
   update_packet_config (&remote_protocol_e);
   update_packet_config (&remote_protocol_E);
   update_packet_config (&remote_protocol_P);
-  update_packet_config (&remote_protocol_qSymbol);
   for (i = 0; i < NR_Z_PACKET_TYPES; i++)
     update_packet_config (&remote_protocol_Z[i]);
   /* Force remote_write_bytes to check whether target supports binary
      downloading. */
   update_packet_config (&remote_protocol_binary_download);
-}
-
-/* Symbol look-up. */
-
-static void
-remote_check_symbols (struct objfile *objfile)
-{
-  char *msg, *reply, *tmp;
-  struct minimal_symbol *sym;
-  int end;
-
-  if (remote_protocol_qSymbol.support == PACKET_DISABLE)
-    return;
-
-  msg   = alloca (PBUFSIZ);
-  reply = alloca (PBUFSIZ);
-
-  /* Invite target to request symbol lookups. */
-
-  putpkt ("qSymbol::");
-  getpkt (reply, PBUFSIZ, 0);
-  packet_ok (reply, &remote_protocol_qSymbol);
-
-  while (strncmp (reply, "qSymbol:", 8) == 0)
-    {
-      tmp = &reply[8];
-      end = hex2bin (tmp, msg, strlen (tmp) / 2);
-      msg[end] = '\0';
-      sym = lookup_minimal_symbol (msg, NULL, NULL);
-      if (sym == NULL)
-	sprintf (msg, "qSymbol::%s", &reply[8]);
-      else
-	sprintf (msg, "qSymbol:%s:%s", 
-		 paddr_nz (SYMBOL_VALUE_ADDRESS (sym)),
-		 &reply[8]);
-      putpkt (msg);
-      getpkt (reply, PBUFSIZ, 0);
-    }
 }
 
 static void
@@ -2191,12 +2136,7 @@ serial device is attached to the remote system\n\
      be split out into seperate variables, especially since GDB will
      someday have a notion of debugging several processes.  */
 
-  inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
-  /* First delete any symbols previously loaded from shared libraries. */
-  no_shared_libraries (NULL, 0);
-#endif
-
+  inferior_pid = MAGIC_NULL_PID;
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it
      (we'd be in an inconsistent state otherwise).  */
@@ -2215,19 +2155,14 @@ serial device is attached to the remote system\n\
       putpkt ("!");
       getpkt (buf, PBUFSIZ, 0);
     }
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
   /* FIXME: need a master target_open vector from which all 
      remote_opens can be called, so that stuff like this can 
      go there.  Failing that, the following code must be copied
      to the open function for any remote target that wants to 
      support svr4 shared libraries.  */
-
-  /* Set up to detect and load shared libraries. */
+#ifdef SOLIB_CREATE_INFERIOR_HOOK
   if (exec_bfd) 	/* No use without an exec file. */
-    {
-      SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
-      remote_check_symbols (symfile_objfile);
-    }
+    SOLIB_CREATE_INFERIOR_HOOK (inferior_pid);
 #endif
 }
 
@@ -2288,7 +2223,7 @@ serial device is attached to the remote system\n\
      flag indicating that a target is active.  These functions should
      be split out into seperate variables, especially since GDB will
      someday have a notion of debugging several processes.  */
-  inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
+  inferior_pid = MAGIC_NULL_PID;
 
   /* With this target we start out by owning the terminal. */
   remote_async_terminal_ours_p = 1;
@@ -2301,11 +2236,6 @@ serial device is attached to the remote system\n\
      wait_for_inferior() to expect/get timeouts will be
      implemented. */
   wait_forever_enabled_p = 0;
-
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
-  /* First delete any symbols previously loaded from shared libraries. */
-  no_shared_libraries (NULL, 0);
-#endif
 
   /* Start the remote connection; if error (0), discard this target.
      In particular, if the user quits, be sure to discard it
@@ -2328,19 +2258,14 @@ serial device is attached to the remote system\n\
       putpkt ("!");
       getpkt (buf, PBUFSIZ, 0);
     }
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
   /* FIXME: need a master target_open vector from which all 
      remote_opens can be called, so that stuff like this can 
      go there.  Failing that, the following code must be copied
      to the open function for any remote target that wants to 
      support svr4 shared libraries.  */
-
-  /* Set up to detect and load shared libraries. */
+#ifdef SOLIB_CREATE_INFERIOR_HOOK
   if (exec_bfd) 	/* No use without an exec file. */
-    {
-      SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
-      remote_check_symbols (symfile_objfile);
-    }
+    SOLIB_CREATE_INFERIOR_HOOK (inferior_pid);
 #endif
 }
 
@@ -2391,7 +2316,7 @@ remote_async_detach (char *args, int from_tty)
 
 /* Convert hex digit A to a number.  */
 
-static int
+int
 fromhex (int a)
 {
   if (a >= '0' && a <= '9')
@@ -2404,25 +2329,6 @@ fromhex (int a)
     error ("Reply contains invalid hex digit %d", a);
 }
 
-static int
-hex2bin (const char *hex, char *bin, int count)
-{
-  int i;
-
-  for (i = 0; i < count; i++)
-    {
-      if (hex[0] == 0 || hex[1] == 0)
-	{
-	  /* Hex string is short, or of uneven length.
-	     Return the count that has been converted so far. */
-	  return i;
-	}
-      *bin++ = fromhex (hex[0]) * 16 + fromhex (hex[1]);
-      hex += 2;
-    }
-  return i;
-}
-
 /* Convert number NIB to a hex digit.  */
 
 static int
@@ -2433,23 +2339,6 @@ tohex (int nib)
   else
     return 'a' + nib - 10;
 }
-
-static int
-bin2hex (const char *bin, char *hex, int count)
-{
-  int i;
-  /* May use a length, or a nul-terminated string as input. */
-  if (count == 0)
-    count = strlen (bin);
-
-  for (i = 0; i < count; i++)
-    {
-      *hex++ = tohex ((*bin >> 4) & 0xf);
-      *hex++ = tohex (*bin++ & 0xf);
-    }
-  *hex = 0;
-  return i;
-}
 
 /* Tell the remote machine to resume.  */
 
@@ -2458,10 +2347,9 @@ static enum target_signal last_sent_signal = TARGET_SIGNAL_0;
 static int last_sent_step;
 
 static void
-remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
+remote_resume (int pid, int step, enum target_signal siggnal)
 {
   char *buf = alloca (PBUFSIZ);
-  int pid = PIDGET (ptid);
   char *p;
 
   if (pid == -1)
@@ -2508,7 +2396,7 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
 	      putpkt (buf);
 	      getpkt (buf, PBUFSIZ, 0);
 
-	      if (packet_ok (buf, &remote_protocol_E) == PACKET_OK)
+	      if (packet_ok(buf, &remote_protocol_E) == PACKET_OK)
 		return;
 	    }
 	}
@@ -2526,7 +2414,7 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
 	      putpkt (buf);
 	      getpkt (buf, PBUFSIZ, 0);
 
-	      if (packet_ok (buf, &remote_protocol_e) == PACKET_OK)
+	      if (packet_ok(buf, &remote_protocol_e) == PACKET_OK)
 		return;
 	    }
 	}
@@ -2547,10 +2435,9 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
 
 /* Same as remote_resume, but with async support. */
 static void
-remote_async_resume (ptid_t ptid, int step, enum target_signal siggnal)
+remote_async_resume (int pid, int step, enum target_signal siggnal)
 {
   char *buf = alloca (PBUFSIZ);
-  int pid = PIDGET (ptid);
   char *p;
 
   if (pid == -1)
@@ -2596,7 +2483,7 @@ remote_async_resume (ptid_t ptid, int step, enum target_signal siggnal)
 	      putpkt (buf);
 	      getpkt (buf, PBUFSIZ, 0);
 
-	      if (packet_ok (buf, &remote_protocol_E) == PACKET_OK)
+	      if (packet_ok(buf, &remote_protocol_E) == PACKET_OK)
 		goto register_event_loop;
 	    }
 	}
@@ -2614,7 +2501,7 @@ remote_async_resume (ptid_t ptid, int step, enum target_signal siggnal)
 	      putpkt (buf);
 	      getpkt (buf, PBUFSIZ, 0);
 
-	      if (packet_ok (buf, &remote_protocol_e) == PACKET_OK)
+	      if (packet_ok(buf, &remote_protocol_e) == PACKET_OK)
 		goto register_event_loop;
 	    }
 	}
@@ -2857,8 +2744,8 @@ remote_console_output (char *msg)
    Returns "pid", which in the case of a multi-threaded 
    remote OS, is the thread-id.  */
 
-static ptid_t
-remote_wait (ptid_t ptid, struct target_waitstatus *status)
+static int
+remote_wait (int pid, struct target_waitstatus *status)
 {
   unsigned char *buf = alloca (PBUFSIZ);
   int thread_num = -1;
@@ -2902,7 +2789,6 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 	      {
 		unsigned char *p1;
 		char *p_temp;
-		int fieldsize;
 
 		/* Read the register number */
 		regno = strtol ((const char *) p, &p_temp, 16);
@@ -2936,10 +2822,13 @@ Packet: '%s'\n",
 Packet: '%s'\n",
 			       regno, p, buf);
 
-		    fieldsize = hex2bin (p, regs, REGISTER_RAW_SIZE (regno));
-		    p += 2 * fieldsize;
-		    if (fieldsize < REGISTER_RAW_SIZE (regno))
-		      warning ("Remote reply is too short: %s", buf);
+		    for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
+		      {
+			if (p[0] == 0 || p[1] == 0)
+			  warning ("Remote reply is too short: %s", buf);
+			regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
+			p += 2;
+		      }
 		    supply_register (regno, regs);
 		  }
 
@@ -3064,14 +2953,14 @@ Packet Dropped");
 got_status:
   if (thread_num != -1)
     {
-      return pid_to_ptid (thread_num);
+      return thread_num;
     }
-  return inferior_ptid;
+  return inferior_pid;
 }
 
 /* Async version of remote_wait. */
-static ptid_t
-remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
+static int
+remote_async_wait (int pid, struct target_waitstatus *status)
 {
   unsigned char *buf = alloca (PBUFSIZ);
   int thread_num = -1;
@@ -3121,7 +3010,6 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 	      {
 		unsigned char *p1;
 		char *p_temp;
-		int fieldsize;
 
 		/* Read the register number */
 		regno = strtol ((const char *) p, &p_temp, 16);
@@ -3155,10 +3043,13 @@ Packet: '%s'\n",
 Packet: '%s'\n",
 			       regno, p, buf);
 
-		    fieldsize = hex2bin (p, regs, REGISTER_RAW_SIZE (regno));
-		    p += 2 * fieldsize;
-		    if (fieldsize < REGISTER_RAW_SIZE (regno))
-		      warning ("Remote reply is too short: %s", buf);
+		    for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
+		      {
+			if (p[0] == 0 || p[1] == 0)
+			  warning ("Remote reply is too short: %s", buf);
+			regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
+			p += 2;
+		      }
 		    supply_register (regno, regs);
 		  }
 
@@ -3286,9 +3177,9 @@ Packet Dropped");
 got_status:
   if (thread_num != -1)
     {
-      return pid_to_ptid (thread_num);
+      return thread_num;
     }
-  return inferior_ptid;
+  return inferior_pid;
 }
 
 /* Number of bytes of registers this stub implements.  */
@@ -3307,7 +3198,7 @@ remote_fetch_registers (int regno)
   char *p;
   char *regs = alloca (REGISTER_BYTES);
 
-  set_thread (PIDGET (inferior_ptid), 1);
+  set_thread (inferior_pid, 1);
 
   sprintf (buf, "g");
   remote_send (buf, PBUFSIZ);
@@ -3408,7 +3299,12 @@ store_register_using_P (int regno)
   sprintf (buf, "P%x=", regno);
   p = buf + strlen (buf);
   regp = register_buffer (regno);
-  bin2hex (regp, p, REGISTER_RAW_SIZE (regno));
+  for (i = 0; i < REGISTER_RAW_SIZE (regno); ++i)
+    {
+      *p++ = tohex ((regp[i] >> 4) & 0xf);
+      *p++ = tohex (regp[i] & 0xf);
+    }
+  *p = '\0';
   remote_send (buf, PBUFSIZ);
 
   return buf[0] != '\0';
@@ -3426,7 +3322,7 @@ remote_store_registers (int regno)
   char *p;
   char *regs;
 
-  set_thread (PIDGET (inferior_ptid), 1);
+  set_thread (inferior_pid, 1);
 
   if (regno >= 0)
     {
@@ -3465,7 +3361,13 @@ remote_store_registers (int regno)
   regs = register_buffer (-1);
   p = buf + 1;
   /* remote_prepare_to_store insures that register_bytes_found gets set.  */
-  bin2hex (regs, p, register_bytes_found);
+  for (i = 0; i < register_bytes_found; i++)
+    {
+      *p++ = tohex ((regs[i] >> 4) & 0xf);
+      *p++ = tohex (regs[i] & 0xf);
+    }
+  *p = '\0';
+
   remote_send (buf, PBUFSIZ);
 }
 
@@ -3692,8 +3594,12 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
       /* Normal mode: Send target system values byte by byte, in
 	 increasing byte addresses.  Each byte is encoded as a two hex
 	 value.  */
-      nr_bytes = bin2hex (myaddr, p, todo);
-      p += 2 * nr_bytes;
+      for (nr_bytes = 0; nr_bytes < todo; nr_bytes++)
+	{
+	  *p++ = tohex ((myaddr[nr_bytes] >> 4) & 0xf);
+	  *p++ = tohex (myaddr[nr_bytes] & 0xf);
+	}
+      *p = '\0';
       break;
     case PACKET_SUPPORT_UNKNOWN:
       internal_error (__FILE__, __LINE__,
@@ -3784,11 +3690,14 @@ remote_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
          each byte encoded as two hex characters.  */
 
       p = buf;
-      if ((i = hex2bin (p, myaddr, todo)) < todo)
+      for (i = 0; i < todo; i++)
 	{
-	  /* Reply is short.  This means that we were able to read
-	     only part of what we wanted to. */
-	  return i + (origlen - len);
+	  if (p[0] == 0 || p[1] == 0)
+	    /* Reply is short.  This means that we were able to read
+	       only part of what we wanted to.  */
+	    return i + (origlen - len);
+	  myaddr[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
+	  p += 2;
 	}
       myaddr += todo;
       memaddr += todo;
@@ -4988,7 +4897,12 @@ remote_rcmd (char *command,
     error ("\"monitor\" command ``%s'' is too long\n", command);
 
   /* Encode the actual command */
-  bin2hex (command, p, 0);
+  for (i = 0; command[i]; i++)
+    {
+      *p++ = tohex ((command[i] >> 4) & 0xf);
+      *p++ = tohex (command[i] & 0xf);
+    }
+  *p = '\0';
 
   if (putpkt (buf) < 0)
     error ("Communication problem with target\n");
@@ -5082,7 +4996,7 @@ threadalive_test (char *cmd, int tty)
 {
   int sample_thread = SAMPLE_THREAD;
 
-  if (remote_thread_alive (pid_to_ptid (sample_thread)))
+  if (remote_thread_alive (sample_thread))
     printf_filtered ("PASS: Thread alive test\n");
   else
     printf_filtered ("FAIL: Thread alive test\n");
@@ -5193,11 +5107,11 @@ init_remote_threadtests (void)
    buffer.  */
 
 static char *
-remote_pid_to_str (ptid_t ptid)
+remote_pid_to_str (int pid)
 {
   static char buf[30];
 
-  sprintf (buf, "Thread %d", PIDGET (ptid));
+  sprintf (buf, "Thread %d", pid);
   return buf;
 }
 
@@ -5368,7 +5282,7 @@ device is attached to the remote system (e.g. host:port).");
      flag indicating that a target is active.  These functions should
      be split out into seperate variables, especially since GDB will
      someday have a notion of debugging several processes.  */
-  inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
+  inferior_pid = MAGIC_NULL_PID;
 
   /* Start the remote connection; if error (0), discard this target. */
 
@@ -5600,15 +5514,15 @@ minitelnet (void)
     }
 }
 
-static ptid_t
-remote_cisco_wait (ptid_t ptid, struct target_waitstatus *status)
+static int
+remote_cisco_wait (int pid, struct target_waitstatus *status)
 {
   if (minitelnet () != ENTER_DEBUG)
     {
       error ("Debugging session terminated by protocol error");
     }
   putpkt ("?");
-  return remote_wait (ptid, status);
+  return remote_wait (pid, status);
 }
 
 static void
@@ -5766,6 +5680,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).",
 static void
 set_remote_cmd (char *args, int from_tty)
 {
+  
 }
 
 static void
@@ -5776,7 +5691,6 @@ show_remote_cmd (char *args, int from_tty)
   show_remote_protocol_e_packet_cmd (args, from_tty);
   show_remote_protocol_E_packet_cmd (args, from_tty);
   show_remote_protocol_P_packet_cmd (args, from_tty);
-  show_remote_protocol_qSymbol_packet_cmd (args, from_tty);
   show_remote_protocol_binary_download_cmd (args, from_tty);
 }
 
@@ -5788,23 +5702,6 @@ build_remote_gdbarch_data (void)
   /* Cisco stuff */
   tty_input = xmalloc (PBUFSIZ);
   remote_address_size = TARGET_ADDR_BIT;
-}
-
-/* Saved pointer to previous owner of the new_objfile event. */
-static void (*remote_new_objfile_chain) (struct objfile *);
-
-/* Function to be called whenever a new objfile (shlib) is detected. */
-static void
-remote_new_objfile (struct objfile *objfile)
-{
-  if (remote_desc != 0)		/* Have a remote connection */
-    {
-      remote_check_symbols (objfile);
-    }
-  /* Call predecessor on chain, if any. */
-  if (remote_new_objfile_chain != 0 &&
-      remote_desc == 0)
-    remote_new_objfile_chain (objfile);
 }
 
 void
@@ -5836,10 +5733,6 @@ _initialize_remote (void)
 
   init_remote_cisco_ops ();
   add_target (&remote_cisco_ops);
-
-  /* Hook into new objfile notification.  */
-  remote_new_objfile_chain = target_new_objfile_hook;
-  target_new_objfile_hook  = remote_new_objfile;
 
 #if 0
   init_remote_threadtests ();
@@ -5940,13 +5833,6 @@ in a memory packet.\n",
 
   add_info ("remote-process", remote_info_process,
 	    "Query the remote system for process info.");
-
-  add_packet_config_cmd (&remote_protocol_qSymbol,
-			 "qSymbol", "symbol-lookup",
-			 set_remote_protocol_qSymbol_packet_cmd,
-			 show_remote_protocol_qSymbol_packet_cmd,
-			 &remote_set_cmdlist, &remote_show_cmdlist,
-			 0);
 
   add_packet_config_cmd (&remote_protocol_e,
 			 "e", "step-over-range",

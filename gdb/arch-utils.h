@@ -93,9 +93,9 @@ extern int (*target_architecture_hook) (const struct bfd_arch_info *);
 
 extern int default_register_sim_regno (int reg_nr);
 
-/* Identity function on a CORE_ADDR.  Just returns its parameter.  */
+/* Default conversion of function pointer address - returns address.  */
 
-extern CORE_ADDR core_addr_identity (CORE_ADDR addr);
+extern CORE_ADDR default_convert_from_func_ptr_addr (CORE_ADDR addr);
 
 /* No-op conversion of reg to regnum. */
 
@@ -110,16 +110,5 @@ extern CORE_ADDR default_frame_address (struct frame_info *);
 extern int default_prepare_to_proceed (int select_it);
 
 extern int generic_prepare_to_proceed (int select_it);
-
-/* Versions of init_frame_pc().  Do nothing; do the default. */
-
-void init_frame_pc_noop (int fromleaf, struct frame_info *prev);
-
-void init_frame_pc_default (int fromleaf, struct frame_info *prev);
-
-/* Version of cannot_fetch_register() / cannot_store_register() that
-   always fails. */
-
-int cannot_register_not (int regnum);
 
 #endif

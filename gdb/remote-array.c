@@ -44,12 +44,30 @@ extern int baud_rate;
 
 #define ARRAY_PROMPT ">> "
 
+#define SWAP_TARGET_AND_HOST(buffer,len) 				\
+  do									\
+    {									\
+      if (TARGET_BYTE_ORDER != HOST_BYTE_ORDER)				\
+	{								\
+	  char tmp;							\
+	  char *p = (char *)(buffer);					\
+	  char *q = ((char *)(buffer)) + len - 1;		   	\
+	  for (; p < q; p++, q--)				 	\
+	    {								\
+	      tmp = *q;							\
+	      *q = *p;							\
+	      *p = tmp;							\
+	    }								\
+	}								\
+    }									\
+  while (0)
+
 static void debuglogs (int, char *, ...);
 static void array_open ();
 static void array_close ();
 static void array_detach ();
 static void array_attach ();
-static void array_resume (ptid_t ptid, int step, enum target_signal sig);
+static void array_resume ();
 static void array_fetch_register ();
 static void array_store_register ();
 static void array_fetch_registers ();
@@ -61,8 +79,7 @@ static void array_create_inferior ();
 static void array_mourn_inferior ();
 static void make_gdb_packet ();
 static int array_xfer_memory ();
-static ptid_t array_wait (ptid_t ptid,
-                                 struct target_waitstatus *status);
+static int array_wait ();
 static int array_insert_breakpoint ();
 static int array_remove_breakpoint ();
 static int tohex ();
@@ -490,10 +507,22 @@ get_hex_word (void)
 
   val = 0;
 
-  for (i = 0; i < 8; i++)
-    val = (val << 4) + get_hex_digit (i == 0);
+#if 0
+  if (HOST_BYTE_ORDER == BIG_ENDIAN)
+    {
+#endif
+      for (i = 0; i < 8; i++)
+	val = (val << 4) + get_hex_digit (i == 0);
+#if 0
+    }
+  else
+    {
+      for (i = 7; i >= 0; i--)
+	val = (val << 4) + get_hex_digit (i == 0);
+    }
+#endif
 
-  debuglogs (4, "get_hex_word() got a 0x%x.", val);
+  debuglogs (4, "get_hex_word() got a 0x%x for a %s host.", val, (HOST_BYTE_ORDER == BIG_ENDIAN) ? "big endian" : "little endian");
 
   return val;
 }
@@ -668,7 +697,7 @@ array_attach (char *args, int from_tty)
  * array_resume -- Tell the remote machine to resume.
  */
 static void
-array_resume (ptid_t ptid, int step, enum target_signal sig)
+array_resume (int pid, int step, enum target_signal sig)
 {
   debuglogs (1, "array_resume (step=%d, sig=%d)", step, sig);
 
@@ -688,8 +717,8 @@ array_resume (ptid_t ptid, int step, enum target_signal sig)
  * array_wait -- Wait until the remote machine stops, then return,
  *          storing status in status just as `wait' would.
  */
-static ptid_t
-array_wait (ptid_t ptid, struct target_waitstatus *status)
+static int
+array_wait (int pid, struct target_waitstatus *status)
 {
   int old_timeout = timeout;
   int result, i;
@@ -755,7 +784,7 @@ array_wait (ptid_t ptid, struct target_waitstatus *status)
 
   timeout = old_timeout;
 
-  return inferior_ptid;
+  return 0;
 }
 
 /*
@@ -765,14 +794,16 @@ array_wait (ptid_t ptid, struct target_waitstatus *status)
 static void
 array_fetch_registers (int ignored)
 {
-  char *reg = alloca (MAX_REGISTER_RAW_SIZE);
-  int regno;
+  int regno, i;
   char *p;
-  char *packet = alloca (PBUFSIZ);
+  unsigned char packet[PBUFSIZ];
+  char regs[REGISTER_BYTES];
 
   debuglogs (1, "array_fetch_registers (ignored=%d)\n", ignored);
 
   memset (packet, 0, PBUFSIZ);
+  /* Unimplemented registers read as all bits zero.  */
+  memset (regs, 0, REGISTER_BYTES);
   make_gdb_packet (packet, "g");
   if (array_send_packet (packet) == 0)
     error ("Couldn't transmit packet\n");
@@ -784,10 +815,10 @@ array_fetch_registers (int ignored)
     {
       /* supply register stores in target byte order, so swap here */
       /* FIXME: convert from ASCII hex to raw bytes */
-      LONGEST i = ascii2hexword (packet + (regno * 8));
+      i = ascii2hexword (packet + (regno * 8));
       debuglogs (5, "Adding register %d = %x\n", regno, i);
-      store_unsigned_integer (&reg, REGISTER_RAW_SIZE (regno), i);
-      supply_register (regno, (char *) &reg);
+      SWAP_TARGET_AND_HOST (&i, 4);
+      supply_register (regno, (char *) &i);
     }
 }
 

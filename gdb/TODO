@@ -10,6 +10,20 @@ find out whether anyone else is working on it.
 Below is a list of problems identified during the GDB 5.0 release
 cycle.  People hope to have these problems fixed in 5.1.
 
+-- 2001-03-08
+
+Update GDB's coding standard documentation.  Known topics:
+
+       o     alloca/malloc et.al.
+
+       o     typedef and structs
+
+       o	ISO-C
+
+and most likely also:
+
+       o	 include conventions
+
 --
 
 Wow, three bug reports for the same problem in one day!  We should
@@ -75,6 +89,25 @@ The following new features should be included in 5.1.
 
 --
 
+Enable MI by default.  Old code can be deleted after 5.1 is out.
+
+Issues:
+
+	o	syntax change where a list would
+		look like:
+		     [ foo=a, foo=b, foo=c ]
+		instead of
+		     { foo=a, foo=b, foo=c }
+
+	o	kill off the idea of a reverse
+		query.
+
+	o	review test cases
+
+	o	enable it
+
+--
+
 Pascal (Pierre Muller, David Taylor)
 
 Pierre Muller has contributed patches for adding Pascal Language
@@ -118,6 +151,14 @@ patch has been submitted.
 		==================
 
 The following code cleanups will hopefully be applied to GDB 5.1.
+
+-- 2001-03-26
+
+Resolve the build status of all broken targets as identified by the
+MAINTAINERS file.
+
+	o	arm-* vs NetBSD's lack of ``unix''
+	o	arm-* vs IRIX (see below)
 
 --
 
@@ -168,6 +209,11 @@ will still occure. sid/component/configure.in mis-configures
 
 --
 
+Thread support.  Right now, as soon as a thread finishes and exits,
+you're hosed.  This problem is reported once a week or so.
+
+--
+
 		GDB 5.2 - New features
 		======================
 
@@ -178,10 +224,6 @@ GCC 3.0 ABI support (but hopefully sooner...).
 --
 
 Objective C/C++ support (but hopefully sooner...).
-
---
-
-Import of readline 4.2
 
 --
 
@@ -200,13 +242,9 @@ Makefile.in and configure.in.
 
 Compiler warnings.
 
-Eliminate warnings for all targets on at least one host for one of the
--W flags.  Flags up for debate include: -Wswitch -Wcomment -trigraphs
--Wtrigraphs -Wunused-function -Wunused-label -Wunused-variable
--Wunused-value -Wchar-subscripts -Wtraditional -Wshadow -Wcast-qual
--Wcast-align -Wwrite-strings -Wconversion -Wstrict-prototypes
--Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
--Woverloaded-virtual -Winline
+Eliminate all warnings for at least one host/target for the flags:
+-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs -Wformat -Wparentheses
+-Wpointer-arith -Wuninitialized
 
 --
 
@@ -260,25 +298,6 @@ Deprecate, if not delete, the following:
 		The size of the cache can be computed
 		on the fly.
 
-	IS_TRAPPED_INTERNALVAR
-		The pseudo registers should eventually make
-		this redundant.
-
---
-
-Obsolete the targets.
-
-arm*-wince-pe
-mips*-*-pe
-sh*-*-pe
-
-Obsolete the protocols:
-
-RDB
-
-``As of version 5.3, WindRiver has removed the RDB server (RDB
-protocol support is built into gdb).''  -- Till.
-
 --
 
 Restructure gdb directory tree so that it avoids any 8.3 and 14
@@ -315,6 +334,18 @@ custom tty manipulation - it should be using the serial object.
 --
 
 Rename read_register{,_pid}() to read_unsigned_register{,_pid}().
+
+--
+
+Can't build IRIX -> arm GDB.
+http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00356.html
+
+David Whedon writes:
+> Now I'm building for an embedded arm target.  If there is a way of turning
+> remote-rdi off, I couldn't find it. It looks like it gets built by default
+> in gdb/configure.tgt(line 58) Anyway, the build dies in
+> gdb/rdi-share/unixcomm.c.  SERPORT1 et. al. never get defined because we
+> aren't one of the architectures supported.
 
 --
 
@@ -579,11 +610,6 @@ gdb/doc/*.texinfo directory.
 
 --
 
-Rewrite/break up sparcl-tdep.c so that it uses ser*.c as the mechanism
-for accessing either the serial or UDP port.
-
---
-
 			New Features and Fixes
 			======================
 
@@ -841,6 +867,58 @@ http://sources.redhat.com/ml/gdb-patches/2000-10/msg00011.html
 
 --
 
+			Thread Support
+			==============
+
+--
+
+Generic: lin-thread cannot handle thread exit (Mark Kettenis, Michael
+Snyder) http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00525.html
+
+The thread_db assisted debugging code doesn't handle exiting threads
+properly, at least in combination with glibc 2.1.3 (the framework is
+there, just not the actual code).  There are at least two problems
+that prevent this from working.
+
+As an additional reference point, the pre thread_db code did not work
+either.
+
+--
+
+GNU/Linux/x86 and random thread signals (and Solaris/SPARC but not
+Solaris/x86).
+http://sourceware.cygnus.com/ml/gdb/2000-q1/msg00336.html
+
+Christopher Blizzard writes:
+
+So, I've done some more digging into this and it looks like Jim
+Kingdon has reported this problem in the past:
+
+http://sourceware.cygnus.com/ml/bug-gdb/1999-10/msg00058.html
+
+I can reproduce this problem both with and without Tom's patch.  Has
+anyone seen this before?  Maybe have a solution for it hanging around?
+:)
+
+There's a test case for this documented at:
+
+when debugging threaded applications you get extra SIGTRAPs
+http://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=9565
+
+[There should be a GDB testcase - cagney]
+
+--
+
+GDB5 TOT on unixware 7
+http://sourceware.cygnus.com/ml/gdb/2000-04/msg00119.html
+
+Robert Lipe writes:
+> I just spun the top of tree of the GDB5 branch on UnixWare 7.  As a
+> practical matter, the current thread support is somewhat more annoying
+> than when GDB was thread-unaware.
+
+--
+
 			Language Support
 			================
 
@@ -973,14 +1051,6 @@ on the fly - should it be returned in the ``T'' packet?
 
 Underlying problem is that the register file is target endian.  If the
 target endianess changes gdb doesn't know.
-
-Suggest encoding registers as NN!VALUE.
-
---
-
-GDB should allow incomming packets to be larger than outgoing ones.  A
-fully loaded T packet (containing all registers) can be very large -
-definitly larger than a corresponding Gg packet.
 
 --
 
@@ -1260,9 +1330,6 @@ The name is wrong for starters.  ``target_signal'' should probably be
 ``gdb_signal''.  ``from_host'' should be ``from_target_signal''.
 After that it needs to be multi-arched and made independent of any
 host signal numbering.
-
-Once this is done, the signal enum can probably be moved to
-include/gdb so that it is available to embedded stubs.
 
 --
 

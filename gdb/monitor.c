@@ -67,13 +67,13 @@ static void monitor_store_register (int regno);
 static void monitor_printable_string (char *newstr, char *oldstr, int len);
 static void monitor_error (char *function, char *message, CORE_ADDR memaddr, int len, char *string, int final_char);
 static void monitor_detach (char *args, int from_tty);
-static void monitor_resume (ptid_t ptid, int step, enum target_signal sig);
+static void monitor_resume (int pid, int step, enum target_signal sig);
 static void monitor_interrupt (int signo);
 static void monitor_interrupt_twice (int signo);
 static void monitor_interrupt_query (void);
 static void monitor_wait_cleanup (void *old_timeout);
 
-static ptid_t monitor_wait (ptid_t ptid, struct target_waitstatus *status);
+static int monitor_wait (int pid, struct target_waitstatus *status);
 static void monitor_fetch_registers (int regno);
 static void monitor_store_registers (int regno);
 static void monitor_prepare_to_store (void);
@@ -128,12 +128,6 @@ static char register_fastmap[256];
 
 static struct re_pattern_buffer getmem_resp_delim_pattern;
 static char getmem_resp_delim_fastmap[256];
-
-static struct re_pattern_buffer setmem_resp_delim_pattern;
-static char setmem_resp_delim_fastmap[256];
-
-static struct re_pattern_buffer setreg_resp_delim_pattern;
-static char setreg_resp_delim_fastmap[256];
 
 static int dump_reg_flag;	/* Non-zero means do a dump_registers cmd when
 				   monitor_wait wakes up.  */
@@ -758,14 +752,6 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
     compile_pattern (mon_ops->getmem.resp_delim, &getmem_resp_delim_pattern,
 		     getmem_resp_delim_fastmap);
 
-  if (mon_ops->setmem.resp_delim)
-    compile_pattern (mon_ops->setmem.resp_delim, &setmem_resp_delim_pattern,
-                     setmem_resp_delim_fastmap);
-
-  if (mon_ops->setreg.resp_delim)
-    compile_pattern (mon_ops->setreg.resp_delim, &setreg_resp_delim_pattern,
-                     setreg_resp_delim_fastmap);
-  
   unpush_target (targ_ops);
 
   if (dev_name)
@@ -847,7 +833,7 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
 
   push_target (targ_ops);
 
-  inferior_ptid = pid_to_ptid (42000);	/* Make run command think we are busy... */
+  inferior_pid = 42000;		/* Make run command think we are busy... */
 
   /* Give monitor_wait something to read */
 
@@ -936,7 +922,7 @@ monitor_supply_register (int regno, char *valstr)
 /* Tell the remote machine to resume.  */
 
 static void
-monitor_resume (ptid_t ptid, int step, enum target_signal sig)
+monitor_resume (int pid, int step, enum target_signal sig)
 {
   /* Some monitors require a different command when starting a program */
   monitor_debug ("MON resume\n");
@@ -1086,8 +1072,8 @@ monitor_wait_filter (char *buf,
 /* Wait until the remote machine stops, then return, storing status in
    status just as `wait' would.  */
 
-static ptid_t
-monitor_wait (ptid_t ptid, struct target_waitstatus *status)
+static int
+monitor_wait (int pid, struct target_waitstatus *status)
 {
   int old_timeout = timeout;
   char buf[TARGET_BUF_SIZE];
@@ -1163,7 +1149,7 @@ monitor_wait (ptid_t ptid, struct target_waitstatus *status)
 
   in_monitor_wait = 0;
 
-  return inferior_ptid;
+  return inferior_pid;
 }
 
 /* Fetch register REGNO, or all registers if REGNO is -1. Returns
@@ -1354,13 +1340,6 @@ monitor_store_register (int regno)
   else
     monitor_printf (current_monitor->setreg.cmd, name, val);
 
-  if (current_monitor->setreg.resp_delim)
-    {
-      monitor_debug ("EXP setreg.resp_delim\n");
-      monitor_expect_regexp (&setreg_resp_delim_pattern, NULL, 0);
-      if (current_monitor->flags & MO_SETREG_INTERACTIVE)
-	monitor_printf ("%s\r", paddr_nz (val));
-    }
   if (current_monitor->setreg.term)
     {
       monitor_debug ("EXP setreg.term\n");
@@ -1487,12 +1466,6 @@ monitor_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
       monitor_printf_noecho (cmd, memaddr);
 
-      if (current_monitor->setmem.resp_delim)
-        {
-          monitor_debug ("EXP setmem.resp_delim");
-          monitor_expect_regexp (&setmem_resp_delim_pattern, NULL, 0); 
-	  monitor_printf ("%x\r", val);
-       }
       if (current_monitor->setmem.term)
 	{
 	  monitor_debug ("EXP setmem.term");
@@ -2207,7 +2180,7 @@ monitor_load (char *file, int from_tty)
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));
 
-  inferior_ptid = null_ptid ;	/* No process now */
+  inferior_pid = 0;		/* No process now */
 
 /* This is necessary because many things were based on the PC at the time that
    we attached to the monitor, which is no longer valid now that we have loaded

@@ -40,7 +40,6 @@
 #include "annotate.h"
 #include "gdbtypes.h"
 #include "linespec.h"
-#include "filenames.h"		/* for DOSish file names */
 #ifdef UI_OUT
 #include "ui-out.h"
 #endif
@@ -331,12 +330,12 @@ mod_path (char *dirname, char **which_path)
 	  }
       }
 
-      if (!(IS_DIR_SEPARATOR (*name) && p <= name + 1)	 /* "/" */
-#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+      if (!(SLASH_P (*name) && p <= name + 1)	/* "/" */
+#if defined(_WIN32) || defined(__MSDOS__) || defined(__CYGWIN__)
       /* On MS-DOS and MS-Windows, h:\ is different from h: */
-	  && !(p == name + 3 && name[1] == ':') 	 /* "d:/" */
+	  && !(!SLASH_P (*name) && ROOTED_P (name) && p <= name + 3)	/* d:/ */
 #endif
-	  && IS_DIR_SEPARATOR (p[-1]))
+	  && SLASH_P (p[-1]))
 	/* Sigh. "foo/" => "foo" */
 	--p;
       *p = '\0';
@@ -349,7 +348,7 @@ mod_path (char *dirname, char **which_path)
 	      name = current_directory;
 	      goto append;
 	    }
-	  else if (p > name + 1 && IS_DIR_SEPARATOR (p[-2]))
+	  else if (p > name + 1 && SLASH_P (p[-2]))
 	    {
 	      if (p - name == 2)
 		{
@@ -371,11 +370,11 @@ mod_path (char *dirname, char **which_path)
 
       if (name[0] == '~')
 	name = tilde_expand (name);
-#ifdef HAVE_DOS_BASED_FILE_SYSTEM
-      else if (IS_ABSOLUTE_PATH (name) && p == name + 2) /* "d:" => "d:." */
+#if defined(_WIN32) || defined(__MSDOS__) || defined(__CYGWIN__)
+      else if (ROOTED_P (name) && p == name + 2)	/* "d:" => "d:." */
 	name = concat (name, ".", NULL);
 #endif
-      else if (!IS_ABSOLUTE_PATH (name) && name[0] != '$')
+      else if (!ROOTED_P (name) && name[0] != '$')
 	name = concat (current_directory, SLASH_STRING, name, NULL);
       else
 	name = savestring (name, p - name);
@@ -515,14 +514,12 @@ source_info (char *ignore, int from_tty)
 /*  >>>> This should only allow files of certain types,
    >>>>  eg executable, non-directory */
 int
-openp (const char *path, int try_cwd_first, const char *string,
-       int mode, int prot,
+openp (char *path, int try_cwd_first, char *string, int mode, int prot,
        char **filename_opened)
 {
   register int fd;
   register char *filename;
-  const char *p;
-  const char *p1;
+  register char *p, *p1;
   register int len;
   int alloclen;
 
@@ -533,29 +530,28 @@ openp (const char *path, int try_cwd_first, const char *string,
   mode |= O_BINARY;
 #endif
 
-  if (try_cwd_first || IS_ABSOLUTE_PATH (string))
+  if (try_cwd_first || ROOTED_P (string))
     {
       int i;
-      filename = alloca (strlen (string) + 1);
-      strcpy (filename, string);
+      filename = string;
       fd = open (filename, mode, prot);
       if (fd >= 0)
 	goto done;
       for (i = 0; string[i]; i++)
-	if (IS_DIR_SEPARATOR (string[i]))
+	if (SLASH_P (string[i]))
 	  goto done;
     }
 
   /* ./foo => foo */
-  while (string[0] == '.' && IS_DIR_SEPARATOR (string[1]))
+  while (string[0] == '.' && SLASH_P (string[1]))
     string += 2;
 
   alloclen = strlen (path) + strlen (string) + 2;
-  filename = alloca (alloclen);
+  filename = (char *) alloca (alloclen);
   fd = -1;
   for (p = path; p; p = p1 ? p1 + 1 : 0)
     {
-      p1 = strchr (p, DIRNAME_SEPARATOR);
+      p1 = (char *) strchr (p, DIRNAME_SEPARATOR);
       if (p1)
 	len = p1 - p;
       else
@@ -573,7 +569,7 @@ openp (const char *path, int try_cwd_first, const char *string,
 	  if (newlen > alloclen)
 	    {
 	      alloclen = newlen;
-	      filename = alloca (alloclen);
+	      filename = (char *) alloca (alloclen);
 	    }
 	  strcpy (filename, current_directory);
 	}
@@ -585,7 +581,7 @@ openp (const char *path, int try_cwd_first, const char *string,
 	}
 
       /* Remove trailing slashes */
-      while (len > 0 && IS_DIR_SEPARATOR (filename[len - 1]))
+      while (len > 0 && SLASH_P (filename[len - 1]))
 	filename[--len] = 0;
 
       strcat (filename + len, SLASH_STRING);
@@ -600,15 +596,15 @@ done:
   if (filename_opened)
     {
       if (fd < 0)
-	*filename_opened = NULL;
-      else if (IS_ABSOLUTE_PATH (filename))
+	*filename_opened = (char *) 0;
+      else if (ROOTED_P (filename))
 	*filename_opened = savestring (filename, strlen (filename));
       else
 	{
 	  /* Beware the // my son, the Emacs barfs, the botch that catch... */
 
 	  *filename_opened = concat (current_directory,
-           IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1])
+		 SLASH_P (current_directory[strlen (current_directory) - 1])
 				     ? "" : SLASH_STRING,
 				     filename, NULL);
 	}
@@ -670,7 +666,7 @@ int
 open_source_file (struct symtab *s)
 {
   char *path = source_path;
-  const char *p;
+  char *p;
   int result;
   char *fullname;
 
@@ -710,7 +706,7 @@ open_source_file (struct symtab *s)
   if (result < 0)
     {
       /* Didn't work.  Try using just the basename. */
-      p = lbasename (s->filename);
+      p = basename (s->filename);
       if (p != s->filename)
 	result = openp (path, 0, p, OPEN_MODE, 0, &s->fullname);
     }

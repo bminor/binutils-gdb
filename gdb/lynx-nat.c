@@ -287,8 +287,8 @@ fetch_inferior_registers (int regno)
       int i;
 
       errno = 0;
-      retval = ptrace (PTRACE_GETREGS, PIDGET (inferior_ptid),
-                       (PTRACE_ARG3_TYPE) & ec, 0);
+      retval = ptrace (PTRACE_GETREGS, inferior_pid, (PTRACE_ARG3_TYPE) & ec,
+		       0);
       if (errno)
 	perror_with_name ("ptrace(PTRACE_GETREGS)");
 
@@ -340,8 +340,8 @@ fetch_inferior_registers (int regno)
       int i;
 
       errno = 0;
-      retval = ptrace (PTRACE_GETFPREGS, PIDGET (inferior_ptid),
-                       (PTRACE_ARG3_TYPE) & fc, 0);
+      retval = ptrace (PTRACE_GETFPREGS, inferior_pid, (PTRACE_ARG3_TYPE) & fc,
+		       0);
       if (errno)
 	perror_with_name ("ptrace(PTRACE_GETFPREGS)");
 
@@ -396,8 +396,8 @@ store_inferior_registers (int regno)
 	      8 * REGISTER_RAW_SIZE (O0_REGNUM));
 
       errno = 0;
-      retval = ptrace (PTRACE_SETREGS, PIDGET (inferior_ptid),
-                       (PTRACE_ARG3_TYPE) & ec, 0);
+      retval = ptrace (PTRACE_SETREGS, inferior_pid, (PTRACE_ARG3_TYPE) & ec,
+		       0);
       if (errno)
 	perror_with_name ("ptrace(PTRACE_SETREGS)");
     }
@@ -444,8 +444,8 @@ store_inferior_registers (int regno)
 
 /* We read fcontext first so that we can get good values for fq_t... */
       errno = 0;
-      retval = ptrace (PTRACE_GETFPREGS, PIDGET (inferior_ptid),
-                       (PTRACE_ARG3_TYPE) & fc, 0);
+      retval = ptrace (PTRACE_GETFPREGS, inferior_pid, (PTRACE_ARG3_TYPE) & fc,
+		       0);
       if (errno)
 	perror_with_name ("ptrace(PTRACE_GETFPREGS)");
 
@@ -455,8 +455,8 @@ store_inferior_registers (int regno)
       fc.fsr = read_register (FPS_REGNUM);
 
       errno = 0;
-      retval = ptrace (PTRACE_SETFPREGS, PIDGET (inferior_ptid),
-                       (PTRACE_ARG3_TYPE) & fc, 0);
+      retval = ptrace (PTRACE_SETFPREGS, inferior_pid, (PTRACE_ARG3_TYPE) & fc,
+		       0);
       if (errno)
 	perror_with_name ("ptrace(PTRACE_SETFPREGS)");
     }
@@ -508,7 +508,7 @@ fetch_inferior_registers (int regno)
   else
     reglo = reghi = regno;
 
-  ecp = registers_addr (PIDGET (inferior_ptid));
+  ecp = registers_addr (inferior_pid);
 
   for (regno = reglo; regno <= reghi; regno++)
     {
@@ -524,7 +524,7 @@ fetch_inferior_registers (int regno)
 	  unsigned int reg;
 
 	  errno = 0;
-	  reg = ptrace (ptrace_fun, PIDGET (inferior_ptid),
+	  reg = ptrace (ptrace_fun, inferior_pid,
 			(PTRACE_ARG3_TYPE) (ecp + regmap[regno] + i), 0);
 	  if (errno)
 	    perror_with_name ("ptrace(PTRACE_PEEKUSP)");
@@ -538,6 +538,11 @@ fetch_inferior_registers (int regno)
 /* Store our register values back into the inferior.
    If REGNO is -1, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
+
+/* Registers we shouldn't try to store.  */
+#if !defined (CANNOT_STORE_REGISTER)
+#define CANNOT_STORE_REGISTER(regno) 0
+#endif
 
 void
 store_inferior_registers (int regno)
@@ -554,7 +559,7 @@ store_inferior_registers (int regno)
   else
     reglo = reghi = regno;
 
-  ecp = registers_addr (PIDGET (inferior_ptid));
+  ecp = registers_addr (inferior_pid);
 
   for (regno = reglo; regno <= reghi; regno++)
     {
@@ -574,7 +579,7 @@ store_inferior_registers (int regno)
 	  reg = *(unsigned int *) &registers[REGISTER_BYTE (regno) + i];
 
 	  errno = 0;
-	  ptrace (ptrace_fun, PIDGET (inferior_ptid),
+	  ptrace (ptrace_fun, inferior_pid,
 		  (PTRACE_ARG3_TYPE) (ecp + regmap[regno] + i), reg);
 	  if (errno)
 	    perror_with_name ("ptrace(PTRACE_POKEUSP)");
@@ -586,13 +591,12 @@ store_inferior_registers (int regno)
 /* Wait for child to do something.  Return pid of child, or -1 in case
    of error; store status through argument pointer OURSTATUS.  */
 
-ptid_t
-child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
+int
+child_wait (int pid, struct target_waitstatus *ourstatus)
 {
   int save_errno;
   int thread;
   union wait status;
-  int pid;
 
   while (1)
     {
@@ -618,7 +622,7 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  return -1;
 	}
 
-      if (pid != PIDGET (inferior_ptid))	/* Some other process?!? */
+      if (pid != PIDGET (inferior_pid))		/* Some other process?!? */
 	continue;
 
       thread = status.w_tid;	/* Get thread id from status */
@@ -626,27 +630,26 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       /* Initial thread value can only be acquired via wait, so we have to
          resort to this hack.  */
 
-      if (TIDGET (inferior_ptid) == 0 && thread != 0)
+      if (TIDGET (inferior_pid) == 0 && thread != 0)
 	{
-	  inferior_ptid = MERGEPID (PIDGET (inferior_ptid), thread);
-	  add_thread (inferior_ptid);
+	  inferior_pid = BUILDPID (inferior_pid, thread);
+	  add_thread (inferior_pid);
 	}
 
-      ptid = BUILDPID (pid, thread);
+      pid = BUILDPID (pid, thread);
 
       /* We've become a single threaded process again.  */
       if (thread == 0)
-	inferior_ptid = ptid;
+	inferior_pid = pid;
 
       /* Check for thread creation.  */
       if (WIFSTOPPED (status)
 	  && WSTOPSIG (status) == SIGTRAP
-	  && !in_thread_list (ptid))
+	  && !in_thread_list (pid))
 	{
 	  int realsig;
 
-	  realsig = ptrace (PTRACE_GETTRACESIG, PIDGET (ptid),
-	                    (PTRACE_ARG3_TYPE) 0, 0);
+	  realsig = ptrace (PTRACE_GETTRACESIG, pid, (PTRACE_ARG3_TYPE) 0, 0);
 
 	  if (realsig == SIGNEWTHREAD)
 	    {
@@ -654,7 +657,7 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	         realsig -- the code in wait_for_inferior expects SIGTRAP. */
 	      ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
 	      ourstatus->value.sig = TARGET_SIGNAL_0;
-	      return ptid;
+	      return pid;
 	    }
 	  else
 	    error ("Signal for unknown thread was not SIGNEWTHREAD");
@@ -663,16 +666,15 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       /* Check for thread termination.  */
       else if (WIFSTOPPED (status)
 	       && WSTOPSIG (status) == SIGTRAP
-	       && in_thread_list (ptid))
+	       && in_thread_list (pid))
 	{
 	  int realsig;
 
-	  realsig = ptrace (PTRACE_GETTRACESIG, PIDGET (ptid),
-	                    (PTRACE_ARG3_TYPE) 0, 0);
+	  realsig = ptrace (PTRACE_GETTRACESIG, pid, (PTRACE_ARG3_TYPE) 0, 0);
 
 	  if (realsig == SIGTHREADEXIT)
 	    {
-	      ptrace (PTRACE_CONT, PIDGET (ptid), (PTRACE_ARG3_TYPE) 0, 0);
+	      ptrace (PTRACE_CONT, PIDGET (pid), (PTRACE_ARG3_TYPE) 0, 0);
 	      continue;
 	    }
 	}
@@ -703,16 +705,14 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       store_waitstatus (ourstatus, status.w_status);
 #endif
 
-      return ptid;
+      return pid;
     }
 }
 
 /* Return nonzero if the given thread is still alive.  */
 int
-child_thread_alive (ptid_t ptid)
+child_thread_alive (int pid)
 {
-  int pid = PIDGET (ptid);
-
   /* Arggh.  Apparently pthread_kill only works for threads within
      the process that calls pthread_kill.
 
@@ -730,10 +730,9 @@ child_thread_alive (ptid_t ptid)
    If SIGNAL is nonzero, give it that signal.  */
 
 void
-child_resume (ptid_t ptid, int step, enum target_signal signal)
+child_resume (int pid, int step, enum target_signal signal)
 {
   int func;
-  int pid = PIDGET (ptid);
 
   errno = 0;
 
@@ -741,7 +740,7 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
      we only want to step/continue a single thread.  */
   if (pid == -1)
     {
-      pid = PIDGET (inferior_ptid);
+      pid = inferior_pid;
       func = step ? PTRACE_SINGLESTEP : PTRACE_CONT;
     }
   else
@@ -767,11 +766,11 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
    buffer.  */
 
 char *
-child_pid_to_str (ptid_t ptid)
+child_pid_to_str (int pid)
 {
   static char buf[40];
 
-  sprintf (buf, "process %d thread %d", PIDGET (ptid), TIDGET (ptid));
+  sprintf (buf, "process %d thread %d", PIDGET (pid), TIDGET (pid));
 
   return buf;
 }

@@ -65,80 +65,44 @@ struct ui_stream
 
 /* Prototypes for ui-out API. */
 
-/* A result is a recursive data structure consisting of lists and
-   tuples. */
-
-enum ui_out_type
-  {
-    ui_out_type_tuple,
-    ui_out_type_list
-  };
-
-extern void ui_out_begin (struct ui_out *uiout,
-			  enum ui_out_type level_type,
-			  const char *id);
-
-extern void ui_out_end (struct ui_out *uiout, enum ui_out_type type);
-
-extern struct cleanup *ui_out_begin_cleanup_end (struct ui_out *uiout,
-						 enum ui_out_type level_type,
-						 const char *id);
-
-/* A table can be considered a special tuple/list combination with the
-   implied structure: ``table = { hdr = { header, ... } , body = [ {
-   field, ... }, ... ] }''. If NR_ROWS is negative then there is at
-   least one row. */
-
 extern void ui_out_table_begin (struct ui_out *uiout, int nbrofcols,
-				int nr_rows, const char *tblid);
+				char *tblid);
 
 extern void ui_out_table_header (struct ui_out *uiout, int width,
-				 enum ui_align align, const char *col_name,
-				 const char *colhdr);
+				 enum ui_align align, char *colhdr);
 
 extern void ui_out_table_body (struct ui_out *uiout);
 
 extern void ui_out_table_end (struct ui_out *uiout);
 
-/* Compatibility wrappers.  */
-
-extern void ui_out_list_begin (struct ui_out *uiout, const char *id);
+extern void ui_out_list_begin (struct ui_out *uiout, char *lstid);
 
 extern void ui_out_list_end (struct ui_out *uiout);
 
-extern struct cleanup *make_cleanup_ui_out_list_begin_end (struct ui_out *uiout,
-							   const char *id);
+extern struct cleanup *make_cleanup_ui_out_list_end (struct ui_out *uiout);
 
-extern void ui_out_tuple_begin (struct ui_out *uiout, const char *id);
+extern void ui_out_field_int (struct ui_out *uiout, char *fldname, int value);
 
-extern void ui_out_tuple_end (struct ui_out *uiout);
-
-extern struct cleanup *make_cleanup_ui_out_tuple_begin_end (struct ui_out *uiout,
-							    const char *id);
-
-extern void ui_out_field_int (struct ui_out *uiout, const char *fldname,
-			      int value);
-
-extern void ui_out_field_core_addr (struct ui_out *uiout, const char *fldname,
+extern void ui_out_field_core_addr (struct ui_out *uiout, char *fldname,
 				    CORE_ADDR address);
 
-extern void ui_out_field_string (struct ui_out * uiout, const char *fldname,
+extern void ui_out_field_string (struct ui_out * uiout, char *fldname,
 				 const char *string);
 
-extern void ui_out_field_stream (struct ui_out *uiout, const char *fldname,
+extern void ui_out_field_stream (struct ui_out *uiout, char *fldname,
 				 struct ui_stream *buf);
 
-extern void ui_out_field_fmt (struct ui_out *uiout, const char *fldname,
-			      const char *format, ...);
+extern void ui_out_field_fmt (struct ui_out *uiout, char *fldname,
+			      char *format, ...);
 
-extern void ui_out_field_skip (struct ui_out *uiout, const char *fldname);
+extern void ui_out_field_skip (struct ui_out *uiout, char *fldname);
 
 extern void ui_out_spaces (struct ui_out *uiout, int numspaces);
 
-extern void ui_out_text (struct ui_out *uiout, const char *string);
+extern void ui_out_text (struct ui_out *uiout, char *string);
 
 extern void ui_out_message (struct ui_out *uiout, int verbosity,
-			    const char *format, ...);
+			    char *format, ...);
 
 extern struct ui_stream *ui_out_stream_new (struct ui_out *uiout);
 
@@ -184,13 +148,6 @@ extern void gdb_error (struct ui_out *uiout, int severity, char *format, ...);
 extern void gdb_query (struct ui_out *uiout, int qflags, char *qprompt);
 #endif
 
-/* HACK: Code in GDB is currently checking to see the type of ui_out
-   builder when determining which output to produce.  This function is
-   a hack to encapsulate that test.  Once GDB manages to separate the
-   CLI/MI from the core of GDB the problem should just go away ....  */
-
-extern int ui_out_is_mi_like_p (struct ui_out *uiout);
-
 /* From here on we have things that are only needed by implementation
    routines and main.c.   We should pehaps have a separate file for that,
    like a  ui-out-impl.h  file */
@@ -200,41 +157,28 @@ extern int ui_out_is_mi_like_p (struct ui_out *uiout);
 /* Type definition of all implementation functions. */
 
 typedef void (table_begin_ftype) (struct ui_out * uiout,
-				  int nbrofcols, int nr_rows,
-				  const char *tblid);
+				  int nbrofcols, char *tblid);
 typedef void (table_body_ftype) (struct ui_out * uiout);
 typedef void (table_end_ftype) (struct ui_out * uiout);
 typedef void (table_header_ftype) (struct ui_out * uiout, int width,
-				   enum ui_align align, const char *col_name,
-				   const char *colhdr);
-/* Note: level 0 is the top-level so LEVEL is always greater than
-   zero. */
-typedef void (ui_out_begin_ftype) (struct ui_out *uiout,
-				   enum ui_out_type type,
-				   int level, const char *id);
-typedef void (ui_out_end_ftype) (struct ui_out *uiout,
-				 enum ui_out_type type,
-				 int level);
+				   enum ui_align align, char *colhdr);
+typedef void (list_begin_ftype) (struct ui_out * uiout,
+				 int list_flag, char *lstid);
+typedef void (list_end_ftype) (struct ui_out * uiout, int list_flag);
 typedef void (field_int_ftype) (struct ui_out * uiout, int fldno, int width,
-				enum ui_align align,
-				const char *fldname, int value);
+			     enum ui_align align, char *fldname, int value);
 typedef void (field_skip_ftype) (struct ui_out * uiout, int fldno, int width,
-				 enum ui_align align,
-				 const char *fldname);
+				 enum ui_align align, char *fldname);
 typedef void (field_string_ftype) (struct ui_out * uiout, int fldno, int width,
-				   enum ui_align align,
-				   const char *fldname,
+				   enum ui_align align, char *fldname,
 				   const char *string);
 typedef void (field_fmt_ftype) (struct ui_out * uiout, int fldno, int width,
-				enum ui_align align,
-				const char *fldname,
-				const char *format,
-				va_list args);
+				enum ui_align align, char *fldname,
+				char *format, va_list args);
 typedef void (spaces_ftype) (struct ui_out * uiout, int numspaces);
-typedef void (text_ftype) (struct ui_out * uiout,
-			   const char *string);
+typedef void (text_ftype) (struct ui_out * uiout, char *string);
 typedef void (message_ftype) (struct ui_out * uiout, int verbosity,
-			      const char *format, va_list args);
+			      char *format, va_list args);
 typedef void (wrap_hint_ftype) (struct ui_out * uiout, char *identstring);
 typedef void (flush_ftype) (struct ui_out * uiout);
 
@@ -249,8 +193,8 @@ struct ui_out_impl
     table_body_ftype *table_body;
     table_end_ftype *table_end;
     table_header_ftype *table_header;
-    ui_out_begin_ftype *begin;
-    ui_out_end_ftype *end;
+    list_begin_ftype *list_begin;
+    list_end_ftype *list_end;
     field_int_ftype *field_int;
     field_skip_ftype *field_skip;
     field_string_ftype *field_string;
@@ -260,7 +204,6 @@ struct ui_out_impl
     message_ftype *message;
     wrap_hint_ftype *wrap_hint;
     flush_ftype *flush;
-    int is_mi_like_p;
   };
 
 extern struct ui_out_data *ui_out_data (struct ui_out *uiout);
