@@ -1,3 +1,8 @@
+2002-07-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/interrupt.exp: Setup xfail for all i386 BSD's on "call
+	function when asleep" test.
+
 2002-07-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdb.base/page.exp: Rewrite to handle problems with very long
