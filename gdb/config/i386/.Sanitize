@@ -23,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+gdbserve.mt
 go32.mh
 i386aix.mh
 i386aix.mt
