@@ -467,7 +467,7 @@ print_insn_arg (d, buffer, p, addr, stream)
 		  break;
 
 		case 'x':
-		  ieee_extended_to_double (ext_format_68881, p, &flval);
+		  ieee_extended_to_double (&ext_format_68881, p, &flval);
 		  p += 12;
 		  break;
 
