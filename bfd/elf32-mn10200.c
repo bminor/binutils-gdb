@@ -26,8 +26,6 @@ static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void mn10200_info_to_howto
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
-static bfd_reloc_status_type bfd_elf32_mn10200_reloc
-  PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 
 
 /* We have to use RELA instructions since md_apply_fix3 in the assembler
@@ -126,9 +124,9 @@ static reloc_howto_type elf_mn10200_howto_table[] =
 	 true,
 	 0,
 	 complain_overflow_bitfield,
-	 bfd_elf32_mn10200_reloc,
+	 bfd_elf_generic_reloc,
 	 "R_MN10200_PCREL8",
-	 true,
+	 false,
 	 0xff,
 	 0xff,
 	 true),
@@ -141,9 +139,9 @@ static reloc_howto_type elf_mn10200_howto_table[] =
 	 true,
 	 0,
 	 complain_overflow_bitfield,
-	 bfd_elf32_mn10200_reloc,
+	 bfd_elf_generic_reloc,
 	 "R_MN10200_PCREL24",
-	 true,
+	 false,
 	 0xffffff,
 	 0xffffff,
 	 true),
@@ -197,103 +195,6 @@ mn10200_info_to_howto (abfd, cache_ptr, dst)
   r_type = ELF32_R_TYPE (dst->r_info);
   BFD_ASSERT (r_type < (unsigned int) R_MN10200_MAX);
   cache_ptr->howto = &elf_mn10200_howto_table[r_type];
-}
-
-static bfd_reloc_status_type
-bfd_elf32_mn10200_reloc (abfd, reloc, symbol, data, isection, obfd, err)
-     bfd *abfd;
-     arelent *reloc;
-     asymbol *symbol;
-     PTR data;
-     asection *isection;
-     bfd *obfd;
-     char **err;
-{
-  if (obfd != (bfd *) NULL
-      && (symbol->flags & BSF_SECTION_SYM) == 0
-      && (! reloc->howto->partial_inplace
-	  || reloc->addend == 0))
-    {
-      reloc->address += isection->output_offset;
-      return bfd_reloc_ok;
-    }
-  else if (obfd != NULL)
-    {
-      return bfd_reloc_continue;
-    }
-
-#if 0
-  /* Catch relocs involving undefined symbols.  */
-  if (bfd_is_und_section (symbol->section)
-      && (symbol->flags & BSF_WEAK) == 0
-      && obfd == NULL)
-    return bfd_reloc_undefined;
-
-  /* We handle final linking of some relocs ourselves.  */
-    {
-      long relocation;
-
-      /* Is the address of the relocation really within the section?  */
-      if (reloc->address > isection->_cooked_size)
-	return bfd_reloc_outofrange;
-
-      /* Work out which section the relocation is targetted at and the
-	 initial relocation command value.  */
-
-      /* Get symbol value.  (Common symbols are special.)  */
-      if (bfd_is_com_section (symbol->section))
-	relocation = 0;
-      else
-	relocation = symbol->value;
-
-      /* Convert input-section-relative symbol value to absolute + addend.  */
-      relocation += symbol->section->output_section->vma;
-      relocation += symbol->section->output_offset;
-      relocation += reloc->addend;
-
-      if (reloc->howto->pc_relative == true)
-	{
-	  /* Here the variable relocation holds the final address of the
-	     symbol we are relocating against, plus any addend.  */
-	  relocation -= isection->output_section->vma + isection->output_offset;
-
-	  /* Deal with pcrel_offset */
-	  relocation -= reloc->address;
-
-	  if (reloc->howto->type == R_MN10200_PCREL32_1BYTE
-	      || reloc->howto->type == R_MN10200_PCREL16_1BYTE
-	      || reloc->howto->type == R_MN10200_PCREL8_1BYTE)
-            relocation += 1;
-	  else if (reloc->howto->type == R_MN10200_PCREL32_2BYTE
-	      || reloc->howto->type == R_MN10200_PCREL16_2BYTE)
-            relocation += 2;
-	}
-
-      /* I've got no clue... */
-      reloc->addend = 0;	
-
-      if (reloc->howto->size == 0)
-	{
-	  if (relocation > 0x7f || relocation < -0x80)
-	    return bfd_reloc_overflow;
-
-	  bfd_put_8 (abfd, relocation & 0xff,
-		     (bfd_byte *)data + reloc->address);
-	}
-      else if (reloc->howto->size == 1)
-	{
-	  if (relocation > 0x7fff || relocation < -0x8000)
-	    return bfd_reloc_overflow;
-
-	  bfd_putb16 (relocation & 0xffff, (bfd_byte *)data + reloc->address);
- 	}
-      else if (reloc->howto->size == 2)
-	bfd_putb32 (relocation, (bfd_byte *)data + reloc->address);
-      return bfd_reloc_ok;
-    }
-#endif
-
-  return bfd_reloc_continue;
 }
 
 #define TARGET_LITTLE_SYM	bfd_elf32_mn10200_vec
