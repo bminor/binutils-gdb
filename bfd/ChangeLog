@@ -1,3 +1,10 @@
+Thu Oct 21 12:41:34 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	gcc -Wall lint:
+	* coff-h8300.c, coffcode.h: Change shrink parameter
+	in *_reloc16_estimate to unsigned to match prototype.
+	* archive.c: Avoid "/*" in comment.
+
 Thu Oct 21 13:05:16 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* dep-in.sed: Create our own line breaks for a more aesthetic
