@@ -1,3 +1,11 @@
+2001-02-11  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* NEWS: Document that "info symbol" works with COFF debug info and
+	its variants.
+
+	* minsyms.c (lookup_minimal_symbol_by_pc_section): Don't skip
+	symbols whose SYMBOL_BFD_SECTION is NULL.
+
 2000-02-10  Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>
 
 	Get rid of AIX specific PC_LOAD_SEGMENT, replace with PC_SOLIB.

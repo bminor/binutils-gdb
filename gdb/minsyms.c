@@ -482,6 +482,10 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
 	      /* This is the new code that distinguishes it from the old function */
 	      if (section)
 		while (hi >= 0
+		       /* Some types of debug info, such as COFF,
+			  don't fill the bfd_section member, so don't
+			  throw away symbols on those platforms.  */
+		       && SYMBOL_BFD_SECTION (&msymbol[hi]) != NULL
 		       && SYMBOL_BFD_SECTION (&msymbol[hi]) != section)
 		  --hi;
 

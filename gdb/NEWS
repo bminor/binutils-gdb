@@ -3,6 +3,8 @@
 
 *** Changes since GDB 5.0:
 
+* "info symbol" works on platforms which use COFF, ECOFF, XCOFF, and NLM.
+
 * New native configurations
 
 Alpha FreeBSD					alpha*-*-freebsd*
