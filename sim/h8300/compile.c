@@ -84,9 +84,7 @@ int debug;
 static cpu_state_type cpu;
 
 int h8300hmode = 0;
-/* start-sanitize-h8s */
 int h8300smode = 0;
-/* end-sanitize-h8s */
 
 static int memory_size;
 
@@ -1467,7 +1465,6 @@ sim_resume (step, siggnal)
 	case O (O_NOP, SB):
 	  goto next;
 
-/* start-sanitize-h8s */
 	case O (O_STM, SL):
 	  {
 	    int nregs, firstreg, i;
@@ -1502,7 +1499,6 @@ sim_resume (step, siggnal)
 	  }
 	  goto next;
 
-/* end-sanitize-h8s */
 	default:
 	  cpu.exception = SIGILL;
 	  goto end;
@@ -1973,10 +1969,7 @@ sim_load (prog, from_tty)
       if (bfd_check_format (abfd, bfd_object)) 
 	{
 	  set_h8300h (abfd->arch_info->mach == bfd_mach_h8300h
-/* start-sanitize-h8s */
-		      || abfd->arch_info->mach == bfd_mach_h8300s
-/* end-sanitize-h8s */
-		      );
+		      || abfd->arch_info->mach == bfd_mach_h8300s);
 	}
       bfd_close (abfd);
     }

@@ -86,6 +86,8 @@ disassembler (abfd)
     case bfd_arch_h8300:
       if (bfd_get_mach(abfd) == bfd_mach_h8300h)
 	disassemble = print_insn_h8300h;
+      else if (bfd_get_mach(abfd) == bfd_mach_h8300s)
+	disassemble = print_insn_h8300s;
       else 
 	disassemble = print_insn_h8300;
       break;
@@ -156,11 +158,7 @@ disassembler (abfd)
 #endif
 #ifdef ARCH_sparc
     case bfd_arch_sparc:
-      if (bfd_get_mach (abfd) == bfd_mach_sparc_v9
-	  || bfd_get_mach (abfd) == bfd_mach_sparc_v9a)
-	disassemble = print_insn_sparc64;
-      else
-	disassemble = print_insn_sparc;
+      disassemble = print_insn_sparc;
       break;
 #endif
 #ifdef ARCH_w65

@@ -9,7 +9,6 @@ Tue Jul  2 23:08:45 1996  Jeffrey A Law  (law@cygnus.com)
 	by two bits.
 	(OSHIFTS): Corresponding changes.
 
-start-sanitize-h8s 
 Tue Jul  2 01:37:27 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* compile.c (sim_resume): Handle "ldm.l" and "stm.l".
@@ -18,7 +17,6 @@ Wed Jun 26 08:58:53 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* compile.c (h8300smode): Declare.
 
-end-sanitize-h8s
 Wed Jun 26 12:20:56 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
 
         * Makefile.in (bindir, libdir, datadir, mandir, infodir, includedir,
@@ -28,13 +26,11 @@ Wed Jun 26 12:20:56 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
         (AC_PROG_INSTALL): Added.
         * configure: Rebuilt.
 
-start-sanitize-h8s
 Tue Jun 18 16:31:10 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* compile.c (sim_load): Treat the H8/S like the H8/300H for now.
 	* run.c (main): Treat the H8/S like the H8/300H for now.
 	
-end-sanitize-h8s 
 Fri May 24 10:35:25 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* compile.c (SEXTCHAR): Clear upper bits when sign

@@ -90,10 +90,7 @@ main (ac, av)
     }
 
   if (abfd->arch_info->mach == bfd_mach_h8300h
-/* start-sanitize-h8s */
-      || abfd->arch_info->mach == bfd_mach_h8300s
-/* end-sanitize-h8s */
-      )
+      || abfd->arch_info->mach == bfd_mach_h8300s)
     set_h8300h (1);
 
   for (s = abfd->sections; s; s=s->next) 

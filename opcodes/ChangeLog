@@ -1,5 +1,7 @@
 Thu Jul  4 11:42:51 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Released binutils 2.7.
+
 	* alpha-opc.c: Correct second case of "mov" to use OPRL.
 
 Wed Jul  3 16:03:47 1996  Stu Grossman  (grossman@critters.cygnus.com)
@@ -49,10 +51,9 @@ Tue Jun 18 15:58:27 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
 	* h8300-dis.c (bfd_h8_disassemble): Rename "hmode" argument
 	to just "mode".
 
-start-sanitize-h8s
 	* disassemble.c (disassembler): Handle H8/S.
 	* h8300-dis.c (print_insn_h8300s): New function for H8/S.
-end-sanitize-h8s
+
 Tue Jun 18 18:06:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sparc-opc.c: Add beq/teq as aliases for be/te.

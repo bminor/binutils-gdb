@@ -13,7 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define DEFINE_TABLE
 
@@ -64,10 +64,10 @@ bfd_h8_disassemble_init ()
 
 
 unsigned int
-bfd_h8_disassemble (addr, info, hmode)
+bfd_h8_disassemble (addr, info, mode)
      bfd_vma addr;
      disassemble_info *info;
-     int hmode;
+     int mode;
 {
   /* Find the first entry in the table for this opcode */
   static CONST char *regnames[] =
@@ -92,10 +92,11 @@ bfd_h8_disassemble (addr, info, hmode)
   int rd = 0;
   int rdisp = 0;
   int abs = 0;
+  int bit = 0;
   int plen = 0;
   static boolean init = 0;
   struct h8_opcode *q = h8_opcodes;
-  char CONST **pregnames = hmode ? lregnames : wregnames;
+  char CONST **pregnames = mode != 0 ? lregnames : wregnames;
   int status;
   int l;
   
@@ -243,7 +244,11 @@ bfd_h8_disassemble (addr, info, hmode)
 	      else if (looking_for & L_3)
 		{
 		  plen = 3;
-	      
+		  bit = thisnib;
+		}
+	      else if (looking_for & L_2)
+		{
+		  plen = 2;
 		  abs = thisnib;
 		}
 	      else if (looking_for == E)
@@ -275,9 +280,12 @@ bfd_h8_disassemble (addr, info, hmode)
 			  fprintf (stream, ",");
 
 
-			if (x & (IMM|KBIT|DBIT))
+			if (x & L_3)
 			  {
-			
+			    fprintf (stream, "#0x%x", (unsigned) bit);
+			  }
+			else if (x & (IMM|KBIT|DBIT))
+			  {
 			    fprintf (stream, "#0x%x", (unsigned) abs);
 			  }
 			else if (x & REG)
@@ -314,7 +322,12 @@ bfd_h8_disassemble (addr, info, hmode)
 			    fprintf (stream, "@%s", pregnames[rn]);
 			  }
 
-			else if (x & (ABS|ABSJMP|ABSMOV))
+			else if (x & ABS8MEM)
+			  {
+			    fprintf (stream, "@0x%x:8", (unsigned) abs);
+			  }
+
+			else if (x & (ABS|ABSJMP))
 			  {
 			    fprintf (stream, "@0x%x:%d", (unsigned) abs, plen);
 			  }
@@ -326,10 +339,16 @@ bfd_h8_disassemble (addr, info, hmode)
 
 			else if (x & PCREL)
 			  {
-			    if (x & L_16)
-			      abs  +=2;
-			    fprintf (stream, ".%s%d (%x)", (char) abs > 0 ? "+" : "", (char) abs,
-				     addr + (char) abs + 2);
+			    if (x & L_16) 
+			      {
+				abs  +=2;
+				fprintf (stream, ".%s%d (%x)", (short) abs > 0 ? "+" : "", (short) abs,
+					 addr + (short) abs + 2);
+			      }
+			    else {
+			      fprintf (stream, ".%s%d (%x)", (char) abs > 0 ? "+" : "", (char) abs,
+				       addr + (char) abs + 2);
+			    }
 			  }
 			else if (x & DISP)
 			  {
@@ -381,7 +400,7 @@ disassemble_info *info;
   return bfd_h8_disassemble (addr, info , 0);
 }
 
- int 
+int 
 print_insn_h8300h (addr, info)
 bfd_vma addr;
 disassemble_info *info;
@@ -389,3 +408,10 @@ disassemble_info *info;
   return bfd_h8_disassemble (addr, info , 1);
 }
 
+int 
+print_insn_h8300s (addr, info)
+bfd_vma addr;
+disassemble_info *info;
+{
+  return bfd_h8_disassemble (addr, info , 2);
+}
