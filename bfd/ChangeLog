@@ -1,5 +1,9 @@
 Tue Oct  5 10:44:32 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* configure.host: Recognize hppa*-*-hiux* (currently synonym for hpux).
+	Change other hppa entries to use -*- not -hp-.
+	* config.bfd: Recognize hppa*-*-hiux* (currently synonym for hpux).
+
 	* coff-rs6000.c, cpu-rs6000.c, rs6000-core.c: Change non-ASCII
 	characters in comment to octal escapes.
 
