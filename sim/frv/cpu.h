@@ -394,10 +394,6 @@ union sem_fields {
     IADDR i_label24;
   } sfmt_call;
   struct { /*  */
-    UINT f_A;
-    UINT f_ACC40Sk;
-  } sfmt_mclracc;
-  struct { /*  */
     INT f_u12;
     UINT f_FRk;
     unsigned char out_FRkhi;
@@ -4196,7 +4192,7 @@ struct scache {
   f_ope4 = EXTRACT_LSB0_UINT (insn, 32, 7, 2); \
   f_FRj = EXTRACT_LSB0_UINT (insn, 32, 5, 6); \
 
-#define EXTRACT_IFMT_MCLRACC_VARS \
+#define EXTRACT_IFMT_MNOP_VARS \
   UINT f_pack; \
   UINT f_ACC40Sk; \
   UINT f_op; \
@@ -4205,7 +4201,26 @@ struct scache {
   UINT f_ope1; \
   UINT f_FRj_null; \
   unsigned int length;
-#define EXTRACT_IFMT_MCLRACC_CODE \
+#define EXTRACT_IFMT_MNOP_CODE \
+  length = 4; \
+  f_pack = EXTRACT_LSB0_UINT (insn, 32, 31, 1); \
+  f_ACC40Sk = EXTRACT_LSB0_UINT (insn, 32, 30, 6); \
+  f_op = EXTRACT_LSB0_UINT (insn, 32, 24, 7); \
+  f_A = EXTRACT_LSB0_UINT (insn, 32, 17, 1); \
+  f_misc_null_10 = EXTRACT_LSB0_UINT (insn, 32, 16, 5); \
+  f_ope1 = EXTRACT_LSB0_UINT (insn, 32, 11, 6); \
+  f_FRj_null = EXTRACT_LSB0_UINT (insn, 32, 5, 6); \
+
+#define EXTRACT_IFMT_MCLRACC_0_VARS \
+  UINT f_pack; \
+  UINT f_ACC40Sk; \
+  UINT f_op; \
+  UINT f_A; \
+  UINT f_misc_null_10; \
+  UINT f_ope1; \
+  UINT f_FRj_null; \
+  unsigned int length;
+#define EXTRACT_IFMT_MCLRACC_0_CODE \
   length = 4; \
   f_pack = EXTRACT_LSB0_UINT (insn, 32, 31, 1); \
   f_ACC40Sk = EXTRACT_LSB0_UINT (insn, 32, 30, 6); \

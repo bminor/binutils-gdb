@@ -1,3 +1,7 @@
+2003-09-03  Dave Brolley  <brolley@redhat.com>
+
+	* cpu.h, model.c, sem.c, decode.h, decode.c: Regenerated.
+
 2003-08-29  Dave Brolley  <brolley@redhat.com>
 
 	* Makefile.in (stamp-arch): Copy frv.cpu from $(srcdir)../../cpu

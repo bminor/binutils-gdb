@@ -776,7 +776,9 @@ static const struct insn_sem frvbf_insn_sem[] =
   { FRV_INSN_CMHTOB, FRVBF_INSN_CMHTOB, FRVBF_SFMT_CMHTOB },
   { FRV_INSN_MBTOHE, FRVBF_INSN_MBTOHE, FRVBF_SFMT_MBTOHE },
   { FRV_INSN_CMBTOHE, FRVBF_INSN_CMBTOHE, FRVBF_SFMT_CMBTOHE },
-  { FRV_INSN_MCLRACC, FRVBF_INSN_MCLRACC, FRVBF_SFMT_MCLRACC },
+  { FRV_INSN_MNOP, FRVBF_INSN_MNOP, FRVBF_SFMT_REI },
+  { FRV_INSN_MCLRACC_0, FRVBF_INSN_MCLRACC_0, FRVBF_SFMT_MCLRACC_0 },
+  { FRV_INSN_MCLRACC_1, FRVBF_INSN_MCLRACC_1, FRVBF_SFMT_MCLRACC_0 },
   { FRV_INSN_MRDACC, FRVBF_INSN_MRDACC, FRVBF_SFMT_MRDACC },
   { FRV_INSN_MRDACCG, FRVBF_INSN_MRDACCG, FRVBF_SFMT_MRDACCG },
   { FRV_INSN_MWTACC, FRVBF_INSN_MWTACC, FRVBF_SFMT_MWTACC },
@@ -2142,7 +2144,87 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
           case 56 : itype = FRVBF_INSN_MBTOH; goto extract_sfmt_mbtoh;
           case 57 : itype = FRVBF_INSN_MHTOB; goto extract_sfmt_mhtob;
           case 58 : itype = FRVBF_INSN_MBTOHE; goto extract_sfmt_mbtohe;
-          case 59 : itype = FRVBF_INSN_MCLRACC; goto extract_sfmt_mclracc;
+          case 59 :
+            {
+              unsigned int val = (((insn >> 17) & (1 << 0)));
+              switch (val)
+              {
+              case 0 : itype = FRVBF_INSN_MCLRACC_0; goto extract_sfmt_mclracc_0;
+              case 1 :
+                {
+                  unsigned int val = (((insn >> 25) & (63 << 0)));
+                  switch (val)
+                  {
+                  case 0 : /* fall through */
+                  case 1 : /* fall through */
+                  case 2 : /* fall through */
+                  case 3 : /* fall through */
+                  case 4 : /* fall through */
+                  case 5 : /* fall through */
+                  case 6 : /* fall through */
+                  case 7 : /* fall through */
+                  case 8 : /* fall through */
+                  case 9 : /* fall through */
+                  case 10 : /* fall through */
+                  case 11 : /* fall through */
+                  case 12 : /* fall through */
+                  case 13 : /* fall through */
+                  case 14 : /* fall through */
+                  case 15 : /* fall through */
+                  case 16 : /* fall through */
+                  case 17 : /* fall through */
+                  case 18 : /* fall through */
+                  case 19 : /* fall through */
+                  case 20 : /* fall through */
+                  case 21 : /* fall through */
+                  case 22 : /* fall through */
+                  case 23 : /* fall through */
+                  case 24 : /* fall through */
+                  case 25 : /* fall through */
+                  case 26 : /* fall through */
+                  case 27 : /* fall through */
+                  case 28 : /* fall through */
+                  case 29 : /* fall through */
+                  case 30 : /* fall through */
+                  case 31 : /* fall through */
+                  case 32 : /* fall through */
+                  case 33 : /* fall through */
+                  case 34 : /* fall through */
+                  case 35 : /* fall through */
+                  case 36 : /* fall through */
+                  case 37 : /* fall through */
+                  case 38 : /* fall through */
+                  case 39 : /* fall through */
+                  case 40 : /* fall through */
+                  case 41 : /* fall through */
+                  case 42 : /* fall through */
+                  case 43 : /* fall through */
+                  case 44 : /* fall through */
+                  case 45 : /* fall through */
+                  case 46 : /* fall through */
+                  case 47 : /* fall through */
+                  case 48 : /* fall through */
+                  case 49 : /* fall through */
+                  case 50 : /* fall through */
+                  case 51 : /* fall through */
+                  case 52 : /* fall through */
+                  case 53 : /* fall through */
+                  case 54 : /* fall through */
+                  case 55 : /* fall through */
+                  case 56 : /* fall through */
+                  case 57 : /* fall through */
+                  case 58 : /* fall through */
+                  case 59 : /* fall through */
+                  case 60 : /* fall through */
+                  case 61 : /* fall through */
+                  case 62 : itype = FRVBF_INSN_MCLRACC_1; goto extract_sfmt_mclracc_0;
+                  case 63 : itype = FRVBF_INSN_MNOP; goto extract_sfmt_rei;
+                  default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+                  }
+                }
+              default : itype = FRVBF_INSN_X_INVALID; goto extract_sfmt_empty;
+              }
+            }
           case 60 : itype = FRVBF_INSN_MRDACC; goto extract_sfmt_mrdacc;
           case 61 : itype = FRVBF_INSN_MWTACC; goto extract_sfmt_mwtacc;
           case 62 : itype = FRVBF_INSN_MRDACCG; goto extract_sfmt_mrdaccg;
@@ -10755,21 +10837,18 @@ frvbf_decode (SIM_CPU *current_cpu, IADDR pc,
     return idesc;
   }
 
- extract_sfmt_mclracc:
+ extract_sfmt_mclracc_0:
   {
     const IDESC *idesc = &frvbf_insn_data[itype];
     CGEN_INSN_INT insn = entire_insn;
-#define FLD(f) abuf->fields.sfmt_mclracc.f
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
     UINT f_ACC40Sk;
-    UINT f_A;
 
     f_ACC40Sk = EXTRACT_LSB0_UINT (insn, 32, 30, 6);
-    f_A = EXTRACT_LSB0_UINT (insn, 32, 17, 1);
 
   /* Record the fields for the semantic handler.  */
-  FLD (f_A) = f_A;
   FLD (f_ACC40Sk) = f_ACC40Sk;
-  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_mclracc", "f_A 0x%x", 'x', f_A, "f_ACC40Sk 0x%x", 'x', f_ACC40Sk, (char *) 0));
+  TRACE_EXTRACT (current_cpu, abuf, (current_cpu, pc, "sfmt_mclracc_0", "f_ACC40Sk 0x%x", 'x', f_ACC40Sk, (char *) 0));
 
 #undef FLD
     return idesc;

@@ -27646,18 +27646,52 @@ if (EQQI (CPU (h_cccr[FLD (f_CCi)]), ORSI (FLD (f_cond), 2))) {
 #undef FLD
 }
 
-/* mclracc: mclracc$pack $ACC40Sk,$A */
+/* mnop: mnop$pack */
 
 static SEM_PC
-SEM_FN_NAME (frvbf,mclracc) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+SEM_FN_NAME (frvbf,mnop) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_mclracc.f
+#define FLD(f) abuf->fields.fmt_empty.f
   ARGBUF *abuf = SEM_ARGBUF (sem_arg);
   int UNUSED written = 0;
   IADDR UNUSED pc = abuf->addr;
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
 
-frvbf_clear_accumulators (current_cpu, FLD (f_ACC40Sk), FLD (f_A));
+((void) 0); /*nop*/
+
+  return vpc;
+#undef FLD
+}
+
+/* mclracc-0: mclracc$pack $ACC40Sk,$A0 */
+
+static SEM_PC
+SEM_FN_NAME (frvbf,mclracc_0) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+frvbf_clear_accumulators (current_cpu, FLD (f_ACC40Sk), 0);
+
+  return vpc;
+#undef FLD
+}
+
+/* mclracc-1: mclracc$pack $ACC40Sk,$A1 */
+
+static SEM_PC
+SEM_FN_NAME (frvbf,mclracc_1) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
+  ARGBUF *abuf = SEM_ARGBUF (sem_arg);
+  int UNUSED written = 0;
+  IADDR UNUSED pc = abuf->addr;
+  SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 4);
+
+frvbf_clear_accumulators (current_cpu, FLD (f_ACC40Sk), 1);
 
   return vpc;
 #undef FLD
@@ -28537,7 +28571,9 @@ static const struct sem_fn_desc sem_fns[] = {
   { FRVBF_INSN_CMHTOB, SEM_FN_NAME (frvbf,cmhtob) },
   { FRVBF_INSN_MBTOHE, SEM_FN_NAME (frvbf,mbtohe) },
   { FRVBF_INSN_CMBTOHE, SEM_FN_NAME (frvbf,cmbtohe) },
-  { FRVBF_INSN_MCLRACC, SEM_FN_NAME (frvbf,mclracc) },
+  { FRVBF_INSN_MNOP, SEM_FN_NAME (frvbf,mnop) },
+  { FRVBF_INSN_MCLRACC_0, SEM_FN_NAME (frvbf,mclracc_0) },
+  { FRVBF_INSN_MCLRACC_1, SEM_FN_NAME (frvbf,mclracc_1) },
   { FRVBF_INSN_MRDACC, SEM_FN_NAME (frvbf,mrdacc) },
   { FRVBF_INSN_MRDACCG, SEM_FN_NAME (frvbf,mrdaccg) },
   { FRVBF_INSN_MWTACC, SEM_FN_NAME (frvbf,mwtacc) },

@@ -11715,9 +11715,41 @@ model_frv_cmbtohe (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_frv_mclracc (SIM_CPU *current_cpu, void *sem_arg)
+model_frv_mnop (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_mclracc.f
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_frv_mclracc_0 (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_frv_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_frv_mclracc_1 (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -29014,9 +29046,49 @@ model_fr500_cmbtohe (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_fr500_mclracc (SIM_CPU *current_cpu, void *sem_arg)
+model_fr500_mnop (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_mclracc.f
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr500_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr500_mclracc_0 (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_FRinti = -1;
+    INT in_FRintj = -1;
+    INT in_ACC40Si = -1;
+    INT in_ACCGi = -1;
+    INT out_FRintk = -1;
+    INT out_ACC40Sk = -1;
+    INT out_ACC40Uk = -1;
+    INT out_ACCGk = -1;
+    cycles += frvbf_model_fr500_u_media (current_cpu, idesc, 0, referenced, in_FRinti, in_FRintj, in_ACC40Si, in_ACCGi, out_FRintk, out_ACC40Sk, out_ACC40Uk, out_ACCGk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr500_mclracc_1 (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -40878,9 +40950,41 @@ model_tomcat_cmbtohe (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_tomcat_mclracc (SIM_CPU *current_cpu, void *sem_arg)
+model_tomcat_mnop (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_mclracc.f
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_tomcat_mclracc_0 (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_tomcat_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_tomcat_mclracc_1 (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -56783,9 +56887,45 @@ model_fr400_cmbtohe (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_fr400_mclracc (SIM_CPU *current_cpu, void *sem_arg)
+model_fr400_mnop (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_mclracc.f
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_fr400_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr400_mclracc_0 (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    INT in_ACC40Si = -1;
+    INT in_FRintj = -1;
+    INT out_ACC40Sk = -1;
+    INT out_FRintk = -1;
+    cycles += frvbf_model_fr400_u_media_4 (current_cpu, idesc, 0, referenced, in_ACC40Si, in_FRintj, out_ACC40Sk, out_FRintk);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_fr400_mclracc_1 (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -68625,9 +68765,41 @@ model_simple_cmbtohe (SIM_CPU *current_cpu, void *sem_arg)
 }
 
 static int
-model_simple_mclracc (SIM_CPU *current_cpu, void *sem_arg)
+model_simple_mnop (SIM_CPU *current_cpu, void *sem_arg)
 {
-#define FLD(f) abuf->fields.sfmt_mclracc.f
+#define FLD(f) abuf->fields.fmt_empty.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_simple_mclracc_0 (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
+  const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
+  const IDESC * UNUSED idesc = abuf->idesc;
+  int cycles = 0;
+  {
+    int referenced = 0;
+    int UNUSED insn_referenced = abuf->written;
+    cycles += frvbf_model_simple_u_exec (current_cpu, idesc, 0, referenced);
+  }
+  return cycles;
+#undef FLD
+}
+
+static int
+model_simple_mclracc_1 (SIM_CPU *current_cpu, void *sem_arg)
+{
+#define FLD(f) abuf->fields.sfmt_mdasaccs.f
   const ARGBUF * UNUSED abuf = SEM_ARGBUF ((SEM_ARG) sem_arg);
   const IDESC * UNUSED idesc = abuf->idesc;
   int cycles = 0;
@@ -69494,7 +69666,9 @@ static const INSN_TIMING frv_timing[] = {
   { FRVBF_INSN_CMHTOB, model_frv_cmhtob, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_MBTOHE, model_frv_mbtohe, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_CMBTOHE, model_frv_cmbtohe, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_MCLRACC, model_frv_mclracc, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MNOP, model_frv_mnop, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MCLRACC_0, model_frv_mclracc_0, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MCLRACC_1, model_frv_mclracc_1, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_MRDACC, model_frv_mrdacc, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_MRDACCG, model_frv_mrdaccg, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_MWTACC, model_frv_mwtacc, { { (int) UNIT_FRV_U_EXEC, 1, 1 } } },
@@ -70243,7 +70417,9 @@ static const INSN_TIMING fr500_timing[] = {
   { FRVBF_INSN_CMHTOB, model_fr500_cmhtob, { { (int) UNIT_FR500_U_MEDIA_DUAL_HTOB, 1, 1 } } },
   { FRVBF_INSN_MBTOHE, model_fr500_mbtohe, { { (int) UNIT_FR500_U_MEDIA_DUAL_BTOHE, 1, 1 } } },
   { FRVBF_INSN_CMBTOHE, model_fr500_cmbtohe, { { (int) UNIT_FR500_U_MEDIA_DUAL_BTOHE, 1, 1 } } },
-  { FRVBF_INSN_MCLRACC, model_fr500_mclracc, { { (int) UNIT_FR500_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MNOP, model_fr500_mnop, { { (int) UNIT_FR500_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MCLRACC_0, model_fr500_mclracc_0, { { (int) UNIT_FR500_U_MEDIA, 1, 1 } } },
+  { FRVBF_INSN_MCLRACC_1, model_fr500_mclracc_1, { { (int) UNIT_FR500_U_MEDIA, 1, 1 } } },
   { FRVBF_INSN_MRDACC, model_fr500_mrdacc, { { (int) UNIT_FR500_U_MEDIA, 1, 1 } } },
   { FRVBF_INSN_MRDACCG, model_fr500_mrdaccg, { { (int) UNIT_FR500_U_MEDIA, 1, 1 } } },
   { FRVBF_INSN_MWTACC, model_fr500_mwtacc, { { (int) UNIT_FR500_U_MEDIA, 1, 1 } } },
@@ -70992,7 +71168,9 @@ static const INSN_TIMING tomcat_timing[] = {
   { FRVBF_INSN_CMHTOB, model_tomcat_cmhtob, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_MBTOHE, model_tomcat_mbtohe, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_CMBTOHE, model_tomcat_cmbtohe, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_MCLRACC, model_tomcat_mclracc, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MNOP, model_tomcat_mnop, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MCLRACC_0, model_tomcat_mclracc_0, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MCLRACC_1, model_tomcat_mclracc_1, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_MRDACC, model_tomcat_mrdacc, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_MRDACCG, model_tomcat_mrdaccg, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_MWTACC, model_tomcat_mwtacc, { { (int) UNIT_TOMCAT_U_EXEC, 1, 1 } } },
@@ -71741,7 +71919,9 @@ static const INSN_TIMING fr400_timing[] = {
   { FRVBF_INSN_CMHTOB, model_fr400_cmhtob, { { (int) UNIT_FR400_U_MEDIA_DUAL_HTOB, 1, 1 } } },
   { FRVBF_INSN_MBTOHE, model_fr400_mbtohe, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_CMBTOHE, model_fr400_cmbtohe, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_MCLRACC, model_fr400_mclracc, { { (int) UNIT_FR400_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_MNOP, model_fr400_mnop, { { (int) UNIT_FR400_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MCLRACC_0, model_fr400_mclracc_0, { { (int) UNIT_FR400_U_MEDIA_4, 1, 1 } } },
+  { FRVBF_INSN_MCLRACC_1, model_fr400_mclracc_1, { { (int) UNIT_FR400_U_MEDIA_4, 1, 1 } } },
   { FRVBF_INSN_MRDACC, model_fr400_mrdacc, { { (int) UNIT_FR400_U_MEDIA_4, 1, 1 } } },
   { FRVBF_INSN_MRDACCG, model_fr400_mrdaccg, { { (int) UNIT_FR400_U_MEDIA_4_ACCG, 1, 1 } } },
   { FRVBF_INSN_MWTACC, model_fr400_mwtacc, { { (int) UNIT_FR400_U_MEDIA_4, 1, 1 } } },
@@ -72490,7 +72670,9 @@ static const INSN_TIMING simple_timing[] = {
   { FRVBF_INSN_CMHTOB, model_simple_cmhtob, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_MBTOHE, model_simple_mbtohe, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_CMBTOHE, model_simple_cmbtohe, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
-  { FRVBF_INSN_MCLRACC, model_simple_mclracc, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MNOP, model_simple_mnop, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MCLRACC_0, model_simple_mclracc_0, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
+  { FRVBF_INSN_MCLRACC_1, model_simple_mclracc_1, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_MRDACC, model_simple_mrdacc, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_MRDACCG, model_simple_mrdaccg, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
   { FRVBF_INSN_MWTACC, model_simple_mwtacc, { { (int) UNIT_SIMPLE_U_EXEC, 1, 1 } } },
