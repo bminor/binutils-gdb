@@ -1,5 +1,8 @@
 Tue Aug  8 10:50:15 1995  Jeffrey A. Law  <law@rtl.cygnus.com>
 
+	* top.c (target_output_hook): Make declaration match the one
+	in defs.h.
+
 	* symfile.c (add_psymbol_to_list): Initialize SYMBOL_SECTION.
 	(add_psymbol_addr_to_list): Likewise.
 	* symfile.h (ADD_PSYMBOL_VT_TO_LIST): Likewise.
