@@ -1,3 +1,8 @@
+Wed Mar 31 16:35:12 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* dis-asm.h: (disassemble_info):  Fix typo in prototype of
+	dis_asm_memory_error().
+
 Tue Mar 30 19:09:23 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dis-asm.h (disassembler_info): Add read_memory_func,

@@ -59,7 +59,7 @@ dis_asm_read_memory PARAMS ((bfd_vma memaddr, bfd_byte *myaddr, int len));
 /* GDB--Like memory_error with slightly different parameters.  */
 extern void
 dis_asm_memory_error
-  PARAMS ((int status, bfd_vma memaddr, disassembler_info *info));
+  PARAMS ((int status, bfd_vma memaddr, disassemble_info *info));
 
 #define GDB_INIT_DISASSEMBLE_INFO(INFO, STREAM) \
   (INFO).fprintf_func = (fprintf_ftype)fprintf_filtered, \
