@@ -1,3 +1,9 @@
+Fri Jan 13 17:52:57 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
+
+	* infcmd.c (signal_command): Accept "signal 0"; the change to not
+	accept it was accidental.  "handle 0" and "info signal 0" remain
+	illegal, though.
+
 Thu Jan 12 21:23:25 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* stabsread.c (read_enum_type):  When pending enum symbols are

@@ -474,8 +474,12 @@ signal_command (signum_exp, from_tty)
   if (oursig == TARGET_SIGNAL_UNKNOWN)
     {
       /* No, try numeric.  */
-      oursig =
-	target_signal_from_command (parse_and_eval_address (signum_exp));
+      int num = parse_and_eval_address (signum_exp);
+
+      if (num == 0)
+	oursig = TARGET_SIGNAL_0;
+      else
+	oursig = target_signal_from_command (num);
     }
 
   if (from_tty)
