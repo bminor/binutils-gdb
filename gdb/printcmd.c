@@ -1285,6 +1285,12 @@ address_info (char *exp, int from_tty)
 			val, REGISTER_NAME (basereg));
       break;
 
+    case LOC_THREAD_LOCAL_STATIC:
+      printf_filtered ("a thread-local variable at offset %ld in the "
+                       "thread-local storage for `%s'",
+                       val, SYMBOL_OBJFILE (sym)->name);
+      break;
+
     case LOC_OPTIMIZED_OUT:
       printf_filtered ("optimized out");
       break;

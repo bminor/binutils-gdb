@@ -410,6 +410,12 @@ static int islocal;		/* Variable is at the returned offset
 				   this function, so we can't say
 				   which register it's relative to;
 				   use LOC_LOCAL.  */
+static int is_thread_local;     /* Variable is at a constant offset in the
+                                   thread-local storage block for the
+                                   current thread and the dynamic linker
+                                   module containing this expression.
+                                   decode_locdesc returns the offset from
+                                   that base.  */
 
 /* DW_AT_frame_base values for the current function.
    frame_base_reg is -1 if DW_AT_frame_base is missing, otherwise it
@@ -4788,6 +4794,14 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
                                 "external variable");
                     }
 		  add_symbol_to_list (sym, &global_symbols);
+                  if (is_thread_local)
+                    {
+                      /* SYMBOL_VALUE_ADDRESS contains at this point the
+		         offset of the variable within the thread local
+			 storage.  */
+                      SYMBOL_CLASS (sym) = LOC_THREAD_LOCAL_STATIC;
+                      SYMBOL_OBJFILE (sym) = objfile;
+                    }
 
 		  /* In shared libraries the address of the variable
 		     in the location descriptor might still be relocatable,
@@ -4796,7 +4810,7 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 		     value is zero, the address of the variable will then
 		     be determined from the minimal symbol table whenever
 		     the variable is referenced.  */
-		  if (SYMBOL_VALUE_ADDRESS (sym))
+		  else if (SYMBOL_VALUE_ADDRESS (sym))
 		    {
 		      fixup_symbol_section (sym, objfile);
 		      SYMBOL_VALUE_ADDRESS (sym) +=
@@ -4846,6 +4860,11 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 		    {
 		      SYMBOL_CLASS (sym) = LOC_LOCAL;
 		    }
+                  else if (is_thread_local)
+                    {
+                      SYMBOL_CLASS (sym) = LOC_THREAD_LOCAL_STATIC;
+                      SYMBOL_OBJFILE (sym) = objfile;
+                    }
 		  else
 		    {
 		      fixup_symbol_section (sym, objfile);
@@ -6358,6 +6377,7 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
   offreg = 0;
   isderef = 0;
   islocal = 0;
+  is_thread_local = 0;
   optimized_out = 1;
 
   while (i < size)
@@ -6580,6 +6600,16 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
 	  if (i < size)
 	    complain (&dwarf2_complex_location_expr);
 	  break;
+
+        case DW_OP_GNU_push_tls_address:
+          is_thread_local = 1;
+	  /* The top of the stack has the offset from the beginning
+	     of the thread control block at which the variable is located.  */
+	  /* Nothing should follow this operator, so the top of stack would
+	     be returned.  */
+	  if (i < size)
+	    complain (&dwarf2_complex_location_expr);
+          break;
 
 	default:
 	  complain (&dwarf2_unsupported_stack_op, dwarf_stack_op_name (op));

@@ -1,3 +1,20 @@
+2002-10-21  Jim Blandy  <jimb@redhat.com>
+	    Elena Zannoni  <ezannoni@redhat.com>
+
+	* symtab.h (address_class): Re-add LOC_THREAD_LOCAL_STATIC
+	for thread local storage locations.
+	(struct symbol): Add objfile field.
+	(SYMBOL_OBJFILE): Define.
+	* dwarf2read.c (is_thread_local): New static variable.
+	(new_symbol): If variable is in thread local fill in address class
+	and objfile appropriately.
+	(decode_locdesc): Recognize and handle DW_OP_GNU_push_tls_address
+	stack operation.
+	* printcmd.c (address_info): Print the information for thread
+	local storage variable.
+	* findvar.c (read_var_value): In case of thread local variable,
+	defer to the target vector code to compute address.
+
 2002-10-21  Elena Zannoni  <ezannoni@redhat.com>
 
         * solib-svr4.c (svr4_fetch_objfile_link_map): New function.

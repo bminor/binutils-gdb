@@ -629,6 +629,14 @@ enum address_class
 
   LOC_HP_THREAD_LOCAL_STATIC,
 
+  /* Value is at a thread-specific location calculated by a
+     target-specific method.  SYMBOL_OBJFILE gives the object file
+     in which the symbol is defined; the symbol's value is the
+     offset into that objfile's thread-local storage for the current
+     thread.  */
+      
+  LOC_THREAD_LOCAL_STATIC,
+
   /* The variable does not actually exist in the program.
      The value is ignored.  */
 
@@ -698,6 +706,12 @@ struct symbol
   {
     /* Used by LOC_BASEREG and LOC_BASEREG_ARG.  */
     short basereg;
+
+    /* Used by LOC_THREAD_LOCAL_STATIC.  The objfile in which this
+       symbol is defined.  To find a thread-local variable (e.g., a
+       variable declared with the `__thread' storage class), we may
+       need to know which object file it's in.  */
+    struct objfile *objfile;
   }
   aux_value;
 
@@ -719,6 +733,7 @@ struct symbol
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_BASEREG(symbol)		(symbol)->aux_value.basereg
+#define SYMBOL_OBJFILE(symbol)          (symbol)->aux_value.objfile
 #define SYMBOL_ALIASES(symbol)		(symbol)->aliases
 #define SYMBOL_RANGES(symbol)		(symbol)->ranges
 
