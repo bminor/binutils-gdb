@@ -1,3 +1,9 @@
+1999-06-05  Richard Henderson  <rth@cygnus.com>
+
+	* gas/elf/elf.exp: New directory.
+	* gas/elf/section0.[sd]: New test.
+	* gas/elf/section1.[sd]: New test.
+
 1999-06-03  Philip Blundell  <philb@gnu.org>
 
 	* gas/arm/arm7t.d, gas/arm/inst.d: Update to match current gas,
