@@ -1,3 +1,11 @@
+2003-06-01  Richard Henderson  <rth@redhat.com>
+
+	* gdb.asm/alpha.inc (gdbasm_enter): Use numeric register names
+	for .frame.
+	(gdbasm_call): Lose ldgp.
+	(gdbasm_startup): Add frame information.
+	* gdb.asm/asm-source.exp (alpha*-*): Add -no-mdebug to asm-flags.
+
 2003-05-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.base/float.exp: Expect similar output for x86_64-*-* as for

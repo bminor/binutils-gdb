@@ -40,7 +40,7 @@ switch -glob -- [istarget] {
         set asm-arch alpha
 	# ??? Won't work with ecoff systems like Tru64, but then we also
 	# don't have any other -g flag that creates mdebug output.
-        set asm-flags "-gdwarf2 -I${srcdir}/${subdir} -I${objdir}/${subdir}"
+        set asm-flags "-gdwarf2 -no-mdebug -I${srcdir}/${subdir} -I${objdir}/${subdir}"
     }
     "*arm-*-*" {
         set asm-arch arm

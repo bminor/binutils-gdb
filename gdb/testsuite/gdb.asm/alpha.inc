@@ -6,7 +6,7 @@
 
 	comment "subroutine prologue"
 	.macro gdbasm_enter
-	.frame	$sp, 16, $ra, 0
+	.frame	$30, 16, $26, 0
 	.mask	0x04000000, -16
 	ldgp	$gp, 0($27)
 	subq	$sp, 16, $sp
@@ -26,9 +26,11 @@
 	.end	\name
 	.endm
 
+	comment "subroutine call"
+	/* Can't use ldgp here because the finish-frame test expects the
+	   pc to wind up on the next line.  That's ok, we're all local.  */
 	.macro gdbasm_call subr
 	jsr	$26, \subr
-	ldgp	$gp, 0($26)
 	.endm
 
 	.macro gdbasm_several_nops
@@ -47,6 +49,8 @@
 
 	comment "crt0 startup"
 	.macro gdbasm_startup
+	.frame	$31, 0, $31, 0
+	.prologue
 	ldgp	$gp, 0($27)
 	.endm
 
