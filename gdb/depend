@@ -367,7 +367,7 @@ paread.o : ${srcdir}/paread.c ${srcdir}/defs.h $(INCLUDE_DIR)/ansidecl.h xm.h co
   $(BFD_SRC_DIR)/sysdep.h $(BFD_SRC_DIR)/hosts/std-host.h ${srcdir}/symtab.h ${srcdir}/symfile.h \
   $(INCLUDE_DIR)/demangle.h ${srcdir}/objfiles.h ${srcdir}/buildsym.h ${srcdir}/gdb-stabs.h ${srcdir}/complaints.h \
   $(INCLUDE_DIR)/aout/aout64.h 
-	${CC} -c ${INTERNAL_CFLAGS}  ${srcdir}/paread.c
+	${CC} -c ${INTERNAL_CFLAGS}  -I${BFD_SRC_DIR} -I${BFD_OBJ_DIR} ${srcdir}/paread.c
 parse.o : ${srcdir}/parse.c ${srcdir}/defs.h $(INCLUDE_DIR)/ansidecl.h xm.h config.status nm.h config.status $(INCLUDE_DIR)/fopen-same.h \
   tm.h config.status ${srcdir}/symtab.h $(INCLUDE_DIR)/obstack.h ${srcdir}/gdbtypes.h ${srcdir}/frame.h ${srcdir}/expression.h \
   ${srcdir}/value.h ${srcdir}/command.h ${srcdir}/language.h ${srcdir}/parser-defs.h 
@@ -622,7 +622,7 @@ xcoffexec.o : ${srcdir}/xcoffexec.c ${srcdir}/defs.h $(INCLUDE_DIR)/ansidecl.h x
   ${srcdir}/value.h ${srcdir}/gdbtypes.h ${srcdir}/expression.h ${srcdir}/target.h ../bfd/bfd.h ${srcdir}/gdbcmd.h ${srcdir}/command.h \
   ${srcdir}/gdbcore.h ${srcdir}/symfile.h $(INCLUDE_DIR)/demangle.h ${srcdir}/objfiles.h $(BFD_SRC_DIR)/libbfd.h \
   ${srcdir}/xcoffsolib.h 
-	${CC} -c ${INTERNAL_CFLAGS}  ${srcdir}/xcoffexec.c
+	${CC} -c ${INTERNAL_CFLAGS}  -I${BFD_SRC_DIR} -I${BFD_OBJ_DIR} ${srcdir}/xcoffexec.c
 xcoffread.o : ${srcdir}/xcoffread.c ${srcdir}/defs.h $(INCLUDE_DIR)/ansidecl.h xm.h config.status nm.h config.status $(INCLUDE_DIR)/fopen-same.h \
   tm.h config.status ../bfd/bfd.h $(INCLUDE_DIR)/obstack.h ${srcdir}/symtab.h ${srcdir}/gdbtypes.h ${srcdir}/symfile.h \
   $(INCLUDE_DIR)/demangle.h ${srcdir}/objfiles.h ${srcdir}/buildsym.h ${srcdir}/stabsread.h ${srcdir}/complaints.h \
