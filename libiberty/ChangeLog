@@ -1,3 +1,8 @@
+2000-07-24	Daniel Berlin <dberlin@redhat.com>
+
+	* cplus-dem.c (demangle_signature): Change if (GNU_DEMANGLING) to 
+	if (AUTO_DEMANGLING || GNU_DEMANGLING)
+
 2000-07-23  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 	    Jeff Law <law@cygnus.com>
 
