@@ -423,7 +423,8 @@ if { [istarget mips*-*-*] } then {
     run_dump_test_arches "blt"		[mips_arch_list_matching mips2]
     run_dump_test_arches "bltu"		[mips_arch_list_matching mips2]
     run_dump_test_arches "branch-misc-1" [mips_arch_list_matching mips1]
-    run_list_test_arches "branch-misc-2" "-32" [mips_arch_list_matching mips1]
+    run_list_test_arches "branch-misc-2" "-32 -non_shared" [mips_arch_list_matching mips1]
+    run_list_test_arches "branch-misc-2pic" "-32 -call_shared" [mips_arch_list_matching mips1]
 
     if $ilocks {
 	run_dump_test "div-ilocks"

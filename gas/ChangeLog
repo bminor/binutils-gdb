@@ -1,3 +1,8 @@
+2003-07-08  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (mips_validate_fix): Do not warn about branch
+	target being a global symbol if not compiling SVR4 PIC code.
+
 2003-07-07  Nick Clifton  <nickc@redhat.com>
 
 	* doc/c-m32r.texi (M32R-Directives): New node.  Document the

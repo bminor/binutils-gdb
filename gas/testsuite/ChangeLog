@@ -1,3 +1,11 @@
+2003-07-08  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/testsuite/gas/mips/mips.exp: Make sure that branch-misc-2 is
+	run to compile non-PIC code, and add branch-misc-2pic.
+	* gas/mips/branch-misc-2.l: Adjust for change in non-PIC warnings.
+	* gas/mips/branch-misc-2pic.l: New file.
+	* gas/mips/branch-misc-2pic.s: New file.
+
 2003-07-07  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/h8300/h8sx_disp2.[sd]: Add tests for symbolic displacements.
