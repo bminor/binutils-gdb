@@ -803,6 +803,8 @@ append_insn (place, ip, address_expr, reloc_type)
 	  emit_nop ();
 	  if (nops > 1)
 	    emit_nop ();
+	  if (listing)
+	    listing_prev_line ();
 	  if (insn_label != NULL)
 	    {
 	      assert (S_GET_SEGMENT (insn_label) == now_seg);

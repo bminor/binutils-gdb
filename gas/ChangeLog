@@ -1,3 +1,13 @@
+Tue Jan 11 13:01:20 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* listing.c (listing_prev_line): New function.
+	* listing.c: Include subsegs.h.
+	(listing_prev_line): New function.
+	(calc_hex): Reset byte_in_frag to zero for each new frag.
+	* config/tc-mips.c (append_insn): Call listing_prev_line after
+	emitting nop instructions.
+	* Makefile.in (listing.o): Depends upon subsegs.h.
+
 Mon Jan 10 09:52:23 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_ip): Put check for missing label on .PROC
@@ -8,7 +18,7 @@ Mon Jan 10 09:52:23 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 Fri Jan  7 17:38:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecoff.c (ecoff_stab): Don't clobber the ECOFF symbol information
-	with the associate stabs information.
+	with the associated stabs information.
 	(ecoff_build_symbols): Never set the type of stabs symbols to
 	st_Global.  Don't update the symbol index or ifd if the gas symbol
 	is not the same as the ECOFF symbol (which is now the case for
