@@ -11215,7 +11215,6 @@ arm_cleanup ()
   /* Put it at the end of text section.  */
   subseg_set (text_section, 0);
   s_ltorg (0);
-  listing_prev_line ();
 }
 
 void

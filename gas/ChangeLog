@@ -1,3 +1,8 @@
+2002-05-14  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/tc-arm.c (arm_cleanup): Remove redundant call to
+	listing_prev_line().
+
 2002-05-13  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-arm.c (md_assemble): Remove redundant call to
