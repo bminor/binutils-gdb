@@ -1,5 +1,8 @@
 Thu Jan 23 22:24:43 1992  Fred Fish  (fnf at cygnus.com)
 
+	* valops.c (value_assign):  Cast some args to modify_field() and
+	{read,write}_register_bytes() correctly.
+
 	* ansidecl.h:  Removed, is duplicate of ../include/ansidecl.h
 
 	* Makefile.in (MALLOCSRC):  Removed reference to removed local
