@@ -1,3 +1,7 @@
+Thu Oct 16 11:55:20 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* mips-opc.c: Note that 'jalx' is (probably incorrectly) marked I1.
+
 Tue Oct 14 16:10:31 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850-dis.c (disassemble): Use new symbol_at_address_func() field
