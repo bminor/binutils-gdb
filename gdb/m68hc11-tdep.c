@@ -750,6 +750,12 @@ show_regs (char *args, int from_tty)
 }
 
 static CORE_ADDR
+m68hc11_stack_align (CORE_ADDR addr)
+{
+  return ((addr + 1) & -2);
+}
+
+static CORE_ADDR
 m68hc11_push_arguments (int nargs,
                         value_ptr *args,
                         CORE_ADDR sp,
@@ -794,7 +800,7 @@ m68hc11_push_arguments (int nargs,
   for (argnum = first_stack_argnum; argnum < nargs; argnum++)
     {
       type = VALUE_TYPE (args[argnum]);
-      stack_alloc += (TYPE_LENGTH (type) + 1) & ~2;
+      stack_alloc += (TYPE_LENGTH (type) + 1) & -2;
     }
   sp -= stack_alloc;
 
@@ -807,6 +813,13 @@ m68hc11_push_arguments (int nargs,
       val = (char*) VALUE_CONTENTS (args[argnum]);
       write_memory (sp + stack_offset, val, len);
       stack_offset += len;
+      if (len & 1)
+        {
+          static char zero = 0;
+
+          write_memory (sp + stack_offset, &zero, 1);
+          stack_offset++;
+        }
     }
   return sp;
 }
@@ -817,7 +830,7 @@ m68hc11_push_arguments (int nargs,
 CORE_ADDR
 m68hc11_call_dummy_address (void)
 {
-  return (CORE_ADDR) read_register (HARD_PC_REGNUM);
+  return entry_point_address ();
 }
 
 static struct type *
@@ -838,8 +851,24 @@ m68hc11_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 static void
 m68hc11_store_return_value (struct type *type, char *valbuf)
 {
-  write_register_bytes (REGISTER_BYTE (HARD_D_REGNUM),
-                        valbuf, TYPE_LENGTH (type));
+  int len;
+
+  len = TYPE_LENGTH (type);
+
+  /* First argument is passed in D and X registers.  */
+  if (len <= 4)
+    {
+      LONGEST v = extract_unsigned_integer (valbuf, len);
+
+      write_register (HARD_D_REGNUM, v);
+      if (len > 2)
+        {
+          v >>= 16;
+          write_register (HARD_X_REGNUM, v);
+        }
+    }
+  else
+    error ("return of value > 4 is not supported.");
 }
 
 
@@ -853,16 +882,27 @@ m68hc11_extract_return_value (struct type *type,
 {
   int len = TYPE_LENGTH (type);
   
-  if (len <= 2)
+  switch (len)
     {
-      memcpy (valbuf, &regbuf[2], len);
-    }
-  else if (len <= 4)
-    {
-      memcpy (valbuf, regbuf, len);
-    }
-  else
-    {
+    case 1:
+      memcpy (valbuf, &regbuf[HARD_D_REGNUM * 2 + 1], len);
+      break;
+  
+    case 2:
+      memcpy (valbuf, &regbuf[HARD_D_REGNUM * 2], len);
+      break;
+      
+    case 3:
+      memcpy (&valbuf[0], &regbuf[HARD_X_REGNUM * 2 + 1], 1);
+      memcpy (&valbuf[1], &regbuf[HARD_D_REGNUM * 2], 2);
+      break;
+      
+    case 4:
+      memcpy (&valbuf[0], &regbuf[HARD_X_REGNUM * 2], 2);
+      memcpy (&valbuf[2], &regbuf[HARD_D_REGNUM * 2], 2);
+      break;
+
+    default:
       error ("bad size for return value");
     }
 }
@@ -871,13 +911,15 @@ m68hc11_extract_return_value (struct type *type,
 static int
 m68hc11_use_struct_convention (int gcc_p, struct type *type)
 {
-  return (TYPE_LENGTH (type) > 4);
+  return (TYPE_CODE (type) == TYPE_CODE_STRUCT
+          || TYPE_CODE (type) == TYPE_CODE_UNION
+          || TYPE_LENGTH (type) > 4);
 }
 
 static int
 m68hc11_return_value_on_stack (struct type *type)
 {
-  return m68hc11_use_struct_convention (1, type);
+  return TYPE_LENGTH (type) > 4;
 }
 
 /* Extract from an array REGBUF containing the (raw) register state
@@ -899,7 +941,7 @@ m68hc11_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   char valbuf[2];
   
-  pc = read_register (HARD_PC_REGNUM);
+  pc = CALL_DUMMY_ADDRESS ();
   sp -= 2;
   store_unsigned_integer (valbuf, 2, pc);
   write_memory (sp + stack_correction, valbuf, 2);
@@ -1042,6 +1084,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, m68hc11_breakpoint_from_pc);
+  set_gdbarch_stack_align (gdbarch, m68hc11_stack_align);
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
   set_gdbarch_ieee_float (gdbarch, 1);

@@ -1,3 +1,18 @@
+2000-09-06  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* m68hc11-tdep.c (m68hc11_store_return_value): Store the value
+	in D and X if it's larger than 16-bits.
+	(m68hc11_extract_return_value): Fix extractions for 1 and 3 bytes
+	return.
+	(m68hc11_push_return_address): Use CALL_DUMMY_ADDRESS for the
+	return address.
+	(m68hc11_use_struct_convention): Check for struct and union.
+	(m68hc11_return_value_on_stack): Use the struct convention.
+	(m68hc11_call_dummy_address): Use the entry point address.
+	(m68hc11_push_arguments): Fix alignment and padding.
+	(m68hc11_stack_align): New function.
+	(m68hc11_gdbarch_init): Register it.
+
 2000-09-06  Scott Bambrough <scottb@netwinder.org>
 
 	* arm-linux-tdep.c (arm_linux_skip_solib_resolver):
