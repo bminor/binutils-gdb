@@ -1,3 +1,10 @@
+1998-10-26  Michael Meissner  <meissner@cygnus.com>
+
+	* config/tc-m32r.c (assemble_two_insns): Rename assemble_two_insns
+	from assemble_parallel_insns.  Add support for '->' to indicate
+	explicitly serializing the instructions.
+	(md_assemble): Ditto.
+
 Sat Oct 24 15:12:19 1998  Catherine Moore  <clm@cygnus.com>
 
         * config/tc-sh.c (sh_fix_adjustable):  Adjust EXTERN and

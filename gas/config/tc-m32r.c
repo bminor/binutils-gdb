@@ -43,10 +43,12 @@ typedef struct
   const CGEN_INSN *	insn;
   const CGEN_INSN *	orig_insn;
   CGEN_FIELDS		fields;
-#ifdef CGEN_INT_INSN
-  cgen_insn_t       	buffer [CGEN_MAX_INSN_SIZE / sizeof (cgen_insn_t)];
+#if CGEN_INT_INSN_P
+  CGEN_INSN_INT         buffer [1];
+#define INSN_VALUE(buf) (*(buf))
 #else
-  char                  buffer [CGEN_MAX_INSN_SIZE];
+  unsigned char         buffer [CGEN_MAX_INSN_SIZE];
+#define INSN_VALUE(buf) (buf)
 #endif
   char *		addr;
   fragS *		frag;
@@ -703,54 +705,44 @@ can_make_parallel (a, b)
   return NULL;
 }
 
-#ifdef CGEN_INT_INSN
+/* Force the top bit of the second 16-bit insn to be set.  */
 
 static void
 make_parallel (buffer)
-     cgen_insn_t * buffer;
+     CGEN_INSN_BYTES_PTR buffer;
 {
-  /* Force the top bit of the second insn to be set.  */
-
-  bfd_vma value;
-      
-  if (CGEN_OPCODE_ENDIAN (gas_cgen_opcode_desc) == CGEN_ENDIAN_BIG)
-    {
-      value = bfd_getb16 ((bfd_byte *) buffer);
-      value |= 0x8000;
-      bfd_putb16 (value, (char *) buffer);
-    }
-  else
-    {
-      value = bfd_getl16 ((bfd_byte *) buffer);
-      value |= 0x8000;
-      bfd_putl16 (value, (char *) buffer);
-    }
+#if CGEN_INT_INSN_P
+  *buffer |= 0x8000;
+#else
+  buffer [CGEN_OPCODE_ENDIAN (gas_cgen_opcode_desc) == CGEN_ENDIAN_BIG ? 0 : 1]
+    |= 0x80;
+#endif
 }
 
-#else
+/* Same as make_parallel except buffer contains the bytes in target order.  */
 
 static void
-make_parallel (buffer)
-     char * buffer;
+target_make_parallel (buffer)
+     char *buffer;
 {
-  /* Force the top bit of the second insn to be set.  */
-
   buffer [CGEN_OPCODE_ENDIAN (gas_cgen_opcode_desc) == CGEN_ENDIAN_BIG ? 0 : 1]
     |= 0x80;
 }
 
-#endif /* ! CGEN_INT_INSN */
-
+/* Assemble two instructions with an explicit parallel operation (||) or
+   sequential operation (->).  */
 static void
-assemble_parallel_insn (str, str2)
+assemble_two_insns (str, str2, parallel_p)
      char * str;
      char * str2;
+     int    parallel_p;
 {
   char *    str3;
   m32r_insn first;
   m32r_insn second;
   char *    errmsg;
-  
+  char      save_str2 = *str2;
+
   * str2 = 0; /* Seperate the two instructions.  */
 
   /* If there was a previous 16 bit insn, then fill the following 16 bit slot,
@@ -786,14 +778,14 @@ assemble_parallel_insn (str, str2)
     }
     
   /* Check to see if this is an allowable parallel insn.  */
-  if (CGEN_INSN_ATTR (first.insn, CGEN_INSN_PIPE) == PIPE_NONE)
+  if (parallel_p && CGEN_INSN_ATTR (first.insn, CGEN_INSN_PIPE) == PIPE_NONE)
     {
       /* xgettext:c-format */
       as_bad (_("instruction '%s' cannot be executed in parallel."), str);
       return;
     }
   
-  *str2 = '|';       /* Restore the original assembly text, just in case it is needed.  */
+  *str2 = save_str2; /* Restore the original assembly text, just in case it is needed.  */
   str3  = str;       /* Save the original string pointer.  */
   str   = str2 + 2;  /* Advanced past the parsed string.  */
   str2  = str3;      /* Remember the entire string in case it is needed for error messages.  */
@@ -829,11 +821,11 @@ assemble_parallel_insn (str, str2)
      may have to change.  */
   first.orig_insn = first.insn;
   first.insn = m32r_cgen_lookup_get_insn_operands
-    (gas_cgen_opcode_desc, NULL, bfd_getb16 ((char *) first.buffer), 16,
+    (gas_cgen_opcode_desc, NULL, INSN_VALUE (first.buffer), 16,
      first.indices);
   
   if (first.insn == NULL)
-    as_fatal (_("internal error: m32r_cgen_lookup_get_insn_operands failed for first insn"));
+    as_fatal (_("internal error: lookup/get operands failed"));
 
   second.debug_sym_link = NULL;
 
@@ -862,14 +854,14 @@ assemble_parallel_insn (str, str2)
     }
 
   /* Check to see if this is an allowable parallel insn.  */
-  if (CGEN_INSN_ATTR (second.insn, CGEN_INSN_PIPE) == PIPE_NONE)
+  if (parallel_p && CGEN_INSN_ATTR (second.insn, CGEN_INSN_PIPE) == PIPE_NONE)
     {
       /* xgettext:c-format */
       as_bad (_("instruction '%s' cannot be executed in parallel."), str);
       return;
     }
   
-  if (! enable_m32rx)
+  if (parallel_p && ! enable_m32rx)
     {
       if (CGEN_INSN_NUM (first.insn) != M32R_INSN_NOP
 	  && CGEN_INSN_NUM (second.insn) != M32R_INSN_NOP)
@@ -883,11 +875,11 @@ assemble_parallel_insn (str, str2)
   /* Get the indices of the operands of the instruction.  */
   second.orig_insn = second.insn;
   second.insn = m32r_cgen_lookup_get_insn_operands
-    (gas_cgen_opcode_desc, NULL, bfd_getb16 ((char *) second.buffer), 16,
+    (gas_cgen_opcode_desc, NULL, INSN_VALUE (second.buffer), 16,
      second.indices);
   
   if (second.insn == NULL)
-    as_fatal (_("internal error: m32r_cgen_lookup_get_insn_operands failed for second insn"));
+    as_fatal (_("internal error: lookup/get operands failed"));
 
   /* We assume that if the first instruction writes to a register that is
      read by the second instruction it is because the programmer intended
@@ -897,7 +889,7 @@ assemble_parallel_insn (str, str2)
      a warning message.  Similarly we assume that parallel branch and jump
      instructions are deliberate and should not produce errors.  */
   
-  if (warn_explicit_parallel_conflicts)
+  if (parallel_p && warn_explicit_parallel_conflicts)
     {
       if (first_writes_to_seconds_operands (& first, & second, false))
 	/* xgettext:c-format */
@@ -908,7 +900,7 @@ assemble_parallel_insn (str, str2)
 	as_warn (_("%s: output of 2nd instruction is the same as an input to 1st instruction - is this intentional ?"), str2);
     }
       
-  if ((errmsg = (char *) can_make_parallel (& first, & second)) == NULL)
+  if (!parallel_p || (errmsg = (char *) can_make_parallel (& first, & second)) == NULL)
     {
       /* Get the fixups for the first instruction.  */
       gas_cgen_swap_fixups ();
@@ -919,7 +911,8 @@ assemble_parallel_insn (str, str2)
 			    CGEN_FIELDS_BITSIZE (& first.fields), 0, NULL);
       
       /* Force the top bit of the second insn to be set.  */
-      make_parallel (second.buffer);
+      if (parallel_p)
+	make_parallel (second.buffer);
 
       /* Get its fixups.  */
       gas_cgen_restore_fixups ();
@@ -977,7 +970,14 @@ md_assemble (str)
   /* Look for a parallel instruction seperator.  */
   if ((str2 = strstr (str, "||")) != NULL)
     {
-      assemble_parallel_insn (str, str2);
+      assemble_two_insns (str, str2, 1);
+      return;
+    }
+
+  /* Also look for a sequential instruction seperator.  */
+  if ((str2 = strstr (str, "->")) != NULL)
+    {
+      assemble_two_insns (str, str2, 0);
       return;
     }
 /* end-sanitize-m32rx */
@@ -1045,11 +1045,11 @@ md_assemble (str)
 	  /* Get the indices of the operands of the instruction.
 	     FIXME: See assemble_parallel for notes on orig_insn.  */
 	  insn.insn = m32r_cgen_lookup_get_insn_operands
-	    (gas_cgen_opcode_desc, NULL, bfd_getb16 ((char *) insn.buffer),
+	    (gas_cgen_opcode_desc, NULL, INSN_VALUE (insn.buffer),
 	     16, insn.indices);
 	  
 	  if (insn.insn == NULL)
-	    as_fatal (_("internal error: m32r_cgen_get_insn_operands failed"));
+	    as_fatal (_("internal error: lookup/get operands failed"));
 	}
 /* end-sanitize-m32rx */
 
@@ -1113,7 +1113,7 @@ md_assemble (str)
 	  SWAP_BYTES (prev_insn.addr [0], insn.addr [0]);
 	  SWAP_BYTES (prev_insn.addr [1], insn.addr [1]);
 
-	  make_parallel (insn.addr);
+	  target_make_parallel (insn.addr);
 
 	  /* Swap any relaxable frags recorded for the two insns.  */
 	  /* FIXME: Clarify.  relaxation precludes parallel insns */
