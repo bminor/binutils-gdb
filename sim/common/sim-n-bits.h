@@ -26,7 +26,7 @@
 
 #include "sim-xcat.h"
 
-#ifdef __STDC__
+#if defined(__STDC__) && defined(signed)
 /* If signed were defined to be say __signed (ie, some versions of Linux),
    then the signedN macro would not work correctly.  If we have a standard
    compiler, we have signed.  */
@@ -49,6 +49,7 @@
 #define ROTRn XCONCAT2(ROTR,N)
 #define SEXTn XCONCAT2(SEXT,N)
 
+/* TAGS: MASKED16 MASKED32 MASKED64 */
 
 INLINE_SIM_BITS\
 (unsignedN)
@@ -59,6 +60,7 @@ MASKEDn (unsignedN word,
   return (word & MASKn (start, stop));
 }
 
+/* TAGS: LSMASKED16 LSMASKED32 LSMASKED64 */
 
 INLINE_SIM_BITS\
 (unsignedN)
@@ -68,6 +70,7 @@ LSMASKEDn (unsignedN word,
   return (word & LSMASKn (nr_bits));
 }
 
+/* TAGS: MSMASKED16 MSMASKED32 MSMASKED64 */
 
 INLINE_SIM_BITS\
 (unsignedN)
@@ -77,6 +80,7 @@ MSMASKEDn (unsignedN word,
   return (word & MSMASKn (nr_bits));
 }
 
+/* TAGS: EXTRACTED16 EXTRACTED32 EXTRACTED64 */
 
 INLINE_SIM_BITS\
 (unsignedN)
@@ -89,6 +93,7 @@ EXTRACTEDn (unsignedN val,
   return val;
 }
 
+/* TAGS: INSERTED16 INSERTED32 INSERTED64 */
 
 INLINE_SIM_BITS\
 (unsignedN)
@@ -101,6 +106,7 @@ INSERTEDn (unsignedN val,
   return val;
 }
 
+/* TAGS: ROT16 ROT32 ROT64 */
 
 INLINE_SIM_BITS\
 (unsignedN)
@@ -115,6 +121,7 @@ ROTn (unsignedN val,
     return val;
 }
 
+/* TAGS: ROTL16 ROTL32 ROTL64 */
 
 INLINE_SIM_BITS\
 (unsignedN)
@@ -127,6 +134,7 @@ ROTLn (unsignedN val,
   return result;
 }
 
+/* TAGS: ROTR16 ROTR32 ROTR64 */
 
 INLINE_SIM_BITS\
 (unsignedN)
@@ -139,6 +147,7 @@ ROTRn (unsignedN val,
   return result;
 }
 
+/* TAGS: SEXT16 SEXT32 SEXT64 */
 
 INLINE_SIM_BITS\
 (unsignedN)

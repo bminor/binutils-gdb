@@ -1,3 +1,10 @@
+Tue Sep  2 14:57:06 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (TAGS): Add support for "/* TAGS: foo */" marker.
+	* sim-n-bits.h: Add TAGS comments for all functions.
+	* sim-n-core.h: Likewise.
+	* sim-n-endian.h: Likewise.
+
 Mon Sep  1 10:50:11 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-utils.c (sim_state_alloc): Set CPU backlinks, callback and
