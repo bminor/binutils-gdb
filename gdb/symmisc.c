@@ -711,7 +711,9 @@ block_depth (block)
 }
 
 
-/* Increase the space allocated for LISTP. */
+/* Increase the space allocated for LISTP, which is probably
+   global_psymbol_list or static_psymbol_list. This space will eventually
+   be freed in free_objfile().  */
 
 void
 extend_psymbol_list (listp, objfile)

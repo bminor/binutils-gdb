@@ -49,6 +49,8 @@ struct elfinfo {
   unsigned int dbsize;		/* Size of dwarf debug section */
   unsigned int lnoffset;	/* Offset to dwarf line number section */
   unsigned int lnsize;		/* Size of dwarf line number section */
+  asection *stabsect;		/* Section pointer for .stab section */
+  asection *stabindexsect;	/* Section pointer for .stab.index section */
 };
 
 static void
@@ -84,6 +86,9 @@ elf_locate_sections PARAMS ((bfd *, asection *, PTR));
    knowledge of DWARF (by design, so any debugging format can be
    used).
 
+   We also recognize the ".stab" sections used by the Sun compilers
+   released with Solaris 2.
+
    FIXME:  The section names should not be hardwired strings. */
 
 static void
@@ -104,6 +109,14 @@ elf_locate_sections (ignore_abfd, sectp, eip)
     {
       ei -> lnoffset = sectp -> filepos;
       ei -> lnsize = bfd_get_section_size_before_reloc (sectp);
+    }
+  else if (STREQ (sectp -> name, ".stab"))
+    {
+      ei -> stabsect = sectp;
+    }
+  else if (STREQ (sectp -> name, ".stab.index"))
+    {
+      ei -> stabindexsect = sectp;
     }
 }
 
@@ -164,6 +177,18 @@ record_minimal_symbol (name, address, ms_type, objfile)
 {
   name = obsavestring (name, strlen (name), &objfile -> symbol_obstack);
   prim_record_minimal_symbol (name, address, ms_type);
+}
+
+static void
+record_minimal_symbol_and_info (name, address, ms_type, info, objfile)
+     char *name;
+     CORE_ADDR address;
+     enum minimal_symbol_type ms_type;
+     char *info;		/* FIXME, is this really char *? */
+     struct objfile *objfile;
+{
+  name = obsavestring (name, strlen (name), &objfile -> symbol_obstack);
+  prim_record_minimal_symbol_and_info (name, address, ms_type, info);
 }
 
 /*
@@ -239,7 +264,9 @@ elf_symtab_read (abfd, addr, objfile)
 		{
 		  ms_type = mst_unknown;
 		}
-	      record_minimal_symbol ((char *) sym -> name, symaddr, ms_type, objfile);
+	      /* Pass symbol size field in via BFD.  FIXME!!!  */
+	      record_minimal_symbol_and_info ((char *) sym -> name,
+			 symaddr, ms_type, sym->udata, objfile);
 	    }
 	}
       do_cleanups (back_to);
@@ -262,15 +289,19 @@ elf_symtab_read (abfd, addr, objfile)
    symbol tables.  When more extensive information is requested of a
    file, the corresponding partial symbol table is mutated into a full
    fledged symbol table by going back and reading the symbols
-   for real.  The function dwarf_psymtab_to_symtab() is the function that
-   does this for DWARF symbols.
+   for real.
+
+   We look for sections with specific names, to tell us what debug
+   format to look for:  FIXME!!!
+
+   dwarf_build_psymtabs() builds psymtabs for DWARF symbols;
+   elfstab_build_psymtabs() handles STABS symbols.
 
    Note that ELF files have a "minimal" symbol table, which looks a lot
    like a COFF symbol table, but has only the minimal information necessary
-   for linking.  We process this also, and just use the information to
-   add to gdb's minimal symbol table.  This gives us some minimal debugging
-   capability even for files compiled without -g.
- */
+   for linking.  We process this also, and use the information to
+   build gdb's minimal symbol table.  This gives us some minimal debugging
+   capability even for files compiled without -g.  */
 
 static void
 elf_symfile_read (objfile, addr, mainline)
@@ -282,6 +313,7 @@ elf_symfile_read (objfile, addr, mainline)
   struct elfinfo ei;
   struct cleanup *back_to;
   asection *text_sect;
+  CORE_ADDR offset;
 
   init_minimal_symbol_collection ();
   back_to = make_cleanup (discard_minimal_symbols, 0);
@@ -292,24 +324,46 @@ elf_symfile_read (objfile, addr, mainline)
      of the text section, we can compute the relocation amount. */
 
   text_sect = bfd_get_section_by_name (objfile -> obfd, ".text");
-  addr -= bfd_section_vma (objfile -> obfd, text_sect);
+  offset = addr - bfd_section_vma (objfile -> obfd, text_sect);
 
   /* Process the normal ELF symbol table first. */
 
-  elf_symtab_read (abfd, addr, objfile);
+  elf_symtab_read (abfd, offset, objfile);
 
-  /* Now process the DWARF debugging information, which is contained in
+  /* Now process debugging information, which is contained in
      special ELF sections.  We first have to find them... */
 
   (void) memset ((char *) &ei, 0, sizeof (ei));
   bfd_map_over_sections (abfd, elf_locate_sections, (PTR) &ei);
   if (ei.dboffset && ei.lnoffset)
     {
+      /* DWARF sections */
       dwarf_build_psymtabs (fileno ((FILE *)(abfd -> iostream)),
 			    bfd_get_filename (abfd),
-			    addr, mainline,
+			    offset, mainline,
 			    ei.dboffset, ei.dbsize,
 			    ei.lnoffset, ei.lnsize, objfile);
+    }
+  if (ei.stabsect)
+    {
+      /* STABS sections */
+
+      /* FIXME:  Sun didn't really know how to implement this well.
+	 They made .stab sections that don't point to the .stabstr
+	 section with the sh_link field.  BFD doesn't make string table
+	 sections visible to the caller.  So we have to search the
+	 ELF section table, not the BFD section table, for the string
+	 table.  */
+      Elf_Internal_Shdr *elf_sect = bfd_elf_find_section (abfd, ".stabstr");
+
+      if (elf_sect)
+	elfstab_build_psymtabs (objfile,
+	  addr,	/* We really pass the text seg addr, not the offset, here. */
+	  mainline,
+	  ei.stabsect->filepos,				/* .stab offset */
+	  bfd_get_section_size_before_reloc (ei.stabsect),/* .stab size */
+	  elf_sect->sh_offset,				/* .stabstr offset */
+	  elf_sect->sh_size);				/* .stabstr size */
     }
 
   if (!have_partial_symbols ())
@@ -331,8 +385,7 @@ elf_symfile_read (objfile, addr, mainline)
    file is specified (not just adding some symbols from another file, e.g. a
    shared library).
 
-   For now at least, we have nothing in particular to do, so this function is
-   just a stub. */
+   We reinitialize buildsym, since we may be reading stabs from an ELF file.  */
 
 static void
 elf_new_init (ignore)

@@ -267,14 +267,14 @@ free_objfile (objfile)
 
   if (objfile -> obfd != NULL)
     {
+      char *name = bfd_get_filename (objfile->obfd);
       bfd_close (objfile -> obfd);
+      free (name);
     }
 
   /* Remove it from the chain of all objfiles. */
 
   unlink_objfile (objfile);
-
-#if 0	/* FIXME!! */
 
   /* Before the symbol table code was redone to make it easier to
      selectively load and remove information particular to a specific
@@ -288,8 +288,6 @@ free_objfile (objfile)
   CLEAR_SOLIB ();
 #endif
   clear_pc_function_cache ();
-
-#endif
 
   /* The last thing we do is free the objfile struct itself for the
      non-reusable case, or detach from the mapped file for the reusable
@@ -319,6 +317,10 @@ free_objfile (objfile)
 	{
 	  mfree (objfile -> md, objfile -> name);
 	}
+      if (objfile->global_psymbols.list)
+	mfree (objfile->md, objfile->global_psymbols.list);
+      if (objfile->static_psymbols.list)
+	mfree (objfile->md, objfile->static_psymbols.list);
       /* Free the obstacks for non-reusable objfiles */
       obstack_free (&objfile -> psymbol_obstack, 0);
       obstack_free (&objfile -> symbol_obstack, 0);

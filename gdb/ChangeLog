@@ -1,5 +1,58 @@
 Fri Jun 12 18:54:40 1992  John Gilmore  (gnu at cygnus.com)
 
+	* arm-pinsn.c, i960-pinsn.c, m68k-pinsn.c, mips-pinsn.c, 
+	ns32k-pinsn.c, pyr-pinsn.c, sparc-pinsn.c, tahoe-pinsn.c, 
+	vax-pinsn.c:  Remove reg_names decl (now in defs.h).
+
+	Solaris-2 support on SPARC:
+
+	* dbxread.c:  Add symbol_size to struct dbx_symfile_info.
+	Add symbol_size and file offsets to struct symloc.
+	Add static symbol_table_offset, string_table_offset,
+	file_string_table_offset, next_file_string_table_offset, 
+	last_function_name.
+	(add_old_header_file):  Convert error() to complain()t.
+	(dbx_symfile_read):  Get symbol size via the objfile.
+	Also get symbol_table_offset.
+	(dbx_symfile_init):  Record symbol size and count via the objfile.
+	(dbx_next_symbol_text):  Always add file_string_table_offset when
+	accessing string table.
+	(read_dbx_symtab):  Initialize file_string_table_offset to 0.
+	(SET_NAMESTRING):  Use the offset.
+	(end_psymtab):  Large kludge to determine addresses where source
+	files start and end (for the psymtab header).
+	(psymtab_to_symtab_1):  Set file_string_table_offset before reading.
+	Get this, symbol size, and symbol offset, from psymtab.
+	(read_ofile_symtab):  Don't back up one symbol for Solaris2.
+	Patch up last_source_start_addr if zero in N_SO.
+	(process_one_symbol):  Add variable function_start_offset.
+	( "", N_FUN, N_LBRAC, N_RBRAC, N_SLINE):  Add ifdef for
+	BLOCK_ADDRESS_FUNCTION_RELATIVE.
+	( "", N_OBJ, N_OPT):  Ignore.
+	(elfstab_build_psymtabs):  New function to read stabs out of
+	an ELF file.
+
+	* Makefile.in:  Accept $(BISON) even though we really want $(YACC).
+	(gdb):  use GLOBAL_CFLAGS when linking, too.
+	* partial-stab.h (N_UNDF):  Deal with Sol2 relative stringtab offsets.
+	(N_OBJ, N_OPT):  Ignore.
+	('f', 'F'):  Save last function name.
+
+	* elfread.c (record_minimal_symbol_and_info):  Kludged to put
+	extra info in the minimal symbol.
+	(elf_symtab_read):  The extra info is the size of an ELF object,
+	which was kludged to us in the `udata' field of the BFD symbol.
+	Gag me with a crowbar...
+	(elf_symfile_read):  Keep track of both the absolute load address,
+	and the offset between load addr and symbols.  Handle STABS as
+	well as DWARF sections, passing the absolute load address to
+	elfstab_build_psymtabs.
+
+	* symfile.h:  Prototype elfstab_build_psymtabs.
+	* symfile.c:  Add almost-OK debug versions of add_psymbol_*to_list.
+
+	* xm-sysv4.h:  Add <limits.h> to avoid conflicting defns in defs.h.
+
 	* buildsym.h:  Add processing_acc_compilation flag.
 	* buildsym.c (read_sun_builtin_type, read_sun_floating_type):  New.
 	(define_symbol):  Skip arg types in function entries.  Resolve
@@ -14,6 +67,11 @@ Fri Jun 12 18:54:40 1992  John Gilmore  (gnu at cygnus.com)
 
 	* configure.in:  Solaris config is sparc-sun-solaris2.
 	* config/sun4os5.m[ht]:  Rename to config/sun4sol2.m[ht]; new xm, tm.
+
+	* objfiles.c (free_objfile):  Eliminate storage leaks.  Contributed
+	by <Peter.Schauer@regent.e-technik.tu-muenchen.dbp.de>. 
+	* symfile.c (symfile_bfd_open):  Comment where name is freed.
+	* symmisc.c (extend_psymbol_list):  Comment where list is freed.
 
 Fri Jun 12 12:49:43 1992  Fred Fish  (fnf@cygnus.com)
 

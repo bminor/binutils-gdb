@@ -656,6 +656,7 @@ symfile_bfd_open (name)
     }
   free (name);			/* Free 1st new malloc'd copy */
   name = absolute_name;		/* Keep 2nd malloc'd copy in bfd */
+				/* It'll be freed in free_objfile(). */
 
   sym_bfd = bfd_fdopenr (name, NULL, desc);
   if (!sym_bfd)
