@@ -420,22 +420,8 @@ Wed Aug  9 16:28:21 EDT 2000	Diego Novillo <dnovillo@cygnus.com>
 	* config/atof-ieee.c: Fix formatting.
 	* config/atof-tahoe.c: Likewise.
 
-2000-07-29  Marek Michalkiewicz  <marekm@linux.org.pl>
-
-<<<<<<< ChangeLog
-	* config/tc-avr.c: Use PARAMS macro in function declarations.
-	Don't declare md_pcrel_from_section (already in tc-avr.h).
-	(avr_operands): Use AVR_UNDEF_P and AVR_SKIP_P macros.
-	(avr_operand): Don't set (unsigned) op_mask to -1.
-=======
 2000-08-06  Nick Clifton  <nickc@cygnus.com>
->>>>>>> 1.551
 
-<<<<<<< ChangeLog
-2000-08-04  Nick Clifton  <nickc@cygnus.com>
-
-=======
->>>>>>> 1.551
 	* config/tc-sparc.c (md_begin): Fix typo in recent formatting
 	work.
 
