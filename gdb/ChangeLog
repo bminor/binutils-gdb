@@ -1,3 +1,9 @@
+2001-11-26  Jim Blandy  <jimb@redhat.com>
+
+	* symtab.c (find_pc_sect_line): Revert change of 2001-11-13; add
+	comment explaining that hand-written assembly code can have line
+	number info but no debug info for an enclosing function.
+
 2001-11-26  Jakub Jelinek  <jakub@redhat.com>
 
 	* sparc-nat.c (fetch_inferior_registers): Don't rely
