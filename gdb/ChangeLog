@@ -1,3 +1,8 @@
+Thu Aug  4 11:46:27 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* TODO: Remove note about fast watchpoints and remove obsolete
+	Mach stuff.
+
 Thu Aug  4 11:08:03 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* config/i386/xm-i386v4.h, config/m68k/xm-m68kv4.h,

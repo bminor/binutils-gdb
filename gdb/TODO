@@ -1,54 +1,5 @@
-Contents
---------
-
 If you find inaccuracies in this list, please send mail to
 bug-gdb@prep.ai.mit.edu. 
-
-* Things to do for Mach.
-* General to do list.
-
-Things to do for Mach
----------------------
-
-Note: If mach_port_t is undefined, you have mach2 headers instead of
-mach3 headers.  Get the mach3 headers or typedef it to unsigned int.
-
-0.  Get it to compile and run again, especially for non-threaded
-programs (some of the following are sub-tasks for this).
-
-1.  attach_command still contains a call to wait_for_inferior which is
-wrong for Mach.  Need to figure out a way to push this functionality
-into target_attach (perhaps by having target_attach, for non-Mach
-targets, call a function which does what is now in attach_command).
-
-2.  jtv's port contains an #ifdef which skips the call to
-insert_step_breakpoint right after SOLIB_CREATE_INFERIOR_HOOK, but
-goes ahead and calls insert_breakpoints.  I don't understand this--the
-comment would appear to apply to all breakpoints.  Perhaps it is an
-artifact from a previous version of the Mach port?  (BTW, the modern
-equivalent is the call to proceed from m3_create_inferior; proceed
-inserts breakpoints).
-
-3.  Get the thread stuff to use the new generic thread code (enhancing
-the generic thread code to include any missing features).  This is
-necessary to make thread-specific breakpoints work again.  If someone
-wants to try to patch up the old Mach threads code, need to deal with
-the hooks for PREPARE_TO_PROCEED and ATTACH_TO_THREAD, which I haven't
-merged--can these go in target_resume()?
-
-4.  BFD problem--"Undefined symbol _aout_32_swap_exec_header_in".
-Believed to be fixed (fix not yet tested with GDB).
-
-5.  The linker complains about mfree and so on being multiply defined.
-Believed to be fixed (fix not yet tested).
-
-6.  i386_mach3_float_info and register_addr were undefined in the
-link.  I haven't investigated, but probably just another easy
-configuration thing or something. (possibly already fixed).
-
-7.  Implement the features which CMU gdb has which the main GDB does
-not.  This could be done by getting paperwork from CMU and merging
-their changes, or by reimplementing them.
 
 General To Do List
 ------------------
@@ -71,19 +22,6 @@ each time the inferior starts and stops.
 Breakpoints should not be inserted and deleted all the time.  Only the
 one(s) there should be removed when we have to step over one.  Support
 breakpoints that don't have to be removed to step over them.
-
-Speed up watchpoints by using debug registers, page table diddling (on
-SunOS4, can call mprotect() in the inferior; on other machines can do
-something simpler), etc.  Note that you need to detect a
-"fast-watchable expression" (i.e., if watching "*p", then either a
-change to the address pointed to by p or a change to p itself which
-causes the value of *p to change, is a watchpoint hit).  It is
-possible we will also someday want extensions which are
-lower-level--"read from these addresses", "write to these addresses",
-etc., but there is no consensus about just how important these are and
-exactly what form they would take.  There is a consensus that the
-existing watchpoint semantics should use hardware assists when
-available.
 
 Update gdbint.texinfo to include doc on the directory structure and 
 the various tricks of building gdb.
@@ -292,7 +230,7 @@ ptype &point[4]   ==> Attempt to take address of non-lvalue.
   For "char *malloc();":
 ptype malloc	  ==> "char *()";  should be same as
 ptype &malloc     ==> "char *(*)()"
-call printf ("%x\n", malloc)   ==> wierd value, should be same as
+call printf ("%x\n", malloc)   ==> weird value, should be same as
 call printf ("%x\n", &malloc)  ==> correct value
 
 Fix dbxread.c symbol reading in the presence of interrupts.  It
