@@ -1,5 +1,12 @@
 2000-06-08  Fernando Nasser  <fnasser@cygnus.com>
 
+	* config/i386/tm-embed.h: New file.  Specific for embedded targets
+	like i386-elf, i386-coff and i386-aout.
+	* config/i386/embed.mt (): Specify tm-embed.h instead of the System V
+	header file.
+
+2000-06-08  Fernando Nasser  <fnasser@cygnus.com>
+
 	* MAINTAINERS: Add myself to gdbtk list.
 
 2000-06-08  Kevin Buettner  <kevinb@redhat.com>
