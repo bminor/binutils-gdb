@@ -45,11 +45,28 @@ here.  */
 #include "ansidecl.h"
 #include "obstack.h"
 
-#define BFD_VERSION "2.1"
+#define BFD_VERSION "2.2"
+
+#define BFD_ARCH_SIZE @WORDSIZE@
+
+#if BFD_ARCH_SIZE >= 64
+#define BFD64
+#endif
+
+#ifndef FOPEN_AUT /* WAG */
+/* INSERT SYSDEP HERE */
+/* END OF SYSDEP */
+#endif
 
 /* forward declaration */
 typedef struct _bfd bfd;
 
+/* To squelch erroneous compiler warnings ("illegal pointer
+   combination") from the SVR3 compiler, we would like to typedef
+   boolean to int (it doesn't like functions which return boolean.
+   Making sure they are never implicitly declared to return int
+   doesn't seem to help).  But this file is not configured based on
+   the host.  */
 /* General rules: functions which are boolean return true on success
    and false on failure (unless they're a predicate).   -- bfd.doc */
 /* I'm sure this is going to break something and someone is going to
@@ -68,19 +85,31 @@ typedef enum bfd_boolean {false, true} boolean;
 /* typedef off_t	file_ptr; */
 typedef long int file_ptr;
 
-/* Support for different sizes of target format ints and addresses.
-   If the host implements--and wants BFD to use--64-bit values, it
-   defines HOST_64_BIT (in BFD and in every program that calls it --
-   since this affects declarations in bfd.h).  */
+/* Support for different sizes of target format ints and addresses.  If the
+   host implements 64-bit values, it defines HOST_64_BIT to be the appropriate
+   type.  Otherwise, this code will fall back on gcc's "long long" type if gcc
+   is being used.  HOST_64_BIT must be defined in such a way as to be a valid
+   type name by itself or with "unsigned" prefixed.  It should be a signed
+   type by itself.
 
-#ifdef	HOST_64_BIT
+   If neither is the case, then compilation will fail if 64-bit targets are
+   requested.  If you don't request any 64-bit targets, you should be safe. */
+
+#ifdef	BFD64
+
+#if defined (__GNUC__) && !defined (HOST_64_BIT)
+#define HOST_64_BIT long long
+typedef HOST_64_BIT int64_type;
+typedef unsigned HOST_64_BIT uint64_type;
+#endif
+
 typedef unsigned HOST_64_BIT bfd_vma;
 typedef HOST_64_BIT bfd_signed_vma;
 typedef unsigned HOST_64_BIT bfd_size_type;
 typedef unsigned HOST_64_BIT symvalue;
 #define fprintf_vma(s,x) \
 		fprintf(s,"%08x%08x", uint64_typeHIGH(x), uint64_typeLOW(x))
-#else /* not HOST_64_BIT.  */
+#else /* not BFD64  */
 
 /* Represent a target address.  Also used as a generic unsigned type
    which is guaranteed to be big enough to hold any arithmetic types
@@ -98,7 +127,7 @@ typedef unsigned long bfd_size_type;
 
 /* Print a bfd_vma x on stream s.  */
 #define fprintf_vma(s,x) fprintf(s, "%08lx", x)
-#endif /* not HOST_64_BIT.  */
+#endif /* not BFD64  */
 #define printf_vma(x) fprintf_vma(stdout,x)
 
 typedef unsigned int flagword;	/* 32 bits of flags */
@@ -253,11 +282,21 @@ typedef enum bfd_print_symbol
 { 
   bfd_print_symbol_name,
   bfd_print_symbol_more,
-  bfd_print_symbol_all,
-  bfd_print_symbol_nm	/* Pretty format suitable for nm program. */
+  bfd_print_symbol_all
 } bfd_print_symbol_type;
     
 
+/* Information about a symbol that nm needs.  */
+
+typedef struct _symbol_info
+{
+  symvalue value;
+  char type;                   /*  */
+  CONST char *name;            /* Symbol name.  */
+  char stab_other;             /* Unused. */
+  short stab_desc;             /* Info for N_TYPE.  */
+  CONST char *stab_name;
+} symbol_info;
 
 /* The code that implements targets can initialize a jump table with this
    macro.  It must name all its routines the same way (a prefix plus
@@ -268,8 +307,10 @@ typedef enum bfd_print_symbol
 #ifndef CAT
 #ifdef __STDC__
 #define CAT(a,b) a##b
+#define CAT3(a,b,c) a##b##c
 #else
 #define CAT(a,b) a/**/b
+#define CAT3(a,b,c) a/**/b/**/c
 #endif
 #endif
 
@@ -291,6 +332,7 @@ CAT(NAME,_get_reloc_upper_bound),\
 CAT(NAME,_canonicalize_reloc),\
 CAT(NAME,_make_empty_symbol),\
 CAT(NAME,_print_symbol),\
+CAT(NAME,_get_symbol_info),\
 CAT(NAME,_get_lineno),\
 CAT(NAME,_set_arch_mach),\
 CAT(NAME,_openr_next_archived_file),\
