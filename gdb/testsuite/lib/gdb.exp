@@ -1424,15 +1424,23 @@ proc get_debug_format { } {
 # expected to fail, 0 otherwise (or if it is unknown).  Must have
 # previously called get_debug_format.
 
-proc setup_xfail_format { format } {
+proc test_debug_format { format } {
     global debug_format
 
     if [string match $debug_format $format] then {
-	setup_xfail "*-*-*"
 	return 1;
     }
     return 0
-}    
+}
+
+proc setup_xfail_format { format } {
+    set ret [test_debug_format format];
+
+    if [expr $ret != 0] then {
+	setup_xfail "*-*-*"
+    }
+    return $ret;
+}
 
 proc gdb_step_for_stub { } {
     global gdb_prompt;

@@ -1,3 +1,20 @@
+2001-09-27  Michael Snyder  <msnyder@redhat.com>
+
+	* lib/gdb.exp (test_debug_format): New proc.
+	(setup_xfail_format): Use new proc test_debug_format.
+	* gdb.base/constvars.exp (local_compiler_xfail_check): New
+	proc; use new service proc test_debug_format.
+	Replace all other "gcc_compiled" tests with this test.
+	* gdb.base/volatile.exp (local_compiler_xfail_check): New
+	proc; use new service proc test_debug_format.
+	Replace all other "gcc_compiled" tests with this test.
+
+2001-09-27  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/cvexpr.exp: New file.
+	* gdb.base/cvexpr.c: New file
+	Test for expressions using const and volatile keywords.
+
 2001-09-26  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/constvars.exp: Check for different orders of keywords
