@@ -1,5 +1,9 @@
 Mon Jun  3 11:01:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in: Rebuild dependencies.
+ 	(BFD32_BACKENDS): Add ppcboot.o.
+	(BFD32_BACKENDS_CFILES): Add ppcboot.c.
+
 	* elf32-mips.c (mips_elf_size_dynamic_sections): Initialize c.
 	From Per Fogelstrom <per.fogelstrom@mailbox200.swipnet.se>.
 
