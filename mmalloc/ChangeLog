@@ -1,5 +1,13 @@
+Fri Apr 10 22:59:17 1992  Fred Fish  (fnf@cygnus.com)
+
+	* configure.in:  Recognize new ncr3000 config.
+	* config/mh-ncr3000:  New config file.
+	* Makefile.in (MINUS_G):  Add macro and default to -g.
+
 Wed Apr  8 09:34:53 1992  Fred Fish  (fnf@cygnus.com)
 
+	* mmalloc.c:  Minor fix to comment.
+	* mmalloc.texi:  Update to match actual implementation
 	* mmalloc.h (morecore):  Change prototype's 2nd arg to int.
 
 Tue Apr  7 22:16:09 1992  Fred Fish  (fnf@cygnus.com)
