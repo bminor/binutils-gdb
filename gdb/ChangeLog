@@ -1,3 +1,11 @@
+2002-10-21  Elena Zannoni  <ezannoni@redhat.com>
+
+	* symtab.h (address_class):  Rename
+	LOC_THREAD_LOCAL_STATIC to LOC_HP_THREAD_LOCAL_STATIC.
+	* hpread.c (hpread_process_one_debug_symbol): Ditto.
+	* printcmd.c (address_info): Ditto.
+	* findvar.c (symbol_read_needs_frame, read_var_value): Ditto.
+
 2002-10-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386bsd-nat.c (i386bsd_dr_set, i386bsd_dr_get_status): Use

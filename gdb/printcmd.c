@@ -1279,7 +1279,7 @@ address_info (char *exp, int from_tty)
       }
       break;
 
-    case LOC_THREAD_LOCAL_STATIC:
+    case LOC_HP_THREAD_LOCAL_STATIC:
       printf_filtered (
 			"a thread-local variable at offset %ld from the thread base register %s",
 			val, REGISTER_NAME (basereg));

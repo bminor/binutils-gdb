@@ -625,9 +625,9 @@ enum address_class
   LOC_UNRESOLVED,
 
   /* Value is at a thread-specific location calculated by a
-     target-specific method. */
+     target-specific method. This is used only by hppa.  */
 
-  LOC_THREAD_LOCAL_STATIC,
+  LOC_HP_THREAD_LOCAL_STATIC,
 
   /* The variable does not actually exist in the program.
      The value is ignored.  */
