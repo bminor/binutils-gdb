@@ -93,8 +93,8 @@
 #define MSYMBOL_SIZE(msym)				\
 	((long) MSYMBOL_INFO (msym) & 0x7fffffff)
 
-/* This table matches the indicees assigned to enum arm_abi.  Keep
-   them in sync.  */
+/* This table matches the indicees assigned to enum arm_abi. 
+   Keep them in sync.  */
 
 static const char * const arm_abi_names[] =
 {
@@ -110,15 +110,15 @@ static const char * const arm_abi_names[] =
   NULL
 };
 
-/* Number of different reg name sets (options). */
+/* Number of different reg name sets (options).  */
 static int num_flavor_options;
 
 /* We have more registers than the disassembler as gdb can print the value
    of special registers as well.
    The general register names are overwritten by whatever is being used by
-   the disassembler at the moment. We also adjust the case of cpsr and fps. */
+   the disassembler at the moment. We also adjust the case of cpsr and fps.  */
 
-/* Initial value: Register names used in ARM's ISA documentation. */
+/* Initial value: Register names used in ARM's ISA documentation.  */
 static char * arm_register_name_strings[] =
 {"r0",  "r1",  "r2",  "r3",	/*  0  1  2  3 */
  "r4",  "r5",  "r6",  "r7",	/*  4  5  6  7 */
@@ -126,15 +126,15 @@ static char * arm_register_name_strings[] =
  "r12", "sp",  "lr",  "pc",	/* 12 13 14 15 */
  "f0",  "f1",  "f2",  "f3",	/* 16 17 18 19 */
  "f4",  "f5",  "f6",  "f7",	/* 20 21 22 23 */
- "fps", "cpsr" }; 		/* 24 25       */
+ "fps", "cpsr" };		/* 24 25       */
 static char **arm_register_names = arm_register_name_strings;
 
 /* Valid register name flavors.  */
 static const char **valid_flavors;
 
-/* Disassembly flavor to use. Default to "std" register names. */
+/* Disassembly flavor to use. Default to "std" register names.  */
 static const char *disassembly_flavor;
-/* Index to that option in the opcodes table. */
+/* Index to that option in the opcodes table.  */
 static int current_option;
 
 /* This is used to keep the bfd arch_info in sync with the disassembly
@@ -149,7 +149,7 @@ static void convert_from_extended (void *ptr, void *dbl);
    all saved registers, 'cause we need 'em a lot!  We also keep the
    current size of the stack frame, and the offset of the frame
    pointer from the stack pointer (for frameless functions, and when
-   we're still in the prologue of a function with a frame) */
+   we're still in the prologue of a function with a frame).  */
 
 struct frame_extra_info
 {
@@ -170,7 +170,7 @@ arm_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
   return (chain != 0 && (FRAME_SAVED_PC (thisframe) >= LOWEST_PC));
 }
 
-/* Set to true if the 32-bit mode is in use. */
+/* Set to true if the 32-bit mode is in use.  */
 
 int arm_apcs_32 = 1;
 
@@ -226,7 +226,7 @@ arm_pc_is_thumb_dummy (CORE_ADDR memaddr)
      We hope the current stack pointer is not so far alway from the dummy
      frame location (true if we have not pushed large data structures or
      gone too many levels deep) and that our 1024 is not enough to consider
-     code regions as part of the stack (true for most practical purposes) */
+     code regions as part of the stack (true for most practical purposes).  */
   if (PC_IN_CALL_DUMMY (memaddr, sp, sp + 1024))
     return caller_is_thumb;
   else
@@ -289,7 +289,7 @@ arm_frameless_function_invocation (struct frame_info *fi)
 
   /* There are some frameless functions whose first two instructions
      follow the standard APCS form, in which case after_prologue will
-     be func_start + 8. */
+     be func_start + 8.  */
 
   frameless = (after_prologue < func_start + 12);
   return frameless;
@@ -356,31 +356,31 @@ thumb_skip_prologue (CORE_ADDR pc, CORE_ADDR func_end)
   */
   int findmask = 0;
 
-  for (current_pc = pc; 
-       current_pc + 2 < func_end && current_pc < pc + 40; 
+  for (current_pc = pc;
+       current_pc + 2 < func_end && current_pc < pc + 40;
        current_pc += 2)
     {
       unsigned short insn = read_memory_unsigned_integer (current_pc, 2);
 
-      if ((insn & 0xfe00) == 0xb400)	/* push { rlist } */
+      if ((insn & 0xfe00) == 0xb400)		/* push { rlist } */
 	{
-	  findmask |= 1;  /* push found */
+	  findmask |= 1;			/* push found */
 	}
       else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm  OR  
 						   sub sp, #simm */
 	{
-	  if ((findmask & 1) == 0)  /* before push ? */
+	  if ((findmask & 1) == 0)		/* before push ? */
 	    continue;
 	  else
-	    findmask |= 4;  /* add/sub sp found */
+	    findmask |= 4;			/* add/sub sp found */
 	}
       else if ((insn & 0xff00) == 0xaf00)	/* add r7, sp, #imm */
 	{
-	  findmask |= 2;  /* setting of r7 found */
+	  findmask |= 2;			/* setting of r7 found */
 	}
       else if (insn == 0x466f)			/* mov r7, sp */
 	{
-	  findmask |= 2;  /* setting of r7 found */
+	  findmask |= 2;			/* setting of r7 found */
 	}
       else if (findmask == (4+2+1))
 	{
@@ -388,9 +388,9 @@ thumb_skip_prologue (CORE_ADDR pc, CORE_ADDR func_end)
 	  break;
 	}
       else
-	/* something in the prolog that we don't care about or some
+	/* Something in the prolog that we don't care about or some
 	   instruction from outside the prolog scheduled here for
-	   optimization */
+	   optimization.  */
 	continue;
     }
 
@@ -431,7 +431,7 @@ arm_skip_prologue (CORE_ADDR pc)
       sym = lookup_symbol (func_name, NULL, VAR_NAMESPACE, NULL, NULL);
       if (sym && SYMBOL_LANGUAGE (sym) != language_asm)
         {
-	  /* Don't use this trick for assembly source files. */
+	  /* Don't use this trick for assembly source files.  */
 	  sal = find_pc_line (func_addr, 0);
 	  if ((sal.line != 0) && (sal.end < func_end))
 	    return sal.end;
@@ -443,18 +443,18 @@ arm_skip_prologue (CORE_ADDR pc)
     return thumb_skip_prologue (pc, func_end);
 
   /* Can't find the prologue end in the symbol table, try it the hard way
-     by disassembling the instructions. */
+     by disassembling the instructions.  */
   skip_pc = pc;
   inst = read_memory_integer (skip_pc, 4);
   /* "mov ip, sp" is no longer a required part of the prologue.  */
-  if (inst == 0xe1a0c00d)       /* mov ip, sp */
+  if (inst == 0xe1a0c00d)			/* mov ip, sp */
     {
       skip_pc += 4;
       inst = read_memory_integer (skip_pc, 4);
     }
 
   /* Some prologues begin with "str lr, [sp, #-4]!".  */
-  if (inst == 0xe52de004)                       /* str lr, [sp, #-4]! */
+  if (inst == 0xe52de004)			/* str lr, [sp, #-4]! */
     {
       skip_pc += 4;
       inst = read_memory_integer (skip_pc, 4);
@@ -474,7 +474,7 @@ arm_skip_prologue (CORE_ADDR pc)
 
   /* Any insns after this point may float into the code, if it makes
      for better instruction scheduling, so we skip them only if we
-     find them, but still consdier the function to be frame-ful.  */
+     find them, but still consider the function to be frame-ful.  */
 
   /* We may have either one sfmfd instruction here, or several stfe
      insns, depending on the version of floating point code we
@@ -505,7 +505,7 @@ arm_skip_prologue (CORE_ADDR pc)
       inst = read_memory_integer (skip_pc, 4);
     }
 
-  while ((inst & 0xffffcfc0) == 0xe50b0000)     /* str r(0123), [r11, #-nn] */
+  while ((inst & 0xffffcfc0) == 0xe50b0000)	/* str r(0123), [r11, #-nn] */
     {
       skip_pc += 4;
       inst = read_memory_integer (skip_pc, 4);
@@ -513,6 +513,7 @@ arm_skip_prologue (CORE_ADDR pc)
 
   return skip_pc;
 }
+
 /* *INDENT-OFF* */
 /* Function: thumb_scan_prologue (helper function for arm_scan_prologue)
    This function decodes a Thumb function prologue to determine:
@@ -542,7 +543,7 @@ thumb_scan_prologue (struct frame_info *fi)
   CORE_ADDR prologue_start;
   CORE_ADDR prologue_end;
   CORE_ADDR current_pc;
-  /* Which register has been copied to register n? */
+  /* Which register has been copied to register n?  */
   int saved_reg[16];
   /* findmask:
      bit 0 - push { rlist }
@@ -556,10 +557,10 @@ thumb_scan_prologue (struct frame_info *fi)
     {
       struct symtab_and_line sal = find_pc_line (prologue_start, 0);
 
-      if (sal.line == 0)	/* no line info, use current PC */
+      if (sal.line == 0)		/* no line info, use current PC  */
 	prologue_end = fi->pc;
       else if (sal.end < prologue_end)	/* next line begins after fn end */
-	prologue_end = sal.end;	/* (probably means no prologue)  */
+	prologue_end = sal.end;		/* (probably means no prologue)  */
     }
   else
     /* We're in the boondocks: allow for 
@@ -591,7 +592,7 @@ thumb_scan_prologue (struct frame_info *fi)
       if ((insn & 0xfe00) == 0xb400)	/* push { rlist } */
 	{
 	  int mask;
-	  findmask |= 1;  /* push found */
+	  findmask |= 1;		/* push found */
 	  /* Bits 0-7 contain a mask for registers R0-R7.  Bit 8 says
 	     whether to save LR (R14).  */
 	  mask = (insn & 0xff) | ((insn & 0x100) << 6);
@@ -610,13 +611,13 @@ thumb_scan_prologue (struct frame_info *fi)
       else if ((insn & 0xff00) == 0xb000)	/* add sp, #simm  OR  
 						   sub sp, #simm */
 	{
-	  if ((findmask & 1) == 0)  /* before push ? */
+	  if ((findmask & 1) == 0)  		/* before push?  */
 	    continue;
 	  else
-	    findmask |= 4;  /* add/sub sp found */
+	    findmask |= 4;			/* add/sub sp found */
 	  
-	  offset = (insn & 0x7f) << 2;	/* get scaled offset */
-	  if (insn & 0x80)	/* is it signed? (==subtracting) */
+	  offset = (insn & 0x7f) << 2;		/* get scaled offset */
+	  if (insn & 0x80)		/* is it signed? (==subtracting) */
 	    {
 	      fi->extra_info->frameoffset += offset;
 	      offset = -offset;
@@ -625,14 +626,14 @@ thumb_scan_prologue (struct frame_info *fi)
 	}
       else if ((insn & 0xff00) == 0xaf00)	/* add r7, sp, #imm */
 	{
-	  findmask |= 2;  /* setting of r7 found */
+	  findmask |= 2;			/* setting of r7 found */
 	  fi->extra_info->framereg = THUMB_FP_REGNUM;
 	  /* get scaled offset */
 	  fi->extra_info->frameoffset = (insn & 0xff) << 2;
 	}
       else if (insn == 0x466f)			/* mov r7, sp */
 	{
-	  findmask |= 2;  /* setting of r7 found */
+	  findmask |= 2;			/* setting of r7 found */
 	  fi->extra_info->framereg = THUMB_FP_REGNUM;
 	  fi->extra_info->frameoffset = 0;
 	  saved_reg[THUMB_FP_REGNUM] = ARM_SP_REGNUM;
@@ -641,7 +642,7 @@ thumb_scan_prologue (struct frame_info *fi)
 	{
 	  int lo_reg = insn & 7;		/* dest.  register (r0-r7) */
 	  int hi_reg = ((insn >> 3) & 7) + 8;	/* source register (r8-15) */
-	  saved_reg[lo_reg] = hi_reg;	/* remember hi reg was saved */
+	  saved_reg[lo_reg] = hi_reg;		/* remember hi reg was saved */
 	}
       else
 	/* Something in the prolog that we don't care about or some
@@ -779,7 +780,7 @@ arm_scan_prologue (struct frame_info *fi)
   LONGEST return_value;
   CORE_ADDR prologue_start, prologue_end, current_pc;
 
-  /* Check if this function is already in the cache of frame information. */
+  /* Check if this function is already in the cache of frame information.  */
   if (check_prologue_cache (fi))
     return;
 
@@ -830,23 +831,23 @@ arm_scan_prologue (struct frame_info *fi)
 	    
 	 is a suitable endpoint since it accounts for the largest
 	 possible prologue plus up to five instructions inserted by
-	 the scheduler. */
+	 the scheduler.  */
          
       if (prologue_end > prologue_start + 64)
 	{
-	  prologue_end = prologue_start + 64;	/* See above. */
+	  prologue_end = prologue_start + 64;	/* See above.  */
 	}
     }
   else
     {
-      /* Get address of the stmfd in the prologue of the callee; the saved
-         PC is the address of the stmfd + 8.  */
+      /* Get address of the stmfd in the prologue of the callee; 
+         the saved PC is the address of the stmfd + 8.  */
       if (!safe_read_memory_integer (fi->frame, 4,  &return_value))
         return;
       else
         {
           prologue_start = ADDR_BITS_REMOVE (return_value) - 8;
-          prologue_end = prologue_start + 64;   /* See above. */
+          prologue_end = prologue_start + 64;	/* See above.  */
         }
     }
 
@@ -873,17 +874,17 @@ arm_scan_prologue (struct frame_info *fi)
 
   sp_offset = fp_offset = 0;
 
-  for (current_pc = prologue_start; 
-       current_pc < prologue_end; 
+  for (current_pc = prologue_start;
+       current_pc < prologue_end;
        current_pc += 4)
     {
       unsigned int insn = read_memory_unsigned_integer (current_pc, 4);
 
-      if (insn == 0xe1a0c00d)           /* mov ip, sp */
+      if (insn == 0xe1a0c00d)		/* mov ip, sp */
 	{
 	  continue;
 	}
-      else if (insn == 0xe52de004)      /* str lr, [sp, #-4]! */
+      else if (insn == 0xe52de004)	/* str lr, [sp, #-4]! */
 	{
 	  /* Function is frameless: extra_info defaults OK?  */
 	  continue;
@@ -895,7 +896,7 @@ arm_scan_prologue (struct frame_info *fi)
 	{
 	  int mask = insn & 0xffff;
 
-	  /* Calculate offsets of saved registers. */
+	  /* Calculate offsets of saved registers.  */
 	  for (regno = ARM_PC_REGNUM; regno >= 0; regno--)
 	    if (mask & (1 << regno))
 	      {
@@ -903,23 +904,23 @@ arm_scan_prologue (struct frame_info *fi)
 		fi->saved_regs[regno] = sp_offset;
 	      }
 	}
-      else if ((insn & 0xffffcfc0) == 0xe50b0000)       /* str rx, [r11, -n] */
+      else if ((insn & 0xffffcfc0) == 0xe50b0000)	/* str rx, [r11, -n] */
 	{
 	  /* No need to add this to saved_regs -- it's just an arg reg.  */
 	  continue;
 	}
       else if ((insn & 0xfffff000) == 0xe24cb000)	/* sub fp, ip #n */
 	{
-	  unsigned imm = insn & 0xff;	/* immediate value */
-	  unsigned rot = (insn & 0xf00) >> 7;	/* rotate amount */
+	  unsigned imm = insn & 0xff;			/* immediate value */
+	  unsigned rot = (insn & 0xf00) >> 7;		/* rotate amount */
 	  imm = (imm >> rot) | (imm << (32 - rot));
 	  fp_offset = -imm;
 	  fi->extra_info->framereg = ARM_FP_REGNUM;
 	}
       else if ((insn & 0xfffff000) == 0xe24dd000)	/* sub sp, sp #n */
 	{
-	  unsigned imm = insn & 0xff;	/* immediate value */
-	  unsigned rot = (insn & 0xf00) >> 7;	/* rotate amount */
+	  unsigned imm = insn & 0xff;			/* immediate value */
+	  unsigned rot = (insn & 0xf00) >> 7;		/* rotate amount */
 	  imm = (imm >> rot) | (imm << (32 - rot));
 	  sp_offset -= imm;
 	}
@@ -934,7 +935,7 @@ arm_scan_prologue (struct frame_info *fi)
 	  int n_saved_fp_regs;
 	  unsigned int fp_start_reg, fp_bound_reg;
 
-	  if ((insn & 0x800) == 0x800)	/* N0 is set */
+	  if ((insn & 0x800) == 0x800)		/* N0 is set */
 	    {
 	      if ((insn & 0x40000) == 0x40000)	/* N1 is set */
 		n_saved_fp_regs = 3;
@@ -958,18 +959,18 @@ arm_scan_prologue (struct frame_info *fi)
 	    }
 	}
       else if ((insn & 0xf0000000) != 0xe0000000)
-	break;	/* Condition not true, exit early */
+	break;			/* Condition not true, exit early */
       else if ((insn & 0xfe200000) == 0xe8200000) /* ldm? */
-	break;	/* Don't scan past a block load */
+	break;			/* Don't scan past a block load */
       else
 	/* The optimizer might shove anything into the prologue,
-	   so we just skip what we don't recognize. */
+	   so we just skip what we don't recognize.  */
 	continue;
     }
 
-  /* The frame size is just the negative of the offset (from the original SP)
-     of the last thing thing we pushed on the stack.  The frame offset is
-     [new FP] - [new SP].  */
+  /* The frame size is just the negative of the offset (from the
+     original SP) of the last thing thing we pushed on the stack. 
+     The frame offset is [new FP] - [new SP].  */
   fi->extra_info->framesize = -sp_offset;
   if (fi->extra_info->framereg == ARM_FP_REGNUM)
     fi->extra_info->frameoffset = fp_offset - sp_offset;
@@ -1013,15 +1014,15 @@ arm_frame_chain (struct frame_info *fi)
 #if 0	/* FIXME: enable this code if we convert to new call dummy scheme.  */
   CORE_ADDR fn_start, callers_pc, fp;
 
-  /* is this a dummy frame? */
+  /* Is this a dummy frame?  */
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     return fi->frame;		/* dummy frame same as caller's frame */
 
-  /* is caller-of-this a dummy frame? */
+  /* Is caller-of-this a dummy frame?  */
   callers_pc = FRAME_SAVED_PC (fi);	/* find out who called us: */
   fp = arm_find_callers_reg (fi, ARM_FP_REGNUM);
   if (PC_IN_CALL_DUMMY (callers_pc, fp, fp))
-    return fp;			/* dummy frame's frame may bear no relation to ours */
+    return fp;		/* dummy frame's frame may bear no relation to ours */
 
   if (find_pc_partial_function (fi->pc, 0, &fn_start, 0))
     if (fn_start == entry_point_address ())
@@ -1042,7 +1043,7 @@ arm_frame_chain (struct frame_info *fi)
   /* If the caller is Thumb and the caller is ARM, or vice versa,
      the frame register of the caller is different from ours.
      So we must scan the prologue of the caller to determine its
-     frame register number. */
+     frame register number.  */
   /* XXX Fixme, we should try to do this without creating a temporary
      caller_fi.  */
   if (arm_pc_is_thumb (caller_pc) != arm_pc_is_thumb (fi->pc))
@@ -1148,7 +1149,7 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       for (reg = 0; reg < NUM_REGS; reg++)
 	fi->saved_regs[reg] = SIGCONTEXT_REGISTER_ADDRESS (sp, fi->pc, reg);
 
-      /* FIXME: What about thumb mode? */
+      /* FIXME: What about thumb mode?  */
       fi->extra_info->framereg = ARM_SP_REGNUM;
       fi->frame =
 	read_memory_integer (fi->saved_regs[fi->extra_info->framereg],
@@ -1185,20 +1186,20 @@ arm_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       arm_scan_prologue (fi);
 
       if (!fi->next)
-	/* this is the innermost frame? */
+	/* This is the innermost frame?  */
 	fi->frame = read_register (fi->extra_info->framereg);
       else if (fi->extra_info->framereg == ARM_FP_REGNUM
 	       || fi->extra_info->framereg == THUMB_FP_REGNUM)
 	{
 	  /* not the innermost frame */
-	  /* If we have an FP, the callee saved it. */
+	  /* If we have an FP, the callee saved it.  */
 	  if (fi->next->saved_regs[fi->extra_info->framereg] != 0)
 	    fi->frame =
 	      read_memory_integer (fi->next
 				   ->saved_regs[fi->extra_info->framereg], 4);
 	  else if (fromleaf)
 	    /* If we were called by a frameless fn.  then our frame is
-	       still in the frame pointer register on the board... */
+	       still in the frame pointer register on the board...  */
 	    fi->frame = read_fp ();
 	}
 
@@ -1364,7 +1365,7 @@ arm_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
   };
   static unsigned long arm_bx_r4 = 0xe12fff14;	/* bx r4 instruction */
 
-  /* Set flag indicating whether the current PC is in a Thumb function. */
+  /* Set flag indicating whether the current PC is in a Thumb function.  */
   caller_is_thumb = arm_pc_is_thumb (read_pc ());
   arm_set_call_dummy_breakpoint_offset ();
 
@@ -1397,7 +1398,7 @@ arm_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
     }
 
   /* Put the target address in r4; the call dummy will copy this to
-     the PC. */
+     the PC.  */
   write_register (4, fun);
 }
 
@@ -1418,7 +1419,7 @@ arm_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
      stack is required.  Need to take care here as structs may be
      passed on the stack, and we have to to push them.  */
   nstack_size = -4 * REGISTER_SIZE;	/* Some arguments go into A1-A4.  */
-  if (struct_return)		/* The struct address goes in A1.  */
+  if (struct_return)			/* The struct address goes in A1.  */
     nstack_size += REGISTER_SIZE;
 
   /* Walk through the arguments and add their size to nstack_size.  */
@@ -1470,7 +1471,7 @@ arm_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 #if 1
       /* I don't know why this code was disable. The only logical use
          for a function pointer is to call that function, so setting
-         the mode bit is perfectly fine. FN */
+         the mode bit is perfectly fine.  FN */
       /* If the argument is a pointer to a function, and it is a Thumb
          function, set the low bit of the pointer.  */
       if (TYPE_CODE_PTR == typecode
@@ -1779,7 +1780,7 @@ thumb_get_next_pc (CORE_ADDR pc)
 {
   unsigned long pc_val = ((unsigned long) pc) + 4;	/* PC after prefetch */
   unsigned short inst1 = read_memory_integer (pc, 2);
-  CORE_ADDR nextpc = pc + 2;	/* default is next instruction */
+  CORE_ADDR nextpc = pc + 2;		/* default is next instruction */
   unsigned long offset;
 
   if ((inst1 & 0xff00) == 0xbd00)	/* pop {rlist, pc} */
@@ -1799,7 +1800,7 @@ thumb_get_next_pc (CORE_ADDR pc)
     {
       unsigned long status = read_register (ARM_PS_REGNUM);
       unsigned long cond = bits (inst1, 8, 11);
-      if (cond != 0x0f && condition_true (cond, status))	/* 0x0f = SWI */
+      if (cond != 0x0f && condition_true (cond, status))    /* 0x0f = SWI */
 	nextpc = pc_val + (sbits (inst1, 0, 7) << 1);
     }
   else if ((inst1 & 0xf800) == 0xe000)	/* unconditional branch */
@@ -1837,7 +1838,7 @@ arm_get_next_pc (CORE_ADDR pc)
       switch (bits (this_instr, 24, 27))
 	{
 	case 0x0:
-	case 0x1:		/* data processing */
+	case 0x1:			/* data processing */
 	case 0x2:
 	case 0x3:
 	  {
@@ -2043,13 +2044,13 @@ arm_get_next_pc (CORE_ADDR pc)
    single-step support.  We find the target of the coming instruction
    and breakpoint it.
 
-   single_step is also called just after the inferior stops.  If we had
-   set up a simulated single-step, we undo our damage.  */
+   single_step() is also called just after the inferior stops.  If we
+   had set up a simulated single-step, we undo our damage.  */
 
 static void
 arm_software_single_step (enum target_signal sig, int insert_bpt)
 {
-  static int next_pc; /* State between setting and unsetting. */
+  static int next_pc;		/* State between setting and unsetting.  */
   static char break_mem[BREAKPOINT_MAX]; /* Temporary storage for mem@bpt */
 
   if (insert_bpt)
@@ -2165,7 +2166,7 @@ static const char arm_default_thumb_be_breakpoint[] = THUMB_BE_BREAKPOINT;
 /* XXX ??? from old tm-arm.h: if we're using RDP, then we're inserting
    breakpoints and storing their handles instread of what was in
    memory.  It is nice that this is the same size as a handle -
-   otherwise remote-rdp will have to change. */
+   otherwise remote-rdp will have to change.  */
 
 static const unsigned char *
 arm_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
@@ -2363,7 +2364,7 @@ arm_store_return_value (struct type *type, char *valbuf)
 }
 
 /* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function. */
+   subroutine will return.  This is called from call_function.  */
 
 static void
 arm_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
@@ -2397,7 +2398,8 @@ arm_in_call_stub (CORE_ADDR pc, char *name)
 
   /* Find the starting address of the function containing the PC.  If
      the caller didn't give us a name, look it up at the same time.  */
-  if (find_pc_partial_function (pc, name ? NULL : &name, &start_addr, NULL) == 0)
+  if (0 == find_pc_partial_function (pc, name ? NULL : &name, 
+				     &start_addr, NULL))
     return 0;
 
   return strncmp (name, "_call_via_r", 11) == 0;
@@ -2440,7 +2442,7 @@ arm_skip_stub (CORE_ADDR pc)
 /* If the user changes the register disassembly flavor used for info
    register and other commands, we have to also switch the flavor used
    in opcodes for disassembly output.  This function is run in the set
-   disassembly_flavor command, and does that. */
+   disassembly_flavor command, and does that.  */
 
 static void
 set_disassembly_flavor_sfunc (char *args, int from_tty,
@@ -2462,7 +2464,7 @@ set_disassembly_flavor (void)
   const char *setname, *setdesc, **regnames;
   int numregs, j;
 
-  /* Find the flavor that the user wants in the opcodes table. */
+  /* Find the flavor that the user wants in the opcodes table.  */
   int current = 0;
   numregs = get_arm_regnames (current, &setname, &setdesc, &regnames);
   while ((disassembly_flavor != setname)
@@ -2470,11 +2472,11 @@ set_disassembly_flavor (void)
     get_arm_regnames (++current, &setname, &setdesc, &regnames);
   current_option = current;
 
-  /* Fill our copy. */
+  /* Fill our copy.  */
   for (j = 0; j < numregs; j++)
     arm_register_names[j] = (char *) regnames[j];
 
-  /* Adjust case. */
+  /* Adjust case.  */
   if (isupper (*regnames[ARM_PC_REGNUM]))
     {
       arm_register_names[ARM_FPS_REGNUM] = "FPS";
@@ -2486,23 +2488,23 @@ set_disassembly_flavor (void)
       arm_register_names[ARM_PS_REGNUM] = "cpsr";
     }
 
-  /* Synchronize the disassembler. */
+  /* Synchronize the disassembler.  */
   set_arm_regname_option (current);
 }
 
 /* arm_othernames implements the "othernames" command.  This is kind
    of hacky, and I prefer the set-show disassembly-flavor which is
    also used for the x86 gdb.  I will keep this around, however, in
-   case anyone is actually using it. */
+   case anyone is actually using it.  */
 
 static void
 arm_othernames (char *names, int n)
 {
-  /* Circle through the various flavors. */
+  /* Circle through the various flavors.  */
   current_option = (current_option + 1) % num_flavor_options;
 
   disassembly_flavor = valid_flavors[current_option];
-  set_disassembly_flavor (); 
+  set_disassembly_flavor ();
 }
 
 /* Fetch, and possibly build, an appropriate link_map_offsets structure
@@ -2511,7 +2513,7 @@ arm_othernames (char *names, int n)
    Instead, the relevant structs offsets were obtained from examining
    link.h.  (We can't refer to link.h from this file because the host
    system won't necessarily have it, or if it does, the structs which
-   it defines will refer to the host system, not the target.)  */
+   it defines will refer to the host system, not the target).  */
 
 struct link_map_offsets *
 arm_linux_svr4_fetch_link_map_offsets (void)
@@ -2524,13 +2526,13 @@ arm_linux_svr4_fetch_link_map_offsets (void)
       lmp = &lmo;
 
       lmo.r_debug_size = 8;	/* Actual size is 20, but this is all we
-                                   need. */
+                                   need.  */
 
       lmo.r_map_offset = 4;
       lmo.r_map_size   = 4;
 
       lmo.link_map_size = 20;	/* Actual size is 552, but this is all we
-                                   need. */
+                                   need.  */
 
       lmo.l_addr_offset = 0;
       lmo.l_addr_size   = 4;
@@ -2889,7 +2891,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* This should be low enough for everything.  */
   tdep->lowest_pc = 0x20;
-  tdep->jb_pc = -1; /* Longjump support not enabled by default.  */
+  tdep->jb_pc = -1;	/* Longjump support not enabled by default.  */
 
   set_gdbarch_use_generic_dummy_frames (gdbarch, 0);
 
@@ -2954,7 +2956,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Information about registers, etc.  */
   set_gdbarch_print_float_info (gdbarch, arm_print_float_info);
-  set_gdbarch_fp_regnum (gdbarch, ARM_FP_REGNUM); /* ??? */
+  set_gdbarch_fp_regnum (gdbarch, ARM_FP_REGNUM);	/* ??? */
   set_gdbarch_sp_regnum (gdbarch, ARM_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, ARM_PC_REGNUM);
   set_gdbarch_register_byte (gdbarch, arm_register_byte);
@@ -3142,18 +3144,18 @@ _initialize_arm_tdep (void)
 
   tm_print_insn = gdb_print_insn_arm;
 
-  /* Get the number of possible sets of register names defined in opcodes. */
+  /* Get the number of possible sets of register names defined in opcodes.  */
   num_flavor_options = get_arm_regname_num_options ();
 
-  /* Sync the opcode insn printer with our register viewer: */
+  /* Sync the opcode insn printer with our register viewer.  */
   parse_arm_disassembler_option ("reg-names-std");
 
-  /* Begin creating the help text. */
+  /* Begin creating the help text.  */
   stb = mem_fileopen ();
   fprintf_unfiltered (stb, "Set the disassembly flavor.\n\
 The valid values are:\n");
 
-  /* Initialize the array that will be passed to add_set_enum_cmd(). */
+  /* Initialize the array that will be passed to add_set_enum_cmd().  */
   valid_flavors = xmalloc ((num_flavor_options + 1) * sizeof (char *));
   for (i = 0; i < num_flavor_options; i++)
     {
@@ -3161,7 +3163,7 @@ The valid values are:\n");
       valid_flavors[i] = setname;
       fprintf_unfiltered (stb, "%s - %s\n", setname,
 			  setdesc);
-      /* Copy the default names (if found) and synchronize disassembler. */
+      /* Copy the default names (if found) and synchronize disassembler.  */
       if (!strcmp (setname, "std"))
 	{
           disassembly_flavor = setname;
@@ -3171,15 +3173,15 @@ The valid values are:\n");
           set_arm_regname_option (i);
 	}
     }
-  /* Mark the end of valid options. */
+  /* Mark the end of valid options.  */
   valid_flavors[num_flavor_options] = NULL;
 
-  /* Finish the creation of the help text. */
+  /* Finish the creation of the help text.  */
   fprintf_unfiltered (stb, "The default is \"std\".");
   helptext = ui_file_xstrdup (stb, &length);
   ui_file_delete (stb);
 
-  /* Add the disassembly-flavor command */
+  /* Add the disassembly-flavor command.  */
   new_cmd = add_set_enum_cmd ("disassembly-flavor", no_class,
 			      valid_flavors,
 			      &disassembly_flavor,
@@ -3194,7 +3196,7 @@ The valid values are:\n");
 				  "Set usage of ARM 32-bit mode.\n", &setlist),
 		     &showlist);
 
-  /* Add the deprecated "othernames" command */
+  /* Add the deprecated "othernames" command.  */
 
   add_com ("othernames", class_obscure, arm_othernames,
 	   "Switch to the next set of register names.");
