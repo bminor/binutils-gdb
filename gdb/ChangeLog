@@ -1,3 +1,10 @@
+2003-04-10  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v-tdep.c (d10v_frame_this_id): Set the code addr to the
+	frame's function's address.  Simplify.
+	(d10v_frame_unwind_cache): Check that the frame's function is
+	non-zero.
+
 2003-04-10  Jim Blandy  <jimb@redhat.com>
 
 	* s390-tdep.c (s390_gdbarch_init): Put back accidentally deleted
