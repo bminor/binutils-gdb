@@ -25,7 +25,7 @@
 
 global GDB
 if ![info exists GDB] then {
-    set GDB [findfile $base_dir/../gdb "gdb" [transform gdb ]]
+    set GDB [findfile $base_dir/../gdb $base_dir/../gdb [transform gdb ]]
 }
 
 global GDBFLAGS
@@ -138,9 +138,10 @@ proc runto { function } {
     }
 
     send "break $function\n"
-    # The first regexp is what we get with -g, the second without -g.
+    # The first two regexps are what we get with -g, the third is without -g.
     expect {
-	-re "Break.* at .*: file .*, line $decimal.\r\n$prompt $" {}
+	-re "Breakpoint \[0-9\]* at 0x\[0-9a-f\]*: file .*, line $decimal.\r\n$prompt $" {}
+	-re "Breakpoint \[0-9\]*: file .*, line $decimal.\r\n$prompt $" {}
 	-re "Breakpoint \[0-9\]* at 0x\[0-9a-f\]*.*$prompt $" {}
 	-re "$prompt $" { fail "setting breakpoint at $function" ; return 0 }
 	timeout { fail "setting breakpoint at $function (timeout)" ; return 0 }
@@ -252,7 +253,9 @@ proc gdb_test { args } {
 	    perror "internal buffer is full."
 	}
 	timeout	{
-	    fail "(timeout) $message"
+	    if ![string match "" $message] then {
+		fail "(timeout) $message"
+	    }
 	    set result 1
 	}
     }
@@ -261,8 +264,10 @@ proc gdb_test { args } {
 
 # Given an input string, adds backslashes as needed to create a
 # regexp that will match the string.
+
 proc string_to_regexp {str} {
-    regsub -all {[]*+.|()^$[]} $str {\\&} result
+    set result $str
+    regsub -all {[]*+.|()^$\[]} $str {\\&} result
     return $result
 }
 
@@ -406,27 +411,22 @@ proc default_gdb_start { } {
     global spawn_id
     global timeout
     verbose "Spawning $GDB $GDBFLAGS"
+
+    if { [which $GDB] == 0 } then {
+	perror "$GDB does not exist."
+	exit 1
+    }
     
     set oldtimeout $timeout
     set timeout [expr "$timeout + 60"]
     if [ llength $GDBFLAGS ] then {
-	if {[which $GDB] != 0} then {
 	    spawn $GDB $GDBFLAGS
-	} else {
-	    perror "$GDB does not exist."
-	    exit 1
-	}
     } else {
-	if {[which $GDB] != 0} then {
 	    spawn $GDB
-	} else {
-	    perror "$GDB does not exist."
-	    exit 1
-	}
     }
     expect {
 	-re ".*\r\n$prompt $" {
-	    verbose "GDB initialized for native mode"
+	    verbose "GDB initialized."
 	}
 	-re "$prompt $"	{
 	    perror "GDB never initialized."
