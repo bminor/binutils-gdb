@@ -1,3 +1,11 @@
+Mon Feb  5 18:35:46 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* i960.h (I_HX, I_HX2): Define.
+	start-sanitize-i960xl
+	(I_XL): Remove.  The HX supports all XL instructions.
+	end-sanitize-i960xl
+	(i960_opcodes): Add HX instructions.
+
 Mon Jan 29 12:43:39 1996  Ken Raeburn  <raeburn@cygnus.com>
 
 	* i386.h: Fix waiting forms of finit, fstenv, fsave, fstsw, fstcw,
