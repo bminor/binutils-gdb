@@ -1,3 +1,10 @@
+Wed Feb 23 12:58:46 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh (dis_asm_read_memory): Change LEN to unsigned long.
+  	Match ../include/dis-asm.h change.
+	* gdbarch.h: Regenerate.
+	* corefile.c (dis_asm_read_memory): Update.
+
 Mon Feb 21 13:57:27 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure.in (CONFIG_INITS): Fix typo, was CONFIG_INIT.

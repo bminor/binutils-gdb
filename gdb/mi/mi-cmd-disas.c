@@ -26,7 +26,7 @@
 #include "mi-getopt.h"
 #include "ui-out.h"
 
-static int gdb_dis_asm_read_memory (bfd_vma memaddr, bfd_byte * myaddr, int len,
+static int gdb_dis_asm_read_memory (bfd_vma memaddr, bfd_byte * myaddr, unsigned int len,
 				    disassemble_info * info);
 static int compare_lines (const PTR mle1p, const PTR mle2p);
 
@@ -52,7 +52,8 @@ int gdb_disassemble_from_exec = -1;
 /* This is the memory_read_func for gdb_disassemble when we are
    disassembling from the exec file. */
 static int
-gdb_dis_asm_read_memory (bfd_vma memaddr, bfd_byte * myaddr, int len, disassemble_info * info)
+gdb_dis_asm_read_memory (bfd_vma memaddr, bfd_byte * myaddr,
+			 unsigned int len, disassemble_info * info)
 {
   extern struct target_ops exec_ops;
   int res;

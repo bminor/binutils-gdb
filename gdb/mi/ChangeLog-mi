@@ -1,3 +1,8 @@
+Wed Feb 23 13:31:16 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mi-cmd-disas.c (gdb_dis_asm_read_memory): Change LEN to unsigned
+ 	long.  Match ../include/dis-asm.h change.
+
 Wed Feb 23 10:30:55 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbmi.texinfo: Update copyright - FSF.  Update version

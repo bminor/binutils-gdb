@@ -637,7 +637,7 @@ extern int (*target_architecture_hook) (const struct bfd_arch_info *);
 #include "dis-asm.h"		/* Get defs for disassemble_info */
 
 extern int dis_asm_read_memory (bfd_vma memaddr, bfd_byte *myaddr,
-				int len, disassemble_info *info);
+				unsigned int len, disassemble_info *info);
 
 extern void dis_asm_memory_error (int status, bfd_vma memaddr,
 				  disassemble_info *info);
