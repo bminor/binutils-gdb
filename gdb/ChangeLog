@@ -1,3 +1,8 @@
+2003-11-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-tdep.c (frv_frame_this_id): Eliminate call to
+	inside_entry_func().
+
 2003-11-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_extract_return_value,
