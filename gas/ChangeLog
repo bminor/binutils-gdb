@@ -1,3 +1,8 @@
+1999-01-16  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c (write_2_short): Do not generate a sequential
+	merge of two instructions if the left instruciton kills the right.
+
 1999-01-11  Doug Evans  <devans@casey.cygnus.com>
 
 	* Makefile.in: Regenerate.
