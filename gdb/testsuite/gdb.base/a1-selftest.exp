@@ -455,6 +455,10 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$prompt $"\
     }
     
     # get a stack trace
+    #
+    # This fails on some linux systems for unknown reasons.  On the
+    # systems where it fails, sometimes it works fine when run manually.
+    # The testsuite failures may not be limited to just aout systems.
     setup_xfail "i*86-*-linuxaout"
     set description "backtrace through signal handler"
     send "backtrace\n"
