@@ -1,5 +1,14 @@
+Tue Jun  1 14:40:41 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* aoutx.h (translate_from_native_sym_flags):  Don't set
+	BSF_DEBUGGING for constructor symbols, only BSF_CONSTRUCTOR.
+	* aoutx.h (translate_to_native_sym_flags):  Translate
+	constructor symbols properly.
+
 Thu May 27 16:09:04 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 
+	* archures.c (bfd_default_arch_struct): use 4 byte alignment as a
+	minimum.
 	* aout-target.h (minimum_alignment): 8 byte alignment is right.
 	(fix ld/2680)
 
