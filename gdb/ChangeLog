@@ -1,3 +1,7 @@
+2000-02-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure: Regenerated.
+
 2000-02-16  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* arm-tdep.c (set_disassembly_flavor, arm_othernames,
