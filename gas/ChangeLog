@@ -1,3 +1,9 @@
+Sat Jan 14 23:48:13 1995  Steve Chamberlain  <sac@jonny>
+
+	* config/tc-w65.c, config/tc-w65.h, config/w65.mt: Newfiles.
+	* config/obj-coff.h: Cope with w65.
+	* configure, configure.in: Recognize w65.
+
 Thu Jan 12 17:56:24 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* app.c (do_scrub_next_char) [__GNUC__ && __OPTIMIZE__]: If `get'
