@@ -240,7 +240,7 @@ i386_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
 /* Assuming FRAME is for a GNU/Linux sigtramp routine, return the
    address of the associated sigcontext structure.  */
 
-CORE_ADDR
+static CORE_ADDR
 i386_linux_sigcontext_addr (struct frame_info *frame)
 {
   CORE_ADDR pc;
@@ -284,100 +284,6 @@ i386_linux_sigcontext_addr (struct frame_info *frame)
 
   error ("Couldn't recognize signal trampoline.");
   return 0;
-}
-
-/* Offset to saved PC in sigcontext, from <asm/sigcontext.h>.  */
-#define LINUX_SIGCONTEXT_PC_OFFSET (56)
-
-/* Assuming FRAME is for a GNU/Linux sigtramp routine, return the
-   saved program counter.  */
-
-static CORE_ADDR
-i386_linux_sigtramp_saved_pc (struct frame_info *frame)
-{
-  CORE_ADDR addr;
-  addr = i386_linux_sigcontext_addr (frame);
-  return read_memory_integer (addr + LINUX_SIGCONTEXT_PC_OFFSET, 4);
-}
-
-/* Offset to saved SP in sigcontext, from <asm/sigcontext.h>.  */
-#define LINUX_SIGCONTEXT_SP_OFFSET (28)
-
-/* Assuming FRAME is for a GNU/Linux sigtramp routine, return the
-   saved stack pointer.  */
-
-static CORE_ADDR
-i386_linux_sigtramp_saved_sp (struct frame_info *frame)
-{
-  CORE_ADDR addr;
-  addr = i386_linux_sigcontext_addr (frame);
-  return read_memory_integer (addr + LINUX_SIGCONTEXT_SP_OFFSET, 4);
-}
-
-/* Signal trampolines don't have a meaningful frame.  As in
-   "i386/tm-i386.h", the frame pointer value we use is actually the
-   frame pointer of the calling frame -- that is, the frame which was
-   in progress when the signal trampoline was entered.  GDB mostly
-   treats this frame pointer value as a magic cookie.  We detect the
-   case of a signal trampoline by looking at the SIGNAL_HANDLER_CALLER
-   field, which is set based on PC_IN_SIGTRAMP.
-
-   When a signal trampoline is invoked from a frameless function, we
-   essentially have two frameless functions in a row.  In this case,
-   we use the same magic cookie for three frames in a row.  We detect
-   this case by seeing whether the next frame has
-   SIGNAL_HANDLER_CALLER set, and, if it does, checking whether the
-   current frame is actually frameless.  In this case, we need to get
-   the PC by looking at the SP register value stored in the signal
-   context.
-
-   This should work in most cases except in horrible situations where
-   a signal occurs just as we enter a function but before the frame
-   has been set up.  */
-
-#define FRAMELESS_SIGNAL(frame)					\
-  ((frame)->next != NULL					\
-   && (frame)->next->signal_handler_caller			\
-   && frameless_look_for_prologue (frame))
-
-CORE_ADDR
-i386_linux_frame_chain (struct frame_info *frame)
-{
-  if (frame->signal_handler_caller || FRAMELESS_SIGNAL (frame))
-    return frame->frame;
-
-  if (! inside_entry_file (frame->pc))
-    return read_memory_unsigned_integer (frame->frame, 4);
-
-  return 0;
-}
-
-/* Return the saved program counter for FRAME.  */
-
-CORE_ADDR
-i386_linux_frame_saved_pc (struct frame_info *frame)
-{
-  if (frame->signal_handler_caller)
-    return i386_linux_sigtramp_saved_pc (frame);
-
-  if (FRAMELESS_SIGNAL (frame))
-    {
-      CORE_ADDR sp = i386_linux_sigtramp_saved_sp (frame->next);
-      return read_memory_unsigned_integer (sp, 4);
-    }
-
-  return read_memory_unsigned_integer (frame->frame + 4, 4);
-}
-
-/* Immediately after a function call, return the saved pc.  */
-
-CORE_ADDR
-i386_linux_saved_pc_after_call (struct frame_info *frame)
-{
-  if (frame->signal_handler_caller)
-    return i386_linux_sigtramp_saved_pc (frame);
-
-  return read_memory_unsigned_integer (read_register (SP_REGNUM), 4);
 }
 
 /* Set the program counter for process PTID to PC.  */
@@ -557,15 +463,15 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->jb_pc_offset = 20;	/* From <bits/setjmp.h>.  */
 
-  /* When the i386 Linux kernel calls a signal handler, the return
-     address points to a bit of code on the stack.  These definitions
-     are used to identify this bit of code as a signal trampoline in
-     order to support backtracing through calls to signal handlers.  */
+  tdep->sigcontext_addr = i386_linux_sigcontext_addr;
+  tdep->sc_pc_offset = 14 * 4;	/* From <asm/sigcontext.h>.  */
+  tdep->sc_sp_offset = 7 * 4;
 
+  /* When the i386 Linux kernel calls a signal handler, the return
+     address points to a bit of code on the stack.  This function is
+     used to identify this bit of code as a signal trampoline in order
+     to support backtracing through calls to signal handlers.  */
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_linux_pc_in_sigtramp);
-  set_gdbarch_frame_chain (gdbarch, i386_linux_frame_chain);
-  set_gdbarch_frame_saved_pc (gdbarch, i386_linux_frame_saved_pc);
-  set_gdbarch_saved_pc_after_call (gdbarch, i386_linux_saved_pc_after_call);
 
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
 				       i386_linux_svr4_fetch_link_map_offsets);

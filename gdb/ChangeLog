@@ -1,5 +1,17 @@
 2002-07-02  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-linux-tdep.c (i386_linux_sigcontext_addr): Make static.
+	(LINUX_SIGCONTEXT_PC_OFFSET, LINUX_SIGCONEXT_SP_OFFSET): Remove
+	macros.
+	(i386_linux_sigtramp_saved_pc, i386_linux_sigtramp_saved_sp):
+	Remove functions.
+	(FRAMELESS_SIGNAL): Remove function.
+	(i386_linux_frame_chain, i386_linux_frame_saved_pc,
+	i386_linux_saved_pc_after_call): Removed.
+	(i386_linux_init_abi): Initialize tdep->sigcontext_addr,
+	tdep->sc_pc_offset and tdep->sc_sp_offset.  Don't override
+	frame_chain, frame_saved_pc and saved_pc_after_call any longer.
+
 	* i386-tdep.c (i386_frameless_signal_p): New function.
 	(i386_frame_chain): Deal with frameless signals.
 	(i386_sigtramp_saved_sp): New function.
