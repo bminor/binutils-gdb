@@ -627,6 +627,8 @@ uninstall:
 vault-install:
 	@if [ -f ./release/vault-install ] ; then \
 	  ./release/vault-install $(host_alias) $(target_alias) ; \
+	else \
+	  true ; \
 	fi
 
 .PHONY: install.all
@@ -639,15 +641,15 @@ install.all: install-no-fixedincludes
 		true ; \
 	fi
 
-# install-no-fixedincludes is used because Cygnus can not distributed
+# install-no-fixedincludes is used because Cygnus can not distribute
 # the fixed header files.
 .PHONY: install-no-fixedincludes
 install-no-fixedincludes: \
 	install-dirs \
-	gcc-no-fixedincludes \
 	$(INSTALL_MODULES) \
 	$(INSTALL_TARGET_MODULES) \
-	$(INSTALL_X11_MODULES)
+	$(INSTALL_X11_MODULES) \
+	gcc-no-fixedincludes \
 
 # Install the gcc headers files, but not the fixed include files,
 # which Cygnus is not allowed to distribute.  This rule is very
@@ -1112,25 +1114,25 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex texinfo/gpl.texinfo
 		echo "==> Making $(TOOL)-$$VER.tar.z"; \
 		ln -s proto-toplev $(TOOL)-$$VER; \
 		tar cfh - $(TOOL)-$$VER \
-		| $(GZIP) -v -9 >$(TOOL)-$$VER.tar.z)
+		| $(GZIP) -v -9 >$(TOOL)-$$VER.tar.gz)
 
 TEXINFO_SUPPORT= texinfo/texinfo.tex texinfo/gpl.texinfo
 DIST_SUPPORT= $(DEVO_SUPPORT) $(TEXINFO_SUPPORT)
 
-.PHONY: gas.tar.z
+.PHONY: gas.tar.gz
 GAS_SUPPORT_DIRS= bfd include libiberty opcodes
-gas.tar.z: $(DIST_SUPPORT) $(GAS_SUPPORT_DIRS) gas
+gas.tar.gz: $(DIST_SUPPORT) $(GAS_SUPPORT_DIRS) gas
 	$(MAKE) -f Makefile.in taz SUPPORT_FILES="$(GAS_SUPPORT_DIRS)" TOOL=gas
 
 # The FSF "binutils" release includes gprof and ld.
-.PHONY: binutils.tar.z
+.PHONY: binutils.tar.gz
 BINUTILS_SUPPORT_DIRS= bfd include libiberty opcodes ld gprof
-binutils.tar.z: $(DIST_SUPPORT) $(BINUTILS_SUPPORT_DIRS) binutils
+binutils.tar.gz: $(DIST_SUPPORT) $(BINUTILS_SUPPORT_DIRS) binutils
 	$(MAKE) -f Makefile.in taz SUPPORT_FILES="$(BINUTILS_SUPPORT_DIRS)" TOOL=binutils
 
-.PHONY: gas+binutils.tar.z
+.PHONY: gas+binutils.tar.gz
 GASB_SUPPORT_DIRS= $(GAS_SUPPORT_DIRS) binutils ld gprof
-gas+binutils.tar.z: $(DIST_SUPPORT) $(GASB_SUPPORT_DIRS) gas
+gas+binutils.tar.gz: $(DIST_SUPPORT) $(GASB_SUPPORT_DIRS) gas
 	$(MAKE) -f Makefile.in taz SUPPORT_FILES="$(GASB_SUPPORT_DIRS)" TOOL=gas
 
 .NOEXPORT:

@@ -1,3 +1,9 @@
+Thu Jun  3 17:38:54 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* Makefile.in (taz): Use .gz suffix instead of .z.
+	(binutils.tar.gz, gas+binutils.tar.gz, gas.tar.gz): Fixed target
+	names.
+
 Thu Jun  3 00:27:06 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in (vault-install): add an 'else true' (for Ultrix)
