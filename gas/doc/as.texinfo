@@ -194,9 +194,10 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @c We don't use deffn and friends for the following because they seem
 @c to be limited to one line for the header.
 @smallexample
-@value{AS} [ -a[dhlns] ] [ -D ] [ -f ] [ -I @var{path} ] 
- [ -K ] [ -L ] [ -o @var{objfile} ] [ -R ] 
- [ --statistics] [ -v ] [ -W ] [ -Z ]
+@value{AS} [ -a[dhlns] ] [ -D ] [ -f ] [ --help ]
+ [ -I @var{dir} ] [ -J ] [ -K ] [ -L ] [ -o @var{objfile} ]
+ [ -R ] [ --statistics ] [ -v ] [ -version ] [ --version ]
+ [ -W ] [ -w ] [ -x ] [ -Z ]
 @ifset A29K
 @c am29k has no machine-dependent assembler options
 @end ifset
@@ -215,14 +216,14 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @ifset I960
 @c see md_parse_option in tc-i960.c
  [ -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC ]
- [ -b ] [ -norelax ]
+ [ -b ] [ -no-relax ]
 @end ifset
 @ifset M680X0
  [ -l ] [ -m68000 | -m68010 | -m68020 | ... ]
 @end ifset
 @ifset MIPS
- [ -nocpp ] [ -EL ] [ -EB ] [ -G @var{num} ]
- [ -mips1 ] [ -mips2 ] [ -mips3 ]
+ [ -nocpp ] [ -EL ] [ -EB ] [ -G @var{num} ] [ -mcpu=@var{CPU} ]
+ [ -mips1 ] [ -mips2 ] [ -mips3 ] [ -m4650 ] [ -no-m4650 ]
  [ --trap ] [ --break ]
 @end ifset
  [ -- | @var{files} @dots{} ]
@@ -234,19 +235,19 @@ Turn on listings, in any of a variety of ways:
 
 @table @code
 @item -ad
-omit debugging directives from listing
+omit debugging directives
 
 @item -ah
 include high-level source
 
 @item -al
-assembly listing
+include assembly
 
 @item -an
-no forms processing
+omit forms processing
 
 @item -as
-symbols
+include symbols
 @end table
 
 You may combine these options; for example, use @samp{-aln} for assembly
@@ -254,15 +255,21 @@ listing without forms processing.  By itself, @samp{-a} defaults to
 @samp{-ahls}---that is, all listings turned on.
 
 @item -D
-This option is accepted only for script compatibility with calls to
-other assemblers; it has no effect on @code{@value{AS}}.
+Ignored.  This option is accepted for script compatibility with calls to
+other assemblers.
 
 @item -f
 ``fast''---skip whitespace and comment preprocessing (assume source is
-compiler output)
+compiler output).
 
-@item -I @var{path}
-Add @var{path} to the search list for @code{.include} directives
+@item --help
+Print a summary of the command line options and exit.
+
+@item -I @var{dir}
+Add directory @var{dir} to the search list for @code{.include} directives.
+
+@item -J
+Don't warn about signed overflow.
 
 @item -K
 @ifclear DIFF-TBL-KLUGE
@@ -273,26 +280,36 @@ Issue warnings when difference tables altered for long displacements.
 @end ifset
 
 @item -L
-Keep (in symbol table) local symbols, starting with @samp{L}
+Keep (in the symbol table) local symbols, starting with @samp{L}.
 
 @item -o @var{objfile}
-Name the object-file output from @code{@value{AS}}
+Name the object-file output from @code{@value{AS}} @var{objfile}.
 
 @item -R
-Fold data section into text section
+Fold the data section into the text section.
 
 @item --statistics
-Display maximum space (in bytes), and total time (in seconds), taken by
+Print the maximum space (in bytes) and total time (in seconds) used by
 assembly.
 
 @item -v
-Announce @code{as} version
+@itemx -version
+Print the @code{as} version.
+
+@item --version
+Print the @code{as} version and exit.
 
 @item -W
-Suppress warning messages
+Suppress warning messages.
+
+@item -w
+Ignored.
+
+@item -x
+Ignored.
 
 @item -Z
-Generate object file even after errors
+Generate an object file even after errors.
 
 @item -- | @var{files} @dots{}
 Standard input, or source files to assemble.
@@ -310,7 +327,7 @@ Specify which variant of the 960 architecture is the target.
 @item -b
 Add code to collect statistics about branches taken.
 
-@item -norelax
+@item -no-relax
 Do not alter compare-and-branch instructions for long displacements;
 error if necessary.
 
@@ -386,6 +403,17 @@ Generate code for a particular MIPS Instruction Set Architecture level.
 @samp{-mips1} corresponds to the @sc{r2000} and @sc{r3000} processors,
 @samp{-mips2} to the @sc{r6000} processor, and @samp{-mips3} to the @sc{r4000}
 processor.
+
+@item -m4650
+@item -no-m4650
+Generate code for the MIPS @sc{r4650} chip.  This tells the assembler to accept
+the @samp{mad} and @samp{madu} instruction, and to not schedule @samp{nop}
+instructions around accesses to the @samp{HI} and @samp{LO} registers.
+@samp{-no-m4650} turns off this option.
+
+@item -mcpu=@var{CPU}
+Generate code for a particular MIPS cpu.  This has little effect on the
+assembler, but it is passed by @code{@value{GCC}}.
 
 @item -nocpp
 @code{@value{AS}} ignores this option.  It is accepted for compatibility with
@@ -4506,7 +4534,7 @@ H8/300:
 
 @table @code
 @cindex H8/300H, assembling for
-@item .h300h
+@item .h8300h
 Recognize and emit additional instructions for the H8/300H variant, and
 also make @code{.int} emit 32-bit numbers rather than the usual (16-bit)
 for the H8/300 family.
@@ -5614,18 +5642,18 @@ beginning of each function in the file.  The @sc{gnu} C compiler
 generates these calls automatically when you give it a @samp{-b} option.
 For further details, see the documentation of @samp{gbr960}.
 
-@item -norelax
-@cindex @code{-norelax} option, i960
+@item -no-relax
+@cindex @code{-no-relax} option, i960
 Normally, Compare-and-Branch instructions with targets that require
 displacements greater than 13 bits (or that have external targets) are
 replaced with the corresponding compare (or @samp{chkbit}) and branch
-instructions.  You can use the @samp{-norelax} option to specify that
+instructions.  You can use the @samp{-no-relax} option to specify that
 @code{@value{AS}} should generate errors instead, if the target displacement
 is larger than 13 bits.
 
 This option does not affect the Compare-and-Jump instructions; the code
 emitted for them is @emph{always} adjusted when necessary (depending on
-displacement size), regardless of whether you use @samp{-norelax}.
+displacement size), regardless of whether you use @samp{-no-relax}.
 @end table
 
 @node Floating Point-i960
@@ -5737,11 +5765,11 @@ into separate instructions to do the compare and the branch.
 @cindex compare and jump expansions, i960
 @cindex i960 compare and jump expansions
 Whether @code{@value{AS}} gives an error or expands the instruction depends
-on two choices you can make: whether you use the @samp{-norelax} option,
+on two choices you can make: whether you use the @samp{-no-relax} option,
 and whether you use a ``Compare and Branch'' instruction or a ``Compare
 and Jump'' instruction.  The ``Jump'' instructions are @emph{always}
 expanded if necessary; the ``Branch'' instructions are expanded when
-necessary @emph{unless} you specify @code{-norelax}---in which case
+necessary @emph{unless} you specify @code{-no-relax}---in which case
 @code{@value{AS}} gives an error instead.
 
 These are the Compare-and-Branch instructions, their ``Jump'' variants,
@@ -5947,8 +5975,10 @@ always accepted, but is only required for some configurations, notably
 
 The standard Motorola syntax for this chip differs from the syntax
 already discussed (@pxref{M68K-Syntax,,Syntax}).  @code{@value{AS}} can
-accept both kinds of syntax, even within a single instruction.  The
-two kinds of syntax are fully compatible.
+accept some forms of Motorola syntax for operands, even if @sc{mit} syntax is
+used for other operands in the same instruction.  The
+two kinds of syntax are fully compatible; our support for Motorola syntax is
+simply incomplete at present.
 @ignore
 @c FIXME! I can't figure out what this means.  Surely the "always" is in some
 @c restricted context, for instance.  It's not necessary for the preceding text
@@ -5988,7 +6018,7 @@ is also known as @samp{fp}, the Frame Pointer.
 @samp{@var{digits}(@var{apc})}
 
 @item Index
-@samp{@var{digits}(@var{apc},(@var{register}.@var{size}*@var{scale})}@*
+@samp{@var{digits}(@var{apc},(@var{register}.@var{size}*@var{scale}))}@*
 or @samp{(@var{apc},@var{register}.@var{size}*@var{scale})}@*
 In either case, @var{size} and @var{scale} are optional
 (@var{scale} defaults to @samp{1}, @var{size} defaults to @samp{l}).
@@ -5996,6 +6026,9 @@ In either case, @var{size} and @var{scale} are optional
  @var{size} can be @samp{w} or @samp{l}.  @var{scale} is only supported
 on the 68020 and greater.
 @end table
+
+Other, more complex addressing modes permitted in Motorola syntax are not
+handled.
 
 @node M68K-Float
 @section Floating Point
@@ -7191,6 +7224,17 @@ Generate code for a particular MIPS Instruction Set Architecture level.
 @samp{-mips2} to the @sc{r6000} processor, and @samp{-mips3} to the @sc{r4000}
 processor.  You can also switch instruction sets during the assembly; see
 @ref{MIPS ISA,, Directives to override the ISA level}.
+
+@item -m4650
+@item -no-m4650
+Generate code for the MIPS @sc{r4650} chip.  This tells the assembler to accept
+the @samp{mad} and @samp{madu} instruction, and to not schedule @samp{nop}
+instructions around accesses to the @samp{HI} and @samp{LO} registers.
+@samp{-no-m4650} turns off this option.
+
+@item -mcpu=@var{CPU}
+Generate code for a particular MIPS cpu.  This has little effect on the
+assembler, but it is passed by @code{@value{GCC}}.
 
 @cindex @code{-nocpp} ignored (MIPS)
 @item -nocpp
