@@ -1,3 +1,8 @@
+2003-11-27  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* read.c: Convert to ISO-C.
+	* read.h: Likewise.
+
 2003-11-27  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-sh.c (sh_elf_cons): If md_cons_align is defined
