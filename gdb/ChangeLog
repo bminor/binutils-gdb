@@ -1,3 +1,16 @@
+2002-06-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-i386.h (PUSH_ARGUMENTS, STORE_STRUCT_RETURN,
+	DEPRECATED_EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE,
+	DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS, PUSH_DUMMY_FRAME,
+	POP_FRAME): Remove defines.
+	(i386_push_arguments, i386_store_struct_return,
+	i386_extract_return_value, i386_store_return_value,
+	i386_extract_struct_value_address, i386_push_dummy_frame,
+	i386_pop_frame): Renove prototypes.
+	* i386-tdep.c (i386_gdbarch_init): Adjust for removal of the
+	macros mentioned above.
+
 2002-06-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* cli/cli-decode.c (add_setshow_boolean_cmd): Replace

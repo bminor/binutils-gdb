@@ -1417,6 +1417,15 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_pc_in_call_dummy (gdbarch, pc_in_call_dummy_on_stack);
 
+  set_gdbarch_deprecated_extract_return_value (gdbarch,
+					       i386_extract_return_value);
+  set_gdbarch_push_arguments (gdbarch, i386_push_arguments);
+  set_gdbarch_push_dummy_frame (gdbarch, i386_push_dummy_frame);
+  set_gdbarch_pop_frame (gdbarch, i386_pop_frame);
+  set_gdbarch_store_struct_return (gdbarch, i386_store_struct_return);
+  set_gdbarch_store_return_value (gdbarch, i386_store_return_value);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
+					    i386_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, i386_use_struct_convention);
 
   set_gdbarch_frame_init_saved_regs (gdbarch, i386_frame_init_saved_regs);

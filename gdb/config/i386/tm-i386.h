@@ -65,62 +65,12 @@ extern void i387_float_info (void);
 #define FLOAT_INFO { i387_float_info (); }
 
 
-#define PUSH_ARGUMENTS(nargs, args, sp, struct_return, struct_addr) \
-  i386_push_arguments ((nargs), (args), (sp), (struct_return), (struct_addr))
-extern CORE_ADDR i386_push_arguments (int nargs, struct value **args,
-				      CORE_ADDR sp, int struct_return,
-				      CORE_ADDR struct_addr);
-
-/* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function.  */
-
-#define STORE_STRUCT_RETURN(addr, sp) \
-  i386_store_struct_return ((addr), (sp))
-extern void i386_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
-
-/* Extract from an array REGBUF containing the (raw) register state
-   a function return value of type TYPE, and copy that, in virtual format,
-   into VALBUF.  */
-
-#define DEPRECATED_EXTRACT_RETURN_VALUE(type, regbuf, valbuf) \
-  i386_extract_return_value ((type), (regbuf), (valbuf))
-extern void i386_extract_return_value (struct type *type, char *regbuf,
-				       char *valbuf);
-
-/* Write into the appropriate registers a function return value stored
-   in VALBUF of type TYPE, given in virtual format.  */
-
-#define STORE_RETURN_VALUE(type, valbuf) \
-  i386_store_return_value ((type), (valbuf))
-extern void i386_store_return_value (struct type *type, char *valbuf);
-
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value,
-   as a CORE_ADDR.  */
-
-#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(regbuf) \
-  i386_extract_struct_value_address ((regbuf))
-extern CORE_ADDR i386_extract_struct_value_address (char *regbuf);
-
-
 /* Things needed for making the inferior call functions.  */
 
 /* "An argument's size is increased, if necessary, to make it a
    multiple of [32 bit] words.  This may require tail padding,
    depending on the size of the argument" - from the x86 ABI.  */
 #define PARM_BOUNDARY 32
-
-/* Push an empty stack frame, to record the current PC, etc.  */
-
-#define PUSH_DUMMY_FRAME { i386_push_dummy_frame (); }
-
-extern void i386_push_dummy_frame (void);
-
-/* Discard from the stack the innermost frame, restoring all registers.  */
-
-#define POP_FRAME  { i386_pop_frame (); }
-
-extern void i386_pop_frame (void);
 
 
 /* this is 
