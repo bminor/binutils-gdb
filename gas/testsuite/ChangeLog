@@ -1,3 +1,9 @@
+Thu Oct 28 21:40:06 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/basic: New directory.
+	* gas/hppa/basic/basic.exp: New test driver.
+	* gas/hppa/basic/*.s: New test files.
+
 Mon Oct 25 09:40:59 1993  Ken Raeburn  (raeburn@cygnus.com)
 
 	* gas/sun4: New directory.
