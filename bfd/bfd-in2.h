@@ -2433,6 +2433,9 @@ bfd_print_symbol_vandf PARAMS ((PTR file, asymbol *symbol));
 int 
 bfd_decode_symclass PARAMS ((asymbol *symbol));
 
+boolean
+bfd_is_undefined_symclass PARAMS ((int symclass));
+
 void 
 bfd_symbol_info PARAMS ((asymbol *symbol, symbol_info *ret));
 

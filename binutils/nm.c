@@ -1427,7 +1427,7 @@ print_symbol_info_bsd (info, abfd)
      symbol_info *info;
      bfd *abfd;
 {
-  if (info->type == 'U' || info->type == 'w')
+  if (bfd_is_undefined_symclass (info->type))
     {
       printf ("%*s",
 #ifdef BFD64
@@ -1458,7 +1458,7 @@ print_symbol_info_sysv (info, abfd)
      bfd *abfd;
 {
   print_symname ("%-20s|", info->name, abfd);	/* Name */
-  if (info->type == 'U' || info->type == 'w')
+  if (bfd_is_undefined_symclass (info->type))
     printf ("        ");	/* Value */
   else
     print_value (info->value);
@@ -1481,7 +1481,7 @@ print_symbol_info_posix (info, abfd)
 {
   print_symname ("%s ", info->name, abfd);
   printf ("%c ", info->type);
-  if (info->type == 'U' || info->type == 'w')
+  if (bfd_is_undefined_symclass (info->type))
     printf ("        ");
   else
     print_value (info->value);

@@ -1,5 +1,23 @@
-2000-01-27  Thomas de Lellis  <tdel@wrs.com>
+2000-01-27  Thomas de Lellis  <tdel@windriver.com>
 
+        * syms.c (bfd_decode_symclass)
+        Two new class characters were added - 'V' and 'v'.  The
+        meaning of 'W' is now restricted to just weak non-object
+        symbols.  This allows differentiation between, for example,
+        weak functions vs weak objects.  nm for example now dumps:
+        'W' = weak global
+        'w' = weak unresolved
+        'V' = weak global object
+        'v' = weak unresolved object
+
+	(bfd_is_undefined_symclass): New function.  Return true if the
+	given symbol class represents and undefined/unresolved symbol.
+	
+        (bfd_symbol_info): Use bfd_is_undefined_symclass to check for
+	unresolved symbols.
+
+	* bfd-in2.h: Add prototype for bfd_is_undefined_symbol().
+	
         * elf32-arm.h (elf32_arm_get_symbol_type): If a symbol has the
 	STT_ARM_16BIT flag set, but it is not attached to a data object
 	return STT_ARM_16BIT so that it will be treated as code by the

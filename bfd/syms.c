@@ -584,14 +584,28 @@ bfd_decode_symclass (symbol)
   if (bfd_is_und_section (symbol->section))
     {
       if (symbol->flags & BSF_WEAK)
-	return 'w';
+	{
+	  /* If weak, determine if it's specifically an object
+	     or non-object weak.  */
+	  if (symbol->flags & BSF_OBJECT)
+	    return 'v';
+	  else
+	    return 'w';
+	}
       else
 	return 'U';
     }
   if (bfd_is_ind_section (symbol->section))
     return 'I';
   if (symbol->flags & BSF_WEAK)
-    return 'W';
+    {
+      /* If weak, determine if it's specifically an object
+	 or non-object weak.  */
+      if (symbol->flags & BSF_OBJECT)
+	return 'V';
+      else
+	return 'W';
+    }
   if (!(symbol->flags & (BSF_GLOBAL | BSF_LOCAL)))
     return '?';
 
@@ -617,6 +631,26 @@ bfd_decode_symclass (symbol)
 
 /*
 FUNCTION
+	bfd_is_undefined_symclass 
+
+DESCRIPTION
+	Returns non-zero if the class symbol returned by
+	bfd_decode_symclass represents an undefined symbol.
+	Returns zero otherwise.
+
+SYNOPSIS
+	boolean bfd_is_undefined_symclass (int symclass);
+*/
+
+boolean
+bfd_is_undefined_symclass (symclass)
+     int symclass;
+{
+  return symclass == 'U' || symclass == 'w' || symclass == 'v';
+}
+
+/*
+FUNCTION
 	bfd_symbol_info
 
 DESCRIPTION
@@ -634,10 +668,12 @@ bfd_symbol_info (symbol, ret)
      symbol_info *ret;
 {
   ret->type = bfd_decode_symclass (symbol);
-  if (ret->type != 'U' && ret->type != 'w')
-    ret->value = symbol->value + symbol->section->vma;
-  else
+  
+  if (bfd_is_undefined_symclass (ret->type))
     ret->value = 0;
+  else
+    ret->value = symbol->value + symbol->section->vma;
+  
   ret->name = symbol->name;
 }
 

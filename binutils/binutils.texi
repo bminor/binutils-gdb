@@ -700,11 +700,18 @@ The symbol is in the text (code) section.
 @item U
 The symbol is undefined.
 
+@item V
+The symbol is a weak object.  When a weak defined symbol is linked with
+a normal defined symbol, the normal defined symbol is used with no error.
+When a weak undefined symbol is linked and the symbol is not defined,
+the value of the weak symbol becomes zero with no error.
+
 @item W
-The symbol is weak.  When a weak defined symbol is linked with a normal
-defined symbol, the normal defined symbol is used with no error.  When a
-weak undefined symbol is linked and the symbol is not defined, the value
-of the weak symbol becomes zero with no error.
+The symbol is a weak symbol that has not been specifically tagged as a
+weak object symbol.  When a weak defined symbol is linked with a normal
+defined symbol, the normal defined symbol is used with no error.
+When a weak undefined symbol is linked and the symbol is not defined,
+the value of the weak symbol becomes zero with no error.
 
 @item -
 The symbol is a stabs symbol in an a.out object file.  In this case, the

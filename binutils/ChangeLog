@@ -1,3 +1,12 @@
+2000-27-01  Thomas de Lellis  <tdel@windriver.com>
+
+        * nm.c (print_symbol_info_bsd): Use bfd_is_undefined_symclass to
+	check to unresolved symbols.
+        (print_symbol_info_sysv):  Ditto.
+        (print_symbol_info_posix):  Ditto.
+
+        * binutils.texi: Document new 'V' symclass flag for nm.
+
 2000-01-27  Nick Clifton  <nickc@redhat.com>
 
 	* binutils.texi (objdump): Document new ARM specific
