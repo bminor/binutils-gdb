@@ -54,7 +54,7 @@ RANLIB = ranlib
 #### Host, target, and site specific Makefile fragments come in here.
 ###
 
-CFLAGS = $(H_CFLAGS) -I$(srcdir)/.. -I$(srcdir)/../../include 
+CFLAGS = $(H_CFLAGS) -I.. -I$(srcdir)/.. -I$(srcdir)/../../include 
 
 # main GDB source directory
 
