@@ -795,6 +795,8 @@ mips_elf_section_from_shdr (abfd, hdr, name)
      Elf32_Internal_Shdr *hdr;
      char *name;
 {
+  asection *newsect;
+
   /* There ought to be a place to keep ELF backend specific flags, but
      at the moment there isn't one.  We just keep track of the
      sections by their name, instead.  Fortunately, the ABI gives
@@ -835,60 +837,33 @@ mips_elf_section_from_shdr (abfd, hdr, name)
       return false;
     }
 
-  if (hdr->rawdata == NULL)
+  if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
+    return false;
+  newsect = (asection *) hdr->rawdata;
+
+  if (hdr->sh_type == SHT_MIPS_DEBUG)
     {
-      asection *newsect;
+      if (! bfd_set_section_flags (abfd, newsect,
+				   (bfd_get_section_flags (abfd, newsect)
+				    | SEC_DEBUGGING)))
+	return false;
+    }
 
-      newsect = bfd_make_section (abfd, name);
-      if (newsect != NULL)
-	{
-	  newsect->filepos = hdr->sh_offset;
-	  newsect->flags |= SEC_HAS_CONTENTS;
-	  newsect->vma = hdr->sh_addr;
-	  newsect->_raw_size = hdr->sh_size;
-	  newsect->alignment_power = bfd_log2 (hdr->sh_addralign);
+  /* FIXME: We should record sh_info for a .gptab section.  */
 
-	  if (hdr->sh_flags & SHF_ALLOC)
-	    {
-	      newsect->flags |= SEC_ALLOC;
-	      newsect->flags |= SEC_LOAD;
-	    }
+  /* For a .reginfo section, set the gp value in the tdata information
+     from the contents of this section.  We need the gp value while
+     processing relocs, so we just get it now.  */
+  if (hdr->sh_type == SHT_MIPS_REGINFO)
+    {
+      Elf32_External_RegInfo ext;
+      Elf32_RegInfo s;
 
-	  if (!(hdr->sh_flags & SHF_WRITE))
-	    newsect->flags |= SEC_READONLY;
-
-	  if (hdr->sh_flags & SHF_EXECINSTR)
-	    newsect->flags |= SEC_CODE;
-	  else if (newsect->flags & SEC_ALLOC)
-	    newsect->flags |= SEC_DATA;
-
-	  if (hdr->sh_type == SHT_MIPS_DEBUG)
-	    newsect->flags |= SEC_DEBUGGING;
-
-	  hdr->rawdata = (void *) newsect;
-
-	  /* FIXME: We should record the sh_info field for a .gptab
-	     section.  */
-
-	  /* For a .reginfo section, set the gp value in the tdata
-	     information from the contents of this section.  We need
-	     the gp value while processing relocs, so we just get it
-	     now.  */
-	  if (hdr->sh_type == SHT_MIPS_REGINFO)
-	    {
-	      Elf32_External_RegInfo ext;
-	      Elf32_RegInfo s;
-
-	      if (bfd_get_section_contents (abfd, newsect, (PTR) &ext,
-					    (file_ptr) 0,
-					    sizeof ext) == false)
-		return false;
-	      bfd_mips_elf32_swap_reginfo_in (abfd, &ext, &s);
-	      elf_gp (abfd) = s.ri_gp_value;
-	    }
-	}
-      else
-	hdr->rawdata = (void *) bfd_get_section_by_name (abfd, name);
+      if (! bfd_get_section_contents (abfd, newsect, (PTR) &ext,
+				      (file_ptr) 0, sizeof ext))
+	return false;
+      bfd_mips_elf32_swap_reginfo_in (abfd, &ext, &s);
+      elf_gp (abfd) = s.ri_gp_value;
     }
 
   return true;
@@ -1201,20 +1176,15 @@ mips_elf_final_link (abfd, info)
 				   _bfd_generic_link_write_global_symbol,
 				   (PTR) &wginfo);
 
-  /* Remove empty sections.  Also drop the .options section, since it
-     has special semantics which I haven't bothered to figure out.
-     Also drop the .gptab sections, which also require special
-     handling which is not currently done.  Removing the .gptab
-     sections is required for Irix 5 compatibility; I don't know about
-     the other sections.  */
+  /* Drop the .options section, since it has special semantics which I
+     haven't bothered to figure out.  Also drop the .gptab sections,
+     which also require special handling which is not currently done.
+     Removing the .gptab sections is required for Irix 5
+     compatibility; I don't know about .options.  */
   secpp = &abfd->sections;
   while (*secpp != NULL)
     {
-      if (((*secpp)->_raw_size == 0
-	   && strcmp ((*secpp)->name, ".data") != 0
-	   && strcmp ((*secpp)->name, ".text") != 0
-	   && strcmp ((*secpp)->name, ".bss") != 0)
-	  || strcmp ((*secpp)->name, ".options") == 0
+      if (strcmp ((*secpp)->name, ".options") == 0
 	  || strncmp ((*secpp)->name, ".gptab", 6) == 0)
 	{
 	  *secpp = (*secpp)->next;
@@ -1694,6 +1664,7 @@ static const struct ecoff_debug_swap mips_elf_ecoff_debug_swap =
 #define ELF_ARCH			bfd_arch_mips
 #define ELF_MACHINE_CODE		EM_MIPS
 #define ELF_MAXPAGESIZE			0x10000
+#define elf_backend_collect		true
 #define elf_info_to_howto		0
 #define elf_info_to_howto_rel		mips_info_to_howto_rel
 #define elf_backend_sym_is_global	mips_elf_sym_is_global

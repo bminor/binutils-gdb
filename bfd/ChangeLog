@@ -1,3 +1,15 @@
+Fri May 20 11:57:05 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elf.c (_bfd_elf_make_section_from_shdr): New function, based on
+	code repeated three times in bfd_section_from_shdr in elfcode.h.
+	* libelf.h (_bfd_elf_make_section_from_shdr): Declare.
+	* elfcode.h (bfd_section_from_shdr): Use new function
+	_bfd_elf_make_section_from_shdr to create BFD sections.  If a
+	reloc section does not use the main symbol table, or it is part of
+	the process image, treat it as a normal section, not relocs.
+	* elf32-mips.c (mips_elf_section_from_shdr): Use new function
+	_bfd_elf_make_section_from_shdr.
+
 Thu May 19 11:37:11 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elf32-target.h, elf64-target.h: Change ar_max_namelen value from

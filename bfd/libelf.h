@@ -453,7 +453,8 @@ extern bfd_reloc_status_type bfd_elf_generic_reloc PARAMS ((bfd *,
 							    char **));
 extern boolean bfd_elf_mkobject PARAMS ((bfd *));
 extern Elf_Internal_Shdr *bfd_elf_find_section PARAMS ((bfd *, char *));
-
+extern boolean _bfd_elf_make_section_from_shdr
+  PARAMS ((bfd *abfd, Elf_Internal_Shdr *hdr, const char *name));
 extern struct bfd_link_hash_table *_bfd_elf_link_hash_table_create
   PARAMS ((bfd *));
 

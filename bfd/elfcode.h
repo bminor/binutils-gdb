@@ -496,7 +496,6 @@ bfd_add_2_to_strtab (abfd, ss, str, str2)
   return ss->length - ln;
 }
 
-
 /* ELF .o/exec file reading */
 
 /* Create a new bfd section from an ELF section header. */
@@ -508,84 +507,20 @@ bfd_section_from_shdr (abfd, shindex)
 {
   Elf_Internal_Shdr *hdr = elf_elfsections (abfd)[shindex];
   Elf_Internal_Ehdr *ehdr = elf_elfheader (abfd);
-  asection *newsect;
   char *name;
 
   name = elf_string_from_elf_strtab (abfd, hdr->sh_name);
 
   switch (hdr->sh_type)
     {
-
     case SHT_NULL:
-      /* inactive section. Throw it away. */
+      /* Inactive section. Throw it away.  */
       return true;
 
-    case SHT_PROGBITS:
-    case SHT_DYNAMIC:
-      /* Bits that get saved. This one is real. */
-      if (hdr->rawdata == NULL)
-	{
-	  newsect = bfd_make_section_anyway (abfd, name);
-	  if (newsect == NULL)
-	    return false;
-
-	  newsect->filepos = hdr->sh_offset;
-	  newsect->flags |= SEC_HAS_CONTENTS;
-	  newsect->vma = hdr->sh_addr;
-	  newsect->_raw_size = hdr->sh_size;
-	  newsect->alignment_power = bfd_log2 (hdr->sh_addralign);
-
-	  if (hdr->sh_flags & SHF_ALLOC)
-	    {
-	      newsect->flags |= SEC_ALLOC;
-	      newsect->flags |= SEC_LOAD;
-	    }
-
-	  if (!(hdr->sh_flags & SHF_WRITE))
-	    newsect->flags |= SEC_READONLY;
-
-	  if (hdr->sh_flags & SHF_EXECINSTR)
-	    newsect->flags |= SEC_CODE;	/* FIXME: may only contain SOME code */
-	  else if (newsect->flags & SEC_ALLOC)
-	    newsect->flags |= SEC_DATA;
-
-	  /* The debugging sections appear to recognized only by name,
-	     not any sort of flag.  */
-	  if (strncmp (name, ".debug", sizeof ".debug" - 1) == 0
-	      || strncmp (name, ".line", sizeof ".line" - 1) == 0
-	      || strncmp (name, ".stab", sizeof ".stab" - 1) == 0)
-	    newsect->flags |= SEC_DEBUGGING;
-
-	  hdr->rawdata = (PTR) newsect;
-	}
-      return true;
-
-    case SHT_NOBITS:
-      /* Bits that get saved. This one is real. */
-      if (hdr->rawdata == NULL)
-	{
-	  newsect = bfd_make_section_anyway (abfd, name);
-	  if (newsect == NULL)
-	    return false;
-
-	  newsect->vma = hdr->sh_addr;
-	  newsect->_raw_size = hdr->sh_size;
-	  newsect->filepos = hdr->sh_offset;	/* fake */
-	  newsect->alignment_power = bfd_log2 (hdr->sh_addralign);
-	  if (hdr->sh_flags & SHF_ALLOC)
-	    newsect->flags |= SEC_ALLOC;
-
-	  if (!(hdr->sh_flags & SHF_WRITE))
-	    newsect->flags |= SEC_READONLY;
-
-	  /* FIXME: This section is empty.  Does it really make sense
-	     to set SEC_CODE for it?  */
-	  if (hdr->sh_flags & SHF_EXECINSTR)
-	    newsect->flags |= SEC_CODE;	/* FIXME: may only contain SOME code */
-
-	  hdr->rawdata = (PTR) newsect;
-	}
-      return true;
+    case SHT_PROGBITS:	/* Normal section with contents.  */
+    case SHT_DYNAMIC:	/* Dynamic linking information.  */
+    case SHT_NOBITS:	/* .bss section.  */
+      return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
 
     case SHT_SYMTAB:		/* A symbol table */
       if (elf_onesymtab (abfd) == shindex)
@@ -612,7 +547,7 @@ bfd_section_from_shdr (abfd, shindex)
       return true;
 
     case SHT_STRTAB:		/* A string table */
-      if (hdr->rawdata)
+      if (hdr->rawdata != NULL)
 	return true;
       if (ehdr->e_shstrndx == shindex)
 	{
@@ -658,47 +593,28 @@ bfd_section_from_shdr (abfd, shindex)
 	  }
       }
 
-      newsect = bfd_make_section_anyway (abfd, name);
-      if (newsect == NULL)
-	return false;
-
-      newsect->flags = SEC_HAS_CONTENTS;
-      hdr->rawdata = (PTR) newsect;
-      newsect->_raw_size = hdr->sh_size;
-      newsect->alignment_power = bfd_log2 (hdr->sh_addralign);
-      newsect->vma = hdr->sh_addr;
-      newsect->filepos = hdr->sh_offset;
-
-      if (hdr->sh_flags & SHF_ALLOC)
-	newsect->flags |= SEC_ALLOC | SEC_LOAD;
-      if (!(hdr->sh_flags & SHF_WRITE))
-	newsect->flags |= SEC_READONLY;
-      if (hdr->sh_flags & SHF_EXECINSTR)
-	newsect->flags |= SEC_CODE;
-      else if (newsect->flags & SEC_ALLOC)
-	newsect->flags |= SEC_DATA;
-
-      /* Check for debugging string tables.  */
-      if (strncmp (name, ".debug", sizeof ".debug" - 1) == 0
-	  || strncmp (name, ".stab", sizeof ".stab" - 1) == 0)
-	newsect->flags |= SEC_DEBUGGING;
-
-      return true;
+      return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
 
     case SHT_REL:
     case SHT_RELA:
-      /* *These* do a lot of work -- but build no sections!
-	 The spec says there can be multiple strtabs, but only one symtab,
-	 but there can be lots of REL* sections. */
-      /* FIXME:  The above statement is wrong!  There are typically at least
-	 two symbol tables in a dynamically linked executable, ".dynsym"
-	 which is the dynamic linkage symbol table and ".symtab", which is
-	 the "traditional" symbol table.  -fnf */
-
+      /* *These* do a lot of work -- but build no sections!  */
       {
 	asection *target_sect;
 	Elf_Internal_Shdr *hdr2;
 	int use_rela_p = get_elf_backend_data (abfd)->use_rela_p;
+
+	/* Get the symbol table.  */
+	if (! bfd_section_from_shdr (abfd, hdr->sh_link))
+	  return false;
+
+	/* If this reloc section does not use the main symbol table,
+	   or if it is in the process image, we don't treat it as a
+	   reloc section.  BFD can't adequately represent such a
+	   section, so at least for now, we don't try.  We just
+	   present it as a normal section.  */
+	if ((hdr->sh_flags & SHF_ALLOC) != 0
+	    || hdr->sh_link != elf_onesymtab (abfd))
+	  return _bfd_elf_make_section_from_shdr (abfd, hdr, name);
 
 	/* Don't allow REL relocations on a machine that uses RELA and
 	   vice versa.  */
@@ -708,15 +624,13 @@ bfd_section_from_shdr (abfd, shindex)
 	   each of those architectures.  It's conceivable that, e.g., a
 	   bunch of absolute 32-bit relocs might be more compact in REL
 	   form even on a RELA machine...  */
-	BFD_ASSERT (!(use_rela_p && (hdr->sh_type == SHT_REL)));
-	BFD_ASSERT (!(!use_rela_p && (hdr->sh_type == SHT_RELA)));
-	BFD_ASSERT (hdr->sh_entsize ==
-		    (use_rela_p
-		     ? sizeof (Elf_External_Rela)
-		     : sizeof (Elf_External_Rel)));
+	BFD_ASSERT (use_rela_p
+		    ? (hdr->sh_type == SHT_RELA
+		       && hdr->sh_entsize == sizeof (Elf_External_Rela))
+		    : (hdr->sh_type == SHT_REL
+		       && hdr->sh_entsize == sizeof (Elf_External_Rel)));
 
-	if (! bfd_section_from_shdr (abfd, hdr->sh_info)     /* target */
-	    || ! bfd_section_from_shdr (abfd, hdr->sh_link)) /* symbol table */
+	if (! bfd_section_from_shdr (abfd, hdr->sh_info))
 	  return false;
 	target_sect = section_from_elf_index (abfd, hdr->sh_info);
 	if (target_sect == NULL
@@ -728,7 +642,7 @@ bfd_section_from_shdr (abfd, shindex)
 	elf_elfsections (abfd)[shindex] = hdr2;
 	target_sect->reloc_count = hdr->sh_size / hdr->sh_entsize;
 	target_sect->flags |= SEC_RELOC;
-	target_sect->relocation = 0;
+	target_sect->relocation = NULL;
 	target_sect->rel_filepos = hdr->sh_offset;
 	abfd->flags |= HAS_RELOC;
 	return true;

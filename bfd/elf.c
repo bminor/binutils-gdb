@@ -154,6 +154,68 @@ elf_string_from_elf_section (abfd, shindex, strindex)
   return ((char *) hdr->rawdata) + strindex;
 }
 
+/* Make a BFD section from an ELF section.  We store a pointer to the
+   BFD section in the rawdata field of the header.  */
+
+boolean
+_bfd_elf_make_section_from_shdr (abfd, hdr, name)
+     bfd *abfd;
+     Elf_Internal_Shdr *hdr;
+     const char *name;
+{
+  asection *newsect;
+  flagword flags;
+
+  if (hdr->rawdata != NULL)
+    {
+      BFD_ASSERT (strcmp (name, ((asection *) hdr->rawdata)->name) == 0);
+      return true;
+    }
+
+  newsect = bfd_make_section_anyway (abfd, name);
+  if (newsect == NULL)
+    return false;
+
+  newsect->filepos = hdr->sh_offset;
+
+  if (! bfd_set_section_vma (abfd, newsect, hdr->sh_addr)
+      || ! bfd_set_section_size (abfd, newsect, hdr->sh_size)
+      || ! bfd_set_section_alignment (abfd, newsect,
+				      bfd_log2 (hdr->sh_addralign)))
+    return false;
+
+  flags = SEC_NO_FLAGS;
+  if (hdr->sh_type != SHT_NOBITS)
+    flags |= SEC_HAS_CONTENTS;
+  if ((hdr->sh_flags & SHF_ALLOC) != 0)
+    {
+      flags |= SEC_ALLOC;
+      if (hdr->sh_type != SHT_NOBITS)
+	flags |= SEC_LOAD;
+    }
+  if ((hdr->sh_flags & SHF_WRITE) == 0)
+    flags |= SEC_READONLY;
+  if ((hdr->sh_flags & SHF_EXECINSTR) != 0)
+    flags |= SEC_CODE;
+  else if ((flags & SEC_ALLOC) != 0)
+    flags |= SEC_DATA;
+
+  /* The debugging sections appear to be recognized only by name, not
+     any sort of flag.  */
+  if (strncmp (name, ".debug", sizeof ".debug" - 1) == 0
+      || strncmp (name, ".line", sizeof ".line" - 1) == 0
+      || strncmp (name, ".stab", sizeof ".stab" - 1) == 0)
+    flags |= SEC_DEBUGGING;
+
+  if (! bfd_set_section_flags (abfd, newsect, flags))
+    return false;
+
+  hdr->rawdata = (PTR) newsect;
+  elf_section_data (newsect)->this_hdr = *hdr;
+
+  return true;
+}
+
 /*
 INTERNAL_FUNCTION
 	bfd_elf_find_section
