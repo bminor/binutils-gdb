@@ -60,8 +60,47 @@
 "dmac r<RS>, r<RT>"
 *vr4320:
 {
-  LO = 99 + SignedMultiply (SD_, GPR[RS], GPR[RT]);
+  LO = LO + SignedMultiply (SD_, GPR[RS], GPR[RT]);
 }
+
+// Count Leading Zeros
+000000,5.RS,00000,5.RD,00000,110101::::CLZ
+"clz r<RD>, r<RS>"
+*vr4320:
+{
+  unsigned32 t = Low32Bits (SD_, GPR[RS]);
+  signed64 c = 0;
+
+  while (! (t & ( 1 << 31))
+	&& c < 32)
+    {
+    c++;
+    t <<= 1;
+    }
+
+  GPR[RD] = c;
+}
+
+// D-Count Leading Zeros
+000000,5.RS,00000,5.RD,00000,111101::::DCLZ
+"dclz r<RD>, r<RS>"
+*vr4320:
+{
+  unsigned64 t = GPR[RS];
+  signed64 c = 0;
+
+  while (! (t & ( (unsigned64)1 << 63))
+	&& c < 64)
+    {
+    c++;
+    t <<= 1;
+    }
+
+  printf("lo %d\n", c);
+  GPR[RD] = c;
+}
+
+
 
 
 

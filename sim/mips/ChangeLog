@@ -1,3 +1,10 @@
+start-sanitize-vr4320
+Tue Mar 10 10:32:22 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* vr4320.igen (clz,dclz) : Added.
+	(dmac): Replaced 99, with LO.
+
+end-sanitize-vr4320
 start-sanitize-vr5400
 Fri Mar  6 08:30:58 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
