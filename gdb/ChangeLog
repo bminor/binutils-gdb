@@ -1,3 +1,14 @@
+Tue Jun 21 14:06:46 1994  Kung Hsu  (kung@mexican.cygnus.com)
+
+	* config/i386/nm-linux.h: change calling convention of 
+	TARGET_CAN_USE_HARDWARE_WATCHPOINT() and
+	target_insert_watchpoint() and
+	target_remove_watchpoint().
+
+	* config/mips/tm-mips64.h: define FORCE_LONG_LONG to force LONGEST
+	to be long long in gdb.
+	* config/mips/tm-bigmips.h: ditto.
+
 Mon Jun 20 23:54:37 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* c-lang.c (asm_language_defn):  New definitions for language_asm,
