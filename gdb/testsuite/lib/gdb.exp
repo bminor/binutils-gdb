@@ -23,9 +23,10 @@
 # need to be modified for any target, it can be done with a variable
 # or by passing arguments.
 
-if ![info exists GDB] then {
-    set GDB [transform gdb]
-}
+# dejagnu latest-931018 doesn't like "transform gdb".
+#if ![info exists GDB] then {
+#    set GDB [transform gdb]
+#}
 if ![info exists GDBFLAGS] then {
     set GDBFLAGS ""
 }
