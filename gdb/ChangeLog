@@ -1,3 +1,8 @@
+2001-05-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS: I'm no longer actively maintaining the mn10300
+	target.
+
 2001-05-04  Andrew Cagney  <ac131313@redhat.com>
  
  	* main.c (captured_main): Delete #ifndef _WIN32 conditional for
