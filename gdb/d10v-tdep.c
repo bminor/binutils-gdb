@@ -1586,8 +1586,6 @@ static gdbarch_init_ftype d10v_gdbarch_init;
 static struct gdbarch *
 d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  static LONGEST d10v_call_dummy_words[] =
-  {0};
   struct gdbarch *gdbarch;
   int d10v_num_regs;
   struct gdbarch_tdep *tdep;
@@ -1680,8 +1678,6 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 0);
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
-  set_gdbarch_call_dummy_words (gdbarch, d10v_call_dummy_words);
-  set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (d10v_call_dummy_words));
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
 

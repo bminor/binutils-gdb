@@ -1238,10 +1238,8 @@ extern void set_gdbarch_call_dummy_words (struct gdbarch *gdbarch, LONGEST * cal
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (CALL_DUMMY_WORDS)
 #error "Non multi-arch definition of CALL_DUMMY_WORDS"
 #endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_WORDS)
+#if !defined (CALL_DUMMY_WORDS)
 #define CALL_DUMMY_WORDS (gdbarch_call_dummy_words (current_gdbarch))
-#endif
 #endif
 
 /* Default (value) for non- multi-arch platforms. */
@@ -1254,10 +1252,8 @@ extern void set_gdbarch_sizeof_call_dummy_words (struct gdbarch *gdbarch, int si
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SIZEOF_CALL_DUMMY_WORDS)
 #error "Non multi-arch definition of SIZEOF_CALL_DUMMY_WORDS"
 #endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (SIZEOF_CALL_DUMMY_WORDS)
+#if !defined (SIZEOF_CALL_DUMMY_WORDS)
 #define SIZEOF_CALL_DUMMY_WORDS (gdbarch_sizeof_call_dummy_words (current_gdbarch))
-#endif
 #endif
 
 #if defined (DEPRECATED_CALL_DUMMY_STACK_ADJUST)

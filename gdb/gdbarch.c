@@ -2255,8 +2255,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: SIZEOF_CALL_DUMMY_WORDS # %s\n",
                       XSTRING (SIZEOF_CALL_DUMMY_WORDS));
   fprintf_unfiltered (file,
-                      "gdbarch_dump: SIZEOF_CALL_DUMMY_WORDS = 0x%08lx\n",
-                      (long) SIZEOF_CALL_DUMMY_WORDS);
+                      "gdbarch_dump: SIZEOF_CALL_DUMMY_WORDS = %d\n",
+                      SIZEOF_CALL_DUMMY_WORDS);
 #endif
 #ifdef SKIP_PROLOGUE
   fprintf_unfiltered (file,

@@ -1,5 +1,13 @@
 2003-03-29  Andrew Cagney  <cagney@redhat.com>
 
+	* d10v-tdep.c (d10v_gdbarch_init): Do not set call_dummy_words or
+	sizeof_call_dummy_words.
+	* gdbarch.sh (CALL_DUMMY_WORDS, SIZEOF_CALL_DUMMY_WORDS): Always
+	define.
+	* gdbarch.h: Regenerate.
+	
+2003-03-29  Andrew Cagney  <cagney@redhat.com>
+
 	* infttrace.h: New file.
 	* hpread.c: Include "gdb_assert.h" and "somsolib.h".
 	(hpread_get_textlow): Detect an uninitialized dn_bufp.
