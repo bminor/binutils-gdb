@@ -1,3 +1,12 @@
+Tue Jun 21 12:45:55 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in: Add all-librx target similar to all-libproc.
+
+Wed Jun  8 23:11:55 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* config.guess:  Rearrange tests for Alpha-OSF1 to properly deal
+	with post 1.2 uname bogosity.
+
 Thu Jun  9 00:27:59 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure: Remove temporary files on receipt of a signal.
