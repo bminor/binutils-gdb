@@ -8,9 +8,6 @@
 #  HOSTING_CRT0		crt0.o file used for bootstrapping
 #  HOSTING_LIBS		libraries used for bootstrapping
 #  NATIVE_LIB_DIRS	library directories to search on this host
-#  HLDFLAGS		link flags to use on this host
-#  HLDENV		environment variable to set when linking for the host
-#  RPATH_ENVVAR		environment variable used to find shared libraries
 
 HDEFINES=
 HOSTING_CRT0=/lib/crt0.o
@@ -19,11 +16,11 @@ NATIVE_LIB_DIRS=
 
 case "${host}" in
 
-alpha-*-linux*)
-  HOSTING_CRT0=/usr/lib/crt0.o
+alpha*-*-linux*)
+  HOSTING_CRT0=/usr/lib/crt1.o
   ;;
 
-alpha-*-*)
+alpha*-*-*)
   HOSTING_CRT0=/usr/ccs/lib/crt0.o
   NATIVE_LIB_DIRS=/usr/ccs/lib
   ;;
@@ -156,53 +153,4 @@ sparc*-*-solaris2*)
   NATIVE_LIB_DIRS=/usr/ccs/lib
   ;;
 
-esac
-
-HLDFLAGS=
-HLDENV=
-RPATH_ENVVAR=LD_LIBRARY_PATH
-# If we have shared libraries, try to set rpath reasonably.
-if test "${shared}" = "true"; then
-  case "${host}" in
-  *-*-hpux*)
-    HLDFLAGS='-Wl,+s,+b,$(libdir)'
-    RPATH_ENVVAR=SHLIB_PATH
-    ;;
-  *-*-irix[56]*)
-    HLDFLAGS='-Wl,-rpath,$(libdir)'
-    ;;
-  *-*-linux*aout*)
-    ;;
-  *-*-linux*)
-    HLDFLAGS='-Wl,-rpath,$(libdir)'
-    ;;
-  *-*-solaris*)
-    HLDFLAGS='-R $(libdir)'
-    ;;
-  *-*-sysv4*)
-    HLDENV='if test -z "$${LD_RUN_PATH}"; then LD_RUN_PATH=$(libdir); else LD_RUN_PATH=$${LD_RUN_PATH}:$(libdir); fi; export LD_RUN_PATH;'
-    ;;
-  esac
-fi
-
-# On SunOS, if the linker supports the -rpath option, use it to
-# prevent ../bfd and ../opcodes from being included in the run time
-# search path.
-case "${host}" in
-  *-*-sunos*)
-    echo 'main () { }' > conftest.c
-    ${CC} -o conftest -Wl,-rpath= conftest.c >/dev/null 2>conftest.t
-    if grep 'unrecognized' conftest.t >/dev/null 2>&1; then
-      :
-    elif grep 'No such file' conftest.t >/dev/null 2>&1; then
-      :
-    elif grep 'do not mix' conftest.t >/dev/null 2>&1; then
-      :
-    elif test "${shared}" = "true"; then
-      HLDFLAGS='-Wl,-rpath=$(libdir)'
-    else
-      HLDFLAGS='-Wl,-rpath='
-    fi
-    rm -f conftest.t conftest.c conftest
-    ;;
 esac

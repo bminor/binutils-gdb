@@ -104,7 +104,7 @@ h8300-*-hms)		targ_emul=h8300; targ_extra_emuls="h8300h h8300s"
 h8500-*-hms)		targ_emul=h8500
 			targ_extra_emuls="h8500s h8500b h8500m h8500c"
 			;;
-sh-*-elf*)		targ_emul=shelf
+sh-*-elf*|sh-*-rtems*)	targ_emul=shelf
 			targ_extra_emuls="shlelf sh shl"
 			;;
 sh-*-*)			targ_emul=sh; targ_extra_emuls=shl ;;
@@ -134,7 +134,7 @@ hppa*-*-rtems*)		targ_emul=hppaelf ;;
 vax-dec-ultrix* | vax-dec-bsd*) targ_emul=vax ;;
 mips*-dec-ultrix*)	targ_emul=mipslit ;;
 mips*-dec-osf*)		targ_emul=mipslit ;;
-mips*-sgi-irix[56]*)	targ_emul=elf32bmip ;;
+mips*-sgi-irix[56]*)	targ_emul=elf32bsmip ;;
 mips*-sgi-irix*)	targ_emul=mipsbig ;;
 mips*el-*-ecoff*)	targ_emul=mipsidtl ;;
 mips*-*-ecoff*)		targ_emul=mipsidt ;;
@@ -153,24 +153,24 @@ mips*r5900*-*-elf*)	targ_emul=elf32l4300 ;;
 mips*el-*-elf*)		targ_emul=elf32elmip ;;
 mips*-*-elf*)		targ_emul=elf32ebmip ;;
 mips*-*-rtems*)		targ_emul=elf32ebmip ;;
-mips*el-*-linux*)	targ_emul=elf32lmip
-			targ_extra_emuls="elf32bmip mipslit mipsbig"
+mips*el-*-linux*)	targ_emul=elf32lsmip
+			targ_extra_emuls="elf32bsmip mipslit mipsbig"
 			;;
-mips*-*-linux*)		targ_emul=elf32bmip
-			targ_extra_emuls="elf32lmip mipsbig mipslit"
+mips*-*-linux*)		targ_emul=elf32bsmip
+			targ_extra_emuls="elf32lsmip mipsbig mipslit"
 			;;
 mips*-*-lnews*)		targ_emul=mipslnews ;;
 mn10200-*-*)		targ_emul=mn10200 ;;
 mn10300-*-*)		targ_emul=mn10300 ;;
-alpha-*-linuxecoff*)	targ_emul=alpha targ_extra_emuls=elf64alpha
+alpha*-*-linuxecoff*)	targ_emul=alpha targ_extra_emuls=elf64alpha
 			tdir_elf64alpha=`echo ${targ_alias} | sed -e 's/ecoff//'`
 			;;
-alpha-*-linux*)		targ_emul=elf64alpha targ_extra_emuls=alpha
+alpha*-*-linux*)	targ_emul=elf64alpha targ_extra_emuls=alpha
 			tdir_alpha=`echo ${targ_alias} | sed -e 's/linux/linuxecoff/'`
 			;;
-alpha-*-osf*)		targ_emul=alpha ;;
-alpha-*-gnu*)		targ_emul=elf64alpha ;;
-alpha-*-netware*)	targ_emul=alpha ;;
+alpha*-*-osf*)		targ_emul=alpha ;;
+alpha*-*-gnu*)		targ_emul=elf64alpha ;;
+alpha*-*-netware*)	targ_emul=alpha ;;
 z8k-*-coff) 		targ_emul=z8002; targ_extra_emuls=z8001 ;;
 ns32k-pc532-mach* | ns32k-pc532-ux*)	targ_emul=pc532macha ;;
 ns32k-pc532-netbsd* | ns32k-pc532-lites*) targ_emul=ns32knbsd ;;
