@@ -56,7 +56,7 @@ struct ui_file *raw_stdout;
 static char *last_async_command;
 static char *previous_async_command;
 static char *mi_error_message;
-static struct regbuf *old_regs;
+static struct regcache *old_regs;
 
 extern void _initialize_mi_main (void);
 static char *mi_input (char *);
@@ -372,12 +372,12 @@ register_changed_p (int regnum)
 
   if (! frame_register_read (selected_frame, regnum, raw_buffer))
     return -1;
-  regbuf_read (old_regs, regnum, old_buffer);
+  regcache_read (old_regs, regnum, old_buffer);
   if (memcmp (old_buffer, raw_buffer, REGISTER_RAW_SIZE (regnum)) == 0)
     return 0;
 
   /* Found a changed register.  Update the buffer and return 1.  */
-  regbuf_write (old_regs, regnum, raw_buffer);
+  regcache_write (old_regs, regnum, raw_buffer);
   return 1;
 }
 
@@ -1471,7 +1471,7 @@ mi1_command_loop (void)
 static void
 setup_architecture_data (void)
 {
-  old_regs = regbuf_xmalloc (current_gdbarch);
+  old_regs = regcache_xmalloc (current_gdbarch);
 }
 
 static void
@@ -1497,7 +1497,6 @@ _initialize_mi_main (void)
     return;
 
   init_ui_hook = mi_init_ui;
-  setup_architecture_data ();
   register_gdbarch_swap (&old_regs, sizeof (old_regs), NULL);
   register_gdbarch_swap (NULL, 0, setup_architecture_data);
   if (event_loop_p)

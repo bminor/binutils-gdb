@@ -1672,7 +1672,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     SAVE_DUMMY_FRAME_TOS (sp);
 
   {
-    struct regbuf *retbuf = NULL;
+    struct regcache *retbuf = NULL;
     char *name;
     struct symbol *symbol;
 

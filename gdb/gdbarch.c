@@ -1118,8 +1118,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
-                      "EXTRACT_RETURN_VALUE(type, regbuf, valbuf)",
-                      XSTRING (EXTRACT_RETURN_VALUE (type, regbuf, valbuf)));
+                      "EXTRACT_RETURN_VALUE(type, regcache, valbuf)",
+                      XSTRING (EXTRACT_RETURN_VALUE (type, regcache, valbuf)));
 #endif
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
@@ -1130,8 +1130,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 #ifdef EXTRACT_STRUCT_VALUE_ADDRESS
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
-                      "EXTRACT_STRUCT_VALUE_ADDRESS(regbuf)",
-                      XSTRING (EXTRACT_STRUCT_VALUE_ADDRESS (regbuf)));
+                      "EXTRACT_STRUCT_VALUE_ADDRESS(regcache)",
+                      XSTRING (EXTRACT_STRUCT_VALUE_ADDRESS (regcache)));
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
                         "gdbarch_dump: EXTRACT_STRUCT_VALUE_ADDRESS = 0x%08lx\n",
@@ -3754,7 +3754,7 @@ set_gdbarch_return_value_on_stack (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regbuf *regbuf, char *valbuf)
+gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, char *valbuf)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->extract_return_value == 0)
@@ -3762,7 +3762,7 @@ gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct
                     "gdbarch: gdbarch_extract_return_value invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_extract_return_value called\n");
-  gdbarch->extract_return_value (type, regbuf, valbuf);
+  gdbarch->extract_return_value (type, regcache, valbuf);
 }
 
 void
@@ -3901,7 +3901,7 @@ gdbarch_extract_struct_value_address_p (struct gdbarch *gdbarch)
 }
 
 CORE_ADDR
-gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, struct regbuf *regbuf)
+gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, struct regcache *regcache)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->extract_struct_value_address == 0)
@@ -3909,7 +3909,7 @@ gdbarch_extract_struct_value_address (struct gdbarch *gdbarch, struct regbuf *re
                     "gdbarch: gdbarch_extract_struct_value_address invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_extract_struct_value_address called\n");
-  return gdbarch->extract_struct_value_address (regbuf);
+  return gdbarch->extract_struct_value_address (regcache);
 }
 
 void

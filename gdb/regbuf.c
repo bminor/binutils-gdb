@@ -30,7 +30,7 @@ extern void _initialize_regbuf (void);
 /* Per-architecture object describing the layout of a register buffer.
    Computed once when the architecture is created */
 
-struct gdbarch_data *regbuf_data_handle;
+struct gdbarch_data *regcache_data_handle;
 
 struct regbuf_descr
 {
@@ -55,8 +55,7 @@ regbuf_descr (struct gdbarch *gdbarch)
   int i;
   /* FIXME: cagney/2002-05-11: gdbarch_data() should take that
      ``gdbarch'' as a parameter.  */
-  struct regbuf_descr *descr = gdbarch_data (gdbarch,
-					     regbuf_data_handle);
+  struct regbuf_descr *descr = gdbarch_data (gdbarch, regbuf_data_handle);
   if (descr != NULL)
     return descr;
   

@@ -40,7 +40,7 @@
 #include "ui-out.h"
 #include "event-top.h"
 #include "parser-defs.h"
-#include "regbuf.h"
+#include "regcache.h"
 
 /* Functions exported for general use: */
 
@@ -970,7 +970,7 @@ breakpoint_auto_delete_contents (PTR arg)
    will eventually be popped when we do hit the dummy end breakpoint).  */
 
 int
-run_stack_dummy (CORE_ADDR addr, struct regbuf **buffer)
+run_stack_dummy (CORE_ADDR addr, struct regcache **buffer)
 {
   struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
   int saved_async = 0;
@@ -1043,7 +1043,7 @@ run_stack_dummy (CORE_ADDR addr, struct regbuf **buffer)
     return 2;
 
   /* On normal return, the stack dummy has been popped already.  */
-  *buffer = regbuf_dup (stop_registers);
+  *buffer = regcache_dup (stop_registers);
   return 0;
 }
 

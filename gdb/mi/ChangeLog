@@ -1,3 +1,9 @@
+2002-05-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-main.c (register_changed_p): Update.
+	(setup_architecture_data): Update
+	(_initialize_mi_main): Don't call setup_architecture_data.
+
 2002-05-11  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-main.c: Include "regbuf.h".

@@ -1,3 +1,86 @@
+2002-05-16  Andrew Cagney  <ac131313@redhat.com>
+
+
+	* blockframe.c, regbuf.c, rs6000-tdep.c: Include "regcache.h".
+
+** REMEMBER TO FIX DEPENDENCIES
+	
+	* regcache.c: Update copyright.
+
+	* regbuf.c (regbuf_descr): gdbarch_data finally takes a gdbarch
+	parameter.
+
+	* rs6000-tdep.c (rs6000_extract_return_value): Update.
+	(rs6000_extract_struct_value_address): Update.
+
+	* infrun.c (write_inferior_status_register): Update.
+	(save_inferior_status): Update.
+	(discard_inferior_status): Update.
+	(build_infrun): Update.
+
+2002-05-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* infcmd.c: Include "regcache.h" instead of "regbuf.h".
+
+	* infrun.c (save_inferior_status): Update.
+	(struct inferior_status): Change type of stop_registers and
+	registers to `struct regcache'.
+	(restore_inferior_status): 
+
+	* regcache.h (regcache_dup): Declare.
+
+	* valops.c (hand_function_call): Update.
+
+	* gdbarch.sh (struct regcache): Declare opaque.
+	(EXTRACT_STRUCT_VALUE_ADDRESS): Ditto.
+	(EXTRACT_RETURN_VALUE): Ditto.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+	* values.c (value_being_returned): Change retbuf parameter to a
+	`struct regcache'.
+
+	* inferior.h (run_stack_dummy): Change retbuf to a `struct
+	regcache'.
+	* value.h (value_being_returned): Ditto.
+
+	* infcmd.c (run_stack_dummy): Update.
+	(run_stack_dummy): Change parameter to regcache.
+
+	* infrun.c (stop_registers): Change type to ``struct regcache''.
+	* inferior.h (stop_registers): Ditto.
+
+	* regcache.c (build_regcache): Update.
+	(regcache_restore): Ditto.
+	(regcache_save): Ditto.
+	(_initialize_regcache): Swap current_regcache instead of
+	regcache_regbuf.
+
+	* blockframe.c (generic_get_saved_register): 
+
+	* regcache.h (regcache_read_as_address): Declare.
+	(regcache_xfree, regcache_xmalloc):
+
+	* blockframe.c (generic_read_register_dummy): Update.
+	(generic_push_dummy_frame): Update.
+
+	* frame.h (generic_find_dummy_frame): Change return type to
+	``struct regcache''.
+
+	* blockframe.c (struct dummy_frame): Replace regbuf with regcache.
+	(generic_find_dummy_frame): Update.
+
+	* regcache.h (struct regbuf): Delete declaration.
+	(current_regcache): Declare.
+	(struct regcache): Declare opaque.
+	(struct regbuf): Delete.
+
+	* regcache.c (regcache_write): Add regcache parameter.  Only pass
+	through to target code when backed by a real target.
+	(regcache_read): Ditto.
+	(struct regcache): define.
+	(current_regcache): New global variable.
+	(regcache_regbuf): Delete.
+
 2002-05-16  Richard Earnshaw  <rearnsha@arm.com>
 
 	* regbuf.c (regbuf_descr): gdbarch_data() now takes a gdbarch

@@ -154,7 +154,7 @@ extern void generic_mourn_inferior (void);
 
 extern void terminal_ours (void);
 
-extern int run_stack_dummy (CORE_ADDR, struct regbuf **retbuf);
+extern int run_stack_dummy (CORE_ADDR, struct regcache **retbuf);
 
 extern CORE_ADDR read_pc (void);
 
@@ -397,7 +397,7 @@ extern int proceed_to_finish;
    Thus this contains the return value from the called function (assuming
    values are returned in a register).  */
 
-extern struct regbuf *stop_registers;
+extern struct regcache *stop_registers;
 
 /* Nonzero if the child process in inferior_ptid was attached rather
    than forked.  */

@@ -42,7 +42,6 @@
 #include "inf-loop.h"
 #include "regcache.h"
 #include "value.h"
-#include "regbuf.h"
 
 /* Prototypes for local functions */
 
@@ -338,7 +337,7 @@ int proceed_to_finish;
    Thus this contains the return value from the called function (assuming
    values are returned in a register).  */
 
-struct regbuf *stop_registers;
+struct regcache *stop_registers;
 
 /* Nonzero if program stopped due to error trying to insert breakpoints.  */
 
@@ -3908,12 +3907,12 @@ struct inferior_status
   int stop_after_trap;
   int stop_soon_quietly;
   CORE_ADDR selected_frame_address;
-  struct regbuf *stop_registers;
+  struct regcache *stop_registers;
 
   /* These are here because if call_function_by_hand has written some
      registers and then decides to call error(), we better not have changed
      any registers.  */
-  struct regbuf *registers;
+  struct regcache *registers;
 
   int selected_level;
   int breakpoint_proceeded;
@@ -3928,7 +3927,7 @@ write_inferior_status_register (struct inferior_status *inf_status, int regno,
   int size = REGISTER_RAW_SIZE (regno);
   void *buf = alloca (size);
   store_signed_integer (buf, size, val);
-  regbuf_write (inf_status->registers, regno, buf);
+  regcache_write (inf_status->registers, regno, buf);
 }
 
 /* Save all of the information associated with the inferior<==>gdb
@@ -3962,8 +3961,8 @@ save_inferior_status (int restore_stack_info)
   inf_status->restore_stack_info = restore_stack_info;
   inf_status->proceed_to_finish = proceed_to_finish;
 
-  inf_status->stop_registers = regbuf_dup (stop_registers);
-  inf_status->registers = regbuf_xmalloc (current_gdbarch);
+  inf_status->stop_registers = regcache_dup (stop_registers);
+  inf_status->registers = regcache_xmalloc (current_gdbarch);
   regcache_save (inf_status->registers);
 
   record_selected_frame (&(inf_status->selected_frame_address),
@@ -4029,14 +4028,14 @@ restore_inferior_status (struct inferior_status *inf_status)
   proceed_to_finish = inf_status->proceed_to_finish;
 
   /* FIXME: Is the restore of stop_registers always needed?  */
-  regbuf_xfree (stop_registers);
+  regcache_xfree (stop_registers);
   stop_registers = inf_status->stop_registers;
 
   /* The inferior can be gone if the user types "print exit(0)"
      (and perhaps other times).  */
   if (target_has_execution)
     regcache_restore (inf_status->registers);
-  regbuf_xfree (inf_status->registers);
+  regcache_xfree (inf_status->registers);
 
   /* FIXME: If we are being called after stopping in a function which
      is called from gdb, we should not be trying to restore the
@@ -4084,8 +4083,8 @@ discard_inferior_status (struct inferior_status *inf_status)
 {
   /* See save_inferior_status for info on stop_bpstat. */
   bpstat_clear (&inf_status->stop_bpstat);
-  regbuf_xfree (inf_status->registers);
-  regbuf_xfree (inf_status->stop_registers);
+  regcache_xfree (inf_status->registers);
+  regcache_xfree (inf_status->stop_registers);
   xfree (inf_status);
 }
 
@@ -4177,7 +4176,7 @@ save_inferior_ptid (void)
 static void
 build_infrun (void)
 {
-  stop_registers = regbuf_xmalloc (current_gdbarch);
+  stop_registers = regcache_xmalloc (current_gdbarch);
 }
 
 void

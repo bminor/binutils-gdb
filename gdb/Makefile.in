@@ -530,7 +530,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	demangle.c dwarfread.c dwarf2read.c elfread.c environ.c eval.c \
 	event-loop.c event-top.c \
 	expprint.c f-exp.y f-lang.c f-typeprint.c f-valprint.c \
-	findvar.c regcache.c regbuf.c gdbarch.c arch-utils.c gdbtypes.c \
+	findvar.c regcache.c gdbarch.c arch-utils.c gdbtypes.c \
 	inf-loop.c infcmd.c inflow.c infrun.c language.c \
 	kod.c kod-cisco.c \
 	ui-out.c cli-out.c \
@@ -643,7 +643,6 @@ memattr_h =     memattr.h
 monitor_h =	monitor.h
 objfiles_h =	objfiles.h
 parser_defs_h =	parser-defs.h $(doublest_h)
-regbuf_h =	regbuf.h
 regcache_h =	regcache.h
 remote_h =	remote.h
 remote_utils_h =  remote-utils.h $(target_h)
@@ -726,7 +725,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	gdbarch.o arch-utils.o gdbtypes.o copying.o $(DEPFILES) \
 	memattr.o mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
 	builtin-regs.o std-regs.o \
-	signals.o regbuf.o \
+	signals.o \
 	kod.o kod-cisco.o \
 	gdb-events.o \
 	exec.o bcache.o objfiles.o minsyms.o maint.o demangle.o \
@@ -1300,7 +1299,7 @@ avr-tdep.o: avr-tdep.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 bcache.o: bcache.c $(bcache_h) $(defs_h)
 
 blockframe.o: blockframe.c $(defs_h) $(gdbcore_h) $(inferior_h) \
-	$(objfiles_h) $(symfile_h) $(target_h) $(regcache_h) $(regbuf_h)
+	$(objfiles_h) $(symfile_h) $(target_h) $(regcache_h)
 
 breakpoint.o: breakpoint.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(language_h) $(target_h) $(gdbthread_h) \
@@ -1460,10 +1459,7 @@ findvar.o: findvar.c $(defs_h) $(gdbcore_h) $(inferior_h) $(target_h) \
 frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 	$(regcache_h)
 
-regbuf.o: regbuf.c $(defs_h) $(regbuf_h) gdb_assert.h
-
-regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(regcache_h) \
-	$(regbuf_h)
+regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(regcache_h)
 
 fork-child.o: fork-child.c $(gdb_wait_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(terminal_h) $(gdbthread_h) $(gdb_string_h)
@@ -1679,7 +1675,7 @@ ia64-tdep.o: ia64-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \
 
 infcmd.o: infcmd.c $(defs_h) environ.h $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(language_h) $(symfile_h) $(gdb_string_h) \
-	$(ui_out_h) $(completer_h) $(regbuf_h)
+	$(ui_out_h) $(completer_h)
 
 inflow.o: inflow.c $(bfd_h) $(command_h) $(defs_h) $(inferior_h) \
 	$(target_h) $(terminal_h) $(gdbthread_h) $(gdb_string_h)
@@ -2025,8 +2021,7 @@ rs6000-nat.o: rs6000-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(target_h) \
 	$(gdb_stabs_h) $(regcache_h) $(arch_utils_h)
 
 rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
-	$(target_h) ppc-tdep.h $(regcache_h) $(value_h) $(parser_defs_h) \
-	$(regbuf_h)
+	$(target_h) ppc-tdep.h $(regcache_h) $(value_h) $(parser_defs_h)
 
 s390-tdep.o: s390-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) $(inferior_h) \
 	$(symtab_h) $(target_h) $(gdbcore_h) $(gdbcmd_h) $(symfile_h) \

@@ -1,6 +1,7 @@
 /* Cache and manage the values of registers for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000,
+   2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,13 +23,20 @@
 #ifndef REGCACHE_H
 #define REGCACHE_H
 
-struct regbuf;
+struct regcache;
+
+extern struct regcache *current_regcache;
+
+void regcache_xfree (struct regcache *regcache);
+struct regcache *regcache_xmalloc (struct gdbarch *gdbarch);
 
 /* Transfer a raw register [0..NUM_REGS) between core-gdb and the
    regcache. */
 
-void regcache_read (int rawnum, char *buf);
-void regcache_write (int rawnum, char *buf);
+void regcache_read (struct regcache *regcache, int rawnum, char *buf);
+void regcache_write (struct regcache *regcache, int rawnum, char *buf);
+int regcache_valid_p (struct regcache *regcache, int regnum);
+CORE_ADDR regcache_read_as_address (struct regcache *regcache, int rawnum);
 
 /* Transfer a raw register [0..NUM_REGS) between the regcache and the
    target.  These functions are called by the target in response to a
@@ -53,9 +61,13 @@ extern signed char *register_valid;
    write through - it is strictly for code that needs to restore the
    target's registers to a previous state.  */
 
-extern void regcache_save (struct regbuf *regbuf);
-extern void regcache_restore (struct regbuf *regbufx);
-extern void regcache_restore_no_writethrough (struct regbuf *regbufx);
+extern void regcache_save (struct regcache *regcache);
+extern void regcache_restore (struct regcache *regcache);
+extern void regcache_restore_no_writethrough (struct regcache *regcache);
+extern struct regcache *regcache_dup (struct regcache *regcache);
+
+extern char *grub_around_regcache_for_registers (struct regcache *);
+extern char *grub_around_regcache_for_register_valid (struct regcache *);
 
 extern int register_cached (int regnum);
 

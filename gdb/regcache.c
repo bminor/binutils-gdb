@@ -1,6 +1,7 @@
 /* Cache and manage the values of registers for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000,
+   2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,7 +27,6 @@
 #include "gdbcmd.h"
 #include "regcache.h"
 #include "gdb_assert.h"
-#include "regbuf.h"
 
 /*
  * DATA STRUCTURE
@@ -34,11 +34,202 @@
  * Here is the actual register cache.
  */
 
-/* Global structure containing the current regbuf.  */
+/* Per-architecture object describing the layout of a register cache.
+   Computed once when the architecture is created */
+
+struct gdbarch_data *regcache_data_handle;
+
+struct regcache_descr
+{
+  /* The architecture this descriptor belongs to.  */
+  struct gdbarch *gdbarch;
+  /* Total number of registers in the buffer.  */
+  int nr_registers;
+  /* Size of the register buffer, over-allocate making room for both
+     real and pseudo-registers.  */
+  /* FIXME: cagney/2002-05-11: This over-allocation shouldn't be
+     necessary.  Unfortunatly, some targets store real values in
+     pseudo-registers and we want to be sure those targets don't crash
+     GDB.  Once that code has been trashed this can be pruned down to
+     just raw registers.  */
+  long sizeof_registers;
+  /* Offset into the register buffer for each register.  */
+  long *register_offset;
+  /* Size, in bytes of the register valid array.  */
+  long sizeof_register_valid_p;
+  /* Size, in ``bytes'', of a register.  */
+  long *sizeof_register;
+};
+
+static struct regcache_descr *
+regcache_descr (struct gdbarch *gdbarch)
+{
+  int i;
+  struct regcache_descr *descr;
+  /* FIXME: cagney/2002-05-11: gdbarch_data() should take that
+     ``gdbarch'' as a parameter.  */
+  gdb_assert (gdbarch != NULL);
+
+  descr = gdbarch_data (gdbarch, regcache_data_handle);
+  if (descr != NULL)
+    return descr;
+  
+  descr = XMALLOC (struct regcache_descr);
+  descr->gdbarch = gdbarch;
+
+  /* FIXME: cagney/2002-05-11: Shouldn't be including pseudo-registers
+     in the register buffer.  Unfortunatly some architectures do.  */
+  descr->nr_registers = NUM_REGS + NUM_PSEUDO_REGS;
+  descr->sizeof_register_valid_p = NUM_REGS + NUM_PSEUDO_REGS;
+
+  /* FIXME: cagney/2002-05-11: Instead of using REGISTER_BYTE() this
+     code should compute the offets et.al. at runtime.  This currently
+     isn't possible because some targets overlap register locations -
+     see the mess in read_register_bytes() and write_register_bytes()
+     registers.  */
+  descr->sizeof_register = XCALLOC (descr->nr_registers, long);
+  descr->register_offset = XCALLOC (descr->nr_registers, long);
+  for (i = 0; i < descr->nr_registers; i++)
+    {
+      descr->register_offset[i] = REGISTER_BYTE (i);
+      descr->sizeof_register[i] = REGISTER_RAW_SIZE (i);
+    }
+
+  /* Come up with the real size of the registers buffer.  */
+  descr->sizeof_registers = REGISTER_BYTES; /* OK use.  */
+  for (i = 0; i < descr->nr_registers; i++)
+    {
+      long regend;
+      /* Keep extending the buffer so that there is always enough
+         space for all registers.  The comparison is necessary since
+         legacy code is free to put registers in random places in the
+         buffer separated by holes.  Once REGISTER_BYTE() is killed
+         this can be greatly simplified.  */
+      /* FIXME: cagney/2001-12-04: This code shouldn't need to use
+         REGISTER_BYTE().  Unfortunatly, legacy code likes to lay the
+         buffer out so that certain registers just happen to overlap.
+         Ulgh!  New targets use gdbarch's register read/write and
+         entirely avoid this uglyness.  */
+      regend = descr->register_offset[i] + descr->sizeof_register[i];
+      if (descr->sizeof_registers < regend)
+	descr->sizeof_registers = regend;
+    }
+  set_gdbarch_data (gdbarch, regcache_data_handle, descr);
+  return descr;
+}
+
+static void
+xfree_regcache_descr (struct gdbarch *gdbarch, void *ptr)
+{
+  struct regcache_descr *descr = ptr;
+  if (descr == NULL)
+    return;
+  xfree (descr->register_offset);
+  xfree (descr->sizeof_register);
+  descr->register_offset = NULL;
+  descr->sizeof_register = NULL;
+  xfree (descr);
+}
+
+/* For moment, ``struct regcache'' is just a character buffer.  */
+
+struct regcache
+{
+  struct regcache_descr *descr;
+  char *registers;
+  char *register_valid_p;
+  /* If a value isn't in the cache should the corresponding target be
+     queried for a value.  */
+  int passthrough_p;
+};
+
+struct regcache *
+regcache_xmalloc (struct gdbarch *gdbarch)
+{
+  struct regcache_descr *descr;
+  struct regcache *regcache;
+  gdb_assert (gdbarch != NULL);
+  descr = regcache_descr (gdbarch);
+  regcache = XMALLOC (struct regcache);
+  regcache->descr = descr;
+  regcache->registers = XCALLOC (descr->sizeof_registers, char);
+  regcache->register_valid_p = XCALLOC (descr->sizeof_register_valid_p, char);
+  regcache->passthrough_p = 0;
+  return regcache;
+}
+
+void
+regcache_xfree (struct regcache *regcache)
+{
+  if (regcache == NULL)
+    return;
+  xfree (regcache->registers);
+  xfree (regcache->register_valid_p);
+  xfree (regcache);
+}
+
+void
+do_regcache_xfree (void *buf)
+{
+  regcache_xfree (buf);
+}
+
+struct regcache *
+regcache_xmalloc_with_cleanup (struct gdbarch *gdbarch)
+{
+  struct regcache *regcache = regcache_xmalloc (gdbarch);
+  make_cleanup (do_regcache_xfree, regcache);
+  return regcache;
+}
+
+struct regcache *
+regcache_dup (struct regcache *regcache)
+{
+  struct regcache *newbuf;
+  gdb_assert (current_regcache != NULL);
+  newbuf = regcache_xmalloc (regcache->descr->gdbarch);
+  memcpy (newbuf->registers, regcache->registers,
+	  regcache->descr->sizeof_registers);
+  memcpy (newbuf->register_valid_p, regcache->register_valid_p,
+	  regcache->descr->sizeof_register_valid_p);
+  return newbuf;
+}
+
+int
+regcache_valid_p (struct regcache *regcache, int regnum)
+{
+  gdb_assert (regcache != NULL);
+  gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_registers);
+  return regcache->register_valid_p[regnum];
+}
+
+CORE_ADDR
+regcache_read_as_address (struct regcache *regcache, int regnum)
+{
+  char *buf;
+  gdb_assert (regcache != NULL);
+  gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_registers);
+  buf = alloca (regcache->descr->sizeof_register[regnum]);
+  regcache_read (regcache, regnum, buf);
+  return extract_address (buf, regcache->descr->sizeof_register[regnum]);
+}
+
+char *
+grub_around_regcache_for_registers (struct regcache *regcache)
+{
+  return regcache->registers;
+}
+
+char *
+grub_around_regcache_for_register_valid (struct regcache *regcache)
+{
+  return regcache->register_valid_p;
+}
+
+/* Global structure containing the current regcache.  */
 /* FIXME: cagney/2002-05-11: The two global arrays registers[] and
    register_valid[] currently point into this structure.  */
-
-struct regbuf *regcache_regbuf;
+struct regcache *current_regcache;
 
 /* NOTE: this is a write-through cache.  There is no "dirty" bit for
    recording if the register values have been changed (eg. by the
@@ -323,11 +514,21 @@ legacy_read_register_gen (int regnum, char *myaddr)
 }
 
 void
-regcache_read (int rawnum, char *buf)
+regcache_read (struct regcache *regcache, int regnum, char *buf)
 {
-  gdb_assert (rawnum >= 0 && rawnum < (NUM_REGS + NUM_PSEUDO_REGS));
-  /* For moment, just use underlying legacy code. Ulgh!!! */
-  legacy_read_register_gen (rawnum, buf);
+  gdb_assert (regcache != NULL && buf != NULL);
+  gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_registers);
+  if (regcache->passthrough_p)
+    /* For moment, just use underlying legacy code. Ulgh!!! This
+       silently and very indirectly updates the regcache's regcache via
+       the global register_valid[].  */
+    legacy_read_register_gen (regnum, buf);
+  else
+    {
+      memcpy (buf, (regcache->registers
+		    + regcache->descr->register_offset[regnum]),
+	      regcache->descr->sizeof_register[regnum]);
+    }
 }
 
 void
@@ -382,11 +583,21 @@ legacy_write_register_gen (int regnum, char *myaddr)
 }
 
 void
-regcache_write (int rawnum, char *buf)
+regcache_write (struct regcache *regcache, int regnum, char *buf)
 {
-  gdb_assert (rawnum >= 0 && rawnum < (NUM_REGS + NUM_PSEUDO_REGS));
-  /* For moment, just use underlying legacy code. Ulgh!!! */
-  legacy_write_register_gen (rawnum, buf);
+  gdb_assert (regcache != NULL && buf != NULL);
+  gdb_assert (regnum >= 0 && regnum < regcache->descr->nr_registers);
+  if (regcache->passthrough_p)
+    /* For moment, just use underlying legacy code. Ulgh!!! This
+       silently and very indirectly updates the regcache's regcache via
+       the global register_valid[].  */
+    legacy_write_register_gen (regnum, buf);
+  else
+    {
+      memcpy (regcache->registers + regcache->descr->register_offset[regnum], buf,
+	      regcache->descr->sizeof_register[regnum]);
+      regcache->register_valid_p[regnum] = 1;
+    }
 }
 
 void
@@ -762,40 +973,52 @@ reg_flush_command (char *command, int from_tty)
 static void
 build_regcache (void)
 {
-  regcache_regbuf = regbuf_xmalloc (current_gdbarch);
-  registers = grub_around_regbuf_for_registers (regcache_regbuf);
-  register_valid = grub_around_regbuf_for_register_valid (regcache_regbuf);
+  current_regcache = regcache_xmalloc (current_gdbarch);
+  current_regcache->passthrough_p = 1;
+  registers = grub_around_regcache_for_registers (current_regcache);
+  register_valid = grub_around_regcache_for_register_valid (current_regcache);
 }
 
 void
-regcache_save (struct regbuf *regbuf)
+regcache_save (struct regcache *regcache)
 {
-  /* FIXME: cagney/2002-05-11: This assumes that the current
-     architecture and the regbuf architecture are identical.  */
-  char *regbuf_registers = grub_around_regbuf_for_registers (regbuf);
-  char *regbuf_register_valid = grub_around_regbuf_for_register_valid (regbuf);
-  memcpy (regbuf_registers, registers, REGISTER_BYTES);
-  memcpy (regbuf_register_valid, register_valid, NUM_REGS + NUM_PSEUDO_REGS);
+  gdb_assert (current_regcache != NULL && regcache != NULL);
+  gdb_assert (current_regcache->descr->gdbarch == regcache->descr->gdbarch);
+  memcpy (grub_around_regcache_for_registers (regcache),
+	  grub_around_regcache_for_registers (current_regcache),
+	  regcache->descr->sizeof_registers);
+  memcpy (grub_around_regcache_for_register_valid (regcache),
+	  grub_around_regcache_for_register_valid (current_regcache),
+	  regcache->descr->sizeof_register_valid_p);
 }
 
 void
-regcache_restore (struct regbuf *regbuf)
+regcache_restore (struct regcache *regcache)
 {
-  char *regbuf_registers = grub_around_regbuf_for_registers (regbuf);
-  write_register_bytes (0, regbuf_registers, REGISTER_BYTES);
+  char *regcache_registers;
+  gdb_assert (current_regcache != NULL && regcache != NULL);
+  gdb_assert (current_regcache->descr->gdbarch == regcache->descr->gdbarch);
+  regcache_registers = grub_around_regcache_for_registers (regcache);
+  /* NOTE: cagney, this should be regcache->sizeof_registers but,
+     again, things are screwed as it might copy pseudo registers.  */
+  write_register_bytes (0, regcache_registers, REGISTER_BYTES);
 }
 
 void
-regcache_restore_no_writethrough (struct regbuf *regbuf)
+regcache_restore_no_writethrough (struct regcache *regcache)
 {
-  char *regbuf_registers = grub_around_regbuf_for_registers (regbuf);
-  memcpy (registers, regbuf_registers, REGISTER_BYTES);
+  char *regcache_registers;
+  gdb_assert (current_regcache != NULL && regcache != NULL);
+  gdb_assert (current_regcache->descr->gdbarch == regcache->descr->gdbarch);
+  regcache_registers = grub_around_regcache_for_registers (regcache);
+  memcpy (registers, regcache_registers, REGISTER_BYTES);
 }
 
 void
 _initialize_regcache (void)
 {
-  REGISTER_GDBARCH_SWAP (regcache_regbuf);
+  regcache_data_handle = register_gdbarch_data (NULL, xfree_regcache_descr);
+  REGISTER_GDBARCH_SWAP (current_regcache);
   register_gdbarch_swap (&registers, sizeof (registers), NULL);
   register_gdbarch_swap (&register_valid, sizeof (register_valid), NULL);
   register_gdbarch_swap (NULL, 0, build_regcache);
