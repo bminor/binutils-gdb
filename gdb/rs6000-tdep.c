@@ -1039,7 +1039,7 @@ rs6000_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 ran_out_of_registers_for_arguments:
 
   saved_sp = read_sp ();
-#ifndef ELF_OBJECT_FORMAT
+
   /* location for 8 parameters are always reserved. */
   sp -= wordsize * 8;
 
@@ -1048,7 +1048,6 @@ ran_out_of_registers_for_arguments:
 
   /* stack pointer must be quadword aligned */
   sp &= -16;
-#endif
 
   /* if there are more arguments, allocate space for them in 
      the stack, then push them starting from the ninth one. */
