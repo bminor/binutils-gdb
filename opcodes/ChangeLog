@@ -1,4 +1,14 @@
+Mon Nov 25 13:08:40 1996  J.T. Conklin  <jtc@cygnus.com>
+
+	* m68k-opc.c (m68k_opcodes): Consistantly Use "s" as the storage
+ 	specifier of the effective-address operand in immediate forms of
+ 	arithmetic instructions.  The specifier for the immediate operand
+ 	notes how and where the constant will be stored.
+
 Mon Nov 25 11:17:01 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-opc.c (mn10300_opcodes): Remove redundant "lcc"
+	opcode.
 
 	* mn10300-dis.c (disassemble): Use '$' instead of '%' for 
 	register prefix.
