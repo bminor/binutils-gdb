@@ -1,5 +1,5 @@
 /* readelf.c -- display contents of an ELF format file
-   Copyright (C) 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1998, 99, 2000 Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
    Modifications by Nick Clifton <nickc@cygnus.com>
@@ -2999,9 +2999,10 @@ get_dynamic_flags (flags)
 	case DF_SYMBOLIC: strcat (buff, "SYMBOLIC "); break;
 	case DF_TEXTREL:  strcat (buff, "TEXTREL "); break;
 	case DF_BIND_NOW: strcat (buff, "BIND_NOW "); break;
-	default:          strcat (buff, "unknown "); return;
+	default:          strcat (buff, "unknown "); break;
 	}
     }
+  return buff;
 }
 
 /* Parse and display the contents of the dynamic segment.  */
@@ -3178,7 +3179,7 @@ process_dynamic_segment (file)
 	{
 	case DT_FLAGS:
 	  if (do_dynamic)
-	    printf (get_dynamic_flags (entry->d_un.d_val));
+	    printf ("%s", get_dynamic_flags (entry->d_un.d_val));
 	  break;
 	  
 	case DT_AUXILIARY:
@@ -5965,7 +5966,7 @@ read_and_display_attr (attribute, form, data, pointer_size)
     case DW_FORM_ref_addr:
     case DW_FORM_addr:
       uvalue = byte_get (data, pointer_size);
-      printf (is_ref ? " <%x>" : " %#x", uvalue);
+      printf (is_ref ? " <%lx>" : " %#lx", uvalue);
       data += pointer_size;
       break;
 
@@ -5973,21 +5974,21 @@ read_and_display_attr (attribute, form, data, pointer_size)
     case DW_FORM_flag:
     case DW_FORM_data1:
       uvalue = byte_get (data ++, 1);
-      printf (is_ref ? " <%x>" : " %d", uvalue);
+      printf (is_ref ? " <%lx>" : " %ld", uvalue);
       break;
 
     case DW_FORM_ref2:
     case DW_FORM_data2:
       uvalue = byte_get (data, 2);
       data += 2;
-      printf (is_ref ? " <%x>" : " %d", uvalue);
+      printf (is_ref ? " <%lx>" : " %ld", uvalue);
       break;
 
     case DW_FORM_ref4:
     case DW_FORM_data4:
       uvalue = byte_get (data, 4);
       data += 4;
-      printf (is_ref ? " <%x>" : " %d", uvalue);
+      printf (is_ref ? " <%lx>" : " %ld", uvalue);
       break;
 
     case DW_FORM_ref8:
@@ -6981,7 +6982,9 @@ process_corefile_note_segment (file, offset, length)
 
   external = pnotes;
 
-  printf (_("\nNotes at offset 0x%08lx with length 0x%08lx:\n"), offset, length);
+  printf (_("\nNotes at offset 0x%08lx with length 0x%08lx:\n"),
+	  (unsigned long) offset,
+	  (unsigned long) length);
   printf (_("  Owner\t\tData size\tDescription\n"));
 
   while (external < (Elf_External_Note *)((char *) pnotes + length))

@@ -1,3 +1,8 @@
+2000-01-27  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* utils.c (print_name_only): Don't pass error strings to
+	printf as format arg.
+
 1999-09-24  Nick Clifton  <nickc@cygnus.com>
 
 	* gmon_io.c (gmon_out_read): Make sure that sensible values

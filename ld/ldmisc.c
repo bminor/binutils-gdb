@@ -1,5 +1,5 @@
 /* ldmisc.c
-   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
@@ -213,7 +213,7 @@ vfinfo (fp, fmt, arg)
 
 	    case 'E':
 	      /* current bfd error or errno */
-	      fprintf (fp, bfd_errmsg (bfd_get_error ()));
+	      fprintf (fp, "%s", bfd_errmsg (bfd_get_error ()));
 	      break;
 
 	    case 'I':

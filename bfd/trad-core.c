@@ -1,5 +1,5 @@
 /* BFD back end for traditional Unix core files (U-area and raw sections)
-   Copyright 1988, 89, 91, 92, 93, 94, 95, 96, 98, 1999
+   Copyright 1988, 89, 91, 92, 93, 94, 95, 96, 98, 99, 2000
    Free Software Foundation, Inc.
    Written by John Gilmore of Cygnus Support.
 
@@ -202,7 +202,7 @@ trad_unix_core_file_p (abfd)
      0 is at the place pointed to by u_ar0 (by setting the vma of the start
      of the section to -u_ar0).  GDB uses this info to locate the regs,
      using minor trickery to get around the offset-or-absolute-addr problem. */
-  core_regsec (abfd)->vma = 0 - (bfd_vma) u.u_ar0;
+  core_regsec (abfd)->vma = (asection *) (0 - (bfd_vma) u.u_ar0);
 
   core_datasec (abfd)->filepos = NBPG * UPAGES;
   core_stacksec (abfd)->filepos = (NBPG * UPAGES) + NBPG * u.u_dsize

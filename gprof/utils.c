@@ -69,7 +69,7 @@ DEFUN (print_name_only, (self), Sym * self)
 		}
 	    }
 	  sprintf (buf, " (%s:%d)", filename, self->line_num);
-	  printf (buf);
+	  printf ("%s", buf);
 	  size += strlen (buf);
 	}
       if (demangled)

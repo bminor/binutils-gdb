@@ -1,5 +1,5 @@
 /* ELF linking support for BFD.
-   Copyright 1995, 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
+   Copyright 1995, 96, 97, 98, 99, 2000 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -231,7 +231,7 @@ _bfd_elf_link_record_dynamic_symbol (info, h)
 	  if (h->root.type == bfd_link_hash_undefined)
 	    {
 	      bfd * abfd = h->root.u.undef.abfd;
-	      char * name = h->root.root.string;
+	      const char * name = h->root.root.string;
 	      
 	      (*info->callbacks->undefined_symbol)
 		(info, name, abfd, bfd_und_section_ptr, 0);

@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 386 COFF files.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -45,7 +45,6 @@ static reloc_howto_type *coff_i386_rtype_to_howto
 	   bfd_vma *));
 static reloc_howto_type *coff_i386_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
-static const bfd_target *i3coff_object_p PARAMS ((bfd *));
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
 /* The page size is a guess based on ELF.  */

@@ -1,3 +1,14 @@
+2000-01-27  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* coff-i386.c (i3coff_object_p): Remove prototype.
+	Update copyright.
+
+	* elflink.c (_bfd_elf_link_record_dynamic_symbol): Add const
+	to name.  Update copyright.
+
+	* trad-core.c (trad_unix_core_file_p): Cast core_regsec
+	assignment to avoid warning.  Update copyright.
+
 2000-01-24  Robert Lipe  (robertl@sco.com)
 
         * coffcode.h (coff_write_object_contents): Get buff via bfd_malloc
