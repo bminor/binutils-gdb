@@ -1,3 +1,8 @@
+Sun Mar 31 00:30:47 1996  steve chamberlain  <sac@slash.cygnus.com>
+
+	* scripttempl/{ppcpe.sc, pe.sc} (.junk): Remove and use /DISCARD/.
+	* emultempl/pe.em (init): Remove special case PPC code.
+
 Fri Mar 29 00:01:29 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* scripttempl/h8300.sc: Make vectors section 0xc4 bytes long
