@@ -37,6 +37,7 @@ config.sub
 configdos.bat
 configure
 configure.in
+configure.man
 cvs
 diff
 emacs
