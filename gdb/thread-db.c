@@ -25,8 +25,11 @@
 #include "gdb_proc_service.h"
 #include "gdb_thread_db.h"
 
+#include "bfd.h"
 #include "gdbthread.h"
 #include "inferior.h"
+#include "symfile.h"
+#include "objfiles.h"
 #include "target.h"
 
 #ifndef LIBTHREAD_DB_SO
@@ -51,6 +54,9 @@ static void (*target_new_objfile_chain) (struct objfile *objfile);
 
 /* Non-zero if we're using this module's target vector.  */
 static int using_thread_db;
+
+/* Non-zero if we musn't deactivate this module's target vector.  */
+static int keep_thread_db;
 
 /* Non-zero if we have determined the signals used by the threads
    library.  */
@@ -110,7 +116,7 @@ static CORE_ADDR td_create_bp_addr;
 static CORE_ADDR td_death_bp_addr;
 
 /* Prototypes for local functions.  */
-static int find_new_threads_callback (const td_thrhandle_t *th_p, void *data);
+static void thread_db_find_new_threads (void);
 
 
 /* Building process ids.  */
@@ -499,23 +505,17 @@ disable_thread_signals (void)
 }
 
 static void
-thread_db_push_target (void)
+deactivate_target (void)
 {
-  using_thread_db = 1;
+  /* Forget about the child's process ID.  We shouldn't need it
+     anymore.  */
+  proc_handle.pid = 0;
 
-  /* Push this target vector.  */
-  push_target (&thread_db_ops);
-
-  enable_thread_event_reporting ();
-}
-
-static void
-thread_db_unpush_target (void)
-{
-  /* Unpush this target vector.  */
-  unpush_target (&thread_db_ops);
-
-  using_thread_db = 0;
+  if (! keep_thread_db)
+    {
+      using_thread_db = 0;
+      unpush_target (&thread_db_ops);
+    }
 }
 
 static void
@@ -523,39 +523,61 @@ thread_db_new_objfile (struct objfile *objfile)
 {
   td_err_e err;
 
+  if (objfile == NULL)
+    {
+      /* All symbols have been discarded.  If the thread_db target is
+         active, deactivate it now, even if the application was linked
+         statically against the thread library.  */
+      keep_thread_db = 0;
+      if (using_thread_db)
+	deactivate_target ();
+
+      goto quit;
+    }
+
   if (using_thread_db)
     /* Nothing to do.  The thread library was already detected and the
        target vector was already activated.  */
     goto quit;
 
-  if (objfile == NULL)
-    /* Un-interesting object file.  */
-    goto quit;
-
-  /* Initialize the structure that identifies the child process.  */
+  /* Initialize the structure that identifies the child process.  Note
+     that at this point there is no guarantee that we actually have a
+     child process.  */
   proc_handle.pid = GET_PID (inferior_pid);
 
-  /* Now attempt to open a connection to the thread library running in
-     the child process.  */
+  /* Now attempt to open a connection to the thread library.  */
   err = td_ta_new_p (&proc_handle, &thread_agent);
   switch (err)
     {
     case TD_NOLIBTHREAD:
-      /* No thread library found in the child process, probably
-         because the child process isn't running yet.  */
+      /* No thread library was detected.  */
       break;
 
     case TD_OK:
-      /* The thread library was detected in the child; we go live now!  */
-      thread_db_push_target ();
+      /* The thread library was detected.  Activate the thread_db target.  */
+      push_target (&thread_db_ops);
+      using_thread_db = 1;
 
-      /* Find all user-space threads.  */
-      err = td_ta_thr_iter_p (thread_agent, find_new_threads_callback,
-			      &inferior_pid, TD_THR_ANY_STATE,
-			      TD_THR_LOWEST_PRIORITY, TD_SIGNO_MASK,
-			      TD_THR_ANY_USER_FLAGS);
-      if (err != TD_OK)
-	error ("Finding new threads failed: %s", thread_db_err_str (err));
+      /* If the thread library was detected in the main symbol file
+         itself, we assume that the program was statically linked
+         against the thread library and well have to keep this
+         module's target vector activated until forever...  Well, at
+         least until all symbols have been discarded anyway (see
+         above).  */
+      if (objfile == symfile_objfile)
+	{
+	  gdb_assert (proc_handle.pid == 0);
+	  keep_thread_db = 1;
+	}
+
+      /* We can only poke around if there actually is a child process.
+         If there is no child process alive, postpone the steps below
+         until one has been created.  */
+      if (proc_handle.pid != 0)
+	{
+	  enable_thread_event_reporting ();
+	  thread_db_find_new_threads ();
+	}
       break;
 
     default:
@@ -610,7 +632,7 @@ static void
 thread_db_detach (char *args, int from_tty)
 {
   disable_thread_event_reporting ();
-  thread_db_unpush_target ();
+  deactivate_target ();
 
   target_beneath->to_detach (args, from_tty);
 }
@@ -708,6 +730,12 @@ thread_db_wait (int pid, struct target_waitstatus *ourstatus)
     pid = lwp_from_thread (pid);
 
   pid = target_beneath->to_wait (pid, ourstatus);
+
+  if (proc_handle.pid == 0)
+    /* The current child process isn't the actual multi-threaded
+       program yet, so don't try to do any special thread-specific
+       post-processing and bail out early.  */
+    return pid;
 
   if (ourstatus->kind == TARGET_WAITKIND_EXITED)
     return -1;
@@ -834,24 +862,29 @@ thread_db_kill (void)
 static void
 thread_db_create_inferior (char *exec_file, char *allargs, char **env)
 {
-  /* We never want to actually create the inferior!  If this is ever
-     called, it means we were on the target stack when the user said
-     "run".  But we don't want to be on the new inferior's target
-     stack until the libthread_db connection is ready to be made.  So
-     we unpush ourselves from the stack, and then invoke
-     find_default_create_inferior, which will invoke the appropriate
-     process_stratum target to do the create.  */
+  target_beneath->to_create_inferior (exec_file, allargs, env);
+}
 
-  thread_db_unpush_target ();
+static void
+thread_db_post_startup_inferior (int pid)
+{
+  if (proc_handle.pid == 0)
+    {
+      /* The child process is now the actual multi-threaded
+         program.  Snatch its process ID...  */
+      proc_handle.pid = GET_PID (pid);
 
-  find_default_create_inferior (exec_file, allargs, env);
+      /* ...and perform the remaining initialization steps.  */
+      enable_thread_event_reporting ();
+      thread_db_find_new_threads();
+    }
 }
 
 static void
 thread_db_mourn_inferior (void)
 {
   remove_thread_event_breakpoints ();
-  thread_db_unpush_target ();
+  deactivate_target ();
 
   target_beneath->to_mourn_inferior ();
 }
@@ -967,6 +1000,7 @@ init_thread_db_ops (void)
   thread_db_ops.to_xfer_memory = thread_db_xfer_memory;
   thread_db_ops.to_kill = thread_db_kill;
   thread_db_ops.to_create_inferior = thread_db_create_inferior;
+  thread_db_ops.to_post_startup_inferior = thread_db_post_startup_inferior;
   thread_db_ops.to_mourn_inferior = thread_db_mourn_inferior;
   thread_db_ops.to_thread_alive = thread_db_thread_alive;
   thread_db_ops.to_find_new_threads = thread_db_find_new_threads;

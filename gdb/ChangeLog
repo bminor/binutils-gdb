@@ -1,3 +1,31 @@
+2000-12-27  Mark Kettenis  <kettenis@gnu.org>
+
+	Fix debugging programs statically linked against the thread library.
+	* thread-db.c: Various comment fixes and additions.
+	Include "bfd.h", "symfile.h" and "objfiles.h".
+	(keep_thread_db): New variable.
+	(find_new_threads_callback): Remove prototype.
+	(thread_db_find_new_threads): New prototype.
+	(thread_db_push_target, thread_db_unpush_target): Remove
+	functions.
+	(deactivate_target): New function.
+	(thread_db_new_objfile): If OBJFILE == NULL, force deactivation of
+	target vector.  Activate target vector directly instead of calling
+	thread_db_push_target.  Set keep_thread_db if thread library is
+	detected in the main symbol file.  Only enable thread event
+	reporting if there actually is a child process.  Likewise for
+	detecting new threads, done by calling thread_db_find_new_threads
+	instead of iterating over the threads ourselves.
+	(thread_db_detach): Call deactivate_target instead of
+	thread_db_unpush_target.
+	(thread_db_wait): Bail out early if we're not debugging the
+	multi-threaded child process yet.
+	(thread_db_post_startup_inferior): New function.
+	(thread_db_mourn_inferior): Call deactivate_target instead of
+	thread_db_unpush_target.
+	(init_thread_db_ops): Add thread_db_post_startup_inferior to
+	thread_db_ops.
+
 2000-12-22  Mark Kettenis  <kettenis@gnu.org>
 
 	* solib.c (solib_open): If path is relative, look for it
