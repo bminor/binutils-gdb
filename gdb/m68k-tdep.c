@@ -22,13 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 
 
-/* Things needed for making the inferior call functions.
-   It seems like every m68k based machine has almost identical definitions
-   in the individual machine's configuration files.  Most other cpu types
-   (mips, i386, etc) have routines in their *-tdep.c files to handle this
-   for most configurations.  The m68k family should be able to do this as
-   well.  These macros can still be overridden when necessary.  */
-
 /* Push an empty stack frame, to record the current PC, etc.  */
 
 void
