@@ -1,3 +1,8 @@
+2000-06-07  David Mosberger  <davidm@hpl.hp.com>
+
+	* config/tc-ia64.c: Add missing prototypes.
+	(generate_unwind_image): Cast argument to output_unw_records call.
+
 Wed Jun  7 22:44:14 2000  Denis Chertykov  <denisc@overta.ru>
 
 	* config/tc-avr.c (avr_operand): fix the fomratting of the comment.
