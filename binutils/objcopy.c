@@ -58,65 +58,65 @@ typedef struct section_rename
 section_rename;
 
 /* List of sections to be renamed.  */
-static section_rename * section_rename_list;
+static section_rename *section_rename_list;
 
 static void copy_usage
-  PARAMS ((FILE *, int));
+  (FILE *, int);
 static void strip_usage
-  PARAMS ((FILE *, int));
+  (FILE *, int);
 static flagword parse_flags
-  PARAMS ((const char *));
+  (const char *);
 static struct section_list *find_section_list
-  PARAMS ((const char *, bfd_boolean));
+  (const char *, bfd_boolean);
 static void setup_section
-  PARAMS ((bfd *, asection *, PTR));
+  (bfd *, asection *, void *);
 static void copy_section
-  PARAMS ((bfd *, asection *, PTR));
+  (bfd *, asection *, void *);
 static void get_sections
-  PARAMS ((bfd *, asection *, PTR));
+  (bfd *, asection *, void *);
 static int compare_section_lma
-  PARAMS ((const PTR, const PTR));
+  (const void *, const void *);
 static void add_specific_symbol
-  PARAMS ((const char *, struct symlist **));
+  (const char *, struct symlist **);
 static void add_specific_symbols
-  PARAMS ((const char *, struct symlist **));
+  (const char *, struct symlist **);
 static bfd_boolean is_specified_symbol
-  PARAMS ((const char *, struct symlist *));
+  (const char *, struct symlist *);
 static bfd_boolean is_strip_section
-  PARAMS ((bfd *, asection *));
+  (bfd *, asection *);
 static unsigned int filter_symbols
-  PARAMS ((bfd *, bfd *, asymbol **, asymbol **, long));
+  (bfd *, bfd *, asymbol **, asymbol **, long);
 static void mark_symbols_used_in_relocations
-  PARAMS ((bfd *, asection *, PTR));
+  (bfd *, asection *, void *);
 static void filter_bytes
-  PARAMS ((char *, bfd_size_type *));
+  (char *, bfd_size_type *);
 static bfd_boolean write_debugging_info
-  PARAMS ((bfd *, PTR, long *, asymbol ***));
+  (bfd *, void *, long *, asymbol ***);
 static void copy_object
-  PARAMS ((bfd *, bfd *));
+  (bfd *, bfd *);
 static void copy_archive
-  PARAMS ((bfd *, bfd *, const char *));
+  (bfd *, bfd *, const char *);
 static void copy_file
-  PARAMS ((const char *, const char *, const char *, const char *));
+  (const char *, const char *, const char *, const char *);
 static int strip_main
-  PARAMS ((int, char **));
+  (int, char **);
 static int copy_main
-  PARAMS ((int, char **));
+  (int, char **);
 static const char *lookup_sym_redefinition
-  PARAMS((const char *));
+  (const char *);
 static void redefine_list_append
-  PARAMS ((const char *, const char *, const char *));
+  (const char *, const char *, const char *);
 static const char * find_section_rename
-  PARAMS ((bfd *, sec_ptr, flagword *));
+  (bfd *, sec_ptr, flagword *);
 static void add_section_rename
-  PARAMS ((const char *, const char *, flagword));
+  (const char *, const char *, flagword);
 static void add_redefine_syms_file 
-  PARAMS ((const char *));
+  (const char *);
 
 #define RETURN_NONFATAL(s) {bfd_nonfatal (s); status = 1; return;}
 
-static asymbol **isympp = NULL;	/* Input symbols */
-static asymbol **osympp = NULL;	/* Output symbols that survive stripping */
+static asymbol **isympp = NULL;	/* Input symbols.  */
+static asymbol **osympp = NULL;	/* Output symbols that survive stripping.  */
 
 /* If `copy_byte' >= 0, copy only that byte of every `interleave' bytes.  */
 static int copy_byte = -1;
@@ -129,11 +129,11 @@ static int status = 0;		/* Exit status.  */
 enum strip_action
   {
     STRIP_UNDEF,
-    STRIP_NONE,			/* don't strip */
-    STRIP_DEBUG,		/* strip all debugger symbols */
-    STRIP_UNNEEDED,		/* strip unnecessary symbols */
+    STRIP_NONE,			/* Don't strip.  */
+    STRIP_DEBUG,		/* Strip all debugger symbols.  */
+    STRIP_UNNEEDED,		/* Strip unnecessary symbols.  */
     STRIP_NONDEBUG,		/* Strip everything but debug info.  */
-    STRIP_ALL			/* strip all symbols */
+    STRIP_ALL			/* Strip all symbols.  */
   };
 
 /* Which symbols to remove.  */
@@ -142,8 +142,8 @@ static enum strip_action strip_symbols;
 enum locals_action
   {
     LOCALS_UNDEF,
-    LOCALS_START_L,		/* discard locals starting with L */
-    LOCALS_ALL			/* discard all locals */
+    LOCALS_START_L,		/* Discard locals starting with L.  */
+    LOCALS_ALL			/* Discard all locals.  */
   };
 
 /* Which local symbols to remove.  Overrides STRIP_ALL.  */
@@ -251,41 +251,43 @@ static char *prefix_sections_string = 0;
 static char *prefix_alloc_sections_string = 0;
 
 /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
-
-#define OPTION_ADD_SECTION 150
-#define OPTION_CHANGE_ADDRESSES (OPTION_ADD_SECTION + 1)
-#define OPTION_CHANGE_LEADING_CHAR (OPTION_CHANGE_ADDRESSES + 1)
-#define OPTION_CHANGE_START (OPTION_CHANGE_LEADING_CHAR + 1)
-#define OPTION_CHANGE_SECTION_ADDRESS (OPTION_CHANGE_START + 1)
-#define OPTION_CHANGE_SECTION_LMA (OPTION_CHANGE_SECTION_ADDRESS + 1)
-#define OPTION_CHANGE_SECTION_VMA (OPTION_CHANGE_SECTION_LMA + 1)
-#define OPTION_CHANGE_WARNINGS (OPTION_CHANGE_SECTION_VMA + 1)
-#define OPTION_DEBUGGING (OPTION_CHANGE_WARNINGS + 1)
-#define OPTION_GAP_FILL (OPTION_DEBUGGING + 1)
-#define OPTION_NO_CHANGE_WARNINGS (OPTION_GAP_FILL + 1)
-#define OPTION_PAD_TO (OPTION_NO_CHANGE_WARNINGS + 1)
-#define OPTION_REMOVE_LEADING_CHAR (OPTION_PAD_TO + 1)
-#define OPTION_SET_SECTION_FLAGS (OPTION_REMOVE_LEADING_CHAR + 1)
-#define OPTION_SET_START (OPTION_SET_SECTION_FLAGS + 1)
-#define OPTION_STRIP_UNNEEDED (OPTION_SET_START + 1)
-#define OPTION_WEAKEN (OPTION_STRIP_UNNEEDED + 1)
-#define OPTION_REDEFINE_SYM (OPTION_WEAKEN + 1)
-#define OPTION_REDEFINE_SYMS (OPTION_REDEFINE_SYM + 1)
-#define OPTION_SREC_LEN (OPTION_REDEFINE_SYMS + 1)
-#define OPTION_SREC_FORCES3 (OPTION_SREC_LEN + 1)
-#define OPTION_STRIP_SYMBOLS (OPTION_SREC_FORCES3 + 1)
-#define OPTION_KEEP_SYMBOLS (OPTION_STRIP_SYMBOLS + 1)
-#define OPTION_LOCALIZE_SYMBOLS (OPTION_KEEP_SYMBOLS + 1)
-#define OPTION_KEEPGLOBAL_SYMBOLS (OPTION_LOCALIZE_SYMBOLS + 1)
-#define OPTION_WEAKEN_SYMBOLS (OPTION_KEEPGLOBAL_SYMBOLS + 1)
-#define OPTION_RENAME_SECTION (OPTION_WEAKEN_SYMBOLS + 1)
-#define OPTION_ALT_MACH_CODE (OPTION_RENAME_SECTION + 1)
-#define OPTION_PREFIX_SYMBOLS (OPTION_ALT_MACH_CODE + 1)
-#define OPTION_PREFIX_SECTIONS (OPTION_PREFIX_SYMBOLS + 1)
-#define OPTION_PREFIX_ALLOC_SECTIONS (OPTION_PREFIX_SECTIONS + 1)
-#define OPTION_FORMATS_INFO (OPTION_PREFIX_ALLOC_SECTIONS + 1)
-#define OPTION_ADD_GNU_DEBUGLINK (OPTION_FORMATS_INFO + 1)
-#define OPTION_ONLY_KEEP_DEBUG (OPTION_ADD_GNU_DEBUGLINK + 1)
+enum command_line_switch
+  {
+    OPTION_ADD_SECTION=150,
+    OPTION_CHANGE_ADDRESSES,
+    OPTION_CHANGE_LEADING_CHAR,
+    OPTION_CHANGE_START,
+    OPTION_CHANGE_SECTION_ADDRESS,
+    OPTION_CHANGE_SECTION_LMA,
+    OPTION_CHANGE_SECTION_VMA,
+    OPTION_CHANGE_WARNINGS,
+    OPTION_DEBUGGING,
+    OPTION_GAP_FILL,
+    OPTION_NO_CHANGE_WARNINGS,
+    OPTION_PAD_TO,
+    OPTION_REMOVE_LEADING_CHAR,
+    OPTION_SET_SECTION_FLAGS,
+    OPTION_SET_START,
+    OPTION_STRIP_UNNEEDED,
+    OPTION_WEAKEN,
+    OPTION_REDEFINE_SYM,
+    OPTION_REDEFINE_SYMS,
+    OPTION_SREC_LEN,
+    OPTION_SREC_FORCES3,
+    OPTION_STRIP_SYMBOLS,
+    OPTION_KEEP_SYMBOLS,
+    OPTION_LOCALIZE_SYMBOLS,
+    OPTION_KEEPGLOBAL_SYMBOLS,
+    OPTION_WEAKEN_SYMBOLS,
+    OPTION_RENAME_SECTION,
+    OPTION_ALT_MACH_CODE,
+    OPTION_PREFIX_SYMBOLS,
+    OPTION_PREFIX_SECTIONS,
+    OPTION_PREFIX_ALLOC_SECTIONS,
+    OPTION_FORMATS_INFO,
+    OPTION_ADD_GNU_DEBUGLINK,
+    OPTION_ONLY_KEEP_DEBUG
+  };
 
 /* Options to handle if running as "strip".  */
 
@@ -407,9 +409,7 @@ extern enum bfd_architecture bfd_external_binary_architecture;
 
 
 static void
-copy_usage (stream, exit_status)
-     FILE *stream;
-     int exit_status;
+copy_usage (FILE *stream, int exit_status)
 {
   fprintf (stream, _("Usage: %s [option(s)] in-file [out-file]\n"), program_name);
   fprintf (stream, _(" Copies a binary file, possibly transforming it in the process\n"));
@@ -486,9 +486,7 @@ copy_usage (stream, exit_status)
 }
 
 static void
-strip_usage (stream, exit_status)
-     FILE *stream;
-     int exit_status;
+strip_usage (FILE *stream, int exit_status)
 {
   fprintf (stream, _("Usage: %s <option(s)> in-file(s)\n"), program_name);
   fprintf (stream, _(" Removes symbols and sections from files\n"));
@@ -523,8 +521,7 @@ strip_usage (stream, exit_status)
    string can't be parsed.  */
 
 static flagword
-parse_flags (s)
-     const char *s;
+parse_flags (const char *s)
 {
   flagword ret;
   const char *snext;
@@ -579,11 +576,9 @@ parse_flags (s)
 /* Find and optionally add an entry in the change_sections list.  */
 
 static struct section_list *
-find_section_list (name, add)
-     const char *name;
-     bfd_boolean add;
+find_section_list (const char *name, bfd_boolean add)
 {
-  register struct section_list *p;
+  struct section_list *p;
 
   for (p = change_sections; p != NULL; p = p->next)
     if (strcmp (p->name, name) == 0)
@@ -613,9 +608,7 @@ find_section_list (name, add)
 /* Add a symbol to strip_specific_list.  */
 
 static void
-add_specific_symbol (name, list)
-     const char *name;
-     struct symlist **list;
+add_specific_symbol (const char *name, struct symlist **list)
 {
   struct symlist *tmp_list;
 
@@ -631,9 +624,7 @@ add_specific_symbol (name, list)
 #define IS_LINE_TERMINATOR(c) ((c) == '\n' || (c) == '\r' || (c) == '\0')
 
 static void
-add_specific_symbols (filename, list)
-     const char *filename;
-     struct symlist **list;
+add_specific_symbols (const char *filename, struct symlist **list)
 {
   struct stat st;
   FILE * f;
@@ -745,9 +736,7 @@ add_specific_symbols (filename, list)
    strip_specific_list and keep_symbols.  */
 
 static bfd_boolean
-is_specified_symbol (name, list)
-     const char *name;
-     struct symlist *list;
+is_specified_symbol (const char *name, struct symlist *list)
 {
   struct symlist *tmp_list;
 
@@ -761,9 +750,7 @@ is_specified_symbol (name, list)
 /* See if a section is being removed.  */
 
 static bfd_boolean
-is_strip_section (abfd, sec)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *sec;
+is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 {
   if (sections_removed || sections_copied)
     {
@@ -798,13 +785,10 @@ is_strip_section (abfd, sec)
    Return the number of symbols to print.  */
 
 static unsigned int
-filter_symbols (abfd, obfd, osyms, isyms, symcount)
-     bfd *abfd;
-     bfd *obfd;
-     asymbol **osyms, **isyms;
-     long symcount;
+filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
+		asymbol **isyms, long symcount)
 {
-  register asymbol **from = isyms, **to = osyms;
+  asymbol **from = isyms, **to = osyms;
   long src_count = 0, dst_count = 0;
   int relocatable = (abfd->flags & (HAS_RELOC | EXEC_P | DYNAMIC))
 		    == HAS_RELOC;
@@ -865,7 +849,8 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
         {
           char *n, *ptr;
 
-          ptr = n = xmalloc (1 + strlen (prefix_symbols_string) + strlen (name) + 1);
+          ptr = n = xmalloc (1 + strlen (prefix_symbols_string)
+			     + strlen (name) + 1);
           if (add_leading_char)
 	    *ptr++ = bfd_get_symbol_leading_char (obfd);
 
@@ -949,8 +934,7 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
 /* Find the redefined name of symbol SOURCE.  */
 
 static const char *
-lookup_sym_redefinition (source)
-     const char *source;
+lookup_sym_redefinition (const char *source)
 {
   struct redefine_node *list;
 
@@ -964,10 +948,7 @@ lookup_sym_redefinition (source)
 /* Add a node to a symbol redefine list.  */
 
 static void
-redefine_list_append (cause, source, target)
-     const char *cause;
-     const char *source;
-     const char *target;
+redefine_list_append (const char *cause, const char *source, const char *target)
 {
   struct redefine_node **p;
   struct redefine_node *list;
@@ -997,12 +978,13 @@ redefine_list_append (cause, source, target)
    from the file, and add them to the symbol redefine list.  */
 
 static void
-add_redefine_syms_file (filename)
-     const char *filename;
+add_redefine_syms_file (const char *filename)
 {
   FILE *file;
   char *buf;
-  size_t bufsize, len, outsym_off;
+  size_t bufsize;
+  size_t len;
+  size_t outsym_off;
   int c, lineno;
 
   file = fopen (filename, "r");
@@ -1107,9 +1089,7 @@ add_redefine_syms_file (filename)
    Adjust *SIZE.  */
 
 static void
-filter_bytes (memhunk, size)
-     char *memhunk;
-     bfd_size_type *size;
+filter_bytes (char *memhunk, bfd_size_type *size)
 {
   char *from = memhunk + copy_byte, *to = memhunk, *end = memhunk + *size;
 
@@ -1125,18 +1105,16 @@ filter_bytes (memhunk, size)
 /* Copy object file IBFD onto OBFD.  */
 
 static void
-copy_object (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
+copy_object (bfd *ibfd, bfd *obfd)
 {
   bfd_vma start;
   long symcount;
   asection **osections = NULL;
-  asection * gnu_debuglink_section = NULL;
+  asection *gnu_debuglink_section = NULL;
   bfd_size_type *gaps = NULL;
   bfd_size_type max_gap = 0;
   long symsize;
-  PTR dhandle;
+  void *dhandle;
   enum bfd_architecture iarch;
   unsigned int imach;
 
@@ -1232,7 +1210,8 @@ copy_object (ibfd, obfd)
 	  if (pset != NULL)
 	    {
 	      if (pset->change_vma != CHANGE_IGNORE)
-		if (! bfd_set_section_vma (obfd, padd->section, pset->vma_val))
+		if (! bfd_set_section_vma (obfd, padd->section,
+					   pset->vma_val))
 		  RETURN_NONFATAL (bfd_get_filename (obfd));
 
 	      if (pset->change_lma != CHANGE_IGNORE)
@@ -1250,13 +1229,11 @@ copy_object (ibfd, obfd)
 
   if (gnu_debuglink_filename != NULL)
     {
-      gnu_debuglink_section = bfd_create_gnu_debuglink_section (obfd, gnu_debuglink_filename);
+      gnu_debuglink_section = bfd_create_gnu_debuglink_section
+	(obfd, gnu_debuglink_filename);
 
       if (gnu_debuglink_section == NULL)
-	{
-	  fprintf (stderr, "UGG\n");
 	RETURN_NONFATAL (gnu_debuglink_filename);
-	}
     }
 
   if (gap_fill_set || pad_to_set)
@@ -1386,7 +1363,7 @@ copy_object (ibfd, obfd)
       if (strip_symbols != STRIP_ALL)
 	bfd_map_over_sections (ibfd,
 			       mark_symbols_used_in_relocations,
-			       (PTR)isympp);
+			       (void *) isympp);
       osympp = (asymbol **) xmalloc ((symcount + 1) * sizeof (asymbol *));
       symcount = filter_symbols (ibfd, obfd, osympp, isympp, symcount);
     }
@@ -1412,7 +1389,7 @@ copy_object (ibfd, obfd)
       for (padd = add_sections; padd != NULL; padd = padd->next)
 	{
 	  if (! bfd_set_section_contents (obfd, padd->section,
-					  (PTR) padd->contents,
+					  (void *) padd->contents,
 					  (file_ptr) 0,
 					  (bfd_size_type) padd->size))
 	    RETURN_NONFATAL (bfd_get_filename (obfd));
@@ -1423,10 +1400,7 @@ copy_object (ibfd, obfd)
     {
       if (! bfd_fill_in_gnu_debuglink_section
 	  (obfd, gnu_debuglink_section, gnu_debuglink_filename))
-	{
-	  fprintf (stderr, "UGG 2\n");
-	  RETURN_NONFATAL (gnu_debuglink_filename);
-	}
+	RETURN_NONFATAL (gnu_debuglink_filename);
     }
 
   if (gap_fill_set || pad_to_set)
@@ -1510,10 +1484,7 @@ copy_object (ibfd, obfd)
    contents to temp file, and keep the temp file handle.  */
 
 static void
-copy_archive (ibfd, obfd, output_target)
-     bfd *ibfd;
-     bfd *obfd;
-     const char *output_target;
+copy_archive (bfd *ibfd, bfd *obfd, const char *output_target)
 {
   struct name_list
     {
@@ -1527,10 +1498,9 @@ copy_archive (ibfd, obfd, output_target)
 
   /* Make a temp directory to hold the contents.  */
   if (MKDIR (dir, 0700) != 0)
-    {
-      fatal (_("cannot mkdir %s for archive copying (error: %s)"),
-	     dir, strerror (errno));
-    }
+    fatal (_("cannot mkdir %s for archive copying (error: %s)"),
+	   dir, strerror (errno));
+
   obfd->has_armap = ibfd->has_armap;
 
   list = NULL;
@@ -1557,10 +1527,9 @@ copy_archive (ibfd, obfd, output_target)
 	{
 	  output_name = make_tempname (output_name);
 	  if (MKDIR (output_name, 0700) != 0)
-	    {
-	      fatal (_("cannot mkdir %s for archive copying (error: %s)"),
-		     output_name, strerror (errno));
-	    }
+	    fatal (_("cannot mkdir %s for archive copying (error: %s)"),
+		   output_name, strerror (errno));
+
 	  l = (struct name_list *) xmalloc (sizeof (struct name_list));
 	  l->name = output_name;
 	  l->next = list;
@@ -1640,11 +1609,8 @@ copy_archive (ibfd, obfd, output_target)
 /* The top-level control.  */
 
 static void
-copy_file (input_filename, output_filename, input_target, output_target)
-     const char *input_filename;
-     const char *output_filename;
-     const char *input_target;
-     const char *output_target;
+copy_file (const char *input_filename, const char *output_filename,
+	   const char *input_target,   const char *output_target)
 {
   bfd *ibfd;
   char **obj_matching;
@@ -1730,10 +1696,8 @@ copy_file (input_filename, output_filename, input_target, output_target)
 /* Add a name to the section renaming list.  */
 
 static void
-add_section_rename (old_name, new_name, flags)
-     const char * old_name;
-     const char * new_name;
-     flagword flags;
+add_section_rename (const char * old_name, const char * new_name,
+		    flagword flags)
 {
   section_rename * rename;
 
@@ -1764,10 +1728,8 @@ add_section_rename (old_name, new_name, flags)
    Also set RETURNED_FLAGS to the flags to be used for this section.  */
 
 static const char *
-find_section_rename (ibfd, isection, returned_flags)
-     bfd * ibfd ATTRIBUTE_UNUSED;
-     sec_ptr isection;
-     flagword * returned_flags;
+find_section_rename (bfd * ibfd ATTRIBUTE_UNUSED, sec_ptr isection,
+		     flagword * returned_flags)
 {
   const char * old_name = bfd_section_name (ibfd, isection);
   section_rename * rename;
@@ -1791,10 +1753,7 @@ find_section_rename (ibfd, isection, returned_flags)
    name and attributes as ISECTION in IBFD.  */
 
 static void
-setup_section (ibfd, isection, obfdarg)
-     bfd *ibfd;
-     sec_ptr isection;
-     PTR obfdarg;
+setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 {
   bfd *obfd = (bfd *) obfdarg;
   struct section_list *p;
@@ -1818,7 +1777,8 @@ setup_section (ibfd, isection, obfdarg)
   name = find_section_rename (ibfd, isection, & flags);
 
   /* Prefix sections.  */
-  if ((prefix_alloc_sections_string) && (bfd_get_section_flags (ibfd, isection) & SEC_ALLOC))
+  if ((prefix_alloc_sections_string)
+      && (bfd_get_section_flags (ibfd, isection) & SEC_ALLOC))
     prefix = prefix_alloc_sections_string;
   else if (prefix_sections_string)
     prefix = prefix_sections_string;
@@ -1935,10 +1895,7 @@ loser:
    If stripping then don't copy any relocation info.  */
 
 static void
-copy_section (ibfd, isection, obfdarg)
-     bfd *ibfd;
-     sec_ptr isection;
-     PTR obfdarg;
+copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 {
   bfd *obfd = (bfd *) obfdarg;
   struct section_list *p;
@@ -2016,7 +1973,7 @@ copy_section (ibfd, isection, obfdarg)
   if (bfd_get_section_flags (ibfd, isection) & SEC_HAS_CONTENTS
       && bfd_get_section_flags (obfd, osection) & SEC_HAS_CONTENTS)
     {
-      PTR memhunk = (PTR) xmalloc ((unsigned) size);
+      void *memhunk = (void *) xmalloc ((unsigned) size);
 
       if (!bfd_get_section_contents (ibfd, isection, memhunk, (file_ptr) 0,
 				     size))
@@ -2033,7 +1990,7 @@ copy_section (ibfd, isection, obfdarg)
     }
   else if (p != NULL && p->set_flags && (p->flags & SEC_HAS_CONTENTS) != 0)
     {
-      PTR memhunk = (PTR) xmalloc ((unsigned) size);
+      void * memhunk = (void *) xmalloc ((unsigned) size);
 
       /* We don't permit the user to turn off the SEC_HAS_CONTENTS
 	 flag--they can just remove the section entirely and add it
@@ -2053,10 +2010,7 @@ copy_section (ibfd, isection, obfdarg)
    used.  */
 
 static void
-get_sections (obfd, osection, secppparg)
-     bfd *obfd ATTRIBUTE_UNUSED;
-     asection *osection;
-     PTR secppparg;
+get_sections (bfd *obfd ATTRIBUTE_UNUSED, asection *osection, void *secppparg)
 {
   asection ***secppp = (asection ***) secppparg;
 
@@ -2069,9 +2023,7 @@ get_sections (obfd, osection, secppparg)
    sections to the front, where they are easier to ignore.  */
 
 static int
-compare_section_lma (arg1, arg2)
-     const PTR arg1;
-     const PTR arg2;
+compare_section_lma (const void *arg1, const void *arg2)
 {
   const asection **sec1 = (const asection **) arg1;
   const asection **sec2 = (const asection **) arg2;
@@ -2115,10 +2067,7 @@ compare_section_lma (arg1, arg2)
    Ignore relocations which will not appear in the output file.  */
 
 static void
-mark_symbols_used_in_relocations (ibfd, isection, symbolsarg)
-     bfd *ibfd;
-     sec_ptr isection;
-     PTR symbolsarg;
+mark_symbols_used_in_relocations (bfd *ibfd, sec_ptr isection, void *symbolsarg)
 {
   asymbol **symbols = (asymbol **) symbolsarg;
   long relsize;
@@ -2158,11 +2107,9 @@ mark_symbols_used_in_relocations (ibfd, isection, symbolsarg)
 /* Write out debugging information.  */
 
 static bfd_boolean
-write_debugging_info (obfd, dhandle, symcountp, symppp)
-     bfd *obfd;
-     PTR dhandle;
-     long *symcountp ATTRIBUTE_UNUSED;
-     asymbol ***symppp ATTRIBUTE_UNUSED;
+write_debugging_info (bfd *obfd, void *dhandle,
+		      long *symcountp ATTRIBUTE_UNUSED,
+		      asymbol ***symppp ATTRIBUTE_UNUSED)
 {
   if (bfd_get_flavour (obfd) == bfd_target_ieee_flavour)
     return write_ieee_debugging_info (obfd, dhandle);
@@ -2226,9 +2173,7 @@ write_debugging_info (obfd, dhandle, symcountp, symppp)
 }
 
 static int
-strip_main (argc, argv)
-     int argc;
-     char *argv[];
+strip_main (int argc, char *argv[])
 {
   char *input_target = NULL;
   char *output_target = NULL;
@@ -2310,11 +2255,11 @@ strip_main (argc, argv)
 	}
     }
 
- if (formats_info)
-   {
-     display_info ();
-     return 0;
-   }
+  if (formats_info)
+    {
+      display_info ();
+      return 0;
+    }
  
   if (show_version)
     print_version ("strip");
@@ -2373,9 +2318,7 @@ strip_main (argc, argv)
 }
 
 static int
-copy_main (argc, argv)
-     int argc;
-     char *argv[];
+copy_main (int argc, char *argv[])
 {
   char * binary_architecture = NULL;
   char *input_filename = NULL;
@@ -2541,7 +2484,8 @@ copy_main (argc, argv)
 	    f = fopen (pa->filename, FOPEN_RB);
 
 	    if (f == NULL)
-	      fatal (_("cannot open: %s: %s"), pa->filename, strerror (errno));
+	      fatal (_("cannot open: %s: %s"),
+		     pa->filename, strerror (errno));
 
 	    if (fread (pa->contents, 1, pa->size, f) == 0
 		|| ferror (f))
@@ -2958,12 +2902,8 @@ copy_main (argc, argv)
   return 0;
 }
 
-int main PARAMS ((int, char **));
-
 int
-main (argc, argv)
-     int argc;
-     char *argv[];
+main (int argc, char *argv[])
 {
 #if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
   setlocale (LC_MESSAGES, "");

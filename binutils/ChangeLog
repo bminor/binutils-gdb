@@ -1,3 +1,8 @@
+2003-07-23  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c: Switch to ISO C.  Remove debugging code accidentally
+	left in.  Some formatting tidy ups.
+
 2003-07-22  Salvador Eduardo Tropea <set@computer.org>
 
 	* objdump.c: New command line option --debugging-tags.
