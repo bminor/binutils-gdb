@@ -1176,7 +1176,7 @@ proc gdb_compile {source dest type options} {
 # against several different thread libraries, to see which one this
 # system has.
 proc gdb_compile_pthreads {source dest type options} {
-    set build_binfile 0
+    set built_binfile 0
     set why_msg "unrecognized error"
     foreach lib {-lpthreads -lpthread -lthread} {
         # This kind of wipes out whatever libs the caller may have
@@ -1201,7 +1201,7 @@ proc gdb_compile_pthreads {source dest type options} {
             }
         }
     }
-    if {$built_binfile == "0"} {
+    if {!$built_binfile} {
         unsupported "Couldn't compile $source: ${why_msg}"
         return -1
     }
