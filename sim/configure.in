@@ -38,6 +38,7 @@ esac])
 # Assume simulator can be built with cc.
 # If the user passes --enable-sim built it regardless of $(CC).
 only_if_gcc=no
+extra_subdirs=common
 
 # WHEN ADDING ENTRIES TO THIS MATRIX:
 #  Make sure that the left side always has two dashes.  Otherwise you
@@ -47,6 +48,13 @@ only_if_gcc=no
 case "${target}" in
   arm*-*-*)		sim_target=arm ;;
   d10v-*-*)		sim_target=d10v ;;
+# start-sanitize-d30v
+  d30v-*-*)
+	sim_target=d30v
+	only_if_gcc=yes
+	extra_subdirs="${extra_subdirs} igen"
+	;;
+# end-sanitize-d30v
   h8300*-*-*)		sim_target=h8300 ;;
   h8500-*-*)		sim_target=h8500 ;;
   mips*-*-*)
@@ -66,6 +74,7 @@ case "${target}" in
 	# unless asked to.
 	sim_target=ppc
 	only_if_gcc=yes
+	#extra_subdirs="${extra_subdirs}"
 	;;
 # start-sanitize-v850
   v850-*-*)
@@ -107,7 +116,7 @@ yes)
 esac
 
 if test x"${sim_target}" != xnone ; then
-	configdirs="common ${sim_target}"
+	configdirs="${extra_subdirs} ${sim_target}"
 	AC_CONFIG_SUBDIRS($configdirs)
 fi
 
