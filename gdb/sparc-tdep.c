@@ -2931,7 +2931,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   /* None found: is the request for a sparc architecture? */
-  if (info.bfd_architecture != bfd_arch_sparc)
+  if (info.bfd_arch_info->arch != bfd_arch_sparc)
     return NULL;	/* No; then it's not for us.  */
 
   /* Yes: create a new gdbarch for the specified machine type.  */
