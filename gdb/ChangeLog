@@ -1,6 +1,12 @@
 Wed Sep 16 22:31:55 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* breakpoint.c, sparc-tdep.c: comment changes.
+	* configure.in: removed target_dependent line.
+
+	* remote-mm.c (mm_attach): change printf to error to prevent
+	fallthrough bug.
+	* remote-udi.c (udi_attach): change printf to error to prevent
+	fallthrough bug.
 
 Sat Sep 19 04:23:54 1992  John Gilmore  (gnu@cygnus.com)
 

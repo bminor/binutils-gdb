@@ -424,7 +424,7 @@ udi_attach (args, from_tty)
   DENTER("udi_attach()");
 
   if (udi_session_id < 0)
-      printf ("UDI connection not opened yet, use the 'target udi' command.\n");
+      error ("UDI connection not opened yet, use the 'target udi' command.\n");
 	
   if (from_tty)
       printf ("Attaching to remote program %s...\n", prog_name);

@@ -1,7 +1,6 @@
 configdirs="doc"
 srcname="GDB"
 srctrigger=main.c
-target_dependent=true
 
 # per-host:
 

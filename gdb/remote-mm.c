@@ -488,7 +488,7 @@ mm_attach (args, from_tty)
   DENTER("mm_attach()");
 
   if (!mm_stream)
-      printf ("MiniMon not opened yet, use the 'target minimon' command.\n");
+      error ("MiniMon not opened yet, use the 'target minimon' command.\n");
 	
   dont_repeat();
 
