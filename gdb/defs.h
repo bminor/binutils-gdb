@@ -875,7 +875,6 @@ extern char *mstrsave (void *, const char *);
 
 /* Robust versions of same.  Throw an internal error when no memory,
    guard against stray NULL arguments. */
-extern void *xmrealloc (void *md, void *ptr, size_t size);
 extern void *xmcalloc (void *md, size_t number, size_t size);
 extern void xmfree (void *md, void *ptr);
 

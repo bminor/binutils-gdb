@@ -1014,8 +1014,8 @@ find_source_lines (struct symtab *s, int desc)
 	      {
 		lines_allocated *= 2;
 		line_charpos =
-		  (int *) xmrealloc (s->objfile->md, (char *) line_charpos,
-				     sizeof (int) * lines_allocated);
+		  (int *) xrealloc ((char *) line_charpos,
+				    sizeof (int) * lines_allocated);
 	      }
 	    line_charpos[nlines++] = lseek (desc, 0, SEEK_CUR);
 	  }
@@ -1052,8 +1052,8 @@ find_source_lines (struct symtab *s, int desc)
 	      {
 		lines_allocated *= 2;
 		line_charpos =
-		  (int *) xmrealloc (s->objfile->md, (char *) line_charpos,
-				     sizeof (int) * lines_allocated);
+		  (int *) xrealloc ((char *) line_charpos,
+				    sizeof (int) * lines_allocated);
 	      }
 	    line_charpos[nlines++] = p - data;
 	  }
@@ -1063,8 +1063,7 @@ find_source_lines (struct symtab *s, int desc)
 #endif /* lseek linear.  */
   s->nlines = nlines;
   s->line_charpos =
-    (int *) xmrealloc (s->objfile->md, (char *) line_charpos,
-		       nlines * sizeof (int));
+    (int *) xrealloc ((char *) line_charpos, nlines * sizeof (int));
 
 }
 

@@ -1,5 +1,13 @@
 2004-08-10  Andrew Cagney  <cagney@gnu.org>
 
+	* defs.h (xmrealloc): Delete.
+	* utils.c (xmrealloc): Delete.
+	(xrealloc): Inline calls to xmrealloc, mmalloc and mrealloc.
+	* symmisc.c (extend_psymbol_list): Use xrealloc.
+	* source.c (find_source_lines): Ditto.
+	* hpread.c (hpread_lookup_type): Ditto.
+	* dbxread.c (add_bincl_to_list): Ditto.
+
 	* utils.c (xmmalloc): Delete.
 	(xmalloc): Inline xmmalloc and mmalloc calls.
 	(msavestring): Use xmalloc.

@@ -905,8 +905,8 @@ add_bincl_to_list (struct partial_symtab *pst, char *name, int instance)
       int offset = next_bincl - bincl_list;
       bincls_allocated *= 2;
       bincl_list = (struct header_file_location *)
-	xmrealloc (pst->objfile->md, (char *) bincl_list,
-		   bincls_allocated * sizeof (struct header_file_location));
+	xrealloc ((char *) bincl_list,
+		  bincls_allocated * sizeof (struct header_file_location));
       next_bincl = bincl_list + offset;
     }
   next_bincl->pst = pst;

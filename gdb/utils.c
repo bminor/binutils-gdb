@@ -1038,26 +1038,6 @@ nomem (long size)
 }
 
 void *
-xmrealloc (void *md, void *ptr, size_t size)
-{
-  void *val;
-
-  /* See libiberty/xmalloc.c.  This function need's to match that's
-     semantics.  It never returns NULL.  */
-  if (size == 0)
-    size = 1;
-
-  if (ptr != NULL)
-    val = mrealloc (md, ptr, size);
-  else
-    val = mmalloc (md, size);
-  if (val == NULL)
-    nomem (size);
-
-  return (val);
-}
-
-void *
 xmcalloc (void *md, size_t number, size_t size)
 {
   void *mem;
@@ -1113,7 +1093,21 @@ xmalloc (size_t size)
 PTR				/* OK: PTR */
 xrealloc (PTR ptr, size_t size)	/* OK: PTR */
 {
-  return xmrealloc (NULL, ptr, size);
+  void *val;
+
+  /* See libiberty/xmalloc.c.  This function need's to match that's
+     semantics.  It never returns NULL.  */
+  if (size == 0)
+    size = 1;
+
+  if (ptr != NULL)
+    val = realloc (ptr, size);	/* OK: realloc */
+  else
+    val = malloc (size);		/* OK: malloc */
+  if (val == NULL)
+    nomem (size);
+
+  return (val);
 }
 
 PTR				/* OK: PTR */

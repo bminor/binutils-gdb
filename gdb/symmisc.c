@@ -1238,8 +1238,8 @@ extend_psymbol_list (struct psymbol_allocation_list *listp,
     {
       new_size = listp->size * 2;
       listp->list = (struct partial_symbol **)
-	xmrealloc (objfile->md, (char *) listp->list,
-		   new_size * sizeof (struct partial_symbol *));
+	xrealloc ((char *) listp->list,
+		  new_size * sizeof (struct partial_symbol *));
     }
   /* Next assumes we only went one over.  Should be good if
      program works correctly */

@@ -3042,8 +3042,7 @@ hpread_lookup_type (dnttpointer hp_type, struct objfile *objfile)
 	  if (size_changed)
 	    {
 	      DNTT_TYPE_VECTOR (objfile) = (struct type **)
-		xmrealloc (objfile->md,
-			   (char *) DNTT_TYPE_VECTOR (objfile),
+		xrealloc ((char *) DNTT_TYPE_VECTOR (objfile),
 		   (DNTT_TYPE_VECTOR_LENGTH (objfile) * sizeof (struct type *)));
 
 	      memset (&DNTT_TYPE_VECTOR (objfile)[old_len], 0,
