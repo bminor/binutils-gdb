@@ -34,6 +34,10 @@
 #define MAX_RELOC_EXPANSION 3
 #define LOCAL_LABELS_FB 1
 
+/* Maximum symbol offset that can be encoded in a BFD_RELOC_MIPS_GPREL
+   relocation: */
+#define MAX_GPREL_OFFSET (0x7FF4)
+
 #define LOCAL_LABEL(name) mips_local_label (name)
 extern int mips_local_label PARAMS ((const char *));
 
@@ -52,12 +56,6 @@ extern int mips_local_label PARAMS ((const char *));
 #ifndef TARGET_BYTES_LITTLE_ENDIAN
 #undef  TARGET_BYTES_BIG_ENDIAN
 #define TARGET_BYTES_BIG_ENDIAN		1
-#endif
-
-#if TARGET_BYTES_BIG_ENDIAN
-#define BYTE_ORDER	BIG_ENDIAN
-#else
-#define BYTE_ORDER      LITTLE_ENDIAN
 #endif
 
 /* The endianness of the target format may change based on command
