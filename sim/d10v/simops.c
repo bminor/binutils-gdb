@@ -111,7 +111,7 @@ trace_input_func (name, in1, in2, in3)
 
   if ((d10v_debug & DEBUG_LINE_NUMBER) == 0)
     (*d10v_callback->printf_filtered) (d10v_callback,
-				       "0x%.*x %s: %-*s",
+				       "0x%.*x %s: %-*s ",
 				       SIZE_PC, (unsigned)PC,
 				       type,
 				       SIZE_INSTRUCTION, name);
@@ -171,7 +171,7 @@ trace_input_func (name, in1, in2, in3)
 	}
 
       (*d10v_callback->printf_filtered) (d10v_callback,
-					 "0x%.*x %s: %-*.*s %-*s",
+					 "0x%.*x %s: %-*.*s %-*s ",
 					 SIZE_PC, (unsigned)PC,
 					 type,
 					 SIZE_LOCATION, SIZE_LOCATION, buf,
