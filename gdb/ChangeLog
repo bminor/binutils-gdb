@@ -1,3 +1,31 @@
+Sat Oct 26 07:15:14 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/alpha/alpha-osf3.mh (XM_CLIBS):  Add -lm for OSF/1-4.0.
+
+	* procfs.c (proc_set_exec_trap):  Under Alpha OSF/1-4.0, tracing
+	the entry to the exit system call to detect termination of the
+	inferior stopped working. Trace termination of the inferior via
+	PRFS_STOPTERM instead.
+	(procfs_init_inferior):  Do not trace entry to exit system call
+	if PIOCSSPCACT is defined.
+	(procfs_wait):  Handle PR_DEAD event, which signals the termination
+	of the inferior if PRFS_STOPTERM is set.
+
+	* mdebugread.c (parse_partial_symbols):  Ignore stNil section
+	start address symbols.
+
+	* sparc-tdep.c (get_saved_register):  Get saved PC from the
+	frame info if not in innermost frame.
+
+Thu Oct 24 10:51:45 1996  Mark Alexander  <marka@cygnus.com>
+
+	* dbxread.c (process_one_symbol): Interpret end-of-function
+	markers correctly; this fixes problem on Vr5000 where all
+	functions in a module had the same address.
+	* configure.in, configure.tgt, configure.host, gdbserver/configure.in:
+	Correct	for pc-linux-gnu problem in config.guess.
+	* configure: Regenerate.
+
 Thu Oct 24 10:06:58 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* dbxread.c:  Don't swap symbols in place, since internal and

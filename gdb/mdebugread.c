@@ -2448,9 +2448,12 @@ parse_partial_symbols (objfile, section_offsets)
 	    }
 	  break;
 	case stLocal:
+	case stNil:
 	  /* The alpha has the section start addresses in stLocal symbols
 	     whose name starts with a `.'. Skip those but complain for all
-	     other stLocal symbols.  */
+	     other stLocal symbols.
+	     Irix6 puts the section start addresses in stNil symbols, skip
+	     those too.  */
 	  if (name[0] == '.')
 	    continue;
 	  /* Fall through.  */
