@@ -1,3 +1,7 @@
+2005-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_section_data): Use (sec) instead of sec.
+
 2005-04-03  Fred Fish  <fnf@specifixinc.com>
 
 	* dwarf2.c (struct dwarf2_debug): Add dwarf_ranges_buffer and

@@ -1115,7 +1115,7 @@ struct bfd_elf_section_data
   void *sec_info;
 };
 
-#define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)
+#define elf_section_data(sec)  ((struct bfd_elf_section_data*)(sec)->used_by_bfd)
 #define elf_linked_to_section(sec) (elf_section_data(sec)->linked_to)
 #define elf_section_type(sec)  (elf_section_data(sec)->this_hdr.sh_type)
 #define elf_section_flags(sec) (elf_section_data(sec)->this_hdr.sh_flags)
