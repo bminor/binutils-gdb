@@ -14,11 +14,11 @@
 	bfd_is_target_special_symbol.
 	* aout-target.h: Likewise.
 	* aout-tic30.c: Likewise.
-	* binary.c: LIkewise.
+	* binary.c: Likewise.
 	* coffcode.h: Likewise.
 	* i386msdos.c: Likewise.
 	* ieee.c: Likewise.
-	* ihex.c: LIkewise.
+	* ihex.c: Likewise.
 	* libaout.h: Likewise.
 	* libbfd-in.h: Likewise
 	* libecoff.h: Likewise.
