@@ -879,7 +879,24 @@ proc gdb_expect { args } {
 	    }
 	}
     }
+    global suppress_flag;
+    global remote_suppress_flag;
+    if [info exists remote_suppress_flag] {
+	set old_val $remote_suppress_flag;
+    }
+    if [info exists suppress_flag] {
+	if { $suppress_flag } {
+	    set remote_suppress_flag 1;
+	}
+    }
     set code [catch {uplevel remote_expect host $gtimeout $expcode} string];
+    if [info exists old_val] {
+	set remote_suppress_flag $old_val;
+    } else {
+	if [info exists remote_suppress_flag] {
+	    unset remote_suppress_flag;
+	}
+    }
 
     if {$code == 1} {
         global errorInfo errorCode;
@@ -1048,58 +1065,58 @@ proc setup_xfail_format { format } {
 proc gdb_step_for_stub { } {
     global gdb_prompt;
 
-    if [target_info exists gdb_stub_step_command] {
-	set command [target_info gdb_stub_step_command];
-    } else {
-	set command "step";
-    }
-    send_gdb "${command}\n";
-    set tries 0;
-    gdb_expect 60 {
-	-re "(main.* at |.*in .*start).*$gdb_prompt" {
-	    return;
+    if ![target_info exists gdb,use_breakpoint_for_stub] {
+	if [target_info exists gdb_stub_step_command] {
+	    set command [target_info gdb_stub_step_command];
+	} else {
+	    set command "step";
 	}
-	-re "libgloss/\[a-z\]*\[0-9\]*/stub.c" {
-	    send_gdb "where\n";
-	    gdb_expect {
-		-re "main\[^\r\n\]*at \(\[^:]+\):\(\[0-9\]+\)" {
-		    set file $expect_out(1,string);
-		    set linenum [expr $expect_out(2,string) + 1];
-		    set breakplace "${file}:${linenum}";
-		}
-		default {}
+	send_gdb "${command}\n";
+	set tries 0;
+	gdb_expect 60 {
+	    -re "(main.* at |.*in .*start).*$gdb_prompt" {
+		return;
 	    }
-	    send_gdb "break ${breakplace}\n";
-	    gdb_expect 60 {
-		-re "Breakpoint (\[0-9\]+) at.*$gdb_prompt" {
-		    set breakpoint $expect_out(1,string);
-		}
-		-re "Breakpoint (\[0-9\]+): file.*$gdb_prompt" {
-		    set breakpoint $expect_out(1,string);
-		}
-		default {}
-	    }
-	    send_gdb "continue\n";
-	    gdb_expect 60 {
-		-re "Breakpoint ${breakpoint},.*$gdb_prompt" {
-		    gdb_test "delete $breakpoint" ".*" "";
+	    -re ".*$gdb_prompt" {
+		incr tries;
+		if { $tries == 5 } {
+		    fail "stepping out of breakpoint function";
 		    return;
 		}
-		default {}
+		send_gdb "${command}\n";
+		exp_continue;
 	    }
-	}
-	-re ".*$gdb_prompt" {
-	    incr tries;
-	    if { $tries == 5 } {
+	    default {
 		fail "stepping out of breakpoint function";
 		return;
 	    }
-	    send_gdb "${command}\n";
-	    exp_continue;
 	}
-	default {
-	    fail "stepping out of breakpoint function";
+    }
+    send_gdb "where\n";
+    gdb_expect {
+	-re "main\[^\r\n\]*at \(\[^:]+\):\(\[0-9\]+\)" {
+	    set file $expect_out(1,string);
+	    set linenum [expr $expect_out(2,string) + 1];
+	    set breakplace "${file}:${linenum}";
+	}
+	default {}
+    }
+    send_gdb "break ${breakplace}\n";
+    gdb_expect 60 {
+	-re "Breakpoint (\[0-9\]+) at.*$gdb_prompt" {
+	    set breakpoint $expect_out(1,string);
+	}
+	-re "Breakpoint (\[0-9\]+): file.*$gdb_prompt" {
+	    set breakpoint $expect_out(1,string);
+	}
+	default {}
+    }
+    send_gdb "continue\n";
+    gdb_expect 60 {
+	-re "Breakpoint ${breakpoint},.*$gdb_prompt" {
+	    gdb_test "delete $breakpoint" ".*" "";
 	    return;
 	}
+	default {}
     }
 }

@@ -1,3 +1,12 @@
+Tue Sep 16 22:21:48 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.base/callfuncs.exp: Fix indentation.
+
+	* lib/gdb.exp(gdb_expect): Set remote_suppress_flag if
+	suppress_flag has been set.
+	(gdb_step_for_stub): Check for gdb,use_breakpoint_for_stub
+	target feature.
+
 Mon Sep 15 15:43:17 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* gdb.stabs/weird.exp: Don't start gdb 'til after we've compiled
