@@ -303,7 +303,8 @@ hppa64_return_value (struct gdbarch *gdbarch,
      are in r28, padded on the left.  Aggregates less that 65 bits are
      in r28, right padded.  Aggregates upto 128 bits are in r28 and
      r29, right padded.  */ 
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (TYPE_CODE (type) == TYPE_CODE_FLT
+      && TYPE_LENGTH (type) <= 8)
     {
       /* Floats are right aligned?  */
       int offset = register_size (gdbarch, FP4_REGNUM) - TYPE_LENGTH (type);
@@ -333,15 +334,15 @@ hppa64_return_value (struct gdbarch *gdbarch,
       int b;
       for (b = 0; b < TYPE_LENGTH (type); b += 8)
 	{
-	  int part = (TYPE_LENGTH (type) - b - 1) % 8 + 1;
+	  int part = min (8, TYPE_LENGTH (type) - b);
 	  if (readbuf != NULL)
-	    regcache_cooked_read_part (regcache, 28, 0, part,
+	    regcache_cooked_read_part (regcache, 28 + b / 8, 0, part,
 				       (char *) readbuf + b);
 	  if (writebuf != NULL)
-	    regcache_cooked_write_part (regcache, 28, 0, part,
+	    regcache_cooked_write_part (regcache, 28 + b / 8, 0, part,
 					(const char *) writebuf + b);
 	}
-  return RETURN_VALUE_REGISTER_CONVENTION;
+      return RETURN_VALUE_REGISTER_CONVENTION;
     }
   else
     return RETURN_VALUE_STRUCT_CONVENTION;
@@ -1137,7 +1138,7 @@ hppa_frame_saved_pc (struct frame_info *frame)
      are saved in the exact same order as GDB numbers registers.  How
      convienent.  */
   if (pc_in_interrupt_handler (pc))
-    return read_memory_integer (get_frame_base (frame) + PC_REGNUM * 4,
+    return read_memory_integer (get_frame_base (frame) + PCOQ_HEAD_REGNUM * 4,
 				TARGET_PTR_BIT / 8) & ~0x3;
 
   if ((get_frame_pc (frame) >= get_frame_base (frame)
@@ -2292,111 +2293,106 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 			int nargs, struct value **args, CORE_ADDR sp,
 			int struct_return, CORE_ADDR struct_addr)
 {
-  /* Array of arguments' offsets.  */
-  int *offset = (int *) alloca (nargs * sizeof (int));
+  /* NOTE: cagney/2004-02-27: This is a guess - its implemented by
+     reverse engineering testsuite failures.  */
 
-  /* Array of arguments' lengths: real lengths in bytes, not aligned
-     to word size.  */
-  int *lengths = (int *) alloca (nargs * sizeof (int));
+  /* Stack base address at which any pass-by-reference parameters are
+     stored.  */
+  CORE_ADDR struct_end = 0;
+  /* Stack base address at which the first parameter is stored.  */
+  CORE_ADDR param_end = 0;
 
-  /* The value of SP as it was passed into this function.  */
-  CORE_ADDR orig_sp = sp;
+  /* The inner most end of the stack after all the parameters have
+     been pushed.  */
+  CORE_ADDR new_sp = 0;
 
-  /* The number of stack bytes occupied by the current argument.  */
-  int bytes_reserved;
-
-  /* The total number of bytes reserved for the arguments.  */
-  int cum_bytes_reserved = 0;
-
-  /* Similarly, but aligned.  */
-  int cum_bytes_aligned = 0;
-  int i;
-
-  /* Iterate over each argument provided by the user.  */
-  for (i = 0; i < nargs; i++)
+  /* Two passes.  First pass computes the location of everything,
+     second pass writes the bytes out.  */
+  int write_pass;
+  for (write_pass = 0; write_pass < 2; write_pass++)
     {
-      struct type *arg_type = VALUE_TYPE (args[i]);
-
-      /* Integral scalar values smaller than a register are padded on
-         the left.  We do this by promoting them to full-width,
-         although the ABI says to pad them with garbage.  */
-      if (is_integral_type (arg_type)
-	  && TYPE_LENGTH (arg_type) < DEPRECATED_REGISTER_SIZE)
+      CORE_ADDR struct_ptr = 0;
+      CORE_ADDR param_ptr = 0;
+      int i;
+      for (i = 0; i < nargs; i++)
 	{
-	  args[i] = value_cast ((TYPE_UNSIGNED (arg_type)
-				 ? builtin_type_unsigned_long
-				 : builtin_type_long),
-				args[i]);
-	  arg_type = VALUE_TYPE (args[i]);
+	  struct value *arg = args[i];
+	  struct type *type = check_typedef (VALUE_TYPE (arg));
+	  if ((TYPE_CODE (type) == TYPE_CODE_INT
+	       || TYPE_CODE (type) == TYPE_CODE_ENUM)
+	      && TYPE_LENGTH (type) <= 8)
+	    {
+	      /* Integer value store, right aligned.  "unpack_long"
+		 takes care of any sign-extension problems.  */
+	      param_ptr += 8;
+	      if (write_pass)
+		{
+		  ULONGEST val = unpack_long (type, VALUE_CONTENTS (arg));
+		  int reg = 27 - param_ptr / 8;
+		  write_memory_unsigned_integer (param_end - param_ptr,
+						 val, 8);
+		  if (reg >= 19)
+		    regcache_cooked_write_unsigned (regcache, reg, val);
+		}
+	    }
+	  else
+	    {
+	      /* Small struct value, store left aligned?  */
+	      int reg;
+	      if (TYPE_LENGTH (type) > 8)
+		{
+		  param_ptr = align_up (param_ptr, 16);
+		  reg = 26 - param_ptr / 8;
+		  param_ptr += align_up (TYPE_LENGTH (type), 16);
+		}
+	      else
+		{
+		  param_ptr = align_up (param_ptr, 8);
+		  reg = 26 - param_ptr / 8;
+		  param_ptr += align_up (TYPE_LENGTH (type), 8);
+		}
+	      if (write_pass)
+		{
+		  int byte;
+		  write_memory (param_end - param_ptr, VALUE_CONTENTS (arg),
+				TYPE_LENGTH (type));
+		  for (byte = 0; byte < TYPE_LENGTH (type); byte += 8)
+		    {
+		      if (reg >= 19)
+			{
+			  int len = min (8, TYPE_LENGTH (type) - byte);
+			  regcache_cooked_write_part (regcache, reg, 0, len,
+						      VALUE_CONTENTS (arg) + byte);
+			}
+		      reg--;
+		    }
+		}
+	    }
 	}
-
-      lengths[i] = TYPE_LENGTH (arg_type);
-
-      /* Align the size of the argument to the word size for this
-	 target.  */
-      bytes_reserved = (lengths[i] + DEPRECATED_REGISTER_SIZE - 1) & -DEPRECATED_REGISTER_SIZE;
-
-      offset[i] = cum_bytes_reserved;
-
-      /* Aggregates larger than eight bytes (the only types larger
-         than eight bytes we have) are aligned on a 16-byte boundary,
-         possibly padded on the right with garbage.  This may leave an
-         empty word on the stack, and thus an unused register, as per
-         the ABI.  */
-      if (bytes_reserved > 8)
+      /* Update the various stack pointers.  */
+      if (!write_pass)
 	{
-	  /* Round up the offset to a multiple of two slots.  */
-	  int new_offset = ((offset[i] + 2*DEPRECATED_REGISTER_SIZE-1)
-			    & -(2*DEPRECATED_REGISTER_SIZE));
-
-	  /* Note the space we've wasted, if any.  */
-	  bytes_reserved += new_offset - offset[i];
-	  offset[i] = new_offset;
+	  struct_end = sp + struct_ptr;
+	  /* PARAM_PTR already accounts for all the arguments passed
+	     by the user.  However, the ABI mandates minimum stack
+	     space allocations for outgoing arguments.  The ABI also
+	     mandates minimum stack alignments which we must
+	     preserve.  */
+	  param_end = struct_end + max (align_up (param_ptr, 16),
+					REG_PARM_STACK_SPACE);
 	}
-
-      cum_bytes_reserved += bytes_reserved;
     }
-
-  /* CUM_BYTES_RESERVED already accounts for all the arguments passed
-     by the user.  However, the ABIs mandate minimum stack space
-     allocations for outgoing arguments.
-
-     The ABIs also mandate minimum stack alignments which we must
-     preserve.  */
-  cum_bytes_aligned = align_up (cum_bytes_reserved, 16);
-  sp += max (cum_bytes_aligned, REG_PARM_STACK_SPACE);
-
-  /* Now write each of the args at the proper offset down the
-     stack.  */
-  for (i = 0; i < nargs; i++)
-    write_memory (orig_sp + offset[i], VALUE_CONTENTS (args[i]), lengths[i]);
 
   /* If a structure has to be returned, set up register 28 to hold its
      address */
   if (struct_return)
     write_register (28, struct_addr);
 
-  /* For the PA64 we must pass a pointer to the outgoing argument
-     list.  The ABI mandates that the pointer should point to the
-     first byte of storage beyond the register flushback area.
-
-     However, the call dummy expects the outgoing argument pointer to
-     be passed in register %r4.  */
-  write_register (4, orig_sp + REG_PARM_STACK_SPACE);
-
-  /* ?!? This needs further work.  We need to set up the global data
-     pointer for this procedure.  This assumes the same global pointer
-     for every procedure.  The call dummy expects the dp value to be
-     passed in register %r6.  */
-  write_register (6, read_register (27));
-  
   /* Set the return address.  */
   regcache_cooked_write_unsigned (regcache, RP_REGNUM, bp_addr);
 
-  /* The stack will have 64 bytes of additional space for a frame
-     marker.  */
-  return sp + 64;
-
+  /* The stack will have 32 bytes of additional space for a frame marker.  */
+  return param_end + 64;
 }
 
 static CORE_ADDR
@@ -2946,7 +2942,7 @@ hppa_target_read_pc (ptid_t ptid)
   if (flags & 2)
     return read_register_pid (31, ptid) & ~0x3;
 
-  return read_register_pid (PC_REGNUM, ptid) & ~0x3;
+  return read_register_pid (PCOQ_HEAD_REGNUM, ptid) & ~0x3;
 }
 
 /* Write out the PC.  If currently in a syscall, then also write the new
@@ -2965,7 +2961,7 @@ hppa_target_write_pc (CORE_ADDR v, ptid_t ptid)
   if (flags & 2)
     write_register_pid (31, v | 0x3, ptid);
 
-  write_register_pid (PC_REGNUM, v, ptid);
+  write_register_pid (PCOQ_HEAD_REGNUM, v, ptid);
   write_register_pid (PCOQ_TAIL_REGNUM, v + 4, ptid);
 }
 
@@ -4908,7 +4904,7 @@ hppa_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 static CORE_ADDR
 hppa_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  return frame_unwind_register_signed (next_frame, PC_REGNUM) & ~3;
+  return frame_unwind_register_signed (next_frame, PCOQ_HEAD_REGNUM) & ~3;
 }
 
 /* Exception handling support for the HP-UX ANSI C++ compiler.
@@ -5779,7 +5775,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_fp_regnum (gdbarch, 3);
   set_gdbarch_sp_regnum (gdbarch, 30);
   set_gdbarch_fp0_regnum (gdbarch, 64);
-  set_gdbarch_pc_regnum (gdbarch, PCOQ_HEAD_REGNUM);
   set_gdbarch_deprecated_register_raw_size (gdbarch, hppa_register_raw_size);
   set_gdbarch_deprecated_register_byte (gdbarch, hppa_register_byte);
   set_gdbarch_deprecated_register_virtual_size (gdbarch, hppa_register_raw_size);

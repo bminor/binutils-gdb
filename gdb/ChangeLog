@@ -1,3 +1,9 @@
+2004-03-07  Andrew Cagney  <cagney@redhat.com>
+
+	* hppa-tdep.c: Replace PC_REGNUM with PCOQ_HEAD_REGNUM.
+	(hppa64_return_value, hppa64_push_dummy_call): Rewrite.
+	(hppa_gdbarch_init): Do not set PC_REGNUM.
+
 2004-03-06  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/alpha/tm-fbsd.h: Remove file.
