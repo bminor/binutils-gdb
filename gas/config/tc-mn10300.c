@@ -54,15 +54,20 @@ const char EXP_CHARS[] = "eE";
    as in 0d1.0.  */
 const char FLT_CHARS[] = "dD";
 
-const relax_typeS md_relax_table[] = {
+const relax_typeS md_relax_table[] =
+{
+  /* The plus values for the bCC and fBCC instructions in the table below
+     are because the branch instruction is translated into a jump
+     instruction that is now +2 or +3 bytes further on in memory, and the
+     correct size of jump instruction must be selected.  */
   /* bCC relaxing  */
   {0x7f, -0x80, 2, 1},
-  {0x7fff, -0x8000 + 1, 5, 2},
+  {0x7fff + 2, -0x8000 + 2, 5, 2},
   {0x7fffffff, -0x80000000, 7, 0},
 
-  /* bCC relaxing (uncommon cases)  */
+  /* bCC relaxing (uncommon cases for 3byte length instructions)  */
   {0x7f, -0x80, 3, 4},
-  {0x7fff, -0x8000 + 1, 6, 5},
+  {0x7fff + 3, -0x8000 + 3, 6, 5},
   {0x7fffffff, -0x80000000, 8, 0},
 
   /* call relaxing  */
@@ -80,7 +85,7 @@ const relax_typeS md_relax_table[] = {
 
   /* fbCC relaxing  */
   {0x7f, -0x80, 3, 14},
-  {0x7fff, -0x8000 + 1, 6, 15},
+  {0x7fff + 3, -0x8000 + 3, 6, 15},
   {0x7fffffff, -0x80000000, 8, 0},
 
 };

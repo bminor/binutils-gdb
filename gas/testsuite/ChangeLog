@@ -1,3 +1,9 @@
+2004-11-23  Nick Clifton  <nickc@redhat.com>
+
+	* gas/mn10300/relax.s: Add further tests of the relaxing of branch
+	instructions.
+	* gas/mn10300/relax.d: Add expected relocations.
+
 2004-11-22  Ravi Ramaseshan  <ravi.ramaseshan@codito.com>
 
 	* gas/arc/ld.s: Add check of load of a long immediate.
