@@ -1,3 +1,25 @@
+Tue Aug 19 08:47:17 1997  Fred Fish  <fnf@cygnus.com>
+
+	* coff-i960.c (COFF_ALIGN_IN_SECTION_HEADER): Define to 1.
+	(GET_SCNHDR_ALIGN, PUT_SCNHDR_ALIGN): Define.
+	* coff-m88k.c (GET_SCNHDR_NRELOC, GET_SCNHDR_NLNNO): Define.
+	* coffcode.h (coff_set_alignment_hook): Conditionally compile in if
+	COFF_ALIGN_IN_SECTION_HEADER is defined.  Convert alignment to power
+	of two for I960 only.
+	* coffswap.h (GET_SCNHDR_NRELOC, PUT_SCNHDR_NRELOC, GET_SCNDHR_NLNNO,
+	PUT_SCNHDR_NLNNO, GET_SCNHDR_FLAGS, PUT_SCNHDR_FLAGS): Provide
+	default definitions.
+	(coff_swap_scnhdr_in): Use GET_SCNHDR_FLAGS, GET_SCNHDR_NRELOC,
+	GET_SCNHDR_NLNNO, and GET_SCNHDR_ALIGN.
+	(coff_swap_scnhdr_out): Use PUT_SCNHDR_FLAGS, PUT_SCNHDR_ALIGN.
+start-sanitize-tic80
+	* Makefile.in (coff-tic80.o): Depends upon coffswap.h.
+	* coff-tic80.c (COFF_ALIGN_IN_SECTION_HEADER): Define to 1.
+	(GET_SCNHDR_FLAGS, PUT_SCNHDR_FLAGS): Define
+	*coffcode.h (coff_write_object_contents): Set alignment field in
+ 	section header for TIC80COFF files.
+end-sanitize-tic80
+
 start-sanitize-v850
 Mon Aug 18 11:36:19 1997  Nick Clifton  <nickc@cygnus.com>
 

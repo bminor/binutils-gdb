@@ -31,6 +31,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libcoff.h"
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (2)
+#define COFF_ALIGN_IN_SECTION_HEADER 1
+
+#define GET_SCNHDR_FLAGS bfd_h_get_16
+#define PUT_SCNHDR_FLAGS bfd_h_put_16
 
 static void rtype2howto
   PARAMS ((arelent *cache_ptr, struct internal_reloc *dst));
@@ -704,7 +708,9 @@ coff_tic80_relocate_section (output_bfd, info, input_bfd,
   return true;
 }
 
-#define TIC80 1		/* Customize coffcode.h */
+#define TIC80COFF 1		/* Customize coffcode.h */
+#undef C_AUTOARG		/* Clashes with TIc80's C_UEXT */
+#undef C_LASTENT		/* Clashes with TIc80's C_STATLAB */
 #include "coffcode.h"
 
 const bfd_target 

@@ -1056,7 +1056,7 @@ coff_new_section_hook (abfd, section)
   return true;
 }
 
-#ifdef I960
+#ifdef COFF_ALIGN_IN_SECTION_HEADER
 
 /* Set the alignment of a BFD section.  */
 
@@ -1071,13 +1071,22 @@ coff_set_alignment_hook (abfd, section, scnhdr)
   struct internal_scnhdr *hdr = (struct internal_scnhdr *) scnhdr;
   unsigned int i;
 
+#ifdef I960
+  /* Extract ALIGN from 2**ALIGN stored in section header */
   for (i = 0; i < 32; i++)
     if ((1 << i) >= hdr->s_align)
       break;
+#endif
+/* start-sanitize-tic80 */
+#ifdef TIC80COFF
+  /* TI tools hijack bits 8-11 for the alignment */
+  i = (hdr->s_flags >> 8) & 0xF ;
+#endif
+/* end-sanitize-tic80 */
   section->alignment_power = i;
 }
 
-#else /* ! I960 */
+#else /* ! COFF_ALIGN_IN_SECTION_HEADER */
 #ifdef COFF_WITH_PE
 
 /* a couple of macros to help setting the alignment power field */
@@ -1222,7 +1231,7 @@ coff_set_alignment_hook (abfd, section, scnhdr)
 
 #endif /* ! RS6000COFF_C */
 #endif /* ! COFF_WITH_PE */
-#endif /* ! I960 */
+#endif /* ! COFF_ALIGN_IN_SECTION_HEADER */
 
 #ifndef coff_mkobject
 
@@ -1584,11 +1593,13 @@ coff_set_arch_mach_hook (abfd, filehdr)
       break;
 #endif
 
+/* start-sanitize-tic80 */
 #ifdef TIC80_ARCH_MAGIC
     case TIC80_ARCH_MAGIC:
       arch = bfd_arch_tic80;
       break;
 #endif
+/* end-sanitize-tic80 */
 
     default:			/* Unreadable input file type */
       arch = bfd_arch_obscure;
@@ -2641,7 +2652,12 @@ coff_write_object_contents (abfd)
       section.s_align = (current->alignment_power
 			 ? 1 << current->alignment_power
 			 : 0);
-
+/* start-sanitize-tic80 */
+#else
+#ifdef TIC80COFF
+      section.s_flags |= (current->alignment_power & 0xF) << 8;
+#endif
+/* end-sanitize-tic80 */
 #endif
 
 #ifdef COFF_IMAGE_WITH_PE
@@ -2793,6 +2809,12 @@ coff_write_object_contents (abfd)
   else
     internal_f.f_flags |= F_AR32W;
 
+/* start-sanitize-tic80 */
+#ifdef TIC80_TARGET_ID
+  internal_f.f_target_id = TIC80_TARGET_ID;
+#endif
+/* end-sanitize-tic80 */
+
   /*
      FIXME, should do something about the other byte orders and
      architectures.
@@ -2830,10 +2852,12 @@ coff_write_object_contents (abfd)
       internal_a.magic = NMAGIC; /* Assume separate i/d */
 #define __A_MAGIC_SET__
 #endif /* A29K */
-#ifdef TIC80
+/* start-sanitize-tic80 */
+#ifdef TIC80COFF
     internal_a.magic = TIC80_ARCH_MAGIC;
 #define __A_MAGIC_SET__
 #endif /* TIC80 */
+/* end-sanitize-tic80 */
 #ifdef I860
     /* FIXME: What are the a.out magic numbers for the i860?  */
     internal_a.magic = 0;
@@ -2896,7 +2920,7 @@ coff_write_object_contents (abfd)
 #endif /* LYNXOS */
 #endif /* SPARC */
 
-#if RS6000COFF_C
+#ifdef RS6000COFF_C
 #define __A_MAGIC_SET__
     internal_a.magic = (abfd->flags & D_PAGED) ? RS6K_AOUTHDR_ZMAGIC :
     (abfd->flags & WP_TEXT) ? RS6K_AOUTHDR_NMAGIC :
@@ -3383,6 +3407,9 @@ coff_slurp_symbol_table (abfd)
 #ifdef RS6000COFF_C
 	    case C_HIDEXT:
 #endif
+#ifdef C_SYSTEM
+	    case C_SYSTEM:	/* System Wide variable */
+#endif
 #ifdef COFF_WITH_PE
             /* PE uses storage class 0x68 to denote a section symbol */
             case C_SECTION:
@@ -3478,9 +3505,15 @@ coff_slurp_symbol_table (abfd)
 #endif
 	    case C_REGPARM:	/* register parameter		 */
 	    case C_REG:	/* register variable		 */
+/* start-sanitize-tic80 */
+#ifndef TIC80COFF
+/* end-sanitize-tic80 */
 #ifdef C_AUTOARG
 	    case C_AUTOARG:	/* 960-specific storage class */
 #endif
+/* start-sanitize-tic80 */
+#endif
+/* end-sanitize-tic80 */
 	    case C_TPDEF:	/* type definition		 */
 	    case C_ARG:
 	    case C_AUTO:	/* automatic variable */
@@ -3583,6 +3616,14 @@ coff_slurp_symbol_table (abfd)
 	      /* NT uses 0x67 for a weak symbol, not C_ALIAS.  */
 	    case C_ALIAS:	/* duplicate tag		 */
 #endif
+/* start-sanitize-tic80 */
+	      /* New storage classes for TIc80 */
+#ifdef TIC80COFF
+	    case C_UEXT:	/* Tentative external definition */
+#endif
+	    case C_STATLAB:	/* Static load time label */
+	    case C_EXTLAB:	/* External load time label */
+/* end-sanitize-tic80 */
 	    case C_HIDDEN:	/* ext symbol in dmert public lib */
 	    default:
 	      (*_bfd_error_handler)
