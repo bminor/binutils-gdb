@@ -48,8 +48,6 @@
 .*:49: Error: .*
 .*:50: Error: .*
 .*:51: Error: .*
-.*:52: Error: .*
-.*:53: Error: .*
 GAS LISTING .*
 
 
@@ -75,34 +73,32 @@ GAS LISTING .*
   20 [ 	]*foo:[ 	]*jcxz foo	# No prefix exists to select CX as a counter
   21 [ 	]*jmpl \*%eax	# 32-bit data size not allowed
   22 [ 	]*jmpl \*\(%rax\)	# 32-bit data size not allowed
-  23 [ 	]*lahf		# illegal
-  24 [ 	]*lcalll \$0,\$0	# illegal
-  25 [ 	]*lcallq \$0,\$0	# illegal
-  26 [ 	]*ldsl %eax,\(%rax\) # illegal
-  27 [ 	]*ldsq %rax,\(%rax\) # illegal
-  28 [ 	]*lesl %eax,\(%rax\) # illegal
-  29 [ 	]*lesq %rax,\(%rax\) # illegal
-  30 [ 	]*ljmpl \$0,\$0	# illegal
-  31 [ 	]*ljmpq \$0,\$0	# illegal
-  32 [ 	]*ljmpq \*\(%rax\)	# 64-bit data size not allowed
-  33 [ 	]*loopw foo	# No prefix exists to select CX as a counter
-  34 [ 	]*loopew foo	# No prefix exists to select CX as a counter
-  35 [ 	]*loopnew foo	# No prefix exists to select CX as a counter
-  36 [ 	]*loopnzw foo	# No prefix exists to select CX as a counter
-  37 [ 	]*loopzw foo	# No prefix exists to select CX as a counter
-  38 [ 	]*leavel		# can't have 32-bit stack operands
-  39 [ 	]*pop %ds		# illegal
-  40 [ 	]*pop %es		# illegal
-  41 [ 	]*pop %ss		# illegal
-  42 [ 	]*popa		# illegal
-  43 [ 	]*popl %eax	# can't have 32-bit stack operands
-  44 [ 	]*push %cs	# illegal
-  45 [ 	]*push %ds	# illegal
-  46 [ 	]*push %es	# illegal
-  47 [ 	]*push %ss	# illegal
-  48 [ 	]*pusha		# illegal
-  49 [ 	]*pushl %eax	# can't have 32-bit stack operands
-  50 [ 	]*pushfl		# can't have 32-bit stack operands
-  51 [ 	]*popfl		# can't have 32-bit stack operands
-  52 [ 	]*retl		# can't have 32-bit stack operands
-  53 [ 	]*sahf		# illegal
+  23 [ 	]*lcalll \$0,\$0	# illegal
+  24 [ 	]*lcallq \$0,\$0	# illegal
+  25 [ 	]*ldsl %eax,\(%rax\) # illegal
+  26 [ 	]*ldsq %rax,\(%rax\) # illegal
+  27 [ 	]*lesl %eax,\(%rax\) # illegal
+  28 [ 	]*lesq %rax,\(%rax\) # illegal
+  29 [ 	]*ljmpl \$0,\$0	# illegal
+  30 [ 	]*ljmpq \$0,\$0	# illegal
+  31 [ 	]*ljmpq \*\(%rax\)	# 64-bit data size not allowed
+  32 [ 	]*loopw foo	# No prefix exists to select CX as a counter
+  33 [ 	]*loopew foo	# No prefix exists to select CX as a counter
+  34 [ 	]*loopnew foo	# No prefix exists to select CX as a counter
+  35 [ 	]*loopnzw foo	# No prefix exists to select CX as a counter
+  36 [ 	]*loopzw foo	# No prefix exists to select CX as a counter
+  37 [ 	]*leavel		# can't have 32-bit stack operands
+  38 [ 	]*pop %ds		# illegal
+  39 [ 	]*pop %es		# illegal
+  40 [ 	]*pop %ss		# illegal
+  41 [ 	]*popa		# illegal
+  42 [ 	]*popl %eax	# can't have 32-bit stack operands
+  43 [ 	]*push %cs	# illegal
+  44 [ 	]*push %ds	# illegal
+  45 [ 	]*push %es	# illegal
+  46 [ 	]*push %ss	# illegal
+  47 [ 	]*pusha		# illegal
+  48 [ 	]*pushl %eax	# can't have 32-bit stack operands
+  49 [ 	]*pushfl		# can't have 32-bit stack operands
+  50 [ 	]*popfl		# can't have 32-bit stack operands
+  51 [ 	]*retl		# can't have 32-bit stack operands

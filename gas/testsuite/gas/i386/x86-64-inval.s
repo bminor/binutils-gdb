@@ -20,7 +20,6 @@
 foo:	jcxz foo	# No prefix exists to select CX as a counter
 	jmpl *%eax	# 32-bit data size not allowed
         jmpl *(%rax)	# 32-bit data size not allowed
-        lahf		# illegal
         lcalll $0,$0	# illegal
         lcallq $0,$0	# illegal
         ldsl %eax,(%rax) # illegal
@@ -50,4 +49,3 @@ foo:	jcxz foo	# No prefix exists to select CX as a counter
         pushfl		# can't have 32-bit stack operands
 	popfl		# can't have 32-bit stack operands
 	retl		# can't have 32-bit stack operands
-        sahf		# illegal

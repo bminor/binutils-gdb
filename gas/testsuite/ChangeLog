@@ -1,3 +1,6 @@
+2004-11-25 Jan Beulich  <jbeulich@novell.com>
+	* gas/i386/x86-64-inval.[sl]: Remove sahf/lahf.
+
 2004-11-24  Paul Brook  <paul@codesourcery.com>
 
 	* gas/elf/group0a.d: Adjust expected secion ordering.

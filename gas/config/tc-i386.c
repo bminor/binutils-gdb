@@ -2362,9 +2362,6 @@ process_suffix (void)
 	   && (i.tm.opcode_modifier & No_sSuf))
     {
       i.suffix = stackop_size;
-      if (i.suffix == QWORD_MNEM_SUFFIX
-	  && (i.tm.opcode_modifier & No_qSuf))
-	i.suffix = LONG_MNEM_SUFFIX;
     }
   else if (intel_syntax
 	   && !i.suffix
@@ -2702,7 +2699,7 @@ finalize_imm ()
   i.types[0] = overlap0;
 
   overlap1 = i.types[1] & i.tm.operand_types[1];
-  if ((overlap1 & (Imm8 | Imm8S | Imm16 | Imm32S | Imm32))
+  if ((overlap1 & (Imm8 | Imm8S | Imm16 | Imm32S | Imm32 | Imm64))
       && overlap1 != Imm8 && overlap1 != Imm8S
       && overlap1 != Imm16 && overlap1 != Imm32S
       && overlap1 != Imm32 && overlap1 != Imm64)

@@ -1,3 +1,11 @@
+2004-11-25 Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (optimize_imm): Adjust immediates to only those
+	permissible for the selected instruction suffix.
+	(process_suffix): For DefaultSize instructions, suppressing the
+	guessing of a 'q' suffix if the instruction doesn't support it is
+	pointless, because only an 'l' suffix can be guessed in this place.
+
 2004-11-24  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-iq2000.c: Remove support for IQ10 processor.
