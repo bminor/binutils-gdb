@@ -166,28 +166,54 @@ struct arm_it
 
 struct arm_it inst;
 
-struct asm_shift
+enum asm_shift_index
 {
-  CONST char *  template;
-  unsigned long value;
+  SHIFT_LSL = 0,
+  SHIFT_LSR,
+  SHIFT_ASR,
+  SHIFT_ROR,
+  SHIFT_RRX
 };
 
-static CONST struct asm_shift shift[] =
+struct asm_shift_properties
 {
-  {"asl", 0},
-  {"lsl", 0},
-  {"lsr", 0x00000020},
-  {"asr", 0x00000040},
-  {"ror", 0x00000060},
-  {"rrx", 0x00000060},
-  {"ASL", 0},
-  {"LSL", 0},
-  {"LSR", 0x00000020},
-  {"ASR", 0x00000040},
-  {"ROR", 0x00000060},
-  {"RRX", 0x00000060}
+  enum asm_shift_index index;
+  unsigned long        bit_field;
+  unsigned int         allows_0  : 1;
+  unsigned int         allows_32 : 1;
 };
 
+static const struct asm_shift_properties shift_properties [] =
+{
+  { SHIFT_LSL, 0,    1, 0},
+  { SHIFT_LSR, 0x20, 0, 1},
+  { SHIFT_ASR, 0x40, 0, 1},
+  { SHIFT_ROR, 0x60, 0, 0},
+  { SHIFT_RRX, 0x60, 0, 0}
+};
+
+struct asm_shift_name
+{
+  const char *                        name;
+  const struct asm_shift_properties * properties;
+};
+
+static const struct asm_shift_name shift_names [] =
+{
+  { "asl", shift_properties + SHIFT_LSL },
+  { "lsl", shift_properties + SHIFT_LSL },
+  { "lsr", shift_properties + SHIFT_LSR },
+  { "asr", shift_properties + SHIFT_ASR },
+  { "ror", shift_properties + SHIFT_ROR },
+  { "rrx", shift_properties + SHIFT_RRX },
+  { "ASL", shift_properties + SHIFT_LSL },
+  { "LSL", shift_properties + SHIFT_LSL },
+  { "LSR", shift_properties + SHIFT_LSR },
+  { "ASR", shift_properties + SHIFT_ASR },
+  { "ROR", shift_properties + SHIFT_ROR },
+  { "RRX", shift_properties + SHIFT_RRX }
+};
+  
 #define NO_SHIFT_RESTRICT 1
 #define SHIFT_RESTRICT	  0
 
@@ -2505,7 +2531,7 @@ decode_shift (str, unrestrict)
      char ** str;
      int     unrestrict;
 {
-  struct asm_shift * shft;
+  struct asm_shift_name * shift;
   char * p;
   char   c;
 
@@ -2522,83 +2548,87 @@ decode_shift (str, unrestrict)
 
   c = * p;
   * p = '\0';
-  shft = (struct asm_shift *) hash_find (arm_shift_hsh, * str);
+  shift = (struct asm_shift_name *) hash_find (arm_shift_hsh, * str);
   * p = c;
-  if (shft)
+  
+  if (shift == NULL)
     {
-      if (   ! strncmp (* str, "rrx", 3)
-          || ! strncmp (* str, "RRX", 3))
-	{
-	  * str = p;
-	  inst.instruction |= shft->value;
-	  return SUCCESS;
-	}
-
-      skip_whitespace (p);
-
-      if (unrestrict && reg_required_here (& p, 8) != FAIL)
-	{
-	  inst.instruction |= shft->value | SHIFT_BY_REG;
-	  * str = p;
-	  return SUCCESS;
-	}
-      else if (is_immediate_prefix (* p))
-	{
-	  inst.error = NULL;
-	  p ++;
-
-	  if (my_get_expression (& inst.reloc.exp, & p))
-	    return FAIL;
-
-	  /* Validate some simple #expressions.  */
-	  if (inst.reloc.exp.X_op == O_constant)
-	    {
-	      unsigned num = inst.reloc.exp.X_add_number;
-
-	      /* Reject operations greater than 32, or lsl #32.  */
-	      if (num > 32 || (num == 32 && shft->value == 0))
-		{
-		  inst.error = _("Invalid immediate shift");
-		  return FAIL;
-		}
-
-	      /* Shifts of zero should be converted to lsl
-		 (which is zero).  */
-	      if (num == 0)
-		{
-		  * str = p;
-		  return SUCCESS;
-		}
-
-	      /* Shifts of 32 are encoded as 0, for those shifts that
-		 support it.  */
-	      if (num == 32)
-		num = 0;
-
-	      inst.instruction |= (num << 7) | shft->value;
-	      * str = p;
-	      return SUCCESS;
-	    }
-
-	  inst.reloc.type   = BFD_RELOC_ARM_SHIFT_IMM;
-	  inst.reloc.pc_rel = 0;
-	  inst.instruction |= shft->value;
-
-	  * str = p;
-	  return SUCCESS;
-	}
-      else
-	{
-	  inst.error = (unrestrict
-			? _("shift requires register or #expression")
-			: _("shift requires #expression"));
-	  * str = p;
-	  return FAIL;
-	}
+      inst.error = _("Shift expression expected");
+      return FAIL;
     }
 
-  inst.error = _("Shift expression expected");
-  return FAIL;
+  assert (shift->properties->index == shift_properties[shift->properties->index].index);
+  
+  if (shift->properties->index == SHIFT_RRX)
+    {
+      * str = p;
+      inst.instruction |= shift->properties->bit_field;
+      return SUCCESS;
+    }
+
+  skip_whitespace (p);
+
+  if (unrestrict && reg_required_here (& p, 8) != FAIL)
+    {
+      inst.instruction |= shift->properties->bit_field | SHIFT_BY_REG;
+      * str = p;
+      return SUCCESS;
+    }
+  else if (! is_immediate_prefix (* p))
+    {
+      inst.error = (unrestrict
+		    ? _("shift requires register or #expression")
+		    : _("shift requires #expression"));
+      * str = p;
+      return FAIL;
+    }
+    
+  inst.error = NULL;
+  p ++;
+  
+  if (my_get_expression (& inst.reloc.exp, & p))
+    return FAIL;
+  
+  /* Validate some simple #expressions.  */
+  if (inst.reloc.exp.X_op == O_constant)
+    {
+      unsigned num = inst.reloc.exp.X_add_number;
+
+      /* Reject operations greater than 32.  */
+      if (num > 32
+	  /* Reject a shift of 0 unless the mode allows it.  */
+	  || (num == 0 && shift->properties->allows_0 == 0)
+	  /* Reject a shift of 32 unless the mode allows it.  */
+	  || (num == 32 && shift->properties->allows_32 == 0)
+	  )
+	{
+	  /* As a special case we allow ROR #0, but we issue a message
+	     reminding the programmer that this is actually an RRX.  */
+	  if (num == 0 && shift->properties->index == SHIFT_ROR)
+	    as_tsktsk (_("ROR #0 is actually RRX"));
+	  else
+	    {
+	      inst.error = _("Invalid immediate shift");
+	      return FAIL;
+	    }
+	}
+
+      /* Shifts of 32 are encoded as 0, for those shifts that
+	 support it.  */
+      if (num == 32)
+	num = 0;
+      
+      inst.instruction |= (num << 7) | shift->properties->bit_field;
+    }
+  else
+    {
+      inst.reloc.type   = BFD_RELOC_ARM_SHIFT_IMM;
+      inst.reloc.pc_rel = 0;
+      inst.instruction |= shift->properties->bit_field;
+    }
+  
+  * str = p;
+  return SUCCESS;
 }
 
 /* Do those data_ops which can take a negative immediate constant
@@ -5240,8 +5270,8 @@ md_begin ()
     hash_insert (arm_tops_hsh, tinsns[i].template, (PTR) (tinsns + i));
   for (i = 0; i < sizeof (conds) / sizeof (struct asm_cond); i++)
     hash_insert (arm_cond_hsh, conds[i].template, (PTR) (conds + i));
-  for (i = 0; i < sizeof (shift) / sizeof (struct asm_shift); i++)
-    hash_insert (arm_shift_hsh, shift[i].template, (PTR) (shift + i));
+  for (i = 0; i < sizeof (shift_names) / sizeof (struct asm_shift_name); i++)
+    hash_insert (arm_shift_hsh, shift_names[i].name, (PTR) (shift_names + i));
   for (i = 0; i < sizeof (psrs) / sizeof (struct asm_psr); i++)
     hash_insert (arm_psr_hsh, psrs[i].template, (PTR) (psrs + i));
 
@@ -7388,7 +7418,7 @@ arm_parse_reloc ()
   }
   reloc_map[] =
   {
-#define MAP(str,reloc) { str, sizeof (str)-1, reloc }
+#define MAP(str,reloc) { str, sizeof (str) - 1, reloc }
     MAP ("(got)",    BFD_RELOC_ARM_GOT32),
     MAP ("(gotoff)", BFD_RELOC_ARM_GOTOFF),
     /* ScottB: Jan 30, 1998 - Added support for parsing "var(PLT)"

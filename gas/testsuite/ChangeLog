@@ -1,3 +1,10 @@
+2000-08-16  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/inst.s: Add tests for edge cases of shift based
+        addressing modes.
+
+	* gas/arm/inst.d: Add expected results for new tests.
+
 2000-07-20  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/all/gas.exp: Don't run floating-point tests on CRIS.

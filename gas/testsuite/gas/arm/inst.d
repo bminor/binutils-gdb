@@ -167,3 +167,35 @@ Disassembly of section .text:
 [		]*268:.*_wibble.*
 0000026c <[^>]*> dafffffe ?	ble	0000026c <[^>]*>
 [		]*26c:.*testerfunc.*
+00000270 <[^>]*> e1a01102 ?	mov	r1, r2, lsl #2
+00000274 <[^>]*> e1a01002 ?	mov	r1, r2
+00000278 <[^>]*> e1a01f82 ?	mov	r1, r2, lsl #31
+0000027c <[^>]*> e1a01312 ?	mov	r1, r2, lsl r3
+00000280 <[^>]*> e1a01122 ?	mov	r1, r2, lsr #2
+00000284 <[^>]*> e1a01fa2 ?	mov	r1, r2, lsr #31
+00000288 <[^>]*> e1a01022 ?	mov	r1, r2, lsr #32
+0000028c <[^>]*> e1a01332 ?	mov	r1, r2, lsr r3
+00000290 <[^>]*> e1a01142 ?	mov	r1, r2, asr #2
+00000294 <[^>]*> e1a01fc2 ?	mov	r1, r2, asr #31
+00000298 <[^>]*> e1a01042 ?	mov	r1, r2, asr #32
+0000029c <[^>]*> e1a01352 ?	mov	r1, r2, asr r3
+000002a0 <[^>]*> e1a01162 ?	mov	r1, r2, ror #2
+000002a4 <[^>]*> e1a01fe2 ?	mov	r1, r2, ror #31
+000002a8 <[^>]*> e1a01372 ?	mov	r1, r2, ror r3
+000002ac <[^>]*> e1a01062 ?	mov	r1, r2, rrx
+000002b0 <[^>]*> e1a01102 ?	mov	r1, r2, lsl #2
+000002b4 <[^>]*> e1a01002 ?	mov	r1, r2
+000002b8 <[^>]*> e1a01f82 ?	mov	r1, r2, lsl #31
+000002bc <[^>]*> e1a01312 ?	mov	r1, r2, lsl r3
+000002c0 <[^>]*> e1a01122 ?	mov	r1, r2, lsr #2
+000002c4 <[^>]*> e1a01fa2 ?	mov	r1, r2, lsr #31
+000002c8 <[^>]*> e1a01022 ?	mov	r1, r2, lsr #32
+000002cc <[^>]*> e1a01332 ?	mov	r1, r2, lsr r3
+000002d0 <[^>]*> e1a01142 ?	mov	r1, r2, asr #2
+000002d4 <[^>]*> e1a01fc2 ?	mov	r1, r2, asr #31
+000002d8 <[^>]*> e1a01042 ?	mov	r1, r2, asr #32
+000002dc <[^>]*> e1a01352 ?	mov	r1, r2, asr r3
+000002e0 <[^>]*> e1a01162 ?	mov	r1, r2, ror #2
+000002e4 <[^>]*> e1a01fe2 ?	mov	r1, r2, ror #31
+000002e8 <[^>]*> e1a01372 ?	mov	r1, r2, ror r3
+000002ec <[^>]*> e1a01062 ?	mov	r1, r2, rrx

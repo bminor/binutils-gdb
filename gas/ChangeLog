@@ -1,3 +1,20 @@
+2000-08-16  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (struct asm_shift): Delete.
+	(shift[]): Delete.
+	(enum asm_shift_index): New.
+	(struct asm_shift_properties): New.
+	(struct asm_shift_name): New.
+	(shift_properties[]); New.
+	(shift_names[]); New.
+
+	(decode_shift): Use new structures.
+	Issue a warning is "ROR #0" is used.
+	Issue a warning if "ASR #0" or "LSR #0" is used.
+
+	(md_begin): Initialise arm_shift_hsh table from new
+	asm_shift_name array.
+
 2000-08-16  Jakub Jelinek  <jakub@redhat.com>
 
 	* config/tc-sparc.c: Kill all warnings.
