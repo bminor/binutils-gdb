@@ -3201,7 +3201,7 @@ arm_elf_find_function (bfd *         abfd ATTRIBUTE_UNUSED,
 	    continue;
 	  /* Fall through.  */
 	case STT_NOTYPE:
-	  if (q->symbol.section == section
+	  if (bfd_get_section (&q->symbol) == section
 	      && q->symbol.value >= low_func
 	      && q->symbol.value <= offset)
 	    {

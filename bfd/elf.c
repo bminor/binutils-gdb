@@ -6313,7 +6313,7 @@ elf_find_function (bfd *abfd ATTRIBUTE_UNUSED,
 	  break;
 	case STT_NOTYPE:
 	case STT_FUNC:
-	  if (q->symbol.section == section
+	  if (bfd_get_section (&q->symbol) == section
 	      && q->symbol.value >= low_func
 	      && q->symbol.value <= offset)
 	    {
