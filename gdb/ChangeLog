@@ -1,3 +1,7 @@
+2004-03-17  David Carlton  <carlton@kealia.com>
+
+	* NEWS: Mention C++ nested types and namespaces
+
 2004-03-16  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* PROBLEMS: Add section headers, "Regressions since gdb 6.0"
