@@ -658,6 +658,10 @@ static struct complaint dwarf2_macro_spaces_in_definition =
 {
   "macro definition contains spaces in formal argument list:\n`%s'", 0, 0
 };
+static struct complaint dwarf2_invalid_attrib_class =
+{
+  "invalid attribute class or form for '%s' in '%s'", 0, 0
+};
 
 /* local function prototypes */
 
@@ -905,6 +909,8 @@ static void add_to_cu_func_list (const char *, CORE_ADDR, CORE_ADDR);
 static void dwarf_decode_macros (struct line_header *, unsigned int,
                                  char *, bfd *, const struct comp_unit_head *,
                                  struct objfile *);
+
+static int attr_form_is_block (struct attribute *);
 
 /* Try to locate the sections we need for DWARF 2 debugging
    information and return true if we have enough to do something.  */
@@ -1870,7 +1876,24 @@ read_func_scope (struct die_info *die, struct objfile *objfile,
   attr = dwarf_attr (die, DW_AT_frame_base);
   if (attr)
     {
-      CORE_ADDR addr = decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
+      CORE_ADDR addr;
+
+      /* Support the .debug_loc offsets */
+      if (attr_form_is_block (attr))
+        {
+          addr = decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
+        }
+      else if (attr->form == DW_FORM_data4 || attr->form == DW_FORM_data8)
+        {
+          complain (&dwarf2_complex_location_expr);
+          addr = 0;
+        }
+      else
+        {
+          complain (&dwarf2_invalid_attrib_class, "DW_AT_frame_base", name);
+          addr = 0;
+        }
+    
       if (isderef)
 	complain (&dwarf2_unsupported_at_frame_base, name);
       else if (isreg)
@@ -2348,7 +2371,22 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   /* Get index in virtual function table if it is a virtual member function.  */
   attr = dwarf_attr (die, DW_AT_vtable_elem_location);
   if (attr)
-    fnp->voffset = decode_locdesc (DW_BLOCK (attr), objfile, cu_header) + 2;
+    {
+      /* Support the .debug_loc offsets */
+      if (attr_form_is_block (attr))
+        {
+          fnp->voffset = decode_locdesc (DW_BLOCK (attr), objfile, cu_header) + 2;
+        }
+      else if (attr->form == DW_FORM_data4 || attr->form == DW_FORM_data8)
+        {
+          complain (&dwarf2_complex_location_expr);
+        }
+      else
+        {
+          complain (&dwarf2_invalid_attrib_class, "DW_AT_vtable_elem_location",
+                    fieldname);
+        }
+   }
 }
 
 /* Create the vector of member function fields, and attach it to the type.  */
@@ -2812,7 +2850,20 @@ read_common_block (struct die_info *die, struct objfile *objfile,
   attr = dwarf_attr (die, DW_AT_location);
   if (attr)
     {
-      base = decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
+      /* Support the .debug_loc offsets */
+      if (attr_form_is_block (attr))
+        {
+          base = decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
+        }
+      else if (attr->form == DW_FORM_data4 || attr->form == DW_FORM_data8)
+        {
+          complain (&dwarf2_complex_location_expr);
+        }
+      else
+        {
+          complain (&dwarf2_invalid_attrib_class, "DW_AT_location",
+                    "common block member");
+        }
     }
   if (die->has_children)
     {
@@ -3458,7 +3509,20 @@ read_partial_die (struct partial_die_info *part_die, bfd *abfd,
 	  part_die->highpc = DW_ADDR (&attr);
 	  break;
 	case DW_AT_location:
-	  part_die->locdesc = DW_BLOCK (&attr);
+          /* Support the .debug_loc offsets */
+          if (attr_form_is_block (&attr))
+            {
+	       part_die->locdesc = DW_BLOCK (&attr);
+            }
+          else if (attr.form == DW_FORM_data4 || attr.form == DW_FORM_data8)
+            {
+              complain (&dwarf2_complex_location_expr);
+            }
+          else
+            {
+              complain (&dwarf2_invalid_attrib_class, "DW_AT_location",
+                        "partial symbol information");
+            }
 	  break;
 	case DW_AT_language:
 	  part_die->language = DW_UNSND (&attr);
@@ -4522,7 +4586,7 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
   char *name;
   struct attribute *attr = NULL;
   struct attribute *attr2 = NULL;
-  CORE_ADDR addr;
+  CORE_ADDR addr = 0;
 
   name = dwarf2_linkage_name (die);
   if (name)
@@ -4606,8 +4670,22 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	      attr2 = dwarf_attr (die, DW_AT_external);
 	      if (attr2 && (DW_UNSND (attr2) != 0))
 		{
-		  SYMBOL_VALUE_ADDRESS (sym) =
-		    decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
+                  /* Support the .debug_loc offsets */
+                  if (attr_form_is_block (attr))
+                    {
+		      SYMBOL_VALUE_ADDRESS (sym) =
+		        decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
+                    }
+                  else if (attr->form == DW_FORM_data4
+                           || attr->form == DW_FORM_data8)
+                    {
+                      complain (&dwarf2_complex_location_expr);
+                    }
+                  else
+                    {
+                      complain (&dwarf2_invalid_attrib_class, "DW_AT_location",
+                                "external variable");
+                    }
 		  add_symbol_to_list (sym, &global_symbols);
 
 		  /* In shared libraries the address of the variable
@@ -4630,8 +4708,23 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 		}
 	      else
 		{
-		  SYMBOL_VALUE (sym) = addr =
-		    decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
+                  /* Support the .debug_loc offsets */
+                  if (attr_form_is_block (attr))
+                    {
+		      SYMBOL_VALUE (sym) = addr =
+		        decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
+                    }
+                  else if (attr->form == DW_FORM_data4
+                           || attr->form == DW_FORM_data8)
+                    {
+                      complain (&dwarf2_complex_location_expr);
+                    }
+                  else
+                    {
+                      complain (&dwarf2_invalid_attrib_class, "DW_AT_location",
+                                "external variable");
+                      addr = 0;
+                    }
 		  add_symbol_to_list (sym, list_in_scope);
 		  if (optimized_out)
 		    {
@@ -6793,4 +6886,16 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
           break;
         }
     }
+}
+
+/* Check if the attribute's form is a DW_FORM_block*
+   if so return true else false. */
+static int
+attr_form_is_block (struct attribute *attr)
+{
+  return (attr == NULL ? 0 :
+      attr->form == DW_FORM_block1
+      || attr->form == DW_FORM_block2
+      || attr->form == DW_FORM_block4
+      || attr->form == DW_FORM_block);
 }

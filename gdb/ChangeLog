@@ -1,3 +1,21 @@
+2002-07-12  Petr Sorfa <petrs@caldera.com>
+
+        *  dwarf2read.c (dwarf2_invalid_attrib_class): New
+        complaint for invalid attribute class or form.
+        (read_func_scope): DW_AT_frame_base
+        better handling of DW_AT_block*.
+        (dwarf2_add_member_fn): DW_AT_vtable_elem_location
+        better handling of DW_AT_block*.
+        (read_common_block): DW_AT_location
+        better handling of DW_AT_block*.
+        (read_partial_die): DW_AT_location better handling
+        of DW_AT_block*.
+        (new_symbol): DW_AT_external better handling of
+        DW_AT_block*. Proper initialization of variable
+        "addr".
+        (attr_form_is_block): New function that returns true
+        if the attribute's form is of DW_FORM_block*.
+
 2002-07-12  Peter Schauer  <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>
 
 	* valops.c (find_method_list): Remove comment about
