@@ -62,14 +62,6 @@ DLLTOOL = @DLLTOOL@
 WINDRES = @WINDRES@
 MIG = @MIG@
 
-# If the user configured GDB to include the TUI, the name of the tui
-# library goes here.
-TUI_LIBRARY = @TUI_LIBRARY@
-
-# If the user configured GDB to include the TUI, the all-tui 
-# target goes here.
-BUILD_TUI = @BUILD_TUI@
-
 # Flags that describe where you can find the termcap library.
 # This can be overridden in the host Makefile fragment file.
 TERMCAP = @TERM_LIB@
@@ -142,11 +134,6 @@ INTL_DEPS = @INTLDEPS@
 INTL_SRC = $(srcdir)/$(INTL_DIR)
 INTL_CFLAGS = -I$(INTL_DIR) -I$(INTL_SRC)
 
-# Where is the TUI library?  Typically in tui/.
-TUI_DIR=tui
-TUI_SRC = $(srcdir)/$(TUI_DIR)
-TUI_CFLAGS= -I$(TUI_SRC)
-
 #
 # MI sub directory definitons
 #
@@ -171,6 +158,33 @@ SUBDIR_MI_ALL=
 SUBDIR_MI_CLEAN=
 SUBDIR_MI_INSTALL=
 SUBDIR_MI_UNINSTALL=
+
+#
+# TUI sub directory definitions
+#
+SUBDIR_TUI_OBS = \
+	tui.o tuiData.o tuiSource.o tuiStack.o tuiIO.o \
+	tuiGeneralWin.o tuiLayout.o tuiWin.o tuiCommand.o \
+	tuiDisassem.o tuiSourceWin.o tuiRegs.o tuiDataWin.o
+SUBDIR_TUI_SRCS = \
+	tui/tui.c tui/tuiData.c tui/tuiSource.c \
+	tui/tuiStack.c tui/tuiIO.c \
+	tui/tuiGeneralWin.c tui/tuiLayout.c \
+	tui/tuiWin.c tui/tuiCommand.c \
+	tui/tuiDisassem.c tui/tuiSourceWin.c \
+	tui/tuiRegs.c tui/tuiDataWin.c
+SUBDIR_TUI_DEPS =
+SUBDIR_TUI_INITS = \
+	$(SUBDIR_TUI_SRCS)
+SUBDIR_TUI_LDFLAGS=
+SUBDIR_TUI_CFLAGS= \
+	-DTUI=1 -I${srcdir}/tui
+SUBDIR_TUI_ALL=
+SUBDIR_TUI_CLEAN=
+SUBDIR_TUI_INSTALL=
+SUBDIR_TUI_UNINSTALL=
+
+
 
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file
@@ -275,7 +289,7 @@ INTERNAL_WARN_CFLAGS = \
 	$(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(MMALLOC_CFLAGS) $(INCLUDE_CFLAGS) \
-	$(INTL_CFLAGS) $(TUI_CFLAGS) $(ENABLE_CFLAGS) \
+	$(INTL_CFLAGS) $(ENABLE_CFLAGS) \
 	$(GDB_WARN_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 
@@ -836,13 +850,6 @@ xm-vaxbsd.h: xm-vax.h
 kdb:	$(NTSSTART) $(OBS) $(NTSOBS) $(ADD_DEPS) $(CDEPS)
 	ld -o kdb $(NTSSTART) $(OBS) $(NTSOBS) init.o $(ADD_FILES) \
 	  -lc $(CLIBS)
-
-# Have the TUI library depend on a phony target, so we'll always
-# recurse and make sure it's up to date.  If it is, then the file will
-# be unchanged, and we won't rebuild it.
-# .PHONY: check-tui
-all-tui: 
-	@(cd tui; ${MAKE} ${FLAGS_TO_PASS} all)
 
 # Put the proper machine-specific files first, so M-. on a machine
 # specific routine gets the one for the correct machine.  (FIXME: those
@@ -1986,5 +1993,70 @@ mi-parse.o: $(srcdir)/mi/mi-parse.c $(defs_h) $(mi_parse_h) $(mi_cmds_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-parse.c
 mi-getopt.o: $(srcdir)/mi/mi-getopt.c $(mi_getopt_h) $(defs_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-getopt.c
+
+#
+# TUI dependencies
+#
+# Need to explicitly specify the compile rule as make will do nothing
+# or try to compile the object file into the mi directory.
+
+tui.o: $(srcdir)/tui/tui.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiLayout.h $(srcdir)/tui/tuiIO.h \
+		$(srcdir)/tui/tuiRegs.h $(srcdir)/tui/tuiWin.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tui.c
+tuiCommand.o: $(srcdir)/tui/tuiCommand.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiWin.h $(srcdir)/tui/tuiIO.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiCommand.c
+tuiData.o: $(srcdir)/tui/tuiData.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiData.c
+tuiDataWin.o: $(srcdir)/tui/tuiDataWin.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiRegs.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiDataWin.c
+tuiDisassem.o: $(srcdir)/tui/tuiDisassem.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiLayout.h $(srcdir)/tui/tuiSourceWin.h \
+		$(srcdir)/tui/tuiStack.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiDisassem.c
+tuiGeneralWin.o: $(srcdir)/tui/tuiGeneralWin.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiGeneralWin.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiGeneralWin.c
+tuiIO.o: $(srcdir)/tui/tuiIO.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiIO.h $(srcdir)/tui/tuiCommand.h \
+		$(srcdir)/tui/tuiWin.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiIO.c
+tuiLayout.o: $(srcdir)/tui/tuiLayout.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiGeneralWin.h $(srcdir)/tui/tuiStack.h \
+		$(srcdir)/tui/tuiRegs.h $(srcdir)/tui/tuiDisassem.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiLayout.c
+tuiRegs.o: $(srcdir)/tui/tuiRegs.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiLayout.h $(srcdir)/tui/tuiWin.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiRegs.c
+tuiSource.o: $(srcdir)/tui/tuiSource.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiStack.h $(srcdir)/tui/tuiSourceWin.h \
+		$(srcdir)/tui/tuiSource.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiSource.c
+tuiSourceWin.o: $(srcdir)/tui/tuiSourceWin.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiStack.h $(srcdir)/tui/tuiSourceWin.h \
+		$(srcdir)/tui/tuiSource.h $(srcdir)/tui/tuiDisassem.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiSourceWin.c
+tuiStack.o: $(srcdir)/tui/tuiStack.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiStack.h $(srcdir)/tui/tuiSourceWin.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiStack.c
+tuiWin.o: $(srcdir)/tui/tuiWin.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
+		$(srcdir)/tui/tuiGeneralWin.h $(srcdir)/tui/tuiStack.h \
+		$(srcdir)/tui/tuiSourceWin.h $(srcdir)/tui/tuiDataWin.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiWin.c
 
 ### end of the gdb Makefile.in.

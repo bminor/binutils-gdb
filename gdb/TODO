@@ -303,15 +303,6 @@ Nuke USG define.
 
 --
 
-Eliminate gdb/tui/Makefile.in.
-Cleanup configury support for optional sub-directories.
-
-Check how GCC handles multiple front ends for an example of how things
-could work.  A tentative first step is to rationalize things so that
-all sub directories are handled in a fashion similar to gdb/mi.
-
---
-
 [PATCH/5] src/intl/Makefile.in:distclean additions
 http://sourceware.cygnus.com/ml/gdb-patches/2000-04/msg00363.html
 
@@ -632,6 +623,18 @@ Convert ALL architectures to MULTI-ARCH.
 --
 
 Convert GDB build process to AUTOMAKE.
+
+See also sub-directory configure below.
+
+--
+
+Cleanup configury support for optional sub-directories.
+
+Check how GCC handles multiple front ends for an example of how things
+could work.  A tentative first step is to rationalize things so that
+all sub directories are handled in a fashion similar to gdb/mi.
+
+See also automake above.
 
 --
 

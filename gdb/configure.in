@@ -456,17 +456,19 @@ AC_ARG_ENABLE(tui,
 ])
 case ${enable_tui} in
   "yes" )
-    AC_DEFINE(TUI)
-    BUILD_TUI=all-tui
-    TUI_LIBRARY=tui/libtui.a
-  ;;
-  * )
-    BUILD_TUI=
-    TUI_LIBRARY=
-  ;;
+    if test -d "${srcdir}/tui" ; then
+      CONFIG_OBS="${CONFIG_OBS} \$(SUBDIR_TUI_OBS)"
+      CONFIG_DEPS="${CONFIG_DEPS} \$(SUBDIR_TUI_DEPS)"
+      CONFIG_SRCS="${CONFIG_SRS} \$(SUBDIR_TUI_SRCS)"
+      CONFIG_INITS="${CONFIG_INITS} \$(SUBDIR_TUI_INITS)"
+      ENABLE_CFLAGS="${ENABLE_CFLAGS} \$(SUBDIR_TUI_CFLAGS)"
+      CONFIG_ALL="${CONFIG_ALL} \$(SUBDIR_TUI_ALL)"
+      CONFIG_CLEAN="${CONFIG_CLEAN} \$(SUBDIR_TUI_CLEAN)"
+      CONFIG_INSTALL="${CONFIG_INSTALL} \$(SUBDIR_TUI_INSTALL)"
+      CONFIG_UNINSTALL="${CONFIG_UNINSTALL} \$(SUBDIR_TUI_UNINSTALL)"
+    fi
+    ;;
 esac
-AC_SUBST(BUILD_TUI)
-AC_SUBST(TUI_LIBRARY)
 
 AC_ARG_ENABLE(netrom,
 [  --enable-netrom         Enable NetROM support],
@@ -1014,7 +1016,7 @@ dnl Check for exe extension set on certain hosts (e.g. Win32)
 AC_EXEEXT
 
 AC_CONFIG_SUBDIRS($configdirs)
-AC_OUTPUT(Makefile tui/Makefile .gdbinit:gdbinit.in,
+AC_OUTPUT(Makefile .gdbinit:gdbinit.in,
 [
 dnl Autoconf doesn't provide a mechanism for modifying definitions 
 dnl provided by makefile fragments.

@@ -1,3 +1,22 @@
+Thu May 25 11:09:50 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (AC_OUTPUT): Do not generate tui/Makefile.
+	(enable-tui): Convert Makefile configury to use the same mechanism
+ 	as MI.
+
+	* Makefile.in (BUILD_TUI, TUI_LIBRARY, TUI_DIR, TUI_SRC,
+ 	TUI_CFLAGS): Delete
+	(all-tui): Delete target.
+	(tuiWin.o, tuiStack.o, tuiSourceWin.o, tuiSource.o, tuiRegs.o,
+ 	tuiLayout.o, tuiIO.o, tuiGeneralWin.o, tuiDisassem.o,
+ 	tuiDataWin.o, tuiData.o, tuiCommand.o, tui.o): New targets.
+	(SUBDIR_TUI_OBS, SUBDIR_TUI_SRCS, SUBDIR_TUI_DEPS,
+ 	SUBDIR_TUI_INITS, SUBDIR_TUI_LDFLAGS, SUBDIR_TUI_CFLAGS,
+ 	SUBDIR_TUI_ALL, SUBDIR_TUI_CLEAN, SUBDIR_TUI_INSTALL,
+ 	SUBDIR_TUI_UNINSTALL): Define.
+
+	* TODO: Update.
+
 Thu May 25 11:02:24 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Update.  Mark Kettenis fixed FreeBSD >2.2 support.

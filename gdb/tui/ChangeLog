@@ -1,3 +1,7 @@
+Mon May 15 17:16:10 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in: Delete.
+
 Tue Apr 18 15:32:15 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (distclean, maintainer-clean, realclean,
