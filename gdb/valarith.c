@@ -103,7 +103,7 @@ value_sub (value_ptr arg1, value_ptr arg2)
 	{
 	  /* pointer - integer.  */
 	  LONGEST sz = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)));
-	  return value_from_pointer (VALUE_TYPE (arg1),
+	  return value_from_pointer (type1,
 				     (value_as_pointer (arg1)
 				      - (sz * value_as_long (arg2))));
 	}
