@@ -1,3 +1,10 @@
+Sun Jun 18 01:01:09 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips-tdep.c (mips_debug): New variable.
+ 	(_initialize_mips_tdep): Add command "set debug mips".
+	(mips_push_arguments): Add code to dump the argument list as it is
+ 	created.
+
 Sun Jun 18 00:27:15 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips-tdep.c (mips_push_arguments): For MIPS_EABI, squeeze a

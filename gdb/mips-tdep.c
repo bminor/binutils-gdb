@@ -107,6 +107,7 @@ static enum mips_fpu_type mips_fpu_type = MIPS_DEFAULT_FPU_TYPE;
 #define FP_REGISTER_DOUBLE (REGISTER_VIRTUAL_SIZE(FP0_REGNUM) == 8)
 #endif
 
+static int mips_debug = 0;
 
 /* MIPS specific per-architecture information */
 struct gdbarch_tdep
@@ -2095,13 +2096,23 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
     len += ROUND_UP (TYPE_LENGTH (VALUE_TYPE (args[argnum])), MIPS_SAVED_REGSIZE);
   sp -= ROUND_UP (len, 16);
 
+  if (mips_debug)
+    fprintf_unfiltered (gdb_stdlog, "mips_push_arguments: sp=0x%lx allocated %d\n",
+			(long) sp, ROUND_UP (len, 16));
+
   /* Initialize the integer and float register pointers.  */
   argreg = A0_REGNUM;
   float_argreg = FPA0_REGNUM;
 
   /* the struct_return pointer occupies the first parameter-passing reg */
   if (struct_return)
-    write_register (argreg++, struct_addr);
+    {
+      if (mips_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "mips_push_arguments: struct_return at r%d 0x%lx\n",
+			    argreg, (long) struct_addr);
+      write_register (argreg++, struct_addr);
+    }
 
   /* Now load as many as possible of the first arguments into
      registers, and push the rest onto the stack.  Loop thru args
@@ -2115,15 +2126,23 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
       int len = TYPE_LENGTH (arg_type);
       enum type_code typecode = TYPE_CODE (arg_type);
 
+      if (mips_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "mips_push_arguments: %d len=%d type=%d",
+			    argnum, len, (int) typecode);
+
       /* The EABI passes structures that do not fit in a register by
          reference. In all other cases, pass the structure by value.  */
-      if (MIPS_EABI && len > MIPS_SAVED_REGSIZE &&
-	  (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION))
+      if (MIPS_EABI
+	  && len > MIPS_SAVED_REGSIZE
+	  && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION))
 	{
 	  store_address (valbuf, MIPS_SAVED_REGSIZE, VALUE_ADDRESS (arg));
 	  typecode = TYPE_CODE_PTR;
 	  len = MIPS_SAVED_REGSIZE;
 	  val = valbuf;
+	  if (mips_debug)
+	    fprintf_unfiltered (gdb_stdlog, " push");
 	}
       else
 	val = (char *) VALUE_CONTENTS (arg);
@@ -2161,17 +2180,30 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
 
 	      /* Write the low word of the double to the even register(s).  */
 	      regval = extract_unsigned_integer (val + low_offset, 4);
-	      write_register (float_argreg++, regval);
-	      if (!MIPS_EABI)
-		write_register (argreg + 1, regval);
-
-	      /* Write the high word of the double to the odd register(s).  */
-	      regval = extract_unsigned_integer (val + 4 - low_offset, 4);
+	      if (mips_debug)
+		fprintf_unfiltered (gdb_stdlog, " fpreg=%d val=%s",
+				    float_argreg, phex (regval, 4));
 	      write_register (float_argreg++, regval);
 	      if (!MIPS_EABI)
 		{
-		  write_register (argreg, regval);
-		  argreg += 2;
+		  if (mips_debug)
+		    fprintf_unfiltered (gdb_stdlog, " reg=%d val=%s",
+					argreg, phex (regval, 4));
+		  write_register (argreg++, regval);
+		}
+
+	      /* Write the high word of the double to the odd register(s).  */
+	      regval = extract_unsigned_integer (val + 4 - low_offset, 4);
+	      if (mips_debug)
+		fprintf_unfiltered (gdb_stdlog, " fpreg=%d val=%s",
+				    float_argreg, phex (regval, 4));
+	      write_register (float_argreg++, regval);
+	      if (!MIPS_EABI)
+		{
+		  if (mips_debug)
+		    fprintf_unfiltered (gdb_stdlog, " reg=%d val=%s",
+					argreg, phex (regval, 4));
+		  write_register (argreg++, regval);
 		}
 
 	    }
@@ -2181,7 +2213,10 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
 	         in a single register.  */
 	      /* On 32 bit ABI's the float_argreg is further adjusted
                  above to ensure that it is even register aligned. */
-	      CORE_ADDR regval = extract_address (val, len);
+	      LONGEST regval = extract_unsigned_integer (val, len);
+	      if (mips_debug)
+		fprintf_unfiltered (gdb_stdlog, " fpreg=%d val=%s",
+				    float_argreg, phex (regval, len));
 	      write_register (float_argreg++, regval);
 	      if (!MIPS_EABI)
 		{
@@ -2189,6 +2224,9 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
                      registers for each argument.  The below is (my
                      guess) to ensure that the corresponding integer
                      register has reserved the same space. */
+		  if (mips_debug)
+		    fprintf_unfiltered (gdb_stdlog, " reg=%d val=%s",
+					argreg, phex (regval, len));
 		  write_register (argreg, regval);
 		  argreg += FP_REGISTER_DOUBLE ? 1 : 2;
 		}
@@ -2217,6 +2255,7 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
 		     promoted to int before being stored? */
 
 		  int longword_offset = 0;
+		  CORE_ADDR addr;
 		  if (TARGET_BYTE_ORDER == BIG_ENDIAN)
 		    {
 		      if (MIPS_STACK_ARGSIZE == 8 &&
@@ -2230,15 +2269,33 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
 			longword_offset = MIPS_STACK_ARGSIZE - len;
 		    }
 
-		  write_memory (sp + stack_offset + longword_offset,
-				val, partial_len);
+		  if (mips_debug)
+		    {
+		      fprintf_unfiltered (gdb_stdlog, " stack_offset=0x%lx",
+					  (long) stack_offset);
+		      fprintf_unfiltered (gdb_stdlog, " longword_offset=0x%lx",
+					  (long) longword_offset);
+		    }
+		    
+		  addr = sp + stack_offset + longword_offset;
+
+		  if (mips_debug)
+		    {
+		      int i;
+		      fprintf_unfiltered (gdb_stdlog, " @0x%lx ", (long) addr);
+		      for (i = 0; i < partial_len; i++)
+			{
+			  fprintf_unfiltered (gdb_stdlog, "%02x", val[i] & 0xff);
+			}
+		    }
+		  write_memory (addr, val, partial_len);
 		}
 
 	      /* Note!!! This is NOT an else clause.
 	         Odd sized structs may go thru BOTH paths.  */
 	      if (argreg <= MIPS_LAST_ARG_REGNUM)
 		{
-		  CORE_ADDR regval = extract_address (val, partial_len);
+		  LONGEST regval = extract_unsigned_integer (val, partial_len);
 
 		  /* A non-floating-point argument being passed in a 
 		     general register.  If a struct or union, and if
@@ -2261,6 +2318,10 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
 		    regval <<= ((MIPS_SAVED_REGSIZE - partial_len) *
 				TARGET_CHAR_BIT);
 
+		  if (mips_debug)
+		    fprintf_filtered (gdb_stdlog, " reg=%d val=%s",
+				      argreg,
+				      phex (regval, MIPS_SAVED_REGSIZE));
 		  write_register (argreg, regval);
 		  argreg++;
 
@@ -2288,6 +2349,8 @@ mips_push_arguments (nargs, args, sp, struct_return, struct_addr)
 		stack_offset += ROUND_UP (partial_len, MIPS_STACK_ARGSIZE);
 	    }
 	}
+      if (mips_debug)
+	fprintf_unfiltered (gdb_stdlog, "\n");
     }
 
   /* Return adjusted stack pointer.  */
@@ -3854,8 +3917,12 @@ mips_gdbarch_init (info, arches)
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
   int elf_flags;
+#if 0
   int ef_mips_bitptrs;
+#endif
+#if 0
   int ef_mips_arch;
+#endif
   enum mips_abi mips_abi;
 
   /* Extract the elf_flags if available */
@@ -3908,14 +3975,18 @@ mips_gdbarch_init (info, arches)
   if (gdbarch_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
-			  "mips_gdbarch_init: elf_flags = %08x\n",
+			  "mips_gdbarch_init: elf_flags = 0x%08x\n",
 			  elf_flags);
+#if 0
       fprintf_unfiltered (gdb_stdlog,
 			  "mips_gdbarch_init: ef_mips_arch = %d\n",
 			  ef_mips_arch);
+#endif
+#if 0
       fprintf_unfiltered (gdb_stdlog,
 			  "mips_gdbarch_init: ef_mips_bitptrs = %d\n",
 			  ef_mips_bitptrs);
+#endif
       fprintf_unfiltered (gdb_stdlog,
 			  "mips_gdbarch_init: mips_abi = %d\n",
 			  mips_abi);
@@ -4044,6 +4115,7 @@ mips_gdbarch_init (info, arches)
      the current gcc - it would make GDB treat these 64-bit programs
      as 32-bit programs by default. */
 
+#if 0
   /* determine the ISA */
   switch (elf_flags & EF_MIPS_ARCH)
     {
@@ -4062,6 +4134,7 @@ mips_gdbarch_init (info, arches)
     default:
       break;
     }
+#endif
 
 #if 0
   /* determine the size of a pointer */
@@ -4652,4 +4725,11 @@ that would transfer 32 bits for some registers (e.g. SR, FSR) and\n\
 64 bits for others.  Use \"off\" to disable compatibility mode",
 				  &setlist),
 		     &showlist);
+
+  /* Debug this files internals. */
+  add_show_from_set (add_set_cmd ("mips", class_maintenance, var_zinteger,
+				  &mips_debug, "Set mips debugging.\n\
+When non-zero, mips specific debugging is enabled.", &setdebuglist),
+		     &showdebuglist);
 }
+
