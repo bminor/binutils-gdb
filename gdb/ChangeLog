@@ -1,3 +1,7 @@
+Wed Nov  2 11:01:55 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* nlm/Makefile.in: install gdbserve.nlm.
+
 Tue Nov  1 16:41:12 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* Makefile.in:  Use $(objdir)/tcl and $(objdir)/tk if they are

@@ -178,12 +178,10 @@ all: gdbserve.nlm
 # install-only is intended to address that need.
 install: all install-only
 install-only: 
-	$(INSTALL_XFORM) gdbserver $(bindir)/gdbserver
-	$(INSTALL_XFORM1) $(srcdir)/gdbserver.1 $(man1dir)/gdbserver.1
+	$(INSTALL_XFORM) gdbserve.nlm $(bindir)/gdbserve.nlm
 
 uninstall: force
-	rm -f $(bindir)/gdbserver $(man1dir)/gdbserver.1
-#	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
+	rm -f $(bindir)/gdbserve.nlm
 
 installcheck:
 check:
