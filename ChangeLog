@@ -1,5 +1,7 @@
 Thu Nov  4 18:58:23 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config.sub: Accept hiux* as an OS name.
+
 	* Makefile.in: Change RUNTEST_FLAGS back to RUNTESTFLAGS per
 	etc/make-stds.texi.  The underscore came from gcc, and dje now
 	agrees that RUNTESTFLAGS is the correct name.
