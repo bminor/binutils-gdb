@@ -1,3 +1,12 @@
+2000-01-23  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* emultempl/{armcoff.em,armelf.em,armelf_oabi.em,beos.em,
+	generic.em,gld960.em,gld960c.em,hppaelf.em,linux.em,lnk960.em,
+	mipsecoff.em,sunos.em,vanilla.em} (ld_emulation_xfer_struct):
+	Add missing NULL initialisers, and comments.
+
+	* testsuite/ld-srec/sr3.cc (__rethrow): New.
+
 2000-01-21  Nick Clifton  <nickc@cygnus.com>
 
 	* ldlang.c (lang_size_sections): Fix typo in comment.

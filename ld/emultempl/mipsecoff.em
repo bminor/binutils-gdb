@@ -224,6 +224,15 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   before_allocation_default,
   gld${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",
-  "${OUTPUT_FORMAT}"
+  "${OUTPUT_FORMAT}",
+  NULL,	/* finish */
+  NULL,	/* create output section statements */
+  NULL,	/* open dynamic archive */
+  NULL,	/* place orphan */
+  NULL,	/* set symbols */
+  NULL,	/* parse args */
+  NULL,	/* unrecognized file */
+  NULL,	/* list options */
+  NULL 	/* recognized file */
 };
 EOF

@@ -184,6 +184,15 @@ struct ld_emulation_xfer_struct ld_gld960coff_emulation =
   before_allocation_default,
   gld960_get_script,
   "960coff",
-  ""
+  "",
+  NULL,	/* finish */
+  NULL,	/* create output section statements */
+  NULL,	/* open dynamic archive */
+  NULL,	/* place orphan */
+  NULL,	/* set symbols */
+  NULL,	/* parse args */
+  NULL,	/* unrecognized file */
+  NULL,	/* list options */
+  NULL 	/* recognized file */
 };
 EOF

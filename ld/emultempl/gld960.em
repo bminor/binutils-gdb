@@ -168,6 +168,15 @@ struct ld_emulation_xfer_struct ld_gld960_emulation =
   before_allocation_default,
   gld960_get_script,
   "960",
-  ""
+  "",
+  NULL,	/* finish */
+  NULL,	/* create output section statements */
+  NULL,	/* open dynamic archive */
+  NULL,	/* place orphan */
+  NULL,	/* set symbols */
+  NULL,	/* parse args */
+  NULL,	/* unrecognized file */
+  NULL,	/* list options */
+  NULL 	/* recognized file */
 };
 EOF

@@ -56,6 +56,11 @@ __throw ()
 }
 
 void
+__rethrow ()
+{
+}
+
+void
 __terminate ()
 {
 }

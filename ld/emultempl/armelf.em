@@ -1278,14 +1278,14 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld${EMULATION_NAME}_get_script,
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  gld${EMULATION_NAME}_finish, /* finish */
-  NULL, /* create output section statements */
+  gld${EMULATION_NAME}_finish,
+  NULL,	/* create output section statements */
   gld${EMULATION_NAME}_open_dynamic_archive,
   gld${EMULATION_NAME}_place_orphan,
-  NULL, /* set_symbols */
+  NULL,	/* set symbols */
   gld${EMULATION_NAME}_parse_args,
-  NULL, /* unrecognised file */
+  NULL,	/* unrecognized file */
   gld${EMULATION_NAME}_list_options,
-  NULL /* recognized file */
+  NULL 	/* recognized file */
 };
 EOF

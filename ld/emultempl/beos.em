@@ -832,6 +832,9 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   NULL, /* open dynamic archive */
   gld${EMULATION_NAME}_place_orphan,
   gld_${EMULATION_NAME}_set_symbols,
-  gld_${EMULATION_NAME}_parse_args
+  gld_${EMULATION_NAME}_parse_args,
+  NULL,	/* unrecognized file */
+  NULL,	/* list options */
+  NULL 	/* recognized file */
 };
 EOF

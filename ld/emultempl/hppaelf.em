@@ -276,5 +276,12 @@ struct ld_emulation_xfer_struct ld_hppaelf_emulation =
   "elf32-hppa",
   hppaelf_finish,
   hppaelf_create_output_section_statements,
+  NULL,	/* open dynamic archive */
+  NULL,	/* place orphan */
+  NULL,	/* set symbols */
+  NULL,	/* parse args */
+  NULL,	/* unrecognized file */
+  NULL,	/* list options */
+  NULL 	/* recognized file */
 };
 EOF
