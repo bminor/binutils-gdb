@@ -1,5 +1,8 @@
 Thu Jan  2 13:37:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (load_register): Rewrite 64 bit handling to
+	work if valueT is only 32 bits.
+
 	* config/tc-mips.c: Throughout, check target_big_endian rather
  	than byte_order.
  	(byte_order): Remove.
