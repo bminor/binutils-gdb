@@ -21,7 +21,13 @@
 #ifndef TM_RS6000LYNX_H
 #define TM_RS6000LYNX_H
 
-#include "config/tm-lynx.h"
+#include "coff-solib.h"		/* COFF shared library support */
+
+/* Lynx's signal.h doesn't seem to have any macros for what signal numbers
+   the real-time events are.  */
+#define REALTIME_LO 33
+/* One more than the last one.  */
+#define REALTIME_HI 64
 
 /* Use generic RS6000 definitions. */
 #include "rs6000/tm-rs6000.h"

@@ -1,5 +1,8 @@
 2004-11-13  Andrew Cagney  <cagney@gnu.org>
 
+	* config/tm-lynx.h: Delete, inline contents ...
+	* config/rs6000/tm-rs6000ly.h: ... here.
+
 	* config/tm-sysv4.h: Delete file, inlining contents.
 	* config/ia64/tm-aix.h (SKIP_TRAMPOLINE_CODE): Define.
 	* config/tm-linux.h (SKIP_TRAMPOLINE_CODE): Define.
