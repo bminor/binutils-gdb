@@ -155,6 +155,7 @@ const pseudo_typeS obj_pseudo_table[] = {
 	{ "type",	obj_coff_type,		0	},
 	{ "val",	obj_coff_val,		0	},
         { "section",    obj_coff_section,       0       },
+        { "sect",    obj_coff_section,       0       },
         { "text",       obj_coff_text,          0       },
         { "data",       obj_coff_data,          0       },
 	/* we don't yet handle this. */
