@@ -512,7 +512,7 @@ mtable[] =
 #define MARM 0
     "arm", ".byte", ".short", ".long", ".asciz", "@",
     "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long",
-    ".global", ".space", ".align\t2",".align\t4", "-mapcs-26",
+    ".global", ".space", ".align\t2",".align\t4", "-mapcs-32",
     "pe-arm-little", bfd_arch_arm,
     arm_jtab, sizeof (arm_jtab), 8
   }
