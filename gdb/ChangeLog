@@ -1,3 +1,20 @@
+2005-02-16  Mark Kettenis  <kettenis@gnu.org>
+
+	* wrapper.h: Update copyright year.  Properly wrap a few
+	prototypes.
+	(struct gdb_wrapper_arguments): Remove forward declaration.
+	* wrapper.c: Update copyright year.  Include "ui-out.h".
+	(struct gdb_wrapper_arguments): Remove.
+	(struct captured_value_struct_elt_args): Remove.
+	(wrapper_parse_exp_1, wrap_evaluate_expression)
+	(wrap_value_fetch_lazy, wrap_value_equal, wrap_value_assign)
+	(wrap_value_subscript, wrap_value_ind, wrap_parse_and_eval_type)
+	(do_captured_value_struct_elf): Remove functions.
+	(gdb_parse_exp_1, gdb_evaluate_expression, gdb_value_fetch_lazy)
+	(gdb_value_equal, gdb_value_assign, gdb_value_subscript)
+	(gdb_value_ind, gdb_parse_and_eval_type, gdb_value_struct_elt):
+	Re-implement using TRY_CATCH.
+
 2005-02-16  Yoshinori Sato  <ysato@users.sourceforge.jp>
 
 	* remote-e7000.c: unuse TM_FILE defined macro.

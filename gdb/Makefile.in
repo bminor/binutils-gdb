@@ -2709,7 +2709,8 @@ wince.o: wince.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(objfiles_h) $(gdb_string_h) $(gdbthread_h) $(gdbcmd_h) \
 	$(wince_stub_h) $(regcache_h) $(mips_tdep_h)
 wince-stub.o: wince-stub.c $(wince_stub_h)
-wrapper.o: wrapper.c $(defs_h) $(value_h) $(exceptions_h) $(wrapper_h)
+wrapper.o: wrapper.c $(defs_h) $(value_h) $(exceptions_h) $(wrapper_h) \
+	$(ui_out_h)
 xcoffread.o: xcoffread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(gdb_stat_h) \
 	$(coff_internal_h) $(libcoff_h) $(coff_xcoff_h) $(libxcoff_h) \
 	$(coff_rs6000_h) $(symtab_h) $(gdbtypes_h) $(symfile_h) \
