@@ -1072,10 +1072,10 @@ Disassembly of section \.text:
  82e:	c8 00       	sdiv
 
 00000830 <divlh>:
- 830:	e8 00       	divlh
+ 830:	e0 00       	divlh
 
 00000832 <sdivlh>:
- 832:	e0 00       	sdivlh
+ 832:	e8 00       	sdivlh
 
 00000834 <nop>:
  834:	00 00       	nop
