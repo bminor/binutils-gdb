@@ -1,3 +1,10 @@
+2000-01-21  Nick Clifton  <nickc@cygnus.com>
+
+	* libbfd.c (bfd_read): Do not attempt to get a negativly sized
+	amount from a bfd_in_memory structure.
+	(bfd_seek): Do not allow seeks past the end of a bfd_in_memory
+	structure.
+
 2000-01-14  Nick Clifton  <nickc@cygnus.com>
 
 	* linker.c (default_indirect_link_order): oops - fix incorrectly

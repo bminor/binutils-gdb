@@ -274,7 +274,10 @@ bfd_read (ptr, size, nitems, abfd)
       get = size * nitems;
       if (abfd->where + get > bim->size)
 	{
-	  get = bim->size - abfd->where;
+	  if (bim->size < abfd->where)
+	    get = 0;
+	  else
+	    get = bim->size - abfd->where;
 	  bfd_set_error (bfd_error_file_truncated);
 	}
       memcpy (ptr, bim->buffer + abfd->where, get);
@@ -677,10 +680,22 @@ bfd_seek (abfd, position, direction)
 
   if ((abfd->flags & BFD_IN_MEMORY) != 0)
     {
+      struct bfd_in_memory *bim;
+
+      bim = (struct bfd_in_memory *) abfd->iostream;
+      
       if (direction == SEEK_SET)
 	abfd->where = position;
       else
 	abfd->where += position;
+      
+      if (abfd->where > bim->size)
+	{
+	  abfd->where = bim->size;
+	  bfd_set_error (bfd_error_file_truncated);
+	  return -1;
+	}
+      
       return 0;
     }
 
