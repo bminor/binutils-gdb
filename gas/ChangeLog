@@ -1,5 +1,9 @@
 Tue Mar 11 01:13:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-m88k.c (m88k_do_align): Don't use a special nop
+	alignment if a zero fill pattern was explicitly specified.
+	* config/tc-sh.c (sh_do_align): Likewise.
+
 	* read.c (equals): Always permit register names to be redefined.
 
 	* config/tc-mips.c (mips_fix_adjustable): Permit a reloc against a
@@ -88,7 +92,7 @@ Thu Feb 27 15:39:16 1997  Fred Fish  <fnf@cygnus.com>
 end-sanitize-tic80
 Thu Feb 27 13:29:04 1997  Ian Lance Taylor  <ian@cygnus.com>
 
-	* config/tc-m68k.c (md_assemble): Handle a reloc width of 'W'.n
+	* config/tc-m68k.c (md_assemble): Handle a reloc width of 'W'.
 
 	* gasp.c (hash_add_to_string_table): Correct misspelling in error
 	message, and add newline.
