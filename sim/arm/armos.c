@@ -558,7 +558,7 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 		 ctrl-C whilst processing SWIRead()).  The SWI will complete
 		 returning -1 in r0 to the caller.  If GDB is then used to
 		 resume the system call the reason code will now be -1.  */
-	      return FALSE;
+	      return TRUE;
 	  
 	      /* Unimplemented reason codes.  */
 	    case AngelSWI_Reason_ReadC:
@@ -697,7 +697,7 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	 ctrl-C whilst processing SWIRead()).  The SWI will complete
 	 returning -1 in r0 to the caller.  If GDB is then used to
 	 resume the system call the reason code will now be -1.  */
-      return FALSE;
+      return TRUE;
 	  
     case 0x180001: /* RedBoot's Syscall SWI in ARM mode.  */
       if (swi_mask & SWI_MASK_REDBOOT)
