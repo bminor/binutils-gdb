@@ -5132,17 +5132,25 @@ things without first using the debugger to find the facts.
 @cindex configuring _GDBN__
 @cindex installation
 
-The script @samp{config.gdb} automates the process of preparing _GDBN__ for
-installation; you can then use @samp{make} to actually build it.  For
-example, 
+The script @samp{config.gdb} automates the process of preparing _GDBN__
+for installation; you can then use @samp{make} to actually build it.
+The best way to build GDB is in a subdirectory that records the
+configuration options used; this gives you a clean way of building
+_GDBN__ binaries with several different configuration options.
+@samp{config.gdb} doesn't depend on this---it's just a good habit.  For
+example, assuming the _GDBN__ source is in a directory called
+``@code{gdb-4.0}'': 
 
 @example
-config.gdb sun3os4
+cd gdb-4.0
+mkdir =sun3os4
+cd =sun3os4
+../config.gdb sun3os4
 make
 @end example
 
 @noindent
-is all that's required to install _GDBN__ on a Sun 3 running SunOS 4.  
+will install _GDBN__ on a Sun 3 running SunOS 4.  
 
 @table @code
 @kindex config.gdb
