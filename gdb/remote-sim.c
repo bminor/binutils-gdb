@@ -93,6 +93,11 @@ extern struct target_ops gdbsim_ops;
 
 static int program_loaded = 0;
 
+/* We must keep track of whether the simulator has been opened or not because
+   GDB can call a target's close routine twice, but sim_close doesn't allow
+   this.  */
+static int gdbsim_open_p = 0;
+
 static void
 dump_mem (buf, len)
      char *buf;
@@ -380,9 +385,19 @@ gdbsim_open (args, from_tty)
   if (sr_get_debug ())
     printf_filtered ("gdbsim_open: args \"%s\"\n", args ? args : "(null)");
 
+  /* Remove current simulator if one exists.  Only do this if the simulator
+     has been opened because sim_close requires it.
+     This is important because the call to push_target below will cause
+     sim_close to be called if the simulator is already open, but push_target
+     is called after sim_open!  We can't move the call to push_target before
+     the call to sim_open because sim_open may invoke `error'.  */
+  if (gdbsim_open_p)
+    unpush_target (&gdbsim_ops);
+
   init_callbacks ();
 
   sim_open (args);
+  gdbsim_open_p = 1;
 
   push_target (&gdbsim_ops);
   target_fetch_registers (-1);
@@ -407,7 +422,11 @@ gdbsim_close (quitting)
 
   program_loaded = 0;
 
-  sim_close (quitting);
+  if (gdbsim_open_p)
+    {
+      sim_close (quitting);
+      gdbsim_open_p = 0;
+    }
 
   end_callbacks ();
 }

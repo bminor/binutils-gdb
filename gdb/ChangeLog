@@ -1,3 +1,9 @@
+Mon Dec 30 00:14:06 1996  Doug Evans  <dje@seba.cygnus.com>
+
+	* remote-sim.c (gdbsim_open_p): New static local.
+	(gdbsim_open): Call unpush_target if sim open.  Set gdbsim_open_p.
+	(gdbsim_close): Only call sim_close if sim open.  Reset gdbsim_open_p.
+
 Sun Dec 29 09:15:03 1996  Mark Alexander  <marka@cygnus.com>
 
 	* config/i386/xm-windows.h: Make SIGTRAP and SIGQUIT consistent
