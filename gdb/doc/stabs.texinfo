@@ -1107,14 +1107,16 @@ subr (f)
 @{
 @end example
 
-if @code{f} gets allocated in a register, then its stabs look like:
+if @code{f} is passed as a double at stack offset 8, and the prologue
+converts it to a float in register number 0, then the stabs look like:
 
-@c FIXME: Probably should run this through the compiler and get the
-@c whole thing including ".stabs" and so on.
 @example
-f:p13              # @r{where 13 is double}
-f:r12              # @r{where 12 is float}
+.stabs "f:p13",160,0,3,8   # @r{160 is @code{N_PSYM}, here 13 is @code{double}}
+.stabs "f:r12",64,0,3,0    # @r{64 is @code{N_RSYM}, here 12 is @code{float}}
 @end example
+
+In both stabs 3 is the line number where @code{f} is declared
+(@pxref{Line Numbers}).
 
 @findex N_LSYM, for parameter
 GCC, at least on the 960, has another solution to the same problem.  It
