@@ -17,8 +17,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+srcdir = .
+
+ddestdir = /usr/local
+idestdir = $(ddestdir)
+
+SHELL = /bin/sh
+
 # main GDB source directory
-srcdir = ..
+gdbdir = ..
 
 # Documentation (gdb.dvi) needs either GNU m4 or SysV m4; 
 # Berkeley/Sun don't have quite enough. 
@@ -26,24 +33,33 @@ srcdir = ..
 M4=gm4
 
 # where to find texinfo; GDB dist should include a recent one
-TEXIDIR=${srcdir}/../texinfo/fsf
+TEXIDIR=${gdbdir}/../texinfo/fsf
 
 # where to find makeinfo, preferably one designed for texinfo-2
 MAKEINFO=makeinfo
 
 # Where is the source dir for the READLINE library?  Traditionally in .. or .
 # (For the binary library built from it, we use ${READLINE_DIR}${subdir}.)
-READLINE_DIR = ${srcdir}/../readline
+READLINE_DIR = ${gdbdir}/../readline
 
 # Main GDB manual's source files
 SFILES_DOCDIR = \
 	gdb.texinfo pretex.m4 none.m4 all.m4 gdbinv-m.m4 gdbinv-s.m4 gdbVN.m4
 
-all: gdb.info gdb.dvi refcard.dvi gdb-internals gdbint.dvi
+all: gdb.info gdbint.info
+#all: gdb.info gdb.dvi refcard.dvi gdb-internals gdbint.dvi
+
+install: force
+	for i in *.info* ; do \
+		echo Installing $$i... ; \
+		(cp $$i $(idestdir)/info/$$i.new \
+			&& mv -f $(idestdir)/info/$$i.new $(idestdir)/info/$$i) \
+		|| exit 1 ; \
+	done
 
 clean:
 	rm -f gdb.dvi rdl-apps.texi gdb-all* gdb.info* gdbVN.m4
-	rm -f gdb-internals gdbint.?? gdbint.???
+	rm -f gdb-internals gdbint.?? gdbint.??? gdbint.info
 	rm -f refcard.ps refcard.dvi rcfonts.tex refcard.log *~
 
 # GDB QUICK REFERENCE (TeX dvi file, CM fonts)
@@ -67,8 +83,8 @@ rdl-apps.texi: ${READLINE_DIR}/inc-readline.texinfo \
 	echo "@include ${READLINE_DIR}/inc-history.texinfo" >>rdl-apps.texi
 
 # File to record current GDB version number (copied from main dir Makefile.in)
-gdbVN.m4 : ${srcdir}/Makefile.in
-	( VER=`sed <${srcdir}/Makefile.in -n 's/VERSION = //p'` ;\
+gdbVN.m4 : ${gdbdir}/Makefile.in
+	( VER=`sed <${gdbdir}/Makefile.in -n 's/VERSION = //p'` ;\
 	echo "_define__(<_GDB_VN__>,$$VER)" > gdbVN.m4 )
 
 # GDB MANUAL: texinfo source, created by preprocessing w/m4
@@ -92,7 +108,7 @@ gdb.dvi : gdb-all.texi rdl-apps.texi
 # cope with all the markup.  In the meantime, we distribute the info
 # files 
 gdb.info: gdb-all.texi
-	${MAKEINFO} gdb-all.texi
+	$(MAKEINFO) -o gdb.info $(srcdir)/gdb-all.texi
 
 # GDB INTERNALS MANUAL: TeX dvi file
 gdbint.dvi : gdbint.texinfo
@@ -103,9 +119,12 @@ gdbint.dvi : gdbint.texinfo
 		gdbint.log gdbint.pgs gdbint.toc gdbint.tps gdbint.vrs
 
 # GDB INTERNALS MANUAL: info file
-gdb-internals : gdbint.texinfo
-	${MAKEINFO} gdbint.texinfo
+gdb-internals: gdbint.info
 
+gdbint.info: gdbint.texinfo
+	$(MAKEINFO) -o gdbint.info $(srcdir)/gdbint.texinfo
 
+force:
 
-
+Makefile: $(srcdir)/Makefile.in $(host_makefile_frag) $(target_makefile_frag)
+	$(SHELL) ./config.status
