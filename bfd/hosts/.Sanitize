@@ -45,6 +45,7 @@ i386aix.h
 i386bsd.h
 i386isc.h
 i386linux.h
+i386lynx.h
 i386mach.h
 i386v.h
 i386v4.h
