@@ -1,7 +1,8 @@
 Wed Feb  3 17:22:16 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* configure: Include srcdir in message about target of link not
-	being found.
+	being found.  Don't convert `-' to `_' in `with' options being
+	passed to subdirs.
 
 Tue Feb  2 18:57:59 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
