@@ -1,3 +1,5 @@
+#include <ctype.h>
+
 #include "libiberty.h"
 #include "cg_arcs.h"
 #include "sym_ids.h"

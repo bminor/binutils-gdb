@@ -1,3 +1,7 @@
+Wed Nov  1 15:23:15 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
+
+	* sym_ids.c: Include <ctype.h>.
+
 Wed Oct 25 13:24:31 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* Makefile.in (diststuff):  Also make info.
