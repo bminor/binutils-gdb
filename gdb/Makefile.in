@@ -149,7 +149,8 @@ SFILES_MAINDIR = \
 	 utils.c valarith.c valops.c valprint.c values.c c-exp.y m2-exp.y \
 	 signame.c cplus-dem.c mem-break.c target.c inftarg.c \
 	 dbxread.c coffread.c elfread.c dwarfread.c \
-	 ieee-float.c language.c parse.c
+	 ieee-float.c language.c parse.c buildsym.c
+#	 xcoffread.c xcoffexec.c \
 
 # Source files in subdirectories (which will be handled separately by
 #  'make gdb.tar.Z').
@@ -253,7 +254,9 @@ OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     command.o utils.o expprint.o environ.o version.o \
     copying.o $(DEPFILES) signame.o cplus-dem.o mem-break.o target.o \
     inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
+    buildsym.o \
     dbxread.o coffread.o elfread.o dwarfread.o # mipsread.o
+#    xcoffexec.o xcoffread.o \
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
 
@@ -604,7 +607,7 @@ m2-exp.tab.c: $(srcdir)/m2-exp.y
 	${YACC} $(srcdir)/m2-exp.y
 	mv y.tab.c m2-exp.tab.c
 
-# dbxread, coffread, mipsread, elfread have dependencies on BFD header files.
+# The symbol-file readers have dependencies on BFD header files.
 dbxread.o: ${srcdir}/dbxread.c
 	${CC} -c ${CFLAGS} -I$(BFD_DIR) ${srcdir}/dbxread.c
 
@@ -616,6 +619,9 @@ mipsread.o: ${srcdir}/mipsread.c
 
 elfread.o: ${srcdir}/elfread.c
 	${CC} -c ${CFLAGS} -I$(BFD_DIR) ${srcdir}/elfread.c
+
+xcoffread.o: ${srcdir}/xcoffread.c
+	${CC} -c ${CFLAGS} -I$(BFD_DIR) ${srcdir}/xcoffread.c
 
 # Drag in the files that are in another directory.
 

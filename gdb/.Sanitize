@@ -52,6 +52,8 @@ arm-xdep.c
 blockframe.c
 breakpoint.c
 breakpoint.h
+buildsym.c
+buildsym.h
 c-exp.y
 coffread.c
 command.c
