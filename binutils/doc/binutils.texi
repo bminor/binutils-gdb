@@ -68,7 +68,7 @@ notice identical to this one except for the removal of this paragraph
 @title The @sc{gnu} Binary Utilities
 @subtitle Version @value{VERSION}
 @sp 1
-@subtitle May 1993
+@subtitle @value{UPDATED}
 @author Roland H. Pesch
 @author Jeffrey M. Osier
 @author Cygnus Support

@@ -1,3 +1,11 @@
+2004-12-08  Ben Elliston  <bje@au.ibm.com>
+
+	* doc/Makefile.am (config.texi): Emit a @set UPDATED command to
+	config.texi whose value is the current month and year.
+	* doc/Makefile.in: Rebuild.
+	* doc/binutils.texi: Set the document subtitle to be the value of
+	the Texinfo UPDATED variable (obtained from config.texi).
+
 2004-12-07  Ben Elliston  <bje@au.ibm.com>
 
 	PR binutils/249
