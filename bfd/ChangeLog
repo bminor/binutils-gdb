@@ -1,3 +1,8 @@
+Thu Jul 22 15:40:14 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* Makefile.in (Makefile): add configure.in, drop redundant
+	  $(srcdir), drop redundant ./
+
 Thu Jul 22 13:34:57 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* hpux-core.c: New file; backend for HP/UX style core files.
