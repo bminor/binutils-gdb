@@ -1,3 +1,14 @@
+2004-06-25  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* elf32-m32r.c (m32r_elf_howto_table): Support R_M32R_GOTOFF.
+	(m32r_elf_relocate_section): Changed for R_M32R_GOTOFF.
+	(m32r_elf_gcsweep_hook): Likewise.
+	(m32r_elf_check_relocs): Likewise.
+	(m32r_elf_howto_table): Added R_M32R_GOTOFF_HI_ULO,
+	R_M32R_GOTOFF_HI_SLO and R_M32R_GOTOFF_LO.
+	* reloc.c: Added BFD_RELOC_M32R_GOTOFF_HI_ULO,
+	BFD_RELOC_M32R_GOTOFF_HI_SLO and BFD_RELOC_M32R_GOTOFF_LO.
+
 2004-06-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf64_x86_64_check_relocs): Warn overflow

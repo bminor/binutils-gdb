@@ -1,5 +1,5 @@
 /* GAS interface for targets using CGEN: Cpu tools GENerator.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -354,6 +354,10 @@ gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
 
   *strP = input_line_pointer;
   input_line_pointer = hold;
+
+#ifdef TC_CGEN_PARSE_FIX_EXP
+  opinfo = TC_CGEN_PARSE_FIX_EXP (opinfo, & exp);
+#endif 
 
   /* FIXME: Need to check `want'.  */
 

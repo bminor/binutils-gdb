@@ -669,7 +669,7 @@ static reloc_howto_type m32r_elf_howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
-	 "R_M32R_RELATIVE",		/* name */
+	 "R_M32R_RELATIVE",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
@@ -678,15 +678,15 @@ static reloc_howto_type m32r_elf_howto_table[] =
   HOWTO (R_M32R_GOTOFF,	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+	 24,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc, /* special_function */
-	 "R_M32R_GOTOFF",		/* name */
+	 "R_M32R_GOTOFF",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
-	 0xffffffff,		/* dst_mask */
+	 0xffffff,		/* src_mask */
+	 0xffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* An PC Relative 24-bit relocation used when setting PIC offset
@@ -803,6 +803,48 @@ static reloc_howto_type m32r_elf_howto_table[] =
 	 0x0000ffff,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
+
+  HOWTO (R_M32R_GOTOFF_HI_ULO,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_M32R_GOTOFF_HI_ULO",/* name */
+	 FALSE,			/* partial_inplace */
+	 0x0000ffff,		/* src_mask */
+	 0x0000ffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_M32R_GOTOFF_HI_SLO,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_M32R_GOTOFF_HI_SLO",/* name */
+	 FALSE,			/* partial_inplace */
+	 0x0000ffff,		/* src_mask */
+	 0x0000ffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO (R_M32R_GOTOFF_LO,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_M32R_GOTOFF_LO",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0x0000ffff,		/* src_mask */
+	 0x0000ffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 };
 
 /* Handle the R_M32R_10_PCREL reloc.  */
@@ -1269,6 +1311,9 @@ static const struct m32r_reloc_map m32r_reloc_map[] =
   { BFD_RELOC_M32R_GOTPC_HI_ULO, R_M32R_GOTPC_HI_ULO },
   { BFD_RELOC_M32R_GOTPC_HI_SLO, R_M32R_GOTPC_HI_SLO },
   { BFD_RELOC_M32R_GOTPC_LO, R_M32R_GOTPC_LO },
+  { BFD_RELOC_M32R_GOTOFF_HI_ULO, R_M32R_GOTOFF_HI_ULO },
+  { BFD_RELOC_M32R_GOTOFF_HI_SLO, R_M32R_GOTOFF_HI_SLO },
+  { BFD_RELOC_M32R_GOTOFF_LO, R_M32R_GOTOFF_LO },
 };
 
 static reloc_howto_type *
@@ -2796,6 +2841,31 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  switch ((int) r_type)
 	    {
+            case R_M32R_GOTOFF:
+              /* Relocation is relative to the start of the global offset
+                 table (for ld24 rx, #uimm24). eg access at label+addend
+		 
+                 ld24 rx. #label@GOTOFF + addend
+                 sub  rx, r12.  */
+
+              BFD_ASSERT (sgot != NULL);
+
+              relocation = -(relocation - sgot->output_section->vma);
+              rel->r_addend = -rel->r_addend;
+              break;
+
+            case R_M32R_GOTOFF_HI_ULO:
+            case R_M32R_GOTOFF_HI_SLO:
+            case R_M32R_GOTOFF_LO:
+	      BFD_ASSERT (sgot != NULL);
+
+	      relocation -= sgot->output_section->vma;
+
+	      if ((r_type == R_M32R_GOTOFF_HI_SLO)
+		  && ((relocation + rel->r_addend) & 0x8000))
+		rel->r_addend += 0x10000;
+	      break;
+
             case R_M32R_GOTPC24:
               /* .got(_GLOBAL_OFFSET_TABLE_) - pc relocation
                  ld24 rx,#_GLOBAL_OFFSET_TABLE_
@@ -4306,6 +4376,10 @@ m32r_elf_gc_sweep_hook (abfd, info, sec, relocs)
       case R_M32R_GOT16_HI_ULO:
       case R_M32R_GOT16_HI_SLO:
       case R_M32R_GOT16_LO:
+      case R_M32R_GOTOFF:
+      case R_M32R_GOTOFF_HI_ULO:
+      case R_M32R_GOTOFF_HI_SLO:
+      case R_M32R_GOTOFF_LO:
       case R_M32R_GOT24:
       case R_M32R_GOTPC_HI_ULO:
       case R_M32R_GOTPC_HI_SLO:
@@ -4435,6 +4509,10 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
             {
             case R_M32R_GOT16_HI_ULO:
             case R_M32R_GOT16_HI_SLO:
+            case R_M32R_GOTOFF:
+            case R_M32R_GOTOFF_HI_ULO:
+            case R_M32R_GOTOFF_HI_SLO:
+            case R_M32R_GOTOFF_LO:
             case R_M32R_GOT16_LO:
             case R_M32R_GOTPC24:
             case R_M32R_GOTPC_HI_ULO:

@@ -1,5 +1,5 @@
 /* tc-m32r.h -- Header file for tc-m32r.c.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -131,3 +131,15 @@ extern void m32r_flush_pending_output PARAMS ((void));
                                                                                   
 #define elf_tc_final_processing 	m32r_elf_final_processing
 extern void m32r_elf_final_processing PARAMS ((void));
+
+#define md_parse_name(name, exprP, nextcharP) \
+  m32r_parse_name ((name), (exprP), (nextcharP))
+extern int m32r_parse_name (char const *, expressionS *, char *);
+
+/* This is used to construct expressions out of @GOTOFF, @PLT and @GOT
+   symbols.  The relocation type is stored in X_md.  */
+#define O_PIC_reloc O_md1
+
+#define TC_CGEN_PARSE_FIX_EXP(opinfo, exp) \
+  m32r_cgen_parse_fix_exp(opinfo, exp)
+extern int m32r_cgen_parse_fix_exp(int, expressionS *);

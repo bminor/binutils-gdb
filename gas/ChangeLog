@@ -1,3 +1,18 @@
+2004-06-25  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* config/tc-m32r.c (md_convert_frag): Changed for @PLT.
+	(m32r_cgen_record_fixup_exp): Changed for  @GOTOFF, @GOT.
+	(m32r_fix_adjustable): Changed for  @GOTOFF, @GOT, @PLT.
+	(tc_gen_reloc): Likewise.
+	(m32r_end_of_match): Add for @GOTOFF, @GOT, @PLT.
+	(m32r_parse_name): Likewise.
+	(m32r_cgen_parse_fix_exp): Likewise.
+	* config/tc-m32r.h (md_parse_name): Define for @GOTOFF, @GOT, @PLT.
+	(O_PIC_reloc): Likewise.
+	(TC_CGEN_PARSE_FIX_EXP): Likewise..
+	* cgen.c (gas_cgen_parse_operand): Add TC_CGEN_PARSE_FIX_EXP
+	for @GOTOFF, @GOT, @PLT.
+
 2004-06-21 Jan Beulich  <jbeulich@novell.com>
 
 	* gas/symbols.c: While discarding ordinary local absolute symbols
