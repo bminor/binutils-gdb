@@ -90,7 +90,6 @@ elf-m10200.c
 elf-m10300.c
 elf.c
 elf32-arc.c
-elf32-arm.c
 elf32-d10v.c
 elf32-d30v.c
 elf32-fr30.c
@@ -113,6 +112,8 @@ elf64-gen.c
 elf64-mips.c
 elf64-sparc.c
 elf64.c
+elfarm-nabi.c
+elfarm-oabi.c
 elfcode.h
 elflink.c
 format.c
@@ -181,6 +182,7 @@ ppcboot.c
 reloc.c
 reloc16.c
 riscix.c
+sco5-core.c
 section.c
 som.c
 som.h
