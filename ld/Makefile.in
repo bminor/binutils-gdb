@@ -25,9 +25,10 @@ srcdir = .
 
 ddestdir = /usr/local
 
-version=`$(unsubdir)/../gcc$(subdir)/gcc -dumpversion`
+#version=/`$(unsubdir)/../gcc$(subdir)/gcc -dumpversion`
+version=
 bindir = $(ddestdir)/bin
-gcclibdir = $(ddestdir)/lib/gcc/$(target_alias)/$(version)
+gcclibdir = $(ddestdir)/lib/gcc/$(target_alias)$(version)
 
 # Seach path to override the default search path for -lfoo libraries.
 # If LIB_PATH is empty, the ones in the script (if any) are left alone.
@@ -395,6 +396,7 @@ objdump:objdump.c
 
 install: $(LD_PROG)
 	$(INSTALL_PROGRAM) ld.new $(ddestdir)/bin/ld
+	$(INSTALL_PROGRAM) ld.new $(gcclibdir)/ld
 # Something like the following might make sense for install, but doesn't work
 # - it is too fragile, depending on a gcc binary int the right place.
 # Perhaps using gcc/version.c might work?

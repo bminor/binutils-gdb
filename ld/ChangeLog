@@ -1,3 +1,8 @@
+Tue Nov 12 18:36:50 1991  Steve Chamberlain  (sac at cygnus.com)
+
+	* Makefile.in: Take out the version number for install
+	* m88kbcs.sc: put in contructor blocks.
+
 Mon Nov 11 18:47:33 1991  Per Bothner  (bothner at cygnus.com)
 
 	* ldmisc.c, ldmisc.h:  Re-write info() to take a filename

@@ -30,7 +30,12 @@ SECTIONS
   .data SIZEOF(.text) + ADDR(.text) + 0x400000:
     { 					
       *(.data)
-      CONSTRUCTORS;
+	__CTOR_LIST__ = .;
+	*(CTOR)
+	LONG(0);
+	__DTOR_LIST__ = . ;
+	*(DTOR)
+	LONG(0);
 	*(.comment)
       _edata  =  .; 			
     }  					
