@@ -1332,6 +1332,9 @@ dollar_label_name (n, augend)
   know (n >= 0);
   know (augend == 0 || augend == 1);
   p = symbol_name_build;
+#ifdef LOCAL_LABEL_PREFIX
+  *p++ = LOCAL_LABEL_PREFIX;
+#endif
   *p++ = 'L';
 
   /* Next code just does sprintf( {}, "%d", n); */
