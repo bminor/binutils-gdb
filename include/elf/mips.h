@@ -56,6 +56,35 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* -mips4 code.  */
 #define E_MIPS_ARCH_4		0x30000000
+
+/* Machine variant if we know it.  This field was invented at Cygnus,
+   but it is hoped that other vendors will adopt it.  If some standard
+   is developed, this code should be changed to follow it. */
+
+#define EF_MIPS_MACH		0x00FF0000
+
+/* Cygnus is choosing values between 80 and 9F;
+   00 - 7F should be left for a future standard;
+   the rest are open. */
+
+#define E_MIPS_MACH_3900	0x00810000
+
+#define E_MIPS_MACH_4010	0x00820000
+#define E_MIPS_MACH_4100	0x00830000
+/* start-sanitize-vr4320 */
+#define E_MIPS_MACH_4320	0x00840000
+/* end-sanitize-vr4320 */
+#define E_MIPS_MACH_4650	0x00850000
+/* start-sanitize-tx49 */
+#define E_MIPS_MACH_4900	0x00860000
+/* end-sanitize-tx49 */
+
+/* start-sanitize-vr5400 */
+#define E_MIPS_MACH_5400	0x00910000
+/* end-sanitize-vr5400 */
+/* start-sanitize-r5900 */
+#define E_MIPS_MACH_5900	0x00920000
+/* end-sanitize-r5900 */
 
 /* Processor specific section indices.  These sections do not actually
    exist.  Symbols with a st_shndx field corresponding to one of these
@@ -123,6 +152,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* Events section.  */
 #define SHT_MIPS_EVENTS		0x70000021
+
+/* start-sanitize-sky */
+/* The VU overlay table.  */
+#define SHT_DVP_OVERLAY_TABLE		0x7ffff420
+#define SHNAME_DVP_OVERLAY_TABLE	".DVP.ovlytab"
+#define SHNAME_DVP_OVERLAY_STRTAB	".DVP.ovlystrtab"
+/* A VU overlay.  */
+#define SHT_DVP_OVERLAY			0x7ffff421
+/* Prefix of VU overlay sections.  */
+#define SHNAME_DVP_OVERLAY_PREFIX	".DVP.overlay."
+/* end-sanitize-sky */
 
 /* A section of type SHT_MIPS_LIBLIST contains an array of the
    following structure.  The sh_link field is the section index of the
@@ -330,10 +370,13 @@ extern void bfd_mips_elf32_swap_reginfo_out
 /* start-sanitize-sky */
 /* These values are used for the dvp.  */
 #define STO_DVP_DMA		0xe8
-#define STO_DVP_PKE		0xe9
-#define STO_DVP_GPUIF		0xea
+#define STO_DVP_VIF		0xe9
+#define STO_DVP_GIF		0xea
 #define STO_DVP_VU		0xeb
-#define MIPS_STO_DVP_P(sto) ((sto) >= STO_DVP_DMA && (sto) <= STO_DVP_VU)
+/* Reserve a couple in case we need them.  */
+#define STO_DVP_RES1		0xec
+#define STO_DVP_RES2		0xed
+#define STO_DVP_P(sto) ((sto) >= STO_DVP_DMA && (sto) <= STO_DVP_RES2)
 
 /* end-sanitize-sky */
 /* This value is used for a mips16 .text symbol.  */
@@ -514,5 +557,33 @@ extern void bfd_mips_elf64_swap_reginfo_in
   PARAMS ((bfd *, const Elf64_External_RegInfo *, Elf64_Internal_RegInfo *));
 extern void bfd_mips_elf64_swap_reginfo_out
   PARAMS ((bfd *, const Elf64_Internal_RegInfo *, Elf64_External_RegInfo *));
+
+/* start-sanitize-sky */
+/* The vu overlay table is an array of this.  */
+
+typedef struct
+{
+  /* Offset into overlay string table section.  */
+  char name[8];
+  char lma[8];
+  char vma[8];
+} Elf64_Dvp_External_Overlay;
+
+typedef struct
+{
+  bfd_vma name;
+  bfd_vma lma;
+  bfd_vma vma;
+} Elf64_Dvp_Internal_Overlay;
+
+/* overlay swapping routines.  */
+extern void bfd_dvp_elf64_swap_overlay_in
+  PARAMS ((bfd *, const Elf64_Dvp_External_Overlay *,
+	   Elf64_Dvp_Internal_Overlay *));
+extern void bfd_dvp_elf64_swap_overlay_out
+  PARAMS ((bfd *, const Elf64_Dvp_Internal_Overlay *,
+	   Elf64_Dvp_External_Overlay *));
+
+/* end-sanitize-sky */
 
 #endif /* _ELF_MIPS_H */
