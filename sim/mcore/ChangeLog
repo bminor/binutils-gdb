@@ -1,0 +1,14 @@
+1999-04-22  Nick Clifton  <nickc@cygnus.com>
+
+	* interp.c: Add tracing and verbose options.
+	Fixed trap and syscall emulations.
+
+1999-04-08  Nick Clifton  <nickc@cygnus.com>
+
+	* interp.c: New file: Simulator for MCore.
+	* sysdep.h: New file: Systems definitions for MCore simulator.
+	* configure.in: New file: Configure script for MCore simulator.
+	* configure: New file: Genreated.
+	* config,in: New file: Config support.
+	* Makefile.in: New file: Meta makefile for MCore simulator.
+
