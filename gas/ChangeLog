@@ -1,3 +1,8 @@
+1999-06-03  Richard Henderson  <rth@cygnus.com>
+
+	* dwarf2dbg.c (dwarf2_gen_line_info): Use section_symbol
+	instead of doing the work by hand.
+
 1999-06-03  David Mosberger  <davidm@hpl.hp.com>
 
 	* dwarf2dbg.c (INITIAL_STATE): New macro encapsulating initial

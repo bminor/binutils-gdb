@@ -371,15 +371,11 @@ dwarf2_gen_line_info (bfd_vma addr, struct dwarf2_line_info *l)
 
   if (!ls.line_seg)
     {
-      symbolS *secsym;
-
-      ls.line_seg = subseg_get (".debug_line", DL_BODY);
+      ls.line_seg = subseg_new (".debug_line", 0);
       bfd_set_section_flags (stdoutput, ls.line_seg, SEC_READONLY);
-      secsym = symbol_find (".debug_line");
-      if (secsym)
-	secsym->bsym = ls.line_seg->symbol;
-      else
-	symbol_table_insert (section_symbol (ls.line_seg));
+
+      /* We're going to need this symbol.  */
+      (void) section_symbol (ls.line_seg);
     }
 
   saved_seg = now_seg;
