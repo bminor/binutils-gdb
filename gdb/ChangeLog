@@ -1,3 +1,10 @@
+2002-06-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mips-tdep.c (PROC_SYMBOL): Add warning comment.
+	(struct mips_objfile_private, compare_pdr_entries): New.
+	(non_heuristic_proc_desc): Read the ".pdr" section if it
+	is present.
+
 2002-06-12  Andrew Cagney  <ac131313@redhat.com>
 
 	* arm-tdep.c (arm_push_arguments): Rewrite using a two-pass loop.
