@@ -14,6 +14,12 @@ M68K Linux					m68*-*-linux*
 Fujitsu FR30					fr30-*-elf*
 Mitsubishi D30V					d30v-*-*
 
+* PowerPC Variants
+
+PowerPC configurations of GDB now support `set processor' to control
+the register set in use.  Available processor types include
+rs6000, 403, 403GC, 505, 601, 602, 603, 604, 750, and 860.
+
 * Readline 2.2
 
 GDB now uses readline 2.2.
@@ -43,6 +49,11 @@ HP has donated a curses-based terminal user interface (TUI).  To get
 it, build with --enable-tui.
 
 * GDB Remote protocol
+
+A new protocol packet 'X' that writes binary data is now available.
+Default behavior is to try 'X', then drop back to 'M' if the stub
+fails to respond.  The settable variable `remotebinarydownload'
+allows explicit control over the use of 'X'.
 
 For 64 bit targets, the memory packets ("M" and "m") can now contain a
 full 64 bit address.  The class-obscure gdb command:

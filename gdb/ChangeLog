@@ -1,3 +1,7 @@
+Mon Feb  8 18:10:50 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* NEWS: Mention new X packet and PowerPC variant support.
+
 1999-02-08  Nick Clifton  <nickc@cygnus.com>
 
 	* configure.host: Add support for StrongARM host.
@@ -5,9 +9,9 @@
 
 Mon Feb  8 12:05:05 1999  David Taylor  <taylor@texas.cygnus.com>
 
-	* dsrec.c (make_srec): cast targ_addr to int in call to sprintf
+	* dsrec.c (make_srec): Cast targ_addr to int in call to sprintf
  	otherwise on big endian machine with a bfd_vma of 64 bits,
- 	*everything* gets loaded at location 0.  (PR 18929)
+ 	*everything* gets loaded at location 0.
 
 Mon Jan  4 10:05:43 1999  Frank Ch. Eigler  <fche@cygnus.com>
 
@@ -97,9 +101,9 @@ Tue Feb  2 17:36:29 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 1999-02-01  Jim Blandy  <jimb@zwingli.cygnus.com>
 
-	Allow PPC users to select which PPC/RS6000 variant they're debugging
-	at run-time.  At the moment, the only thing this affects is the
-	set of registers visible.
+	Allow PPC users to select which PPC/RS6000 variant they're
+ 	debugging at run-time.  At the moment, the only thing this affects
+ 	is the set of registers visible.
 	* config/rs6000/tm-rs6000.h (REGISTER_NAME): Define this as a call
 	to the function rs6000_register_name.
 	(rs6000_register_name): Include extern decl.
