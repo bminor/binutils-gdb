@@ -2851,6 +2851,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_signed_vma reloc_signed_min = ~ reloc_signed_max;
 	bfd_vma check;
 	bfd_signed_vma signed_check;
+	bfd_boolean thumb_plt_call = FALSE;
 
 	/* Need to refetch the addend and squish the two 11 bit pieces
 	   together.  */
@@ -2900,8 +2901,20 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    value = (splt->output_section->vma
 		     + splt->output_offset
 		     + h->plt.offset);
-	    /* Target the Thumb stub before the ARM PLT entry.  */
-	    value -= 4;
+ 	    if (globals->symbian_p)
+ 	      {
+ 		/* On SymbianOS, we are guaranteed to be using at least ARMv5t.
+ 		   Convert the BL to a BLX instruction to call the ARM-mode PLT
+ 		   entry.  */
+ 		if ((lower_insn & (0x3 << 11)) == 0x3 << 11)
+		  {
+		    lower_insn = (lower_insn & ~(0x3 << 11)) | 0x1 << 11;
+		    thumb_plt_call = TRUE;
+		  }
+ 	      }
+ 	    else
+ 	      /* Target the Thumb stub before the ARM PLT entry.  */
+ 	      value -= PLT_THUMB_STUB_SIZE;
 	    *unresolved_reloc_p = FALSE;
 	  }
 
@@ -2925,8 +2938,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	  overflow = TRUE;
 
 #ifndef OLD_ARM_ABI
-	if (r_type == R_ARM_THM_XPC22
-	    && ((lower_insn & 0x1800) == 0x0800))
+	if ((r_type == R_ARM_THM_XPC22
+	     && ((lower_insn & 0x1800) == 0x0800))
+	    || thumb_plt_call)
 	  /* For a BLX instruction, make sure that the relocation is rounded up
 	     to a word boundary.  This follows the semantics of the instruction
 	     which specifies that bit 1 of the target address will come from bit
