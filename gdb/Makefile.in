@@ -1267,6 +1267,38 @@ ALLDEPFILES = a68v-nat.c \
 	xstormy16-tdep.c \
 	z8k-tdep.c
 
+# Some files need explict build rules (due to -Werror problems) or due
+# to sub-directory fun 'n' games.
+
+# Provide explicit rule/dependency - works for more makes.
+copying.o: $(srcdir)/copying.c
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/copying.c
+
+hpux-thread.o: $(srcdir)/hpux-thread.c
+	$(CC) -c $(INTERNAL_CFLAGS) -I$(srcdir)/osf-share \
+		-I$(srcdir)/osf-share/HP800 -I/usr/include/dce \
+		$(srcdir)/hpux-thread.c
+
+# FIXME: Procfs.o gets -Wformat errors because things like pid_t don't
+# match output format strings.
+procfs.o: $(srcdir)/procfs.c
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $(srcdir)/procfs.c
+
+v850ice.o: $(srcdir)/v850ice.c
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
+		$(TIX_CFLAGS) $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
+		$(GDBTK_CFLAGS) \
+		$(srcdir)/v850ice.c
+
+# FIXME: z8k-tdep.c calls _initialize_gdbtypes().  Since that isn't
+# declared -Wimplicit fails. It should be using the GDBARCH framework.
+# cagney 1999-09-02.
+z8k-tdep.o: $(srcdir)/z8k-tdep.c
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
+		$(srcdir)/z8k-tdep.c
+
+# The dependencies.  In aphabetic order.
+
 a68v-nat.o: a68v-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(regcache_h)
 
@@ -1387,7 +1419,6 @@ complaints.o: complaints.c $(complaints_h) $(defs_h) $(gdbcmd_h)
 
 # Provide explicit rule/dependency - works for more makes.
 copying.o: $(srcdir)/copying.c $(defs_h) $(gdbcmd_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/copying.c
 
 core-aout.o: core-aout.c $(defs_h) $(gdbcore_h) $(value_h) $(inferior_h) \
 	$(regcache_h)
@@ -1595,9 +1626,6 @@ gdbtk-wrapper.o: $(srcdir)/gdbtk/generic/gdbtk-wrapper.c \
 v850ice.o: v850ice.c $(defs_h) $(symtab_h) $(inferior_h) $(command_h) \
 	$(frame_h) $(breakpoint_h) $(gdbcore_h) $(value_h) $(symfile_h) \
 	$(gdb_string_h) $(target_h) $(objfiles_h) $(regcache_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) $(TIX_CFLAGS) \
-	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
-		$(srcdir)/v850ice.c
 
 v850-tdep.o: v850-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(value_h) $(bfd_h) $(gdb_string_h) $(gdbcore_h) $(symfile_h) \
@@ -1895,20 +1923,9 @@ monitor.o: monitor.c $(monitor_h) $(bfd_h) $(defs_h) $(gdbcmd_h) \
 
 nbsd-tdep.o: nbsd-tdep.c $(defs_h) solib-svr4.h
 
-Onindy.o: nindy-share/Onindy.c $(gdb_wait_h) nindy-share/block_io.h \
-	nindy-share/env.h
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/Onindy.c
-
-nindy.o: nindy-share/nindy.c $(gdb_wait_h) nindy-share/block_io.h \
-	nindy-share/env.h
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/nindy.c
-
 nlmread.o: nlmread.c $(bfd_h) $(buildsym_h) $(complaints_h) $(defs_h) \
 	$(gdb_stabs_h) $(objfiles_h) $(symfile_h) $(symtab_h) $(stabsread_h) \
 	$(gdb_string_h)
-
-ttyflush.o: nindy-share/ttyflush.c
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/ttyflush.c
 
 nindy-tdep.o: nindy-tdep.c $(defs_h) $(frame_h) $(symtab_h)  $(gdbcore_h)
 
@@ -1933,8 +1950,6 @@ pa64solib.o: pa64solib.c $(defs_h) $(regcache_h)
 
 hpux-thread.o: hpux-thread.c $(defs_h) $(gdbthread_h) $(target_h) inferior.h \
 	$(regcache_h)
-	$(CC) -c $(INTERNAL_CFLAGS) -I$(srcdir)/osf-share \
-	  -I$(srcdir)/osf-share/HP800 -I/usr/include/dce $(srcdir)/hpux-thread.c
 
 hpread.o: hpread.c $(bfd_h) $(buildsym_h) $(complaints_h) $(defs_h) \
 	$(demangle_h) $(gdb_stabs_h) $(gdbtypes_h) $(objfiles_h) \
@@ -1978,7 +1993,6 @@ printcmd.o: printcmd.c $(breakpoint_h) $(defs_h) $(expression_h) \
 # match output format strings.
 procfs.o: procfs.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(target_h) $(gdb_string_h) $(gdbthread_h) proc-utils.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $(srcdir)/procfs.c
 
 proc-api.o: proc-api.c $(defs_h) $(gdbcmd_h) proc-utils.h $(completer_h)
 
@@ -2139,9 +2153,6 @@ sh3-rom.o: sh3-rom.c $(monitor_h) $(bfd_h) $(gdb_wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(target_h) $(serial_h) $(terminal_h) $(arch_utils_h) \
 	$(regcache_h) $(sh_tdep_h)
 
-signals.o: signals/signals.c $(defs_h) $(target_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $<
-
 mon960-rom.o: mon960-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(srec_h) $(xmodem_h) $(symtab_h) $(symfile_h) \
 	$(inferior_h)
@@ -2204,7 +2215,6 @@ stack.o: stack.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 ui-file.o: ui-file.c $(defs_h) ui-file.h
 tui-file.o: $(srcdir)/tui/tui-file.c $(defs_h) $(srcdir)/tui/tui-file.h \
 	$(srcdir)/tui/tuiIO.h
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-file.c
 
 ax-general.o: ax-general.c $(defs_h) $(ax_h) $(value_h)
 
@@ -2309,18 +2319,6 @@ x86-64-linux-nat.o : x86-64-linux-nat.c $(defs_h) $(inferior_h) \
 win32-nat.o: win32-nat.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h) \
 	$(gdb_string_h) $(regcache_h) $(completer_h)
 
-xdr_ld.o: vx-share/xdr_ld.c $(defs_h) vx-share/vxTypes.h \
-	vx-share/vxWorks.h vx-share/xdr_ld.h
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/vx-share/xdr_ld.c
-
-xdr_ptrace.o: vx-share/xdr_ptrace.c $(defs_h) vx-share/vxTypes.h \
-	vx-share/vxWorks.h vx-share/xdr_ptrace.h
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/vx-share/xdr_ptrace.c
-
-xdr_rdb.o: vx-share/xdr_rdb.c $(defs_h) vx-share/vxTypes.h \
-	vx-share/vxWorks.h vx-share/xdr_rdb.h
-	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/vx-share/xdr_rdb.c
-
 xcoffread.o: xcoffread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 	$(INCLUDE_DIR)/aout/stab_gnu.h $(INCLUDE_DIR)/coff/internal.h \
 	$(INCLUDE_DIR)/coff/rs6000.h $(BFD_SRC)/libcoff.h $(buildsym_h) \
@@ -2335,8 +2333,6 @@ xcoffsolib.o: xcoffsolib.c $(bfd_h) $(defs_h) $(xcoffsolib_h) $(inferior_h) \
 # cagney 1999-09-02.
 z8k-tdep.o: z8k-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(gdbcmd_h) \
 	$(gdbtypes_h) $(dis_asm_h) $(gdbcore_h) $(regcache_h)
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
-		$(srcdir)/z8k-tdep.c
 
 c-exp.tab.o: c-exp.tab.c $(defs_h) $(gdb_string_h) $(expression_h) \
 	$(value_h) $(parser_defs_h) $(language_h) $(c_lang_h) $(bfd_h) \
@@ -2445,6 +2441,28 @@ mi-getopt.o: $(srcdir)/mi/mi-getopt.c $(mi_getopt_h) $(defs_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-getopt.c
 
 #
+# nindy-share sub-directory
+#
+
+Onindy.o: nindy-share/Onindy.c $(gdb_wait_h) nindy-share/block_io.h \
+	nindy-share/env.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/Onindy.c
+
+nindy.o: nindy-share/nindy.c $(gdb_wait_h) nindy-share/block_io.h \
+	nindy-share/env.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/nindy.c
+
+ttyflush.o: nindy-share/ttyflush.c $(srcdir)/nindy-share/ttyflush.c
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/nindy-share/ttyflush.c
+
+#
+# Signals sub-directory
+#
+
+signals.o: $(srcdir)/signals/signals.c $(defs_h) $(target_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/signals/signals.c
+
+#
 # TUI dependencies
 #
 # Need to explicitly specify the compile rule as make will do nothing
@@ -2455,12 +2473,14 @@ tui.o: $(srcdir)/tui/tui.c \
 		$(srcdir)/tui/tuiLayout.h $(srcdir)/tui/tuiIO.h \
 		$(srcdir)/tui/tuiRegs.h $(srcdir)/tui/tuiWin.h
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tui.c
-tui-out.o: $(srcdir)/tui/tui-out.c \
-		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tui-out.c
+tui-file.o: $(srcdir)/tui/tui-file.c
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-file.c
 tui-hooks.o: $(srcdir)/tui/tui-hooks.c \
 		$(srcdir)/tui/tui.h
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tui-hooks.c
+tui-out.o: $(srcdir)/tui/tui-out.c \
+		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tui-out.c
 tuiCommand.o: $(srcdir)/tui/tuiCommand.c \
 		$(srcdir)/tui/tui.h $(srcdir)/tui/tuiData.h \
 		$(srcdir)/tui/tuiWin.h $(srcdir)/tui/tuiIO.h
@@ -2514,5 +2534,19 @@ tuiWin.o: $(srcdir)/tui/tuiWin.c \
 		$(srcdir)/tui/tuiGeneralWin.h $(srcdir)/tui/tuiStack.h \
 		$(srcdir)/tui/tuiSourceWin.h $(srcdir)/tui/tuiDataWin.h
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/tui/tuiWin.c
+
+# vx-share sub-directory
+
+xdr_ld.o: vx-share/xdr_ld.c $(defs_h) vx-share/vxTypes.h \
+	vx-share/vxWorks.h vx-share/xdr_ld.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/vx-share/xdr_ld.c
+
+xdr_ptrace.o: vx-share/xdr_ptrace.c $(defs_h) vx-share/vxTypes.h \
+	vx-share/vxWorks.h vx-share/xdr_ptrace.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/vx-share/xdr_ptrace.c
+
+xdr_rdb.o: vx-share/xdr_rdb.c $(defs_h) vx-share/vxTypes.h \
+	vx-share/vxWorks.h vx-share/xdr_rdb.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/vx-share/xdr_rdb.c
 
 ### end of the gdb Makefile.in.

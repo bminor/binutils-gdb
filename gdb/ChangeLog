@@ -1,3 +1,12 @@
+2002-08-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (copying.o): Separate out compile rule.
+	(hpux-thread.o, procfs.o, signals.o): Ditto.
+	(v850ice.o, z8k-tdep.o): Ditto.
+	(tui-file.o): Move to TUI section.
+	(xdr_ptrace.o, xdr_rdb.o, xdr_ld.o): Move to separate section.
+	(nindy.o, Onindy.o, ttyflush.o): Move to separate section.
+
 2002-08-16  Joel Brobecker  <brobecker@gnat.com>
 
 	* i386-tdep.c (i386_pe_skip_trampoline_code): renamed from
