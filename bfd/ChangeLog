@@ -1,3 +1,9 @@
+2002-10-25  Jim Wilson  <wilson@redhat.com>
+
+	* elf64-sh64.c (sh_elf64_relocate_section): Call
+	_bfd_elf_rela_local_sym.  Handle relocs against STT_SECTION symbol
+	of SHF_MERGE section.
+
 2002-10-25  Hans-Peter Nilsson  <hp@axis.com>
 
 	* simple.c: Correct placement of ATTRIBUTE_UNUSED.
