@@ -512,7 +512,7 @@ TARGET_LIBS = chillrt | libg++ | newlib | xiberty
 # end-sanitize-chill
 
 # The first rule in the file had better be this one.  Don't put any above it.
-all: $(ALL)
+all: all.normal
 .PHONY: all
 
 # The target built for a native build.
@@ -522,25 +522,6 @@ all.normal: \
 	$(ALL_TARGET_MODULES) \
 	$(ALL_X11_MODULES) \
 	all-gcc
-
-# The target built for a cross build.
-.PHONY: all.cross
-all.cross: \
-	all-bfd \
-	all-binutils \
-	all-byacc \
-	all-dejagnu \
-	all-flex \
-	all-gas \
-	all-gcc \
-	all-gdb \
-	all-ld \
-	all-libiberty \
-	all-mmalloc \
-	all-opcodes \
-	all-readline \
-	all-sim \
-	$(ALL_TARGET_MODULES)
 
 # Do a target for all the subdirectories.  A ``make do-X'' will do a
 # ``make X'' in all subdirectories (because, in general, there is a
@@ -679,25 +660,6 @@ gcc-no-fixedincludes:
 	  rm -rf gcc/include; \
 	  mv gcc/tmp-include gcc/include 2>/dev/null; \
 	else true; fi
-
-.PHONY: install.cross
-install.cross: \
-	install-dirs \
-        install-binutils \
-	install-byacc \
-	install-dejagnu \
-	install-etc \
-	install-flex \
-	install-gas \
-	install-gcc \
-	install-gdb \
-        install-glob \
-        install-ld \
-	install-libiberty \
-	install-mmalloc \
-	install-opcodes \
-	install-readline \
-	$(INSTALL_TARGET_MODULES)
 
 # This rule is used to build the modules which use FLAGS_TO_PASS.  To
 # build a target all-X means to cd to X and make all.
@@ -1114,7 +1076,7 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex texinfo/gpl.texinfo
 	chmod og=u `find . -print`
 	(VER=`sed <$(TOOL)/Makefile.in -n 's/^VERSION *= *//p'`; \
 		echo "==> Making $(TOOL)-$$VER.tar.gz"; \
-		ln -s proto-toplev $(TOOL)-$$VER; \
+		rm -f $(TOOL)-$$VER; ln -s proto-toplev $(TOOL)-$$VER; \
 		tar cfh - $(TOOL)-$$VER \
 		| $(GZIP) -v -9 >$(TOOL)-$$VER.tar.gz)
 
