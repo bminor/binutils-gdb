@@ -65,7 +65,7 @@ responsibility among the other maintainers.
   HPPA		   Dave Anglin <dave.anglin@nrc.ca>
   IA-64		   Jim Wilson <wilson@tuliptree.org>
   IQ2000	   Stan Cox <scox@redhat.com>
-  i860		   Jason Eckhardt <jle@redhat.com>
+  i860		   Jason Eckhardt <jle@rice.edu>
   ix86		   Alan Modra <amodra@bigpond.net.au>
   ix86 PE	   Christopher Faylor <cgf@redhat.com>
   ix86 COFF	   DJ Delorie <dj@redhat.com>
