@@ -546,7 +546,7 @@ hexToInt(char **ptr, int *intValue)
       *intValue = (*intValue << 4) | hexValue;
       numChars ++;
 
-      *ptr++;
+      (*ptr)++;
     }
 
   return (numChars);
@@ -727,6 +727,12 @@ handle_exception (registers)
 	      registers[NPC] = addr + 4;
 	    }
 
+/* Need to flush the instruction cache here, as we may have deposited a
+   breakpoint, and the icache probably has no way of knowing that a data ref to
+   some location may have changed something that is in the instruction cache.
+ */
+
+	  flush_i_cache();
 	  return;
 
 	  /* kill the program */

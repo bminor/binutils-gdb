@@ -1,3 +1,8 @@
+Mon Aug 24 20:44:38 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* sparc-stub.c (handle_exception):  Flush instruction cache just
+	before returning to the user.  (hexToInt):  Fix overzealous cleanup.
+
 Mon Aug 24 11:57:13 1992  Fred Fish  (fnf@cygnus.com)
 
 	* infrun.c (handle_command):  Rewrite to allow multiple signal
