@@ -9,56 +9,56 @@
 
 Disassembly of section .text:
 
-0+0 <_rcall>:
+0+00 <_rcall>:
 	.globl	_rcall
 	.globl _start
 _start:
 _rcall:
-	ldaa	\#0x10		;86 10
-   0:	86 10       	ldaa	\#16
+	ldaa	#0x10		;86 10
+   0:	86 10       	ldaa	#16
 	jbra	Lend		; Must be switched to a jmp
-   2:	7e 01 0b    	jmp	10b <Lend>
-	jbsr	toto		; \-> to a jsr
-   5:	bd 01 1b    	jsr	11b <toto>
-	jbne	toto		; \-> to a beq\+jmp
+   2:	7e 00 00    	jmp	0 <_rcall>
+	jbsr	toto		; -> to a jsr
+   5:	bd 00 00    	jsr	0 <_rcall>
+	jbne	toto		; -> to a beq\+jmp
    8:	27 03       	beq	d <_rcall\+0xd>
-   a:	7e 01 1b    	jmp	11b <toto>
+   a:	7e 00 00    	jmp	0 <_rcall>
 	jbeq	toto		; -> to a bne\+jmp
    d:	26 03       	bne	12 <_rcall\+0x12>
-   f:	7e 01 1b    	jmp	11b <toto>
+   f:	7e 00 00    	jmp	0 <_rcall>
 	jbcs	toto		; -> to a bcc\+jmp
   12:	24 03       	bcc	17 <_rcall\+0x17>
-  14:	7e 01 1b    	jmp	11b <toto>
+  14:	7e 00 00    	jmp	0 <_rcall>
 	jbcc	toto		; -> to a bcs\+jmp
   17:	25 03       	bcs	1c <_rcall\+0x1c>
-  19:	7e 01 1b    	jmp	11b <toto>
+  19:	7e 00 00    	jmp	0 <_rcall>
 	xgdx
   1c:	8f          	xgdx
 	xgdx
   1d:	8f          	xgdx
 	beq	bidule		; -> to a bne\+jmp
   1e:	26 03       	bne	23 <_rcall\+0x23>
-  20:	7e 01 80    	jmp	180 <bidule>
+  20:	7e 00 00    	jmp	0 <_rcall>
 	bcs	bidule		; -> to a bcc\+jmp
   23:	24 03       	bcc	28 <_rcall\+0x28>
-  25:	7e 01 80    	jmp	180 <bidule>
+  25:	7e 00 00    	jmp	0 <_rcall>
 	bcc	bidule		; -> to a bcs\+jmp
   28:	25 03       	bcs	2d <_rcall\+0x2d>
-  2a:	7e 01 80    	jmp	180 <bidule>
+  2a:	7e 00 00    	jmp	0 <_rcall>
 	xgdx
   2d:	8f          	xgdx
 	jbra	200
   2e:	7e 00 c8    	jmp	c8 <_rcall\+0xc8>
 	jbsr	1923
-  31:	bd 07 83    	jsr	783 <bidule\+0x603>
+  31:	bd 07 83    	jsr	783 <.L0\+0x602>
 	bne	Lend		; -> to a beq\+jmp
   34:	27 03       	beq	39 <_rcall\+0x39>
-  36:	7e 01 0b    	jmp	10b <Lend>
+  36:	7e 00 00    	jmp	0 <_rcall>
 	jbsr	toto
-  39:	bd 01 1b    	jsr	11b <toto>
+  39:	bd 00 00    	jsr	0 <_rcall>
 	jbeq	toto
   3c:	26 03       	bne	41 <_rcall\+0x41>
-  3e:	7e 01 1b    	jmp	11b <toto>
+  3e:	7e 00 00    	jmp	0 <_rcall>
 	...
 	.skip 200
 	ldaa	\*dir		;96 33

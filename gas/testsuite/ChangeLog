@@ -1,3 +1,20 @@
+2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gas/m68hc11/all.exp: Run the new test.
+	* gas/m68hc11/insns12.s: New file to test specific 68HC12 insns.
+	* gas/m68hc11/insns12.d: New file.
+	* gas/m68hc11/branchs12.s: New test.
+	* gas/m68hc11/branchs12.d: New test.
+
+	* gas/m68hc11/all_insns.d: Dump the relocs to verify that they
+	are against symbols and not sections (for linker relaxation).
+	* gas/m68hc11/insns-dwarf2.d: Likewise.
+	* gas/m68hc11/insns.d: Likewise.
+	* gas/m68hc11/lbranch.d: Likewise.
+	* gas/m68hc11/lbranch-dwarf2.d: Likewise.
+	* gas/m68hc11/opers12.d: Likewise.
+	* gas/m68hc11/opers12-dwarf2.d: Likewise.
+
 2002-08-12  Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/elf-consthilo.[sd]: New test.
