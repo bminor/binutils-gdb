@@ -40,28 +40,6 @@ if test "$ac_cv_os_lynx" = "yes" ; then
   AC_MSG_RESULT(no)
 fi
 ])
-#
-# Sometimes the native compiler is a bogus stub for gcc or /usr/ucb/cc. This
-# makes configure think it's cross compiling. If --target wasn't used, then
-# we can't configure, so something is wrong.
-AC_DEFUN(CY_AC_C_CROSS,
-[# If we cannot run a trivial program, we must be cross compiling.
-AC_MSG_CHECKING(whether cross-compiling)
-AC_CACHE_VAL(ac_cv_c_cross,[
-AC_TRY_RUN([
-  main(){return(0);}],
-  ac_cv_c_cross=no, ac_cv_c_cross=yes, ac_cv_c_cross=yes)
-])
-if test x"${target}" = x"${host}" -a x"${ac_cv_c_cross}" = x"yes"; then
-  dnl this hack is cause the message is so long we don't call AC_MSG_ERROR
-  echo "configure: error: You need to specify --target to cross compile," 1>&2;
-  echo "	or the native compiler is broken" 1>&2;
-  exit 1;
-else
-  cross_compiling=$ac_cv_c_cross
-  AC_MSG_RESULT($ac_cv_c_cross)
-fi
-])
 AC_DEFUN(CY_AC_PATH_TCLH, [
 #
 # Ok, lets find the tcl source trees so we can use the headers

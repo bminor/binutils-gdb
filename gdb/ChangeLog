@@ -1,3 +1,10 @@
+Thu May  9 19:06:02 1996  Fred Fish  <fnf@cygnus.com>
+
+	* aclocal.m4: Remove unused definition of AC_C_CROSS.
+	* configure.in: Add powerpcle-*-solaris* host and target config
+	so April 30th change does not get lost next time configure is
+	rebuilt.
+
 Thu May  9 14:13:08 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* Makefile.in, breakpoint.c, corelow.c, fork-child.c, inflow.c,
