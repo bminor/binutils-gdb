@@ -514,8 +514,7 @@ main (argc, argv)
 
       /* If it's an undefined symbol, see if it's on the import list.
 	 Change the prefix if necessary.  */
-      if (bfd_get_section (sym) == &bfd_und_section
-	  && import_symbols != NULL)
+      if (bfd_get_section (sym) == &bfd_und_section)
 	{
 	  register struct string_list *l;
 

@@ -1,5 +1,8 @@
 Thu Dec  9 17:47:19 1993  Ian Lance Taylor  (ian@deneb.cygnus.com)
 
+	* nlmconv.c (main): Warn about imported symbols that are not in
+	the IMPORT list even if the IMPORT keyword is not used.
+
 	* nlmconv.c (debug, unlink_on_exit): New static variables.
 	(long_options): Add "debug" and "linker".
 	(main): Handle -d and -l arguments.  Make command line input and
