@@ -1,3 +1,18 @@
+Thu Mar  6 12:19:59 1997  Fred Fish  <fnf@cygnus.com>
+
+start-sanitize-tic80
+	* coff-tic80.c (rtype2howto): If passed a relocation type we don't
+	understand, just set the howto field to NULL, and the caller will
+	print an appropriate error message.
+end-sanitize-tic80
+	* coffcode.h (coff_slurp_reloc_table): Pull duplicate declarations and
+	code fragment out of both legs of #ifdef RELOC_PROCESSING ... #endif
+	block.  Use NULL for initializations of "ptr" rather than bare 0.
+	* coff-h8300.c: Fix typo in comment.
+	* coff-h8500.c: Ditto.
+	* coff-w65.c: Ditto
+	* coff-z8k.c: Ditto.
+	
 start-sanitize-m32r
 Wed Mar  5 13:59:09 1997  Doug Evans  <dje@seba.cygnus.com>
 

@@ -1906,6 +1906,13 @@ coff_set_flags (abfd, magicp, flagsp)
       }
       break;
 #endif
+/* start-sanitize-tic80 */
+#ifdef TIC80_ARCH_MAGIC
+    case bfd_arch_tic80:
+      *magicp = TIC80_ARCH_MAGIC;
+      return true;
+#endif
+/* end-sanitize-tic80 */
 #ifdef ARMMAGIC
     case bfd_arch_arm:
       *magicp = ARMMAGIC;
@@ -3620,26 +3627,20 @@ coff_slurp_reloc_table (abfd, asect, symbols)
 
   for (idx = 0; idx < asect->reloc_count; idx++)
     {
-#ifdef RELOC_PROCESSING
       struct internal_reloc dst;
       struct external_reloc *src;
+#ifndef RELOC_PROCESSING
+      asymbol *ptr;
+#endif
 
       cache_ptr = reloc_cache + idx;
       src = native_relocs + idx;
+
       coff_swap_reloc_in (abfd, src, &dst);
 
+#ifdef RELOC_PROCESSING
       RELOC_PROCESSING (cache_ptr, &dst, symbols, abfd, asect);
 #else
-      struct internal_reloc dst;
-      asymbol *ptr;
-      struct external_reloc *src;
-
-      cache_ptr = reloc_cache + idx;
-      src = native_relocs + idx;
-
-      coff_swap_reloc_in (abfd, src, &dst);
-
-
       cache_ptr->address = dst.r_vaddr;
 
       if (dst.r_symndx != -1)
@@ -3650,7 +3651,7 @@ coff_slurp_reloc_table (abfd, asect, symbols)
 		("%s: warning: illegal symbol index %ld in relocs",
 		 bfd_get_filename (abfd), dst.r_symndx);
 	      cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
-	      ptr = 0;
+	      ptr = NULL;
 	    }
 	  else
 	    {
@@ -3662,7 +3663,7 @@ coff_slurp_reloc_table (abfd, asect, symbols)
       else
 	{
 	  cache_ptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
-	  ptr = 0;
+	  ptr = NULL;
 	}
 
       /* The symbols definitions that we have read in have been
@@ -3680,7 +3681,7 @@ coff_slurp_reloc_table (abfd, asect, symbols)
 
       /* Fill in the cache_ptr->howto field from dst.r_type */
       RTYPE2HOWTO (cache_ptr, &dst);
-#endif
+#endif	/* RELOC_PROCESSING */
 
       if (cache_ptr->howto == NULL)
 	{
