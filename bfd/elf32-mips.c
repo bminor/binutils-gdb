@@ -195,6 +195,8 @@ static void mips_elf_allocate_dynamic_relocations
   PARAMS ((bfd *, unsigned int));
 static boolean mips_elf_stub_section_p 
   PARAMS ((bfd *, asection *));
+static int sort_dynamic_relocs
+  PARAMS ((const void *, const void *));
 
 /* The level of IRIX compatibility we're striving for.  */
 
@@ -203,6 +205,9 @@ typedef enum {
   ict_irix5,
   ict_irix6
 } irix_compat_t;
+
+/* This will be used when we sort the dynamic relocation records.  */
+static bfd *reldyn_sorting_bfd;
 
 /* Nonzero if ABFD is using the N32 ABI.  */
 
@@ -5141,6 +5146,26 @@ _bfd_mips_elf_final_link (abfd, info)
   return true;
 }
 
+/* This function is called via qsort() to sort the dynamic relocation
+   entries by increasing r_symndx value.  */
+
+static int
+sort_dynamic_relocs (arg1,arg2)
+        const PTR arg1;
+        const PTR arg2;
+{
+  const Elf32_External_Rel *ext_reloc1 = (const Elf32_External_Rel *) arg1;
+  const Elf32_External_Rel *ext_reloc2 = (const Elf32_External_Rel *) arg2;
+
+  Elf_Internal_Rel int_reloc1;
+  Elf_Internal_Rel int_reloc2;
+
+  bfd_elf32_swap_reloc_in(reldyn_sorting_bfd, ext_reloc1, &int_reloc1);
+  bfd_elf32_swap_reloc_in(reldyn_sorting_bfd, ext_reloc2, &int_reloc2);
+
+  return (ELF32_R_SYM(int_reloc1.r_info) - ELF32_R_SYM(int_reloc2.r_info));
+}
+
 /* Returns the GOT section for ABFD.  */
 
 static asection *
@@ -8835,6 +8860,23 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
 			MIPS_FUNCTION_STUB_SIZE);
 	      }
 	  }
+      }
+
+    /* We need to sort the entries of the dynamic relocation section.  */
+
+    if (!ABI_64_P (output_bfd))
+      {
+            asection *reldyn;
+
+            reldyn = bfd_get_section_by_name (dynobj,
+                                     MIPS_ELF_REL_DYN_SECTION_NAME (dynobj));
+            if (reldyn != NULL && reldyn->reloc_count > 2)
+              {
+                reldyn_sorting_bfd = output_bfd;
+                qsort ((Elf32_External_Rel *) reldyn->contents + 1,
+                       (size_t) reldyn->reloc_count - 1,
+                       sizeof (Elf32_External_Rel), sort_dynamic_relocs);
+              }
       }
 
     /* Clean up a first relocation in .rel.dyn.  */

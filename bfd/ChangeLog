@@ -1,3 +1,10 @@
+2000-07-09  Koundinya K  <kk@ddeorg.soft.net>
+
+        * elf32-mips.c (sort_dynamic_relocs): New Function.
+        (_bfd_mips_elf_finish_dynamic_sections): Call sort_dynamic_relocs
+	via qsort to sort the dynamic relocations in increasing r_symndx
+	value.
+	
 2000-07-09  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf64-hppa.c (elf64_hppa_dyn_hash_table_init): Add
