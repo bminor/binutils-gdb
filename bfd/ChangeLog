@@ -1,5 +1,9 @@
 Thu Aug 19 09:45:51 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
+	* Makefile.in (BFD_LIBS, ALL_MACHINES, BFD32_BACKENDS, BFD64_BACKENDS,
+	OPTIONAL_BACKENDS): Alphabetize entries and add a few missing ones.
+	* archures.c: Alphabetize decls.
+
 	* configure.in, targets.c: Add missing vectors to the tables.
 	* targets.c (target_vector) [!SELECT_VECS]: Add DEFAULT_VECTOR.
 	Remove hp300bsd_vec due to clash with sunos_big_vec.

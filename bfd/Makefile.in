@@ -82,36 +82,96 @@ BFD_H = bfd.h
 # for the debugger, so if you are downloading things as S-records you
 # need two copies of the executable, one to download and one for the
 # debugger).
-BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
-	archures.o core.o section.o format.o syms.o reloc.o init.o \
-	ctor.o seclet.o coffgen.o \
+BFD_LIBS = \
+	archive.o archures.o bfd.o cache.o coffgen.o core.o ctor.o \
+	format.o init.o libbfd.o opncls.o reloc.o \
+	seclet.o section.o syms.o targets.o \
 	ecoff.o elf.o srec.o
 
-ALL_MACHINES = cpu-h8300.o cpu-i960.o cpu-sparc.o cpu-m68k.o cpu-m88k.o \
-	cpu-vax.o cpu-mips.o cpu-a29k.o cpu-i386.o cpu-rs6000.o cpu-hppa.o \
-	cpu-z8k.o cpu-we32k.o cpu-h8500.o cpu-alpha.o cpu-sh.o
+# This list is alphabetized to make it easier to keep in sync
+# with the decls and initializer in archures.c.
+ALL_MACHINES = \
+	cpu-a29k.o \
+	cpu-alpha.o \
+	cpu-h8300.o \
+	cpu-h8500.o \
+	cpu-hppa.o \
+	cpu-i386.o \
+	cpu-i960.o \
+	cpu-m68k.o \
+	cpu-m88k.o \
+	cpu-mips.o \
+	cpu-rs6000.o \
+	cpu-sh.o \
+	cpu-sparc.o \
+	cpu-vax.o \
+	cpu-we32k.o \
+	cpu-z8k.o
 
+# The .o files needed by all of the 32 bit vectors that are configured into
+# target_vector in targets.c if configured with --with-targets=all.
 BFD32_BACKENDS = \
-	elf32.o elf32-sparc.o elf32-i386.o elf32-i860.o elf32-m68k.o \
-	elf32-hppa.o elf32-mips.o elf32-m88k.o elf32-gen.o \
+	aout-adobe.o \
+	aout32.o \
+	bout.o \
+	coff-a29k.o \
+	coff-h8300.o \
+	coff-h8500.o \
+	coff-i386.o \
+	coff-i960.o \
+	coff-m68k.o \
+	coff-m88k.o \
+	coff-mips.o \
+	coff-rs6000.o \
+	coff-sh.o \
+	coff-u68k.o \
+	coff-we32k.o \
+	coff-z8k.o \
+	elf32-gen.o \
+	elf32-hppa.o \
+	elf32-i386.o \
+	elf32-i860.o \
+	elf32-m68k.o \
+	elf32-m88k.o \
+	elf32-mips.o \
+	elf32-sparc.o \
+	elf32.o \
+	hp300hpux.o \
+	hppa.o \
+	i386aout.o \
+	i386bsd.o \
+	i386linux.o \
+	i386lynx.o \
+	i386mach3.o \
+	ieee.o \
+	mipsbsd.o \
+	newsos3.o \
 	nlm.o \
-	nlm32.o nlm32-gen.o nlm32-i386.o \
-	aout32.o sunos.o newsos3.o mipsbsd.o aout-adobe.o \
-	i386aout.o i386bsd.o i386linux.o i386lynx.o i386mach3.o \
-	hp300bsd.o hp300hpux.o bout.o \
-	coff-i960.o coff-a29k.o coff-m68k.o coff-u68k.o \
-	coff-i386.o coff-m88k.o \
-	coff-rs6000.o coff-h8300.o coff-h8500.o coff-z8k.o coff-we32k.o \
-	coff-mips.o coff-sh.o \
-	hppa.o oasys.o ieee.o reloc16.o \
-	stab-syms.o
+	nlm32-gen.o \
+	nlm32-i386.o \
+	nlm32.o \
+	oasys.o \
+	reloc16.o \
+	stab-syms.o \
+	sunos.o
 
+# The .o files needed by all of the 64 bit vectors that are configured into
+# target_vector in targets.c if configured with --with-targets=all
+# and --with-64-bit-bfd.
 BFD64_BACKENDS = \
-	elf64.o elf64-gen.o \
-	nlm64.o nlm64-gen.o \
-	aout64.o demo64.o coff-alpha.o
+	aout64.o \
+	coff-alpha.o \
+	demo64.o \
+	elf64-gen.o \
+	elf64.o \
+	nlm64-gen.o \
+	nlm64.o
 
-OPTIONAL_BACKENDS = trad-core.o sco-core.o aix386-core.o hpux-core.o
+OPTIONAL_BACKENDS = \
+	aix386-core.o \
+	hpux-core.o \
+	sco-core.o \
+	trad-core.o
 
 # These are defined by configure.in:
 # WORDSIZE=32
