@@ -1,3 +1,7 @@
+2004-04-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c: Fix spelling mistakes.
+
 2004-04-28  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
 	    Andrew Cagney  <cagney@redhat.com>
 

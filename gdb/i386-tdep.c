@@ -572,12 +572,12 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 
 	    subl $XXX, %esp
 
-	 NOTE: You can't subtract a 16 bit immediate from a 32 bit
+	 NOTE: You can't subtract a 16-bit immediate from a 32-bit
 	 reg, so we don't have to worry about a data16 prefix.  */
       op = read_memory_unsigned_integer (pc + 3, 1);
       if (op == 0x83)
 	{
-	  /* `subl' with 8 bit immediate.  */
+	  /* `subl' with 8-bit immediate.  */
 	  if (read_memory_unsigned_integer (pc + 4, 1) != 0xec)
 	    /* Some instruction starting with 0x83 other than `subl'.  */
 	    return pc + 3;
@@ -589,12 +589,12 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 	}
       else if (op == 0x81)
 	{
-	  /* Maybe it is `subl' with a 32 bit immedediate.  */
+	  /* Maybe it is `subl' with a 32-bit immediate.  */
 	  if (read_memory_unsigned_integer (pc + 4, 1) != 0xec)
 	    /* Some instruction starting with 0x81 other than `subl'.  */
 	    return pc + 3;
 
-	  /* It is `subl' with a 32 bit immediate.  */
+	  /* It is `subl' with a 32-bit immediate.  */
 	  cache->locals = read_memory_integer (pc + 5, 4);
 	  return pc + 9;
 	}
@@ -657,9 +657,9 @@ i386_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
    once used in the System V compiler).
 
    Local space is allocated just below the saved %ebp by either the
-   'enter' instruction, or by "subl $<size>, %esp".  'enter' has a 16
-   bit unsigned argument for space to allocate, and the 'addl'
-   instruction could have either a signed byte, or 32 bit immediate.
+   'enter' instruction, or by "subl $<size>, %esp".  'enter' has a
+   16-bit unsigned argument for space to allocate, and the 'addl'
+   instruction could have either a signed byte, or 32-bit immediate.
 
    Next, the registers used by this function are pushed.  With the
    System V compiler they will always be in the order: %edi, %esi,
@@ -1161,7 +1161,7 @@ i386_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
      (i386_frame_this_id, i386_sigtramp_frame_this_id,
      i386_unwind_dummy_id).  It's there, since all frame unwinders for
      a given target have to agree (within a certain margin) on the
-     defenition of the stack address of a frame.  Otherwise
+     definition of the stack address of a frame.  Otherwise
      frame_id_inner() won't work correctly.  Since DWARF2/GCC uses the
      stack address *before* the function call as a frame's CFA.  On
      the i386, when %ebp is used as a frame pointer, the offset
@@ -1533,7 +1533,7 @@ i386_register_to_value (struct frame_info *frame, int regnum,
       return;
     }
 
-  /* Read a value spread accross multiple registers.  */
+  /* Read a value spread across multiple registers.  */
 
   gdb_assert (len > 4 && len % 4 == 0);
 
@@ -1565,7 +1565,7 @@ i386_value_to_register (struct frame_info *frame, int regnum,
       return;
     }
 
-  /* Write a value spread accross multiple registers.  */
+  /* Write a value spread across multiple registers.  */
 
   gdb_assert (len > 4 && len % 4 == 0);
 
@@ -1936,7 +1936,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->sizeof_fpregset = I387_SIZEOF_FSAVE;
 
   /* The default settings include the FPU registers, the MMX registers
-     and the SSE registers.  This can be overidden for a specific ABI
+     and the SSE registers.  This can be overridden for a specific ABI
      by adjusting the members `st0_regnum', `mm0_regnum' and
      `num_xmm_regs' of `struct gdbarch_tdep', otherwise the registers
      will show up in the output of "info all-registers".  Ideally we
@@ -1952,7 +1952,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->st0_regnum = I386_ST0_REGNUM;
 
   /* The MMX registers are implemented as pseudo-registers.  Put off
-     caclulating the register number for %mm0 until we know the number
+     calculating the register number for %mm0 until we know the number
      of raw registers.  */
   tdep->mm0_regnum = 0;
 
@@ -1995,7 +1995,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* NOTE: kettenis/20040418: GCC does have two possible register
      numbering schemes on the i386: dbx and SVR4.  These schemes
      differ in how they number %ebp, %esp, %eflags, and the
-     floating-point registers, and are implemented by the attays
+     floating-point registers, and are implemented by the arrays
      dbx_register_map[] and svr4_dbx_register_map in
      gcc/config/i386.c.  GCC also defines a third numbering scheme in
      gcc/config/i386.c, which it designates as the "default" register
