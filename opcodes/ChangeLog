@@ -1,3 +1,7 @@
+2000-08-15  Jim Wilson  <wilson@cygnus.com>
+
+	* ia64-ic.tbl: Add missing entries.
+
 2000-08-08  Jason Eckhardt  <jle@cygnus.com>
 
 	* i860-dis.c (print_br_address): Change third argument from int

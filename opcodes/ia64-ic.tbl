@@ -202,4 +202,34 @@ pr-norm-writers-fp;	IC:pr-gen-writers-fp[Field(ctype)==]
 pr-norm-writers-int;	IC:pr-gen-writers-int[Field(ctype)==]
 pr-or-writers;	IC:pr-gen-writers-int[Field(ctype) in {or orcm}], IC:pr-gen-writers-int[Field(ctype) in {or.andcm and.orcm}]
 pr-readers-br;	br.call, br.cond, brl.call, brl.cond, br.ret, br.wexit, br.wtop, break.b, break, nop.b, nop, IC:ReservedBQP
-pr-readers-nobr-nomovpr;	add, addp4, and, andcm, break.f, break.i, break.m, break.x, break, chk.s, IC:chk-a, cmp, cmp4, IC:cmpxchg, IC:czx, dep, extr, IC:fp-arith, IC:fp-non-arith, fc, fchkf, fclrf, fcmp, IC:fetchadd, fpcmp, fsetc, fwb, getf, IC:invala-all, itc.i, itc.d, itr.i, itr.d, IC:ld, IC:ldf, IC:ldfp, IC:lfetch-all, mf, IC:mix, IC:mov-from-AR-M, IC:mov-from-AR-IM, IC:mov-from-AR-I, IC:mov-to-AR-M, IC:mov-to-AR-I, IC:mov-to-AR-IM, IC:mov-to-BR, IC:mov-from-BR, IC:mov-to-CR, IC:mov-from-CR, IC:mov-to-IND, IC:mov-from-IND, IC:mov-ip, IC:mov-immediate, IC:mov-to-PSR-l, IC:mov-to-PSR-um, IC:mov-from-PSR, IC:mov-from-PSR-um, movl, IC:mux, nop.f, nop.i, nop.m, nop.x, nop, or, IC:pack, IC:padd, IC:pavg, IC:pavgsub, IC:pcmp, IC:pmax, IC:pmin, IC:pmpy, IC:pmpyshr, popcnt, IC:probe-all, IC:psad, IC:pshl, IC:pshladd, IC:pshr, IC:pshradd, IC:psub, ptc.e, ptc.g, ptc.ga, ptc.l, ptr.d, ptr.i, IC:ReservedQP, rsm, setf, shl, shladd, shladdp4, shr, shrp, srlz.i, srlz.d, ssm, IC:st, IC:stf, sub, sum, IC:sxt, sync, tak,
+pr-readers-nobr-nomovpr;	add, addp4, and, andcm, break.f, break.i, break.m, break.x, break, chk.s, IC:chk-a, cmp, cmp4, IC:cmpxchg, IC:czx, dep, extr, IC:fp-arith, IC:fp-non-arith, fc, fchkf, fclrf, fcmp, IC:fetchadd, fpcmp, fsetc, fwb, getf, IC:invala-all, itc.i, itc.d, itr.i, itr.d, IC:ld, IC:ldf, IC:ldfp, IC:lfetch-all, mf, IC:mix, IC:mov-from-AR-M, IC:mov-from-AR-IM, IC:mov-from-AR-I, IC:mov-to-AR-M, IC:mov-to-AR-I, IC:mov-to-AR-IM, IC:mov-to-BR, IC:mov-from-BR, IC:mov-to-CR, IC:mov-from-CR, IC:mov-to-IND, IC:mov-from-IND, IC:mov-ip, IC:mov-immediate, IC:mov-to-PSR-l, IC:mov-to-PSR-um, IC:mov-from-PSR, IC:mov-from-PSR-um, movl, IC:mux, nop.f, nop.i, nop.m, nop.x, nop, or, IC:pack, IC:padd, IC:pavg, IC:pavgsub, IC:pcmp, IC:pmax, IC:pmin, IC:pmpy, IC:pmpyshr, popcnt, IC:probe-all, IC:psad, IC:pshl, IC:pshladd, IC:pshr, IC:pshradd, IC:psub, ptc.e, ptc.g, ptc.ga, ptc.l, ptr.d, ptr.i, IC:ReservedQP, rsm, setf, shl, shladd, shladdp4, shr, shrp, srlz.i, srlz.d, ssm, IC:st, IC:stf, sub, sum, IC:sxt, sync, tak, tbit, thash, tnat, tpa, ttag, IC:unpack, IC:xchg, xma, xmpy, xor, IC:zxt
+pr-unc-writers-fp;	IC:pr-gen-writers-fp[Field(ctype)==unc]+11, fprcpa+11, fprsqrta+11, frcpa+11, frsqrta+11
+pr-unc-writers-int;	IC:pr-gen-writers-int[Field(ctype)==unc]+11
+pr-writers;	IC:pr-writers-int, IC:pr-writers-fp
+pr-writers-fp;	IC:pr-norm-writers-fp, IC:pr-unc-writers-fp
+pr-writers-int;	IC:pr-norm-writers-int, IC:pr-unc-writers-int
+predicatable-instructions;	IC:mov-from-PR, IC:mov-to-PR, IC:pr-readers-br, IC:pr-readers-nobr-nomovpr
+priv-ops;	IC:mov-to-IND-priv, bsw, itc.i, itc.d, itr.i, itr.d, IC:mov-to-CR, IC:mov-from-CR, IC:mov-to-PSR-l, IC:mov-from-PSR, IC:mov-from-IND-priv, ptc.e, ptc.g, ptc.ga, ptc.l, ptr.i, ptr.d, rfi, rsm, ssm, tak, tpa
+probe-all;	IC:probe-fault, IC:probe-nofault
+probe-fault;	probe[Format in {M40}]
+probe-nofault;	probe[Format in {M38 M39}]
+psad;	psad1
+pshl;	pshl2, pshl4
+pshladd;	pshladd2
+pshr;	pshr2, pshr4
+pshradd;	pshradd2
+psub;	psub1, psub2, psub4
+ReservedBQP;	-+15
+ReservedQP;	-+16
+rse-readers;	alloc, br.call, br.ia, br.ret, brl.call, cover, flushrs, loadrs, IC:mov-from-AR-BSP, IC:mov-from-AR-BSPSTORE, IC:mov-to-AR-BSPSTORE, IC:mov-from-AR-RNAT, IC:mov-to-AR-RNAT, rfi
+rse-writers;	alloc, br.call, br.ia, br.ret, brl.call, cover, flushrs, loadrs, IC:mov-to-AR-BSPSTORE, rfi
+st;	st1, st2, st4, st8, st8.spill
+st-postinc;	IC:stf[Format in {M10}], IC:st[Format in {M5}]
+stf;	stfs, stfd, stfe, stf8, stf.spill
+sxt;	sxt1, sxt2, sxt4
+sys-mask-writers-partial;	rsm, ssm
+unpack;	unpack1, unpack2, unpack4
+unpredicatable-instructions;	alloc, br.cloop, br.ctop, br.cexit, brp, bsw, clrrrb, cover, epc, flushrs, loadrs, rfi
+user-mask-writers-partial;	rum, sum
+xchg;	xchg1, xchg2, xchg4, xchg8
+zxt;	zxt1, zxt2, zxt4
