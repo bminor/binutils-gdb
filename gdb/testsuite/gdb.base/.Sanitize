@@ -81,7 +81,6 @@ foo.c
 funcargs.c
 funcargs.exp
 gdbvars.exp
-gen_solib_threshold.c
 grbx.c
 help.exp
 i486-elf.u
@@ -154,7 +153,6 @@ setshow.exp
 setvar.c
 setvar.exp
 shlib-call.exp
-shlib-cl2.exp
 shmain.c
 shr1.c
 shr2.c
@@ -169,10 +167,6 @@ solib.c
 solib.exp
 solib1.c
 solib2.c
-solib_threshold.build
-solib_threshold.exp
-solib_threshold.link_opts
-solib_threshold.mk
 so-impl-ld.c
 so-impl-ld.exp
 so-indr-cl.c
