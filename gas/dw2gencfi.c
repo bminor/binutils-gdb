@@ -23,6 +23,37 @@
 #include "as.h"
 #include "dw2gencfi.h"
 
+struct cie_entry
+{
+  unsigned long offset;
+  size_t size;
+  void *data;
+  struct cie_entry *next;
+};
+
+struct cfi_data
+{
+  enum cfi_insn insn;
+  long param[2];
+  struct cfi_data *next;
+};
+
+struct cfi_info
+{
+  addressT start_address;
+  addressT end_address;
+  addressT last_address;
+  const char *labelname;
+  struct cfi_data *data;
+  struct cfi_info *next;
+};
+
+/* Current open CFI entry.  */
+static struct cfi_info *cfi_info;
+
+/* List of CIEs so that they could be reused.  */
+static struct cie_entry *cie_root;
+
 /* Current target config.  */
 static struct cfi_config current_config;
 
@@ -39,6 +70,7 @@ const pseudo_typeS cfi_pseudo_table[] =
     { "cfi_def_cfa_offset", dot_cfi, CFA_def_cfa_offset },
     { "cfi_adjust_cfa_offset", dot_cfi, CFI_adjust_cfa_offset },
     { "cfi_offset", dot_cfi, CFA_offset },
+    { "cfi_register", dot_cfi, CFA_register },
     { NULL, NULL, 0 }
   };
 
@@ -90,25 +122,6 @@ cfi_insn_str (enum cfi_insn insn)
   return "CFA_unknown";
 }
 
-struct cfi_data
-{
-  enum cfi_insn insn;
-  long param[2];
-  struct cfi_data *next;
-};
-
-struct cfi_info
-{
-  addressT start_address;
-  addressT end_address;
-  addressT last_address;
-  const char *labelname;
-  struct cfi_data *data;
-  struct cfi_info *next;
-};
-
-static struct cfi_info *cfi_info;
-
 static struct cfi_data *
 alloc_cfi_data (void)
 {
@@ -138,7 +151,9 @@ cfi_parse_arg (long *param, int resolvereg)
       retval = 1;
     }
 #ifdef tc_regname_to_dw2regnum
-  else if (resolvereg && (is_name_beginner (*input_line_pointer)))
+  else if (resolvereg && ((is_name_beginner (*input_line_pointer))
+			   || (*input_line_pointer == '%'
+			       && is_name_beginner (*(++input_line_pointer)))))
     {
       char *name, c, *p;
 
@@ -271,6 +286,21 @@ cfi_make_insn (int arg)
 	}
       break;
 
+    case CFA_register:
+      if (cfi_parse_reg (&param[0]) < 0)
+	{
+	  as_bad (_("first argument to %s is not a register"),
+		  cfi_insn_str (arg));
+	  return;
+	}
+      if (cfi_parse_reg (&param[1]) < 0)
+	{
+	  as_bad (_("second argument to %s is not a register"),
+		  cfi_insn_str (arg));
+	  return;
+	}
+      break;
+
       /* Instructions that take one register argument.  */
     case CFA_def_cfa_register:
       if (cfi_parse_reg (&param[0]) < 0)
@@ -336,11 +366,20 @@ cfi_get_label (void)
 static void
 dot_cfi_startproc (void)
 {
+  const char *simple = "simple";
+
   if (cfi_info)
     {
       as_bad (_("previous CFI entry not closed (missing .cfi_endproc)"));
       return;
     }
+
+#if defined(TARGET_USE_CFIPOP)
+  /* Because this file is linked even for architectures that 
+     don't use CFI, we must wrap this call.  */
+  if (current_config.addr_length == 0)
+    tc_cfi_init ();
+#endif
 
   cfi_info = alloc_cfi_info ();
 
@@ -348,14 +387,20 @@ dot_cfi_startproc (void)
   cfi_info->last_address = cfi_info->start_address;
   cfi_info->labelname = S_GET_NAME (cfi_get_label ());
 
+  SKIP_WHITESPACE ();
 #ifdef tc_cfi_frame_initial_instructions
-  tc_cfi_frame_initial_instructions ();
+  if (strncmp (simple, input_line_pointer, strlen (simple)) != 0)
+    tc_cfi_frame_initial_instructions ();
+  else
+    input_line_pointer += strlen (simple);
 #endif
 }
 
 #define cfi_is_advance_insn(insn)				\
   ((insn >= CFA_set_loc && insn <= CFA_advance_loc4)		\
    || insn == CFA_advance_loc)
+
+/* Output CFI instructions to the file.  */
 
 enum data_types
   {
@@ -367,8 +412,6 @@ enum data_types
     t_uleb128 = 0x10,
     t_sleb128 = 0x11
   };
-
-/* Output CFI instructions to the file.  */
 
 static int
 output_data (char **p, unsigned long *size, enum data_types type, long value)
@@ -393,7 +436,8 @@ output_data (char **p, unsigned long *size, enum data_types type, long value)
       ret_size = 8;
       break;
     default:
-      as_warn (_("unknown type %d"), type);
+      /* This should never happen - throw an internal error.  */
+      as_fatal (_("unknown type %d"), type);
       return 0;
     }
 
@@ -434,7 +478,7 @@ output_data (char **p, unsigned long *size, enum data_types type, long value)
 		value);
       break;
     default:
-      as_warn ("unknown type %d", type);
+      as_fatal (_("unknown type %d"), type);
       return 0;
     }
 
@@ -486,7 +530,8 @@ cfi_output_insn (struct cfi_data *data, char **buf, unsigned long *buf_size)
 
     case CFA_def_cfa:
       if (verbose)
-	printf ("\t# CFA_def_cfa(%ld,%ld)\n", data->param[0], data->param[1]);
+	printf ("\t# CFA_def_cfa(%ld,%ld)\n",
+		data->param[0], data->param[1]);
       output_data (pbuf, buf_size, t_byte, CFA_def_cfa);
       output_data (pbuf, buf_size, t_uleb128, data->param[0]);
       output_data (pbuf, buf_size, t_uleb128, data->param[1]);
@@ -518,6 +563,15 @@ cfi_output_insn (struct cfi_data *data, char **buf, unsigned long *buf_size)
 		   data->param[1] / current_config.data_align);
       break;
 
+    case CFA_register:
+      if (verbose)
+	printf ("\t# %s(%ld,%ld)\n", cfi_insn_str (data->insn),
+		data->param[0], data->param[1]);
+      output_data (pbuf, buf_size, t_byte, CFA_register);
+      output_data (pbuf, buf_size, t_uleb128, data->param[0]);
+      output_data (pbuf, buf_size, t_uleb128, data->param[1]);
+      break;
+
     case CFA_nop:
       if (verbose)
 	printf ("\t# CFA_nop\n");
@@ -538,9 +592,10 @@ static void
 dot_cfi_endproc (void)
 {
   struct cfi_data *data_ptr;
+  struct cie_entry *cie_ptr;
   char *cie_buf, *fde_buf, *pbuf, *where;
-  unsigned long  buf_size, cie_size, fde_size, last_cie_offset;
-  unsigned long	fde_initloc_offset, fde_len_offset;
+  unsigned long buf_size, cie_size, fde_size, last_cie_offset;
+  unsigned long fde_initloc_offset, fde_len_offset, fde_offset;
   void *saved_seg, *cfi_seg;
   expressionS exp;
 
@@ -598,8 +653,51 @@ dot_cfi_endproc (void)
 
   /* OK, we built the CIE. Let's write it to the file...  */
   last_cie_offset = frag_now_fix ();
-  where = (unsigned char *) frag_more (cie_size);
-  memcpy (where, cie_buf, cie_size);
+
+  /* Check if we have already emitted the exactly same CIE. 
+     If yes then use its offset instead and don't put out 
+     the new one.  */
+  cie_ptr = cie_root;
+  while (cie_ptr)
+    {
+      if (cie_ptr->size == cie_size - 4
+	  && memcmp (cie_ptr->data, cie_buf + 4, cie_ptr->size) == 0)
+	break;
+      cie_ptr = cie_ptr->next;
+    }
+
+  /* If we have found the same CIE, use it...  */
+  if (cie_ptr)
+    {
+      if (verbose)
+	printf ("# Duplicate CIE found. Previous is at offset %lu\n",
+		cie_ptr->offset);
+      last_cie_offset = cie_ptr->offset;
+    }
+  else
+    {
+      /* Otherwise join this CIE to the list.  */
+      where = (unsigned char *) frag_more (cie_size);
+      memcpy (where, cie_buf, cie_size);
+      if (cie_root)
+	{
+	  cie_ptr = cie_root;
+	  while (cie_ptr->next)
+	    cie_ptr = cie_ptr->next;
+	  cie_ptr->next = calloc (sizeof (struct cie_entry), 1);
+	  cie_ptr = cie_ptr->next;
+	}
+      else
+	{
+	  cie_root = calloc (sizeof (struct cie_entry), 1);
+	  cie_ptr = cie_root;
+	}
+
+      cie_ptr->size = cie_size - 4;
+      cie_ptr->data = calloc (cie_ptr->size, 1);
+      cie_ptr->offset = last_cie_offset;
+      memcpy (cie_ptr->data, cie_buf + 4, cie_ptr->size);
+    }
 
   /* Clean up.  */
   free (cie_buf);
@@ -608,6 +706,9 @@ dot_cfi_endproc (void)
   fde_buf = xcalloc (1024, 1);
   pbuf = fde_buf;
   buf_size = 1024;
+
+  /* Offset of this FDE in current fragment.  */
+  fde_offset = frag_now_fix ();
 
   if (verbose)
     {
@@ -623,10 +724,10 @@ dot_cfi_endproc (void)
   buf_size -= 4;
 
   /* CIE pointer - offset from here.  */
-  output_data (&pbuf, &buf_size, t_long, cie_size + 4);
+  output_data (&pbuf, &buf_size, t_long, fde_offset - last_cie_offset + 4);
 
   /* FDE initial location - this must be set relocatable!  */
-  fde_initloc_offset = pbuf - fde_buf;
+  fde_initloc_offset = pbuf - fde_buf + fde_offset;
   output_data (&pbuf, &buf_size, current_config.addr_length,
 	       cfi_info->start_address);
 
@@ -647,9 +748,6 @@ dot_cfi_endproc (void)
   pbuf = fde_buf + fde_len_offset;
   buf_size = 4;
   output_data (&pbuf, &buf_size, t_long, fde_size - 4);
-
-  /* Adjust initloc offset.  */
-  fde_initloc_offset += frag_now_fix ();
 
   /* Copy FDE to objfile.  */
   where = (unsigned char *) frag_more (fde_size);
@@ -691,6 +789,7 @@ dot_cfi (int arg)
     case CFA_def_cfa_register:
     case CFA_def_cfa_offset:
     case CFA_offset:
+    case CFA_register:
     case CFI_adjust_cfa_offset:
       cfi_make_insn (arg);
       break;

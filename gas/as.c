@@ -837,10 +837,6 @@ main (argc, argv)
   bfd_set_error_program_name (myname);
 #endif
 
-#ifdef TARGET_USE_CFIPOP
-  tc_cfi_init ();
-#endif
-
 #ifdef USE_EMULATIONS
   select_emulation_mode (argc, argv);
 #endif
