@@ -544,7 +544,7 @@ for configdir in ${configdirs} ; do
 		if [ -n "${commons}" ] ; then
 			if [ -d ${configdir} ] ; then
 				(cd ${configdir} ;
-					./configure ${commons} ${verbose} ${forcesubdirs} ${removing}) \
+					./configure ${commons} ${verbose} ${forcesubdirs} ${removing} "+destdir=${destdir}") \
 					| sed 's/^/	/'
 			else
 				echo Warning: directory \"${configdir}\" is missing.
@@ -555,7 +555,7 @@ for configdir in ${configdirs} ; do
 			for host in ${specifics} ; do
 				echo Configuring target specific directory ${configdir}.${host}...
 				(cd ${configdir}.${host} ;
-					./configure ${host} ${verbose} ${forcesubdirs} ${removing}) \
+					./configure ${host} ${verbose} ${forcesubdirs} ${removing} "+destdir=${destdir}") \
 					| sed 's/^/	/'
 			done # for host in specifics
 		fi # if there are any specifics
@@ -580,7 +580,7 @@ for configdir in ${configdirs} ; do
 		if [ -n "${commons}" ] ; then
 			if [ -d ${configdir} ] ; then
 				(cd ${configdir} ;
-					./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} ${commons}) \
+					./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} ${commons} "+destdir=${destdir}") \
 					| sed 's/^/	/'
 			else
 				echo Warning: directory \"${configdir}\" is missing.
@@ -591,7 +591,7 @@ for configdir in ${configdirs} ; do
 			for target in ${specifics} ; do
 				echo Configuring target specific directory ${configdir}.${target}...
 				(cd ${configdir}.${target} ;
-					./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} "+target=${target}") \
+					./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} "+target=${target}" "+destdir=${destdir}") \
 					| sed 's/^/	/'
 			done
 		fi # if any specifics
@@ -602,7 +602,10 @@ exit 0
 
 #
 # $Log$
-# Revision 1.17  1991/06/09 20:39:58  rich
+# Revision 1.18  1991/06/12 21:23:05  rich
+# correctly propogate destdir
+#
+# Revision 1.17  1991/06/09  20:39:58  rich
 # Added +clib option.
 #
 # Revision 1.16  1991/05/27  21:04:21  rich
