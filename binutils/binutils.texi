@@ -2048,9 +2048,14 @@ Specify an include directory to use when reading an @code{rc} file.
 option.  @code{windres} will also search this directory when looking for
 files named in the @code{rc} file.
 
+@item -D @var{target}
 @item --define @var{sym[=val]}
 Specify a @code{-D} option to pass to the preprocessor when reading an
 @code{rc} file.
+
+@item -v
+Enable verbose mode.  This tells you what the preprocessor is if you
+didn't specify one.
 
 @item --language @var{val}
 Specify the default language to use when reading an @code{rc} file.

@@ -46,6 +46,10 @@
 #include <ctype.h>
 #include <time.h>
 
+/* used by resrc.c at least */
+
+int verbose = 0;
+
 /* An enumeration of format types.  */
 
 enum res_format
@@ -122,6 +126,7 @@ static const struct option long_options[] =
   {"output-format", required_argument, 0, 'O'},
   {"preprocessor", required_argument, 0, OPTION_PREPROCESSOR},
   {"target", required_argument, 0, 'F'},
+  {"verbose", no_argument, 0, 'v'},
   {"version", no_argument, 0, OPTION_VERSION},
   {"yydebug", no_argument, 0, OPTION_YYDEBUG},
   {0, no_argument, 0, 0}
@@ -705,7 +710,9 @@ Options:\n\
   -F TARGET, --target TARGET  Specify COFF target\n\
   --preprocessor PROGRAM      Program to use to preprocess rc file\n\
   --include-dir DIR           Include directory when preprocessing rc file\n\
-  --define SYM[=VAL]          Define SYM when preprocessing rc file\n\
+  -DSYM[=VAL], --define SYM[=VAL]\n\
+                              Define SYM when preprocessing rc file\n\
+  -v                          Verbose - tells you what it's doing\n\n
   --language VAL              Set language when reading rc file\n"));
 #ifdef YYDEBUG
   fprintf (stream, _("\
@@ -794,7 +801,7 @@ main (argc, argv)
   preprocargs = NULL;
   language = -1;
 
-  while ((c = getopt_long (argc, argv, "i:o:I:O:F:D:", long_options,
+  while ((c = getopt_long (argc, argv, "i:o:I:O:F:D:v", long_options,
 			   (int *) 0)) != EOF)
     {
       switch (c)
@@ -841,6 +848,10 @@ main (argc, argv)
 	      free (preprocargs);
 	      preprocargs = n;
 	    }
+	  break;
+
+	case 'v':
+	  verbose ++;
 	  break;
 
 	case OPTION_INCLUDE_DIR:

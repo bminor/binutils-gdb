@@ -1,3 +1,12 @@
+1999-05-17  DJ Delorie  <dj@cygnus.com>
+
+	* windres.c: add verbose option
+	(main): process verbose option
+	* resrc.c (look_for_default): new.  Look for the default
+	preprocessor in a given location.
+	(read_rc_file): for foo/bar-windres, look for foo/bar-gcc,
+	foo/gcc (in case of foo/windres), and then gcc (the old default).
+
 1999-05-16  Nick Clifton  <nickc@cygnus.com>
 
 	* dlltool.c (deduce_name): New function: Deduce name of program to
