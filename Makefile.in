@@ -55,9 +55,8 @@ AR = ar
 AR_FLAGS = rc
 CC = cc
 
-# If any variables are added here, they must be added to do-*, below.
-# The HOST_* variables are a special case, which are used for the gcc
-# cross-building scheme.
+# Special variables passed down in EXTRA_GCC_FLAGS.  They are defined
+# here so that they can be overridden by Makefile fragments.
 HOST_CC = $(CC_FOR_BUILD)
 HOST_PREFIX = 
 HOST_PREFIX_1 = loser-
@@ -298,7 +297,9 @@ TARGET_FLAGS_TO_PASS = $(BASE_FLAGS_TO_PASS) $(EXTRA_TARGET_FLAGS)
 # Flags to pass down to gcc.  gcc builds a library, libgcc.a, so it
 # unfortunately needs the native compiler and the target ar and
 # ranlib.
-
+# If any variables are added here, they must be added to do-*, below.
+# The HOST_* variables are a special case, which are used for the gcc
+# cross-building scheme.
 EXTRA_GCC_FLAGS = \
 	'AR=$$(AR_FOR_TARGET)' \
 	'AS=$(AS)' \
