@@ -52,13 +52,9 @@ AR_FLAGS = qc
 CFLAGS = -g
 RANLIB = ranlib
 
-BISON = `if [ -d $${rootme}/bison ] ; \
-	  then echo $${rootme}/bison -L $${rootme}/bison/ -y ; \
-	else \
-	  if [ -d $${rootme}/byacc ] ; \
+BISON = `if [ -d $${rootme}/byacc ] ; \
 	    then echo $${rootme}/byacc/byacc ; \
 	    else echo bison -y ; \
-	  fi ; \
 	fi`
 
 LEX = `if [ -d $${rootme}/flex ] ; \
@@ -69,7 +65,7 @@ MAKEINFO = `if [ -d $${rootme}/texinfo/C ] ; \
 	then echo $${rootme}/texinfo/C/makeinfo ; \
 	else echo makeinfo ; fi`
 
-SUBDIRS = libiberty mmalloc glob readline bfd gdb binutils ld gas tgas gcc libg++ libgcc clib newlib libm 
+SUBDIRS = libiberty mmalloc glob readline bfd gdb binutils ld gas tgas gcc libg++ newlib libm # clib -- newlib replaces
 OTHERS = 
 
 ALL = all.normal
@@ -147,20 +143,20 @@ install-dir.info:
 	$(INSTALL_DATA) dir.info $(infodir)/dir.info
 
 all.normal: all-autoconf all-libiberty all-mmalloc all-texinfo \
-	all-bison all-byacc all-flex all-bfd all-ld all-gas all-tgas all-gcc \
+	all-byacc all-flex all-bfd all-ld all-gas all-tgas all-gcc \
 	all-binutils all-libg++ all-readline all-gdb \
 	all-make all-rcs all-cvs all-diff all-grep \
 	all-patch all-emacs all-ispell \
 	all-newlib all-gprof all-send_pr all-libm
 
-all.cross: all-libiberty all-mmalloc all-gas all-tgas all-byacc all-ld \
-	all-bfd all-libgcc all-readline all-gdb all-newlib
+all.cross: all-libiberty all-mmalloc all-gas all-byacc all-flex all-ld \
+	all-bfd all-readline all-gdb all-binutils all-gcc all-newlib
 #	$(MAKE) $(FLAGS_TO_PASS) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
 clean: clean-autoconf clean-libiberty clean-mmalloc clean-texinfo \
 	clean-bfd clean-newlib clean-binutils clean-flex \
-	clean-bison clean-byacc clean-ld clean-gas \
-	clean-gcc clean-libgcc clean-readline clean-glob clean-gdb \
+	clean-byacc clean-ld clean-gas \
+	clean-gcc clean-readline clean-glob clean-gdb \
 	clean-make clean-diff clean-grep clean-rcs \
 	clean-cvs clean-patch clean-emacs clean-ispell \
 	clean-libg++ clean-gprof clean-send_pr clean-libm
@@ -181,15 +177,34 @@ install.all: install-no-fixedincludes
 		true ; \
 	fi
  
-install-no-fixedincludes: install-dirs gcc-no-fixedincludes
-	install-autoconf install-texinfo install-mmalloc \
-	install-libiberty install-bfd install-binutils install-bison \
-	install-byacc install-flex install-ld install-gas \
-	install-gprof install-libgcc install-readline install-glob \
-	install-gdb install-make install-diff install-cvs \
-	install-patch install-emacs install-ispell install-libg++ \
-	install-newlib install-send_pr install-libm
-
+install-no-fixedincludes: install-dirs gcc-no-fixedincludes \
+	install-autoconf \
+	install-bfd \
+	install-binutils \
+	install-byacc \
+	install-cvs \
+	install-diff \
+	install-emacs \
+	install-flex \
+	install-gas \
+	install-gdb \
+	install-glob \
+	install-gprof \
+	install-grep \
+	install-ispell \
+	install-ld \
+	install-libg++ \
+	install-libiberty \
+	install-libm \
+	install-make \
+	install-mmalloc \
+	install-newlib \
+	install-patch \
+	install-rcs \
+	install-readline \
+	install-send_pr \
+	install-texinfo 
+	
 gcc-no-fixedincludes:
 	@if [ -f ./gcc/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
@@ -201,9 +216,9 @@ gcc-no-fixedincludes:
 	fi
 
 install.cross: install-dirs install-libiberty install-mmalloc \
-        install-binutils install-bison install-byacc install-flex \
-        install-ld install-gas install-libgcc install-readline \
-        install-glob install-gdb install-mmalloc install-gprof \
+        install-binutils install-byacc install-flex \
+        install-ld install-gas install-readline \
+        install-glob install-gdb install-mmalloc \
         install-newlib install-gcc
 
 ### autoconf
@@ -453,34 +468,6 @@ install-byacc: force
 		true ; \
 	fi
 
-### bison
-all-bison: all-libiberty
-	@if [ -f ./bison/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		(cd ./bison; \
-		$(MAKE) $(FLAGS_TO_PASS) all) ; \
-	else \
-		true ; \
-	fi
-
-clean-bison: force
-	@if [ -f ./bison/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		(cd ./bison; \
-		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
-	else \
-		true ; \
-	fi
-
-install-bison: force
-	@if [ -f ./bison/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		(cd ./bison; \
-		$(MAKE) $(FLAGS_TO_PASS) install) ; \
-	else \
-		true ; \
-	fi
-
 ### flex
 all-flex: all-libiberty
 	@if [ -f ./flex/Makefile ] ; then \
@@ -654,56 +641,6 @@ install-ld: force
 	@if [ -f ./ld/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ld; \
-		$(MAKE) $(FLAGS_TO_PASS) install) ; \
-	else \
-		true ; \
-	fi
-
-### libgcc (and libgcc1)
-all-libgcc1: all-gas all-binutils
-	@if [ -f ./libgcc/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		(cd ./libgcc; \
-		$(MAKE) $(FLAGS_TO_PASS) libgcc1.a) ; \
-	else \
-		true ; \
-	fi
-
-clean-libgcc1: force
-	@if [ -f ./libgcc/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		(cd ./libgcc; \
-		$(MAKE) $(FLAGS_TO_PASS) clean-libgcc1) ; \
-	else \
-		true ; \
-	fi
-
-install-libgcc1: force
-	echo libgcc1 is a component, not an installable target
-
-all-libgcc: all-gas all-gcc all-binutils
-	true
-	@if [ -f ./libgcc/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		(cd ./libgcc; \
-		$(MAKE) $(FLAGS_TO_PASS) all) ; \
-	else \
-		true ; \
-	fi
-
-clean-libgcc: force
-	@if [ -f ./libgcc/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		(cd ./libgcc; \
-		$(MAKE) $(FLAGS_TO_PASS) clean) ; \
-	else \
-		true ; \
-	fi
-
-install-libgcc: force
-	@if [ -f ./libgcc/Makefile ] ; then \
-		rootme=`pwd` ; export rootme ; \
-		(cd ./libgcc; \
 		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \

@@ -61,25 +61,38 @@ amd)
 	;;
 esac
 
-#
-# remove various programs from consideration, based on the target 
-# this usually means that a port of the program doesn't exist yet.
+# remove various programs from consideration, if this is a cross-compiler 
+# (host != target) build, AND if the host is one that has a
+# "native" environment that we support
 
 if [ x"${host}" = x"${target}" ] ; then
-         configdirs=`echo ${configdirs} | sed -e 's/newlib//;s/libgcc//'`
+         configdirs=`echo ${configdirs} | sed -e 's/newlib//'`
 else
 	true
 fi	
+
+# remove various programs from consideration, based on the host or 
+# target this usually means that a port of the program doesn't
+# exist yet.
+
+case "${host}" in
+hppa*-*-*)
+	configdirs=`echo ${configdirs} | sed -e 's/emacs//'`
+	;;
+*-*-solaris2)
+	configdirs=`echo ${configdirs} | sed -e 's/emacs//'`
+	;;
+esac
 
 case "${target}" in
 mips-*-*)
 	configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas//'`
 	;;
 rs6000-*-*)
-	configdirs=`echo ${configdirs} | sed -e 's/gas//;s/binutils//;s/ld//'`
+	configdirs=`echo ${configdirs} | sed -e 's/gas//;s/binutils//;s/ld//;s/libgcc//'`
 	;;
 hppa*-*-*)
-	configdirs=`echo ${configdirs} | sed -e 's/gas//;s/bfd//;s/gdb//;s/binutils//;s/gdbtest//;s/ld//;s/emacs//'`
+	configdirs=`echo ${configdirs} | sed -e 's/gas//;s/bfd//;s/gdb//;s/binutils//;s/gdbtest//;s/ld//;s/libg++//'`
 	;;
 *-*-solaris2)
 	configdirs=`echo ${configdirs} | sed -e 's/gas//'`

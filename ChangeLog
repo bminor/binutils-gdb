@@ -1,6 +1,16 @@
+Mon Aug  3 15:41:28 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* config/mh-solaris: removed the -xs from CFLAGS (let the people
+	with Sun's C compiler deal with it themselved)
+
 Mon Aug  3 00:34:17 1992  Fred Fish  (fnf@cygnus.com)
 
 	* config.sub (ncr3000):  Change i386 to i486.
+
+Thu Jul 23 00:12:17 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: add install-rcs, install-grep to
+	install-no-fixedincludes, removed install-bison and install-libgcc
 
 Tue Jul 21 01:01:50 1992  david d `zoo' zuhn (zoo@cygnus.com)
 
