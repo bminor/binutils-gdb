@@ -6171,6 +6171,7 @@ static struct bfd_elf_special_section const ppc_elf_special_sections[]=
 #else
 #define ELF_MAXPAGESIZE		0x10000
 #endif
+#define ELF_MINPAGESIZE		0x1000
 #define elf_info_to_howto	ppc_elf_info_to_howto
 
 #ifdef  EM_CYGNUS_POWERPC

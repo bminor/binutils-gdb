@@ -1,6 +1,6 @@
 /* Target definitions for NN-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004 Free Software Foundation, Inc.
+   2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -283,6 +283,10 @@
 #define ELF_MAXPAGESIZE 1
 #endif
 
+#ifndef ELF_MINPAGESIZE
+#define ELF_MINPAGESIZE ELF_MAXPAGESIZE
+#endif
+
 #ifndef ELF_DYNAMIC_SEC_FLAGS
 /* Note that we set the SEC_IN_MEMORY flag for these sections.  */
 #define ELF_DYNAMIC_SEC_FLAGS			\
@@ -519,6 +523,7 @@ static const struct elf_backend_data elfNN_bed =
   ELF_ARCH,			/* arch */
   ELF_MACHINE_CODE,		/* elf_machine_code */
   ELF_MAXPAGESIZE,		/* maxpagesize */
+  ELF_MINPAGESIZE,		/* minpagesize */
   ELF_DYNAMIC_SEC_FLAGS,        /* dynamic_sec_flags */
   elf_info_to_howto,
   elf_info_to_howto_rel,

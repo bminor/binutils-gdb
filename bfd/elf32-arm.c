@@ -5721,6 +5721,7 @@ const struct elf_size_info elf32_arm_size_info = {
 #else
 #define ELF_MAXPAGESIZE			0x8000
 #endif
+#define ELF_MINPAGESIZE			0x1000
 
 #define bfd_elf32_bfd_copy_private_bfd_data	elf32_arm_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data	elf32_arm_merge_private_bfd_data

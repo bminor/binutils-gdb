@@ -1,3 +1,13 @@
+2005-01-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf-bfd.h (struct elf_backend_data): Add minpagesize.
+	* elf32-arm.c (ELF_MINPAGESIZE): Define.
+	* elf32-ppc.c (ELF_MINPAGESIZE): Define.
+	* elfcode.h (elf_object_p): Use minpagesize instead of
+	maxpagesize.
+	* elfxx-target.h (ELF_MINPAGESIZE): Default to ELF_MAXPAGESIZE.
+	(elfNN_bed): Include ELF_MINPAGESIZE.
+
 2005-01-28  Julian Brown  <julian@codesourcery.com>
 
 	* bin-in.h (bfd_elf32_arm_set_target_relocs): Update prototype.

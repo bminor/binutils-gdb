@@ -551,6 +551,11 @@ struct elf_backend_data
   /* The maximum page size for this backend.  */
   bfd_vma maxpagesize;
 
+  /* The minimum page size for this backend.  An input object will not be
+     considered page aligned unless its sections are correctly aligned for
+     pages at least this large.  May be smaller than maxpagesize.  */
+  bfd_vma minpagesize;
+
   /* The BFD flags applied to sections created for dynamic linking.  */
   flagword dynamic_sec_flags;
 
