@@ -166,15 +166,15 @@ extern CORE_ADDR saved_pc_after_call ();
 
 #define REGISTER_CONVERTIBLE(N) ((N) >= FP0_REGNUM)
 
+#include "floatformat.h"
+
 /* Convert data from raw format for register REGNUM in buffer FROM
    to virtual format with type TYPE in buffer TO.  */
-
-extern struct ext_format ext_format_i960;
 
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO)	\
 { \
   double val; \
-  ieee_extended_to_double (&ext_format_i960, (FROM), &val); \
+  floatformat_to_double (&floatformat_i960_ext, (FROM), &val); \
   store_floating ((TO), TYPE_LENGTH (TYPE), val); \
 }
 
@@ -184,7 +184,7 @@ extern struct ext_format ext_format_i960;
 #define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO)	\
 { \
   double val = extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
-  double_to_ieee_extended (&ext_format_i960, &val, (TO)); \
+  floatformat_from_double (&floatformat_i960_ext, &val, (TO)); \
 }
 
 /* Return the GDB type object for the "standard" data type

@@ -107,7 +107,7 @@ NINDY ROM monitor at the other end of the line.
 #include "target.h"
 #include "gdbcore.h"
 #include "command.h"
-#include "ieee-float.h"
+#include "floatformat.h"
 
 #include "wait.h"
 #include <sys/file.h>
@@ -129,7 +129,6 @@ extern void generic_mourn_inferior ();
 
 extern struct target_ops nindy_ops;
 extern GDB_FILE *instream;
-extern struct ext_format ext_format_i960;	/* i960-tdep.c */
 
 extern char ninStopWhy ();
 extern int ninMemGet ();
@@ -442,7 +441,7 @@ nindy_fetch_registers(regno)
 			 &nindy_regs.fp_as_double[8 * (regnum - FP0_REGNUM)],
 			 &inv);
     /* dub now in host byte order */
-    double_to_ieee_extended (&ext_format_i960, &dub,
+    floatformat_from_double (&floatformat_i960_ext, &dub,
 			     &registers[REGISTER_BYTE (regnum)]);
   }
 
@@ -471,8 +470,8 @@ nindy_store_registers(regno)
   memcpy (nindy_regs.tcw, &registers[REGISTER_BYTE (TCW_REGNUM)], 1*4);
   for (regnum = FP0_REGNUM; regnum < FP0_REGNUM + 4; regnum++)
     {
-      ieee_extended_to_double (&ext_format_i960,
-			       &registers[REGISTER_BYTE (regnum)], &dub);
+      floatformat_to_double (&floatformat_i960_ext,
+			     &registers[REGISTER_BYTE (regnum)], &dub);
       store_floating (&nindy_regs.fp_as_double[8 * (regnum - FP0_REGNUM)],
 		      REGISTER_VIRTUAL_SIZE (regnum),
 		      dub);

@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "obstack.h"
 #include "target.h"
-#include "ieee-float.h"
+#include "value.h"
 
 #include "symfile.h" /* for objfiles.h */
 #include "objfiles.h" /* for find_pc_section */
@@ -164,6 +164,29 @@ sparc_frame_saved_pc (frame)
   char buf[MAX_REGISTER_RAW_SIZE];
   CORE_ADDR addr;
 
+  if (frame->signal_handler_caller)
+    {
+      /* This is the signal trampoline frame.
+	 Get the saved PC from the sigcontext structure.  */
+
+#ifndef SIGCONTEXT_PC_OFFSET
+#define SIGCONTEXT_PC_OFFSET 12
+#endif
+
+      CORE_ADDR sigcontext_addr;
+      char scbuf[TARGET_PTR_BIT / HOST_CHAR_BIT];
+
+      /* The sigcontext address is contained in register O2.  */
+      get_saved_register (buf, (int *)NULL, (CORE_ADDR *)NULL,
+			  frame, O0_REGNUM + 2, (enum lval_type *)NULL);
+      sigcontext_addr = extract_address (buf, REGISTER_RAW_SIZE (O0_REGNUM));
+
+      /* Don't cause a memory_error when accessing sigcontext in case the
+	 stack layout has changed or the stack is corrupt.  */
+      target_read_memory (sigcontext_addr + SIGCONTEXT_PC_OFFSET,
+			  scbuf, sizeof (scbuf));
+      return extract_address (scbuf, sizeof (scbuf));
+    }
   addr = (frame->bottom + FRAME_SAVED_I0 +
 	  REGISTER_RAW_SIZE (I7_REGNUM) * (I7_REGNUM - I0_REGNUM));
   read_memory (addr, buf, REGISTER_RAW_SIZE (I7_REGNUM));
@@ -568,16 +591,6 @@ sparc_pc_adjust(pc)
   else
     return pc+8;
 }
-
-
-/* Structure of SPARC extended floating point numbers.
-   This information is not currently used by GDB, since no current SPARC
-   implementations support extended float.  */
-
-const struct ext_format ext_format_sparc = {
-/* tot sbyte smask expbyte manbyte */
-   16, 0,    0x80, 0,1,	   4,8,		/* sparc */
-};
 
 #ifdef USE_PROC_FS	/* Target dependent support for /proc */
 

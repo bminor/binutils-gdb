@@ -27,15 +27,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "value.h"
 #include "frame.h"
-#include "ieee-float.h"
+#include "floatformat.h"
 #include "target.h"
-
-/* Structure of i960 extended floating point format.  */
-
-const struct ext_format ext_format_i960 = {
-/* tot sbyte smask expbyte manbyte */
-   12, 9,    0x80, 9,8,	   4,0,		/* i960 */
-};
 
 /* gdb960 is always running on a non-960 host.  Check its characteristics.
    This routine must be called as part of gdb initialization.  */

@@ -195,9 +195,8 @@ store_address (addr, len, val)
    formats.  So if host is IEEE floating and target is VAX floating,
    or vice-versa, it loses.  This means that we can't (yet) use these
    routines for extendeds.  Extendeds are handled by
-   REGISTER_CONVERTIBLE.  What we want is a fixed version of
-   ieee-float.c (the current version can't deal with single or double,
-   and I suspect it is probably broken for some extendeds too).
+   REGISTER_CONVERTIBLE.  What we want is to use floatformat.h, but that
+   doesn't yet handle VAX floating at all.
 
    2.  We can't deal with it if there is more than one floating point
    format in use.  This has to be fixed at the unpack_double level.
@@ -423,14 +422,14 @@ value_of_register (regnum)
 {
   CORE_ADDR addr;
   int optim;
-  register value val;
+  register value reg_val;
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
   enum lval_type lval;
 
   get_saved_register (raw_buffer, &optim, &addr,
 		      selected_frame, regnum, &lval);
 
-  val = allocate_value (REGISTER_VIRTUAL_TYPE (regnum));
+  reg_val = allocate_value (REGISTER_VIRTUAL_TYPE (regnum));
 
   /* Convert raw data to virtual format if necessary.  */
 
@@ -438,17 +437,17 @@ value_of_register (regnum)
   if (REGISTER_CONVERTIBLE (regnum))
     {
       REGISTER_CONVERT_TO_VIRTUAL (regnum, REGISTER_VIRTUAL_TYPE (regnum),
-				   raw_buffer, VALUE_CONTENTS_RAW (val));
+				   raw_buffer, VALUE_CONTENTS_RAW (reg_val));
     }
   else
 #endif
-    memcpy (VALUE_CONTENTS_RAW (val), raw_buffer,
+    memcpy (VALUE_CONTENTS_RAW (reg_val), raw_buffer,
 	    REGISTER_RAW_SIZE (regnum));
-  VALUE_LVAL (val) = lval;
-  VALUE_ADDRESS (val) = addr;
-  VALUE_REGNO (val) = regnum;
-  VALUE_OPTIMIZED_OUT (val) = optim;
-  return val;
+  VALUE_LVAL (reg_val) = lval;
+  VALUE_ADDRESS (reg_val) = addr;
+  VALUE_REGNO (reg_val) = regnum;
+  VALUE_OPTIMIZED_OUT (reg_val) = optim;
+  return reg_val;
 }
 
 /* Low level examining and depositing of registers.

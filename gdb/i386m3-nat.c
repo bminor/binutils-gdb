@@ -55,8 +55,6 @@ FIXME!! UPAGES is neither 2 nor 16
 extern void print_387_control_word ();		/* i387-tdep.h */
 extern void print_387_status_word ();
 
-extern struct ext_format ext_format_i387;
-
 #define private static
 
 
@@ -313,7 +311,7 @@ print_387_status (status, ep)
       for (i = 9; i >= 0; i--)
 	printf_unfiltered ("%02x", ep->regs[fpreg][i]);
       
-      ieee_extended_to_double (&ext_format_i387, (char *)ep->regs[fpreg],
+      floatformat_to_double (&floatformat_i387_ext, (char *)ep->regs[fpreg],
 			       &val);
       printf_unfiltered ("  %g\n", val);
     }

@@ -26,7 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "setjmp.h"
 #include "value.h"
-#include "ieee-float.h"	/* for ext_format & friends */
 
 /* Size of an instruction */
 #define	BYTES_PER_88K_INSN	4
@@ -36,13 +35,6 @@ void frame_find_saved_regs ();
 /* is this target an m88110?  Otherwise assume m88100.  This has
    relevance for the ways in which we screw with instruction pointers.  */ 
 int target_is_m88110 = 0;
-
-/* FIXME: this is really just a guess based on m88110 being big
-   endian. */
-const struct ext_format ext_format_m88110 = {
-/* tot sbyte smask expbyte	manbyte */
-   10, 0,    0x80, 0,1,		4,8		/* m88110 */
-};
 
 /* Given a GDB frame, determine the address of the calling function's frame.
    This will be used to create a new GDB frame struct, and then

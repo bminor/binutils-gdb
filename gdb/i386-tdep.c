@@ -22,12 +22,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "gdbcore.h"
 #include "target.h"
-<<<<<<< i386-tdep.c
 #include "floatformat.h"
-||||||| 1.26
-=======
 #include "symtab.h"
->>>>>>> 1.27
 
 static long
 i386_get_frame_setup PARAMS ((int));
