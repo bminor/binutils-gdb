@@ -1,3 +1,10 @@
+Wed May  6 18:05:36 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* arparse.y: make END call ar_end
+	* arsup.c (ar_end): added, deletes temp file if archive session
+	aborted.
+
+
 Wed May  6 11:08:53 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* Makefile.in: use bison & flex from ../ if they exist.  Also,
