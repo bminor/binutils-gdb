@@ -7474,7 +7474,7 @@ _bfd_mips_elf_modify_segment_map (abfd)
 	  unsigned int i, c;
 	  struct elf_segment_map *n;
 
-	  low = 0xffffffff;
+	  low = ~(bfd_vma) 0;
 	  high = 0;
 	  for (i = 0; i < sizeof sec_names / sizeof sec_names[0]; i++)
 	    {

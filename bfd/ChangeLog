@@ -1,3 +1,8 @@
+2003-08-14  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_modify_segment_map): Fix PT_DYNAMIC
+	code to work with 64-bit bfds.
+
 2003-08-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* dep-in.sed: Remove libintl.h.
