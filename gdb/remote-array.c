@@ -1419,6 +1419,4 @@ void
 _initialize_array ()
 {
   add_target (&array_ops);
-  baud_rate = 4800;			/* this is the only supported baud rate */
 }
-

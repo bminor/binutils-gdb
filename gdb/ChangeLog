@@ -1,3 +1,8 @@
+Fri Dec 15 13:18:55 1995  Rob Savoye  <rob@darkstar.cygnus.com>
+
+	* remote-array.c: Remove bogus setting of baudrate to 4800. Their
+	hardware has real UARTS now.
+
 Mon Dec 11 18:19:16 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* configure.in (powerpc-*-macos*): New target configuration.
