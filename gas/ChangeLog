@@ -1,3 +1,12 @@
+Sun Aug 13 00:35:02 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (md_pseudo_table): Add entries for
+	"begin_brtab" and "end_brtab" pseudo-ops.
+	(pa_brtab): New function.
+	(tc_gen_reloc, SOM version): Handle R_BEGIN_BRTAB and R_END_BRTAB.
+	(hppa_force_relocation): Force relocations for BRTAB fixups
+	when OBJ_SOM is defined.
+
 Fri Aug 11 20:34:05 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
 	* Makefile.in (TE_OBJS): Add empty definition.

@@ -15,7 +15,7 @@
 
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 
 /* HP PA-RISC support was contributed by the Center for Software Science
@@ -475,6 +475,7 @@ static int pa_parse_neg_add_cmpltr PARAMS ((char **, int));
 static int pa_parse_nonneg_add_cmpltr PARAMS ((char **, int));
 static void pa_align PARAMS ((int));
 static void pa_block PARAMS ((int));
+static void pa_brtab PARAMS ((int));
 static void pa_call PARAMS ((int));
 static void pa_call_args PARAMS ((struct call_desc *));
 static void pa_callinfo PARAMS ((int));
@@ -582,6 +583,7 @@ const pseudo_typeS md_pseudo_table[] =
   /* align pseudo-ops on the PA specify the actual alignment requested,
      not the log2 of the requested alignment.  */
   {"align", pa_align, 8},
+  {"begin_brtab", pa_brtab, 1},
   {"block", pa_block, 1},
   {"blockz", pa_block, 0},
   {"byte", pa_cons, 1},
@@ -593,6 +595,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"data", pa_data, 0},
   {"double", pa_float_cons, 'd'},
   {"end", pa_end, 0},
+  {"end_brtab", pa_brtab, 0},
   {"enter", pa_enter, 0},
   {"entry", pa_entry, 0},
   {"equ", pa_equ, 0},
@@ -2741,6 +2744,8 @@ tc_gen_reloc (section, fixp)
 	case R_FSEL:
 	case R_LSEL:
 	case R_RSEL:
+	case R_BEGIN_BRTAB:
+	case R_END_BRTAB:
 	  /* There is no symbol or addend associated with these fixups.  */
 	  relocs[i]->sym_ptr_ptr = &dummy_symbol->bsym;
 	  relocs[i]->addend = 0;
@@ -4005,6 +4010,27 @@ pa_block (z)
     }
 
   pa_undefine_label ();
+  demand_empty_rest_of_line ();
+}
+
+/* Handle a .begin_brtab and .end_brtab pseudo-op.  */
+
+static void
+pa_brtab (begin)
+     int begin;
+{
+
+#ifdef OBJ_SOM
+  /* The BRTAB relocations are only availble in SOM (to denote
+     the beginning and end of branch tables).  */
+  char *where = frag_more (0);
+
+  fix_new_hppa (frag_now, where - frag_now->fr_literal, 0,
+		NULL, (offsetT) 0, NULL,
+		0, begin ? R_HPPA_BEGIN_BRTAB : R_HPPA_END_BRTAB,
+		e_fsel, 0, 0, NULL);
+#endif
+
   demand_empty_rest_of_line ();
 }
 
@@ -6284,6 +6310,8 @@ hppa_force_relocation (fixp)
   hppa_fixp = (struct hppa_fix_struct *) fixp->tc_fix_data;
 #ifdef OBJ_SOM
   if (fixp->fx_r_type == R_HPPA_ENTRY || fixp->fx_r_type == R_HPPA_EXIT
+      || fixp->fx_r_type == R_HPPA_BEGIN_BRTAB
+      || fixp->fx_r_type == R_HPPA_END_BRTAB
       || (fixp->fx_addsy != NULL && fixp->fx_subsy != NULL
 	  && (hppa_fixp->segment->flags & SEC_CODE) != 0))
     return 1;
