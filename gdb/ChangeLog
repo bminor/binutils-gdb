@@ -1,3 +1,8 @@
+2003-06-06  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v-tdep.c (struct d10v_unwind_cache): Delete "return_pc".
+	(d10v_frame_unwind_cache): Do not set "return_pc".
+
 2003-06-06  Michael Snyder  <msnyder@redhat.com>
 
 	* h8300-tdep.c: Make tidy (long lines).

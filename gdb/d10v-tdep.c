@@ -563,7 +563,6 @@ d10v_skip_prologue (CORE_ADDR pc)
 
 struct d10v_unwind_cache
 {
-  CORE_ADDR return_pc;
   /* The previous frame's inner most stack address.  Used as this
      frame ID's stack_addr.  */
   CORE_ADDR prev_sp;
@@ -682,7 +681,6 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
   info->saved_regs = FRAME_OBSTACK_CALLOC (NUM_REGS, CORE_ADDR);
 
   info->size = 0;
-  info->return_pc = 0;
   info->sp_offset = 0;
 
   info->uses_frame = 0;
@@ -778,20 +776,6 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
       {
 	info->saved_regs[i] = (info->prev_sp + info->saved_regs[i]);
       }
-
-  if (info->saved_regs[LR_REGNUM])
-    {
-      CORE_ADDR return_pc
-	= get_frame_memory_unsigned (next_frame, info->saved_regs[LR_REGNUM], 
-				     register_size (gdbarch, LR_REGNUM));
-      info->return_pc = d10v_make_iaddr (return_pc);
-    }
-  else
-    {
-      ULONGEST return_pc;
-      frame_unwind_unsigned_register (next_frame, LR_REGNUM, &return_pc);
-      info->return_pc = d10v_make_iaddr (return_pc);
-    }
 
   /* The D10V_SP_REGNUM is special.  Instead of the address of the SP, the
      previous frame's SP value is saved.  */
