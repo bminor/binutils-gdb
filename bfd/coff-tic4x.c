@@ -299,6 +299,7 @@ static const bfd_coff_backend_data ticoff0_swap_table =
 #else
   FALSE,
 #endif
+  COFF_DEFAULT_SECTION_ALIGNMENT_POWER,
 #ifdef COFF_FORCE_SYMBOLS_IN_STRINGS
   TRUE,
 #else
@@ -309,7 +310,6 @@ static const bfd_coff_backend_data ticoff0_swap_table =
 #else
   2,
 #endif
-  COFF_DEFAULT_SECTION_ALIGNMENT_POWER,
   coff_SWAP_filehdr_in, coff_SWAP_aouthdr_in, coff_SWAP_scnhdr_in,
   coff_SWAP_reloc_in, ticoff0_bad_format_hook, coff_set_arch_mach_hook,
   coff_mkobject_hook, styp_to_sec_flags, coff_set_alignment_hook,
@@ -340,6 +340,7 @@ static const bfd_coff_backend_data ticoff1_swap_table =
 #else
   FALSE,
 #endif
+  COFF_DEFAULT_SECTION_ALIGNMENT_POWER,
 #ifdef COFF_FORCE_SYMBOLS_IN_STRINGS
   TRUE,
 #else
@@ -350,7 +351,6 @@ static const bfd_coff_backend_data ticoff1_swap_table =
 #else
   2,
 #endif
-  COFF_DEFAULT_SECTION_ALIGNMENT_POWER,
   coff_SWAP_filehdr_in, coff_SWAP_aouthdr_in, coff_SWAP_scnhdr_in,
   coff_SWAP_reloc_in, ticoff1_bad_format_hook, coff_set_arch_mach_hook,
   coff_mkobject_hook, styp_to_sec_flags, coff_set_alignment_hook,

@@ -1,3 +1,8 @@
+2003-06-04  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* coff-tic4x.c (ticoff0_swap_table, ticoff1_swap_table): Fixed
+	initialization bug
+
 2003-06-03  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-v850.c (v850_elf_howto_t): Rename R_V850_32to
