@@ -1092,6 +1092,12 @@ static struct default_space_dict pa_def_spaces[] =
   ((exp).X_op == O_subtract			\
    && strcmp((exp).X_op_symbol->bsym->name, "$PIC_pcrel$0") == 0)
 
+/* We need some complex handling for stabs (sym1 - sym2).  Luckily, we'll
+   always be able to reduce the expression to a constant, so we don't
+   need real complex handling yet.  */
+#define is_complex(exp)				\
+  ((exp).X_op != O_constant && (exp).X_op != O_symbol)
+
 /* Actual functions to implement the PA specific code for the assembler.  */
 
 /* Returns a pointer to the label_symbol_struct for the current space.
@@ -1251,8 +1257,12 @@ cons_fix_new_hppa (frag, where, size, exp)
 {
   unsigned int rel_type;
 
+  /* Get a base relocation type.  We use NONE for complex as it should
+     always be reducable to a constant in the cases we generate.  */
   if (is_DP_relative (*exp))
     rel_type = R_HPPA_GOTOFF;
+  else if (is_complex (*exp))
+    rel_type = R_HPPA_NONE;
   else
     rel_type = R_HPPA;
 
@@ -2561,8 +2571,6 @@ tc_gen_reloc (section, fixp)
   arelent *reloc;
   struct hppa_fix_struct *hppa_fixp;
   bfd_reloc_code_real_type code;
-  static int unwind_reloc_fixp_cnt = 0;
-  static arelent *unwind_reloc_entryP = NULL;
   static arelent *no_relocs = NULL;
   arelent **relocs;
   bfd_reloc_code_real_type **codes;
@@ -4293,7 +4301,7 @@ pa_comm (unused)
 	{
 	  if (S_GET_VALUE (symbol) != size)
 	    {
-	      as_warn ("Length of .comm \"%s\" is already %d. Not changed.",
+	      as_warn ("Length of .comm \"%s\" is already %ld. Not changed.",
 		       S_GET_NAME (symbol), S_GET_VALUE (symbol));
 	      return;
 	    }
@@ -4776,8 +4784,6 @@ pa_proc (unused)
      int unused;
 {
   struct call_info *call_info;
-  segT seg;
-
   if (within_procedure)
     as_fatal ("Nested procedures");
 
@@ -4794,6 +4800,8 @@ pa_proc (unused)
      using space/subspace aliases.  */
   if (!USE_ALIASES && call_info_root != NULL)
     {
+      segT seg;
+
       /* Force creation of a new $CODE$ subspace; inherit attributes from
 	 the first $CODE$ subspace.  */
       seg = subseg_force_new ("$CODE$", 0);
@@ -5155,7 +5163,7 @@ pa_space (unused)
       save_s = input_line_pointer;
       if ((temp = pa_parse_number (&input_line_pointer, 0)) >= 0)
 	{
-	  if (sd_chain = pa_find_space_by_number (temp))
+	  if ((sd_chain = pa_find_space_by_number (temp)))
 	    {
 	      current_space = sd_chain;
 

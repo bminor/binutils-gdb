@@ -1,3 +1,13 @@
+Mon Jul  4 18:29:43 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (is_complex): New macro.
+	(cons_fix_new_hppa): "Handle" complex expressions.
+
+Fri Jul  1 00:48:12 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/obj-coff.c (write_object_file): Set s_align field from
+	section_alignment array.
+
 Thu Jun 30 15:05:28 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* write.c (write_object_file): Use bfd_com_section_ptr.
