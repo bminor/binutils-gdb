@@ -265,6 +265,8 @@ struct gdbarch
   gdbarch_dwarf2_build_frame_info_ftype *dwarf2_build_frame_info;
   gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special;
   gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special;
+  gdbarch_next_cooked_register_to_save_ftype *next_cooked_register_to_save;
+  gdbarch_next_cooked_register_to_restore_ftype *next_cooked_register_to_restore;
 };
 
 
@@ -419,6 +421,8 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
+  default_next_cooked_register_to_save,
+  default_next_cooked_register_to_restore,
   /* startup_gdbarch() */
 };
 
@@ -549,6 +553,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->construct_inferior_arguments = construct_inferior_arguments;
   current_gdbarch->elf_make_msymbol_special = default_elf_make_msymbol_special;
   current_gdbarch->coff_make_msymbol_special = default_coff_make_msymbol_special;
+  current_gdbarch->next_cooked_register_to_save = default_next_cooked_register_to_save;
+  current_gdbarch->next_cooked_register_to_restore = default_next_cooked_register_to_restore;
   /* gdbarch_alloc() */
 
   return current_gdbarch;
@@ -791,6 +797,12 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of dwarf2_build_frame_info, has predicate */
   /* Skip verify of elf_make_msymbol_special, invalid_p == 0 */
   /* Skip verify of coff_make_msymbol_special, invalid_p == 0 */
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
+      && (gdbarch->next_cooked_register_to_save == default_next_cooked_register_to_save))
+    fprintf_unfiltered (log, "\n\tnext_cooked_register_to_save");
+  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
+      && (gdbarch->next_cooked_register_to_restore == default_next_cooked_register_to_restore))
+    fprintf_unfiltered (log, "\n\tnext_cooked_register_to_restore");
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -819,6 +831,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
     fprintf_unfiltered (file,
                         "gdbarch_dump: in_function_epilogue_p = 0x%08lx\n",
                         (long) current_gdbarch->in_function_epilogue_p);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: next_cooked_register_to_restore = 0x%08lx\n",
+                        (long) current_gdbarch->next_cooked_register_to_restore);
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: next_cooked_register_to_save = 0x%08lx\n",
+                        (long) current_gdbarch->next_cooked_register_to_save);
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
                         "gdbarch_dump: pseudo_register_read = 0x%08lx\n",
@@ -4880,6 +4900,44 @@ set_gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch,
                                        gdbarch_coff_make_msymbol_special_ftype coff_make_msymbol_special)
 {
   gdbarch->coff_make_msymbol_special = coff_make_msymbol_special;
+}
+
+int
+gdbarch_next_cooked_register_to_save (struct gdbarch *gdbarch, int last_regnum)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->next_cooked_register_to_save == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_next_cooked_register_to_save invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_next_cooked_register_to_save called\n");
+  return gdbarch->next_cooked_register_to_save (gdbarch, last_regnum);
+}
+
+void
+set_gdbarch_next_cooked_register_to_save (struct gdbarch *gdbarch,
+                                          gdbarch_next_cooked_register_to_save_ftype next_cooked_register_to_save)
+{
+  gdbarch->next_cooked_register_to_save = next_cooked_register_to_save;
+}
+
+int
+gdbarch_next_cooked_register_to_restore (struct gdbarch *gdbarch, int last_regnum)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch->next_cooked_register_to_restore == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_next_cooked_register_to_restore invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_next_cooked_register_to_restore called\n");
+  return gdbarch->next_cooked_register_to_restore (gdbarch, last_regnum);
+}
+
+void
+set_gdbarch_next_cooked_register_to_restore (struct gdbarch *gdbarch,
+                                             gdbarch_next_cooked_register_to_restore_ftype next_cooked_register_to_restore)
+{
+  gdbarch->next_cooked_register_to_restore = next_cooked_register_to_restore;
 }
 
 

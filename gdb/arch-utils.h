@@ -171,6 +171,10 @@ extern int legacy_convert_register_p (int regnum);
 extern void legacy_register_to_value (int regnum, struct type *type, char *from, char *to);
 extern void legacy_value_to_register (struct type *type, int regnum, char *from, char *to);
 
+/* Iterators that provide the next/prev register to save/restore.  */
+extern int default_next_cooked_register_to_save (struct gdbarch *gdbarch, int regnum);
+extern int default_next_cooked_register_to_restore (struct gdbarch *gdbarch, int regnum);
+
 /* For compatibility with older architectures, returns
    (LEGACY_SIM_REGNO_IGNORE) when the register doesn't have a valid
    name.  */

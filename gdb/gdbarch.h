@@ -2483,6 +2483,16 @@ extern void set_gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch, gdba
 #endif
 #endif
 
+/* Iterators for the cooked registers to save or restore. */
+
+typedef int (gdbarch_next_cooked_register_to_save_ftype) (struct gdbarch *gdbarch, int last_regnum);
+extern int gdbarch_next_cooked_register_to_save (struct gdbarch *gdbarch, int last_regnum);
+extern void set_gdbarch_next_cooked_register_to_save (struct gdbarch *gdbarch, gdbarch_next_cooked_register_to_save_ftype *next_cooked_register_to_save);
+
+typedef int (gdbarch_next_cooked_register_to_restore_ftype) (struct gdbarch *gdbarch, int last_regnum);
+extern int gdbarch_next_cooked_register_to_restore (struct gdbarch *gdbarch, int last_regnum);
+extern void set_gdbarch_next_cooked_register_to_restore (struct gdbarch *gdbarch, gdbarch_next_cooked_register_to_restore_ftype *next_cooked_register_to_restore);
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 

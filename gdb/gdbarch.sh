@@ -658,6 +658,9 @@ m::CONSTRUCT_INFERIOR_ARGUMENTS:char *:construct_inferior_arguments:int argc, ch
 F:2:DWARF2_BUILD_FRAME_INFO:void:dwarf2_build_frame_info:struct objfile *objfile:objfile:::0
 f:2:ELF_MAKE_MSYMBOL_SPECIAL:void:elf_make_msymbol_special:asymbol *sym, struct minimal_symbol *msym:sym, msym:::default_elf_make_msymbol_special::0
 f:2:COFF_MAKE_MSYMBOL_SPECIAL:void:coff_make_msymbol_special:int val, struct minimal_symbol *msym:val, msym:::default_coff_make_msymbol_special::0
+# Iterators for the cooked registers to save or restore.
+m:::int:next_cooked_register_to_save:int last_regnum:last_regnum:::default_next_cooked_register_to_save
+m:::int:next_cooked_register_to_restore:int last_regnum:last_regnum:::default_next_cooked_register_to_restore
 EOF
 }
 

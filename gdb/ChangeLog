@@ -1,5 +1,45 @@
 2002-08-25  Andrew Cagney  <ac131313@redhat.com>
 
+	* arch-utils.h (default_next_cooked_register_to_save): Declare.
+	(default_next_cooked_register_to_restore): Declare.
+	* arch-utils.c (default_next_cooked_register_to_save): New
+	function.
+	(default_next_cooked_register_to_restore): New function.
+
+	* regcache.c (struct regcache): Replace passthrough_p with
+	readonly_p.  Replace raw_registers with registers.  Replace
+	raw_register_valid_p with register_valid_p.
+	(struct regcache_descr): Replace sizeof_raw_registers with
+	sizeof_registers.  Replace sizeof_raw_register_valid_p with
+	sizeof_register_valid_p.
+	(init_legacy_regcache_descr): Update.
+	(init_regcache_descr): Update.
+	(regcache_xmalloc): Update.
+	(regcache_xfree): Update.
+	(regcache_cpy): Update.
+	(regcache_cpy_no_passthrough): Update.
+	(regcache_valid_p): Update.
+	(deprecated_grub_regcache_for_registers): Update.
+	(deprecated_grub_regcache_for_register_valid): Update.
+	(register_buffer): Update.
+	(regcache_raw_read): Update.
+	(regcache_raw_write): Update.  Assert that the register cache is
+	not read-only.
+	(build_regcache): Update.  Clear the readonly_p flag.
+	(regcache_cooked_read): Update.  If a read-only cache, check for a
+	cached cooked register value.
+	(regcache_cooked_write): Assert that the cache isn't read-only.
+	(next_cooked_register): New function.
+	(regcache_restore): New function.
+	(regcache_save): New function.
+	(regcache_cpy): Rewrite.
+
+	* gdbarch.sh (next_cooked_register_to_save): New method.
+	(next_cooked_register_to_restore): New method.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+2002-08-25  Andrew Cagney  <ac131313@redhat.com>
+
 	* regcache.h (register_offset_hack): Declare.
 	(regcache_cooked_read_using_offset_hack): Declare.
 	(regcache_cooked_write_using_offset_hack): Declare.
@@ -10,6 +50,46 @@
 	(regcache_dump): Check that the registers, according to their
 	offset, are packed hard against each other.
 	(cooked_xfer_using_offset_hack): New function.
+
+2002-08-25  Andrew Cagney  <ac131313@redhat.com>
+
+	* arch-utils.h (default_next_cooked_register_to_save): Declare.
+	(default_next_cooked_register_to_restore): Declare.
+	* arch-utils.c (default_next_cooked_register_to_save): New
+	function.
+	(default_next_cooked_register_to_restore): New function.
+
+	* regcache.c (struct regcache): Replace passthrough_p with
+	readonly_p.  Replace raw_registers with registers.  Replace
+	raw_register_valid_p with register_valid_p.
+	(struct regcache_descr): Replace sizeof_raw_registers with
+	sizeof_registers.  Replace sizeof_raw_register_valid_p with
+	sizeof_register_valid_p.
+	(init_legacy_regcache_descr): Update.
+	(init_regcache_descr): Update.
+	(regcache_xmalloc): Update.
+	(regcache_xfree): Update.
+	(regcache_cpy): Update.
+	(regcache_cpy_no_passthrough): Update.
+	(regcache_valid_p): Update.
+	(deprecated_grub_regcache_for_registers): Update.
+	(deprecated_grub_regcache_for_register_valid): Update.
+	(register_buffer): Update.
+	(regcache_raw_read): Update.
+	(regcache_raw_write): Update.  Assert that the register cache is
+	not read-only.
+	(build_regcache): Update.  Clear the readonly_p flag.
+	(regcache_cooked_read): Update.  If a read-only cache, check for a
+	cached cooked register value.
+	(regcache_cooked_write): Assert that the cache isn't read-only.
+	(next_cooked_register): New function.
+	(regcache_restore): New function.
+	(regcache_save): New function.
+	(regcache_cpy): Rewrite.
+
+	* gdbarch.sh (next_cooked_register_to_save): New method.
+	(next_cooked_register_to_restore): New method.
+	* gdbarch.h, gdbarch.c: Regenerate.
 
 2002-08-25  Andrew Cagney  <ac131313@redhat.com>
 

@@ -493,6 +493,29 @@ legacy_value_to_register (struct type *type, int regnum,
   REGISTER_CONVERT_TO_RAW (type, regnum, from, to);
 }
 
+static int
+next_cooked_register (struct gdbarch *gdbarch, int regnum)
+{
+  if (regnum < 0)
+    return 0;
+  regnum++;
+  if (regnum
+      >= (gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch)))
+    return -1;
+  return regnum;
+}
+
+int
+default_next_cooked_register_to_save (struct gdbarch *gdbarch, int regnum)
+{
+  return next_cooked_register (gdbarch, regnum);
+}
+
+int
+default_next_cooked_register_to_restore (struct gdbarch *gdbarch, int regnum)
+{
+  return next_cooked_register (gdbarch, regnum);
+}
 
 /* Functions to manipulate the endianness of the target.  */
 
