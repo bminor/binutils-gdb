@@ -7,6 +7,20 @@ Thu Jun 16 14:25:22 1994  Eric Youngdale  (ericy@cais.cais.com)
 
 Thu Jun 16 12:22:01 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* Makefile.in: Rebuilt dependencies.
+	(ALL_EMULATIONS): Add ei386linux.o, eelf32_sparc.o,
+	eelf64_sparc.o.  Remove $(OTHER_EMULATIONS).
+	(ei386linux.c, eelf32_sparc.c, eelf64_sparc.c): New targets.
+	* config/i386-linux.mt (OTHER_EMULATIONS): Don't define.
+	(ei386linux.c): Remove; now in Makefile.in.
+	* config/i386-lynx.mt (OTHER_EMULATIONS): Don't define.
+	* config/m68k-lynx.mt (OTHER_EMULATIONS): Don't define.
+	* config/sparc-lynx.mt (OTHER_EMULATIONS): Don't define.
+	* config/sparc64-elf.mt (OTHER_EMULATIONS): Don't define.
+	(eelf64_sparc.c): Remove; now in Makefile.in.
+	* config/sun4sol2.mt (OTHER_EMULATIONS): Don't define.
+	(eelf32_sparc.c): Remove; now in Makefile.in.
+
 	* ldexp.c (exp_print_tree): Don't crash if etree_rel section has
 	no owner--it might be bfd_abs_section.  From Eric Youngdale
 	<ericy@cais.cais.com>.
@@ -3029,5 +3043,8 @@ Fri Oct  4 21:51:58 1991  John Gilmore  (gnu at cygnus.com)
 
 
 Local Variables:
+mode: indented-text
+left-margin: 8
+fill-column: 74
 version-control: never
 End:

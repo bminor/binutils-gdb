@@ -1,2 +1,1 @@
 EMUL=m68klynx
-OTHER_EMULATIONS=em68klynx.o
