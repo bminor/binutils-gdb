@@ -1335,16 +1335,22 @@ elf_slurp_reloc_table (abfd, asect, symbols, dynamic)
     }
   else
     {
+      /* Note that ASECT->RELOC_COUNT tends not to be accurate in this
+	 case because relocations against this section may use the
+	 dynamic symbol table, and in that case bfd_section_from_shdr
+	 in elf.c does not update the RELOC_COUNT.  */
       if (asect->_raw_size == 0)
 	return true;
 
       rel_hdr = &d->this_hdr;
       reloc_count = rel_hdr->sh_size / rel_hdr->sh_entsize;
       rel_hdr2 = NULL;
+      reloc_count2 = 0;
     }
 
-  relents = (arelent *) bfd_alloc (abfd, 
-				   asect->reloc_count * sizeof (arelent));
+  relents = ((arelent *) 
+	     bfd_alloc (abfd, 
+			(reloc_count + reloc_count2) * sizeof (arelent)));
   if (relents == NULL)
     return false;
 
