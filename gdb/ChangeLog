@@ -1,3 +1,8 @@
+Mon Dec  9 00:14:49 1996  Geoffrey Noer  <noer@cygnus.com>
+
+	* config/mn10300/tm-mn10300.h: fix register names
+	* mn10300-tdep.c: new skeleton tdep for mn10300
+
 Sun Dec  8 18:02:57 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* remote-sim.h: Update some comments.
