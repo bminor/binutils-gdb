@@ -5,6 +5,11 @@
 
  * User visible changes:
 
+Remote debugging using the GDB-specific (`target remote') protocol now
+supports the `load' command.  This is only useful if you have some way
+of getting the stub to the target system, and putting it somewhere in
+memory where it won't get clobbered by the download.
+
 Filename completion now works.
 
 When run under emacs mode, the "info line" command now causes the
