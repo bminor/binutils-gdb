@@ -1,3 +1,10 @@
+2000-05-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* gnu-regex.c (re_match_2_internal): Revert 2000-05-27
+	patch which removed use of PARAMS from declaration.  This
+	file should not have been touched as it is supposed to track
+	the version in glibc.
+
 2000-05-31  Mark Kettenis  <kettenis@gnu.org>
 
 	Add support for FreeBSD/Alpha.
