@@ -1,6 +1,6 @@
 ARCH=mcore
 SCRIPT_NAME=mcorepe
-OUTPUT_FORMAT="pei-mcore-big"
+OUTPUT_FORMAT="pei-mcore-little"
 LITTLE_OUTPUT_FORMAT="pei-mcore-little"
 BIG_OUTPUT_FORMAT="pei-mcore-big"
 TEMPLATE_NAME=pe

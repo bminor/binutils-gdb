@@ -1,5 +1,5 @@
 SCRIPT_NAME=elf
-OUTPUT_FORMAT="elf32-mcore-big"
+OUTPUT_FORMAT="elf32-mcore-little"
 BIG_OUTPUT_FORMAT="elf32-mcore-big"
 LITTLE_OUTPUT_FORMAT="elf32-mcore-little"
 PAGE_SIZE=0x1000

@@ -27,7 +27,8 @@
 #endif
 
 #define TARGET_ARCH	bfd_arch_mcore
-#define TARGET_BYTES_BIG_ENDIAN 1
+/* Used to initialise target_big_endian.  */
+#define TARGET_BYTES_BIG_ENDIAN 0
 
 /* Don't write out relocs for pcrel stuff.  */
 #define TC_COUNT_RELOC(x) (((x)->fx_addsy || (x)->fx_subsy) && \

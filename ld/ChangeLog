@@ -1,3 +1,8 @@
+1999-11-03  Nick Clifton  <nickc@cygnus.com>
+
+	* emulparams/elf32mcore.sh (OUTPUT_FORMAT): Change to little endian.
+	* emulparams/mcorepe.sh (OUTPUT_FORMAT): Change to little endian.
+
 1999-11-01  Steve Chamberlain  <sac@pobox.com>
 
 	* ldlang.c (section_already_linked): Rework to use hash table.
