@@ -850,6 +850,17 @@ i386_store_return_value (struct type *type, char *valbuf)
 			"Cannot store return value of %d bytes long.", len);
     }
 }
+
+/* Extract from an array REGBUF containing the (raw) register state
+   the address in which a function should return its structure value,
+   as a CORE_ADDR.  */
+
+CORE_ADDR
+i386_extract_struct_value_address (char *regbuf)
+{
+  return extract_address (&regbuf[REGISTER_BYTE (LOW_RETURN_REGNUM)],
+			  REGISTER_RAW_SIZE (LOW_RETURN_REGNUM));
+}
 
 
 /* Convert data from raw format for register REGNUM in buffer FROM to

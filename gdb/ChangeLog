@@ -1,5 +1,10 @@
 2001-04-01  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-tdep.c (i386_extract_struct_value_address): New function.
+	* config/i386/tm-i386.h (EXTRACT_STRUCT_VALUE_ADDRESS): Redefine
+	in terms of i386_extract_struct_value_address.
+	(i386_extract_struct_value_address): New prototype.
+
 	* i386-linux-nat.c (i386_linux_dr_get): Change type of return
 	value to `unsigned long'.  Change type of `value' to `unsigned
 	long'.

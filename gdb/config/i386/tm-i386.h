@@ -305,15 +305,18 @@ extern void i386_extract_return_value (struct type *type, char *regbuf,
 
 /* Write into the appropriate registers a function return value stored
    in VALBUF of type TYPE, given in virtual format.  */
+
 #define STORE_RETURN_VALUE(type, valbuf) \
   i386_store_return_value ((type), (valbuf))
 extern void i386_store_return_value (struct type *type, char *valbuf);
 
-/* Extract from an array REGBUF containing the (raw) register state the address
-   in which a function should return its structure value, as a CORE_ADDR (or an
-   expression that can be used as one).  */
+/* Extract from an array REGBUF containing the (raw) register state
+   the address in which a function should return its structure value,
+   as a CORE_ADDR.  */
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF))
+#define EXTRACT_STRUCT_VALUE_ADDRESS(regbuf) \
+  i386_extract_struct_value_address ((regbuf))
+extern CORE_ADDR i386_extract_struct_value_address (char *regbuf);
 
 /* The following redefines make backtracing through sigtramp work.
    They manufacture a fake sigtramp frame and obtain the saved pc in sigtramp
