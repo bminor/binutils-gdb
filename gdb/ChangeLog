@@ -1,5 +1,10 @@
 Tue Apr 14 15:43:49 1998  John Metzler  <jmetzler@cygnus.com>
 
+	* gdbcfgxref (xref_menu): Call new regex and wild card searches
+	Now you can type in a specific triple like mips64-vr4320-elf or
+	somthing like mips*.h
+	(triple_search) wildcardsearch): The new functions
+
 	* configure.tgt: Switch over to use tm-4320.h. Since I switched to
  	MIPS EABI the fixes are no longer backward compatible with 4300.
 	* tm-vr4320.h: Added
