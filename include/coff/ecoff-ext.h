@@ -284,3 +284,9 @@ PROTO (bfd_vma, _do_getl32, (unsigned char *addr));
 						 _do_getl32 ((ax)->a_width))
 #define	AUX_GET_COUNT(bigend, ax)	(bigend? _do_getb32 ((ax)->a_count): \
 						 _do_getl32 ((ax)->a_count))
+
+/* Relative file descriptor */
+
+struct rfd_ext {
+  char	rfd[4];
+};
