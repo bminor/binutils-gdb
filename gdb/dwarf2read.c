@@ -1553,11 +1553,13 @@ add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
     case DW_TAG_enumeration_type:
       /* Skip aggregate types without children, these are external
          references.  */
+      /* NOTE: carlton/2002-11-29: See comment in new_symbol about
+	 static vs. global.  */
       if (pdi->has_children == 0)
 	return;
       add_psymbol_to_list (actual_name, strlen (actual_name),
 			   STRUCT_NAMESPACE, LOC_TYPEDEF,
-			   &objfile->static_psymbols,
+			   &objfile->global_psymbols,
 			   0, (CORE_ADDR) 0, cu_language, objfile);
 
       if (cu_language == language_cplus)
@@ -1565,14 +1567,14 @@ add_partial_symbol (struct partial_die_info *pdi, struct objfile *objfile,
 	  /* For C++, these implicitly act as typedefs as well. */
 	  add_psymbol_to_list (actual_name, strlen (actual_name),
 			       VAR_NAMESPACE, LOC_TYPEDEF,
-			       &objfile->static_psymbols,
+			       &objfile->global_psymbols,
 			       0, (CORE_ADDR) 0, cu_language, objfile);
 	}
       break;
     case DW_TAG_enumerator:
       add_psymbol_to_list (actual_name, strlen (actual_name),
 			   VAR_NAMESPACE, LOC_CONST,
-			   &objfile->static_psymbols,
+			   &objfile->global_psymbols,
 			   0, (CORE_ADDR) 0, cu_language, objfile);
       break;
     default:
@@ -5239,26 +5241,43 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 		  gdb_assert (SYMBOL_DEMANGLED_NAME (sym) == NULL);
 		}
 	    }
-	  
-	  add_symbol_to_list (sym, list_in_scope);
 
-	  /* The semantics of C++ state that "struct foo { ... }" also
-	     defines a typedef for "foo". Synthesize a typedef symbol so
-	     that "ptype foo" works as expected.  */
-	  if (cu_language == language_cplus)
-	    {
-	      struct symbol *typedef_sym = (struct symbol *)
-	      obstack_alloc (&objfile->symbol_obstack,
-			     sizeof (struct symbol));
-	      *typedef_sym = *sym;
-	      SYMBOL_NAMESPACE (typedef_sym) = VAR_NAMESPACE;
-	      if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-		TYPE_NAME (SYMBOL_TYPE (sym)) =
-		  obsavestring (SYMBOL_NAME (sym),
-				strlen (SYMBOL_NAME (sym)),
-				&objfile->type_obstack);
-	      add_symbol_to_list (typedef_sym, list_in_scope);
-	    }
+	  {
+	    /* NOTE: carlton/2002-11-29: Class symbols shouldn't
+	       really ever be static objects: otherwise, if you try
+	       to, say, break of a class's method and you're in a file
+	       which doesn't mention that class, it won't work unless
+	       the check for all static symbols in lookup_symbol_aux
+	       saves you.  Though perhaps C allows different files to
+	       define different structs with the same name; if so,
+	       this should be conditional on C++.  See the
+	       OtherFileClass tests in gdb.c++/namespace.exp.  */
+
+	    struct pending **list_to_add;
+
+	    list_to_add = (list_in_scope == &file_symbols
+			   ? &global_symbols : list_in_scope);
+	  
+	    add_symbol_to_list (sym, list_to_add);
+
+	    /* The semantics of C++ state that "struct foo { ... }" also
+	       defines a typedef for "foo". Synthesize a typedef symbol so
+	       that "ptype foo" works as expected.  */
+	    if (cu_language == language_cplus)
+	      {
+		struct symbol *typedef_sym = (struct symbol *)
+		  obstack_alloc (&objfile->symbol_obstack,
+				 sizeof (struct symbol));
+		*typedef_sym = *sym;
+		SYMBOL_NAMESPACE (typedef_sym) = VAR_NAMESPACE;
+		if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
+		  TYPE_NAME (SYMBOL_TYPE (sym)) =
+		    obsavestring (SYMBOL_NAME (sym),
+				  strlen (SYMBOL_NAME (sym)),
+				  &objfile->type_obstack);
+		add_symbol_to_list (typedef_sym, list_to_add);
+	      }
+	  }
 	  break;
 	case DW_TAG_typedef:
 	  if (processing_has_namespace_info
@@ -5292,7 +5311,17 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	    {
 	      dwarf2_const_value (attr, sym, objfile, cu_header);
 	    }
-	  add_symbol_to_list (sym, list_in_scope);
+	  {
+	    /* NOTE: carlton/2002-11-29: See comment above in the
+	       DW_TAG_class_type, etc. block.  */
+
+	    struct pending **list_to_add;
+
+	    list_to_add = (list_in_scope == &file_symbols
+			   ? &global_symbols : list_in_scope);
+	  
+	    add_symbol_to_list (sym, list_to_add);
+	  }
 	  break;
 	default:
 	  /* Not a tag we recognize.  Hopefully we aren't processing

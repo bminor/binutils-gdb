@@ -39,6 +39,7 @@ if { [skip_cplus_tests] } { continue }
 
 set testfile "namespace"
 set srcfile ${testfile}.cc
+set srcfile1 ${testfile}1.cc
 set binfile ${objdir}/${subdir}/${testfile}
 
 if [get_compiler_info ${binfile}] {
@@ -47,7 +48,7 @@ if [get_compiler_info ${binfile}] {
 
 
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile} ${srcdir}/${subdir}/${srcfile1}" "${binfile}" executable {debug c++}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will a
 utomatically fail."
 }
@@ -251,12 +252,18 @@ gdb_test "ptype E" "type = namespace C::D::E" "ptype C::D::E"
 gdb_test "ptype CClass" "type = class C::CClass \{\r\n  public:\r\n    int x;\r\n\}" "ptype CClass"
 gdb_test "ptype CClass::NestedClass" "type = class C::CClass::NestedClass \{\r\n  public:\r\n    int y;\r\n\}" "ptype CClass::NestedClass"
 gdb_test "ptype NestedClass" "No symbol \"NestedClass\" in current context." "ptype NestedClass"
-gdb_test "ptype ::C::CClass" "type = class C::CClass \{\r\n  public:\r\n    inty;\r\n\}" "ptype ::C::CClass"
+gdb_test "ptype ::C::CClass" "type = class C::CClass \{\r\n  public:\r\n    int x;\r\n\}" "ptype ::C::CClass"
 gdb_test "ptype ::C::CClass::NestedClass" "type = class C::CClass::NestedClass \{\r\n  public:\r\n    int y;\r\n\}" "ptype ::C::CClass::NestedClass"
 gdb_test "ptype ::C::NestedClass" "No symbol \"NestedClass\" in namespace \"C\"." "ptype ::C::NestedClass"
 gdb_test "ptype C::CClass" "No symbol \"Class\" in namespace \"C::C\"" "ptype C::CClass"
 gdb_test "ptype C::CClass::NestedClass" "No symbol \"Class\" in namespace \"C::C\"" "ptype C::CClass::NestedClass"
 gdb_test "ptype C::NestedClass" "No symbol \"NestedClass\" in namespace \"C::C\"." "ptype C::NestedClass"
+
+# Tests involving multiple files
+
+gdb_test "ptype OtherFileClass" "type = class C::OtherFileClass \{\r\n  public:\r\n    int z;\r\n\}" "ptype OtherFileClass"
+gdb_test "ptype ::C::OtherFileClass" "type = class C::OtherFileClass \{\r\n  public:\r\n    int z;\r\n\}" "ptype ::C::OtherFileClass"
+gdb_test "ptype C::OtherFileClass" "No symbol \"Class\" in namespace \"C::C\"" "ptype C::OtherFileClass"
 
 # Some anonymous namespace tests.
 

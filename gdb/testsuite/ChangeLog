@@ -1,3 +1,8 @@
+2002-11-29  David Carlton  <carlton@bactrian.org>
+
+	* gdb.c++/namespace.exp: Add OtherFileClass tests.
+	* gdb.c++/namespace1.cc (C): New file.
+
 2002-11-27  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/m-data.cc (main): Add marker comment.
