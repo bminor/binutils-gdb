@@ -15,7 +15,7 @@ movgs:
 
 	; try alternate names for lcr
 	and_spr_immed	0,273
-	movgs gr8,lcr			; lcr is spr number 273
+	movgs gr8,spr[273]			; lcr is spr number 273
 	test_gr_limmed	0xdead,0xbeef,gr8
 	test_spr_limmed	0xdead,0xbeef,spr[273]
 

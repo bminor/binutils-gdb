@@ -1,3 +1,8 @@
+2003-09-11  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/testsuite/sim/frv/movgs.cgs: Change lcr to spr[273],
+	which according to the comments seems to be the intent.
+
 2003-09-09  Dave Brolley  <brolley@redhat.com>
 
 	* sim/frv/maddaccs.cgs: move to fr400 subdirectory.
