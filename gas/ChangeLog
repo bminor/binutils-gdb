@@ -1,3 +1,9 @@
+2000-02-27  Thomas de Lellis  <tdel@windriver.com>
+
+	* config/obj-elf.c (elf_frob_symbol): Remove code which when
+	TC_PPC was defined forced the type of a symbol with no other type
+	to be BSF_OBJECT.
+
 2000-02-27  Hans-Peter Nilsson  <hp@axis.com>
 
 	* doc/internals.texi (CPU backend): Mention that
