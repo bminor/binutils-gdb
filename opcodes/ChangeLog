@@ -1,3 +1,11 @@
+2001-10-09  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* sh-opc.h: Fix encoding of least significant nibble of the
+	DSP single data transfer instructions.
+
+        * sh-dis.c (print_insn_shx): Fix decoding of As opcode in DSP
+	instructions. 
+
 2001-10-08  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* cgen-asm.in: Fix compile time warning messages in generated

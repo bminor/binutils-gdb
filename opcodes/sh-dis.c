@@ -465,7 +465,7 @@ print_insn_shx (memaddr, info)
 	      if ((rn & 0xc) != 4)
 		goto fail;
 	      rn = rn & 0x3;
-	      rn |= (rn & 2) << 1;
+	      rn |= (!(rn & 2)) << 2;
 	      break;
 	    case PPI:
 	    case REPEAT:
