@@ -5441,7 +5441,7 @@ md_apply_fix (fixP, valueP)
   unsigned char *buf;
   long insn, value;
 
-  assert (fixP->fx_size == 4);
+  assert (fixP->fx_size == 4 || fixP->fx_r_type == BFD_RELOC_16);
 
   value = *valueP;
   fixP->fx_addnumber = value;	/* Remember value for tc_gen_reloc */
@@ -5506,6 +5506,15 @@ md_apply_fix (fixP, valueP)
 	  || (mips_pic == EMBEDDED_PIC && SWITCH_TABLE (fixP)))
 	md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
 			    value, 4);
+      break;
+
+    case BFD_RELOC_16:
+      /* If we are deleting this reloc entry, we must fill in the
+         value now.  */
+      assert (fixP->fx_size == 2);
+      if (fixP->fx_done)
+	md_number_to_chars (fixP->fx_frag->fr_literal + fixP->fx_where,
+			    value, 2);
       break;
 
     case BFD_RELOC_LO16:

@@ -21,6 +21,9 @@ Wed Feb 15 15:07:00 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 Wed Feb 15 11:46:02 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (md_apply_fix): Accept BFD_RELOC_16, for
+	DWARF.  From gary@Intrepid.COM (Gary Funck).
+
 	* config/tc-mips.c (macro): Handle M_U{L,S}D[_A] (unaligned double
 	loads and stores).
 
