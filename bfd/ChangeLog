@@ -1,3 +1,9 @@
+2002-01-16  Richard Earnshaw  <rearnsha@arm.com>
+
+	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Handle 
+	EF_ARM_VFP_FLOAT.
+	(elf32_arm_print_private_bfd_data): Likewise.
+
 2002-01-16  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/tr.po: Import new version.

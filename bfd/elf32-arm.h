@@ -2297,21 +2297,46 @@ Error: %s passes floats in integer registers, whereas %s passes them in FP regis
 	  flags_compatible = false;
 	}
 
-#ifdef EF_ARM_SOFT_FLOAT
-      if ((in_flags & EF_ARM_SOFT_FLOAT) != (out_flags & EF_ARM_SOFT_FLOAT))
+      if ((in_flags & EF_ARM_VFP_FLOAT) != (out_flags & EF_ARM_VFP_FLOAT))
 	{
-	  if (in_flags & EF_ARM_SOFT_FLOAT)
-	    _bfd_error_handler (_ ("\
-Error: %s uses software FP, whereas %s uses hardware FP"),
+	  if (in_flags & EF_ARM_VFP_FLOAT)
+	    _bfd_error_handler (_("\
+Error: %s uses VFP instructions, whereas %s FPA instructions"),
 				bfd_archive_filename (ibfd),
 				bfd_get_filename (obfd));
 	  else
-	    _bfd_error_handler (_ ("\
-Error: %s uses hardware FP, whereas %s uses software FP"),
+	    _bfd_error_handler (_("\
+Error: %s uses FPA instructions, whereas %s VFP instructions"),
 				bfd_archive_filename (ibfd),
 				bfd_get_filename (obfd));
 
 	  flags_compatible = false;
+	}
+
+#ifdef EF_ARM_SOFT_FLOAT
+      if ((in_flags & EF_ARM_SOFT_FLOAT) != (out_flags & EF_ARM_SOFT_FLOAT))
+	{
+	  /* We can allow interworking between code that is VFP format
+	     layout, and uses either soft float or integer regs for
+	     passing floating point arguments and results.  We already
+	     know that the APCS_FLOAT flags match; similarly for VFP
+	     flags.  */
+	  if ((in_flags & EF_ARM_APCS_FLOAT) != 0
+	      || (in_flags & EF_ARM_VFP_FLOAT) == 0)
+	    {
+	      if (in_flags & EF_ARM_SOFT_FLOAT)
+		_bfd_error_handler (_ ("\
+Error: %s uses software FP, whereas %s uses hardware FP"),
+				    bfd_archive_filename (ibfd),
+				    bfd_get_filename (obfd));
+	      else
+		_bfd_error_handler (_ ("\
+Error: %s uses hardware FP, whereas %s uses software FP"),
+				    bfd_archive_filename (ibfd),
+				    bfd_get_filename (obfd));
+
+	      flags_compatible = false;
+	    }
 	}
 #endif
 
@@ -2374,6 +2399,11 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
       else
 	fprintf (file, _(" [APCS-32]"));
 
+      if (flags & EF_ARM_VFP_FLOAT)
+	fprintf (file, _(" [VFP float format]"));
+      else
+	fprintf (file, _(" [FPA float format]"));
+
       if (flags & EF_ARM_APCS_FLOAT)
 	fprintf (file, _(" [floats passed in float registers]"));
 
@@ -2389,8 +2419,9 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
       if (flags & EF_ARM_SOFT_FLOAT)
 	fprintf (file, _(" [software FP]"));
 
-      flags &= ~(EF_ARM_INTERWORK | EF_ARM_APCS_26 | EF_ARM_APCS_FLOAT | EF_ARM_PIC
-		 | EF_ARM_NEW_ABI | EF_ARM_OLD_ABI | EF_ARM_SOFT_FLOAT);
+      flags &= ~(EF_ARM_INTERWORK | EF_ARM_APCS_26 | EF_ARM_APCS_FLOAT
+		 | EF_ARM_PIC | EF_ARM_NEW_ABI | EF_ARM_OLD_ABI
+		 | EF_ARM_SOFT_FLOAT | EF_ARM_VFP_FLOAT);
       break;
 
     case EF_ARM_EABI_VER1:
