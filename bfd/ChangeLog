@@ -1,3 +1,12 @@
+2004-02-27  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf32-s390.c (allocate_dynrelocs): Use SYMBOL_REFERENCES_LOCAL
+	for pc relative relocs.
+	(elf_s390_relocate_section): Likewise.
+	* elf64-s390.c (allocate_dynrelocs): Use SYMBOL_REFERENCES_LOCAL
+	for pc relative relocs.
+	(elf_s390_relocate_section): Likewise.
+
 2004-02-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (elfNN_ia64_check_relocs): Fix call to
