@@ -1,5 +1,13 @@
 Thu Mar 27 12:55:42 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffcode.h (bfd_coff_backend_data): Add new field
+	_bfd_coff_default_section_alignment_power.
+	(bfd_coff_default_section_alignment_power): Define.
+	(bfd_coff_std_swap_table): Initialize new field.
+	* libcoff.h: Rebuild.
+	* cofflink.c (coff_link_add_symbols): Limit alignment of a common
+	symbol to the default section alignment.
+
 	* COPYING: Update FSF address.
 
 start-sanitize-d30v
