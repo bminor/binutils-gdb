@@ -1,4 +1,10 @@
 start-sanitize-sky
+Thu Jun 11 15:24:53 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/sky/vu01reg-main.c: New file.
+	* sim/sky/vu01reg.dvpasm: New file.
+	* sim/sky/vu01reg.brn: New file.
+
 Wed Jun 10 15:56:10 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* sim/sky/t-int.c: New file to test sky hardware
