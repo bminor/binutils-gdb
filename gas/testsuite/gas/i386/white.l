@@ -19,3 +19,6 @@ GAS LISTING .*
   16 0022 66B81300 0000              		Mov \$ foo , %eAx	
   17                                	.Code32 
   18 0028 66B81300                   		mov \$ foo , %ax	
+  19                                	
+  20 002c D9C9                       		fxch   %st  \(  1  \) 
+  21 002e D9C9                       		fxch   %           st\(1\)

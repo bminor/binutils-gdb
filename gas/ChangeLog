@@ -1,3 +1,9 @@
+1999-08-29  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	Based on a patch from H.J. Lu  <hjl@gnu.org>
+	* config/tc-i386.c (parse_register): Handle FP regs specially.
+	(md_begin): Remove '(' and ')' from register_chars.
+
 1999-08-29  Doug Evans  <devans@casey.cygnus.com>
 
 	* config/tc-m32r.c (md_parse_option): Delete unrecognized option

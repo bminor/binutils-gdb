@@ -16,3 +16,6 @@ foo:	jmpw % es : * ( % ebx )
 	Mov $ foo , %eAx	
 .Code32 
 	mov $ foo , %ax	
+
+	fxch   %st  (  1  ) 
+	fxch   %           st(1)

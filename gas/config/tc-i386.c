@@ -703,8 +703,6 @@ md_begin ()
 #ifdef LEX_AT
     identifier_chars['@'] = '@';
 #endif
-    register_chars[')'] = ')';
-    register_chars['('] = '(';
     digit_chars['-'] = '-';
     identifier_chars['_'] = '_';
     identifier_chars['.'] = '.';
@@ -4165,6 +4163,39 @@ parse_register (reg_string, end_op)
   *end_op = s - 1;
 
   r = (const reg_entry *) hash_find (reg_hash, reg_name_given);
+
+  /* Handle floating point regs, allowing spaces in the (i) part.  */
+  if (r == i386_regtab /* %st is first entry of table */)
+    {
+      --s;
+      if (is_space_char (*s))
+	++s;
+      if (*s == '(')
+	{
+	  *p++ = *s++;
+	  if (is_space_char (*s))
+	    ++s;
+	  if (*s >= '0' && *s <= '7')
+	    {
+	      r = &i386_float_regtab[*s - '0'];
+	      *p++ = *s++;
+	      if (is_space_char (*s))
+		++s;
+	      if (*s == ')')
+		{
+		  *end_op = s + 1;
+		  return r;
+		}
+	      *p++ = *s;
+	    }
+	  if (!allow_naked_reg)
+	    {
+	      *p = '\0';
+	      as_bad (_("bad register name `%s'"), reg_name_given);
+	    }
+	  return (const reg_entry *) NULL;
+	}
+    }
 
   if (r == NULL)
     {

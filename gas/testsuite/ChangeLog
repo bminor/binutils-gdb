@@ -1,3 +1,7 @@
+1999-08-29  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	* gas/i386/white.s, gas/i386/white.l: Add space in FP reg tests.
+
 Sat Aug 28 00:16:12 1999  Jerry Quinn <jquinn@nortelnetworks.com>
 
 	* gas/hppa/basic/basic.exp:  Add new tests shift2.s,
