@@ -1,3 +1,19 @@
+Wed Nov  1 14:26:02 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@lts.sel.alcatel.de>
+
+	* coff-m88k.c (rtype2howto): New static function.
+	(RTYPE2HOWTO): Use it rather than a macro definition.
+
+	* coffcode.h (coff_write_object_contents): set internal_a.magic
+	to PAGEMAGICPEXECPAGED #if defined (M68) && !defined (LYNXOS).
+
+	* configure.in: m68*-motorola-sysv3* does not use ptrace-core.o;
+	define TRAD_HEADER to new file hosts/delta68.h.
+	m88*-motorola-sysv*, however, does use ptrace-core.o.
+	* hosts/delta68.h: New file.
+
+	* ptrace-core.c (ptrace_unix_core_file_p): change bfd_zmalloc to
+	bfd_zalloc; provide proper parm abfd to calls to bfd_zalloc.
+
 Wed Nov  1 13:51:54 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* i386linux.c (MY(vec)): Declare before use.

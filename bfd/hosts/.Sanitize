@@ -26,6 +26,7 @@ Things-to-keep:
 
 alphalinux.h
 decstation.h
+delta68.h
 dpx2.h
 hp300bsd.h
 i386bsd.h

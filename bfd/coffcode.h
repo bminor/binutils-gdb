@@ -2226,6 +2226,10 @@ coff_write_object_contents (abfd)
 #if defined(LYNXOS)
     internal_a.magic = LYNXCOFFMAGIC;
 #endif /* LYNXOS */
+#else
+#if defined (PAGEMAGICPEXECPAGED)
+    internal_a.magic = PAGEMAGICPEXECPAGED;
+#endif
 #endif /* M68 || WE32K || M68K */
 
 #if defined(ARM)

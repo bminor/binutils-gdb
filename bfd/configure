@@ -1119,6 +1119,13 @@ EOF
 EOF
 
 	;;
+  m68*-motorola-sysv3*)
+	COREFILE=trad-core.o
+	cat >> confdefs.h <<\EOF
+#define TRAD_HEADER "hosts/delta68.h"
+EOF
+
+	;;
   m68*-motorola-sysv*)	COREFILE=ptrace-core.o ;;
   m68*-sony-*)
 	COREFILE=trad-core.o
@@ -1135,7 +1142,7 @@ EOF
 
 	;;
   m88*-*-sysv4*)	;;
-  m88*-motorola-sysv*)	COREFILE=trad-core.o ;;
+  m88*-motorola-sysv*)	COREFILE=ptrace-core.o ;;
   m88*-*-mach3*)
 	COREFILE=trad-core.o
 	cat >> confdefs.h <<\EOF
@@ -1219,7 +1226,7 @@ EOF
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1223 "configure"
+#line 1230 "configure"
 #include "confdefs.h"
 #include <sys/procfs.h>
 int main() { return 0; }

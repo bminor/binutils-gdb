@@ -200,6 +200,10 @@ changequote([,])dnl
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/hp300bsd.h")
 	;;
+  m68*-motorola-sysv3*)
+	COREFILE=trad-core.o
+	AC_DEFINE(TRAD_HEADER, "hosts/delta68.h")
+	;;
   m68*-motorola-sysv*)	COREFILE=ptrace-core.o ;;
   m68*-sony-*)
 	COREFILE=trad-core.o
@@ -210,7 +214,7 @@ changequote([,])dnl
 	AC_DEFINE(TRAD_HEADER,"hosts/m68knbsd.h")
 	;;
   m88*-*-sysv4*)	;;
-  m88*-motorola-sysv*)	COREFILE=trad-core.o ;;
+  m88*-motorola-sysv*)	COREFILE=ptrace-core.o ;;
   m88*-*-mach3*)
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/m88kmach3.h")
