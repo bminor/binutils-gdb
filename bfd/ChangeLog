@@ -1,3 +1,12 @@
+2004-04-21  Eric Botcazou  <ebotcazou@act-europe.fr>
+
+	* elflink.c (elf_gc_mark_dynamic_ref_symbol): New function.
+	(bfd_elf_gc_sections): Fail if a shared object is being created.
+	Do not fail if dynamic sections have been created.  Instead call
+	elf_gc_mark_dynamic_ref_symbol to mark sections that contain
+	dynamically referenced symbols.  Do not mark the whole graph
+	rooted at .eh_frame, only the section proper.
+
 2004-04-20  DJ Delorie  <dj@redhat.com>
 
 	* reloc.c: Add BFD_RELOC_32_SECREL.

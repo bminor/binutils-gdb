@@ -8412,6 +8412,24 @@ elf_gc_smash_unused_vtentry_relocs (struct elf_link_hash_entry *h, void *okp)
   return TRUE;
 }
 
+/* Mark sections containing dynamically referenced symbols.  This is called
+   through elf_link_hash_traverse.  */
+
+static bfd_boolean
+elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h,
+				void *okp ATTRIBUTE_UNUSED)
+{
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  if ((h->root.type == bfd_link_hash_defined
+       || h->root.type == bfd_link_hash_defweak)
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC))
+    h->root.u.def.section->flags |= SEC_KEEP;
+
+  return TRUE;
+}
+
 /* Do mark and sweep of unused sections.  */
 
 bfd_boolean
@@ -8426,8 +8444,8 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
   if (!get_elf_backend_data (abfd)->can_gc_sections
       || info->relocatable
       || info->emitrelocations
-      || !is_elf_hash_table (info->hash)
-      || elf_hash_table (info)->dynamic_sections_created)
+      || info->shared
+      || !is_elf_hash_table (info->hash))
     {
       (*_bfd_error_handler)(_("Warning: gc-sections option ignored"));
       return TRUE;
@@ -8447,8 +8465,15 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
   if (!ok)
     return FALSE;
 
-  /* Grovel through relocs to find out who stays ...  */
+  /* Mark dynamically referenced symbols.  */
+  if (elf_hash_table (info)->dynamic_sections_created)
+    elf_link_hash_traverse (elf_hash_table (info),
+			    elf_gc_mark_dynamic_ref_symbol,
+			    &ok);
+  if (!ok)
+    return FALSE;
 
+  /* Grovel through relocs to find out who stays ...  */
   gc_mark_hook = get_elf_backend_data (abfd)->gc_mark_hook;
   for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
     {
@@ -8460,8 +8485,15 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
       for (o = sub->sections; o != NULL; o = o->next)
 	{
 	  if (o->flags & SEC_KEEP)
-	    if (!elf_gc_mark (info, o, gc_mark_hook))
-	      return FALSE;
+	    {
+	      /* _bfd_elf_discard_section_eh_frame knows how to discard
+		 orphaned FDEs so don't mark sections referenced by the
+		 EH frame section.  */  
+	      if (strcmp (o->name, ".eh_frame") == 0)
+		o->gc_mark = 1;
+	      else if (!elf_gc_mark (info, o, gc_mark_hook))
+		return FALSE;
+	    }
 	}
     }
 
