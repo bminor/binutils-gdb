@@ -1801,6 +1801,7 @@ while test -n "${ac_files}"; do
   fi
 done
 
+exit 0
 EOF
 chmod +x ${CONFIG_STATUS}
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} ${CONFIG_STATUS}
