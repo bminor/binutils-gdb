@@ -3173,11 +3173,7 @@ OP_E (int bytemode, int sizeflag)
 			     ? names64[index] : names32[index]);
 		  oappend (scratchbuf);
 		}
-	      if (!intel_syntax
-		  || (intel_syntax
-		      && bytemode != b_mode
-		      && bytemode != w_mode
-		      && bytemode != v_mode))
+	      if (scale != 0 || (!intel_syntax && index != 4))
 		{
 		  *obufp++ = scale_char;
 		  *obufp = '\0';
