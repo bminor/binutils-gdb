@@ -1,3 +1,8 @@
+2003-02-05  Jason Molenda  (jason-cl@molenda.com)
+
+	* gdb.mi/mi-syn-frames.c (subroutine): Add an extra statement
+	at the beginning so the breakpoint doesn't get set on the loop.
+
 2003-02-05  Michael Chastain  <mec@shout.net>
 
 	* gdb.c++/local.exp: Relax the test for PR gdb/825 to accept

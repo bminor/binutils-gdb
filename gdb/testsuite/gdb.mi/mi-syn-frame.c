@@ -46,8 +46,9 @@ handler (int sig)
 void
 subroutine (int in)
 {
-  while (in < 100)
-    in++;
+  int count = in;
+  while (count < 100)
+    count++;
 }
 
 void
