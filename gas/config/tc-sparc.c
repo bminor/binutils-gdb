@@ -500,6 +500,7 @@ char *str;
 				} /* if %asr */
 				break;
 
+ /* start-sanitize */
 #ifndef NO_V9
 			case 'k':
 				the_insn.reloc = RELOC_WDISP14;
@@ -533,6 +534,7 @@ char *str;
 				break;
 				
 #endif /* NO_V9 */
+ /* end-sanitize */
 
 			case '\0':  /* end of args */
 				if (*s == '\0') {
@@ -1090,6 +1092,7 @@ long val;
 		buf[3] = val;
 		break;
 
+ /* start-sanitize */
 #ifndef NO_V9
 	case RELOC_WDISP14:
 		val = (val >>= 2) + 1;
@@ -1104,6 +1107,7 @@ long val;
 		buf[3] = val;
 		break;
 #endif /* NO_V9 */
+ /* end-sanitize */
 
 	case RELOC_HI22:
 		if(!fixP->fx_addsy) {
@@ -1349,7 +1353,6 @@ relax_addressT segment_address_in_file;
  *		Warn on architecture bumps.  See also -A.
  *
  *	-Av6, -Av7, -Acypress, -Av8
- *	-Av9
  *		Select the architecture.  Instructions or features not
  *		supported by the selected architecture cause fatal errors.
  *
@@ -1373,7 +1376,9 @@ relax_addressT segment_address_in_file;
  *		instruction set you MUST -Acypress.
  *
  */
-
+ /* start-sanitize */
+ /* There is also a -Av9 architecture option.  xoxorich. */
+ /* end-sanitize */
 int md_parse_option(argP, cntP, vecP)
 char **argP;
 int *cntP;
