@@ -30,7 +30,7 @@
 /* #define DUMPING         1 */
 
 /* To use the quick look-up tables, uncomment this define. */
-#define QUICK_LOOK_UP      0
+#define QUICK_LOOK_UP      1
 
 /* To call PXDB to process un-processed files, uncomment this define. */
 #define USE_PXDB           1
@@ -39,6 +39,9 @@
 
 void hpread_symfile_init
   PARAMS ((struct objfile *));
+
+void
+do_pxdb PARAMS ((bfd *));
 
 void hpread_build_psymtabs
   PARAMS ((struct objfile *, struct section_offsets *, int));
@@ -276,17 +279,38 @@ hpread_pxdb_needed (sym_bfd)
 
 #endif
 
-#ifdef QUICK_LOOK_UP
+/* Check whether the file needs to be preprocessed by pxdb. 
+   If so, call pxdb. */
 
-/* This flag can be set to zero to use the old
-   style psymtab (build from a scan of the LNTT)
-   or to one to try to use the quick look-up
-   tables. */
-int psym_new_style = 1;
+void 
+do_pxdb (sym_bfd)
+     bfd *sym_bfd;
+{
+  /* The following code is HP-specific.  The "right" way of
+     doing this is unknown, but we bet would involve a target-
+     specific pre-file-load check using a generic mechanism. */
+
+  /* This code will not be executed if the file is not in SOM
+     format (i.e. if compiled with gcc) */
+    if (hpread_pxdb_needed (sym_bfd)) 
+      {
+	/*This file has not been pre-processed. Preprocess now */
+	  
+	if (hpread_call_pxdb (sym_bfd->filename))
+	  {
+	    /* The call above has changed the on-disk file, 
+               we can close the file anyway, because the
+	       symbols will be reread in when the target is run */
+	    bfd_close (sym_bfd); 
+	  }
+      }
+}
+
 
 
+#ifdef QUICK_LOOK_UP
 
-/* Code to handle quick lookup-tables follows */
+/* Code to handle quick lookup-tables follows. */
 
 
 /* Some useful macros */
@@ -1630,7 +1654,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
   struct cleanup *old_chain;
 
   int hp_symnum, symcount, i;
-  int scan_start;
+  int scan_start = 0;
 
   union dnttentry *dn_bufp;
   unsigned long valu;
@@ -1684,44 +1708,38 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
        anyway, but it turns out to be not so easy. So this could 
        actually be commented out, but I leave it in, just in case
        we decide to add support for non-pxdb-ed stuff in the future. */
-    bfd *abfd;
-    abfd = symfile_bfd_open (objfile->name);
-    if (!hpread_pxdb_needed (abfd))
-      {
-	if (psym_new_style)
-	  {
-	    PXDB_header pxdb_header;
-	    int found_modules_in_program;
+    PXDB_header pxdb_header;
+    int found_modules_in_program;
 
-	    if (hpread_get_header (objfile, &pxdb_header))
-	      {
-		/* Build a minimal table.  No types, no global variables,
-		   no include files.... */
+    if (hpread_get_header (objfile, &pxdb_header))
+      {
+	/* Build a minimal table.  No types, no global variables,
+	   no include files.... */
 #ifdef DUMPING
-		if (dumping)
-		  printf ("\nNew method for %s\n", objfile->name);
+	if (dumping)
+	  printf ("\nNew method for %s\n", objfile->name);
 #endif
 
-		/* elz: quick_traverse returns true if it found
-		   some modules in the main source file, other
-		   than those in end.c
-		   In C and C++, all the files have MODULES entries
-		   in the LNTT, and the quick table traverse is all 
-		   based on finding these MODULES entries. Without 
-		   those it cannot work. 
-		   It happens that F77 programs don't have MODULES
-		   so the quick traverse gets confused. F90 programs
-		   have modules, and the quick method still works.
-		   So, if modules (other than those in end.c) are
-		   not found we give up on the quick table stuff, 
-		   and fall back on the slower method  */
-		found_modules_in_program = hpread_quick_traverse (objfile,
-								  section_offsets,
-								  GNTT (objfile),
-								  VT (objfile),
-								  &pxdb_header);
+	/* elz: quick_traverse returns true if it found
+	   some modules in the main source file, other
+	   than those in end.c
+	   In C and C++, all the files have MODULES entries
+	   in the LNTT, and the quick table traverse is all 
+	   based on finding these MODULES entries. Without 
+	   those it cannot work. 
+	   It happens that F77 programs don't have MODULES
+	   so the quick traverse gets confused. F90 programs
+	   have modules, and the quick method still works.
+	   So, if modules (other than those in end.c) are
+	   not found we give up on the quick table stuff, 
+	   and fall back on the slower method  */
+	found_modules_in_program = hpread_quick_traverse (objfile,
+							  section_offsets,
+							  GNTT (objfile),
+							  VT (objfile),
+							  &pxdb_header);
 
-		discard_cleanups (old_chain);
+	discard_cleanups (old_chain);
 
 		/* Set up to scan the global section of the LNTT.
 
@@ -1733,41 +1751,21 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		   with just one global record, there's no way to
 		   tell other than by looking at the record, so that's
 		   done below. */
-		if (found_modules_in_program)
-		  scan_start = pxdb_header.globals;
-		else
-		  scan_start = 0;
-	      }
-
+	if (found_modules_in_program)
+	  scan_start = pxdb_header.globals;
+      }
 #ifdef DUMPING
-	    else
-	      {
-		if (dumping)
-		  printf ("\nGoing on to old method for %s\n", objfile->name);
-	      }
-#endif
-
-	  }			/* End of new method code */
-      }				/* end of if pxdb exists */
-    /* elz: if pxdb does not exists on the system, then scan the whole debug info
-       Actually this will never be reached because we error out in case there 
-       is no pxdb on the system. It turns out that the debug info cannot be
-       handled the same way as after bxdb has been run, and gdb gets very 
-       very confused. Ileave this in anyway, in case one day we want to 
-       support non pxdb-ed files. */
     else
-      scan_start = 0;
-
-    bfd_close (abfd);		/* close the bfd we opened to check for pxdb */
-
-  }				/* end of ifdef QUICK_LOOK_UP */
-#else
-  scan_start = 0;		/* if we don't want quick lookup tables start
-				   from the beginning */
+      {
+	if (dumping)
+	  printf ("\nGoing on to old method for %s\n", objfile->name);
+      }
 #endif
+  }
+#endif /* QUICK_LOOK_UP */
 
-  /* Make two passes, one over the GNTT symbols, the other for the
-     LNTT symbols.
+    /* Make two passes, one over the GNTT symbols, the other for the
+       LNTT symbols.
 
      JB comment: above isn't true--they only make one pass, over
      the LNTT.  */
@@ -1809,7 +1807,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		       ignore it and be done! */
 		    continue;
 		  }
-#endif
+#endif /* QUICK_LOOK_UP */
 
 		/* A source file of some kind.  Note this may simply
 		   be an included file.  */
@@ -1997,7 +1995,8 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 		     ignore it and be done! */
 		  continue;
 		}
-#endif
+#endif /* QUICK_LOOK_UP */
+
 	      /* Scope block begin/end.  We only care about function
 	         and file blocks right now.  */
 

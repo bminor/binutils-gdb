@@ -1,3 +1,19 @@
+Tue Feb  2 17:36:29 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* hp-psymtab-read.c (do_pxdb): New function. Check whether the
+	file needs to be processed by pxdb (an HP debug info massaging
+	tool), if so call it.
+	(hpread_build_psymtabs): Initialize scan_start to 0 and
+	simplify flow of control.
+
+	* somread.c (som_symfile_read): Add call to do_pxdb (), 
+	in hp-psymtab-read.c.
+
+	* symfile.c (symbol_file_add): Remove ifdef'ed out HPUX specific
+	code.
+	(symfile_bfd_open): Remove HPUXHPPA ifdef'ed code. Code is now
+	in hp-psymtab-read.c.
+
 1999-02-02  Martin Hunt  <hunt@cygnus.com>
 
 	* printcmd.c (print_scalar_formatted): Use strcat to concat all

@@ -65,6 +65,9 @@ hpread_symfile_finish PARAMS ((struct objfile *));
 extern void
 hpread_symfile_init PARAMS ((struct objfile *));
 
+extern void
+do_pxdb PARAMS ((bfd *));
+
 /*
 
 LOCAL FUNCTION
@@ -359,6 +362,8 @@ som_symfile_read (objfile, section_offsets, mainline)
 {
   bfd *abfd = objfile->obfd;
   struct cleanup *back_to;
+
+  do_pxdb (symfile_bfd_open (objfile->name));
 
   init_minimal_symbol_collection ();
   back_to = make_cleanup (discard_minimal_symbols, 0);
