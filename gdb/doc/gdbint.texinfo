@@ -1372,7 +1372,7 @@ Finally, here's an example of printing an address.  The original code:
 @smallexample
   annotate_field (4);
   printf_filtered ("%s ",
-        local_hex_string_custom ((unsigned long) b->address, "08l"));
+        hex_string_custom ((unsigned long) b->address, 8));
 @end smallexample
 
 It became:
