@@ -895,13 +895,6 @@ extern NORETURN void error_silent (const char *fmt, ...) ATTR_NORETURN ATTR_FORM
 
 extern NORETURN void error_stream (struct ui_file *) ATTR_NORETURN;
 
-/* Initialize the error buffer.  */
-extern void error_init (void);
-
-/* Returns a freshly allocate buffer containing the last error
-   message.  */
-extern char *error_last_message (void);
-
 /* Output arbitrary error message.  */
 extern void error_output_message (char *pre_print, char *msg);
 

@@ -1,3 +1,23 @@
+2005-01-13  Andrew Cagney  <cagney@gnu.org>
+
+	* defs.h (error_last_message, error_init): Delete declaration.
+	* utils.c (fatal, vfatal): Call throw_vfatal.
+	(error, verror): Call throw_verror;
+	(do_write, error_stream_1): Delete function.
+	(error_stream): Simplify, call error.
+	(error_last_message, error_init, gdb_lasterr): Delete.
+	(error_silent): Simplify, call throw_vsilent.
+	* mi/mi-interp.c (mi_cmd_interpreter_exec): Dup the message.
+	* main.c (captured_main): Delete call to error_init.
+	* exceptions.c (throw_verror, throw_verror)
+	(throw_vsilent): New functions.
+	(do_write, print_and_throw): New functions.
+	(last_message): New global.
+	(throw_reason): Replace error_last_message with last_message.
+	(catch_exceptions_with_msg): Dup the message.
+	* exceptions.h (throw_verror, throw_vfatal, throw_vsilent):
+	Declare.
+
 2005-01-13  Michael Snyder  <msnyder@redhat.com>
 
 	* remote-st.c: Whitespace tweaks.

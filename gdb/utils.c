@@ -82,10 +82,6 @@ extern char *canonicalize_file_name (const char *);
 
 void (*deprecated_error_begin_hook) (void);
 
-/* Holds the last error message issued by gdb */
-
-static struct ui_file *gdb_lasterr;
-
 /* Prototypes for local functions */
 
 static void vfprintf_maybe_filtered (struct ui_file *, const char *,
@@ -99,9 +95,6 @@ static void prompt_for_continue (void);
 
 static void set_screen_size (void);
 static void set_width (void);
-
-static NORETURN void error_stream_1 (struct ui_file *stream, 
-				     enum return_reason reason) ATTR_NORETURN;
 
 /* Chain of cleanup actions established with make_cleanup,
    to be executed if an error happens.  */
@@ -616,10 +609,7 @@ warning (const char *string, ...)
 NORETURN void
 verror (const char *string, va_list args)
 {
-  struct ui_file *tmp_stream = mem_fileopen ();
-  make_cleanup_ui_file_delete (tmp_stream);
-  vfprintf_unfiltered (tmp_stream, string, args);
-  error_stream_1 (tmp_stream, RETURN_ERROR);
+  throw_verror (GENERIC_ERROR, string, args);
 }
 
 NORETURN void
@@ -627,7 +617,7 @@ error (const char *string, ...)
 {
   va_list args;
   va_start (args, string);
-  verror (string, args);
+  throw_verror (GENERIC_ERROR, string, args);
   va_end (args);
 }
 
@@ -638,10 +628,7 @@ error (const char *string, ...)
 NORETURN void
 vfatal (const char *string, va_list args)
 {
-  struct ui_file *tmp_stream = mem_fileopen ();
-  make_cleanup_ui_file_delete (tmp_stream);
-  vfprintf_unfiltered (tmp_stream, string, args);
-  error_stream_1 (tmp_stream, RETURN_QUIT);
+  throw_vfatal (string, args);
 }
 
 NORETURN void
@@ -649,14 +636,8 @@ fatal (const char *string, ...)
 {
   va_list args;
   va_start (args, string);
-  vfatal (string, args);
+  throw_vfatal (string, args);
   va_end (args);
-}
-
-static void
-do_write (void *data, const char *buffer, long length_buffer)
-{
-  ui_file_write (data, buffer, length_buffer);
 }
 
 /* Cause a silent error to occur.  Any error message is recorded
@@ -665,16 +646,9 @@ NORETURN void
 error_silent (const char *string, ...)
 {
   va_list args;
-  struct ui_file *tmp_stream = mem_fileopen ();
   va_start (args, string);
-  make_cleanup_ui_file_delete (tmp_stream);
-  vfprintf_unfiltered (tmp_stream, string, args);
-  /* Copy the stream into the GDB_LASTERR buffer.  */
-  ui_file_rewind (gdb_lasterr);
-  ui_file_put (tmp_stream, do_write, gdb_lasterr);
+  throw_vsilent (string, args);
   va_end (args);
-
-  throw_reason (RETURN_ERROR);
 }
 
 /* Output an error message including any pre-print text to gdb_stderr.  */
@@ -691,50 +665,13 @@ error_output_message (char *pre_print, char *msg)
   fprintf_filtered (gdb_stderr, "\n");
 }
 
-static NORETURN void
-error_stream_1 (struct ui_file *stream, enum return_reason reason)
-{
-  if (deprecated_error_begin_hook)
-    deprecated_error_begin_hook ();
-
-  /* Copy the stream into the GDB_LASTERR buffer.  */
-  ui_file_rewind (gdb_lasterr);
-  ui_file_put (stream, do_write, gdb_lasterr);
-
-  /* Write the message plus any error_pre_print to gdb_stderr.  */
-  target_terminal_ours ();
-  wrap_here ("");		/* Force out any buffered output */
-  gdb_flush (gdb_stdout);
-  annotate_error_begin ();
-  if (error_pre_print)
-    fputs_filtered (error_pre_print, gdb_stderr);
-  ui_file_put (stream, do_write, gdb_stderr);
-  fprintf_filtered (gdb_stderr, "\n");
-
-  throw_reason (reason);
-}
-
 NORETURN void
 error_stream (struct ui_file *stream)
 {
-  error_stream_1 (stream, RETURN_ERROR);
-}
-
-/* Get the last error message issued by gdb */
-
-char *
-error_last_message (void)
-{
   long len;
-  return ui_file_xstrdup (gdb_lasterr, &len);
-}
-
-/* This is to be called by main() at the very beginning */
-
-void
-error_init (void)
-{
-  gdb_lasterr = mem_fileopen ();
+  char *message = ui_file_xstrdup (stream, &len);
+  make_cleanup (xfree, message);
+  error ("%s", message);
 }
 
 /* Print a message reporting an internal error/warning. Ask the user

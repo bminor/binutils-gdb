@@ -78,6 +78,10 @@ extern const struct exception exception_none;
 
 extern NORETURN void throw_exception (struct exception exception) ATTR_NORETURN;
 extern NORETURN void throw_reason (enum return_reason reason) ATTR_NORETURN;
+extern NORETURN void throw_verror (enum errors, const char *fmt,
+				   va_list ap) ATTR_NORETURN;
+extern NORETURN void throw_vfatal (const char *fmt, va_list ap) ATTR_NORETURN;
+extern NORETURN void throw_vsilent (const char *fmt, va_list ap) ATTR_NORETURN;
 
 
 /* Call FUNC(UIOUT, FUNC_ARGS) but wrapped within an exception

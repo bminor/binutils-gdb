@@ -264,6 +264,8 @@ throw_exception (struct exception exception)
   SIGLONGJMP (current_catcher->buf, exception.reason);
 }
 
+static char *last_message;
+
 NORETURN void
 throw_reason (enum return_reason reason)
 {
@@ -277,13 +279,91 @@ throw_reason (enum return_reason reason)
       break;
     case RETURN_ERROR:
       exception.error = GENERIC_ERROR;
-      exception.message = error_last_message ();
+      exception.message = last_message;
       break;
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
     }
   
   throw_exception (exception);
+}
+
+static void
+do_write (void *data, const char *buffer, long length_buffer)
+{
+  ui_file_write (data, buffer, length_buffer);
+}
+
+
+NORETURN static void
+print_and_throw (enum return_reason reason, enum errors error,
+		 const char *prefix, const char *fmt,
+		 va_list ap) ATTR_NORETURN;
+NORETURN static void
+print_and_throw (enum return_reason reason, enum errors error,
+		 const char *prefix, const char *fmt, va_list ap)
+{
+  /* FIXME: cagney/2005-01-13: While xstrvprintf is simpler it alters
+     GDB's output.  Instead of the message being printed
+     line-at-a-time the message comes out all at once.  The problem is
+     that the MI testsuite is checks for line-at-a-time messages and
+     changing this behavior means updating the testsuite.  */
+
+  struct exception e;
+  struct ui_file *tmp_stream;
+  long len;
+
+  /* Convert the message into a print stream.  */
+  tmp_stream = mem_fileopen ();
+  make_cleanup_ui_file_delete (tmp_stream);
+  vfprintf_unfiltered (tmp_stream, fmt, ap);
+
+  /* Save the message.  */
+  xfree (last_message);
+  last_message = ui_file_xstrdup (tmp_stream, &len);
+
+  if (deprecated_error_begin_hook)
+    deprecated_error_begin_hook ();
+
+  /* Write the message plus any pre_print to gdb_stderr.  */
+  target_terminal_ours ();
+  wrap_here ("");		/* Force out any buffered output */
+  gdb_flush (gdb_stdout);
+  annotate_error_begin ();
+  if (error_pre_print)
+    fputs_filtered (error_pre_print, gdb_stderr);
+  ui_file_put (tmp_stream, do_write, gdb_stderr);
+  fprintf_filtered (gdb_stderr, "\n");
+
+  /* Throw the exception.  */
+  e.reason = reason;
+  e.error = error;
+  e.message = last_message;
+  throw_exception (e);
+}
+
+NORETURN void
+throw_verror (enum errors error, const char *fmt, va_list ap)
+{
+  print_and_throw (RETURN_ERROR, error, error_pre_print, fmt, ap);
+}
+
+NORETURN void
+throw_vfatal (const char *fmt, va_list ap)
+{
+  print_and_throw (RETURN_QUIT, NO_ERROR, quit_pre_print, fmt, ap);
+}
+
+NORETURN void
+throw_vsilent (const char *fmt, va_list ap)
+{
+  struct exception e;
+  e.reason = RETURN_ERROR;
+  e.error = GENERIC_ERROR;
+  xfree (last_message);
+  last_message = xstrvprintf (fmt, ap);
+  e.message = last_message;
+  throw_exception (e);
 }
 
 /* Call FUNC() with args FUNC_UIOUT and FUNC_ARGS, catching any
@@ -365,7 +445,12 @@ catch_exceptions_with_msg (struct ui_out *uiout,
 	 one.  This is used in the case of a silent error whereby the
 	 caller may optionally want to issue the message.  */
       if (gdberrmsg != NULL)
-	*gdberrmsg = exception.message;
+	{
+	  if (exception.message != NULL)
+	    *gdberrmsg = xstrdup (exception.message);
+	  else
+	    *gdberrmsg = NULL;
+	}
       return exception.reason;
     }
   return val;

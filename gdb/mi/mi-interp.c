@@ -241,7 +241,7 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 	struct exception e = interp_exec (interp_to_use, argv[i]);
 	if (e.reason < 0)
 	  {
-	    mi_error_message = e.message;
+	    mi_error_message = xstrdup (e.message);
 	    result = MI_CMD_ERROR;
 	    break;
 	  }
