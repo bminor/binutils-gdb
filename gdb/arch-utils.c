@@ -1,7 +1,7 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
-   Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,7 +30,7 @@
 #include "regcache.h"
 #include "gdb_assert.h"
 #include "sim-regno.h"
-
+#include "gdbcore.h"
 #include "osabi.h"
 
 #include "version.h"
@@ -60,13 +60,46 @@ legacy_store_return_value (struct type *type, struct regcache *regcache,
   DEPRECATED_STORE_RETURN_VALUE (type, b);
 }
 
-
 int
 always_use_struct_convention (int gcc_p, struct type *value_type)
 {
   return 1;
 }
 
+enum return_value_convention
+legacy_return_value (struct gdbarch *gdbarch, struct type *valtype,
+		     struct regcache *regcache, void *readbuf,
+		     const void *writebuf)
+{
+  /* NOTE: cagney/2004-06-13: The gcc_p parameter to
+     USE_STRUCT_CONVENTION isn't used.  */
+  int struct_return = ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
+			|| TYPE_CODE (valtype) == TYPE_CODE_UNION
+			|| TYPE_CODE (valtype) == TYPE_CODE_ARRAY)
+		       && DEPRECATED_USE_STRUCT_CONVENTION (0, valtype));
+
+  if (writebuf != NULL)
+    {
+      gdb_assert (!struct_return);
+      /* NOTE: cagney/2004-06-13: See stack.c:return_command.  Old
+	 architectures don't expect STORE_RETURN_VALUE to handle small
+	 structures.  Should not be called with such types.  */
+      gdb_assert (TYPE_CODE (valtype) != TYPE_CODE_STRUCT
+		  && TYPE_CODE (valtype) != TYPE_CODE_UNION);
+      STORE_RETURN_VALUE (valtype, regcache, writebuf);
+    }
+
+  if (readbuf != NULL)
+    {
+      gdb_assert (!struct_return);
+      EXTRACT_RETURN_VALUE (valtype, regcache, readbuf);
+    }
+
+  if (struct_return)
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  else
+    return RETURN_VALUE_REGISTER_CONVENTION;
+}
 
 int
 legacy_register_sim_regno (int regnum)

@@ -1,7 +1,7 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright 1998, 1999, 2000, 2002, 2003 Free Software Foundation,
-   Inc.
+   Copyright 1998, 1999, 2000, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,6 +31,15 @@ struct gdbarch_info;
 
 /* gdbarch trace variable */
 extern int gdbarch_debug;
+
+/* An implementation of return_value that props up architectures still
+   using USE_STRUCT_RETURN, EXTRACT_RETURN_VALUE and
+   STORE_RETURN_VALUE.  See also the hacks in "stack.c".  */
+enum return_value_convention legacy_return_value (struct gdbarch *gdbarch,
+						  struct type *valtype,
+						  struct regcache *regcache,
+						  void *readbuf,
+						  const void *writebuf);
 
 /* Implementation of extract return value that grubs around in the
    register cache.  */

@@ -1091,36 +1091,20 @@ print_return_value (int struct_return, struct type *value_type)
      inferior function call code.  In fact, when inferior function
      calls are made async, this will likely be made the norm.  */
 
-  if (gdbarch_return_value_p (gdbarch))
+  switch (gdbarch_return_value (gdbarch, value_type, NULL, NULL, NULL))
     {
-      switch (gdbarch_return_value (gdbarch, value_type, NULL, NULL, NULL))
-	{
-	case RETURN_VALUE_REGISTER_CONVENTION:
-	case RETURN_VALUE_ABI_RETURNS_ADDRESS:
-	  value = allocate_value (value_type);
-	  CHECK_TYPEDEF (value_type);
-	  gdbarch_return_value (current_gdbarch, value_type, stop_registers,
-				VALUE_CONTENTS_RAW (value), NULL);
-	  break;
-	case RETURN_VALUE_STRUCT_CONVENTION:
-	  value = NULL;
-	  break;
-	default:
-	  internal_error (__FILE__, __LINE__, "bad switch");
-	}
-    }
-  else if (struct_return && DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
-    {
-      CORE_ADDR addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (stop_registers);
-      if (!addr)
-	error ("Function return value unknown.");
-      value = value_at (value_type, addr, NULL);
-    }
-  else
-    {
+    case RETURN_VALUE_REGISTER_CONVENTION:
+    case RETURN_VALUE_ABI_RETURNS_ADDRESS:
       value = allocate_value (value_type);
-      EXTRACT_RETURN_VALUE (value_type, stop_registers,
-			    VALUE_CONTENTS_RAW (value));
+      CHECK_TYPEDEF (value_type);
+      gdbarch_return_value (current_gdbarch, value_type, stop_registers,
+			    VALUE_CONTENTS_RAW (value), NULL);
+      break;
+    case RETURN_VALUE_STRUCT_CONVENTION:
+      value = NULL;
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "bad switch");
     }
 
   if (value)

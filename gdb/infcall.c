@@ -939,7 +939,7 @@ the function call).", name);
 	 "struct return convention", check that PUSH_DUMMY_CALL isn't
 	 playing tricks.  */
       retval = value_at (value_type, struct_addr, NULL);
-    else if (gdbarch_return_value_p (current_gdbarch))
+    else
       {
 	/* This code only handles "register convention".  */
 	retval = allocate_value (value_type);
@@ -949,15 +949,6 @@ the function call).", name);
 	gdbarch_return_value (current_gdbarch, value_type, retbuf,
 			      VALUE_CONTENTS_RAW (retval) /*read*/,
 			      NULL /*write*/);
-      }
-    else
-      {
-	/* NOTE: cagney/2003-10-20: Unlike "gdbarch_return_value", the
-	   EXTRACT_RETURN_VALUE and DEPRECATED_USE_STRUCT_CONVENTION
-	   methods do not handle the edge case of a function returning
-	   a small structure / union in registers.  */
-	retval = allocate_value (value_type);
-	EXTRACT_RETURN_VALUE (value_type, retbuf, VALUE_CONTENTS_RAW (retval));
       }
     do_cleanups (retbuf_cleanup);
     return retval;

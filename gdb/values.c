@@ -1247,20 +1247,6 @@ using_struct_return (struct type *value_type, int gcc_p)
        code in "print_return_value".  */
     return 0;
 
-  if (!gdbarch_return_value_p (current_gdbarch))
-    {
-      /* FIXME: cagney/2003-10-01: The below is dead.  Instead an
-	 architecture should implement "gdbarch_return_value".  Using
-	 that new function it is possible to exactly specify the ABIs
-	 "struct return" vs "register return" conventions.  */
-      if (code == TYPE_CODE_STRUCT
-	  || code == TYPE_CODE_UNION
-	  || code == TYPE_CODE_ARRAY)
-	return DEPRECATED_USE_STRUCT_CONVENTION (gcc_p, value_type);
-      else
-	return 0;
-    }
-
   /* Probe the architecture for the return-value convention.  */
   return (gdbarch_return_value (current_gdbarch, value_type,
 				NULL, NULL, NULL)

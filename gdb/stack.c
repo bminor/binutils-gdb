@@ -1870,24 +1870,12 @@ If you continue, the return value that you specified will be ignored.\n";
   if (return_value != NULL)
     {
       struct type *return_type = VALUE_TYPE (return_value);
-      if (!gdbarch_return_value_p (current_gdbarch))
-	{
-	  STORE_RETURN_VALUE (return_type, current_regcache,
-			      VALUE_CONTENTS (return_value));
-	}
-      /* FIXME: cagney/2004-01-17: If extract_returned_value_address
-         is available and the function is using
-         RETURN_VALUE_STRUCT_CONVENTION, should use it to find the
-         address of the returned value so that it can be assigned.  */
-      else
-	{
-	  gdb_assert (gdbarch_return_value (current_gdbarch, return_type,
-					    NULL, NULL, NULL)
-		      == RETURN_VALUE_REGISTER_CONVENTION);
-	  gdbarch_return_value (current_gdbarch, return_type,
-				current_regcache, NULL /*read*/,
-				VALUE_CONTENTS (return_value) /*write*/);
-	}
+      gdb_assert (gdbarch_return_value (current_gdbarch, return_type,
+					NULL, NULL, NULL)
+		  == RETURN_VALUE_REGISTER_CONVENTION);
+      gdbarch_return_value (current_gdbarch, return_type,
+			    current_regcache, NULL /*read*/,
+			    VALUE_CONTENTS (return_value) /*write*/);
     }
 
   /* If we are at the end of a call dummy now, pop the dummy frame

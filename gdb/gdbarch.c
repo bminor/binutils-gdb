@@ -457,6 +457,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->convert_register_p = generic_convert_register_p;
   current_gdbarch->pointer_to_address = unsigned_pointer_to_address;
   current_gdbarch->address_to_pointer = unsigned_address_to_pointer;
+  current_gdbarch->return_value = legacy_return_value;
   current_gdbarch->extract_return_value = legacy_extract_return_value;
   current_gdbarch->store_return_value = legacy_store_return_value;
   current_gdbarch->deprecated_use_struct_convention = generic_use_struct_convention;
@@ -3456,7 +3457,7 @@ int
 gdbarch_return_value_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->return_value != NULL;
+  return gdbarch->return_value != legacy_return_value;
 }
 
 enum return_value_convention
@@ -3464,6 +3465,7 @@ gdbarch_return_value (struct gdbarch *gdbarch, struct type *valtype, struct regc
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->return_value != NULL);
+  /* Do not check predicate: gdbarch->return_value != legacy_return_value, allow call.  */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_return_value called\n");
   return gdbarch->return_value (gdbarch, valtype, regcache, readbuf, writebuf);

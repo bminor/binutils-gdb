@@ -541,7 +541,11 @@ F:DEPRECATED_STORE_STRUCT_RETURN:void:deprecated_store_struct_return:CORE_ADDR a
 # should take the type/value of the function to be called and not the
 # return type.  This is left as an exercise for the reader.
 
-M::enum return_value_convention:return_value:struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf:valtype, regcache, readbuf, writebuf
+# NOTE: cagney/2004-06-13: The function stack.c:return_command uses
+# the predicate with default hack to avoid calling STORE_RETURN_VALUE
+# (via legacy_return_value), when a small struct is involved.
+
+M:::enum return_value_convention:return_value:struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf:valtype, regcache, readbuf, writebuf:::legacy_return_value
 
 # The deprecated methods EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE,
 # DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS and

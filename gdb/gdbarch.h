@@ -1093,7 +1093,10 @@ extern void set_gdbarch_deprecated_store_struct_return (struct gdbarch *gdbarch,
 
 /* It has been suggested that this, well actually its predecessor,
    should take the type/value of the function to be called and not the
-   return type.  This is left as an exercise for the reader. */
+   return type.  This is left as an exercise for the reader.
+   NOTE: cagney/2004-06-13: The function stack.c:return_command uses
+   the predicate with default hack to avoid calling STORE_RETURN_VALUE
+   (via legacy_return_value), when a small struct is involved. */
 
 extern int gdbarch_return_value_p (struct gdbarch *gdbarch);
 

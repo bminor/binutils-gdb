@@ -1,5 +1,24 @@
 2004-06-20  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbarch.sh (RETURN_VALUE): Default to legacy_return_value.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* Makefile.in (arch-utils.o): Update dependencies.
+	* values.c (using_struct_return): Move code calling
+	USE_STRUCT_CONVENTION to legacy_return_value, simplify.
+	* stack.c (return_command): Move code calling STORE_RETURN_VALUE
+	to legacy_return_value, simplify.
+	* infcmd.c (print_return_value): Move code calling
+	DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS and EXTRACT_RETURN_VALUE
+	to legacy_return_value, simplify.
+	* infcall.c (call_function_by_hand): Move code calling
+	EXTRACT_RETURN_VALUE to legacy_return_value, simplify.
+	* arch-utils.c: Update copyright.  Include "gdbcore.h".
+	(legacy_return_value): New function.
+	* arch-utils.h: Update copyright.
+	(legacy_return_value): Declare.
+	
+2004-06-20  Andrew Cagney  <cagney@gnu.org>
+
 	* gdbarch.sh (DEPRECATED_USE_STRUCT_CONVENTION): Deprecated.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* values.c (using_struct_return): Update call.
