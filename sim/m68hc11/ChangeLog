@@ -3,11 +3,8 @@
 	* dv-m68hc11.c (m68hc11cpu_io_read_buffer): Translate memory
 	bank window to some virtual address to read from extended memory.
 	(m68hc11cpu_io_write_buffer): Likewise for writing.
-	(attach_m68hc11_regs): When use_bank property is defined, attached
+	(attach_m68hc11_regs): When use_bank property is defined, attach
 	to the 68HC12 16K memory bank window.
-
-2002-08-13  Stephane Carrez  <Stephane.Carrez@nerim.fr>
-
 	* interp.c (sim_hw_configure): Create memory region for banked
 	memory.
 
