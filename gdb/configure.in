@@ -446,6 +446,20 @@ AC_ARG_WITH(sim-gpu2,
     fi ;;
   *)  AC_MSG_WARN([--with-sim-gpu2 option invalid for target ${target}])
 esac])dnl
+
+# Enable target accurate FP library
+AC_ARG_WITH(sim-funit,
+[  --with-sim-funit=path		Use target FP lib under given directory],
+[case "${target}" in
+  mips*-sky-*)
+    if test -d "${withval}"
+    then
+      LIBS="${LIBS} -L${withval}/lib -lfunit"
+    else
+      AC_MSG_WARN([Directory ${withval} does not exist.])
+    fi ;;
+  *)  AC_MSG_WARN([--with-sim-funit option invalid for target ${target}])
+esac])dnl
 # end-sanitize-sky
 
 AC_SUBST(ENABLE_CFLAGS)

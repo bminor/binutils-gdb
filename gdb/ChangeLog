@@ -1,3 +1,8 @@
+start-sanitize-sky
+Wed Tue 21 17:29:48 1998  Jim Lemke  <jlemke@cygnus.com>
+	* configure.in: Add configure option --with-sim-funit.
+
+end-sanitize-sky
 Tue Apr 21 11:20:54 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* mips-tdep.c (gdb_print_insn_mips): Disassemble MIPS instructions

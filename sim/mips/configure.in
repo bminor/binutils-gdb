@@ -246,6 +246,16 @@ then
 else
   AC_MSG_ERROR("Directory ${withval} does not exist.");
 fi])dnl
+# Enable target accurate FP library
+AC_ARG_WITH(sim-funit,
+[  --with-sim-funit=path		Use target FP library under given directory],
+[if test -d "${withval}"
+then
+  SIM_SUBTARGET="${SIM_SUBTARGET} -DSKY_FUNIT -I${withval}/include"
+  mips_extra_libs="${mips_extra_libs} -L${withval}/lib -lfunit"
+else
+  AC_MSG_ERROR("Directory ${withval} does not exist.");
+fi])dnl
 # end-sanitize-sky
 AC_SUBST(mips_extra_libs)
 
