@@ -1,3 +1,7 @@
+2003-01-02  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* gas/iq2000: New testsuite.
+
 2003-01-02  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/elf_arch_mips32r2.d: Fix file description comment.
