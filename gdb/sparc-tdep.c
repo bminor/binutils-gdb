@@ -2207,6 +2207,124 @@ gdb_print_insn_sparc (bfd_vma memaddr, disassemble_info *info)
   return print_insn_sparc (memaddr, info);
 }
 
+
+#define SPARC_F0_REGNUM		FP0_REGNUM	/* %f0 */
+#define SPARC_F1_REGNUM		(FP0_REGNUM + 1)/* %f1 */
+#define SPARC_O0_REGNUM		O0_REGNUM	/* %o0 */
+#define SPARC_O1_REGNUM		O1_REGNUM	/* %o1 */
+
+/* Push the arguments onto the stack and into the appropriate registers.  */
+
+static CORE_ADDR
+sparc32_do_push_arguments (struct regcache *regcache, int nargs,
+			   struct value **args, CORE_ADDR sp)
+{
+  CORE_ADDR *addr;
+  int size = 0;
+  int i;
+
+  /* Structure, union and quad-precision arguments are passed by
+     reference.  We allocate space for these arguments on the stack
+     and record their addresses in an array.  Array elements for
+     arguments that are passed by value will be set to zero.*/
+  addr = alloca (nargs * sizeof (CORE_ADDR));
+
+  for (i = nargs - 1; i >= 0; i--)
+    {
+      struct type *type = VALUE_ENCLOSING_TYPE (args[i]);
+      enum type_code code = TYPE_CODE (type);
+      int len = TYPE_LENGTH (type);
+
+      /* Push the contents of structure, union and quad-precision
+	 arguments on the stack.  */
+      if (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION || len > 8)
+	{
+	  /* Keep the stack doubleword aligned.  */
+	  sp -= (len + 7) & ~7;
+	  write_memory (sp, VALUE_CONTENTS_ALL (args[i]), len);
+	  addr[i] = sp;
+	  size += 4;
+	}
+      else
+	{
+	  addr[i] = 0;
+	  size += (len > 4) ? 8 : 4;
+	}
+    }
+
+  /* The needed space for outgoing arguments should be a multiple of 4.  */
+  gdb_assert (size % 4 == 0);
+
+  /* Make sure we reserve space for the first six words of arguments
+     in the stack frame, even if we don't need them.  */
+  if (size < 24)
+    sp -= (24 - size);
+
+  /* Make sure we end up with a doubleword aligned stack in the end.
+     Reserve an extra word if necessary in order to accomplish this.  */
+  if ((sp - size) % 8 == 0)
+    sp -= 4;
+
+  /* Now push the arguments onto the stack.  */
+  for (i = nargs - 1; i >=0; i--)
+    {
+      char buf[8];
+      int len;
+
+      if (addr[i])
+	{
+	  store_unsigned_integer (buf, 4, addr[i]);
+	  len = 4;
+	}
+      else
+	{
+	  struct value *arg = args[i];
+
+	  len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
+
+	  /* Expand signed and unsigned bytes and halfwords as needed.  */
+	  if (len < 4)
+	    {
+	      arg = value_cast (builtin_type_long, arg);
+	      len = 4;
+	    }
+	  else if (len > 4 && len < 8)
+	    {
+	      arg = value_cast (builtin_type_long_long, arg);
+	      len = 4;
+	    }
+
+	  gdb_assert (len == 4 || len == 8);
+	  memcpy (buf, VALUE_CONTENTS_ALL (arg), len);
+	}
+
+      /* We always write the argument word on the stack.  */
+      sp -= len;
+      write_memory (sp, buf, len);
+
+      /* If this argument occupies one of the first 6 words, write it
+         into the appropriate register too.  */
+      size -= len;
+      if (size < 24)
+	{
+	  int regnum = SPARC_O0_REGNUM + (size / 4);
+
+	  regcache_cooked_write (regcache, regnum, buf);
+	  if (len == 8 && size < 20)
+	    regcache_cooked_write (regcache, regnum + 1, buf + 4);
+	}
+    }
+
+  /* Reserve space for the struct/union return value pointer.  */
+  sp -= 4;
+
+  /* Stack should be doubleword aligned at this point.  */
+  gdb_assert (sp % 8 == 0);
+
+  /* Return the adjusted stack pointer.  */
+  return sp;
+}
+
 /* The SPARC passes the arguments on the stack; arguments smaller
    than an int are promoted to an int.  The first 6 words worth of 
    args are also passed in registers o0 - o5.  */
@@ -2215,70 +2333,26 @@ CORE_ADDR
 sparc32_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 			int struct_return, CORE_ADDR struct_addr)
 {
-  int i, j, oregnum;
-  int accumulate_size = 0;
-  struct sparc_arg
-    {
-      char *contents;
-      int len;
-      int offset;
-    };
-  struct sparc_arg *sparc_args =
-    (struct sparc_arg *) alloca (nargs * sizeof (struct sparc_arg));
-  struct sparc_arg *m_arg;
+  sp = sparc32_do_push_arguments (current_regcache, nargs, args, sp);
 
-  /* Promote arguments if necessary, and calculate their stack offsets
-     and sizes. */
-  for (i = 0, m_arg = sparc_args; i < nargs; i++, m_arg++)
+  /* FIXME: kettenis/20030525: We don't let this function set the
+     struct/union return pointer just yet.  */
+#if 0
+  if (struct_return)
     {
-      struct value *arg = args[i];
-      struct type *arg_type = check_typedef (VALUE_TYPE (arg));
-      /* Cast argument to long if necessary as the compiler does it too.  */
-      switch (TYPE_CODE (arg_type))
-	{
-	case TYPE_CODE_INT:
-	case TYPE_CODE_BOOL:
-	case TYPE_CODE_CHAR:
-	case TYPE_CODE_RANGE:
-	case TYPE_CODE_ENUM:
-	  if (TYPE_LENGTH (arg_type) < TYPE_LENGTH (builtin_type_long))
-	    {
-	      arg_type = builtin_type_long;
-	      arg = value_cast (arg_type, arg);
-	    }
-	  break;
-	default:
-	  break;
-	}
-      m_arg->len = TYPE_LENGTH (arg_type);
-      m_arg->offset = accumulate_size;
-      accumulate_size = (accumulate_size + m_arg->len + 3) & ~3;
-      m_arg->contents = VALUE_CONTENTS (arg);
-    }
+      char buf[4];
 
-  /* Make room for the arguments on the stack.  */
-  accumulate_size += DEPRECATED_CALL_DUMMY_STACK_ADJUST;
-  sp = ((sp - accumulate_size) & ~7) + DEPRECATED_CALL_DUMMY_STACK_ADJUST;
-
-  /* `Push' arguments on the stack.  */
-  for (i = 0, oregnum = 0, m_arg = sparc_args; 
-       i < nargs;
-       i++, m_arg++)
-    {
-      write_memory (sp + m_arg->offset, m_arg->contents, m_arg->len);
-      for (j = 0; 
-	   j < m_arg->len && oregnum < 6; 
-	   j += SPARC_INTREG_SIZE, oregnum++)
-	deprecated_write_register_gen (O0_REGNUM + oregnum, m_arg->contents + j);
+      /* The space for the struct/union return value pointer has
+         already been reserved.  */
+      store_unsigned_integer (buf, 4, struct_addr);
+      write (sp, buf, 4);
     }
 
   return sp;
+#else
+  return sp + 4;
+#endif
 }
-
-#define SPARC_F0_REGNUM		FP0_REGNUM	/* %f0 */
-#define SPARC_F1_REGNUM		(FP0_REGNUM + 1)/* %f1 */
-#define SPARC_O0_REGNUM		O0_REGNUM	/* %o0 */
-#define SPARC_O1_REGNUM		O1_REGNUM	/* %o1 */
 
 /* Extract from REGCACHE a function return value of type TYPE and copy
    that into VALBUF.

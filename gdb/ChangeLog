@@ -1,5 +1,11 @@
 2003-05-25  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.c (sparc32_do_push_arguments): New function.
+	(sparc32_push_arguments): Re-implement by calling
+	sparc32_do_push_arguments.
+
+2003-05-25  Mark Kettenis  <kettenis@gnu.org>
+
 	* sparc-tdep.c (SPARC_F0_REGNUM, SPARC_F1_REGNUM, SPARC_O0_REGNUM,
 	SPARC_O1_REGNUM): New defines.
 	(sparc32_extract_return_value): Rewrite to operate on a regcache.
