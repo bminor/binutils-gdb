@@ -153,6 +153,8 @@ philosopher (void *data)
 	pthread_mutex_unlock (&fork_mutex[(n + 1) % num_philosophers]);
 	random_delay ();
       }
+
+  return (void *) 0;
 }
 
 int

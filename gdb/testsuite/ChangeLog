@@ -1,5 +1,10 @@
 2002-02-23  Michael Chastain  <mec@shout.net>
 
+	* gdb.threads/linux-dp.c (philosopher): Add a return statement
+	to placate gcc.
+
+2002-02-23  Michael Chastain  <mec@shout.net>
+
 	* gdb.c++/templates.exp: Remove setup_xfail_format "stabs" on
 	test "ptype bint".  The test passes on all my stabs configurations.
 
