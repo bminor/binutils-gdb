@@ -1,3 +1,10 @@
+Tue Jul  4 03:43:49 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.asm/asm-source.exp: Use raw AS/LD instead of CC to
+ 	compile/link program.  Update line numbers.
+	* gdb.asm/d10v.inc: Define ``startup''.
+	* gdb.asm/asmsrc1.s: Add definition of _start.
+	
 Fri Jun 23 17:45:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/call-ar-st.exp: More rewrites of multi-line patterns.

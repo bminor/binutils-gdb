@@ -1,13 +1,24 @@
 	.include "common.inc"
 	.include "arch.inc"
 
+comment "WARNING: asm-source.exp checks for line numbers printed by gdb."
+comment "Be careful about changing this file without also changing"
+comment "asm-source.exp."
+
+	
+comment	"This file is not linked with crt0."
+comment	"Provide very simplistic equivalent."
+	
+	.global _start
+_start:
+	startup
+	call main
+	exit0
+
+
 comment "main routine for assembly source debugging test"
 comment "This particular testcase uses macros in <arch>.inc to achieve"
-comment "machine independence.  This file must be compiled with -Darch=foo."
-
-comment "WARNING: asm-source.exp checks for line numbers printed by gdb,"
-comment "therefore be careful about changing this file without also changing"
-comment "asm-source.exp."
+comment "machine independence."
 
 	.global main
 main:
