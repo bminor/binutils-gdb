@@ -1345,8 +1345,9 @@ coff-tic30.lo: coff-tic30.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/tic30.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 coff-tic80.lo: coff-tic80.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/tic80.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
-coff-tic54x.lo: coff-tic54x.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/tic54x.h \
-  $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
+coff-tic54x.lo: coff-tic54x.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/ti.h \
+  $(INCDIR)/coff/tic54x.h $(INCDIR)/coff/internal.h \
+  libcoff.h coffcode.h coffswap.h
 coff-u68k.lo: coff-u68k.c coff-m68k.c $(INCDIR)/coff/m68k.h \
   $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/bfdlink.h \
   coffcode.h coffswap.h

@@ -2064,6 +2064,7 @@ coff_set_arch_mach_hook (abfd, filehdr)
           break;
 #endif
         default:
+          arch = bfd_arch_obscure;
           (*_bfd_error_handler)
             (_("Unrecognized TI COFF target id '0x%x'"), 
              internal_f->f_target_id);

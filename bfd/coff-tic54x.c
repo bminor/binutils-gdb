@@ -1,5 +1,5 @@
 /* BFD back-end for TMS320C54X coff binaries.
-   Copyright (C) 1999,2000 Free Software Foundation, Inc.
+   Copyright (C) 1999, 2000 Free Software Foundation, Inc.
    Contributed by Timothy Wall (twall@cygnus.com)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -420,7 +420,7 @@ const bfd_target tic54x_coff0_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | HAS_LOAD_PAGE ),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT /*| HAS_LOAD_PAGE*/ ),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   '_',				/* leading symbol underscore */
@@ -464,7 +464,7 @@ const bfd_target tic54x_coff0_beh_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | HAS_LOAD_PAGE ),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT /*| HAS_LOAD_PAGE*/ ),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   '_',				/* leading symbol underscore */
@@ -509,7 +509,7 @@ const bfd_target tic54x_coff1_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | HAS_LOAD_PAGE ),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT /*| HAS_LOAD_PAGE*/ ),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   '_',				/* leading symbol underscore */
@@ -554,7 +554,7 @@ const bfd_target tic54x_coff1_beh_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | HAS_LOAD_PAGE ),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT /*| HAS_LOAD_PAGE*/ ),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   '_',				/* leading symbol underscore */
@@ -599,7 +599,7 @@ const bfd_target tic54x_coff2_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | HAS_LOAD_PAGE ),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT /*| HAS_LOAD_PAGE*/ ),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   '_',				/* leading symbol underscore */
@@ -644,7 +644,7 @@ const bfd_target tic54x_coff2_beh_vec =
 
   (HAS_RELOC | EXEC_P |		/* object flags */
    HAS_LINENO | HAS_DEBUG |
-   HAS_SYMS | HAS_LOCALS | WP_TEXT | HAS_LOAD_PAGE ),
+   HAS_SYMS | HAS_LOCALS | WP_TEXT /*| HAS_LOAD_PAGE*/ ),
 
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   '_',				/* leading symbol underscore */
