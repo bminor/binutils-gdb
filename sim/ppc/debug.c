@@ -63,6 +63,8 @@ static trace_option_descriptor trace_description[] = {
   { trace_core_device, "core-device" },
   { trace_stack_device, "stack-device" },
   /* misc */
+  { trace_opts, "options", "Print options simulator was compiled with" },
+  { trace_tbd, "tbd", "Trace any missing features" },
   /* sentinal */
   { nr_trace_options, NULL },
 };

@@ -1,3 +1,23 @@
+Thu Nov 16 09:52:26 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* table.c (table_entry_read): Allow the annex to have blank lines.
+
+	* ppc-instructions: Change lines in model stuff that just have a
+	tab to just newline.  Add 601 support.  Document most instructions
+	in terms of model specific timing information.  Drop 'FUNCTION'
+	from PPC_FUNCTION_UNIT_xxx enums.  Change PPC_UNIT_UNKNOWN ->
+	PPC_UNIT_BAD.  Add TRACE(trace_tbd) for all data cache
+	instruction.s.  Signal illegal instruciton if data cache block
+	invalidate is issued from problem state.
+
+	* igen.c (max_model_fields_len): New static to keep track of the
+	max size for the model specific fields.
+	(model_c_insn): Use max_model_fields_len to size fields.
+	(insn_table_insert_insn): Set max_model_fields_len.
+	(model_table_insert): Ditto.
+
+	* debug.c (trace_description): Add support for trace_tbd.
+
 Wed Nov 15 17:32:13 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* cpu.h (cpu_model): Add declaration.

@@ -44,12 +44,14 @@ struct _table {
   char *pos;
   int line_nr;
   int nr_fields;
+  int nr_model_fields;
   char *file_name;
 };
 
 extern table *
 table_open(char *file_name,
-	   int nr_fields)
+	   int nr_fields,
+	   int nr_model_fields)
 {
   int fd;
   struct stat stat_buf;
@@ -59,6 +61,7 @@ table_open(char *file_name,
   file = ZALLOC(table);
   ASSERT(file != NULL);
   file->nr_fields = nr_fields;
+  file->nr_model_fields = nr_model_fields;
 
   /* save the file name */
   file->file_name = (char*)zalloc(strlen(file_name) + 1);
@@ -158,7 +161,45 @@ table_entry_read(table *file)
   file->line_nr++;
   entry->line_nr = file->line_nr;
 
-  /* if following lines tab indented, put in the annex */
+  /* if following lines begin with a star, add them to the model
+     section.  */
+  while ((file->nr_model_fields > 0) && (*file->pos == '*')) {
+    table_model_entry *model = (table_model_entry*)zalloc(sizeof(table_model_entry)
+							  + (file->nr_model_fields + 1) * sizeof(char*));
+    if (entry->model_last)
+      entry->model_last->next = model;
+    else
+      entry->model_first = model;
+    entry->model_last = model;
+
+    /* break the line into its colon delimitered fields */
+    file->pos++;
+    for (field = 0; field < file->nr_model_fields-1; field++) {
+      model->fields[field] = file->pos;
+      while(*file->pos && *file->pos != ':' && *file->pos != '\n')
+	file->pos++;
+      if (*file->pos == ':') {
+	*file->pos = '\0';
+	file->pos++;
+      }
+    }
+
+    /* any trailing stuff not the last field */
+    ASSERT(field == file->nr_model_fields-1);
+    model->fields[field] = file->pos;
+    while (*file->pos && *file->pos != '\n') {
+      file->pos++;
+    }
+    if (*file->pos == '\n') {
+      *file->pos = '\0';
+      file->pos++;
+    }
+
+    file->line_nr++;
+    model->line_nr = file->line_nr;
+  }
+
+  /* if following lines are tab indented, put in the annex */
   if (*file->pos == '\t') {
     entry->annex = file->pos;
     do {
@@ -166,8 +207,18 @@ table_entry_read(table *file)
 	file->pos++;
       } while (*file->pos != '\0' && *file->pos != '\n');
       if (*file->pos == '\n') {
-	file->pos++;
+	char *save_pos = ++file->pos;
+	int extra_lines = 0;
 	file->line_nr++;
+	/* Allow tab indented to have blank lines */
+	while (*save_pos == '\n') {
+	  save_pos++;
+	  extra_lines++;
+	}
+	if (*save_pos == '\t') {
+	  file->pos = save_pos;
+	  file->line_nr += extra_lines;
+	}
       }
     } while (*file->pos != '\0' && *file->pos == '\t');
     if (file->pos[-1] == '\n')

@@ -637,6 +637,8 @@ static insn *last_model_internal;
 static insn *model_data;
 static insn *last_model_data;
 
+static int max_model_fields_len;
+
 static void
 insn_table_insert_function(insn_table *table,
 			   table_entry *file_entry)
@@ -672,6 +674,15 @@ insn_table_insert_insn(insn_table *table,
      is correct.  */
   for(insn_model_ptr = file_entry->model_first; insn_model_ptr; insn_model_ptr = insn_model_ptr->next) {
     char *name = insn_model_ptr->fields[insn_model_name];
+    int len = strlen (insn_model_ptr->fields[insn_model_fields]);
+
+    while (len > 0 && isspace(*insn_model_ptr->fields[insn_model_fields])) {
+      len--;
+      insn_model_ptr->fields[insn_model_fields]++;
+    }
+
+    if (max_model_fields_len < len)
+      max_model_fields_len = len;
 
     for(model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
       if (strcmp(name, model_ptr->printable_name) == 0) {
@@ -956,12 +967,21 @@ static void
 model_table_insert(insn_table *table,
 		   table_entry *file_entry)
 {
+  int len;
+
   /* create a new model */
   model *new_model = ZALLOC(model);
 
   new_model->name = file_entry->fields[model_identifer];
   new_model->printable_name = file_entry->fields[model_name];
   new_model->insn_default = file_entry->fields[model_default];
+
+  while (*new_model->insn_default && isspace(*new_model->insn_default))
+    new_model->insn_default++;
+
+  len = strlen(new_model->insn_default);
+  if (max_model_fields_len < len)
+    max_model_fields_len = len;
 
   /* append it to the end of the model list */
   if (last_model)
@@ -3079,7 +3099,8 @@ model_c_insn(insn_table *entry,
 
   while (model_ptr) {
     if (model_ptr->fields[insn_model_name] == current_name) {
-      lf_printf(file, "  { %-48s },\t/* %s */\n",
+      lf_printf(file, "  { %-*s },  /* %s */\n",
+		max_model_fields_len,
 		model_ptr->fields[insn_model_fields],
 		instruction->file_entry->fields[insn_name]);
       return;
@@ -3088,7 +3109,8 @@ model_c_insn(insn_table *entry,
     model_ptr = model_ptr->next;
   }
 
-  lf_printf(file, "  { %-48s },\t/* %s */\n",
+  lf_printf(file, "  { %-*s },  /* %s */\n",
+	    max_model_fields_len,
 	    data_ptr->model_ptr->insn_default,
 	    instruction->file_entry->fields[insn_name]);
 }
@@ -3156,30 +3178,6 @@ gen_model_c(insn_table *table, lf *file)
   for(insn_ptr = model_internal; insn_ptr; insn_ptr = insn_ptr->next) {
     model_c_or_h_function(table, file, insn_ptr->file_entry, "STATIC_INLINE_MODEL");
   }
-
-  lf_printf(file, "/* Insn functional unit info */\n");
-  for(model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
-    model_c_passed_data data;
-
-    lf_printf(file, "static const model_time model_time_%s[] = {\n", model_ptr->name);
-    data.file = file;
-    data.model_ptr = model_ptr;
-    insn_table_traverse_insn(table,
-			     (void *)&data,
-			     model_c_insn);
-
-    lf_printf(file, "};\n");
-    lf_printf(file, "\n");
-    lf_printf(file, "\f\n");
-  }
-
-  lf_printf(file, "STATIC_MODEL const model_time *const model_time_mapping[ (int)nr_models ] = {\n");
-  lf_printf(file, "  (const model_time *const)0,\n");
-  for(model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
-    lf_printf(file, "  model_time_%s,\n", model_ptr->name);
-  }
-  lf_printf(file, "};\n");
-  lf_printf(file, "\n");
 
   for(insn_ptr = model_internal; insn_ptr; insn_ptr = insn_ptr->next) {
     model_c_function(table, file, insn_ptr->file_entry, "STATIC_INLINE_MODEL");
@@ -3250,6 +3248,30 @@ gen_model_c(insn_table *table, lf *file)
     lf_printf(file, "}\n");
     lf_printf(file, "\n");
   }
+
+  lf_printf(file, "/* Insn functional unit info */\n");
+  for(model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
+    model_c_passed_data data;
+
+    lf_printf(file, "static const model_time model_time_%s[] = {\n", model_ptr->name);
+    data.file = file;
+    data.model_ptr = model_ptr;
+    insn_table_traverse_insn(table,
+			     (void *)&data,
+			     model_c_insn);
+
+    lf_printf(file, "};\n");
+    lf_printf(file, "\n");
+    lf_printf(file, "\f\n");
+  }
+
+  lf_printf(file, "STATIC_MODEL const model_time *const model_time_mapping[ (int)nr_models ] = {\n");
+  lf_printf(file, "  (const model_time *const)0,\n");
+  for(model_ptr = models; model_ptr; model_ptr = model_ptr->next) {
+    lf_printf(file, "  model_time_%s,\n", model_ptr->name);
+  }
+  lf_printf(file, "};\n");
+  lf_printf(file, "\n");
 
   lf_printf(file, "\f\n");
   lf_printf(file, "/* map model enumeration into printable string */\n");
