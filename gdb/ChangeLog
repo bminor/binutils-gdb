@@ -1,3 +1,12 @@
+2004-09-01  Andrew Cagney  <cagney@gnu.org>
+
+	* frame.c: Include "objfiles.h".
+	(inside_main_func): New function.
+	(get_prev_frame): Use new inside_main_func.
+	* Makefile.in (frame.o): Update dependencies.
+	* defs.h (inside_main_func): Delete declaration.
+	* blockframe.c (inside_main_func): Delete function.
+
 2004-08-31  Jim Blandy  <jimb@redhat.com>
 
 	* dwarf2read.c (is_vtable_name): New function, based on logic from

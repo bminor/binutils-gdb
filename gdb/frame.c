@@ -40,6 +40,7 @@
 #include "command.h"
 #include "gdbcmd.h"
 #include "observer.h"
+#include "objfiles.h"
 
 static struct frame_info *get_prev_frame_1 (struct frame_info *this_frame);
 
@@ -1108,6 +1109,27 @@ frame_debug_got_null_frame (struct ui_file *file,
     }
 }
 
+/* Is this (non-sentinel) frame in the "main"() function?  */
+
+static int
+inside_main_func (struct frame_info *this_frame)
+{
+  struct minimal_symbol *msymbol;
+  CORE_ADDR maddr;
+
+  if (symfile_objfile == 0)
+    return 0;
+  msymbol = lookup_minimal_symbol (main_name (), NULL, symfile_objfile);
+  if (msymbol == NULL)
+    return 0;
+  /* Make certain that the code, and not descriptor, address is
+     returned.  */
+  maddr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+					      SYMBOL_VALUE_ADDRESS (msymbol),
+					      &current_target);
+  return maddr == get_frame_func (this_frame);
+}
+
 /* Return a structure containing various interesting information about
    the frame that called THIS_FRAME.  Returns NULL if there is entier
    no such frame or the frame fails any of a set of target-independent
@@ -1163,17 +1185,13 @@ get_prev_frame (struct frame_info *this_frame)
      get_current_frame().  */
   gdb_assert (this_frame != NULL);
 
-  /* Make sure we pass an address within THIS_FRAME's code block to
-     inside_main_func().  Otherwise, we might stop unwinding at a
-     function which has a call instruction as its last instruction if
-     that function immediately precedes main().  */
   if (this_frame->level >= 0
       && !backtrace_past_main
-      && inside_main_func (get_frame_address_in_block (this_frame)))
-    /* Don't unwind past main(), but always unwind the sentinel frame.
-       Note, this is done _before_ the frame has been marked as
-       previously unwound.  That way if the user later decides to
-       allow unwinds past main(), that just happens.  */
+      && inside_main_func (this_frame))
+    /* Don't unwind past main().  Note, this is done _before_ the
+       frame has been marked as previously unwound.  That way if the
+       user later decides to enable unwinds past main(), that will
+       automatically happen.  */
     {
       frame_debug_got_null_frame (gdb_stdlog, this_frame, "inside main func");
       return NULL;

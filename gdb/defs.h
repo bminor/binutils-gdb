@@ -340,8 +340,6 @@ struct frame_info;
 
 extern int inside_entry_func (struct frame_info *this_frame);
 
-extern int inside_main_func (CORE_ADDR pc);
-
 /* From utils.c */
 
 extern void initialize_utils (void);
