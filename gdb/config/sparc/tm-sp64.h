@@ -179,13 +179,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define FCC2_REGNUM (C0_REGNUM + 45)		/* floating point condition code reg 1 */
 #define FCC3_REGNUM (C0_REGNUM + 46)		/* floating point condition code reg 2 */
 
-/* FIXME: PS_REGNUM is for a priviledged v8 register which doesn't exist
-   in v9 (in the same form).  We use bits of sparc-tdep.c which requires
-   PS_REGNUM.  So define it here to be an unused ASR reg so sparc-tdep.c will
-   compile.  What we really want to do is put some conditionals in sparc-tdep.c
-   (run time or compile time) or separate the v8 stuff out of sparc-tdep.c.  */
+/* FIXME: PS_REGNUM, FPS_REGNUM, CPS_REGNUM are for priviledged v8 registers
+   which don't exist in v9 (in the same form).  We use bits of sparc-tdep.c
+   which requires these, so define them here to be unused ASR regs so
+   sparc-tdep.c will compile.  What we really want to do is put some
+   conditionals in sparc-tdep.c (run time or compile time) or separate the v8
+   stuff out of sparc-tdep.c.  */
 
-#define PS_REGNUM (ASR_REGNUM (31))
+#define PS_REGNUM (ASR_REGNUM (29))
+#define FPS_REGNUM (ASR_REGNUM (30))
+#define CPS_REGNUM (ASR_REGNUM (31))
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.
@@ -251,12 +254,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
  ((N) < 32 ? builtin_type_long_long : (N) < 80 ? builtin_type_float : \
   builtin_type_long_long)
 
-/* We try to support both 32 bit and 64 bit pointers.  */
-/* FIXME: This is important for the present.  Don't remove until things
-   settle.  */
-extern int target_ptr_bit;
+/* We use to support both 32 bit and 64 bit pointers.
+   We can't anymore because TARGET_PTR_BIT must now be a constant.  */
 #undef  TARGET_PTR_BIT
-#define TARGET_PTR_BIT target_ptr_bit
+#define TARGET_PTR_BIT 64
 
 /* Store the address of the place in which to copy the structure the
    subroutine will return.  This is called from call_function. */
