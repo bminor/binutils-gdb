@@ -1,3 +1,8 @@
+2003-03-08  Andrew Cagney  <cagney@redhat.com>
+
+	* valarith.c (value_subscripted_rvalue): Copy the array's REGNO to
+	the result.
+
 2003-03-07  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh: Don't generate two macro definitions when an
