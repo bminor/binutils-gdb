@@ -40,9 +40,9 @@ operands.d
 operands.s
 p2410.s
 p2663.s
+pcrel.d
+pcrel.s
 pic1.s
-schwab.d
-schwab.s
 t2.s
 
 Things-to-lose:

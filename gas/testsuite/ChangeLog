@@ -1,3 +1,8 @@
+Mon Jul  8 14:27:39 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/m68k/pcrel.d: Rename from schwab.d.
+	* gas/m68k/pcrel.s: Rename from schwab.s.
+
 Mon Jul  8 14:23:26 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* gas/m68k/schwab.d: Correct for ELF format.

@@ -1,4 +1,4 @@
-#name: PC-relative relocations
+#name: pcrel
 #objdump: -drs -j .text
 
 .*:     file format .*
