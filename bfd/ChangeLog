@@ -1,3 +1,13 @@
+Mon Nov  9 23:58:17 1992  John Gilmore  (gnu@cygnus.com)
+
+	* opncls.c (bfd_fdopenr, bfd_close):  Add doc about cacheing
+	and about when file descriptors are closed.
+
+Sat Nov  7 00:42:20 1992  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* bout.c (b_out_squirt_out_relocs): Make sure alignment relocs get
+	written out correctly.
+
 Thu Nov  5 15:34:19 1992  Ian Lance Taylor  (ian@cygnus.com)
 
 	* section.c: New section bit SEC_SHARED_LIBRARY.
