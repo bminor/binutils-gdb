@@ -236,7 +236,7 @@ language support	(Blanket Write Privs Maintainers)
   C++			Daniel Jacobowitz	dan@debian.org
   Java support		(Global Maintainers)
   Pascal support	Pierre Muller		muller@sources.redhat.com
-
+  Objective C support   Adam Fedor		fedor@gnu.org
 shared libs (devolved)	Kevin Buettner		kevinb@redhat.com
   xcoffsolib		Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 

@@ -1,3 +1,8 @@
+2003-08-09  Andrew Cagney  <cagney@redhat.com>
+
+	* MAINTAINERS (language support): List Adam Fedor as Objective C
+	maintainer.
+
 2003-08-08  J. Brobecker  <brobecker@gnat.com>
 
 	* NEWS (Multi-arched targets): Document that all hppa-hpux targets
