@@ -1,3 +1,8 @@
+2001-03-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* solib-aix5.c (aix5_relocate_main_executable): Don't use ANOFFSET
+	as an lvalue.
+
 2001-03-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS (paper trail): Update.
