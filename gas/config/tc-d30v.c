@@ -759,13 +759,14 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 
   if (exec_type == EXEC_SEQ
       && (opcode1->op->flags_used & (FLAG_JMP | FLAG_JSR))
+      && ((opcode1->op->flags_used & FLAG_DELAY) == 0)
       && ((opcode1->ecc == ECC_AL) || ! Optimizing))
     {
-      /* Unconditional branches kill instructions in the right bin.
-	 Conditional branches don't always but if we are not
-	 optimizing, then we want to produce an error about such
-	 constructs.  For the purposes of this test, subroutine
-	 calls are considered to be branches.  */
+      /* Unconditional, non-delayed branches kill instructions in
+	 the right bin.  Conditional branches don't always but if
+	 we are not optimizing, then we have been asked to produce
+	 an error about such constructs.  For the purposes of this
+	 test, subroutine calls are considered to be branches.  */
       write_1_short (opcode1, insn1, fx->next, false);
       return 1;
     }
@@ -799,10 +800,11 @@ write_2_short (opcode1, insn1, opcode2, insn2, exec_type, fx)
 	    }
 	}
       else if (opcode1->op->flags_used & (FLAG_JMP | FLAG_JSR)
+	       && ((opcode1->op->flags_used & FLAG_DELAY) == 0)
 	       && ((opcode1->ecc == ECC_AL) || ! Optimizing))
 	{
-	  /* We must emit branch type instruction on its own with
-	     nothing in the right container.  */
+	  /* We must emit (non-delayed) branch type instructions
+	     on their own with nothing in the right container.  */
 	  write_1_short (opcode1, insn1, fx->next, false);
 	  return 1;
 	}
@@ -1725,26 +1727,25 @@ md_pcrel_from_section (fixp, sec)
 
 int
 md_apply_fix3 (fixp, valuep, seg)
-     fixS *fixp;
-     valueT *valuep;
+     fixS * fixp;
+     valueT * valuep;
      segT seg;
 {
-  char *where;
+  char * where;
   unsigned long insn, insn2;
   long value;
 
   if (fixp->fx_addsy == (symbolS *) NULL)
     {
-      value = *valuep;
+      value = * valuep;
       fixp->fx_done = 1;
     }
   else if (fixp->fx_pcrel)
-    {
-      value = *valuep;
-    }
+    value = * valuep;
   else
     {
       value = fixp->fx_offset;
+      
       if (fixp->fx_subsy != (symbolS *) NULL)
 	{
 	  if (S_GET_SEGMENT (fixp->fx_subsy) == absolute_section) 
@@ -1765,23 +1766,30 @@ md_apply_fix3 (fixp, valuep, seg)
   
   switch (fixp->fx_r_type)
     {
-    case BFD_RELOC_8:
-      /* Caused by a bad .byte directive.  */
-      as_fatal (_("line %d: unable to place address of symbol '%s' into a byte"),
-		fixp->fx_line, S_GET_NAME (fixp->fx_addsy));
-      break;
+    case BFD_RELOC_8:  /* Caused by a bad .byte directive.  */
+      /* Drop trhough.  */
       
-    case BFD_RELOC_16:
-      /* Caused by a bad .short directive.  */
-      as_fatal (_("line %d: unable to place address of symbol '%s' into a short"),
-		fixp->fx_line, S_GET_NAME (fixp->fx_addsy));
-      break;
+    case BFD_RELOC_16:  /* Caused by a bad .short directive.  */
+      /* Drop through.  */
       
-    case BFD_RELOC_64:
-      /* Caused by a bad .quad directive.  */
-      as_fatal (_("line %d: unable to place address of symbol '%s' into a .quad"),
-		fixp->fx_line, S_GET_NAME (fixp->fx_addsy));
-      break;
+    case BFD_RELOC_64:  /* Caused by a bad .quad directive.  */
+      {
+	char * size;
+
+	size = (fixp->fx_r_type == BFD_RELOC_8) ? _("byte")
+	  : (fixp->fx_r_type == BFD_RELOC_16) ? _("short")
+	  : _("quad");
+
+	if (fixp->fx_addsy == NULL)
+	  as_bad (_("line %d: unable to place address into a %s"),
+		    fixp->fx_line, size);
+	else
+	  as_bad (_("line %d: unable to place address of symbol '%s' into a %s"),
+		    fixp->fx_line,
+		    S_GET_NAME (fixp->fx_addsy),
+		    size);
+	break;
+      }
       
     case BFD_RELOC_D30V_6:
       check_size (value, 6, fixp->fx_file, fixp->fx_line);

@@ -1,3 +1,8 @@
+Wed Oct  7 14:09:14 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-d30v.c (md_apply_fix3): Do not assume that bad
+	relocations are always associated with a symbol.
+
 Tue Oct  6 09:31:15 1998  Catherine Moore  <clm@cygnus.com>
 
         * tc-sparc.h (TC_FORCE_RELOCATION):  Define.
