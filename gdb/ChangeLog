@@ -1,5 +1,14 @@
 2003-03-10  Andrew Cagney  <cagney@redhat.com>
 
+	* regcache.h (regcache_cooked_read_ftype): Define.
+	(regcache_save, regcache_restore): Add a cooked_read parameter.
+	* regcache.c (regcache_save, regcache_restore): Update.
+	(do_cooked_read): New function.
+	(regcache_cpy): Pass do_cooked_read to regcache_save and
+	regcache_restore.
+
+2003-03-10  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (gdbarch_unwind_pc): New method.
 	* gdbarch.h, gdbarch.c: Regenerate.
 	* frame.c (frame_pc_unwind): Rewrite.  Prefer gdbarch_unwind_pc,

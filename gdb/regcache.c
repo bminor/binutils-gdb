@@ -389,58 +389,78 @@ register_buffer (struct regcache *regcache, int regnum)
 }
 
 void
-regcache_save (struct regcache *dst, struct regcache *src)
+regcache_save (struct regcache *dst, regcache_cooked_read_ftype *cooked_read,
+	       void *src)
 {
   struct gdbarch *gdbarch = dst->descr->gdbarch;
+  void *buf = alloca (max_register_size (gdbarch));
   int regnum;
-  /* The SRC and DST register caches had better belong to the same
-     architecture.  */
-  gdb_assert (src->descr->gdbarch == dst->descr->gdbarch);
   /* The DST should be `read-only', if it wasn't then the save would
-     end up trying to write the register values out through to the
+     end up trying to write the register values back out to the
      target.  */
-  gdb_assert (!src->readonly_p);
   gdb_assert (dst->readonly_p);
   /* Clear the dest.  */
   memset (dst->registers, 0, dst->descr->sizeof_cooked_registers);
   memset (dst->register_valid_p, 0, dst->descr->sizeof_cooked_register_valid_p);
   /* Copy over any registers (identified by their membership in the
-     save_reggroup) and mark them as valid.  The full [0
-     .. NUM_REGS+NUM_PSEUDO_REGS) range is checked since some
-     architectures need to save/restore `cooked' registers that live
-     in memory.  */
+     save_reggroup) and mark them as valid.  The full [0 .. NUM_REGS +
+     NUM_PSEUDO_REGS) range is checked since some architectures need
+     to save/restore `cooked' registers that live in memory.  */
   for (regnum = 0; regnum < dst->descr->nr_cooked_registers; regnum++)
     {
       if (gdbarch_register_reggroup_p (gdbarch, regnum, save_reggroup))
 	{
-	  regcache_cooked_read (src, regnum, register_buffer (dst, regnum));
-	  dst->register_valid_p[regnum] = 1;
+	  int valid = cooked_read (src, regnum, buf);
+	  if (valid)
+	    {
+	      memcpy (register_buffer (dst, regnum), buf,
+		      register_size (gdbarch, regnum));
+	      dst->register_valid_p[regnum] = 1;
+	    }
 	}
     }
 }
 
 void
-regcache_restore (struct regcache *dst, struct regcache *src)
+regcache_restore (struct regcache *dst,
+		  regcache_cooked_read_ftype *cooked_read,
+		  void *src)
 {
   struct gdbarch *gdbarch = dst->descr->gdbarch;
+  void *buf = alloca (max_register_size (gdbarch));
   int regnum;
-  gdb_assert (src->descr->gdbarch == dst->descr->gdbarch);
+  /* The dst had better not be read-only.  If it is, the `restore'
+     doesn't make much sense.  */
   gdb_assert (!dst->readonly_p);
-  gdb_assert (src->readonly_p);
   /* Copy over any registers, being careful to only restore those that
-     were both saved and need to be restored.  The full [0
-     .. NUM_REGS+NUM_PSEUDO_REGS) range is checked since some
-     architectures need to save/restore `cooked' registers that live
-     in memory.  */
-  for (regnum = 0; regnum < src->descr->nr_cooked_registers; regnum++)
+     were both saved and need to be restored.  The full [0 .. NUM_REGS
+     + NUM_PSEUDO_REGS) range is checked since some architectures need
+     to save/restore `cooked' registers that live in memory.  */
+  for (regnum = 0; regnum < dst->descr->nr_cooked_registers; regnum++)
     {
-      if (gdbarch_register_reggroup_p (gdbarch, regnum, restore_reggroup)
-	  && src->register_valid_p[regnum])
+      if (gdbarch_register_reggroup_p (gdbarch, regnum, restore_reggroup))
 	{
-	  regcache_cooked_write (dst, regnum, register_buffer (src, regnum));
+	  int valid = cooked_read (src, regnum, buf);
+	  if (valid)
+	    regcache_cooked_write (dst, regnum, buf);
 	}
     }
 }
+
+static int
+do_cooked_read (void *src, int regnum, void *buf)
+{
+  struct regcache *regcache = src;
+  if (!regcache_valid_p (regcache, regnum)
+      && regcache->readonly_p)
+    /* Don't even think about fetching a register from a read-only
+       cache when the register isn't yet valid.  There isn't a target
+       from which the register value can be fetched.  */
+    return 0;
+  regcache_cooked_read (regcache, regnum, buf);
+  return 1;
+}
+
 
 void
 regcache_cpy (struct regcache *dst, struct regcache *src)
@@ -452,9 +472,9 @@ regcache_cpy (struct regcache *dst, struct regcache *src)
   gdb_assert (src != dst);
   gdb_assert (src->readonly_p || dst->readonly_p);
   if (!src->readonly_p)
-    regcache_save (dst, src);
+    regcache_save (dst, do_cooked_read, src);
   else if (!dst->readonly_p)
-    regcache_restore (dst, src);
+    regcache_restore (dst, do_cooked_read, src);
   else
     regcache_cpy_no_passthrough (dst, src);
 }
