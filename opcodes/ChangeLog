@@ -1,3 +1,14 @@
+Tue May 12 11:46:31 1998  Richard Henderson  <rth@cygnus.com>
+
+	* d30v-opc.c (pre_defined_register): Remove alias for r0.
+
+start-sanitize-r5900
+Mon May 11 13:12:15 1998  Frank Ch. Eigler  <fche@cygnus.com>
+	
+	* mips-opc.c (break): Added 20-bit single-operand break
+	instruction for R5900 only.
+
+end-sanitize-r5900
 Sun May 10 22:37:22 1998  Jeffrey A Law  (law@cygnus.com)
 
 	* po/Make-in (install-info): New target.
