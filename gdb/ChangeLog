@@ -1,3 +1,75 @@
+2003-07-16  Michael Snyder  <msnyder@redhat.com>
+
+	* sh-tdep.c (sh_gdbarch_init): Fetch_registers for the sh3-dsp
+	should go thru sh_dsp_register_sim_regno, else the dsp regs
+	will not get the right values.
+
+2003-07-16  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh-tdep.c (sh_sh4_register_convert_to_virtual): Substitute call to
+	deprecated_store_floating by call to store_typed_floating.
+	(sh_sh4_register_convert_to_raw): Substitute call to
+	deprecated_extract_floating by call to extract_typed_floating.
+
+2003-07-16  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh-tdep.c (sh_gdbarch_init): Set double to 4 byte on sh2e and sh3e.
+
+2003-07-16  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh-tdep.c: Substitute calls to REGISTER_RAW_SIZE by calls to
+	register_size and calls to REGISTER_VIRTUAL_TYPE by calls to
+	gdbarch_register_type in 32 bit code throughout.  Avoid current_gdbarch
+	as possible.
+	(do_pseudo_register): Remove.
+	(sh_push_dummy_code): New function.
+	(sh64_store_struct_return): Rename from sh_store_struct_return.
+	Only called for sh64 now.
+	(sh_extract_struct_value_address): Regcache'ify.
+	(sh_push_dummy_call): Rename from sh_push_arguments.  Regcache'ify
+	and accomodate new tasks.
+	(sh64_push_return_address): Rename from sh_push_return_address.
+	Only called for sh64 now.
+	(sh_default_extract_return_value): Rename from sh_extract_return_value.
+	Regcache'ify.
+	(sh3e_sh4_extract_return_value): Regcache'ify.
+	(sh_default_store_return_value): Ditto.
+	(sh3e_sh4_store_return_value): Ditto.
+	(sh_default_register_byte): Remove.
+	(sh_sh4_register_byte): Remove.
+	(sh_default_register_raw_size): Remove.
+	(sh_sh4_register_raw_size): Remove.
+	(sh_register_virtual_size): Remove.
+	(sh_sh3e_register_virtual_type): Remove.
+	(sh_sh3e_register_type): New function.
+	(sh_sh4_register_virtual_type): Remove.
+	(sh_sh4_register_type): New function.
+	(sh_default_register_virtual_type): Remove.
+	(sh_default_register_type): New function.
+	(do_fv_register_info): Add parameters to accomodate call from
+	sh_print_registers_info.
+	(do_dr_register_info): Ditto.
+	(sh_print_pseudo_register): Rename from sh_do_pseudo_register.
+	Add parameters to accomodate call from sh_print_registers_info.
+	(sh_do_fp_register): Ditto.
+	(sh64_do_pseudo_register): Call do_dr_register_info,
+	do_fv_register_info and sh_do_fp_register with default parameters.
+	(sh_do_register): Add parameters to accomodate call from
+	sh_print_registers_info.
+	(sh_print_register): Ditto.
+	(sh_print_registers_info): Rename from sh_do_registers_info.
+	Add parameters to be used as gdbarch_print_registers_info
+	implementation.  Accomodate removed do_pseudo_register function
+	pointer.
+	(sh_compact_do_registers_info): Accomodate removed do_pseudo_register
+	function pointer. Call sh_print_register with default parameters.
+	(sh64_do_registers_info): Call sh_print_registers_info instead of
+	sh_do_registers_info.
+	(sh_gdbarch_init): Rearrange to cleanup and to allow easier
+	detection of deprecated vs. non-deprecated functionality.
+	Rename sh_call_dummy_words to sh64_call_dummy_words.  Remove
+	function pointer assignments by direct function calls.
+
 2003-07-15  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.c (get_frame_id): Use frame_unwind_find_by_frame.
