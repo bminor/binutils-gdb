@@ -1,5 +1,9 @@
 2004-03-31  Joel Brobecker  <brobecker@gnat.com>
 
+	* Makefile.in (ALL_SUBDIRS) Add gdb.ada.
+
+2004-03-31  Joel Brobecker  <brobecker@gnat.com>
+
 	* gdb.ada: New subdirectory.
 	* gdb.ada/Makefile.in: New file.
 	* gdb.ada/gnat_ada.gpr.in: New file.
