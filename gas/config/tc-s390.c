@@ -1227,6 +1227,7 @@ md_gather_operands (str, insn, opcode)
   /* Write out the instruction.  */
   f = frag_more (opcode->oplen);
   memcpy (f, insn, opcode->oplen);
+  dwarf2_emit_insn (opcode->oplen);
 
   /* Create any fixups.  At this point we do not use a
      bfd_reloc_code_real_type, but instead just use the
