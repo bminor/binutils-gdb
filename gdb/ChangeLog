@@ -1,3 +1,8 @@
+2001-12-18  Martin M. Hunt  <hunt@redhat.com>
+
+	* ser-tcp.c (tcp_open): Disable Nagle algorithm which
+	improves performance in some cases.
+
 2001-12-17  Ben Harris  <bjh21@netbsd.org>
 
 	* armbsd-nat.c: Remove file, renamed to armnbsd-nat.c.

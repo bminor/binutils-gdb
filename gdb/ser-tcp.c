@@ -165,6 +165,11 @@ tcp_open (struct serial *scb, const char *name)
   tmp = 0;
   ioctl (scb->fd, FIONBIO, &tmp);
 
+  /* Disable Nagle algorithm. Needed in some cases. */
+  tmp = 1;
+  setsockopt (scb->fd, IPPROTO_TCP, TCP_NODELAY,
+	      (char *)&tmp, sizeof (tmp));
+  
   /* If we don't do this, then GDB simply exits
      when the remote side dies.  */
   signal (SIGPIPE, SIG_IGN);
