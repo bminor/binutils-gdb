@@ -1,3 +1,7 @@
+2003-03-08  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbarch.sh (save_dummy_frame_tos): Add comment.
+
 2003-03-08  Andrew Cagney  <cagney@redhat.com>
 
 	* cli-out.c: Update copyright.
