@@ -1,3 +1,8 @@
+2000-01-07  David O'Brien  <obrien@BSDi.com>
+
+	* emultempl/elf32.em: Only perform Linux ld hints processing when
+	targeting Linux.
+
 2001-01-07  Philip Blundell  <philb@gnu.org>
 
 	* ld.texinfo (Bug Reporting): Update email address for reports.

@@ -425,11 +425,13 @@ EOF
 if [ "x${host}" = "x${target}" ] ; then
   case " ${EMULATION_LIBPATH} " in
   *" ${EMULATION_NAME} "*)
-cat >>e${EMULATION_NAME}.c <<EOF
+    case ${target} in
+      *-*-linux-gnu*)
+	cat >>e${EMULATION_NAME}.c <<EOF
 
 /* For a native linker, check the file /etc/ld.so.conf for directories
    in which we may find shared libraries.  /etc/ld.so.conf is really
-   only meaningful on Linux, but we check it on other systems anyhow.  */
+   only meaningful on Linux.  */
 
 static boolean gld${EMULATION_NAME}_check_ld_so_conf
   PARAMS ((const char *, int));
@@ -509,7 +511,9 @@ gld${EMULATION_NAME}_check_ld_so_conf (name, force)
 }
 
 EOF
-  ;;
+	# Linux
+	;;
+    esac
   esac
 fi
 cat >>e${EMULATION_NAME}.c <<EOF
@@ -695,10 +699,15 @@ EOF
 if [ "x${host}" = "x${target}" ] ; then
   case " ${EMULATION_LIBPATH} " in
   *" ${EMULATION_NAME} "*)
-cat >>e${EMULATION_NAME}.c <<EOF
+    case ${target} in
+      *-*-linux-gnu*)
+	cat >>e${EMULATION_NAME}.c <<EOF
 	  if (gld${EMULATION_NAME}_check_ld_so_conf (l->name, force))
 	    break;
 EOF
+	# Linux
+        ;;
+    esac
   ;;
   esac
 fi
