@@ -1,3 +1,8 @@
+Mon Mar 23 18:53:40 1998  Joel Sherrill  <joel@OARcorp.com>
+
+	* configure.in: (sh*-*-rtems*): Switched from ELF to COFF.
+	* configure: Rebuild.
+
 start-sanitize-sky
 Mon Mar 23 13:16:22 1998  Doug Evans  <devans@canuck.cygnus.com>
 
