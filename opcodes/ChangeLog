@@ -1,4 +1,9 @@
 start-sanitize-sky
+Tue Jan  6 13:08:14 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* txvu-dis.c (print_insn_txvu): Handle no separator between
+	upper and lower insn #ifndef VERTICAL_BAR_SEPARATOR.
+
 Mon Jan  5 13:41:07 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* txvu-dis.c, txvu-opc.c: New files.

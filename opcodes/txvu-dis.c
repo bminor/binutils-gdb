@@ -55,7 +55,14 @@ print_insn_txvu (pc, info)
 
   /* FIXME: This will need revisiting.  */
   print_insn (pc, info, upper, 0);
+#ifdef VERTICAL_BAR_SEPARATOR
   (*func) (stream, " | ");
+#else
+  /* Not sure how much whitespace to print here.
+     At least two spaces, not more than 9, and having columns line up somewhat
+     seems reasonable.  */
+  (*func) (stream, " \t");
+#endif
   print_insn (pc, info, lower, 1);
 
   return 8;
