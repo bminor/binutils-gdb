@@ -1,3 +1,19 @@
+2004-03-22  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.h (deprecated_pc_in_call_dummy): Rename
+	generic_pc_in_call_dummy.
+	* dummy-frame.h (pc_in_dummy_frame): Delete declaration.
+	* dummy-frame.c (deprecated_pc_in_call_dummy): Rename
+	generic_pc_in_call_dummy.
+	(pc_in_dummy_frame): Make static.
+	* gdbarch.sh (DEPRECATED_PC_IN_CALL_DUMMY): Update.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* dummy-frame.c (dummy_frame_sniffer): Simplify.
+	* frame.c (frame_type_from_pc): Call deprecated_pc_in_call_dummy.
+	(legacy_get_prev_frame): Ditto.
+	* inferior.h: Delete reference to generic_pc_in_call_dummy in
+	comment.
+	
 2004-03-21  Andrew Cagney  <cagney@redhat.com>
 
 	* inferior.h (deprecated_pc_in_call_dummy_at_entry_point): Delete

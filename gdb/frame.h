@@ -568,8 +568,8 @@ extern void generic_push_dummy_frame (void);
 extern void generic_pop_current_frame (void (*)(struct frame_info *));
 extern void generic_pop_dummy_frame (void);
 
-extern int generic_pc_in_call_dummy (CORE_ADDR pc,
-				     CORE_ADDR sp, CORE_ADDR fp);
+extern int deprecated_pc_in_call_dummy (CORE_ADDR pc, CORE_ADDR sp,
+					CORE_ADDR fp);
 
 /* NOTE: cagney/2002-06-26: Targets should no longer use this
    function.  Instead, the contents of a dummy frames registers can be

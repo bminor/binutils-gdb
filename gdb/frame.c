@@ -1154,12 +1154,8 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 static enum frame_type
 frame_type_from_pc (CORE_ADDR pc)
 {
-  /* FIXME: cagney/2002-11-24: Can't yet directly call
-     pc_in_dummy_frame() as some architectures don't set
-     PC_IN_CALL_DUMMY() to generic_pc_in_call_dummy() (remember the
-     latter is implemented by simply calling pc_in_dummy_frame).  */
   if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
-      && DEPRECATED_PC_IN_CALL_DUMMY (pc, 0, 0))
+      && deprecated_pc_in_call_dummy (pc, 0, 0))
     return DUMMY_FRAME;
   else
     {
@@ -1688,9 +1684,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      initialization, as seen in create_new_frame(), should occur
      before the INIT function has been called.  */
   if (DEPRECATED_USE_GENERIC_DUMMY_FRAMES
-      && (DEPRECATED_PC_IN_CALL_DUMMY_P ()
-	  ? DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (prev), 0, 0)
-	  : pc_in_dummy_frame (get_frame_pc (prev))))
+      && deprecated_pc_in_call_dummy (get_frame_pc (prev), 0, 0))
     prev->type = DUMMY_FRAME;
   else
     {

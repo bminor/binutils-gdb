@@ -347,7 +347,7 @@ struct gdbarch startup_gdbarch =
   0,  /* cannot_fetch_register */
   0,  /* cannot_store_register */
   0,  /* get_longjmp_target */
-  generic_pc_in_call_dummy,  /* deprecated_pc_in_call_dummy */
+  deprecated_pc_in_call_dummy,  /* deprecated_pc_in_call_dummy */
   0,  /* deprecated_init_frame_pc_first */
   0,  /* deprecated_init_frame_pc */
   0,  /* believe_pcc_promotion */
@@ -499,7 +499,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->register_sim_regno = legacy_register_sim_regno;
   current_gdbarch->cannot_fetch_register = cannot_register_not;
   current_gdbarch->cannot_store_register = cannot_register_not;
-  current_gdbarch->deprecated_pc_in_call_dummy = generic_pc_in_call_dummy;
+  current_gdbarch->deprecated_pc_in_call_dummy = deprecated_pc_in_call_dummy;
   current_gdbarch->convert_register_p = legacy_convert_register_p;
   current_gdbarch->register_to_value = legacy_register_to_value;
   current_gdbarch->value_to_register = legacy_value_to_register;
@@ -3767,7 +3767,7 @@ int
 gdbarch_deprecated_pc_in_call_dummy_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_pc_in_call_dummy != generic_pc_in_call_dummy;
+  return gdbarch->deprecated_pc_in_call_dummy != deprecated_pc_in_call_dummy;
 }
 
 int
@@ -3775,7 +3775,7 @@ gdbarch_deprecated_pc_in_call_dummy (struct gdbarch *gdbarch, CORE_ADDR pc, CORE
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->deprecated_pc_in_call_dummy != NULL);
-  /* Do not check predicate: gdbarch->deprecated_pc_in_call_dummy != generic_pc_in_call_dummy, allow call.  */
+  /* Do not check predicate: gdbarch->deprecated_pc_in_call_dummy != deprecated_pc_in_call_dummy, allow call.  */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_pc_in_call_dummy called\n");
   return gdbarch->deprecated_pc_in_call_dummy (pc, sp, frame_address);
