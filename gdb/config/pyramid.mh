@@ -1,4 +1,4 @@
-# Pyramid under OSx 4.0 (4.2bsd).
+# Host: Pyramid under OSx 4.0 (4.2bsd).
 
 #msg If you don't compile GDB with GCC, you'll need to add
 #msg ALLOCA=alloca.o and ALLOCA1=alloca.o to the Makefile.

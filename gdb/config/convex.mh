@@ -1,3 +1,3 @@
-# Convex Unix (4bsd)
+# Host: Convex Unix (4bsd)
 XDEPFILES= convex-xdep.o
 XM_FILE= xm-convex.h

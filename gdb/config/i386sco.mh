@@ -1,4 +1,4 @@
-# Intel 386 running SCO Unix (pre-SVR4)
+# Host: Intel 386 running SCO Unix (pre-SVR4)
 XDEPFILES= infptrace.o coredep.o i386-xdep.o
 XM_FILE= xm-i386sco.h
 XM_CLIBS= -lPW

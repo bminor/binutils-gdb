@@ -1,3 +1,3 @@
-# Sun 386i
+# Host: Sun 386i
 XDEPFILES= infptrace.o sun386-xdep.o
 XM_FILE= xm-sun386.h

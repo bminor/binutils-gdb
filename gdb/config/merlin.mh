@@ -1,4 +1,4 @@
-# Merlin running utek 2.1
+# Host: Merlin running utek 2.1
 XDEPFILES= infptrace.o coredep.o
 XM_FILE= xm-merlin.h
 # See SHELL_FILE in m-merlin.h for a explanation of this.

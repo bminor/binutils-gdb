@@ -1,4 +1,4 @@
-# Intel 386 running System V release 3.2
+# Host: Intel 386 running System V release 3.2
 XDEPFILES= infptrace.o coredep.o i386-xdep.o
 XM_FILE= xm-i386v32.h
 XM_CLIBS= -lPW

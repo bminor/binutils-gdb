@@ -1,4 +1,4 @@
-# Hewlett-Packard 9000 series 300, running HPUX
+# Host: Hewlett-Packard 9000 series 300, running HPUX
 # The following is true because gcc uses a different .o file format
 # than the native HPUX compiler
 #msg If you compile GDB with GCC on HPUX, you must make sure

@@ -1,4 +1,4 @@
-# AT&T 3b1/Unix pc
+# Host: AT&T 3b1/Unix pc
 # I don't think cc has been tried.  -traditional for <sys/ioctl.h>
 # (not sure whether necessary).
 CC= gcc -traditional
