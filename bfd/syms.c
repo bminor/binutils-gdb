@@ -1,24 +1,24 @@
 /* Generic symbol-table support for the BFD library.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
 SECTION
@@ -74,9 +74,9 @@ SUBSECTION
 |         if (storage_needed < 0)
 |           FAIL
 |
-|	  if (storage_needed == 0) {
-|	     return ;
-|	  }
+|	  if (storage_needed == 0)
+|	    return;
+|	  
 |	  symbol_table = (asymbol **) xmalloc (storage_needed);
 |	    ...
 |	  number_of_symbols =
@@ -85,9 +85,8 @@ SUBSECTION
 |         if (number_of_symbols < 0)
 |           FAIL
 |
-|	  for (i = 0; i < number_of_symbols; i++) {
-|	     process_symbol (symbol_table[i]);
-|	  }
+|	  for (i = 0; i < number_of_symbols; i++)
+|	    process_symbol (symbol_table[i]);
 
 	All storage for the symbols themselves is in an objalloc
 	connected to the BFD; it is freed when the BFD is closed.
@@ -108,25 +107,26 @@ SUBSECTION
 	example showing the creation of a symbol table with only one element:
 
 |	#include "bfd.h"
-|	main()
+|	int main (void)
 |	{
 |	  bfd *abfd;
 |	  asymbol *ptrs[2];
 |	  asymbol *new;
 |
-|	  abfd = bfd_openw("foo","a.out-sunos-big");
-|	  bfd_set_format(abfd, bfd_object);
-|	  new = bfd_make_empty_symbol(abfd);
+|	  abfd = bfd_openw ("foo","a.out-sunos-big");
+|	  bfd_set_format (abfd, bfd_object);
+|	  new = bfd_make_empty_symbol (abfd);
 |	  new->name = "dummy_symbol";
-|	  new->section = bfd_make_section_old_way(abfd, ".text");
+|	  new->section = bfd_make_section_old_way (abfd, ".text");
 |	  new->flags = BSF_GLOBAL;
 |	  new->value = 0x12345;
 |
 |	  ptrs[0] = new;
 |	  ptrs[1] = (asymbol *)0;
 |
-|	  bfd_set_symtab(abfd, ptrs, 1);
-|	  bfd_close(abfd);
+|	  bfd_set_symtab (abfd, ptrs, 1);
+|	  bfd_close (abfd);
+|	  return 0;
 |	}
 |
 |	./makesym
@@ -346,7 +346,7 @@ FUNCTION
 	bfd_is_local_label
 
 SYNOPSIS
-        bfd_boolean bfd_is_local_label(bfd *abfd, asymbol *sym);
+        bfd_boolean bfd_is_local_label (bfd *abfd, asymbol *sym);
 
 DESCRIPTION
 	Return TRUE if the given symbol @var{sym} in the BFD @var{abfd} is
@@ -438,7 +438,7 @@ FUNCTION
 	bfd_print_symbol_vandf
 
 SYNOPSIS
-	void bfd_print_symbol_vandf(bfd *abfd, PTR file, asymbol *symbol);
+	void bfd_print_symbol_vandf (bfd *abfd, PTR file, asymbol *symbol);
 
 DESCRIPTION
 	Print the value and flags of the @var{symbol} supplied to the
@@ -451,16 +451,14 @@ bfd_print_symbol_vandf (abfd, arg, symbol)
      asymbol *symbol;
 {
   FILE *file = (FILE *) arg;
+
   flagword type = symbol->flags;
+
   if (symbol->section != (asection *) NULL)
-    {
-      bfd_fprintf_vma (abfd, file,
-		       symbol->value + symbol->section->vma);
-    }
+    bfd_fprintf_vma (abfd, file,
+		     symbol->value + symbol->section->vma);
   else
-    {
-      bfd_fprintf_vma (abfd, file, symbol->value);
-    }
+    bfd_fprintf_vma (abfd, file, symbol->value);
 
   /* This presumes that a symbol can not be both BSF_DEBUGGING and
      BSF_DYNAMIC, nor more than one of BSF_FUNCTION, BSF_FILE, and
@@ -504,7 +502,7 @@ FUNCTION
 	_bfd_generic_make_empty_symbol
 
 SYNOPSIS
-	asymbol *_bfd_generic_make_empty_symbol (bfd *);
+	asymbol * _bfd_generic_make_empty_symbol (bfd *);
 
 DESCRIPTION
 	Create a new <<asymbol>> structure for the BFD @var{abfd}
@@ -634,7 +632,7 @@ DESCRIPTION
 	class of @var{symbol}, or '?' for an unknown class.
 
 SYNOPSIS
-	int bfd_decode_symclass(asymbol *symbol);
+	int bfd_decode_symclass (asymbol *symbol);
 */
 int
 bfd_decode_symclass (symbol)
@@ -726,7 +724,7 @@ DESCRIPTION
 	calling this function.
 
 SYNOPSIS
-	void bfd_symbol_info(asymbol *symbol, symbol_info *ret);
+	void bfd_symbol_info (asymbol *symbol, symbol_info *ret);
 */
 
 void
@@ -749,7 +747,7 @@ FUNCTION
 	bfd_copy_private_symbol_data
 
 SYNOPSIS
-	bfd_boolean bfd_copy_private_symbol_data(bfd *ibfd, asymbol *isym, bfd *obfd, asymbol *osym);
+	bfd_boolean bfd_copy_private_symbol_data (bfd *ibfd, asymbol *isym, bfd *obfd, asymbol *osym);
 
 DESCRIPTION
 	Copy private symbol information from @var{isym} in the BFD
@@ -816,7 +814,6 @@ _bfd_generic_read_minisymbols (abfd, dynamic, minisymsp, sizep)
    an asymbol.  We don't worry about the sym argument we are passed;
    we just return the asymbol the minisymbol points to.  */
 
-/*ARGSUSED*/
 asymbol *
 _bfd_generic_minisymbol_to_symbol (abfd, dynamic, minisym, sym)
      bfd *abfd ATTRIBUTE_UNUSED;
@@ -1245,12 +1242,11 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
   else
 #endif
     {
-      /* Cache non-existant or invalid.  Do binary search on
-         indextable.  */
-
       long low, high;
       long mid = -1;
 
+      /* Cache non-existant or invalid.  Do binary search on
+         indextable.  */
       indexentry = NULL;
 
       low = 0;
@@ -1305,9 +1301,11 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
 	case N_SLINE:
 	case N_DSLINE:
 	case N_BSLINE:
-	  /* A line number.  The value is relative to the start of the
-             current function.  */
-	  val = indexentry->val + bfd_get_32 (abfd, stab + VALOFF);
+	  /* A line number.  If the function was specified, then the value
+	     is relative to the start of the function.  Otherwise, the
+	     value is an absolute address.  */
+	  val = ((indexentry->function_name ? indexentry->val : 0)
+		 + bfd_get_32 (abfd, stab + VALOFF));
 	  /* If this line starts before our desired offset, or if it's
 	     the first line we've been able to find, use it.  The
 	     !saw_line check works around a bug in GCC 2.95.3, which emits
@@ -1376,7 +1374,6 @@ _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset, pfound,
       /* This will typically be something like main:F(0,1), so we want
          to clobber the colon.  It's OK to change the name, since the
          string is in our own local storage anyhow.  */
-
       s = strchr (indexentry->function_name, ':');
       if (s != NULL)
 	*s = '\0';
