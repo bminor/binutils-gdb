@@ -1,3 +1,7 @@
+Wed Dec 16 16:17:22 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* config/tc-fr30.c (md_assemble): Warn about invalid instructions in delay slots.
+
 start-sanitize-vr4xxx
 1998-12-16  Gavin Romig-Koch  <gavin@cygnus.com>
 
