@@ -931,7 +931,6 @@ mn10200_elf_relax_section (abfd, sec, link_info, again)
 					       irel->r_offset + 1, 2))
 	    goto error_return;
 
-printf("yahoo\n");
 	  /* That will change things, so, we should relax again.
 	     Note that this is not required, and it may be slow.  */
 	  *again = true;
