@@ -1,4 +1,8 @@
-Fri Jun 12 13:07:10 1998  Doug Evans  <devans@canuck.cygnus.com>
+Fri Jun 12 18:35:07 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* gennltvals.def (m32r): Use common syscall.h now.
+	(mn10300): Add entry.
+	* nltvals.def: Regenerate.
 
 	* sim-engine.c (sim_engine_get_run_state): New function.
 	* sim-engine.h (sim_engine_get_run_state): Declare it.

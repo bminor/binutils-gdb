@@ -1,6 +1,6 @@
 #! /bin/sh
-# Generate nltvals.def, a file that describes various target values
-# used by the host/target interface.
+# Generate nltvals.def, a file that describes various newlib/libgloss
+# target values used by the host/target interface.
 #
 # Syntax: /bin/sh gennltvals.sh shell srcroot cpp
 
@@ -29,16 +29,22 @@ $shell ${srccom}/gentvals.sh "" open ${srcroot}/newlib/libc/include \
 # Note that there is a standard syscall.h file (libgloss/syscall.h) now which
 # hopefully more targets can use.
 
-targets="d30v m32r sparc"
+# start-sanitize-d30v
+dir=libgloss target=d30v
+echo "/* start-sanitize-${target} */"
+$shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
+	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
+echo "/* end-sanitize-${target} */"
+# end-sanitize-d30v
 
-for t in $targets
-do
-	case $t in
-	d30v) dir=libgloss macro=d30v ;;
-	m32r) dir=libgloss/m32r/sys macro=m32r ;;
-	sparc) dir=libgloss macro=sparc ;;
-	esac
+dir=libgloss target=m32r
+$shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
+	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
 
-	$shell ${srccom}/gentvals.sh $macro sys ${srcroot}/$dir \
-		"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
-done
+dir=libgloss target=sparc
+$shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
+	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
+
+dir=libgloss target=mn10300
+$shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
+	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
