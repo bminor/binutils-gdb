@@ -64,13 +64,22 @@ serial_open(name)
   scb->bufcnt = 0;
   scb->bufp = scb->buf;
 
-  if (SERIAL_OPEN (scb, name))
+  if (scb->ops->open(scb, name))
     {
       free (scb);
       return NULL;
     }
 
   return scb;
+}
+
+void
+serial_close(scb)
+     serial_t scb;
+{
+  scb->ops->close(scb);
+
+  free(scb);
 }
 
 #if 0

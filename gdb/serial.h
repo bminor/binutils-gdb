@@ -49,38 +49,47 @@ struct serial_ops {
 
 void serial_add_interface PARAMS ((struct serial_ops *optable));
 
-/* Try to open the serial device "name", returns a serial_t if ok, NULL if not.
- */
-
 serial_t serial_open PARAMS ((const char *name));
 
-/* Internal open routine for specific I/O interface */
+/* For most routines, if a failure is indicated, then errno should be
+   examined.  */
 
-#define SERIAL_OPEN(SERIAL_T, NAME) (SERIAL_T)->ops->open((SERIAL_T), NAME)
+/* Try to open NAME.  Returns a new serial_t on success, NULL on failure.
+ */
 
-/* Turn the port into raw mode.  */
+#define SERIAL_OPEN(NAME) serial_open(NAME)
+
+/* Turn the port into raw mode. */
 
 #define SERIAL_RAW(SERIAL_T) (SERIAL_T)->ops->go_raw((SERIAL_T))
 
-/* Read one char from the serial device with <TO>-second timeout.
-   Returns char if ok, else EOF, -2 for timeout, -3 for anything else  */
+/* Read one char from the serial device with TIMEOUT seconds timeout.
+   Returns char if ok, else one of the following codes.  Note that all
+   error codes are guaranteed to be < 0.  */
+
+#define SERIAL_ERROR -1		/* General error, see errno for details */
+#define SERIAL_TIMEOUT -2
+#define SERIAL_EOF -3
 
 #define SERIAL_READCHAR(SERIAL_T, TIMEOUT) ((SERIAL_T)->ops->readchar((SERIAL_T), TIMEOUT))
 
-/* Set the baudrate to the decimal value supplied.  Return 1 on failure,
-   0 otherwise.  */
+/* Set the baudrate to the decimal value supplied.  Returns 0 for success,
+   -1 for failure.  */
 
 #define SERIAL_SETBAUDRATE(SERIAL_T, RATE) ((SERIAL_T)->ops->setbaudrate((SERIAL_T), RATE))
 
-/* Write some chars to the device, returns 0 for failure.  See errno for
-   details. */
+/* Write LEN chars from STRING to the port SERIAL_T.  Returns 0 for success,
+   -1 for failure.  */
 
 #define SERIAL_WRITE(SERIAL_T, STRING, LEN) ((SERIAL_T)->ops->write((SERIAL_T), STRING, LEN))
 
-/* Close the serial port */
+/* Push out all buffers, close the device and destroy SERIAL_T. */
 
-#define SERIAL_CLOSE(SERIAL_T) (SERIAL_T)->ops->close((SERIAL_T))
+void serial_close PARAMS ((serial_t));
 
-/* Restore the serial port to the state saved in oldstate */
+#define SERIAL_CLOSE(SERIAL_T) serial_close(SERIAL_T)
+
+/* Restore the serial port to the state saved in oldstate.  XXX - currently
+   unused! */
 
 #define SERIAL_RESTORE(SERIAL_T) (SERIAL_T)->ops->restore((SERIAL_T))

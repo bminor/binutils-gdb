@@ -47,7 +47,7 @@ hardwire_open(scb, name)
 {
   scb->fd = open (name, O_RDWR);
   if (scb->fd < 0)
-    return errno;
+    return -1;
 
   return 0;
 }
@@ -145,17 +145,17 @@ hardwire_readchar(scb, timeout)
 
   if (numfds <= 0)
     if (numfds == 0)
-      return -2;		/* Timeout */
+      return SERIAL_TIMEOUT;
     else
-      return -3;		/* Got an error from select */
+      return SERIAL_ERROR;	/* Got an error from select */
 
   scb->bufcnt = read(scb->fd, scb->buf, BUFSIZ);
 
   if (scb->bufcnt <= 0)
     if (scb->bufcnt == 0)
-      return EOF;		/* 0 chars means end of file */
+      return SERIAL_EOF;	/* 0 chars means end of file */
     else
-      return -3;		/* Got an error from read */
+      return SERIAL_ERROR;	/* Got an error from read */
 
   scb->bufcnt--;
   scb->bufp = scb->buf;
@@ -220,24 +220,20 @@ hardwire_setbaudrate(scb, rate)
   struct termios termios;
 
   if (tcgetattr (scb->fd, &termios))
-    error("hardwire_setbaudrate: tcgetattr failed: %s\n", safe_strerror(errno));
+    return -1;
 
   cfsetospeed (&termios, rate_to_code (rate));
   cfsetispeed (&termios, rate_to_code (rate));
 
   if (tcsetattr (scb->fd, TCSANOW, &termios))
-    error ("hardwire_setbaudrate: tcsetattr failed: %s\n", safe_strerror(errno));
-
-  return 1;
+    return -1;
 #endif
 
 #ifdef HAVE_TERMIO
   struct termio termio;
 
   if (ioctl (scb->fd, TCGETA, &termio))
-    {
-      fprintf(stderr, "TCGETA failed: %s\n", safe_strerror(errno));
-    }
+    return -1;
 
 #ifndef CIBAUD
 #define CIBAUD CBAUD
@@ -247,23 +243,22 @@ hardwire_setbaudrate(scb, rate)
   termio.c_cflag |= rate_to_code (rate);
 
   if (ioctl (scb->fd, TCSETA, &termio))
-    {
-      fprintf(stderr, "TCSETA failed: %s\n", safe_strerror(errno));
-    }
+    return -1;
 #endif
 
 #ifdef HAVE_SGTTY
   struct sgttyb sgttyb;
 
   if (ioctl (scb->fd, TIOCGETP, &sgttyb))
-    fprintf (stderr, "TIOCGETP failed: %s\n", safe_strerror (errno));
+    return -1;
 
   sgttyb.sg_ispeed = rate_to_code (rate);
   sgttyb.sg_ospeed = rate_to_code (rate);
 
   if (ioctl (scb->fd, TIOCSETP, &sgttyb))
-    fprintf (stderr, "TIOCSETP failed: %s\n", safe_strerror (errno));
+    return -1;
 #endif
+  return 0;
 }
 
 static int
@@ -298,8 +293,6 @@ hardwire_close(scb)
 {
   if (scb->fd < 0)
     return;
-
-  SERIAL_RESTORE(scb);
 
   close(scb->fd);
   scb->fd = -1;

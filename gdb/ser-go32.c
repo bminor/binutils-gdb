@@ -222,7 +222,7 @@ go32_open (scb, name)
   if (strncasecmp (name, "com", 3) != 0)
     {
       errno = ENOENT;
-      return 1;
+      return -1;
     }
 
   port = name[3] - '0';
@@ -230,12 +230,12 @@ go32_open (scb, name)
   if ((port != 1) && (port != 2))
     {
       errno = ENOENT;
-      return 1;
+      return -11;
     }
 
   scb->fd = dos_async_init(port);
   if (!scb->fd)
-    return 1;
+    return -1;
 
   return 0;
 }
@@ -257,7 +257,7 @@ go32_readchar (scb, timeout)
   if (dosasync_read(scb->fd, &buf, 1, timeout))  
     return buf;
   else
-    return -2; /* Timeout, I guess */
+    return SERIAL_TIMEOUT;
 }
 
 static int
@@ -275,6 +275,8 @@ go32_write (scb, str, len)
      int len;
 {
   dosasync_write(scb->fd, str, len);
+
+  return 0;
 }
 
 static void
