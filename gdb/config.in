@@ -379,14 +379,8 @@
 /* Define if you have the <sys/select.h> header file.  */
 #undef HAVE_SYS_SELECT_H
 
-/* Define if you have the <sys/stat.h> header file.  */
-#undef HAVE_SYS_STAT_H
-
 /* Define if you have the <sys/syscall.h> header file.  */
 #undef HAVE_SYS_SYSCALL_H
-
-/* Define if you have the <sys/types.h> header file.  */
-#undef HAVE_SYS_TYPES_H
 
 /* Define if you have the <sys/user.h> header file.  */
 #undef HAVE_SYS_USER_H
