@@ -1,5 +1,8 @@
 Tue Jun 29 11:02:58 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/pa/tm-hppa.h: Remove unused ARGS_GROW_DOC.
+	(REG_STRUCT_HAS_ADDR): Add comment.
+
 	* infrun.c (wait_for_inferior): Use find_pc_line not find_pc_symtab
 	to check whether there is line number information.
 
