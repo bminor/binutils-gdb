@@ -1,3 +1,10 @@
+2003-06-02  David Carlton  <carlton@bactrian.org>
+
+	* linespec.c (find_methods): Break out code into
+	add_matching_methods and add_constructors.
+	(add_matching_methods): New.
+	(add_constructors): Ditto.
+
 2003-06-02  Andrew Cagney  <cagney@redhat.com>
 
 	* alpha-tdep.c (alpha_gdbarch_init): Set convert_register_p,

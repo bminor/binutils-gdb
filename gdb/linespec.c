@@ -82,6 +82,12 @@ static int total_number_of_methods (struct type *type);
 
 static int find_methods (struct type *, char *, struct symbol **);
 
+static int add_matching_methods (int method_counter, struct type *t,
+				 struct symbol **sym_arr);
+
+static int add_constructors (int method_counter, struct type *t,
+			     struct symbol **sym_arr);
+
 static void build_canonical_line_spec (struct symtab_and_line *,
 				       char *, char ***);
 
@@ -210,7 +216,6 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 	   method_counter >= 0;
 	   --method_counter)
 	{
-	  int field_counter;
 	  char *method_name = TYPE_FN_FIELDLIST_NAME (t, method_counter);
 	  char dem_opname[64];
 
@@ -226,88 +231,13 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 
 	  if (strcmp_iw (name, method_name) == 0)
 	    /* Find all the overloaded methods with that name.  */
-	    for (field_counter = TYPE_FN_FIELDLIST_LENGTH (t, method_counter) - 1;
-		 field_counter >= 0;
-		 --field_counter)
-	      {
-		struct fn_field *f;
-		char *phys_name;
-
-		f = TYPE_FN_FIELDLIST1 (t, method_counter);
-
-		if (TYPE_FN_FIELD_STUB (f, field_counter))
-		  {
-		    char *tmp_name;
-
-		    tmp_name = gdb_mangle_name (t,
-						method_counter,
-						field_counter);
-		    phys_name = alloca (strlen (tmp_name) + 1);
-		    strcpy (phys_name, tmp_name);
-		    xfree (tmp_name);
-		  }
-		else
-		  phys_name = TYPE_FN_FIELD_PHYSNAME (f, field_counter);
-		
-		/* Destructor is handled by caller, don't add it to
-		   the list.  */
-		if (is_destructor_name (phys_name) != 0)
-		  continue;
-
-		sym_arr[i1] = lookup_symbol (phys_name,
-					     NULL, VAR_DOMAIN,
-					     (int *) NULL,
-					     (struct symtab **) NULL);
-		if (sym_arr[i1])
-		  i1++;
-		else
-		  {
-		    /* This error message gets printed, but the method
-		       still seems to be found
-		       fputs_filtered("(Cannot find method ", gdb_stdout);
-		       fprintf_symbol_filtered (gdb_stdout, phys_name,
-		       language_cplus,
-		       DMGL_PARAMS | DMGL_ANSI);
-		       fputs_filtered(" - possibly inlined.)\n", gdb_stdout);
-		     */
-		  }
-	      }
+	    i1 += add_matching_methods (method_counter, t,
+					sym_arr + i1);
 	  else if (strncmp (class_name, name, name_len) == 0
 		   && (class_name[name_len] == '\0'
 		       || class_name[name_len] == '<'))
-	    {
-	      /* For GCC 3.x and stabs, constructors and destructors
-		 have names like __base_ctor and __complete_dtor.
-		 Check the physname for now if we're looking for a
-		 constructor.  */
-	      for (field_counter
-		     = TYPE_FN_FIELDLIST_LENGTH (t, method_counter) - 1;
-		   field_counter >= 0;
-		   --field_counter)
-		{
-		  struct fn_field *f;
-		  char *phys_name;
-		  
-		  f = TYPE_FN_FIELDLIST1 (t, method_counter);
-
-		  /* GCC 3.x will never produce stabs stub methods, so
-		     we don't need to handle this case.  */
-		  if (TYPE_FN_FIELD_STUB (f, field_counter))
-		    continue;
-		  phys_name = TYPE_FN_FIELD_PHYSNAME (f, field_counter);
-		  if (! is_constructor_name (phys_name))
-		    continue;
-
-		  /* If this method is actually defined, include it in the
-		     list.  */
-		  sym_arr[i1] = lookup_symbol (phys_name,
-					       NULL, VAR_DOMAIN,
-					       (int *) NULL,
-					       (struct symtab **) NULL);
-		  if (sym_arr[i1])
-		    i1++;
-		}
-	    }
+	    i1 += add_constructors (method_counter, t,
+				    sym_arr + i1);
 	}
     }
 
@@ -325,6 +255,113 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
   if (i1 == 0)
     for (ibase = 0; ibase < TYPE_N_BASECLASSES (t); ibase++)
       i1 += find_methods (TYPE_BASECLASS (t, ibase), name, sym_arr + i1);
+
+  return i1;
+}
+
+/* Add the symbols associated to methods of the class whose type is T
+   and whose name matches the method indexed by METHOD_COUNTER in the
+   array SYM_ARR.  Return the number of methods added.  */
+
+static int
+add_matching_methods (int method_counter, struct type *t,
+		      struct symbol **sym_arr)
+{
+  int field_counter;
+  int i1 = 0;
+
+  for (field_counter = TYPE_FN_FIELDLIST_LENGTH (t, method_counter) - 1;
+       field_counter >= 0;
+       --field_counter)
+    {
+      struct fn_field *f;
+      char *phys_name;
+
+      f = TYPE_FN_FIELDLIST1 (t, method_counter);
+
+      if (TYPE_FN_FIELD_STUB (f, field_counter))
+	{
+	  char *tmp_name;
+
+	  tmp_name = gdb_mangle_name (t,
+				      method_counter,
+				      field_counter);
+	  phys_name = alloca (strlen (tmp_name) + 1);
+	  strcpy (phys_name, tmp_name);
+	  xfree (tmp_name);
+	}
+      else
+	phys_name = TYPE_FN_FIELD_PHYSNAME (f, field_counter);
+		
+      /* Destructor is handled by caller, don't add it to
+	 the list.  */
+      if (is_destructor_name (phys_name) != 0)
+	continue;
+
+      sym_arr[i1] = lookup_symbol (phys_name,
+				   NULL, VAR_DOMAIN,
+				   (int *) NULL,
+				   (struct symtab **) NULL);
+      if (sym_arr[i1])
+	i1++;
+      else
+	{
+	  /* This error message gets printed, but the method
+	     still seems to be found
+	     fputs_filtered("(Cannot find method ", gdb_stdout);
+	     fprintf_symbol_filtered (gdb_stdout, phys_name,
+	     language_cplus,
+	     DMGL_PARAMS | DMGL_ANSI);
+	     fputs_filtered(" - possibly inlined.)\n", gdb_stdout);
+	  */
+	}
+    }
+
+  return i1;
+}
+
+/* Add the symbols associated to constructors of the class whose type
+   is CLASS_TYPE and which are indexed by by METHOD_COUNTER to the
+   array SYM_ARR.  Return the number of methods added.  */
+
+static int
+add_constructors (int method_counter, struct type *t,
+		  struct symbol **sym_arr)
+{
+  int field_counter;
+  int i1 = 0;
+
+  /* For GCC 3.x and stabs, constructors and destructors
+     have names like __base_ctor and __complete_dtor.
+     Check the physname for now if we're looking for a
+     constructor.  */
+  for (field_counter
+	 = TYPE_FN_FIELDLIST_LENGTH (t, method_counter) - 1;
+       field_counter >= 0;
+       --field_counter)
+    {
+      struct fn_field *f;
+      char *phys_name;
+		  
+      f = TYPE_FN_FIELDLIST1 (t, method_counter);
+
+      /* GCC 3.x will never produce stabs stub methods, so
+	 we don't need to handle this case.  */
+      if (TYPE_FN_FIELD_STUB (f, field_counter))
+	continue;
+      phys_name = TYPE_FN_FIELD_PHYSNAME (f, field_counter);
+      if (! is_constructor_name (phys_name))
+	continue;
+
+      /* If this method is actually defined, include it in the
+	 list.  */
+      sym_arr[i1] = lookup_symbol (phys_name,
+				   NULL, VAR_DOMAIN,
+				   (int *) NULL,
+				   (struct symtab **) NULL);
+      if (sym_arr[i1])
+	i1++;
+    }
 
   return i1;
 }
