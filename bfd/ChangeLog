@@ -1,3 +1,8 @@
+2003-05-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-hppa.c (elf32_hppa_relocate_section): Delete bogus
+	undefined_symbol call.
+
 2003-05-27  Richard Sandiford  <rsandifo@redhat.com>
 
 	* elfxx-mips.c (mips_elf_hash_sort_data): Fix formattting.
