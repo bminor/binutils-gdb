@@ -1466,7 +1466,7 @@ hppa64_hpux_search_dummy_call_sequence (struct gdbarch *gdbarch, CORE_ADDR pc,
       find_pc_partial_function (SYMBOL_VALUE_ADDRESS (msym), &name,
       				&begin, &end);
 
-      if (*name == 0 || begin == 0 || end == 0)
+      if (name == NULL || begin == 0 || end == 0)
         continue;
 
       if (target_read_memory (end - sizeof (insns), (char *)insns, sizeof (insns)) == 0)

@@ -1,5 +1,9 @@
 2004-12-19  Mark Kettenis  <kettenis@gnu.org>
 
+	* hppa-hpux-tdep.c (hppa64_hpux_search_dummy_call_sequence): Check
+	whether the name returned by find_pc_partial_function is a null
+	pointer, not whether it is an empty string.
+
 	* hppa-tdep.h (hppa_regnum): Add HPPA_DP_REGNUM, HPPA_RET0_REGNUM,
 	HPPA_RET1_REGNUM and HPPA64_FP4_REGNUM.
 	* hppa-tdep.c (hppa64_integral_or_pointer_p)
