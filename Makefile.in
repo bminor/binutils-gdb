@@ -228,6 +228,7 @@ $(end-sanitize-chill)\
 	"LOADLIBES=$(LOADLIBES)" \
 	"MAKEINFO=$(MAKEINFO)" \
 	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
+	"PRMS=$(PRMS)" \
 	"RANLIB_FOR_TARGET=$(RANLIB_FOR_TARGET)" \
 	"XTRAFLAGS_FOR_TARGET=$(XTRAFLAGS)" \
 	"exec_prefix=$(exec_prefix)" \
@@ -358,7 +359,7 @@ all.normal: all-m4 all-autoconf all-libiberty all-mmalloc all-texinfo \
 	$(start-sanitize-chill) \
 	all-chillrt \
 	$(end-sanitize-chill) \
-	all-gprof all-send-pr all-libm all-deja-gnu \
+	all-gprof all-prms all-send-pr all-libm all-deja-gnu \
 	all-fileutils all-find all-gawk all-sed all-shellutils \
 	all-textutils all-time all-wdiff all-uudecode \
 	all-hello all-tar all-gzip all-indent all-recode
@@ -439,9 +440,10 @@ install-no-fixedincludes: install-dirs gcc-no-fixedincludes \
 	install-newlib \
 	install-opcodes \
 	install-patch \
+	install-prms \
 	install-rcs \
 	install-readline \
-	install-recode \	
+	install-recode \
 	install-sed \
 	install-send-pr \
 	install-shellutils \
@@ -1134,6 +1136,25 @@ install-ispell: force
 	@if [ -f ./ispell/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		(cd ./ispell; \
+		$(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+### prms
+all-prms: force
+	@if [ -f ./prms/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./prms; \
+		$(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+install-prms: force
+	@if [ -f ./prms/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		(cd ./prms; \
 		$(MAKE) $(FLAGS_TO_PASS) install) ; \
 	else \
 		true ; \
