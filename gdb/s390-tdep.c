@@ -122,8 +122,7 @@ struct frame_extra_info
 static CORE_ADDR s390_frame_saved_pc_nofix (struct frame_info *fi);
 
 static int
-s390_readinstruction (bfd_byte instr[], CORE_ADDR at,
-		      struct disassemble_info *info)
+s390_readinstruction (bfd_byte instr[], CORE_ADDR at)
 {
   int instrlen;
 
@@ -133,12 +132,12 @@ s390_readinstruction (bfd_byte instr[], CORE_ADDR at,
     4,
     6
   };
-  if ((*info->read_memory_func) (at, &instr[0], 2, info))
+  if (target_read_memory (at, &instr[0], 2))
     return -1;
   instrlen = s390_instrlen[instr[0] >> 6];
   if (instrlen > 2)
     {
-      if ((*info->read_memory_func) (at + 2, &instr[2], instrlen - 2, info))
+      if (target_read_memory (at + 2, &instr[2], instrlen - 2))
         return -1;
     }
   return instrlen;
@@ -936,9 +935,6 @@ s390_get_frame_info (CORE_ADDR start_pc,
      -1 if we got an error trying to read memory.  */
   int result = 0;
 
-  /* We just use this for reading instructions.  */
-  disassemble_info info;
-
   /* The current PC for our abstract interpretation.  */
   CORE_ADDR pc;
 
@@ -966,8 +962,6 @@ s390_get_frame_info (CORE_ADDR start_pc,
      the SP, FP, or back chain.  */
   CORE_ADDR after_last_frame_setup_insn = start_pc;
 
-  info.read_memory_func = deprecated_tm_print_insn_info.read_memory_func;
-
   /* Set up everything's initial value.  */
   {
     int i;
@@ -991,7 +985,7 @@ s390_get_frame_info (CORE_ADDR start_pc,
   for (pc = start_pc; ; pc = next_pc)
     {
       bfd_byte insn[S390_MAX_INSTR_SIZE];
-      int insn_len = s390_readinstruction (insn, pc, &info);
+      int insn_len = s390_readinstruction (insn, pc);
 
       /* Fields for various kinds of instructions.  */
       unsigned int b2, r1, r2, d2, x2, r3;
@@ -1487,11 +1481,9 @@ static int
 s390_check_function_end (CORE_ADDR pc)
 {
   bfd_byte instr[S390_MAX_INSTR_SIZE];
-  disassemble_info info;
   int regidx, instrlen;
 
-  info.read_memory_func = deprecated_tm_print_insn_info.read_memory_func;
-  instrlen = s390_readinstruction (instr, pc, &info);
+  instrlen = s390_readinstruction (instr, pc);
   if (instrlen < 0)
     return -1;
   /* check for BR */
@@ -1500,7 +1492,7 @@ s390_check_function_end (CORE_ADDR pc)
   regidx = instr[1] & 0xf;
   /* Check for LMG or LG */
   instrlen =
-    s390_readinstruction (instr, pc - (GDB_TARGET_IS_ESAME ? 6 : 4), &info);
+    s390_readinstruction (instr, pc - (GDB_TARGET_IS_ESAME ? 6 : 4));
   if (instrlen < 0)
     return -1;
   if (GDB_TARGET_IS_ESAME)
@@ -1517,8 +1509,7 @@ s390_check_function_end (CORE_ADDR pc)
     return 0;
   if (regidx == 14)
     return 1;
-  instrlen = s390_readinstruction (instr, pc - (GDB_TARGET_IS_ESAME ? 12 : 8),
-				   &info);
+  instrlen = s390_readinstruction (instr, pc - (GDB_TARGET_IS_ESAME ? 12 : 8));
   if (instrlen < 0)
     return -1;
   if (GDB_TARGET_IS_ESAME)
@@ -1619,7 +1610,6 @@ s390_is_sigreturn (CORE_ADDR pc, struct frame_info *sighandler_fi,
 		   CORE_ADDR *sregs, CORE_ADDR *sigcaller_pc)
 {
   bfd_byte instr[S390_MAX_INSTR_SIZE];
-  disassemble_info info;
   int instrlen;
   CORE_ADDR scontext;
   int retval = 0;
@@ -1628,8 +1618,7 @@ s390_is_sigreturn (CORE_ADDR pc, struct frame_info *sighandler_fi,
 
   scontext = temp_sregs = 0;
 
-  info.read_memory_func = deprecated_tm_print_insn_info.read_memory_func;
-  instrlen = s390_readinstruction (instr, pc, &info);
+  instrlen = s390_readinstruction (instr, pc);
   if (sigcaller_pc)
     *sigcaller_pc = 0;
   if (((instrlen == S390_SYSCALL_SIZE) &&

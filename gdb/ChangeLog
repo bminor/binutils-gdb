@@ -1,5 +1,13 @@
 2003-08-27  Andrew Cagney  <cagney@redhat.com>
 
+	* s390-tdep.c (s390_readinstruction): Delete "info" parameter.
+	Use target_read_memory.
+	(s390_get_frame_info): Update.  Do not reference
+	deprecated_tm_print_insn_info.
+	(s390_check_function_end, s390_is_sigreturn): Ditto.
+
+2003-08-27  Andrew Cagney  <cagney@redhat.com>
+
 	* Makefile.in (cris-tdep.o): Update dependencies.
 	* cris-tdep.c: Include "gdb_assert.h".
 	(cris_gdbarch_init): Set print_insn.
