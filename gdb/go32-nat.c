@@ -157,7 +157,9 @@ static void store_register (int regno);
 static void go32_store_registers (int regno);
 static void go32_prepare_to_store (void);
 static int go32_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
-			     int write, struct target_ops *target);
+			     int write,
+			     struct mem_attrib *attrib,
+			     struct target_ops *target);
 static void go32_files_info (struct target_ops *target);
 static void go32_stop (void);
 static void go32_kill_inferior (void);
@@ -539,6 +541,7 @@ go32_prepare_to_store (void)
 
 static int
 go32_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+		  struct mem_attrib *attrib ATTRIBUTE_UNUSED,
 		  struct target_ops *target ATTRIBUTE_UNUSED)
 {
   if (write)

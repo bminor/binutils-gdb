@@ -1,3 +1,8 @@
+2001-02-04  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* go32-nat.c (go32_xfer_memory): Make the argument list consistent
+	with target.h's `to_xfer_memory' member.
+
 2001-02-02  J.T. Conklin  <jtc@redback.com>
 
 	* ppc-bdm.c (#include <signal.h>): Removed.
