@@ -1610,27 +1610,38 @@ extern int gdbarch_update_p (struct gdbarch_info info);
 
    Reserve space for a per-architecture data-pointer.  An identifier
    for the reserved data-pointer is returned.  That identifer should
-   be saved in a local static.
+   be saved in a local static variable.
 
-   When a new architecture is selected, INIT() is called.  When a
-   previous architecture is re-selected, the per-architecture
-   data-pointer for that previous architecture is restored (INIT() is
-   not called).
+   The per-architecture data-pointer can be initialized in one of two
+   ways: The value can be set explicitly using a call to
+   set_gdbarch_data(); the value can be set implicitly using the value
+   returned by a non-NULL INIT() callback.  INIT(), when non-NULL is
+   called after the basic architecture vector has been created.
 
-   INIT() shall return the initial value for the per-architecture
-   data-pointer for the current architecture.
+   When a previously created architecture is re-selected, the
+   per-architecture data-pointer for that previous architecture is
+   restored.  INIT() is not called.
+
+   During initialization, multiple assignments of the data-pointer are
+   allowed, non-NULL values are deleted by calling FREE().  If the
+   architecture is deleted using gdbarch_free() all non-NULL data
+   pointers are also deleted using FREE().
 
    Multiple registrarants for any architecture are allowed (and
    strongly encouraged).  */
 
-typedef void *(gdbarch_data_ftype) (void);
-extern struct gdbarch_data *register_gdbarch_data (gdbarch_data_ftype *init);
+struct gdbarch_data;
 
-/* Return the value of the per-architecture data-pointer for the
-   current architecture. */
+typedef void *(gdbarch_data_init_ftype) (struct gdbarch *gdbarch);
+typedef void (gdbarch_data_free_ftype) (struct gdbarch *gdbarch,
+					void *pointer);
+extern struct gdbarch_data *register_gdbarch_data (gdbarch_data_init_ftype *init,
+						   gdbarch_data_free_ftype *free);
+extern void set_gdbarch_data (struct gdbarch *gdbarch,
+			      struct gdbarch_data *data,
+			      void *pointer);
 
 extern void *gdbarch_data (struct gdbarch_data*);
-
 
 
 /* Register per-architecture memory region.

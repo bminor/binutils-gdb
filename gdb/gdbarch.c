@@ -60,10 +60,14 @@
 
 #include "floatformat.h"
 
+#include "gdb_assert.h"
+
 /* Static function declarations */
 
 static void verify_gdbarch (struct gdbarch *gdbarch);
+static void alloc_gdbarch_data (struct gdbarch *);
 static void init_gdbarch_data (struct gdbarch *);
+static void free_gdbarch_data (struct gdbarch *);
 static void init_gdbarch_swap (struct gdbarch *);
 static void swapout_gdbarch_swap (struct gdbarch *);
 static void swapin_gdbarch_swap (struct gdbarch *);
@@ -96,7 +100,7 @@ struct gdbarch
   gdbarch_dump_tdep_ftype *dump_tdep;
 
   /* per-architecture data-pointers */
-  int nr_data;
+  unsigned nr_data;
   void **data;
 
   /* per-architecture swap-regions */
@@ -386,6 +390,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   struct gdbarch *gdbarch = XMALLOC (struct gdbarch);
   memset (gdbarch, 0, sizeof (*gdbarch));
 
+  alloc_gdbarch_data (gdbarch);
+
   gdbarch->tdep = tdep;
 
   gdbarch->bfd_arch_info = info->bfd_arch_info;
@@ -466,7 +472,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
 void
 gdbarch_free (struct gdbarch *arch)
 {
-  /* At the moment, this is trivial.  */
+  gdb_assert (arch != NULL);
+  free_gdbarch_data (arch);
   xfree (arch);
 }
 
@@ -4013,19 +4020,20 @@ set_gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 
 struct gdbarch_data
 {
-  int index;
+  unsigned index;
+  gdbarch_data_init_ftype *init;
+  gdbarch_data_free_ftype *free;
 };
 
 struct gdbarch_data_registration
 {
-  gdbarch_data_ftype *init;
   struct gdbarch_data *data;
   struct gdbarch_data_registration *next;
 };
 
 struct gdbarch_data_registry
 {
-  int nr;
+  unsigned nr;
   struct gdbarch_data_registration *registrations;
 };
 
@@ -4035,7 +4043,8 @@ struct gdbarch_data_registry gdbarch_data_registry =
 };
 
 struct gdbarch_data *
-register_gdbarch_data (gdbarch_data_ftype *init)
+register_gdbarch_data (gdbarch_data_init_ftype *init,
+                       gdbarch_data_free_ftype *free)
 {
   struct gdbarch_data_registration **curr;
   for (curr = &gdbarch_data_registry.registrations;
@@ -4043,9 +4052,10 @@ register_gdbarch_data (gdbarch_data_ftype *init)
        curr = &(*curr)->next);
   (*curr) = XMALLOC (struct gdbarch_data_registration);
   (*curr)->next = NULL;
-  (*curr)->init = init;
   (*curr)->data = XMALLOC (struct gdbarch_data);
   (*curr)->data->index = gdbarch_data_registry.nr++;
+  (*curr)->data->init = init;
+  (*curr)->data->free = free;
   return (*curr)->data;
 }
 
@@ -4056,17 +4066,65 @@ static void
 init_gdbarch_data (struct gdbarch *gdbarch)
 {
   struct gdbarch_data_registration *rego;
-  gdbarch->nr_data = gdbarch_data_registry.nr + 1;
-  gdbarch->data = xmalloc (sizeof (void*) * gdbarch->nr_data);
   for (rego = gdbarch_data_registry.registrations;
        rego != NULL;
        rego = rego->next)
     {
-      if (rego->data->index < gdbarch->nr_data)
-	gdbarch->data[rego->data->index] = rego->init ();
+      struct gdbarch_data *data = rego->data;
+      gdb_assert (data->index < gdbarch->nr_data);
+      if (data->init != NULL)
+        {
+          void *pointer = data->init (gdbarch);
+          set_gdbarch_data (gdbarch, data, pointer);
+        }
     }
 }
 
+/* Create/delete the gdbarch data vector. */
+
+static void
+alloc_gdbarch_data (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch->data == NULL);
+  gdbarch->nr_data = gdbarch_data_registry.nr;
+  gdbarch->data = xcalloc (gdbarch->nr_data, sizeof (void*));
+}
+
+static void
+free_gdbarch_data (struct gdbarch *gdbarch)
+{
+  struct gdbarch_data_registration *rego;
+  gdb_assert (gdbarch->data != NULL);
+  for (rego = gdbarch_data_registry.registrations;
+       rego != NULL;
+       rego = rego->next)
+    {
+      struct gdbarch_data *data = rego->data;
+      gdb_assert (data->index < gdbarch->nr_data);
+      if (data->free != NULL && gdbarch->data[data->index] != NULL)
+        {
+          data->free (gdbarch, gdbarch->data[data->index]);
+          gdbarch->data[data->index] = NULL;
+        }
+    }
+  xfree (gdbarch->data);
+  gdbarch->data = NULL;
+}
+
+
+/* Initialize the current value of thee specified per-architecture
+   data-pointer. */
+
+void
+set_gdbarch_data (struct gdbarch *gdbarch,
+                  struct gdbarch_data *data,
+                  void *pointer)
+{
+  gdb_assert (data->index < gdbarch->nr_data);
+  if (data->free != NULL && gdbarch->data[data->index] != NULL)
+    data->free (gdbarch, gdbarch->data[data->index]);
+  gdbarch->data[data->index] = pointer;
+}
 
 /* Return the current value of the specified per-architecture
    data-pointer. */
@@ -4074,8 +4132,7 @@ init_gdbarch_data (struct gdbarch *gdbarch)
 void *
 gdbarch_data (struct gdbarch_data *data)
 {
-  if (data->index >= current_gdbarch->nr_data)
-    internal_error ("gdbarch_data: request for non-existant data.");
+  gdb_assert (data->index < current_gdbarch->nr_data);
   return current_gdbarch->data[data->index];
 }
 

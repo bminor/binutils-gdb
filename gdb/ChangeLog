@@ -1,3 +1,20 @@
+2001-02-06  Andrew Cagney  <ac131313@cygnus.com>
+
+	* gdbarch.sh: Include "gdb_assert.h".
+	(struct gdbarch): Change ``nr_data'' to unsigned.
+	(alloc_gdbarch_data, free_gdbarch_data): New functions.
+	(gdbarch_free): Free the data-pointer vector.  Use xfree to delete
+ 	architecture vector.
+ 	(struct gdbarch_data, struct gdbarch_data_registration): Move init
+ 	method to gdbarch_data.  Add free method, make index unsigned.
+	(struct gdbarch_data_registry): Make nr unsigned.
+	(register_gdbarch_data): Add free parameter. Store in
+ 	gdbarch_data.
+	(init_gdbarch_data): Use set_gdbarch_data.
+	(set_gdbarch_data): New function.
+	
+	* gdbarch.h, gdbarch.c: Re-generate.
+	
 2001-02-06  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* ser-unix.c (hardware_print_tty_state) [HAVE_SGTTY]: Call
