@@ -1,3 +1,26 @@
+2000-03-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-nat.c: Use elf_gregset_t and elf_fpregset_t instead
+	of gregset_t and fpregset_t.  Those are the only names that are
+	guaranteed to specify the right types for all supported Linux
+	systems out there.
+	Various doc fixes and gratitious local variable renames, all in an
+	attempt to stress similarities between the code and unify the
+	terminology used.  Use ISO-C all over.
+	(regmap): Remove trailing comma.
+	(FPREG_ADDR): Renamed from FPREGSET_T_FPREG_ADDR.
+	(convert_to_gregset): Make static.  Remove GDB_REGS argument.  It
+	is unnecessary and wasn't used anyway.  All callers changed.
+	(convert_to_fpregset, convert_to_xfpregset): Likewise.
+	(fetch_regs, store_regs): Remove unused variable `regno'.
+	(fill_fpregs): If REGNO is not -1, only update the specified
+	register.
+	(fetch_core_registers): Renamed from
+	i386_linux_fetch_core_registers.  There is no need for a unique
+	name since the function is static anyway.
+	(linux_elf_core_fns): Renamed from i386_linux_nat_core_functions
+	since it is more descriptive.
+
 Sun Mar  5 19:40:27 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS (readline/): Expand to include host maintainers.
