@@ -1,5 +1,7 @@
 2004-02-22  Mark Kettenis  <kettenis@gnu.org>
 
+	* x86-64-tdep.h (amd64obsd_r_reg_offset): New extern declaration.
+
 	* amd64fbsd-tdep.c: Include "solib-svr4.h".
 	(amd64fbsd_init_abi): Set link map offsets.
 	* amd64nbsd-tdep.c: Include "slib-svr4.h".

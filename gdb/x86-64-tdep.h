@@ -66,6 +66,9 @@ void x86_64_fill_fxsave (char *fxsave, int regnum);
 /* Variables exported from amd64nbsd-tdep.c.  */
 extern int amd64nbsd_r_reg_offset[];
 
+/* Variables exported from amd64obsd-tdep.c.  */
+extern int amd64obsd_r_reg_offset[];
+
 /* Variables exported from amd64fbsd-tdep.c.  */
 extern CORE_ADDR amd64fbsd_sigtramp_start;
 extern CORE_ADDR amd64fbsd_sigtramp_end;
