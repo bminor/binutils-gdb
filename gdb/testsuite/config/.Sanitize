@@ -23,6 +23,8 @@ Do-first:
 
 Things-to-keep:
 
+config.rel.in
+makefile.rel.in
 mips-gdb.exp
 nind-gdb.exp
 udi-gdb.exp
