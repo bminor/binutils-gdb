@@ -1,3 +1,38 @@
+Tue Mar  2 08:53:34 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* config/tc-m68k.c (isbyte): Accept all values from -255 to +255,
+	so "~0x80" won't be rejected.
+
+	* config/obj-elf.c: No longer include elf/reloc.h.
+	(obj_elf_section): Set SEC_READONLY and SEC_CODE for text section.
+	(obj_elf_stab, obj_elf_desc): Deleted do-nothing and commented-out
+	routines.
+	(obj_elf_xstab): New routine.
+	(obj_elf_set_size): Call as_warn, not fprintf.  Pass desired
+	argument to s_ignore.  Put "#if 0" around unused code.
+	(obj_pseudo_table): Use s_ignore instead of do-nothing routines.
+	Call elf_xstabs for .stabs and .xstabs operators.
+
+	* config/tc-sparc.h (TARGET_FORMAT) [OBJ_ELF]: Now "elf32-sparc".
+
+	* write.c (relax_and_size_seg): Set SEC_RELOC only if fixups are
+	present.
+
+	* configure.in: mips-bsd configuration was missing format spec.
+	Should use aout.
+
+	* Makefile.in (Makefile): Depends on configure.in.
+
+	* config/tc-mips.c (append_insn): Don't check for alignment of
+	frag in memory; alignment of instructions in section is a separate
+	matter.
+
+	* config/tc-mips.c (macro_build_lui): Fix some assumptions of ANSI
+	C availability.
+
+	* listing.h: Always provide function declarations, not macros, so
+	pcc won't lose.
+
 Tue Mar  2 00:50:43 1993  John Gilmore  (gnu@cygnus.com)
 
 	* CONTRIBUTORS:  Update Gilmore entry.
