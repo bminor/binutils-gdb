@@ -1513,17 +1513,22 @@ coff_compute_section_file_positions (abfd)
 #endif
   unsigned int count;
 
+
 #ifdef COFF_IMAGE_WITH_PE
-  page_size = pe_value (&(coff_data (abfd)->link_info->pe_info->file_alignment),
-			PE_DEF_FILE_ALIGNMENT);
+  if (coff_data (abfd)->link_info) 
+    {
+      page_size = pe_value (&(coff_data (abfd)->link_info->pe_info->file_alignment),
+			    PE_DEF_FILE_ALIGNMENT);
+    }
+  else
+    page_size = PE_DEF_FILE_ALIGNMENT;
 #else
   page_size = COFF_PAGE_SIZE;
 #endif
-
   if (bfd_get_start_address (abfd))
     {
       /*  A start address may have been added to the original file. In this
-	case it will need an optional header to record it.  */
+	  case it will need an optional header to record it.  */
       abfd->flags |= EXEC_P;
     }
 
@@ -1547,7 +1552,7 @@ coff_compute_section_file_positions (abfd)
          stores codeview debug data. */
       if (strcmp (current->name, ".junk") == 0)
         {
-         continue;
+	  continue;
         }
 #endif
 
@@ -1558,7 +1563,7 @@ coff_compute_section_file_positions (abfd)
 #ifndef I960
       {
 	/* make sure this section is aligned on the right boundary - by
-	 padding the previous section up if necessary */
+	   padding the previous section up if necessary */
 
 	old_sofar = sofar;
 	sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);

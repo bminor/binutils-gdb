@@ -10,10 +10,12 @@ Tue Aug 29 13:50:21 1995  steve chamberlain  <sac@slash.cygnus.com>
 	(coff-i386_rtype_to_howto): Understand R_IMAGEBASE type.
 	* coffcode.h (sec_to_styp_flags): .edata is data.
 	(coff_compute_section_file_positions): Get page size right for PE.
+	Pagesize info is only valid in PE image files.
 	(fill_pe_header_info): Fix fields.
 	(coff_write_object_contents): Remove end_of_image calc.
 	(_bfd_coff_generate_reloc_section): Remove orphaned comment.
 	* coffswap.h (coff_swap_scnhdr_in): Don't always add IMAGE_BASE.
+	Swap in PE header.
 	(coff_swap_scnhdr_out): Setup PE flags correctly.
 	* reloc.c (BFD_RELOC_RVA): New field.
 
