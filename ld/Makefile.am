@@ -521,11 +521,6 @@ etic80coff.c: $(srcdir)/emulparams/tic80coff.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/tic80coff.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} tic80coff "$(tdir_tic80coff)"
 end-sanitize-tic80:
-start-sanitize-sky:
-etxvuelf.c: $(srcdir)/emulparams/txvuelf.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} txvuelf "$(tdir_txvu)"
-end-sanitize-sky:
 evanilla.c: $(srcdir)/emulparams/vanilla.sh \
   $(srcdir)/emultempl/vanilla.em $(srcdir)/scripttempl/vanilla.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} vanilla "$(tdir_vanilla)"
