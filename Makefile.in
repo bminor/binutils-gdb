@@ -48,16 +48,14 @@ AR = ar
 AR_FLAGS = qc
 RANLIB = ranlib
 
-BISON = `if [ -d $(unsubdir)/../bison ] ; \
-	then echo \`pwd\`/$(unsubdir)/../bison$(subdir)/bison -L \`pwd\`/$(unsubdir)/../bison$(subdir)/ -y ; \
+BISON = `if [ -d $${rootme}/bison ] ; \
+	then echo $${rootme}/bison/bison -L $${rootme}/bison/ -y ; \
 	else echo bison -y ; fi`
 
-MAKEINFO = makeinfo
-FRESHMAKEINFO = `if [ -d $(unsubdir)/../texinfo/C ] ; \
-	then echo \`pwd\`/$(unsubdir)/../texinfo/C$(subdir)/makeinfo ; \
-	else echo echo ; fi`
+MAKEINFO = `if [ -d $${rootme}/texinfo/C ] ; \
+	then echo $${rootme}/texinfo/C/makeinfo ; \
+	else echo makeinfo ; fi`
 
-#\`(cd $(srcdir)/bison ; \\`pwd\\`)\`
 SUBDIRS = libiberty glob readline bfd gdb binutils ld gas gcc libg++ gnulib clib
 OTHERS = 
 
@@ -76,17 +74,17 @@ INSTALL_TARGET = install.all
 all:	$(ALL)
 
 info:	cfg-paper.info
-	$(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)"
+	rootme=`pwd` ; export rootme ; $(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)" "MAKEINFO=$(MAKEINFO)"
 
 clean-info:
 	$(MAKE) subdir_do DO=clean-info "DODIRS=$(SUBDIRS)"
 	rm -f cfg-paper.info
 
 cfg-paper.info: cfg-paper.texi
-	$(MAKEINFO) -o cfg-paper.info $(srcdir)/cfg-paper.texi
+	rootme=`pwd` ; export rootme ; $(MAKEINFO) -o cfg-paper.info $(srcdir)/cfg-paper.texi
 
 configure.info: configure.texi
-	$(MAKEINFO) -o configure.info $(srcdir)/configure.texi
+	rootme=`pwd` ; export rootme ; $(MAKEINFO) -o configure.info $(srcdir)/configure.texi
 
 install-info: install-info-dirs force
 	$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)"
@@ -100,7 +98,7 @@ install-dir.info:
 # clib prms
 #	all-gnulib
 all.normal: all-texinfo all-bison all-byacc all-flex all-ld \
-	all-gcc all-gas all-binutils \
+	all-gas all-gcc all-binutils \
 	all-libg++ all-gdb all-make all-cvs all-patch all-emacs all-ispell all-fileutils
 all.cross: all-bison all-ld all-gnulib all-gdb
 #	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
@@ -129,6 +127,7 @@ install.cross: install-dirs install-libiberty install-binutils install-bison \
 all-libiberty: just-libiberty
 just-libiberty: force
 	if [ -d $(unsubdir)/libiberty ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/libiberty$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -147,6 +146,7 @@ just-libiberty: force
 
 clean-libiberty: force
 	if [ -d $(unsubdir)/libiberty ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/libiberty$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -165,6 +165,7 @@ clean-libiberty: force
 
 install-libiberty: force
 	if [ -d $(unsubdir)/libiberty ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/libiberty$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -186,6 +187,8 @@ install-libiberty: force
 all-texinfo: just-texinfo
 just-texinfo: just-libiberty force
 	if [ -d $(unsubdir)/texinfo ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/texinfo$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -204,6 +207,7 @@ just-texinfo: just-libiberty force
 
 clean-texinfo: force
 	if [ -d $(unsubdir)/texinfo ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/texinfo$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -222,6 +226,7 @@ clean-texinfo: force
 
 install-texinfo: force
 	if [ -d $(unsubdir)/texinfo ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/texinfo$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -243,6 +248,7 @@ install-texinfo: force
 all-bfd: just-bfd
 just-bfd: force
 	if [ -d $(unsubdir)/bfd ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/bfd$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -261,6 +267,7 @@ just-bfd: force
 
 clean-bfd: force
 	if [ -d $(unsubdir)/bfd ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/bfd$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -279,6 +286,7 @@ clean-bfd: force
 
 install-bfd: force
 	if [ -d $(unsubdir)/bfd ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/bfd$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -300,6 +308,7 @@ install-bfd: force
 all-binutils: just-binutils
 just-binutils: just-libiberty just-bfd force
 	if [ -d $(unsubdir)/binutils ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/binutils$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -318,6 +327,7 @@ just-binutils: just-libiberty just-bfd force
 
 clean-binutils: force
 	if [ -d $(unsubdir)/binutils ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/binutils$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -336,6 +346,7 @@ clean-binutils: force
 
 install-binutils: force
 	if [ -d $(unsubdir)/binutils ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/binutils$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -357,6 +368,7 @@ install-binutils: force
 all-byacc: just-byacc
 just-byacc: force
 	if [ -d $(unsubdir)/byacc ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/byacc$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -375,6 +387,7 @@ just-byacc: force
 
 clean-byacc: force
 	if [ -d $(unsubdir)/byacc ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/byacc$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -393,6 +406,7 @@ clean-byacc: force
 
 install-byacc: force
 	if [ -d $(unsubdir)/byacc ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/byacc$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -414,6 +428,7 @@ install-byacc: force
 all-bison: just-bison
 just-bison: just-libiberty force
 	if [ -d $(unsubdir)/bison ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/bison$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -432,6 +447,7 @@ just-bison: just-libiberty force
 
 clean-bison: force
 	if [ -d $(unsubdir)/bison ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/bison$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -450,6 +466,7 @@ clean-bison: force
 
 install-bison: force
 	if [ -d $(unsubdir)/bison ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/bison$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -470,8 +487,9 @@ install-bison: force
 .PHONY: all-gcc just-gcc
 all-gcc: just-gcc
 #just-gcc: just-libiberty just-bison just-gnulib1 force
-just-gcc: just-libiberty just-bison force
+just-gcc: just-libiberty just-bison just-gas force
 	if [ -d $(unsubdir)/gcc ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/gcc$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -490,6 +508,7 @@ just-gcc: just-libiberty just-bison force
 
 clean-gcc: force
 	if [ -d $(unsubdir)/gcc ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/gcc$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -508,6 +527,7 @@ clean-gcc: force
 
 install-gcc:
 	if [ -d $(unsubdir)/gcc ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/gcc$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -529,6 +549,7 @@ install-gcc:
 all-readline: just-readline
 just-readline: force
 	if [ -d $(unsubdir)/readline ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/readline$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -547,6 +568,7 @@ just-readline: force
 
 clean-readline: force
 	if [ -d $(unsubdir)/readline ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/readline$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -565,6 +587,7 @@ clean-readline: force
 
 install-readline: force
 	if [ -d $(unsubdir)/readline ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/readline$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -586,6 +609,7 @@ install-readline: force
 all-glob: just-glob
 just-glob: force
 	if [ -d $(unsubdir)/glob ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/glob$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -604,6 +628,7 @@ just-glob: force
 
 clean-glob: force
 	if [ -d $(unsubdir)/glob ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/glob$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -622,6 +647,7 @@ clean-glob: force
 
 install-glob: force
 	if [ -d $(unsubdir)/glob ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/glob$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -643,6 +669,7 @@ install-glob: force
 all-gas: just-gas
 just-gas: just-libiberty just-bfd force
 	if [ -d $(unsubdir)/gas ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/gas$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -661,6 +688,7 @@ just-gas: just-libiberty just-bfd force
 
 clean-gas: force
 	if [ -d $(unsubdir)/gas ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/gas$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -679,6 +707,7 @@ clean-gas: force
 
 install-gas: force
 	if [ -d $(unsubdir)/gas ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/gas$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -700,6 +729,7 @@ install-gas: force
 all-ld: just-ld
 just-ld: just-libiberty just-bfd just-bison force
 	if [ -d $(unsubdir)/ld ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/ld$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -718,6 +748,7 @@ just-ld: just-libiberty just-bfd just-bison force
 
 clean-ld: force
 	if [ -d $(unsubdir)/ld ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/ld$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -736,6 +767,7 @@ clean-ld: force
 
 install-ld: force
 	if [ -d $(unsubdir)/ld ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/ld$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -756,6 +788,7 @@ install-ld: force
 .PHONY: all-gnulib just-gnulib1 just-gnulib
 just-gnulib1: all-gas all-binutils force
 	if [ -d $(unsubdir)/gnulib ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/gnulib$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -774,6 +807,7 @@ just-gnulib1: all-gas all-binutils force
 
 clean-gnulib1: force
 	if [ -d $(unsubdir)/gnulib ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/gnulib$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -794,9 +828,10 @@ install-gnulib1: force
 	echo gnulib1 is a component, not an installable target
 
 all-gnulib: just-gnulib
-just-gnulib: all-gcc all-gas all-binutils force
+just-gnulib: all-gas all-gcc all-binutils force
 	true
 	if [ -d $(unsubdir)/gnulib ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/gnulib$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -815,6 +850,7 @@ just-gnulib: all-gcc all-gas all-binutils force
 
 clean-gnulib: force
 	if [ -d $(unsubdir)/gnulib ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/gnulib$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -833,6 +869,7 @@ clean-gnulib: force
 
 install-gnulib: force
 	if [ -d $(unsubdir)/gnulib ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/gnulib$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -854,6 +891,7 @@ install-gnulib: force
 all-gdb: just-gdb
 just-gdb: just-bfd just-libiberty just-readline just-glob just-bison force
 	if [ -d $(unsubdir)/gdb ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/gdb$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -872,6 +910,7 @@ just-gdb: just-bfd just-libiberty just-readline just-glob just-bison force
 
 clean-gdb: force
 	if [ -d $(unsubdir)/gdb ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/gdb$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -890,6 +929,7 @@ clean-gdb: force
 
 install-gdb: force
 	if [ -d $(unsubdir)/gdb ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/gdb$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -911,6 +951,7 @@ install-gdb: force
 all-make: just-make
 just-make: all-libiberty force
 	if [ -d $(unsubdir)/make ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/make$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -929,6 +970,7 @@ just-make: all-libiberty force
 
 clean-make: force
 	if [ -d $(unsubdir)/make ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/make$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -947,6 +989,7 @@ clean-make: force
 
 install-make: force
 	if [ -d $(unsubdir)/make ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/make$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -968,6 +1011,7 @@ install-make: force
 all-diff: just-diff
 just-diff: force
 	if [ -d $(unsubdir)/diff ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/diff$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -986,6 +1030,7 @@ just-diff: force
 
 clean-diff: force
 	if [ -d $(unsubdir)/diff ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/diff$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1004,6 +1049,7 @@ clean-diff: force
 
 install-diff: force
 	if [ -d $(unsubdir)/diff ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/diff/$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1025,6 +1071,7 @@ install-diff: force
 all-grep: just-grep
 just-grep: force
 	if [ -d $(unsubdir)/grep ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/grep$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1043,6 +1090,7 @@ just-grep: force
 
 clean-grep: force
 	if [ -d $(unsubdir)/grep ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/grep$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1061,6 +1109,7 @@ clean-grep: force
 
 install-grep: force
 	if [ -d $(unsubdir)/grep ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/grep$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1082,6 +1131,7 @@ install-grep: force
 all-rcs: just-rcs
 just-rcs: just-diff just-grep force
 	if [ -d $(unsubdir)/rcs ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/rcs$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1100,6 +1150,7 @@ just-rcs: just-diff just-grep force
 
 clean-rcs: force
 	if [ -d $(unsubdir)/rcs ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/rcs$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1118,6 +1169,7 @@ clean-rcs: force
 
 install-rcs: install-grep install-diff force
 	if [ -d $(unsubdir)/rcs ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/rcs$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1139,6 +1191,7 @@ install-rcs: install-grep install-diff force
 all-gdbm: just-gdbm
 just-gdbm: force
 	if [ -d $(unsubdir)/gdbm ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/gdbm$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1157,6 +1210,7 @@ just-gdbm: force
 
 clean-gdbm: force
 	if [ -d $(unsubdir)/gdbm ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/gdbm$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1175,6 +1229,7 @@ clean-gdbm: force
 
 install-gdbm: force
 	if [ -d $(unsubdir)/gdbm ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/gdbm$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1196,6 +1251,7 @@ install-gdbm: force
 all-cvs: just-cvs just-rcs just-grep just-diff
 just-cvs: just-gdbm force
 	if [ -d $(unsubdir)/cvs ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/cvs$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1214,6 +1270,7 @@ just-cvs: just-gdbm force
 
 clean-cvs: clean-gdbm force
 	if [ -d $(unsubdir)/cvs ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/cvs$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1232,6 +1289,7 @@ clean-cvs: clean-gdbm force
 
 install-cvs: install-rcs install-gdbm force
 	if [ -d $(unsubdir)/cvs ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/cvs$(subdir); \
 		$(MAKE) \
 			"bindir=$(bindir)" \
@@ -1255,6 +1313,7 @@ install-cvs: install-rcs install-gdbm force
 all-patch: just-patch
 just-patch: force
 	if [ -d $(unsubdir)/patch ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/patch$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1273,6 +1332,7 @@ just-patch: force
 
 clean-patch: force
 	if [ -d $(unsubdir)/patch ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/patch$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1291,6 +1351,7 @@ clean-patch: force
 
 install-patch: force
 	if [ -d $(unsubdir)/patch ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/patch$(subdir); \
 		$(MAKE) \
 			bindir=$(bindir) \
@@ -1313,6 +1374,7 @@ install-patch: force
 all-emacs: just-emacs
 just-emacs: force
 	if [ -d $(unsubdir)/emacs ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/emacs$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1331,6 +1393,7 @@ just-emacs: force
 
 clean-emacs: force
 	if [ -d $(unsubdir)/emacs ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/emacs$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1349,6 +1412,7 @@ clean-emacs: force
 
 install-emacs: install-rcs install-gdbm force
 	if [ -d $(unsubdir)/emacs ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/emacs$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1370,6 +1434,7 @@ install-emacs: install-rcs install-gdbm force
 all-ispell: just-ispell
 just-ispell: all-emacs force
 	if [ -d $(unsubdir)/ispell ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/ispell$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1388,6 +1453,7 @@ just-ispell: all-emacs force
 
 clean-ispell: force
 	if [ -d $(unsubdir)/ispell ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/ispell$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1406,6 +1472,7 @@ clean-ispell: force
 
 install-ispell: install-rcs install-gdbm force
 	if [ -d $(unsubdir)/ispell ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/ispell$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1427,6 +1494,7 @@ install-ispell: install-rcs install-gdbm force
 all-flex: just-flex
 just-flex: force
 	if [ -d $(unsubdir)/flex ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/flex$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1445,6 +1513,7 @@ just-flex: force
 
 clean-flex: force
 	if [ -d $(unsubdir)/flex ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/flex$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1463,6 +1532,7 @@ clean-flex: force
 
 install-flex: force
 	if [ -d $(unsubdir)/flex ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/flex$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
@@ -1484,6 +1554,7 @@ install-flex: force
 all-fileutils: just-fileutils
 just-fileutils: force
 	if [ -d $(unsubdir)/fileutils ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/fileutils$(subdir); \
 		$(MAKE) \
 			"prefix=$(prefix)" \
@@ -1505,6 +1576,7 @@ just-fileutils: force
 
 clean-fileutils: force
 	if [ -d $(unsubdir)/fileutils ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/fileutils$(subdir); \
 		$(MAKE) \
 			"prefix=$(prefix)" \
@@ -1526,6 +1598,7 @@ clean-fileutils: force
 
 install-fileutils: force
 	if [ -d $(unsubdir)/fileutils ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/fileutils$(subdir); \
 		$(MAKE) \
 			"prefix=$(prefix)" \
@@ -1547,15 +1620,17 @@ install-fileutils: force
 
 ### libg++
 .PHONY: all-libg++ just-libg++
-all-libg++: just-gcc just-libg++
+all-libg++: just-gas just-ld just-gcc just-make just-libg++
 # NOTE!  We have added GXX= and XTRAFLAGS to the $(MAKE) line!!!
 # and CC == GXX
 # Do not clone this one.
-just-libg++: force
+just-libg++: just-make force
 	if [ -d $(unsubdir)/libg++ ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/libg++$(subdir); \
 		$(MAKE) \
 			GXX=`cd $(unsubdir)/..$(subdir); pwd`"/gcc/gcc -B"`cd $(unsubdir)/..$(subdir);pwd`"/gcc/" \
+			MAKE=`cd $(unsubdir)/..$(subdir); pwd`/make/make \
 			"XTRAFLAGS=-I"`cd $(unsubdir)/..$(subdir); pwd`/gcc/include\
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
@@ -1576,8 +1651,10 @@ just-libg++: force
 
 clean-libg++: force
 	if [ -d $(unsubdir)/libg++ ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/libg++$(subdir); \
 		$(MAKE) \
+			MAKE=`cd $(unsubdir)/..$(subdir); pwd`/make/make \
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
 			"mandir=$(mandir)" \
@@ -1597,8 +1674,10 @@ clean-libg++: force
 
 install-libg++: force
 	if [ -d $(unsubdir)/libg++ ] ; then \
+		rootme=`pwd` ; export rootme ; \
 		(cd $(unsubdir)/libg++$(subdir); \
 		$(MAKE) \
+			MAKE=`cd $(unsubdir)/..$(subdir); pwd`/make/make \
 			"prefix=$(prefix)" \
 			"datadir=$(datadir)" \
 			"mandir=$(mandir)" \
@@ -1626,7 +1705,7 @@ all.xclib:	all.normal
 subdir_do: force
 	for i in $(DODIRS); do \
 		if [ -f $(unsubdir)/$$i/localenv ] ; then \
-			if (cd $(unsubdir)/$$i$(subdir); \
+			if (rootme=`pwd` ; export rootme ; cd $(unsubdir)/$$i$(subdir); \
 				$(MAKE) \
 					"against=$(against)" \
 					"BISON=$(BISON)" \
@@ -1634,7 +1713,7 @@ subdir_do: force
 					$(DO)) ; then true ; \
 				else exit 1 ; fi ; \
 		else if [ -d $(unsubdir)/$$i ] ; then \
-			if (cd $(unsubdir)/$$i$(subdir); \
+			if (rootme=`pwd` ; export rootme ; cd $(unsubdir)/$$i$(subdir); \
 				$(MAKE) \
 					"against=$(against)" \
 					"AR=$(AR)" \
