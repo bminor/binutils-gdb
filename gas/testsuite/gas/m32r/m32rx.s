@@ -22,9 +22,9 @@ cmpeq:
 	cmpeq fp, fp
 
 	.text
-	.global machl1
-machl1:
-	machl1 fp, fp
+	.global maclh1
+maclh1:
+	maclh1 fp, fp
 	
 	.text
 	.global macsl0
@@ -63,14 +63,9 @@ mullo:
 	mullo fp, fp, a0
 	
 	.text
-	.global mulwhi
-mulwhi:
-	mulwhi fp, fp, a1
-	
-	.text
-	.global mulwlo
-mulwlo:
-	mulwlo fp, fp, a0
+	.global divh
+divh:
+	divh fp, fp
 	
 	.text
 	.global machi
@@ -81,16 +76,6 @@ machi:
 	.global maclo
 maclo:
 	maclo fp, fp, a0
-	
-	.text
-	.global macwhi
-macwhi:
-	macwhi fp, fp, a1
-	
-	.text
-	.global macwlo
-macwlo:
-	macwlo fp, fp, a0
 	
 	.text
 	.global mvfachi
@@ -105,7 +90,7 @@ mvfacmi:
 	.text
 	.global mvfaclo
 mvfaclo:
-	mvfaclo fp, a0
+	mvfaclo fp, a1
 	
 	.text
 	.global mvtachi
@@ -123,9 +108,29 @@ rac:
 	rac a1
 	
 	.text
+	.global rac_ds
+rac_ds:
+	rac a1, a0
+	
+	.text
+	.global rac_dsi
+rac_dsi:
+	rac a0, a1, #1
+	
+	.text
 	.global rach
 rach:
 	rach a1
+	
+	.text
+	.global rach_ds
+rach_ds:
+	rach a0, a1
+	
+	.text
+	.global rach_dsi
+rach_dsi:
+	rach a1, a0, #2
 	
 # Test explicitly parallel and implicitly parallel instructions
 # Including apparent instruction sequence reordering.
@@ -244,14 +249,14 @@ mvfc__sub:
 	.text
 	.global mvtc__subv
 mvtc__subv:
-	mvtc fp, cr0 || subv r2, fp
-	mvtc fp, cr0
+	mvtc fp, cr2 || subv r2, fp
+	mvtc fp, cr2
 	subv r2, fp
 
 	.text
 	.global rte__subx
 rte__subx:
-	rte || subx r2, fp
+	rte || sub r2, fp
 	rte
 	subx r2, fp
 
@@ -270,11 +275,11 @@ slli__machi:
 	machi r2, fp
 
 	.text
-	.global sra__machl1
-sra__machl1:
-	sra fp, fp || machl1 r2, fp
+	.global sra__maclh1
+sra__maclh1:
+	sra fp, fp || maclh1 r2, fp
 	sra fp, fp
-	machl1 r2, fp
+	maclh1 r2, fp
 
 	.text
 	.global srai__maclo
@@ -398,9 +403,9 @@ cmpeq__rac:
 	.text
 	.global cmpu__rach
 cmpu__rach:
-	cmpu fp, fp || rach a0
+	cmpu fp, fp || rach a0, a1
 	cmpu fp, fp
-	rach a0
+	rach a1, a1, #1
 
 	.text
 	.global cmpz__sadd
@@ -484,7 +489,6 @@ snc__neg:
 	.text
 	.global nop__sadd
 nop__sadd:
-label:		
 	nop
 	sadd
 
@@ -556,3 +560,25 @@ bc__add__forced_parallel:
 	.global add__bc__forced_parallel
 add__bc__forced_parallel:
 	add r7, r8 || bc label
+label:
+	nop
+
+; Additional testcases.
+; These insns were added to the chip later.
+
+	.text
+mulwhi:
+	mulwhi fp, fp, a0
+	mulwhi fp, fp, a1
+	
+mulwlo:
+	mulwlo fp, fp, a0
+	mulwlo fp, fp, a1
+
+macwhi:
+	macwhi fp, fp, a0
+	macwhi fp, fp, a1
+
+macwlo:
+	macwlo fp, fp, a0
+	macwlo fp, fp, a1
