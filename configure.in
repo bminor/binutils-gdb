@@ -161,7 +161,13 @@ if false && [ "${host}" = "${target}" ] && [ x${enable_shared} = x ]; then
   esac
 fi
 
-if [ x${enable_shared} = xyes ]; then
+case "${enable_shared}" in
+  yes) shared=yes ;;
+  no) shared=no ;;
+  *) shared=yes ;;
+esac
+
+if [ x${shared} = xyes ]; then
   waugh=
   case "${host}" in
     hppa*)		waugh=config/mh-papic ;;
@@ -664,7 +670,7 @@ if [ x${use_gnu_ld} = x ] ; then
   fi
 fi
 
-if [ x${enable_shared} = xyes ]; then
+if [ x${shared} = xyes ]; then
   case "${target}" in
     hppa*)		target_makefile_frag=config/mt-papic ;;
     i[345]86-*)		target_makefile_frag=config/mt-x86pic ;;
@@ -720,7 +726,7 @@ esac
 
 # If --enable-shared was set, we must set LD_LIBRARY_PATH so that the
 # binutils tools will find libbfd.so.
-if [ "${enable_shared}" = "yes" ]; then
+if [ "${shared}" = "yes" ]; then
   sed -e 's/^SET_LIB_PATH[ 	]*=.*$/SET_LIB_PATH = $(REALLY_SET_LIB_PATH)/' \
       Makefile > Makefile.tem
   rm -f Makefile

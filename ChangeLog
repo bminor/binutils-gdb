@@ -1,3 +1,8 @@
+Mon Apr  8 14:45:41 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Permit --enable-shared to specify a list of
+	directories.
+
 Fri Apr  5 08:17:57 1996  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* configure.in (host==solaris): Pass only the first word of $CC
