@@ -1,3 +1,8 @@
+2005-01-26  Nick Roberts  <nickrob@snap.net.nz>
+
+	* interps.c (interpreter_exec_cmd): Use condition,
+	e.reason < 0, to raise an error.
+
 2005-01-25  Andrew Cagney  <cagney@gnu.org>
 
 	* ppc-linux-tdep.c: Include "tramp-frame.h"
