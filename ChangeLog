@@ -1,3 +1,9 @@
+start-sanitize-ide
+Wed Dec 17 11:27:59 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Only put libide in GDB_TK if --enable-ide.
+
+end-sanitize-ide
 start-sanitize-d30v
 Wed Dec 17 09:53:02 1997  Michael Meissner  <meissner@cygnus.com>
 
