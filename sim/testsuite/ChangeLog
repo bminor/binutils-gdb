@@ -1,5 +1,6 @@
 Fri Feb 20 11:00:02 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* sim/m32r/mvfc.cgs: Fixed test.
 	* sim/m32r/remu.cgs: Fixed test.
 
 	* sim/m32r/bnc24.cgs: Test long BNC instruction.
