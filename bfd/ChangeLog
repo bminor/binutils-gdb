@@ -1,3 +1,7 @@
+2004-04-22  Chris Demetriou  <cgd@broadcom.com>
+
+	* elfxx-mips.c (mips_elf_get_global_gotsym_index): Remove.
+
 2004-04-21  Philip Blundell  <pb@nexus.co.uk>
 
 	* elf32-arm.h (elf32_arm_check_relocs): Don't output REL32

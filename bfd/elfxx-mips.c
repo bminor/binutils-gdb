@@ -400,8 +400,6 @@ static asection *mips_elf_got_section
   (bfd *, bfd_boolean);
 static struct mips_got_info *mips_elf_got_info
   (bfd *, asection **);
-static long mips_elf_get_global_gotsym_index
-  (bfd *abfd);
 static bfd_vma mips_elf_local_got_index
   (bfd *, bfd *, struct bfd_link_info *, bfd_vma);
 static bfd_vma mips_elf_global_got_index
@@ -1813,28 +1811,6 @@ mips_elf_got_info (bfd *abfd, asection **sgotp)
     *sgotp = (sgot->flags & SEC_EXCLUDE) == 0 ? sgot : NULL;
 
   return g;
-}
-
-/* Obtain the lowest dynamic index of a symbol that was assigned a
-   global GOT entry.  */
-static long
-mips_elf_get_global_gotsym_index (bfd *abfd)
-{
-  asection *sgot;
-  struct mips_got_info *g;
-
-  if (abfd == NULL)
-    return 0;
-
-  sgot = mips_elf_got_section (abfd, TRUE);
-  if (sgot == NULL || mips_elf_section_data (sgot) == NULL)
-    return 0;
-
-  g = mips_elf_section_data (sgot)->u.got_info;
-  if (g == NULL || g->global_gotsym == NULL)
-    return 0;
-
-  return g->global_gotsym->dynindx;
 }
 
 /* Returns the GOT offset at which the indicated address can be found.
