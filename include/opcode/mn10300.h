@@ -1,5 +1,5 @@
 /* mn10300.h -- Header file for Matsushita 10300 opcode table
-   Copyright 1996 Free Software Foundation, Inc.
+   Copyright 1996, 1997 Free Software Foundation, Inc.
    Written by Jeff Law, Cygnus Support
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -104,6 +104,24 @@ extern const struct mn10300_operand mn10300_operands[];
 
 #define MN10300_OPERAND_RELAX 0x4000
 
+/* start-sanitize-am33 */
+#define MN10300_OPERAND_USP 0x8000
+
+#define MN10300_OPERAND_SSP 0x10000
+
+#define MN10300_OPERAND_MSP 0x20000
+
+#define MN10300_OPERAND_PC 0x40000
+
+#define MN10300_OPERAND_EPSW 0x80000
+
+#define MN10300_OPERAND_RREG 0x100000
+
+#define MN10300_OPERAND_XRREG 0x200000
+
+#define MN10300_OPERAND_PLUS 0x400000
+/* end-sanitize-am33 */
+
 /* Opcode Formats.  */
 #define FMT_S0 1
 #define FMT_S1 2
@@ -115,5 +133,9 @@ extern const struct mn10300_operand mn10300_operands[];
 #define FMT_D2 8
 #define FMT_D4 9
 #define FMT_D5 10
+/* start-sanitize-am33 */
+#define FMT_D6 11
+#define FMT_D7 12
+/* start-sanitize-am33 */
 
 #endif /* MN10300_H */

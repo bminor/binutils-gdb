@@ -1,3 +1,11 @@
+start-sanitize-am33
+Fri Jun 19 09:39:47 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300.h (MN10300_OPERAND_XRREG): Define.
+	(MN10300_OPERAND_PLUS): Likewise.
+	(FMT_D6, FMT_D7): Likewise.
+
+end-sanitize-am33
 1998-06-18  Ulrich Drepper  <drepper@cygnus.com>
 
 	* i386.h: Add support for fxsave, fxrstor, sysenter and sysexit.
