@@ -1,3 +1,7 @@
+Wed Apr 28 09:20:55 1993  Ian Lance Taylor  (ian@rtl.cygnus.com)
+
+	* config/sparc/sun4sol2.mh (XM_CLIBS): Define to be -lnsl.
+
 Wed Apr 28 06:11:38 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* Remote targets (mourn): Call unpush_target.
