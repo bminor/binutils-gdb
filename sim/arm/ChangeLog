@@ -1,3 +1,11 @@
+Thu Apr 17 02:39:02 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (SIM_OBJS): Add sim-load.o.
+	* wrapper.c (sim_kind,myname): New static locals.
+	(sim_open): Set sim_kind, myname.
+	(sim_load): Call sim_load_file to do work.  Set start address from bfd.
+	(sim_create_inferior): Return SIM_RC.  Delete start_address arg.
+
 Thu Apr 17 11:48:25 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* wrapper.c (sim_trace): Update so that it matches prototype.

@@ -1,5 +1,5 @@
 /* run front end support for arm
-   Copyright (C) 1995, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996, 1997 Free Software Foundation, Inc.
 
 This file is part of ARM SIM.
 
@@ -34,6 +34,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 host_callback *sim_callback;
 
 static struct ARMul_State *state;
+
+/* Who is using the simulator.  */
+static SIM_OPEN_KIND sim_kind;
+
+/* argv[0] */
+static char *myname;
 
 /* Memory size in bytes.  */
 static int mem_size = (1 << 21);
@@ -161,14 +167,13 @@ sim_resume (sd, step, siggnal)
   FLUSHPIPE;
 }
 
-void
-sim_create_inferior (sd, start_address, argv, env)
+SIM_RC
+sim_create_inferior (sd, argv, env)
      SIM_DESC sd;
-     SIM_ADDR start_address;
      char **argv;
      char **env;
 {
-  ARMul_SetPC(state, start_address);
+  return SIM_RC_OK;
 }
 
 void
@@ -251,8 +256,8 @@ sim_open (kind, argv)
      SIM_OPEN_KIND kind;
      char **argv;
 {
-  /*  (*sim_callback->error) (sim_callback, "testing 1 2 3\n");*/
-  /* nothing to do, fudge our descriptor */
+  sim_kind = kind;
+  myname = argv[0];
   return (SIM_DESC) 1;
 }
 
@@ -264,14 +269,24 @@ sim_close (sd, quitting)
   /* nothing to do */
 }
 
-int
-sim_load (sd, prog, from_tty)
+SIM_RC
+sim_load (sd, prog, abfd, from_tty)
      SIM_DESC sd;
      char *prog;
+     bfd *abfd;
      int from_tty;
 {
-  /* Return nonzero so GDB will handle it.  */
-  return 1;
+  extern bfd *sim_load_file (); /* ??? Don't know where this should live.  */
+  bfd *prog_bfd;
+
+  prog_bfd = sim_load_file (sd, myname, sim_callback, prog, abfd,
+			    sim_kind == SIM_OPEN_DEBUG);
+  if (prog_bfd == NULL)
+    return SIM_RC_FAIL;
+  ARMul_SetPC (state, bfd_get_start_address (prog_bfd));
+  if (abfd == NULL)
+    bfd_close (prog_bfd);
+  return SIM_RC_OK;
 }
 
 void
