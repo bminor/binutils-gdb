@@ -23,7 +23,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sim-options.h"
 #include "libiberty.h"
 #include "bfd.h"
-#include "targ-vals.h"
 
 static void free_state (SIM_DESC);
 static void print_m32r_misc_cpu (SIM_CPU *cpu, int verbose);
@@ -87,7 +86,9 @@ sim_open (kind, callback, abfd, argv)
   /* Allocate core managed memory */
   sim_do_commandf (sd, "memory region 0,0x%lx", M32R_DEFAULT_MEM_SIZE);
 
-  /* Allocate a handler for the MSPR register.  */
+  /* Allocate a handler for the control registers and other devices.
+     All are allocated in one chunk to keep things from being
+     unnecessarily complicated.  */
   sim_core_attach (sd, NULL,
 		   0 /*level*/,
 		   access_read_write,
@@ -174,6 +175,11 @@ sim_open (kind, callback, abfd, argv)
   /* Initialize various cgen things not done by common framework.  */
   cgen_init (sd);
 
+  /* Open a copy of the opcode table.  */
+  STATE_OPCODE_TABLE (sd) = m32r_cgen_opcode_open (STATE_ARCHITECTURE (sd)->mach,
+						   CGEN_ENDIAN_BIG);
+  m32r_cgen_init_dis (STATE_OPCODE_TABLE (sd));
+
   {
     int c;
 
@@ -200,6 +206,7 @@ sim_close (sd, quitting)
      SIM_DESC sd;
      int quitting;
 {
+  m32r_cgen_opcode_close (STATE_OPCODE_TABLE (sd));
   sim_module_uninstall (sd);
 }
 
@@ -309,6 +316,11 @@ print_m32r_misc_cpu (SIM_CPU *cpu, int verbose)
 		     PROFILE_LABEL_WIDTH, "Fill nops:",
 		     sim_add_commas (buf, sizeof (buf),
 				     CPU_M32R_MISC_PROFILE (cpu).fillnop_count));
+      if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_m32rx)
+	sim_io_printf (sd, "  %-*s %s\n\n",
+		       PROFILE_LABEL_WIDTH, "Parallel insns:",
+		       sim_add_commas (buf, sizeof (buf),
+				       CPU_M32R_MISC_PROFILE (cpu).parallel_count));
     }
 }
 
@@ -349,17 +361,6 @@ sim_do_command (sd, cmd)
     sim_io_eprintf (sd, "Unknown command `%s'\n", cmd);
 }
 
-/* The semantic code invokes this for illegal (unrecognized) instructions.  */
-
-void
-sim_engine_illegal_insn (current_cpu, pc)
-     SIM_CPU *current_cpu;
-     PCADDR pc;
-{
-  sim_engine_halt (CPU_STATE (current_cpu), current_cpu, NULL, pc,
-		   sim_stopped, SIM_SIGILL);
-}
-
 /* Utility fns to access registers, without knowing the current mach.  */
 
 SI
@@ -398,101 +399,4 @@ h_gr_set (SIM_CPU *current_cpu, UINT regno, SI newval)
     default :
       abort ();
     }
-}
-
-/* Read/write functions for system call interface.  */
-
-static int
-syscall_read_mem (host_callback *cb, struct cb_syscall *sc,
-		  unsigned long taddr, char *buf, int bytes)
-{
-  SIM_DESC sd = (SIM_DESC) sc->p1;
-  SIM_CPU *cpu = (SIM_CPU *) sc->p2;
-
-  return sim_core_read_buffer (sd, cpu, read_map, buf, taddr, bytes);
-}
-
-static int
-syscall_write_mem (host_callback *cb, struct cb_syscall *sc,
-		   unsigned long taddr, const char *buf, int bytes)
-{
-  SIM_DESC sd = (SIM_DESC) sc->p1;
-  SIM_CPU *cpu = (SIM_CPU *) sc->p2;
-
-  return sim_core_write_buffer (sd, cpu, write_map, buf, taddr, bytes);
-}
-
-/* Trap support.
-   The result is the pc address to continue at.  */
-
-USI
-do_trap (SIM_CPU *current_cpu, int num)
-{
-  SIM_DESC sd = CPU_STATE (current_cpu);
-  host_callback *cb = STATE_CALLBACK (sd);
-
-#ifdef SIM_HAVE_BREAKPOINTS
-  /* Check for breakpoints "owned" by the simulator first, regardless
-     of --environment.  */
-  if (num == 1)
-    {
-      /* First try sim-break.c.  If it's a breakpoint the simulator "owns"
-	 it doesn't return.  Otherwise it returns and let's us try.  */
-      sim_handle_breakpoint (sd, current_cpu, sim_pc_get (current_cpu));
-      /* Fall through.  */
-    }
-#endif
-
-  if (STATE_ENVIRONMENT (sd) == OPERATING_ENVIRONMENT)
-    {
-      /* The new pc is the trap vector entry.
-	 We assume there's a branch there to some handler.  */
-      USI new_pc = num * 4;
-      return new_pc;
-    }
-
-  switch (num)
-    {
-    case 0 :
-      /* Trap 0 is used for system calls.  */
-      {
-	CB_SYSCALL s;
-
-	CB_SYSCALL_INIT (&s);
-	s.func = h_gr_get (current_cpu, 0);
-	s.arg1 = h_gr_get (current_cpu, 1);
-	s.arg2 = h_gr_get (current_cpu, 2);
-	s.arg3 = h_gr_get (current_cpu, 3);
-
-	if (s.func == TARGET_SYS_exit)
-	  {
-	    sim_engine_halt (sd, current_cpu, NULL, sim_pc_get (current_cpu),
-			     sim_exited, s.arg1);
-	  }
-
-	s.p1 = (PTR) sd;
-	s.p2 = (PTR) current_cpu;
-	s.read_mem = syscall_read_mem;
-	s.write_mem = syscall_write_mem;
-	cb_syscall (STATE_CALLBACK (sd), &s);
-	h_gr_set (current_cpu, 2, s.errcode);
-	h_gr_set (current_cpu, 0, s.result);
-	h_gr_set (current_cpu, 1, s.result2);
-	break;
-      }
-
-    case 1:	/* breakpoint trap */
-      sim_engine_halt (sd, current_cpu, NULL, NULL_CIA,
-		       sim_stopped, SIM_SIGTRAP);
-      break;
-
-    default :
-      {
-	USI new_pc = num * 4;
-	return new_pc;
-      }
-    }
-
-  /* Fake an "rte" insn.  */
-  return (sim_pc_get (current_cpu) & -4) + 4;
 }

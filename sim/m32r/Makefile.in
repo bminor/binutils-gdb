@@ -73,7 +73,8 @@ MAIN_INCLUDE_DEPS = \
 	$(srcdir)/../common/sim-trace.h \
 	$(srcdir)/../common/sim-profile.h \
 	tconfig.h
-INCLUDE_DEPS = $(MAIN_INCLUDE_DEPS) $(SIM_EXTRA_DEPS) cpu-sim.h
+INCLUDE_DEPS = $(MAIN_INCLUDE_DEPS) $(SIM_EXTRA_DEPS) cpu-sim.h \
+	$(srcdir)/../../include/opcode/cgen.h
 OPS_INCLUDE_DEPS = \
 	$(srcdir)/../common/cgen-mem.h \
 	$(srcdir)/../common/cgen-ops.h
@@ -138,22 +139,24 @@ m32r-clean:
 # cgen support, enable with --enable-cgen-maint
 CGEN_MAINT = ; @true
 # The following line is commented in or out depending upon --enable-cgen-maint.
-@cgen_maint@CGEN_MAINT =
+@CGEN_MAINT@CGEN_MAINT =
 
 stamp-arch: $(CGEN_MAIN_SCM) $(srccgen)/m32r.cpu
-	$(MAKE) cgen-arch
+	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS)
 	touch stamp-arch
 arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
 	@true
 
 stamp-cpu: $(CGEN_MAIN_SCM) $(CGEN_CPU_SCM) $(srccgen)/m32r.cpu
-	$(MAKE) cgen-cpu cpu=m32r mach=m32r SUFFIX= FLAGS="with-scache,with-profile fn" EXTRAFILES="$(CGEN_CPU_EXTR) $(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
+	$(MAKE) cgen-cpu $(CGEN_FLAGS_TO_PASS) \
+	  cpu=m32r mach=m32r SUFFIX= FLAGS="with-scache,with-profile fn" EXTRAFILES="$(CGEN_CPU_EXTR) $(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
 	touch stamp-cpu
 cpu.h extract.c sem.c sem-switch.c model.c: $(CGEN_MAINT) stamp-cpu
 	@true
 
 stamp-decode: $(CGEN_MAIN_SCM) $(CGEN_DECODE_SCM) $(srccgen)/m32r.cpu
-	$(MAKE) cgen-decode cpu=m32r mach=m32r SUFFIX= FLAGS="with-scache,with-profile fn"
+	$(MAKE) cgen-decode $(CGEN_FLAGS_TO_PASS) \
+	  cpu=m32r mach=m32r SUFFIX= FLAGS="with-scache,with-profile fn"
 	touch stamp-decode
 decode.h decode.c: $(CGEN_MAINT) stamp-decode
 	@true
@@ -161,13 +164,15 @@ decode.h decode.c: $(CGEN_MAINT) stamp-decode
 
 # start-sanitize-m32rx
 stamp-xcpu: $(CGEN_MAIN_SCM) $(CGEN_CPU_SCM) $(srccgen)/m32r.cpu
-	$(MAKE) cgen-cpu cpu=m32rx mach=m32rx SUFFIX=x FLAGS="with-profile fn" EXTRAFILES="$(CGEN_CPU_READ) $(CGEN_CPU_SEM)"
+	$(MAKE) cgen-cpu $(CGEN_FLAGS_TO_PASS) \
+	  cpu=m32rx mach=m32rx SUFFIX=x FLAGS="with-profile fn" EXTRAFILES="$(CGEN_CPU_READ) $(CGEN_CPU_SEM)"
 	touch stamp-xcpu
 cpux.h readx.c semx.c modelx.c: $(CGEN_MAINT) stamp-xcpu
 	@true
 
 stamp-xdecode: $(CGEN_MAIN_SCM) $(CGEN_DECODE_SCM) $(srccgen)/m32r.cpu
-	$(MAKE) cgen-decode cpu=m32rx mach=m32rx SUFFIX=x
+	$(MAKE) cgen-decode $(CGEN_FLAGS_TO_PASS) \
+	  cpu=m32rx mach=m32rx SUFFIX=x
 	touch stamp-xdecode
 decodex.h decodex.c: $(CGEN_MAINT) stamp-xdecode
 	@true

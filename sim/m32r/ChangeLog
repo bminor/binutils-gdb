@@ -1,3 +1,18 @@
+Mon Aug  3 12:59:17 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Makefile.in (INCLUDE_DEPS): Add include/opcode/cgen.h.
+
+	* sim-if.c (sim_open): Open opcode table.
+	(sim_close): Close it.
+
+start-sanitize-m32rx
+Tue Jul 28 13:06:19 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	Add support for new versions of mulwhi,mulwlo,macwhi,macwlo that
+	accept an accumulator choice.
+	* cpux.c,decodex.c,decodex.h,modelx.c,readx.c,semx.c: Regenerate.
+
+end-sanitize-m32rx
 Fri Jul 24 13:00:29 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* m32r.c: Include cgen-mem.h.
