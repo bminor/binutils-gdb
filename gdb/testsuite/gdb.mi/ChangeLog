@@ -1,3 +1,11 @@
+2002-02-05  Jim Blandy  <jimb@redhat.com>
+
+	* mi-var-child.exp ("get children of struct_declarations", "get
+	children of struct_declarations.s2.u2.u1s2", "get children of
+	weird"): Tolerate argument types when they appear in function
+	types.  (Dwarf 2 includes prototype info; STABS does not.)
+	* mi0-var-child.exp: Same.
+
 2001-12-19  Keith Seitz  <keiths@redhat.com>
 
 	* mi-var-display.exp: char* variables have a child. Update all
