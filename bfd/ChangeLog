@@ -1,3 +1,7 @@
+2002-01-22  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (INSN_UNOP): Encode with RB as $sp.
+
 2002-01-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_finish_dynamic_sections): Correct sign of

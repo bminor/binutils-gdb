@@ -941,7 +941,7 @@ elf64_alpha_info_to_howto (abfd, cache_ptr, dst)
 #define OP_LDQ		0x29
 #define OP_BR		0x30
 #define OP_BSR		0x34
-#define INSN_UNOP	0x2fe00000
+#define INSN_UNOP	0x2ffe0000
 
 struct alpha_relax_info
 {
