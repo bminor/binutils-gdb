@@ -25,6 +25,7 @@
 
 #include "defs.h"
 #include "inferior.h"
+#include "gdb_assert.h"
 
 #include "ppc-tdep.h"
 #include "ppcnbsd-tdep.h"
@@ -48,6 +49,14 @@ static int
 getfpregs_supplies (int regno)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  /* FIXME: jimb/2004-05-05: Some PPC variants don't have
+     floating-point registers.  For such variants,
+     tdep->ppc_fp0_regnum and tdep->ppc_fpscr_regnum will be -1.  I
+     don't think NetBSD runs on any of those chips, but we can at
+     least make sure that if someone tries it, they'll get a proper
+     notification.  */
+  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
 
   return ((regno >= tdep->ppc_fp0_regnum
            && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)

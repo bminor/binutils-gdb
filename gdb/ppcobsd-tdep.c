@@ -24,6 +24,7 @@
 #include "osabi.h"
 #include "regcache.h"
 #include "regset.h"
+#include "gdb_assert.h"
 
 #include "gdb_string.h"
 
@@ -46,6 +47,14 @@ ppcobsd_supply_gregset (const struct regset *regset,
 			struct regcache *regcache, int regnum,
 			const void *gregs, size_t len)
 {
+  /* FIXME: jimb/2004-05-05: Some PPC variants don't have
+     floating-point registers.  For such variants,
+     tdep->ppc_fp0_regnum and tdep->ppc_fpscr_regnum will be -1.  I
+     don't think OpenBSD runs on any of those chips, but we can at
+     least make sure that if someone tries it, they'll get a proper
+     notification.  */
+  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
+
   ppc_supply_gregset (regset, regcache, regnum, gregs, len);
   ppc_supply_fpregset (regset, regcache, regnum, gregs, len);
 }
@@ -60,6 +69,14 @@ ppcobsd_collect_gregset (const struct regset *regset,
 			 const struct regcache *regcache, int regnum,
 			 void *gregs, size_t len)
 {
+  /* FIXME: jimb/2004-05-05: Some PPC variants don't have
+     floating-point registers.  For such variants,
+     tdep->ppc_fp0_regnum and tdep->ppc_fpscr_regnum will be -1.  I
+     don't think OpenBSD runs on any of those chips, but we can at
+     least make sure that if someone tries it, they'll get a proper
+     notification.  */
+  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
+
   ppc_collect_gregset (regset, regcache, regnum, gregs, len);
   ppc_collect_fpregset (regset, regcache, regnum, gregs, len);
 }
