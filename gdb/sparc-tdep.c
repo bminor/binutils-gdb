@@ -52,12 +52,12 @@
    Solaris 1.x.  If we talk about Solaris we mean Solaris 2.x and
    above (Solaris 7, 8 and 9 are nothing but Solaris 2.7, 2.8 and 2.9
    suffering from severe version number inflation).  Solaris 2.x is
-   also known as SunOS 5.x, since that's what uname(1).  Solaris 2.x
-   is SVR4-based.  */
+   also known as SunOS 5.x, since that's what uname(1) says.  Solaris
+   2.x is SVR4-based.  */
 
 /* Please use the sparc32_-prefix for 32-bit specific code, the
    sparc64_-prefix for 64-bit specific code and the sparc_-prefix for
-   code can handle both.  The 64-bit specific code lives in
+   code that can handle both.  The 64-bit specific code lives in
    sparc64-tdep.c; don't add any here.  */
 
 /* The stack pointer is offset from the stack frame by a BIAS of 2047

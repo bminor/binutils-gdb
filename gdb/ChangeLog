@@ -1,5 +1,7 @@
 2003-11-15  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.c: Fix typos in comments.
+
 	* sparc-linux-tdep.c (sparc32_linux_init_abi): Set long_double_bit
 	to 64.
 
