@@ -1,3 +1,13 @@
+2003-02-21  Bob Wilson  <bob.wilson@acm.org>
+
+	* doc/binutils.texi: Fix typos and obvious texinfo mistakes.  Make
+	section title capitalization more consistent.  Update descriptions
+	of various options to be consistent with the code.  Fix errors and
+	incomplete list in the description of c++filt format options.  Remove
+	information about the linker.  Change to be more polite about poor
+	bug reports.  Replace FDL appendix with include of fdl.texi.
+	* doc/fdl.texi: New file.
+
 2003-02-21  Roger Sayle  <roger@eyesopen.com>
 
 	* objcopy.c (filter_symbols): Fix compilation problems with
