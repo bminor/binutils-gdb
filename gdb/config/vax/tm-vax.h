@@ -245,16 +245,16 @@ fix to bug-gdb@prep.ai.mit.edu.  */
    So return 0 (indicating we don't know the address of
    the arglist) if we don't know what frame this frame calls.  */
 #define FRAME_ARGS_ADDRESS_CORRECT(fi) \
- (((fi)->next_frame                                  \
-   ? read_memory_integer ((fi)->next_frame + 8, 4)   \
+ (((fi)->next                                  \
+   ? read_memory_integer ((fi)->next->frame + 8, 4)   \
    : /* read_register (AP_REGNUM) */ 0))
 
 /* In most of GDB, getting the args address is too important to
    just say "I don't know".  This is sometimes wrong for functions
    that aren't on top of the stack, but c'est la vie.  */
 #define FRAME_ARGS_ADDRESS(fi) \
- (((fi)->next_frame                                  \
-   ? read_memory_integer ((fi)->next_frame + 8, 4)   \
+ (((fi)->next                                  \
+   ? read_memory_integer ((fi)->next->frame + 8, 4)   \
    : read_register (AP_REGNUM) /* 0 */))
 
 #define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)

@@ -21,9 +21,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #if !defined (INFERIOR_H)
 #define INFERIOR_H 1
 
-/* For symtab_and_line */
-#include "symtab.h"
-
 /* For bpstat.  */
 #include "breakpoint.h"
 
@@ -110,6 +107,18 @@ read_pc PARAMS ((void));
 extern void
 write_pc PARAMS ((CORE_ADDR));
 
+extern CORE_ADDR
+read_sp PARAMS ((void));
+
+extern void
+write_sp PARAMS ((CORE_ADDR));
+
+extern CORE_ADDR
+read_fp PARAMS ((void));
+
+extern void
+write_fp PARAMS ((CORE_ADDR));
+
 extern void
 wait_for_inferior PARAMS ((void));
 
@@ -187,6 +196,8 @@ fork_inferior PARAMS ((char *, char *, char **,
 
 extern void
 new_tty_prefork PARAMS ((char *));
+
+extern int gdb_has_a_terminal PARAMS ((void));
 
 /* From infrun.c */
 
@@ -300,6 +311,29 @@ extern int pc_changed;
 
 extern int attach_flag;
 
+/* Sigtramp is a routine that the kernel calls (which then calls the
+   signal handler).  On most machines it is a library routine that
+   is linked into the executable.
+
+   This macro, given a program counter value and the name of the
+   function in which that PC resides (which can be null if the
+   name is not known), returns nonzero if the PC and name show
+   that we are in sigtramp.
+
+   On most machines just see if the name is sigtramp (and if we have
+   no name, assume we are not in sigtramp).  */
+#if !defined (IN_SIGTRAMP)
+#  if defined (SIGTRAMP_START)
+#    define IN_SIGTRAMP(pc, name) \
+       ((pc) >= SIGTRAMP_START   \
+        && (pc) < SIGTRAMP_END \
+        )
+#  else
+#    define IN_SIGTRAMP(pc, name) \
+       (name && STREQ ("_sigtramp", name))
+#  endif
+#endif
+
 /* Possible values for CALL_DUMMY_LOCATION.  */
 #define ON_STACK 1
 #define BEFORE_TEXT_END 2
@@ -326,15 +360,23 @@ extern CORE_ADDR text_end;
    && (pc) <= text_end + CALL_DUMMY_LENGTH + DECR_PC_AFTER_BREAK)
 #else /* On stack.  */
 
-/* This assumes that frame_address is the value of SP_REGNUM before
-   the dummy frame was pushed.  The only known machine for which this
-   isn't true is the 29k, which doesn't use ON_STACK.  Machines for
-   which it isn't true who want to put stack dummies on the stack
-   could provide their own PC_IN_CALL_DUMMY, or perhaps this macro
-   could be re-written to check for the end of the stack instead
-   (using the target_ops->sections).  Are there user programs, libraries,
-   kernel routines, etc. which also execute on the stack?  If so, the
-   latter would be a bad idea.  */
+/* Is the PC in a call dummy?  SP and FRAME_ADDRESS are the bottom and
+   top of the stack frame which we are checking, where "bottom" and
+   "top" refer to some section of memory which contains the code for
+   the call dummy.  Calls to this macro assume that the contents of
+   SP_REGNUM and FP_REGNUM (or the saved values thereof), respectively,
+   are the things to pass.
+
+   This won't work on the 29k, where SP_REGNUM and FP_REGNUM don't
+   have that meaning, but the 29k doesn't use ON_STACK.  This could be
+   fixed by generalizing this scheme, perhaps by passing in a frame
+   and adding a few fields, at least on machines which need them for
+   PC_IN_CALL_DUMMY.
+
+   Something simpler, like checking for the stack segment, doesn't work,
+   since various programs (threads implementations, gcc nested function
+   stubs, etc) may either allocate stack frames in another segment, or
+   allocate other kinds of code on the stack.  */
 
 #define PC_IN_CALL_DUMMY(pc, sp, frame_address) \
   ((sp) INNER_THAN (pc) && (frame_address != 0) && (pc) INNER_THAN (frame_address))

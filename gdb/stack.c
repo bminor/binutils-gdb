@@ -162,7 +162,7 @@ print_frame_info (fi, level, source, args)
   enum language funlang = language_unknown;
   int numargs;
 
-  if (PC_IN_CALL_DUMMY (fi->pc, read_register (SP_REGNUM), fi->frame))
+  if (PC_IN_CALL_DUMMY (fi->pc, read_sp (), fi->frame))
     {
       /* Do this regardless of SOURCE because we don't have any source
 	 to list for this frame.  */
@@ -181,7 +181,7 @@ print_frame_info (fi, level, source, args)
       return;
     }
 
-  sal = find_pc_line (fi->pc, fi->next_frame);
+  sal = find_pc_line (fi->pc, fi->next);
   func = find_pc_function (fi->pc);
   if (func)
     {
@@ -245,7 +245,7 @@ print_frame_info (fi, level, source, args)
 	  struct print_args_args args;
 	  args.fi = fi;
 	  args.func = func;
-	  catch_errors (print_args_stub, (char *)&args, "");
+	  catch_errors (print_args_stub, (char *)&args, "", RETURN_MASK_ERROR);
 	}
       printf_filtered (")");
       if (sal.symtab && sal.symtab->filename)
@@ -417,7 +417,7 @@ frame_info (addr_exp, from_tty)
     error ("Invalid frame specified.");
 
   fi = get_frame_info (frame);
-  sal = find_pc_line (fi->pc, fi->next_frame);
+  sal = find_pc_line (fi->pc, fi->next);
   func = get_frame_function (frame);
   s = find_pc_symtab(fi->pc);
   if (func)
@@ -475,12 +475,13 @@ frame_info (addr_exp, from_tty)
   if (calling_frame)
     printf_filtered (" called by frame at %s", 
 		     local_hex_string(FRAME_FP (calling_frame)));
-  if (fi->next_frame && calling_frame)
+  if (fi->next && calling_frame)
     puts_filtered (",");
   wrap_here ("   ");
-  if (fi->next_frame)
-    printf_filtered (" caller of frame at %s", local_hex_string(fi->next_frame));
-  if (fi->next_frame || calling_frame)
+  if (fi->next)
+    printf_filtered (" caller of frame at %s",
+		     local_hex_string (fi->next->frame));
+  if (fi->next || calling_frame)
     puts_filtered ("\n");
   if (s)
      printf_filtered(" source language %s.\n", language_str(s->language));

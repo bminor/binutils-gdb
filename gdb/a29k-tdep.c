@@ -377,7 +377,7 @@ init_frame_info (innermost_frame, fci)
   if (innermost_frame)
     fci->frame = read_register (GR1_REGNUM);
   else
-    fci->frame = fci->next_frame + fci->next->rsize;
+    fci->frame = fci->next->frame + fci->next->rsize;
   
 #if CALL_DUMMY_LOCATION == ON_STACK
   This wont work;

@@ -1,3 +1,15 @@
+Wed Jul  7 14:30:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/{rs6000/tm-rs6000.h,sparc/tm-sparc.h,pyr/tm-pyr.h},
+	inferior.h (PC_IN_CALL_DUMMY) [ON_STACK]: Add comments about stack
+	frame tops and bottoms.
+
+	* frame.h, blockframe.c, stack.c, a29k-tdep.c,
+	config/gould/tmp-{pn,np1}.h,
+	config/{sparc/tm-sparc.h,pyr/tm-pyr.h,vax/tm-vax.h}: Remove field
+	next_frame from struct frame_info.  It has no purpose beyond
+	->next->frame and is an artifact from GDB 2.8.
+
 Tue Jul  6 11:51:18 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in: Remove gdb before creating a new one.

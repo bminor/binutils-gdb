@@ -18,20 +18,9 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-extern int	symtab_relocated;
-
 /* Minimum possible text address in AIX */
 
 #define TEXT_SEGMENT_BASE	0x10000000
-
-
-/* text addresses in a core file does not necessarily match to symbol table,
-   if symbol table relocation wasn't done yet. */
-
-#define	CORE_NEEDS_RELOCATION(PC)	\
-  if (!symtab_relocated && !inferior_pid)	\
-    xcoff_relocate_core ();
-extern void xcoff_relocate_core PARAMS ((void));
 
 /* Load segment of a given pc value. */
 
@@ -42,20 +31,16 @@ extern void xcoff_relocate_core PARAMS ((void));
 #define BELIEVE_PCC_PROMOTION 1
 
 /* return true if a given `pc' value is in `call dummy' function. */
-
+/* FIXME: This just checks for the end of the stack, which is broken
+   for things like stepping through gcc nested function stubs.  */
 #define	PC_IN_CALL_DUMMY(STOP_PC, STOP_SP, STOP_FRAME_ADDR)	\
 	(STOP_SP < STOP_PC && STOP_PC < STACK_END_ADDR)
 
-/* For each symtab, we keep track of which BFD it came from.  */
-#define	EXTRA_SYMTAB_INFO	\
-	unsigned    nonreloc:1;		/* TRUE if non relocatable */
-
-#define	INIT_EXTRA_SYMTAB_INFO(symtab)	\
-	symtab->nonreloc = 0;		\
-
+#if 0
 extern unsigned int text_start, data_start;
-extern int inferior_pid;
 extern char *corefile;
+#endif
+extern int inferior_pid;
 
 /* setpgrp() messes up controling terminal. The other version of it
    requires libbsd.a. */
@@ -114,17 +99,12 @@ function_frame_info PARAMS ((CORE_ADDR, struct aix_framedata *));
 
 /* When a child process is just starting, we sneak in and relocate
    the symbol table (and other stuff) after the dynamic linker has
-   figured out where they go. But we want to do this relocation just
-   once. */
-
-extern int loadinfotextindex;
+   figured out where they go.  */
 
 #define	SOLIB_CREATE_INFERIOR_HOOK(PID)	\
   do {					\
-    if (loadinfotextindex == 0)	\
-	xcoff_relocate_symtab (PID);	\
+    xcoff_relocate_symtab (PID);	\
   } while (0)
-	
 
 /* Number of trap signals we need to skip over, once the inferior process
    starts running. */
@@ -155,15 +135,17 @@ extern int loadinfotextindex;
 
 #define	PROCESS_LINENUMBER_HOOK()	aix_process_linenos ()
    
-   
 /* When a target process or core-file has been attached, we sneak in
-   and figure out where the shared libraries have got to. In case there
-   is no inferior_process exists (e.g. bringing up a core file), we can't
-   attemtp to relocate symbol table, since we don't have information about
-   load segments. */
+   and figure out where the shared libraries have got to.  */
 
 #define	SOLIB_ADD(a, b, c)	\
-   if (inferior_pid)	xcoff_relocate_symtab (inferior_pid)
+  if (inferior_pid)	\
+    /* Attach to process.  */  \
+    xcoff_relocate_symtab (inferior_pid); \
+  else		\
+    /* Core file.  */ \
+    xcoff_relocate_core ();
+extern void xcoff_relocate_core PARAMS ((void));
 
 /* Immediately after a function call, return the saved pc.
    Can't go through the frames for this because on some machines
@@ -401,10 +383,11 @@ extern unsigned int rs6000_struct_return_address;
 /* In the case of the RS6000, the frame's nominal address
    is the address of a 4-byte word containing the calling frame's address.  */
 
-#define FRAME_CHAIN(thisframe)  \
-  (!inside_entry_file ((thisframe)->pc) ?	\
-   read_memory_integer ((thisframe)->frame, 4) :\
-   0)
+#define FRAME_CHAIN(thisframe) rs6000_frame_chain (thisframe)
+#ifdef __STDC__
+struct frame_info;
+#endif
+CORE_ADDR rs6000_frame_chain PARAMS ((struct frame_info *));
 
 /* Define other aspects of the stack frame.  */
 
@@ -426,19 +409,30 @@ extern unsigned int rs6000_struct_return_address;
 	CORE_ADDR initial_sp;			/* initial stack pointer. */ \
 	struct frame_saved_regs *cache_fsr;	/* saved registers	  */
 
+#define INIT_FRAME_PC_FIRST(fromleaf, prev) \
+  prev->pc = (fromleaf ? SAVED_PC_AFTER_CALL (prev->next) : \
+	      prev->next ? FRAME_SAVED_PC (prev->next) : read_pc ());
+#define INIT_FRAME_PC(fromleaf, prev) /* nothing */
+#define	INIT_EXTRA_FRAME_INFO(fromleaf, fi)	\
+  fi->initial_sp = 0;		\
+  fi->cache_fsr = 0; \
+  if (fi->next != (CORE_ADDR)0 \
+      && read_memory_integer (fi->frame, 4) == 0 \
+      && fi->pc < TEXT_SEGMENT_BASE) \
+    /* We're in get_prev_frame_info */ \
+    /* and this is a special signal frame.  */ \
+    /* (fi->pc will be something like 0x3f88 or 0x2790).  */ \
+    fi->signal_handler_caller = 1;
+
 /* Frameless function invocation in IBM RS/6000 is sometimes
    half-done. It perfectly sets up a new frame, e.g. a new frame (in
    fact stack) pointer, etc, but it doesn't save the %pc.  We call
    frameless_function_invocation to tell us how to get the %pc.  */
 
-#define	INIT_EXTRA_FRAME_INFO(fromleaf, fi)	\
-	fi->initial_sp = 0;		\
-	fi->cache_fsr = 0;
-
 #define FRAME_SAVED_PC(FRAME)					\
 	(frameless_function_invocation (FRAME, 1)		\
 	 ? SAVED_PC_AFTER_CALL (FRAME)				\
-	 : read_memory_integer (read_memory_integer ((FRAME)->frame, 4)+8, 4))
+	 : read_memory_integer (rs6000_frame_chain (FRAME)+8, 4))
 
 #define FRAME_ARGS_ADDRESS(FI)	\
   (((struct frame_info*)(FI))->initial_sp ?		\

@@ -310,13 +310,18 @@ sparc_extract_struct_value_address PARAMS ((char [REGISTER_BYTES]));
    If there is a frame below this one, and the frame pointers are
    identical, it's a leaf frame and the bottoms are the same also.
 
-   Otherwise the bottom of this frame is the top of the next frame.  */
+   Otherwise the bottom of this frame is the top of the next frame.
+
+   The bottom field is misnamed, since it might imply that memory from
+   bottom to frame contains this frame.  That need not be true if
+   stack frames are allocated in different segments (e.g. some on a
+   stack, some on a heap in the data segment).  */
 
 #define EXTRA_FRAME_INFO	FRAME_ADDR bottom;
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fci)  \
   (fci)->bottom =					\
    ((fci)->next ?					\
-    ((fci)->frame == (fci)->next_frame ?		\
+    ((fci)->frame == (fci)->next->frame ?		\
      (fci)->next->bottom : (fci)->next->frame) :	\
     read_register (SP_REGNUM));
 
