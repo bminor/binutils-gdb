@@ -456,6 +456,12 @@ po/POTFILES.in: @MAINT@ Makefile
 	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
+# We want install to imply install-info as per GNU standards, despite the
+# cygnus option.
+install: install-recursive install-info
+install-info: install-info-recursive
+RECURSIVE_TARGETS += install-info-recursive
+
 # Note: GASP is now deprecated and has been removed.  It is still
 # available in the CVS archive or older binutils releases if it is needed.
 noinst_PROGRAMS = as-new
