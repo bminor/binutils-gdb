@@ -25,14 +25,15 @@ Permission is granted to copy and distribute translations of this manual
 into another language, under the above conditions for modified versions.
 @end ignore
 
-@node History Top
+@node History Top,,,
+@appendix Command Line History
 @ifinfo
 This file is meant to be an inclusion in the documentation of programs
 that use the history library features.  There is also a standalone
 document, entitled @file{history.texinfo}.
 @end ifinfo
 
-This chapter describes the GNU History library, a programming tool that
+This Appendix describes the GNU History library, a programming tool that
 provides a consistent user interface for recalling lines of previously
 typed input.
 
