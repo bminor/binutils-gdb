@@ -6420,7 +6420,7 @@ elf_gc_sections (abfd, info)
              struct elf_link_hash_entry *h, Elf_Internal_Sym *));
 
   if (!get_elf_backend_data (abfd)->can_gc_sections
-      || info->relocateable
+      || info->relocateable || info->emitrelocations
       || elf_hash_table (info)->dynamic_sections_created)
     return true;
 
