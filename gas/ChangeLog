@@ -1,3 +1,13 @@
+Sat May 27 21:28:49 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* config/te-dpx2.h: Include obj-format.h.
+	(COFF_MAGIC): Renamed from FILE_HEADER_MAGIC.
+
+Wed May 24 13:45:32 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* configure, configure.in, config/obj-coff.c, config/obj-coff.h:
+	Add support for ARM pe
+
 Tue May 23 17:00:32 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* config/tc-sparc.c (tc_gen_reloc): Handle BFD_RELOC_SPARC_WDISP16
