@@ -1,3 +1,11 @@
+2001-10-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-i386v.h: Don't include "regcache.h".
+	(EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE, FRAME_CHAIN,
+	FRAMELESS_FUNCTION_INVOCATION, FRAME_SAVED_PC, FRAME_NUM_ARGS):
+	Remove macros.  The versions from "tm-i386.h" should work fine
+	(and in most cases even better).
+
 2001-10-30  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_extract_return_value): Use
