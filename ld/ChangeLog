@@ -1,3 +1,8 @@
+2003-08-15  Nick Clifton  <nickc@redhat.com>
+
+	* ld.texinfo (Options): Put keywords for the -z option into a
+	table.  Add more text describing what the -z now option does.
+
 2003-08-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* dep-in.sed: Remove libintl.h.
