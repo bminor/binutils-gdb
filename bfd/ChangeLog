@@ -1,3 +1,9 @@
+Mon Feb 17 12:02:17 1992  Per Bothner  (bothner at cygnus.com)
+
+	* hp300bsd.c (new), config/mt-hp300bsd:  Make hp300bsd
+	a full configuration (with possible cross-development),
+	instead of using host-aout.c.
+
 Sun Feb 16 13:01:49 1992  Per Bothner  (bothner at cygnus.com)
 
 	* aout-target.h (MY(write_object_contents):
