@@ -1,3 +1,9 @@
+Thu Jan 26 11:39:21 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aoutx.h (NAME(aout,some_aout_object_p)): Always set EXEC_P if
+	the start address is in the .text section, even if STAT_FOR_EXEC
+	is set.  Just use STAT_FOR_EXEC as an additional test.
+
 Thu Jan 26 11:12:54 1995  Michael Meissner  <meissner@cygnus.com>
 
 	* elfcode.h (prep_headers): Use EM_PPC instead of
