@@ -1,3 +1,9 @@
+Thu Aug 12 15:24:28 1993  Fred Fish  (fnf@deneb.cygnus.com)
+
+	* gdb.t17/interrupt.exp:  Fix 'missing Continuing' case so pattern
+	to match does not match the passing case but still matches the 
+	failing case.
+
 Thu Aug 12 16:58:59 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (distclean): Remove *.plog *.sum *.psum site.*.
