@@ -1,3 +1,12 @@
+Thu Nov 04 08:08:46 1993  Jeffrey Wheat  (cassidy@cygnus.com)
+
+	* Makefile.in: Add .PHONY for check and installcheck rules.
+
+Tue Nov  2 14:42:27 1993  Bill Cox (bill@tarkas.cygnus.com)
+
+	* libbfd-in.h (artdata): Use long, not time_t for portability, at
+	  least to HPUX.  File below is a derived file.
+
 Tue Nov  2 14:42:27 1993  Bill Cox (bill@tarkas.cygnus.com)
 
 	* libbfd.h (artdata): Use long, not time_t for portability, at
