@@ -1,3 +1,28 @@
+Fri May  8 07:48:27 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in: propogate INSTALL, INSTALL_DATA, INSTALL_PROGRAM on
+	  recursions.
+
+Thu May  7 10:00:52 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* am29k-pinsn.c:  Use new opcode table in "opcode/a29k.h".
+	* am29k-tdep.c:  Update to latest code from AMD.
+	(get_saved_register) don't crap out if no frame.
+	* remote-udi.c:  Set/clear inferior_pid as appropriate.
+	(udi_open) call target_preopen, don't close fd 0!!!, clean up
+	error handling.  Fixup end-of-debugging messages.
+	(udi_fetch_registers) clean up big time, mainly don't multiply
+	register_valid indices by 4, and use proper Offset when reading
+	gr96-gr127.  (udi_store_registers) general cleanup.
+	(fetch_register) cleanup, simplify.  (regnum_to_srnum)
+	INT_REGNUM->INTE_REGNUM.
+	* tm-29k.h:  Upgrade to latest code from AMD.
+	* 29k-share/udi/udip2soc.c:  Get rid of useless errmsg_m macro.
+	(UDIConnect) Clean up error processing (like, don't do exit() if
+	execlp fails), make code restartable, make more attractive.
+	(UDIStop) Use SIGINT instead of SIGUSR1, as isstip won't stop
+	otherwise.
+
 Wed May  6 14:34:18 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* tm-irix3.h:  Re-define CPLUS_MARKER to '.'.

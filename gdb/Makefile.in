@@ -171,7 +171,10 @@ DIST=gdb
 LINT=/usr/5bin/lint
 LINTFLAGS= -I${BFD_DIR}
 
-# Select options to use when compiling cplus-dem.c.  The default is to
+# Select demangler to use.
+DEMANGLER=cplus-dem
+
+# Select options to use when compiling ${DEMANGLER}.c.  The default is to
 # use -Dnounderscore, which is correct for most targets, and also
 # defaults to g++ style demangling.  For other demangling styles, such
 # as the Annotated C++ Reference Manual (section 7.2.1c) style, set
@@ -191,7 +194,7 @@ SFILES_MAINDIR = \
 	 main.c printcmd.c gdbtypes.c \
 	 remote.c source.c stack.c symmisc.c symtab.c symfile.c \
 	 utils.c valarith.c valops.c valprint.c values.c c-exp.y m2-exp.y \
-	 cplus-dem.c mem-break.c target.c inftarg.c \
+	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
 	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
 	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
 	 minsyms.c mipsread.c
@@ -289,7 +292,7 @@ OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     values.o eval.o valops.o valarith.o valprint.o printcmd.o \
     symtab.o symfile.o symmisc.o infcmd.o infrun.o remote.o \
     command.o utils.o expprint.o environ.o version.o gdbtypes.o \
-    copying.o $(DEPFILES) cplus-dem.o mem-break.o target.o \
+    copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
     inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
     buildsym.o objfiles.o minsyms.o \
     dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o
@@ -598,6 +601,9 @@ subdir_do: force
 					"CFLAGS=$(CFLAGS)" \
 					"RANLIB=$(RANLIB)" \
 					"MAKEINFO=$(MAKEINFO)" \
+					"INSTALL=$(INSTALL)" \
+					"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
+					"INSTALL_DATA=$(INSTALL_DATA)" \
 					"BISON=$(BISON)" $(DO)) ; then true ; \
 			else exit 1 ; fi ; \
 		else true ; fi ; \
@@ -727,9 +733,9 @@ force_update:
 # underscores because GDB strips them off during symbol read-in.  Thus
 # -Dnounderscore.  
 
-cplus-dem.o: cplus-dem.c
+${DEMANGLER}.o: ${DEMANGLER}.c
 	${CC} -c ${INTERNAL_CFLAGS} ${DEMANGLE_OPTS} \
-	  `echo ${srcdir}/cplus-dem.c | sed 's,^\./,,'`
+	  `echo ${srcdir}/${DEMANGLER}.c | sed 's,^\./,,'`
 
 # GNU Make has an annoying habit of putting *all* the Makefile variables
 # into the environment, unless you include this target as a circumvention.
