@@ -2402,6 +2402,15 @@ find_variant_by_arch (enum bfd_architecture arch, unsigned long mach)
 
   return NULL;
 }
+
+static int
+gdb_print_insn_powerpc (bfd_vma memaddr, disassemble_info *info)
+{
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+    return print_insn_big_powerpc (memaddr, info);
+  else
+    return print_insn_little_powerpc (memaddr, info);
+}
 
 /* Initialize the current architecture based on INFO.  If possible, re-use an
    architecture from ARCHES, which is a list of architectures already created
@@ -2423,7 +2432,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   bfd abfd;
   int sysv_abi;
   enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
-  gdbarch_print_insn_ftype *print_insn;
 
   from_xcoff_exec = info.abfd && info.abfd->format == bfd_object &&
     bfd_get_flavour (info.abfd) == bfd_target_xcoff_flavour;
@@ -2558,12 +2566,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Select instruction printer.  */
   if (arch == power)
-    print_insn = print_insn_rs6000;
-  else if (info.byte_order == BFD_ENDIAN_BIG)
-    print_insn = print_insn_big_powerpc;
+    set_gdbarch_print_insn (gdbarch, print_insn_rs6000);
   else
-    print_insn = print_insn_little_powerpc;
-  set_gdbarch_print_insn (gdbarch, print_insn);
+    set_gdbarch_print_insn (gdbarch, gdb_print_insn_powerpc);
 
   set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
