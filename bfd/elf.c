@@ -2635,7 +2635,9 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
   struct bfd_link_order *l;
   bfd_boolean gas;
 
-  if (elf_section_data (sec)->this_hdr.sh_type != SHT_GROUP
+  /* Ignore linker created group section.  See elfNN_ia64_object_p in
+     elfxx-ia64.c.  */
+  if (((sec->flags & (SEC_GROUP | SEC_LINKER_CREATED)) != SEC_GROUP)
       || *failedptr)
     return;
 

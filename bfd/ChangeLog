@@ -1,5 +1,10 @@
 2005-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf.c (bfd_elf_set_group_contents): Ignore linker created
+	group section. 
+
+2005-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf-bfd.h (elf_section_data): Use (sec) instead of sec.
 
 2005-04-03  Fred Fish  <fnf@specifixinc.com>
