@@ -1,3 +1,7 @@
+2002-10-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* elf.c (elfcore_grok_note): Fix recognition on NT_PRXFPREG notes.
+
 2002-09-04  Kevin Buettner  <kevinb@redhat.com>
 
  	* config.bfd (mips*-*-irix6*): Add new ABI vectors.  Make n32 default
