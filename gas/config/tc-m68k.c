@@ -31,7 +31,7 @@
    pre-processor is disabled, these aren't very useful.  The macro
    tc_comment_chars points to this.  We use this, rather than the
    usual comment_chars, so that the --bitwise-or option will work.  */
-#if (defined (OBJ_ELF) && ! defined (TE_PSOS) && ! defined (TE_LINUX)) || defined (TE_DELTA)
+#if defined (TE_SVR4) || defined (TE_DELTA)
 const char *m68k_comment_chars = "|#";
 #else
 const char *m68k_comment_chars = "|";
@@ -1161,7 +1161,10 @@ m68k_ip (instring)
 		    case AINDR:
 		    case AINC:
 		    case ADEC:
+		      break;
 		    case DISP:
+		      if (opP->reg == PC || opP->reg == ZPC)
+                        losing++;
 		      break;
 		    default:
 		      losing++;
@@ -4804,7 +4807,7 @@ s_even (ignore)
   temp = 1;			/* JF should be 2? */
   temp_fill = get_absolute_expression ();
   if (!need_pass_2)		/* Never make frag if expect extra pass. */
-    frag_align (temp, (int) temp_fill);
+    frag_align (temp, (int) temp_fill, 0);
   demand_empty_rest_of_line ();
   record_alignment (now_seg, temp);
 }

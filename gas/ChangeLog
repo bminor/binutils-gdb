@@ -1,3 +1,11 @@
+Fri Feb 21 11:55:03 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Set em=svr4 for m68k-*-sysv4*.
+	* configure: Rebuild.
+	* config/te-svr4.h: New file.
+	* config/tc-m68k.c (m68k_comment_chars): Only include `#' if
+	TE_SVR4 or TE_DELTA.
+
 Thu Feb 20 22:24:39 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10200.c (md_convert_frag): Create a fixup for the
