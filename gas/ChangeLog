@@ -1,3 +1,8 @@
+Wed Feb 15 16:08:47 1995  Jason Molenda  <crash@cygnus.com>
+
+	* config/tc-h8500.c (tc_coff_symbol_emit_hook): Add ignored
+	parameter, to match prototype.
+
 Wed Feb 15 15:07:00 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (md_pseudo_table): If ELF, go to ppc_elf_cons

@@ -1537,8 +1537,10 @@ md_pcrel_from (fixP)
   return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 }
 
+/*ARGSUSED*/
 void
-tc_coff_symbol_emit_hook ()
+tc_coff_symbol_emit_hook (ignore)
+     symbolS *ignore;
 {
 }
 
