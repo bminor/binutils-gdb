@@ -37,10 +37,8 @@ atof-tahoe.c
 atof-vax.c
 coff_gnu.h
 cplus-dem.c
-ebmon29k.mt
 h8300.mt
 h8500.mt
-h8300hds.mt
 ho-ansi.h
 ho-decstatn.h
 ho-generic.h
@@ -63,7 +61,6 @@ ho-vax.h
 ho-vsta.h
 ho-vms.h
 i386coff.mt
-ic960coff.mt
 m68k.mt
 m68kcoff.mt
 m88k-opcode.h
@@ -93,7 +90,6 @@ obj-som.h
 obj-vms.c
 obj-vms.h
 sh.mt
-sparc.mt
 tc-a29k.c
 tc-a29k.h
 tc-alpha.c
