@@ -433,7 +433,6 @@ get_ctrl_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBUTE_UN
         }
     }
   the_ctrl = 0;
-  return;
 }
 
 struct flag_names {
@@ -481,7 +480,6 @@ get_flags_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBUTE_U
     }
  done:
   *ptr = src + j;
-  return;
 }
 
 struct interrupt_names {
@@ -525,7 +523,6 @@ get_interrupt_operand (char **ptr, struct z8k_op *mode, unsigned int dst ATTRIBU
   /* No interrupt type specified, opcode won't do anything.  */
   as_warn (_("opcode has no effect"));
   the_interrupt = 0x0;
-  return;
 }
 
 struct cc_names {

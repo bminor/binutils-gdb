@@ -4031,7 +4031,6 @@ do_empty (str)
 {
   /* Do nothing really.  */
   end_of_line (str);
-  return;
 }
 
 static void
@@ -4215,7 +4214,6 @@ do_mull (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -4269,7 +4267,6 @@ do_mul (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -4325,7 +4322,6 @@ do_mla (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 /* Expects *str -> the characters "acc0", possibly with leading blanks.
@@ -5760,7 +5756,6 @@ do_cps_mode (str)
     }
   
   inst.instruction |= expr.X_add_number;
-  return;
 }
 
 static void
@@ -6292,7 +6287,6 @@ do_iwmmxt_tandc (str)
 
   if (reg != REG_PC && !inst.error)
     inst.error = _("only r15 allowed here");
-  return;
 }
 
 static void
@@ -6300,8 +6294,6 @@ do_iwmmxt_tbcst (str)
      char * str;
 {
   check_iwmmxt_insn (str, check_tbcst, 0);
-
-  return;
 }
 
 static void
@@ -6314,7 +6306,6 @@ do_iwmmxt_textrc (str)
     return;
 
   inst.instruction |= number & 0x7;
-  return;
 }
 
 static void
@@ -6339,7 +6330,6 @@ do_iwmmxt_tinsr (str)
     return;
 
   inst.instruction |= number & 0x7;
-  return;
 }
 
 static void
@@ -6347,8 +6337,6 @@ do_iwmmxt_tmcr (str)
      char * str;
 {
   check_iwmmxt_insn (str, check_tmcr, 0);
-
-  return;
 }
 
 static void
@@ -6356,8 +6344,6 @@ do_iwmmxt_tmcrr (str)
      char * str;
 {
   check_iwmmxt_insn (str, check_tmcrr, 0);
-
-  return;
 }
 
 static void
@@ -6365,8 +6351,6 @@ do_iwmmxt_tmia (str)
      char * str;
 {
   check_iwmmxt_insn (str, check_tmia, 0);
-
-  return;
 }
 
 static void
@@ -6374,8 +6358,6 @@ do_iwmmxt_tmovmsk (str)
      char * str;
 {
   check_iwmmxt_insn (str, check_tmovmsk, 0);
-
-  return;
 }
 
 static void
@@ -6383,8 +6365,6 @@ do_iwmmxt_tmrc (str)
      char * str;
 {
   check_iwmmxt_insn (str, check_tmrc, 0);
-
-  return;
 }
 
 static void
@@ -6392,8 +6372,6 @@ do_iwmmxt_tmrrc (str)
      char * str;
 {
   check_iwmmxt_insn (str, check_tmrrc, 0);
-
-  return;
 }
 
 static void
@@ -6401,7 +6379,6 @@ do_iwmmxt_torc (str)
      char * str;
 {
   check_iwmmxt_insn (str, check_rd, 0);
-  return;
 }
 
 static void
@@ -6414,7 +6391,6 @@ do_iwmmxt_waligni (str)
     return;
 
   inst.instruction |= ((number & 0x7) << 20);
-  return;
 }
 
 static void
@@ -6425,7 +6401,6 @@ do_iwmmxt_wmov (str)
     return;
   
   inst.instruction |= ((inst.instruction >> 16) & 0xf);
-  return;
 }
 
 static void
@@ -6466,8 +6441,6 @@ do_iwmmxt_wrwr (str)
      char * str;
 {
   check_iwmmxt_insn (str, check_wrwr, 0);
-  
-  return;
 }
 
 static void
@@ -6475,8 +6448,6 @@ do_iwmmxt_wrwrwcg (str)
      char * str;
 {
   check_iwmmxt_insn (str, check_wrwrwcg, 0);
-
-  return;
 }
 
 static void
@@ -6484,8 +6455,6 @@ do_iwmmxt_wrwrwr (str)
      char * str;
 {
   check_iwmmxt_insn (str, check_wrwrwr, 0);
-
-  return;
 }
 
 static void
@@ -6498,7 +6467,6 @@ do_iwmmxt_wshufh (str)
     return;
 
   inst.instruction |= ((number & 0xf0) << 16) | (number & 0xf);
-  return;
 }
 
 static void
@@ -6509,7 +6477,6 @@ do_iwmmxt_wzero (str)
     return;
 
   inst.instruction |= ((inst.instruction & 0xf) << 12) | ((inst.instruction & 0xf) << 16);
-  return;
 }
 
 /* Xscale multiply-accumulate (argument parse)
@@ -7298,7 +7265,6 @@ do_arit (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -7355,8 +7321,6 @@ do_adrl (str)
   inst.reloc.exp.X_add_number -= 8; /* PC relative adjust  */
   inst.reloc.pc_rel            = 1;
   inst.size                    = INSN_SIZE * 2;
-
-  return;
 }
 
 static void
@@ -7381,7 +7345,6 @@ do_cmp (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -7406,7 +7369,6 @@ do_mov (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static int
@@ -7657,7 +7619,6 @@ do_ldst (str)
 
   inst.instruction |= (pre_inc ? PRE_INDEX : 0);
   end_of_line (str);
-  return;
 }
 
 static void
@@ -7736,7 +7697,6 @@ do_ldstt (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static int
@@ -7992,7 +7952,6 @@ do_ldstv4 (str)
 
   inst.instruction |= (pre_inc ? PRE_INDEX : 0);
   end_of_line (str);
-  return;
 }
 
 static long
@@ -8189,7 +8148,6 @@ do_ldmstm (str)
 
   inst.instruction |= range;
   end_of_line (str);
-  return;
 }
 
 static void
@@ -8208,8 +8166,6 @@ do_swi (str)
   inst.reloc.type = BFD_RELOC_ARM_SWI;
   inst.reloc.pc_rel = 0;
   end_of_line (str);
-
-  return;
 }
 
 static void
@@ -8270,7 +8226,6 @@ do_swap (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -8315,7 +8270,6 @@ do_branch (str)
 #endif /* OBJ_ELF  */
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -8397,7 +8351,6 @@ do_cdp (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -8433,7 +8386,6 @@ do_lstc (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -8495,7 +8447,6 @@ do_co_reg (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -8515,7 +8466,6 @@ do_fpa_ctrl (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -8711,7 +8661,6 @@ do_fpa_dyadic (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -8736,7 +8685,6 @@ do_fpa_monadic (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -8761,7 +8709,6 @@ do_fpa_cmp (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -8786,7 +8733,6 @@ do_fpa_from_reg (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -8807,7 +8753,6 @@ do_fpa_to_reg (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static int
@@ -8906,7 +8851,6 @@ do_vfp_sp_monadic (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -8927,7 +8871,6 @@ do_vfp_dp_monadic (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -8950,7 +8893,6 @@ do_vfp_sp_dyadic (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -8973,7 +8915,6 @@ do_vfp_dp_dyadic (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -8994,7 +8935,6 @@ do_vfp_reg_from_sp (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -9023,7 +8963,6 @@ do_vfp_sp_reg2 (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -9044,7 +8983,6 @@ do_vfp_sp_from_reg (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -9065,7 +9003,6 @@ do_vfp_reg_from_dp (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -9088,7 +9025,6 @@ do_vfp_reg2_from_dp (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -9109,7 +9045,6 @@ do_vfp_dp_from_reg (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -9132,7 +9067,6 @@ do_vfp_dp_from_reg2 (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static const struct vfp_reg *
@@ -9211,7 +9145,6 @@ do_vfp_reg_from_ctrl (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -9232,7 +9165,6 @@ do_vfp_ctrl_from_reg (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -9257,7 +9189,6 @@ do_vfp_sp_ldst (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -9282,7 +9213,6 @@ do_vfp_dp_ldst (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 /* Parse and encode a VFP SP register list, storing the initial
@@ -9649,7 +9579,6 @@ do_vfp_sp_compare_z (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -9666,7 +9595,6 @@ do_vfp_dp_compare_z (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -9687,7 +9615,6 @@ do_vfp_dp_sp_cvt (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 static void
@@ -9708,7 +9635,6 @@ do_vfp_sp_dp_cvt (str)
     }
 
   end_of_line (str);
-  return;
 }
 
 /* Thumb specific routines.  */
@@ -10967,7 +10893,6 @@ do_mav_ldst (str, reg0)
 fail_ldst:
   if (!inst.error)
      inst.error = BAD_ARGS;
-  return;
 }
 
 static void
@@ -10976,7 +10901,6 @@ do_t_nop (str)
 {
   /* Do nothing.  */
   end_of_line (str);
-  return;
 }
 
 /* Handle the Format 4 instructions that do not have equivalents in other
@@ -11350,7 +11274,6 @@ do_t_swi (str)
 
   inst.reloc.type = BFD_RELOC_ARM_SWI;
   end_of_line (str);
-  return;
 }
 
 static void
@@ -13741,8 +13664,6 @@ fix_new_arm (frag, where, size, exp, pc_rel, reloc)
   arm_data = (arm_fix_data *) obstack_alloc (& notes, sizeof (arm_fix_data));
   new_fix->tc_fix_data = (PTR) arm_data;
   arm_data->thumb_mode = thumb_mode;
-
-  return;
 }
 
 /* This fix_new is called by cons via TC_CONS_FIX_NEW.  */

@@ -973,7 +973,6 @@ get_mova_operands (char *op_end, struct h8_op *operand)
 
  error:
   as_bad (_("expected valid addressing mode for mova: \"@(disp, ea.sz),ERn\""));
-  return;
 }
 
 static void

@@ -2051,8 +2051,6 @@ check_size (value, bits, file, line)
 
   if (tmp > max)
     as_bad_where (file, line, _("value too large to fit in %d bits"), bits);
-
-  return;
 }
 
 /* d30v_frob_label() is called when after a label is recognized.  */

@@ -1475,7 +1475,6 @@ arc_common (localScope)
   symbolP->bsym->flags |= BSF_OBJECT;
 
   demand_empty_rest_of_line ();
-  return;
 }
 
 /* Select the cpu we're assembling for.  */

@@ -414,13 +414,11 @@ vms_check_for_special_label (symbolS *symbolP)
 	flag_hash_long_names = 1;
 #endif
     }
-  return;
 }
 
 void
 obj_read_begin_hook (void)
 {
-  return;
 }
 
 void
@@ -1744,7 +1742,6 @@ setup_basic_type (struct VMS_DBG_Symbol *spnt ATTRIBUTE_UNUSED)
   VMS_Store_Immediate_Data (Local, Lpnt, OBJ_S_C_DBG);
   Lpnt = 0;
 #endif	/* SETUP_BASIC_TYPES */
-  return;
 }
 
 /* This routine generates a symbol definition for a C symbol for the
@@ -1976,7 +1973,6 @@ VMS_stab_parse (symbolS *sp, int expected_type,
 
   /* ...and restore the string.  */
   *pnt1 = ':';
-  return;
 }
 
 /* Simpler interfaces into VMS_stab_parse().  */
@@ -4155,8 +4151,6 @@ synthesize_data_segment (unsigned data_siz, unsigned text_siz,
 	    }
 	}
     }
-
-  return;
 }
 
 /* Perform data segment fixups.  */
@@ -4281,8 +4275,6 @@ vms_fixup_xtors_section (struct VMS_Symbol *symbols,
   /* Flush the buffer if it is more than 75% full.  */
   if (Object_Record_Offset > (sizeof (Object_Record_Buffer) * 3 / 4))
     Flush_VMS_Object_Record_Buffer ();
-
-  return;
 }
 
 
@@ -4540,8 +4532,6 @@ global_symbol_directory (unsigned text_siz, unsigned data_siz)
 				0,
 				GBLSYM_DEF);
     }
-
-  return;
 }
 
 

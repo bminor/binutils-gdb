@@ -369,7 +369,6 @@ md_begin ()
     as_fatal (_("Broken assembler.  No assembly attempted."));
 
   define_some_regs ();
-  return;
 }
 
 /* Assemble a single instruction.  Its label has already been handled
@@ -1224,7 +1223,6 @@ md_apply_fix3 (fixP, valP, seg)
   number_to_chars_bigendian (place, val, fixP->fx_size);
   if (fixP->fx_addsy == NULL)
     fixP->fx_done = 1;
-  return;
 }
 
 const char *md_shortopts = "";
@@ -1248,7 +1246,6 @@ void
 md_show_usage (stream)
      FILE *stream ATTRIBUTE_UNUSED;
 {
-  return;
 }
 
 /* This is called when a line is unrecognized.  */

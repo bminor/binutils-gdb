@@ -10486,8 +10486,6 @@ ia64_validate_fix (fix)
     default:
       break;
     }
-
-  return;
 }
 
 static void

@@ -4943,7 +4943,6 @@ s_alpha_ent (ignore)
   alpha_evax_proc.symbol = symbol;
 
   demand_empty_rest_of_line ();
-  return;
 }
 
 /* Parse .frame <framreg>,<framesize>,RA,<rsa_offset> directives.  */
@@ -4978,8 +4977,6 @@ s_alpha_frame (ignore)
       return;
     }
   alpha_evax_proc.rsa_offset = get_absolute_expression ();
-
-  return;
 }
 
 static void
@@ -5129,8 +5126,6 @@ s_alpha_pdesc (ignore)
 
   md_number_to_chars (p, alpha_evax_proc.imask, 4);
   md_number_to_chars (p + 4, alpha_evax_proc.fmask, 4);
-
-  return;
 }
 
 /* Support for crash debug on vms.  */
@@ -5169,8 +5164,6 @@ s_alpha_name (ignore)
   seginfo->literal_pool_size += 8;
 
   fix_new_exp (frag_now, p - frag_now->fr_literal, 8, &exp, 0, BFD_RELOC_64);
-
-  return;
 }
 
 static void
@@ -5197,8 +5190,6 @@ s_alpha_linkage (ignore)
 		   BFD_RELOC_ALPHA_LINKAGE);
     }
   demand_empty_rest_of_line ();
-
-  return;
 }
 
 static void
@@ -5225,8 +5216,6 @@ s_alpha_code_address (ignore)
 		   BFD_RELOC_ALPHA_CODEADDR);
     }
   demand_empty_rest_of_line ();
-
-  return;
 }
 
 static void
@@ -5237,7 +5226,6 @@ s_alpha_fp_save (ignore)
   alpha_evax_proc.fp_save = tc_get_register (1);
 
   demand_empty_rest_of_line ();
-  return;
 }
 
 static void
@@ -5257,8 +5245,6 @@ s_alpha_mask (ignore)
       (void) get_absolute_expression ();
     }
   demand_empty_rest_of_line ();
-
-  return;
 }
 
 static void
@@ -5278,8 +5264,6 @@ s_alpha_fmask (ignore)
       (void) get_absolute_expression ();
     }
   demand_empty_rest_of_line ();
-
-  return;
 }
 
 static void
@@ -5292,8 +5276,6 @@ s_alpha_end (ignore)
   *input_line_pointer = c;
   demand_empty_rest_of_line ();
   alpha_evax_proc.symbol = 0;
-
-  return;
 }
 
 static void
@@ -5314,8 +5296,6 @@ s_alpha_file (ignore)
   s = symbol_find_or_make (demand_copy_string (&length));
   symbol_get_bfdsym (s)->flags |= BSF_FILE;
   demand_empty_rest_of_line ();
-
-  return;
 }
 #endif /* OBJ_EVAX  */
 
@@ -5675,7 +5655,6 @@ alpha_print_token (f, exp)
       print_expr (f, exp);
       break;
     }
-  return;
 }
 #endif
 

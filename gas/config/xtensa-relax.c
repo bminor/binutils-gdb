@@ -532,7 +532,6 @@ append_transition (tt, opcode, t)
       nxt = nxt->next;
     }
   prev->next = tl;
-  return;
 }
 
 

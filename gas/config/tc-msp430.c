@@ -1493,7 +1493,6 @@ md_apply_fix3 (fixp, valuep, seg)
     {
       fixp->fx_addnumber = value;
     }
-  return;
 }
 
 /* A `BFD_ASSEMBLER' GAS will call this to generate a reloc.  GAS
