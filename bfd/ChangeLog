@@ -1,3 +1,43 @@
+2001-11-23  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf.c (_bfd_elf_rela_local_sym): New.
+	* elflink.h (elf_link_input_bfd): Don't consider empty
+	merged sections as removed in relocation tests.
+	* elf-bfd.h (_bfd_elf_rela_local_sym): Add prototype.
+	* elf32-i386.c (elf_i386_relocate_section): Handle relocs
+	against STT_SECTION symbol of SHF_MERGE section.
+	* elf32-arm.h (elf32_arm_relocate_section): Likewise.
+	* elf32-avr.c (elf32_avr_relocate_section): Call
+	_bfd_elf_rela_local_sym.
+	* elf32-cris.c (cris_elf_relocate_section): Likewise.
+	* elf32-d10v.c (elf32_d10v_relocate_section): Likewise.
+	* elf32-fr30.c (fr30_final_link_relocate): Likewise.
+	* elf32-h8300.c (elf32_h8_relocate_section): Likewise.
+	* elf32-hppa.c (elf32_hppa_relocate_section): Likewise.
+	* elf32-i370.c (i370_elf_relocate_section): Likewise.
+	* elf32-i860.c (elf32_i860_relocate_section): Likewise.
+	* elf32-m32r.c (m32r_elf_relocate_section): Likewise.
+	* elf32-m68k.c (elf_m68k_relocate_section): Likewise.
+	* elf32-mcore.c (mcore_elf_relocate_section): Likewise.
+	* elf32-openrisc.c (openrisc_elf_relocate_section): Likewise.
+	* elf32-ppc.c (ppc_elf_relocate_section): Likewise.
+	* elf32-s390.c (elf_s390_relocate_section): Likewise.
+	* elf32-sparc.c (elf32_sparc_relocate_section): Likewise.
+	* elf32-v850.c (v850_elf_relocate_section): Likewise.
+	* elf64-alpha.c (elf64_alpha_relocate_section): Likewise.
+	* elf64-mmix.c (mmix_elf_relocate_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Likewise.
+	* elf64-s390.c (elf_s390_relocate_section): Likewise.
+	* elf64-sparc.c (sparc64_elf_relocate_section): Likewise.
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Likewise.
+	* elf-hppa.h (elf_hppa_relocate_section): Likewise.
+	* elf-m10200.c (mn10200_elf_relocate_section): Likewise.
+	* elf-m10300.c (mn10300_elf_relocate_section): Likewise.
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Likewise.
+	* elf32-sh.c (sh_elf_relocate_section): Likewise for
+	!partial_inplace relocs. Handle relocs against STT_SECTION
+	symbol of SHF_MERGE for partial_inplace relocs.
+
 2001-11-21  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* po/Make-in (distclean): Move SRC-POTFILES.in and

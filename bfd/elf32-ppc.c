@@ -2998,9 +2998,8 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  sec = local_sections[r_symndx];
 	  sym_name = "<local symbol>";
 
-	  relocation = (sec->output_section->vma
-			+ sec->output_offset
-			+ sym->st_value);
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	  addend = rel->r_addend;
 	  /* Relocs to local symbols are always resolved.  */
 	  will_become_local = 1;
 	}

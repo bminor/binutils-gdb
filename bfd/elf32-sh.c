@@ -2960,7 +2960,7 @@ sh_elf_discard_copies (h, ignore)
 static boolean
 sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			 contents, relocs, local_syms, local_sections)
-     bfd *output_bfd ATTRIBUTE_UNUSED;
+     bfd *output_bfd;
      struct bfd_link_info *info;
      bfd *input_bfd;
      asection *input_section;
@@ -3041,7 +3041,6 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  relocation = (sec->output_section->vma
 			+ sec->output_offset
 			+ sym->st_value);
-
 	  if (info->relocateable)
 	    {
 	      /* This is a relocateable link.  We don't have to change
@@ -3078,6 +3077,37 @@ sh_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		}
 
 	      continue;
+	    }
+	  else if (! howto->partial_inplace)
+	    {
+	      relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	      addend = rel->r_addend;
+	    }
+	  else if ((sec->flags & SEC_MERGE)
+		   && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	    {
+	      asection *msec;
+
+	      if (howto->rightshift || howto->src_mask != 0xffffffff)
+		{
+		  (*_bfd_error_handler)
+		    (_("%s(%s+0x%lx): %s relocation against SEC_MERGE section"),
+		     bfd_archive_filename (input_bfd),
+		     bfd_get_section_name (input_bfd, input_section),
+		     (long) rel->r_offset, howto->name);
+		  return false;
+		}
+
+              addend = bfd_get_32 (input_bfd, contents + rel->r_offset);
+              msec = sec;
+              addend =
+		_bfd_merged_section_offset (output_bfd, &msec,
+					    elf_section_data (sec)->merge_info,
+					    sym->st_value + addend, (bfd_vma) 0)
+		- relocation;
+	      addend += msec->output_section->vma + msec->output_offset;
+	      bfd_put_32 (input_bfd, addend, contents + rel->r_offset);
+	      addend = 0;
 	    }
 	}
       else

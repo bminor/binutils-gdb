@@ -6317,7 +6317,9 @@ elf_link_input_bfd (finfo, input_bfd)
 			   || h->root.type == bfd_link_hash_defweak)
 			  && ! bfd_is_abs_section (h->root.u.def.section)
 			  && bfd_is_abs_section (h->root.u.def.section
-						 ->output_section))
+						 ->output_section)
+			  && elf_section_data (h->root.u.def.section)->merge_info
+			     == NULL)
 			{
 #if BFD_VERSION_DATE < 20031005
 			  if ((o->flags & SEC_DEBUGGING) != 0)
@@ -6348,7 +6350,8 @@ elf_link_input_bfd (finfo, input_bfd)
 
 		      if (sec != NULL
 			  && ! bfd_is_abs_section (sec)
-			  && bfd_is_abs_section (sec->output_section))
+			  && bfd_is_abs_section (sec->output_section)
+			  && elf_section_data (sec)->merge_info == NULL)
 			{
 #if BFD_VERSION_DATE < 20031005
 			  if ((o->flags & SEC_DEBUGGING) != 0

@@ -3481,9 +3481,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* Reloc against local symbol.  */
 	  sym = local_syms + r_symndx;
 	  sym_sec = local_sections[r_symndx];
-	  value  = (sym_sec->output_section->vma
-		    + sym_sec->output_offset
-		    + sym->st_value);
+	  value = _bfd_elf_rela_local_sym (output_bfd, sym, sym_sec, rel);
 	}
       else
 	{

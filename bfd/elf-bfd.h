@@ -1140,6 +1140,8 @@ extern void _bfd_elf_fprintf_vma
 
 extern enum elf_reloc_type_class _bfd_elf_reloc_type_class
   PARAMS ((const Elf_Internal_Rela *));
+extern bfd_vma _bfd_elf_rela_local_sym
+  PARAMS ((bfd *, Elf_Internal_Sym *, asection *, Elf_Internal_Rela *));
 
 extern unsigned long bfd_elf_hash
   PARAMS ((const char *));

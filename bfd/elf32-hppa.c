@@ -3650,10 +3650,7 @@ elf32_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	  /* This is a local symbol, h defaults to NULL.  */
 	  sym = local_syms + r_symndx;
 	  sym_sec = local_sections[r_symndx];
-	  relocation = ((ELF_ST_TYPE (sym->st_info) == STT_SECTION
-			   ? 0 : sym->st_value)
-			 + sym_sec->output_offset
-			 + sym_sec->output_section->vma);
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sym_sec, rel);
 	}
       else
 	{

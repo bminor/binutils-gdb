@@ -6370,3 +6370,35 @@ _bfd_elf_reloc_type_class (rela)
 {
   return reloc_class_normal;
 }
+
+/* For RELA architectures, return what the relocation value for
+   relocation against a local symbol.  */
+
+bfd_vma
+_bfd_elf_rela_local_sym (abfd, sym, sec, rel)
+     bfd *abfd;
+     Elf_Internal_Sym *sym;
+     asection *sec;
+     Elf_Internal_Rela *rel;
+{
+  bfd_vma relocation;
+
+  relocation = (sec->output_section->vma
+		+ sec->output_offset
+		+ sym->st_value);
+  if ((sec->flags & SEC_MERGE)
+      && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+    {
+      asection *msec;
+
+      msec = sec;
+      rel->r_addend =
+	_bfd_merged_section_offset (abfd, &msec,
+				    elf_section_data (sec)->merge_info,
+				    sym->st_value + rel->r_addend,
+				    (bfd_vma) 0)
+	- relocation;
+      rel->r_addend += msec->output_section->vma + msec->output_offset;
+    }
+  return relocation;
+}

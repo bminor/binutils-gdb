@@ -1,3 +1,10 @@
+2001-11-23  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-alpha.c (tc_gen_reloc): Remove SEC_MERGE test.
+	* write.c (adjust_reloc_syms): Don't handle relocs against
+	SEC_MERGE section symbols specially.
+	(fixup_segment): Likewise.
+
 2001-11-21  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (mips_need_elf_addend_fixup): New, extracted from...

@@ -1858,9 +1858,51 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
+#ifdef USE_REL
 	  relocation = (sec->output_section->vma
 			+ sec->output_offset
 			+ sym->st_value);
+	  if ((sec->flags & SEC_MERGE)
+		   && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	    {
+	      asection *msec;
+	      bfd_vma addend, value;
+
+	      if (howto->rightshift)
+		{
+		  (*_bfd_error_handler)
+		    (_("%s(%s+0x%lx): %s relocation against SEC_MERGE section"),
+		     bfd_archive_filename (input_bfd),
+		     bfd_get_section_name (input_bfd, input_section),
+		     (long) rel->r_offset, howto->name);
+		  return false;
+		}
+
+	      value = bfd_get_32 (input_bfd, contents + rel->r_offset);
+
+	      /* Get the (signed) value from the instruction.  */
+	      addend = value & howto->src_mask;
+	      if (addend & ((howto->src_mask + 1) >> 1))
+		{
+		  bfd_signed_vma mask;
+
+		  mask = -1;
+		  mask &= ~ howto->src_mask;
+		  addend |= mask;
+		}
+	      msec = sec;
+	      addend =
+		_bfd_merged_section_offset (output_bfd, &msec,
+					    elf_section_data (sec)->merge_info,
+					    sym->st_value + addend, (bfd_vma) 0)
+		- relocation;
+	      addend += msec->output_section->vma + msec->output_offset;
+	      value = (value & ~ howto->dst_mask) | (addend & howto->dst_mask);
+	      bfd_put_32 (input_bfd, value, contents + rel->r_offset);
+	    }
+#else
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+#endif
 	}
       else
 	{

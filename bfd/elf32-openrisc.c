@@ -324,7 +324,7 @@ openrisc_final_link_relocate (howto, input_bfd, input_section, contents, rel,
 static boolean
 openrisc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			       contents, relocs, local_syms, local_sections)
-     bfd *output_bfd ATTRIBUTE_UNUSED;
+     bfd *output_bfd;
      struct bfd_link_info *info;
      bfd *input_bfd;
      asection *input_section;
@@ -394,8 +394,7 @@ openrisc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
-	  relocation = (sec->output_section->vma
-			+ sec->output_offset + sym->st_value);
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
 
 	  name = bfd_elf_string_from_elf_section
 	    (input_bfd, symtab_hdr->sh_link, sym->st_name);

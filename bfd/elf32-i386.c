@@ -1770,6 +1770,32 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	  relocation = (sec->output_section->vma
 			+ sec->output_offset
 			+ sym->st_value);
+	  if ((sec->flags & SEC_MERGE)
+	      && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	    {
+	      asection *msec;
+	      bfd_vma addend;
+
+	      if (howto->src_mask != 0xffffffff)
+		{
+		  (*_bfd_error_handler)
+		    (_("%s(%s+0x%lx): %s relocation against SEC_MERGE section"),
+		     bfd_archive_filename (input_bfd),
+		     bfd_get_section_name (input_bfd, input_section),
+		     (long) rel->r_offset, howto->name);
+		  return false;
+		}
+
+	      addend = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	      msec = sec;
+	      addend =
+		_bfd_merged_section_offset (output_bfd, &msec,
+					    elf_section_data (sec)->merge_info,
+					    sym->st_value + addend, (bfd_vma) 0)
+		- relocation;
+	      addend += msec->output_section->vma + msec->output_offset;
+	      bfd_put_32 (input_bfd, addend, contents + rel->r_offset);
+	    }
 	}
       else
 	{
