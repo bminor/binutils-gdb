@@ -1,4 +1,4 @@
-2000-09-15  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+2000-09-19  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* config/tc-vax.c (synthetic_votstrs): Remove jbssi and jbcci.
 	Likewise in relaxation description comments.
