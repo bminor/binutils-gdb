@@ -26,9 +26,8 @@
 
 /* Routine used to read generic debugging information.  */
 
-extern PTR read_debugging_info 
-  PARAMS ((bfd *, asymbol **, long));
-  
+extern void *read_debugging_info (bfd *, asymbol **, long);
+
 /* Routine used to print generic debugging information.  */
 
 extern bfd_boolean print_debugging_info
@@ -36,30 +35,24 @@ extern bfd_boolean print_debugging_info
 
 /* Routines used to read and write stabs information.  */
 
-extern PTR start_stab
-  PARAMS ((PTR, bfd *, bfd_boolean, asymbol **, long));
+extern void *start_stab (void *, bfd *, bfd_boolean, asymbol **, long);
 
-extern bfd_boolean finish_stab
-  PARAMS ((PTR, PTR));
+extern bfd_boolean finish_stab (void *, void *);
 
 extern bfd_boolean parse_stab
-  PARAMS ((PTR, PTR, int, int, bfd_vma, const char *));
+  (void *, void *, int, int, bfd_vma, const char *);
 
 extern bfd_boolean write_stabs_in_sections_debugging_info
-  PARAMS ((bfd *, PTR, bfd_byte **, bfd_size_type *, bfd_byte **,
-	   bfd_size_type *));
+  (bfd *, void *, bfd_byte **, bfd_size_type *, bfd_byte **, bfd_size_type *);
 
 /* Routines used to read and write IEEE debugging information.  */
 
-extern bfd_boolean parse_ieee
-  PARAMS ((PTR, bfd *, const bfd_byte *, bfd_size_type));
+extern bfd_boolean parse_ieee (void *, bfd *, const bfd_byte *, bfd_size_type);
 
-extern bfd_boolean write_ieee_debugging_info
-  PARAMS ((bfd *, PTR));
+extern bfd_boolean write_ieee_debugging_info (bfd *, void *);
 
 /* Routine used to read COFF debugging information.  */
 
-extern bfd_boolean parse_coff
-  PARAMS ((bfd *, asymbol **, long, PTR));
+extern bfd_boolean parse_coff (bfd *, asymbol **, long, void *);
 
 #endif

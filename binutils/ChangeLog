@@ -1,3 +1,58 @@
+2003-09-14  Andreas Jaeger  <aj@suse.de>
+
+	* addr2line.c: Convert to ISO C90 prototypes, change PTR, remove
+	unneeded (void *) casts.
+	* ar.c: Likewise.
+	* arlex.l: Likewise.
+	* arparse.y: Likewise.
+	* arsup.c: Likewise.
+	* binemul.c: Likewise.
+	* binemul.h: Likewise.
+	* bucomm.c: Likewise.
+	* bucomm.h: Likewise.
+	* budbg.h: Likewise.
+	* budemang.c: Likewise.
+	* budemang.h: Likewise.
+	* coffdump.c: Likewise.
+	* coffgrok.c: Likewise.
+	* cxxfilt.c: Likewise.
+	* debug.c: Likewise.
+	* debug.h: Likewise.
+	* deflex.l: Likewise.
+	* dlltool.c: Likewise.
+	* dlltool.h: Likewise.
+	* dllwrap.c: Likewise.
+	* emul_aix.c: Likewise.
+	* filemode.c: Likewise.
+	* ieee.c: Likewise.
+	* nlmconv.c: Likewise.
+	* nlmconv.h: Likewise.
+	* nlmheader.y: Likewise.
+	* nm.c: Likewise.
+	* prdbg.c: Likewise.
+	* rclex.l: Likewise.
+	* rcparse.y: Likewise.
+	* rdcoff.c: Likewise.
+	* rddbg.c: Likewise.
+	* rename.c: Likewise.
+	* resbin.c: Likewise.
+	* rescoff.c: Likewise.
+	* resrc.c: Likewise.
+	* size.c: Likewise.
+	* srconv.c: Likewise.
+	* stabs.c: Likewise.
+	* strings.c: Likewise.
+	* sysdump.c: Likewise.
+	* sysinfo.y: Likewise.
+	* syslex.l: Likewise.
+	* unwind-ia64.c: Likewise.
+	* unwind-ia64.h: Likewise.
+	* version.c: Likewise.
+	* windres.c: Likewise.
+	* windres.h: Likewise.
+	* winduni.c: Likewise.
+	* wrstabs.c: Likewise.
+
 2003-09-10  James E Wilson  <wilson@specifixinc.com>
 
 	* MAINTAINERS: Update my e-mail address.

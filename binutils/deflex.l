@@ -1,6 +1,6 @@
 %{/* deflex.l - Lexer for .def files */
 
-/*   Copyright 1995, 1997, 1998, 1999, 2002 Free Software Foundation, Inc.
+/*   Copyright 1995, 1997, 1998, 1999, 2002, 2003 Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
 
@@ -89,5 +89,5 @@ int linenumber;
 %%
 #ifndef yywrap
 /* Needed for lex, though not flex. */
-int yywrap() { return 1; }
+int yywrap(void) { return 1; }
 #endif

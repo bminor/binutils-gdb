@@ -76,145 +76,118 @@ struct pr_stack
   int num_parents;
 };
 
-static void indent
-  PARAMS ((struct pr_handle *));
-static bfd_boolean push_type
-  PARAMS ((struct pr_handle *, const char *));
-static bfd_boolean prepend_type
-  PARAMS ((struct pr_handle *, const char *));
-static bfd_boolean append_type
-  PARAMS ((struct pr_handle *, const char *));
-static bfd_boolean substitute_type
-  PARAMS ((struct pr_handle *, const char *));
-static bfd_boolean indent_type
-  PARAMS ((struct pr_handle *));
-static char *pop_type
-  PARAMS ((struct pr_handle *));
-static void print_vma
-  PARAMS ((bfd_vma, char *, bfd_boolean, bfd_boolean));
+static void indent (struct pr_handle *);
+static bfd_boolean push_type (struct pr_handle *, const char *);
+static bfd_boolean prepend_type (struct pr_handle *, const char *);
+static bfd_boolean append_type (struct pr_handle *, const char *);
+static bfd_boolean substitute_type (struct pr_handle *, const char *);
+static bfd_boolean indent_type (struct pr_handle *);
+static char *pop_type (struct pr_handle *);
+static void print_vma (bfd_vma, char *, bfd_boolean, bfd_boolean);
 static bfd_boolean pr_fix_visibility
-  PARAMS ((struct pr_handle *, enum debug_visibility));
-static bfd_boolean pr_start_compilation_unit
-  PARAMS ((PTR, const char *));
-static bfd_boolean pr_start_source
-  PARAMS ((PTR, const char *));
-static bfd_boolean pr_empty_type
-  PARAMS ((PTR));
-static bfd_boolean pr_void_type
-  PARAMS ((PTR));
-static bfd_boolean pr_int_type
-  PARAMS ((PTR, unsigned int, bfd_boolean));
-static bfd_boolean pr_float_type
-  PARAMS ((PTR, unsigned int));
-static bfd_boolean pr_complex_type
-  PARAMS ((PTR, unsigned int));
-static bfd_boolean pr_bool_type
-  PARAMS ((PTR, unsigned int));
+  (struct pr_handle *, enum debug_visibility);
+static bfd_boolean pr_start_compilation_unit (void *, const char *);
+static bfd_boolean pr_start_source (void *, const char *);
+static bfd_boolean pr_empty_type (void *);
+static bfd_boolean pr_void_type (void *);
+static bfd_boolean pr_int_type (void *, unsigned int, bfd_boolean);
+static bfd_boolean pr_float_type (void *, unsigned int);
+static bfd_boolean pr_complex_type (void *, unsigned int);
+static bfd_boolean pr_bool_type (void *, unsigned int);
 static bfd_boolean pr_enum_type
-  PARAMS ((PTR, const char *, const char **, bfd_signed_vma *));
-static bfd_boolean pr_pointer_type
-  PARAMS ((PTR));
-static bfd_boolean pr_function_type
-  PARAMS ((PTR, int, bfd_boolean));
-static bfd_boolean pr_reference_type
-  PARAMS ((PTR));
-static bfd_boolean pr_range_type
-  PARAMS ((PTR, bfd_signed_vma, bfd_signed_vma));
+  (void *, const char *, const char **, bfd_signed_vma *);
+static bfd_boolean pr_pointer_type (void *);
+static bfd_boolean pr_function_type (void *, int, bfd_boolean);
+static bfd_boolean pr_reference_type (void *);
+static bfd_boolean pr_range_type (void *, bfd_signed_vma, bfd_signed_vma);
 static bfd_boolean pr_array_type
-  PARAMS ((PTR, bfd_signed_vma, bfd_signed_vma, bfd_boolean));
-static bfd_boolean pr_set_type
-  PARAMS ((PTR, bfd_boolean));
-static bfd_boolean pr_offset_type
-  PARAMS ((PTR));
-static bfd_boolean pr_method_type
-  PARAMS ((PTR, bfd_boolean, int, bfd_boolean));
-static bfd_boolean pr_const_type
-  PARAMS ((PTR));
-static bfd_boolean pr_volatile_type
-  PARAMS ((PTR));
+  (void *, bfd_signed_vma, bfd_signed_vma, bfd_boolean);
+static bfd_boolean pr_set_type (void *, bfd_boolean);
+static bfd_boolean pr_offset_type (void *);
+static bfd_boolean pr_method_type (void *, bfd_boolean, int, bfd_boolean);
+static bfd_boolean pr_const_type (void *);
+static bfd_boolean pr_volatile_type (void *);
 static bfd_boolean pr_start_struct_type
-  PARAMS ((PTR, const char *, unsigned int, bfd_boolean, unsigned int));
+  (void *, const char *, unsigned int, bfd_boolean, unsigned int);
 static bfd_boolean pr_struct_field
-  PARAMS ((PTR, const char *, bfd_vma, bfd_vma, enum debug_visibility));
-static bfd_boolean pr_end_struct_type
-  PARAMS ((PTR));
+  (void *, const char *, bfd_vma, bfd_vma, enum debug_visibility);
+static bfd_boolean pr_end_struct_type (void *);
 static bfd_boolean pr_start_class_type
-  PARAMS ((PTR, const char *, unsigned int, bfd_boolean, unsigned int,
-	   bfd_boolean, bfd_boolean));
+  (void *, const char *, unsigned int, bfd_boolean, unsigned int,
+   bfd_boolean, bfd_boolean);
 static bfd_boolean pr_class_static_member
-  PARAMS ((PTR, const char *, const char *, enum debug_visibility));
+  (void *, const char *, const char *, enum debug_visibility);
 static bfd_boolean pr_class_baseclass
-  PARAMS ((PTR, bfd_vma, bfd_boolean, enum debug_visibility));
-static bfd_boolean pr_class_start_method
-  PARAMS ((PTR, const char *));
+  (void *, bfd_vma, bfd_boolean, enum debug_visibility);
+static bfd_boolean pr_class_start_method (void *, const char *);
 static bfd_boolean pr_class_method_variant
-  PARAMS ((PTR, const char *, enum debug_visibility, bfd_boolean, bfd_boolean,
-	   bfd_vma, bfd_boolean));
+  (void *, const char *, enum debug_visibility, bfd_boolean, bfd_boolean,
+   bfd_vma, bfd_boolean);
 static bfd_boolean pr_class_static_method_variant
-  PARAMS ((PTR, const char *, enum debug_visibility, bfd_boolean,
-	   bfd_boolean));
-static bfd_boolean pr_class_end_method
-  PARAMS ((PTR));
-static bfd_boolean pr_end_class_type
-  PARAMS ((PTR));
-static bfd_boolean pr_typedef_type
-  PARAMS ((PTR, const char *));
+  (void *, const char *, enum debug_visibility, bfd_boolean, bfd_boolean);
+static bfd_boolean pr_class_end_method (void *);
+static bfd_boolean pr_end_class_type (void *);
+static bfd_boolean pr_typedef_type (void *, const char *);
 static bfd_boolean pr_tag_type
-  PARAMS ((PTR, const char *, unsigned int, enum debug_type_kind));
-static bfd_boolean pr_typdef
-  PARAMS ((PTR, const char *));
-static bfd_boolean pr_tag
-  PARAMS ((PTR, const char *));
-static bfd_boolean pr_int_constant
-  PARAMS ((PTR, const char *, bfd_vma));
-static bfd_boolean pr_float_constant
-  PARAMS ((PTR, const char *, double));
-static bfd_boolean pr_typed_constant
-  PARAMS ((PTR, const char *, bfd_vma));
+  (void *, const char *, unsigned int, enum debug_type_kind);
+static bfd_boolean pr_typdef (void *, const char *);
+static bfd_boolean pr_tag (void *, const char *);
+static bfd_boolean pr_int_constant (void *, const char *, bfd_vma);
+static bfd_boolean pr_float_constant (void *, const char *, double);
+static bfd_boolean pr_typed_constant (void *, const char *, bfd_vma);
 static bfd_boolean pr_variable
-  PARAMS ((PTR, const char *, enum debug_var_kind, bfd_vma));
-static bfd_boolean pr_start_function
-  PARAMS ((PTR, const char *, bfd_boolean));
+  (void *, const char *, enum debug_var_kind, bfd_vma);
+static bfd_boolean pr_start_function (void *, const char *, bfd_boolean);
 static bfd_boolean pr_function_parameter
-  PARAMS ((PTR, const char *, enum debug_parm_kind, bfd_vma));
-static bfd_boolean pr_start_block
-  PARAMS ((PTR, bfd_vma));
-static bfd_boolean pr_end_block
-  PARAMS ((PTR, bfd_vma));
-static bfd_boolean pr_end_function
-  PARAMS ((PTR));
-static bfd_boolean pr_lineno
-  PARAMS ((PTR, const char *, unsigned long, bfd_vma));
+  (void *, const char *, enum debug_parm_kind, bfd_vma);
+static bfd_boolean pr_start_block (void *, bfd_vma);
+static bfd_boolean pr_end_block (void *, bfd_vma);
+static bfd_boolean pr_end_function (void *);
+static bfd_boolean pr_lineno (void *, const char *, unsigned long, bfd_vma);
 static bfd_boolean append_parent (struct pr_handle *, const char *);
 /* Only used by tg_ code.  */
-static bfd_boolean tg_fix_visibility (struct pr_handle *, enum debug_visibility);
+static bfd_boolean tg_fix_visibility
+  (struct pr_handle *, enum debug_visibility);
 static void find_address_in_section (bfd *, asection *, void *);
 static void translate_addresses (bfd *, char *, FILE *, asymbol **);
 static const char *visibility_name (enum debug_visibility);
 /* Tags style replacements.  */
 static bfd_boolean tg_start_compilation_unit (void *, const char *);
 static bfd_boolean tg_start_source (void *, const char *);
-static bfd_boolean tg_enum_type (void *, const char *, const char **, bfd_signed_vma *);
-static bfd_boolean tg_start_struct_type (void *, const char *, unsigned int, bfd_boolean, unsigned int);
-static bfd_boolean pr_struct_field (void *, const char *, bfd_vma, bfd_vma, enum debug_visibility);
-static bfd_boolean tg_struct_field (void *, const char *, bfd_vma, bfd_vma, enum debug_visibility);
-static bfd_boolean tg_struct_field  (void *, const char *, bfd_vma, bfd_vma, enum debug_visibility);
+static bfd_boolean tg_enum_type
+  (void *, const char *, const char **, bfd_signed_vma *);
+static bfd_boolean tg_start_struct_type
+  (void *, const char *, unsigned int, bfd_boolean, unsigned int);
+static bfd_boolean pr_struct_field
+  (void *, const char *, bfd_vma, bfd_vma, enum debug_visibility);
+static bfd_boolean tg_struct_field
+  (void *, const char *, bfd_vma, bfd_vma, enum debug_visibility);
+static bfd_boolean tg_struct_field
+  (void *, const char *, bfd_vma, bfd_vma, enum debug_visibility);
 static bfd_boolean tg_end_struct_type (void *);
-static bfd_boolean tg_start_class_type (void *, const char *, unsigned int, bfd_boolean, unsigned int, bfd_boolean, bfd_boolean);
-static bfd_boolean tg_class_static_member (void *, const char *, const char *, enum debug_visibility);
-static bfd_boolean tg_class_baseclass (void *, bfd_vma, bfd_boolean, enum debug_visibility);
-static bfd_boolean tg_class_method_variant (void *, const char *, enum debug_visibility, bfd_boolean, bfd_boolean, bfd_vma, bfd_boolean);
-static bfd_boolean tg_class_static_method_variant (void *, const char *, enum debug_visibility, bfd_boolean, bfd_boolean);
+static bfd_boolean tg_start_class_type
+  (void *, const char *, unsigned int, bfd_boolean, unsigned int, bfd_boolean, bfd_boolean);
+static bfd_boolean tg_class_static_member
+  (void *, const char *, const char *, enum debug_visibility);
+static bfd_boolean tg_class_baseclass
+  (void *, bfd_vma, bfd_boolean, enum debug_visibility);
+static bfd_boolean tg_class_method_variant
+  (void *, const char *, enum debug_visibility, bfd_boolean, bfd_boolean, bfd_vma, bfd_boolean);
+static bfd_boolean tg_class_static_method_variant
+  (void *, const char *, enum debug_visibility, bfd_boolean, bfd_boolean);
 static bfd_boolean tg_end_class_type (void *);
-static bfd_boolean tg_tag_type (void *, const char *, unsigned int, enum debug_type_kind);
+static bfd_boolean tg_tag_type
+  (void *, const char *, unsigned int, enum debug_type_kind);
 static bfd_boolean tg_typdef (void *, const char *);
 static bfd_boolean tg_tag (void *, const char *);
 static bfd_boolean tg_int_constant (void *, const char *, bfd_vma);
 static bfd_boolean tg_float_constant (void *, const char *, double);
 static bfd_boolean tg_typed_constant (void *, const char *, bfd_vma);
-static bfd_boolean tg_variable (void *, const char *, enum debug_var_kind, bfd_vma);
+static bfd_boolean tg_variable
+  (void *, const char *, enum debug_var_kind, bfd_vma);
 static bfd_boolean tg_start_function (void *, const char *, bfd_boolean);
-static bfd_boolean tg_function_parameter (void *, const char *, enum debug_parm_kind, bfd_vma);
+static bfd_boolean tg_function_parameter
+  (void *, const char *, enum debug_parm_kind, bfd_vma);
 static bfd_boolean tg_start_block (void *, bfd_vma);
 static bfd_boolean tg_end_block (void *, bfd_vma);
 static bfd_boolean tg_lineno (void *, const char *, unsigned long, bfd_vma);
@@ -318,13 +291,8 @@ static const struct debug_write_fns tg_fns =
 /* Print out the generic debugging information recorded in dhandle.  */
 
 bfd_boolean
-print_debugging_info (f, dhandle, abfd, syms, demangler, as_tags)
-     FILE *f;
-     PTR dhandle;
-     bfd *abfd;
-     asymbol **syms;
-     PTR demangler;
-     bfd_boolean as_tags;
+print_debugging_info (FILE *f, void *dhandle, bfd *abfd, asymbol **syms,
+		      void *demangler, bfd_boolean as_tags)
 {
   struct pr_handle info;
 
@@ -352,8 +320,7 @@ print_debugging_info (f, dhandle, abfd, syms, demangler, as_tags)
 /* Indent to the current indentation level.  */
 
 static void
-indent (info)
-     struct pr_handle *info;
+indent (struct pr_handle *info)
 {
   unsigned int i;
 
@@ -364,9 +331,7 @@ indent (info)
 /* Push a type on the type stack.  */
 
 static bfd_boolean
-push_type (info, type)
-     struct pr_handle *info;
-     const char *type;
+push_type (struct pr_handle *info, const char *type)
 {
   struct pr_stack *n;
 
@@ -388,9 +353,7 @@ push_type (info, type)
 /* Prepend a string onto the type on the top of the type stack.  */
 
 static bfd_boolean
-prepend_type (info, s)
-     struct pr_handle *info;
-     const char *s;
+prepend_type (struct pr_handle *info, const char *s)
 {
   char *n;
 
@@ -407,9 +370,7 @@ prepend_type (info, s)
 /* Append a string to the type on the top of the type stack.  */
 
 static bfd_boolean
-append_type (info, s)
-     struct pr_handle *info;
-     const char *s;
+append_type (struct pr_handle *info, const char *s)
 {
   unsigned int len;
 
@@ -451,9 +412,7 @@ append_parent (struct pr_handle *info, const char *s)
    there is no underscore, the name follows the type.  */
 
 static bfd_boolean
-substitute_type (info, s)
-     struct pr_handle *info;
-     const char *s;
+substitute_type (struct pr_handle *info, const char *s)
 {
   char *u;
 
@@ -495,8 +454,7 @@ substitute_type (info, s)
 /* Indent the type at the top of the stack by appending spaces.  */
 
 static bfd_boolean
-indent_type (info)
-     struct pr_handle *info;
+indent_type (struct pr_handle *info)
 {
   unsigned int i;
 
@@ -512,8 +470,7 @@ indent_type (info)
 /* Pop a type from the type stack.  */
 
 static char *
-pop_type (info)
-     struct pr_handle *info;
+pop_type (struct pr_handle *info)
 {
   struct pr_stack *o;
   char *ret;
@@ -531,11 +488,7 @@ pop_type (info)
 /* Print a VMA value into a string.  */
 
 static void
-print_vma (vma, buf, unsignedp, hexp)
-     bfd_vma vma;
-     char *buf;
-     bfd_boolean unsignedp;
-     bfd_boolean hexp;
+print_vma (bfd_vma vma, char *buf, bfd_boolean unsignedp, bfd_boolean hexp)
 {
   if (sizeof (vma) <= sizeof (unsigned long))
     {
@@ -557,9 +510,7 @@ print_vma (vma, buf, unsignedp, hexp)
 /* Start a new compilation unit.  */
 
 static bfd_boolean
-pr_start_compilation_unit (p, filename)
-     PTR p;
-     const char *filename;
+pr_start_compilation_unit (void *p, const char *filename)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
@@ -573,9 +524,7 @@ pr_start_compilation_unit (p, filename)
 /* Start a source file within a compilation unit.  */
 
 static bfd_boolean
-pr_start_source (p, filename)
-     PTR p;
-     const char *filename;
+pr_start_source (void *p, const char *filename)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
@@ -589,8 +538,7 @@ pr_start_source (p, filename)
 /* Push an empty type onto the type stack.  */
 
 static bfd_boolean
-pr_empty_type (p)
-     PTR p;
+pr_empty_type (void *p)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
@@ -600,8 +548,7 @@ pr_empty_type (p)
 /* Push a void type onto the type stack.  */
 
 static bfd_boolean
-pr_void_type (p)
-     PTR p;
+pr_void_type (void *p)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
@@ -611,10 +558,7 @@ pr_void_type (p)
 /* Push an integer type onto the type stack.  */
 
 static bfd_boolean
-pr_int_type (p, size, unsignedp)
-     PTR p;
-     unsigned int size;
-     bfd_boolean unsignedp;
+pr_int_type (void *p, unsigned int size, bfd_boolean unsignedp)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char ab[10];
@@ -626,9 +570,7 @@ pr_int_type (p, size, unsignedp)
 /* Push a floating type onto the type stack.  */
 
 static bfd_boolean
-pr_float_type (p, size)
-     PTR p;
-     unsigned int size;
+pr_float_type (void *p, unsigned int size)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char ab[10];
@@ -645,9 +587,7 @@ pr_float_type (p, size)
 /* Push a complex type onto the type stack.  */
 
 static bfd_boolean
-pr_complex_type (p, size)
-     PTR p;
-     unsigned int size;
+pr_complex_type (void *p, unsigned int size)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
@@ -660,9 +600,7 @@ pr_complex_type (p, size)
 /* Push a bfd_boolean type onto the type stack.  */
 
 static bfd_boolean
-pr_bool_type (p, size)
-     PTR p;
-     unsigned int size;
+pr_bool_type (void *p, unsigned int size)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char ab[10];
@@ -675,11 +613,8 @@ pr_bool_type (p, size)
 /* Push an enum type onto the type stack.  */
 
 static bfd_boolean
-pr_enum_type (p, tag, names, values)
-     PTR p;
-     const char *tag;
-     const char **names;
-     bfd_signed_vma *values;
+pr_enum_type (void *p, const char *tag, const char **names,
+	      bfd_signed_vma *values)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   unsigned int i;
@@ -736,8 +671,7 @@ pr_enum_type (p, tag, names, values)
 /* Turn the top type on the stack into a pointer.  */
 
 static bfd_boolean
-pr_pointer_type (p)
-     PTR p;
+pr_pointer_type (void *p)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char *s;
@@ -753,10 +687,7 @@ pr_pointer_type (p)
 /* Turn the top type on the stack into a function returning that type.  */
 
 static bfd_boolean
-pr_function_type (p, argcount, varargs)
-     PTR p;
-     int argcount;
-     bfd_boolean varargs;
+pr_function_type (void *p, int argcount, bfd_boolean varargs)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char **arg_types;
@@ -830,8 +761,7 @@ pr_function_type (p, argcount, varargs)
 /* Turn the top type on the stack into a reference to that type.  */
 
 static bfd_boolean
-pr_reference_type (p)
-     PTR p;
+pr_reference_type (void *p)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
@@ -843,10 +773,7 @@ pr_reference_type (p)
 /* Make a range type.  */
 
 static bfd_boolean
-pr_range_type (p, lower, upper)
-     PTR p;
-     bfd_signed_vma lower;
-     bfd_signed_vma upper;
+pr_range_type (void *p, bfd_signed_vma lower, bfd_signed_vma upper)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char abl[20], abu[20];
@@ -869,11 +796,8 @@ pr_range_type (p, lower, upper)
 /* Make an array type.  */
 
 static bfd_boolean
-pr_array_type (p, lower, upper, stringp)
-     PTR p;
-     bfd_signed_vma lower;
-     bfd_signed_vma upper;
-     bfd_boolean stringp;
+pr_array_type (void *p, bfd_signed_vma lower, bfd_signed_vma upper,
+	       bfd_boolean stringp)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char *range_type;
@@ -922,9 +846,7 @@ pr_array_type (p, lower, upper, stringp)
 /* Make a set type.  */
 
 static bfd_boolean
-pr_set_type (p, bitstringp)
-     PTR p;
-     bfd_boolean bitstringp;
+pr_set_type (void *p, bfd_boolean bitstringp)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
@@ -947,8 +869,7 @@ pr_set_type (p, bitstringp)
 /* Make an offset type.  */
 
 static bfd_boolean
-pr_offset_type (p)
-     PTR p;
+pr_offset_type (void *p)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char *t;
@@ -969,11 +890,7 @@ pr_offset_type (p)
 /* Make a method type.  */
 
 static bfd_boolean
-pr_method_type (p, domain, argcount, varargs)
-     PTR p;
-     bfd_boolean domain;
-     int argcount;
-     bfd_boolean varargs;
+pr_method_type (void *p, bfd_boolean domain, int argcount, bfd_boolean varargs)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   unsigned int len;
@@ -1070,8 +987,7 @@ pr_method_type (p, domain, argcount, varargs)
 /* Make a const qualified type.  */
 
 static bfd_boolean
-pr_const_type (p)
-     PTR p;
+pr_const_type (void *p)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
@@ -1081,8 +997,7 @@ pr_const_type (p)
 /* Make a volatile qualified type.  */
 
 static bfd_boolean
-pr_volatile_type (p)
-     PTR p;
+pr_volatile_type (void *p)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
@@ -1092,12 +1007,8 @@ pr_volatile_type (p)
 /* Start accumulating a struct type.  */
 
 static bfd_boolean
-pr_start_struct_type (p, tag, id, structp, size)
-     PTR p;
-     const char *tag;
-     unsigned int id;
-     bfd_boolean structp;
-     unsigned int size;
+pr_start_struct_type (void *p, const char *tag, unsigned int id,
+		      bfd_boolean structp, unsigned int size)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
@@ -1154,9 +1065,7 @@ pr_start_struct_type (p, tag, id, structp, size)
 /* Output the visibility of a field in a struct.  */
 
 static bfd_boolean
-pr_fix_visibility (info, visibility)
-     struct pr_handle *info;
-     enum debug_visibility visibility;
+pr_fix_visibility (struct pr_handle *info, enum debug_visibility visibility)
 {
   const char *s = NULL;
   char *t;
@@ -1207,12 +1116,8 @@ pr_fix_visibility (info, visibility)
 /* Add a field to a struct type.  */
 
 static bfd_boolean
-pr_struct_field (p, name, bitpos, bitsize, visibility)
-     PTR p;
-     const char *name;
-     bfd_vma bitpos;
-     bfd_vma bitsize;
-     enum debug_visibility visibility;
+pr_struct_field (void *p, const char *name, bfd_vma bitpos, bfd_vma bitsize,
+		 enum debug_visibility visibility)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char ab[20];
@@ -1253,8 +1158,7 @@ pr_struct_field (p, name, bitpos, bitsize, visibility)
 /* Finish a struct type.  */
 
 static bfd_boolean
-pr_end_struct_type (p)
-     PTR p;
+pr_end_struct_type (void *p)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char *s;
@@ -1277,14 +1181,9 @@ pr_end_struct_type (p)
 /* Start a class type.  */
 
 static bfd_boolean
-pr_start_class_type (p, tag, id, structp, size, vptr, ownvptr)
-     PTR p;
-     const char *tag;
-     unsigned int id;
-     bfd_boolean structp;
-     unsigned int size;
-     bfd_boolean vptr;
-     bfd_boolean ownvptr;
+pr_start_class_type (void *p, const char *tag, unsigned int id,
+		     bfd_boolean structp, unsigned int size,
+		     bfd_boolean vptr, bfd_boolean ownvptr)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char *tv = NULL;
@@ -1370,11 +1269,8 @@ pr_start_class_type (p, tag, id, structp, size, vptr, ownvptr)
 /* Add a static member to a class.  */
 
 static bfd_boolean
-pr_class_static_member (p, name, physname, visibility)
-     PTR p;
-     const char *name;
-     const char *physname;
-     enum debug_visibility visibility;
+pr_class_static_member (void *p, const char *name, const char *physname,
+			enum debug_visibility visibility)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char *t;
@@ -1402,11 +1298,8 @@ pr_class_static_member (p, name, physname, visibility)
 /* Add a base class to a class.  */
 
 static bfd_boolean
-pr_class_baseclass (p, bitpos, virtual, visibility)
-     PTR p;
-     bfd_vma bitpos;
-     bfd_boolean virtual;
-     enum debug_visibility visibility;
+pr_class_baseclass (void *p, bfd_vma bitpos, bfd_boolean virtual,
+		    enum debug_visibility visibility)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char *t;
@@ -1501,9 +1394,7 @@ pr_class_baseclass (p, bitpos, virtual, visibility)
 /* Start adding a method to a class.  */
 
 static bfd_boolean
-pr_class_start_method (p, name)
-     PTR p;
-     const char *name;
+pr_class_start_method (void *p, const char *name)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
@@ -1515,15 +1406,10 @@ pr_class_start_method (p, name)
 /* Add a variant to a method.  */
 
 static bfd_boolean
-pr_class_method_variant (p, physname, visibility, constp, volatilep, voffset,
-			 context)
-     PTR p;
-     const char *physname;
-     enum debug_visibility visibility;
-     bfd_boolean constp;
-     bfd_boolean volatilep;
-     bfd_vma voffset;
-     bfd_boolean context;
+pr_class_method_variant (void *p, const char *physname,
+			 enum debug_visibility visibility,
+			 bfd_boolean constp, bfd_boolean volatilep,
+			 bfd_vma voffset, bfd_boolean context)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char *method_type;
@@ -1600,12 +1486,9 @@ pr_class_method_variant (p, physname, visibility, constp, volatilep, voffset,
 /* Add a static variant to a method.  */
 
 static bfd_boolean
-pr_class_static_method_variant (p, physname, visibility, constp, volatilep)
-     PTR p;
-     const char *physname;
-     enum debug_visibility visibility;
-     bfd_boolean constp;
-     bfd_boolean volatilep;
+pr_class_static_method_variant (void *p, const char *physname,
+				enum debug_visibility visibility,
+				bfd_boolean constp, bfd_boolean volatilep)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char *method_type;
@@ -1654,8 +1537,7 @@ pr_class_static_method_variant (p, physname, visibility, constp, volatilep)
 /* Finish up a method.  */
 
 static bfd_boolean
-pr_class_end_method (p)
-     PTR p;
+pr_class_end_method (void *p)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
@@ -1666,8 +1548,7 @@ pr_class_end_method (p)
 /* Finish up a class.  */
 
 static bfd_boolean
-pr_end_class_type (p)
-     PTR p;
+pr_end_class_type (void *p)
 {
   return pr_end_struct_type (p);
 }
@@ -1675,9 +1556,7 @@ pr_end_class_type (p)
 /* Push a type on the stack using a typedef name.  */
 
 static bfd_boolean
-pr_typedef_type (p, name)
-     PTR p;
-     const char *name;
+pr_typedef_type (void *p, const char *name)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
@@ -1687,11 +1566,8 @@ pr_typedef_type (p, name)
 /* Push a type on the stack using a tag name.  */
 
 static bfd_boolean
-pr_tag_type (p, name, id, kind)
-     PTR p;
-     const char *name;
-     unsigned int id;
-     enum debug_type_kind kind;
+pr_tag_type (void *p, const char *name, unsigned int id,
+	     enum debug_type_kind kind)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   const char *t, *tag;
@@ -1744,9 +1620,7 @@ pr_tag_type (p, name, id, kind)
 /* Output a typedef.  */
 
 static bfd_boolean
-pr_typdef (p, name)
-     PTR p;
-     const char *name;
+pr_typdef (void *p, const char *name)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char *s;
@@ -1770,9 +1644,7 @@ pr_typdef (p, name)
    stack, so all we have to do here is print it out.  */
 
 static bfd_boolean
-pr_tag (p, name)
-     PTR p;
-     const char *name ATTRIBUTE_UNUSED;
+pr_tag (void *p, const char *name ATTRIBUTE_UNUSED)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char *t;
@@ -1792,10 +1664,7 @@ pr_tag (p, name)
 /* Output an integer constant.  */
 
 static bfd_boolean
-pr_int_constant (p, name, val)
-     PTR p;
-     const char *name;
-     bfd_vma val;
+pr_int_constant (void *p, const char *name, bfd_vma val)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char ab[20];
@@ -1809,10 +1678,7 @@ pr_int_constant (p, name, val)
 /* Output a floating point constant.  */
 
 static bfd_boolean
-pr_float_constant (p, name, val)
-     PTR p;
-     const char *name;
-     double val;
+pr_float_constant (void *p, const char *name, double val)
 {
   struct pr_handle *info = (struct pr_handle *) p;
 
@@ -1824,10 +1690,7 @@ pr_float_constant (p, name, val)
 /* Output a typed constant.  */
 
 static bfd_boolean
-pr_typed_constant (p, name, val)
-     PTR p;
-     const char *name;
-     bfd_vma val;
+pr_typed_constant (void *p, const char *name, bfd_vma val)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char *t;
@@ -1849,11 +1712,8 @@ pr_typed_constant (p, name, val)
 /* Output a variable.  */
 
 static bfd_boolean
-pr_variable (p, name, kind, val)
-     PTR p;
-     const char *name;
-     enum debug_var_kind kind;
-     bfd_vma val;
+pr_variable (void *p, const char *name, enum debug_var_kind kind,
+	     bfd_vma val)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char *t;
@@ -1890,10 +1750,7 @@ pr_variable (p, name, kind, val)
 /* Start outputting a function.  */
 
 static bfd_boolean
-pr_start_function (p, name, global)
-     PTR p;
-     const char *name;
-     bfd_boolean global;
+pr_start_function (void *p, const char *name, bfd_boolean global)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char *t;
@@ -1918,11 +1775,8 @@ pr_start_function (p, name, global)
 /* Output a function parameter.  */
 
 static bfd_boolean
-pr_function_parameter (p, name, kind, val)
-     PTR p;
-     const char *name;
-     enum debug_parm_kind kind;
-     bfd_vma val;
+pr_function_parameter (void *p, const char *name,
+		       enum debug_parm_kind kind, bfd_vma val)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char *t;
@@ -1961,9 +1815,7 @@ pr_function_parameter (p, name, kind, val)
 /* Start writing out a block.  */
 
 static bfd_boolean
-pr_start_block (p, addr)
-     PTR p;
-     bfd_vma addr;
+pr_start_block (void *p, bfd_vma addr)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char ab[20];
@@ -1986,11 +1838,7 @@ pr_start_block (p, addr)
 /* Write out line number information.  */
 
 static bfd_boolean
-pr_lineno (p, filename, lineno, addr)
-     PTR p;
-     const char *filename;
-     unsigned long lineno;
-     bfd_vma addr;
+pr_lineno (void *p, const char *filename, unsigned long lineno, bfd_vma addr)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char ab[20];
@@ -2005,9 +1853,7 @@ pr_lineno (p, filename, lineno, addr)
 /* Finish writing out a block.  */
 
 static bfd_boolean
-pr_end_block (p, addr)
-     PTR p;
-     bfd_vma addr;
+pr_end_block (void *p, bfd_vma addr)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char ab[20];
@@ -2024,8 +1870,7 @@ pr_end_block (p, addr)
 /* Finish writing out a function.  */
 
 static bfd_boolean
-pr_end_function (p)
-     PTR p ATTRIBUTE_UNUSED;
+pr_end_function (void *p ATTRIBUTE_UNUSED)
 {
   return TRUE;
 }
@@ -2148,7 +1993,8 @@ tg_enum_type (void *p, const char *tag, const char **names,
 
 static bfd_boolean
 tg_start_struct_type (void *p, const char *tag, unsigned int id,
-		      bfd_boolean structp, unsigned int size ATTRIBUTE_UNUSED)
+		      bfd_boolean structp,
+		      unsigned int size ATTRIBUTE_UNUSED)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   const char *name;
@@ -2432,7 +2278,7 @@ tg_class_method_variant (void *p, const char *physname ATTRIBUTE_UNUSED,
 
   method_name = strdup (context ? info->stack->next->next->method
 			: info->stack->next->method);
-  
+
   /* Stick the name of the method into its type.  */
   if (! substitute_type (info, method_name))
     return FALSE;
@@ -2461,7 +2307,7 @@ tg_class_method_variant (void *p, const char *physname ATTRIBUTE_UNUSED,
   free (method_type);
   free (method_name);
   free (context_type);
-  
+
   return TRUE;
 }
 
@@ -2471,8 +2317,7 @@ static bfd_boolean
 tg_class_static_method_variant (void *p,
 				const char *physname ATTRIBUTE_UNUSED,
 				enum debug_visibility visibility,
-				bfd_boolean constp,
-				bfd_boolean volatilep)
+				bfd_boolean constp, bfd_boolean volatilep)
 {
   struct pr_handle *info = (struct pr_handle *) p;
   char *method_type;
@@ -2775,7 +2620,7 @@ tg_start_function (void *p, const char *name, bfd_boolean global)
 
   if (! substitute_type (info, dname))
     return FALSE;
-    
+
   if (dname != name)
     {
       char *sep;
@@ -2836,11 +2681,11 @@ tg_function_parameter (void *p, const char *name, enum debug_parm_kind kind,
     {
       if (info->parameter != 1 && ! append_type (info, ", "))
 	return FALSE;
-    
+
       if (kind == DEBUG_PARM_REG || kind == DEBUG_PARM_REF_REG)
 	if (! append_type (info, "register "))
 	  return FALSE;
-          
+
       if (! append_type (info, t))
 	return FALSE;
     }
@@ -2905,8 +2750,7 @@ tg_start_block (void *p, bfd_vma addr)
 /* Write out line number information.  */
 
 static bfd_boolean
-tg_lineno (void *p ATTRIBUTE_UNUSED,
-	   const char *filename ATTRIBUTE_UNUSED,
+tg_lineno (void *p ATTRIBUTE_UNUSED, const char *filename ATTRIBUTE_UNUSED,
 	   unsigned long lineno ATTRIBUTE_UNUSED,
 	   bfd_vma addr ATTRIBUTE_UNUSED)
 {

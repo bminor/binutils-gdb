@@ -1,5 +1,5 @@
 /* version.c -- binutils version information
-   Copyright 1991, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1991, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
@@ -27,13 +27,12 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    implements the --version option for the various programs.  */
 
 void
-print_version (name)
-     const char *name;
+print_version (const char *name)
 {
   /* This output is intended to follow the GNU standards document.  */
   /* xgettext:c-format */
   printf ("GNU %s %s\n", name, BFD_VERSION_STRING);
-  printf (_("Copyright 2002 Free Software Foundation, Inc.\n"));
+  printf (_("Copyright 2003 Free Software Foundation, Inc.\n"));
   printf (_("\
 This program is free software; you may redistribute it under the terms of\n\
 the GNU General Public License.  This program has absolutely no warranty.\n"));

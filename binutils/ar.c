@@ -1,6 +1,6 @@
 /* ar.c - Archive modify and extract.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002
+   2001, 2002, 2003
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -54,54 +54,30 @@
 /* Kludge declaration from BFD!  This is ugly!  FIXME!  XXX */
 
 struct ar_hdr *
-  bfd_special_undocumented_glue PARAMS ((bfd * abfd, const char *filename));
+  bfd_special_undocumented_glue (bfd * abfd, const char *filename);
 
 /* Static declarations */
 
-static void
-mri_emul PARAMS ((void));
-
-static const char *
-normalize PARAMS ((const char *, bfd *));
-
-static void
-remove_output PARAMS ((void));
-
-static void
-map_over_members PARAMS ((bfd *, void (*)(bfd *), char **, int));
-
-static void
-print_contents PARAMS ((bfd * member));
-
-static void
-delete_members PARAMS ((bfd *, char **files_to_delete));
+static void mri_emul (void);
+static const char *normalize (const char *, bfd *);
+static void remove_output (void);
+static void map_over_members (bfd *, void (*)(bfd *), char **, int);
+static void print_contents (bfd * member);
+static void delete_members (bfd *, char **files_to_delete);
 
 #if 0
-static void
-do_quick_append PARAMS ((const char *archive_filename,
-			 char **files_to_append));
+static void do_quick_append
+  (const char *archive_filename, char **files_to_append);
 #endif
 
-static void
-move_members PARAMS ((bfd *, char **files_to_move));
-
-static void
-replace_members PARAMS ((bfd *, char **files_to_replace, bfd_boolean quick));
-
-static void
-print_descr PARAMS ((bfd * abfd));
-
-static void
-write_archive PARAMS ((bfd *));
-
-static void
-ranlib_only PARAMS ((const char *archname));
-
-static void
-ranlib_touch PARAMS ((const char *archname));
-
-static void
-usage PARAMS ((int));
+static void move_members (bfd *, char **files_to_move);
+static void replace_members
+  (bfd *, char **files_to_replace, bfd_boolean quick);
+static void print_descr (bfd * abfd);
+static void write_archive (bfd *);
+static void ranlib_only (const char *archname);
+static void ranlib_touch (const char *archname);
+static void usage (int);
 
 /** Globals and flags */
 
@@ -148,7 +124,7 @@ enum pos
   } postype = pos_default;
 
 static bfd **
-get_pos_bfd PARAMS ((bfd **, enum pos, const char *));
+get_pos_bfd (bfd **, enum pos, const char *);
 
 /* For extract/delete only.  If COUNTED_NAME_MODE is TRUE, we only
    extract the COUNTED_NAME_COUNTER instance of that name.  */
@@ -166,7 +142,7 @@ static bfd_boolean full_pathname = FALSE;
 int interactive = 0;
 
 static void
-mri_emul ()
+mri_emul (void)
 {
   interactive = isatty (fileno (stdin));
   yyparse ();
@@ -177,11 +153,7 @@ mri_emul ()
    whose name matches one in FILES.  */
 
 static void
-map_over_members (arch, function, files, count)
-     bfd *arch;
-     void (*function) PARAMS ((bfd *));
-     char **files;
-     int count;
+map_over_members (bfd *arch, void (*function)(bfd *), char **files, int count)
 {
   bfd *head;
   int match_count;
@@ -242,8 +214,7 @@ map_over_members (arch, function, files, count)
 bfd_boolean operation_alters_arch = FALSE;
 
 static void
-usage (help)
-     int help;
+usage (int help)
 {
   FILE *s;
 
@@ -303,9 +274,7 @@ usage (help)
    name which we will use in an archive.  */
 
 static const char *
-normalize (file, abfd)
-     const char *file;
-     bfd *abfd;
+normalize (const char *file, bfd *abfd)
 {
   const char *filename;
 
@@ -351,7 +320,7 @@ static FILE *output_file = NULL;
 static bfd *output_bfd = NULL;
 
 static void
-remove_output ()
+remove_output (void)
 {
   if (output_filename != NULL)
     {
@@ -366,12 +335,10 @@ remove_output ()
 /* The option parsing should be in its own function.
    It will be when I have getopt working.  */
 
-int main PARAMS ((int, char **));
+int main (int, char **);
 
 int
-main (argc, argv)
-     int argc;
-     char **argv;
+main (int argc, char **argv)
 {
   char *arg_ptr;
   char c;
@@ -726,9 +693,7 @@ main (argc, argv)
 }
 
 bfd *
-open_inarch (archive_filename, file)
-     const char *archive_filename;
-     const char *file;
+open_inarch (const char *archive_filename, const char *file)
 {
   const char *target;
   bfd **last_one;
@@ -825,8 +790,7 @@ open_inarch (archive_filename, file)
 }
 
 static void
-print_contents (abfd)
-     bfd *abfd;
+print_contents (bfd *abfd)
 {
   int ncopied = 0;
   char *cbuf = xmalloc (BUFSIZE);
@@ -873,8 +837,7 @@ print_contents (abfd)
    Gilmore  */
 
 void
-extract_file (abfd)
-     bfd *abfd;
+extract_file (bfd *abfd)
 {
   FILE *ostream;
   char *cbuf = xmalloc (BUFSIZE);
@@ -966,9 +929,7 @@ extract_file (abfd)
 /* Just do it quickly; don't worry about dups, armap, or anything like that */
 
 static void
-do_quick_append (archive_filename, files_to_append)
-     const char *archive_filename;
-     char **files_to_append;
+do_quick_append (const char *archive_filename, char **files_to_append)
 {
   FILE *ofile, *ifile;
   char *buf = xmalloc (BUFSIZE);
@@ -1080,8 +1041,7 @@ do_quick_append (archive_filename, files_to_append)
 #endif /* 0 */
 
 static void
-write_archive (iarch)
-     bfd *iarch;
+write_archive (bfd *iarch)
 {
   bfd *obfd;
   char *old_name, *new_name;
@@ -1134,10 +1094,7 @@ write_archive (iarch)
    and should be a pos value.  */
 
 static bfd **
-get_pos_bfd (contents, default_pos, default_posname)
-     bfd **contents;
-     enum pos default_pos;
-     const char *default_posname;
+get_pos_bfd (bfd **contents, enum pos default_pos, const char *default_posname)
 {
   bfd **after_bfd = contents;
   enum pos realpos;
@@ -1173,9 +1130,7 @@ get_pos_bfd (contents, default_pos, default_posname)
 }
 
 static void
-delete_members (arch, files_to_delete)
-     bfd *arch;
-     char **files_to_delete;
+delete_members (bfd *arch, char **files_to_delete)
 {
   bfd **current_ptr_ptr;
   bfd_boolean found;
@@ -1246,9 +1201,7 @@ delete_members (arch, files_to_delete)
 /* Reposition existing members within an archive */
 
 static void
-move_members (arch, files_to_move)
-     bfd *arch;
-     char **files_to_move;
+move_members (bfd *arch, char **files_to_move)
 {
   bfd **after_bfd;		/* New entries go after this one */
   bfd **current_ptr_ptr;	/* cdr pointer into contents */
@@ -1293,10 +1246,7 @@ move_members (arch, files_to_move)
 /* Ought to default to replacing in place, but this is existing practice!  */
 
 static void
-replace_members (arch, files_to_move, quick)
-     bfd *arch;
-     char **files_to_move;
-     bfd_boolean quick;
+replace_members (bfd *arch, char **files_to_move, bfd_boolean quick)
 {
   bfd_boolean changed = FALSE;
   bfd **after_bfd;		/* New entries go after this one */
@@ -1370,8 +1320,7 @@ replace_members (arch, files_to_move, quick)
 }
 
 static void
-ranlib_only (archname)
-     const char *archname;
+ranlib_only (const char *archname)
 {
   bfd *arch;
 
@@ -1385,8 +1334,7 @@ ranlib_only (archname)
 /* Update the timestamp of the symbol map of an archive.  */
 
 static void
-ranlib_touch (archname)
-     const char *archname;
+ranlib_touch (const char *archname)
 {
 #ifdef __GO32__
   /* I don't think updating works on go32.  */
@@ -1431,8 +1379,7 @@ ranlib_touch (archname)
 /* Things which are interesting to map over all or some of the files: */
 
 static void
-print_descr (abfd)
-     bfd *abfd;
+print_descr (bfd *abfd)
 {
   print_arelt_descr (stdout, abfd, verbose);
 }

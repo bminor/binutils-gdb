@@ -1762,8 +1762,7 @@ sizedposnumexpr:
 /* Set the language from the command line.  */
 
 void
-rcparse_set_language (lang)
-     int lang;
+rcparse_set_language (int lang)
 {
   language = lang;
 }
