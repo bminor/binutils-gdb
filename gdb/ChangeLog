@@ -1,3 +1,9 @@
+2003-06-17  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* ada-tasks.c (find_function_in_inferior): Don't declare it.
+	("regcache.h"): Include it.
+	* ada-lex.l (block_lookup): Replace VAR_NAMESPACE with VAR_DOMAIN.
+
 2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
 
         * NEWS: Mention gdbserver detach change and "disconnect" command.
