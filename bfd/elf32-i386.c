@@ -1263,46 +1263,51 @@ allocate_dynrelocs (h, inf)
 	    return false;
 	}
 
-      s = htab->splt;
-      if (s == NULL)
-	abort ();
-
-      /* If this is the first .plt entry, make room for the special
-	 first entry.  */
-      if (s->_raw_size == 0)
-	s->_raw_size += PLT_ENTRY_SIZE;
-
-      h->plt.offset = s->_raw_size;
-
-      /* If this symbol is not defined in a regular file, and we are
-	 not generating a shared library, then set the symbol to this
-	 location in the .plt.  This is required to make function
-	 pointers compare as equal between the normal executable and
-	 the shared library.  */
-      if (! info->shared
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
-	{
-	  h->root.u.def.section = s;
-	  h->root.u.def.value = h->plt.offset;
-	}
-
-      /* Make room for this entry.  */
-      s->_raw_size += PLT_ENTRY_SIZE;
-
-      /* We also need to make an entry in the .got.plt section, which
-	 will be placed in the .got section by the linker script.  */
-      s = htab->sgotplt;
-      if (s == NULL)
-	abort ();
-      s->_raw_size += 4;
-
       if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
 	{
+	  s = htab->splt;
+	  if (s == NULL)
+	    abort ();
+
+	  /* If this is the first .plt entry, make room for the special
+	     first entry.  */
+	  if (s->_raw_size == 0)
+	    s->_raw_size += PLT_ENTRY_SIZE;
+
+	  h->plt.offset = s->_raw_size;
+
+	  /* If this symbol is not defined in a regular file, and we are
+	     not generating a shared library, then set the symbol to this
+	     location in the .plt.  This is required to make function
+	     pointers compare as equal between the normal executable and
+	     the shared library.  */
+	  if (! info->shared
+	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+	    {
+	      h->root.u.def.section = s;
+	      h->root.u.def.value = h->plt.offset;
+	    }
+
+	  /* Make room for this entry.  */
+	  s->_raw_size += PLT_ENTRY_SIZE;
+
+	  /* We also need to make an entry in the .got.plt section, which
+	     will be placed in the .got section by the linker script.  */
+	  s = htab->sgotplt;
+	  if (s == NULL)
+	    abort ();
+	  s->_raw_size += 4;
+
 	  /* We also need to make an entry in the .rel.plt section.  */
 	  s = htab->srelplt;
 	  if (s == NULL)
 	    abort ();
 	  s->_raw_size += sizeof (Elf32_External_Rel);
+	}
+      else
+	{
+	  h->plt.offset = (bfd_vma) -1;
+	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
 	}
     }
   else
