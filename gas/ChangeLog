@@ -1,7 +1,7 @@
 2003-06-10  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-h8300.c (h8300sxnmode): New.
-	(md_pseudo_table): Add .h8300sxn entry.  Sync others with FSF version.
+	(md_pseudo_table): Add .h8300sxn entry.
 
 2003-06-09  H.J. Lu <hongjiu.lu@intel.com>
 
