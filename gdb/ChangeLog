@@ -1,3 +1,8 @@
+2000-09-11  Kevin Buettner  <kevinb@redhat.com>
+
+	* irix4-nat.c (fetch_core_registers): Protoize.
+	* irix5-nat.c (fetch_core_registers, find_solib): Protoize.
+
 2000-09-06  Mark Kettenis  <kettenis@gnu.org>
 
 	* lin-lwp.c (normal_mask, blocked_mask): New variables.

@@ -180,12 +180,22 @@ get_longjmp_target (CORE_ADDR *pc)
   return 1;
 }
 
+/* Provide registers to GDB from a core file.
+
+   CORE_REG_SECT points to an array of bytes, which were obtained from
+   a core file which BFD thinks might contain register contents. 
+   CORE_REG_SIZE is its size.
+
+   Normally, WHICH says which register set corelow suspects this is:
+     0 --- the general-purpose register set
+     2 --- the floating-point register set
+   However, for Irix 5, WHICH isn't used.
+
+   REG_ADDR is also unused.  */
+
 static void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;			/* Unused */
-     CORE_ADDR reg_addr;	/* Unused */
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
+		      int which, CORE_ADDR reg_addr)
 {
   if (core_reg_size == REGISTER_BYTES)
     {
@@ -764,8 +774,7 @@ xfer_link_map_member (struct so_list *so_list_ptr, struct link_map *lm)
  */
 
 static struct so_list *
-find_solib (so_list_ptr)
-     struct so_list *so_list_ptr;	/* Last lm or NULL for first one */
+find_solib (struct so_list *so_list_ptr)
 {
   struct so_list *so_list_next = NULL;
   struct link_map *lm = NULL;
