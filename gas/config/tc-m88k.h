@@ -62,9 +62,12 @@ struct reloc_info_m88k
 
 /* The m88k uses '@' to start local labels.  */
 #define LEX_AT (LEX_BEGIN_NAME | LEX_NAME)
+
+#ifndef BFD_ASSEMBLER
 #define LOCAL_LABEL(name) \
   ((name[0] =='@' && (name [1] == 'L' || name [1] == '.')) \
    || (name[0] == 'L' && name[1] == '0' && name[2] == '\001'))
+#endif
 
 /* The m88k uses pseudo-ops with no leading period.  */
 #define NO_PSEUDO_DOT

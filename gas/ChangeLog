@@ -1,3 +1,21 @@
+Fri Feb 28 14:40:00 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* write.h (LOCAL_LABEL): Only define if not BFD_ASSEMBLER.
+	(S_LOCAL_NAME): Likewise.
+	(FAKE_LABEL_NAME): Define unconditionally.
+	* symbols.c (colon): Call bfd_is_local_label, not LOCAL_LABEL, if
+	BFD_ASSEMBLER.
+	(S_IS_LOCAL): Call bfd_is_local_label_name, not LOCAL_LABEL.
+	* config/tc-*.h: Only define LOCAL_LABEL if not BFD_ASSEMBLER.
+	Don't define FAKE_LABEL_NAME.
+	* config/te-ic960.h: Likewise.
+	* config/tc-mips.h (tc_frob_file_before_adjust): Define.
+	(mips_frob_file_before_adjust): Declare.
+	* config/tc-mips.c (mips_frob_file_before_adjust): New function.
+	(mips_local_label): Remove.
+
+	* config/te-sco386.h: Remove; not used.
+
 start-sanitize-tic80
 Thu Feb 27 15:39:16 1997  Fred Fish  <fnf@cygnus.com>
 

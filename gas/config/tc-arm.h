@@ -1,8 +1,7 @@
 /* This file is tc-arm.h
+   Copyright (C) 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
-
-   Copyright (C) 1994, 1995 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -17,10 +16,15 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 #define TC_ARM 1
+
+#ifndef TARGET_BYTES_BIG_ENDIAN
+#define TARGET_BYTES_BIG_ENDIAN 0
+#endif
 
 #define COFF_MAGIC ARMMAGIC
 #define TARGET_ARCH bfd_arch_arm
@@ -31,10 +35,6 @@
 
 #define LITTLE_ENDIAN 1234
 #define BIG_ENDIAN 4321
-
-#ifndef TARGET_BYTES_BIG_ENDIAN
-#define TARGET_BYTES_BIG_ENDIAN 0
-#endif
 
 #ifdef OBJ_AOUT
 #ifdef TE_RISCIX
@@ -111,9 +111,10 @@ char *arm_canonicalize_symbol_name PARAMS ((char *));
 #define LOCAL_LABELS_FB  1
 
 /* Use defaults for OBJ_AOUT.  */
+#ifndef BFD_ASSEMBLER
 #ifndef OBJ_AOUT
 #define LOCAL_LABEL(name)	((name)[0] == '.' && (name)[1] == 'L')
-#define FAKE_LABEL_NAME		".L0\001"
+#endif
 #endif
 
 /* end of tc-arm.h */
