@@ -1,5 +1,11 @@
 2003-02-20  Andrew Cagney  <ac131313@redhat.com>
 
+	* remote-sim.c (gdbsim_insert_breakpoint)
+	(gdbsim_remove_breakpoint): Delete #ifdef SIM_HAS_BREAKPOINTS
+	code.
+
+2003-02-20  Andrew Cagney  <ac131313@redhat.com>
+
 	* remote.c (_initialize_remote): Add commands "set/show remote
 	hardware-watchpoint-limit" and "set/show remote
 	hardware-breakpoint-limit".

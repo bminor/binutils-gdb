@@ -1,5 +1,7 @@
 /* Simulator pseudo baseclass.
-   Copyright (C) 1997-1998 Free Software Foundation, Inc.
+
+   Copyright 1997, 1998, 2003 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support.
 
 This file is part of GDB, the GNU debugger.
@@ -90,9 +92,6 @@ typedef struct _sim_cpu sim_cpu;
 #include "sim-engine.h"
 #include "sim-watch.h"
 #include "sim-memopt.h"
-#ifdef SIM_HAVE_BREAKPOINTS
-#include "sim-break.h"
-#endif
 #include "sim-cpu.h"
 
 /* Global pointer to current state while sim_resume is running.
@@ -226,10 +225,6 @@ typedef struct {
   /* generic watchpoint support */
   sim_watchpoints watchpoints;
 #define STATE_WATCHPOINTS(sd) (&(sd)->base.watchpoints)
-
-  /* Pointer to list of breakpoints */
-  struct sim_breakpoint *breakpoints;
-#define STATE_BREAKPOINTS(sd) ((sd)->base.breakpoints)
 
 #if WITH_HW
   struct sim_hw *hw;
