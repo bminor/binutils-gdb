@@ -99,6 +99,9 @@ switch -glob -- [istarget] {
         set asm-arch v850
         set gdb_wrapper_initialized 1
     }
+    "m68k-*-*" {
+        set asm-arch m68k
+    }
 }
 
 if { "${asm-arch}" == "" } {
