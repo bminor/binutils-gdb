@@ -1,3 +1,8 @@
+2004-04-23  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/call-sc.exp: New test of scalar call/return values.
+	* gdb.base/call-sc.c: Ditto.
+
 2004-04-23  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.threads/manythreads.c: Reduce thread stack size.
