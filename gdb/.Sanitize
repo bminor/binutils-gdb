@@ -149,6 +149,7 @@ nm-hppab.h
 nm-hppah.h
 nm-i386bsd.h
 nm-i386mach.h
+nm-i386sco.h
 nm-i386v.h
 nm-i386v4.h
 nm-irix3.h
