@@ -1,5 +1,8 @@
 Thu Aug  6 10:56:01 1992  Fred Fish  (fnf@cygnus.com)
 
+	* stabsread.c:  Ensure that all members of all allocated structures
+	are initialized to known state to avoid hard to find bugs with gdb
+	using fields containing random data.
 	* buildsym.c (start_subfile):  Compact dirname initialization.
 	* buildsym.c (patch_subfile_names):  New function.
 	* buildsym.c (end_symtab):  Make copy of dirname on symbol obstack.

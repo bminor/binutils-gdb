@@ -390,6 +390,7 @@ define_symbol (valu, string, desc, type, objfile)
 
   sym = (struct symbol *) 
     obstack_alloc (&objfile -> symbol_obstack, sizeof (struct symbol));
+  memset (sym, 0, sizeof (struct symbol));
 
   if (processing_gcc_compilation)
     {
@@ -490,8 +491,7 @@ define_symbol (valu, string, desc, type, objfile)
 	    SYMBOL_TYPE (sym) = lookup_fundamental_type (objfile,
 							 FT_DBL_PREC_FLOAT);
 	    dbl_valu = (char *)
-	      obstack_alloc (&objfile -> type_obstack,
-			     sizeof (double));
+	      obstack_alloc (&objfile -> type_obstack, sizeof (double));
 	    memcpy (dbl_valu, &d, sizeof (double));
 	    SWAP_TARGET_AND_HOST (dbl_valu, sizeof (double));
 	    SYMBOL_VALUE_BYTES (sym) = dbl_valu;
@@ -603,8 +603,7 @@ define_symbol (valu, string, desc, type, objfile)
 	  /* This code doesn't work -- it needs to realloc and can't.  */
 	  /* Attempt to set up to record a function prototype... */
 	  struct type *new = (struct type *)
-	    obstack_alloc (&objfile -> type_obstack,
-			   sizeof (struct type));
+	    obstack_alloc (&objfile -> type_obstack, sizeof (struct type));
 
 	  /* Generate a template for the type of this function.  The 
 	     types of the arguments will be added as we read the symbol 
@@ -831,8 +830,8 @@ define_symbol (valu, string, desc, type, objfile)
       if (synonym)
 	{
 	  register struct symbol *typedef_sym = (struct symbol *)
-	    obstack_alloc (&objfile -> type_obstack,
-			   sizeof (struct symbol));
+	    obstack_alloc (&objfile -> type_obstack, sizeof (struct symbol));
+	  memset (typedef_sym, 0, sizeof (struct symbol));
 	  SYMBOL_NAME (typedef_sym) = SYMBOL_NAME (sym);
 	  SYMBOL_TYPE (typedef_sym) = SYMBOL_TYPE (sym);
 
@@ -1351,9 +1350,8 @@ read_struct_type (pp, type, objfile)
       ALLOCATE_CPLUS_STRUCT_TYPE(type);
 
       n_baseclasses = read_number (pp, ',');
-      TYPE_FIELD_VIRTUAL_BITS (type) =
-	(B_TYPE *) obstack_alloc (&objfile -> type_obstack,
-				  B_BYTES (n_baseclasses));
+      TYPE_FIELD_VIRTUAL_BITS (type) = (B_TYPE *)
+	obstack_alloc (&objfile -> type_obstack, B_BYTES (n_baseclasses));
       B_CLRALL (TYPE_FIELD_VIRTUAL_BITS (type), n_baseclasses);
 
       for (i = 0; i < n_baseclasses; i++)
@@ -1622,19 +1620,18 @@ read_struct_type (pp, type, objfile)
   TYPE_NFIELDS (type) = nfields;
   TYPE_FIELDS (type) = (struct field *)
     obstack_alloc (&objfile -> type_obstack, sizeof (struct field) * nfields);
+  memset (TYPE_FIELDS (type), 0, sizeof (struct field) * nfields);
 
   if (non_public_fields)
     {
       ALLOCATE_CPLUS_STRUCT_TYPE (type);
 
-      TYPE_FIELD_PRIVATE_BITS (type) =
-	  (B_TYPE *) obstack_alloc (&objfile -> type_obstack,
-				    B_BYTES (nfields));
+      TYPE_FIELD_PRIVATE_BITS (type) = (B_TYPE *)
+	obstack_alloc (&objfile -> type_obstack, B_BYTES (nfields));
       B_CLRALL (TYPE_FIELD_PRIVATE_BITS (type), nfields);
 
-      TYPE_FIELD_PROTECTED_BITS (type) =
-	  (B_TYPE *) obstack_alloc (&objfile -> type_obstack,
-				    B_BYTES (nfields));
+      TYPE_FIELD_PROTECTED_BITS (type) = (B_TYPE *)
+	obstack_alloc (&objfile -> type_obstack, B_BYTES (nfields));
       B_CLRALL (TYPE_FIELD_PROTECTED_BITS (type), nfields);
     }
 
@@ -1858,9 +1855,11 @@ read_struct_type (pp, type, objfile)
 
 	  *pp += 1;
 
-	  new_mainlist->fn_fieldlist.fn_fields =
-	    (struct fn_field *) obstack_alloc (&objfile -> type_obstack,
-					       sizeof (struct fn_field) * length);
+	  new_mainlist->fn_fieldlist.fn_fields = (struct fn_field *)
+	    obstack_alloc (&objfile -> type_obstack,
+			   sizeof (struct fn_field) * length);
+	  memset (new_mainlist->fn_fieldlist.fn_fields, 0,
+		  sizeof (struct fn_field) * length);
 	  for (i = length; (i--, sublist); sublist = sublist->next)
 	    new_mainlist->fn_fieldlist.fn_fields[i] = sublist->fn_field;
 
@@ -1882,6 +1881,8 @@ read_struct_type (pp, type, objfile)
       TYPE_FN_FIELDLISTS (type) = (struct fn_fieldlist *)
 	obstack_alloc (&objfile -> type_obstack,
 		       sizeof (struct fn_fieldlist) * nfn_fields);
+      memset (TYPE_FN_FIELDLISTS (type), 0,
+	      sizeof (struct fn_fieldlist) * nfn_fields);
       TYPE_NFN_FIELDS (type) = nfn_fields;
       TYPE_NFN_FIELDS_TOTAL (type) = total_length;
     }
@@ -2069,9 +2070,9 @@ read_array_type (pp, type, objfile)
     TYPE_LENGTH (range_type) = sizeof (int);
 
     TYPE_NFIELDS (range_type) = 2;
-    TYPE_FIELDS (range_type) =
-      (struct field *) obstack_alloc (&objfile -> type_obstack,
-				      2 * sizeof (struct field));
+    TYPE_FIELDS (range_type) = (struct field *)
+      obstack_alloc (&objfile -> type_obstack, 2 * sizeof (struct field));
+    memset (TYPE_FIELDS (range_type), 0, 2 * sizeof (struct field));
     TYPE_FIELD_BITPOS (range_type, 0) = lower;
     TYPE_FIELD_BITPOS (range_type, 1) = upper;
   }
@@ -2080,9 +2081,9 @@ read_array_type (pp, type, objfile)
   TYPE_TARGET_TYPE (type) = element_type;
   TYPE_LENGTH (type) = (upper - lower + 1) * TYPE_LENGTH (element_type);
   TYPE_NFIELDS (type) = 1;
-  TYPE_FIELDS (type) =
-    (struct field *) obstack_alloc (&objfile -> type_obstack,
-				    sizeof (struct field));
+  TYPE_FIELDS (type) = (struct field *)
+    obstack_alloc (&objfile -> type_obstack, sizeof (struct field));
+  memset (TYPE_FIELDS (type), 0, sizeof (struct field));
   TYPE_FIELD_TYPE (type, 0) = range_type;
 
   /* If we have an array whose element type is not yet known, but whose
@@ -2139,7 +2140,8 @@ read_enum_type (pp, type, objfile)
       *pp = p + 1;
       n = read_number (pp, ',');
 
-      sym = (struct symbol *) obstack_alloc (&objfile -> symbol_obstack, sizeof (struct symbol));
+      sym = (struct symbol *)
+	obstack_alloc (&objfile -> symbol_obstack, sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
       SYMBOL_NAME (sym) = name;
       SYMBOL_CLASS (sym) = LOC_CONST;
@@ -2159,8 +2161,8 @@ read_enum_type (pp, type, objfile)
   TYPE_FLAGS (type) &= ~TYPE_FLAG_STUB;
   TYPE_NFIELDS (type) = nsyms;
   TYPE_FIELDS (type) = (struct field *)
-    obstack_alloc (&objfile -> type_obstack,
-		   sizeof (struct field) * nsyms);
+    obstack_alloc (&objfile -> type_obstack, sizeof (struct field) * nsyms);
+  memset (TYPE_FIELDS (type), 0, sizeof (struct field) * nsyms);
 
   /* Find the symbols for the values and put them into the type.
      The symbols can be found in the symlist that we put them on
@@ -2504,8 +2506,7 @@ read_range_type (pp, typenums, objfile)
       if (got_signed || got_unsigned)
 	{
 	  result_type = (struct type *)
-	    obstack_alloc (&objfile -> type_obstack,
-			   sizeof (struct type));
+	    obstack_alloc (&objfile -> type_obstack, sizeof (struct type));
 	  memset (result_type, 0, sizeof (struct type));
 	  TYPE_OBJFILE (result_type) = objfile;
 	  TYPE_LENGTH (result_type) = nbits / TARGET_CHAR_BIT;
@@ -2630,9 +2631,8 @@ read_range_type (pp, typenums, objfile)
   }
 
   TYPE_NFIELDS (result_type) = 2;
-  TYPE_FIELDS (result_type) =
-    (struct field *) obstack_alloc (&objfile -> type_obstack,
-				    2 * sizeof (struct field));
+  TYPE_FIELDS (result_type) = (struct field *)
+    obstack_alloc (&objfile -> type_obstack, 2 * sizeof (struct field));
   memset (TYPE_FIELDS (result_type), 0, 2 * sizeof (struct field));
   TYPE_FIELD_BITPOS (result_type, 0) = n2;
   TYPE_FIELD_BITPOS (result_type, 1) = n3;
