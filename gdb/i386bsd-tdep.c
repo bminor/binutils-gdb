@@ -113,6 +113,9 @@ i386bsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
 /* NetBSD 1.0 or later.  */
 
+CORE_ADDR i386nbsd_sigtramp_start = 0xbfbfdf20;
+CORE_ADDR i386nbsd_sigtramp_end = 0xbfbfdff0;
+
 /* From <machine/signal.h>.  */
 int i386nbsd_sc_pc_offset = 44;
 int i386nbsd_sc_sp_offset = 56;
@@ -129,8 +132,8 @@ i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->struct_return = reg_struct_return;
 
   /* NetBSD uses a different memory layout.  */
-  tdep->sigtramp_start = 0xbfbfdf20;
-  tdep->sigtramp_end = 0xbfbfdff0;
+  tdep->sigtramp_start = i386nbsd_sigtramp_start;
+  tdep->sigtramp_end = i386nbsd_sigtramp_end;
 
   /* NetBSD has a `struct sigcontext' that's different from the
      origional 4.3 BSD.  */

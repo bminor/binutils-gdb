@@ -1,5 +1,12 @@
 2002-07-04  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386bsd-tdep.c (i386nbsd_sigtramp_start, i386nbsd_sigtramp_end):
+	New variables.
+	(i386nbsd_init_abi): Use these to initialize tdep->sigtramp_start
+	and tdep->sigtramp_end.
+	* i386obsd-nat.c: New file.
+	* config/i386/obsd.mh (NATDEPFILES): Add i386obsd-nat.o.
+
 	* dwarf2cfi.c (cfi_pop_frame): Use alloca() for regbuf.
 	Don't call get_current_frame().
 
