@@ -1,3 +1,8 @@
+2004-01-24  Jakub Jelinek  <jakub@redhat.com>
+
+	* emulparams/elf64_ia64.sh: Put .rela.opd into
+	OTHER_GOT_RELOC_SECTIONS instead of OTHER_PLT_RELOC_SECTIONS.
+
 2004-01-20  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* pe-dll.c (pe_create_import_fixup): Clear WP_TEXT flag.
