@@ -1,3 +1,8 @@
+Fri Jan 19 00:59:53 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* rs6000-nat.c (exec_one_dummy_insn): Rework to avoid
+	ptrace bug in aix4.1.3 on the rs6000.
+
 Wed Jan 17 13:22:27 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote-hms.c (hms_ops): Add value for to_thread_alive.

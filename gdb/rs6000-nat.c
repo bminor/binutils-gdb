@@ -238,7 +238,15 @@ exec_one_dummy_insn ()
   target_insert_breakpoint (DUMMY_INSN_ADDR, shadow_contents);
 
   errno = 0;
-  ptrace (PT_CONTINUE, inferior_pid, (PTRACE_ARG3_TYPE) DUMMY_INSN_ADDR, 0, 0);
+
+  /* You might think this could be done with a single ptrace call, and
+     you'd be correct for just about every platform I've ever worked
+     on.  However, rs6000-ibm-aix4.1.3 seems to have screwed this up --
+     the inferior never hits the breakpoint (it's also worth noting
+     powerpc-ibm-aix4.1.3 works correctly).  */
+  write_pc (DUMMY_INSN_ADDR);
+  ptrace (PT_CONTINUE, inferior_pid, (PTRACE_ARG3_TYPE)1, 0, 0);
+
   if (errno)
     perror ("pt_continue");
 
