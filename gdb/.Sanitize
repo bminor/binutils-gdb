@@ -88,6 +88,8 @@ gmalloc.c
 gmalloc.h
 gould-pinsn.c
 gould-xdep.c
+h8300-tdep.c
+hds-tdep.c
 hp300ux-xdep.c
 i386-pinsn.c
 i386-stub.c
@@ -181,6 +183,7 @@ terminal.h
 tm-29k.h
 tm-3b1.h
 tm-68k.h
+tm-h8300.h
 tm-m88k.h
 tm-altos.h
 tm-altosgas.h
