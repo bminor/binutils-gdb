@@ -1,3 +1,8 @@
+Mon Feb 23 10:27:40 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mips.c (mips_ip, case 'P'): Make 'P' arguments be
+	absolute expressions instead of '$' prefixed register names.
+
 Sat Feb 21 22:36:52 1998  Richard Henderson  <rth@cygnus.com>
 
 	* read.c (s_set): Record file and line info for symbols when -as.

@@ -1,5 +1,5 @@
 /* tc-mips.c -- assemble code for a MIPS chip.
-   Copyright (C) 1993, 1994, 1995, 1996, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1993, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
    Modified for ECOFF and R4000 support by Ian Lance Taylor of Cygnus
@@ -2590,6 +2590,10 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 	case 'a':
 	  assert (ep != NULL);
 	  r = BFD_RELOC_MIPS_JMP;
+	  continue;
+
+	case 'C':
+	  insn.insn_opcode |= va_arg (args, unsigned long);
 	  continue;
 
 	default:
@@ -5817,19 +5821,21 @@ macro (ip)
       this knowledge can be encoded in the itbl spec. */
 
     case M_COP0:
-      s = "cop0";
+      s = "c0";
       goto copz;
     case M_COP1:
-      s = "cop1";
+      s = "c1";
       goto copz;
     case M_COP2:
-      s = "cop2";
+      s = "c2";
       goto copz;
     case M_COP3:
-      s = "cop3";
+      s = "c3";
     copz:
-      /* For now we just do C (same as Cz). */
-      macro_build ((char *) NULL, &icnt, &offset_expr, s, "C");
+      /* For now we just do C (same as Cz).  The parameter will be
+         stored in insn_opcode by mips_ip.  */
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, s, "C",
+		   ip->insn_opcode);
       return;
 
 #ifdef LOSING_COMPILER
@@ -7155,6 +7161,20 @@ mips_ip (str, ip)
               s = expr_end;
               continue;
 
+	    case 'P':		/* Performance register */
+              my_getExpression (&imm_expr, s);
+	      check_absolute_expr (ip, &imm_expr);
+              if (imm_expr.X_add_number != 0 && imm_expr.X_add_number != 1)
+		{
+                  as_warn ("Invalidate performance regster (%ld)",
+			   (long) imm_expr.X_add_number);
+                  imm_expr.X_add_number &= 1;
+		}
+              ip->insn_opcode |= (imm_expr.X_add_number << 1);
+              imm_expr.X_op = O_absent;
+              s = expr_end;
+              continue;
+
 	    case 'b':		/* base register */
 	    case 'd':		/* destination register */
 	    case 's':		/* source register */
@@ -7166,7 +7186,6 @@ mips_ip (str, ip)
 	    case 'G':		/* coprocessor destination register */
 	    case 'x':		/* ignore register name */
 	    case 'z':		/* must be zero register */
-	    case 'P':		/* performance register */
 	      s_reset = s;
 	      if (s[0] == '$')
 		{
@@ -7249,7 +7268,6 @@ mips_ip (str, ip)
 		  if (regno == AT
 		      && ! mips_opts.noat
 		      && *args != 'E'
-		      && *args != 'P'
 		      && *args != 'G')
 		    as_warn ("Used $at without \".set noat\"");
 		  c = *args;
@@ -7304,9 +7322,6 @@ mips_ip (str, ip)
 		      break;
 		    case 'D':
 		      /* Itbl operand; not yet implemented. FIXME ?? */
-		      break;
-		    case 'P':
-		      ip->insn_opcode |= regno << 1;
 		      break;
 		      /* What about all other operands like 'i', which
 			 can be specified in the opcode table? */
