@@ -28,6 +28,7 @@
 #include "gdb/fileio.h"
 #include "gdb_wait.h"
 #include "gdb_stat.h"
+#include "remote-fileio.h"
 
 #include <fcntl.h>
 #include <sys/time.h>

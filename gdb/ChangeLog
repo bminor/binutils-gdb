@@ -1,5 +1,11 @@
 2003-06-11  Andrew Cagney  <cagney@redhat.com>
 
+	* remote-fileio.c: Include "remote-fileio.h".
+	* Makefile.in (remote-fileio.o): Update dependencies.
+	(remote_fileio_h): Fix typo.
+
+2003-06-11  Andrew Cagney  <cagney@redhat.com>
+
 	* xstormy16-tdep.c (xstormy16_push_return_address): Make static.
 	(xstormy16_save_dummy_frame_tos): Make static.
 	(_initialize_xstormy16_tdep): Add declaration.
