@@ -76,12 +76,17 @@ die horribly;
 #define LEX_BR 0
 #endif
 
+#ifndef LEX_PCT
+/* The Delta 68k assembler permits % inside label names.  */
+#define LEX_PCT 0
+#endif
+
 /* used by is_... macros. our ctype[] */
 const char lex_type[256] =
 {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* @ABCDEFGHIJKLMNO */
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* PQRSTUVWXYZ[\]^_ */
-  0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,	/* _!"#$%&'()*+,-./ */
+  0, 0, 0, 0, 3, LEX_PCT, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,	/* _!"#$%&'()*+,-./ */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,	/* 0123456789:;<=>? */
   LEX_AT, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* @ABCDEFGHIJKLMNO */
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, LEX_BR, 0, LEX_BR, 0, 3, /* PQRSTUVWXYZ[\]^_ */
@@ -152,7 +157,7 @@ struct broken_word *broken_words;
 int new_broken_words;
 #endif
 
-static char *demand_copy_string PARAMS ((int *lenP));
+char *demand_copy_string PARAMS ((int *lenP));
 int is_it_end_of_statement PARAMS ((void));
 static segT get_segmented_expression PARAMS ((expressionS *expP));
 static segT get_known_segmented_expression PARAMS ((expressionS * expP));
@@ -248,6 +253,17 @@ static const pseudo_typeS potable[] =
   {"string", stringer, 1},
 /* tag */
   {"text", s_text, 0},
+
+  /* This is for gcc to use.  It's only just been added (2/94), so gcc
+     won't be able to use it for a while -- probably a year or more.
+     But once this has been released, check with gcc maintainers
+     before deleting it or even changing the spelling.  */
+  {"this_GCC_requires_the_GNU_assembler", s_ignore, 0},
+  /* If we're folding case -- done for some targets, not necessarily
+     all -- the above string in an input file will be converted to
+     this one.  Match it either way...  */
+  {"this_gcc_requires_the_gnu_assembler", s_ignore, 0},
+
   {"title", listing_title, 0},	/* Listing title */
 /* type */
 /* use */
@@ -413,7 +429,8 @@ read_a_source_file (name)
 	   * Input_line_pointer points after that character.
 	   */
 	  if (is_name_beginner (c))
-	    {			/* want user-defined label or pseudo/opcode */
+	    {
+	      /* want user-defined label or pseudo/opcode */
 	      HANDLE_CONDITIONAL_ASSEMBLY ();
 
 	      s = --input_line_pointer;
@@ -852,7 +869,8 @@ s_comm (ignore)
   *p = c;
   if (S_IS_DEFINED (symbolP))
     {
-      as_bad ("Ignoring attempt to re-define symbol");
+      as_bad ("Ignoring attempt to re-define symbol `%s'.",
+	      S_GET_NAME (symbolP));
       ignore_rest_of_line ();
       return;
     }
@@ -1198,9 +1216,8 @@ s_lcomm (needs_align)
 #endif /* OBJ_COFF */
     }
   else
-    {
-      as_bad ("Ignoring attempt to re-define symbol %s.", name);
-    }
+    as_bad ("Ignoring attempt to re-define symbol `%s'.",
+	    S_GET_NAME (symbolP));
 
   subseg_set (current_seg, current_subseg);
 
@@ -2492,7 +2509,7 @@ demand_copy_C_string (len_pointer)
  * Demand string, but return a safe (=private) copy of the string.
  * Return NULL if we can't read a string here.
  */
-static char *
+char *
 demand_copy_string (lenP)
      int *lenP;
 {
