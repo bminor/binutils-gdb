@@ -1,7 +1,7 @@
 #if defined(__STDC__) || defined(const)
 const
 #endif
-char version_string[] = "GNU assembler version 1.38.1 (Cygnus Support pre-release)\n";
+char version_string[] = "GNU assembler version 1.90.1 (Cygnus Support pre-release)\n";
 
 /* DO NOT PUT COMMENTS ABOUT CHANGES IN THIS FILE.
 
