@@ -28,4 +28,10 @@ Disassembly of section .text:
   40:	90 [ 	]*nop    
   41:	8d 91 00 00 00 00    	lea    0x0\(%ecx\),%edx
 [ 	]+43: R_386_TLS_LE	var2
-  47:	c3 [ 	]*ret[ 	]*
+  47:	a1 00 00 00 00 [ 	]*mov    0x0,%eax
+[ 	]+48: R_386_TLS_IE	foo
+  4c:	65 8b 00 [ 	]*mov    %gs:\(%eax\),%eax
+  4f:	65 a1 00 00 00 00 [ 	]*mov    %gs:0x0,%eax
+  55:	03 05 00 00 00 00 [ 	]*add    0x0,%eax
+			57: R_386_TLS_IE	foo
+  5b:	c3 [ 	]*ret[ 	]*

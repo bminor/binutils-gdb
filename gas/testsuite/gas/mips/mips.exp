@@ -190,6 +190,7 @@ if { [istarget mips*-*-*] } then {
 
   	run_dump_test "mips-abi32"
   	run_dump_test "mips-abi32-pic"
+  	run_dump_test "mips-abi32-pic2"
 
 	run_dump_test "elf${el}-rel"
 	if {[istarget mips64*-*-*] || [istarget mipsisa32*-*-*]
@@ -215,5 +216,6 @@ if { [istarget mips*-*-*] } then {
 	    run_dump_test "${tmips}mips${el}16-e"
 	    run_dump_test "${tmips}mips${el}16-f"
 	}
+	run_dump_test "elf-consthilo"
     }
 }

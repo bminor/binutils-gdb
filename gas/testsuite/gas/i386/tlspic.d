@@ -18,6 +18,13 @@ Disassembly of section .text:
   17:	8d 76 00 [ 	]*lea    0x0\(%esi\),%esi
   1a:	2b 83 00 00 00 00 [ 	]*sub    0x0\(%ebx\),%eax
 [ 	]+1c: R_386_TLS_IE_32	foo
-  20:	8b 5d fc [ 	]*mov    0xfffffffc\(%ebp\),%ebx
-  23:	c9 [ 	]*leave[ 	]*
-  24:	c3 [ 	]*ret[ 	]*
+  20:	8b 83 00 00 00 00 [ 	]*mov    0x0\(%ebx\),%eax
+[ 	]+22: R_386_TLS_GOTIE	foo
+  26:	8d 76 00 [ 	]*lea    0x0\(%esi\),%esi
+  29:	65 8b 00 [ 	]*mov    %gs:\(%eax\),%eax
+  2c:	65 8b 0d 00 00 00 00 [ 	]*mov    %gs:0x0,%ecx
+  33:	03 8b 00 00 00 00 [ 	]*add    0x0\(%ebx\),%ecx
+[ 	]+35: R_386_TLS_GOTIE	foo
+  39:	8b 5d fc [ 	]*mov    0xfffffffc\(%ebp\),%ebx
+  3c:	c9 [ 	]*leave[ 	]*
+  3d:	c3 [ 	]*ret[ 	]*

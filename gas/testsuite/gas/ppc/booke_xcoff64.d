@@ -2,7 +2,7 @@
 #objdump: -Dr -Mbooke64
 #name: xcoff64 BookE tests
 
-.*:     file format aixcoff64-rs6000
+.*:     file format aix5?coff64-rs6000
 
 Disassembly of section .text:
 
@@ -12,9 +12,9 @@ Disassembly of section .text:
    8:	24 25 00 30 	bce	1,4\*cr1\+gt,38 <.text\+0x38>
    c:	24 46 00 3d 	bcel	2,4\*cr1\+eq,48 <.text\+0x48>
   10:	24 67 00 5a 	bcea	3,4\*cr1\+so,58 <.text\+0x58>
-			10: R_BA	.text
+			12: R_BA_16	.text
   14:	24 88 00 7b 	bcela	4,4\*cr2,78 <.text\+0x78>
-			14: R_BA	.text
+			16: R_BA_16	.text
   18:	4c a9 00 22 	bclre	5,4\*cr2\+gt
   1c:	4c aa 00 23 	bclrel	5,4\*cr2\+eq
   20:	4d 0b 04 22 	bcctre	8,4\*cr2\+so
@@ -22,9 +22,9 @@ Disassembly of section .text:
   28:	58 00 00 74 	be	9c <.text\+0x9c>
   2c:	58 00 00 89 	bel	b4 <.text\+0xb4>
   30:	58 00 00 f2 	bea	f0 <.text\+0xf0>
-			30: R_BA	.text
+			30: R_BA_26	.text
   34:	58 00 01 27 	bela	124 <.text\+0x124>
-			34: R_BA	.text
+			34: R_BA_26	.text
   38:	e9 09 00 80 	lbze	r8,8\(r9\)
   3c:	e9 8f 00 41 	lbzue	r12,4\(r15\)
   40:	7c 86 40 fe 	lbzuxe	r4,r6,r8

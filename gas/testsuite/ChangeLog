@@ -1,3 +1,39 @@
+2002-09-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+	2002-09-19  Jakub Jelinek  <jakub@redhat.com>
+	* gas/i386/tlspic.s: Add tests.
+	* gas/i386/tlspic.d: Regenerated.
+	* gas/i386/tlsnopic.s: Add tests.
+	* gas/i386/tlsnopic.d: Regenerated.
+
+	2002-09-16  Chris Demetriou  <cgd@broadcom.com>
+	* gas/mips/mips-abi32-pic2.s: New file.
+	* gas/mips/mips-abi32-pic2.d: New file.
+	* gas/mips/mips.exp: Run new test.
+
+	2002-08-20  Richard Sandiford  <rsandifo@redhat.com>
+	* gas/mips/rol.s: Add rotate by zero tests.
+	* gas/mips/rol.d: Update accordingly.
+	* gas/mips/rol64.d: Expect rotates by zero to use dsrl.
+
+	2002-08-13  Stephen Clarke <stephen.clarke@superh.com>
+	* gas/sh/sh64/datal32-3.d: Formatting change to match the current
+	output of objdump.
+
+	2002-08-12  Richard Sandiford  <rsandifo@redhat.com>
+	* gas/mips/elf-consthilo.[sd]: New test.
+	* gas/mips/mips.exp: Run it.
+
+	2002-08-06  Alan Modra  <amodra@bigpond.net.au>
+	* gas/ppc/altivec_xcoff64.d: Adjust for aix5 target.
+	* gas/ppc/booke_xcoff64.d: Likewise.  Also fix relocs.
+
+	2002-08-03  Jakub Jelinek  <jakub@redhat.com>
+	* testsuite/gas/i386/gotpc.s: New.
+	* testsuite/gas/i386/gotpc.d: New.
+	* testsuite/gas/i386/i386.exp: Add gotpc test.
+
 2002-08-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/m68k/all.exp: xfail non-ELF targets on pcrel test.
