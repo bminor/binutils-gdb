@@ -1,3 +1,7 @@
+2002-03-07  Daniel Jacobowitz  <drow@mvista.com>
+
+	* ld.texinfo: Wrap @menu in @ifnottex, not @ifinfo.
+
 2002-03-05  Jakub Jelinek  <jakub@redhat.com>
 
 	* scripttempl/elf.sc: Only use DATA_SEGMENT_END() together with
