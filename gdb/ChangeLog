@@ -3,6 +3,8 @@ Fri Feb 12 15:46:49 1993  K. Richard Pixley  (rich@cygnus.com)
 	* xcoffread.c (process_xcoff_symbol, read_symbol_lineno): complain
 	  expects a pointer to complaint rather than a complaint
 	  structure.
+	  (process_linenos): free the previously allocated subfile name,
+	  then allocate the new one from the heap.
 
 Fri Feb 12 08:06:05 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 

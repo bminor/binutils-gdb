@@ -630,9 +630,8 @@ process_linenos (start, end)
 
 /*	start_subfile (inclTable[ii].name, (char*)0);  */
 	start_subfile (" ?", (char*)0);
-	current_subfile->name = 
-		obsavestring (inclTable[ii].name, strlen (inclTable[ii].name),
-			      &current_objfile->symbol_obstack);
+	free (current_subfile->name);
+	current_subfile->name = strdup (inclTable[ii].name);
 
         if (lv == lineTb) {
 	  current_subfile->line_vector = (struct linetable *)
