@@ -1,3 +1,7 @@
+Thu Oct 24 09:08:47 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* aclocal.m4, configure:  Set USE_BINARY_FOPEN for *-*-windows.
+
 start-sanitize-v850
 Wed Oct 23 00:53:16 1996  Jeffrey A Law  (law@cygnus.com)
 
