@@ -1,3 +1,8 @@
+Wed Mar  9 13:48:11 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* ar.c (move_members): Fix it so that the abi positional modifiers
+	don't delete all archive members following the insert point.
+
 Tue Mar  8 13:14:43 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* coffgrok.[ch]: New files, understand coff objects.

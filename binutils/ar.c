@@ -883,18 +883,21 @@ move_members (files_to_move)
 	    {
 	      /* Move this file to the end of the list - first cut from
 		 where it is.  */
+	      bfd *link;
 	      *current_ptr_ptr = current_ptr->next;
 
 	      /* Now glue to end */
 	      after_bfd = get_pos_bfd (&inarch->next, pos_end);
+	      link = *after_bfd;
 	      *after_bfd = current_ptr;
-	      current_ptr->next = (bfd *) NULL;
+	      current_ptr->next = link;
 
 	      if (verbose)
 		printf ("m - %s\n", *files_to_move);
 
 	      goto next_file;
 	    }
+
 	  current_ptr_ptr = &((*current_ptr_ptr)->next);
 	}
       fprintf (stderr, "%s: no entry %s in archive %s!\n",
