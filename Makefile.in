@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Sun Aug 25 22:42:31 PDT 1991, by rich@cygint.cygnus.com
+# Last Mod Tue Sep 24 21:25:57 PDT 1991, by rich@cygnus.com
 #
 # $Id$
 
@@ -55,6 +55,8 @@ subdir_do: force
 					"CC=$(CC)" \
 					"AR_FLAGS=$(AR_FLAGS)" \
 					"RANLIB=$(RANLIB)" \
+					"LOADLIBES=$(LOADLIBES)" \
+					"LDFLAGS=$(LDFLAGS)" \
 					"BISON=$(BISON)" $(DO)) ; then true ; \
 			else exit 1 ; fi ; \
 		else true ; fi ; \
@@ -82,22 +84,25 @@ pass:
 	cp $(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
                 then echo .$(target) ; fi`/gstdarg.h $(srcdir)/gas/stdarg.h
 	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)" \
-		"CC=$(srcdir)/../gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
-		then echo .$(target) ; fi`$(subdir)/$(stagepass)/gcc -O \
-		-B$(srcdir)/../gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
+		"CC=`pwd`/$(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
+		then echo .$(target) ; fi`$(subdir)/$(stagepass)/gcc \
+		-O \
+		-B`pwd`/$(srcdir)/gcc`if [ -d $(srcdir)/gcc.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ \
-		-B$(srcdir)/../gas`if [ -d $(srcdir)/gas.$(target) ] ; \
+		-B`pwd`/$(srcdir)/gas`if [ -d $(srcdir)/gas.$(target) ] ; \
+		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ \
+		-B`pwd`/$(srcdir)/ld`if [ -d $(srcdir)/ld.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/" \
-		"AR=$(srcdir)/../binutils`if [ -d $(srcdir)/binutils.$(target) ] ; \
+		"AR=`pwd`/$(srcdir)/binutils`if [ -d $(srcdir)/binutils.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ar" \
-		"RANLIB=$(srcdir)/../binutils`if [ -d $(srcdir)/binutils.$(target) ] ; \
+		"RANLIB=`pwd`/$(srcdir)/binutils`if [ -d $(srcdir)/binutils.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ranlib" \
-		"LOADLIBES=$(srcdir)/../gnulib`if [ -d $(srcdir)/binutils.$(target) ] ; \
+		"LOADLIBES=`pwd`/$(srcdir)/gnulib`if [ -d $(srcdir)/binutils.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/gnulib.a /lib/libc.a" \
 		"LDFLAGS=-nostdlib /lib/crt0.o \
-		-L$(srcdir)/../gnulib`if [ -d $(srcdir)/gnulib.$(target) ] ; \
+		-L`pwd`/$(srcdir)/gnulib`if [ -d $(srcdir)/gnulib.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ \
-		-B$(srcdir)/../ld`if [ -d $(srcdir)/ld.$(target) ] ; \
+		-B`pwd`/$(srcdir)/ld`if [ -d $(srcdir)/ld.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/"
 
 
@@ -205,10 +210,10 @@ setup-dirs: force_update
 	./configure sun4
 	make clean
 	./configure -rm sun4
+	chmod og=u `find $(DEVO_SUPPORT) $(GDB_SUPPORT_FILES) -print`
 
 bfd.ilrt.tar.Z: setup-dirs
 	rm -f bfd.ilrt.tar.Z
-	chmod og=u `find $(DEVO_SUPPORT) $(GDB_SUPPORT_FILES) -print`
 	tar cf - $(DEVO_SUPPORT) $(GDB_SUPPORT_FILES) \
 		| compress -v >bfd.ilrt.tar.Z
 
@@ -225,6 +230,7 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/fsf/texinfo.tex
 	mkdir proto-toplev/texinfo
 	mkdir proto-toplev/texinfo/fsf
 	ln -s ../../../texinfo/fsf/texinfo.tex proto-toplev/texinfo/fsf/
+	chmod og=u `find proto-toplev -print`
 	(VER=`sed <gdb/Makefile.in -n 's/VERSION = //p'`; \
 		echo "==> Making gdb-$$VER.tar.Z"; \
 		ln -s proto-toplev gdb-$$VER; \
@@ -235,7 +241,14 @@ force_update:
 
 #
 # $Log$
-# Revision 1.33  1991/09/20 08:41:45  gnu
+# Revision 1.35  1991/09/25 04:34:40  rich
+# Pass command names with absolute paths.  Easier than keeping relative
+# paths right when dealing with sub/sub/directories.
+#
+# Revision 1.34  1991/09/20  09:08:56  gnu
+# Set file permissions on all files when building a distribution.
+#
+# Revision 1.33  1991/09/20  08:41:45  gnu
 # New rules for building distributions.  Normal distribution
 # is built by doing `make -f Makefile.in gdb.tar.Z' in the devo dir.
 #
