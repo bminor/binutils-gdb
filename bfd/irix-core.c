@@ -152,7 +152,7 @@ do_sections (abfd, coreout)
 	continue;
 
       if (!make_bfd_asection (abfd, secname,
-			      SEC_ALLOC | SEC_LOAD+SEC_HAS_CONTENTS,
+			      SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS,
 			      vmap.v_len, vmap.v_vaddr, vmap.v_offset))
 	/* Fail.  */
 	return 0;
@@ -288,7 +288,8 @@ irix_core_core_file_failing_signal (abfd)
 
 static bfd_boolean
 irix_core_core_file_matches_executable_p (core_bfd, exec_bfd)
-     bfd *core_bfd, *exec_bfd;
+     bfd *core_bfd ATTRIBUTE_UNUSED;
+     bfd *exec_bfd ATTRIBUTE_UNUSED;
 {
   return TRUE;			/* XXX - FIXME */
 }

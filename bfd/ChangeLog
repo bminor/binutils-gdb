@@ -1,3 +1,9 @@
+2005-03-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* irix-core.c (do_sections): Replace + by | in expression.
+	(irix_core_core_file_matches_executable_p): Add ATTRIBUTE_UNUSED
+	to unused parameters to avoid a compiler warning.
+
 2005-03-28  Mark Kettenis  <kettenis@gnu.org>
 
 	* netbsd-core.c: Convert to ISO C.  Fix formatting.
