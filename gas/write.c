@@ -402,59 +402,56 @@ relax_and_size_seg (abfd, sec, xxx)
      char *xxx;
 {
   flagword flags;
+  fragS *fragp;
+  segment_info_type *seginfo;
+  int x;
+  valueT size, newsize;
 
   flags = bfd_get_section_flags (abfd, sec);
 
-  if (/*flags & SEC_ALLOC*/ 1)
+  seginfo = (segment_info_type *) bfd_get_section_userdata (abfd, sec);
+  if (seginfo && seginfo->frchainP)
     {
-      fragS *fragp;
-      segment_info_type *seginfo;
-      int x;
-      valueT size, newsize;
-
-      seginfo = (segment_info_type *) bfd_get_section_userdata (abfd, sec);
-      if (seginfo && seginfo->frchainP)
-	{
-	  relax_segment (seginfo->frchainP->frch_root, sec);
-	  for (fragp = seginfo->frchainP->frch_root; fragp; fragp = fragp->fr_next)
-	    cvt_frag_to_fill (sec, fragp);
-	  for (fragp = seginfo->frchainP->frch_root;
-	       fragp->fr_next;
-	       fragp = fragp->fr_next)
-	    /* walk to last elt */;
-	  size = fragp->fr_address + fragp->fr_fix;
-	}
-      else
-	size = 0;
-      if (size > 0)
-	{
-	  flags |= SEC_HAS_CONTENTS;
-	  /* @@ This is just an approximation.  */
-	  if (seginfo->fix_root)
-	    flags |= SEC_RELOC;
-	  else
-	    flags &= ~SEC_RELOC;
-	  x = bfd_set_section_flags (abfd, sec, flags);
-	  assert (x == true);
-	}
-      size = md_section_align (sec, size);
-      x = bfd_set_section_size (abfd, sec, size);
-      assert (x == true);
-
-      /* If the size had to be rounded up, add some padding in the last
-	 non-empty frag.  */
-      newsize = bfd_get_section_size_before_reloc (sec);
-      assert (newsize >= size);
-      if (size != newsize)
-	{
-	  fragS *last = seginfo->frchainP->frch_last;
-	  fragp = seginfo->frchainP->frch_root;
-	  while (fragp->fr_next != last)
-	    fragp = fragp->fr_next;
-	  last->fr_address = size;
-	  fragp->fr_offset += newsize - size;
-	}
+      relax_segment (seginfo->frchainP->frch_root, sec);
+      for (fragp = seginfo->frchainP->frch_root; fragp; fragp = fragp->fr_next)
+	cvt_frag_to_fill (sec, fragp);
+      for (fragp = seginfo->frchainP->frch_root;
+	   fragp->fr_next;
+	   fragp = fragp->fr_next)
+	/* walk to last elt */;
+      size = fragp->fr_address + fragp->fr_fix;
     }
+  else
+    size = 0;
+  if (size > 0)
+    {
+      flags |= SEC_HAS_CONTENTS;
+      /* @@ This is just an approximation.  */
+      if (seginfo->fix_root)
+	flags |= SEC_RELOC;
+      else
+	flags &= ~SEC_RELOC;
+      x = bfd_set_section_flags (abfd, sec, flags);
+      assert (x == true);
+    }
+  size = md_section_align (sec, size);
+  x = bfd_set_section_size (abfd, sec, size);
+  assert (x == true);
+
+  /* If the size had to be rounded up, add some padding in the last
+     non-empty frag.  */
+  newsize = bfd_get_section_size_before_reloc (sec);
+  assert (newsize >= size);
+  if (size != newsize)
+    {
+      fragS *last = seginfo->frchainP->frch_last;
+      fragp = seginfo->frchainP->frch_root;
+      while (fragp->fr_next != last)
+	fragp = fragp->fr_next;
+      last->fr_address = size;
+      fragp->fr_offset += newsize - size;
+    }
+
 #ifdef tc_frob_section
   tc_frob_section (sec);
 #endif
@@ -636,7 +633,7 @@ write_relocs (abfd, sec, xxx)
   for (fixp = seginfo->fix_root; fixp != (fixS *) NULL; fixp = fixp->fx_next)
     {
       arelent **reloc;
-      extern arelent *tc_gen_reloc ();
+      extern arelent **tc_gen_reloc ();
       char *data;
       bfd_reloc_status_type s;
       int j;
@@ -749,6 +746,7 @@ write_contents (abfd, sec, xxx)
 }
 #endif
 
+#if defined(BFD_ASSEMBLER) || !defined (BFD)
 static void
 merge_data_into_text ()
 {
@@ -776,11 +774,14 @@ merge_data_into_text ()
   data_fix_root = NULL;
 #endif
 }
+#endif /* BFD_ASSEMBLER || ! BFD */
 
 #if !defined (BFD_ASSEMBLER) && !defined (BFD)
 static void
 relax_and_size_all_segments ()
 {
+  fragS *fragP;
+
   relax_segment (text_frag_root, SEG_TEXT);
   relax_segment (data_frag_root, SEG_DATA);
   relax_segment (bss_frag_root, SEG_BSS);
@@ -1761,7 +1762,12 @@ fixup_segment (fixP, this_segment_type)
   register segT add_symbol_segment = absolute_section;
 
   seg_reloc_count = 0;
-  /* If the linker is doing the relaxing, we must not do any fixups */
+  /* If the linker is doing the relaxing, we must not do any fixups.  */
+  /* Well, strictly speaking that's not true -- we could do any that
+     are PC-relative and don't cross regions that could change size.
+     And for the i960 (the only machine for which we've got a relaxing
+     linker right now), we might be able to turn callx/callj into bal
+     in cases where we know the maximum displacement.  */
   if (linkrelax)
     for (; fixP; fixP = fixP->fx_next)
       seg_reloc_count++;
@@ -1886,7 +1892,7 @@ fixup_segment (fixP, this_segment_type)
 		  }
 		else if (add_symbol_segment == undefined_section
 #ifdef BFD_ASSEMBLER
-			 || add_symbol_segment == &bfd_com_section
+			 || bfd_is_com_section (add_symbol_segment)
 #endif
 			 )
 		  {
@@ -1932,16 +1938,17 @@ fixup_segment (fixP, this_segment_type)
 
 	if (!fixP->fx_bit_fixP)
 	  {
-	    if ((size == 1
-		 && (add_number & ~0xFF)
-		 && ((add_number & ~0xFF) != (-1 & ~0xFF)))
-		|| (size == 2
-		    && (add_number & ~0xFFFF)
-		    && ((add_number & ~0xFFFF) != (-1 & ~0xFFFF)))
-		|| (size == 4
-		    && (add_number & ~(valueT)0xFFFFFFFF)
-		    && ((add_number & ~(valueT)0xFFFFFFFF) != (-1 & ~(valueT)0xFFFFFFFF)))
-		)
+	    valueT mask = 0;
+	    /* set all bits to one */
+	    mask--;
+	    /* Technically speaking, combining these produces an
+	       undefined result if size is sizeof (valueT), though I
+	       think these two half-way operations should both be
+	       defined.  */
+	    mask <<= size * 4;
+	    mask <<= size * 4;
+	    if ((add_number & mask) != 0
+		&& (add_number & mask) != mask)
 	      {
 		char buf[50];
 		sprint_value (buf, fragP->fr_address + where);
@@ -1967,23 +1974,17 @@ fixup_segment (fixP, this_segment_type)
 #endif
       }				/* For each fixS in this segment. */
 
-#ifdef OBJ_COFF
-#ifdef TC_I960
+#if defined (OBJ_COFF) && defined (TC_I960)
   {
     fixS *topP = fixP;
 
     /* two relocs per callj under coff. */
     for (fixP = topP; fixP; fixP = fixP->fx_next)
-      {
-	if (fixP->fx_callj && fixP->fx_addsy != 0)
-	  {
-	    ++seg_reloc_count;
-	  }			/* if callj and not already fixed. */
-      }				/* for each fix */
+      if (fixP->fx_callj && fixP->fx_addsy != 0)
+	++seg_reloc_count;
   }
-#endif /* TC_I960 */
+#endif /* OBJ_COFF && TC_I960 */
 
-#endif /* OBJ_COFF */
   return (seg_reloc_count);
 }
 
