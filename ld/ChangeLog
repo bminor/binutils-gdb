@@ -1,3 +1,8 @@
+1999-09-29  Andrew Haley  <aph@cygnus.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Defer
+	merging sections when not relocating.
+
 1999-09-28  Mumit Khan  <khan@xraylith.wisc.edu>
 
 	* pe-dll.c (process_def_file): Move the offset lookup from here to

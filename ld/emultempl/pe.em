@@ -1028,9 +1028,12 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
   hold_section = s;
 
   hold_section_name = xstrdup (secname);
-  dollar = strchr (hold_section_name, '$');
-  if (dollar != NULL)
-    *dollar = '\0';
+  if (!link_info.relocateable)
+    {
+      dollar = strchr (hold_section_name, '$');
+      if (dollar != NULL)
+	*dollar = '\0';
+    }
 
   hold_use = NULL;
   lang_for_each_statement (gld${EMULATION_NAME}_place_section);
