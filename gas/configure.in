@@ -179,10 +179,10 @@ changequote([,])dnl
       arm*-*-conix*)			fmt=elf ;;
       arm-*-linux*aout*)	        fmt=aout em=linux ;;
       arm*-*-linux-gnu*)		fmt=elf  em=linux ;;
-      arm-*-netbsd*)	                fmt=aout em=nbsd bfd_gas=yes ;;
+      arm-*-netbsd*)	                fmt=aout em=nbsd ;;
       arm-*-oabi | thumb-*-oabi)        fmt=elf ;;
       arm-epoc-pe | thumb-epoc-pe)      fmt=coff em=epoc-pe ;;
-      arm-*-wince)          fmt=coff em=wince-pe bfd_gas=yes;;
+      arm-*-wince)			fmt=coff em=wince-pe ;;
       arm-*-pe | thumb-*-pe)            fmt=coff em=pe ;;
       arm-*-riscix*)	                fmt=aout em=riscix ;;
 
@@ -253,11 +253,11 @@ changequote([,])dnl
 			    fmt=aout em=mach bfd_gas=yes ;;
       i386-*-msdos*)        fmt=aout ;;
       i386-*-moss*)	    fmt=elf ;;
-      i386-*-pe)            fmt=coff em=pe ;;
+      i386-*-pe)            fmt=coff em=pe bfd_gas=yes ;;
       i386-*-cygwin*)       fmt=coff em=pe bfd_gas=yes ;;
       i386-*-interix*)	    fmt=coff em=interix bfd_gas=yes ;;
       i386-*-mingw32*)      fmt=coff em=pe bfd_gas=yes ;;
-      i386-*-*nt*)          fmt=coff em=pe ;;
+      i386-*-*nt*)          fmt=coff em=pe bfd_gas=yes ;;
       i386-*-vxworks*)      fmt=aout ;;
       i960-*-bout)          fmt=bout ;;
       i960-*-coff)          fmt=coff em=ic960 ;;

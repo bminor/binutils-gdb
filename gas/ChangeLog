@@ -1,3 +1,10 @@
+2000-05-01  Alan Modra  <alan@linuxcare.com.au>
+
+	* configure.in: Set bfd_gas=yes on i386-*-pe and i386-*-nt* to
+	ensure all pe targets use bfd.  Remove unnecessary bfd_gas=yes on
+	arm-*-netbsd* and arm-*-wince as this is set for all arm*.
+	* configure: Regenerate.
+
 2000-04-29  Andreas Jaeger  <aj@suse.de>
 
 	* as.h: Correctly check GCC version.
