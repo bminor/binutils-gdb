@@ -1,3 +1,17 @@
+Thu Mar  2 05:31:34 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.base/Makefile.in: Try compiling callfuncs.c, if that fails try
+	-DNO_PROTOTYPES.
+	* gdb.base/callfuncs.c: Control use of prototypes based on
+	NO_PROTOTYPES, not __STDC.
+	* gdb.base/callfuncs.exp (do_function_calls): xfail one of the
+	t_float_values2 tests if prototypes in use.
+
+	* gdb.base/callfuncs.c (t_float_values, t_float_values2,
+	t_double_values):  When checking differences against DELTA, check
+	that difference is within the range (-DELTA,DELTA), not just
+	(-infinity,DELTA).
+
 Tue Feb 28 16:28:54 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* config/mips-gdb.exp (gdb_load): In every test case, we need to do
