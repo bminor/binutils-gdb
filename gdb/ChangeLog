@@ -1,3 +1,13 @@
+Tue Oct 15 14:24:19 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/powerpc/tm-ppc-eabi.h: Undefine NO_SINGLE_STEP so targets
+	can use single-step commands.
+
+Sun Oct 13 11:38:25 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* stabsread.c (define_symbol):  If REG_STRUCT_HAS_ADDR is non-zero,
+	follow typedefs before checking TYPE_CODE for structures and unions.
+
 Fri Oct 11 15:43:54 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* frame.h:  Move definition of struct frame_saved_args to before
