@@ -1,4 +1,4 @@
-# Copyright (C) 1992, 1993, 1994, 1997, 1999 Free Software Foundation, Inc.
+# Copyright (C) 1992, 1993, 1994, 1997, 1999, 2001 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -1012,7 +1012,7 @@ proc do_tests {} {
 
     gdb_stop_suppressing_tests;
     
-    if { ![ runto 'inheritance2(void)' ] } {
+    if { ![ runto 'inheritance2' ] } {
 	gdb_suppress_tests;
     }
 
@@ -1024,7 +1024,7 @@ proc do_tests {} {
 
     gdb_stop_suppressing_tests;
 
-    if { ![ runto 'inheritance4(void)' ] } {
+    if { ![ runto 'inheritance4' ] } {
 	gdb_suppress_tests;
     }
 
