@@ -1,3 +1,7 @@
+2003-07-07  Daniel Jacobowitz  <drow@mvista.com>
+
+	* disasm.c (dump_insns): Separate instructions from addresses.
+
 2003-07-07  Andreas Schwab  <schwab@suse.de>
 
 	* Makefile.in (m68k-tdep.o, m68klinux-tdep.o): Update

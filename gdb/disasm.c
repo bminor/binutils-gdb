@@ -123,6 +123,9 @@ dump_insns (struct ui_out *uiout, disassemble_info * di,
 	  ui_out_field_int (uiout, "offset", offset);
 	  ui_out_text (uiout, ">:\t");
 	}
+      else
+	ui_out_text (uiout, ":\t");
+
       if (filename != NULL)
 	xfree (filename);
       if (name != NULL)
