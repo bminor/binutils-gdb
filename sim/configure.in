@@ -15,6 +15,7 @@ case "${target}" in
   arm*-*-*)		sim_target=arm ;;
   h8300*-*-*)		sim_target=h8300 ;;
   h8500-*-*)		sim_target=h8500 ;;
+  mips*-*-*)		sim_target=mips ;;
   sh*-*-*)		sim_target=sh ;; 
   powerpc-*-eabisim*)	sim_target=ppc ;;
   powerpcle-*-eabisim*)	sim_target=ppc ;;

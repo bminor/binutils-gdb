@@ -1,3 +1,13 @@
+Wed Nov  8 15:46:49 1995  James G. Smith  <jsmith@pasanda.cygnus.co.uk>
+
+	* configure.in (mips*-*-*): Added "mips" simulator target.
+	* configure: Re-generated.
+
+Tue Oct 10 11:08:20 1995  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (BISON): Remove macro.
+	(FLAGS_TO_PASS): Remove BISON.
+
 Sun Oct  8 04:26:27 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* configure.in:  Explicitly `exit 0' for broken shells.
