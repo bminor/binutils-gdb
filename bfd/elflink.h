@@ -492,14 +492,19 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
      represent variables; this can cause confusion in principle, but
      any such confusion would seem to indicate an erroneous program or
      shared library.  We also permit a common symbol in a regular
-     object to override a weak symbol in a shared object.  */
+     object to override a weak symbol in a shared object.
+
+     We prefer a non-weak definition in a shared library to a weak
+     definition in the executable.  */
 
   if (newdyn
       && newdef
       && (olddef
 	  || (h->root.type == bfd_link_hash_common
 	      && (bind == STB_WEAK
-		  || ELF_ST_TYPE (sym->st_info) == STT_FUNC))))
+		  || ELF_ST_TYPE (sym->st_info) == STT_FUNC)))
+      && (h->root.type != bfd_link_hash_defweak
+	  || bind == STB_WEAK))
     {
       *override = true;
       newdef = false;
@@ -543,7 +548,10 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
 
      As above, we again permit a common symbol in a regular object to
      override a definition in a shared object if the shared object
-     symbol is a function or is weak.  */
+     symbol is a function or is weak.
+
+     As above, we permit a non-weak definition in a shared object to
+     override a weak definition in a regular object.  */
 
   if (! newdyn
       && (newdef
@@ -552,7 +560,9 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
 		  || h->type == STT_FUNC)))
       && olddyn
       && olddef
-      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0)
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+      && (bind != STB_WEAK
+	  || h->root.type == bfd_link_hash_defweak))
     {
       /* Change the hash table entry to undefined, and let
 	 _bfd_generic_link_add_one_symbol do the right thing with the
@@ -625,6 +635,31 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
 
       h->verinfo.vertree = NULL;
     }
+
+  /* Handle the special case of a weak definition in a regular object
+     followed by a non-weak definition in a shared object.  In this
+     case, we prefer the definition in the shared object.  To make
+     this work we have to frob the flags.  */
+  if (olddef
+      && ! olddyn
+      && h->root.type == bfd_link_hash_defweak
+      && newdef
+      && newdyn
+      && bind != STB_WEAK)
+    h->elf_link_hash_flags &= ~ ELF_LINK_HASH_DEF_REGULAR;
+
+  /* Handle the special case of a non-weak definition in a shared
+     object followed by a weak definition in a regular object.  In
+     this case we prefer to definition in the shared object.  To make
+     this work we have to tell the caller to not treat the new symbol
+     as a definition.  */
+  if (olddef
+      && olddyn
+      && h->root.type != bfd_link_hash_defweak
+      && newdef
+      && ! newdyn
+      && bind == STB_WEAK)
+    *override = true;
 
   return true;
 }
@@ -4139,6 +4174,7 @@ elf_bfd_final_link (abfd, info)
 
       rel_hash = elf_section_data (o)->rel_hashes;
       rel_hdr = &elf_section_data (o)->rel_hdr;
+      BFD_ASSERT (elf_section_data (o)->rel_count == o->reloc_count);
       for (i = 0; i < o->reloc_count; i++, rel_hash++)
 	{
 	  if (*rel_hash == NULL)
@@ -5087,7 +5123,7 @@ elf_link_input_bfd (finfo, input_bfd)
 	      irela = internal_relocs;
 	      irelaend = irela + o->reloc_count;
 	      rel_hash = (elf_section_data (o->output_section)->rel_hashes
-			  + o->output_section->reloc_count);
+			  + elf_section_data (o->output_section)->rel_count);
 	      for (; irela < irelaend; irela++, rel_hash++)
 		{
 		  unsigned long r_symndx;
@@ -5277,7 +5313,7 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
 
   /* Figure out the symbol index.  */
   rel_hash_ptr = (elf_section_data (output_section)->rel_hashes
-		  + output_section->reloc_count);
+		  + elf_section_data (output_section)->rel_count);
   if (link_order->type == bfd_section_reloc_link_order)
     {
       indx = link_order->u.reloc.p->u.section->target_index;
@@ -5386,7 +5422,7 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
       irel.r_offset = offset;
       irel.r_info = ELF_R_INFO (indx, howto->type);
       erel = ((Elf_External_Rel *) rel_hdr->contents
-	      + output_section->reloc_count);
+	      + elf_section_data (output_section)->rel_count);
       elf_swap_reloc_out (output_bfd, &irel, erel);
     }
   else
@@ -5398,11 +5434,11 @@ elf_reloc_link_order (output_bfd, info, output_section, link_order)
       irela.r_info = ELF_R_INFO (indx, howto->type);
       irela.r_addend = addend;
       erela = ((Elf_External_Rela *) rel_hdr->contents
-	       + output_section->reloc_count);
+	       + elf_section_data (output_section)->rel_count);
       elf_swap_reloca_out (output_bfd, &irela, erela);
     }
 
-  ++output_section->reloc_count;
+  ++elf_section_data (output_section)->rel_count;
 
   return true;
 }
@@ -5622,8 +5658,8 @@ elf_finish_pointer_linker_section (output_bfd, input_bfd, info, lsect, h, reloca
 	      elf_swap_reloca_out (output_bfd, &outrel,
 				   (((Elf_External_Rela *)
 				     lsect->section->contents)
-				    + lsect->section->reloc_count));
-	      ++lsect->section->reloc_count;
+				    + elf_section_data (lsect->section)->rel_count));
+	      ++elf_section_data (lsect->section)->rel_count;
 	    }
 	}
     }

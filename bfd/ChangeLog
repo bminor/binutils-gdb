@@ -1,3 +1,16 @@
+1999-07-07  Ian Lance Taylor  <ian@zembu.com>
+
+	* elflink.h (elf_bfd_final_link): Assert that section reloc_count
+	field equals the new rel_count field.
+	(elf_link_input_bfd): When doing a relocateable link, use the new
+	rel_count field rather than the reloc_count field.
+	(elf_reloc_link_order): Likewise.
+	(elf_finish_pointer_linker_section): Likewise.
+
+	Based on patch from H.J. Lu <hjl@gnu.org>:
+	* elflink.h (elf_merge_symbol): Permit a non-weak definition in a
+	shared library to override a weak definition in a regular object.
+
 Tue Jul  6 10:23:39 1999  Jeffrey A Law  (law@cygnus.com)
 
         * libhppa.h: Revert July 2, 1999 patch.
