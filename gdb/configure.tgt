@@ -167,6 +167,10 @@ mips64*vr5000*-*-elf*)	gdb_target=vr5000 ;;
 mips64*vr5900*el-*-elf*)	gdb_target=vr5000el ;;
 mips64*vr5900*-*-elf*)	gdb_target=vr5000 ;;
 # end-sanitize-r5900
+# start-sanitize-r3900
+mips*r3900*el*-elf*)	gdb_target=r3900el ;;
+mips*r3900*-elf*)	gdb_target=r3900 ;;
+# end-sanitize-r3900
 mips64*el-*-elf*)	gdb_target=embedl64 ;;
 mips64*-*-elf*)		gdb_target=embed64 ;;
 mips*el-*-ecoff*)	gdb_target=embedl ;;

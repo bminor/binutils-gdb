@@ -1,3 +1,9 @@
+start-sanitize-r3900
+Tue Jun  3 16:24:46 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+	* configure.tgt: add mipsr3900-elf target
+	* config/mips/r3900.mt r3900l.mt tm-r3900.h tm-r3900l.h: ditto
+end-sanitize-r3900
+
 start-sanitize-gdbtk
 Tue Jun  3 15:46:51 1997  Tom Tromey  <tromey@cygnus.com>
 
