@@ -1,3 +1,8 @@
+2002-01-02  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Reformat error
+	messages to ease translation into other languages.
+
 2001-12-31  Jakub Jelinek  <jakub@redhat.com>
 
 	* elflink.h (elf_bfd_final_link): Check if dynobj is not NULL

@@ -1,5 +1,5 @@
 /* 32-bit ELF support for ARM
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -2242,26 +2242,34 @@ Error: %s compiled for APCS-%d, whereas %s is compiled for APCS-%d"),
 
       if ((in_flags & EF_ARM_APCS_FLOAT) != (out_flags & EF_ARM_APCS_FLOAT))
 	{
-	  char *s1 = in_flags  & EF_ARM_APCS_FLOAT ? _("float") : _("integer");
-	  char *s2 = out_flags & EF_ARM_APCS_FLOAT ? _("float") : _("integer");
+	  if (in_flags & EF_ARM_APCS_FLOAT)
+	    _bfd_error_handler (_("\
+Error: %s passes floats in FP registers, whereas %s passes them in integer registers"),
+				bfd_archive_filename (ibfd),
+				bfd_get_filename (obfd));
+	  else
+	    _bfd_error_handler (_("\
+Error: %s passes floats in integer registers, whereas %s passes them in FP registers"),
+				bfd_archive_filename (ibfd),
+				bfd_get_filename (obfd));
 
-	  _bfd_error_handler (_("\
-Error: %s passes floats in %s registers, whereas %s passes them in %s registers"),
-			      bfd_archive_filename (ibfd), s1,
-			      bfd_get_filename (obfd), s2);
 	  flags_compatible = false;
 	}
 
 #ifdef EF_ARM_SOFT_FLOAT
       if ((in_flags & EF_ARM_SOFT_FLOAT) != (out_flags & EF_ARM_SOFT_FLOAT))
 	{
-	  char *s1 = in_flags  & EF_ARM_SOFT_FLOAT ? _("soft") : _("hard");
-	  char *s2 = out_flags & EF_ARM_SOFT_FLOAT ? _("soft") : _("hard");
+	  if (in_flags & EF_ARM_SOFT_FLOAT)
+	    _bfd_error_handler (_ ("\
+Error: %s uses software FP, whereas %s uses hardware FP"),
+				bfd_archive_filename (ibfd),
+				bfd_get_filename (obfd));
+	  else
+	    _bfd_error_handler (_ ("\
+Error: %s uses hardware FP, whereas %s uses software FP"),
+				bfd_archive_filename (ibfd),
+				bfd_get_filename (obfd));
 
-	  _bfd_error_handler (_ ("\
-Error: %s uses %s floating point, whereas %s uses %s floating point"),
-			      bfd_archive_filename (ibfd), s1,
-			      bfd_get_filename (obfd), s2);
 	  flags_compatible = false;
 	}
 #endif
