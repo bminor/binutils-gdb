@@ -1,3 +1,15 @@
+Thu Aug 15 12:33:29 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in: Update editing of autoconf vars to reflect
+	Jul 18 configure.in change.
+	* mpw-make.sed: Update editing of include pathnames to be
+	more general, add @DASH_C_FLAG@ to explicit compile rule edit.
+
+Thu Aug 15 10:35:13 1996  Richard Henderson  <rth@tamu.edu>
+
+	* elf64-alpha.c (elf64_alpha_output_extsym): The section from
+	which to offset to get the .plt entry address is ".plt".
+
 Thu Aug 15 16:40:30 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* reloc.c: (BFD_RELOC_ARM_THUMB_ADD, BFD_RELOC_ARM_THUMB_IMM,

@@ -4,13 +4,16 @@
 /HDEFINES/s/@HDEFINES@//
 /TDEFINES/s/@TDEFINES@//
 
-/INCDIR=/s/"{srcdir}":/"{topsrcdir}"/
-/^CSEARCH = .*$/s/$/ -i "{INCDIR}":mpw: -i ::extra-include:/
+# Fix pathnames to include directories.
+/^INCDIR = /s/^INCDIR = .*$/INCDIR = "{topsrcdir}"include/
+/^CSEARCH = /s/$/ -i "{INCDIR}":mpw: -i ::extra-include:/
 
-/WORDSIZE/s/^WORDSIZE = /#WORDSIZE = /
-/BFD_MACHINES/s/^BFD_MACHINES = /#BFD_MACHINES = /
-/BFD_BACKENDS/s/^BFD_BACKENDS = /#BFD_BACKENDS = /
-/TDEFAULTS/s/^TDEFAULTS = /#TDEFAULTS = /
+# Comment out setting of vars, configure script will add these itself.
+/^WORDSIZE =/s/^/#/
+# /^ALL_BACKENDS/s/^/#/
+/^BFD_BACKENDS/s/^/#/
+/^BFD_MACHINES/s/^/#/
+/^TDEFAULTS/s/^/#/
 
 # Remove extra, useless, "all".
 /^all \\Option-f _oldest/,/^$/d
@@ -59,11 +62,11 @@
 # MPW Make doesn't know about $<.
 /"{o}"targets.c.o \\Option-f "{s}"targets.c Makefile/,/^$/c\
 "{o}"targets.c.o \\Option-f "{s}"targets.c Makefile\
-	{CC} {ALL_CFLAGS} {TDEFAULTS} "{s}"targets.c -o "{o}"targets.c.o
+	{CC} @DASH_C_FLAG@ {ALL_CFLAGS} {TDEFAULTS} "{s}"targets.c -o "{o}"targets.c.o
 
 /"{o}"archures.c.o \\Option-f "{s}"archures.c Makefile/,/^$/c\
 "{o}"archures.c.o \\Option-f "{s}"archures.c Makefile\
-	{CC} {ALL_CFLAGS} {TDEFAULTS} "{s}"archures.c -o "{o}"archures.c.o
+	{CC} @DASH_C_FLAG@ {ALL_CFLAGS} {TDEFAULTS} "{s}"archures.c -o "{o}"archures.c.o
 
 # Remove the .h rebuilding rules, we don't currently have a doc subdir,
 # or a way to build the prototype-hacking tool that's in it.

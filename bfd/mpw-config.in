@@ -54,7 +54,11 @@ MoveIfChange "{o}"config.new "{o}"config.h
 # We can only handle 32-bit targets right now.
 
 sed -e 's/@WORDSIZE@/32/' \Option-d
+    -e 's/@wordsize@/32/' \Option-d
     -e "s/@VERSION@/`Catenate {srcdir}VERSION`/" \Option-d
+    -e 's/@BFD_HOST_64_BIT_DEFINED@/0/' \Option-d
+    -e 's/@BFD_HOST_64_BIT@//' \Option-d
+    -e 's/@BFD_HOST_U_64_BIT@//' \Option-d
     -e 's/@BFD_HOST_64BIT_LONG@/0/' \Option-d
     "{srcdir}"bfd-in2.h >"{o}"bfd.h-new
 
