@@ -139,7 +139,8 @@ asection *input_section;
 	    return(bfd_reloc_dangerous);
 	}
 	/* sym_ptr_ptr = r_symndx, in coff_slurp_reloc_table() */
-	value = (unsigned int)reloc_entry->addend; /* r_symndx */
+	value = 0;/*EXTRACT_HWORD(insn) << 16;*/
+	value += (unsigned int)reloc_entry->addend; /* r_symndx */
 	value += part1_consth_value;
 	value >>= 16;
 	insn = INSERT_HWORD(insn,value);
@@ -232,7 +233,7 @@ bfd_target a29kcoff_big_vec =
   '/',				/* ar_pad_char */
   15,				/* ar_max_namelen */
 
-     3,				/* minimum section alignment */
+     2,				/* minimum section alignment */
 _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* data */
 _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
 
