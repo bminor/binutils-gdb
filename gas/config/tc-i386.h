@@ -1,5 +1,5 @@
-/* i386.h -- Header file for i386.c
-   Copyright (C) 1989, Free Software Foundation.
+/* tc-i386.h -- Header file for tc-i386.c
+   Copyright (C) 1989, 1992 Free Software Foundation.
    
    This file is part of GAS, the GNU Assembler.
    
@@ -22,16 +22,19 @@
 #define AOUT_MACHTYPE 100
 #define REVERSE_SORT_RELOCS
 
-#define tc_crawl_symbol_chain(a)	; /* not used */
-#define tc_headers_hook(a)		; /* not used */
-    
+#define NO_LISTING
+
+#define tc_aout_pre_write_hook(x)	{;} /* not used */
+#define tc_crawl_symbol_chain(a)	{;} /* not used */
+#define tc_headers_hook(a)		{;} /* not used */
+
 #define MAX_OPERANDS 3		/* max operands per insn */
 #define MAX_PREFIXES 4		/* max prefixes per opcode */
 #define MAX_IMMEDIATE_OPERANDS 2 /* max immediates per insn */
 #define MAX_MEMORY_OPERANDS 2	/* max memory ref per insn
 				 * lcall uses 2
 				 */
-    /* we define the syntax here (modulo base,index,scale syntax) */
+/* we define the syntax here (modulo base,index,scale syntax) */
 #define REGISTER_PREFIX '%'
 #define IMMEDIATE_PREFIX '$'
 #define ABSOLUTE_PREFIX '*'
@@ -39,18 +42,18 @@
     
 #define TWO_BYTE_OPCODE_ESCAPE 0x0f
     
-    /* register numbers */
+/* register numbers */
 #define EBP_REG_NUM 5
 #define ESP_REG_NUM 4
     
-    /* modrm_byte.regmem for twobyte escape */
+/* modrm_byte.regmem for twobyte escape */
 #define ESCAPE_TO_TWO_BYTE_ADDRESSING ESP_REG_NUM
-    /* index_base_byte.index for no index register addressing */
+/* index_base_byte.index for no index register addressing */
 #define NO_INDEX_REGISTER ESP_REG_NUM
-    /* index_base_byte.base for no base register addressing */
+/* index_base_byte.base for no base register addressing */
 #define NO_BASE_REGISTER EBP_REG_NUM
     
-    /* these are the att as opcode suffixes, making movl --> mov, for example */
+ /* these are the att as opcode suffixes, making movl --> mov, for example */
 #define DWORD_OPCODE_SUFFIX 'l'
 #define WORD_OPCODE_SUFFIX  'w'
 #define BYTE_OPCODE_SUFFIX  'b'
@@ -115,53 +118,32 @@
 #define Abs32 0x20000000
 #define Abs (Abs8|Abs16|Abs32)
 
-#define MODE_FROM_DISP_SIZE(t) \
-    ((t&(Disp8)) ? 1 : \
-     ((t&(Disp32)) ? 2 : 0))
-
 #define Byte (Reg8|Imm8|Imm8S)
 #define Word (Reg16|Imm16)
 #define DWord (Reg32|Imm32)
 
-/* convert opcode suffix ('b' 'w' 'l' typically) into type specifyer */
-#define OPCODE_SUFFIX_TO_TYPE(s)                 \
-    (s == BYTE_OPCODE_SUFFIX ? Byte : \
-     (s == WORD_OPCODE_SUFFIX ? Word : DWord))
-
-#define FITS_IN_SIGNED_BYTE(num) ((num) >= -128 && (num) <= 127)
-#define FITS_IN_UNSIGNED_BYTE(num) ((num) >= 0 && (num) <= 255)
-#define FITS_IN_UNSIGNED_WORD(num) ((num) >= 0 && (num) <= 65535)
-#define FITS_IN_SIGNED_WORD(num) ((num) >= -32768 && (num) <= 32767)
-
 #define SMALLEST_DISP_TYPE(num) \
-    FITS_IN_SIGNED_BYTE(num) ? (Disp8|Disp32|Abs8|Abs32) : (Disp32|Abs32)
-
-#define SMALLEST_IMM_TYPE(num) \
-    (num == 1) ? (Imm1|Imm8|Imm8S|Imm16|Imm32): \
-    FITS_IN_SIGNED_BYTE(num) ? (Imm8S|Imm8|Imm16|Imm32) : \
-    FITS_IN_UNSIGNED_BYTE(num) ? (Imm8|Imm16|Imm32): \
-    (FITS_IN_SIGNED_WORD(num)||FITS_IN_UNSIGNED_WORD(num)) ? (Imm16|Imm32) : \
-    (Imm32)
+    fits_in_signed_byte(num) ? (Disp8|Disp32|Abs8|Abs32) : (Disp32|Abs32)
 
 typedef struct {
 	/* instruction name sans width suffix ("mov" for movl insns) */
-	char          *name;
+	char *name;
 	
 	/* how many operands */
-	unsigned int    operands;
+	unsigned int operands;
 	
 	/* base_opcode is the fundamental opcode byte with a optional prefix(es). */
-	unsigned int    base_opcode;
+	unsigned int base_opcode;
 	
 	/* extension_opcode is the 3 bit extension for group <n> insns.
 	   If this template has no extension opcode (the usual case) use None */
-	unsigned char    extension_opcode;
-#define None 0xff		/* If no extension_opcode is possible. */
+	unsigned char extension_opcode;
+#define None 0xff /* If no extension_opcode is possible. */
 	
 	/* the bits in opcode_modifier are used to generate the final opcode from
 	   the base_opcode.  These bits also are used to detect alternate forms of
 	   the same instruction */
-	unsigned int    opcode_modifier;
+	unsigned int opcode_modifier;
 	
 	/* opcode_modifier bits: */
 #define W        0x1	/* set if operands are words or dwords */
@@ -211,26 +193,26 @@ typedef struct {
   END.
   */
 typedef struct {
-	template      *start;
-	template      *end;
+	template *start;
+	template *end;
 } templates;
 
 /* these are for register name --> number & type hash lookup */
 typedef struct {
-	char * reg_name;
-	unsigned int   reg_type;
-	unsigned int   reg_num;
+	char *reg_name;
+	unsigned int reg_type;
+	unsigned int reg_num;
 } reg_entry;
 
 typedef struct {
-	char * seg_name;
-	unsigned int   seg_prefix;
+	char *seg_name;
+	unsigned int seg_prefix;
 } seg_entry;
 
 /* these are for prefix name --> prefix code hash lookup */
 typedef struct {
-	char * prefix_name;
-	unsigned char  prefix_code;
+	char *prefix_name;
+	unsigned char prefix_code;
 } prefix_entry;
 
 /* 386 operand encoding bytes:  see 386 book for details of this. */

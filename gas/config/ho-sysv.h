@@ -19,8 +19,6 @@
 
 #define HO_USG
 
-#define bcopy(from,to,n) memcpy((to),(from),(n))
-#define bzero(s,n) memset((s),0,(n))
 #define setbuffer(stream, buf, size) setvbuf((stream), (buf), _IOLBF, (size))
 
 extern int free();

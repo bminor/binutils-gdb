@@ -23,6 +23,8 @@
 
 #define M_GENERIC 1
 
+#define HAVE_STRERROR
+
 extern int free();
 
 /* end of ho-generic.h */

@@ -17,8 +17,6 @@
 #along with GNU GAS; see the file COPYING.  If not, write to
 #the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
-# $Id$
-
 # The targets for external use include:
 # all, doc, proto, install, uninstall, includes, TAGS,
 # clean, cleanconfig, realclean, stage1, stage2, stage3, stage4.
@@ -59,57 +57,6 @@ BISON = bison
 MAKEINFO = makeinfo
 RANLIB = ranlib
 
-# Version of ar to use when compiling gnulib. 
-OLDAR = ar
-
-# Additional system libraries to link with.
-CLIB=
-
-# Specify the rule for actually making gnulib.
-GNULIB = gnulib.portable
-
-# Specify the rule for actually making gnulib2.
-GNULIB2 = gnulib2.portable
-
-# List of extra C and assembler files to add to gnulib.
-# Assembler files should have names ending in `.asm'.
-LIBFUNCS_EXTRA = 
-
-# Program to convert libraries.
-LIBCONVERT = 
-
-# Control whether header files are installed.
-INSTALL_HEADERS=install-headers
-
-# Change this to empty to prevent installing limits.h
-LIMITS_H = limits.h
-
-# Directory to link to, when using the target `maketest'.
-DIR = ../gcc
-
-# For better debugging under COFF, define SEPARATE_AUX_OUTPUT in config.h
-# and define the following variable as `aux-output2.c' in make-...
-AUX_OUTPUT2 =
-
-# Flags to use when cross-building GCC.
-# Prefix to apply to names of object files when using them
-# to run on the machine we are compiling on.
-HOST_PREFIX=
-# Prefix to apply to names of object files when compiling them
-# to run on the machine we are compiling on.
-# The default for this variable is chosen to keep these rules 
-# out of the way of the other rules for compiling the same source files.
-HOST_PREFIX_1=loser-
-HOST_CC=$(CC)
-HOST_CFLAGS=$(ALL_CFLAGS)
-HOST_LDFLAGS=$(LDFLAGS)
-HOST_CPPFLAGS=$(CPPFLAGS)
-
-# Choose the real default target.
-ALL=as.new
-
-# End of variables for you to override.
-
 # Lists of files for various purposes.
 
 REAL_SOURCES = \
@@ -128,8 +75,10 @@ REAL_SOURCES = \
 	$(srcdir)/input-file.c \
 	$(srcdir)/input-scrub.c \
 	$(srcdir)/messages.c \
+	$(srcdir)/obstack.c \
 	$(srcdir)/output-file.c \
 	$(srcdir)/read.c \
+	$(srcdir)/strerror.c \
 	$(srcdir)/strstr.c \
 	$(srcdir)/subsegs.c \
 	$(srcdir)/symbols.c \
@@ -155,8 +104,10 @@ REAL_HEADERS = \
 	$(srcdir)/frags.h \
 	$(srcdir)/hash.h \
 	$(srcdir)/input-file.h \
+	$(srcdir)/listing.h \
 	$(srcdir)/tc.h \
 	$(srcdir)/obj.h \
+	$(srcdir)/obstack.h \
 	$(srcdir)/read.h \
 	$(srcdir)/struc-symbol.h \
 	$(srcdir)/subsegs.h \
@@ -194,8 +145,10 @@ OBJS = \
 	input-file.o \
 	input-scrub.o \
 	messages.o \
+	obstack.o \
 	output-file.o \
 	read.o \
+	strerror.o \
 	strstr.o \
 	subsegs.o \
 	symbols.o \
@@ -207,41 +160,19 @@ OBJS = \
 
 #### host, target, and site specific Makefile frags come in here.
 
-# Definition of `all' is here so that new rules inserted by sed
-# do not specify the default target.
-# The real definition is under `all.internal'.
-
-all: $(ALL)
+all: as.new
 info:
 install-info:
-
-fake-as: force
-	- rm -f ./as.new
-	cp /bin/as ./fake-as
-	cp ./fake-as ./as.new
 
 # Now figure out from those variables how to compile and link.
 
 # This is the variable actually used when we compile.
 ALL_CFLAGS = -g $(INTERNAL_CFLAGS) $(CFLAGS) $(HDEFINES) $(TDEFINES)
 
-# Even if ALLOCA is set, don't use it if compiling with GCC.
-USE_ALLOCA= `if [ x"${CC}" = x"${OLDCC}" ] ; then echo ${ALLOCA}; else true; fi`
-USE_HOST_ALLOCA= `if [ x"${CC}" = x"${OLDCC}" ] ; then echo ${HOST_PREFIX}${ALLOCA}; else true; fi`
-
-# Likewise, for use in the tools that must run on this machine
-# even if we are cross-building GCC.
-# We don't use USE_ALLOCA because backquote expansion doesn't work in deps.
-HOST_LIBDEPS= $(HOST_PREFIX)$(OBSTACK) $(HOST_PREFIX)$(ALLOCA) $(HOST_PREFIX)$(MALLOC)
-
 # How to link with both our special library facilities
 # and the system's installed libraries.
 
-LIBS = $(LOCAL_LOADLIBES) $(CLIB) $(unsubdir)/../libiberty$(subdir)/libiberty.a
-
-# Likewise, for use in the tools that must run on this machine
-# even if we are cross-building GCC.
-HOST_LIBS = $(HOST_PREFIX)$(OBSTACK) $(USE_HOST_ALLOCA) $(HOST_PREFIX)$(MALLOC) $(CLIB) 
+LIBS = $(LOCAL_LOADLIBES) $(CLIB) # ../libiberty/libiberty.a
 
 # Specify the directories to be searched for header files.
 # Both . and srcdir are used, in that order,
@@ -257,35 +188,17 @@ SUBDIR_INCLUDES = -I.. -I$(srcdir) -I$(srcdir)/config
 # This tells GNU make version 3 not to export all the variables
 # defined in this file into the environment.
 .NOEXPORT:
-
+
 # Files to be copied away after each stage in building.
-STAGE_GCC=gcc
 STAGESTUFF = *.o as.new
 
-# The files that "belong" in CONFIG_H are deliberately omitted
-# because having them there would not be useful in actual practice.
-# All they would do is cause complete recompilation every time
-# one of the machine description files is edited.
-# That may or may not be what one wants to do.
-# If it is, rm *.o is an easy way to do it.
-# CONFIG_H = config.h tm.h
-CONFIG_H =
-
 as.new: $(OBJS) $(LIBDEPS)
 	-mv -f as.new as.old
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
 
-objdump:
-
-all.internal: native
-# This is what is made with the host's compiler if making a cross assembler.
-native: config.status as
-
 config.status:
 	@echo You must configure gas.  Look at the INSTALL file for details.
 	@false
-
-compilations: ${OBJS}
 
 # Compiling object files from source files.
 
@@ -380,26 +293,6 @@ targ-cpu.o : targ-cpu.c targ-env.h obj-format.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h \
   symbols.h tc.h obj.h $(TARG_CPU_DEPENDENTS)
 
-
-# Compile the libraries to be used by gen*.
-# If we are not cross-building, gen* use the same .o's that cc1 will use,
-# and HOST_PREFIX_1 is `foobar', just to ensure these rules don't conflict
-# with the rules for rtl.o, alloca.o, etc.
-$(HOST_PREFIX_1)alloca.o: alloca.c
-	rm -f $(HOST_PREFIX)alloca.c
-	cp $(srcdir)/alloca.c $(HOST_PREFIX)alloca.c
-	$(HOST_CC) -c $(HOST_CFLAGS) $(HOST_CPPFLAGS) $(INCLUDES) $(HOST_PREFIX)alloca.c
-
-$(HOST_PREFIX_1)obstack.o: obstack.c
-	rm -f $(HOST_PREFIX)obstack.c
-	cp $(srcdir)/obstack.c $(HOST_PREFIX)obstack.c
-	$(HOST_CC) -c $(HOST_CFLAGS) $(HOST_CPPFLAGS) $(INCLUDES) $(HOST_PREFIX)obstack.c
-
-$(HOST_PREFIX_1)malloc.o: malloc.c
-	rm -f $(HOST_PREFIX)malloc.c
-	cp $(srcdir)/malloc.c $(HOST_PREFIX)malloc.c
-	$(HOST_CC) -c $(HOST_CFLAGS) $(HOST_CPPFLAGS) $(INCLUDES) $(HOST_PREFIX)malloc.c
-
 # Remake the info files.
 
 doc: $(srcdir)/as.info
@@ -407,37 +300,26 @@ doc: $(srcdir)/as.info
 $(srcdir)/as.info: $(srcdir)/doc/as.texinfo
 	(cd doc; make as.info; mv as.info $srcdir)	
 
-
-# Deletion of files made during compilation.
-# There are three levels of this: `clean', `cleanconfig' and `realclean'.
-# `clean' deletes what you want to delete ordinarily to save space.
-# This is most, but not all, of the files made by compilation.
-# `cleanconfig' also deletes everything depending
-# on the choice of config files.
-# `realclean' also deletes everything that could be regenerated automatically.
-
 clean:
-	-rm -f $(STAGESTUFF) $(HOST_PREFIX_1)alloca.c $(HOST_PREFIX_1)malloc.c $(HOST_PREFIX_1)obstack.c  core
+	-rm -f $(STAGESTUFF) core
 
 # Like clean but also delete the links made to configure gas.
-cleanconfig: clean
-	-rm -f config.status Makefile host.h targ-env.h
-	-rm -f targ-cpu.h targ-cpu.c
-	-rm -f obj-format.h obj-format.c
-	-rm -f atof-targ.c
+distclean: clean
+	-rm -f config.status Makefile host.h targ-env.h targ-cpu.h \
+		targ-cpu.c obj-format.h obj-format.c atof-targ.c \
+		gas.aux gas.cps gas.fns gas.info gas.kys gas.pgs
+		gas.tps gas.vrs TAGS gas.info* gas.?? gas.??s gas.log \
+		gas.toc gas.*aux *.dvi
 
-# Get rid of every file that's generated from some other file (except INSTALL).
-realclean: cleanconfig
-	-rm -f gas.aux gas.cps gas.fns gas.info gas.kys gas.pgs gas.tps gas.vrs
-	-rm -f TAGS 
-	-rm -f gas.info* gas.?? gas.??s gas.log gas.toc gas.*aux
-	-rm -f *.dvi
-
 # Entry points `install', `includes' and `uninstall'.
 
 # Copy the files into directories where they will be run.
-install: $(ALL)
-	$(INSTALL_PROGRAM) $(ALL) $(bindir)/as
+install:
+	if [ "$(host_alias)" = "$(target_alias)" ] ; then \
+		$(INSTALL_PROGRAM) as.new $(bindir)/as ; \
+	else \
+		$(INSTALL_PROGRAM) as.new $(bindir)/as-$(target_alias) ; \
+	fi
 
 # Create the installation directory.
 install-dir:
@@ -446,50 +328,33 @@ install-dir:
 	-mkdir $(libdir)/gcc/$(target)
 	-mkdir $(libdir)/gcc/$(target)/$(version)
 
-# Install the compiler executables built during cross compilation.
-install-cross: native install-dir
-	-if [ -f cc1 ] ; then $(INSTALL_PROGRAM) cc1 $(libsubdir)/cc1; else true; fi
-	-if [ -f cc1plus ] ; then $(INSTALL_PROGRAM) cc1plus $(libsubdir)/cc1plus; else true; fi
-	$(INSTALL_PROGRAM) cpp $(libsubdir)/cpp
-	./gcc -dumpspecs > $(libsubdir)/specs
-	$(INSTALL_PROGRAM) gcc $(bindir)/gcc
-
-# Install the man pages.
-install-man: install-dir $(srcdir)/gcc.1 protoize.1 unprotoize.1
-	$(INSTALL_FILE) $(srcdir)/gcc.1 $(mandir)/gcc.$(manext)
-	chmod a-x $(mandir)/gcc.$(manext)
-	$(INSTALL_FILE) $(srcdir)/protoize.1 $(mandir)/protoize.$(manext)
-	chmod a-x $(mandir)/protoize.$(manext)
-	$(INSTALL_FILE) $(srcdir)/unprotoize.1 $(mandir)/unprotoize.$(manext)
-	chmod a-x $(mandir)/unprotoize.$(manext)
-
 # Cancel installation by deleting the installed files.
 uninstall:
 	-rm -rf $(libsubdir)
 	-rm -rf $(bindir)/as
 	-rm -rf $(mandir)/gas.$(manext)
 
-
+
 # These exist for maintenance purposes.
 
 tags TAGS: force
 	etags $(REAL_SOURCES) $(REAL_HEADERS) $(srcdir)/README $(srcdir)/Makefile $(srcdir)/config/*.[hc]
 	
-bootstrap: $(ALL) force
+bootstrap: as.new force
 	$(MAKE) stage1
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(ALL)
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new
 	$(MAKE) stage2
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(ALL)
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new
 	$(MAKE) comparison against=stage2
 
 bootstrap2: force
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(ALL)
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new
 	$(MAKE) stage2
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(ALL)
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new
 	$(MAKE) comparison against=stage2
 
 bootstrap3: force
-	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= $(ALL)
+	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as.new
 	$(MAKE) comparison against=stage2
 
 # Copy the object files from a particular stage into a subdirectory.
@@ -525,40 +390,8 @@ de-stage3: force
 	- (cd stage3 ; rm as ; mv -f * ..)
 	- rmdir stage3
 
-# Copy just the executable files from a particular stage into a subdirectory,
-# and delete the object files.  Use this if you're just verifying a version
-# that is pretty sure to work, and you are short of disk space.
-risky-stage1: force
-	-mkdir stage1
-	-mv cc1 cpp cccp gcc stage1
-	-rm -f stage1/gnulib
-	-cp gnulib stage1 && $(RANLIB) stage1/gnulib
-	-make clean
-
-risky-stage2: force
-	-mkdir stage2
-	-mv cc1 cpp cccp gcc stage2
-	-rm -f stage2/gnulib
-	-cp gnulib stage2 && $(RANLIB) stage2/gnulib
-	-make clean
-
-risky-stage3: force
-	-mkdir stage3
-	-mv cc1 cpp cccp gcc stage3
-	-rm -f stage3/gnulib
-	-cp gnulib stage3 && $(RANLIB) stage3/gnulib
-	-make clean
-
-risky-stage4: force
-	-mkdir stage4
-	-mv cc1 cpp cccp gcc stage4
-	-rm -f stage4/gnulib
-	-cp gnulib stage4 && $(RANLIB) stage4/gnulib
-	-make clean
-
 #In GNU Make, ignore whether `stage*' exists.
 .PHONY: stage1 stage2 stage3 stage4 clean realclean TAGS bootstrap
-.PHONY: risky-stage1 risky-stage2 risky-stage3 risky-stage4
 
 force:
 

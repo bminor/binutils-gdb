@@ -597,7 +597,7 @@ symbolS *symbolP;
 	/* Additional information */
 	symbolP->sy_symbol.ost_flags = 0;
 	/* Auxiliary entries */
-	bzero((char*)&symbolP->sy_symbol.ost_auxent[0], AUXESZ);
+	memset((char*) &symbolP->sy_symbol.ost_auxent[0], '\0', AUXESZ);
 	
 #ifdef STRIP_UNDERSCORE
 	/* Remove leading underscore at the beginning of the symbol.
@@ -749,7 +749,7 @@ static void
 	SKIP_WHITESPACES();
 	
 	def_symbol_in_progress = (symbolS *) obstack_alloc(&notes, sizeof(*def_symbol_in_progress));
-	bzero(def_symbol_in_progress, sizeof(*def_symbol_in_progress));
+	memset(def_symbol_in_progress, '\0', sizeof(*def_symbol_in_progress));
 	
 	symbol_name = input_line_pointer;
 	name_end = get_symbol_end();
@@ -1269,8 +1269,8 @@ static unsigned int DEFUN_VOID(yank_symbols)
 					    }		/* make it at least 1 */
 					    
 					    /* Clobber possible stale .dim information. */
-					    bzero(symbolP->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_ary.x_dimen,
-						  sizeof(symbolP->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_ary.x_dimen));
+					    memset(symbolP->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_ary.x_dimen,
+						  '\0', sizeof(symbolP->sy_symbol.ost_auxent[0].x_sym.x_fcnary.x_ary.x_dimen));
 				    }
 				    /* The C_FCN doesn't need any additional information.
 				       I don't even know if this is needed for sdb. But the
@@ -1947,7 +1947,7 @@ static void
 			S_SET_OFFSET(symbolP, symbolP->sy_name_offset);
 			S_SET_ZEROES(symbolP, 0);
 		} else {
-			bzero(symbolP->sy_symbol.ost_entry.n_name, SYMNMLEN);
+			memset(symbolP->sy_symbol.ost_entry.n_name, '\0', SYMNMLEN);
 			strncpy(symbolP->sy_symbol.ost_entry.n_name, temp, SYMNMLEN);
 		}
 		where =  symbol_to_chars(abfd, where, symbolP);

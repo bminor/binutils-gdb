@@ -86,9 +86,9 @@ long offset;		/* X_add_number. */
 int pcrel;		/* TRUE if PC-relative relocation. */
 enum reloc_type	r_type;	/* Relocation type */
 {
-	register fixS *	fixP;
+	fixS *fixP;
 	
-	fixP = (fixS *)obstack_alloc(&notes,sizeof(fixS));
+	fixP = (fixS *) obstack_alloc(&notes, sizeof(fixS));
 	
 	fixP->fx_frag	= frag;
 	fixP->fx_where	= where;
@@ -100,10 +100,10 @@ enum reloc_type	r_type;	/* Relocation type */
 	fixP->fx_r_type	= r_type;
 	
 	/* JF these 'cuz of the NS32K stuff */
-	fixP->fx_im_disp	= 0;
+	fixP->fx_im_disp = 0;
 	fixP->fx_pcrel_adjust = 0;
-	fixP->fx_bsr	= 0;
-	fixP->fx_bit_fixP	= 0;
+	fixP->fx_bsr = 0;
+	fixP->fx_bit_fixP = 0;
 	
 	/* usually, we want relocs sorted numerically, but while
 	   comparing to older versions of gas that have relocs
@@ -128,8 +128,9 @@ enum reloc_type	r_type;	/* Relocation type */
 #endif /* REVERSE_SORT_RELOCS */
 	
 	fixP->fx_callj = 0;
-	return fixP;
-}
+	return(fixP);
+} /* fix_new() */
+
 #ifndef BFD
 void write_object_file() 
 {
@@ -143,10 +144,6 @@ void write_object_file()
 	/* register fixS *		fixP; JF unused */
 	unsigned int data_siz;
 	
-#ifdef DONTDEF
-	void gdb_emit();
-	void gdb_end();
-#endif
 	long object_file_size;
 	
 #ifdef	VMS
@@ -565,14 +562,6 @@ void write_object_file()
 		/* Write the data to the file */
 		output_file_append(the_object_file,object_file_size,out_file_name);
 #endif
-		
-#ifdef DONTDEF
-		if (flagseen['G'])		/* GDB symbol file to be appended? */
-		    {
-			    gdb_emit (out_file_name);
-			    gdb_end ();
-		    }
-#endif /* DONTDEF */
 		
 		output_file_close(out_file_name);
 	} /* non vms output */
@@ -1138,8 +1127,8 @@ char	**charPP;
 char	*fromP;
 unsigned long length;
 {
-	if (length) {		/* Don't trust bcopy() of 0 chars. */
-		bcopy(fromP, *charPP, (int) length);
+	if (length) {		/* Don't trust memcpy() of 0 chars. */
+		memcpy(*charPP, fromP, (int) length);
 		*charPP += length;
 	}
 }

@@ -45,7 +45,7 @@
 #define LISTING_LHS_WIDTH 3   /* 3 word on the first line */
 #define LISTING_LHS_WIDTH_SECOND 3  /* One word on the second line */
 #define LISTING_LHS_CONT_LINES 4   /* And 4 lines max */
-#define LISTING_HEADER "TANDEM ST-2000 68K GAS "
+#define LISTING_HEADER "68K GAS "
 
 /* Copied from write.c */
 #define M68K_AIM_KLUDGE(aim, this_state,this_type) \

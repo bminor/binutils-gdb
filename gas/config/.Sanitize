@@ -32,9 +32,7 @@ atof-ieee.c
 atof-vax.c
 coff.gnu.h
 cplus-dem.c
-ho-a29k.h
 ho-ansi.h
-ho-cygnus.h
 ho-decstation.h
 ho-generic.h
 ho-hpux.h
@@ -46,8 +44,6 @@ ho-sun4.h
 ho-sunos.h
 ho-sysv.h
 ho-vax.h
-mh-a29k
-mh-cygnus
 mh-i386
 mt-ebmon29k
 mt-h8300
@@ -128,7 +124,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.14  1992/02/13 10:13:24  rich
+# Revision 1.15  1992/02/17 15:53:46  rich
+# fighting bitrot in a major way
+#
+# Revision 1.14  1992/02/13  10:13:24  rich
 # clean up Sanitize for gas
 #
 # Revision 1.13  1992/02/11  00:51:52  sac

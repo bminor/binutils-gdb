@@ -464,7 +464,7 @@ char *str;
 	argsStart = s;
 	for (;;) {
 		opcode = insn->match;
-		bzero(&the_insn, sizeof(the_insn));
+		memset(&the_insn, '\0', sizeof(the_insn));
 		the_insn.reloc = NO_RELOC;
 		
 		/*
@@ -630,13 +630,13 @@ char *str;
 				break;
 				
 			case '5':   /* 5 bit immediate in src1 */
-				bzero(&the_insn, sizeof(the_insn));
+				memset(&the_insn, '\0', sizeof(the_insn));
 				if ( !getExpression(s)) {
 					s = expr_end;
 					if (the_insn.exp.X_add_number & ~0x1f)
 					    as_bad("5-bit immediate too large");
 					opcode |= (the_insn.exp.X_add_number & 0x1f) << 11;
-					bzero(&the_insn, sizeof(the_insn));
+					memset(&the_insn, '\0', sizeof(the_insn));
 					the_insn.reloc = NO_RELOC;
 					continue;
 				}
@@ -1019,7 +1019,7 @@ struct relocation_info *ri_p, ri;
 	/* Also easy */
 	md_number_to_chars(&the_bytes[8], ri.r_addend, sizeof(ri.r_addend));
 	/* now put it back where you found it, Junior... */
-	bcopy (the_bytes, (char *)ri_p, sizeof(*ri_p));
+	memcpy((char *) ri_p, the_bytes, sizeof(*ri_p));
 #endif
 }
 
@@ -1122,7 +1122,7 @@ relax_addressT segment_address_in_file;
 	extern char *next_object_file_charP;
 	long add_number;
 	
-	bzero((char *) &ri, sizeof(ri));
+	memset((char *) &ri, '\0', sizeof(ri));
 	for (; fixP; fixP = fixP->fx_next) {
 		
 		if (fixP->fx_r_type & ~0x3f) {

@@ -437,7 +437,7 @@ char *str;
 	}
 	argsStart = s;
 	opcode = insn->opcode;
-	bzero(&the_insn, sizeof(the_insn));
+	memset(&the_insn, '\0', sizeof(the_insn));
 	the_insn.reloc = NO_RELOC;
 	
 	/*
@@ -900,20 +900,21 @@ register fragS *fragP;
 /* should never be called for 29k */
 void md_create_long_jump(ptr, from_addr, to_addr, frag, to_symbol)
 char	*ptr;
-long	from_addr,
-    to_addr;
+long	from_addr;
+long    to_addr;
 fragS	*frag;
 symbolS	*to_symbol;
 {
 	as_fatal("sparc_create_long_jump\n");
 }
 
-/* should never be called for sparc */
+/* should never be called for a29k */
 int md_estimate_size_before_relax(fragP, segtype)
 register fragS *fragP;
 segT segtype;
 {
 	as_fatal("sparc_estimate_size_before_relax\n");
+	return(0);
 }
 
 #if 0
@@ -986,24 +987,22 @@ char *where;
 fixS *fixP;
 relax_addressT segment_address_in_file;
 {
-	long r_index;
+	long r_symbolnum;
 	
 	know(fixP->fx_r_type < NO_RELOC);
 	know(fixP->fx_addsy != NULL);
 	
-	r_index = (S_IS_DEFINED(fixP->fx_addsy)
-		   ? S_GET_TYPE(fixP->fx_addsy)
-		   : fixP->fx_addsy->sy_number);
-	
-	/* this is easy */
 	md_number_to_chars(where,
 			   fixP->fx_frag->fr_address + fixP->fx_where - segment_address_in_file,
 			   4);
 	
-	/* now the fun stuff */
-	where[4] = (r_index >> 16) & 0x0ff;
-	where[5] = (r_index >> 8) & 0x0ff;
-	where[6] = r_index & 0x0ff;
+	r_symbolnum = (S_IS_DEFINED(fixP->fx_addsy)
+		       ? S_GET_TYPE(fixP->fx_addsy)
+		       : fixP->fx_addsy->sy_number);
+	
+	where[4] = (r_symbolnum >> 16) & 0x0ff;
+	where[5] = (r_symbolnum >> 8) & 0x0ff;
+	where[6] = r_symbolnum & 0x0ff;
 	where[7] = (((!S_IS_DEFINED(fixP->fx_addsy)) << 7)  & 0x80) | (0 & 0x60) | (fixP->fx_r_type & 0x1F);
 	/* Also easy */
 	md_number_to_chars(&where[8], fixP->fx_addnumber, 4);

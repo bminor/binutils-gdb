@@ -19,11 +19,6 @@
 
 #include "as.h"
 
-#ifdef USG
-#define bzero(s,n) memset(s,0,n)
-#define bcopy(from,to,n) memcpy(to,from,n)
-#endif
-
 /*
  *			bignum_copy ()
  *
@@ -31,7 +26,7 @@
  * If the output is shorter than the input, copy lower-order littlenums.
  * Return 0 or the number of significant littlenums dropped.
  * Assumes littlenum arrays are densely packed: no unused chars between
- * the littlenums. Uses bcopy() to move littlenums, and wants to
+ * the littlenums. Uses memcpy() to move littlenums, and wants to
  * know length (in chars) of the input bignum.
  */
 
@@ -49,7 +44,7 @@ register int out_length; /* in sizeof(littlenum)s */
 		LITTLENUM_TYPE *p; /* -> most significant (non-zero) input
 				      littlenum. */ 
 		
-		bcopy((char *) in, (char *) out,
+		memcpy((void *) out, (void *) in,
 		      out_length << LITTLENUM_SHIFT); 
 		for (p = in + in_length - 1; p >= in; --p) {
 			if (* p) break;
@@ -60,12 +55,12 @@ register int out_length; /* in sizeof(littlenum)s */
 			significant_littlenums_dropped = 0;
 		}
 	} else {
-		bcopy((char *) in, (char *) out,
+		memcpy((char *) out, (char *) in,
 		      in_length << LITTLENUM_SHIFT);
 
 		if (out_length > in_length) {
-			bzero((char *) (out + out_length),
-			      (out_length - in_length) << LITTLENUM_SHIFT);
+			memset((char *) (out + out_length),
+			      '\0', (out_length - in_length) << LITTLENUM_SHIFT);
 		}
 
 		significant_littlenums_dropped = 0;

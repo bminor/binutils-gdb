@@ -516,7 +516,7 @@ static void sparc_ip(str)
     argsStart = s;
     for (;;) {
 	opcode = insn->match;
-	bzero(&the_insn, sizeof(the_insn));
+	memset(&the_insn, '\0', sizeof(the_insn));
 	the_insn.reloc = NO_RELOC;
 	
 	/*
@@ -1645,7 +1645,7 @@ void emit_sparc_reloc(fixP, segment_address_in_file)
     extern char *next_object_file_charP;
     /*    long add_number; */
     
-    bzero((char *) &ri, sizeof(ri));
+    memset((char *) &ri, '\0', sizeof(ri));
     for (; fixP; fixP = fixP->fx_next) {
 	
 	if (fixP->fx_r_type >= NO_RELOC) {

@@ -25,6 +25,5 @@
 
 #define sys_nerr	_sys_nerr
 #define sys_errlist	_sys_errlist
-#define bzero(b,l)	(memset((b),0,(l)))
 
 /* end of ho-ansi.h */

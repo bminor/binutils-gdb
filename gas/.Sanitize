@@ -37,6 +37,10 @@ README
 README-quirks
 README-vms-dbg
 README.coff
+obstack.h
+obstack.c
+bit_fix.h
+strerror.c
 README.rich
 a.out.gnu.h
 app.c
@@ -101,7 +105,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.8  1992/02/14 00:21:34  pesch
+# Revision 1.9  1992/02/17 15:52:52  rich
+# fighting bitrot in a major way
+#
+# Revision 1.8  1992/02/14  00:21:34  pesch
 # It's OK to keep the doc subdirectory, really.
 #
 # Revision 1.7  1992/02/13  10:13:19  rich

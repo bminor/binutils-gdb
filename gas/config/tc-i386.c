@@ -34,46 +34,47 @@
 
 typedef struct {
 	/* TM holds the template for the insn were currently assembling. */
-	template          tm;
+	template tm;
 	/* SUFFIX holds the opcode suffix (e.g. 'l' for 'movl') if given. */
-	char              suffix;
+	char suffix;
 	/* Operands are coded with OPERANDS, TYPES, DISPS, IMMS, and REGS. */
 	
 	/* OPERANDS gives the number of given operands. */
-	unsigned int               operands;
+	unsigned int operands;
 	
 	/* REG_OPERANDS, DISP_OPERANDS, MEM_OPERANDS, IMM_OPERANDS give the number of
 	   given register, displacement, memory operands and immediate operands. */
-	unsigned int               reg_operands, disp_operands, mem_operands, imm_operands;
+	unsigned int reg_operands, disp_operands, mem_operands, imm_operands;
 	
 	/* TYPES [i] is the type (see above #defines) which tells us how to
 	   search through DISPS [i] & IMMS [i] & REGS [i] for the required
 	   operand. */
-	unsigned int               types [MAX_OPERANDS];
+	unsigned int types[MAX_OPERANDS];
 	
 	/* Displacements (if given) for each operand. */
-	expressionS       * disps [MAX_OPERANDS];
+	expressionS *disps[MAX_OPERANDS];
 	
 	/* Immediate operands (if given) for each operand. */
-	expressionS       * imms [MAX_OPERANDS];
+	expressionS *imms[MAX_OPERANDS];
 	
 	/* Register operands (if given) for each operand. */
-	reg_entry         * regs [MAX_OPERANDS];
+	reg_entry *regs[MAX_OPERANDS];
 	
 	/* BASE_REG, INDEX_REG, and LOG2_SCALE_FACTOR are used to encode
 	   the base index byte below.  */
-	reg_entry         * base_reg;
-	reg_entry         * index_reg;
-	unsigned int                log2_scale_factor;
+	reg_entry *base_reg;
+	reg_entry *index_reg;
+	unsigned int log2_scale_factor;
 	
 	/* SEG gives the seg_entry of this insn.  It is equal to zero unless
 	   an explicit segment override is given. */
-	seg_entry         * seg;	/* segment for memory operands (if given) */
+	const seg_entry *seg;	/* segment for memory operands (if given) */
 	
 	/* PREFIX holds all the given prefix opcodes (usually null).
 	   PREFIXES is the size of PREFIX. */
-	char              prefix [MAX_PREFIXES];
-	unsigned int              prefixes;
+ /* richfix: really unsigned? */
+	unsigned char prefix[MAX_PREFIXES];
+	unsigned int prefixes;
 	
 	/* RM and IB are the modrm byte and the base index byte where the addressing
 	   modes of this insn are encoded. */
@@ -203,14 +204,28 @@ const relax_typeS md_relax_table[] = {
 #if __STDC__ == 1
 
 static char *output_invalid(int c);
+static int fits_in_signed_byte(long num);
+static int fits_in_signed_word(long num);
+static int fits_in_unsigned_byte(long num);
+static int fits_in_unsigned_word(long num);
 static int i386_operand(char *operand_string);
+static int smallest_imm_type(long num);
 static reg_entry *parse_register(char *reg_string);
+static unsigned long mode_from_disp_size(unsigned long t);
+static unsigned long opcode_suffix_to_type(unsigned long s);
 
 #else /* not __STDC__ */
 
 static char *output_invalid();
+static int fits_in_signed_byte();
+static int fits_in_signed_word();
+static int fits_in_unsigned_byte();
+static int fits_in_unsigned_word();
 static int i386_operand();
+static int smallest_imm_type();
 static reg_entry *parse_register();
+static unsigned long mode_from_disp_size();
+static unsigned long opcode_suffix_to_type();
 
 #endif /* not __STDC__ */
 
@@ -317,11 +332,11 @@ void md_begin ()
 	{  
 		register unsigned int c;
 		
-		bzero (opcode_chars, sizeof(opcode_chars));
-		bzero (operand_chars, sizeof(operand_chars));
-		bzero (space_chars, sizeof(space_chars));
-		bzero (identifier_chars, sizeof(identifier_chars));
-		bzero (digit_chars, sizeof(digit_chars));
+		memset(opcode_chars, '\0', sizeof(opcode_chars));
+		memset(operand_chars, '\0', sizeof(operand_chars));
+		memset(space_chars, '\0', sizeof(space_chars));
+		memset(identifier_chars, '\0', sizeof(identifier_chars));
+		memset(digit_chars, '\0', sizeof(digit_chars));
 		
 		for (c = 0; c < 256; c++) {
 			if (islower(c) || isdigit(c)) {
@@ -473,15 +488,15 @@ void md_assemble (line)
 char *line;
 {
 	/* Holds temlate once we've found it. */
-	register template * t;
+	register template *t;
 	
 	/* Possible templates for current insn */
 	templates *current_templates = (templates *) 0;
 	
 	/* Initialize globals. */
-	bzero (&i, sizeof(i));
-	bzero (disp_expressions, sizeof(disp_expressions));
-	bzero (im_expressions, sizeof(im_expressions));
+	memset(&i, '\0', sizeof(i));
+	memset(disp_expressions, '\0', sizeof(disp_expressions));
+	memset(im_expressions, '\0', sizeof(im_expressions));
 	save_stack_p = save_stack;	/* reset stack pointer */
 	
 	/* Fist parse an opcode & call i386_operand for the operands.
@@ -638,12 +653,12 @@ char *line;
 				
 				/* now *l must be either ',' or END_OF_INSN */
 				if (*l == ',') {
-					if (*++l == END_OF_INSN) {		/* just skip it, if it's \n complain */
+					if (*++l == END_OF_INSN) { /* just skip it, if it's \n complain */
 						goto expecting_operand_after_comma;
 					}
 					expecting_operand = 1;
 				}
-			} while (*l != END_OF_INSN);		/* until we get end of insn */
+			} while (*l != END_OF_INSN); /* until we get end of insn */
 		}
 	}
 	
@@ -676,7 +691,7 @@ char *line;
 	     ( ((t0 & t1 & (Reg)) == 0 && (m0 & m1 & (Reg)) == 0) || \
 	      ((t0 & t1) & (m0 & m1) & (Reg)) \
 	      ) : 1)
-		{
+	      {
 			register unsigned int overlap0, overlap1;
 			expressionS * exp;
 			unsigned int overlap2;
@@ -746,7 +761,7 @@ char *line;
 			}
 			
 			/* Copy the template we found (we may change it!). */
-			bcopy (t, &i.tm, sizeof (template));
+			memcpy(&i.tm, t, sizeof(template));
 			t = &i.tm;			/* alter new copy of template */
 			
 			/* If there's no opcode suffix we try to invent one based on register
@@ -917,7 +932,7 @@ char *line;
 							if (i.base_reg == esp && ! i.index_reg) {
 								/* <disp>(%esp) becomes two byte modrm with no index register. */
 								i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
-								i.rm.mode = MODE_FROM_DISP_SIZE (i.types[o]);
+								i.rm.mode = mode_from_disp_size(i.types[o]);
 								i.bi.base = ESP_REG_NUM;
 								i.bi.index = NO_INDEX_REGISTER;
 								i.bi.scale = 0;		/* Must be zero! */
@@ -929,7 +944,7 @@ char *line;
 									/* fake_zero_displacement code does not set this. */
 									i.types[o] |= Disp8;
 								}
-								i.rm.mode = MODE_FROM_DISP_SIZE (i.types[o]);
+								i.rm.mode = mode_from_disp_size(i.types[o]);
 								i.rm.regmem = EBP_REG_NUM;
 							} else if (! i.base_reg && (i.types[o] & BaseIndex)) {
 								/* There are three cases here.
@@ -961,7 +976,7 @@ char *line;
 							} else {
 								/* It's not a special case; rev'em up. */
 								i.rm.regmem = i.base_reg->reg_num;
-								i.rm.mode = MODE_FROM_DISP_SIZE (i.types[o]);
+								i.rm.mode = mode_from_disp_size(i.types[o]);
 								if (i.index_reg) {
 									i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
 									i.bi.base = i.base_reg->reg_num;
@@ -970,7 +985,7 @@ char *line;
 									if (i.base_reg == ebp && i.disp_operands == 0) { /* pace */
 										fake_zero_displacement = 1;
 										i.types[o] |= Disp8;
-										i.rm.mode = MODE_FROM_DISP_SIZE (i.types[o]);
+										i.rm.mode = mode_from_disp_size(i.types[o]);
 									}
 								}
 							}
@@ -987,15 +1002,15 @@ char *line;
 							
 							/* Select the correct segment for the memory operand. */
 							if (i.seg) {
-								const unsigned int seg_index;
-								const seg_entry * default_seg;
+								unsigned int seg_index;
+								const seg_entry *default_seg;
 								
 								if (i.rm.regmem == ESCAPE_TO_TWO_BYTE_ADDRESSING) {
 									seg_index = (i.rm.mode<<3) | i.bi.base;
-									default_seg = two_byte_segment_defaults [seg_index];
+									default_seg = two_byte_segment_defaults[seg_index];
 								} else {
 									seg_index = (i.rm.mode<<3) | i.rm.regmem;
-									default_seg = one_byte_segment_defaults [seg_index];
+									default_seg = one_byte_segment_defaults[seg_index];
 								}
 								/* If the specified segment is not the default, use an
 								   opcode prefix to select it */
@@ -1054,12 +1069,12 @@ char *line;
 			
 			switch (i.disps[0]->X_seg) {
 			case SEG_ABSOLUTE:
-				if (FITS_IN_SIGNED_BYTE (n)) {
+				if (fits_in_signed_byte(n)) {
 					p = frag_more (2);
 					p[0] = t->base_opcode;
 					p[1] = n;
 #if 0 /* leave out 16 bit jumps - pace */
-				} else if (FITS_IN_SIGNED_WORD (n)) {
+				} else if (fits_in_signed_word(n)) {
 					p = frag_more (4);
 					p[0] = WORD_PREFIX_OPCODE;
 					p[1] = t->base_opcode;
@@ -1106,7 +1121,7 @@ char *line;
 			int size = (t->opcode_modifier & JumpByte) ? 1 : 4;
 			int n = i.disps[0]->X_add_number;
 			
-			if (FITS_IN_UNSIGNED_BYTE(t->base_opcode)) {
+			if (fits_in_unsigned_byte(t->base_opcode)) {
 				FRAG_APPEND_1_CHAR (t->base_opcode);
 			} else {
 				p = frag_more (2);	/* opcode can be at most two bytes */
@@ -1119,7 +1134,7 @@ char *line;
 			switch (i.disps[0]->X_seg) {
 			case SEG_ABSOLUTE:
 				md_number_to_chars (p, n, size);
-				if (size == 1 && ! FITS_IN_SIGNED_BYTE (n)) {
+				if (size == 1 && ! fits_in_signed_byte(n)) {
 					as_bad("loop/jecx only takes byte displacement; %d shortened to %d",
 					       n, *p);
 				}
@@ -1145,7 +1160,7 @@ char *line;
 			md_number_to_chars (p + 5, i.imms[0]->X_add_number, 2);
 		} else {
 			/* Output normal instructions here. */
-			register char *q;
+			unsigned char *q;
 			
 			/* First the prefix bytes. */
 			for (q = i.prefix; q < i.prefix + i.prefixes; q++) {
@@ -1154,9 +1169,9 @@ char *line;
 			}
 			
 			/* Now the opcode; be careful about word order here! */
-			if (FITS_IN_UNSIGNED_BYTE(t->base_opcode)) {
+			if (fits_in_unsigned_byte(t->base_opcode)) {
 				FRAG_APPEND_1_CHAR (t->base_opcode);
-			} else if (FITS_IN_UNSIGNED_WORD(t->base_opcode)) {
+			} else if (fits_in_unsigned_word(t->base_opcode)) {
 				p =  frag_more (2);
 				/* put out high byte first: can't use md_number_to_chars! */
 				*p++ = (t->base_opcode >> 8) & 0xff;
@@ -1271,8 +1286,8 @@ char *operand_string;
 	char * end_of_operand_string = operand_string + strlen(operand_string);
 	
 	/* Start and end of displacement string expression (if found). */
-	char * displacement_string_start = 0;
-	char * displacement_string_end;
+	char *displacement_string_start = NULL;
+	char *displacement_string_end = NULL;
 	
 	/* We check for an absolute prefix (differentiating,
 	   for example, 'jmp pc_relative_label' from 'jmp *absolute_label'. */
@@ -1283,8 +1298,8 @@ char *operand_string;
 	
 	/* Check if operand is a register. */
 	if (*op_string == REGISTER_PREFIX) {
-		register reg_entry * r;
-		if (! (r = parse_register (op_string))) {
+		register reg_entry *r;
+		if (!(r = parse_register (op_string))) {
 			as_bad("bad register name ('%s')", op_string);
 			return 0;
 		}
@@ -1323,19 +1338,22 @@ char *operand_string;
 		i.regs[this_operand] = r;
 		i.reg_operands++;
 	} else if (*op_string == IMMEDIATE_PREFIX) { /* ... or an immediate */
-		char * save_input_line_pointer;
-		register expressionS *exp;
-		segT exp_seg;
+		char *save_input_line_pointer;
+		segT exp_seg = SEG_GOOF;
+		expressionS *exp;
+
 		if (i.imm_operands == MAX_IMMEDIATE_OPERANDS) {
 			as_bad("only 1 or 2 immediate operands are allowed");
 			return 0;
 		}
+
 		exp = &im_expressions[i.imm_operands++];
-		i.imms [this_operand] = exp;
+		i.imms[this_operand] = exp;
 		save_input_line_pointer = input_line_pointer;
 		input_line_pointer = ++op_string;        /* must advance op_string! */
-		exp_seg = expression (exp);
+		exp_seg = expression(exp);
 		input_line_pointer = save_input_line_pointer;
+
 		switch (exp_seg) {
 		case SEG_ABSENT:    /* missing or bad expr becomes absolute 0 */
 			as_bad("missing or invalid immediate expression '%s' taken as 0",
@@ -1347,7 +1365,7 @@ char *operand_string;
 			i.types[this_operand] |= Imm;
 			break;
 		case SEG_ABSOLUTE:
-			i.types[this_operand] |= SMALLEST_IMM_TYPE (exp->X_add_number);
+			i.types[this_operand] |= smallest_imm_type(exp->X_add_number);
 			break;
 		case SEG_TEXT: case SEG_DATA: case SEG_BSS: case SEG_UNKNOWN:
 			i.types[this_operand] |= Imm32; /* this is an address ==> 32bit */
@@ -1511,16 +1529,16 @@ char *operand_string;
 		   assuming displacement_string_start and displacement_string_end
 		   are meaningful. */
 		if (displacement_string_start) {
-			register expressionS * exp;
-			segT exp_seg;
-			char * save_input_line_pointer;
+			register expressionS *exp;
+			segT exp_seg = SEG_GOOF;
+			char *save_input_line_pointer;
 			exp = &disp_expressions[i.disp_operands];
 			i.disps [this_operand] = exp;
 			i.disp_operands++;
 			save_input_line_pointer = input_line_pointer;
 			input_line_pointer = displacement_string_start;
 			END_STRING_AND_SAVE (displacement_string_end);
-			exp_seg = expression (exp);
+			exp_seg = expression(exp);
 			if(*input_line_pointer)
 			    as_bad("Ignoring junk '%s' after expression",input_line_pointer);
 			RESTORE_END_STRING (displacement_string_end);
@@ -1641,10 +1659,11 @@ void
 object_headers *headers;
 register fragS *	fragP;
 {
-	register unsigned char * opcode;
-	unsigned char * where_to_put_displacement;
-	unsigned int target_address, opcode_address;
-	unsigned int extension;
+	register unsigned char *opcode;
+	unsigned char *where_to_put_displacement = NULL;
+	unsigned int target_address;
+	unsigned int opcode_address;
+	unsigned int extension = 0;
 	int displacement_from_opcode_start;
 	
 	opcode = (unsigned char *) fragP -> fr_opcode;
@@ -1860,26 +1879,24 @@ relax_addressT segment_address_in_file;
 	 */
 	
 	static unsigned char nbytes_r_length [] = { 42, 0, 1, 42, 2 };
-	long r_index;
+	long r_symbolnum;
 	
 	know(fixP->fx_addsy != NULL);
 	
-	r_index = (S_IS_DEFINED(fixP->fx_addsy)
-		   ? S_GET_TYPE(fixP->fx_addsy)
-		   : fixP->fx_addsy->sy_number);
-	
-	/* this is easy */
 	md_number_to_chars(where,
 			   fixP->fx_frag->fr_address + fixP->fx_where - segment_address_in_file,
 			   4);
 	
-	/* now the fun stuff */
-	where[4] = r_index  & 0x0ff;
-	where[5] = (r_index >> 8) & 0x0ff;
-	where[6] = (r_index >> 16) & 0x0ff;
+	r_symbolnum = (S_IS_DEFINED(fixP->fx_addsy)
+		       ? S_GET_TYPE(fixP->fx_addsy)
+		       : fixP->fx_addsy->sy_number);
+	
+	where[6] = (r_symbolnum >> 16) & 0x0ff;
+	where[5] = (r_symbolnum >> 8) & 0x0ff;
+	where[4] = r_symbolnum & 0x0ff;
 	where[7] = ((((!S_IS_DEFINED(fixP->fx_addsy)) << 3)  & 0x08)
 		    | ((nbytes_r_length[fixP->fx_size] << 1) & 0x06)
-		    | ((fixP->fx_pcrel << 0) & 0x01) & 0x0f);
+		    | (((fixP->fx_pcrel << 0) & 0x01) & 0x0f));
 	
 	return;
 } /* tc_aout_fix_to_chars() */
@@ -2005,6 +2022,66 @@ fixS *fixP;
 {
 	return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 }
+
+ /* these were macros, but I don't trust macros that eval their
+    arguments more than once.  Besides, gcc can static inline them.
+    xoxorich.  */
+
+static unsigned long mode_from_disp_size(t)
+unsigned long t;
+{
+	return((t & (Disp8))
+	       ? 1
+	       : ((t & (Disp32)) ? 2 : 0));
+} /* mode_from_disp_size() */
+
+/* convert opcode suffix ('b' 'w' 'l' typically) into type specifyer */
+
+static unsigned long opcode_suffix_to_type(s)
+unsigned long s;
+{
+	return(s == BYTE_OPCODE_SUFFIX
+	       ? Byte : (s == WORD_OPCODE_SUFFIX
+			 ? Word : DWord));
+} /* opcode_suffix_to_type() */
+
+static int fits_in_signed_byte(num)
+long num;
+{
+	return((num >= -128) && (num <= 127));
+} /* fits_in_signed_byte() */
+
+static int fits_in_unsigned_byte(num)
+long num;
+{
+	return((num & 0xff) == num);
+} /* fits_in_unsigned_byte() */
+
+static int fits_in_unsigned_word(num)
+long num;
+{
+	return((num & 0xffff) == num);
+} /* fits_in_unsigned_word() */
+
+static int fits_in_signed_word(num)
+long num;
+{
+	return((-32768 <= num) && (num <= 32767));
+} /* fits_in_signed_word() */
+
+static int smallest_imm_type(num)
+long num;
+{
+	return((num == 1)
+	       ? (Imm1|Imm8|Imm8S|Imm16|Imm32)
+	       : (fits_in_signed_byte(num)
+		  ? (Imm8S|Imm8|Imm16|Imm32)
+		  : (fits_in_unsigned_byte(num)
+		     ? (Imm8|Imm16|Imm32)
+		     : ((fits_in_signed_word(num) || fits_in_unsigned_word(num))
+			? (Imm16|Imm32)
+			: (Imm32)))));
+} /* smallest_imm_type() */
 
 /*
  * Local Variables:

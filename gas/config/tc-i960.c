@@ -1,5 +1,5 @@
-/* i960.c - All the i80960-specific stuff
-   Copyright (C) 1989, 1990, 1991 Free Software Foundation, Inc.
+/* tc-i960.c - All the i80960-specific stuff
+   Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
    
    This file is part of GAS.
    
@@ -496,7 +496,7 @@ char *textP;	/* Source text of instruction */
 	
 	
 	/* Parse instruction into opcode and operands */
-	bzero(args, sizeof(args));
+	memset(args, '\0', sizeof(args));
 	n_ops = i_scan(textP, args);
 	if (n_ops == -1){
 		return;		/* Error message already issued */
@@ -1471,7 +1471,7 @@ struct i960_opcode *oP; /* Pointer to description of instruction */
 	expressionS expr;	/* Parsed expression */
 	fixS *fixP;		/*->description of deferred address fixup */
 	
-	bzero(&instr, sizeof(memS));
+	memset(&instr, '\0', sizeof(memS));
 	instr.opcode = oP->opcode;
 	
 	/* Process operands. */
@@ -2551,7 +2551,7 @@ relax_addressT segment_address_in_file;
 	symbolS *symbolP;
 	
 	/* JF this is for paranoia */
-	bzero((char *)&ri, sizeof(ri));
+	memset((char *)&ri, '\0', sizeof(ri));
 	
 	know((symbolP = fixP->fx_addsy) != 0);
 	

@@ -36,7 +36,7 @@
 #include "as.h"
 
 #include "obstack.h"
-#include "listing.h"
+
 char *input_line_pointer;	/*->next char of source file to parse. */
 
 
@@ -171,11 +171,6 @@ void
 struct hash_control *
     po_hash = NULL;			/* use before set up: NULL->address error */
 
-#ifdef DONTDEF
-void	s_gdbline(),	s_gdblinetab();
-void	s_gdbbeg(),	s_gdbblock(),	s_gdbend(),	s_gdbsym();
-#endif
-
 static const pseudo_typeS
     potable[] =
 {
@@ -190,7 +185,11 @@ static const pseudo_typeS
 	/* dim */
 	{ "double",	float_cons,	'd'	},
 	/* dsect */
+#ifdef NO_LISTING
+	{ "eject",	s_ignore,	0	},	/* Formfeed listing */
+#else
 	{ "eject",	listing_eject,	0	},	/* Formfeed listing */
+#endif /* NO_LISTING */
 	{ "else",	s_else,		0	},
 	{ "end",	s_end,		0	},
 	{ "endif",	s_endif,	0	},
@@ -203,14 +202,6 @@ static const pseudo_typeS
 	{ "file",	s_app_file,	0	},
 	{ "fill",	s_fill,		0	},
 	{ "float",	float_cons,	'f'	},
-#ifdef DONTDEF
-	{ "gdbbeg",	s_gdbbeg,	0	},
-	{ "gdbblock",	s_gdbblock,	0	},
-	{ "gdbend",	s_gdbend,	0	},
-	{ "gdbsym",	s_gdbsym,	0	},
-	{ "gdbline",	s_gdbline,	0	},
-	{ "gdblinetab",s_gdblinetab,	0	},
-#endif
 	{ "global",	s_globl,	0	},
 	{ "globl",	s_globl,	0	},
 	{ "hword",	cons,		2	},
@@ -223,17 +214,34 @@ static const pseudo_typeS
 	{ "include",	s_include,	0	},
 	{ "int",	cons,		4	},
 	{ "lcomm",	s_lcomm,	0	},
+#ifdef NO_LISTING
+	{ "lflags",	s_ignore,	0	},	/* Listing flags */
+	{ "list",	s_ignore,	1	},	/* Turn listing on */
+#else
 	{ "lflags",	listing_flags,	0	},	/* Listing flags */
 	{ "list",	listing_list,	1	},	/* Turn listing on */
+#endif /* NO_LISTING */
 	{ "long",	cons,		4	},
 	{ "lsym",	s_lsym,		0	},
+#ifdef NO_LISTING
+	{ "nolist",	s_ignore,	0	},	/* Turn listing off */
+#else
 	{ "nolist",	listing_list,	0	},	/* Turn listing off */
+#endif /* NO_LISTING */
 	{ "octa",	big_cons,	16	},
 	{ "org",	s_org,		0	},
-	{ "psize", listing_psize,     0       },   /* set paper size */
+#ifdef NO_LISTING
+	{ "psize",	s_ignore,	0       },   /* set paper size */
+#else
+	{ "psize",	listing_psize,	0       },   /* set paper size */
+#endif /* NO_LISTING */
 	/* print */
 	{ "quad",	big_cons,	8	},
+#ifdef NO_LISTING
+	{ "sbttl",	s_ignore,	1	},	/* Subtitle of listing */
+#else
 	{ "sbttl",	listing_title,	1	},	/* Subtitle of listing */
+#endif /* NO_LISTING */
 	/* scl */
 	/* sect */
 	{ "set",	s_set,		0	},
@@ -243,7 +251,11 @@ static const pseudo_typeS
 	{ "space",	s_space,	0	},
 	/* tag */
 	{ "text",	s_text,		0	},
+#ifdef NO_LISTING
+	{ "title",	s_ignore,	0	},	/* Listing title */
+#else
 	{ "title",	listing_title,	0	},	/* Listing title */
+#endif /* NO_LISTING */
 	/* type */
 	/* use */
 	/* val */
@@ -321,12 +333,6 @@ char *name;
 	register int temp;
 	/* register struct frag * fragP; JF unused */	/* a frag we just made */
 	pseudo_typeS	*pop;
-#ifdef DONTDEF
-	void gdb_block_beg();
-	void gdb_block_position();
-	void gdb_block_end();
-	void gdb_symbols_fixup();
-#endif
 	
 	buffer = input_scrub_new_file(name);
 	
@@ -504,7 +510,7 @@ char *name;
 					   guarentee it. . . */
 					tmp_len=buffer_limit-s;
 					tmp_buf=xmalloc(tmp_len);
-					bcopy(s,tmp_buf,tmp_len);
+					memcpy(tmp_buf, s, tmp_len);
 					do {
 						new_tmp = input_scrub_next_buffer(&buffer);
 						if (!new_tmp)
@@ -519,7 +525,7 @@ char *name;
 						    num=buffer_limit-buffer;
 						
 						tmp_buf = xrealloc(tmp_buf, tmp_len + num);
-						bcopy(buffer,tmp_buf+tmp_len,num);
+						memcpy(tmp_buf + tmp_len, buffer, num);
 						tmp_len+=num;
 					} while(!ends);
 					
@@ -773,7 +779,7 @@ void s_fill() {
 	temp_fill = get_absolute_expression ();
 	if (temp_size && !need_pass_2) {
 		p = frag_var(rs_fill, (int)temp_size, (int)temp_size, (relax_substateT)0, (symbolS *)0, temp_repeat, (char *)0);
-		bzero (p, (int)temp_size);
+		memset(p, '\0', (int) temp_size);
 		/*
 		 * The magic number BSD_FILL_SIZE_CROCK_4 is from BSD 4.2 VAX flavoured AS.
 		 * The following bizzare behaviour is to be compatible with above.
@@ -790,118 +796,6 @@ void s_fill() {
 	}
 	demand_empty_rest_of_line();
 }
-
-#ifdef DONTDEF
-void
-    s_gdbbeg()
-{
-	register int temp;
-	
-	temp = get_absolute_expression ();
-	if (temp < 0)
-	    as_warn("Block number <0. Ignored.");
-	else if (flagseen ['G'])
-	    gdb_block_beg ((long) temp, frag_now, (long)(obstack_next_free(& frags) - frag_now->fr_literal));
-	demand_empty_rest_of_line ();
-}
-
-void
-    s_gdbblock()
-{
-	register int position;
-	int temp;
-	
-	if (get_absolute_expression_and_terminator (&temp) != ',') {
-		as_bad("expected comma before position in .gdbblock");
-		--input_line_pointer;
-		ignore_rest_of_line ();
-		return;
-	}
-	position = get_absolute_expression ();
-	if (flagseen ['G'])
-	    gdb_block_position ((long) temp, (long) position);
-	demand_empty_rest_of_line ();
-}
-
-void
-    s_gdbend()
-{
-	register int temp;
-	
-	temp = get_absolute_expression ();
-	if (temp < 0)
-	    as_warn("Block number <0. Ignored.");
-	else if (flagseen ['G'])
-	    gdb_block_end ((long) temp, frag_now, (long)(obstack_next_free(& frags) - frag_now->fr_literal));
-	demand_empty_rest_of_line ();
-}
-
-void
-    s_gdbsym()
-{
-	register char *name,
-	*p;
-	register char c;
-	register symbolS *	symbolP;
-	register int temp;
-	
-	name = input_line_pointer;
-	c = get_symbol_end();
-	p = input_line_pointer;
-	symbolP = symbol_find_or_make(name);
-	*p = c;
-	SKIP_WHITESPACE();
-	if (* input_line_pointer != ',') {
-		as_bad("Expected comma after name");
-		ignore_rest_of_line();
-		return;
-	}
-	input_line_pointer ++;
-	if ((temp = get_absolute_expression ()) < 0) {
-		as_bad("Bad GDB symbol file offset (%d.) <0! Ignored.", temp);
-		ignore_rest_of_line();
-		return;
-	}
-	if (flagseen ['G'])
-	    gdb_symbols_fixup (symbolP, (long)temp);
-	demand_empty_rest_of_line ();
-}
-
-void
-    s_gdbline()
-{
-	int file_number,
-	lineno;
-	
-	if (get_absolute_expression_and_terminator(&file_number) != ',') {
-		as_bad("expected comman after filenum in .gdbline");
-		ignore_rest_of_line();
-		return;
-	}
-	lineno=get_absolute_expression();
-	if (flagseen['G'])
-	    gdb_line(file_number,lineno);
-	demand_empty_rest_of_line();
-}
-
-
-void
-    s_gdblinetab()
-{
-	int file_number,
-	offset;
-	
-	if (get_absolute_expression_and_terminator(&file_number) != ',') {
-		as_bad("expected comma after filenum in .gdblinetab");
-		ignore_rest_of_line();
-		return;
-	}
-	offset=get_absolute_expression();
-	if (flagseen['G'])
-	    gdb_line_tab(file_number,offset);
-	demand_empty_rest_of_line();
-}
-#endif
 
 void s_globl() {
 	register char *name;
@@ -1645,13 +1539,13 @@ register unsigned int nbytes;	/* 1=.byte, 2=.word, 4=.long */
 			default:
 			case SEG_UNKNOWN:
 #ifdef TC_NS32K
-				fix_new_ns32k (frag_now, p - frag_now->fr_literal, nbytes,
-					       exp . X_add_symbol, exp . X_subtract_symbol,
-					       exp . X_add_number, 0, 0, 2, 0, 0);
+				fix_new_ns32k(frag_now, p - frag_now->fr_literal, nbytes,
+					       exp.X_add_symbol, exp.X_subtract_symbol,
+					       exp.X_add_number, 0, 0, 2, 0, 0);
 #else
-				fix_new (frag_now, p - frag_now->fr_literal, nbytes,
-					 exp . X_add_symbol, exp . X_subtract_symbol,
-					 exp . X_add_number, 0, RELOC_32);
+				fix_new(frag_now, p - frag_now->fr_literal, nbytes,
+					 exp.X_add_symbol, exp.X_subtract_symbol,
+					 exp.X_add_number, 0, RELOC_32);
 #endif /* TC_NS32K */
 				break;
 			} /* switch(segment) */
@@ -1784,11 +1678,11 @@ register int nbytes;
 		    if (! need_pass_2)
 			{
 				p = frag_more (nbytes);
-				bcopy (bignum_low, p, (int)nbytes);
+				memcpy(p, bignum_low, (int) nbytes);
 			}
 		    /* C contains character after number. */
 		    SKIP_WHITESPACE();
-		    c = * input_line_pointer;
+		    c = *input_line_pointer;
 		    /* C contains 1st non-blank character after number. */
 	    }
 	demand_empty_rest_of_line();
@@ -1854,45 +1748,40 @@ register int float_type;	/* 'f':.ffloat ... 'F':.float ... */
 	    {
 		    c = ',';			/* Do loop. */
 	    }
-	while (c == ',')
-	    {
-		    /* input_line_pointer->1st char of a flonum (we hope!). */
-		    SKIP_WHITESPACE();
-		    /* Skip any 0{letter} that may be present. Don't even check if the
-		     * letter is legal. Someone may invent a "z" format and this routine
-		     * has no use for such information. Lusers beware: you get
-		     * diagnostics if your input is ill-conditioned.
-		     */
-		    
-		    if (input_line_pointer[0]=='0' && isalpha(input_line_pointer[1]))
-			input_line_pointer+=2;
-		    
-		    err = md_atof (float_type, temp, &length);
-		    know(length <=  MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT);
-		    know(length > 0);
-		    if (* err)
-			{
-				as_bad("Bad floating literal: %s", err);
-				ignore_rest_of_line();
-				/* Input_line_pointer->just after end-of-line. */
-				c = 0;		/* Break out of loop. */
+	while (c == ',') {
+		/* input_line_pointer->1st char of a flonum (we hope!). */
+		SKIP_WHITESPACE();
+		/* Skip any 0{letter} that may be present. Don't even check if the
+		 * letter is legal. Someone may invent a "z" format and this routine
+		 * has no use for such information. Lusers beware: you get
+		 * diagnostics if your input is ill-conditioned.
+		 */
+		
+		if (input_line_pointer[0]=='0' && isalpha(input_line_pointer[1]))
+		    input_line_pointer+=2;
+		
+		err = md_atof (float_type, temp, &length);
+		know(length <=  MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT);
+		know(length > 0);
+		if (* err) {
+			as_bad("Bad floating literal: %s", err);
+			ignore_rest_of_line();
+			/* Input_line_pointer->just after end-of-line. */
+			c = 0;		/* Break out of loop. */
+		} else {
+			if (! need_pass_2) {
+				p = frag_more (length);
+				memcpy(p, temp, length);
 			}
-		    else
-			{
-				if (! need_pass_2)
-				    {
-					    p = frag_more (length);
-					    bcopy (temp, p, length);
-				    }
-				SKIP_WHITESPACE();
-				c = * input_line_pointer ++;
-				/* C contains 1st non-white character after number. */
-				/* input_line_pointer->just after terminator (c). */
-			}
-	    }
-	-- input_line_pointer;		/*->terminator (is not ','). */
+			SKIP_WHITESPACE();
+			c = *input_line_pointer++;
+			/* C contains 1st non-white character after number. */
+			/* input_line_pointer->just after terminator (c). */
+		}
+	}
+	--input_line_pointer; /*->terminator (is not ','). */
 	demand_empty_rest_of_line();
-}				/* float_cons() */
+} /* float_cons() */
 
 /*
  *			stringer()
