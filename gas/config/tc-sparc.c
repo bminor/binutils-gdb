@@ -46,20 +46,6 @@ static void s_proc PARAMS ((int));
 static void s_reserve PARAMS ((int));
 static void s_common PARAMS ((int));
 
-/* Ugly hack to keep non-BFD version working.  */
-#ifndef BFD_ASSEMBLER
-#define BFD_RELOC_NONE		NO_RELOC
-#define BFD_RELOC_32		RELOC_32
-#define BFD_RELOC_HI22		RELOC_HI22
-#define BFD_RELOC_LO10		RELOC_LO10
-#define BFD_RELOC_SPARC_WDISP22	RELOC_WDISP22
-#define BFD_RELOC_32_PCREL_S2	RELOC_WDISP30
-#define BFD_RELOC_SPARC22	RELOC_22
-#define BFD_RELOC_SPARC_BASE13	RELOC_BASE13
-#define BFD_RELOC_SPARC13	RELOC_13
-#define BFD_RELOC_SPARC_BASE22	RELOC_BASE22
-#endif
-
 const pseudo_typeS md_pseudo_table[] =
 {
   {"align", s_align_bytes, 0},	/* Defaulting is invalid (0) */
@@ -119,9 +105,8 @@ const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 /* Also be aware that MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT may have to be
-   changed in read.c .  Ideally it shouldn't have to know about it at all,
-   but nothing is ideal around here.
-   */
+   changed in read.c.  Ideally it shouldn't have to know about it at all,
+   but nothing is ideal around here.  */
 
 static unsigned char octal[256];
 #define isoctal(c)  octal[(unsigned char) (c)]
@@ -134,11 +119,7 @@ struct sparc_it
     struct nlist *nlistp;
     expressionS exp;
     int pcrel;
-#ifdef BFD_ASSEMBLER
     bfd_reloc_code_real_type reloc;
-#else
-    enum reloc_type reloc;
-#endif
   };
 
 struct sparc_it the_insn, set_insn;
@@ -209,7 +190,7 @@ s_reserve (ignore)
     {
       as_bad ("bad .reserve segment: `%s'", input_line_pointer);
       return;
-    }				/* if not bss */
+    }
 
   if (input_line_pointer[2] == '.')
     input_line_pointer += 7;
@@ -630,13 +611,7 @@ md_begin ()
   /* end-sanitize-v9 */
 
   target_big_endian = 1;
-}				/* md_begin() */
-
-void
-md_end ()
-{
-  return;
-}				/* md_end() */
+}
 
 void
 md_assemble (str)
@@ -719,7 +694,7 @@ md_assemble (str)
     default:
       as_fatal ("failed sanity check.");
     }
-}				/* md_assemble() */
+}
 
 static void
 sparc_ip (str)
@@ -816,13 +791,12 @@ sparc_ip (str)
 		  }
 		else if (isdigit (*s))
 		  {
-		    while (isdigit (*s))
-		      {
-			kmask = kmask * 10 + *s - '0';
-			++s;
-		      }
+		    expressionS exp;
 
-		    if (kmask < 0 || kmask > 127)
+		    if (expression (&exp) != absolute_section
+			|| exp.X_op != O_constant
+			|| (kmask = exp.X_add_number) < 0
+			|| kmask > 127)
 		      {
 			error_message = ": invalid membar mask number";
 			goto error;
@@ -1422,9 +1396,9 @@ sparc_ip (str)
 		    {
 		      the_insn.reloc = BFD_RELOC_LO10;
 		      s += 3;
-		      /* start-sanitize-v9 */
-#ifndef NO_V9
 		    }
+		  /* start-sanitize-v9 */
+#ifndef NO_V9
 		  else if (c == 'u'
 			   && s[2] == 'h'
 			   && s[3] == 'i')
@@ -1438,23 +1412,21 @@ sparc_ip (str)
 		    {
 		      the_insn.reloc = BFD_RELOC_SPARC_HM10;
 		      s += 4;
-#endif /* NO_V9 */
-		      /* end-sanitize-v9 */
 		    }
+#endif /* NO_V9 */
+		  /* end-sanitize-v9 */
 		  else
 		    break;
 		}
-	      /* Note that if the getExpression() fails, we
-		 will still have created U entries in the
-		 symbol table for the 'symbols' in the input
-		 string.  Try not to create U symbols for
-		 registers, etc. */
+	      /* Note that if the getExpression() fails, we will still
+		 have created U entries in the symbol table for the
+		 'symbols' in the input string.  Try not to create U
+		 symbols for registers, etc.  */
 	      {
-		/* This stuff checks to see if the
-		   expression ends in +%reg If it does,
-		   it removes the register from the
-		   expression, and re-sets 's' to point
-		   to the right place */
+		/* This stuff checks to see if the expression ends in
+		   +%reg.  If it does, it removes the register from
+		   the expression, and re-sets 's' to point to the
+		   right place.  */
 
 		char *s1;
 
@@ -1485,28 +1457,37 @@ sparc_ip (str)
 	      (void) getExpression (s);
 	      s = expr_end;
 
-	      /* Check for invalid constant values.  Don't
-		 warn if constant was inside %hi or %lo,
-		 since these truncate the constant to
-		 fit.  */
-	      if (immediate_max != 0
-		  && the_insn.reloc != BFD_RELOC_LO10
-		  && the_insn.reloc != BFD_RELOC_HI22
-	      /* start-sanitize-v9 */
-#ifndef NO_V9
-#ifndef BFD_ASSEMBLER /* the bfd backend doesn't support these relocs yet */
-		  && the_insn.reloc != RELOC_HLO10
-		  && the_insn.reloc != RELOC_HHI22
-#endif
-#endif
-	      /* end-sanitize-v9 */
+	      if (the_insn.exp.X_op == O_constant
 		  && the_insn.exp.X_add_symbol == 0
-		  && the_insn.exp.X_op_symbol == 0
-		  && the_insn.exp.X_op == O_constant
-		  && (the_insn.exp.X_add_number > immediate_max
-		      || the_insn.exp.X_add_number < ~immediate_max))
-		as_bad ("constant value must be between %ld and %ld",
-			~immediate_max, immediate_max);
+		  && the_insn.exp.X_op_symbol == 0)
+		{
+		  /* start-sanitize-v9 */
+#ifndef NO_V9
+		  switch (the_insn.reloc)
+		    {
+		    case BFD_RELOC_SPARC_HH22:
+		      the_insn.reloc = BFD_RELOC_HI22;
+		      the_insn.exp.X_add_number >>= 32;
+		      break;
+		    case BFD_RELOC_SPARC_HM10:
+		      the_insn.reloc = BFD_RELOC_LO10;
+		      the_insn.exp.X_add_number >>= 32;
+		      break;
+		    }
+#endif
+		  /* end-sanitize-v9 */
+		  /* Check for invalid constant values.  Don't warn if
+		     constant was inside %hi or %lo, since these
+		     truncate the constant to fit.  */
+		  if (immediate_max != 0
+		      && the_insn.reloc != BFD_RELOC_LO10
+		      && the_insn.reloc != BFD_RELOC_HI22
+		      && (the_insn.exp.X_add_number > immediate_max
+			  || the_insn.exp.X_add_number < ~immediate_max))
+		    as_bad ("constant value must be between %ld and %ld",
+			    ~immediate_max, immediate_max);
+		}
+
 	      /* Reset to prevent extraneous range check.  */
 	      immediate_max = 0;
 
@@ -1867,33 +1848,17 @@ md_number_to_chars (buf, val, n)
 /* Apply a fixS to the frags, now that we know the value it ought to
    hold. */
 
-#ifdef BFD_ASSEMBLER
 int
-#else
-void
-#endif
 md_apply_fix (fixP, value)
      fixS *fixP;
-#ifdef BFD_ASSEMBLER
      valueT *value;
-#else
-     long value;
-#endif
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   offsetT val;
 
-#ifdef BFD_ASSEMBLER
   val = *value;
-#else
-  val = value;
-#endif
 
-#ifdef BFD_ASSEMBLER
   assert (fixP->fx_r_type < BFD_RELOC_UNUSED);
-#else
-  assert (fixP->fx_r_type < NO_RELOC);
-#endif
 
   fixP->fx_addnumber = val;	/* Remember value for emit_reloc */
 
@@ -2084,9 +2049,7 @@ md_apply_fix (fixP, value)
       break;
     }
 
-#ifdef BFD_ASSEMBLER
   return 1;
-#endif
 }
 
 /* should never be called for sparc */
@@ -2100,8 +2063,6 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
 {
   as_fatal ("sparc_create_short_jmp\n");
 }
-
-#ifdef BFD_ASSEMBLER
 
 /* Translate internal representation of relocation info to BFD target
    format.  */
@@ -2118,21 +2079,24 @@ tc_gen_reloc (section, fixp)
 
   reloc->sym_ptr_ptr = &fixp->fx_addsy->bsym;
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+  reloc->addend = 0;
   if (fixp->fx_pcrel == 0)
-    reloc->addend = fixp->fx_addnumber;
+    reloc->addend += fixp->fx_addnumber;
   else
-    switch (OUTPUT_FLAVOR)
-      {
-      case bfd_target_elf_flavour:
-	reloc->addend = 0;
-	break;
-      case bfd_target_aout_flavour:
-	reloc->addend = - reloc->address;
-	break;
-      default:
-	/* What's a good default here?  Is there any??  */
-	abort ();
-      }
+    {
+      reloc->addend += fixp->fx_offset;
+      switch (OUTPUT_FLAVOR)
+	{
+	case bfd_target_elf_flavour:
+	  break;
+	case bfd_target_aout_flavour:
+	  reloc->addend -= reloc->address;
+	  break;
+	default:
+	  /* What's a good default here?  Is there any??  */
+	  abort ();
+	}
+    }
 
   switch (fixp->fx_r_type)
     {
@@ -2164,71 +2128,6 @@ tc_gen_reloc (section, fixp)
 
   return reloc;
 }
-
-#else
-
-/* Translate internal representation of relocation info to target format.
-
-   On sparc: first 4 bytes are normal unsigned long address, next three
-   bytes are index, most sig. byte first.  Byte 7 is broken up with
-   bit 7 as external, bits 6 & 5 unused, and the lower
-   five bits as relocation type.  Next 4 bytes are long addend. */
-/* Thanx and a tip of the hat to Michael Bloom, mb@ttidca.tti.com */
-void
-tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
-     char *where;
-     fixS *fixP;
-     relax_addressT segment_address_in_file;
-{
-  long r_index;
-  long r_extern;
-  long r_addend = 0;
-  long r_address;
-
-  know (fixP->fx_addsy);
-
-  if (!S_IS_DEFINED (fixP->fx_addsy))
-    {
-      r_extern = 1;
-      r_index = fixP->fx_addsy->sy_number;
-    }
-  else
-    {
-      r_extern = 0;
-      r_index = S_GET_TYPE (fixP->fx_addsy);
-    }
-
-  /* this is easy */
-  md_number_to_chars (where,
-		      r_address = fixP->fx_frag->fr_address + fixP->fx_where - segment_address_in_file,
-		      4);
-
-  /* now the fun stuff */
-  where[4] = (r_index >> 16) & 0x0ff;
-  where[5] = (r_index >> 8) & 0x0ff;
-  where[6] = r_index & 0x0ff;
-  where[7] = ((r_extern << 7) & 0x80) | (0 & 0x60) | (fixP->fx_r_type & 0x1F);
-
-  /* Also easy */
-  if (fixP->fx_addsy->sy_frag)
-    {
-      r_addend = fixP->fx_addsy->sy_frag->fr_address;
-    }
-
-  if (fixP->fx_pcrel)
-    {
-      r_addend += fixP->fx_offset - r_address;
-    }
-  else
-    {
-      r_addend = fixP->fx_addnumber;
-    }
-
-  md_number_to_chars (&where[8], r_addend, 4);
-
-  return;
-}				/* tc_aout_fix_to_chars() */
-#endif
 
 /* should never be called for sparc */
 void
@@ -2458,14 +2357,5 @@ md_pcrel_from (fixP)
 {
   return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
 }
-
-#ifndef BFD_ASSEMBLER
-void 
-tc_aout_pre_write_hook (headers)
-     object_headers *headers;
-{
-  H_SET_VERSION (headers, 1);
-}
-#endif
 
 /* end of tc-sparc.c */
