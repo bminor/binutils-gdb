@@ -1,5 +1,15 @@
 2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* config/i386/nbsd.mh (NATDEPFILES): Use line continuations.
+	* config/i386/nbsdelf.mh (NATDEPFILES): Likewise.
+	* config/m68k/nbsd.mh (NATDEPFILES): Likewise.
+	* config/ns32k/nbsd.mh (NATDEPFILES): Likewise.
+	* config/powerpc/nbsd.mh (NATDEPFILES): Likewise.
+	* config/sparc/nbsd.mh (NATDEPFILES): Likewise.
+	* config/sparc/nbsdelf.mh (NATDEPFILES): Likewise.
+
+2002-05-11  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* i386nbsd-nat.c: Delete file.  Move fetch_core_registers and
 	fetch_elfcore_registers to...
 	* i386nbsd-tdep.c: ...here.
