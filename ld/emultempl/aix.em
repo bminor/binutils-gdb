@@ -83,7 +83,7 @@ struct filelist
 };
 
 /* List of import files.  */
-struct filelist *import_files;
+static struct filelist *import_files;
 
 /* List of export symbols read from the export files.  */
 
