@@ -1,3 +1,7 @@
+Wed Nov 22 11:27:02 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: Don't turn -v into --v.
+
 Tue Nov 21 16:48:02 1995  Doug Evans  <dje@deneb.cygnus.com>
 
 	* configure.in (targargs): Fix typo.

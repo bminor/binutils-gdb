@@ -146,6 +146,9 @@ do
 		shift
 		arguments="$arguments $option=$optarg"
 		;;
+	--v)
+		arguments="$arguments -v"
+		;;
 	--*)
 		arguments="$arguments $option"
 		;;
