@@ -2323,16 +2323,13 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (h == NULL)
 	    break;
 
-	  if (h->plt.offset == (bfd_vma) -1)
+	  if (h->plt.offset == (bfd_vma) -1 || htab->splt == NULL)
 	    {
 	      /* We didn't make a PLT entry for this symbol.  This
 		 happens when statically linking PIC code, or when
 		 using -Bsymbolic.  */
 	      break;
 	    }
-
-	  if (htab->splt == NULL)
-	    abort ();
 
 	  relocation = (htab->splt->output_section->vma
 			+ htab->splt->output_offset

@@ -2028,6 +2028,8 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
     got_base = elf_hash_table (info)->hgot->root.u.def.value;
 
   sgot = splt = sreloc = NULL;
+  if (dynobj != NULL)
+    splt = bfd_get_section_by_name (dynobj, ".plt");
 
   rel = relocs;
   relend = relocs + NUM_SHDR_ENTRIES (& elf_section_data (input_section)->rel_hdr);
@@ -2409,18 +2411,12 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
              procedure linkage table.  */
 	  BFD_ASSERT (h != NULL);
 
-	  if (h->plt.offset == (bfd_vma) -1)
+	  if (h->plt.offset == (bfd_vma) -1 || splt == NULL)
 	    {
 	      /* We didn't make a PLT entry for this symbol.  This
 		 happens when statically linking PIC code, or when
 		 using -Bsymbolic.  */
 	      goto do_default;
-	    }
-
-	  if (splt == NULL)
-	    {
-	      splt = bfd_get_section_by_name (dynobj, ".plt");
-	      BFD_ASSERT (splt != NULL);
 	    }
 
 	  relocation = (splt->output_section->vma
