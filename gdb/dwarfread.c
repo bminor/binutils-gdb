@@ -361,7 +361,8 @@ EXFUN(process_dies,
 
 static void
 EXFUN(read_structure_scope,
-     (struct dieinfo *dip AND char *thisdie AND char *enddie));
+     (struct dieinfo *dip AND char *thisdie AND char *enddie AND
+      struct objfile *objfile));
 
 static struct type *
 EXFUN(decode_array_element_type, (char *scan AND char *end));
@@ -382,7 +383,8 @@ EXFUN(read_enumeration,
 
 static struct type *
 EXFUN(struct_type,
-      (struct dieinfo *dip AND char *thisdie AND char *enddie));
+      (struct dieinfo *dip AND char *thisdie AND char *enddie AND
+       struct objfile *objfile));
 
 static struct type *
 EXFUN(enum_type, (struct dieinfo *dip));
@@ -867,7 +869,7 @@ LOCAL FUNCTION
 SYNOPSIS
 
 	static struct type *struct_type (struct dieinfo *dip, char *thisdie,
-	    char *enddie)
+	    char *enddie, struct objfile *objfile)
 
 DESCRIPTION
 
@@ -878,10 +880,11 @@ DESCRIPTION
  */
 
 static struct type *
-DEFUN(struct_type, (dip, thisdie, enddie),
+DEFUN(struct_type, (dip, thisdie, enddie, objfile),
      struct dieinfo *dip AND
      char *thisdie AND
-     char *enddie)
+     char *enddie AND
+     struct objfile *objfile)
 {
   struct type *type;
   struct nextfield {
@@ -896,6 +899,7 @@ DEFUN(struct_type, (dip, thisdie, enddie),
   char *tpart2;
   char *tpart3;
   struct dieinfo mbr;
+  char *nextdie;
   
   if ((type = lookup_utype (dip -> dieref)) == NULL)
     {
@@ -953,6 +957,14 @@ DEFUN(struct_type, (dip, thisdie, enddie),
 	{
 	  break;
 	}
+      else if (mbr.at_sibling != 0)
+	{
+	  nextdie = dbbase + mbr.at_sibling - dbroff;
+	}
+      else
+	{
+	  nextdie = thisdie + mbr.dielength;
+	}
       switch (mbr.dietag)
 	{
 	case TAG_member:
@@ -968,10 +980,10 @@ DEFUN(struct_type, (dip, thisdie, enddie),
 	  nfields++;
 	  break;
 	default:
-	  SQUAWK (("bad member of '%s'", TYPE_NAME (type)));
+	  process_dies (thisdie, nextdie, objfile);
 	  break;
 	}
-      thisdie += mbr.dielength;
+      thisdie = nextdie;
     }
   /* Now create the vector of fields, and record how big it is.  */
   TYPE_NFIELDS (type) = nfields;
@@ -994,7 +1006,7 @@ LOCAL FUNCTION
 SYNOPSIS
 
 	static void read_structure_scope (struct dieinfo *dip,
-		char *thisdie, char *enddie)
+		char *thisdie, char *enddie, struct objfile *objfile)
 
 DESCRIPTION
 
@@ -1011,15 +1023,16 @@ NOTES
  */
 
 static void
-DEFUN(read_structure_scope, (dip, thisdie, enddie),
+DEFUN(read_structure_scope, (dip, thisdie, enddie, objfile),
      struct dieinfo *dip AND
      char *thisdie AND
-     char *enddie)
+     char *enddie AND
+     struct objfile *objfile)
 {
   struct type *type;
   struct symbol *sym;
   
-  type = struct_type (dip, thisdie, enddie);
+  type = struct_type (dip, thisdie, enddie, objfile);
   if ((sym = new_symbol (dip)) != NULL)
     {
       SYMBOL_TYPE (sym) = type;
@@ -1541,7 +1554,8 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	static void process_dies (char *thisdie, char *enddie)
+	static void process_dies (char *thisdie, char *enddie,
+				  struct objfile *objfile)
 
 DESCRIPTION
 
@@ -1595,7 +1609,7 @@ DEFUN(process_dies, (thisdie, enddie, objfile),
 	      break;
 	    case TAG_structure_type:
 	    case TAG_union_type:
-	      read_structure_scope (&di, thisdie, nextdie);
+	      read_structure_scope (&di, thisdie, nextdie, objfile);
 	      break;
 	    case TAG_enumeration_type:
 	      read_enumeration (&di, thisdie, nextdie);
