@@ -220,7 +220,7 @@ obj_coff_weak (ignore)
       *input_line_pointer = c;
       SKIP_WHITESPACE ();
 
-#ifdef BFD_ASSEMBLER
+#if defined BFD_ASSEMBLER || defined S_SET_WEAK
       S_SET_WEAK (symbolP);
 #endif
 

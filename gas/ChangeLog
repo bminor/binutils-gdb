@@ -1,3 +1,8 @@
+2000-11-30  Philip Blundell  <pb@futuretv.com>
+
+	* config/obj-coff.c (obj_coff_weak): Use S_SET_WEAK if it exists,
+	even in non BFD_ASSEMBLER case.
+
 2000-11-30  Diego Novillo  <dnovillo@redhat.com>
 
 	* tc-i386.c (md_assemble): Swap i.disp_relocs when using intel
