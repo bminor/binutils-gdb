@@ -1,3 +1,12 @@
+2002-07-12  Andrew Cagney  <cagney@redhat.com>
+
+	* MAINTAINERS: Mention --enable-sim-build-warnings.
+	(m68hc11-elf): Disable sim build warnings.
+	(m32r-elf): Mark as broken obsolete candidate.
+	(x86_64-linux-gnu): Mark as buildable with -Werror.
+	(arm-elf): Change -w to ``,'' which enables warnings but not
+	-Werror.
+
 2002-07-12  Andrew Cagney  <ac131313@redhat.com>
 
 	* bcache.h: Update copyright.
