@@ -130,7 +130,7 @@ c_print_type (type, varstring, stream, show, level)
   /* For demangled function names, we have the arglist as part of the name,
      so don't print an additional pair of ()'s */
 
-  demangled_args = varstring[strlen(varstring) - 1] == ')';
+  demangled_args = strchr(varstring, '(') != NULL;
   c_type_print_varspec_suffix (type, stream, show, 0, demangled_args);
 
 }

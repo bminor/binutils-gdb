@@ -1,3 +1,22 @@
+Fri Aug 19 13:35:01 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* c-typeprint.c (c_print_type):  Assume demangled arguments
+	if a '(' is found in varstring, Looking for ')' at the end of
+	varstring did fail with demangled const member functions, which
+	have a trailing `const'.
+	* remote.c (get_offsets, putpkt):  Change to `char' buffers,
+	to avoid errors when compiling with DEC c89.
+	(remote_wait):  Cast to `char *' before passing buffer to
+	fputs_filtered, to avoid errors when compiling with DEC c89.
+	(remote_wait):  Do not return inferior_pid by default, this
+	statement is never reached, which causes warnings from some
+	compilers.
+	* stabsread.c (scan_file_globals):  Ignore static minimal symbols.
+	* symfile.c (load_command):  If called with no argument, try
+	to get the filename from the executable file.
+	(generic_load):  Remove check for NULL filename, it is done
+	in load_command now.
+
 Fri Aug 19 00:40:55 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (skip_trampoline_code): Revert incorrect change

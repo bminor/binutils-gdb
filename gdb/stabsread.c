@@ -3818,6 +3818,15 @@ scan_file_globals (objfile)
     {
       QUIT;
 
+      /* Skip static symbols.  */
+      switch (MSYMBOL_TYPE (msymbol))
+	{
+	case mst_file_text:
+	case mst_file_data:
+	case mst_file_bss:
+	  continue;
+	}
+
       prev = NULL;
 
       /* Get the hash index and check all the symbols

@@ -1,5 +1,5 @@
 /* Generic symbol file reading for the GNU debugger, GDB.
-   Copyright 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
 This file is part of GDB.
@@ -72,6 +72,9 @@ load_command PARAMS ((char *, int));
 
 static void
 add_symbol_file_command PARAMS ((char *, int));
+
+static void
+add_shared_symbol_files_command PARAMS ((char *, int));
 
 static void
 cashier_psymtab PARAMS ((struct partial_symtab *));
@@ -294,11 +297,9 @@ init_entry_point_info (objfile)
   else
     {
       /* Examination of non-executable.o files.  Short-circuit this stuff.  */
-      /* ~0 will not be in any file, we hope.  */
-      objfile -> ei.entry_point = ~0;
-      /* set the startup file to be an empty range.  */
-      objfile -> ei.entry_file_lowpc = 0;
-      objfile -> ei.entry_file_highpc = 0;
+      objfile -> ei.entry_point = INVALID_ENTRY_POINT;
+      objfile -> ei.entry_file_lowpc = INVALID_ENTRY_LOWPC;
+      objfile -> ei.entry_file_highpc = INVALID_ENTRY_HIGHPC;
     }
 }
 
@@ -463,6 +464,13 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 #endif /* not IBM6000_TARGET */
 
   (*objfile -> sf -> sym_read) (objfile, section_offsets, mainline);
+
+  if (!have_partial_symbols () && !have_full_symbols ())
+    {
+      wrap_here ("");
+      printf_filtered ("(no debugging symbols found)...");
+      wrap_here ("");
+    }
 
   /* Don't allow char * to have a typename (else would get caddr_t).
      Ditto void *.  FIXME: Check whether this is now done by all the
@@ -849,6 +857,8 @@ load_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
+  if (arg == NULL)
+    arg = get_exec_file (1);
   target_load (arg, from_tty);
 }
 
@@ -868,9 +878,6 @@ generic_load (filename, from_tty)
   struct cleanup *old_cleanups;
   asection *s;
   bfd *loadfile_bfd;
-
-  if (filename == NULL)
-    filename = get_exec_file (1);
 
   loadfile_bfd = bfd_openr (filename, gnutarget);
   if (loadfile_bfd == NULL)
@@ -1018,6 +1025,18 @@ add_symbol_file_command (args, from_tty)
     error ("Not confirmed.");
 
   symbol_file_add (name, 0, text_addr, 0, mapped, readnow);
+}
+
+static void
+add_shared_symbol_files_command  (args, from_tty)
+     char *args;
+     int from_tty;
+{
+#ifdef ADD_SHARED_SYMBOL_FILES
+  ADD_SHARED_SYMBOL_FILES (args, from_tty);
+#else
+  error ("This command is not available in this configuration of GDB.");
+#endif  
 }
 
 /* Re-read symbols if a symbol-file has changed.  */
@@ -1168,6 +1187,12 @@ reread_symbols ()
 	     zero is OK since dbxread.c also does what it needs to do if
 	     objfile->global_psymbols.size is 0.  */
 	  (*objfile->sf->sym_read) (objfile, objfile->section_offsets, 0);
+	  if (!have_partial_symbols () && !have_full_symbols ())
+	    {
+	      wrap_here ("");
+	      printf_filtered ("(no debugging symbols found)\n");
+	      wrap_here ("");
+	    }
 	  objfile -> flags |= OBJF_SYMS;
 
 	  /* We're done reading the symbol file; finish off complaints.  */
@@ -1205,17 +1230,17 @@ deduce_language_from_filename (filename)
     ; /* Get default */
   else if (0 == (c = strrchr (filename, '.')))
     ; /* Get default. */
-  else if (STREQ(c,".mod"))
-    return language_m2;
-  else if (STREQ(c,".c"))
+  else if (STREQ (c, ".c"))
     return language_c;
-  else if (STREQ(c,".s"))
-    return language_asm;
-  else if (STREQ (c,".cc") || STREQ (c,".C") || STREQ (c, ".cxx")
-	   || STREQ (c, ".cpp"))
+  else if (STREQ (c, ".cc") || STREQ (c, ".C") || STREQ (c, ".cxx")
+	   || STREQ (c, ".cpp") || STREQ (c, ".cp"))
     return language_cplus;
-  else if (STREQ (c,".ch") || STREQ (c,".c186") || STREQ (c,".c286"))
+  else if (STREQ (c, ".ch") || STREQ (c, ".c186") || STREQ (c, ".c286"))
     return language_chill;
+  else if (STREQ (c, ".mod"))
+    return language_m2;
+  else if (STREQ (c, ".s") || STREQ (c, ".S"))
+    return language_asm;
 
   return language_unknown;		/* default */
 }
@@ -1630,10 +1655,18 @@ to execute.", &cmdlist);
   c->completer = filename_completer;
 
   c = add_cmd ("add-symbol-file", class_files, add_symbol_file_command,
-   "Load the symbols from FILE, assuming FILE has been dynamically loaded.\n\
-The second argument provides the starting address of the file's text.",
+   "Usage: add-symbol-file FILE ADDR\n\
+Load the symbols from FILE, assuming FILE has been dynamically loaded.\n\
+ADDR is the starting address of the file's text.",
 	       &cmdlist);
   c->completer = filename_completer;
+
+  c = add_cmd ("add-shared-symbol-files", class_files,
+	       add_shared_symbol_files_command,
+   "Load the symbols from shared objects in the dynamic linker's link map.",
+   	       &cmdlist);
+  c = add_alias_cmd ("assf", "add-shared-symbol-files", class_files, 1,
+		     &cmdlist);
 
   c = add_cmd ("load", class_files, load_command,
    "Dynamically load FILE into the running program, and record its symbols\n\
