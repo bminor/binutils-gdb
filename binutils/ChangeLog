@@ -1,3 +1,25 @@
+2003-08-11  Ian Lance Taylor <ian@airs.com>
+
+	* readelf.c: Add ability to read archives.
+	(archive_file_offset): New variable.
+	(archive_file_size): New variable.
+	(get_data): Include archive_file_offset in file offset
+	calculation when fseeking.
+	(process_program_headers): Likewise.
+	(process_symbol_table): Likewise.
+	(process_dynamic_segment): Handle computation of end of file
+	position when the file is in an archive.
+	(process_object): New function.  Contains the body of
+	process_file().
+	(process_archive): New function.  Call process_object on each
+	member of an archive.
+	(process_file): Detect archives and handle appropriately.
+	* Makefile.am: Add dependency on aout/ar.h for readelf.c
+	* Makefile.in: Regenerate.
+	* NEWS: Document readelf's new ability.
+	* doc/binutils: Alter text to say that readelf supports archives
+	and 64-bit ELF files.
+	
 2003-08-08  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

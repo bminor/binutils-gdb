@@ -90,11 +90,15 @@
 #include "elf/iq2000.h"
 #include "elf/xtensa.h"
 
+#include "aout/ar.h"
+
 #include "bucomm.h"
 #include "getopt.h"
 #include "libiberty.h"
 
 char *program_name = "readelf";
+long archive_file_offset;
+unsigned long archive_file_size;
 unsigned long dynamic_addr;
 bfd_size_type dynamic_size;
 char *dynamic_strings;
@@ -244,9 +248,10 @@ get_data (void *var, FILE *file, long offset, size_t size, const char *reason)
   if (size == 0)
     return NULL;
 
-  if (fseek (file, offset, SEEK_SET))
+  if (fseek (file, archive_file_offset + offset, SEEK_SET))
     {
-      error (_("Unable to seek to 0x%x for %s\n"), offset, reason);
+      error (_("Unable to seek to 0x%x for %s\n"),
+	     archive_file_offset + offset, reason);
       return NULL;
     }
 
@@ -3064,7 +3069,8 @@ process_program_headers (FILE *file)
 	  break;
 
 	case PT_INTERP:
-	  if (fseek (file, (long) segment->p_offset, SEEK_SET))
+	  if (fseek (file, archive_file_offset + (long) segment->p_offset,
+		     SEEK_SET))
 	    error (_("Unable to find program interpreter name\n"));
 	  else
 	    {
@@ -4503,10 +4509,16 @@ process_dynamic_segment (FILE *file)
 	     should work.  */
 	  section.sh_offset = offset_from_vma (file, entry->d_un.d_val, 0);
 
-	  if (fseek (file, 0, SEEK_END))
-	    error (_("Unable to seek to end of file!"));
+	  if (archive_file_offset != 0)
+	    section.sh_size = archive_file_size - section.sh_offset;
+	  else
+	    {
+	      if (fseek (file, 0, SEEK_END))
+		error (_("Unable to seek to end of file!"));
 
-	  section.sh_size = ftell (file) - section.sh_offset;
+	      section.sh_size = ftell (file) - section.sh_offset;
+	    }
+
 	  if (is_32bit_elf)
 	    section.sh_entsize = sizeof (Elf32_External_Sym);
 	  else
@@ -4544,9 +4556,15 @@ process_dynamic_segment (FILE *file)
 	     should work.  */
 
 	  offset = offset_from_vma (file, entry->d_un.d_val, 0);
-	  if (fseek (file, 0, SEEK_END))
-	    error (_("Unable to seek to end of file\n"));
-	  str_tab_len = ftell (file) - offset;
+
+	  if (archive_file_offset != 0)
+	    str_tab_len = archive_file_size - offset;
+	  else
+	    {
+	      if (fseek (file, 0, SEEK_END))
+		error (_("Unable to seek to end of file\n"));
+	      str_tab_len = ftell (file) - offset;
+	    }
 
 	  if (str_tab_len < 1)
 	    {
@@ -5598,8 +5616,10 @@ process_symbol_table (FILE *file)
   if (dynamic_info[DT_HASH] && ((do_using_dynamic && dynamic_strings != NULL)
 				|| do_histogram))
     {
-      if (fseek (file, offset_from_vma (file, dynamic_info[DT_HASH],
-					sizeof nb + sizeof nc),
+      if (fseek (file,
+		 (archive_file_offset
+		  + offset_from_vma (file, dynamic_info[DT_HASH],
+				     sizeof nb + sizeof nc)),
 		 SEEK_SET))
 	{
 	  error (_("Unable to seek to start of dynamic information"));
@@ -10142,30 +10162,18 @@ get_file_header (FILE *file)
   return 1;
 }
 
+/* Process one ELF object file according to the command line options.
+   This file may actually be stored in an archive.  The file is
+   positioned at the start of the ELF object.  */
+
 static int
-process_file (char *file_name)
+process_object (char *file_name, FILE *file)
 {
-  FILE *file;
-  struct stat statbuf;
   unsigned int i;
-
-  if (stat (file_name, & statbuf) < 0)
-    {
-      error (_("Cannot stat input file %s.\n"), file_name);
-      return 1;
-    }
-
-  file = fopen (file_name, "rb");
-  if (file == NULL)
-    {
-      error (_("Input file %s not found.\n"), file_name);
-      return 1;
-    }
 
   if (! get_file_header (file))
     {
       error (_("%s: Failed to read file header\n"), file_name);
-      fclose (file);
       return 1;
     }
 
@@ -10181,10 +10189,7 @@ process_file (char *file_name)
     printf (_("\nFile: %s\n"), file_name);
 
   if (! process_file_header ())
-    {
-      fclose (file);
-      return 1;
-    }
+    return 1;
 
   if (! process_section_headers (file))
     {
@@ -10216,8 +10221,6 @@ process_file (char *file_name)
   process_gnu_liblist (file);
 
   process_arch_specific (file);
-
-  fclose (file);
 
   if (program_headers)
     {
@@ -10258,6 +10261,210 @@ process_file (char *file_name)
     }
 
   return 0;
+}
+
+/* Process an ELF archive.  The file is positioned just after the
+   ARMAG string.  */
+
+static int
+process_archive (char *file_name, FILE *file)
+{
+  struct ar_hdr arhdr;
+  size_t got;
+  unsigned long size;
+  char *longnames = NULL;
+  unsigned long longnames_size = 0;
+  size_t file_name_size;
+
+  show_name = 1;
+
+  got = fread (&arhdr, 1, sizeof arhdr, file);
+  if (got != sizeof arhdr)
+    {
+      if (got == 0)
+	return 0;
+
+      error (_("%s: failed to read archive header\n"), file_name);
+      return 1;
+    }
+
+  if (memcmp (arhdr.ar_name, "/               ", 16) == 0)
+    {
+      /* This is the archive symbol table.  Skip it.
+	 FIXME: We should have an option to dump it.  */
+      size = strtoul (arhdr.ar_size, NULL, 10);
+      if (fseek (file, size + (size & 1), SEEK_CUR) != 0)
+	{
+	  error (_("%s: failed to skip archive symbol table\n"), file_name);
+	  return 1;
+	}
+
+      got = fread (&arhdr, 1, sizeof arhdr, file);
+      if (got != sizeof arhdr)
+	{
+	  if (got == 0)
+	    return 0;
+
+	  error (_("%s: failed to read archive header\n"), file_name);
+	  return 1;
+	}
+    }
+
+  if (memcmp (arhdr.ar_name, "//              ", 16) == 0)
+    {
+      /* This is the archive string table holding long member
+	 names.  */
+
+      longnames_size = strtoul (arhdr.ar_size, NULL, 10);
+
+      longnames = malloc (longnames_size);
+      if (longnames == NULL)
+	{
+	  error (_("Out of memory\n"));
+	  return 1;
+	}
+
+      if (fread (longnames, longnames_size, 1, file) != 1)
+	{
+	  error(_("%s: failed to read string table\n"), file_name);
+	  return 1;
+	}
+
+      if ((longnames_size & 1) != 0)
+	getc (file);
+
+      got = fread (&arhdr, 1, sizeof arhdr, file);
+      if (got != sizeof arhdr)
+	{
+	  if (got == 0)
+	    return 0;
+
+	  error (_("%s: failed to read archive header\n"), file_name);
+	  return 1;
+	}
+    }
+
+  file_name_size = strlen (file_name);
+
+  while (1)
+    {
+      char *name;
+      char *nameend;
+      char *namealc;
+
+      if (arhdr.ar_name[0] == '/')
+	{
+	  unsigned long off;
+
+	  off = strtoul (arhdr.ar_name + 1, NULL, 10);
+	  if (off >= longnames_size)
+	    {
+	      error (_("%s: invalid archive string table offset %lu\n"), off);
+	      return 1;
+	    }
+
+	  name = longnames + off;
+	  nameend = memchr (name, '/', longnames_size - off);
+	}
+      else
+	{
+	  name = arhdr.ar_name;
+	  nameend = memchr (name, '/', 16);
+	}
+
+      if (nameend == NULL)
+	{
+	  error (_("%s: bad archive file name\n"));
+	  return 1;
+	}
+
+      namealc = malloc (file_name_size + (nameend - name) + 3);
+      if (namealc == NULL)
+	{
+	  error (_("Out of memory\n"));
+	  return 1;
+	}
+
+      memcpy (namealc, file_name, file_name_size);
+      namealc[file_name_size] = '(';
+      memcpy (namealc + file_name_size + 1, name, nameend - name);
+      namealc[file_name_size + 1 + (nameend - name)] = ')';
+      namealc[file_name_size + 2 + (nameend - name)] = '\0';
+
+      archive_file_offset = ftell (file);
+      archive_file_size = strtoul (arhdr.ar_size, NULL, 10);
+
+      process_object (namealc, file);
+
+      free (namealc);
+
+      if (fseek (file,
+		 (archive_file_offset
+		  + archive_file_size
+		  + (archive_file_size & 1)),
+		 SEEK_SET) != 0)
+	{
+	  error (_("%s: failed to seek to next archive header\n"), file_name);
+	  return 1;
+	}
+
+      got = fread (&arhdr, 1, sizeof arhdr, file);
+      if (got != sizeof arhdr)
+	{
+	  if (got == 0)
+	    return 0;
+
+	  error (_("%s: failed to read archive header\n"), file_name);
+	  return 1;
+	}
+    }
+
+  if (longnames != 0)
+    free (longnames);
+
+  return 0;
+}
+
+static int
+process_file (char *file_name)
+{
+  FILE *file;
+  struct stat statbuf;
+  char armag[SARMAG];
+  int ret;
+
+  if (stat (file_name, &statbuf) < 0)
+    {
+      error (_("Cannot stat input file %s.\n"), file_name);
+      return 1;
+    }
+
+  file = fopen (file_name, "rb");
+  if (file == NULL)
+    {
+      error (_("Input file %s not found.\n"), file_name);
+      return 1;
+    }
+
+  if (fread (armag, SARMAG, 1, file) != 1)
+    {
+      error (_("%s: Failed to read file header\n"), file_name);
+      fclose (file);
+      return 1;
+    }
+
+  if (memcmp (armag, ARMAG, SARMAG) == 0)
+    ret = process_archive (file_name, file);
+  else
+    {
+      rewind (file);
+      archive_file_size = archive_file_offset = 0;
+      ret = process_object (file_name, file);
+    }
+
+  fclose (file);
+
+  return ret;
 }
 
 #ifdef SUPPORT_DISASSEMBLY

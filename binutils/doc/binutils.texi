@@ -3078,9 +3078,8 @@ readelf [@option{-a}|@option{--all}]
 @command{readelf} displays information about one or more ELF format object
 files.  The options control what particular information to display.
 
-@var{elffile}@dots{} are the object files to be examined.  At the
-moment, @command{readelf} does not support examining archives, nor does it
-support examining 64 bit ELF files.
+@var{elffile}@dots{} are the object files to be examined.  32-bit and
+64-bit ELF files are supported, as are archives containing ELF files.
 
 @c man end
 

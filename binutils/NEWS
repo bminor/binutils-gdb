@@ -1,5 +1,7 @@
 -*- text -*-
 
+* readelf can now parse archives.
+
 * objdump now accepts --debugging-tags to print the debug information in a
   format compatible with ctags tool.
 
