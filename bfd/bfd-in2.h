@@ -620,6 +620,12 @@ typedef struct sec
 	    translate to bfd_com_section), but ECOFF has two. */
 #define SEC_IS_COMMON 0x8000
 
+         /* The section contains only debugging information.  For
+           example, this is set for ELF .debug and .stab sections.
+           strip tests this flag to see if a section can be
+           discarded. */
+#define SEC_DEBUGGING 0x10000
+
 	 /*  End of section flags.  */
 
         /*  The virtual memory address of the section - where it will be
@@ -770,7 +776,10 @@ bfd_get_section_by_name PARAMS ((bfd *abfd, CONST char *name));
 asection *
 bfd_make_section_old_way PARAMS ((bfd *, CONST char *name));
 
-asection * 
+asection *
+bfd_make_section_anyway PARAMS ((bfd *, CONST char *name));
+
+asection *
 bfd_make_section PARAMS ((bfd *, CONST char *name));
 
 boolean 
@@ -1558,6 +1567,7 @@ struct _bfd
       struct hpux_core_struct *hpux_core_data;
       struct sgi_core_struct *sgi_core_data;
       struct lynx_core_struct *lynx_core_data;
+      struct osf_core_struct *osf_core_data;
       PTR any;
       } tdata;
   
