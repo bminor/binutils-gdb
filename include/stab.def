@@ -14,7 +14,22 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
 
+
+/* Alias symbol. Any reference to this will turn into into one to the
+   next symbol in the table
+*/
+
+__define_stab (N_INDR, 0x0b, "INDR")
+
+/* Warning symbol. The text gives a warning message, the next symbol
+   in the table will be undefined. When the symbol is referenced, the
+   message is printed.
+*/
+
+__define_stab (N_WARNING, 0x1e,"WARNING")
+
 /* Global variable.  Only the name is significant.
    To find the address, look in the corresponding external symbol.  */
 __define_stab (N_GSYM, 0x20, "GSYM")

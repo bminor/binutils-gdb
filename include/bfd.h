@@ -542,6 +542,12 @@ flagword flags;
     */
 #define SEC_CONSTRUCTOR 0x100
 
+    /* The section is a constuctor, and should be placed at the end of the ..
+    */
+#define SEC_CONSTRUCTOR_TEXT 0x1100
+#define SEC_CONSTRUCTOR_DATA 0x2100
+#define SEC_CONSTRUCTOR_BSS  0x3100
+
     /* The section has contents - a bss section could be
     @code{SEC_ALLOC} | @code{SEC_HAS_CONTENTS}, a debug section could be
     @code{SEC_HAS_CONTENTS}
@@ -820,7 +826,6 @@ typedef struct symbol_cache_entry
     /* Used by the linker
     */
 #define BSF_KEEP        0x10000
-#define BSF_WARNING     0x20000
 #define BSF_KEEP_G      0x80000
 
     /* Unused
@@ -843,6 +848,22 @@ typedef struct symbol_cache_entry
     This bit is set by the target bfd part to convey this information. 
     */
 #define BSF_NOT_AT_END    0x40000
+
+    /* Signal that the symbol is the label of constructor section.
+    */
+#define BSF_CONSTRUCTOR   0x1000000
+
+    /* Signal that the symbol is a warning symbol. If the symbol is a warning
+    symbol, then the value field (I know this is tacky) will point to the
+    asymbol which when referenced will cause the warning.
+    */
+#define BSF_WARNING       0x2000000
+
+    /* Signal that the symbol is indirect. The value of the symbol is a
+    pointer to an undefined asymbol which contains the name to use
+    instead.
+    */
+#define BSF_INDIRECT     0x4000000
   flagword flags;
 
     /* Aointer to the section to which this symbol is relative, or 0 if the
@@ -1078,11 +1099,7 @@ PROTO(symindex, bfd_get_next_mapent, (bfd *, symindex, carsym **));
 /* Used whilst processing archives. Sets the head of the chain of bfds
 contained in an archive to @var{new_head}. (see chapter on archives)
 */
-PROTO(boolean, bfd_set_archive_head, (bfd *output, bfd *new_head));
-
-PROTO(bfd *, bfd_get_elt_at_index, (bfd *, int));
-
-
+PROTO(boolean, bfd_set_archive_head, (bfd *output, bfd *new_head));PROTO(bfd *, bfd_get_elt_at_index, (bfd *, int));
 /* Initially provided a bfd containing an archive and NULL, opens a bfd
 on the first contained element and returns that. Subsequent calls to
 bfd_openr_next_archived_file should pass the archive and the previous
