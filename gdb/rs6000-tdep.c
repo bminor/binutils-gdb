@@ -141,6 +141,33 @@ altivec_register_p (int regno)
 }
 
 
+/* Return true if REGNO is an SPE register, false otherwise.  */
+int
+spe_register_p (int regno)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  
+  /* Is it a reference to EV0 -- EV31, and do we have those?  */
+  if (tdep->ppc_ev0_regnum >= 0
+      && tdep->ppc_ev31_regnum >= 0
+      && tdep->ppc_ev0_regnum <= regno && regno <= tdep->ppc_ev31_regnum)
+    return 1;
+
+  /* Is it a reference to the 64-bit accumulator, and do we have that?  */
+  if (tdep->ppc_acc_regnum >= 0
+      && tdep->ppc_acc_regnum == regno)
+    return 1;
+
+  /* Is it a reference to the SPE floating-point status and control register,
+     and do we have that?  */
+  if (tdep->ppc_spefscr_regnum >= 0
+      && tdep->ppc_spefscr_regnum == regno)
+    return 1;
+
+  return 0;
+}
+
+
 /* Return non-zero if the architecture described by GDBARCH has
    floating-point registers (f0 --- f31 and fpscr).  */
 int
@@ -1831,6 +1858,10 @@ rs6000_dwarf2_stab_reg_to_regnum (int num)
         return tdep->ppc_xer_regnum;
       case 109:
         return tdep->ppc_vrsave_regnum;
+      case 111:
+        return gdbarch_tdep (current_gdbarch)->ppc_acc_regnum;
+      case 112:
+        return gdbarch_tdep (current_gdbarch)->ppc_spefscr_regnum;
       default: 
         return num;
       }
@@ -2827,6 +2858,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->ppc_vrsave_regnum = -1;
   tdep->ppc_ev0_regnum = -1;
   tdep->ppc_ev31_regnum = -1;
+  tdep->ppc_acc_regnum = -1;
+  tdep->ppc_spefscr_regnum = -1;
 
   set_gdbarch_pc_regnum (gdbarch, 64);
   set_gdbarch_sp_regnum (gdbarch, 1);
@@ -2880,6 +2913,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	tdep->ppc_ev31_regnum = 38;
         tdep->ppc_fp0_regnum = -1;
         tdep->ppc_fpscr_regnum = -1;
+        tdep->ppc_acc_regnum = 39;
+        tdep->ppc_spefscr_regnum = 40;
         set_gdbarch_pc_regnum (gdbarch, 0);
         set_gdbarch_sp_regnum (gdbarch, tdep->ppc_gp0_regnum + 1);
         set_gdbarch_deprecated_fp_regnum (gdbarch, tdep->ppc_gp0_regnum + 1);

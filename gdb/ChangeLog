@@ -1,3 +1,14 @@
+2004-05-22  Jim Blandy  <jimb@redhat.com>
+
+	* ppc-tdep.h (spe_register_p): New declaration.
+	(struct gdbarch_tdep): New members: ppc_acc_regnum and
+	ppc_spefscr_regnum.
+	* rs6000-tdep.c (spe_register_p): New function.
+	(rs6000_dwarf2_stab_reg_to_regnum): Recognize numbers for acc and
+	spefscr.
+	(rs6000_gdbarch_init): Initialize the new members of the tdep
+	structure.
+
 2004-05-21  Jim Blandy  <jimb@redhat.com>
 
 	* ppc-linux-nat.c (fetch_register): Move code back to be next

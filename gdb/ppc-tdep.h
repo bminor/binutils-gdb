@@ -73,6 +73,7 @@ enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarc
 
 /* From rs6000-tdep.c... */
 int altivec_register_p (int regno);
+int spe_register_p (int regno);
 
 /* Return non-zero if the architecture described by GDBARCH has
    floating-point registers (f0 --- f31 and fpscr).  */
@@ -162,6 +163,8 @@ struct gdbarch_tdep
     int ppc_vrsave_regnum;	/* Last AltiVec register */
     int ppc_ev0_regnum;         /* First ev register */
     int ppc_ev31_regnum;        /* Last ev register */
+    int ppc_acc_regnum;         /* SPE 'acc' register */
+    int ppc_spefscr_regnum;     /* SPE 'spefscr' register */
     int lr_frame_offset;	/* Offset to ABI specific location where
                                    link register is saved.  */
 };
