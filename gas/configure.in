@@ -116,7 +116,7 @@ changequote([,])dnl
       arc-*-elf*)           fmt=elf bfd_gas=yes ;;
 # end-sanitize-arc
 
-      arm-*-riscix*)	    fmt=aout targ=arm-lit ;;
+      arm-*-riscix*)	    fmt=aout targ=arm-lit em=riscix ;;
       arm-*-aout)	    fmt=aout
 			    case "$endian" in
 			      big)	targ=arm-big ;;
@@ -126,6 +126,10 @@ changequote([,])dnl
       arm-*-coff)           fmt=coff ;;
       arm-*-riscix*)        fmt=aout ;;
       arm-*-pe)             fmt=coff targ=armcoff em=pe ;;
+
+# start-sanitize-d10v
+      d10v-*-elf*)           fmt=elf bfd_gas=yes ;;
+# end-sanitize-d10v
 
       hppa-*-*elf*)         fmt=elf em=hppa ;;
       hppa-*-lites*)        fmt=elf em=hppa ;;
@@ -199,6 +203,7 @@ changequote([,])dnl
       mips-sony-bsd*)       fmt=ecoff targ=mips-big ;;
       mips-*-bsd*)          AC_MSG_ERROR(Unknown vendor for mips-bsd configuration.) ;;
       mips-*-ultrix*)       fmt=ecoff targ=mips-lit endian=little ;;
+      mips-*-osf*)          fmt=ecoff targ=mips-lit endian=little ;;
       mips-*-ecoff*)        fmt=ecoff 
 			    case "$endian" in
 			    big) targ=mips-big ;;

@@ -1,3 +1,12 @@
+start-sanitize-d10v
+	Wed Jul 17 14:25:13 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* config/tc-d10v.c: New file.
+	* config/tc-d10v.h: New file.
+	* configure (d10v-*-elf): New target.
+	* configure.in (d10v-*-elf): New target.
+end-sanitize-d10v
+	
 Fri Jul 12 20:54:19 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/tc-ppc.c (md_parse_option): Recognize -K PIC.
