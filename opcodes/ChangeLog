@@ -1,3 +1,7 @@
+Sun Sep 11 22:32:17 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-dis.c (reg_names): Use r26-r23 for arg0-arg3.
+
 Tue Sep  6 11:37:12 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* mips-opc.c: Set INSN_STORE_MEMORY flag for all instructions
