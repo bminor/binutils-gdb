@@ -49,11 +49,6 @@ static struct obstack stat_obstack;
 #define obstack_chunk_free free
 static CONST char *startup_file;
 static lang_statement_list_type input_file_chain;
-
-/* Points to the last statement in the .data section, so we can add
-   stuff to the data section without pain */
-static lang_statement_list_type end_of_data_section_statement_list;
-
 static boolean placed_commons = false;
 static lang_output_section_statement_type *default_common_section;
 static boolean map_option_f;
@@ -2767,14 +2762,6 @@ lang_leave_output_section_statement (fill, memspec)
   current_section->fill = fill;
   current_section->region = lang_memory_region_lookup (memspec);
   stat_ptr = &statement_list;
-
-  /* We remember if we are closing a .data section, since we use it to
-     store constructors in */
-  if (strcmp (current_section->name, ".data") == 0)
-    {
-      end_of_data_section_statement_list = statement_list;
-
-    }
 }
 
 /*

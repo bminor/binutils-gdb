@@ -1,5 +1,9 @@
 Wed Jun 22 13:42:14 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* ldlang.c (end_of_data_section_statement_list): Don't define.
+	(lang_leave_output_section_statement): Don't set obsolete variable
+	end_of_data_section_statement_list.
+
 	* scripttempl/go32coff.sc: Don't put ${DATA_ALIGNMENT} inside an
 	ALIGN.
 
