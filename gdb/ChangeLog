@@ -1,3 +1,9 @@
+Wed Dec 10 15:54:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* dwarf2read.c (dwarf2_build_psymtabs_hard): Check
+ 	cu_header.length is within dwarf_info_buffer not
+ 	dwarf_abbrev_buffer.
+
 Mon Dec  8 15:51:45 1997  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* gdbtk.c (gdb_get_tracepoint_info): use info in struct 
