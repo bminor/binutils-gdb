@@ -1,3 +1,11 @@
+1999-08-08  Ian Lance Taylor  <ian@zembu.com>
+
+	* Makefile.am: Rename .dep* files to DEP*.
+	(MKDEP): Rename from DEP.  Change all uses.  Use $${srcdir} rather
+	than $(srcdir).  Rename TCDEP targets to DEPTC.  Rename OBJDEP
+	targets to DEPOBJ.
+	* Makefile.in: Rebuild.
+
 1999-08-08  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* config/tc-sparc.c (sparc_ip): Allow assembly of %lo()+%reg.
