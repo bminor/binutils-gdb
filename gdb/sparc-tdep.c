@@ -130,9 +130,6 @@ struct gdbarch_tdep
  *       TARGET_ARCHITECTURE->mach == bfd_mach_sparc_v9a))
  */
 
-/* From infrun.c */
-extern int stop_after_trap;
-
 /* We don't store all registers immediately when requested, since they
    get sent over in large chunks anyway.  Instead, we accumulate most
    of the changes and send them over once.  "deferred_stores" keeps
