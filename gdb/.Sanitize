@@ -330,6 +330,7 @@ remote-vx68.c
 remote-vx960.c
 remote-vxmips.c
 remote-vxsparc.c
+remote-wiggler.c
 remote.c
 reply_mig_hack.awk
 rs6000-nat.c
