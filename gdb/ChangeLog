@@ -1,3 +1,9 @@
+2002-02-17  Kevin Buettner  <kevinb@redhat.com>
+
+	From Peter Schauer  <pes@regent.e-technik.tu-muenchen.de>:
+	* ia64-tdep.c (ia64_gdbarch_init): Eliminate incorrect use
+	of ``current_gdbarch''.
+
 2002-02-17  Tom Tromey  <tromey@redhat.com>
 
 	* cli/cli-cmds.c (compare_strings): New function.
