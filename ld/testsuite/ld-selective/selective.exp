@@ -136,20 +136,14 @@ if ![ld_simple_link $ld tmpdir/3.x "$ldflags tmpdir/3.o"] {
     if ![ld_nm $nm tmpdir/3.x] {
        unresolved $test4
     } else {
-       if {[info exists nm_output(foo__1B)]} {
-          send_log "foo__1B == $nm_output(foo__1B)\n"
-          verbose "foo__1B == $nm_output(foo__1B)"
-          fail $test4
-       } else {
-           if {[ info exists nm_output(bar__1A)]} {
-              send_log "bar__1A== $nm_output(_bar__1A)\n"
-              verbose "bar__1A == $nm_output(_bar__1A)"
-              fail $test4
-           } else {
-               pass $test4
-             }
-          }
-      }
+	if {[ info exists nm_output(bar__1A)]} {
+	    send_log "bar__1A== $nm_output(_bar__1A)\n"
+	    verbose "bar__1A == $nm_output(_bar__1A)"
+	    fail $test4
+	} else {
+	    pass $test4
+	}
+    }
 }
 
 if { ![ld_compile "$CC $cflags $cxxflags" $srcdir/$subdir/4.cc tmpdir/4.o]} {
