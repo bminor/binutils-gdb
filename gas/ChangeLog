@@ -2,6 +2,7 @@ Thu Dec 12 16:40:47 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* write.c (adjust_reloc_syms): Make sure that symbols are
 	resolved; expression symbols may have been skipped.
+	* config/obj-coff.c (fixup_segment): Likewise.
 
 Thu Dec 12 15:18:21 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 

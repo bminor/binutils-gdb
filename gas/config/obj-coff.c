@@ -22,7 +22,6 @@
 #include "as.h"
 #include "obstack.h"
 #include "subsegs.h"
-#include "libiberty.h"
 
 /* I think this is probably always correct.  */
 #ifndef KEEP_RELOC_INFO
@@ -1654,6 +1653,7 @@ do_relocs_for (abfd, h, file_cursor)
 		      /* Turn the segment of the symbol into an offset.  */
 		      if (symbol_ptr)
 			{
+			  resolve_symbol_value (symbol_ptr);
 			  if (! symbol_ptr->sy_resolved)
 			    {
 			      char *file;
@@ -3839,6 +3839,13 @@ fixup_segment (segP, this_segment_type)
 	  fixP->fx_addsy = add_symbolP = tc_get_bal_of_call (add_symbolP);
 	}
 #endif
+
+      /* Make sure the symbols have been resolved; this may not have
+         happened if these are expression symbols.  */
+      if (add_symbolP != NULL && ! add_symbolP->sy_resolved)
+	resolve_symbol_value (add_symbolP);
+      if (sub_symbolP != NULL && ! sub_symbolP->sy_resolved)
+	resolve_symbol_value (sub_symbolP);
 
       if (add_symbolP != NULL
 	  && add_symbolP->sy_mri_common)
