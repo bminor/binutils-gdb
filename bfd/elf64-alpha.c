@@ -2105,6 +2105,12 @@ elf64_alpha_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
 {
   asection *msec;
 
+  if (_bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
+				     filename_ptr, functionname_ptr,
+				     line_ptr, 0,
+				     &elf_tdata (abfd)->dwarf2_find_line_info))
+    return true;
+
   msec = bfd_get_section_by_name (abfd, ".mdebug");
   if (msec != NULL)
     {
