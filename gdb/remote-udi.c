@@ -1,4 +1,4 @@
-/* Remote debugging interface for Am290*0 running MiniMON monitor, for GDB.
+/* Remote debugging interface for AMD 29k interfaced via UDI, for GDB.
    Copyright 1990, 1992 Free Software Foundation, Inc.
    Written by Daniel Mann.  Contributed by AMD.
 
@@ -18,9 +18,13 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* This is like remote.c but expects MiniMON to be running on the Am29000 
-   target hardware.
- - Originally written by Daniel Mann at AMD for gdb 3.91.6.
+/* This is like remote.c but uses the Universal Debug Interface (UDI) to 
+   talk to the target hardware (or simulator).  UDI is a TCP/IP based
+   protocol; for hardware that doesn't run TCP, an interface adapter 
+   daemon talks UDI on one side, and talks to the hardware (typically
+   over a serial port) on the other side.
+
+ - Originally written by Daniel Mann at AMD for MiniMON and gdb 3.91.6.
  - David Wood (wood@lab.ultra.nyu.edu) at New York University adapted this
 	file to gdb 3.95.  I was unable to get this working on sun3os4
 	with termio, only with sgtty.  Because we are only attempting to
@@ -29,7 +33,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	As a result this module has only the stubs to download files. 
 	You should get tagged at compile time if you need to make any 
 	changes/additions.
-*- Daniel Mann at AMD took the 3.95 adaptions above and replaced
+ - Daniel Mann at AMD took the 3.95 adaptions above and replaced
    	MiniMON interface with UDI-p interface.	  */
  
 #include "defs.h"
@@ -1324,7 +1328,7 @@ int   QuietMode = 0;		/* used for debugging */
  */
 static struct target_ops udi_ops = {
         "udi", "Remote UDI connected TIP",
-	"Remote debug an Am290*0 using socket connection to TIP process ",
+	"Remote debug an AMD 29k using UDI socket connection to TIP process",
         udi_open, udi_close,
         udi_attach, udi_detach, udi_resume, udi_wait,
         udi_fetch_registers, udi_store_registers,
