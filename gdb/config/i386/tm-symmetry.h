@@ -1,7 +1,7 @@
 /* Target machine definitions for GDB on a Sequent Symmetry under dynix 3.0,
    with Weitek 1167 and i387 support.
    Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
-   Symmetry version by Jay Vosburgh (uunet!sequent!fubar).
+   Symmetry version by Jay Vosburgh (fubar@sequent.com).
 
 This file is part of GDB.
 
@@ -21,46 +21,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* I don't know if this will work for cross-debugging, even if you do get
    a copy of the right include file.  */
+#ifdef _SEQUENT_
+/* ptx */
+#include <sys/reg.h>
+#else
+/* dynix */
 #include <machine/reg.h>
+#endif
 
-#define TARGET_BYTE_ORDER LITTLE_ENDIAN
+#ifdef _SEQUENT_
+/* ptx, not dynix */
+#define SDB_REG_TO_REGNUM(value) ptx_coff_regno_to_gdb(value)
+extern int ptx_coff_regno_to_gdb();
+#endif /* _SEQUENT_ */
 
-/* Offset from address of function to start of its code.
-   Zero on most machines.  */
-
-#define FUNCTION_START_OFFSET 0
-
-/* Advance PC across any function entry prologue instructions
-   to reach some "real" code.  From m-i386.h */
-
-#define SKIP_PROLOGUE(frompc)   {(frompc) = i386_skip_prologue((frompc));}
-
-extern int
-i386_skip_prologue PARAMS ((int));
-
-/* Immediately after a function call, return the saved pc.
-   Can't always go through the frames for this because on some machines
-   the new frame is not set up until the new function executes
-   some instructions.  */
-
-#define SAVED_PC_AFTER_CALL(frame) \
-  read_memory_integer(read_register(SP_REGNUM), 4)
-
-/* I don't know the real values for these.  */
-#define TARGET_UPAGES UPAGES
-#define TARGET_NBPG NBPG
-
-/* Address of end of stack space.  */
-
-#define STACK_END_ADDR (0x40000000 - (TARGET_UPAGES * TARGET_NBPG))
-
-/* Stack grows downward.  */
-
-#define INNER_THAN <
-
-/* Sequence of bytes for breakpoint instruction.  */
-
-#define BREAKPOINT {0xcc}
+#define START_INFERIOR_TRAPS_EXPECTED 2
 
 /* Amount PC must be decremented by after a breakpoint.
    This is often the number of bytes in BREAKPOINT
@@ -68,16 +43,14 @@ i386_skip_prologue PARAMS ((int));
 
 #define DECR_PC_AFTER_BREAK 0
 
+#include "i386/tm-i386v.h"
+
 /* Nonzero if instruction at PC is a return instruction.  */
 /* For Symmetry, this is really the 'leave' instruction, which */
 /* is right before the ret */
 
+#undef
 #define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 1) == 0xc9)
-
-/* Return 1 if P points to an invalid floating point value.
-*/
-
-#define INVALID_FLOAT(p, len) (0)
 
 #if 0
  --- this code can't be used unless we know we are running native,
@@ -88,11 +61,8 @@ i386_skip_prologue PARAMS ((int));
 #define FLOAT_INFO { i386_float_info(); }
 #endif
 
-/* Say how long (ordinary) registers are.  */
-
-#define REGISTER_TYPE long
-
 /* Number of machine registers */
+#undef NUM_REGS
 #define NUM_REGS 49
 
 /* Initializer for an array of names of registers.
@@ -104,6 +74,7 @@ i386_skip_prologue PARAMS ((int));
    Also note that the st(0)...st(7) 387 registers are represented as
    st0...st7.  */
 
+#undef REGISTER_NAMES
 #define REGISTER_NAMES { "eax", "edx", "ecx", "st0", "st1", \
 			     "ebx", "esi", "edi", "st2", "st3", \
 			     "st4", "st5", "st6", "st7", "esp", \
@@ -122,20 +93,146 @@ i386_skip_prologue PARAMS ((int));
    to be actual register numbers as far as the user is concerned
    but do serve to get the desired values when passed to read_register.  */
 
+#define EAX_REGNUM	0
+#define EDX_REGNUM	1
+#define ECX_REGNUM	2
+#define ST0_REGNUM	3
+#define ST1_REGNUM	4
+#define EBX_REGNUM	5
+#define ESI_REGNUM	6
+#define EDI_REGNUM	7
+#define ST2_REGNUM	8
+#define ST3_REGNUM	9
+
+#define ST4_REGNUM	10
+#define ST5_REGNUM	11
+#define ST6_REGNUM	12
+#define ST7_REGNUM	13
+
 #define FP1_REGNUM 18		/* first 1167 register */
+/* Get %fp2 - %fp31 by addition, since they are contiguous */
+
+#undef SP_REGNUM
 #define SP_REGNUM 14		/* Contains address of top of stack */
+#undef FP_REGNUM
 #define FP_REGNUM 15		/* Contains address of executing stack frame */
+#undef PC_REGNUM
 #define PC_REGNUM 16		/* Contains program counter */
+#undef PS_REGNUM
 #define PS_REGNUM 17		/* Contains processor status */
 
+#ifndef _SEQUENT_
+/* dynix, not ptx.  For ptx, see register_addr in symm-tdep.c */
+
+/* The magic numbers below are offsets into u_ar0 in the user struct.
+ * They live in <machine/reg.h>.  Gdb calls this macro with blockend
+ * holding u.u_ar0 - KERNEL_U_ADDR.  Only the registers listed are
+ * saved in the u area (along with a few others that aren't useful
+ * here.  See <machine/reg.h>).
+ */
+
+#define REGISTER_U_ADDR(addr, blockend, regno) \
+{ struct user foo;	/* needed for finding fpu regs */ \
+switch (regno) { \
+    case 0: \
+      addr = blockend + EAX * sizeof(int); break; \
+  case 1: \
+      addr = blockend + EDX * sizeof(int); break; \
+  case 2: \
+      addr = blockend + ECX * sizeof(int); break; \
+  case 3:			/* st(0) */ \
+      addr = blockend - \
+	  ((int)&foo.u_fpusave.fpu_stack[0][0] - (int)&foo); \
+      break; \
+  case 4:			/* st(1) */ \
+      addr = blockend - \
+	  ((int) &foo.u_fpusave.fpu_stack[1][0] - (int)&foo); \
+      break; \
+  case 5: \
+      addr = blockend + EBX * sizeof(int); break; \
+  case 6: \
+      addr = blockend + ESI * sizeof(int); break; \
+  case 7: \
+      addr = blockend + EDI * sizeof(int); break; \
+  case 8:			/* st(2) */ \
+      addr = blockend - \
+	  ((int) &foo.u_fpusave.fpu_stack[2][0] - (int)&foo); \
+      break; \
+  case 9:			/* st(3) */ \
+      addr = blockend - \
+	  ((int) &foo.u_fpusave.fpu_stack[3][0] - (int)&foo); \
+      break; \
+  case 10:			/* st(4) */ \
+      addr = blockend - \
+	  ((int) &foo.u_fpusave.fpu_stack[4][0] - (int)&foo); \
+      break; \
+  case 11:			/* st(5) */ \
+      addr = blockend - \
+	  ((int) &foo.u_fpusave.fpu_stack[5][0] - (int)&foo); \
+      break; \
+  case 12:			/* st(6) */ \
+      addr = blockend - \
+	  ((int) &foo.u_fpusave.fpu_stack[6][0] - (int)&foo); \
+      break; \
+  case 13:			/* st(7) */ \
+      addr = blockend - \
+	  ((int) &foo.u_fpusave.fpu_stack[7][0] - (int)&foo); \
+      break; \
+  case 14: \
+      addr = blockend + ESP * sizeof(int); break; \
+  case 15: \
+      addr = blockend + EBP * sizeof(int); break; \
+  case 16: \
+      addr = blockend + EIP * sizeof(int); break; \
+  case 17: \
+      addr = blockend + FLAGS * sizeof(int); break; \
+  case 18:			/* fp1 */ \
+  case 19:			/* fp2 */ \
+  case 20:			/* fp3 */ \
+  case 21:			/* fp4 */ \
+  case 22:			/* fp5 */ \
+  case 23:			/* fp6 */ \
+  case 24:			/* fp7 */ \
+  case 25:			/* fp8 */ \
+  case 26:			/* fp9 */ \
+  case 27:			/* fp10 */ \
+  case 28:			/* fp11 */ \
+  case 29:			/* fp12 */ \
+  case 30:			/* fp13 */ \
+  case 31:			/* fp14 */ \
+  case 32:			/* fp15 */ \
+  case 33:			/* fp16 */ \
+  case 34:			/* fp17 */ \
+  case 35:			/* fp18 */ \
+  case 36:			/* fp19 */ \
+  case 37:			/* fp20 */ \
+  case 38:			/* fp21 */ \
+  case 39:			/* fp22 */ \
+  case 40:			/* fp23 */ \
+  case 41:			/* fp24 */ \
+  case 42:			/* fp25 */ \
+  case 43:			/* fp26 */ \
+  case 44:			/* fp27 */ \
+  case 45:			/* fp28 */ \
+  case 46:			/* fp29 */ \
+  case 47:			/* fp30 */ \
+  case 48:			/* fp31 */ \
+     addr = blockend - \
+	 ((int) &foo.u_fpasave.fpa_regs[(regno)-18] - (int)&foo); \
+  } \
+}
+#endif /* _SEQUENT_ */
+
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
 /* 10 i386 registers, 8 i387 registers, and 31 Weitek 1167 registers */
+#undef REGISTER_BYTES
 #define REGISTER_BYTES ((10 * 4) + (8 * 10) + (31 * 4))
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
+#undef REGISTER_BYTE
 #define REGISTER_BYTE(N) 		\
 ((N < 3) ? (N * 4) :			\
 (N < 5) ? (((N - 2) * 10) + 2) :	\
@@ -148,6 +245,7 @@ i386_skip_prologue PARAMS ((int));
  * which are 80 bits each. 
  */
 
+#undef REGISTER_RAW_SIZE
 #define REGISTER_RAW_SIZE(N) \
 ((N < 3) ? 4 :	\
 (N < 5) ? 10 :	\
@@ -155,22 +253,15 @@ i386_skip_prologue PARAMS ((int));
 (N < 14) ? 10 :	\
     4)
 
-/* Number of bytes of storage in the program's representation
-   for register N.  On the vax, all regs are 4 bytes.  */
-
-#define REGISTER_VIRTUAL_SIZE(N) 4
-
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
+#undef MAX_REGISTER_RAW_SIZE
 #define MAX_REGISTER_RAW_SIZE 10
-
-/* Largest value REGISTER_VIRTUAL_SIZE can have.  */
-
-#define MAX_REGISTER_VIRTUAL_SIZE 4
 
 /* Nonzero if register N requires conversion
    from raw format to virtual format.  */
 
+#undef REGISTER_CONVERTIBLE
 #define REGISTER_CONVERTIBLE(N) \
 ((N < 3) ? 0 : \
 (N < 5) ? 1  : \
@@ -181,6 +272,7 @@ i386_skip_prologue PARAMS ((int));
 /* Convert data from raw format for register REGNUM
    to virtual format for register REGNUM.  */
 
+#undef REGISTER_CONVERT_TO_VIRTUAL
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO)	\
 ((REGNUM < 3) ? bcopy ((FROM), (TO), 4) : \
 (REGNUM < 5) ? i387_to_double((FROM), (TO)) : \
@@ -194,6 +286,7 @@ i387_to_double PARAMS ((char *, char *));
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 
+#undef REGISTER_CONVERT_TO_RAW
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
 ((REGNUM < 3) ? bcopy ((FROM), (TO), 4) : \
 (REGNUM < 5) ? double_to_i387((FROM), (TO)) : \
@@ -207,6 +300,7 @@ double_to_i387 PARAMS ((char *, char *));
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
+#undef REGISTER_VIRTUAL_TYPE
 #define REGISTER_VIRTUAL_TYPE(N) \
 ((N < 3) ? builtin_type_int : \
 (N < 5) ? builtin_type_double : \
@@ -214,10 +308,13 @@ double_to_i387 PARAMS ((char *, char *));
 (N < 14) ? builtin_type_double : \
     builtin_type_int)
 
-/* from m-i386.h */
+/* from m-i386.h (now known as tm-i386v.h).  */
 /* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function. */
+   subroutine will return.  This is called from call_function.  FIXME:
+   Why is it writing register 0?  Is the symmetry different from tm-i386v.h,
+   or is it some sort of artifact?  FIXME.  */
 
+#undef STORE_STRUCT_RETURN
 #define STORE_STRUCT_RETURN(ADDR, SP) \
   { (SP) -= sizeof (ADDR);		\
     write_memory ((SP), &(ADDR), sizeof (ADDR)); \
@@ -227,111 +324,13 @@ double_to_i387 PARAMS ((char *, char *));
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
+#undef EXTRACT_RETURN_VALUE
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   symmetry_extract_return_value(TYPE, REGBUF, VALBUF)
 
-/* Write into appropriate registers a function return value
-   of type TYPE, given in virtual format.  */
-
-#define STORE_RETURN_VALUE(TYPE,VALBUF) \
-  write_register_bytes (0, VALBUF, TYPE_LENGTH (TYPE))
-
-/* Extract from an array REGBUF containing the (raw) register state
-   the address in which a function should return its structure value,
-   as a CORE_ADDR (or an expression that can be used as one).  */
-
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF))
-
 
-/* Describe the pointer in each stack frame to the previous stack frame
-   (its caller).  */
-
-/* FRAME_CHAIN takes a frame's nominal address
-   and produces the frame's chain-pointer.
-
-   However, if FRAME_CHAIN_VALID returns zero,
-   it means the given frame is the outermost one and has no caller.  */
-
-/* On Symmetry, %ebp points to caller's %ebp, and the return address
-   is right on top of that.  */
-
-#define FRAME_CHAIN(thisframe)  \
-  (!inside_entry_file ((thisframe)->pc) ? \
-   read_memory_integer((thisframe)->frame, 4) :\
-   0)
-
-#define FRAME_CHAIN_VALID(chain, thisframe) \
-  (chain != 0)
-
-/* Define other aspects of the stack frame.  */
-
-/* A macro that tells us whether the function invocation represented
-   by FI does not have a frame on the stack associated with it.  If it
-   does not, FRAMELESS is set to 1, else 0.  */
-#define FRAMELESS_FUNCTION_INVOCATION(FI, FRAMELESS) \
-  (FRAMELESS) = frameless_look_for_prologue(FI)
-
-#define FRAME_SAVED_PC(fi) (read_memory_integer((fi)->frame + 4, 4))
-
-#define FRAME_ARGS_ADDRESS(fi) ((fi)->frame)
-
-#define FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
-
-/* Return number of args passed to a frame.
-   Can return -1, meaning no way to tell.
-  
-   The weirdness in the "addl $imm8" case is due to gcc sometimes
-   issuing "addl $-int" after function call returns; this would
-   produce ridiculously huge arg counts.  */
-
-#define FRAME_NUM_ARGS(numargs, fi)  \
-{ \
-  int op = read_memory_integer(FRAME_SAVED_PC((fi)), 4); \
-  int narg; \
-  if ((op & 0xff) == 0x59) /* 0x59  'popl %ecx' */ \
-    { \
-      numargs = 1; \
-    } \
-  else if ((op & 0xffff) == 0xc483) /* 0xc483 'addl $imm8' */ \
-    { \
-      narg = ((op >> 16) & 0xff); \
-      numargs = (narg >= 128) ? -1 : narg / 4; \
-    } \
-  else if ((op & 0xffff) == 0xc481) /* 0xc481 'addl $imm32' */ \
-    { \
-      narg = read_memory_integer(FRAME_SAVED_PC((fi))+2,4); \
-      numargs = (narg < 0) ? -1 : narg / 4; \
-    } \
-  else \
-    { \
-      numargs = -1; \
-    } \
-}
-
-/* Return number of bytes at start of arglist that are not really args.  */
-
-#define FRAME_ARGS_SKIP 8
-
-/* Put here the code to store, into a struct frame_saved_regs,
-   the addresses of the saved registers of frame described by FRAME_INFO.
-   This includes special registers such as pc and fp saved in special
-   ways in the stack frame.  sp is even more special:
-   the address we return for it IS the sp for the next frame.  */
-
-#define FRAME_FIND_SAVED_REGS(frame_info, frame_saved_regs) \
-{ i386_frame_find_saved_regs ((frame_info), &(frame_saved_regs)); }
-
-#ifdef __STDC__		/* Forward decl's for prototypes */
-struct frame_info;
-struct frame_saved_regs;
-#endif
-
-extern void
-i386_frame_find_saved_regs PARAMS ((struct frame_info *,
-				    struct frame_saved_regs *));
-
-
-/* Things needed for making the inferior call functions.  */
+/* Things needed for making the inferior call functions.  FIXME: Merge
+   this with the main 386 stuff.  */
 
 #define PUSH_DUMMY_FRAME \
 {  CORE_ADDR sp = read_register (SP_REGNUM); \

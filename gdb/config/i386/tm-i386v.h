@@ -225,7 +225,7 @@ i386_skip_prologue PARAMS ((int));
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-#define FRAME_NUM_ARGS(numargs, fi) (numargs) = i386_frame_num_args(fi)
+#define FRAME_NUM_ARGS(numargs, fi) (numargs) = -1
 
 #ifdef __STDC__		/* Forward decl's for prototypes */
 struct frame_info;

@@ -809,7 +809,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	remote-udi.c remote-vx.c remote-z8k.c rs6000-nat.c rs6000-pinsn.c \
 	rs6000-tdep.c ser-go32.c ser-tcp.c sh-tdep.c solib.c sparc-nat.c \
 	sparc-pinsn.c sparc-tdep.c sun3-nat.c sun386-nat.c symm-tdep.c \
-	symm-xdep.c tahoe-pinsn.c ultra3-nat.c ultra3-xdep.c umax-xdep.c \
+	symm-nat.c tahoe-pinsn.c ultra3-nat.c ultra3-xdep.c umax-xdep.c \
 	vax-pinsn.c vx-share/xdr_ld.c vx-share/xdr_ptrace.c vx-share/xdr_rdb.c \
 	xcoffexec.c xcoffread.c xcoffsolib.c z8k-tdep.c
 
@@ -1255,7 +1255,7 @@ symfile.o: symfile.c $(breakpoint_h) complaints.h $(defs_h) \
 	language.h objfiles.h symfile.h $(symtab_h) target.h
 
 symm-tdep.o: symm-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)	
-symm-xdep.o: symm-xdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
+symm-nat.o: symm-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
 
 symmisc.o: symmisc.c $(bfd_h) $(breakpoint_h) $(command_h) $(defs_h) \
 	$(expression_h) $(gdbtypes_h) language.h objfiles.h symfile.h \

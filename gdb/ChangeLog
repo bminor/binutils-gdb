@@ -1,5 +1,12 @@
 Sun Jul 18 15:22:45 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
 
+	* infptrace.c: Split out define of PT_KILL; Sequent defines PT_KILL
+	but not the others.
+	* symm-tdep.c: Remove exec_file_command.
+	[_SEQUENT_] (ptx_coff_regno_to_gdb, register_addr): New functions.
+	A few miscellaneous cleanups.
+	* symm-nat.c: Renamed from symm-xdep.c.
+
 	* mips-tdep.c (mips_skip_prologue): New argument lenient.
 	Use read_memory_nobpt.
 	(is_delayed, mips_in_lenient_prologue): New functions.

@@ -35,7 +35,8 @@ hppa*-hp-bsd*)		gdb_host=hppabsd ;;
 hppa*-hp-hpux*)		gdb_host=hppahpux ;;
 
 i[34]86-ncr-*)		gdb_host=ncr3000 ;;
-i[34]86-sequent-*)	gdb_host=symmetry ;;
+i[34]86-sequent-bsd*)	gdb_host=symmetry ;; #dynix
+i[34]86-sequent-sysv*)	gdb_host=ptx ;;
 
 i[34]86-*-aix*)		gdb_host=i386aix ;;
 i[34]86-*-bsd*)		gdb_host=i386bsd ;;

@@ -39,105 +39,6 @@ static i386_follow_jump ();
 #include <sgtty.h>
 #define TERMINAL struct sgttyb
 
-exec_file_command (filename, from_tty)
-     char *filename;
-     int from_tty;
-{
-  int val;
-
-  /* Eliminate all traces of old exec file.
-     Mark text segment as empty.  */
-
-  if (execfile)
-    free (execfile);
-  execfile = 0;
-  data_start = 0;
-  data_end -= exec_data_start;
-  text_start = 0;
-  text_end = 0;
-  exec_data_start = 0;
-  exec_data_end = 0;
-  if (execchan >= 0)
-    close (execchan);
-  execchan = -1;
-
-  /* Now open and digest the file the user requested, if any.  */
-
-  if (filename)
-    {
-      filename = tilde_expand (filename);
-      make_cleanup (free, filename);
-      
-      execchan = openp (getenv ("PATH"), 1, filename, O_RDONLY, 0,
-			&execfile);
-      if (execchan < 0)
-	perror_with_name (filename);
-
-#ifdef COFF_FORMAT
-      {
-	int aout_hdrsize;
-	int num_sections;
-
-	if (read_file_hdr (execchan, &file_hdr) < 0)
-	  error ("\"%s\": not in executable format.", execfile);
-
-	aout_hdrsize = file_hdr.f_opthdr;
-	num_sections = file_hdr.f_nscns;
-
-	if (read_aout_hdr (execchan, &exec_aouthdr, aout_hdrsize) < 0)
-	  error ("\"%s\": can't read optional aouthdr", execfile);
-
-	if (read_section_hdr (execchan, _TEXT, &text_hdr, num_sections,
-			      aout_hdrsize) < 0)
-	  error ("\"%s\": can't read text section header", execfile);
-
-	if (read_section_hdr (execchan, _DATA, &data_hdr, num_sections,
-			      aout_hdrsize) < 0)
-	  error ("\"%s\": can't read data section header", execfile);
-
-	text_start = exec_aouthdr.text_start;
-	text_end = text_start + exec_aouthdr.tsize;
-	text_offset = text_hdr.s_scnptr;
-	exec_data_start = exec_aouthdr.data_start;
-	exec_data_end = exec_data_start + exec_aouthdr.dsize;
-	exec_data_offset = data_hdr.s_scnptr;
-	data_start = exec_data_start;
-	data_end += exec_data_start;
-	exec_mtime = file_hdr.f_timdat;
-      }
-#else /* not COFF_FORMAT */
-      {
-	struct stat st_exec;
-
-	val = myread (execchan, &exec_aouthdr, sizeof (AOUTHDR));
-
-	if (val < 0)
-	  perror_with_name (filename);
-
-	text_start = N_ADDRADJ(exec_aouthdr);
-        exec_data_start = round(exec_aouthdr.a_text, NBPG*CLSIZE);
-	text_offset = N_TXTOFF (exec_aouthdr);
-	exec_data_offset = N_TXTOFF (exec_aouthdr) + exec_aouthdr.a_text;
-	text_end = exec_aouthdr.a_text;
-        exec_data_end = exec_data_start + exec_aouthdr.a_data;
-	data_start = exec_data_start;
-	data_end = data_start + exec_aouthdr.a_data;
-	exec_data_offset = N_TXTOFF(exec_aouthdr);
-	fstat (execchan, &st_exec);
-	exec_mtime = st_exec.st_mtime;
-      }
-#endif /* not COFF_FORMAT */
-
-      validate_files ();
-    }
-  else if (from_tty)
-    printf ("No exec file now.\n");
-
-  /* Tell display code (if any) about the changed file name.  */
-  if (exec_file_display_hook)
-    (*exec_file_display_hook) (filename);
-}
-
 /* rounds 'one' up to divide evenly by 'two' */
 
 int
@@ -229,7 +130,7 @@ i386_frame_find_saved_regs (fip, fsrp)
   CORE_ADDR adr;
   int i;
   
-  bzero (fsrp, sizeof *fsrp);
+  memset (fsrp, 0, sizeof *fsrp);
   
   /* if frame is the end of a dummy, compute where the
    * beginning would be
@@ -301,9 +202,9 @@ i386_get_frame_setup (pc)
       static unsigned char proto2[4] = { 0x87,0x44,0x24,0x00 };
       pos = codestream_tell ();
       codestream_read (buf, 4);
-      if (bcmp (buf, proto1, 3) == 0)
+      if (memcmp (buf, proto1, 3) == 0)
 	pos += 3;
-      else if (bcmp (buf, proto2, 4) == 0)
+      else if (memcmp (buf, proto2, 4) == 0)
 	pos += 4;
       
       codestream_seek (pos);
@@ -434,6 +335,7 @@ i386_skip_prologue (pc)
   return (codestream_tell ());
 }
 
+void
 symmetry_extract_return_value(type, regbuf, valbuf)
      struct type *type;
      char *regbuf;
@@ -456,11 +358,13 @@ symmetry_extract_return_value(type, regbuf, valbuf)
       xd.l[0] = *((int *)&regbuf[REGISTER_BYTE(20)]);
       switch (TYPE_LENGTH(type)) {
       case 4:
+	/* FIXME: broken for cross-debugging.  */
 	f = (float) xd.d;
-	bcopy(&f, valbuf, TYPE_LENGTH(type));
+	memcpy (valbuf, &f, TYPE_LENGTH(type));
 	break;
       case 8:
-	bcopy(&xd.d, valbuf, TYPE_LENGTH(type)); 
+	/* FIXME: broken for cross-debugging.  */
+	memcpy (valbuf, &xd.d, TYPE_LENGTH(type)); 
 	break;
       default:
 	error("Unknown floating point size");
@@ -473,17 +377,113 @@ symmetry_extract_return_value(type, regbuf, valbuf)
       switch (TYPE_LENGTH(type)) {
       case 4:			/* float */
 	f = (float) xd.d;
-	bcopy(&f, valbuf, 4); 
+	/* FIXME: broken for cross-debugging.  */
+	memcpy (valbuf, &f, 4); 
 	break;
       case 8:			/* double */
-	bcopy(&xd.d, valbuf, 8);
+	/* FIXME: broken for cross-debugging.  */
+	memcpy (valbuf, &xd.d, 8);
 	break;
       default:
 	error("Unknown floating point size");
 	break;
       }
     }
-  } else { 
-    bcopy (regbuf, valbuf, TYPE_LENGTH (type)); 
+  } else {
+    memcpy (valbuf, regbuf, TYPE_LENGTH (type)); 
   }
 }
+
+#ifdef _SEQUENT_ /* ptx, not dynix */
+/*
+ * Convert compiler register number to gdb internal
+ * register number.  The PTX C compiler only really
+ * puts things in %edi, %esi and %ebx, but it can't hurt
+ * to be complete here.
+ */
+int
+ptx_coff_regno_to_gdb(regno)
+     int regno;
+{
+  return I386_REGNO_TO_SYMMETRY(regno);
+}
+
+/* For ptx, the value in blockend will be meaningless.  This function
+   merely returns the proper offset given the register number.  This
+   is much easier, because under ptx, the upage is set up with the
+   user struct on "top", and the registers "beneath" it (and thus defines
+   TRAD_CORE_USER_OFFSET in bfd).  */
+
+/* The following table is for ptx 1.3.  In theory it should not change with
+   the OS version, but if it does we should (if possible) figure out a way
+   to accept both the old and the new formats.  */
+
+static unsigned int reg_offsets[NUM_REGS] = {
+/*
+ * u.u_ar0 = 0xfffff8d0
+ * VA_UBLOCK = 0xffffe000
+ * VA_UAREA = 0xfffff8e8
+ * struct user at ublock offset 0x18e8
+ * registers at ublock offset 0x18d0
+ */
+0x18d0, /* eax */
+0x18c8, /* eax */
+0x18cc, /* eax */
+0x1be0, /* st0 */
+0x1bea, /* st1 */
+0x18c4, /* ebx */
+0x18b8, /* esi */
+0x18b4, /* edi */
+0x1bf4, /* st2 */
+0x1bfe, /* st3 */
+0x1c08, /* st4 */
+0x1c12, /* st5 */
+0x1c1c, /* st6 */
+0x1c26, /* st7 */
+0x18e0, /* esp */
+0x18bc, /* ebp */
+0x18d4, /* eip */
+0x18dc, /* flags */
+0x1c38, /* fp1 */
+0x1c3c, /* fp2 */
+0x1c40, /* fp3 */
+0x1c44, /* fp4 */
+0x1c48, /* fp5 */
+0x1c4c, /* fp6 */
+0x1c50, /* fp7 */
+0x1c54, /* fp8 */
+0x1c58, /* fp9 */
+0x1c5c, /* fp10 */
+0x1c60, /* fp11 */
+0x1c64, /* fp12 */
+0x1c68, /* fp13 */
+0x1c6c, /* fp14 */
+0x1c70, /* fp15 */
+0x1c74, /* fp16 */
+0x1c78, /* fp17 */
+0x1c7c, /* fp18 */
+0x1c80, /* fp19 */
+0x1c84, /* fp20 */
+0x1c88, /* fp21 */
+0x1c8c, /* fp22 */
+0x1c90, /* fp23 */
+0x1c94, /* fp24 */
+0x1c98, /* fp25 */
+0x1c9c, /* fp26 */
+0x1ca0, /* fp27 */
+0x1ca4, /* fp28 */
+0x1ca8, /* fp29 */
+0x1cac, /* fp30 */
+0x1cb0, /* fp31 */
+};
+
+unsigned int
+register_addr (regno, blockend)
+     int regno, blockend;
+{
+  if ((regno < 0) || (regno >= NUM_REGS)) {
+    error("Invalid register number %d.", regno);
+  }
+  return reg_offsets[regno];
+}
+#endif /* _SEQUENT_ */

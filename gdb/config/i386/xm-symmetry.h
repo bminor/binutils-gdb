@@ -1,6 +1,6 @@
-/* Definitions to make GDB run on a Sequent Symmetry under dynix 3.0,
-   with Weitek 1167 and i387 support.
-   Copyright 1986, 1987, 1989, 1992  Free Software Foundation, Inc.
+/* Definitions to make GDB run on a Sequent Symmetry under
+   dynix 3.1 and ptx 1.3, with Weitek 1167 and i387 support.
+   Copyright 1986, 1987, 1989, 1992, 1993  Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -18,12 +18,25 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* Symmetry version by Jay Vosburgh (uunet!sequent!fubar) */
+/* Symmetry version by Jay Vosburgh (fubar@sequent.com) */
 
 /* This machine doesn't have the siginterrupt call.  */
 #define NO_SIGINTERRUPT
 
 #define HAVE_WAIT_STRUCT
+
+#ifdef _SEQUENT_
+/* ptx */
+#define HAVE_TERMIO
+#define USG
+#else
+/* dynix */
+
+/* Get rid of any system-imposed stack limit if possible.  */
+
+#define SET_STACK_LIMIT_HUGE
+
+#endif
 
 /* XPT_DEBUG doesn't work yet under Dynix 3.0.12, but UNDEBUG does... */
 /* #define PTRACE_ATTACH XPT_DEBUG
@@ -31,116 +44,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define ATTACH_DETACH  */
 
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
-
-/* Get rid of any system-imposed stack limit if possible.  */
-
-#define SET_STACK_LIMIT_HUGE
-
-/* This is the amount to subtract from u.u_ar0
-   to get the offset in the core file of the register values.  */
-
-#define KERNEL_U_ADDR (0x80000000 - (UPAGES * NBPG))
-
-/* The magic numbers below are offsets into u_ar0 in the user struct.
-   They live in <machine/reg.h>.  Gdb calls this macro with blockend
-   holding u.u_ar0 - KERNEL_U_ADDR.  Only the registers listed are
-   saved in the u area (along with a few others that aren't useful
-   here.  See <machine/reg.h>).  */
-
-#define REGISTER_U_ADDR(addr, blockend, regno) \
-{ struct user foo;	/* needed for finding fpu regs */ \
-switch (regno) { \
-    case 0: \
-      addr = blockend + EAX * sizeof(int); break; \
-  case 1: \
-      addr = blockend + EDX * sizeof(int); break; \
-  case 2: \
-      addr = blockend + ECX * sizeof(int); break; \
-  case 3:			/* st(0) */ \
-      addr = blockend - \
-	  ((int)&foo.u_fpusave.fpu_stack[0][0] - (int)&foo); \
-      break; \
-  case 4:			/* st(1) */ \
-      addr = blockend - \
-	  ((int) &foo.u_fpusave.fpu_stack[1][0] - (int)&foo); \
-      break; \
-  case 5: \
-      addr = blockend + EBX * sizeof(int); break; \
-  case 6: \
-      addr = blockend + ESI * sizeof(int); break; \
-  case 7: \
-      addr = blockend + EDI * sizeof(int); break; \
-  case 8:			/* st(2) */ \
-      addr = blockend - \
-	  ((int) &foo.u_fpusave.fpu_stack[2][0] - (int)&foo); \
-      break; \
-  case 9:			/* st(3) */ \
-      addr = blockend - \
-	  ((int) &foo.u_fpusave.fpu_stack[3][0] - (int)&foo); \
-      break; \
-  case 10:			/* st(4) */ \
-      addr = blockend - \
-	  ((int) &foo.u_fpusave.fpu_stack[4][0] - (int)&foo); \
-      break; \
-  case 11:			/* st(5) */ \
-      addr = blockend - \
-	  ((int) &foo.u_fpusave.fpu_stack[5][0] - (int)&foo); \
-      break; \
-  case 12:			/* st(6) */ \
-      addr = blockend - \
-	  ((int) &foo.u_fpusave.fpu_stack[6][0] - (int)&foo); \
-      break; \
-  case 13:			/* st(7) */ \
-      addr = blockend - \
-	  ((int) &foo.u_fpusave.fpu_stack[7][0] - (int)&foo); \
-      break; \
-  case 14: \
-      addr = blockend + ESP * sizeof(int); break; \
-  case 15: \
-      addr = blockend + EBP * sizeof(int); break; \
-  case 16: \
-      addr = blockend + EIP * sizeof(int); break; \
-  case 17: \
-      addr = blockend + FLAGS * sizeof(int); break; \
-  case 18:			/* fp1 */ \
-  case 19:			/* fp2 */ \
-  case 20:			/* fp3 */ \
-  case 21:			/* fp4 */ \
-  case 22:			/* fp5 */ \
-  case 23:			/* fp6 */ \
-  case 24:			/* fp7 */ \
-  case 25:			/* fp8 */ \
-  case 26:			/* fp9 */ \
-  case 27:			/* fp10 */ \
-  case 28:			/* fp11 */ \
-  case 29:			/* fp12 */ \
-  case 30:			/* fp13 */ \
-  case 31:			/* fp14 */ \
-  case 32:			/* fp15 */ \
-  case 33:			/* fp16 */ \
-  case 34:			/* fp17 */ \
-  case 35:			/* fp18 */ \
-  case 36:			/* fp19 */ \
-  case 37:			/* fp20 */ \
-  case 38:			/* fp21 */ \
-  case 39:			/* fp22 */ \
-  case 40:			/* fp23 */ \
-  case 41:			/* fp24 */ \
-  case 42:			/* fp25 */ \
-  case 43:			/* fp26 */ \
-  case 44:			/* fp27 */ \
-  case 45:			/* fp28 */ \
-  case 46:			/* fp29 */ \
-  case 47:			/* fp30 */ \
-  case 48:			/* fp31 */ \
-     addr = blockend - \
-	 ((int) &foo.u_fpasave.fpa_regs[(regno)-18] - (int)&foo); \
-  } \
-}
-
-/* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
-
-#define FETCH_INFERIOR_REGISTERS
 
 /* We must fetch all the regs before storing, since we store all at once.  */
 
