@@ -552,9 +552,13 @@ static void
 dos_close (scb)
      serial_t scb;
 {
-    struct dos_ttystate *port = &ports[scb->fd];
+    struct dos_ttystate *port;
     struct intrupt *intrupt;
 
+    if (!scb)
+      return;
+
+    port = &ports[scb->fd];
     if (!(intrupt = port->intrupt))
       return;
 
@@ -768,6 +772,28 @@ dos_write (scb, str, len)
   return 0;
 }
 
+
+static int
+dos_sendbreak (scb)
+     serial_t scb;
+{
+  volatile struct dos_ttystate *port = &ports[scb->fd];
+  unsigned char cfcr;
+  long then;
+
+  cfcr = inb(port, com_cfcr);
+  outb(port, com_cfcr, cfcr | CFCR_SBREAK);
+
+  /* 0.25 sec delay */
+  then = rawclock () + RAWHZ / 4;
+  while ((rawclock () - then) < 0)
+    continue;
+
+  outb(port, com_cfcr, cfcr);
+  return 0;
+}
+
+
 static struct serial_ops dos_ops =
 {
   "hardwire",
@@ -778,7 +804,7 @@ static struct serial_ops dos_ops =
   dos_write,
   dos_noop,			/* flush output */
   dos_flush_input,
-  dos_noop,			/* send break -- currently used only for nindy */
+  dos_sendbreak,
   dos_raw,
   dos_get_tty_state,
   dos_set_tty_state,
@@ -800,12 +826,12 @@ dos_info (arg, from_tty)
     {
       if (port->baudrate == 0)
 	continue;
-      printf_filtered ("Port:\tCOM%d (%sactive)\n", port - ports,
+      printf_filtered ("Port:\tCOM%d (%sactive)\n", port - ports + 1,
 		       port->intrupt ? "" : "not ");
       printf_filtered ("Addr:\t0x%03x (irq %d)\n", port->base, port->irq);
       printf_filtered ("16550:\t%s\n", port->fifo ? "yes" : "no");
       printf_filtered ("Speed:\t%d baud\n", port->baudrate);
-      printf_filtered ("Errs:\tframing %d parity %d overflow %d\n", 
+      printf_filtered ("Errs:\tframing %d parity %d overflow %d\n\n", 
 		       port->ferr, port->perr, port->oflo);
     }
 
