@@ -254,7 +254,7 @@ seg_info_type seg_info_off_by_4[N_SEG] =
 #define SEG_INFO_FROM_SEG_NUMBER(x) (seg_info_off_by_4[(x)])
 
 
-relax_addressT
+static relax_addressT
 DEFUN (relax_align, (address, alignment),
        register relax_addressT address AND
        register long alignment)
