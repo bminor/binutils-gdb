@@ -501,6 +501,7 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 	    h->plt.refcount += 1;
 	  break;
 
+	case R_X86_64_64:
 	case R_X86_64_32:
 	case R_X86_64_32S:
 	case R_X86_64_PC32:
@@ -1435,6 +1436,7 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_X86_64_8:
 	case R_X86_64_16:
 	case R_X86_64_32:
+	case R_X86_64_64:
 	case R_X86_64_PC8:
 	case R_X86_64_PC16:
 	case R_X86_64_PC32:

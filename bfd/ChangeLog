@@ -1,3 +1,8 @@
+2001-05-29  Andreas Jaeger  <aj@suse.de>
+
+	* elf64-x86-64.c (elf64_x86_64_check_relocs): Handle R_X86_64_64.
+	(elf64_x86_64_relocate_section): Likewise.
+
 2001-05-30  Alan Modra  <amodra@one.net.au>
 
 	* elf32-hppa.c (elf32_hppa_check_relocs): Don't NEED_PLT for
