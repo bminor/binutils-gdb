@@ -1,3 +1,13 @@
+1998-07-19 15:15  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c: Fix several versioning related bugs.  Produce nicer
+	output.
+
+Fri Jul 10 15:57:58 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c: Switch prototypes from unsigned short to unsigned
+	int.
+
 Fri Jul 10 16:17:50 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Christian Holland <CHolland@de.lucent.com>:
@@ -26,7 +36,7 @@ Tue Jul  7 13:26:13 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 Thu Jul  2 14:01:34 1998  Klaus Kaempf  <kkaempf@rmi.de>
 
-	* configure.com: Add vax/vms support. 
+	* configure.com: Add vax/vms support.
 	* makefile.vms-in: Renamed from makefile.vms.  Add substitutions
 	now done by configure.com.
 
@@ -108,7 +118,7 @@ Tue Jun 23 11:08:53 1998  Nick Clifton  <nickc@cygnus.com>
 	<schwab@issan.informatik.uni-dortmund.de> including output
 	formatting and version info display.
 
-	* binutils.texi: Document --section-headers switch to readelf. 
+	* binutils.texi: Document --section-headers switch to readelf.
 
 Mon Jun 22 18:28:19 1998  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -203,7 +213,7 @@ Wed Jun  3 12:09:40 1998  Nick Clifton  <nickc@cygnus.com>
 
 	Replace calls to fprintf (stderr,...) with calls to fatal () or
 	non_fatal () as appropriate.
-	
+
 	* objcopy.1: Document command line option changes.
 	* binutils.texi: Document command line option changes.
 
@@ -212,9 +222,9 @@ Wed Jun  3 12:09:40 1998  Nick Clifton  <nickc@cygnus.com>
 	except that it returns rather than calling xexit().
 
 	(bfd_check_format_matches): Call fatal() rather than bfd_fatal().
-	
+
 	(check_matching_formats): Fix C formating.
-	
+
 	(parse_vma): Call fatal().
 
 Mon Jun  1 18:26:40 1998  Ian Lance Taylor  <ian@cygnus.com>
@@ -232,7 +242,7 @@ Thu May 14 14:00:56 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* dlltool.c: Add support for Thumb DLLs.  Add support for
 	interworking between ARM and Thumb programs and DLLs.  Tidy the
-	code. 
+	code.
 
 	* binutils.texi: Document dlltool.
 
@@ -249,7 +259,7 @@ Sun May 10 22:34:44 1998  Jeffrey A Law  (law@cygnus.com)
 Fri May  8 10:33:13 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* ar.c (usage): Extend information provided about command line
-	options. 
+	options.
 
 Wed May  6 15:28:51 1998  Klaus Kaempf  <kkaempf@progis.de>
 
@@ -1545,7 +1555,7 @@ Mon Jun 24 17:19:02 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
 	* Makefile.in (bindir, libdir, datadir, mandir, infodir, includedir,
 	INSTALL_PROGRAM, INSTALL_DATA): Use autoconf set values.
 	(docdir): Removed.
-	* configure.in (AC_PREREQ): Autoconf 2.5 or higher.	
+	* configure.in (AC_PREREQ): Autoconf 2.5 or higher.
 
 Mon Jun 24 11:59:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -2426,7 +2436,7 @@ Thu Nov 30 20:26:02 1995  Kim Knuttila  <krk@cygnus.com>
 	sinfo: added a preferred alignment field.
 	(secdata): section data for the PowerPC version.
 	(make_one_lib_file): More symbols, More sections (pdata, rdata)
-	(make_tail): Use idata$6 instead of idata$7 for ppc. Also added a 
+	(make_tail): Use idata$6 instead of idata$7 for ppc. Also added a
 	NULL idata$3 descriptor (temporary).
 
 Tue Nov 28 17:23:44 1995  Doug Evans  <dje@canuck.cygnus.com>
@@ -2794,7 +2804,7 @@ Tue Sep  5 20:22:42 1995  Ian Lance Taylor  <ian@cygnus.com>
 	* sysdump.c: Include "bfd.h" and "bucomm.h".  Don't include
 	"sysdep.h" or <stdlib.h>.
 	(dump_symbol_info): Rename from symbol_info.  Change all callers.
-	
+
 Mon Sep  4 14:30:00 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in (host_makefile_frag): Don't set.  Substitute for
@@ -2918,7 +2928,7 @@ Tue Jul 25 11:21:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 Mon Jul 24 13:52:28 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
 	* srconv.c (wr_hd): Set afl field to 4 for bfd_arch_sh.
-	(writeINT): When size == -2, use 2 bytes for the h8300 and 4 bytes 
+	(writeINT): When size == -2, use 2 bytes for the h8300 and 4 bytes
 	for the	sh.
 
 	* sysdump.c (fillup): Return size - 1, the last byte is a checksum
@@ -3006,7 +3016,7 @@ Wed Jul 12 10:40:23 1995  H.J. Lu  <hjl@nynexst.com>
 
 Tue Jul 11 13:10:52 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
-	* sysdump.c: re-indented file.  
+	* sysdump.c: re-indented file.
 	(module): read blocks sequentially instead of trying to parse
 	them, as that would require changing the parser recognize the
 	difference between a DPSstart and DPSend block.
@@ -3070,7 +3080,7 @@ Tue Jul  4 14:48:42 1995  Ian Lance Taylor  <ian@cygnus.com>
 Mon Jul  3 14:16:47 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* configure.in (i386-*-win32): New configuration.
-	* dlltool.c (killat, xlate, usage, long_options, main): 
+	* dlltool.c (killat, xlate, usage, long_options, main):
 	Understand and cope with -k option.
 
 Sat Jul  1 12:25:15 1995  Fred Fish  <fnf@cygnus.com>
@@ -3711,8 +3721,8 @@ Fri Jul 22 16:48:34 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 Fri Jul 22 10:36:50 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
-	* coffgrok.c (doit):  Zero all fields of new structure.	
-	* srconv.c (sysroff_swap_*_out): Remove redundant trailing arg. 
+	* coffgrok.c (doit):  Zero all fields of new structure.
+	* srconv.c (sysroff_swap_*_out): Remove redundant trailing arg.
 	* sysinfo.y: Generate sysroff_swap_*_out without requiring extra
 	arg.
 
@@ -4197,7 +4207,7 @@ Sun Feb 20 18:47:42 1994  Ian Lance Taylor  (ian@lisa.cygnus.com)
 
 Thu Feb 17 09:28:23 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
-	* ar.c, bucomm.c, nlmconv.c, nm.c, objcopy.c, objdump.c, 
+	* ar.c, bucomm.c, nlmconv.c, nm.c, objcopy.c, objdump.c,
 	size.c: Use bfd_get_error and bfd_set_error and new error names.
 
 Fri Feb 11 15:54:51 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
@@ -4228,7 +4238,7 @@ Wed Feb  2 13:42:23 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* nlmconv.c (main): Use bfd_get_flavour instead of struct member.
 	* ar.c (print_contents, extract_file), size.c
-	(print_berkeley_format, print_sysv_format): Use bfd_get_filename and 
+	(print_berkeley_format, print_sysv_format): Use bfd_get_filename and
 	bfd_my_archive instead of dereferencing the structs directly.
 
 	* ar.c: Use bfd_fatal and bfd_nonfatal instead of bfd_perror and exit.
@@ -4242,7 +4252,7 @@ Wed Feb  2 13:42:23 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 	bfd_nonfatal instead of hardcoded error message if nothing matches.
 
 	* arsup.c, ar.c, objdump.c: Use bfd_get_filename instead of
-	abfd->filename. 
+	abfd->filename.
 
 	* nm.c (display_archive): New function, from code in display_file.
 	(display_rel_file): Renamed from do_one_rel_file.
@@ -4264,7 +4274,7 @@ Wed Feb  2 13:42:23 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* objdump.c (disassemble_data): Move some variable decls closer to
 	their use.  Add some comments.  Replace a nested block with a
-	return. 
+	return.
 
 Mon Jan 31 18:50:41 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
@@ -4289,7 +4299,7 @@ Wed Jan 26 13:13:18 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 	(dump_bfd_header): New function broken out of display_bfd.
 	(dump_section_header): New function broken out of dump_headers.
 	(remove_useless_symbols): Don't shadow global variable name with
-	parameter. 
+	parameter.
 	(objdump_print_address): Fix backward test.
 
 Tue Jan 25 19:40:54 1994  Stan Shebs  (shebs@andros.cygnus.com)
@@ -4306,7 +4316,7 @@ Mon Jan 24 13:29:02 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 	(display_bfd): Pass the arg, and get it filled in by calling
 	bfd_check_format_matches instead of bfd_check_format.
 	(display_info, display_info_table): target_vector was renamed to
-	bfd_target_vector. 
+	bfd_target_vector.
 
 	* binutils.texi (objdump): Note some limitations of -h section
 	address printing.
@@ -4334,7 +4344,7 @@ Mon Jan 17 13:57:25 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* objdump.c (stab_name): Allocate dynamically.
 	(stab_print): Use pointers to strings instead of char arrays.
-	(dump_stabs): Change alloc and init of arrays appropriately.	
+	(dump_stabs): Change alloc and init of arrays appropriately.
 	(dump_stabs_1): Always decide whether to print stab_name or
 	the stab's type number, if unnamed.
 
@@ -4497,7 +4507,7 @@ Thu Dec  2 16:00:06 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	relocs by the output_offset.
 	(i386_mangle_relocs): Change type of relocs argument.  Cast length
 	argument to memmove to size_t.
-	(alpha_mangle_relocs): New function.	
+	(alpha_mangle_relocs): New function.
 
 Wed Nov 17 17:38:58 1993  Sean Eric Fagan  (sef@cygnus.com)
 
@@ -4639,7 +4649,7 @@ Mon Sep 20 19:28:57 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	a different section.  Use time_t for time variable.
 	(setup_sections): Only put sections with contents in output NLM.
 	(i386_mangle_relocs): No symbols are common at this point.  Add
-	casts to avoid warnings.	
+	casts to avoid warnings.
 
 Fri Sep 10 11:00:40 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
@@ -4864,7 +4874,7 @@ Fri Jun 18 14:29:12 1993  Per Bothner  (bothner@deneb.cygnus.com)
 	Change output syntax to match gdb.
 
 Thu Jun 17 16:53:56 1993  david d `zoo' zuhn (zoo@cygnus.com)
-	
+
 	* Makefile.in: canonicalize install.sh; for use within
 	this directory (and subdirs)
 
@@ -5006,19 +5016,19 @@ Wed Apr 28 23:41:32 1993  David J. Mackenzie  (djm@rtl.cygnus.com)
 
 	* objdump.c (usage): Add missing options.
 	(display_file): Print program name before calling
-	bdf_perror. 
+	bdf_perror.
 
 	* nm.c (usage): Add missing options.
 	(main): Clean up option parser.
 	(display_file): Print program name before calling
-	bdf_perror. 
+	bdf_perror.
 
 	* copy.c (copy_usage, strip_usage): Add missing options.
 
 	* ar.c (usage): New function.
 	(main): Call it.
 	(open_inarch, do_quick_append): Print program name before calling
-	bdf_perror. 
+	bdf_perror.
 
 Thu Apr 22 15:01:35 1993  Ian Lance Taylor  (ian@cygnus.com)
 
@@ -5572,7 +5582,7 @@ Sat Dec  7 17:09:37 1991  Steve Chamberlain  (sac at rtl.cygnus.com)
 	* objdump.c: lint
 	* sparc-pinsn.c: include objdump.h
 
-	
+
 
 Fri Dec  6 23:02:14 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
@@ -5679,7 +5689,7 @@ Wed Oct 16 11:45:36 1991  Per Bothner  (bothner at cygnus.com)
 	* Makefile.in, ar.c, bucomm.c, copy.c, cplus-dem.c, filemode.c,
 	i960-pinsn.c, m68k-pinsn.c, nm.c, objdump.c, size.c, sparc-pinsn.c,
 	* strip.c: Add or update Copyright notice.
-	* TODO:  Add note on 'nm -a'.	
+	* TODO:  Add note on 'nm -a'.
 	* version.c: Update version number to 1.90.
 	* Makefile.in: Fix making of documentation for dist.
 
