@@ -391,6 +391,5 @@ int
 scm_value_print (struct value *val, struct ui_file *stream, int format,
 		 enum val_prettyprint pretty)
 {
-  return (val_print (value_type (val), value_contents (val), 0,
-		     VALUE_ADDRESS (val), stream, format, 1, 0, pretty));
+  return (common_val_print (val, stream, format, 1, 0, pretty));
 }

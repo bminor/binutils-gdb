@@ -182,8 +182,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 	      else
 		fprintf_filtered (stream, "%d..%d: ", i, i + reps - 1);
 
-	      val_print (value_type (v), value_contents (v), 0, 0,
-			 stream, format, 2, 1, pretty);
+	      common_val_print (v, stream, format, 2, 1, pretty);
 
 	      things_printed++;
 	      i += reps;
@@ -235,8 +234,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
       return 0;
     }
 
-  return (val_print (type, value_contents (val), 0, address,
-		     stream, format, 1, 0, pretty));
+  return common_val_print (val, stream, format, 1, 0, pretty);
 }
 
 /* TYPE, VALADDR, ADDRESS, STREAM, RECURSE, and PRETTY have the
@@ -384,8 +382,7 @@ java_print_value_fields (struct type *type, const bfd_byte *valaddr,
 		  v = value_from_longest (TYPE_FIELD_TYPE (type, i),
 				   unpack_field_as_long (type, valaddr, i));
 
-		  val_print (TYPE_FIELD_TYPE (type, i), value_contents (v), 0,
-			     0, stream, format, 0, recurse + 1, pretty);
+		  common_val_print (v, stream, format, 0, recurse + 1, pretty);
 		}
 	    }
 	  else
@@ -404,9 +401,8 @@ java_print_value_fields (struct type *type, const bfd_byte *valaddr,
 		      struct type *t = check_typedef (value_type (v));
 		      if (TYPE_CODE (t) == TYPE_CODE_STRUCT)
 			v = value_addr (v);
-		      val_print (value_type (v),
-				 value_contents (v), 0, VALUE_ADDRESS (v),
-				 stream, format, 0, recurse + 1, pretty);
+		      common_val_print (v, stream, format, 0, recurse + 1,
+					pretty);
 		    }
 		}
 	      else if (TYPE_FIELD_TYPE (type, i) == NULL)

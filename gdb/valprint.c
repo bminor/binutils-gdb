@@ -217,6 +217,54 @@ val_print (struct type *type, const bfd_byte *valaddr, int embedded_offset,
 			stream, format, deref_ref, recurse, pretty));
 }
 
+/* Check whether the value VAL is printable.  Return 1 if it is;
+   return 0 and print an appropriate error message to STREAM if it
+   is not.  */
+
+static int
+value_check_printable (struct value *val, struct ui_file *stream)
+{
+  if (val == 0)
+    {
+      fprintf_filtered (stream, _("<address of value unknown>"));
+      return 0;
+    }
+
+  if (value_optimized_out (val))
+    {
+      fprintf_filtered (stream, _("<value optimized out>"));
+      return 0;
+    }
+
+  return 1;
+}
+
+/* Print the value VAL onto stream STREAM according to FORMAT (a
+   letter, or 0 for natural format using TYPE).
+
+   If DEREF_REF is nonzero, then dereference references, otherwise just print
+   them like pointers.
+
+   The PRETTY parameter controls prettyprinting.
+
+   If the data are a string pointer, returns the number of string characters
+   printed.
+
+   This is a preferable interface to val_print, above, because it uses
+   GDB's value mechanism.  */
+
+int
+common_val_print (struct value *val, struct ui_file *stream, int format,
+		  int deref_ref, int recurse, enum val_prettyprint pretty)
+{
+  if (!value_check_printable (val, stream))
+    return 0;
+
+  return val_print (value_type (val), value_contents_all (val),
+		    value_embedded_offset (val), VALUE_ADDRESS (val),
+		    stream, format, deref_ref, recurse, pretty);
+}
+
 /* Print the value VAL in C-ish syntax on stream STREAM.
    FORMAT is a format-letter, or 0 for print in natural format of data type.
    If the object printed is a string pointer, returns
@@ -226,16 +274,9 @@ int
 value_print (struct value *val, struct ui_file *stream, int format,
 	     enum val_prettyprint pretty)
 {
-  if (val == 0)
-    {
-      printf_filtered (_("<address of value unknown>"));
-      return 0;
-    }
-  if (value_optimized_out (val))
-    {
-      printf_filtered (_("<value optimized out>"));
-      return 0;
-    }
+  if (!value_check_printable (val, stream))
+    return 0;
+
   return LA_VALUE_PRINT (val, stream, format, pretty);
 }
 

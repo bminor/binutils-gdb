@@ -512,9 +512,14 @@ loclist_read_variable (struct symbol *symbol, struct frame_info *frame)
   data = find_location_expression (dlbaton, &size,
 				   frame ? get_frame_pc (frame) : 0);
   if (data == NULL)
-    error (_("Variable \"%s\" is not available."), SYMBOL_NATURAL_NAME (symbol));
-
-  val = dwarf2_evaluate_loc_desc (symbol, frame, data, size, dlbaton->objfile);
+    {
+      val = allocate_value (SYMBOL_TYPE (symbol));
+      VALUE_LVAL (val) = not_lval;
+      set_value_optimized_out (val, 1);
+    }
+  else
+    val = dwarf2_evaluate_loc_desc (symbol, frame, data, size,
+				    dlbaton->objfile);
 
   return val;
 }

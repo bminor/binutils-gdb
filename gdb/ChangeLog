@@ -1,3 +1,27 @@
+2005-02-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2loc.c (loclist_read_variable): Set optimized_out
+	instead of reporting an error.
+	* valprint.c (value_check_printable): New function.
+	(common_val_print): New function.  Use value_check_printable.
+	(value_print): Use value_check_printable.
+	* value.h (common_val_print): Add prototype.
+
+	* c-valprint.c (c_val_print): Use common_val_print.
+	* cp-valprint.c (cp_print_value_fields): Likewise.
+	(cp_print_hpacc_virtual_table_entries): Likewise.
+	* f-valprint.c (f_val_print): Likewise.
+	* jv-valprint.c (java_value_print, java_print_value_fields):
+	Likewise.
+	* scm-valprint.c (scm_value_print): Likewise.
+	* stack.c (print_frame_args): Likewise.
+	* varobj.c (c_value_of_variable): Likewise.
+	* p-valprint.c (pascal_val_print, pascal_value_print): Likewise.
+	(pascal_object_print_value_fields): Likewise.  Update call to
+	pascal_object_print_static_field.
+	(pascal_object_print_static_field): Remove TYPE argument.  Use
+	common_val_print.
+
 2005-02-25 Mark Kettenis  <kettenis@gnu.org>
 	
 	Committed by Elena Zannoni <ezannoni@redhat.com>
