@@ -89,6 +89,14 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 
 #define REGISTER_SIZE 4
 
+/* The size of a register.  This is predefined in tm-mips64.h.  We
+   can't use REGISTER_SIZE because that is used for various other
+   things.  */
+
+#ifndef MIPS_REGSIZE
+#define MIPS_REGSIZE 4
+#endif
+
 /* Number of machine registers */
 
 #define NUM_REGS 80
@@ -142,22 +150,22 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 
 /* Total amount of space needed to store our copies of the machine's
    register state, the array `registers'.  */
-#define REGISTER_BYTES (NUM_REGS*4)
+#define REGISTER_BYTES (NUM_REGS*MIPS_REGSIZE)
 
 /* Index within `registers' of the first byte of the space for
    register N.  */
 
-#define REGISTER_BYTE(N) ((N) * 4)
+#define REGISTER_BYTE(N) ((N) * MIPS_REGSIZE)
 
 /* Number of bytes of storage in the actual machine representation
-   for register N.  On mips, all regs are 4 bytes.  */
+   for register N.  On mips, all regs are the same size.  */
 
-#define REGISTER_RAW_SIZE(N) 4
+#define REGISTER_RAW_SIZE(N) MIPS_REGSIZE
 
 /* Number of bytes of storage in the program's representation
-   for register N.  On mips, all regs are 4 bytes.  */
+   for register N.  On mips, all regs are the same size.  */
 
-#define REGISTER_VIRTUAL_SIZE(N) 4
+#define REGISTER_VIRTUAL_SIZE(N) MIPS_REGSIZE
 
 /* Largest value REGISTER_RAW_SIZE can have.  */
 
@@ -299,25 +307,31 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 #define POP_FRAME		mips_pop_frame()
 
 #define MK_OP(op,rs,rt,offset) (((op)<<26)|((rs)<<21)|((rt)<<16)|(offset))
+#ifndef OP_LDFPR
+#define OP_LDFPR 061	/* lwc1 */
+#endif
+#ifndef OP_LDGPR
+#define OP_LDGPR 043	/* lw */
+#endif
 #define CALL_DUMMY_SIZE (16*4)
 #define Dest_Reg 2
 #define CALL_DUMMY {\
  MK_OP(0,RA_REGNUM,0,8),	/* jr $ra # Fake ABOUT_TO_RETURN ...*/\
  0,				/* nop 	  #  ... to stop raw backtrace*/\
  0x27bd0000,			/* addu	sp,?0 # Pseudo prologue */\
-/* Start here: */\
- MK_OP(061,SP_REGNUM,12,0),	/* lwc1 $f12,0(sp) # Reload FP regs*/\
- MK_OP(061,SP_REGNUM,13,4),	/* lwc1 $f13,4(sp) */\
- MK_OP(061,SP_REGNUM,14,8),	/* lwc1 $f14,8(sp) */\
- MK_OP(061,SP_REGNUM,15,12),	/* lwc1 $f15,12(sp) */\
- MK_OP(043,SP_REGNUM,4,0),	/* lw $r4,0(sp) # Reload first 4 args*/\
- MK_OP(043,SP_REGNUM,5,4),	/* lw $r5,4(sp) */\
- MK_OP(043,SP_REGNUM,6,8),	/* lw $r6,8(sp) */\
- MK_OP(043,SP_REGNUM,7,12),	/* lw $r7,12(sp) */\
+/* Start here; reload FP regs, then GP regs: */\
+ MK_OP(OP_LDFPR,SP_REGNUM,12,0             ), /* l[wd]c1 $f12,0(sp) */\
+ MK_OP(OP_LDFPR,SP_REGNUM,13,  MIPS_REGSIZE), /* l[wd]c1 $f13,{4,8}(sp) */\
+ MK_OP(OP_LDFPR,SP_REGNUM,14,2*MIPS_REGSIZE), /* l[wd]c1 $f14,{8,16}(sp) */\
+ MK_OP(OP_LDFPR,SP_REGNUM,15,3*MIPS_REGSIZE), /* l[wd]c1 $f15,{12,24}(sp) */\
+ MK_OP(OP_LDGPR,SP_REGNUM, 4,0             ), /* l[wd] $r4,0(sp) */\
+ MK_OP(OP_LDGPR,SP_REGNUM, 5,  MIPS_REGSIZE), /* l[wd] $r5,{4,8}(sp) */\
+ MK_OP(OP_LDGPR,SP_REGNUM, 6,2*MIPS_REGSIZE), /* l[wd] $r6,{8,16}(sp) */\
+ MK_OP(OP_LDGPR,SP_REGNUM, 7,3*MIPS_REGSIZE), /* l[wd] $r7,{12,24}(sp) */\
  (017<<26)| (Dest_Reg << 16),	/* lui $r31,<target upper 16 bits>*/\
  MK_OP(13,Dest_Reg,Dest_Reg,0),	/* ori $r31,$r31,<lower 16 bits>*/ \
  (Dest_Reg<<21) | (31<<11) | 9,	/* jalr $r31 */\
- MK_OP(043,SP_REGNUM,7,12),	/* lw $r7,12(sp) */\
+ MK_OP(OP_LDGPR,SP_REGNUM, 7,3*MIPS_REGSIZE), /* l[wd] $r7,{12,24}(sp) */\
  0x5000d,			/* bpt */\
 }
 
@@ -328,7 +342,7 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
+#if TARGET_BYTE_ORDER == BIG_ENDIAN && ! defined (GDB_TARGET_IS_MIPS64)
 /* For big endian mips machines the loading of FP values depends on whether
    they are single or double precision. */
 #define FIX_CALL_DUMMY(dummyname, start_sp, fun, nargs, args, rettype, gcc_p) \
@@ -342,14 +356,14 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
       if (nargs > 0 &&							\
 	  TYPE_CODE(VALUE_TYPE(args[0])) == TYPE_CODE_FLT &&		\
 	  TYPE_LENGTH(VALUE_TYPE(args[0])) == 8) {			\
-	((int *) (dummyname))[3] = MK_OP(061,SP_REGNUM,12,4);		\
-	((int *) (dummyname))[4] = MK_OP(061,SP_REGNUM,13,0);		\
+	((int *) (dummyname))[3] = MK_OP(OP_LDFPR,SP_REGNUM,12,4);	\
+	((int *) (dummyname))[4] = MK_OP(OP_LDFPR,SP_REGNUM,13,0);	\
       }									\
       if (nargs > 1 &&							\
 	  TYPE_CODE(VALUE_TYPE(args[1])) == TYPE_CODE_FLT &&		\
 	  TYPE_LENGTH(VALUE_TYPE(args[1])) == 8) {			\
-	((int *) (dummyname))[5] = MK_OP(061,SP_REGNUM,14,12);		\
-	((int *) (dummyname))[6] = MK_OP(061,SP_REGNUM,15,8);		\
+	((int *) (dummyname))[5] = MK_OP(OP_LDFPR,SP_REGNUM,14,12);	\
+	((int *) (dummyname))[6] = MK_OP(OP_LDFPR,SP_REGNUM,15,8);	\
       }									\
     }									\
   } while (0)
