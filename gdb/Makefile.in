@@ -631,6 +631,7 @@ bcache_h = bcache.h
 bfd_target_h = bfd-target.h
 block_h = block.h
 breakpoint_h = breakpoint.h $(frame_h) $(value_h) $(gdb_events_h)
+bsd_kvm_h = bsd-kvm.h
 buildsym_h = buildsym.h
 call_cmds_h = call-cmds.h
 charset_h = charset.h
@@ -1322,6 +1323,7 @@ ALLDEPFILES = \
 	arm-linux-nat.c arm-linux-tdep.c arm-tdep.c \
 	armnbsd-nat.c armnbsd-tdep.c \
 	avr-tdep.c \
+	bsd-kvm.c \
 	coff-solib.c \
 	core-regset.c core-aout.c corelow.c \
 	dcache.c dpx2-nat.c exec.c fork-child.c \
@@ -1613,6 +1615,8 @@ breakpoint.o: breakpoint.c $(defs_h) $(symtab_h) $(frame_h) $(breakpoint_h) \
 	$(objfiles_h) $(source_h) $(linespec_h) $(completer_h) $(gdb_h) \
 	$(ui_out_h) $(cli_script_h) $(gdb_assert_h) $(block_h) \
 	$(gdb_events_h)
+bsd-kvm.o: bsd-kvm.c $(defs_h) $(frame_h) $(regcache_h) $(target_h) \
+	$(gdb_assert_h) $(readline_h) $(bsd_kvm_h)
 buildsym.o: buildsym.c $(defs_h) $(bfd_h) $(gdb_obstack_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(gdb_assert_h) \
 	$(complaints_h) $(gdb_string_h) $(expression_h) $(language_h) \
@@ -1854,7 +1858,7 @@ i386bsd-tdep.o: i386bsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 i386-cygwin-tdep.o: i386-cygwin-tdep.c $(defs_h) $(osabi_h) $(gdb_string_h) \
 	$(i386_tdep_h)
 i386fbsd-nat.o: i386fbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
-	$(i386_tdep_h)
+	$(i386_tdep_h) $(bsd_kvm_h)
 i386fbsd-tdep.o: i386fbsd-tdep.c $(defs_h) $(arch_utils_h) $(osabi_h) \
 	$(i386_tdep_h) $(i387_tdep_h) $(solib_svr4_h)
 i386gnu-nat.o: i386gnu-nat.c $(defs_h) $(inferior_h) $(floatformat_h) \
