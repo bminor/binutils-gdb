@@ -1,3 +1,11 @@
+Thu Apr 20 18:54:15 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	From Daniel Berlin <dan@cgsoftware.com> and Tim Mooney
+ 	<mooney@dogbert.cc.ndsu.nodak.edu>:
+	* infrun.c (follow_fork_mode_kind_names): NULL terminate
+ 	array. Re-indent.
+	(scheduler_enums): Ditto.
+
 Mon Apr 17 13:37:10 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch.sh: Make multi-arch variable defaults, defaults for non-
