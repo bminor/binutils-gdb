@@ -1,3 +1,11 @@
+2002-10-02  Daniel Jacobowitz  <drow@mvista.com>
+
+	Fix PR gdb/778
+	* gdbtypes.c (fill_in_vptr_fieldno): Call check_typedef
+	before recursing.
+	* gnu-v3-abi.c (gnuv3_virtual_fn_field): Check return value
+	of fill_in_vptr_fieldno.
+
 2002-10-02  Elena Zannoni  <ezannoni@redhat.com>
  
 	* inferior.h (registers_info, stepi_command, nexti_command,
