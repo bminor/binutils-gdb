@@ -1,3 +1,8 @@
+Mon Mar 17 14:57:55 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* remote-sim.h: New file, copied in from gdb/remote-sim.h.  One
+ 	day this will be placed in a directory of its own.
+
 Sat Mar 15 19:00:14 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* obstack.h: Update to current FSF version.

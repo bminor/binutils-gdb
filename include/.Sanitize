@@ -52,6 +52,7 @@ obstack.h
 os9k.h
 opcode
 progress.h
+remote-sim.h
 wait.h
 
 Things-to-lose:
