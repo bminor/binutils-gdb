@@ -1,6 +1,6 @@
 /* Intel 387 floating point stuff.
-   Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1998, 1999, 2000,
+   2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -542,9 +542,12 @@ static int i387_tag (unsigned char *raw);
 void
 i387_supply_fxsave (char *fxsave)
 {
-  int i;
+  int i, last_regnum = MXCSR_REGNUM;
 
-  for (i = FP0_REGNUM; i <= MXCSR_REGNUM; i++)
+  if (gdbarch_tdep (current_gdbarch)->num_xmm_regs == 0)
+    last_regnum = FOP_REGNUM;
+
+  for (i = FP0_REGNUM; i <= last_regnum; i++)
     {
       /* Most of the FPU control registers occupy only 16 bits in
 	 the fxsave area.  Give those a special treatment.  */
@@ -601,9 +604,12 @@ i387_supply_fxsave (char *fxsave)
 void
 i387_fill_fxsave (char *fxsave, int regnum)
 {
-  int i;
+  int i, last_regnum = MXCSR_REGNUM;
 
-  for (i = FP0_REGNUM; i <= MXCSR_REGNUM; i++)
+  if (gdbarch_tdep (current_gdbarch)->num_xmm_regs == 0)
+    last_regnum = FOP_REGNUM;
+
+  for (i = FP0_REGNUM; i <= last_regnum; i++)
     if (regnum == -1 || regnum == i)
       {
 	/* Most of the FPU control registers occupy only 16 bits in

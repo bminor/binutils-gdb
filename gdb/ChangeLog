@@ -1,3 +1,9 @@
+2002-05-12  Mark Kettenis  <kettenis@gnu.org>
+
+	* i387-tdep.c (i387_supply_fxsave): Skip the SSE registers if
+	the're not supported by the current architecture.
+	(i387_fill_fxsave): Likewise.
+
 2002-05-12  Fred Fish  <fnf@redhat.com>
 
 	* symfile.c (default_symfile_offsets): Arrange for uninitialized
