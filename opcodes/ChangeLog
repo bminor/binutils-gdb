@@ -1,5 +1,7 @@
 Mon Jul 19 13:52:21 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* hppa-dis.c (print_insn_hppa): Use extract_5r_store for 'r'.
+
 	* hppa-dis.c (print_insn_hppa, case '>'): If next character is 'n',
 	don't output a space.
 

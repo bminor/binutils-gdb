@@ -486,6 +486,9 @@ print_insn_hppa (memaddr, info)
 		case 'V':
 		  fput_const (extract_5_store (insn), info);
 		  break;
+		case 'r':
+		  fput_const (extract_5r_store (insn), info);
+		  break;
 		case 'R':
 		  fput_const (extract_5R_store (insn), info);
 		  break;
