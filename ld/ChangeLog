@@ -1,5 +1,13 @@
 Fri Feb 25 10:47:25 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+        * emultempl/hppaelf.em: First attempt to clean this file up.
+	Add comments in several functions as to their purpose and
+	how they function (or my current best guess).  Clean up horrible
+	spacing and indention that never should have been accepted in the
+	first place.  Add FIXMEs for issues which need to be resolved.
+	Disable linker-stub generation until it gets fixed.  This allows
+	the linker to at least work on simple code for testing purposes.
+
 	* ldlang.c (lang_size_sections): No longer static (PA ELF calls
 	it via hppaelf_finish).  Prototype moved into ldlang.h.
 	(lang_process): Move problematic extra call to lang_size_sections
