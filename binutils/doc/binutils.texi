@@ -1688,7 +1688,7 @@ Format some lines for output devices that have more than 80 columns.
 Also do not truncate symbol names when they are displayed.
 
 @item -z
-@item --disassemble-zeroes
+@itemx --disassemble-zeroes
 Normally the disassembly output will skip blocks of zeroes.  This
 option directs the disassembler to disassemble those blocks, just like
 any other data.
