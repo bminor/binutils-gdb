@@ -1,3 +1,19 @@
+Fri Mar  3 17:07:14 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/elf32.em (hold_rel): New static variable.
+	(gld${EMULATION_NAME}_place_orphan): Place readonly sections with
+	contents whose names begin with ".rel" after hold_rel.  Remove the
+	assertion which checked for unplaced .rel sections.  Don't try to
+	sort the section into place if place->bfd_section is NULL.
+	(gld${EMULATION_NAME}_place_section): Set hold_rel to the first
+	section beginning with ".rel".
+
+Thu Mar  2 14:34:43 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	Doc note from pierre@phi.la.tce.com (Pierre Willard):
+	* ld.texinfo: -X and -x work even if -s or -S are not specified.
+	* ld.1: Similar change. 
+
 Wed Mar  1 13:51:16 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emulparams/gld960coff.sh (COFF_CTORS): Define.
