@@ -15,18 +15,12 @@
 
 Do-first:
 
-mpw_files="mpw-make.in mpw-config.in ChangeLog.mpw"
+mpw_files="mpw-make.in mpw-config.in mpw-em.c ChangeLog.mpw"
 
 if ( echo $* | grep keep\-mpw > /dev/null ) ; then
 	keep_these_too="${mpw_files} ${keep_these_too}"
 else
 	lose_these_too="${mpw_files} ${lose_these_too}"
-fi
-
-if ( echo $* | grep keep\-gm > /dev/null ) ; then
-	keep_these_too="mpw-xconfig.in mpw-em.c ChangeLog.gm ${keep_these_too}"
-else
-	lose_these_too="mpw-xconfig.in mpw-em.c ChangeLog.gm ${lose_these_too}"
 fi
 
 # All files listed between the "Things-to-keep:" line and the
