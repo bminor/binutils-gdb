@@ -1,5 +1,6 @@
 /* Perform non-arithmetic operations on values, for GDB.
-   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994
+   Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -283,7 +284,7 @@ value
 value_assign (toval, fromval)
      register value toval, fromval;
 {
-  register struct type *type = VALUE_TYPE (toval);
+  register struct type *type;
   register value val;
   char raw_buffer[MAX_REGISTER_RAW_SIZE];
   int use_buffer = 0;
@@ -291,6 +292,7 @@ value_assign (toval, fromval)
   COERCE_ARRAY (fromval);
   COERCE_REF (toval);
 
+  type = VALUE_TYPE (toval);
   if (VALUE_LVAL (toval) != lval_internalvar)
     fromval = value_cast (type, fromval);
 
@@ -683,9 +685,9 @@ value_ind (arg1)
 CORE_ADDR
 push_word (sp, word)
      CORE_ADDR sp;
-     REGISTER_TYPE word;
+     unsigned LONGEST word;
 {
-  register int len = sizeof (REGISTER_TYPE);
+  register int len = REGISTER_SIZE;
   char buffer[MAX_REGISTER_RAW_SIZE];
 
   store_unsigned_integer (buffer, len, word);
@@ -865,11 +867,12 @@ call_function_by_hand (function, nargs, args)
   register CORE_ADDR sp;
   register int i;
   CORE_ADDR start_sp;
-  /* CALL_DUMMY is an array of words (REGISTER_TYPE), but each word
-     is in host byte order.  It is switched to target byte order before calling
-     FIX_CALL_DUMMY.  */
-  static REGISTER_TYPE dummy[] = CALL_DUMMY;
-  REGISTER_TYPE dummy1[sizeof dummy / sizeof (REGISTER_TYPE)];
+  /* CALL_DUMMY is an array of words (REGISTER_SIZE), but each word
+     is in host byte order.  Before calling FIX_CALL_DUMMY, we byteswap it
+     and remove any extra bytes which might exist because unsigned LONGEST is
+     bigger than REGISTER_SIZE.  */
+  static unsigned LONGEST dummy[] = CALL_DUMMY;
+  char dummy1[REGISTER_SIZE * sizeof dummy / sizeof (unsigned LONGEST)];
   CORE_ADDR old_sp;
   struct type *value_type;
   unsigned char struct_return;
@@ -917,8 +920,9 @@ call_function_by_hand (function, nargs, args)
 
   /* Create a call sequence customized for this function
      and the number of arguments for it.  */
-  for (i = 0; i < sizeof dummy / sizeof (REGISTER_TYPE); i++)
-    store_unsigned_integer (&dummy1[i], sizeof (REGISTER_TYPE),
+  for (i = 0; i < sizeof dummy / sizeof (dummy[0]); i++)
+    store_unsigned_integer (&dummy1[i * REGISTER_SIZE],
+			    REGISTER_SIZE,
 			    (unsigned LONGEST)dummy[i]);
 
 #ifdef GDB_TARGET_IS_HPPA
@@ -1408,7 +1412,7 @@ search_struct_method (name, arg1p, args, offset, static_memfuncp, type)
 {
   int i;
   value v;
-  static int name_matched = 0;
+  int name_matched = 0;
   char dem_opname[64];
 
   check_stub_type (type);
@@ -1550,7 +1554,9 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
 
       v = search_struct_method (name, argp, args, 0, static_memfuncp, t);
 
-      if (v == 0 || v == (value) -1)
+      if (v == (value) -1)
+	error ("Cannot take address of a method");
+      else if (v == 0)
 	{
 	  if (TYPE_NFN_FIELDS (t))
 	    error ("There is no member or method named %s.", name);

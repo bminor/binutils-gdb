@@ -1,3 +1,9 @@
+Tue Jan 25 12:58:26 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* valops.c (value_assign):  Set `type' after coercing toval.
+	* c-valprint.c (c_val_print), ch-valprint.c (chill_val_print):
+	Use extract_unsigned_integer to get the address of a reference.
+
 Tue Jan 25 11:31:53 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabsread.c (STABS_CONTINUE, error_type), partial-stab.h:
@@ -35,7 +41,7 @@ Sat Jan 22 17:08:48 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 Sat Jan 22 20:25:11 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mips-tdep.c (init_extra_frame_info):  Use frame relative stack
-	pointer value when fixing up the frame at the start of a function
+	pointer value when fixing up the frame at the start of a function.
 
 Sat Jan 22 12:29:13 1994  Stu Grossman  (grossman at cygnus.com)
 
