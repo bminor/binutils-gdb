@@ -1,3 +1,9 @@
+Fri Oct  4 10:59:52 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* emulparams/sparcaout.sh ({BIG,LITTLE}_OUTPUT_FORMAT): Define.
+	* scripttempl/aout.sc ({BIG,LITTLE}_OUTPUT_FORMAT): Provide default.
+	(OUTPUT_FORMAT): Support bi-endian targets.
+
 Thu Oct  3 13:52:03 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* fnmatch.h, fnmatch.c: Remove (now in libiberty).
