@@ -1,5 +1,8 @@
 Tue May 28 13:29:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-z8k.c (md_apply_fix): Handle fx_r_type of 0, as
+	created by emit_expr.
+
 	* symbols.c (symbol_create): If bfd_make_empty_symbol fails, call
 	as_perror rather than assert.
 
