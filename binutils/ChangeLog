@@ -1,5 +1,8 @@
 Mon Aug  4 11:47:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aclocal.m4, configure, Makefile.in: Rebuild with new automake
+	patches.
+
 	* deflex.l, defparse.y: Use VERSIONK rather than VERSION.
 	* rclex.l, rcparse.y: Likewise.
 	* Makefile.am (windres_SOURCES): Add $(BULIBS).

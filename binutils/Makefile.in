@@ -234,6 +234,10 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = 
+bin_PROGRAMS =  size$(EXEEXT) objdump$(EXEEXT) ar$(EXEEXT) \
+strings$(EXEEXT) ranlib$(EXEEXT) c++filt$(EXEEXT) objcopy$(EXEEXT) \
+addr2line$(EXEEXT)
+noinst_PROGRAMS =  nm.new$(EXEEXT) strip.new$(EXEEXT)
 PROGRAMS =  $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 
@@ -379,9 +383,7 @@ maintainer-clean-hdr:
 mostlyclean-binPROGRAMS:
 
 clean-binPROGRAMS:
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  rm -f $$p $$p$(EXEEXT); \
-	done
+	test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
 distclean-binPROGRAMS:
 
@@ -392,23 +394,21 @@ install-binPROGRAMS: $(bin_PROGRAMS)
 	$(mkinstalldirs) $(bindir)
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
 	  if test -f $$p; then \
-	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p$(EXEEXT) $(bindir)/`echo $$p|sed '$(transform)'`$(EXEEXT)"; \
-	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p$(EXEEXT) $(bindir)/`echo $$p|sed '$(transform)'`$(EXEEXT); \
+	    echo " $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed '$(transform)'`"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL_PROGRAM) $$p $(bindir)/`echo $$p|sed '$(transform)'`; \
 	  else :; fi; \
 	done
 
 uninstall-binPROGRAMS:
 	$(NORMAL_UNINSTALL)
 	list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  rm -f $(bindir)/`echo $$p|sed '$(transform)'`$(EXEEXT); \
+	  rm -f $(bindir)/`echo $$p|sed '$(transform)'`; \
 	done
 
 mostlyclean-noinstPROGRAMS:
 
 clean-noinstPROGRAMS:
-	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
-	  rm -f $$p $$p$(EXEEXT); \
-	done
+	test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
 
 distclean-noinstPROGRAMS:
 
@@ -440,85 +440,69 @@ distclean-libtool:
 
 maintainer-clean-libtool:
 
-nlmconv: $(nlmconv_OBJECTS) $(nlmconv_DEPENDENCIES)
+nlmconv$(EXEEXT): $(nlmconv_OBJECTS) $(nlmconv_DEPENDENCIES)
 	@rm -f nlmconv$(EXEEXT)
 	$(LINK) $(nlmconv_LDFLAGS) $(nlmconv_OBJECTS) $(nlmconv_LDADD) $(LIBS)
-	@test -z "$(EXEEXT)" || echo timestamp > nlmconv
 
-srconv: $(srconv_OBJECTS) $(srconv_DEPENDENCIES)
+srconv$(EXEEXT): $(srconv_OBJECTS) $(srconv_DEPENDENCIES)
 	@rm -f srconv$(EXEEXT)
 	$(LINK) $(srconv_LDFLAGS) $(srconv_OBJECTS) $(srconv_LDADD) $(LIBS)
-	@test -z "$(EXEEXT)" || echo timestamp > srconv
 
-sysdump: $(sysdump_OBJECTS) $(sysdump_DEPENDENCIES)
+sysdump$(EXEEXT): $(sysdump_OBJECTS) $(sysdump_DEPENDENCIES)
 	@rm -f sysdump$(EXEEXT)
 	$(LINK) $(sysdump_LDFLAGS) $(sysdump_OBJECTS) $(sysdump_LDADD) $(LIBS)
-	@test -z "$(EXEEXT)" || echo timestamp > sysdump
 
-coffdump: $(coffdump_OBJECTS) $(coffdump_DEPENDENCIES)
+coffdump$(EXEEXT): $(coffdump_OBJECTS) $(coffdump_DEPENDENCIES)
 	@rm -f coffdump$(EXEEXT)
 	$(LINK) $(coffdump_LDFLAGS) $(coffdump_OBJECTS) $(coffdump_LDADD) $(LIBS)
-	@test -z "$(EXEEXT)" || echo timestamp > coffdump
 
-dlltool: $(dlltool_OBJECTS) $(dlltool_DEPENDENCIES)
+dlltool$(EXEEXT): $(dlltool_OBJECTS) $(dlltool_DEPENDENCIES)
 	@rm -f dlltool$(EXEEXT)
 	$(LINK) $(dlltool_LDFLAGS) $(dlltool_OBJECTS) $(dlltool_LDADD) $(LIBS)
-	@test -z "$(EXEEXT)" || echo timestamp > dlltool
 
-windres: $(windres_OBJECTS) $(windres_DEPENDENCIES)
+windres$(EXEEXT): $(windres_OBJECTS) $(windres_DEPENDENCIES)
 	@rm -f windres$(EXEEXT)
 	$(LINK) $(windres_LDFLAGS) $(windres_OBJECTS) $(windres_LDADD) $(LIBS)
-	@test -z "$(EXEEXT)" || echo timestamp > windres
 
-size: $(size_OBJECTS) $(size_DEPENDENCIES)
+size$(EXEEXT): $(size_OBJECTS) $(size_DEPENDENCIES)
 	@rm -f size$(EXEEXT)
 	$(LINK) $(size_LDFLAGS) $(size_OBJECTS) $(size_LDADD) $(LIBS)
-	@test -z "$(EXEEXT)" || echo timestamp > size
 
-objdump: $(objdump_OBJECTS) $(objdump_DEPENDENCIES)
+objdump$(EXEEXT): $(objdump_OBJECTS) $(objdump_DEPENDENCIES)
 	@rm -f objdump$(EXEEXT)
 	$(LINK) $(objdump_LDFLAGS) $(objdump_OBJECTS) $(objdump_LDADD) $(LIBS)
-	@test -z "$(EXEEXT)" || echo timestamp > objdump
 
-ar: $(ar_OBJECTS) $(ar_DEPENDENCIES)
+ar$(EXEEXT): $(ar_OBJECTS) $(ar_DEPENDENCIES)
 	@rm -f ar$(EXEEXT)
 	$(LINK) $(ar_LDFLAGS) $(ar_OBJECTS) $(ar_LDADD) $(LIBS)
-	@test -z "$(EXEEXT)" || echo timestamp > ar
 
-strings: $(strings_OBJECTS) $(strings_DEPENDENCIES)
+strings$(EXEEXT): $(strings_OBJECTS) $(strings_DEPENDENCIES)
 	@rm -f strings$(EXEEXT)
 	$(LINK) $(strings_LDFLAGS) $(strings_OBJECTS) $(strings_LDADD) $(LIBS)
-	@test -z "$(EXEEXT)" || echo timestamp > strings
 
-ranlib: $(ranlib_OBJECTS) $(ranlib_DEPENDENCIES)
+ranlib$(EXEEXT): $(ranlib_OBJECTS) $(ranlib_DEPENDENCIES)
 	@rm -f ranlib$(EXEEXT)
 	$(LINK) $(ranlib_LDFLAGS) $(ranlib_OBJECTS) $(ranlib_LDADD) $(LIBS)
-	@test -z "$(EXEEXT)" || echo timestamp > ranlib
 
-c++filt: $(c__filt_OBJECTS) $(c__filt_DEPENDENCIES)
+c++filt$(EXEEXT): $(c__filt_OBJECTS) $(c__filt_DEPENDENCIES)
 	@rm -f c++filt$(EXEEXT)
 	$(LINK) $(c__filt_LDFLAGS) $(c__filt_OBJECTS) $(c__filt_LDADD) $(LIBS)
-	@test -z "$(EXEEXT)" || echo timestamp > c++filt
 
-objcopy: $(objcopy_OBJECTS) $(objcopy_DEPENDENCIES)
+objcopy$(EXEEXT): $(objcopy_OBJECTS) $(objcopy_DEPENDENCIES)
 	@rm -f objcopy$(EXEEXT)
 	$(LINK) $(objcopy_LDFLAGS) $(objcopy_OBJECTS) $(objcopy_LDADD) $(LIBS)
-	@test -z "$(EXEEXT)" || echo timestamp > objcopy
 
-addr2line: $(addr2line_OBJECTS) $(addr2line_DEPENDENCIES)
+addr2line$(EXEEXT): $(addr2line_OBJECTS) $(addr2line_DEPENDENCIES)
 	@rm -f addr2line$(EXEEXT)
 	$(LINK) $(addr2line_LDFLAGS) $(addr2line_OBJECTS) $(addr2line_LDADD) $(LIBS)
-	@test -z "$(EXEEXT)" || echo timestamp > addr2line
 
-nm.new: $(nm_new_OBJECTS) $(nm_new_DEPENDENCIES)
+nm.new$(EXEEXT): $(nm_new_OBJECTS) $(nm_new_DEPENDENCIES)
 	@rm -f nm.new$(EXEEXT)
 	$(LINK) $(nm_new_LDFLAGS) $(nm_new_OBJECTS) $(nm_new_LDADD) $(LIBS)
-	@test -z "$(EXEEXT)" || echo timestamp > nm.new
 
-strip.new: $(strip_new_OBJECTS) $(strip_new_DEPENDENCIES)
+strip.new$(EXEEXT): $(strip_new_OBJECTS) $(strip_new_DEPENDENCIES)
 	@rm -f strip.new$(EXEEXT)
 	$(LINK) $(strip_new_LDFLAGS) $(strip_new_OBJECTS) $(strip_new_LDADD) $(LIBS)
-	@test -z "$(EXEEXT)" || echo timestamp > strip.new
 .y.c:
 	$(SHELL) $(YLWRAP) "$(YACC)" $< y.tab.c $*.c y.tab.h $*.h -- $(YFLAGS)
 .y.h:
