@@ -1,5 +1,7 @@
 Wed Mar 12 15:04:00 1997  Jeffrey A Law  (law@cygnus.com)
 
+	* simops.c: Fix carry bit computation for "add" instructions.
+
 	* simops.c: Fix typos in bset insns.  Fix arguments to store_mem
 	for bset imm8,(d8,an) and bclr imm8,(d8,an).
 
