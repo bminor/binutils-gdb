@@ -1275,6 +1275,9 @@ bfd_set_start_address PARAMS ((bfd *, bfd_vma));
 long 
 bfd_get_mtime PARAMS ((bfd *));
 
+long
+bfd_get_size PARAMS ((bfd *));
+
 #define bfd_sizeof_headers(abfd, reloc) \
      BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, reloc))
 
