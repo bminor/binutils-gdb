@@ -1,3 +1,7 @@
+Mon Jul 11 14:37:39 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* config.sub:  Fix typo powerpc -> powerpc-*.
+
 Sat Jul  9 13:03:43 1994  Michael Tiemann  (tiemann@blues.cygnus.com)
 
 	* Makefile.in: `all-emacs19' depends on `all-byacc'.

@@ -141,6 +141,7 @@ case $basic_machine in
 		| powerpc \
 		| h8300 | h8300h | sh \
 		| m88110 | sparc | m680[01234]0 | m683?2 | z8k | v70 \
+		| v810 \
 		| h8500 | mips64 | mipsel | mips64el) # CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
@@ -156,7 +157,7 @@ case $basic_machine in
 	      | none-* | 580-* | cray2-* | i960-* | xmp-* | ymp-* \
 	      | hppa1.0-* | hppa1.1-* | alpha-* | we32k-* | cydra-* | ns16k-* \
 	      | pn-* | np1-* | xps100-* | clipper-* | orion-* | sparclite-* \
-	      | powerpc \
+	      | powerpc-* \
 	      | h8300-* | h8300h-* | sh-* \
 	      | m88110-* | m680[01234]0-* | m683?2-* | z8k-* | h8500-* \
 	      | mips64-* | mipsel-* | mips64el-*) # CYGNUS LOCAL
@@ -566,6 +567,10 @@ case $basic_machine in
 	necv70)						# CYGNUS LOCAL
 		basic_machine=v70-nec
 		os=-sysv
+		;;
+	v810 | necv810)
+		basic_machine=v810-nec
+		os=-none
 		;;
 	news1000)
 		basic_machine=m68030-sony
