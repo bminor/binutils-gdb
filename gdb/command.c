@@ -281,7 +281,6 @@ add_set_enum_cmd (name, class, enumlist, var, doc, list)
 {
   struct cmd_list_element *c
     = add_set_cmd (name, class, var_enum, var, doc, list);
-
   c->enums = enumlist;
 
   return c;
@@ -1269,8 +1268,23 @@ do_setshow_command (arg, from_tty, c)
 	    char *match = NULL;
 	    char *p;
 
-	    p = strchr (arg, ' ');
+	    /* if no argument was supplied, print an informative error message */
+	    if (arg == NULL)
+	      {
+		char msg[1024];
+		strcpy (msg, "Requires an argument. Valid arguments are ");
+		for (i = 0; c->enums[i]; i++)
+		  {
+		    if (i != 0)
+		      strcat (msg, ", ");
+		    strcat (msg, c->enums[i]);
+		  }
+		strcat (msg, ".");
+		error (msg);
+	      }
 
+	    p = strchr (arg, ' ');
+	    
 	    if (p)
 	      len = p - arg;
 	    else

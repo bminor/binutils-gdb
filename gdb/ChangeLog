@@ -1,3 +1,11 @@
+Wed Mar  4 16:53:52 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* serial.c (_initialize_serial): Add a description of 
+	"set remotelogbase".
+
+	* command.c (do_setshow_command): If no arguments are supplied,
+	don't dump core, instead print out an error message.
+
 Wed Mar  4 16:50:18 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* gdbtk.c (gdb_listfiles): Fix thinko in last change.

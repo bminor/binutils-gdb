@@ -517,7 +517,7 @@ by gdbserver.", &setlist),
   add_show_from_set (add_set_enum_cmd ("remotelogbase", no_class,
 				       logbase_enums,
 				       (char *)&serial_logbase,
-				       "Set ...",
+				       "Set numerical base for remote session logging",
 				       &setlist),
 			   &showlist);
 }
