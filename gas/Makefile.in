@@ -219,15 +219,19 @@ OBJS = \
 	xmalloc.o \
 	xrealloc.o
 
+#### host, target, and site specific Makefile frags come in here.
+
 # Definition of `all' is here so that new rules inserted by sed
 # do not specify the default target.
 # The real definition is under `all.internal'.
 
 all: $(ALL)
 
-# sed inserts variable overrides after the following line.
-####
-
+fake-as: force
+	- rm -f ./as.new
+	cp /bin/as ./as.new
+	touch fake-as
+
 # Now figure out from those variables how to compile and link.
 
 # This is the variable actually used when we compile.
@@ -244,11 +248,12 @@ HOST_LIBDEPS= $(HOST_PREFIX)$(OBSTACK) $(HOST_PREFIX)$(ALLOCA) $(HOST_PREFIX)$(M
 
 # How to link with both our special library facilities
 # and the system's installed libraries.
-LIBS = $(CLIB) $(unsubdir)/../libiberty`if [ -d $(unsubdir)/libiberty.$(target) ] ; then echo .$(target) ; fi`$(subdir)/libiberty.a
+
+LIBS = $(LOCAL_LOADLIBES) $(CLIB) $(srcdir)/../libiberty`if [ -d $(srcdir)/libiberty.$(target) ] ; then echo .$(target) ; fi`$(subdir)/libiberty.a
 
 # Likewise, for use in the tools that must run on this machine
 # even if we are cross-building GCC.
-HOST_LIBS = $(HOST_PREFIX)$(OBSTACK) $(USE_HOST_ALLOCA) $(HOST_PREFIX)$(MALLOC) $(CLIB)
+HOST_LIBS = $(HOST_PREFIX)$(OBSTACK) $(USE_HOST_ALLOCA) $(HOST_PREFIX)$(MALLOC) $(CLIB) 
 
 # Specify the directories to be searched for header files.
 # Both . and srcdir are used, in that order,
