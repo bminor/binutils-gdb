@@ -1,3 +1,7 @@
+2003-10-08  David Taylor <dtaylor@emc.com>
+
+	* bfd.texinfo: Remove spurious backslash.
+
 2003-07-04  Josh Baratz  <baratz@intersystems.com>
 
 	* Makefile.am (MKDOC rule): Add $(CFLAGS) in case it contains
