@@ -36,6 +36,16 @@
 	* config/pa/tm-hppa.h, config/pa/tm-hppa64.h: Update.
 	* config/s390/tm-s390.h, config/sparc/tm-sp64.h: Update.
 	* config/sparc/tm-sparc.h: Update.
+
+2003-05-05  Kris Warkentin <kewarken@qnx.com>
+
+	* configure.tgt: Add i[3456]86-*-nto*.
+	* i386-nto-tdep.c: New file.  i386 specific support for QNX Neutrino.
+	* nto-tdep.c: New file. Neutrino target support routines.
+	* nto-tdep.h: New file. Neutrino target header.
+	* config/tm-qnxnto.h: New file.
+	* config/i386/i386nto.mt: New file.
+	* config/i386/tm-i386nto.h: New file.
 	
 2003-05-04  Andrew Cagney  <cagney@redhat.com>
 
