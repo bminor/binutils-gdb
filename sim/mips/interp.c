@@ -1123,9 +1123,12 @@ sim_monitor (SIM_DESC sd,
       /*      [A0 + 4] = instruction cache size */
       /*      [A0 + 8] = data cache size */
       {
-	address_word value = MEM_SIZE /* FIXME STATE_MEM_SIZE (sd) */;
+	unsigned_4 value = MEM_SIZE /* FIXME STATE_MEM_SIZE (sd) */;
+	unsigned_4 zero = 0;
 	H2T (value);
-	sim_write (sd, A0, (char *)&value, sizeof (value));
+	sim_write (sd, A0 + 0, (char *)&value, 4);
+	sim_write (sd, A0 + 4, (char *)&zero, 4);
+	sim_write (sd, A0 + 8, (char *)&zero, 4);
 	/* sim_io_eprintf (sd, "sim: get_mem_info() depreciated\n"); */
 	break;
       }

@@ -696,7 +696,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -722,7 +721,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -747,7 +745,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -770,7 +767,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -793,7 +789,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -826,7 +821,6 @@
 "ddivu r<RS>, r<RT>"
 *mipsIII:
 *mipsIV:
-*r3900:
 *vr5000:
 // start-sanitize-vr4320
 *vr4320:
@@ -995,7 +989,6 @@
 000000,5.RS,5.RT,0000000000011100:SPECIAL:64::DMULT
 "dmult r<RS>, r<RT>"
 *mipsIII,mipsIV:
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1022,7 +1015,6 @@
 000000,5.RS,5.RT,0000000000011101:SPECIAL:64::DMULTU
 "dmultu r<RS>, r<RT>"
 *mipsIII,mipsIV:
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1060,7 +1052,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1084,7 +1075,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1108,7 +1098,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1132,7 +1121,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1156,7 +1144,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1180,7 +1167,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1204,7 +1190,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1228,7 +1213,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1252,7 +1236,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1276,7 +1259,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1301,7 +1283,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1536,7 +1517,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1654,7 +1634,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1702,7 +1681,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1856,7 +1834,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -1907,7 +1884,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -2180,7 +2156,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -2599,7 +2574,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -2650,7 +2624,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -2697,7 +2670,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -2743,7 +2715,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -2826,7 +2797,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -2874,7 +2844,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -3468,7 +3437,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -3493,7 +3461,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -3518,7 +3485,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -3543,7 +3509,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -3568,7 +3533,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -3593,7 +3557,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -3618,7 +3581,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -3643,7 +3605,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -3668,7 +3629,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -3693,7 +3653,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -3718,7 +3677,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
@@ -3743,7 +3701,6 @@
 // start-sanitize-r5900
 *r5900:
 // end-sanitize-r5900
-*r3900:
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19

@@ -1,9 +1,19 @@
+Thu Apr  2 10:59:39 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_monitor): get_mem_info returns a 4 byte quantity,
+ 	not an address sized quantity.  Return zero for cache sizes.
+
+Wed Apr  1 23:47:53 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips.igen (r3900): r3900 does not support 64 bit integer
+ 	operations.
+
 start-sanitize-sky
 Wed Apr 1 08:20:31 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* mips.igen (SQC2/LQC2): Make bodies sky-target-only also.
-end-sanitize-sky
 	
+end-sanitize-sky
 start-sanitize-sky
 Mon Mar 30 18:41:43 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
