@@ -1,3 +1,17 @@
+Sat Jun  6 17:02:51 1992  John Gilmore  (gnu at cygnus.com)
+
+	* configure.in:  Handle Solaris2 as *-sun-sysv4 or as *-sun-sunos5.
+
+Sun May 31 05:45:00 1992  david d `zoo' zuhn (zoo@cygnus.com)
+
+	* configure.in: handle m680[01234]0 as aliases for m68k
+
+Tue May 26 16:50:59 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+	
+	* coff-a29k.c: do byte relocs correctly
+	* coffcode.h (styp_to_sec_flags): never load INFO sections
+	* seclet.c (rel): don't relocate INFO sections
+
 Wed May 20 08:18:18 1992  Ken Raeburn  (Raeburn@Cygnus.COM)
 
 	* section.c (bfd_*_symbol, bfd_*_section): Initialize statically.

@@ -41,7 +41,7 @@ m88k)
 	esac
 	;;
 
-m68k)
+m68k|m680[01234]0)
 	case "${host_vendor}" in
 	cbm)
 		case ${host_os} in
@@ -60,7 +60,7 @@ m68k)
 	apollo*)
 		case "${host_os}" in
 		sysv*)	my_host=apollov68 ;;
-		bsd*)	my_host=apollo68;; 
+ 		bsd*)	my_host=apollo68 ;;
 		esac
 		;;
 	esac
@@ -91,7 +91,7 @@ i386)
 sparc)
 	case "${host_os}" in
 	sunos64)	my_host=sparc-ll ;;
-	sysv4)		my_host=sysv4 ;;
+	sysv4|sunos5*)	my_host=sysv4 ;;
 	sysv64)		my_host=sysv4-ll ;;
 	*)		my_host=sparc ;;
 	esac
@@ -142,7 +142,7 @@ stratus | cbm | ncr)	bfd_target=${target_cpu}-elf ;;
 
 unknown)
 	case "${target_os}" in
-	bsd) bfd_target=${target_cpu}-aout ;;
+	aout|bsd) bfd_target=${target_cpu}-aout ;;
 	sysv4*) bfd_target=${target_cpu}-elf ;;
 	go32) bfd_target=i386-aout ;;		
 	sysv* | scosysv*) bfd_target=${target_cpu}-coff ;;
@@ -177,14 +177,14 @@ hitachi)
 wrs)
 	case "${target_cpu}" in
 	i960) bfd_target=i960-bout ;;
-	m68k) bfd_target=m68k-aout ;;
+	m68k|m680[01234]0) bfd_target=m68k-aout ;;
 	esac
 	;;
 sun)
 	case "${target_cpu}" in
-	m68k)	bfd_target=m68k-aout ;;
+	m68k|m680[01234]0)	bfd_target=m68k-aout ;;
 	sparc)	case "${target_os}" in
-		sysv4)	bfd_target=sparc-elf ;;
+		sysv4|sunos5*)	bfd_target=sparc-elf ;;
 		*)	bfd_target=sparc-aout ;;
 		esac
 		;;
@@ -198,7 +198,7 @@ dec)
 	;;
 hp)
 	case "${target_cpu}" in
-	m68k)
+	m68k|m680[01234]0)
 		case "${target_os}" in
 		hpux)	bfd_target=hp9000 ;;
 		bsd)	bfd_target=hp300bsd ;;
@@ -219,12 +219,12 @@ big)
 	esac
 	;;
 tandem)
-	bfd_target=m68k-aout 
+	bfd_target=st2000
 	;;
 
 none|nyu|sco)
 	case "${target_cpu}" in
-	m68k) case "${target_os}" in
+	m68k|m680[01234]0) case "${target_os}" in
 		os68k) bfd_target=m68k-aout ;;
 	      esac
 	      ;;
