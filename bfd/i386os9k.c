@@ -1,5 +1,5 @@
 /* BFD back-end for os9000 i386 binaries.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1998, 1999
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2001
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -27,7 +27,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "libaout.h"		/* BFD a.out internal data structures */
 #include "os9k.h"
 
-static const bfd_target *os9k_callback PARAMS ((bfd *));
+static const bfd_target * os9k_callback PARAMS ((bfd *));
+static const bfd_target * os9k_object_p PARAMS ((bfd *));
+static int                os9k_sizeof_headers PARAMS ((bfd *, boolean));
+boolean                   os9k_swap_exec_header_in PARAMS ((bfd *, mh_com *, struct internal_exec *));
 
 /* Swaps the information in an executable header taken from a raw byte
    stream memory image, into the internal exec_header structure.  */
@@ -147,14 +150,14 @@ os9k_callback (abfd)
   struct internal_exec *execp = exec_hdr (abfd);
   unsigned long bss_start;
 
-  /* Architecture and machine type */
+  /* Architecture and machine type.  */
   bfd_set_arch_mach (abfd, bfd_arch_i386, 0);
 
   /* The positions of the string table and symbol table.  */
   obj_str_filepos (abfd) = 0;
   obj_sym_filepos (abfd) = 0;
 
-  /* The alignments of the sections */
+  /* The alignments of the sections.  */
   obj_textsec (abfd)->alignment_power = execp->a_talign;
   obj_datasec (abfd)->alignment_power = execp->a_dalign;
   obj_bsssec (abfd)->alignment_power = execp->a_balign;
@@ -163,23 +166,22 @@ os9k_callback (abfd)
   obj_textsec (abfd)->vma = execp->a_tload;
   obj_datasec (abfd)->vma = execp->a_dload;
 
-  /* And reload the sizes, since the aout module zaps them */
+  /* And reload the sizes, since the aout module zaps them.  */
   obj_textsec (abfd)->_raw_size = execp->a_text;
 
-  bss_start = execp->a_dload + execp->a_data;	/* BSS = end of data section */
+  bss_start = execp->a_dload + execp->a_data;	/* BSS = end of data section.  */
   obj_bsssec (abfd)->vma = align_power (bss_start, execp->a_balign);
 
-  /* The file positions of the sections */
+  /* The file positions of the sections.  */
   obj_textsec (abfd)->filepos = execp->a_entry;
   obj_datasec (abfd)->filepos = execp->a_dload;
 
   /* The file positions of the relocation info ***
   obj_textsec (abfd)->rel_filepos = N_TROFF(*execp);
-  obj_datasec (abfd)->rel_filepos =  N_DROFF(*execp);
-  */
+  obj_datasec (abfd)->rel_filepos =  N_DROFF(*execp);  */
 
-  adata (abfd).page_size = 1;	/* Not applicable. */
-  adata (abfd).segment_size = 1;/* Not applicable. */
+  adata (abfd).page_size = 1;	/* Not applicable.  */
+  adata (abfd).segment_size = 1;/* Not applicable.  */
   adata (abfd).exec_bytes_size = MHCOM_BYTES_SIZE;
 
   return abfd->xvec;
@@ -247,7 +249,7 @@ os9k_write_object_contents (abfd)
 	  != EXEC_BYTES_SIZE))
     return false;
 
-  /* Now write out reloc info, followed by syms and strings */
+  /* Now write out reloc info, followed by syms and strings.  */
   if (bfd_get_symcount (abfd) != 0)
     {
       if (bfd_seek (abfd, (file_ptr) (N_SYMOFF (*exec_hdr (abfd))), SEEK_SET)
@@ -292,14 +294,13 @@ os9k_set_section_contents (abfd, section, location, offset, count)
 	+ obj_textsec (abfd)->_raw_size;
 
     }
-  /* regardless, once we know what we're doing, we might as well get going */
+  /* Regardless, once we know what we're doing, we might as well get going.  */
   if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0)
     return false;
 
   if (count != 0)
-    {
-      return (bfd_write ((PTR) location, 1, count, abfd) == count) ? true : false;
-    }
+    return (bfd_write ((PTR) location, 1, count, abfd) == count) ? true : false;
+
   return true;
 }
 #endif	/* 0 */
@@ -312,8 +313,7 @@ os9k_sizeof_headers (ignore_abfd, ignore)
   return sizeof (struct internal_exec);
 }
 
-
-/***********************************************************************/
+
 
 #define aout_32_close_and_cleanup aout_32_bfd_free_cached_info
 
@@ -335,41 +335,41 @@ os9k_sizeof_headers (ignore_abfd, ignore)
 #define os9k_bfd_link_split_section  _bfd_generic_link_split_section
 
 const bfd_target i386os9k_vec =
-{
-  "i386os9k",			/* name */
-  bfd_target_os9k_flavour,
-  BFD_ENDIAN_LITTLE,		/* data byte order is little */
-  BFD_ENDIAN_LITTLE,		/* hdr byte order is little */
-  (HAS_RELOC | EXEC_P | WP_TEXT),	/* object flags */
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD),	/* section flags */
-  0,				/* symbol leading char */
-  ' ',				/* ar_pad_char */
-  16,				/* ar_max_namelen */
+  {
+    "i386os9k",			/* name */
+    bfd_target_os9k_flavour,
+    BFD_ENDIAN_LITTLE,		/* data byte order is little */
+    BFD_ENDIAN_LITTLE,		/* hdr byte order is little */
+    (HAS_RELOC | EXEC_P | WP_TEXT),	/* object flags */
+    (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD),	/* section flags */
+    0,				/* symbol leading char */
+    ' ',				/* ar_pad_char */
+    16,				/* ar_max_namelen */
 
-  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
-  bfd_getl32, bfd_getl_signed_32, bfd_putl32,
-  bfd_getl16, bfd_getl_signed_16, bfd_putl16,	/* data */
-  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
-  bfd_getl32, bfd_getl_signed_32, bfd_putl32,
-  bfd_getl16, bfd_getl_signed_16, bfd_putl16,	/* hdrs */
-  {_bfd_dummy_target, os9k_object_p,	/* bfd_check_format */
-   bfd_generic_archive_p, _bfd_dummy_target},
-  {bfd_false, bfd_false,	/* bfd_set_format */
-   _bfd_generic_mkarchive, bfd_false},
-  {bfd_false, bfd_false,	/* bfd_write_contents */
-   _bfd_write_archive_contents, bfd_false},
+    bfd_getl64, bfd_getl_signed_64, bfd_putl64,
+    bfd_getl32, bfd_getl_signed_32, bfd_putl32,
+    bfd_getl16, bfd_getl_signed_16, bfd_putl16,	/* data */
+    bfd_getl64, bfd_getl_signed_64, bfd_putl64,
+    bfd_getl32, bfd_getl_signed_32, bfd_putl32,
+    bfd_getl16, bfd_getl_signed_16, bfd_putl16,	/* hdrs */
+    {_bfd_dummy_target, os9k_object_p,	/* bfd_check_format */
+     bfd_generic_archive_p, _bfd_dummy_target},
+    {bfd_false, bfd_false,	/* bfd_set_format */
+     _bfd_generic_mkarchive, bfd_false},
+    {bfd_false, bfd_false,	/* bfd_write_contents */
+     _bfd_write_archive_contents, bfd_false},
 
-     BFD_JUMP_TABLE_GENERIC (aout_32),
-     BFD_JUMP_TABLE_COPY (_bfd_generic),
-     BFD_JUMP_TABLE_CORE (_bfd_nocore),
-     BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd),
-     BFD_JUMP_TABLE_SYMBOLS (aout_32),
-     BFD_JUMP_TABLE_RELOCS (aout_32),
-     BFD_JUMP_TABLE_WRITE (aout_32),
-     BFD_JUMP_TABLE_LINK (os9k),
-     BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+    BFD_JUMP_TABLE_GENERIC (aout_32),
+    BFD_JUMP_TABLE_COPY (_bfd_generic),
+    BFD_JUMP_TABLE_CORE (_bfd_nocore),
+    BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd),
+    BFD_JUMP_TABLE_SYMBOLS (aout_32),
+    BFD_JUMP_TABLE_RELOCS (aout_32),
+    BFD_JUMP_TABLE_WRITE (aout_32),
+    BFD_JUMP_TABLE_LINK (os9k),
+    BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+    
+    NULL,
 
-  NULL,
-  
-  (PTR) 0,
-};
+    (PTR) 0,
+  };

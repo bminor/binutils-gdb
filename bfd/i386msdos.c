@@ -1,5 +1,5 @@
 /* BFD back-end for MS-DOS executables.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2001
    Free Software Foundation, Inc.
    Written by Bryan Ford of the University of Utah.
 
@@ -31,23 +31,23 @@
 #if 0
 struct exe_header
 {
-	unsigned short magic;
-	unsigned short bytes_in_last_page;
-	unsigned short npages;	/* number of 512-byte "pages" including this header */
-	unsigned short nrelocs;
-	unsigned short header_paras;	/* number of 16-byte paragraphs in header */
-	unsigned short reserved;
-	unsigned short load_switch;
-	unsigned short ss_ofs;
-	unsigned short sp;
-	unsigned short checksum;
-	unsigned short ip;
-	unsigned short cs_ofs;
-	unsigned short reloc_ofs;
-	unsigned short reserved2;
-	unsigned short something1;
-	unsigned short something2;
-	unsigned short something3;
+  unsigned short magic;
+  unsigned short bytes_in_last_page;
+  unsigned short npages;	/* number of 512-byte "pages" including this header */
+  unsigned short nrelocs;
+  unsigned short header_paras;	/* number of 16-byte paragraphs in header */
+  unsigned short reserved;
+  unsigned short load_switch;
+  unsigned short ss_ofs;
+  unsigned short sp;
+  unsigned short checksum;
+  unsigned short ip;
+  unsigned short cs_ofs;
+  unsigned short reloc_ofs;
+  unsigned short reserved2;
+  unsigned short something1;
+  unsigned short something2;
+  unsigned short something3;
 };
 #endif
 
@@ -56,6 +56,9 @@ struct exe_header
 #define EXE_LOAD_LOW	0xffff
 #define EXE_PAGE_SIZE	512
 
+static int     msdos_sizeof_headers PARAMS ((bfd *, boolean));
+static boolean msdos_write_object_contents PARAMS ((bfd *));
+static boolean msdos_set_section_contents PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
 
 static int
 msdos_sizeof_headers (abfd, exec)
@@ -103,7 +106,7 @@ msdos_write_object_contents (abfd)
       return false;
     }
 
-  /* constants */
+  /* Constants.  */
   bfd_h_put_16(abfd, EXE_MAGIC, &hdr[0]);
   bfd_h_put_16(abfd, EXE_PAGE_SIZE / 16, &hdr[8]);
   bfd_h_put_16(abfd, EXE_LOAD_LOW, &hdr[12]);
@@ -112,10 +115,10 @@ msdos_write_object_contents (abfd)
   bfd_h_put_16(abfd, 0x30fb, &hdr[30]); /* XXX??? */
   bfd_h_put_16(abfd, 0x726a, &hdr[32]); /* XXX??? */
 
-  /* bytes in last page (0 = full page) */
+  /* Bytes in last page (0 = full page).  */
   bfd_h_put_16(abfd, outfile_size & (EXE_PAGE_SIZE - 1), &hdr[2]);
 
-  /* number of pages */
+  /* Number of pages.  */
   bfd_h_put_16(abfd, (outfile_size + EXE_PAGE_SIZE - 1) / EXE_PAGE_SIZE,
   	       &hdr[4]);
 
@@ -193,56 +196,56 @@ msdos_set_section_contents (abfd, section, location, offset, count)
 #define msdos_32_bfd_link_split_section  _bfd_generic_link_split_section
 
 const bfd_target i386msdos_vec =
-{
-  "msdos",			/* name */
-  bfd_target_msdos_flavour,
-  BFD_ENDIAN_LITTLE,		/* target byte order */
-  BFD_ENDIAN_LITTLE,		/* target headers byte order */
-  (EXEC_P),			/* object flags */
-  (SEC_CODE | SEC_DATA | SEC_HAS_CONTENTS
-   | SEC_ALLOC | SEC_LOAD),	/* section flags */
-  0,				/* leading underscore */
-  ' ',				/* ar_pad_char */
-  16,				/* ar_max_namelen */
-  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
-  bfd_getl32, bfd_getl_signed_32, bfd_putl32,
-  bfd_getl16, bfd_getl_signed_16, bfd_putl16,	/* data */
-  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
-  bfd_getl32, bfd_getl_signed_32, bfd_putl32,
-  bfd_getl16, bfd_getl_signed_16, bfd_putl16,	/* hdrs */
-
   {
-    _bfd_dummy_target,
-    _bfd_dummy_target,		/* bfd_check_format */
-    _bfd_dummy_target,
-    _bfd_dummy_target,
-  },
-  {
-    bfd_false,
-    msdos_mkobject,
-    _bfd_generic_mkarchive,
-    bfd_false,
-  },
-  {				/* bfd_write_contents */
-    bfd_false,
-    msdos_write_object_contents,
-    _bfd_write_archive_contents,
-    bfd_false,
-  },
+    "msdos",			/* name */
+    bfd_target_msdos_flavour,
+    BFD_ENDIAN_LITTLE,		/* target byte order */
+    BFD_ENDIAN_LITTLE,		/* target headers byte order */
+    (EXEC_P),			/* object flags */
+    (SEC_CODE | SEC_DATA | SEC_HAS_CONTENTS
+     | SEC_ALLOC | SEC_LOAD),	/* section flags */
+    0,				/* leading underscore */
+    ' ',				/* ar_pad_char */
+    16,				/* ar_max_namelen */
+    bfd_getl64, bfd_getl_signed_64, bfd_putl64,
+    bfd_getl32, bfd_getl_signed_32, bfd_putl32,
+    bfd_getl16, bfd_getl_signed_16, bfd_putl16,	/* data */
+    bfd_getl64, bfd_getl_signed_64, bfd_putl64,
+    bfd_getl32, bfd_getl_signed_32, bfd_putl32,
+    bfd_getl16, bfd_getl_signed_16, bfd_putl16,	/* hdrs */
 
-  BFD_JUMP_TABLE_GENERIC (msdos),
-  BFD_JUMP_TABLE_COPY (_bfd_generic),
-  BFD_JUMP_TABLE_CORE (_bfd_nocore),
-  BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
-  BFD_JUMP_TABLE_SYMBOLS (msdos),
-  BFD_JUMP_TABLE_RELOCS (msdos),
-  BFD_JUMP_TABLE_WRITE (msdos),
-  BFD_JUMP_TABLE_LINK (msdos),
-  BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+    {
+      _bfd_dummy_target,
+      _bfd_dummy_target,		/* bfd_check_format */
+      _bfd_dummy_target,
+      _bfd_dummy_target,
+    },
+    {
+      bfd_false,
+      msdos_mkobject,
+      _bfd_generic_mkarchive,
+      bfd_false,
+    },
+    {				/* bfd_write_contents */
+      bfd_false,
+      msdos_write_object_contents,
+      _bfd_write_archive_contents,
+      bfd_false,
+    },
 
-  NULL,
+    BFD_JUMP_TABLE_GENERIC (msdos),
+    BFD_JUMP_TABLE_COPY (_bfd_generic),
+    BFD_JUMP_TABLE_CORE (_bfd_nocore),
+    BFD_JUMP_TABLE_ARCHIVE (_bfd_noarchive),
+    BFD_JUMP_TABLE_SYMBOLS (msdos),
+    BFD_JUMP_TABLE_RELOCS (msdos),
+    BFD_JUMP_TABLE_WRITE (msdos),
+    BFD_JUMP_TABLE_LINK (msdos),
+    BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),
+
+    NULL,
   
-  (PTR) 0
-};
+    (PTR) 0
+  };
 
 

@@ -20,7 +20,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
-
     hpux native  ------------> |               |
                                | hp300hpux bfd | ----------> hpux w/gnu ext
     hpux w/gnu extension ----> |               |
@@ -190,6 +189,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define QMAGIC 0314
 
 #include "aoutx.h"
+
+static const bfd_target * MY (callback) PARAMS ((bfd *));
+static boolean            MY (write_object_contents) PARAMS ((bfd *));
+static void               convert_sym_type PARAMS ((struct external_nlist *, aout_symbol_type *, bfd *));
+
+boolean                   MY (slurp_symbol_table) PARAMS ((bfd *));
+void                      MY (swap_std_reloc_in) PARAMS ((bfd *, struct hp300hpux_reloc *, arelent *, asymbol **, bfd_size_type));
+boolean                   MY (slurp_reloc_table) PARAMS ((bfd *, sec_ptr, asymbol **));
+long                      MY (get_symtab) PARAMS ((bfd *, asymbol **));
+long                      MY (get_symtab_upper_bound) PARAMS ((bfd *));
+long                      MY (canonicalize_reloc) PARAMS ((bfd *, sec_ptr, arelent **, asymbol **));
 
 /* Since the hpux symbol table has nlist elements interspersed with
    strings and we need to insert som strings for secondary symbols, we

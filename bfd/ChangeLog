@@ -1,3 +1,13 @@
+2001-08-27  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* mipsbsd.c: Add missing prototypes.
+	* hp300hpux.c: Add missing prototypes.
+	* i386aout.c: Add missing prototypes.
+	* i386lynx.c: Add missing prototypes.
+	* i386mach3.c: Add missing prototypes.
+	* i386msdos.c: Add missing prototypes.
+	* i386os9k.c: Add missing prototypes.
+
 2001-08-27  Linus Nordberg  <linus@swox.se>
 	    Torbjorn Granlund  <tege@swox.com>
 	    Staffan Ulfberg  <staffanu@swox.se>

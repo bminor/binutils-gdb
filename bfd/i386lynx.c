@@ -1,5 +1,5 @@
 /* BFD back-end for i386 a.out binaries under LynxOS.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 2001
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -82,6 +82,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "libaout.h"
 #include "aout/aout64.h"
+
+void NAME (lynx,swap_std_reloc_out) PARAMS ((bfd *, arelent *, struct reloc_std_external *));
+void NAME (lynx,swap_ext_reloc_out) PARAMS ((bfd *, arelent *, struct reloc_ext_external *));
+void NAME (lynx,swap_ext_reloc_in)  PARAMS ((bfd *, struct reloc_ext_external *, arelent *, asymbol **, bfd_size_type));
+void NAME (lynx,swap_std_reloc_in)  PARAMS ((bfd *, struct reloc_std_external *, arelent *, asymbol **, bfd_size_type));
+boolean NAME (lynx,slurp_reloc_table) PARAMS ((bfd *, sec_ptr, asymbol **));
+boolean NAME (lynx,squirt_out_relocs) PARAMS ((bfd *, asection *));
+long NAME (lynx,canonicalize_reloc) PARAMS ((bfd *, sec_ptr, arelent **, asymbol **));
 
 #ifdef LYNX_CORE
 
