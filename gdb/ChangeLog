@@ -1,6 +1,7 @@
 2000-05-31  Mark Kettenis  <kettenis@gnu.org>
 
 	Add support for FreeBSD/Alpha.
+	* configure.host, configure.tgt (alpha*-*-freebsd*): New entry.
 	* alphabsd-nat.c, config/alpha/fbsd.mh, config/alpha/fbsd.mt,
 	config/alpha/nm-fbsd.h, config/alpha/tm-fbsd.h,
 	config/alpha/xm-fbsd.h: New files.
