@@ -1,3 +1,12 @@
+Wed Apr  2 19:04:20 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/h8300.exp: New file.
+
+Sun Mar 30 13:38:25 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.base/setshow.exp: Check for the existence of a
+	feature, not its value.
+
 Sat Mar 29 11:19:46 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* gdb.c++/virtfunc.exp: Restart gdb in a sane fashion.
