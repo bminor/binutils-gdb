@@ -1,6 +1,6 @@
 /* tc-mn10200.c -- Assembler code for the Matsushita 10200
 
-   Copyright (C) 1996 Free Software Foundation.
+   Copyright (C) 1996, 1997 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
