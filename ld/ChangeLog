@@ -1,3 +1,8 @@
+2004-02-14  Richard Sandiford  <rsandifo@redhat.com>
+
+	* emulparams/elf32bmipn32-defs.sh (OTHER_SECTIONS): Discard
+	.MIPS.content* and .MIPS.events* sections.
+
 2004-02-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* emulparams/armelf.sh, emulparams/armelf_linux.sh: Move
