@@ -129,80 +129,84 @@ queue_fixup (opindex, opinfo, expP)
 */
 
 struct saved_fixups {
-     struct fixup fixup_chain[GAS_CGEN_MAX_FIXUPS];
-     int num_fixups_in_chain;
+  struct fixup fixup_chain[GAS_CGEN_MAX_FIXUPS];
+  int num_fixups_in_chain;
 };
 
 static struct saved_fixups stored_fixups[MAX_SAVED_FIXUP_CHAINS];
 
-void 
+void
 gas_cgen_initialize_saved_fixups_array ()
 {
-   int i = 0;
-   while (i < MAX_SAVED_FIXUP_CHAINS)
-      stored_fixups[i++].num_fixups_in_chain = 0;
+  int i = 0;
+
+  while (i < MAX_SAVED_FIXUP_CHAINS)
+    stored_fixups[i++].num_fixups_in_chain = 0;
 }
 
-void 
-gas_cgen_save_fixups (int i)
+void
+gas_cgen_save_fixups (i)
+     int i;
 {
-      if (i < 0 || i >= MAX_SAVED_FIXUP_CHAINS)
-      {
-          as_fatal("index into stored_fixups[] out of bounds");
-          return;
-      }
+  if (i < 0 || i >= MAX_SAVED_FIXUP_CHAINS)
+    {
+      as_fatal ("index into stored_fixups[] out of bounds");
+      return;
+    }
+
+  stored_fixups[i].num_fixups_in_chain = num_fixups;
+  memcpy (stored_fixups[i].fixup_chain, fixups,
+	  sizeof (fixups[0]) * num_fixups);
+  num_fixups = 0;
+}
+
+void
+gas_cgen_restore_fixups (i)
+     int i;
+{
+  if (i < 0 || i >= MAX_SAVED_FIXUP_CHAINS)
+    {
+      as_fatal ("index into stored_fixups[] out of bounds");
+      return;
+    }
+
+  num_fixups = stored_fixups[i].num_fixups_in_chain;
+  memcpy (fixups,stored_fixups[i].fixup_chain,
+	  (sizeof (stored_fixups[i].fixup_chain[0])) * num_fixups);
+  stored_fixups[i].num_fixups_in_chain = 0;
+}
+
+void
+gas_cgen_swap_fixups (i)
+     int i;
+{
+  if (i < 0 || i >= MAX_SAVED_FIXUP_CHAINS)
+    {
+      as_fatal ("index into stored_fixups[] out of bounds");
+      return;
+    }
+
+  if (num_fixups == 0)
+    gas_cgen_restore_fixups (i);
+
+  else if (stored_fixups[i].num_fixups_in_chain == 0)
+    gas_cgen_save_fixups (i);
+
+  else
+    {
+      int tmp;
+      struct fixup tmp_fixup;
+
+      tmp = stored_fixups[i].num_fixups_in_chain;
       stored_fixups[i].num_fixups_in_chain = num_fixups;
-      memcpy(stored_fixups[i].fixup_chain, fixups,
-                    sizeof (fixups[0])*num_fixups);
-      num_fixups = 0;
-}
+      num_fixups = tmp;
 
-void 
-gas_cgen_restore_fixups (int i)
-{
-      if (i < 0 || i >= MAX_SAVED_FIXUP_CHAINS)
-      {
-          as_fatal("index into stored_fixups[] out of bounds");
-          return;
-      }
-      num_fixups = stored_fixups[i].num_fixups_in_chain;
-      memcpy(fixups,stored_fixups[i].fixup_chain,
-                    (sizeof (stored_fixups[i].fixup_chain[0]))*num_fixups);
-      stored_fixups[i].num_fixups_in_chain = 0;
-}
-
-void 
-gas_cgen_swap_fixups (int i)
-{
-     int tmp;
-     struct fixup tmp_fixup;
-
-     if (i < 0 || i >= MAX_SAVED_FIXUP_CHAINS)
-     {
-         as_fatal("index into stored_fixups[] out of bounds");
-         return;
-     }
-
-     if (num_fixups == 0)
-     {
-       gas_cgen_restore_fixups (i);
-     }
-     else if (stored_fixups[i].num_fixups_in_chain == 0)
-     {
-       gas_cgen_save_fixups (i);
-     }
-     else
-     {
-       tmp = stored_fixups[i].num_fixups_in_chain;
-       stored_fixups[i].num_fixups_in_chain = num_fixups;
-       num_fixups = tmp;
-
-       for (tmp = GAS_CGEN_MAX_FIXUPS; tmp--;)
-       {
-         tmp_fixup          = stored_fixups[i].fixup_chain [tmp];
-         stored_fixups[i].fixup_chain[tmp] = fixups [tmp];
-         fixups [tmp]       = tmp_fixup;
-       }
+      for (tmp = GAS_CGEN_MAX_FIXUPS; tmp--;)
+	{
+	  tmp_fixup = stored_fixups[i].fixup_chain [tmp];
+	  stored_fixups[i].fixup_chain[tmp] = fixups [tmp];
+	  fixups [tmp] = tmp_fixup;
+	}
     }
 }
 
@@ -338,7 +342,7 @@ gas_cgen_parse_operand (cd, want, strP, opindex, opinfo, resultP, valueP)
       expr_jmp_buf_p = 0;
       input_line_pointer = (char *) hold;
       *resultP_1 = CGEN_PARSE_OPERAND_RESULT_ERROR;
-      return "illegal operand";
+      return _("illegal operand");
     }
 
   expr_jmp_buf_p = 1;
@@ -692,10 +696,8 @@ gas_cgen_md_apply_fix3 (fixP, valueP, seg)
 	  break;
 	}
     }
-  else
-    {
-      /* bfd_install_relocation will be called to finish things up.  */
-    }
+  /* else
+     bfd_install_relocation will be called to finish things up.  */
 
   /* Tuck `value' away for use by tc_gen_reloc.
      See the comment describing fx_addnumber in write.h.

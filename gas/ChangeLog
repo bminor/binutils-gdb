@@ -1,3 +1,7 @@
+2001-10-13  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* cgen.c: Tidy up formatting.
+
 2001-10-12  matthew green  <mrg@redhat.com>
 
 	* config/tc-ppc.c (md_parse_option): New -m7410, -m7450 and -m7455
