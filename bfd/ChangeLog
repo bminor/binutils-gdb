@@ -1,9 +1,15 @@
-2003-04-24 Dhananjay Deshpande <dhananjayd@kpitcummins.com> 
+2003-04-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c: Formatting and comment fixes.
+	(ELIMINATE_COPY_RELOCS): Move before ppc_elf_copy_indirect_symbol.
+	(ppc_elf_copy_indirect_symbol): Copy flags here for weakdefs.
+
+2003-04-24 Dhananjay Deshpande <dhananjayd@kpitcummins.com>
 
 	* archures.c (bfd_mach_h8300hn, bfd_mach_h8300sn): Added.
 	* bfd-in2.h: Rebuilt.
 	* coff-h8300.c (BADMAG): Add check for H8300HNBADMAG & H8300SNBADMAG.
-	* coffcode.h (coff_set_arch_mach_hook): Add case for H8300HNMAGIC 
+	* coffcode.h (coff_set_arch_mach_hook): Add case for H8300HNMAGIC
 	& H8300SNMAGIC.
 	(coff_set_flags): Add case for bfd_mach_h8300hn & bfd_mach_h8300sn.
 	* cpu-h8300.c (h8300_scan): Handle h8300hn, h8300sn.
@@ -16,9 +22,9 @@
 	* elf32-sh.c (tpoff): New.
 	(struct elf_sh_dyn_relocs): Remove tls_tpoff32.
 	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): Pass SHARED instead of INFO.
-        (allocate_dynrelocs): Don't make unnecessary dynamic TLS
+	(allocate_dynrelocs): Don't make unnecessary dynamic TLS
 	relocations.  Adjust WILL_CALL_FINISH_DYNAMIC_SYMBOL uses.
-        (sh_elf_relocate_section): Likewise. Remove unnecessary tests.
+	(sh_elf_relocate_section): Likewise. Remove unnecessary tests.
 	(dtpoff_base): Fix wrong indentation.
 	(sh_elf_check_relocs): Don't set DF_STATIC_TLS flag with non-TLS
 	relocations.  Don't set tls_tpoff32 flag.  Don't make unnecessary
