@@ -20,7 +20,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "inferior.h"
 #include "target.h"
-#include "nm.h"
 
 #include <sys/ptrace.h>
 #include <sys/reg.h>

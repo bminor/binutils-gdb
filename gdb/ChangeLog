@@ -1,3 +1,10 @@
+Tue Oct 27 17:08:45 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* defs.h: include nm.h.
+	* coredep.c, infptrace.c, procfs.c, rs6000-nat.c, sparc-nat.c,
+	  sparc-tdep.c, : do not include nm.h.
+	* doc/gdbint.texinfo: nm.h now included in defs.h.
+
 Fri Oct 23 04:47:17 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in (VERSION):  4.7.1 post release!
