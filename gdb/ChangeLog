@@ -1,5 +1,10 @@
 2003-03-08  Andrew Cagney  <cagney@redhat.com>
 
+	* cli-out.c: Update copyright.
+	(cli_out_data): Define typedef.  Use instead of ui_out_data.
+
+2003-03-08  Andrew Cagney  <cagney@redhat.com>
+
 	* valarith.c (value_subscripted_rvalue): Copy the array's REGNO to
 	the result.
 
