@@ -1,5 +1,7 @@
 Thu Feb 15 11:29:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in: Rebuild dependencies.
+
 	* elflink.c (_bfd_elf_create_linker_section): Remove unused
 	zero_section variable.
 
