@@ -1266,7 +1266,7 @@ ALLDEPFILES = \
 	armnbsd-nat.c armnbsd-tdep.c \
 	avr-tdep.c \
 	coff-solib.c \
-	core-sol2.c core-regset.c core-aout.c corelow.c \
+	core-regset.c core-aout.c corelow.c \
 	dcache.c delta68-nat.c dpx2-nat.c exec.c fork-child.c \
 	glibc-tdep.c \
 	go32-nat.c h8300-tdep.c \
@@ -1668,8 +1668,6 @@ corelow.o: corelow.c $(defs_h) $(gdb_string_h) $(frame_h) $(inferior_h) \
 	$(gdbthread_h) $(regcache_h) $(symfile_h) $(exec_h)
 core-regset.o: core-regset.c $(defs_h) $(command_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(gdb_string_h) $(gregset_h)
-core-sol2.o: core-sol2.c $(defs_h) $(gdb_string_h) $(regcache_h) \
-	$(inferior_h) $(target_h) $(command_h) $(gdbcore_h) $(gregset_h)
 cp-abi.o: cp-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(command_h) $(gdbcmd_h) \
 	$(ui_out_h) $(gdb_string_h)
 cp-namespace.o: cp-namespace.c $(defs_h) $(cp_support_h) $(gdb_obstack_h) \

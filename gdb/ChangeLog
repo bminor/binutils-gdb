@@ -1,3 +1,9 @@
+2004-01-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* Makefile.in (ALLDEPFILES): Remove core-sol2.c.
+	(core-sol2.o): Remove dependency.
+	* core-sol2.c: Remove file.
+
 2004-01-17  Andrew Cagney  <cagney@redhat.com>
 
 	* mdebugread.c (compare_blocks): Make addr_diff a LONGEST.
