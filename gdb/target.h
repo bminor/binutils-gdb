@@ -177,7 +177,7 @@ enum target_signal {
   TARGET_SIGNAL_REALTIME_61 = 73,
   TARGET_SIGNAL_REALTIME_62 = 74,
   TARGET_SIGNAL_REALTIME_63 = 75,
-
+#if defined(MACH) || defined(__MACH__)
   /* Mach exceptions */
   TARGET_EXC_BAD_ACCESS = 76,
   TARGET_EXC_BAD_INSTRUCTION = 77,
@@ -185,7 +185,7 @@ enum target_signal {
   TARGET_EXC_EMULATION = 79,
   TARGET_EXC_SOFTWARE = 80,
   TARGET_EXC_BREAKPOINT = 81,
-
+#endif
   /* Some signal we don't know about.  */
   TARGET_SIGNAL_UNKNOWN,
 
@@ -563,7 +563,7 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
    should act like SIGSTOP).  This function is normally used by GUIs to
    implement a stop button.  */
 
-#define target_stop() current_target.to_stop ()
+#define target_stop current_target.to_stop
 
 /* Pointer to next target in the chain, e.g. a core file and an exec file.  */
 
@@ -782,6 +782,10 @@ extern enum target_signal target_signal_from_command PARAMS ((int));
 
 /* Any target can call this to switch to remote protocol (in remote.c). */
 extern void push_remote_target PARAMS ((char *name, int from_tty));
+
+/* Any target cah call this to open using the remote protocol */
+extern void open_remote_target PARAMS ((char *name, int from_tty, struct target_ops *target, int extended_p));
+
 
 /* Imported from machine dependent code */
 

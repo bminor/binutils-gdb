@@ -227,7 +227,7 @@ static void remote_open PARAMS ((char *name, int from_tty));
 
 static void extended_remote_open PARAMS ((char *name, int from_tty));
 
-static void remote_open_1 PARAMS ((char *, int, struct target_ops *));
+static void remote_open_1 PARAMS ((char *, int, struct target_ops *, int extended_p));
 
 static void remote_close PARAMS ((int quitting));
 
@@ -243,10 +243,6 @@ static void extended_remote_create_inferior PARAMS ((char *, char *, char **));
 
 static void remote_mourn_1 PARAMS ((struct target_ops *));
 
-static void getpkt PARAMS ((char *buf, int forever));
-
-static int putpkt PARAMS ((char *buf));
-
 static void remote_send PARAMS ((char *buf));
 
 static int readchar PARAMS ((int timeout));
@@ -256,8 +252,6 @@ static int remote_wait PARAMS ((int pid, struct target_waitstatus *status));
 static void remote_kill PARAMS ((void));
 
 static int tohex PARAMS ((int nib));
-
-static int fromhex PARAMS ((int a));
 
 static void remote_detach PARAMS ((char *args, int from_tty));
 
@@ -279,8 +273,17 @@ static int remote_insert_breakpoint PARAMS ((CORE_ADDR, char *));
 
 static int remote_remove_breakpoint PARAMS ((CORE_ADDR, char *));
 
+static int hexnumlen PARAMS ((ULONGEST num));
+
 static struct target_ops remote_ops;	/* Forward decl */
 static struct target_ops extended_remote_ops;	/* Forward decl */
+
+/* exported functions */
+
+extern int fromhex PARAMS ((int a));
+extern void getpkt PARAMS ((char *buf, int forever));
+extern int putpkt PARAMS ((char *buf));
+
 
 /* This was 5 seconds, which is a long time to sit and wait.
    Unless this is going though some terminal server or multiplexer or
@@ -332,7 +335,8 @@ static int remote_write_size = PBUFSIZ;
 
 /* This is the size (in chars) of the first response to the `g' command.  This
    is used to limit the size of the memory read and write commands to prevent
-   stub buffers from overflowing.  */
+   stub buffers from overflowing.  The size does not include headers and
+   trailers, it is only the payload size. */
 
 static int remote_register_buf_size = 0;
 
@@ -434,8 +438,8 @@ remote_close (quitting)
 static void
 get_offsets ()
 {
-  char buf[PBUFSIZ];
-  int nvals;
+  char buf[PBUFSIZ], *ptr;
+  int lose;
   CORE_ADDR text_addr, data_addr, bss_addr;
   struct section_offsets *offs;
 
@@ -452,9 +456,43 @@ get_offsets ()
       return;
     }
 
-  nvals = sscanf (buf, "Text=%lx;Data=%lx;Bss=%lx", &text_addr, &data_addr,
-		  &bss_addr);
-  if (nvals != 3)
+  /* Pick up each field in turn.  This used to be done with scanf, but
+     scanf will make trouble if CORE_ADDR size doesn't match
+     conversion directives correctly.  The following code will work
+     with any size of CORE_ADDR.  */
+  text_addr = data_addr = bss_addr = 0;
+  ptr = buf;
+  lose = 0;
+
+  if (strncmp (ptr, "Text=", 5) == 0)
+    {
+      ptr += 5;
+      /* Don't use strtol, could lose on big values.  */
+      while (*ptr && *ptr != ';')
+	text_addr = (text_addr << 4) + fromhex (*ptr++);
+    }
+  else
+    lose = 1;
+
+  if (!lose && strncmp (ptr, ";Data=", 6) == 0)
+    {
+      ptr += 6;
+      while (*ptr && *ptr != ';')
+	data_addr = (data_addr << 4) + fromhex (*ptr++);
+    }
+  else
+    lose = 1;
+
+  if (!lose && strncmp (ptr, ";Bss=", 5) == 0)
+    {
+      ptr += 5;
+      while (*ptr && *ptr != ';')
+	bss_addr = (bss_addr << 4) + fromhex (*ptr++);
+    }
+  else
+    lose = 1;
+
+  if (lose)
     error ("Malformed response to offset query, %s", buf);
 
   if (symfile_objfile == NULL)
@@ -511,7 +549,7 @@ remote_open (name, from_tty)
      char *name;
      int from_tty;
 {
-  remote_open_1 (name, from_tty, &remote_ops);
+  remote_open_1 (name, from_tty, &remote_ops, 0);
 }
 
 /* Open a connection to a remote debugger using the extended
@@ -522,25 +560,18 @@ extended_remote_open (name, from_tty)
      char *name;
      int from_tty;
 {
-  char buf[PBUFSIZ];
-
-  /* Do the basic remote open stuff.  */
-  remote_open_1 (name, from_tty, &extended_remote_ops);
-
-  /* Now tell the remote that we're using the extended protocol.  */
-  putpkt ("!");
-  getpkt (buf, 0);
-
+  remote_open_1 (name, from_tty, &extended_remote_ops, 1/*extended_p*/);
 }
 
 /* Generic code for opening a connection to a remote target.  */
 static DCACHE *remote_dcache;
 
 static void
-remote_open_1 (name, from_tty, target)
+remote_open_1 (name, from_tty, target, extended_p)
      char *name;
      int from_tty;
      struct target_ops *target;
+     int extended_p;
 {
   if (name == 0)
     error ("To open a remote debug connection, you need to specify what serial\n\
@@ -602,6 +633,15 @@ device is attached to the remote system (e.g. /dev/ttya).");
   if (!catch_errors (remote_start_remote, (char *)0, 
 		     "Couldn't establish connection to remote target\n", RETURN_MASK_ALL))
     pop_target();
+
+
+  if (extended_p)
+    {
+      /* tell the remote that we're using the extended protocol.  */
+      char buf[PBUFSIZ];
+      putpkt ("!");
+      getpkt (buf, 0);
+    }
 }
 
 /* This takes a program previously attached to and detaches it.  After
@@ -630,7 +670,7 @@ remote_detach (args, from_tty)
 
 /* Convert hex digit A to a number.  */
 
-static int
+int
 fromhex (a)
      int a;
 {
@@ -638,6 +678,8 @@ fromhex (a)
     return a - '0';
   else if (a >= 'a' && a <= 'f')
     return a - 'a' + 10;
+  else if (a >= 'A' && a <= 'F')
+    return a - 'A' + 10;
   else 
     error ("Reply contains invalid hex digit %d", a);
 }
@@ -748,6 +790,25 @@ Give up (and stop debugging it)? "))
 /* If nonzero, ignore the next kill.  */
 int kill_kludge;
 
+void
+remote_console_output (msg)
+     char *msg;
+{
+  char *p;
+
+  for (p = msg; *p; p +=2) 
+    {
+      char tb[2];
+      char c = fromhex (p[0]) * 16 + fromhex (p[1]);
+      tb[0] = c;
+      tb[1] = 0;
+      if (target_output_hook)
+	target_output_hook (tb);
+      else 
+	fputs_filtered (tb, gdb_stdout);
+    }
+}
+
 /* Wait until the remote machine stops, then return,
    storing status in STATUS just as `wait' would.
    Returns "pid" (though it's not clear what, if anything, that
@@ -794,7 +855,6 @@ remote_wait (pid, status)
 		n... = register number
 		r... = register contents
 		*/
-
 	    p = &buf[3];	/* after Txx */
 
 	    while (*p)
@@ -868,17 +928,7 @@ Packet: '%s'\n",
 
 	  goto got_status;
 	case 'O':		/* Console output */
- 	  for (p = buf + 1; *p; p +=2) 
- 	    {
- 	      char tb[2];
- 	      char c = fromhex (p[0]) * 16 + fromhex (p[1]);
- 	      tb[0] = c;
- 	      tb[1] = 0;
- 	      if (target_output_hook)
- 		target_output_hook (tb);
- 	      else 
- 		fputs_filtered (tb, gdb_stdout);
- 	    }
+	  remote_console_output (buf + 1);
 	  continue;
 	case '\0':
 	  if (last_sent_signal != TARGET_SIGNAL_0)
@@ -1106,7 +1156,7 @@ hexnumlen (num)
   for (i = 0; num != 0; i++)
     num >>= 4;
 
-  return min (i, 1);
+  return max (i, 1);
 }
 
 /* Write memory data directly to the remote machine.
@@ -1129,12 +1179,11 @@ remote_write_bytes (memaddr, myaddr, len)
   /* Chop the transfer down if necessary */
 
   max_buf_size = min (remote_write_size, PBUFSIZ);
-  max_buf_size = min (max_buf_size, remote_register_buf_size);
+  if (remote_register_buf_size != 0)
+    max_buf_size = min (max_buf_size, remote_register_buf_size);
 
-#define PACKET_OVERHEAD (1 + 1 + 1 + 2)	/* $x#xx  - Overhead for all types of packets */
-
-  /* packet overhead + <memaddr>,<len>:  */
-  max_buf_size -= PACKET_OVERHEAD + hexnumlen (memaddr + len - 1) + 1 + hexnumlen (len) + 1;
+  /* Subtract header overhead from max payload size -  $M<memaddr>,<len>:#nn */
+  max_buf_size -= 2 + hexnumlen (memaddr + len - 1) + 1 + hexnumlen (len) + 4;
 
   origlen = len;
   while (len > 0)
@@ -1200,10 +1249,8 @@ remote_read_bytes (memaddr, myaddr, len)
   /* Chop the transfer down if necessary */
 
   max_buf_size = min (remote_write_size, PBUFSIZ);
-  max_buf_size = min (max_buf_size, remote_register_buf_size);
-
-  /* packet overhead */
-  max_buf_size -= PACKET_OVERHEAD;
+  if (remote_register_buf_size != 0)
+    max_buf_size = min (max_buf_size, remote_register_buf_size);
 
   origlen = len;
   while (len > 0)
@@ -1393,7 +1440,7 @@ remote_send (buf)
 /* Send a packet to the remote machine, with error checking.
    The data of the packet is in BUF.  */
 
-static int
+int
 putpkt (buf)
      char *buf;
 {
@@ -1601,7 +1648,7 @@ read_frame (buf)
    If FOREVER, wait forever rather than timing out; this is used
    while the target is executing user code.  */
 
-static void
+void
 getpkt (buf, forever)
      char *buf;
      int forever;
@@ -1664,7 +1711,7 @@ getpkt (buf, forever)
       if (val == 1)
 	{
 	  if (remote_debug)
-	    fprintf_unfiltered (gdb_stderr, "Packet received: %s\n", buf);
+	    fprintf_unfiltered (gdb_stdout, "Packet received: %s\n", buf);
 	  SERIAL_WRITE (remote_desc, "+", 1);
 	  return;
 	}
@@ -1947,6 +1994,21 @@ push_remote_target (name, from_tty)
 {
   printf_filtered ("Switching to remote protocol\n");
   remote_open (name, from_tty);
+}
+
+/* Other targets want to use the entire remote serial module but with
+   certain remote_ops overridden. */
+
+void
+open_remote_target (name, from_tty, target, extended_p)
+     char *name;
+     int from_tty;
+     struct target_ops *target;
+     int extended_p;
+{
+  printf_filtered ("Selecting the %sremote protocol\n",
+		   (extended_p ? "extended-" : ""));
+  remote_open_1 (name, from_tty, target, extended_p);
 }
 
 void

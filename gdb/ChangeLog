@@ -1,3 +1,19 @@
+Thu Feb 12 12:14:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-d10v.c: New file.  Layer the d10v GDB->remote memory map
+ 	on top of the remote serial memory transfer functions.
+
+	* config/d10v/d10v.mt (TDEPFILES): Add remote-d10v.o
+
+	* Makefile.in (remote-d10v.o): Add dependencies.
+
+	* remote.c (remote_open_1): Add arg extended_p, engage extended
+ 	protocol when extended_p.
+	(remote_open, extended_remote_open): Pass !extended_p /
+ 	extended_p to remote_open_1.
+
+	* remote.c (open_remote_target), target.h: New function.
+
 Wed Feb 11 08:41:15 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/i386/fbsd.mh (XDEPFILES): Add ser-tcp.o.
