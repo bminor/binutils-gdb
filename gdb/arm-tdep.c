@@ -3110,11 +3110,11 @@ _initialize_arm_tdep (void)
 				  arm_elf_osabi_sniffer);
 
   /* Register some ABI variants for embedded systems.  */
-  gdbarch_register_osabi (bfd_arch_arm, GDB_OSABI_ARM_EABI_V1,
+  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_ARM_EABI_V1,
                           arm_init_abi_eabi_v1);
-  gdbarch_register_osabi (bfd_arch_arm, GDB_OSABI_ARM_EABI_V2,
+  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_ARM_EABI_V2,
                           arm_init_abi_eabi_v2);
-  gdbarch_register_osabi (bfd_arch_arm, GDB_OSABI_ARM_APCS,
+  gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_ARM_APCS,
                           arm_init_abi_apcs);
 
   tm_print_insn = gdb_print_insn_arm;

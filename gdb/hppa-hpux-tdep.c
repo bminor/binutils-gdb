@@ -38,9 +38,8 @@ hppa_hpux_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 void
 _initialize_hppa_hpux_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_hppa, GDB_OSABI_HPUX_SOM,
+  gdbarch_register_osabi (bfd_arch_hppa, 0, GDB_OSABI_HPUX_SOM,
                           hppa_hpux_som_init_abi);
-  gdbarch_register_osabi (bfd_arch_hppa, GDB_OSABI_HPUX_ELF,
+  gdbarch_register_osabi (bfd_arch_hppa, 0, GDB_OSABI_HPUX_ELF,
                           hppa_hpux_elf_init_abi);
 }
-

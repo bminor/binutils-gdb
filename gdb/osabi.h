@@ -61,9 +61,11 @@ void gdbarch_register_osabi_sniffer (enum bfd_architecture,
 				     enum bfd_flavour,
 				     enum gdb_osabi (*)(bfd *));
 
-/* Register a handler for an OS ABI variant for a given architecture.  There
-   should be only one handler for a given OS ABI each architecture family.  */
-void gdbarch_register_osabi (enum bfd_architecture, enum gdb_osabi,
+/* Register a handler for an OS ABI variant for a given architecture
+   and machine type.  There should be only one handler for a given OS
+   ABI for each architecture and machine type combination.  */
+void gdbarch_register_osabi (enum bfd_architecture, unsigned long,
+			     enum gdb_osabi,
                              void (*)(struct gdbarch_info,
 				      struct gdbarch *));
 

@@ -1715,11 +1715,11 @@ are \"default\", \"pcc\" and \"reg\", and the default value is \"default\".",
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_nlm_flavour,
 				  i386_nlm_osabi_sniffer);
 
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_SVR4,
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_SVR4,
 			  i386_svr4_init_abi);
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_GO32,
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_GO32,
 			  i386_go32_init_abi);
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_NETWARE,
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_NETWARE,
 			  i386_nw_init_abi);
 
   /* Initialize the i386 specific register groups.  */

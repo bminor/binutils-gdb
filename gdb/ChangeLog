@@ -1,3 +1,43 @@
+2002-12-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* osabi.c: Include "gdb_assert.h" and "gdb_string.h".
+	(struct gdb_osabi_handler): Remove member `arch'.  Add member
+	`arch_info'.
+	(gdbarch_register_osabi): Add new argument `machine'.  Use ot to
+	construct a `struct bfd_arch_info' and store it in the `struct
+	gdb_osabi_handler' that is created.
+	(gdbarch_init_osabi): Check for compatibility based on machine
+	type and architecture.
+	* osabi.h (gdbarch_register_osabi): Adjust prototype and update
+	comment.
+	* alpha-linux-tdep.c (_initialize_alpha_linux_tdep): Add 0 as
+	second argument in call to gdbarch_register_osabi.
+	* alpha-osf1-tdep.c (_initialize_alpha_osf1_tdep): Likewise.
+	* alphafbsd-tdep.c (_initialize_alphafbsd_tdep): Likewise.
+	* alphanbsd-tdep.c (_initialize_alphanbsd_tdep): Likewise.
+	* arm-linux-tdep.c (_initialize_arm_linux_tdep): Likewise.
+	* arm-tdep.c (_initialize_arm_tdep): Likewise.
+	* armnbsd-tdep.c (_initialize_armnbsd_tdep): Likewise.
+	* hppa-hpux-tdep.c (_initialize_hppa_hpux_tdep): Likewise.
+	* i386-interix-tdep.c (_initialize_i386_interix_tdep): Likewise.
+	* i386-linux-tdep.c (_initialize_i386_linux_tdep): Likewise.
+	* i386-sol2-tdep.c (_initialize_i386_sol2_tdep): Likewise.
+	* i386-tdep.c (_initialize_i386_tdep): Likewise.
+	* i386bsd-tdep.c (_initialize_i386bsd_tdep): Likewise.
+	* i386gnu-tdep.c (_initialize_i386gnu_tdep): Likewise.
+	* i386ly-tdep.c (_initialize_i386lynx_tdep): Renamed from
+	_initialize_i386bsd_tdep and updated likewise.
+	* i386nbsd-tdep.c (_initialize_i386nbsd_tdep): Likewise.
+	* i386obsd-tdep.c (_initialize_i386obsd_tdep): Likewise.
+	* mips-irix-tdep.c (_initialize_mips_irix_tdep): Likewise.
+	* mips-linux-tdep.c (_initialize_mips_linux_tdep): Likewise.
+	* mipsnbsd-tdep.c (_initialize_mipsnbsd__tdep): Likewise.
+	* ns32knbsd-tdep.c (_initialize_ns32kmnsd_tdep): Likewise.
+	* ppc-linux-tdep.c (_initialize_ppc_linux_tdep): Likewise.
+	* ppcnbsd-tdep.c (_initialize_ppcnbsd_tdep): Likewise.
+	* shnbsd-tdep.c (_initialize_shnbsd_tdep): Likewise.
+	* sparcnbsd-tdep.c (_initialize_sparcnbsd_tdep): Likewise.
+
 2002-12-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib-svr4.c (elf_locate_base): Fix sizeof() related bug.  Add

@@ -726,7 +726,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
 void
 _initialize_ppc_linux_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_powerpc, GDB_OSABI_LINUX,
+  gdbarch_register_osabi (bfd_arch_powerpc, 0, GDB_OSABI_LINUX,
 			  ppc_linux_init_abi);
   add_core_fns (&ppc_linux_regset_core_fns);
 }

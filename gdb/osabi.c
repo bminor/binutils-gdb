@@ -19,7 +19,10 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+
+#include "gdb_assert.h"
 #include "gdb_string.h"
+
 #include "osabi.h"
 
 #include "elf-bfd.h"
@@ -70,7 +73,7 @@ gdbarch_osabi_name (enum gdb_osabi osabi)
 struct gdb_osabi_handler  
 {
   struct gdb_osabi_handler *next;
-  enum bfd_architecture arch;
+  const struct bfd_arch_info *arch_info;
   enum gdb_osabi osabi;
   void (*init_osabi)(struct gdbarch_info, struct gdbarch *);
 };
@@ -78,11 +81,13 @@ struct gdb_osabi_handler
 static struct gdb_osabi_handler *gdb_osabi_handler_list;
 
 void
-gdbarch_register_osabi (enum bfd_architecture arch, enum gdb_osabi osabi,
+gdbarch_register_osabi (enum bfd_architecture arch, unsigned long machine,
+			enum gdb_osabi osabi,
                         void (*init_osabi)(struct gdbarch_info,
 					   struct gdbarch *))
 {
   struct gdb_osabi_handler **handler_p;
+  const struct bfd_arch_info *arch_info = bfd_lookup_arch (arch, machine);
 
   /* Registering an OS ABI handler for "unknown" is not allowed.  */
   if (osabi == GDB_OSABI_UNKNOWN)
@@ -93,14 +98,16 @@ gdbarch_register_osabi (enum bfd_architecture arch, enum gdb_osabi osabi,
          "OS ABI \"%s\" for architecture %s was made.  The handler will "
 	 "not be registered",
 	 gdbarch_osabi_name (osabi),
-	 bfd_printable_arch_mach (arch, 0));
+	 bfd_printable_arch_mach (arch, machine));
       return;
     }
+
+  gdb_assert (arch_info);
 
   for (handler_p = &gdb_osabi_handler_list; *handler_p != NULL;
        handler_p = &(*handler_p)->next)
     {
-      if ((*handler_p)->arch == arch
+      if ((*handler_p)->arch_info == arch_info
 	  && (*handler_p)->osabi == osabi)
 	{
 	  internal_error
@@ -108,7 +115,7 @@ gdbarch_register_osabi (enum bfd_architecture arch, enum gdb_osabi osabi,
 	     "gdbarch_register_osabi: A handler for OS ABI \"%s\" "
 	     "has already been registered for architecture %s",
 	     gdbarch_osabi_name (osabi),
-	     bfd_printable_arch_mach (arch, 0));
+	     arch_info->printable_name);
 	  /* If user wants to continue, override previous definition.  */
 	  (*handler_p)->init_osabi = init_osabi;
 	  return;
@@ -118,7 +125,7 @@ gdbarch_register_osabi (enum bfd_architecture arch, enum gdb_osabi osabi,
   (*handler_p)
     = (struct gdb_osabi_handler *) xmalloc (sizeof (struct gdb_osabi_handler));
   (*handler_p)->next = NULL;
-  (*handler_p)->arch = arch;
+  (*handler_p)->arch_info = arch_info;
   (*handler_p)->osabi = osabi;
   (*handler_p)->init_osabi = init_osabi;
 }
@@ -230,9 +237,9 @@ void
 gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch,
                     enum gdb_osabi osabi)
 {
-  struct gdb_osabi_handler *handler;
-  bfd *abfd = info.abfd;
   const struct bfd_arch_info *arch_info = gdbarch_bfd_arch_info (gdbarch);
+  const struct bfd_arch_info *compatible;
+  struct gdb_osabi_handler *handler;
 
   if (osabi == GDB_OSABI_UNKNOWN)
     {
@@ -244,8 +251,19 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch,
   for (handler = gdb_osabi_handler_list; handler != NULL;
        handler = handler->next)
     {
-      if (handler->arch == bfd_get_arch (abfd)
-	  && handler->osabi == osabi)
+      if (handler->osabi != osabi)
+	continue;
+
+      /* Check whether the machine type and architecture of the
+         handler are compatible with the desired machine type and
+         architecture.
+
+	 NOTE: kettenis/20021027: There may be more than one machine
+	 type that is compatible with the desired machine type.  Right
+	 now we simply return the first match, which is fine for now.
+	 However, we might want to do something smarter in the future.  */
+      compatible = arch_info->compatible (arch_info, handler->arch_info);
+      if (compatible == handler->arch_info)
 	{
 	  (*handler->init_osabi) (info, gdbarch);
 	  return;

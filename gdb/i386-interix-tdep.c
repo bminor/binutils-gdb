@@ -354,6 +354,6 @@ _initialize_i386_interix_tdep (void)
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_coff_flavour,
                                   i386_interix_osabi_sniffer);
 
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_INTERIX,
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_INTERIX,
                           i386_interix_init_abi);
 }

@@ -358,7 +358,7 @@ mips_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 void
 _initialize_mips_linux_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_mips, GDB_OSABI_LINUX,
+  gdbarch_register_osabi (bfd_arch_mips, 0, GDB_OSABI_LINUX,
 			  mips_linux_init_abi);
   add_core_fns (&regset_core_fns);
 }

@@ -188,5 +188,6 @@ _initialize_shnbsd_tdep (void)
   add_core_fns (&shnbsd_core_fns);
   add_core_fns (&shnbsd_elfcore_fns);
 
-  gdbarch_register_osabi (bfd_arch_sh, GDB_OSABI_NETBSD_ELF, shnbsd_init_abi);
+  gdbarch_register_osabi (bfd_arch_sh, 0, GDB_OSABI_NETBSD_ELF,
+			  shnbsd_init_abi);
 }

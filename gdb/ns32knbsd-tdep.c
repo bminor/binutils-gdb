@@ -66,6 +66,6 @@ _initialize_ns32knbsd_tdep (void)
   gdbarch_register_osabi_sniffer (bfd_arch_ns32k, bfd_target_aout_flavour,
 				  ns32knbsd_aout_osabi_sniffer);
 
-  gdbarch_register_osabi (bfd_arch_ns32k, GDB_OSABI_NETBSD_AOUT,
+  gdbarch_register_osabi (bfd_arch_ns32k, 0, GDB_OSABI_NETBSD_AOUT,
 			  ns32knbsd_init_abi_aout);
 }

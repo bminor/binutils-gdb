@@ -39,5 +39,5 @@ extern void _initialize_i386gnu_tdep (void);
 void
 _initialize_i386gnu_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_i386, GDB_OSABI_HURD, i386gnu_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_HURD, i386gnu_init_abi);
 }
