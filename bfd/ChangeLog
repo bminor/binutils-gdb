@@ -1,3 +1,7 @@
+2001-03-16  Philip Blundell  <philb@gnu.org>
+
+	* configure: Regenerate.
+
 2001-03-16  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf32-hppa.c (elf32_hppa_link_hash_entry): Add maybe_pic_call.
