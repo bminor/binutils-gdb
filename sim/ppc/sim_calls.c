@@ -441,6 +441,16 @@ sim_io_flush_stdoutput(void)
   }
 }
 
+void
+sim_io_error (SIM_DESC sd, const char *fmt, ...)
+{
+  va_list ap;
+  va_start(ap, fmt);
+  callbacks->evprintf_filtered (callbacks, fmt, ap);
+  va_end(ap);
+  callbacks->error (callbacks, "");
+}
+
 /****/
 
 void *

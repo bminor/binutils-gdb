@@ -1,3 +1,9 @@
+2001-12-15  matthew green  <mrg@redhat.com>
+
+	* main.c: Include "defs.h", "bfd.h", "callback.h" and "remote-sim.h".
+	(sim_io_error): New function.
+	* sim_calls.c: (sim_io_error): New function.
+
 2001-12-14  matthew green  <mrg@redhat.com>
 
 	* Makefile.in (LIB_OBJ): Add @sim_fpu@.
