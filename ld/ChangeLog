@@ -5,7 +5,9 @@ Thu Jun  2 17:24:08 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	shared library support code.
 	* emultempl/sunos.em: New file.
 	* emulparams/sun4.sh (TEMPLATE_NAME): Define as sunos.
+	* emulparams/sun3.sh (TEMPLATE_NAME): Likewise.
 	* Makefile.in (esun4.c): Depend upon sunos.em, not generic.em.
+	(esun3.c): Likewise.
 
 	* ldlang.c: Minor formatting cleanups.
 	(lang_for_each_input_file): New function.
