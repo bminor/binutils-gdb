@@ -1,3 +1,9 @@
+Tue Nov 25 00:12:38 1997  Doug Evans  <devans@seba.cygnus.com>
+
+	* gennltvals.sh: Generate syscall values for d30v.
+	Use libgloss/syscall.h for sparc.
+	* nltvals.def: Regenerate.
+
 Mon Nov 24 18:56:07 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* sim-io.c (sim_io_syscalls): New function to provide system call
@@ -22,6 +28,7 @@ Mon Nov 24 12:09:59 1997  Doug Evans  <devans@seba.cygnus.com>
 	* sim-trace.c (trace_option_handler): Set state trace file
 	for --trace-file in addition to cpu's values.
 	(trace_vprintf): If cpu == NULL, try state's trace file.
+	(trace_options): Reorganize table, reword some descriptions.
 
 Sun Nov 23 10:57:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
