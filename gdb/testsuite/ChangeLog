@@ -1,5 +1,9 @@
 2004-08-05  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.base/gcore.c: Add copyright notice.
+
+2004-08-05  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.base/freebpcmd.c: Include <stdio.h>.
 	* gdb.base/long_long.c: Include <string.h>.
 	* gdb.base/sigaltstack.c: Include <stdlib.h> <string.h>.
