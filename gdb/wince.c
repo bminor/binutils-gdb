@@ -602,10 +602,10 @@ towide (const char *s, gdb_wince_len * out_len)
     n = 0;			/* wrap */
 
   /* Allocate space for the converted string, reusing any previously allocated
-     space, if applicable. Note that if outs[n] is NULL, realloc will act as
+     space, if applicable. Note that if outs[n] is NULL, xrealloc will act as
      a malloc (under cygwin, at least).
    */
-  outs[n] = (LPWSTR) realloc (outs[n], *out_len);
+  outs[n] = (LPWSTR) xrealloc (outs[n], *out_len);
   memset (outs[n], 0, *out_len);
   (void) MultiByteToWideChar (CP_ACP, 0, s, -1, outs[n], *out_len);
   return outs[n];
@@ -1156,7 +1156,7 @@ child_store_inferior_registers (int r)
    of error; store status through argument pointer OURSTATUS.  */
 
 static int
-handle_load_dll (PTR dummy)
+handle_load_dll (void *dummy)
 {
   LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
   char dll_buf[MAX_PATH + 1];
@@ -1573,7 +1573,7 @@ upload_to_device (const char *to, const char *from)
     error ("no filename found to upload - %s.", in_to);
 
   len = strlen (dir) + strlen (to) + 2;
-  remotefile = (char *) realloc (remotefile, len);
+  remotefile = (char *) xrealloc (remotefile, len);
   strcpy (remotefile, dir);
   strcat (remotefile, "\\");
   strcat (remotefile, to);
@@ -1924,7 +1924,7 @@ init_child_ops (void)
 
 #define replace_upload(what) \
       upload_when = what; \
-      remote_upload = realloc (remote_upload, strlen (upload_options[upload_when].name) + 1); \
+      remote_upload = xrealloc (remote_upload, strlen (upload_options[upload_when].name) + 1); \
       strcpy (remote_upload, upload_options[upload_when].name);
 
 static void
