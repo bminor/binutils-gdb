@@ -1,3 +1,12 @@
+Mon Feb 23 19:31:19 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Add elf.lo to elf shell variable.
+	* Makefile.am (BFD_LIBS): Remove elf.lo.
+	(BFD_LIBS_CFILES): Remove elf.c.
+	(BFD32_BACKENDS): Add elf.lo.
+	(BFD32_BACKENDS_CFILES): Add elf.c.
+	* configure, Makefile.in: Rebuild.
+
 1998-02-23 15:53  Richard Henderson  <rth@cygnus.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): A pc-relative
