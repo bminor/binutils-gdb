@@ -1,3 +1,10 @@
+2005-03-17  Paul Brook <paul@codesourcery.com>
+	    Dan Jacobowitz <dan@codesourcery.com>
+	    Mark Mitchell  <mark@codesourcery.com>
+
+	* binutils/readelf.c (get_arm_segment_type): New function.
+	(get_segment_type): Use it.
+
 2005-03-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/es.po: Commit new Spanish translation.

@@ -1,3 +1,14 @@
+2005-03-17  Paul Brook <paul@codesourcery.com>
+	    Dan Jacobowitz <dan@codesourcery.com>
+	    Mark Mitchell  <mark@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_modify_segment_map): New function.
+	(elf32_arm_additional_program_headers): Likewise.
+	(elf_backend_modify_segment_map): Define.
+	(elf_backend_additional_program_headers): Likewise.
+	(elf32_arm_symbian_modify_segment_map): Use
+	elf32_arm_modify_segment_map.
+
 2005-03-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_create_linker_section): Set SEC_LINKER_CREATED

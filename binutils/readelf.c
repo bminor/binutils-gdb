@@ -2235,6 +2235,20 @@ get_osabi_name (unsigned int osabi)
 }
 
 static const char *
+get_arm_segment_type (unsigned long type)
+{
+  switch (type)
+    {
+    case PT_ARM_EXIDX:
+      return "EXIDX";
+    default:
+      break;
+    }
+
+  return NULL;
+}
+
+static const char *
 get_mips_segment_type (unsigned long type)
 {
   switch (type)
@@ -2324,6 +2338,9 @@ get_segment_type (unsigned long p_type)
 
 	  switch (elf_header.e_machine)
 	    {
+	    case EM_ARM:
+	      result = get_arm_segment_type (p_type);
+	      break;
 	    case EM_MIPS:
 	    case EM_MIPS_RS3_LE:
 	      result = get_mips_segment_type (p_type);
