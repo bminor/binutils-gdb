@@ -1,3 +1,11 @@
+Tue Aug 23 17:51:13 1994  J.T. Conklin  (jtc@cygnus.com)
+
+	* nlm/gdbserve.c: conditionalize header file inclusion for either
+	  NetWare 4.0 or PIN targets.
+	* nlm/i386.c: include appropriate header files.
+	* nlm/prelude.c: define TERMINATE_BY_UNLOAD for NetWare 4.0
+	  targets.
+
 Tue Aug 23 16:54:16 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* nlm/ppc.c (set_step_traps clear_step_traps):  Cleanups.
