@@ -176,6 +176,8 @@ m68kbsd_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   m68kbsd_init_abi (info, gdbarch);
 
+  /* NetBSD ELF uses the SVR4 ABI.  */
+  m68k_svr4_init_abi (info, gdbarch);
   tdep->struct_return = pcc_struct_return;
 
   /* NetBSD ELF uses SVR4-style shared libraries.  */

@@ -1,3 +1,7 @@
+2004-05-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* m68kbsd-tdep.c (m68kbsd_elf_init_abi): Call m68k_svr4_init_abi.
+
 2004-05-10  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
 
 	* acinclude.m4: Quote macro names being defined by AC_DEFUN 
