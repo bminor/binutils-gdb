@@ -1,3 +1,8 @@
+Wed Oct  9 07:42:44 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* Makefile.in (init.c):  Retro HPUX grep lacks -h option.  Strip
+	filenames with sed instead.
+
 Tue Oct  8 15:59:44 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* defs.h:  Remove decls of xmalloc and xrealloc.  There is a

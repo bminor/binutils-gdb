@@ -602,8 +602,8 @@ init.c: $(OBS) $(TSOBS)
 	    -e '/[a-z0-9A-Z_]*-exp.tab.o/d' \
 	    -e 's/\.o/.c/' \
 	    -e 's|\([^  ][^     ]*\)|$(srcdir)/\1|g' | \
-	xargs grep -h -s '^_initialize_[a-z_0-9A-Z]* *(' | \
-	sed -e 's/^\([a-z_0-9A-Z]*\).*/  {extern void \1 PARAMS ((void)); \1 ();}/p' >>init.c-tmp
+	xargs grep -s '^_initialize_[a-z_0-9A-Z]* *(' | \
+	sed -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/  {extern void \1 PARAMS ((void)); \1 ();}/p' >>init.c-tmp
 	@echo '}' >>init.c-tmp
 	@mv init.c-tmp init.c
 
