@@ -305,8 +305,48 @@ addr_bits_set ()
 int
 saved_pc_after_call ()
 {
-  return addr_bits_remove (read_memory_integer (read_register (SP_REGNUM), PTR_SIZE));
+  return addr_bits_remove 
+    (read_memory_integer (read_register (SP_REGNUM), PTR_SIZE));
 }
+
+
+extract_return_value(type, regbuf, valbuf)
+struct type *type;
+char *regbuf;
+char *valbuf;
+{
+  int b;
+  int len = TYPE_LENGTH(type);
+
+  for (b = 0; b < len; b += 2) {
+    int todo = len - b;
+    if (todo > 2)
+      todo = 2;
+    memcpy(valbuf + b, regbuf + b, todo);
+  }
+}
+
+void
+write_return_value(type, valbuf)
+struct type *type;
+char *valbuf;
+{
+  int reg;
+  int len;
+  for (len = 0; len <  TYPE_LENGTH(type); len += 2)
+    {
+      write_register_bytes(REGISTER_BYTE(len /2  + 2), valbuf + len, 2);
+    }
+}
+
+void
+store_struct_return(addr, sp)
+CORE_ADDR addr;
+CORE_ADDR sp;
+{
+  write_register(2, addr);
+}
+
 
 void
 print_register_hook (regno)
@@ -406,7 +446,7 @@ segmented_command (args, from_tty)
      char *args;
      int from_tty;
 {
-  z8k_set_pointer_size (16);
+  z8k_set_pointer_size (32);
 }
 
 static void

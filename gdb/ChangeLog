@@ -1,3 +1,8 @@
+Wed Mar 17 11:28:11 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* z8k-tdep.c (extract_return_value, write_return_value,
+	store_struct_return): New functions from macros in tm-z8k.h.
+	
 Wed Mar 17 11:23:06 1993  Fred Fish  (fnf@cygnus.com)
 
 	* valops.c (value_arg_coerce):  Apply temporary patch to
