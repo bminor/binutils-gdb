@@ -489,8 +489,10 @@ sim_open (kind, cb, abfd, argv)
     }
   
   /* start-sanitize-tx3904 */
-  else if(! strcmp(board, BOARD_JMR3904) ||
-	  (! strcmp(board, BOARD_JMR3904_DEBUG)))
+#if (WITH_HW)
+  if (board != NULL
+      && (strcmp(board, BOARD_JMR3904) == 0 ||
+	  strcmp(board, BOARD_JMR3904_DEBUG) == 0))
     {
       /* match VIRTUAL memory layout of JMR-TX3904 board */
 
@@ -547,6 +549,7 @@ sim_open (kind, cb, abfd, argv)
 
       device_init(sd);
     }
+#endif
   /* end-sanitize-tx3904 */
 
 
@@ -1758,7 +1761,7 @@ signal_exception (SIM_DESC sd,
 		  address_word cia,
 		  int exception,...)
 {
-  int vector;
+  /* int vector; */
 
 #ifdef DEBUG
   sim_io_printf(sd,"DBG: SignalException(%d) PC = 0x%s\n",exception,pr_addr(cia));
@@ -1915,12 +1918,12 @@ signal_exception (SIM_DESC sd,
 	 else
 	   EPC = cia;
 	 /* FIXME: TLB et.al. */
-	 vector = 0x180;
+	 /* vector = 0x180; */
        }
      else
        {
 	 CAUSE = (exception << 2);
-	 vector = 0x180;
+	 /* vector = 0x180; */
        }
      SR |= status_EXL;
      /* Store exception code into current exception id variable (used
@@ -3350,6 +3353,12 @@ decode_coproc (SIM_DESC sd,
 		/* 10 = EntryHi            R4000   VR4100  VR4300 */
 		/* 11 = Compare            R4000   VR4100  VR4300 */
 		/* 12 = SR                 R4000   VR4100  VR4300 */
+#ifdef SUBTARGET_R3900
+	      case 3:
+		/* ignore */
+		break;
+		/* 3 = Config              R3900                  */
+#endif /* SUBTARGET_R3900 */
 	      case 12:
 		if (code == 0x00)
 		  GPR[rt] = SR;
