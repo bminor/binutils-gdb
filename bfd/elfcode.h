@@ -66,10 +66,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libbfd.h"
 #include "libelf.h"
 
-#ifndef alloca
-PTR alloca ();
-#endif
-
 /* Renaming structures, typedefs, macros and functions to be size-specific.  */
 #define Elf_External_Ehdr	NAME(Elf,External_Ehdr)
 #define Elf_External_Sym	NAME(Elf,External_Sym)

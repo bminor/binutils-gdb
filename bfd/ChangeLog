@@ -1,4 +1,6 @@
-Wed Feb 23 18:28:37 1994  Jeffrey A. Law  (law@cygnus.com)
+Wed Feb 23 18:28:37 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* elfcode.h (alloca): Delete declaration.
 
 	* som.c (som_prep_headers): Use CPU_PA_RISC1_0 for magic
 	number rather than HP9000S800_ID.  Note som.c is careful
