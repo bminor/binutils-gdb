@@ -383,7 +383,9 @@ print_insn_arg (d, l, pc, info)
 static
 void set_mips_isa_type (int mach, int * isa, int *cputype) 
 {
-    switch (info->mach)
+  int target_processor = 0 ;
+  int mips_isa = 0 ;
+    switch (mach)
     {
       /* start-sanitize-tx19 */
       case bfd_mach_mips1900:
@@ -479,7 +481,6 @@ void set_mips_isa_type (int mach, int * isa, int *cputype)
     }
     *isa = mips_isa ;
     *cputype = target_processor ;
-      
 }
 #endif /* symbol table available */
 
