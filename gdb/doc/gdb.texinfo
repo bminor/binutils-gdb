@@ -9448,7 +9448,7 @@ sequence will be the @code{qs}@code{ThreadInfo} query.
 @tab reply @code{m}@var{<id>}
 @tab A single thread id
 @item
-@tab reply @code{m}@var{<id>,}@var{<id>...}
+@tab reply @code{m}@var{<id>},@var{<id>...}
 @tab a comma-separated list of thread ids
 @item
 @tab reply @code{l}
@@ -11311,7 +11311,7 @@ you may want to limit the size of this search, using one of these
 commands:
 
 @table @code
-@cindex @code{heuristic-fence-post} (Alpha,MIPS)
+@cindex @code{heuristic-fence-post} (Alpha, MIPS)
 @item set heuristic-fence-post @var{limit}
 Restrict @value{GDBN} to examining at most @var{limit} bytes in its
 search for the beginning of a function.  A value of @var{0} (the
@@ -11920,18 +11920,18 @@ form of @value{GDBN} may need to coexist with other forms, hence a
 different name for the specialized version's init file).  These are the
 environments with special init file names:
 
-@kindex .vxgdbinit
+@cindex @file{.vxgdbinit}
 @itemize @bullet
 @item
-VxWorks (Wind River Systems real-time OS): @samp{.vxgdbinit}
+VxWorks (Wind River Systems real-time OS): @file{.vxgdbinit}
 
-@kindex .os68gdbinit
+@cindex @file{.os68gdbinit}
 @item
-OS68K (Enea Data Systems real-time OS): @samp{.os68gdbinit}
+OS68K (Enea Data Systems real-time OS): @file{.os68gdbinit}
 
-@kindex .esgdbinit
+@cindex @file{.esgdbinit}
 @item
-ES-1800 (Ericsson Telecom AB M68000 emulator): @samp{.esgdbinit}
+ES-1800 (Ericsson Telecom AB M68000 emulator): @file{.esgdbinit}
 @end itemize
 
 You can also request the execution of a command file with the

@@ -1,3 +1,10 @@
+2000-04-17  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdb.texinfo (Protocol): Prevent makeinfo from complaining about
+	a comma inside @var.
+	(Command Files): Index markup changes from Dmitry Sivachenko
+	<dima@Chg.RU>.
+
 2000-04-16  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* Makefile.in (LN_S): Define.
