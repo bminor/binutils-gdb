@@ -1,3 +1,13 @@
+Fri Feb  4 17:28:32 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* libbfd.c (bfd_zmalloc): Call bfd_xmalloc instead of malloc.
+	(bfd_xmalloc, bfd_xmalloc_by_size_t): Functions deleted.
+	* libbfd-in.h: Define them as macros calling xmalloc and declare
+	xmalloc. 
+	* libbfd.h: Rebuilt.
+	* ecofflink.c hash.c ieee.c opncls.c (obstack_chunk_alloc): Define
+	to be xmalloc, not bfd_xmalloc_by_size_t.
+
 Thu Feb  3 16:49:35 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ecofflink.c (bfd_ecoff_debug_externals): If a small undefined

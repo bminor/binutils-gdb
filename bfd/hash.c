@@ -290,7 +290,7 @@ SUBSUBSECTION
 */
 
 /* Obstack allocation and deallocation routines.  */
-#define obstack_chunk_alloc bfd_xmalloc_by_size_t
+#define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
 
 /* The default number of entries to use when creating a hash table.  */
@@ -419,7 +419,7 @@ bfd_hash_newfunc (entry, table, string)
 PTR
 bfd_hash_allocate (table, size)
      struct bfd_hash_table *table;
-     size_t size;
+     unsigned int size;
 {
   return obstack_alloc (&table->memory, size);
 }

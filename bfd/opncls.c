@@ -29,7 +29,7 @@ FILE *bfd_open_file PARAMS ((bfd *));
    if we do that we can't use fcntl.  */
 
 
-#define obstack_chunk_alloc bfd_xmalloc_by_size_t
+#define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
 
 /* Return a new BFD.  All BFD's are allocated through this routine.  */

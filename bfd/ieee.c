@@ -32,7 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
 #include "obstack.h"
-#define obstack_chunk_alloc bfd_xmalloc_by_size_t
+#define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
 
 /* Functions for writing to ieee files in the strange way that the

@@ -41,7 +41,7 @@ static boolean ecoff_write_symhdr PARAMS ((bfd *, struct ecoff_debug_info *,
 					   file_ptr where));
 
 /* Obstack allocation and deallocation routines.  */
-#define obstack_chunk_alloc bfd_xmalloc_by_size_t
+#define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
 
 /* The minimum amount of data to allocate.  */

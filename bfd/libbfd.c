@@ -132,65 +132,14 @@ char *
 bfd_zmalloc (size)
      bfd_size_type size;
 {
-  char *ptr = (char *) malloc ((size_t)size);
+  char *ptr = (char *) bfd_xmalloc (size);
 
-  if ((ptr != NULL) && (size != 0))
+  if (size != 0)
    memset(ptr,0, (size_t) size);
 
   return ptr;
 }
 #endif /* bfd_zmalloc */
-
-/*
-INTERNAL_FUNCTION
-	bfd_xmalloc
-
-SYNOPSIS
-	PTR  bfd_xmalloc (bfd_size_type size);
-
-DESCRIPTION
-	Like <<malloc>>, but exit if no more memory.
-
-*/
-
-/** There is major inconsistency in how running out of memory is handled.
-  Some routines return a NULL, and set bfd_error to no_memory.
-  However, obstack routines can't do this ... */
-
-
-PTR
-bfd_xmalloc (size)
-     bfd_size_type size;
-{
-  static CONST char no_memory_message[] = "Virtual memory exhausted!\n";
-  PTR ptr;
-  if (size == 0) size = 1;
-  ptr = (PTR)malloc((size_t) size);
-  if (!ptr)
-    {
-      write (2, no_memory_message, sizeof(no_memory_message)-1);
-      exit (1);
-    }
-  return ptr;
-}
-
-/*
-INTERNAL_FUNCTION
-	bfd_xmalloc_by_size_t
-
-SYNOPSIS
-	PTR bfd_xmalloc_by_size_t (size_t size);
-
-DESCRIPTION
-	Like <<malloc>>, but exit if no more memory.
-	Uses <<size_t>>, so it's suitable for use as <<obstack_chunk_alloc>>.
- */
-PTR
-bfd_xmalloc_by_size_t (size)
-     size_t size;
-{
-  return bfd_xmalloc ((bfd_size_type) size);
-}
 
 /* Some IO code */
 

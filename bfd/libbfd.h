@@ -73,7 +73,17 @@ struct areltdata {
 
 #define arelt_size(bfd) (((struct areltdata *)((bfd)->arelt_data))->parsed_size)
 
+/* There is major inconsistency in how running out of memory is handled.
+   Some routines return a NULL, and set bfd_error to no_memory.
+   However, obstack routines can't do this ... */
+
 char *bfd_zmalloc PARAMS ((bfd_size_type size));
+/* From libiberty.  */
+extern PTR xmalloc PARAMS ((size_t));
+/* SIZE is bfd_size_type.  */
+#define bfd_xmalloc(size) xmalloc ((size_t) size)
+/* SIZE is size_t.  */
+#define bfd_xmalloc_by_size_t(size) xmalloc (size)
 
 /* These routines allocate and free things on the BFD's obstack.  Note
    that realloc can never occur in place.  */
@@ -259,12 +269,6 @@ extern bfd_target *bfd_default_vector[];
 
 void 
 bfd_check_init PARAMS ((void));
-
-PTR  
-bfd_xmalloc  PARAMS ((bfd_size_type size));
-
-PTR 
-bfd_xmalloc_by_size_t  PARAMS ((size_t size));
 
 void 
 bfd_write_bigendian_4byte_int PARAMS ((bfd *abfd,  int i));
