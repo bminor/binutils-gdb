@@ -3644,3 +3644,18 @@ main (argc, argv)
   quit ();
   return 0;
 }
+
+/* This function is used because an abort in some of the other files
+   may be compiled into as_abort because they include as.h.  */
+
+void
+as_abort (file, line, fn)
+     const char *file, *fn;
+     int line;
+{
+  fprintf (stderr, "Internal error, aborting at %s line %d", file, line);
+  if (fn)
+    fprintf (stderr, " in %s", fn);
+  fprintf (stderr, "\nPlease report this bug.\n");
+  exit (1);
+}
