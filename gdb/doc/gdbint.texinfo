@@ -4133,7 +4133,7 @@ visible to random source files.
 All static functions must be declared in a block near the top of the
 source file.
 
-@subsection Clean Design
+@subsection Clean Design and Portable Implementation
 
 @cindex design
 In addition to getting the syntax right, there's the little question of
@@ -4218,6 +4218,67 @@ kinds; it would be a bad idea to replace all the uses of the small hooks
 with @code{GET_SAVED_REGISTER}, since that would result in much
 duplicated code.  Other times, duplicating a few lines of code here or
 there is much cleaner than introducing a large number of small hooks.
+
+@cindex portable file name handling
+@cindex file names, portability
+One particularly notorious area where system dependencies tend to
+creep in is handling of file names.  The mainline @value{GDBN} code
+assumes Posix semantics of file names: absolute file names begin with
+a forward slash @file{/}, slashes are used to separate leading
+directories, case-sensitive file names.  These assumptions are not
+necessarily true on non-Posix systems such as MS-Windows.  To avoid
+system-dependent code where you need to take apart or construct a file
+name, use the following portable macros:
+
+@table @code
+@findex HAVE_DOS_BASED_FILE_SYSTEM
+@item HAVE_DOS_BASED_FILE_SYSTEM
+This preprocessing symbol is defined to a non-zero value on hosts
+whose filesystems belong to the MS-DOS/MS-Windows family.  Use this
+symbol to write conditional code which should only be compiled for
+such hosts.
+
+@findex IS_DIR_SEPARATOR
+@item IS_DIR_SEPARATOR (@var{c}
+Evaluates to a non-zero value if @var{c} is a directory separator
+character.  On Unix and GNU/Linux systems, only a slash @file{/} is
+such a character, but on Windows, both @file{/} and @file{\} will
+pass.
+
+@findex IS_ABSOLUTE_PATH
+@item IS_ABSOLUTE_PATH (@var{file})
+Evaluates to a non-zero value if @var{file} is an absolute file name.
+For Unix and GNU/Linux hosts, a name which begins with a slash
+@file{/} is absolute.  On DOS and Windows, @file{d:/foo} and
+@file{x:\bar} are also absolute file names.
+
+@findex FILENAME_CMP
+@item FILENAME_CMP (@var{f1}, @var{f2})
+Calls a function which compares file names @var{f1} and @var{f2} as
+appropriate for the underlying host filesystem.  For Posix systems,
+this simply calls @code{strcmp}; on case-insensitive filesystems it
+will call @code{strcasecmp} instead.
+
+@findex DIRNAME_SEPARATOR
+@item DIRNAME_SEPARATOR
+Evaluates to a character which separates directories in
+@code{PATH}-style lists, typically held in environment variables.
+This character is @samp{:} on Unix, @samp{;} on DOS and Windows.
+
+@findex SLASH_STRING
+@item SLASH_STRING
+This evaluates to a constant string you should use to produce an
+absolute filename from leading directories and the file's basename.
+@code{SLASH_STRING} is @code{"/"} on most systems, but might be
+@code{"\\"} for some Windows-based ports.
+@end table
+
+In addition to using these macros, be sure to use portable library
+functions whenever possible.  For example, to extract a directory or a
+basename part from a file name, use the @code{dirname} and
+@code{basename} library functions (available in @code{libiberty} for
+platforms which don't provide them), instead of searching for a slash
+with @code{strrchr}.
 
 Another way to generalize @value{GDBN} along a particular interface is with an
 attribute struct.  For example, @value{GDBN} has been generalized to handle

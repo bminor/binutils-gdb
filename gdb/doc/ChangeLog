@@ -1,3 +1,10 @@
+2001-05-10  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdbint.texinfo (Clean Design and Portable Implementation):
+	Renamed from "Clean Design".
+	(Clean Design and Portable Implementation): Document portable
+	methods of handling file names, and the associated macros.
+
 2001-04-02  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdb.texinfo (Tracepoint Actions): Mention the "info scope"
