@@ -45,6 +45,9 @@ config
 configure.bat
 configure.in
 cxxfilt.man
+dlltool.c
+defparse.y
+deflex.l
 filemode.c
 gmalloc.c
 is-ranlib.c

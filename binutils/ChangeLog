@@ -1,3 +1,13 @@
+Wed Jun 14 13:27:22 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* deflex.l, defparse.y, dlltool.c: New files.
+	* Makefile.in, configure.in: Support for them.
+
+Mon Jun 12 11:27:54 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* sysdump.c: Include sysdep.h
+	(main): Open input with FOPEN_RB.  binutils/7137
+
 Fri Jun  9 17:26:11 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* objdump.c (wide_output): New flag variable.
